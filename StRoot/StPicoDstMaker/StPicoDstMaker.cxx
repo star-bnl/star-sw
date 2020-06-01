@@ -115,7 +115,9 @@ StPicoDstMaker::StPicoDstMaker(char const* name) :
   mEmcCollection(nullptr), mEmcPosition(nullptr),
   mEmcGeom{}, mEmcIndex{},
   mBField(0),
+#if !defined (__TFG__VERSION__)
   mVtxMode(PicoVtxMode::NotSet), // This should always be ::NotSet, do not change it, see ::Init()
+#endif /* !__TFG__VERSION__ */
   mCovMtxMode(PicoCovMtxMode::Skip),
   mBEmcSmdMode(PicoBEmcSmdMode::SmdSkip),
   mInputFileName(), mOutputFileName(), mOutputFile(nullptr),
@@ -279,12 +281,13 @@ Int_t StPicoDstMaker::Init() {
       return kStErr;
     }
 
-#if !defined (__TFG__VERSION__)
     // To write or not to write BEmc Smd hits into the branch
     if (setBEmcSmdModeAttr() != kStOk) {
       LOG_ERROR << "Pico BEmc Smd I/O mode is not set ..." << endm;
       return kStErr;
     }
+
+#if !defined (__TFG__VERSION__)
 
     if (mInputFileName.Length() == 0) {
       // No input file
@@ -354,20 +357,27 @@ Int_t StPicoDstMaker::setVtxModeAttr(){
 #endif /* __TFG__VERSION__ */
 
   if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxDefault") == 0) {
-    setVtxMode(PicoVtxMode::Default);
+    setVtxMode( PicoVtxMode::Default );
     LOG_INFO << " PicoVtxDefault is being used " << endm;
     return kStOK;
   }
   else if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxVpd") == 0) {
-    setVtxMode(PicoVtxMode::Vpd);
+    setVtxMode( PicoVtxMode::Vpd );
     LOG_INFO << " PicoVtxVpd is being used " << endm;
     return kStOK;
   }
   else if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxVpdOrDefault") == 0) {
-    setVtxMode(PicoVtxMode::VpdOrDefault);
+    setVtxMode( PicoVtxMode::VpdOrDefault );
     LOG_INFO << " PicoVtxVpdOrDefault is being used " << endm;
     return kStOK;
   }
+#if !defined (__TFG__VERSION__)
+  else if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxMtd") == 0) {
+    setVtxMode( PicoVtxMode::Mtd );
+    LOG_INFO << " PicoVtxMtd is being used " << endm;
+    return kStOK;
+  }
+#endif /* !__TFG__VERSION__ */
 
   return kStErr;
 }
@@ -1029,6 +1039,11 @@ void StPicoDstMaker::fillTracks() {
       picoTrk->setDedx( gTrk->probPidTraits().dEdxFit() );
       picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
     }
+    
+#if defined (__TFG__VERSION__)
+    picoTrk->setDndx( gTrk->probPidTraits().dNdxFit() );
+    picoTrk->setDndxError( gTrk->probPidTraits().dNdxErrorFit() );
+#endif /* __TFG__VERSION__ */
 
     // Fill track's hit information
     picoTrk->setNHitsDedx( gTrk->nHitsDedx() );
@@ -1787,6 +1802,7 @@ void StPicoDstMaker::fillEmcTrigger() {
   // Test for EMC trigger
   StTriggerSimuMaker* trigSimu = (StTriggerSimuMaker*)GetMaker("StarTrigSimu");
   if (!trigSimu) return;
+  if (!trigSimu->bemc) return;
 
   // BEMC High Tower trigger
   int bht0 = trigSimu->bemc->barrelHighTowerTh(0);
@@ -2363,17 +2379,17 @@ bool StPicoDstMaker::selectVertex() {
   // Switch between modes: Default and Vpd (VpdOrDefault)
   // Default takes the first primary vertex, meanwhile
   // Vpd
-  if (mVtxMode == PicoVtxMode::Default) {
+  if ( mVtxMode == PicoVtxMode::Default ) {
 
     // Choose the default vertex, i.e. the first vertex
     mMuDst->setVertexIndex(0);
     selectedVertex = mMuDst->primaryVertex();
   }
-  else if (mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault) {
+  else if ( mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault ) {
 
     // For VpdOrDefault option one will take the first primary
     // vertex if no TOF or VPD information is available
-    if(mVtxMode == PicoVtxMode::VpdOrDefault) {
+    if( mVtxMode == PicoVtxMode::VpdOrDefault ) {
       mMuDst->setVertexIndex(0);
       selectedVertex = mMuDst->primaryVertex();
     }
@@ -2381,7 +2397,7 @@ bool StPicoDstMaker::selectVertex() {
     // Retrieve pointer to TOF and VPD information
     StBTofHeader const* mBTofHeader = mMuDst->btofHeader();
 
-    if (mBTofHeader && fabs(mBTofHeader->vpdVz()) < 200) {
+    if ( mBTofHeader && fabs(mBTofHeader->vpdVz()) < 200. ) {
 
       // Retrieve z-position of pVtx estimated from VPD information
       float vzVpd = mBTofHeader->vpdVz();
@@ -2394,14 +2410,67 @@ bool StPicoDstMaker::selectVertex() {
         if (!vtx) continue;
 
 	// Check TpcVz and VpdVz difference
-        if (fabs(vzVpd - vtx->position().z()) < mTpcVpdVzDiffCut) {
-          mMuDst->setVertexIndex(iVtx);
+        if (fabs(vzVpd - vtx->position().z()) <
+#if defined(__TFG__VERSION__)
+	    StMuDst::instance()->TpcVpdVzDiffCut()
+#else
+	    mTpcVpdVzDiffCut
+#endif 
+	    ) {
+	  // Reset vertex index
+          mMuDst->setVertexIndex( iVtx );
+	  // Reset pointer to the primary vertex
           selectedVertex = mMuDst->primaryVertex();
+	  // Quit vertex loop
           break;
         } //if (fabs(vzVpd - vtx->position().z()) < mTpcVpdVzDiffCut)
       } //for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx)
     } //if (mBTofHeader && fabs(mBTofHeader->vpdVz()) < 200)
   } //else if (mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault)
+  else if ( mVtxMode == PicoVtxMode::Mtd ) {
+    
+    // Set the first primary vertex as a default vertex
+    mMuDst->setVertexIndex(0);
+    // Set pointer to the first primary vertex
+    selectedVertex = mMuDst->primaryVertex();
+
+    // Loop over primary vertices
+    for(unsigned int iVtx=0; iVtx<mMuDst->numberOfPrimaryVertices(); iVtx++) {
+
+      // Set pointer to i-th primary vertex
+      mMuDst->setVertexIndex( iVtx );
+
+      // Counter for primary tracks that matched MTD
+      int nMtdMatched = 0;
+
+      // Loop over primary tracks
+      for(unsigned int iTrk=0; iTrk<mMuDst->numberOfPrimaryTracks(); iTrk++) {
+
+	// Retrieve i-th primary track from that belongs
+	// to the current primary vertex
+	StMuTrack* pTrack = mMuDst->primaryTracks( iTrk );
+	// Track must exist
+	if( !pTrack ) continue;
+
+	// Check if track matches MTD
+	if( pTrack->index2MtdHit()<0 ) continue;
+	// Increment number of tracks that matched MTD
+	nMtdMatched++;
+	
+      } // for(unsigned int iTrk=0; iTrk<mMuDst->numberOfPrimaryTracks(); iTrk++)
+
+      // Take the first primary vertex that has at least 2 tracks
+      // that matched MTD
+      if( nMtdMatched >= 2 ) {
+	// Reset vertex index
+	mMuDst->setVertexIndex( iVtx );
+	// Reset pointer to the primary vertex
+	selectedVertex = mMuDst->primaryVertex();
+	// Quit vertex loop
+	break;
+      } // if( nMtdMatched >= 2 )
+    } // for(unsigned int iVtx=0; iVtx<mMuDst->numberOfPrimaryVertices(); iVtx++)
+  } //  else if ( mVtxMode == PicoVtxMode::Mtd )
   else { // default case
     LOG_ERROR << "Pico Vtx Mode not set!" << endm;
   }
