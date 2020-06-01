@@ -1,4 +1,3 @@
-
 /*
  *
  * \class StFcsTrgQaMaker
@@ -64,6 +63,8 @@ Int_t StFcsTrgQaMaker::Init(){
       mEPmap[ns]= new TH2F(Form("EPmap%s",NS[ns]),Form("EPmap%s",NS[ns]),
 			   kFcsEcal4x4NCol*kFcsEcal4x4NRow,0.0,kFcsEcal4x4NCol*kFcsEcal4x4NRow,
 			   kFcsPresNCol*kFcsPresNRow,0.0,kFcsPresNCol*kFcsPresNRow);
+      mEcalNorm[ns] = new TH1F(Form("NormEcal%s",NS[ns]),Form("NormEcal4x4%s",NS[ns]),
+			       kFcsEcal4x4NCol*kFcsEcal4x4NRow,0.0,kFcsEcal4x4NCol*kFcsEcal4x4NRow);
   }
   return kStOK;
 };
@@ -94,6 +95,7 @@ Int_t StFcsTrgQaMaker::Make() {
 	float pt=max*mPtCh;
 	mEcal[maxns]->Fill(id,pt);
 	if(pt>mEcalPtThr){
+	    mEcalNorm[maxns]->Fill(id);
 	    for(int dep=0; dep<6; dep++){
 		for(int ch=0; ch<32; ch++){
 		    if(trg->phit[maxns][dep][ch]>0){
@@ -138,8 +140,11 @@ Int_t StFcsTrgQaMaker::Finish(){
 ClassImp(StFcsTrgQaMaker);
 
 /*
- * $Id: StFcsTrgQaMaker.cxx,v 1.1 2020/05/29 18:59:32 akio Exp $
+ * $Id: StFcsTrgQaMaker.cxx,v 1.2 2020/06/01 19:34:41 akio Exp $
  * $Log: StFcsTrgQaMaker.cxx,v $
+ * Revision 1.2  2020/06/01 19:34:41  akio
+ * adding normarization histo
+ *
  * Revision 1.1  2020/05/29 18:59:32  akio
  * Initial version of FCS Trigger QA maker
  *
