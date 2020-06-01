@@ -49,7 +49,7 @@ u_int fcs_trg_base::get_version()
 } ;
 
 
-void fcs_trg_base::init()
+void fcs_trg_base::init(const char* fname)
 {
 	if(id != 0) return ;	// just one guy
 
@@ -79,8 +79,10 @@ void fcs_trg_base::init()
 
 		memset(fcs_data_c::ped,0,sizeof(fcs_data_c::ped)) ;
 
-		fcs_data_c::load_rdo_map() ;
-		fcs_data_c::gain_from_cache() ;
+		char rdomap[128]; 
+		sprintf(rdomap,"%s/fcs_daq_map.txt",fname);
+		fcs_data_c::load_rdo_map(rdomap) ;
+		fcs_data_c::gain_from_cache(fname) ;
 
 		if(!sim_mode){  //no need for pedestal in sim_mode
 		    for(int s=1;s<=1;s++) {
