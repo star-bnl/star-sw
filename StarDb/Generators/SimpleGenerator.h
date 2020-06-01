@@ -75,6 +75,7 @@ TDataSet *CreateTable(const Char_t *theFile) {
     if      (NameP == "Lambda0"    )  StarVMCApplication::Instance()->ForceDecay(nameP, "proton",     "pi-", 0, 100);
     else if (NameP == "Lambda0_bar")  StarVMCApplication::Instance()->ForceDecay(nameP, "antiproton", "pi+", 0, 100);
     // StarVMCApplication::Instance()->ForceDecay(nameP, "K+", "K-", "", 100);
+    StarMCSimplePrimaryGenerator::SetTemperature(0.160); // 160 MeV for fixed target
     StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
     if (! gener) {
       cout << "Create StarMCSimplePrimaryGenerator(" <<  Npart << "," <<  iD << "," 
