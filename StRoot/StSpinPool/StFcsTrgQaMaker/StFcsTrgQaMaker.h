@@ -39,12 +39,13 @@ private:
     char* mFilename=0;
     int mRun=0;
     float mPtCh=0.0316;
-    float mEcalPtThr=1.0;
+    float mEcalPtThr=1.5;
 
     TH2F* mEcal[kFcsNorthSouth];
     TH2F* mHcal[kFcsNorthSouth];
     TH2F* mPres[kFcsNorthSouth];
     TH2F* mEPmap[kFcsNorthSouth];
+    TH1F* mEcalNorm[kFcsNorthSouth];
 
     ClassDef(StFcsTrgQaMaker,1);
 };
@@ -52,8 +53,11 @@ private:
 #endif
 
 /*
- * $Id: StFcsTrgQaMaker.h,v 1.1 2020/05/29 18:59:32 akio Exp $
+ * $Id: StFcsTrgQaMaker.h,v 1.2 2020/06/01 19:34:41 akio Exp $
  * $Log: StFcsTrgQaMaker.h,v $
+ * Revision 1.2  2020/06/01 19:34:41  akio
+ * adding normarization histo
+ *
  * Revision 1.1  2020/05/29 18:59:32  akio
  * Initial version of FCS Trigger QA maker
  *
