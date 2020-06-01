@@ -10,7 +10,7 @@
 #include "StDetectorDbMaker/St_beamInfoC.h"
 #include "StMessMgr.h" 
 ClassImp(StarMCSimplePrimaryGenerator);
-Double_t StarMCSimplePrimaryGenerator::fTemperature = 1; // GeV/c
+Double_t StarMCSimplePrimaryGenerator::fTemperature = 0.457;; // GeV/c
 //_____________________________________________________________________________
 StarMCSimplePrimaryGenerator::StarMCSimplePrimaryGenerator(Int_t    nprim,   Int_t    Id, 
 							   Double_t pT_min , Double_t pT_max,
@@ -64,7 +64,6 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
     LOG_INFO << fpT_min << " <  log10(beta*gamma) < " << fpT_max << endm;
   }
   if (fOption.Contains("mtsq",TString::kIgnoreCase)) {
-    fTemperature = 0.457;
     LOG_INFO << "Use dN/dmT^2 = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endm;
   } else if (fOption.Contains("mt",TString::kIgnoreCase)) {
     LOG_INFO << "Use dN/dmT = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endm;
