@@ -7,6 +7,10 @@
 #endif
 TDataSet *CreateTable(const Char_t *theFile) {
   TString NameP(gSystem->BaseName(theFile));
+  NameP.ReplaceAll("M.C","-.C");
+  NameP.ReplaceAll("MFixed.C","-Fixed.C");
+  NameP.ReplaceAll("P.C","+.C");
+  NameP.ReplaceAll("PFixed.C","+Fixed.C");
   NameP.ReplaceAll(".C","");
   Bool_t isFixed = kFALSE;
   Double_t pTlow  =    0;
@@ -75,7 +79,7 @@ TDataSet *CreateTable(const Char_t *theFile) {
     if      (NameP == "Lambda0"    )  StarVMCApplication::Instance()->ForceDecay(nameP, "proton",     "pi-", 0, 100);
     else if (NameP == "Lambda0_bar")  StarVMCApplication::Instance()->ForceDecay(nameP, "antiproton", "pi+", 0, 100);
     // StarVMCApplication::Instance()->ForceDecay(nameP, "K+", "K-", "", 100);
-    StarMCSimplePrimaryGenerator::SetTemperature(0.160); // 160 MeV for fixed target
+    StarMCSimplePrimaryGenerator::SetTemperature(0.155); // 155 MeV for fixed target
     StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarVMCApplication::Instance()->GetPrimaryGenerator();
     if (! gener) {
       cout << "Create StarMCSimplePrimaryGenerator(" <<  Npart << "," <<  iD << "," 
