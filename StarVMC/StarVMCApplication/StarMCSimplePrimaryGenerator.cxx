@@ -6,6 +6,8 @@
 #include "TEnv.h"
 #include "TRandom.h"
 #include "TSystem.h"
+#include "TDatabasePDG.h"
+#include "TParticlePDG.h"
 #include "StDetectorDbMaker/St_vertexSeedC.h"
 #include "StDetectorDbMaker/St_beamInfoC.h"
 #include "StMessMgr.h" 
@@ -72,9 +74,15 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
     if ( St_beamInfoC::instance()->IsFixedTarget()) {
       Double_t KinE = St_beamInfoC::instance()->getYellowEnergy(); // per nucleon
       const double kProtonMass = 0.938272321;    // Proton mass in GeV
+      //      Double_t mass =TDatabasePDG::Instance()->GetParticle(fId)->Mass();
       Double_t E = KinE + kProtonMass;
-      Double_t pZ = -TMath::Sqrt(E*E - kProtonMass*kProtonMass);
-      fEta_min = 0.5*TMath::Log((E + pZ)/(E - pZ))/2;
+      Double_t plab = -TMath::Sqrt(E*E - kProtonMass*kProtonMass);
+      Double_t Ecm = TMath::Sqrt(2*kProtonMass*kProtonMass + 2*E*kProtonMass);
+      Double_t Etot = E +  kProtonMass;
+      Double_t gammaCM = Etot/Ecm;
+      Double_t betaCM  = plab/Etot;
+      Double_t yCM  = TMath::Log(gammaCM*(1 + betaCM));
+      fEta_min = yCM;
       fEta_max = 0.5;
     }
     LOG_INFO << "Rapidity is Gaussian with mean =  " << fEta_min  << " and sigma = " << fEta_max << endm;
