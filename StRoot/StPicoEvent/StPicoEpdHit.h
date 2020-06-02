@@ -99,10 +99,16 @@ class StPicoEpdHit : public TObject {
   ///                    bit 30=0/1 if tile is marked bad/good in database
   Int_t qtData() const              { return mQTdata; }
   /// gain calibrated energy loss in tile, in units of Landau MPV for one MIP
-  Float_t nMIP() const              { return mnMIP; }
+  /// if the tile is identified as bad in the database, returns zero.  Note you
+  /// can always access the raw ADC value, regardless of good/bad
+  Float_t nMIP() const              { return this->isGood() ? mnMIP : 0.0; }
   /// false if tile is bad or missing, according to (time-dependent) database
   Bool_t isGood() const             { return (mQTdata >> 30) & 0x1; }
-
+  /// truncated nMIP.  This is usually the most useful thing to the physics analyzer.
+  ///    if nMIP < thresh, returns zero
+  ///    if nMIP > MAX,    returns MAX
+  ///    otherwise         returns nMIP
+  Float_t TnMIP(float MAX=2.0, float thresh=0.3) const   {float nm = this->nMIP(); if (nm<thresh) return 0.0; else return nm<MAX ? nm : MAX;}
 
   /// If you use the setQTdata method, you need to pack the data yourself.
   /// It is useful if you are getting the QT data from, e.g. StMuEpdHit
