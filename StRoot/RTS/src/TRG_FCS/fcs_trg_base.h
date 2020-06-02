@@ -64,7 +64,7 @@ public:
 
 	virtual u_int get_version() ;
 
-	void init() ;
+	void init(const char* fname) ;
 
 	void run_start(u_int run) ;
 
