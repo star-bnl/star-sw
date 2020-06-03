@@ -1143,8 +1143,9 @@ int fcs_data_c::gain_from_cache(const char *fname)
 			double d = ped[s][i].el_gain[c] * ped[s][i].et_gain[c] ;
 
 
-			// pre FY20: ped[s][i].i_gain[c] = (u_int)(d*64.0+0.5) ;
-			ped[s][i].i_gain[c] = (u_int)(d*256.0+0.5) ;
+			// pre FY20: 
+			ped[s][i].i_gain[c] = (u_int)(d*64.0+0.5) ;
+			//ped[s][i].i_gain[c] = (u_int)(d*256.0+0.5) ;
 
 			if(ped[s][i].i_gain[c]>4095) {	// 12 bit max!
 				LOG(ERR,"S%d:%d: ch %d -- gain correction too big",s+1,i+1,c,ped[s][i].i_gain[c]) ;
