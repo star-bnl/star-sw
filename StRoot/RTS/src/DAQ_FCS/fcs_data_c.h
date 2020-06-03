@@ -3,6 +3,11 @@
 
 #include <pthread.h>
 
+#include <sys/types.h>
+typedef unsigned int u_int;
+typedef unsigned short u_short;
+typedef unsigned char u_char;
+
 // Helper class for various things (data extraction, pedestal calculation etc)
 class fcs_data_c {
 public:
@@ -172,7 +177,7 @@ public:
 	static u_char rdo_map_loaded ;			// boolean
 
 	static int ped_from_cache(const char *fname) ;
-	static int gain_from_cache(const char *fname=0) ;
+        static int gain_from_cache(const char *fname=0) ;
 	static int load_rdo_map(const char *fname=0) ;
 
 	// mutex for pedestals but also for statistics
@@ -182,6 +187,7 @@ public:
 		int ht_rate ;
 	} statistics[8] ;
 
+#ifndef __CINT__
 	static pthread_mutex_t ped_mutex ;
 	static void ped_lock() {
 		pthread_mutex_lock(&ped_mutex) ;
@@ -192,6 +198,7 @@ public:
 	static void ped_mutex_init() {
 		pthread_mutex_init(&ped_mutex,0) ;
 	} ;
+#endif
 
 private:
 	u_short set_board_id() ;
