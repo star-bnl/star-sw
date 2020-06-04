@@ -1,7 +1,10 @@
 *
-* $Id: csintz.F,v 1.1 2018/11/19 20:44:06 perev Exp $
+* $Id: csintz.F,v 1.2 2020/06/04 23:05:02 perev Exp $
 *
 * $Log: csintz.F,v $
+* Revision 1.2  2020/06/04 23:05:02  perev
+* add csguard call
+*
 * Revision 1.1  2018/11/19 20:44:06  perev
 * 64bits add files
 *
@@ -1510,6 +1513,8 @@ C      GO TO 7771
        GO TO 7771
  712  CSINTZ=-12
  7771 CALL CSIERR(CSINTZ)
-  777 RETURN
+  777 continue
+      call csguard()
+      RETURN
       END
 #endif

@@ -1,7 +1,10 @@
 *
-* $Id: csjcax.F,v 1.2 2009/01/18 23:51:38 perev Exp $
+* $Id: csjcax.F,v 1.3 2020/06/04 23:05:02 perev Exp $
 *
 * $Log: csjcax.F,v $
+* Revision 1.3  2020/06/04 23:05:02  perev
+* add csguard call
+*
 * Revision 1.2  2009/01/18 23:51:38  perev
 * BugFix. imitation of stack, non static variable
 *
@@ -53,4 +56,5 @@
        I = iStk(nStk)
        nStk = nStk-1
       CALL MHFREE(I)
+      call csguard()
       END

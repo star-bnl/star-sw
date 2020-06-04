@@ -1,7 +1,10 @@
 *
-* $Id: csintx.F,v 1.1 2018/11/19 20:44:06 perev Exp $
+* $Id: csintx.F,v 1.2 2020/06/04 23:05:02 perev Exp $
 *
 * $Log: csintx.F,v $
+* Revision 1.2  2020/06/04 23:05:02  perev
+* add csguard call
+*
 * Revision 1.1  2018/11/19 20:44:06  perev
 * 64bits add files
 *
@@ -1898,5 +1901,7 @@
        GO TO 7771
  712  CSINTX=-12
  7771 CALL CSIERR(CSINTX)
-  777 RETURN
+  777 continue
+      call csguard()
+      RETURN
       END
