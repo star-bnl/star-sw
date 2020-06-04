@@ -809,6 +809,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	memset (rowsdEH, 0, sizeof(rowsdEH));
 	g2t_tpc_hit_st *tpc_hitC = TrackSegmentHits[iSegHits].tpc_hitC;
 	tpc_hitC->adc = 0;
+	memset (tpc_hitC->adcs, 0, sizeof(tpc_hitC->adcs));
 	volId = tpc_hitC->volume_id%100000;
 	Int_t row = TrackSegmentHits[iSegHits].coorLS.fromRow();
 	Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
@@ -1191,6 +1192,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  tpc_hitC->ds = dSSum; 
 	  //	  tpc_hitC->adc = TotalSignal;
 	  tpc_hitC->np = nP;
+	  if (row > 1)       tpc_hitC->adcs[0]  += rowsdEH[row-2];
+	  tpc_hitC->adcs[1]                     += rowsdEH[row-1];
+	  if (row <= kRowMax) tpc_hitC->adcs[2] += rowsdEH[row];
 	  if (ClusterProfile) {
 	    if (TotalSignal > 0) {
 #ifdef __LASERINO__
