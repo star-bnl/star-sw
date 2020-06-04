@@ -20,10 +20,12 @@ void Cint2Root(TString topDir = ".") {
     if (! name.EndsWith(".C")) continue;
     TString rootf(path);
     rootf.ReplaceAll(".C",".root");
+#if 1
     if (!gSystem->AccessPathName(rootf,kReadPermission)) {
       cout << path.Data() << "\t" << rootf.Data() << " already exists" << endl;
       continue;
     }
+#endif
     cout << path.Data() << "\tCreate " << rootf.Data() << endl;
     cout << "LoadTable:" << path.Data() << endl;
     TString command(".L "); command += path;

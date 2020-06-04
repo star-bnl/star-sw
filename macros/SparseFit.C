@@ -149,17 +149,21 @@ TTree* toTree(THnSparse* h)
    return tree;
 }
 //________________________________________________________________________________
-Int_t Bins2Index(Int_t *bins, Int_t *Nbins, Int_t dim) {
+Int_t Bins2Index(Int_t *bins, Int_t *Nbins, Int_t dim, Int_t *step = 0) {
   Int_t indx = 0;
   for (Int_t d = 0; d < dim - 1; d++) {
-    if (d > 0) indx *= Nbins[d];
-    indx += bins[d] - 1;
+    indx *= Nbins[d];
+    Int_t i = bins[d] - 1;
+    if (step && step[d] > 1) {
+      i /= step[d];
+    }
+    indx += i;
   }
   return indx;
 }
 //________________________________________________________________________________
 void Index2Bins(Int_t indx, Int_t *Nbins, Int_t dim, Int_t *bins) {
-   for (Int_t d = dim - 1; d >= 0; d--) {
+   for (Int_t d = dim - 2; d >= 0; d--) {
      bins[d] = indx%Nbins[d] + 1;
      indx /= Nbins[d];
   }
@@ -168,6 +172,10 @@ void Index2Bins(Int_t indx, Int_t *Nbins, Int_t dim, Int_t *bins) {
 TTree *SparseFit() {
   THnSparse *h = (THnSparse *) gDirectory->Get("Sparse");
   if (! h) return 0;
+#ifdef __TOTREE__
+  TFile *f = new TFile("Sparse2Tree.root","recreate");
+  TTree *tree = toTree(h);
+#else /* ! __TOTREE__ */
   Int_t dim = h->GetNdimensions();
   TArrayI Bins(dim); Int_t *bins = Bins.GetArray();
   TArrayI NBins(dim); Int_t *Nbins = NBins.GetArray();
@@ -192,25 +200,39 @@ TTree *SparseFit() {
     branchname += axises[d]->GetName();
     branchname += "/D";
   }
+  tree->Branch("coord", x, branchname);
   tree->Branch("fit", &x[dim], "entries/D:mean/D:rms/D:peak/D:dpeak/D:mu/D:dmu/D:sigma/D:dsimga/D:chisq/D:prob/D");
-  TH1D *proj = 0;
-#if 0
-  TH1D **hist = new TH1D*[NbinsT];
+#ifndef __PROJECTION__
+  //  Int_t step[6] = {12, 40, 1, 1, 1, 1};
+  Int_t *step = 0;
+  Int_t binsM[6] = {0};
+  TH1F **hist = new TH1F*[NbinsT];
   memset (hist, 0, sizeof(TH1D *)*NbinsT);
+  TH1F *proj = 0;
+  
   for (Long64_t i = 0; i < h->GetNbins(); ++i) {
     x[dim] = h->GetBinContent(i, bins);
+    Bool_t fail = kFALSE;
     for (Int_t d = 0; d < dim-1; ++d) {
+      if (bins[d] > Nbins[d]) {fail = kTRUE; break;}
+    }
+    if (fail) continue;
+    for (Int_t d = 0; d < dim-1; ++d) {
+
       x[d] = h->GetAxis(d)->GetBinCenter(bins[d]);
     }
-    Int_t index = Bins2Index(bins,Nbins,dim);
+    Int_t index = Bins2Index(bins,Nbins,dim,step);
     if (! hist[index]) {
       TString Name("P");
       TString Title;
+      Index2Bins(index, Nbins, dim, binsM);
       for (Int_t d = 0; d < dim-1; ++d) {
-	Name += "_"; Name += bins[d];
-	Title += " "; Title += x[d];
+	Name += Form("_%i",binsM[d]);
+	if      (d < 2) Title += Form(" %s=%i",axises[d]->GetName(),binsM[d]);
+        else if (d < 4) Title += Form(" %s=%7.1f",axises[d]->GetName(),x[d]);
+        else 	        Title += Form(" %s=%7.3f",axises[d]->GetName(),x[d]);
       }
-      hist[index] = new TH1D(Name,Title, axises[dim-1]->GetNbins(), axises[dim-1]->GetXmin(), axises[dim-1]->GetXmax());
+      hist[index] = new TH1F(Name,Title, axises[dim-1]->GetNbins(), axises[dim-1]->GetXmin(), axises[dim-1]->GetXmax());
     }
     hist[index]->SetBinContent(bins[dim-1], x[dim]);
   }
@@ -231,8 +253,8 @@ TTree *SparseFit() {
     x[dim+1] = proj->GetMean();
     x[dim+2] = proj->GetRMS();
     for (Int_t p = 0; p < 3; p++) {
-      x[dim+3+2*p] = gaus->GetParameter(0);
-      x[dim+4+2*p] = gaus->GetParError(0);
+      x[dim+3+2*p] = gaus->GetParameter(p);
+      x[dim+4+2*p] = gaus->GetParError(p);
     }
     x[dim+9] = gaus->GetChisquare();
     x[dim+10] = gaus->GetProb();
@@ -243,7 +265,8 @@ TTree *SparseFit() {
       Ask();
     }
   }
-#else
+#else /* __PROJECTION__ */
+  TH1D *proj = 0;
   for (Int_t index = 0; index < NbinsT; index++) {
     Index2Bins(index, Nbins, dim, bins);
     for (Int_t d = 0; d < dim - 1; d++) {
@@ -276,6 +299,7 @@ TTree *SparseFit() {
     }
     delete proj; proj = 0;
   }
-#endif
+#endif /* __TOTREE__ */
+#endif /* __TOTREE__ */
   return tree;
 }
