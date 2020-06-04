@@ -23,7 +23,7 @@ namespace AliHLTTPCCADataCompressor
   class RowCluster
   {
     public:
-      RowCluster() {}
+      RowCluster(): fRow(0), fCluster(0) {}
       RowCluster( unsigned int iRow, unsigned int iCluster )
         : fRow( iRow ), fCluster( iCluster ) {}
       unsigned int Row() const { return fRow; }
@@ -36,7 +36,7 @@ namespace AliHLTTPCCADataCompressor
   class SliceRowCluster
   {
     public:
-      SliceRowCluster() {}
+      SliceRowCluster(): fSlice(0), fRow(0), fCluster(0) {}
       SliceRowCluster( unsigned int s, unsigned int r, unsigned int c )
         : fSlice( s ), fRow( r ), fCluster( c ) {}
       unsigned int Slice() const { return fSlice; }

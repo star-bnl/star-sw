@@ -31,6 +31,7 @@
 #include "Jevp/StJevpPlot/JLatex.h"
 #include "JTMonitor.h"
 
+#include "PdfFileBuilder.h"
 #include "Jevp/StJevpBuilders/baseBuilder.h"
 #include "Jevp/StJevpBuilders/bbcBuilder.h"
 #include "Jevp/StJevpBuilders/daqBuilder.h"
@@ -69,6 +70,11 @@ static sigjmp_buf env;
 int JEVPSERVERport;
 JevpServer serv;
 
+void PO(char *s) {
+    int fd = open("boo.txt", O_CREAT | O_WRONLY, 0666);
+    close(fd);
+    LOG("JEFF", "(%s): num files: %d", s, fd);
+}
 
 static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
@@ -192,7 +198,10 @@ void JevpServer::main(int argc, char *argv[])
 {
   // gErrorIgnoreLevel = kBreak;   // suppress root messages...
   serv.parseArgs(argc, argv);
-  
+
+  gMessMgr->SwitchOff("I");
+  gMessMgr->SwitchOff("W");
+
   rtsLogOutput(serv.log_output);
   rtsLogAddDest(serv.log_dest, serv.log_port);
   rtsLogLevel(serv.log_level);
@@ -235,6 +244,7 @@ void JevpServer::readSocket()
     TSocket *s;
     TMessage *mess;
   
+    //PO("readSocket: ");
     CP;
     s = mon->Select(100);
     if((long) s <= 0) {
@@ -250,6 +260,9 @@ void JevpServer::readSocket()
 	TSocket *nsocket = ssocket->Accept();
 	//TInetAddress adr = nsocket->GetInetAddress();
 	mon->Add(nsocket);
+
+	//PO("accept: ");
+
 	return;
     }
     CP;
@@ -264,6 +277,8 @@ void JevpServer::readSocket()
 	mon->Remove(s);
 	delete s;
 	delete mess;
+	//PO("disconnect: ");
+		
 	return;
     }
     CP;
@@ -278,6 +293,7 @@ void JevpServer::readSocket()
 	    CP;
 	    //LOG("JEFF", "Handle message from reader");
 
+
 	    handleNewEvent(msg);
       
 	    EvpMessage m;
@@ -287,12 +303,16 @@ void JevpServer::readSocket()
 	    TMessage mess(kMESS_OBJECT);
 	    mess.WriteObject(&m);
 	    s->Send(mess);
+
+	    //PO("EvpMessage readerThread: ");
+
 	    CP;
 	}
 	else {                                // from a client!
 	    CP;
 	    //LOG("JEFF", "Handle message from client");
 	    handleEvpMessage(s, msg);
+	    //PO("EvpMessage: ");
 	    CP;
 	}
     
@@ -359,6 +379,10 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	else if (strcmp(argv[i], "-basedir") == 0) {
 	    i++;
 	    basedir = argv[i];
+	}
+	else if (strcmp(argv[i], "-maxevts") == 0) {
+	    i++;
+	    maxevts = atoi(argv[i]);
 	}
 	else if (strcmp(argv[i], "-nothrottle") == 0) {
 	    throttleAlgos = 0;
@@ -474,18 +498,36 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	}
 	else {
 	    printf("\n\nUsage for %s:  (bad arg %s)\n",argv[0],argv[i]);
-	    printf("\t[-dd filename]       for each display definition:\n");
-	    printf("\t[-basedir basedir]   config file directory\n");
-	    printf("\t[-nodb]\n");
-	    printf("\t[-db]    not usually needed, but db usually disabled in reanalysis\n");
-	    printf("\t[-port] port]\n");
-	    printf("\t[-die]    (exit after end of run..)\n");
-	    printf("\t[-file daqfilename]\n");
-	    printf("\t[-test]   (set port to %d)\n",myport+10);
-	    printf("\t[-production]\n");
-	    printf("\t[-diska [/net/a]]  (used to pass to builders on launch)\n");
+
+	    printf("\t[-production]        \n");   
+	    printf("\t[-test]              port to %d, no dbs, /jevp_test config directorys\n",myport+10);
+	    printf("\t[-updatedb]          run on test port, but to real DB, for re-analysis...\n");
+
+	    printf("\t[-l4production       L4 jevp\n");
+	    printf("\t[-l4test]            L4 test\n");
+	    printf("\t[-l4updatedb]\n");
+
+	    printf("\t[-file daqfilename]  file to analyze\n");
+	    printf("\t[-die]               exit after end of run...\n");
+
+	    printf("\t[-dd filename]       explicit HistoDefs.txt file:\n");
+	    printf("\t[-basedir basedir]   basedirectory\n");
+	    printf("\t[-nodb]              do not write to DB after run\n");        
+	    printf("\t[-db]                default\n");
+	    printf("\t[-port]              port]\n");
+	
+
+
+	
+	    printf("\t[-diska [/net/a]]    used to pass to builders on launch\n");
 	    printf("\t[-nothrottle]\n");
-	    printf("\t[-log]   (log each event)\n");
+	    printf("\t[-log]               log each event\n");
+	    printf("\t[-stderr]            log to standard error\n");
+	    printf("\t[-maxevts ###]       maximum number of events in run\n");
+	    printf("\t[-nopdf]\n");
+	    printf("\t[-pallete            just add pallete file to histodefs.txt\n");
+	    printf("\n\n");
+	    printf("\t[-testdd filename]   test the display description file.\n");
 	    printf("\n\n");
 	    printf("Defaults:  \n");
 	    printf("\tbasedir      = '/RTScache/conf'\n");
@@ -505,87 +547,152 @@ void JevpServer::parseArgs(int argc, char *argv[])
     }    
 }
 
+void JevpServer::writePalleteFile()
+{
+    char pallete_fn[100];
+    sprintf(pallete_fn, "%s/Pallete.txt", basedir);
+    
+    // Create a pallete!
+    DisplayFile *pallete_file = new DisplayFile(1);
+
+    
+    TListIter next(&builders);
+    JevpPlotSet *curr;
+    
+    next.Reset();
+    while((curr = (JevpPlotSet *)next())) {
+	JevpPlot *currplot;
+	TListIter nextplot(&curr->plots);
+	while((currplot = (JevpPlot *)nextplot())) { 
+	    char *builder = currplot->getParent();
+	    char *name = currplot->GetPlotName();
+	
+	    DisplayNode *builderNode = pallete_file->root->child->findChild(builder);
+	    if(!builderNode) {
+		builderNode = new DisplayNode();
+		builderNode->setName(builder);
+		pallete_file->root->child->insertChildAlpha(builderNode);
+	    }
+
+	    DisplayNode *plotNode = new DisplayNode();
+	    plotNode->setName(name);
+	    plotNode->leaf = 1;
+	    builderNode->insertChildAlpha(plotNode);
+	}
+    }
+    LOG(NOTE, "Writing palleteFile... %s", pallete_fn);
+    unlink(pallete_fn);
+    if(pallete_file->Write(pallete_fn) < 0) {
+	LOG(ERR, "Error writing pallete file %s", pallete_fn);
+    }
+    
+    delete pallete_file;
+
+    char *args[4];
+    args[0] = (char *)"OnlTools/Jevp/archiveHistoDefs.pl";
+    args[1] = basedir;
+    args[2] = (char *)"Pallete.txt";
+    args[3] = NULL;
+
+    execScript("OnlTools/Jevp/archiveHistoDefs.pl", args);
+}
+
 int JevpServer::updateDisplayDefs()
 {
-  char tmp[100];
-  sprintf(tmp, "%s/%s", basedir, displays_fn);
-  if(displays) delete displays;
-  displays = new DisplayFile();
-  displays->Read(tmp);
+    if(displays) delete displays;
 
-  displays->dump();
-  return 0;
+    // Read the new HistoDefs file!
+    char tmp[100];
+    sprintf(tmp, "%s/%s", basedir, displays_fn);
+    displays = new DisplayFile();
+    displays->Read(tmp);
+
+
+    printf("update DD: %d %d\n", strlen(displays->textBuff), displays->textBuffLen);
+    pdfFileBuilder = new PdfFileBuilder(displays, this, NULL);
+
+    char *args[4];
+    args[0] = (char *)"OnlTools/Jevp/archiveHistoDefs.pl";
+    args[1] = basedir;
+    args[2] = displays_fn;
+    args[3] = NULL;
+
+    execScript("OnlTools/Jevp/archiveHistoDefs.pl", args);
+    return 0;
 }
 
 int JevpServer::init(int port, int argc, char *argv[]) {
 
-  ssocket = new TServerSocket(port,kTRUE,100);
-  mon = new JTMonitor();
-  mon->Add(ssocket);
+    ssocket = new TServerSocket(port,kTRUE,100);
+    mon = new JTMonitor();
+    mon->Add(ssocket);
 
-  updateDisplayDefs();
+    updateDisplayDefs();
 
-  // Create daq reader...
-  LOG(DBG, "Reader filename is %s",daqfilename ? daqfilename : "none");
-  if(ndaqfilenames) daqfilename = daqfilenames[cdaqfilename];
+    // Create daq reader...
+    LOG(DBG, "Reader filename is %s",daqfilename ? daqfilename : "none");
+    if(ndaqfilenames) daqfilename = daqfilenames[cdaqfilename];
 
-  rdr = new daqReader(daqfilename);
+    rdr = new daqReader(daqfilename);
 
-  if(diska) rdr->setEvpDisk(diska);
+    if(diska) rdr->setEvpDisk(diska);
 
-  // daqreader resets it?
-  rtsLogOutput(log_output);
-  rtsLogAddDest(log_dest, log_port);
-  rtsLogLevel(log_level);
+    // daqreader resets it?
+    rtsLogOutput(log_output);
+    rtsLogAddDest(log_dest, log_port);
+    rtsLogLevel(log_level);
 
 
-  //rtsLogOutput(RTS_LOG_STDERR);
-  //rtsLogLevel(DBG);
+    //rtsLogOutput(RTS_LOG_STDERR);
+    //rtsLogLevel(DBG);
   
-  // Create builders...
-  if(!isL4) {
-    builders.Add(new baseBuilder(this));
-    builders.Add(new bbcBuilder(this));
-    builders.Add(new daqBuilder(this));
-    builders.Add(new bemcBuilder(this));
-    builders.Add(new eemcBuilder(this));
-    builders.Add(new fpdBuilder(this));
-    builders.Add(new hltBuilder(this));
-    builders.Add(new l3Builder(this));
-    builders.Add(new tofBuilder(this));
-    builders.Add(new mtdBuilder(this));
-    builders.Add(new tpxBuilder(this));
-    builders.Add(new trgBuilder(this));
-    builders.Add(new upcBuilder(this));
-    builders.Add(new fgtBuilder(this));
-    builders.Add(new vpdBuilder(this));
-    builders.Add(new fmsBuilder(this));
-    builders.Add(new fpsBuilder(this));
-    builders.Add(new gmtBuilder(this));
-    builders.Add(new pxlBuilder(this));
-    builders.Add(new istBuilder(this));
-    builders.Add(new ssdBuilder(this));
-    builders.Add(new ppBuilder(this));
-  }
-  else {
-    builders.Add(new trgBuilder(this));
-    builders.Add(new l4Builder(this));
-  }
+    // Create builders...
+    if(!isL4) {
+	builders.Add(new baseBuilder(this));
+	builders.Add(new bbcBuilder(this));
+	builders.Add(new daqBuilder(this));
+	builders.Add(new bemcBuilder(this));
+	builders.Add(new eemcBuilder(this));
+	builders.Add(new fpdBuilder(this));
+	builders.Add(new hltBuilder(this));
+	builders.Add(new l3Builder(this));
+	builders.Add(new tofBuilder(this));
+	builders.Add(new mtdBuilder(this));
+	builders.Add(new tpxBuilder(this));
+	builders.Add(new trgBuilder(this));
+	builders.Add(new upcBuilder(this));
+	builders.Add(new fgtBuilder(this));
+	builders.Add(new vpdBuilder(this));
+	builders.Add(new fmsBuilder(this));
+	builders.Add(new fpsBuilder(this));
+	builders.Add(new gmtBuilder(this));
+	builders.Add(new pxlBuilder(this));
+	builders.Add(new istBuilder(this));
+	builders.Add(new ssdBuilder(this));
+	builders.Add(new ppBuilder(this));
+    }
+    else {
+	builders.Add(new trgBuilder(this));
+	builders.Add(new l4Builder(this));
+    }
 
+  
 
-  TListIter next(&builders);
-  JevpPlotSet *curr;
-  while((curr = (JevpPlotSet *)next())) {
-    LOG(NOTE, "init");
-    curr->_initialize(argc, argv);
-    curr->clientdatadir = clientdatadir;
-    LOG(NOTE, "init done");
-  }
-  CP;
+    TListIter next(&builders);
+    JevpPlotSet *curr;
+    while((curr = (JevpPlotSet *)next())) {
+	LOG(NOTE, "init");
+	curr->_initialize(argc, argv);
+	curr->clientdatadir = clientdatadir;
+	LOG(NOTE, "init done");
+    }
+    CP;
 
-  debugBuilders(__LINE__);
+    writePalleteFile();
+  
+    debugBuilders(__LINE__);
 
-  return 0;
+    return 0;
 }  
 
 
@@ -593,7 +700,8 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 void JevpServer::handleNewEvent(EvpMessage *m)
 {
   
-    if(strcmp(m->cmd,"stoprun") == 0) {
+    if(((maxevts > 0) && (evtsInRun > maxevts)) ||
+       strcmp(m->cmd,"stoprun") == 0) {
 	LOG(DBG, "SERVThread: Got stoprun from reader");
 	CP;
 	if(runStatus.running()) {
@@ -630,6 +738,8 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     }
     else if(strcmp(m->cmd,"newevent") == 0) {
 	LOG(DBG, "SERVThread: Got newevent");
+	evtsInRun++;
+
 	CP;
 	JevpPlotSet *curr;
 	TListIter next(&builders);
@@ -637,8 +747,12 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 	if(rdr->run != (unsigned int)runStatus.run) {
 	    CP;
 	    LOG(DBG, "Starting new run #%d  (%d)",rdr->run, runStatus.run);
+
+	    updateDisplayDefs();
+
 	    performStartRun();
 	    eventsThisRun = 0;
+	    evtsInRun = 0;
 	}
 
 	eventsThisRun++;
@@ -778,130 +892,135 @@ void JevpServer::handleClient(int delay) {
 
 void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
 {
-  CP;
-  if(strcmp(msg->getCmd(), "dump") == 0) {
     CP;
-    dump();
-  }
-  else if(strcmp(msg->getCmd(), "display_desc") == 0) {  // Display Descriptor
-
-    LOG(NOTE, "Got request for display %s", msg->args);
-    int ret = displays->setDisplay(msg->args);
-    LOG(DBG, "setdisplay returend %d", ret);
-
-    EvpMessage m;
-    m.setSource("serv");
-    m.setCmd("xml");
-    if(!displays) {
-      LOG(ERR, "No displays available\n");
-      return;
+    if(strcmp(msg->getCmd(), "dump") == 0) {
+	CP;
+	dump();
     }
-    
-    m.setArgs(displays->textBuff);
-    CP;
+    else if(strcmp(msg->getCmd(), "display_desc") == 0) {  // Display Descriptor
 
-    TMessage mess(kMESS_OBJECT);
-    mess.WriteObject(&m);
-    s->Send(mess);
-    LOG(NOTE, "replied to display %s", msg->args);
-  }
-  else if(strcmp(msg->getCmd(), "GetStatus") == 0) {
-    LOG(NOTE, "GetStatus");
-    TMessage mess(kMESS_OBJECT);
-    mess.WriteObject(&runStatus);
-    s->Send(mess);
-    LOG(NOTE, "Replied to GetStatus");
-  }
-  else if(strcmp(msg->getCmd(), "ping") == 0) {    
-    EvpMessage m;
-    m.setSource((char *)"serv");
-    m.setCmd((char *)"ping");
-    TMessage mess(kMESS_OBJECT);
-    mess.WriteObject(&m);
-    CP;
-    s->Send(mess);
-  }
-  else if(strcmp(msg->getCmd(), "print") == 0) {
-    //char printer[100];
-    //int tab;
-    //int display;
+        //printf("Got request for display %s\n", msg->args);
+	//int ret = displays->setDisplay(msg->args);
+	//LOG(DBG, "setdisplay returend %d", ret);
 
-    //sscanf(msg->args, "%s %d %d", printer, &display, &tab);
-    //LOG(NOTE, "Request to printing tab %d to printer %s", tab, printer);
+	EvpMessage m;
+	m.setSource("serv");
+	m.setCmd("xml");
+	//if(!displays) {
+	//    LOG(ERR, "No displays available\n");
+	//    return;
+	//	}
+	//printf("boo\n");
+	//printf("strlen: %d %d\n", strlen(displays->textBuff), displays->textBuffLen);
+	//printf("boo\n");
+	m.setArgs(displays->textBuff);
+	CP;
 
-    
-    writePdf((char *)"/tmp/jevp.pdf", 1);
-
-    gSystem->Exec("/usr/bin/convert /tmp/jevp.pdf /tmp/jevp.ps");
-    
-  }
-  else if(strcmp(msg->getCmd(), "getplot") == 0) {
-    LOG(NOTE, "GetPlot");
-    CP;
-    RtsTimer_root clock;
-    clock.record_time();
-    handleGetPlot(s,msg->args);
-    double t1 = clock.record_time();
-    if(t1 > .05) {
-      LOG(WARN, "Timing: handleGetPlot(%s) time=%lf",msg->args,t1);
+	TMessage mess(kMESS_OBJECT);
+	mess.WriteObject(&m);
+	s->Send(mess);
+	LOG(NOTE, "replied to display %s", msg->args);
     }
-    LOG(NOTE, "Done with GetPlot");
-  }
-  else if(strcmp(msg->getCmd(), "swaprefs") == 0) {
-    CP;
-    handleSwapRefs(msg->args);
-  }
-  else if(strcmp(msg->getCmd(), "deleteplot") == 0) {
-    CP;
-    char str[256];
-    int idx;
-    sscanf(msg->args, "%s %d", str, &idx);
-    deleteReferencePlot(str,idx);
-  }
-  else if(strcmp(msg->getCmd(), "getServerTags") == 0) {
-    CP;
-    EvpMessage m;
-    m.setSource((char *)"serv");
-    m.setCmd((char *)"getServerTags");
-    if(serverTags) {
-      LOG(DBG, "server tags are: %s",serverTags);
-      m.setArgs(serverTags);
+    else if(strcmp(msg->getCmd(), "GetStatus") == 0) {
+	LOG(NOTE, "GetStatus");
+	TMessage mess(kMESS_OBJECT);
+	mess.WriteObject(&runStatus);
+	s->Send(mess);
+	LOG(NOTE, "Replied to GetStatus");
+    }
+    else if(strcmp(msg->getCmd(), "ping") == 0) {    
+	EvpMessage m;
+	m.setSource((char *)"serv");
+	m.setCmd((char *)"ping");
+	TMessage mess(kMESS_OBJECT);
+	mess.WriteObject(&m);
+	CP;
+	s->Send(mess);
+    }
+    else if(strcmp(msg->getCmd(), "print") == 0) {
+	//char printer[100];
+	//int tab;
+	//int display;
+
+	//sscanf(msg->args, "%s %d %d", printer, &display, &tab);
+	//LOG(NOTE, "Request to printing tab %d to printer %s", tab, printer);
+	
+	LOG("JEFF", "Not supported...");
+    
+	// if(pdfdir) {
+	//     pdfFileBuilder->writePdf((char *)"/tmp/jevp.pdf", 1);
+
+	//     gSystem->Exec("/usr/bin/convert /tmp/jevp.pdf /tmp/jevp.ps");
+	// }
+    
+    }
+    else if(strcmp(msg->getCmd(), "getplot") == 0) {
+	LOG(NOTE, "GetPlot");
+	CP;
+	RtsTimer_root clock;
+	clock.record_time();
+	handleGetPlot(s,msg->args);
+	double t1 = clock.record_time();
+	if(t1 > .05) {
+	    LOG(WARN, "Timing: handleGetPlot(%s) time=%lf",msg->args,t1);
+	}
+	LOG(NOTE, "Done with GetPlot");
+    }
+    else if(strcmp(msg->getCmd(), "swaprefs") == 0) {
+	CP;
+	handleSwapRefs(msg->args);
+    }
+    else if(strcmp(msg->getCmd(), "deleteplot") == 0) {
+	CP;
+	char str[256];
+	int idx;
+	sscanf(msg->args, "%s %d", str, &idx);
+	deleteReferencePlot(str,idx);
+    }
+    else if(strcmp(msg->getCmd(), "getServerTags") == 0) {
+	CP;
+	EvpMessage m;
+	m.setSource((char *)"serv");
+	m.setCmd((char *)"getServerTags");
+	if(serverTags) {
+	    LOG(DBG, "server tags are: %s",serverTags);
+	    m.setArgs(serverTags);
+	}
+	else {
+	    LOG(DBG, "No server tags?");
+	    m.setArgs("");
+	}
+
+	TMessage mess(kMESS_OBJECT);
+	mess.WriteObject(&m);
+	s->Send(mess);
+    }
+    else if(strcmp(msg->getCmd(), "monitor") == 0) {
+	CP;
+	EvpMessage m;
+	m.setSource((char *)"serv");
+	m.setCmd((char *)"monitor");
+
+	getMonitorString(msg->args, &m);
+    
+	TMessage mess(kMESS_OBJECT);
+	mess.WriteObject(&m);
+	CP;
+	s->Send(mess);
+    }
+    else if (strcmp(msg->getCmd(), "launch") == 0) {
+	LOG(DBG, "Got launch:  (%s) (%s)", msg->getArgs(), msg->getSource());	
+
+
+	char *x = (char *)malloc(strlen(msg->getArgs()) + 1);
+	strcpy(x, msg->getArgs());
+	launchArgs = x;
     }
     else {
-      LOG(DBG, "No server tags?");
-      m.setArgs("");
+	CP;
+	LOG(WARN,"Unknown command: %s\n",msg->getCmd());
     }
-
-    TMessage mess(kMESS_OBJECT);
-    mess.WriteObject(&m);
-    s->Send(mess);
-  }
-  else if(strcmp(msg->getCmd(), "monitor") == 0) {
     CP;
-    EvpMessage m;
-    m.setSource((char *)"serv");
-    m.setCmd((char *)"monitor");
-
-    getMonitorString(msg->args, &m);
-    
-    TMessage mess(kMESS_OBJECT);
-    mess.WriteObject(&m);
-    CP;
-    s->Send(mess);
-  }
-  else if (strcmp(msg->getCmd(), "launch") == 0) {
-    LOG(DBG, "Got launch:  (%s) (%s)", msg->getArgs(), msg->getSource());	
-
-
-    char *x = (char *)malloc(strlen(msg->getArgs()) + 1);
-    strcpy(x, msg->getArgs());
-    launchArgs = x;
-  }
-  else {
-    CP;
-    LOG(WARN,"Unknown command: %s\n",msg->getCmd());
-  }
-  CP;
 }
 
 void JevpServer::performStartRun()
@@ -1023,36 +1142,11 @@ void JevpServer::performStopRun()
   LOG(DBG, "fn=%s",fn);
   CP;
 
-  // Add any new plots to the pallet...
-  freePallete();
 
-  next.Reset();
-  while((curr = (JevpPlotSet *)next())) {
 
-    LOG(DBG, "Adding plot to pallete: builder=%s",curr->getPlotSetName());
+ 
 
-    JevpPlot *currplot;
-    TListIter nextplot(&curr->plots);
-    while((currplot = (JevpPlot *)nextplot())) { 
-      LOG(DBG, "                    : plot = %s",currplot->GetPlotName());
-      addToPallete(currplot);
-    }
-  }
-  CP;
-
-  LOG(NOTE, "Writing display file...%s",fn);
-  unlink(fn);
-  if(displays->Write(fn) < 0) {
-    LOG(ERR, "Error writing display file %s",fn);
-  }
-
-  char *args[4];
-  args[0] = (char *)"OnlTools/Jevp/archiveHistoDefs.pl";
-  args[1] = basedir;
-  args[2] = displays_fn;
-  args[3] = NULL;
-
-  execScript("OnlTools/Jevp/archiveHistoDefs.pl", args);
+ 
 
   runStatus.setStatus("stopped");
 }
@@ -1232,383 +1326,382 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
 
 JevpPlot *JevpServer::getJevpSummaryPlot()
 {
-  if(jevpSummaryPlot) {
-    delete jevpSummaryPlot;
-    jevpSummaryPlot = NULL;
-  }
+    if(jevpSummaryPlot) {
+	delete jevpSummaryPlot;
+	jevpSummaryPlot = NULL;
+    }
 
-  debugBuilders(__LINE__);
+    debugBuilders(__LINE__);
 
-  CP;
-  jevpSummaryPlot = new JevpPlot();
-  jevpSummaryPlot->needsdata = 0;
-  jevpSummaryPlot->setParent((char *)"serv");
-  TH1I *h = new TH1I("JevpSummary", "JevpSummary", 64,0,63);
-  //h->GetXaxis()->SetAxisColor(kWhite);
-  h->GetXaxis()->SetTickLength(0);
-  h->GetXaxis()->SetLabelColor(kWhite);
-  //h->GetYaxis()->SetAxisColor(kWhite);
-  h->GetYaxis()->SetTickLength(0);
-  h->GetYaxis()->SetLabelColor(kWhite);
-  //h->SetLineColor(kWhite);
-  //h->SetAxisColor(kWhite);
-  //h->SetLabelColor(kWhite);
+    CP;
+    jevpSummaryPlot = new JevpPlot();
+    jevpSummaryPlot->needsdata = 0;
+    jevpSummaryPlot->setParent((char *)"serv");
+    TH1I *h = new TH1I("JevpSummary", "JevpSummary", 64,0,63);
+    //h->GetXaxis()->SetAxisColor(kWhite);
+    h->GetXaxis()->SetTickLength(0);
+    h->GetXaxis()->SetLabelColor(kWhite);
+    //h->GetYaxis()->SetAxisColor(kWhite);
+    h->GetYaxis()->SetTickLength(0);
+    h->GetYaxis()->SetLabelColor(kWhite);
+    //h->SetLineColor(kWhite);
+    //h->SetAxisColor(kWhite);
+    //h->SetLabelColor(kWhite);
 
-  jevpSummaryPlot->addHisto(h);
+    jevpSummaryPlot->addHisto(h);
 
-  jevpSummaryPlot->setOptStat(0);
-  jevpSummaryPlot->gridx = 0;
-  jevpSummaryPlot->gridy = 0;
+    jevpSummaryPlot->setOptStat(0);
+    jevpSummaryPlot->gridx = 0;
+    jevpSummaryPlot->gridy = 0;
   
   
-  CP;
-  JLatex *l;
+    CP;
+    JLatex *l;
   
   
-  int i = 0;
-  char tmp[512];
+    int i = 0;
+    char tmp[512];
 
-  sprintf(tmp,"Run #%d: (%s for %ld seconds)",runStatus.run, runStatus.status, time(NULL) - runStatus.timeOfLastChange);
-  l = new JLatex(2, liney(i++), tmp);
-  i++;
-  l->SetTextSize(.05);
-  jevpSummaryPlot->addElement(l);
-
-  sprintf(tmp, "Tags:   %s", serverTags);
-  l = new JLatex(2, liney(i++), tmp);
-  i++;
-  l->SetTextSize(.035);
-  jevpSummaryPlot->addElement(l);
-
-  CP;
-  // Now show builders...
-  TListIter next(&builders);
-  JevpPlotSet *obj;
-  int n=0;
-
-  debugBuilders(__LINE__);
-
-  CP;
-  while((obj = (JevpPlotSet *)next())) {
-    LOG(DBG, "object");
-    LOG(DBG, "name=%s",obj->getPlotSetName());
-    BuilderStatus *curr = &obj->builderStatus;
-
-    n++;
-    sprintf(tmp, "builder %15s: (events %d, avgtime %06.4lf)",
-	    curr->name, curr->events, obj->getAverageProcessingTime());
-    
-    LOG(DBG, "here %s",tmp);
+    sprintf(tmp,"Run #%d: (%s for %ld seconds)",runStatus.run, runStatus.status, time(NULL) - runStatus.timeOfLastChange);
     l = new JLatex(2, liney(i++), tmp);
-    l->SetTextSize(.035);
+    //l->SetTextFont(8);   // courier new
+    i++;
+    l->SetTextSize(.05);
+    jevpSummaryPlot->addElement(l);
 
-    LOG(DBG, "Here");
-    jevpSummaryPlot->addElement(l); 
-
-    LOG(DBG, "HEre");
-  }
-  
-  CP;
-  if(n == 0) {
-    sprintf(tmp,"There are no builders");
+    sprintf(tmp, "Tags:   %s", serverTags);
     l = new JLatex(2, liney(i++), tmp);
+    //l->SetTextFont(8);
+    i++;
     l->SetTextSize(.035);
     jevpSummaryPlot->addElement(l);
-  }
-  CP;
 
-  return jevpSummaryPlot;
+    CP;
+    // Now show builders...
+    TListIter next(&builders);
+    JevpPlotSet *obj;
+    int n=0;
+
+    debugBuilders(__LINE__);
+
+    i = 0;
+    
+    CP;
+    while((obj = (JevpPlotSet *)next())) {
+	LOG(DBG, "object");
+	LOG(DBG, "name=%s",obj->getPlotSetName());
+	BuilderStatus *curr = &obj->builderStatus;
+
+	n++;
+	sprintf(tmp, "%6s: %6d evts - %06.4lf sec",
+		curr->name, curr->events, obj->getAverageProcessingTime());
+    
+	LOG(DBG, "here %s",tmp);
+	int xpos = ((i > 11) ? 32 : 0);
+	int ypos = 5 + ((i > 11) ? i-12 : i);
+       
+	i++;
+
+	l = new JLatex(xpos, liney(ypos), tmp);
+	l->SetTextFont(82);
+	l->SetTextSize(.03);
+	l->SetLineColor(4);
+
+	LOG(DBG, "Here");
+	jevpSummaryPlot->addElement(l); 
+
+	LOG(DBG, "HEre");
+    }
+  
+    CP;
+    if(n == 0) {
+	sprintf(tmp,"There are no builders");
+	l = new JLatex(2, liney(10), tmp);
+	l->SetTextSize(.035);
+	jevpSummaryPlot->addElement(l);
+    }
+    CP;
+
+    return jevpSummaryPlot;
 }
 
 void JevpServer::handleSwapRefs(char *name)
 {
-  char name1[256];
-  char name2[256];
-  char tmp[256];
-  char base[256];
-  int idx1, idx2;
-  sscanf(name, "%s %d %d", base, &idx1, &idx2);
+    char name1[256];
+    char name2[256];
+    char tmp[256];
+    char base[256];
+    int idx1, idx2;
+    sscanf(name, "%s %d %d", base, &idx1, &idx2);
   
-  LOG(DBG,"Swapping %s (%d <--> %d)\n",base,idx1,idx2);
-  sprintf(name1, "%s/REF.%s.%d.root",refplotdir, base, idx1);
-  sprintf(name2, "%s/REF.%s.%d.root",refplotdir, base, idx2);
+    LOG(DBG,"Swapping %s (%d <--> %d)\n",base,idx1,idx2);
+    sprintf(name1, "%s/REF.%s.%d.root",refplotdir, base, idx1);
+    sprintf(name2, "%s/REF.%s.%d.root",refplotdir, base, idx2);
 
-  sprintf(tmp, "%s/REF.%s.root.tmp",refplotdir, base);
-  rename(name1, tmp);
-  rename(name2, name1);
-  rename(tmp, name2);
+    sprintf(tmp, "%s/REF.%s.root.tmp",refplotdir, base);
+    rename(name1, tmp);
+    rename(name2, name1);
+    rename(tmp, name2);
 }
 
 void JevpServer::writeRunPdf(int display, int run)
 {
-  RtsTimer_root pdfclock;
-  pdfclock.record_time();
+    RtsTimer_root pdfclock;
+    pdfclock.record_time();
 
-  if(pdfdir == NULL) return;
+    if(pdfdir == NULL) return;
 
-  int ret = displays->setDisplay(display);
-  if(ret < 0) {
-    LOG(ERR, "Can't set display to %d",display);
-    return;
-  }
-  double t = pdfclock.record_time();
-  LOG(NOTE, "write PDF[%d:%s]:  setdisplays took %lf",display,displays->displayRoot->name,t);
+    displays->setDisplay(displays->getDisplayNodeFromIndex(display));
+    displays->updateDisplayRoot();
+
+    double t = pdfclock.record_time();
+    LOG(NOTE, "write PDF[%d:%s]:  setdisplays took %lf",display,displays->displayRoot->name,t);
   
-  char filename[256];
-  sprintf(filename, "%s/%s_%d.pdf",pdfdir, displays->displayRoot->name, run);
-  CP;
+    char filename[256];
+    sprintf(filename, "%s/%s_%d.pdf",pdfdir, displays->displayRoot->name, run);
+    CP;
        
-  writePdf(filename, 1);
+    if(pdfdir) {
+	pdfFileBuilder->writePdf(filename, 1);
+    }
 
-  t = pdfclock.record_time();
-  LOG(NOTE, "write PDF[%d:%s]:  writepdf took %lf",display,displays->displayRoot->name,t);
-  CP;
-
-  // Save it in the database...
-  if(nodb != 1) {
-    LOG("JEFF", "Writing PDF file: %s to DB",filename);
-
-    char *args[5];
-
-    args[0] = (char *)"WritePDFToDB";
-    char tmp[10];
-    sprintf(tmp, "%d", run);
-    args[1] = tmp;
-    args[2] = filename;
-    args[3] = displays->displayRoot->name;
-    args[4] = NULL;
-
-    //int ret = char((execScript *)"WritePDFToDB",args);
-    int ret = execScript("WritePDFToDB", args, 0);
-    LOG(WARN, "Wrote PDF file to DB: %s (ret=%d)", filename, ret);
-    
     t = pdfclock.record_time();
-    LOG(NOTE, "write PDF[%d:%s]:  writepdfdb took %lf (no wait!)",display,displays->displayRoot->name,t);
-  }
+    LOG(NOTE, "write PDF[%d:%s]:  writepdf took %lf",display,displays->displayRoot->name,t);
+    CP;
+
+    // Save it in the database...
+    if(nodb != 1) {
+	LOG("JEFF", "Writing PDF file: %s to DB",filename);
+
+	char *args[5];
+
+	args[0] = (char *)"WritePDFToDB";
+	char tmp[10];
+	sprintf(tmp, "%d", run);
+	args[1] = tmp;
+	args[2] = filename;
+	args[3] = displays->displayRoot->name;
+	args[4] = NULL;
+
+	//int ret = char((execScript *)"WritePDFToDB",args);
+	int ret = execScript("WritePDFToDB", args, 0);
+	LOG(WARN, "Wrote PDF file to DB: %s (ret=%d)", filename, ret);
+    
+	t = pdfclock.record_time();
+	LOG(NOTE, "write PDF[%d:%s]:  writepdfdb took %lf (no wait!)",display,displays->displayRoot->name,t);
+    }
 }
 
-void JevpServer::writePdf(char *filename, int combo_index)
-{
-  if(pdfdir == NULL) return;
+// void JevpServer::writePdf(char *filename, int combo_index)
+// {
+//     LOG(DBG, "Writing pdf: %s index=%d",filename,combo_index);
+//     DisplayNode *root = displays->getTab(combo_index);
 
-  LOG(DBG, "Writing pdf: %s index=%d",filename,combo_index);
-  DisplayNode *root = displays->getTab(combo_index);
-
-  if(combo_index == 0) {
-    LOG(DBG, "disproot = 0x%x root = 0x%x", displays->displayRoot, root);
-    root = displays->displayRoot;
-  }
+//     if(combo_index == 0) {
+// 	LOG(DBG, "disproot = 0x%x root = 0x%x", displays->displayRoot, root);
+// 	root = displays->displayRoot;
+//     }
 
 
-  //   char filename[256];
-  //   sprintf(filename, "%s/%s_%d.pdf", pdfdir, displays->displayRoot->name, run);
+//     //   char filename[256];
+//     //   sprintf(filename, "%s/%s_%d.pdf", pdfdir, displays->displayRoot->name, run);
 
-  LOG(DBG, "writeNodePdf root: %s",filename);
+//     LOG(DBG, "writeNodePdf root: %s",filename);
 
-  PdfIndex index;
-  writeNodePdf(root, &index, NULL, filename, 1, 0);
+//     PdfIndex index;
+//     writeNodePdf(root, &index, NULL, filename, 1, 0);
   
-  LOG(DBG, "write endfilename");
+//     LOG(DBG, "write endfilename");
 
-  // Now a summary....
-  char endfilename[256];
-  strcpy(endfilename, filename);
-  strcat(endfilename, ")");
-  TCanvas summary("c2");
-  summary.Print(endfilename, "pdf,Portrait");
+//     // Now a summary....
+//     char endfilename[256];
+//     strcpy(endfilename, filename);
+//     strcat(endfilename, ")");
+//     TCanvas summary("c2");
+//     summary.Print(endfilename, "pdf,Portrait");
 
   
-  CP;
-  // Index the file...
-  char indexedfilename[256];
-  strcpy(indexedfilename, filename);
-  // strcat(indexedfilename, ".idx");
-  index.CreateIndexedFile(filename, indexedfilename);
+//     CP;
+//     // Index the file...
+//     char indexedfilename[256];
+//     strcpy(indexedfilename, filename);
+//     // strcat(indexedfilename, ".idx");
+//     index.CreateIndexedFile(filename, indexedfilename);
 
-  CP;
-}
+//     CP;
+// }
 
-int JevpServer::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page, int nosibs)
-{
-  LOG(NOTE, "Checking node %s against server tags %s", node->name, serverTags);
+// int JevpServer::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
+// {
+//     LOG(NOTE, "Checking node %s against server tags %s", node->name, serverTags);
 
-  int npages = 0;
+//     int npages = 0;
 
-  if(!node->matchTags(serverTags)) {
-    LOG(NOTE, "node %s does not match tags %s", node->name, serverTags);
+//     if(node->leaf) {   // We are writing histograms...
+// 	LOG(NOTE, "leaf");
+// 	writeHistogramLeavesPdf(node, index, prevIndexEntry, filename, page);
+// 	return 1;
+//     }
+//     else {   // We are just writing index entries
+// 	// are we the child?
+// 	LOG(NOTE, "name");
 
-    // But, handle siblings!   
-    if(node->next && !nosibs) {
-      npages += writeNodePdf(node->next, index, prevIndexEntry, filename, page, 0);
-    }
-    return npages;
-  }
-
-  if(node->leaf) {   // We are writing histograms...
-      LOG(NOTE, "leaf");
-    writeHistogramLeavesPdf(node, index, prevIndexEntry, filename, page);
-    return 1;
-  }
-  else {   // We are just writing index entries
-    // are we the child?
-      LOG(NOTE, "name");
-
-    index_entry *currIndexEntry;
-    if(node->prev == NULL) {
-      currIndexEntry = index->add_child(prevIndexEntry, node->name, page, 0);
-    }
-    else {
-      currIndexEntry = index->add_sibling(prevIndexEntry, node->name, page, 0);
-    }
+// 	index_entry *currIndexEntry;
+// 	if((!node->parent) || (node->parent->child == node)) {
+// 	    currIndexEntry = index->add_child(prevIndexEntry, node->name, page, 0);
+// 	}
+// 	else {
+// 	    currIndexEntry = index->add_sibling(prevIndexEntry, node->name, page, 0);
+// 	}
     
-    if(node->child) {
-      npages += writeNodePdf(node->child, index, currIndexEntry, filename, page, 0);
-    }
+// 	if(node->child) {
+// 	    npages += writeNodePdf(node->child, index, currIndexEntry, filename, page, 0);
+// 	}
     
-    if(node->next && !nosibs) {
-      npages += writeNodePdf(node->next, index, currIndexEntry, filename, page + npages, 0);
-    }
+// 	if(node->next && !nosibs) {
+// 	    npages += writeNodePdf(node->next, index, currIndexEntry, filename, page + npages, 0);
+// 	}
 
-    return npages;
-  }
-}    
+// 	return npages;
+//     }
+// }    
 
 
 
 // If page = 1 prints out start tag --> "filename("
 // But assumes a summary follows, so there is no end tag --> "filename)"
 //
-int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
-{
-  RtsTimer_root clk;
-  clk.record_time();
+// int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
+// {
+//   RtsTimer_root clk;
+//   clk.record_time();
 
-  LOG(DBG, "Write histogram leaves: %s",node->name);
+//   LOG(DBG, "Write histogram leaves: %s",node->name);
 
-  CP;
-  if((node->prev != NULL) || (!node->leaf)) {
-    LOG(ERR, "Shouldn't happen: prev=0x%x leaf=%d", node->prev, node->leaf);
-  }
+//   CP;
+//   //if((node->prev != NULL) || (!node->leaf)) {
+//   // LOG(ERR, "Shouldn't happen: prev=0x%x leaf=%d", node->prev, node->leaf);
+//   //}
 
-  CP;
-  // create index first
-  index_entry *cindex = index->add_child(prevIndexEntry, node->name, page, 0);
-  DisplayNode *cnode = node->next;
-  while(cnode) {
-    cindex = index->add_sibling(cindex, cnode->name, page, 0);
-    cnode = cnode->next;
-  }
-  CP;
-  // Now draw histograms...
-  gStyle->SetCanvasColor(19);
-  TCanvas *c1 = new TCanvas("c1","c1",1000,800);
+//   CP;
+//   // create index first
+//   index_entry *cindex = index->add_child(prevIndexEntry, node->name, page, 0);
+//   DisplayNode *cnode = node->next;
+//   while(cnode) {
+//     cindex = index->add_sibling(cindex, cnode->name, page, 0);
+//     cnode = cnode->next;
+//   }
+//   CP;
+//   // Now draw histograms...
+//   gStyle->SetCanvasColor(19);
+//   TCanvas *c1 = new TCanvas("c1","c1",1000,800);
 
-  char fname[256];
-  strcpy(fname, filename);
-  if(page == 1) {
-    strcat(fname, "(");
-  }
-  CP;
-  int wide = node->getIntParentProperty("wide");
-  if(wide < 0) wide = 1;
-  int deep = node->getIntParentProperty("deep");
-  if(deep < 0) deep = 1;
-  int scaley = node->getIntParentProperty("scaley");
-  if(scaley <= 0) scaley = 0;
-  CP;
-  c1->Clear();
-  c1->Divide(wide, deep);
-  int pad = 1;
-  CP;
-  if(scaley) {
-    double ymax = -999999;
-    cnode = node;
-    while(cnode) {
+//   char fname[256];
+//   strcpy(fname, filename);
+//   if(page == 1) {
+//     strcat(fname, "(");
+//   }
+//   CP;
+//   int wide = node->getIntParentProperty("wide");
+//   if(wide < 0) wide = 1;
+//   int deep = node->getIntParentProperty("deep");
+//   if(deep < 0) deep = 1;
+//   int scaley = node->getIntParentProperty("scaley");
+//   if(scaley <= 0) scaley = 0;
+//   CP;
+//   c1->Clear();
+//   c1->Divide(wide, deep);
+//   int pad = 1;
+//   CP;
+//   if(scaley) {
+//     double ymax = -999999;
+//     cnode = node;
+//     while(cnode) {
 
-      LOG(DBG, "cnode->name = %s", cnode->name);
-      JevpPlot *plot = getPlot(cnode->name);
-      if(plot) {
-	LOG(DBG, "got plot 0x%x",plot);
-	double my = plot->getMaxY();
-	if(my > ymax) ymax = my;
-      }
-      cnode = cnode->next;
-    }
-    CP;
+//       LOG(DBG, "cnode->name = %s", cnode->name);
+//       JevpPlot *plot = getPlot(cnode->name);
+//       if(plot) {
+// 	LOG(DBG, "got plot 0x%x",plot);
+// 	double my = plot->getMaxY();
+// 	if(my > ymax) ymax = my;
+//       }
+//       cnode = cnode->next;
+//     }
+//     CP;
     
-    //printf("Got scaley...  Setting max value to ymax=%lf\n",ymax*1.1);
-    cnode = node;
-    while(cnode) {
-      JevpPlot *plot = getPlot(cnode->name);
-      if(plot) {
-	if(plot->logy) {
-	  plot->setMaxY(ymax * 2);
-	}
-	else {
-	  plot->setMaxY(ymax * 1.1);
-	}
-      }
-      cnode = cnode->next;
-    }
-  }
-  CP;
+//     //printf("Got scaley...  Setting max value to ymax=%lf\n",ymax*1.1);
+//     cnode = node;
+//     while(cnode) {
+//       JevpPlot *plot = getPlot(cnode->name);
+//       if(plot) {
+// 	if(plot->logy) {
+// 	  plot->setMaxY(ymax * 2);
+// 	}
+// 	else {
+// 	  plot->setMaxY(ymax * 1.1);
+// 	}
+//       }
+//       cnode = cnode->next;
+//     }
+//   }
+//   CP;
 
-  cnode = node;
-  while(cnode) {
-    c1->cd(pad);
-    CP;
+//   cnode = node;
+//   while(cnode) {
+//     c1->cd(pad);
+//     CP;
 
-    LOG(DBG, "Plotting %s on page %d / pad %d",cnode->name, page, pad);
+//     LOG(DBG, "Plotting %s on page %d / pad %d",cnode->name, page, pad);
 
-    JevpPlot *plot = NULL;
-    //if(strcmp(cnode->name, "serv_JevpSummary") == 0) {
-    // plot = getJevpSummaryPlot();
-    //}
-    //else {
-    CP;
-    plot = getPlot(cnode->name);
-    CP;
-    //}
+//     JevpPlot *plot = NULL;
+//     //if(strcmp(cnode->name, "serv_JevpSummary") == 0) {
+//     // plot = getJevpSummaryPlot();
+//     //}
+//     //else {
+//     CP;
+//     plot = getPlot(cnode->name);
+//     CP;
+//     //}
 
-    if(plot) {
-      CP;
-      LOG(DBG, "Found plot %s",cnode->name);
-      CP;
-      plot->draw();
-      CP;
-    }
-    else {
-      CP;
-      LOG(DBG, "Can't find plot %s",cnode->name);
-      CP;
-      DrawCrossOfDeath(cnode->name);
-      CP;
-    }
+//     if(plot) {
+//       CP;
+//       LOG(DBG, "Found plot %s",cnode->name);
+//       CP;
+//       plot->draw();
+//       CP;
+//     }
+//     else {
+//       CP;
+//       LOG(DBG, "Can't find plot %s",cnode->name);
+//       CP;
+//       DrawCrossOfDeath(cnode->name);
+//       CP;
+//     }
 
-    cnode = cnode->next;
-    pad++;
-  }
-  CP;
-  while(pad <= wide*deep) {
-    c1->cd(pad);
-    TLatex *x = new TLatex(.5,.5," ");
-    x->Draw();
-    //gPad->Draw();
-    // printf("Drawing jeff %d\n",pad);
-    pad++;
-  }
+//     cnode = cnode->next;
+//     pad++;
+//   }
+//   CP;
+//   while(pad <= wide*deep) {
+//     c1->cd(pad);
+//     TLatex *x = new TLatex(.5,.5," ");
+//     x->Draw();
+//     //gPad->Draw();
+//     // printf("Drawing jeff %d\n",pad);
+//     pad++;
+//   }
 
-  double t1 = clk.record_time();
-  CP;
-  c1->Print(fname, "pdf,Portrait");
+//   double t1 = clk.record_time();
+//   CP;
+//   c1->Print(fname, "pdf,Portrait");
 
-  double t2 = clk.record_time();
+//   double t2 = clk.record_time();
 
-  LOG(DBG, "Write histogram leaves: %s (%lf/%lf)",node->name,t1,t2);
+//   LOG(DBG, "Write histogram leaves: %s (%lf/%lf)",node->name,t1,t2);
 
-  delete c1;
-  return 1;
-}
+//   delete c1;
+//   return 1;
+// }
 
 
 int JevpServer::getMaxRef(char *name)
@@ -1701,119 +1794,107 @@ void JevpServer::saveReferencePlot(JevpPlot *plot) {
 
 void JevpServer::addServerTag(char *tag)
 {
-  char tg[100];
-  sprintf(tg, "|%s|",tag);
+    char tg[100];
+    sprintf(tg, "|%s|",tag);
 
-  if(serverTags == NULL) {
-    serverTags = (char *)malloc(strlen(tag)+2);
-    strcpy(serverTags, "|");
-    strcat(serverTags, tag);
-    strcat(serverTags, "|");
-    return;
-  }
+    if(serverTags == NULL) {
+	serverTags = (char *)malloc(strlen(tag)+2);
+	strcpy(serverTags, "|");
+	strcat(serverTags, tag);
+	strcat(serverTags, "|");
+	return;
+    }
 
-  if(strstr(serverTags, tg)) return;
+    if(strstr(serverTags, tg)) return;
   
-  char *ntag = (char *)malloc(strlen(serverTags) + strlen(tag) + 2);
-  strcpy(ntag, serverTags);
-  strcat(ntag, tag);
-  strcat(ntag, "|");
+    char *ntag = (char *)malloc(strlen(serverTags) + strlen(tag) + 2);
+    strcpy(ntag, serverTags);
+    strcat(ntag, tag);
+    strcat(ntag, "|");
 
-  free(serverTags);
-  serverTags = ntag;
+    free(serverTags);
+    serverTags = ntag;
 }
 
 
 // tags delimeted by "|"
 void JevpServer::addServerTags(char *tags)
 {
-  LOG(DBG, "Adding tag: %s",tags);
+    LOG(DBG, "Adding tag: %s",tags);
 
-  char *tmp = (char *)malloc(strlen(tags)+1);
-  strcpy(tmp, tags);
+    char *tmp = (char *)malloc(strlen(tags)+1);
+    strcpy(tmp, tags);
   
-  if(tmp[0] != '|') {
-    LOG(ERR, "Bad tag string: %s",tags);
+    if(tmp[0] != '|') {
+	LOG(ERR, "Bad tag string: %s",tags);
+	free(tmp);
+	return;
+    }
+
+    char *t = strtok(tmp, "|");
+    while(t) {
+	addServerTag(t);
+	t = strtok(NULL, "|");
+    }
+  
+    LOG(DBG, "server tags are: %s",serverTags);
     free(tmp);
-    return;
-  }
-
-  char *t = strtok(tmp, "|");
-  while(t) {
-    addServerTag(t);
-    t = strtok(NULL, "|");
-  }
-  
-  LOG(DBG, "server tags are: %s",serverTags);
-  free(tmp);
 }
 
 
 int JevpServer::execScript(const char *name, char *args[], int waitforreturn)
 {
-  CP;
-  pid_t pid = fork();
+    CP;
+    pid_t pid = fork();
 
-  if(pid == -1) {
-    LOG(CRIT, "Error spawning script: %s (%s)",name, strerror(errno),0,0,0);
-    return 1;
-  }
-
-  if(pid == 0) {
-    for(int i=0;;i++) {
-      if(args[i] == NULL) break;
-      LOG(NOTE, "args[%d] = %s",i,args[i]);
+    if(pid == -1) {
+	LOG(CRIT, "Error spawning script: %s (%s)",name, strerror(errno),0,0,0);
+	return 1;
     }
+
+    if(pid == 0) {
+	for(int i=0;;i++) {
+	    if(args[i] == NULL) break;
+	    LOG(NOTE, "args[%d] = %s",i,args[i]);
+	}
     
-    int ret = execvp(name,args);
-    if(ret < 0) {
-      char buff[100];
-      LOG(CRIT, "Error spawning script: %s (%s)  (%s)",name, strerror(errno),getcwd(buff,100));
-      return 1;
+	int ret = execvp(name,args);
+	if(ret < 0) {
+	    char buff[100];
+	    LOG(CRIT, "Error spawning script: %s (%s)  (%s)",name, strerror(errno),getcwd(buff,100));
+	    return 1;
+	}
     }
-  }
 
-  CP;
-  if(!waitforreturn) return 0;
-  CP;
+    CP;
+    if(!waitforreturn) return 0;
+    CP;
 
-  // Wait for child to return....
-  int stat=0;
-  do {
-    waitpid(pid,&stat,0);
-  } while(WIFEXITED(stat) == 0);
+    // Wait for child to return....
+    int stat=0;
+    do {
+	waitpid(pid,&stat,0);
+    } while(WIFEXITED(stat) == 0);
 
-  return WEXITSTATUS(stat);
+    return WEXITSTATUS(stat);
 }
 
-DisplayNode *JevpServer::getPalleteNode()
-{
-  if(!displays) return NULL;
-  if(!displays->root) return NULL;
-  DisplayNode *palleteNode = displays->root->child;
+// DisplayNode *JevpServer::getPalleteNode(DisplayFile *pall)
+// {
+//   if(!displays) return NULL;
+//   if(!displays->root) return NULL;
+//   DisplayNode *palleteNode = displays->root->child;
   
-  CP;
+//   CP;
 
-  while(palleteNode) {
-    if(strcmp(palleteNode->name, "pallete") == 0) {
-      return palleteNode;
-    }
-    palleteNode = palleteNode->next;
-  }
-  return NULL;
-}
-
-void JevpServer::freePallete()
-{
-  CP;
-  DisplayNode *palleteNode = getPalleteNode();
-  CP;
-  if(palleteNode) {
-    CP;
-    palleteNode->freeChildren();
-    CP;
-  }
-}
+//   while(palleteNode) {
+//     if(strcmp(palleteNode->name, "pallete") == 0) {
+//       return palleteNode;
+//     }
+//     palleteNode = palleteNode->next;
+//   }
+//   return NULL;
+// }
 
 // This function actually checks if already in pallete
 // if not, adds....
@@ -1822,7 +1903,9 @@ void JevpServer::addToPallete(JevpPlot *plot)
   char *builder = plot->getParent();
   char *name = plot->GetPlotName();
 
-  DisplayNode *palleteNode = getPalleteNode();
+  DisplayNode *palleteNode; // = pallete->root->child;
+  //if(!palleteNode) {
+  //  LOG(ERR,
 
   CP;
   if(!palleteNode) {

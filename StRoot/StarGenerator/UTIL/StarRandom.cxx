@@ -40,7 +40,7 @@ extern "C"
 
 
 // ----------------------------------------------------------------------------
-StarRandom::StarRandom() : TObject()
+StarRandom::StarRandom() : TObject(), mSeed(0), mState()
 {
 
 }
@@ -119,7 +119,8 @@ void StarRandom::set( ROOT::Math::GSLRandomEngine *engine ){ mEngine = engine; }
 void StarRandom::seed( UInt_t s ){ 
   if (!sInstance) Instance(); 
   mEngine->SetSeed(s); 
-  sInstance->mSeed = s;
+  //sInstance->mSeed = s;
+  Instance().mSeed = s;
 }
 // ----------------------------------------------------------------------------
 void StarRandom::seed( UShort_t seed1, UShort_t seed2 ) {

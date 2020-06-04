@@ -41,11 +41,13 @@ class AliHLTTPCCAClusterData
     /**
      * Construct AliHLTTPCCAClusterData object from GBHit array.
      */
-    AliHLTTPCCAClusterData( const AliHLTTPCCAGBHit *hits, int *offset, int numberOfClusters, int nRows8 ) {
+    AliHLTTPCCAClusterData( const AliHLTTPCCAGBHit *hits, int *offset, int numberOfClusters, int nRows8 ):
+      fSlice(0), fFirstRow(0), fLastRow(0), fNumberOfClusters(0), fRowOffset(0), fData(0)
+    {
       readEvent( hits, offset, numberOfClusters, nRows8 );
     }
 
-    AliHLTTPCCAClusterData() {}
+    AliHLTTPCCAClusterData(): fSlice(0), fFirstRow(0), fLastRow(0), fNumberOfClusters(0), fRowOffset(0), fData(0) {}
 
     // void readEvent( const AliHLTArray<AliHLTTPCSpacePointData *> &clusters,
     //     int numberOfClusters, double ClusterZCut );

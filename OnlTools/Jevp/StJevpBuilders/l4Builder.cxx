@@ -170,7 +170,7 @@ void l4Builder::initialize(int argc, char *argv[])
 		BeamPlots[i]->gridy = 0;                                                                       
 		BeamPlots[i]->setPalette(1);                                                                   
 	}    
-	for(int i = 0; i < 4; i++) {
+	for(int i = 0; i < 5; i++) {
 		BesGoodPlots[i] = new JevpPlot();
 		BesGoodPlots[i]->gridx = 0;
 		BesGoodPlots[i]->gridy = 0;
@@ -268,6 +268,9 @@ void l4Builder::initialize(int argc, char *argv[])
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HLTGood2Plots[i]);
 	}
+	for(int i=0;i<5;i++) {
+	    addPlot(BesGoodPlots[i]);
+	}
 
 	for(int i = 0; i < 1; i++) {
 		LOG(DBG, "Adding plot %d", i);
@@ -291,14 +294,14 @@ void l4Builder::initialize(int argc, char *argv[])
 
 void l4Builder::startrun(daqReader *rdr)
 {
-	printf("hello there. This is startrun\n");
+    //printf("hello there. This is startrun\n");
 	runnumber = rdr->run;
 
 	int initialno = 39;
 	for(int i = 0; i < initialno; i++) {
 		getPlotByIndex(i)->getHisto(0)->histo->Reset();
 	}
-	for(int i = 0; i < 4; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
+	for(int i = 0; i < 5; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 2; i++)BesMontinorPlots[i]->getHisto(0)->histo->Reset();
 	for(int i = 0; i < 5; i++)FixedTargetPlots[i]->getHisto(0)->histo->Reset();
@@ -354,7 +357,7 @@ void l4Builder::startrun(daqReader *rdr)
 	DiElectron2TwrFilled = false;
 
 
-	printf("Starting run #%d\n", runnumber);
+	//printf("Starting run #%d\n", runnumber);
 };
 
 void l4Builder::stoprun(daqReader *rdr)
@@ -453,7 +456,7 @@ void l4Builder::stoprun(daqReader *rdr)
 	outstream.open(OutParas);
 
 	if(outstream.fail()) {
-		LOG(ERR, "Open failed for file %s!", OutParas);
+	    LOG(ERR, "Open failed for file %s!", OutParas);
 	}
 
 	outstream << "beamX" << "    " << BeamX << endl;
@@ -577,7 +580,7 @@ void l4Builder::writeHistogram()
 
 	for(int i = 0; i < initialno; i++) getPlotByIndex(i)->getHisto(0)->histo->Write();
 	if(BESGoodFilled){
-		for(int i = 0; i < 4; i++)BesGoodPlots[i]->getHisto(0)->histo->Write();
+		for(int i = 0; i < 5; i++)BesGoodPlots[i]->getHisto(0)->histo->Write();
 	}
 	if(HLTGood2Filled){
 		for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Write();
@@ -752,7 +755,7 @@ void l4Builder::event(daqReader *rdr)
 		return;
 	}
 
-	unsigned int decision = hlt_eve->hltDecision;
+	unsigned int decision = hlt_eve->hltDecision;	
 
 	if(!TriggerFilled) {
 		TriggerFilled = true;
@@ -1088,9 +1091,11 @@ void l4Builder::event(daqReader *rdr)
 			BESGoodFilled = true;
 			addServerTags("L4BesGoodEvents");
 		}
+
 		hBesGoodVertexXY->Fill(vertX, vertY);
 		hBesGoodVertexZ->Fill(vertZ);
 		hBesGoodVr->Fill(vertR);
+		hBesGoodVrVsVz->Fill(vertZ,vertR);
 	}
 
 	//HLTGood2
@@ -2365,13 +2370,13 @@ void l4Builder::defineBesGoodPlots()
 	BesGoodPlots[index]->addHisto(ph);
 
 	index++; //1
-	hBesGoodVertexZ = new TH1D("BesGood_VertexZ","BesGood_VertexZ",100,-10.,10.);
+	hBesGoodVertexZ = new TH1D("BesGood_VertexZ","BesGood_VertexZ",100,-200.,200.);
 	ph = new PlotHisto();
 	ph->histo = hBesGoodVertexZ;
 	BesGoodPlots[index]->addHisto(ph);
 
 	index++; //2
-	hBesGoodVr = new TH1D("BesGood_Vr","BesGood_Vr",100,0,5);
+	hBesGoodVr = new TH1D("BesGood_Vr","BesGood_Vr",100,0,10);
 	ph = new PlotHisto();
 	ph->histo = hBesGoodVr;
 	BesGoodPlots[index]->addHisto(ph);
@@ -2382,6 +2387,12 @@ void l4Builder::defineBesGoodPlots()
 	ph = new PlotHisto();
 	ph->histo = hBesGoodprimaryMult;
 	BesGoodPlots[index]->addHisto(ph);
+
+	index++; //4
+	hBesGoodVrVsVz = new TH2D("BesGood_VrVsVz","BesGood_VrVsVz",1000,-150,150,400,0,10);
+        ph = new PlotHisto();
+        ph->histo = hBesGoodVrVsVz;
+        BesGoodPlots[index]->addHisto(ph);
 }
 
 void l4Builder::defineHLTGood2Plots()
@@ -3361,6 +3372,8 @@ void l4Builder::setAllPlots()
 	hMeanDcaXy->SetLabelSize(0.04, "X");
 	hBesGoodVertexXY->GetXaxis()->SetTitle("VertexX (cm)");
 	hBesGoodVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
+	hBesGoodVrVsVz->GetXaxis()->SetTitle("VertexZ (cm)");
+	hBesGoodVrVsVz->GetYaxis()->SetTitle("VertexR (cm)");
 	hBesGoodVertexZ->GetXaxis()->SetTitle("VertexZ (cm)");
 	//hBesGoodVertexXY->GetZaxis()->SetRangeUser(1.e-10,1.e30);
 	hBesGoodVr->GetXaxis()->SetTitle("VertexR (cm)");

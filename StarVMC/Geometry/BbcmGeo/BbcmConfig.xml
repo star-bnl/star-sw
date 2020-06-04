@@ -1,0 +1,43 @@
+<Document  file="StarVMC/Geometry/BbcmGeo/BbcmConfig.xml">
+ 
+  <Detector name="BBCM" comment="Beam Beam Counter configurations"> 
+ 
+
+    <Modules>BbcmGeo</Modules>
+    
+    <Setup  name  = "BBCMof" comment="No BBCM" module="BbcmGeo" onoff="off" />
+
+    <Setup  name   = "BBCMon"
+	    comment= "Default configuration for the Beam Beam counter"
+	    module = "BbcmGeo"
+	    onoff  = "on"
+	    simu   = "2">
+	   
+
+      <!-- Select version of the BBC -->
+      <Init struct="BBCG" var="version" value="1.0" />
+
+    </Setup> 
+ 
+    <Setup  name   = "BBCMin"
+	    comment= "BBC with inner tiles only"
+	    module = "BbcmGeo"
+	    onoff  = "on"
+	    simu   = "2">
+
+      <!-- Select version of the BBC -->
+      <Init struct="BBCG" var="version" value="2.0" />
+      <Init struct="BBCG" var="onoff"   value="{3,1,2}" />
+      <Init struct="BBCG" var="zdis"    value="{-380.0,380.0}" />
+
+    </Setup> 
+  
+  </Detector> 
+   
+</Document>
+  
+ 
+  
+ 
+ 
+

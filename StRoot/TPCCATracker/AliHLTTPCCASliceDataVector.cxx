@@ -99,21 +99,6 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
   AssignMemoryAligned<VectorAlignment>( hitWeights,   mem, numberOfHitsWithPadding );
   AssignMemoryAligned<VectorAlignment>( clusterDataIndex, mem, numberOfHitsWithPadding );
 
-#ifndef NVALGRIND
-  ////////////////////////////////////
-  // 1.5. fill HitData with 0 for valgrind
-  ////////////////////////////////////
-
-  {
-    const float_v zero( Vc::Zero );
-    for ( int i = 0; i < numberOfHitsWithPadding; i += float_v::Size ) {
-      zero.store( &hitDataY[i] );
-      zero.store( &hitDataZ[i] );
-      zero.store( &hitDataIsUsed[i] );
-    }
-  }
-#endif
-
   ////////////////////////////////////
   // 2. fill HitData and FirstHitInBin
   ////////////////////////////////////
@@ -193,16 +178,13 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
 
     for ( int hitIndex = 0; hitIndex < row.fNHits; ++hitIndex ) {
       const unsigned short bin = bins[hitIndex];
-      VALGRIND_CHECK_VALUE_IS_DEFINED( bin );
       assert( bin < numberOfBins + 3 );
       --filled[bin];
       const unsigned short ind = c[bin] + filled[bin]; // generate an index for this hit that is >= c[bin] and < c[bin + 1]
       assert( ind < row.fNHits );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( ind );
       const int globalHitIndex = clusterDataOffset + hitIndex;
 
       // allows to find the global hit index / coordinates from a global bin sorted hit index
-      VALGRIND_CHECK_VALUE_IS_DEFINED( globalHitIndex );
       row.fClusterDataIndex[ind] = globalHitIndex;
       row.fHitDataY[ind] = data.Y( globalHitIndex );
       row.fHitDataZ[ind] = data.Z( globalHitIndex );

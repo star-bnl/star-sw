@@ -28,7 +28,7 @@ class StarGenEvent;
 StarGenEvent *event = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary = 0;
+StarPrimaryMaker *_primary = 0;
 
 class StarKinematics;
 StarKinematics *kinematics = 0;
@@ -126,7 +126,7 @@ void trig( Int_t n=1 )
 		chain->Make();
 
 		// Print the event
-		primary->event()->Print();
+		_primary->event()->Print();
 	}
 }
 // ----------------------------------------------------------------------------
@@ -138,7 +138,7 @@ void Kinematics()
 	gSystem->Load( "libKinematics.so");
 	kinematics = new StarKinematics();
 
-	primary->AddGenerator(kinematics);
+	_primary->AddGenerator(kinematics);
 }
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -169,10 +169,10 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
 	// before the geant maker
 	//
 	//  StarPrimaryMaker *
-	primary = new StarPrimaryMaker();
+	_primary = new StarPrimaryMaker();
 	{
-		primary -> SetFileName( "kinematics.starsim.root");
-		chain -> AddBefore( "geant", primary );
+		_primary -> SetFileName( "kinematics.starsim.root");
+		chain -> AddBefore( "geant", _primary );
 	}
 	
 	Particles();	
@@ -181,7 +181,7 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
 	//
 	// Initialize primary event generator and all sub makers
 	//
-	primary -> Init();
+	_primary -> Init();
 	
 	//
 	// Setup geometry and set starsim to use agusread for input

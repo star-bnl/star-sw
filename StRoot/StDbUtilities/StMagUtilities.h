@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.58 2014/07/08 09:50:43 fisyak Exp $
+ * $Id: StMagUtilities.h,v 1.58.10.1 2018/04/13 16:23:20 didenko Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.58.10.1  2018/04/13 16:23:20  didenko
+ * updates for SL16d_embed library
+ *
  * Revision 1.58  2014/07/08 09:50:43  fisyak
  * Fix old correction with 2D and 3D mag.field
  *
@@ -203,7 +206,8 @@ enum   DistortSelect
   k3DGridLeak        = 0x8000,   // Bit 16
   kGGVoltError       = 0x10000,  // Bit 17
   kSectorAlign       = 0x20000,  // Bit 18
-  kDisableTwistClock = 0x40000   // Bit 19
+  kDisableTwistClock = 0x40000,  // Bit 19
+  kDistoSmearing     = 0x100000  // Bit 21
 } ;
 enum   CorrectSelect
 {
@@ -229,6 +233,8 @@ enum   EBMapSizes
 class StTpcDb ;
 class TDataSet ;
 class St_tpcHVPlanesC;
+  class St_tpcCalibResolutionsC;
+  class TRandom;
 #include "StDetectorDbMaker/StDetectorDbSpaceCharge.h"
 #include "StDetectorDbMaker/StDetectorDbTpcVoltages.h"
 #include "StDetectorDbMaker/StDetectorDbTpcOmegaTau.h"
@@ -247,7 +253,9 @@ class StMagUtilities {
   StDetectorDbTpcOmegaTau*   fOmegaTau      ;
   StDetectorDbGridLeak*      fGridLeak      ;
   St_tpcHVPlanesC*           fHVPlanes      ;
+  St_tpcCalibResolutionsC*   fCalibResolutions ;
 
+  virtual void    GetDistoSmearing ( Int_t mode) ;
   virtual void    GetMagFactor ()     ;
   virtual void    GetTPCParams ()     ;
   virtual void    GetTPCVoltages ()   ;
@@ -353,7 +361,11 @@ class StMagUtilities {
   Bool_t   useManualSCForPredict      ; // Flag on using fixed SC value or manually set one for Predict()
   Bool_t   iterateDistortion          ; // Flag on whether to iterate in determining distortions
   Int_t    iterationFailCounter       ; // Count of number of iteration fails
+  Bool_t   doingDistortion            ; // Flag on whether doing or undoing distortions
   Bool_t   usingCartesian             ; // Using Cartesian or cylindrical coordinates
+  TRandom* mRandom                    ; // Random number generator (used in distortion smearing)
+  Float_t  SmearCoefSC                ; // Distortion smearing coefficient for SpaceCharge
+  Float_t  SmearCoefGL                ; // Distortion smearing coefficient for GridLeak
 
 
   Float_t  shiftEr[EMap_nZ][EMap_nR] ;

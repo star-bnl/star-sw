@@ -57,6 +57,33 @@ type_map = {
     'Float_t' : 'real'
     }
 
+# ----------------------------------------------------------------------------------------------------
+def parseArray(array):
+    """
+    Given a string which is interpreted as an array, i.e.
+
+    array="{1,2,3;4,5,6;7,8,9;}"   ! 2D array
+    array="{1,2,3}"                ! 1D array
+
+    returns a (nested) list representing the (2D) 1D array
+    
+    """
+
+    work = array.strip()
+    work = work.lstrip('{')
+    work = work.rstrip('}')
+    work = work.rstrip(';')
+    work = work.replace(' ','')
+    work = work.replace('\n','')
+    
+    out = []
+    nline = 0
+    for line in work.split(';'):
+        out.append( list(line.split(',')) )
+        nline = nline + 1
+
+    if nline==1: out = out[0]
+    return list(out)
 
 
 class PrettyPrint:
@@ -372,6 +399,148 @@ class Document( Handler ):
 # ====================================================================================================
 # Begin definition of Mortran syntax
 
+class Detector( Handler ):
+    """
+    The <Detector> block specifies configuration options for the detector
+    """
+    def __init__(self):
+        global document
+        self.parent = None
+
+        self.name = None
+        self.comment = None
+        self.modules = []
+        self.setups  = []
+
+        Handler.__init__(self)
+
+    def setParent(self, p):
+        self.parent = p
+
+    def addModule( self, module ):
+        self.modules.append( module )
+
+    def startElement(self, tag, attr ):
+        self.name    = attr.get('name', None)
+        self.comment = attr.get('comment', None)
+
+#        formatter( '#ifndef __%s_CONFIG__' % self.name )
+#        formatter( '#define __%s_CONFIG__' % self.name )
+
+    def endElement(self, tag ):
+        pass
+#        formatter ('#endif')
+
+class Setup( Handler ):
+    """
+    The <Setup> block defines a specific configuration for the detector
+    """
+    def __init__(self):
+        self.parent = None
+        self.name = None
+        self.comment = None
+        self.module = None
+        self.onoff = None
+        self.inits = []
+        self.flags = {}
+        Handler.__init__(self);
+
+    def setParent(self,p):
+        self.parent = p
+
+    def startElement(self, tag, attr ):
+        self.name    = attr.get('name',    None)
+        self.comment = attr.get('comment', None)
+        self.module  = attr.get('module',  None)
+        self.onoff   = attr.get('onoff',   None)
+        self.detector = self.parent.name
+
+        # Flags set by agsflag
+        for flag in [ 'prin', 'grap', 'hist', 'geom', 'mfld', 'debu', 'simu' ]:
+            myflag = attr.get(flag, None)
+            if myflag:
+                self.flags[flag] = int(myflag)
+
+
+    def endElement(self, tag):
+#       formatter( 'REPLACE [SETUP %s] with {'%self.name )
+#       formatter( "%s_module = CsAddr('%s')"%(self.detector,self.module) )
+#       formatter( "Call AgDetp NEW('%s')"%(self.detector) )
+        formatter( "FUNCTION SETUP_%s()"%self.name )
+        formatter( "  Integer       :: SETUP_%s"%self.name )
+        formatter( "  Integer, save :: address" )
+        formatter( "  Integer       :: CsAddr" )
+        formatter( "  Real    :: tmp(100)" )
+        if self.onoff == 'off' or self.onoff == 'OFF':
+            formatter ( "address = 0")
+            formatter ( "SETUP_%s = 0"%self.name )
+            formatter ( "RETURN" )
+        else:
+            # Pointer to the constructor defined below
+            formatter( "  SETUP_%s = CsAddr('CONSTRUCT_%s')"%(self.name,self.name) )
+            # Pointer to the detector module
+            formatter( "  address  = CsAddr('%s')"%(self.module) ) 
+            #formatter( "  WRITE(*,*)  '[%10s :: %20s]'"%(self.name,self.module) )
+            formatter( "  Write(*,*) '%12s [%20s] : %80s'"%(self.name,self.module,self.comment) )
+        
+            name = self.parent.name.upper()
+
+            # 
+            # Configuration of more top level flags.  Must be performed prior
+            # to creating the NEW detector bank for the module, otherwise
+            # this flag is reset to default.
+            #
+            for flag,value in self.flags.iteritems():
+                formatter("   CALL Agsflag('%s',%i)"%(flag,value))
+
+            #
+            # Configuration of detector parameters
+            # 
+            formatter( "Call AgDetp NEW('%s')"%name )
+            for i in self.inits:
+                value = i.value
+                value = value.strip('{}')
+                value = value.split(',')
+                if len(value) == 1:
+                    formatter( "Call AgDetp ADD('%s.%s=',%s,1)"%(i.struct,i.variable,i.value) )
+                else:
+                    formatter( "tmp = %s" %i.value )
+                    formatter( "Call AgDetp ADD('%s.%s=',tmp,%i)"%(i.struct,i.variable,len(value)) )
+
+            formatter("RETURN")
+            
+        formatter("ENTRY construct_%s"%self.name)
+        # Setup flags
+        formatter("IF address.le.0 { return; }")
+        # Call the module stored during setup
+        formatter("   CALL CsjCal(address,0, 0,0,0,0,0, 0,0,0,0,0)" )
+        formatter("RETURN")        
+        formatter("END")
+#       formatter( '}' )
+
+class Init( Handler ):
+    def __init__(self):
+        self.parent = None
+
+    def setParent( self, p ):
+        self.parent = p
+        self.parent.inits.append(self)
+
+    def startElement(self, tag, attr ):
+        self.struct   = attr.get('struct', None )
+        if self.struct: self.struct = self.struct.lower()
+        self.variable = attr.get('var', None )
+        self.value    = attr.get('value', None )
+        self.namespace = self.parent.module.upper()
+
+    def endElement(self, tag ):
+        pass
+#        self.parent.inits.append(self)
+
+
+
+class Modules( Handler ):
+    pass
 
 class Module ( Handler ):
     def __init__(self):
@@ -843,7 +1012,7 @@ class Enum( Handler ):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p    
 # ====================================================================================================
-class Struct( Handler ):
+class Structure( Handler ):
     def setParent(self,p): self.parent = p    
     def __init__(self):
         self. name = 0
@@ -881,6 +1050,11 @@ class Struct( Handler ):
         #form( "}! %s" % self.name )
         output += "}"
         form ( output )
+
+class Struct( Structure ):
+    def __init__(self):
+        Structure.__init__(self)
+
 # ====================================================================================================
 class ArrayFormatter:
     def __init__(self,limit=60,indent='    ',level=2 ):
@@ -1020,64 +1194,11 @@ class Fill( Handler ):
                 form      ( '%s = %s ! %s'%( var, val, com ) )
 
         form('ENDFILL')
-                
-            
+                      
 
-    def __NEW_OLD_endElement(self,tag):
 
-        limit = 60
-
-        for i,var in enumerate(self.var_list):
-
-            val = self.val_list[i].strip()  # value(s)
-            com = self.com_list[i]          # comment
-
-            if ( val[0]=='{' ):             # dealing with either matrix or array
-
-                n=len(val)
-                myval=val[1:n-1]
-
-                print myval
-
-                mylines = myval.split(';')
-                nlines = len(mylines)
-
-                output = '%s = {' % var
-                justfy = '      '
-                output += justfy
-                justfy += justfy
-                
-                for myline in mylines:
-
-                    values = myline.split(',')
-                    nv = len(values)
-
-                    for i,v in enumerate(values):
-                        v = v.strip()
-                        if ( i!= nv-1 ):
-                            output += '%s, '% v
-                            if ( len(output)%limit == 0 ):
-                                output+='\n'
-                        else:
-                            output += '%s'  % v
-
-                    if ( nlines > 1 ):
-                        output += ';\n'
-                        output += justfy
-    
-                output += '} ! %s '% com
-
-                for line in output.split('\n'):
-
-                    line = line.strip(',')
-                    #print line                    
-                    #form(line)
-                
-                        
-            else:
-                form ( '%s=%s ! %s'%( var, val, com ) )
-            
-
+class Filling(Fill):
+    def __init__(self): Fill.__init__(self)
             
 
 
@@ -1094,6 +1215,9 @@ class Use(Handler):
             form( "use %s" % struct )
         else:
             form( "use %s %s=%s"%( struct, selector, value ) )
+
+class Using(Use):
+    def __init__(self): Use.__init__(self)
 # ====================================================================================================
 class Material(Handler):
     def __init__(self):
@@ -1335,6 +1459,7 @@ class Create_and_Position(Position):
         Position.__init__(self)                
     def startElement(self,tag,attr):
 
+
         # Arrange shape arguements first
         for key in shape_params:
             val = attr.get(key,None)
@@ -1373,7 +1498,10 @@ class Placement(Handler):
     def __init__(self):
         Handler.__init__(self)
         self.contents = []
-        #self.form=Formatter()
+        #self.misalignments = []
+
+    def addMisalignment(self,m):
+        self.contents.append(m)
 
     def setParent(self,p): self.parent=p
 
@@ -1388,6 +1516,9 @@ class Placement(Handler):
         self.only  = attr.get('konly',None)
         self.copy  = attr.get('ncopy',None)
         self.cond  = attr.get('if',   None)
+        self.matrix= attr.get('matrix', None)
+        self.table = attr.get('table', None)
+        self.row   = attr.get('row', None)
 
         if self.only:
             self.only  = self.only.strip("'")
@@ -1422,6 +1553,13 @@ class Placement(Handler):
         x      = self.attr.pop('x',None)
         y      = self.attr.pop('y',None)
         z      = self.attr.pop('z',None)
+#       matrix = self.attr.pop('matrix',None)
+        table  = self.attr.pop('table',None)
+        row    = self.attr.pop('row','0')
+        opts   = self.attr.pop('opts',None)
+        
+        if table:
+            table = table.split('/')[-1]
 
 
         parlist = []
@@ -1446,23 +1584,51 @@ class Placement(Handler):
             parlist.append( "KONLY" )
 
 
+        #
+        # IF we have a matrix, unpack the elements
+        #
+        if matrix:
+            array = parseArray( matrix )
+
+            self.x = '%f'%float( array[0][3] )
+            self.y = '%f'%float( array[1][3] )
+            self.z = '%f'%float( array[2][3] )
+
+            x = self.x
+            y = self.y
+            z = self.z
+
+            out = ''
+            k = 1
+            for i in range(0,3):
+                for j in range(0,3):
+                    out = 'agml_rotm(%i) = %f'%( k, float(array[i][j]) )
+                    formatter( out, cchar="_" )
+                    k   += 1
+            formatter( 'call agml_rotation( agml_rotm )' , cchar='_' )
+
+
+
+                    
 
         #
         # Now create the executive code
         #
-        if x:
-            formatter( "%%x = %s"% tryFloat(self.x), cchar="_" )
+        if x!=None:
+            formatter( "ag_x = %s"% tryFloat(self.x), cchar="_" )
+            formatter( "CALL agml_translate_x( %x )", cchar="_")
             parlist.append( "X" )
-        if y:
-            formatter( "%%y = %s"% tryFloat(self.y), cchar="_" )
+        if y!=None:
+            formatter( "ag_y = %s"% tryFloat(self.y), cchar="_" )
+            formatter( "CALL agml_translate_y( %y )", cchar="_")            
             parlist.append( "Y" )
-        if z:
-            formatter( "%%z = %s"% tryFloat(self.z), cchar="_" )
+        if z!=None:
+            formatter( "ag_z = %s"% tryFloat(self.z), cchar="_" )
+            formatter( "CALL agml_translate_z( %z )", cchar="_")            
             parlist.append( "Z" )
 
         for key in self.attr.keys():
 
-            
             val = self.attr.pop(key,None)
             if val:
                 formatter( "%%%s = %s"%( key, tryFloat(val) ) )
@@ -1483,20 +1649,26 @@ class Placement(Handler):
 
                 if key == 'alphax':
                     val  = tryFloat(rotation.value)                    
-                    formatter( '%%alphax = %s'%val )
+                    formatter( 'ag_alphax = %s'%val )
                     formatter( 'CALL agml_rotate_x(%alphax)' )
                 if key == 'alphay':
                     val  = tryFloat(rotation.value)                    
-                    formatter( '%%alphay = %s'%val )
+                    formatter( 'ag_alphay = %s'%val )
                     formatter( 'CALL agml_rotate_y(%alphay)' )                    
                 if key == 'alphaz':
                     val  = tryFloat(rotation.value)                    
-                    formatter( '%%alphaz = %s'%val )
+                    formatter( 'ag_alphaz = %s'%val )
                     formatter( 'CALL agml_rotate_z(%alphaz)' )                    
 
                 if key == 'ort':
                     val = rotation.value
                     formatter( "CALL agml_ortho('%s'//char(0))"%val )
+
+		if key == 'matrix':
+		    val = rotation.value
+		    formatter( "agml_rotm = %s"%val );
+		    formatter( "CALL agml_rotation(agml_rotm)")
+		    
 
             #
             # Is defined by the six G3 angles
@@ -1526,13 +1698,42 @@ class Placement(Handler):
                 formatter( "CALL agml_set_angles(%thetax,%phix,%thetay,%phiy,%thetaz,%phiz)" )
 
 
+            # This is a misalignment table
+            if rotation.__class__ == Misalign:
+
+                opts = rotation.opts
+
+                if opts == None:
+                    formatter( "CALL agml_misalign( '%s', %s );"%( rotation.table, rotation.row ) )
+                elif 'left' in opts:
+                    formatter( "CALL agml_misalign_left( '%s', %s );"%( rotation.table, rotation.row ) )
+                elif 'right' in opts:
+                    formatter( "CALL agml_misalign_right( '%s', %s );"%( rotation.table, rotation.row ) )                    
+
         #
         # Next, any remaining attributes
         #
 
         #
-        # Now get the rotation angles from the matrix and output
+        # ... such as evaluating the db table (NOTE: defunct)
         #
+        if table:
+            #formatter( "CALL agml_get_db_matrix( '%s', %s );"%( table, row ) )
+            formatter( "CALL agml_misalign( '%s', %s );"%( table, row ) )
+        
+            if opts == None:
+                formatter( "CALL agml_misalign( '%s', %s );"%( table, row ) )
+            elif 'left' in opts:
+                formatter( "CALL agml_misalign_left( '%s', %s );"%( table, row ) )
+            elif 'right' in opts:
+                formatter( "CALL agml_misalign_right( '%s', %s );"%( table, row ) )                    
+
+        
+
+        #
+        # Now get the translation / rotation matrix
+        #
+        formatter( "CALL agml_get_translation( %x, %y, %z )" )        
         formatter( "CALL agml_get_angles(%thetax,%phix,%thetay,%phiy,%thetaz,%phiz)" )
         parlist.append( 'THETAX' )
         parlist.append( 'PHIX' )
@@ -1541,17 +1742,18 @@ class Placement(Handler):
         parlist.append( 'THETAZ' )
         parlist.append( 'PHIZ' )
 
+
         formatter( "%%parlist = '%s'"%'_'.join(parlist) )
         #
         # And finally invoke AgStar executive action
         #
         formatter( "CALL AxPosition" )
 
-        
 
-            
 
-        
+
+
+
 
     def agstar_placement(self,tag):
 
@@ -1639,11 +1841,6 @@ class Rotation(Handler):
 
     def output(self):
         out=''
-
-#       if self.key=='matrix':
-#           out='""" Got a matrix %s """' % self.value
-#           return out
-        
         if ( self.key != None ):
             out='%s=%s '%(self.key, self.value)
             return out
@@ -1666,6 +1863,7 @@ class Rotation(Handler):
             self.key = 'matrix'
             self.value = matrix
             self.parent.add(self)
+            return
 
 
         list = ['alphax','alphay','alphaz','ort']
@@ -1690,6 +1888,93 @@ class Rotation(Handler):
         
         self.parent.add(self)        
 
+class Misalign(Handler):
+
+    def __init__(self):
+        Handler.__init__(self)
+        self.key = None
+        self.angles = None
+        
+    def setParent(self,p):
+        self.parent = p
+
+    def startElement(self,tag,attr):        
+        self.matrix = attr.pop('matrix',None) # get transformation matrix
+        self.table  = attr.pop('table', None) # alternatively get db table
+        self.row    = attr.pop('row',   '0' ) # ... and row of table
+        self.opts   = attr.pop('opts',  None) # misalignment options
+ 
+        self.parent.addMisalignment( self )
+
+    def output(self):
+        #
+        # IF we have a matrix, unpack the elements and call agml rotation with matrix
+        # NOTE: May need to take care of order of operations!
+        #
+        if self.matrix:
+            array = parseArray( self.matrix )
+
+            self.x = '%f'%float( array[0][3] )
+            self.y = '%f'%float( array[1][3] )
+            self.z = '%f'%float( array[2][3] )
+
+            x = self.x
+            y = self.y
+            z = self.z
+
+            out = ''
+            k = 1
+            for i in range(0,3):
+                for j in range(0,3):
+                    out = 'agml_rotm(%i) = %f'%( k, float(array[i][j]) )
+                    formatter( out, cchar="_" )
+                    k   += 1
+            formatter( 'call agml_rotation( agml_rotm )' , cchar='_' )
+
+        #
+        # IF we have a table, apply it
+        #            
+        if self.table:
+            #formatter( "CALL agml_get_db_matrix( '%s', %s );"%( self.table, self.row ) )
+
+            if self.opts == None:
+                formatter( "CALL agml_misalign( '%s\0', %s );"%( self.table, self.row ) )
+            elif 'left' in self.opts:
+                formatter( "CALL agml_misalign_left( '%s\0', %s );"%( self.table, self.row ) )
+            elif 'right' in self.opts:
+                formatter( "CALL agml_misalign_right( '%s\0', %s );"%( self.table, self.row ) )
+
+        
+
+        #
+        # We are dealing with a misalignment, so we switch to general transformation
+        #
+        #document.impl( 'place.SetOrder( AgPlacement::kGeneral );', unit=current );
+
+        #
+        # We next apply a transformation matrix, either by hand or by DB table
+        #
+        #if matrix:
+        #    matrix = parseArray(matrix)
+        #    array  = ''
+        #    for element in matrix:
+        #        array += '{%s},'%','.join(element)
+        #    array = array.strip(',')
+        #    document.impl( '{ double matrix[4][4] = {%s}; place.SetOrder( AgPosition::kGeneral ); place.Matrix( matrix ); }'%array, unit=current )
+        #    document.impl( '/// Rotation Matrix = %s'%array, unit=current )
+        #    
+        #elif table:
+
+        #    chair = table.split('/')[-1]
+        #    
+        #    document.impl( 'place.SetTable("%s",%s); // Use DB table to position object (if available)'%(table,row), unit=current )
+        #    document.impl( 'place.SetChair("%s");    // Use DB table to position object (if available)'%(chair    ), unit=current )              
+        #    
+        #else:       pass """ Should really raise hell here """
+
+
+    def endElement(self,tag):
+        pass
 
         
 # ====================================================================================================
@@ -2143,6 +2428,182 @@ class Arguement(Handler):
         pass
     def endElement(self,tag):
         pass
+#__________________________________________________________________________________________
+# Begin support for new steering
+module_tags  = []
+module_flags = {}
+
+class Tag(Handler):
+    def __init__(self):
+        global document
+        self.parent   = None
+
+        self.name     = None
+        self.comment  = None
+        self.flags    = []
+        self.includes = []
+        self.modules  = []
+
+        # Build list of include files from either StarVMC/Geometry or $STAR/StarVMC/Geometry
+        for root, dirs, files in os.walk( 'StarVMC/Geometry' ):
+            for f in files:
+                if 'Config.xml' in f:
+                    name = f
+                    name = name.replace('.xml','.age')
+                    self.includes.append( 'StarVMC/xgeometry/%s' % name )
+
+                if 'Geo' in f and '.xml' in f:
+                    name = f[:4].lower()
+                    if '.' in name or '#' in name: continue
+                    if name in self.modules:
+                        pass
+                    else:
+                        self.modules.append(name)
+        
+        Handler.__init__(self)
+    def setParent(self,p): self.parent = p
+
+    def startElement(self, tag, attr ):
+        global module_tags
+        self.name    = attr.get('name', None)
+        self.comment = attr.get('comment', None)
+        self.top     = attr.get('top', None )
+        formatter( 'REPLACE [EXE %s] with {'%self.name )
+
+        module_tags.append( self.name.upper() )
+    
+
+    def characters(self,content):
+        global module_flags
+        for flag in content.split(' '):
+            if len(flag.strip()):
+                self.flags.append(flag)
+                module_flags[flag]=1
+    
+#       for line in content.split('\n'):
+#           line = line.strip(' ')
+#           for element in line.split(' '):
+#               element = element.strip(' ')
+#               if element != '':
+#                   formatter( '%s = SETUP_%s()'%('???',element) )
+
+    def endElement(self,tag):
+        for flag in self.flags: 
+            name = flag[:4].upper()
+            formatter( '%s = %s()'%(name,flag) )
+#       
+        formatter('}')
+    
+class StarGeometry(Handler):
+    def __init__(self):
+        self.parent = None
+        self.name   = "StarGeometry"
+        self.tag    = None
+        self.geoms  = []
+    def setParent(self, p):
+        self.parent = p
+    def addGeometry(self,geom):
+        self.geoms.append(geom)
+
+        
+class Geometry(Handler):
+    def __init__(self):    
+        self.parent   = None
+        self.name     = None
+        self.docum    = None
+        self.modules  = []
+        self.pmodules = []
+        self.constructs = []
+        self.sys    = [] # subsystems
+        self.config = {} # subsystem configuration
+        Handler.__init__(self)
+        
+    def setParent(self,p): self.parent = p
+
+    def addSystem( self, system, config ):
+        self.sys.append(system)
+        self.config[system] = config
+#       self.modules.append(module)
+#       self.pmodules.append( module[:4].lower() )
+
+
+    def startElement(self, tag, attr ):
+        global module_flags
+        self.name  = attr.get('tag', None)
+        self.docum = attr.get('comment', None )
+
+        formatter('SUBROUTINE GEOM_%s' % self.name )
+
+    def endElement(self,tag):
+
+        # Declare integers to hold the address
+        for sub in self.sys:
+            formatter( 'INTEGER :: %s_addr = 0'%sub )
+
+        # Execute the module
+        for sub in self.sys:
+            config = self.config[sub]
+            formatter( '%s_addr = SETUP_%s()'%(sub,config))
+            formatter( 'call construct_%s'%config )
+        
+        # First setup integers to hold pointer to the method's address
+##         global module_tags
+##         for module in self.modules:
+##             formatter( 'INTEGER :: %s /0/' % module )
+##         formatter( 'SELECT CASE (tag)' )
+##         for tag in module_tags:
+##             formatter( '  Case ("%s")'%tag )
+##             formatter( '     EXE %s'%tag )
+##         formatter( '  Case DEFAULT' )
+##         formatter( "     write(*,*) 'Unknown tag ',tag " )
+##         formatter( 'END SELECT' )
+##         for construct in self.constructs:
+##             print str(construct) 
+## #   
+# Loop over all modules again and create
+#        for module in self.modules:
+#           formatter( 'IF %s { Call CsJCAL( %s, 0, 0,0,0,0,0, 0,0,0,0,0) }'%(module,module) )
+
+        formatter('END SUBROUTINE GEOM_%s'%self.name)
+                  
+       
+        
+
+class Construct(Handler):
+    def __init__(self):
+        self.parent = None
+        self.sys    = None
+        self.config = None
+        
+    def setParent(self, p):
+        self.parent = p
+    
+    def startElement(self, tag, attr ):
+        self.parent.constructs.append(self)
+
+        self.sys     = attr.get('sys', None)
+        self.config  = attr.get('config', None)
+        
+        #self.module = attr.get('module', None)
+        #self.track  = attr.get('track', 'primary' )
+
+        self.parent.addSystem( self.sys, self.config )
+        
+
+    def __str__(self):
+        output = ''
+#       output =  'IF %s {\n' % self.module 
+#       result = 1
+#       if self.track.lower() == 'secondary': result = 2
+#       output += "   CALL AgSFlag('SIMU',%i);\n"%result 
+#       output += "   CALL CsJCAL( %s, 0, 0,0,0,0,0, 0,0,0,0,0);\n"%self.module 
+#       output += "}\n"
+        return output
+        
+ 
+        
+# End support new steering
+#__________________________________________________________________________________________
 # ====================================================================================================
 class Fatal(Handler):
     def __init__(self): Handler.__init__(self)

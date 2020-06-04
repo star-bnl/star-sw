@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCATracker.h,v 1.1 2016/02/05 23:27:29 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATracker.h,v 1.2 2016/07/15 14:43:33 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -177,9 +177,6 @@ inline void AliHLTTPCCATracker::GetErrors2( int iRow, const sfloat_v &z, const s
   //
   // Use calibrated cluster error from OCDB
   //
-
-  VALGRIND_CHECK_VALUE_IS_DEFINED( z );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( DzDs );
 
   fParam.GetClusterErrors2( iRow, z, sinPhi, DzDs, *Err2Y, *Err2Z );
 }

@@ -23,7 +23,11 @@ extern "C" {
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-StarLight::StarLight(const Char_t *name) : StarGenerator(name)
+StarLight::StarLight(const Char_t *name) : StarGenerator(name),
+					   ParametersDouble(),
+					   ParametersInt(),
+					   _parameters(0),
+					   mSTARlight(0)
 {
 
 
@@ -157,7 +161,7 @@ Int_t StarLight::Generate()
 
   if ( (mBlue == "Au") || (mBlue == "Cu") || (mBlue == "U") )  FillAA( mEvent );
   if ( (mBlue == "proton") && (mYell == "proton") )            FillPP( mEvent );
-  else                                                         FillPP( mEvent );
+  else /* ever make it onto this branch, assert in init        FillPP( mEvent ); */ assert(0);
 
   //
   // Get number of particles

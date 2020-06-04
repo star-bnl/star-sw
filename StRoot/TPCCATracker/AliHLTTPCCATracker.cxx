@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.1 2016/02/05 23:27:29 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.3 2016/07/15 14:43:33 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -54,12 +54,16 @@ AliHLTTPCCATracker::AliHLTTPCCATracker()
 #endif //DO_TPCCATRACKER_EFF_PERFORMANCE
     fParam(),
     fClusterData( 0 ),
+    fData(),
     fHitMemory( 0 ),
     fHitMemorySize( 0 ),
     fTrackMemory( 0 ),
     fTrackMemorySize( 0 ),
     fTrackletStartHits( 0 ),
     fNTracklets( 0 ),
+    fTrackletVectors(),
+    fNumberOfTracks(0),
+    fTracks(0),
     fNTrackHits( 0 ),
     fOutput( 0 )
 {
@@ -247,11 +251,6 @@ void AliHLTTPCCATracker::WriteOutput()
       const int inpIdOffset = fClusterData->RowOffset( rowIndex );
       const int inpIdtot = fData.ClusterDataIndex( row, hitIndex );
       const int inpId = inpIdtot - inpIdOffset;
-      VALGRIND_CHECK_VALUE_IS_DEFINED( rowIndex );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdOffset );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdtot );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( inpId );
 
       const float origX = fClusterData->X( inpIdtot );
       const float origY = fClusterData->Y( inpIdtot );

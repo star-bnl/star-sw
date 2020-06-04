@@ -233,7 +233,7 @@ void AgMaterial::Print( Option_t *opts ) const
     }
   LOG_INFO << output.Data() << endm;
 
-  if ( mType > kMaterial )
+  if ( mType > kMaterial ) {
     LOG_INFO << Form("\t\t\t\t\t\t\t\t\t\t           A           Z         W")<<endm;
     for ( UInt_t i=0;i<mC.size();i++ )
       {
@@ -243,6 +243,7 @@ void AgMaterial::Print( Option_t *opts ) const
 	Double_t w = mW[i];
 	LOG_INFO << Form("\t\t\t\t\t\t\t\t\t\t %4s   %6.3f     %6.3f    %6.3f",comp.Data(),a,z,w)<<endm;
       }
+  }
 
 }
 

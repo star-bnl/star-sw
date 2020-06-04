@@ -499,7 +499,11 @@ void JevpPlot::draw()
     gPad->SetLogy(logy);
     LOG(NOTE, "l1: %lf", clock3.record_time());
     if(optlogz != -1) {
-	gStyle->SetOptLogz(optlogz);
+	//gStyle->SetOptLogz(optlogz);
+	gPad->SetLogz(optlogz);
+    }
+    else {
+	gPad->SetLogz(0);
     }
 
     LOG(NOTE, "l1: %lf", clock3.record_time());

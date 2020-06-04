@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.1 2016/02/05 23:27:29 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.2 2016/07/15 14:43:33 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -160,17 +160,6 @@ void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, const int rowI
 
   const ushort_v oldHitIndex = static_cast<ushort_v>( r.fCurrentHitIndex );
   // fData.SetHitAsUsedInTrack( fData.Row( rowIndex - 1 ), static_cast<ushort_v>( r.fCurrentHitIndex ), active ); // TODO mark first hit
-  
-#ifndef NVALGRIND
-  VALGRIND_CHECK_VALUE_IS_DEFINED( active );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( oldHitIndex );
-  for ( int i = 0; i < oldHitIndex.Size; ++i ) {
-    if ( active[i] ) {
-      debugF() << rowIndex << " - " << i << " - " << oldHitIndex[i] << endl;
-      VALGRIND_CHECK_VALUE_IS_DEFINED( fData.HitLinkUpData( row )[oldHitIndex[i]] );
-    }
-  }
-#endif
 
 
   // const short_v aaaaaItIsNotUsedButDoHelpsALotToSpeedUpAaaaaa = short_v(fData.HitDataIsUsed( row ), Vc::IndexesFromZero, short_m(Vc::Zero)); // TODO understand
@@ -180,9 +169,6 @@ void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, const int rowI
   const sfloat_v x = fData.RowX( rowIndex ); // convert to sfloat_v once now
   const sfloat_v y( fData.HitDataY( row ), oldHitIndex, fitMask);
   const sfloat_v z( fData.HitDataZ( row ), oldHitIndex, fitMask);
-  VALGRIND_CHECK_VALUE_IS_DEFINED( x );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( y );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( z );
 
   debugF() << "x, y, z: " << x << y << z << endl;
 
@@ -190,10 +176,7 @@ void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, const int rowI
     // correct SinPhi if it is necessary
     // calculate displacement to previous hit
   const sfloat_v dx = x - r.fParam.X();
-  VALGRIND_CHECK_VALUE_IS_DEFINED( dx );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( r.fLastY );
   const sfloat_v dy = y - r.fLastY;
-  VALGRIND_CHECK_VALUE_IS_DEFINED( dy );
   const sfloat_v dz = z - r.fLastZ;
   debugF() << "dx, dy, dz: " << dx << dy << dz << endl;
   r.fLastY( activeF ) = y;
@@ -201,31 +184,21 @@ void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, const int rowI
 
   sfloat_v err2Y, err2Z;
   sfloat_v sinPhi = r.fParam.GetSinPhi();
-  VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
 
 
   const sfloat_m fragile =
       static_cast<sfloat_m>( r.fNHits < ushort_v(AliHLTTPCCAParameters::MinimumHitsForFragileTracklet) ) || CAMath::Abs( r.fParam.SinPhi() ) >= .99f;
-  VALGRIND_CHECK_VALUE_IS_DEFINED( fragile );
   sinPhi( fragile ) = dy * CAMath::RSqrt( dx * dx + dy * dy );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
 
 
   assert( ( x == 0 && activeF ).isEmpty() );
   
   activeF = r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), -1.f, activeF );
-  
-  VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
-  
-  
 
-
-  VALGRIND_CHECK_VALUE_IS_DEFINED( active );
   if ( !activeF.isEmpty() )
   {
     fTracker.GetErrors2( rowIndex, r.fParam, &err2Y, &err2Z );
     const short_m hitAdded = static_cast<short_m>( r.fParam.Filter( activeF, y, z, err2Y, err2Z, .99f ) );
-    VALGRIND_CHECK_VALUE_IS_DEFINED( hitAdded );
     trackletVector.SetRowHits( rowIndex, trackIndex, static_cast<ushort_v>(r.fCurrentHitIndex), hitAdded );
     ++r.fNHits( static_cast<ushort_m>(hitAdded) );
     r.fEndRow( hitAdded ) = rowIndex;
@@ -237,7 +210,6 @@ void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, const int rowI
   
   r.fCurrentHitIndex.gather( fData.HitLinkUpData( row ), static_cast<ushort_v>( oldHitIndex ), active ); // set to next linked hit
 
-  VALGRIND_CHECK_VALUE_IS_DEFINED( r.fCurrentHitIndex );
   const short_m fittingDone = r.fCurrentHitIndex < 0 && active;
   debugF() << "fittingDone = " << fittingDone << endl;
 //  if ( ISUNLIKELY( !fittingDone.isEmpty() ) ) {
@@ -351,10 +323,7 @@ short_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, con
 //     // correct SinPhi if it is necessary
 //     // calculate displacement to previous hit
 //   const sfloat_v dx = x - r.fParam.X();
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( dx );
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( r.fLastY );
 //   const sfloat_v dy = y - r.fLastY;
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( dy );
 //   const sfloat_v dz = z - r.fLastZ;
 //   debugF() << "dx, dy, dz: " << dx << dy << dz << endl;
 //   r.fLastY( activeF ) = y;
@@ -362,14 +331,11 @@ short_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, con
 // 
 //   sfloat_v err2Y, err2Z;
 //  sfloat_v sinPhi = r.fParam.GetSinPhi();
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
 // 
 //   const sfloat_v ri = sfloat_v( Vc::One ) / CAMath::Sqrt( dx * dx + dy * dy ); // RSqrt
 //  const sfloat_m fragile =
 //      static_cast<sfloat_m>( r.fNHits < AliHLTTPCCAParameters::MinimumHitsForFragileTracklet ) || CAMath::Abs( r.fParam.SinPhi() ) >= .99f;
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( fragile );
 //   sinPhi( fragile ) = dy * ri;
-//   VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
 
   
   sfloat_m activeF( active ); // get float mask
@@ -718,17 +684,7 @@ short_m AliHLTTPCCATrackletConstructor::ExtendTracklet( TrackMemory &r, const in
 
 void AliHLTTPCCATrackletConstructor::run()
 {
-  
-#ifndef NVALGRIND
-  for ( int i = 0; i < fTracker.Param().NRows(); ++i ) {
-    const AliHLTTPCCARow &row = fData.Row( i );
-    for ( int hit = 0; hit < row.NHits(); ++hit ) {
-      debugF() << i << ", " << hit << endl;
-      const short tmp = fData.HitLinkUpDataS( row, hit );
-      VALGRIND_CHECK_VALUE_IS_DEFINED( tmp );
-    }
-  }
-#endif
+
   assert( *fTracker.NTracklets() < 32768 );
   const short nTracks = *fTracker.NTracklets();
 
@@ -1048,7 +1004,6 @@ void InitTracklets::operator()( int rowIndex )
   const sfloat_m maskF( mask );
   {
     const AliHLTTPCCARow &row = fData.Row( rowIndex );
-    VALGRIND_CHECK_MEM_IS_ADDRESSABLE( &row, sizeof( AliHLTTPCCARow ) );
     const sfloat_v x = fData.RowX( rowIndex );
     const ushort_v &hitIndex = static_cast<ushort_v>( r.fCurrentHitIndex );
     const sfloat_v y( fData.HitDataY( row ), hitIndex, mask );

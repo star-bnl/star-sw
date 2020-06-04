@@ -8,6 +8,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TArrayD.h"
 #include "TStyle.h"
 #include "TFile.h"
 #include "TCanvas.h"
@@ -208,7 +209,8 @@ void StdEdxModel::h2MDF(const Char_t  *total, Int_t max, Int_t maxTerm){
   mDFit->SetMinRelativeError(.01);
 
   // variables to hold the temporary input data 
-  Double_t *x = new Double_t[nVars];
+  TArrayD X(2);
+  Double_t *x = X.GetArray(); 
   
   // Print out the start parameters
   mDFit->Print("p");
@@ -464,8 +466,11 @@ void StdEdxModel::MakedEdxModel() {
   h2MDF(dEdxMPV->GetName(),7,200);
   fOut->Write();
 }
-// $Id: StdEdxModel.cxx,v 1.1 2015/12/24 00:16:25 fisyak Exp $
+// $Id: StdEdxModel.cxx,v 1.2 2016/06/10 19:55:45 fisyak Exp $
 // $Log: StdEdxModel.cxx,v $
+// Revision 1.2  2016/06/10 19:55:45  fisyak
+// Fix mem. leak (covertry)
+//
 // Revision 1.1  2015/12/24 00:16:25  fisyak
 // Add TpcRS model and macros
 //

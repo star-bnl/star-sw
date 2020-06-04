@@ -28,7 +28,7 @@
 class AliHLTTPCCASliceTrack
 {
   public:
-
+    AliHLTTPCCASliceTrack(): fParam(), fFirstClusterRef(0), fNClusters(0) {}
     int NClusters()                    const { return fNClusters;       }
     int FirstClusterRef()              const { return fFirstClusterRef; }
     const AliHLTTPCCATrackParam &Param() const { return fParam;           }

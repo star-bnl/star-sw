@@ -10,7 +10,7 @@ class StarGenEvent;
 StarGenEvent   *event       = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary = 0;
+StarPrimaryMaker *_primary = 0;
 
 class StarFilterMaker;
 StarFilterMaker *filter = 0;
@@ -75,7 +75,7 @@ void Pythia8( TString config="pp:W", Double_t ckin3=0.0, Double_t ckin4=-1.0 )
   pythia8 -> Set(Form("PhaseSpace:ptHatMin=%f", ckin3 ));
   pythia8 -> Set(Form("PhaseSpace:ptHatMax=%f", ckin4 ));
 
-  primary -> AddGenerator( pythia8 );
+  _primary -> AddGenerator( pythia8 );
   
 }
 // ----------------------------------------------------------------------------
@@ -127,7 +127,7 @@ void Pythia6( TString mode="pp:minbias", Double_t ckin3=0.0, Double_t ckin4=-1.0
   pysubs.ckin(3)=ckin3;
   pysubs.ckin(4)=ckin4;
 
-  primary->AddGenerator(pythia6);
+  _primary->AddGenerator(pythia6);
 
 }
 
@@ -161,12 +161,12 @@ void starsim( Int_t nevents=1, Double_t ckin3=7.0, Double_t ckin4=-1.0  )
   // Create the primary event generator and insert it
   // before the geant maker
   //
-  primary = new StarPrimaryMaker();
+  _primary = new StarPrimaryMaker();
   {
-    primary -> SetFileName( Form("filter_%f_%f.gener.root",ckin3,ckin4) );
-    primary -> SetVertex( 0.1, -0.2, 0.0 );
-    primary -> SetSigma ( 0.1,  0.1, 30.0 );
-    chain -> AddBefore( "geant", primary );
+    _primary -> SetFileName( Form("filter_%f_%f.gener.root",ckin3,ckin4) );
+    _primary -> SetVertex( 0.1, -0.2, 0.0 );
+    _primary -> SetSigma ( 0.1,  0.1, 30.0 );
+    chain -> AddBefore( "geant", _primary );
   }
 
   //
@@ -179,13 +179,13 @@ void starsim( Int_t nevents=1, Double_t ckin3=7.0, Double_t ckin4=-1.0  )
   // Setup the generator filter
   //
   filter = new StDijetFilter();
-  primary -> AddFilter( filter );
+  _primary -> AddFilter( filter );
 
   // If set to 1, tracks will be saved in the tree on events which were
   // rejected.  If the tree size is too big (because the filter is too
   // powerful) you may want to set this equal to zero.  In which case
   // only header information is saved for the event.
-  primary->SetAttr("FilterKeepAll",     int(1));
+  _primary->SetAttr("FilterKeepAll",     int(1));
 
   // By default, the primary maker enters an infinite loop and executes
   // the event generator until it yields an event which passes the filter.
@@ -201,7 +201,7 @@ void starsim( Int_t nevents=1, Double_t ckin3=7.0, Double_t ckin4=-1.0  )
   //
   // Initialize primary event generator and all sub makers
   //
-  primary -> Init();
+  _primary -> Init();
 
   //
   // Setup geometry and set starsim to use agusread for input

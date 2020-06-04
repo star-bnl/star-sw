@@ -1,0 +1,346 @@
+<Document file="StarVMC/Geometry/EpdmGeo/EpdmGeo0.xml">
+
+  <Module name="EpdmGeo0" comment="Event Plane Detector (Full geometry)">
+    <Author name="Sam, Jason and Prashanth"/>
+    <Created date="03 Dec 2017"/>
+    <CDE> AgeCOM, GConst, GCunit</CDE>
+    <Content>
+      EPDM,   <!-- mother volume of EPD, a wheel -->
+      EPSS,   <!-- SS container -->
+      EPDT    <!-- EPD general Trapizoid  -->
+    </Content>
+
+    <varlist type="float">
+      rotz <!-- Rotation of SS in Z-axis -->
+    </varlist>
+
+    <varlist type="int">
+      tt, <!-- tile numebr to loop over --> 
+      ss,  <!-- Super-sector number to loop over-->
+      icolor <!-- color of different parts of a tile -->
+    </varlist>
+
+    <Structure name="mcdt" comment="Mother cdt of wheels">
+      <var name="version" type="float"/>
+      <var name="onoff"   type="int" />
+      <var name="x"       type="float"/>
+      <var name="y"       type="float"/>
+      <var name="z(2)"    type="float"/>
+      <var name="thick"   type="float" />
+      <var name="srad"    type="float" />
+      <var name="lrad"    type="float" />
+    </Structure>
+
+
+    <Structure  name="cdta" comment=" Cdt of a thicker part tiles">
+      <var name="version" type="float"/>
+      <var name="onoff"   type="int" />
+      <var name="x(31)"   type="float"/> <!-- has array length of 31, but 1st tile is separtly handeled -->
+      <var name="y(31)"   type="float"/>
+      <var name="z"       type="float"/>
+      <var name="rot(31)" type="float"/>
+      <var name="dz(31)"  type="float" />
+      <var name="h(31)"   type="float" />
+      <var name="bl(31)"  type="float" />
+      <var name="tl(31)"  type="float" />
+      <var name="alp(31)" type="float" />
+    </Structure>
+
+
+    <Structure  name="cdtb" comment=" Cdt of a thiner part tiles">
+      <var name="version" type="float"/>
+      <var name="onoff"   type="int" />
+      <var name="x(31)"   type="float"/>
+      <var name="y(31)"   type="float"/>
+      <var name="z"       type="float"/>
+      <var name="rot(31)" type="float"/>
+      <var name="dz(31)"  type="float" />
+      <var name="h(31)"   type="float" />
+      <var name="bl(31)"  type="float" />
+      <var name="tl(31)"  type="float" />
+      <var name="alp(31)" type="float" />
+    </Structure>
+
+    <Structure  name="cdtc" comment=" Cdt of 1st tile upper triangel">
+      <var name="version" type="float"/>
+      <var name="onoff"   type="int" />
+      <var name="x"       type="float"/>
+      <var name="y"       type="float"/>
+      <var name="z"       type="float"/>
+      <var name="rot"     type="float"/>
+      <var name="dz"      type="float" />
+      <var name="h"       type="float" />
+      <var name="bl"      type="float" />
+      <var name="tl"      type="float" />
+      <var name="alp"     type="float" />
+    </Structure>
+
+    <Structure  name="cdtd" comment=" Cdt of 1st tile lower part">
+      <var name="version" type="float"/>
+      <var name="onoff"   type="int" />
+      <var name="x"       type="float"/>
+      <var name="y"       type="float"/>
+      <var name="z"       type="float"/>
+      <var name="rot"     type="float"/>
+      <var name="dz"      type="float" />
+      <var name="h"       type="float" />
+      <var name="bl"      type="float" />
+      <var name="tl"      type="float" />
+      <var name="alp"     type="float" />
+    </Structure>
+
+
+    <Fill name="mcdt" comment="EPD geometry">
+      <var name="Version" value="1.0"         comment="Geometry version"  />
+      <var name="onoff"   value="1"           comment=" 0 off, 1 on" />
+      <var name="x"       value="0.0"         comment="x cdt of mother" />
+      <var name="y"       value="0.0"         comment="y cdt of mother" />
+      <var name="z"       value="{-374.0,374.0}"         comment="Distance from center of star (prototype dist, not correct)" />
+      <var name="thick"   value="1.2/2"       comment="thickness of detector"  />
+      <var name="srad"    value="3.0"         comment="check inner radius" /> <!-- slightly higer than the required values -->
+      <var name="lrad"    value="100"          comment="check outer radius" /><!-- slightly higer than the required values -->
+    </Fill>
+
+
+    <!-- folowing values are caluclated in a spread sheet. Please find the details in EPD Drupal page. Coordinates of the corners of tiles are from Solid Works. -->
+     <Fill  name="cdta" comment=" Corrdiante of a single sectors">
+      <var name="version" value="1.0"/>
+      <var name="onoff"   value="1"/>
+      <var name="y"       value="{0.0, 1.3875, -1.3875, 2.0125, -2.0125, 2.72, -2.72, 3.5075, -3.5075, 4.2925,
+                                  -4.2925, 5.07, -5.07, 5.8125, -5.8125, 6.5275, -6.5275, 7.2425, -7.2425,
+                                   7.9575, -7.9575, 8.6725, -8.6725, 9.3875, -9.3875, 10.1025, -10.1025, 10.82,
+                                   -10.82, 11.7675, -11.7675}"/>
+      <var name="x"       value="{0.0, 10.6075, 10.6075, 14.9275, 14.9275, 19.7975, 19.7975, 25.2225, 25.2225,
+                                   30.65, 30.65, 36.105, 36.105, 41.515, 41.515, 46.95, 46.95, 52.385, 52.385,
+                                   57.8225, 57.8225, 63.26, 63.26, 68.695, 68.695, 74.1325, 74.1325, 79.5675,
+                                   79.5675, 84.9925, 84.9925}"/>
+      <var name="z"       value="0.0"/>
+
+      <var name="rot"     value="{0.0, -7.41, 7.41, -7.49, 7.49, -7.50, 7.50, -7.51, 7.51, -7.51, 7.51, -8.09, 8.09,
+				  -7.48, 7.48, -7.49, 7.49, -7.50, 7.50, -7.47, 7.47, -7.48, 7.48, -7.49,
+				   7.49, -7.52, 7.52, -7.52, 7.52, -7.74, 7.74}" />
+
+
+      <var name="dz"      value="{0.0, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2,
+				  1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2,
+			          1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2, 1.2/2 }" />
+
+      <var name="h"       value="{0.0, 2.12, 2.12, 2.12, 2.12, 2.685, 2.685, 2.685, 2.685, 2.685, 2.685, 2.685,
+                                  2.685, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68,
+                                  2.68, 2.68, 2.68, 2.68, 2.68, 2.72, 2.72}" />
+      <var name="bl"      value="{0.0, 1.013, 1.013, 1.533, 1.533, 2.047, 2.047, 2.697, 2.697, 3.349, 3.349, 4.004,
+  				  4.004, 4.674, 4.674, 5.396, 5.396, 6.117, 6.117, 6.838, 6.838, 7.559, 7.559,
+ 				  8.280, 8.280, 9.002, 9.002, 9.728, 9.728, 10.449, 10.449}" />
+      <var name="tl"      value="{0.0, 1.512, 1.512, 2.032, 2.032, 2.682, 2.682, 3.328, 3.328, 3.979, 3.979, 4.656,
+  			          4.656, 5.375, 5.375, 6.097, 6.097, 6.818, 6.818, 7.538, 7.538, 8.260, 8.260,
+				  8.981, 8.981, 9.703, 9.703, 10.424, 10.424, 10.692, 10.692}" />
+      <var name="alp"     value="{0.0, 0.896, -0.896, 0.790, -0.790, 0.747, -0.747, 0.785, -0.785, 0.746, -0.746,
+  				  0.109, -0.109, 0.023, -0.023, 0.013, -0.013, 0.006, -0.006, 0.011, -0.011,
+ 				  0.030, -0.030, 0.023, -0.023, -0.005, 0.005, -0.060, 0.060, 4.773, -4.773}" />
+    </Fill>
+
+
+     <Fill  name="cdtb" comment=" Corrdiante of a single sectors">
+      <var name="version" value="1.0"/>
+      <var name="onoff"   value="1"/>
+      <var name="y"       value="{0.0, 0.1075, -0.1075, 0.1625, -0.1625, 0.2275, -0.2275, 0.3, -0.3, 0.37, -0.37,
+  				  0.43, -0.43, 0.455, -0.455, 0.455, -0.455, 0.455, -0.455, 0.455, -0.455,
+				  0.455, -0.455, 0.455, -0.455, 0.455, -0.455, 0.455, -0.455, 0.685, -0.685}"/>
+
+      <var name="x"       value="{0.0, 10.775, 10.775, 15.17, 15.17, 20.125, 20.125, 25.645, 25.645, 31.1675,
+ 				  31.1675, 36.715, 36.715, 42.22, 42.22, 47.75, 47.75, 53.28, 53.28, 58.81,
+ 				  58.81, 64.34, 64.34, 69.87, 69.87, 75.4025, 75.4025, 80.9325, 80.9325,
+				  86.4725, 86.4725}"/>
+      <var name="z"       value="0.0"/>
+
+      <var name="rot"     value="{0.0, -10.30, 10.30, -6.48, 6.48, -7.67, 7.67, -7.76, 7.76, -7.30, 7.30, -7.02,
+  				   7.02, -7.59, 7.59, -7.59, 7.59, -7.59, 7.59, -7.59, 7.59, -7.59, 7.59,
+				  -7.59, 7.59, -7.22, 7.22, -7.22, 7.22, -7.38, 7.38}" />
+
+      <var name="dz"      value="{0.0, 0.5175, 0.5175, 0.5025, 0.5025, 0.4875, 0.4875, 0.4725, 0.4725, 0.4575,
+  				  0.4575, 0.4425, 0.4425, 0.4275, 0.4275, 0.4125, 0.4125, 0.3975, 0.3975,
+				  0.3825, 0.3825, 0.3675, 0.3675, 0.3525, 0.3525, 0.3375, 0.3375, 0.3225,
+				  0.3225, 0.3075, 0.3075}" />
+
+      <var name="h"       value="{0.0, 2.12, 2.12, 2.12, 2.12, 2.685, 2.685, 2.685, 2.685, 2.685, 2.685, 2.685,
+ 				   2.685, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68, 2.68,
+				   2.68, 2.68, 2.68, 2.68, 2.68, 2.72, 2.72}" />
+
+      <var name="bl"      value="{0.0, 0.000, 0.000, 0.055, 0.055, 0.116, 0.116, 0.187, 0.187, 0.257, 0.257, 0.327,
+  				  0.327, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378,
+				  0.378, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378}" />
+
+      <var name="tl"      value="{0.0, 0.056, 0.056, 0.111, 0.111, 0.182, 0.182, 0.257, 0.257, 0.328, 0.328, 0.375,
+ 				  0.375, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378, 0.378,
+ 				   0.378, 0.378, 0.378, 0.378, 0.378, 0.378, 0.842, 0.842}" />
+
+      <var name="alp"     value="{0.0, -9.560, 9.560, -7.020, 7.020, -7.212, 7.212, -7.067, 7.067, -7.134, 7.134,
+  				  -6.487, 6.487, -7.595, 7.595, -7.595, 7.595, -7.595, 7.595, -7.595, 7.595,
+  				  -7.595, 7.595, -7.595, 7.595, -6.843, 6.843, -6.843, 6.843, -2.285, 2.285}" />
+    </Fill>
+
+
+
+
+    <Fill  name="cdtc" comment=" Corrdiante of  upper triangle">
+      <var name="version" value="1.0"/>
+      <var name="onoff"   value="1"/>
+      <var name="y"       value="0.0"/>
+      <var name="x"       value="8.375"/>
+      <var name="z"       value="0.0"/>
+      <var name="rot"     value="0" />
+      <var name="dz"      value="1.2/2.0" />
+      <var name="h"       value="0.135" />
+      <var name="bl"      value="2.05" />
+      <var name="tl"      value="0.0" />
+      <var name="alp"     value="0.0" />
+    </Fill>
+
+    <Fill  name="cdtd" comment=" Corrdiante of rest of tile  one">
+      <var name="version" value="1.0"/>
+      <var name="onoff"   value="1"/>
+      <var name="y"       value="0.0"/>
+      <var name="x"       value="6.215"/>
+      <var name="z"       value="0.0"/>
+      <var name="rot"     value="0.0" />
+      <var name="dz"      value="1.2/2.0" />
+      <var name="h"       value="2.025" />
+      <var name="bl"      value="0.97" />
+      <var name="tl"      value="2.05" />
+      <var name="alp"     value="0.0" />
+    </Fill>
+
+
+
+    <Create block="EPDM"  />
+    <Placement block="EPDM" in="CAVE" konly="MANY" x="mcdt_x" y="mcdt_y" z="mcdt_z(1)"> <Rotation alphay="0"  /> </Placement> 
+    <Placement block="EPDM" in="CAVE" konly="MANY" x="mcdt_x" y="mcdt_y" z="mcdt_z(2)"> <Rotation alphay="180"/> </Placement> 
+
+
+    <Volume name="EPDM" comment="Mother volume">
+      <Material  name="Air"      /> 
+      <Medium    name="Standard" />
+      <Attribute seen="0" colo="3" />
+
+      <Shape type="TUBE" rmin="mcdt_srad" rmax="mcdt_lrad" dz="mcdt_thick" />
+
+      <For var="ss" from="0" to="12">
+	rotz=-105-(30*ss); <!-- rotation angle of each SS,EPSS -->
+	<Create block="EPSS" />
+	<Placement block="EPSS" x="0" y="0" z="0">
+	  <Rotation alphay="180"/> <!-- helps to get the tile number in the g2t tables -->
+	  <Rotation alphaz="rotz"/>
+	</Placement>
+      </For>
+
+    </Volume>
+
+
+    <Volume name="EPSS" comment="Mother volume">
+      <Material  name="Air"      /> 
+      <Medium    name="Standard" />
+      <Attribute seen="0" colo="3" />
+      <Shape type="TUBS" rmin="mcdt_srad" rmax="mcdt_lrad" phi1="-15" phi2="15" />
+
+      <!-- Tile one Trapzoidal part -->
+      icolor=2;
+      <Create block="EPDT" />
+      <Placement block="EPDT" in="EPSS" x="cdtd_x" y="-cdtd_y" z="cdtd_z" 
+	dz="cdtd_dz"    thet="0.0"    phi="0.0"
+	h1 ="cdtd_h"   h2 ="cdtd_h"
+	bl1="cdtd_bl"   bl2="cdtd_bl"
+	tl1="cdtd_tl"   tl2="cdtd_tl"
+	alp1="cdtd_alp" alp2="cdtd_alp" >
+	<Rotation alphaz="-90-cdtd_rot"/>
+      </Placement>
+
+      <!-- Tile one Triangular part -->
+      icolor=6;
+      <Create block="EPDT" />
+      <Placement block="EPDT" in="EPSS" x="cdtc_x" y="-cdtc_y" z="cdtc_z" 
+	dz="cdtc_dz"    thet="0.0"    phi="0.0"
+	h1 ="cdtc_h"   h2 ="cdtc_h"
+	bl1="cdtc_bl"   bl2="cdtc_bl"
+	tl1="cdtc_tl"   tl2="cdtc_tl"
+	alp1="cdtc_alp" alp2="cdtc_alp" >
+	<Rotation alphaz="-90-cdtc_rot"/>
+      </Placement>
+
+      <!--Creating 31 tiles -->
+      <For var="tt" from="1" to="31">
+
+	<!-- Creating thiner part of a tile -->
+        icolor=4;
+	<Create block="EPDT" />
+	<Placement block="EPDT" in="EPSS" x="cdtb_x(tt)" y="-cdtb_y(tt)" z="(0.6-cdtb_dz(tt))" 
+	  dz="cdtb_dz(tt)"    thet="0.0"    phi="0.0"
+	  h1 ="cdtb_h(tt)"   h2 ="cdtb_h(tt)"
+	  bl1="cdtb_bl(tt)"   bl2="cdtb_bl(tt)"
+	  tl1="cdtb_tl(tt)"   tl2="cdtb_tl(tt)"
+	  alp1="cdtb_alp(tt)" alp2="cdtb_alp(tt)" >
+	  <Rotation alphaz="-90+cdtb_rot(tt)"/>
+	</Placement>
+
+	<!-- Creating thicker part of a tile -->
+        icolor=3;
+	<Create block="EPDT" />
+	<Placement block="EPDT" in="EPSS" x="cdta_x(tt)" y="-cdta_y(tt)" z="cdta_z" 
+	  dz="cdta_dz(tt)"    thet="0.0"    phi="0.0"
+	  h1 ="cdta_h(tt)"   h2 ="cdta_h(tt)"
+	  bl1="cdta_bl(tt)"   bl2="cdta_bl(tt)"
+	  tl1="cdta_tl(tt)"   tl2="cdta_tl(tt)"
+	  alp1="cdta_alp(tt)" alp2="cdta_alp(tt)" >
+	  <Rotation alphaz="-90+cdta_rot(tt)"/>
+	</Placement>
+
+      </For>
+    </Volume>
+
+
+    <!-- Instrument block, a gen. Trapziod -->
+    <Volume name="EPDT" comment="EPD a general trapzoid">
+      <Material  name="POLYSTYREN"      /> 
+
+      <Material name="Cpolystyren" isvol="1"  />
+      <!-- By specifying isvol="1", polystyrene is copied into a new material
+       named Cpolystyrene.  A new material is introduced here in order to
+       force the creation of a new medium, which we change with parameters
+       below. -->
+
+      <If expr="icolor.eq.6"><Attribute seen="1" colo="6" /></If>
+      <If expr="icolor.eq.2"><Attribute seen="1" colo="2" /></If>
+      <If expr="icolor.eq.4"><Attribute seen="1" colo="4" /></If>
+      <If expr="icolor.eq.3"><Attribute seen="1" colo="3" /></If>
+
+      <Shape    type="TRAP"
+	dz="0"    thet="0"    phi="0"
+	h1 ="0"   h2 ="0"
+	bl1="0"   bl2="0"
+	tl1="0"   tl2="0"
+	alp1="0" alp2="0" />
+
+      <Cut name="CUTGAM" value="0.00008"  />
+      <Cut name="CUTELE" value="0.001"  />
+      <Cut name="BCUTE"  value="0.0001"  />
+      <Cut name="CUTNEU" value="0.001"  />
+      <Cut name="CUTHAD" value="0.001"  />
+      <Cut name="CUTMUO" value="0.001"  />
+      <Par name="BIRK1"  value="1.000"  />
+      <Par name="BIRK2"  value="0.013"  />
+      <Par name="BIRK3"  value="9.6E-6"  />
+      <!-- Parameters are the Geant3 paramters which may be set via a call to GSTPar.  -->
+
+      <Instrument block="EPDT">
+	<Hit meas="eloss" opts="S" nbits="0" min="0" max="100.0"  />
+	<Hit meas="tof"  nbits="0" opts="C" min="0" max="10" />
+      </Instrument>
+
+      <!-- The instrument block indicates what information should be saved
+       for this volume, and how the information should be packed. -->
+
+    </Volume>
+
+   
+
+  </Module>
+</Document>

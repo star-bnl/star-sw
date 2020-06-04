@@ -1,0 +1,14 @@
+/*    pxlSimPar
+*
+*  Table: pxlSimPar
+*
+* description: simulation parameters for PXL (fast or slow)
+* 
+*/ 
+
+struct pxlSimPar {
+  octet mode;         /* effMode: 0-ideal; 1 (default) -momentum depenent; 2 nomimal */
+  float pCut;         /* momentum cut for momentum depenent efficiency */
+  float effPxlInner;  /* inner PXL efficiency */
+  float effPxlOuter;  /* outer PXL efficiency */
+};

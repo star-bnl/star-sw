@@ -112,7 +112,7 @@ class l4Builder : public JevpBuilder {
 		 */  
 		JevpPlot *HltPlots[39];
 		JevpPlot *BeamPlots[3];
-		JevpPlot *BesGoodPlots[4];
+		JevpPlot *BesGoodPlots[5];
 		JevpPlot *HLTGood2Plots[4];
 		JevpPlot *BesMontinorPlots[2];
 		JevpPlot *FixedTargetPlots[5];
@@ -440,6 +440,7 @@ class l4Builder : public JevpBuilder {
 
 		// BesGood
 		TH2D *hBesGoodVertexXY;
+		TH2D *hBesGoodVrVsVz;
 		TH1D *hBesGoodVr;
 		TH1D *hBesGoodVertexZ;
 		TH1I *hBesGoodprimaryMult;

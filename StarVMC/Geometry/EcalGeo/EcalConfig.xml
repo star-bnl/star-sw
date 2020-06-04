@@ -1,0 +1,85 @@
+<Document  file="StarVMC/Geometry/EcalGeo/EcalConfig.xml">
+ 
+  <Detector name="ECAL" comment="Endcap EMC"> 
+
+
+    <Modules>
+      EcalGeo,
+      EcalGeo6
+    </Modules> 
+
+    <Setup  name   = "ECALof" comment="OFF" module="EcalGeo" onoff="off" />
+
+    <Setup  name   = "ECALon"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "EcalGeo"
+	    onoff  = "on" simu="1"  > 
+
+      <Init struct="emcg" var="onoff"    value="1" />
+      <Init struct="emcg" var="fillmode" value="3" />
+
+    </Setup>
+
+    <Setup  name   = "ECAL31"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "EcalGeo"
+	    onoff  = "on" simu="1"  > 
+
+      <Init struct="emcg" var="onoff"    value="1" />
+      <Init struct="emcg" var="fillmode" value="3" />
+
+    </Setup>
+
+    <Setup  name   = "ECAL11"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "EcalGeo"
+	    onoff  = "on" simu="1"  > 
+
+      <Init struct="emcg" var="onoff"    value="1" />
+      <Init struct="emcg" var="fillmode" value="1" />
+
+    </Setup>
+ 
+     <Setup  name   = "ECAL33"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "EcalGeo"
+	    onoff  = "on" simu="1"  > 
+
+      <Init struct="emcg" var="onoff"    value="3" />
+      <Init struct="emcg" var="fillmode" value="3" />
+
+    </Setup>
+
+
+    <Setup  name   = "ECALv6"
+	    comment= "Version 6 endcap"
+	    module = "EcalGeo6"
+	    onoff  = "on" simu="1"  > 
+
+      <Init struct="emcg" var="onoff"     value="1" />
+      <Init struct="emcg" var="fillmode"  value="3" />
+      <Init struct="ecut" var="absorber"  value="1" />
+      <Init struct="ecut" var="sensitive" value="1" />
+
+    </Setup>
+ 
+   <Setup  name   = "ECALv6_cut00"
+           comment= "Version 6 endcap [no emc cuts]"
+           module = "EcalGeo6"
+	   onoff  = "on" simu="1"  > 
+
+      <Init struct="emcg" var="onoff"     value="1" />
+      <Init struct="emcg" var="fillmode"  value="3" />
+      <Init struct="ecut" var="absorber"  value="0" />
+      <Init struct="ecut" var="sensitive" value="0" />
+
+    </Setup>
+ 
+
+
+  </Detector> 
+  
+  
+</Document>
+  
+ 

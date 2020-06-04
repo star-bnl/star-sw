@@ -51,25 +51,6 @@ static inline ushort_m validHitIndexes( const ushort_v &v )
 // }
 #endif //USE_TBB
 
-// ---------
-
-#ifdef NVALGRIND
-#define VALGRIND_CHECK_VALUE_IS_DEFINED( mask )
-#define VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( v, k )
-#define VALGRIND_CHECK_MEM_IS_DEFINED( v, k );
-#define VALGRIND_CHECK_MEM_IS_ADDRESSABLE( v, k );
-#else // NVALGRIND
-#include <valgrind/memcheck.h>
-#define VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( v, k ) \
-{ \
-  __typeof__( v + v ) tmp( v ); \
-  tmp.setZero( !k ); \
-  VALGRIND_CHECK_VALUE_IS_DEFINED( tmp ); \
-}
-#endif // NVALGRIND
-
-// --------
-
 
 #if defined(HLTCA_STANDALONE)
 typedef unsigned char UChar_t;

@@ -22,7 +22,7 @@
 // File and Version Information:
 // $Rev::                             $: revision of last commit
 // $Author: jwebb $: author of last commit
-// $Date: 2012/11/27 22:27:32 $: date of last commit
+// $Date: 2016/05/05 22:45:11 $: date of last commit
 //
 // Description:
 //
@@ -64,7 +64,7 @@ class Gammagammaleptonpair : public eventChannel
   double _remainwd;// "
   int _ivalwd;     // "
   double _dgammade[1000];
-  double _tautolangle[100];
+  double _tautolangle[101];
   
   double twoMuonCrossSection(double w);
   void pickw(double &w);

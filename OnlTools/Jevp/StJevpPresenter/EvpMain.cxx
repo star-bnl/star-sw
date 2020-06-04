@@ -18,21 +18,28 @@ EvpMain *evpMain;
 
 const char *presenterCurrFile = "none";
 int presenterCurrLine = 0;
-
+int exiting=0;
 
 static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
   static char str[255];
   
+  if(exiting == 1) {
+    LOG(ERR, "Signal %d, but already exiting", arg);
+    return;
+  }
+
+  if(arg == 28) return;
+
   if(arg == 17) {
     LOG(DBG, "Got signal 17: ignoring");
     return;
   }
 
   sprintf(str,"Signal %d: shutting down! (file=%s line=%d)",arg,presenterCurrFile, presenterCurrLine);
-
   LOG(ERR, "%s", str);
 
+  exiting = 1;
   exit(-1);
 }
 

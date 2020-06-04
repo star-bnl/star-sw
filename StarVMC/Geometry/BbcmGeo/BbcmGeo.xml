@@ -113,9 +113,9 @@
                     31,32,33,34,35;}"
 
        -->
-        
+  <Use struct="BBCG"/>      
 
-  <Fill name="HEXG" comment="hexagon tile geometry"  >
+  <If expr="BBCG_version==1.0"><Fill name="HEXG" comment="hexagon tile geometry"  >
     <var name="Type"    value="1"     comment="1 for small hex tile, 2 for large tile "  />
     <var name="irad"    value="4.174" comment="inscribing circle radius =9.64/2*sin(60)=4.174 "  />
     <var name="clad"    value="0.1"   comment="cladding thickness "  />
@@ -123,9 +123,9 @@
     <var name="zoffset" value="1.5"   comment="z-offset from center of BBCW (1), or BBCE (2) "  />
     <var name="xoffset" value="0.0"   comment="x-offset center from beam for BBCW (1), or BBCE (2) "  />
     <var name="yoffset" value="0.0"   comment="y-offset center from beam for BBCW (1), or BBCE (2) "  />
-  </Fill>
-        
-  <Fill name="HEXG" comment="hexagon tile geometry"  >
+  </Fill></If>
+
+  <If expr="BBCG_version==1.0"><Fill name="HEXG" comment="hexagon tile geometry"  >
     <var name="Type"    value="2"      comment="1 for small hex tile, 2 for large tile "  />
     <var name="irad"    value="16.697" comment="inscribing circle radius (4x that of small one) "  />
     <var name="clad"    value="0.1"    comment="cladding of tile "  />
@@ -133,7 +133,27 @@
     <var name="zoffset" value="-1.5"   comment="z-offset from center of BBCW (1), or BBCE (2) "  />
     <var name="xoffset" value="0.0"    comment="x-offset center from beam for BBCW (1), or BBCE (2) "  />
     <var name="yoffset" value="0.0"    comment="y-offset center from beam for BBCW (1), or BBCE (2) "  />
-  </Fill>
+  </Fill></If>
+
+  <If expr="BBCG_version==2.0"><Fill name="HEXG" comment="hexagon tile geometry"  >
+    <var name="Type"    value="1"     comment="1 for small hex tile, 2 for large tile "  />
+    <var name="irad"    value="4.174" comment="inscribing circle radius =9.64/2*sin(60)=4.174 "  />
+    <var name="clad"    value="0.1"   comment="cladding thickness "  />
+    <var name="thick"   value="1.0"   comment="thickness of tile "  />
+    <var name="zoffset" value="0.0"   comment="z-offset from center of BBCW (1), or BBCE (2) "  />
+    <var name="xoffset" value="0.0"   comment="x-offset center from beam for BBCW (1), or BBCE (2) "  />
+    <var name="yoffset" value="0.0"   comment="y-offset center from beam for BBCW (1), or BBCE (2) "  />
+  </Fill></If>
+
+  <If expr="BBCG_version==2.0"><Fill name="HEXG" comment="hexagon tile geometry"  >
+    <var name="Type"    value="2"      comment="1 for small hex tile, 2 for large tile "  />
+    <var name="irad"    value="16.697" comment="inscribing circle radius (4x that of small one) "  />
+    <var name="clad"    value="0.1"    comment="cladding of tile "  />
+    <var name="thick"   value="1.0"    comment="thickness of tile "  />
+    <var name="zoffset" value="0.0"    comment="z-offset from center of BBCW (1), or BBCE (2) "  />
+    <var name="xoffset" value="0.0"    comment="x-offset center from beam for BBCW (1), or BBCE (2) "  />
+    <var name="yoffset" value="0.0"    comment="y-offset center from beam for BBCW (1), or BBCE (2) "  />
+  </Fill></If>
         
   <Use struct="BBCG"/>
   <!-- An important difference between AgML structures and c-structs is that 
@@ -442,5 +462,14 @@
 </Module>
 </Document> 
  
+<!-- 
+     REVISIONS:
+
+     12/19/2018 With the addition of the event plane detector (EPD), the BBC
+     large tiles are removed.  The BBC small tiles remain.  They will be placed
+     at a new z-location.  The overall thickness of the BBC mother volume must
+     be reduced to prevent overlap with the EPD.
+
+ -->
   
  

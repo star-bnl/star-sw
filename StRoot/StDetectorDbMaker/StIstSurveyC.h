@@ -5,7 +5,7 @@
 
 class StidsOnTpc : public St_SurveyC {
  public:
-  static StidsOnTpc* 	instance();
+  static StidsOnTpc*    	instance();
   StidsOnTpc(St_Survey *table=0) : St_SurveyC(table) {}
   virtual ~StidsOnTpc() {fgInstance = 0;}
  private:
@@ -14,19 +14,19 @@ class StidsOnTpc : public St_SurveyC {
 };
 
 
-class StIstpstOnIds : public St_SurveyC {
+class StpstOnIds : public St_SurveyC {
  public:
-  static StIstpstOnIds* 	instance();
-  StIstpstOnIds(St_Survey *table=0) : St_SurveyC(table) {}
-  virtual ~StIstpstOnIds() {fgInstance = 0;}
+  static StpstOnIds* 	instance();
+  StpstOnIds(St_Survey *table=0) : St_SurveyC(table) {}
+  virtual ~StpstOnIds() {fgInstance = 0;}
  private:
-  static StIstpstOnIds* fgInstance;
-  ClassDef(StIstpstOnIds,1) //C++ TChair for pstOnIds
+  static StpstOnIds* fgInstance;
+  ClassDef(StpstOnIds,1) //C++ TChair for pstOnIds
 };
 
 class StistOnPst : public St_SurveyC {
  public:
-  static StistOnPst* 	instance();
+  static StistOnPst* 	        instance();
   StistOnPst(St_Survey *table=0) : St_SurveyC(table) {}
   virtual ~StistOnPst() {fgInstance = 0;}
  private:

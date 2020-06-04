@@ -14,7 +14,7 @@ class StarGenEvent;
 StarGenEvent   *event       = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary = 0;
+StarPrimaryMaker *_primary = 0;
 
 class StarKinematics;
 StarKinematics *kinematics = 0;
@@ -71,7 +71,7 @@ void trig( Int_t n=1 )
   // Clear the chain from the previous event
   chain->Clear();
 
-  primary->SetVertex( 0.0, 0.0, zvertex );
+  _primary->SetVertex( 0.0, 0.0, zvertex );
   //  kinematics->Kine( _ntracks, "pi-", 4.995, 5.005, -0.005, 0.005 );
   //  kinematics -> Kine( _ntracks, "pi-", 0.39995, 0.40005, -0.0005, 0.0005 );
   kinematics -> Kine( _ntracks, _part, _pt - 0.005, _pt + 0.00t, _eta - 0.0005, _eta + 0.0005 );
@@ -80,7 +80,7 @@ void trig( Int_t n=1 )
   chain->Make();
 
   // Print the event
-  //primary->event()->Print();
+  //_primary->event()->Print();
     
 }
 // ----------------------------------------------------------------------------
@@ -93,7 +93,7 @@ void Kinematics()
   gSystem->Load( "libKinematics.so");
   kinematics = new StarKinematics();
     
-  primary->AddGenerator(kinematics);
+  _primary->AddGenerator(kinematics);
 }
 
 // ----------------------------------------------------------------------------
@@ -153,19 +153,19 @@ void starsim( Double_t zslice  = 0.0,
   // before the geant maker
   //
   //  StarPrimaryMaker *
-  primary = new StarPrimaryMaker();
+  _primary = new StarPrimaryMaker();
   {
-    primary -> SetFileName( rcname );
-    chain -> AddBefore( "geant", primary );
+    _primary -> SetFileName( rcname );
+    chain -> AddBefore( "geant", _primary );
   }
-  primary->SetSigma( 0.0, 0.0, 0.0 );
+  _primary->SetSigma( 0.0, 0.0, 0.0 );
 
   Kinematics();
 
   //
   // Initialize primary event generator and all sub makers
   //
-  primary -> Init();
+  _primary -> Init();
 
 
   //

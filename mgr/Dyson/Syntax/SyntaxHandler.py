@@ -115,9 +115,13 @@ class SyntaxHandler ( ContentHandler ):
         self.addToken( 'Keep'      , Language.Keep          ) # New in AgROOT
         # ===================================================
         self.addToken( 'Structure' , Language.Struct        )     
-        self.addToken( 'Struct'    , Language.Struct        )
-        self.addToken( 'Fill'      , Language.Fill          )
-        self.addToken( 'Use'       , Language.Use           )
+        self.addToken( 'Struct'    , Language.Struct        ) # New style struct
+#       self.addToken( 'Fill'      , Language.Fill          )
+        self.addToken( 'Fill'      , Language.Filling       )
+        self.addToken( 'Filling'   , Language.Filling       ) # New style struct
+#       self.addToken( 'Use'       , Language.Use           )
+        self.addToken( 'Use'       , Language.Using         )
+        self.addToken( 'Using'     , Language.Using         ) # New style struct
         # ===================================================
         self.addToken( 'Shape'     , Language.Shape         )
         self.addToken( 'Material'  , Language.Material      )
@@ -126,11 +130,12 @@ class SyntaxHandler ( ContentHandler ):
         self.addToken( 'Component' , Language.Component     )
         self.addToken( 'Attribute' , Language.Attribute     )
         self.addToken( 'Create'    , Language.Create        )
-        self.addToken( 'Position'  , Language.Position      )
+#       self.addToken( 'Position'  , Language.Position      )
 
-        self.addToken( 'Placement',   Language.Placement    )
+        self.addToken( 'Placement',  Language.Placement     )
         self.addToken( 'Translation', Language.Translation  )
         self.addToken( 'Rotation',    Language.Rotation     )
+        self.addToken( 'Misalign',    Language.Misalign     ) # AgML 2.0
         
         self.addToken( 'Create_and_Position',
                        Language.Create_and_Position         )
@@ -175,6 +180,17 @@ class SyntaxHandler ( ContentHandler ):
         # ===================================================        
         self.addToken( 'Function'  , Language.Function      )
         self.addToken( 'Arguement' , Language.Arguement     )
+        # =================================================== # Detector module configuration
+        # Syntax elements for detector configuration
+        self.addToken( 'Detector'  , Language.Detector      )
+        self.addToken( 'Setup'     , Language.Setup         )
+        self.addToken( 'Modules'   , Language.Modules       )
+        self.addToken( 'Init'      , Language.Init          )
+        # =================================================== # Master geomtery configuration
+        self.addToken( 'StarGeometry', Language.StarGeometry )
+        self.addToken( 'Tag'       , Language.Tag           )
+        self.addToken( 'Geometry'  , Language.Geometry      )
+        self.addToken( 'Construct' , Language.Construct     )                
         # ===================================================
         self.current = 0
         # ===================================================

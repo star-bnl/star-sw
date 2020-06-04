@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.cxx,v 1.9 2015/05/07 04:33:32 smirnovd Exp $
+ * $Id: StPxlDb.cxx,v 1.11 2018/03/15 21:33:07 dongx Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,12 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.cxx,v $
+ * Revision 1.11  2018/03/15 21:33:07  dongx
+ * *** empty log message ***
+ *
+ * Revision 1.10  2017/09/01 03:10:49  dongx
+ * Added access functions for pxlDigmapsSim table
+ *
  * Revision 1.9  2015/05/07 04:33:32  smirnovd
  * StPxlDb: Set name of resulting matrix after copying from a temporary matrix object
  *
@@ -60,6 +66,8 @@
 #include "tables/St_pxlHotPixels_Table.h"
 #include "tables/St_pxlSensorTps_Table.h"
 #include "tables/St_pxlControl_Table.h"
+#include "tables/St_pxlDigmapsSim_Table.h"
+#include "tables/St_pxlSimPar_Table.h"
 
 
 ClassImp(StPxlDb)
@@ -71,6 +79,8 @@ StPxlDb::StPxlDb() : StObject()
    mSensorStatusTable = 0;
    mRowColumnStatusTable = 0;
    mPxlControl = 0;
+   mPxlDigmapsSim = 0;
+   mPxlSimPar = 0;
    memset(mThinPlateSpline, 0, sizeof(mThinPlateSpline));
 }
 //_____________________________________________________________________________
