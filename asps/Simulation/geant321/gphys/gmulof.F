@@ -1,8 +1,12 @@
 *
-* $Id: gmulof.F,v 1.1.1.1 2004/01/15 00:12:13 potekhin Exp $
+* $Id: gmulof.F,v 1.2 2020/06/04 22:30:01 jwebb Exp $
 *
 * $Log: gmulof.F,v $
+* Revision 1.2  2020/06/04 22:30:01  jwebb
+* Make safe against accessing ELOW(0)
+*
 * Revision 1.1.1.1  2004/01/15 00:12:13  potekhin
+*
 *
 * Revision 1.2  1998/02/10 13:05:10  atgeant3
 * *** empty log message ***
@@ -77,6 +81,7 @@ C.
 *
       JRANG = LQ(JMA-15)
       IKCUT = GEKA*LOG10(CUTELE) + GEKB
+      IKCUT = MAX(IKCUT,1)
       GKC   = (CUTELE-ELOW(IKCUT))/(ELOW(IKCUT+1)-ELOW(IKCUT))
       STOPC = (1.-GKC)*Q(JRANG+IKCUT) + GKC*Q(JRANG+IKCUT+1)
       JMULOF = LQ(JTM-1)
@@ -133,6 +138,7 @@ C.
                EKF = (1.-DEEMAX)*GEKIN
                IF (EKF.LE.ELOW(1)) EKF = ELOW(1)
                IKF = GEKA*LOG10(EKF) + GEKB
+               IKF = MAX(IKF,1)
                GKR = (EKF-ELOW(IKF))/(ELOW(IKF+1)-ELOW(IKF))
                SLOSS = STOPMX-(1.-GKR)*Q(JRANG+IKF)-GKR*Q(JRANG+IKF+1)
                IF (SLOSS.LE.0.) SLOSS = 0.
@@ -223,5 +229,7 @@ C.
       DO 40 I=1,IKCUT
          Q(JMULOF+I)=0.5*Q(JMULOF+IKCUT+1)
    40 CONTINUE
-*
+
+
+
       END
