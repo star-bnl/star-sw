@@ -9,41 +9,42 @@
     <Setup  name   = "VPDDon"
 	    comment= "Default configuration for the Beam Beam counter"
 	    module = "VpddGeo"
-	    onoff  = "on" >
+	    onoff  = "on" simu="1" >
       <Init struct="VPDV" var="vpdconfig" value="1" />
     </Setup>
     <Setup  name   = "VPDD02"
 	    comment= "Default configuration for the Beam Beam counter"
 	    module = "VpddGeo"
-	    onoff  = "on" >
+	    onoff  = "on" simu="1" >
       <Init struct="VPDV" var="vpdconfig" value="2" />
     </Setup>
     <Setup  name   = "VPDD03"
 	    comment= "Default configuration for the Beam Beam counter"
 	    module = "VpddGeo"
-	    onoff  = "on" >
+	    onoff  = "on" simu="1" >
       <Init struct="VPDV" var="vpdconfig" value="3" />
     </Setup>
     <Setup  name   = "VPDD04"
 	    comment= "Default configuration for the Beam Beam counter"
 	    module = "VpddGeo"
-	    onoff  = "on" >
+	    onoff  = "on" simu="1" >
       <Init struct="VPDV" var="vpdconfig" value="4" />
     </Setup>
     <Setup  name   = "VPDD07"
 	    comment= "Default configuration for the Beam Beam counter"
 	    module = "VpddGeo2"
-	    onoff  = "on" >
+	    onoff  = "on" simu="1" >
       <Init struct="VPDV" var="vpdconfig" value="7" />
     </Setup>
      <Setup  name   = "VPDD08"
 	    comment= "Default configuration for the Beam Beam counter"
 	    module = "VpddGeo3"
-	    onoff  = "on" >
+	    onoff  = "on" simu="1" >
       <Init struct="VPDV" var="vpdconfig" value="7" />
     </Setup>
  
   </Detector> 
+
    
 </Document>
   

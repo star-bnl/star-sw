@@ -1,24 +1,31 @@
 /*
  *  StFixedVertexFinder.cxx
- *  $Id: StFixedVertexFinder.cxx,v 1.6 2017/01/03 22:17:36 smirnovd Exp $
+ *  $Id: StFixedVertexFinder.cxx,v 1.8 2018/03/24 20:10:41 jwebb Exp $
  *
  *  Author Lee Barnby (University of Birmingham) May 2006.
  *
  */
 
-#include <StEventTypes.h>
-#include <StEnumerations.h>
-#include <StMessMgr.h>
+#include <StEvent/StEventTypes.h>
+#include <StEvent/StEnumerations.h>
+#include <St_base/StMessMgr.h>
 
 
-#include "StFixedVertexFinder.h"
-#include "StMcEvent.hh"
-#include "StMcVertex.hh"
-#include "StMaker.h"
+#include "StGenericVertexMaker/StFixedVertexFinder.h"
+#include "StMcEvent/StMcEvent.hh"
+#include "StMcEvent/StMcVertex.hh"
+#include "StChain/StMaker.h"
 
 
-StFixedVertexFinder::StFixedVertexFinder(){
-    mFixedX=mFixedY=mFixedZ=0.0;
+StFixedVertexFinder::StFixedVertexFinder() : 
+  StGenericVertexFinder(),
+  mFixedX(0),
+  mFixedY(0),
+  mFixedZ(0),
+  mFixedEx(0),
+  mFixedEy(0),
+  mFixedEz(0)
+{
     mMode=0;
 }
 
@@ -26,7 +33,18 @@ int StFixedVertexFinder::fit(StEvent* event)
 {
   StPrimaryVertex  prim;
   StVertexFinderId VFId;
-  Float_t cov[6] = {0.0,0.0,0.0,0.0,0.0,0.0}; // All errors are zero
+
+  // All errors are zero... by default
+  // if user has set a vertex error, we use it, regardless of mode
+
+  float s2x = mFixedEx * mFixedEx;
+  float s2y = mFixedEy * mFixedEy;
+  float s2z = mFixedEz * mFixedEz;
+
+  float   cov[6] = {s2x,
+		    0.0,s2y,
+		    0.0,0.0,s2z}; 
+
 
   if (mMode == 0){
     // Really the default which takes the SetPos() TBI
@@ -81,9 +99,26 @@ void StFixedVertexFinder::SetVertexPosition(double x, double y, double z){
     mFixedY=y;
     mFixedZ=z;
 }
+void StFixedVertexFinder::SetVertexError(double x, double y, double z){
+    mFixedEx=x;
+    mFixedEy=y;
+    mFixedEz=z;
+}
 
 /*
  * $Log: StFixedVertexFinder.cxx,v $
+ * Revision 1.8  2018/03/24 20:10:41  jwebb
+ * Added option for user to specify the uncertainties on the vertex.  Useful
+ * in embedding jobs in order to get the track association with primary
+ * vertex correct (especially when tracks are from precision tracking, eg
+ * HFT).
+ *
+ * Revision 1.7  2017/05/12 18:37:23  smirnovd
+ * Cosmetic changes
+ *
+ * Removed log messages from source files
+ * Prefixed included headers with paths to respective modules
+ *
  * Revision 1.6  2017/01/03 22:17:36  smirnovd
  * [Stylistic] Changed public addVertex() to accept references
  *

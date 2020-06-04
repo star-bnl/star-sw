@@ -310,6 +310,14 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
 	#print "\tAfter  ".($#src)." ".($#inc)."\n";
 
+	#print "-=-=-=-=- LALALA -=-=-=-\n";
+	# 2018/01 issue after updating to AgML 2.0
+	# TODO problem with optimization in xgeometry and StarGeometry
+	if ( $DEBUG =~ /-O/ ){   # there is an optimization used
+	    $DEBUG = "-O1 -g";   # switch to a lower optimization level
+	    $FDEBUG= "-O1 -g";
+	}
+
 	# repack now and make sure only one exists
 	push(@srcL,@src)      if ($#src != 0);
 	push(@h_filesL,@inc)  if ($#inc != 0);
@@ -749,6 +757,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	      $pkg =~ m/^StTofPool$/          ||
 	      $pkg =~ m/^StRichPool$/         ||
 	      $pkg =~ m/^StGeneri/            ||
+	      $pkg =~ m/^StPxlSim/            ||
 	      $pkg =~ m/^St.*Utilities/       ||
 	      $pkg =~ m/^StTriggerUtilities$/ ||
 	      $pkg =~ m/^Stv$/                ||
@@ -1091,7 +1100,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			 'SOFLAGS'  => $SOFLAGS,
 			 'LIBPATH'  => $libpath,
 			 'ObjDir'   => $obj_dir,
-			 'DEBUG'    => $DEBUG
+			 'DEBUG'    => $DEBUG,
+			 'FDEBUG'   => $FDEBUG
 			 );
 
     #print "DEBUG ".$env2->{ROOTCINT_CPPFLAGS}."\n";
@@ -1234,7 +1244,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
     }
 
-    if ( $#Defs > -1 ) {
+    if ( $#Defs > -1 ){  # && ! $OnlinePackage ) {
 	my @CintFiles = ( $PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h" );
 	@Defs = script::sortu(@Defs);
 	my @defs = ();
@@ -1279,6 +1289,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#	push @src, $CintFiles[0];
 	push @src, @objfiles[0];
 	print "+==========add cint $CintFiles[0]\n" if $param::debug;
+	#die ;
     }
 
     if ( $#QtDefs > -1 ) {

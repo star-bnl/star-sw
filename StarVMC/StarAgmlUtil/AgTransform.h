@@ -71,6 +71,9 @@ public:
   /// Reset the matrix to unit matrix 
   void Reset();
 
+  /// Returns true if this is a misaligned transformation
+  bool misaligned(){ return mIsMisaligned; }
+
   // /// Get the six G3 angles defined by the rotation part of the matrix
   // void getAngles( double& thetax,  double& phix,
   // 		  double& thetay,  double& phiy,
@@ -81,6 +84,7 @@ private:
 protected:
 
   double mMatrix[4][4];
+  bool   mIsMisaligned;
 
 };
 

@@ -10,7 +10,7 @@
 
 use Env;
 # if (defined($AFS)) {$File::Find::dont_use_nlink;}
-require "find.pl";
+use File::Find;
 
 # Added so it does not depend on soft-link but
 # rather on afs/cons created tree structure.

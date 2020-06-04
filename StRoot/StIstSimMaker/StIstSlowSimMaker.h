@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstSlowSimMaker.h,v 1.1 2016/02/17 14:39:00 jeromel Exp $
+* $Id: StIstSlowSimMaker.h,v 1.2 2018/03/15 21:38:24 dongx Exp $
 *
 * Author: Leszek Kosarzewski, March 2014
 ****************************************************************************
@@ -25,6 +25,7 @@
 #include <vector>
 
 
+class TRandom3;
 class StEvent;
 class StMcEvent;
 class StMcIstHitCollection;
@@ -56,7 +57,7 @@ class StIstSlowSimMaker : public StMaker {
 
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StIstSlowSimMaker.h,v 1.1 2016/02/17 14:39:00 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StIstSlowSimMaker.h,v 1.2 2018/03/15 21:38:24 dongx Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
   
@@ -75,6 +76,12 @@ class StIstSlowSimMaker : public StMaker {
   typedef std::vector< Int_t > MappingGeomVec_t; //!Geometry ID -> channel elec. index
   MappingGeomVec_t mMappingGeomVec;
   
+  //! single hit efficiency - tunable parameter
+  short mHitEffMode;
+  float mMomCut;
+  float mHitEff;
+  TRandom3* mRndGen;
+      
   void getMCHitRowAndColumn(const StMcIstHit *istMChit, UShort_t &meanColumn, UShort_t &meanRow) const;
   void checkPadCrossing(const StThreeVectorD inPos, const StThreeVectorD outPos, StThreeVectorD mcLocalDir, Double_t dS, vector<StThreeVectorD> &cross_vec) const;
   void transformToSensor(StThreeVectorD &hitPos) const;
