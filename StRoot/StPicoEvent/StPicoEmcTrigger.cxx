@@ -1,14 +1,19 @@
-/// C++ headers
+//
+// The StPicoEmc trigger class holds EMC trigger information
+//
+
+// C++ headers
 #include <limits>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoEmcTrigger.h"
 
 ClassImp(StPicoEmcTrigger)
 
 //_________________
-StPicoEmcTrigger::StPicoEmcTrigger(): TObject(), mFlag(0), mId(0), mAdc(0) {
+StPicoEmcTrigger::StPicoEmcTrigger(): TObject(), mFlag(0), mId(0), mAdc(0),
+                                      mSmdE(0), mSmdP(0) {
   /* empty */
 }
 
@@ -16,9 +21,30 @@ StPicoEmcTrigger::StPicoEmcTrigger(): TObject(), mFlag(0), mId(0), mAdc(0) {
 StPicoEmcTrigger::StPicoEmcTrigger(Int_t flag, Int_t id, Int_t adc): StPicoEmcTrigger() {
 
   if (flag < 0 || id < 0 || adc < 0) return;
-  mFlag = (flag > std::numeric_limits<unsigned char>::max()) ? std::numeric_limits<unsigned char>::max() : (UChar_t)flag;
-  mId = (id > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)id;
-  mAdc = (adc > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)adc;
+  mFlag = ( (flag > std::numeric_limits<unsigned char>::max()) ?
+	    std::numeric_limits<unsigned char>::max() : (UChar_t)flag );
+  mId = ( (id > std::numeric_limits<unsigned short>::max()) ?
+	  std::numeric_limits<unsigned short>::max() : (UShort_t)id );
+  mAdc = ( (adc > std::numeric_limits<unsigned short>::max()) ?
+	   std::numeric_limits<unsigned short>::max() : (UShort_t)adc );
+  mSmdE = {};
+  mSmdP = {};
+}
+
+//_________________
+StPicoEmcTrigger::StPicoEmcTrigger(Int_t flag, Int_t id, Int_t adc,
+                                   std::vector<unsigned short> smdE,
+                                   std::vector<unsigned short> smdP): StPicoEmcTrigger() {
+
+  if (flag < 0 || id < 0 || adc < 0) return;
+  mFlag = ( (flag > std::numeric_limits<unsigned char>::max()) ?
+            std::numeric_limits<unsigned char>::max() : (UChar_t)flag );
+  mId = ( (id > std::numeric_limits<unsigned short>::max()) ?
+          std::numeric_limits<unsigned short>::max() : (UShort_t)id );
+  mAdc = ( (adc > std::numeric_limits<unsigned short>::max()) ?
+           std::numeric_limits<unsigned short>::max() : (UShort_t)adc );
+  mSmdE = smdE;
+  mSmdP = smdP;
 }
 
 //_________________
@@ -26,6 +52,9 @@ StPicoEmcTrigger::StPicoEmcTrigger(const StPicoEmcTrigger &trigger) {
   mFlag = trigger.mFlag;
   mId = trigger.mId;
   mAdc = trigger.mAdc;
+  mSmdE = trigger.mSmdE;
+  mSmdP = trigger.mSmdP;
+
 }
 
 //_________________
@@ -35,7 +64,9 @@ StPicoEmcTrigger::~StPicoEmcTrigger() {
 
 //_________________
 void StPicoEmcTrigger::Print(const Char_t* option) const {
-  LOG_INFO << " Flag = " << mFlag << " Id = " << mId << " Adc = " << mAdc << endm;
+  LOG_INFO << "flag: " << mFlag << " id: " << mId << " ADC: " << mAdc
+           << " SMDE hits num: " << mSmdE.size()
+           << " SMDP hits num: " << mSmdP.size() << endm;
 }
 
 //_________________
@@ -68,5 +99,35 @@ void StPicoEmcTrigger::setAdc(Int_t adc) {
   else {
     mAdc = (adc > std::numeric_limits<unsigned short>::max()) ?
       std::numeric_limits<unsigned short>::max() : (UShort_t)adc;
+  }
+}
+
+//_________________
+Int_t StPicoEmcTrigger::smdEIndex(Int_t i) const {
+  if ( mSmdE.empty() ) {
+    return -1;  // Error: no entries in the STL vector
+  }
+  else {
+    if ( i>=0 && i<=(Int_t)mSmdE.size() ) {
+      return (Int_t)mSmdE.at( i );
+    }
+    else {
+      return -2; // Error: out of range
+    }
+  }
+}
+
+//_________________
+Int_t StPicoEmcTrigger::smdPIndex(Int_t i) const {
+  if ( mSmdP.empty() ) {
+    return -1;  // Error: no entries in the STL vector
+  }
+  else {
+    if ( i>=0 && i<=(Int_t)mSmdP.size() ) {
+      return (Int_t)mSmdP.at( i );
+    }
+    else {
+      return -2; // Error: out of range
+    }
   }
 }

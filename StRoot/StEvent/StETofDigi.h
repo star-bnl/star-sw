@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofDigi.h,v 2.2 2018/07/13 14:55:09 ullrich Exp $
+ * $Id: StETofDigi.h,v 2.3 2019/02/11 18:52:38 ullrich Exp $
  *
  * Author: Philipp Weidenkaff, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofDigi.h,v $
+ * Revision 2.3  2019/02/11 18:52:38  ullrich
+ * Added an additional access functions to get the associated hit.
+ *
  * Revision 2.2  2018/07/13 14:55:09  ullrich
  * Added getter function for the associated hit (Florian)
  *
@@ -146,7 +149,10 @@ public:
     ** @brief pointer to the hit which has been reconstructed from this digi
     **/
     StETofHit* associatedHit();
-
+    /**
+    ** @brief pointer to the hit which has been reconstructed from this digi
+    **/
+    StETofHit* associatedHit() const;
 
 
     /**
@@ -213,7 +219,8 @@ inline unsigned int StETofDigi::elChan()   const { return mElChan;  };
 inline unsigned int StETofDigi::get4Id()   const { return mGet4Id;  };
 inline unsigned int StETofDigi::rocId()    const { return mRocId;   };
 
-inline StETofHit*   StETofDigi::associatedHit()  { return mAssociatedHit; };
+inline StETofHit*   StETofDigi::associatedHit()         { return mAssociatedHit; };
+inline StETofHit*   StETofDigi::associatedHit()  const  { return mAssociatedHit; };
 
 inline void StETofDigi::setRawTime(   const double& time )  { mRawTime   = time; };
 inline void StETofDigi::setRawTot(    const double& tot  )  { mRawTot    = tot;  };

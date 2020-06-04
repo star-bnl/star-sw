@@ -1,21 +1,23 @@
 /***************************************************************************
  *
- * $Id: StETofGeometry.cxx,v 1.1 2018/07/25 14:34:40 jeromel Exp $
+ * $Id: StETofGeometry.cxx,v 1.2 2019/02/19 20:20:14 fseck Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
  *
  * Description: Collection of geometry classes for the eTOF:
- *              - eTOF geometry constants
  *              - StETofNode: generic eTOF geometry object initialized via
  *                TGeoManager
- *              - StETofModule, StETofCounter inherit from StETofNode
+ *              - StETofGeomModule, StETofGeomCounter inherit from StETofNode
  *              - StETofGeometry builds the geometry and features all
  *                necessary methods to match track helices with eTOF hits
  *
  ***************************************************************************
  *
  * $Log: StETofGeometry.cxx,v $
+ * Revision 1.2  2019/02/19 20:20:14  fseck
+ * update after second part of eTOF code review
+ *
  * Revision 1.1  2018/07/25 14:34:40  jeromel
  * First version, reviewed Raghav+Jerome
  *
@@ -30,7 +32,7 @@
 #include "TGeoBBox.h"
 
 #include "StETofUtil/StETofGeometry.h"
-#include "StMaker.h"
+#include "StMessMgr.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,16 +42,18 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool StETofNode::mDebug = false;
-
 StETofNode::StETofNode( const TGeoPhysicalNode& gpNode )
+: mSafetyMarginX( 0. ),
+  mSafetyMarginY( 0. ), 
+  mDebug( false )
 {
+
     mGeoMatrix = static_cast< TGeoHMatrix* > ( gpNode.GetMatrix() );
-    /*  
+    /*
     double* trans  = mGeoMatrix->GetTranslation();
     double* rot    = mGeoMatrix->GetRotationMatrix();
 
-    LOG_INFO << trans[0] << "  " << trans[1] << "  " << trans[2] << endm;   
+    LOG_INFO << trans[0] << "  " << trans[1] << "  " << trans[2] << endm;
     
     LOG_INFO << rot[0] << "  " << rot[1] << "  " << rot[2] << endm; 
     LOG_INFO << rot[3] << "  " << rot[4] << "  " << rot[5] << endm; 
@@ -61,6 +65,9 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode )
 }
 
 StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy )
+: mSafetyMarginX( 0. ),
+  mSafetyMarginY( 0. ), 
+  mDebug( false )
 {
     mGeoMatrix = static_cast< TGeoHMatrix* > ( gpNode.GetMatrix() );
     /*
@@ -68,17 +75,17 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const f
     double* rot    = mGeoMatrix->GetRotationMatrix();
 
     LOG_INFO << trans[0] << "  " << trans[1] << "  " << trans[2] << endm;
-    
+
     LOG_INFO << rot[0] << "  " << rot[1] << "  " << rot[2] << endm;
     LOG_INFO << rot[3] << "  " << rot[4] << "  " << rot[5] << endm;
     LOG_INFO << rot[6] << "  " << rot[7] << "  " << rot[8] << endm;
     */
     mBox = static_cast< TGeoBBox* > ( gpNode.GetShape() );
-    
+
     // resize mBox with dx and dy
     float dz = mBox->GetDZ();
     mBox->SetBoxDimensions( dx, dy, dz );
-        
+
     buildMembers();
 }
 
@@ -131,13 +138,13 @@ StETofNode::calcXYPlaneNormal()
 {
     // calculate the normal vector to the local XY-plane
     // i.e. the global representation of the local unit vector (0,0,1)
-    
+
     double xl[ 3 ] = { 0, 0, 1 };
     double xm[ 3 ];
-    
+
     // transform to global coordinates
     local2Master( xl, xm );
-    
+
     // subtract vector pointing to the center
     /*
     xm[ 0 ] -= mGeoMatrix->GetTranslation()[ 0 ];
@@ -151,7 +158,7 @@ StETofNode::calcXYPlaneNormal()
 
     // subtract vector pointing to the center
     norm -= mCenter;
-    
+
     return norm;
 }
 
@@ -180,7 +187,7 @@ StETofNode::calcPhi( const double& rel_local_x, const double& rel_local_y )
     // set rel_local_x to -1 to get the lower edge (largest span of the node in phi)
     double xl[3] = { 0, 0, 0 };
     double xm[3];
-        
+
     if( fabs( rel_local_x ) <= 1. && rel_local_x != 0. ) { 
         double dx = mBox->GetDX(); 
         xl[ 0 ] = dx * rel_local_x;
@@ -201,14 +208,25 @@ StETofNode::buildMembers()
     // build member variables: mMinEta, mMaxEta, mMinPhi, mMaxPhi, mCenter, mNormal 
     mCenter = calcCenterPos();
     mNormal = calcXYPlaneNormal();
-    
+
     mEtaMin = calcEta( -1. );
     mEtaMax = calcEta(  1. );
 
     mPhiMin = calcPhi( -1, -1. );
     mPhiMax = calcPhi( -1,  1. );
-    
+
     if( mDebug ) print();
+}
+
+
+void
+StETofNode::setSafetyMargins( const double* margins )
+{
+    if( margins[ 0 ] < 0 || margins[ 1 ] < 0 ) {
+        LOG_ERROR << "StETofNode::setSafetyMargins()  --  ERROR: input values are negative" << endm;
+    }
+    mSafetyMarginX = fabs( margins[ 0 ] );
+    mSafetyMarginY = fabs( margins[ 1 ] );
 }
 
 
@@ -216,7 +234,13 @@ bool
 StETofNode::isLocalPointIn( const double* local )
 {
     // returns true if point in local coordinates is inside the node's volume
-    return mBox->Contains( local );
+    //return mBox->Contains( local );
+
+    if ( fabs( local[ 0 ] ) > mBox->GetDX() + mSafetyMarginX ) return false;
+    if ( fabs( local[ 1 ] ) > mBox->GetDY() + mSafetyMarginY ) return false;
+    if ( fabs( local[ 2 ] ) > mBox->GetDZ() ) return false;
+
+    return true;
 }
 
 
@@ -229,7 +253,7 @@ StETofNode::isGlobalPointIn( const StThreeVectorD& global )
 
     master2Local( xm, xl );
 
-    return mBox->Contains( xl );
+    return isLocalPointIn( xl );
 }
 
 
@@ -239,21 +263,21 @@ StETofNode::helixCross( const StHelixD& helix, double& pathLength, StThreeVector
     // check if helix goes through this node
     // and return path length of helix before crossing this node
     float maxPathLength = 1000;
-    
+
     bool isInside = false;
     pathLength = 0;
-    
+
     // find intersection between helix & the node's XY-plane
     pathLength = helix.pathLength( mCenter, mNormal );
-    
+
     if( pathLength > 0 && pathLength < maxPathLength ) {
         cross = helix.at( pathLength );
         theta = mNormal.angle( helix.cat( pathLength ) );
     }
-    
+
     // check if the intersection point is really inside the node
     isInside = isGlobalPointIn( cross );
-    
+
     return isInside;
 }
 
@@ -289,16 +313,15 @@ StETofNode::print( const Option_t* opt ) const
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool StETofGeomModule::mDebug = true; //false;
-
 StETofGeomModule::StETofGeomModule( const TGeoPhysicalNode& gpNode, const int moduleId )
 : StETofNode( gpNode ),
-  mModuleIndex( moduleId ) 
+  mModuleIndex( moduleId ),
+  mDebug( false )
 {
     mSector = calcSector( moduleId );
     mPlane  = calcPlane(  moduleId );
 
-    mETofCounter.reserve( ETofGeomConst::nCounters );
+    mETofCounter.reserve( eTofConst::nCounters );
 
     if( mDebug ) print();
 }
@@ -306,18 +329,20 @@ StETofGeomModule::StETofGeomModule( const TGeoPhysicalNode& gpNode, const int mo
 
 void
 StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const int moduleId, const int counterId )
-{   
+{
     StETofGeomCounter* counter = new StETofGeomCounter( gpNode, moduleId, counterId );
-    
+
     mETofCounter.push_back( counter );
 }
 
 
 void
-StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId )
-{  
+StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins )
+{
     StETofGeomCounter* counter = new StETofGeomCounter( gpNode, dx, dy, moduleId, counterId );
-    
+
+    counter->setSafetyMargins( safetyMargins );
+
     mETofCounter.push_back( counter );
 }
 
@@ -329,8 +354,18 @@ StETofGeomModule::counter( const  unsigned int i ) const
         LOG_ERROR << "Counter not defined" << endm;
         return nullptr;
     }
-    
+
     return mETofCounter[ i ];
+}
+
+void
+StETofGeomModule::clearCounters()
+{
+    for( size_t i=0; i<mETofCounter.size(); i++ ) {
+        LOG_DEBUG << "deleting counter (" << i << ")" << endm;
+        delete mETofCounter[ i ];
+    }
+    mETofCounter.clear();
 }
 
 
@@ -339,7 +374,7 @@ StETofGeomModule::calcSector( const int moduleId )
 {
     // calculate sector from moduleId
     // moduleId = (plane - 1) + 3 * (sector - 13)
-    return ( moduleId / ETofGeomConst::nPlanes ) + ETofGeomConst::sectorStart;
+    return ( moduleId / eTofConst::nPlanes ) + eTofConst::sectorStart;
 }
 
 
@@ -348,7 +383,7 @@ StETofGeomModule::calcPlane( const int moduleId )
 {
     // calculate plane from moduleId
     // moduleId = (plane - 1) + 3 * (sector - 13)
-    return ( moduleId % ETofGeomConst::nPlanes ) + ETofGeomConst::zPlaneStart;
+    return ( moduleId % eTofConst::nPlanes ) + eTofConst::zPlaneStart;
 }
 
 
@@ -370,12 +405,11 @@ StETofGeomModule::print( const Option_t* opt ) const
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool StETofGeomCounter::mDebug = true; //false;
-
 StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const int moduleId, const int counterId )
 : StETofNode( gpNode ),
   mModuleIndex( moduleId ),
-  mCounterIndex( counterId )
+  mCounterIndex( counterId ),
+  mDebug( false )
 {
     mSector = calcSector( moduleId  );
     mPlane  = calcPlane( moduleId );
@@ -389,7 +423,8 @@ StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const int 
 StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId )
 : StETofNode( gpNode, dx, dy ),
   mModuleIndex( moduleId ),
-  mCounterIndex( counterId )
+  mCounterIndex( counterId ),
+  mDebug( false )
 {
     mSector = calcSector( moduleId  );
     mPlane  = calcPlane( moduleId );
@@ -405,7 +440,7 @@ StETofGeomCounter::calcSector( const int moduleId )
 {
     // calculate sector from moduleId
     // moduleId = (plane - 1) + 3 * (sector - 13)
-    return ( moduleId / ETofGeomConst::nPlanes ) + ETofGeomConst::sectorStart;
+    return ( moduleId / eTofConst::nPlanes ) + eTofConst::sectorStart;
 }
 
 
@@ -414,7 +449,7 @@ StETofGeomCounter::calcPlane( const int moduleId )
 {
     // calculate plane from moduleId
     // moduleId = (plane - 1) + 3 * (sector - 13)
-    return ( moduleId % ETofGeomConst::nPlanes ) + ETofGeomConst::zPlaneStart;
+    return ( moduleId % eTofConst::nPlanes ) + eTofConst::zPlaneStart;
 }
 
 
@@ -423,12 +458,11 @@ StETofGeomCounter::createGeomStrips()
 {
     // divide the counter into strips   
     float counterDx  = this->box()->GetDX();
-    float stripWidth = 2 * counterDx / ETofGeomConst::nStrips;
+    float stripPitch = 2 * counterDx / eTofConst::nStrips;
 
-    for( int i=0; i<=ETofGeomConst::nStrips; i++) {
-        mStripX[ i ] = stripWidth * i - counterDx;
-        //cout << mStripX[ i ] << endl;
-    } 
+    for( int i=0; i<=eTofConst::nStrips; i++) {
+        mStripX[ i ] = stripPitch * i - counterDx;
+    }
 }
 
 
@@ -436,16 +470,20 @@ int
 StETofGeomCounter::findStrip( const double* local )
 {
     // look up the strip the local point is in
-    
-    int iStrip = -1;
+    int iStrip = -999;
 
-    if( isLocalPointIn( local ) ) {
-        for( int i=0; i<ETofGeomConst::nStrips; i++ ) {
-            if( mStripX[ i ] <= local[ 0 ] && local[ 0 ] <= mStripX[ i+1 ] ) {
+    // only care about the local X coordinate
+    double xl[ 3 ] = { local[ 0 ], 0. ,0. }; 
+
+    if( isLocalPointIn( xl ) ) {
+        for( int i=0; i<eTofConst::nStrips; i++ ) {
+            if( mStripX[ i ] <= xl[ 0 ] && xl[ 0 ] <= mStripX[ i+1 ] ) {
                 iStrip = i+1;
                 break;
             }
-        } 
+        }
+        if( xl[ 0 ] < mStripX[ 0 ] ) iStrip = 0;
+        if( xl[ 0 ] > mStripX[ eTofConst::nStrips ] ) iStrip = 33;
     }
 
     return iStrip;
@@ -470,12 +508,11 @@ StETofGeomCounter::print( const Option_t* opt ) const
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool StETofGeometry::mDebug = false;
-
 StETofGeometry::StETofGeometry( const char* name, const char* title )
 : TNamed( name, title ),
   mNValidModules( 0 ),
-  mInitFlag( false )
+  mInitFlag( false ),
+  mDebug( false )
 {
 
 }
@@ -483,51 +520,31 @@ StETofGeometry::StETofGeometry( const char* name, const char* title )
 
 StETofGeometry::~StETofGeometry()
 {
-
+    reset();
 }
 
-
-int
-StETofGeometry::calcModuleIndex( const int& sector, const int& plane )
-{
-    // calculate module index from sector (13 -- 24) and plane (1 -- 3)
-    return (plane - ETofGeomConst::zPlaneStart ) + ETofGeomConst::nPlanes * ( sector - ETofGeomConst::sectorStart );
-}
-
-int
-StETofGeometry::calcVolumeIndex( const int& sector, const int& plane, const int& counter, const int& strip )
-{
-    // calculate volume Id
-    int idMultiplier[ 3 ] = { 10000, 1000, 100 };
-    int id = sector * idMultiplier[ 0 ] + plane * idMultiplier[ 1 ] + counter * idMultiplier[ 2 ] + strip;
-
-    return id;
-}
 
 void
-StETofGeometry::init( StMaker* maker, TGeoManager* geoManager )
+StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins )
 {
-    //if( maker->debug() ) debugOn();
-    debugOn();
-    //debugOff();
+    if( !geoManager ) {
+        LOG_ERROR << " *** StETofGeometry::Init - Cannot find TGeoManager *** " << endm;
+        return;
+    }
 
-    if( geoManager == nullptr ) LOG_ERROR << " *** StETofGeometry::Init - Cannot find TGeoManager *** " << endm;
-
-    LOG_INFO << " +++ geoManager :   "  << geoManager << endm;
+    LOG_DEBUG << " +++ geoManager :   "  << geoManager << endm;
 
     mNValidModules = 0;
 
-    //StETofGeomCounter* mCounter[ 36 ][ 3 ];
-
 
     // loop over sectors
-    for( int sector = ETofGeomConst::sectorStart; sector <= ETofGeomConst::sectorStop; sector++ ) {
+    for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
         // loop over planes
-        for( int plane = ETofGeomConst::zPlaneStart; plane <= ETofGeomConst::zPlaneStop; plane++ ) {
+        for( int plane = eTofConst::zPlaneStart; plane <= eTofConst::zPlaneStop; plane++ ) {
             std::string geoPath( formTGeoPath( geoManager, plane, sector ) );
 
             if( geoPath.empty() ) {
-                LOG_INFO << "StETofGeometry::Init(...) - Cannot find path to ETOF module "
+                LOG_DEBUG << "StETofGeometry::Init(...) - Cannot find path to ETOF module "
                             "(id " << plane << sector << "). Skipping..." << endm;
                 continue;
             }
@@ -539,30 +556,26 @@ StETofGeometry::init( StMaker* maker, TGeoManager* geoManager )
 
             mETofModule[ mNValidModules-1 ] = new StETofGeomModule( *gpNode, moduleId );
 
-            
-            //load the counters of the modules
-            //  StETofGeomCounter* mCounter[ 3 ];
 
+            // load the counters of the modules
             // loop over counters
-            for( int counter = ETofGeomConst::counterStart; counter <= ETofGeomConst::counterStop; counter++ ) {
+            for( int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
                 std::string geoPath( formTGeoPath( geoManager, plane, sector, counter ) );
 
                 if( geoPath.empty() ) {
-                    LOG_INFO << "StETofGeometry::Init(...) - Cannot find path to ETOF counter "
+                    LOG_DEBUG << "StETofGeometry::Init(...) - Cannot find path to ETOF counter "
                                 "(id " << plane << sector << ", " << counter << "). Skipping..." << endm;
                     continue;
                 }
 
                 const TGeoPhysicalNode* gpNode = geoManager->MakePhysicalNode( geoPath.c_str() );
 
-                //mCounter[ moduleId ][ counter-1 ] = new StETofGeomCounter( *gpNode, moduleId, counter );
-
                 //get the gas gap dimensions
                 int gap = 1;
                 std::string geoPathActiveVolume( formTGeoPath( geoManager, plane, sector, counter, gap ) );
 
                 if( geoPathActiveVolume.empty() ) {
-                    LOG_INFO << "StETofGeometry::Init(...) - Cannot find path to ETOF counter gas gap (for active area evaluation)"
+                    LOG_DEBUG << "StETofGeometry::Init(...) - Cannot find path to ETOF counter gas gap (for active area evaluation)"
                                 "(id " << plane << sector << ", " << counter << "). Skipping..." << endm;
                     continue;
                 }
@@ -574,11 +587,12 @@ StETofGeometry::init( StMaker* maker, TGeoManager* geoManager )
                 float dx = activeVolume->GetDX();
                 float dy = activeVolume->GetDY();
 
-                LOG_INFO << activeVolume->GetDX() << "  " << activeVolume->GetDY() << "  " << activeVolume->GetDZ() << endm;
+                LOG_DEBUG << activeVolume->GetDX() << "  " << activeVolume->GetDY() << "  " << activeVolume->GetDZ() << endm;
 
-                int counterId = counter - ETofGeomConst::counterStart;
+                int counterId = counter - eTofConst::counterStart;
 
-                mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId );
+                mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins );
+
 
             } // end of loop over counters
 
@@ -587,13 +601,25 @@ StETofGeometry::init( StMaker* maker, TGeoManager* geoManager )
 
     LOG_INFO << "amount of valid modules: " << mNValidModules << endm;  
 
-    //cout << " ************************************** " << endl;
-    //mETofModule[ 5 ]->counter( 0 )->print();
-    //cout << " ************************************** " << endl;
-
-
     // finished initializing geometry
     setInitFlag( true );
+}
+
+void
+StETofGeometry::reset()
+{
+    for( size_t i=0; i<mNValidModules; i++ ) {
+        LOG_DEBUG << "for ETofModule (" << i << ")" << endm;
+        mETofModule[ i ]->clearCounters();
+
+        LOG_DEBUG << "deleting ETofModule (" << i << ")" << endm;
+        delete mETofModule[ i ];
+        mETofModule[ i ] = 0;
+    }
+    LOG_INFO << "StETofGeometry cleared up ...." << endm;
+
+    mNValidModules = 0;
+    mInitFlag = false;
 }
 
 
@@ -659,6 +685,37 @@ StETofGeometry::formTGeoPath( const TGeoManager* geoManager, int plane, int sect
 }
 
 
+int
+StETofGeometry::calcModuleIndex( const int& sector, const int& plane )
+{
+    // calculate module index from sector (13 -- 24) and plane (1 -- 3)
+    return (plane - eTofConst::zPlaneStart ) + eTofConst::nPlanes * ( sector - eTofConst::sectorStart );
+}
+
+
+int
+StETofGeometry::calcVolumeIndex( const int& sector, const int& plane, const int& counter, const int& strip )
+{
+    // calculate volume Id
+    int idMultiplier[ 3 ] = { 10000, 1000, 100 };
+    int id = sector * idMultiplier[ 0 ] + plane * idMultiplier[ 1 ] + counter * idMultiplier[ 2 ] + strip;
+
+    return id;
+}
+
+void
+StETofGeometry::decodeVolumeIndex( const int& volumeId, int& sector, int& plane, int& counter, int& strip )
+{
+     // decode volume Id
+    int idMultiplier[ 3 ] = { 10000, 1000, 100 };
+
+    sector  = volumeId / idMultiplier[ 0 ];
+    plane   = ( volumeId % idMultiplier[ 0 ] ) / idMultiplier[ 1 ];
+    counter = ( volumeId % idMultiplier[ 1 ] ) / idMultiplier[ 2 ];
+    strip   = volumeId % idMultiplier[ 2 ]; 
+}
+
+
 StETofNode*
 StETofGeometry::findETofNode( const int moduleId, const int counterId )
 {
@@ -708,31 +765,31 @@ StETofGeometry::hitLocal2Master( const int moduleId, const int counterId, const 
     }
 
     findETofNode( moduleId, counterId )->local2Master( local, master );
-
-    return;
 }
 
 StThreeVectorD
 StETofGeometry::helixCrossETofPlane( const StHelixD& helix )
 {
-    //if ( IsDebugOn() ) LOG_INFO << "zplane:" << ETofGeomConst::zplanes[ 1 ] << endm;
+    if( isDebugOn() ) {
+        LOG_INFO << "zplane:" << eTofConst::zplanes[ 1 ] << endm;
+    }
 
     // center of ETOF plane
-    StThreeVectorD r( 0, 0, ETofGeomConst::zplanes[ 1 ] );
+    StThreeVectorD r( 0, 0, eTofConst::zplanes[ 1 ] );
 
     // Normal to ETOF plane
     StThreeVectorD n( 0, 0, 1 );
 
-    //if ( IsDebugOn() )
-    //  logPoint( "( outer- ) helix origin" , helix.origin() );
+    if( isDebugOn() )
+      logPoint( "( outer- ) helix origin" , helix.origin() );
 
     double s = helix.pathLength( r, n );
     StThreeVectorD point = helix.at( s );
 
-    //if ( IsDebugOn() ) {
-    //  LOG_INFO << "pathLength @ ETOF plane = " << s << endm;
-    //  logPoint( "intersection", point );
-    //}
+    if( isDebugOn() ) {
+      LOG_INFO << "pathLength @ ETOF plane = " << s << endm;
+      logPoint( "intersection", point );
+    }
 
     return point;
 }
@@ -742,31 +799,32 @@ StETofGeometry::helixCrossETofPlane( const StHelixD& helix )
  * HelixCrossSector 
  * Returns a vector of sector ids that the track could intersect with
  */
-vector< int >
+std::vector< int >
 StETofGeometry::helixCrossSector( const StHelixD& helix )
 {
     StThreeVectorD point = helixCrossETofPlane( helix );
 
-    //LOG_INFO << "track phi @ ETOF= " << point.phi() << endm;
+    LOG_DEBUG << "track phi @ ETOF= " << point.phi() << endm;
 
     return sectorAtPhi( point.phi() );
 }
 
-vector< int >
+std::vector< int >
 StETofGeometry::sectorAtPhi( const double& angle )
 {
     float phi = angle;
+
     // make phi bounded by [0, 2pi]
     if ( phi < 0. ) phi += 2. * M_PI;
 
     // 15 degree slice; half of an ETOF sector
     double slice = M_PI / 12.;
 
-    // sector 15 at phi = 0
+    // sector 21 at phi = 0
     // sector 24 at phi = pi/2
-    // sector 21 at phi = pi
+    // sector 15 at phi = pi
     // sector 18 at phi = 3pi/2
-    vector< int > sectorId = { 15, 14, 13, 24, 23, 22, 21, 20, 19, 18, 17, 16 };
+    vector< int > sectorId = { 21, 22, 23, 24, 13, 14, 15, 16, 17, 18, 19, 20 };
 
     double iSlice = phi / slice;
     int sectorA = -1;
@@ -776,7 +834,7 @@ StETofGeometry::sectorAtPhi( const double& angle )
     int indexA = ( intSlice / 2 );
 
     // in this case the track falls into a 15 degree slice in the center of the sector, only matches with this sector
-    if ( intSlice % 2 == 0 && intSlice < 24 ){
+    if( intSlice % 2 == 0 && intSlice < 24 ) {
         sectorA = sectorId[ indexA ];
     } else {
         // in this case the track is in the 15 degree slice overlap of two sector
@@ -787,10 +845,12 @@ StETofGeometry::sectorAtPhi( const double& angle )
         sectorA = sectorId[ indexA ];
         sectorB = sectorId[ indexB ];
     }
-    //if ( IsDebugOn() ) LOG_INFO << "phi = " << phi << ", iSlice = " << iSlice << ", SectorA: " << sectorA << ", SectorB: " << sectorB <<  endm;
+    if ( isDebugOn() ) {
+        LOG_INFO << "phi = " << phi << ", iSlice = " << iSlice << ", SectorA: " << sectorA << ", SectorB: " << sectorB <<  endm;
+    }
 
     vector< int > r = { sectorA };
-    if ( sectorB >= 13 )
+    if( sectorB >= 13 )
         r.push_back( sectorB );
 
     return r;
@@ -801,40 +861,40 @@ StETofGeometry::sectorAtPhi( const double& angle )
  * HelixCrossCounter( 
  * Returns true if a counter is crossed by a helix
 **/
-bool
-StETofGeometry::helixCrossCounter( const StHelixD& helix, vector< int >& idVec )
+void
+StETofGeometry::helixCrossCounter( const StHelixD& helix, vector< int >& idVec, vector< StThreeVectorD >& crossVec, vector< StThreeVectorD >& localVec, vector< double >& thetaVec )
 {
     // estimate which sector(s) the track crossed
     vector< int > sectorsCrossed = helixCrossSector( helix ); 
-    
-    if( sectorsCrossed.size() == 1 ) LOG_INFO << "sector crossed: "  << sectorsCrossed[ 0 ] << endm;
-    if( sectorsCrossed.size() == 2 ) LOG_INFO << "sectors crossed: " << sectorsCrossed[ 0 ] << ", " << sectorsCrossed[ 1 ] << endm;
-    
+
+    if( sectorsCrossed.size() == 1 ) LOG_DEBUG << "sector crossed: "  << sectorsCrossed[ 0 ] << endm;
+    if( sectorsCrossed.size() == 2 ) LOG_DEBUG << "sectors crossed: " << sectorsCrossed[ 0 ] << ", " << sectorsCrossed[ 1 ] << endm;
+
     // loop over all modules
     for( unsigned int i=0; i<mNValidModules; i++ ) {
         if( !mETofModule[ i ] ) continue;
-        
+
         // only search in modules of crossed sectors
         int iSector = mETofModule[ i ]->sector();        
         auto found = std::find( std::begin( sectorsCrossed ), std::end( sectorsCrossed ), iSector );
 
         if( found == std::end( sectorsCrossed ) ) continue;
-            
-        //LOG_INFO << iSector << "  " << mETofModule[i]->GetPlane() << endm;
-    
+
+        LOG_DEBUG << iSector << "  " << mETofModule[i]->plane() << endm;
+
         double module_pathLen;
         double module_theta;
         StThreeVectorD module_cross;
 
         bool helixCrossedModule = mETofModule[ i ]->helixCross( helix, module_pathLen, module_cross, module_theta );
-        
+
         if( module_theta > 0.5 * M_PI ) module_theta -= M_PI;
         module_theta = fabs( module_theta * 180. / M_PI );
 
         /*
         if( helixCrossedModule ) {
             LOG_INFO << " -----------" << "\nmoduleId:"<< mETofModule[ i ]->moduleIndex() << "  helix_crossed: " << helixCrossedModule
-                 << "  sector: " << mETofModule[ i ]->sector() << " plane: " << mETofModule[ i ]->plane() << endm;
+                     << "  sector: " << mETofModule[ i ]->sector() << " plane: " << mETofModule[ i ]->plane() << endm;
             LOG_INFO << "pathLength: " << module_pathLen << "   absolute impact angle: " << module_theta << " degree" << endm;
             logPoint( "crossing point" , module_cross );
             LOG_INFO << "cross.eta: " << module_cross.pseudoRapidity() << endm;
@@ -844,9 +904,9 @@ StETofGeometry::helixCrossCounter( const StHelixD& helix, vector< int >& idVec )
 
         // only search for intersections of counters with the helix if the module was crossed
         if( !helixCrossedModule ) continue;
-        
+
         int nValidCounters = mETofModule[ i ]->numberOfCounters();
-        
+
         // loop over counters
         for( int j=0; j<nValidCounters; j++ ) { 
             double pathLen;
@@ -854,7 +914,7 @@ StETofGeometry::helixCrossCounter( const StHelixD& helix, vector< int >& idVec )
             StThreeVectorD cross;
 
             bool helixCrossedCounter = mETofModule[ i ]->counter( j )->helixCross( helix, pathLen, cross, theta );
-            
+
             if( theta > 0.5 * M_PI ) theta -= M_PI;
             theta = fabs( theta * 180. / M_PI );
 
@@ -871,12 +931,14 @@ StETofGeometry::helixCrossCounter( const StHelixD& helix, vector< int >& idVec )
 
                 int sector  = mETofModule[ i ]->sector();
                 int plane   = mETofModule[ i ]->plane();
-                int counter = mETofModule[ i ]->counter( j )->counterIndex();
+                int counter = mETofModule[ i ]->counter( j )->counterIndex() + 1;
 
                 int volumeIndex = calcVolumeIndex( sector, plane, counter, strip );
-                //LOG_INFO << " &&&&& volume index: " << volumeIndex << endm;
 
                 idVec.push_back( volumeIndex );
+                crossVec.push_back( cross );
+                localVec.push_back( StThreeVectorD( local[ 0 ], local[ 1 ], local[ 2 ] ) );
+                thetaVec.push_back( theta );
 
                 /*
                 LOG_INFO << " -----------" << "\ncounterId: " << mETofModule[ i ]->counter( j )->counterIndex() << endm;
@@ -890,8 +952,6 @@ StETofGeometry::helixCrossCounter( const StHelixD& helix, vector< int >& idVec )
 
         } // end loop over counters
     } // end loop over modules
-
-    return true;
 }
 
 

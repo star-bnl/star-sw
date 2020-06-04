@@ -1,15 +1,7 @@
-// $Id: St_geant_Maker.cxx,v 1.171 2018/03/22 19:46:19 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.16.2.1 2018/11/11 16:12:38 didenko Exp $
 // $Log: St_geant_Maker.cxx,v $
-// Revision 1.171  2018/03/22 19:46:19  jwebb
-// Get the hit count right for FTS
-//
-// Revision 1.170  2018/03/20 20:46:26  jwebb
-//
-// Re-enable the FTSA (fts "active") volume.  (Temporarily lost when I during
-// integration of the FtsdGeo1 model).
-//
-// Revision 1.169  2018/03/19 17:50:42  jwebb
-// Setup support for 3 planes of Si tracking
+// Revision 1.16.2.1  2018/11/11 16:12:38  didenko
+// branch updates for S18c_embed
 //
 // Revision 1.168  2017/12/28 19:10:33  jwebb
 //
@@ -1419,6 +1411,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
     AddData(g2t_emc_hit);
+    iRes = g2t_emc(g2t_track,g2t_emc_hit); if (Debug() > 1) g2t_emc_hit->Print(0,10);
     //           ==============================
   }
   
@@ -1552,11 +1545,9 @@ Int_t St_geant_Maker::Make() {
     iRes = g2t_hca( g2t_track, g2t_hca_hit);
   } 
 
-  nhits=nhit1=0;
-  geant3 -> Gfnhit("FTSH","FTSA", nhit1); nhits+=nhit1; nhit1=0;
-  geant3 -> Gfnhit("FTSH","FSIA", nhit1); nhits+=nhit1; nhit1=0;
-  geant3 -> Gfnhit("FTSH","FSIB", nhit1); nhits+=nhit1; nhit1=0;
-  geant3 -> Gfnhit("FTSH","FSIC", nhit1); nhits+=nhit1; nhit1=0;
+  nhits=0;
+
+  geant3 -> Gfnhit("FTSH","FTSA", nhits); 
   if ( nhits > 0 ) {
     St_g2t_fts_hit *g2t_fts_hit = new St_g2t_fts_hit("g2t_fts_hit",nhits);
     AddData(  g2t_fts_hit );

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.50 2018/07/09 16:50:31 ullrich Exp $
+ * $Id: StEvent.h,v 2.51 2018/12/11 19:53:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.51  2018/12/11 19:53:10  ullrich
+ * Added RICHf.
+ *
  * Revision 2.50  2018/07/09 16:50:31  ullrich
  * Added EToF hooks.
  *
@@ -193,6 +196,7 @@ class StEtrHitCollection;
 class StEmcCollection;
 class StEpdCollection;
 class StFmsCollection;
+class StRHICfCollection;
 class StRichCollection;
 class StRpsCollection;
 class StTofCollection;
@@ -255,6 +259,8 @@ public:
     const StEmcCollection*              emcCollection() const;
     StFmsCollection*                    fmsCollection();
     const StFmsCollection*              fmsCollection() const;
+    StRHICfCollection*                  rhicfCollection();
+    const StRHICfCollection*            rhicfCollection() const;
     StRichCollection*                   richCollection();
     const StRichCollection*             richCollection() const;
     StRpsCollection*                    rpsCollection();
@@ -359,6 +365,7 @@ public:
     void setEmcCollection(StEmcCollection*);
     void setEpdCollection(StEpdCollection*);
     void setFmsCollection(StFmsCollection*);
+    void setRHICfCollection(StRHICfCollection*);
     void setRichCollection(StRichCollection*);
     void setRpsCollection(StRpsCollection*);
     void setTofCollection(StTofCollection*);

@@ -34,3 +34,6 @@
 #include "StMuFmsInfo.h"
 #include "StMuEpdHit.h"
 #include "StMuEpdHitCollection.h"
+#include "StMuETofCollection.h"
+#include "StMuETofDigi.h"
+#include "StMuETofHit.h"

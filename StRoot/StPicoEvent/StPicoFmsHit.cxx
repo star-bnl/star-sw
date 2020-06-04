@@ -1,16 +1,16 @@
-/// C++ headers
+//
+// StPicoFmsHit stores FMS hit information
+//
+
+// C++ headers
 #include <iostream>
 #include <limits>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoFmsHit.h"
 
 ClassImp(StPicoFmsHit)
-
-/**
- * \author: Peifeng Liu, Stony Brook University, pliuphys@gmail.com
- */
 
 //_________________
 StPicoFmsHit::StPicoFmsHit() : TObject(), mChannelDetectorId(0), mAdc(0) {
@@ -45,7 +45,8 @@ void StPicoFmsHit::Print(const Char_t *option) const {
 
 //_________________
 void StPicoFmsHit::setAdc(Float_t adc) {
-  mAdc = ( (adc > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)adc );
+  mAdc = ( (adc > std::numeric_limits<unsigned short>::max()) ?
+	   std::numeric_limits<unsigned short>::max() : (UShort_t)adc );
 }
 
 //_________________

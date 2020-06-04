@@ -82,6 +82,9 @@ enum nodeQA {kKeepHit=1,kGoodHit=2};
 class StiKalmanTrack : public StiTrack 
 {
  public:
+
+  enum { kAppGud =1, kAppRR=2, kAppUpd = 4, kAppUPD = 8 };
+
   
   /*! 
     Constructor
@@ -265,6 +268,7 @@ class StiKalmanTrack : public StiTrack
   int     getCharge()const;   	// charge of the particle
   double  getChi2()  const;   	// chi2/ndf of fit 
   double  getChi2Max() const;   // maximal chi2 
+  double  getXi2  () const { return mXi2;}   // helix chi2 
   double  getDca2(StiTrack *t) const;   // distance of closest approach to given track - 2D calc
   double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
 
@@ -272,8 +276,8 @@ class StiKalmanTrack : public StiTrack
   int  refitL();
   void reserveHits(int yes=1);
   StiTrackNode *extendToVertex(StiHit* vertex);
-  void setFlag(long v);
-  long getFlag() const;
+  void setFlag(int v);
+  int  getFlag() const;
 
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
@@ -329,8 +333,9 @@ protected:
   UShort_t  mSeedHitCount; //number of points used to seed the track (seed quality)
   char      mCombUsed; 	  // save which combinatoric style was used
   int     mVertex;
-  long    mFlag;         //A flag to pack w/ topo info
+  int     mFlag;         //A flag to pack w/ topo info
   double  mMass;         // mass hypothesis
+  double  mXi2;
   double  _dca;
 
  public:
@@ -346,12 +351,12 @@ inline double  StiKalmanTrack::getMass() const
   return mMass;  
 }
 
-inline void StiKalmanTrack::setFlag(long v) 
+inline void StiKalmanTrack::setFlag(int v) 
 {
   mFlag = v;
 }
 
-inline long StiKalmanTrack::getFlag() const 
+inline int StiKalmanTrack::getFlag() const 
 {
   return mFlag;
 }

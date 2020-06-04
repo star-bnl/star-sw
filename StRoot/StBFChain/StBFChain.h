@@ -7,7 +7,7 @@
  \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
  \date   1999/07/29 , 2001-2011
- @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.57 2016/05/17 12:05:33 jeromel Exp $
+ @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.58 2018/09/04 20:16:06 jeromel Exp $
 
  Class to control "BFC" chain
 
@@ -43,9 +43,9 @@ class StBFChain : public StChain {
   TString             fFiltTrg;   // trigger filtering properties (flavor, inc/exc)
   Int_t               fRunG;      // on fly simulation run no. & set for RDNM
   Int_t               fNoChainOptions;
-  TString             Gproperty;  // a global property name
-  TString             Gpattern;   // a global pattern
-  TString             Gvalue;     // a global value
+  vector<TString>     Gproperty;  // a global property name
+  vector<TString>     Gpattern;   // a global pattern
+  vector<TString>     Gvalue;     // a global value
 #ifdef USE_BFCTIMESTAMP
   StVecBFCTS          GTSOptions; // global set of detector specific timestamps
 #endif /*  USE_BFCTIMESTAMP */
@@ -104,7 +104,7 @@ class StBFChain : public StChain {
                TString GetGeometry() const;
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.57 2016/05/17 12:05:33 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.58 2018/09/04 20:16:06 jeromel Exp $ built " __DATE__ " " __TIME__ ;
        return cvs;
    }
    /// StBFChain control class

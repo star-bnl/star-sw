@@ -1,0 +1,14 @@
+/* etofResetTimeCorr.idl
+*
+* table: etofResetTimeCorr
+*
+* description: parameter for a common T0 offset correction to sync
+*              the whole eTOF with the bTOF clock
+*
+* author: Florian Seck ( TU Darmstadt )
+*
+*/
+
+struct etofResetTimeCorr {
+	float  resetTimeOffset;   /* common t0 offset correction to sync eTOF with bTOF clock */
+};

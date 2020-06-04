@@ -2,12 +2,14 @@
 #define _StEpdEpFinder
 
 class TVector3;
-class TH2D;
+//class TH2D;
 class TFile;
 class TProfile;
 class TProfile2D;
 class StEpdGeom;
 class TClonesArray;
+
+#include "TH2D.h"
 
 /*************************************
  * \author Mike Lisa
@@ -26,10 +28,17 @@ class TClonesArray;
  * if the user requests more than one thing, as well as "has-it-already-been-calculated?"
  * ambiguities.
  *
+ *   A word about "EventType": the correction factors and other things about the event
+ * plane can depend on centrality, vertex position, etc.  This code will apply the
+ * corrections separately for different "EventTypes".  It is up to the user to decide
+ * what this denotes.  All I care about is that when you send me an event, you tell
+ * me the EventTypeId, which is just an integer.  The rest is up to you (as it should be :).
+ *   For many (most?) people, this will just be a centrality index.
+ *
  * This class will do "phi-weighting" and "shifting" corrections, but it needs
  *  some information to do it.  It will generate such information itself, but
  *  here is what you need to do, if you are starting from scratch:
- * 1) With whatever centrality/Vz/whatever event cuts you are going to analyze, and
+ * 1) With whatever multiplicity/Vz/whatever event cuts you are going to analyze, and
  *    on whatever dataset, run your code that calls this class.  This will produce
  *    a file called StEpdEpFinderCorrectionHistograms_OUTPUT.root in the cwd.
  *    --> mv StEpdEpFinderCorrectionHistograms_OUTPUT.root StEpdEpFinderCorrectionHistos_INPUT.root
@@ -65,21 +74,21 @@ class TClonesArray;
  *    In these histograms, order is "n" (as in n=2 for second-order EP)
  *    x-axis is "i" from equation (6) above.  As in <cos(n*i*Psi_n)>
  *       There are _EpTermsMax bins running from 0.5 to _EPtermsMax+0.5, so there should be no confusion with this axis.
- *    y-axis is CentId, the *user-defined* centrality bin number.
+ *    y-axis is EventTypeId, the *user-defined* EventType bin number.
  *--------->>>>>>>>>>>>>>>>>> And at this point I must make a demand of the user <<<<<<<<<<<<<<<<<<<
- *    When the user instantiates an StEpdEpFinder object, he specifies nCentralityBins, the number of centrality bins he will use.
- *       >>>> The user MUST number these bins 0,1,2,3,4,...(nCentralityBins-1) when he interacts with this class <<<<
- *       (If he wants to use a different convention in his code, that's fine, but when taling to StEpdEpFinder, use 0..(nCentralityBins-1)
- *    The y-axis then has nCentralityBins bins, going from -0.5 to nCentralityBins-0.5
+ *    When the user instantiates an StEpdEpFinder object, he specifies nEventTypeBins, the number of EventType bins he will use.
+ *       >>>> The user MUST number these bins 0,1,2,3,4,...(nEventTypeBins-1) when he interacts with this class <<<<
+ *       (If he wants to use a different convention in his code, that's fine, but when taling to StEpdEpFinder, use 0..(nEventTypeBins-1)
+ *    The y-axis then has nEventTypeBins bins, going from -0.5 to nEventTypeBins-0.5
  *
  * 3) Eta weights. Used (optional) by StEpdEpFinder, but not created by it.
- *    It gives the additional "weight" that a hit gets, and depends on centrality, eta (obviously), and the harmonic order ("n")
- *    x-axis is eta;  y-axis is centralityID
- *----->>>>>>>> The user MUST use the same centrality numbering (i.e. integers, starting at zero) as mentioned above.
- *----->>>>>>>> The first (non-underflow) bin on the x-axis MUST be centered at zero, and the last (non-overflow) bin on the x-axis MUST be centered on nCentralityBins-1
+ *    It gives the additional "weight" that a hit gets, and depends on EventType, eta (obviously), and the harmonic order ("n")
+ *    x-axis is eta;  y-axis is EventTypeID
+ *----->>>>>>>> The user MUST use the same EventType numbering (i.e. integers, starting at zero) as mentioned above.
+ *----->>>>>>>> The first (non-underflow) bin on the x-axis MUST be centered at zero, and the last (non-overflow) bin on the x-axis MUST be centered on nEventTypeBins-1
  *
  * 4) Resolution-related histograms.  Not used by StEpdEpFinder, but produced by StEpdEpFinder for user convenience.
- *    These are just the simple <cos(n\Psi_{n,E}-n\Psi_{n,W})> values, as a function of centrality ID
+ *    These are just the simple <cos(n\Psi_{n,E}-n\Psi_{n,W})> values, as a function of EventType ID
  *
  *************************************/
 
@@ -94,18 +103,18 @@ class StEpdEpFinder{
   /// This file is actually PRODUCED by the code in an earlier run.  The user must rename
   /// the file StEpdEpFinderCorrectionHistograms_OUTPUT.root if he wants to use it.
   /// \param CorrectionFileName     Full name of the .root file with correction histograms.
-  /// \param nCentralityBins        Number of centrality bins that the user is using.  Up to the user to have a consistent usage, here and in analysis.
-  StEpdEpFinder(int nCentralityBins=10, char const* CorrectionFileName="StEpdEpFinderCorrectionHistograms_INPUT.root");
+  /// \param nEventTypeBins        Number of EventType bins that the user is using.  Up to the user to have a consistent usage, here and in analysis.
+  StEpdEpFinder(int nEventTypeBins=10, char const* OutFileName="StEpdEpFinderCorrectionHistograms_OUTPUT.root", char const* CorrectionFileName="StEpdEpFinderCorrectionHistograms_INPUT.root");
   ~StEpdEpFinder(){/* no-op */};
 
   /// sets eta-based weights and sets the flag indicating that eta-based weights will be used
-  /// The x-axis of the TH2D is abs(eta).  The y-axis is centralityID (according to whatever convention/definition the user is using)
-  /// \param order        order of the EP (first-order plane, 2nd-order plane, ...)
-  /// \param EtaWeight    histogram with the weights as a function of |eta| and centrality
+  /// The x-axis of the TH2D is abs(eta).  The y-axis is EventTypeID (according to whatever convention/definition the user is using)
+  /// \param order        order of the EP Begins at UNITY! i.e. order=1 means first-order plane, order=2 means 2nd-order plane, ...
+  /// \param EtaWeight    histogram with the weights as a function of |eta| and EventType
   void SetEtaWeights(int order, TH2D EtaWeight);
 
   /// sets ring-based weights and sets the flag indicating that the ring-based weights will be used
-  /// \param order        order of the EP (first-order plane, 2nd-order plane, ...)
+  /// \param order        order of the EP Begins at UNITY! i.e. order=1 means first-order plane, order=2 means 2nd-order plane, ...
   /// \param RingWeights  1D array of length 16, containing the RingWeights
   void SetRingWeights(int order, double* RingWeights);
 
@@ -131,16 +140,25 @@ class StEpdEpFinder{
   ///  have to call the StEpdEpFinder over and over again for various information
   /// \param EpdHits      Epd Hits in a TClones array.  Will be decoded as StEpdHit, StMuEpdHit, or StPicoEpdHit as dictated by mFormatUsed
   /// \param primVertex   primary vertex position for this event
-  /// \param CentralityID user-defined integer specifying centrality of the event.  User must use same convention in correction histograms and weights
-  StEpdEpInfo Results(TClonesArray* EpdHits, TVector3 primVertex, int CentralityID);
+  /// \param EventTypeID user-defined integer specifying EventType of the event.  User must use same convention in correction histograms and weights
+  StEpdEpInfo Results(TClonesArray* EpdHits, TVector3 primVertex, int EventTypeID);
+
+  /// Returns a big string that tells in text what the settings were.
+  /// This is for your convenience and is of course optional.  I like
+  /// to put a concatenation of such Reports into a text file, so I
+  /// "autodocument" what were the settings for a given run
+  TString Report();
+
 
  private:
 
+  bool OrderOutsideRange(int order);         // just makes sure order is between 1 and _EpOrderMax
+
   double GetPsiInRange(double Qx, double Qy, int order);
-  double RingOrEtaWeight(int ring, double eta, int order, int CentId);
+  double RingOrEtaWeight(int ring, double eta, int order, int EventTypeId);
   StEpdGeom* mEpdGeom;
 
-  int mNumberOfCentralityBins;               // user-defined.  Default is 10.  Used for correction histograms
+  int mNumberOfEventTypeBins;                // user-defined.  Default is 10.  Used for correction histograms
   int mFormatUsed;                           // 0=StEvent, 1=StMuDst; 2=StPicoDst.  Default is 2
 
   // tile weight = (0 if ADC< thresh), (MAX if ADC>MAX); (ADC otherwise).
@@ -170,7 +188,7 @@ class StEpdEpFinder{
 
   
 
-
+  ClassDef(StEpdEpFinder,0)
 
 };
 

@@ -1,4 +1,8 @@
-/// PicoDst headers
+//
+// StPicoDst holds pointers to TClonesArrays with all data
+//
+
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoEvent.h"
 #include "StPicoTrack.h"
@@ -11,6 +15,8 @@
 #include "StPicoBTofPidTraits.h"
 #include "StPicoMtdPidTraits.h"
 #include "StPicoTrackCovMatrix.h"
+#include "StPicoBEmcSmdEHit.h"
+#include "StPicoBEmcSmdPHit.h"
 #include "StPicoDst.h"          //MUST be the last one
 
 TClonesArray** StPicoDst::picoArrays = 0;
@@ -207,6 +213,42 @@ void StPicoDst::printTrackCovMatrices() {
   for(UInt_t iEntry=0; iEntry<numberOfTrackCovMatrices(); iEntry++) {
     LOG_INFO << "+++ trackCovMatrix " << iEntry << "\n";
     trackCovMatrix(iEntry)->Print();
+    LOG_INFO << "\n";
+  }
+
+  LOG_INFO << endm;
+}
+
+//_________________
+void StPicoDst::printBEmcSmdEHits() {
+
+  if ( numberOfBEmcSmdEHits() == 0 ) {
+    LOG_INFO << "No BEmc SmdE hits found!" << endm;
+    return;
+  }
+
+  LOG_INFO << "\n+++++++++ BEmc SmdE hits list ( " << numberOfBEmcSmdEHits() << " entries )\n\n";
+  for ( UInt_t iEntry=0; iEntry<numberOfBEmcSmdEHits(); iEntry++ ) {
+    LOG_INFO << "+++ BEmcSmdEHit " << iEntry << "\n";
+    bemcSmdEHit(iEntry)->Print();
+    LOG_INFO << "\n";
+  }
+
+  LOG_INFO << endm;
+}
+
+//_________________
+void StPicoDst::printBEmcSmdPHits() {
+
+  if ( numberOfBEmcSmdPHits() == 0 ) {
+    LOG_INFO << "No BEmc SmdP hits found!" << endm;
+    return;
+  }
+
+  LOG_INFO << "\n+++++++++ BEmc SmdP hits list ( " << numberOfBEmcSmdPHits() << " entries )\n\n";
+  for( UInt_t iEntry=0; iEntry<numberOfBEmcSmdPHits(); iEntry++ ) {
+    LOG_INFO << "+++ BEmcSmdPHit " << iEntry << "\n";
+    bemcSmdPHit(iEntry)->Print();
     LOG_INFO << "\n";
   }
 

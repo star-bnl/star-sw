@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHit.cxx,v 2.1 2018/07/09 14:53:48 ullrich Exp $
+ * $Id: StETofHit.cxx,v 2.2 2019/02/11 18:53:09 ullrich Exp $
  *
  * Author: Philipp Weidenkaff, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHit.cxx,v $
+ * Revision 2.2  2019/02/11 18:53:09  ullrich
+ * Added additional access functions to get the associated track & idTruth and qaTruth variables for simulated Hits.
+ *
  * Revision 2.1  2018/07/09 14:53:48  ullrich
  * Initial Revision.
  *
@@ -28,9 +31,11 @@ StETofHit::StETofHit()
   mClusterSize(0),
   mLocalX(0),
   mLocalY(0),
-  mAssociatedTrack(0)
+  mAssociatedTrack(0),
+  mIdTruth(0),
+  mQuality(0)
 {
-
+    /* no op */
 }
 
 
@@ -45,9 +50,11 @@ StETofHit::StETofHit( const unsigned int sector, const unsigned int zPlane,  con
   mClusterSize(clusterSize),
   mLocalX(localX),
   mLocalY(localY),
-  mAssociatedTrack(0)
+  mAssociatedTrack(0),
+  mIdTruth(0),
+  mQuality(0)
 {
-
+    /* no op */
 }
 
 
@@ -60,15 +67,17 @@ StETofHit::StETofHit( const StETofHit& hitIn )
   mClusterSize(hitIn.mClusterSize),
   mLocalX(hitIn.mLocalX),
   mLocalY(hitIn.mLocalY),
-  mAssociatedTrack(hitIn.mAssociatedTrack)
+  mAssociatedTrack(hitIn.mAssociatedTrack),
+  mIdTruth(hitIn.mIdTruth),
+  mQuality(hitIn.mQuality)
 {
-
+    /* no op */
 }
 
 
 StETofHit::~StETofHit()
 {
-
+    /* no op */
 }
 
 
@@ -113,6 +122,15 @@ StETofHit::setHwAddress( const unsigned int sector, const unsigned int zPlane, c
     mCounter = counter;
 }
 
+void
+StETofHit::setIdTruth( unsigned short idtruth, unsigned short qatruth )
+{
+    if (qatruth==0) qatruth = (idtruth>>16);
+    idtruth    = idtruth&((1<<16)-1);
+    mIdTruth = static_cast<UShort_t>(idtruth);
+    mQuality = static_cast<UShort_t>(qatruth);
+}
+
 
 ostream&
 operator<<( ostream &os, const StETofHit& hit )
@@ -124,7 +142,8 @@ operator<<( ostream &os, const StETofHit& hit )
        << " Plane "         << hit.zPlane()      << endl
        << " Counter "       << hit.counter()     << endl
        << " LocalX "        << hit.localX()      << endl
-       << " LocalY "        << hit.localY()      << endl;
-
+       << " LocalY "        << hit.localY()      << endl
+       << " idTruth "       << hit.idTruth()     << endl
+       << " qaTruth "       << hit.qaTruth()     << endl;
     return os;
 }

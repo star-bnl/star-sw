@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.50 2018/07/09 14:54:37 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.52 2019/02/11 18:51:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.52  2019/02/11 18:51:10  ullrich
+ * Added new EToF classes.
+ *
+ * Revision 2.51  2018/12/11 19:53:10  ullrich
+ * Added RICHf.
+ *
  * Revision 2.50  2018/07/09 14:54:37  ullrich
  * Changed to add ETof.
  *
@@ -179,6 +185,7 @@
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
 #include "StEventSummary.h"
+#include "StRHICfCollection.h"
 #include "StFmsCollection.h"
 #include "StFmsCluster.h"
 #include "StFmsHit.h"
@@ -276,6 +283,7 @@
 #include "StBTofHit.h"
 #include "StETofHit.h"
 #include "StETofDigi.h"
+#include "StETofPidTraits.h"
 #include "StEpdHit.h"
 #include "StBTofCollection.h"
 #include "StETofCollection.h"

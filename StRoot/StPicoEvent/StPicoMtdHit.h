@@ -1,11 +1,18 @@
+/**
+ * \class StPicoMtdHit
+ * \brief Holds information about the hit from MTD
+ *
+ * The class holds information about the hit from the Muon Telescope Detector (MTD)
+ */
+
 #ifndef StPicoMtdHit_h
 #define StPicoMtdHit_h
 
-/// C++ headers
+// C++ headers
 #include <utility>
 
-/// ROOT headers
-#include <TObject.h>
+// ROOT headers
+#include "TObject.h"
 
 //_________________
 class StPicoMtdHit : public TObject {
@@ -21,9 +28,9 @@ class StPicoMtdHit : public TObject {
   /// Print the stored information
   virtual void Print(const Char_t* option = "") const;
 
-  /**
-   * Getters
-   */
+  //
+  // Getters
+  //
 
   /// Return global channel number of the MTD hit
   /// Its defition is (backleg-1) * 60 + (module-1) * 12 + cell
@@ -52,9 +59,9 @@ class StPicoMtdHit : public TObject {
   /// Return time-over-threshold of the MTD hit
   std::pair<Float_t, Float_t> tot() const;
 
-  /**
-   * Setters
-   */
+  //
+  // Setters
+  //
 
   /// Set trigger flag of the MTD hit (corresponds to the number)
   /// of MTD hits matchedd to the same trigger unit that fired

@@ -1,15 +1,15 @@
-/*! 
- *  \class StPicoMtdTrigger
- *  \brief Class storing MTD trigger information
- *  including VPD, QT, MT101, TF201
+/**
+ * \class StPicoMtdTrigger
+ * \brief Class storing MTD trigger information including VPD, QT, MT101, TF201
  *
+ * The class stores trigger information related to the Muon Telescope Detector (MTD)
  */
 
 #ifndef StPicoMtdTrigger_h
 #define StPicoMtdTrigger_h
 
-/// ROOT headers
-#include <TObject.h>
+// ROOT headers
+#include "TObject.h"
 
 //_________________
 class StPicoMtdTrigger : public TObject {
@@ -22,10 +22,10 @@ class StPicoMtdTrigger : public TObject {
   /// Destructor
   virtual ~StPicoMtdTrigger();
 
-  /**
-   * Getters
-   */
-
+  //
+  // Getters
+  //
+  
   /// VPD tag sum
   UShort_t getVpdTacSum();
 
@@ -79,9 +79,9 @@ class StPicoMtdTrigger : public TObject {
   
   Char_t shouldHaveRejectEvent();
 
-  /**
-   * Setters
-   */
+  //
+  // Getters
+  //
 
   /// Set VPD TAC sum
   void setVpdTacSum(UShort_t tacSum);
@@ -137,9 +137,9 @@ class StPicoMtdTrigger : public TObject {
   ClassDef(StPicoMtdTrigger, 1);
 };
 
-/**
- * Getters
- */
+//
+// Getters
+//
 inline UShort_t StPicoMtdTrigger::getVpdTacSum() { return mVpdTacSum; }
 inline UInt_t   StPicoMtdTrigger::getTHUBtime(const Int_t thub) { return mTHUBtime[thub - 1]; }
 inline UShort_t StPicoMtdTrigger::getQTtacSum(const Int_t qt, const Int_t pos) { return mQTtacSum[qt - 1][pos - 1]; }
@@ -148,9 +148,9 @@ inline UShort_t StPicoMtdTrigger::getMT101Id(const Int_t qt, const Int_t index) 
 inline UInt_t   StPicoMtdTrigger::getTF201TriggerBit() { return mTF201TriggerBit; }
 inline Char_t   StPicoMtdTrigger::shouldHaveRejectEvent() { return mShouldHaveRejectEvent; }
 
-/**
- * Setters
- */
+//
+// Setters
+//
 inline void StPicoMtdTrigger::setVpdTacSum(UShort_t tacSum) { mVpdTacSum = (UShort_t)tacSum; }
 inline void StPicoMtdTrigger::setVpdTacSum(UShort_t tdcHighThrEast, UShort_t tdcHighThrWest) { mVpdTacSum = (UShort_t)tdcHighThrEast + (UShort_t)tdcHighThrWest; }
 inline void StPicoMtdTrigger::setTHUBtime(Int_t thubID, UInt_t word) { mTHUBtime[thubID] = (UInt_t)word;}

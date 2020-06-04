@@ -66,7 +66,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.79 2018/06/29 21:46:23 smirnovd Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.77.2.1 2018/11/11 15:56:09 didenko Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -87,6 +87,7 @@ static const Double_t zmax = -zmin;
 static TProfile2D *hist[5][2];
 static const Int_t nChecks = 21;
 static TH1  *checkList[2][21];
+static TString TpcMedium("TPCE_SENSITIVE_GAS");
 //________________________________________________________________________________
 ClassImp(StTpcRSMaker);
 //________________________________________________________________________________
@@ -143,25 +144,16 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     LOG_ERROR << "Database Missing! Can't initialize TpcRS" << endm;
     return kStFatal;
   }
+  mCutEle = GetCutEle();
+  if (mCutEle > 0) {
+    LOG_INFO << "StTpcRSMaker::InitRun: mCutEle set to = " << mCutEle << " from geant \"" << TpcMedium.Data() << "\" parameters" << endm;
+  } else {
+    mCutEle = 1e-4;
+    LOG_ERROR << "StTpcRSMaker::InitRun: mCutEle has not been found in GEANT3 for \"" << TpcMedium.Data() << "\" parameters." 
+	      << "Probably due to missing  Set it to default " << mCutEle << endm;
+  }
   NoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
   NoOfRows      = NoOfInnerRows + St_tpcPadPlanesC::instance()->outerPadRows();
-#if 0
-  if (! gMC) {
-    LOG_INFO << "TVirtualMC has not been instantiated" << endm;
-    return kStFatal;
-  }
-  TString cmd("Gccuts_t *ccuts  = (Gccuts_t *) ((");// TGeant3 *) gMC
-  if (gClassTable->GetID("TGiant3") >= 0) { // root4star
-    cmd += "TGiant";
-  } else {
-    cmd += "TGeant";
-  }
-  cmd += Form(" *) %p))->Gccuts();",gMC); 
-  cmd += Form("((StTpcRSMaker *) %p)->SetCutEle(ccuts->cutele);",this);
-  TInterpreter::EErrorCode error = TInterpreter::kNoError;
-  gInterpreter->ProcessLine(cmd.Data(), &error);
-  assert(error == TInterpreter::kNoError);
-#endif
   if (TESTBIT(m_Mode, kBICHSEL)) {
     LOG_INFO << "StTpcRSMaker:: use H.Bichsel model for dE/dx simulation" << endm;
     if (! mdNdEL10 || ! mdNdx) {
@@ -1775,22 +1767,128 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
   f->SetParameter(0,w);
   return f;
 }
+//________________________________________________________________________________
+#ifndef WIN32
+# define gcomad gcomad_
+#else
+# define gcomad  GCOMAD
+#endif
+//______________________________________________________________________
+extern "C"
+{
+  void type_of_call gcomad(DEFCHARD, Int_t*& DEFCHARL);
+}
+Float_t StTpcRSMaker::GetCutEle() {
+  //----------GCBANK
+  //      COMMON/GCBANK/NZEBRA,GVERSN,ZVERSN,IXSTOR,IXDIV,IXCONS,FENDQ(16)
+  //     +             ,LMAIN,LR1,WS(KWBANK)
+  struct Gcbank_t {
+    Int_t nzebra;
+    Float_t gversn;
+    Float_t zversn;
+    Int_t ixstor;
+    Int_t ixdiv;
+    Int_t ixcons;
+    Float_t fendq[16];
+    Int_t lmain;
+    Int_t lr1;
+  };
+  Gcbank_t *fGcbank;          //! GCBANK common structure
+  gcomad(PASSCHARD("GCBANK"),(int*&) fGcbank  PASSCHARL("GCBANK"));
+//----------GCLINK
+//      COMMON/GCLINK/JDIGI ,JDRAW ,JHEAD ,JHITS ,JKINE ,JMATE ,JPART
+//     +      ,JROTM ,JRUNG ,JSET  ,JSTAK ,JGSTAT,JTMED ,JTRACK,JVERTX
+//     +      ,JVOLUM,JXYZ  ,JGPAR ,JGPAR2,JSKLT
+typedef struct {
+  Int_t    jdigi;
+  Int_t    jdraw;
+  Int_t    jhead;
+  Int_t    jhits;
+  Int_t    jkine;
+  Int_t    jmate;
+  Int_t    jpart;
+  Int_t    jrotm;
+  Int_t    jrung;
+  Int_t    jset;
+  Int_t    jstak;
+  Int_t    jgstat;
+  Int_t    jtmed;
+  Int_t    jtrack;
+  Int_t    jvertx;
+  Int_t    jvolum;
+  Int_t    jxyz;
+  Int_t    jgpar;
+  Int_t    jgpar2;
+  Int_t    jsklt;
+} Gclink_t;
+  Gclink_t *fGclink;          //! GCLINK common structure
+  gcomad(PASSCHARD("GCLINK"),(int*&) fGclink  PASSCHARL("GCLINK"));
 
+  //----------GCCUTS
+  //  COMMON/GCCUTS/CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM
+  //   +             ,DCUTE ,DCUTM ,PPCUTM,TOFMAX,GCUTS(5)
+  struct  Gccuts_t {
+    Float_t cutgam;
+    Float_t cutele;
+    Float_t cutneu;
+    Float_t cuthad;
+    Float_t cutmuo;
+    Float_t bcute;
+    Float_t bcutm;
+    Float_t dcute;
+    Float_t dcutm;
+    Float_t ppcutm;
+    Float_t tofmax;
+    Float_t gcuts[5];
+  };
+  Gccuts_t *fGccuts;          //! GCCUTS common structure
+  gcomad(PASSCHARD("GCCUTS"),(int*&) fGccuts  PASSCHARL("GCCUTS"));
+  //----------GCNUM
+  //   COMMON/GCNUM/NMATE ,NVOLUM,NROTM,NTMED,NTMULT,NTRACK,NPART
+  //  +            ,NSTMAX,NVERTX,NHEAD,NBIT
+  struct  Gcnum_t {
+    Int_t    nmate;
+    Int_t    nvolum;
+    Int_t    nrotm;
+    Int_t    ntmed;
+    Int_t    ntmult;
+    Int_t    ntrack;
+    Int_t    npart;
+    Int_t    nstmax;
+    Int_t    nvertx;
+    Int_t    nhead;
+    Int_t    nbit;
+  };
+  Gcnum_t  *fGcnum;           //! GCNUM common structure
+  gcomad(PASSCHARD("GCNUM"), (int*&) fGcnum   PASSCHARL("GCNUM"));
+  Int_t *addr;
+  // Variables for ZEBRA store
+  gcomad(PASSCHARD("IQ"), addr  PASSCHARL("IQ"));
+  Int_t   *fZiq = addr;
+  gcomad(PASSCHARD("LQ"), addr  PASSCHARL("LQ"));
+  Int_t   *fZlq = addr;
+  Float_t *fZq       = (float*)fZiq;
+  Int_t   ITPAR = 2; // IF(CHPAR.EQ.'CUTELE')ITPAR=2
+  Int_t JTMED = fGclink->jtmed;
+  for (Int_t i = 1; i <= fGcnum->ntmed; i++) {
+    Int_t JTM = fZlq[JTMED-i];
+    if (! JTM) continue;
+    TString Medium((Char_t *)(&fZiq[JTM+1]),20);
+    if (!Medium.BeginsWith(TpcMedium)) continue;
+    Int_t JTMN = fZlq[JTM];
+    if (! JTMN) continue;
+    Float_t cutele = fZq[JTMN+ITPAR];
+    return cutele;
+  }
+  LOG_INFO << "StTpcRSMaker::GetCutEle: specific CutEle for medium \"" << TpcMedium.Data() << "\" has not been found. Use default." << endm;
+  return fGccuts->cutele;
+}
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.79 2018/06/29 21:46:23 smirnovd Exp $
+// $Id: StTpcRSMaker.cxx,v 1.77.2.1 2018/11/11 15:56:09 didenko Exp $
 // $Log: StTpcRSMaker.cxx,v $
-// Revision 1.79  2018/06/29 21:46:23  smirnovd
-// Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
-//
-// Revert "NoDead option added"
-// Revert "Fill mag field more carefully"
-// Revert "Assert commented out"
-// Revert "Merging with TPC group code"
-// Revert "Remove too strong assert"
-// Revert "Restore removed by mistake line"
-// Revert "Remove not used anymore file"
-// Revert "iTPCheckIn"
+// Revision 1.77.2.1  2018/11/11 15:56:09  didenko
+// branch updates for S18c_embed
 //
 // Revision 1.77  2018/02/18 21:08:54  perev
 // Move back DSmirnov correction

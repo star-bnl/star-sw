@@ -1,32 +1,33 @@
 /**
  * \class StPicoHelix
- * \author Grigory Nigmatkulov, May 07 2018
+ * \brief Helix parametrization that uses ROOT TVector3
  * 
  * Parametrization of a helix (modification of StHelix). Can also cope 
  * with straight tracks, i.e. with zero curvature. This represents only 
  * the mathematical model of a helix. See the SCL user guide for more.
  *
+ * \author Grigory Nigmatkulov, May 07 2018
  */
 
 #ifndef StPicoHelix_h
 #define StPicoHelix_h
 
-/// C++ headers
+// C++ headers
 #include <math.h>
 #include <utility>
 #include <algorithm>
 
-/// ROOT headers
-#include <TVector3.h>
+// ROOT headers
+#include "TVector3.h"
 
-/// PicoDst headers
+// PicoDst headers
 #ifdef _VANILLA_ROOT_
 #include "SystemOfUnits.h"
 #else
 #include "StarClassLibrary/SystemOfUnits.h"
 #endif
 
-/// Declare C++ namespaces
+// Declare C++ namespaces
 #if !defined(ST_NO_NAMESPACES)
 using std::pair;
 using std::swap;
@@ -35,9 +36,9 @@ using std::max;
 
 //_________________
 class StPicoHelix {
+  
  public:
-
-  /// Empty constructor
+  /// Default constructor
   StPicoHelix();
   
   /// Constructor that takes next arguments:
@@ -48,22 +49,27 @@ class StPicoHelix {
   /// Copy constructor
   StPicoHelix(const StPicoHelix&);
 
-  /// Assignment operator (will use the one, provided by compiler)
+  // Assignment operator (will use the one, provided by compiler)
   //StPicoHelix& operator=(const StPicoHelix&);
   
   /// Destructor
   virtual ~StPicoHelix();
 
-  
+  /// Return dip angle
+  Double_t dipAngle()   const;
+  /// Return curvature: 1/R in xy-plane
+  Double_t curvature()  const;
+  /// Return phase: aziumth in xy-plane measured from ring center
+  Double_t phase()      const;
+  /// Return x-center of circle in xy-plane
+  Double_t xcenter()    const;
+  /// Return y-center of circle in xy-plane
+  Double_t ycenter()    const;
+  /// Return -sign(q*B);
+  Int_t    h()          const;
 
-  Double_t dipAngle()   const;           
-  Double_t curvature()  const;	/// 1/R in xy-plane
-  Double_t phase()      const;	/// aziumth in xy-plane measured from ring center
-  Double_t xcenter()    const;	/// x-center of circle in xy-plane
-  Double_t ycenter()    const;	/// y-center of circle in xy-plane
-  Int_t    h()          const;	/// -sign(q*B);
-    
-  const TVector3& origin() const;  /// starting point
+  /// Return origin of the helix = starting point
+  const TVector3& origin() const;
 
   /// Set helix parameters
   void setParameters(Double_t c, Double_t dip, Double_t phase, const TVector3& o, Int_t h);
@@ -128,16 +134,26 @@ class StPicoHelix {
   Double_t fudgePathLength(const TVector3&) const;
 
  protected:
-  Bool_t    mSingularity;  /// true for straight line case (B=0)
-  TVector3  mOrigin;       /// starting point of a helix
+  /// true for straight line case (B=0)
+  Bool_t    mSingularity;  
+  /// starting point of a helix
+  TVector3  mOrigin;
+  /// Dip angle
   Double_t  mDipAngle;
+  /// Curvature = 1/R
   Double_t  mCurvature;
+  /// Phase
   Double_t  mPhase;
-  Int_t     mH;	           /// -sign(q*B);
-  
+  /// -sign(q*B);
+  Int_t     mH;
+
+  /// Cos of dip angle
   Double_t mCosDipAngle;
+  /// Sin of dip angle
   Double_t mSinDipAngle;
+  /// Cos of phase
   Double_t mCosPhase;
+  //// Sin of phase
   Double_t mSinPhase;
     
   ClassDef(StPicoHelix,1)
@@ -211,12 +227,12 @@ inline Int_t StPicoHelix::bad(Double_t WorldSize) const {
   
   //ierr = mOrigin.bad(WorldSize);
 
-  /// The line above is commented and the StThreeVector::bad(double)
-  /// is rewritten here
+  // The line above is commented and the StThreeVector::bad(double)
+  // is rewritten here
   for(Int_t iIter=0; iIter<3; iIter++) {
 
     Double_t tmpVal;
-    /// Value StThreeVector.mX1[iter] ???
+    // Value StThreeVector.mX1[iter] ???
     switch(iIter) {
     case 0: tmpVal = mOrigin.X(); break;
     case 1: tmpVal = mOrigin.Y(); break;

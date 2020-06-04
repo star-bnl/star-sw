@@ -14,7 +14,7 @@ SRC = $(shell find . -name "*.cxx")
 
 all: $(STPICODST)
 
-# $(SRC:.cc=.o) 
+# $(SRC:.cc=.o)
 $(STPICODST): $(SRC:.cxx=.o) StPicoDst_Dict.C
 	$(CXX) $(CFLAGS) -shared $^ -o $(STPICODST) $(LIBS)
 

@@ -1,13 +1,20 @@
+/**
+ * \class StPicoDst
+ * \brief Main class that keeps TClonesArrays with main classes
+ *
+ * The StPicoDstClass holds pointers to the picoArrays with all data
+ */
+
 #ifndef StPicoDst_h
 #define StPicoDst_h
 
-/// ROOT headers
-#include <TClonesArray.h>
+// ROOT headers
+#include "TClonesArray.h"
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoArrays.h"
 
-/// Forward declarations
+// Forward declarations
 class StPicoEvent;
 class StPicoTrack;
 class StPicoEmcTrigger;
@@ -22,6 +29,8 @@ class StPicoBEmcPidTraits;
 class StPicoBTofPidTraits;
 class StPicoMtdPidTraits;
 class StPicoTrackCovMatrix;
+class StPicoBEmcSmdEHit;
+class StPicoBEmcSmdPHit;
 
 //_________________
 class StPicoDst {
@@ -68,34 +77,69 @@ class StPicoDst {
   static StPicoMtdPidTraits* mtdPidTraits(Int_t i) { return (StPicoMtdPidTraits*)picoArrays[StPicoArrays::MtdPidTraits]->UncheckedAt(i); }
   /// Return pointer to i-th track covariance matrix
   static StPicoTrackCovMatrix* trackCovMatrix(Int_t i) { return (StPicoTrackCovMatrix*)picoArrays[StPicoArrays::TrackCovMatrix]->UncheckedAt(i); }
+  /// Return pointer to i-th BEMC SMD eta hit
+  static StPicoBEmcSmdEHit* bemcSmdEHit(Int_t i) { return (StPicoBEmcSmdEHit*)picoArrays[StPicoArrays::BEmcSmdEHit]->UncheckedAt(i); }
+  /// Return pointer to i-th BEMC SMD phi hit
+  static StPicoBEmcSmdPHit* bemcSmdPHit(Int_t i) { return (StPicoBEmcSmdPHit*)picoArrays[StPicoArrays::BEmcSmdPHit]->UncheckedAt(i); }
 
-  /// Return number of entries in the pico arrays
+  /// Return number of tracks
   static UInt_t numberOfTracks() { return picoArrays[StPicoArrays::Track]->GetEntries(); }
+  /// Return number of Emc triggers
   static UInt_t numberOfEmcTriggers() { return picoArrays[StPicoArrays::EmcTrigger]->GetEntries(); }
+  /// Return number of MTD triggers
   static UInt_t numberOfMtdTriggers() { return picoArrays[StPicoArrays::MtdTrigger]->GetEntries(); }
+  /// Return number of BTow hits
   static UInt_t numberOfBTowHits() { return picoArrays[StPicoArrays::BTowHit]->GetEntries(); }
+  /// Return number of BTOF hits
   static UInt_t numberOfBTofHits() { return picoArrays[StPicoArrays::BTofHit]->GetEntries(); }
+  /// Return number of MTD hits
   static UInt_t numberOfMtdHits() { return picoArrays[StPicoArrays::MtdHit]->GetEntries(); }
+  /// Return number of BBC hits
   static UInt_t numberOfBbcHits() { return picoArrays[StPicoArrays::BbcHit]->GetEntries(); }
+  /// Return number of EPD hits
   static UInt_t numberOfEpdHits() { return picoArrays[StPicoArrays::EpdHit]->GetEntries(); }
+  /// Return number of FMS hits
   static UInt_t numberOfFmsHits() { return picoArrays[StPicoArrays::FmsHit]->GetEntries(); }
+  /// Return number of BEMC PID traits
   static UInt_t numberOfBEmcPidTraits() { return picoArrays[StPicoArrays::BEmcPidTraits] ->GetEntries(); }
+  /// Return number of BTOF PID traits
   static UInt_t numberOfBTofPidTraits() { return picoArrays[StPicoArrays::BTofPidTraits]->GetEntries(); }
+  /// Return number of MTD traits
   static UInt_t numberOfMtdPidTraits() { return picoArrays[StPicoArrays::MtdPidTraits]->GetEntries(); }
+  /// Return number of track covariance matrices
   static UInt_t numberOfTrackCovMatrices() { return picoArrays[StPicoArrays::TrackCovMatrix]->GetEntries(); }
+  /// Return number of BEMC SMD eta hits
+  static UInt_t numberOfBEmcSmdEHits() { return picoArrays[StPicoArrays::BEmcSmdEHit]->GetEntries(); }
+  /// Return number of BEMC SMD phi hits
+  static UInt_t numberOfBEmcSmdPHits() { return picoArrays[StPicoArrays::BEmcSmdPHit]->GetEntries(); }
+
 
   /// Print information
   void print() const;
+  /// Print track info
   static void printTracks();
+  /// Print trigger
   static void printTriggers();
+  /// Print BTOW hit info
   static void printBTowHits();
+  /// Print BTOF hit info
   static void printBTofHits();
+  /// Print MTD hit info
   static void printMtdHits();
+  /// Print FMS hit info
   static void printFmsHits();
+  /// Print BEMC PID trait info
   static void printBEmcPidTraits();
+  /// Print BTOF PID trait info
   static void printBTofPidTraits();
+  /// Print MTD PID trait info
   static void printMtdPidTraits();
+  /// Print track covariance matrix info
   static void printTrackCovMatrices();
+  /// Print BEMC SMD eta info
+  static void printBEmcSmdEHits();
+  /// Print BEMC SMD phi info
+  static void printBEmcSmdPHits();
 
  private:
 

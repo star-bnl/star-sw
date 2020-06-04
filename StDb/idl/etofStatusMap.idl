@@ -1,0 +1,14 @@
+/* etofStatusMap.idl
+*
+* table: etofStatusMap
+*
+* description: status map of all etof channels
+*              0 - off / not existing,  1 - on
+*
+* author: Florian Seck ( TU Darmstadt )
+*
+*/
+
+struct etofStatusMap {
+	octet  status[6912];  /* status of each eTOF channel */
+};

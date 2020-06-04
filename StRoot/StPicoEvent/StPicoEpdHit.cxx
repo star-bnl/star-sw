@@ -1,4 +1,4 @@
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoEpdHit.h"
 
 //

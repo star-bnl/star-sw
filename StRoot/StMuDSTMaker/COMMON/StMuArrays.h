@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.34 2018/02/27 04:11:17 jdb Exp $
+ * $Id: StMuArrays.h,v 1.35 2019/02/21 13:32:54 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -28,7 +28,7 @@ enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0Mc, smuV0Assoc, smuXi, smuXiMc,
 /// @enum MCTypes enumeration to to index the mcArrays
 enum MCTypes {MCVertex=0, MCTrack};
 /// @enum enumeration to to index the arrays
-enum muDstTypes {muEvent=0, muPrimaryVertex, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject, muCovGlobTrack, muCovPrimTrack, mupp2pp,muMtd}; 
+enum muDstTypes {muEvent=0, muPrimaryVertex, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject, muCovGlobTrack, muCovPrimTrack, mupp2pp, muMtd}; 
 
 /// @enum pmdTypes enumeration to to index the pmdArrays
 enum pmdTypes {muPmdHit=0, muCpvHit, muPmdCluster, muCpvCluster}; 
@@ -39,6 +39,9 @@ enum tofTypes {muTofHit=0, muTofData, muTofRawData};
 
 /// dongx
 enum btofTypes {muBTofHit=0, muBTofRawHit, muBTofHeader};
+
+// jdb
+enum etofTypes {muETofDigi=0, muETofHit, muETofHeader};
 
 enum mtdTypes {muMTDHit=0, muMTDRawHit, muMTDHeader};
 
@@ -59,6 +62,7 @@ __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArray
 // run 5 - dongx
 __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NBTOFARRAYS__    =3 ,  /// dongx
+__NETOFARRAYS__    =3 ,  /// jdb
 __NEPDARRAYS__     =1,   /// MALisa
 __NMTDARRAYS__    =3,
  __NFGTARRAYS__    =4 ,	///< size of the fgt arrays, i.e. number of TClonesArrays  
@@ -66,9 +70,9 @@ __NEZTARRAYS__     =5 ,  ///< size of the ez arrays >
      
 /// dongx
 #ifndef __NO_STRANGE_MUDST__
-__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
+__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NETOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
 #else
-__NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
+__NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NETOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
 #endif
 };
 class StMuArrays {
@@ -86,6 +90,7 @@ class StMuArrays {
     static const char**      fmsArrayNames;//[__NFMSARRAYS__    ]
     static const char**      tofArrayNames;//[__NTOFARRAYS__    ]
     static const char**     btofArrayNames;//[__NBTOFARRAYS__   ] // dongx
+    static const char**     etofArrayNames;//[__NETOFARRAYS__   ] // jdb
     static const char**     epdArrayNames; //[__NEPDARRAYS__    ] // MALisa
     static const char**      mtdArrayNames;//[__NMTDARRAYS__    ]
     static const char**      fgtArrayNames;//[__NFGTARRAYS__    ]
@@ -102,6 +107,7 @@ class StMuArrays {
     static const char**  fmsArrayTypes;//    [__NFMSARRAYS__    ]
     static const char**  tofArrayTypes;//    [__NTOFARRAYS__    ]
     static const char**  btofArrayTypes;//   [__NBTOFARRAYS__   ]  // dongx
+    static const char**  etofArrayTypes;//   [__NETOFARRAYS__   ]  // jdb
     static const char**  epdArrayTypes;//    [__NEPDARRAYS__    ]  // MALisa
     static const char**  mtdArrayTypes;//    [__NMTDARRAYS__    ]
     static const char**  fgtArrayTypes;//    [__NFGTARRAYS__    ]
@@ -118,6 +124,7 @@ class StMuArrays {
     static int*       fmsArraySizes;// [__NFMSARRAYS__    ]
     static int*       tofArraySizes;// [__NTOFARRAYS__    ]
     static int*      btofArraySizes;// [__NBTOFARRAYS__   ]  // dongx
+    static int*      etofArraySizes;// [__NETOFARRAYS__   ]  // jdb
     static int*       epdArraySizes;// [__NEPDARRAYS__    ]  // MALisa
     static int*       mtdArraySizes;// [__NMTDARRAYS__     ]
     static int*       fgtArraySizes;// [__NFGTARRAYS__    ]
@@ -134,6 +141,7 @@ class StMuArrays {
     static int*    fmsArrayCounters;// [__NFMSARRAYS__    ]
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
     static int*   btofArrayCounters;// [__NBTOFARRAYS__   ]  // dongx
+    static int*   etofArrayCounters;// [__NETOFARRAYS__   ]  // jdb
     static int*    epdArrayCounters;// [__NEPDARRAYS__    ]  // MALisa
     static int*    mtdArrayCounters;// [__NEZARRAYS__    ]
     static int*    fgtArrayCounters;// [__NFGTARRAYS__    ]
@@ -147,6 +155,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.35  2019/02/21 13:32:54  jdb
+ * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
+ *
  * Revision 1.34  2018/02/27 04:11:17  jdb
  * Added EPD types
  *

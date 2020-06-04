@@ -1,18 +1,21 @@
 /**
  * \class StPicoPhysicalHelix
- * \author Grigory Nigmatkulov, May 07 2018
+ * \brief Helis parametrization for the particle
  * 
- * Parametrization of a physical helix (modification of StPhysicalHelix).
+ * Parametrization of a physical helix (modification of StPhysicalHelix)
+ * that uses ROOT classes
  *
+ * \author Grigory Nigmatkulov 
+ * \date May 07 2018
  */
 
 #ifndef StPicoPhysicalHelix_h
 #define StPicoPhysicalHelix_h
 
-/// ROOT headers
-#include <TVector3.h>
+// ROOT headers
+#include "TVector3.h"
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoHelix.h"
 
 //_________________
@@ -33,10 +36,13 @@ class StPicoPhysicalHelix : public StPicoHelix {
   /// Destructor
   ~StPicoPhysicalHelix();
 
-  /// Requires: signed Magnetic Field
-  TVector3 momentum(Double_t) const;             // returns the momentum at origin
-  TVector3 momentumAt(Double_t, Double_t) const; // returns momemtum at S
-  Int_t charge(Double_t)   const;                // returns charge of particle
+  /// Return the momentum at origin
+  ///    \param bField magnetic field
+  TVector3 momentum(Double_t) const;
+  /// Return momemtum at S
+  TVector3 momentumAt(Double_t, Double_t) const;
+  /// Return charge of a particle
+  Int_t charge(Double_t)   const;
   /// 2d DCA to x,y point signed relative to curvature
   Double_t curvatureSignedDistance(Double_t x, Double_t y) ;
   /// 2d DCA to x,y point signed relative to rotation 

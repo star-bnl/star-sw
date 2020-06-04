@@ -1,4 +1,8 @@
-/// PicoDst headers
+//
+// StPicoBTofHit holds information about BTOF hits
+//
+
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoBTofHit.h"
 

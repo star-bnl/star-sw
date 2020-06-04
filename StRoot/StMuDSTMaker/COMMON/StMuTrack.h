@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.52 2017/04/17 19:19:51 smirnovd Exp $
+ * $Id: StMuTrack.h,v 1.54 2019/02/21 14:00:02 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -22,6 +22,7 @@
 #include "StMuUtilities.h"
 #include "StMuProbPidTraits.h"
 #include "StMuBTofPidTraits.h" /// dongx
+#include "StMuETofPidTraits.h" /// fseck
 #include "StMuMtdPidTraits.h" /// Bingchu
 #include "StMuPrimaryTrackCovariance.h"
 
@@ -66,6 +67,7 @@ class StMuTrack : public TObject {
     Int_t index2Cov() const;
     Int_t index2RichSpectra() const; ///< Returns index of associated rich spectra.
     Int_t index2BTofHit() const; /// dongx
+    Int_t index2ETofHit() const;
     Int_t index2MtdHit() const; ///
     Int_t vertexIndex() const; ///< Returns index of associated primary vertex.
     void setVertexIndex(Int_t i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
@@ -73,6 +75,7 @@ class StMuTrack : public TObject {
     const StMuTrack* primaryTrack() const; ///< Returns pointer to associated primary track. Null pointer if no global track available.
     const StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
     const StMuBTofHit* tofHit() const;  /// dongx
+    const StMuETofHit* etofHit() const;
     const StMuMtdHit* mtdHit() const;  /// Bingchu
     UShort_t nHits() const;     ///< Return total number of hits on track.
     UShort_t nHitsPoss() const; ///< Return number of possible hits on track.
@@ -131,13 +134,16 @@ class StMuTrack : public TObject {
     const StMuHelix &muOuterHelix() const {return mOuterHelix;} ///< Returns outer helix (last measured point)
     const StMuProbPidTraits &probPidTraits() const; ///< Returns Yuri Fisyak new pid probabilities. 
     const StMuBTofPidTraits &btofPidTraits() const; /// dongx
+    const StMuETofPidTraits &etofPidTraits() const;
     const StMuMtdPidTraits &mtdPidTraits() const; ///
     void setBTofPidTraits(const StMuBTofPidTraits& pid); /// dongx
+    void setETofPidTraits(const StMuETofPidTraits& pid);
     void setMtdPidTraits(const StMuMtdPidTraits& pid); ///
     static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
     static void setProbabilityPidCentrality(Double_t cent); ///< Sets the centrality for calculating Aihong's pid.
     virtual void Print(Option_t* option = "") const;  ///< Print track info
     void setIndex2BTofHit(Int_t i) {mIndex2BTofHit=i;} /// dongx
+    void setIndex2ETofHit(Int_t i) {mIndex2ETofHit=i;}
     void setIndex2MtdHit(Int_t i) {mIndex2MtdHit=i;} /// Bingchu
     void setIndex2Cov(Int_t i) {mIndex2Cov=i;}    ///< Set index of associated DCA geoemtry for the global track.
 
@@ -196,6 +202,8 @@ protected:
   StMuBTofPidTraits mBTofPidTraits; /// dongx
   StMuMtdPidTraits  mMtdPidTraits; /// Bingchu
   Int_t mIndex2Cov;
+  Int_t mIndex2ETofHit;
+  StMuETofPidTraits mETofPidTraits;
   // IdTruth
   UShort_t         mIdTruth; // MC track id if any 
   UShort_t         mQuality; // quality of this information (percentage of hits coming the above MC track)
@@ -207,13 +215,14 @@ protected:
   StThreeVectorD momentumAtPrimaryVertex(const StEvent *event, const StTrack* track, const StVertex *vertex) const; ///< Helper function: Calculates the momentum at dca a given StTrack and the primary vertex taken from StEvent.
   void fillMuProbPidTraits(const StEvent*, const StTrack*); ///< Helper function to fill all the different pid values 
   void fillMuBTofPidTraits(const StTrack*); /// dongx
+  void fillMuETofPidTraits(const StTrack*);
   void fillMuMtdPidTraits(const StTrack*); /// Bingchu
   static StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm; ///< StuProbabilityPidAlgorithm, we will use the same algorithm for all tracks
   static Double_t mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,15)
+  ClassDef(StMuTrack,16)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -223,6 +232,7 @@ inline Int_t StMuTrack::index2Global() const {return mIndex2Global;}
 inline Int_t StMuTrack::index2Cov() const {return mIndex2Cov;}
 inline Int_t StMuTrack::index2RichSpectra() const {return mIndex2RichSpectra;}
 inline Int_t StMuTrack::index2BTofHit() const {return mIndex2BTofHit;}  /// dongx
+inline Int_t StMuTrack::index2ETofHit() const {return mIndex2ETofHit;}
 inline Int_t StMuTrack::index2MtdHit() const {return mIndex2MtdHit;}  ///
 inline UShort_t StMuTrack::nHits() const {return mNHits;}
 inline UShort_t  StMuTrack::nHitsDedx() const {return mNHitsDedx;}
@@ -252,14 +262,17 @@ inline const StThreeVectorF &StMuTrack::firstPoint() const {return mFirstPoint;}
 inline const StThreeVectorF &StMuTrack::lastPoint() const {return mLastPoint;}
 inline const StMuProbPidTraits &StMuTrack::probPidTraits() const { return mProbPidTraits;} ///< Returns Yuri Fisyak new pid probabilities. 
 inline const StMuBTofPidTraits &StMuTrack::btofPidTraits() const { return mBTofPidTraits;} /// dongx
+inline const StMuETofPidTraits &StMuTrack::etofPidTraits() const { return mETofPidTraits;}
 inline const StMuMtdPidTraits &StMuTrack::mtdPidTraits() const { return mMtdPidTraits;} /// Bingchu
 inline void StMuTrack::setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm* p) { mProbabilityPidAlgorithm=p;}
 inline void StMuTrack::setProbabilityPidCentrality(Double_t cent) { mProbabilityPidCentrality = cent;}
 inline void StMuTrack::setBTofPidTraits(const StMuBTofPidTraits& pid) { mBTofPidTraits = pid; }
+inline void StMuTrack::setETofPidTraits(const StMuETofPidTraits& pid) { mETofPidTraits = pid; }
 
 inline const StMuTrack* StMuTrack::globalTrack() const { return (mIndex2Global>=0) ? (StMuTrack*)StMuDst::array(muGlobal)->UncheckedAt(mIndex2Global) :0;}
 inline const StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectra>=0) ? (StRichSpectra*)StMuDst::array(muRich)->UncheckedAt(mIndex2RichSpectra) : 0;}
 inline const StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (StMuBTofHit*)StMuDst::btofArray(muBTofHit)->UncheckedAt(mIndex2BTofHit) :0;} /// dongx
+inline const StMuETofHit* StMuTrack::etofHit() const { return (mIndex2ETofHit>=0) ? (StMuETofHit*)StMuDst::etofArray(muETofHit)->UncheckedAt(mIndex2ETofHit) :0;}
 inline const StMuMtdHit* StMuTrack::mtdHit() const { return (mIndex2MtdHit>=0) ? (StMuMtdHit*)StMuDst::mtdArray(muMTDHit)->UncheckedAt(mIndex2MtdHit) :0;} ///
 ostream&              operator<<(ostream& os, StMuTrack const & v);
 #endif
@@ -267,6 +280,12 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.54  2019/02/21 14:00:02  jdb
+ * Bumped the ClassDef versions in MuDst where eTOF was added. I also added the etofTypes to the LinkDef file
+ *
+ * Revision 1.53  2019/02/21 13:32:54  jdb
+ * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
+ *
  * Revision 1.52  2017/04/17 19:19:51  smirnovd
  * StMuTrack: Make setVertexIndex() public
  *

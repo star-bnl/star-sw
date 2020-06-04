@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDetectorName.cxx,v 2.2 2015/05/13 17:06:13 ullrich Exp $
+ * $Id: StDetectorName.cxx,v 2.3 2019/02/11 18:49:59 ullrich Exp $
  *
  * Author: unknown
  ***************************************************************************
@@ -10,9 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDetectorName.cxx,v $
+ * Revision 2.3  2019/02/11 18:49:59  ullrich
+ * Added EToF.
+ *
  * Revision 2.2  2015/05/13 17:06:13  ullrich
  * Added hooks and interfaces to Sst detector (part of HFT).
- *
  *
  **************************************************************************/
 #include "StDetectorName.h"
@@ -32,6 +34,7 @@ const char* DetectorName(int id) {
         DetectorNames[kFtpcEastId ] = "FtpcEast";
         DetectorNames[kTofId      ] = "Tof";
         DetectorNames[kBTofId     ] = "Tof";
+        DetectorNames[kETofId     ] = "ETof";
         DetectorNames[kCtbId      ] = "Ctb";
         DetectorNames[kSsdId      ] = "Ssd";
         DetectorNames[kSstId      ] = "Sst";
@@ -67,5 +70,5 @@ const char* DetectorName(int id) {
     if (id < kMaxDetectorId)
         return DetectorNames[id];
     else
-        return DetectorNames[0];
+        return DetectorNames[kUnknownId];
 }

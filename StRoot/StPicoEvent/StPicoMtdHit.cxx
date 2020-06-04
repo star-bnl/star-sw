@@ -1,7 +1,11 @@
-/// C++ headers
+//
+// StPicoMtdHit holds information about MTD hit
+//
+
+// C++ headers
 #include <limits>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoMtdHit.h"
 
@@ -21,28 +25,6 @@ StPicoMtdHit::StPicoMtdHit(const StPicoMtdHit &hit) : TObject() {
   mTrailingEdgeTime = hit.mTrailingEdgeTime;
 }
 
-/*
-//_________________
-StPicoMtdHit::StPicoMtdHit(StMuMtdHit const* hit): StPicoMtdHit() {
-
-  Int_t gchan = (hit->backleg() - 1) * 60 + (hit->module() - 1) * 12 + hit->cell();
-
-  if (gchan < std::numeric_limits<short>::max()) {
-    mgChannel = (Short_t)gchan;
-  }
-  else {
-    mgChannel = -1;
-    LOG_INFO << "Weird cell: backleg = " << hit->backleg()
-             << ", module = " << hit->module()
-             << ", cell = " << hit->cell()
-             << endm;
-  }
-
-  mLeadingEdgeTime  = (pair<Float_t, Float_t>)hit->leadingEdgeTime();
-  mTrailingEdgeTime = (pair<Float_t, Float_t>)hit->trailingEdgeTime();
-}
-*/
-
 //_________________
 StPicoMtdHit::~StPicoMtdHit() {
   /* emtpy */
@@ -61,7 +43,7 @@ void StPicoMtdHit::setHitChannel(Int_t backleg, Int_t module, Int_t cell) {
   
   Int_t gchan = (backleg - 1) * 60 + (module - 1) * 12 + cell;
 
-  /// Check the range of the hit value
+  // Check the range of the hit value
   if( gchan < std::numeric_limits<short>::max() ) {
     mgChannel = (Short_t)gchan;
   }

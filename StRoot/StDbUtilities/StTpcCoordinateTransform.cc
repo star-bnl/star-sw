@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.47 2018/06/29 21:46:19 smirnovd Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.47.4.1 2018/12/14 16:36:22 genevb Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.47.4.1  2018/12/14 16:36:22  genevb
+ * Same patch as 1.51-to-1.52 to address RT#3379
+ *
  * Revision 1.47  2018/06/29 21:46:19  smirnovd
  * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
  *
@@ -472,13 +475,13 @@ Int_t StTpcCoordinateTransform::rowFromLocalY(Double_t y, Int_t sector) {
 		       - St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-2))/2;
       } else {
 	Radii[i-1] = (St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1) +
-		      St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i-1))/2;
+		      St_tpcPadConfigC::instance()->radialDistanceAtRow(sector,i))/2;
       }
     }
   }
-  if (y < Radii[1]) return 1;
-  if (y > Radii[Nrows]) return Nrows;
-  Long64_t row = TMath::BinarySearch(Nrows+1, Radii, y);
+  Long64_t row = TMath::BinarySearch(Nrows+1, Radii, y) + 1;
+  if (row <= 0) row = 1;
+  if (row > Nrows) row = Nrows;
   return row;
 }
 //________________________________________________________________________________

@@ -141,7 +141,7 @@ class StBbcGeom{
   /// \param tileNumbers   array of tile numbers, between 1 and 18, corresponding to the PMT
   void GetTilesOfPmt(unsigned short pmtNumber, unsigned short* nTiles, unsigned short* tileNumbers);
 
-  ClassDef(StBbcGeom, 0)
+  ClassDef(StBbcGeom,0)
 };
 
 

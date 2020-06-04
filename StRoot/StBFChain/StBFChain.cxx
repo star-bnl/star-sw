@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.656 2018/06/29 21:46:18 smirnovd Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.661 2019/02/25 05:11:57 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -14,7 +14,6 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "StTreeMaker/StTreeMaker.h"
 #include "StIOMaker/StIOMaker.h"
-#include "StDbUtilities/StMagUtilities.h"
 #include "StMessMgr.h"
 #include "StEnumerations.h"
 #include "TTree.h"
@@ -99,9 +98,9 @@ void StBFChain::Setup(Int_t mode) {
   FDateS = FTimeS = 0;
   fFiltTrg   = "";
   fRunG  = -1;
-  Gproperty  = ".gopt.";
-  Gvalue     = "";
-  Gpattern   = "*";
+  Gproperty.clear();
+  Gvalue.clear();
+  Gpattern.clear();
 
 
 }
@@ -589,6 +588,7 @@ Int_t StBFChain::Instantiate()
       // X-tended works only for VFPPV, VFPPVnoCTB, VFPPVev for now but could be re-used
       // However, we will change this to a more flexible arbitrarry setting later
       if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100); 
+      //if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100); 
       mk->PrintAttr();
     }
     if (maker=="StKFVertexMaker") {
@@ -669,8 +669,12 @@ Int_t StBFChain::Instantiate()
     if ( maker == "StPicoDstMaker"){
       if ( GetOption("picoWrite") )  mk->SetMode(1);
       if ( GetOption("picoRead")  )  mk->SetMode(2);   // possibly more magic
-      if ( GetOption("PicoVtxVpd"))           mk->SetAttr("picoVtxMode", "PicoVtxVpd");
-      else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("picoVtxMode", "PicoVtxDefault");
+      if ( GetOption("PicoVtxVpd"))           mk->SetAttr("PicoVtxMode", "PicoVtxVpd");
+      else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxDefault");
+      if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("PicoCovMtxMode", "PicoCovMtxWrite");
+      else if ( GetOption("PicoCovMtxSkip"))  mk->SetAttr("PicoCovMtxMode", "PicoCovMtxSkip"); // Default mode
+      if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");
+      else if ( GetOption("PicoBEmcSmdSkip"))  mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdSkip"); // Default mode
       
     }
 
@@ -771,6 +775,7 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OGridLeakFull")) mk->SetAttr("OGridLeakFull", kTRUE);
 	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , kTRUE);
 	if( GetOption("OSectorAlign"))mk->SetAttr("OSectorAlign",kTRUE);
+	if( GetOption("ODistoSmear")) mk->SetAttr("ODistoSmear", kTRUE);
       }
       mk->PrintAttr();
     }
@@ -902,8 +907,15 @@ Int_t StBFChain::Instantiate()
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stv");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiVMC");
 
-  gMessMgr->QAInfo() << "+++ Setting attribute " << Gproperty.Data() << " = " << Gvalue.Data() << endm;
-  SetAttr(Gproperty.Data(),Gvalue.Data(),Gpattern.Data());
+  for ( unsigned int n=0 ; n < Gproperty.size() ; n++ ){
+    gMessMgr->QAInfo() << "+++ Setting attribute " 
+		       << (Gproperty.at(n)).Data() << " = " << (Gvalue.at(n)).Data() << " for "
+		       << (Gpattern.at(n).Data())  << endm;
+
+    SetAttr( (Gproperty.at(n)).Data(),
+	     (Gvalue.at(n)).Data(),
+	     (Gpattern.at(n)).Data()    );
+  }
 
   return status;
 }
@@ -1121,6 +1133,7 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     Check = kTRUE;
     return 0;
   }
+
   // GoptXXXvvvvvv -> Gopt 4 / XXX 3 / vvvvvv 6 = 13
   if ( Tag.BeginsWith("gopt") && Tag.Length() == 13 ) return 0;
 
@@ -1128,6 +1141,14 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     Check = kTRUE;
     if ( TPRegexp("^FiltTrg(Inc|Exc)?(_.*)*$").Match(Tag,"i") > 0) return 0;
   }
+  if ( Tag.BeginsWith("VFStore",TString::kIgnoreCase)         ||
+       Tag.BeginsWith("TpcVpdVzDiffCut",TString::kIgnoreCase) 
+       ) {
+    // need to match an ":" sign
+    Check = kTRUE;
+    if ( Tag.Index(':') != 0) return 0;
+  }
+
 
   if (Check) {
     gMessMgr->Error() << "Option " << Tag.Data() << " has not been recognized" << endm;
@@ -1238,14 +1259,17 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  // TODO option best as gopt.$ATTRR.$VAL for arbitrary attribute and value
 	  //      parsing to extend
 	  char GOptName[4],GOptValue[7];
-	  //TString property(".gopt.");
+ 	  TString property(".gopt.");
 	  //TString pattern("*");
 
 	  (void) sscanf(Tag.Data(),"gopt%3s%6s",GOptName,GOptValue);
           // sscanf adds null terminators for %s, so buffers need to be 1 longer
 
 	  // see StBFChain::Setup() for default values
-	  Gproperty += GOptName;
+	  property += GOptName;
+	  Gproperty.push_back(property);
+	  Gvalue.push_back(GOptValue);
+	  Gpattern.push_back("*");
 
 	  // JL - this is not finished, see comment in kOpt()
 	  
@@ -1253,11 +1277,11 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  // setting to something else than "*"
 	  //Gpattern  += GOptName;
 	  //Gpattern  += "*";
-	  Gvalue = GOptValue;
+
 
 	  gMessMgr->QAInfo() << Tag.Data() << " ... this will set an general attribute "
-			     << Gproperty.Data() << " with value " << GOptValue << " to "
-			     << Gpattern.Data() << endm;
+			     << property.Data() << " with value " << GOptValue << " to "
+			     << "*" << endm;
 	  // Attr() need to be set after the maker exist
 	  //SetAttr(property.Data(),GOptValue,pattern.Data());
 	  //SetAttr(property.Data(),GOptValue,pattern.Data());
@@ -1267,9 +1291,34 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  if (Tag.Length() > 4)  (void) sscanf(Tag.Data(),"rung.%d",&fRunG);
 	  gMessMgr->QAInfo() << Tag.Data() << " will be considered as Run number (& rndm seed set) " 
 			     << fRunG << " for simulation." << endm; 
+
+
+	  // JL: super long options I could not accomomodate with gopt (also used ":")
+	} else if (Tag.BeginsWith("VFStore"        ,TString::kIgnoreCase) ||
+		   Tag.BeginsWith("TpcVpdVzDiffCut",TString::kIgnoreCase) 
+		   ) {
+	  TString VFS   = Tag;
+	  Ssiz_t  idx   = Tag.Index(':');
+
+	  //cout << "-+-+-+-  DEBUG -+-+-+- position = " << idx << endl;
+
+	  if ( idx != 0){
+	    // exclude VFStoreX or options not containing "."
+	    Gproperty.push_back(Tag(0,idx));
+	    Gvalue.push_back(Tag(idx+1,64));
+	    // can use better patterns VFStore -> mk=StGenericVertexMaker
+	    Gpattern.push_back("*");
+
+	    gMessMgr->QAInfo() << "Detecting " << Tag(0,idx).Data() << " = " << Tag(idx+1,64).Data() << " as global property" << endm;
+
+	    // Attr() need to be set after the maker exist
+
+	  }
+	  
+
 	} else if (Tag.BeginsWith("FiltTrg",TString::kIgnoreCase)) {
           TString filtTrgTag = Tag;
-          Ssiz_t flavorIdx = Tag.Index('_');
+          Ssiz_t  flavorIdx = Tag.Index('_');
           if (flavorIdx > 0) {
             filtTrgTag = Tag(0,flavorIdx);
             fFiltTrg = Tag(flavorIdx+1,64);
@@ -1285,6 +1334,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
             // not a match, disable
             fFiltTrg = "";
           }
+
 	} else { // Check for predefined db time stamps ?
 	  kgo = kOpt(Tag.Data(),kFALSE);
 	  if (kgo != 0){

@@ -1,8 +1,8 @@
 #ifndef StPicoBbcHit_h
 #define StPicoBbcHit_h
 
-/// ROOT headers
-#include <TObject.h>
+// ROOT headers
+#include "TObject.h"
 
 //
 // \class StPicoBbcHit
@@ -39,7 +39,7 @@ class StPicoBbcHit : public TObject {
 
  public:
 
-  /// default constructor.  sets all values empty
+  /// Default constructor.  sets all values empty
   StPicoBbcHit();
   /// constructor setting all values
   /// \param PMTnumber    phototube number. [1,16]
@@ -51,12 +51,12 @@ class StPicoBbcHit : public TObject {
   /// \param statusIsGood good status, according to database
   StPicoBbcHit(Int_t PMTnumber, Int_t EW, Int_t ADC, Int_t TAC,
 	       Int_t TDC, Bool_t hasTAC, Bool_t statusIsGood);
-  /// copy constructor
+  /// Copy constructor
   StPicoBbcHit(const StPicoBbcHit &hit);
-  /// destructor
+  /// Destructor
   virtual ~StPicoBbcHit();
 
-  /// true if this channel has a valid TAC value
+  /// True if this channel has a valid TAC value
   Bool_t hasTac() const;
   /// ADC value [0,4095]
   Int_t  adc() const;
@@ -71,7 +71,7 @@ class StPicoBbcHit : public TObject {
   ///   absolute value is phototube number, between 1 and 16, inclusive
   ///   sign is +1/-1 for West/East
   Short_t id() const;
-  /// the packed data from the QT board: ADC=bits 0-11; TAC=bits 12-23; TDC=bits 24-28;
+  /// The packed data from the QT board: ADC=bits 0-11; TAC=bits 12-23; TDC=bits 24-28;
   ///                    bit 29=0/1 for has/does not have TAC;
   ///                    bit 30=0/1 if tile is marked bad/good in database
   Int_t qtData() const;

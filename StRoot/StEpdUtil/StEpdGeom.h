@@ -218,7 +218,6 @@ class StEpdGeom{
 
   ClassDef(StEpdGeom,0)
 
-
 };
 
 inline bool StEpdGeom::IsWest(short uniqueID){return uniqueID>0;}

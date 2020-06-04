@@ -1,9 +1,8 @@
 #ifndef StPicoTrackCovMatrix_h
 #define StPicoTrackCovMatrix_h
 
-/// ROOT headers
-#include <TObject.h>
-#include <TBufferFile.h>
+// ROOT headers
+#include "TObject.h"
 
 //_________________
 class StPicoTrackCovMatrix : public TObject {
@@ -32,12 +31,17 @@ class StPicoTrackCovMatrix : public TObject {
   /// Return pointer to the correlation array
   const Float_t* correlations() const;
 
-  /// Main parameters
+  /// Return impact
   Float_t imp() const;
+  /// Return z
   Float_t z() const;
+  /// Return psi
   Float_t psi() const;
+  /// Return pti
   Float_t pti() const;
+  /// Return tangent
   Float_t tan() const;
+  /// Return curvature
   Float_t curv() const;
 
   /// Return true, if all values 0. It corresponds to
@@ -56,11 +60,17 @@ class StPicoTrackCovMatrix : public TObject {
   /// Set 10 correlation parameters
   void setCorrelations(Float_t corr[10]);
 
+  /// Set impact
   void setImp(Float_t imp);
+  /// Set z
   void setZ(Float_t z);
+  /// Set psi
   void setPsi(Float_t psi);
+  /// Set pti
   void setPti(Float_t pti);
+  /// Set tangent
   void setTan(Float_t tan);
+  /// Set curvature
   void setCurv(Float_t curv);
   
  private:
@@ -76,12 +86,19 @@ class StPicoTrackCovMatrix : public TObject {
   /// Signed impact parameter; Signed in such a way that:
   /// x =  -impact*sin(Psi), y =   impact*cos(Psi)
   Float16_t mImp;
+  /// Z position of the track fitted to (0,0,z)
   Float16_t mZ;
-  Float16_t mPsi;        //[-pi,pi,20]    Psi angle of the track
+  /// Psi angle of the track
+  Float16_t mPsi;        //[-pi,pi,20]
+  /// Pti of the track ( 1/pT )
   Float16_t mPti;
-  Float16_t mTan;        //[-10,10,20]    tangent of the track momentum dip angle
+  /// Tangent of the track momentum dip angle
+  Float16_t mTan;        //[-10,10,20]
+  /// Curvature
   Float16_t mCurv;
+  /// Diagonal elements
   Float16_t mSigma[5];
+  /// Off-diagonal elements
   Float16_t mCorr[10];   //[-1,1,20] 
 
   ClassDef(StPicoTrackCovMatrix, 1)

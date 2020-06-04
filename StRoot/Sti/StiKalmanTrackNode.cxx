@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.181 2018/06/29 21:46:27 smirnovd Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.182 2018/11/10 00:22:03 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.182  2018/11/10 00:22:03  perev
+ * 1. implementation of StiKalmanTrackNode::initialize(const double dirg[3])
+ * 2. Replace Step to Path in THelixTrack call
+ *
  * Revision 2.181  2018/06/29 21:46:27  smirnovd
  * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
  *
@@ -1988,6 +1992,29 @@ int StiKalmanTrackNode::locate()
 #endif //1
 
 //______________________________________________________________________________
+void StiKalmanTrackNode::initialize(const double dirg[3])
+{
+//	dir - direction normalised dir[0]**2 +dir[1]**2 = 1
+
+  double cosp = _detector->getCos();
+  double sinp = _detector->getSin();
+  double dirl[3] = {0,0,dirg[2]};
+  dirl[0] = cosp*dirg[0] + sinp*dirg[1];
+  dirl[1] =-sinp*dirg[0] + cosp*dirg[1];
+  if (fabs(dirl[0])>=1.) {dirl[0] = 1; dirl[1]=0;}
+  if (fabs(dirl[1])>=1.) {dirl[1] = 1; dirl[0]=0;}
+  mFP._cosCA = dirl[0];
+  mFP._sinCA = dirl[1];
+  mFP.P[StiNodePars::kPhi] = atan2(dirl[1],dirl[0]);
+  mFP.P[StiNodePars::kTan] = dirl[2];
+
+//   assert(_hit->x_g()*dirg[0]+_hit->y_g()*dirg[1]>0);
+//   assert(mFP.x()*mFP._cosCA + mFP.y()*mFP._sinCA>0);
+// 
+// 
+  mPP() = mFP;
+}
+//______________________________________________________________________________
 void StiKalmanTrackNode::initialize(StiHit *h)
 {
   reset();
@@ -2396,7 +2423,7 @@ static const int    nsurf  = 6;
 static const double surf[6] = {-Radius*Radius, 0, 0, 0, 1, 1};
       double dir[3] = {mFP._cosCA,mFP._sinCA,mFP.tanl()};
       THelixTrack tc(mFP.P,dir,mFP.curv());
-      double s = tc.Step(smax, surf, nsurf,0,0,1);
+      double s = tc.Path(smax, surf, nsurf,0,0,1);
       if (TMath::Abs(s) < smax) 
 	time = TMath::Abs(s)/(TMath::Ccgs()*1e-6); // mksec
     }

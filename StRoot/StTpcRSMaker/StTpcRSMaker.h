@@ -76,6 +76,7 @@ class StTpcRSMaker : public StMaker {
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
+  static Float_t GetCutEle();
   static TF1F     *fgTimeShape3[2];   //!
   static TF1F     *fgTimeShape0[2];   //!
   Char_t   beg[1];                    //!
@@ -129,25 +130,16 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.30 2018/06/29 21:46:24 smirnovd Exp $ built " __DATE__ " " __TIME__ ; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.2.2.1 2018/11/11 15:56:20 didenko Exp $ built " __DATE__ " " __TIME__ ; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.30 2018/06/29 21:46:24 smirnovd Exp $
+// $Id: StTpcRSMaker.h,v 1.2.2.1 2018/11/11 15:56:20 didenko Exp $
 // $Log: StTpcRSMaker.h,v $
-// Revision 1.30  2018/06/29 21:46:24  smirnovd
-// Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
-//
-// Revert "NoDead option added"
-// Revert "Fill mag field more carefully"
-// Revert "Assert commented out"
-// Revert "Merging with TPC group code"
-// Revert "Remove too strong assert"
-// Revert "Restore removed by mistake line"
-// Revert "Remove not used anymore file"
-// Revert "iTPCheckIn"
+// Revision 1.2.2.1  2018/11/11 15:56:20  didenko
+// branch updates for S18c_embed
 //
 // Revision 1.28  2016/09/18 22:45:25  fisyak
 // Clean up, add Heed model, adjust for new StTpcdEdxCorrections

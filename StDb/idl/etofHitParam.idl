@@ -1,0 +1,15 @@
+/* etofHitParam.idl
+*
+* table: etofHitParam
+*
+* description: parameters used in the etof hitmaker for clustering
+*
+*
+* author: Florian Seck ( TU Darmstadt )
+*
+*/
+
+struct etofHitParam {
+	float  maxLocalY;           /* maximum absolute local Y for matching of digis */
+	float  clusterMergeRadius;  /* maximum distance for clustering of hits */
+};

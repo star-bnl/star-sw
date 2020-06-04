@@ -1,12 +1,17 @@
+/**
+ * \class StPicoFmsHit
+ * \brief Holds information about FMS hit
+ *
+ * The class keeps information about the hit from Forward Meson Spectrometer
+ * 
+ * \author Peifeng Liu, Stony Brook University, pliuphys@gmail.com
+ */
+
 #ifndef StPicoFmsHit_h
 #define StPicoFmsHit_h
 
-/// ROOT headers
-#include <TObject.h>
-
-/**
- * \author: Peifeng Liu, Stony Brook University, pliuphys@gmail.com
- */
+// ROOT headers
+#include "TObject.h"
 
 //_________________
 class StPicoFmsHit: public TObject {
@@ -23,18 +28,26 @@ class StPicoFmsHit: public TObject {
   /// Prints FMS hit information
   virtual void Print(const Char_t *option = "") const;
 
-  /**
-   * Getters
-   */
+  //
+  // Getters
+  //
+  
+  /// Return detector ID [0,31]
   Int_t detectorId() const;
+  /// Return channel [0,2047]
   Int_t channel() const;
+  /// Return ADC
   Int_t adc() const;
 
-  /**
-   * Setters
-   */
+  //
+  // Setters
+  //
+
+  /// Set channel and detector ID
   void setChannelDetectorId(Int_t channelId, Int_t detectorId);
+  /// Set ADC
   void setAdc(Float_t adc);
+  /// Set ADC
   void setAdc(Int_t adc);
   
  private:

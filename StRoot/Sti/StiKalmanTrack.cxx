@@ -1,11 +1,25 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.155 2018/07/06 22:13:16 smirnovd Exp $
- * $Id: StiKalmanTrack.cxx,v 2.155 2018/07/06 22:13:16 smirnovd Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.158 2018/11/13 18:40:20 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.158 2018/11/13 18:40:20 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.158  2018/11/13 18:40:20  perev
+ * Put back constant for approx()
+ *
+ * Revision 2.157  2018/11/10 03:15:24  perev
+ * JetCorr fix +tuning
+ *
+ * Revision 2.156  2018/11/10 00:45:31  perev
+ * 1. for approx() added options:
+ *    kAppGud - errors are correct
+ *    kAppRR - fit with errors
+ *    kAppUpd - update only one node
+ *    kAppUPD - update all nodes
+ * 2. Fit in direction inner ==> outer
+ *
  * Revision 2.155  2018/07/06 22:13:16  smirnovd
  * [Cosmetic] Remove unused variables and commented code
  *
@@ -595,6 +609,7 @@
 #include "StThreeVectorD.hh"
 #include "StPhysicalHelixD.hh"
 #include "THelixTrack.h"
+//#include "ThreePoint.h"
 
 #include "StHit.h"
 
@@ -711,16 +726,40 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
   const StiDetector* detector=0;
   UInt_t nhits = hits.size();
   setSeedHitCount(nhits);
+
+//   int thpOn = 0;
+//   ThreePoint thp;
+
+  StiKalmanTrackNode *nBuf[3];
+  double dir[3];
   for (UInt_t ihit=0;ihit<nhits;ihit++)
   {
-    StiHit *hit = hits[ihit];
+    StiHit *hit = hits[ihit];	//loop from in to out to keep sign of dir
     detector = hit->detector();
     assert(detector);
     StiKalmanTrackNode * n = trackNodeFactory->getInstance();
     n->initialize(hit);
     add(n,kOutsideIn);
+//     if (!thpOn) continue;
+// 
+//     double pos[3]={hit->x_g(),hit->y_g(),hit->z_g()};
+//     thp.Add(pos);
+//     nBuf[0]=nBuf[1]; nBuf[1]=nBuf[2]; nBuf[2] = n;
+//     if (ihit < 2) continue;
+//     if (ihit== 2) {
+//       thp.GetDir(0,dir);
+//       nBuf[0]->initialize(dir);
+//     }
+//     thp.GetDir(1,dir);
+//     nBuf[1]->initialize(dir);
   }
-  int ierr = approx(0);
+//   if (thpOn) {
+//   thp.GetDir(2,dir);
+//   nBuf[2]->initialize(dir);
+//   }
+
+  int ierr = approx(kAppRR|kAppUPD);
+StiDebug::Count("Xi2Helx1",mXi2);
   if (!ierr) return 0;
   BFactory::Free(this);
   return 1;  
@@ -1704,15 +1743,33 @@ void StiKalmanTrack::print(const char *opt) const
 #include "TH1F.h"
 #include "TProfile.h"
 #endif // APPROX_DEBUG
+
+#if 1 //My last version fix + tune
 //_____________________________________________________________________________
-int StiKalmanTrack::approx(int mode,int nNodes)
+int StiKalmanTrack::approx(int mode, int)
 {
 static int nCall=0; nCall++;
 StiDebug::Break(nCall);
+if (!mode) mode = kAppRR | kAppUPD;
+#ifdef APPROX_DEBUG
+static TCanvas *myCanvas=0;
+static TH1  *H[4];
 
-const double BAD_XI2[2]={99,22};
-int nNode,nNodeIn;
-double Xi2=0;
+if(!myCanvas) {
+   myCanvas=new TCanvas("Approx","",600,800);
+   H[0] = new TH1F("Approx0l","Approx0l", 100,0,5);
+   H[1] = new TH1F("Approx1l","Approx1l", 100,0,5);
+   H[2] = new TProfile("Approx0 ","Approx0",  30,0,30);
+   H[3] = new TProfile("Approx1 ","Approx1 ", 30,0,30);
+   myCanvas->Divide(1,4);
+   for (int i=0;i<4;i++) {myCanvas->cd(i+1); H[i]->Draw();}
+}
+#endif // APPROX_DEBUG
+
+//const double BAD_XI2[2]={70,5},XI2_FACT=1; 	// Tuned constants
+const double BAD_XI2[2]={99,22},XI2_FACT=9;	// The old constants
+int nNode,nNodeIn,iNode=0;
+  mXi2=0;
   StiHitErrs hr;
 //		Loop over nodes and collect global xyz
 
@@ -1722,7 +1779,8 @@ double Xi2=0;
   THelixFitter circ;
   THelixTrack  cirl;
   int zeroH = -1;
-  for (source=begin();(targetNode=source())&&nNode<nNodes;++source) {
+  for (source=rbegin();(targetNode=source());++source) {
+    iNode++;
     if (!targetNode->isValid()) 	continue;
     const StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
@@ -1732,63 +1790,22 @@ double Xi2=0;
       zeroH = fabs(hz)<=kZEROHZ;
     }
     circ.Add(hit->x_g(),hit->y_g(),hit->z_g());
+    if (mode&kAppRR) {
     hr = targetNode->getGlobalHitErrs(hit);
     circ.AddErr(hr.G(),hr.hZZ);
+    }
     nNode++;
   }  
   if (!nNode) 				return 1; 
   nNodeIn = nNode;
   int nPnts = nNode;
-  if (nPnts==2) {
-    nPnts=3;
-    circ.Add(0.,0.,0.);
-    double vErr[3]={1.,0.,1};
-    circ.AddErr(vErr,100*100.);
-  }
   
   
-  Xi2 =circ.Fit();
-  if (mode==1 && Xi2>BAD_XI2[1]) return 2; //Xi2 too bad, no updates
+  mXi2 =circ.Fit();
+  if (mXi2>BAD_XI2[mode&kAppGud]) return 2; //Xi2 too bad, no updates
   if (zeroH) circ.Set(kZEROCURV);
-  circ.MakeErrs();
+  if (mode&kAppRR) circ.MakeErrs();
   
-  circ.Backward();
-  double xyz[3]; 
-  const StiHit *hit = firstNode->getHit();
-  assert(hit);
-  xyz[0] = hit->x_g();
-  xyz[1] = hit->y_g();
-  xyz[2] = hit->z_g();
-  double ds = circ.Path(xyz[0],xyz[1]);
-  double curv = circ.GetRho();
-  circ.Move(ds);
-  cirl = circ;
-  double alfa = firstNode->getAlpha();
-  cirl.Rot(-alfa);
-  StiNodePars P = firstNode->fitPars();
-  P.x()  =  cirl.Pos()[0];
-  P.y()  =  cirl.Pos()[1];
-  P.z()  =  cirl.Pos()[2];
-  P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
-  P.curv() = curv;
-  double hh = P.hz();
-  hh = (fabs(hh)<1e-10)? 0:1./hh;
-  P.ptin() = (hh)? curv*hh:1e-3;
-
-  P.tanl() = cirl.GetSin()/cirl.GetCos();
-  P._cosCA = cirl.Dir()[0]/cirl.GetCos();
-  P._sinCA = cirl.Dir()[1]/cirl.GetCos();
-  if (fabs(P._cosCA)>0.99 || fabs(P._sinCA)>0.99) P.ready();
-  firstNode->fitPars() = P;
-  P = firstNode->fitPars();
-  StiNodeErrs &E = firstNode->fitErrs();
-  cirl.StiEmx(E.G());
-  TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
-  E._cPP*=hh; E._cTP*=hh;
-
-
-
-#if 0
   double s=0,xyz[3]; 
   double curv = circ.GetRho();
   iNode = 0;
@@ -1808,6 +1825,9 @@ double Xi2=0;
     double ds = circ.Path(xyz[0],xyz[1]);
     circ.Move(ds);
     s+=ds;
+    int upd = (mode&&kAppUPD);
+    upd |= ((mode&&kAppUpd) && (targetNode==firstNode));
+    if (!upd) continue;
     cirl = circ;
     double alfa = targetNode->getAlpha();
     cirl.Rot(-alfa);
@@ -1829,20 +1849,19 @@ double Xi2=0;
     targetNode->fitPars() = P;
     int ians = targetNode->nudge();
     if(ians) {nNode--; targetNode->setInvalid();continue;}
-    P = targetNode->fitPars();
-    StiNodeErrs &E = targetNode->fitErrs();
-    cirl.StiEmx(E.G());
-    TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
-    E._cPP*=hh; E._cTP*=hh;
-    if ((mode&1)==0 && Xi2>XI2_FACT) E*=Xi2/XI2_FACT;
-    E.check("In aprox");
+    if (mode&kAppRR) {
+      P = targetNode->fitPars();
+      StiNodeErrs &E = targetNode->fitErrs();
+      cirl.StiEmx(E.G());
+      TCL::vscale(&(E._cPX),hh,&(E._cPX),5);
+      E._cPP*=hh; E._cTP*=hh;
+      if ((mode&kAppGud)==0 && mXi2>XI2_FACT) E*=mXi2/XI2_FACT;
+      E.check("In aprox");
+    }   
   }   
-#endif
-  if (Xi2>BAD_XI2[mode])return 2;
-  if (nNode==nNodeIn) 	return 0;
-  if (nNode<2)		return 3;
   return 0;
-}    
+} 
+#endif
 //_____________________________________________________________________________
 double StiKalmanTrack::diff(const StiNodePars &p1,const StiNodeErrs &e1
                            ,const StiNodePars &p2,const StiNodeErrs &e2,int &igor) 

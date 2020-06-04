@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.37 2018/05/22 20:04:45 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.38 2019/01/04 18:19:56 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.38  2019/01/04 18:19:56  akio
+ * A bug fix which caused crash when fmsBitShiftGain/B was empty.
+ *
  * Revision 1.37  2018/05/22 20:04:45  akio
  * fix not dumping last detector Id to dump file
  *
@@ -577,12 +580,12 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   }
 
   //!fmsBitShiftGain
+  mmBitShiftGain = new fmsBitShiftGain_st* [mMaxDetectorId+1]();
   if(dbBitShiftGainB!=0){
       mBitShiftGainB = (fmsBitShiftGainB_st*) dbBitShiftGainB->GetTable();
       mMaxBitShiftGain = dbBitShiftGainB->GetNRows();
       if(mMaxBitShiftGain==1){
 	  mMaxBitShiftGain=0;
-	  mmBitShiftGain = new fmsBitShiftGain_st* [mMaxDetectorId+1]();	  
 	  for(Int_t i=0; i<2500; i++){
 	      Int_t d=mBitShiftGainB[0].detectorId[i];
 	      Int_t c=mBitShiftGainB[0].ch[i];
@@ -618,7 +621,6 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   }else if(!mmBitShiftGain && dbBitShiftGain){
       mBitShiftGain = (fmsBitShiftGain_st*) dbBitShiftGain->GetTable();
       mMaxBitShiftGain = dbBitShiftGain->GetNRows();
-      mmBitShiftGain = new fmsBitShiftGain_st* [mMaxDetectorId+1]();
       for(Int_t i=0; i<mMaxBitShiftGain; i++){
 	  Int_t d=mBitShiftGain[i].detectorId;
 	  Int_t c=mBitShiftGain[i].ch;

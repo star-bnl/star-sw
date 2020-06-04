@@ -1,0 +1,20 @@
+/* etofTimingWindow.idl
+*
+* table: etofTimingWindow
+*
+* description: parameters for selection of digis inside the
+*              timing window and pulser digis for clock synchonization
+*
+* author: Florian Seck ( TU Darmstadt )
+*
+*/
+
+struct etofTimingWindow {
+	unsigned short  afckAddress[12];   /* MAC address of AFCK board */
+	float  timingMin[12];  /* lower edge of the timing window */
+	float  timingMax[12];  /* upper edge of the timing window */
+	float  timingPeak[12]; /* peak position in the timing window */
+	float  pulserMin[12];  /* lower edge of the pulser-after-token window */
+	float  pulserMax[12];  /* upper edge of the pulser-after-token window */
+	float  pulserPeak[12]; /* peak position in the pulser-after-token window */
+};

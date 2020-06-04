@@ -1,0 +1,19 @@
+/* etofElectronicsMap.idl
+*
+* table: etofElectronicsMap
+*
+* description: parameters for convertion of electronic addresses to
+*              etof geometry identifiers
+*
+* author: Florian Seck ( TU Darmstadt )
+*
+*/
+
+struct etofElectronicsMap{
+	octet           nAfcks;              /* number of AFCK boards in the system */
+	unsigned short  nChannels;           /* number of channels connected to the AFCKs */
+	unsigned short  afckAddress[12];     /* MAC address of AFCK board */
+	octet           sector[12];          /* eTOF sector linked to the AFCK */
+	unsigned short  channelNumber[576];  /* channel number */
+	unsigned short  geometryId[576];     /* geometry id->plane,counter,strip,side */
+};

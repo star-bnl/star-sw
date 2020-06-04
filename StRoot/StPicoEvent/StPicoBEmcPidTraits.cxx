@@ -1,10 +1,14 @@
-/// C++ headers
+//
+// StPicoBEmcPidTraits holds information about BEMC-matched tracks
+//
+
+// C++ headers
 #include <limits>
 
-/// ROOT headers
-#include <TMath.h>
+// ROOT headers
+#include "TMath.h"
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoBEmcPidTraits.h"
 
@@ -29,33 +33,37 @@ StPicoBEmcPidTraits::StPicoBEmcPidTraits(Int_t index, Int_t id, Int_t adc0, cons
   mTrackIndex = (index > std::numeric_limits<short>::max()) ? -1 : (Short_t)index;
 
   auto getConstrainedShort = [](float x) {
-    return fabs(x) >= std::numeric_limits<short>::max() ? std::numeric_limits<short>::max() : (short)(TMath::Nint(x));
+    return ( ( TMath::Abs(x) >= std::numeric_limits<short>::max() ) ?
+	     std::numeric_limits<short>::max() : (short)(TMath::Nint(x)) );
   };
 
   mBemcId       = (id > std::numeric_limits<short>::max()) ? -1 : (Short_t)id;
-  mBemcAdc0     = (adc0 > std::numeric_limits<unsigned short>::max()) ? std::numeric_limits<unsigned short>::max() : (UShort_t)adc0;
+  mBemcAdc0     = ( (adc0 > std::numeric_limits<unsigned short>::max()) ?
+		    std::numeric_limits<unsigned short>::max() : (UShort_t)adc0 );
   mBemcE0       = getConstrainedShort(e[0] * 1000.);
   mBemcE        = getConstrainedShort(e[1] * 1000.);
   mBemcZDist    = getConstrainedShort(dist[0] * 100.);
   mBemcPhiDist  = getConstrainedShort(dist[1] * 10000.);
-  mBemcSmdNEta     = (nhit[0] > std::numeric_limits<unsigned char>::max()) ? std::numeric_limits<unsigned char>::max() : (UChar_t)(nhit[0]);
-  mBemcSmdNPhi     = (nhit[1] > std::numeric_limits<unsigned char>::max()) ? std::numeric_limits<unsigned char>::max() : (UChar_t)(nhit[1]);
+  mBemcSmdNEta  = ( (nhit[0] > std::numeric_limits<unsigned char>::max()) ?
+		    std::numeric_limits<unsigned char>::max() : (UChar_t)(nhit[0]) );
+  mBemcSmdNPhi  = ( (nhit[1] > std::numeric_limits<unsigned char>::max()) ?
+		    std::numeric_limits<unsigned char>::max() : (UChar_t)(nhit[1]) );
 
   mBtowId       = (ntow[0] <= 0 || ntow[0] > 4800) ? -1 : (Short_t)ntow[0];
 
-  /// Logic: If at least one closest to the mactched tower was
-  /// found than we check the second one. The 1st and the 2nd
-  /// digits of mBtowId23 represent Ids of the 1st and the 2nd highest
-  /// towers that are the closest to the track-matched one, respectively.
+  // Logic: If at least one closest to the mactched tower was
+  // found than we check the second one. The 1st and the 2nd
+  // digits of mBtowId23 represent Ids of the 1st and the 2nd highest
+  // towers that are the closest to the track-matched one, respectively.
   if (ntow[1] < 0 || ntow[1] >= 9) {
-    if (!(ntow[2] < 0 || ntow[2] >= 9))  { /// If 2 towers were found
+    if (!(ntow[2] < 0 || ntow[2] >= 9))  { // If 2 towers were found
       mBtowId23 = (Char_t)(ntow[1] * 10 + ntow[2]);
     }
-    else {                                 /// If only 1 tower was found
+    else {                                 // If only 1 tower was found
       mBtowId23 = (Char_t)(ntow[1] * 10 + 9); 
     }
   }
-  else { /// If none of the towers with energy>0.2 GeV were found near the matched tower
+  else { // If none of the towers with energy>0.2 GeV were found near the matched tower
     mBtowId23 = 99;
   }
 
@@ -95,7 +103,8 @@ StPicoBEmcPidTraits::~StPicoBEmcPidTraits() {
 //_________________
 void StPicoBEmcPidTraits::Print(const Char_t* option) const {
   LOG_INFO << "Matched track index = " << mTrackIndex << endm;
-  LOG_INFO << " BEMC Id = " << bemcId() << " BTOW Adc0 = " << bemcAdc0() << " bemc E0 = " << bemcE0() << " e = " << bemcE() << endm;
+  LOG_INFO << " BEMC Id = " << bemcId() << " BTOW Adc0 = " << bemcAdc0()
+	   << " bemc E0 = " << bemcE0() << " e = " << bemcE() << endm;
   LOG_INFO << " BEMC distz = " << bemcZDist() << " distphi = " << bemcPhiDist() << endm;
   LOG_INFO << " BSMD nEta/nPhi = " << bemcSmdNEta() << "/" << bemcSmdNPhi() << endm;
   LOG_INFO << " BTOW Id = " << btowId() << " tower Id 2/3 = " << btowId2() << " " << btowId3() << endm;
@@ -130,26 +139,28 @@ void StPicoBEmcPidTraits::setDistances(Float_t dist[4]) {
 
 //_________________
 void StPicoBEmcPidTraits::setNHits(Int_t nhit[2]) {
-  mBemcSmdNEta     = (nhit[0] > std::numeric_limits<unsigned char>::max()) ? std::numeric_limits<unsigned char>::max() : (UChar_t)(nhit[0]);
-  mBemcSmdNPhi     = (nhit[1] > std::numeric_limits<unsigned char>::max()) ? std::numeric_limits<unsigned char>::max() : (UChar_t)(nhit[1]);
+  mBemcSmdNEta = ( (nhit[0] > std::numeric_limits<unsigned char>::max()) ?
+		   std::numeric_limits<unsigned char>::max() : (UChar_t)(nhit[0]) );
+  mBemcSmdNPhi = ( (nhit[1] > std::numeric_limits<unsigned char>::max()) ?
+		   std::numeric_limits<unsigned char>::max() : (UChar_t)(nhit[1]) );
 }
 
 //_________________
 void StPicoBEmcPidTraits::setNTOW(Int_t ntow[3]) {
   mBtowId = (ntow[0] <= 0 || ntow[0] > 4800) ? -1 : (Short_t)ntow[0];
-  /// Logic: If at least one closest to the mactched tower was
-  /// found than we check the second one. The 1st and the 2nd
-  /// digits of mBtowId23 represent Ids of the 1st and the 2nd highest
-  /// towers that are the closest to the track-matched one, respectively.
+  // Logic: If at least one closest to the mactched tower was
+  // found than we check the second one. The 1st and the 2nd
+  // digits of mBtowId23 represent Ids of the 1st and the 2nd highest
+  // towers that are the closest to the track-matched one, respectively.
   if (ntow[1] < 0 || ntow[1] >= 9) {
-    if (!(ntow[2] < 0 || ntow[2] >= 9))  { /// If 2 towers were found
+    if (!(ntow[2] < 0 || ntow[2] >= 9))  { // If 2 towers were found
       mBtowId23 = (Char_t)(ntow[1] * 10 + ntow[2]);
     }
-    else {                                 /// If only 1 tower was found
+    else {                                 // If only 1 tower was found
       mBtowId23 = (Char_t)(ntow[1] * 10 + 9); 
     }
   }
-  else { /// If none of the towers with energy>0.2 GeV were found near the matched tower
+  else { // If none of the towers with energy>0.2 GeV were found near the matched tower
     mBtowId23 = 99;
   }  
 }

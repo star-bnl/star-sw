@@ -1,8 +1,12 @@
-/// C++ headers
+//
+// StPicoMtdTrigger stores trigger information related to MTD
+//
+
+// C++ headers
 #include <bitset>
 #include <math.h>
 
-/// PicoDst headers
+// PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoMtdTrigger.h"
 
@@ -22,12 +26,12 @@ void StPicoMtdTrigger::setQTtacSum(Int_t runnumber, UShort_t mtdQTadc[8][16],
 				   const Int_t QTSlewBinEdge[8][16][8],
 				   const Int_t QTSlewCorr[8][16][8]) {
   
-  /// Obtain RHIC run year
+  // Obtain RHIC run year
   int year = runnumber / 1e6 + 1999;
   // Oct. 1st (approx. 273rd day) is the start of a new running year
   if ((runnumber % 1000000) / 1000 >= 273) year += 1;
 
-  /// QT Tac cuts
+  // QT Tac cuts
   UShort_t mtd_qt_tac_min = 100;
   if (runnumber >= 16045067) mtd_qt_tac_min = 80;
   if (runnumber >= 18070005) mtd_qt_tac_min = 200; // change due to new boards
@@ -43,7 +47,7 @@ void StPicoMtdTrigger::setQTtacSum(Int_t runnumber, UShort_t mtdQTadc[8][16],
 	continue;
       }
 
-      /// Apply slewing correction
+      // Apply slewing correction
       for (Int_t k=0; k<2; k++) {
 	j[k] = mtdQTtac[im][i*2+k];
 	a[k] = mtdQTadc[im][i*2+k];
@@ -72,7 +76,7 @@ void StPicoMtdTrigger::setQTtacSum(Int_t runnumber, UShort_t mtdQTadc[8][16],
 	continue;
       }
 
-      /// Apply position correction
+      // Apply position correction
       Int_t module = QTtoModule[im][i];
       if(module<0) {
 	mQTtacSum[im][i] = 0;
@@ -84,8 +88,7 @@ void StPicoMtdTrigger::setQTtacSum(Int_t runnumber, UShort_t mtdQTadc[8][16],
 }
 
 //_________________
-void StPicoMtdTrigger::setMT101(UShort_t mt101Tac[8][2], UShort_t mt101Id[8][2])
-{
+void StPicoMtdTrigger::setMT101(UShort_t mt101Tac[8][2], UShort_t mt101Id[8][2]) {
   // MT101
   for (Int_t i = 0; i < kNQTboard; i++) {
     for(Int_t j = 0; j < 2; j++) {
