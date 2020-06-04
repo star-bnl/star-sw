@@ -1,0 +1,1701 @@
+<Document file="StarVMC/Geometry/SisdGeo/SisdGeo7a.xml">
+
+  <Module name="SISDGEO7a" comment="  is the Silicon Strip Detector with TUP modifications "  >
+    <Author name="Bouchet and Potekhin"  />
+    <Created date=" 1 Feb 07 "  />
+    
+    <CDE  >
+      AGECOM
+      GCONST
+      GCUNIT
+    </CDE>
+    <!-- 
+	 Author : A. Quintero and J. Bouchet
+	 this version is a copy of SisdGeo6.xml without the support material and it adds :
+	 1) new ladder radius = 22.3 for all ladders
+	 2) tilt angle of ladders by 12 degrees
+	 3) ladders parameters are defined in SFPA_configuration 6 
+	 ConfigA , ConfigB are not used
+
+         ==== Should not be used with versions of STAR including the SVT // JW ====
+
+         ==== This current version is only valid from the 2014+ SSD setup // FV  ====
+    --> 
+    <Content  >
+      SFMO, <!--  SSD mother Volume -->
+      SFLM, <!--  Ladder+structure mother volume SFDM, -->
+      SFSW, <!--  mothervolume for Si modules -->
+      SFSD,SFSL,
+      <!--SFSM,-->
+      SFLT,SFLU,SFFK,SFFL,SFKK,SFKL,SFRA,SFRS,SFFX,SFPI,SFPJ,SFAA,SFAM,SFAB,SFAS,SAPP,SAPC,SAPS,SAPT,SFLA,SFLB,SFLC,SFES,SFEB,SFCO,SFCM,SFCB,SFCS,SFKF,SFKS,SSBS,SSBB,SFPR,SFPB,SSST,SSSS,SSRS,SSRT,SSLB,SBCH,SBCV,SBFH,SBFV,SSLT,SCMP,SCVM,SCVB,SCVS,SOSK,SFPK
+    </Content>
+    
+    <Structure name="SSDP"  >
+      <var name="Version"   type="float"  />
+      <var name="config"    type="int"  />
+      <var name="placement" type="int"  />
+      <var name="misalign"  type="int"  />
+    </Structure>
+    
+
+    
+    <Structure name="SFJP"  >
+      <var name="Version" type="int" />
+      <var name="AlphaZ" />
+      <var name="AlphaZH" />
+      <var name="SSST_Rmin" />
+      <var name="SSST_Rmax" />
+      <var name="SSST_Width" />
+      <var name="SSST_Pz" />
+      <var name="SSSS_Rmin" />
+      <var name="SSSS_Width" />
+      <var name="SSRS_Rmin" />
+      <var name="SSLB_Dx" />
+      <var name="SSLB_Px" />
+      <var name="SSLB_Dy" />
+      <var name="SSLB_Dz" />
+      <var name="SSBQ_Dx" />
+      <var name="SSBQ_Dy" />
+      <var name="SSBQ_Dz" />
+      <var name="SSCR_ThA" />
+      <var name="SSCR_ThD" />
+      <var name="SSCR_Wd" />
+      <var name="SSCR_Hl" />
+      <var name="SSCR_Vl" />
+      <var name="SSLT_Px" />
+      <var name="SSLT_Rmax" />
+      <var name="SSLT_Dz" />
+      <var name="SCMP_Dx" />
+      <var name="SCMP_Dy" />
+      <var name="SCMP_Dz" />
+      <var name="SCMP_Px" />
+      <var name="SCVM_Dz" />
+      <var name="SCVM_Dx" />
+      <var name="SCVM_Px" />
+      <var name="SCVM_Dy" />
+      <var name="SCVM_Pz" />
+      <var name="SCVB_Dy" />
+      <var name="SCVS_Dx" />
+      <var name="SCVS_Dy" />
+      <var name="SCVS_Px" />
+      <var name="SCVS_Py" />
+      <var name="SFCO_Dx" />
+      <var name="SFCO_Dy" />
+      <var name="SFCO_Dz" />
+      <var name="SFCO_Px" />
+      <var name="SFCO_Py" />
+      <var name="SFCM_Dx" />
+      <var name="SFCS_Dz" />
+      <var name="SFKF_Dy" />
+      <var name="SFKF_Dz" />
+      <var name="SFKF_Dx" />
+      <var name="SFKF_Px" />
+      <var name="SFKF_Py" />
+      <var name="SFKS_Dx" />
+      <var name="SFKS_Px" />
+      <var name="SFKS_Py" />
+      <var name="SFPR_Py" />
+      <var name="SFPB_Py" />
+      <var name="SFPB_Py2" />
+      <var name="SFCB_Dx" />
+      <var name="SSBS_Dy" />
+      <var name="SSBS_Dx" />
+      <var name="SSBB_Dx" />
+      <var name="SSBB_Dz" />
+      <var name="FLEX_Di" />
+      <var name="SFPB_Dx" />
+      <var name="SFPB_Dy" />
+      <var name="SFPBDz" />
+      <var name="SAPP_Dxe" />
+      <var name="SAPP_Dxz" />
+      <var name="SAPP_Dy" />
+      <var name="SAPP_Dz" />
+      <var name="SAPP_Py1" />
+      <var name="SAPP_Py2" />
+      <var name="SAPP_Py3" />
+      <var name="SFAM_Dxe" />
+      <var name="SFAM_Dxz" />
+      <var name="SFAM_Dy" />
+      <var name="SFAM_Dz" />
+      <var name="SFAM_DZs" />
+      <var name="SFLA_Dx" />
+      <var name="SFLA_Dy" />
+      <var name="SFLA_Dz" />
+      <var name="SFLB_Dz" />
+      <var name="SFLC_Dz" />
+      <var name="SFEB_Dx" />
+      <var name="SFEB_Dz" />
+      <var name="SFES_Dx" />
+      <var name="SFFK_Dxe" />
+      <var name="SFFK_Dy" />
+      <var name="SFFX_Dye" />
+      <var name="SFFK_Dz" />
+      <var name="SFFL_Dx" />
+      <var name="SFFK_Dxz" />
+      <var name="SFFK_Px" />
+      <var name="SFFK_Py1" />
+      <var name="SFFK_Py2" />
+      <var name="SFKL_Px" />
+      <var name="SFKK_Dy" />
+      <var name="SFLU_Dz" />
+      <var name="SFLU_h1" />
+      <var name="SFLU_bl1" />
+      <var name="SFRA_Dx" />
+      <var name="SFRA_Dy" />
+      <var name="SFRA_Py" />
+      <var name="SFRA_Dz" />
+      <var name="SFRA_Pz" />
+      <var name="SFSW_Dy" />
+      <var name="SFSW_Dz" />
+      <var name="SFRS_Dx" />
+      <var name="SFRS_Dy" />
+      <var name="SFRS_Px" />
+      <var name="SFRS_Py" />
+      <var name="SFSM_Ll" />
+      <var name="SFFX_Dx" />
+      <var name="SFFX_Dyz" />
+      <var name="SFPI_Rmin" />
+      <var name="SFPI_Rmax" />
+      <var name="SFPI_Px" />
+      <var name="SFPI_Py1" />
+      <var name="SFPI_Py2" />
+      <var name="SFPI_Pz" />
+      <var name="SFPJ_Dx1" />
+      <var name="SFPJ_Dx2" />
+      <var name="SFPJ_Dy" />
+      <var name="SFPJ_Dz" />
+      <var name="SFAA_Dx" />
+      <var name="SFAA_Dy" />
+      <var name="SFAA_Dz" />
+      <var name="SFAA_Px1" />
+      <var name="SFAA_Px2" />
+      <var name="SFAA_Px3" />
+      <var name="SFAA_Pz1" />
+      <var name="SFAA_Pz2" />
+      <var name="SFAA_Pz3" />
+      <var name="SFSL_Dx" />
+      <var name="SFSL_Dy" />
+      <var name="SFSL_Dz" />
+      <var name="SFSD_Dx" />
+      <var name="SFSD_Dy" />
+      <var name="SFSD_Dz" />
+      <var name="SFLA_Px" />
+      <var name="SFLA_Py" />
+      <var name="SFLC_Px" />
+      <var name="SFLC_Py" />
+      <var name="SFES_Px" />
+      <var name="SFES_Py" />
+      <var name="SFES_Pz" />
+      <var name="SFEB_Px" />
+      <var name="SFEB_Py" />
+    </Structure>        
+    <Structure name="SFPB"  >
+            <var name="Hhight" />
+            <var name="Khight" />
+            <var name="Hbase" />
+            <var name="Kbase" />
+            <var name="Fsize" />
+            <var name="Zcoor" />
+        </Structure>        
+    <Structure name="SFPA"  >
+            <var name="Version"  />
+            <var name="rmin" />
+            <var name="rmax" />
+            <var name="Len" />
+            <var name="SOutRInn" />
+            <var name="SOutROut" />
+            <var name="SOutLen" />
+            <var name="rad" />
+            <var name="nssd" />
+            <var name="dmWid" />
+            <var name="dmThk" />
+            <var name="dmLen" />
+            <var name="smWid" />
+            <var name="smThk" />
+            <var name="smLen" />
+            <var name="ssLen" />
+            <var name="wpLen" />
+            <var name="sdlen" />
+            <var name="tilt" />
+            <var name="cprad" />
+            <var name="cpral" />
+            <var name="cfrad" />
+            <var name="gpThk" />
+            <var name="laddermap(20)" type="int" />
+            <var name="ladderAngle(20)" />
+            <var name="ladderTilt(20)" />
+            <var name="LadderRadius(20)" />
+        </Structure>
+
+    <varlist type="INTEGER"  >
+      ConfigA,ConfigB,ncopy
+    </varlist>        
+    <varlist type="INTEGER"  >
+            ilad,iwaf,jwaf <!-- nc does nothing --> 
+        </varlist>        
+    <varlist type="REAL"     >
+            wafpckLen, dthk, radtilt, ang, radius, tilt, x, y, xpos, ypos, doff, xc, yc
+        </varlist>        
+    <varlist type="REAL"     >
+            essai,hight,lng,leng,yoffset
+        </varlist>
+        
+    <Fill name="SSDP" comment="Silicon Strips"  >
+            <var name="Version" value="1" comment=" Version " />
+            <var name="Config" value="1" comment=" There are a few configuraions possible " />
+            <var name="Placement" value="1" comment=" 0=cave, 1=idsm " />
+            <var name="Misalign"  value="1" comment=" 0=sensors on ladder 1=sensors in SFMO" />
+        </Fill>        
+    <Fill name="SFJP" comment="Different Dimension parameters"  >
+            <var name="Version" value="1" comment=" new version information  " />
+            <var name="AlphaZ" value="54" comment=" Alpha of the SFLA and other parts " />
+            <var name="AlphaZH" value="45" comment=" Alpha of other parts " />
+            <var name="SSST_Rmin" value="31.285" comment=" Minimum Radius of the Small aluminium sector (outside structure) " />
+            <var name="SSST_Rmax" value="31.8" comment=" Maximum Radios of the Small aluminium sector (outside structure) " />
+            <var name="SSST_Width" value="2.5" comment=" Width of the small aluminium sector (outside structure) " />
+            <var name="SSST_Pz" value="0.2" comment=" Additional Z-Position of the aluminium sectors " />
+            <var name="SSSS_Rmin" value="23.3" comment=" Width of the small inner aluminium sector (outside structure) " />
+            <var name="SSSS_Width" value="0.5" comment=" Width of the small inner aluminium sector (outside structure) " />
+            <var name="SSRS_Rmin" value="28.0" comment=" Width of the side of the small rib (outside structure) " />
+            <var name="SSLB_Dx" value="8.5" comment=" Mother volume of the linking box (sector to the cone) " />
+            <var name="SSLB_Px" value="19.1" comment=" X-Position = Y-Position of the mother volume of the linking box " />
+            <var name="SSLB_Dy" value="7.3" comment=" Mother volume of the linking box (sector to the cone) " />
+            <var name="SSLB_Dz" value="2.5" comment=" Mother volume of the linking box (sector to the cone) " />
+            <var name="SSBQ_Dx" value="7.8" comment=" Linking box (sector to the cone) " />
+            <var name="SSBQ_Dy" value="7.3" comment=" Linking box (sector to the cone) " />
+            <var name="SSBQ_Dz" value="2.5" comment=" Linking box (sector to the cone) " />
+            <var name="SSCR_ThA" value="1.5" comment=" Linking cross total thickness (aluminum part) " />
+            <var name="SSCR_ThD" value="1.0" comment=" Linking cross total thickness (DELRIN part) " />
+            <var name="SSCR_Wd" value="1.2" comment=" Linking cross total width " />
+            <var name="SSCR_Hl" value="8.5" comment=" Linking cross horizontal arm full length " />
+            <var name="SSCR_Vl" value="1.6" comment=" Linking cross vertical arm full length " />
+            <var name="SSLT_Px" value="18.1" comment=" X-Position = Y-Position of the linking tube " />
+            <var name="SSLT_Rmax" value="0.8" comment=" Radius of the linking tube (sector to the cone) " />
+            <var name="SSLT_Dz" value="5.05" comment=" Width of the linking tube (sector of the cone) " />
+            <var name="SCMP_Dx" value="6.3" comment=" Width of the mounting plate inserted in the cones " />
+            <var name="SCMP_Dy" value="0.4" comment=" Width of the mounting plate inserted in the cones " />
+            <var name="SCMP_Dz" value="3.6" comment=" Width of the mounting plate inserted in the cones " />
+            <var name="SCMP_Px" value="15.945" comment=" X-Position = Y-Position of the mounting plate " />
+            <var name="SCVM_Dz" value="3.6" comment=" Mother volume of the V-shape piece length " />
+            <var name="SCVM_Dx" value="6.4" comment=" Mother volume of the V-shape piece dx " />
+            <var name="SCVM_Px" value="17.00" comment=" X-Position = Y-Position of the V-Shape piece " />
+            <var name="SCVM_Dy" value="2.6" comment=" Mother volume of the V-Shape piece dy " />
+            <var name="SCVM_Pz" value="57.5" comment=" Z-Position of the mother volume " />
+            <var name="SCVB_Dy" value="0.5" comment=" Height of the base of the V-Shape piece " />
+            <var name="SCVS_Dx" value="2.3" comment=" Dx of the V-plates of the V-shape piece 45 degrees " />
+            <var name="SCVS_Dy" value="0.6" comment=" Medium Height of the V-plates of the V-shape piece 45 degrees " />
+            <var name="SCVS_Px" value="1.0" comment=" x-Position of the V-plates of the V-shape piece 45 degrees " />
+            <var name="SCVS_Py" value="0.22" comment=" x-Position of the V-plates of the V-shape piece 45 degrees " />
+            <var name="SFCO_Dx" value="4.4" comment=" Dx of the connection board (end of the ladder) " />
+            <var name="SFCO_Dy" value="0.37" comment=" Width of the connection board (end of the ladder) " />
+            <var name="SFCO_Dz" value="15.8" comment=" Length of the connection board (end of the ladder) " />
+            <var name="SFCO_Px" value="1.7" comment=" X-Position of the connection board (end of the ladder) " />
+            <var name="SFCO_Py" value="0.2" comment=" Y-Position of the connection board (end of the ladder) " />
+            <var name="SFCM_Dx" value="3.998" comment=" Dx of the second connection board (smaller than the above one!!) " />
+            <var name="SFCS_Dz" value="7.5" comment=" Dx of the small part of the second connection board " />
+            <var name="SFKF_Dy" value="0.06" comment=" Width of the kapton flex circuit between the connection boards " />
+            <var name="SFKF_Dz" value="8.1" comment=" Length of the kapton flex circuit between the connection boards " />
+            <var name="SFKF_Dx" value="0.44" comment=" Dx of the first part of the kapton flex circuit " />
+            <var name="SFKF_Px" value="0.16" comment=" x-Position of the first part of the kapton flex circuit " />
+            <var name="SFKF_Py" value="2.07" comment=" y-Position of the first part of the kapton flex circuit " />
+            <var name="SFKS_Dx" value="1.65" comment=" Dx of the second part of the kapton flex circuit " />
+            <var name="SFKS_Px" value="0.505" comment=" x-Position of the second part ot the kapton flex " />
+            <var name="SFKS_Py" value="1.585" comment=" y-Position of the second part ot the kapton flex " />
+            <var name="SFPR_Py" value="1.79" comment=" Y-Position of the mechanical parts " />
+            <var name="SFPB_Py" value="3.48" comment=" Y-Position of the mechanical parts 2 " />
+            <var name="SFPB_Py2" value="0.08" comment=" Y-Position of the mechanical parts 2 " />
+            <var name="SFCB_Dx" value="3.0" comment=" Dx of the big part of the second connection board " />
+            <var name="SSBS_Dy" value="0.5" comment=" Width of the aluminium plates linking the ladder to the sector " />
+            <var name="SSBS_Dx" value="2.5" comment=" Dx = Dz = small part of the aluminium plate linking the ladder " />
+            <var name="SSBB_Dx" value="4.3" comment=" Dx of the Big part of the aluminium plate linking the ladder  " />
+            <var name="SSBB_Dz" value="1.9" comment=" Dz of the Big part of the aluminium plate linking the ladder  " />
+            <var name="FLEX_Di" value="0.02" comment=" Distanze between overlaying flexes " />
+            <var name="SFPB_Dx" value="4.3" comment=" Dx of the outside mechanical part (G10 rectangle - box base) " />
+            <var name="SFPB_Dy" value="0.8" comment=" Width of the outside mechanical part (G10 rectangle - box base) " />
+            <var name="SFPBDz" value="0.95" comment=" Length of the outside mechanical part (G10 rectangle - box base) " />
+            <var name="SAPP_Dxe" value="7.6" comment=" Dx of the epoxy core of the adc board appendice mother volume " />
+            <var name="SAPP_Dxz" value="0.04" comment=" Dx of the carbon side shell of the adc board appendice " />
+            <var name="SAPP_Dy" value="0.5" comment=" Width of the epoxy core of the adc board appendice mother volume " />
+            <var name="SAPP_Dz" value="1.275" comment=" Length of the adc board appendice mother volume " />
+            <var name="SAPP_Py1" value="0.04" comment=" 1. y-Position of the mother colume of the adc board " />
+            <var name="SAPP_Py2" value="0.5" comment=" 2. y-Position of the mother colume of the adc board " />
+            <var name="SAPP_Py3" value="0.08" comment=" 3. y-Position of the mother colume of the adc board " />
+            <var name="SFAM_Dxe" value="7.2" comment=" Dx of the mother volume of the adc board " />
+            <var name="SFAM_Dxz" value="2.1" comment=" Dx of the small volume of the adc board " />
+            <var name="SFAM_Dy" value="0.3" comment=" Width of the mother volume of the adc board " />
+            <var name="SFAM_Dz" value="12.4" comment=" Length of the mother volume of the adc board " />
+            <var name="SFAM_DZs" value="2.15" comment=" Length of the small volume of the adc board " />
+            <var name="SFLA_Dx" value="1.5" comment=" Dx of the long part of the bus cable linking the modules " />
+            <var name="SFLA_Dy" value="0.0130" comment=" Width of the long part of the bus cable linking the modules " />
+            <var name="SFLA_Dz" value="4.3" comment=" Length of the long part of the bus cable linking the modules " />
+            <var name="SFLB_Dz" value="7.5" comment=" Length of the long bus cable " />
+            <var name="SFLC_Dz" value="0.93" comment=" Length of the long bus cable on the cb up to the connector " />
+            <var name="SFEB_Dx" value="3.89" comment=" Dx of the big bus elbow " />
+            <var name="SFEB_Dz" value="1.5" comment=" Length of the bus elbow " />
+            <var name="SFES_Dx" value="1.875" comment=" Dx of the big bus elbow " />
+            <var name="SFFK_Dxe" value="0.4" comment=" Dx of the horizontal part of the ladder skeleton carbon base " />
+            <var name="SFFK_Dy" value="0.02" comment=" Width of the horizontal part of the ladder skeleton carbon base " />
+            <var name="SFFK_Dz" value="69.75" comment=" Length of of the horizontal part of the ladder skeleton carbon base " />
+            <var name="SFFL_Dx" value="0.6" comment=" Dx of the tilted part of the ladder " />
+            <var name="SFFK_Dxz" value="5.1" comment=" Dx of the horizontal part of the kapton film " />
+
+            <var name="SFFK_Px" value="3.5" comment="    x-Position of the carbon base under the ladder " />
+            <var name="SFFK_Py1" value="0.02" comment=" 1. y-Position of the carbon base under the ladder " />
+            <var name="SFFK_Py2" value="0.04" comment=" 2. y-Position of the carbon base under the ladder " />
+            <var name="SFKL_Px" value="2.55" comment="    x-Position of the tilted kapton film under the ladder " />
+            <var name="SFKK_Dy" value="0.0025" comment=" Width of the kapton film " />
+            <var name="SFLU_Dz" value="49.8" comment=" Length of the triangular ladder skeleton " />
+            <var name="SFLU_h1" value="0.02" comment=" Height of the triangular ladder skeleton " />
+            <var name="SFLU_bl1" value="0.2" comment=" Base length  of the triangular ladder skeleton " />
+            <var name="SFRA_Dx" value="3.76" comment="         Dx of the hybrid stiffner " />
+            <var name="SFRA_Dy" value="0.019" comment="      Width of the hybrid stiffner " />
+            <var name="SFRA_Py" value="0.099" comment=" Y-Position of the hybrid stiffner " />
+            <var name="SFRA_Dz" value="1.0" comment="     Length of the hybrid stiffner " />
+            <var name="SFRA_Pz" value="1.1" comment=" Z-Position of the hybrid stiffner " />
+            <var name="SFSW_Dy" value="1.0" comment=" Width of a single wafer container " />
+            <var name="SFSW_Dz" value="2.175" comment=" Lengthof of a single wafer container " />
+            <var name="SFRS_Dx" value="0.04" comment=" Dx of the two supports of the hybrid stiffner " />
+            <var name="SFRS_Dy" value="0.0915" comment=" Dy of the two supports of the hybrid stiffner " />
+            <var name="SFRS_Px" value="3.8" comment=" x-Position of the two supports of the hybrid stiffner " />
+            <var name="SFRS_Py" value="0.0265" comment=" y-Position of the two supports of the hybrid stiffner " />
+            <var name="SFSM_Ll" value="2.6" comment=" Length of the triangular base " />
+            <var name="SFFX_Dx" value="3.84" comment=" Dx of the flex " />
+            <var name="SFFX_Dyz" value="0.0007" comment=" Width of the flex " />
+            <var name="SFPI_Rmin" value="0.15" comment=" Rmin of the pions " />
+            <var name="SFPI_Rmax" value="0.2" comment=" Rmax of the pions " />
+            <var name="SFPI_Px" value="3.2" comment=" X-Position of the four pions  " />
+            <var name="SFPI_Py1" value="0.35" comment=" 1. Y-Position of the four pions  " />
+            <var name="SFPI_Py2" value="0.025" comment=" 2. Y-Position of the four pions  " />
+            <var name="SFPI_Pz" value="0.7" comment=" Z-Position of the four pions  " />
+            <var name="SFPJ_Dx1" value="0.075" comment=" 1. Dx of the base of the pions " />
+            <var name="SFPJ_Dx2" value="0.025" comment=" 2. Dx of the base of the pions " />
+            <var name="SFPJ_Dy" value="0.3" comment=" Dy of the base of the pions " />
+            <var name="SFPJ_Dz" value="0.0125" comment=" Dz of the base of the pions " />
+            <var name="SFAA_Dx" value="0.3" comment=" Dx of the A128C chip " />
+            <var name="SFAA_Dy" value="0.015" comment=" Dy of the A128C chip " />
+            <var name="SFAA_Dz" value="0.4" comment=" Dz of the A128C chip        " />
+            <var name="SFAA_Px1" value="0.325" comment=" 1. x-=Position of the A128C chips " />
+            <var name="SFAA_Px2" value="0.65" comment=" 2. x-=Position of the A128C chips " />
+            <var name="SFAA_Px3" value="0.6" comment=" 3. x-=Position of the A128C chips " />
+            <var name="SFAA_Pz1" value="1.1" comment=" 1. z-=Position of the A128C chips " />
+            <var name="SFAA_Pz2" value="1.0" comment=" 2. z-=Position of the A128C chips " />
+            <var name="SFAA_Pz3" value="0.02" comment=" 3. z-=Position of the A128C chips " />
+
+            <var name="SFSL_Dx" value="3.75" comment=" Dx of the strip detector " />
+            <var name="SFSL_Dy" value="0.015" comment=" Dy of the strip detector " />
+            <var name="SFSL_Dz" value="2.1" comment=" Dz of the strip detector " />
+
+            <var name="SFSD_Dx" value="3.65" comment=" Dx of the sensitive area " />
+            <var name="SFSD_Dy" value="0.015" comment=" Dy of the sensitive area " />
+            <var name="SFSD_Dz" value="2.0" comment=" Dz of the sensitive area " />
+
+            <var name="SFLA_Px" value="1.1" comment=" x-Position of the top flex along the z-axis     " />
+            <var name="SFLA_Py" value="1.35" comment=" y-Position of the top flex along the z-axis " />
+            <var name="SFLC_Px" value="2.3" comment=" x-Position of the bottom flex along the z-axis " />
+            <var name="SFLC_Py" value="0.3" comment=" y-Position of the bottom flex along the z-axis " />
+            <var name="SFES_Px" value="3.32" comment=" x-Position of the small elbow bus " />
+            <var name="SFES_Py" value="1.6" comment=" y-Position of the small elbow bus " />
+            <var name="SFES_Pz" value="0.1" comment=" z-Position of the small elbow bus " />
+            <var name="SFEB_Px" value="2.71" comment=" x-Position of the big elbow bus " />
+            <var name="SFEB_Py" value="0.75" comment=" y-Position of the big elbow bus " />
+        </Fill>        
+    <Fill name="SFJP" comment="Different Dimension parameters"  >
+            <var name="Version" value="2" comment=" Version  " />
+            <var name="SSRS_Rmin" value="23.3" comment=" Width of the side of the small rib (outside structure) " />
+        </Fill>        
+    <Fill name="SFPB" comment="Some SSD Shell dimensions"  >
+            <var name="Hhight" value="(0.02/tan(54*pi/180)+0.02/(2*tan(pi/5))+0.2)*sin(pi/5)" comment=" haut 1 " />
+            <var name="Khight" value="0.02/sin(54*pi/180)" comment=" haut 2 " />
+            <var name="Hbase" value="(0.02/tan(63*pi/180)+0.01/tan(27*pi/180)+0.2)*sin(27*pi/180)" comment=" bas 1 " />
+            <var name="Kbase" value="0.02/sin(63*pi/180)" comment=" bas 2 " />
+            <var name="Fsize" value="0.6/cos(15*pi/180)+0.02*tan(15*pi/180)" comment=" lenght of the side kapton film " />
+            <var name="Zcoor" value="5.18462095393834410" comment=" z coord " />
+        </Fill>        
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+            <var name="version" value="1" comment=" geometry version " />
+           <!-- <var name="rmin" value="21.8" comment=" mother rmin " />-->
+           <!-- new rmin to accomodate the new radius -->
+            <var name="rmin" value="21.6" comment=" mother rmin " />
+            <var name="rmax" value="28.5" comment=" mother rmax " />
+            <var name="SOutRInn" value="29.5" comment=" outer shield cylinder, inner radius " />
+            <var name="SOutROut" value="29.52" comment=" outer shield cylinder, outer radius " />
+            <var name="SOutLen" value="65.4" comment=" outer shield cylinder, half length " />
+            <var name="Len" value="107." comment=" mother Len along the z direction " />
+            <var name="rad" value="23." comment=" distance from beam axis to detector center " />
+            <var name="nssd" value="16" comment=" number of silicon strip detectors  " />
+            <var name="dmWid" value="7.8" comment=" detector mother width  " />
+            <var name="dmThk" value="2.0" comment=" detector mother thickness " />
+            <var name="dmLen" value="90." comment=" detector mother length (detectors + adc board)  " />
+            <var name="smWid" value="7.5" comment=" structure mother width " />
+            <var name="smThk" value="5.0" comment=" structure mother thickness " />
+            <var name="smLen" value="101.9" comment=" structure mother length  " />
+            <var name="ssLen" value="95./20." comment=" length of a subvolume of the structure " />
+            <var name="wpLen" value="69.6" comment=" length of wafer pack " />
+            <var name="sdlen" value="4.2" comment=" length of one strip detector (along beam axis) " />
+            <var name="tilt" value="5.0" comment=" tiling angle (degrees) " />
+            <var name="cprad" value="0.1" comment=" cooling pipe outer radius " />
+            <var name="cpral" value="0.09" comment=" cooling pipe inner radius " />
+            <var name="cfrad" value="0.1" comment=" carbon fiber tube radius (support structure) " />
+            <var name="gpThk" value="-1.0" comment=" gap between structure mother and detector " />
+
+            <var name="ladderMap" value="{0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}" comment=" presence of ladders " />
+            <var name="ladderAngle" value="{-1.0,-1.0,45.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}" comment=" individual angles " />
+            <var name="ladderTilt" value="{-1.0,-1.0,0.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}" comment=" individual tilts " />
+            <var name="ladderRadius" value="{-1.0,-1.0,23.000,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0,-1.0}" comment=" individual radii " />
+        </Fill>        
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+            <var name="version" value="2" comment=" geometry version " />
+            <var name="ladderMap" value="{1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1}" comment=" presence of ladders " />
+            <var name="ladderAngle" value="{90.0,108.3,130.0,-1.0,-1.0,-1.0,-1.0,-1.0,230.0,251.7,270.0,288.3,310.0,-1.0,-1.0,-1.0,-1.0,-1.0,50.0,71.7}" comment=" individual angles " />
+            <var name="ladderTilt" value="{0.0,-6.0,0.0,-1.0,-1.0,-1.0,-1.0,0.0,0.0,6.0,0.0,-6.0,0.0,-1.0,-1.0,-1.0,-1.0,-1.0,0.0,6.0}" comment=" individual tilts " />
+            <var name="ladderRadius" value="{23.174,22.800,24.600,-1.0,-1.0,-1.0,-1.0,-1.0,24.600,22.800,23.174,22.800,24.600,-1.0,-1.0,-1.0,-1.0,-1.0,24.600,22.800}" comment=" individual radii " />
+        </Fill>        
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+            <var name="version" value="3" comment=" geometry version " />
+            <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
+            <var name="ladderAngle" value="{90.0,108.3,126.6,144.4,162.2,180.0,197.8,215.6,233.4,251.7,270.0,288.3,306.6,324.4,342.2,0.0,17.8,35.6,53.4,71.7}" comment=" individual angles " />
+            <var name="ladderTilt" value="{0.0,-6.0,-7.0,-7.0,-7.0,0.0,7.0,7.0,7.0,6.0,0.0,-6.0,-7.0,-7.0,-7.0,0.0,7.0,7.0,7.0,6.0}" comment=" individual tilts " />
+            <var name="ladderRadius" value="{23.177,22.800,22.800,22.800,23.800,22.500,23.800,22.800,22.800,22.800,23.177,22.800,22.800,22.800,23.800,22.500,23.800,22.800,22.800,22.800}" comment=" individual radii " />
+        </Fill>        
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+            <var name="version" value="4" comment=" geometry version " />
+            <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
+            <var name="ladderAngle" value="{90.0,108.3,126.6,144.4,162.2,180.0,197.8,215.6,233.4,251.7,270.0,288.3,306.6,324.4,342.2,0.0,17.8,35.6,53.4,71.7}" comment=" individual angles " />
+            <var name="ladderTilt" value="{0.0,-6.0,-7.0,-7.0,-7.0,0.0,7.0,7.0,7.0,6.0,0.0,-6.0,-7.0,-7.0,-7.0,0.0,7.0,7.0,7.0,6.0}" comment=" individual tilts " />
+            <var name="ladderRadius" value="{23.177,22.800,22.800,22.800,22.800,22.500,22.800,22.800,22.800,22.800,23.177,22.800,22.800,22.800,22.800,22.500,22.800,22.800,22.800,22.800}" comment=" individual radii " />
+        </Fill>        
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+            <var name="version" value="5" comment=" geometry version " />
+            <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
+            <var name="ladderAngle" value="{90.0,108.3,126.6,144.4,162.2,180.0,197.8,215.6,233.4,251.7,270.0,288.3,306.6,324.4,342.2,0.0,17.8,35.6,53.4,71.7}" comment=" individual angles " />
+            <var name="ladderTilt" value="{0.0,-6.0,-7.0,-7.0,-7.0,0.0,7.0,7.0,7.0,6.0,0.0,-6.0,-7.0,-7.0,-7.0,0.0,7.0,7.0,7.0,6.0}" comment=" individual tilts " />
+            <var name="ladderRadius" value="{23.177,22.800,22.600,22.600,22.600,22.300,22.600,22.600,22.600,22.800,23.177,22.800,22.600,22.600,22.600,22.500,22.600,22.600,22.600,22.800}" comment=" individual radii " />
+        </Fill>
+
+    <!-- these are the new paramters for the SSD-->
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+            <var name="version" value="6" comment=" geometry version " />
+            <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
+            <var name="ladderAngle" value="{99.0,117.3,135.6,153.4,171.2,189.0,206.8,224.6,242.4,260.7,279.0,297.3,315.6,333.4,351.2,9.0,26.8,44.6,62.4,80.2}" comment=" individual angles " />
+            <var name="ladderTilt" value="{-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0,-12.0}" comment=" individual tilts " />
+            <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
+        </Fill>
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+            <var name="version" value="7" comment=" geometry version " />
+            <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
+            <var name="ladderAngle" value="{81.0,99.0,117.0,135.0,153.0,171.0,189.0,207.0,225.0,243.0,261.0,279.0,297.0,315,333,351,9.0,27.0,45.0,63.0}" comment=" individual angles " />
+            <var name="ladderTilt" value="{-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0}" comment=" individual tilts " />
+            <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
+        </Fill>
+    <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+            <var name="version"      value="7.1" comment=" geometry version " />
+            <var name="ladderMap"    value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
+	    <var name="ladderAngle"  value="{81.0, 63.0, 45.0, 27.0, 9.0, 351.0, 333.0, 315.0, 297.0, 279.0, 261.0, 243.0, 225.0, 207.0, 189.0, 171.0, 153.0, 135.0, 117.0, 99.0}" comment=" individual angles, revised numbering 1/12/15" />
+            <var name="ladderTilt"   value="{-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0}" comment=" individual tilts " />
+            <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
+        </Fill>
+
+    <Use struct="SSDP" />
+
+        ConfigA = mod(SSDP_Config   ,10) 
+        ConfigB = mod(SSDP_Config/10,10) 
+
+<!--        <Use struct="SFPA" select="version" value="ConfigA " />-->
+<!--     jb : update : use the latest version of SFPA -->
+
+     <Use struct="SFPA" select="version" value="7.1" />
+     <Use struct="SFJP" select="version" value="2 " />
+
+     <Mixture name="G10" dens="1.7"  >
+            <Component name="Si" a="28.08" z="14" w="0.6*1*28./60." />
+            <Component name="O" a="16" z="8" w="0.6*2*16./60. + 0.4*4*16./174." />
+            <Component name="C" a="12" z="6" w="0.4*8*12./174." />
+            <Component name="H" a="1"  z="1" w="0.4*14*1./174." />
+        </Mixture>        
+     <Mixture name="G5"  dens="0.85"  >
+            <Component name="Si" a="28.08" z="14" w="0.6*1*28./60." />
+            <Component name="O" a="16" z="8" w="0.6*2*16./60. + 0.4*4*16./174." />
+            <Component name="C" a="12" z="6" w="0.4*8*12./174." />
+            <Component name="H" a="1" z="1" w="0.4*14*1./174." />
+        </Mixture>       
+     <Mixture name="DELRIN" dens="1.2"  >
+            <Component name="O" a="16" z="8" w="2*16./100." />
+            <Component name="C" a="12" z="6" w="5*12./100." />
+            <Component name="H" a="1" z="1" w="8*1.0/100." />
+        </Mixture>        
+
+    <!-- Create the SSD mother volume and place it w/in the IDSM, flagging it as overlapping -->
+     <Create    block="SFMO" />
+
+     <Placement block="SFMO" in="IDSM" konly="ONLY" if="SSDP_placement==1" >
+       <!-- 
+       <Misalign table="Geometry/sst/sstOnOsc" opts="left" />
+       -->
+     </Placement>
+     <Placement block="SFMO" in="CAVE" konly="MANY" if="SSDP_placement==0" >
+       <!--
+       <Misalign table="Geometry/sst/sstOnOsc" opts="left" />
+       -->
+     </Placement>
+
+
+
+<Block name="SFMO" comment="is the mother of all Silicon Strip Detector volumes"  >
+
+	  <Material name="Air" />
+
+	  <Attribute for="SFMO" seen="1" colo="6" />
+	  <Shape type="TUBE" rmax="SFPA_rmax" rmin="SFPA_rmin" dz="SFPA_Len/2" />
+
+	  dthk = SFPA_smThk + SFPA_gpThk
+	  <If expr="ConfigB.ge.7"  >
+	    <Create    block="SOSK" />
+<!--
+    <Placement block="SOSK" />  
+-->
+	  </If>
+
+
+          <!-- These are the ladders... need to understand what the NC variable does... -->
+          <!-- looks like nothing... can test by removing it... -->
+	  <Create block="SFLM" />
+	  <Do var="ilad" from="1" to="20"  >
+
+	    <If expr="SFPA_ladderMap(ilad).gt.0"  >   
+
+	      <!-- Place active sensors and local support material -->
+	      <If expr="SSDP_misalign.eq.1">
+		<Create    block="SFSW" />
+		<Do var="iwaf" from="1" to="SFPA_nssd">
+		  ncopy = (ilad-1)*SFPA_nssd + iwaf
+		  <Placement block="SFSW" in="SFMO" ncopy="ncopy" konly="MANY">
+		    <Rotation alphaz="180" />
+		    <Misalign table="Geometry/sst/sstSensorOnLadder"  row="ncopy-1" opts="left" />
+		    <Misalign table="Geometry/sst/sstLadderOnSst"     row="ilad -1" opts="left" />
+		  </Placement>
+		</Do>
+	      </If>
+
+	      <!-- Place ladders (support material) -->
+	      ang = (SFPA_ladderAngle(ilad)*pi)/180.0 
+	      <Placement y="0.0" x="0.0" z="0.0" konly="MANY" block="SFLM"  >
+                <Rotation alphaz="SFPA_ladderAngle(ilad)-90" /> 	
+		<Misalign table="Geometry/sst/sstLadderOnSstMisalign" row="ilad-1" opts="right" />
+	      </Placement>
+	    </If>
+	    
+	  </Do>
+
+          <!-- these have been unplaced since version 7.  why? -->            
+          <Create block="SSST" />        
+          <Create block="SSSS" />
+          <Create block="SSRT" />
+          <Create block="SSRS" />
+          <Create block="SSLB" />	  
+          <Create block="SSLT" />	  
+          <Create block="SCMP" />
+          <Create block="SCVM" />
+
+       </Block>
+
+<!-- Believe I want to get rid of SFLM and SFDM and place their content in the mother volume directly -->
+        
+<Block name="SFLM" comment="is the mother of the ladder"  >
+
+          <Material  name="Air" />
+          <Attribute for="SFLM" seen="1" colo="7" />
+          <Shape type="TUBS" 
+		 dz="SFPA_smLen/2" 
+		 rmin="21.6" 
+		 rmax="SFPA_rmax-0.2" 
+		 phi1="-11+90" 
+		 phi2="11+90"
+	  />
+	  
+	  <!-- center offset for the SFSW volume -->
+	  doff = dthk/2.0 -(SFPA_smThk +SFPA_gpThk)/2
+	  radtilt = - (SFPA_ladderTilt(1)*pi)/180.0
+	  xc = doff*sin(radtilt)
+	  yc = SFPA_ladderRadius(1) + doff*cos(radtilt)
+	  tilt = SFPA_ladderTilt(1)
+	  
+          wafpckLen=SFPA_wpLen/(SFPA_nssd*1.) 
+	  x = 0
+	  y = 0
+	  <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+
+	  <If expr="SSDP_misalign.eq.0">
+          <Create block="SFSW" />
+          <Do var="iwaf" from="1" to="SFPA_nssd"  >
+
+            <Placement block="SFSW" 
+		       x    ="xpos" 
+		       y    ="ypos" 
+		       z    ="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen"  
+		       konly="MANY">
+	      <Rotation alphaz="tilt" />
+	    </Placement>            
+	    
+          </Do>
+	  </If>
+          
+ <!--        
+
+        <Block name="SFSM" comment="is the mother volume of the ladder (mechanic structure)"  >
+            <Material name="Air" />
+            <Attribute for="SFSM" seen="0" colo="6" />
+            <Shape type="BOX" dz="SFPA_smLen/2." dx="SFPA_dmWid/2" dy="SFPA_smThk/2" /> -->
+
+        doff = dthk/2.0 + (SFPA_dmThk +SFPA_gpThk)/2
+        xc = doff*sin(radtilt)
+        yc = SFPA_ladderRadius(1) + doff*cos(radtilt)
+        yoffset = -1.7 
+
+	<Create block="SFLT" />
+        hight = SFJP_SFSM_Ll*tan(54*pi/180)-SFPB_Hhight/tan(pi/5)-0.02 
+	x = -(SFPB_Hhight-SFPB_Khight)
+	y = hight+yoffset 
+	<Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+<!--            <Placement y="hight+yoffset" x="-(SFPB_Hhight-SFPB_Khight)" z="0.0" block="SFLT" konly="'MANY'"  > -->
+         <Placement block="SFLT" konly="ONLY" y="ypos" x="xpos" z="0.0" >
+           <Rotation alphaz="-90-36+tilt" />
+         </Placement>
+
+         x = +(SFPB_Hhight-SFPB_Khight)
+	 y = hight+yoffset 
+	 <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+ 
+        <!--    <Placement y="hight+yoffset" x="(SFPB_Hhight-SFPB_Khight)" z="0" block="SFLT" konly="ONLY" > -->
+	<Placement y="ypos" x="xpos" z="0" block="SFLT" konly="ONLY" >
+          <Rotation alphay="180." />
+          <Rotation alphaz="90.+36.+tilt" />
+        </Placement>            
+	
+        x = 0.-(SFJP_SFSM_Ll-(SFJP_SFLU_bl1+SFJP_SFLU_h1/2*1/tan(pi/5)))
+	y = yoffset 
+	<Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	
+        <Create block="SFLU" />
+	<!--           <Placement y="0.+yoffset" x="0.-(SFJP_SFSM_Ll-(SFJP_SFLU_bl1+SFJP_SFLU_h1/2*1/tan(pi/5)))" z="0." block="SFLU" konly="'MANY'" > -->
+	<Placement y="ypos" x="xpos" z="0." block="SFLU" konly="ONLY">
+	  <Rotation alphaz="tilt"/>
+	  </Placement>
+		   
+            essai = 180 
+            essai = essai + 27 + 27 
+	    y = cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset
+	    x = -cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)-(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    <!--            <Placement y="cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset" x="-cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)-(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))" z="0" block="SFLU" konly="'MANY'" > -->
+	    <Placement y="ypos" x="xpos" z="0." block="SFLU" konly="ONLY">
+                <Rotation alphay="180" />
+                <Rotation alphaz="essai+tilt" />
+            </Placement>
+            x = 0.+(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))
+	    y = 0.+yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    
+	    <!--            <Placement y="0.+yoffset" x="0.+(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))" z="0." block="SFLU" konly="'MANY'" > -->
+	    <Placement y="ypos" x="xpos" z="0." block="SFLU" konly="ONLY">
+              <Rotation alphay="180." />
+	      <Rotation alphaz="tilt"/>
+            </Placement>
+            x = cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))
+	    y = cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    
+	    <!--         <Placement y="cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset" x="cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))" z="0" block="SFLU"  > -->
+	    <Placement y="ypos" x="xpos" z="0." block="SFLU" konly="ONLY">
+              <Rotation alphaz="-essai+tilt" />
+            </Placement>            
+
+	    x = SFJP_SFFK_Px/2+SFJP_SFFK_Dxe
+	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+            <Create block="SFFK" />
+	    <!-- <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset" x="SFJP_SFFK_Px/2+SFJP_SFFK_Dxe" z="0.0" block="SFFK" konly="'MANY'" > -->
+	    <Placement y="ypos" x="xpos" z="0." block="SFFK" konly="ONLY">
+	      <Rotation alphaz="tilt" />
+            </Placement>
+     	    x = - (SFJP_SFFK_Px/2+SFJP_SFFK_Dxe)
+	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+       <!--  <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset" x="-SFJP_SFFK_Px/2-SFJP_SFFK_Dxe" z="0.0" block="SFFK" konly="'MANY'" > -->
+	    <Placement y="ypos" x="xpos" z="0." block="SFFK" konly="ONLY">
+	      <Rotation alphaz="tilt" />
+            </Placement>
+	    
+
+	    x = -SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)
+	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+            <Create block="SFFL" />
+            <!--   <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset" x="-SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)" z="0" block="SFFL" konly="'MANY'" > -->
+	    <Placement y="ypos" x="xpos" z="0." block="SFFL" konly="ONLY">
+              <Rotation alphaz="15+tilt" />
+            </Placement>
+            
+	    x =  SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)
+	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+
+            <!--   <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset" x="SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)" z="0" block="SFFL" konly="'MANY'" > -->
+	    <Placement y="ypos" x="xpos" z="0." block="SFFL" konly="ONLY">
+              <Rotation alphaz="-15+tilt" />
+            </Placement>
+            
+	    x = 0.0
+	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Py2+yoffset-SFJP_SFKK_Dy/2.
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+            <Create block="SFKK" />
+        <!--    <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Py2+yoffset-SFJP_SFKK_Dy/2." x="0." z="0." block="SFKK" konly="'MANY'" > -->
+	      <Placement y="ypos" x="xpos" z="0." block="SFKK" konly="ONLY">
+	      <Rotation alphaz="tilt" />
+            </Placement>           
+
+            <Create block="SFKL" />
+	    x = -SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)+0.005
+	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+            <!--   <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021" x="-SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)+0.005" z="0" block="SFKL" konly="'MANY'" > -->
+	    <Placement y="ypos" x="xpos" z="0." block="SFKL" konly="ONLY">
+              <Rotation alphaz="15+tilt" />
+            </Placement>
+            x = +SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)-0.005
+	    y = -SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+
+            <!--   <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021" x="+SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)-0.005" z="0" block="SFKL" konly="'MANY'" > -->
+	    <Placement y="ypos" x="xpos" z="0." block="SFKL" konly="ONLY">
+              <Rotation alphaz="-15+tilt" />
+            </Placement>   
+            
+	    x = 0.0 
+	    y = -SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+            <Create block="SAPP" />
+            <!--<Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2." block="SAPP" konly="'MANY'" > -->
+	      <Placement y="ypos" x="xpos" z="SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2." block="SAPP" konly="ONLY">
+                <Rotation alphay="180." />
+		<Rotation alphaz="tilt"/>
+            </Placement>
+            
+            <!--<Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2.)" block="SAPP" konly="'MANY'" >-->
+	      <Placement y="ypos" x="xpos" z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2.)" block="SAPP" konly="ONLY">
+		<Rotation alphaz="tilt"/>
+            </Placement>
+            
+	    x = 0.0
+	    y = -SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>            
+
+            <Create block="SFAM" />
+            <!--<Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)-SFJP_SFAM_Dz/2." block="SFAM" konly="'MANY'" >-->
+	    <Placement y="ypos" x="xpos" z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)-SFJP_SFAM_Dz/2." block="SFAM" konly="'MANY'">
+		<Rotation alphaz="tilt"/>
+            </Placement>
+            
+            <!--<Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="+(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)+SFJP_SFAM_Dz/2." block="SFAM" konly="'MANY'" >-->
+	    <Placement y="ypos" x="xpos" z="+(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)+SFJP_SFAM_Dz/2." block="SFAM" konly="'MANY'">
+              <Rotation alphay="180." />
+	      <Rotation alphaz="tilt"/>
+            </Placement>
+
+
+
+	    yoffset = 0.0
+
+	    x = -SFJP_SFCO_Px
+	    y = SFJP_SFCO_Py +yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+            <Create block="SFCO" />
+            <!--<Placement y="SFJP_SFCO_Py" x="-SFJP_SFCO_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCO" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCO" >
+                <Rotation alphaz="+SFJP_AlphaZ+tilt" />
+            </Placement>
+            
+	    x = SFJP_SFCO_Px
+	    y = SFJP_SFCO_Py +yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+            <!--<Placement y="SFJP_SFCO_Py" x="+SFJP_SFCO_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCO" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCO" >
+                <Rotation alphaz="-SFJP_AlphaZ+tilt" />
+
+            </Placement>      
+     
+	    x = +SFJP_SFCO_Px
+	    y =  SFJP_SFCO_Py +yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+            <Create block="SFCM" />
+            <!--<Placement y="SFJP_SFCO_Py" x="+SFJP_SFCO_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCM" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCM" konly="'MANY'" >
+                <Rotation alphaz="-SFJP_AlphaZ+tilt" />
+            </Placement>
+            
+	    x = -SFJP_SFCO_Px
+	    y =  SFJP_SFCO_Py +yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+            <!--<Placement y="SFJP_SFCO_Py" x="-SFJP_SFCO_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCM" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCM" konly="'MANY'" >
+                <Rotation alphay="180" />
+                <Rotation alphaz="+SFJP_AlphaZ+tilt" />
+            </Placement>
+           
+            <Create block="SFKF" />
+	    x = -SFJP_SFKF_Px
+	    y = SFJP_SFKF_Py + yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+            <!--<Placement y="SFJP_SFKF_Py" x="-SFJP_SFKF_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2-0.2" block="SFKF" konly="'MANY'" > -->
+	    <Placement x="xpos" y="ypos" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2.-0.2" block="SFKF" >
+                <Rotation alphaz="+SFJP_AlphaZ+tilt" />
+            </Placement>
+
+     	    x = SFJP_SFKF_Px
+	    y = SFJP_SFKF_Py + yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+       
+            <!--<Placement y="SFJP_SFKF_Py" x="+SFJP_SFKF_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2+0.2" block="SFKF" konly="'MANY'" > -->
+	    <Placement x="xpos" y="ypos" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2.+0.2" block="SFKF" >
+                <Rotation alphaz="-SFJP_AlphaZ+tilt" />
+            </Placement>
+            
+            <Create block="SFKS" />
+	    x = +SFJP_SFKS_Px
+	    y = SFJP_SFKS_Py + yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+            <!--<Placement y="SFJP_SFKS_Py" x="+SFJP_SFKS_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2-0.2" block="SFKS" konly="'MANY'" > -->
+	    <Placement x="xpos" y="ypos" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2-0.2" block="SFKS" >
+                <Rotation alphaz="-SFJP_AlphaZ+tilt" />
+            </Placement>
+            
+	    x = -SFJP_SFKS_Px
+	    y =  SFJP_SFKS_Py + yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+            <!--<Placement y="SFJP_SFKS_Py" x="-SFJP_SFKS_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2+0.2" block="SFKS" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2+0.2" block="SFKS" >
+                <Rotation alphaz="+SFJP_AlphaZ+tilt" />
+            </Placement>            
+
+            <Create block="SFPR" />
+	    x = 0.0
+	    y =  SFJP_SFPR_Py + yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	    
+            <!--<Placement y="+SFJP_SFPR_Py" x="0" z="-SFJP_SFLU_Dz" block="SFPR" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="-SFJP_SFLU_Dz" block="SFPR">
+	      <Rotation alphaz="tilt"/>
+            </Placement>
+            
+            <!--<Placement y="+SFJP_SFPR_Py" x="0" z="+SFJP_SFLU_Dz-3.7" block="SFPR" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="SFJP_SFLU_Dz-3.7" block="SFPR">
+	      <Rotation alphaz="tilt"/>
+            </Placement>           
+
+            <Create block="SFPB" />
+	    x = 0.0
+	    y =  +SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2 + yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+            <!--<Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2" x="0" z="-SFJP_SFLU_Dz-SFJP_SFPBDz/2." block="SFPB" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="-SFJP_SFLU_Dz-SFJP_SFPBDz/2." block="SFPB">
+	      <Rotation alphaz="tilt"/>
+            </Placement>
+            
+            <!--<Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2" x="0" z="+SFJP_SFLU_Dz+SFJP_SFPBDz/2." block="SFPB" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="+SFJP_SFLU_Dz+SFJP_SFPBDz/2." block="SFPB">
+	      <Rotation alphaz="tilt"/>
+            </Placement>       
+
+            
+	    <Create block="SSBS" />
+	    x = 0.0
+	    y = +SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2.
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+            <!--<Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz+SFJP_SSBS_Dx/2." block="SSBS" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz+SFJP_SSBS_Dx/2." block="SSBS">
+	      <Rotation alphaz="tilt"/>
+            </Placement>
+            x = 0
+	    y = +SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2.
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+            <!--<Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz-SFJP_SSBS_Dx/2." block="SSBS" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz-SFJP_SSBS_Dx/2." block="SSBS">
+	      <Rotation alphaz="tilt"/>
+            </Placement>            
+
+            <Create block="SSBB" />
+	    x = 0.0
+	    y = +SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2. 
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+            <!--<Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz/2." block="SSBB" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz/2." block="SSBB">
+	      <Rotation alphaz="tilt"/>
+            </Placement>
+            
+            <!--<Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz/2." block="SSBB" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz/2." block="SSBB">
+	      <Rotation alphaz="tilt"/>
+            </Placement>
+            
+            <Create block="SFLA" />
+            <Create block="SFLB" />
+            <Create block="SFLC" />
+            <Create block="SFEB" />
+            <Create block="SFES" />
+            wafpckLen=SFPA_wpLen/(SFPA_nssd*1.) 
+            <Do var="iwaf" from="1" to="8"  >
+              <Do var="jwaf" from="1" to="iwaf"  >
+		x = +SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf
+		y =  SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf + yoffset
+		<Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+                <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen" block="SFLA" konly="ONLY" >-->
+		<Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen" block="SFLA">
+                  <Rotation alphaz="-SFJP_AlphaZ+tilt" />
+		</Placement>
+		x = -SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf
+		y =  SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf + yoffset
+		<Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+		
+		<!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-iwaf*wafpckLen" block="SFLA" konly="'MANY'" >-->
+		<Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-iwaf*wafpckLen" block="SFLA">
+		  <Rotation alphaz="+SFJP_AlphaZ+tilt" />
+		</Placement>
+		
+		x = SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf
+		y = SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf + yoffset
+	      <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      
+              <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2.+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >-->
+              <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2.+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" konly="ONLY">
+                <Rotation alphaz="-SFJP_AlphaZ+tilt" />
+              </Placement>
+              
+              x = -SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf
+	      y =  SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf+ yoffset
+	      <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      
+              <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2.-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >-->
+              <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2.-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC">
+                <Rotation alphaz="+SFJP_AlphaZ+tilt" />
+              </Placement>
+              
+              x =  SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf
+	      y = -SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf + yoffset
+	      <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      
+              <!--<Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'">-->
+              <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA">
+                <Rotation alphaz="-SFJP_AlphaZ+tilt" />
+              </Placement>
+              
+              x = -SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf
+	      y = -SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf + yoffset
+	      <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      
+              <!--<Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'" >-->
+              <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen" block="SFLA">
+                <Rotation alphaz="+SFJP_AlphaZ+tilt" />
+              </Placement>
+              
+              x = +SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf
+	      y = -SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf + yoffset
+	      <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      
+              <!--<Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >-->
+              <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC">
+                <Rotation alphaz="-SFJP_AlphaZ+tilt" />
+              </Placement>
+              
+              x = -SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf
+	      y = -SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf + yoffset
+	      <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+	      
+              <!--<Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >-->
+              <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC">
+                <Rotation alphaz="+SFJP_AlphaZ+tilt" />
+              </Placement>
+              
+            </Do>
+            
+	    
+            <Do var="jwaf" from="1" to="8"  >
+              x = SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf
+	      y = SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf + yoffset
+	      <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+              <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'" >-->
+	      <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA"  >	  
+                <Rotation alphaz="-SFJP_AlphaZ+tilt" />
+              </Placement>
+ 
+              x = -SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf
+	      y = SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf + yoffset
+	      <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+             
+              <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'" >-->
+
+              <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen" block="SFLA"  >
+                <Rotation alphaz="+SFJP_AlphaZ+tilt" />
+	      </Placement>
+              
+            </Do>
+            
+            x = +SFJP_SFLA_Px+SFJP_FLEX_Di*iwaf
+	    y = SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf +yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+  	    
+           <!-- <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*iwaf" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz/2." block="SFLB" konly="'MANY'" >-->
+             <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz/2." block="SFLB"  >
+              <Rotation alphaz="-SFJP_AlphaZ+tilt" />
+            </Placement>
+            
+            x = -SFJP_SFLA_Px-SFJP_FLEX_Di*iwaf
+	    y = SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf +yoffset
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+
+            <!--<Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*iwaf" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz/2." block="SFLB" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz/2." block="SFLB" >
+              <Rotation alphaz="+SFJP_AlphaZ+tilt" />
+            </Placement>
+
+<!--
+            x = -SFJP_SFES_Px
+	    y = -SFJP_SFES_Py 
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+-->
+            <!--<Placement y="-SFJP_SFES_Py" x="-SFJP_SFES_Px" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFES" konly="'MANY'" >-->
+<!--
+	    <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFES">
+              <Rotation alphaz="57.66+tilt" />
+            </Placement>
+            x = +SFJP_SFES_Px
+	    y = -SFJP_SFES_Py 
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+        -->    <!--<Placement y="-SFJP_SFES_Py" x="+SFJP_SFES_Px" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFES" konly="'MANY'" >--> <!--
+	    <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFES" konly="ONLY" >
+              <Rotation alphaz="-57.66+tilt" />
+            </Placement>                
+	    -->
+	    x = -SFJP_SFEB_Px
+	    y = -SFJP_SFEB_Py 
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+            <!--<Placement y="-SFJP_SFEB_Py" x="-SFJP_SFEB_Px" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFEB" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFEB" konly="ONLY" >
+              <Rotation alphaz="55.35+tilt" />
+            </Placement>
+            
+	    x = +SFJP_SFEB_Px
+	    y = -SFJP_SFEB_Py 
+	    <Call routine="sisdgeo7a_trans_to_sfm" expr="x, y, xc, yc, tilt, xpos, ypos"/>
+            <!--<Placement y="-SFJP_SFEB_Py" x="+SFJP_SFEB_Px" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFEB" konly="'MANY'" >-->
+	    <Placement x="xpos" y="ypos" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFEB" >
+              <Rotation alphaz="-55.35+tilt" />
+            </Placement>               
+	    
+          </Do>
+	  
+	</Block>
+        
+
+<!--
+    Single wafer container... contains the misalignable sensitive
+    and dead / support material.  The sensitive strip is placed 
+    with unit matrix transform compared with SFSW... (except it
+    if flipped 180 degrees...)
+
+    So.... fairly easy to apply the alignment tables directly to
+    *this* layer, with (possibly) an additional flip about z-axis.
+
+    TBD
+
+-->
+	<Block name="SFSW" comment="is a single wafer container"  >
+          <Material name="Air" />
+          <Attribute for="SFSW" seen="0" colo="6" />
+	  
+          <Shape type="BOX" 
+		 dz="SFJP_SFSW_Dz" 
+		 dx="SFPA_dmWid/2" 
+		 dy="SFJP_SFSW_Dy" />
+	  
+     <!--
+          SFSL contains SFSD, the sensitive detector of the SSD.
+	  It is placed with idenntity matrix...  with 180 flip about z.
+          So... placement of SfSW using the alignment tables, plus a
+          rotation.  Seems like the best plan.  It keeps all support 
+          matrials in the vicinity of the sensitive element aligned
+          relative to the sensor.
+          -->
+          <Create block="SFSL" />
+          <Placement block="SFSL" konly="ONLY"  />
+
+          
+          <Create block="SFRA" />
+          <Placement y="SFJP_SFRA_Py" x="0.0" z="SFJP_SFRA_Pz" block="SFRA" konly="ONLY"  />
+
+          
+          <Placement y="SFJP_SFRA_Py" x="0.0" z="-SFJP_SFRA_Pz" block="SFRA" konly="ONLY"   >
+            </Placement>
+            
+            <Create block="SFRS" />
+            <Placement y="SFJP_SFRS_Py" x="SFJP_SFRS_Px" z="SFJP_SFRA_Pz" block="SFRS" konly="ONLY"   >
+            </Placement>
+            
+            <Placement y="SFJP_SFRS_Py" x="SFJP_SFRS_Px" z="-SFJP_SFRA_Pz" block="SFRS" konly="ONLY"   >
+            </Placement>
+            
+            <Placement y="SFJP_SFRS_Py" x="-SFJP_SFRS_Px" z="SFJP_SFRA_Pz" block="SFRS" konly="ONLY"   >
+            </Placement>
+            
+            <Placement y="SFJP_SFRS_Py" x="-SFJP_SFRS_Px" z="-SFJP_SFRA_Pz" block="SFRS" konly="ONLY"   >
+            </Placement>
+            
+            <Create block="SFFX" />
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz" x="0.0" z="SFJP_SFRA_Pz" block="SFFX" konly="ONLY"   >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz" x="0.0" z="-SFJP_SFRA_Pz" block="SFFX" konly="ONLY"   >
+            </Placement>           
+
+            <Create block="SFPI" />
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="SFJP_SFPI_Px" z="SFJP_SFPI_Pz" block="SFPI" konly="ONLY"   >
+                <Rotation alphax="90" />
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="-SFJP_SFPI_Px" z="SFJP_SFPI_Pz" block="SFPI" konly="ONLY"   >
+                <Rotation alphax="90" />
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="SFJP_SFPI_Px" z="-SFJP_SFPI_Pz" block="SFPI" konly="ONLY"   >
+                <Rotation alphax="90" />
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="-SFJP_SFPI_Px" z="-SFJP_SFPI_Pz" block="SFPI" konly="ONLY"   >
+                <Rotation alphax="90" />
+            </Placement>
+            
+            <Create block="SFAA" />
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="ONLY"   >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="ONLY"   >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="ONLY"   >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"  >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
+            </Placement>
+            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="ONLY"  >
+            </Placement>
+            
+        </Block>       
+   
+
+	<Block name="SFRA" comment="is the hybrid stiffneer"  >
+            <Material name="Carbon" />
+            <Attribute for="SFRA" seen="2" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFRA_Dz" dx="SFJP_SFRA_Dx" dy="SFJP_SFRA_Dy" />
+        </Block>        
+
+        <Block name="SFRS" comment="two supports of the hybrid stiffneer (piece of it)"  >
+            <Material name="Carbon" />
+            <Attribute for="SFRS" seen="2" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFRA_Dz" dx="SFJP_SFRS_Dx" dy="SFJP_SFRS_Dy" />
+        </Block>        
+
+        <Block name="SFFX" comment="is the flex"  >
+            <Material name="Copper" />
+            <Attribute for="SFFX" seen="1" colo="42" />
+            <Shape type="BOX" dz="SFJP_SFRA_Dz" dx="SFJP_SFFX_Dx" dy="SFJP_SFFX_Dyz" />
+        </Block>
+        
+        <Block name="SFAA" comment="is the A128C chip"  >
+
+            <Material name="Silicon" />
+            <Attribute for="SFAA" seen="1" colo="41" />
+            <Shape type="BOX" dz="SFJP_SFAA_Dz" dx="SFJP_SFAA_Dx" dy="SFJP_SFAA_Dy" />
+        </Block>        
+
+        <Block name="SFPI" comment="are the pions"  >
+            <Material name="air" />
+            <Attribute for="SFPI" seen="2" colo="33" />
+            <Shape type="TUBE" rmax="SFJP_SFPJ_Dy" rmin="SFJP_SFPI_Rmin/2." dz="SFJP_SFPI_Pz/2.0+SFJP_SFPJ_Dz" />
+            <Create block="SFPK" />
+            <Placement y="0." x="0." z="0" block="SFPK"  >
+            </Placement>
+
+            <Create block="SFPJ" />
+            <Placement y="0." x="0." z="-SFJP_SFPI_Pz/2.0+SFJP_SFPJ_Dz" block="SFPJ"  >
+            </Placement>
+        </Block>     
+
+        <Block name="SFPK" comment="is the small radius cylinder of the pions"  >
+            <Material name="Aluminium" />
+            <Attribute for="SFPJ" seen="2" colo="33" />
+            <Shape type="TUBE" rmax="SFJP_SFPI_Rmax/2." rmin="SFJP_SFPI_Rmin/2." dz="SFJP_SFPI_Pz/2.0" />
+        </Block> 
+      
+        <Block name="SFPJ" comment="is the base of the pions"  >
+            <Material name="Aluminium" />
+            <Attribute for="SFPJ" seen="2" colo="33" />
+            <Shape type="TUBE" rmax="SFJP_SFPJ_Dy" rmin="SFJP_SFPJ_Dx1+SFJP_SFPJ_Dx2" dz="SFJP_SFPJ_Dz" />
+        </Block>       
+
+        <Block name="SFSL" comment="is the Silicon of the strip detector"  >
+            <Material name="Silicon" />
+            <Attribute for="SFSL" seen="2" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFSL_Dz" dx="SFJP_SFSL_Dx" dy="SFJP_SFSL_Dy" />
+
+            <Create    block="SFSD" />
+            <Placement block="SFSD"   if="SFPA_version&lt;=7.0" />
+            <Placement block="SFSD"   if="SFPA_version&gt; 7.0"  ><Rotation alphaz="180" /></Placement>
+
+
+        </Block>
+        
+        <Block name="SFSD" comment="is the strip detector"  >
+            <Material name="Silicon" />
+            <Material name="Sensitive" isvol="1" />
+            <Attribute for="SFSD" seen="2" colo="41" />
+            <Shape type="BOX" dz="SFJP_SFSD_Dz" dx="SFJP_SFSD_Dx" dy="SFJP_SFSD_Dy" />
+
+            <Call expr="%Imed,'STRA',1." routine="GSTPAR" />
+
+            <Instrument block="SFSD">
+                 <Hit meas="x" bins="0.001" opts="s"             />
+                 <Hit meas="y" bins="0.001"                      />
+                 <Hit meas="z" bins="0.001"                      />
+                 <Hit meas="cx" nbits="10"                       />
+                 <Hit meas="cy" nbits="10"                       />
+                 <Hit meas="cz" nbits="10"                       />
+                 <Hit meas="step" bins="0.01"                    />
+                 <Hit meas="sleng" nbits="16" min="0" max="500"  />
+                 <Hit meas="tof"   nbits="16" min="0" max="1.0E-6" />
+                 <Hit meas="ptot"  nbits="16" min="0" max="100.0" />
+                 <Hit meas="eloss" nbits="16" min="0" max="0.01" />
+            </Instrument>
+
+        </Block>
+
+
+
+        <Block name="SFLT" comment="is (half) the top corner of the triangular ladder skeleton"  >
+            <Material name="Carbon" />
+            <Attribute for="SFLT" seen="1" colo="1" />
+            <Shape type="TRAP" tl2="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(pi/5)" phi="0" alp2="(pi/2-atan(2*tan(pi/5)))*360/(2*pi)" h2="SFJP_SFLU_h1" h1="SFJP_SFLU_h1" bl1="SFJP_SFLU_bl1" tl1="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(pi/5)" alp1="(pi/2-atan(2*tan(pi/5)))*360/(2*pi)" dz="SFJP_SFLU_Dz" thet="0" bl2="SFJP_SFLU_bl1" />
+        </Block>
+        
+        <Block name="SFLU" comment="is (half) the side corner of the triangular ladder skeleton"  >
+            <Material name="Carbon" />
+            <Attribute for="SFLU" seen="1" colo="1" />
+            <Shape type="TRAP" tl2="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(27*2*pi/360)" phi="0" alp2="(pi/2-atan(2*tan(27*2*pi/360)))*360/(2*pi)" h2="SFJP_SFLU_h1" h1="SFJP_SFLU_h1" bl1="SFJP_SFLU_bl1" tl1="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(27*2*pi/360)" alp1="(pi/2-atan(2*tan(27*2*pi/360)))*360/(2*pi)" dz="SFJP_SFLU_Dz" thet="0" bl2="SFJP_SFLU_bl1" />
+        </Block>
+        
+        <Block name="SFFK" comment="horizontal part of the ladder skeleton carbon base"  >
+            <Material name="Carbon" />
+            <Attribute for="SFFK" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFK_Dxe" dy="SFJP_SFFK_Dy" />
+        </Block>       
+
+        <Block name="SFFL" comment="titled part of the ladder skeleton carbon base"  >
+            <Material name="Carbon" />
+            <Attribute for="SFFL" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFL_Dx/cos(15*pi/180)" dy="SFJP_SFFK_Dy" />
+        </Block>
+        
+        <Block name="SFKK" comment="horizontal part of the kapton film under the ladder base"  >
+            <Material name="Mylar" />
+            <Attribute for="SFKK" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFK_Dxz/2." dy="SFJP_SFKK_Dy/2." />
+        </Block>        
+
+        <Block name="SFKL" comment="titled part of the kpaton film under the ladder base"  >
+            <Material name="Mylar" />
+            <Attribute for="SFKL" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFL_Dx/cos(15*pi/180)" dy="SFJP_SFKK_Dy/2." />
+        </Block>        
+
+        <Block name="SFLA" comment="is the long part of the bus cable linking the modules to the connection board"  >
+            <Material name="Mylar" />
+            <Attribute for="SFLA" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFLA_Dz/2." dx="SFJP_SFLA_Dx/2." dy="SFJP_SFLA_Dy/2." />
+        </Block>
+        
+        <Block name="SFLB" comment="is the part of the long bus cable on the connection board"  >
+            <Material name="Mylar" />
+            <Attribute for="SFLB" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFLB_Dz/2." dx="SFJP_SFLA_Dx/2." dy="SFJP_SFLA_Dy/2." />
+        </Block>
+        
+        <Block name="SFLC" comment="is the part of the long bus cable on the connection board up to the connector"  >
+            <Material name="Mylar" />
+            <Attribute for="SFLC" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFLC_Dz/2." dx="SFJP_SFLA_Dx/2." dy="SFJP_SFLA_Dy/2." />
+        </Block>        
+
+        <Block name="SFEB" comment="is the big bus elbow"  >
+            <Material name="Mylar" />
+            <Attribute for="SFEB" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFEB_Dz/2." dx="SFJP_SFEB_Dx/2." dy="SFJP_SFLA_Dy/2." />
+        </Block>       
+
+        <Block name="SFES" comment="is the small bus elbow"  >
+            <Material name="Mylar" />
+            <Attribute for="SFES" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SFEB_Dz/2." dx="SFJP_SFES_Dx/2." dy="SFJP_SFLA_Dy/2." />
+        </Block>       
+
+        <Block name="SFAM" comment="is the mother volume of the adc board"  >
+            <Material name="Air" />
+            <Attribute for="SFAM" seen="0" colo="6" />
+            <Shape type="BOX" dz="SFJP_SFAM_Dz/2" dx="SFJP_SFAM_Dxe/2." dy="SFJP_SFAM_Dy/2." />
+
+            <Create block="SFAB" />
+            <Placement y="0." x="0." z="SFJP_SFAM_DZs/2" block="SFAB" >
+            </Placement>
+            
+            <Create block="SFAS" />
+            <Placement y="0." x="(SFJP_SFAM_Dxe-SFJP_SFAM_Dxz)/2." z="(-SFJP_SFAM_Dz+SFJP_SFAM_DZs)/2" block="SFAS"  >
+            </Placement>
+            
+            <Placement y="0." x="(-SFJP_SFAM_Dxe+SFJP_SFAM_Dxz)/2." z="(-SFJP_SFAM_Dz+SFJP_SFAM_DZs)/2" block="SFAS"  >
+            </Placement>
+            
+        </Block>       
+
+        <Block name="SFAB" comment="is the big volume of the adc board"  >
+            <Material name="G10" />
+            <Attribute for="SFAB" seen="1" colo="30" />
+            <Shape type="BOX" dz="(SFJP_SFAM_Dz-SFJP_SFAM_DZs)/2" dx="SFJP_SFAM_Dxe/2." dy="SFJP_SFAM_Dy/2." />
+        </Block>
+        
+        <Block name="SFAS" comment="is the small volume of the adc board"  >
+            <Material name="G10" />
+            <Attribute for="SFAS" seen="1" colo="30" />
+            <Shape type="BOX" dz="(SFJP_SFAM_DZs)/2" dx="(SFJP_SFAM_Dxz)/2." dy="(SFJP_SFAM_Dy)/2." />
+        </Block>
+        
+        <Block name="SAPP" comment="is the mother volume of the adc board appendice"  >
+            <Material name="Air" />
+            <Attribute for="SAPP" seen="0" colo="6" />
+            <Shape type="BOX" dz="SFJP_SAPP_Dz/2." dx="(SFJP_SAPP_Dxe+2*SFJP_SAPP_Dxz)/2." dy="(SFJP_SAPP_Dy+2*SFJP_SAPP_Dxz)/2." />
+            <Create block="SAPC" />
+            <Placement y="0." x="0." z="(-SFJP_SAPP_Dz+SFJP_SAPP_Dy)/2." block="SAPC"  >
+            </Placement>
+            
+            <Create block="SAPS" />
+            <Placement y="0" x="SFJP_SAPP_Dxe/2.+SFJP_SAPP_Dxz/2" z="0." block="SAPS"  >
+            </Placement>
+            
+            <Placement y="0" x="-(SFJP_SAPP_Dxe/2.+SFJP_SAPP_Dxz/2)" z="0." block="SAPS"  >
+            </Placement>
+            
+            <Create block="SAPT" />
+            <Placement y="(SFJP_SAPP_Dy+SFJP_SAPP_Dxz)/2." x="0." z="0." block="SAPT"  >
+            </Placement>
+            
+            <Placement y="-(SFJP_SAPP_Dy+SFJP_SAPP_Dxz)/2." x="0." z="0." block="SAPT"  >
+            </Placement>
+            
+        </Block>
+        
+        <Block name="SAPC" comment="is the core (Epoxy) of the adc board appendice"  >
+            <Material name="Carbon" />
+            <Attribute for="SAPC" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SAPP_Dy/2." dx="SFJP_SAPP_Dxe/2." dy="SFJP_SAPP_Dy/2." />
+        </Block>       
+
+        <Block name="SAPS" comment="is the side shell (Carbon) of the adc board appendice"  >
+            <Material name="Carbon" />
+            <Attribute for="SAPS" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SAPP_Dz/2." dx="SFJP_SAPP_Dxz/2." dy="(SFJP_SAPP_Dy+2*SFJP_SAPP_Dxz)/2." />
+        </Block>
+        
+        <Block name="SAPT" comment="is the top-bottom shell (Carbon) of the adc board appendice"  >
+            <Material name="Carbon" />
+            <Attribute for="SAPT" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SAPP_Dz/2." dx="SFJP_SAPP_Dxe/2." dy="SFJP_SAPP_Dxz/2." />
+        </Block>        
+
+        <Block name="SFCO" comment="is the connection board (rectangular with Hirose connectors)"  >
+            <Material name="G10" />
+            <Attribute for="SFCO" seen="1" colo="30" />
+            <Shape type="BOX" dz="SFJP_SFCO_Dz/2" dx="SFJP_SFCO_Dx/2." dy="SFJP_SFCO_Dy/2." />
+        </Block>        
+
+        <Block name="SFCM" comment="is the mother volume of the second connection board"  >
+            <Material name="Air" />
+            <Attribute for="SFCM" seen="0" colo="6" />
+            <Shape type="BOX" dz="SFJP_SFCO_Dz/2" dx="SFJP_SFCM_Dx/2." dy="SFJP_SFCO_Dy/2." />
+
+            <Create block="SFCB" />
+            <Placement y="0" x="+0.5" z="0" block="SFCB"  >
+            </Placement>
+            
+            <Create block="SFCS" />
+            <Placement y="0" x="-1.5" z="-SFJP_SFCO_Dz/2+SFJP_SFCS_Dz/2" block="SFCS"  >
+            </Placement>
+            
+        </Block>       
+
+        <Block name="SFCB" comment="is the big part of the second connection board"  >
+            <Material name="G10" />
+            <Attribute for="SFCB" seen="1" colo="30" />
+            <Shape type="BOX" dz="SFJP_SFCO_Dz/2" dx="SFJP_SFCB_Dx/2." dy="SFJP_SFCO_Dy/2." />
+        </Block>
+        
+        <Block name="SFCS" comment="is the big part of the second connection board"  >
+            <Material name="G10" />
+            <Attribute for="SFCS" seen="1" colo="30" />
+            <Shape type="BOX" dz="SFJP_SFCS_Dz/2" dx="(SFJP_SFCM_Dx-SFJP_SFCB_Dx)/2." dy="SFJP_SFCO_Dy/2." />
+        </Block>
+        
+        <Block name="SFKF" comment="is the first part of the kapton flex circuit"  >
+            <Material name="G10" />
+            <Attribute for="SFKF" seen="1" colo="30" />
+            <Shape type="BOX" dz="SFJP_SFKF_Dz/2" dx="SFJP_SFKF_Dx/2." dy="SFJP_SFKF_Dy/2." />
+        </Block>
+        
+        <Block name="SFKS" comment="is the second part of the kapton flex circuit"  >
+            <Material name="G10" />
+            <Attribute for="SFKS" seen="1" colo="30" />
+            <Shape type="BOX" dz="SFJP_SFKF_Dz/2" dx="SFJP_SFKS_Dx/2." dy="SFJP_SFKF_Dy/2." />
+        </Block>
+        
+        <Block name="SFPR" comment="is the ladder end inside mechanical part (prism with g10 with half density)"  >
+            <Material name="G5" />
+            <Attribute for="SFPR" seen="1" colo="4" />
+            <Shape type="PGON" zi="{0,3.7}" rmn="{0,0}" rmx="{3.48,3.48}"  nz="2" npdiv="1" phi1="-126" dphi="72" />
+        </Block>       
+
+        <Block name="SFPB" comment="is the ladder end outside mechanical part (rectangle with g10)"  >
+            <Material name="G10" />
+            <Attribute for="SFPB" seen="1" colo="4" />
+            <Shape type="BOX" dz="SFJP_SFPBDz/2." dx="SFJP_SFPB_Dx/2." dy="SFJP_SFPB_Dy/2." />
+        </Block>        
+
+        <Block name="SSBS" comment="is the small part of the aluminium plate linking the ladder to the sector"  >
+            <Material name="Aluminium" />
+            <Attribute for="SSBS" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SSBS_Dx/2." dx="SFJP_SSBS_Dx/2." dy="SFJP_SSBS_Dy/2." />
+        </Block>
+        
+        <Block name="SSBB" comment="is the Big part of the aluminium plate linking the ladder to the sector"  >
+            <Material name="Aluminium" />
+            <Attribute for="SSBB" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SSBB_Dz/2." dx="SFJP_SSBB_Dx/2." dy="SFJP_SSBS_Dy/2." />
+        </Block>
+        
+        <Block name="SSST" comment="is the top of the small sector"  >
+            <Material name="Aluminium" />
+            <Attribute for="SSST" seen="1" colo="1" />
+            <Shape type="TUBS" rmin="SFJP_SSST_Rmin" rmax="SFJP_SSST_Rmax" dz="SFJP_SSST_Width/2." phi2="(180.-SFJP_AlphaZH)" phi1="SFJP_AlphaZH" />
+        </Block>
+       
+        <Block name="SSSS" comment="is the side of the small sector"  >
+            <Material name="Aluminium" />
+            <Attribute for="SSSS" seen="1" colo="1" />
+            <Shape type="TUBS" rmin="SFJP_SSSS_Rmin" rmax="SFJP_SSST_Rmin" dz="SFJP_SSSS_Width/2." phi2="(180.-SFJP_AlphaZH)" phi1="SFJP_AlphaZH" />
+        </Block>
+        
+        <Block name="SSRT" comment="is the top of the side rib"  >
+
+            <If expr="ConfigB.le.5"  >
+                <Material name="Aluminium" />
+                <Else  >
+                    <Material name="Carbon" />
+                </Else>
+                
+            </If>           
+
+            <Attribute for="SSRT" seen="1" colo="1" />
+            <Shape type="TUBS" rmin="SFJP_SSST_Rmin" rmax="SFJP_SSST_Rmax" dz="SFJP_SSST_Width/2." phi2="+SFJP_AlphaZH" phi1="-SFJP_AlphaZH" />
+        </Block>
+        
+        <Block name="SSRS" comment="is the side of the small rib"  >
+            <If expr="ConfigB.le.5"  >
+                <Material name="Aluminium" />
+                <Else  >
+                    <Material name="Carbon" />
+                </Else>
+                
+            </If>
+            
+            <Attribute for="SSRS" seen="1" colo="1" />
+            <Shape type="TUBS" rmin="SFJP_SSRS_Rmin" rmax="SFJP_SSST_Rmin" dz="SFJP_SSSS_Width/2." phi2="+SFJP_AlphaZH" phi1="-SFJP_AlphaZH" />
+        </Block>        
+
+        <Block name="SSLB" comment="is the linking (sector to the cone) box"  >
+            <Material name="Air" />
+            <Attribute for="SSLB" seen="0" colo="6" />
+            <Shape type="BOX" dz="SFJP_SSLB_Dz/2." dx="SFJP_SSLB_Dx/2." dy="SFJP_SSLB_Dy/2." />
+
+            <Create block="SBCH" />
+            <Placement y="0" x="0" z="SFJP_SSLB_Dz/2.-SFJP_SSCR_ThD/2." block="SBCH"  >
+            </Placement>
+            
+            <Create block="SBCV" />
+            <Placement y="(SFJP_SSCR_Wd+SFJP_SSCR_Vl)/2" x="0" z="SFJP_SSLB_Dz/2.-SFJP_SSCR_ThD/2." block="SBCV"  >
+            </Placement>
+            
+            <Placement y="-(SFJP_SSCR_Wd+SFJP_SSCR_Vl)/2" x="0" z="SFJP_SSLB_Dz/2.-SFJP_SSCR_ThD/2." block="SBCV"  >
+            </Placement>
+            
+            <Create block="SBFH" />
+            <Placement y="0" x="0" z="SFJP_SSLB_Dz/2.-SFJP_SSCR_ThD-SFJP_SSCR_ThA/2." block="SBFH"  >
+            </Placement>
+            
+            <Create block="SBFV" />
+            <Placement y="(SFJP_SSCR_Wd+SFJP_SSCR_Vl)/2" x="0" z="SFJP_SSLB_Dz/2.-SFJP_SSCR_ThD-SFJP_SSCR_ThA/2." block="SBFV"  >
+            </Placement>
+            
+            <Placement y="-(SFJP_SSCR_Wd+SFJP_SSCR_Vl)/2" x="0" z="SFJP_SSLB_Dz/2.-SFJP_SSCR_ThD-SFJP_SSCR_ThA/2." block="SBFV"  >
+            </Placement>          
+
+        </Block>
+        
+        <Block name="SBCH" comment="is the horizontal branch of the DELRIN cross"  >
+            <Material name="Delrin" />
+            <Attribute for="SBCH" seen="1" colo="2" />
+            <Shape type="BOX" dz="SFJP_SSCR_ThD/2." dx="SFJP_SSCR_Hl/2." dy="SFJP_SSCR_Wd/2." />
+        </Block>
+        
+        <Block name="SBFH" comment="is the horizontal branch of the Alumimium cross"  >
+            <Material name="Aluminium" />
+            <Attribute for="SBFH" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SSCR_ThA/2." dx="SFJP_SSCR_Hl/2." dy="SFJP_SSCR_Wd/2." />
+        </Block>
+        
+        <Block name="SBCV" comment="is the vertical branch of the DELRIN cross"  >
+            <Material name="Delrin" />
+            <Attribute for="SBCV" seen="1" colo="2" />
+            <Shape type="BOX" dz="SFJP_SSCR_ThD/2." dx="SFJP_SSCR_Wd/2." dy="SFJP_SSCR_Vl/2." />
+        </Block>
+        
+        <Block name="SBFV" comment="is the vertical branch of the Alumimium cross"  >
+            <Material name="Aluminium" />
+            <Attribute for="SBFV" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SSCR_ThA/2." dx="SFJP_SSCR_Wd/2." dy="SFJP_SSCR_Vl/2." />
+        </Block>
+        
+        <Block name="SSLT" comment="is the linking (sector to the cone) tube"  >
+            <Material name="Aluminium" />
+            <Attribute for="SSLT" seen="1" colo="1" />
+            <Shape type="TUBE" rmax="SFJP_SSLT_Rmax" rmin="0." dz="SFJP_SSLT_Dz/2." />
+        </Block>
+        
+        <Block name="SCMP" comment="is the mounting plate inserted in the cones."  >
+            <Material name="Aluminium" />
+            <Attribute for="SCMP" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SCMP_Dz/2" dx="SFJP_SCMP_Dx/2." dy="SFJP_SCMP_Dy/2." />
+        </Block>
+        
+        <Block name="SCVM" comment="is the mother volume of the V-shape piece"  >
+            <Material name="Air" />
+            <Attribute for="SCVM" seen="0" colo="6" />
+            <Shape type="BOX" dz="SFJP_SCVM_Dz/2" dx="SFJP_SCVM_Dx/2." dy="SFJP_SCVM_Dy/2." />
+            <Create block="SCVB" />
+            <Placement y="-SFJP_SCVM_Dy/2.+SFJP_SCVB_Dy/2." x="0." z="0." block="SCVB"  >
+            </Placement>
+            
+            <Create block="SCVS" />
+            <Placement y="SFJP_SCVS_Py" x="SFJP_SCVS_Px" z="0.0" block="SCVS"  >
+                <Rotation alphaz="SFJP_AlphaZH" />
+            </Placement>
+            
+            <Placement y="SFJP_SCVS_Py" x="-SFJP_SCVS_Px" z="0.0" block="SCVS"  >
+                <Rotation alphaz="-SFJP_AlphaZH" />
+            </Placement>
+            
+        </Block>
+        
+        <Block name="SCVB" comment="is the base plate of the V-shape piece"  >
+            <Material name="Aluminium" />
+            <Attribute for="SCVB" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SCVM_Dz/2" dx="SFJP_SCVM_Dx/2." dy="SFJP_SCVB_Dy/2." />
+        </Block>
+        
+        <Block name="SCVS" comment="is the side plate of the V-shape piece"  >
+            <Material name="Aluminium" />
+            <Attribute for="SCVS" seen="1" colo="1" />
+            <Shape type="BOX" dz="SFJP_SCVM_Dz/2" dx="SFJP_SCVS_Dx/2." dy="SFJP_SCVS_Dy/2." />
+        </Block>        
+
+<!-- Material weights have been corrected to account for the Natoms=(int) vs Natoms=(float)
+     difference between AgSTAR and ROOT.
+  -->
+        <Block name="SOSK" comment="is the separation shield cylinder"  >
+            <Mixture name="SSDALMY" dens="1.40845"  >
+                <Component name="C5" a="12" z="6"  w="10000*5" />
+                <Component name="H4" a="1"  z="1"  w="10000*4" />
+                <Component name="O2" a="16" z="8"  w="10000*2" />
+                <Component name="Al" a="27" z="13" w="986" />
+	    </Mixture>        
+
+            <Material name="SSDALMY" />
+            <Attribute for="SOSK" seen="1" colo="3" />
+            <Shape type="TUBE" rmax="SFPA_SOutROut" rmin="SFPA_SOutRInn" dz="SFPA_SOutLen" />
+        </Block>
+
+    </Module>
+   
+
+<Subroutine name="sisdgeo7a_trans_to_sfm" 
+	    args="['x', 'y','xc', 'yc','tilt', 'xpos', 'ypos']" >
+
+  <Arguement type="real" intent="in" name="x" />
+  <Arguement type="real" intent="in" name="y" />
+  <Arguement type="real" intent="in" name="xc" />
+  <Arguement type="real" intent="in" name="yc" />
+  <Arguement type="real" intent="in" name="tilt" />
+  <Arguement type="real" intent="inout" name="xpos" />
+  <Arguement type="real" intent="inout" name="ypos" />
+
+  <varlist type="double" >
+    sint, cost, degrad
+   </varlist>
+  degrad=3.1415926/180.0
+  sint=sin(degrad*tilt)
+  cost=cos(degrad*tilt)
+  xpos = xc  +  cost*x - sint*y
+  ypos = yc  +  sint*x + cost*y
+  return
+</Subroutine>
+
+    
+</Document>
+
+
+ 
+

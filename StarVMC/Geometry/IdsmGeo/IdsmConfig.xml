@@ -2,24 +2,33 @@
 <Detector name="IDSM" comment="Inner detector supports">
   <Modules>
     IdsmGeo1,
-    IdsmGeo2
+    IdsmGeo2,
+    IdsmGeo2a
   </Modules>
 
   <Setup name="IDSMof" comment="OFF" module="IdsmGeo1" onoff="off" />
 
-  <Setup name="IDSMon" comment="Inner detector support module" module="IdsmGeo1" onoff="on" >
+  <Setup name="IDSMon" comment="Inner detector support module" module="IdsmGeo1" onoff="on"  simu="2">
     <Init struct="idsc" var="version" value ="1" />
   </Setup>
 
-  <Setup name="IDSM01" comment="Inner detector support module" module="IdsmGeo1" onoff="on" >
+  <Setup name="IDSM01" comment="Inner detector support module" module="IdsmGeo1" onoff="on"  simu="2">
     <Init struct="idsc" var="version" value ="1" />
   </Setup>
 
-  <Setup name="IDSM02" comment="Inner detector support module" module="IdsmGeo2" onoff="on" >
+  <Setup name="IDSM02" comment="Inner detector support module" module="IdsmGeo2" onoff="on"  simu="2">
     <Init struct="idsc" var="version" value ="2" />
   </Setup>
 
-  <Setup name="IDSM14" comment="Inner detector support module" module="IdsmGeo2" onoff="on" >
+  <Setup name="IDSM14" comment="Inner detector support module" module="IdsmGeo2" onoff="on"  simu="2">
+    <Init struct="idsc" var="version" value ="14" />
+  </Setup>
+
+  <Setup name="IDSM02a" comment="Inner detector support module" module="IdsmGeo2a" onoff="on"  simu="2">
+    <Init struct="idsc" var="version" value ="2" />
+  </Setup>
+
+  <Setup name="IDSM14a" comment="Inner detector support module" module="IdsmGeo2a" onoff="on"  simu="2">
     <Init struct="idsc" var="version" value ="14" />
   </Setup>
 

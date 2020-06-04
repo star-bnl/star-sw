@@ -26,16 +26,16 @@
  
     <Modules>SvttGeo10,SvttGeo11,SvttGeo1,SvttGeo2,SvttGeo3,SvttGeo4,SvttGeo5,SvttGeo6,SvttGeo7,SvttGeo9,SvttGeo</Modules>
 
-    <Setup  name   = "SVTTof" comment="SVTT off" module="SvttGeo" onoff="off" />
-    <Setup  name   = "SVtton" comment="SVTT on"  module="SvttGeo" onoff="on"  />
+    <Setup  name   = "SVTTof" comment="SVTT off" module="SvttGeo" onoff="off"  simu="2"/>
+    <Setup  name   = "SVtton" comment="SVTT on"  module="SvttGeo" onoff="on"   simu="2"/>
 
-   <Setup name="SVT204" comment="SVTT version" onoff="on"  module="SvttGeo4" >
+   <Setup name="SVT204" comment="SVTT version" onoff="on"  module="SvttGeo4"  simu="2">
       <Init struct="svtg" var="nlayer" value="6" />    <!-- nSvtLayer=6 -->
       <Init struct="svtg" var="supportver" value="2" /><!-- SvshConfig = 2 -->
       <Init struct="svtg" var="conever"    value="2" /><!-- create cone -->
     </Setup>
 
-    <Setup name="SVT206" comment="SVTT version" onoff="on" module="SvttGeo6">
+    <Setup name="SVT206" comment="SVTT version" onoff="on" module="SvttGeo6" simu="2">
       <Init struct="svtg" var="nlayer"     value="6" />    <!-- nSvtLayer=6 -->
       <Init struct="svtg" var="supportver" value="2" />    <!-- SvshConfig = 2 -->
       <Init struct="svtg" var="conever"    value="2" />    <!-- create cone -->
@@ -45,12 +45,12 @@
 
 
 
-    <Setup name="SVT306" comment="SVTT version" onoff="on"  module="SvttGeo6">
+    <Setup name="SVT306" comment="SVTT version" onoff="on"  module="SvttGeo6" simu="2">
       <Init struct="svtg" var="nlayer" value="6" />    <!-- nSvtLayer=6 -->
       <Init struct="svtg" var="supportver" value="3" /><!-- SvshConfig = 3 -->
       <Init struct="svtg" var="conever"    value="2" /><!-- create cone -->
     </Setup>                            
-    <Setup name="SVT306x" comment="SVTT version" onoff="on" module="SvttGeo6">
+    <Setup name="SVT306x" comment="SVTT version" onoff="on" module="SvttGeo6" simu="2">
       <Init struct="svtg" var="nlayer"     value="7" />   
       <Init struct="svtg" var="supportver" value="3" /><!-- SvshConfig = 3 -->
       <Init struct="svtg" var="conever"    value="2" /><!-- create cone -->
@@ -61,19 +61,19 @@
     </Setup>
 
 
-    <Setup name="SVT310x" comment="SVTT version" onoff="on" module="SvttGeo10">
+    <Setup name="SVT310x" comment="SVTT version" onoff="on" module="SvttGeo10" simu="2">
       <Init struct="svtg" var="supportver" value="3" /> <!-- SvshConfig = 3 -->
       <Init struct="svtg" var="conever"    value="2" /> <!-- create cone -->
     </Setup>
 
-    <Setup name="SVT312" comment="SVTT version" onoff="on" module="SvttGeo11">
+    <Setup name="SVT312" comment="SVTT version" onoff="on" module="SvttGeo11" simu="2">
       <Init struct="svtg" var="nlayer"     value="6" />    <!-- nSvtLayer=6 -->
       <Init struct="svtg" var="supportver" value="3" />
       <Init struct="svtg" var="conever"    value="2" />
       <Init struct="svtg" var="config"     value="12" />
     </Setup>
 
-    <Setup name="SVT312x" comment="SVTT version" onoff="on" module="SvttGeo11" >
+    <Setup name="SVT312x" comment="SVTT version" onoff="on" module="SvttGeo11"  simu="2">
       <Init struct="svtg" var="supportver" value="3" />
       <Init struct="svtg" var="conever"    value="2" />
       <Init struct="svtg" var="config"     value="12" />
@@ -97,7 +97,7 @@
 
 
 
-    <Setup name="SVT103" comment="SVTT version" onoff="on" module="SvttGeo3" > 
+    <Setup name="SVT103" comment="SVTT version" onoff="on" module="SvttGeo3"  simu="2"> 
 <!--
       <Init struct="svtg" var="config"     value="3" />
 -->
@@ -109,7 +109,7 @@
 
 
 
-    <Setup name="SVTT00" comment="SVTT version" onoff="on" module="SvttGeo">
+    <Setup name="SVTT00" comment="SVTT version" onoff="on" module="SvttGeo" simu="2">
 
 <!--
       svtWater="off" nSvtVafer=7; nSvtLayer=6
@@ -126,36 +126,36 @@
 
 
  
-    <Setup name="SVT100" comment="SVTT version" onoff="on" module="SvttGeo">
+    <Setup name="SVT100" comment="SVTT version" onoff="on" module="SvttGeo" simu="2">
 <!--      svtWater="on" nSvtVafer=0; nSvtLayer=-3; svtWaferDim=0;  -->
     </Setup>
 
-    <Setup name="SVT101" comment="SVTT version" onoff="on"  module="SvttGeo1" >
+    <Setup name="SVT101" comment="SVTT version" onoff="on"  module="SvttGeo1" simu="2" >
 <!--      SvttConfig = 1; svtWater=on ; nSvtLayer=6;]                                  -->
     </Setup>
 
-    <Setup name="SVT102" comment="SVTT version" onoff="on"  module="SvttGeo2" >                                               
+    <Setup name="SVT102" comment="SVTT version" onoff="on"  module="SvttGeo2"  simu="2">                                               
 <!--      SvttConfig = 2; svtWater="on" nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;       
       SvshConfig = 0; "No SVT shield"]             -->
     </Setup>                              
 
  
-    <Setup name="SVT106" comment="SVTT version" onoff="on"  module="SvttGeo6" >
+    <Setup name="SVT106" comment="SVTT version" onoff="on"  module="SvttGeo6"  simu="2">
 <!--      svtWater="on" nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;       
       SvshConfig = 0; "No SVT shield"]                                -->
     </Setup>
             
-    <Setup name="SVT203" comment="SVTT version" onoff="on"  module="SvttGeo3" >
+    <Setup name="SVT203" comment="SVTT version" onoff="on"  module="SvttGeo3"  simu="2">
 <!--      svtWater="on" nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;       
       SvshConfig = 2; "SVT shield" -->
     </Setup>
     
-    <Setup name="SVT304" comment="SVTT version" onoff="on" module="SvttGeo4" >
+    <Setup name="SVT304" comment="SVTT version" onoff="on" module="SvttGeo4"  simu="2">
 <!--      svtWater="on" nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;       
       SvshConfig = 3; "SVT shield"]                                               -->
     </Setup>
 
-    <Setup name="SVT211" comment="SVTT version" onoff="on"  module="SvttGeo11">
+    <Setup name="SVT211" comment="SVTT version" onoff="on"  module="SvttGeo11" simu="2">
 <!--
       svtWater="on" nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;      
       SvshConfig = 2; "SVT shield"]                                              
@@ -163,7 +163,7 @@
     </Setup>
     
 
-    <Setup name="SVT311" comment="SVTT version" onoff="on" module="SvttGeo11" >
+    <Setup name="SVT311" comment="SVTT version" onoff="on" module="SvttGeo11"  simu="2">
 <!--
       svtWater="on" nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;      
       SvshConfig = 3; "SVT shield"]                               

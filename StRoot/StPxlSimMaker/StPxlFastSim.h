@@ -1,11 +1,17 @@
 /*
- * $Id: StPxlFastSim.h,v 1.7 2015/03/13 18:45:01 perev Exp $
+ * $Id: StPxlFastSim.h,v 1.8 2017/10/19 19:38:17 jeromel Exp $
  *
  * Author: M. Mustafa
  *
- * 
+ *
  **********************************************************
  * $Log: StPxlFastSim.h,v $
+ * Revision 1.8  2017/10/19 19:38:17  jeromel
+ * Merging PXL201709UPD back to MAIN
+ *
+ * Revision 1.7.8.1  2017/09/11 19:20:54  jeromel
+ * No changes, checking branch
+ *
  * Revision 1.7  2015/03/13 18:45:01  perev
  * Roll back
  *
@@ -33,7 +39,7 @@
    This class has the responsibility to create StPxlHit objects and store them in
    StPxlHitCollection.
 
-   StPxlHit is a Gaussian smeared StMcPxlHit. 
+   StPxlHit is a Gaussian smeared StMcPxlHit.
    The smearing parameters are fetched from Calibrations/tracker/PixelHitError*
 
    This class conforms to the STAR StMaker standards.
@@ -51,25 +57,25 @@ class StPxlFastSim: public StPxlISim
 {
  public:
 
-  /*! \brief Constructor */ 
+  /*! \brief Constructor */
   StPxlFastSim(const Char_t *name="pxlFastSim",Bool_t randomSeed=kFALSE): StPxlISim(name), mPxlDb(0), mRandom(0), mResXPix(0), mResYPix(0), mResZPix(0), mUseRandomSeed(randomSeed) {}
 
   /*! \brief This class does not own any hit containers.
-   *        mRandom is deleted here. 
+   *        mRandom is deleted here.
   */
   ~StPxlFastSim();
 
 
-  /*! \brief A random seed is passed to mRandom 
+  /*! \brief A random seed is passed to mRandom
    * PXL smearing resolutions (PixelHitError) are fetched from calib_db.
-   * 
+   *
    * returns kStOk if resolutions have been fetched successfully. kStErr otherwise.
    */
   Int_t initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDataSet,const Int_t run);
 
    /*! \brief creates an StPxlHit object for every StMcPxlHit, and fills the
-   *  hit StPxlHitCollection container. 
-   * 
+   *  hit StPxlHitCollection container.
+   *
    *  Returns:
    *  kStOk: if hits have been loaded to StPxlHitCollection successfully.
   */
@@ -80,7 +86,7 @@ class StPxlFastSim: public StPxlISim
   */
 
  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.7 2015/03/13 18:45:01 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.8 2017/10/19 19:38:17 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
  private:
   //Routine to smear hit by resolution with gaussian, mean zero and width res.
@@ -100,13 +106,19 @@ class StPxlFastSim: public StPxlISim
 };
 #endif
 /*
- * $Id: StPxlFastSim.h,v 1.7 2015/03/13 18:45:01 perev Exp $
+ * $Id: StPxlFastSim.h,v 1.8 2017/10/19 19:38:17 jeromel Exp $
  *
  * Author: M. Mustafa
  *
- * 
+ *
  **********************************************************
  * $Log: StPxlFastSim.h,v $
+ * Revision 1.8  2017/10/19 19:38:17  jeromel
+ * Merging PXL201709UPD back to MAIN
+ *
+ * Revision 1.7.8.1  2017/09/11 19:20:54  jeromel
+ * No changes, checking branch
+ *
  * Revision 1.7  2015/03/13 18:45:01  perev
  * Roll back
  *

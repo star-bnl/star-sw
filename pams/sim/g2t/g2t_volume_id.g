@@ -1,7 +1,41 @@
-* $Id: g2t_volume_id.g,v 1.81 2016/11/03 13:49:01 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.90 2018/12/03 21:08:53 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
-* Revision 1.81  2016/11/03 13:49:01  jwebb
-* Integrate EPD into framework.
+* Revision 1.90  2018/12/03 21:08:53  jwebb
+* g2t_volume_id for TPC is split out into a separate subroutine.
+*
+* Code is added to recognize iTPC era geometry, and setup the appropriate
+* TPAD volume mappings.
+*
+* (Support for iTPC R&D models retired).
+*
+* Code was tested on simulations from y2003 to 2018.  Output of fz2root is
+* identical on a hit-by-hit basis on the first production quality geometry
+* from each year.  y2019 simulations of single muons show the expected
+* number of hits on tracks.  note-- prompt hit region has not been
+* vetted, but no issues expected as we do not change the prompt-hit logic.
+*
+* Revision 1.89  2018/07/24 18:46:14  jwebb
+* Updates to EPD geometry and numbering from Prashanth.
+*
+* Revision 1.88  2018/02/01 22:52:38  jwebb
+* Updated g2t volume ID for epd.
+*
+* Revision 1.87  2018/01/26 18:09:07  jwebb
+* Reduce unneeded output
+*
+* Revision 1.86  2017/12/28 18:11:29  jwebb
+*
+* Add FMS postshower hits interface to C++...
+*
+* Revision 1.85  2017/12/19 16:36:29  jwebb
+* Updated EPD volume id
+*
+* Revision 1.84  2017/10/24 22:03:32  jwebb
+* Shut the framework up.
+*
+* Revision 1.83  2017/10/18 14:33:39  jwebb
+* Modifications of g2t_volume_id to support alternate paths to pxl, ist, sst
+* active sensors, while maintaining the same absolute volume ID.
 *
 * Revision 1.80  2015/10/12 20:46:57  jwebb
 * Hit definition and starsim to root interface for FTS.
@@ -185,7 +219,8 @@
 *              CALB_Nmodule(1) and (2), not on RICH presence !     *
 ********************************************************************
       implicit none
-      integer  g2t_volume_id
+      integer :: g2t_volume_id
+      integer :: g2t_tpc_volume_id
 +CDE,gcunit.
 * 
       Character*3      Csys
@@ -196,14 +231,15 @@
       Integer          ftpc_hash(6,2)   / 1, 6, 5, 4, 3, 2, 
                                           6, 1, 2, 3, 4, 5/
 
-      Integer          innout,sector,sub_sector,volume_id
+      Integer          innout,sector,sub_sector,volume_id,sensor,unknown
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          ftpv,padrow,ftpc_sector,innour,lnumber,wafer,lsub,phi_30d
       Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder,nwafer
       Integer          module,layer,nch
       Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
-      Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/,ifsc/0/,imtd/0/
+      Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/,ifsc/0/,imtd/0/,ipxl/0/
+      Integer          iist/0/,isst/0/ !
       Integer          istVersion/0/,istLayer/0/
 *     FPD
       Integer          n1,n2,ew,nstb,ch,sl,quad,layr,slat
@@ -240,6 +276,10 @@
       Integer hcal_cell   "HCAL cells  3x3"
       Integer hcal_fiber  "HCAL fibers 15x15 or 16x16"
       Integer hcal_sl     "HCAL short long cell, 1 short,2 long"
+      Integer epd_epdm, epd_epss, epd_epdt
+
+      Integer etof_sector, etof_plane, etof_counter, etof_gap, etof_cell
+      Integer pixl_alignment/0/ "Pixel alignment level"
  
       Structure  SVTG  {version}
       Structure  TPCG  {version, tpadconfig }
@@ -256,6 +296,10 @@
       Structure  FPDG { Version }         ! FPD geometry
       Structure  FSCG { Version }         ! FSC geometry
       Structure  MTDG { Version, Config } ! MTD geometry
+
+      Structure  PIXL { Version, int sector, int ladder, int sensor, phiNum(10), int on(1), int misalign }
+      Structure  ISTC { version, int misalign }
+      Structure  SSDP { version, int contig, int placement, int misalign }
 
 
       logical    first/.true./
@@ -281,6 +325,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           USE  /DETM/FSCM/FSCG  stat=ifsc
           USE  /DETM/MUTD/MTDG  stat=imtd
 
+          USE  /DETM/PIXL/PIXL  stat=ipxl
+          USE  /DETM/ISTD/ISTC  stat=iist
+          USE  /DETM/SISD/SSDP  stat=isst
+        
           call RBPOPD
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
           if (ivpd>=0) print *,'              : VPD version =',vpdg_version
@@ -293,6 +341,19 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *             print *,'              : ISTB version of code=', ismg_code
              istVersion=ismg_code
           endif
+
+
+
+
+
+
+   """This is a hack.  For some reason that I have yet to determine, the PIXL"""
+   """structure is not being loaded... maybe the name PIXL gets confused with"""
+   """the data struct associated w/ pixlgeo?  Maybe reasonas?"""
+             pixl_alignment = 1
+             pixl_misalign  = 1
+
+
 
 
           """ Intialize TPADs based on TPC version """
@@ -425,31 +486,33 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         endif
         
       else if (Csys=='ssd') then
-        volume_id = 7000+100*numbv(2)+numbv(1)
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      else if (Csys=='tpc') then
-*2*                                        Peter M. Jacobs
-        tpgv  = numbv(1)
-        tpss  = numbv(2)
-        sector= tpss+12*(tpgv-1) 
-        tpad  = numbv(3)
-        isdet = 0
 
-        If  (tpcg_version==1) then
-          If (cd=='TPAI')  isdet=1
-          If (cd=='TPAO')  isdet=2
-*PN:      outermost pseudopadrow:
-          If (cd=='TPAO' & tpad==14) tpad=45
-        else
-!//		tpad >nbpads (73) prompt hits
-          if (tpad .gt. nbpads) tpad = tpad - nbpads
-          isdet = isdets(tpad);
-          tpad  = tpads (tpad);
+        if ( isst.lt.0 ) then
+
+        volume_id = 7000+100*numbv(2)+numbv(1)
+
+        else if ( ssdp_misalign .eq. 0 ) then
+
+        ladder = numbv(1)
+        sensor = numbv(2)
+        volume_id = 7000+100*numbv(2)+numbv(1)
+
+        else if( ssdp_misalign.eq.1 ) then
+
+        ladder = numbv(1) - 1
+        sensor = mod( ladder , 16 ) + 1
+        ladder =      ladder / 16   + 1
+
+        volume_id = 7000 + 100*sensor + ladder
 
         endif
 
-        volume_id=100000*isdet+100*sector+tpad
-*
+
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      else if (Csys=='tpc') then
+
+        volume_id = g2t_tpc_volume_id( numbv )
+
       else if (Csys=='mwc') then
 *3*
         rileft    = numbv(1)
@@ -814,28 +877,82 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 *16*                          Mikhail Kopytine for the BBC group
       else if (Csys=='bbc') then
-*        
+*         
 *       BBC has 4 levels: west/east, annulus, triple module, single module
         volume_id = numbv(1)*1000 + numbv(2)*100 + numbv(3)*10 + numbv(4)    
 *17*                                 Kai Schweda
       else if (Csys=='pix') then
-        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 
-*18*                                 Maxim Potekhin
+c$$$    write (*,*) numbv
+
+        """ Old numbering scheme """
+        if ( pixl_alignment .eq. 0 ) then
+        write (*,*) 'old numbering'
+        sector = numbv(1)
+        ladder = numbv(2)
+        sensor = numbv(3)
+        unknown = numbv(4)
+        endif
+
+        """ New numbering scheme (ladders in pxmo)"""
+        if ( pixl_alignment .eq. 1 ) then
+
+        sector =    ( numbv(1)-1)/4   + 1
+        ladder = mod( numbv(1)-1, 4 ) + 1
+        sensor = numbv(2)
+
+        endif
+
+
+        if ( pixl_misalign .eq. 1 ) then
+
+        sensor = numbv(1) - 1     ! 0 ... 399
+        sector = sensor / 40 + 1
+        ladder = mod ( sensor / 10, 4 ) + 1
+        sensor = mod ( sensor, 10 ) + 1
+
+        endif
+
+        "volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)"
+        volume_id = 1000000*sector + 10000*ladder + 100*sensor
+
+*18* 
+      else if ( Csys=='ist' .and. iist>= 0 ) then
+
+          " The extra offset on the ladder number looks odd here...      "
+          " But it was used in the legacy encoding (ver != 3 or 4 below) "
+          " which we end up falling through to in the ist.               "
+
+          if      ( ISTC_misalign .eq. 1 ) then
+
+              sensor = numbv(1) - 1         ! 0 to 143
+              ladder = sensor / 6 + 1 + 1   ! extra +1 as per legacy below...
+              sensor = mod( sensor, 6 ) + 1 !
+
+
+          else if ( ISTC_misalign .eq. 0 ) then
+              ladder = numbv(1) + 1 ! IBAM
+              sensor = numbv(2)     ! IBLM
+
+          else
+              STOP "IST misalignment in ambiguous state / test mode"
+          endif
+          volume_id = ladder * 1000000  +   
+                      sensor *   10000  
+
+
+
       else if (Csys=='ist') then
         if(istVersion.ne.3.and.istVersion.ne.4) then
             istLayer=numbv(1)+1
-*            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(2),' ',numbv(3),' ',numbv(4)
             volume_id = istLayer*1000000 + numbv(2)*10000 + 100*numbv(3)  + numbv(4)
         endif
         if(istVersion.eq.3) then
             istLayer=3
-*            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(1),' ',numbv(2),' ',numbv(3)
             volume_id = istLayer*1000000 + numbv(1)*10000 + 100*numbv(2)  + numbv(3)
         endif
         if(istVersion.eq.4) then
             istLayer=2
-*            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(1),' ',numbv(2),' ',numbv(3)
             volume_id = istLayer*1000000 + numbv(1)*10000 + 100*numbv(2)  + numbv(3)
         endif
 *19*                                 Kai Schweda
@@ -859,6 +976,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
          if(cd=='FLGR') sl=1
          if(cd=='FLXF') sl=2; 
          if(cd=='FPSC') sl=3; 
+         if(cd=='FOSC') sl=4; 
          assert(sl.gt.0)        ! Wrong sensitive detector in FPD/FMS
          if(sl.le.2) then !fms or fpd
           ew=(n1-1)/2+1
@@ -896,18 +1014,16 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	    if(n2.ge.362 .and. n2.le.373)  ch=n2 +166
 	    if(n2.ge.374 .and. n2.le.384)  ch=n2 +171
 	    if(n2.ge.385 .and. n2.le.394)  ch=n2 +177   
-            !write(*,*) 'matrix check - Large cells FMS: ',nstb, ch,n2
            else
             if(n2.ge. 85 .and. n2.le.154)  ch=n2 +  5 + 5*((n2-85)/7)
 	    if(n2.ge.155 .and. n2.le.238)  ch=n2 + 50 
-            !write(*,*) 'matrix check - Small cells FMS: ',nstb, ch,n2
            endif
           endif
           volume_id=ew*10000+nstb*1000+ch       
-       else                     ! FPS (FMS-Preshower)
-          ew=2          
+       else if(sl.eq.3) then    ! FPS (FMS-Preshower)
+          ew=2
           layr=n1
-          if(layr.eq.4) layr=3          
+          if(layr.eq.4) layr=3
           if(n2.le.21) then
              quad=1
              slat=n2
@@ -917,14 +1033,28 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           else if(n2.le.21+19+21) then
              quad=3
              slat=n2-21-19
-          else 
+          else
              quad=4
              slat=n2-21-19-21
           endif
-          volume_id=100000+ew*10000+quad*1000+layr*100+slat  
-*$$$      write(*,*) 'FMSPS ',n1,n2,quad,layr,slat,volume_id
-         endif
-        }
+          volume_id=100000+ew*10000+quad*1000+layr*100+slat
+       else                     ! FPOST (FMS-Postshower)
+          ew=2          
+          if(n1.le.5) then
+             quad=1
+             if(n1.le.2) then
+                layr=n1
+             else
+                layr=n1+1
+             endif
+          else
+             quad=2
+             layr=n1-3
+          endif
+          slat=n2
+          volume_id=200000+ew*10000+quad*1000+layr*100+slat  
+       endif
+      }
 *24*                                 Dmitry Arkhipkin
       else if (Csys=='fsc') then
         volume_id = numbv(1);
@@ -1017,17 +1147,188 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            "Disk number is 1st entry in numbv"
            volume_id = numbv(1)
 *******************************************************************************************
-** 28                                                                           Jason Webb
+** 28                                                                           Prashanth S 
       ELSE IF (CSYS=='epd') THEN
          
-           "East / west is first in numbv, paddle number is second"           
-           volume_id = 100*numbv(1) + numbv(2)
-            
+           epd_epdm = numbv(1) "1 for east, 2 for west mother wheel"  
+           epd_epss = numbv(2) "1 for PP1, 2 for PP2, PP-postion 1'o,2'o clock etc"
+           epd_epdt = numbv(3) "1:T1 trap, 2:T1 Triangular, 3:T2 Thin, 4:T3 Thick"
+
+	   volume_id = 100000 * epd_epdm                          +
+	                 1000 * epd_epss                          +
+		           10 * (mod(epd_epdt,2) + (epd_epdt/2) ) +
+			    1 * (mod(epd_epdt,2)) 
+
+     " EPD volume_id " 
+     " 100,000 : east or west "
+     "   1,000 : Position clock wise, 1 to 12 "
+     "      10 : Tile number 1 to 31, refer EPD Drupal page"
+     "       1 : 1 T1 trap or T2 thin; 0 T1 triangular or T2 thick
+	               
+
+*write (*,*) 'g2t volume id: epd=', epd_epdm,'  ',epd_epss,'  ',epd_epdt,'  ',
+*    (mod(epd_epdt,2) + (epd_epdt/2) ),' ',mod(epd_epdt,2) ,'  ',volume_id
+   
+
+
+*******************************************************************************************
+** 29                                                                           Jason Webb
+      ELSE IF (CSYS=='eto') THEN
+
+         """Endcap TIME OF FLIGHT"""
+
+         etof_plane    = numbv(1)/100          "1 closest to IP, 3 furthest from IP"
+         etof_sector   = mod( numbv(1), 100 )  "matches TPC scheme 13 to 24"
+         etof_counter  = numbv(2)              "3 counters per gas volume"
+         etof_gap      = numbv(3)              "12 gaps between glass"
+         etof_cell     = numbv(4)              "32 cells per gap"
+
+        
+
+         volume_id = etof_cell               + 
+                     100      * etof_gap     +
+                     10000    * etof_counter + 
+                     100000   * etof_sector  +   
+                     10000000 * etof_plane
+
+         """ Note: this last part could just be 100000*numbv(1).  We break it """
+         """ into plane and sector just to make explicit the numbering scheme """
+                     
       else
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
-    g2t_volume_id = volume_id
 
+
+    g2t_volume_id = volume_id
 
     end
       
+    Integer function g2t_tpc_volume_id ( numbv )
+      Integer, intent(in) :: numbv(15)
+
+      Logical :: first = .true.
+      
+      Structure  TPCC  { version,misalign  }      
+      Structure  TPCG  { version,tpadconfig  }
+      Structure  TPRS  { sec,nrow }
+
+
+      Integer ::       Iprin,Nvb
+      Character(len=4) ::           cs,cd
+      COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+
+      Integer :: npadi = 0, npado = 0, npad = 0
+      Integer,Parameter :: fpad = 1
+      Integer,Parameter :: fsec = 100
+
+      Integer :: tpads(156), isdet(156), i, j, n, m
+
+      Integer :: tpgv, tpss, pad, det, prompt, sector
+
+
+      if ( first ) then
+
+         call rbpushd  "save current zebra directory"
+         first = .false.
+         USE /DETM/TPCE/TPCC       stat=itpcc
+         USE /DETM/TPCE/TPCG       stat=itpcg
+         USE /DETM/TPCE/TPRS       stat=itprs
+         npadi = TPRS_nrow
+         USE /DETM/TPCE/TPRS       stat=itprs 
+         npado = TPRS_nrow
+         call rbpopd   "restore original zebra directory"
+
+
+        !write (*,*) 'We are in FIRST', itpcg, itprs
+        !write (*,*) 'We have TPCC  version    = ', TPCC_version
+        !write (*,*) 'We have TPCG  version    = ', TPCG_version
+        !write (*,*) 'We have TPCG  tpadconfig = ', TPCG_tpadconfig
+        !write (*,*) 'We have TPRS(sec=1) nrow = ', npadi
+        !write (*,*) 'We have TPRS(sec=2) nrow = ', npado
+
+
+         ! zero out both arrays to start
+         tpads(1:156) = 0
+         isdet(1:156) = 0  
+
+         ! Default will be the TPC pre iTPC upgrade
+
+
+
+         npad = 73 """13 inner + 2x13 fake + 32 outer + 2 fake """
+
+         tpads(1:73) = (/     1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 
+                              4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 
+                              7, 8, 8, 8, 9, 9, 9,10,10,10, 
+                             11,11,11,12,12,12,13,13,13,14, 
+                             14,15,16,17,18,19,20,21,22,23, 
+                             24,25,26,27,28,29,30,31,32,33, 
+                             34,35,36,37,38,39,40,41,42,43, 
+                             44,45,45   /)
+
+         isdet(1:73) = (/ 1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+                          0, 2, 1, 0, 2, 1, 0, 2, 1, 0,
+                          2, 1, 0, 2, 1, 0, 2, 1, 0, 2,
+	                  1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+	                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 2 /)
+
+         ! Otherwise handle the iTPC upgrade inner = 40 rows outer = 32
+         if (TPCC_version.ge.6) then
+
+         write (*,*) 'Info :: g2t_volume_id :: iTPC geometry will be decoded'
+
+         npad = 76 """ 40 inner + 2 fake + 32 outer + 2 fake """
+
+         tpads(1:76) = (/   1,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                           10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                           20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                           30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+                           40, 40, 41, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+                           50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+                           60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
+                           70, 71, 72, 72 /)
+                      
+         isdet(1:76) = (/   1,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  2,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                            0,  0,  0,  2 /)
+                      
+
+         endif
+
+      endif!first           
+
+      tpgv = numbv(1)
+      tpss = numbv(2)
+      sector  = tpss + 12*(tpgv - 1)    
+      pad  = numbv(3)
+      det  = 0
+
+      If  (tpcg_version==1) then
+
+          If (cd=='TPAI')  det=1
+          If (cd=='TPAO')  det=2
+*PN:      outermost pseudopadrow:
+          If (cd=='TPAO' & pad==14) pad=45
+
+      else
+
+          if (pad .gt. npad) pad = pad - npad
+
+          det = isdet(pad); ! flag as fake or not
+          pad = tpads(pad); ! remap fake padrows onto nearest real one
+
+        endif      
+
+      g2t_tpc_volume_id = 100000*det + 100*sector + pad
+
+
+      RETURN
+    end

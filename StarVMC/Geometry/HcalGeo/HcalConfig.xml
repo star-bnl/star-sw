@@ -13,22 +13,22 @@
     <Setup  name   = "HCALon"
 	    comment= "Default configuration for the Endcap EMC"
 	    module = "HcalGeo"
-	    onoff  = "on"  > 
+	    onoff  = "on" simu="1"  > 
     </Setup> 
     <Setup  name   = "HCALv0"
 	    comment= "Default configuration for the Endcap EMC"
 	    module = "HcalGeo"
-	    onoff  = "on"  > 
+	    onoff  = "on" simu="1"  > 
     </Setup> 
     <Setup  name   = "HCALv1"
 	    comment= "Default configuration for the Endcap EMC"
 	    module = "HcalGeo1"
-	    onoff  = "on"  > 
+	    onoff  = "on" simu="1"  > 
     </Setup> 
     <Setup  name   = "HCALvF"
 	    comment= "Default configuration for the Endcap EMC"
 	    module = "HcalGeoF"
-	    onoff  = "on"  > 
+	    onoff  = "on" simu="1"  > 
     </Setup> 
 
   </Detector> 

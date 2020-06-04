@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.16 2017/03/02 18:30:44 jeromel Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.17 2017/10/20 17:50:32 smirnovd Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,17 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.17  2017/10/20 17:50:32  smirnovd
+ * Squashed commit of the following:
+ *
+ *     StBTof: Remove outdated ClassImp macro
+ *
+ *     Prefer explicit namespace for std:: names in header files
+ *
+ *     Removed unnecessary specification of default std::allocator
+ *
+ * Frank signed-off
+ *
  * Revision 1.16  2017/03/02 18:30:44  jeromel
  * Changes by jdb, nl - inData.open() of files on live disk TBF later
  *
@@ -108,9 +119,6 @@
 #include "StBTofCalibMaker.h"
 #include "StVpdCalibMaker/StVpdCalibMaker.h"
 
-#ifdef __ROOT__
-ClassImp(StBTofCalibMaker)
-#endif
 
 /// Very High resolution mode, pico-second per bin
 const Double_t StBTofCalibMaker::VHRBIN2PS =  24.4140625; // 1000*25/1024 (ps/chn)
