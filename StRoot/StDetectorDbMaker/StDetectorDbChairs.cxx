@@ -258,6 +258,8 @@ MakeChairInstance2(tpcCorrection,St_TpcEdgeC,Calibrations/tpc/TpcEdge);
 MakeChairInstance2(tpcCorrection,St_TpcAdcCorrectionBC,Calibrations/tpc/TpcAdcCorrectionB);
 #include "St_TpcAdcCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcAdcCorrectionMDF,Calibrations/tpc/TpcAdcCorrectionMDF);
+#include "St_TpcAdcCorrection3MDF.h"
+MakeChairInstance2(MDFCorrection3,St_TpcAdcCorrection3MDF,Calibrations/tpc/TpcAdcCorrection3MDF);
 #include "St_tpcMethaneInC.h"
 MakeChairInstance2(tpcCorrection,St_tpcMethaneInC,Calibrations/tpc/tpcMethaneIn);
 #include "St_tpcTimeBucketCorC.h"
@@ -438,6 +440,144 @@ Double_t St_MDFCorrectionC::EvalFactor(Int_t k, Int_t p, Double_t x) const {
   }
   return r;
 }
+//________________________________________________________________________________
+ClassImp(St_MDFCorrection3C);
+St_MDFCorrection3C *St_MDFCorrection3C::fgMDFCorrection3C = 0;
+//____________________________________________________________________
+St_MDFCorrection3C::St_MDFCorrection3C(St_MDFCorrection3 *table) : TChair(table), fFunc(0) {
+  UInt_t N = table->GetNRows();
+  fFunc = new TF1*[N];
+  memset(fFunc, 0, N*sizeof(TF1*));
+}
+//____________________________________________________________________
+St_MDFCorrection3C::~St_MDFCorrection3C() {
+  UInt_t N = Table()->GetNRows();
+  for (UInt_t i = 0; i < N; i++) {SafeDelete(fFunc[i]);}
+  delete [] fFunc;
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection3C::MDFunc(Double_t *x, Double_t *p) {
+  // Evaluate parameterization at point x. Optional argument coeff is
+  // a vector of coefficients for the parameterisation, NCoefficients
+  // elements long.
+  assert(x);
+  UInt_t k = p[0];
+  assert(k >= 0 && k < fgMDFCorrection3C->getNumRows());
+  Double_t returnValue = fgMDFCorrection3C->DMean(k);
+  Double_t term        = 0;
+  UChar_t    i, j;
+  for (i = 0; i < fgMDFCorrection3C->NCoefficients(k); i++) {
+    // Evaluate the ith term in the expansion
+    term = fgMDFCorrection3C->Coefficients(k)[i];
+    for (j = 0; j < fgMDFCorrection3C->NVariables(k); j++) {
+      // Evaluate the factor (polynomial) in the j-th variable.
+      Int_t    p  =  fgMDFCorrection3C->Powers(k)[i * fgMDFCorrection3C->NVariables(k) + j];
+      Double_t y  =  1 + 2. / (fgMDFCorrection3C->XMax(k)[j] - fgMDFCorrection3C->XMin(k)[j])
+	* (x[j] - fgMDFCorrection3C->XMax(k)[j]);
+      term        *= fgMDFCorrection3C->EvalFactor(k,p,y);
+    }
+    // Add this term to the final result
+    returnValue += term;
+  }
+  return returnValue;
+}
+
+//____________________________________________________________________
+Double_t St_MDFCorrection3C::Eval(Int_t k, Double_t x0, Double_t x1, Double_t x2) const {
+  Double_t x[3] = {x0, x1, x2};
+  return Eval(k,x);
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection3C::Eval(Int_t k, Double_t *x) const {
+  // Evaluate parameterization at point x. Optional argument coeff is
+  // a vector of coefficients for the parameterisation, NCoefficients
+  // elements long.
+  assert(x);
+  if (! fFunc[k]) {
+    fgMDFCorrection3C = (St_MDFCorrection3C *) this;
+    if (NVariables(k) <= 0) {
+      return 0;
+    } else if (NVariables(k) == 1) {
+      fFunc[k] = new TF1(Form("%s_%i",Table()->GetName(),k),St_MDFCorrection3C::MDFunc,
+			 XMin(k)[0],XMax(k)[0],1);
+      fFunc[k]->SetParameter(0,k);
+      fFunc[k]->Save(XMin(k)[0],XMax(k)[0],0,0,0,0);
+    } else if (NVariables(k) == 2) {
+      fFunc[k] = new TF2(Form("%s_%i",Table()->GetName(),k),St_MDFCorrection3C::MDFunc,
+			 XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],1);
+      fFunc[k]->SetParameter(0,k);
+      ((TF2 *) fFunc[k])->Save(XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],0,0);
+    } else if (NVariables(k) == 3) {
+      fFunc[k] = new TF3(Form("%s_%i",Table()->GetName(),k),St_MDFCorrection3C::MDFunc,
+			 XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],XMin(k)[2],XMax(k)[2],1);
+      fFunc[k]->SetParameter(0,k);
+      ((TF3 *) fFunc[k])->Save(XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],XMin(k)[2],XMax(k)[2]);
+    }
+  }
+  Double_t xx[3];
+  for (Int_t v = 0; v < NVariables(k); v++) {
+    xx[v] = TMath::Max(XMin(k)[v], TMath::Min(XMin(k)[v]+0.999*(XMax(k)[v]-XMin(k)[v]), x[v]));
+  }
+  Double_t returnValue = fFunc[k]->GetSave(xx);
+  return returnValue;
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection3C::EvalError(Int_t k, Double_t *x) const {
+  // Evaluate parameterization error at point x. Optional argument coeff is
+  // a vector of coefficients for the parameterisation, NCoefficients(k)
+  // elements long.
+  assert(x);
+  Double_t returnValue = 0;
+  Double_t term        = 0;
+  UChar_t    i, j;
+  for (i = 0; i < NCoefficients(k); i++) {
+    // Evaluate the ith term in the expansion
+    term = CoefficientsRMS(k)[i];
+    for (j = 0; j < NVariables(k); j++) {
+      // Evaluate the factor (polynomial) in the j-th variable.
+      Int_t    p  =  Powers(k)[i * NVariables(k) + j];
+      Double_t y  =  1 + 2. / (XMax(k)[j] - XMin(k)[j])
+	* (x[j] - XMax(k)[j]);
+      term        *= EvalFactor(p,y);
+    }
+    // Add this term to the final result
+    returnValue += term*term;
+  }
+  returnValue = TMath::Sqrt(returnValue);
+  return returnValue;
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection3C::EvalFactor(Int_t k, Int_t p, Double_t x) const {
+  // Evaluate function with power p at variable value x
+  Int_t    i   = 0;
+  Double_t p1  = 1;
+  Double_t p2  = 0;
+  Double_t p3  = 0;
+  Double_t r   = 0;
+
+  switch(p) {
+  case 1:
+    r = 1;
+    break;
+  case 2:
+    r =  x;
+    break;
+  default:
+    p2 = x;
+    for (i = 3; i <= p; i++) {
+      p3 = p2 * x;
+      if (PolyType(k) == kLegendre)
+	p3 = ((2 * i - 3) * p2 * x - (i - 2) * p1) / (i - 1);
+      else if (PolyType(k) == kChebyshev)
+	p3 = 2 * x * p2 - p1;
+      p1 = p2;
+      p2 = p3;
+    }
+    r = p3;
+  }
+  return r;
+}
+
 #include "St_tpcEffectiveGeomC.h"
 MakeChairAltInstance(tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeomB,gEnv->GetValue("NewTpcAlignment",0));
 #include "St_tpcElectronicsC.h"
