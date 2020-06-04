@@ -1,0 +1,18 @@
+/*    epdGain.idl
+*
+*  Table: epdGain
+*
+*       description: //  EPD MIP position in ch
+*/ 
+
+struct epdGain { 
+  unsigned short ew[768]; /* ew=0 East EPD, ew=1 West EPD */
+  unsigned short pp[768]; /*pp=0-11, SuperSector number */
+  unsigned short tile[768]; /* tile=0-30, tile number in a super sector*/
+  float vped[768]; /* SiPM vPED, unspecified -999 */
+  float mip[768]; /* ADC ch MIP, unspecified -999 */
+  float qt_pedestals[768]; /* QT mean pedestal, unspecified -999 */
+  float dark_current[768]; /* Dark Current of SiPMs, unspecified -999*/
+  float qt_pedestals_sigma[768]; /* QT mean pedestal sigma, unspecified -999 */
+  float offset[768]; /* offset, unspecified -999*/
+};  

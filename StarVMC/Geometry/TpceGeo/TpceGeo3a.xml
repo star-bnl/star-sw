@@ -286,6 +286,7 @@
 	<!-- Primary configuration structure -->
         <Structure name="TPCC">
 	  <var name="version" />
+	  <var name="misalign" type="int"   />
 	</Structure>
         
         <Structure name="TPCG"  >
@@ -437,7 +438,8 @@
         </Structure>
 
         <Fill name="TPCC" comment="Selected TPCG version subversion">
-	  <var name="version" value="3.0" comment="Default is 3.0" />
+	  <var name="version" value="3.0" commenet="Default is 3.0" />
+	  <var name="misalign" value="0" comment="0: ideal 1: global position" />
 	</Fill>
         
         <Fill name="TPCG" comment="// TPC basic dimensions"  >
@@ -760,7 +762,13 @@
         </Mixture>
         
         <Create    block="TPCE"  />
-        <Placement block="TPCE" in="CAVE" group="TpcRefSys" />
+
+        <Placement block="TPCE" in="CAVE" group="TpcRefSys"     if="TPCC_misalign.eq.0" />
+        <Placement block="TPCE" in="CAVE" group="TpcRefSys"     if="TPCC_misalign.eq.1"  >
+	  <Misalign table="TpcPosition" row="0" /><!-- apply TPC global position -->
+	</Placement>
+
+
 
 	<!--                                                                                        TPCE -->
         <Block name="TPCE" comment="is the TPC envelope"  >

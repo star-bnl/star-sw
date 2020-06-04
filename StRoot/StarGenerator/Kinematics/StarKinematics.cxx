@@ -4,13 +4,23 @@
 #include "StarGenerator/UTIL/StarParticleData.h"
 #include "StarGenerator/UTIL/StarRandom.h"
 
-#include "TVector3.h"
+#include <boost/algorithm/string.hpp>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <random>
+
 #define random myrandom
+
+
 
 // ----------------------------------------------------------------------------
 
 StarParticleData &data = StarParticleData::instance();
 StarRandom       &random = StarRandom::Instance();
+
+static std::random_device _stl_rd;
+static std::mt19937 _mt19937( _stl_rd() );
 
 StarGenEvent *gEvent = 0;
 StarGenEvent *gUser  = 0;
@@ -63,35 +73,45 @@ StarGenParticle *StarKinematics::AddParticle( const Char_t *type )
   p->SetMass( pdg->Mass() );
   p->SetId( id );
   return p;
-}
+}	
 // ----------------------------------------------------------------------------
-void StarKinematics::Kine(Int_t ntrack, const Char_t *type, Double_t ptlow, Double_t pthigh,
+void StarKinematics::Kine(Int_t ntrack, const Char_t *_type, Double_t ptlow, Double_t pthigh,
 			  Double_t ylow, Double_t yhigh,
 			  Double_t philow, Double_t phihigh )
 {
 
+  std::string type = _type;
+  std::vector<std::string> types;
+  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+
   for ( Int_t i=0;i<ntrack;i++ )
     {
-
-      StarGenParticle *p = AddParticle(type);
+      
+      std::shuffle( types.begin(), types.end(), _mt19937 );
+      type = types[0];
+      
+      StarGenParticle *p = AddParticle(type.c_str());
 
       // Sample pt, eta, phi
-      Double_t pt = random(ptlow,  pthigh);
-      Double_t eta= random(ylow,   yhigh );
-      Double_t phi= random(philow, phihigh );
-      Double_t m  = p->GetMass();
+      double pt = random(ptlow,  pthigh);
+      double y  = random(ylow,   yhigh );
+      double phi= random(philow, phihigh );
+      double m  = p->GetMass();
 
-      // Use TVector3 to get the momentum vector correct
-      TVector3 momentum; {
-	momentum.SetPtEtaPhi( pt, eta, phi );
+      double mt = pt;
+      if ( IAttr("rapidity" ) ) { 
+	// switch from pseudorapidity to plain vanilla rapidity
+	mt = TMath::Sqrt( pt*pt + m*m );
       }
+      
+      double px = pt * TMath::Cos( phi );
+      double py = pt * TMath::Sin( phi );
+      double pz = mt * TMath::SinH( y ); 
+      double E  = mt * TMath::CosH( y );
 
-      Double_t E2 = momentum.Mag2() + m*m;
-      Double_t E  = sqrt(E2);
-
-      p->SetPx( momentum.Px() );
-      p->SetPy( momentum.Py() );
-      p->SetPz( momentum.Pz() );
+      p->SetPx( px );
+      p->SetPy( py );
+      p->SetPz( pz );
       p->SetEnergy( E );
 
       p->SetVx( 0. ); // put vertex at 0,0,0,0
@@ -103,29 +123,40 @@ void StarKinematics::Kine(Int_t ntrack, const Char_t *type, Double_t ptlow, Doub
 
 }
 // ----------------------------------------------------------------------------
-void StarKinematics::Dist( Int_t ntrack, const Char_t *type, TF1 *ptFunc, TF1 *etaFunc, TF1 *phiFunc )
+void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TF1 *ptFunc, TF1 *etaFunc, TF1 *phiFunc )
 {
+
+  std::string type = _type;
+  std::vector<std::string> types;
+  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+
   for ( Int_t i=0; i<ntrack; i++ )
     {
 
-      StarGenParticle *p = AddParticle(type);
+      std::shuffle( types.begin(), types.end(), _mt19937 );
+      type = types[0];
+      
+      StarGenParticle *p = AddParticle(type.c_str());
       
       Double_t pt  = ptFunc  -> GetRandom();
-      Double_t eta = etaFunc -> GetRandom();
+      Double_t y   = etaFunc -> GetRandom();
       Double_t phi = (phiFunc) ? phiFunc->GetRandom() : random( 0., TMath::TwoPi() );
       Double_t m   = p->GetMass();
 
-      // Use TVector3 to get the momentum vector correct
-      TVector3 momentum; {
-	momentum.SetPtEtaPhi( pt, eta, phi );
+      double mt = pt;
+      if ( IAttr("rapidity" ) ) { 
+	// switch from pseudorapidity to plain vanilla rapidity
+	mt = TMath::Sqrt( pt*pt + m*m );
       }
+      
+      double px = pt * TMath::Cos( phi );
+      double py = pt * TMath::Sin( phi );
+      double pz = mt * TMath::SinH( y ); 
+      double E  = mt * TMath::CosH( y );
 
-      Double_t E2 = momentum.Mag2() + m*m;
-      Double_t E  = sqrt(E2);
-
-      p->SetPx( momentum.Px() );
-      p->SetPy( momentum.Py() );
-      p->SetPz( momentum.Pz() );
+      p->SetPx( px );
+      p->SetPy( py );
+      p->SetPz( pz );
       p->SetEnergy( E );
 
       p->SetVx( 0. ); // put vertex at 0,0,0,0
@@ -136,29 +167,39 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *type, TF1 *ptFunc, TF1 *e
     }
 }
 // ----------------------------------------------------------------------------
-void StarKinematics::Dist( Int_t ntrack, const Char_t *type, TH1 *ptFunc, TH1 *etaFunc, TH1 *phiFunc )
+void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TH1 *ptFunc, TH1 *etaFunc, TH1 *phiFunc )
 {
+  std::string type = _type;
+  std::vector<std::string> types;
+  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+
   for ( Int_t i=0; i<ntrack; i++ )
     {
 
-      StarGenParticle *p = AddParticle(type);
+      std::shuffle( types.begin(), types.end(), _mt19937 );
+      type = types[0];
+ 
+      StarGenParticle *p = AddParticle(type.c_str());
       
       Double_t pt  = ptFunc  -> GetRandom();
-      Double_t eta = etaFunc -> GetRandom();
+      Double_t y   = etaFunc -> GetRandom();
       Double_t phi = (phiFunc) ? phiFunc->GetRandom() : random( 0., TMath::TwoPi() );
       Double_t m   = p->GetMass();
 
-      // Use TVector3 to get the momentum vector correct
-      TVector3 momentum; {
-	momentum.SetPtEtaPhi( pt, eta, phi );
+      double mt = pt;
+      if ( IAttr("rapidity" ) ) { 
+	// switch from pseudorapidity to plain vanilla rapidity
+	mt = TMath::Sqrt( pt*pt + m*m );
       }
+      
+      double px = pt * TMath::Cos( phi );
+      double py = pt * TMath::Sin( phi );
+      double pz = mt * TMath::SinH( y ); 
+      double E  = mt * TMath::CosH( y );
 
-      Double_t E2 = momentum.Mag2() + m*m;
-      Double_t E  = sqrt(E2);
-
-      p->SetPx( momentum.Px() );
-      p->SetPy( momentum.Py() );
-      p->SetPz( momentum.Pz() );
+      p->SetPx( px );
+      p->SetPy( py );
+      p->SetPz( pz );
       p->SetEnergy( E );
 
       p->SetVx( 0. ); // put vertex at 0,0,0,0
@@ -171,12 +212,19 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *type, TH1 *ptFunc, TH1 *e
 // ----------------------------------------------------------------------------
 const double deg2rad = TMath::DegToRad();
 
-void StarKinematics::Cosmic( int ntrack, const char* type, double plow, double phigh, double radius, double zmin, double zmax, double dphi )
+void StarKinematics::Cosmic( int ntrack, const char* _type, double plow, double phigh, double radius, double zmin, double zmax, double dphi )
 {
+  std::string type = _type;
+  std::vector<std::string> types;
+  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+
   for ( Int_t i=0; i<ntrack; i++ )
     {
 
-      StarGenParticle *p = AddParticle(type);
+      std::shuffle( types.begin(), types.end(), _mt19937 );
+      type = types[0];
+ 
+      StarGenParticle *p = AddParticle(type.c_str());
 
       // Generate a random vertex
       double zvertex = random( zmin, zmax );
@@ -194,23 +242,23 @@ void StarKinematics::Cosmic( int ntrack, const char* type, double plow, double p
       double pmag    = random(plow,  phigh);
 
       // Momentum vector pointing in towards the beamline
-      TVector3 momentum = -pmag * direct;
+      _momentum = -pmag * direct;
 
       // Now, randomize phi and theta by +/- dphi degrees about the momentum axis
-             phi   = momentum.Phi()   + deg2rad * random( -dphi, +dphi );
-      double theta = momentum.Theta() + deg2rad * random( -dphi, +dphi );
+             phi   = _momentum.Phi()   + deg2rad * random( -dphi, +dphi );
+      double theta = _momentum.Theta() + deg2rad * random( -dphi, +dphi );
 
-      momentum.SetPhi(phi);
-      momentum.SetTheta(theta);            
+      _momentum.SetPhi(phi);
+      _momentum.SetTheta(theta);            
 
       Double_t m   = p->GetMass();
 
-      Double_t E2 = momentum.Mag2() + m*m;
+      Double_t E2 = _momentum.Mag2() + m*m;
       Double_t E  = sqrt(E2);
 
-      p->SetPx( momentum.Px() );
-      p->SetPy( momentum.Py() );
-      p->SetPz( momentum.Pz() );
+      p->SetPx( _momentum.Px() );
+      p->SetPy( _momentum.Py() );
+      p->SetPz( _momentum.Pz() );
       p->SetEnergy( E );
 
       p->SetVx( xvertex ); 

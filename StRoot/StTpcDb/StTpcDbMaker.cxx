@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.63 2015/05/21 21:48:22 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.63.6.1 2018/04/13 16:34:51 didenko Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.63.6.1  2018/04/13 16:34:51  didenko
+ * updates for SL16d_embed library
+ *
  * Revision 1.63  2015/05/21 21:48:22  fisyak
  * Fix array out of bound, comment out tpcGlobalPosition field dependence
  *
@@ -280,6 +283,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     if( IAttr("OGridLeak3D")) mask |= ( k3DGridLeak   << 1);
     if( IAttr("OGGVoltErr") ) mask |= ( kGGVoltError  << 1);
     if( IAttr("OSectorAlign"))mask |= ( kSectorAlign  << 1);
+    if( IAttr("ODistoSmear")) mask |= ( kDistoSmearing<< 1);
     LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;

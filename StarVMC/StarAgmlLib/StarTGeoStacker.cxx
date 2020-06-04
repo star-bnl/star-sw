@@ -1146,7 +1146,9 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   TString NAME=position.block();
 
   // And name it
-  matrix -> SetName( Form("pos_%s_in_%s_%i", daughter->GetName(), mother->GetName(), copy ) );
+  matrix -> SetName( Form("pos_%s_in_%s_%i", daughter->GetName(), mother->GetName(), copy ) );  
+  if ( position.misaligned() ) matrix -> SetTitle( position.table() );
+
 
   //
   //////////////////////////////////////////////////////////////////////////////

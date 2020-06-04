@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcPair.h,v 1.5 2011/07/19 19:15:05 perev Exp $
+ * $Id: StMiniMcPair.h,v 1.6 2018/01/03 18:18:09 genevb Exp $
  * \file  StMiniMcPair.h
  * \brief  for simplicity, this contains both the rc and mc track information.
  * 
@@ -21,7 +21,7 @@ public:
     
     void setNCommonHit(Short_t val) { mNCommonHit=val; }
     void setIsBestContam(Short_t val ) {mIsBestContam=val ; }
-    void setDominatrack(Short_t val) { mDominatrack=val; }
+    void setDominatrack(Int_t val) { mDominatrack=val; }
     void setDominCommonHit(Short_t val) { mDominCommonHit=val; }
     void setAvgQuality(float val) { mAvgQuality=val; }
     float    commonFrac() const { 
@@ -40,7 +40,7 @@ public:
 private:
     Short_t      mNCommonHit; 		/// Common Hits is now encoded, tpc + svt * 100 + ssd * 1000
     Bool_t       mIsBestContam;
-    Short_t      mDominatrack;
+    Int_t        mDominatrack;
     Short_t      mDominCommonHit;	///            with IdTruth             -"-           
     Float_t      mAvgQuality;
 
@@ -51,6 +51,9 @@ private:
 
 //
 // $Log: StMiniMcPair.h,v $
+// Revision 1.6  2018/01/03 18:18:09  genevb
+// idTruths and keys moved from short to int
+//
 // Revision 1.5  2011/07/19 19:15:05  perev
 // Cleanup
 //

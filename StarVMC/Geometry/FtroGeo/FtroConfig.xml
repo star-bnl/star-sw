@@ -6,14 +6,14 @@
 
     <Setup  name   = "FTROof" comment="FTPC readout off" module="FtroGeo" onoff="off" />
 
-    <Setup  name   = "FTROon"
+    <Setup  name   = "FTROon" simu="2" 
 	    comment= "Default configuration for the FTPC readout"
 	    module = "FtroGeo"
 	    onoff  = "on" >
 
     </Setup>
 
-    <Setup  name   = "FTRO01"
+    <Setup  name   = "FTRO01" simu="2" 
 	    comment= "Default configuration for the FTPC readout"
 	    module = "FtroGeo"
 	    onoff  = "on" >

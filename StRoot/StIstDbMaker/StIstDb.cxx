@@ -1,4 +1,4 @@
-/* $Id: StIstDb.cxx,v 1.14 2015/08/03 14:26:03 smirnovd Exp $ */
+/* $Id: StIstDb.cxx,v 1.15 2018/03/15 21:35:48 dongx Exp $ */
 
 #include <assert.h>
 #include "StIstDb.h"
@@ -12,6 +12,7 @@
 #include "tables/St_istMapping_Table.h"
 #include "tables/St_istControl_Table.h"
 #include "tables/St_istChipConfig_Table.h"
+#include "tables/St_istSimPar_Table.h"
 
 THashList *StIstDb::mgRotList = 0;
 
@@ -30,6 +31,7 @@ StIstDb::StIstDb() : StObject()
    mIstMapping  = NULL;
    mIstControl  = NULL;
    mIstChipStatus = NULL;
+   mIstSimPar = 0;
 }
 //_____________________________________________________________________________
 Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
@@ -168,6 +170,9 @@ void StIstDb::Print(Option_t *opt) const
 /***************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.15  2018/03/15 21:35:48  dongx
+* Added the access to new table istSimPar
+*
 * Revision 1.14  2015/08/03 14:26:03  smirnovd
 * Corrected style with 'astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f'
 *

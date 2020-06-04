@@ -61,6 +61,9 @@ Bfc_st BFC[] = { // standard chains
   {"Geometry    ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
 #ifdef __AgMLonFly__
+  {"ideal",       "",  "","",            "",           "",              "Ideal Alignment", kFALSE},
+  {"misalign",    "",  "","",            "","-AgMLideal",           "Misaligned Geometry", kFALSE},
+  {"AgMLutil",    "",  "","",            "","StarAgmlUtil",             "AgML support", kFALSE},
   {"AgMLlib",     "",  "","",            "","StarAgmlUtil,StarAgmlLib", "AgML support", kFALSE},
   {"AgML"        ,""  ,"","AgMLlib,-Agi,-VmcGeo","","Geometry,StarGeometry"
    ,                                                            "Alias VmcGeometry to AgiLGeometry",kFALSE},
@@ -1173,6 +1176,7 @@ Bfc_st BFC[] = { // standard chains
   {"OGridLeak3D" ,""  ,"","",""                                       ,"","3D Grid Leak correction",kFALSE},
   {"OGGVoltErr"  ,""  ,"","",""                                   ,"","GG voltage error correction",kFALSE},
   {"OSectorAlign",""  ,"","",""                        ,"","Sector alignment distortion correction",kFALSE},
+  {"ODistoSmear" ,""  ,"","",""    ,"","Distortion smearing accounting for calibration resolutions",kFALSE},
   {"AlignSectors",""  ,"","",""                                             ,"",STAR_CHAIN_OBSOLETE,kFALSE},
   {"DbRichSca"   ,""  ,"","detdb","","",                    "Force reading of Rich scalers from DB",kFALSE},
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
@@ -1459,9 +1463,12 @@ Bfc_st BFC[] = { // standard chains
   {"svtdEdx"     ,"","",""                                               ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"Event"       ,  "","","MakeEvent",                          "","","Request to initialize event",kFALSE},
 
-  {"pxlFastSim"  ,"","","StMcEvent,StEvent"
-   ,                                           "StPxlSimMaker","StPxlSimMaker","PXL Fast Simulator",kFALSE},
   {"pxlRaw"      ,"","","pxlDb",    "StPxlRawHitMaker", "StPxlRawHitMaker",     "PXL raw hit maker",kFALSE},
+  {"pxlFastSim"  ,"","","pxlRaw,StMcEvent,StEvent"
+   ,                                           "StPxlSimMaker","StPxlSimMaker","PXL Fast Simulator",kFALSE},
+  {"pxlSlowSim"  ,"","","pxlRaw,StMcEvent,StEvent"
+   ,                                           "StPxlSimMaker","StPxlSimMaker","PXL Slow Simulator",kFALSE},
+ 
   {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker",     "PXL cluster maker",kFALSE},
   {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker",     "PXL hit maker",kFALSE},
   //{"pxlMon"    ,"","","StEvent"              ,"StPxlMonMaker","StPxlMonMaker","Example of Pxl QA",kFALSE},

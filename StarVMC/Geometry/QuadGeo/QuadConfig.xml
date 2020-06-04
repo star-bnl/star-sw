@@ -4,9 +4,9 @@
  
     <Modules>QuadGeo</Modules>
 
-    <Setup  name   = "QUADof" comment="FGT off" module="QuadGeo" onoff="off" />
+    <Setup  name   = "QUADof" comment="FGT off" module="QuadGeo" onoff="off"  simu="1"/>
 
-    <Setup  name   = "QUADon"
+    <Setup  name   = "QUADon"  simu="1"
 	    comment= "Default configuration for the Forward GEM tracker"
 	    module = "QuadGeo"
 	    onoff  = "on" >

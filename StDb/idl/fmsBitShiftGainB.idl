@@ -1,0 +1,16 @@
+/*    fmsBitShiftGainB.idl
+*
+*  Table: fmsBitShiftGainB
+*
+*       description: // FMS & FPD detector bit shift gain
+*                     0 for no bit shift
+*                     +1 for shifting up (adc=1,2,3,4... becomes 2,4,6,8...)
+*                     -1 for shifting down (adc=1,2,3,4... becomes 0,1,1,2...)
+*                     up to +-5 
+*/ 
+
+struct fmsBitShiftGainB {   
+  octet detectorId[2500];     /* DetectorId */
+  unsigned short ch[2500];    /* Ch 1-578 */
+  short bitshift[2500];       /* bit shift */
+};  

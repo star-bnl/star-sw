@@ -13,7 +13,7 @@
     <Setup  name   = "ECALon"
 	    comment= "Default configuration for the Endcap EMC"
 	    module = "EcalGeo"
-	    onoff  = "on"  > 
+	    onoff  = "on" simu="1"  > 
 
       <Init struct="emcg" var="onoff"    value="1" />
       <Init struct="emcg" var="fillmode" value="3" />
@@ -23,7 +23,7 @@
     <Setup  name   = "ECAL31"
 	    comment= "Default configuration for the Endcap EMC"
 	    module = "EcalGeo"
-	    onoff  = "on"  > 
+	    onoff  = "on" simu="1"  > 
 
       <Init struct="emcg" var="onoff"    value="1" />
       <Init struct="emcg" var="fillmode" value="3" />
@@ -33,7 +33,7 @@
     <Setup  name   = "ECAL11"
 	    comment= "Default configuration for the Endcap EMC"
 	    module = "EcalGeo"
-	    onoff  = "on"  > 
+	    onoff  = "on" simu="1"  > 
 
       <Init struct="emcg" var="onoff"    value="1" />
       <Init struct="emcg" var="fillmode" value="1" />
@@ -43,7 +43,7 @@
      <Setup  name   = "ECAL33"
 	    comment= "Default configuration for the Endcap EMC"
 	    module = "EcalGeo"
-	    onoff  = "on"  > 
+	    onoff  = "on" simu="1"  > 
 
       <Init struct="emcg" var="onoff"    value="3" />
       <Init struct="emcg" var="fillmode" value="3" />
@@ -54,7 +54,7 @@
     <Setup  name   = "ECALv6"
 	    comment= "Version 6 endcap"
 	    module = "EcalGeo6"
-	    onoff  = "on"  > 
+	    onoff  = "on" simu="1"  > 
 
       <Init struct="emcg" var="onoff"     value="1" />
       <Init struct="emcg" var="fillmode"  value="3" />
@@ -66,7 +66,7 @@
    <Setup  name   = "ECALv6_cut00"
            comment= "Version 6 endcap [no emc cuts]"
            module = "EcalGeo6"
-	   onoff  = "on"  > 
+	   onoff  = "on" simu="1"  > 
 
       <Init struct="emcg" var="onoff"     value="1" />
       <Init struct="emcg" var="fillmode"  value="3" />

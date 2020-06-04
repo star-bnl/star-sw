@@ -23,7 +23,7 @@ class StarGenEvent;
 StarGenEvent   *event       = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary = 0;
+StarPrimaryMaker *_primary = 0;
 
 class StarGenEventReader;
 StarGenEventReader *eventreader = 0;
@@ -68,14 +68,14 @@ void reader( Int_t nevents=1, UInt_t rngSeed = 12345 )
   // before the geant maker
   //
   //  StarPrimaryMaker *
-  primary = new StarPrimaryMaker();
+  _primary = new StarPrimaryMaker();
   {
-    primary -> SetFileName( "output.pythia6.starsim.root");
+    _primary -> SetFileName( "output.pythia6.starsim.root");
   }
 
   eventreader = new StarEventReader();
   eventreader -> SetInputFile("pythia6.starsim.root","genevents","primaryEvent");
-  primary->AddGenerator(eventreader);
+  _primary->AddGenerator(eventreader);
 
   
   //
@@ -91,11 +91,11 @@ void reader( Int_t nevents=1, UInt_t rngSeed = 12345 )
   //   simulation.  (To run generator in standalone mode,
   //   set ptmin=1.0E9.)
   //                    ptmin  ptmax
-  primary->SetPtRange  (0,  -1.0);         // GeV
+  _primary->SetPtRange  (0,  -1.0);         // GeV
   //                    etamin etamax
-  primary->SetEtaRange ( -3.0, +3.0 );
+  _primary->SetEtaRange ( -3.0, +3.0 );
   //                    phimin phimax
-  primary->SetPhiRange ( 0., TMath::TwoPi() );
+  _primary->SetPhiRange ( 0., TMath::TwoPi() );
   
   
   // 
@@ -104,13 +104,13 @@ void reader( Int_t nevents=1, UInt_t rngSeed = 12345 )
   //   y = 0 gauss width = 1mm
   //   z = 0 gauss width = 30cm
   // 
-  primary->SetVertex( 0., 0., 0. );
-  primary->SetSigma( 0.1, 0.1, 30.0 );
+  _primary->SetVertex( 0., 0., 0. );
+  _primary->SetSigma( 0.1, 0.1, 30.0 );
 
   //
   // Initialize primary event generator and all sub makers
   //
-  primary -> Init();
+  _primary -> Init();
 
   //
   // Trigger on nevents
