@@ -1,7 +1,10 @@
 *
-* $Id: csinfn.F,v 1.1 2018/11/19 20:44:06 perev Exp $
+* $Id: csinfn.F,v 1.2 2020/06/04 23:05:02 perev Exp $
 *
 * $Log: csinfn.F,v $
+* Revision 1.2  2020/06/04 23:05:02  perev
+* add csguard call
+*
 * Revision 1.1  2018/11/19 20:44:06  perev
 * 64bits add files
 *
@@ -671,4 +674,6 @@
       IA(ITA+1)=IEQD(2)
 ***       CALL CCOPYA(D,IA(ITA),KDLEN)
       ITA=ITA+KDLEN-1
- 999  END
+ 999  continue  
+      call csguard()
+      END

@@ -1,6 +1,9 @@
 /*
-* $Id: memget.c,v 1.3 2004/09/19 00:10:34 perev Exp $
+* $Id: memget.c,v 1.4 2020/06/04 23:25:18 perev Exp $
 * $Log: memget.c,v $
+* Revision 1.4  2020/06/04 23:25:18  perev
+* assert added to chack 64b consistensy
+*
 * Revision 1.3  2004/09/19 00:10:34  perev
 * Walgrind pseudo leak fixed
 *
@@ -31,12 +34,14 @@
  */
 
 #include <stdlib.h>
+#include <assert.h>
 void *fakePerevPointer=0;
 unsigned long memget_  (unsigned int *n)
-{  return ( (unsigned long) malloc(*n) );  }
+{assert(0); 
+ return ( (unsigned long) malloc(*n) );  }
 
 unsigned long memgetf_ (unsigned int *n)
-{
+{ assert(0);
   fakePerevPointer=malloc(*n<<2);
   return ( ((unsigned long)fakePerevPointer)>>2);  
 }

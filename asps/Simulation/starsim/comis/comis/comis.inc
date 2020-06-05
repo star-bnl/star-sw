@@ -1,7 +1,10 @@
 *
-* $Id: comis.inc,v 1.1 2018/11/19 20:43:51 perev Exp $
+* $Id: comis.inc,v 1.2 2020/06/04 23:05:02 perev Exp $
 *
 * $Log: comis.inc,v $
+* Revision 1.2  2020/06/04 23:05:02  perev
+* add csguard call
+*
 * Revision 1.1  2018/11/19 20:43:51  perev
 * 64bits add files
 *
@@ -19,5 +22,9 @@
       INTEGER KOD(LASTK)
       REAL RA(LASTK)
       EQUIVALENCE(IA,RA),(IA,KOD)
+
+      integer IAGUARD
+      COMMON/COMIS/IAGUARD(10)
+      
 
 #endif

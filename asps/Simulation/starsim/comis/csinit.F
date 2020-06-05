@@ -1,7 +1,10 @@
 *
-* $Id: csinit.F,v 1.1 2018/11/19 20:44:06 perev Exp $
+* $Id: csinit.F,v 1.2 2020/06/04 23:05:02 perev Exp $
 *
 * $Log: csinit.F,v $
+* Revision 1.2  2020/06/04 23:05:02  perev
+* add csguard call
+*
 * Revision 1.1  2018/11/19 20:44:06  perev
 * 64bits add files
 *
@@ -174,6 +177,10 @@
       ICHMINU=ICHAR('-')
       ICHPLUS=ICHAR('+')
       ICHCOMM=ICHAR(',')
+      do jk=1,10
+        GUARD(jk) = -1946
+        IAGUARD(jk) = -1946
+      enddo
 #if defined(CERNLIB_PAW)
       CALL CSPAWI
       MODHFI=0
@@ -241,3 +248,16 @@
 #endif
       RETURN
       END
+
+      subroutine CSGUARD
+#undef CERNLIB_COMIS_CSPAR_INC
+#undef CERNLIB_COMIS_MDPOOL_INC
+#undef CERNLIB_COMIS_COMIS_INC
+#include "comis/cspar.inc"
+#include "comis/mdpool.inc"
+#include "comis/comis.inc"
+      do jk=1,10
+        call assert(GUARD(jk)  .eq.-1946)
+        call assert(IAGUARD(jk).eq.-1946)
+      enddo
+      end      
