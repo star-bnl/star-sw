@@ -1,8 +1,12 @@
 *
-* $Id: grayl.F,v 1.1.1.1 2004/01/15 00:12:15 potekhin Exp $
+* $Id: grayl.F,v 1.2 2020/06/05 12:47:55 jwebb Exp $
 *
 * $Log: grayl.F,v $
+* Revision 1.2  2020/06/05 12:47:55  jwebb
+* Protect against cos(theta)>1 and/or <1
+*
 * Revision 1.1.1.1  2004/01/15 00:12:15  potekhin
+*
 *
 * Revision 1.1.1.1  1997/11/03 15:30:43  atlascvs
 * Importing CERNLIB version 08.21.
@@ -82,6 +86,8 @@ C
 C
 C            Find out cos(theta)
       COSTH=1.-0.5*(QNEW*GEKIN1)**2
+      IF (COSTH.LT.-1.) COSTH=-1.
+      IF (COSTH.GT.1.)  COSTH=1.
       IF(RNDM(2).GT.0.5*(1.+COSTH**2)) GO TO 5
       SINTH=SQRT((1.-COSTH)*(1.+COSTH))
 C
