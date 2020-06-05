@@ -1,7 +1,10 @@
 *
-* $Id: cstran.F,v 1.1 2018/11/19 20:44:06 perev Exp $
+* $Id: cstran.F,v 1.2 2020/06/04 23:05:02 perev Exp $
 *
 * $Log: cstran.F,v $
+* Revision 1.2  2020/06/04 23:05:02  perev
+* add csguard call
+*
 * Revision 1.1  2018/11/19 20:44:06  perev
 * 64bits add files
 *
@@ -771,6 +774,7 @@ CD      IF(ICSPRC.EQ.1)CALL PRCODE(IPCB,IPCE)
       ENDIF
       IQ(IBIMPL)=0
       CALL CSFRCBL(LISTCB)
+      call csguard()
       RETURN
 *   DPR1
     3 CONTINUE

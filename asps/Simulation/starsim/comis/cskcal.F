@@ -1,7 +1,10 @@
 *
-* $Id: cskcal.F,v 1.2 2018/11/19 20:44:06 perev Exp $
+* $Id: cskcal.F,v 1.3 2020/06/04 23:05:02 perev Exp $
 *
 * $Log: cskcal.F,v $
+* Revision 1.3  2020/06/04 23:05:02  perev
+* add csguard call
+*
 * Revision 1.2  2018/11/19 20:44:06  perev
 * 64bits add files
 *
@@ -168,4 +171,5 @@
  707  CSKCAL=-7
       CALL CSGTIDP(IP,PRONAME,NCH)
       PRINT *,' call to missing routine ',PRONAME(:NCH)
+      call csguard()
       END

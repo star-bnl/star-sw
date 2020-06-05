@@ -1,7 +1,10 @@
 *
-* $Id: mdext.F,v 1.1 2004/09/24 18:57:04 fisyak Exp $
+* $Id: mdext.F,v 1.2 2020/06/04 23:05:02 perev Exp $
 *
 * $Log: mdext.F,v $
+* Revision 1.2  2020/06/04 23:05:02  perev
+* add csguard call
+*
 * Revision 1.1  2004/09/24 18:57:04  fisyak
 * Fix comis for Scientific Linux
 *
@@ -45,6 +48,7 @@
       MDEXT=MDEXL(LENG,IND)
 #endif
 #if defined(CERNLIB_UNIX)
+
       INTEGER CSALLO
       L=LENG*4
       IM=CSALLO(L)
