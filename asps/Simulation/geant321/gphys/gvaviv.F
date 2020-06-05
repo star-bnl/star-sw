@@ -1,8 +1,12 @@
 *
-* $Id: gvaviv.F,v 1.1.1.1 2004/01/15 00:12:16 potekhin Exp $
+* $Id: gvaviv.F,v 1.2 2020/06/05 15:31:12 jwebb Exp $
 *
 * $Log: gvaviv.F,v $
+* Revision 1.2  2020/06/05 15:31:12  jwebb
+* Apply changes found in VMC geant3 (reorder, protect against div-by-0's)
+*
 * Revision 1.1.1.1  2004/01/15 00:12:16  potekhin
+*
 *
 * Revision 1.1.1.1  1997/11/03 15:30:44  atlascvs
 * Importing CERNLIB version 08.21.
@@ -201,6 +205,10 @@ C.
  
       GVAVIV=0
       IF(RKAPPA .LT. 0.01 .OR. RKAPPA .GT. 12) RETURN
+       HC(0)=LOG(RKAPPA)+BETA2+0.42278434
+       DSIGM(1)=SQRT(RKAPPA/(1-0.5*BETA2))
+       HC(1)=DSIGM(1)
+       HC(8)=0.39894228*HC(1)
       IF(RKAPPA .GE. 0.29) THEN
        ITYPE=1
        NPT=100
@@ -210,14 +218,11 @@ C.
        AC(8)=(-0.013483*BETA2-0.048801)*RKAPPA+
      1   (-1.6921*BETA2+8.3656)*WK+(-0.73275*BETA2-3.5226)
        DRK(1)=WK**2
-       DSIGM(1)=SQRT(RKAPPA/(1-0.5*BETA2))
        DO 1 J = 1,4
        DRK(J+1)=DRK(1)*DRK(J)
        DSIGM(J+1)=DSIGM(1)*DSIGM(J)
     1  ALFA(J+1)=(FNINV(J)-BETA2*FNINV(J+1))*DRK(J)
  
-       HC(0)=LOG(RKAPPA)+BETA2+0.42278434
-       HC(1)=DSIGM(1)
        HC(2)=ALFA(3)*DSIGM(3)
        HC(3)=(3*ALFA(2)**2+ALFA(4))*DSIGM(4)-3
        HC(4)=(10*ALFA(2)*ALFA(3)+ALFA(5))*DSIGM(5)-10*HC(2)
@@ -226,7 +231,6 @@ C.
        HC(7)=HC(2)*HC(5)
        DO 2 J = 2,7
     2  HC(J)=EDGEC(J)*HC(J)
-       HC(8)=0.39894228*HC(1)
       ELSEIF(RKAPPA .GE. 0.22) THEN
        ITYPE=2
        NPT=150
@@ -331,11 +335,21 @@ C.
       AC(9)=(AC(8)-AC(0))/NPT
       IF(ITYPE .EQ. 3) THEN
        X=(AC(7)-AC(8))/(AC(7)*AC(8))
-       Y=1/LOG(AC(8)/AC(7))
+       IF(AC(7) .NE. AC(8)) THEN
+          Y=1/LOG(AC(8)/AC(7))
+       ELSE
+          Y=1.E10
+       ENDIF
        P2=AC(7)**2
+C.     PROTECT AGAINST DIVISION BY ZERO
+       DIVISOR=1+X*Y*AC(7)
+       IF(DIVISOR .EQ. 0) THEN
+        AC(11)=1.E10
+       ELSE
        AC(11)=P2*(AC(1)*EXP(-AC(2)*(AC(7)+AC(5)*P2)-
      1            AC(3)*EXP(-AC(4)*(AC(7)+AC(6)*P2)))-0.045*Y/AC(7))/
-     2            (1+X*Y*AC(7))
+     2            DIVISOR
+       ENDIF
        AC(12)=(0.045+X*AC(11))*Y
       ENDIF
       IF(ITYPE .EQ. 4) AC(10)=0.995/GLANDS(AC(8))
