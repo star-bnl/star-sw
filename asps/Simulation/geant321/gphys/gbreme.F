@@ -1,8 +1,12 @@
 *
-* $Id: gbreme.F,v 1.1.1.1 2004/01/15 00:12:13 potekhin Exp $
+* $Id: gbreme.F,v 1.2 2020/06/05 15:30:05 jwebb Exp $
 *
 * $Log: gbreme.F,v $
+* Revision 1.2  2020/06/05 15:30:05  jwebb
+* Protect against divide-by-almost-zero
+*
 * Revision 1.1.1.1  2004/01/15 00:12:13  potekhin
+*
 *
 * Revision 1.1.1.1  1997/11/03 15:30:33  atlascvs
 * Importing CERNLIB version 08.21.
@@ -94,11 +98,15 @@ C
          IF(GEKIN.LT.0.0001) THEN
             G1=1.+AL+BL
             IF(G1.GT.GMAX) GMAX=G1
+*
+            IF(ABS(AL).GT.1.e-6) THEN
             X0=-BL/(2.*AL)
             IF((XC.LT.X0).AND.(X0.LT.1.)) THEN
                G0=1.+AL*X0+BL*X0**2
                IF(G0.GT.GMAX) GMAX=G0
             ENDIF
+            ENDIF
+*
          ENDIF
       ELSE
          U3=U2*U
