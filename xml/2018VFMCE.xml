@@ -23,9 +23,9 @@
   foreach name (K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed \
                 K_S0       Lambda0_bar      Lambda0      XiM_bar      XiM       Omega_bar      Omega      \
                 LNNFixed LNFixed \
-                H3LdpFixed H3LFixed \
+                H3LdpFixed H3LFixed H3LrFixed  \
                 H4LtpFixed H4L2dFixed H4LFixed H5LFixed H6L3Fixed H6LFixed \
-                He4LFixed \
+                He4LFixed  \
                 He5L3Fixed He5LFixed He5Li5Fixed \
                 He6L3adFixed He6L3Fixed He6LFixed \
                 He7L3Fixed He7LFixed \
@@ -58,5 +58,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 1000 100 K_S0" />
+<input URL="command:RunId.pl 1 100 500 K_S0" />
 </job>
