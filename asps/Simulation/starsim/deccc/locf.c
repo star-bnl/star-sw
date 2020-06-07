@@ -1,9 +1,9 @@
 /*
- * $Id: locf.c,v 1.5 2020/06/04 23:22:40 perev Exp $
+ * $Id: locf.c,v 1.6 2020/06/07 19:25:28 perev Exp $
  *
  * $Log: locf.c,v $
- * Revision 1.5  2020/06/04 23:22:40  perev
- * assert added
+ * Revision 1.6  2020/06/07 19:25:28  perev
+ * Move update temporary back
  *
  * Revision 1.4  2018/12/03 00:50:44  perev
  * locf & locb use csvptokn
@@ -60,8 +60,7 @@ unsigned long  csPoter( int token);
 #define isToken(A) ((A&kMAZK)==kMASK) 
 
 unsigned long csvplong (         int  tokn);
-//static unsigned long myBase=(unsigned long)&myBase;
-  static unsigned long myBase=(unsigned long)0;
+  static unsigned long myBase=(unsigned long)&myBase;
 
 //______________________________________________________________________________
 __UINT64_TYPE__ longf_(char *iadr )
@@ -109,7 +108,6 @@ int  locb_(char *iadr )
     if (isToken(myDif)) 			break;
     return myDif;
   } while(0);
-  assert(0);
   return csvptokn_(iadr); 
 }
 //______________________________________________________________________________
@@ -117,7 +115,6 @@ char *getPntF(int myDif)
 {
   if (!myDif) return 0;
   if (isToken(myDif)) {
-assert(0);
     char *ret = (char*)csvplong(myDif);
     return ret;
   } else {
@@ -129,7 +126,6 @@ char *getPntB(int myDif)
 {
   if (!myDif) return 0;
   if (isToken(myDif)) {
-assert(0);
     char *ret = (char*)csvplong(myDif);
     return ret;
   } else {
