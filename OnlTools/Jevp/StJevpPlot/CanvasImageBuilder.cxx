@@ -258,7 +258,7 @@ int CanvasImageBuilder::writeImageFiles(DisplayNode *node, int page) {
     return npages;
 }
 
-int CanvasImageBuilder::writeRunStatus(RunStatus *rs, int evtCnt, const char *serverTags)
+int CanvasImageBuilder::writeRunStatus(RunStatus *rs, int evtCnt, const char *serverTags, time_t writeTime)
 {
     char fn[256];
     sprintf(fn, "/tmp/%s_build_%08d/runStatus.json", basedir, writeIdx);
@@ -282,7 +282,7 @@ int CanvasImageBuilder::writeRunStatus(RunStatus *rs, int evtCnt, const char *se
     fprintf(f,"\"%s\":%d,", "lastEvtTime", rs->lastEvtTime);   
     fprintf(f,"\"%s\":%d,", "lastEvtNumber", rs->lastEvtNumber);   
     fprintf(f,"\"%s\":%d,", "nEvts", evtCnt);   
-    fprintf(f,"\"%s\":%ld,", "writeTime", time(NULL));
+    fprintf(f,"\"%s\":%ld,", "writeTime", writeTime);
     fprintf(f,"\"%s\":%d,", "lastStatusChangeTime", rs->timeOfLastChange);
     fprintf(f,"\"%s\":\"%s\"", "serverTags", serverTags); 
     fprintf(f, "}");
@@ -300,6 +300,8 @@ void CanvasImageBuilder::sendDieToImageWriter() {
     
 int CanvasImageBuilder::sendToImageWriter(RunStatus *rs, int numberOfEvents, const char *serverTags, bool force) {
     XX(0);
+    time_t writeTime = time(NULL);
+
     //LOG("JEFF", "sendToImageWriter 0x%x", imageWriter);
     int nwriting = imageWriter->getNWriting();
     if((nwriting > 0) && !force) {
@@ -330,7 +332,7 @@ int CanvasImageBuilder::sendToImageWriter(RunStatus *rs, int numberOfEvents, con
 
     writeIndex();
     XX(1);
-    writeRunStatus(rs, numberOfEvents, serverTags);
+    writeRunStatus(rs, numberOfEvents, serverTags, writeTime);
     XX(1);
     int cnt = writeImages();
     XX(1);
