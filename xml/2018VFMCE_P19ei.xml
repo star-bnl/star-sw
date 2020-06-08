@@ -43,7 +43,9 @@
   if (! $?) set noiTPClu = ",noiTPClu";
 #  setenv StarEndMakerShell
 # set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
-  set chain = "MC.2018,vmc,VMCAlignment,UseMCTstart,NoiTPCLu,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name}${noiTPClu};
+#  set chain = "MC.2018,vmc,VMCAlignment,UseMCTstart,NoiTPCLu,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name}${noiTPClu};
+# P19ie  production_3p85GeV_fixedTarget_2018 dataset
+   set chain = "DbV20200101,P2018a,StiCA,btof,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-beamline3D"
 #  set sdt = ",sdt20180426.135000"
   set sdt = ",sdt20180531.080000"
   set VFMCE = ",VFMCE";
@@ -58,5 +60,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 500 500 K_S0" />
+<input URL="command:RunId.pl 100 600 500 K_S0" />
 </job>
