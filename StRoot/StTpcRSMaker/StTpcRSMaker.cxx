@@ -665,14 +665,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	double driftVelocity = StTpcDb::instance()->DriftVelocity(1);
 	fgTriggerT0 = - StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth)*mTimeBinWidth*1e-6;
       } else if (g2t_ver->GetNRows() > 0) {
-      const Double_t kAu2Gev=0.9314943228;
-      UInt_t un = St_beamInfoC::instance()->getYellowMassNumber();
-      Double_t M = kAu2Gev*un;
-      if (!un) {un = 1; M = 0.93827231;}
-      //      if (un == 197) { M = 196.966570*kAu2Gev;}
-      Double_t KinE = un*St_beamInfoC::instance()->getYellowEnergy();
-      Double_t gamma = TMath::Sqrt((KinE+M)*(KinE+M))/M;
-      Double_t beta  = gamma/TMath::Sqrt(gamma*gamma+1);
+      Double_t beta  = St_beamInfoC::instance()->BetaYellow();
       fgTriggerT0 = -gver->ge_x[2]/(beta*TMath::Ccgs());
     }
   }
