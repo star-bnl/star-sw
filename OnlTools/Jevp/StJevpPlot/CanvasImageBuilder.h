@@ -53,7 +53,7 @@ class CanvasImageBuilder {
  private:
     void writeIndex(int combo_index = 1);
     int writeImages();
-    int writeRunStatus(RunStatus *rs, int numberOfEvents, const char *serverTags);
+    int writeRunStatus(RunStatus *rs, int numberOfEvents, const char *serverTags, time_t writeTime);
 
  private:
     void writeIndexFiles(FILE *f, DisplayNode *node, int page, int tabs);
