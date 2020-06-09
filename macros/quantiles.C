@@ -1,5 +1,6 @@
-void quantiles(TH1 *h, Int_t nq = 101, Int_t opt=0) {
+void quantiles(TH1 *h, Int_t opt=0) {
   if (! h) return;
+  Int_t nq = h->GetNbinsX();
   if (opt == 0) {
     TH1F *hh = new TH1F(*(TH1F *) h);
     hh->SetName(Form("Qua_%s",h->GetName()));

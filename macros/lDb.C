@@ -6,7 +6,7 @@ StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display
 StBFChain *bfc(Int_t First, const Char_t *Chain = "MC2016,20Muons,vmc,Rung.1",
  	       const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName = "");
 #endif
-void lDb(const Char_t *date = 0) {
+void lDb(const Char_t *date = 0, Int_t N = -1) {
 #ifdef __CLING__  
   gSystem->Load("St_base");
   gSystem->Load("libmysqlclient");
@@ -19,5 +19,5 @@ void lDb(const Char_t *date = 0) {
 #endif
   TString Chain("mysql,tpcDb,detDb,magF,TpcHitMover,CorrX,LaserIT,nodefault");
   if (date) {Chain += ","; Chain += date;}
-  bfc(-1,Chain.Data());
+  bfc(N,Chain.Data());
 }

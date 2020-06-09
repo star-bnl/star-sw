@@ -17,10 +17,23 @@ my @rootfiles = ();
 my $all = 0;
 #my $all = 1;
 #@histGF = qw (VoltageC);
+my @opt;
 foreach my $arg (@ARGV) {
   if ($arg =~ /\.root$/) {push @rootfiles, $arg; next;}
 }
-if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0) {
+# ADC
+#  @histADC = qw(I3DZ I3DTanL I3DdX IC3DZ IC3DTanL IC3DdX I3Dnpads I3Dntmbks I3Dnpadtmbks
+#		O3DZ O3DTanL O3DdX IC3DZ IC3DTanL IC3DdX O3Dnpads O3Dntmbks O3Dnpadtmbks);
+#for (my $i = 1; $i <=13; $i++) {
+#  push @histADC, "WI_" . $i;
+#  push @histADC, "EI_" . $i;
+#  push @histADC, "WO_" . $i;
+#  push @histADC, "EO_" . $i;
+#}
+#my @opt = qw (ADC);
+#print "histADC = @histADC\n";
+################################################################################
+if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 and $#histADC < 0) {
   @histGF = qw (SecRow3 SecRow3C 
 		PressureC Pressure
 		Time TimeC
@@ -45,8 +58,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0)
 #	      );
   @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
   #  @histXF = @histNF;
-  @histADC = qw(I3DZ I3DTanL I3DdX IC3DZ IC3DTanL IC3DdX I3Dnpads I3Dntmbks I3Dnpadtmbks
-		O3DZ O3DTanL O3DdX IC3DZ IC3DTanL IC3DdX O3Dnpads O3Dntmbks O3Dnpadtmbks);
+  @opt = qw (GF GP NF);# XF);# RL5);
 }
 print "fit.pl for  @rootfiles \n"; 
 if ($#histGF >= 0) {print " with GF: @histGF \n";}
@@ -55,8 +67,7 @@ if ($#histRL5 >= 0){print " with RL5:@histRL5\n";}
 if ($#histNF >= 0) {print " with NF: @histNF \n";}
 if ($#histXF >= 0) {print " with NF: @histXF \n";}
 exit if $#rootfiles < 0;
-my @opt = qw (GF GP NF);# XF);# RL5);
-#my @opt = qw (ADC);
+#my @opt = qw (GF GP NF);# XF);# RL5);
 my $XML = "fit.xml";
 open (XML,">$XML") or die "Can't open $XML";
 print XML '<?xml version="1.0" encoding="utf-8" ?>

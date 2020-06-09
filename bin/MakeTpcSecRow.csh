@@ -340,4 +340,5 @@
 #root.exe -q -b /net/l404/data/fisyak/Histograms/RunXX/RunXX02/SecRow3CGFRunXX02.root 'MakeTpcSecRowB.C(20191121,000002,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,000002.log
 #root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000002.root /net/l404/data/fisyak/Histograms/RunXX/RunXX03/SecRow3CGFRunXX03.root 'MakeTpcSecRowB.C(20191121,000003,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,000003.log
 #root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000003.root /net/l404/data/fisyak/Histograms/RunXX/RunXX05/SecRow3CGFRunXX05.root 'MakeTpcSecRowB.C(20191121,000005,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,000005.log
-root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000005.root /net/l404/data/fisyak/Histograms/RunXX/RunXX07/SecRow3CGFRunXX07.root 'MakeTpcSecRowB.C(20191121,000007,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,000007.log
+#root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000005.root /net/l404/data/fisyak/Histograms/RunXX/RunXX07/SecRow3CGFRunXX07.root 'MakeTpcSecRowB.C(20191121,000007,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,000007.log
+root.exe -q -b /net/l404/data/fisyak/Histograms/RunXX/RunXX10/SecRow3CGFRunXX10.root 'MakeTpcSecRowB.C(20191121,10,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,000010.log

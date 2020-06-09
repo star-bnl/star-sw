@@ -21,6 +21,7 @@ my @Runs = (
     'Run17' 	  => {node => 'dbbak.starp.bnl.gov', port => '3416'},
     'Run18' 	  => {node => 'dbbak.starp.bnl.gov', port => '3417'},
     'Run19' 	  => {node => 'dbbak.starp.bnl.gov', port => '3418'},
+    'Run20' 	  => {node => 'dbbak.starp.bnl.gov', port => '3419'},
     'CURRENT'     => {node => 'onldb.starp.bnl.gov', port => '3501'}
 	   );
 my $Run = "CURRENT";

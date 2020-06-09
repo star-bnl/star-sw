@@ -80,17 +80,7 @@ starClockOnl.20200223.234623.C:    row.frequency         =    9337360; // freque
 #include "TMath.h"
 #endif
 //________________________________________________________________________________
-Double_t RHIClock(Double_t ekin, Double_t m) {
-  //Circumference =  3833.845 m => https://www.slac.stanford.edu/pubs/confproc/biw98/shea.pdf
-  Double_t l       = 3833.845*9.99999253982746361e-01;// *9.99988614393081399e-01;// *9.99998896969437556e-01;  // RHIC perimetr
-  Double_t NB = 120;      // no. of buches
-  Double_t beta = TMath::Sqrt((ekin+m)*(ekin+m) - m*m)/(ekin+m);
-  Double_t f = 1e-6*NB*beta*TMath::C()/l;
-  cout << "Freqency = " << f << " (MHz) for kinetic energy = " << ekin << " mass = " << m <<endl;
-  return f;
-}
-//________________________________________________________________________________
-Int_t RHIClock(const Char_t *name="p", Double_t e = 250) {
+void RHIClock(const Char_t *name="p", Double_t e = 250) {
   TString Name(name);
   Double_t M = 1;
   Int_t    Z = 1;
@@ -170,16 +160,29 @@ Int_t RHIClock(const Char_t *name="p", Double_t e = 250) {
     A = 196.96655;
     Z = 79;
     M = A*u;
+  } else if (Name == "3p85GeV_fixedTarget") {
+    e = 3.85; //  9104996 / 9104995 ; γ = 4.135
+    A = 196.966568662;
+    Z = 79;
+    M = A*u;
   }
   Double_t N = TMath::Nint(A); // no. of nucleons
+  Double_t u = 931.4940054e-3; // 0.938271998/1.00727646688; //  1 u = 931.494 0054(57) MeV/c2
+  const Double_t mP = 1.00727646662*u;      //  938.2720813
+  const Double_t mN = 1.00866491588*u;      //  939.5654133
+  M = A*u; // Z * mP + (N - Z)*mN;
   Double_t E = e*N;
   //  Double_t E = e*A;
   //  e = TMath::Sqrt(p*p + M*M) - M;
   //  Double_t gamma = (e + M)/M;
-  Double_t gamma = (E+M)/M;
+  //  Double_t gamma = (E+M)/M;
+  Double_t gamma = E/M;
   Double_t beta  = TMath::Sqrt(1 - 1./(gamma*gamma));
-  cout << Name.Data() << "\tA\t" << A << "\tN\t" << N << "\tZ\t" << Z << "\tM\t" << M << "\tE\t" << e << "\tgamma = " << gamma << "\tbeta = " << beta  << endl; 
-  return RHIClock(E,M);
+  Double_t l       = 3833.845*9.99999253982746361e-01;// *9.99988614393081399e-01;// *9.99998896969437556e-01;  // RHIC perimetr
+  Double_t NB = 120;      // no. of buches
+  Double_t f = 1e-6*NB*beta*TMath::C()/l;
+  cout << Name.Data() << "\tA\t" << A << "\tN\t" << N << "\tZ\t" << Z << "\tM\t" << M << "\te = " << e << "\tE\t" << E << "\tgamma = " << gamma << "\tbeta = " << beta  
+       << "\tFreqency = " << f << " (MHz)" << endl; 
 }
 
 
