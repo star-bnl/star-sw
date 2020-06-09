@@ -1049,7 +1049,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   TString output(Out);
   if (output == "") {
     output = file1;
-    output.ReplaceAll(".root",".ADC3L.root");
+    output.ReplaceAll(".root",".ADC3U.root");
   }
   cout << "Output for " << output << endl;
   const Int_t&       fNoRcHit                                 = iter("fNoRcHit");
@@ -1072,10 +1072,11 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   //  const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
   const Int_t*&      fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
   const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
+  const Float_t*&    fRcHit_mPosition_mX3                     = iter("fRcHit.mPosition.mX3");
   const Float_t*&    fRcHit_mdX                               = iter("fRcHit.mdX");
-  const Float_t*&    fRcHit_mCharge                               = iter("fRcHit.mCharge");
+  const Float_t*&    fRcHit_mCharge                           = iter("fRcHit.mCharge");
   const UShort_t*&   fRcHit_mAdc                              = iter("fRcHit.mAdc");
-  const UShort_t*&    fRcHit_mFlag                             = iter("fRcHit.mFlag");
+  const UShort_t*&    fRcHit_mFlag                            = iter("fRcHit.mFlag");
   const UChar_t*&    fRcHit_mFitFlag                          = iter("fRcHit.mFitFlag");
   const UChar_t*&    fRcHit_mMinpad                           = iter("fRcHit.mMinpad");
   const UChar_t*&    fRcHit_mMaxpad                           = iter("fRcHit.mMaxpad");
@@ -1088,7 +1089,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
 #endif
   // ADC block
-  enum {kTPC = 4, kVar = 6, kOpt = 2};
+  enum {kTPC = 4, kVar = 6, kOpt = 2, ktmBins = 13};
   const Char_t *tpcName[kTPC] = {"I","O","IC","OC"};
   struct Plot_t {
     const Char_t *vName;
@@ -1110,8 +1111,48 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
   const Char_t *vName[kVar] = {"Z","TanL","dXLog","npads","ntmbks","npadtmbks"};
   const Char_t *opName[kOpt] = {"","3D"};
   const Char_t *zName[kOpt] = {"log(simulated ADC)", "log(simulated ADC/recon. ADC)"};
+
+  Double_t tmBins[ktmBins+1] = {3.50, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 13.5, 15.5, 17.5, 21.5, 31.5};
+  TAxis tmbAx(ktmBins,tmBins);
+  struct Adc_t {
+    Double_t    sec;
+    Double_t    row; // 
+    Double_t Ntmbks; // ntmbks
+    Double_t      z; // Global Z
+    Double_t   AdcL; // TMath::Log(Adc_RC)
+    Double_t   ratL; // TMath::Log(Adc_MC/Adc_RC)
+  };
+  const static Int_t NoDim = sizeof(Adc_t)/sizeof(Double_t);
+  const Char_t *Names[NoDim] = {"secWE","rowIO", "Ntmbks", "z",  "AdcL","ratL"};
+  const Int_t  nBins[NoDim]  = {      2,      2,       25,  110,    140,   250};
+  const Adc_t  xMin          = {    0.5,    0.5,      2.5,   -5,      3,  -0.75};
+  const Adc_t  xMax          = {   24.5,   80.5,     27.5,  215,     10,   1.75};
+
   TProfile2D *profs[kTPC][kVar];
   TH3F       *hists[kTPC][kVar];
+#ifdef __SPARSE__
+  THnSparse  *sparse = new THnSparseC("Sparse", "TMath::Log(Adc_MC/Adc_RC) versus sector/row/no.tmbk/zG/TMath::Log(Adc_RC)", NoDim, nBins, &xMin.sec, &xMax.sec);
+  for (Int_t i = 0; i < NoDim; i++) {
+    sparse->GetAxis(i)->SetName(Names[i]);
+  }
+#endif
+  //           WE IO NTB
+  TH3F *AdcHits[2][2][13] = {0};
+  const Char_t *WE[4] = {"W","E","West","East"};
+  const Char_t *IO[4] = {"I","O","Inner","Outer"};
+  for (Int_t we = 0; we < 2; we++) {
+    for (Int_t io = 0; io < 2; io++) {
+      for (Int_t tb = 0; tb < ktmBins; tb++) {
+	TString Name(Form("%s%s_%i",WE[we],IO[io],tb+1));
+	TString Title(Form("%s %s tb [ %5.1f,%5.1f] AdcMCL - AdcRCL  versus |Z| and AdcRCL",WE[we+2],IO[io+2],tmBins[tb],tmBins[tb+1]));
+	AdcHits[we][io][tb] = new TH3F(Name,Title,
+				       nBins[3],xMin.z,xMax.z,
+				       nBins[4],xMin.AdcL,xMax.AdcL,
+				       nBins[5],xMin.ratL,xMax.ratL);
+      }
+    }
+  }
+#ifdef __ADCPLOTS__
   for (Int_t i = 0; i < kTPC; i++) 
     for (Int_t j = 0; j < kVar; j++) 
       for (Int_t k = 0; k < kOpt; k++) {
@@ -1119,7 +1160,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
 	  profs[i][j] = new TProfile2D(Form("%s%s%s",tpcName[i],opName[k],vName[j]),
 				       Form("log(simulated ADC) versus log(recon. ADC) and %s", Plots[j].vName),
 				       Plots[j].nx,Plots[j].xmin,Plots[j].xmax,Plots[j].ny,Plots[j].ymin,Plots[j].ymax);
-	} else {
+	} else if (k == 1) {
 	  hists[i][j] = new TH3F(Form("%s%s%s",tpcName[i],opName[k],vName[j]),
 				 Form("log(simulated ADC) - log(recon. ADC)  versus log(recon. ADC) and %s",Plots[j].vName),
 				 Plots[j].nx,Plots[j].xmin,Plots[j].xmax,Plots[j].ny,Plots[j].ymin,Plots[j].ymax,400,-2,2);
@@ -1148,6 +1189,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
       }
     }
   }
+#endif /* __ADCPLOTS__ */
   TString  currentFileName;
   TChain *chain = iter.Chain();
   while (iter.Next()) {
@@ -1205,6 +1247,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
 #else
       Double_t dADC = 0;
 #endif
+#ifdef __ADCPLOTS__
       Double_t z[4] = {lADCs, lADCs-lADCr, lADCs - dADC, lADCs-lADCr - dADC};
       for (Int_t j = 0; j < kVar; j++) {
 	profs[io][j]->Fill(lADCr, y[j], z[0]);
@@ -1222,9 +1265,25 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
       histdE[2][0]->Fill(fMcHit_mLgamma[k],NpRC/fRcHit_mdX[k]); 
       histdE[2][1]->Fill(TMath::Log(NpRC),           1e9*fRcHit_mCharge[k]/NpRC);
       histdE[2][2]->Fill(TMath::Log(NpRC),TMath::Log(1e9*fRcHit_mCharge[k]/NpRC));
+#endif /*  __ADCPLOTS__ */
+#ifdef __SPARSE__
+      //________________________________________________________________________________
+      Adc_t AdcV = { (Double_t) sector,  (Double_t) row, (Double_t) fRcHit_mMintmbk[0]+fRcHit_mMaxtmbk[0]+1, TMath::Abs(fRcHit_mPosition_mX3[0]), lADCr, lADCs - lADCr};
+      sparse->Fill(&AdcV.sec);
+#endif
+      Int_t we = 0; 
+      if (sector > 12) we = 1;
+      Double_t ntb = fRcHit_mMintmbk[0]+fRcHit_mMaxtmbk[0]+1;
+      Int_t tb = tmbAx.FindBin(ntb) - 1;
+      if (tb < 0 || tb >= ktmBins) continue;
+      AdcHits[we][io][tb]->Fill(TMath::Abs(fRcHit_mPosition_mX3[0]), lADCr, lADCs - lADCr);
     }
   }
+  fOut->cd();
   fOut->Write();
+#ifdef __SPARSE__
+  sparse->Write();
+#endif
 }
 //________________________________________________________________________________
 Double_t Derivatives5(Double_t y[5], Double_t h) {
@@ -3277,8 +3336,8 @@ void TpcTPadSp(const Char_t *Out = "SpXSpZ", const Char_t *files="*.root") {
   const UChar_t*&    fRcHit_mMaxtmbk                          = iter("fRcHit.mMaxtmbk");
   const Short_t*&    fRcHit_mMcl_x                            = iter("fRcHit.mMcl_x");
   const Short_t*&    fRcHit_mMcl_t                            = iter("fRcHit.mMcl_t");
-  const UShort_t*&    fRcHit_mFlag                             = iter("fRcHit.mFlag");
-  const Int_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const UShort_t*&   fRcHit_mFlag                             = iter("fRcHit.mFlag");
+  const Int_t*&      fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
   const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
 #if 0
   const Float_t*&    fRcTrack_fpx                             = iter("fRcTrack.fpx");
