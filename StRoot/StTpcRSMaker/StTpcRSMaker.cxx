@@ -210,6 +210,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     Int_t Mask = -1; // 22 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrectionMDF);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection3MDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
     //    CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
     //    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
