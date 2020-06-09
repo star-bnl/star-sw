@@ -29,7 +29,7 @@
  @search_files = ();
  my $ROOT_VERSION = `root-config --version`;
  chomp($ROOT_VERSION);
- my ($ROOT_MAIN,$ROOT_MINOR) = split ('/',$ROOT_VERSION); print "ROOT_VERSION = $ROOT_VERSION => $ROOT_MAIN $ROOT_MINOR\n";
+ my ($ROOT_MAIN,$ROOT_MINOR) = split ('/',$ROOT_VERSION);# print "ROOT_VERSION = $ROOT_VERSION => $ROOT_MAIN $ROOT_MINOR\n";
  $PLATFORM      = `root-config --platform`; chomp($PLATFORM);
  $ARCH          = `root-config --arch`; chomp($ARCH);
  $CC           = `root-config  --cc`; chomp($CC); # print "CC = $CC\n";
@@ -115,7 +115,7 @@
  if ($CXX eq 'g++') {
    if ($CXX_MAJOR > 4 or $CXX_MAJOR == 4 and $CXX_MINOR >= 6) {$CXXFLAGS .= " -fpermissive";}
    if ($CXX_MAJOR > 6 or $CXX_MAJOR == 6 and $CXX_MINOR >= 3) {$CXXFLAGS .= " -Wno-misleading-indentation -Wno-ignored-attributes";}
-   print "CXX_MAJOR = $CXX_MAJOR, CXX_MINOR = $CXX_MINOR => CXXFLAGS = $CXXFLAGS ==============\n";
+#   print "CXX_MAJOR = $CXX_MAJOR, CXX_MINOR = $CXX_MINOR => CXXFLAGS = $CXXFLAGS ==============\n";
  }
  my @words     = split(' ',$CFLAGS);# print "words = @words\n";
  my $cflags    = "";
