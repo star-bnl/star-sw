@@ -17,6 +17,7 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
+#include "TString.h"
 #include "StRoot/StGmtUtil/StGmtConsts.h"
 
 
