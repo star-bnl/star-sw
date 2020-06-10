@@ -921,7 +921,9 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
   int nTpcHits = dets[kTpcId][2];
   for (int i=1;i<kMaxDetectorId;i++) {
     if (!dets[i][1]) continue;
-    detInfo->setNumberOfPoints(dets[i][1],static_cast<StDetectorId>(i));
+    UChar_t c = dets[i][1];
+    if (dets[i][1] > 255) c = 255;
+    detInfo->setNumberOfPoints(c,static_cast<StDetectorId>(i));
   }
   StiKTNIterator tNode = track->rbegin();
   StiKTNIterator eNode = track->rend();
@@ -1129,7 +1131,9 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
 
   for (int i=1;i<kMaxDetectorId;i++) {
     if (!dets[i][2]) continue;
-    fitTraits.setNumberOfFitPoints((unsigned char)dets[i][2],(StDetectorId)i);
+    UChar_t c = dets[i][2];
+    if (dets[i][2] > 255) c = 255;
+    fitTraits.setNumberOfFitPoints(c,(StDetectorId)i);
   }
   if (gTrack->type()==primary) {
      fitTraits.setPrimaryVertexUsedInFit(true);
