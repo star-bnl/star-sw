@@ -112,8 +112,6 @@ TDataSet *CreateTable() {
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
   
-  // row.SecRowCorOW[0] = row.SecRowCorOE[0] = 0.11; // IRAKLI : based on shift seen in the MuDst based simulation;
-#if 1
   const Double_t RowMuTrs[8] = {
     4.45505e-02,  3.63901e-03,  // Inner W
     3.52547e-02,  3.85726e-03,  // Outer W
@@ -123,26 +121,6 @@ TDataSet *CreateTable() {
   for (Int_t i = 0; i < 8; i++) {
     a[i] = RowMuTrs[i];
   }
-  // row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02;
-  // row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02;
-  // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
-  //                                          3.22907e-01                          2.72715e-01
-  // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
-  // diff                                   : 9.13675e-02                          6.29849e-02
-  // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
-  const Double_t RowSigmaTrs[8] = {
-    -5.00e-03, 0,  // Inner W
-    -5.00e-03, 0,  // Outer W
-    -1.76e-02, 0,  // Inner E
-    -1.76e-02, 0};  // Outer E
-  Float_t *b = &row.SecRowSigIW[0];
-  for (Int_t i = 0; i < 8; i++) {
-    b[i] = RowSigmaTrs[i];
-  }
-  /* Sigmas 
-     Tpx inner = 0.395
-     Tpx outer = 0.314
-     iTpc      = 0.322 Outer  0.316 */
 #endif
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
