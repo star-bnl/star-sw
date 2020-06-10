@@ -90,6 +90,8 @@
 
 class StHitFilter;
 class StHit;
+class StTrackDetectorInfo;
+ostream&  operator<<(ostream& os,  const StTrackDetectorInfo& t);
 
 class StTrackDetectorInfo : public StObject {
 public:
@@ -118,7 +120,8 @@ public:
     void addHit(StHit*, bool = true);
     void removeHit(StHit*&);
     int  bad() const;
-    
+    virtual void Print(Option_t *option="") const {cout << option << (*this) << endl; }
+
 protected:
     void setNumberOfPoints(unsigned short);  // obsolete since ITTF
     

@@ -291,3 +291,13 @@ int  StTrackDetectorInfo::bad() const
 
    return 0;
 }
+//________________________________________________________________________________
+
+ostream&  operator<<(ostream& os,  const StTrackDetectorInfo& detectorInfo) {
+  StPtrVecHit hvec = detectorInfo.hits();
+  for (UInt_t j=0; j<hvec.size(); j++) {// hit loop
+    StHit *hit = hvec[j];
+    if (hit) os << *hit << endl;
+  }
+  return os;
+}
