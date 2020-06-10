@@ -74,3 +74,23 @@ ln -s TpcLengthCorrectionMDF.9p2GeV_AuAu.C                           TpcLengthCo
 ln -s TpcLengthCorrectionMDF.31GeV_fixedTarget_1.C                     TpcLengthCorrectionMDF.20190709.032312.C
 ln -s TpcLengthCorrectionMDF.200GeV_AuAu_1.C                           TpcLengthCorrectionMDF.20190709.191524.C
 ln -s TpcLengthCorrectionMDF.9p2GeV_AuAu.C                           TpcLengthCorrectionMDF.20190715.085004.C
+
+
+
+
+ln -s  TpcSecRowB.11p5GeV.root                TpcSecRowB.20191208.091308.root 
+ln -s  TpcSecRowB.5p75GeV_fixedTarget.root    TpcSecRowB.20191221.154021.root 
+ln -s  TpcSecRowB.11p5GeV.root		    TpcSecRowB.20191221.190032.root 
+ln -s  TpcSecRowB.31p2GeV_fixedTarget.root    TpcSecRowB.20200128.182912.root 
+ln -s  TpcSecRowB.9p8GeV_fixedTarget.root	    TpcSecRowB.20200130.005840.root 
+ln -s  TpcSecRowB.9p2GeV.root		    TpcSecRowB.20200131.012112.root 
+ln -s  TpcSecRowB.9p8GeV_fixedTarget.root	    TpcSecRowB.20200131.050328.root 
+ln -s  TpcSecRowB.19p5GeV_fixedTarget.root    TpcSecRowB.20200201.191904.root 
+ln -s  TpcSecRowB.13p5GeV_fixedTarget.root    TpcSecRowB.20200202.160409.root 
+ln -s  TpcSecRowB.9p2GeV.root		    TpcSecRowB.20200203.202534.root 
+ln -s  TpcSecRowB.7p3GeV_fixedTarget.root	    TpcSecRowB.20200204.053518.root 
+ln -s  TpcSecRowB.9p2GeV.root		    TpcSecRowB.20200205.144626.root 
+ln -s  TpcSecRowB.11p5GeV.root		    TpcSecRowB.20200210.220428.root 
+ln -s  TpcSecRowB.5p75GeV_fixedTarget.root    TpcSecRowB.20200213.152339.root 
+ln -s  TpcSecRowB.11p5GeV.root		    TpcSecRowB.20200214.143742.root 
+ln -s  TpcSecRowB.9p2GeVb.root		    TpcSecRowB.20200224.230740.root 

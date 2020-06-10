@@ -341,4 +341,10 @@
 #root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000002.root /net/l404/data/fisyak/Histograms/RunXX/RunXX03/SecRow3CGFRunXX03.root 'MakeTpcSecRowB.C(20191121,000003,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,000003.log
 #root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000003.root /net/l404/data/fisyak/Histograms/RunXX/RunXX05/SecRow3CGFRunXX05.root 'MakeTpcSecRowB.C(20191121,000005,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,000005.log
 #root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000005.root /net/l404/data/fisyak/Histograms/RunXX/RunXX07/SecRow3CGFRunXX07.root 'MakeTpcSecRowB.C(20191121,000007,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,000007.log
-root.exe -q -b /net/l404/data/fisyak/Histograms/RunXX/RunXX10/SecRow3CGFRunXX10.root 'MakeTpcSecRowB.C(20191121,10,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,000010.log
+#root.exe -q -b /net/l404/data/fisyak/Histograms/RunXX/RunXX10/SecRow3CGFRunXX10.root 'MakeTpcSecRowB.C(20191121,10,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,000010.log
+foreach f (`ls -1d SecRow3CGF*.root`) 
+    set b = `echo ${f} | sed -e 's/SecRow3CGF//'`;
+    echo "${f} => ${b}"
+    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000007.root ~/work/Histograms/RunXX/RunXX14/${f} 'MakeTpcSecRowB.C(20191121,14,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,014.log
+    mv TpcSecRowB.20191121.000014.root  TpcSecRowB.${b}; mv  MakeTpcSecRowB.20191121,014.log MakeTpcSecRowB.${b}.log
+end
