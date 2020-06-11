@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.147 2020/02/26 15:55:22 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.148 2020/06/11 19:20:37 genevb Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -597,16 +597,6 @@
 	    $CXXFLAGS    .= " -pedantic"; 
 	}
 
-	# compiler bug / calo tower and zebra Q() bank
-	if ( $CXX_MAJOR >= 4 && $CXX_MINOR >= 8 && $CXX_LOWER > 2 && 
-	     $FC =~ m/gfortran/ && ! $USE_64BITS ){
-
-	    # seems that legacy and sse are clashing
-	    $FFLAGS   .= " -mno-sse -mno-sse2 -mno-sse3";  
-	}
-
-	# <--- end compiler version conditional option settings
-	
 
 	$CXXFLAGS    .= " -Wno-long-long";
 
