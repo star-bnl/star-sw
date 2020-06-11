@@ -213,7 +213,7 @@ JevpServer::JevpServer() {
     maxevts = 0;
     evtsInRun = 0;
     runCanvasImageBuilder = 0;
-    imagewriterdir = (char *)"/tmp/jevp";
+    imagewriterdir = (char *)"jevpplots";
 
     ssocket = NULL;
     mon = NULL;
