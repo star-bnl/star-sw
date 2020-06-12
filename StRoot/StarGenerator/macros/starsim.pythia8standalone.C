@@ -1,6 +1,14 @@
 /**!
  * Example macro for running an event generator in standalone mode.
  *
+ * Use cases:
+ *   1) Generate input root files for geant simulation
+ *   2) Generate root files for quick analysis.  
+ *
+ * NOTE:  By default, a number of particles are made stable (e.g. pi0, K0, etc...),
+ *        to allow GEANT to handle the decays.  If this is not desired, change the
+ *        flag below.
+ *
  * Usage:
  *
  * root4star
@@ -8,6 +16,8 @@
  * int nevents=100;
  * standalone( nevents )
  */
+
+const bool GEANT_HANDLES_DECAYS = true;
 
 class St_geant_Maker;
 St_geant_Maker *geant_maker = 0;
@@ -201,7 +211,7 @@ void starsim( Int_t nevents=1000, UInt_t rngSeed = 12345 )
   // them.  If you need pythia to decay these for analysis, enable
   // the following code block...
   //
-  if ( 0 ) {
+  if ( GEANT_HANDLES_DECAYS ) {
     _pythia8->Set("111:onMode=1"); // pi0 
     _pythia8->Set("211:onMode=1"); // pi+/-                         
     _pythia8->Set("221:onMode=1"); // eta                              
