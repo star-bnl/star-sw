@@ -830,9 +830,20 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  SecRow[2]->Fill(sector,row,Gain);
 #endif /* __LASERINO__ */
 	}
-	Double_t GainXCorrectionL = AdditionalMcCorrection[iowe] + row*AdditionalMcCorrection[iowe+1];
+	Int_t rowM = row; // Account row numbering changing for sector 20 in y2018
+	static Bool_t ChangedRowCount = 
+	  St_tpcPadConfigC::instance()->numberOfInnerRows(1) != 
+	  St_tpcPadConfigC::instance()->numberOfInnerRows(20);
+	if (ChangedRowCount && sector == 20) {
+	  if (row <= 40) {
+	    if (row > 13) rowM = 13;
+	  } else {
+	    rowM = row - 27;
+	  }
+	}
+	Double_t GainXCorrectionL = AdditionalMcCorrection[iowe] + rowM*AdditionalMcCorrection[iowe+1];
 	Gain *= TMath::Exp(-GainXCorrectionL);
-	Double_t GainXSigma = AddSigmaMcCorrection[iowe] + row*AddSigmaMcCorrection[iowe+1];
+	Double_t GainXSigma = AddSigmaMcCorrection[iowe] + rowM*AddSigmaMcCorrection[iowe+1];
 	if (GainXSigma > 0) Gain *= TMath::Exp(gRandom->Gaus(0.,GainXSigma));
 	if (ClusterProfile) {
 	  checkList[io][3]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),Gain);
