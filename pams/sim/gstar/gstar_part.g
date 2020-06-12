@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.58 2020/05/06 20:33:38 jwebb Exp $
+* $Id: gstar_part.g,v 1.59 2020/06/12 14:10:12 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.59  2020/06/12 14:10:12  jwebb
+* Fix cut-n-paste error on K0short definition
+*
 * Revision 1.58  2020/05/06 20:33:38  jwebb
 * Pentaquark decay chain, all daughters decay to charged states
 *
@@ -853,7 +856,7 @@ Particle H_dibaryon               code      = 60001,
                       trktyp=4 bratio={1.0,} mode={080809,}
 
   Particle K0short        code=95 TrkTyp=4 mass=.4977  charge=0  tlife= 1.e-24,
-                     pdg=311  bratio= { 0.334, 0.333, 0.333}    mode= { 80809, 80908, 090808 }
+                     pdg=311  bratio= { 0.5, 0.5}    mode= { 809, 908 }
 
 
 ***************************************************************************
