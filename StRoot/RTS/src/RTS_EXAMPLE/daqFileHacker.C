@@ -89,6 +89,9 @@ void doHack(daqReader *rdr) {
     if(rdr->daqbits64 & (1ll << 13)) hlt150 = 1;
     if(rdr->daqbits64 & (1ll << 14)) hltall = 1;
     
+    if(x == -999) return;
+    if(!mb && !hlt70 && !hlt150 && !hltall) return;
+
     printf("%d %f %f %f %d %d %d %d %d\n", rdr->evt_time - firsttm, x, y, z, n, mb, hlt70, hlt150, hltall);
 }
 /*
