@@ -1,6 +1,14 @@
 /**!
  * Example macro for running an event generator in standalone mode.
  *
+ * Use cases:
+ *   1) Generate input root files for geant simulation
+ *   2) Generate root files for quick analysis.  
+ *
+ * NOTE:  By default, a number of particles are made stable (e.g. pi0, K0, etc...),
+ *        to allow GEANT to handle the decays.  If this is not desired, change the
+ *        flag below.
+ *
  * Usage:
  *
  * root4star
@@ -8,6 +16,8 @@
  * int nevents=100;
  * standalone( nevents )
  */
+
+const bool GEANT_HANDLES_DECAYS = true;
 
 class St_geant_Maker;
 St_geant_Maker *geant_maker = 0;
@@ -17,6 +27,9 @@ StarGenEvent   *event       = 0;
 
 class StarPrimaryMaker;
 StarPrimaryMaker *_primary = 0;
+
+class StarPythia8;
+StarPythia8* _pythia8;
 
 // ----------------------------------------------------------------------------
 void trig( Int_t n=1 )
@@ -97,6 +110,7 @@ void Pythia8( TString config="pp:W", const char* _library="libPythia8_1_62.so" )
   // the primary generator
   //
   StarPythia8 *pythia8 = new StarPythia8();    
+  _pythia8=pythia8;
   if ( config=="pp:W" )
     {
       pythia8->SetFrame("CMS", 510.0);
@@ -189,6 +203,30 @@ void starsim( Int_t nevents=1000, UInt_t rngSeed = 12345 )
   // Initialize primary event generator and all sub makers
   //
   _primary -> Init();
+
+
+  //
+  // By default we have configured pythia8 such that the following
+  // particles are stable, so that geant is responsible for decaying
+  // them.  If you need pythia to decay these for analysis, enable
+  // the following code block...
+  //
+  if ( GEANT_HANDLES_DECAYS ) {
+    _pythia8->Set("111:onMode=1"); // pi0 
+    _pythia8->Set("211:onMode=1"); // pi+/-                         
+    _pythia8->Set("221:onMode=1"); // eta                              
+    _pythia8->Set("321:onMode=1"); // K+/-                             
+    _pythia8->Set("310:onMode=1"); // K short                                               
+    _pythia8->Set("130:onMode=1"); // K long                                               
+    _pythia8->Set("3122:onMode=1"); // Lambda 0                                             
+    _pythia8->Set("3112:onMode=1"); // Sigma -                                              
+    _pythia8->Set("3222:onMode=1"); // Sigma +                                              
+    _pythia8->Set("3212:onMode=1"); // Sigma 0                                              
+    _pythia8->Set("3312:onMode=1"); // Xi -                                                 
+    _pythia8->Set("3322:onMode=1"); // Xi 0                                                 
+    _pythia8->Set("3334:onMode=1"); // Omega -              
+  }
+
 
   //
   // Trigger on nevents
