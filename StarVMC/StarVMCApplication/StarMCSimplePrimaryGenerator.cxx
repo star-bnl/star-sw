@@ -93,9 +93,8 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
       fPVZ = (TH1 *) PVfile->Get("z"); assert(fPVZ); fPVZ->SetDirectory(0);
       fPVxyError = (TH1 *) PVfile->Get("hPVError"); if (fPVxyError) fPVxyError->SetDirectory(0);
       delete PVfile;
-      LOG_INFO << "PVxyz.root with x, y and z histograms has been found. These histogram will be use to generate primary vertex x, y, z.";
-      if (fPVxyError) LOG_INFO << " hPVError histogram will be used for transverse PV error.";
-      LOG_INFO << endm;
+      LOG_WARN << "PVxyz.root with x, y and z histograms has been found. These histogram will be use to generate primary vertex x, y, z." << endm;
+      if (fPVxyError) LOG_WARN << " hPVError histogram will be used for transverse PV error." << endm;
     }
     delete [] file;
   }
@@ -205,7 +204,7 @@ void StarMCSimplePrimaryGenerator::GeneratePrimaries() {
 	  Double_t z    = fZ_min + (fZ_max-fZ_min)*gRandom->Rndm();
 	  SetOrigin(x0 + dxdz*z, y0 + dydz*z, z);
 	} else {
-	  LOG_INFO << "Warning : Requested Beam Line, but there is no beam line" << endm;
+	  LOG_WARN << "Warning : Requested Beam Line, but there is no beam line" << endm;
 	}
       } else {
 	fOrigin.SetZ(fZ_min + (fZ_max-fZ_min)*gRandom->Rndm());
