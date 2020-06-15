@@ -100,10 +100,23 @@ TDataSet *CreateTable() {
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        =  2.145*1.515;// HC 1.;// 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
+if 0
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
   row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01 +1.14433e-01 -3.57593e-01 -3.95075e-02 -2.12902e-02 -2.43764e-03 +1.92592e-01; // hijingAuAu200.DEV2X5.StiCA.Minuit
   row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01 -6.15827e-02 +1.99821e-01              +6.06971e-03 -6.98644e-04 -1.37937e-01;
+#endif
+  const Float_t RowMuTrs[8] = {
+    8.58173375017355466e-01,  -5.31599e-03,
+    9.59121536004932995e-01,   2.01122e-03,
+    6.99268875017355351e-01,  -4.17326e-03,
+    9.57378636004933004e-01,   2.02957e-03
+  };
+  Float_t *a = &row.SecRowCorIW[0];
+  for (Int_t i = 0; i < 8; i++) {
+    a[i] = RowMuTrs[i%4];
+  }
+#if 0
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
   //                                          3.22907e-01                          2.72715e-01
   // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
@@ -116,6 +129,7 @@ TDataSet *CreateTable() {
   for (Int_t i = 0; i < 8; i++) {
     b[i] = RowSigmaTrs[i%4];
   }
+#endif
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
   //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
