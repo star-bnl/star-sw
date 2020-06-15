@@ -535,7 +535,8 @@ StEventMaker::makeEvent()
       mCurrentRunInfo->setTpcDriftVelocity(west, gStTpcDb->DriftVelocity(24,0));
     }
     if (dbBeamInfo) {
-        mCurrentRunInfo->setCenterOfMassEnergy(dbBeamInfo->getBlueEnergy() + dbBeamInfo->getYellowEnergy());
+      //        mCurrentRunInfo->setCenterOfMassEnergy(dbBeamInfo->getBlueEnergy() + dbBeamInfo->getYellowEnergy());
+      mCurrentRunInfo->setCenterOfMassEnergy(dbBeamInfo->SqrtS());
         mCurrentRunInfo->setBeamMassNumber(blue, dbBeamInfo->getBlueMassNumber());
         mCurrentRunInfo->setBeamMassNumber(yellow, dbBeamInfo->getYellowMassNumber());
         mCurrentRunInfo->setBeamEnergy(blue, dbBeamInfo->getBlueEnergy());
