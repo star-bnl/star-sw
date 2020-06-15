@@ -84,6 +84,8 @@ else
     cons
 
     mgr/CleanLibs  0  &
+    mgr/CreateLinks
+
     echo <<EOF 
 
 This pass should have ended saying 
