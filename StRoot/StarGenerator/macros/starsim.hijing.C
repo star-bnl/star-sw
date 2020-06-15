@@ -130,8 +130,13 @@ void starsim( int nevents=10,int rngSeed=1234, const char* tag="y2018" )
   trig( nevents );
   command("gprint kine");
 
-  //  command("call agexit");  // Make sure that STARSIM exits properly
+  if ( gROOT->IsBatch() ) {
+      command("call agexit");  // Make sure that STARSIM exits properly
+  }
+  else {
+      std::cout << "Interactive mode.  Please call AgExit() before .q" << std::endl; 
+  }
 
 }
 // ----------------------------------------------------------------------------
-
+void AgExit() { command("call agexit"); } 
