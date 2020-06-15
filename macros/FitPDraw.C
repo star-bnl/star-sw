@@ -103,6 +103,7 @@ Int_t SetFileList() {
   if (F) delete F;
   F = new TFile*[N]; memset(F, 0, N*sizeof(TFile*));
   TFile *f = 0;  
+#if 0
   for (Int_t k = 0; k < N; k++) {
     TIter  iter(fs);
     while ((f = (TFile *) iter())) {
@@ -113,10 +114,21 @@ Int_t SetFileList() {
       if (k == 0 && ! name.Contains(Names[k])) continue;
       if (k != 0 && ! name.EndsWith(Names[k])) continue;
       F[k] = f;
+      cout << NF << "\tAdd " << F[k]->GetName() << endl;
       NF++;
       break;
     }
   }
+#else
+  TIter  iter(fs);
+  while ((f = (TFile *) iter())) {
+    TNtuple *FitP = (TNtuple *) f->Get("FitP");
+    if (! FitP) continue;
+    F[NF] = f;
+    cout << NF << "\tAdd " << F[NF]->GetName() << endl;
+    NF++;
+  }
+#endif
   return NF;
 }
 //________________________________________________________________________________
@@ -129,7 +141,7 @@ void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)",
 	      const Char_t *opt = "profg",
 	      Double_t ymin = -1,
 	      Double_t ymax =  1) {
-  Int_t NF = SetFileList();
+  Int_t NF = SetFileList();  
   if (! NF) return;
   TString Current(gDirectory->GetName());
   gStyle->SetOptStat(0);
@@ -242,6 +254,53 @@ void DrawHist(const Char_t *dir="TPoints70BG",
     if (index < 0) index = 0;
     else           index += 3;
     leg->AddEntry(hist,name.Data()+index);
+  }
+  leg->Draw();
+}
+//________________________________________________________________________________
+void FitPMu(const Char_t *draw="mu", 
+	      const Char_t *ext = "P",
+	      Int_t    nx = 0,   // 45,
+	      Double_t xMin = 0, //  0.5,
+	      Double_t xMax = 0, // 45.5,
+	      const Char_t *cut = "i&&j", 
+	      const Char_t *opt = "",
+	      Double_t ymin = -1,
+	      Double_t ymax =  1) {
+  Int_t NF = SetFileList();
+  if (! NF) return;
+  TString Current(gDirectory->GetName());
+  gStyle->SetOptStat(0);
+  Int_t icol = 0;
+  TLegend *leg = new TLegend(0.5,0.7,1.0,1.0);
+  //  gStyle->SetMarkerSize(0.4);
+  for (Int_t k = 0; k < N; k++) {
+    if (! F[k]) continue;
+    F[k]->cd();
+    TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");
+    if (! FitP) continue;
+    icol = k + 1;
+    Int_t kM = 20;
+    if (icol == 3) kM = 24;
+    if      (icol == 1) kM = 20;
+    else if (icol == 5) kM = 20;
+    else if (icol >  7) {kM = 27; icol -= 6;}
+    FitP->SetMarkerStyle(kM);
+    FitP->SetMarkerColor(icol);
+    FitP->SetLineColor(icol);
+    FitP->SetMarkerSize(1);
+    TString same(opt);
+    if (k != 0) same += "same";
+    TString Draw(draw);
+    Draw += ">> Mu";
+    FitP->Draw(Draw,cut,same);
+    TString name(gSystem->BaseName(gDirectory->GetName()));
+    name.ReplaceAll(".root","");
+    name.ReplaceAll("SecRow3CGF","");
+    name.ReplaceAll("AvCurrentCGF","");
+    name.ReplaceAll("Z3CGF","");
+    TH1 *hist = (TH1 *) gDirectory->Get("Mu");
+    leg->AddEntry(hist,name.Data());
   }
   leg->Draw();
 }

@@ -385,7 +385,7 @@ void DrawFList(const Char_t *pattern = "OuterPadRcNoiseConv*", const Char_t *cti
     leg->Draw();
   }
   c->Update();
-#ifdef __zoom__
+#ifndef __NO_zoom__
   TQtZoomPadWidget *zoomer = new TQtZoomPadWidget();  // Create the Pad zoomer widget
   //  Double_t zoom = 1.;
   //  zoomer->SetZoomFactor(zoom);

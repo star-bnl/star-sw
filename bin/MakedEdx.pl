@@ -1908,7 +1908,9 @@ my $NEvents = 100000;
 #$hist = "RunXX14"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/08/20   Z correction
 #$hist = "RunXX15"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/08/20   SecRowB  Good enough
 #$hist = "RunXX16"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/09/20   switch off TpcPadCorrectionMDF
-$hist = "RunXX17"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/10/20   new TpcPadCorrectionMDF
+#$hist = "RunXX17"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/10/20   new TpcPadCorrectionMDF
+#$hist = "RunXX18"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/10/20   new TpcLengthCorrectionMDF
+$hist = "RunXX19"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/11/20  once again  new TpcLengthCorrectionMDF
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();

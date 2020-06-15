@@ -38,9 +38,16 @@ setenv STARFPE NO
 #root.exe -x  -q -b 'TpcRS.C(100,"MC.2020,-bbcSim,StiCA'${KFVertex}',-geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,NoHistos,noTags,noRunco,McTpcAna,rung.'${rung}${sdt}'",0,"heed,hadr_of",0,"'${file}'")' &gt;&amp; ${logFile}
 #root.exe -x  -q -b 'TpcRS.C(100,"MC.2020,-bbcSim,StiCA'${KFVertex}',-geantOut,evout,NoHistos,noTags,noRunco,McTpcAna,rung.'${rung}${sdt}'",0,"",0,"'${file}'")' &gt;&amp; ${logFile}
  root.exe -q -b 'bfc.C(100,"mtin,MC.2020,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
+################################################################################
+#    root4star -q -b 'TpcRS.C(1000,"MC.2016,sdt20160419.051230,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
+# set KFVertex = ",KFVertex";
+# set sdt = ",sdt20200125.045909"
+#root.exe -x  -q -b 'TpcRS.C(100,"MC.2020,-bbcSim,StiCA'${KFVertex}',-hitfilt,-geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1,McTpcAna",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile} 
 #  endif
 </command>
 <!-- <input URL="command:TpcRS_Part.pl" /> -->
 <input URL="command:daq2020TpcRS.pl" />
+<!-- <input URL="command:TpcRS_Part.pl" />  -->
+
 </job>
 

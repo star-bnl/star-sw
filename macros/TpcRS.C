@@ -32,7 +32,7 @@ Bool_t Root4Star = kFALSE;
 //________________________________________________________________________________
 void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
   cout << "Call SetPartGen with RootFile = " << RootFile.Data() << "\tRunOpt = " << RunOpt.Data() << "\t Opt = " << Opt.Data() << endl;
-  Int_t Ids[15] =            {      5,      6,           3,          2,       8,       9,      11,      12,       14,     15,         45,       46,    49,      47,         8};
+  Int_t Ids[15] =            {      5,      6,           3,          2,       8,       9,      11,      12,       14,     15,         45,       46,    49,      47,         9};
   Double_t Masses[15] = {    0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231,1.875613,2.80925,2.80923,3.727417,0.13956995  };
   const Char_t  *Names[15] = {"muon+", "muon-", "electron", "positron", "pion+", "pion-", "kaon+", "kaon-", "proton", "pbar", "deuteron", "triton", "He3", "alpha", "pionMIP"};
   Int_t    NTRACK = 100;

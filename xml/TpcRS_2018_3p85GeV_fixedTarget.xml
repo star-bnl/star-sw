@@ -40,9 +40,9 @@
 </command>
 <!-- <input URL="command:TpcRS_Part.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget/*MuDst.root" />  -->
-<input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget.B/*MuDst.root" />
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget.B/*MuDst.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget/st_physics_adc_19151031_raw_1500002_121_150.MuDst.root" />  -->
-<!-- <input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget/*.MuDst.root" /> -->
+<input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq_2018_3p85GeV_fixedTarget/*.MuDst.root" />
 
 </job>
 
