@@ -338,6 +338,7 @@ void DrawFList(const Char_t *pattern = "OuterPadRcNoiseConv*", const Char_t *cti
       f = FitFiles[l];
       TH1 *h = (TH1 *) f->Get(hist->GetName());
       if (! h) continue;
+      cout << "i = " << i << "\tl = " << l << "\t" << f->GetName() << "\t" << h->GetName() << endl;
       h->SetMarkerStyle(20);
       h->SetMarkerColor(l+1);
       h->SetLineColor(l+1);

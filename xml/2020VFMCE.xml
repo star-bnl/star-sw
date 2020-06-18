@@ -19,9 +19,28 @@
     exit 1;
   endif
   set name = ""
-  foreach name (K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed AntiLNNFixed AntiH4LFixed AntiLNFixed AntiH3LFixed LNNFixed H4LFixed LNFixed H3LFixed \
-               K_S01GeV  K_S0       Lambda0_bar      Lambda0      XiM_bar      XiM       Omega_bar      Omega      AntiLNN      AntiH4L      AntiLN      AntiH3L      LNN      H4L      LN      H3L \
-                Upsilon1SmTsq Upsilon2SmTsq)
+  foreach name (K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed \
+                LNNFixed LNFixed \
+                H3LdpFixed H3LFixed H3LrFixed  \
+                H4LtpFixed H4L2dFixed H4LFixed H5LFixed H6L3Fixed H6LFixed \
+                He4LFixed  \
+                He5L3Fixed He5LFixed He5Li5Fixed \
+                He6L3adFixed He6L3Fixed He6LFixed \
+                He7L3Fixed He7LFixed \
+                Li6LFixed \
+                Li7L3Fixed Li7LFixed \
+                Li8LFixed \
+                K_S0       Lambda0_bar      Lambda0      XiM_bar      XiM       Omega_bar      Omega      \
+                LNN LN \
+                H3Ldp H3L H3Lr  \
+                H4Ltp H4L2d H4L H5L H6L3 H6L \
+                He4L  \
+                He5L3 He5L He5Li5 \
+                He6L3ad He6L3 He6L \
+                He7L3 He7L \
+                Li6L \
+                Li7L3 Li7L \
+                Li8L )
     echo $Name | grep $name
     if (! $?) break;
 #    if ($name == $Name) break;
@@ -33,7 +52,7 @@
 #Stx  set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
 #StiCA
   set chain = "MC.2020a,P2020a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
-  set sdt = ",sdt20200111.052520"
+  set sdt = ",sdt20200211.052520"
   set VFMCE = ",VFMCE";
   set Chain = ${chain}${VFMCE}${sdt}",Rung."${rung}
   set base = ${name}_${rung}_${f}_${N};
@@ -52,5 +71,5 @@
     endif
   endif
 </command>
-<input URL="command:RunId.pl 1001 19000 100 K_S0" />
+<input URL="command:RunId.pl 2 500 500 K_S0" />
 </job>
