@@ -19,21 +19,52 @@ using namespace units;
 #include "TF1F.h"
 #include "TH1.h"
 #include "TTree.h"
-#include "StTpcDb/StTpcDb.h"
+#include "StDbUtilities/StCoordinates.hh"
+#include "StDbUtilities/StTpcPadCoordinate.hh"
 #include "StMagF.h"
 #include "TArrayF.h"
 #include "TArrayI.h"
+// SCL
+#include "StPhysicalHelixD.hh"
+#include "StTpcDb/StTpcDb.h"
 class Altro;
 class StTpcdEdxCorrection;
 class StTpcDigitalSector;
-class HitPoint_t;
 class g2t_tpc_hit_st;
 class g2t_vertex_st;
+class g2t_track_st;
 class StTpcCoordinateTransform;
 struct SignalSum_t {
   Float_t      Sum;
   Short_t      Adc;
-  Short_t  TrackId;
+  Int_t        TrackId;
+};
+class StTpcRSSegment : public TObject {
+public:
+  StTpcRSSegment() {}
+  virtual ~StTpcRSSegment() {}
+  void Set(g2t_tpc_hit_st *tpc_hitC = 0, g2t_vertex_st *gver = 0, Int_t mode = 0);
+  Int_t indx;
+  Int_t TrackId;
+  Double_t s; // track length to current point
+  Double_t sMin, sMax;
+  g2t_tpc_hit_st *tpc_hitC;
+  StGlobalCoordinate   xyzG;
+  StTpcLocalSectorCoordinate coorLS;
+  StTpcLocalSectorDirection dirLS, BLS;
+  StTpcPadCoordinate Pad;	
+  StTpcLocalSectorCoordinate coorLSU; // upper row position
+  StTpcLocalSectorCoordinate coorLSL; // lower row position
+  StPhysicalHelixD track;
+  Int_t m_Mode;
+  Int_t charge;
+  static Int_t _debug; 
+  static void SetDebug(Int_t i) {_debug = i;};
+  static Int_t Debug() {return _debug;}
+  void Print(const Char_t *opt = "") const;
+  void   GenerateSignal(StTpcLocalSectorCoordinate &xyzW, Int_t rowMin, Int_t rowMax, Float_t Gain);
+  Double_t dEdxCorrection();
+  ClassDef(StTpcRSSegment,1)
 };
 class StTpcRSMaker : public StMaker {
  public:
@@ -45,19 +76,21 @@ class StTpcRSMaker : public StMaker {
 	      kDistortion  = 4,// include distortions
 	      kNoToflight  = 5 // don't account for particle time of flight
   };
-  enum {kPadMax = 32, kTimeBacketMax = 64, kRowMax = 72};
+  enum {kPadMax = 32, kTimeBucketMax = 64, kRowMax = 72};
   StTpcRSMaker(const char *name="TpcRS");
   virtual              ~StTpcRSMaker();
   virtual Int_t         InitRun(int runnumber);
   virtual Int_t         Make();
   virtual Int_t  	Finish();
-  TF1F *GetShaperResponse(Int_t io = 0, Int_t sector = 1) {return (TF1F *) mShaperResponses[io][sector-1];}          
-  TF1F *GetChargeFraction(Int_t io = 0, Int_t sector = 20)     {return (TF1F *) mChargeFraction[io][sector-1];}     
-  TF1F *GetPadResponseFunction(Int_t io = 0, Int_t sector = 20){return (TF1F *) mPadResponseFunction[io][sector-1];}
-  TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
-  TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
-  TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
-  TF1  *GetHeed()                    {return mHeed;}
+  static TF1F *GetShaperResponse(Int_t io = 0, Int_t sector = 1) {return (TF1F *) mShaperResponses[io][sector-1];}          
+  static TF1F *GetChargeFraction(Int_t io = 0, Int_t sector = 20)     {return (TF1F *) mChargeFraction[io][sector-1];}     
+  static TF1F *GetPadResponseFunction(Int_t io = 0, Int_t sector = 20){return (TF1F *) mPadResponseFunction[io][sector-1];}
+  static TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
+  static TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
+  static TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
+  static TF1F *GetTimeShapePASA(Int_t io = 0)  {return fgTimeShapePASA[io];}
+  static TF1F *GetTimeShapePASA4()          {return fgTimeShapePASA4;}
+  static TF1  *GetHeed()                    {return mHeed;}
   Double_t GetNoPrimaryClusters(Double_t betaGamma, Int_t charge);
   virtual void Print(Option_t *option="") const;
   StTpcDigitalSector *DigitizeSector(Int_t sector);
@@ -69,49 +102,51 @@ class StTpcRSMaker : public StMaker {
   static Double_t shapeEI_I(Double_t *x, Double_t *par=0);
   static Double_t shapeEI3(Double_t *x, Double_t *par=0);
   static Double_t shapeEI3_I(Double_t *x, Double_t *par=0);
+  static Double_t shapeEIPASA(Double_t *x, Double_t *par=0);
+  static Double_t shapeEIPASA_I(Double_t *x, Double_t *par=0);
+  static Double_t shapeEIPASA4_I(Double_t *x, Double_t *par=0);
   static Double_t fei(Double_t t, Double_t t0, Double_t T);
   static Double_t polya(Double_t *x, Double_t *par);
-  SignalSum_t  *GetSignalSum(Int_t sector);
-  SignalSum_t  *ResetSignalSum(Int_t sector);
+  static SignalSum_t  *GetSignalSum(Int_t sector);
+  static SignalSum_t  *ResetSignalSum(Int_t sector);
   void SettauIntegrationX(Double_t p =      74.6e-9, Int_t io=0) {mtauIntegrationX[io] = p;}
-  void SettauCX(Double_t           p =    1000.0e-9, Int_t io=0) {mtauCX[io] = p;}
-  void SetCutEle(Double_t p = 1e-4)                  {mCutEle = p;}
+  static void SettauCX(Double_t           p =    1000.0e-9, Int_t io=0) {mtauCX[io] = p;}
+  static void SetCutEle(Double_t p = 1e-4)                  {mCutEle = p;}
   static Double_t Ec(Double_t *x, Double_t *p); // minimal energy to create an ion pair
   static TF1 *fEc(Double_t w = 26.2);           // HEED function to generate Ec
+  static StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
+  static void SetParticleType(g2t_track_st *tpc_track, Int_t Id, Int_t &id3, Int_t &ipart, Int_t &charge, Double_t &mass); 
+  static Double_t CalcTmax(g2t_tpc_hit_st *tpc_hitC, Int_t ipart, Double_t mass, Int_t charge, Double_t &betaGamma, Double_t &eKin);
  private:
+#ifdef __OLD__
   static Double_t ShaperFunc(Double_t *x, Double_t *p);
+#endif
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
-  static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
+  static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0, Double_t &EffcetiveTime);
   static Float_t  GetCutEle();
-#if defined(__CINT__) 
-  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, HitPoint_t *TrackSegmentHits);
-  void   GenerateSignal(HitPoint_t *TrackSegmentHits,Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
-  Double_t dEdxCorrection(HitPoint_t *TrackSegmentHits);
-#else
-  Bool_t TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex_st *gver, HitPoint_t &TrackSegmentHits);
-  void   GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, Int_t rowMin, Int_t rowMax, Double_t sigmaJitterT, Double_t sigmaJitterX);
-  Double_t dEdxCorrection(HitPoint_t &TrackSegmentHits);
-#endif
-  static TF1F     *fgTimeShape3[2];  //!
-  static TF1F     *fgTimeShape0[2];   //!
-  Char_t   beg[1];                    //!
-  TTree   *fTree;                     //!
-  SignalSum_t     *m_SignalSum;       //!
-  TH1D*    mdNdx;                     //!
-  TH1D*    mdNdxL10;                  //!
-  TH1D*    mdNdEL10;                  //!
-  TF1F  *mShaperResponses[2][24];     //!
-  TF1F  *mShaperResponse;             //!
-  TF1F  *mChargeFraction[2][24];      //!
-  TF1F  *mPadResponseFunction[2][24]; //!
-  TF1F  *mPolya[2];                   //!
-  TF1F  *mGG;                         //! Gating Grid Transperency
-  TF1   *mHeed;                       //!
-  StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
+  static TF1F     *fgTimeShape3[2];    //!
+  static TF1F     *fgTimeShape0[2];    //!
+  static TF1F     *fgTimeShapePASA[2]; //!
+  static TF1F     *fgTimeShapePASA4;   //!
+  Char_t   beg[1];                     //!
+  TTree   *fTree;                      //!
+  static SignalSum_t     *m_SignalSum; //!
+  TH1D*    mdNdx;                      //!
+  TH1D*    mdNdxL10;                   //!
+  TH1D*    mdNdEL10;                   //!
+  static TF1F  *mShaperResponses[2][24];     //!
+  static TF1F  *mShaperResponse;             //!
+  static TF1F  *mChargeFraction[2][24];      //!
+  static TF1F  *mPadResponseFunction[2][24]; //!
+  static TF1F  *mPolya[2];                   //!
+  static TF1F  *mGG;                         //! Gating Grid Transperency
+  static TF1   *mHeed;                       //!
   Double_t InnerAlphaVariation[24];   //!
   Double_t OuterAlphaVariation[24];   //!
-  Altro *mAltro;                      //!
+  Double_t InnerEffectiveTime[24];   //!
+  Double_t OuterEffectiveTime[24];   //!
+  Altro *mAltro[48];                  //! 0 - 23 => ALTRO, 24 - 47 => SAMPA chips
   // local variables
   Int_t numberOfSectors;              //!
   Int_t NoPads;                       //!
@@ -128,33 +163,18 @@ class StTpcRSMaker : public StMaker {
   Double_t innerSectorAnodeVoltage[24];//!
   Double_t outerSectorAnodeVoltage[24];//!
   Double_t      mtauIntegrationX[2];  //! for TPX inner=0/outer=1
-  Double_t      mtauCX[2];            //! -"- 
+  static Double_t      mtauCX[2];            //! -"- 
   Double_t    mLocalYDirectionCoupling[2][24][7]; //!
-  Double_t   msMin, msMax;            //!
+  Int_t      mNSplittedHits;          //!
+  Double_t   mTimeBinWidth;           //!
+  Char_t end[1];                      //!
   TArrayI    mNoTpcHitsAll;           //!
   TArrayI    mNoTpcHitsReal;          //!
-  Int_t      mNSplittedHits;          //!
-  Double_t xOnWire, yOnWire, zOnWire; //!
-  Double_t mGainLocal;                //!
-  Double_t QAv;                       //!
-  Double_t TotalSignal;               //!
-  Int_t pad0;                         //!
-  Int_t tbk0;                         //!
-  Double_t TotalSignalInCluster;      //!
-  Double_t padsdE[kPadMax];           //!
-  Double_t tbksdE[kTimeBacketMax];    //!
-  Double_t rowsdEH[kRowMax];          //!
-  Double_t rowsdE[kRowMax];           //!
-  Char_t end[1];                      //!
   Double_t             mLaserScale;   //!
-  const Double_t minSignal;           //!
   const Double_t ElectronRange;       //!
   const Double_t ElectronRangeEnergy; //!
   const Double_t ElectronRangePower;  //!
-  const Int_t NoOfSectors;            //!
-  const Int_t NoOfPads;               //!
-  const Int_t NoOfTimeBins;           //!
-  Double_t   mCutEle;                 //! cut for delta electrons
+  static Double_t   mCutEle;                 //! cut for delta electrons
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
