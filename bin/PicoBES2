@@ -24,7 +24,7 @@ cd ${PicoDIR}
  end
 ================================= Summurizing  ===============================================
 @ count = 0
-foreach d (`ls -1d [0-1]??/20*`)
+foreach d (`ls -1d [0-3]??/2*`)
   cd ${d}; pwd;
   ls -ltr | tail -1 | grep Chain	
   if ($?) then	
@@ -40,7 +40,7 @@ foreach d (`ls -1d [0-1]??/20*`)
   cd -;
 end
 
-grep total ???/20*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'
+grep total ???/21*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'
 ================================================================================
  foreach f (`grep missing Chain.log | awk '{print $3}'`)
    set b = `basename ${f} .picoDst.root`; set d = `dirname ${f}`; 

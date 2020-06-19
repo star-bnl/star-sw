@@ -1,5 +1,5 @@
 #! /bin/tcsh -f
-#cd ~/bin/; onl CURRENT | SortRun.pl | tee RunXXDefs.pm
+cd ~/bin/; onl CURRENT | SortRun.pl | tee RunXXDefs.pm
 #git diff .
 #git ci -m "Update" .
 #cd ~/reco/2020/TFG19m/RF/11p5GeV.B

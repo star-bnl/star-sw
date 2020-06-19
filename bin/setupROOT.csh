@@ -24,7 +24,7 @@ setenv SHIFTINCDIR ""#$CERN_ROOT/../../usr.local/include/shift
 setenv x11libdir /usr/X11R6/lib
 setenv xpmlibdir /usr/X11R6/lib
 setenv xftlibdir /usr/X11R6/lib
-setenv DISABLE "--disable-python --disable-qt --disable-qtgsi --disable-vc"
+setenv DISABLE "--disable-python --disable-qt --disable-qtgsi --disable-vc --disable-pythia8"
 #setenv DISABLE "--disable-qt --disable-qtgsi --disable-vc"
 #setenv MYSQL /opt/star
 #setenv MYSQLINCDIR $MYSQL/include/mysql	
@@ -238,8 +238,6 @@ echo "EXTRA_FLAGS = $EXTRA_FLAGS"
     --with-gsl-incdir=$GSL_DIR/include \
     --with-gsl-libdir=$GSL_DIR/lib \
     --with-pythia6-libdir=$XOPTSTAR/lib \
-    --with-pythia8-libdir=$XOPTSTAR/lib \
-    --with-pythia8-incdir=$XOPTSTAR/include \
     --with-mysql-incdir=$MYSQLINCDIR --with-mysql-libdir=$MYSQLCLILIB \
     --with-fftw3-incdir=$XOPTSTAR/include --with-fftw3-libdir=$XOPTSTAR/lib \
     --with-xrootd=$XOPTSTAR \
@@ -247,6 +245,8 @@ echo "EXTRA_FLAGS = $EXTRA_FLAGS"
     --all \
     $DISABLE \
     $ENABLE_CXX11 $EXTRA_FLAGS
+#    --with-pythia8-libdir=$XOPTSTAR/lib \
+#    --with-pythia8-incdir=$XOPTSTAR/include \
 #unsetenv libdir 
 #unsetenv macrodir
 #unsetenv plugindir
