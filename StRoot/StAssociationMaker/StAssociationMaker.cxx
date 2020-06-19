@@ -931,41 +931,40 @@ Int_t StAssociationMaker::Make()
 	    xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
 	    yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
 	    zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
-	    float scale = 1;
-	    if (! mDistanceAssoc) scale = 5;
-	    if ( fabs(xDiff)>= scale*parDB->xCutTpc() ||
-		 fabs(yDiff)>= scale*parDB->yCutTpc() ||
-		 fabs(zDiff)>= scale*parDB->zCutTpc()) continue;
+	    if (! mDistanceAssoc &&
+		( fabs(xDiff)>= parDB->xCutTpc() ||
+		  fabs(yDiff)>= parDB->yCutTpc() ||
+		  fabs(zDiff)>= parDB->zCutTpc())) continue;
 	    float distance  = xDiff*xDiff + yDiff*yDiff+zDiff*zDiff;
 	    if (distance < tpcHitDistance) {
 	      tpcHitDistance=distance;
 	      closestTpcHit = mcTpcHit;
 	    }
-	  
+	  } // End of Hits in Padrow loop for MC Hits
+	  if (closestTpcHit) {
 	    // Note: Association is within sector and pad row, so a Monte Carlo
 	    // looper may have multiple Monte Carlo hits from one track associated
 	    // to one and the same reconstructed hit!
 	    // Make Associations  Use maps,
-	    mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
-	    mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
+	    mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, (const StMcTpcHit*) closestTpcHit) );
+	    mMcTpcHitMap->insert(mcTpcHitMapValType ( (const StMcTpcHit*)closestTpcHit, rcTpcHit) );
 	    rcTpcHit->SetBit(StMcHit::kMatched,1);
-	    mcTpcHit->SetBit(StMcHit::kMatched,1);
+	    closestTpcHit->SetBit(StMcHit::kMatched,1);
 	    ++matchedR;
 	    ++padrowMatchesDi;
-	  }
-	  if (Debug()==2)
-	    if (closestTpcHit)
+	    if (Debug()==2)
 	      mTpcLocalHitResolution->Fill(closestTpcHit->position().x()-
 					   rcTpcHit->position().x(),
 					   closestTpcHit->position().z()-
 					   rcTpcHit->position().z() );			
-	} // End of Hits in Padrow loop for MC Hits
+	  }
+	} // End of Hits in Padrow loop for Rec. Hits
 	if (Debug()>=2 && iPadrow>=0) {
 	  cout << "Reco  Hits in Padrow   " << tpcPadRowHitColl->hits().size() << endl;
 	  cout << "Id Matches in Padrow   " << padrowMatchesId << endl;
 	  cout << "Distance Matches in pr " << padrowMatchesDi << endl;
 	}
-      } // End of Hits in Padrow loop for Rec. Hits
+      } 
     } // End of Sector Loop for Rec. Hits
     // check non associated Mc hits 
     if (Debug()) {
