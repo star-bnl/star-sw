@@ -147,6 +147,8 @@ if 0
     No. cut on 3 first wires => -9.21881e-02 ; X9
     row.FirstRowC  = -0.104;  // extra correction for pad row 1 due to disabled firth 3 anode wires
    */
+  row.RecombinationI =  row.RecombinationO = 2;
+  row.Sigma_xWI = row.Sigma_xWO = row.Slope_zWI = row.Slope_zWO = 0.0100; 
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

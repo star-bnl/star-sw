@@ -357,7 +357,8 @@ void MakeTpcAvgPowerSupply(Int_t year = 2020) {
   //  TString sql("SELECT runNumber,from_unixtime(startRunRTS),from_unixtime(endRunRTS) from runUpdateStatus where beginTime > \"2016-01-13\" order by beginTime;");
   //  TString sql("SELECT runNumber,from_unixtime(startRunRTS),from_unixtime(endRunRTS) from runUpdateStatus order by beginTime;");
   //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime) from daqSummary  order by beginTime;");
-  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  where beginTime > \"2019-11-01\"  order by beginTime;");
+  //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  where beginTime > \"2019-11-01\"  order by beginTime;");
+  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  where beginTime > \"2020-06-01\"  order by beginTime;");
   //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary where beginTime > \"2018-03-15 13:44:00\"  order by beginTime;");
   TSQLResult *res = RunLog->Query(sql.Data());
   Int_t Nruns = res->GetRowCount(); cout << "Got " << Nruns << " rows in result" << endl;

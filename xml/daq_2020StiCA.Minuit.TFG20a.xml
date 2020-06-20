@@ -37,6 +37,7 @@
 #  cp ${evtsFile} ${evtsFileB}
 # TFG19m, TFG20a 12/26/2019 12/29/2019
   root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,-evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFileB}'")' &gt;&amp; ${logFile}
   cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
 #  cp  ${filel}* ${SUBMITTINGDIRECTORY}
