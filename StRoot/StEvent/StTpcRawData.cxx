@@ -83,14 +83,20 @@
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 //________________________________________________________________________________
 StTpcDigitalSector::StTpcDigitalSector(Int_t sector) : mSector(sector) {
+#if 0
   StDigitalTimeBins  timeBins;
+#endif
   mNoRows = St_tpcPadConfigC::instance()->padRows(sector);
   for(Int_t row=1; row <= mNoRows; row++) {
     StDigitalPadRow    padRow;
     Int_t NoPads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
+#if 0
     for (Int_t pad = 0; pad < NoPads; pad++) {
       padRow.push_back( timeBins);
     }
+#else
+    padRow.resize(NoPads);
+#endif
     mData.push_back(padRow);
   }
 }
