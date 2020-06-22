@@ -1,6 +1,6 @@
 TObjectSet* materialSets = 0;
 
-TH1F*       materialPlot(const char* volume) { return (TH1F*)((TObjectSet*)materialSet->Find(volume))->GetObject(); }
+TH2F*       materialPlot(const char* volume) { return (TH1F*)((TObjectSet*)materialSet->Find(volume))->GetObject(); }
 
 
 void makeMaterialPlot( const char* tag="dev2021" ) {
