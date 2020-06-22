@@ -342,10 +342,11 @@ void l4Builder::startrun(daqReader *rdr)
     //printf("hello there. This is startrun\n");
     LOG("JEFF", "startrun");
 
-        eventCounter = 0;
-	runnumber = rdr->run;
+    eventCounter = 0;
+    T0 = 0;
+    runnumber = rdr->run;
 
-        for(int i = 0; i < nHltPlots; i++) {
+	for(int i = 0; i < nHltPlots; i++) {
 		getPlotByIndex(i)->getHisto(0)->histo->Reset();
 	}
 	for(int i = 0; i < nBesGoodPlots; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
@@ -405,7 +406,7 @@ void l4Builder::startrun(daqReader *rdr)
 
 
 	//printf("Starting run #%d\n", runnumber);
-};
+}
 
 void l4Builder::stoprun(daqReader *rdr)
 {
@@ -651,7 +652,7 @@ void l4Builder::writeHistogram()
 
 	// JML:  cannot use private directories in production code!
 	//sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
-	sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", clientdatadir, runnumber);
+	sprintf(histfile, "%s/hlt_%d_current_hist.root", clientdatadir, runnumber);
 	TFile file(histfile, "RECREATE");
 	int initialno = 54;
 
@@ -817,22 +818,22 @@ void l4Builder::event(daqReader *rdr)
     eventCounter++;
 
 
-    HLT_EVE			*hlt_eve     = NULL;
-    HLT_TOF			*hlt_tof     = NULL;
-    HLT_PVPD		*hlt_pvpd    = NULL;
-    HLT_EMC			*hlt_emc     = NULL;
-    HLT_GT			*hlt_gt      = NULL;
-    HLT_RHO			*hlt_dipi    = NULL;
-    HLT_DIEP		*hlt_upcdiep = NULL;
-    HLT_PT			*hlt_pt      = NULL;
-    HLT_NODE		*hlt_node    = NULL;
-    HLT_HIPT		*hlt_hipt    = NULL;
-    HLT_DIEP		*hlt_diep    = NULL;
-    HLT_DIEP		*hlt_Twrdiep = NULL;
-    HLT_HF			*hlt_hf      = NULL;
-    HLT_MTD			*hlt_mtd     = NULL;
-    HLT_MTDQuarkonium	*hlt_mtdqm   = NULL;
-    HLT_ETOF                *hlt_etof    = NULL;
+    HLT_EVE           *hlt_eve     = NULL;
+    HLT_TOF           *hlt_tof     = NULL;
+    HLT_PVPD          *hlt_pvpd    = NULL;
+    HLT_EMC           *hlt_emc     = NULL;
+    HLT_GT            *hlt_gt      = NULL;
+    HLT_RHO           *hlt_dipi    = NULL;
+    HLT_DIEP          *hlt_upcdiep = NULL;
+    HLT_PT            *hlt_pt      = NULL;
+    HLT_NODE          *hlt_node    = NULL;
+    HLT_HIPT          *hlt_hipt    = NULL;
+    HLT_DIEP          *hlt_diep    = NULL;
+    HLT_DIEP          *hlt_Twrdiep = NULL;
+    HLT_HF            *hlt_hf      = NULL;
+    HLT_MTD           *hlt_mtd     = NULL;
+    HLT_MTDQuarkonium *hlt_mtdqm   = NULL;
+    HLT_ETOF          *hlt_etof    = NULL;
 
     XX(0);
     while(dd && dd->iterate()) {
@@ -1196,32 +1197,47 @@ void l4Builder::event(daqReader *rdr)
 	}
 
 #pragma omp section
-	{   //  sections ccc
-	    THREADCP(3,0);
-	    for (int i = 0; i < hlt_etof->nETofHits; ++i) {
-		const hlt_ETofHit& hit = hlt_etof->etofHit[i];
-		hEtofHitsXY->Fill(hit.globalX, hit.globalY);
+        {   //  sections ccc
+            THREADCP(3,0);
+            for (int i = 0; i < hlt_etof->nETofHits; ++i) {
+                const hlt_ETofHit& hit = hlt_etof->etofHit[i];
+                hEtofHitsXY->Fill(hit.globalX, hit.globalY);
 
-		int mrpcidx = (hit.sector - 13) * 9 + (hit.module - 1 ) * 3 + hit.counter;
-		hEtofLocalYMrpc->Fill(mrpcidx, hit.localY);
-	    }
+                int mrpcidx = (hit.sector - 13) * 9 + (hit.module - 1 ) * 3 + hit.counter;
+                hEtofLocalYMrpc->Fill(mrpcidx, hit.localY);
+            }
 
-	    pEtofNhitsPerEvent->Fill(evt_time - first_evt_time, hlt_etof->nETofHits);
+            pEtofNhitsPerEvent->Fill(evt_time - first_evt_time, hlt_etof->nETofHits);
               
-	    for(u_int i = 0; i < hlt_node->nNodes; i++) {
-		if (hlt_node->node[i].etofBeta <= 0) continue;
-		int globalTrackSN = hlt_node->node[i].globalTrackSN;
-		hlt_track gTrack = hlt_gt->globalTrack[globalTrackSN];
+            for(u_int i = 0; i < hlt_node->nNodes; i++) {
+                if (hlt_node->node[i].etofBeta <= 0) continue;
+                int globalTrackSN = hlt_node->node[i].globalTrackSN;
+                int primaryTrackSN = hlt_node->node[i].primaryTrackSN;
 
-		int   q  = gTrack.q;
-		float pt = gTrack.pt;
-		float pz = gTrack.tanl * gTrack.pt;
-		float p  = sqrt(pt*pt + pz*pz);
+                if(primaryTrackSN < 0) continue;
 
-		hEtofInvBeta->Fill(q*p, 1.0/hlt_node->node[i].etofBeta);
-	    }
-	    THREADEXIT(3);
-	}
+                hlt_track gTrack = hlt_gt->globalTrack[globalTrackSN];
+                hlt_track pTrack = hlt_pt->primaryTrack[primaryTrackSN];
+
+                int   q  = pTrack.q;
+                float pt = pTrack.pt;
+                float pz = pTrack.tanl * gTrack.pt;
+                float p  = sqrt(pt*pt + pz*pz);
+
+                const double mass_pi = 0.13957; // pi inv_m GeV
+                double beta_pi = 1. / sqrt( 1. + mass_pi*mass_pi / p*p );
+                double deltaT = hlt_node->node[i].etofPi * ( ( beta_pi / hlt_node->node[i].etofBeta ) - 1 );
+                hEtofDeltaT->Fill(deltaT);
+
+                if (0 == T0 && hEtofDeltaT->GetEntries()>2000) {
+                    T0 = hEtofDeltaT->GetBinCenter(hEtofDeltaT->GetMaximumBin());
+                    cout << "Event: " << eventCounter << " T0 = " << T0 << "\n";
+                }
+                double invBeta = (1 / hlt_node->node[i].etofBeta) - (T0 / (hlt_node->node[i].etofPi * beta_pi ) );
+                hEtofInvBeta->Fill(q*p, invBeta);
+            }
+            THREADEXIT(3);
+        }
 #pragma omp section
 	{    // section dd
 	    THREADCP(4,0);
@@ -2923,6 +2939,10 @@ void l4Builder::defineHltPlots()
         pEtofNhitsPerEvent = new TProfile("EtofNhitsPerEvent", "ETOF <nhits> per event; Second in the run; <nhits>",
                                           370, 0, 3700);
         HltPlots[index]->addHisto(new PlotHisto(pEtofNhitsPerEvent));
+
+        index++;                // 60
+        hEtofDeltaT = new TH1D("EtfoDeltaT", "ETOF start time offset;ns;#Delta T", 200, -50, 50);
+        HltPlots[index]->addHisto(new PlotHisto(hEtofDeltaT));
 }
 
 void l4Builder::defineBeamPlots()
@@ -3014,22 +3034,22 @@ void l4Builder::defineBesGoodPlots()
 
 	index++; // 6
 	hBesGoodVxT = new TH2D("BesGoodVxT", "Vx vs. time (nPTracks > 200);Seconds in the run;Vx [cm]",
-			       8, 0, 2400, 100, -2, 2);
+			       10, 0, 3000, 100, -2, 2);
 	hBesGoodVxT->GetXaxis()->SetNdivisions(505);
 	BesGoodPlots[index]->addHisto(new PlotHisto(hBesGoodVxT));
 
 	index++; // 7
-	hBesGoodVxT_2 = new TH1D("BesGoodVxT_2", "dummy", 40, 0, 2400);
+	hBesGoodVxT_2 = new TH1D("BesGoodVxT_2", "dummy", 40, 0, 3000);
 	BesGoodPlots[index]->addHisto(new PlotHisto(hBesGoodVxT_2));
 
 	index++; // 8
 	hBesGoodVyT = new TH2D("BesGoodVyT", "Vy vs. time (nPTracks > 200);Seconds in the run;Vy [cm]",
-			       8, 0, 2400, 100, -2, 2);
+			       10, 0, 3000, 100, -2, 2);
 	hBesGoodVyT->GetXaxis()->SetNdivisions(505);
 	BesGoodPlots[index]->addHisto(new PlotHisto(hBesGoodVyT));
 
 	index++; // 9
-	hBesGoodVyT_2 = new TH1D("BesGoodVyT_2", "dummy", 40, 0, 2400);
+	hBesGoodVyT_2 = new TH1D("BesGoodVyT_2", "dummy", 40, 0, 3000);
 	BesGoodPlots[index]->addHisto(new PlotHisto(hBesGoodVyT_2));
 }
 
@@ -3069,12 +3089,12 @@ void l4Builder::defineHLTGood2Plots()
 
 	index++; //4
 	hHLTGood2VzT = new TH2D("HLTGood2VzT", "Vz vs. time  (nPTracks > 2);Seconds in the run;Vz",
-				8, 0, 2400, 50, -200, 200);
+				10, 0, 3000, 50, -200, 200);
 	hHLTGood2VzT->GetXaxis()->SetNdivisions(505);
 	HLTGood2Plots[index]->addHisto(new PlotHisto(hHLTGood2VzT));
 
 	index++; //5
-	hHLTGood2VzT_2 = new TH1D("HLTGood2VzT_2", "dummy", 40, 0, 2400);
+	hHLTGood2VzT_2 = new TH1D("HLTGood2VzT_2", "dummy", 40, 0, 3000);
 	HLTGood2Plots[index]->addHisto(new PlotHisto(hHLTGood2VzT_2));
 	
 }

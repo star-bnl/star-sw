@@ -43,7 +43,7 @@ class l4Builder : public JevpBuilder {
 		 * @see 
 		 * @author 
 		 */  
-                static const int nHltPlots = 60;
+                static const int nHltPlots = 61;
                 JevpPlot *HltPlots[nHltPlots];
 
 		JevpPlot *BeamPlots[3];
@@ -385,6 +385,8 @@ class l4Builder : public JevpBuilder {
                 TH2D *hEtofInvBeta;
                 TH2D *hEtofLocalYMrpc;
                 TProfile *pEtofNhitsPerEvent;
+                TH1D *hEtofDeltaT;
+                double T0;
     
                 /*   TH3D *hMatchannel3D ; */
 
