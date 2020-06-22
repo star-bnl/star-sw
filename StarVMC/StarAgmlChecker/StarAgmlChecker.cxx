@@ -10,6 +10,7 @@
 #include <cmath>
 #include <limits>
 #include <assert.h>
+#include "StMessMgr.h"
 
 StarAgmlChecker::StarAgmlChecker( TGeoManager *m ) : TGeoChecker(m)
 {
@@ -68,7 +69,7 @@ TObjectSet *StarAgmlChecker::MaterialPlot( const Char_t   *_top   ,
 
   // Setup an iterator over its daughter nodes
   TGeoIterator next( volume ); 
-  next.SetType( 1 );
+  //  next.SetType( 1 );
 
   // Create a TObjectSet for this volume filled with a 2D histogram
   TH2F *hist = new TH2F(name,"radlen",nEta,mnEta,mxEta,nPhi,mnPhi,mxPhi);  
@@ -81,6 +82,8 @@ TObjectSet *StarAgmlChecker::MaterialPlot( const Char_t   *_top   ,
   TGeoNode *node = 0;
   while( (node=(TGeoNode *)next()) )
     {
+
+      node->Print();
 
       // Get the current volume and find associated object set
       TGeoVolume *vol = node->GetVolume();
@@ -95,6 +98,8 @@ TObjectSet *StarAgmlChecker::MaterialPlot( const Char_t   *_top   ,
 
       // And shunt to the parent
       set->Shunt( topSet );
+
+      LOG_INFO << "Added set " << set->GetName() << endm;
 
     }
 
