@@ -1473,12 +1473,13 @@ void TGeant3::AddParticlesToPdgDataBase()
   static Double_t widthLambda = khShGev/tauLambda;
   Particle_t Nuclei[] = { // https://periodictable.com/Isotopes
     //name          ,title          ,mass                 ,stable,        width,charge,    TrackingCod,PDGcode           ,decays        
-    {"Lambda0R"     ,"Lambda0R"     ,1.115684             ,kFALSE,1e-10*widthLambda, 0, kPTNeutron,       2202212,  {"proton", "pi-",  0}},         
+    {"Lambda0R"     ,"Lambda0R"     ,1.115684             ,kFALSE, 1e10*widthLambda, 0, kPTNeutron,       2202212,  {"proton", "pi-",  0}},         
     {"DEUTERON"     ,"DEUTERON"     ,2.01410177785*kAu2Gev,kTRUE ,            0,     3,    kPTIon,GetIonPdg(1, 2),  {0,  0,  0}},         
     {"TRITON"       ,"TRITON"       ,3.01604927767*kAu2Gev,kTRUE ,            0,     3,    kPTIon,GetIonPdg(1, 3),  {0,  0,  0}}, // khShGev/(12.32*kYear2Sec)  
     {"ALPHA"        ,"ALPHA"        ,4.00260325415*kAu2Gev,kTRUE ,            0,     6,    kPTIon,GetIonPdg(2, 4),  {0,  0,  0}},       
     {"HE3"          ,"HE3"          ,3.01602931914*kAu2Gev,kTRUE ,            0,     6,    kPTIon,GetIonPdg(2, 3),  {0,  0,  0}},       
-    {"He3r"         ,"He3r"         ,2.815                ,kFALSE,        0.002,     6, kPTHadron,     2000020030,  {"DEUTERON", "proton"  ,     0}}, // -> d p  
+    //    {"He3r"         ,"He3r"         ,2.815                ,kFALSE,        0.002,     6, kPTHadron,     2000020030,  {"DEUTERON", "proton"  ,     0}}, // -> d p  
+    {"He3r"         ,"He3r"         ,2.8185               ,kFALSE,       0.0002,     6, kPTHadron,     2000020030,  {"DEUTERON", "proton"  ,     0}}, // -> d p  
     {"HE6"          ,"HE6"          ,6.018889124*kAu2Gev  ,kTRUE ,            0,     6,    kPTIon,GetIonPdg(2, 6),  {0,  0,  0}}, // khShGev/(806.7e-3) 
     {"Li5"          ,"Li5"          ,4.6676161            ,kFALSE, 0.0021642217,     9,    kPTHadron , 1000030050,  {"ALPHA", "proton", 0}}, // -> He4 p
     {"Li6"          ,"Li6"          ,6.015122794*kAu2Gev  ,kTRUE ,            0,     9,    kPTIon,GetIonPdg(3, 6),  {0,  0,  0}},       
@@ -1492,7 +1493,7 @@ void TGeant3::AddParticlesToPdgDataBase()
     {"H3L"          ,"H3L"          ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,           3004,  {"HE3"     , "pi-"     ,     0}}, // HyperTriton -> He3 pi-    
     {"H3Ldp"        ,"H3Ldp"        ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,           3012,  {"DEUTERON", "proton"  , "pi-"}}, // HyperTriton -> d p pi-    
     {"H3Lr"         ,"H3Lr"         ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,        1003004,  {"He3r"    , "pi-"     ,     0}}, //  -> He3r pi-
-    {"H3RL"         ,"H3RL"         ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,        2003004,  {"Lambda0R", "proton"  ,     0}}, //  -> Lambda0R proton
+    {"H3RL"         ,"H3RL"         ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,        2003004,  {"Lambda0R", "DEUTERON",     0}}, //  -> Lambda0R proton
     {"H4L"          ,"H4L"          ,3.924                ,kFALSE,  widthLambda,     3, kPTHadron,           3005,  {"ALPHA"   , "pi-"     ,     0}}, // -> He4 pi-    
     {"H4Ltp"        ,"H4Ltp"        ,3.924                ,kFALSE,  widthLambda,     3, kPTHadron,           3013,  {"TRITON"  , "proton"  , "pi-"}}, // -> t p pi-    		             
     {"H4L2d"        ,"H4L2d"        ,3.924                ,kFALSE,  widthLambda,     3, kPTHadron,           3014,  {"DEUTERON", "DEUTERON", "pi-"}}, // -> d d pi-    	             
