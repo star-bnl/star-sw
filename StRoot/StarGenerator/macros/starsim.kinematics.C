@@ -76,7 +76,7 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2012 geant gstar usexgeom agml ";
+    TString simple = "y2018a geant gstar usexgeom agml ";
     bfc(0, simple );
   }
 
@@ -114,7 +114,7 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   //
   // Setup geometry and set starsim to use agusread for input
   //
-  geometry("y2012");
+  //geometry("y2012");
   command("gkine -4 0");
   command("gfile o kinematics.starsim.fzd");
   
