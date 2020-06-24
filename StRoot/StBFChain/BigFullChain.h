@@ -1529,7 +1529,7 @@ Bfc_st BFC[] = { // standard chains
 #endif
   {"StarLight", "","StarPrimary","StarPrimary",                         "StarLight","StarLight","", kFALSE},
   {"StarUrQMD" , "","StarPrimary","StarPrimary",                   "StarStarUrQMD","UrQMD3_3_1","", kFALSE},
-  {"genIn", "GenTreeReader","StarPrimary","StarPrimary,StarPrimary"
+  {"genIn", "GenTreeReader","StarPrimary","StarPrimary"
    ,                             "StarGenEventReader","StarGenEventReader","Read event from TTree", kFALSE},
   {"GenFILT", "GenFILT","StarPrimary","StarPrimary"
    ,                                 "StarFilterMaker","StarGeneratorFilt","Filt generated events", kFALSE},
