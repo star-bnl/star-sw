@@ -795,7 +795,9 @@ Gcmate_t *St_geant_Maker::cmate;
 Gccuts_t *St_geant_Maker::ccuts;
 Gcphys_t *St_geant_Maker::cphys;
 Int_t     St_geant_Maker::nlev;
+#ifdef __Kine_gdat_t__
 Kine_gdat_t *St_geant_Maker::kine_gdat = 0;
+#endif
 static Int_t irot = 0;
 static TVolume *topnode=0;
 typedef struct {
@@ -844,7 +846,9 @@ St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int
   cmate  = (Gcmate_t *) geant3->Gcmate();
   ccuts  = (Gccuts_t *) geant3->Gccuts();
   cphys  = (Gcphys_t *) geant3->Gcphys();
+#ifdef __Kine_gdat_t__
   kine_gdat = (Kine_gdat_t *) geant3->Kine_gdat();
+#endif
   Do("kuip/s/filecase KEEP");
 }
 //_____________________________________________________________________________
@@ -1149,6 +1153,7 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Make() {
+#ifdef __Kine_gdat_t__
   // Check kinematics
   if (kine_gdat) {
     St_kine_gdat *kineT = ( St_kine_gdat *) GetData("kine_gdat",".const");
@@ -1158,7 +1163,7 @@ Int_t St_geant_Maker::Make() {
     }
     kineT->AddAt(&kine_gdat->IKineOld,0);
   }
-  
+#endif  
   Int_t    /*nhits,nhit1,nhit2,nhit3,nhit4,*/link=1,ide=1,npart,irun,ievt,iwtfl;
   Float_t  vert[4],weigh;
   if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
