@@ -27,7 +27,7 @@ ClassImp(StarPrimaryMaker);
 
 #include "StarGenerator/EVENT/StarGenEvent.h"
 #include "StarGenerator/EVENT/StarGenParticle.h"
-#include "AgStar/AgStarReader.h"
+#include "StarGenerator/AgStar/AgStarReader.h"
 #include "StarGenerator/UTIL/StarRandom.h"
 
 #include "StarGenerator/FILT/StarFilterMaker.h"
