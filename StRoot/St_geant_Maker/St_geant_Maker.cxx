@@ -1153,6 +1153,7 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Make() {
+#ifdef __Kine_gdat_t__
   // Check kinematics
   if (kine_gdat) {
     St_kine_gdat *kineT = ( St_kine_gdat *) GetData("kine_gdat",".const");
@@ -1162,7 +1163,7 @@ Int_t St_geant_Maker::Make() {
     }
     kineT->AddAt(&kine_gdat->IKineOld,0);
   }
-  
+#endif  
   Int_t    /*nhits,nhit1,nhit2,nhit3,nhit4,*/link=1,ide=1,npart,irun,ievt,iwtfl;
   Float_t  vert[4],weigh;
   if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }

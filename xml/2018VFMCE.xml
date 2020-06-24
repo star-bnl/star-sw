@@ -23,7 +23,7 @@
   foreach name (K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed \
                 K_S0       Lambda0_bar      Lambda0      XiM_bar      XiM       Omega_bar      Omega      \
                 LNNFixed LNFixed \
-                H3LdpFixed H3LFixed H3LrFixed  \
+                H3LdpFixed H3LFixed H3LrFixed H3RLFixed \
                 H4LtpFixed H4L2dFixed H4LFixed H5LFixed H6L3Fixed H6LFixed \
                 He4LFixed  \
                 He5L3Fixed He5LFixed He5Li5Fixed \
@@ -31,7 +31,17 @@
                 He7L3Fixed He7LFixed \
                 Li6LFixed \
                 Li7L3Fixed Li7LFixed \
-                Li8LFixed )
+                Li8LFixed \
+                LNN LN \
+                H3Ldp H3L H3Lr H3RL \
+                H4Ltp H4L2d H4L H5L H6L3 H6L \
+                He4L  \
+                He5L3 He5L He5Li5 \
+                He6L3ad He6L3 He6L \
+                He7L3 He7L \
+                Li6L \
+                Li7L3 Li7L \
+                Li8L )
     echo $Name | grep $name
     if (! $?) break;
 #    if ($name == $Name) break;
@@ -58,5 +68,5 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 500 500 K_S0" />
+<input URL="command:RunId.pl 1 1000 200 K_S0" />
 </job>

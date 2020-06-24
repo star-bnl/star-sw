@@ -18,7 +18,7 @@
 # List of disks will be by numbers
 $MIN   =   1;                                             # 4
 $MAX   =   6;                                             # for testing
-$MAX   = 100;                                             # Upper number ; can be as high
+$MAX   = 101;                                             # Upper number ; can be as high
 $MAIN  = "/star/data";                                    # default base path
 
 # An array of disks to add to the $MAIN pattern - entries can also be wildcarded patterns
@@ -314,6 +314,8 @@ foreach $disk (@DISKS){
 	foreach $trg (@TMP){
 	    # print "Found $trg\n";
 	    if ($trg =~ /StarDb/){ next;}
+	    next if ( ! -d $trg);
+
 	    $tmp = $trg;
 	    $tmp =~ s/.*\///;
 	    push (@TRGS,$tmp);
@@ -321,8 +323,13 @@ foreach $disk (@DISKS){
 	    # print "DEBUG Looking now in $trg\n";
 	    @vers = glob("$trg/*/*");
 	    foreach $ver (@vers){
-		if (! -d $ver && ! -l $ver){ next;}
-		# print "\tFound $ver\n";
+		#if ( ! -d $ver && ! -l $ver){ next;}
+		# unfortunately, found files in embedding tree as links to GPFS
+		# need to follow the link OR simply restrict to -d and skip
+		# links (simpler)
+		next if ( ! -d $ver );
+
+		#print "\tFound $trg -> $ver\n";
 		$ver =~ s/.*\///;
 		$LIBS{$ver} = 1;
 		if ( defined($ALIBS{$ver}) ){

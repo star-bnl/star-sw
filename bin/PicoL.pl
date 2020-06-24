@@ -27,6 +27,7 @@ if ($pwd =~ /dev/) {
   elsif ($pwd =~ /2020\/19p5GeV_fixedTarget/) {$glob = "/reco/production_19p5GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/31p2GeV_fixedTarget/) {$glob = "/reco/production_31p2GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/7p3GeV_fixedTarget/)  {$glob = "/reco/production_7p3GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
+  elsif ($pwd =~ /2020\/9p2GeVc/)             {$glob = "/reco/production_9p2GeV_2020c/ReversedFullField/dev/2020";}
   elsif ($pwd =~ /2020\/9p2GeVb/)             {$glob = "/reco/production_9p2GeV_2020b/ReversedFullField/dev/2020";}
   elsif ($pwd =~ /2020\/9p2GeV/)              {$glob = "/reco/production_9p2GeV_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/9p8GeV_fixedTarget/)  {$glob = "/reco/production_9p8GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
@@ -59,7 +60,8 @@ if ($pwd =~ /dev/) {
   elsif ($pwd =~ /2020\/11p5GeV/)             {$glob = "/2020/TFG19m/RF/11p5GeV.B";}
   elsif ($pwd =~ /2020\/31p2GeV_fixedTarget/) {$glob = "/2020/TFG20a/RF/31p2GeV_fixedTarget";}
   elsif ($pwd =~ /2020\/9p8GeV_fixedTarget/)  {$glob = "/2020/TFG20a/RF/9p8GeV_fixedTarget";}
-  elsif ($pwd =~ /2020\/9p2GeVb/)             {$glob = "/2020/TFG20a/RF/9p2GeVb";
+  elsif ($pwd =~ /2020\/9p2GeVb/)             {$glob = "/2020/TFG20a/RF/9p2GeVb";}
+  elsif ($pwd =~ /2020\/9p2GeVc/)             {$glob = "/2020/TFG20a/RF/9p2GeVc";
 					       print "pwd = $pwd +> glob = $glob; PICOPATH = $PICOPATH\n" if ($debug);
 					     }
   elsif ($pwd =~ /2020\/9p2GeV/)              {$glob = "/2020/TFG20a/RF/9p2GeV";}
