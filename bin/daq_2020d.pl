@@ -34,13 +34,13 @@ sub PrintHash($$) {
 sub GoodRun($$) {
   my $env = shift;
   my $run = shift;
-  print "GoodRun:: run = $run" if $debug;
+  print "GoodRun:: run = $run\n" if $debug;
   foreach my $key (sort keys %$env ) {
     print "$pwd, trig = $env->{$key}->{trig}, field = $env->{$key}->{field}; first = $env->{$key}->{first}, last = $env->{$key}->{last}" if ($debug);
-    if ($pwd !~ /$env->{$key}->{trig}/)  {print ", rejected by trig\n"  if ($debug); next;}
+    if ($pwd !~ /$env->{$key}->{trig}/)  {print ", rejected by trig $env->{$key}->{trig}\n"  if ($debug); next;}
     if ($pwd !~ /$env->{$key}->{field}/) {print ", rejected by field\n" if ($debug); next;}
-    if ($run < $env->{$key}->{first})     {print ", rejected by first\n" if ($debug); next;}
-    if ($run > $env->{$key}->{last})      {print ", rejected by last\n"  if ($debug); next;}
+    if ($run < $env->{$key}->{first})     {print ", rejected run $run by first\n" if ($debug); next;}
+    if ($run > $env->{$key}->{last})      {print ", rejected run $run by last\n"  if ($debug); next;}
     print " accepted\n" if ($debug);
     return $run;
   }
@@ -48,7 +48,7 @@ sub GoodRun($$) {
   return -1;
 }
 my $def = {@Runs};# print "Runs = @Runs\n";
-PrintHash($def,"Runs") if ($debug);
+#PrintHash($def,"Runs") if ($debug);
 #die;
 my $glob = "/hlt/cephfs/daq/2019/".$Day."/* /hlt/cephfs/daq/2020/" . $Day ."/*";
 my  @runs  = glob $glob;  print "runs = @runs\n" if ($debug);
