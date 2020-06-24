@@ -69,12 +69,12 @@
 *
       DO isys=1,3
 
-IF (isys==1) call G2R_GET_SYS ('MUTD','MIGG',Iprin,Idigi)
-IF (isys==2) call G2R_GET_SYS ('MUTD','MTTT',Iprin,Idigi)
-if (isys==3) call G2R_GET_SYS ('MUTD','MTTF',Iprin,Idigi)
+         IF (isys==1) call G2R_GET_SYS ('MUTD','MIGG',Iprin,Idigi)
+         IF (isys==2) call G2R_GET_SYS ('MUTD','MTTT',Iprin,Idigi)
+         if (isys==3) call G2R_GET_SYS ('MUTD','MTTF',Iprin,Idigi)
 
-      if (Iprin.lt.0) goto 99
-      Local  = Idigi.ge.2
+         if (Iprin.lt.0) goto 99
+         Local  = Idigi.ge.2
 *
       Do While (G2R_GET_HIT('mtd') .eq. 0)
          i=i+1
