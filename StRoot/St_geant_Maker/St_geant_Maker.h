@@ -270,8 +270,9 @@ protected:
    static Gcphys_t  *cphys; //!
    static Int_t      nlev;  //!
    static Bool_t     fInitRunDone; //!
+#ifdef __Kine_gdat_t__
    static Kine_gdat_t *kine_gdat;  //!
-
+#endif
     
 
    /// Given a list of sensitive volumes within the (G3) hit container, loop over all

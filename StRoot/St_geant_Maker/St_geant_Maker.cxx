@@ -795,7 +795,9 @@ Gcmate_t *St_geant_Maker::cmate;
 Gccuts_t *St_geant_Maker::ccuts;
 Gcphys_t *St_geant_Maker::cphys;
 Int_t     St_geant_Maker::nlev;
+#ifdef __Kine_gdat_t__
 Kine_gdat_t *St_geant_Maker::kine_gdat = 0;
+#endif
 static Int_t irot = 0;
 static TVolume *topnode=0;
 typedef struct {
@@ -844,7 +846,9 @@ St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int
   cmate  = (Gcmate_t *) geant3->Gcmate();
   ccuts  = (Gccuts_t *) geant3->Gccuts();
   cphys  = (Gcphys_t *) geant3->Gcphys();
+#ifdef __Kine_gdat_t__
   kine_gdat = (Kine_gdat_t *) geant3->Kine_gdat();
+#endif
   Do("kuip/s/filecase KEEP");
 }
 //_____________________________________________________________________________
