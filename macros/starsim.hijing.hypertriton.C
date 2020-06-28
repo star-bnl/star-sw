@@ -1,0 +1,1 @@
+../StRoot/StarGenerator/macros/starsim.hijing.hypertriton.C
