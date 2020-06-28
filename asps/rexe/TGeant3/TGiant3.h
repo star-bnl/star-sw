@@ -524,6 +524,8 @@ typedef struct {
      >                 PhiMin,PhiMax,Ptflag,Zmin,Zmax,
      >                 Pxmin,Pxmax,Pymin,Pymax,Pzmin,Pzmax
 */
+#ifndef __Kine_gdat_t__
+#define __Kine_gdat_t__
 typedef struct {
   Int_t   IKineOld,IdInp,Kevent[3];
   Float_t AVflag,AVcoor[3],AVsigm[3],AvSlope[3];
@@ -531,6 +533,7 @@ typedef struct {
   Float_t PhiMin,PhiMax,Ptflag,Zmin,Zmax;
   Float_t Pxmin,Pxmax,Pymin,Pymax,Pzmin,Pzmax;
 } Kine_gdat_t;
+#endif
 class TVolume;
 
 class TGiant3 : public StarMC { 
