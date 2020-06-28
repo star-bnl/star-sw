@@ -1490,6 +1490,7 @@ void TGeant3::AddParticlesToPdgDataBase()
     {"B11"          ,"B11"          ,11.0216577497*kAu2Gev,kTRUE ,            0,    15,    kPTIon,GetIonPdg(5,11),  {0,  0,  0}},      // ,khShGev/13.81
     {"LN"           ,"LN"           ,2.050                ,kFALSE,  widthLambda,     0, kPTHadron,           3003,  {"DEUTERON", "pi-"     ,     0}}, //  Deuteron pi-         =>       
     {"LNN"          ,"LNN"          ,2.9925               ,kFALSE,  widthLambda,     0, kPTHadron,     1010000030,  {"TRITON"  , "pi-"     ,     0}}, //  pi- Triton         =>                   
+    {"H2L"          ,"H2L"          ,2.0545               ,kFALSE,  widthLambda,     3, kPTHadron,           3028,  {"proton"  , "proton"  , "pi-"}}, // H2K -< p p pi-
     {"H3L"          ,"H3L"          ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,           3004,  {"HE3"     , "pi-"     ,     0}}, // HyperTriton -> He3 pi-    
     {"H3Ldp"        ,"H3Ldp"        ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,           3012,  {"DEUTERON", "proton"  , "pi-"}}, // HyperTriton -> d p pi-    
     {"H3Lr"         ,"H3Lr"         ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,        1003004,  {"He3r"    , "pi-"     ,     0}}, //  -> He3r pi-

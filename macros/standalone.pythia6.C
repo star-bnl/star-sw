@@ -1,0 +1,1 @@
+../StRoot/StarGenerator/macros/standalone.pythia6.C

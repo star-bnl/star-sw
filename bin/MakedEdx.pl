@@ -893,7 +893,7 @@ my $NEvents = 100000;
 #$disk = "data*"; $RECO = "/reco/production2009_500Ge*/*/"; $Production = "P09if_calib"; $year = "2009/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; # 04/16/2010 pp500
 #$disk = "data*"; $RECO = "/reco/production2009*/*/"; $Production = "P09ig_calib"; $year = "2009/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; # 04/16/2010
 #$disk = "data*"; $RECO = "/reco/production2009*/*/"; $Production = "P09ig_calib2"; $year = "2009/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; # 04/16/2010#
-#USATLAS test <<<<<<<<<<<<<<<<<<<<
+#USATLAS test 
 #$hist = "RunIX65";  # test run with tables moved in MySQL, zdvx is taken from daq file
 #$NEvents = 5000; # test run
 #$disk = "/usatlas/workarea/fisyak/dEdx"; $RECO = "/reco/production2009*/*/"; $Production = "P09ig_calib"; $year = "2009/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; # 01/27/2010#
@@ -1365,7 +1365,7 @@ my $NEvents = 100000;
 #RunXV11FixTagKFV : #sigma(@76cm) =  7.80%
 #RunXV12FixTagVFM : #sigma(@76cm) =  7.66%
 #RunXV12FixTagVFM : #sigma(@76cm) =  7.53%
-#RunXV13FixTagKFV : #sigma(@76cm) =  7.58% <<<<<<<<<<<<<<<<<<<<<< ?
+#RunXV13FixTagKFV : #sigma(@76cm) =  7.58% 
 #RunXV13FixTagKFV : #sigma(@76cm) =  7.44%
 #RunXV14FixTagNoGL : #sigma(@76cm) =  7.53%
 #RunXV14FixTagNoGL : #sigma(@76cm) =  7.47%
@@ -1879,6 +1879,8 @@ my $NEvents = 100000;
 #$hist = "Run318"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/18/2019 move to MySQL and check in dev before code commit
 #$hist = "Run319"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/19/2019 move to MySQL and check in dev after code commit
 #$hist = "Run320"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/28/2019 check option without dN/dx
+$hist = "Run321"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/28/20 test calibration
+
 ################## Run XX ##############################################################
 # 11p5GeV                 20191208.100905, 20191221.190032, 20200210.220428, 20200214.143742, 20200214.143742
 # 5p75GeV_fixedTarget     20191221.154021, 
@@ -1910,7 +1912,7 @@ my $NEvents = 100000;
 #$hist = "RunXX16"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/09/20   switch off TpcPadCorrectionMDF
 #$hist = "RunXX17"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/10/20   new TpcPadCorrectionMDF
 #$hist = "RunXX18"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/10/20   new TpcLengthCorrectionMDF
-$hist = "RunXX19"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/11/20  once again  new TpcLengthCorrectionMDF
+#$hist = "RunXX19"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/11/20  once again  new TpcLengthCorrectionMDF
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();

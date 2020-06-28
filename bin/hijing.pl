@@ -2,7 +2,7 @@
 use File::Basename;
 use Sys::Hostname;
 use Cwd;
-my $maxEvts = 10;
+my $maxEvts = 100;
 my $energy  = 200.;
 my @beamAZ  = qw( 197 79 ); #gold
 my @targAZ  = qw( 197 79 ); #gold
@@ -26,7 +26,7 @@ print Out "
 ' istat=1 old istat>1 new         '  2
 ";
 close(Out);
-for (my $iset = 3; $iset <= 100; $iset++) {
+for (my $iset = 1; $iset <= 100; $iset++) {
   my $cmd = "hijing_382 -run $iset -inp $inp";
   print "$cmd\n";
   my $flag = system($cmd);

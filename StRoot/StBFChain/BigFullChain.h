@@ -51,7 +51,7 @@ ________________________________________________________________________________
 #define __NoStrangeMuDst__
 #endif
 #define __NoDisplay__
-//#define __AgMLonFly__
+#define __AgMLonFly__
 Bfc_st BFC[] = { // standard chains
   {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -280,7 +280,7 @@ Bfc_st BFC[] = { // standard chains
   {"MC2020",      "","","MC.2020,sdt20200292,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
   {"MC.2020"  ,"","","MC.2020a",                                                           "","","",kFALSE},
   {"MC2020a"  ,"","","MC.2020a",                                                           "","","",kFALSE},
-#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
+#if  ROOT_VERSION_CODE < 393216 /* ROOT_VERSION(6,0,0) */
   {"MC.2020a","","","y2020a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.Sti,CorrY,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
    ",geantout,big,MiniMcMk,Sti,NewTpcAlignment,AgML",                                     "","","/",kFALSE},
@@ -1406,7 +1406,7 @@ Bfc_st BFC[] = { // standard chains
   {"tls"         ,""  ,"","",""                          "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"rts"         ,""  ,"","",""                                                ,"RTS","load libRTS",kFALSE},
   {"daq"         ,""  ,"","rts",""                         ,"StDaqLib,StDAQMaker","Load StDAQMaker",kFALSE},
-#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
+#if  ROOT_VERSION_CODE < 393216 /* ROOT_VERSION(6,0,0) */
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
 #else
   {"SCL"         ,""  ,"","",""                         ,"WARNING *** Option is OBSOLETE ***",kFALSE},

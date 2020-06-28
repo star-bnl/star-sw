@@ -59,21 +59,27 @@ void Hijing()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( int nevents=10,int rngSeed=1234, const char* tag="y2018" )
+void starsim( int nevents=10,int rngSeed=0, const char* tag="y2020", Int_t RunG = 1 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = Form("%s geant gstar usexgeom agml ",tag);
-    bfc(0, simple );
+    TString simple = Form("%s geant gstar usexgeom agml magF FieldOn ReverseField",tag);
+    bfc(-1, simple );
+    StMaker *geant = chain->Maker("geant");
+    chain->AddAfter("MagField",geant);
+    StMaker::lsMakers(chain);
+    chain->Init();
   }
 
   gSystem->Load( "libVMC.so");
 
   gSystem->Load( "StarGeneratorUtil.so" );
   gSystem->Load( "StarGeneratorEvent.so" );
+#if 0
   gSystem->Load( "AgStar.so" );
   gSystem->Load( "AgStar.so" );
+#endif
   gSystem->Load( "StarGeneratorBase.so" );
   gSystem->Load( "libMathMore.so"   );  
   gSystem->Load( "libHijing1_383.so");
@@ -124,7 +130,7 @@ void starsim( int nevents=10,int rngSeed=1234, const char* tag="y2018" )
   //
   //geometry("y2012");
   command("gkine -4 0");
-  command("gfile o hijing.starsim.fzd");
+  command(Form("gfile o hijing_%i.fzd",RunG));
   
   //
   // Trigger on nevents

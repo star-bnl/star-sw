@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job name="hijing" fileListSyntax="paths" nProcesses="100"  filesPerHour="25" simulateSubmission="false">
+
+<command>
+  setup 32b 
+  source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh
+  starver SL20c
+  cd ${SUBMITTINGDIRECTORY}  
+  set Name = `basename $PWD`
+  set log  =  ${JOBINDEX}B.log
+  if (-r ${log}) exit 0;
+  root4star -b -q 'hijing.C(100,0,"y2020",'${JOBINDEX}')'  &gt;&amp; ${log}
+
+</command>
+
+<ResourceUsage>
+               <Priority>75</Priority>
+</ResourceUsage>
+
+
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+
+<!--<stderr URL="file:./shed$JOBID.err.out"/>-->
+
+</job>
+

@@ -1,0 +1,1 @@
+../StRoot/StarGenerator/macros/starsim.pythia6standalone.Z0.C
