@@ -153,13 +153,13 @@ void starsim( Int_t nevents=1, Int_t Index = 0, Int_t rngSeed=4321 )
   gSystem->Load( "libHijing1_383.so");
   gSystem->Load( "libKinematics.so");
   gSystem->Load( "xgeometry.so"     );
-
+#if 0
   gSystem->Load("libHepMC2_06_09.so");
-  gSystem->Load("libPythia8_1_86.so");
+  gSystem->Load("libPythia8_2_35.so");
   gSystem->Load("libPhotos3_61.so");
   gSystem->Load("libTauola1_1_5.so");
   gSystem->Load("libEvtGen1_06_00.so");
-
+#endif
   // force gstar load/call
   gSystem->Load( "gstar.so" );
   command("call gstar");
@@ -198,6 +198,7 @@ void starsim( Int_t nevents=1, Int_t Index = 0, Int_t rngSeed=4321 )
   //
   Kinematics();
 
+#if 0
   //
   // Setup decay manager
   //
@@ -212,7 +213,7 @@ void starsim( Int_t nevents=1, Int_t Index = 0, Int_t rngSeed=4321 )
   //decayEvt->SetDecayTable("StRoot/StSimulationMaker/Decay_Table/Jpsi.DEC");
   decayMgr->AddDecayer( 0, decayEvt ); // Handle any decay requested
   decayEvt->SetDebug(1);
-    
+#endif    
   //
   // Initialize primary event generator and all sub makers
   //
