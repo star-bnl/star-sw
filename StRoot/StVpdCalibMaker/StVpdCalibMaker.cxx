@@ -1,16 +1,19 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.14 2018/04/30 23:18:00 smirnovd Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.15 2020/07/03 21:54:50 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
  *
- * Description: - VPD Calibration Maker to do the calibration for upVPD 
+ * Description: - VPD Calibration Maker to do the calibration for upVPD
  *              - store into StBTofHeader
  *
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.15  2020/07/03 21:54:50  geurts
+ * Removed an old typo in the log messages regarding the corralgo version that the VPD will be using.
+ *
  * Revision 1.14  2018/04/30 23:18:00  smirnovd
  * Reduce excessive output
  *
@@ -97,7 +100,7 @@ ClassImp(StVpdCalibMaker)
   const Double_t StVpdCalibMaker::VHRBIN2PS =  24.4140625; // 1000*25/1024 (ps/chn)
 /// High resolution mode, pico-second per bin
   const Double_t StVpdCalibMaker::HRBIN2PS = 97.65625; // 97.65625= 1000*100/1024  (ps/chn)
-/// TDC limit    
+/// TDC limit
   const Double_t StVpdCalibMaker::TMAX = 51200.;
 /// VZDIFFCUT:  VzVpd - VzProj cut
   const Double_t StVpdCalibMaker::VZDIFFCUT=6.;
@@ -126,7 +129,7 @@ StVpdCalibMaker::StVpdCalibMaker(const Char_t *name) : StMaker(name)
 
   // default initialization from database
   mInitFromFile = kFALSE;
-  // assign default locations and names to the calibration files 
+  // assign default locations and names to the calibration files
   setCalibFilePvpd("/star/institutions/rice/calib/default/pvpdCali_4DB.dat");
   // use vpd as start by default;
   mUseVpdStart = kTRUE;
@@ -180,7 +183,7 @@ Int_t StVpdCalibMaker::Init()
           LOG_INFO << "Histograms will be stored in " << mHistoFileName.c_str() << endm;
         }
     }
-    
+
   //return kStOK;
   return StMaker::Init();
 }
@@ -211,7 +214,7 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
   /// read in and check the size
   if (mInitFromFile){
     LOG_INFO << "Initializing VPD calibration parameters from file"
-    		 << "(" << mCalibFilePvpd << ")" << endm;  
+    		 << "(" << mCalibFilePvpd << ")" << endm;
     ifstream inData;
     inData.open(mCalibFilePvpd.c_str());
     int nchl, nbin;
@@ -222,7 +225,7 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
 		LOG_ERROR << "number of bins (" << nbin << ") out of range ("
 			  << NBinMax << ") for vpd channel " << i << endm;
 		return kStErr;
-      }	
+      }
       for(int j=0;j<=nbin;j++) inData>>mVPDTotEdge[i][j];
       for(int j=0;j<=nbin;j++) inData>>mVPDTotCorr[i][j];
     }
@@ -245,7 +248,7 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
       Int_t numRows = vpdTotCorr->GetNRows();
 
       if(numRows!=NVPD*2) {
-	LOG_WARN  << " Mis-matched number of rows in vpdTotCorr table: " << numRows 
+	LOG_WARN  << " Mis-matched number of rows in vpdTotCorr table: " << numRows
 		  << " (exp:" << NVPD*2 << ")" << endm;
       }
 
@@ -257,11 +260,11 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
 	    short flag = totCorr[i].corralgo;
 	    if(flag==0) {
 	      mUseVpdStart=kTRUE;
-	      LOG_INFO << "Selected VPD for TOF start-timing (corralgo=1)" << endm;
+	      LOG_INFO << "Selected VPD for TOF start-timing (corralgo=0)" << endm;
 	    }
 	    else if(flag==1) {
 	      mUseVpdStart=kFALSE;
-	      LOG_INFO << "VPD NOT used for TOF start-timing (corralgo=0)" << endm;
+	      LOG_INFO << "VPD NOT used for TOF start-timing (corralgo=1)" << endm;
 	    }
 	    else {
 	      LOG_WARN << "Unknown calibration option " << flag << endm;
@@ -296,17 +299,17 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
 	LOG_INFO << "Selected VPD for TOF start-timing" << endm;
       }
       else {
-	LOG_INFO << "VPD NOT used for TOF start-timing" << endm;  
+	LOG_INFO << "VPD NOT used for TOF start-timing" << endm;
       }
     }
     else {
     // Note: this construction addresses RT#1996 and allows backward compatibility with older database
     //       timestamps at which these database structures did not exist. All values will be zero (hence the ERROR)
-    //       and the VPD will be disabled for TOF start timing, i.e. the TOF could still operate in start-less mode 
-      LOG_ERROR << "unable to get vpdTotCorr dataset ... reset all to zero values (NOT GOOD!) and disable use for TOF-start" << endm; 
+    //       and the VPD will be disabled for TOF start timing, i.e. the TOF could still operate in start-less mode
+      LOG_ERROR << "unable to get vpdTotCorr dataset ... reset all to zero values (NOT GOOD!) and disable use for TOF-start" << endm;
       resetPars();
       mUseVpdStart=kFALSE;
-      LOG_INFO << "VPD NOT used for TOF start-timing" << endm;  
+      LOG_INFO << "VPD NOT used for TOF start-timing" << endm;
       return kStErr;
     }
   }
@@ -383,13 +386,13 @@ Bool_t StVpdCalibMaker::writeVpdData() const
     tofHeader->setVpdVz(mVPDVtxZ[i],i);
   }
 
-    LOG_INFO << "BTofHeader: NWest = " << tofHeader->numberOfVpdHits(west) 
+    LOG_INFO << "BTofHeader: NWest = " << tofHeader->numberOfVpdHits(west)
 	     << " NEast = " << tofHeader->numberOfVpdHits(east) << endm;
     if(tofHeader->numberOfVpdHits(west)!=mNWest ||
        tofHeader->numberOfVpdHits(east)!=mNEast) {
       LOG_WARN << "BTofHeader inconsistency: Local nWest = " << mNWest << " nEast = " << mNEast << endm;
     }
-    LOG_INFO <<"summary:  VPD-VtxZ = " << mVPDVtxZ[0] 
+    LOG_INFO <<"summary:  VPD-VtxZ = " << mVPDVtxZ[0]
              << "; TSum West = " << mTSumWest << "  East = " << mTSumEast << endm;
 
   return kTRUE;
@@ -430,7 +433,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
         int indx = (trayId-NTray-1)*NVPD+(tubeId-1);
         if (indx>=2*NVPD){
           LOG_ERROR << "vpd index (" << indx << ") out of range ("
-                << 2*NVPD << ") for trayId-tubeId " << trayId 
+                << 2*NVPD << ") for trayId-tubeId " << trayId
                 << "-" << tubeId << endm;
           return kStErr;
         }
@@ -441,10 +444,10 @@ Bool_t StVpdCalibMaker::loadVpdData()
     }
 
   }
-  
+
   else {
     StEvent *thisEvent = (StEvent *) GetInputDS("StEvent");
-  
+
     // event selection  // no primary vertex required
     if( !thisEvent )  {
       LOG_WARN << "No StEvent present" << endl;
@@ -469,7 +472,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
     StSPtrVecBTofHit &tofHits = mBTofColl->tofHits();
     Int_t nhits = tofHits.size();
     LOG_INFO << "Total number of TOF cells + VPD tubes : " << nhits << endm;
-  
+
     for(int i=0;i<nhits;i++) {
       StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
       if(!aHit) continue;
@@ -479,7 +482,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
 	int indx = (trayId-NTray-1)*NVPD+(tubeId-1);
 	if (indx>=2*NVPD){
 	  LOG_ERROR << "vpd index (" << indx << ") out of range ("
-		    << 2*NVPD << ") for trayId-tubeId " << trayId 
+		    << 2*NVPD << ") for trayId-tubeId " << trayId
 		    << "-" << tubeId << endm;
 	  return kStErr;
 	}
@@ -508,11 +511,11 @@ void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time, std::vecto
   bool vpdEast=false;
   for(int i=0;i<2*NVPD;i++) {
         if (i>=NVPD) vpdEast=true;
-      
+
         //**************BEGIN SIMULATION CODE BLOCK***************
         if ( qaTruth[i] > 0 && time[i] != 0.) {
             LOG_DEBUG << "Simulation" << endm;
-              
+
               if (vpdEast){
                   mNEast++;
                   mVPDLeTime[i] = time[i];
@@ -529,9 +532,9 @@ void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time, std::vecto
               }
         }
         //**************END SIMULATION CODE BLOCK*****************
-      
+
         else if( time[i]>0. && tot[i]>0. ) {
-          
+
             int ibin = -1;
             for(int j=0;j<NBinMax-1;j++) {
                 if(tot[i]>=mVPDTotEdge[i][j] && tot[i]<mVPDTotEdge[i][j+1]) {
@@ -573,7 +576,7 @@ void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time, std::vecto
                     mVPDLeTime[i] = 0.; // out of range, remove this hit
               }
         }
-      
+
       else LOG_DEBUG << "No hit." << endm;
   }
 
@@ -589,7 +592,7 @@ void StVpdCalibMaker::vzVpdFinder()
           mTruncation = kFALSE;
       }
     else if(mVPDLeTime[i]<1.e-4 || !mFlag[i]) continue;
-      
+
     double vpdtime;
     if(i<NVPD&&mNWest>1) {  // west VPD
       vpdtime = (mVPDLeTime[i]*mNWest-mTSumWest)/(mNWest-1);    // Cuts on times with a significant deviation from the average.
@@ -606,7 +609,7 @@ void StVpdCalibMaker::vzVpdFinder()
       if(fabs(vpdtime)>TDIFFCUT) {
         mTSumEast -= mVPDLeTime[i];
         mVPDLeTime[i] = 0.;
-        mNEast--; 
+        mNEast--;
         mVPDHitPatternEast &= ( 0x7ffff - (1<<(i-NVPD)) );
         mFlag[i] = 0;
       }
@@ -725,8 +728,8 @@ void StVpdCalibMaker::writeHistograms() const
     theHistoFile->Close();
     delete theHistoFile;
   }
-  else 
+  else
     LOG_ERROR << "unable to open histogram file" << endm;
-    
+
   return;
 }
