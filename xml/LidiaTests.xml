@@ -3,17 +3,27 @@
 
 <command>
 
-#source /star/u/starreco/.cshrc
-#source  /afs/rhic.bnl.gov/rhstar/group/.stardev
-#unsetenv NODEBUG
-#setup 32b
-setup debug
-
+source /afs/rhic.bnl.gov/star/packages/.DEV2/setupDEV2.csh
+set Name = `basename ${SUBMITTINGDIRECTORY}`
+echo $Name | egrep -i '(debug|dbg)'
+if (! $?) then
+  if ($?NODEBUG) unsetenv NODEBUG
+else
+  setenv NODEBUG yes
+endif
+echo $Name | egrep -i 'x8664'
+if (! $?) then
+  setenv USE_64BITS 1
+else
+  setenv USE_64BITS 0  
+endif
+starver TFG20c
+setenv STARFPE NO
 #set controlFile = /star/u/starreco/newtest/sampleList_nonopt.txt 
 set controlFile = $STAR/StRoot/StBFChain/sampleList.txt
 set nevents = `grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *nevents" | head -1 | sed 's| *nevents *= *\([0-9]*\) *$|\1|'`
 set chain = `grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *chain" | head -1 | sed 's| *chain *= *\(.*\) *$|\1|'`
-set out_dir = `grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *out_dir" | head -1 | sed 's| *out_dir *= *\(.*\) *$|\1|'`
+set out_dir = ${SUBMITTINGDIRECTORY}/`grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *out_dir" | head -1 | sed 's| *out_dir *= *\(.*\) *$|\1|'`
 
 set inputfile = `grep -A5 job${JOBINDEX} ${controlFile} | grep -e " *inputfile" | head -1 | sed 's| *inputfile *= *\(.*\) *$|\1|'`
 set logFile = `echo $inputfile | sed 's|.*/\([A-Za-z_0-9.]*\).[df][az][qd]|\1.log|'` 
