@@ -91,7 +91,9 @@ class StMuDst;
 class StMuPrimaryVertex;
 class StMuBTofPidTraits;
 #include "StPhysicalHelixD.hh"
+#ifdef __TFG__VERSION__
 #include "StDetectorDbMaker/St_tofCorrC.h"
+#endif /* __TFG__VERSION__ */
 
 typedef std::vector<Int_t>  IntVec;
 typedef std::vector<Double_t>  DoubleVec;
@@ -162,7 +164,7 @@ private:
   void processStEvent();
   ///
   void processMuDst();
-  ///
+
   void cleanCalibMuDst();
   void cleanCalib(StMuBTofPidTraits&);  //! functions to clean up calib done before in MuDst
         
@@ -205,9 +207,39 @@ private:
 
   static const Double_t mC_Light;  // = C_C_LIGHT/1.e9;
 
+#ifndef __TFG__VERSION__
+    Bool_t     mValidCalibPar = kFALSE;
+    Bool_t     mValidStartTime = kFALSE;
+
+    Int_t      mVPDEastHitsCut = 0;
+    Int_t      mVPDWestHitsCut = 0;
+#else /* __TFG__VERSION__ */
     Bool_t     mValidCalibPar;
     Bool_t     mValidStartTime;
+#endif /* __TFG__VERSION__ */
 
+#ifndef __TFG__VERSION__
+    Float_t   mTofTotEdge[mNTray][mNModule][mNCell][mNBinMax];//!From Double_t to Float_t 
+    Float_t   mTofTotCorr[mNTray][mNModule][mNCell][mNBinMax];//! from board-by-board to cell-by-cell
+    Float_t   mTofZEdge[mNTray][mNModule][mNCell][mNBinMax];//! boards now filled 24 times
+    Float_t   mTofZCorr[mNTray][mNModule][mNCell][mNBinMax];
+    Double_t  mTofTZero[mNTray][mNModule][mNCell];  //! cell-by-cell T0
+
+    Double_t   mVPDLeTime[2*mNVPD];
+    
+    Double_t   mTSumEast = 0.0;
+    Double_t   mTSumWest = 0.0;
+    UInt_t     mVPDHitPatternEast = 0;
+    UInt_t     mVPDHitPatternWest = 0;
+    Int_t      mNEast = 0;
+    Int_t      mNWest = 0;            //! for Run8 to save time, these stored first
+    Double_t   mVPDVtxZ = 0.0;          //! vertex z from VPD
+    Double_t   mProjVtxZ = 0.0;         //! vertex z from track projection, track closest to beam line
+    Double_t   mEvtVtxZ = 0.0;          //! vertex z from event vertex (mostly TPC vertex)
+    Double_t   mTDiff = 0.0;            //! time difference between east and west
+    Double_t   mTStart = 0.0;           //! start time
+    Int_t      mNTzero = 0;           //! number of hits used in T0 (non-vpd-start)
+#else /* __TFG__VERSION__ */
     Int_t      mVPDEastHitsCut;
     Int_t      mVPDWestHitsCut;
     Double_t   mVPDLeTime[2*St_tofCorrC::mNVPD];
@@ -224,6 +256,7 @@ private:
     Double_t   mTDiff;            //! time difference between east and west
     Double_t   mTStart;           //! start time
     Int_t      mNTzero;           //! number of hits used in T0 (non-vpd-start)
+#endif /* __TFG__VERSION__ */
 
     StPhysicalHelixD* mBeamHelix;  //! beamline helix used for Run 8
     ///
@@ -235,7 +268,12 @@ private:
 
     Bool_t            mOuterGeometry;
     Bool_t            mSlewingCorr;  //! switch for slewing correction since run 8
+#ifndef __TFG__VERSION__
+    Bool_t            mUseEventVertex = kFALSE; //! switch for using event vertices
+    Bool_t            mInitFromFile; //! switch for reading from files
+#else /* __TFG__VERSION__ */
     Bool_t            mUseEventVertex; //! switch for using event vertices
+#endif /* __TFG__VERSION__ */
     Bool_t            mUseVpdStart;  //! switch for vpd start
     Bool_t            mForceTStartZero = false; //!switch to allow totally startless bTOF
     Bool_t            mFXTMode = kFALSE; //! FXT mode, protons included in calculating T0
@@ -247,7 +285,11 @@ private:
 
     Bool_t   mHisto;            //! switch to fill QA histograms
     string   mHistoFileName;    //! histogram file name
+#ifndef __TFG__VERSION__
+    TH1D*    hEventCounter = nullptr;     //!
+#else /* __TFG__VERSION__ */
     TH1D*    hEventCounter;     //!
+#endif /* __TFG__VERSION__ */
             
     virtual const char *GetCVS() const 
       {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.13 2020/04/10 20:41:38 zye20 Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
@@ -263,6 +305,9 @@ inline void StBTofCalibMaker::setUseEventVertex(const bool val) { mUseEventVerte
 inline void StBTofCalibMaker::setMuDstIn(const bool val) { mMuDstIn = val; }
 inline void StBTofCalibMaker::setHistoFileName(const Char_t* filename){ mHistoFileName=filename; }
 inline void StBTofCalibMaker::setCreateHistoFlag(Bool_t histos)  { mHisto = histos; }
+#ifndef __TFG__VERSION__
+inline void StBTofCalibMaker::setInitFromFile(const Bool_t val)  {mInitFromFile = val; }
+#endif /* ! __TFG__VERSION__ */
 inline void StBTofCalibMaker::setCalibFilePvpd(const Char_t* filename) {mCalibFilePvpd = filename;}
 inline void StBTofCalibMaker::setCalibFileTot(const Char_t* filename)  {mCalibFileTot = filename;}
 inline void StBTofCalibMaker::setCalibFileZhit(const Char_t* filename) {mCalibFileZhit = filename;}

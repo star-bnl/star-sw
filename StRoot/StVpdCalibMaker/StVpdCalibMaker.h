@@ -77,6 +77,11 @@ public:
                 
   /// read calibration parameters from file
     // note: the default value will be changed back to kFALSE
+#ifndef __TFG__VERSION__
+  void setInitFromFile(const Bool_t initFromFile= kTRUE);
+  void setCalibFilePvpd(const Char_t* filename);
+
+#endif /* ! __TFG__VERSION__ */
   /// set the VPD # of hits cut
   void setVPDHitsCut(const Int_t eastVpdCut, const Int_t westVpdCut);
   /// switch to read in StEvent/MuDst
@@ -134,6 +139,12 @@ private:
   
   Int_t      mVPDEastHitsCut;
   Int_t      mVPDWestHitsCut;
+#ifndef __TFG__VERSION__
+
+  Double_t   mVPDTotEdge[2*NVPD][NBinMax];
+  Double_t   mVPDTotCorr[2*NVPD][NBinMax];
+
+#endif /* ! __TFG__VERSION__ */
   Double_t   mVPDLeTime[2*NVPD];
   Double_t   mVPDTot[2*NVPD];
   std::vector<Int_t> mVPD_qaTruth;
@@ -162,6 +173,10 @@ private:
   TH2D*    mhNVpdHits;         //! nhits west vs east
     TH1D*   mmVpdVertexHist;
 
+#ifndef __TFG__VERSION__
+  Bool_t mInitFromFile;  //! switch for reading from files
+  string mCalibFilePvpd; //! filename for pvpd calibration parameters
+#endif /* ! __TFG__VERSION__ */
   Bool_t mUseVpdStart;   //! switch for using Vpd as the start time (true by default)
   Bool_t mForceTofStart;   //! flag indicating that a user overrides any dbase-based start timing default
 
@@ -175,6 +190,10 @@ inline void StVpdCalibMaker::setVPDHitsCut(const Int_t ieast, const Int_t iwest)
 inline void StVpdCalibMaker::setMuDstIn() { mMuDstIn = kTRUE; }
 inline void StVpdCalibMaker::setHistoFileName(const Char_t* filename){mHistoFileName=filename;}
 inline void StVpdCalibMaker::setCreateHistoFlag(const Bool_t histos){mHisto = histos;}
+#ifndef __TFG__VERSION__
+inline void StVpdCalibMaker::setInitFromFile(const Bool_t val)  {mInitFromFile = val; }
+inline void StVpdCalibMaker::setCalibFilePvpd(const Char_t* filename) {mCalibFilePvpd = filename;}
+#endif /* ! __TFG__VERSION__ */
 inline void StVpdCalibMaker::setUseVpdStart(const Bool_t val) {mUseVpdStart = val; mForceTofStart = kTRUE;}
 inline Bool_t StVpdCalibMaker::useVpdStart() const { return mUseVpdStart; }
 #endif
