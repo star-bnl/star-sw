@@ -1,16 +1,22 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.13 2017/03/02 18:26:50 jeromel Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.15 2020/07/03 21:54:50 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
  *
- * Description: - VPD Calibration Maker to do the calibration for upVPD 
+ * Description: - VPD Calibration Maker to do the calibration for upVPD
  *              - store into StBTofHeader
  *
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.15  2020/07/03 21:54:50  geurts
+ * Removed an old typo in the log messages regarding the corralgo version that the VPD will be using.
+ *
+ * Revision 1.14  2018/04/30 23:18:00  smirnovd
+ * Reduce excessive output
+ *
  * Revision 1.13  2017/03/02 18:26:50  jeromel
  * Updates to StVpdCalibMaker after review - changes by jdb, nl
  *
@@ -73,7 +79,12 @@
 #include "StEventUtilities/StuRefMult.hh"
 #include "PhysicalConstants.h"
 #include "phys_constants.h"
+#ifndef __TFG__VERSION__
+#include "tables/St_vpdTotCorr_Table.h"
+
+#else /* __TFG__VERSION__ */
 #include "StDetectorDbMaker/St_vpdTotCorrC.h"
+#endif /* __TFG__VERSION__ */
 #include "StBTofUtil/StBTofHitCollection.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -93,7 +104,7 @@ ClassImp(StVpdCalibMaker)
   const Double_t StVpdCalibMaker::VHRBIN2PS =  24.4140625; // 1000*25/1024 (ps/chn)
 /// High resolution mode, pico-second per bin
   const Double_t StVpdCalibMaker::HRBIN2PS = 97.65625; // 97.65625= 1000*100/1024  (ps/chn)
-/// TDC limit    
+/// TDC limit
   const Double_t StVpdCalibMaker::TMAX = 51200.;
 /// VZDIFFCUT:  VzVpd - VzProj cut
   const Double_t StVpdCalibMaker::VZDIFFCUT=6.;
@@ -117,8 +128,15 @@ StVpdCalibMaker::StVpdCalibMaker(const Char_t *name) : StMaker(name)
   mBTofColl       = 0;
   mValidCalibPar  = kFALSE;
 
+#ifndef __TFG__VERSION__
   setCreateHistoFlag(kFALSE);
-  setHistoFileName(""); //"vpdana.root");
+  setHistoFileName("vpdana.root");
+
+  // default initialization from database
+  mInitFromFile = kFALSE;
+  // assign default locations and names to the calibration files
+  setCalibFilePvpd("/star/institutions/rice/calib/default/pvpdCali_4DB.dat");
+#endif /* __TFG__VERSION__ */
   // use vpd as start by default;
   mUseVpdStart = kTRUE;
   mForceTofStart = kFALSE; // flag indicates user-override for TOF Start time calculation
@@ -131,6 +149,10 @@ StVpdCalibMaker::~StVpdCalibMaker()
 //_____________________________________________________________________________
 void StVpdCalibMaker::resetPars()
 {
+#ifndef __TFG__VERSION__
+  memset(mVPDTotEdge, 0, sizeof(mVPDTotEdge));
+  memset(mVPDTotCorr, 0, sizeof(mVPDTotCorr));
+#endif /* ! __TFG__VERSION__ */
 }
 
 //_____________________________________________________________________________
@@ -169,7 +191,7 @@ Int_t StVpdCalibMaker::Init()
           LOG_INFO << "Histograms will be stored in " << mHistoFileName.c_str() << endm;
         }
     }
-    
+
   //return kStOK;
   return StMaker::Init();
 }
@@ -196,10 +218,52 @@ Int_t StVpdCalibMaker::InitRun(Int_t runnumber)
 //_____________________________________________________________________________
 Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
 {
+  /// initialize the calibrations parameters from dbase
+  /// read in and check the size
+#ifndef __TFG__VERSION__
+  if (mInitFromFile){
+    LOG_INFO << "Initializing VPD calibration parameters from file"
+    		 << "(" << mCalibFilePvpd << ")" << endm;
+    ifstream inData;
+    inData.open(mCalibFilePvpd.c_str());
+    int nchl, nbin;
+    for(int i=0;i<NVPD*2;i++) {
+      inData>>nchl;
+      inData>>nbin;
+      if (nbin>NBinMax) {
+		LOG_ERROR << "number of bins (" << nbin << ") out of range ("
+			  << NBinMax << ") for vpd channel " << i << endm;
+		return kStErr;
+      }
+      for(int j=0;j<=nbin;j++) inData>>mVPDTotEdge[i][j];
+      for(int j=0;j<=nbin;j++) inData>>mVPDTotCorr[i][j];
+    }
+    inData.close();
+  }
+  else {
+#endif /* __TFG__VERSION__ */
+    /// Get all calibration parameters from the database
+    LOG_INFO << "Initializing VPD calibration parameters from database" << endm;
 
+    // read vpdTotCorr table
+    TDataSet *dbDataSet = GetDataBase("Calibrations/tof/vpdTotCorr");
+    if (dbDataSet){
+      St_vpdTotCorr* vpdTotCorr = static_cast<St_vpdTotCorr*>(dbDataSet->Find("vpdTotCorr"));
+      if(!vpdTotCorr) {
+	LOG_ERROR << "unable to get vpdTotCorr table parameters" << endm;
+	//    assert(vpdTotCorr);
+	return kStErr;
+      }
+#ifndef __TFG__VERSION__
+      vpdTotCorr_st* totCorr = static_cast<vpdTotCorr_st*>(vpdTotCorr->GetArray());
+      Int_t numRows = vpdTotCorr->GetNRows();
+#endif /* __TFG__VERSION__ */
+
+#ifdef __TFG__VERSION__
       Int_t numRows = St_vpdTotCorrC::instance()->getNumRows();
+#endif /* __TFG__VERSION__ */
       if(numRows!=NVPD*2) {
-	LOG_WARN  << " Mis-matched number of rows in vpdTotCorr table: " << numRows 
+	LOG_WARN  << " Mis-matched number of rows in vpdTotCorr table: " << numRows
 		  << " (exp:" << NVPD*2 << ")" << endm;
       }
 
@@ -208,34 +272,58 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
       for (Int_t i=0;i<numRows;i++) {
 	if (!mForceTofStart){
 	  if(i==0) {  // identify once only, for the first tube
+#ifndef __TFG__VERSION__
+	    short flag = totCorr[i].corralgo;
+#else /* __TFG__VERSION__ */
 	    short flag = St_vpdTotCorrC::instance()->corralgo(i);
+#endif /* __TFG__VERSION__ */
 	    if(flag==0) {
 	      mUseVpdStart=kTRUE;
-	      LOG_INFO << "Selected VPD for TOF start-timing (corralgo=1)" << endm;
+	      LOG_INFO << "Selected VPD for TOF start-timing (corralgo=0)" << endm;
 	    }
 	    else if(flag==1) {
 	      mUseVpdStart=kFALSE;
-	      LOG_INFO << "VPD NOT used for TOF start-timing (corralgo=0)" << endm;
+	      LOG_INFO << "VPD NOT used for TOF start-timing (corralgo=1)" << endm;
 	    }
 	    else {
 	      LOG_WARN << "Unknown calibration option " << flag << endm;
 	    }
 	  }
 	  else { // verify that all other entries agree
+#ifndef __TFG__VERSION__
+	    if (totCorr[0].corralgo==0 && (totCorr[i].corralgo!=0))
+	      {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
+	    if (totCorr[0].corralgo==1 && (totCorr[i].corralgo!=1))
+	      {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
+#else /* __TFG__VERSION__ */
 	    if (St_vpdTotCorrC::instance()->corralgo(0)==0 && (St_vpdTotCorrC::instance()->corralgo(i)!=0))
 	      {LOG_WARN << "corralgo dbase inconsistency: " << St_vpdTotCorrC::instance()->corralgo(i) << endm;}
 	    if (St_vpdTotCorrC::instance()->corralgo(0)==1 && (St_vpdTotCorrC::instance()->corralgo(i)!=1))
 	      {LOG_WARN << "corralgo dbase inconsistency: " << St_vpdTotCorrC::instance()->corralgo(i) << endm;}
+#endif /* __TFG__VERSION__ */
 	  }
 	}
+#ifndef __TFG__VERSION__
+
+	short tubeId = totCorr[i].tubeId;
+#else /* __TFG__VERSION__ */
 	short tubeId = St_vpdTotCorrC::instance()->tubeId(i);
 	assert(tubeId == i+1);
+#endif /* __TFG__VERSION__ */
 	// check index range
 	if (tubeId>2*NVPD) {
 	  LOG_ERROR << "tubeId (" << tubeId << ") out of range ("
 		    << 2*NVPD << ")" << endm;
 	  return kStErr;
 	}
+#ifndef __TFG__VERSION__
+
+	for(Int_t j=0;j<NBinMax;j++) {
+	  mVPDTotEdge[tubeId-1][j] = totCorr[i].tot[j];
+	  mVPDTotCorr[tubeId-1][j] = totCorr[i].corr[j];
+	  LOG_DEBUG << " east/west: " << (tubeId-1)/NVPD << " tubeId: " << tubeId << endm;
+	} // end j 0->NBinMax
+#endif /* ! __TFG__VERSION__ */
       } // end i 0->numRows
 
       // Let the user know what is used for calculating TOF Start (and how we got there)
@@ -244,8 +332,23 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
 	LOG_INFO << "Selected VPD for TOF start-timing" << endm;
       }
       else {
-	LOG_INFO << "VPD NOT used for TOF start-timing" << endm;  
+	LOG_INFO << "VPD NOT used for TOF start-timing" << endm;
       }
+    }
+    else {
+    // Note: this construction addresses RT#1996 and allows backward compatibility with older database
+    //       timestamps at which these database structures did not exist. All values will be zero (hence the ERROR)
+    //       and the VPD will be disabled for TOF start timing, i.e. the TOF could still operate in start-less mode
+      LOG_ERROR << "unable to get vpdTotCorr dataset ... reset all to zero values (NOT GOOD!) and disable use for TOF-start" << endm;
+      resetPars();
+      mUseVpdStart=kFALSE;
+      LOG_INFO << "VPD NOT used for TOF start-timing" << endm;
+      return kStErr;
+    }
+#ifndef __TFG__VERSION__
+  }
+#endif /* __TFG__VERSION__ */
+
   return kStOK;
 }
 
@@ -318,13 +421,13 @@ Bool_t StVpdCalibMaker::writeVpdData() const
     tofHeader->setVpdVz(mVPDVtxZ[i],i);
   }
 
-    LOG_INFO << "BTofHeader: NWest = " << tofHeader->numberOfVpdHits(west) 
+    LOG_INFO << "BTofHeader: NWest = " << tofHeader->numberOfVpdHits(west)
 	     << " NEast = " << tofHeader->numberOfVpdHits(east) << endm;
     if(tofHeader->numberOfVpdHits(west)!=mNWest ||
        tofHeader->numberOfVpdHits(east)!=mNEast) {
       LOG_WARN << "BTofHeader inconsistency: Local nWest = " << mNWest << " nEast = " << mNEast << endm;
     }
-    LOG_INFO <<"summary:  VPD-VtxZ = " << mVPDVtxZ[0] 
+    LOG_INFO <<"summary:  VPD-VtxZ = " << mVPDVtxZ[0]
              << "; TSum West = " << mTSumWest << "  East = " << mTSumEast << endm;
 
   return kTRUE;
@@ -365,7 +468,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
         int indx = (trayId-NTray-1)*NVPD+(tubeId-1);
         if (indx>=2*NVPD){
           LOG_ERROR << "vpd index (" << indx << ") out of range ("
-                << 2*NVPD << ") for trayId-tubeId " << trayId 
+                << 2*NVPD << ") for trayId-tubeId " << trayId
                 << "-" << tubeId << endm;
           return kStErr;
         }
@@ -376,10 +479,10 @@ Bool_t StVpdCalibMaker::loadVpdData()
     }
 
   }
-  
+
   else {
     StEvent *thisEvent = (StEvent *) GetInputDS("StEvent");
-  
+
     // event selection  // no primary vertex required
     if( !thisEvent )  {
       LOG_WARN << "No StEvent present" << endl;
@@ -404,7 +507,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
     StSPtrVecBTofHit &tofHits = mBTofColl->tofHits();
     Int_t nhits = tofHits.size();
     LOG_INFO << "Total number of TOF cells + VPD tubes : " << nhits << endm;
-  
+
     for(int i=0;i<nhits;i++) {
       StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
       if(!aHit) continue;
@@ -414,7 +517,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
 	int indx = (trayId-NTray-1)*NVPD+(tubeId-1);
 	if (indx>=2*NVPD){
 	  LOG_ERROR << "vpd index (" << indx << ") out of range ("
-		    << 2*NVPD << ") for trayId-tubeId " << trayId 
+		    << 2*NVPD << ") for trayId-tubeId " << trayId
 		    << "-" << tubeId << endm;
 	  return kStErr;
 	}
@@ -439,36 +542,102 @@ void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time, std::vecto
   mNWest = 0;
   mVPDHitPatternWest = 0;
   mVPDHitPatternEast = 0;
-  
+
   bool vpdEast=false;
   for(int i=0;i<2*NVPD;i++) {
+#ifdef __TFG__VERSION__
     assert (St_vpdTotCorrC::instance()->tubeId(i) == i+1);
-    if (i>=NVPD) vpdEast=true;
-    if (time[i] <= 0.0 || tot[i] <= 0. ) continue;
-    Double_t dcorr = St_vpdTotCorrC::instance()->Corr(i,tot[i]);
-    if (dcorr > -9999.0) {
-      if (vpdEast){
-	mNEast++;
-	mVPDLeTime[i] = time[i] - dcorr;
-	mTSumEast += mVPDLeTime[i];
-	mVPDHitPatternEast |= 1<<(i-NVPD);
-	mFlag[i] = 1;
-      } else {
-	mNWest++;
-	mVPDLeTime[i] = time[i] - dcorr;
-	mTSumWest += mVPDLeTime[i];
-	mVPDHitPatternWest |= 1<<i;
-	mFlag[i] = 1;
-      }
-    } else {
-      if (vpdEast){
-	LOG_WARN << " Vpd East tube " << i+1-NVPD << " TOT  out of range  !" << endm;
-      } else{
-	LOG_WARN << " Vpd West tube " << i+1      << " TOT  out of range  !" << endm;
-      }
-      mVPDLeTime[i] = 0.; // out of range, remove this hit
-    }
+#endif /* __TFG__VERSION__ */
+        if (i>=NVPD) vpdEast=true;
+
+        //**************BEGIN SIMULATION CODE BLOCK***************
+        if ( qaTruth[i] > 0 && time[i] != 0.) {
+            LOG_DEBUG << "Simulation" << endm;
+
+              if (vpdEast){
+                  mNEast++;
+                  mVPDLeTime[i] = time[i];
+                  mTSumEast += mVPDLeTime[i];
+                  mVPDHitPatternEast |= 1<<(i-NVPD);
+                  mFlag[i] = 1;
+              }
+              else {
+                  mNWest++;
+                  mVPDLeTime[i] = time[i];
+                  mTSumWest += mVPDLeTime[i];
+                  mVPDHitPatternWest |= 1<<i;
+                  mFlag[i] = 1;
+              }
+        }
+        //**************END SIMULATION CODE BLOCK*****************
+
+        else if( time[i]>0. && tot[i]>0. ) {
+
+#ifndef __TFG__VERSION__
+            int ibin = -1;
+            for(int j=0;j<NBinMax-1;j++) {
+                if(tot[i]>=mVPDTotEdge[i][j] && tot[i]<mVPDTotEdge[i][j+1]) {
+                  ibin = j;
+                  break;
+                }
+            }
+              if(ibin>=0&&ibin<NBinMax) {
+                    Double_t x1 = mVPDTotEdge[i][ibin];
+                    Double_t x2 = mVPDTotEdge[i][ibin+1];
+                    Double_t y1 = mVPDTotCorr[i][ibin];
+                    Double_t y2 = mVPDTotCorr[i][ibin+1];
+                    Double_t dcorr = y1 + (tot[i]-x1)*(y2-y1)/(x2-x1);
+
+                    if (vpdEast){
+                      mNEast++;
+                      mVPDLeTime[i] = time[i] - dcorr;
+                      mTSumEast += mVPDLeTime[i];
+                      mVPDHitPatternEast |= 1<<(i-NVPD);
+                          mFlag[i] = 1;
+                    }
+                    else {
+                      mNWest++;
+                      mVPDLeTime[i] = time[i] - dcorr;
+                      mTSumWest += mVPDLeTime[i];
+                      mVPDHitPatternWest |= 1<<i;
+                          mFlag[i] = 1;
+                    }
+              }
+              else {
+                if (vpdEast){
+                  LOG_WARN << " Vpd East tube " << i+1-NVPD << " TOT ("<< ibin
+                       << ") out of range (0-"<<NBinMax<<") !" << endm;
+                }
+                else{
+                  LOG_WARN << " Vpd West tube " << i+1 << " TOT ("<< ibin
+                       << ") out of range (0-"<<NBinMax<<") !" << endm;
+                }
+                    mVPDLeTime[i] = 0.; // out of range, remove this hit
+              }
+#else /* __TFG__VERSION__ */
+	      Double_t dcorr = St_vpdTotCorrC::instance()->Corr(i,tot[i]);
+	      if (dcorr > -9999.0) {
+		if (vpdEast){
+		  mNEast++;
+		  mVPDLeTime[i] = time[i] - dcorr;
+		  mTSumEast += mVPDLeTime[i];
+		  mVPDHitPatternEast |= 1<<(i-NVPD);
+		  mFlag[i] = 1;
+		}
+		else {
+		  mNWest++;
+		  mVPDLeTime[i] = time[i] - dcorr;
+		  mTSumWest += mVPDLeTime[i];
+		  mVPDHitPatternWest |= 1<<i;
+		  mFlag[i] = 1;
+		}
+              }
+#endif /* __TFG__VERSION__ */
+        }
+
+      else LOG_DEBUG << "No hit." << endm;
   }
+
 }
 
 //_____________________________________________________________________________
@@ -481,14 +650,11 @@ void StVpdCalibMaker::vzVpdFinder()
           mTruncation = kFALSE;
       }
     else if(mVPDLeTime[i]<1.e-4 || !mFlag[i]) continue;
-      
-      LOG_DEBUG << "mTruncation is set to: " << mTruncation << endm;
-      
+
     double vpdtime;
     if(i<NVPD&&mNWest>1) {  // west VPD
       vpdtime = (mVPDLeTime[i]*mNWest-mTSumWest)/(mNWest-1);    // Cuts on times with a significant deviation from the average.
       if(fabs(vpdtime)>TDIFFCUT) {
-          LOG_INFO << "Cut out West" << endm;
         mTSumWest -= mVPDLeTime[i];
         mVPDLeTime[i] = 0.;
         mNWest--;
@@ -499,10 +665,9 @@ void StVpdCalibMaker::vzVpdFinder()
     if(i>=NVPD&&mNEast>1) {  // east VPD
       vpdtime = (mVPDLeTime[i]*mNEast-mTSumEast)/(mNEast-1);    // Cuts on times with a significant deviation from the average.
       if(fabs(vpdtime)>TDIFFCUT) {
-          LOG_INFO << "Cut out East" << endm;
         mTSumEast -= mVPDLeTime[i];
         mVPDLeTime[i] = 0.;
-        mNEast--; 
+        mNEast--;
         mVPDHitPatternEast &= ( 0x7ffff - (1<<(i-NVPD)) );
         mFlag[i] = 0;
       }
@@ -511,12 +676,16 @@ void StVpdCalibMaker::vzVpdFinder()
 
   // remove slower hit in low energy runs.
   if(mTruncation ) {
-      LOG_INFO << "Uh-oh, stepped into the truncation block!" << endm;
+    LOG_DEBUG << "Uh-oh, stepped into the truncation block!" << endm;
     Int_t hitIndex[2*NVPD];
     Int_t nTube = NVPD;
     TMath::Sort(nTube, &mVPDLeTime[0], &hitIndex[0]);
     int nRejectedWest = (int)(FracTruncated*mNWest+0.5);
-    LOG_INFO << " NWest before = " << mNWest << " rejected = " << nRejectedWest << endm;
+#ifndef __TFG__VERSION__
+    LOG_DEBUG << " NWest before = " << mNWest << " rejected = " << nRejectedWest << endm;
+#else /* __TFG__VERSION__ */
+    if (Debug()) {LOG_INFO << " NWest before = " << mNWest << " rejected = " << nRejectedWest << endm;}
+#endif /* __TFG__VERSION__ */
     for(int i=0;i<nRejectedWest;i++) {
       int index = hitIndex[i];
       mTSumWest -= mVPDLeTime[index];
@@ -528,7 +697,11 @@ void StVpdCalibMaker::vzVpdFinder()
 
     TMath::Sort(nTube, &mVPDLeTime[NVPD], &hitIndex[NVPD]);
     int nRejectedEast = (int)(FracTruncated*mNEast+0.5);
-    LOG_INFO << " NEast before = " << mNEast << " rejected = " << nRejectedEast << endm;
+#ifndef __TFG__VERSION__
+    LOG_DEBUG << " NEast before = " << mNEast << " rejected = " << nRejectedEast << endm;
+#else /* __TFG__VERSION__ */
+    if (Debug()) {LOG_INFO << " NEast before = " << mNEast << " rejected = " << nRejectedEast << endm;}
+#endif /* __TFG__VERSION__ */
     for(int i=0;i<nRejectedEast;i++) {
       int index = hitIndex[i+NVPD] + NVPD;
       mTSumEast -= mVPDLeTime[index];
@@ -542,7 +715,11 @@ void StVpdCalibMaker::vzVpdFinder()
   // calculate the vertex z from vpd
   if ( mNEast>=mVPDEastHitsCut && mNWest>=mVPDWestHitsCut ) {
     mVPDVtxZ[0] = (mTSumEast/mNEast - mTSumWest/mNWest)/2.*(C_C_LIGHT/1.e9);
-      LOG_INFO << "Vertex is at: " << mVPDVtxZ[0] << endm;
+#ifndef __TFG__VERSION__
+    LOG_DEBUG << "Vertex is at: " << mVPDVtxZ[0] << endm;
+#else /* __TFG__VERSION__ */
+    if (Debug()) {LOG_INFO << "Vertex is at: " << mVPDVtxZ[0] << endm;}
+#endif /* __TFG__VERSION__ */
     mNVzVpd++;
   }
 }
@@ -621,8 +798,8 @@ void StVpdCalibMaker::writeHistograms() const
     theHistoFile->Close();
     delete theHistoFile;
   }
-  else 
+  else
     LOG_ERROR << "unable to open histogram file" << endm;
-    
+
   return;
 }
