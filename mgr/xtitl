@@ -30,8 +30,8 @@ fi
 # Begin source code.
 case $TERM in
  xterm|vt100|vt220|xterms|aixterm|xterm*)          # vt100 tool
- echo "]0;${TNAME}"
- echo "]1;${TNAME}"
+ echo -ne "]1;${TNAME}"
+ echo -ne "]0;${TNAME}"
  ;;
 
  *)
