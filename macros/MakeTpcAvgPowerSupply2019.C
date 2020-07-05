@@ -1,6 +1,6 @@
 /*
    cd ~/work/Tpc/Current/2019
-   root.exe -b -q  lmysql.C 'MakeTpcAvgPowerSupply.C+(2019)' >& MakeTpcAvgPowerSupply.`date +%m%d%y`.log &
+   root.exe -b -q  lmysql.C 'MakeTpcAvgPowerSupply2019.C+(2019)' >& MakeTpcAvgPowerSupply.`date +%m%d%y`.log &
    mv MakeTpcAvgPowerSupply.2019.root MakeTpcAvgPowerSupply.2019.`date +%m%d%y`.root
    put2DB.pl 'StarDb/Calibrations/tpc/TpcAvg*.root' | tee put2DB.`date +%m%d%y`.log
    put2DB.pl 'StarDb/Calibrations/tpc/TpcAvg*.root'
@@ -325,7 +325,7 @@ Int_t LastProcessedRun(TpcAvgPowerSupply_st *avgI, Double_t AcCharge[2]) {
   return LastRun;
 }
 //________________________________________________________________________________
-void MakeTpcAvgPowerSupply(Int_t year = 2020) {
+void MakeTpcAvgPowerSupply2019(Int_t year = 2019) {
   TDatime d(10000*(year-1) + 1201,0);
   if (year == 2020) {
     d = TDatime(10000*(year-1) + 1101,0);
@@ -358,7 +358,8 @@ void MakeTpcAvgPowerSupply(Int_t year = 2020) {
   //  TString sql("SELECT runNumber,from_unixtime(startRunRTS),from_unixtime(endRunRTS) from runUpdateStatus order by beginTime;");
   //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime) from daqSummary  order by beginTime;");
   //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  where beginTime > \"2019-11-01\"  order by beginTime;");
-  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  where beginTime > \"2020-06-01\"  order by beginTime;");
+  //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  where beginTime > \"2020-06-01\"  order by beginTime;");
+  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  where beginTime > \"2019-01-01\" and  beginTime < \"2019-08-01\"order by beginTime;");
   //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary where beginTime > \"2018-03-15 13:44:00\"  order by beginTime;");
   TSQLResult *res = RunLog->Query(sql.Data());
   Int_t Nruns = res->GetRowCount(); cout << "Got " << Nruns << " rows in result" << endl;

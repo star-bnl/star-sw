@@ -1,5 +1,5 @@
 /*
-   root.exe 'Db.C("Calibrations/tpc/TpcAvgPowerSupply",20180101,0)' 'TpcAvgPowerSupplyScan.C+((St_TpcAvgPowerSupply *)table,20181201)'
+   root.exe 'Db.C("Calibrations/tpc/TpcAvgPowerSupply",20190101,0)' 'TpcAvgPowerSupplyScan.C+((St_TpcAvgPowerSupply *)table,20190801)'
  */
 #include "TFile.h"
 #include "TNtuple.h"
