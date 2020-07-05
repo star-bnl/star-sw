@@ -258,6 +258,8 @@ MakeChairInstance2(tpcCorrection,St_TpcEdgeC,Calibrations/tpc/TpcEdge);
 MakeChairInstance2(tpcCorrection,St_TpcAdcCorrectionBC,Calibrations/tpc/TpcAdcCorrectionB);
 #include "St_TpcAdcCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcAdcCorrectionMDF,Calibrations/tpc/TpcAdcCorrectionMDF);
+#include "St_TpcAdcCorrection3MDF.h"
+MakeChairInstance2(MDFCorrection3,St_TpcAdcCorrection3MDF,Calibrations/tpc/TpcAdcCorrection3MDF);
 #include "St_tpcMethaneInC.h"
 MakeChairInstance2(tpcCorrection,St_tpcMethaneInC,Calibrations/tpc/tpcMethaneIn);
 #include "St_tpcTimeBucketCorC.h"
@@ -298,6 +300,8 @@ MakeChairInstance2(tpcCorrection,St_TpcdEdxCorC,Calibrations/tpc/TpcdEdxCor);
 MakeChairInstance2(tpcCorrection,St_TpcLengthCorrectionBC,Calibrations/tpc/TpcLengthCorrectionB);
 #include "St_TpcDriftVelRowCorC.h"
 MakeChairInstance2(tpcCorrection,St_TpcDriftVelRowCorC,Calibrations/tpc/TpcDriftVelRowCor);
+#include "St_TpcAccumulatedQC.h"
+MakeChairInstance2(tpcCorrect192,St_TpcAccumulatedQC,Calibrations/tpc/TpcAccumulatedQ);
 #include "St_TpcLengthCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMDF,Calibrations/tpc/TpcLengthCorrectionMDF);
 #include "St_TpcPadCorrectionMDF.h"
@@ -438,6 +442,144 @@ Double_t St_MDFCorrectionC::EvalFactor(Int_t k, Int_t p, Double_t x) const {
   }
   return r;
 }
+//________________________________________________________________________________
+ClassImp(St_MDFCorrection3C);
+St_MDFCorrection3C *St_MDFCorrection3C::fgMDFCorrection3C = 0;
+//____________________________________________________________________
+St_MDFCorrection3C::St_MDFCorrection3C(St_MDFCorrection3 *table) : TChair(table), fFunc(0) {
+  UInt_t N = table->GetNRows();
+  fFunc = new TF1*[N];
+  memset(fFunc, 0, N*sizeof(TF1*));
+}
+//____________________________________________________________________
+St_MDFCorrection3C::~St_MDFCorrection3C() {
+  UInt_t N = Table()->GetNRows();
+  for (UInt_t i = 0; i < N; i++) {SafeDelete(fFunc[i]);}
+  delete [] fFunc;
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection3C::MDFunc(Double_t *x, Double_t *p) {
+  // Evaluate parameterization at point x. Optional argument coeff is
+  // a vector of coefficients for the parameterisation, NCoefficients
+  // elements long.
+  assert(x);
+  UInt_t k = p[0];
+  assert(k >= 0 && k < fgMDFCorrection3C->getNumRows());
+  Double_t returnValue = fgMDFCorrection3C->DMean(k);
+  Double_t term        = 0;
+  UChar_t    i, j;
+  for (i = 0; i < fgMDFCorrection3C->NCoefficients(k); i++) {
+    // Evaluate the ith term in the expansion
+    term = fgMDFCorrection3C->Coefficients(k)[i];
+    for (j = 0; j < fgMDFCorrection3C->NVariables(k); j++) {
+      // Evaluate the factor (polynomial) in the j-th variable.
+      Int_t    p  =  fgMDFCorrection3C->Powers(k)[i * fgMDFCorrection3C->NVariables(k) + j];
+      Double_t y  =  1 + 2. / (fgMDFCorrection3C->XMax(k)[j] - fgMDFCorrection3C->XMin(k)[j])
+	* (x[j] - fgMDFCorrection3C->XMax(k)[j]);
+      term        *= fgMDFCorrection3C->EvalFactor(k,p,y);
+    }
+    // Add this term to the final result
+    returnValue += term;
+  }
+  return returnValue;
+}
+
+//____________________________________________________________________
+Double_t St_MDFCorrection3C::Eval(Int_t k, Double_t x0, Double_t x1, Double_t x2) const {
+  Double_t x[3] = {x0, x1, x2};
+  return Eval(k,x);
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection3C::Eval(Int_t k, Double_t *x) const {
+  // Evaluate parameterization at point x. Optional argument coeff is
+  // a vector of coefficients for the parameterisation, NCoefficients
+  // elements long.
+  assert(x);
+  if (! fFunc[k]) {
+    fgMDFCorrection3C = (St_MDFCorrection3C *) this;
+    if (NVariables(k) <= 0) {
+      return 0;
+    } else if (NVariables(k) == 1) {
+      fFunc[k] = new TF1(Form("%s_%i",Table()->GetName(),k),St_MDFCorrection3C::MDFunc,
+			 XMin(k)[0],XMax(k)[0],1);
+      fFunc[k]->SetParameter(0,k);
+      fFunc[k]->Save(XMin(k)[0],XMax(k)[0],0,0,0,0);
+    } else if (NVariables(k) == 2) {
+      fFunc[k] = new TF2(Form("%s_%i",Table()->GetName(),k),St_MDFCorrection3C::MDFunc,
+			 XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],1);
+      fFunc[k]->SetParameter(0,k);
+      ((TF2 *) fFunc[k])->Save(XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],0,0);
+    } else if (NVariables(k) == 3) {
+      fFunc[k] = new TF3(Form("%s_%i",Table()->GetName(),k),St_MDFCorrection3C::MDFunc,
+			 XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],XMin(k)[2],XMax(k)[2],1);
+      fFunc[k]->SetParameter(0,k);
+      ((TF3 *) fFunc[k])->Save(XMin(k)[0],XMax(k)[0],XMin(k)[1],XMax(k)[1],XMin(k)[2],XMax(k)[2]);
+    }
+  }
+  Double_t xx[3];
+  for (Int_t v = 0; v < NVariables(k); v++) {
+    xx[v] = TMath::Max(XMin(k)[v], TMath::Min(XMin(k)[v]+0.999*(XMax(k)[v]-XMin(k)[v]), x[v]));
+  }
+  Double_t returnValue = fFunc[k]->GetSave(xx);
+  return returnValue;
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection3C::EvalError(Int_t k, Double_t *x) const {
+  // Evaluate parameterization error at point x. Optional argument coeff is
+  // a vector of coefficients for the parameterisation, NCoefficients(k)
+  // elements long.
+  assert(x);
+  Double_t returnValue = 0;
+  Double_t term        = 0;
+  UChar_t    i, j;
+  for (i = 0; i < NCoefficients(k); i++) {
+    // Evaluate the ith term in the expansion
+    term = CoefficientsRMS(k)[i];
+    for (j = 0; j < NVariables(k); j++) {
+      // Evaluate the factor (polynomial) in the j-th variable.
+      Int_t    p  =  Powers(k)[i * NVariables(k) + j];
+      Double_t y  =  1 + 2. / (XMax(k)[j] - XMin(k)[j])
+	* (x[j] - XMax(k)[j]);
+      term        *= EvalFactor(p,y);
+    }
+    // Add this term to the final result
+    returnValue += term*term;
+  }
+  returnValue = TMath::Sqrt(returnValue);
+  return returnValue;
+}
+//____________________________________________________________________
+Double_t St_MDFCorrection3C::EvalFactor(Int_t k, Int_t p, Double_t x) const {
+  // Evaluate function with power p at variable value x
+  Int_t    i   = 0;
+  Double_t p1  = 1;
+  Double_t p2  = 0;
+  Double_t p3  = 0;
+  Double_t r   = 0;
+
+  switch(p) {
+  case 1:
+    r = 1;
+    break;
+  case 2:
+    r =  x;
+    break;
+  default:
+    p2 = x;
+    for (i = 3; i <= p; i++) {
+      p3 = p2 * x;
+      if (PolyType(k) == kLegendre)
+	p3 = ((2 * i - 3) * p2 * x - (i - 2) * p1) / (i - 1);
+      else if (PolyType(k) == kChebyshev)
+	p3 = 2 * x * p2 - p1;
+      p1 = p2;
+      p2 = p3;
+    }
+    r = p3;
+  }
+  return r;
+}
+
 #include "St_tpcEffectiveGeomC.h"
 MakeChairAltInstance(tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeomB,gEnv->GetValue("NewTpcAlignment",0));
 #include "St_tpcElectronicsC.h"
@@ -456,8 +598,6 @@ MakeChairInstance(tpcHighVoltages,Calibrations/tpc/tpcHighVoltages);
 MakeChairAltInstance(tpcPadrowT0,Calibrations/tpc/tpcPadrowT0,Calibrations/tpc/tpcPadrowT0B,gEnv->GetValue("NewTpcAlignment",0));
 #include "St_tpcSectorT0offsetC.h"
 MakeChairInstance(tpcSectorT0offset,Calibrations/tpc/tpcSectorT0offset);
-#include "St_TpcAltroParametersC.h"
-MakeChairInstance(TpcAltroParameters,Calibrations/tpc/TpcAltroParameters);
 #include "St_tpcAltroParamsC.h"
 MakeChairInstance(tpcAltroParams,Calibrations/tpc/tpcAltroParams);
 #include "St_asic_thresholdsC.h"
@@ -1023,6 +1163,21 @@ Float_t St_TpcAvgCurrentC::AcCharge(Int_t sector, Int_t channel) {
   return (sector > 0 && sector <= 24 && channel > 0 && channel <= 8) ?
     Struct()->AcCharge[8*(sector-1)+channel-1] :     0;
 }
+#include "St_itpcRDOMapC.h"
+MakeChairInstance2(tpcRDOMap,St_itpcRDOMapC,Calibrations/tpc/itpcRDOMap);
+//________________________________________________________________________________
+Int_t St_itpcRDOMapC::rdo(Int_t padrow, Int_t pad) const {
+  Int_t rdo = 0;
+  Int_t N = nrows(0);
+  for (Int_t i = 0; i < N; i++) {
+    if (padrow != row(i)) continue;
+    if (pad < padMin(i) || pad > padMax(i)) continue;
+    rdo = rdoI(i);
+    
+    break;
+  }
+  return rdo;
+}
 #include "St_tpcRDOMapC.h"
 MakeChairInstance(tpcRDOMap,Calibrations/tpc/tpcRDOMap);
 //________________________________________________________________________________
@@ -1038,6 +1193,17 @@ Int_t St_tpcRDOMapC::rdo(Int_t padrow, Int_t pad) const {
   }
   return rdo;
 }
+//________________________________________________________________________________
+Int_t St_tpcRDOMapC::rdo(Int_t sector, Int_t padrow, Int_t pad) const {
+  if (St_tpcPadConfigC::instance()->iTpc(sector)) {
+    Int_t N40 = St_tpcPadConfigC::instance()->innerPadRows(sector);
+    if (padrow <= N40) {
+      return St_itpcRDOMapC::instance()->rdo(padrow,pad);
+    }
+    return St_tpcRDOMapC::instance()->rdo(padrow-N40+13,pad) + 2;
+  }
+  return rdo(padrow, pad);
+}
 #include "St_tpcRDOT0offsetC.h"
 MakeChairInstance(tpcRDOT0offset,Calibrations/tpc/tpcRDOT0offset);
 Float_t St_tpcRDOT0offsetC::T0(Int_t sector, Int_t padrow, Int_t pad) const {
@@ -1052,6 +1218,13 @@ Float_t St_tpcRDOT0offsetC::T0(Int_t sector, Int_t padrow, Int_t pad) const {
 
 #include "St_tpcBXT0CorrEPDC.h"
 MakeChairInstance2(tpcBXT0Corr,StTpcBXT0CorrEPDC,Calibrations/tpc/tpcBXT0CorrEPD);
+double StTpcBXT0CorrEPDC::getCorrection (double epdTAC, double driftVelocity, double timeBinWidth) {
+  double timeBucketShiftScale = 500000/(driftVelocity*timeBinWidth);
+  double generalOffset = a(0)[0];
+  //			printf("%f, %f, %f, %f, %f\n, ", epdTAC, driftVelocity, timeBinWidth, timeBucketShiftScale, generalOffset);
+  if (epdTAC == -1) return timeBucketShiftScale*generalOffset;
+  else return timeBucketShiftScale*(generalOffset + a(0)[1] + a(0)[2]*epdTAC);
+}
 
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
@@ -1133,6 +1306,8 @@ starClockOnl_st *St_starClockOnlC::Struct(Int_t i) {
 MakeChairInstance(starMagOnl,RunLog/onl/starMagOnl);
 #include "St_beamInfoC.h"
 MakeChairInstance(beamInfo,RunLog/onl/beamInfo);
+static Double_t kuAtomicMassUnit = 931.4940054e-3; 
+static Double_t kProtonMass =  kuAtomicMassUnit*1.00727646662;
 //________________________________________________________________________________
 Bool_t        St_beamInfoC::IsFixedTarget() {
   Bool_t isFixTag = kFALSE;
@@ -1142,24 +1317,110 @@ Bool_t        St_beamInfoC::IsFixedTarget() {
   return isFixTag;
 }
 //________________________________________________________________________________
+Float_t        St_beamInfoC::GammaYellow() {
+  Float_t gamma = 1;
+  if (blueIntensity() < 10*yellowIntensity()) { 
+  Int_t N = TMath::Nint(getYellowMassNumber()); // no. of nucleons
+  Double_t E = N*getYellowEnergy();
+  Double_t M = kuAtomicMassUnit*getYellowMassNumber();
+    gamma = E/M;
+  }
+  return gamma;
+}
+//________________________________________________________________________________
+Float_t        St_beamInfoC::GammaBlue() {
+  Float_t gamma = 1;
+  if (blueIntensity() > 10*yellowIntensity()) { 
+    Int_t N = TMath::Nint(getBlueMassNumber()); // no. of nucleons
+    Double_t E = N*getBlueEnergy();
+    Double_t M = kuAtomicMassUnit*getBlueMassNumber();
+    gamma = E/M;
+  }
+  return gamma;
+}
+//________________________________________________________________________________
+Float_t        St_beamInfoC::Gamma() {
+  if (blueIntensity() > yellowIntensity()) return GammaBlue();
+  else                                     return GammaYellow();
+}
+//________________________________________________________________________________
+Float_t        St_beamInfoC::BetaBlue() {
+  Float_t beta =  TMath::Sqrt(1 - 1./(GammaBlue()*GammaBlue()));
+  return beta;
+}
+//________________________________________________________________________________
+Float_t        St_beamInfoC::BetaYellow() {
+  Float_t beta = -TMath::Sqrt(1 - 1./(GammaYellow()*GammaYellow()));
+  return beta;
+}
+//________________________________________________________________________________
+Float_t        St_beamInfoC::Beta() {
+  Float_t beta = TMath::Sqrt(1 - 1./(Gamma()*Gamma()));
+  return beta;
+}
+//________________________________________________________________________________
+Float_t        St_beamInfoC::SqrtS() {
+  static Double_t mP = kuAtomicMassUnit*1.00727646662; // proton mass 
+  Double_t eBlue = mP*GammaBlue(); 
+  Double_t eYellow = mP*GammaYellow();
+  return TMath::Sqrt(2*mP*mP + 2*eBlue*eYellow*(1 - BetaBlue()*BetaYellow()));
+}
+//________________________________________________________________________________
+Float_t        St_beamInfoC::Ycms() {
+  Double_t eBlue   = kProtonMass*GammaBlue(); 
+  Double_t eYellow = kProtonMass*GammaYellow();
+  Double_t Etot    = eBlue + eYellow;
+  Double_t Ecm     = SqrtS();
+  Double_t gammaCM = Etot/Ecm;
+  Double_t betaCM  = (eBlue*BetaBlue() + eYellow*BetaYellow())/Etot;
+  Double_t yCM  = TMath::Log(gammaCM*(1 + betaCM));
+  return yCM;
+}
+//________________________________________________________________________________
+Float_t        St_beamInfoC::Frequency() {
+  static Double_t l       = 3833.845*9.99999253982746361e-01;// *9.99988614393081399e-01;// *9.99998896969437556e-01;  // RHIC perimetr
+  static Double_t NB = 120;      // no. of buches
+  Double_t frequency = 1e-6*NB*Beta()*TMath::C()/l;
+  return frequency;
+}
+//________________________________________________________________________________
 #include "St_tpcRDOMasksC.h"
 MakeChairInstance(tpcRDOMasks,RunLog/onl/tpcRDOMasks);
 //________________________________________________________________________________
-UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sector) {
+UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
   UInt_t MASK = 0x0000; // default is to mask it out
   //UInt_t MASK = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
-  if(sector < 1 || sector > 24 || getNumRows() == 0){
+  if(sec < 1 || sec > 24 || getNumRows() == 0){
     LOG_WARN << "St_tpcRDOMasksC:: getSectorMask : return default mask for "
-     << "sector= " << sector << " getNumRows()=" << getNumRows() << endm;
+     << "sector= " << sec << " getNumRows()=" << getNumRows() << endm;
     return MASK;
   }
-  MASK = mask(((sector + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
-  if( sector % 2 == 0){ // if its even relevent bits are 6-11
-    MASK = MASK >> 6;
+  //  tpcRDOMasks_st *row = Struct();
+  // Take care about unsorted tpcRDOMaks table
+  Int_t i = -1;
+  UInt_t j = (sec + 1) / 2 - 1;
+  for (i = 0; i < 12; i++) {
+    if (sector(i) == 2*j + 1) {break;}
   }
-  // Otherwise want lower 6 bits
-  MASK &= 0x000003F; // Mask out higher order bits
-  if (sector == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
+  assert(i >= 0);
+  //  MASK = mask(((sec + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
+  MASK = mask(i); // does the mapping from sector 1-24 to packed sectors
+  if (runNumber() <= 19000000 || (runNumber() < 20000000 && sec != 20)) {// no iTPC
+    if (sec == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
+    if( sec % 2 == 0){ // if its even relevent bits are 6-11
+      MASK = MASK >> 6;
+    }
+    // Otherwise want lower 6 bits
+    MASK &= 0x000003F; // Mask out higher order bits
+  } else   if (runNumber() < 20000000 && sec == 20) { // Run XVIII, sector 20 
+    MASK = 255;
+  } else  { // Run XIX and higher
+    if( sec % 2 == 0){ // if its even relevent bits are 8-13
+      MASK = MASK >> 8;
+    }
+    // Otherwise want lower 6 bits
+    MASK &= 255; // Mask out higher order bits
+  }
   return MASK;
 }
 //________________________________________________________________________________
