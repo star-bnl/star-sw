@@ -12,6 +12,8 @@ while (@ARGV) {
   $_ = shift @ARGV;
   if (/=/) {
     my($var, $val) = /([^=]*)=(.*)/;
+#    $var =~ s/\\//g;
+    $val =~ s/\\//g;
     $HoC{$var} = $val; print "Set regexp \'$var\' replacement with \'$val\'\n";
   }
   else {
@@ -21,10 +23,11 @@ while (@ARGV) {
     }
   }
 }
-for my $key (sort  keys %HoC) {
-  next if ! $key;
-  print "$key\n";
-}
+#die;
+#for my $key (sort  keys %HoC) {
+#  next if ! $key;
+#  print "HoC{\'$key\'} = \'$HoC{$key}\'\n";
+#}
 #my @files = glob $glob; 
 print "files = @files\n";
 foreach my $file (@files) {
@@ -35,6 +38,7 @@ foreach my $file (@files) {
     $l++;
     for my $key (sort  keys %HoC) {
       next if ! $key;
+      $key =~ s/\\//g;
       if (index($line, $key) != -1) {
 #      if ($line =~ m#$key#) {
 	$found++;
@@ -54,11 +58,15 @@ foreach my $file (@files) {
     print "--- $newfile\n+++ $file\n";
     while ($lineo = <INPUT>) {
       my $line = $lineo;
+#      print "$line";
       for my $key (sort  keys %HoC) {
-#	print "$line";
-#	print "$key => $HoC{$key}\n";
-	$line =~ s#$key#$HoC{$key}#g;
-#	print "$line\n";
+	my $keym = $key;
+	$keym =~ s/\\//g;
+	if (index($line, $keym) != -1) {
+#	  print "$key => $HoC{$key}\n";
+	  $line =~ s#$key#$HoC{$key}#g;
+#	    print "$line\n";
+	}
       }
       print OUTPUT $line;  #print $line;
       if ($lineo ne $line) {
