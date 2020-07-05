@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.99 2019/11/29 19:00:08 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.100 2020/07/05 15:57:03 fisyak Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
@@ -68,8 +68,8 @@ using namespace units;
 #include "tables/St_g2t_track_Table.h" 
 #endif
 const static Int_t tZero= 19950101;
-const static Int_t tMin = 20000101;
-const static Int_t tMax = 20200101;
+static Int_t tMin = 20000101;
+static Int_t tMax = 20210101;
 const static TDatime t0(tZero,0);
 const static Int_t timeOffSet = t0.Convert();
 static Double_t tpcTime = -1;
@@ -107,6 +107,8 @@ StdEdxY2Maker::StdEdxY2Maker(const char *name): StMaker(name), m_Mask(-1) {
   memset (beg, 0, end-beg);
   SETBIT(m_Mode,kPadSelection); 
   m_Minuit = new TMinuit(2);
+  SetAttr("tMin",tMin);
+  SetAttr("tMax",tMax);
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Init(){
@@ -143,6 +145,8 @@ Int_t StdEdxY2Maker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
+  tMin = IAttr("tMin"); 
+  tMax = IAttr("tMax"); 
   static Int_t DoOnce = 0;
   if (!gStTpcDb) {
     cout << "Database Missing! Can't initialize StdEdxY2Maker" << endl;
@@ -151,9 +155,13 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
   // 		TPG parameters
   numberOfSectors   = gStTpcDb->Dimensions()->numberOfSectors();
   numberOfTimeBins  = gStTpcDb->Electronics()->numberOfTimeBins();
+  SafeDelete(m_TpcdEdxCorrection);
+  m_TpcdEdxCorrection = new StTpcdEdxCorrection(m_Mask, Debug());
 
   if (! DoOnce) {
     DoOnce = 1;
+    if ((GetDate() > 20171201 && m_TpcdEdxCorrection->IsFixedTarget()) ||
+	(GetDate() > 20181201)) fUsedNdx = kTRUE; // use dN/dx for fixed target for Run XVIII and year >= XIX
     if (TESTBIT(m_Mode, kCalibration)) {// calibration mode
       if (Debug()) LOG_WARN << "StdEdxY2Maker::InitRun Calibration Mode is On (make calibration histograms)" << endm;
       TFile *f = GetTFile();
@@ -170,9 +178,6 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
     }
     QAPlots(0);
   }
-  SafeDelete(m_TpcdEdxCorrection);
-  m_TpcdEdxCorrection = new StTpcdEdxCorrection(m_Mask, Debug());
-  if (GetDate() > 20181201) fUsedNdx = kTRUE; // use dN/dx for year > 2018
   return kStOK;
 }
 //________________________________________________________________________________
@@ -902,10 +907,13 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static TH1F *BaddEdxMult70[2], *BaddEdxMultZ[2];
 #endif
   static Int_t hMade = 0;
+  //#define __ETA_PLOTS__
+#ifdef __ETA_PLOTS__
   static TH2F *Eta[2] = {0};     // 0 -> F, 1 -> 70
 #ifdef __iTPCOnly__
   static TH2F *EtaiTPC[2] = {0};
 #endif  
+#endif /*  __ETA_PLOTS__ */ 
   if (! gTrack && !hMade) {
     TFile  *f = GetTFile();
     assert(f);
@@ -938,7 +946,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 				      "dNdx/Pion",
 				      "dNdx(uncorrected)/Pion"};
     for (Int_t t = 0; t < kTotalMethods; t++) {
-      if (! fUsedNdx && t > 4) continue;
+      if (! fUsedNdx && t >= 4) continue;
       for (Int_t s = 0; s < 2; s++) {// charge 0 => "+", 1 => "-"
 	TPoints[s][t]   = new TH3F(Form("TPoints%s%s",N[t],NS[s]),
 				   Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s",T[t],TS[s]),
@@ -954,6 +962,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 				   Form("Pull %s versus Length in iTPC %s",T[t],TS[s]),
 				   190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
 #endif
+#ifdef __ETA_PLOTS__
 	if (s == 0 && t < 2) {
 	  Eta[t] = new TH2F(Form("Eta%s",N[t]),
 			    Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, TPC - iTPC",T[t]),
@@ -964,6 +973,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 				100,-2.5,2.5,500,-1.,4.);
 #endif
 	}
+#endif /*  __ETA_PLOTS__ */
       }
     }
     TDatime t1(tMin,0); // min Time and
@@ -1129,6 +1139,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #ifdef __iTPCOnly__
       }
 #endif
+#ifdef __ETA_PLOTS__
       if (j < 2 && PiD.fFit.TrackLength() > 40) {
 	StTrackNode *node = gTrack->node();
 	StPrimaryTrack *pTrack = static_cast<StPrimaryTrack*>(node->track(primary));
@@ -1151,6 +1162,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  }
 	}
       }
+#endif /*  __ETA_PLOTS__ */
     }
   }
   if (PiD.fFit.TrackLength() > 20) { 
@@ -1509,35 +1521,34 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
   static TH1F *ZdcC = 0; // ZdcCoincidenceRate
   static TH1F *BBC   = 0; // BbcCoincidenceRate
   if (! iok && !BarPressure) {
-    TDatime t1(tMin,0); /// min Time and
-      TDatime t2(tMax,0); /// max 
-	UInt_t i1 = t1.Convert() - timeOffSet;
-	UInt_t i2 = t2.Convert() - timeOffSet;
-	Int_t Nt = (i2 - i1)/(3600); // each hour 
-	BarPressure           = new TProfile("BarPressure","barometricPressure (mbar) versus time",Nt,i1,i2);                    
-	inputTPCGasPressure   = new TProfile("inputTPCGasPressure","inputTPCGasPressure (mbar) versus time",Nt,i1,i2);           
-	nitrogenPressure      = new TProfile("nitrogenPressure","nitrogenPressure (mbar) versus time",Nt,i1,i2);                 
-	gasPressureDiff       = new TProfile("gasPressureDiff","gasPressureDiff (mbar) versus time",Nt,i1,i2);                   
-	inputGasTemperature   = new TProfile("inputGasTemperature","inputGasTemperature (degrees K) versus time",Nt,i1,i2);      
-	flowRateArgon1        = new TProfile("flowRateArgon1","flowRateArgon1 (liters/min) versus time",Nt,i1,i2);               
-	flowRateArgon2        = new TProfile("flowRateArgon2","flowRateArgon2 (liters/min) versus time",Nt,i1,i2);               
-	flowRateMethane       = new TProfile("flowRateMethane","flowRateMethane (liters/min) versus time",Nt,i1,i2);             
-	percentMethaneIn      = new TProfile("percentMethaneIn","percentMethaneIn (percent) versus time",Nt,i1,i2);              
-	ppmOxygenIn           = new TProfile("ppmOxygenIn","ppmOxygenIn (ppm) versus time",Nt,i1,i2);                            
-	flowRateExhaust       = new TProfile("flowRateExhaust","flowRateExhaust (liters/min) versus time",Nt,i1,i2);             
-	ppmWaterOut           = new TProfile("ppmWaterOut","ppmWaterOut (ppm) versus time",Nt,i1,i2);                             
-	ppmOxygenOut          = new TProfile("ppmOxygenOut","ppmOxygenOut (ppm) versus time",Nt,i1,i2);
-	flowRateRecirculation = new TProfile("flowRateRecirculation","flowRateRecirculation (liters/min) versus time",Nt,i1,i2);
-	//     CenterPressure        = new TProfile("CenterPressureP","log(center) vs log(Pressure)",150, 6.84, 6.99);
-	//     Center                = new TProfile("Center","Tpc Gain Monitor center versus Time",Nt,i1,i2);
-	//     Height 		  = new TProfile("Height","Tpc Gain Monitor height versus Time",Nt,i1,i2);
-	//     Width  		  = new TProfile("Width","Tpc Gain Monitor width versus Time",Nt,i1,i2);  
-	// trigDetSums histograms
-	ZdcC                  = new TH1F("ZdcC","ZdcCoincidenceRate (log10)",100,0,10);
-	Multiplicity          = new TH1F("Multiplicity","Multiplicity (log10)",100,0,10);
-	BBC                   = new TH1F("BBC","BbcCoincidenceRate (log10)",100,0,10);
-  }
-  else {
+    TDatime t1(tMin,0); // min Time and
+    TDatime t2(tMax,0); // max 
+    UInt_t i1 = t1.Convert() - timeOffSet;
+    UInt_t i2 = t2.Convert() - timeOffSet;
+    Int_t Nt = (i2 - i1)/(3600); // each hour 
+    BarPressure           = new TProfile("BarPressure","barometricPressure (mbar) versus time",Nt,i1,i2);                    
+    inputTPCGasPressure   = new TProfile("inputTPCGasPressure","inputTPCGasPressure (mbar) versus time",Nt,i1,i2);           
+    nitrogenPressure      = new TProfile("nitrogenPressure","nitrogenPressure (mbar) versus time",Nt,i1,i2);                 
+    gasPressureDiff       = new TProfile("gasPressureDiff","gasPressureDiff (mbar) versus time",Nt,i1,i2);                   
+    inputGasTemperature   = new TProfile("inputGasTemperature","inputGasTemperature (degrees K) versus time",Nt,i1,i2);      
+    flowRateArgon1        = new TProfile("flowRateArgon1","flowRateArgon1 (liters/min) versus time",Nt,i1,i2);               
+    flowRateArgon2        = new TProfile("flowRateArgon2","flowRateArgon2 (liters/min) versus time",Nt,i1,i2);               
+    flowRateMethane       = new TProfile("flowRateMethane","flowRateMethane (liters/min) versus time",Nt,i1,i2);             
+    percentMethaneIn      = new TProfile("percentMethaneIn","percentMethaneIn (percent) versus time",Nt,i1,i2);              
+    ppmOxygenIn           = new TProfile("ppmOxygenIn","ppmOxygenIn (ppm) versus time",Nt,i1,i2);                            
+    flowRateExhaust       = new TProfile("flowRateExhaust","flowRateExhaust (liters/min) versus time",Nt,i1,i2);             
+    ppmWaterOut           = new TProfile("ppmWaterOut","ppmWaterOut (ppm) versus time",Nt,i1,i2);                             
+    ppmOxygenOut          = new TProfile("ppmOxygenOut","ppmOxygenOut (ppm) versus time",Nt,i1,i2);
+    flowRateRecirculation = new TProfile("flowRateRecirculation","flowRateRecirculation (liters/min) versus time",Nt,i1,i2);
+    //     CenterPressure        = new TProfile("CenterPressureP","log(center) vs log(Pressure)",150, 6.84, 6.99);
+    //     Center                = new TProfile("Center","Tpc Gain Monitor center versus Time",Nt,i1,i2);
+    //     Height 		  = new TProfile("Height","Tpc Gain Monitor height versus Time",Nt,i1,i2);
+    //     Width  		  = new TProfile("Width","Tpc Gain Monitor width versus Time",Nt,i1,i2);  
+    // trigDetSums histograms
+    ZdcC                  = new TH1F("ZdcC","ZdcCoincidenceRate (log10)",100,0,10);
+    Multiplicity          = new TH1F("Multiplicity","Multiplicity (log10)",100,0,10);
+    BBC                   = new TH1F("BBC","BbcCoincidenceRate (log10)",100,0,10);
+  } else {
     tpcGas_st  *tpcgas = m_TpcdEdxCorrection && m_TpcdEdxCorrection->tpcGas() ? m_TpcdEdxCorrection->tpcGas()->GetTable():0;
     if (tpcgas) {
       if (BarPressure)           BarPressure->Fill(tpcTime,tpcgas->barometricPressure);             

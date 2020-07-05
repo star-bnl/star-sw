@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.15 2019/11/19 14:44:41 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.16 2020/07/05 15:57:03 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -40,34 +40,36 @@ class StTpcdEdxCorrection : public TObject {
     kAdcCorrection         =  1,//R  					     
     kEdge                  =  2,//E   correction near edge of chamber	     
     kAdcCorrectionMDF      =  3,//RMDF  					     
-    kTpcdCharge            =  4,//D  					     
-    kTpcrCharge            =  5,//D  					     
-    kTpcCurrentCorrection  =  6,//      					     
-    kTpcSecRowB            =  7,//S  					     
-    kTpcSecRowC            =  8,//S  					     
-    kTpcRowQ               =  9,//   	 					       	   
-    ktpcPressure           = 10,//P  					     
-    ktpcTime               = 11,//t  					     
-    kDrift                 = 12,//O  					     
-    kMultiplicity          = 13,//M  					     
-    kzCorrection           = 14,//Z  					     
-    ktpcMethaneIn          = 15,//m  					     
-    ktpcGasTemperature     = 16,//T  					     
-    ktpcWaterOut           = 17,//W   				7       	   
-    kSpaceCharge           = 18,//C   space charge near the wire	       	   
-    kPhiDirection          = 19,//p   correction wrt local interception angle  
-    kTanL                  = 20,//p   correction wrt local tan(lambda)  
-    kdXCorrection          = 21,//X  					     
-    kTpcEffectivedX        = 22,//X   Effective pad row height
-    kTpcPadTBins           = 23,//d  					     
-    kTpcZDC                = 24,//   					     
-    kTpcPadMDF             = 25, 
-    kTpcLast               = 26,//                                             
-    kTpcNoAnodeVGainC      = 27,//   					     
-    kTpcLengthCorrection   = 28,//                                             
-    kTpcLengthCorrectionMDF= 29,//   					   
-    kTpcdEdxCor            = 30,//   					   
-    kTpcAllCorrections     = 31 //                                             
+    kAdcCorrection3MDF     =  4,//RMDF 3D  					     
+    kTpcdCharge            =  5,//D  					     
+    kTpcrCharge            =  6,//D  					     
+    kTpcCurrentCorrection  =  7,//      					     
+    kTpcSecRowB            =  8,//S  					     
+    kTpcSecRowC            =  9,//S  					     
+    kTpcRowQ               = 10,//   	 					       	   
+    kTpcAccumlatedQ        = 11,//   	 					       	   
+    ktpcPressure           = 12,//P  					     
+    ktpcTime               = 13,//t  					     
+    kDrift                 = 14,//O  					     
+    kMultiplicity          = 15,//M  					     
+    kzCorrection           = 16,//Z  					     
+    ktpcMethaneIn          = 17,//m  					     
+    ktpcGasTemperature     = 18,//T  					     
+    ktpcWaterOut           = 19,//W   				7       	   
+    kSpaceCharge           = 20,//C   space charge near the wire	       	   
+    kPhiDirection          = 21,//p   correction wrt local interception angle  
+    kTanL                  = 22,//p   correction wrt local tan(lambda)  
+    kdXCorrection          = 23,//X  					     
+    kTpcEffectivedX        = 24,//X   Effective pad row height
+    kTpcPadTBins           = 25,//d  					     
+    kTpcZDC                = 26,//   					     
+    kTpcPadMDF             = 27, 
+    kTpcLast               = 28,//                                             
+    kTpcNoAnodeVGainC      = 29,//   					     
+    kTpcLengthCorrection   = 30,//                                             
+    kTpcLengthCorrectionMDF= 31,//   					   
+    kTpcdEdxCor            = 32,//   					   
+    kTpcAllCorrections     = 33 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
@@ -99,6 +101,7 @@ class StTpcdEdxCorrection : public TObject {
   Int_t Mask()                             {return m_Mask;}
   Float_t           Adc2GeV()              {return mAdc2GeV;}
   void Print(Option_t *opt = "") const;
+  Bool_t            IsFixedTarget()        {return m_isFixedTarget;}
  private:
   Int_t                m_Mask;                  //!
   St_tpcGas           *m_tpcGas;                //!
@@ -106,6 +109,7 @@ class StTpcdEdxCorrection : public TObject {
   Float_t              mAdc2GeV;                //! Outer/Inner conversion factors from ADC -> GeV
   dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
   Int_t                m_Debug;                 //!
+  Bool_t               m_isFixedTarget;
 };
 //________________________________________________________________________________
 class dEdxY2_t {
