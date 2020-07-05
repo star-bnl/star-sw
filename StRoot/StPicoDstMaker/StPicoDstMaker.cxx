@@ -1005,8 +1005,8 @@ void StPicoDstMaker::fillTracks() {
       }
 #endif /* __HIST_PV__ */
       if (dca3D > StMuDst::dca3Dmax()) continue;
-#endif /* __TFG__VERSION__ */
     }
+#endif /* __TFG__VERSION__ */
 
 #if defined (__TFG__VERSION__)
     if ( StMuDst::dca3Dmax()>0 ) {
