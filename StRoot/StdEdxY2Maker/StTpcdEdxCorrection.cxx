@@ -13,10 +13,12 @@
 #include "StDetectorDbMaker/St_TpcEdgeC.h"
 #include "StDetectorDbMaker/St_TpcAdcCorrectionBC.h"
 #include "StDetectorDbMaker/St_TpcAdcCorrectionMDF.h"
+#include "StDetectorDbMaker/St_TpcAdcCorrection3MDF.h"
 #include "StDetectorDbMaker/St_TpcdChargeC.h"
 #include "StDetectorDbMaker/St_TpcrChargeC.h"
 #include "StDetectorDbMaker/St_TpcCurrentCorrectionC.h"
 #include "StDetectorDbMaker/St_TpcRowQC.h"
+#include "StDetectorDbMaker/St_TpcAccumulatedQC.h"
 #include "StDetectorDbMaker/St_TpcSecRowBC.h"
 #include "StDetectorDbMaker/St_TpcSecRowCC.h"
 #include "StDetectorDbMaker/St_tpcPressureBC.h"
@@ -58,9 +60,9 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 				      "TpcSecRowB",
 				      "TpcZCorrectionB"};
   static Int_t NT = sizeof(FXTtables)/sizeof(const Char_t *);
-  Bool_t isFixedTarget = St_beamInfoC::instance()->IsFixedTarget();
+  m_isFixedTarget = St_beamInfoC::instance()->IsFixedTarget();
   TString flavor("sim+ofl");
-  if (isFixedTarget) flavor = "sim+ofl+FXT";
+  if (m_isFixedTarget) flavor = "sim+ofl+FXT";
   St_db_Maker *dbMk = (St_db_Maker *) StMaker::GetTopChain()->Maker("db");
   for (Int_t i = 0; i < NT; i++) {
     dbMk->SetFlavor(flavor, FXTtables[i]);
@@ -77,14 +79,16 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   }
   SettpcGas(tpcGas);
   memset (m_Corrections, 0, sizeof(m_Corrections));
-  m_Corrections[kUncorrected           ] = dEdxCorrection_t("UnCorrected"         ,""                                                                    ,0); 					       
+  m_Corrections[kUncorrected           ] = dEdxCorrection_t("UnCorrected"         ,""                                                                   ,0); 					       
   m_Corrections[kAdcCorrection         ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clustering nonlinearity correction"				,St_TpcAdcCorrectionBC::instance());	     
   m_Corrections[kEdge                  ] = dEdxCorrection_t("TpcEdge"             ,"Gain on distance from Chamber edge"                                 ,St_TpcEdgeC::instance());		     
   m_Corrections[kAdcCorrectionMDF      ] = dEdxCorrection_t("TpcAdcCorrectionMDF" ,"ADC/Clustering nonlinearity correction MDF"				,St_TpcAdcCorrectionMDF::instance());	     
+  m_Corrections[kAdcCorrection3MDF     ] = dEdxCorrection_t("TpcAdcCorrection3MDF","ADC/Clustering nonlinearity correction MDF 3D"			,St_TpcAdcCorrection3MDF::instance());	     
   m_Corrections[kTpcdCharge            ] = dEdxCorrection_t("TpcdCharge"          ,"ADC/Clustering undershoot correction"				,St_TpcdChargeC::instance());		     
   m_Corrections[kTpcrCharge            ] = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction"					,St_TpcrChargeC::instance());		     
   m_Corrections[kTpcCurrentCorrection  ] = dEdxCorrection_t("TpcCurrentCorrection","Correction due to sagg of Voltage due to anode current"		,St_TpcCurrentCorrectionC::instance());     
   m_Corrections[kTpcRowQ               ] = dEdxCorrection_t("TpcRowQ"             ,"Gas gain correction for row versus accumulated charge,"             ,St_TpcRowQC::instance());		           
+  m_Corrections[kTpcAccumlatedQ        ] = dEdxCorrection_t("TpcAccumlatedQ"      ,"Gas gain correction for HV channel versus accumulated charge,"      ,St_TpcAccumulatedQC::instance());		           
   m_Corrections[kTpcSecRowB            ] = dEdxCorrection_t("TpcSecRowB"          ,"Gas gain correction for sector/row"					,St_TpcSecRowBC::instance());		     
   m_Corrections[kTpcSecRowC            ] = dEdxCorrection_t("TpcSecRowC"          ,"Additional Gas gain correction for sector/row"			,St_TpcSecRowCC::instance());		     
   m_Corrections[ktpcPressure           ] = dEdxCorrection_t("tpcPressureB"        ,"Gain on Gas Density due to Pressure"			        ,St_tpcPressureBC::instance());	     
@@ -110,10 +114,13 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kTpcdEdxCor            ] = dEdxCorrection_t("TpcdEdxCor"            ,"dEdx correction wrt Bichsel parameterization"			,St_TpcdEdxCorC::instance());               
   const St_tpcCorrectionC *chair = 0;
   const St_MDFCorrectionC *chairMDF = 0;
+  const St_MDFCorrection3C *chair3MDF = 0;
   const St_tpcCorrection  *table = 0;
   const St_MDFCorrection  *tableMDF = 0;
+  const St_MDFCorrection3  *table3MDF = 0;
   const tpcCorrection_st *cor = 0;
   const MDFCorrection_st *corMDF = 0;
+  const MDFCorrection3_st *cor3MDF = 0;
   Int_t N = 0;  
   Int_t npar = 0;
   Int_t nrows = 0;
@@ -127,8 +134,9 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     }
     chair    = dynamic_cast<St_tpcCorrectionC *>(m_Corrections[k].Chair);
     chairMDF = dynamic_cast<St_MDFCorrectionC *>(m_Corrections[k].Chair);
-    if (! chair && ! chairMDF) {
-      LOG_WARN << " \tis not tpcCorrection or MDFCorrection type" << endm;
+    chair3MDF = dynamic_cast<St_MDFCorrection3C *>(m_Corrections[k].Chair);
+    if (! chair && ! chairMDF && ! chair3MDF) {
+      LOG_WARN << " \tis not tpcCorrection or MDFCorrection types" << endm;
       m_Corrections[k].nrows = m_Corrections[k].Chair->Table()->GetNRows();
       continue; // not St_tpcCorrectionC
     }
@@ -159,25 +167,48 @@ void StTpcdEdxCorrection::ReSetCorrections() {
       m_Corrections[k].nrows = nrows;
       continue;
     }
-    tableMDF = (const St_MDFCorrection *) chairMDF->Table();
-    if (! tableMDF) goto EMPTY;
-    corMDF = tableMDF->GetTable();
-    N = tableMDF->GetNRows();
-    if (! corMDF || ! N) {
-      goto EMPTY;
+    if (chairMDF) {
+      tableMDF = (const St_MDFCorrection *) chairMDF->Table();
+      if (! tableMDF) goto EMPTY;
+      corMDF = tableMDF->GetTable();
+      N = tableMDF->GetNRows();
+      if (! corMDF || ! N) {
+	goto EMPTY;
+      }
+      npar = 0;
+      for (Int_t i = 0; i < N; i++, corMDF++) {
+	if (corMDF->nrows == 0 && corMDF->idx == 0) continue;
+	npar++;
+	nrows++;
+      }
+      if (! npar ) {
+	LOG_INFO << " \thas no significant corrections => switch it off" << endm;
+	goto CLEAR;
+      }
+      m_Corrections[k].nrows = nrows;
+      continue;
     }
-    npar = 0;
-    for (Int_t i = 0; i < N; i++, corMDF++) {
-      if (corMDF->nrows == 0 && corMDF->idx == 0) continue;
-      npar++;
-      nrows++;
+    if (chair3MDF) {
+      table3MDF = (const St_MDFCorrection3 *) chair3MDF->Table();
+      if (! table3MDF) goto EMPTY;
+      cor3MDF = table3MDF->GetTable();
+      N = table3MDF->GetNRows();
+      if (! cor3MDF || ! N) {
+	goto EMPTY;
+      }
+      npar = 0;
+      for (Int_t i = 0; i < N; i++, cor3MDF++) {
+	if (cor3MDF->nrows == 0 && cor3MDF->idx == 0) continue;
+	npar++;
+	nrows++;
+      }
+      if (! npar ) {
+	LOG_INFO << " \thas no significant corrections => switch it off" << endm;
+	goto CLEAR;
+      }
+      m_Corrections[k].nrows = nrows;
+      continue;
     }
-    if (! npar ) {
-      LOG_INFO << " \thas no significant corrections => switch it off" << endm;
-      goto CLEAR;
-    }
-    m_Corrections[k].nrows = nrows;
-    continue;
   EMPTY:
     LOG_INFO << " \tis empty" << endm;
   CLEAR:
@@ -185,10 +216,20 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     m_Corrections[k].Chair = 0;
   }	
   // Use only one ADC correction
-  if (m_Corrections[kAdcCorrection         ].Chair && 
-      m_Corrections[kAdcCorrectionMDF      ].Chair) {
-    LOG_ERROR << " \tTwo ADC corrections activated ? Keep active only AdcCorrectionMDF" << endm;
-    m_Corrections[kAdcCorrection         ].Chair = 0;
+  if        (m_Corrections[kAdcCorrection3MDF     ].Chair) {
+    if      (m_Corrections[kAdcCorrection         ].Chair) {
+      LOG_ERROR << " \tAt least two ADC corrections activated. Deactivate kAdcCorrection" << endm;
+      m_Corrections[kAdcCorrection         ].Chair = 0;
+    }
+    if      (m_Corrections[kAdcCorrectionMDF      ].Chair) {
+      LOG_ERROR << " \tAt least two ADC corrections activated. Deactivate kAdcCorrectionMDF" << endm;
+      m_Corrections[kAdcCorrectionMDF      ].Chair = 0;
+    }
+  } else if (m_Corrections[kAdcCorrectionMDF      ].Chair) {
+    if (m_Corrections[kAdcCorrection         ].Chair) {
+      LOG_ERROR << " \tAt least two ADC corrections activated. Deactivate kAdcCorrection" << endm;
+      m_Corrections[kAdcCorrection         ].Chair = 0;
+    }
   }
 }
 //________________________________________________________________________________
@@ -280,6 +321,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[kTpcCurrentCorrection] = CdEdx.Crow;                                   
   VarXs[kTpcrCharge]           = CdEdx.rCharge;                               
   VarXs[kTpcRowQ]              = CdEdx.Qcm;
+  VarXs[kTpcAccumlatedQ]       = CdEdx.Qcm;
   VarXs[kTpcPadTBins]          = CdEdx.Npads*CdEdx.Ntbins;     
   VarXs[ktpcPressure]          = TMath::Log(gas->barometricPressure);     
   VarXs[kDrift]                = ZdriftDistanceO2;      // Blair correction 
@@ -330,11 +372,23 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     if (k == kAdcCorrectionMDF) {
       ADC = adcCF;
       if (ADC <= 0) return 3; //HACK to avoid FPE (VP)
-      Double_t xx[2] = {TMath::Log(ADC), (Double_t)(CdEdx.npads+CdEdx.ntmbks)};
       l = kTpcOutIn;
       Int_t nrows = ((St_TpcAdcCorrectionMDF *) m_Corrections[k].Chair)->nrows();
       if (l >= nrows) l = nrows - 1;
-      dE = ADC*Adc2GeVReal*((St_TpcAdcCorrectionMDF *) m_Corrections[k].Chair)->Eval(l,xx);
+      Double_t xx[2] = {TMath::Log(ADC), (Double_t)(CdEdx.npads+CdEdx.ntmbks)};
+      Double_t Cor = ((St_TpcAdcCorrectionMDF *) m_Corrections[k].Chair)->Eval(l,xx);
+      dE = ADC*Adc2GeVReal*TMath::Exp(Cor);
+      goto ENDL;
+    }
+    if (k == kAdcCorrection3MDF) {
+      ADC = adcCF;
+      if (ADC <= 0) return 3; //HACK to avoid FPE (VP)
+      l = kTpcOutIn;
+      Int_t nrows = ((St_TpcAdcCorrection3MDF *) m_Corrections[k].Chair)->nrows();
+      if (l >= nrows) l = nrows - 1;
+      Double_t xx[3] = {(Double_t)  CdEdx.ntmbks, TMath::Abs(CdEdx.zG), TMath::Log(ADC)};
+      Double_t Cor = ((St_TpcAdcCorrection3MDF *) m_Corrections[k].Chair)->Eval(l,xx);
+      dE = ADC*Adc2GeVReal*TMath::Exp(Cor);
       goto ENDL;
     }
     cor = ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable();
@@ -345,6 +399,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     else {
       if (nrows == St_tpcPadConfigC::instance()->numberOfRows(sector)) l = row - 1;
       else if (nrows == 192) {l = 8*(sector-1) + channel - 1; assert(l == (cor+l)->idx-1);}
+      else if (nrows ==   8) {l =                channel - 1; assert(l == (cor+l)->idx-1);}
       else if (nrows ==  48) {l = 2*(sector-1) + kTpcOutIn;}
       else if (nrows ==   6) {l =            kTpcOutIn;     if (sector > 12) l+= 3;}
       else if (nrows ==   4) {l = TMath::Min(kTpcOutIn, 1); if (sector > 12) l+= 2;} 
