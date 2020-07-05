@@ -18,6 +18,7 @@
 #include "StDetectorDbMaker/St_TpcrChargeC.h"
 #include "StDetectorDbMaker/St_TpcCurrentCorrectionC.h"
 #include "StDetectorDbMaker/St_TpcRowQC.h"
+#include "StDetectorDbMaker/St_TpcAccumulatedQC.h"
 #include "StDetectorDbMaker/St_TpcSecRowBC.h"
 #include "StDetectorDbMaker/St_TpcSecRowCC.h"
 #include "StDetectorDbMaker/St_tpcPressureBC.h"
@@ -87,6 +88,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kTpcrCharge            ] = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction"					,St_TpcrChargeC::instance());		     
   m_Corrections[kTpcCurrentCorrection  ] = dEdxCorrection_t("TpcCurrentCorrection","Correction due to sagg of Voltage due to anode current"		,St_TpcCurrentCorrectionC::instance());     
   m_Corrections[kTpcRowQ               ] = dEdxCorrection_t("TpcRowQ"             ,"Gas gain correction for row versus accumulated charge,"             ,St_TpcRowQC::instance());		           
+  m_Corrections[kTpcAccumlatedQ        ] = dEdxCorrection_t("TpcAccumlatedQ"      ,"Gas gain correction for HV channel versus accumulated charge,"      ,St_TpcAccumulatedQC::instance());		           
   m_Corrections[kTpcSecRowB            ] = dEdxCorrection_t("TpcSecRowB"          ,"Gas gain correction for sector/row"					,St_TpcSecRowBC::instance());		     
   m_Corrections[kTpcSecRowC            ] = dEdxCorrection_t("TpcSecRowC"          ,"Additional Gas gain correction for sector/row"			,St_TpcSecRowCC::instance());		     
   m_Corrections[ktpcPressure           ] = dEdxCorrection_t("tpcPressureB"        ,"Gain on Gas Density due to Pressure"			        ,St_tpcPressureBC::instance());	     
@@ -319,6 +321,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[kTpcCurrentCorrection] = CdEdx.Crow;                                   
   VarXs[kTpcrCharge]           = CdEdx.rCharge;                               
   VarXs[kTpcRowQ]              = CdEdx.Qcm;
+  VarXs[kTpcAccumlatedQ]       = CdEdx.Qcm;
   VarXs[kTpcPadTBins]          = CdEdx.Npads*CdEdx.Ntbins;     
   VarXs[ktpcPressure]          = TMath::Log(gas->barometricPressure);     
   VarXs[kDrift]                = ZdriftDistanceO2;      // Blair correction 
@@ -396,6 +399,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     else {
       if (nrows == St_tpcPadConfigC::instance()->numberOfRows(sector)) l = row - 1;
       else if (nrows == 192) {l = 8*(sector-1) + channel - 1; assert(l == (cor+l)->idx-1);}
+      else if (nrows ==   8) {l =                channel - 1; assert(l == (cor+l)->idx-1);}
       else if (nrows ==  48) {l = 2*(sector-1) + kTpcOutIn;}
       else if (nrows ==   6) {l =            kTpcOutIn;     if (sector > 12) l+= 3;}
       else if (nrows ==   4) {l = TMath::Min(kTpcOutIn, 1); if (sector > 12) l+= 2;} 
