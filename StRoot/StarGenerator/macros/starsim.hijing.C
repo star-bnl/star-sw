@@ -64,7 +64,8 @@ void starsim( int nevents=10,int rngSeed=0, const char* tag="y2020", Int_t RunG 
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = Form("%s geant gstar usexgeom agml magF FieldOn ReverseField",tag);
+    //    TString simple = Form("%s geant gstar usexgeom agml magF FieldOn ReverseField",tag);
+    TString simple = Form("%s geant gstar usexgeom agml",tag);
     bfc(-1, simple );
     StMaker *geant = chain->Maker("geant");
     chain->AddAfter("MagField",geant);
@@ -95,7 +96,7 @@ void starsim( int nevents=10,int rngSeed=0, const char* tag="y2020", Int_t RunG 
   //
   _primary = new StarPrimaryMaker();
   {
-    _primary -> SetFileName( "hijing.starsim.root");
+    _primary -> SetFileName(Form("hijing_%i.starsim.root",RunG));
     chain -> AddBefore( "geant", _primary );
   }
 
@@ -129,6 +130,8 @@ void starsim( int nevents=10,int rngSeed=0, const char* tag="y2020", Int_t RunG 
   // Setup geometry and set starsim to use agusread for input
   //
   //geometry("y2012");
+  //  command(Form("detp geometry %s field=-5",tag));
+  command(Form("detp geometry %s",tag));
   command("gkine -4 0");
   command(Form("gfile o hijing_%i.fzd",RunG));
   
