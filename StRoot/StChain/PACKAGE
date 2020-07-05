@@ -1,5 +1,0 @@
-# $Id $
-# package StChain
-# author: 
-Library:libStChain.so:LIBS +=   -lHtml
-#Library:libStChain.so:LIBS +=   -lHtml

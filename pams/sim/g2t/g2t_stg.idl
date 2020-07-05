@@ -1,6 +1,0 @@
-#include "PAM.idl"
-#include "g2t_track.idl"
-#include "g2t_fts_hit.idl"
-
-interface g2t_stg : amiModule{ STAFCV_T call (inout g2t_track g2t_track, out g2t_fts_hit g2t_stg_hit ); };
-                      

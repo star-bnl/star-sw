@@ -1,5 +1,0 @@
-# $Id $
-# package StSsdDaqMaker
-# author: 
-Library:libStSsdDaqMaker.so:LIBS +=   -lStChain  -lStDAQMaker  -lStDb_Tables  -lStSsdUtil  -lsvt_Tables
-#Library:libStSsdDaqMaker.so:LIBS +=   -lStChain  -lStDAQMaker  -lStDb_Tables  -lStSsdUtil  -lsvt_Tables
