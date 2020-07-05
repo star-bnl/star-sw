@@ -65,7 +65,8 @@ void starsim( int nevents=10,int rngSeed=0, const char* tag="y2020", Int_t RunG 
   gROOT->ProcessLine(".L bfc.C");
   {
     //    TString simple = Form("%s geant gstar usexgeom agml magF FieldOn ReverseField",tag);
-    TString simple = Form("%s geant gstar usexgeom agml",tag);
+    TString simple = Form("%s geant gstar usexgeom agml magF FieldOn",tag);
+    //    TString simple = Form("%s geant gstar usexgeom agml",tag);
     bfc(-1, simple );
     StMaker *geant = chain->Maker("geant");
     chain->AddAfter("MagField",geant);
