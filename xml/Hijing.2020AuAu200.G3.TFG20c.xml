@@ -40,6 +40,7 @@
 <!-- <input URL="file:/net/l404/data/fisyak/reco/2019/hijingAuAu200.DEV2.StiCA.Minuit.newCut/*.event.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200*.gener.root" /> -->
 <!-- <input URL="file://net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" />  -->
-<input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2020/Hijing.fz/*fzd" />
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2020/Hijing.fz/*fzd" /> -->
+<input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/2020/Hijing.fzFF/*fzd" />
 </job>
 

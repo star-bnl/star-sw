@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.99 2019/11/29 19:00:08 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.100 2020/07/05 15:57:03 fisyak Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
@@ -907,10 +907,13 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static TH1F *BaddEdxMult70[2], *BaddEdxMultZ[2];
 #endif
   static Int_t hMade = 0;
+  //#define __ETA_PLOTS__
+#ifdef __ETA_PLOTS__
   static TH2F *Eta[2] = {0};     // 0 -> F, 1 -> 70
 #ifdef __iTPCOnly__
   static TH2F *EtaiTPC[2] = {0};
 #endif  
+#endif /*  __ETA_PLOTS__ */ 
   if (! gTrack && !hMade) {
     TFile  *f = GetTFile();
     assert(f);
@@ -959,6 +962,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 				   Form("Pull %s versus Length in iTPC %s",T[t],TS[s]),
 				   190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
 #endif
+#ifdef __ETA_PLOTS__
 	if (s == 0 && t < 2) {
 	  Eta[t] = new TH2F(Form("Eta%s",N[t]),
 			    Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, TPC - iTPC",T[t]),
@@ -969,6 +973,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 				100,-2.5,2.5,500,-1.,4.);
 #endif
 	}
+#endif /*  __ETA_PLOTS__ */
       }
     }
     TDatime t1(tMin,0); // min Time and
@@ -1134,6 +1139,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #ifdef __iTPCOnly__
       }
 #endif
+#ifdef __ETA_PLOTS__
       if (j < 2 && PiD.fFit.TrackLength() > 40) {
 	StTrackNode *node = gTrack->node();
 	StPrimaryTrack *pTrack = static_cast<StPrimaryTrack*>(node->track(primary));
@@ -1156,6 +1162,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  }
 	}
       }
+#endif /*  __ETA_PLOTS__ */
     }
   }
   if (PiD.fFit.TrackLength() > 20) { 

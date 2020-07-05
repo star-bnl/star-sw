@@ -1844,6 +1844,37 @@ my $NEvents = 100000;
 
 ################################################################################
 # Run XIX
+# '461' => {trig=>'19GeV_2019',         	field => 'RF',	first=> '20056040',	 last => '20056040',	 list => '',  beginTime => '20190225.233839'}, # 	2019-02-25	23:38:39	2019-02-26	09:57:02
+# '737' => {trig=>'19GeV_2019',         	field => 'RF',	first=> '20093035',	 last => '20093036',	 list => '',  beginTime => '20190403.111220'}, # 	2019-04-03	11:12:20	2019-04-04	09:44:05
+# '738' => {trig=>'14p5GeV_2019',       	field => 'RF',	first=> '20094048',	 last => '20094048',	 list => '',  beginTime => '20190404.094405'}, # 	2019-04-04	09:44:05	2019-04-04	10:25:04
+#'1081' => {trig=>'14p5GeV_2019',       	field => 'RF',	first=> '20154012',	 last => '20154013',	 list => '',  beginTime => '20190603.113018'}, # 	2019-06-03	11:30:18	2019-06-03	22:36:55
+#'1082' => {trig=>'7p7GeV_2019',        	field => 'RF',	first=> '20154047',	 last => '20154052',	 list => '',  beginTime => '20190603.223655'}, # 	2019-06-03	22:36:55	2019-06-04	01:53:10
+#'1100' => {trig=>'7p7GeV_2019',        	field => 'RF',	first=> '20158022',	 last => '20158026',	 list => '',  beginTime => '20190607.120916'}, # 	2019-06-07	12:09:16	2019-06-07	17:03:52
+#'1101' => {trig=>'7p7GeV_2019',        	field => 'RF',	first=> '20158036',	 last => '20158036',	 list => '',  beginTime => '20190607.170352'}, # 	2019-06-07	17:03:52	2019-06-07	17:47:02
+#'1102' => {trig=>'3p85GeV_fixedTarget_2019',	field => 'RF',	first=> '20158041',	 last => '20158042',	 list => '',  beginTime => '20190607.174702'}, # 	2019-06-07	17:47:02	2019-06-07	18:24:43
+#'1104' => {trig=>'7p7GeV_2019',        	field => 'RF',	first=> '20158048',	 last => '20158051',	 list => '',  beginTime => '20190607.202244'}, # 	2019-06-07	20:22:44	2019-06-08	04:31:05
+#'1112' => {trig=>'7p7GeV_2019',        	field => 'RF',	first=> '20160020',	 last => '20160022',	 list => '',  beginTime => '20190609.102036'}, # 	2019-06-09	10:20:36	2019-06-09	12:45:28
+#'1113' => {trig=>'3p85GeV_fixedTarget_2019',	field => 'RF',	first=> '20160023',	 last => '20160027',	 list => '',  beginTime => '20190609.124528'}, # 	2019-06-09	12:45:28	2019-06-10	02:41:09
+#'1114' => {trig=>'7p7GeV_2019',        	field => 'RF',	first=> '20160036',	 last => '20160041',	 list => '',  beginTime => '20190610.024109'}, # 	2019-06-10	02:41:09	2019-06-10	04:41:11
+#'1163' => {trig=>'7p7GeV_2019',        	field => 'RF',	first=> '20169022',	 last => '20169025',	 list => '',  beginTime => '20190618.113308'}, # 	2019-06-18	11:33:08	2019-06-18	14:36:58
+#'1164' => {trig=>'7.3GeV_fixedTarget_2019',	field => 'RF',	first=> '20169028',	 last => '20169045',	 list => '',  beginTime => '20190618.143658'}, # 	2019-06-18	14:36:58	2019-06-18	22:20:09
+#'1166' => {trig=>'7.3GeV_fixedTarget_2019',	field => 'RF',	first=> '20169052',	 last => '20169055',	 list => '',  beginTime => '20190619.000404'}, # 	2019-06-19	00:04:04	2019-06-19	02:51:26
+#'1167' => {trig=>'7p7GeV_2019',        	field => 'RF',	first=> '20169058',	 last => '20169060',	 list => '',  beginTime => '20190619.025126'}, # 	2019-06-19	02:51:26	2019-06-19	04:18:08
+#'1203' => {trig=>'7p7GeV_2019',        	field => 'RF',	first=> '20178009',	 last => '20178014',	 list => '',  beginTime => '20190627.075110'}, # 	2019-06-27	07:51:10	2019-06-28	08:19:31
+#'1204' => {trig=>'9p2GeV_2019',        	field => 'RF',	first=> '20179015',	 last => '20179026',	 list => '',  beginTime => '20190628.081931'}, # 	2019-06-28	08:19:31	2019-06-28	14:32:40
+#'1205' => {trig=>'9p2GeV_2019',        	field => 'RF',	first=> '20179028',	 last => '20179028',	 list => '',  beginTime => '20190628.143240'}, # 	2019-06-28	14:32:40	2019-06-29	03:28:34
+#'1206' => {trig=>'4p59GeV_fixedTarget_2019',	field => 'RF',	first=> '20179039',	 last => '20179041',	 list => '',  beginTime => '20190629.032834'}, # 	2019-06-29	03:28:34	2019-06-29	04:38:17
+#'1222' => {trig=>'4p59GeV_fixedTarget_2019',	field => 'RF',	first=> '20183020',	 last => '20183025',	 list => '',  beginTime => '20190702.103243'}, # 	2019-07-02	10:32:43	2019-07-02	14:41:51
+#'1223' => {trig=>'9p2GeV_2019',        	field => 'RF',	first=> '20183026',	 last => '20183026',	 list => '',  beginTime => '20190702.144151'}, # 	2019-07-02	14:41:51	2019-07-02	15:03:34
+#'1260' => {trig=>'9p2GeV_2019',        	field => 'RF',	first=> '20189012',	 last => '20189017',	 list => '',  beginTime => '20190708.073906'}, # 	2019-07-08	07:39:06	2019-07-09	03:23:12
+#'1261' => {trig=>'31GeV_fixedTarget_2019',	field => 'RF',	first=> '20189035',	 last => '20189035',	 list => '',  beginTime => '20190709.032312'}, # 	2019-07-09	03:23:12	2019-07-09	03:36:39
+#'1266' => {trig=>'31GeV_fixedTarget_2019',	field => 'RF',	first=> '20190018',	 last => '20190024',	 list => '',  beginTime => '20190709.103011'}, # 	2019-07-09	10:30:11	2019-07-10	11:01:57
+#'1267' => {trig=>'AuAu200_2019',       	field => 'RF',	first=> '20191005',	 last => '20191005',	 list => '',  beginTime => '20190710.110157'}, # 	2019-07-10	11:01:57	2019-07-10	11:40:57
+#'1276' => {trig=>'AuAu200_2019',       	field => 'RF',	first=> '20193025',	 last => '20193026',	 list => '',  beginTime => '20190712.191209'}, # 	2019-07-12	19:12:09	2019-07-15	08:51:41
+#'1277' => {trig=>'9p2GeV_2019',        	field => 'RF',	first=> '20196006',	 last => '20196006',	 list => '',  beginTime => '20190715.085141'}, # 	2019-07-15	08:51:41	2019-07-15	09:28:55
+#'1280' => {trig=>'9p2GeV_2019',        	field => 'RF',	first=> '20196015',	 last => '20196017',	 list => '',  beginTime => '20190715.103049'}, # 	2019-07-15	10:30:49	2019-07-15	11:43:38
+
+
 # 10/31/19 dEdx905 new TcpSecRowB
 # 11/01/19 dEdx906 new TpcRowQ, account aging
 # 11/01/19 dEdx907 new TcpSecRowB
@@ -1879,7 +1910,16 @@ my $NEvents = 100000;
 #$hist = "Run318"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/18/2019 move to MySQL and check in dev before code commit
 #$hist = "Run319"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/19/2019 move to MySQL and check in dev after code commit
 #$hist = "Run320"; $NEvents = 2000; $disk = "data4?/"; $RECO = "reco/production*_2018/*FullField";  $Production = "/P19id_calib"; $year = "/2018/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/28/2019 check option without dN/dx
-$hist = "Run321"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/28/20 test calibration
+#$hist = "Run321"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/28/20 test calibration
+#$hist = "Run322"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/29/20 TpcRowQ from channel
+#$hist = "Run323"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/30/20 TpcRowQ per channel and sector 
+#$hist = "Run324"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/01/20 TpcSecRowB
+#$hist = "Run325"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/01/20 reset TpcPadCorrectionMDF and TpcPadCorrection
+#$hist = "Run326"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/02/20 rerun reset TpcPadCorrectionMDF and TpcPadCorrection
+#$hist = "Run327"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/02/20 new TpcPadCorrectionMDF 
+#$hist = "Run328"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/03/20 new TpcLengthCorrectionMDF and TcpSecRowB
+#$hist = "Run329"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/04/20 new TpcLengthCorrectionMDF and TpcSecRowB bug in Run328
+$hist = "Run330"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/05/20 new TpcSecRowB 
 
 ################## Run XX ##############################################################
 # 11p5GeV                 20191208.100905, 20191221.190032, 20200210.220428, 20200214.143742, 20200214.143742

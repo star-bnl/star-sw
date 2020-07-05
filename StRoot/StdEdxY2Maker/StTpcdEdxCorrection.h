@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.15 2019/11/19 14:44:41 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.16 2020/07/05 15:57:03 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -47,28 +47,29 @@ class StTpcdEdxCorrection : public TObject {
     kTpcSecRowB            =  8,//S  					     
     kTpcSecRowC            =  9,//S  					     
     kTpcRowQ               = 10,//   	 					       	   
-    ktpcPressure           = 11,//P  					     
-    ktpcTime               = 12,//t  					     
-    kDrift                 = 13,//O  					     
-    kMultiplicity          = 14,//M  					     
-    kzCorrection           = 15,//Z  					     
-    ktpcMethaneIn          = 16,//m  					     
-    ktpcGasTemperature     = 17,//T  					     
-    ktpcWaterOut           = 18,//W   				7       	   
-    kSpaceCharge           = 19,//C   space charge near the wire	       	   
-    kPhiDirection          = 20,//p   correction wrt local interception angle  
-    kTanL                  = 21,//p   correction wrt local tan(lambda)  
-    kdXCorrection          = 22,//X  					     
-    kTpcEffectivedX        = 23,//X   Effective pad row height
-    kTpcPadTBins           = 24,//d  					     
-    kTpcZDC                = 25,//   					     
-    kTpcPadMDF             = 26, 
-    kTpcLast               = 27,//                                             
-    kTpcNoAnodeVGainC      = 28,//   					     
-    kTpcLengthCorrection   = 29,//                                             
-    kTpcLengthCorrectionMDF= 30,//   					   
-    kTpcdEdxCor            = 31,//   					   
-    kTpcAllCorrections     = 32 //                                             
+    kTpcAccumlatedQ        = 11,//   	 					       	   
+    ktpcPressure           = 12,//P  					     
+    ktpcTime               = 13,//t  					     
+    kDrift                 = 14,//O  					     
+    kMultiplicity          = 15,//M  					     
+    kzCorrection           = 16,//Z  					     
+    ktpcMethaneIn          = 17,//m  					     
+    ktpcGasTemperature     = 18,//T  					     
+    ktpcWaterOut           = 19,//W   				7       	   
+    kSpaceCharge           = 20,//C   space charge near the wire	       	   
+    kPhiDirection          = 21,//p   correction wrt local interception angle  
+    kTanL                  = 22,//p   correction wrt local tan(lambda)  
+    kdXCorrection          = 23,//X  					     
+    kTpcEffectivedX        = 24,//X   Effective pad row height
+    kTpcPadTBins           = 25,//d  					     
+    kTpcZDC                = 26,//   					     
+    kTpcPadMDF             = 27, 
+    kTpcLast               = 28,//                                             
+    kTpcNoAnodeVGainC      = 29,//   					     
+    kTpcLengthCorrection   = 30,//                                             
+    kTpcLengthCorrectionMDF= 31,//   					   
+    kTpcdEdxCor            = 32,//   					   
+    kTpcAllCorrections     = 33 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();

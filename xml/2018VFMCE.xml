@@ -23,7 +23,7 @@
   foreach name (K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed \
                 K_S0       Lambda0_bar      Lambda0      XiM_bar      XiM       Omega_bar      Omega      \
                 LNNFixed LNFixed \
-                H2LFixed \
+                H2LrFixed H2LFixed \
                 H3LdpFixed H3LFixed H3LrFixed H3RLFixed \
                 H4LtpFixed H4L2dFixed H4LFixed H5LFixed H6L3Fixed H6LFixed \
                 He4LFixed  \
@@ -35,7 +35,7 @@
                 Li8LFixed \
                 LNN LN \
                 H3Ldp H3L H3Lr H3RL \
-                H2L \
+                H2Lr  H2L \
                 H4Ltp H4L2d H4L H5L H6L3 H6L \
                 He4L  \
                 He5L3 He5L He5Li5 \

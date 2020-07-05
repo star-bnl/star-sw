@@ -1491,6 +1491,7 @@ void TGeant3::AddParticlesToPdgDataBase()
     {"LN"           ,"LN"           ,2.050                ,kFALSE,  widthLambda,     0, kPTHadron,           3003,  {"DEUTERON", "pi-"     ,     0}}, //  Deuteron pi-         =>       
     {"LNN"          ,"LNN"          ,2.9925               ,kFALSE,  widthLambda,     0, kPTHadron,     1010000030,  {"TRITON"  , "pi-"     ,     0}}, //  pi- Triton         =>                   
     {"H2L"          ,"H2L"          ,2.0545               ,kFALSE,  widthLambda,     3, kPTHadron,           3028,  {"proton"  , "proton"  , "pi-"}}, // H2K -< p p pi-
+    {"H2Lr"         ,"H2Lr"         ,2.0545               ,kFALSE,  widthLambda,     3, kPTHadron,        1003028,  {"Lambda0R", "proton"  ,     0}}, // H2K -< p p pi-
     {"H3L"          ,"H3L"          ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,           3004,  {"HE3"     , "pi-"     ,     0}}, // HyperTriton -> He3 pi-    
     {"H3Ldp"        ,"H3Ldp"        ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,           3012,  {"DEUTERON", "proton"  , "pi-"}}, // HyperTriton -> d p pi-    
     {"H3Lr"         ,"H3Lr"         ,2.9924               ,kFALSE,  widthLambda,     3, kPTHadron,        1003004,  {"He3r"    , "pi-"     ,     0}}, //  -> He3r pi-
@@ -1513,7 +1514,8 @@ void TGeant3::AddParticlesToPdgDataBase()
     {"Li6L"         ,"Li6L"         ,5.77                 ,kFALSE,  widthLambda,     9, kPTHadron,           3024,  {"HE3"     , "HE3"     , "pi-"}}, // -> He3 He3 pi-	             	             
     {"Li7L"         ,"Li7L"         ,6.7                  ,kFALSE,  widthLambda,     9, kPTHadron,           3025,  {"Be7"     , "pi-"     ,     0}}, // -> Be7 pi-    	             	             
     {"Li7L3"        ,"Li7L3"        ,6.7                  ,kFALSE,  widthLambda,     9, kPTHadron,           3026,  {"ALPHA"   , "HE3"     , "pi-"}}, // -> He4 He3 pi-	             	             
-    {"Li8L"         ,"Li8L"         ,7.65                 ,kFALSE,  widthLambda,     9, kPTHadron,           3027,  {"ALPHA"   , "ALPHA"   , "pi-"}}  // -> He4 He4 pi-                              
+    {"Li8L"         ,"Li8L"         ,7.65                 ,kFALSE,  widthLambda,     9, kPTHadron,           3027,  {"ALPHA"   , "ALPHA"   , "pi-"}}, // -> He4 He4 pi-                              
+    {"H5LL"         ,"H5LL"         ,5.047                ,kFALSE,  widthLambda,     3, kPTHadron,        2003015,  {"He5L"    , "pi-"     ,     0}}  // -> He5L  pi-    		             
   };
   Int_t nIons = sizeof(Nuclei)/sizeof(Particle_t);
   for (Int_t i = 0; i < nIons; i++) {
