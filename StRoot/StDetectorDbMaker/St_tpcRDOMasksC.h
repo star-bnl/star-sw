@@ -26,6 +26,8 @@ class St_tpcRDOMasksC : public TChair {
     else if (row >37 && row <= 45) rdo = 6;
     return rdo;
   }
+#else
+  static UInt_t rdoForPadrow(Int_t row) {return rdoForPadrow(1,row,1);}
 #endif
   static UInt_t rdoForPadrow(Int_t sector, Int_t row, Int_t pad=1) { 
     //Function returns the rdo board number for a given padrow index. Range of map used is 1-72
