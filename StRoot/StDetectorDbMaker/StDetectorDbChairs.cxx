@@ -301,7 +301,7 @@ MakeChairInstance2(tpcCorrection,St_TpcLengthCorrectionBC,Calibrations/tpc/TpcLe
 #include "St_TpcDriftVelRowCorC.h"
 MakeChairInstance2(tpcCorrection,St_TpcDriftVelRowCorC,Calibrations/tpc/TpcDriftVelRowCor);
 #include "St_TpcAccumulatedQC.h"
-MakeChairInstance2(tpcCorrect192,St_TpcAccumulatedQC,Calibrations/tpc/TpcAccumulatedQ);
+MakeChairInstance2(tpcCorrection,St_TpcAccumulatedQC,Calibrations/tpc/TpcAccumulatedQ);
 #include "St_TpcLengthCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMDF,Calibrations/tpc/TpcLengthCorrectionMDF);
 #include "St_TpcPadCorrectionMDF.h"
