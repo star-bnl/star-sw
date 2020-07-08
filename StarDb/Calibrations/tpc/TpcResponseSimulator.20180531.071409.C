@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.20180531.071409.C,v 1.1 2020/05/23 22:33:31 fisyak Exp $
+// $Id: TpcResponseSimulator.20180531.071409.C,v 1.2 2020/07/08 17:12:39 fisyak Exp $
 // $Log: TpcResponseSimulator.20180531.071409.C,v $
+// Revision 1.2  2020/07/08 17:12:39  fisyak
+// Move to MySQL, clean up
+//
 // Revision 1.1  2020/05/23 22:33:31  fisyak
 // Guannan parameters for 3p85GeV2018
 //
@@ -114,10 +117,15 @@ TDataSet *CreateTable() {
   
   // row.SecRowCorOW[0] = row.SecRowCorOE[0] = 0.11; // IRAKLI : based on shift seen in the MuDst based simulation;
 #if 1
-  row.SecRowCorIW[0] = 0.013; 
-  row.SecRowCorOW[0] = -0.013;
-  row.SecRowCorIE[0] = -0.035; 
-  row.SecRowCorOE[0] = -0.013;
+  const Double_t RowMuTrs[8] = {
+    4.45505e-02,  3.63901e-03,  // Inner W
+    3.52547e-02,  3.85726e-03,  // Outer W
+    5.28188e-02,  3.94541e-03,  // Inner E
+    -9.11388e-03, 2.63198e-03};  // Outer E
+  Float_t *a = &row.SecRowCorIW[0];
+  for (Int_t i = 0; i < 8; i++) {
+    a[i] = RowMuTrs[i];
+  }
   // row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02;
   // row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02;
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
@@ -132,7 +140,7 @@ TDataSet *CreateTable() {
     -1.76e-02, 0};  // Outer E
   Float_t *b = &row.SecRowSigIW[0];
   for (Int_t i = 0; i < 8; i++) {
-    b[i] = RowSigmaTrs[i%8];
+    b[i] = RowSigmaTrs[i];
   }
   /* Sigmas 
      Tpx inner = 0.395

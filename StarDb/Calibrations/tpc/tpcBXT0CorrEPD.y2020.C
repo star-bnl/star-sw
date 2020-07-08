@@ -6,7 +6,7 @@ TDataSet *CreateTable() {
 // ------  Test whether this table share library was loaded ------
 	if (!TClass::GetClass("St_tpcBXT0Corr")) return 0;
 	tpcBXT0Corr_st row;
-	St_tpcBXT0Corr *tableSet = new St_tpcBXT0Corr("tpcBXT0CorrEPD",2);
+	St_tpcBXT0Corr *tableSet = new St_tpcBXT0Corr("tpcBXT0CorrEPD",1);
 //
 memset(&row,0,tableSet->GetRowSize());
     row.type	 =          0; // ;
