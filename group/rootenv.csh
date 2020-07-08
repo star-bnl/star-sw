@@ -190,6 +190,8 @@ if ( -x ${GROUP_DIR}/dropit) then
     setenv MANPATH `${GROUP_DIR}/dropit -p ${ROOTSYS}/man -p ${MANPATH}`
 endif
 
+# Python support
+setenv PYTHONPATH $ROOTSYS/lib
 
 # OpenGL
 if ( -r $ROOTSYS/../Mesa) setenv OPENGL $ROOTSYS/../Mesa
