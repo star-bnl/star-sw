@@ -15,7 +15,8 @@
 #  set rung = `echo $file | awk -F\: '{print $1}'`
 #  set f    = `echo $file | awk -F\: '{print $2}'`
 #  set l    = `echo $file | awk -F\: '{print $3}'`
-  set file2 = `basename ${file} .gener.root`;
+  set file3 = `basename ${file} .fzd`;
+  set file2 = `basename ${file3} .gener.root`;
   set file1 = `basename ${file2} .event.root`;
   set name  = `basename ${file1} .daq`;
   echo "${name}"

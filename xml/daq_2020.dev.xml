@@ -5,12 +5,14 @@
 #   setenv StarEndMakerShell
    setenv STARFPE NO
 #   setup debug
-#    setenv NODEBUG yes
+    setenv NODEBUG yes
 #   setup  gcc631
 #   setup 64b
 #   setup gcc
-#   setup 32b
-#   starver dev
+   setup 32b
+   source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh
+   starver dev
+    
      set evtsFile = $INPUTFILE0;
      set f        = 1
      set l        = 5000000
@@ -39,10 +41,11 @@
 #  root.exe -b -q 'bfc.C(200,"P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  .DEV2 12/24/2019
 #  root.exe -b -q 'bfc.C(500,"P2020a,StiCA,btof,mtd,BEmcChkStat,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  .DEV2 07/06/2020
-  root.exe -b -q 'bfc.C(2000,"P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
+# DEV 07/07/20
+  root4star -q -b 'bfc.C(2000,"P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+
 #  cp  ${filel}* ${SUBMITTINGDIRECTORY}
- # rm ${bla}
+#  rm ${bla}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
