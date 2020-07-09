@@ -1,7 +1,10 @@
 /*
- * $Id: jumpxn.c,v 1.1 2018/11/19 23:20:12 perev Exp $
+ * $Id: jumpxn.c,v 1.1.2.1 2020/07/09 19:48:44 perev Exp $
  *
  * $Log: jumpxn.c,v $
+ * Revision 1.1.2.1  2020/07/09 19:48:44  perev
+ * Comis64_0
+ *
  * Revision 1.1  2018/11/19 23:20:12  perev
  * 64bits new comis files added from /CERN
  *
@@ -27,7 +30,7 @@ C- 3) CALL JUMPX2 (par1,par2)      to transfer
 int jumpad_(unsigned long *fun);
 //static unsigned long uumpad = (unsigned long)jumpad_;
 static unsigned long uumpad = (unsigned long)0;
-int           csvptokn_(unsigned long addr);
+int           csvpotokn(unsigned long addr);
 unsigned long csvplong (         int  tokn);
 
 #define kMASK 0x40000000
@@ -37,7 +40,7 @@ unsigned long csvplong (         int  tokn);
 int csToken(unsigned long fun) 
 {
 #if 1
-return csvptokn_(fun);
+return csvptokn(fun);
 #else
 
   int token = fun-uumpad;
