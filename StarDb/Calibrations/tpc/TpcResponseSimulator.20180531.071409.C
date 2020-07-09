@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.20180531.071409.C,v 1.1 2020/05/23 22:33:31 fisyak Exp $
+// $Id: TpcResponseSimulator.20180531.071409.C,v 1.2 2020/07/08 17:12:39 fisyak Exp $
 // $Log: TpcResponseSimulator.20180531.071409.C,v $
+// Revision 1.2  2020/07/08 17:12:39  fisyak
+// Move to MySQL, clean up
+//
 // Revision 1.1  2020/05/23 22:33:31  fisyak
 // Guannan parameters for 3p85GeV2018
 //
