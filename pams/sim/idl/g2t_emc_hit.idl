@@ -1,9 +1,0 @@
-struct g2t_emc_hit {         /* G2t_emc_hit */ 
-       long      id;         /* Primary Key */
-       long      track_p;    /* Pointer to parent track */
-       long      volume_id;  /* STAR volume id */
-       float     de;         /* Energy loss */
-       float     x; /* x-position of hit (global) */
-       float     y; /* y-position of hit (global) */
-       float     z; /* z-position of hit (global) */
-   };
