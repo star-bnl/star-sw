@@ -1,5 +1,0 @@
-# $Id $
-# package StEventUtilities
-# author: 
-Library:libStEventUtilities.so:LIBS +=   -lStChain  -lStDbUtilities  -l_StEvent  -l_StTpcDb
-#Library:libStEventUtilities.so:LIBS +=   -lStChain  -lStDbUtilities  -lStEvent  -lStTpcDb

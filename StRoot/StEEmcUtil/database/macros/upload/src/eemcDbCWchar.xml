@@ -1,9 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbCWchar  <comment>  *    CW characterization (from Dubna) </comment>
-  <dbInt> sn <comment>   cw base serial number ,  SER from Dubna  </comment> </dbInt> 
-  <dbInt> address <comment>   cw base programmable id ,ADDR from Dubna  </comment> </dbInt> 
-  <dbFloat> maxHV <comment>   cw HV (V) for dac=1023,  K1280 from Dubna  </comment> </dbFloat> 
-  <dbFloat> dumm <comment>   8-byte align  </comment> </dbFloat> 
-  <dbString> comment <length> 160 </length> </dbString>
-</StDbTable> 
-</StarDataBase>
