@@ -1,7 +1,10 @@
 /*
- * $Id: csallo.c,v 1.5 2009/10/13 18:39:35 perev Exp $
+ * $Id: csallo.c,v 1.5.20.1 2020/07/09 19:43:57 perev Exp $
  *
  * $Log: csallo.c,v $
+ * Revision 1.5.20.1  2020/07/09 19:43:57  perev
+ * Add64
+ *
  * Revision 1.5  2009/10/13 18:39:35  perev
  * assert for 64bit added
  *
@@ -78,6 +81,7 @@ int type_of_call csallo_(lenb)
 {
   unsigned long lpntr;
   int pntr; 
+assert(0 && "CSALO");
 
   lpntr= (unsigned long)( malloc(*lenb) );
   /*  pntr=lpntr - iqpntr; */
@@ -97,7 +101,7 @@ void type_of_call csfree_(mpntr)
 unsigned  mpntr[];
 {
   void *pntr;
-
+assert(0 && " CSFREE ");
   pntr = (void*)(mpntr[0]+iqpntr); 
   free(pntr);
 }

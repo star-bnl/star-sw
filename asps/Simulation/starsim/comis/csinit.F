@@ -1,7 +1,10 @@
 *
-* $Id: csinit.F,v 1.2 2020/06/04 23:05:02 perev Exp $
+* $Id: csinit.F,v 1.2.4.1 2020/07/09 19:44:01 perev Exp $
 *
 * $Log: csinit.F,v $
+* Revision 1.2.4.1  2020/07/09 19:44:01  perev
+* Add64
+*
 * Revision 1.2  2020/06/04 23:05:02  perev
 * add csguard call
 *
@@ -82,7 +85,10 @@
      +            CSTPAR,CSCPAR,CSSPAR
          CHARACTER KWORDS*22
          DATA KWORDS/'ENDIFITHENELSEIFENDDOD'/
-
+         integer myinit/0/
+         save myinit
+	 if (myinit.ne.0) return
+	 myinit = 1946
 #if defined(CERNLIB_STDUNIX)
          WRITE(*,*) 'CSINIT: CERNLIB_STDUNIX'
 #endif
