@@ -33,10 +33,12 @@
 #include "TFile.h"
 #include "TNtuple.h"
 #include "TCanvas.h"
+#include "TPRegexp.h"
 //#include "TDirIter.h"
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
 #include "TObjArray.h"
+#include "TObjectTable.h"
 #include "brtw.C"
 #endif
 TF1 *FitGF(TH1 *proj, Option_t *opt="");
@@ -84,8 +86,9 @@ static const Hist_t Histos[] = {
 
 }; 
 //________________________________________________________________________________
-void kfQA(const Char_t *path2dir = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/9p2GeVc/J/dev", const Char_t *Out = 0){
+void kfQA(const Char_t *pattern = "21185_", const Char_t *Out = 0){
   const Int_t N = sizeof(Histos)/sizeof(Hist_t); cout << " N " << N << endl;
+  TPRegexp Pattern(pattern);
 #if 0
   if (gClassTable->GetID("StBichsel") < 0) {
     gSystem->Load("libTable");
@@ -140,7 +143,7 @@ void kfQA(const Char_t *path2dir = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/9p2G
   Int_t noRuns = 0;
   //  TDirIter Dir(files);
   //  const Char_t *file = Dir.NextFile();
-  TSystemDirectory Dir("",path2dir);
+  TSystemDirectory Dir("",".");
   TList *files = Dir.GetListOfFiles();
   if (! files) return;
   TIter next(files);
@@ -149,6 +152,8 @@ void kfQA(const Char_t *path2dir = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/9p2G
   while ((file = (TSystemFile *) next())) {
     TString File(file->GetName());
     if (! File.EndsWith(".root")) continue;
+    if (  File.BeginsWith("All")) continue;
+    if (! File.BeginsWith(pattern)) continue;
     //    cout << file->GetName() << "\t" << file->GetTitle() << endl;
     sscanf(File.Data(),"%i_",&run); 
     TString path( file->GetTitle());
@@ -163,6 +168,7 @@ void kfQA(const Char_t *path2dir = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/9p2G
   }
 #endif
   // Unique keys
+  TH1F *hist = 0;
   for( auto it = fileMap.begin(), end = fileMap.end();
        it != end;
        it = fileMap.upper_bound(it->first)) {
@@ -187,8 +193,9 @@ void kfQA(const Char_t *path2dir = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/9p2G
     params[0] = run;
     params[1] = Run;
     params[2] = no;
-    TH1F *hist = 0;
-    for (Int_t i = 0; i < N; i++) {
+    Int_t p = 4;
+    for (Int_t i = 0; i < N; i++) { // loop over histograms
+      if (hist) delete hist;
       hist = 0;
       for (auto f : TFiles) {
 	if (! hist) {
@@ -197,17 +204,18 @@ void kfQA(const Char_t *path2dir = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/9p2G
 	} else {
 	  TH1F *h = (TH1F *) f->Get(Histos[i].Path);
 	  if (h) hist->Add(h);
+	  delete h;
 	}
       } 
-      Int_t p = 0;
       TObjArray* arr = 0;
       Double_t binWidth;
       Double_t S;
-      if (! hist) goto CLOSEFILES;
-      params[3] = hist->GetEntries();
-      if (params[3] < 100) goto CLOSEFILES;
-      p = 4;
-      for (Int_t j = 0; j < NTVar; j++) {
+      if (! hist) continue;
+      if (i == 2) {// "/Particles/KFParticlesFinder/PrimaryVertexQA/z"
+	params[3] = hist->GetEntries();
+	if (params[3] < 100) continue;
+      }
+      for (Int_t j = 0; j < NTVar; j++) { // loop over variables
 	if ((1 << j) &  Histos[i].opt) {
 	  params[p] = 0;
 	  params[p+1] = 0;
@@ -241,6 +249,7 @@ void kfQA(const Char_t *path2dir = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/9p2G
 	      if (hist->GetDimension() == 2) {
 		h2 = (TH2 *) hist;
 		arr =  new TObjArray(4);
+		arr->SetOwner(kTRUE);
 		h2->FitSlicesY(0, 0, -1, 0, "QNR", arr);
 		TH1* mu = (TH1 *) (*arr)[1];
 		mu->Fit("pol4");
@@ -269,6 +278,7 @@ void kfQA(const Char_t *path2dir = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/9p2G
 		params[p] = gp->GetParameter(1);
 		params[++p] = gp->GetParameter(2);
 	      }
+	      delete proj;
 	      j++;
 	      break;
 	    case 9: // M
@@ -303,10 +313,7 @@ void kfQA(const Char_t *path2dir = "/gpfs01/star/subsys-tpc/fisyak/kfp/2020/9p2G
     for (auto f : TFiles) {
       delete f;
     }
-#ifndef __DRAW__
-    delete hist;
-    hist = 0;
-#endif
+    //    gObjectTable->Print();
   }
   fout->cd();
   QA->Write();
