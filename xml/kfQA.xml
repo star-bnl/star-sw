@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="xrootd" simulateSubmission ="false" copyInputLocally="false">
+        <command>
+  cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+  set input        = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+  set output       = D${input}.root
+  set log          = D${input}.log
+  if (-r ${output}) exit 0;
+  if (-r ${log}) exit 0;
+  ln -s ~/macros/.sl* .
+  root.exe -q -b lBichsel.C dEdxFit.C+  'kfQA.C+("'${input}'","'${output}'")'  &gt;&amp; ${log}
+        </command>
+    <ResourceUsage>
+      <Priority>99</Priority>
+    </ResourceUsage>
+    <stdout URL="file:./sched$JOBID.log" />
+    <stderr URL="file:./sched$JOBID.err" />
+     <input URL="command:kfQA.csh" /> 
+</job>
+

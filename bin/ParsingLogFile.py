@@ -3,11 +3,15 @@ import sys
 import math
 import datetime
 import commands
-
+from operator import truediv
+import DBFun
 #-----------------------------------------------------------------------------------
 #     Developed by : Amol 
 #     This python script parses the log file
-#     Parse(filename) --> Parse log file 
+#     Parse(filename)               --> Parse log file
+#     ForEachFile(filename)   --> Check for log file if the job is completed successfully
+#     ParseErrorFile(filename)      --> Parsing the error (not completed)
+#     InsertDBRecords(parsing_info) --> Insert the parsing information into database
 #-----------------------------------------------------------------------------------
 
 
@@ -18,6 +22,11 @@ def Parse(filename):
     mtime = os.path.getmtime(filename)
     createtime=datetime.datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
     row["createTime"] = createtime
+    row["crashedCode"] = "none"
+    ppyear=filename.split("year_")[1].split("/")[0]
+    if ppyear.find(".")>=0:
+       ppyear = ppyear.split(".")[0]
+    row["prodyear"]=ppyear
     jobstatus = "Done"
     error_message = "none"
     path = filename
@@ -27,10 +36,6 @@ def Parse(filename):
     row["jobStatus"]=jobstatus
     row["errMessage"]=error_message
     folders = filename.split("/")
-    #platform = folders[5] #--daq_sl302.ittf--
-    #prodyear = folders[7].split("_") #--2014--
-    #pyear = prodyear[1]
-    #row["prodyear"]=pyear
     logfilename = folders[len(folders)-1]
     row["logFile"]=logfilename
     #--activated flag if embed contains in filename--
@@ -44,6 +49,21 @@ def Parse(filename):
     row["LibLevel"]=output.split("STAR_LEVEL : ")[1].split()[0][:-1]
     row["rootLevel"]=output.split("ROOT_LEVEL : ")[1].split()[0]
     row["nodeID"]=output.split("node : ")[1].split()[0]
+    #-- For BTOF --
+    cmd = "cat "+filename+" | grep '(matched)'"
+    output = commands.getoutput(cmd)
+    if len(output)>1:
+       lines = output.split("\n")
+       btofcount = 0
+       totalbtof = 0
+       for line in lines:
+           btofcount = btofcount + 1
+           lineparts = line.split()
+           totalbtof = totalbtof + int(lineparts[10])
+       avg_btof = truediv(totalbtof,btofcount)
+       row["avg_no_btof"]=avg_btof
+    else:
+       row["avg_no_btof"]=0 
     #--QA :INFO  - ============= You are in DEV ===============--
     cmd = "cat "+filename+" | grep \"You are in\""
     output = commands.getoutput(cmd)
@@ -131,7 +151,7 @@ def Parse(filename):
     row["NoEventVtx"]=no_event_vtx
     if no_event_vtx > 0:
        #print("Primary Track:"+str(primary_track)+" no_event_vtx="+str(no_event_vtx))
-       row["avgNoVtx_evt"]= float(primary_track/no_event_vtx)
+       row["avgNoVtx_evt"]= truediv(primary_track,no_event_vtx)
     else: 
        row["avgNoVtx_evt"]=0
     #--for QA jobs--
@@ -291,12 +311,12 @@ def Parse(filename):
     row["CPU_per_evt_sec"]=avg_only_cpu
     #--other readings--
     if complete_events > 0:
-       percent_usable_event = ((no_event_with_track*100)/complete_events)
-       avg_tracks = no_tracks/complete_events
-       avg_tracks_nfit15 = no_nfit15/complete_events
-       avg_v0_vertices = v0vertices/complete_events
-       avg_kink_vertices = kinkvertices/complete_events
-       avg_xi_vertices = xivertices/complete_events
+       percent_usable_event = int(round(truediv((no_event_with_track*100),complete_events)))
+       avg_tracks = int(round(truediv(no_tracks,complete_events)))
+       avg_tracks_nfit15 = int(round(truediv(no_nfit15,complete_events)))
+       avg_v0_vertices = int(round(truediv(v0vertices,complete_events)))
+       avg_kink_vertices = int(round(truediv(kinkvertices,complete_events)))
+       avg_xi_vertices = int(round(truediv(xivertices,complete_events)))
     else:
        percent_usable_event = 0
        avg_tracks = 0
@@ -311,21 +331,21 @@ def Parse(filename):
     row["avg_no_KinkVrt"]=avg_kink_vertices 
     row["avg_no_XiVrt"]=avg_xi_vertices
     if no_event > 0:
-       avg_tracks_per_event = no_tracks/no_event_with_track
-       avg_tracks_nfit15_per_event = no_nfit15/no_event_with_track
-       avg_v0_vertices_per_event = v0vertices/no_event_with_track
-       avg_kink_vertices_per_event = kinkvertices/no_event_with_track
-       avg_xi_vertices_per_event = xivertices/no_event_with_track
-       avg_primary_tracks_1vtx = primary_track/no_event_with_track
-       avg_primary_track_nfit15_1vtx = primary_track_nfit15/no_event_with_track
+       avg_tracks_per_event = int(round(truediv(no_tracks,no_event_with_track)))
+       avg_tracks_nfit15_per_event = int(round(truediv(no_nfit15,no_event_with_track)))
+       avg_v0_vertices_per_event = int(round(truediv(v0vertices,no_event_with_track)))
+       avg_kink_vertices_per_event = int(round(truediv(kinkvertices,no_event_with_track)))
+       avg_xi_vertices_per_event = int(round(truediv(xivertices,no_event_with_track)))
+       avg_primary_tracks_1vtx = int(round(truediv(primary_track,no_event_with_track)))
+       avg_primary_track_nfit15_1vtx = int(round(truediv(primary_track_nfit15,no_event_with_track)))
        #--QA jobs--
-       avg_mtd_hits = mtdhits/no_event_with_track
-       avg_pixel_hits = pixelhits/no_event_with_track
-       avg_ist_hits = isthits/no_event_with_track
-       avg_sst_hits = ssthits/no_event_with_track
-       avg_used_pixel_hits = usedpixelhits/no_event_with_track
-       avg_used_ist_hits = usedisthits/no_event_with_track
-       avg_used_sst_hits = usedisthits/no_event_with_track
+       avg_mtd_hits = int(round(truediv(mtdhits,no_event_with_track)))
+       avg_pixel_hits = int(round(truediv(pixelhits,no_event_with_track)))
+       avg_ist_hits = int(round(truediv(isthits,no_event_with_track)))
+       avg_sst_hits = int(round(truediv(ssthits,no_event_with_track)))
+       avg_used_pixel_hits = int(round(truediv(usedpixelhits,no_event_with_track)))
+       avg_used_ist_hits = int(round(truediv(usedisthits,no_event_with_track)))
+       avg_used_sst_hits = int(round(truediv(usedisthits,no_event_with_track)))
     else:
        avg_tracks_per_event = 0
        avg_tracks_nfit15_per_event = 0
@@ -350,8 +370,8 @@ def Parse(filename):
     if vrank_no > 0:
        #print(primary_track)
        #print(vrank_no)
-       avg_primary_tracks = primary_track/vrank_no
-       avg_primary_track_nfit15 = primary_track_nfit15/vrank_no
+       avg_primary_tracks = int(round(truediv(primary_track,vrank_no)))
+       avg_primary_track_nfit15 = int(round(truediv(primary_track_nfit15,vrank_no)))
     else:
        avg_primary_tracks = 0
        avg_primary_track_nfit15 = 0
@@ -378,24 +398,74 @@ def ParseErrorFile(filename):
     error_msg = ["bus error", "segmentation violation","Segmentation violation","segmentation fault","Segmentation fault","Stale NFS file handle","Tried to find a host for 500 times, will abort now","Killed","Abort","StFATAL","Catch exception FATAL","floating point exception","Fatal in <operator delete","Fatal in <operator new>","runtime_error","failed"]
     return 0
 
+def CheckDBRecord(parsing_info):
+    qry = "select * from JobStatus where "
+    qry1 = "LibLevel='"+parsing_info.get("LibLevel")+"' and LibTag='"+parsing_info.get("LibTag")+"' and rootLevel='"+parsing_info.get("rootLevel")+"' and path='"+parsing_info.get("path")+"' and logFile='"+parsing_info.get("logFile")+"' and createTime='"+parsing_info.get("createTime")+"' and chainOpt='"+parsing_info.get("chainOpt")+"'"
+    query = qry+qry1
+    #print(query)
+    result = DBFun.execute("LibraryJobs",query)
+    count = 0
+    for row in result:
+        count = count + 1
+    return count
+
+def InsertDBRecords(parsing_info):
+    valuelist = "("
+    qry1 = "insert into JobStatus (jobID,LibLevel,LibTag,rootLevel,path,prodyear,logFile,createTime,chainOpt,jobStatus,crashedCode,errMessage,NoEventDone,memUsageF,memUsageL,CPU_per_evt_sec,RealTime_per_evt,percent_of_usable_evt,avg_no_tracks,avg_no_tracksnfit15,NoEventVtx,avgNoVtx_evt,avg_no_primaryT,avg_no_primaryT_1vtx,avg_no_primaryTnfit15,avg_no_primaryTnfit15_1vtx,avg_no_V0Vrt,avg_no_XiVrt,avg_no_KinkVrt,avgNoTrack_usbevt,avgNoTrackNfit15_usbevt,avgNoPrTrack_1vtx_usbevt,avgNoPrTrackNfit15_1vtx_usbevt,avgNoV0_usbevt,avgNoXi_usbevt,avgNoKink_usbevt,nodeID,NoEventSkip,avg_no_btof) values "
+    keys = qry1.split("(")[1].split(")")[0].split(",")
+    for key in keys:
+        if type(parsing_info.get(key))==str:
+           valuelist = valuelist +"'"+str(parsing_info.get(key))+"',"
+        else:
+           valuelist = valuelist+str(parsing_info.get(key))+","
+    valuelist = valuelist[:-1]
+    valuelist = valuelist + ")"
+    #print(qry1+valuelist) 
+    query = qry1+valuelist
+    result = DBFun.execute("LibraryJobs",query)
+    print("Added the row...")
+    return 0
+
+def ForEachFile(filename):
+      cmd = "cat "+filename+" | grep \"Run completed\""
+      output = commands.getoutput(cmd)
+      if output.find("Run completed")<0:
+         cmd = "cat "+filename+" | grep \"error\""
+         output = commands.getoutput(cmd)
+         print("-------------------------------------------------------------------------------------------------")
+         print("Error:"+output)
+         print("-------------------------------------------------------------------------------------------------")
+      else:
+         #print("Successfully completed...")
+         parsing_info = Parse(filename)
+         print("-------------------------------------------------------------------------------------------------")
+         print(parsing_info)
+         print("-------------------------------------------------------------------------------------------------")
+         if CheckDBRecord(parsing_info)==0:
+            InsertDBRecords(parsing_info)
+         else:
+            print("Row is already present in DB...")
+         print("-------------------------------------------------------------------------------------------------") 
+         #sort_keys = parsing_info.keys()
+         #sort_keys.sort()
+         #for parameter in sort_keys:
+         #    print('|%32s:%s'%(str(parameter),str(parsing_info.get(parameter))))
+         #    print("-------------------------------------------------------------------------------------------------") 
+         #exit()
+
 if __name__ == "__main__":
    if len(sys.argv)!=2:
       print("------------------------------------------------")
       print("....Please use like this........................")
-      print("    python ParseLogFile.py /abc/pqr/xyz.log     ")
+      print("    python ParseLogFile.py /abc/pqr/filelist.txt")
       print("------------------------------------------------")
    else:
-      cmd = "cat "+sys.argv[1]+" | grep \"Run completed\""
-      output = commands.getoutput(cmd)
-      if output.find("Run completed")<0:
-         cmd = "cat "+sys.argv[1]+" | grep \"error\""
-         output = commands.getoutput(cmd)
-         print("Error:"+output)
-      else:
-         parsing_info = Parse(sys.argv[1])
-         print("-------------------------------------------------------------------------------------------------")
-         sort_keys = parsing_info.keys()
-         sort_keys.sort()
-         for parameter in sort_keys:
-             print('|%32s:%s'%(str(parameter),str(parsing_info.get(parameter))))
-             print("-------------------------------------------------------------------------------------------------") 
+      filelist = open(sys.argv[1],"rb+")
+      for fl in filelist:
+          print("File:"+fl[:-1])
+          ForEachFile(fl[:-1])
+
+
+
+
+

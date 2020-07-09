@@ -17,6 +17,8 @@
 #  set split = (${INPUTFILE0}:as|/| |)
  set input        = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
  set outputb      = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+ set year         = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+  
 # set input = ${INPUTFILE0};
 #foreach input (`cat $FILELIST`)
   set dir = ${input};
@@ -38,19 +40,6 @@
   set idNdx = kFALSE;
   echo ${SUBMITTINGDIRECTORY} | grep dNdx 
   if (! $? )  set idNdx = kTRUE;
-  set year = y2020;
-  grep 2019 ${INPUTFILE0}
-  if ($? ) set year = y2019
-  grep 2018 ${INPUTFILE0}
-  if ($? ) set year = y2018
-  grep 2016 ${INPUTFILE0}
-  if ($? ) set year = y2016
-  grep 2014 ${INPUTFILE0}
-  if ($? ) set year = y2014
-  grep 2011 ${INPUTFILE0}
-  if ($? ) set year = y2011
-  grep 2010 ${INPUTFILE0}
-  if ($? ) set year = y2010
 ##  root.exe -q -b -x  'kfpAnalysis.C(1000000,"./*.picoDst.root","'${output}'","y2020",'${idNdx}')' &gt;&amp; ${log}
   root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${input}'/*.picoDst.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
 #  mv ${outputb} ${output}

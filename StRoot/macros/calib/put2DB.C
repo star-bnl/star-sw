@@ -135,9 +135,8 @@ void put2DB(const char* files=
       //      const Int_t Nmax = 192; 
       Nmax = 50; 
       if (TName == "TpcCurrentCorrectionX" ||
-	  TName == "TpcAccumulatedQC")
-	  ) Nmax = 192;
-      if (N > Nmax) {cout << "Table has " << N << " more than " << Nmax << " rows. Possible BUG " << endl; return;}
+	  TName == "TpcAccumulatedQ")	Nmax = 192;
+      if (N > Nmax) {cout << "Table " << TName.Data() << " has " << N << " more than " << Nmax << " rows. Possible BUG " << endl; return;}
       myTable->ReAllocate(Nmax);
       tpcCorrection_st row;
       memset(&row, 0, sizeof(tpcCorrection_st));

@@ -18,6 +18,18 @@ my $pwd = Cwd::cwd(); print "pwd = $pwd\n" if ($debug);
 my $glob;
 my $dayMin =  0;
 my $dayMax =  0;
+my $year = "y2020";
+if    ($pwd =~ /2020/) { $year = "y2020";}
+elsif ($pwd =~ /2019/) { $year = "y2019";} 
+elsif ($pwd =~ /2018/) { $year = "y2018";} 
+elsif ($pwd =~ /2017/) { $year = "y2017";} 
+elsif ($pwd =~ /2016/) { $year = "y2016";} 
+elsif ($pwd =~ /2015/) { $year = "y2015";} 
+elsif ($pwd =~ /2014/) { $year = "y2014";} 
+elsif ($pwd =~ /2013/) { $year = "y2013";} 
+elsif ($pwd =~ /2012/) { $year = "y2012";} 
+elsif ($pwd =~ /2011/) { $year = "y2011";} 
+elsif ($pwd =~ /2010/) { $year = "y2010";} 
 if ($pwd =~ /dev/) {
   $PICOPATH = "/gpfs01/star/data*";
   if    ($pwd =~ /2020\/5p75GeV_fixedTarget/) {$glob = "/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
@@ -41,7 +53,7 @@ if ($pwd =~ /dev/) {
 
   elsif ($pwd =~ /2011\/27GeV/)               {$glob = "/2011/27GeV";}
   elsif ($pwd =~ /2018\/27GeV/)               {$PICOPATH = "/gpfs01/star/data*"; $glob = "/reco/production_27GeV_fixedTarget_2018/ReversedFullField/P19ie/2018";}
-  elsif ($pwd =~ /201\/7GeV/)                 {$glob = "/2010/7GeV";}
+  elsif ($pwd =~ /2010\/7GeV/)                 {$glob = "/2010/7GeV";}
 
   elsif ($pwd =~ /2018\/3p85GeV_fixedTarget/) {$glob = "/2018/3p85GeV_fixedTarget";}
 
@@ -81,8 +93,8 @@ my %Runs= ();
 foreach my $run (glob $GLOB) {
   my $f = File::Basename::basename($run);
   my $day = int ($f/1000);       # print "day = $day\n";
-  my $year = int ($day/1000);    # print "year = $year\n";
-  $day -=  1000*$year;           # print "day = $day\n";
+  my $Y = int ($day/1000);    # print "Y = $Y\n";
+  $day -=  1000*$Y;           # print "day = $day\n";
   if ($dayMin > 0 && $day < $dayMin) {next;}
   if ($dayMax > 0 && $day > $dayMax) {next;}
   $Runs{$f}++;
@@ -114,7 +126,7 @@ foreach my $run (glob $GLOB) {
   my $picoGlob = $run . "/*picoDst.root";
   my @picos = glob $picoGlob;
   if ($#picos > -1) {
-    print "string:$run:$ana\n";
+    print "string:$run:$ana:$year\n";
   }
 #  last;
 #  die;
