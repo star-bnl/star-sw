@@ -680,7 +680,7 @@ Int_t StdEdxY2Maker::Make(){
 	dedx.id_track  =  Id;
 	dedx.det_id    =  kTpcId;    // TPC track 
 	dedx.method    =  kEnsembleTruncatedMeanId; // == kTruncatedMeanId+1;
-	dedx.ndedx     =  N70 + 100*((int) TrackLength);
+	dedx.ndedx     =  TMath::Min(99,N70) + 100*((int) TrackLength);
 	dedx.dedx[0]   =  I70;
 	dedx.dedx[1]   =  D70;
 	dedx.dedx[2]   =  dXavLog2;
@@ -712,7 +712,7 @@ Int_t StdEdxY2Maker::Make(){
 	  dedx.id_track  =  Id;
 	  dedx.det_id    =  kTpcId;    // TPC track 
 	  dedx.method    =  kWeightedTruncatedMeanId;// == kLikelihoodFitId+1;
-	  dedx.ndedx     =  NdEdx + 100*((int) TrackLength);
+	  dedx.ndedx     =  TMath::Min(99,NdEdx) + 100*((int) TrackLength);
 	  dedx.dedx[0]   =  TMath::Exp(fitZ);
 	  dedx.dedx[1]   =  fitdZ; 
 	  dedx.dedx[2]   =  dXavLog2;
@@ -738,7 +738,7 @@ Int_t StdEdxY2Maker::Make(){
 	    dedx.id_track  =  Id;
 	    dedx.det_id    =  kTpcId;    // TPC track 
 	    dedx.method    =  kOtherMethodId2;
-	    dedx.ndedx     =  NdEdx + 100*((int) TrackLength);
+	    dedx.ndedx     =  TMath::Min(99,NdEdx) + 100*((int) TrackLength);
 	    dedx.dedx[0]   =  fitN;
 	    dedx.dedx[1]   =  fitdN/fitN; 
 	    dedx.dedx[2]   =  dXavLog2;
