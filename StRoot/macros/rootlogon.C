@@ -17,10 +17,11 @@
       gEnv->SetValue("Gui.Backend","qt");
       gEnv->SetValue("Gui.Factory","qtgui");     
   }
-  rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV" || TString(gSystem->Getenv("STAR_VERSION")) == "DEV2" || TString(gSystem->Getenv("STAR_VERSION")) == "DEV6";
+  TString StarVersion(gSystem->Getenv("STAR_VERSION"));
+  rootlogon_fpe =StarVersion == ".DEV" ||StarVersion == "DEV2" ||StarVersion == "DEV6";
 #if 1
   if (! rootlogon_fpe && gClassTable->GetID("TGiant3") < 0) { // ! root4star
-    rootlogon_fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2";
+    rootlogon_fpe = StarVersion == ".DEV2";
   }
 #endif
   rootlogon_env = gSystem->Getenv("STARFPE");
