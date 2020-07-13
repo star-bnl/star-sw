@@ -34,21 +34,86 @@
 #include "TNtuple.h"
 #include "TCanvas.h"
 #include "TPRegexp.h"
+#include "TLegend.h"
 //#include "TDirIter.h"
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
 #include "TObjArray.h"
 #include "TObjectTable.h"
+//#include "dEdxFit.C"
 #include "brtw.C"
 #endif
 TF1 *FitGF(TH1 *proj, Option_t *opt="");
 TF1* FitGP(TH1* proj, Option_t* opt = "RQ", Double_t nSigma = 3, Int_t pow = 3, Double_t zmin = -0.2, Double_t zmax = 0.2);
 enum {NTVar = 12};
 const Char_t *Var[NTVar] = {"mean", "RMS", "mu", "sigma","sg10","sg100", "muGP", "sigmaGP", "M", "Gamma", "Significance", "PerEvent"};
-class Hist_t {
-public:
+struct Plot_t {
+  const Char_t *VarInTuple;
+  const Char_t *particle;
+  const Char_t *Var;
+  const Char_t *hTitle;
+};
+Plot_t Plots[] = {
+  {"Pr_x_mean",                   "",      "mean",         "PrimaryVertexQA x"},	 // 0  
+  {"Pr_y_mean",   	  	  "",      "mean",     	   "PrimaryVertexQA y"},	 // 1
+  {"Pr_z_mean",   	  	  "",      "mean",     	   "PrimaryVertexQA z"},	 // 2
+  {"Pr_x_RMS",    	  	  "",      "RMS",      	   "PrimaryVertexQA x"},	 // 3
+  {"Pr_y_RMS",    	  	  "",      "RMS",      	   "PrimaryVertexQA y"},	 // 4
+  {"Pr_z_RMS",    	  	  "",      "RMS",      	   "PrimaryVertexQA z"},	 // 5
+  {"Pr_Ntracks_mean",     	  "",      "mean", 	   "PrimaryVertexQA Ntracks"},	 // 6
+  {"Tk_hPrimaryRatio_mean",       "",      "mean", 	   "hPrimaryRatio"},		 // 7
+  {"Tk_hPVError_mean",            "",      "mean", 	   "hPVError"},			 // 8
+  {"Pr_Ntracks_RMS",      	  "",      "RMS",  	   "PrimaryVertexQA Ntracks"},	 // 9
+  {"Tk_hPrimaryRatio_RMS",        "",      "RMS",  	   "hPrimaryRatio"},		 //10
+  {"Tk_hPVError_RMS",     	  "",      "RMS",  	   "hPVError"},			 //11  
+  {"Tk_hPVErrorVsNPVTracks_sg10", "",      "sg10", 	   "hPVErrorVsNPVTracks"},	 //12 
+  {"Tk_hPVErrorVsNPVTracks_sg100","",      "sg100",	   "hPVErrorVsNPVTracks"},	 //13
+  {"dEdx_Pull_piN_muGP",          "piN",   "muGP", 	   "hdEdXPull"},	  	 //14
+  {"dEdx_Pull_piP_muGP",          "piP",   "muGP",         "hdEdXPull"},	  	 //15
+  {"dEdx_Pull_KN_muGP",           "KN",    "muGP",         "hdEdXPull"},	  	 //16
+  {"dEdx_Pull_KP_muGP",           "KP",    "muGP",         "hdEdXPull"},	  	 //17
+  {"dEdx_Pull_p_muGP",            "p",     "muGP",         "hdEdXPull"},	  	 //18
+  {"dEdx_Pull_pN_muGP",           "pN",    "muGP",         "hdEdXPull"},	  	 //19
+  {"dNdx_Pull_piN_muGP",          "piN",   "muGP",         "hdNdXPull"},	         //20
+  {"dNdx_Pull_piP_muGP",          "piP",   "muGP",         "hdNdXPull"},	  	 //21
+  {"dNdx_Pull_KN_muGP",           "KN",    "muGP",         "hdNdXPull"},	  	 //22
+  {"dNdx_Pull_KP_muGP",           "KP",    "muGP",         "hdNdXPull"},	  	 //23
+  {"dNdx_Pull_p_muGP",            "p",     "muGP",         "hdNdXPull"},	  	 //24
+  {"dNdx_Pull_pN_muGP",           "pN",    "muGP",         "hdNdXPull"},	  	 //25
+  {"dEdx_Pull_piN_sigmaGP",       "piN",   "sigmaGP",      "hdEdXPull"},	  	 //26
+  {"dEdx_Pull_piP_sigmaGP",       "piP",   "sigmaGP",      "hdEdXPull"},	 	 //27
+  {"dEdx_Pull_KN_sigmaGP",        "KN",    "sigmaGP",      "hdEdXPull"},	  	 //28
+  {"dEdx_Pull_KP_sigmaGP",        "KP",    "sigmaGP",      "hdEdXPull"},	 	 //29
+  {"dEdx_Pull_p_sigmaGP",         "p",     "sigmaGP",      "hdEdXPull"},	         //30
+  {"dEdx_Pull_pN_sigmaGP",        "pN",    "sigmaGP",      "hdEdXPull"},	 	 //31
+  {"dNdx_Pull_piN_sigmaGP",       "piN",   "sigmaGP",      "hdNdXPull"},	 	 //32
+  {"dNdx_Pull_piP_sigmaGP",       "piP",   "sigmaGP",      "hdNdXPull"},	 	 //33
+  {"dNdx_Pull_KN_sigmaGP",        "KN",    "sigmaGP",      "hdNdXPull"},	 	 //34
+  {"dNdx_Pull_KP_sigmaGP",        "KP",    "sigmaGP",      "hdNdXPull"},	 	 //35
+  {"dNdx_Pull_p_sigmaGP",         "p",     "sigmaGP",      "hdNdXPull"},	 	 //36
+  {"dNdx_Pull_pN_sigmaGP",        "pN",    "sigmaGP",      "hdNdXPull"},	 	 //37
+  {"M2_piN_muGP",                 "piN",   "muGP",         "hTofPID"},		         //38
+  {"M2_piP_muGP",         	  "piP",   "muGP",         "hTofPID"},		         //39
+  {"M2_KN_muGP",          	  "KN",    "muGP",         "hTofPID"},		         //40
+  {"M2_KP_muGP",          	  "KP",    "muGP",         "hTofPID"},		 	 //41
+  {"M2_p_muGP",           	  "p",     "muGP",         "ToF M2 proton"},		 //42
+  {"M2_pN_muGP",          	  "pN",    "muGP",         "ToF M2 pbar"},		 //43
+  {"M2_piN_sigmaGP",      	  "piN",   "sigmaGP",      "hTofPID"},	 		 //44
+  {"M2_piP_sigmaGP",      	  "piP",   "sigmaGP",      "hTofPID"},	 		 //45
+  {"M2_KN_sigmaGP",       	  "KN",    "sigmaGP",      "hTofPID"},	 		 //46
+  {"M2_KP_sigmaGP",       	  "KP",    "sigmaGP",      "hTofPID"},	 		 //47
+  {"M2_p_sigmaGP",        	  "p",     "sigmaGP",      "hTofPID"},	 		 //48
+  {"M2_pN_sigmaGP",       	  "pN",    "sigmaGP",      "hTofPID"},	 		 //49
+  {"Mass_Ks_M",           	  "",      "M",            "Ks M"},                      //50
+  {"Mass_Ks_Gamma",       	  "",      "Gamma",        "Ks M"},			 //51
+  {"Mass_Ks_Significance",	  "",      "Significance", "Ks M"},			 //52
+  {"Mass_Ks_PerEvent",    	  "",      "PerEvent",     "Ks M"}			 //53
+};											
+											
+class Hist_t {										
+public:											
   Hist_t (const Char_t *name = "", const Char_t *path = "", const Int_t Opt = 0) : Name(name), Path(path), opt(Opt) {}
-  //  virtual ~Hist_t() {}
+  //  virtual ~Hist_t() {}								
   const Char_t *Name; 
   const Char_t *Path;
   const Int_t opt; // 1 - mean, 2 - RMS, 4 - mu, 8 - sigma, 16 - sg10, 32 - sg100, 64 - muGP, 128 - sigmaGP, 256 - M, 512 - Gamma, 1024 - Significance
@@ -68,14 +133,14 @@ static const Hist_t Histos[] = {
   Hist_t("dEdx_Pull","/Tracks/K+/hdEdXPull",64+128),
   Hist_t("dEdx_Pull","/Tracks/p/hdEdXPull",64+128),
   Hist_t("dEdx_Pull","/Tracks/p-/hdEdXPull",64+128),
-
+  
   Hist_t("dNdx_Pull","/Tracks/pi-/hdNdXPull",64+128),
   Hist_t("dNdx_Pull","/Tracks/pi+/hdNdXPull",64+128),
   Hist_t("dNdx_Pull","/Tracks/K-/hdNdXPull",64+128),
   Hist_t("dNdx_Pull","/Tracks/K+/hdNdXPull",64+128),
   Hist_t("dNdx_Pull","/Tracks/p/hdNdXPull",64+128),
   Hist_t("dNdx_Pull","/Tracks/p-/hdNdXPull",64+128),
-
+  
   Hist_t("M2","/Tracks/pi-/hTofPID",64+128),
   Hist_t("M2","/Tracks/pi+/hTofPID",64+128),
   Hist_t("M2","/Tracks/K-/hTofPID",64+128),
@@ -83,7 +148,7 @@ static const Hist_t Histos[] = {
   Hist_t("M2","/Tracks/p/hTofPID",64+128),
   Hist_t("M2","/Tracks/p-/hTofPID",64+128),
   Hist_t("Mass","/Particles/KFParticlesFinder/Particles/Ks/Parameters/M",256+512+1024+2048)
-
+  
 }; 
 //________________________________________________________________________________
 void kfQA(const Char_t *pattern = "21185_", const Char_t *Out = 0){
@@ -320,3 +385,112 @@ void kfQA(const Char_t *pattern = "21185_", const Char_t *Out = 0){
   //  fout->Close();
   //  delete fout;
 }
+//________________________________________________________________________________
+void PrintVars(const Char_t *file = "K/dEdx/21174052_1.root") {
+  const Int_t N = sizeof(Histos)/sizeof(Hist_t); cout << " N " << N << endl;
+  for (Int_t i = 0; i < N; i++) {
+    TString var(Histos[i].Name);
+    TString histName(gSystem->BaseName(Histos[i].Path));
+    
+    TString part(gSystem->BaseName(gSystem->DirName(Histos[i].Path)));
+    TString part2(gSystem->BaseName(gSystem->DirName(gSystem->DirName(Histos[i].Path))));
+    part.ReplaceAll("+","P");
+    part.ReplaceAll("-","N");
+    //    TFile *f = new TFile(file);
+    auto *f = new TFile(file);
+    if (! f) return;
+    TH1 *hist = (TH1 *) f->Get(Histos[i].Path);
+    if (! hist) continue;
+    //    cout << "histogram name " << hist->GetName() << "\t" << hist->GetTitle() << endl;
+    for (Int_t j = 0; j < NTVar; j++) {
+      if ((1 << j) &  Histos[i].opt) {
+	TString variable(var); variable += "_";
+	if      (histName == "hdEdXPull") variable += part;
+	else if (histName == "hdNdXPull") variable += part;
+	else if (histName == "hTofPID") variable += part;
+	else if (histName == "M") variable += part2;
+	else                      variable += histName;
+	variable += "_"; variable += Var[j];
+	//	cout << "histogram name " << hist->GetName() << "\t" << hist->GetTitle() << "\t" << Var[j] << "\t" << variable.Data() <<  endl;
+	cout << "{\"" <<  variable.Data() << "\",\t\"" << part.Data() << "\",\t\"" << Var[j] << "\",\t\"" <<  hist->GetTitle() << "\"}," << endl;
+      }
+    }
+  } 
+}
+//________________________________________________________________________________
+Float_t day(Float_t Run) {
+  Int_t r = ((Int_t)Run)%1000000;
+  Int_t D = r/1000;
+  Int_t s = r%1000;
+  return D + ((Float_t) (s))/60.;
+}
+//________________________________________________________________________________
+void Plot(Int_t iplot1=0, Int_t iplot2=0, const Char_t *tfg = "kfQA.K.dEdx.W.root", const Char_t *dev = "kfQA.K.dev.W.root") {
+  TCanvas *c1 = (TCanvas*)gROOT->GetListOfCanvases()->FindObject("c1");
+  if (! c1) c1 = new TCanvas("c1","c1",10,10,600,600);
+  else      c1->Clear();
+  TCanvas *c2 = (TCanvas*)gROOT->GetListOfCanvases()->FindObject("c2");
+  if (! c2) c2 = new TCanvas("c2","c2",10,640,1800,600);
+  else      c2->Clear();
+  const Char_t *v[2] = {"tfg","dev"};
+  Int_t d1 = 169;
+  Int_t d2 = 192;
+  static TFile *files[2] = {0};
+  if (! files[0]) files[0] = new TFile(tfg);
+  if (! files[1]) files[1] = new TFile(dev);
+  TH2F *h[12] ={0};
+  TH1  *h1[12] = {0};
+  TString same;
+  TNtuple *QA[2] = {0};
+  const Char_t *dt[2] = {"tfg","dev"};
+  TLegend *l = new TLegend(0.2,0.2,0.6,0.4);
+  for (Int_t iplot = iplot1, p = 0; iplot <= iplot2; iplot++, p++) {
+    for (Int_t iv = 0; iv < 2; iv++) {
+      Int_t ivp = iv + 2*p;
+      Int_t color = ivp + 1;
+      if (files[iv]) {
+	files[iv]->cd(); 
+	QA[iv] = (TNtuple *) files[iv]->Get("QA");
+	if (QA[iv]) {
+	  QA[iv]->SetMarkerColor(color);
+	  QA[iv]->SetLineColor(color);
+	  TString name(Form("%s_%s",Plots[iplot].Var,Plots[iplot].hTitle));
+	  name.ReplaceAll(" ","");
+	  c1->cd();
+	  TString h1n(name); h1n += "1D"; h1n += Plots[iplot].particle;  h1n += dt[iv];
+	  QA[iv]->Draw(Form("%s>>%s",Plots[iplot].VarInTuple,h1n.Data()),"",same);
+	  h1[ivp] = (TH1 *) files[iv]->Get(h1n);
+	  h1[ivp]->SetLineColor(color);
+	  h1[ivp]->SetMarkerColor(color);
+	  if (h1[ivp]) {
+	    TAxis *xax = h1[ivp]->GetXaxis();
+	    Double_t xmin =  xax->GetXmin();
+	    Double_t xmax =  xax->GetXmax();
+	    TF1 *gaus = (TF1 *) gROOT->GetListOfFunctions()->FindObject("gaus");
+	    if (gaus) gaus->SetLineColor(color);
+	    h1[ivp]->Fit("gaus","","goff");
+	    gaus = (TF1 *) h1[ivp]->GetListOfFunctions()->FindObject("gaus");
+	    if (gaus) {
+	      //	    gaus->SetLineColor(color);
+	      //	    gaus->Draw("same");
+	      Double_t mu = gaus->GetParameter(1);
+	      Double_t sigma = gaus->GetParameter(2);
+	      cout << files[iv]->GetName() << "\t" << name.Data() << " = " << mu << " +/- " << sigma << "\tBad Runs (> 5 sigma)" << endl;
+	      QA[iv]->Scan(Form("Run:%s",Plots[iplot].VarInTuple),Form("abs(%s-%f)>5*%f",Plots[iplot].VarInTuple,mu,sigma));
+	    }
+	    TString h2n(name); h2n += "2D"; h2n += Plots[iplot].particle;  h2n += dt[iv];
+	    h[ivp] = new TH2F(h2n,Form("%s from day",Plots[iplot].hTitle),60*(d2 - d1 +1),d1, d2+1,200,xmin,xmax);
+	    h[ivp]->SetMarkerColor(color);
+	    c2->cd();
+	    QA[iv]->Draw(Form("%s:day(Run)>>%s",Plots[iplot].VarInTuple,h[ivp]->GetName()),"",same);
+	    same = "sames";
+	    l->AddEntry(h[ivp],Form("%s (%s)",Plots[iplot].hTitle,dt[iv]));
+	  }
+	}
+      }
+    }
+    l->Draw();
+  }
+}  
+//________________________________________________________________________________
+  

@@ -60,7 +60,7 @@ KFParticleDatabase::KFParticleDatabase():
   fMass[ 5] = 1.876124;
   fMass[ 6] = 2.809432;
   fMass[ 7] = 2.809413;
-  fMass[ 8] = 3.728400;
+  fMass[ 8] = 3.727379;
   fMass[ 9] = 5.6055375;
   fMass[10] = 5.6015181;
   fMass[11] = 6.5338336;

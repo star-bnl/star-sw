@@ -628,6 +628,8 @@ void KFParticleBase::AddDaughter( const KFParticleBase &Daughter )
    ** \param[in] Daughter - the daughter particle
    **/
     
+  AddDaughterId( Daughter.Id() );
+  
   if( fNDF<-1 ){ // first daughter -> just copy
     fNDF   = -1;
     fQ     =  Daughter.GetQ();
@@ -799,6 +801,8 @@ void KFParticleBase::SubtractDaughter( const KFParticleBase &Daughter )
    ** similar to AddDaughterWithEnergyFit() but momentum is subtracted.
    ** \param[in] Daughter - the daughter particle
    **/
+
+  AddDaughterId( Daughter.Id() );
 
   float m[8], mV[36];
 
@@ -3389,6 +3393,86 @@ void KFParticleBase::RotateXY(float angle, float Vtx[3])
   X() = GetX() + Vtx[0];
   Y() = GetY() + Vtx[1];
   Z() = GetZ() + Vtx[2];
+}
+
+void KFParticleBase::Rotate(float angle, const KFParticleBase& axis)
+{
+  /** Rotates the KFParticle object around OZ axis, OZ axis is set by the vertex position.
+   ** \param[in] angle - angle of rotation in XY plane in [rad]
+   ** \param[in] Vtx[3] - position of the vertex in [cm]
+   **/
+
+  // Before rotation the center of the coordinat system should be moved to the vertex position; move back after rotation
+  X() = X() - axis.GetX();
+  Y() = Y() - axis.GetY();
+  Z() = Z() - axis.GetZ();
+
+  // Rotate the particle
+  const float c = cos(angle);
+  const float c1 = 1.f - c;
+  const float s = sin(angle);
+
+  const float axisNorm = 1.f/sqrt(axis.GetPx()*axis.GetPx() + 
+                                  axis.GetPy()*axis.GetPy() +
+                                  axis.GetPz()*axis.GetPz());
+  const float u[3] = {axis.GetPx()*axisNorm, 
+                      axis.GetPy()*axisNorm, 
+                      axis.GetPz()*axisNorm};
+  
+  float mA[8][8];
+  for( Int_t i=0; i<8; i++ ){
+    for( Int_t j=0; j<8; j++){
+      mA[i][j] = 0;
+    }
+  }
+  for( int i=0; i<8; i++ ){
+    mA[i][i] = 1;
+  }
+
+//   mA[0][0] = c + u[0]*u[0]*c1;      mA[0][1] = u[0]*u[1]*c1 - u[2]*s; mA[0][2] = u[0]*u[2]*c1 + u[1]*s;
+//   mA[1][0] = u[0]*u[1]*c1 + u[2]*s; mA[1][1] = c + u[1]*u[1]*c1;      mA[1][2] = u[1]*u[2]*c1 - u[0]*s;
+//   mA[2][0] = u[0]*u[2]*c1 - u[1]*s; mA[2][1] = u[1]*u[2]*c1 + u[0]*s; mA[2][2] = c + u[2]*u[2]*c1;
+  
+  mA[3][3] = c + u[0]*u[0]*c1;      mA[3][4] = u[0]*u[1]*c1 - u[2]*s; mA[3][5] = u[0]*u[2]*c1 + u[1]*s;
+  mA[4][3] = u[0]*u[1]*c1 + u[2]*s; mA[4][4] = c + u[1]*u[1]*c1;      mA[4][5] = u[1]*u[2]*c1 - u[0]*s;
+  mA[5][3] = u[0]*u[2]*c1 - u[1]*s; mA[5][4] = u[1]*u[2]*c1 + u[0]*s; mA[5][5] = c + u[2]*u[2]*c1;
+
+  float mAC[8][8];
+  float mAp[8];
+
+  for( Int_t i=0; i<8; i++ ){
+    mAp[i] = 0;
+    for( Int_t k=0; k<8; k++){
+      mAp[i]+=mA[i][k] * fP[k];
+    }
+  }
+
+  for( Int_t i=0; i<8; i++){
+    fP[i] = mAp[i];
+  }
+
+  for( Int_t i=0; i<8; i++ ){
+    for( Int_t j=0; j<8; j++ ){
+      mAC[i][j] = 0;
+      for( Int_t k=0; k<8; k++ ){
+        mAC[i][j]+= mA[i][k] * GetCovariance(k,j);
+      }
+    }
+  }
+
+  for( Int_t i=0; i<8; i++ ){
+    for( Int_t j=0; j<=i; j++ ){
+      float xx = 0;
+      for( Int_t k=0; k<8; k++){
+        xx+= mAC[i][k]*mA[j][k];
+      }
+      Covariance(i,j) = xx;
+    }
+  }
+
+  X() = GetX() + axis.GetX();
+  Y() = GetY() + axis.GetY();
+  Z() = GetZ() + axis.GetZ();
 }
 
 void KFParticleBase::InvertCholetsky3(float a[6])

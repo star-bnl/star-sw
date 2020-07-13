@@ -30,7 +30,7 @@ elsif ($pwd =~ /2013/) { $year = "y2013";}
 elsif ($pwd =~ /2012/) { $year = "y2012";} 
 elsif ($pwd =~ /2011/) { $year = "y2011";} 
 elsif ($pwd =~ /2010/) { $year = "y2010";} 
-if ($pwd =~ /dev/) {
+if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/) {
   $PICOPATH = "/gpfs01/star/data*";
   if    ($pwd =~ /2020\/5p75GeV_fixedTarget/) {$glob = "/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/11p5GeV.C/)           {$glob = "/reco/production_11p5GeV_2020/ReversedFullField/dev/20*"; $dayMin = 42;}
@@ -43,7 +43,7 @@ if ($pwd =~ /dev/) {
   elsif ($pwd =~ /2020\/9p2GeVb/)             {$glob = "/reco/production_9p2GeV_2020b/ReversedFullField/dev/2020";}
   elsif ($pwd =~ /2020\/9p2GeV/)              {$glob = "/reco/production_9p2GeV_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/9p8GeV_fixedTarget/)  {$glob = "/reco/production_9p8GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
-  
+  elsif ($pwd =~ /2019\/19GeV_2019/)          {$glob = "/reco/production_19GeV_2019/ReversedFullField/P20ic_calib/2019";}
 } else {# TFG
   $PICOPATH = "/gpfs01/star/pwg_tasks/tfg02"; print "PICOPATH = $PICOPATH\n" if ($debug);
   if (! -r  $PICOPATH) {$PICOPATH = "/net/l401/data/scratch1/reco";}
@@ -126,7 +126,13 @@ foreach my $run (glob $GLOB) {
   my $picoGlob = $run . "/*picoDst.root";
   my @picos = glob $picoGlob;
   if ($#picos > -1) {
-    print "string:$run:$ana:$year\n";
+    print "string:$run:$ana:$year:picoDst\n";
+  } else {
+    my $MuGlob = $run . "/*MuDst.root";
+    my @Mus = glob $MuGlob;
+    if ($#Mus > -1) {
+      print "string:$run:$ana:$year:MuDst\n";
+    }
   }
 #  last;
 #  die;
