@@ -18,6 +18,7 @@
  set input        = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
  set outputb      = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
  set year         = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+ set dstype       = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
   
 # set input = ${INPUTFILE0};
 #foreach input (`cat $FILELIST`)
@@ -35,13 +36,13 @@
 #  if (-r ${bla}) exit 0;
 #  touch ${bla}
 
-#  rsync -c ${SUBMITTINGDIRECTORY}/${input}/*picoDst.root .
-##  rsync  ${input}/*.picoDst.root .
+#  rsync -c ${SUBMITTINGDIRECTORY}/${input}/*${dstype}.root .
+##  rsync  ${input}/*.${dstype}.root .
   set idNdx = kFALSE;
   echo ${SUBMITTINGDIRECTORY} | grep dNdx 
   if (! $? )  set idNdx = kTRUE;
-##  root.exe -q -b -x  'kfpAnalysis.C(1000000,"./*.picoDst.root","'${output}'","y2020",'${idNdx}')' &gt;&amp; ${log}
-  root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${input}'/*.picoDst.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
+##  root.exe -q -b -x  'kfpAnalysis.C(1000000,"./*.'${dstype}'.root","'${output}'","y2020",'${idNdx}')' &gt;&amp; ${log}
+  root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${input}'/*.'${dstype}'.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
 #  mv ${outputb} ${output}
 #  mv ${logb} ${log}
 #  rm ${bla}
