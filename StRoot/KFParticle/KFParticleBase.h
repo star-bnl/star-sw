@@ -221,6 +221,7 @@ class KFParticleBase :public TObject {
 
   static void GetArmenterosPodolanski(KFParticleBase& positive, KFParticleBase& negative, float QtAlfa[2] );
   void RotateXY(float angle, float Vtx[3]);
+  void Rotate(float angle, const KFParticleBase& axis);
 
   int Id() const { return fId; } ///< Returns Id of the particle.
   int NDaughters() const { return fDaughtersIds.size(); } ///< Returns number of daughter particles.

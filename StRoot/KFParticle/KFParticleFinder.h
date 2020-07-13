@@ -439,6 +439,10 @@ class KFParticleFinder
   std::vector<KFParticle> fHe5L;     ///< Vector with temporary He4_Lambda->He4 p pi- candidates
   std::vector<KFParticle> fLLn;      ///< Vector with temporary H3_Lambda pi- candidates
   std::vector<KFParticle> fH5LL;     ///< Vector with temporary H5_LL->He5_Lambda pi- candidates
+  std::vector<KFParticle> fPpi;      ///< all ppi- combinations
+  std::vector<KFParticle> fPpiBar;   ///< all p-pi+ combinations
+  std::vector<KFParticle> fPPpi;     ///< pppi- combinations
+  std::vector<KFParticle> fPPpiBar;  ///< p-p-pi+ combinations
   
   //vectors of candidates with the mass constraint
   static const int fNSecCandidatesSets = 5; ///< Number of sets of secondary particle candidates.
