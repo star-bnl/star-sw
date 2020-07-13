@@ -472,53 +472,46 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
 //       if( isTofm2 && (m2 > 6.8 && m2<9.1) ) //if( !isTofm2 || (isTofm2 && (m2 > 5)) )
 //         totalPDG.push_back(1000010030*q);
       
-    if(isTofm2)
-    {
-      //d
-      if(dEdXPull[3] < nSigmaCut && dEdXPull[2] > nSigmaCut) 
-        if( m2 > 3 && m2<4.2 )
-          totalPDG.push_back(1000010020*q); 
-      //t
-      if(dEdXPull[4] < nSigmaCut && dEdXPull[3] > nSigmaCut) 
-        if( m2 > 6.8 && m2<9.1 )
-          totalPDG.push_back(1000010030*q);
-    }
-    else
-    {
-      //d
-      if(p<0.7)
-      {
-        double lowerParameters[4] = {9.34099e+00, -1.39588e+00,  6.75213e-03,  4.48929e-02};
+  
+    //d
+    if(isTofm2 && (m2>3 && m2<4.2)){
+      if(p<1.5){
+        double lowerParameters[4] = {7.11737e+00,-1.31428e+00, 1.96720e-01, 6.47905e-02};
         double lowerDBound = lowerParameters[0]*TMath::Power(p, lowerParameters[1] + lowerParameters[2]*log(p) + lowerParameters[3]*log(p)*log(p));
-
-        double upperParameters[4] = {1.54857e+01, -1.58706e+00, -2.43286e-02,  8.86096e-02};
+   
+        double upperParameters[4] = {1.39824e+01,-1.53919e+00, 1.10899e-01, 9.82910e-02};
         double upperDBound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
         
         if(dEdX > lowerDBound && dEdX < upperDBound)
           totalPDG.push_back(1000010020*q); 
       }
-      //t
-      if(p<1.0)
-      {
-        double lowerParameters[4] = {1.65856e+01, -1.70116e+00, -2.53917e-01,  7.82259e-03};
+      else if(dEdXPull[3] < nSigmaCut && dEdX < 8.) 
+        totalPDG.push_back(1000010020*q); 
+    }
+    
+    //t
+    if(isTofm2 && (m2>6.8 && m2<9.1)){
+      if(p<2.5) {
+        double lowerParameters[4] = {1.38117e+01,-1.67910e+00,-4.52185e-03, 9.21224e-02};
         double lowerTBound = lowerParameters[0]*TMath::Power(p, lowerParameters[1] + lowerParameters[2]*log(p) + lowerParameters[3]*log(p)*log(p));
 
-        double upperParameters[4] = {2.51004e+01, -1.49819e+00, -1.51865e-01,  2.55032e-02};
+        double upperParameters[4] = {2.29456e+01,-1.41456e+00, 1.04286e-01, 1.26818e-01};
         double upperTBound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
         
         if(dEdX > lowerTBound && dEdX < upperTBound)
           totalPDG.push_back(1000010030*q); 
       }
+      else if(dEdXPull[4] < nSigmaCut && dEdX < 8.) 
+        totalPDG.push_back(1000010030*q);
     }
-   
+    
     //He3   
     if(p<3.0)
     {
-  
-      double lowerParameters[4] = {2.59893e+01, -1.25774e+00,  2.77889e-01,  2.14613e-01};
+      double lowerParameters[4] = {2.27715e+01,-1.36600e+00, 3.01143e-01, 2.38046e-01};
       double lowerHe3Bound = lowerParameters[0]*TMath::Power(p, lowerParameters[1] + lowerParameters[2]*log(p) + lowerParameters[3]*log(p)*log(p));
       
-      double upperParameters[4] = {3.50044e+01, -1.14152e+00, 3.14559e-01, 1.63104e-01};
+      double upperParameters[4] = {3.33751e+01,-1.22800e+00, 2.98371e-01, 1.82920e-01};
       double upperHe3Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
       
       if(dEdX > lowerHe3Bound && dEdX < upperHe3Bound) 
@@ -573,86 +566,99 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
 // }
   }
   
-// if(isTofm2)
-// {
-    //He6
-//     if(p<3)
-//     {
-//       double loweParameters[4] = {4.94182e+01,-1.11587e+00, 6.92555e-01,-7.76954e-01};
-//       double lowerHe6Bound = loweParameters[0]*TMath::Power(p, loweParameters[1] + loweParameters[2]*log(p) + loweParameters[3]*log(p)*log(p));
-// 
-//       double upperParameters[4] = {9.71889e+01,-2.83338e+00, 2.59383e+00,-1.06951e+00};
-//       double upperHe6Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
-//       
-//       if(dEdX > lowerHe6Bound && dEdX < upperHe6Bound)
-//       {
-//         if(p<2.)
-//         {
-//           if( !isTofm2 || (isTofm2 && m2>6.5) )
-//             totalPDG.push_back(1000010020*q);
-//         }
-//         else
-//         {
-//           if(isTofm2 && m2>6.5)
-//             totalPDG.push_back(1000010020*q);
-//         }
-//       }
-//     }
-//     else if(p>=3.0)// && dEdX > 11. && dEdX < 18.)
-//       if( isTofm2 && m2>6.5 )
-//         totalPDG.push_back(1000010020*q);
-    if(p<3)
-    {
-      double loweParameters[4] = {4.94182e+01,-1.11587e+00, 6.92555e-01,-7.76954e-01};
-      double lowerHe6Bound = loweParameters[0]*TMath::Power(p, loweParameters[1] + loweParameters[2]*log(p) + loweParameters[3]*log(p)*log(p));
+  //He6
+  if(p<4.5) {
+    double loweParameters[4] = {5.63562e+01,-1.29479e+00, 2.27883e-01,-4.10513e-02};
+    double lowerHe6Bound = loweParameters[0]*TMath::Power(p, loweParameters[1] + loweParameters[2]*log(p) + loweParameters[3]*log(p)*log(p));
 
-      double upperParameters[4] = {9.71889e+01,-2.83338e+00, 2.59383e+00,-1.06951e+00};
-      double upperHe6Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
-      
-      if(dEdX > lowerHe6Bound && dEdX < upperHe6Bound)
-      {
-        if(p<1. || p>2.3)
-        {
-          if(isTofm2 && m2>6.5)
-            totalPDG.push_back(1000020060*q);
-        }
-        else
-        {
-          if(!isTofm2 || (isTofm2 && m2>6.5))
-            totalPDG.push_back(1000020060*q);
-        }
+    double upperParameters[4] = {7.52605e+01,-1.42948e+00, 5.87043e-01,-2.13013e-01};
+    double upperHe6Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
+    
+    if(dEdX > lowerHe6Bound && dEdX < upperHe6Bound) {
+      if(p>3.0) {
+        if(isTofm2 && m2>6.5)
+          totalPDG.push_back(1000020060*q);
+      }
+      else{
+        if(!isTofm2 || (isTofm2 && m2>6.5))
+          totalPDG.push_back(1000020060*q);
       }
     }
-    else if(p>=3.0 && dEdX > 11.)// && dEdX < 18.)
-      if( (isTofm2 && m2>6.5 ) )
-        totalPDG.push_back(1000020060*q);
-
-    //Li6
-    if(p<4)
-    {
-      double loweParameters[4] = {6.41054e+01,-9.78136e-01, 1.56090e-01, 4.28567e-02};
-      double lowerLi6Bound = loweParameters[0]*TMath::Power(p, loweParameters[1] + loweParameters[2]*log(p) + loweParameters[3]*log(p)*log(p));
-
-      double upperParameters[4] = {1.04312e+02,-1.41641e+00, 5.42703e-01,-4.36049e-02};
-      double upperLi6Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
-      
-      if(dEdX > lowerLi6Bound && dEdX < upperLi6Bound)
-      {
-        if(p<1.3)
-        {
-          if( isTofm2 && (m2>2.8) && (m2<4.2) )
-            totalPDG.push_back(1000030060*q);
-        }
-        else
-        {
-          if( !isTofm2 || (isTofm2 && (m2>2.8) && (m2<4.2) ) )
-            totalPDG.push_back(1000030060*q);
-        }
-      }
   }
-    else if(p>=4.0 && dEdX > 25. && dEdX < 37.)
-      if( !isTofm2 || (isTofm2 && (m2>2.8) && (m2<4.2)) )
-        totalPDG.push_back(1000030060*q);
+  else if(p>=4.5 && dEdX > 11. && dEdX < 18.)
+    if(isTofm2 && m2>6.5)
+      totalPDG.push_back(1000020060*q);
+
+  //Li6
+  if(p<4){
+    double loweParameters[4] = {7.30295e+01,-1.08787e+00, 6.87593e-02, 1.14228e-01};
+    double lowerLi6Bound = loweParameters[0]*TMath::Power(p, loweParameters[1] + loweParameters[2]*log(p) + loweParameters[3]*log(p)*log(p));
+
+    double upperParameters[4] = {9.35347e+01,-1.25594e+00, 2.91456e-01, 9.52847e-02};
+    double upperLi6Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
+    
+    if(dEdX > lowerLi6Bound && dEdX < upperLi6Bound){
+      if(p<1.){
+        if( isTofm2 && (m2>2.8) && (m2<4.2) )
+          totalPDG.push_back(1000030060*q);
+      }
+      else{
+        if( !isTofm2 || (isTofm2 && (m2>2.8) && (m2<4.2) ) )
+          totalPDG.push_back(1000030060*q);
+      }
+    }
+  }
+  else if(p>=4.0 && dEdX > 25. && dEdX < 37.)
+    if( !isTofm2 || (isTofm2 && (m2>2.8) && (m2<4.2)) )
+      totalPDG.push_back(1000030060*q);
+
+  //Li7
+  if(p<4){
+    double loweParameters[4] = {9.30989e+01,-1.22084e+00, 3.73173e-01,-1.12695e-01};
+    double lowerLi6Bound = loweParameters[0]*TMath::Power(p, loweParameters[1] + loweParameters[2]*log(p) + loweParameters[3]*log(p)*log(p));
+
+    double upperParameters[4] = {1.14003e+02,-1.33179e+00, 4.19395e-01,-3.20841e-02};
+    double upperLi6Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
+    
+    if(dEdX > lowerLi6Bound && dEdX < upperLi6Bound){
+      if(p<1.){
+        if( isTofm2 && (m2>4) && (m2<6) )
+          totalPDG.push_back(1000030070*q);
+      }
+      else{
+        if( !isTofm2 || (isTofm2 && (m2>4) && (m2<6) ) )
+          totalPDG.push_back(1000030070*q);
+      }
+    }
+  }
+  else if(p>=4.0 && dEdX > 25. && dEdX < 37.)
+    if( !isTofm2 || (isTofm2 && (m2>4) && (m2<6)) )
+      totalPDG.push_back(1000030070*q);
+    
+  //Be7
+  if(p<4){
+    double loweParameters[4] = { 1.08163e+02,-1.08057e+00, 2.34159e-01, 1.98949e-02};
+    double lowerLi6Bound = loweParameters[0]*TMath::Power(p, loweParameters[1] + loweParameters[2]*log(p) + loweParameters[3]*log(p)*log(p));
+
+    double upperParameters[4] = {1.37012e+02,-1.14016e+00, 3.73116e-01,-1.85678e-02};
+    double upperLi6Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
+    
+    if(dEdX > lowerLi6Bound && dEdX < upperLi6Bound){
+      if(p<1.){
+        if( isTofm2 && (m2>2) && (m2<4) )
+          totalPDG.push_back(1000040070*q);
+      }
+      else{
+        if( !isTofm2 || (isTofm2 && (m2>2) && (m2<4) ) )
+          totalPDG.push_back(1000040070*q);
+      }
+    }
+  }
+  else if(p>=4.0 && dEdX > 40. && dEdX < 55.)
+    if( !isTofm2 || (isTofm2 && (m2>2) && (m2<4)) )
+      totalPDG.push_back(1000040070*q);
+    
+    
     
   if(totalPDG.size() == 0)
     totalPDG.push_back(-1);
