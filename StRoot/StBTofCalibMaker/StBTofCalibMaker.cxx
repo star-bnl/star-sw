@@ -1187,7 +1187,7 @@ void StBTofCalibMaker::processStEvent()
         /// PID calculation if the track is a "primary" track.
         Double_t L = -9999.;
         Double_t ptot = -9999.;
-        Bool_t doPID = kFALSE;     //! switch indicating to calculate PID or not
+        Int_t doPID = 0;     //! switch indicating to calculate PID or not
         if(mUseEventVertex) {
             if(!pTrack) {
                 LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
@@ -1200,7 +1200,7 @@ void StBTofCalibMaker::processStEvent()
                     StThreeVectorF primPos = thisVertex->position();
                     L = tofPathLength(&primPos, &pidTof->position(), theTrackGeometry->helix().curvature());
                     ptot = pTrack->geometry()->momentum().mag();
-                    doPID = kTRUE;
+                    doPID = 1;
                     LOG_DEBUG << "Pathlength and ptot set." << endm;
                 }
             }
@@ -1220,13 +1220,13 @@ void StBTofCalibMaker::processStEvent()
                 if(gTrack->dcaGeometry()) {
                     ptot = gTrack->dcaGeometry()->momentum().mag();
                 }
-                doPID = kTRUE;
+                doPID = 1;
             }
 
         }
 
         if(!doPID) continue;
-        doPID++;
+	doPID++;
 
         Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
 
@@ -1443,7 +1443,7 @@ void StBTofCalibMaker::processMuDst()
         /// PID calculation if the track is a "primary" track.
         Double_t L = -9999.;
         Double_t ptot = -9999.;
-        Bool_t doPID = kFALSE;
+        Int_t doPID = 0;
         if(mUseEventVertex) {
             if(!pTrack) {
                 LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
@@ -1457,7 +1457,7 @@ void StBTofCalibMaker::processMuDst()
                     StPhysicalHelixD thisHelix = pTrack->helix();
                     L = tofPathLength(&primPos, &pidTof.position(), thisHelix.curvature());
                     ptot = pTrack->momentum().mag();
-                    doPID = kTRUE;
+                    doPID = 1;
                 }
             }
 
@@ -1473,12 +1473,12 @@ void StBTofCalibMaker::processMuDst()
             } else {
                 L = tofPathLength(&tofPos, &pidTof.position(), gHelix.curvature());
                 ptot = gTrack->momentum().mag();
-                doPID = kTRUE;
+                doPID = 1;
             }
         }
 
         if(doPID) {
-            doPID++;
+	    doPID++;
             Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
 
             Double_t b_e  = ptot/sqrt(ptot*ptot+M_ELECTRON*M_ELECTRON);
