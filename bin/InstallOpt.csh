@@ -82,6 +82,7 @@ setenv DIR ~/sources/.${STAR_HOST_SYS}
 if ($?NODEBUG) setenv DIR ~/sources/.${STAR_HOST_SYS}_opt
 if (! -d ${DIR}) mkdir ${DIR}
 foreach pkg ($list) 
+    rehash
     setenv CXXFLAGS "${cxxflags}"
     setenv CFLAGS   "${cflags}"
     cd $DIR
@@ -237,13 +238,18 @@ setenv CFLAGSd   "$cflags"
       setenv CXXFLAGS "${CXXFLAGSD}"
       setenv CFLAGS   "${CFLAGSD}"
           if (! -d XOPTSTAR/qt4) mkdir -p XOPTSTAR/qt4
-#          ./configure --prefix=$XOPTSTAR -no-glib -no-qt3support <<EOF
-#o
-#          ./configure --prefix=$XOPTSTAR/qt4 -no-glib -opensource <<EOF
-          ./configure -prefix $XOPTSTAR/qt4 -no-glib -opensource -continue  <<EOF
+          ./configure --prefix=$XOPTSTAR -no-glib -no-qt3support -no-cups <<EOF
+o
 yes
 EOF
+#          ./configure --prefix=$XOPTSTAR/qt4 -no-glib -opensource <<EOF
+#          ./configure -prefix $XOPTSTAR/qt4 -no-glib -opensource -continue  <<EOF
+#yes
+#EOF
+          setenv PATH ./bin:$PATH
 	  qmake
+          cp -rp bin $QTDIR
+          cp -rp mkspecs $QTDIR
           make install
           cp -rp bin $QTDIR
           cp -rp mkspecs $QTDIR
