@@ -1,6 +1,6 @@
-if ("$OPTSTAR" == "$XOPTSTAR") then
+if ("${OPTSTAR}" == "${XOPTSTAR}") then
   setenv XOPTSTAR ${OPTSTAR}/${STAR_HOST_SYS}
-  if (! -d $XOPTSTAR) mkdir -p $XOPTSTAR
+  if (! -d ${XOPTSTAR}) mkdir -p ${XOPTSTAR}
 endif
 setenv FORCE_32BITS FALSE
 setenv CC  "gcc"
@@ -99,7 +99,7 @@ setenv CFLAGSd   "$cflags"
           if (-r ~/sources/${pkg}.tar.gz) then
             gunzip ~/sources/${pkg}.tar.gz
             tar xf ~/sources/${pkg}.tar
-#	    mv ${pkg} ../
+	    mv ${pkg} ../
           else
             if (-r ~/sources/${pkg}.tar) then
               tar xf ~/sources/${pkg}.tar
@@ -107,12 +107,13 @@ setenv CFLAGSd   "$cflags"
             else
               if (-r ~/sources/${pkg}.tz) then
                 tar xfz ~/sources/${pkg}.tz
-#         	mv ${pkg} ../
+         	mv ${pkg} ../
               else
                 break;
               endif
             endif
           endif
+	  dirsync  ../${pkg} .
         endif
       else 
         mkdir ${pkg}
@@ -122,7 +123,7 @@ setenv CFLAGSd   "$cflags"
     switch ($pkg)
       case "libtools*":
        ./bootstrap
-       ./configure --prefix=$XOPTSTAR
+       ./configure --prefix=${XOPTSTAR}
        make install
        if ( $?) break;
         touch ../${pkg}.Done
@@ -155,13 +156,13 @@ setenv CFLAGSd   "$cflags"
 	  breaksw
       case "cmake*":
 	./bootstrap
-          ./configure --prefix=$XOPTSTAR
+          ./configure --prefix=${XOPTSTAR}
           make install
           if ( $?) break;
           touch ../${pkg}.Done
           breaksw
       case "apr-util*":
-          ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR
+          ./configure --prefix=${XOPTSTAR} --with-apr=${XOPTSTAR}
           make install
           if ( $?) break;
           touch ../${pkg}.Done
@@ -173,9 +174,12 @@ setenv CFLAGSd   "$cflags"
           touch ../${pkg}.Done
           breaksw
       case "apache-log4cxx-0.10.0.CVS":
+          dirsync  ~/sources/${pkg} .
+#	  unsetenv CXXFLAGS  # ${CXXFLAGS} -Wnonarrowing"
+#	  unsetenv CFLAGS    # ${CFLAGS} -Wnonarrowing"
 #          ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR --with-apr-util=$XOPTSTAR --disable-libtool --with-tags=$LDFLAGS
           ./configure --prefix=$XOPTSTAR --with-apr=$XOPTSTAR --with-apr-util=$XOPTSTAR 
-	  make clean
+##	  make clean
           make
 	  if ( $?) break;
           make install
@@ -237,7 +241,7 @@ setenv CFLAGSd   "$cflags"
       case "qt*":
       setenv CXXFLAGS "${CXXFLAGSD}"
       setenv CFLAGS   "${CFLAGSD}"
-          if (! -d XOPTSTAR/qt4) mkdir -p XOPTSTAR/qt4
+          if (! -d ${XOPTSTAR}/qt4) mkdir -p ${XOPTSTAR}/qt4
           ./configure --prefix=$XOPTSTAR -no-glib -no-qt3support -no-cups <<EOF
 o
 yes
