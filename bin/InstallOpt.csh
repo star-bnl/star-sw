@@ -91,7 +91,7 @@ setenv CXXFLAGSd "$cxxflags"
 setenv CFLAGSd   "$cflags"
 #    source ${GROUP_DIR}/.starver ${STAR_LEVEL}
     if ( -r ${pkg}.Done || -r ${pkg}.Failed) continue
-    if (! -r ${pkg}) then
+#    if (! -r ${pkg}) then
       if ($pkg != "xrootd-4.4.1" && $pkg != "xrootd-4.5.0-rc1" && $pkg != "Coin-3.1.3" && $pkg != "eigen3" && $pkg != "VecGeom") then
         if (-r ~/sources/${pkg}) then
           dirsync  ~/sources/${pkg} ${pkg}
@@ -118,7 +118,7 @@ setenv CFLAGSd   "$cflags"
       else 
         mkdir ${pkg}
       endif
-    endif
+#    endif
     cd ${pkg}
     switch ($pkg)
       case "libtools*":
