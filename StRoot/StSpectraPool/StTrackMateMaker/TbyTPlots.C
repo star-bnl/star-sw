@@ -1,11 +1,12 @@
 /*
   root.exe TbyTPlots.C+
+  root.exe Plots.root
   .L TbyTPlots.C+
   Init();
   Draw();
  */
 //#define __SAVE_ROOT_PICTURES_
-#if !defined(__CINT__) || defined(__MAKECINT__)
+#
 #include "Riostream.h"
 #include <stdio.h>
 #include "TSystem.h"
@@ -14,6 +15,7 @@
 #include "TH2.h"
 #include "TH3.h"
 #include "TProfile.h"
+#include "TProfile2D.h"
 #include "TStyle.h"
 #include "TF1.h"
 #include "TTree.h"
@@ -29,102 +31,114 @@
 #include "TText.h"
 #include "TROOT.h"
 #include "TList.h"
+#include "TDirectory.h"
 #include "TPolyMarker.h"
 #include "TFileSet.h"
 #include "TDataSetIter.h"
 #include "TEfficiency.h"
-#else
-class TSystem;
-class TMath;
-class TH1;
-class TH2;
-class TH3;
-class TProfile;
-class TStyle;
-class TF1;
-class TTree;
-class TChain;
-class TFile;
-class TNtuple;
-class TCanvas;
-class TMinuit;
-class TSpectrum;
-class TString;
-class TLegend;
-class TLine;
-class TText;
-class TROOT;
-class TList;
-class TPolyMarker;
+#include "Ask.h"
+//#include "StSpectraPool/StTrackMateMaker/TrackMatch.h#ifndef __TrackMatch__
+#ifndef __TrackMatch__
+#define __TrackMatch__
+#include "TObject.h"
+class TrackParameters : public TObject {
+ public:
+  TrackParameters() {}
+  virtual ~TrackParameters() {}
+  void set() {memset(&begin, 0, &end-&begin);}
+  Bool_t IsEmpty()    {return MatchStatus == 0;}
+  Bool_t IsMatch()    {return MatchStatus & 1;}
+  Bool_t IsClone()    {return MatchStatus & 2;}
+  Bool_t IsSplitted() {return MatchStatus & 4;}
+  Bool_t IsLost()     {return MatchStatus & 8;}
+  Int_t  charge()     {return (Charge > 0) ? 0 : 1;}
+  Char_t begin;
+  Int_t   Id;
+  Float_t PtGl;
+  Float_t EtaGl;
+  Float_t PhiGl;
+  Float_t PGl;
+  Float_t FitPtsGl;
+  Float_t PtPr;
+  Float_t EtaPr;
+  Float_t PhiPr;
+  Float_t PPr;
+  Float_t FitPtsPr;
+  Float_t Dedx;
+  Float_t Charge;
+  Float_t Prim;
+  Float_t Chi2Gl0;
+  Float_t Chi2Gl1;
+  Float_t Chi2Pr0;
+  Float_t Chi2Pr1;
+  Float_t FirstPointX;
+  Float_t FirstPointY;
+  Float_t FirstPointZ;
+  Float_t LastPointX;
+  Float_t LastPointY;
+  Float_t LastPointZ;
+  Float_t PrimX;
+  Float_t PrimY;
+  Float_t PrimZ;
+/*   Float_t SecF;  // first and last hit sector */
+/*   Float_t SecL; */
+  Int_t   hitMap; // HFT hits pxl + 10 * ist + 100 *Ssd
+  Int_t   MatchStatus; // 1 - ReCo (1 to 1 match), 2 - CLone, 4 - Splitted, 8 - Lost 
+  Char_t end;
+  ClassDef(TrackParameters,3)
+};
+class TrackMatch : public TObject {
+ public:
+ TrackMatch() {}
+ virtual ~TrackMatch() {}
+  TrackParameters newP;
+  TrackParameters oldP;
+  ClassDef(TrackMatch,3)
+};
 #endif
+#include "TObject.h"
 TFile *fOut = 0;
 TCanvas *c1 = 0;
 TChain *fChain = 0;
 const Int_t NfitPtsHist = 7;
-struct mc_data_t {
-  float oldPtGl;
-  float newPtGl;
-  float oldEtaGl;
-  float newEtaGl;
-  float oldPhiGl;
-  float newPhiGl;
-  float oldPGl;
-  float newPGl;
-  float oldFitPtsGl;
-  float newFitPtsGl;
-  float oldPtPr;
-  float newPtPr;
-  float oldEtaPr;
-  float newEtaPr;
-  float oldPhiPr;
-  float newPhiPr;
-  float oldPPr;
-  float newPPr;
-  float oldFitPtsPr;
-  float newFitPtsPr;
-  float oldDedx;
-  float newDedx;
-  float oldCharge;
-  float newCharge;
-  float maxPing;
-  float Prim;
-  float oldChi2Gl0;
-  float newChi2Gl0;
-  float oldChi2Gl1;
-  float newChi2Gl1;
-  float oldChi2Pr0;
-  float newChi2Pr0;
-  float oldChi2Pr1;
-  float newChi2Pr1;
-  float firstHitsDist;
-  float lastHitsDist;
-  float oldPrimX;
-  float oldPrimY;
-  float oldPrimZ;
-  float newPrimX;
-  float newPrimY;
-  float newPrimZ;
-  Float_t newSecF;  // first and last hit sector
-  Float_t oldSecF;
-  Float_t newSecL;
-  Float_t oldSecL;
-  Int_t newHitMap;
-  Int_t oldHitMap;
-};
-static mc_data_t data;
-static Float_t  refMult;
 const Char_t *GP[2] = {"Gl","Pr"};
 const Char_t *GPTitle[2] = {"Global","Primary"};
 static TString NameEffpT[4] = {"pTnew","pTold","pTOnew","pTOold"};
 static TString NameEffPhi[4] = {"Phinew","Phiold","PhiOnew","PhiOold"};
+static TString NameEffEta[4] = {"Etanew","Etaold","EtaOnew","EtaOold"};
+static TString EffClone[3] = {"Eff","Clone","Lost"};
+static TString pTEtaPhi[3] = {"pT", "Eta", "Phi"};
+static TString pTEtaPhiT[3] = {"p_{T}", "#eta", "#phi(^{o})"};
 const Int_t minNFP = 10; // 25; // 10;
-const Int_t effNFP = 15; // 25; // 15;
+const Int_t effNFP = 10; // 15; // 25; // 15;
 static TString Old("Old");
 static TString New("New");
 const Char_t *charge[2] = {"pos","neg"};
+const Char_t *chargeT[2] = {"(+)","(-)"};
+const Char_t *NewOld[2] = {"New", "Old"};
+enum {npT    = 106};
+//  Double_t pTMax =   10;
+const Double_t ptBins[npT+1] = {
+  0.01, 0.04, 0.06,
+  0.07, 0.08, 0.11, 0.14, 0.16, 0.17, 0.19, 0.21, 0.22, 0.23,
+  0.24, 0.26, 0.27, 0.28, 0.29, 0.30, 0.31, 0.32, 0.33, 0.34,
+  0.35, 0.36, 0.37, 0.38, 0.39, 0.40, 0.41, 0.42, 0.43, 0.44,
+  0.45, 0.46, 0.47, 0.48, 0.49, 0.50, 0.51, 0.53, 0.54, 0.55,
+  0.56, 0.57, 0.58, 0.60, 0.61, 0.62, 0.63, 0.65, 0.66, 0.67,
+  0.69, 0.70, 0.72, 0.73, 0.75, 0.76, 0.78, 0.80, 0.81, 0.83,
+  0.85, 0.87, 0.89, 0.91, 0.93, 0.96, 0.98, 1.01, 1.03, 1.06,
+  1.09, 1.12, 1.16, 1.19, 1.23, 1.27, 1.31, 1.35, 1.40, 1.45,
+  1.51, 1.57, 1.64, 1.71, 1.80, 1.89, 2.00, 2.11, 2.24, 2.39,
+  2.57, 2.78, 3.05, 3.38, 3.80, 4.28, 4.96, 5.88, 7.25,10.00, 
+  20.0, 30.0, 50.0, 100.
+};
+TProfile  *Eff[2][2][3][2][3] = {0}; 
 TFile *fIn = (TFile *) gDirectory;
 TString gTitle;
 TString cTitle;
+Int_t _debug = 0;
+//________________________________________________________________________________
+//TrackParmeters::TrackParmeters(StGlobalTrack *gTrack) {}
 //________________________________________________________________________________
 void DrawPng(TCanvas *c) {
   static Int_t nPng = 0;
@@ -403,265 +417,30 @@ void EffRefMult(Int_t k = 0) {
   DrawPng(c1);
 }
 //________________________________________________________________________________
-void DrawEfficiency(Int_t k = 0, Double_t pmax = 5.0) {
-  //________________________________________________________________________________
-  // Efficiency itself
-  //________________________________________________________________________________
-  TH2D *pTEf[4];
-  TH1D *pTEfP[4];
-  for (Int_t i = 0; i < 4; i++) {
-    pTEf[i] = (TH2D *) fIn->Get(Form("%s%s",NameEffpT[i].Data(),GP[k]));
-    if (pTEf[i]) pTEfP[i] = pTEf[i]->ProjectionX(Form("%s_all",pTEf[i]->GetName()),-1,-1,"e");
-    else         pTEfP[i] = 0;
-  }
-  Double_t emin = 0.0;
-  //  if (k == 1) emin = 0.9;
-  cTitle  = gTitle;
-  TString hTitle("");
-  hTitle += GPTitle[k]; hTitle +=" track efficiencies vs pT"; 
-  cTitle += hTitle;
-  TCanvas* c1 = new TCanvas(cTitle,cTitle,800,800);// c1->SetLeftMargin(0.14);
-  //  c1->SetTicks(1,1);
-  TH1F* dummyeff= c1->DrawFrame(0.0,emin,pmax, 1.01);
-  dummyeff->SetTitle(hTitle);
-  dummyeff->SetXTitle("pT (GeV/c)");
-  dummyeff->SetYTitle(Form("fit points>=%i rel. efficiency",effNFP)); 
-  TLegend* leg4 = new TLegend(.2,.15,.5,.4);
-  TAxis *y = pTEf[0]->GetYaxis();
-  Int_t ny = y->GetNbins();
-  Double_t yMin = y->GetXmin();
-  Double_t yMax = y->GetXmax();
-  Int_t mstep = 2;
-  Int_t m = ny + 1;
-  for (; m >= 0; m -= mstep) {
-    if (m < 0) m = 0;
-    Int_t m1 = -1, m2 = -1;
-    if (m == 0) {}
-    else {
-      m1 = m-mstep+1;
-      m2 = m;
-    }
-    for (Int_t i = 0; i < 4; i++) {
-      pTEfP[i] = pTEf[i]->ProjectionX(Form("%s_all_%i",pTEf[i]->GetName(),m),m1,m2,"e");
-    }
-    if (! pTEfP[0] || pTEfP[0]->GetEntries() < 1e3) continue;
-    if (! pTEfP[1] || pTEfP[1]->GetEntries() < 1e3) continue;
-    TH1D *effNewP = new TH1D(*pTEfP[3]); effNewP->SetName(Form("eff%s%i",New.Data(),m)); effNewP->SetTitle(hTitle);
-    effNewP->Divide(pTEfP[3],pTEfP[1],1.,1.,"b");
-    TH1D *effOldP = new TH1D(*pTEfP[2]); effOldP->SetName(Form("eff%s%i",Old.Data(),m)); effOldP->SetTitle(hTitle);
-    effOldP->Divide(pTEfP[2],pTEfP[0],1.,1.,"b");
-    effOldP->SetMarkerStyle(21); 
-    effOldP->SetMarkerColor(1);
-    effNewP->SetMarkerStyle(20); 
-    effNewP->SetMarkerColor(1);
-    if (m) {
-      effOldP->SetMarkerColor(m/mstep+2);
-      effNewP->SetMarkerColor(m/mstep+2);
-    }
-    Int_t ymin = (Int_t) pTEf[0]->GetYaxis()->GetBinLowEdge(m-mstep+1);
-    Int_t ymax = (Int_t) pTEf[0]->GetYaxis()->GetBinUpEdge(m);
-    c1->cd();
-    TString NewName;
-    if (! m) NewName = " for All";
-    else {
-      if      (ymin < yMin) NewName = Form(" for Mult < %i", ymax);
-      else if (ymax > yMax) NewName = Form(" for Mult > %i", ymin);
-      else                  NewName = Form(" for %i < Mult < %i", ymin, ymax);
-    }
-    TString NewcName = c1->GetName(); NewcName += NewName;
-    cout << NewcName.Data() << endl;
-    effOldP->Draw("same");
-    effNewP->Draw("same");
-    leg4->AddEntry(effOldP,Form("%s efficiency %s",Old.Data(),NewName.Data()));
-    leg4->AddEntry(effNewP,Form("%s efficiency %s",New.Data(),NewName.Data()));
-    TCanvas* c3 = new TCanvas(NewcName,NewcName,800,800);// c3->SetLeftMargin(0.14);
-  //  c3->SetTicks(1,1);
-    TH1F* dummyeff3= c3->DrawFrame(0.0,emin,pmax, 1.01);
-    TString ttitle(hTitle);
-    ttitle += NewName;
-    dummyeff3->SetTitle(ttitle);
-    dummyeff3->SetXTitle("pT (GeV/c)");
-    dummyeff3->SetYTitle(Form("fit points>=%i rel. efficiency",effNFP)); 
-    effOldP->Draw("same");
-    effNewP->Draw("same");
-    TLegend* leg5 = new TLegend(0.6,0.75,0.9,.9);
-    leg5->AddEntry(effOldP,Form("%s efficiency %s",Old.Data(),NewName.Data()));
-    leg5->AddEntry(effNewP,Form("%s efficiency %s",New.Data(),NewName.Data()));
-    leg5->Draw();
-    DrawPng(c3);
-  }
-  c1->cd();
-  leg4->Draw();
-  DrawPng(c1);
-}
-//________________________________________________________________________________
-void DrawPhiEfficiency(Int_t k = 0) {
-  //________________________________________________________________________________
-  // Efficiency itself
-  //________________________________________________________________________________
-  TH2D *PhiEf[4];
-  TH1D *PhiEfP[4];
-  for (Int_t i = 0; i < 4; i++) {
-    PhiEf[i] = (TH2D *) fIn->Get(Form("%s%s",NameEffPhi[i].Data(),GP[k]));
-    if (PhiEf[i]) PhiEfP[i] = PhiEf[i]->ProjectionX(Form("%s_all",PhiEf[i]->GetName()),-1,-1,"e");
-    else          PhiEfP[i] = 0;
-  }
-  Double_t emin = 0.5;
-  //  if (k == 1) emin = 0.9;
-  cTitle  = gTitle;
-  TString hTitle("");
-  hTitle += GPTitle[k]; hTitle +=" track efficiencies vs #phi"; 
-  cTitle += hTitle;
-  TCanvas* c1 = new TCanvas(cTitle,cTitle,800,800);// c1->SetLeftMargin(0.14);
-  //  c1->SetTicks(1,1);
-  TH1F* dummyeff= c1->DrawFrame(-180,emin,180, 1.01);
-  dummyeff->SetTitle(hTitle);
-  dummyeff->SetXTitle("#phi (degree)");
-  dummyeff->SetYTitle(Form("fit points>=%i rel. efficiency",effNFP)); 
-  TLegend* leg4 = new TLegend(0.6,0.75,0.9,.9);
-  TAxis *y = PhiEf[0]->GetYaxis();
-  Int_t ny = y->GetNbins();
-  Double_t yMin = y->GetXmin();
-  Double_t yMax = y->GetXmax();
-  Int_t mstep = 2;
-  Int_t m = ny + 1;
-  for (; m >= 0; m -= mstep) {
-    if (m < 0) m = 0;
-    Int_t m1 = -1, m2 = -1;
-    if (m == 0) {}
-    else {
-      m1 = m-mstep+1;
-      m2 = m;
-    }
-    for (Int_t i = 0; i < 4; i++) {
-      PhiEfP[i] = PhiEf[i]->ProjectionX(Form("%s_all_%i",PhiEf[i]->GetName(),m),m1,m2,"e");
-    }
-    if (! PhiEfP[0] || PhiEfP[0]->GetEntries() < 1e3) continue;
-    if (! PhiEfP[1] || PhiEfP[1]->GetEntries() < 1e3) continue;
-    TH1D *effNewP = new TH1D(*PhiEfP[3]); effNewP->SetName(Form("eff%s%i",New.Data(),m)); effNewP->SetTitle(hTitle);
-    effNewP->Divide(PhiEfP[3],PhiEfP[1],1.,1.,"b");
-    TH1D *effOldP = new TH1D(*PhiEfP[2]); effOldP->SetName(Form("eff%s%i",Old.Data(),m)); effOldP->SetTitle(hTitle);
-    effOldP->Divide(PhiEfP[2],PhiEfP[0],1.,1.,"b");
-    effOldP->SetMarkerStyle(21); 
-    effOldP->SetMarkerColor(1);
-    effNewP->SetMarkerStyle(20); 
-    effNewP->SetMarkerColor(1);
-    if (m) {
-      effOldP->SetMarkerColor(m/mstep+2);
-      effNewP->SetMarkerColor(m/mstep+2);
-    }
-    Int_t ymin = (Int_t) PhiEf[0]->GetYaxis()->GetBinLowEdge(m-mstep+1);
-    Int_t ymax = (Int_t) PhiEf[0]->GetYaxis()->GetBinUpEdge(m);
-    c1->cd();
-    TString NewName;
-    if (! m) NewName = " for All";
-    else {
-      if      (ymin < yMin) NewName = Form(" for Mult < %i", ymax);
-      else if (ymax > yMax) NewName = Form(" for Mult > %i", ymin);
-      else                  NewName = Form(" for %i < Mult < %i", ymin, ymax);
-    }
-    TString NewcName = c1->GetName(); NewcName += NewName;
-    cout << NewcName.Data() << endl;
-    effOldP->Draw("same");
-    effNewP->Draw("same");
-    leg4->AddEntry(effOldP,Form("%s efficiency %s",Old.Data(),NewName.Data()));
-    leg4->AddEntry(effNewP,Form("%s efficiency %s",New.Data(),NewName.Data()));
-    TCanvas* c3 = new TCanvas(NewcName,NewcName,800,800);// c3->SetLeftMargin(0.14);
-  //  c3->SetTicks(1,1);
-    TH1F* dummyeff3= c3->DrawFrame(-180,emin,180, 1.01);
-    TString ttitle(hTitle);
-    ttitle += NewName;
-    dummyeff3->SetTitle(ttitle);
-    dummyeff3->SetXTitle("#phi (degrees)");
-    dummyeff3->SetYTitle(Form("fit points>=%i rel. efficiency",effNFP)); 
-    effOldP->Draw("same");
-    effNewP->Draw("same");
-    TLegend* leg5 = new TLegend(0.6,0.75,0.9,.9);
-    leg5->AddEntry(effOldP,Form("%s efficiency %s",Old.Data(),NewName.Data()));
-    leg5->AddEntry(effNewP,Form("%s efficiency %s",New.Data(),NewName.Data()));
-    leg5->Draw();
-    DrawPng(c3);
-  }
-  c1->cd();
-  leg4->Draw();
-  DrawPng(c1);
-}
-//________________________________________________________________________________
-void DrawEffVsMult(Int_t k = 0) {
-  //________________________________________________________________________________
-  // Efficiency itself
-  //________________________________________________________________________________
-  cTitle  = gTitle;
-  TString hTitle("");
-  hTitle += " Efficiencies"; hTitle += " versus Multiplicity for "; hTitle += GPTitle[k];
-  cTitle += hTitle;
-  TCanvas* cnv4 = new TCanvas(cTitle,cTitle,800,800); c1 = cnv4; c1->SetLeftMargin(0.14);
-  c1->SetTicks(1,1);
-  TH2D *pTEf[4];
-  TH1D *pTEfP[4];
-  for (Int_t i = 0; i < 4; i++) {
-    pTEf[i] = (TH2D *) fIn->Get(Form("%s%s",NameEffpT[i].Data(),GP[k]));
-    if (pTEf[i]) pTEfP[i] = pTEf[i]->ProjectionY(Form("%s_all",pTEf[i]->GetName()),-1,-1,"e");
-    else         pTEfP[i] = 0;
-  }
-  TH1F* dummyeff= cnv4->DrawFrame(0.0,0.6,700, 1.05);
-  dummyeff->SetTitle(hTitle);
-  dummyeff->SetXTitle("(uncorrected) Multiplicity");
-  dummyeff->SetYTitle(Form("fit points>=%i rel. efficiency",effNFP)); 
-  TLegend* leg4 = new TLegend(0.6,0.75,0.9,.9);
-  TAxis *x = pTEf[0]->GetXaxis();
-  Double_t xMin = x->GetXmin();
-  Double_t xMax = x->GetXmax();
-  Double_t pTs[4] = {0.1, 0.2, 0.5, 2.0};
-  for (Int_t m = 0; m < 5; m++) {
-    if (m < 0) m = 0;
-    Int_t m1 = -1, m2 = -1;
-    if (m == 0) {}
-    else {
-      m1            = x->FindBin(pTs[m-1]);
-      if (m < 4) m2 = x->FindBin(pTs[m])-1;
-    }
-    for (Int_t i = 0; i < 4; i++) {
-      pTEfP[i] = pTEf[i]->ProjectionY(Form("%s_all_%i",pTEf[i]->GetName(),m),m1,m2,"e");
-    }
-    if (! pTEfP[0] || pTEfP[0]->GetEntries() < 1e3) continue;
-    if (! pTEfP[1] || pTEfP[1]->GetEntries() < 1e3) continue;
-    TH1D *effNewP = new TH1D(*pTEfP[3]); effNewP->SetName(Form("eff%s%i",New.Data(),m)); effNewP->SetTitle(hTitle);
-    effNewP->Divide(pTEfP[3],pTEfP[1],1.,1.,"b");
-    TH1D *effOldP = new TH1D(*pTEfP[2]); effOldP->SetName(Form("eff%s%i",Old.Data(),m)); effOldP->SetTitle(hTitle);
-    effOldP->Divide(pTEfP[2],pTEfP[0],1.,1.,"b");
-    effOldP->SetMarkerStyle(21); 
-    effOldP->SetMarkerColor(1);
-    effNewP->SetMarkerStyle(20); 
-    effNewP->SetMarkerColor(1);
-    if (m) {
-      effOldP->SetMarkerColor(m+1);
-      effNewP->SetMarkerColor(m+1);
-    }
-    Double_t xmin = xMin;
-    Double_t xmax = xMax;
-    if (m1 >= 0)  xmin = x->GetBinLowEdge(m1);
-    if (m2 >= 0)  xmax = x->GetBinUpEdge(m2);
-    effOldP->Draw("same");
-    effNewP->Draw("same");
-    if (! m) {
-      leg4->AddEntry(effOldP,Form("%s efficiency for ALL",Old.Data()));
-      leg4->AddEntry(effNewP,Form("%s efficiency for ALL",New.Data()));
-    } else {
-      if        (xmin < xMin) {
-	leg4->AddEntry(effOldP,Form("%s efficiency for pT < %4.1f",Old.Data(), xmax));
-	leg4->AddEntry(effNewP,Form("%s efficiency for pT < %4.1f",New.Data(), xmax));
-      } else if (xmax > xMax) {	        			       
-	leg4->AddEntry(effOldP,Form("%s efficiency for pT > %4.1f",Old.Data(), xmin));
-	leg4->AddEntry(effNewP,Form("%s efficiency for pT > %4.1f",New.Data(), xmin));
-      } else {
-	leg4->AddEntry(effOldP,Form("%s efficiency for %4.1f < pT < %4.1f", Old.Data(), xmin, xmax));
-	leg4->AddEntry(effNewP,Form("%s efficiency for %4.1f < pT < %4.1f", New.Data(), xmin, xmax));
+void DrawEfficiency() {
+  for (Int_t gp = 0; gp < 2; gp++) {// Global / Primaries
+    for (Int_t ec = 0; ec < 3; ec++) {// Efficiency Clone Lost
+      for (Int_t var = 0; var < 3; var++) {// pT, Eta, Phi
+	TString cName(EffClone[ec]); cName += pTEtaPhi[var]; cName += GP[gp];
+	TCanvas *c1 = new TCanvas(cName,cName);
+	if (var == 0) c1->SetLogx(1);
+	TString same;
+	TLegend *l = new TLegend(.2,.15,.5,.4);
+	for (Int_t no = 0; no < 2; no++) {// New Old
+	  for (Int_t c = 0; c < 2; c++) {// charge +/-
+	    if (!  Eff[gp][c][ec][no][var] ) continue;
+	    Eff[gp][c][ec][no][var]->Draw(same);
+	    same = "same";
+	    l->AddEntry(Eff[gp][c][ec][no][var], Form("%s %s",  NewOld[no],  chargeT[c]));
+	  }
+	}
+	l->Draw();
+	c1->Update();
+	//	DrawPng(c);
+	if (Ask()) return;
       }
     }
   }
-  leg4->Draw();
-  DrawPng(c1);
 }
 //________________________________________________________________________________
 void DrawpTDiff(Int_t k=0, Double_t pmax = 5.0) {
@@ -837,6 +616,19 @@ void DrawRpTDiff(Int_t k = 0, const Char_t *opt="pTdiffR", Double_t pmax = 5.0) 
 }
 //________________________________________________________________________________
 void Init(const Char_t *file="Plots.root") {
+  for (Int_t gp = 0; gp < 2; gp++) {// Global / Primaries
+    for (Int_t c = 0; c < 2; c++) {// charge +/-
+      for (Int_t ec = 0; ec < 3; ec++) {// Efficiency Clone Lost
+	for (Int_t no = 0; no < 2; no++) {// New Old
+	  for (Int_t var = 0; var < 3; var++) {// pT, Eta, Phi
+	    TString Name(EffClone[ec]); Name += pTEtaPhi[var]; Name += GP[gp]; Name += charge[c]; Name += NewOld[no];
+	    Eff[gp][c][ec][no][var] = (TProfile *) gDirectory->Get(Name);
+	  }
+	}
+      }
+    }
+  }
+#if 0
   TString pwd(gSystem->BaseName( gSystem->WorkingDirectory()));
   TObjArray *obj = pwd.Tokenize("_");
   Int_t nParsed = obj->GetEntries();
@@ -858,6 +650,7 @@ void Init(const Char_t *file="Plots.root") {
     //  gTitle.ReplaceAll(".Plots.root","");
     gTitle = "";
   }
+#endif
 }
 //________________________________________________________________________________
 void DrawPrimVx() {
@@ -886,23 +679,20 @@ void DrawCharge() {
 //________________________________________________________________________________
 void Draw(const Char_t *file="Plots.root") {
   Init(file);
+  DrawEfficiency();
+#if 0
   DrawFitPnts();  DrawFitPnts(1);
   DrawRelMomDifNft(0,0);  DrawRelMomDifNft(1,0);
-  DrawRelMomDifNft(0,5);  DrawRelMomDifNft(1,5);
-  EffRefMult(0);  EffRefMult(1);
-  DrawEfficiency(0);  DrawEfficiency(1);
-  DrawPhiEfficiency(0);  DrawPhiEfficiency(1);
-  DrawpTDiff(0); DrawpTDiff(1);
   DrawRpTDiff(0);DrawRpTDiff(1);
   DrawRpTDiff(0,"pTInvdiffR");  DrawRpTDiff(1,"pTInvdiffR");
   DrawPrimVx();
   DrawCharge();
   DrawHitPattern();
+#endif
 }
 //________________________________________________________________________________
 void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
   TString Out(file);
-  Init(Out.Data());
   if (Out == "") {
     TString TreeName("trackMateComp");
     fChain = new TChain(TreeName);
@@ -933,8 +723,8 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
 	delete f;
       }
     }
-    fChain->SetBranchAddress("data_array",&data.oldPtGl);
-    fChain->SetBranchAddress("ev_array",&refMult);
+    TrackMatch *T = new TrackMatch;
+    fChain->SetBranchAddress("TrackMatch", &T);
     tFile.ReplaceAll(".root","");
     tFile.ReplaceAll("trackMate_physics_","");
     tFile.ReplaceAll("trackMate_","");
@@ -947,6 +737,7 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
     // book
     TString Title;
     TString Name;
+#if 0
     TH1D *DifPvX = new TH1D("DifPvX",Form("Difference in X for %s - %s positions",New.Data(),Old.Data()),100,-1.00,1.00);
     TH1D *DifPvY = new TH1D("DifPvY",Form("Difference in Y for %s - %s positions",New.Data(),Old.Data()),100,-1.00,1.00);
     TH1D *DifPvZ = new TH1D("DifPvZ",Form("Difference in Z for %s - %s positions",New.Data(),Old.Data()),100,-1.00,1.00);
@@ -974,7 +765,7 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
     //________________________________________________________________________________
     // Relative Momentum difference, vs fit pts
     //________________________________________________________________________________
-    TH2D* pTDifNFP[2][2];
+    TH2D* pTDifNFP[2]1[2];
     TH2D* pTDifNFP5[2][2];
     for (Int_t k = 0; k < 2; k++) {
       for (Int_t c = 0; c < 2; c++) {
@@ -993,42 +784,35 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
       }
     }
     //________________________________________________________________________________
-    // Efficiency versus Mult and pT
+#endif
+    // Efficiencies
     //________________________________________________________________________________
-    //
-    TH2D *pTEf[2][4]; 
-    const Char_t *TitleEffPt[4] = {Form("%s Fit Pts>%i %s versus pT_%s |#eta| < 0.5",New.Data(),effNFP,New.Data(),New.Data()),
-				   Form("%s Fit Pts>%i %s versus pT_%s |#eta| < 0.5",Old.Data(),effNFP,Old.Data(),Old.Data()),
-				   Form("%s & %s Fit Pts>%i %s and %s versus pT_%s |#eta| < 0.5",New.Data(),Old.Data(),effNFP,Old.Data(),New.Data(),New.Data()),
-				   Form("%s & %s Fit Pts>%i %s and %s versus pT_%s |#eta| < 0.5",New.Data(),Old.Data(),effNFP,Old.Data(),New.Data(),Old.Data())};
-    for (Int_t k = 0; k < 2; k++) {
-      for (Int_t i = 0; i < 4; i++) {
-	Name = Form("%s%s",NameEffpT[i].Data(),GP[k]);
-	Title = Form("%s for %s",TitleEffPt[i],GPTitle[k]);
-	pTEf[k][i] = new TH2D(Name,Title,70,0,7,7,0,700);
-	pTEf[k][i]->Sumw2();
-	pTEf[k][i]->SetMarkerStyle(20+i);
-	pTEf[k][i]->SetMarkerColor(1+i);
+    //            GP  C  Eff/Clone/Lost new/old pT/Eta/Phi
+    const Char_t *Titles[6] = {Form("Efficiency no. of Fit Pts>%i %s versus ",effNFP,New.Data(),New.Data()),
+			       Form("Efficiency no. of Fit Pts>%i %s versus ",effNFP,Old.Data(),Old.Data()),
+			       Form("Clone rate no. of Fit Pts>%i %s versus ",effNFP,New.Data(),New.Data()),
+			       Form("Clone rate no. of Fit Pts>%i %s versus ",effNFP,Old.Data(),Old.Data()),
+			       Form("Lost rate no. of Fit Pts>%i %s versus " ,effNFP,New.Data(),New.Data()),
+			       Form("Lost rate no. of Fit Pts>%i %s versus " ,effNFP,Old.Data(),Old.Data())};
+    for (Int_t gp = 0; gp < 2; gp++) {// Global / Primaries
+      for (Int_t c = 0; c < 2; c++) {// charge +/-
+	for (Int_t ec = 0; ec < 3; ec++) {// Efficiency Clone Lost
+	  for (Int_t no = 0; no < 2; no++) {// New Old
+	    for (Int_t var = 0; var < 3; var++) {// pT, Eta, Phi
+	      Name = EffClone[ec]; Name += pTEtaPhi[var]; Name += GP[gp]; Name += charge[c]; Name += NewOld[no];
+	      Title = Titles[no+2*ec]; Title += pTEtaPhiT[var]; Title += " for "; Title +=  GPTitle[gp]; Title += chargeT[c];
+	      if      (var == 0) Eff[gp][c][ec][no][var] = new TProfile(Name,Title, npT, ptBins);
+	      else if (var == 1) Eff[gp][c][ec][no][var] = new TProfile(Name,Title, 120, -3.0, 3.0);
+	      else               Eff[gp][c][ec][no][var] = new TProfile(Name,Title, 180, -180., 180.);
+	      Eff[gp][c][ec][no][var]->SetXTitle(pTEtaPhiT[var]);
+	      if (c  == 1) Eff[gp][c][ec][no][var]->SetMarkerColor(2);  // negative is red
+	      if (no == 1) Eff[gp][c][ec][no][var]->SetMarkerStyle(25); // Old is empty boxes
+	    }
+	  }
+	}
       }
     }
-    // Efficiency versus Mult and Phi
-    //________________________________________________________________________________
-    //
-    const Char_t *TitleEffPhi[4] = {Form("%s Fit Pts>%i %s versus #phi_%s |#eta| < 0.5",New.Data(),effNFP,New.Data(),New.Data()),
-				    Form("%s Fit Pts>%i %s versus #phi_%s |#eta| < 0.5",Old.Data(),effNFP,Old.Data(),Old.Data()),
-				    Form("%s & %s Fit Pts>%i %s and %s versus #phi_%s |#eta| < 0.5",New.Data(),Old.Data(),effNFP,Old.Data(),New.Data(),New.Data()),
-				    Form("%s & %s Fit Pts>%i %s and %s versus #phi_%s |#eta| < 0.5",New.Data(),Old.Data(),effNFP,Old.Data(),New.Data(),Old.Data())};
-    TH2D *PhiEf[2][4]; 
-    for (Int_t k = 0; k < 2; k++) {
-      for (Int_t i = 0; i < 4; i++) {
-	Name = Form("%s%s",NameEffPhi[i].Data(),GP[k]);
-	Title = Form("%s for %s",TitleEffPhi[i],GPTitle[k]);
-	PhiEf[k][i] = new TH2D(Name,Title,180,-180,180,7,0,700);
-	PhiEf[k][i]->Sumw2();
-	PhiEf[k][i]->SetMarkerStyle(20+i);
-	PhiEf[k][i]->SetMarkerColor(1+i);
-      }
-    }
+#if 0
     //________________________________________________________________________________
     // Pt difference, vs pt
     //________________________________________________________________________________
@@ -1107,6 +891,7 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
 			 200,-2,2,90,-180,180);
     etaphi[1] = new TH2D(Form("EtaPhi%s",New.Data()),Form("#phi versus #eta for %s",New.Data()),
 			 200,-2,2,90,-180,180);
+#endif
     // Loop
     Long64_t nentries = fChain->GetEntriesFast();
     if (Nentries > 0 && nentries > Nentries) nentries = Nentries;
@@ -1117,23 +902,68 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
       if (ientry < 0) break;
       if (jentry%100000 == 0) cout << "Read entry " << jentry << endl;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-      if (data.newFitPtsGl <= 0 && data.oldFitPtsGl <= 0) continue;
-      if ((data.newFitPtsGl > 0 && TMath::Abs(data.newEtaGl) > 0.5) ||
-	  (data.oldFitPtsGl > 0 && TMath::Abs(data.oldEtaGl) > 0.5)) continue;
-      fitPtsHist->Fill(data.newFitPtsGl,data.oldFitPtsGl);
+      for (Int_t gp = 0; gp < 2; gp++) {// Global Primary
+	Double_t Vars[2][3] = {0}; // 2 -> New/Old; 3 -> pT/Eta/Phi
+	Int_t c[2] = {0};
+	Int_t iOld = T->oldP.MatchStatus; // 0 - lost, 1 - match, > 1 - clone, 
+	Int_t iNew = T->newP.MatchStatus;
+	if (_debug && iOld != iNew) {
+	  static Int_t iBreak = 0;
+	  iBreak++;
+	}
+	if (gp == 0) {
+	  if (iOld && T->oldP.FitPtsGl < effNFP) iOld = 0;
+	  if (iNew && T->newP.FitPtsGl < effNFP) iNew = 0;
+	  if (iOld) {Vars[1][0] = T->oldP.PtGl; Vars[1][1] = T->oldP.EtaGl; Vars[1][2] = TMath::RadToDeg()*T->oldP.PhiGl; c[1] = T->oldP.charge();}
+	  if (iNew) {Vars[0][0] = T->newP.PtGl; Vars[0][1] = T->newP.EtaGl; Vars[0][2] = TMath::RadToDeg()*T->newP.PhiGl; c[0] = T->newP.charge();}
+	} else {
+	  if (iOld && T->oldP.FitPtsPr < effNFP) iOld = 0;
+	  if (iNew && T->newP.FitPtsPr < effNFP) iNew = 0;
+	  if (iOld) {Vars[1][0] = T->oldP.PtPr; Vars[1][1] = T->oldP.EtaPr; Vars[1][2] = TMath::RadToDeg()*T->oldP.PhiPr; c[1] = T->oldP.charge();}
+	  if (iNew) {Vars[0][0] = T->newP.PtPr; Vars[0][1] = T->newP.EtaPr; Vars[0][2] = TMath::RadToDeg()*T->newP.PhiPr; c[0] = T->newP.charge();}
+	}
+	if (iOld == 0 && iNew == 0) continue;
+	Double_t LostOld = iOld == 0 ? 1 : 0, MatchedOld = iOld >= 1 ? 1 : 0, CloneOld = iNew > 1 ? 1 : 0;
+	Double_t LostNew = iNew == 0 ? 1 : 0, MatchedNew = iNew >= 1 ? 1 : 0, CloneNew = iOld > 1 ? 1 : 0;
+	if (_debug) {
+	  cout << ientry << "\tgp = " << gp << "\tOld " << iOld << " Id = " << T->oldP.Id << "\tL/M/C = " << LostOld << "/" << MatchedOld << "/" << CloneOld 
+	       << "\tc/pT/eta/phi" << c[1] << "/" << Vars[1][0] << "/" << Vars[1][1] << "/" << Vars[1][2] << endl; 
+	  cout << ientry << "\tgp = " << gp << "\tNew " << iNew << " Id = " << T->newP.Id << "\tL/M/C = " << LostNew << "/" << MatchedNew << "/" << CloneNew 
+	       << "\tc/pT/eta/phi" << c[0] << "/" << Vars[0][0] << "/" << Vars[0][0] << "/" << Vars[0][2] << endl; 
+	}
+	for (Int_t var = 0; var < 3 ; var++) {
+	  if (iNew) Eff[gp][c[0]][1][0][var]->Fill(Vars[0][var],CloneNew);
+	  if (iOld) Eff[gp][c[1]][1][1][var]->Fill(Vars[1][var],CloneOld);
+	  if (CloneOld < 0.5 && CloneNew < 0.5) {
+	    if (iNew) {
+	      Eff[gp][c[0]][0][0][var]->Fill(Vars[0][var],MatchedOld);
+	      Eff[gp][c[0]][2][0][var]->Fill(Vars[0][var],LostOld);
+	    }
+	    if (iOld) {
+	      Eff[gp][c[1]][0][1][var]->Fill(Vars[1][var],MatchedNew);
+	      Eff[gp][c[1]][2][1][var]->Fill(Vars[1][var],LostNew);
+	    }
+	  }
+	}
+      }
+#if 0	
+      if (T->newP.FitPtsGl <= 0 && T->oldP.FitPtsGl <= 0) continue;
+      if ((T->newP.FitPtsGl > 0 && TMath::Abs(T->newP.EtaGl) > 0.5) ||
+	  (T->oldP.FitPtsGl > 0 && TMath::Abs(T->oldP.EtaGl) > 0.5)) continue;
+      fitPtsHist->Fill(T->newP.FitPtsGl,T->oldP.FitPtsGl);
       Double_t chargeOld = 0;
-      if (data.oldCharge > 0) chargeOld = 1;
-      if (data.oldCharge < 0) chargeOld = 2;
+      if (T->oldP.Charge > 0) chargeOld = 1;
+      if (T->oldP.Charge < 0) chargeOld = 2;
       if (chargeOld > 0.5) {
-	if (data.oldFitPtsGl > 0) HftPattern->Fill(data.oldHitMap,chargeOld);
-	if (data.oldFitPtsPr > 0) HftPattern->Fill(data.oldHitMap,chargeOld+2);
+	if (T->oldP.FitPtsGl > 0) HftPattern->Fill(T->oldP.hitMap,chargeOld);
+	if (T->oldP.FitPtsPr > 0) HftPattern->Fill(T->oldP.hitMap,chargeOld+2);
       }
       Double_t chargeNew = 0;
-      if (data.newCharge > 0) chargeNew = 1;
-      if (data.newCharge < 0) chargeNew = 2;
+      if (T->newP.Charge > 0) chargeNew = 1;
+      if (T->newP.Charge < 0) chargeNew = 2;
       if (chargeNew > 0.5) {
-	if (data.newFitPtsGl > 0) HftPattern->Fill(data.newHitMap,chargeNew+4);
-	if (data.newFitPtsPr > 0) HftPattern->Fill(data.newHitMap,chargeNew+6);
+	if (T->newP.FitPtsGl > 0) HftPattern->Fill(T->newP.hitMap,chargeNew+4);
+	if (T->newP.FitPtsPr > 0) HftPattern->Fill(T->newP.hitMap,chargeNew+6);
       }
       Double_t pTdiffGl  = -9999;
       Double_t pTdiffGlR = -9999;
@@ -1141,97 +971,97 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
       Double_t pTdiffPr  = -9999;
       Double_t pTdiffPrR = -9999;
       Double_t pTInvdiffPrR = -9999;
-      if (data.newFitPtsGl >= effNFP) { // New GL
-	pTEf[0][0]->Fill(data.newPtGl,refMult); 
-	Double_t phi = TMath::RadToDeg()*data.newPhiGl;
-	PhiEf[0][0]->Fill(phi,refMult);
+      if (T->newP.FitPtsGl >= effNFP) { // New GL
+	//	pTEf[0][0]->Fill(T->newP.PtGl,refMult); 
+	Double_t phi = TMath::RadToDeg()*T->newP.PhiGl;
+	//	PhiEf[0][0]->Fill(phi,refMult);
       }
-      if (data.oldFitPtsGl >= effNFP) { // Old GL
-	pTEf[0][1]->Fill(data.oldPtGl,refMult); 
-	Double_t phi = TMath::RadToDeg()*data.oldPhiGl;
-	PhiEf[0][1]->Fill(phi,refMult);
+      if (T->oldP.FitPtsGl >= effNFP) { // Old GL
+	//	pTEf[0][1]->Fill(T->oldP.PtGl,refMult); 
+	Double_t phi = TMath::RadToDeg()*T->oldP.PhiGl;
+	//	PhiEf[0][1]->Fill(phi,refMult);
       }
-      Double_t phiNew = TMath::RadToDeg()*data.newPhiPr;
-      Double_t phiOld = TMath::RadToDeg()*data.oldPhiPr;
-      if (data.newFitPtsPr >= effNFP) {pTEf[1][0]->Fill(data.newPtPr,refMult); PhiEf[1][0]->Fill(phiNew,refMult);}
-      if (data.oldFitPtsPr >= effNFP) {pTEf[1][1]->Fill(data.oldPtPr,refMult); PhiEf[1][1]->Fill(phiOld,refMult);}
+      Double_t phiNew = TMath::RadToDeg()*T->newP.PhiPr;
+      Double_t phiOld = TMath::RadToDeg()*T->oldP.PhiPr;
+      //      if (T->newP.FitPtsPr >= effNFP) {pTEf[1][0]->Fill(T->newP.PtPr,refMult); PhiEf[1][0]->Fill(phiNew,refMult);}
+      //      if (T->oldP.FitPtsPr >= effNFP) {pTEf[1][1]->Fill(T->oldP.PtPr,refMult); PhiEf[1][1]->Fill(phiOld,refMult);}
       // Matched 
-      if (data.maxPing < 0) continue;
+      //      if (data.maxPing < 0) continue;
 #if 0
-      if (data.newFitPtsGl > 2*data.maxPing ||
-	  data.oldFitPtsGl > 2*data.maxPing ) continue;
-      if (data.newFitPtsGl < minNFP || data.oldFitPtsGl < minNFP) continue;
+      if (T->newP.FitPtsGl > 2*data.maxPing ||
+	  T->oldP.FitPtsGl > 2*data.maxPing ) continue;
+      if (T->newP.FitPtsGl < minNFP || T->oldP.FitPtsGl < minNFP) continue;
 #endif
       //      if (data.firstHitsDist < 0 || data.firstHitsDist> 1) continue;
-      fitPtsHistPing->Fill(data.newFitPtsGl,data.oldFitPtsGl);
-      pTdiffGl  = data.oldPtGl - data.newPtGl;
-      pTdiffGlR = data.oldPtGl/data.newPtGl - 1;
-      pTInvdiffGlR = data.newPtGl/data.oldPtGl - 1;
-      if (data.newFitPtsPr >= effNFP && data.oldFitPtsPr >= effNFP) {
-	if (RefMultOld != refMult) {
-	  RefMultOld = refMult;
-	  if (! (data.newPrimX == 0 && data.newPrimY == 0 && data.newPrimZ == 0) &&
-	      ! (data.oldPrimX == 0 && data.oldPrimY == 0 && data.oldPrimZ == 0)) {
-	    DifPvX->Fill(data.newPrimX - data.oldPrimX);
-	    DifPvY->Fill(data.newPrimY - data.oldPrimY);
-	    DifPvZ->Fill(data.newPrimZ - data.oldPrimZ);
+      fitPtsHistPing->Fill(T->newP.FitPtsGl,T->oldP.FitPtsGl);
+      pTdiffGl  = T->oldP.PtGl - T->newP.PtGl;
+      pTdiffGlR = T->oldP.PtGl/T->newP.PtGl - 1;
+      pTInvdiffGlR = T->newP.PtGl/T->oldP.PtGl - 1;
+      if (T->newP.FitPtsPr >= effNFP && T->oldP.FitPtsPr >= effNFP) {
+	//	if (RefMultOld != refMult) {
+	//	  RefMultOld = refMult;
+	  if (! (T->newP.PrimX == 0 && T->newP.PrimY == 0 && T->newP.PrimZ == 0) &&
+	      ! (T->oldP.PrimX == 0 && T->oldP.PrimY == 0 && T->oldP.PrimZ == 0)) {
+	    DifPvX->Fill(T->newP.PrimX - T->oldP.PrimX);
+	    DifPvY->Fill(T->newP.PrimY - T->oldP.PrimY);
+	    DifPvZ->Fill(T->newP.PrimZ - T->oldP.PrimZ);
 	  }
-	}
-	Charge->Fill(data.oldCharge,data.newCharge);
-	if (data.newFitPtsGl >= 15 && data.oldFitPtsGl >= 15) Charge15->Fill(data.oldCharge,data.newCharge);
-	Charge15->Fill(data.oldCharge,data.newCharge);
-	pTdiffPr = data.oldPtPr - data.newPtPr;
-	pTdiffPrR = data.oldPtPr/data.newPtPr - 1;
-	pTInvdiffPrR = data.newPtPr/data.oldPtPr - 1;
+	  //      }
+	Charge->Fill(T->oldP.Charge,T->newP.Charge);
+	if (T->newP.FitPtsGl >= 15 && T->oldP.FitPtsGl >= 15) Charge15->Fill(T->oldP.Charge,T->newP.Charge);
+	Charge15->Fill(T->oldP.Charge,T->newP.Charge);
+	pTdiffPr = T->oldP.PtPr - T->newP.PtPr;
+	pTdiffPrR = T->oldP.PtPr/T->newP.PtPr - 1;
+	pTInvdiffPrR = T->newP.PtPr/T->oldP.PtPr - 1;
       }
       Int_t charge = 0;
-      if ((data.newCharge && data.newCharge < 0) ||
-	  (data.oldCharge && data.oldCharge < 0)) charge = 1;
-      pTDifNFP[0][charge]->Fill(data.newFitPtsGl,pTdiffGlR); 
-      if (data.newPtGl > 0.5)  pTDifNFP5[0][charge]->Fill(data.newFitPtsGl,pTdiffGlR); 
+      if ((T->newP.Charge && T->newP.Charge < 0) ||
+	  (T->oldP.Charge && T->oldP.Charge < 0)) charge = 1;
+      pTDifNFP[0][charge]->Fill(T->newP.FitPtsGl,pTdiffGlR); 
+      if (T->newP.PtGl > 0.5)  pTDifNFP5[0][charge]->Fill(T->newP.FitPtsGl,pTdiffGlR); 
       // Both global
-      if (data.newFitPtsGl < effNFP || data.oldFitPtsGl < effNFP) continue;
-      pTdiff[0][charge]->Fill(data.newPtGl,pTdiffGl);
-      pTdiffR[0][charge]->Fill(data.newPtGl,pTdiffGlR);
-      pTInvdiffR[0][charge]->Fill(data.newPtGl,pTInvdiffGlR);
-      PhidiffR[0][0][charge]->Fill(data.newPhiGl,pTdiffGlR);
-      if (data.newEtaGl > 0) PhidiffR[1][0][charge]->Fill(data.newPhiGl,pTdiffGlR);
-      else                   PhidiffR[2][0][charge]->Fill(data.newPhiGl,pTdiffGlR);
-      if (data.newPtGl > 0.5) {
-	Phi5diffR[0][0][charge]->Fill(data.newPhiGl,pTdiffGlR);
-	if (data.newEtaGl > 0) Phi5diffR[1][0][charge]->Fill(data.newPhiGl,pTdiffGlR);
-	else                   Phi5diffR[2][0][charge]->Fill(data.newPhiGl,pTdiffGlR);
+      if (T->newP.FitPtsGl < effNFP || T->oldP.FitPtsGl < effNFP) continue;
+      pTdiff[0][charge]->Fill(T->newP.PtGl,pTdiffGl);
+      pTdiffR[0][charge]->Fill(T->newP.PtGl,pTdiffGlR);
+      pTInvdiffR[0][charge]->Fill(T->newP.PtGl,pTInvdiffGlR);
+      PhidiffR[0][0][charge]->Fill(T->newP.PhiGl,pTdiffGlR);
+      if (T->newP.EtaGl > 0) PhidiffR[1][0][charge]->Fill(T->newP.PhiGl,pTdiffGlR);
+      else                   PhidiffR[2][0][charge]->Fill(T->newP.PhiGl,pTdiffGlR);
+      if (T->newP.PtGl > 0.5) {
+	Phi5diffR[0][0][charge]->Fill(T->newP.PhiGl,pTdiffGlR);
+	if (T->newP.EtaGl > 0) Phi5diffR[1][0][charge]->Fill(T->newP.PhiGl,pTdiffGlR);
+	else                   Phi5diffR[2][0][charge]->Fill(T->newP.PhiGl,pTdiffGlR);
       }
-      phiNew = TMath::RadToDeg()*data.newPhiGl;
-      phiOld = TMath::RadToDeg()*data.oldPhiGl;
+      phiNew = TMath::RadToDeg()*T->newP.PhiGl;
+      phiOld = TMath::RadToDeg()*T->oldP.PhiGl;
       
-      pTEf[0][2]->Fill(data.newPtGl,refMult); PhiEf[0][2]->Fill(phiNew,refMult);
-      pTEf[0][3]->Fill(data.oldPtGl,refMult); PhiEf[0][3]->Fill(phiOld,refMult);
+      //      pTEf[0][2]->Fill(T->newP.PtGl,refMult); PhiEf[0][2]->Fill(phiNew,refMult);
+      //      pTEf[0][3]->Fill(T->oldP.PtGl,refMult); PhiEf[0][3]->Fill(phiOld,refMult);
       // Both primaries
-      if (data.newFitPtsPr < effNFP || data.oldFitPtsPr < effNFP) continue;
-      pTDifNFP[1][charge]->Fill(data.newFitPtsPr,pTdiffPrR); 
-      if (data.newPtPr > 0.5)  pTDifNFP5[1][charge]->Fill(data.newFitPtsPr,pTdiffPrR); 
-      pTdiff[1][charge]->Fill(data.newPtPr,pTdiffPr);
-      pTdiffR[1][charge]->Fill(data.newPtPr,pTdiffPrR);
-      pTInvdiffR[1][charge]->Fill(data.newPtPr,pTInvdiffPrR);
-      PhidiffR[0][1][charge]->Fill(data.newPhiPr,pTdiffPrR);
-      if (data.newEtaPr > 0) PhidiffR[1][1][charge]->Fill(data.newPhiPr,pTdiffPrR);
-      else                   PhidiffR[2][1][charge]->Fill(data.newPhiPr,pTdiffPrR);
-      if (data.newPtPr > 0.5) {
-	Phi5diffR[0][1][charge]->Fill(data.newPhiPr,pTdiffPrR);
-	if (data.newEtaPr > 0) Phi5diffR[1][1][charge]->Fill(data.newPhiPr,pTdiffPrR);
-	else                   Phi5diffR[2][1][charge]->Fill(data.newPhiPr,pTdiffPrR);
+      if (T->newP.FitPtsPr < effNFP || T->oldP.FitPtsPr < effNFP) continue;
+      pTDifNFP[1][charge]->Fill(T->newP.FitPtsPr,pTdiffPrR); 
+      if (T->newP.PtPr > 0.5)  pTDifNFP5[1][charge]->Fill(T->newP.FitPtsPr,pTdiffPrR); 
+      pTdiff[1][charge]->Fill(T->newP.PtPr,pTdiffPr);
+      pTdiffR[1][charge]->Fill(T->newP.PtPr,pTdiffPrR);
+      pTInvdiffR[1][charge]->Fill(T->newP.PtPr,pTInvdiffPrR);
+      PhidiffR[0][1][charge]->Fill(T->newP.PhiPr,pTdiffPrR);
+      if (T->newP.EtaPr > 0) PhidiffR[1][1][charge]->Fill(T->newP.PhiPr,pTdiffPrR);
+      else                   PhidiffR[2][1][charge]->Fill(T->newP.PhiPr,pTdiffPrR);
+      if (T->newP.PtPr > 0.5) {
+	Phi5diffR[0][1][charge]->Fill(T->newP.PhiPr,pTdiffPrR);
+	if (T->newP.EtaPr > 0) Phi5diffR[1][1][charge]->Fill(T->newP.PhiPr,pTdiffPrR);
+	else                   Phi5diffR[2][1][charge]->Fill(T->newP.PhiPr,pTdiffPrR);
       }
-      phiNew = TMath::RadToDeg()*data.newPhiPr;
-      phiOld = TMath::RadToDeg()*data.oldPhiPr;
-      pTEf[1][2]->Fill(data.newPtPr,refMult); PhiEf[1][2]->Fill(phiNew,refMult);
-      pTEf[1][3]->Fill(data.oldPtPr,refMult); PhiEf[1][3]->Fill(phiOld,refMult);
+      phiNew = TMath::RadToDeg()*T->newP.PhiPr;
+      phiOld = TMath::RadToDeg()*T->oldP.PhiPr;
+      //      pTEf[1][2]->Fill(T->newP.PtPr,refMult); PhiEf[1][2]->Fill(phiNew,refMult);
+      //      pTEf[1][3]->Fill(T->oldP.PtPr,refMult); PhiEf[1][3]->Fill(phiOld,refMult);
+#endif
     }
-    if (fOut) fOut->Write();
-    delete fOut;
+  }
+  if (fOut) {
+    fOut->Write();
+    fOut->cd();
   }
   Draw(Out);
 }
-/*
-  
-*/  

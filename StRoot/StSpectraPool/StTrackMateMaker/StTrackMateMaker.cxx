@@ -6,8 +6,6 @@
 #include <set>
 
 #include "StTrackMateMaker.h"
-#include "StTrackPing.hh"
-
 #include "TH2.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -40,80 +38,17 @@
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
-
 struct CompareHits {
   bool operator() (StTpcHit* hit1,StTpcHit* hit2) { 
     if (! hit1) return kTRUE;
     return hit1->Compare(hit2);}
 } comp;
+bool compStTrackPing(const StTrackPing& rhs, const StTrackPing& lhs){
+    return rhs.mNPings>lhs.mNPings;
+}
 
 static const char rcsid[] = "$Id: StTrackMateMaker.cxx,v 1.4 2013/01/16 21:56:45 fisyak Exp $";
 ClassImp(StTrackMateMaker);
-// tpt => old
-// sti => new
-  
-static  TString names("oldPtGl/F:newPtGl/F:oldEtaGl/F:newEtaGl/F:oldPhiGl/F:newPhiGl/F:oldPGl/F:newPGl/F:oldFitPtsGl/F:"
-		      "newFitPtsGl/F:oldPtPr/F:newPtPr/F:oldEtaPr/F:newEtaPr/F:oldPhiPr/F:newPhiPr/F:oldPPr/F:newPPr/F:"
-		      "oldFitPtsPr/F:newFitPtsPr/F:oldDedx/F:newDedx/F:oldCharge/F:newCharge/F:maxPing/F:Prim/F:"
-		      "oldChi2Gl0/F:newChi2Gl0/F:oldChi2Gl1/F:newChi2Gl1/F:oldChi2Pr0/F:newChi2Pr0/F:oldChi2Pr1/F:"
-		      "newChi2Pr1/F:firstHitsDist/F:lastHitsDist/F:"
-		      "oldPrimX/F:oldPrimY/F:oldPrimZ/F:newPrimX/F:newPrimY/F:newPrimZ/F"
-		      ":newSecF/F:oldSecF/F:newSecL/F:oldSecL/F:newHitMap/I:oldHitMap/I");
-struct mc_data_array {
-  Char_t begin;
-  Float_t oldPtGl;
-  Float_t newPtGl;
-  Float_t oldEtaGl;
-  Float_t newEtaGl;
-  Float_t oldPhiGl;
-  Float_t newPhiGl;
-  Float_t oldPGl;
-  Float_t newPGl;
-  Float_t oldFitPtsGl;
-  Float_t newFitPtsGl;
-  Float_t oldPtPr;
-  Float_t newPtPr;
-  Float_t oldEtaPr;
-  Float_t newEtaPr;
-  Float_t oldPhiPr;
-  Float_t newPhiPr;
-  Float_t oldPPr;
-  Float_t newPPr;
-  Float_t oldFitPtsPr;
-  Float_t newFitPtsPr;
-  Float_t oldDedx;
-  Float_t newDedx;
-  Float_t oldCharge;
-  Float_t newCharge;
-  Float_t maxPing;
-  Float_t Prim;
-  Float_t oldChi2Gl0;
-  Float_t newChi2Gl0;
-  Float_t oldChi2Gl1;
-  Float_t newChi2Gl1;
-  Float_t oldChi2Pr0;
-  Float_t newChi2Pr0;
-  Float_t oldChi2Pr1;
-  Float_t newChi2Pr1;
-  Float_t firstHitsDist;
-  Float_t lastHitsDist;
-  Float_t oldPrimX;
-  Float_t oldPrimY;
-  Float_t oldPrimZ;
-  Float_t newPrimX;
-  Float_t newPrimY;
-  Float_t newPrimZ;
-  Float_t newSecF;  // first and last hit sector
-  Float_t oldSecF;
-  Float_t newSecL;
-  Float_t oldSecL;
-  Int_t newHitMap;
-  Int_t oldHitMap;
-  Char_t end;
-public:
-  void set() {memset(&begin, 0, &end-&begin);}
-};
-static mc_data_array myData;    
 //________________________________________________________________________________
 Int_t StTrackMateMaker::Init() {
   TFile *f = GetTFile();
@@ -123,8 +58,8 @@ Int_t StTrackMateMaker::Init() {
   LOG_INFO << "StTrackMateMaker::Init() - creating histogram" << endm;
   TString evNames = "refMult/F";
   trackTree = new TTree("trackMateComp","trackMateComp");
-  trackBr = trackTree->Branch("data_array",&myData.oldPtGl,names.Data());
-  //  eventBr = trackTree->Branch("ev_array",evOutput,evNames.Data());
+  fTrackMatch = new TrackMatch;
+  trackBr = trackTree->Branch("TrackMatch",&fTrackMatch);
   LOG_INFO << "StTrackMateMaker::Init() - successful" << endm;
   
   return StMaker::Init();
@@ -138,7 +73,7 @@ void StTrackMateMaker::Clear(const char* c)
 Bool_t StTrackMateMaker::GoodTrack(StTrack* trk) {
   if (! trk || trk->flag()<=0 || trk->topologyMap().trackFtpc()) return kFALSE;
   if (! trk->detectorInfo())  return kFALSE;
-  if ( trk->fitTraits().numberOfFitPoints(kTpcId) < 10) return kFALSE;
+  if ( trk->fitTraits().numberOfFitPoints(kTpcId) < 15) return kFALSE;
   return kTRUE;
 }
 //________________________________________________________________________________
@@ -183,8 +118,8 @@ Int_t StTrackMateMaker::Make(){
   LOG_INFO << "Run # and Event #, should be the same for both StEvents" << endm;
   LOG_INFO << "Event1: Run "<< rEvent1->runId() << " Event1 No: " << rEvent1->id() << endm;
   LOG_INFO << "Event2: Run "<< rEvent2->runId() << " Event2 No: " << rEvent2->id() << endm;
-  LOG_INFO << "Vertex Positions" << endm;
   assert (rEvent1->runId() == rEvent2->runId() && rEvent1->id() == rEvent2->id());
+  LOG_INFO << "Vertex Positions" << endm;
   if (rEvent1->primaryVertex() ) {
     LOG_INFO << "Event1: Vertex Position " << rEvent1->primaryVertex()->position() << endm;
   }
@@ -257,14 +192,14 @@ Int_t StTrackMateMaker::Make(){
   // - hit 1 to hit 2, assuming they are in the same sector, padrow and have the same index
   // - hit 2 to track 2, using the map we will build next
   
-  map<const StTpcHit*,StGlobalTrack*> hitTrackMap1;
+  Hit2TrackMap hitTrackMap1;
   size_t failedTries1 = buildRecHitTrackMap(trackNodes1,hitTrackMap1);
   LOG_INFO << "Hits1 used by more than 1 track: " << failedTries1 << endm;
-  map<const StTpcHit*,StGlobalTrack*> hitTrackMap2;
+  Hit2TrackMap hitTrackMap2;
   size_t failedTries2 = buildRecHitTrackMap(trackNodes2,hitTrackMap2);
   LOG_INFO << "Hits2 used by more than 1 track: " << failedTries2 << endm;
-  map<const StTpcHit*,const StTpcHit*> Hit2ToHit1;
-  map<const StTpcHit*,const StTpcHit*> Hit1ToHit2;
+  Hit2HitMap Hit2ToHit1;
+  Hit2HitMap Hit1ToHit2;
   buildHit2HitMaps(tpchitcoll1,tpchitcoll2,Hit1ToHit2,Hit2ToHit1);
   // Do Track association.
   LOG_INFO << "Begin Track Association..." << endm;
@@ -284,8 +219,8 @@ Int_t StTrackMateMaker::Make(){
   // 2 and find out the tracks that were not associated from event 2
   
   //  set<StGlobalTrack*> assocTracks2;
-  map<StGlobalTrack*,StGlobalTrack*> Track1ToTrack2;
-  map<StGlobalTrack*,StGlobalTrack*> Track2ToTrack1;
+  Track2TrackMap Track1ToTrack2;
+  Track2TrackMap Track2ToTrack1;
   buildTrack2TrackMap(trackNodes1, trackNodes2, Hit1ToHit2, hitTrackMap2, Track1ToTrack2);
   buildTrack2TrackMap(trackNodes2, trackNodes1, Hit2ToHit1, hitTrackMap1, Track2ToTrack1);
   checkConsistency(Track1ToTrack2,Track2ToTrack1);
@@ -295,132 +230,83 @@ Int_t StTrackMateMaker::Make(){
   // find candidate with most common tpc hits,
   // could rewrite using
   // max_element...
+  // track1 => track2
+#if 0
+  for (auto it = Track1ToTrack2.begin(), end =  Track1ToTrack2.end(); it != end; it = Track1ToTrack2.upper_bound(it->first)) {
+    StGlobalTrack *track1 = it->first;
+    if (! track1) continue;
+    Int_t nt2 = Track1ToTrack2.count(track1);
+    if (! nt2) {
+      FillMatch(track1);
+    } else {
+      auto ret = Track1ToTrack2.equal_range(track1);
+      for (auto it2 = ret.first; it2 != ret.second; ++it2) {
+	StGlobalTrack *track2 = it2->second;
+	FillMatch(track1, track2);
+      }
+    }
+  }
+  // track2 => track1 
+  for (auto it = Track2ToTrack1.begin(), end =  Track2ToTrack1.end(); it != end; it = Track2ToTrack1.upper_bound(it->first)) {
+    StGlobalTrack *track2 = it->first;
+    if (! track2) continue;
+    Int_t nt1 = Track2ToTrack1.count(track2);
+    if (nt1 == 1) continue;g
+    if (! nt1) {
+      FillMatch(0,track2);
+    } else {
+      auto ret = Track2ToTrack1.equal_range(track2);
+      Int_t matchstatus1 = 0;
+      for (auto it2 = ret.first; it2 != ret.second; ++it2) {
+	StGlobalTrack *track1 = it2->second;
+	if (track1 ) matchstatus1++;
+	FillMatch(track1, track2);
+      }
+    }
+  }
+#else
   for (auto x1 : Track1ToTrack2) {
     StGlobalTrack *trk1 = x1.first;
     if (! trk1 ) continue;
-    StPrimaryTrack* ptrk1 = (StPrimaryTrack*) trk1->node()->track(primary);
     StGlobalTrack *trk2 = x1.second;
     if (! trk2 ) {
-      Fill(trk1,ptrk1,0,0,-1);
+      FillMatch(trk1,0);
     } else {
-      //      assert(trk1 == Track2ToTrack1[trk2]);
-      StPrimaryTrack* ptrk2 = (StPrimaryTrack*) trk2->node()->track(primary);
-      Fill(trk1,ptrk1,trk2,ptrk2,1);
+      FillMatch(trk1,trk2);
     }
   }
   for (auto x2 : Track2ToTrack1) {
     StGlobalTrack *trk2 = x2.first;
     if (! trk2 ) continue;
-    StPrimaryTrack* ptrk2 = (StPrimaryTrack*) trk2->node()->track(primary);
     StGlobalTrack *trk1 = x2.second;
-    if (trk1) continue;
-    Fill(0,0,trk2,ptrk2,-2);
+    if (! trk1 ) {
+      FillMatch(0,trk2);
+    } else if (trk1->flagExtension() == 0 || trk2->flagExtension() == 0) {
+      FillMatch(trk1,trk2);
+    }
   }
+#endif
   return kStOK;
 }
 //________________________________________________________________________________
-void StTrackMateMaker::Fill(StGlobalTrack* trk1, StPrimaryTrack* ptrk1,StGlobalTrack* trk2, StPrimaryTrack* ptrk2,Int_t maxPing) {
-  myData.set();
-  myData.firstHitsDist = myData.lastHitsDist = -999.;
-  if (trk1) {
-    StDcaGeometry *dca1 = trk1->dcaGeometry();
-    StThreeVectorF mom1;
-    if (dca1) mom1 = dca1->momentum();
-    else      mom1 = trk1->geometry()->momentum();
-    myData.oldPtGl = mom1.perp(); 
-    myData.oldEtaGl = mom1.pseudoRapidity();
-    myData.oldPhiGl = mom1.phi();
-    myData.oldPGl = mom1.mag();
-    myData.oldFitPtsGl = trk1->fitTraits().numberOfFitPoints(kTpcId);
-    myData.oldDedx = getTpcDedx(trk1);
-    myData.oldCharge = trk1->geometry()->charge();
-    myData.oldChi2Gl0 = trk1->fitTraits().chi2(0);
-    myData.oldChi2Gl1 = trk1->fitTraits().chi2(1);
-    myData.maxPing = 0;
-    if (ptrk1) {
-      const StThreeVectorF& pmom1 = ptrk1->geometry()->momentum();
-      myData.oldPtPr  = pmom1.perp(); 
-      myData.oldEtaPr = pmom1.pseudoRapidity();
-      myData.oldPhiPr = pmom1.phi();
-      myData.oldPPr   = pmom1.mag();
-      myData.oldFitPtsPr = trk1->fitTraits().numberOfFitPoints(kTpcId);
-      myData.Prim    += 1;
-      myData.oldChi2Pr0 = ptrk1->fitTraits().chi2(0);
-      myData.oldChi2Pr1 = ptrk1->fitTraits().chi2(1);
-      StPrimaryTrack *prim = (StPrimaryTrack *) ptrk1;
-      const StVertex *vertex = prim->vertex();
-      if (vertex) {
-	myData.oldPrimX = vertex->position().x();
-	myData.oldPrimY = vertex->position().y();
-	myData.oldPrimZ = vertex->position().z();
-      }
-    }
-  }
-  if (trk2) {
-    StDcaGeometry *dca2 = trk2->dcaGeometry();
-    StThreeVectorF mom2;
-    if (dca2) mom2 = dca2->momentum();
-    else      mom2 = trk2->geometry()->momentum();
-    myData.newPtGl  = mom2.perp();
-    myData.newEtaGl = mom2.pseudoRapidity();
-    myData.newPhiGl = mom2.phi();
-    myData.newPGl   = mom2.mag();
-    myData.newFitPtsGl = trk2->fitTraits().numberOfFitPoints(kTpcId);
-    myData.newDedx = getTpcDedx(trk2);
-    myData.newCharge = trk2->geometry()->charge();
-    myData.newChi2Gl0 = trk2->fitTraits().chi2(0);
-    myData.newChi2Gl1 = trk2->fitTraits().chi2(1);
-    myData.maxPing = 0;
-    if (ptrk2) {
-      const StThreeVectorF& pmom2 = ptrk2->geometry()->momentum();
-      myData.newPtPr  = pmom2.perp();
-      myData.newEtaPr = pmom2.pseudoRapidity();
-      myData.newPhiPr = pmom2.phi();
-      myData.newPPr   = pmom2.mag();
-      myData.newFitPtsPr = trk2->fitTraits().numberOfFitPoints(kTpcId);
-      myData.Prim    += 10;
-      myData.newChi2Pr0 = ptrk2->fitTraits().chi2(0);
-      myData.newChi2Pr1 = ptrk2->fitTraits().chi2(1);
-      StPrimaryTrack *prim = (StPrimaryTrack *) ptrk2;
-      const StVertex *vertex = prim->vertex();
-      if (vertex) {
-	myData.newPrimX = vertex->position().x();
-	myData.newPrimY = vertex->position().y();
-	myData.newPrimZ = vertex->position().z();
-      }
-    }
-  }
-  myData.maxPing = maxPing;
-  StTrackDetectorInfo *det1 = 0;
-  StTrackDetectorInfo *det2 = 0;
-  if (trk1)  det1 = trk1->detectorInfo();
-  if (trk2)  det2 = trk2->detectorInfo();
-  if (det1 && det2) {
-    StThreeVectorF difFirst = det1->firstPoint() - det2->firstPoint();
-    myData.firstHitsDist = difFirst.mag();
-    StThreeVectorF difLast = det1->lastPoint() - det2->lastPoint();
-    myData.lastHitsDist = difLast.mag();
-  }
-  if (det1) myData.oldHitMap  
-    =    det1->numberOfReferencedPoints(kPxlId) + 
-    10  *det1->numberOfReferencedPoints(kIstId) +
-    100 *det1->numberOfReferencedPoints(kSsdId);
-  if (det2) myData.newHitMap  
-    =    det2->numberOfReferencedPoints(kPxlId) + 
-    10  *det2->numberOfReferencedPoints(kIstId) +
-    100 *det2->numberOfReferencedPoints(kSsdId); 
+void StTrackMateMaker::FillMatch(StGlobalTrack* trk1, StGlobalTrack* trk2) {
+  fTrackMatch->newP = TrackParametersFill(trk1);
+  fTrackMatch->oldP = TrackParametersFill(trk2);
   trackTree->Fill();
 }
 //________________________________________________________________________________
-size_t StTrackMateMaker::buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<const StTpcHit*,StGlobalTrack*>& htMap){
+size_t StTrackMateMaker::buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,Hit2TrackMap& htMap){
   size_t failedInserts = 0;
   for (size_t it = 0; it<nodes.size(); ++it) {
     StGlobalTrack* track = (StGlobalTrack*)nodes[it]->track(global);
     if (! GoodTrack(track)) continue;
+    track->setFlagExtension(0);
     StPtrVecHit hits = track->detectorInfo()->hits(kTpcId);
     for (StPtrVecHitIterator hIterTrk = hits.begin(); hIterTrk != hits.end(); ++hIterTrk) {
-      StHit* h = *hIterTrk;
+      StTpcHit* h = (StTpcHit *) *hIterTrk;
       if (! h) continue;
+      htMap.insert(HitTrackPair(h,track));
+#if 0
       StTpcHit* hit = (StTpcHit*) h;
       StGlobalTrack* trackO = htMap[hit];
       if (trackO && track != trackO) {
@@ -431,15 +317,16 @@ size_t StTrackMateMaker::buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map
       } else {
 	htMap[hit] = track;
       }
-//       pair<map<const StTpcHit*,StGlobalTrack*>::iterator,bool> insRes = htMap.insert(map<const StTpcHit*,StGlobalTrack*>::value_type(hit,track));
+//       pair<Hit2TrackMap::iterator,bool> insRes = htMap.insert(Hit2TrackMap::value_type(hit,track));
 //       if (insRes.second==false) ++failedInserts;	    
+#endif
     }//hits in track loop
   }// track loop
   return failedInserts;
 }
 //________________________________________________________________________________
 void StTrackMateMaker::buildHit2HitMaps(const StTpcHitCollection *tpchitcoll1, const StTpcHitCollection *tpchitcoll2,
-		       map<const StTpcHit*,const StTpcHit*> &Hit1ToHit2,map<const StTpcHit*,const StTpcHit*> &Hit2ToHit1) {
+		       Hit2HitMap &Hit1ToHit2,Hit2HitMap &Hit2ToHit1) {
   for (Int_t s = 0; s < 24; s++) {
     const StTpcSectorHitCollection* sectorcoll1 = tpchitcoll1->sector(s);
     const StTpcSectorHitCollection* sectorcoll2 = tpchitcoll2->sector(s);
@@ -498,122 +385,174 @@ void StTrackMateMaker::buildHit2HitMaps(const StTpcHitCollection *tpchitcoll1, c
 //________________________________________________________________________________
 void    StTrackMateMaker::buildTrack2TrackMap(const StSPtrVecTrackNode &trackNodes1, 
 					      const StSPtrVecTrackNode &trackNodes2, 
-					      map<const StTpcHit*,const StTpcHit*> &Hit1ToHit2, 
-					      map<const StTpcHit*,StGlobalTrack*> &hitTrackMap2,
-					      map<StGlobalTrack*,StGlobalTrack*> &Track1ToTrack2) {
-  StTrackPing initTrackPing;
-  initTrackPing.mTrack=0;
-  initTrackPing.mNPings=0;
+					      Hit2HitMap &Hit1ToHit2, 
+					      Hit2TrackMap &hitTrackMap2,
+					      Track2TrackMap &Track1ToTrack2) {
   for (size_t iTrk=0; iTrk<trackNodes1.size();++iTrk) {
-    StGlobalTrack *trk1 = (StGlobalTrack *) trackNodes1[iTrk]->track(global);
-    if (! GoodTrack(trk1)) continue;
+    StGlobalTrack *track1 = (StGlobalTrack *) trackNodes1[iTrk]->track(global);
+    if (! GoodTrack(track1)) continue;
     if (Debug()>2) LOG_INFO << "Processing Track " << iTrk << endm;
-    vector<StTrackPing> candidates(20,initTrackPing); //make sure it's filled with null pointers and zeros
-    size_t nCandidates = 0;
-    StPtrVecHit trkhits1 = trk1->detectorInfo()->hits(kTpcId);
-    
+    StGlobalTrack *track2 = 0;
+    if (Debug() > 2 && Track1ToTrack2.count(track1) > 0 ) { 
+      LOG_INFO << "Matching track count before " << Track1ToTrack2.count(track1) << endm;
+    }
+    vector<StTrackPing> candidates;
+    StPtrVecHit trkhits1 = track1->detectorInfo()->hits(kTpcId);
     for (StPtrVecHitIterator hIterTrk = trkhits1.begin(); hIterTrk != trkhits1.end(); ++hIterTrk) {
       // get the hit from the track
       const StTpcHit* hit1 = static_cast<const StTpcHit*>(*hIterTrk);
       const StTpcHit* hit2 = Hit1ToHit2[hit1];
       if (! hit2) continue;
       // use the map to find its track!
-      StTrack* trackCand = hitTrackMap2[hit2];
-      if (!trackCand) {
-	// the hit is not on a track in the 2nd event
-	continue;
+      auto ret = hitTrackMap2.equal_range(hit2);
+      for (auto it = ret.first; it !=ret.second; ++it) {
+	track2 = it->second;
+	if (!track2) continue;
+	Bool_t found = kFALSE;
+	for (auto it = candidates.begin(); it != candidates.end(); ++it) {
+	  if (track2 == it->mTrack) {
+	    found = kTRUE;
+	    it->mNPings++;
+	    break;
+	  }
+	}
+	if (! found) candidates.push_back(StTrackPing(track2,1));
+      } // track2 loop
+      if (candidates.size() > 1) {
+	sort(candidates.begin(), candidates.end(), compStTrackPing);
       }
-      // At this point we have a candidate StTrack
-      // If there are no candidates, create the first candidate.
-      // If already there, increment its nPings.
-      // If doesn't match any of the previous candidates, create new candidate.
-      
-      if (nCandidates == 0) {
-	candidates[0].mTrack   = trackCand;
-	candidates[0].mNPings  = 1;
-	nCandidates++;
-	
-      }//if, case of no tracks in candidate vector
-      else {
-	for (UInt_t iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
-	  if (trackCand==candidates[iCandidate].mTrack){
-	    candidates[iCandidate].mNPings++;
-	    break;
-	  }
-	  if (iCandidate == (nCandidates-1)){
-	    candidates[nCandidates].mTrack  = trackCand;
-	    candidates[nCandidates].mNPings = 1;
-	    nCandidates++;
-	    // check that we don't overstep the bounds,
-	    // if so increase the size of the vector in steps of 20 candidates
-	    if (nCandidates>=candidates.size()) {
-	      candidates.resize(nCandidates+20);
-	      if (Debug()) LOG_INFO << "Resizing in the TPC hits of the track " << endm;
-	    }
-	    break;
-	  }
-	} // candidate loop
-      }//else, case of tracks in candidate vector
-      
-    }// trk1 hit loop
-    vector<StTrackPing>::iterator max = max_element(candidates.begin(),candidates.end(),compStTrackPing);
-    UInt_t NPings = (*max).mNPings;
-    if (Debug()>2) {
-      LOG_INFO << "Matching track " << (*max).mTrack << " has " << NPings << ", index " << max-candidates.begin() << endm;
+    } // track1 hits
+    Int_t noMatched = 0;
+    for (auto it = candidates.begin(); it != candidates.end(); ++it) {
+      if (Debug()>2) {
+	LOG_INFO << "Matching track " << it->mTrack << " has " << it->mNPings << ", index " << it-candidates.begin() << endm;
+      }
+      // Association is considered as good if no. of matched (good) point > 5 and no. matched point > 0.5 * Min(no. of fit points on track1 or track2)
+      StGlobalTrack* track2 = (StGlobalTrack*) it->mTrack;
+      if (! track2) continue;
+      Bool_t Matched = GoodMatch(track1, track2, it->mNPings);
+      if (Matched) {
+	noMatched++;
+	Track1ToTrack2.insert( TrackTrackPair (track1, track2));
+      }
     }
-    // Association is considered as good if no. of matched (good) point > 5 and no. of bad points for each track less than 5
-    StGlobalTrack* trk2 = (StGlobalTrack*) (*max).mTrack;
-    Bool_t Matched = GoodMatch(trk1, trk2, NPings);
-    if (Matched) Track1ToTrack2[trk1] = trk2;
-    else         Track1ToTrack2[trk1] =    0;
-  }//track loop
- }
+    if (! noMatched) {
+      Track1ToTrack2.insert( TrackTrackPair (track1, 0));
+    } // candidates
+    if (Debug() > 2 && Track1ToTrack2.count(track1) > 1) {
+      LOG_INFO << "Matching tracks = " << noMatched << "\tcount after " << Track1ToTrack2.count(track1) << endm;
+      static Int_t breakI = 0;
+      breakI++;
+  }
+  }//track1 loop
+}
 //________________________________________________________________________________
-Float_t StTrackMateMaker::getTpcDedx(StTrack* trk) {
-  const StSPtrVecTrackPidTraits& vec = trk->pidTraits();
+void StTrackMateMaker::checkConsistency(Track2TrackMap &Track1ToTrack2, Track2TrackMap &Track2ToTrack1) {
+  // Check consistency of the maps Track1 <=> Track2 
+  for (auto it = Track1ToTrack2.begin(), end =  Track1ToTrack2.end(); it != end; it = Track1ToTrack2.upper_bound(it->first)) {
+    StGlobalTrack *track1 = it->first;
+    if (! track1) continue;
+    auto ret = Track1ToTrack2.equal_range(track1);
+    Int_t nt2 = Track1ToTrack2.count(track1);
+    for (auto it2 = ret.first; it2 != ret.second; ++it2) {
+      StGlobalTrack *track2 = it2->second;
+      if (! track2 ) continue;
+      Int_t nt1 = Track2ToTrack1.count(track2);
+      if (nt1 == 1 && nt2 == 1) {
+	auto ret2 = Track2ToTrack1.equal_range(track2);
+	for (Track2TrackIter it3 = ret2.first; it3 !=ret2.second; ++it3) {
+	  StGlobalTrack* track = it3->second;
+	  if (track1 != track) {
+	    LOG_INFO  << "Inconsistent tracks nt1 =" << nt1 << "\tnt2 = " <<nt2 << endm;
+	    PrPP(checkConsistency,*track1);
+	    PrPP(checkConsistency,*track2);
+	    if (! track) {
+	      if (Debug()%10 > 2) {LOG_INFO << "track is missing" << endm;}
+	    } else {
+	      PrPP(checkConsistency,*track);
+	    }
+	    StGlobalTrack *tracks[3] = {track1, track2, track};
+	    for (Int_t i = 0; i < 3; i++) {
+	      StGlobalTrack *t = tracks[i];
+	      if (! t) continue;
+	      if (Debug()%10 > 2) {LOG_INFO << Form("Track %i\t",i+1); PrPP(checkConsistency,*t);}
+	      StTrackDetectorInfo *det = t->detectorInfo();
+	      StPtrVecHit hits = det->hits(kTpcId);
+	      UInt_t Nhits = hits.size(); 
+	      if (Debug()%10 > 2) {LOG_INFO << Form("Track %i\t",i+1); PrPP(checkConsistency,Nhits);}
+	      for (UInt_t j = 0; j < Nhits; j++) {
+		StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[j]);
+		if (! tpcHit) continue;
+		PrPP("hit", *tpcHit);
+	      }
+	    }
+	    static Int_t iBreak = 0;
+	    iBreak++;
+	  }
+	}
+      }
+    }
+  }
+}
+//________________________________________________________________________________
+TrackParameters StTrackMateMaker::TrackParametersFill(StGlobalTrack *gTrack) {
+  static TrackParameters par;
+  par.set();
+  if (! gTrack) return par;
+  par.Id = gTrack->key();
+  StPrimaryTrack* pTrack = (StPrimaryTrack*) gTrack->node()->track(primary);
+  par.MatchStatus = gTrack->flagExtension() + 1;
+  gTrack->setFlagExtension(par.MatchStatus);
+  StTrackDetectorInfo *det = gTrack->detectorInfo();
+  if (det) {
+    par.FirstPointX = det->firstPoint().x();
+    par.FirstPointY = det->firstPoint().y();
+    par.FirstPointZ = det->firstPoint().z();
+    par.LastPointX = det->lastPoint().x();
+    par.LastPointY = det->lastPoint().y();
+    par.LastPointZ = det->lastPoint().z();
+    par.hitMap  
+      =    det->numberOfReferencedPoints(kPxlId) + 
+      10  *det->numberOfReferencedPoints(kIstId) +
+      100 *det->numberOfReferencedPoints(kSsdId);
+  }
   const StDedxPidTraits* mTraits = 0;
+  const StSPtrVecTrackPidTraits& vec = gTrack->pidTraits();
   for (unsigned int i=0; i<vec.size(); i++) {
     const StDedxPidTraits *p = dynamic_cast<const StDedxPidTraits*>(vec[i]);
     if (p && p->detector() == kTpcId && p->method() == kTruncatedMeanId) mTraits = p;
   }
-  if (!mTraits) return 0;    // no info available
-  return mTraits->mean();
-}
-//________________________________________________________________________________
-void StTrackMateMaker::checkConsistency(map<StGlobalTrack*,StGlobalTrack*> &Track1ToTrack2, map<StGlobalTrack*,StGlobalTrack*> &Track2ToTrack1) {
-  // Check consistency of the maps Track1 => Track2 
-  for (auto x : Track1ToTrack2) {
-    StGlobalTrack *track1 = x.first;
-    if (! track1) continue;
-    StGlobalTrack *track2 = x.second;
-    if (! track2 ) continue;
-    StGlobalTrack *track = Track2ToTrack1[track2];
-    if (track1 != track) {
-      cout << "Inconsistent tracks" << endl;
-      PrPP(Make,*track1);
-      PrPP(Make,*track2);
-      if (! track) {
-	cout << "track2 => track1 is missing" << endl;
-      } else {
-	PrPP(Make,*track);
-      }
-      StGlobalTrack *tracks[3] = {track1, track2, track};
-      for (Int_t i = 0; i < 3; i++) {
-	StGlobalTrack *t = tracks[i];
-	if (! t) continue;
-	PrPP(Form("Track %i",i+1),*t);
-	StTrackDetectorInfo *det = t->detectorInfo();
-	StPtrVecHit hits = det->hits(kTpcId);
-	UInt_t Nhits = hits.size(); 
-	PrPP(Form("Track %i",i+1),Nhits);
-	for (UInt_t j = 0; j < Nhits; j++) {
-	  StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[j]);
-	  if (! tpcHit) continue;
-	  PrPP("hit", *tpcHit);
-	}
-      }
-      static Int_t iBreak = 0;
-      iBreak++;
+  if (mTraits) par.Dedx = mTraits->mean();
+  StDcaGeometry *dca = gTrack->dcaGeometry();
+  StThreeVectorF mom;
+  if (dca) mom = dca->momentum();
+  else      mom = gTrack->geometry()->momentum();
+  par.PtGl = mom.perp(); 
+  par.EtaGl = mom.pseudoRapidity();
+  par.PhiGl = mom.phi();
+  par.PGl = mom.mag();
+  par.FitPtsGl = gTrack->fitTraits().numberOfFitPoints(kTpcId);
+  par.Charge = gTrack->geometry()->charge();
+  par.Chi2Gl0 = gTrack->fitTraits().chi2(0);
+  par.Chi2Gl1 = gTrack->fitTraits().chi2(1);
+  if (pTrack) {
+    const StThreeVectorF& pmom = pTrack->geometry()->momentum();
+    par.PtPr  = pmom.perp(); 
+    par.EtaPr = pmom.pseudoRapidity();
+    par.PhiPr = pmom.phi();
+    par.PPr   = pmom.mag();
+    par.FitPtsPr = gTrack->fitTraits().numberOfFitPoints(kTpcId);
+    par.Prim    += 1;
+    par.Chi2Pr0 = pTrack->fitTraits().chi2(0);
+    par.Chi2Pr1 = pTrack->fitTraits().chi2(1);
+    StPrimaryTrack *prim = (StPrimaryTrack *) pTrack;
+    const StVertex *vertex = prim->vertex();
+    if (vertex) {
+      par.PrimX = vertex->position().x();
+      par.PrimY = vertex->position().y();
+      par.PrimZ = vertex->position().z();
     }
   }
+  return par;
 }
+									     
