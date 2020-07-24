@@ -46,15 +46,19 @@ private:
     TH2F* mPres[kFcsNorthSouth];
     TH2F* mEPmap[kFcsNorthSouth];
     TH1F* mEcalNorm[kFcsNorthSouth];
-
+    TH1F* mDsmOut;
+    
     ClassDef(StFcsTrgQaMaker,1);
 };
 
 #endif
 
 /*
- * $Id: StFcsTrgQaMaker.h,v 1.2 2020/06/01 19:34:41 akio Exp $
+ * $Id: StFcsTrgQaMaker.h,v 1.3 2020/07/24 17:21:31 akio Exp $
  * $Log: StFcsTrgQaMaker.h,v $
+ * Revision 1.3  2020/07/24 17:21:31  akio
+ * adding hist for DsmOut
+ *
  * Revision 1.2  2020/06/01 19:34:41  akio
  * adding normarization histo
  *
