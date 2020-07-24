@@ -66,6 +66,7 @@ Int_t StFcsTrgQaMaker::Init(){
       mEcalNorm[ns] = new TH1F(Form("NormEcal%s",NS[ns]),Form("NormEcal4x4%s",NS[ns]),
 			       kFcsEcal4x4NCol*kFcsEcal4x4NRow,0.0,kFcsEcal4x4NCol*kFcsEcal4x4NRow);
   }
+  mDsmOut = new TH1F("DsmOut","DsmOut",16,0,16);
   return kStOK;
 };
 
@@ -127,6 +128,12 @@ Int_t StFcsTrgQaMaker::Make() {
 	    }
 	}	
     }
+
+    //DSM out
+    for(int i=0; i<16; i++){
+	if( (trg->dsmout >> i) & 0x1) mDsmOut->Fill(i);
+    }
+
     return kStOK;
 };
 
@@ -140,8 +147,11 @@ Int_t StFcsTrgQaMaker::Finish(){
 ClassImp(StFcsTrgQaMaker);
 
 /*
- * $Id: StFcsTrgQaMaker.cxx,v 1.2 2020/06/01 19:34:41 akio Exp $
+ * $Id: StFcsTrgQaMaker.cxx,v 1.3 2020/07/24 17:21:31 akio Exp $
  * $Log: StFcsTrgQaMaker.cxx,v $
+ * Revision 1.3  2020/07/24 17:21:31  akio
+ * adding hist for DsmOut
+ *
  * Revision 1.2  2020/06/01 19:34:41  akio
  * adding normarization histo
  *
