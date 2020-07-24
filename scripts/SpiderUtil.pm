@@ -28,7 +28,7 @@ $SPDR::VERSION = "V01.001";
 $SPDR::NAME    = "SpiderUtil";
 
 # Now global variables and default values
-$SPDR::WDIR      = "/afs/rhic.bnl.gov/star/doc/www/html/tmp/pub/Spider";
+$SPDR::WDIR      = "/afs/rhic.bnl.gov/star/doc/www/html/tmp/protected/Spider";
 $SPDR::LOGDIR    = "/gpfs01/star/rcf/prodlog";
 $SPDR::HPSSD     = "/home/starreco";
 $SPDR::SITE      = "BNL";
