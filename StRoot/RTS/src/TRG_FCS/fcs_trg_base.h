@@ -222,17 +222,22 @@ public:
 	// for use by stage_2:
 	static u_int s2_ch_mask[NS_COU] ;
 	static int fcs_trgDebug ;
+        static int fcs_readPresMaskFromText;
+        static u_int PRES_MASK[15][9][6];
+
+	// various thresholds
 	static u_short EM_HERATIO_THR ;
 	static u_short HAD_HERATIO_THR ;
 	static u_short EMTHR1 ;
 	static u_short EMTHR2 ;
+	static u_short EMTHR3 ;
 	static u_short HADTHR1 ;
 	static u_short HADTHR2 ;
+	static u_short HADTHR3 ;
 	static u_short JETTHR1 ;
-	static u_short JETTHR2 ;
-
-	// various thresholds
-
+	static u_short JETTHR2 ;       
+	static u_short ETOTTHR ;       
+	static u_short HTOTTHR ;       
 
 	// for use by stage_3:
 	// various stuff...
@@ -240,13 +245,16 @@ public:
 
         // Ecal and Hcal 4x4 sums, Ecal+nearest Hcal sum, and Pres(EPD) hit pattern at stage2
         u_int esum[2][15][9];
+        u_int epdcoin[2][15][9];
         u_int hsum[2][9][5];
         u_int padc[2][6][32];
         u_int phit[2][6][32];
         u_int sum [2][15][9];
         float ratio[2][15][9];
-        float jet[2][3];
-    
+        u_int jet[2][3];
+        u_int etot[2];
+        u_int htot[2];    
+        u_int dsmout;
 };
 
 #endif
