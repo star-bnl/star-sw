@@ -16,16 +16,22 @@ u_int fcs_trg_base::stage_version[4] ;
 u_int fcs_trg_base::s2_ch_mask[NS_COU] ;
 u_int fcs_trg_base::s3_ch_mask ;
 
-
 int fcs_trg_base::fcs_trgDebug ;
+int fcs_trg_base::fcs_readPresMaskFromText;
+u_int fcs_trg_base::PRES_MASK[15][9][6];
+
 u_short        fcs_trg_base::EM_HERATIO_THR ;
 u_short        fcs_trg_base::HAD_HERATIO_THR ;
 u_short        fcs_trg_base::EMTHR1 ;
 u_short        fcs_trg_base::EMTHR2 ;
+u_short        fcs_trg_base::EMTHR3 ;
 u_short        fcs_trg_base::HADTHR1 ;
 u_short        fcs_trg_base::HADTHR2 ;
+u_short        fcs_trg_base::HADTHR3 ;
 u_short        fcs_trg_base::JETTHR1 ;
 u_short        fcs_trg_base::JETTHR2 ;
+u_short        fcs_trg_base::ETOTTHR ;
+u_short        fcs_trg_base::HTOTTHR ;
 
 fcs_trg_base::fcs_trg_base()
 {
@@ -161,19 +167,21 @@ void fcs_trg_base::init(const char* fname)
 
 	// for Akio's code
 	fcs_trgDebug = 0 ;
+	fcs_readPresMaskFromText=0;
 
 	// stage2 params (defaults are from Akio's code)
 	EM_HERATIO_THR = 32 ;	// or 128*(1/4)
 	HAD_HERATIO_THR = 32 ;
 	EMTHR1 = 16 ;
 	EMTHR2 = 32 ;
+	EMTHR3 = 48 ;
 	HADTHR1 = 16 ;
 	HADTHR2 = 32 ;
+	HADTHR3 = 48 ;
 	JETTHR1 = 32 ;
 	JETTHR2 = 64 ;
-	
-
-	
+	ETOTTHR = 10 ;
+	HTOTTHR = 10 ;
 
 	// IMPORTANT: Requested Stage_x versions defaults
 	// Either set by the user to her/his wishes or picked up from the DAQ file
@@ -182,13 +190,10 @@ void fcs_trg_base::init(const char* fname)
 	stage_version[2] = 0 ;
 	stage_version[3] = 0 ;
 
-
-
 	// DEP/Trigger masks
-	s3_ch_mask = (1<<2) ;	// South 0 
-
-	s2_ch_mask[0] = 0 ;		// Nothing in North
-	s2_ch_mask[1] = (1<<3) ;	// just 1 fPRE channel in South for early FY19
+	//s3_ch_mask = (1<<2) ;	        // South 0 
+	//s2_ch_mask[0] = 0 ;		// Nothing in North
+	//s2_ch_mask[1] = (1<<3) ;	// just 1 fPRE channel in South for early FY19
 }
 
 
@@ -812,7 +817,6 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 			}
 			
 			stage_2(ecal_in, hcal_in, fpre_in, geo, d_out.s2[i].s2_to_s3) ;
-
 		}
 	}
 
@@ -825,7 +829,7 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 
 	if(type==0) {
 		// special for FY19 which acts also as stage_3
-		if(tb_cou[1][3][0]==0) return 0 ;
+	        if(tb_cou[1][3][0]==0) return 0 ;
 
 		// otherwise it will be
 		//if(tb_cou[0][3][1]==0) return 0 ;
@@ -837,7 +841,7 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 		
 		l_in[0] = d_out.s2[0].s2_to_s3[0] ;
 		l_in[1] = d_out.s2[0].s2_to_s3[1] ;
-		l_in[2] = d_out.s2[1].s2_to_s3[0] ;	//FY19
+		l_in[2] = d_out.s2[1].s2_to_s3[0] ;
 		l_in[3] = d_out.s2[1].s2_to_s3[1] ;
 	
 		stage_3(l_in,&d_out.s3.dsm_out) ;
