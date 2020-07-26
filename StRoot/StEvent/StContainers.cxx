@@ -10,6 +10,16 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 1.2  2019/07/24 17:47:49  akio
+ * added stgc from jdb
+ *
+ * Revision 1.1  2018/11/14 16:48:57  akio
+ * FCS codes in offline/upgrade/akio
+ *
+ * Revision 2.38.4.1  2018/08/29 14:52:37  jwebb
+ * o Victor corrected issues with FCS hit dependency, enumerations, definitions...
+ *
+ * o Added missing implementations for fcsCollection() and setFcsCollection(...).
  * Revision 2.39  2018/07/09 14:54:37  ullrich
  * Changed to add ETof.
  *
@@ -34,12 +44,16 @@
  * Revision 2.31  2014/04/10 16:00:12  jeromel
  * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
  *
+ * Revision 2.30  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  * Revision 1.1.1.1  2013/07/23 14:13:30  fisyak
  *
  *
  * Revision 2.29  2013/07/16 14:29:03  fisyak
  * Restore mass fit tracks
  *
+ * Revision 2.28  2013/04/10 19:15:52  jeromel
+ * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
  * Revision 2.27  2013/04/05 15:11:25  ullrich
  * Changes due to the addition of StTrackMassFit (Yuri)
  *
@@ -135,6 +149,10 @@
 #include "StFgtHit.h"
 #include "StFgtPoint.h"
 #include "StFgtStrip.h"
+#include "StFcsCluster.h"
+#include "StFcsHit.h"
+#include "StFcsPoint.h"
+#include "StFtsStgcHit.h"
 #include "StFmsCluster.h"
 #include "StFmsHit.h"
 #include "StFmsPoint.h"
@@ -202,6 +220,10 @@ StCollectionImp(EtrHit)
 StCollectionImp(FgtHit)
 StCollectionImp(FgtPoint)
 StCollectionImp(FgtStrip)
+StCollectionImp(FcsCluster)
+StCollectionImp(FcsHit)
+StCollectionImp(FcsPoint)
+StCollectionImp(FtsStgcHit)
 StCollectionImp(FmsCluster)
 StCollectionImp(FmsHit)
 StCollectionImp(FmsPoint)

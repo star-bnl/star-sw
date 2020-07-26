@@ -14,6 +14,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 1.2  2019/07/24 17:47:50  akio
+ * added stgc from jdb
  * Revision 2.51  2018/12/11 19:53:10  ullrich
  * Added RICHf.
  *
@@ -196,6 +198,8 @@ class StEtrHitCollection;
 class StEmcCollection;
 class StEpdCollection;
 class StFmsCollection;
+class StFcsCollection;
+class StStgcCollection;
 class StRHICfCollection;
 class StRichCollection;
 class StRpsCollection;
@@ -260,6 +264,10 @@ public:
     const StEmcCollection*              emcCollection() const;
     StFmsCollection*                    fmsCollection();
     const StFmsCollection*              fmsCollection() const;
+    StFcsCollection*                    fcsCollection();
+    const StFcsCollection*              fcsCollection() const;
+    StStgcCollection*                   stgcCollection();
+    const StStgcCollection*             stgcCollection() const;
     StRHICfCollection*                  rhicfCollection();
     const StRHICfCollection*            rhicfCollection() const;
     StRichCollection*                   richCollection();
@@ -371,6 +379,8 @@ public:
     void setEmcCollection(StEmcCollection*);
     void setEpdCollection(StEpdCollection*);
     void setFmsCollection(StFmsCollection*);
+    void setFcsCollection(StFcsCollection*);
+    void setStgcCollection(StStgcCollection*);
     void setRHICfCollection(StRHICfCollection*);
     void setRichCollection(StRichCollection*);
     void setRpsCollection(StRpsCollection*);

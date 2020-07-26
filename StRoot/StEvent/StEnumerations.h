@@ -16,22 +16,31 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 1.3  2020/05/29 18:57:04  akio
+ * adding some enum for EPD as PRES and 4x4 trigger patch
  * Revision 2.69  2020/01/27 21:28:31  genevb
  * Add short tracks toward ETOF
  *
  * Revision 2.68  2019/02/11 18:51:31  ullrich
  * Added EToF.
  *
+ * Revision 1.2  2019/07/24 17:47:50  akio
+ * added stgc from jdb
  * Revision 2.67  2018/12/11 19:53:10  ullrich
  * Added RICHf.
  *
+ * Revision 1.1  2018/11/14 16:48:58  akio
+ * FCS codes in offline/upgrade/akio
  * Revision 2.66  2018/04/30 23:18:10  smirnovd
  * [Cosmetic] Minor changes in various files
  *
+ * Revision 2.64.6.1  2018/08/29 14:52:37  jwebb
+ * o Victor corrected issues with FCS hit dependency, enumerations, definitions...
  * - Renamed data member s/m/mMass/ in StikalmanTrack
  * - Changes in white space
  * - Return STAR code
  *
+ * o Added missing implementations for fcsCollection() and setFcsCollection(...).
  * Revision 2.65  2018/03/27 02:40:12  genevb
  * Introduce kiTpcId
  *
@@ -295,8 +304,12 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kRpsId       = kRpsIdentifier,
                    kMtdId       = kMtdIdentifier,
                    kSstId       = kSstIdentifier,
-                   kGmtId       = kGmtIdentifier,
-                   kFtsId       = kFtsIdentifier,
+		   kGmtId       = kGmtIdentifier,
+		   kFtsId       = kFtsIdentifier,
+		   kFcsWcalId   = kFcsWcalIdentifier,
+		   kFcsHcalId   = kFcsHcalIdentifier,
+		   kFcsPresId   = kFcsPresIdentifier,
+                   kStgcId      = kStgcIdentifier,		   
                    kiTpcId      = kiTpcIdentifier,
                    kETofId      = kETofIdentifier,
                    kEpdId       = kEpdIdentifier,
@@ -632,6 +645,46 @@ enum StFpostConstants {
     kFpostNCandidate=6
 };
 
+/** FCS detectorId **/
+enum StFcsDetectorId{
+    kFcsEcalNorthDetId=0,
+    kFcsEcalSouthDetId=1,
+    kFcsHcalNorthDetId=2,
+    kFcsHcalSouthDetId=3,
+    kFcsPresNorthDetId=4,
+    kFcsPresSouthDetId=5
+};
+
+/** FCS basic constants **/
+enum StFcsConstants {
+    kFcsNDet=6,
+    kFcsEHP=3,
+    kFcsEcalHcal=2,
+    kFcsNorthSouth=2,
+    kFcsMaxId=748,
+    kFcsEcalNCol=22,
+    kFcsEcalNRow=34,
+    kFcsEcalMaxId=748,
+    kFcsHcalNCol=13,
+    kFcsHcalNRow=20,
+    kFcsHcalMaxId=260,
+    kFcsPresMaxId=192,
+    kFcsPresNCol=16,
+    kFcsPresNRow=12,
+    kFcsMaxDepCrate=5,
+    kFcsMaxDepBd=24,
+    kFcsMaxDepCh=32,
+    kFcsEcal4x4NCol=9,
+    kFcsEcal4x4NRow=15,
+    kFcsHcal4x4NCol=5,
+    kFcsHcal4x4NRow=9
+};
+
+enum StStgcConstants {
+    kStgcNDet = 1,
+    kStgcVerticalStrips=1,
+    kStgcHorizontalStrips=2
+};
 enum StRHICfConstants{
     kRHICfNtower=2,     // 0=small, 1=large                                                                                    
     kRHICfNplate=16,    // longitudinal segmentations      

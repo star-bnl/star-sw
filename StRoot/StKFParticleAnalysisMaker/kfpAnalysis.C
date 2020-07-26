@@ -22,7 +22,8 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   gROOT->LoadMacro("lMuDst.C");
   TString Chain("r");
   Chain += triggerSet;
-  if (! isPico) Chain += ",RMuDst";
+  //  if (! isPico) Chain += ",RMuDst";
+  if (! isPico) {Chain += ",RMuDst,PicoWrite"; isPico = kTRUE;}
   else          Chain += ",RpicoDst";
   Chain += ",kfpAna,mysql,detDb,nodefault,quiet";
   //  lMuDst(0,input,"ry2016,RpicoDst,mysql,PicoAnalysis,quiet,nodefault",output);
@@ -36,7 +37,7 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
 //   StKFParticleInterface::instance()->SetSoftTofPidMode();
   std::cout << "KFParticleAnalysis: running analysis for triggerSet " << triggerSet << "." << std::endl; 
   StKFParticleAnalysisMaker* kfpAnalysis = (StKFParticleAnalysisMaker*) StMaker::GetTopChain()->Maker("KFParticleAnalysis");
-  kfpAnalysis->ProcessSignal();
+  //  if (! isPico) kfpAnalysis->ProcessSignal();  // requires MC info
   kfpAnalysis->AnalyseDsPhiPi();
   kfpAnalysis->CollectPIDHistograms();
   kfpAnalysis->CollectTrackHistograms();

@@ -50,6 +50,7 @@ void makePicoDst(TString triggerSet = "y2019") {
   StMaker *tpcDB = chain->Maker("tpcDB");
   tpcDB->SetActive(kFALSE);
   StPicoDstMaker *PicoDstMaker = (StPicoDstMaker *) chain->Maker("PicoDst");
+#if 0
   if (triggerSet.Contains("y2014",TString::kIgnoreCase) || triggerSet.Contains("y2016",TString::kIgnoreCase)) {
     PicoDstMaker->SetVxZrange(-6,6);
     PicoDstMaker->SetVxRmax(2);
@@ -58,6 +59,7 @@ void makePicoDst(TString triggerSet = "y2019") {
     PicoDstMaker->SetVxRmax(2);
   }
   PicoDstMaker->SetMaxTrackDca(0);
+#endif
   chain->SetAttr(".Privilege",1,"StMuDstMaker::*");
   StGoodTrigger tiggers(triggerSet);
   chain->Init();

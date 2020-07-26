@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "fcs_trg_base.h"
+#include "fcs_ecal_epd_mask.h"
 
 // Processing on the North or South DEP/IO flavoured board. 
 // Inputs are up to 32 links but I already organized them according to strawman.
@@ -116,10 +117,11 @@ void  fcs_trg_base::stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], 
     //u_int esum[15][9];
     //u_int sum[15][9];
     //float ratio[15][9];
-    u_int EM1 =0, EM2 =0;
-    u_int GAM1=0, GAM2=0;
-    u_int ELE1=0, ELE2=0;
-    u_int HAD1=0, HAD2=0;
+    u_int EM1 =0, EM2 =0, EM3=0;
+    u_int GAM1=0, GAM2=0, GAM3=0;
+    u_int ELE1=0, ELE2=0, ELE3=0;
+    u_int HAD1=0, HAD2=0, HAD3=0;
+    u_int ETOT=0, HTOT=0;
     for(int r=0; r<15; r++){
         if(fcs_trgDebug>=2) printf("E4x4 ");
         for(int c=0; c<9; c++){
@@ -143,26 +145,50 @@ void  fcs_trg_base::stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], 
                 ratio[ns][r][c] = float(esum[ns][r][c]) / float(sum[ns][r][c]);
             }
 
+	    //check EPD hits using the mask
+	    epdcoin[ns][r][c]=0;
+	    for(int dep=0; dep<6; dep++){
+		int mask;
+		if(fcs_readPresMaskFromText==0){
+		    mask = fcs_ecal_epd_mask[r][c][dep]; //from include file
+		}else{
+		    mask = PRES_MASK[r][c][dep]; //from static which was from text file 
+		}
+		for(int j=0; j<4; j++) {
+		    for(int k=0; k<8; k++){
+			if( (mask >> (j*8 + k)) & 0x1) { //if this is 0, don't even put the logic in VHDL
+			    epdcoin[ns][r][c] |= (pres[dep].d[j] >> k) & 0x1;
+			}
+		    }
+		}
+	    }
+
 	    // integer multiplication as in VHDL!
 	    // ratio thresholds are in fixed point integer where 1.0==128
 	    u_int h128 = h*128 ;
 	    if(h128 < esum[ns][r][c] * EM_HERATIO_THR){
 		if(sum[ns][r][c] > EMTHR1){
-		    EM1 |= (1<<r);
-		    if((pres[0].d[0] & (1<<r))==0) {GAM1 |= (1<<r);} //hack need map
-		    else                           {ELE1 |= (1<<r);}
+		    EM1 = 1;
+		    if(epdcoin[ns][r][c]==0) {GAM1 = 1;} 
+		    else                     {ELE1 = 1;}
 		}
 		if(sum[ns][r][c] > EMTHR2){
-		    EM2 |= (1<<r);		
-		    if((pres[0].d[0] & (1<<r))==0) {GAM2 |= (1<<r);} //hack need map
-		    else                           {ELE2 |= (1<<r);}
+		    EM2 = 1;		
+		    if(epdcoin[ns][r][c]==0) {GAM2 = 1;} 
+		    else                     {ELE2 = 1;}
+		}
+		if(sum[ns][r][c] > EMTHR3){
+		    EM3 = 1;		
+		    if(epdcoin[ns][r][c]==0) {GAM3 = 1;} 
+		    else                     {ELE3 = 1;}
 		}
 	    }
 	    if(h128 > esum[ns][r][c] * HAD_HERATIO_THR){
-		if(sum[ns][r][c] > HADTHR1) HAD1 |= (1<<r);
-		if(sum[ns][r][c] > HADTHR2) HAD2 |= (1<<r);
+		if(sum[ns][r][c] > HADTHR1) HAD1 = 1;
+		if(sum[ns][r][c] > HADTHR2) HAD2 = 1;
+		if(sum[ns][r][c] > HADTHR3) HAD3 = 1;
 	    }
-	    if(fcs_trgDebug>=2) printf("%5d %3.2f  ",esum[ns][r][c],ratio[ns][r][c]);
+	    if(fcs_trgDebug>=2) printf("%5d %1d %3.2f ",esum[ns][r][c],epdcoin[ns][r][c],ratio[ns][r][c]);
 	}
 	if(fcs_trgDebug>=2) printf("\n");
     }
@@ -200,13 +226,20 @@ void  fcs_trg_base::stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], 
     }
     if(fcs_trgDebug>=2) printf("Jet = %3d %3d %3d\n",jet[ns][0],jet[ns][1],jet[ns][2]);
 
+    //total ET
+    etot[ns] = esub[0] + esub[1] + esub[2] + esub[3];
+    htot[ns] = hsub[0] + hsub[1] + hsub[2] + hsub[3];
+    if(etot[ns]>ETOTTHR) ETOT=1;
+    if(htot[ns]>HTOTTHR) HTOT=1;
+    if(fcs_trgDebug>=2) printf("E/H Tot = %3d %3d\n",etot[ns],htot[ns]);
+
     //sending output bits
-    output[0].d[0] = 0x80 | (EM1  + (EM2 <<3));	// Tonko: added last bit
-    output[0].d[1] = GAM1 + (GAM2<<3);
-    output[0].d[2] = ELE1 + (ELE2<<3);
-    output[0].d[3] = HAD1 + (HAD2<<3);
+    output[0].d[0] = EM1  + (EM2 <<1) + (EM3 <<2) + 0x80; // Tonko: added last bit
+    output[0].d[1] = ELE1 + (ELE2<<1) + (ELE3<<2);
+    output[0].d[2] = GAM1 + (GAM2<<1) + (GAM3<<2);
+    output[0].d[3] = HAD1 + (HAD2<<1) + (HAD3<<2);
     output[0].d[4] = JP1  + (JP2 <<1);
-    output[0].d[5] = pres[0].d[0] ;	// Tonko: added
+    output[0].d[5] = ETOT + (HTOT<<1);
     output[0].d[6] = pres[0].d[1] ;	// Tonko: added
     output[0].d[7] = pres[0].d[7] ;	// Tonko: added
 

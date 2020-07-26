@@ -10,12 +10,22 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 1.2  2019/07/24 17:47:50  akio
+ * added stgc from jdb
  * Revision 2.52  2019/02/11 18:51:10  ullrich
  * Added new EToF classes.
  *
  * Revision 2.51  2018/12/11 19:53:10  ullrich
  * Added RICHf.
  *
+ * Revision 2.49.4.2  2018/08/29 14:52:37  jwebb
+ * o Victor corrected issues with FCS hit dependency, enumerations, definitions...
+ *
+ * o Added missing implementations for fcsCollection() and setFcsCollection(...).
+ *
+ * Revision 2.49.4.1  2018/08/24 15:46:50  jwebb
+ *
+ * ... and need to declare types...
  * Revision 2.50  2018/07/09 14:54:37  ullrich
  * Changed to add ETof.
  *
@@ -37,12 +47,16 @@
  * Revision 2.44  2014/04/10 16:00:13  jeromel
  * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
  *
+ * Revision 2.43  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  * Revision 1.1.1.1  2013/07/23 14:13:29  fisyak
  *
  *
  * Revision 2.42  2013/07/16 14:29:03  fisyak
  * Restore mass fit tracks
  *
+ * Revision 2.41  2013/04/10 19:15:52  jeromel
+ * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
  * Revision 2.40  2013/04/05 15:11:33  ullrich
  * Changes due to the addition of StTrackMassFit (Yuri)
  *
@@ -188,6 +202,12 @@
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
 #include "StEventSummary.h"
+#include "StFcsCollection.h"
+#include "StFcsCluster.h"
+#include "StFcsHit.h"
+#include "StFcsPoint.h"
+#include "StStgcCollection.h"
+#include "StFtsStgcHit.h"
 #include "StRHICfCollection.h"
 #include "StFmsCollection.h"
 #include "StFmsCluster.h"
