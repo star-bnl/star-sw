@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="1" filesPerHour="10.0" fileListSyntax="xrootd" simulateSubmission ="true" copyInputLocally="false">
+<job maxFilesPerProcess="1" filesPerHour="10.0"  fileListSyntax="paths"  simulateSubmission ="true" copyInputLocally="false">
         <command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
-  setenv NODEBUG yes
-  starver TFG17o
-  setup 64b
-  ln -s $STAR/.sl* .
+#  setenv NODEBUG yes
+#  starver TFG17o
+#  setup 64b
+#  ln -s $STAR/.sl* .
 #  cd $SCRATCH
 #   pwd
 #  setenv NODEBUG yes
@@ -27,11 +27,11 @@
       set dir = `dirname ${input}`;
       set tag = `basename ${input} .MuDst.root`;
     endif
-    set log = ${tag}C.log
+    set log = ${tag}B.log
 #  if (-r ${log}) exit 0;
     if (! -r "${tag}.picoDst.root") then
 #      root.exe -q -b 'lMuDst.C(-1,"'${dir}'/'${tag}'.MuDst.root","StEvent,RMuDst,mysql,tpcDb,eemcDb,magF,nodefault,CorrX,TRGDef,mtdMatch,mtdCalib,eemcD,emcAtoE,PreEcl,Epc,trgSim,picoDST")' makePicoDst.C+  &gt;&amp; ${log}
-       root.exe -q -b -x 'lMuDst.C(-1,"'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,quiet")'  makePicoDst.C+  &gt;&amp; ${log}
+       root.exe -q -b -x 'lMuDst.C(-1,"'${dir}'/'${tag}'.MuDst.root","RMuDst,mysql,magF,nodefault,picoWrite,PicoVtxVpdOrDefault,quiet")'  makePicoDst.C+  &gt;&amp; ${log}
     endif
   end
         </command>
@@ -44,4 +44,5 @@
 <!-- <input URL="catalog:star.bnl.gov?production=P17id,filetype=daq_reco_mudst,sname2=st_physics,filename~st_physics,tpx=1,pxl=1,sanity=1,events>10,filename~MuDst,sanity=1,available=1,trgsetupname~AuAu_200_production_mid_2014,storage!=HPSS" preferStorage="local" nFiles="all" /> -->
 <!-- <input URL="root://xrdstar.rcf.bnl.gov:port//home/starlib/home/starreco/reco/AuAu_200_production_mid_2014/ReversedFullField/P17id/2014/160/15160003::st_physics_15160003_raw_5500025.MuDst.root" /> -->
 <!-- <input URL="file:/data0/%home%starreco%reco%AuAu_200_production_mid_2014%ReversedFullField%P17id%2014%160%15160003%st_physics_15160003_raw_4000063.MuDst.root" /> -->
+<input URL="file:/star/data9*/reco/production_19GeV_2019/ReversedFullField/P20ic_calib/2019/*/*/st_*.MuDst.root" />
 </job>
