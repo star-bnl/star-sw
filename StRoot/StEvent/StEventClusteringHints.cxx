@@ -10,6 +10,18 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 1.5  2019/07/24 17:47:50  akio
+ * added stgc from jdb
+ *
+ * Revision 1.4  2019/06/26 17:59:39  akio
+ * Added StFcsHit constructor for MC
+ *
+ * Revision 1.3  2019/06/07 18:20:46  akio
+ * StFcsHit holds all timebins now
+ *
+ * Revision 1.2  2019/02/05 21:39:02  akio
+ * adding StTriggerData2019
+ *
  * Revision 2.42  2019/01/07 15:50:12  ullrich
  * Added StTriggerData2019.
  *
@@ -184,6 +196,8 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StSPtrVecXiVertex",           "evt_vertices", 5);
     setBranch("StSPtrVecCalibrationVertex",  "evt_vertices", 5);
     setBranch("StEmcCollection",             "evt_emc",      6);
+    setBranch("StFcsCollection",             "evt_emc",      6);
+    setBranch("StStgcCollection",            "evt_emc",      6);
     setBranch("StFmsCollection",             "evt_emc",      6);
     setBranch("StRHICfCollection",           "evt_emc",      6);
     setBranch("StRichCollection",            "evt_aux",      7);
@@ -217,6 +231,8 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StSPtrVecDetectorState",      "event", 1);
     setBranch("StEventClusteringHints",      "event", 1);
     setBranch("StEmcCollection",             "event", 1);
+    setBranch("StFcsCollection",             "event", 1);
+    setBranch("StStgcCollection",            "event", 1);
     setBranch("StFmsCollection",             "event", 1);
     setBranch("StRHICfCollection",           "event", 1);
     setBranch("StRichCollection",            "event", 1);
@@ -351,6 +367,7 @@ StEventClusteringHints::print(ostream& os)
 	    cout << '\t' << classes[k] << endl;
     }
 }
+
 #if 1
 static TBuffer&  operator<<(TBuffer& buf, const map<string,string> &s)
 {
@@ -394,6 +411,7 @@ static TBuffer&  operator>>(TBuffer& buf,      map<string,int> & s)
     s[string(ts1.Data())] = ii;}
   return buf;
 }
+
 
 
 void StEventClusteringHints::Streamer(TBuffer &R__b)

@@ -583,6 +583,23 @@ my $NEvents = 100000;
 #$hist = "Hist032"; $Production = "P05if_dedx"; $disk = "data43"; $STAR_LEVEL = "SL05f"; $select = "*2";# 01/11/2006 - check CuCu22 run V
 # ========================== 2006 Run VI  =================================
 # Run V, rerurn
+#                                                             20050111.220000
+#                                                             20050102.000000
+#                                           60
+#cuProductionHighTower_ReversedFullField    6029067 - 6046038 2005-01-30 04:42:50 - 2005-02-15 12:51:45                    6029067,                    6031106 - 6036004,                   6036014 - 6036021, 
+#cuProductionMinBias_ReversedFullField      6029067 - 6046038 2005-01-30 04:42:50 - 2005-02-15 12:51:45 6014088 - 6029066,          6029068 - 6031039,                    6036005 - 6036013                    6036022 - 6036028
+#
+#                                                             20050216.000000
+#cuProductionMinBias_FullField              6047017 - 6065058 2005-02-16 07:24:31 - 2005-03-07 01:01:38
+#cuProductionHighTower_FullField            6047017 - 6065058 2005-02-16 07:24:31 - 2005-03-07 01:01:38
+#cuProductionFPD_FullField                  6060055 - 6060078 2005-03-01 19:56:54 - 2005-03-01 23:49:27
+#                                                             20050310.000000
+#cu62productionMinBias_FullField            6069003 - 6081062 2005-03-10 07:17:44 - 2005-03-22 18:18:36
+#	                                                     20050322.220000
+#cu22ProductionMinBias_FullField            6081094 - 6083034 2005-03-22 22:53:08 - 2005-03-24 12:53:40 
+#                                                             20050401.010000
+#RunV201B
+
 #$hist = "RunV201"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG19g"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/24/19 check new production
 #$hist = "RunV202"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/26/19 add ZDC3 histograms
 #$hist = "RunV203"; $NEvents = 2000; $disk = "data2*/"; $RECO = "reco/cu*/*FullField";  $Production = "/P19ic_calib"; $year = "/2005/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/27/19 new TpcSecRowB and TpcRowQ

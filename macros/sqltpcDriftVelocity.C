@@ -37,6 +37,8 @@ void sqltpcDriftVelocity()
    const char *sql = "select UNIX_TIMESTAMP(beginTime),DATE_FORMAT(beginTime,\"%Y%m%d\") AS date,DATE_FORMAT(beginTime,\"%H%i%s\") AS time,"
      "flavor,deactive,laserDriftVelocityEast as lDvEast,laserDriftVelocityWest as lDvWest, "
      "cathodeDriftVelocityEast as cDvEast,cathodeDriftVelocityWest as cDvWest from Calibrations_tpc.tpcDriftVelocity"
+     " where beginTime > \"2019\" and  beginTime < \"2019-11-01\"";
+
      ";";
      //     " where beginTime > \"2013\" limit 100;";
      //     "WHERE flavor='ofl' and deactive=0";
@@ -86,4 +88,7 @@ void sqltpcDriftVelocity()
 }
 /*
   T->Draw("lDvWest:utime-788936400>>DV(8000,634e6,642e6)","deactive==0&&utime>1420088400","prof")
+2019
+  T->Draw("lDvWest:utime-788936400>>DV(19000,756e6,775e6)","deactive==0&&utime>1420088400","prof")
+
  */

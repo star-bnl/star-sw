@@ -4,8 +4,8 @@
 # Get a detail of the space on each disks
 # Look 2 directory deep for what is there assuming
 #
-# $0 > /afs/rhic.bnl.gov/star/doc/www/html/tmp/pub/overall.html
-#
+# $0 > /afs/rhic.bnl.gov/star/doc/www/html/tmp/pub/overall.html << NO
+# $0 > /afs/rhic.bnl.gov/star/doc/www/html/tmp/protected/overall.html
 #
 # Hidden assumption is that  if a file named FC_$disk.txt or
 # FC_$disk.html exists in $OUTD, a reference to it will appear.
@@ -121,7 +121,7 @@ $MAIN  = "/star/data";                                    # default base path
 
 
 # Static configuration
-$OUTD  = "/afs/rhic.bnl.gov/star/doc/www/html/tmp/pub/Spider"; # this will be used for Catalog hand-shake
+$OUTD  = "/afs/rhic.bnl.gov/star/doc/www/html/tmp/protected/Spider"; # this will be used for Catalog hand-shake
 $ICON1 = "/icons/transfer.gif";                                # Icon to display for indexer result
 #$ICON2 = "/images/Spider1.jpg";                               # Icon to display for spider result
 

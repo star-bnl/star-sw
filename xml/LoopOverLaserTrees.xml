@@ -2,7 +2,7 @@
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
   cd ${SUBMITTINGDIRECTORY}
-  starver TFG20b
+#  starver TFG20b
 #  setenv NODEBUG yes
   FPE_OFF
   setenv MALLOC_CHECK_ 2

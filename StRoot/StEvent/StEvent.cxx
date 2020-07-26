@@ -12,9 +12,18 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 1.2  2019/07/24 17:47:50  akio
+ * added stgc from jdb
  * Revision 2.59  2018/12/11 19:53:10  ullrich
  * Added RICHf.
  *
+ * Revision 1.1  2018/11/14 16:48:59  akio
+ * FCS codes in offline/upgrade/akio
+ *
+ * Revision 2.57.4.1  2018/08/29 14:52:37  jwebb
+ * o Victor corrected issues with FCS hit dependency, enumerations, definitions...
+ *
+ * o Added missing implementations for fcsCollection() and setFcsCollection(...).
  * Revision 2.58  2018/07/09 16:50:31  ullrich
  * Added EToF hooks.
  *
@@ -219,6 +228,8 @@
 #include "StEmcCollection.h"
 #include "StEpdCollection.h"
 #include "StFmsCollection.h"
+#include "StFcsCollection.h"
+#include "StStgcCollection.h"
 #include "StRHICfCollection.h"
 #include "StRichCollection.h"
 #include "StRpsCollection.h"
@@ -580,6 +591,21 @@ StEvent::fmsCollection() const
     return fms;
 }
 
+StFcsCollection*
+StEvent::fcsCollection()
+{
+    StFcsCollection *fcs = 0;
+    _lookup(fcs, mContent);
+    return fcs;
+}
+
+const StFcsCollection*
+StEvent::fcsCollection() const
+{
+    StFcsCollection *fcs = 0;
+    _lookup(fcs, mContent);
+    return fcs;
+}
 StRHICfCollection*
 StEvent::rhicfCollection()
 {
@@ -588,6 +614,13 @@ StEvent::rhicfCollection()
     return rhicf;
 }
 
+StStgcCollection*
+StEvent::stgcCollection()
+{
+    StStgcCollection *stgc = 0;
+    _lookup(stgc, mContent);
+    return stgc;
+}
 const StRHICfCollection*
 StEvent::rhicfCollection() const
 {
@@ -595,6 +628,15 @@ StEvent::rhicfCollection() const
     _lookup(rhicf, mContent);
     return rhicf;
 }
+
+const StStgcCollection*
+StEvent::stgcCollection() const
+{
+    StStgcCollection *stgc = 0;
+    _lookup(stgc, mContent);
+    return stgc;
+}
+
 
 StRichCollection*
 StEvent::richCollection()
@@ -1259,6 +1301,16 @@ StEvent::setFmsCollection(StFmsCollection* val)
 }
 
 void
+StEvent::setFcsCollection(StFcsCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+void
+StEvent::setStgcCollection(StStgcCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+void
 StEvent::setRHICfCollection(StRHICfCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1269,25 +1321,21 @@ StEvent::setRichCollection(StRichCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
-
 void
 StEvent::setRpsCollection(StRpsCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
-
 void
 StEvent::setTofCollection(StTofCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
-
 void
 StEvent::setBTofCollection(StBTofCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
-
 void
 StEvent::setETofCollection(StETofCollection* val)
 {
@@ -1379,7 +1427,7 @@ StEvent::setIstHitCollection(StIstHitCollection* val)
     _lookupAndSet(val, mContent);
 }
 
-void 
+void
 StEvent::setPxlHitCollection(StPxlHitCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1432,6 +1480,7 @@ StEvent::addPrimaryVertex(StPrimaryVertex* vertex, StPrimaryVertexOrder order)
         break;
     }
 }
+
 //________________________________________________________________________________
 void StEvent:: sortVerticiesByRank() {
   StSPtrVecPrimaryVertex* vertexVector = 0;
@@ -1521,35 +1570,35 @@ void StEvent::statistics()
     cout << "\ttriggerMask:                 " << triggerMask() << endl;
     cout << "\tbunchCrossingNumber(0):      " << bunchCrossingNumber(0) << endl;
     cout << "\tbunchCrossingNumber(1):      " << bunchCrossingNumber(1) << endl;
-    cout << "\tStEventSummary:              " << static_cast<void*>(summary()) << endl;
-    cout << "\tStTpcHitCollection:          " << static_cast<void*>(tpcHitCollection()) << endl;
-    cout << "\tStRnDHitCollection:          " << static_cast<void*>(rndHitCollection()) << endl;
-    cout << "\tStFtpcHitCollection:         " << static_cast<void*>(ftpcHitCollection()) << endl;
-    cout << "\tStSvtHitCollection:          " << static_cast<void*>(svtHitCollection()) << endl;
-    cout << "\tStSsdHitCollection:          " << static_cast<void*>(ssdHitCollection()) << endl;
-    cout << "\tStSstHitCollection:          " << static_cast<void*>(sstHitCollection()) << endl;
-    cout << "\tStIstHitCollection:          " << static_cast<void*>(istHitCollection()) << endl;
-    cout << "\tStPxlHitCollection:          " << static_cast<void*>(pxlHitCollection()) << endl;
-    cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection()) << endl;
-    cout << "\tStFmsCollection:             " << static_cast<void*>(fmsCollection()) << endl;
-    cout << "\tStRHICfCollection:           " << static_cast<void*>(rhicfCollection()) << endl;
-    cout << "\tStRichCollection:            " << static_cast<void*>(richCollection()) << endl;
-    cout << "\tStRpsCollection:             " << static_cast<void*>(rpsCollection()) << endl;
-    cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection()) << endl;
-    cout << "\tStBTofCollection:            " << static_cast<void*>(btofCollection()) << endl;
-    cout << "\tStETofCollection:            " << static_cast<void*>(etofCollection()) << endl;
-    cout << "\tStEpdCollection:             " << static_cast<void*>(epdCollection()) << endl;
-    cout << "\tStMtdCollection:             " << static_cast<void*>(mtdCollection()) << endl;
-    cout << "\tStFpdCollection:             " << static_cast<void*>(fpdCollection()) << endl;
-    cout << "\tStPhmdCollection:            " << static_cast<void*>(phmdCollection()) << endl;
-    cout << "\tStL0Trigger:                 " << static_cast<void*>(l0Trigger()) << endl;
-    cout << "\tStL1Trigger:                 " << static_cast<void*>(l0Trigger()) << endl;
-    cout << "\tStL3Trigger:                 " << static_cast<void*>(l3Trigger()) << endl;
-    cout << "\tStHltEvent:                  " << static_cast<void*>(hltEvent()) << endl;
-    cout << "\tStTriggerDetectorCollection: " << static_cast<void*>(triggerDetectorCollection()) << endl;
-    cout << "\tStTriggerIdCollection:       " << static_cast<void*>(triggerIdCollection()) << endl;
-    cout << "\tStTriggerData:               " << static_cast<void*>(triggerData()) << endl;
-    cout << "\tStPrimaryVertex:             " << static_cast<void*>(primaryVertex(0)) << endl;
+    cout << "\tStEventSummary:              " << static_cast<void*>(summary());
+    cout << "\tStTpcHitCollection:          " << static_cast<void*>(tpcHitCollection());
+    cout << "\tStRnDHitCollection:          " << static_cast<void*>(rndHitCollection());
+    cout << "\tStFtpcHitCollection:         " << static_cast<void*>(ftpcHitCollection());
+    cout << "\tStSvtHitCollection:          " << static_cast<void*>(svtHitCollection());
+    cout << "\tStSsdHitCollection:          " << static_cast<void*>(ssdHitCollection());
+    cout << "\tStSstHitCollection:          " << static_cast<void*>(sstHitCollection());
+    cout << "\tStIstHitCollection:          " << static_cast<void*>(istHitCollection());
+    cout << "\tStPxlHitCollection:          " << static_cast<void*>(pxlHitCollection());
+    cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection());
+    cout << "\tStFmsCollection:             " << static_cast<void*>(fmsCollection());
+    cout << "\tStFcsCollection:             " << static_cast<void*>(fcsCollection());
+    cout << "\tStStgcCollection:            " << static_cast<void*>(stgcCollection());
+    cout << "\tStRichCollection:            " << static_cast<void*>(richCollection());
+    cout << "\tStRpsCollection:             " << static_cast<void*>(rpsCollection());
+    cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection());
+    cout << "\tStBTofCollection:            " << static_cast<void*>(btofCollection());
+    cout << "\tStEpdCollection:             " << static_cast<void*>(epdCollection());
+    cout << "\tStMtdCollection:             " << static_cast<void*>(mtdCollection());
+    cout << "\tStFpdCollection:             " << static_cast<void*>(fpdCollection());
+    cout << "\tStPhmdCollection:            " << static_cast<void*>(phmdCollection());
+    cout << "\tStL0Trigger:                 " << static_cast<void*>(l0Trigger());
+    cout << "\tStL1Trigger:                 " << static_cast<void*>(l0Trigger());
+    cout << "\tStL3Trigger:                 " << static_cast<void*>(l3Trigger());
+    cout << "\tStHltEvent:                  " << static_cast<void*>(hltEvent());
+    cout << "\tStTriggerDetectorCollection: " << static_cast<void*>(triggerDetectorCollection());
+    cout << "\tStTriggerIdCollection:       " << static_cast<void*>(triggerIdCollection());
+    cout << "\tStTriggerData:               " << static_cast<void*>(triggerData());
+    cout << "\tStPrimaryVertex:             " << static_cast<void*>(primaryVertex(0));
     cout << "\tnumberOfPrimaryVertices:     " << numberOfPrimaryVertices() << endl;
     cout << "\tStCalibrationVertex:         " << static_cast<void*>(calibrationVertex(0));
     cout << "\tnumberOfCalibrationVertices: " << numberOfCalibrationVertices() << endl;
