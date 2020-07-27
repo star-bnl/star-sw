@@ -92,6 +92,12 @@ class StPicoTrack : public TObject {
   Float_t gDCA(Float_t pVtxX, Float_t pVtxY, Float_t pVtxZ) const;
   /// Return 3-vector (distance) between the DCA point and the point (gDCA - point)
   TVector3 gDCA(TVector3 pVtx) const;
+  /// Return signed DCA of global track to the primary vertex
+  /// \par pVtx Primary vertex position
+  ///
+  /// The values can be estimated only for tracks (with non-zero momentum) that
+  /// have primary partners. In other case -999 value will be returned.
+  Float_t gDCAs(TVector3 pVtx) const;
   /// Return charge of the track (encoded in nHitsFit as: nHitsFit * charge)
   Short_t charge() const                 { return (mNHitsFit > 0) ? 1 : -1; }
   /// Return number of hits
