@@ -405,3 +405,20 @@ Float_t StPicoTrack::dEdxPullToF(Float_t mass, UChar_t fit, Int_t charge) const 
 }
 
 #endif /* __TFG__VERSION__ */
+
+//_________________
+Float_t StPicoTrack::gDCAs(TVector3 point) const {
+  // Signed DCA is defined for tracks with primary partners
+  // and with non-zero global track momentum
+  if ( (gMom().Mag() == 0 ) || ( !isPrimary() ) ) {
+    return -999;
+  }
+  // Momentum of the global track
+  TVector3 dir = gMom();
+  // Unit vector
+  dir = dir.Unit();
+  Float_t cosl = dir.Perp();
+  // Return DCA vector to the point (origin - point)
+  TVector3 dca = gDCA( point );
+  return -dir.Y()/cosl * dca.X() + dir.X()/cosl * dca.Y();
+}
