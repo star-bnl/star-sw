@@ -49,7 +49,7 @@ my $def = {@Runs};# print "Runs = @Runs\n";
 PrintHash($def,"Runs") if ($debug);
 #die;
 #my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /hlt/cephfs/daq/2020/???/*";  print "runs = @runs\n" if ($debug);
-my  @runs  = glob "/hlt/cephfs/daq/2020/1??/*";  print "runs = @runs\n" if ($debug);
+my  @runs  = glob "/hlt/cephfs/daq/2020/2??/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2019/350/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2020/012/2101202?";  print "runs = @runs\n" if ($debug);
 foreach my $run (@runs) {

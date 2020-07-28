@@ -6,7 +6,7 @@ use lib "/net/l402/data/fisyak/STAR/packages/.DEV2/bin";#$ENV{ConstructLocation}
 use RunXXDefs;
 my $debug = 0;
 my $pwd = cwd();
-#my $Day = File::Basename::basename(File::Basename::dirname($pwd));
+my $Day = File::Basename::basename(File::Basename::dirname($pwd));
 #my $Run =  File::Basename::basename($pwd);
 my $Day =  File::Basename::basename($pwd);
 print "Day = $Day\n" if ($debug);

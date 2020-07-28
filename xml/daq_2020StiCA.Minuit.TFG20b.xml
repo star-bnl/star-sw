@@ -15,7 +15,7 @@
     starver TFG20b
      set evtsFile = $INPUTFILE0;
      set f        = 1
-     set l        = 200
+     set l        = 2000
   echo "${evtsFile}"
  if (! -r ${evtsFile}) exit 1;
   set evtsFileB = `basename ${evtsFile}`
@@ -40,9 +40,9 @@
    root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
-  gzip ${logFile}
-  rm ${muFile}
-  rm ${piFile}
+#  gzip ${logFile}
+#  rm ${muFile}
+#  rm ${piFile}
   cp  ${filel}* ${SUBMITTINGDIRECTORY}
   rm ${bla}
   rm -rf ${CURRENT_DIR}
