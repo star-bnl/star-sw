@@ -19,6 +19,7 @@ public:
 
 		return kStOK;
 	}
+#if !defined(__CINT__) && !defined(__CLING__)
 	virtual Int_t  InitRun(Int_t runNumber) {
 		LOG_INFO << "StStgcQAMaker::InitRun - run = " << runNumber << endm;
 		mStgcDbMaker=static_cast<StStgcDbMaker*>(GetMaker("stgcDb"));
@@ -26,7 +27,11 @@ public:
 
 		return kStOK;
 	}
+#else
+	virtual Int_t  InitRun(Int_t runNumber);
+#endif
 	virtual Int_t  Make();
+#if !defined(__CINT__) && !defined(__CLING__)
 	virtual Int_t  Finish() {
 		LOG_DEBUG<<"StStgcQAMaker Finish"<<endm; 
 
@@ -48,13 +53,21 @@ public:
 
 		return kStOK; 
 	}
-	virtual void   Clear(const Char_t *opt) {LOG_DEBUG<<"StStgcQAMaker Clear"<<endm; StMaker::Clear();}
-
+#else
+	virtual Int_t  Finish();
+#endif
+	virtual void   Clear(const Char_t *opt) 
+#if !defined(__CINT__) && !defined(__CLING__)
+{LOG_DEBUG<<"StStgcQAMaker Clear"<<endm; StMaker::Clear();}
+#else
+	;
+#endif
 	void BookHistograms();
 	void setHistFileName(  std::string );
 
 private:
 
+#if !defined(__CINT__) && !defined(__CLING__)
 	void writeHistograms()
 	{
 		LOG_INFO << "writeHistograms() ... " << endm;
@@ -67,7 +80,9 @@ private:
 		// 	if( kv.second->GetEntries() > 0 ) kv.second->Write();
 		// }
 	}
-
+#else
+	void writeHistograms();
+#endif
 
 	StStgcDbMaker * mStgcDbMaker;
 	std::string mQAHistFileName;
