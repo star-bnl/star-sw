@@ -17,7 +17,8 @@ if (! $?) then
 else
   setenv USE_64BITS 0  
 endif
-starver TFG20c
+#starver TFG20c
+starver .DEV2
 setenv STARFPE NO
 #set controlFile = /star/u/starreco/newtest/sampleList_nonopt.txt 
 set controlFile = $STAR/StRoot/StBFChain/sampleList.txt
