@@ -2,5 +2,4 @@
 # mysql -h robinson.star.bnl.gov --port=3316 -u "" -p"" StarDb
 # mysql -h robinson.star.bnl.gov --port=3306 -u "" -p"" StarDb
 #aHost=0xa637e98 "dbx.star.bnl.gov", aUser=0x0, aPasswd=0x0, aDb=0xa637458 "StarDb", aPort=3316
- mysql -h duvall.star.bnl.gov --port=3306 --user="starreco" -p""
-
+ mysql -h duvall.star.bnl.gov --port=3306 --user="starreco" -p"" LibraryJobs
