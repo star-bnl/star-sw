@@ -84,8 +84,11 @@ struct HitPoint_t {
 #define PrPP(A,B)
 #endif
 static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.92 2020/05/22 20:49:19 fisyak Exp $";
-#define __ClusterProfile__
+#ifndef __DEBUG__
 static Bool_t ClusterProfile = kFALSE;
+#else
+static Bool_t ClusterProfile = kTRUE;
+#endif
 #define Laserino 170
 #define Chasrino 171
 //                                    Inner        Outer
@@ -157,6 +160,10 @@ Int_t StTpcRSMaker::Finish() {
 }
 //________________________________________________________________________________
 Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
+  SetAttr("minSector",1);
+  SetAttr("maxSector",24);
+  SetAttr("minRow",1);
+  SetAttr("maxRow",St_tpcPadConfigC::instance()->numberOfRows(20));
   if (!gStTpcDb) {
     LOG_ERROR << "Database Missing! Can't initialize TpcRS" << endm;
     return kStFatal;
@@ -480,135 +487,125 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
   if (Debug()) Print();
   memset (hist, 0, sizeof(hist));
   memset (checkList, 0, sizeof(checkList));
-#ifdef __ClusterProfile__
-  if (GetTFile()) {
-    GetTFile()->cd();
-    ClusterProfile = kTRUE;
-  }
-#endif /* __ClusterProfile__ */
+  if (ClusterProfile  && GetTFile()) GetTFile()->cd();
 #if 0
   StMagUtilities::SetDoDistortionT(gFile);
   StMagUtilities::SetUnDoDistortionT(gFile);
 #endif
   mHeed = fEc(St_TpcResponseSimulatorC::instance()->W());
-  if ( ! ClusterProfile) {
-    return kStOK;
-  }
-  Int_t color = 1;
-  struct Name_t {
-    const Char_t *Name;
-    const Char_t *Title;
-  };
-  const Name_t InOut[6] = {
-    {"Inner","Inner old electronics or iTPC"},
-    {"Outer","Outer old electronics or ITPC"},
-    {"InnerX","Inner new electronics"},
-    {"OuterX","Outer new electronics"},
-    {"I","Inner"},
-    {"O","Outer"}
-  };
-  const Name_t PadTime[3] = {
-    {"Pad","Pad"},
-    {"Time","Time"},
-    {"Row","Row"},
-  };
-  for (Int_t io = 2; io < 4; io++) {
-    for (Int_t pt = 0; pt < 2; pt++) {
-      TString Name(InOut[io].Name); Name += PadTime[pt].Name; Name += "Mc";
-      TString Title(InOut[io].Title); Title += PadTime[pt].Title; Title += "Mc";
-      hist[io][pt] = (TProfile2D *) gDirectory->Get(Name);
-      if (! hist[io][pt]) {
-	hist[io][pt] = new TProfile2D(Name,Title,nx[pt],xmin[pt],xmax[pt],nz,zmin,zmax,""); 
-	hist[io][pt]->SetMarkerStyle(20);
-	hist[io][pt]->SetMarkerColor(color++);
+  if ( ClusterProfile) {
+    Int_t color = 1;
+    struct Name_t {
+      const Char_t *Name;
+      const Char_t *Title;
+    };
+    const Name_t InOut[6] = {
+      {"Inner","Inner old electronics or iTPC"},
+      {"Outer","Outer old electronics or ITPC"},
+      {"InnerX","Inner new electronics"},
+      {"OuterX","Outer new electronics"},
+      {"I","Inner"},
+      {"O","Outer"}
+    };
+    const Name_t PadTime[3] = {
+      {"Pad","Pad"},
+      {"Time","Time"},
+      {"Row","Row"},
+    };
+    for (Int_t io = 2; io < 4; io++) {
+      for (Int_t pt = 0; pt < 2; pt++) {
+	TString Name(InOut[io].Name); Name += PadTime[pt].Name; Name += "Mc";
+	TString Title(InOut[io].Title); Title += PadTime[pt].Title; Title += "Mc";
+	hist[io][pt] = (TProfile2D *) gDirectory->Get(Name);
+	if (! hist[io][pt]) {
+	  hist[io][pt] = new TProfile2D(Name,Title,nx[pt],xmin[pt],xmax[pt],nz,zmin,zmax,""); 
+	  hist[io][pt]->SetMarkerStyle(20);
+	  hist[io][pt]->SetMarkerColor(color++);
+	}
       }
     }
-  }
-  hist[4][0] = new TProfile2D("dEdxCorSecRow","dEdx correction versus sector and row",
-			      NoOfSectors,0.5,NoOfSectors+0.5,
-			      St_tpcPadConfigC::instance()->numberOfRows(20),0.5,St_tpcPadConfigC::instance()->numberOfRows(20)+0.5,""); 
-  hist[4][1] = new TProfile2D("GainSecRow","Overall gain versus sector and row",
-			      NoOfSectors,0.5,NoOfSectors+0.5,
-			      St_tpcPadConfigC::instance()->numberOfRows(20),0.5,St_tpcPadConfigC::instance()->numberOfRows(20)+0.5,""); 
-  const Name_t Checks[21] = {
-    {"dEGeant","dE in Geant"}, // 0
-    {"dSGeant","ds in Geant"}, // 1
-    {"Gain","Gas Gain after Voltage"}, // 2
-    {"GainMc","Gas Gain after MC correction"}, // 3
-    {"dEdxCor","correction of dEdx"}, // 4
-    {"lgam","lgam"}, // 5
-    {"NPGEANT","no. of primary electros from GEANT"}, // 6
-    {"NP","no. of primary electros"}, // 7
-    {"Nt","total no. of electors per cluster"}, // 8
-    {"Qav","Gas gain flactuations"}, // 9
-    {"localYDirectionCoupling","localYDirectionCoupling"}, //10
-    {"n0","No. electrons per primary interaction"}, //11
-    {"padGain","padGain"}, // 12
-    {"localXDirectionCoupling","localXDirectionCoupling"}, // 13
-    {"XYcoupling","XYcoupling"}, //14 
-    {"dE","dE"}, // 15
-    {"dS","dS"}, // 16
-    {"adc","adc"},// 17
-    {"NE","Total no. of generated electors"}, // 18
-    {"dECl","Total log(signal/Nt) in a cluster versus Wire Index"}, // 19
-    {"nPdT","log(Total no. of conducting electrons) - log(no. of primary one) versus log(no. primary electrons)"} // 20 
-  };
-  const Int_t Npbins  = 151;
-  const Int_t NpbinsL =  10;
-  const Double_t Xmax = 1e5;
-  Double_t    dX = TMath::Log(Xmax/10)/(Npbins - NpbinsL);
-  Double_t *pbins = new Double_t[Npbins];
-  Double_t *pbinsL =  new Double_t[Npbins];
-  pbins[0] = 0.5;
-  pbinsL[0] = TMath::Log(pbins[0]);
-  for (Int_t bin = 1; bin < Npbins; bin++) {
-    if (bin <= NpbinsL) {
-      pbins[bin] = pbins[bin-1] + 1;
-    } else if (bin == Npbins - 1) {
-      pbins[bin] = 1e5;
-    } else {
-      Int_t nM = 0.5*(pbins[NpbinsL-2] + pbins[NpbinsL-1])*TMath::Exp(dX*(bin-NpbinsL)); 
-      Double_t dbin = TMath::Nint(nM - pbins[bin-1]);
-      if (dbin < 1.0) dbin = 1.0;
-      pbins[bin] = pbins[bin-1] + dbin;
+    hist[4][0] = new TProfile2D("dEdxCorSecRow","dEdx correction versus sector and row",
+				NoOfSectors,0.5,NoOfSectors+0.5,
+				St_tpcPadConfigC::instance()->numberOfRows(20),0.5,St_tpcPadConfigC::instance()->numberOfRows(20)+0.5,""); 
+    hist[4][1] = new TProfile2D("GainSecRow","Overall gain versus sector and row",
+				NoOfSectors,0.5,NoOfSectors+0.5,
+				St_tpcPadConfigC::instance()->numberOfRows(20),0.5,St_tpcPadConfigC::instance()->numberOfRows(20)+0.5,""); 
+    const Name_t Checks[21] = {
+      {"dEGeant","dE in Geant"}, // 0
+      {"dSGeant","ds in Geant"}, // 1
+      {"Gain","Gas Gain after Voltage"}, // 2
+      {"GainMc","Gas Gain after MC correction"}, // 3
+      {"dEdxCor","correction of dEdx"}, // 4
+      {"lgam","lgam"}, // 5
+      {"NPGEANT","no. of primary electros from GEANT"}, // 6
+      {"NP","no. of primary electros"}, // 7
+      {"Nt","total no. of electors per cluster"}, // 8
+      {"Qav","Gas gain flactuations"}, // 9
+      {"localYDirectionCoupling","localYDirectionCoupling"}, //10
+      {"n0","No. electrons per primary interaction"}, //11
+      {"padGain","padGain"}, // 12
+      {"localXDirectionCoupling","localXDirectionCoupling"}, // 13
+      {"XYcoupling","XYcoupling"}, //14 
+      {"dE","dE"}, // 15
+      {"dS","dS"}, // 16
+      {"adc","adc"},// 17
+      {"NE","Total no. of generated electors"}, // 18
+      {"dECl","Total log(signal/Nt) in a cluster versus Wire Index"}, // 19
+      {"nPdT","log(Total no. of conducting electrons) - log(no. of primary one) versus log(no. primary electrons)"} // 20 
+    };
+    const Int_t Npbins  = 151;
+    const Int_t NpbinsL =  10;
+    const Double_t Xmax = 1e5;
+    Double_t    dX = TMath::Log(Xmax/10)/(Npbins - NpbinsL);
+    Double_t *pbins = new Double_t[Npbins];
+    Double_t *pbinsL =  new Double_t[Npbins];
+    pbins[0] = 0.5;
+    pbinsL[0] = TMath::Log(pbins[0]);
+    for (Int_t bin = 1; bin < Npbins; bin++) {
+      if (bin <= NpbinsL) {
+	pbins[bin] = pbins[bin-1] + 1;
+      } else if (bin == Npbins - 1) {
+	pbins[bin] = 1e5;
+      } else {
+	Int_t nM = 0.5*(pbins[NpbinsL-2] + pbins[NpbinsL-1])*TMath::Exp(dX*(bin-NpbinsL)); 
+	Double_t dbin = TMath::Nint(nM - pbins[bin-1]);
+	if (dbin < 1.0) dbin = 1.0;
+	pbins[bin] = pbins[bin-1] + dbin;
+      }
+      pbinsL[bin] = TMath::Log(pbins[bin]);
     }
-    pbinsL[bin] = TMath::Log(pbins[bin]);
-  }
-  for (Int_t io = 0; io < 2; io++) {
-    for (Int_t i = 0; i < nChecks; i++) {
-      TString Name(Checks[i].Name); Name += InOut[4+io].Name;
-      TString Title(Checks[i].Title); Title += InOut[4+io].Title;
-      if      (i == 11) checkList[io][i] = new TH2D(Name,Title,nz,zmin,zmax,100,-0.5,99.5); 
-      else if (i == 19) checkList[io][i] = new TH2D(Name,Title,173,-.5,172.5,200,-10,10);
-      //      else if (i == 20) checkList[io][i] = new TH2D(Name,Title,Npbins-1,pbinsL,Npbins-1,pbinsL);
-      else if (i == 20) checkList[io][i] = new TH2D(Name,Title,Npbins-1,pbinsL,500,-2.0,8.0);
-      else              checkList[io][i] = new TProfile(Name,Title,nz,zmin,zmax,"");  
-    }
+    for (Int_t io = 0; io < 2; io++) {
+      for (Int_t i = 0; i < nChecks; i++) {
+	TString Name(Checks[i].Name); Name += InOut[4+io].Name;
+	TString Title(Checks[i].Title); Title += InOut[4+io].Title;
+	if      (i == 11) checkList[io][i] = new TH2D(Name,Title,nz,zmin,zmax,100,-0.5,99.5); 
+	else if (i == 19) checkList[io][i] = new TH2D(Name,Title,173,-.5,172.5,200,-10,10);
+	//      else if (i == 20) checkList[io][i] = new TH2D(Name,Title,Npbins-1,pbinsL,Npbins-1,pbinsL);
+	else if (i == 20) checkList[io][i] = new TH2D(Name,Title,Npbins-1,pbinsL,500,-2.0,8.0);
+	else              checkList[io][i] = new TProfile(Name,Title,nz,zmin,zmax,"");  
+      }
 #ifdef __LASERINO__
-    SecRow[0] = new TProfile2D("SecRowdE","Simu <dE> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[1] = new TProfile2D("SecRowdS","Simu <dS> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[2] = new TProfile2D("SecRowGain","<Gain> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[3] = new TProfile2D("SecRowGainC","<GainCorrected> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[4] = new TProfile2D("SecRowdEdxC","<dEdxC> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[5] = new TProfile2D("SecRowNP","<NP> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[6] = new TProfile2D("SecRowNt","<Nt> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[7] = new TProfile2D("SecRowQAv","<QAv> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[8] = new TProfile2D("SecRowgain","<gain> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[9] = new TProfile2D("SecRowTotSigCl","<TotalSignalInCluster> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[10] = new TProfile2D("SecRowADC","<ADC> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[11] = new TProfile2D("SecRowADCAltro","<ADCAltro> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[12] = new TProfile2D("SecRowRange","<row range> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[13] = new TProfile2D("SecRowdY","<dY> versus sector row",24,0.5,24.5,72,0.5,72.5);
-    SecRow[14] = new TProfile2D("SecRowChargeFraction","<ChargeFraction> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[0] = new TProfile2D("SecRowdE","Simu <dE> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[1] = new TProfile2D("SecRowdS","Simu <dS> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[2] = new TProfile2D("SecRowGain","<Gain> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[3] = new TProfile2D("SecRowGainC","<GainCorrected> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[4] = new TProfile2D("SecRowdEdxC","<dEdxC> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[5] = new TProfile2D("SecRowNP","<NP> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[6] = new TProfile2D("SecRowNt","<Nt> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[7] = new TProfile2D("SecRowQAv","<QAv> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[8] = new TProfile2D("SecRowgain","<gain> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[9] = new TProfile2D("SecRowTotSigCl","<TotalSignalInCluster> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[10] = new TProfile2D("SecRowADC","<ADC> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[11] = new TProfile2D("SecRowADCAltro","<ADCAltro> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[12] = new TProfile2D("SecRowRange","<row range> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[13] = new TProfile2D("SecRowdY","<dY> versus sector row",24,0.5,24.5,72,0.5,72.5);
+      SecRow[14] = new TProfile2D("SecRowChargeFraction","<ChargeFraction> versus sector row",24,0.5,24.5,72,0.5,72.5);
 #endif /* __LASERINO__ */
+    }
+    delete [] pbins;
+    delete [] pbinsL;
   }
-  delete [] pbins;
-  delete [] pbinsL;
-  SetAttr("minSector",1);
-  SetAttr("maxSector",24);
-  SetAttr("minRow",1);
-  SetAttr("maxRow",St_tpcPadConfigC::instance()->numberOfRows(20));
-  return kStOK;
+return kStOK;
 }
 //________________________________________________________________________________
 Int_t StTpcRSMaker::Make(){  //  PrintInfo();
