@@ -11,7 +11,6 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "StEvent/StEnumerations.h"
 
-
 class StStgcDbMaker : public StMaker {
 	public: 
 	StStgcDbMaker(const Char_t *name="stgcDb");
@@ -20,6 +19,7 @@ class StStgcDbMaker : public StMaker {
 	virtual Int_t  Init() {
 		return kStOK;
 	}
+#if !defined(__CINT__) && !defined(__CLING__)
 	virtual Int_t  InitRun(Int_t runNumber) {
 		LOG_INFO << "StStgcDbMaker::InitRun - run = " << runNumber << endm;
 		//! Accessing DBs
@@ -37,7 +37,12 @@ class StStgcDbMaker : public StMaker {
 	virtual Int_t  Make() {LOG_DEBUG<<"StStgcDbMaker Make"<<endm; return kStOK;}
 	virtual Int_t  Finish() {LOG_DEBUG<<"StStgcDbMaker Finish"<<endm; return kStOK; }
 	virtual void   Clear(const Char_t *opt) {LOG_DEBUG<<"StStgcDbMaker Clear"<<endm; StMaker::Clear();}
-
+#else
+	virtual Int_t  InitRun(Int_t runNumber);
+	virtual Int_t  Make();
+	virtual Int_t  Finish();
+	virtual void   Clear(const Char_t *opt);
+#endif
 	void setRun(Int_t run) { mRun = run;} // set run# 
 	void setDebug(Int_t debug=1) { mDebug = debug; } //debug mode, 0 for minimal message, >0 for more debug messages
 
@@ -108,6 +113,7 @@ class StStgcDbMaker : public StMaker {
 	}
 
 
+#if !defined(__CINT__) && !defined(__CLING__)
 	void makeMap(){
 		LOG_INFO << "Making Map of sTGC 2019 prototype" << endm;
 		// only 2019 prototype!
@@ -309,7 +315,9 @@ class StStgcDbMaker : public StMaker {
 
 	}
 
-
+#else
+	void makeMap();
+#endif
 	private:
 	Int_t   mRun=0;                          //! run#
 	Int_t   mDebug=0;                        //! >0 dump tables to text files    
