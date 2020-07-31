@@ -355,7 +355,7 @@ endx[
 
 ================================= Summurizing  ===============================================
 @ count = 0
-foreach done (`ls -1d */*/Done`)
+foreach done (`ls -1d ???/*/Done`)
   set d = `dirname ${done}`
   cd ${d}; pwd;
   ls -ltr | tail -1 | grep Chain	
