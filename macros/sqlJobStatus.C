@@ -1,5 +1,6 @@
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <vector>
+#include <list>
 #include "Riostream.h"
 #include "TSQLServer.h"
 #include "TSQLResult.h"
@@ -7,187 +8,69 @@
 #include "TNtuple.h"
 #include "TFile.h"
 #include "TString.h"
-#include "TStopwatch.h"
+#include "TCanvas.h"
 #include "TApplication.h"
 #include "TProfile.h"
-#include "TGClient.h"
-#include "TGButton.h"
-#include "TGListBox.h"
 #include "TList.h"
+#include "TLegend.h"
+#include "TStyle.h"
 #endif
 using namespace std;
-//
-// Author: Ilka Antcheva   1/12/2006
-
-// This macro gives an example of how to create a list box
-// and how to set and use its multiple selection feature.
-// To run it do either:
-// .x listBox.C
-// .x listBox.C++
-typedef vector<TString> VecList;
-
-class MyMainFrame : public TGMainFrame {
-  
-private:
-  TGListBox           *fListBox;
-  TGCheckButton       *fCheckMulti;
-  TList               *fSelected;   
-  
-public:
-  MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h, VecList Vlist);
-  virtual ~MyMainFrame();
-  void DoExit();
-  void DoSelect();
-  void HandleButtons();
-  void PrintSelected();
-  
-  ClassDef(MyMainFrame, 0)
-};
-
-void MyMainFrame::DoSelect()
-{
-  Printf("Slot DoSelect()");
-}
-
-void MyMainFrame::DoExit()
-{
-  Printf("Slot DoExit()");
-  gApplication->Terminate(0);
-}
-
-MyMainFrame::MyMainFrame(const TGWindow *p, UInt_t w, UInt_t h, VecList Vlist) :
-  TGMainFrame(p, w, h)
-{
-  // Create main frame
-  
-  fListBox = new TGListBox(this, 89);
-  fSelected = new TList;
-  Int_t i = 0;
-  for (auto tmp : Vlist) {
-    fListBox->AddEntry(tmp, i++);
-  }
-  fListBox->Resize(100,150);
-  AddFrame(fListBox, new TGLayoutHints(kLHintsTop | kLHintsLeft |
-				       kLHintsExpandX | kLHintsExpandY, 
-				       5, 5, 5, 5));
-  
-  fCheckMulti = new TGCheckButton(this, "&Mutliple selection", 10);
-  AddFrame(fCheckMulti, new TGLayoutHints(kLHintsTop | kLHintsLeft,
-					  5, 5, 5, 5));
-  fCheckMulti->Connect("Clicked()", "MyMainFrame", this, "HandleButtons()"); 
-  // Create a horizontal frame containing button(s)
-  TGHorizontalFrame *hframe = new TGHorizontalFrame(this, 150, 20, kFixedWidth);
-  TGTextButton *show = new TGTextButton(hframe, "&Show");
-  show->SetToolTipText("Click here to print the selection you made");
-  show->Connect("Pressed()", "MyMainFrame", this, "PrintSelected()");
-  hframe->AddFrame(show, new TGLayoutHints(kLHintsExpandX, 5, 5, 3, 4));
-  TGTextButton *exit = new TGTextButton(hframe, "&Exit ");
-  exit->Connect("Pressed()", "MyMainFrame", this, "DoExit()");
-  hframe->AddFrame(exit, new TGLayoutHints(kLHintsExpandX, 5, 5, 3, 4));
-  AddFrame(hframe, new TGLayoutHints(kLHintsExpandX, 2, 2, 5, 1));
-  
-  // Set a name to the main frame   
-  SetWindowName("List Box");
-  MapSubwindows();
-  
-  // Initialize the layout algorithm via Resize()
-  Resize(GetDefaultSize());
-  
-  // Map main frame
-  MapWindow();
-  fListBox->Select(1);
-}
-
-MyMainFrame::~MyMainFrame()
-{
-  // Clean up main frame...
-  Cleanup();
-  if (fSelected) {
-    fSelected->Delete();
-    delete fSelected;
-  }
-}
-
-void MyMainFrame::HandleButtons()
-{
-  // Handle check button.
-  Int_t id;
-  TGButton *btn = (TGButton *) gTQSender;
-  id = btn->WidgetId();
-  
-  printf("HandleButton: id = %d\n", id);
-  
-  if (id == 10)  
-    fListBox->SetMultipleSelections(fCheckMulti->GetState());
-}
-
-
-void MyMainFrame::PrintSelected()
-{
-  // Writes selected entries in TList if multiselection.
-  
-  fSelected->Clear();
-  if (fListBox->GetMultipleSelections()) {
-    Printf("Selected entries are:\n");
-    fListBox->GetSelectedEntries(fSelected);
-    fSelected->ls();
-  } else {
-    Printf("Selected entries is: %d\n", fListBox->GetSelected());
-  }
-}
-#if 0
-void listBox()
-{
-  // Popup the GUI...
-  new MyMainFrame(gClient->GetRoot(), 200, 200);
-}
-#endif
+typedef list<TString> List;
 struct Field_t {
   const Char_t *Name;
   Int_t         type; // 0 -> TString, 1 -> Int_t, 2 -> Float_t, 3 -> Bool_t
+  Bool_t        plot;
   TProfile     *prof; //
 };
-Field_t Fields[40] = {
-  {"jobID",	0, 0},                          //  0
-  {"LibLevel",	0, 0},				//  1
-  {"LibTag",	0, 0},				//  2
-  {"rootLevel",	0, 0},				//  3
-  {"path",	0, 0},				//  4
-  {"prodyear",	0, 0},				//  5
-  {"logFile",	0, 0},				//  6
-  {"createTime",	0, 0},			//  7
-  {"chainOpt",	0, 0},				//  8
-  {"jobStatus",	0, 0},				//  9
-  {"crashedCode",	0, 0},			//  0
-  {"errMessage",	0, 0},			// 11
-  {"NoEventDone",	1, 0},			// 12
-  {"memUsageF",	2, 0},				// 13
-  {"memUsageL",	2, 0},				// 14
-  {"CPU_per_evt_sec",	2, 0},			// 15
-  {"RealTime_per_evt",	2, 0},			// 16
-  {"percent_of_usable_evt",	1, 0},		// 17
-  {"avg_no_tracks",	1, 0},			// 18
-  {"avg_no_tracksnfit15",	1, 0},		// 19
-  {"NoEventVtx",	1, 0},			// 20
-  {"avgNoVtx_evt",	2, 0},			// 21
-  {"avg_no_primaryT",	1, 0},			// 22
-  {"avg_no_primaryT_1vtx",	1, 0},		// 23
-  {"avg_no_primaryTnfit15",	1, 0},		// 24
-  {"avg_no_primaryTnfit15_1vtx",	1, 0},	// 25
-  {"avg_no_V0Vrt",	1, 0},			// 26
-  {"avg_no_XiVrt",	1, 0},			// 27
-  {"avg_no_KinkVrt",	1, 0},			// 28
-  {"avgNoTrack_usbevt",	1, 0},			// 29
-  {"avgNoTrackNfit15_usbevt",	1, 0},		// 20
-  {"avgNoPrTrack_1vtx_usbevt",	1, 0},		// 31
-  {"avgNoPrTrackNfit15_1vtx_usbevt",	1, 0},	// 32
-  {"avgNoV0_usbevt",	1, 0},			// 33
-  {"avgNoXi_usbevt",	1, 0},			// 34
-  {"avgNoKink_usbevt",	1, 0},			// 35
-  {"nodeID",	0, 0},				// 36
-  {"avail",	3, 0},				// 37
-  {"id",	1, 0},				// 38
-  {"NoEventSkip",	1, 0}			// 39
+Field_t Fields[47] = {
+  {"jobID",	0, kFALSE, 0},                          //  0
+  {"LibLevel",	0, kFALSE, 0},				//  1
+  {"LibTag",	0, kFALSE, 0},				//  2
+  {"rootLevel",	0, kFALSE, 0},				//  3
+  {"path",	0, kFALSE, 0},				//  4
+  {"prodyear",	0, kFALSE, 0},				//  5
+  {"logFile",	0, kFALSE, 0},				//  6
+  {"createTime",	0, kFALSE, 0},			//  7
+  {"chainOpt",	0, kFALSE, 0},				//  8
+  {"jobStatus",	0, kFALSE, 0},				//  9
+  {"crashedCode",	0, kFALSE, 0},			//  0
+  {"errMessage",	0, kFALSE, 0},			// 11
+  {"NoEventDone",	1, kTRUE, 0},			// 12
+  {"memUsageF",	2, kTRUE, 0},				// 13
+  {"memUsageL",	2, kTRUE, 0},				// 14
+  {"CPU_per_evt_sec",	2, kTRUE, 0},			// 15
+  {"RealTime_per_evt",	2, kTRUE, 0},			// 16
+  {"percent_of_usable_evt",	1, kTRUE, 0},		// 17
+  {"avg_no_tracks",	1, kTRUE, 0},			// 18
+  {"avg_no_tracksnfit15",	1, kTRUE, 0},		// 19
+  {"NoEventVtx",	1, kTRUE, 0},			// 20
+  {"avgNoVtx_evt",	2, kTRUE, 0},			// 21
+  {"avg_no_primaryT",	1, kTRUE, 0},			// 22
+  {"avg_no_primaryT_1vtx",	1, kTRUE, 0},		// 23
+  {"avg_no_primaryTnfit15",	1, kTRUE, 0},		// 24
+  {"avg_no_primaryTnfit15_1vtx",	1, kTRUE, 0},	// 25
+  {"avg_no_V0Vrt",	1, kFALSE, 0},			// 26
+  {"avg_no_XiVrt",	1, kFALSE, 0},			// 27
+  {"avg_no_KinkVrt",	1, kFALSE, 0},			// 28
+  {"avgNoTrack_usbevt",	1, kTRUE, 0},			// 29
+  {"avgNoTrackNfit15_usbevt",	1, kTRUE, 0},		// 20
+  {"avgNoPrTrack_1vtx_usbevt",	1, kTRUE, 0},		// 31
+  {"avgNoPrTrackNfit15_1vtx_usbevt",	1, kTRUE, 0},	// 32
+  {"avgNoV0_usbevt",	1, kFALSE, 0},			// 33
+  {"avgNoXi_usbevt",	1, kFALSE, 0},			// 34
+  {"avgNoKink_usbevt",	1, kFALSE, 0},			// 35
+  {"nodeID",	0, kFALSE, 0},				// 36
+  {"avail",	3, kFALSE, 0},				// 37
+  {"id",	1, kFALSE, 0},				// 38
+  {"NoEventSkip",	1, kFALSE, 0},			// 39
+  {"avg_no_btof",       1, kTRUE, 0},                   // 40                    | float(8,2)    | NO   |     | 0.00                |                |
+  {"DatasetChainID",    1, kFALSE, 0},                  // 41 | int(11)       | YES  |     | NULL                |                |
+  {"Dataset",           0, kFALSE, 0},                  // 42                        | varchar(128)  | YES  |     | NULL                |                |
+  {"ChangeConsider",    0, kFALSE, 0},                  // 43 | enum('Y','N') | YES  |     | N                   |                |
+  {"gcc_version",       0, kFALSE, 0},                  // 44                    | varchar(32)   | YES  |     | NULL                |                |
+  {"tracker",           0, kFALSE, 0},                  // 45             | varchar(32)   | YES  |     | NULL                |                |
+  {"optimized",         0, kFALSE, 0}                   // 46 | varchar(16)   | YES  |     | NULL                |                |
 };
 class JobStatus : public TObject {
   //                                          +--------------------------------+---------------+------+-----+---------------------+----------------+
@@ -198,7 +81,7 @@ public:					 //   +--------------------------------+---------------+------+-----
   TString LibTag; 			 //  2| LibTag                         | varchar(20)   | NO   | MUL |                     |                |
   TString rootLevel; 	         	 //  3| rootLevel                      | varchar(20)   | NO   |     |                     |                |
   TString path;			         //  4| path                           | varchar(128)  | NO   | MUL |                     |                |
-  Int_t prodyear;			 //  5| prodyear                       | smallint(6)   | NO   |     | 0                   |                |
+  TString prodyear;			 //  5| prodyear                       | smallint(6)   | NO   |     | 0                   |                |
   TString logFile;			 //  6| logFile                        | varchar(64)   | NO   |     |                     |                |
   TString createTime;		         //  7| createTime                     | datetime      | NO   | MUL | 0000-00-00 00:00:00 |                |
   TString chainOpt;			 //  8| chainOpt                       | varchar(248)  | NO   |     | NULL                |                |
@@ -233,7 +116,14 @@ public:					 //   +--------------------------------+---------------+------+-----
   Bool_t avail;				 // 37| avail                          | enum('Y','N') | NO   | MUL | Y                   |                |
   Int_t  id;				 // 38| id                             | mediumint(9)  | NO   | PRI | NULL                | auto_increment |
   Int_t  NoEventSkip;			 // 39| NoEventSkip                    | mediumint(9)  | NO   |     | 0                   |                |
-                                         // +--------------------------------+---------------+------+-----+---------------------+----------------+
+  Float_t avg_no_btof;                   // 40| avg_no_btof                    | float(8,2)    | NO   |     | 0.00                |                |
+  Int_t  DatasetChainID;                 // 41| DatasetChainID                 | int(11)       | YES  |     | NULL                |                |
+  TString Dataset;                       // 42| Dataset                        | varchar(128)  | YES  |     | NULL                |                |
+  Bool_t ChangeConsider;                 // 43| ChangeConsider                 | enum('Y','N') | YES  |     | N                   |                |
+  TString  gcc_version;                  // 44| gcc_version                    | varchar(32)   | YES  |     | NULL                |                |
+  TString tracker;                       // 45| tracker                        | varchar(32)   | YES  |     | NULL                |                |
+  TString optimized;                     // 46| optimized                      | varchar(16)   | YES  |     | NULL                |                |
+  //                                          +--------------------------------+---------------+------+-----+---------------------+----------------+
   ClassDef(JobStatus,1)
 };					 
 
@@ -268,21 +158,54 @@ void PrintRes(TSQLResult *res, TNtuple *tuple = 0, Float_t *ars = 0){
   }
 }
 //________________________________________________________________________________
-void ReduceDataSet(TString &dataset, TString &year) {
-  dataset.ReplaceAll("production_","");
-  TString y("_"); y += year;
-  dataset.ReplaceAll(year,"");
+TString FormVariable(TString prodyear, TString Dataset, TString LibTag, TString optimized, TString path, TString gcc_version, TString tracker) {
+  TString Var(prodyear);
+  if (tracker.BeginsWith("daq")) {Var += "/daq";}
+  else                           {Var += "/trs";}
+  Var += "/";
+  Dataset.ReplaceAll("production_","");
+  Dataset.ReplaceAll("_opt","");
+  Int_t index = Dataset.Index("_fixed");
+  if (index > 0) {
+    Dataset = Dataset(0,index);
+    Dataset += "_FXT";
+  }
+  index = Dataset.Index("_2");
+  if (index > 0) {
+    Dataset = Dataset(0,index);
+  }
+  Var += Dataset;
+  if (tracker.Contains("stica")) {Var += "/CA";}
+  else if (tracker.Contains("stihr")) {Var = ""; return Var;}
+  else                           {Var += "/sti";}
+  if (path.Contains("AgML"))     {Var += "/AgML";}
+  if (gcc_version.Contains("x8664")) Var += "/64b";
+  else                               Var += "/32b";
+  if (optimized == "Yes") Var += "/opt";
+  else                    Var += "/deb";
+  if (LibTag == ".DEV2")  {Var += "/TFGXX";}
+  else                    { Var += "/"; Var += LibTag;}
+#if 0
+  cout << "prodyear = " << prodyear.Data()
+       << "\tDataset = " << Dataset.Data()
+       << "\tLibTag = " << LibTag.Data()
+       << "\toptimized = " << optimized.Data()
+       << "\tpath = " << path.Data()
+       << "\tgcc_version = " << gcc_version.Data()
+       << "\t => Var = " << Var.Data() << endl; 
+#endif
+  return Var;
 }
 //________________________________________________________________________________
-void SetBinName(TProfile *prof, VecList &datasets) {
-  TAxisis *x = prof->GetXaxis();
+void SetBinName(TProfile *prof, List &datasets) {
+  TAxis *x = prof->GetXaxis();
   Int_t bin = 0;
   for (auto t : datasets) {
-    x->SetBinLabel(++bi,t);
+    x->SetBinLabel(++bin,t);
   }
 }
 //________________________________________________________________________________
-void sqlJobStatus(Int_t d1 = 20200101, Int_t d2 = 0) {
+void sqlJobStatus(Int_t d1 = 20200501, Int_t d2 = 0) {
   TDatime t1(d1,0);
   TDatime t2;
   if (d2 > 0) t2.Set(d2,0); 
@@ -323,8 +246,7 @@ void sqlJobStatus(Int_t d1 = 20200101, Int_t d2 = 0) {
   }
   delete res;
 #endif
-  TFile *fout = new TFile("JobStatus.root","recreate");
-  TProfile *NoEventDone = 0, *memUsageF = 0
+  TFile *fOut = new TFile("JobStatus.root","recreate");
   TString A;
   {
     /*
@@ -338,7 +260,7 @@ void sqlJobStatus(Int_t d1 = 20200101, Int_t d2 = 0) {
       SELECT DISTINCT tracker  from JobStatus order by tracker;         daq_sl302.ittf_opt
       SELECT DISTINCT optimized  from JobStatus order by optimized;
     */
-    TString sql = Form("SELECT DISTINCT prodyear,Dataset,LibTag  from JobStatus where LibTag != \"n/a\" and  Dataset != \"\" and createTime >= \"%s\" order by prodyear;",
+    TString sql = Form("SELECT DISTINCT prodyear,Dataset,LibTag,optimized,path,gcc_version,tracker  from JobStatus where LibTag != \"n/a\" and  Dataset != \"\" and jobStatus = \"Done\" and createTime >= \"%s\" order by prodyear;",
 		       t1.AsSQLString());
     cout << sql << endl;
     res = db->Query(sql);
@@ -347,33 +269,32 @@ void sqlJobStatus(Int_t d1 = 20200101, Int_t d2 = 0) {
     if (! nrows) return;
     int nfields = res->GetFieldCount();
     printf("\nGot %d rows in result\n", nrows);
-    VecList datasets;
+    List datasets;
+    
     for (int i = 0; i < nrows; i++) {
       row = res->Next();
-      A = "";
-      for (int j = 0; j < nfields; j++) {
-	if (A != "") A += "/";
-	A += row->GetField(j);
-	printf("%5i %20s : %120s\n", j,  res->GetFieldName(j), row->GetField(j));
-      }
-      
-      cout << A.Data() << endl;
-      datasets.push_back(A);
+      TString Var = FormVariable(row->GetField(0),row->GetField(1),row->GetField(2),row->GetField(3),row->GetField(4),row->GetField(5),row->GetField(6));
+      if (Var == "") continue;
+      datasets.push_back(Var);
     }
-#if 0
-    new MyMainFrame(gClient->GetRoot(), 500, 20*nrows, datasets);
-#endif
+    datasets.sort();
+    datasets.unique();
+    Int_t i = 0;
+    for (TString x : datasets) {
+      cout << i++ << "\t" << x.Data() << endl;
+    }
     delete res;
     Int_t nxbin = datasets.size();
     for (Int_t f = 0; f < 40; f++) {
-      if (Fields[f] <= 0 || Fields[f] > 2) continue;
-      Fields[f].prof = new TProfile(Fields[f].Name,From("%s versus daaset"),nxbin+1,-0.5,nxbin+0.5,"s");
+      if (! Fields[f].plot) continue;
+      Fields[f].prof = new TProfile(Fields[f].Name,Form("%s versus dataset and library",Fields[f].Name),nxbin,0.5,nxbin+0.5,"s");
       SetBinName(Fields[f].prof,datasets);
     }
 
   }
   JobStatus job;
-  const char *sql = "select * from JobStatus limit 3";
+  //  const char *sql = "select * from JobStatus limit 3";
+  const char *sql = Form("SELECT * from JobStatus WHERE  LibTag != \"n/a\" and  Dataset != \"\" and createTime >= \"%s\" and NoEventDone > 0 ", t1.AsSQLString()) ;
   
   res = db->Query(sql);
   
@@ -400,9 +321,11 @@ void sqlJobStatus(Int_t d1 = 20200101, Int_t d2 = 0) {
 #else
   for (int i = 0; i < nrows; i++) {
     row = res->Next();
+#if 0
     for (int j = 0; j < nfields; j++) {
       printf("%5i %20s : %120s\n", j,  res->GetFieldName(j), row->GetField(j));
     }
+#endif
     job.jobID = row->GetField(0);
     job.LibLevel = row->GetField(1);
     
@@ -411,7 +334,7 @@ void sqlJobStatus(Int_t d1 = 20200101, Int_t d2 = 0) {
     job.LibTag = row->GetField(2);
     job.rootLevel = row->GetField(3);
     job.path = row->GetField(4);
-    A = row->GetField(5); Int_t prodyear = A.Atoi();
+    job.prodyear = row->GetField(5); // Int_t prodyear = A.Atoi();
     job.logFile = row->GetField(6);
     job.createTime = row->GetField(7);
     job.chainOpt = row->GetField(8);
@@ -446,9 +369,119 @@ void sqlJobStatus(Int_t d1 = 20200101, Int_t d2 = 0) {
     A = row->GetField(37); Bool_t avail = (A == "Y") ? kTRUE : kFALSE;
     A = row->GetField(38); job.id = A.Atoi();
     A = row->GetField(39); job.NoEventSkip = A.Atoi();
+    job.Dataset = row->GetField(42);
+    job.gcc_version = row->GetField(44);
+    job.tracker = row->GetField(45);
+    job.optimized = row->GetField(46);
+    TString Var =  FormVariable(job.prodyear, job.Dataset, job.LibTag, job.optimized, job.path,job.gcc_version,job.tracker);
+    if (Var == "") continue;
+    for (int j = 0; j < nfields; j++) {
+      if (! Fields[j].prof) continue;
+      A = row->GetField(j);
+      if (Fields[j].type == 1) {
+	Int_t v = A.Atoi();
+	Fields[j].prof->Fill(Var,v);
+      } else if (Fields[j].type == 2) {
+	Double_t v = A.Atof(); 
+	Fields[j].prof->Fill(Var,v);
+      }
+    }
     delete row;
   }
 #endif   
   delete res;
   delete db;
+  fOut->Write();
+}
+//________________________________________________________________________________
+void SetYear(TProfile *prof, const Char_t *Year="2020") {
+  if (! prof) return;
+  TAxis *xax = prof->GetXaxis();
+  Int_t nx = xax->GetNbins();
+  Int_t ib = 999999;
+  Int_t ie = 0;
+  for (Int_t i = 1; i <= nx; i++) {
+    if (TString(xax->GetBinLabel(i)).BeginsWith(Year)) {
+      ib = i;
+      break;
+    }
+  }
+  for (Int_t i = nx; i >= 1; i--) {
+    if (TString(xax->GetBinLabel(i)).BeginsWith(Year)) {
+      ie = i;
+      break;
+    }
+  }
+  if (ie > ib) xax->SetRange(ib,ie);
+}
+//________________________________________________________________________________
+void PlotYear(const Char_t *Year = "2020") {
+  gStyle->SetOptStat(0);
+  gStyle->SetMarkerStyle(20);
+  TCanvas *c1 = new TCanvas(Form("c1%s",Year),Form("Usable Events %s",Year),20,20,2000,500);
+  c1->SetBottomMargin(0.25);
+  TProfile *percent_of_usable_evt = (TProfile *) gDirectory->Get("percent_of_usable_evt");
+  if (! percent_of_usable_evt) return;
+  SetYear( percent_of_usable_evt, Year);
+  percent_of_usable_evt->Draw();
+  // 
+  TCanvas *c2 = new TCanvas(Form("c2%s",Year),Form("Memory Usage %s",Year),20,520,2000,500);
+  c2->SetBottomMargin(0.25);
+  TProfile *memUsageL = (TProfile *) gDirectory->Get("memUsageL");
+  if (! memUsageL) return;
+  SetYear( memUsageL, Year);
+  memUsageL->SetMinimum(0);
+  memUsageL->Draw();
+  TProfile *memUsageF = (TProfile *) gDirectory->Get("memUsageF");
+  if (! memUsageF) return;
+  memUsageF->SetMarkerColor(2);
+  memUsageF->Draw("same");
+  TLegend *l2 = new TLegend(0.9,0.9,1.0,1.0);
+  l2->AddEntry(memUsageF,"Memory 1st event");
+  l2->AddEntry(memUsageL,"Memory last event");
+  l2->Draw();
+  // 
+  TCanvas *c3 = new TCanvas(Form("c3%s",Year),Form("CPU Usage %s",Year),20,1020,2000,500);
+  c3->SetBottomMargin(0.25);
+  TProfile *RealTime_per_evt = (TProfile *) gDirectory->Get("RealTime_per_evt");
+  if (! RealTime_per_evt) return;
+  SetYear( RealTime_per_evt, Year);
+  RealTime_per_evt->SetMinimum(0);
+  RealTime_per_evt->Draw();
+  TProfile *CPU_per_evt_sec = (TProfile *) gDirectory->Get("CPU_per_evt_sec");
+  if (! CPU_per_evt_sec) return;
+  CPU_per_evt_sec->SetMarkerColor(2);
+  CPU_per_evt_sec->Draw("same");
+  TLegend *l3 = new TLegend(0.9,0.9,1.0,1.0);
+  l3->AddEntry(CPU_per_evt_sec,"CPU per event");
+  l3->AddEntry(RealTime_per_evt,"Real time");
+  l3->Draw();
+  // 
+  TCanvas *c4 = new TCanvas(Form("c4%s",Year),Form("CPU Usage %s",Year),20,1520,2000,500);
+  c4->SetBottomMargin(0.25);
+  TLegend *l4 = new TLegend(0.8,0.9,1.0,1.0);
+  TProfile *avg_no_tracks = (TProfile *) gDirectory->Get("avg_no_tracks");
+  if (! avg_no_tracks) return;
+  SetYear( avg_no_tracks, Year);
+  avg_no_tracks->SetMinimum(0);
+  avg_no_tracks->SetMarkerColor(1);
+  
+  avg_no_tracks->Draw();
+  l4->AddEntry(avg_no_tracks,"Total no. tracks");
+  TProfile *avg_no_tracksnfit15 = (TProfile *) gDirectory->Get("avg_no_tracksnfit15");
+  if (! avg_no_tracksnfit15) return;
+  avg_no_tracksnfit15->SetMarkerColor(2);
+  avg_no_tracksnfit15->Draw("same");
+  l4->AddEntry(avg_no_tracksnfit15,"tracks with no. fit points >= 15");
+  TProfile *avg_no_primaryT_1vtx = (TProfile *) gDirectory->Get("avg_no_primaryT_1vtx");
+  if (! avg_no_primaryT_1vtx) return;
+  avg_no_primaryT_1vtx->SetMarkerColor(3);
+  avg_no_primaryT_1vtx->Draw("same");
+  l4->AddEntry(avg_no_primaryT_1vtx,"Primary tracks");
+  TProfile *avg_no_primaryTnfit15_1vtx = (TProfile *) gDirectory->Get("avg_no_primaryTnfit15_1vtx");
+  if (! avg_no_primaryTnfit15_1vtx) return;
+  avg_no_primaryTnfit15_1vtx->SetMarkerColor(4);
+  avg_no_primaryTnfit15_1vtx->Draw("same");
+  l4->AddEntry(avg_no_primaryTnfit15_1vtx,"Primary tracks with no. fit points >= 15");
+  l4->Draw();
 }

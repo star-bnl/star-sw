@@ -568,7 +568,6 @@ class Tag( Handler ):
                 if 'Config.xml' in f:
                     name = f
                     name = name.replace('.xml','.h')
-#yf                    self.includes.append( 'StarVMC/StarGeometry/%s' % name )
                     self.includes.append( '%s' % name )
 
 
@@ -632,7 +631,6 @@ class Tag( Handler ):
             for mod in self.modules:
                 document.impl( 'AgModule *_%s = 0;'%mod, unit='global' )
 
-#yf            document.impl( '#include "StarVMC/StarGeometry/StarGeo.h"',            unit='global' )
             document.impl( '#include "StarGeo.h"',            unit='global' )
             document.impl( '#include "StMessMgr.h"',                                    unit='global' )
             document.impl( '#include "TGeoManager.h"',                                  unit='global' )
@@ -711,7 +709,6 @@ class StarGeometry(Handler):
         document.head(header)
 
         implement1 = """
-//#include "StarVMC/StarGeometry/StarGeo.h"
 #include "StarGeo.h"
 #include "TObjectSet.h"
 #include "TGeoManager.h"        
@@ -785,7 +782,6 @@ class Geometry( Handler ):
         self.parent.addGeometry(self)
 
         # Build list of include files from either StarVMC/Geometry or $STAR/StarVMC/Geometry
-#        self.includes.append('StarVMC/StarGeometry/StarGeo.h')
         self.includes.append('StarGeo.h')
         for root, dirs, files in os.walk( 'StarVMC/Geometry' ):
             for f in files:
@@ -798,7 +794,6 @@ class Geometry( Handler ):
                 if 'Config.xml' in f:
                     name = f
                     name = name.replace('.xml','.h')
-#                    self.includes.append( 'StarVMC/StarGeometry/%s' % name )
                     self.includes.append( '%s' % name )
 
         ## self.name = attr.get('name', None)
@@ -920,7 +915,6 @@ class Detector( Handler ):
         document.head( '#ifndef %s' % myguard )
         document.head( '#define %s' % myguard )        
 
-#        document.impl( '#include "StarVMC/StarGeometry/%s.h"\n\n' % document.agmodule )
         document.impl( '#include "%s.h"\n\n' % document.agmodule )
         document.impl( '#include "StMessMgr.h"\n' )
         document.impl( '#include "TGeoManager.h"\n' )
@@ -1200,9 +1194,7 @@ class Module ( Handler ):
         # ---------------------------------------------------------------        
         document.impl('#include "%s.h"' % document.agmodule, unit='global')
         document.impl( banner, unit='global' )
-        document.impl( text='#include "Rtypes.h"', unit='global' )
-        document.impl( text='#include "TGenericClassInfo.h"', unit='global' )
-        document.impl('ClassImp(%s::%s);'  % (document.agmodule.upper(), document.agmodule), unit='global')
+##        document.impl('ClassImp(%s);'   % document.agmodule, unit='global')
         document.impl(seperator, unit='global')
         document.impl(skip, unit='global')
         document.impl('#include "StarVMC/StarAgmlLib/StarAgmlStacker.h"', unit='global')
@@ -1214,6 +1206,7 @@ class Module ( Handler ):
             document.impl( text='#include "StarVMC/StarAgmlLib/%s.h"'%h, unit='global' )
         for h in ["iostream", "vector", "map"]:
             document.impl( text='#include <%s>'%h, unit='global' )
+
         document.impl('const Int_t _printlevel = 0;', unit='global' )
         document.impl('#define LOG_PRINT if(_printlevel>0) std::cout << GetName() << " -Print- "', unit='global')
         document.impl('#define LOG_INFO  if(_printlevel>1) std::cout << GetName() << " -Info-  "', unit='global')
@@ -1344,7 +1337,7 @@ class Block( Handler ):
         # ---------------------------------------------------------------
         # Add a ClassImp to the global section
         # ---------------------------------------------------------------
-#        document.impl('ClassImp(%s);' % name, unit='global')
+##        document.impl('ClassImp(%s);' % name, unit='global')
 
         # ---------------------------------------------------------------
         # Setup the block output stream in the file handler
@@ -2383,7 +2376,7 @@ class Structure( Handler ):
         document.head( '~ %s_t(){ /* nada */ };'%camelCase(name))
         document.head('};')
         
-#        document.impl('ClassImp(%s_t);'%camelCase(name),                          unit='global')
+##        document.impl('ClassImp(%s_t);'%camelCase(name),                          unit='global')
         document.impl('%s_t %s;'%(camelCase(name),name),                          unit='global')
         document.impl(skip,                                                       unit='global')
 class ArrayFormatter:
