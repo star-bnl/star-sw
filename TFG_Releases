@@ -55,6 +55,6 @@
  TFG20d Freeze before step back with StTpcRSMaker                    2020-05-30 09:33:17 -0400  (HEAD -> master, tag: TFG20d)
  TFG20e Freeze before step back with StTpcRSMaker from TFG20d        2020-06-15 16:06:52 -0400  (HEAD -> master, tag: TFG20e)
  TFG20f Check point before step back in StTpcRSMaker                 2020-06-20 12:40:33 -0400  (HEAD -> master, tag: TFG20f)
- TFG20g_2 Fix Tpc slewing, BeamInfo                                  2020-08-01 15:43:01 -0400  (HEAD -> master, tag: TFG20g_2)
+ TFG20g_2 Fix Tpc slewing, BeamInfo                                  2020-08-01 16:12:38 -0400  (HEAD -> master, tag: TFG20g_2)
 .DEV2  head of TFG git repository
   DEV6  head of TFG git repository build with ROOT6
