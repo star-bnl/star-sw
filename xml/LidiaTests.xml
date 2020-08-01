@@ -2,25 +2,43 @@
 <job name="NewTest" fileListSyntax="paths" nProcesses="125"  filesPerHour="25" simulateSubmission="false">
 
 <command>
-
-source /afs/rhic.bnl.gov/star/packages/.DEV2/setupDEV2.csh
-set Name = `basename ${SUBMITTINGDIRECTORY}`
-echo $Name | egrep -i '(debug|dbg)'
-if (! $?) then
-  if ($?NODEBUG) unsetenv NODEBUG
-else
-  setenv NODEBUG yes
-endif
-echo $Name | egrep -i 'x8664'
-if (! $?) then
-  setenv USE_64BITS 1
-else
-  setenv USE_64BITS 0  
-endif
-#starver TFG20c
-#starver .DEV2
-starver TFG20g
+FPE_OFF
+#source /afs/rhic.bnl.gov/star/packages/.DEV2/setupDEV2.csh
 setenv STARFPE NO
+switch (${SUBMITTINGDIRECTORY}) # debug/opt
+  case "*debug*":
+  case "*dbg*":
+    if ($?NODEBUG) unsetenv NODEBUG
+    breaksw
+  case "*opt*":
+  default:
+    setenv NODEBUG yes
+    breaksw
+endsw # 
+switch (${SUBMITTINGDIRECTORY})  # 64/32 bits
+  case "*x8664*":
+    setenv USE_64BITS 1
+    breaksw
+  default:
+    setenv USE_64BITS 0  
+    breaksw
+endsw # 
+switch (${SUBMITTINGDIRECTORY}) # STAR version
+  case "TFG20c":
+    starver TFG20c
+    breaksw
+  case "TFG20g":
+    starver TFG20g
+    breaksw
+  default:
+    starver .DEV2
+    breaksw
+endsw # 
+
+if (! $?) then
+else
+endif
+echo 
 #set controlFile = /star/u/starreco/newtest/sampleList_nonopt.txt 
 set controlFile = $STAR/StRoot/StBFChain/sampleList.txt
 set nevents = `grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *nevents" | head -1 | sed 's| *nevents *= *\([0-9]*\) *$|\1|'`
