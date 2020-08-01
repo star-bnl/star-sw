@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<<<<<<< HEAD
 <!-- <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="xrootd" simulateSubmission ="false" copyInputLocally="false"> -->
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
@@ -30,9 +31,9 @@ foreach input (`cat $FILELIST`)
   set logb = ${filel}B.log
   set log  = ${SUBMITTINGDIRECTORY}/${logb}
 #  if (-r ${log}) continue;
-#  set outputb = ${dirB}.root;
+  set outputb = ${dirB}.root;
   set output  =  ${SUBMITTINGDIRECTORY}/${outputb};
-  if (-r ${output}) continue;
+  if (-r ${output}) continue
 #  set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
 #  if (-r ${bla}) continue;
 #  touch ${bla}
@@ -47,7 +48,7 @@ foreach input (`cat $FILELIST`)
 #  mv ${outputb} ${output}
 #  mv ${logb} ${log}
 #  rm ${bla}
-xsend
+end
 ##  rm -rf ${CURRENT_DIR}
         </command>
     <ResourceUsage>
