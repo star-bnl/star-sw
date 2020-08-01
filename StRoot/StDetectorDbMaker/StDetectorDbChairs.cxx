@@ -1321,8 +1321,9 @@ Float_t        St_beamInfoC::GammaYellow() {
   Float_t gamma = 1;
   if (blueIntensity() < 10*yellowIntensity()) { 
   Int_t N = TMath::Nint(getYellowMassNumber()); // no. of nucleons
+  if (N < 1) N = 1;
   Double_t E = N*getYellowEnergy();
-  Double_t M = kuAtomicMassUnit*getYellowMassNumber();
+  Double_t M = kuAtomicMassUnit*N;
     gamma = E/M;
   }
   return gamma;
@@ -1332,8 +1333,9 @@ Float_t        St_beamInfoC::GammaBlue() {
   Float_t gamma = 1;
   if (blueIntensity() > 10*yellowIntensity()) { 
     Int_t N = TMath::Nint(getBlueMassNumber()); // no. of nucleons
+    if (N < 1) N = 1;
     Double_t E = N*getBlueEnergy();
-    Double_t M = kuAtomicMassUnit*getBlueMassNumber();
+    Double_t M = kuAtomicMassUnit*N;
     gamma = E/M;
   }
   return gamma;

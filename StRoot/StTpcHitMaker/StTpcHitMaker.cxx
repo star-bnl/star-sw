@@ -681,16 +681,17 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 
   Float_t pad  = cluster.pad;
   Float_t time = cluster.tb;
-#if 0
+#if 1
   Double_t gain = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
   Double_t wire_coupling = (row<=St_tpcPadConfigC::instance()->innerPadRows(sector)) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
+  Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
+#else /* used in TFG till 07/31/20 */
+  Double_t q = 0; 
 #endif
-  Double_t q = 0; // cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
   // Correct for slewing (needs corrected q, and time in microsec)
   Double_t freq = gStTpcDb->Electronics()->samplingFrequency();
   time = freq * St_tpcSlewingC::instance()->correctedT(sector,row,q,time/freq);
-
   static StTpcCoordinateTransform transform(gStTpcDb);
   static StTpcLocalSectorCoordinate local;
   static StTpcLocalCoordinate global;
