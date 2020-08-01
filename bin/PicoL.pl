@@ -87,7 +87,7 @@ print "PICOPATH = $PICOPATH; days = $dayMin  - $dayMax : glob = $glob\n" if ($de
 if (! $glob) {die "glob = $glob";}
 if (! $PICOPATH) {die "PICOPATH = $PICOPATH";}
 #if ($glob == "" or $PICOPATH == "") {die "glob = $glob, PICOPATH = $PICOPATH";}
-my $GLOB = $PICOPATH . $glob . "/*/*";
+my $GLOB = $PICOPATH . $glob . "/???/*";
 print "PICOPATH = $PICOPATH; days = $dayMin  - $dayMax : GLOB = $GLOB\n" if ($debug);
 my %Runs= ();
 foreach my $run (glob $GLOB) {
