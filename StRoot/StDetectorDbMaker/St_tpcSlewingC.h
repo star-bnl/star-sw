@@ -33,6 +33,7 @@ class St_tpcSlewingC : public TChair {
   virtual ~St_tpcSlewingC() {fgInstance = 0;}
   Double_t func1001(Double_t q, Double_t p0, Double_t p1, Double_t p2, Double_t p3) {
     // An exponential of [1/sqrt(q)]^p3
+    if (q <= 0.0) return 0;
     return p0 * TMath::Exp(-p1*TMath::Power(q,-0.5*p3)) + p2;
   }
  private:
