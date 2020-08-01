@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="50" filesPerHour="1.0" fileListSyntax="xrootd" simulateSubmission ="false" copyInputLocally="false">
+<!-- <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="xrootd" simulateSubmission ="false" copyInputLocally="false"> -->
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
  set CURRENT_DIR = `pwd`
          cd ${SUBMITTINGDIRECTORY}
@@ -21,19 +22,19 @@
  set dstype       = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
   
 # set input = ${INPUTFILE0};
-#foreach input (`cat $FILELIST`)
+foreach input (`cat $FILELIST`)
   set dir = ${input};
   set dirB = `basename ${dir}`
   set filel = `basename ${outputb} .root`;
 #  set logb = ${dirB}B.log
   set logb = ${filel}B.log
   set log  = ${SUBMITTINGDIRECTORY}/${logb}
-#  if (-r ${log}) exit 0;
+#  if (-r ${log}) continue;
 #  set outputb = ${dirB}.root;
   set output  =  ${SUBMITTINGDIRECTORY}/${outputb};
-  if (-r ${output}) exit 0;
+  if (-r ${output}) continue;
 #  set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
-#  if (-r ${bla}) exit 0;
+#  if (-r ${bla}) continue;
 #  touch ${bla}
 
 #  rsync -c ${SUBMITTINGDIRECTORY}/${input}/*${dstype}.root .
@@ -46,7 +47,7 @@
 #  mv ${outputb} ${output}
 #  mv ${logb} ${log}
 #  rm ${bla}
-#end
+xsend
 ##  rm -rf ${CURRENT_DIR}
         </command>
     <ResourceUsage>
