@@ -7,7 +7,7 @@ git ci -m "Update" .
 #cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/9p8GeV_fixedTarget
 #cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/19p5GeV_fixedTarget
 #cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/13p5GeV_fixedTarget
-cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/7p3GeV_fixedTarget
+cd /net/l401/data/scratch1/reco/2020/TFG20a/RF/7p3GeV_fixedTarget
 CreateRunDirs.pl
 foreach d (`ls -1d 0*/2*`)
   cd $d;
