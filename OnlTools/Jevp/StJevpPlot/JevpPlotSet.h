@@ -105,6 +105,7 @@ class JevpPlotSet : public TObject {
   char *xml;
   char *hello_cmds;   // do I want to be base_client?  "steal if so"
 
+  int minEvts;
   int maxEvts;
 
   void addServerTags(char *tags);

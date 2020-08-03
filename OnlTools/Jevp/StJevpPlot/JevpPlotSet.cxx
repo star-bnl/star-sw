@@ -522,6 +522,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 	_nget++;
 	_getClockTime += _getClock.record_time();
 
+	if(reader->event_number < minEvts ) continue;
 
 	if(maxEvts > 0) {
 	    if(reader->event_number > (unsigned int)maxEvts) {
@@ -748,13 +749,17 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
 {
     PCP;
     maxEvts = -1;
-
+    minEvts = 0;   
     for(int i=1;i<argc;i++) {
 	if(memcmp(argv[i], "-diska", 6) == 0) {
 	    i++;
 	    diska = argv[i];
 	}
-	if(memcmp(argv[i], "-maxevts", 8) == 0) {
+	else if(memcmp(argv[i], "-minevts", 8) == 0) {
+	    i++;
+	    minEvts = atoi(argv[i]);
+	}
+	else if(memcmp(argv[i], "-maxevts", 8) == 0) {
 	    i++;
 	    maxEvts = atoi(argv[i]);
 	}
