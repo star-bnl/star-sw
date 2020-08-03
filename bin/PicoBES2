@@ -479,3 +479,5 @@ foreach n (19 18 17 16 15 14 13 12 11 10 02 03 04 05 05)
 end
 ================================================================================
 ls -1d *BAK | awk -F\_ '{printf("D%d.*\n",$1/1000)}' | sort -u
+Cosmics days:
+grep Cosmic ~/bin/RunXXDefs.pm | egrep '2020-0[6-8]' | awk -F\' '{printf("%i\n",($8-21000000)/1000)}' | sort -u | xargs

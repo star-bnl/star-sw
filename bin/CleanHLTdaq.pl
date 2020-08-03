@@ -3,7 +3,7 @@ use File::Basename;
 use Cwd;
 my $daq = "";
 my @List = glob "*/*/Done";
-my $debug = 0;
+my $debug = 1;
 foreach my $file (@List) {
   my $Dir = File::Basename::dirname($file);
   print "Dir = $Dir\n" if ($debug);
