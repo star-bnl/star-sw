@@ -1782,7 +1782,7 @@ Bfc_st BFC[] = { // standard chains
   {"l3"          ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"l3cl"        ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"l3t"         ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
-#if 1 /* keep for y2001 and y2003 data */
+#if 0 /* keep for y2001 and y2003 data. remove due to  FPE exception in nightly tests */
   {"l3onl"       ,"","",""                            ,"Stl3RawReaderMaker","Stl3RawReaderMaker","",kFALSE},
   {"l3count"     ,"","",""                              ,"Stl3CounterMaker","Stl3RawReaderMaker","",kFALSE},
 #else
