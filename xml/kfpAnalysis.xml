@@ -23,13 +23,13 @@
 # set input = ${INPUTFILE0};
 foreach input (`cat $FILELIST`)
   set dir = ${input};
-  set dirB = `basename ${dir}`
+#  set dirB = `basename ${dir}`
   set filel = `basename ${outputb} .root`;
 #  set logb = ${dirB}B.log
   set logb = ${filel}B.log
   set log  = ${SUBMITTINGDIRECTORY}/${logb}
 #  if (-r ${log}) continue;
-  set outputb = ${dirB}.root;
+#  set outputb = ${dirB}.root;
   set output  =  ${SUBMITTINGDIRECTORY}/${outputb};
   if (-r ${output}) continue
 #  set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
