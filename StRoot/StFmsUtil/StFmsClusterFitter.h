@@ -279,6 +279,7 @@ inline double asmsqrt(double x) { //slower than std::sqrt()
 // Returns a * f(x,y,b) as defined here:
 // https://drupal.star.bnl.gov/STAR/blog/leun/2010/aug/02/fms-meeting-20100802
 inline double showerShapeComponent(double x, double y, double a, double b) {
+  if (a == 0.0 || b == 0.0) return 0.;
     return a * atan(x * y / (b * sqrt(b * b + x * x + y * y)));
 }
 
