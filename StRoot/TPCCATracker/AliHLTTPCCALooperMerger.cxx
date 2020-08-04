@@ -15,7 +15,7 @@
 #ifdef DRAW_L
 #include "AliHLTTPCCADisplay.h"
 #endif
-
+#include "TMath.h"
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -92,8 +92,10 @@ void AliHLTTPCCALooperMerger::FillSegments()
     float BC_xy_dn = sqrt( (x_dn_r_g-x_seg_1_g)*(x_dn_r_g-x_seg_1_g) + (y_dn_r_g-y_seg_1_g)*(y_dn_r_g-y_seg_1_g) );
     float BC_xy_up = sqrt( (x_up_r_g-x_seg_3_g)*(x_up_r_g-x_seg_3_g) + (y_up_r_g-y_seg_3_g)*(y_up_r_g-y_seg_3_g) );
     float AB_xy_curve = 2*Cr*asin( 0.5*AB_xy/Cr );
-    float BC_xy_dn_curve = 2*Cr*asin( 0.5*BC_xy_dn/Cr );
-    float BC_xy_up_curve = 2*Cr*asin( 0.5*BC_xy_up/Cr );
+    float sinPhi =  TMath::Min(1.0, TMath::Max(-1.0,0.5*BC_xy_dn/Cr));
+    float BC_xy_dn_curve = 2*Cr*asin( sinPhi );
+    sinPhi =  TMath::Min(1.0, TMath::Max(-1.0, 0.5*BC_xy_up/Cr));
+    float BC_xy_up_curve = 2*Cr*asin( sinPhi );
     float AB_z = fabs( z_seg_1 - z_seg_3 );
     float BC_z_dn = AB_z*BC_xy_dn/AB_xy;
     float BC_z_up = AB_z*BC_xy_up/AB_xy;
