@@ -581,8 +581,13 @@ template<class X>
 inline T StThreeVector<T>::angle(const StThreeVector<X>& vec) const
 {
     double norm = this->mag2()*vec.mag2(); 
-    
-    return norm > 0 ? acos(this->dot(vec)/(::sqrt(norm))) : 0;
+    if (norm > 0) {
+      double cos = this->dot(vec)/(::sqrt(norm));
+      if (cos < -1) cos = -1;
+      if (cos >  1) cos =  1;
+      return acos(cos);
+    } 
+    return 0;
 }
 
 template<class T>
