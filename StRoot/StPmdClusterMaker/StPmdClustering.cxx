@@ -1585,8 +1585,15 @@ Float_t StPmdClustering::BuildCluster( StPmdCluster *pcluster,Float_t* hitfract)
     Float_t b=sumxx+sumyy;
     Float_t c=sumxx*sumyy-sumxy*sumxy;
     //      cout<<"sumxx,sumyy,sumxy,b,c="<<sumxx<<","<<sumyy<<","<<sumxy<<","<<b<<","<<c<<endl;
-    Float_t r1=b/2.+sqrt(b*b/4.-c);
-    Float_t r2=b/2.-sqrt(b*b/4.-c);
+    // Check Positive ?
+    Float_t D = b*b/4.-c;
+    if (D > 0) D = sqrt(D);
+    else  {
+      LOG_ERROR << "D = b*b/4.-c = " << D << " is negative" << endm;
+      D = 0;
+    }
+    Float_t r1=b/2.+D;
+    Float_t r2=b/2.-D;
     //    cout<<"r1,r2="<<r1<<","<<r2<<endl;    
     if (r1<r2) {
       SigmaS = r1;
