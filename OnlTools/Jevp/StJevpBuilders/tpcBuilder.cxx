@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.13 2020/05/08 18:45:03 evpops Exp $
+// $Id: tpcBuilder.cxx,v 1.14 2020/08/04 13:42:46 evpops Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -1106,7 +1106,7 @@ void tpcBuilder::event(daqReader *rdr)
 
       double vDrift = laserReader->Make(rdr);
      
-      //LOG("JEFF","%d vDrift = %lf",rdr->event_number, vDrift);
+      LOG("JEFF","Laser Event Processed: run=%d evt=%d vDrift=%lf total_tpc_evts=%d",run, rdr->event_number, vDrift, numberOfEventsRun);
 
       if((vDrift > 5.4) && (vDrift < 5.8)) {
 	nlasers++;
@@ -1118,25 +1118,26 @@ void tpcBuilder::event(daqReader *rdr)
       //LOG("JEFF", "run=%d nlasers: %d curr_drift=%lf", run, nlasers, drift_vel);
       //if(nlasers == 50) {
       if(1) {    // inneficient!  write all of them :-)
-	FILE *f = fopen("/RTS/conf/handler/.l4_drift_velocity","w");
-	if(f) {
-	  fprintf(f, "%lf", drift_vel);
-	  fclose(f);
-	}
-	else {
-	  LOG(OPER, "Can't access drift velocity file!");
-	}
-
-	f = fopen("/RTS/conf/handler/.l4_drift_velocity_run","w");
-	if(f) {
-	  fprintf(f, "%d", run);
-	  fclose(f);
-	}
-	else {
-	  LOG(OPER, "Can't access drift velocity run number file!");
-	}
+	  FILE *f = fopen("/RTS/conf/handler/.l4_drift_velocity","w");
+	  if(f) {
+	      fprintf(f, "%lf", drift_vel);
+	      fclose(f);
+	  }
+	  else {
+	      LOG(OPER, "Can't access drift velocity file!");
+	  }
+	  
+	  f = fopen("/RTS/conf/handler/.l4_drift_velocity_run","w");
+	  if(f) {
+	      fprintf(f, "%d", run);
+	      fclose(f);
+	  }
+	  else {
+	      LOG(OPER, "Can't access drift velocity run number file!");
+	  }
+	  
+	  LOG("JEFF", "Wrote laser to .l4_drift_velocity file %lf %d", drift_vel, run);
       }
-      
     }
 #endif
     break;
