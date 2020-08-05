@@ -32,11 +32,11 @@ static inline unsigned long long bswap_64(unsigned long long x) {
 #include <cstring>
 #include <algorithm>
 #include <functional>
-#include "RTS/trg/include/trgConfNum.h"
-#include "RTS/trg/include/trgDataDefs.h"
+//#include "RTS/trg/include/trgConfNum.h"
+//#include "RTS/trg/include/trgDataDefs.h"
+#include "trgConfNum_fms.h"
+#include "trgDataDefs_v45.h"
 #include "Board.hh"
-
-#define  FEQ_CONF_NUM       7
 
 using namespace std;
 
