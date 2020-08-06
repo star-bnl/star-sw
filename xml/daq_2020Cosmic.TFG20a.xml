@@ -7,12 +7,12 @@
 #   setenv StarEndMakerShell
    setenv STARFPE NO
 #   setup debug
-    setenv NODEBUG yes
+#    setenv NODEBUG yes
 #   setup  gcc631
 #   setup 64b
 #   setup gcc
 #   setup 32b
-    starver TFG20a
+    starver TFG20g
      set evtsFile = $INPUTFILE0;
      set f        = 1
      set l        = 5000000
@@ -53,5 +53,6 @@
 <!-- <input URL="file:/gpfs01/star/daq/2019/071/20071001/st_physics_2007100*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2019/354/20354003/hlt*.daq" /> -->
 <!-- <input URL="command:daq_2020.pl" /> -->
-<input URL="command:daq_2020dR.pl" />
+<!-- <input URL="command:daq_2020dR.pl" /> ->
+<input URL="command:daq_2020d.pl" />
 </job>

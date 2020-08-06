@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<<<<<<< HEAD
 <!-- <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="xrootd" simulateSubmission ="false" copyInputLocally="false"> -->
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
@@ -17,14 +16,18 @@
 #  setup  32b
 #  starver DEV2/SL15
 #  set split = (${INPUTFILE0}:as|/| |)
- set input        = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
- set outputb      = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
- set year         = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
- set dstype       = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+# set input        = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+# set outputb      = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+# set year         = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+# set dstype       = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
   
 # set input = ${INPUTFILE0};
-foreach input (`cat $FILELIST`)
-  set dir = ${input};
+foreach INPUT (`cat $FILELIST`)
+ set input        = `echo $INPUT | awk -F\: '{print $1}'`
+ set outputb      = `echo $INPUT | awk -F\: '{print $2}'`
+ set year         = `echo $INPUT | awk -F\: '{print $3}'`
+ set dstype       = `echo $INPUT | awk -F\: '{print $4}'`
+ set dir = ${input};
   set dirB = `basename ${dir}`
   set filel = `basename ${outputb} .root`;
 #  set logb = ${dirB}B.log
