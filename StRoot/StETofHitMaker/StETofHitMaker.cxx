@@ -233,11 +233,11 @@ StETofHitMaker::InitRun( Int_t runnumber )
             }
         }
     }
-
+    if (mDebug) {
     for( const auto& kv : mSigVel ) {
-        LOG_DEBUG << "counter key: " << kv.first << " --> signal velocity = " << kv.second << " cm / ns" << endm;
+        LOG_INFO << "counter key: " << kv.first << " --> signal velocity = " << kv.second << " cm / ns" << endm;
     }
-
+    }
     // --------------------------------------------------------------------------------------------
     for( int i=0; i<108; i++ ) {
         mCounterActive.push_back( false );
@@ -337,7 +337,7 @@ StETofHitMaker::processStEvent()
 
     size_t nDigis = etofDigis.size();
     if( mDebug ) {
-        LOG_DEBUG << "processStEvent() - # fired eTOF digis : " << nDigis << endm;
+        LOG_INFO << "processStEvent() - # fired eTOF digis : " << nDigis << endm;
     }
 
     bool isMuDst = false;
@@ -407,7 +407,7 @@ StETofHitMaker::processMuDst()
 
     size_t nDigis = mMuDst->numberOfETofDigi();
     if( mDebug ) {
-        LOG_DEBUG << "processMuDst() - # fired eTOF digis : " << nDigis << endm;
+        LOG_INFO << "processMuDst() - # fired eTOF digis : " << nDigis << endm;
     }
     bool isMuDst = true;
 
@@ -479,7 +479,7 @@ StETofHitMaker::startTime()
             btofHeader = btofCollection->tofHeader();
         }
         else {
-            LOG_DEBUG << "no StBTofCollection found by getTstart" << endm;
+	  if (mDebug) {LOG_INFO << "no StBTofCollection found by getTstart" << endm;}
             return -9999.;
         }
     }
@@ -488,14 +488,14 @@ StETofHitMaker::startTime()
     }
 
     if( !btofHeader ) {
-        LOG_DEBUG << "startTime(): -- no bTOF header --> no start time avaiable" << endm;
+        if (mDebug) {LOG_INFO << "startTime(): -- no bTOF header --> no start time avaiable" << endm;}
         return -9999.;
     }
 
     double tstart = btofHeader->tStart();
 
     if( !isfinite( tstart ) ) {
-        LOG_DEBUG << "startTime(): -- from bTOF header is NaN" << endm;
+        if (mDebug) {LOG_INFO << "startTime(): -- from bTOF header is NaN" << endm;}
         return -9999.;
     }
 
@@ -532,7 +532,7 @@ StETofHitMaker::startTimeVpd( double& tstart, double& vertexVz )
             btofHeader = btofCollection->tofHeader();
         }
         else {
-            LOG_DEBUG << "no StBTofCollection found by getTstart" << endm;
+            if (mDebug) {LOG_INFO << "no StBTofCollection found by getTstart" << endm;}
             return;
         }
     }
@@ -541,7 +541,7 @@ StETofHitMaker::startTimeVpd( double& tstart, double& vertexVz )
     }
 
     if( !btofHeader ) {
-        LOG_DEBUG << "startTimeVpd(): -- no bTOF header --> no start time avaiable" << endm;
+        if (mDebug) {LOG_INFO << "startTimeVpd(): -- no bTOF header --> no start time avaiable" << endm;}
         return;
     }
 
@@ -562,7 +562,7 @@ StETofHitMaker::startTimeVpd( double& tstart, double& vertexVz )
     }
     else {
         vertexVz = btofHeader->vpdVz();
-        LOG_DEBUG << "startTimeVpd(): Vpd vertex is at: " << vertexVz << endm;
+        if (mDebug) {LOG_INFO << "startTimeVpd(): Vpd vertex is at: " << vertexVz << endm;}
     }
 
     double tMean   = 0.;
@@ -576,7 +576,7 @@ StETofHitMaker::startTimeVpd( double& tstart, double& vertexVz )
         if( vpdLeTime[ i ] > 0. ) {
             updateCyclicRunningMean( vpdLeTime[ i ], tMean, nTubes, eTofConst::bTofClockCycle );
             nTubesWest++;
-            LOG_DEBUG << "startTimeVpd(): loading VPD west tubeId = " << i+1 << " time " << vpdLeTime[ i ] << endm;
+            if (mDebug) {LOG_INFO << "startTimeVpd(): loading VPD west tubeId = " << i+1 << " time " << vpdLeTime[ i ] << endm;}
         }
     }
 
@@ -586,7 +586,7 @@ StETofHitMaker::startTimeVpd( double& tstart, double& vertexVz )
         if( vpdLeTime[ i + nVpd ] > 0. ) {
             updateCyclicRunningMean( vpdLeTime[ i + nVpd ], tMean, nTubes, eTofConst::bTofClockCycle );
             nTubesEast++;
-            LOG_DEBUG << "startTimeVpd(): loading VPD east tubeId = " << i+1 << " time " << vpdLeTime[ i + nVpd ] << endm;
+            if (mDebug) {LOG_INFO << "startTimeVpd(): loading VPD east tubeId = " << i+1 << " time " << vpdLeTime[ i + nVpd ] << endm;}
         }
     }
 
@@ -618,7 +618,7 @@ StETofHitMaker::fillStorage( StETofDigi* aDigi, unsigned int index )
 
     if( fabs( aDigi->calibTime() ) < 1e-5 && aDigi->calibTot() < 0 ) {
         if( mDebug ) {
-            LOG_DEBUG << "fillStorage() - digi not calibrated, most likely since it is outside the trigger window or pulser. Ignore." << endm;
+            LOG_INFO << "fillStorage() - digi not calibrated, most likely since it is outside the trigger window or pulser. Ignore." << endm;
         }
         return false;
     }
@@ -631,10 +631,10 @@ StETofHitMaker::fillStorage( StETofDigi* aDigi, unsigned int index )
     StETofDigi* pDigi = new StETofDigi( *aDigi );
 
     if( mDebug ) {
-        LOG_DEBUG << "fillStorage() -- sector plane counter strip: " << pDigi->sector() << " ";
-        LOG_DEBUG << pDigi->zPlane() << " " << pDigi->counter() << " " << pDigi->strip() << endm;
-        LOG_DEBUG << "fillStorage() -- calibTime: " << pDigi->calibTime();
-        LOG_DEBUG << "  calibToT: " << pDigi->calibTot() << endm;
+        LOG_INFO << "fillStorage() -- sector plane counter strip: " << pDigi->sector() << " ";
+        LOG_INFO << pDigi->zPlane() << " " << pDigi->counter() << " " << pDigi->strip() << endm;
+        LOG_INFO << "fillStorage() -- calibTime: " << pDigi->calibTime();
+        LOG_INFO << "  calibToT: " << pDigi->calibTot() << endm;
     }
 
     unsigned int key = pDigi->sector()  * 10000 +
@@ -673,13 +673,13 @@ StETofHitMaker::clearHits( const bool isMuDst )
             return;
         }
 
-        LOG_DEBUG << "clearHits() - number of hits present (before clear): " << mEvent->etofCollection()->etofHits().size() << endm;
+        if (mDebug) {LOG_INFO << "clearHits() - number of hits present (before clear): " << mEvent->etofCollection()->etofHits().size() << endm;}
 
         // clear hits (if there are any when running in afterburner mode)
         StSPtrVecETofHit&  etofHits  = mEvent->etofCollection()->etofHits();
         etofHits.clear();
 
-        LOG_DEBUG << "clearHits() - number of hits present (after clear): "  << mEvent->etofCollection()->etofHits().size() << endm;
+        if (mDebug) {LOG_INFO << "clearHits() - number of hits present (after clear): "  << mEvent->etofCollection()->etofHits().size() << endm;}
 
         // and remove pointers to associated hit of the digis
         StSPtrVecETofDigi& etofDigis = mEvent->etofCollection()->etofDigis();
@@ -692,19 +692,19 @@ StETofHitMaker::clearHits( const bool isMuDst )
 
             aDigi->setAssociatedHit( nullptr );
         }
-        LOG_DEBUG << "clearHits() - associated hits of digis set to nullptr" << endm;
+        if (mDebug) {LOG_INFO << "clearHits() - associated hits of digis set to nullptr" << endm;}
     }
     else {
         if( mMuDst->numberOfETofHit() == 0 ) {
             return;
         }
 
-        LOG_DEBUG << "clearHits() - number of hits present (before clear): " << mMuDst->numberOfETofHit() << endm;
+        if (mDebug) {LOG_INFO << "clearHits() - number of hits present (before clear): " << mMuDst->numberOfETofHit() << endm;}
 
         // clear hits (if there are any when running in afterburner mode)
         mMuDst->etofArray( muETofHit )->Clear( "C" );
 
-        LOG_DEBUG << "clearHits() - number of hits present (after clear): "  << mMuDst->numberOfETofHit() << endm;
+        if (mDebug) {LOG_INFO << "clearHits() - number of hits present (after clear): "  << mMuDst->numberOfETofHit() << endm;}
 
         // and remove pointers to associated hit of the digis
         size_t nDigis = mMuDst->numberOfETofDigi();
@@ -716,7 +716,7 @@ StETofHitMaker::clearHits( const bool isMuDst )
 
             aDigi->setAssociatedHitId( -1 );
         }
-        LOG_DEBUG << "clearHits() - associated hit id of digis set to -1" << endm;
+        if (mDebug) {LOG_INFO << "clearHits() - associated hit id of digis set to -1" << endm;}
     }
 }
 
@@ -730,7 +730,7 @@ StETofHitMaker::clearStorage()
         size_t remainingDigis = kv->second.size();
 
         if( mDebug ) {
-            LOG_DEBUG << "strip key " << kv->first << " has " << remainingDigis << " left" << endm;
+            LOG_INFO << "strip key " << kv->first << " has " << remainingDigis << " left" << endm;
         }
 
         for( unsigned int i=0; i<remainingDigis; i++ ) {
@@ -746,7 +746,7 @@ StETofHitMaker::clearStorage()
         size_t remainingHits = kv->second.size();
 
         if( mDebug ) {
-            LOG_DEBUG << "detector key " << kv->first << " has " << remainingHits << " left" << endm;
+            LOG_INFO << "detector key " << kv->first << " has " << remainingHits << " left" << endm;
         }
 
         for( size_t i=0; i<remainingHits; i++ ) {
@@ -855,7 +855,7 @@ StETofHitMaker::matchSides()
         // loop over digis on the same strip
         while( digiVec->size() > 1 ) {
             if( mDebug ) { 
-                LOG_DEBUG << stripIndex << " -- digiVec->size() -- " << digiVec->size() << endm;
+                LOG_INFO << stripIndex << " -- digiVec->size() -- " << digiVec->size() << endm;
             }
             // treat consecutive digis on the same side:
             // we want to have the first and second digi to be on different sides
@@ -919,10 +919,10 @@ StETofHitMaker::matchSides()
             } // first and second digi in the vector are on different sides
 
             if( mDebug ) {
-                LOG_DEBUG << "matchSides() - digi processing for sector " << stripIndex / 10000;
-                LOG_DEBUG << " plane " << ( stripIndex % 10000 ) / 1000  << " counter " << ( stripIndex % 1000 ) / 100;
-                LOG_DEBUG << " strip " << stripIndex % 100;
-                LOG_DEBUG << " size: " << digiVec->size() << endm;
+                LOG_INFO << "matchSides() - digi processing for sector " << stripIndex / 10000;
+                LOG_INFO << " plane " << ( stripIndex % 10000 ) / 1000  << " counter " << ( stripIndex % 1000 ) / 100;
+                LOG_INFO << " strip " << stripIndex % 100;
+                LOG_INFO << " size: " << digiVec->size() << endm;
             }
 
             if( digiVec->size() < 2 ) {
@@ -940,7 +940,7 @@ StETofHitMaker::matchSides()
             timeDiff = xDigiA->calibTime() - xDigiB->calibTime();
 
             if( mDebug ) {
-                LOG_DEBUG << "matchSides() - time difference in ns: " << timeDiff << endm;
+                LOG_INFO << "matchSides() - time difference in ns: " << timeDiff << endm;
             }
 
             // side 1 is the top, side 2 is bottom
@@ -955,8 +955,8 @@ StETofHitMaker::matchSides()
             // check for a better match if the local y position is outside the detector bounds
             if( fabs( posY ) > mMaxYPos && digiVec->size() > 2 ) {
                 if( mDebug ) {
-                    LOG_DEBUG << "matchSides() - hit candidate outside correlation window, check for better possible digis" << endm;
-                    LOG_DEBUG << "size of digi vector: " << digiVec->size() << endm;
+                    LOG_INFO << "matchSides() - hit candidate outside correlation window, check for better possible digis" << endm;
+                    LOG_INFO << "size of digi vector: " << digiVec->size() << endm;
                 }
 
                 StETofDigi* xDigiC = digiVec->at( 2 );
@@ -980,7 +980,7 @@ StETofHitMaker::matchSides()
 
                 if( fabs( posYNew ) < fabs( posY ) ) {
                     if( mDebug ) {
-                        LOG_DEBUG << "matchSides() - found better match for hit candidate -> changing out digis" << endm;
+                        LOG_INFO << "matchSides() - found better match for hit candidate -> changing out digis" << endm;
                     }
 
                     timeDiff = timeDiffNew;
@@ -1009,7 +1009,7 @@ StETofHitMaker::matchSides()
                 }
                 else { // --> keeps candidate even if it is outside correlation window
                     if( mDebug ) {
-                        LOG_DEBUG << "matchSides() - no better match -> keep this hit candidate" << endm;
+                        LOG_INFO << "matchSides() - no better match -> keep this hit candidate" << endm;
                     }
                 }
             } // check for better match with third digi done
@@ -1055,7 +1055,11 @@ StETofHitMaker::matchSides()
 
 
             if( mDebug ) {
-                LOG_DEBUG << "detIndex=" << detIndex << "posX=" << posX << "  posY=" << posY << "  time= " << time << "  totSum=" << totSum << endm;
+                LOG_INFO << "detIndex=" << detIndex << "posX=" << posX << "  posY=" << posY << "  time= " << time << "  totSum=" << totSum << endm;
+		static Int_t iBreak = 0;
+		if (TMath::IsNaN(totSum)) {
+		  iBreak++;
+		}
             }
 
             // build a hit (clustersize is always one strip at this point)
@@ -1072,9 +1076,9 @@ StETofHitMaker::matchSides()
 
             mMapHitDigiIndices[ constructedHit ] = containedDigiIndices;
 
-
-            LOG_DEBUG << *( mStoreHit.at( detIndex ).back() ) << endm;
-
+	    if (mDebug) {
+            LOG_INFO << *( mStoreHit.at( detIndex ).back() ) << endm;
+	    }
             // erase the two used digis!
             iterDigi = digiVec->begin();
             delete *iterDigi;
@@ -1090,7 +1094,7 @@ StETofHitMaker::matchSides()
     } // end of loop over strips
 
     if( mDebug ) {
-        LOG_DEBUG << "matchSides() - matching of sides done" << endm;
+        LOG_INFO << "matchSides() - matching of sides done" << endm;
     }
 }//::matchSides
 
@@ -1121,16 +1125,16 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
         unsigned int counter =   detIndex % 10;
 
         if( mDebug ) {
-            LOG_DEBUG << sector  << "  " << plane << "  " << counter << "  size hitVec: " << kv.second.size() << endm;
+            LOG_INFO << sector  << "  " << plane << "  " << counter << "  size hitVec: " << kv.second.size() << endm;
         }
 
         for( const auto& hit : kv.second ) {
             if( mDebug ) {
-                LOG_DEBUG << "matchSides() - HIT: ";
-                LOG_DEBUG << "time="     << setprecision( 16 ) << hit->time()     << "  ";
-                LOG_DEBUG << "totalTot=" << setprecision(  4 ) << hit->totalTot() << "  ";
-                LOG_DEBUG << "localX="   << setprecision(  4 ) << hit->localX()   << "  ";
-                LOG_DEBUG << "localY="   << setprecision(  4 ) << hit->localY()   << endm;
+                LOG_INFO << "matchSides() - HIT: ";
+                LOG_INFO << "time="     << setprecision( 16 ) << hit->time()     << "  ";
+                LOG_INFO << "totalTot=" << setprecision(  4 ) << hit->totalTot() << "  ";
+                LOG_INFO << "localX="   << setprecision(  4 ) << hit->localX()   << "  ";
+                LOG_INFO << "localY="   << setprecision(  4 ) << hit->localY()   << endm;
             }
 
             mCounterActive.at( ( sector - 13 ) * 9 + ( plane - 1 ) * 3 + ( counter - 1 ) ) = true;
@@ -1172,7 +1176,7 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
                 }
 
                 if( mDebug ) {
-                    LOG_DEBUG << "tot of digis in the hit: " << totA << " and " << totB << " sideSwitch: " << sideSwitch << endm;
+                    LOG_INFO << "tot of digis in the hit: " << totA << " and " << totB << " sideSwitch: " << sideSwitch << endm;
                 }
 
                 float totDiff = totA - totB;
@@ -1202,9 +1206,9 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
             double tof = fmod( hit->time(), eTofConst::bTofClockCycle ) - tstart;
 
             if( mDebug ) {
-                LOG_DEBUG << "hit time, hit time mod bTOF clock cycle, start time, time difference: ";
-                LOG_DEBUG << hit->time() << " , " << tof + tstart << " , " << tstart << " , " <<  tof << endm;
-                LOG_DEBUG << "sector, plane, counter: " << hit->sector() << " , " << hit->zPlane() << " , " <<  hit->counter() << endm;
+                LOG_INFO << "hit time, hit time mod bTOF clock cycle, start time, time difference: ";
+                LOG_INFO << hit->time() << " , " << tof + tstart << " , " << tstart << " , " <<  tof << endm;
+                LOG_INFO << "sector, plane, counter: " << hit->sector() << " , " << hit->zPlane() << " , " <<  hit->counter() << endm;
             }
             mHistograms.at( "unclusteredHit_tof_fullrange_all" )->Fill( tof );
 
@@ -1280,16 +1284,18 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
 
         while( hitVec->size() > 0 ) {
             if( mDebug ) {
-                LOG_DEBUG << "mergeClusters() - hit vector size: " << hitVec->size();
-                LOG_DEBUG << " for sector " << sector << " plane " << plane << " counter " << counter << endm;
-                LOG_DEBUG << "mergeClusters() - checking hit vector for possible hits to merge with..." << endm;
+                LOG_INFO << "mergeClusters() - hit vector size: " << hitVec->size();
+                LOG_INFO << " for sector " << sector << " plane " << plane << " counter " << counter << endm;
+                LOG_INFO << "mergeClusters() - checking hit vector for possible hits to merge with..." << endm;
             }
 
             StETofHit* pHit = hitVec->at( 0 );
-
+	    if (TMath::IsNaN(pHit->totalTot())) {
+	      LOG_ERROR << "The hit has NaN as totalTot(). Exit." << endm;
+	      break;
+	    }
             // scale with tot for weigthed average
             double weight = pHit->totalTot();
-
             if( weight==0 ) {
                 weight = 0.001;
             }
@@ -1308,11 +1314,11 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
             unsigned int index = 1;
             while( hitVec->size() > 1 ) {
                 if( mDebug ) {
-                    LOG_DEBUG << "mergeClusters() - index in hit vector = " << index << endm;
+                    LOG_INFO << "mergeClusters() - index in hit vector = " << index << endm;
                 }
                 if( index >= hitVec->size() ) {
                     if( mDebug ) {
-                        LOG_DEBUG << "mergeClusters() - loop index is exceeds size of hit vector -> stop looping" << endm;
+                        LOG_INFO << "mergeClusters() - loop index is exceeds size of hit vector -> stop looping" << endm;
                     }
                     break;
                 }
@@ -1339,7 +1345,7 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                     ( sqrt( timeDiff * timeDiff + posYDiff * posYDiff ) ) < mMergingRadius )
                 {
                     if( mDebug ) {
-                        LOG_DEBUG << "mergeClusters() - merging is going on" << endm; 
+                        LOG_INFO << "mergeClusters() - merging is going on" << endm; 
                     }
                     //merge hit into cluster
                     double hitWeight = pMergeHit->totalTot();
@@ -1363,9 +1369,9 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                     }
 
                     if( mDebug ) {
-                        LOG_DEBUG << "mergeClusters() - detector: " << detIndex << " seed hit localX: " << pHit->localX();
-                        LOG_DEBUG << " <>  hit to merge localX: " << pMergeHit->localX();
-                        LOG_DEBUG << " <> weighted localX: " << weightedPosX / weightsTotSum << endm; 
+                        LOG_INFO << "mergeClusters() - detector: " << detIndex << " seed hit localX: " << pHit->localX();
+                        LOG_INFO << " <>  hit to merge localX: " << pMergeHit->localX();
+                        LOG_INFO << " <> weighted localX: " << weightedPosX / weightsTotSum << endm; 
                     }
 
                     // merge contained digi index vectors
@@ -1380,7 +1386,7 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                     hitVec->erase( iterHit );
 
                     if( mDebug ) {
-                        LOG_DEBUG << "mergeClusters() - deleting merged hit from Map" << endm;
+                        LOG_INFO << "mergeClusters() - deleting merged hit from Map" << endm;
                     }
 
                     mMapHitDigiIndices.erase( pMergeHit );
@@ -1388,7 +1394,7 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                 } 
                 else { // merging condition not fulfilled
                     if( mDebug ) {
-                        LOG_DEBUG << "mergeClusters() - merging condition not fulfilled -- check the next hit" << endm;
+                        LOG_INFO << "mergeClusters() - merging condition not fulfilled -- check the next hit" << endm;
                     }
                     index++;
                 } // check next hit 
@@ -1397,22 +1403,25 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
 
 
             // renormalize with the total ToT
-            weightedTime /= weightsTotSum;
-            weightedPosX /= weightsTotSum;
-            weightedPosY /= weightsTotSum;
-
+	    if (TMath::Abs(weightsTotSum) > 1e-7) {
+	      weightedTime /= weightsTotSum;
+	      weightedPosX /= weightsTotSum;
+	      weightedPosY /= weightsTotSum;
+	    } else {
+	      LOG_ERROR << "totalTot = "    << setprecision(  4 ) << weightsTotSum << "  " << endm;
+	    }
             // use only the floating point remainder of the time with respect the the bTof clock range
             weightedTime = fmod( weightedTime, eTofConst::bTofClockCycle );
             if( weightedTime < 0 ) weightedTime += eTofConst::bTofClockCycle;
 
             if( mDebug ) {
-                LOG_DEBUG << "mergeClusters() - MERGED HIT: ";
-                LOG_DEBUG << "sector: " << sector << "  plane: " << plane << "  counter: " << counter << "\n";
-                LOG_DEBUG << "time = "        << setprecision( 16 ) << weightedTime  << "  ";
-                LOG_DEBUG << "totalTot = "    << setprecision(  4 ) << weightsTotSum << "  ";
-                LOG_DEBUG << "clusterSize = " << setprecision(  1 ) << clusterSize   << "  ";
-                LOG_DEBUG << "localX = "      << setprecision(  4 ) << weightedPosX  << "  ";
-                LOG_DEBUG << "localY = "      << setprecision(  4 ) << weightedPosY  << endm;
+                LOG_INFO << "mergeClusters() - MERGED HIT: ";
+                LOG_INFO << "sector: " << sector << "  plane: " << plane << "  counter: " << counter << "\n";
+                LOG_INFO << "time = "        << setprecision( 16 ) << weightedTime  << "  ";
+                LOG_INFO << "totalTot = "    << setprecision(  4 ) << weightsTotSum << "  ";
+                LOG_INFO << "clusterSize = " << setprecision(  1 ) << clusterSize   << "  ";
+                LOG_INFO << "localX = "      << setprecision(  4 ) << weightedPosX  << "  ";
+                LOG_INFO << "localY = "      << setprecision(  4 ) << weightedPosY  << endm;
             }
 
             // create combined hit
@@ -1426,8 +1435,8 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                 mMapHitDigiIndices[ combinedHit ] = mMapHitDigiIndices.at( pHit );
 
                 if( mDebug ) {
-                    LOG_DEBUG << "mergeClusters(): size of digi vector for combined hit " << nHitsOnDet << " on the counter: ";
-                    LOG_DEBUG << mMapHitDigiIndices.at( combinedHit ).size() << " copied over from merged hit vector of size "<< mMapHitDigiIndices.at( pHit ).size() << endm;
+                    LOG_INFO << "mergeClusters(): size of digi vector for combined hit " << nHitsOnDet << " on the counter: ";
+                    LOG_INFO << mMapHitDigiIndices.at( combinedHit ).size() << " copied over from merged hit vector of size "<< mMapHitDigiIndices.at( pHit ).size() << endm;
                 }
             }
             else{
@@ -1438,8 +1447,8 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                 // copy contained digis vector map over to the ETofCollection address
                 mMapHitIndexDigiIndices[ lastHitIndex ] = mMapHitDigiIndices.at( pHit );
                 if( mDebug ) {
-                    LOG_DEBUG << "mergeClusters(): size of digi vector for combined hit " << nHitsOnDet << " on the counter: ";
-                    LOG_DEBUG << mMapHitIndexDigiIndices.at( lastHitIndex ).size() << " copied over from merged hit vector of size "<< mMapHitDigiIndices.at( pHit ).size() << endm;
+                    LOG_INFO << "mergeClusters(): size of digi vector for combined hit " << nHitsOnDet << " on the counter: ";
+                    LOG_INFO << mMapHitIndexDigiIndices.at( lastHitIndex ).size() << " copied over from merged hit vector of size "<< mMapHitDigiIndices.at( pHit ).size() << endm;
                 }
             }
 
@@ -1453,10 +1462,10 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
 
             if( mDebug ) {
                 if( !isMuDst && mMapHitDigiIndices.count( combinedHit ) ) {
-                    LOG_DEBUG << "mergeClusters(): size of digi vector for combined hit " << nHitsOnDet << " on the counter: " << mMapHitDigiIndices.at( combinedHit ).size() << " after deletion of merged hit" << endm;
+                    LOG_INFO << "mergeClusters(): size of digi vector for combined hit " << nHitsOnDet << " on the counter: " << mMapHitDigiIndices.at( combinedHit ).size() << " after deletion of merged hit" << endm;
                 }
                 if( isMuDst && mMapHitIndexDigiIndices.count( nHitsOnDet ) ) {
-                    LOG_DEBUG << "mergeClusters(): size of digi vector for combined hit " << nHitsOnDet << " on the counter: " << mMapHitIndexDigiIndices.at( mMuDst->numberOfETofHit() - 1 ).size() << endm;
+                    LOG_INFO << "mergeClusters(): size of digi vector for combined hit " << nHitsOnDet << " on the counter: " << mMapHitIndexDigiIndices.at( mMuDst->numberOfETofHit() - 1 ).size() << endm;
                 }
             }
 
@@ -1465,7 +1474,7 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
     } // end of loop over detectors
 
     if( mDebug ) {
-        LOG_DEBUG << "mergeClusters() - merging into clusters done" << endm;
+        LOG_INFO << "mergeClusters() - merging into clusters done" << endm;
     }
 }//::mergeClusters
 
@@ -1481,12 +1490,12 @@ StETofHitMaker::assignAssociatedHits( const bool isMuDst )
             StETofHit* aHit = etofHits[ ihit ];
 
             if( mDebug ) {
-                LOG_DEBUG << "assignAssociatedHits(): size of digi vector for hit " << ihit << ": "<< mMapHitDigiIndices.at( aHit ).size() << endm;
+                LOG_INFO << "assignAssociatedHits(): size of digi vector for hit " << ihit << ": "<< mMapHitDigiIndices.at( aHit ).size() << endm;
             }
 
             for ( size_t idigi = 0; idigi < mMapHitDigiIndices.at( aHit ).size(); idigi++ ) {
                 if( mDebug ) {
-                    LOG_DEBUG << "assignAssociatedHits(): link points to digi " << etofDigis[ mMapHitDigiIndices.at( aHit ).at( idigi ) ] << endm;
+                    LOG_INFO << "assignAssociatedHits(): link points to digi " << etofDigis[ mMapHitDigiIndices.at( aHit ).at( idigi ) ] << endm;
                 }
                 etofDigis[ mMapHitDigiIndices.at( aHit ).at( idigi ) ]->setAssociatedHit( aHit );
             }
@@ -1496,19 +1505,20 @@ StETofHitMaker::assignAssociatedHits( const bool isMuDst )
     else {
         for( const auto& kv : mMapHitIndexDigiIndices ) {
             if( mDebug ) {
-                LOG_DEBUG << "assignAssociatedHits(): size of digi vector for hit index " << kv.first << ": "<< kv.second.size() << endm;
+                LOG_INFO << "assignAssociatedHits(): size of digi vector for hit index " << kv.first << ": "<< kv.second.size() << endm;
             }
 
             for( const auto& v: kv.second ) {
                 if( mDebug ) {
-                    LOG_DEBUG << "assignAssociatedHits(): link to digi index " << v << endm;
+                    LOG_INFO << "assignAssociatedHits(): link to digi index " << v << endm;
                 }
                 mMuDst->etofDigi( v )->setAssociatedHitId( kv.first );
             }
         }
     }
-
-    LOG_DEBUG << "assignAssociatedHits() - association between digis and hits done" << endm;   
+    if (mDebug) {
+      LOG_INFO << "assignAssociatedHits() - association between digis and hits done" << endm;   
+    }
 }//::assignAssociatedHits
 
 
@@ -1543,7 +1553,7 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             }
 
             if( mDebug ) {
-                LOG_DEBUG << *aHit << endm;
+                LOG_INFO << *aHit << endm;
             }
 
             updateCyclicRunningMean( aHit->time(), averageETofHitTime, nHitsETof, eTofConst::bTofClockCycle );
@@ -1689,10 +1699,10 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             }
 
             if( mDebug ) {
-                LOG_DEBUG << "hit (" << i << "): sector,plane,counter=" << aHit->sector() << ",";
-                LOG_DEBUG << aHit->zPlane() << "," << aHit->counter() << " time=" << aHit->time();
-                LOG_DEBUG << " localX=" << aHit->localX() << " localY=" << aHit->localY();
-                LOG_DEBUG << " clustersize=" << aHit->clusterSize() << endm;
+                LOG_INFO << "hit (" << i << "): sector,plane,counter=" << aHit->sector() << ",";
+                LOG_INFO << aHit->zPlane() << "," << aHit->counter() << " time=" << aHit->time();
+                LOG_INFO << " localX=" << aHit->localX() << " localY=" << aHit->localY();
+                LOG_INFO << " clustersize=" << aHit->clusterSize() << endm;
             }
 
             updateCyclicRunningMean( aHit->time(), averageETofHitTime, nHitsETof, eTofConst::bTofClockCycle );
@@ -1815,8 +1825,9 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
         }
 
     }
-
-    LOG_DEBUG << "fillHitQA() - histograms filled" << endm;   
+    if (mDebug) {
+      LOG_INFO << "fillHitQA() - histograms filled" << endm;   
+    }
 }//::fillHitQA
 
 
