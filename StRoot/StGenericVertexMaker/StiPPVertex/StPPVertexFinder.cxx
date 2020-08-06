@@ -1456,7 +1456,7 @@ bool StPPVertexFinder::matchTrack2Membrane(TrackDataT<StiKalmanTrack> &track)
     }
   }
 
-  if (nFit < mMinFitPfrac * nPos) return false; // too short fragment of a track
+  if (nFit <= mMinFitPfrac * nPos) return false; // too short fragment of a track
 
   if( mFitPossWeighting)
     track.weight *= 1.*nFit/nPos; // introduced in 2012 for pp510 to differentiate between global track quality, together with lowering the overall threshold from 0.7 to 0.51, Jan

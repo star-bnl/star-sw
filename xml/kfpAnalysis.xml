@@ -28,13 +28,13 @@ foreach INPUT (`cat $FILELIST`)
  set year         = `echo $INPUT | awk -F\: '{print $3}'`
  set dstype       = `echo $INPUT | awk -F\: '{print $4}'`
  set dir = ${input};
-  set dirB = `basename ${dir}`
+#  set dirB = `basename ${dir}`
   set filel = `basename ${outputb} .root`;
 #  set logb = ${dirB}B.log
   set logb = ${filel}B.log
   set log  = ${SUBMITTINGDIRECTORY}/${logb}
 #  if (-r ${log}) continue;
-  set outputb = ${dirB}.root;
+#  set outputb = ${dirB}.root;
   set output  =  ${SUBMITTINGDIRECTORY}/${outputb};
   if (-r ${output}) continue
 #  set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root

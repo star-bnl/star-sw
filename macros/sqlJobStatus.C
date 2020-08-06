@@ -183,7 +183,7 @@ TString FormVariable(TString prodyear, TString Dataset, TString LibTag, TString 
   else                               Var += "/32b";
   if (optimized == "Yes") Var += "/opt";
   else                    Var += "/deb";
-  if (LibTag == ".DEV2")  {Var += "/TFGXX";}
+  if (LibTag == ".DEV2" || LibTag.Contains("TFG"))  {Var += "/TFG";}
   else                    { Var += "/"; Var += LibTag;}
 #if 0
   cout << "prodyear = " << prodyear.Data()

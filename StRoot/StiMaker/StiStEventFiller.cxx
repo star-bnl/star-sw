@@ -1210,7 +1210,9 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track,StTrackD
   track->getAllPointCount(dets,kMaxDetectorId-1);
   for (int i=1;i<kMaxDetectorId;i++) {
     if(!dets[i][0]) continue;
-    gTrack->setNumberOfPossiblePoints((unsigned char)dets[i][0],(StDetectorId)i);
+    UChar_t c = dets[i][0];
+    if (dets[i][0] > 255) c = 255;
+    gTrack->setNumberOfPossiblePoints(c,(StDetectorId)i);
   }
   fillGeometry(gTrack, track, false); // inner geometry
   fillGeometry(gTrack, track, true ); // outer geometry

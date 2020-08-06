@@ -1324,7 +1324,8 @@ Float_t        St_beamInfoC::GammaYellow() {
   if (N < 1) N = 1;
   Double_t E = N*getYellowEnergy();
   Double_t M = kuAtomicMassUnit*N;
-    gamma = E/M;
+  if (E < M) E = M;
+  gamma = E/M;
   }
   return gamma;
 }
@@ -1336,6 +1337,7 @@ Float_t        St_beamInfoC::GammaBlue() {
     if (N < 1) N = 1;
     Double_t E = N*getBlueEnergy();
     Double_t M = kuAtomicMassUnit*N;
+    if (E < M) E = M;
     gamma = E/M;
   }
   return gamma;
@@ -1347,18 +1349,18 @@ Float_t        St_beamInfoC::Gamma() {
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::BetaBlue() {
-  Float_t beta =  TMath::Sqrt(1 - 1./(GammaBlue()*GammaBlue()));
-  return beta;
+  Float_t gamma = GammaBlue();
+  return TMath::Sqrt(1 - 1./(gamma*gamma));
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::BetaYellow() {
-  Float_t beta = -TMath::Sqrt(1 - 1./(GammaYellow()*GammaYellow()));
-  return beta;
+  Float_t gamma = GammaYellow();
+  return -TMath::Sqrt(1 - 1./(gamma*gamma));
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::Beta() {
-  Float_t beta = TMath::Sqrt(1 - 1./(Gamma()*Gamma()));
-  return beta;
+  if (blueIntensity() > yellowIntensity()) return BetaBlue();
+  else                                     return BetaYellow();
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::SqrtS() {

@@ -1833,9 +1833,10 @@ bool StBTofMatchMaker::validTrack(StTrack *track){
   if (track->fitTraits().numberOfFitPoints(kTpcId) < mMinFitPointsPerTrack) return false;
   // 5. minimum #fit points over #maximum points
   //fg float ratio = (1.0*track->fitTraits().numberOfFitPoints(kTpcId)) / (1.0*track->numberOfPossiblePoints(kTpcId));
-  float ratio = (float)track->fitTraits().numberOfFitPoints(kTpcId) / (1.0*track->numberOfPossiblePoints(kTpcId));
-  if (ratio < mMinFitPointsOverMax) return false;
-
+  if (track->numberOfPossiblePoints(kTpcId) > 0) {
+    float ratio = (float)track->fitTraits().numberOfFitPoints(kTpcId) / (1.0*track->numberOfPossiblePoints(kTpcId));
+    if (ratio < mMinFitPointsOverMax) return false;
+  }
   return true;
 }
 

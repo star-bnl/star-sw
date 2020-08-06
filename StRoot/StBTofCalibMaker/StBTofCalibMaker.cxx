@@ -1868,6 +1868,7 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
             if(fabs(tdiff)>5.0) {
                 tSum -= t0[i];
                 nTzero--;
+		if (nTzero < 2) {nTzero = 0;break;}
             }
         }
     }

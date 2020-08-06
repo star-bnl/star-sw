@@ -1,6 +1,9 @@
-// $Id: StFmsClusterFitter.h,v 1.10 2019/06/26 16:49:53 akio Exp $
+// $Id: StFmsClusterFitter.h,v 1.11 2020/08/05 16:17:23 akio Exp $
 //
 // $Log: StFmsClusterFitter.h,v $
+// Revision 1.11  2020/08/05 16:17:23  akio
+// Avoid floating point exception (from Yuri)
+//
 // Revision 1.10  2019/06/26 16:49:53  akio
 // shower shape scaling for all shapes
 //
@@ -279,6 +282,7 @@ inline double asmsqrt(double x) { //slower than std::sqrt()
 // Returns a * f(x,y,b) as defined here:
 // https://drupal.star.bnl.gov/STAR/blog/leun/2010/aug/02/fms-meeting-20100802
 inline double showerShapeComponent(double x, double y, double a, double b) {
+    if (a == 0.0 || b == 0.0) return 0.0;
     return a * atan(x * y / (b * sqrt(b * b + x * x + y * y)));
 }
 
