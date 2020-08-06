@@ -411,6 +411,7 @@ void TpcAlignerDrawW2S(const Char_t *files = "*.root") {
   Out.ReplaceAll(".root","W2S");
   Out.ReplaceAll("*","");
   Out += ".root";
+  Out = gSystem->BaseName(Out);
   TFile *fOut = new TFile(Out,"recreate");
   TH3F *plots3D[NwsPlots];
   for (Int_t i = 0; i < NwsPlots; i++) {
