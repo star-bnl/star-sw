@@ -1,7 +1,10 @@
 /*
- * $Id: cscalia.c,v 1.1 2018/11/19 23:20:11 perev Exp $
+ * $Id: cscalia.c,v 1.1.2.1 2020/08/07 02:44:28 perev Exp $
  *
  * $Log: cscalia.c,v $
+ * Revision 1.1.2.1  2020/08/07 02:44:28  perev
+ * Get pointer
+ *
  * Revision 1.1  2018/11/19 23:20:11  perev
  * 64bits new comis files added from /CERN
  *
@@ -45,7 +48,7 @@ cscali_ (
         unsigned long p[15]={0};
         for (int i=0;i<*n;i++) {
           if (!pp[i]) continue;
-          p[i] = getPntF(pp[i]);
+          p[i] = getPntB(pp[i]);
 	}
 	switch (*n)
 	{
