@@ -1,7 +1,10 @@
 *
-* $Id: mjscha.F,v 1.1.2.1 2020/07/09 19:44:02 perev Exp $
+* $Id: mjscha.F,v 1.1.2.2 2020/08/07 02:53:47 perev Exp $
 *
 * $Log: mjscha.F,v $
+* Revision 1.1.2.2  2020/08/07 02:53:47  perev
+* CleanUpOnly
+*
 * Revision 1.1.2.1  2020/07/09 19:44:02  perev
 * Add64
 *
@@ -18,28 +21,6 @@
 #include "comis/pilot.h"
 *CMZ :          23/10/95  13.12.36  by  Julian Bunn
 *-- Author : V.Berezhnoi
-#if defined(CERNLIB_MSDOS)||defined(CERNLIB_WINNT)
       Integer Function MJSCHA(string)
-#endif
-#if (!defined(CERNLIB_MSDOS))&&(!defined(CERNLIB_WINNT))
-      FUNCTION MJSCHA(I)
-#endif
-#if defined(CERNLIB_VAX)||defined(CERNLIB_DECS)
-      CHARACTER *(*)I
-      MJSCHA=%LOC(I)
-#endif
-#if defined(CERNLIB_APOLLO)
-      CHARACTER *(*)I
-***--------------------
-*   gets byte-address of character substring
-***--------------------
-      MJSCHA=IADDR(I)
-#endif
-#if (defined(CERNLIB_IBM)||defined(CERNLIB_UNIX))&&(!defined(CERNLIB_DECS))&&!defined(CERNLIB_WINNT)
-      MJSCHA=MJCHAR(I)
-#endif
-#if defined(CERNLIB_WINNT)||defined(CERNLIB_MSDOS)
-      Character*(*) string
       MJSCHA = LOCB(string)
-#endif
       END
