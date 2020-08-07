@@ -1,7 +1,10 @@
 *
-* $Id: cscomx.F,v 1.1.2.1 2020/07/09 20:16:30 perev Exp $
+* $Id: cscomx.F,v 1.1.2.2 2020/08/07 02:56:04 perev Exp $
 *
 * $Log: cscomx.F,v $
+* Revision 1.1.2.2  2020/08/07 02:56:04  perev
+* CleanUoOnly
+*
 * Revision 1.1.2.1  2020/07/09 20:16:30  perev
 * Set CERNLIB Comis files
 *
@@ -30,12 +33,7 @@
       CALL CLTOU(NM)
       J=MJSCHA(NM)
       JJ=J
-#if defined(CERNLIB_VAX)||defined(CERNLIB_IBM)||defined(CERNLIB_UNIX)||defined(CERNLIB_WINNT)
       LT=LEN(NM)
-#endif
-#if defined(CERNLIB_APOLLO)
-      LT=80
-#endif
       DO 1 K=1,N
       KK=MKBLAN(J,LT)
       L=MIDENT(J,LT,JID,KLENID)
