@@ -1,7 +1,10 @@
 *
-* $Id: mdext.F,v 1.2 2020/06/04 23:05:02 perev Exp $
+* $Id: mdext.F,v 1.2.4.1 2020/08/07 02:52:16 perev Exp $
 *
 * $Log: mdext.F,v $
+* Revision 1.2.4.1  2020/08/07 02:52:16  perev
+* CleanUp
+*
 * Revision 1.2  2020/06/04 23:05:02  perev
 * add csguard call
 *
@@ -18,35 +21,6 @@
       FUNCTION MDEXT(LENG,IND)
       COMMON/MDPOOL/IQ(6)
       LOGICAL MDEXT
-#if defined(CERNLIB_APOLLO)
-      INTEGER LENMEM,L
-      POINTER/LENMEM/L
-      LENMEM=LENG*4
-      IM=MALLOC(L)
-      IF(IM.EQ.0)THEN
-         MDEXT=.FALSE.
-      ELSE
-         MDEXT=.TRUE.
-         IND=(IM-IADDR(IQ(1))+4)/4
-      ENDIF
-**      MDEXT=MDEXL(LENG,IND)
-#endif
-#if defined(CERNLIB_VAX)
-      L=LENG*4
-      K=LIB$GET_VM(L,IM)
-      K1=K/2
-      IF(K-K1*2 .EQ. 1)THEN
-        MDEXT=.TRUE.
-        IND=(IM-%LOC(IQ(1))+4)/4
-      ELSE
-        MDEXT=.FALSE.
-      ENDIF
-***+SELF,IF=IBM,UNIX.
-#endif
-#if defined(CERNLIB_IBM)
-      LOGICAL MDEXL
-      MDEXT=MDEXL(LENG,IND)
-#endif
 #if defined(CERNLIB_UNIX)
 
       INTEGER CSALLO
