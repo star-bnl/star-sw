@@ -1,5 +1,8 @@
-* $Id: agmain.age,v 1.5 2019/10/03 22:11:16 jwebb Exp $
+* $Id: agmain.age,v 1.5.2.1 2020/08/07 02:40:25 perev Exp $
 * $Log: agmain.age,v $
+* Revision 1.5.2.1  2020/08/07 02:40:25  perev
+* New tag Comis64
+*
 * Revision 1.5  2019/10/03 22:11:16  jwebb
 * Revert back to 20MW.
 *
@@ -50,6 +53,7 @@
 *****************************************************************************
 *                                                                           *
       subroutine        AGMAIN
+!//      call       CSINIT(30000)
       call       AGINIT
       call       AGPAWQ
       call       AGEXIT
@@ -169,6 +173,9 @@
       ENDIF
 *
       CALL PAWINT3                  ! HIGZ,HPLOT,COMIS,SIGMA, commons
+
+      call csinit(30000)
+
       if (G) CALL GXCS              ! declare GEANT routines to COMIS
       if (G) CALL UGINIT(PROG(1:LP))! user MENUs
       if (G) CALL GDINIT            ! Initialise Drawing pkg

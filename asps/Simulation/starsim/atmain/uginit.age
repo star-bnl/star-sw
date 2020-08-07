@@ -1,6 +1,10 @@
-* $Id: uginit.age,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: uginit.age,v 1.1.1.1.22.1 2020/08/07 02:40:25 perev Exp $
 * $Log: uginit.age,v $
+* Revision 1.1.1.1.22.1  2020/08/07 02:40:25  perev
+* New tag Comis64
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.2  2001/02/28 17:16:17  nevski
 * agckine.inc moved to commons
@@ -17,6 +21,14 @@
 *****************************************************************************
 #include "commons/typing.inc"
 #include "geant321/gcbank.inc"
+
+//#include "comis/comis/cspar.inc"
+//#include "comis/comis/mdpool.inc"
+#if 1
+      integer QQ,LHP,GUARD
+      parameter (LHP = 50006)
+      COMMON/MDPOOL/QQ(LHP),GUARD(10)
+#endif
 #include "geant321/gcphys.inc"
 #include "geant321/gctrak.inc"
 #include "slug/sclink.inc"
