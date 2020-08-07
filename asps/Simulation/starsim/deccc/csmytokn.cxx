@@ -5,12 +5,13 @@
 #include <assert.h>
 
 extern "C" int           csvptokn(unsigned long addr);
-extern "C" unsigned long csvplong (         int  tokn);
+extern "C" unsigned long csvplong(        int  tokn);
+extern "C" int           csvpyes (         int  tokn);
 
 static std::map<unsigned long,int> mapLong;
 static std::vector<unsigned long>  vecLong;
-#define kMASK 0x40000000
-#define kMAZK 0xEF000000
+enum {kVPMASK=0xABC00000, kVPMAZK=0xFFF00000, kVPMAX = 0x000FFFFF};
+
 //______________________________________________________________________________
 int csvptokn(unsigned long addr)
 {
@@ -20,21 +21,27 @@ int csvptokn(unsigned long addr)
   if (!tokn) {
     vecLong.push_back(addr);
     tokn = vecLong.size();
-    assert(tokn < 0xFFFFFF);
+    assert(tokn*100 < (int)kVPMAX);
   }
-  return tokn|kMASK;
+  return (tokn*100)|kVPMASK;
 }
 //______________________________________________________________________________
 unsigned long csvplong(int tokn)
 {
 //		Convert unsigned long  from token
-  assert((tokn&kMAZK)== kMASK);
-  tokn = tokn&(~kMASK);
-  assert(tokn<=(int)vecLong.size());
-  unsigned long addr = vecLong[tokn-1];
+  assert((tokn&kVPMAZK)==kVPMASK);
+  tokn = (tokn&kVPMAX);
+assert(!(tokn%100));
+  tokn = tokn/100-1;
+  assert(tokn<(int)vecLong.size());
+  unsigned long addr = vecLong[tokn];
   return addr;
 }
-
+//______________________________________________________________________________
+int csvpyes(int tokn)
+{
+  return ((tokn&kVPMAZK)==kVPMASK);
+}
 //______________________________________________________________________________
 int csvpint_(int *tokn)
 {
