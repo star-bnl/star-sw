@@ -1,8 +1,12 @@
 *
-* $Id: gxcs.F,v 1.1.1.1 2004/01/15 00:12:18 potekhin Exp $
+* $Id: gxcs.F,v 1.1.1.1.22.1 2020/08/07 03:34:08 perev Exp $
 *
 * $Log: gxcs.F,v $
+* Revision 1.1.1.1.22.1  2020/08/07 03:34:08  perev
+* branchComis64
+*
 * Revision 1.1.1.1  2004/01/15 00:12:18  potekhin
+*
 *
 * Revision 1.1.1.1  1997/11/03 15:30:50  atlascvs
 * Importing CERNLIB version 08.21.
@@ -25,6 +29,10 @@ C.    *        which may be invoked from COMIS routines                *
 C.    *        (one can call CSOMAP instead)                           *
 C.    *                                                                *
 C.    ******************************************************************
+#ifdef CERNLIB_PAW
+#undef CERNLIB_PAW
+#endif
+
 #include "geant321/gcbank.inc"
 #include "geant321/gcmate.inc"
 #include "geant321/gctmed.inc"
@@ -62,7 +70,9 @@ C.    ******************************************************************
 C.
 C.    ------------------------------------------------------------------
 C.
+#ifdef CERNLIB_PAW
       CALL PAWCS
+#endif
 *
       CALL CSCOM('GCLINK,GCBANK,GCCUTS,GCFLAG,GCKINE,GCLIST#'
      +,           JDIGI,NZEBRA,CUTGAM,IDEBUG,IKINE,NHSTA,P,P,P,P)
