@@ -1,7 +1,10 @@
 /*
- * $Id: locf.c,v 1.6.2.1 2020/07/09 19:48:44 perev Exp $
+ * $Id: locf.c,v 1.6.2.2 2020/08/07 02:49:55 perev Exp $
  *
  * $Log: locf.c,v $
+ * Revision 1.6.2.2  2020/08/07 02:49:55  perev
+ * Cleanup
+ *
  * Revision 1.6.2.1  2020/07/09 19:48:44  perev
  * Comis64_0
  *
@@ -58,24 +61,24 @@
 #include <assert.h>
 int csToken(unsigned long fun);
 unsigned long  csPoter( int token); 
-#define kMASK 0x40000000
-#define kMAZK 0xEF000000
-#define isToken(A) ((A&kMAZK)==kMASK) 
 
-unsigned long csvplong (         int  tokn);
-unsigned long csvptokn (unsigned long tokn);
-
+unsigned long csvplong(         int  tokn);
+         int  csvptokn(unsigned long addr);
+         int  csvpyes (         int  tokn);        
 static unsigned long gBase=0;
 //______________________________________________________________________________
-void setBase(unsigned long addr)
+void setBase(unsigned long addr,int test)
 {
   if (!gBase) {
     gBase = addr;
+    assert(!(gBase&3));
   } else {
+    assert(!(addr&3));
+    if (!test) return;
     long dif = addr-gBase;
     if (dif <0) dif = -dif;
-    assert(dif/sizeof(int) < 0xEFFFFFFF);
-    assert(dif             < 0xEFFFFFFF);
+    assert(dif/sizeof(int) <= 0xEFFFFFFF);
+    assert(dif             <= 0xFFFFFFFF);
   }
 }
 //______________________________________________________________________________
@@ -92,27 +95,29 @@ __UINT64_TYPE__ longb_(char *iadr )
 //______________________________________________________________________________
 int  locf_(char *iadr )
 {
-  setBase((unsigned long)iadr);
-  int myDif = (((unsigned long)iadr) - gBase)/sizeof(int);
-  return myDif;
+  setBase((unsigned long)iadr,1);
+  int myDif = (((unsigned long)iadr) - gBase);
+  return myDif/(int)sizeof(int);
 }
 //______________________________________________________________________________
 int  locb_(char *iadr )
 {  
-  setBase((unsigned long)iadr);
-  int myDif = (((unsigned long)iadr) - gBase);
+  setBase((unsigned long)iadr,0);
+  long myDif = (((unsigned long)iadr) - gBase);
+  if (myDif >= -0xFFFFFFFFL && myDif<= 0xFFFFFFFFL) {
+    assert(!csvpyes((unsigned int)myDif));
+    return myDif;
+  }
+  myDif = csvptokn (iadr);
   return myDif;
 }
 
 //______________________________________________________________________________
-char *getPntF(int myDif)
-{
-  return (char*)gBase+myDif;
-}
-//______________________________________________________________________________
 char *getPntB(int myDif)
 {
-    return (char*)gBase+myDif;
+  if (!(csvpyes(myDif))) return (char*)gBase+myDif;
+  return (char*)csvplong(myDif);
+
 }
 //______________________________________________________________________________
 int getbyteb_(int *myDif)
@@ -122,7 +127,7 @@ int getbyteb_(int *myDif)
 //______________________________________________________________________________
 int getbytef_(int *myDif)
 {
-  return *getPntF(*myDif);
+  return *getPntB(*myDif);
 }
 //______________________________________________________________________________
 int getfun2b_(int *myFun)
