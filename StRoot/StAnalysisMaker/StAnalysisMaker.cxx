@@ -1277,6 +1277,12 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
     if (sum) 
       LOG_QA << "# FPD ADC sum:            " << sum << endm;
   }
+  if (event->fmsCollection() && event->fmsCollection()->numberOfPoints()) {
+    UShort_t sum = 0;
+    for (UInt_t i = 0; i < event->fmsCollection()->numberOfPoints(); i++) sum +=  event->fmsCollection()->points()[i]->energy();
+    if (sum) 
+      LOG_QA << "# FMS   points: " <<  event->fmsCollection()->numberOfPoints() << ":   energy sum:            " << sum << endm;
+  }
   if (event->fgtCollection()) {
     LOG_QA << "# FGT hits:            " << event->fgtCollection()->getNumHits() << endm;
   }
@@ -1288,7 +1294,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   }
 #ifdef _ST_GMT_HIT_H_
   if (event->gmtCollection() && 
-      (event->gmtCollection()->getNumHits() || event->gmtCollection()->getNumStrips())
+      (event->gmtCollection()->getNumHits()) // || event->gmtCollection()->getNumStrips())
       ) {
     LOG_QA << "# GMT hits:           " << event->gmtCollection()->getNumHits() 
 	   << " points: " << event->gmtCollection()->getNumPoints() 
