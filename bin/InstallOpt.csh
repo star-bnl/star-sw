@@ -1,6 +1,9 @@
 if ("${OPTSTAR}" == "${XOPTSTAR}") then
   setenv XOPTSTAR ${OPTSTAR}/${STAR_HOST_SYS}
   if (! -d ${XOPTSTAR}) mkdir -p ${XOPTSTAR}
+  if (! -d ${XOPTSTAR}/qt) mkdir -p ${XOPTSTAR}/qt
+  setenv QTDIR  ${XOPTSTAR}/qt
+  starver .DEV2
 endif
 setenv FORCE_32BITS FALSE
 setenv CC  "gcc"

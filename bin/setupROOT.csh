@@ -149,6 +149,7 @@ switch ( $STAR_HOST_SYS )
         breaksw
 endsw
 switch ( $STAR_HOST_SYS )  
+    case *gcc10*:
     case *gcc9*:
     case *gcc8*:
     case *gcc7*:

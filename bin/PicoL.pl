@@ -46,7 +46,8 @@ if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/) {
   elsif ($pwd =~ /2019\/19GeV_2019/)          {$glob = "/reco/production_19GeV_2019/ReversedFullField/P20ic_calib/2019";}
 } else {# TFG
   $PICOPATH = "/gpfs01/star/pwg_tasks/tfg02"; 
-  if (! -r  $PICOPATH) {$PICOPATH = "/net/l401/data/scratch1/reco";}
+#  if (! -r  $PICOPATH) {$PICOPATH = "/net/l401/data/scratch1/reco";}
+  if (! -r  $PICOPATH) {$PICOPATH = "/hlt/cephfs/reco/Pico";}
   print "PICOPATH = $PICOPATH\n" if ($debug);
   if (! -r $PICOPATH) {exit 1;}
   if    ($pwd =~ /2010\/11GeV/)               {$glob = "/2010/11GeV";}
