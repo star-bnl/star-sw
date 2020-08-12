@@ -1,4 +1,5 @@
 #include "TH1.h"
+#include "TGraph.h"
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TDatime.h"
@@ -24,6 +25,46 @@ void DrawTime(TH1 *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:00")
 }
 //________________________________________________________________________________
 void DrawTimeU(TH1 *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:00") {// "%y\/%m\/%d\/%H%F1995-01-01 00:00:00") {
+  // from unix time
+  //  FitP->Draw("sum_curr_1:utime-788936400","sum_curr_1>=-8&&sum_curr_1<=8&&utime>=1146339600&&utime<1146347789")
+  //                               time of set
+  if (! h) return;
+  //  TDatime da(1995,1,1,0,0,0);//0,0,0,0,0,0);
+  TDatime da(2007,1,1,0,0,0);//0,0,0,0,0,0);
+  gStyle->SetTimeOffset(da.Convert());
+  //  gStyle->SetTimeOffset(-788936400); // - TDatime(19950101,0).Convert();  UNIX_TIMESTAMP("1995-01-01 00:00:00") = 788918400; for dEdx plots
+  //  gStyle->SetTimeOffset(0);
+  h->GetXaxis()->SetTimeDisplay(1);
+  //  h->GetXaxis()->SetTimeFormat("%m\/%d\/%y%F2000-01-01 00:00:00");
+  //  h->GetXaxis()->SetTimeFormat("%y%F1995-01-01 00:00:00");
+  //  h->GetXaxis()->SetTimeFormat("%m\/%y");
+  h->GetXaxis()->SetTimeFormat(opt);
+  //  h->GetXaxis()->SetTimeOffset(da.Convert());   
+  //  h->Draw();
+  gPad->Modified();
+  gPad->Update();
+}
+void DrawTime(TGraph *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:00") {// "%y\/%m\/%d\/%H%F1995-01-01 00:00:00") {
+  //  FitP->Draw("sum_curr_1:utime-788936400","sum_curr_1>=-8&&sum_curr_1<=8&&utime>=1146339600&&utime<1146347789")
+  //                               time of set
+  if (! h) return;
+  //  TDatime da(2001,6,1,0,0,0);
+  //  TDatime da(1995,1,1,0,0,0);//0,0,0,0,0,0);
+  //  gStyle->SetTimeOffset(da.Convert());
+  //  gStyle->SetTimeOffset(-788936400); // - TDatime(19950101,0).Convert();  UNIX_TIMESTAMP("1995-01-01 00:00:00") = 788918400; for dEdx plots
+  //  gStyle->SetTimeOffset(0);
+  h->GetXaxis()->SetTimeDisplay(1);
+  //  h->GetXaxis()->SetTimeFormat("%m\/%d\/%y%F2000-01-01 00:00:00");
+  //  h->GetXaxis()->SetTimeFormat("%y%F1995-01-01 00:00:00");
+  //  h->GetXaxis()->SetTimeFormat("%m\/%y");
+  h->GetXaxis()->SetTimeFormat(opt);
+  //  h->GetXaxis()->SetTimeOffset(da.Convert());   
+  //  h->Draw();
+  gPad->Modified();
+  gPad->Update();
+}
+//________________________________________________________________________________
+void DrawTimeU(TGraph *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:00") {// "%y\/%m\/%d\/%H%F1995-01-01 00:00:00") {
   // from unix time
   //  FitP->Draw("sum_curr_1:utime-788936400","sum_curr_1>=-8&&sum_curr_1<=8&&utime>=1146339600&&utime<1146347789")
   //                               time of set

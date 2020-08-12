@@ -14,6 +14,11 @@
 #include "TList.h"
 #include "TLegend.h"
 #include "TStyle.h"
+#include "TDirectory.h"
+#include "TGraph.h"
+#include "TMultiGraph.h"
+#include "TStyle.h"
+#include "TFrame.h"
 #endif
 using namespace std;
 typedef list<TString> List;
@@ -158,12 +163,17 @@ void PrintRes(TSQLResult *res, TNtuple *tuple = 0, Float_t *ars = 0){
   }
 }
 //________________________________________________________________________________
-TString FormVariable(TString prodyear, TString Dataset, TString LibTag, TString optimized, TString path, TString gcc_version, TString tracker) {
+TString FormVariable(TString prodyear, TString dataset, TString LibTag, TString optimized, TString path, TString gcc_version, TString tracker) {
+  Int_t _debug = 0;
   TString Var(prodyear);
+  TString Dataset(dataset);
+  //  if (Dataset == "auau11_production") _debug = 1;
+  //  if (tracker.Contains("stihr") )     _debug = 1;
   if (tracker.BeginsWith("daq")) {Var += "/daq";}
   else                           {Var += "/trs";}
   Var += "/";
   Dataset.ReplaceAll("production_","");
+  Dataset.ReplaceAll("_production","");
   Dataset.ReplaceAll("_opt","");
   Int_t index = Dataset.Index("_fixed");
   if (index > 0) {
@@ -175,25 +185,30 @@ TString FormVariable(TString prodyear, TString Dataset, TString LibTag, TString 
     Dataset = Dataset(0,index);
   }
   Var += Dataset;
-  if (tracker.Contains("stica")) {Var += "/CA";}
-  else if (tracker.Contains("stihr")) {Var = ""; return Var;}
-  else                           {Var += "/sti";}
+  if (tracker.Contains("stica"))      {Var += "/CA";}
+  else if (tracker.Contains("stihr")) {Var += "/HR";}
+  else                                {Var += "/sti";}
   if (path.Contains("AgML"))     {Var += "/AgML";}
   if (gcc_version.Contains("x8664")) Var += "/64b";
   else                               Var += "/32b";
-  if (optimized == "Yes") Var += "/opt";
-  else                    Var += "/deb";
+  if      (optimized == "Yes") Var += "/opt";
+  else if (optimized == "No")  Var += "/deb";
+  else {
+    if (path.Contains("_opt")) Var += "/opt";
+    else                       Var += "/deb";
+  }
   if (LibTag == ".DEV2" || LibTag.Contains("TFG"))  {Var += "/TFG";}
-  else                    { Var += "/"; Var += LibTag;}
-#if 0
-  cout << "prodyear = " << prodyear.Data()
-       << "\tDataset = " << Dataset.Data()
-       << "\tLibTag = " << LibTag.Data()
-       << "\toptimized = " << optimized.Data()
-       << "\tpath = " << path.Data()
-       << "\tgcc_version = " << gcc_version.Data()
-       << "\t => Var = " << Var.Data() << endl; 
-#endif
+  else                    { Var += "/DEV";/* Var += LibTag; */}
+  if (_debug) {
+    cout << "Var = " << Var.Data() 
+	 << "\tprodyear = " << prodyear.Data()
+	 << "\tdataset = " << dataset.Data()
+	 << "\tLibTag = " << LibTag.Data()
+	 << "\toptimized = " << optimized.Data()
+	 << "\tpath = " << path.Data()
+	 << "\tgcc_version = " << gcc_version.Data()
+	 << "\ttracker = " << tracker.Data() << endl;
+  }
   return Var;
 }
 //________________________________________________________________________________
@@ -206,6 +221,8 @@ void SetBinName(TProfile *prof, List &datasets) {
 }
 //________________________________________________________________________________
 void sqlJobStatus(Int_t d1 = 20200501, Int_t d2 = 0) {
+  TDatime t0(20000101,0);
+  UInt_t  u0 = t0.Convert();
   TDatime t1(d1,0);
   TDatime t2;
   if (d2 > 0) t2.Set(d2,0); 
@@ -264,7 +281,6 @@ void sqlJobStatus(Int_t d1 = 20200501, Int_t d2 = 0) {
 		       t1.AsSQLString());
     cout << sql << endl;
     res = db->Query(sql);
-    
     int nrows = res->GetRowCount();
     if (! nrows) return;
     int nfields = res->GetFieldCount();
@@ -287,15 +303,15 @@ void sqlJobStatus(Int_t d1 = 20200501, Int_t d2 = 0) {
     Int_t nxbin = datasets.size();
     for (Int_t f = 0; f < 40; f++) {
       if (! Fields[f].plot) continue;
-      Fields[f].prof = new TProfile(Fields[f].Name,Form("%s versus dataset and library",Fields[f].Name),nxbin,0.5,nxbin+0.5,"s");
+      Fields[f].prof = new TProfile(Form("%sF",Fields[f].Name),Form("%s versus dataset and library",Fields[f].Name),nxbin,0.5,nxbin+0.5,"s");
       SetBinName(Fields[f].prof,datasets);
     }
 
   }
   JobStatus job;
   //  const char *sql = "select * from JobStatus limit 3";
-  const char *sql = Form("SELECT * from JobStatus WHERE  LibTag != \"n/a\" and  Dataset != \"\" and createTime >= \"%s\" and NoEventDone > 0 ", t1.AsSQLString()) ;
-  
+  TString sql = Form("SELECT * from JobStatus WHERE  LibTag != \"n/a\" and  Dataset != \"\" and createTime >= \"%s\" and NoEventDone > 0 ", t1.AsSQLString()) ;
+  sql += " and Dataset != \"NULL\" and tracker != \"NULL\" and tracker != \"\";";
   res = db->Query(sql);
   
   int nrows = res->GetRowCount();
@@ -373,17 +389,35 @@ void sqlJobStatus(Int_t d1 = 20200501, Int_t d2 = 0) {
     job.gcc_version = row->GetField(44);
     job.tracker = row->GetField(45);
     job.optimized = row->GetField(46);
+    TDatime t(job.createTime);
+    UInt_t u = t.Convert() - u0;
     TString Var =  FormVariable(job.prodyear, job.Dataset, job.LibTag, job.optimized, job.path,job.gcc_version,job.tracker);
     if (Var == "") continue;
     for (int j = 0; j < nfields; j++) {
       if (! Fields[j].prof) continue;
+      TDirectory *dir = fOut->GetDirectory(Var);
+      if (! dir) dir = fOut->mkdir(Var);
+      TGraph *graph = (TGraph *) dir->FindObject(Fields[j].Name);
+      Int_t np = 0;
+      if (! graph) {
+	graph = new TGraph;
+	graph->SetName(Fields[j].Name);
+	graph->SetTitle(Form("%s versus time",Fields[j].Name));
+	dir->Append(graph);
+      } else {
+	np = graph->GetN();
+      }
       A = row->GetField(j);
       if (Fields[j].type == 1) {
 	Int_t v = A.Atoi();
-	Fields[j].prof->Fill(Var,v);
+	Int_t bin = Fields[j].prof->Fill(Var,v);
+	assert(TString(Fields[j].prof->GetXaxis()->GetBinLabel(bin)) != TString(dir->GetName()));
+	graph->SetPoint(np,u,v);
       } else if (Fields[j].type == 2) {
 	Double_t v = A.Atof(); 
-	Fields[j].prof->Fill(Var,v);
+	Int_t bin = Fields[j].prof->Fill(Var,v);
+	assert(TString(Fields[j].prof->GetXaxis()->GetBinLabel(bin)) != TString(dir->GetName()));
+	graph->SetPoint(np,u,v);
       }
     }
     delete row;
@@ -415,52 +449,112 @@ void SetYear(TProfile *prof, const Char_t *Year="2020") {
   if (ie > ib) xax->SetRange(ib,ie);
 }
 //________________________________________________________________________________
-void PlotYear(const Char_t *Year = "2020") {
+void DrawMultiGraphs() {
+  TDatime t0(20000101,0);
+  UInt_t  u0 = t0.Convert();
+  gStyle->SetTimeOffset(u0);
+  TCanvas *c5 = new TCanvas("c5","c5", 10, 10, 1600,400);
+  TProfile *percent_of_usable_evt = (TProfile *) gDirectory->Get("percent_of_usable_evtF");
+  if (! percent_of_usable_evt) return;
+  TAxis *xax = percent_of_usable_evt->GetXaxis();
+  Int_t binF = xax->GetFirst();
+  Int_t binL = xax->GetLast();
+  Int_t color = 0;
+  TMultiGraph *avg_no_tracksnfit15 = new TMultiGraph();
+  TLegend *l = new TLegend(0.2,0.25,0.35,0.45);
+  Double_t x1 = 1e9;
+  Double_t x2 = -1e9;
+  Double_t y1 = 1e9;
+  Double_t y2 = -1e9;
+  for (Int_t bin = binF; bin <= binL; bin++) {
+    TString path("/"); path += xax->GetBinLabel(bin); path += "/avg_no_tracksnfit15";
+    TGraph  *gr = (TGraph *) gDirectory->Get(path);
+    if (! gr) continue;
+    Int_t N = gr->GetN();
+    Double_t *x = gr->GetX();
+    Double_t *y = gr->GetY();
+    for (Int_t i = 0; i < N; i++) {
+      if (x[i] < x1) x1 = x[i];
+      if (x[i] > x2) x2 = x[i];
+      if (y[i] < y1) y1 = y[i];
+      if (y[i] > y2) y2 = y[i];
+    }
+    gr->SetMarkerColor(++color);
+    gr->SetLineStyle(1);
+    gr->SetLineColor(color);
+    avg_no_tracksnfit15->Add(gr);
+    l->AddEntry(gr,xax->GetBinLabel(bin),"lp");
+  }
+  cout << "x1 = " << x1 << "\tx2 = " << x2 << "\ty1 = " << y1 << "\ty2 = " << y2 <<endl;
+  Double_t dx = x2 - x1;
+  Double_t dy = y2 - y1;
+  x1 -= 0.05*dx;
+  x2 += 0.05*dx;
+  y1 -= 0.05*dy;
+  y2 += 0.05*dy;
+  TH1F *fr = c5->DrawFrame(x1,y1,x2,y2);
+  TAxis *xaxm = fr->GetXaxis();
+  xaxm->SetTimeDisplay(1);
+  xaxm->SetTimeFormat("%d/%m/%y"); //%F2000-01-01 00:00:00");
+  fr->Draw();
+  avg_no_tracksnfit15->Draw("lp");
+  l->Draw();
+  c5->Update();
+}
+//________________________________________________________________________________
+void Plot(const Char_t *Year = "2020/daq/11p5GeV") {
+  TDatime t0(20000101,0);
+  UInt_t  u0 = t0.Convert();
+  gStyle->SetTimeOffset(u0);
   gStyle->SetOptStat(0);
   gStyle->SetMarkerStyle(20);
   TCanvas *c1 = new TCanvas(Form("c1%s",Year),Form("Usable Events %s",Year),20,20,2000,500);
   c1->SetBottomMargin(0.25);
-  TProfile *percent_of_usable_evt = (TProfile *) gDirectory->Get("percent_of_usable_evt");
+  TProfile *percent_of_usable_evt = (TProfile *) gDirectory->Get("percent_of_usable_evtF");
   if (! percent_of_usable_evt) return;
   SetYear( percent_of_usable_evt, Year);
   percent_of_usable_evt->Draw();
   // 
-  TCanvas *c2 = new TCanvas(Form("c2%s",Year),Form("Memory Usage %s",Year),20,520,2000,500);
-  c2->SetBottomMargin(0.25);
-  TProfile *memUsageL = (TProfile *) gDirectory->Get("memUsageL");
+  TCanvas *c2 = new TCanvas(Form("c2%s",Year),Form("Memory Usage %s",Year),20,520,2000,3*500);
+  c2->Divide(1,3);
+  c2->cd(1)->SetBottomMargin(0.01);
+  TProfile *memUsageL = (TProfile *) gDirectory->Get("memUsageLF");
   if (! memUsageL) return;
   SetYear( memUsageL, Year);
   memUsageL->SetMinimum(0);
   memUsageL->Draw();
-  TProfile *memUsageF = (TProfile *) gDirectory->Get("memUsageF");
+  TProfile *memUsageF = (TProfile *) gDirectory->Get("memUsageFF");
   if (! memUsageF) return;
   memUsageF->SetMarkerColor(2);
   memUsageF->Draw("same");
-  TLegend *l2 = new TLegend(0.9,0.9,1.0,1.0);
+  TLegend *l2 = new TLegend(0.8,0.9,0.9,1.0);
   l2->AddEntry(memUsageF,"Memory 1st event");
   l2->AddEntry(memUsageL,"Memory last event");
   l2->Draw();
   // 
-  TCanvas *c3 = new TCanvas(Form("c3%s",Year),Form("CPU Usage %s",Year),20,1020,2000,500);
-  c3->SetBottomMargin(0.25);
-  TProfile *RealTime_per_evt = (TProfile *) gDirectory->Get("RealTime_per_evt");
+  //  TCanvas *c3 = new TCanvas(Form("c3%s",Year),Form("CPU Usage %s",Year),20,1020,2000,500);
+  //  c3->SetBottomMargin(0.25);
+  TVirtualPad *c3 = c2->cd(2);
+  c3->SetBottomMargin(0.01);
+  TProfile *RealTime_per_evt = (TProfile *) gDirectory->Get("RealTime_per_evtF");
   if (! RealTime_per_evt) return;
   SetYear( RealTime_per_evt, Year);
   RealTime_per_evt->SetMinimum(0);
   RealTime_per_evt->Draw();
-  TProfile *CPU_per_evt_sec = (TProfile *) gDirectory->Get("CPU_per_evt_sec");
+  TProfile *CPU_per_evt_sec = (TProfile *) gDirectory->Get("CPU_per_evt_secF");
   if (! CPU_per_evt_sec) return;
   CPU_per_evt_sec->SetMarkerColor(2);
   CPU_per_evt_sec->Draw("same");
-  TLegend *l3 = new TLegend(0.9,0.9,1.0,1.0);
+  TLegend *l3 = new TLegend(0.8,0.9,0.9,1.0);
   l3->AddEntry(CPU_per_evt_sec,"CPU per event");
   l3->AddEntry(RealTime_per_evt,"Real time");
   l3->Draw();
   // 
-  TCanvas *c4 = new TCanvas(Form("c4%s",Year),Form("CPU Usage %s",Year),20,1520,2000,500);
+  //  TCanvas *c4 = new TCanvas(Form("c4%s",Year),Form("CPU Usage %s",Year),20,1520,2000,500);
+  TVirtualPad *c4 = c2->cd(3);
   c4->SetBottomMargin(0.25);
-  TLegend *l4 = new TLegend(0.8,0.9,1.0,1.0);
-  TProfile *avg_no_tracks = (TProfile *) gDirectory->Get("avg_no_tracks");
+  TLegend *l4 = new TLegend(0.7,0.9,0.9,1.0);
+  TProfile *avg_no_tracks = (TProfile *) gDirectory->Get("avg_no_tracksF");
   if (! avg_no_tracks) return;
   SetYear( avg_no_tracks, Year);
   avg_no_tracks->SetMinimum(0);
@@ -468,20 +562,23 @@ void PlotYear(const Char_t *Year = "2020") {
   
   avg_no_tracks->Draw();
   l4->AddEntry(avg_no_tracks,"Total no. tracks");
-  TProfile *avg_no_tracksnfit15 = (TProfile *) gDirectory->Get("avg_no_tracksnfit15");
+  TProfile *avg_no_tracksnfit15 = (TProfile *) gDirectory->Get("avg_no_tracksnfit15F");
   if (! avg_no_tracksnfit15) return;
   avg_no_tracksnfit15->SetMarkerColor(2);
   avg_no_tracksnfit15->Draw("same");
   l4->AddEntry(avg_no_tracksnfit15,"tracks with no. fit points >= 15");
-  TProfile *avg_no_primaryT_1vtx = (TProfile *) gDirectory->Get("avg_no_primaryT_1vtx");
+  TProfile *avg_no_primaryT_1vtx = (TProfile *) gDirectory->Get("avg_no_primaryT_1vtxF");
   if (! avg_no_primaryT_1vtx) return;
   avg_no_primaryT_1vtx->SetMarkerColor(3);
   avg_no_primaryT_1vtx->Draw("same");
   l4->AddEntry(avg_no_primaryT_1vtx,"Primary tracks");
-  TProfile *avg_no_primaryTnfit15_1vtx = (TProfile *) gDirectory->Get("avg_no_primaryTnfit15_1vtx");
+  TProfile *avg_no_primaryTnfit15_1vtx = (TProfile *) gDirectory->Get("avg_no_primaryTnfit15_1vtxF");
   if (! avg_no_primaryTnfit15_1vtx) return;
   avg_no_primaryTnfit15_1vtx->SetMarkerColor(4);
   avg_no_primaryTnfit15_1vtx->Draw("same");
   l4->AddEntry(avg_no_primaryTnfit15_1vtx,"Primary tracks with no. fit points >= 15");
   l4->Draw();
+  //  avg_no_primaryT->GetHistogram()->GetXaxis()->SetTimeFormat("%d/%m/%y%F2000-01-01 00:00:00");
+  
+
 }

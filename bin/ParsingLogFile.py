@@ -32,7 +32,7 @@ def Parse(filename):
     path = filename
     while path[len(path)-1]!= "/":
           path = path[:-1] #--removeing last character of string--
-    row["path"]=path
+    row["path"]=path[:-1]
     row["jobStatus"]=jobstatus
     row["errMessage"]=error_message
     folders = filename.split("/")

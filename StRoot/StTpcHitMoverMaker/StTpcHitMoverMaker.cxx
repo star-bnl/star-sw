@@ -156,7 +156,7 @@ Int_t StTpcHitMover::Make() {
 //		THIS IS A BLOCK TO CORRECT TIMING IN FXT MODE FOR DATA
 		  if (doEPDT0Correction) time += triggerOffset;
 //		======================================================
-		  tpcHit->setTimeBucket(time);
+//		  tpcHit->setTimeBucket(time);
 		  StTpcPadCoordinate padcoord(sector, row, pad, time);
 		  StTpcLocalSectorCoordinate  coorS;
 		  transform(padcoord,coorS,kFALSE);
