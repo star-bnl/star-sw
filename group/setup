@@ -98,7 +98,7 @@ switch ($pkg)
 	setenv PATH            `$GROUP_DIR/dropit $STAR_HOST_SYS /opt/star`
         setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS /opt/star ^/usr/lib`
       endif
-      setup $xSTARCMPL
+#      setup $xSTARCMPL
       source $GROUP_DIR/STAR_SYS
 #      setenv CERN /cern64
       setup cern
@@ -125,7 +125,7 @@ switch ($pkg)
       setenv USE_64BITS 0
       unsetenv OPTSTAR
       unsetenv XOPTSTAR
-      setup $xSTARCMPL
+#      setup $xSTARCMPL
       if (-x $GROUP_DIR/dropit ) then
 	setenv PATH            `$GROUP_DIR/dropit $STAR_HOST_SYS /opt/star`
         setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS /opt/star ^/usr/lib64`
