@@ -20,7 +20,7 @@
   set logFile  = ${file}B.log
   set f=`find . -maxdepth 1 -type f -name "${file}*.root"`
   setenv STARFPE NO
-  if ("$f" == "") thenxf
+  if ("$f" == "") then
     if (-r $logFile) rm $logFile
 #    root.exe -q -b -x 'bfc.C(99999,"lana,B2014,LaserIT,StiCA,KFVertex,Corr4,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #    root.exe -q -b -x 'bfc.C(99999,"lana,B2014,LaserIT,StiCA,KFVertex,CorrX,OGridLeakFull,OSpaceZ2,analysis,NoHistos,NoRunco,-HitFilt,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
