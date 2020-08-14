@@ -200,7 +200,7 @@ EndEntity = 16
 	{
 		if (xmlStrlen(value) > 40)
 		{
-		LOG_INFO<<value<<".40s..."<endm;
+		  LOG_INFO<<value<<".40s..."<<endm;
 		}
 		else
 		{

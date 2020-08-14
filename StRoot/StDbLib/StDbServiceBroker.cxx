@@ -484,7 +484,8 @@ int StDbServiceBroker::RecommendHost()
 ////////////////////////////////////////////////////////////////
 string StDbServiceBroker::GiveHostName()
 {
-  return (*MyBestHost).HostName;
+  const ChapiDbHost &BestHost = *MyBestHost;
+  return BestHost.HostName;
 }
 ////////////////////////////////////////////////////////////////
 short StDbServiceBroker::GiveHostPort()

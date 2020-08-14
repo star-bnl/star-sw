@@ -555,8 +555,8 @@ bool MysqlDb::loadBalance()
       short mSBStatus = my_manager->myServiceBroker->GetStatus();
       if (mSBStatus==st_db_service_broker::NO_ERROR)
 	{
-          
-	  const char* lbHostName = (my_manager->myServiceBroker->GiveHostName()).c_str();
+          string lbHostNameS = my_manager->myServiceBroker->GiveHostName();
+	  const char* lbHostName = lbHostNameS.c_str();
 	  if(mdbhost) delete [] mdbhost;
 	  mdbhost = new char[strlen(lbHostName)+1];
           strcpy(mdbhost,lbHostName);
