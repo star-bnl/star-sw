@@ -22,9 +22,13 @@ C ORIG. 03/02/89  K.M.STORR
 C
 
       DIMENSION    MS(99), MT(99), NCHP(9)
+#if __GNUC__ < 10
       data iblan1/x'20202000'/
       data mask1/x'000000ff'/
-
+#else
+      data iblan1/z'20202000'/
+      data mask1/z'000000ff'/
+#endif
       NCH = NCHP(1)
       IF   (NCH)             91, 29, 11
    11 NWS    = ishftr (NCH,2)
