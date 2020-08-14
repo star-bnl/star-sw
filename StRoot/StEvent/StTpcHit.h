@@ -128,7 +128,7 @@ class StTpcHit : public StHit {
 	  Short_t mnpad=0, Short_t mxpad=0, Short_t mntmbk=0,
 	  Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0, UShort_t Adc = 0) 
    :  StHit(p, e, hw, q, c, IdTruth, quality, Id), mAdc(Adc) {
-    setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0; mdX = 0;}
+    setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0; mdX = 0; mTimeBucket = 0;}
   ~StTpcHit() {}
     
   StDetectorId   detector() const;
