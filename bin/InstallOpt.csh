@@ -1,8 +1,8 @@
 if ("${OPTSTAR}" == "${XOPTSTAR}") then
   setenv XOPTSTAR ${OPTSTAR}/${STAR_HOST_SYS}
   if (! -d ${XOPTSTAR}) mkdir -p ${XOPTSTAR}
-  if (! -d ${XOPTSTAR}/qt) mkdir -p ${XOPTSTAR}/qt
-  setenv QTDIR  ${XOPTSTAR}/qt
+  if (! -d ${XOPTSTAR}/qt4) mkdir -p ${XOPTSTAR}/qt4
+  setenv QTDIR  ${XOPTSTAR}/qt4
   starver .DEV2
 endif
 setenv FORCE_32BITS FALSE
@@ -247,8 +247,8 @@ setenv CFLAGSd   "$cflags"
       case "qt*":
       setenv CXXFLAGS "${CXXFLAGSD}"
       setenv CFLAGS   "${CFLAGSD}"
-          if (! -d ${XOPTSTAR}/qt4) mkdir -p ${XOPTSTAR}/qt4
-          ./configure --prefix=$XOPTSTAR -no-glib -no-qt3support -no-cups <<EOF
+#          if (! -d ${XOPTSTAR}/qt4) mkdir -p ${XOPTSTAR}/qt4
+          ./configure --prefix=$QTDIR -no-glib -no-qt3support -no-cups <<EOF
 o
 yes
 EOF
