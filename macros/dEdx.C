@@ -59,7 +59,7 @@ void dEdx(Int_t nevents=1000,
   }
   TString STAR_VERSION(gSystem->Getenv("STAR_VERSION"));
   if (STAR_VERSION.BeginsWith("TFG") || STAR_VERSION.Contains("DEV2")) {
-    Chain += ",quiet";
+    Chain += ",quiet,ForcedX";
   } 
   //  Chain += ",CMuDst,picoWrite,noHistos,noRunco,-evout"; // For PicoDst
   TString RootFile(rootFile);

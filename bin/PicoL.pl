@@ -62,6 +62,7 @@ if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/) {
   elsif ($pwd =~ /2019\/14GeV/)               {$glob = "/2019/14GeV_2019_TFG19e";}
   elsif ($pwd =~ /2019\/19GeV/)               {$glob = "/2019/19GeV_2019_TFG19e";}
   elsif ($pwd =~ /2019\/31GeV_fixedTarget/)   {$glob = "/2019/31GeV_fixedTarget_2019_TFG19l.Minuit";}
+  elsif ($pwd =~ /2019\/26p2GeV_fixedTarget/)   {$glob = "/2019/26p2GeV_fixedTarget_2019_TFG19l.Minuit";}
   elsif ($pwd =~ /2019\/4p59GeV_fixedTarget/) {$glob = "/2019/4p59GeV_2019_TFG19e";}
   elsif ($pwd =~ /2019\/3p85GeV_fixedTarget/) {$glob = "/2019/3p85GeV_Fixed_2019_TFG19e";}
   elsif ($pwd =~ /2019\/7\.3GeV_fixedTarget/) {$glob = "/2019/7.3GeV_Fixed_2019_TFG19e";}

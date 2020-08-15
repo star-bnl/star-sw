@@ -4,7 +4,7 @@ set domain = `hostname -d`
 switch ($domain) 
   case "*local":
   case "*starp.bnl.gov":
-    set list = "gcc485 gcc531 gcc631 gcc7 gcc8 gcc9 gcc/10";
+    set list = "gcc485 gcc531 gcc631 gcc7 gcc8 gcc9 gcc/10.1.0";
     breaksw
   case "*bnl.gov":
 #    set list = "gcc482 gcc492 gcc/10";

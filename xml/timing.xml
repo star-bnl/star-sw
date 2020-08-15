@@ -6,34 +6,58 @@
   echo $INPUTFILE0
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
-    set VERSION = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
-    set DEBUG   = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set DIR     = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set VERSION = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
     set GCCVERS = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
     set BITS    = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+    set DEBUG   = `echo $INPUTFILE0 | awk -F\: '{print $5}'`
   else
     exit 1;
   endif
+  echo "DIR = $DIR, VERSION = $VERSION, GCCVERS = $GCCVERS, BITS = $BITS, DEBUG = $DEBUG"
 #  set NODE = `hostname -s`;
 #  set dir  = ${NODE}_${VERSION}_${DEBUG}_${GCCVERS}_${BITS}
-  set dir  = ${VERSION}_${DEBUG}_${GCCVERS}_${BITS}
-  if (! -d $dir) mkdir -p $dir
-  cd $dir;
-  set logFile  = st_physics_11029020_raw_1030002.log
-  if (-r $logFile) exit 0;
-  setenv StarEndMakerShell
-  if ("${DEBUG}" == "opt") setenv NODEBUG yes
+#  set dir  = ${VERSION}_${DEBUG}_${GCCVERS}_${BITS}
+  if (! -d $DIR) mkdir -p $DIR
+  cd $DIR;
+#  set logFile  = st_physics_11029020_raw_1030002.log
+#  set logFile  = hlt_20355004_10_01_000.log
+  set logFile  = hlt_20192001_11_01_000.log
+#  if (-r ${DIR}/${logFile}) exit 0;
+#  setenv StarEndMakerShell
+  if ("${DEBUG}" == "opt") then 
+    setenv NODEBUG yes
+  else                       
+    if ($?NODEBUG) unsetenv NODEBUG
+  endif
+  if ("${BITS}" == "64b") then 
+    setenv  USE_64BITS 1
+  else                       
+    if ($?USE_64BITS) unsetenv USE_64BITS
+  endif
+  setenv STARFPE NO
+# setup ${BITS}
+  setenv DECHO yes
+  echo "setup ${GCCVERS}"
   setup ${GCCVERS}
-  setup ${BITS}
+  unsetenv DECHO
+  echo "starver ${VERSION}"
   starver ${VERSION}
+#  STAR_LEVELS &gt;&amp; ${logFile}
+  STAR_LEVELS | tee  ${logFile}
 #  set exec = "root4star"
   set exec = "root.exe"
 #  echo ${BITS} | grep '64\.'
 # if (! $?)  set exec = "root.exe"
 #  ${exec} -q -b 'bfc.C('$f','$l',"'$chain',Sti")' &gt;&amp; ${logFile}
 # ${exec} -q -b 'bfc.C(100,"P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeakFull","/star/rcf/test/daq/2010/029/st_physics_11029020_raw_1030002.daq")' &gt;&amp; ${logFile}
- ${exec} -q -b 'bfc.C(200,"P2018,McTpcAna,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noRunco,StiCA,CorrX","/hlt/cephfs/daq/2018/152/19152033/st_physics_adc_19152033_raw_5000002.daq")'  &gt;&amp; ${logFile}
+# ${exec} -q -b 'bfc.C(200,"P2018,McTpcAna,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noRunco,StiCA,CorrX","/hlt/cephfs/daq/2018/152/19152033/st_physics_adc_19152033_raw_5000002.daq")'  &gt;&amp; ${logFile}
+# ${exec} -q -b 'bfc.C(200,"P2018,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noRunco,StiCA,CorrX","/hlt/cephfs/daq/2018/152/19152033/st_physics_adc_19152033_raw_5000002.daq")'  &gt;&amp; ${logFile}
+# ${exec} -q -b 'bfc.C(200,"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","/hlt/cephfs/daq/2019/355/20355004/hlt_20355004_10_01_000.daq")'  &gt;&amp; ${logFile}
+ ${exec} -q -b 'bfc.C(2000,"P2019a,mtd,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,picoWrite,PicoVtxVpdOrDefault","/hlt/cephfs/daq/2019B/192/20192001/hlt_20192001_11_01_000.daq")'  &gt;&gt;&amp; ${logFile}
 </command>
-<stdout URL="file:./sched$JOBID.log" />
+        <stdout URL="file:./sched$JOBID.log" />
+        <stderr URL="file:./sched$JOBID.err" />
 <!-- <input URL="command:Nightlies.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Nightlies/Test.MC.year_*.csh" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Nightlies/Test.MC.year_2005_cucu62_minbias.csh" /> -->

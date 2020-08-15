@@ -22,25 +22,6 @@ cd ${PicoDIR}
         mv ${d}/${b}B.log Zombie/${b}B.log${N} 
    endif
  end
-================================= Summurizing  ===============================================
-@ count = 0
-foreach d (`ls -1d [0-3]??/2*`)
-  cd ${d}; pwd;
-  ls -ltr | tail -1 | grep Chain	
-  if ($?) then	
-    rm -rf .sl*
-    ln -s ~/macros/.sl73_* .	
-    root.exe -q -b 'Chain.C+("./*picoDst.root","PicoDst")' >&  Chain.log  &
-    @ count++;  echo "count $count";
-    if ($count > 20) then 
-        cd -
-	break;
-    endif
-  endif
-  cd -;
-end
-
-grep total ???/21*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'
 ================================================================================
  foreach f (`grep missing Chain.log | awk '{print $3}'`)
    set b = `basename ${f} .picoDst.root`; set d = `dirname ${f}`; 
@@ -350,7 +331,7 @@ foreach d (`ls -1d */2*`)
   endif
   lsf63 ~/xml/daq_2020StiCA.Minuit.TFG19m.xml
   cd -
-endx[
+end
 #  sleep 60
 
 ================================= Summurizing  ===============================================
@@ -481,3 +462,24 @@ end
 ls -1d *BAK | awk -F\_ '{printf("D%d.*\n",$1/1000)}' | sort -u
 Cosmics days:
 grep Cosmic ~/bin/RunXXDefs.pm | egrep '2020-0[6-8]' | awk -F\' '{printf("%i\n",($8-21000000)/1000)}' | sort -u | xargs
+================================================================================
+dEdx production
+foreach d (`ls -1d ???`)
+  cd $d;
+  if (-r Done) then
+    cd -
+    continue;
+  endif
+  daq_2020d.pl
+  if ($?) then
+    ls -1d *bla.root
+    if ($?) then
+      rm sched* *xml;
+      touch Done
+    endif
+    cd -;
+    continue;
+  endif
+  lsf63 ~/xml/daq_2020StiCA.Minuit.TFG20g.xml
+  cd -
+end
