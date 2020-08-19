@@ -99,6 +99,6 @@ private:
     map<string,string> mMiniDstMap;     	//!
     map<string, int>   mBranchIds;      	//!
  
-    ClassDef(StEventClusteringHints,1)
+    ClassDef(StEventClusteringHints,2)
 };
 #endif

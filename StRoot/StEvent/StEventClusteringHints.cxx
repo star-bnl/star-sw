@@ -368,7 +368,7 @@ StEventClusteringHints::print(ostream& os)
     }
 }
 
-#if 1
+#if 0
 static TBuffer&  operator<<(TBuffer& buf, const map<string,string> &s)
 {
   TString ts1,ts2;
