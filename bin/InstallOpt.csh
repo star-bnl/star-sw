@@ -71,7 +71,7 @@ endsw
 #set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 VecGeom node-v10.16.0";
 #set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 veccore VecGeom node-v10.16.0 ";
 #set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8301  eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 veccore VecGeom node-v10.16.0 "; # pythia8301 cannot be done with cint
-set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 veccore VecGeom node-v10.16.0 ";
+set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 veccore VecGeom node-v10.16.0 tbb cfitsio-3.49";
 
 #set list = "gsl-2.1";
 #set list = "boost_1_66_0";
@@ -97,7 +97,7 @@ setenv CFLAGSd   "$cflags"
 #    source ${GROUP_DIR}/.starver ${STAR_LEVEL}
     if ( -r ${pkg}.Done || -r ${pkg}.Failed) continue
 #    if (! -r ${pkg}) then
-      if ($pkg != "xrootd-4.4.1" && $pkg != "xrootd-4.5.0-rc1" && $pkg != "Coin-3.1.3" && $pkg != "eigen3" && $pkg != "VecGeom") then
+      if ($pkg != "xrootd-4.4.1" && $pkg != "xrootd-4.5.0-rc1" && $pkg != "Coin-3.1.3" && $pkg != "eigen3" && $pkg != "VecGeom" && pkg != "tbb") then
         if (-r ~/sources/${pkg}) then
           dirsync  ~/sources/${pkg} ${pkg}
         else 
@@ -125,6 +125,7 @@ setenv CFLAGSd   "$cflags"
     cd ${pkg}
     switch ($pkg)
       case "libtools*":
+      case "cfitsio*":
        ./bootstrap
        ./configure --prefix=${XOPTSTAR}
        make install
@@ -133,6 +134,7 @@ setenv CFLAGSd   "$cflags"
 	breaksw
       case "VecGeom*":
       case "veccore":
+      case "tbb":
 #      case "pythia83*":
 	cmake -DCMAKE_INSTALL_PREFIX=${XOPTSTAR} ../../${pkg}
 	if ( $?) break;

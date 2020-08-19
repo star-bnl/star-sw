@@ -32,14 +32,16 @@ cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE="${R
 -Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=OFF -Drootfit=ON -Dvc=OFF -Dunuran=oFF \
 -Dpyroot=ON \
 -Dpythia6=ON  -Dpythia8=ON \
+-D builtin_tbb=OFF \
 -Dbuiltin_vdt=ON \
 -Dvecgeom=OFF  \
 -DXROOTD_ROOT_DIR="${XOPTSTAR}" \
--Dbuiltin_cfitsio=On -DCMAKE_CXX_FLAGS="-fdiagnostics-color=always -msse4.2" \
+-DCMAKE_CXX_FLAGS="-fdiagnostics-color=always -msse4.2" \
 -DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse4.2" \
 -Dbuiltin_afterimage=ON \
 -Dtable=ON \
 -Druntime_cxxmodules=On
+# -Dbuiltin_cfitsio=On 
 #  -Dbuiltin_xrootd=ON 
 #-DPYTHIA6_DIR=${XOPTSTAR} \
 #-DPYTHIA8_DIR=${XOPTSTAR} \
