@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: genDst.C,v 1.7 2020/01/25 05:10:00 genevb Exp $
+// $Id: genDst.C,v 1.8 2020/08/19 15:27:33 genevb Exp $
 // Author: G. Van Buren (BNL)
 //
 // Description:
@@ -138,7 +138,9 @@ void procGeoTag(TObjArray* optionTokens)
 
 bool findAndRemoveOption(const char* optionName, TObjArray* optionTokens)
 {
-  TObject* obj = optionTokens->FindObject(optionName);
+  TString optName = optionName;
+  optName.ToLower();
+  TObject* obj = optionTokens->FindObject(optName.Data());
   if (obj) {
     optionTokens->Remove(obj);
     optionTokens->Compress();
@@ -160,7 +162,7 @@ void genDst(unsigned int First,
   StMuDstMaker muDstMaker(0, 0, "", infile, "st:MuDst.root", 1e9); // set up maker in read mode
   //                      0, 0                        this means read mode
   //                           dir                    read all files in this directory
-  //                               file               bla.lis real all file in this list, if (file!="") dir is ignored
+  //                               file               bla.lis read all file in this list, if (file!="") dir is ignored
   //                                    filter        apply filter to filenames, multiple filters are separated by ':'
   //                                          10      maximum number of file to read
 
@@ -184,7 +186,30 @@ void genDst(unsigned int First,
   TObjArray* optionTokens = Options.Tokenize(optDelim);
   optionTokens->SetOwner(kTRUE);
 
+  // Determine database flavors
+  TString flavors = "ofl"; // default flavor for offline
+
+  // simulation flavors
+  if (findAndRemoveOption("Simu",optionTokens) && ! findAndRemoveOption("NoSimuDb",optionTokens))
+    flavors.Prepend("sim+");
+
+  // filestream flavors
+  TObject* firstFile = muDstChain.GetListOfFiles()->At(0);
+  if (firstFile) {
+    TString firstFileName = firstFile->GetTitle();
+    firstFileName = firstFileName(firstFileName.Last('/')+1,firstFileName.Length());
+    if (firstFileName.BeginsWith("st_")) {
+      TString fileStream = firstFileName(3,firstFileName.Index('_',3)-3);
+      if (fileStream.Length()>0) flavors.Prepend(fileStream += '+');
+    }
+  }
+ 
+  gMessMgr->Info() << "Using DB flavors: " << flavors << endm;
+  db->SetFlavor(flavors.Data());
+
   if (findAndRemoveOption("picodst",optionTokens)) {
+    // _________________________________________________________________
+    // Processing with generation of PicoDsts
 
     loadLibsPico();
 
@@ -254,6 +279,8 @@ void genDst(unsigned int First,
     processMaker = (StMaker*) (new StPicoDstMaker(StPicoDstMaker::IoWrite, infile, "picoDst"));
 
   } else if (Options.Contains("vf")) {
+    // _________________________________________________________________
+    // Processing with new vertex-finding
 
     loadLibsVF();
 
@@ -386,6 +413,9 @@ void genDst(unsigned int Last,
 /////////////////////////////////////////////////////////////////////////////
 //
 // $Log: genDst.C,v $
+// Revision 1.8  2020/08/19 15:27:33  genevb
+// Add DB flavors
+//
 // Revision 1.7  2020/01/25 05:10:00  genevb
 // Include DbV, more like BFC
 //
