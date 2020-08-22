@@ -32,8 +32,8 @@ cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE="${R
 -Dall=ON -Dcxx11=ON -Dlibcxx=ON -Dcacoa=ON -Dgdml=ON -Dgsl_shared=ON -Dminuit2=ON -Dqt=OFF -Drootfit=ON -Dvc=OFF -Dunuran=oFF \
 -Dpyroot=ON \
 -Dpythia6=ON  -Dpythia8=ON \
--D builtin_tbb=OFF \
 -Dbuiltin_vdt=ON \
+-Dtbb=OFF \
 -Dvecgeom=OFF  \
 -DXROOTD_ROOT_DIR="${XOPTSTAR}" \
 -DCMAKE_CXX_FLAGS="-fdiagnostics-color=always -msse4.2" \
@@ -41,6 +41,7 @@ cmake $ROOT/6.99.99/root -DCMAKE_INSTALL_PREFIX=$ROOTSYS -DCMAKE_BUILD_TYPE="${R
 -Dbuiltin_afterimage=ON \
 -Dtable=ON \
 -Druntime_cxxmodules=On
+#-D builtin_tbb=OFF \
 # -Dbuiltin_cfitsio=On 
 #  -Dbuiltin_xrootd=ON 
 #-DPYTHIA6_DIR=${XOPTSTAR} \
