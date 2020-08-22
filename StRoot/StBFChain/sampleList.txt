@@ -1037,7 +1037,7 @@ job113{
 inputfile = /star/rcf/test/daq/2020/351/st_physics_20351078_raw_5000001.daq
 out_dir = daq_sl302.stica/year_2020/production_11p5GeV_2020
 chain = P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## AuAu 11.5GeV run 2020 with geometry ry2020a and Sti tracking
@@ -1046,7 +1046,7 @@ job114{
 inputfile = /star/rcf/test/daq/2020/351/st_physics_20351078_raw_5000001.daq
 out_dir = daq_sl302.ittf/year_2020/production_11p5GeV_2020
 chain = P2020a,btof,mtd,etofA,BEmcChkStat,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## fixedTarget 31.2GeV run 2020 with geometry ry2020a and StiCA tracking
@@ -1055,7 +1055,7 @@ job115{
 inputfile = /star/rcf/test/daq/2020/028/st_physics_21028024_raw_1500008.daq
 out_dir = daq_sl302.stica/year_2020/production_31p2GeV_fixedTarget_2020
 chain = P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-beamline3D,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## fixedTarget 31.2GeV run 2020 with geometry ry2020a and Sti tracking
@@ -1064,7 +1064,7 @@ job116{
 inputfile = /star/rcf/test/daq/2020/028/st_physics_21028024_raw_1500008.daq
 out_dir = daq_sl302.ittf/year_2020/production_31p2GeV_fixedTarget_2020
 chain = P2020a,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-beamline3D,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 ## fixedTarget 19.5GeV run 2020 with geometry ry2020a and StiCA tracking
 
@@ -1072,7 +1072,7 @@ job117{
 inputfile = /star/rcf/test/daq/2020/032/st_physics_21032055_raw_1500015.daq
 out_dir = daq_sl302.stica/year_2020/production_19p5GeV_fixedTarget_2020
 chain = P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-beamline3D,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## fixedTarget 19.5GeV run 2020 with geometry ry2020a and Sti tracking
@@ -1081,7 +1081,7 @@ job118{
 inputfile = /star/rcf/test/daq/2020/032/st_physics_21032055_raw_1500015.daq
 out_dir = daq_sl302.ittf/year_2020/production_19p5GeV_fixedTarget_2020
 chain = P2020a,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-beamline3D,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## fixedTarget 7.3GeV run 2020 with geometry ry2020a and StiCA tracking
@@ -1090,7 +1090,7 @@ job119{
 inputfile = /star/rcf/test/daq/2020/035/st_physics_21035026_raw_1500009.daq
 out_dir = daq_sl302.stica/year_2020/production_7p3GeV_fixedTarget_2020
 chain = P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-beamline3D,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## fixedTarget 7.3GeV run 2020 with geometry ry2020a and Sti tracking
@@ -1099,7 +1099,7 @@ job120{
 inputfile = /star/rcf/test/daq/2020/035/st_physics_21035026_raw_1500009.daq
 out_dir = daq_sl302.ittf/year_2020/production_7p3GeV_fixedTarget_2020
 chain = P2020a,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-beamline3D,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## AuAu 9.2GeV run 2020 with geometry ry2020a and StiCA tracking
@@ -1108,7 +1108,7 @@ job121{
 inputfile = /star/rcf/test/daq/2020/038/st_physics_21038010_raw_3000003.daq
 out_dir = daq_sl302.stica/year_2020/production_9p2GeV_2020
 chain = P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## AuAu 9.2GeV run 2020 with geometry ry2020a and Sti tracking
@@ -1117,7 +1117,7 @@ job122{
 inputfile = /star/rcf/test/daq/2020/038/st_physics_21038010_raw_3000003.daq
 out_dir = daq_sl302.ittf/year_2020/production_9p2GeV_2020
 chain = P2020a,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## fixedTarget 4.59GeV run 2019 with geometry ry2019a and StiCA tracking
@@ -1126,7 +1126,7 @@ job123{
 inputfile = /star/rcf/test/daq/2019/181/st_physics_20181004_raw_2000007.daq
 out_dir = daq_sl302.stica/year_2019/production_4p59GeV_fixedTarget_2019
 chain = P2019a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-beamline3D,-OPr13,OPr40,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## fixedTarget 4.59GeV run 2019 with geometry ry2019a and Sti tracking
@@ -1135,7 +1135,7 @@ job124{
 inputfile = /star/rcf/test/daq/2019/181/st_physics_20181004_raw_2000007.daq
 out_dir = daq_sl302.ittf/year_2019/production_4p59GeV_fixedTarget_2019
 chain = P2019a,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-beamline3D,-OPr13,OPr40,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## fixedTarget 31GeV run 2019 with geometry ry2019a and StiCA tracking
@@ -1144,7 +1144,7 @@ job125{
 inputfile = /star/rcf/test/daq/2019/190/st_physics_20190014_raw_2000009.daq
 out_dir = daq_sl302.stica/year_2019/production_31GeV_fixedTarget_2019
 chain = P2019a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-beamline3D,-OPr13,OPr40,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }
 
 ## fixedTarget 31GeV run 2019 with geometry ry2019a and Sti tracking
@@ -1153,5 +1153,5 @@ job125{
 inputfile = /star/rcf/test/daq/2019/190/st_physics_20190014_raw_2000009.daq
 out_dir = daq_sl302.ittf/year_2019/production_31GeV_fixedTarget_2019
 chain = P2019a,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-beamline3D,-OPr13,OPr40,-hitfilt,QAalltrigs
-nevents = 2000
+nevents = 1000
 }

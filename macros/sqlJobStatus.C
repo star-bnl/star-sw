@@ -1,4 +1,5 @@
 #if !defined(__CINT__) || defined(__MAKECINT__)
+#include <assert.h>
 #include <vector>
 #include <list>
 #include "Riostream.h"
@@ -20,6 +21,7 @@
 #include "TStyle.h"
 #include "TFrame.h"
 #endif
+#define PrPP(PARAM)  if (PARAM ## V == "") PARAM ## V = PARAM; if (PARAM ## V != PARAM) {cout << #PARAM << " = |" << PARAM ## V.Data() << "|\t|" << PARAM.Data() << "|" << endl; }
 using namespace std;
 typedef list<TString> List;
 struct Field_t {
@@ -163,7 +165,66 @@ void PrintRes(TSQLResult *res, TNtuple *tuple = 0, Float_t *ars = 0){
   }
 }
 //________________________________________________________________________________
-TString FormVariable(TString prodyear, TString dataset, TString LibTag, TString optimized, TString path, TString gcc_version, TString tracker) {
+TString FormVariable(TString prodyearV, TString datasetV, TString LibTagV, TString optimizedV, TString path, TString gcc_versionV, TString trackerV) {
+  // path TFG20g/sl73_x8664_gcc485_opt/daq_sl302.stica/year_2019/production_4p59GeV_fixedTarget_2019/st_physics_20181004_raw_2000007.log
+  //                /star/rcf/test/dev/daq_sl302.ittf/Fri/year_2020/production_11p5GeV_2020
+  /*
+|     2020 | production_11p5GeV_2020     | .DEV2  |           | sl73_x8664_gcc485_opt/daq_sl302.ittf/year_2020/production_11p5GeV_2020                                                   |                    | daq_sl302.ittf      | 2020-08-04 14:33:00 |
+|     2020 | production_11p5GeV_2020     | .DEV2  |           | sl73_x8664_gcc485_opt/daq_sl302.stica/year_2020/production_11p5GeV_2020                                                  |                    | daq_sl302.stica     | 2020-08-04 14:22:44 |
+|     2020 | NULL                        | .DEV2  | NULL      | /gpfs01/star/subsys-tpc/fisyak/nightlies/.DEV2/sl73_x8664_gcc485_debug/daq_sl302.stica/year_2020/production_11p5GeV_2020 | NULL               | NULL                | 2020-08-20 19:41:02 |
+|     2020 | NULL                        | .DEV2  | NULL      | /gpfs01/star/subsys-tpc/fisyak/nightlies/.DEV2/sl73_x8664_gcc485_opt/daq_sl302.ittf/year_2020/production_11p5GeV_2020    | NULL               | NULL                | 2020-08-20 18:03:31 |
+|     2020 | NULL                        | .DEV2  | NULL      | /gpfs01/star/subsys-tpc/fisyak/nightlies/.DEV2/sl73_x8664_gcc485_opt/daq_sl302.stica/year_2020/production_11p5GeV_2020   | NULL               | NULL                | 2020-08-20 18:03:59 |
+|     2020 | NULL                        | DEV    | NULL      | /star/rcf/test/dev/daq_sl302.ittf/Fri/year_2020/production_11p5GeV_2020                                                  | NULL               | NULL                | 2020-08-21 10:26:00 |
+|     2020 | NULL                        | DEV    | NULL      | /star/rcf/test/dev/daq_sl302.stica/Fri/year_2020/production_11p5GeV_2020                                                 | NULL               | NULL                | 2020-08-21 11:24:00 |
+   */
+  TString prodyear, dataset, LibTag, optimized, gcc_version, tracker;
+  TObjArray *obj = path.Tokenize("/");
+  Int_t nParsed = obj->GetEntries();
+  Int_t k = nParsed - 1;
+  optimized =  "No";
+  if (path.Contains("test/dev")) {
+    LibTag = "DEV";
+    if (LibTagV == "n/a") LibTagV = LibTag;
+    dataset = ((TObjString *) obj->At(k))->GetName();
+    k--; prodyear = ((TObjString *) obj->At(k))->GetName(); prodyear.ReplaceAll("year_","");  
+    k--;
+    k--; tracker = ((TObjString *) obj->At(k))->GetName();
+    if (tracker.Contains("_opt")) {optimized = "Yes";/* tracker.ReplaceAll("_opt","");*/}
+    if (gcc_versionV != "") gcc_version  = gcc_versionV;
+    else                    gcc_version = ".sl73_gcc485";
+    if (dataset.Contains("_64bit") && dataset == datasetV) { 
+      if (gcc_version != gcc_versionV) {
+	gcc_versionV = ".sl73_x8664_gcc485";
+	gcc_version = gcc_versionV; 
+      }
+      dataset.ReplaceAll("_64bit","");  datasetV = dataset;
+    }
+  } else {
+    dataset = ((TObjString *) obj->At(k))->GetName();
+    k--; prodyear = ((TObjString *) obj->At(k))->GetName(); prodyear.ReplaceAll("year_","");
+    k--; tracker = ((TObjString *) obj->At(k))->GetName();
+    k--; {gcc_version = "."; gcc_version += ((TObjString *) obj->At(k))->GetName();}
+    if (gcc_version.Contains("_opt")) {optimized = "Yes"; gcc_version.ReplaceAll("_opt","");}
+    if (gcc_version.Contains("_debug")) {optimized =  "No"; gcc_version.ReplaceAll("_debug","");}
+    if (gcc_version.Contains("_deb")) {optimized =  "No"; gcc_version.ReplaceAll("_deb","");}
+    if (k > 0) {k--; LibTag = ((TObjString *) obj->At(k))->GetName();}
+    else       {     LibTag = ".DEV2";}
+  }
+  //  obj->SetOwner(kFALSE);
+  delete obj;
+  dataset.ReplaceAll("_opt","");
+  datasetV.ReplaceAll("_opt","");
+  prodyear.ReplaceAll(".AgML","");
+  PrPP(prodyear);
+  PrPP(dataset);
+  PrPP(LibTag);
+  //  PrPP(optimized);
+  PrPP(gcc_version);
+  PrPP(tracker);
+  if (! (prodyearV == prodyear && datasetV == dataset && LibTagV == LibTag && (gcc_versionV != "" &&  gcc_versionV == gcc_version) && trackerV == tracker)) {//  && optimizedV == optimized
+    cout << "path = " << path.Data() << endl;
+    assert(0);
+  }
   Int_t _debug = 0;
   TString Var(prodyear);
   TString Dataset(dataset);
@@ -189,6 +250,8 @@ TString FormVariable(TString prodyear, TString dataset, TString LibTag, TString 
   else if (tracker.Contains("stihr")) {Var += "/HR";}
   else                                {Var += "/sti";}
   if (path.Contains("AgML"))     {Var += "/AgML";}
+  if (LibTag.Contains(".DEV2") || LibTag.Contains("TFG"))  {Var += "/TFG";}
+  else                    { Var += "/DEV";/* Var += LibTag; */}
   if (gcc_version.Contains("x8664")) Var += "/64b";
   else                               Var += "/32b";
   if      (optimized == "Yes") Var += "/opt";
@@ -197,8 +260,6 @@ TString FormVariable(TString prodyear, TString dataset, TString LibTag, TString 
     if (path.Contains("_opt")) Var += "/opt";
     else                       Var += "/deb";
   }
-  if (LibTag == ".DEV2" || LibTag.Contains("TFG"))  {Var += "/TFG";}
-  else                    { Var += "/DEV";/* Var += LibTag; */}
   if (_debug) {
     cout << "Var = " << Var.Data() 
 	 << "\tprodyear = " << prodyear.Data()
@@ -277,10 +338,13 @@ void sqlJobStatus(Int_t d1 = 20200501, Int_t d2 = 0) {
       SELECT DISTINCT tracker  from JobStatus order by tracker;         daq_sl302.ittf_opt
       SELECT DISTINCT optimized  from JobStatus order by optimized;
     */
-    TString sql = Form("SELECT DISTINCT prodyear,Dataset,LibTag,optimized,path,gcc_version,tracker  from JobStatus where LibTag != \"n/a\" and  Dataset != \"\" and jobStatus = \"Done\" and createTime >= \"%s\" order by prodyear;",
+    //    TString sql = Form("SELECT DISTINCT prodyear,Dataset,LibTag,optimized,path,gcc_version,tracker  from JobStatus where LibTag != \"n/a\" and  Dataset != \"\" and jobStatus = \"Done\" and createTime >= \"%s\" order by prodyear;",
+    //    TString sql = Form("SELECT prodyear,Dataset,LibTag,optimized,path,gcc_version,tracker  from JobStatus where LibTag != \"n/a\" and  Dataset != \"\" and jobStatus = \"Done\" and createTime >= \"%s\" order by prodyear;",
+    TString sql = Form("SELECT prodyear,Dataset,LibTag,optimized,path,gcc_version,tracker  from JobStatus where createTime >= \"%s\" order by prodyear;",
 		       t1.AsSQLString());
     cout << sql << endl;
     res = db->Query(sql);
+    if (! res) return;
     int nrows = res->GetRowCount();
     if (! nrows) return;
     int nfields = res->GetFieldCount();
@@ -411,12 +475,12 @@ void sqlJobStatus(Int_t d1 = 20200501, Int_t d2 = 0) {
       if (Fields[j].type == 1) {
 	Int_t v = A.Atoi();
 	Int_t bin = Fields[j].prof->Fill(Var,v);
-	assert(TString(Fields[j].prof->GetXaxis()->GetBinLabel(bin)) != TString(dir->GetName()));
+	assert(bin > 0 && TString(Fields[j].prof->GetXaxis()->GetBinLabel(bin)) != TString(dir->GetName()));
 	graph->SetPoint(np,u,v);
       } else if (Fields[j].type == 2) {
 	Double_t v = A.Atof(); 
 	Int_t bin = Fields[j].prof->Fill(Var,v);
-	assert(TString(Fields[j].prof->GetXaxis()->GetBinLabel(bin)) != TString(dir->GetName()));
+	assert(bin > 0 && TString(Fields[j].prof->GetXaxis()->GetBinLabel(bin)) != TString(dir->GetName()));
 	graph->SetPoint(np,u,v);
       }
     }
@@ -508,16 +572,18 @@ void Plot(const Char_t *Year = "2020/daq/11p5GeV") {
   gStyle->SetTimeOffset(u0);
   gStyle->SetOptStat(0);
   gStyle->SetMarkerStyle(20);
-  TCanvas *c1 = new TCanvas(Form("c1%s",Year),Form("Usable Events %s",Year),20,20,2000,500);
+  TCanvas *c1 = new TCanvas(Form("c1%s",Year),Form("Usable Events %s",Year),20,20,1000,500);
   c1->SetBottomMargin(0.25);
+  c1->cd(1)->SetRightMargin(0.20);
   TProfile *percent_of_usable_evt = (TProfile *) gDirectory->Get("percent_of_usable_evtF");
   if (! percent_of_usable_evt) return;
   SetYear( percent_of_usable_evt, Year);
   percent_of_usable_evt->Draw();
   // 
-  TCanvas *c2 = new TCanvas(Form("c2%s",Year),Form("Memory Usage %s",Year),20,520,2000,3*500);
+  TCanvas *c2 = new TCanvas(Form("c2%s",Year),Form("Memory Usage %s",Year),20,520,1000,3*500);
   c2->Divide(1,3);
   c2->cd(1)->SetBottomMargin(0.01);
+  c2->cd(1)->SetRightMargin(0.20);
   TProfile *memUsageL = (TProfile *) gDirectory->Get("memUsageLF");
   if (! memUsageL) return;
   SetYear( memUsageL, Year);
@@ -532,10 +598,11 @@ void Plot(const Char_t *Year = "2020/daq/11p5GeV") {
   l2->AddEntry(memUsageL,"Memory last event");
   l2->Draw();
   // 
-  //  TCanvas *c3 = new TCanvas(Form("c3%s",Year),Form("CPU Usage %s",Year),20,1020,2000,500);
+  //  TCanvas *c3 = new TCanvas(Form("c3%s",Year),Form("CPU Usage %s",Year),20,1020,1000,500);
   //  c3->SetBottomMargin(0.25);
   TVirtualPad *c3 = c2->cd(2);
   c3->SetBottomMargin(0.01);
+  c3->SetRightMargin(0.20);
   TProfile *RealTime_per_evt = (TProfile *) gDirectory->Get("RealTime_per_evtF");
   if (! RealTime_per_evt) return;
   SetYear( RealTime_per_evt, Year);
@@ -550,9 +617,10 @@ void Plot(const Char_t *Year = "2020/daq/11p5GeV") {
   l3->AddEntry(RealTime_per_evt,"Real time");
   l3->Draw();
   // 
-  //  TCanvas *c4 = new TCanvas(Form("c4%s",Year),Form("CPU Usage %s",Year),20,1520,2000,500);
+  //  TCanvas *c4 = new TCanvas(Form("c4%s",Year),Form("CPU Usage %s",Year),20,1520,1000,500);
   TVirtualPad *c4 = c2->cd(3);
-  c4->SetBottomMargin(0.25);
+  c4->SetBottomMargin(0.30);
+  c4->SetRightMargin(0.20);
   TLegend *l4 = new TLegend(0.7,0.9,0.9,1.0);
   TProfile *avg_no_tracks = (TProfile *) gDirectory->Get("avg_no_tracksF");
   if (! avg_no_tracks) return;

@@ -1887,8 +1887,8 @@ PAIRHIT StMiniMcMaker::findFirstLastHit(const StTrack* track)
     if(!hit) continue;
     vec.push_back(hit);
   }
-  sort(vec.begin(),vec.end(),hitCmp);
   if (vec.size()) {
+    sort(vec.begin(),vec.end(),hitCmp);
     return PAIRHIT(vec[0],vec[vec.size()-1]);   
   }
   else {
@@ -1910,8 +1910,8 @@ PAIRHIT StMiniMcMaker::findFirstLastFitHit(const StTrack* track)
     if(!hit->usedInFit()) continue;
     vec.push_back(hit);
   }
-  sort(vec.begin(),vec.end(),hitCmp);
   if (vec.size()) {
+    sort(vec.begin(),vec.end(),hitCmp);
     return PAIRHIT(vec[0],vec[vec.size()-1]);   
   }
   else {
