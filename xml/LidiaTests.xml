@@ -23,11 +23,22 @@ switch (${SUBMITTINGDIRECTORY})  # 64/32 bits
     setenv USE_64BITS 0  
     breaksw
 endsw # 
+switch (${SUBMITTINGDIRECTORY})  # gcc
+  case "*gcc1010*":
+    setup gcc/10
+    breaksw
+  case "*gcc630*":
+    setup gcc/6.3
+    breaksw
+  default:
+    breaksw
+endsw # 
+
 switch (${SUBMITTINGDIRECTORY}) # STAR version
-  case "TFG20c":
+  case "*TFG20c*":
     starver TFG20c
     breaksw
-  case "TFG20g":
+  case "*TFG20g*":
     starver TFG20g
     breaksw
   default:
@@ -40,7 +51,8 @@ else
 endif
 echo 
 #set controlFile = /star/u/starreco/newtest/sampleList_nonopt.txt 
-set controlFile = $STAR/StRoot/StBFChain/sampleList.txt
+#set controlFile = $STAR/StRoot/StBFChain/sampleList.txt
+set controlFile = /afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StBFChain/sampleList.txt
 set nevents = `grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *nevents" | head -1 | sed 's| *nevents *= *\([0-9]*\) *$|\1|'`
 set chain = `grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *chain" | head -1 | sed 's| *chain *= *\(.*\) *$|\1|'`
 set out_dir = ${SUBMITTINGDIRECTORY}/`grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *out_dir" | head -1 | sed 's| *out_dir *= *\(.*\) *$|\1|'`
