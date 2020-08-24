@@ -109,14 +109,21 @@ int gl3Event::readFromEvpReader(daqReader *rdr, float bField)
 	// only do tracking on full hypersectors...
 	if((i%2) == 1) {
 	    ret = tracker->processSector();
-	    LOG(DBG, "processSector returns %d", ret);
+	    //LOG("JEFF", "processSector returns %d", ret);
+	    if(ret == 1) {
+		free(sectp);
+		delete tracker;
+		return 1;
+	    }
+
+	  
 	    ret = tracker->fillTracks(szSECP_max, (char *)sectp, 0);
-	    LOG(DBG, "fillTracks returns %d", ret);
+	    ///LOG("JEFF", "fillTracks returns %d", ret);
 	    
-	    LOG(DBG, "SECP size = %d",sectp->bh.length*4 + sectp->banks[0].len*4);
+	    //LOG("JEFF", "SECP size = %d",sectp->bh.length*4 + sectp->banks[0].len*4);
 	    
 	    int n = readSectorTracks((char *)sectp);
-	    LOG(DBG, "Got %d tracks",n);
+	    //LOG("JEFF", "Got %d tracks",n);
 	    
 	    if(n < 0) {
 		LOG(WARN, "Error reading tracker: sector %d\n",i,0,0,0,0);
