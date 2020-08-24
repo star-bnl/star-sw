@@ -523,6 +523,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 	_getClockTime += _getClock.record_time();
 
 	if(reader->event_number < minEvts ) continue;
+	//LOG("JEFF", "reader->event_number = %d", reader->event_number);
 
 	if(maxEvts > 0) {
 	    if(reader->event_number > (unsigned int)maxEvts) {
@@ -755,11 +756,11 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
 	    i++;
 	    diska = argv[i];
 	}
-	else if(memcmp(argv[i], "-minevts", 8) == 0) {
+	else if(memcmp(argv[i], "-firstevt", 9) == 0) {
 	    i++;
 	    minEvts = atoi(argv[i]);
 	}
-	else if(memcmp(argv[i], "-maxevts", 8) == 0) {
+	else if(memcmp(argv[i], "-lastevt", 8) == 0) {
 	    i++;
 	    maxEvts = atoi(argv[i]);
 	}
@@ -801,7 +802,7 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
 	}
 	else {
 	    printf("No arg #%d = %s\n",i,argv[i]);
-	    printf("%s arguments\n\t-diska diskapath\n\t-file filename\n\t-pdf pdffilename\n\t-loglevel level\n\t-confdatadir datadir (/RTScache/conf/jevp)\n\t-clientdatadir datadir (/a/jevp/client)\n\t-buildxml <file>\n\t-xml <file>\n",argv[0]);
+	    printf("%s arguments\n\t-firstevt evt\n\t-lastevt\n\t-diska diskapath\n\t-file filename\n\t-pdf pdffilename\n\t-loglevel level\n\t-confdatadir datadir (/RTScache/conf/jevp)\n\t-clientdatadir datadir (/a/jevp/client)\n\t-buildxml <file>\n\t-xml <file>\n",argv[0]);
 	    PCP;
 	    return -1;
 	}    
