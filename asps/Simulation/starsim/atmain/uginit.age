@@ -1,5 +1,8 @@
-* $Id: uginit.age,v 1.1.1.1.22.1 2020/08/07 02:40:25 perev Exp $
+* $Id: uginit.age,v 1.1.1.1.22.2 2020/08/24 17:29:39 perev Exp $
 * $Log: uginit.age,v $
+* Revision 1.1.1.1.22.2  2020/08/24 17:29:39  perev
+* commentout
+*
 * Revision 1.1.1.1.22.1  2020/08/07 02:40:25  perev
 * New tag Comis64
 *
@@ -22,8 +25,8 @@
 #include "commons/typing.inc"
 #include "geant321/gcbank.inc"
 
-//#include "comis/comis/cspar.inc"
-//#include "comis/comis/mdpool.inc"
+!//#include "comis/comis/cspar.inc"
+!//#include "comis/comis/mdpool.inc"
 #if 1
       integer QQ,LHP,GUARD
       parameter (LHP = 50006)
