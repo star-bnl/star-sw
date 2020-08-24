@@ -522,7 +522,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 
     justUpdateDisplayPallete = 0;
     
-    throttle_time = .05;
+    throttle_time = .1;
 
     log_output = RTS_LOG_NET;
     //log_output = RTS_LOG_STDERR;
