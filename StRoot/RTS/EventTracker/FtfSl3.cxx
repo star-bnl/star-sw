@@ -1297,7 +1297,7 @@ int FtfSl3::processSector ( ){
    }
    para.eventReset = 1 ;
    nTracks         = 0 ;
-   process ( ) ;
+   if(process()==1) return 1 ;     // error!
    if (para.dEdx) dEdx();
    //
    if ( debugLevel > 0 ) 
