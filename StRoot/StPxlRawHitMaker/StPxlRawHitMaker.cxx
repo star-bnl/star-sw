@@ -162,13 +162,13 @@ void StPxlRawHitMaker::decodeSectorData()
    mTrailerDataLength = 0;
 
    if (mSectorDataLength == 0 || !mSectorData) {
-      LOG_WARN << "no sector data" << endm;
+      LOG_DEBUG << "no sector data" << endm;
       return;
    }
 
    // check header token and get pointer to header data block
    if (mSectorData[0] != mHeaderToken) {
-      LOG_WARN << "no pxl sector header token" << endm;
+      LOG_DEBUG << "no pxl sector header token" << endm;
       return;
    }
    else {
@@ -192,7 +192,7 @@ void StPxlRawHitMaker::decodeSectorData()
       {
          if(mHeaderData[8] & BIT(i) && Debug() > 2)
             {
-               LOG_WARN << "sector "<<mSector<<"  sensor "<<i+1<<"  deserialization error!" << endm;
+               LOG_DEBUG << "sector "<<mSector<<"  sensor "<<i+1<<"  deserialization error!" << endm;
             }
       }
 
@@ -200,25 +200,25 @@ void StPxlRawHitMaker::decodeSectorData()
       {
          if(mHeaderData[9] & BIT(i) && Debug() > 2)
             {
-               LOG_WARN << "sector "<<mSector<<"  sensor "<<i+33<<"  deserialization error!" << endm;
+               LOG_DEBUG << "sector "<<mSector<<"  sensor "<<i+33<<"  deserialization error!" << endm;
             }
       }
 
    if(mHeaderData[9] >> 8)
       {
-         LOG_WARN << "sector "<<mSector<<"  event memory 1 overflow!" << endm;
+         LOG_DEBUG << "sector "<<mSector<<"  event memory 1 overflow!" << endm;
       }
 
    if(mHeaderData[9] >> 9)
       {
-         LOG_WARN << "sector "<<mSector<<"  event memory 2 overflow!" << endm;
+         LOG_DEBUG << "sector "<<mSector<<"  event memory 2 overflow!" << endm;
       }
 
    for(int i=0; i<32; i++)
       {
          if(mHeaderData[10] & BIT(i))
             {
-               LOG_WARN << "sector "<<mSector<<"  sensor "<<i+1<<"  trailer or event length error!" << endm;
+               LOG_DEBUG << "sector "<<mSector<<"  sensor "<<i+1<<"  trailer or event length error!" << endm;
             }
       }
 
@@ -226,7 +226,7 @@ void StPxlRawHitMaker::decodeSectorData()
       {
          if(mHeaderData[11] & BIT(i))
             {
-               LOG_WARN << "sector "<<mSector<<"  sensor "<<i+33<<"  trailer or event length error!" << endm;
+               LOG_DEBUG << "sector "<<mSector<<"  sensor "<<i+33<<"  trailer or event length error!" << endm;
             }
       }
 
@@ -249,7 +249,7 @@ void StPxlRawHitMaker::decodeSectorData()
       }
    }
    else {
-      LOG_WARN << "sector data separator token wrong: 0x" << hex << mSectorData[index] << dec << endm;
+      LOG_DEBUG << "sector data separator token wrong: 0x" << hex << mSectorData[index] << dec << endm;
       mHitsData = 0;
       mHitsDataLength = 0;
       return;
@@ -263,7 +263,7 @@ void StPxlRawHitMaker::decodeSectorData()
       }
    }
    else {
-      LOG_WARN << "sector data end token wrong: 0x" << hex << mSectorData[mSectorDataLength / sizeof(UInt_t) - 1] << dec << endm;
+      LOG_DEBUG << "sector data end token wrong: 0x" << hex << mSectorData[mSectorDataLength / sizeof(UInt_t) - 1] << dec << endm;
       return;
    }
 
@@ -282,7 +282,7 @@ Int_t StPxlRawHitMaker::getHitsDataLength()
 void StPxlRawHitMaker::decodeHitsData()
 {
    if (mHitsDataLength == 0 || !mHitsData) {
-      LOG_WARN << "no hits data" << endm;
+      LOG_DEBUG << "no hits data" << endm;
       return;
    }
 
@@ -304,7 +304,7 @@ void StPxlRawHitMaker::decodeWord(UInt_t val)
    // get ladder and sensor from chip id = (ladder-1)*10+sensor-1
    int chip_id = mid(mChipIdStartBit, mChipIdEndBit, val0) + mid(mChipIdStartBit, mChipIdEndBit, val1) * mChipIdPow;
    if (chip_id < 1 || chip_id > kNumberOfPxlLaddersPerSector * kNumberOfPxlSensorsPerLadder) {
-      LOG_WARN << "wrong chip id: " << chip_id << endm;
+      LOG_DEBUG << "wrong chip id: " << chip_id << endm;
       return;
    }
    mLadder = (chip_id - 1) / 10 + 1;
