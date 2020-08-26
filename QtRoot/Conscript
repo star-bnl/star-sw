@@ -56,13 +56,13 @@ if ($STAR_HOST_SYS =~ /darwin/) {
 #  $DEBUG .= " -spec macx-g++ ";
 #  $DEBUG .= " -spec macx-xcode ";
 #  $DEBUG .= " -spec macx-llvm ";
-} else {
-  if ($STAR_HOST_SYS =~ /icc/) {
-    if ($STAR_HOST_SYS !~ /x86/) {$DEBUG .= " -spec linux-icc-32";}
-    else                         {$DEBUG .= " -spec linux-icc-64";}
-  } else {# gcc
-    if ($STAR_HOST_SYS !~ /x86/) {$DEBUG .= " -spec linux-g++-32";}
-  }
+# } else {
+#   if ($STAR_HOST_SYS =~ /icc/) {
+#     if ($STAR_HOST_SYS !~ /x86/) {$DEBUG .= " -spec linux-icc-32";}
+#     else                         {$DEBUG .= " -spec linux-icc-64";}
+#   } else {# gcc
+#     if ($STAR_HOST_SYS !~ /x86/) {$DEBUG .= " -spec linux-g++-32";}
+#   }
 }
 $DEBUG .= " CONFIG+=debug" if $env->{DEBUG} !~ /-O/;
 #$DEBUG .= " " . $env->{CXXFLAGS};
@@ -76,7 +76,7 @@ else       {$PATH .=       $env->{Packages}->{QT}->{BINDIR};}
 $ENV{PATH} = $PATH;
 $env2 = $env->clone();
 $env2->{ENV}->{PATH} = $PATH;
-  Command $env2 ["Makefile"], qw(qtRoot.pro qtthread/qtthread.pro qt4ged/qt4ged.pro), qq(cd $obj_dir;qmake PREFIX=$env->{ENV}->{QTROOTSYSDIR} $DEBUG);
+  Command $env2 ["Makefile"], qw(qtRoot.pro qtthread/qtthread.pro qt4ged/qt4ged.pro), qq(cd $obj_dir;qmake PREFIX=$env->{ENV}->{QTROOTSYSDIR} -spec  $env->{Packages}->{QT}->{QMAKESPEC} $DEBUG);
 Command $env2 [(@DepsL1, @DepsI)], (Makefile, @src), qq(cd $obj_dir;make;make install);
 #Command $env2 [(@DepsL1, @DepsI)], (Makefile), qq(cd $obj_dir;make;make install);
 #Command $env2 [@DepsI], (Makefile, @src), qq(cd $obj_dir;make;make install);

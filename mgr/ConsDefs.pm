@@ -527,6 +527,9 @@
    if (-e $QTDIR . "/bin/moc") {
      $QTLIBDIR = $QTDIR . "/lib";
      $QTBINDIR = $QTDIR . "/bin";
+     $QMAKESPEC = "";
+     if (! $USE_64BITS) {$QMAKESPEC = $QTDIR . "/mkspecs/linux-g++-32";}
+     else               {$QMAKESPEC = $QTDIR . "/mkspecs/linux-g++-64";}
    }
    if ($QTBINDIR) {
      $QTINCDIR = $QTDIR . "/include";
@@ -861,7 +864,8 @@
 				       'BINDIR'     => $QTBINDIR,
 				       'FLAGS'      => $QTFLAGS,
 				       'LIBDIR'     => $QTLIBDIR,
-				       'LIBS'       => $QTLIBS
+				       'LIBS'       => $QTLIBS,
+				       'QMAKESPEC'  => $QMAKESPEC
 				      },
 			      'COIN3D' => {
 					   'DIR'   => $COIN3DIR,
