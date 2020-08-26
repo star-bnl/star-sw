@@ -15,7 +15,7 @@
 #define V5
 //#define AVX1V
 //#define TETA
-
+//#define FOURHITSEGMENTS
 
 
 #define NDEBUG
