@@ -82,14 +82,20 @@ double FtfFinder::process (  ) {
 //
    short i ;
    para.primaries = 1 ;
-   for ( i = 0 ; i < para.nPrimaryPasses ; i++ )
-        if ( getTracks ( ) ) break ;
+   for ( i = 0 ; i < para.nPrimaryPasses ; i++ ) {
+       int ret = getTracks();
+       //LOG("JEFF", "a: getTracksRet()=%d", ret);
+       if(ret) return 1;
+   }
 //
 //      Look for secondaries    
 //
    para.primaries = 0 ;
-   for ( i = 0 ; i < para.nSecondaryPasses ; i++ )
-        if ( getTracks ( ) ) break ;
+   for ( i = 0 ; i < para.nSecondaryPasses ; i++ ) {
+       int ret = getTracks();
+       //LOG("JEFF", "b: getTracksRet()=%d", ret);
+       if(ret) return 1;
+   }
 
 //   if ( para.dEdx ) dEdx ( ) ;
 
@@ -151,9 +157,9 @@ int FtfFinder::getTracks ( ) {
 //
 //
          if ( nTracks > maxTracks ){
-            LOG(ERR, "\n FtfFinder::getTracks: Max nr tracks reached !") ;
-            nTracks = maxTracks  ;
-            return 1 ;
+	     LOG(OPER, "Event too larget to track!  Ignoring event!") ;
+	     nTracks = maxTracks  ;
+	     return 1 ;
          }
 //
 //     Initialize variables before going into track hit loop
