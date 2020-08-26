@@ -337,8 +337,9 @@ Int_t StBFChain::Instantiate()
 	  }
 	  
 	  // Determine flavors
-	  TString flavors = "ofl+TFG"; // default flavor for offline
-	  
+	  TString flavors = "ofl"; // default flavor for offline
+	  // TFG specific Db tag
+	  if (! GetOption("NoTFGLDbTag")) flavors += "+TFG";
 	  // simulation flavors
 	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) flavors.Prepend("sim+");
 	  

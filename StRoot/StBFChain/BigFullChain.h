@@ -1267,6 +1267,7 @@ Bfc_st BFC[] = { // standard chains
   {"NoLocalCintDb","" ,"",""                                      ,"","","Switch off local Cint Db",kFALSE},
   {"NoMySQLDb"   ,""  ,"",""                                           ,"","","Switch off MySQL Db",kFALSE},
   {"NoCintCalDb" ,""  ,"","NoLocalCintDb"                         ,"","","Switch off local Cint Db",kFALSE},
+  {"NoTFGLDbTag" ,""  ,"",""                                ,"","","Switch off TFG specific Db tag",kFALSE},
   {"dbSnapshot"  ,""  ,"",""                                         ,"","","Create?use dbSnapshot",kFALSE},
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
