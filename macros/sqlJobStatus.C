@@ -20,6 +20,8 @@
 #include "TMultiGraph.h"
 #include "TStyle.h"
 #include "TFrame.h"
+#include "TROOT.h"
+#include "Ask.h"
 #endif
 #define PrPP(PARAM)  if (PARAM ## V == "") PARAM ## V = PARAM; if (PARAM ## V != PARAM) {cout << #PARAM << " = |" << PARAM ## V.Data() << "|\t|" << PARAM.Data() << "|" << endl; }
 using namespace std;
@@ -135,6 +137,31 @@ public:					 //   +--------------------------------+---------------+------+-----
 };					 
 
 //________________________________________________________________________________
+void DrawPng(TCanvas *c) {
+  static Int_t nPng = 0;
+  TString pngName("");
+  if (c) {
+    c->Update(); pngName = c->GetTitle();
+    pngName.ReplaceAll(" ","_");
+    pngName.ReplaceAll("(","_");
+    pngName.ReplaceAll(")","_");
+    pngName.ReplaceAll("{","_");
+    pngName.ReplaceAll("}","_");
+    pngName.ReplaceAll("<","lt");
+    pngName.ReplaceAll(">","gt");
+    pngName.ReplaceAll(".","_");
+    pngName.ReplaceAll("/","_");
+    pngName.ReplaceAll("^","_");
+    pngName.ReplaceAll("__","_");
+    pngName.ReplaceAll("__","_");
+    pngName += ".png"; 
+    TVirtualX::Instance()->WritePixmap(c->GetCanvasID(),-1,-1,(Char_t *)pngName.Data());
+    nPng++;
+    cout << "Draw #\t" << nPng << "\t" << pngName << endl;
+  }
+}
+//________________________________________________________________________________
+//________________________________________________________________________________
 void PrintRes(TSQLResult *res, TNtuple *tuple = 0, Float_t *ars = 0){
   if (! res) return;
   Int_t nrows = res->GetRowCount();
@@ -177,6 +204,10 @@ TString FormVariable(TString prodyearV, TString datasetV, TString LibTagV, TStri
 |     2020 | NULL                        | DEV    | NULL      | /star/rcf/test/dev/daq_sl302.ittf/Fri/year_2020/production_11p5GeV_2020                                                  | NULL               | NULL                | 2020-08-21 10:26:00 |
 |     2020 | NULL                        | DEV    | NULL      | /star/rcf/test/dev/daq_sl302.stica/Fri/year_2020/production_11p5GeV_2020                                                 | NULL               | NULL                | 2020-08-21 11:24:00 |
    */
+  TString empty;
+  if (path.EndsWith("/year_2014/AuAu200_production_low.nohftge")) return empty;
+  if (path.EndsWith("/year_2014/AuAu200_production_low.nohftg")) return empty;
+  if (path.EndsWith("/year_2014/AuAu200_production_low.nohft_")) return empty;
   TString prodyear, dataset, LibTag, optimized, gcc_version, tracker;
   TObjArray *obj = path.Tokenize("/");
   Int_t nParsed = obj->GetEntries();
@@ -197,7 +228,6 @@ TString FormVariable(TString prodyearV, TString datasetV, TString LibTagV, TStri
 	gcc_versionV = ".sl73_x8664_gcc485";
 	gcc_version = gcc_versionV; 
       }
-      dataset.ReplaceAll("_64bit","");  datasetV = dataset;
     }
   } else {
     dataset = ((TObjString *) obj->At(k))->GetName();
@@ -207,11 +237,14 @@ TString FormVariable(TString prodyearV, TString datasetV, TString LibTagV, TStri
     if (gcc_version.Contains("_opt")) {optimized = "Yes"; gcc_version.ReplaceAll("_opt","");}
     if (gcc_version.Contains("_debug")) {optimized =  "No"; gcc_version.ReplaceAll("_debug","");}
     if (gcc_version.Contains("_deb")) {optimized =  "No"; gcc_version.ReplaceAll("_deb","");}
-    if (k > 0) {k--; LibTag = ((TObjString *) obj->At(k))->GetName();}
+    if (k > 0) {k--; LibTag = ((TObjString *) obj->At(k))->GetName(); LibTag.ReplaceAll(".HOLD","");}
     else       {     LibTag = ".DEV2";}
   }
   //  obj->SetOwner(kFALSE);
   delete obj;
+  if (dataset.Contains("_64bit")) {
+    dataset.ReplaceAll("_64bit","");  datasetV = dataset;
+  }
   dataset.ReplaceAll("_opt","");
   datasetV.ReplaceAll("_opt","");
   prodyear.ReplaceAll(".AgML","");
@@ -226,13 +259,13 @@ TString FormVariable(TString prodyearV, TString datasetV, TString LibTagV, TStri
     assert(0);
   }
   Int_t _debug = 0;
-  TString Var(prodyear);
+  TString Var(prodyear(2,2));
   TString Dataset(dataset);
   //  if (Dataset == "auau11_production") _debug = 1;
   //  if (tracker.Contains("stihr") )     _debug = 1;
-  if (tracker.BeginsWith("daq")) {Var += "/daq";}
-  else                           {Var += "/trs";}
-  Var += "/";
+  if (tracker.BeginsWith("daq")) {Var += "RC";}
+  else                           {Var += "MC";}
+  Var += "_"; // "/";
   Dataset.ReplaceAll("production_","");
   Dataset.ReplaceAll("_production","");
   Dataset.ReplaceAll("_opt","");
@@ -249,17 +282,31 @@ TString FormVariable(TString prodyearV, TString datasetV, TString LibTagV, TStri
   if (tracker.Contains("stica"))      {Var += "/CA";}
   else if (tracker.Contains("stihr")) {Var += "/HR";}
   else                                {Var += "/sti";}
-  if (path.Contains("AgML"))     {Var += "/AgML";}
+  if (path.Contains("AgML"))          {Var += "/AgML";}
   if (LibTag.Contains(".DEV2") || LibTag.Contains("TFG"))  {Var += "/TFG";}
   else                    { Var += "/DEV";/* Var += LibTag; */}
   if (gcc_version.Contains("x8664")) Var += "/64b";
   else                               Var += "/32b";
-  if      (optimized == "Yes") Var += "/opt";
-  else if (optimized == "No")  Var += "/deb";
+  if      (gcc_version.Contains("gcc4"))  Var += "4";
+  else if (gcc_version.Contains("gcc5"))  Var += "5"; 
+  else if (gcc_version.Contains("gcc6"))  Var += "6"; 
+  else if (gcc_version.Contains("gcc7"))  Var += "7"; 
+  else if (gcc_version.Contains("gcc8"))  Var += "8"; 
+  else if (gcc_version.Contains("gcc9"))  Var += "9"; 
+  else if (gcc_version.Contains("gcc10"))  Var += "10"; 
+  if      (optimized == "Yes") Var += "-O"; // "/opt";
+  else if (optimized == "No")  Var += "-g"; // "/deb";
   else {
-    if (path.Contains("_opt")) Var += "/opt";
-    else                       Var += "/deb";
+    if (path.Contains("_opt")) Var += "-O"; // "/opt";
+    else                       Var += "-g"; // /deb";
   }
+  Var.ReplaceAll("2007","");
+  Var.ReplaceAll("2008","");
+  Var.ReplaceAll("2009","");
+  //  if (Var.Contains("_We")) {_debug = 1;}
+  if (Var.Contains("nohft_")) {_debug = 1;}
+  if (Var.Contains("nohftg") && ! Var.Contains("nohftgeo") ) {_debug = 1;}
+  if (Var.Contains("64bit")) {_debug = 1;}
   if (_debug) {
     cout << "Var = " << Var.Data() 
 	 << "\tprodyear = " << prodyear.Data()
@@ -269,6 +316,8 @@ TString FormVariable(TString prodyearV, TString datasetV, TString LibTagV, TStri
 	 << "\tpath = " << path.Data()
 	 << "\tgcc_version = " << gcc_version.Data()
 	 << "\ttracker = " << tracker.Data() << endl;
+    static Int_t iBreak = 0;
+    iBreak++;
   }
   return Var;
 }
@@ -349,26 +398,39 @@ void sqlJobStatus(Int_t d1 = 20200501, Int_t d2 = 0) {
     if (! nrows) return;
     int nfields = res->GetFieldCount();
     printf("\nGot %d rows in result\n", nrows);
-    List datasets;
-    
+    List binsL;
+    List dataS;
     for (int i = 0; i < nrows; i++) {
       row = res->Next();
       TString Var = FormVariable(row->GetField(0),row->GetField(1),row->GetField(2),row->GetField(3),row->GetField(4),row->GetField(5),row->GetField(6));
       if (Var == "") continue;
-      datasets.push_back(Var);
+      binsL.push_back(Var);
+      Int_t index = Var.Index("/");
+      TString S(Var(0,index));
+      dataS.push_back(S);
     }
-    datasets.sort();
-    datasets.unique();
+    binsL.sort();
+    binsL.unique();
     Int_t i = 0;
-    for (TString x : datasets) {
+    cout << "List of bins" << endl;
+    for (TString x : binsL) {
       cout << i++ << "\t" << x.Data() << endl;
     }
+    cout << "================================================================================" << endl;
+    dataS.sort();
+    dataS.unique();
+    cout << "List of sets" << endl;
+    i = 0;
+    for (TString x : dataS) {
+      cout << i++ << "\t" << x.Data() << endl;
+    }
+    cout << "================================================================================" << endl;
     delete res;
-    Int_t nxbin = datasets.size();
+    Int_t nxbin = binsL.size();
     for (Int_t f = 0; f < 40; f++) {
       if (! Fields[f].plot) continue;
       Fields[f].prof = new TProfile(Form("%sF",Fields[f].Name),Form("%s versus dataset and library",Fields[f].Name),nxbin,0.5,nxbin+0.5,"s");
-      SetBinName(Fields[f].prof,datasets);
+      SetBinName(Fields[f].prof,binsL);
     }
 
   }
@@ -566,13 +628,15 @@ void DrawMultiGraphs() {
   c5->Update();
 }
 //________________________________________________________________________________
-void Plot(const Char_t *Year = "2020/daq/11p5GeV") {
+void Plot(const Char_t *Year = "20RC_11p5GeV") {
   TDatime t0(20000101,0);
   UInt_t  u0 = t0.Convert();
   gStyle->SetTimeOffset(u0);
   gStyle->SetOptStat(0);
   gStyle->SetMarkerStyle(20);
-  TCanvas *c1 = new TCanvas(Form("c1%s",Year),Form("Usable Events %s",Year),20,20,1000,500);
+  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
+  if (c1) {c1->Clear(); c1->SetTitle(Form("Usable Events %s",Year));}
+  else    {c1 = new TCanvas("c1",Form("Usable Events %s",Year),20,20,1000,500);}
   c1->SetBottomMargin(0.25);
   c1->cd(1)->SetRightMargin(0.20);
   TProfile *percent_of_usable_evt = (TProfile *) gDirectory->Get("percent_of_usable_evtF");
@@ -580,10 +644,13 @@ void Plot(const Char_t *Year = "2020/daq/11p5GeV") {
   SetYear( percent_of_usable_evt, Year);
   percent_of_usable_evt->Draw();
   // 
-  TCanvas *c2 = new TCanvas(Form("c2%s",Year),Form("Memory Usage %s",Year),20,520,1000,3*500);
+  TCanvas *c2 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c2");
+  if (c2) {c2->Clear(); c2->SetTitle(Year);}
+  else    {c2 = new TCanvas("c2",Year,20,520,1000,3*500);}
   c2->Divide(1,3);
-  c2->cd(1)->SetBottomMargin(0.01);
-  c2->cd(1)->SetRightMargin(0.20);
+  TVirtualPad *pad3 = c2->cd(3);
+  pad3->SetBottomMargin(0.30);
+  pad3->SetRightMargin(0.20);
   TProfile *memUsageL = (TProfile *) gDirectory->Get("memUsageLF");
   if (! memUsageL) return;
   SetYear( memUsageL, Year);
@@ -600,9 +667,9 @@ void Plot(const Char_t *Year = "2020/daq/11p5GeV") {
   // 
   //  TCanvas *c3 = new TCanvas(Form("c3%s",Year),Form("CPU Usage %s",Year),20,1020,1000,500);
   //  c3->SetBottomMargin(0.25);
-  TVirtualPad *c3 = c2->cd(2);
-  c3->SetBottomMargin(0.01);
-  c3->SetRightMargin(0.20);
+ TVirtualPad *pad1 =  c2->cd(1);
+  pad1->SetBottomMargin(0.01);
+  pad1->SetRightMargin(0.20);
   TProfile *RealTime_per_evt = (TProfile *) gDirectory->Get("RealTime_per_evtF");
   if (! RealTime_per_evt) return;
   SetYear( RealTime_per_evt, Year);
@@ -616,11 +683,9 @@ void Plot(const Char_t *Year = "2020/daq/11p5GeV") {
   l3->AddEntry(CPU_per_evt_sec,"CPU per event");
   l3->AddEntry(RealTime_per_evt,"Real time");
   l3->Draw();
-  // 
-  //  TCanvas *c4 = new TCanvas(Form("c4%s",Year),Form("CPU Usage %s",Year),20,1520,1000,500);
-  TVirtualPad *c4 = c2->cd(3);
-  c4->SetBottomMargin(0.30);
-  c4->SetRightMargin(0.20);
+  TVirtualPad *pad2 = c2->cd(2);
+  pad2->SetBottomMargin(0.01);
+  pad2->SetRightMargin(0.20);
   TLegend *l4 = new TLegend(0.7,0.9,0.9,1.0);
   TProfile *avg_no_tracks = (TProfile *) gDirectory->Get("avg_no_tracksF");
   if (! avg_no_tracks) return;
@@ -647,6 +712,45 @@ void Plot(const Char_t *Year = "2020/daq/11p5GeV") {
   l4->AddEntry(avg_no_primaryTnfit15_1vtx,"Primary tracks with no. fit points >= 15");
   l4->Draw();
   //  avg_no_primaryT->GetHistogram()->GetXaxis()->SetTimeFormat("%d/%m/%y%F2000-01-01 00:00:00");
-  
+  DrawPng(c2);
 
+}
+//________________________________________________________________________________
+void Plots(Int_t i1 = 0, Int_t i2 = -1) {
+  const Char_t *Sets[] = {
+    "00MC_hc_standard/",  "00RC_central/",  "00RC_minbias/",
+    "01MC_hc_standard/",  "01MC_pp_minbias/",  "01RC_central/",  "01RC_minbias/",  "01RC_ppMinBias/",
+    "03MC_dau_minbias/",  "03RC_dAuMinBias/",  "03RC_ppMinBias/",
+    "04MC_auau_central/",  "04MC_auau_minbias/",  "04RC_AuAuMinBias/",  "04RC_AuAu_prodHigh/",  "04RC_AuAu_prodLow/",  "04RC_prodPP/",
+    "05MC_cucu200_minbias/",  "05MC_cucu62_minbias/",  
+    "05RC_CuCu200_HighTower/",  "05RC_CuCu200_MinBias/",  "05RC_CuCu200_embedTpc/",  "05RC_CuCu200_embedTpcSvtSsd/",
+    "05RC_CuCu22_MinBias/",  "05RC_CuCu62_MinBias/", "05RC_ppProduction/",
+    "06MC_pp200_minbias/",  "06RC_ppProdLong/",  "06RC_ppProdTrans/",
+    "07MC_auau200_central/",  "07RC_Production/",  "07RC_ProductionMinBias/",  "07RC_auau200_embedTpcSvtSsd/",
+    "08MC_dau200_minbias/",  "08MC_pp200_minbias/",  "08RC_dAu/",  "08RC_ppProduction/",
+    "09MC_pp200_minbias/",  "09MC_pp500_minbias/",  "09RC_pp200_embed/",  "09RC_production/",  "09RC_production_500GeV/",
+    "10MC_auau11_minbias/",  "10MC_auau200_minbias/",  "10MC_auau39_minbias/",  "10MC_auau62_minbias/",  "10MC_auau7_minbias/",
+    "10RC_auau11/",  "10RC_auau11_embed/",  "10RC_auau200/",  "10RC_auau200_embed/",  "10RC_auau39/",  "10RC_auau39_embed/",
+    "10RC_auau62/",  "10RC_auau7/",  "10RC_auau7_embed/",
+    "11MC_auau200_central/",  "11MC_pp500_minbias/",  "11MC_pp500_pileup/",  "11RC_AuAu19/",  "11RC_AuAu200/",
+    "11RC_AuAu200_embed/",  "11RC_AuAu27/",  "11RC_pp500/",  "11RC_pp500_embed/",
+    "12MC_CuAu200_minbias/",  "12MC_UU200_minbias/",  "12MC_pp200_minbias/",  "12MC_pp500_minbias/",
+    "12RC_UU/",  "12RC_UU193_embed/",  "12RC_cuAu/",  "12RC_pp200/",  "12RC_pp200_embed/",  "12RC_pp500/",
+    "13MC_pp500/",  "13MC_pp500_We/",  "13MC_pp500_minbias/",  "13RC_pp500/",
+    "14MC_AuAu200_low/",  "14MC_He3Au200_minbias/",  "14MC_auau200_minbias/",  "14RC_15GeV/",
+    "14RC_AuAu200/",  "14RC_AuAu200_low/",  "14RC_AuAu200_low.nohft/",  "14RC_AuAu200_low.nohftgeo/",
+    "14RC_AuAu200_low.nohftgeo_/",  "14RC_AuAu200_mid/",  "14RC_AuHe3/",
+    "15MC_pp200_minbias/",  "15MC_pp200long/",  "15RC_pAl200/",  "15RC_pAu200/",
+    "15RC_pp200long/",  "15RC_pp200long.nohft/",
+    "16MC_AuAu200/",  "16MC_dAu200_minbias/",  "16RC_AuAu200/",  "16RC_dAu20/",  "16RC_dAu200/",  "16RC_dAu39/",  "16RC_dAu62/",
+    "17RC_54GeV/",  "17RC_AuAu54/",  "17RC_pp500/",  
+    "18RC_27GeV/",  "18RC_isobar/",
+    "19RC_14p5GeV/",  "19RC_19GeV/",  "19RC_31GeV_FXT/",  "19RC_4p59GeV_FXT/",  "19RC_7p7GeV/",  "19RC_AuAu200/",
+    "20RC_11p5GeV/",    "20RC_19p5GeV_FXT/",  "20RC_31p2GeV_FXT/",  "20RC_7p3GeV_FXT/",  "20RC_9p2GeV/"};
+  Int_t Nsets = sizeof(Sets)/sizeof(const Char_t *);
+  if (i2 < i1) i2 = Nsets - 1;
+  for (Int_t i = i1; i <= i2; i++) {
+    Plot(Sets[i]);
+    if (Ask()) return;
+  }
 }
