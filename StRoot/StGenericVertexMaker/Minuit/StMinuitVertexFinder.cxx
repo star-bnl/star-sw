@@ -58,7 +58,7 @@ StMinuitVertexFinder::StMinuitVertexFinder(VertexFit_t fitMode) :
 
 StMinuitVertexFinder::~StMinuitVertexFinder()
 {
-   LOG_WARN << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
+   LOG_DEBUG << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
    mHelices.clear();
    mHelixFlags.clear();
    mZImpact.clear();
@@ -530,7 +530,7 @@ int StMinuitVertexFinder::fit(StEvent* event)
 
 	// Check fit result
 	if (mStatusMin) {
-	  LOG_WARN << "StMinuitVertexFinder::fit: error in Minuit::mnexcm(), check status flag. ( iter=" << iter << ")" << endm;
+	  LOG_DEBUG << "StMinuitVertexFinder::fit: error in Minuit::mnexcm(), check status flag. ( iter=" << iter << ")" << endm;
 	  done = 0; // refit
 	}
 
