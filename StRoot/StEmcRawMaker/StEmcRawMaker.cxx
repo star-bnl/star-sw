@@ -233,7 +233,7 @@ Bool_t StEmcRawMaker::prepareEnvironment()
     StEmcRawData *bemcRaw = emc->bemcRawData();
     if(bemcRaw)
     {
-        LOG_WARN << "::prepareEnvironment() found old StEmcRawData *bemcRaw. Will delete it and create a new one"<<endm;
+        LOG_DEBUG << "::prepareEnvironment() found old StEmcRawData *bemcRaw. Will delete it and create a new one"<<endm;
         delete bemcRaw;
     }
     bemcRaw = new StEmcRawData();

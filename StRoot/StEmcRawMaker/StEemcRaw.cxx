@@ -177,7 +177,7 @@ Bool_t StEemcRaw::headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int to
 	  static Int_t count = 0;
 	  if (count < 20) {
 	    count++;
-	 LOG_WARN <<Form("StEemcRaw::headersAreSick() sizeHeader(icr=%d)<=0,  crID=%d, skip it",icr,fiber->crID)<<endm;
+	 LOG_DEBUG <<Form("StEemcRaw::headersAreSick() sizeHeader(icr=%d)<=0,  crID=%d, skip it",icr,fiber->crID)<<endm;
 	  }
 	  continue;  //drop cartes not present in data blocks
 	}
@@ -188,7 +188,7 @@ Bool_t StEemcRaw::headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int to
         if(isOff)
         { // kill this fiber for the rest of this job
             mDb->setFiberOff(icr);
-            LOG_WARN << "StEemcRaw::headersAreSick() detected icr="<<icr<< ", name="<<fiber->name<<" is OFF,\n this fiber will ignored till the end of this job" << endm;
+            LOG_DEBUG << "StEemcRaw::headersAreSick() detected icr="<<icr<< ", name="<<fiber->name<<" is OFF,\n this fiber will ignored till the end of this job" << endm;
             continue;
         }
         nOn++;
@@ -227,7 +227,7 @@ Bool_t StEemcRaw::headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int to
                 hs[3]->Fill(k);
         }
        LOG_DEBUG  << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
-       if(sanity) LOG_WARN  << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
+       if(sanity) LOG_DEBUG  << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
     }
 
     if (hs[4])
@@ -393,7 +393,7 @@ Bool_t   StEemcRaw::headersAreSick(StEEMCReader *eeReader, StEmcRawData *raw, in
                 hs[3]->Fill(k);
         }
        LOG_DEBUG  << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
-       if(sanity) LOG_WARN  << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
+       if(sanity) LOG_DEBUG  << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
     }
 
     if (hs[4])
