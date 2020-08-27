@@ -240,6 +240,9 @@ TString FormVariable(TString prodyearV, TString datasetV, TString LibTagV, TStri
     if (k > 0) {k--; LibTag = ((TObjString *) obj->At(k))->GetName(); LibTag.ReplaceAll(".HOLD","");}
     else       {     LibTag = ".DEV2";}
   }
+  if (LibTag == ".DEV2" || LibTag == "TFG20g") {
+    LibTag = "TFG"; LibTagV = LibTag;
+  }
   //  obj->SetOwner(kFALSE);
   delete obj;
   if (dataset.Contains("_64bit")) {
@@ -330,7 +333,7 @@ void SetBinName(TProfile *prof, List &datasets) {
   }
 }
 //________________________________________________________________________________
-void sqlJobStatus(Int_t d1 = 20200501, Int_t d2 = 0) {
+void sqlJobStatus(Int_t d1 = 20200820, Int_t d2 = 0) {
   TDatime t0(20000101,0);
   UInt_t  u0 = t0.Convert();
   TDatime t1(d1,0);
@@ -490,6 +493,11 @@ void sqlJobStatus(Int_t d1 = 20200501, Int_t d2 = 0) {
     A = row->GetField(16); job.RealTime_per_evt = A.Atof();
     A = row->GetField(17); job.percent_of_usable_evt = A.Atoi();
     A = row->GetField(18); job.avg_no_tracks = A.Atoi();
+    if (job.avg_no_tracks <= 0) {
+      //      goto ENDL;
+      delete row;
+      continue;
+    }
     A = row->GetField(19); job.avg_no_tracksnfit15 = A.Atoi();
     A = row->GetField(20); job.NoEventVtx = A.Atoi();
     A = row->GetField(21); job.avgNoVtx_evt = A.Atof();
@@ -546,6 +554,7 @@ void sqlJobStatus(Int_t d1 = 20200501, Int_t d2 = 0) {
 	graph->SetPoint(np,u,v);
       }
     }
+  ENDL:
     delete row;
   }
 #endif   
@@ -631,22 +640,28 @@ void DrawMultiGraphs() {
 void Plot(const Char_t *Year = "20RC_11p5GeV") {
   TDatime t0(20000101,0);
   UInt_t  u0 = t0.Convert();
+  TProfile *percent_of_usable_evt = (TProfile *) gDirectory->Get("percent_of_usable_evtF");
+  if (! percent_of_usable_evt) return;
+  SetYear( percent_of_usable_evt, Year);
+  TAxis *xax = percent_of_usable_evt->GetXaxis();
+  Int_t ib = xax->GetFirst();
+  Int_t ie = xax->GetLast();
+  Double_t xwid = 20 + 100*(ie - ib + 1);
   gStyle->SetTimeOffset(u0);
   gStyle->SetOptStat(0);
   gStyle->SetMarkerStyle(20);
   TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
-  if (c1) {c1->Clear(); c1->SetTitle(Form("Usable Events %s",Year));}
-  else    {c1 = new TCanvas("c1",Form("Usable Events %s",Year),20,20,1000,500);}
+  if (c1) {delete c1;}//  c1->Clear(); c1->SetTitle(Form("Usable Events %s",Year));}
+  c1 = new TCanvas("c1",Form("Usable Events %s",Year),20,20,xwid,500);
   c1->SetBottomMargin(0.25);
   c1->cd(1)->SetRightMargin(0.20);
-  TProfile *percent_of_usable_evt = (TProfile *) gDirectory->Get("percent_of_usable_evtF");
-  if (! percent_of_usable_evt) return;
-  SetYear( percent_of_usable_evt, Year);
   percent_of_usable_evt->Draw();
+  c1->Update();
+  DrawPng(c1);
   // 
   TCanvas *c2 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c2");
-  if (c2) {c2->Clear(); c2->SetTitle(Year);}
-  else    {c2 = new TCanvas("c2",Year,20,520,1000,3*500);}
+  if (c2) {delete c2;} //c2->Clear(); c2->SetTitle(Year);}
+  c2 = new TCanvas("c2",Year,20,520,xwid,3*500);
   c2->Divide(1,3);
   TVirtualPad *pad3 = c2->cd(3);
   pad3->SetBottomMargin(0.30);
@@ -665,7 +680,7 @@ void Plot(const Char_t *Year = "20RC_11p5GeV") {
   l2->AddEntry(memUsageL,"Memory last event");
   l2->Draw();
   // 
-  //  TCanvas *c3 = new TCanvas(Form("c3%s",Year),Form("CPU Usage %s",Year),20,1020,1000,500);
+  //  TCanvas *c3 = new TCanvas(Form("c3%s",Year),Form("CPU Usage %s",Year),20,1020,xwid,500);
   //  c3->SetBottomMargin(0.25);
  TVirtualPad *pad1 =  c2->cd(1);
   pad1->SetBottomMargin(0.01);
