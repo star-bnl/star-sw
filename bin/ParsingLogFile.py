@@ -280,8 +280,10 @@ def Parse(filename):
            if int(ntrack)>0:
               no_event_with_track = no_event_with_track + 1
     #--number of skipped tracks--
-    cmd = "cat "+filename+" | grep \"INFO  - QAInfo:Run\" | grep \"Total events processed\" | awk \'{print $17}\'"
+    #cmd = "cat "+filename+" | grep \"INFO  - QAInfo:Run\" | grep \"Total events processed\" | awk \'{print $17}\'"
+    cmd = "cat "+filename+" | grep 'StAnalysisMaker::Finish() Processed' | awk '{print $5}'"
     output = commands.getoutput(cmd)
+    #print("output:"+output) 
     skip_event=int(output)
     row["NoEventSkip"]=skip_event
     #--Event completed--
@@ -427,16 +429,16 @@ def InsertDBRecords(parsing_info):
     return 0
 
 def ForEachFile(filename):
-      cmd = "cat "+filename+" | grep \"Run completed\""
+      cmd = "cat "+filename+" | egrep '(Run completed|Terminating)'"
       output = commands.getoutput(cmd)
-      if output.find("Run completed")<0:
+      if output.find("Run completed")<0 and output.find("Terminating")<0 :
          cmd = "cat "+filename+" | grep \"error\""
          output = commands.getoutput(cmd)
          print("-------------------------------------------------------------------------------------------------")
          print("Error:"+output)
          print("-------------------------------------------------------------------------------------------------")
       else:
-         #print("Successfully completed...")
+         print("Successfully completed...")
          parsing_info = Parse(filename)
          print("-------------------------------------------------------------------------------------------------")
          print(parsing_info)
