@@ -1,4 +1,4 @@
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.667 2019/11/19 17:26:17 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.668 2020/08/28 19:46:47 genevb Exp $
 
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -667,6 +667,7 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("picoWrite") )  mk->SetMode(1);
       if ( GetOption("picoRead")  )  mk->SetMode(2);   // possibly more magic
       if ( GetOption("PicoVtxVpd"))           mk->SetAttr("PicoVtxMode", "PicoVtxVpd");
+      else if ( GetOption("PicoVtxFXT"))      mk->SetAttr("PicoVtxMode", "PicoVtxFXT");
       else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxDefault");
       if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("PicoCovMtxMode", "PicoCovMtxWrite");
       else if ( GetOption("PicoCovMtxSkip"))  mk->SetAttr("PicoCovMtxMode", "PicoCovMtxSkip"); // Default mode
