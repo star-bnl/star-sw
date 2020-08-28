@@ -1,6 +1,9 @@
- // $Id: StFcsFastSimulatorMaker.cxx,v 1.6 2020/05/29 18:51:02 akio Exp $                                            
+ // $Id: StFcsFastSimulatorMaker.cxx,v 1.7 2020/08/27 22:08:09 akio Exp $                                            
  //                                                                                                                     
  // $Log: StFcsFastSimulatorMaker.cxx,v $
+ // Revision 1.7  2020/08/27 22:08:09  akio
+ // fix a continue bug found by Ting Lin
+ //
  // Revision 1.6  2020/05/29 18:51:02  akio
  // adding EPD g2t reading as PRES
  //
@@ -90,13 +93,14 @@
 		 //table to keep pointer to hit for each det & channel
 		 auto map = new StFcsHit*[kFcsNorthSouth][kFcsEcalMaxId](); //no need for memset with ()
 		 for (Int_t i=0; i < nHits; ++i) {
-		     if (!hit) continue;
+		     if (!hit) {hit++; continue;}
 		     const Int_t ns  = hit->volume_id / 1000 - 1;
 		     const Int_t id  = hit->volume_id % 1000 - 1;
 		     const Int_t det = dbMaker->detectorId(ehp,ns);
 		     if(det<0 || det>=kFcsNDet || id<0 || id>=kFcsEcalMaxId){
 			 LOG_WARN << Form("ECAL det=%1d id=%3d volid=%5d e=%f out of range (%d)",
 					  det,id,hit->volume_id,hit->de,kFcsMaxId) << endm;
+			 hit++;
 			 continue;
 		     }else if(mDebug){
 			 LOG_INFO << Form("ECAL det=%1d id=%3d volid=%4d e=%f",
@@ -139,13 +143,14 @@
 		 //table to keep pointer to hit for each det & channel
 		 auto map = new StFcsHit*[kFcsNorthSouth][kFcsHcalMaxId](); //no need for memset with ()
 		 for (Int_t i=0; i < nHits; i++) {
-		     if (!hit) continue;
+		     if (!hit) {hit++; continue;}
 		     const Int_t ns  = hit->volume_id / 1000 - 1;
 		     const Int_t id  = hit->volume_id % 1000 - 1;
 		     const Int_t det = dbMaker->detectorId(ehp,ns);
 		     if(det<0 || det>=kFcsNDet || id<0 || id>=kFcsHcalMaxId){
 			 LOG_WARN << Form("HCAL det=%d id=%d volid=%5d e=%f out of range (%d)",
 					  det,id,hit->volume_id,hit->de,kFcsMaxId) << endm;
+			 hit++;
 			 continue;
 		     }else if(mDebug){
 			 LOG_INFO << Form("HCAL det=%d id=%d volid=%5d e=%f",
@@ -230,13 +235,13 @@
 		 //table to keep pointer to hit for each det & channel
 		 auto map = new StFcsHit*[kFcsNorthSouth][kFcsPresMaxId](); //no need for memset with ()
 		 for (Int_t i=0; i < nHits; ++i) {
-		     if (!hit) continue;		     
+		     if (!hit) {hit++; continue;}
 		     const int volume_id = hit->volume_id;
 		     const int ew        = volume_id/100000;  
 		     const int pp        = (volume_id%100000)/1000;
 		           int tt        = (volume_id%1000)/10;
 		     const float de      = hit->de * 1000.0;
-		     if(ew==1) continue; //west side only
+		     if(ew==1) {hit++; continue;} //west side only
 		     //hack! reverse TT Even/Odd
 		     if(tt>1){
 			 if(tt%2==0) {tt+=1;}
@@ -248,6 +253,7 @@
 		     if(det<0 || det>=kFcsNDet || id<0 || id>=kFcsPresMaxId){
 			 LOG_WARN << Form("Pres det=%1d id=%3d volid=%4d e=%f10.6  id out of range (%d)",
 					  det,id,hit->volume_id,1000*hit->de,kFcsPresId) << endm;
+			 hit++; 
 			 continue;
 		     }else if(mDebug){
 			 LOG_INFO << Form("Pres det=%1d id=%3d volid=%4d e=%10.6f",
