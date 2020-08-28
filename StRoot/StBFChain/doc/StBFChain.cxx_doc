@@ -1,10 +1,5 @@
-//_____________________________________________________________________
-//<<<<<<< StBFChain.cxx
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.173 2019/04/23 15:30:07 jeromel Exp $
-//=======
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.173 2019/04/23 15:30:07 jeromel Exp $
-//>>>>>>> 1.660.2.3
-//_____________________________________________________________________
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.174 2020/08/28 19:46:47 genevb Exp $
+
 #include "TROOT.h"
 #include "TPRegexp.h"
 #include "TString.h"
@@ -1006,6 +1001,12 @@ Bfc_st BFC[] = {
   {"P2019a","" ,"",
    "B2019a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,beamline3D,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    , "","", "Base chain for year 2019 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+  {"B2020a" ,"","",
+   "ry2020a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+   "","", "Base chain for run 2020 data (tpc)",kFALSE},
+  {"P2020a","" ,"",
+   "B2020a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   , "","", "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
@@ -1079,6 +1080,8 @@ Bfc_st BFC[] = {
   {"Corr5" ,"" ,"","Corr4,SCEbyE,OGridLeak3D,OSpaceZ2","",""
    , "... Corr4+SCEbyE,OGridLeak3D,OSpaceZ2...",kFALSE},
   {"CorrX" ,"" ,"","ExB,OShortR,OBmap,OPr13,OIFC,OSectorAlign,NewTpcAlignment"
+   ",-AlignSectors,-OBmap2D,-OClock,-OTwist" ,"","","New Tpc Alignment",kFALSE},
+  {"CorrY" ,"" ,"","ExB,OShortR,OBmap,OPr40,OIFC,OSectorAlign,NewTpcAlignment,OSpaceZ2,OGridLeakFull"
    ",-AlignSectors,-OBmap2D,-OClock,-OTwist" ,"","","New Tpc Alignment",kFALSE},
   {"ExB" ,"" ,"","","" ,"","Activate ExB correction",kFALSE},
   {"EB1" ,"" ,"","","" ,"","Force ExB configuration 1",kFALSE},
@@ -1278,6 +1281,7 @@ Bfc_st BFC[] = {
   {"mtdDat" ,"mtd_raw","MtdChain","db,MuDst","StMtdHitMaker","StEvent,StMtdHitMaker"
    , "MTD hit maker",kFALSE},
   {"mtdTrkMask","","","db","StMtdTrackingMaskMaker" ,"StMtdEvtFilterMaker","MTD track masking",kFALSE},
+  {"epdHit", "", "", "epdDb,event", "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
   {"tpc" ,"","","TpxRaw,TpxClu,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use TpxClu instead",kFALSE},
   {"tpcI" ,"tpcChain","","db,tpcDB,TpcHitMover", "StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent" ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
@@ -1392,7 +1396,6 @@ Bfc_st BFC[] = {
   {"ssdpre" ,"","","ssdEmbed,spa" ,"","","SSD full chain for pre-embedding",kFALSE},
   {"ssdAdd" ,"","","ssd_daq","StSsdAddMaker","StSsdAddMaker", "... SSD merge maker",kFALSE},
   {"ssdE" ,"","","ssdpre,ssdAdd" ,"","","SSD full chain for embedding",kFALSE},
-  {"epdHit", "", "", "epdDb,event", "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
   {"ZDCVtx" ,"","","db" ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"emcDY2" ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc"
    ,"StEmcRawMaker","StEmcRawMaker", "B/E EMC data common maker",kFALSE},
@@ -1626,6 +1629,7 @@ Bfc_st BFC[] = {
   {"picoRead" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"WritesRead picoDST format",kFALSE},
   {"PicoVtxDefault" ,"","","" ,"" ,"","pico Vtx default mode",kFALSE},
   {"PicoVtxVpd" ,"","","-PicoVtxDefault" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxFXT" ,"","","-PicoVtxDefault" ,"" ,"","pico Vtx constraint on FXT [198,202] mode",kFALSE},
   {"PicoCovMtxSkip" ,"","","" ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
   {"PicoCovMtxWrite","","","-PicoCovMtxSkip" ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"PicoBEmcSmdSkip" ,"","","" ,"" ,"","Do not write BSMD to picoDst (default)",kFALSE},
@@ -2662,6 +2666,12 @@ Bfc_st BFC[] = {
   {"P2019a","" ,"",
    "B2019a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,beamline3D,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    , "","", "Base chain for year 2019 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+  {"B2020a" ,"","",
+   "ry2020a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+   "","", "Base chain for run 2020 data (tpc)",kFALSE},
+  {"P2020a","" ,"",
+   "B2020a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   , "","", "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
@@ -2735,6 +2745,8 @@ Bfc_st BFC[] = {
   {"Corr5" ,"" ,"","Corr4,SCEbyE,OGridLeak3D,OSpaceZ2","",""
    , "... Corr4+SCEbyE,OGridLeak3D,OSpaceZ2...",kFALSE},
   {"CorrX" ,"" ,"","ExB,OShortR,OBmap,OPr13,OIFC,OSectorAlign,NewTpcAlignment"
+   ",-AlignSectors,-OBmap2D,-OClock,-OTwist" ,"","","New Tpc Alignment",kFALSE},
+  {"CorrY" ,"" ,"","ExB,OShortR,OBmap,OPr40,OIFC,OSectorAlign,NewTpcAlignment,OSpaceZ2,OGridLeakFull"
    ",-AlignSectors,-OBmap2D,-OClock,-OTwist" ,"","","New Tpc Alignment",kFALSE},
   {"ExB" ,"" ,"","","" ,"","Activate ExB correction",kFALSE},
   {"EB1" ,"" ,"","","" ,"","Force ExB configuration 1",kFALSE},
@@ -2934,6 +2946,7 @@ Bfc_st BFC[] = {
   {"mtdDat" ,"mtd_raw","MtdChain","db,MuDst","StMtdHitMaker","StEvent,StMtdHitMaker"
    , "MTD hit maker",kFALSE},
   {"mtdTrkMask","","","db","StMtdTrackingMaskMaker" ,"StMtdEvtFilterMaker","MTD track masking",kFALSE},
+  {"epdHit", "", "", "epdDb,event", "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
   {"tpc" ,"","","TpxRaw,TpxClu,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use TpxClu instead",kFALSE},
   {"tpcI" ,"tpcChain","","db,tpcDB,TpcHitMover", "StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent" ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
@@ -3048,7 +3061,6 @@ Bfc_st BFC[] = {
   {"ssdpre" ,"","","ssdEmbed,spa" ,"","","SSD full chain for pre-embedding",kFALSE},
   {"ssdAdd" ,"","","ssd_daq","StSsdAddMaker","StSsdAddMaker", "... SSD merge maker",kFALSE},
   {"ssdE" ,"","","ssdpre,ssdAdd" ,"","","SSD full chain for embedding",kFALSE},
-  {"epdHit", "", "", "epdDb,event", "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
   {"ZDCVtx" ,"","","db" ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"emcDY2" ,"emcRaw","","daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc"
    ,"StEmcRawMaker","StEmcRawMaker", "B/E EMC data common maker",kFALSE},
@@ -3282,6 +3294,7 @@ Bfc_st BFC[] = {
   {"picoRead" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"WritesRead picoDST format",kFALSE},
   {"PicoVtxDefault" ,"","","" ,"" ,"","pico Vtx default mode",kFALSE},
   {"PicoVtxVpd" ,"","","-PicoVtxDefault" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxFXT" ,"","","-PicoVtxDefault" ,"" ,"","pico Vtx constraint on FXT [198,202] mode",kFALSE},
   {"PicoCovMtxSkip" ,"","","" ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
   {"PicoCovMtxWrite","","","-PicoCovMtxSkip" ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"PicoBEmcSmdSkip" ,"","","" ,"" ,"","Do not write BSMD to picoDst (default)",kFALSE},
@@ -3403,6 +3416,7 @@ void StBFChain::Setup(Int_t mode) {
   FDateS = FTimeS = 0;
   fFiltTrg   = "";
   fRunG  = -1;
+  fFmsGainCorrTag="";
   Gproperty.clear();
   Gvalue.clear();
   Gpattern.clear();
@@ -3481,12 +3495,8 @@ Int_t StBFChain::Load()
 	      assert(libraryload!=kStErr); // this is obvious and will display an explicit
 	      break;
 	    } else {
-	      if (Debug() > 1) {  TString ts("load "); ts += libL; StMemStat::PrintMem(ts.Data());}
-	      
-	      //if (Debug() > 1) 
-	      {LOG_QA  << Form("Library %-22s [%15s] (%s)\tis loaded",libL.Data(),fBFC[i].Key,path) << endm;}
-	      //else             {LOG_QA  << "Library " << Form("%-20s\t(%s)\tis loaded",libL.Data(),path) << endm;}
-
+	      LOG_QA << Form("Library %-22s [%15s] (%s)\tis loaded",libL.Data(),fBFC[i].Key,path) << endm;
+	      StMemStat::doPs(libL.Data(), "Load");
 	      LoadedLibs.Add(new TObjString(libN));
 	    }
 	  } else {
@@ -3975,6 +3985,7 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("picoWrite") )  mk->SetMode(1);
       if ( GetOption("picoRead")  )  mk->SetMode(2);   // possibly more magic
       if ( GetOption("PicoVtxVpd"))           mk->SetAttr("PicoVtxMode", "PicoVtxVpd");
+      else if ( GetOption("PicoVtxFXT"))      mk->SetAttr("PicoVtxMode", "PicoVtxFXT");
       else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxDefault");
       if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("PicoCovMtxMode", "PicoCovMtxWrite");
       else if ( GetOption("PicoCovMtxSkip"))  mk->SetAttr("PicoCovMtxMode", "PicoCovMtxSkip"); // Default mode
@@ -4127,7 +4138,10 @@ Int_t StBFChain::Instantiate()
       if (GetOption("pxlSlowSim")) mk->SetAttr("useDIGMAPSSim",kTRUE);
     }
 
-
+    //FMS GainCorrection flavors
+    if (maker == "StFmsDbMaker"){
+	if(fFmsGainCorrTag!="") mk->SetAttr("FmsGainCorr",fFmsGainCorrTag.Data());
+    }
 
     // Hit filtering will be made from a single maker in
     // future with flexible filtering method
@@ -4450,6 +4464,12 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     return 0;
   }
 
+  //FMS gaincorr
+  if(Tag.BeginsWith("fmsGainCorr")){
+      Check = kTRUE;
+      return 0;
+  }
+
   // GoptXXXvvvvvv -> Gopt 4 / XXX 3 / vvvvvv 6 = 13
   if ( Tag.BeginsWith("gopt") && Tag.Length() == 13 ) return 0;
 
@@ -4650,6 +4670,9 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
             // not a match, disable
             fFiltTrg = "";
           }
+
+	} else if (Tag.BeginsWith("fmsGainCorr",TString::kIgnoreCase)) {
+	    fFmsGainCorrTag = Tag;
 
 	} else { // Check for predefined db time stamps ?
 	  kgo = kOpt(Tag.Data(),kFALSE);
