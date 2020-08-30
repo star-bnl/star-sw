@@ -2,7 +2,7 @@
 <job name="NewTest" fileListSyntax="paths" nProcesses="125"  filesPerHour="25" simulateSubmission="false">
 
 <command>
-#FPE_OFF
+FPE_OFF
 #source /afs/rhic.bnl.gov/star/packages/.DEV2/setupDEV2.csh
 setenv STARFPE NO
 switch (${SUBMITTINGDIRECTORY}) # debug/opt

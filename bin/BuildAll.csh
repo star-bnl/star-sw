@@ -8,7 +8,7 @@ switch ($domain)
     breaksw
   case "*bnl.gov":
 #    set list = "gcc482 gcc492 gcc/6.3 gcc/10";
-    set list = "gcc gcc/6.3"#  gcc/10.1.0"
+    set list = "gcc gcc/6.3  gcc/10.1.0"
     breaksw
 endsw
 foreach gcc (${list})
