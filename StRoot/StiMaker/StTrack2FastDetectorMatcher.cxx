@@ -21,7 +21,7 @@
 #include "StBTofCollection.h" // dongx
 #include "StBTofUtil/StBTofGeometry.h"
 #include "TMath.h"
-
+#include "TGeoManager.h"
 //________________________________________________________________________________
 StTrack2FastDetectorMatcher::StTrack2FastDetectorMatcher() : mTotEve(0), mMinZBtof(-3.0), mMaxZBtof(3.0), mMinAdcBemc(5), mMinAdcEemc(5),  
 							     isMC(kFALSE),
@@ -72,18 +72,31 @@ void StTrack2FastDetectorMatcher::fillArrays(StEvent* event) {
       TObjectSet *btofGeom_dataset = (TObjectSet *) mydb->GetDataSet("btofGeometry");
       btofGeom = btofGeom_dataset ? (StBTofGeometry *) btofGeom_dataset->GetObject() : nullptr;
       if (! btofGeom) {
-	TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
-	if (starHall) {
-	  LOG_INFO << " BTofGeometry initialization ... " << endm;
-	  btofGeom = new StBTofGeometry("btofGeometry","btofGeometry");
-	  if (isMC) btofGeom->SetMCOn();
-	  else      btofGeom->SetMCOff();
-	  Int_t Debug = mydb->Debug();
-	  mydb->SetDebug(0);
-	  btofGeom->Init(mydb, starHall);
-	  mydb->SetDebug(Debug);
-	  mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
+	Int_t Debug = mydb->Debug();
+#if 0
+	if (gGeoManager) {
+	    LOG_INFO << " BTofGeometry initialization from VMC geometry ... " << endm;
+	    btofGeom = new StBTofGeometry("btofGeometry","btofGeometry");
+	    if (isMC) btofGeom->SetMCOn();
+	    else      btofGeom->SetMCOff();
+	    mydb->SetDebug(0);
+	    btofGeom->Init(mydb,0,gGeoManager);
+	} else {
+#endif
+	  TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
+	  if (starHall) {
+	    LOG_INFO << " BTofGeometry initialization ... " << endm;
+	    btofGeom = new StBTofGeometry("btofGeometry","btofGeometry");
+	    if (isMC) btofGeom->SetMCOn();
+	    else      btofGeom->SetMCOff();
+	    mydb->SetDebug(0);
+	    btofGeom->Init(mydb, starHall);
+	  }
+#if 0
 	}
+#endif
+	mydb->SetDebug(Debug);
+	mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
       }
       if (btofGeom) {btofList  = new StBtofHitList; btofList->initRun();} // dongx
     } else {
