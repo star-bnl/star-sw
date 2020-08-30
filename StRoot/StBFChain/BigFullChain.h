@@ -2010,7 +2010,8 @@ Bfc_st BFC[] = { // standard chains
   {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
   {"PicoVtxVpd"     ,"","","-PicoVtxDefault"             ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
   {"PicoVtxVpdOrDefault","","","-PicoVtxDefault,-PicoVtxVpd"
-   ,                                                     "" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+   ,                                                      "" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxFXT"     ,"","","-PicoVtxDefault"    ,"" ,"","pico Vtx constraint on FXT [198,202] mode",kFALSE},
   {"PicoCovMtxSkip" ,"","",""       ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
   {"PicoCovMtxWrite","","","-PicoCovMtxSkip"   ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"femtoDst"    ,"","","KFPInter","StFemtoDstMaker"
