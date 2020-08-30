@@ -26,8 +26,8 @@
 *              All DSM and QT crate definitions are now in trgCrateDefs.h
 *              An include line joins crate definitions with trigger block defs.
 ******************************************************************************/
-#include "trgCrateDefs.h"
-#include "daqFormats.h"
+#include "StRoot/RTS/trg/include/trgCrateDefs.h"
+//#include "StRoot/RTS/include/daqFormats.h"
 #define FORMAT_VERSION        0x17072645      /* Format: yymmddvv */
 #define MAX_TRG_BLK_SIZE          122896      /* Current total: 113.25k bytes for pre/post non-zero suppressed data.  Allow 120k */
 #define MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
