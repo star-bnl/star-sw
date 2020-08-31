@@ -2096,28 +2096,29 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
   TimeCoordinate += mDb->tZero()/mDb->microsecondsPerTimebin();
   PadtransPerTimebin = (int) mParam->numberOfDriftSteps() / mDb->numberOfTimebins();
   PadtransLower= (int) (TimeCoordinate*PadtransPerTimebin);
-
-  if ( TimeCoordinate > mDb->numberOfTimebins() || TimeCoordinate <= 0 ) 
+  
+  if ( TimeCoordinate > mDb->numberOfTimebins() || TimeCoordinate <= 0 || PadtransLower >= mParam->numberOfDriftSteps() - 1 ) 
     {
       // exceeds table dimensions
       return FALSE;
     }
-
+  
   /* linear interpolation in radius table */
-  Peak->Rad=pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
-    -(pRadius[iRow + mDb->numberOfPadrowsPerSide()*(PadtransLower)]
-      -pRadius[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)])/2;
+  Int_t irow = iRow%10;
+  Peak->Rad=pRadius[irow + mDb->numberOfPadrowsPerSide() * PadtransLower]
+    -(pRadius[irow + mDb->numberOfPadrowsPerSide()*(PadtransLower)]
+      -pRadius[irow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)])/2;
 
-  if ( pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower] == 0 )
+  if ( pRadius[irow + mDb->numberOfPadrowsPerSide() * PadtransLower] == 0 )
     {
       // outside FTPC sensitive region
       return FALSE;
     }
   
    /* linear interpolation in deflection table */
-  PhiDeflect=pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
-    +(pDeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]
-      -pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower])/2;
+  PhiDeflect=pDeflection[irow + mDb->numberOfPadrowsPerSide() * PadtransLower]
+    +(pDeflection[irow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]
+      -pDeflection[irow + mDb->numberOfPadrowsPerSide() * PadtransLower])/2;
 
     
   /* calculate phi angle from pad position */
@@ -2158,19 +2159,19 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
       
       PadtransLower= (int) (TimeCoordinate*PadtransPerTimebin);
       
-      if ( TimeCoordinate > mDb->numberOfTimebins() || TimeCoordinate <= 0 ) 
+      if ( TimeCoordinate > mDb->numberOfTimebins() || TimeCoordinate <= 0 || PadtransLower >= mParam->numberOfDriftSteps() - 1 ) 
 	{
 	  // exceeds table dimensions
 	  return FALSE;
 	}
       
       /* linear interpolation in radius table */
+      Int_t irow = iRow%10;
+      Peak->Rad=pRadius[irow + mDb->numberOfPadrowsPerSide() * PadtransLower]
+	-(pRadius[irow + mDb->numberOfPadrowsPerSide()*(PadtransLower)]
+	  -pRadius[irow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)])/2;
       
-      Peak->Rad=pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
-	-(pRadius[iRow + mDb->numberOfPadrowsPerSide()*(PadtransLower)]
-	  -pRadius[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)])/2;
-      
-      if ( pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower] == 0 )
+      if ( pRadius[irow + mDb->numberOfPadrowsPerSide() * PadtransLower] == 0 )
 	{
 	  // outside FTPC sensitive region
 	  return FALSE;
@@ -2179,9 +2180,9 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
       // calculate new corrected deflection angle and phi 
       
       /* linear interpolation in deflection table */
-      PhiDeflect=pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
-	+(pDeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]
-	  -pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower])/2;
+      PhiDeflect=pDeflection[irow + mDb->numberOfPadrowsPerSide() * PadtransLower]
+	+(pDeflection[irow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]
+	  -pDeflection[irow + mDb->numberOfPadrowsPerSide() * PadtransLower])/2;
       
       
       /* calculate phi angle from pad position */
