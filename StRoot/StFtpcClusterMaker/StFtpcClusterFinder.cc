@@ -2104,7 +2104,7 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
     }
   
   /* linear interpolation in radius table */
-  Int_t irow = iRow%10;
+  Int_t irow = iRow%mDb->numberOfPadrowsPerSide();
   Peak->Rad=pRadius[irow + mDb->numberOfPadrowsPerSide() * PadtransLower]
     -(pRadius[irow + mDb->numberOfPadrowsPerSide()*(PadtransLower)]
       -pRadius[irow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)])/2;
@@ -2166,7 +2166,7 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
 	}
       
       /* linear interpolation in radius table */
-      Int_t irow = iRow%10;
+      Int_t irow = iRow%mDb->numberOfPadrowsPerSide();
       Peak->Rad=pRadius[irow + mDb->numberOfPadrowsPerSide() * PadtransLower]
 	-(pRadius[irow + mDb->numberOfPadrowsPerSide()*(PadtransLower)]
 	  -pRadius[irow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)])/2;
