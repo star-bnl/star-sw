@@ -19,5 +19,8 @@
 # /star/u/fisyak/bin/putDV2DBcron.csh
  50 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * * csh -x /star/u/fisyak/bin/putDV2DBcron.csh MAILTO=""
 # /star/u/fisyak/bin/JobSubmitcron.csh
- 59 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * * csh -x /star/u/fisyak/bin/JobSubmitcron.csh | tee  ~/reco/2020/TFG19m/RF/11p5GeV.B/JobSubmitcron.`date +%m%d%y%H`.log MAILTO=""
- 0 0,6,12,18 * * * csh -x /star/u/fisyak/bin/rsynchPicocron.csh  MAILTO=""
+ 59 0,2,4,6,8,10,12,14,16,18,20,22 * * * csh -x /star/u/fisyak/bin/JobSubmitcron.csh  MAILTO=""
+# /star/u/fisyak/bin/JobSubmit2020_26p5GeV_fixedTarget.csh
+ 39 0,2,4,6,8,10,12,14,16,18,20,22 * * * csh -x /star/u/fisyak/bin/JobSubmit2020_26p5GeV_fixedTarget.csh  MAILTO=""
+# /star/u/fisyak/bin/rsynchPicocron.csh
+# 0 0,2,4,6,8,10,12,14,16,18,20,22 * * * csh -x /star/u/fisyak/bin/rsynchPicocron.csh  MAILTO=""

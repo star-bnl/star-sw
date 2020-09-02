@@ -27,8 +27,8 @@ foreach d (`ls -1d ???/2*`)
     continue;
   endif
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber63 ~/xml/daq_2020StiCA.Minuit.TFG19m.xml
-#  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2020StiCA.Minuit.TFG20a.xml
-  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber63 ~/xml/daq_2020StiCA.Minuit.TFG20a.xml
+   /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2020StiCA.Minuit.TFG20a.xml
+#  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber63 ~/xml/daq_2020StiCA.Minuit.TFG20a.xml
   touch Submitted
   cd -
 end

@@ -352,6 +352,7 @@ foreach done (`ls -1d ???/*/Done`)
   endif
   cd -;
 end
+sleep 60; 
 touch `grep total ???/2*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'`
 ################################################################################
 root.exe -q -b 'Chain.C+("*/*/*picoDst.root","PicoDst")' | tee Chain.logxf
