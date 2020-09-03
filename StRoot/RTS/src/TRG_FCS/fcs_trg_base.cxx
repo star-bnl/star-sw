@@ -170,16 +170,16 @@ void fcs_trg_base::init(const char* fname)
 	fcs_readPresMaskFromText=0;
 
 	// stage2 params (defaults are from Akio's code)
-	EM_HERATIO_THR = 32 ;	// or 128*(1/4)
+	EM_HERATIO_THR = 32 ;  // or 128*(1/4)
 	HAD_HERATIO_THR = 32 ;
-	EMTHR1 = 16 ;
-	EMTHR2 = 32 ;
-	EMTHR3 = 48 ;
-	HADTHR1 = 16 ;
-	HADTHR2 = 32 ;
-	HADTHR3 = 48 ;
-	JETTHR1 = 32 ;
-	JETTHR2 = 64 ;
+	EMTHR1 = 32 ;
+	EMTHR2 = 48 ;
+	EMTHR3 = 64 ;
+	HADTHR1 = 32 ;
+	HADTHR2 = 48 ;
+	HADTHR3 = 64 ;
+	JETTHR1 = 64 ;
+	JETTHR2 = 128;
 	ETOTTHR = 10 ;
 	HTOTTHR = 10 ;
 
