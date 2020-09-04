@@ -465,7 +465,7 @@ Cosmics days:
 grep Cosmic ~/bin/RunXXDefs.pm | egrep '2020-0[6-8]' | awk -F\' '{printf("%i\n",($8-21000000)/1000)}' | sort -u | xargs
 ================================================================================
 dEdx production
-foreach d (`ls -1d ???`)
+foreach d (`ls -1d *GeV*/???`)
   cd $d;
   if (-r Done) then
     cd -
@@ -481,6 +481,6 @@ foreach d (`ls -1d ???`)
     cd -;
     continue;
   endif
-  lsf63 ~/xml/daq_2020StiCA.Minuit.TFG20g.xml
+  lsf6X ~/xml/daq_2020StiCA.Minuit.TFG20g.xml
   cd -
 end

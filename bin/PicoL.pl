@@ -106,6 +106,7 @@ if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/) {
   elsif ($pwd =~ /2020\/26p5GeV_fixedTarget/) {$glob = "/2020/TFG20a/RF/26p5GeV_fixedTarget";}
   elsif ($pwd =~ /2020\/7p3GeV_fixedTarget/)  {$glob = "/2020/TFG20a/RF/7p3GeV_fixedTarget";}
   elsif ($pwd =~ /2020\/9p2GeV/)              {$glob = "/2020/TFG20a/RF/9p2GeV";}
+  elsif ($pwd =~ /2020\/7p7GeV/)              {$glob = "/2020/TFG20a/RF/7p7GeV";}
   
 }
 print "PICOPATH = $PICOPATH; days = $dayMin  - $dayMax : glob = $glob\n" if ($debug);
