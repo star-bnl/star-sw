@@ -125,7 +125,7 @@ class AliHLTTPCCAGBTracker
     AliHLTResizableArray<AliHLTTPCCAClusterData, 1, AliHLTFullyCacheLineAligned> fClusterData;
 
     double fTime; //* total time
-    static const int fNTimers = 25;
+    enum  {fNTimers = 25};
     double fStatTime[fNTimers]; //* timers
     int fStatNEvents;    //* n events proceed
     int fFirstSliceHit[100]; // hit array

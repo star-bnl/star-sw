@@ -91,7 +91,14 @@ void AliHLTTPCCALooperMerger::FillSegments()
     float AB_xy = sqrt( (x_seg_1_g-x_seg_3_g)*(x_seg_1_g-x_seg_3_g) + (y_seg_1_g-y_seg_3_g)*(y_seg_1_g-y_seg_3_g) );
     float BC_xy_dn = sqrt( (x_dn_r_g-x_seg_1_g)*(x_dn_r_g-x_seg_1_g) + (y_dn_r_g-y_seg_1_g)*(y_dn_r_g-y_seg_1_g) );
     float BC_xy_up = sqrt( (x_up_r_g-x_seg_3_g)*(x_up_r_g-x_seg_3_g) + (y_up_r_g-y_seg_3_g)*(y_up_r_g-y_seg_3_g) );
-    float AB_xy_curve = 2*Cr*asin( 0.5*AB_xy/Cr );
+    float AB_xy_curve = 0;
+    if (TMath::Abs(Cr) > 0) {
+      if (TMath::Abs( 0.5*AB_xy/Cr ) < 1) {
+	AB_xy_curve = 2*Cr*asin( 0.5*AB_xy/Cr );
+      } else {
+	AB_xy_curve = 2*Cr*TMath::Sign( TMath::PiOver2(), 0.5*AB_xy/Cr );
+      }
+    }
     float sinPhi =  TMath::Min(1.0, TMath::Max(-1.0,0.5*BC_xy_dn/Cr));
     float BC_xy_dn_curve = 2*Cr*asin( sinPhi );
     sinPhi =  TMath::Min(1.0, TMath::Max(-1.0, 0.5*BC_xy_up/Cr));
