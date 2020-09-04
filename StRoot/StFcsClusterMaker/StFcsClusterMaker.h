@@ -1,5 +1,8 @@
-// $Id: StFcsClusterMaker.h,v 1.9 2019/11/22 17:26:17 akio Exp $
+// $Id: StFcsClusterMaker.h,v 1.10 2020/09/03 19:42:24 akio Exp $
 // $Log: StFcsClusterMaker.h,v $
+// Revision 1.10  2020/09/03 19:42:24  akio
+// moving sum & fit to StFcsWaveformFitMaker
+//
 // Revision 1.9  2019/11/22 17:26:17  akio
 // fix typo
 //
@@ -28,8 +31,8 @@
 // FCS codes in offline/upgrade/akio
 //
 
-#ifndef STROOT_STFCSPOINTMAKER_STFCSPOINTMAKER_H_
-#define STROOT_STFCSPOINTMAKER_STFCSPOINTMAKER_H_
+#ifndef STROOT_STFCSCLUSTERMAKER_STFCSCLUSTERMAKER_H_
+#define STROOT_STFCSCLUSTERMAKER_STFCSCLUSTERMAKER_H_
 
 #include <map>
 #include <vector>
@@ -57,8 +60,8 @@ public:
     //void SetReadMuDst(int v=1) {mReadMuDst=v;} 
     
     void setDebug(int v) {mDebug=v;}
-    void setEnergySelect(int v) {mEnergySelect=v;}
-    void setSumTimeBins(int min, int max) {mMinTB=min; mMaxTB=max;}
+    //void setEnergySelect(int v) {mEnergySelect=v;}
+    //void setSumTimeBins(int min, int max) {mMinTB=min; mMaxTB=max;}
 
     void set_NEIGHBOR_DISTANCE(float e, float h){m_NEIGHBOR_DISTANCE_Ecal=e; m_NEIGHBOR_DISTANCE_Hcal=h;}
     void set_DISTANCE_ADVANTAGE(float v){m_DISTANCE_ADVANTAGE=v;}
@@ -67,8 +70,10 @@ public:
     void set_TOWER_E_RATIO2SPLIT(float v){m_TOWER_E_RATIO2SPLIT=v;}
 
  private:
-    int makeSum(int det);
-    int makeFit(int det);
+    //move those to StFcsWaveformFitMaker   
+    //int makeSum(int det);
+    //int makeFit(int det);
+
     int makeCluster(int det);
 
     float isNeighbor(StFcsHit* hit,  StFcsCluster* clu);
@@ -77,15 +82,18 @@ public:
     void  updateCluster(StFcsCluster* clu);
     void  clusterMomentAnalysis(StFcsCluster* clu, float ecut=-1.0);
     float getSigma(StFcsCluster* clu, double thetam, float ecut);
-    void   categorization(StFcsCluster* clu);
+    void  categorization(StFcsCluster* clu);
 	
     StFcsDbMaker* mDb=0;               //!
     StFcsCollection* mFcsCollection=0; //!
 
     Int_t mDebug=0;                        //! debug opption
-    Int_t mEnergySelect=0;                 //! 0=MC(straight from dE), 1=Sum of timebins, 2=Fit
-    Int_t mMinTB=35;                       //! min timebin for sum
-    Int_t mMaxTB=60;                       //! max timebin for sum
+
+    //move those to StFcsWaveformFitMaker   
+    //Int_t mEnergySelect=0;                 //! 0=MC(straight from dE), 1=Sum of timebins, 2=Fit
+    //Int_t mMinTB=35;                       //! min timebin for sum
+    //Int_t mMaxTB=60;                       //! max timebin for sum
+
     Float_t m_NEIGHBOR_DISTANCE_Ecal=1.01; //! Distance to make it neignbor for Ecal and Hcal
     Float_t m_NEIGHBOR_DISTANCE_Hcal=1.42; //! 1.01 for 4 towers around
                                            //! 1.42 for 8 surrounding)
@@ -99,6 +107,6 @@ public:
     //                     //! 1= Just read Mudst and recalc positions based on DB values
 
     virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
-    ClassDef(StFcsClusterMaker, 0)
+    ClassDef(StFcsClusterMaker, 1)
 };
-#endif  // STROOT_STFCSPOINTMAKER_STFCSPOINTMAKER_H_
+#endif  // STROOT_STFCSCLUSTERMAKER_STFCSCLUSTERMAKER_H_

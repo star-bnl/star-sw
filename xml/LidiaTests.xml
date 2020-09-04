@@ -89,6 +89,14 @@ setenv StarEndMakerShell
 #echo $SCRATCH/${infile0}
 echo ${inputfile} | grep fzd
 if (! $?) then
+switch (${SUBMITTINGDIRECTORY})  # gcc
+  case "*gcc1010*":
+    exit 0;
+  breaksw
+  default:
+  breaksw
+endsw # 
+
   root4star -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${inputfile}\&quot;\) &gt;&amp; ${logFile}
 else
   root.exe -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${inputfile}\&quot;\) &gt;&amp; ${logFile}
