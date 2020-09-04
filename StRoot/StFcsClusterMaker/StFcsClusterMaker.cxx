@@ -1,6 +1,9 @@
-// $Id: StFcsClusterMaker.cxx,v 1.14 2019/11/22 17:26:17 akio Exp $
+// $Id: StFcsClusterMaker.cxx,v 1.15 2020/09/03 19:42:24 akio Exp $
 //
 // $Log: StFcsClusterMaker.cxx,v $
+// Revision 1.15  2020/09/03 19:42:24  akio
+// moving sum & fit to StFcsWaveformFitMaker
+//
 // Revision 1.14  2019/11/22 17:26:17  akio
 // fix typo
 //
@@ -95,10 +98,13 @@ Int_t StFcsClusterMaker::Make() {
 	return kStWarn;	
     }
     
+    /*  move this to StFcsWaveformFitMaker
     for(int det=0; det<=kFcsNDet; det++) {
       if      (mEnergySelect==1) {makeSum(det);}
       else if (mEnergySelect==2) {makeFit(det);}
     }
+    */
+
     for(int det=0; det<=kFcsHcalSouthDetId; det++) {
       makeCluster(det);	
     }
@@ -106,6 +112,8 @@ Int_t StFcsClusterMaker::Make() {
     return kStOk;
 }
 
+//move those to StFcsWaveformFitMaker
+/* 
 int StFcsClusterMaker::makeSum(int det) {
   StSPtrVecFcsHit& hits = mFcsCollection->hits(det);
   int nhit=hits.size();
@@ -127,6 +135,7 @@ int StFcsClusterMaker::makeSum(int det) {
 int StFcsClusterMaker::makeFit(int det) {
   return 0;
 }
+*/
 
 int StFcsClusterMaker::makeCluster(int det) {
   StSPtrVecFcsHit&      hits = mFcsCollection->hits(det);

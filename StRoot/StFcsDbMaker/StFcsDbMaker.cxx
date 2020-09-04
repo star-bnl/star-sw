@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDbMaker.cxx,v 1.20 2020/07/24 17:23:31 akio Exp $
+ * $Id: StFcsDbMaker.cxx,v 1.21 2020/09/03 19:43:20 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.cxx,v $
+ * Revision 1.21  2020/09/03 19:43:20  akio
+ * Updating SC map and adding patchpanel & cable color map
+ *
  * Revision 1.20  2020/07/24 17:23:31  akio
  * EPD mip value from 1.6MeV to 2.0MeV
  *
@@ -94,6 +97,12 @@ Short_t mMap_crt[kFcsNDet][kFcsMaxId];
 Short_t mMap_slt[kFcsNDet][kFcsMaxId];
 Short_t mMap_dep[kFcsNDet][kFcsMaxId];
 Short_t mMap_ch [kFcsNDet][kFcsMaxId];
+Short_t mMap_ppb[kFcsNDet][kFcsMaxId];
+Short_t mMap_ppp[kFcsNDet][kFcsMaxId];
+Short_t mMap_pph[kFcsNDet][kFcsMaxId];
+Short_t mMap_wcol[kFcsNDet][kFcsMaxId];
+Short_t mMap_jcol[kFcsNDet][kFcsMaxId];
+
 //Reverse map                                                                                                                     
 Short_t mRMap_det[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];                                              
 Short_t mRMap_id [kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];                                              
@@ -110,9 +119,69 @@ Short_t mScMap_dep[kFcsNDet][kFcsMaxId];
 Short_t mScMap_bra[kFcsNDet][kFcsMaxId];
 Short_t mScMap_add[kFcsNDet][kFcsMaxId];
 Short_t mScMap_sipm[kFcsNDet][kFcsMaxId];
+Short_t mScMap_pp[kFcsNDet][kFcsMaxId];
+Short_t mScMap_j[kFcsNDet][kFcsMaxId];
 //Reverse SC map
 Short_t mRScMap_det[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxBranch][kFcsMaxAddr][kFcsMaxSiPM];
 Short_t mRScMap_id[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxBranch][kFcsMaxAddr][kFcsMaxSiPM];
+
+//PatchPanel Map
+const short EPPMap[8][6][3]={ // {dep#,low_ch/high_ch,pwr&ctrl row#}
+    {{20, 0, 1},{20, 1,-1},  //PPB1 P2,P3
+     { 0, 0, 2},{ 0, 1,-1},  //PPB1 P4,P5
+     { 1, 0, 3},{ 1, 1,-1}}, //PPB1 P6,P7
+    {{ 2, 0,-2},{ 2, 1,-1},  //PPB2 P2,P3
+     { 3, 0,-2},{ 3, 1,-1},  //PPB2 P4,P5
+     { 4, 0,-2},{ 4, 1,-1}}, //PPB2 P6,P7
+    {{22, 0, 4},{23, 0,-1},  //PPB3 P2,P3
+     { 5, 0, 5},{ 5, 1,-1},  //PPB3 P4,P5
+     { 6, 0, 6},{ 6, 1,-1}}, //PPB3 P6,P7
+    {{ 7, 0, 7},{ 7, 1,-1},  //PPB4 P2,P3
+     { 8, 0, 8},{ 8, 1,-1},  //PPB4 P4,P5
+     { 9, 0, 9},{ 9, 1,-1}}, //PPB4 P6,P7
+    {{10, 0,10},{10, 1,-1},  //PPB5 P2,P3
+     {11, 0,11},{11, 1,-1},  //PPB5 P4,P5
+     {12, 0,12},{12, 1,-1}}, //PPB5 P6,P7
+    {{13, 0,13},{13, 1,-1},  //PPB6 P2,P3
+     {14, 0,14},{14, 1,-1},  //PPB6 P4,P5
+     {22, 1,15},{23, 1,-1}}, //PPB6 P6,P7
+    {{15, 0,-2},{15, 1,-1},  //PPB7 P2,P3
+     {16, 0,-2},{16, 1,-1},  //PPB7 P4,P5
+     {17, 0,-2},{17, 1,-1}}, //PPB7 P6,P7
+    {{18, 0,16},{18, 1,-1},  //PPB8 P2,P3
+     {19, 0,17},{19, 1,-1},  //PPB8 P4,P5
+     {21, 0,-1},{21, 1,-1}}  //PPB8 P6,P7
+};
+const short HPPMap[4][6][3]={ // {dep#,low_ch/high_ch,pwr&ctrl row#}
+    {{ 6, 0, 1},{ 6, 1,-1},  //PPB1 P2,P3
+     { 0, 0, 2},{ 1, 0,-1},  //PPB1 P4,P5
+     {-1,-1,-1},{-1,-1,-1}}, //PPB1 P6,P7
+    {{ 2, 0, 3},{ 0, 1,-1},  //PPB2 P2,P3
+     { 1, 1, 4},{ 2, 1,-1},  //PPB2 P4,P5
+     { 8, 0, 5},{-1,-1,-1}}, //PPB2 P6,P7
+    {{ 8, 1, 6},{-1,-1,-1},  //PPB3 P2,P3
+     { 3, 0, 7},{ 4, 0,-1},  //PPB3 P4,P5
+     { 5, 0, 8},{ 3, 1,-1}}, //PPB3 P6,P7
+    {{ 4, 1, 9},{ 5, 1,-1},  //PPB4 P2,P3
+     { 7, 0,10},{ 7, 1,-1},  //PPB4 P4,P5
+     {-1,-1,-1},{-1,-1,-1}}  //PPB4 P6,P7
+};
+Short_t	EMapPPB[24][2];
+Short_t EMapPPP[24][2];
+Short_t EMapSCDEP[17];
+Short_t EMapSCBRA[17];
+Short_t EMapSCPP[17];
+Short_t EMapSCJ[17];
+Short_t	HMapPPB[24][2];
+Short_t HMapPPP[24][2];
+Short_t HMapSCDEP[10];
+Short_t HMapSCBRA[10];
+Short_t HMapSCPP[10];
+Short_t HMapSCJ[10];
+
+char* colW[4]={"Green ","Brown ","Orange","Blue  "};
+char* colJ[8]={"Blue  ","Orange","Violet","Yellow",
+	       "Green ","Red   ","Grey  ","Black "};
 
 ClassImp(StFcsDbMaker)
 
@@ -544,6 +613,7 @@ int StFcsDbMaker::getNDep(Int_t ehp, Int_t ns) const{
     case 1: return 1;
     case 2: return 1;
     case 3: return 1;
+    default: return 0;
     }
   }else{
     switch(ehp){
@@ -551,38 +621,124 @@ int StFcsDbMaker::getNDep(Int_t ehp, Int_t ns) const{
     case 1: return 9;
     case 2: return 6;
     case 3: return 3;
+    default: return 0;
     }
   }
 }
+    
+int StFcsDbMaker::jacketColor(int ehp, int dep, int ch){
+    // char* colJ[8]={"Blue  ","Orange","Violet","Yellow",
+    //                "Green ","Red   ","Grey  ","Black "};
+    switch(ehp){
+    case 0: 
+	if(dep<=19) return dep%5;
+	switch(dep){
+	case 20: case 21: return ch/4;
+	case 22: return 6;
+	case 23: return 5;
+	default: return -1;
+	}
+    case 1:	
+	switch(dep){
+	case 0: return 0;
+	case 1: return 1;
+	case 2: return 2;
+	case 3: return 3;
+	case 4: return 4;
+	case 5: return 6;
+	case 6: 
+	    if(ch<8 ) return 3;
+	    if(ch<16) return 4;
+	    if(ch<24) return 6;
+	    return -1;
+	case 7: 
+	    if(ch<8 ) return 0;
+	    if(ch<16) return 1;
+	    if(ch<24) return 2;
+	    return -1;
+	case 8: return 5;
+	default: return -1;
+	}
+    default:
+	return -1;
+    }
+}
+    
+
+
+void  StFcsDbMaker::makePPMap(){
+    for(int b=1; b<=8; b++){
+	for(int p=2; p<=7; p++){
+	    short dep = EPPMap[b-1][p-2][0];
+	    short lh  = EPPMap[b-1][p-2][1];
+	    short scr = EPPMap[b-1][p-2][2];
+	    if(dep>=0){
+		EMapPPB[dep][lh]=b;
+		EMapPPP[dep][lh]=p;
+		if(scr>0){
+		    EMapSCDEP[scr-1]=dep;
+		    EMapSCBRA[scr-1]=lh;
+		    EMapSCPP[scr-1]=b;
+		    EMapSCJ[scr-1]=p/2;
+		}
+	    }
+	}
+    }
+    for(int b=1; b<=4; b++){
+	for(int p=2; p<=7; p++){
+	    short dep = HPPMap[b-1][p-2][0];
+	    short lh  = HPPMap[b-1][p-2][1];
+	    short scr = HPPMap[b-1][p-2][2];
+	    if(dep>=0){
+		HMapPPB[dep][lh]=b;
+		HMapPPP[dep][lh]=p;
+		if(scr>0){
+		    HMapSCDEP[scr-1]=dep;
+		    HMapSCBRA[scr-1]=lh;
+		    HMapSCPP[scr-1]=b;
+		    HMapSCJ[scr-1]=p/2;
+		}
+	    }
+	}
+    }
+}
 
 void  StFcsDbMaker::makeMap(){
+    makePPMap();
     int ehp,crt,slt,dep,ch,det,id;
     for(int det=0; det<kFcsNDet; det++){
       for(int id=0; id<kFcsMaxId; id++){
 	mMap_ehp[det][id]=-1;
 	mMap_ch[det][id]=-1;
+	mMap_ppb[det][id]=-1;
+	mMap_ppp[det][id]=-1;
+	mMap_pph[det][id]=-1;
+	mMap_wcol[det][id]=-1;
+	mMap_jcol[det][id]=-1;
 	mScMap_ehp[det][id]=-1;
+	mScMap_pp[det][id]=-1;
+	mScMap_j[det][id]=-1;
       }
     }
     for(int ehp=0; ehp<kFcsEHP; ehp++){
       for(int ns=0; ns<kFcsNorthSouth; ns++){
-	for(int dep=0; dep<kFcsMaxDepBd; dep++){
+        for(int dep=0; dep<kFcsMaxDepBd; dep++){
 	  for(int ch=0; ch<kFcsMaxDepCh; ch++){
 	    mRMap_det[ehp][ns][dep][ch]=6;
 	    mRMap_id[ehp][ns][dep][ch]=-1;
 	  }
 	  for(int bra=0; bra<kFcsMaxBranch; bra++){
-	      for(int add=0; add<kFcsMaxAddr; add++){
-		  for(int sipm=0; sipm<kFcsMaxSiPM; sipm++){
-		      mRScMap_det[ehp][ns][dep][bra][add][sipm]=-1;
-		  }
+	    for(int add=0; add<kFcsMaxAddr; add++){
+	      for(int sipm=0; sipm<kFcsMaxSiPM; sipm++){
+		mRScMap_det[ehp][ns][dep][bra][add][sipm]=-1;
+	      }
 	    }
 	  }
 	}
       }
     }
     
-    //Ecal                                                                                                                            
+    //Ecal                                                                                                                        
     ehp=0;
     for(int ns=0; ns<2; ns++){
         id=0;
@@ -610,9 +766,25 @@ void  StFcsDbMaker::makeMap(){
 		mRMap_crt[ehp][ns][dep][ch] = crt;
 		mRMap_slt[ehp][ns][dep][ch] = slt;
 		
+		//cable
+		int lh= ch/16;		
+		int b = EMapPPB[dep][lh];
+		int p = EMapPPP[dep][lh];
+		int h = (ch%16)/4 + (p-2)*4 + 1;
+		int w = ch%4;
+		int j = jacketColor(ehp,dep,ch);
+		mMap_ppb[det][id] = b; 
+		mMap_ppp[det][id] = p; 
+		mMap_pph[det][id] = h;
+		mMap_wcol[det][id] = w; 
+		mMap_jcol[det][id] = j;
+
 		//SC map
-		unsigned short scdep=(row-1)/2;
-		unsigned short bra=0;
+		int scr=(row-1)/2;
+		unsigned short scdep=EMapSCDEP[scr];
+		unsigned short bra=EMapSCBRA[scr];
+		unsigned short pp=EMapSCPP[scr];
+		unsigned short pj=EMapSCJ[scr];;
 		unsigned short add=(col-1)/2;
 		unsigned short sipm;
 		if(ns==0){ 
@@ -626,6 +798,8 @@ void  StFcsDbMaker::makeMap(){
 		mScMap_bra[det][id]  = bra;
 		mScMap_add[det][id]  = add;
 		mScMap_sipm[det][id] = sipm;
+		mScMap_pp[det][id]   = pp;
+		mScMap_j[det][id]    = pj;
 		mRScMap_det[ehp][ns][scdep][bra][add][sipm]=det;
 		mRScMap_id[ehp][ns][scdep][bra][add][sipm]=id;
 
@@ -634,7 +808,7 @@ void  StFcsDbMaker::makeMap(){
         }
     }
 
-    //Hcal                                                                                                                            
+    //Hcal
     ehp=1;
     for(int ns=0; ns<2; ns++){
 	id=0;
@@ -663,24 +837,39 @@ void  StFcsDbMaker::makeMap(){
 		mRMap_crt[ehp][ns][dep][ch] = crt;
 		mRMap_slt[ehp][ns][dep][ch] = slt;
 
+		//cable
+		int lh= ch/16;		
+		int b = HMapPPB[dep][lh];
+		int p = HMapPPP[dep][lh];
+		int h = (ch%16)/4 + (p-2)*4 + 1;
+		int w = ch%4;
+		int j = jacketColor(ehp,dep,ch);
+		mMap_ppb[det][id] = b; 
+		mMap_ppp[det][id] = p; 
+		mMap_pph[det][id] = h;
+		mMap_wcol[det][id] = w; 
+		mMap_jcol[det][id] = j;
+
 		//SC map
-		const unsigned short scDepMap[10]={6,0,0,1,2,3,3,4,5,7};
-		const unsigned short scBraMap[10]={0,0,1,0,0,0,1,0,0,0};
 		unsigned short feerow = (row-1)/2;
-		unsigned short scdep=scDepMap[feerow];
-		unsigned short bra=scBraMap[feerow];
+		unsigned short scdep=HMapSCDEP[feerow];
+		unsigned short bra=HMapSCBRA[feerow];
+		unsigned short pp=HMapSCPP[feerow];
+		unsigned short pj=HMapSCJ[feerow];
 		unsigned short add=col-1;
 		unsigned short sipm;
 		if(ns==0){ 
-		    sipm = row%2;
-		}else{       
 		    sipm = (row-1)%2;
+		}else{       
+		    sipm = row%2;
 		}
 		mScMap_ehp[det][id]  = ehp;
 		mScMap_ns[det][id]   = ns;
 		mScMap_dep[det][id]  = scdep;
 		mScMap_bra[det][id]  = bra;
 		mScMap_add[det][id]  = add;
+		mScMap_pp[det][id]   = pp;
+		mScMap_j[det][id]    = pj;
 		mScMap_sipm[det][id] = sipm;
 		mRScMap_det[ehp][ns][scdep][bra][add][sipm]=det;
 		mRScMap_id[ehp][ns][scdep][bra][add][sipm]=id;
@@ -744,7 +933,7 @@ void  StFcsDbMaker::makeMap2019(){
     }
   }
   
-  //Ecal                                                                                                                            
+  //Ecal
   ehp=0;
   id=0;
   det = ns;	
@@ -759,7 +948,8 @@ void  StFcsDbMaker::makeMap2019(){
       mMap_crt[det][id] = crt; 
       mMap_slt[det][id] = slt; 
       mMap_dep[det][id] = dep; 
-      mMap_ch [det][id] = c[dep] ; 
+      mMap_ch [det][id] = c[dep] ;
+
       mRMap_det[ehp][ns][dep][c[dep]] = det;
       mRMap_id [ehp][ns][dep][c[dep]] = id ;
       mRMap_crt[ehp][ns][dep][c[dep]] = crt;
@@ -769,7 +959,7 @@ void  StFcsDbMaker::makeMap2019(){
     }
   }
   
-  //Hcal                                                                                                                            
+  //Hcal                                                                                                                          
   ehp=1;
   id=0;
   det = ns + 2;
@@ -842,23 +1032,40 @@ void StFcsDbMaker::getEPDfromId(Int_t det, Int_t id, Int_t &pp, Int_t &tt){
     }
 }
 
-void StFcsDbMaker::printHeader(FILE* f, int flag=0){
+void StFcsDbMaker::printHeader(FILE* f, int flag=0, int csv=0){
   fprintf(f,"### Detector\n");
-  fprintf(f,"#det : 0/1=ECal N/S, 2/3=Hcal N/S , 4/5=PRS N/S\n");
-  fprintf(f,"#id  : 0~747 for Ecal, 0~259 for Hcal\n");
-  fprintf(f,"#row : 1~34 for Ecal, 1~20 for Hcal\n");
-  fprintf(f,"#col : 1~22 for Ecal, 1~13 for Hcal\n");
+  fprintf(f,"#det : 0/1=ECal-N/S 2/3=Hcal-N/S  4/5=PRS-N/S\n");
+  fprintf(f,"#id  : 0~747 for Ecal  0~259 for Hcal\n");
+  fprintf(f,"#row : 1~34 for Ecal  1~20 for Hcal\n");
+  fprintf(f,"#col : 1~22 for Ecal  1~13 for Hcal\n");
   fprintf(f,"### Readout\n");
-  fprintf(f,"#ehp : 0=ECal, 1=Hcal, 2=PRS\n");
-  fprintf(f,"#ns  : 0=north, 1=south\n");
-  fprintf(f,"#crt : 0=EcalNorth, 1=MixNorth, 2=Main, 3=MixSouth, 4=EcalSouth\n");
+  fprintf(f,"#ehp : 0=ECal  1=Hcal  2=PRS\n");
+  fprintf(f,"#ns  : 0=north  1=south\n");
+  fprintf(f,"#crt : 0=EcalNorth  1=MixNorth  2=Main  3=MixSouth  4=EcalSouth\n");
   fprintf(f,"#slt : 0~19\n");
-  fprintf(f,"#dep : 0~24 for Ecal, 0~7 for Hcal, 0~3 for Pres\n");
+  fprintf(f,"#dep : 0~24 for Ecal  0~7 for Hcal  0~3 for Pres\n");
   fprintf(f,"#ch  : 0~31 for all DEP\n");
-  if(flag==0){
-      fprintf(f,"#det id row col     ehp  ns crt slt dep  ch\n");
+  fprintf(f,"### Patchpanel and cable\n");  
+  fprintf(f,"#FRow: FEEBd Row = (row-1)/2   [0-16 for Ecal  0-9  for Hcal]\n");
+  fprintf(f,"#FCol: FEEBd Col = FEEBd Addr  [0-10 for Ecal  0-12 for Hcal]\n");
+  fprintf(f,"#SiPM: FEEBd Ch#               [0-3  for Ecal  0-1  for Hcal]\n");
+  fprintf(f,"#ppb : PatchPanel Board#       [1~8  for Ecal  1-4  for Hcal]\n");
+  fprintf(f,"#ppp : PatchPanel MDR cable P# [2-7]\n");
+  fprintf(f,"#pph : PatchPanel Header#      [1-24]\n");
+  fprintf(f,"#jcol: Cable Jacket color\n");
+  fprintf(f,"#wcol: Cable Wire color\n");  
+  if(csv==0){
+      if(flag==0){
+	  fprintf(f,"#det id row col     ehp  ns crt slt dep  ch   Frow Fcol SiPM ppb ppp pph jcol   wcol\n");
+      }else{
+	  fprintf(f,"#ehp ns dep  ch   crt slt   det  id row col   Frow Fcol SiPM ppb ppp pph jcol   wcol\n");
+      }
   }else{
-      fprintf(f,"#ehp ns dep  ch   crt slt   det  id row col\n");
+      if(flag==0){
+	  fprintf(f,"#det,id,row,col,ehp,ns,crt,slt,dep,ch,Frow,Fcol,SiPM,ppb,ppp,pph,jcol,wcol\n");
+      }else{
+	  fprintf(f,"#ehp,ns,dep,ch,crt,slt,det,id,row,col,Frow,Fcol,SiPM,ppb,ppp,pph,jcol,wcol\n");
+      }
   }
 }
 
@@ -892,8 +1099,11 @@ void StFcsDbMaker::printHeader4(FILE* f, int flag=0){
   fprintf(f,"#branch     : 0~1\n");
   fprintf(f,"#switch addr: 0~15\n");
   fprintf(f,"#SiPM#      : 0~3 for Ecal, 0~1 for Hcal&Pres\n");
+  fprintf(f,"### Patchpanel and cable\n");  
+  fprintf(f,"#ppb : PatchPanel Board# (1~8 for ecal, 1-4 for hcal)\n");
+  fprintf(f,"#J   : PatchPanel SC conection (J1~J3)\n");
   if(flag==0){
-      fprintf(f,"#det id row col     ehp  ns dep bra add SiPM\n");
+      fprintf(f,"#det id row col     ehp  ns dep bra add SiPM  ppb  J\n");
   }else{
       fprintf(f,"#ehp  ns dep bra add SiPM   det  id row col\n");
   }
@@ -903,21 +1113,22 @@ void StFcsDbMaker::printMap(){
     int ehp,ns,crt,slt,dep,ch,det,id,row,col;
     
     FILE *f1  = fopen("fcsMap.txt","w");           printHeader(f1);
-    FILE *f1e = fopen("ecal_readout_map.csv","w"); printHeader(f1e);
-    FILE *f1h = fopen("hcal_readout_map.csv","w"); printHeader(f1h);
-    FILE *f1p = fopen("pres_readout_map.csv","w"); printHeader(f1p);
-    
+    FILE *f1c = fopen("fcsMap.csv","w");           printHeader(f1c,0,1);
+    FILE *f1e = fopen("fcs_ecal_readout_map.csv","w"); printHeader(f1e);
+    FILE *f1h = fopen("fcs_hcal_readout_map.csv","w"); printHeader(f1h);
+    FILE *f1p = fopen("fcs_pres_readout_map.csv","w"); printHeader(f1p);    
     FILE *f2 = fopen("fcsMap2.txt","w");    printHeader2(f2);    
     FILE *f3 = fopen("fcsDepMap.txt","w");  printHeader(f3,1);    
-    FILE *f4 = fopen("fcsDepMap2.txt","w"); printHeader3(f4);
-    
+    FILE *f3c= fopen("fcsDepMap.csv","w");  printHeader(f3c,1,1);    
+    FILE *f4 = fopen("fcsDepMap2.txt","w"); printHeader3(f4);    
     FILE *f5  = fopen("fcsScMap.txt","w");    printHeader4(f5);
-    FILE *f5e = fopen("ecal_sc_map.csv","w"); printHeader4(f5e);
-    FILE *f5h = fopen("hcal_sc_map.csv","w"); printHeader4(f5h);
-    FILE *f5p = fopen("pres_sc_map.csv","w"); printHeader4(f5p);
+    FILE *f5e = fopen("fcs_ecal_sc_map.csv","w"); printHeader4(f5e);
+    FILE *f5h = fopen("fcs_hcal_sc_map.csv","w"); printHeader4(f5h);
+    FILE *f5p = fopen("fcs_pres_sc_map.csv","w"); printHeader4(f5p);
     FILE *f6  = fopen("fcsScRevMap.txt","w"); printHeader4(f6,1);
 
     FILE *f7  = fopen("fcsEpdMap.txt","w");    
+    FILE *fpp = fopen("fcsPPMap.txt","w");    
 
     char* EHP[3]={"Ecal","Hcal","Pres"};
     char* CRT[5]={"EN","MN","MA","MS","ES"};
@@ -931,14 +1142,38 @@ void StFcsDbMaker::printMap(){
 	for(row=1; row<=nRow(det); row++){
 	    for(col=1; col<=nColumn(det); col++){
 		if(mMap_ehp[det][id]>=0){
-		    fprintf(f1,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
+		    fprintf(f1,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d    %2d  %2d  %2d     %2d  P%1d H%02d %6s %6s\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
 			    mMap_ns [det][id], 
 			    mMap_crt[det][id],
 			    mMap_slt[det][id],
 			    mMap_dep[det][id],
-			    mMap_ch [det][id]); 
+			    mMap_ch [det][id],
+			    (row-1)/2,
+			    mScMap_add[det][id],
+			    mScMap_sipm[det][id],
+			    mMap_ppb[det][id],
+			    mMap_ppp[det][id],
+			    mMap_pph[det][id],
+			    colJ[mMap_jcol[det][id]],
+			    colW[mMap_wcol[det][id]]);
+		    fprintf(f1c,"%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%2d,%2d,%2d,%2d,P%1d,H%02d,%6s,%6s\n",
+			    det,id,row,col,
+			    mMap_ehp[det][id], 
+			    mMap_ns [det][id], 
+			    mMap_crt[det][id],
+			    mMap_slt[det][id],
+			    mMap_dep[det][id],
+			    mMap_ch [det][id],
+			    (row-1)/2,
+			    mScMap_add[det][id],
+			    mScMap_sipm[det][id],
+			    mMap_ppb[det][id],
+			    mMap_ppp[det][id],
+			    mMap_pph[det][id],
+			    colJ[mMap_jcol[det][id]],
+			    colW[mMap_wcol[det][id]]);
 		    fprintf(f1e,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
@@ -952,14 +1187,16 @@ void StFcsDbMaker::printMap(){
 			    mMap_dep[det][id],mMap_ch[det][id]);
 		}
 		if(mScMap_ehp[det][id]>=0){
-		    fprintf(f5,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
+		    fprintf(f5,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d    %2d   J%1d\n",
                             det,id,row,col,
                             mScMap_ehp[det][id],
                             mScMap_ns [det][id],
                             mScMap_dep[det][id],
                             mScMap_bra[det][id],
                             mScMap_add[det][id],
-                            mScMap_sipm[det][id]);
+                            mScMap_sipm[det][id],
+                            mScMap_pp[det][id],
+                            mScMap_j[det][id]);
 		    fprintf(f5e,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
                             det,id,row,col,
                             mScMap_ehp[det][id],
@@ -975,7 +1212,7 @@ void StFcsDbMaker::printMap(){
 	}
     }
     
-    //Hcal                                                                                                                            
+    //Hcal
     for(int ns=0; ns<2; ns++){
 	det=ns+2;
 	id=0;
@@ -983,14 +1220,38 @@ void StFcsDbMaker::printMap(){
 	for(row=1; row<=nRow(det); row++){
 	    for(col=1; col<=nColumn(det); col++){
 		if(mMap_ehp[det][id]>=0){
-		    fprintf(f1,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
+		    fprintf(f1,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d    %2d  %2d  %2d     %2d  P%1d H%02d %6s %6s\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
 			    mMap_ns[det][id], 
 			    mMap_crt[det][id],
 			    mMap_slt[det][id],
 			    mMap_dep[det][id],
-			    mMap_ch[det][id]); 
+			    mMap_ch[det][id],
+                            (row-1)/2,
+                            mScMap_add[det][id],
+                            mScMap_sipm[det][id],
+			    mMap_ppb[det][id],
+			    mMap_ppp[det][id],
+			    mMap_pph[det][id],
+			    colJ[mMap_jcol[det][id]],
+			    colW[mMap_wcol[det][id]]); 
+		    fprintf(f1c,"%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%2d,%2d,%2d,%2d,P%1d,H%02d,%6s,%6s\n",
+			    det,id,row,col,
+			    mMap_ehp[det][id], 
+			    mMap_ns[det][id], 
+			    mMap_crt[det][id],
+			    mMap_slt[det][id],
+			    mMap_dep[det][id],
+			    mMap_ch[det][id],
+                            (row-1)/2,
+                            mScMap_add[det][id],
+                            mScMap_sipm[det][id],
+			    mMap_ppb[det][id],
+			    mMap_ppp[det][id],
+			    mMap_pph[det][id],
+			    colJ[mMap_jcol[det][id]],
+			    colW[mMap_wcol[det][id]]); 
 		    fprintf(f1h,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
@@ -1004,14 +1265,16 @@ void StFcsDbMaker::printMap(){
 			    mMap_dep[det][id],mMap_ch[det][id]);
 		}
 		if(mScMap_ehp[det][id]>=0){
-		    fprintf(f5,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
+		    fprintf(f5,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d    %2d   J%1d\n",
                             det,id,row,col,
                             mScMap_ehp[det][id],
                             mScMap_ns [det][id],
                             mScMap_dep[det][id],
                             mScMap_bra[det][id],
                             mScMap_add[det][id],
-                            mScMap_sipm[det][id]);
+                            mScMap_sipm[det][id],
+                            mScMap_pp[det][id],
+                            mScMap_j[det][id]);
 		    fprintf(f5h,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
                             det,id,row,col,
                             mScMap_ehp[det][id],
@@ -1027,7 +1290,7 @@ void StFcsDbMaker::printMap(){
 	}
     }
     
-    //Prs                                                                                                                            
+    //Prs
     for(int ns=0; ns<2; ns++){
 	det=ns+4;
 	id=0;
@@ -1051,8 +1314,8 @@ void StFcsDbMaker::printMap(){
 			    mMap_slt[det][id],
 			    mMap_dep[det][id],
 			    mMap_ch[det][id]); 
-		    fprintf(f2,"%2s%02d%-02d-%02d ",
-			    CRT[mMap_crt[det][id]],mMap_slt[det][id],
+		    fprintf(f2,"%1d%02d-%02d%02d ",
+			    mMap_crt[det][id],mMap_slt[det][id],
 			    mMap_dep[det][id],mMap_ch[det][id]);
 		}
 		if(mScMap_ehp[det][id]>=0){
@@ -1104,19 +1367,43 @@ void StFcsDbMaker::printMap(){
 		    if(det>=0 && det<kFcsNDet){
 			row=getRowNumber(det,id);
 			col=getColumnNumber(det,id);
-			fprintf(f3,"%3d %3d %3d %3d   %2s %2d   %3d %3d %3d %3d\n",				    
-				ehp,ns,dep,ch,
-				CRT[crt],slt,
-				det,id,row,col);		
-			fprintf(f4,"%2s%03d-%02d/%02d ",DET[det],id,row,col);  
-		    }else{
-			/*
-			  fprintf(f3,"%3d %3d %3d %3d   %3s %3s   %3d %3d %3d %3d\n",
-			  ns,ehp,dep,ch,
-			  "-","-",-1,-1,-1,-1);
-			  fprintf(f4,"%2s%03d-%02d/%02d ","--",0,0,0);  
-			*/
+			if(ehp<2){
+ 			    fprintf(f3,"%3d %3d %3d %3d   %2s %2d   %3d %3d %3d %3d      %2d  %2d  %2d     %2d  P%1d H%02d %6s %6s\n",
+				    ehp,ns,dep,ch,
+				    CRT[crt],slt,
+				    det,id,row,col,
+				    (row-1)/2,
+				    mScMap_add[det][id],
+				    mScMap_sipm[det][id],
+				    mMap_ppb[det][id],
+				    mMap_ppp[det][id],
+				    mMap_pph[det][id],
+				    colJ[mMap_jcol[det][id]],
+				    colW[mMap_wcol[det][id]]); 
+			    fprintf(f3c,"%3d,%3d,%3d,%3d,%2s,%2d,%3d,%3d,%3d,%3d,%2d,%2d,%2d,%2d,P%1d,H%02d,%6s,%6s\n",
+				    ehp,ns,dep,ch,
+				    CRT[crt],slt,
+				    det,id,row,col,
+				    (row-1)/2,
+				    mScMap_add[det][id],
+				    mScMap_sipm[det][id],
+				    mMap_ppb[det][id],
+				    mMap_ppp[det][id],
+				    mMap_pph[det][id],
+				    colJ[mMap_jcol[det][id]],
+				    colW[mMap_wcol[det][id]]);
+			}else{
+ 			    fprintf(f3,"%3d %3d %3d %3d   %2s %2d   %3d %3d %3d %3d\n",
+				    ehp,ns,dep,ch,
+				    CRT[crt],slt,
+				    det,id,row,col);
+			    fprintf(f3c,"%3d,%3d,%3d,%3d,%2s,%2d,%3d,%3d,%3d,%3d\n",
+				    ehp,ns,dep,ch,
+				    CRT[crt],slt,
+				    det,id,row,col);
+			}
 		    }
+		    fprintf(f4,"%2s%03d-%02d/%02d ",DET[det],id,row,col);  
 		    if(ch%8==7) fprintf(f4,"\n");
 		}
 	    }
@@ -1170,13 +1457,62 @@ void StFcsDbMaker::printMap(){
 	}
     }
 
+    for(int ehp=0; ehp<2; ehp++){
+	int bmax=0;
+	if(ehp==0) {bmax=8; fprintf(fpp,"Ecal\n");}
+	if(ehp==1) {bmax=4; fprintf(fpp,"Hcal\n");}
+	fprintf(fpp,"PPB# P# DEP  Ch  T                                                              Pwr/ctrl Row#\n");    
+	for(int b=1; b<=bmax; b++){
+	    for(int p=2; p<=7; p++){
+		int ns =0;
+		int dep,lh,scr;
+		if(ehp==0){
+		    dep = EPPMap[b-1][p-2][0];
+		    lh  = EPPMap[b-1][p-2][1];
+		    scr = EPPMap[b-1][p-2][2];
+		}else{
+		    dep = HPPMap[b-1][p-2][0];
+		    lh  = HPPMap[b-1][p-2][1];
+		    scr = HPPMap[b-1][p-2][2];
+		}		    		
+		fprintf(fpp,"%2d %2d ",b,p);
+		if(lh>=0) {
+		    fprintf(fpp,"%2d  %02d-%02d  ",dep,lh*16,lh*16+15);
+		    for(int i=0; i<4; i++){
+			int t   = (p-2)*4+i;
+			int ch  = lh*16 + i*4;
+			int det = mRMap_det[ehp][ns][dep][ch];
+			int id  = mRMap_id[ehp][ns][dep][ch]; 
+			int row = getRowNumber(det,id);
+			int col = jacketColor(ehp,dep,ch);
+			if(id>=0) { 
+			    fprintf(fpp,"T%02d=R%02d-%6s  ",t,row,colJ[col]);
+			}else{
+			    fprintf(fpp,"T%02d=            ",t);
+			}
+		    }
+		}else{
+		    fprintf(fpp," -                                                                         ");
+		}
+		if(p%2==0) {
+		    fprintf(fpp,"J%1d   ",p/2);
+		    if(scr>0) fprintf(fpp,"%2d,%2d",scr*2-1,scr*2);
+		    else if(scr==-2) fprintf(fpp,"no power");
+		    else      fprintf(fpp,"-");
+		}
+		fprintf(fpp,"\n");
+	    }
+	}
+    }
 
     fclose(f1);
+    fclose(f1c);
     fclose(f1e);
     fclose(f1h);
     fclose(f1p);
     fclose(f2);
     fclose(f3);
+    fclose(f3c);
     fclose(f4);
     fclose(f5);
     fclose(f5e);
@@ -1184,6 +1520,7 @@ void StFcsDbMaker::printMap(){
     fclose(f5p);
     fclose(f6);
     fclose(f7);
+    fclose(fpp);
 }
 
 Float_t StFcsDbMaker::getEtGain(Int_t det, Int_t id) const{

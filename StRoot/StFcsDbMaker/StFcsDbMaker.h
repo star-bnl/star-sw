@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDbMaker.h,v 1.13 2020/05/29 18:53:40 akio Exp $
+ * $Id: StFcsDbMaker.h,v 1.14 2020/09/03 19:43:20 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.h,v $
+ * Revision 1.14  2020/09/03 19:43:20  akio
+ * Updating SC map and adding patchpanel & cable color map
+ *
  * Revision 1.13  2020/05/29 18:53:40  akio
  * Adding EPD as PRES maps, STAR coordinate for 4x4 trigger patch, renming map files to be used for DAQ as Tonko specifies
  *
@@ -153,9 +156,11 @@ class StFcsDbMaker : public StMaker {
   int  getNDep(Int_t ehp, int ns) const;
   
   void makeMap();
+  void makePPMap();
+  int  jacketColor(int ehp, int dep, int ch);
   void makeMap2019();
   void printMap();
-  void printHeader(FILE* f, int flag);
+  void printHeader(FILE* f, int flag, int csv);
   void printHeader2(FILE* f);
   void printHeader3(FILE* f);
   void printHeader4(FILE* f, int flag);
