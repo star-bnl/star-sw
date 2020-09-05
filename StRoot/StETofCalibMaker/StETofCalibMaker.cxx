@@ -38,6 +38,7 @@
  *
  *
  ***************************************************************************/
+#include <assert.h>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -75,7 +76,8 @@
 #include "tables/St_etofResetTimeCorr_Table.h"
 #include "tables/St_etofPulserTotPeak_Table.h"
 #include "tables/St_etofPulserTimeDiffGbtx_Table.h"
-
+//#define __PRINT__   kv.second->Print(); assert(TMath::Finite( kv.second->GetSumOfWeights()));
+#define __PRINT__
 namespace etofSlewing {
     const unsigned int nTotBins = 30;
 
@@ -155,7 +157,7 @@ StETofCalibMaker::Init()
 Int_t
 StETofCalibMaker::InitRun( Int_t runnumber )
 {
-    mRunYear = ( runnumber + 727000 ) / 1000000 + 1999;
+  mRunYear = GetDateTime().GetYear(); // ( runnumber + 727000 ) / 1000000 + 1999;
     LOG_INFO << "runnumber: " << runnumber << "  --> year: " << mRunYear << endm;
 
     TDataSet* dbDataSet = nullptr;
@@ -244,11 +246,11 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             mStatus[ channelToKey( i ) ] = status[ i ];
         }
     }
-
+    if (mDebug) {
     for( const auto& kv : mStatus ) {
-        LOG_DEBUG << "channel key: " << kv.first << " --> status = " << kv.second << endm;
+        LOG_INFO << "channel key: " << kv.first << " --> status = " << kv.second << endm;
     }
-
+    }
     // --------------------------------------------------------------------------------------------
 
     // timing window
@@ -327,12 +329,13 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             return kStFatal;
         }
     }
-
+    if (mDebug) {
     for( const auto& kv : mTimingWindow ) {
-        LOG_DEBUG << "AFCK address: 0x" << std::hex << kv.first << std::dec << " --> timing window from " << kv.second.first << " to " << kv.second.second << " ns" << endm;
+        LOG_INFO << "AFCK address: 0x" << std::hex << kv.first << std::dec << " --> timing window from " << kv.second.first << " to " << kv.second.second << " ns" << endm;
     }
     for( const auto& kv : mPulserWindow ) {
-        LOG_DEBUG << "AFCK address: 0x" << std::hex << kv.first << std::dec << " --> pulser window from " << kv.second.first << " to " << kv.second.second << " ns" << endm;
+        LOG_INFO << "AFCK address: 0x" << std::hex << kv.first << std::dec << " --> pulser window from " << kv.second.first << " to " << kv.second.second << " ns" << endm;
+    }
     }
     LOG_INFO << "pulser time peak at " << mPulserPeakTime << " ns" << endm;
     // --------------------------------------------------------------------------------------------
@@ -460,11 +463,11 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             }
         }
     }
-
+    if (mDebug) {
     for( const auto& kv : mSignalVelocity ) {
-        LOG_DEBUG << "counter key: " << kv.first << " --> signal velocity = " << kv.second << " cm / ns" << endm;
+        LOG_INFO << "counter key: " << kv.first << " --> signal velocity = " << kv.second << " cm / ns" << endm;
     }
-
+    }
     // --------------------------------------------------------------------------------------------
 
     // digi tot correction factor, time correction offset and slewing corrections
@@ -499,18 +502,20 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
             unsigned int strip = ( key % 1000 ) / 10;
             unsigned int side  = key % 10;
-
             if( mDebug ) {
-                LOG_DEBUG << i << "  " << detector << "  " << strip << " " << side << "  " << digiTotCorrTable->totCorr[ i ] << endm;
+                LOG_INFO << i << "  " << detector << "  " << strip << " " << side << "  " << digiTotCorrTable->totCorr[ i ] << endm;
+		//		assert(TMath::Finite(digiTotCorrTable->totCorr[ i ]));
             }
-
-            mDigiTotCorr.at( detector )->SetBinContent( strip + eTofConst::nStrips * ( side - 1 ) , digiTotCorrTable->totCorr[ i ] );
+	    if (TMath::Finite(digiTotCorrTable->totCorr[ i ])) 
+	      mDigiTotCorr.at( detector )->SetBinContent( strip + eTofConst::nStrips * ( side - 1 ) , digiTotCorrTable->totCorr[ i ] );
+	    else {
+	      LOG_ERROR << i << "  " << detector << "  " << strip << " " << side << "  totCorr = " << digiTotCorrTable->totCorr[ i ] << endm;
+	    }
         }
 
         for( auto& kv : mDigiTotCorr ) {
-            kv.second->SetDirectory( 0 );
+           __PRINT__  kv.second->SetDirectory( 0 );
         }
-
 
         //-------------------
         // digi time corr
@@ -541,14 +546,14 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             unsigned int side  = key % 10;
 
             if( mDebug ) {
-                LOG_DEBUG << i << "  " << detector << "  " << strip << " " << side << "  " << digiTimeCorrTable->timeCorr[ i ] << endm;
+                LOG_INFO << i << "  " << detector << "  " << strip << " " << side << "  " << digiTimeCorrTable->timeCorr[ i ] << endm;
             }
 
             mDigiTimeCorr.at( detector )->SetBinContent( strip + eTofConst::nStrips * ( side - 1 ) , digiTimeCorrTable->timeCorr[ i ] );
         }
 
         for( auto& kv : mDigiTimeCorr ) {
-            kv.second->SetDirectory( 0 );
+            __PRINT__ kv.second->SetDirectory( 0 );
         }
 
 
@@ -601,8 +606,9 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         }
 
         for( auto& kv : mDigiSlewCorr ) {
-            kv.second->SetDirectory( 0 );
+            __PRINT__ kv.second->SetDirectory( 0 );
         }
+
     }
     else {
         LOG_INFO << "etof calibration histograms: filename provided --> use parameter file: " << mFileNameCalibHistograms.c_str() << endm;
@@ -626,9 +632,9 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                 for( unsigned int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
 
                     unsigned int key = sector * 100 + zPlane * 10  + counter;
-
-                    LOG_DEBUG << "detectorId key: " << sector << " " << zPlane << " " << counter << endm;
-
+		    if (mDebug) {
+                    LOG_INFO << "detectorId key: " << sector << " " << zPlane << " " << counter << endm;
+		    }
                     TString hname;
                     TProfile* hProfile;
                     //-------------------
@@ -770,18 +776,19 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         }
 
         for( auto& kv : mDigiTotCorr ) {
-            kv.second->SetDirectory( 0 );
+            __PRINT__ kv.second->SetDirectory( 0 );
         }
         for( auto& kv : mDigiTimeCorr ) {
-            kv.second->SetDirectory( 0 );
+            __PRINT__ kv.second->SetDirectory( 0 );
         }
         for( auto& kv : mDigiSlewCorr ) {
-            kv.second->SetDirectory( 0 );
+            __PRINT__ kv.second->SetDirectory( 0 );
         }
 
         histFile->Close();
         delete histFile;
         histFile = nullptr;
+
     }
 
     // --------------------------------------------------------------------------------------------
@@ -823,11 +830,11 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         }
         
         paramFile.close();
-
+	if (mDebug) {
         for( const auto& kv : param ) {
-            LOG_DEBUG << "run: " << kv.first << " --> reset time corr = " << kv.second << " ns" << endm;
+            LOG_INFO << "run: " << kv.first << " --> reset time corr = " << kv.second << " ns" << endm;
         }
-
+	}
         if( param.count( runnumber ) ) {
             mResetTimeCorr = param.at( runnumber );
         }
@@ -889,11 +896,11 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             }
         }
     }
-
+    if (mDebug) {
     for( const auto& kv : mPulserPeakTot ) {
-        LOG_DEBUG << "side key: " << kv.first << " --> pulser peak tot = " << kv.second << " (bin)" << endm;
+        LOG_INFO << "side key: " << kv.first << " --> pulser peak tot = " << kv.second << " (bin)" << endm;
     }
-
+    }
     // --------------------------------------------------------------------------------------------
 
     // pulser time difference (initialized to some useful value if pulser is not there for a whole run)
@@ -1346,11 +1353,11 @@ StETofCalibMaker::applyMapping( StETofDigi* aDigi )
 
     if( mDebug ) {
         // print out the new information
-        LOG_DEBUG << "sector, zplane, counter, strip, side: " << aDigi->sector() << ", ";
-        LOG_DEBUG << aDigi->zPlane()    << ", " << aDigi->counter()  << ", ";
-        LOG_DEBUG << aDigi->strip()     << ", " << aDigi->side()     << endm;
+        LOG_INFO << "sector, zplane, counter, strip, side: " << aDigi->sector() << ", ";
+        LOG_INFO << aDigi->zPlane()    << ", " << aDigi->counter()  << ", ";
+        LOG_INFO << aDigi->strip()     << ", " << aDigi->side()     << endm;
 
-        LOG_DEBUG << "continuous module number: " << mHwMap->module( aDigi->sector(), aDigi->zPlane() ) << endm;
+        LOG_INFO << "continuous module number: " << mHwMap->module( aDigi->sector(), aDigi->zPlane() ) << endm;
     }
 }
 
@@ -1395,7 +1402,7 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
 {
     if( mDebug ) {
         for( auto it=pulserDigiMap.begin(); it!=pulserDigiMap.end(); it++ ) {
-            LOG_DEBUG << "channel: " << it->first << "   nCandidates: " << it->second.size() << endm;
+            LOG_INFO << "channel: " << it->first << "   nCandidates: " << it->second.size() << endm;
         }
     }
 
@@ -1682,7 +1689,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
     int key = aDigi->sector() * 100000 + aDigi->zPlane() * 10000  + aDigi->counter() * 1000 + aDigi->strip() * 10 + aDigi->side();
     if( !mStatus.count( key) || mStatus.at( key ) != 1 ) {
         if( mDebug ) {
-            LOG_DEBUG << "status of channel with key " << key << " was not ok ---> skip calibrating this digi" << endm;
+            LOG_INFO << "status of channel with key " << key << " was not ok ---> skip calibrating this digi" << endm;
         }
         return;
     }
@@ -1690,7 +1697,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
     // ignore digis flaged as pulsers ( calibTot = -999. )
     if( TMath::Abs( aDigi->calibTot() + 999. ) < 1.e-5 ) {
         if( mDebug ) {
-            LOG_DEBUG << "digi flaged as pulser --> skip" << endm;
+            LOG_INFO << "digi flaged as pulser --> skip" << endm;
         }
         return;
     }
@@ -1702,7 +1709,14 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
         timeToTrigger < mTimingWindow.at( aDigi->rocId() ).second  )
     {
         double calibTot = aDigi->rawTot() * mGet4TotBinWidthNs * calibTotFactor( aDigi );
-
+        if( mDebug ) {
+	  LOG_INFO << "calibTot = " << calibTot << endm;
+	  static Int_t ibreak = 0;
+	  if (! TMath::Finite(calibTot)) {
+	    ibreak++;
+	  }
+        }
+	
         aDigi->setCalibTot( calibTot );
 
         double calibTime = aDigi->rawTime() - mResetTime
@@ -1715,14 +1729,14 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 
         if( mDebug ) {
             // print out the new information
-            LOG_DEBUG << "raw Time, ToT: "        << aDigi->rawTime()   << ", " << aDigi->rawTot()   << endm;
-            LOG_DEBUG << "calibrated Time, ToT: " << aDigi->calibTime() << ", " << aDigi->calibTot() << endm;
+            LOG_INFO << "raw Time, ToT: "        << aDigi->rawTime()   << ", " << aDigi->rawTot()   << endm;
+            LOG_INFO << "calibrated Time, ToT: " << aDigi->calibTime() << ", " << aDigi->calibTot() << endm;
         }
 
     }
     else{
         if( mDebug ) {
-            LOG_DEBUG << "digi is outside the timing window (time to trigger = " << timeToTrigger << ")  --> skip" << endm;
+            LOG_INFO << "digi is outside the timing window (time to trigger = " << timeToTrigger << ")  --> skip" << endm;
         }
     }
 }
@@ -1781,7 +1795,7 @@ StETofCalibMaker::calibTotFactor( StETofDigi* aDigi )
 
         if( TMath::Abs( binContent ) > 1e-5 ) {
             if( mDebug ) {
-                LOG_DEBUG << "calibTotFactor: histogram with key " << key << " at bin " << bin << " -> return bin content: " << binContent << endm;
+                LOG_INFO << "calibTotFactor: histogram with key " << key << " at bin " << bin << " -> return bin content: " << binContent << endm;
             }
             return binContent;
         }
@@ -1814,7 +1828,7 @@ StETofCalibMaker::calibTimeOffset( StETofDigi* aDigi )
     if( mDigiTimeCorr.count( key ) ) {
         float binContent = mDigiTimeCorr.at( key )->GetBinContent( bin );
         if( mDebug ) {
-            LOG_DEBUG << "calibTimeOffset: histogram with key " << key << " at bin " << bin << " -> return bin content: " << binContent << endm;
+            LOG_INFO << "calibTimeOffset: histogram with key " << key << " at bin " << bin << " -> return bin content: " << binContent << endm;
         }
         return binContent;
     }
@@ -1841,20 +1855,20 @@ StETofCalibMaker::slewingTimeOffset( StETofDigi* aDigi )
         unsigned int totBin = mDigiSlewCorr.at( key )->FindBin( aDigi->calibTot() );
         if( mDigiSlewCorr.at( key )->GetBinEntries( totBin ) <= mMinDigisPerSlewBin && totBin < etofSlewing::nTotBins ) {
             if( mDebug ) {
-                LOG_DEBUG << "slewingTimeOffset: insufficient statistics for slewing calibration in channel " << key << " at tot bin " << totBin << "  --> return 0" << endm;
+                LOG_INFO << "slewingTimeOffset: insufficient statistics for slewing calibration in channel " << key << " at tot bin " << totBin << "  --> return 0" << endm;
             }
             return 0.;
         }
 
         float val = mDigiSlewCorr.at( key )->Interpolate( aDigi->calibTot() );
         if( mDebug ) {
-            LOG_DEBUG << "slewingTimeOffset: histogram with key " << key << "  with calib TOT of " << aDigi->calibTot() << " --> interpolated correction: " << val << endm;
+            LOG_INFO << "slewingTimeOffset: histogram with key " << key << "  with calib TOT of " << aDigi->calibTot() << " --> interpolated correction: " << val << endm;
         }
         return val;
     }
     else {
         if( mDebug ) {
-            LOG_DEBUG << "slewingTimeOffset: required histogram with key " << key << " doesn't exist -> return 0" << endm;
+            LOG_INFO << "slewingTimeOffset: required histogram with key " << key << " doesn't exist -> return 0" << endm;
         }
         return 0.;
     }
@@ -1892,7 +1906,7 @@ StETofCalibMaker::triggerTime( StETofHeader* header )
     std::map< ULong64_t, short > countsGdpbTs;
     for( const auto& kv : header->rocGdpbTs() ) {
         if( mDebug ) {
-            LOG_DEBUG << "triggerTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
+            LOG_INFO << "triggerTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
         }
         ++countsGdpbTs[ kv.second ];
     }
@@ -1931,7 +1945,7 @@ StETofCalibMaker::triggerTime( StETofHeader* header )
     }
 
     if( mDebug ) {
-        LOG_DEBUG << "trigger TS: " << mostProbableTriggerTs << " -->  trigger time (ns): " << triggerTime << endm;
+        LOG_INFO << "trigger TS: " << mostProbableTriggerTs << " -->  trigger time (ns): " << triggerTime << endm;
     }
 
     return triggerTime;
@@ -1949,7 +1963,7 @@ StETofCalibMaker::resetTime( StETofHeader* header )
     std::map< ULong64_t, short > countsStarTs;
     for( const auto& kv : header->rocStarTs() ) {
         if( mDebug ) {
-            LOG_DEBUG << "resetTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
+            LOG_INFO << "resetTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
         }
         
         // in Run18 only one of the AFCKs was giving the correct reset time: 0x18e6
@@ -2079,8 +2093,9 @@ StETofCalibMaker::bookHistograms()
     mHistograms[ "pulserDigiTimeDiff_fullCorr"  ] = new TH2F( "pulserDigiTimeDiff_fullCorr",  "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
 
     for ( auto& kv : mHistograms ) {
-        kv.second->SetDirectory( 0 );
+        __PRINT__ kv.second->SetDirectory( 0 );
     }
+
 }
 
 //_____________________________________________________________

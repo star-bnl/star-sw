@@ -1057,13 +1057,13 @@ StETofHitMaker::matchSides()
             if( mDebug ) {
                 LOG_INFO << "detIndex=" << detIndex << "posX=" << posX << "  posY=" << posY << "  time= " << time << "  totSum=" << totSum << endm;
 		static Int_t iBreak = 0;
-		if (TMath::IsNaN(totSum)) {
+		if (! TMath::Finite(totSum)) {
 		  iBreak++;
 		}
             }
 
             // build a hit (clustersize is always one strip at this point)
-            StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, 1., posX, posY );
+            StETofHit* constructedHit = new StETofHit( sector, plane, counter, time, totSum, 1, posX, posY );
 
             // push hit into intermediate collection
             mStoreHit[ detIndex ].push_back( constructedHit ); 
@@ -1290,13 +1290,19 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
             }
 
             StETofHit* pHit = hitVec->at( 0 );
-	    if (TMath::IsNaN(pHit->totalTot())) {
+	    if (! TMath::Finite(pHit->totalTot())) {
 	      LOG_ERROR << "The hit has NaN as totalTot(). Exit." << endm;
 	      break;
 	    }
             // scale with tot for weigthed average
             double weight = pHit->totalTot();
-            if( weight==0 ) {
+	    if ( ! TMath::Finite(weight)) {
+	      if( mDebug ) {
+		LOG_INFO << "weight is not a number" << endm;
+	      }
+	      weight = 0.001;
+	    }
+            if( weight==0 || ! TMath::Finite(weight)) {
                 weight = 0.001;
             }
 
