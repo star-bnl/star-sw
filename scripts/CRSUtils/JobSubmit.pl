@@ -492,10 +492,10 @@ if ( $ThisYear == 2005 ){
 
     #$MAXEVT  = 1000;
     #$NUMEVT  = 1000;
-    #$MAXEVT  = 3000;
-    #$NUMEVT  = 3000;
-    $MAXEVT  = 5000;
-    $NUMEVT  = 5000;
+    $MAXEVT  = 3000;
+    $NUMEVT  = 3000;
+    #$MAXEVT  = 5000;
+    #$NUMEVT  = 5000;
 
     $MINEVT  = 200;
     $FRACTT  =  33;
@@ -1986,7 +1986,7 @@ sub Submit
 
     # little hack for BES in 2018 
     if ( $trgsn =~ m/fixedtarget/i && $ThisYear >= 2018){
-	$chain .= ",-beamline3D";
+	$chain .= ",-beamline3D,PicoVtxFXT";
 	print "$SELF : Altering chain to $chain\n";
     }
 
