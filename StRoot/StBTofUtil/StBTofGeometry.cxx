@@ -1754,6 +1754,7 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
     double s = helix.pathLength(R_tof[i]).first;
     if(s<0.) s = helix.pathLength(R_tof[i]).second;
+    if (s >= 999999998) continue;
     StThreeVectorD point = helix.at(s);
     double phi = point.phi()*180/3.14159;
     double z = point.z();
