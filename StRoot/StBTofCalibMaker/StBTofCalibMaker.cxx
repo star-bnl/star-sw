@@ -1724,11 +1724,10 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
 #else /* __TFG__VERSION__ */
 	dcorr = St_tofZbCorrC::instance()->Corr(tray,module,cell,z);
 	if (dcorr <= -9999.0) {
-	  LOG_DEBUG << "zHit correction: "<<dcorr<<endm;
-        } else {
 	  LOG_DEBUG << " Z out of range! EXIT! " << endm;
 	  return -9999.;
-	}
+        } 
+	LOG_DEBUG << "zHit correction: "<<dcorr<<endm;
 	tofcorr -= dcorr;
 	LOG_DEBUG << "zHit correction: "<<dcorr<<endm;
 #endif /* ! __TFG__VERSION__ */
