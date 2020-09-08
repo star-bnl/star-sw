@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.20 2020/09/01 09:47:27 starembd Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.21 2020/09/08 09:52:08 starembd Exp $
  *
  */
 
@@ -493,12 +493,17 @@ Int_t StPrepEmbedMaker::Make()
 
   Double_t xyzerr[3] = {0.,0.,0.};
    
-  //get primary vertex errors from tags.root
-  nFound=0;
-  nFound = (Int_t) mTree->Draw("sigmaPVX:sigmaPVY:sigmaPVZ",
-	  Form("mRunNumber==%i&&mEventNumber==%i",
-	     EvtHddr->GetRunNumber(),
-	     EvtHddr->GetEventNumber()),"goff");
+  //get primary vertex errors from tags.root (>= Run10)
+  if(EvtHddr->GetRunNumber()>10311000){
+     nFound=0;
+     nFound = (Int_t) mTree->Draw("sigmaPVX:sigmaPVY:sigmaPVZ",
+	     Form("mRunNumber==%i&&mEventNumber==%i",
+		  EvtHddr->GetRunNumber(),
+		  EvtHddr->GetEventNumber()),"goff");
+     xyzerr[0] = mTree->GetV1()[0];
+     xyzerr[1] = mTree->GetV2()[0];
+     xyzerr[2] = mTree->GetV3()[0];
+  }
 
   //get primary vertex errors from moretags.root
   if( mMoreTree ) {
@@ -509,17 +514,10 @@ Int_t StPrepEmbedMaker::Make()
 	     "goff");
 
      LOG_INFO << "StPrepEmbedMaker::Make Use moretags file to extract vertex errors, nFound =" << nFound << endm ;
-  }
 
-  if ( mMoreTree ) {
      xyzerr[0] = mMoreTree->GetV1()[0];
      xyzerr[1] = mMoreTree->GetV2()[0];
      xyzerr[2] = mMoreTree->GetV3()[0];
-  }
-  else {
-     xyzerr[0] = mTree->GetV1()[0];
-     xyzerr[1] = mTree->GetV2()[0];
-     xyzerr[2] = mTree->GetV3()[0];
   }
 
   LOG_INFO << "StPrepEmbedMaker::Make  Event " << EvtHddr->GetEventNumber()
@@ -901,6 +899,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.21  2020/09/08 09:52:08  starembd
+ * fix the nightly test crash issue for year 2005-2007 data
+ *
  * Revision 1.20  2020/09/01 09:47:27  starembd
  * Set primary vertex errors with (more)tags.root
  *
