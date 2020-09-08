@@ -94,9 +94,7 @@ TDataSet *CreateTable() {
   row.SigmaJitterXI         = 0.1027785/2.;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
   row.SigmaJitterXO         = 0.107525/2.; // 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
   row.longitudinalDiffusion = 0.03624; // Magboltz // HD 0.03624*1.5; //HC 0.03624; // Magboltz 
-  row.longitudinalDiffusionI= row.longitudinalDiffusion;
   row.transverseDiffusion   = 0.02218*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau) ; // Magboltz
-  row.transverseDiffusionI  = 0.83* row.transverseDiffusion;
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        =  2.145*1.515;// HC 1.;// 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
@@ -147,8 +145,10 @@ if 0
     No. cut on 3 first wires => -9.21881e-02 ; X9
     row.FirstRowC  = -0.104;  // extra correction for pad row 1 due to disabled firth 3 anode wires
    */
+#if 0
   row.RecombinationI =  row.RecombinationO = 2;
   row.Sigma_xWI = row.Sigma_xWO = row.Slope_zWI = row.Slope_zWO = 0.0100; 
+#endif
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
