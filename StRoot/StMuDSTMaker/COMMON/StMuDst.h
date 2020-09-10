@@ -39,7 +39,6 @@ class StMuFmsCollection;
 class StMuPmdCollection;
 
 class StEvent;
-class StTriggerData;
 class StTrack;
 class StTrackGeometry;
 class StEmcCollection;
