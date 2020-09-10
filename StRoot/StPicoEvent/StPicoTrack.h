@@ -356,9 +356,11 @@ class StPicoTrack : public TObject {
 #if !defined (__TFG__VERSION__)
   /// Topology map for the iTPC
   ULong64_t mTopoMap_iTpc;
+  ClassDef(StPicoTrack, 7)
+#else
+  ClassDef(StPicoTrack, 8)
 #endif
 
-  ClassDef(StPicoTrack, 7)
 };
 
 #endif
