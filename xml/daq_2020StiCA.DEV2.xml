@@ -10,7 +10,7 @@
 #   setup 64b
 #   setup gcc
 #   setup 32b
-#   starver dev
+   starver TFG20g
      set evtsFile = $INPUTFILE0;
      set f        = 1
      set l        = 5000000
@@ -40,7 +40,7 @@
 #  .DEV2 12/24/2019
 #  root.exe -b -q 'bfc.C(500,"P2020a,StiCA,btof,mtd,BEmcChkStat,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  .DEV2 07/06/2020
-  root.exe -b -q 'bfc.C(2000,"P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -b -q 'bfc.C(6000,"P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  cp  ${filel}* ${SUBMITTINGDIRECTORY}
  # rm ${bla}
         </command>
@@ -52,5 +52,7 @@
 <!-- <input URL="file:/gpfs01/star/daq/2019/071/20071001/st_physics_2007100*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2019/354/20354003/hlt*.daq" /> -->
 <!-- <input URL="command:daq_2020.pl" /> -->
-<input URL="file:/gpfs01/star/daq/2020/05?/*/st_physics_adc_*.daq" />
+<!-- <input URL="file:/gpfs01/star/daq/2020/05?/*/st_physics_adc_*.daq" /> -->
+<input URL="file:/star/data03/daq/2020/005/21005010/st_physics_*.daq" />
+
 </job>
