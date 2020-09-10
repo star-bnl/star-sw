@@ -5,7 +5,7 @@
 FPE_OFF
 #source /afs/rhic.bnl.gov/star/packages/.DEV2/setupDEV2.csh
 ln -s ~/.rootrc_nightly .rootrc
-setenv STARFPE NO
+#setenv STARFPE NO
 switch (${SUBMITTINGDIRECTORY}) # debug/opt
   case "*debug*":
   case "*dbg*":

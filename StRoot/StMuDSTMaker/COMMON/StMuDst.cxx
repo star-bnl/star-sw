@@ -11,13 +11,6 @@
 
 #include "StContainers.h"
 #include "StEvent/StEventTypes.h"
-#include "StEvent/StTriggerData.h"
-#include "StEvent/StTriggerData2003.h"
-#include "StEvent/StTriggerData2004.h"
-#include "StEvent/StTriggerData2005.h"
-#include "StEvent/StTriggerData2007.h"
-#include "StEvent/StTriggerData2008.h"
-#include "StEvent/StTriggerData2009.h"
 #include "StEventUtilities/StGoodTrigger.h"
 #include "StarClassLibrary/StTimer.hh"
 #include "StMuDstMaker.h"

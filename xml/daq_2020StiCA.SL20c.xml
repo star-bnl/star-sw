@@ -10,7 +10,7 @@
 #   setup 64b
 #   setup gcc
 #   setup 32b
-   starver TFG20g
+   starver SL20c
      set evtsFile = $INPUTFILE0;
      set f        = 1
      set l        = 5000000
@@ -40,7 +40,8 @@
 #  .DEV2 12/24/2019
 #  root.exe -b -q 'bfc.C(500,"P2020a,StiCA,btof,mtd,BEmcChkStat,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  .DEV2 07/06/2020
-  root.exe -b -q 'bfc.C(6000,"P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -b -q 'bfc.C(6000,"P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root4star -b -q 'bfc.C(6000,"P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  cp  ${filel}* ${SUBMITTINGDIRECTORY}
  # rm ${bla}
         </command>
