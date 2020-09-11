@@ -9,7 +9,7 @@
 #   setup  gcc631
 #   setup 64b
 #   setup gcc
-#   setup 32b
+   setup 32b
    starver SL20c
      set evtsFile = $INPUTFILE0;
      set f        = 1
