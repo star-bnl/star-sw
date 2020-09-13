@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.21 2020/09/08 09:52:08 starembd Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.23 2020/09/13 02:56:31 genevb Exp $
  *
  */
 
@@ -26,7 +26,7 @@
 #include "StEvtHddr.h"
 #include "TTree.h"
 #include "StGenericVertexMaker/StGenericVertexMaker.h"
-#include "StGenericVertexMaker/StFixedVertexFinder.h"
+#include "StGenericVertexMaker/StGenericVertexFinder.h"
 
 #include "tables/St_vertexSeed_Table.h"
 #include "TString.h"
@@ -526,9 +526,14 @@ Int_t StPrepEmbedMaker::Make()
 
   //Set the vertex for StEvent with StGenericVertexMaker
   StGenericVertexMaker * vmaker = (StGenericVertexMaker*) GetMaker("GenericVertex");
-  StFixedVertexFinder * vfinder = (StFixedVertexFinder *) vmaker->GetGenericFinder();
-  vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
-  vfinder->SetVertexError(xyzerr[0],xyzerr[1],xyzerr[2]);
+  StGenericVertexFinder * vfinder = vmaker->GetGenericFinder();
+  if(vfinder->IsFixed()){
+     vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
+     vfinder->SetVertexError(xyzerr[0],xyzerr[1],xyzerr[2]);
+  }
+  else {
+    LOG_WARN << "StPrepEmbedMaker::Make  a fixed vertex finder is not in the chain, vertex position and errors are not set!" << endm;
+  }
 
   if( mPrimeMode && !mPrimed ) {
      mSavePid = mSettings->pid;
@@ -899,6 +904,12 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.23  2020/09/13 02:56:31  genevb
+ * Use IsFixed() function to determine if fixed vertex finder
+ *
+ * Revision 1.22  2020/09/10 23:32:10  starembd
+ * add dynamic_cast for vfinder
+ *
  * Revision 1.21  2020/09/08 09:52:08  starembd
  * fix the nightly test crash issue for year 2005-2007 data
  *

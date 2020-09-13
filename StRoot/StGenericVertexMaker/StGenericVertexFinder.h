@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.57 2017/05/10 23:16:40 smirnovd Exp $
+ * $Id: StGenericVertexFinder.h,v 1.58 2020/09/13 02:55:56 genevb Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -72,6 +72,7 @@ public:
 
   void                   FillStEvent(StEvent*);
   virtual void SetVertexPosition(double x,double y,double z){assert(0);}
+  virtual void SetVertexError(double x,double y,double z){assert(0);}
   virtual int            IsFixed() const        {return 0;}
 
   virtual int            fit(const StMuDst& muDst) { return -1; }
