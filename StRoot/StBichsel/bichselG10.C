@@ -140,6 +140,7 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
   }
   scale *= charge*charge;
   return  TMath::Log10(scale*TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
+  //  Charge*Charge* (TMath::Exp(Bichsel::Instance()->GetMostProbableZM(TMath::Log10(TMath::Abs(Charge)*p/M),dx2)))
 }
 //________________________________________________________________________________
 Double_t bichselZM(Double_t *x,Double_t *par) {

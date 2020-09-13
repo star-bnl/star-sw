@@ -12,6 +12,7 @@
 #endif
 void ppbarM2() {
   TH2* p2 = (TH2 *) gDirectory->Get("Tracks/p/hTofPID");
+  if (! p2) return;
   TObjArray* arr =  new TObjArray(4);
   p2->FitSlicesY(0, 0, -1, 0, "QNR", arr);
   TH1D *m2p = (TH1D *) (*arr)[1]; m2p->SetMarkerColor(1); m2p->SetMarkerStyle(20);
