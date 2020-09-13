@@ -41,5 +41,6 @@
         <stderr URL="file:./sched$JOBID.err" />
 <!-- <input URL="file:/hlt/cephfs/daq/2019/054/20054064/hlt*.daq" /> -->
 <!-- <input URL="command:daq_2019byRun.pl" /> -->
-<input URL="file:/gpfs01/star/daq/2019/066/20066003/*.daq" />
+<!-- <input URL="file:/gpfs01/star/daq/2019/066/20066003/*.daq" /> -->
+<input URL="command:daq_2019d.pl" />
 </job>
