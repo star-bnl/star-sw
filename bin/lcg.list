@@ -1,0 +1,80 @@
+local                                    lcg
+________________________________________________________________________________
+                                         /cvmfs/sft.cern.ch/lcg/external/cernlib/2006a/i686-slc6-gcc47-opt/    08/03/2012
+                                         /cvmfs/sft.cern.ch/lcg/external/cernlib/2006a/x86_64-slc6-gcc47-opt/  11/02/2012
+                                         /cvmfs/sft.cern.ch/lcg/external/cernlib/2006b/i686-centos7-gcc48-opt/ 11/28/2018
+                                        
+cmake-3.14.5                             /cvmfs/sft.cern.ch/lcg/external/CMake/2.8.9/Linux-i386                05/10/2019
+                                         /cvmfs/sft.cern.ch/lcg/external/CMake/2.8.9/Darwin/
+                                         /cvmfs/sft.cern.ch/lcg/contrib/CMake/3.17.1/Linux-x86_64/             04/09/2020
+					 /cvmfs/sft.cern.ch/lcg/releases/CMake/3.17.3-75516/x86_64-centos7-gcc10-opt/ 08/10/2020
+	wget http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/cmake-3.17.3.tar.gz
+apr-1.5.2 
+	svn co https://svn.apache.org/repos/asf/apr/apr/branches/1.6.x/ apr
+apr-util-1.5.4 
+	svn co https://svn.apache.org/repos/asf/apr/apr-util/branches/1.6.x/ apr-util
+apache-log4cxx-0.10.0.CVS 
+	git clone http://gitbox.apache.org/repos/asf/logging-log4cxx.git
+fastjet-3.0.3 
+	wget http://fastjet.fr/repo/fastjet-3.3.4.tar.gz
+fftw-3.3.5                               /cvmfs/sft.cern.ch/lcg/external/fftw3/3.2.2/x86_64-mac106-gcc42-opt/ 02/18/2019
+	wget http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/fftw-3.3.8.tar.gz
+texinfo-6.3 
+	wget http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/texinfo-6.3.tar.gz
+gsl                                      /cvmfs/sft.cern.ch/lcg/external/GSL/1.14/x86_64-slc5-gcc44-opt/      03/30/2019
+	git clone git://git.savannah.gnu.org/gsl.git
+Python-2.7.12                            /cvmfs/sft.cern.ch/lcg/external/Python/2.7.4/x86_64-slc6-gcc48-opt/  05/10/2019
+        wget http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/Python-2.7.16.tgz
+pyparsing-1.5.7                          /cvmfs/sft.cern.ch/lcg/external/pyparsing/1.5.1_python2.5/slc4_ia32_gcc34/ 05/28/2009
+	wget http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/pyparsing-2.4.0.tar.gz
+xrootd-4.10.0-rc5                        /cvmfs/sft.cern.ch/lcg/external/xrootd/3.2.7/x86_64-slc6-gcc48-opt/  09/23/2013
+                                         /cvmfs/sft.cern.ch/lcg/releases/xrootd/4.12.3-d3b45/xs
+	wget http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/xrootd-4.12.3.tar.gz
+Coin-3.1.3                               /cvmfs/sft.cern.ch/lcg/external/coin3d/3.1.3p2/x86_64-slc6-gcc48-opt/ 09/23/2013
+	wget http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/Coin-3.1.3p2.tar.gz
+qt-everywhere-opensource-src-4.8.7       /cvmfs/sft.cern.ch/lcg/external/qt/4.8.4/x86_64-slc6-gcc48-opt/
+                                         /cvmfs/sft.cern.ch/lcg/releases/qt/4.8.7-0b84e/
+                                         /cvmfs/sft.cern.ch/lcg/releases/qt/4.8.7-0b84e/x86_64-centos7-gcc62-opt/ 11/16/2016
+	wget http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/qt-everywhere-opensource-src-4.8.7.tar.gz
+pythia6 
+pythia8243 
+eigen3 
+	git clone  https://github.com/OPM/eigen3.git
+	wget http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/eigen-3.3.7.tar.gz
+mercurial-5.2 
+	
+coin  
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/coin-1ed29953c095.tar.gz  
+soqt                                     /cvmfs/sft.cern.ch/lcg/external/soqt/1.5.0_qt4.8.4_coin3d3.1.3p2/x86_64-slc6-gcc48-opt/ 09/23/2013
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/soqt-1.2.0-const_re_rendering.patch
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/soqt-b5b59b0bd449.tar.gz
+Coin3D-simage-cf953eacd849 
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/simage-1.6.1.tar.gz
+Coin3D-soqt-483ecb26b30c 
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/soqt-1.2.0-const_re_rendering.patch
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/soqt-b5b59b0bd449.tar.gz
+boost_1_66_0                             /cvmfs/sft.cern.ch/lcg/external/Boost/1.53.0_python2.7/x86_64-slc6-gcc48-opt 09/23/2013
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/boost_1_73_0.tar.gz
+veccore 
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/VecCore-0.6.0.tar.gz
+VecGeom
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/VecGeom-v1.1.6.tar.gz
+node-v10.16.0 
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/node-v12.16.1.tar.gz
+cfitsio-3.49
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/cfitsio3450.tar.gz
+Vc                                       /cvmfs/sft.cern.ch/lcg/releases/Vc/1.4.1-d25d4/ 
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/Vc-1.4.1.tar.gz
+gcc                                      /cvmfs/sft.cern.ch/lcg/contrib/gcc/
+git        2.26.2                        /cvmfs/sft.cern.ch/lcg/contrib/git/2.17.0/x86_64-centos7/
+go                                       /cvmfs/sft.cern.ch/lcg/contrib/go/1.9.2/                              05/092019
+binutils                                 /cvmfs/sft.cern.ch/lcg/contrib/binutils/2.33.1/x86_64-centos7 -> /cvmfs/sft.cern.ch/lcg/releases/binutils/2.33.1-c4199/x86_64-centos7/
+cuda                                     /cvmfs/sft.cern.ch/lcg/contrib/cuda/11.0RC/x86_64-centos7/    -> /cvmfs/sft.cern.ch/lcg/releases/cuda/11.0RC-d9c38/x86_64-centos7-gcc62-opt/
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/cuda_11.0.1_450.36.06_linux
+tbb
+	wget  http://lcgpackages.web.cern.ch/lcgpackages/tarFiles/sources/oneTBB-2020_U2.tar.gz
+/cvmfs/sft.cern.ch/lcg/sources/LCG_88/hijing
+                                      pythia8      /cvmfs/sft.cern.ch/lcg/sources/LCG_88/pythia8/302p3/
+/cvmfs/sft.cern.ch/lcg/releases/
+
+
