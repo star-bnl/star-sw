@@ -8,7 +8,7 @@ cd ~/bin/; onl CURRENT | SortRun.pl | tee RunXXDefs.pm
 #cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/9p2GeV
 #cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/9p2GeVb
 #cd /net/l401/data/scratch1/reco/2020/TFG20a/RF/7p7GeV
-cd /hlt/cephfs/reco/Pico/2020/TFG20a/RF/7p7GeV
+cd /hlt/cephfs/Pico/2020/TFG20a/RF/7p7GeV
 CreateRunDirs.pl
 foreach d (`ls -1d ???/2*`)
   cd $d;

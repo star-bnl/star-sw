@@ -23,7 +23,8 @@
   set generF   = ${name}.MuDst.root
   set tagf     = ${name}.root
 #  setenv StarEndMakerShell
-  set sdt = "";
+# set sdt = ",sdt20200111.052520";
+  set sdt = ",sdt20200718.045322";
 #  echo $Name | grep -i Ideal
 #  if ($?) set sdt = ",sdt20160301";
   set KFVertex = "";
@@ -31,11 +32,11 @@
   if (! $?) set KFVertex = ",KFVertex";
   if (! -r ${generF} ) then
 #    root.exe -q -b -x 'bfc.C(100,"In,P2020a,readAll,sdt20200111.052520,StiCA,StiKFVertex,-hitfilt,-geantOut,-evout,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco","'${file}'")' &gt;&amp; ${logName}
-   root.exe -q -b -x 'bfc.C(100,"genIn,MC.2020,sdt20200111.052520,McTpcAna,-bbcSim,StiCA,-hitfilt,geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
+   root.exe -q -b -x 'bfc.C(100,"genIn,MC.2020,McTpcAna,-bbcSim,StiCA,geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,NoHistos,noTags,noRunco'${sdt}',RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
   endif
 </command>
 <!-- <input URL="file:/net/l404/data/fisyak/reco/2019/hijingAuAu200.DEV2.StiCA.Minuit.newCut/*.event.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/simu/Hijing/AuAu200/hijingAuAu200*.gener.root" /> -->
-<input URL="file://net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" />
+<input URL="file:/net/l401/data/scratch2/fisyak/simu/Hijing/AuAu200/hijingAuAu200_*gener.root" />
 </job>
 

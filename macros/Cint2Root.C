@@ -22,7 +22,7 @@ void Cint2Root(TString topDir = ".") {
     rootf.ReplaceAll(".C",".root");
 #if 1
     if (!gSystem->AccessPathName(rootf,kReadPermission)) {
-      //      cout << path.Data() << "\t" << rootf.Data() << " already exists" << endl;
+      cout << path.Data() << "\t" << rootf.Data() << " already exists" << endl;
       continue;
     }
 #endif
