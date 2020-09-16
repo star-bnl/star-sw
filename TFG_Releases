@@ -56,6 +56,6 @@
  TFG20e Freeze before step back with StTpcRSMaker from TFG20d        2020-06-15 16:06:52 -0400  (HEAD -> master, tag: TFG20e)
  TFG20f Check point before step back in StTpcRSMaker                 2020-06-20 12:40:33 -0400  (HEAD -> master, tag: TFG20f)
  TFG20g Add Grisha's fix for CA, add gcc 10.01.00                    2020-09-06 16:35:35 -0400  (HEAD -> master, tag: TFG20g_9)
- TFG20h Freeze before updating geant and KFParticle                  2020-09-16 16:35:35 -0400  (HEAD -> master, tag: TFG20h)
+ TFG20h Freeze before updating geant and KFParticle                  2020-09-16 17:04:43 -0400  (HEAD -> master, tag: TFG20h)
 .DEV2  head of TFG git repository
   DEV6  head of TFG git repository build with ROOT6
