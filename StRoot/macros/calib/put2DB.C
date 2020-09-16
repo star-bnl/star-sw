@@ -11,16 +11,15 @@ StDbManager* mgr = 0;
 Int_t DT = 0;
 class TDirIter;
 //________________________________________________________________________________
-void put2DB(const char* files=
-	    "$STAR/StarDb/Geometry/svt/svtWafersPosition.20050101.000200.C"
-	    /* 
-	      unsetenv DB_SERVER_LOCAL_CONFIG
-	      setenv DB_ACCESS_MODE write # from Michael 02/26/07
-              update beginTime if necessary 
-              and
-	      UPDATE svtDriftCorrection set entryTime=entryTime,beginTime=''2005-01-01 00:00:00' where beginTime like '2005-01-01%'; 
-	    */
-	    ){
+void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.20050101.000200.C",
+	    const Char_t *Flavor = "ofl"){
+  /* 
+     unsetenv DB_SERVER_LOCAL_CONFIG
+     setenv DB_ACCESS_MODE write # from Michael 02/26/07
+     update beginTime if necessary 
+     and
+     UPDATE svtDriftCorrection set entryTime=entryTime,beginTime=''2005-01-01 00:00:00' where beginTime like '2005-01-01%'; 
+  */
   gSystem->Setenv("DB_ACCESS_MODE","write");
   TDirIter Dir(files);
   Char_t *file = 0;
@@ -40,11 +39,7 @@ void put2DB(const char* files=
     Int_t d=20000101;
     Int_t t =      0;
     //  sscanf(Time.Data(),"%d",&d);
-#if 1
-    TString flavor("ofl");
-#else
-    TString flavor("FXT");
-#endif
+    TString flavor(Flavor);
     Int_t n = sscanf(Time.Data(),"%d.%d",&d,&t);
     if (n != 2) {
       Char_t tag[10];
@@ -173,7 +168,7 @@ void put2DB(const char* files=
     delete [] rowIDs;
     if (! status) {cout << file << " ------> Failed" << endl; return;}
     cout << file << " ------> Done" << endl;
-    TString cmd(Form("mv %s %s.HOLD",file, file)); 
+    TString cmd(Form("mv %s %s.HOLD.%s",file, file, flavor.Data())); 
     if (gSystem->Exec(cmd)) return;
 #endif
   }
