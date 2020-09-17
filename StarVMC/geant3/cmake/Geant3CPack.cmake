@@ -21,7 +21,7 @@ if(${${PROJECT_NAME}_VERSION_PATCH} EQUAL "0")
 else()
   set(CPACK_SOURCE_PACKAGE_FILE_NAME
     "geant3+_vmc.${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.p${CPACK_PACKAGE_VERSION_PATCH}")
-endif()      
+endif()
 # Do not use CPACK_SOURCE_IGNORE_FILES as this would exclude test scripts
 # and log_ref directory
 #set(CPACK_SOURCE_IGNORE_FILES

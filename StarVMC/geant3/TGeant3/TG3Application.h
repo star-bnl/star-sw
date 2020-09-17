@@ -1,7 +1,7 @@
-// $Id: TG3Application.h,v 1.2 2018/06/28 19:29:18 fisyak Exp $
+// $Id$
 //
 // Class TG3Application
-// ----------------------- 
+// -----------------------
 // Implementation of the TVirtualMCApplication
 //
 // by Rene Brun 30/12/2002
@@ -12,50 +12,51 @@
 #include <TVirtualMCApplication.h>
 #include <TVirtualMCStack.h>
 
-class TG3Application : public TVirtualMCApplication
-{
-  public:
-    TG3Application(const char *name, const char *title);
-    TG3Application();
-    virtual ~TG3Application();
-  
-    // static access method
-    static TG3Application* Instance(); 
+class TG3Application : public TVirtualMCApplication {
+public:
+   TG3Application(const char *name, const char *title);
+   TG3Application();
+   virtual ~TG3Application();
 
-    // methods
-    void InitMC(const char *setup);
-    void RunMC(Int_t nofEvents);
-    void FinishRun();
- 
-    virtual void ConstructGeometry();
-    virtual void InitGeometry();
-    virtual void GeneratePrimaries();
-    virtual void BeginEvent();
-    virtual void BeginPrimary();
-    virtual void PreTrack();
-    virtual void Stepping();
-    virtual void PostTrack();
-    virtual void FinishPrimary();
-    virtual void FinishEvent();
-    
-    virtual Double_t TrackingRmax() const;
-    virtual Double_t TrackingZmax() const;
-    virtual void Field(const Double_t* x, Double_t* b) const;
-  private:
-    // methods
-    void ConstructMaterials();
-    void ConstructVolumes();
-  
-    // data members
-    TVirtualMCStack*  fStack;
+   // static access method
+   static TG3Application *Instance();
 
-  ClassDef(TG3Application,1)  //dummy Interface to G3 MonteCarlo application
+   // methods
+   void InitMC(const char *setup);
+   void RunMC(Int_t nofEvents);
+   void FinishRun();
+
+   virtual void ConstructGeometry();
+   virtual void InitGeometry();
+   virtual void GeneratePrimaries();
+   virtual void BeginEvent();
+   virtual void BeginPrimary();
+   virtual void PreTrack();
+   virtual void Stepping();
+   virtual void PostTrack();
+   virtual void FinishPrimary();
+   virtual void FinishEvent();
+
+   virtual Double_t TrackingRmax() const;
+   virtual Double_t TrackingZmax() const;
+   virtual void Field(const Double_t *x, Double_t *b) const;
+
+private:
+   // methods
+   void ConstructMaterials();
+   void ConstructVolumes();
+
+   // data members
+   TVirtualMCStack *fStack;
+
+   ClassDef(TG3Application, 1) // dummy Interface to G3 MonteCarlo application
 };
 
 // inline functions
 
-inline TG3Application* TG3Application::Instance()
-{ return (TG3Application*)(TVirtualMCApplication::Instance()); }
+inline TG3Application *TG3Application::Instance()
+{
+   return (TG3Application *)(TVirtualMCApplication::Instance());
+}
 
-#endif //TG3Application_h
-
+#endif // TG3Application_h

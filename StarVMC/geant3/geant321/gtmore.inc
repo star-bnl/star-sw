@@ -6,7 +6,8 @@
 * gtmore.inc
 *
 #if !defined(CERNLIB_INCLUDE)
-      INTEGER      ICLOSE
+*      REAL          GCALPHA
+      INTEGER       ICLOSE
       REAL          PFINAL,DSTRT,WIRE1,WIRE2
       REAL          P1,P2,P3
 C

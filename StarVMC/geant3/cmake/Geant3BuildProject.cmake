@@ -22,7 +22,7 @@ foreach(_mod CMakeMacroParseArguments UseVMC UseMC VMCBuildMode VMCInstallLibDir
 endforeach()
 
 # Find modules
-foreach(_find_mod Garfield Pythia6 ROOT VMC MC)
+foreach(_find_mod Garfield Pythia6 VMCPackages MCPackages)
   configure_file(
     ${PROJECT_SOURCE_DIR}/cmake/Find${_find_mod}.cmake
     ${PROJECT_BINARY_DIR}/Modules/Find${_find_mod}.cmake

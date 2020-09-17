@@ -3,17 +3,17 @@ average trajectories of particles and to calculate the
 transport matrix as well as the propagated error covariance
 matrix. Geane is a set of routines worked out
 by the European Muon Collaboration [1] and it is integrated
-to the GEANT3 system [2]. 
+to the GEANT3 system [2].
 See geant3/doc/gedoc for more details.
- 
-  The user should invoke the routine Ertrak and Eufill or Eufilp or  
+
+  The user should invoke the routine Ertrak and Eufill or Eufilp or
 Eufilv, to carry out the tracking.
-In addition to this a series of utilities are available for the user 
+In addition to this a series of utilities are available for the user
 (e.g. to transform the track representation from one
 system to another or to carry out 5 X 5 matrix multiplication
 in an optimal way).
- 
- 
+
+
 Track variables, Representations
 --------------------------------
       The particle trajectory is characterized by 5 independent
@@ -22,18 +22,18 @@ Among the 5 variables 1 is related to the curvature (to the absolute
 value of the momentum, p), 2 are related to the direction of the
 particle and the other 2 are related to the spatial location.
 The most usual representation of these 5 parameters are:
- 
+
        I.       1/p, lambda, phi, y_perp, z_perp
- 
- 
+
+
 where lambda and phi are the dip and azimuthal angles related
 to the momentum components in the following way:
- 
+
             p_x = p cos(lambda) cos(phi)
             p_y = p cos(lambda) sin(phi)
             p_z = p sin(lambda)
- 
- 
+
+
 y_perp and z_perp are the coordinates of the trajectory in a
 local orthonormal reference frame with the x_perp axis along the
 particle direction, the y_perp being parallel to the x-y plane.
@@ -41,38 +41,38 @@ This representation is usually applied in the overall reference
 frame. (In the EMC code this reference frame is labelled by 'SC'
 since the overall system was identified with that of the Streamer
 Chamber.)
- 
+
        II.       1/p, y', z', y, z
- 
- 
+
+
 where y'=dy/dx and z'=dz/dx. This representation is particularly
 useful in fixed target experiments, where the trajectory is evaluated
 on successive parallel planes (which are perpendicular to the x-axis).
 (In the EMC code this representation is labelled by 'SP' since a
 convenient mathematical description of a trajectory being approxima-
 tely parallel to the x-axis is a 'spline'.)
- 
+
        III.       1/p, v', w', v, w
- 
- 
+
+
 where v'=dv/du and w'=dw/du in an orthonormal coordinate system with
 axis u, v and w. This representation is paricularly useful when the
 trajectory has to be evaluated on different detector planes
 in a colliding beam experiment, where the planes can take a great
 variety of directions.(In the EMC code this representation is
 labelled by 'SD' as System of Detection.)
- 
+
       Of course, all the above representations of the trajectory
 are equivalent and one can go from one representation to the
 other by calculating the corresponding Jacobian. These Jacobians
 are provided by the following EMC routines:
- 
+
      S/R Trscsp    from I   to II
      S/R Trspsc    from II  to I
      S/R Trscsd    from I   to III
      S/R Trsdsc    from III to I
- 
- 
+
+
 User Interface
 ---------------------------------------------------
       Ertrak(const Float_t *x1, const Float_t *p1,
@@ -81,13 +81,13 @@ User Interface
 ---------------------------------------------------
    Performs the tracking of the track from point x1 to  point x2
    (Before calling this routine the user should call Eufil(l/p/v)
- 
+
           x1       - Starting coordinates (Cartesian)
           p1       - Starting 3-momentum  (Cartesian)
           x2       - Final coordinates    (Cartesian)
           p2       - Final 3-momentum     (Cartesian)
           ipa      - Particle code (a la GEANT) of the track
- 
+
           chopt
               'B'   'Backward tracking' - i.e. energy loss
                                  added to the current energy
@@ -100,26 +100,26 @@ User Interface
               'P'   Tracking upto prescribed Planes reached
               'V'   Tracking upto prescribed Volumes reached
               'X'   Tracking upto prescribed Point approached
- 
- 
+
+
 
 ------------------------------------------
 Eufill(Int_t n,Float_t *ein,Float_t *xlf);
 ------------------------------------------
- 
+
     User routine to set the input values  for chopt = 'L'
- 
+
          n     Number of predictions where to store results
          ein   Input error matrix
          xlf   Defines the tracklengths which if passed the
                       result should be stored
- 
+
 
 ----------------------------------------------------------------
 Eufilp(const Int_t n, Float_t *ein, Float_t *pli, Float_t *plf);
 ----------------------------------------------------------------
  User routine to set the input values  for chopt = 'P'
-         
+
 	 n     Number of predictions where to store results
          ein   Input error matrix (in the 'Plane' system )
          pli   Defines the start plane
@@ -141,7 +141,7 @@ Eufilv(Int_t n, Float_t *ein, Char_t *namv, Int_t *numv,Int_t *iovl);
         numv   Volume number (if 0 = all volumes)
         iovl   = 1  prediction when entering in the volume
                = 2  prediction when leaving the volume
- 
+
 
 
 --------------------------------------------------------------------------
@@ -163,7 +163,7 @@ transforms error matrix  from   sc   variables (1/p,lambda,phi,yt,zt)
                   and rd for fixed u
         dj[3]     unit vector in v-direction
         dk[3]     unit vector in w-direction    of detector system
-   
+
         ierr  =   1       particle moves perpendicular to u-axis
                          ( v',w' are not defined )
         spu       sign of u-component of particle momentum   output
@@ -189,7 +189,7 @@ transforms error matrix from  variables (1/p,v',w',v,w)
                 and rd for fixed u
       dj[3]     unit vector in v-direction
       dk[3]     unit vector in w-direction    of detector system
- 
+
       ierr              not used
       spu       sign of u-component of particle momentum    input
 
@@ -211,7 +211,7 @@ transforms error matrix  from   sc   variables (1/p,lambda,phi,yt,zt)
                 these correlation terms appear because rc is assumed
                 to be the error matrix for fixed s (path length)
                 and rs for fixed x
- 
+
       ierr  =   1       particle moves perpendicular to x-axis
                        ( y',z' are not defined )
       spx       sign of x-component of particle momentum   output
@@ -234,7 +234,7 @@ transforms error matrix  from spline variables (1/p,y',z',y,z)
                 these correlation terms appear because rc is assumed
                 to be the error matrix for fixed s (path length)
                 and rs for fixed x
- 
+
       ierr              not used
       spx       sign of x-component of particle momentum    input
 
@@ -246,7 +246,7 @@ Examples of Application
      3. Prediction of the trajectory
      4. Fitting trajectory parameters
 See geant3/doc/gedoc for details.
-  
+
 
 
 
@@ -257,10 +257,10 @@ See geant3/doc/gedoc for details.
 [1] W.Wittek, EMC Internal Reports: EMC/80/15,   EMCSW/80/39,
                                     EMCSW/81/13, EMCSW/81/18
     A.Haas,   The EMC Utility Package: UTIL42
- 
+
 [2] R.Brun, F.Bruyant, M.Maire, A.C.McPherson, P.Zanarini
     DD/EE/84-1, May 1986
- 
- 
- 
- 
+
+
+
+

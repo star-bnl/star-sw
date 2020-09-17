@@ -18,16 +18,24 @@
 
 # Alternative paths which can be defined by user
 set(Garfield_DIR "" CACHE PATH "Directory where Garfield is installed")
-set(Garfield_INC_DIR "" CACHE PATH "Alternative directory for Garfield includes")
+set(Garfield_SRC_DIR "" CACHE PATH "Directory for Garfield sources")
+set(Garfield_INC_DIR "" CACHE PATH "Alternative directory for Garfield Heed includes")
+set(Garfield_HEED_INC_DIR "" CACHE PATH "Alternative directory for Garfield Heed includes")
 set(Garfield_LIB_DIR "" CACHE PATH "Alternative directory for Garfield libraries")
 
-find_path(Garfield_INCLUDE_DIRS Sensor.hh
-          HINTS ${Garfield_DIR}/include ${Garfield_INC_DIR}
+find_path(Garfield_INCLUDE_DIR Sensor.hh
+          HINTS ${Garfield_DIR}/include/Garfield ${Garfield_INC_DIR}
           $ENV{GARFIELD_HOME}/Include)
-#message(STATUS Garfield_INCLUDE_DIRS ${Garfield_INCLUDE_DIRS})
+#message(STATUS Garfield_INCLUDE_DIR ${Garfield_INCLUDE_DIR})
+
+find_path(Garfield_HEED_INCLUDE_DIR HeedFieldMap.h
+          HINTS ${Garfield_SRC_DIR}/Heed ${Garfield_HEED_INC_DIR}
+          $ENV{GARFIELD_HOME}/Heed)
+#message(STATUS Garfield_HEED_INCLUDE_DIR ${Garfield_HEED_INCLUDE_DIR})
+set(Garfield_INCLUDE_DIRS ${Garfield_INCLUDE_DIR} ${Garfield_HEED_INCLUDE_DIR})
 
 find_library(Garfield_LIBRARIES NAMES Garfield
-	         HINTS ${Garfield_DIR}/lib ${Garfield__LIB_DIR}
+	         HINTS ${Garfield_DIR}/lib ${Garfield_LIB_DIR}
              HINTS $ENV{GARFIELD_HOME}/Library)
 #message(STATUS Garfield_LIBRARIES ${Garfield_LIBRARIES})
 
