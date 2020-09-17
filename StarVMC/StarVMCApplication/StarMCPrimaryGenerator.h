@@ -32,10 +32,11 @@
 #include "TPDGCode.h"
 #include "TDatabasePDG.h"
 #include "StarGenerator/BASE/StarParticleStack.h"
+#include "Stypes.h"
 class StarMCPrimaryGenerator : public TObject {
  public:
   StarMCPrimaryGenerator(StarStack* stack = 0) : TObject(), fStarStack(stack), fIsRandom(false), fNofPrimaries(0), 
-    fOption(""), fDebug(0), fId(0), fOrigin(), fSigmasOrigin(), fSetVertex(kFALSE), fUseBeamLine(kFALSE)  {fgInstance = this;}
+    fOption(""), fDebug(0), fId(0), fOrigin(), fSigmasOrigin(), fSetVertex(kFALSE), fUseBeamLine(kFALSE), fStatus(kStOK)  {fgInstance = this;}
   virtual ~StarMCPrimaryGenerator() {fgInstance = 0;}
   static StarMCPrimaryGenerator* Instance()   { return fgInstance;}
   void  SetIsRandom(Bool_t isRandomGenerator) { fIsRandom = isRandomGenerator; }
