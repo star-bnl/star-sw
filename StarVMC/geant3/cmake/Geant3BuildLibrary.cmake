@@ -11,13 +11,18 @@
 # I. Hrivnacova, 13/06/2014
 
 #---CMake required version -----------------------------------------------------
-cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
-#-- ROOT (required) ------------------------------------------------------------
-if(NOT ROOT_FOUND)
-  find_package(ROOT REQUIRED)
-endif(NOT ROOT_FOUND)
+#-------------------------------------------------------------------------------
+# Define installed names
+#
+set(library_name geant321)
+
+#-------------------------------------------------------------------------------
+# Includes
+#
 include_directories(${ROOT_INCLUDE_DIRS})
+include_directories(${VMC_INCLUDE_DIRS})
 
 #-------------------------------------------------------------------------------
 # Setup project include directories; compile definitions; link libraries
@@ -32,15 +37,25 @@ include_directories(
 # Generate Root dictionaries
 #
 ROOT_GENERATE_DICTIONARY(
-  ${CMAKE_SHARED_LIBRARY_PREFIX}geant321
-  with_rootmap
-  ${CMAKE_CURRENT_SOURCE_DIR}/TGeant3/TCallf77.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/TGeant3/TG3Application.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/TGeant3/TGeant3f77.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/TGeant3/TGeant3gu.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/TGeant3/TGeant3.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/TGeant3/TGeant3TGeo.h
-  LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/TGeant3/geant3LinkDef.h)
+  ${library_name}_dict
+  TCallf77.h
+  TG3Application.h
+  TGeant3f77.h
+  TGeant3gu.h
+  TGeant3.h
+  TGeant3TGeo.h
+  MODULE ${library_name}
+  OPTIONS "-I${CMAKE_INSTALL_PREFIX}/include/TGeant3"
+    -excludePath "${CMAKE_CURRENT_BINARY_DIR}"
+    -excludePath "${PROJECT_SOURCE_DIR}/TGeant3"
+  LINKDEF TGeant3/geant3LinkDef.h)
+
+# Files produced by the dictionary generation
+SET(root_dict
+  ${library_name}_dict.cxx)
+SET(root_dict_libs
+  ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}${library_name}_rdict.pcm
+  ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}${library_name}.rootmap)
 
 #-------------------------------------------------------------------------------
 # Always use '@rpath' in install names of libraries.
@@ -55,6 +70,10 @@ set(directories
     gkine gparal gphys gscan gstrag gtrak matx55 miface miguti neutron peanut
     fiface cgpack fluka block comad erdecks erpremc minicern gdraw)
 
+if(BUILD_GCALOR)
+  list(APPEND directories gcalor)
+endif()
+
 # Fortran sources
 set(fortran_sources gcinit.F)
 foreach(_directory ${directories})
@@ -63,6 +82,10 @@ foreach(_directory ${directories})
   list(APPEND fortran_sources ${add_f_sources})
 endforeach()
 list(APPEND fortran_sources ${PROJECT_SOURCE_DIR}/minicern/lnxgs/rdmin.F)
+if(BUILD_GCALOR)
+  # special compiler flags for gcalor
+  set_source_files_properties(${PROJECT_SOURCE_DIR}/gcalor/gcalor.F PROPERTIES COMPILE_OPTIONS "-Wno-aggressive-loop-optimizations")
+endif()
 
 # Exclude some files from the list
 list(REMOVE_ITEM fortran_sources ${PROJECT_SOURCE_DIR}/gtrak/grndm.F)
@@ -80,6 +103,9 @@ endforeach()
 list(APPEND c_sources ${PROJECT_SOURCE_DIR}/minicern/lnxgs/ishftr.c)
 # Linux specific, the file is kept on macosx, macosx64)
 list(REMOVE_ITEM c_sources ${PROJECT_SOURCE_DIR}/minicern/lnblnk.c)
+if(BUILD_GCALOR)
+  list(REMOVE_ITEM c_sources ${PROJECT_SOURCE_DIR}/added/dummies_gcalor.c)
+endif()
 #message(STATUS "c_sources ${c_sources}")
 
 # C++ sources
@@ -87,6 +113,7 @@ file(GLOB cxx_sources
      ${PROJECT_SOURCE_DIR}/comad/gcadd.cxx
      ${PROJECT_SOURCE_DIR}/TGeant3/*.cxx)
 #message(STATUS "cxx_sources ${cxx_sources}")
+
 
 #-------------------------------------------------------------------------------
 # Locate headers for this project
@@ -98,6 +125,11 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/TGeant3/*.h)
 add_definitions(-DCERNLIB_BLDLIB -DCERNLIB_CZ)
 # add flags to make gfortran build stable at -O2
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -finit-local-zero -fno-strict-overflow")
+# allow non-standard-conform BOZ literal constants in GCC >=10
+if (        "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU"
+    AND NOT "${CMAKE_Fortran_COMPILER_VERSION}" VERSION_LESS 10)
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-invalid-boz")
+endif()
 # Architecture dependent not ported flags:
 # -DCERNLIB_LINUX (linux, linuxx8664icc, linuxicc, macosx, macosxxlc, macosicc)
 # -DCERNLIB_PPC (macosx64, macosxxlc, macosicc)
@@ -126,18 +158,14 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND APPLE)
 endif()
 
 #---Add library-----------------------------------------------------------------
-add_library(geant321 ${fortran_sources} ${c_sources} ${cxx_sources}
-            ${CMAKE_SHARED_LIBRARY_PREFIX}geant321_dict.cxx ${headers})
-target_link_libraries(geant321 ${ROOT_LIBRARIES} -lVMC -lEG)
+add_library(${library_name} ${fortran_sources} ${c_sources} ${cxx_sources}
+            ${root_dict} ${headers})
+set(DEPS ${ROOT_DEPS} ${VMC_DEPS})
+target_link_libraries(${library_name} ${VMC_DEPS} ${ROOT_DEPS})
+set_target_properties(geant321 PROPERTIES INTERFACE_LINK_LIBRARIES "${DEPS}")
+target_include_directories(geant321 INTERFACE $<INSTALL_INTERFACE:include/TGeant3>)
 
 #----Installation---------------------------------------------------------------
 install(FILES ${headers} DESTINATION include/TGeant3)
-install(TARGETS geant321 EXPORT Geant3Targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-# Install dictionary map (only if ROOT 6.x
-if (${ROOT_FOUND_VERSION} GREATER 59999)
-  install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}geant321_dict_rdict.pcm
-    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}geant321.rootmap
-    DESTINATION ${CMAKE_INSTALL_LIBDIR})
-endif()
+install(TARGETS ${library_name} EXPORT Geant3Targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES ${root_dict_libs} DESTINATION ${CMAKE_INSTALL_LIBDIR})

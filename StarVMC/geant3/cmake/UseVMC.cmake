@@ -9,7 +9,7 @@
 
 # Configuration file for CMake build for VMC applications.
 # It defines include directories, compile definitions and link libraries
-# (VMC_LIBRARIES) for all required and optional packages.
+# (VMCPackages_LIBRARIES) for all required and optional packages.
 # It also defines the default build mode a default build configuration.
 #
 # I. Hrivnacova, 26/02/2014
@@ -23,17 +23,20 @@ include(VMCBuildMode)
 
 #-------------------------------------------------------------------------------
 # Define include directories, compile definitions and link libraries
-# (VMC_LIBRARIES) for all required and optional packages.
+# (VMCPackages_LIBRARIES) for all required and optional packages.
 #
 
-if (NOT VMC_FOUND)
-  find_package(VMC REQUIRED)
+if (NOT VMCPackages_FOUND)
+  find_package(VMCPackages REQUIRED)
 endif()
 
-set(VMC_LIBRARIES)
+set(VMCPackages_LIBRARIES)
 
 # ROOT (required)
 include_directories(${ROOT_INCLUDE_DIRS})
+
+# VMC (required)
+include_directories(${VMC_INCLUDE_DIRS})
 
 # MTRoot (optional)
 if (VMC_WITH_MTRoot)
@@ -41,21 +44,24 @@ if (VMC_WITH_MTRoot)
   if (MTRoot_FOUND)
      # build outside Geant4VMC
     include_directories(${MTRoot_INCLUDE_DIRS})
-    set(VMC_LIBRARIES ${MTRoot_LIBRARIES} ${VMC_LIBRARIES})
+    set(VMCPackages_LIBRARIES ${MTRoot_LIBRARIES} ${VMCPackages_LIBRARIES})
   else()
      # build inside Geant4VMC
      # includes are already defined
      include_directories(${Geant4VMC_SOURCE_DIR}/mtroot/include)
-     set(VMC_LIBRARIES ${VMC_LIBRARIES} mtroot)
+     set(VMCPackages_LIBRARIES ${VMCPackages_LIBRARIES} mtroot)
   endif(MTRoot_FOUND)
 endif(VMC_WITH_MTRoot)
 
 # Finally add Root libraries
-set(VMC_LIBRARIES ${VMC_LIBRARIES} ${ROOT_LIBRARIES} -lVMC -lEG)
+set(VMCPackages_LIBRARIES ${VMCPackages_LIBRARIES} ${VMC_LIBRARIES})
+
+# Finally add Root libraries
+set(VMCPackages_LIBRARIES ${VMCPackages_LIBRARIES} ${ROOT_LIBRARIES})
 
 # Utility to defined installation lib directory
 if("${CMAKE_INSTALL_LIBDIR}" MATCHES "")
   include(VMCInstallLibDir)
 endif()
 
-#message(STATUS "VMC_LIBRARIES ${VMC_LIBRARIES}")
+#message(STATUS "VMCPackages_LIBRARIES ${VMCPackages_LIBRARIES}")

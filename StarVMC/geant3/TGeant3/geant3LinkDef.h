@@ -2,16 +2,16 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: geant3LinkDef.h,v 1.4 2018/06/28 19:29:19 fisyak Exp $ */
+/* $Id$ */
 
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
- 
-#pragma link C++ class  TGeant3-;
-#pragma link C++ class  TGeant3TGeo+;
-#pragma link C++ class  TGeant3f77+;
-#pragma link C++ class  TG3Application+;
+
+#pragma link C++ class TGeant3 - ;
+#pragma link C++ class TGeant3TGeo + ;
+#pragma link C++ class TGeant3f77 + ;
+#pragma link C++ class TG3Application + ;
 
 /*
 // Unused class rule
@@ -51,4 +51,3 @@
 */
 
 #endif
-

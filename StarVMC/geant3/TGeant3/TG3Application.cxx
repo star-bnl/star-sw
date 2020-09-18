@@ -1,7 +1,7 @@
-// $Id: TG3Application.cxx,v 1.2 2014/05/29 12:45:18 fisyak Exp $
+// $Id$
 //
 // Class TG3Application
-// ----------------------- 
+// -----------------------
 // Implementation of the TVirtualMCApplication
 //
 // by Rene Brun 30/12/2002
@@ -19,39 +19,36 @@
 
 ClassImp(TG3Application)
 
-//_____________________________________________________________________________
-TG3Application::TG3Application(const char *name, const char *title) 
-  : TVirtualMCApplication(name,title),
-    fStack(0)
+   //_____________________________________________________________________________
+   TG3Application::TG3Application(const char *name, const char *title)
+   : TVirtualMCApplication(name, title), fStack(0)
 {
-//
-// Standard constructor
-//
+   //
+   // Standard constructor
+   //
 
-  new TGeant3f77("g",0);
-  
-  // create a user stack
-  //fStack = new TG3Stack(100);  
+   new TGeant3f77("g", 0);
+
+   // create a user stack
+   // fStack = new TG3Stack(100);
 }
 
 //_____________________________________________________________________________
-TG3Application::TG3Application()
-  : TVirtualMCApplication(),
-    fStack(0)
-{    
-  //
-  // Default constructor
-  //
+TG3Application::TG3Application() : TVirtualMCApplication(), fStack(0)
+{
+   //
+   // Default constructor
+   //
 }
 
 //_____________________________________________________________________________
-TG3Application::~TG3Application() 
+TG3Application::~TG3Application()
 {
-  //
-  // Destructor  
-  //
-  
-  //delete fStack;
+   //
+   // Destructor
+   //
+
+   // delete fStack;
 }
 
 //
@@ -61,180 +58,172 @@ TG3Application::~TG3Application()
 //_____________________________________________________________________________
 void TG3Application::ConstructMaterials()
 {
-  //
-  // Materials
-  //
-
+   //
+   // Materials
+   //
 }
-
 
 //_____________________________________________________________________________
-void TG3Application::ConstructVolumes()
-{
-
-}
+void TG3Application::ConstructVolumes() {}
 
 //
 // public
 //
 
 //_____________________________________________________________________________
-void TG3Application::InitMC(const char* /*setup*/)
-{    
-  //
-  // Initialize MC.
-  //
+void TG3Application::InitMC(const char * /*setup*/)
+{
+   //
+   // Initialize MC.
+   //
 
-  TVirtualMC::GetMC()->Init();
-  TVirtualMC::GetMC()->BuildPhysics();  
+   TVirtualMC::GetMC()->Init();
+   TVirtualMC::GetMC()->BuildPhysics();
 }
 
 //_____________________________________________________________________________
 void TG3Application::RunMC(Int_t /*nofEvents*/)
-{    
-  //
-  // MC run.
-  //
+{
+   //
+   // MC run.
+   //
 
-
-  //TVirtualMC::GetMC()->ProcessRun(nofEvents);
-  //FinishRun();
+   // TVirtualMC::GetMC()->ProcessRun(nofEvents);
+   // FinishRun();
 }
 
 //_____________________________________________________________________________
 void TG3Application::FinishRun()
-{    
-  //
-  // Finish MC run.
-  //
+{
+   //
+   // Finish MC run.
+   //
 
- // UGLAST
+   // UGLAST
 }
 
 //_____________________________________________________________________________
 void TG3Application::ConstructGeometry()
-{    
-  //
-  // Construct geometry using TVirtualMC functions.
-  //
+{
+   //
+   // Construct geometry using TVirtualMC functions.
+   //
 
-  //ConstructMaterials();  
-  //ConstructVolumes();  
+   // ConstructMaterials();
+   // ConstructVolumes();
 }
 
 //_____________________________________________________________________________
 void TG3Application::InitGeometry()
-{    
-  //
-  // Initialize geometry
-  //
-  
-  // Nothing needed in this example
+{
+   //
+   // Initialize geometry
+   //
+
+   // Nothing needed in this example
 }
 
 //_____________________________________________________________________________
 void TG3Application::GeneratePrimaries()
-{    
-  //
-  // Fill the user stack (derived from TVirtualMCStack) with primary particles.
-  //
-  
+{
+   //
+   // Fill the user stack (derived from TVirtualMCStack) with primary particles.
+   //
 }
 
 //_____________________________________________________________________________
 void TG3Application::BeginEvent()
-{    
-  //
-  // User actions at beginning of event
-  //
+{
+   //
+   // User actions at beginning of event
+   //
 
-  // nothing to be done this example
+   // nothing to be done this example
 }
 
 //_____________________________________________________________________________
 void TG3Application::BeginPrimary()
-{    
-  //
-  // User actions at beginning of a primary track
-  //
+{
+   //
+   // User actions at beginning of a primary track
+   //
 
-  // nothing to be done this example
+   // nothing to be done this example
 }
 
 //_____________________________________________________________________________
 void TG3Application::PreTrack()
-{    
-  //
-  // User actions at beginning of each track
-  //
+{
+   //
+   // User actions at beginning of each track
+   //
 }
 
 //_____________________________________________________________________________
 void TG3Application::Stepping()
-{    
-  //
-  // User actions at each step
-  //
-  
+{
+   //
+   // User actions at each step
+   //
 }
 
 //_____________________________________________________________________________
 void TG3Application::PostTrack()
-{    
-  //
-  // User actions after finishing of each track
-  //
+{
+   //
+   // User actions after finishing of each track
+   //
 
-  // nothing to be done this example
+   // nothing to be done this example
 }
 
 //_____________________________________________________________________________
 void TG3Application::FinishPrimary()
-{    
-  //
-  // User actions after finishing of a primary track
-  //
+{
+   //
+   // User actions after finishing of a primary track
+   //
 
-  // nothing to be done this example
+   // nothing to be done this example
 }
 
 //_____________________________________________________________________________
 void TG3Application::FinishEvent()
-{    
-  //
-  // User actions after finishing of an event
-  //
+{
+   //
+   // User actions after finishing of an event
+   //
 
-  // nothing to be done this example
-} 
+   // nothing to be done this example
+}
 
 //_____________________________________________________________________________
 Double_t TG3Application::TrackingRmax() const
-{ 
-  //
-  // No limit
-  //
+{
+   //
+   // No limit
+   //
 
-  return DBL_MAX; 
+   return DBL_MAX;
 }
 
 //_____________________________________________________________________________
 Double_t TG3Application::TrackingZmax() const
-{ 
-  //
-  // No limit
-  //
+{
+   //
+   // No limit
+   //
 
-  return DBL_MAX; 
+   return DBL_MAX;
 }
 
 //_____________________________________________________________________________
-void TG3Application::Field(const Double_t* /* x */, Double_t* b) const
+void TG3Application::Field(const Double_t * /* x */, Double_t *b) const
 {
-  // 
-  // No magnetic field.
-  //
-  
+   //
+   // No magnetic field.
+   //
+
    b[0] = 0.;
    b[1] = 0.;
    b[2] = 0.;

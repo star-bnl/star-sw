@@ -1,13 +1,7 @@
 *
-* $Id: berttp.F,v 1.2 2018/06/28 19:29:21 fisyak Exp $
+* $Id$
 *
 * $Log: berttp.F,v $
-* Revision 1.2  2018/06/28 19:29:21  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:33:20  fisyak
-* *** empty log message ***
-*
 * Revision 1.2  2002/11/21 11:40:24  brun
 * Fix a problem when getting the environment variable to reach the file flukaaf.dat
 *
@@ -51,9 +45,9 @@ C     --------------------------------- EVAPORATION DATA
 #include "geant321/xsepar.inc"
       LOGICAL OPENED,EXISTS
       LOGICAL LRMSCH, LRD1O2, LTRASP
-      CHARACTER*100 FILNAM
+      CHARACTER*1024 FILNAM
 #if defined(CERNLIB_UNIX)||defined(CERNLIB_VAX)||defined(CERNLIB_CRAY)
-      CHARACTER*100 CHROOT
+      CHARACTER*1024 CHROOT
 #endif
 C---------------------------------------------------------------------
 #if defined(CERNLIB_FDEBUG)

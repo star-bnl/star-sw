@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.23 2020/09/13 02:56:31 genevb Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.24 2020/09/15 05:13:29 genevb Exp $
  *
  */
 
@@ -526,8 +526,8 @@ Int_t StPrepEmbedMaker::Make()
 
   //Set the vertex for StEvent with StGenericVertexMaker
   StGenericVertexMaker * vmaker = (StGenericVertexMaker*) GetMaker("GenericVertex");
-  StGenericVertexFinder * vfinder = vmaker->GetGenericFinder();
-  if(vfinder->IsFixed()){
+  StGenericVertexFinder * vfinder = (vmaker ? vmaker->GetGenericFinder() : 0);
+  if((vfinder) && (vfinder->IsFixed())){
      vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
      vfinder->SetVertexError(xyzerr[0],xyzerr[1],xyzerr[2]);
   }
@@ -904,6 +904,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.24  2020/09/15 05:13:29  genevb
+ * Better protection against null pointers
+ *
  * Revision 1.23  2020/09/13 02:56:31  genevb
  * Use IsFixed() function to determine if fixed vertex finder
  *

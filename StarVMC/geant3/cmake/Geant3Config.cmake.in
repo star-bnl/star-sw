@@ -20,7 +20,7 @@ get_filename_component(_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 get_filename_component(_prefix "${_dir}/../.." ABSOLUTE)
 
 # Import targets
-include("${_prefix}/@CMAKE_INSTALL_LIBDIR@/Geant3-@Geant3_VERSION@/Geant3Targets.cmake")
+include("${_dir}/Geant3Targets.cmake")
  
 # Import options
 set(Geant3_CMAKE_INSTALL_LIBDIR @CMAKE_INSTALL_LIBDIR@)
