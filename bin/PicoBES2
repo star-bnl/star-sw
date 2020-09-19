@@ -484,3 +484,24 @@ foreach d (`ls -1d *GeV*/???`)
   lsf6X ~/xml/daq_2020StiCA.Minuit.TFG20g.xml
   cd -
 end
+############################################################
+Cosmic
+foreach d (`ls -1d [1-2]??`)
+  cd $d; pwd;
+  if (-r Done) then
+    cd -
+    continue;
+  endif
+  daq_2020d.pl
+  if ($?) then
+    ls -1d *bla.root
+    if ($?) then
+      rm sched* *xml;
+      touch Done
+    endif
+    cd -;
+    continue;
+  endif
+  lsf6X ~/xml/daq_2020Cosmic.TFG20g.xml
+  cd -
+end
