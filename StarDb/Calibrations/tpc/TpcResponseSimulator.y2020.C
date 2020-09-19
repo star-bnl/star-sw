@@ -99,13 +99,13 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 0.57692996501735538; // /net/l404/data/fisyak/Tpc/TpcRS/TpcRS2019.DEV2.Real4/dEdx/Fit/SecRow3CGFpionMIP.root
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.11982875000493309-1.27992e-01;
-  // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
-  //                                          3.22907e-01                          2.72715e-01
-  // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
-  // diff                                   : 9.13675e-02                          6.29849e-02
-  // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
+  // 2020/Hijing.AuAu200.VMC3/dEdx/Fit
+  //  FitP->Draw("mu:y>>R(72,0.5,72.5)","i&&j","prof")
+  // R->Fit("pol0","er","",0.5,40.5)  : -2.97604e-01 -3.40842e-04*x; 
+  // R->Fit("pol1","er+","",40.5,72.5): -5.19383e-01 -2.30484e-04*x;
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 0.57692996501735538 -2.97604e-01; row.SecRowCorIW[1] = row.SecRowCorIE[1] = -3.40842e-04;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.11982875000493309-1.27992e-01 -5.19383e-01; row.SecRowCorOW[1] = row.SecRowCorOE[1] = -2.30484e-04;
+#if 0
   const Double_t RowSigmaTrs[4] = {
     9.13675e-02, 0,  // Inner
     6.29849e-02, 0}; // Outer
@@ -113,6 +113,7 @@ TDataSet *CreateTable() {
   for (Int_t i = 0; i < 8; i++) {
     b[i] = RowSigmaTrs[i%4];
   }
+#endif
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
   //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
