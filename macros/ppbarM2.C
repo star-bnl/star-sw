@@ -11,7 +11,7 @@
 #include "TLegend.h"
 #endif
 void ppbarM2() {
-  TH2* p2 = (TH2 *) gDirectory->Get("Tracks/p/hTofPID");
+  TH2* p2 = (TH2 *) gDirectory->Get("/Tracks/p/hTofPID");
   if (! p2) return;
   TObjArray* arr =  new TObjArray(4);
   p2->FitSlicesY(0, 0, -1, 0, "QNR", arr);
@@ -28,7 +28,7 @@ void ppbarM2() {
   m2p->Draw("same");
   l->AddEntry(m2p,"p");
 #if 1
-  TH2* pbar2 = (TH2* )gDirectory->Get("Tracks/p-/hTofPID");
+  TH2* pbar2 = (TH2* )gDirectory->Get("/Tracks/p-/hTofPID");
   TObjArray* arr2 =  new TObjArray(4);
   pbar2->FitSlicesY(0, 0, -1, 0, "QNR", arr2);
   TH1D *m2pbar = (TH1D *) (*arr2)[1]; m2pbar->SetMarkerColor(2); m2pbar->SetMarkerStyle(20);
