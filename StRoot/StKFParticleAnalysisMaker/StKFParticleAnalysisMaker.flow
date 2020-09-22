@@ -1,0 +1,50 @@
+
+ StKFParticleAnalysisMaker::Init
+   StKFParticleAnalysisMaker::BookVertexPlots
+     foreach decay in fDecays : StKFParticleInterface::AddDecayToReconstructionList
+     if(!fIsPicoAnalysis && fProcessSignal) storeMCHistograms = true;
+     StKFParticleAnalysisMaker::BookVertexPlots 
+       StKFParticlePerformanceInterface::StKFParticlePerformanceInterface
+          KFParticlePerformanceBase::CreateHistos
+             if(fStoreMCHistograms)      "DaughtersQA" : res, pull => hFitDaughtersQA[iPart][iH] + [iPart][iH+8]
+	     if(fStoreFitPullHistograms) "FitQAPull"   : res, pull => hFitQAPull[iPart][iH][s] + [iPart][iH+8][s]
+					 "Parameters"  :
+               KFParticlePerformanceBase::CreateParameterHistograms(0,0,0)
+             if(IsCollect3DHistogram(iPart)) 
+               KFParticlePerformanceBase::CreateParameterHistograms(4,4,0) "SignalReco", 
+               KFParticlePerformanceBase::CreateParameterHistograms(5,5,0) "BGReco",
+             if(fStoreMCHistograms)          
+               KFParticlePerformanceBase::CreateParameterHistograms(1,1,0) "Signal", 
+               KFParticlePerformanceBase::CreateParameterHistograms(2,2,0) "Background", 
+               KFParticlePerformanceBase::CreateParameterHistograms(3,3,0) "Ghost"
+               KFParticlePerformanceBase::CreateParameterHistograms(6,6,0) "MCSignal"
+             if(fStorePrimSecHistograms && plotPrimaryHistograms) "Primary"
+             if(fStorePrimSecHistograms && plotPrimaryHistograms) "Secondary"
+                                                                  "PrimaryVertexQA"
+								  "Efficiency"	
+								     "Signal", "Pileup", "Signal_MCReconstructable", "Pileup_MCReconstructable", "PVTracksQA"
+ 									       "FitQA" ,...	
+								      "TrackParameters"			
+
+
+
+  StKFParticleAnalysisMaker::InitRun
+     StKFParticleInterface::instance()->SetFixedTarget(St_beamInfoC::instance()->IsFixedTarget());
+
+   StKFParticleAnalysisMaker::Make
+     StKFParticleInterface::ProcessEvent(fPicoDst, triggeredTracks)
+       if(fCollectTrackHistograms && (isTofm2 || isETofm2)
+         Fill track parameters histograms 
+       AddTrackToParticleList
+       FillPIDHistograms
+          Fill track parameters histograms
+       SetField
+       CleanPV
+       InitParticles
+       AddPV
+       if(fCollectTrackHistograms) 
+or
+     StKFParticleInterface::ProcessEvent(fMuDst, mcTracks, mcIndices, fProcessSignal);
+     ...
+     StKFParticleInterface::PerformanceAnalysis
+        KFTopoPerformance::FillParticleParameters

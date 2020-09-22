@@ -145,7 +145,7 @@ class KFParticlePerformanceBase
   TH2F *hPartParam2DSecondary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; ///< 2D for secondary candidates.
   TH2F *hPartParam2DSecondaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; ///< 2D for secondary candidates with mass constraint.
 
-  static const int nHistoPartParam3D = 8; ///< Number of 3D histograms: y-pt-M, y-mt-M, b-pt-M, b-y-M, b-mt-M, ct-pt-M, y-phi-M for pT > 1 GeV/c, y-pt-dM
+  static const int nHistoPartParam3D = 14; ///< Number of 3D histograms: y-pt-M, y-mt-M, b-pt-M, b-y-M, b-mt-M, ct-pt-M, y-phi-M for pT > 1 GeV/c, y-pt-dM
   TH3F *hPartParam3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D]; ///< 3D histograms.
 
   static const int nPartEfficiency = 9; ///< Number of efficiency plots for each decay: vs p, pt, y, z, c*tau, decay length, l, r, Mt.
@@ -184,6 +184,7 @@ class KFParticlePerformanceBase
   bool IsCollectZRHistogram(int iParticle) const;
   bool IsCollect3DHistogram(int iParticle) const;
   bool IsCollectArmenteros(int iParticle) const;
+  bool IsCollectDalitz(int iParticle) const;
   
  private:
   const KFParticlePerformanceBase& operator = (const KFParticlePerformanceBase&); ///< Copying of objects of this class is forbidden.

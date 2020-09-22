@@ -12,6 +12,7 @@ class KFTopoPerformance;
 class KFVertex;
 class StPicoDst;
 class StPicoTrack;
+class StMuTrack;
 class KFMCTrack;
 class StMuDst;
 class StDcaGeometry;
@@ -135,6 +136,7 @@ class StKFParticleInterface: public TObject
   void AddTrackToParticleList(const KFPTrack& track, int nHftHitsInTrack, int index, const std::vector<int>& totalPDG, KFVertex& pv, std::vector<int>& primaryTrackList,
                               std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved, Float_t chi2 = 0, Int_t NDF = -1);
   void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2 = kFALSE, float m2tof = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1);
+  void FillPIDHistograms(StMuTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2 = kFALSE, float m2tof = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1);
   
   KFParticleTopoReconstructor* fKFParticleTopoReconstructor;
   std::vector<KFParticle> fParticles;

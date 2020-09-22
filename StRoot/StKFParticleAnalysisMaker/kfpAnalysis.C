@@ -12,7 +12,7 @@ class StGoodTrigger;
 //void kfpAnalysis(Int_t N = 1000, const Char_t *input = "/gpfs01/star/pwg_tasks/tfg02/2010/11GeV/st_physics_11148001_raw_1010001.picoDst.root", const Char_t *output = "picoAna2011AuAu11.root", const Char_t *triggerSet = "y2011") {
 //void kfpAnalysis(Int_t N = 1000, const Char_t *input = "/gpfs01/star/pwg/fisyak/Pico/2010AuAu11/11148001.picoDst.root", const Char_t *output = "picoAna2011AuAu11.root", const Char_t *triggerSet = "y2011") {
 //void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "/net/l401/data/scratch1/reco/2020/TFG19m/RF/11p5GeV.B/347/20347034/hlt_20347034_13_02_000.picoDst.root", const Char_t *output = "Ana2020AuAu11p5GeV.root", const Char_t *triggerSet = "y2020", Bool_t idNdx = kFALSE) {
-void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", const Char_t *output = "Ana.root", const Char_t *triggerSet = "y2020", Bool_t idNdx = kFALSE) {
+void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", const Char_t *output = "Ana.root", const Char_t *triggerSet = "y2019", Bool_t idNdx = kFALSE) {
 #if !defined(__CINT__)
   std::cout << "This code cannot be compiled" << std::endl;
 #else
@@ -65,36 +65,38 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
 //   kfpAnalysis->AddDecayToReconstructionList(-3324); // Xi*0
   
   kfpAnalysis->AddDecayToReconstructionList( 22);   // gamma
-//   kfpAnalysis->AddDecayToReconstructionList( 111);  // pi0
+  kfpAnalysis->AddDecayToReconstructionList( 111);  // pi0
 //   kfpAnalysis->AddDecayToReconstructionList( 3212);  // Sigma0
 //   
-//   kfpAnalysis->AddDecayToReconstructionList( 3003); // Ln
-//   kfpAnalysis->AddDecayToReconstructionList( 3103); // Lnn
+#if 1 /* Hyoer Nuclears */
+  kfpAnalysis->AddDecayToReconstructionList( 3003); // Ln
+  //  kfpAnalysis->AddDecayToReconstructionList(-3003); // Ln_bar
+  kfpAnalysis->AddDecayToReconstructionList( 3103); // Lnn
   
-//   kfpAnalysis->AddDecayToReconstructionList( 3004); // H3L
-//   kfpAnalysis->AddDecayToReconstructionList( 3005); // H4L
+  kfpAnalysis->AddDecayToReconstructionList( 3004); // H3L
+  kfpAnalysis->AddDecayToReconstructionList( 3005); // H4L
   
-//   kfpAnalysis->AddDecayToReconstructionList( 3006); // He4L
+  kfpAnalysis->AddDecayToReconstructionList( 3006); // He4L
 
-//   kfpAnalysis->AddDecayToReconstructionList( 3007); // He5L
-//   kfpAnalysis->AddDecayToReconstructionList( 3203); // LLn
-//   kfpAnalysis->AddDecayToReconstructionList( 3008); // H4LL
-//   kfpAnalysis->AddDecayToReconstructionList( 3009); // H4LL
+  kfpAnalysis->AddDecayToReconstructionList( 3007); // He5L
+  kfpAnalysis->AddDecayToReconstructionList( 3203); // LLn
+  kfpAnalysis->AddDecayToReconstructionList( 3008); // H4LL
+  kfpAnalysis->AddDecayToReconstructionList( 3009); // H4LL
   
-//   kfpAnalysis->AddDecayToReconstructionList( 3000); // LL
-//   kfpAnalysis->AddDecayToReconstructionList( 3001); // Lppi
+  kfpAnalysis->AddDecayToReconstructionList( 3000); // LL
+  kfpAnalysis->AddDecayToReconstructionList( 3001); // Lppi
+#endif  
   
-  
-//   kfpAnalysis->AddDecayToReconstructionList( 9001); // pi+pi+
-//   kfpAnalysis->AddDecayToReconstructionList(-9001); // pi-pi-
-//   kfpAnalysis->AddDecayToReconstructionList( 9002); // pi+K+
-//   kfpAnalysis->AddDecayToReconstructionList(-9002); // pi-K-
-//   kfpAnalysis->AddDecayToReconstructionList( 9003); // K+K+
-//   kfpAnalysis->AddDecayToReconstructionList(-9003); // K-K-
-//   kfpAnalysis->AddDecayToReconstructionList( 9004); // pK+
-//   kfpAnalysis->AddDecayToReconstructionList(-9004); // p-K-
-  
-  
+#if 0  
+  kfpAnalysis->AddDecayToReconstructionList( 9001); // pi+pi+
+  kfpAnalysis->AddDecayToReconstructionList(-9001); // pi-pi-
+  kfpAnalysis->AddDecayToReconstructionList( 9002); // pi+K+
+  kfpAnalysis->AddDecayToReconstructionList(-9002); // pi-K-
+  kfpAnalysis->AddDecayToReconstructionList( 9003); // K+K+
+  kfpAnalysis->AddDecayToReconstructionList(-9003); // K-K-
+  kfpAnalysis->AddDecayToReconstructionList( 9004); // pK+
+  kfpAnalysis->AddDecayToReconstructionList(-9004); // p-K-
+#endif  
   chain->Init();
 
   if(isPico)

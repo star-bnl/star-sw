@@ -19,6 +19,7 @@
 #include "StPicoEvent/StPicoETofPidTraits.h"
 
 #include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
 #include "StProbPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
@@ -234,7 +235,6 @@ void StKFParticleInterface::CollectTrackHistograms()
   
   fTrackHistograms[1] = (TH1F *)   dirs[1]->Get("hPVError");
   if (! fTrackHistograms[1]) fTrackHistograms[1] = new TH1F("hPVError", "hPVError", 10000, 0, 1);
-  
 
   fTrackHistograms2D[5] = (TH2F *)   dirs[1]->Get("hPVErrorVsNTracks");
   if (! fTrackHistograms2D[5]) {
@@ -451,7 +451,6 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
   if(dEdXPull[0] < nSigmaCut)                                           dEdXPDG.push_back(211*q);  
   if(dEdXPull[1] < 2.f && ((checkKTof && checkKHasTof) || !checkKTof) ) dEdXPDG.push_back(321*q);
   if(dEdXPull[2] < nSigmaCut)                                           dEdXPDG.push_back(2212*q); 
-  
       
   vector<int> totalPDG;
   if(!isTofm2)
@@ -471,8 +470,7 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
 //     if(dEdXPull[4] < nSigmaCut && dEdXPull[3] > nSigmaCut) 
 //       if( isTofm2 && (m2 > 6.8 && m2<9.1) ) //if( !isTofm2 || (isTofm2 && (m2 > 5)) )
 //         totalPDG.push_back(1000010030*q);
-      
-  
+    
     //d
     if(isTofm2 && (m2>3 && m2<4.2)){
       if(p<1.5){
@@ -677,9 +675,9 @@ void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nH
     int pdg = totalPDG[iPDG];
     
     KFPTrack trackPDG = track;
-    
-    if(abs(pdg) == 1000020060 || abs(pdg) == 1000030060)
-    {
+
+    //    if(abs(pdg) == 1000020060 || abs(pdg) == 1000030060)
+    //    {
 #if 0
       float dx = (trackPDG.GetX() - pv.X());
       float dy = (trackPDG.GetY() - pv.Y());
@@ -687,77 +685,57 @@ void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nH
       float r = sqrt(trackPDG.GetX()*trackPDG.GetX() + trackPDG.GetY()*trackPDG.GetY());
       float l = sqrt(dx*dx + dy*dy + dz*dz);
 //       if(!(r<2. && l<2.)) continue;
-#endif      
-      if(pdg == 1000020060)
-      {
-        trackPDG.SetCharge( trackPDG.Charge()*2.f );
-        trackPDG.SetPx( trackPDG.GetPx()*2.f );
-        trackPDG.SetPy( trackPDG.GetPy()*2.f );
-        trackPDG.SetPz( trackPDG.GetPz()*2.f );
-
-        const int index2[9] = { 6,7,8, 10,11,12, 15,16,17 };
-        for(int iIndex=0; iIndex<9; iIndex++)
-        {
-          const int iC = index2[iIndex];
-          trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*2.f );
-        }
-        const int index4[6] = { 9, 13,14, 18,19,20 };
-        for(int iIndex=0; iIndex<6; iIndex++)
-        {
-          const int iC = index4[iIndex];
-          trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*4.f );
-        }
-      }
-      if(pdg == 1000030060)
-      {
-        trackPDG.SetCharge( trackPDG.Charge()*3.f );
-        trackPDG.SetPx( trackPDG.GetPx()*3.f );
-        trackPDG.SetPy( trackPDG.GetPy()*3.f );
-        trackPDG.SetPz( trackPDG.GetPz()*3.f );
-
-        const int index2[9] = { 6,7,8, 10,11,12, 15,16,17 };
-        for(int iIndex=0; iIndex<9; iIndex++)
-        {
-          const int iC = index2[iIndex];
-          trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*3.f );
-        }
-        const int index4[6] = { 9, 13,14, 18,19,20 };
-        for(int iIndex=0; iIndex<6; iIndex++)
-        {
-          const int iC = index4[iIndex];
-          trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*9.f );
-        }
-      }
-    }
-    
-    if(abs(pdg) == 1000020030 || abs(pdg) == 1000020040)
-    {
-#if 0
-      float r = sqrt(trackPDG.GetX()*trackPDG.GetX() + trackPDG.GetY()*trackPDG.GetY());
-      float dx = (trackPDG.GetX() - pv.X());
-      float dy = (trackPDG.GetY() - pv.Y());
-      float dz = (trackPDG.GetZ() - pv.Z());
-      float l = sqrt(dx*dx + dy*dy + dz*dz);
-      //      if(!(r<2. && l<2.)) continue;
 #endif
+    //correct for the charge of ions
+    const int index2[9] = { 6,7,8, 10,11,12, 15,16,17 };
+    const int index4[6] = { 9, 13,14, 18,19,20 };
+    if(abs(pdg) == 1000020030 || abs(pdg) == 1000020040 || abs(pdg) == 1000020060) {
       trackPDG.SetCharge( trackPDG.Charge()*2.f );
       trackPDG.SetPx( trackPDG.GetPx()*2.f );
       trackPDG.SetPy( trackPDG.GetPy()*2.f );
       trackPDG.SetPz( trackPDG.GetPz()*2.f );
-
-      const int index2[9] = { 6,7,8, 10,11,12, 15,16,17 };
-      for(int iIndex=0; iIndex<9; iIndex++)
-      {
+      for(int iIndex=0; iIndex<9; iIndex++){
         const int iC = index2[iIndex];
         trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*2.f );
       }
-      const int index4[6] = { 9, 13,14, 18,19,20 };
-      for(int iIndex=0; iIndex<6; iIndex++)
-      {
+      for(int iIndex=0; iIndex<6; iIndex++){
         const int iC = index4[iIndex];
         trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*4.f );
       }
     }
+    if(abs(pdg) == 1000030060 || abs(pdg) == 1000030070) {
+      trackPDG.SetCharge( trackPDG.Charge()*3.f );
+      trackPDG.SetPx( trackPDG.GetPx()*3.f );
+      trackPDG.SetPy( trackPDG.GetPy()*3.f );
+      trackPDG.SetPz( trackPDG.GetPz()*3.f );
+      for(int iIndex=0; iIndex<9; iIndex++) {
+        const int iC = index2[iIndex];
+        trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*3.f );
+      }
+      for(int iIndex=0; iIndex<6; iIndex++) {
+        const int iC = index4[iIndex];
+        trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*9.f );
+      }
+    }
+    if(abs(pdg) == 1000040070) {
+      trackPDG.SetCharge( trackPDG.Charge()*4.f );
+      trackPDG.SetPx( trackPDG.GetPx()*4.f );
+      trackPDG.SetPy( trackPDG.GetPy()*4.f );
+      trackPDG.SetPz( trackPDG.GetPz()*4.f );
+      for(int iIndex=0; iIndex<9; iIndex++) {
+        const int iC = index2[iIndex];
+        trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*4.f );
+      }
+      for(int iIndex=0; iIndex<6; iIndex++) {
+        const int iC = index4[iIndex];
+        trackPDG.SetCovariance( iC, trackPDG.GetCovariance(iC)*16.f );
+      }
+    }
+//     if(abs(pdg) == 211)
+//     {
+//       trackPDG.SetCharge( -trackPDG.Charge() );
+//       pdg = -pdg;
+//     }
     
     nHftHits[nPartSaved] = nHftHitsInTrack;
     
@@ -785,7 +763,7 @@ void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nH
 
     nPartSaved++;
   }
-}
+ }
 
 void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof,  const bool isETofm2, float m2Etof)
 {
@@ -815,13 +793,10 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
           float betaGamma = TMath::Log10(momentum/0.139570);
           float z = gTrack->dEdxPull(0.139570, 1, 1)*gTrack->dEdxError();
           fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
-          z = gTrack->dEdxPull(0.139570, 1, 2);
-	  //          fHistodNdXZ[iTrackHisto]->Fill(betaGamma, z);
           
           betaGamma = TMath::Log10(momentum/5.485799e-4);
           z = gTrack->nSigmaElectron()*gTrack->dEdxError();
           fHistodEdXZ[0]->Fill(betaGamma, z);
-
         }
         if(abs(pdg)==321)
         {
@@ -830,7 +805,6 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
           float betaGamma = TMath::Log10(momentum/0.493677);
           float z = gTrack->dEdxPull(0.493677, 1, 1)*gTrack->dEdxError();
           fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
-
         }
         if(abs(pdg)==2212)
         {
@@ -872,6 +846,41 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
           float z = gTrack->dEdxPull(3.728400, 1, 2)*gTrack->dEdxError();
           fHistodEdXZ[iTrackHisto]->Fill(betaGamma, z);
         }
+      }
+    }
+  }
+}
+
+void StKFParticleInterface::FillPIDHistograms(StMuTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof, const bool isETofm2, float m2Etof)
+{
+  float momentum = gTrack->p().mag();
+  for(unsigned int iPdg = 0; iPdg<pdgVector.size(); iPdg++)
+  {
+    int pdg = pdgVector[iPdg];
+    const int iTrackHisto = fTrackPdgToHistoIndex[pdg];
+    if( ! (iTrackHisto < 0 || iTrackHisto >= NTrackHistoFolders) )
+    {
+      fHistoMomentumTracks[iTrackHisto] -> Fill(momentum);
+      fHistodEdXTracks[iTrackHisto] -> Fill(momentum, gTrack->dEdx()*1.e6);
+      if(isTofm2)
+      {
+        fHistodEdXwithToFTracks[iTrackHisto] -> Fill(momentum, gTrack->dEdx()*1.e6);
+        fHistoTofPIDTracks[iTrackHisto] -> Fill(momentum, m2tof);
+        
+        if(abs(pdg)==211)
+          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.139570, fdEdXMode, 1));
+        if(abs(pdg)==321)
+          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.493677, fdEdXMode, 1));
+        if(abs(pdg)==2212)
+          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.938272, fdEdXMode, 1));
+        if(abs(pdg)==1000010020)
+          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(1.876124, fdEdXMode, 1));
+        if(abs(pdg)==1000010030)
+          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(2.809432, fdEdXMode, 1));
+        if(abs(pdg)==1000020030)
+          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(2.809413, fdEdXMode, 2));
+        if(abs(pdg)==1000020040)
+          fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(3.728400, fdEdXMode, 2));
       }
     }
   }
@@ -969,6 +978,9 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   int nPartSaved = 0;
   int nUsedTracks = 0;
   
+  std::vector<float> m2TofArray(nGlobalTracks*2, -1.0e6f);
+  std::vector<int> trakIdToI(nGlobalTracks*2);
+  
   for (Int_t iTrack = 0; iTrack < nGlobalTracks; iTrack++) 
   {
     StPicoTrack *gTrack = picoDst->track(iTrack);
@@ -977,6 +989,9 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     if (  gTrack->nHitsFit() < 15) continue;
     if (  gTrack->dEdxError() < 0.04 || gTrack->dEdxError() > 0.12 ) continue;
     const int index = gTrack->id();
+    
+    if(index >= trakIdToI.size()) trakIdToI.resize(index+1);
+    trakIdToI[index] = iTrack;
     
     int nHftHitsInTrack = 0;
     if(gTrack->hasPxl1Hit()) nHftHitsInTrack++;
@@ -1032,8 +1047,21 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
         if(timeTof > 0. && lengthTof > 0.)
         {
           m2tof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
-          isTofm2 = true;
-        }
+        isTofm2 = true;
+      }
+//       else
+//       {
+//         const TVector3 & tofPoint  = btofPid->btofHitPos();
+//         StPicoPhysicalHelix innerHelix = gTrack->helix(picoEvent->bField());
+//         double lengthTof = fabs( innerHelix.pathLength( tofPoint ));
+//         
+//         double timeTof = btofPid->btof();
+//         if(timeTof > 0. && lengthTof > 0.)
+//         {
+//           m2tof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
+//           isTofm2 = true;
+//         }
+//       }
       }
     }
     double m2Etof = -1.e6;
@@ -1053,16 +1081,17 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
         const TVector3 & tofPoint  = etofPid->etofHitPos();
         StPicoPhysicalHelix innerHelix = gTrack->helix(picoEvent->bField());
         double lengthTof = fabs( innerHelix.pathLength( tofPoint ));
-        
+      
+      if(fCollectTrackHistograms)
         double timeTof = etofPid->etof();
         if(timeTof > 0. && lengthTof > 0.)
-        {
+      {
           m2Etof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
           isETofm2 = true;
         }
       }
 #endif
-    }
+      }
       
     if(fCollectTrackHistograms && (isTofm2 || isETofm2))
       {
@@ -1073,7 +1102,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
         fTrackHistograms2D[12]->Fill(pL10, dNdxL10);
         if (isTofm2) fTrackHistograms2D[4]->Fill(pL10, m2tof);
         if (isETofm2) fTrackHistograms2D[14]->Fill(pL10, m2Etof);
-      }
+    }
     
     double dEdXPull[7] = { fabs(gTrack->dEdxPull(0.139570, fdEdXMode, 1)),   //0 - pi
                            fabs(gTrack->dEdxPull(0.493677, fdEdXMode, 1)),   //1 - K
@@ -1110,6 +1139,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   fParticlesPdg.resize(nPartSaved);
   fNHftHits.resize(nPartSaved);
   
+//   if( fCleanLowPVTrackEvents && ( 10*primaryTrackList.size() < (nUsedTracks - primaryTrackList.size()) ) ) return 0;
   if(nUsedTracks==0) return 0;
   if (fCollectTrackHistograms) {
     fTrackHistograms[2]->Fill( double(primaryTrackList.size())/double(nUsedTracks) );
@@ -1121,8 +1151,8 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   if( fCleanLowPVTrackEvents && sqrt(dx*dx + dy*dy) > 0.45 ) return 0;
   if (! IsFixedTarget()) {
     if( fCleanLowPVTrackEvents && primaryVertex.GetR() > 1.5 ) return 0;
-    //   if( fCleanLowPVTrackEvents && fabs(primaryVertex.Z()) > 75. ) return 0;
-    
+//   if( fCleanLowPVTrackEvents && fabs(primaryVertex.Z()) > 75. ) return 0;
+  
     //   14 GeV
     //   double nSecLimit = 15.4905 + 1.01890*primaryTrackList.size();
     //   double nSec = (nUsedTracks - primaryTrackList.size());
@@ -1140,6 +1170,8 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   InitParticles();
 
   //read PV
+//   vector<int> emptyPrimaryList(0);
+//   AddPV(primaryVertex, emptyPrimaryList);
   AddPV(primaryVertex, primaryTrackList);
   if(fCollectTrackHistograms)
   {
@@ -1152,6 +1184,216 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   //reconstruct short-lived particles
   ReconstructParticles();
   
+  //TODO !!!!!!!!!!!!!remove me!!!!!!!!!!!!!!
+#if 0
+  const int nCandidates = GetParticles().size();
+  for(int iParticle=0; iParticle<nCandidates; iParticle++) {
+    const KFParticle particle = GetParticles()[iParticle];
+    if(particle.GetPDG() == 3003)
+      RemoveParticle(iParticle);
+    
+//     if(particle.GetPDG() == 3028) {
+//       KFParticle pion = GetParticles()[particle.DaughterIds()[0]];
+//       KFParticle p1   = GetParticles()[particle.DaughterIds()[1]];
+//       KFParticle p2   = GetParticles()[particle.DaughterIds()[2]];      
+//       
+//       KFParticle p1pi;
+//       p1pi += pion;
+//       p1pi += p1;
+//       
+//       KFParticle p2pi;
+//       p2pi += pion;
+//       p2pi += p2;
+//       
+//       KFParticle p1p2;
+//       p1p2 += p1;
+//       p1p2 += p2;
+//       float m12, dm12;
+//       p1p2.GetMass(m12, dm12);
+//       
+//       bool ok = fabs(p1pi.GetMass() - 1.115683f) < 3.f*0.0015f &&
+//                 fabs(p2pi.GetMass() - 1.115683f) < 3.f*0.0015f;
+// //       if(ok)
+// //         RemoveParticle(iParticle);
+//       
+// //       if(ok) {
+// //         
+// //         std::cout << "M " << particle.GetMass() << std::endl;
+// //         std::cout << "m_p1pi " << p1pi.GetMass() << std::endl;
+// //         std::cout << "m_p2pi " << p2pi.GetMass() << std::endl;
+// //         std::cout << "m_pp   " << p1p2.GetMass() << std::endl;
+// //         
+// //         std::cout << "pion " << std::endl;
+// //         std::cout << pion << std::endl;
+// //         std::cout << "protons " << std::endl;
+// //         std::cout << p1 << std::endl;
+// //         std::cout << p2 << std::endl;
+// //         
+// //         std::cout << "combinations:" << std::endl;
+// //         std::cout << "    p1pi   " << p1pi << std::endl;
+// //         std::cout << "    p2pi   " << p2pi << std::endl;
+// //         std::cout << "    p1p2   " << p1p2 << std::endl;
+// //         
+// //         std::cin.get();
+// //       }
+//       
+//       bool isClone = fabs(p1pi.GetMass() - 1.115683f) < 2.f*0.0015f &&
+//                      fabs(p2pi.GetMass() - 1.115683f) < 2.f*0.0015f &&
+//                      m12 < 1.89;
+//       if(isClone)
+//         RemoveParticle(iParticle);
+//     }
+
+    if(particle.GetPDG() == 3029) {
+      KFParticle pion = GetParticles()[particle.DaughterIds()[0]];
+      KFParticle p1   = GetParticles()[particle.DaughterIds()[1]];
+      KFParticle p2   = GetParticles()[particle.DaughterIds()[2]];
+      KFParticle p3   = GetParticles()[particle.DaughterIds()[3]];
+      
+//       KFParticle p1pi;
+//       p1pi += pion;
+//       p1pi += p1;
+//       
+//       KFParticle p2pi;
+//       p2pi += pion;
+//       p2pi += p2;
+// 
+//       KFParticle p3pi;
+//       p3pi += pion;
+//       p3pi += p2;
+// 
+//       bool ok = (fabs(p1pi.GetMass() - 1.115683f) < 3.f*0.0015f && fabs(p2pi.GetMass() - 1.115683f) < 3.f*0.0015f) ||
+//                 (fabs(p2pi.GetMass() - 1.115683f) < 3.f*0.0015f && fabs(p3pi.GetMass() - 1.115683f) < 3.f*0.0015f) ||
+//                 (fabs(p1pi.GetMass() - 1.115683f) < 3.f*0.0015f && fabs(p3pi.GetMass() - 1.115683f) < 3.f*0.0015f) ;
+                
+      KFParticle p1p2;
+      p1p2 += p1;
+      p1p2 += p2;
+      float m12, dm12;
+      p1p2.GetMass(m12, dm12);
+      
+      KFParticle p1p3;
+      p1p3 += p1;
+      p1p3 += p3;
+      float m13, dm13;
+      p1p3.GetMass(m13, dm13);
+      
+      KFParticle p3p2;
+      p3p2 += p3;
+      p3p2 += p2;
+      float m32, dm32;
+      p3p2.GetMass(m32, dm32);
+      
+      bool ok = (m12 < 1.89) && (m13 < 1.89) && (m32 < 1.89);
+      
+      if(!ok)
+        RemoveParticle(iParticle);
+    }
+    
+    if(particle.GetPDG() == 3012) {
+      KFParticle pion     = GetParticles()[particle.DaughterIds()[0]];
+      KFParticle deuteron = GetParticles()[particle.DaughterIds()[1]];
+      KFParticle proton   = GetParticles()[particle.DaughterIds()[2]];
+      
+      float m, dm, l, dl;
+      bool removeCandidate = true;
+      
+      KFParticle ppi;
+      ppi += pion;
+      ppi += proton;
+      ppi.GetMass(m,dm);
+            
+//       if(fabs(m - 1.115683f) < 3.f*0.0015f){
+//         
+// //         KFParticle ppiCopy = ppi;
+// //         ppi.SetNonlinearMassConstraint(1.115683);
+// //         
+// //         KFParticle resonance;
+// //         resonance += ppi;
+// //         resonance += deuteron;
+// //         
+// //         resonance.GetDistanceToVertexLine(GetTopoReconstructor()->GetPrimVertex(), l, dl);
+// //         removeCandidate &= (l/dl > 3.f || (deuteron.GetP() < 1.5f*proton.GetP() ));
+// // //         ppiCopy.SetProductionVertex(GetTopoReconstructor()->GetPrimVertex());
+// // //         float chi2NDF = ppiCopy.GetChi2()/float(ppiCopy.GetNDF());
+// // //         removeCandidate &= (l/dl > 3.f || chi2NDF < 3.f);
+//         deuteron.SetNonlinearMassConstraint(0.938272);
+//         ppi += deuteron;
+//         ppi.SetPDG(3028);
+//         ppi.SetId(GetParticles().size());
+//         AddParticle(ppi);
+//       }
+//       
+//       if(removeCandidate || particle.GetR() < 5.f)
+//         RemoveParticle(iParticle);
+//       else {
+        StPicoTrack *piTrack = picoDst->track(trakIdToI[pion.DaughterIds()[0]]);
+        StPicoTrack *dTrack  = picoDst->track(trakIdToI[deuteron.DaughterIds()[0]]);
+        StPicoTrack *pTrack  = picoDst->track(trakIdToI[proton.DaughterIds()[0]]);
+        
+        const float piTof = m2TofArray[pion.DaughterIds()[0]];
+        const float dTof  = m2TofArray[deuteron.DaughterIds()[0]];
+        const float pTof  = m2TofArray[proton.DaughterIds()[0]];
+        
+        std::vector<int> piPdg; piPdg.push_back(-211);
+        FillPIDHistograms(piTrack, piPdg, piTof > -1.0e6f, piTof);
+        std::vector<int> dPdg; dPdg.push_back(1000010020);
+        FillPIDHistograms(dTrack,   dPdg, dTof  > -1.0e6f, dTof);
+        std::vector<int> pPdg; pPdg.push_back(2212);
+        FillPIDHistograms(pTrack,   pPdg, pTof  > -1.0e6f, pTof);
+      
+        KFParticle dpi;
+        dpi += pion;
+        dpi += deuteron;
+        dpi.SetPDG(3003);
+        dpi.SetId(GetParticles().size());
+        AddParticle(dpi);
+//       }
+        
+//         const int index = dTrack->id();
+//         StPicoTrackCovMatrix *cov = picoDst->trackCovMatrix(trakIdToI[deuteron.DaughterIds()[0]]);
+//         const StDcaGeometry dcaG = cov->dcaGeometry();
+//         Int_t q = 1; if (dTrack->charge() < 0) q = -1;
+//         KFPTrack track;
+//         if( !GetTrack(dcaG, track, q, index) ) continue;
+//       
+//         std::vector<int> totalPDG;
+//         totalPDG.push_back(2212);
+//         std::vector<KFParticle> fragments(1);
+//         std::vector<int> fragmentsPdg(1);
+//         std::vector<int> nHftHits(1);
+//         std::vector<int> primaryTrackList;
+//         int nPartSaved = 0;
+//         AddTrackToParticleList(track, 0, index, totalPDG, primaryVertex, primaryTrackList, nHftHits, fragmentsPdg, fragments, nPartSaved);
+//         
+//         KFParticle newProton = fragments[0];
+//         newProton.SetPDG(2212);
+//         newProton.SetId(GetParticles().size());
+//         AddParticle(newProton);
+//         
+//         KFParticle p1pi;
+//         p1pi += pion;
+//         p1pi += proton;
+//         
+//         KFParticle p2pi;
+//         p2pi += pion;
+//         p2pi += newProton;
+//         
+//         bool ok = fabs(p1pi.GetMass() - 1.115683f) < 3.f*0.0015f &&
+//                   fabs(p2pi.GetMass() - 1.115683f) < 3.f*0.0015f;
+//                   
+//         if(!ok) {
+//           KFParticle pppi;
+//           pppi += pion;
+//           pppi += newProton;
+//           pppi += proton;
+//           pppi.SetPDG(3028);
+//           pppi.SetId(GetParticles().size());
+//           AddParticle(pppi);
+//         }
+    }
+  }
+#endif
   return 1;
 }
 
@@ -1206,6 +1448,8 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
   int nPartSaved = 0;
   int nUsedTracks = 0;
   
+  std::vector<int> trakIdToI(nGlobalTracks*2);
+  
   for (Int_t iTrack = 0; iTrack < nGlobalTracks; iTrack++) 
   {
     StMuTrack *gTrack = muDst->globalTracks(iTrack);
@@ -1222,6 +1466,9 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     
     const int index = gTrack->id();
     
+    if(index >= trakIdToI.size()) trakIdToI.resize(index+1);
+    trakIdToI[index] = iTrack;
+    
     mcIndices[index] = gTrack->idTruth()-1;
     if(mcIndices[index] >= int(mcTracks.size()))
       mcIndices[index] = -1;
@@ -1237,6 +1484,10 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     StDcaGeometry *dcaG = StMuDst::instance()->covGlobTracks(dcaGeometryIndex);
     if (! dcaG) continue;
       
+//     THelixTrack t = dcaG->thelix();
+//     StThreeVectorD V(muDst->primaryVertex()->position());
+//     Double_t dca3D = t.Dca(V.xyz());
+//     if(dca3D > 50.) continue;
     THelixTrack t = dcaG->thelix();
     StThreeVectorD V(muDst->primaryVertex()->position());
     Double_t dca3D = t.Dca(V.xyz());
@@ -1264,7 +1515,7 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     const StMuBTofPidTraits &btofPid = gTrack->btofPidTraits();
     double timeTof = btofPid.timeOfFlight();
     if (timeTof > 0) {
-      double lengthTof = btofPid.pathLength();
+    double lengthTof = btofPid.pathLength();
       if(lengthTof < 0.) {
 	const StThreeVectorF & tofPoint  = btofPid.position();
 	const StThreeVectorF & dcaPoint  = gTrack->dca(bestPV);
@@ -1277,8 +1528,8 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
 	lengthTof = l + dlDCA + dlTOF;
       }
       if(lengthTof > 0.) {
-	m2tof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
-	isTofm2 = true;
+      m2tof = track.GetP()*track.GetP()*(1./((lengthTof/timeTof/29.9792458)*(lengthTof/timeTof/29.9792458))-1.);
+      isTofm2 = true;
       }
     }
     double m2Etof = -1.e6;
@@ -1330,13 +1581,26 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
                            fabs(gTrack->dEdxPull(3.728400, fdEdXMode, 2))};  //6 - He4
     
     vector<int> totalPDG = GetPID(m2tof, track.GetP(), q, gTrack->dEdx()*1.e6, dEdXPull, isTofm2, index);
-        
+    
+    int nPartSaved0 = nPartSaved;
+    unsigned int nPrimaryTracks = primaryTrackList.size();
     Int_t NDF = 2*gTrack->nHitsFit() - 5;
     Float_t Chi2 = gTrack->chi2()*NDF;
     AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved, Chi2, NDF);         
+    
+    //fill PID histograms if they are created
+    //Histograms are filled for secondary tracks only!!!
+    if(fCollectPIDHistograms && (nPrimaryTracks == primaryTrackList.size())) 
+    {
+      vector<int> selectedPdg;
+      for(int iPdg = nPartSaved0; iPdg<nPartSaved; iPdg++)
+        selectedPdg.push_back(fParticlesPdg[iPdg]);
+      FillPIDHistograms(gTrack, selectedPdg, isTofm2, m2tof);
+    }
+    
     nUsedTracks++;
   }
-  
+
   fParticles.resize(nPartSaved);
   fParticlesPdg.resize(nPartSaved);
   fNHftHits.resize(nPartSaved);
@@ -1362,6 +1626,204 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
   }  
   //reconstruct short-lived particles
   ReconstructParticles();
+  
+#if 0
+  const int nCandidates = GetParticles().size();
+  for(int iParticle=0; iParticle<nCandidates; iParticle++) {
+    const KFParticle particle = GetParticles()[iParticle];
+    
+    if(particle.GetPDG() == 3028) {
+      KFParticle pion = GetParticles()[particle.DaughterIds()[0]];
+      KFParticle p1   = GetParticles()[particle.DaughterIds()[1]];
+      KFParticle p2   = GetParticles()[particle.DaughterIds()[2]];      
+      
+      KFParticle p1pi;
+      p1pi += pion;
+      p1pi += p1;
+      
+      KFParticle p2pi;
+      p2pi += pion;
+      p2pi += p2;
+
+      bool ok = fabs(p1pi.GetMass() - 1.115683f) < 3.f*0.0015f &&
+                fabs(p2pi.GetMass() - 1.115683f) < 3.f*0.0015f;
+      if(!ok)
+        RemoveParticle(iParticle);
+    }
+
+    if(particle.GetPDG() == 3029) {
+      KFParticle pion = GetParticles()[particle.DaughterIds()[0]];
+      KFParticle p1   = GetParticles()[particle.DaughterIds()[1]];
+      KFParticle p2   = GetParticles()[particle.DaughterIds()[2]];
+      KFParticle p3   = GetParticles()[particle.DaughterIds()[3]];
+      
+      KFParticle p1pi;
+      p1pi += pion;
+      p1pi += p1;
+      
+      KFParticle p2pi;
+      p2pi += pion;
+      p2pi += p2;
+
+      KFParticle p3pi;
+      p3pi += pion;
+      p3pi += p2;
+
+      bool ok = (fabs(p1pi.GetMass() - 1.115683f) < 3.f*0.0015f && fabs(p2pi.GetMass() - 1.115683f) < 3.f*0.0015f) ||
+                (fabs(p2pi.GetMass() - 1.115683f) < 3.f*0.0015f && fabs(p3pi.GetMass() - 1.115683f) < 3.f*0.0015f) ||
+                (fabs(p1pi.GetMass() - 1.115683f) < 3.f*0.0015f && fabs(p3pi.GetMass() - 1.115683f) < 3.f*0.0015f) ;
+      if(!ok)
+        RemoveParticle(iParticle);
+    }
+  }
+#endif
+#if 0
+  const int nCandidates = GetParticles().size();
+  for(int iParticle=0; iParticle<nCandidates; iParticle++) {
+    const KFParticle particle = GetParticles()[iParticle];
+    
+    if(particle.GetPDG() == 3012 ||
+       particle.GetPDG() == 3013 ||
+       particle.GetPDG() == 3006 ||
+       particle.GetPDG() == 3007 ||
+       particle.GetPDG() == 3028 )
+      RemoveParticle(iParticle);
+    
+    if(particle.GetPDG() == 3122) {
+      KFParticle p   = GetParticles()[particle.DaughterIds()[1]];
+      
+      const int index = trakIdToI[p.DaughterIds()[0]];
+      StMuTrack *pTrack  = muDst->globalTracks(index);
+      Int_t dcaGeometryIndex = pTrack->index2Cov();
+      if (dcaGeometryIndex < 0) continue;
+      StDcaGeometry *dcaG = StMuDst::instance()->covGlobTracks(dcaGeometryIndex);
+      if (! dcaG) continue;
+      Int_t q = 1; if (pTrack->charge() < 0) q = -1;
+      KFPTrack track;
+      if( !GetTrack(*dcaG, track, q, index) ) continue;
+      
+      std::vector<int> totalPDG;
+      totalPDG.push_back(2212);
+      totalPDG.push_back(1000010020);
+      totalPDG.push_back(1000010030);
+      totalPDG.push_back(1000020030);
+      totalPDG.push_back(1000020040);
+      std::vector<KFParticle> fragments(5);
+      std::vector<int> fragmentsPdg(5);
+      std::vector<int> nHftHits(5);
+      std::vector<int> primaryTrackList;
+      int nPartSaved = 0;
+      AddTrackToParticleList(track, 0, index, totalPDG, primaryVertex, primaryTrackList, nHftHits, fragmentsPdg, fragments, nPartSaved);    
+
+      KFParticle pppi = particle;
+      fragments[0].SetId(p.Id());
+      pppi += fragments[0];
+      pppi.SetPDG(3028);
+      pppi.SetId(GetParticles().size());
+      AddParticle(pppi);
+      
+      KFParticle dppi = particle;
+      fragments[1].SetId(p.Id());
+      dppi += fragments[1];
+      dppi.SetPDG(3012);
+      dppi.SetId(GetParticles().size());
+      AddParticle(dppi);
+      
+      KFParticle tppi = particle;
+      fragments[2].SetId(p.Id());
+      tppi += fragments[2];
+      tppi.SetPDG(3013);
+      tppi.SetId(GetParticles().size());
+      AddParticle(tppi);
+
+      KFParticle he3ppi = particle;
+      fragments[3].SetId(p.Id());
+      he3ppi += fragments[3];
+      he3ppi.SetPDG(3006);
+      he3ppi.SetId(GetParticles().size());
+      AddParticle(he3ppi);
+
+      KFParticle he4ppi = particle;
+      fragments[4].SetId(p.Id());
+      he4ppi += fragments[4];
+      he4ppi.SetPDG(3007);
+      he4ppi.SetId(GetParticles().size());
+      AddParticle(he4ppi);      
+    }
+#endif
+#if 1
+  const int nCandidates = GetParticles().size();
+  for(int iParticle=0; iParticle<nCandidates; iParticle++) {
+    const KFParticle particle = GetParticles()[iParticle];
+    
+    if(particle.GetPDG() == 3012 ||
+       particle.GetPDG() == 3013 ||
+       particle.GetPDG() == 3006 ||
+       particle.GetPDG() == 3007 )
+      RemoveParticle(iParticle);
+    
+    if(particle.GetPDG() == 3028) {
+      KFParticle pi = GetParticles()[particle.DaughterIds()[0]];
+      KFParticle p1 = GetParticles()[particle.DaughterIds()[1]];
+      KFParticle p2 = GetParticles()[particle.DaughterIds()[2]];
+      
+      const int index = trakIdToI[p1.DaughterIds()[0]];
+      StMuTrack *pTrack  = muDst->globalTracks(index);
+      Int_t dcaGeometryIndex = pTrack->index2Cov();
+      if (dcaGeometryIndex < 0) continue;
+      StDcaGeometry *dcaG = StMuDst::instance()->covGlobTracks(dcaGeometryIndex);
+      if (! dcaG) continue;
+      Int_t q = 1; if (pTrack->charge() < 0) q = -1;
+      KFPTrack track;
+      if( !GetTrack(*dcaG, track, q, index) ) continue;
+      
+      std::vector<int> totalPDG;
+      totalPDG.push_back(1000010020);
+      totalPDG.push_back(1000010030);
+      totalPDG.push_back(1000020030);
+      totalPDG.push_back(1000020040);
+      std::vector<KFParticle> fragments(4);
+      std::vector<int> fragmentsPdg(4);
+      std::vector<int> nHftHits(4);
+      std::vector<int> primaryTrackList;
+      int nPartSaved = 0;
+      AddTrackToParticleList(track, 0, index, totalPDG, primaryVertex, primaryTrackList, nHftHits, fragmentsPdg, fragments, nPartSaved);    
+      
+      KFParticle ppi;
+      ppi += pi;
+      ppi += p2;
+      
+      KFParticle dppi = ppi;
+      fragments[0].SetId(p1.Id());
+      dppi += fragments[0];
+      dppi.SetPDG(3012);
+      dppi.SetId(GetParticles().size());
+      AddParticle(dppi);
+      
+      KFParticle tppi = ppi;
+      fragments[1].SetId(p1.Id());
+      tppi += fragments[1];
+      tppi.SetPDG(3013);
+      tppi.SetId(GetParticles().size());
+      AddParticle(tppi);
+
+      KFParticle he3ppi = ppi;
+      fragments[2].SetId(p1.Id());
+      he3ppi += fragments[2];
+      he3ppi.SetPDG(3006);
+      he3ppi.SetId(GetParticles().size());
+      AddParticle(he3ppi);
+
+      KFParticle he4ppi = ppi;
+      fragments[3].SetId(p1.Id());
+      he4ppi += fragments[3];
+      he4ppi.SetPDG(3007);
+      he4ppi.SetId(GetParticles().size());
+      AddParticle(he4ppi);      
+    }
+    
+  }
+#endif
   
   return 1;
 }

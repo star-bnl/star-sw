@@ -36,9 +36,9 @@ ClassImp(StKFParticleAnalysisMaker);
 
 //________________________________________________________________________________
 StKFParticleAnalysisMaker::StKFParticleAnalysisMaker(const char *name) : StMaker(name), fNTrackTMVACuts(0), fIsPicoAnalysis(true), fdEdXMode(1), 
-									 fStoreTmvaNTuples(false), fProcessSignal(false), fCollectTrackHistograms(false), fCollectPIDHistograms(false),fTMVAselection(false), 
-									 fFlowAnalysis(false), fFlowChain(NULL), fFlowRunId(-1), fFlowEventId(-1), fCentrality(-1), fFlowFiles(), fFlowMap(), 
-									 fRunCentralityAnalysis(0), fRefmultCorrUtil(0), fCentralityFile(""), fAnalyseDsPhiPi(false), fDecays(0)
+  fStoreTmvaNTuples(false), fProcessSignal(false), fCollectTrackHistograms(false), fCollectPIDHistograms(false),fTMVAselection(false), 
+  fFlowAnalysis(false), fFlowChain(NULL), fFlowRunId(-1), fFlowEventId(-1), fCentrality(-1), fFlowFiles(), fFlowMap(), 
+  fRunCentralityAnalysis(0), fRefmultCorrUtil(0), fCentralityFile(""), fAnalyseDsPhiPi(false), fDecays(0)
 {
   memset(mBeg,0,mEnd-mBeg+1);
   
@@ -191,9 +191,8 @@ Int_t StKFParticleAnalysisMaker::Init()
   if (! file) {
     Warning("StKFParticleAnalysisMaker::Init","File %s has not been found in path %s. Ignore ScaleForWeight",File,path);
   } else {
-    fRefmultCorrUtil = CentralityMaker::instance()->getgRefMultCorr_P16id();
-    fRefmultCorrUtil->setVzForWeight(6, -6.0, 6.0);
-    
+  fRefmultCorrUtil = CentralityMaker::instance()->getgRefMultCorr_P16id();
+  fRefmultCorrUtil->setVzForWeight(6, -6.0, 6.0);
     fRefmultCorrUtil->readScaleForWeight("/gpfs01/star/pwg/pfederic/qVectors/StRoot/StRefMultCorr/macros/weight_grefmult_VpdnoVtx_Vpd5_Run16.txt"); //for new StRefMultCorr, Run16, SL16j
   }
   delete [] file;

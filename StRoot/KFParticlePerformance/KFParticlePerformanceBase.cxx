@@ -694,15 +694,10 @@ void KFParticlePerformanceBase::CreateEfficiencyHistograms(TProfile* histo[3][nP
     TString partAxisNameEff[nPartEfficiency] = {"p [GeV/c]","p_{t} [GeV/c]",
                                                 "y", "z [cm]", "Life time c#tau [cm]", "Decay length [cm]", 
                                                 "L [cm]", "Rxy [cm]", "m_{t} [GeV/c^{2}]"};
-#ifdef CBM
-    int nBinsEff[nPartEfficiency]  = { 100 , 100 , 100 ,  360 ,  100 ,  100 , 200 , 200 , 100 };
-    float xMinEff[nPartEfficiency] = {   0.,   0.,  0.,  -10.,    0.,    0.,    0.,    0. , 0.};
-    float xMaxEff[nPartEfficiency] = {  20.,  5.,   6.,   80.,  100.,  100.,  100.,  50. , 4.};
-#else
     int nBinsEff[nPartEfficiency]  = { 100 , 100 ,  50  ,   100 ,  100 ,  100 ,  100 ,  100 , 100  };
     float xMinEff[nPartEfficiency] = {   0.,   0.,  -3.0,   -10.,    0.,    0.,    0.,    0.,   0. };
     float xMaxEff[nPartEfficiency] = {  10.,  10.,   2.0,    10.,   30.,    5.,    1.,    1.,  10. };
-#endif
+
     TString effTypeName[3] = {"All particles",
                               "Reconstructable daughters",
                               "Reconstructed daughters"};
@@ -756,7 +751,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   TString parTitle[nHistoPartParam];
   TString parName2D[nHistoPartParam2D] = {"y-p_{t}", "Z-R", "Armenteros", "y-m_{t}"};
   TString parTitle2D[nHistoPartParam2D];
-  TString parName3D[nHistoPartParam3D] = {"y-p_{t}-M", "y-m_{t}-M", "centrality-pt-M", "centrality-y-M", "centrality-mt-M", "ct-pt-M", "y-#phi-M", "y-p_{t}-dM" };
+  TString parName3D[nHistoPartParam3D] = {"y-p_{t}-M", "y-m_{t}-M", "centrality-pt-M", "centrality-y-M", "centrality-mt-M", "ct-pt-M", "dalitz", "dalitz2","dalitz3","dalitzM2", "dalitz2M2", "dalitz3M2",
+					  "y-#phi-M", "y-p_{t}-dM" };
   TString parTitle3D[nHistoPartParam3D];
   for(int iParam=0; iParam<nHistoPartParam; iParam++)
   {
@@ -770,9 +766,8 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   
   TString parAxisName[nHistoPartParam] = {"m [GeV/c^{2}]","p [GeV/c]","p_{t} [GeV/c]",
                                           "y","Decay length [cm]","Life time c#tau [cm]",
-                                          "chi2/ndf","prob","#theta [rad]",
-                                          "#phi [rad]","x [cm]","y [cm]","z [cm]","Rxy [cm]", "L [cm]",
-					  "L/dL","m_{t} [GeV/c^{2}]","Multiplicity","dM [GeV/c^{2}]"};
+                                          "#chi^{2}/ndf","prob","#theta [rad]",
+                                          "#phi [rad]","x [cm]","y [cm]","z [cm]","Rxy [cm]", "L [cm]", "L/dL","m_{t} [GeV/c^{2}]","Multiplicity","dM [GeV/c^{2}]"};
 #ifdef CBM
   int nBins[nHistoPartParam] =  {1000, // M
                                   100, // p
@@ -835,7 +830,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   int nBins[nHistoPartParam] = {1000, // M
                                  100, // p
                                  100, // pt
-                                  30, // y
+                                  45, // y
                                   60, // DecayL
                                   60, // ctau
                                  100, // chi2/ndf
@@ -844,9 +839,9 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                  100, // phi
                                  100, // X
                                  100, // Y
-                                 100, // Z
-                                 100, // R
-                                 100, // L
+                                 230, // Z
+                                 500, // R
+                                 500, // L
                                 1000, // L/dL
                                  100, // Mt
 				fParteff.partMaxMult[iPart]+1,
@@ -854,7 +849,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   float xMin[nHistoPartParam] = { fParteff.partMHistoMin[iPart], // M
                                   0.f, // p
                                   0.f, // pt
-                                -1.5f, // y
+                                -3.0f, // y
                                 -10.f, // DecayL
                                 -10.f, // ctau
                                   0.f, // chi2/ndf
@@ -863,7 +858,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                              -3.1416f, // phi
                                 -10.f, // X
                                 -10.f, // Y
-                                -30.f, // Z
+                               -230.f, // Z
                                   0.f, // R
                                   0.f, // L
                                  -1.f, // L/dL
@@ -883,7 +878,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                3.1416f, // phi
                                   10.f, // X
                                   10.f, // Y
-                                  30.f, // Z
+                                 230.f, // Z
                                   50.f, // R
                                   50.f, // L
                                   35.f, // L/dL
@@ -984,24 +979,143 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
     histoParameters3D[iPart][5]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
     histoParameters3D[iPart][5]->GetYaxis()->SetTitleOffset(1.0);
     histoParameters3D[iPart][5]->GetZaxis()->SetTitle("M");
-
-    histoParameters3D[iPart][6] = new TH3F(parName3D[6].Data(),parTitle3D[6] + " pT > 1 GeV", // and track with NDF > 45",
-                                      nBins[3],xMin[3],xMax[3],
-                                      nBins[9],xMin[9],xMax[9],
-                                      nBins[0],xMin[0],xMax[0]);
-    histoParameters3D[iPart][6]->GetXaxis()->SetTitle("y");
-    histoParameters3D[iPart][6]->GetYaxis()->SetTitle("#phi (rad)");
-    histoParameters3D[iPart][6]->GetYaxis()->SetTitleOffset(1.0);
-    histoParameters3D[iPart][6]->GetZaxis()->SetTitle("M");
     
-    histoParameters3D[iPart][7] = new TH3F(parName3D[7].Data(),parTitle3D[7].Data(),
-                                      nBins[3],xMin[3],xMax[3],
-                                      nBins[2],xMin[2],xMax[2],
-                                      nBins[18],xMin[18],xMax[18]);
-    histoParameters3D[iPart][7]->GetXaxis()->SetTitle("y");
-    histoParameters3D[iPart][7]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
-    histoParameters3D[iPart][7]->GetYaxis()->SetTitleOffset(1.0);
-    histoParameters3D[iPart][7]->GetZaxis()->SetTitle("dM");
+    histoParameters3D[iPart][12] = new TH3F(parName3D[12].Data(),parTitle3D[12] + " pT > 1 GeV", // and track with NDF > 45",
+					    nBins[3],xMin[3],xMax[3],
+					    nBins[9],xMin[9],xMax[9],
+					    nBins[0],xMin[0],xMax[0]);
+    histoParameters3D[iPart][12]->GetXaxis()->SetTitle("y");
+    histoParameters3D[iPart][12]->GetYaxis()->SetTitle("#phi (rad)");
+    histoParameters3D[iPart][12]->GetZaxis()->SetTitle("dM");
+    histoParameters3D[iPart][13] = new TH3F(parName3D[13].Data(),parTitle3D[13] + " pT > 1 GeV", // and track with NDF > 45",
+					    nBins[3],xMin[3],xMax[3],
+					    nBins[9],xMin[9],xMax[9],
+					    nBins[0],xMin[0],xMax[0]);
+    histoParameters3D[iPart][13]->GetXaxis()->SetTitle("y");
+    histoParameters3D[iPart][13]->GetYaxis()->SetTitle("#phi (rad)");
+
+    if(IsCollectDalitz(iPart))
+    {
+      int nBinsM12  = 100;
+      int nBinsM23  = 100;
+      int nBinsM13  = 100;
+      int nBinsMass = 100;
+      
+      const int pdg1 = fParteff.partDaughterPdg[iPart][0];
+      const int pdg2 = fParteff.partDaughterPdg[iPart][1];
+      const int pdg3 = fParteff.partDaughterPdg[iPart][2];
+      
+      int index1 = fParteff.GetParticleIndex(pdg1);
+      int index2 = fParteff.GetParticleIndex(pdg2);
+      int index3 = fParteff.GetParticleIndex(pdg3);
+      
+      float m1 = fParteff.partMass[index1];
+      float m2 = fParteff.partMass[index2];
+      float m3 = fParteff.partMass[index3];
+      
+      const float MMin = m1+m2+m3;
+      const float MMax = fParteff.partMass[iPart] + 0.05;
+      
+      const float m12Min = (m1+m2)*0.998;
+      const float m12Max = (MMax-m3);
+
+      const float m23Min = (m2+m3)*0.998;
+      const float m23Max = (MMax-m1);      
+      
+      const float m13Min = (m1+m3)*0.998;
+      const float m13Max = (MMax-m2);  
+      
+      TString axis12 = "m_{"; 
+      axis12 += fParteff.partName[index1];
+      axis12 += fParteff.partName[index2];
+      axis12 += "}";
+
+      TString axis23 = "m_{"; 
+      axis23 += fParteff.partName[index2];
+      axis23 += fParteff.partName[index3];
+      axis23 += "}";
+
+      TString axis13 = "m_{"; 
+      axis13 += fParteff.partName[index1];
+      axis13 += fParteff.partName[index3];
+      axis13 += "}";
+
+      histoParameters3D[iPart][6] = new TH3F(parName3D[6].Data(),parTitle3D[6].Data(),
+                                             nBinsM12, m12Min, m12Max,
+                                             nBinsM23, m23Min, m23Max,
+                                             nBinsMass,MMin,   MMax);      
+      histoParameters3D[iPart][6]->GetXaxis()->SetTitle(axis12 + " [GeV/c]");
+      histoParameters3D[iPart][6]->GetYaxis()->SetTitle(axis23 + " [GeV/c]");
+      histoParameters3D[iPart][6]->GetYaxis()->SetTitleOffset(1.0);
+      histoParameters3D[iPart][6]->GetZaxis()->SetTitle("M");
+      
+      histoParameters3D[iPart][7] = new TH3F(parName3D[7].Data(),parTitle3D[7].Data(),
+                                             nBinsM13, m13Min, m13Max,
+                                             nBinsM23, m23Min, m23Max,
+                                             nBinsMass,MMin,   MMax);
+      histoParameters3D[iPart][7]->GetXaxis()->SetTitle(axis13 + " [GeV/c]");
+      histoParameters3D[iPart][7]->GetYaxis()->SetTitle(axis23 + " [GeV/c]");
+      histoParameters3D[iPart][7]->GetYaxis()->SetTitleOffset(1.0);
+      histoParameters3D[iPart][7]->GetZaxis()->SetTitle("M");
+
+      histoParameters3D[iPart][8] = new TH3F(parName3D[8].Data(),parTitle3D[8].Data(),
+                                             nBinsM12, m12Min, m12Max,
+                                             nBinsM13, m13Min, m13Max,
+                                             nBinsMass,MMin,   MMax);
+      histoParameters3D[iPart][8]->GetXaxis()->SetTitle(axis12 + " [GeV/c]");
+      histoParameters3D[iPart][8]->GetYaxis()->SetTitle(axis13 + " [GeV/c]");
+      histoParameters3D[iPart][8]->GetYaxis()->SetTitleOffset(1.0);
+      histoParameters3D[iPart][8]->GetZaxis()->SetTitle("M");
+      
+      histoParameters3D[iPart][9] = new TH3F(parName3D[9].Data(),parTitle3D[9].Data(),
+                                             nBinsM12, m12Min*m12Min, m12Max*m12Max,
+                                             nBinsM23, m23Min*m23Min, m23Max*m23Max,
+                                             nBinsMass,MMin,   MMax);      
+      histoParameters3D[iPart][9]->GetXaxis()->SetTitle(axis12 + "^{2} [GeV^{2}/c^{2}]");
+      histoParameters3D[iPart][9]->GetYaxis()->SetTitle(axis23 + "^{2} [GeV^{2}/c^{2}]");
+      histoParameters3D[iPart][9]->GetYaxis()->SetTitleOffset(1.0);
+      histoParameters3D[iPart][9]->GetZaxis()->SetTitle("M");
+      
+      histoParameters3D[iPart][10] = new TH3F(parName3D[10].Data(),parTitle3D[10].Data(),
+                                              nBinsM13, m13Min*m13Min, m13Max*m13Max,
+                                              nBinsM23, m23Min*m23Min, m23Max*m23Max,
+                                              nBinsMass,MMin,   MMax);
+      histoParameters3D[iPart][10]->GetXaxis()->SetTitle(axis13 + "^{2} [GeV^{2}/c^{2}]");
+      histoParameters3D[iPart][10]->GetYaxis()->SetTitle(axis23 + "^{2} [GeV^{2}/c^{2}]");
+      histoParameters3D[iPart][10]->GetYaxis()->SetTitleOffset(1.0);
+      histoParameters3D[iPart][10]->GetZaxis()->SetTitle("M");
+      
+      histoParameters3D[iPart][11] = new TH3F(parName3D[11].Data(),parTitle3D[11].Data(),
+                                              nBinsM12, m12Min*m12Min, m12Max*m12Max,
+                                              nBinsM13, m13Min*m13Min, m13Max*m13Max,
+                                              nBinsMass,MMin,   MMax);
+      histoParameters3D[iPart][11]->GetXaxis()->SetTitle(axis12 + "^{2} [GeV^{2}/c^{2}]");
+      histoParameters3D[iPart][11]->GetYaxis()->SetTitle(axis13 + "^{2} [GeV^{2}/c^{2}]");
+      histoParameters3D[iPart][11]->GetYaxis()->SetTitleOffset(1.0);
+      histoParameters3D[iPart][11]->GetZaxis()->SetTitle("M");
+#if 0
+      TString nameXAxis = "#sqrt{3}*(T_{";
+      nameXAxis += fParteff.partName[index1];
+      nameXAxis += "} - T_{";
+      nameXAxis += fParteff.partName[index2];
+      nameXAxis += "})/Q";
+      TString nameYAxis = "(2T_{";
+      nameYAxis += fParteff.partName[index3];
+      nameYAxis += "} - T_{";
+      nameYAxis += fParteff.partName[index1];
+      nameYAxis += "} - T_{";
+      nameYAxis += fParteff.partName[index2];
+      nameYAxis += "})/Q";
+      histoParameters3D[iPart][10] = new TH3F(parName3D[10].Data(),parTitle3D[10].Data(),
+                                              100, -1.2, 1.2,
+                                              100, -1.2, 1.2,
+                                              nBinsMass,MMin,   MMax);
+      histoParameters3D[iPart][10]->GetXaxis()->SetTitle(nameXAxis);
+      histoParameters3D[iPart][10]->GetYaxis()->SetTitle(nameYAxis);
+      histoParameters3D[iPart][10]->GetYaxis()->SetTitleOffset(1.0);
+      histoParameters3D[iPart][10]->GetZaxis()->SetTitle("M");
+#endif
+    }
   }
   else if(histoParameters3D)
   {
@@ -1031,7 +1145,7 @@ bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
          abs(fParteff.partPDG[iParticle]) == 3312 ||
          abs(fParteff.partPDG[iParticle]) == 3334 ||
          (abs(fParteff.partPDG[iParticle]) >= 3000 && 
-          abs(fParteff.partPDG[iParticle]) <= 3027) ||
+          abs(fParteff.partPDG[iParticle]) <= 3029) ||
          abs(fParteff.partPDG[iParticle]) == 3103 ||
          abs(fParteff.partPDG[iParticle]) == 3203 ||
 #ifdef CBM
@@ -1082,6 +1196,17 @@ bool KFParticlePerformanceBase::IsCollectArmenteros(int iParticle) const
          abs(fParteff.partPDG[iParticle]) == 521 ||
          abs(fParteff.partPDG[iParticle]) == 511;        
 #endif
+}
+
+bool KFParticlePerformanceBase::IsCollectDalitz(int iParticle) const
+{
+  /** Checks if Armenteros-Podoliansky plot for decay "iParticle" should be created. */
+  return fParteff.partPDG[iParticle] == 3006 ||
+         fParteff.partPDG[iParticle] == 3007 ||
+         fParteff.partPDG[iParticle] == 3012 ||
+         fParteff.partPDG[iParticle] == 3013 || 
+         fParteff.partPDG[iParticle] == 3028 || 
+         fParteff.partPDG[iParticle] == 3029 ;
 }
 
 void KFParticlePerformanceBase::CreateParameterSubfolder(TString folderName, 
