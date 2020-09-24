@@ -52,18 +52,22 @@ static  const Char_t *Names[8] = {
   "AuAu11_production_ReversedFullField"
 };
 #else /* RunXX */
-static Int_t N = 10;
-static const Char_t *Names[10] = {
-  "RunXX",
+static Int_t N = 14;
+static const Char_t *Names[14] = {
+  "RunXX22B",
   "11p5GeV",
-  "9p2GeV",
-  "9p2GeVb",
-  "5p75GeV_fixedTarget",
-  "31p2GeV_fixedTarget",
-  "9p8GeV_fixedTarget",
-  "19p5GeV_fixedTarget",
   "13p5GeV_fixedTarget",
-  "7p3GeV_fixedTarget"
+  "19p5GeV_fixedTarget",
+  "26p5GeV_fixedTarget",
+  "31p2GeV_fixedTarget",
+  "5p75GeV_fixedTarget",
+  "7p3GeV_fixedTarget",
+  "7p7GeV",
+  "9p2GeVb",
+  "9p2GeVc",
+  "9p2GeV",
+  "9p8GeV_fixedTarget",
+  "Cosmic"
 };
 /*                                                       DB                                                              calc     laser
 11p5GeV              20191208.091308  20191208.091308:   9.0833e+06 : 11p5GeV              9.3374e+06	            ?  : 9.292252 run = 20346051, Freq = 9.3374e+06 11p5GeV	       

@@ -242,6 +242,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     NPART = new TH1D("npart","no accepted particles",500,0,5000);
     dZ = new TH2F("dZ","dZ (W - E)/2 versus Z",nZ,Zmin,Zmax,400,-2.,2.);
     dT = new TH2F("dT","dT(#musec) (W - E)/2 versus Z",nZ,Zmin,Zmax,500,-0.5,0.5);
+#if 0
     const static Int_t tMin = 20190225;;
     const static Int_t tMax = 20140411;
     TDatime t1(tMin,0); // min Time and
@@ -251,7 +252,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     UInt_t i2 = t2.Convert() - timeOffSet;
     Int_t Nt = (i2 - i1)/(360); // each 10 mins 
     dZT = new TH2F("dZT","dZ (W - E)/2 versus date",Nt,i1,i2,1600,-2.,2.);
-    
+#endif    
     dX = new TH2F("dX","dX (W - E)/2 versus Z",nZ,Zmin,Zmax,400,-1.,1.);
     dY = new TH2F("dY","dY (W - E)/2 versus Z",nZ,Zmin,Zmax,400,-1.,1.);
     X = new TH2F("X","X (W + E)/2 versus Z",nZ,Zmin,Zmax,500,-5.,5.);
@@ -441,7 +442,9 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
       dY->Fill(sum.z(),dif.y());
       dZ->Fill(sum.z(),dif.z());
       dT->Fill(sum.z(),dif.z()/driftVel);
+#if 0
       dZT->Fill(date,dif.z());
+#endif
       X->Fill(sum.z(),sum.x());
       Y->Fill(sum.z(),sum.y());
     }

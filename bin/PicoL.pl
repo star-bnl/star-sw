@@ -19,6 +19,7 @@ my $glob;
 my $dayMin =  0;
 my $dayMax =  0;
 my $year = "y2020";
+my $Njobs = 0;
 if    ($pwd =~ /2020/) { $year = "y2020";}
 elsif ($pwd =~ /2019/) { $year = "y2019";} 
 elsif ($pwd =~ /2018/) { $year = "y2018";} 
@@ -153,6 +154,7 @@ foreach my $run (glob $GLOB) {
   my @picos = glob $picoGlob;
   if ($#picos > -1) {
     print "string:$run:$ana:$year:picoDst\n";
+    $Njobs++;
   } else {
     my $MuGlob = $run . "/*MuDst.root";
     my @Mus = glob $MuGlob;
@@ -163,3 +165,4 @@ foreach my $run (glob $GLOB) {
 #  last;
 #  die;
 }
+if (! $Njobs) {die "Don't have input files\n";}

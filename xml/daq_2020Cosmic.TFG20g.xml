@@ -55,4 +55,9 @@
 <!-- <input URL="command:daq_2020.pl" /> -->
 <!-- <input URL="command:daq_2020dR.pl" /> -->
 <input URL="command:daq_2020d.pl" />
+ <ResourceUsage>
+    <Memory>
+      <MinMemory>2000</MinMemory>
+    </Memory>
+  </ResourceUsage>
 </job>

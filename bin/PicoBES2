@@ -466,7 +466,7 @@ grep Cosmic ~/bin/RunXXDefs.pm | egrep '2020-0[6-8]' | awk -F\' '{printf("%i\n",
 ================================================================================
 dEdx production
 foreach d (`ls -1d *GeV*/???`)
-  cd $d;
+  cd $d; pwd;
   if (-r Done) then
     cd -
     continue;
@@ -486,7 +486,7 @@ foreach d (`ls -1d *GeV*/???`)
 end
 ############################################################
 Cosmic
-foreach d (`ls -1d [1-2]??`)
+foreach d (`ls -1d ???`)
   cd $d; pwd;
   if (-r Done) then
     cd -
@@ -504,4 +504,36 @@ foreach d (`ls -1d [1-2]??`)
   endif
   lsf6X ~/xml/daq_2020Cosmic.TFG20g.xml
   cd -
+end
+################################################################################
+foreach d (`find . -type d -name "*GeV*"`)
+  cd ${d}; pwd;
+  PicoL.pl
+  if (! $?) then	
+    rm sched* *xml
+    lsf  ~/xml/kfpAnalysis.xml
+  endif
+  cd -
+end
+
+
+foreach d (`find . -type d -name "*GeV*"`)
+  cd ${d}; pwd;
+    rm sched* *xml
+  hadd.pl ; lsf hadd.xml;
+  cd -
+end
+
+foreach d (`find . -type d -name "*GeV*"`)
+  cd ${d}; pwd;
+    rm sched* *xml
+  set f = `basename ${d}`;
+  hadd ../${f}.K.dEdx.root All*.root >& hadd.log &
+  cd -
+end
+################################################################################
+#MuTpcG
+foreach d (17 18 19 20 21 22 23)
+foreach d (16 24)
+ root.exe -q -b 'lMuDst.C(-1,"./'${d}'*/*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","MuTpcG'${d}'.root")'  MuTpcG.C+ >& MuTpcG${d}.log &
 end
