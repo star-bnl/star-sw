@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
+        <command>
+  set CURRENT_DIR = `pwd`
+  echo "pwd = ${CURRENT_DIR}"
+#         cd ${SUBMITTINGDIRECTORY}
+#   setenv StarEndMakerShell
+   setenv STARFPE NO
+#   setup debug
+#   setenv NODEBUG yes
+#   setup  gcc631
+#   setup 64b
+#   setup gcc
+#   setup 32b
+    starver TFG20h
+     set evtsFile = $INPUTFILE0;
+     set f        = 1
+     set l        = 2000
+  echo "${evtsFile}"
+ if (! -r ${evtsFile}) exit 1;
+  set evtsFileB = `basename ${evtsFile}`
+  set filel    = `basename ${evtsFileB} .daq`
+  set output  = ${filel}.event.root
+  if ( -r ${SUBMITTINGDIRECTORY}/${output}) exit 1;
+  set logFile  = ${filel}B.log
+#  if ( -r ${SUBMITTINGDIRECTORY}/${logFile}) exit 0;
+  set muFile = ${filel}.MuDst.root
+#  if (-r ${SUBMITTINGDIRECTORY}/${muFile}) exit 0;
+  set piFile = ${filel}.picoDst.root
+  if (-r ${SUBMITTINGDIRECTORY}/${piFile}) exit 0;
+  set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
+  if (-r ${bla}) exit 0;
+  touch ${bla}
+  if (-r ${SUBMITTINGDIRECTORY}/Submitted) then 
+    rm ${SUBMITTINGDIRECTORY}/Submitted
+  endif
+#  echo "cp ${evtsFile} ${evtsFileB}"
+#  cp ${evtsFile} ${evtsFileB}
+# TFG19m, TFG20a 12/26/2019 12/29/2019
+   root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,TpxRaw,TpxClu,McTpcAna,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  root.exe -b -q 'bfc.C('${f}','${l}',"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#  cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
+#  gzip ${logFile}
+#  rm ${muFile}
+#  rm ${piFile}
+  cp  ${filel}* ${SUBMITTINGDIRECTORY}
+  rm ${bla}
+  rm -rf ${CURRENT_DIR}
+        </command>
+        <stdout URL="file:./sched$JOBID.log" />
+        <stderr URL="file:./sched$JOBID.err" />
+<!-- <input URL="file:/hlt/cephfs/daq/2019/054/20054064/hlt*.daq" /> -->
+<!-- <input URL="command:daq_2019.pl" /> -->
+<!-- <input URL="file:/hlt/cephfs/daq/2019/06*/*/hlt*.daq" /> -->
+<!-- <input URL="file:/gpfs01/star/daq/2019/071/20071001/st_physics_2007100*.daq" /> -->
+<!-- <input URL="file:/hlt/cephfs/daq/2019/354/20354003/hlt*.daq" /> -->
+<!-- <input URL="command:daq_2020.pl" /> -->
+<!-- <input URL="command:daq_2020dR.pl" /> -->
+<input URL="command:daq_2020d.pl" />
+</job>

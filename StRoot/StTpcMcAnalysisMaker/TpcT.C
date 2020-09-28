@@ -1,4 +1,24 @@
+#if 0
+  foreach d (`ls -1d *GeV*`)
+    root.exe -q -b 'TpcT.C+("'${d}'/*/st*.tags.root","P","'${d}'.Plots.root")' >& ${d}.log &
+  end
+  
+  foreach f (`ls -1d  /hlt/cephfs/reco/2020/TFG20h/RF/*.root`)
+    set b = `basename ${f} .Plots.root`;						      
+    set d = `dirname ${f}`;
+    mkdir ${b}; cd ${b};
+    ln -s ${f} .
+    ln -s ${d}/${b}/*/*.MuDst.root .
+    cd -
+  end
 
+	     foreach d (`ls -1d [1-9]*GeV*`)
+	     cd ${d}; pwd;
+	     root.exe -q *.Plots.root FitTpcT.C
+             cd -
+             end
+
+#endif
 // To build profile histograms: root.exe -q -b TpcT.C+
 // To fit them                : root.exe -q *H.root FitTpcT.C
 // To draw all of them        : root.exe */*Fit.root

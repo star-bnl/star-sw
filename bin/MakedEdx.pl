@@ -1973,7 +1973,8 @@ my $NEvents = 100000;
 #$hist = "RunXX19"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 06/11/20  once again  new TpcLengthCorrectionMDF
 #$hist = "RunXX20"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20b/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/26/20  revisit, check statistics
 #$hist = "RunXX21"; $NEvents = 2000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/26/20  revisit, check statistics
-$hist = "RunXX22"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 009/11/20  revisit, check statistics
+#$hist = "RunXX22"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 009/11/20  revisit, check statistics
+$hist = "RunXX23"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20h/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 009/27/20  revisit, check adc production
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
