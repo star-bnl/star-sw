@@ -1,0 +1,81 @@
+#! /usr/bin/env bash
+
+## Pythia path variables based on args given to configure
+prefix=@prefix@
+datadir=@datadir@
+includedir=$prefix/include
+libdir=$prefix/lib
+## External path variables, also calculated by configure
+hepmcpath=@HEPMCPATH@
+enablegzip=@ENABLEGZIP@
+zlibpath=@ZLIBPATH@
+boostincpath=@BOOSTINCPATH@
+boostlibpath=@BOOSTLIBPATH@
+
+tmp=$(echo $* | egrep -- '--\<help\>|-\<h\>')
+if test $# -eq 0 || test -n "$tmp"; then
+    echo "pythia8-config: configuration tool for the Pythia8 event generator library"
+    echo
+    echo "Usage: $( basename $0 ) [--help|-h] | "
+    echo "           [--{prefix,datadir,libdir,includedir}] | "
+    echo "           [--{cxxflags,ldflags,libs}]"
+    echo "Options:"
+    echo "  --help | -h   : show this help message"
+    echo
+    echo "  --prefix      : show the installation prefix (cf. autoconf)"
+    echo "  --includedir  : show the path to the directory containing the Pythia8 headers"
+    echo "  --libdir      : show the path to the directory containing the Pythia8 libraries"
+    echo "  --datadir     : show the path to the directory containing Pythia8 data"
+    echo "  --xmldoc      : show the path to the xmldoc config directory"
+    echo
+    echo "  --cppflags    : returns a -I flags string for insertion into CPPFLAGS"
+    echo "  --cxxflags    : returns a -I flags string for insertion into CPPFLAGS"
+    echo "  --ldflags     : returns a -L/-l flags string for insertion into LDFLAGS or LIBS"
+    echo "  --libs        : returns a -L/-l flags string for insertion into LDFLAGS or LIBS"
+    echo "  --hepmc       : include HepMC -I/-L/-l flags in above output"
+    echo "  --lhapdf      : LHAPDF will be used: do not include the lhapdfdummy library"
+    exit 0
+fi
+
+OUT=""
+
+
+## Paths
+
+tmp=$( echo "$*" | egrep -- '--\<prefix\>')
+test -n "$tmp" && OUT="$OUT $prefix"
+
+tmp=$( echo "$*" | egrep -- '--\<includedir\>')
+test -n "$tmp" && OUT="$OUT $includedir"
+
+tmp=$( echo "$*" | egrep -- '--\<libdir\>')
+test -n "$tmp" && OUT="$OUT $libdir"
+
+tmp=$( echo "$*" | egrep -- '--\<datadir\>')
+test -n "$tmp" && OUT="$OUT $datadir"
+
+tmp=$( echo "$*" | egrep -- '--\<xmldoc\>')
+test -n "$tmp" && OUT="$OUT $datadir/xmldoc"
+
+
+## "Pre-rolled" build flag strings
+
+tmp=$( echo "$*" | egrep -- '--\<cxxflags\>')
+if test -n "$tmp"; then
+    test -n "$includedir" && OUT="$OUT -I${includedir}"
+    tmp=$( echo "$*" | egrep -- '--\<hepmc\>')
+    test -n "$tmp" && test -n "$hepmcpath" && OUT="$OUT -I${hepmcpath}/include"
+    test "$enablegzip" = "yes" && OUT="$OUT -I${boostincpath}"
+fi
+
+tmp=$( echo "$*" | egrep -- '--\<libs\>')
+if test -n "$tmp"; then
+    test -n "$libdir" && OUT="$OUT -L${libdir} -lpythia8"
+    tmp=$( echo "$*" | egrep -- '--\<hepmc\>')
+    test -n "$tmp" && test -n "$hepmcpath" && OUT="$OUT -lhepmcinterface -L${hepmcpath}/lib -lHepMC"
+    tmp=$( echo "$*" | egrep -- '--\<lhapdf\>')
+    test -n "$tmp" || OUT="$OUT -llhapdfdummy"
+    test "$enablegzip" = "yes" && OUT="$OUT -L${boostlibpath} -lboost_iostreams -L${zlibpath}/lib -lz"
+fi
+
+echo $OUT
