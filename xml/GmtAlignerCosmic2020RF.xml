@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="50" fileListSyntax="paths" copyInputLocally="false">
+<!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="xrootd" copyInputLocally="false"> -->
+	<command>
+         cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+  set logFile  = ${JOBID}B.log
+  root.exe -q -b ' bfc.C(99999999,"in,gmtAligner,tpcDb,corrY,analysis,mysql,nodefault","@'${FILELIST}'",0,"'${JOBID}'.root")' &gt;&amp;  ${logFile}
+	</command>
+	<stdout URL="file:./sched$JOBID.log" />
+	<stderr URL="file:./sched$JOBID.err" />
+<!-- <input URL="command:CosmicsAnalysis.pl" /> -->
+<!-- <input URL="command:EandBSample.pl" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2015/GMT2/*event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2015/pAl200/*event.root" /> -->
+<!--  FF -->
+<!-- <input URL="file:/star/u/pusheax/work/run/GMT/last/data/*event.root" /> -->
+<!--  RF -->
+<!-- <input URL="file:/star/u/pusheax/work/run/GMT/last/cluster_RF/*event.root" /> -->
+<input URL="file:/hlt/cephfs/reco/2020/TFG20g/RF/Cosmic/258/*event.root" />
+<!-- pAl20 -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2015/pAl200B/*.event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2015/pAl200GMT/*.event.root" /> -->
+<!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/AuAu15GMT/*.event.root" /> -->
+</job>
