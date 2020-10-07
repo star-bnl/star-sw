@@ -5,6 +5,7 @@
 #define ulmass F77_NAME(ulmass, ULMASS)
 #define lucomp F77_NAME(lucomp, LUCOMP)
 
+#include <StMessMgr.h>
 
 extern "C" {
   void hijing( const char *frame, float &bmin, float &bmax, int sframe );
@@ -26,13 +27,50 @@ extern "C" {
 };
 
 
+void Hijset() {
+  Hijset(0,"init","the","generator",0,0,0,0);
+};
+
 void Hijset( float E, string frame, string blue, string yell, int Ablue, int Zblue, int Ayell, int Zyell )
 {
-  int sframe = frame.size();
-  int sblue = blue.size();
-  int syell = yell.size();
 
-  hijset( E, frame.c_str(), blue.c_str(), yell.c_str(), Ablue, Zblue, Ayell, Zyell, sframe, sblue, syell );
+  // Lazy initialization of hijing
+  static int called = 0;
+  static float  _E;
+  static string _frame;
+  static string _blue;
+  static string _yell;
+  static int    _ablue;
+  static int    _zblue;
+  static int    _ayell;
+  static int    _zyell;
+  
+  if ( 0 == called ) {             // capture the arguement list on the first call
+    _E     = E;
+    _frame = frame;
+    _blue  = blue;
+    _yell  = yell;
+    _ablue = Ablue;
+    _zblue = Zblue;
+    _ayell = Ayell;
+    _ablue = Zblue;
+    LOG_INFO << "Hijset captured " << _frame << " " << _blue << " " << _yell << endm;
+    ++called;
+  }
+  else if ( 1 == called ) {        // perform actual initialization on subsequent call
+    int sframe = _frame.size();
+    int syell  = _yell.size();
+    int sblue  = _blue.size();
+    LOG_INFO << "Hijset configure E=" << _E << " " << _frame << " " << _blue << " " << _yell << endm;
+    hijset( _E, _frame.c_str(), _blue.c_str(), _yell.c_str(), _ablue, _zblue, _ayell, _zyell, sframe, sblue, syell );
+    ++called;
+  } 
+  else {                           // log additional calls, but don't change the generator state
+
+    LOG_INFO << "Additional call to Hijset is ignored" << endm;
+
+  }
+  
 }
 
 void Hijing( string frame, float bmin, float bmax )

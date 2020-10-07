@@ -56,14 +56,19 @@ class StarHijing : public StarGenerator
 
   /// Returns a reference to the hijing parameters
   HiParnt_t &hiparnt(){ return *address_of_hiparnt();}
+  HiParnt_t* hiparntPtr(){ return address_of_hiparnt();}
 
   /// Returns a reference to the hijing main1 block
-  HiMain1_t &himain1(){ return *address_of_himain1(); }
+  HiMain1_t& himain1(){ return *address_of_himain1(); }
+  HiMain1_t* himain1Ptr(){ return address_of_himain1(); }
+
   /// Returns a refernece to the hijing main2 block
   HiMain2_t &himain2(){ return *address_of_himain2(); }
+  HiMain2_t* himain2Ptr(){ return address_of_himain2(); }
 
   /// Returns a reference to the ludat3 (pydat3) common block
   Ludat3_t &ludat3(){ return *address_of_ludat3(); }
+  Ludat3_t* ludat3Ptr(){ return address_of_ludat3(); }
 
   /// Returns the compressed particle code (used in mdcy, mdme,... )
   /// from the jetset id of the particle

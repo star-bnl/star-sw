@@ -1,0 +1,1139 @@
+
+ *------------------------------------------------------------------------------------* 
+ |                                                                                    | 
+ |  *------------------------------------------------------------------------------*  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  |   PPP   Y   Y  TTTTT  H   H  III    A      Welcome to the Lund Monte Carlo!  |  | 
+ |  |   P  P   Y Y     T    H   H   I    A A     This is PYTHIA version 8.160      |  | 
+ |  |   PPP     Y      T    HHHHH   I   AAAAA    Last date of change: 23 Jan 2012  |  | 
+ |  |   P       Y      T    H   H   I   A   A                                      |  | 
+ |  |   P       Y      T    H   H  III  A   A    Now is 23 Jan 2012 at 11:24:01    |  | 
+ |  |                                                                              |  | 
+ |  |   Torbjorn Sjostrand;  Department of Astronomy and Theoretical Physics,      |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      phone: + 46 - 46 - 222 48 16; e-mail: torbjorn@thep.lu.se               |  | 
+ |  |   Stefan Ask;  Department of Physics, University of Cambridge,               |  | 
+ |  |      Cavendish Laboratory, JJ Thomson Ave., Cambridge CB3 0HE, UK;           |  | 
+ |  |      phone: + 41 - 22 - 767 6707; e-mail: Stefan.Ask@cern.ch                 |  | 
+ |  |   Richard Corke;  Department of Astronomy and Theoretical Physics,           |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      e-mail: richard.corke@thep.lu.se                                        |  | 
+ |  |   Stephen Mrenna;  Computing Division, Simulations Group,                    |  | 
+ |  |      Fermi National Accelerator Laboratory, MS 234, Batavia, IL 60510, USA;  |  | 
+ |  |      phone: + 1 - 630 - 840 - 2556; e-mail: mrenna@fnal.gov                  |  | 
+ |  |   Stefan Prestel;  Department of Astronomy and Theoretical Physics,          |  | 
+ |  |      Lund University, Solvegatan 14A, SE-223 62 Lund, Sweden;                |  | 
+ |  |      phone: + 46 - 46 - 222 06 64; e-mail: stefan.prestel@thep.lu.se         |  | 
+ |  |   Peter Skands;  Theoretical Physics, CERN, CH-1211 Geneva 23, Switzerland;  |  | 
+ |  |      phone: + 41 - 22 - 767 2447; e-mail: peter.skands@cern.ch               |  | 
+ |  |                                                                              |  | 
+ |  |   The main program reference is the 'Brief Introduction to PYTHIA 8.1',      |  | 
+ |  |   T. Sjostrand, S. Mrenna and P. Skands, Comput. Phys. Comm. 178 (2008) 85   |  | 
+ |  |   [arXiv:0710.3820]                                                          |  | 
+ |  |                                                                              |  | 
+ |  |   The main physics reference is the 'PYTHIA 6.4 Physics and Manual',         |  | 
+ |  |   T. Sjostrand, S. Mrenna and P. Skands, JHEP05 (2006) 026 [hep-ph/0603175]. |  | 
+ |  |                                                                              |  | 
+ |  |   An archive of program versions and documentation is found on the web:      |  | 
+ |  |   http://www.thep.lu.se/~torbjorn/Pythia.html                                |  | 
+ |  |                                                                              |  | 
+ |  |   This program is released under the GNU General Public Licence version 2.   |  | 
+ |  |   Please respect the MCnet Guidelines for Event Generator Authors and Users. |  | 
+ |  |                                                                              |  | 
+ |  |   Disclaimer: this program comes without any guarantees.                     |  | 
+ |  |   Beware of errors and use common sense when interpreting results.           |  | 
+ |  |                                                                              |  | 
+ |  |   Copyright (C) 2012 Torbjorn Sjostrand                                      |  | 
+ |  |                                                                              |  | 
+ |  |                                                                              |  | 
+ |  *------------------------------------------------------------------------------*  | 
+ |                                                                                    | 
+ *------------------------------------------------------------------------------------* 
+
+ *--------------------  SusyLesHouches v1.1 SUSY/BSM Interface  ---------------------*
+ | Last Change 12 Jan 2012 - P. Skands
+ | Parsing: cmssm.spc
+ *------------------------------------------------------------------------------------*
+ | 
+ |   Spectrum Calculator was:   SOFTSUSY   version: 3.3.0
+ |   Read SLHA spectrum from: cmssm.spc
+ | 
+ |  ~g                  m
+ |     1000021   1146.878
+ | 
+ |  ~d                  m     ~dL     ~sL     ~bL     ~dR     ~sR     ~bR
+ |     1000001   1055.611   1.000   0.000   0.000   0.000   0.000   0.000  
+ |     1000003   1055.608   0.000   1.000   0.000   0.000   0.000   0.000  
+ |     1000005    965.462   0.000   0.000   0.976   0.000   0.000   0.218  
+ |     2000001   1011.023   0.000   0.000   0.000   1.000   0.000   0.000  
+ |     2000003   1011.020   0.000   0.000   0.000   0.000   1.000   0.000  
+ |     2000005   1007.759   0.000   0.000  -0.218   0.000   0.000   0.976  
+ | 
+ |  ~u                  m     ~uL     ~cL     ~tL     ~uR     ~cR     ~tR
+ |     1000002   1052.787   1.000   0.000   0.000   0.000   0.000   0.000  
+ |     1000004   1052.784   0.000   1.000   0.000   0.000   0.000   0.000  
+ |     1000006    803.541   0.000   0.000   0.425   0.000   0.000   0.905  
+ |     2000002   1014.342   0.000   0.000   0.000   1.000   0.000   0.000  
+ |     2000004   1014.340   0.000   0.000   0.000   0.000   1.000   0.000  
+ |     2000006   1011.028   0.000   0.000   0.905   0.000   0.000  -0.425  
+ | 
+ |  ~e                  m     ~eL    ~muL   ~tauL     ~eR    ~muR   ~tauR
+ |     1000011    361.778   1.000   0.000   0.000   0.000   0.000   0.000  
+ |     1000013    361.862   0.000   1.000   0.000   0.000   0.000   0.000  
+ |     1000015    222.692   0.000   0.000   0.143   0.000   0.000   0.990  
+ |     2000011    229.875   0.000   0.000   0.000   1.000   0.000   0.000  
+ |     2000013    229.864   0.000   0.000   0.000   0.000   1.000   0.000  
+ |     2000015    362.940   0.000   0.000   0.990   0.000   0.000  -0.143  
+ | 
+ |  ~nu                 m   ~nu_e  ~nu_mu ~nu_tau
+ |     1000012    352.903   1.000   0.000   0.000  
+ |     1000014    352.900   0.000   1.000   0.000  
+ |     1000016    351.731   0.000   0.000   1.000  
+ | 
+ |  ~chi0               m      ~B    ~W_3    ~H_1    ~H_2
+ |     1000022    204.168   0.996  -0.017   0.082  -0.034  
+ |     1000023    386.197   0.037   0.971  -0.196   0.130  
+ |     1000025   -639.639  -0.033   0.048   0.703   0.708  
+ |     1000035    653.033  -0.076   0.232   0.678  -0.693  
+ | 
+ |  ~chi+               m   U:   ~W      ~H  |  V:   ~W      ~H
+ |     1000024    386.332     0.961  -0.277  |    0.983  -0.186  
+ |     1000037    652.680     0.277   0.961  |    0.186   0.983  
+ | 
+ |  Higgs      
+ |     alpha       -0.107
+ |     mu         634.226 (DRbar running value at Q = 873.811 GeV)
+ |     tan(beta)    9.669 (DRbar running value at Q = 873.811 GeV)
+ |     v          244.044 (DRbar running value at Q = 873.811 GeV)
+ |     mA       5.400e+05 (DRbar running value at Q = 873.811 GeV)
+ | 
+ |  Gauge      
+ |     g'           0.362 (DRbar running value at Q = 873.811 GeV)
+ |     g            0.643 (DRbar running value at Q = 873.811 GeV)
+ |     g3           1.061 (DRbar running value at Q = 873.811 GeV)
+ | 
+ *------------------------------------------------------------------------------------*
+ PYTHIA Warning in ParticleDataEntry::initBWmass: switching off width for id = 10313
+ PYTHIA Warning in ParticleDataEntry::initBWmass: switching off width for id = 10323
+ PYTHIA Warning in ParticleDataEntry::initBWmass: switching off width for id = 10333
+ PYTHIA Warning in PhaseSpace2to2tauyz::trialKin: negative cross section set 0 for q g -> ~d_L gluino + c.c.
+
+ *-------  PYTHIA Process Initialization  --------------------------*
+ |                                                                  |
+ | We collide p+ with p+ at a CM energy of 1.000e+04 GeV            |
+ |                                                                  |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | Subprocess                                    Code |   Estimated |
+ |                                                    |    max (mb) |
+ |                                                    |             |
+ |------------------------------------------------------------------|
+ |                                                    |             |
+ | g g -> gluino gluino                          1201 |   1.554e-10 |
+ | q qbar -> gluino gluino                       1202 |   2.005e-11 |
+ | q g -> ~d_L gluino + c.c.                     1203 |   2.606e-10 |
+ | q g -> ~u_L gluino + c.c.                     1204 |   5.887e-10 |
+ | q g -> ~s_L gluino + c.c.                     1205 |   2.580e-11 |
+ | q g -> ~c_L gluino + c.c.                     1206 |   1.119e-11 |
+ | q g -> ~b_1 gluino + c.c.                     1207 |   8.588e-12 |
+ | q g -> ~t_1 gluino + c.c.                     1208 |   0.000e+00 |
+ | q g -> ~d_R gluino + c.c.                     1209 |   3.025e-10 |
+ | q g -> ~u_R gluino + c.c.                     1210 |   6.643e-10 |
+ | q g -> ~s_R gluino + c.c.                     1211 |   2.878e-11 |
+ | q g -> ~c_R gluino + c.c.                     1212 |   1.273e-11 |
+ | q g -> ~b_2 gluino + c.c.                     1213 |   7.900e-12 |
+ | q g -> ~t_2 gluino + c.c.                     1214 |   0.000e+00 |
+ | g g -> ~d_L ~d_Lbar                           1215 |   9.108e-12 |
+ | g g -> ~u_L ~u_Lbar                           1216 |   9.252e-12 |
+ | g g -> ~s_L ~s_Lbar                           1217 |   9.108e-12 |
+ | g g -> ~c_L ~c_Lbar                           1218 |   9.252e-12 |
+ | g g -> ~b_1 ~b_1bar                           1219 |   1.855e-11 |
+ | g g -> ~t_1 ~t_1bar                           1220 |   8.104e-11 |
+ | g g -> ~d_R ~d_Rbar                           1221 |   1.225e-11 |
+ | g g -> ~u_R ~u_Rbar                           1222 |   1.190e-11 |
+ | g g -> ~s_R ~s_Rbar                           1223 |   1.225e-11 |
+ | g g -> ~c_R ~c_Rbar                           1224 |   1.190e-11 |
+ | g g -> ~b_2 ~b_2bar                           1225 |   1.257e-11 |
+ | g g -> ~t_2 ~t_2bar                           1226 |   1.211e-11 |
+ | q qbar' -> ~d_L ~d_Lbar                       1231 |   1.248e-11 |
+ | q qbar' -> ~d_L ~s_Lbar                       1232 |   2.796e-12 |
+ | q qbar' -> ~s_L ~d_Lbar                       1233 |   2.944e-13 |
+ | q qbar' -> ~d_L ~b_1bar                       1234 |   9.876e-13 |
+ | q qbar' -> ~b_1 ~d_Lbar                       1235 |   1.153e-13 |
+ | q qbar' -> ~d_L ~d_Rbar                       1236 |   2.765e-11 |
+ | q qbar' -> ~d_R ~d_Lbar                       1237 |   2.765e-11 |
+ | q qbar' -> ~d_L ~s_Rbar                       1238 |   1.273e-11 |
+ | q qbar' -> ~s_R ~d_Lbar                       1239 |   1.757e-12 |
+ | q qbar' -> ~d_L ~b_2bar                       1240 |   3.164e-12 |
+ | q qbar' -> ~b_2 ~d_Lbar                       1241 |   4.375e-13 |
+ | q qbar' -> ~u_L ~u_Lbar                       1242 |   1.804e-11 |
+ | q qbar' -> ~u_L ~c_Lbar                       1243 |   2.966e-12 |
+ | q qbar' -> ~c_L ~u_Lbar                       1244 |   8.926e-14 |
+ | q qbar' -> ~u_L ~t_1bar                       1245 |   0.000e+00 |
+ | q qbar' -> ~t_1 ~u_Lbar                       1246 |   0.000e+00 |
+ | q qbar' -> ~u_L ~u_Rbar                       1247 |   4.575e-11 |
+ | q qbar' -> ~u_R ~u_Lbar                       1248 |   4.575e-11 |
+ | q qbar' -> ~u_L ~c_Rbar                       1249 |   1.327e-11 |
+ | q qbar' -> ~c_R ~u_Lbar                       1250 |   4.898e-13 |
+ | q qbar' -> ~u_L ~t_2bar                       1251 |   0.000e+00 |
+ | q qbar' -> ~t_2 ~u_Lbar                       1252 |   0.000e+00 |
+ | q qbar' -> ~u_L ~d_Lbar + c.c.                1253 |   1.533e-11 |
+ | q qbar' -> ~u_L ~s_Lbar + c.c.                1254 |   7.309e-12 |
+ | q qbar' -> ~u_L ~b_1bar + c.c.                1255 |   2.632e-12 |
+ | q qbar' -> ~u_L ~d_Rbar + c.c.                1256 |   8.516e-11 |
+ | q qbar' -> ~u_L ~s_Rbar + c.c.                1257 |   3.127e-11 |
+ | q qbar' -> ~u_L ~b_2bar + c.c.                1258 |   8.200e-12 |
+ | q qbar' -> ~s_L ~s_Lbar                       1259 |   7.504e-12 |
+ | q qbar' -> ~s_L ~b_1bar                       1260 |   5.289e-14 |
+ | q qbar' -> ~b_1 ~s_Lbar                       1261 |   5.289e-14 |
+ | q qbar' -> ~s_L ~d_Rbar                       1262 |   1.757e-12 |
+ | q qbar' -> ~d_R ~s_Lbar                       1263 |   1.273e-11 |
+ | q qbar' -> ~s_L ~s_Rbar                       1264 |   8.036e-13 |
+ | q qbar' -> ~s_R ~s_Lbar                       1265 |   8.036e-13 |
+ | q qbar' -> ~s_L ~b_2bar                       1266 |   1.995e-13 |
+ | q qbar' -> ~b_2 ~s_Lbar                       1267 |   1.995e-13 |
+ | q qbar' -> ~c_L ~c_Lbar                       1268 |   7.934e-12 |
+ | q qbar' -> ~c_L ~t_1bar                       1269 |   0.000e+00 |
+ | q qbar' -> ~t_1 ~c_Lbar                       1270 |   0.000e+00 |
+ | q qbar' -> ~c_L ~u_Rbar                       1271 |   4.898e-13 |
+ | q qbar' -> ~u_R ~c_Lbar                       1272 |   1.327e-11 |
+ | q qbar' -> ~c_L ~c_Rbar                       1273 |   1.479e-13 |
+ | q qbar' -> ~c_R ~c_Lbar                       1274 |   1.479e-13 |
+ | q qbar' -> ~c_L ~t_2bar                       1275 |   0.000e+00 |
+ | q qbar' -> ~t_2 ~c_Lbar                       1276 |   0.000e+00 |
+ | q qbar' -> ~c_L ~d_Lbar + c.c.                1277 |   1.264e-12 |
+ | q qbar' -> ~c_L ~s_Lbar + c.c.                1278 |   5.924e-13 |
+ | q qbar' -> ~c_L ~b_1bar + c.c.                1279 |   4.531e-14 |
+ | q qbar' -> ~c_L ~d_Rbar + c.c.                1280 |   6.291e-12 |
+ | q qbar' -> ~c_L ~s_Rbar + c.c.                1281 |   6.975e-13 |
+ | q qbar' -> ~c_L ~b_2bar + c.c.                1282 |   1.742e-13 |
+ | q qbar' -> ~b_1 ~b_1bar                       1283 |   1.389e-11 |
+ | q qbar' -> ~b_1 ~d_Rbar                       1284 |   6.329e-13 |
+ | q qbar' -> ~d_R ~b_1bar                       1285 |   4.321e-12 |
+ | q qbar' -> ~b_1 ~s_Rbar                       1286 |   2.895e-13 |
+ | q qbar' -> ~s_R ~b_1bar                       1287 |   2.895e-13 |
+ | q qbar' -> ~b_1 ~b_2bar                       1288 |   7.343e-14 |
+ | q qbar' -> ~b_2 ~b_1bar                       1289 |   7.343e-14 |
+ | q qbar' -> ~t_1 ~t_1bar                       1290 |   4.957e-11 |
+ | q qbar' -> ~t_1 ~u_Rbar                       1291 |   0.000e+00 |
+ | q qbar' -> ~u_R ~t_1bar                       1292 |   0.000e+00 |
+ | q qbar' -> ~t_1 ~c_Rbar                       1293 |   0.000e+00 |
+ | q qbar' -> ~c_R ~t_1bar                       1294 |   0.000e+00 |
+ | q qbar' -> ~t_1 ~t_2bar                       1295 |   6.024e-14 |
+ | q qbar' -> ~t_2 ~t_1bar                       1296 |   6.024e-14 |
+ | q qbar' -> ~t_1 ~d_Lbar + c.c.                1297 |   1.677e-17 |
+ | q qbar' -> ~t_1 ~s_Lbar + c.c.                1298 |   4.383e-16 |
+ | q qbar' -> ~t_1 ~b_1bar + c.c.                1299 |   3.369e-13 |
+ | q qbar' -> ~t_1 ~d_Rbar + c.c.                1300 |   0.000e+00 |
+ | q qbar' -> ~t_1 ~s_Rbar + c.c.                1301 |   0.000e+00 |
+ | q qbar' -> ~t_1 ~b_2bar + c.c.                1302 |   1.442e-14 |
+ | q qbar' -> ~d_R ~d_Rbar                       1303 |   1.861e-11 |
+ | q qbar' -> ~d_R ~s_Rbar                       1304 |   3.700e-12 |
+ | q qbar' -> ~s_R ~d_Rbar                       1305 |   4.145e-13 |
+ | q qbar' -> ~d_R ~b_2bar                       1306 |   1.002e-12 |
+ | q qbar' -> ~b_2 ~d_Rbar                       1307 |   1.169e-13 |
+ | q qbar' -> ~u_R ~u_Rbar                       1308 |   2.527e-11 |
+ | q qbar' -> ~u_R ~c_Rbar                       1309 |   3.778e-12 |
+ | q qbar' -> ~c_R ~u_Rbar                       1310 |   1.148e-13 |
+ | q qbar' -> ~u_R ~t_2bar                       1311 |   0.000e+00 |
+ | q qbar' -> ~t_2 ~u_Rbar                       1312 |   0.000e+00 |
+ | q qbar' -> ~u_R ~d_Lbar + c.c.                1313 |   8.332e-11 |
+ | q qbar' -> ~u_R ~s_Lbar + c.c.                1314 |   3.064e-11 |
+ | q qbar' -> ~u_R ~b_1bar + c.c.                1315 |   1.088e-11 |
+ | q qbar' -> ~u_R ~d_Rbar + c.c.                1316 |   2.568e-11 |
+ | q qbar' -> ~u_R ~s_Rbar + c.c.                1317 |   9.487e-12 |
+ | q qbar' -> ~u_R ~b_2bar + c.c.                1318 |   2.615e-12 |
+ | q qbar' -> ~s_R ~s_Rbar                       1319 |   1.033e-11 |
+ | q qbar' -> ~s_R ~b_2bar                       1320 |   5.366e-14 |
+ | q qbar' -> ~b_2 ~s_Rbar                       1321 |   5.366e-14 |
+ | q qbar' -> ~c_R ~c_Rbar                       1322 |   9.823e-12 |
+ | q qbar' -> ~c_R ~t_2bar                       1323 |   0.000e+00 |
+ | q qbar' -> ~t_2 ~c_Rbar                       1324 |   0.000e+00 |
+ | q qbar' -> ~c_R ~d_Lbar + c.c.                1325 |   6.148e-12 |
+ | q qbar' -> ~c_R ~s_Lbar + c.c.                1326 |   6.791e-13 |
+ | q qbar' -> ~c_R ~b_1bar + c.c.                1327 |   2.492e-13 |
+ | q qbar' -> ~c_R ~d_Rbar + c.c.                1328 |   1.664e-12 |
+ | q qbar' -> ~c_R ~s_Rbar + c.c.                1329 |   1.557e-13 |
+ | q qbar' -> ~c_R ~b_2bar + c.c.                1330 |   4.419e-14 |
+ | q qbar' -> ~b_2 ~b_2bar                       1331 |   1.028e-11 |
+ | q qbar' -> ~t_2 ~t_2bar                       1332 |   1.005e-11 |
+ | q qbar' -> ~t_2 ~d_Lbar + c.c.                1333 |   3.575e-17 |
+ | q qbar' -> ~t_2 ~s_Lbar + c.c.                1334 |   9.341e-16 |
+ | q qbar' -> ~t_2 ~b_1bar + c.c.                1335 |   7.094e-13 |
+ | q qbar' -> ~t_2 ~d_Rbar + c.c.                1336 |   0.000e+00 |
+ | q qbar' -> ~t_2 ~s_Rbar + c.c.                1337 |   0.000e+00 |
+ | q qbar' -> ~t_2 ~b_2bar + c.c.                1338 |   3.047e-14 |
+ | q q' -> ~d_L ~d_L + c.c.                      1351 |   7.250e-11 |
+ | q q' -> ~d_L ~s_L + c.c.                      1352 |   1.188e-11 |
+ | q q' -> ~d_L ~b_1 + c.c.                      1353 |   4.079e-12 |
+ | q q' -> ~d_L ~d_R + c.c.                      1354 |   4.324e-11 |
+ | q q' -> ~d_L ~s_R + c.c.                      1355 |   2.610e-12 |
+ | q q' -> ~d_L ~b_2 + c.c.                      1356 |   7.470e-13 |
+ | q q' -> ~u_L ~u_L + c.c.                      1357 |   4.142e-10 |
+ | q q' -> ~u_L ~c_L + c.c.                      1358 |   1.305e-11 |
+ | q q' -> ~u_L ~t_1 + c.c.                      1359 |   0.000e+00 |
+ | q q' -> ~u_L ~u_R + c.c.                      1360 |   3.096e-10 |
+ | q q' -> ~u_L ~c_R + c.c.                      1361 |   3.082e-12 |
+ | q q' -> ~u_L ~t_2 + c.c.                      1362 |   0.000e+00 |
+ | q q' -> ~u_L ~d_L + c.c.                      1363 |   6.131e-10 |
+ | q q' -> ~u_L ~s_L + c.c.                      1364 |   2.866e-11 |
+ | q q' -> ~u_L ~b_1 + c.c.                      1365 |   3.368e-12 |
+ | q q' -> ~u_L ~d_R + c.c.                      1366 |   1.795e-10 |
+ | q q' -> ~u_L ~s_R + c.c.                      1367 |   8.490e-12 |
+ | q q' -> ~u_L ~b_2 + c.c.                      1368 |   7.349e-12 |
+ | q q' -> ~s_L ~s_L + c.c.                      1369 |   5.876e-13 |
+ | q q' -> ~s_L ~b_1 + c.c.                      1370 |   4.674e-13 |
+ | q q' -> ~s_L ~d_R + c.c.                      1371 |   2.610e-12 |
+ | q q' -> ~s_L ~s_R + c.c.                      1372 |   2.419e-13 |
+ | q q' -> ~s_L ~b_2 + c.c.                      1373 |   7.031e-14 |
+ | q q' -> ~c_L ~c_L + c.c.                      1374 |   1.108e-13 |
+ | q q' -> ~c_L ~t_1 + c.c.                      1375 |   0.000e+00 |
+ | q q' -> ~c_L ~u_R + c.c.                      1376 |   3.082e-12 |
+ | q q' -> ~c_L ~c_R + c.c.                      1377 |   4.402e-14 |
+ | q q' -> ~c_L ~t_2 + c.c.                      1378 |   0.000e+00 |
+ | q q' -> ~c_L ~d_L + c.c.                      1379 |   8.107e-12 |
+ | q q' -> ~c_L ~s_L + c.c.                      1380 |   1.048e-12 |
+ | q q' -> ~c_L ~b_1 + c.c.                      1381 |   6.293e-14 |
+ | q q' -> ~c_L ~d_R + c.c.                      1382 |   1.470e-12 |
+ | q q' -> ~c_L ~s_R + c.c.                      1383 |   1.346e-13 |
+ | q q' -> ~c_L ~b_2 + c.c.                      1384 |   1.551e-13 |
+ | q q' -> ~b_1 ~b_1 + c.c.                      1385 |   7.904e-14 |
+ | q q' -> ~b_1 ~d_R + c.c.                      1386 |   9.873e-13 |
+ | q q' -> ~b_1 ~s_R + c.c.                      1387 |   9.833e-14 |
+ | q q' -> ~b_1 ~b_2 + c.c.                      1388 |   2.616e-14 |
+ | q q' -> ~t_1 ~t_1 + c.c.                      1389 |   0.000e+00 |
+ | q q' -> ~t_1 ~u_R + c.c.                      1390 |   0.000e+00 |
+ | q q' -> ~t_1 ~c_R + c.c.                      1391 |   0.000e+00 |
+ | q q' -> ~t_1 ~t_2 + c.c.                      1392 |   0.000e+00 |
+ | q q' -> ~t_1 ~d_L + c.c.                      1393 |   1.264e-12 |
+ | q q' -> ~t_1 ~s_L + c.c.                      1394 |   9.589e-14 |
+ | q q' -> ~t_1 ~b_1 + c.c.                      1395 |   5.067e-16 |
+ | q q' -> ~t_1 ~d_R + c.c.                      1396 |   0.000e+00 |
+ | q q' -> ~t_1 ~s_R + c.c.                      1397 |   0.000e+00 |
+ | q q' -> ~t_1 ~b_2 + c.c.                      1398 |   2.145e-16 |
+ | q q' -> ~d_R ~d_R + c.c.                      1399 |   6.866e-11 |
+ | q q' -> ~d_R ~s_R + c.c.                      1400 |   1.605e-11 |
+ | q q' -> ~d_R ~b_2 + c.c.                      1401 |   4.058e-12 |
+ | q q' -> ~u_R ~u_R + c.c.                      1402 |   3.836e-10 |
+ | q q' -> ~u_R ~c_R + c.c.                      1403 |   1.683e-11 |
+ | q q' -> ~u_R ~t_2 + c.c.                      1404 |   0.000e+00 |
+ | q q' -> ~u_R ~d_L + c.c.                      1405 |   1.771e-10 |
+ | q q' -> ~u_R ~s_L + c.c.                      1406 |   8.321e-12 |
+ | q q' -> ~u_R ~b_1 + c.c.                      1407 |   9.561e-12 |
+ | q q' -> ~u_R ~d_R + c.c.                      1408 |   5.225e-10 |
+ | q q' -> ~u_R ~s_R + c.c.                      1409 |   3.547e-11 |
+ | q q' -> ~u_R ~b_2 + c.c.                      1410 |   3.334e-12 |
+ | q q' -> ~s_R ~s_R + c.c.                      1411 |   6.560e-13 |
+ | q q' -> ~s_R ~b_2 + c.c.                      1412 |   4.657e-13 |
+ | q q' -> ~c_R ~c_R + c.c.                      1413 |   1.293e-13 |
+ | q q' -> ~c_R ~t_2 + c.c.                      1414 |   0.000e+00 |
+ | q q' -> ~c_R ~d_L + c.c.                      1415 |   1.437e-12 |
+ | q q' -> ~c_R ~s_L + c.c.                      1416 |   1.311e-13 |
+ | q q' -> ~c_R ~b_1 + c.c.                      1417 |   2.175e-13 |
+ | q q' -> ~c_R ~d_R + c.c.                      1418 |   7.251e-12 |
+ | q q' -> ~c_R ~s_R + c.c.                      1419 |   8.238e-13 |
+ | q q' -> ~c_R ~b_2 + c.c.                      1420 |   6.215e-14 |
+ | q q' -> ~b_2 ~b_2 + c.c.                      1421 |   4.143e-14 |
+ | q q' -> ~t_2 ~t_2 + c.c.                      1422 |   0.000e+00 |
+ | q q' -> ~t_2 ~d_L + c.c.                      1423 |   2.333e-14 |
+ | q q' -> ~t_2 ~s_L + c.c.                      1424 |   1.691e-15 |
+ | q q' -> ~t_2 ~b_1 + c.c.                      1425 |   1.620e-17 |
+ | q q' -> ~t_2 ~d_R + c.c.                      1426 |   0.000e+00 |
+ | q q' -> ~t_2 ~s_R + c.c.                      1427 |   0.000e+00 |
+ | q q' -> ~t_2 ~b_2 + c.c.                      1428 |   1.015e-17 |
+ | q g -> ~chi_10 ~d_L + c.c. (q=d,s,b)          1431 |   1.880e-12 |
+ | q g -> ~chi_10 ~u_L + c.c. (q=u,c)            1432 |   2.949e-12 |
+ | q g -> ~chi_10 ~s_L + c.c. (q=d,s,b)          1433 |   2.982e-13 |
+ | q g -> ~chi_10 ~c_L + c.c. (q=u,c)            1434 |   1.029e-13 |
+ | q g -> ~chi_10 ~b_1 + c.c. (q=d,s,b)          1435 |   1.860e-13 |
+ | q g -> ~chi_10 ~t_1 + c.c. (q=u,c)            1436 |   0.000e+00 |
+ | q g -> ~chi_10 ~d_R + c.c. (q=d,s,b)          1437 |   7.895e-12 |
+ | q g -> ~chi_10 ~u_R + c.c. (q=u,c)            1438 |   6.898e-11 |
+ | q g -> ~chi_10 ~s_R + c.c. (q=d,s,b)          1439 |   1.289e-12 |
+ | q g -> ~chi_10 ~c_R + c.c. (q=u,c)            1440 |   2.517e-12 |
+ | q g -> ~chi_10 ~b_2 + c.c. (q=d,s,b)          1441 |   3.538e-13 |
+ | q g -> ~chi_10 ~t_2 + c.c. (q=u,c)            1442 |   0.000e+00 |
+ | q g -> ~chi_20 ~d_L + c.c. (q=d,s,b)          1443 |   3.661e-11 |
+ | q g -> ~chi_20 ~u_L + c.c. (q=u,c)            1444 |   8.248e-11 |
+ | q g -> ~chi_20 ~s_L + c.c. (q=d,s,b)          1445 |   5.934e-12 |
+ | q g -> ~chi_20 ~c_L + c.c. (q=u,c)            1446 |   2.965e-12 |
+ | q g -> ~chi_20 ~b_1 + c.c. (q=d,s,b)          1447 |   2.737e-12 |
+ | q g -> ~chi_20 ~t_1 + c.c. (q=u,c)            1448 |   0.000e+00 |
+ | q g -> ~chi_20 ~d_R + c.c. (q=d,s,b)          1449 |   9.631e-15 |
+ | q g -> ~chi_20 ~u_R + c.c. (q=u,c)            1450 |   8.130e-14 |
+ | q g -> ~chi_20 ~s_R + c.c. (q=d,s,b)          1451 |   1.607e-15 |
+ | q g -> ~chi_20 ~c_R + c.c. (q=u,c)            1452 |   3.046e-15 |
+ | q g -> ~chi_20 ~b_2 + c.c. (q=d,s,b)          1453 |   5.724e-14 |
+ | q g -> ~chi_20 ~t_2 + c.c. (q=u,c)            1454 |   0.000e+00 |
+ | q g -> ~chi_30 ~d_L + c.c. (q=d,s,b)          1455 |   5.531e-14 |
+ | q g -> ~chi_30 ~u_L + c.c. (q=u,c)            1456 |   6.962e-14 |
+ | q g -> ~chi_30 ~s_L + c.c. (q=d,s,b)          1457 |   7.750e-15 |
+ | q g -> ~chi_30 ~c_L + c.c. (q=u,c)            1458 |   2.135e-15 |
+ | q g -> ~chi_30 ~b_1 + c.c. (q=d,s,b)          1459 |   4.647e-14 |
+ | q g -> ~chi_30 ~t_1 + c.c. (q=u,c)            1460 |   0.000e+00 |
+ | q g -> ~chi_30 ~d_R + c.c. (q=d,s,b)          1461 |   3.519e-15 |
+ | q g -> ~chi_30 ~u_R + c.c. (q=u,c)            1462 |   2.877e-14 |
+ | q g -> ~chi_30 ~s_R + c.c. (q=d,s,b)          1463 |   5.068e-16 |
+ | q g -> ~chi_30 ~c_R + c.c. (q=u,c)            1464 |   9.168e-16 |
+ | q g -> ~chi_30 ~b_2 + c.c. (q=d,s,b)          1465 |   4.580e-14 |
+ | q g -> ~chi_30 ~t_2 + c.c. (q=u,c)            1466 |   0.000e+00 |
+ | q g -> ~chi_40 ~d_L + c.c. (q=d,s,b)          1467 |   1.092e-12 |
+ | q g -> ~chi_40 ~u_L + c.c. (q=u,c)            1468 |   1.807e-12 |
+ | q g -> ~chi_40 ~s_L + c.c. (q=d,s,b)          1469 |   1.517e-13 |
+ | q g -> ~chi_40 ~c_L + c.c. (q=u,c)            1470 |   5.481e-14 |
+ | q g -> ~chi_40 ~b_1 + c.c. (q=d,s,b)          1471 |   8.145e-14 |
+ | q g -> ~chi_40 ~t_1 + c.c. (q=u,c)            1472 |   0.000e+00 |
+ | q g -> ~chi_40 ~d_R + c.c. (q=d,s,b)          1473 |   1.767e-14 |
+ | q g -> ~chi_40 ~u_R + c.c. (q=u,c)            1474 |   1.444e-13 |
+ | q g -> ~chi_40 ~s_R + c.c. (q=d,s,b)          1475 |   2.522e-15 |
+ | q g -> ~chi_40 ~c_R + c.c. (q=u,c)            1476 |   4.552e-15 |
+ | q g -> ~chi_40 ~b_2 + c.c. (q=d,s,b)          1477 |   5.915e-14 |
+ | q g -> ~chi_40 ~t_2 + c.c. (q=u,c)            1478 |   0.000e+00 |
+ | q g -> ~chi_1+ ~d_L + c.c. (q=u,c)            1491 |   3.923e-10 |
+ | q g -> ~chi_1- ~u_L + c.c. (q=d,s,b)          1492 |   1.852e-10 |
+ | q g -> ~chi_1+ ~s_L + c.c. (q=u,c)            1493 |   3.194e-11 |
+ | q g -> ~chi_1- ~c_L + c.c. (q=d,s,b)          1494 |   3.827e-11 |
+ | q g -> ~chi_1+ ~b_1 + c.c. (q=u,c)            1495 |   4.806e-14 |
+ | q g -> ~chi_1- ~t_1 + c.c. (q=d,s,b)          1496 |   4.073e-11 |
+ | q g -> ~chi_1+ ~d_R + c.c. (q=u,c)            1497 |   0.000e+00 |
+ | q g -> ~chi_1- ~u_R + c.c. (q=d,s,b)          1498 |   0.000e+00 |
+ | q g -> ~chi_1+ ~s_R + c.c. (q=u,c)            1499 |   0.000e+00 |
+ | q g -> ~chi_1- ~c_R + c.c. (q=d,s,b)          1500 |   0.000e+00 |
+ | q g -> ~chi_1+ ~b_2 + c.c. (q=u,c)            1501 |   9.853e-16 |
+ | q g -> ~chi_1- ~t_2 + c.c. (q=d,s,b)          1502 |   3.204e-13 |
+ | q g -> ~chi_2+ ~d_L + c.c. (q=u,c)            1503 |   1.438e-11 |
+ | q g -> ~chi_2- ~u_L + c.c. (q=d,s,b)          1504 |   7.014e-12 |
+ | q g -> ~chi_2+ ~s_L + c.c. (q=u,c)            1505 |   1.168e-12 |
+ | q g -> ~chi_2- ~c_L + c.c. (q=d,s,b)          1506 |   1.305e-12 |
+ | q g -> ~chi_2+ ~b_1 + c.c. (q=u,c)            1507 |   9.897e-16 |
+ | q g -> ~chi_2- ~t_1 + c.c. (q=d,s,b)          1508 |   2.443e-11 |
+ | q g -> ~chi_2+ ~d_R + c.c. (q=u,c)            1509 |   0.000e+00 |
+ | q g -> ~chi_2- ~u_R + c.c. (q=d,s,b)          1510 |   0.000e+00 |
+ | q g -> ~chi_2+ ~s_R + c.c. (q=u,c)            1511 |   0.000e+00 |
+ | q g -> ~chi_2- ~c_R + c.c. (q=d,s,b)          1512 |   0.000e+00 |
+ | q g -> ~chi_2+ ~b_2 + c.c. (q=u,c)            1513 |   1.041e-15 |
+ | q g -> ~chi_2- ~t_2 + c.c. (q=d,s,b)          1514 |   6.731e-13 |
+ | q qbar' -> ~chi_10 ~chi_10                    1551 |   4.787e-12 |
+ | q qbar' -> ~chi_10 ~chi_20                    1552 |   8.660e-13 |
+ | q qbar' -> ~chi_20 ~chi_20                    1553 |   9.996e-12 |
+ | q qbar' -> ~chi_10 ~chi_30                    1554 |   2.718e-13 |
+ | q qbar' -> ~chi_20 ~chi_30                    1555 |   1.614e-12 |
+ | q qbar' -> ~chi_30 ~chi_30                    1556 |   8.882e-17 |
+ | q qbar' -> ~chi_10 ~chi_40                    1557 |   7.416e-14 |
+ | q qbar' -> ~chi_20 ~chi_40                    1558 |   4.540e-13 |
+ | q qbar' -> ~chi_30 ~chi_40                    1559 |   9.654e-12 |
+ | q qbar' -> ~chi_40 ~chi_40                    1560 |   5.259e-15 |
+ | q qbar' -> ~chi_1+ ~chi_10                    1571 |   3.348e-13 |
+ | q qbar' -> ~chi_1- ~chi_10                    1572 |   2.659e-13 |
+ | q qbar' -> ~chi_2+ ~chi_10                    1573 |   8.943e-14 |
+ | q qbar' -> ~chi_2- ~chi_10                    1574 |   6.907e-14 |
+ | q qbar' -> ~chi_1+ ~chi_20                    1575 |   5.038e-11 |
+ | q qbar' -> ~chi_1- ~chi_20                    1576 |   3.967e-11 |
+ | q qbar' -> ~chi_2+ ~chi_20                    1577 |   1.785e-14 |
+ | q qbar' -> ~chi_2- ~chi_20                    1578 |   1.217e-14 |
+ | q qbar' -> ~chi_1+ ~chi_30                    1579 |   3.918e-13 |
+ | q qbar' -> ~chi_1- ~chi_30                    1580 |   2.966e-13 |
+ | q qbar' -> ~chi_2+ ~chi_30                    1581 |   2.280e-12 |
+ | q qbar' -> ~chi_2- ~chi_30                    1582 |   1.596e-12 |
+ | q qbar' -> ~chi_1+ ~chi_40                    1583 |   2.096e-14 |
+ | q qbar' -> ~chi_1- ~chi_40                    1584 |   1.441e-14 |
+ | q qbar' -> ~chi_2+ ~chi_40                    1585 |   2.234e-12 |
+ | q qbar' -> ~chi_2- ~chi_40                    1586 |   1.557e-12 |
+ | q qbar' -> ~chi_1+ ~chi_1-                    1591 |   1.857e-10 |
+ | q qbar' -> ~chi_1+ ~chi_2-                    1592 |   8.670e-13 |
+ | q qbar' -> ~chi_2+ ~chi_1-                    1593 |   8.670e-13 |
+ | q qbar' -> ~chi_2+ ~chi_2-                    1594 |   9.983e-12 |
+ | q q' -> ~d_L* + c.c                           2011 |   0.000e+00 |
+ | q q' -> ~u_L* + c.c                           2012 |   0.000e+00 |
+ | q q' -> ~s_L* + c.c                           2013 |   0.000e+00 |
+ | q q' -> ~c_L* + c.c                           2014 |   0.000e+00 |
+ | q q' -> ~b_1* + c.c                           2015 |   0.000e+00 |
+ | q q' -> ~t_1* + c.c                           2016 |   0.000e+00 |
+ | q q' -> ~d_R* + c.c                           2021 |   0.000e+00 |
+ | q q' -> ~u_R* + c.c                           2022 |   0.000e+00 |
+ | q q' -> ~s_R* + c.c                           2023 |   0.000e+00 |
+ | q q' -> ~c_R* + c.c                           2024 |   0.000e+00 |
+ | q q' -> ~b_2* + c.c                           2025 |   0.000e+00 |
+ | q q' -> ~t_2* + c.c                           2026 |   0.000e+00 |
+ |                                                                  |
+ *-------  End PYTHIA Process Initialization -----------------------*
+
+ *-------  PYTHIA Flag + Mode + Parm + Word Settings (changes only)  ----------------------------------------------* 
+ |                                                                                                                 | 
+ | Name                                          |                      Now |      Default         Min         Max | 
+ |                                               |                          |                                      | 
+ | BeamRemnants:reconnectRange                   |                  1.50000 |     10.00000         0.0    10.00000 | 
+ | Beams:eCM                                     |                10000.000 |    14000.000    10.00000             | 
+ | HadronLevel:Hadronize                         |                      off |           on                         | 
+ | Init:showChangedParticleData                  |                      off |           on                         | 
+ | Main:numberOfEvents                           |                    10000 |         1000           0             | 
+ | Main:timesAllowErrors                         |                        3 |           10           0             | 
+ | MultipartonInteractions:alphaSvalue           |                  0.13500 |      0.12700   0.0600000     0.25000 | 
+ | MultipartonInteractions:bProfile              |                        3 |            1           0           4 | 
+ | MultipartonInteractions:ecmPow                |                  0.19000 |      0.24000         0.0     0.50000 | 
+ | MultipartonInteractions:expPow                |                  2.00000 |      1.00000     0.40000    10.00000 | 
+ | MultipartonInteractions:pT0Ref                |                  2.08500 |      2.15000     0.50000    10.00000 | 
+ | Next:numberCount                              |                      500 |         1000           0             | 
+ | Next:numberShowEvent                          |                        2 |            1           0             | 
+ | Next:numberShowInfo                           |                        2 |            1           0             | 
+ | Next:numberShowProcess                        |                        2 |            1           0             | 
+ | PartonLevel:FSR                               |                      off |           on                         | 
+ | PartonLevel:ISR                               |                      off |           on                         | 
+ | PartonLevel:MPI                               |                      off |           on                         | 
+ | PDF:pSet                                      |                        8 |            2           1          12 | 
+ | SigmaDiffractive:dampen                       |                       on |          off                         | 
+ | SigmaDiffractive:maxAX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXB                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaDiffractive:maxXX                        |                 65.00000 |     15.00000         0.0             | 
+ | SigmaProcess:alphaSvalue                      |                  0.13500 |      0.12650   0.0600000     0.25000 | 
+ | SLHA:file                                     |                cmssm.spc |         void                         | 
+ | SpaceShower:rapidityOrder                     |                       on |          off                         | 
+ | SUSY:all                                      |                       on |          off                         | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Flag + Mode + Parm + Word Settings  ---------------------------------------------------------* 
+ PYTHIA Warning in TauDecays::decay: unknown tau production, assuming unpolarized and uncorrelated  
+
+ --------  PYTHIA Info Listing  ---------------------------------------- 
+ 
+ Beam A: id =   2212, pz =  5.000e+03, e =  5.000e+03, m =  9.383e-01.
+ Beam B: id =   2212, pz = -5.000e+03, e =  5.000e+03, m =  9.383e-01.
+
+ In 1: id =    2, x =  3.271e-01, pdf =  2.602e-01 at Q2 =  3.091e+05.
+ In 2: id =   21, x =  9.146e-02, pdf =  7.559e-01 at same Q2.
+
+ Subprocess q g -> ~chi_20 ~u_L + c.c. (q=u,c) with code 1444 is 2 -> 2.
+ It has sHat =  2.992e+06,    tHat = -5.350e+05,    uHat = -1.203e+06,
+       pTHat =  4.001e+02,   m3Hat =  3.861e+02,   m4Hat =  1.051e+03,
+    thetaHat =  1.121e+00,  phiHat =  1.358e+00.
+     alphaEM =  8.014e-03,  alphaS =  9.957e-02    at Q2 =  6.253e+05.
+
+ Impact parameter b =  0.000e+00 gives enhancement factor =  1.000e+00.
+ Max pT scale for MPI =  1.000e+04, ISR =  1.000e+04, FSR =  1.000e+04.
+ Number of MPI =     1, ISR =     0, FSRproc =     0, FSRreson =     0.
+
+ --------  End PYTHIA Info Listing  ------------------------------------
+
+ --------  PYTHIA Event Listing  (hard process)  -----------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000  10000.000  10000.000
+     1      2212   (p+)               -12     0     0     3     0     0     0      0.000      0.000   5000.000   5000.000      0.938
+     2      2212   (p+)               -12     0     0     4     0     0     0      0.000      0.000  -5000.000   5000.000      0.938
+     3         2   (u)                -21     1     0     5     6   101     0      0.000      0.000   1635.613   1635.613      0.000
+     4        21   (g)                -21     2     0     5     6   102   101      0.000      0.000   -457.292    457.292      0.000
+     5   1000023   (~chi_20)          -22     3     4     7     8     0     0     84.336    391.081    634.616    843.727    386.111
+     6   1000002   (~u_L)             -22     3     4     9    10   102     0    -84.336   -391.081    543.705   1249.177   1051.081
+     7  -1000012   (~nu_eLbar)        -22     5     0    11    12     0     0     49.768    373.679    584.114    780.102    353.917
+     8        12   nu_e                23     5     0     0     0     0     0     34.567     17.401     50.502     63.625      0.000
+     9   1000023   (~chi_20)          -22     6     0    13    14     0     0   -481.940   -244.778    482.702    821.140    386.118
+    10         2   u                   23     6     0     0     0   102     0    397.605   -146.302     61.003    428.037      0.330
+    11   1000022   ~chi_10             23     7     0     0     0     0     0    -11.775    355.842    586.664    715.976    204.168
+    12       -12   nu_ebar             23     7     0     0     0     0     0     61.543     17.837     -2.550     64.126      0.000
+    13  -1000015   (~tau_1+)          -22     9     0    15    16     0     0   -319.972   -220.686    481.131    657.373    222.638
+    14        15   tau-                23     9     0     0     0     0     0   -161.968    -24.093      1.572    163.768      1.777
+    15   1000022   ~chi_10             23    13     0     0     0     0     0   -268.044   -180.907    414.764    564.171    204.168
+    16       -15   tau+                23    13     0     0     0     0     0    -51.928    -39.779     66.367     93.202      1.777
+                                   Charge sum:  0.667           Momentum sum:      0.000      0.000   1178.321   2092.904   1729.684
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000  10000.000  10000.000
+     1      2212   (p+)               -12     0     0     7     0     0     0      0.000      0.000   5000.000   5000.000      0.938
+     2      2212   (p+)               -12     0     0     8     0     0     0      0.000      0.000  -5000.000   5000.000      0.938
+     3         2   (u)                -21     7     7     5     6   101     0      0.000      0.000   1635.613   1635.613      0.000
+     4        21   (g)                -21     8     8     5     6   102   101      0.000      0.000   -457.292    457.292      0.000
+     5   1000023   (~chi_20)          -22     3     4     9     9     0     0     84.336    391.081    634.616    843.727    386.111
+     6   1000002   (~u_L)             -22     3     4    10    10   102     0    -84.336   -391.081    543.705   1249.177   1051.081
+     7         2   (u)                -61     1     0     3     3   101     0      0.648      0.639   1635.613   1635.613      0.000
+     8        21   (g)                -61     2     0     4     4   102   101      0.588     -0.415   -457.291    457.292      0.000
+     9   1000023   (~chi_20)          -62     5     5    14    15     0     0     84.763    391.275    634.400    843.698    386.111
+    10   1000002   (~u_L)             -62     6     6    16    17   102     0    -83.527   -391.050    543.922   1249.207   1051.081
+    11      2101   ud_0                63     1     0     0     0     0   101     -0.648     -0.639   3364.386   3364.386      0.579
+    12         2   u                   63     2     0     0     0   101     0     -0.019      0.191    -40.764     40.765      0.330
+    13      2101   ud_0                63     2     0     0     0     0   102     -0.569      0.224  -4501.944   4501.944      0.579
+    14  -1000012   (~nu_eLbar)        -22     9     0    18    19     0     0     50.163    373.859    583.914    780.064    353.917
+    15        12   nu_e                23     9     0     0     0     0     0     34.599     17.416     50.486     63.634      0.000
+    16   1000023   (~chi_20)          -22    10     0    20    21     0     0   -481.409   -244.758    482.845    820.906    386.118
+    17         2   u                   23    10     0     0     0   102     0    397.882   -146.292     61.077    428.301      0.330
+    18   1000022   ~chi_10             23    14     0     0     0     0     0    -11.412    356.007    586.480    715.901    204.168
+    19       -12   nu_ebar             23    14     0     0     0     0     0     61.575     17.852     -2.566     64.162      0.000
+    20  -1000015   (~tau_1+)          -22    16     0    22    23     0     0   -319.547   -220.670    481.245    657.244    222.638
+    21        15   (tau-)             -23    16     0    24    25     0     0   -161.862    -24.089      1.600    163.662      1.777
+    22   1000022   ~chi_10             23    20     0     0     0     0     0   -267.679   -180.893    414.862    564.065    204.168
+    23       -15   (tau+)             -23    20     0    26    28     0     0    -51.868    -39.776     66.383     93.179      1.777
+    24        16   nu_tau              91    21     0     0     0     0     0     -7.092     -0.738     -0.110      7.131      0.000
+    25      -211   pi-                 91    21     0     0     0     0     0   -154.771    -23.351      1.710    156.532      0.140
+    26       -16   nu_taubar           91    23     0     0     0     0     0     -1.443     -1.167      2.195      2.874      0.000
+    27       -11   e+                  91    23     0     0     0     0     0    -37.849    -29.299     49.010     68.505      0.001
+    28        12   nu_e                91    23     0     0     0     0     0    -12.576     -9.310     15.178     21.799      0.000
+                                   Charge sum:  2.000           Momentum sum:      0.000      0.000     -0.000  10000.000  10000.000
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+
+ --------  PYTHIA Info Listing  ---------------------------------------- 
+ 
+ Beam A: id =   2212, pz =  5.000e+03, e =  5.000e+03, m =  9.383e-01.
+ Beam B: id =   2212, pz = -5.000e+03, e =  5.000e+03, m =  9.383e-01.
+
+ In 1: id =   21, x =  2.433e-01, pdf =  8.604e-02 at Q2 =  1.379e+06.
+ In 2: id =    2, x =  2.420e-01, pdf =  3.539e-01 at same Q2.
+
+ Subprocess q g -> ~u_L gluino + c.c. with code 1204 is 2 -> 2.
+ It has sHat =  5.888e+06,    tHat = -1.732e+06,    uHat = -1.765e+06,
+       pTHat =  5.272e+02,   m3Hat =  1.049e+03,   m4Hat =  1.136e+03,
+    thetaHat =  1.558e+00,  phiHat =  5.818e+00.
+     alphaEM =  8.054e-03,  alphaS =  9.465e-02    at Q2 =  1.470e+06.
+
+ Impact parameter b =  0.000e+00 gives enhancement factor =  1.000e+00.
+ Max pT scale for MPI =  1.000e+04, ISR =  1.000e+04, FSR =  1.000e+04.
+ Number of MPI =     1, ISR =     0, FSRproc =     0, FSRreson =     0.
+
+ --------  End PYTHIA Info Listing  ------------------------------------
+
+ --------  PYTHIA Event Listing  (hard process)  -----------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000  10000.000  10000.000
+     1      2212   (p+)               -12     0     0     3     0     0     0      0.000      0.000   5000.000   5000.000      0.938
+     2      2212   (p+)               -12     0     0     4     0     0     0      0.000      0.000  -5000.000   5000.000      0.938
+     3        21   (g)                -21     1     0     5     6   102   103      0.000      0.000   1216.700   1216.700      0.000
+     4         2   (u)                -21     2     0     5     6   101     0      0.000      0.000  -1209.864   1209.864      0.000
+     5   1000002   (~u_L)             -22     3     4     7     8   102     0    471.055   -236.671     10.060   1174.381   1049.364
+     6   1000021   (~g)               -22     3     4     9    10   101   103   -471.055    236.671     -3.225   1252.183   1135.802
+     7   1000024   (~chi_1+)          -22     5     0    11    12     0     0    349.021   -568.910    160.791    789.680    390.213
+     8         1   d                   23     5     0     0     0   102     0    122.034    332.239   -150.731    384.701      0.330
+     9   1000006   (~t_1)             -22     6     0    13    14   101     0   -524.338     24.845     75.984    963.667    804.570
+    10        -6   (tbar)             -22     6     0    15    16     0   103     53.284    211.825    -79.209    288.516    171.050
+    11  -1000015   (~tau_1+)          -22     7     0    17    18     0     0    349.928   -591.573    105.808    730.202    222.690
+    12        16   nu_tau              23     7     0     0     0     0     0     -0.908     22.663     54.983     59.478      0.000
+    13   1000023   (~chi_20)          -22     9     0    19    20     0     0   -526.776    -45.561    258.391    703.945    386.269
+    14         6   (t)                -22     9     0    21    22   101     0      2.438     70.406   -182.407    259.722    170.939
+    15       -24   (W-)               -22    10     0    23    24     0     0     78.450    209.276    -38.611    240.442     79.817
+    16        -5   bbar                23    10     0     0     0     0   103    -25.166      2.550    -40.598     48.074      4.800
+    17   1000022   ~chi_10             23    11     0     0     0     0     0    329.208   -549.098     81.168    676.874    204.168
+    18       -15   tau+                23    11     0     0     0     0     0     20.721    -42.476     24.641     53.328      1.777
+    19   1000013   (~mu_L-)           -22    13     0    25    26     0     0   -463.617    -49.213    246.543    639.580    361.825
+    20       -13   mu+                 23    13     0     0     0     0     0    -63.160      3.652     11.848     64.365      0.106
+    21        24   (W+)               -22    14     0    27    28     0     0    -15.458     91.486   -191.796    230.128     86.973
+    22         5   b                   23    14     0     0     0   101     0     17.895    -21.080      9.389     29.594      4.800
+    23         1   d                   23    15     0     0     0   104     0      7.031     84.775    -46.025     96.720      0.330
+    24        -2   ubar                23    15     0     0     0     0   104     71.419    124.500      7.414    143.722      0.330
+    25   1000022   ~chi_10             23    19     0     0     0     0     0   -400.390     -7.363     79.966    456.558    204.168
+    26        13   mu-                 23    19     0     0     0     0     0    -63.227    -41.850    166.577    183.022      0.106
+    27       -15   tau+                23    21     0     0     0     0     0    -40.048     59.301   -169.267    183.779      1.777
+    28        16   nu_tau              23    21     0     0     0     0     0     24.591     32.185    -22.530     46.348      0.000
+                                   Charge sum:  0.667           Momentum sum:     -0.000      0.000      6.835   2426.564   2426.554
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+
+ --------  PYTHIA Event Listing  (complete event)  ---------------------------------------------------------------------------------
+ 
+    no        id   name            status     mothers   daughters     colours      p_x        p_y        p_z         e          m 
+     0        90   (system)           -11     0     0     0     0     0     0      0.000      0.000      0.000  10000.000  10000.000
+     1      2212   (p+)               -12     0     0     7     0     0     0      0.000      0.000   5000.000   5000.000      0.938
+     2      2212   (p+)               -12     0     0     8     0     0     0      0.000      0.000  -5000.000   5000.000      0.938
+     3        21   (g)                -21     7     7     5     6   102   103      0.000      0.000   1216.700   1216.700      0.000
+     4         2   (u)                -21     8     8     5     6   101     0      0.000      0.000  -1209.864   1209.864      0.000
+     5   1000002   (~u_L)             -22     3     4     9     9   102     0    471.055   -236.671     10.060   1174.381   1049.364
+     6   1000021   (~g)               -22     3     4    10    10   101   103   -471.055    236.671     -3.225   1252.183   1135.802
+     7        21   (g)                -61     1     0     3     3   102   103      0.667     -0.579   1216.699   1216.699      0.000
+     8         2   (u)                -61     2     0     4     4   101     0     -1.991      0.116  -1209.863   1209.865      0.000
+     9   1000002   (~u_L)             -62     5     5    14    15   102     0    470.421   -236.896      9.476   1174.168   1049.364
+    10   1000021   (~g)               -62     6     6    16    17   101   103   -471.745    236.434     -2.640   1252.396   1135.802
+    11      2203   uu_1                63     1     0     0     0     0   102     -0.523      0.382   3304.355   3304.356      0.771
+    12         1   d                   63     1     0     0     0   103     0     -0.144      0.196    478.944    478.945      0.330
+    13      2101   ud_0                63     2     0     0     0     0   101      1.991     -0.116  -3790.135   3790.136      0.579
+    14   1000024   (~chi_1+)          -22     9     0    18    19     0     0    348.594   -569.062    160.398    789.521    390.213
+    15         1   d                   23     9     0     0     0   102     0    121.826    332.165   -150.923    384.647      0.330
+    16   1000006   (~t_1)             -22    10     0    20    21   101     0   -524.870     24.663     76.434    963.987    804.570
+    17        -6   (tbar)             -22    10     0    22    23     0   103     53.125    211.771    -79.074    288.409    171.050
+    18  -1000015   (~tau_1+)          -22    14     0    24    25     0     0    349.534   -591.714    105.445    730.074    222.690
+    19        16   nu_tau              23    14     0     0     0     0     0     -0.940     22.652     54.953     59.446      0.000
+    20   1000023   (~chi_20)          -22    16     0    26    27     0     0   -527.165    -45.694    258.720    704.365    386.269
+    21         6   (t)                -22    16     0    28    29   101     0      2.295     70.357   -182.286    259.622    170.939
+    22       -24   (W-)               -22    17     0    30    31     0     0     78.318    209.230    -38.499    240.341     79.817
+    23        -5   bbar                23    17     0     0     0     0   103    -25.193      2.541    -40.576     48.068      4.800
+    24   1000022   ~chi_10             23    18     0     0     0     0     0    328.842   -549.228     80.831    676.762    204.168
+    25       -15   (tau+)             -23    18     0    36    38     0     0     20.692    -42.486     24.614     53.312      1.777
+    26   1000013   (~mu_L-)           -22    20     0    32    33     0     0   -463.969    -49.334    246.842    639.960    361.825
+    27       -13   mu+                 23    20     0     0     0     0     0    -63.195      3.640     11.878     64.405      0.106
+    28        24   (W+)               -22    21     0    34    35     0     0    -15.584     91.442   -191.689    230.029     86.973
+    29         5   b                   23    21     0     0     0   101     0     17.879    -21.085      9.403     29.593      4.800
+    30         1   d                   23    22     0     0     0   104     0      6.978     84.757    -45.979     96.678      0.330
+    31        -2   ubar                23    22     0     0     0     0   104     71.340    124.473      7.481    143.663      0.330
+    32   1000022   ~chi_10             23    26     0     0     0     0     0   -400.642     -7.449     80.179    456.818    204.168
+    33        13   mu-                 23    26     0     0     0     0     0    -63.328    -41.885    166.663    183.142      0.106
+    34       -15   (tau+)             -23    28     0    39    41     0     0    -40.149     59.266   -169.181    183.711      1.777
+    35        16   nu_tau              23    28     0     0     0     0     0     24.565     32.177    -22.508     46.318      0.000
+    36       -16   nu_taubar           91    25     0     0     0     0     0      7.475    -14.146      8.831     18.275      0.000
+    37       -11   e+                  91    25     0     0     0     0     0     13.161    -28.295     15.719     34.941      0.001
+    38        12   nu_e                91    25     0     0     0     0     0      0.055     -0.045      0.064      0.096      0.000
+    39       -16   nu_taubar           91    34     0     0     0     0     0     -4.156      6.496    -18.200     19.766      0.000
+    40       -11   e+                  91    34     0     0     0     0     0    -26.192     37.593   -106.898    116.303      0.001
+    41        12   nu_e                91    34     0     0     0     0     0     -9.801     15.177    -44.084     47.642      0.000
+                                   Charge sum:  2.000           Momentum sum:     -0.000      0.000     -0.000  10000.000  10000.000
+
+ --------  End PYTHIA Event Listing  -----------------------------------------------------------------------------------------------
+
+ Pythia::next(): 500 events have been generated 
+
+ Pythia::next(): 1000 events have been generated 
+
+ Pythia::next(): 1500 events have been generated 
+
+ Pythia::next(): 2000 events have been generated 
+
+ Pythia::next(): 2500 events have been generated 
+ PYTHIA Warning in PhaseSpace2to2tauyz::trialKin: maximum for cross section violated  
+
+ Pythia::next(): 3000 events have been generated 
+
+ Pythia::next(): 3500 events have been generated 
+
+ Pythia::next(): 4000 events have been generated 
+
+ Pythia::next(): 4500 events have been generated 
+
+ Pythia::next(): 5000 events have been generated 
+
+ Pythia::next(): 5500 events have been generated 
+
+ Pythia::next(): 6000 events have been generated 
+
+ Pythia::next(): 6500 events have been generated 
+
+ Pythia::next(): 7000 events have been generated 
+
+ Pythia::next(): 7500 events have been generated 
+
+ Pythia::next(): 8000 events have been generated 
+
+ Pythia::next(): 8500 events have been generated 
+
+ Pythia::next(): 9000 events have been generated 
+
+ Pythia::next(): 9500 events have been generated 
+
+ *-------  PYTHIA Event and Cross Section Statistics  -------------------------------------------------------------*
+ |                                                                                                                 |
+ | Subprocess                                    Code |            Number of events       |      sigma +- delta    |
+ |                                                    |       Tried   Selected   Accepted |     (estimated) (mb)   |
+ |                                                    |                                   |                        |
+ |-----------------------------------------------------------------------------------------------------------------|
+ |                                                    |                                   |                        |
+ | g g -> gluino gluino                          1201 |        4609        146        146 |   4.969e-12  1.965e-13 |
+ | q qbar -> gluino gluino                       1202 |         609         16         16 |   7.624e-13  7.531e-14 |
+ | q g -> ~d_L gluino + c.c.                     1203 |        7456        288        288 |   1.006e-11  2.812e-13 |
+ | q g -> ~u_L gluino + c.c.                     1204 |       17414        869        869 |   2.997e-11  4.841e-13 |
+ | q g -> ~s_L gluino + c.c.                     1205 |         799         22         22 |   5.184e-13  5.375e-14 |
+ | q g -> ~c_L gluino + c.c.                     1206 |         334          4          4 |   3.039e-13  4.454e-14 |
+ | q g -> ~b_1 gluino + c.c.                     1207 |         261          7          7 |   2.923e-13  4.883e-14 |
+ | q g -> ~d_R gluino + c.c.                     1209 |        8844        333        333 |   1.162e-11  2.958e-13 |
+ | q g -> ~u_R gluino + c.c.                     1210 |       19510       1001       1001 |   3.357e-11  5.202e-13 |
+ | q g -> ~s_R gluino + c.c.                     1211 |         798         26         26 |   8.554e-13  8.044e-14 |
+ | q g -> ~c_R gluino + c.c.                     1212 |         414         11         11 |   2.902e-13  4.277e-14 |
+ | q g -> ~b_2 gluino + c.c.                     1213 |         247         12         12 |   2.819e-13  4.758e-14 |
+ | g g -> ~d_L ~d_Lbar                           1215 |         253          9          9 |   2.287e-13  3.623e-14 |
+ | g g -> ~u_L ~u_Lbar                           1216 |         298          6          6 |   2.935e-13  4.388e-14 |
+ | g g -> ~s_L ~s_Lbar                           1217 |         292         13         13 |   3.444e-13  6.179e-14 |
+ | g g -> ~c_L ~c_Lbar                           1218 |         285         13         13 |   3.484e-13  4.597e-14 |
+ | g g -> ~b_1 ~b_1bar                           1219 |         558         23         23 |   6.262e-13  6.812e-14 |
+ | g g -> ~t_1 ~t_1bar                           1220 |        2388         71         71 |   2.866e-12  1.467e-13 |
+ | g g -> ~d_R ~d_Rbar                           1221 |         349         14         14 |   4.415e-13  5.858e-14 |
+ | g g -> ~u_R ~u_Rbar                           1222 |         325          8          8 |   3.887e-13  5.660e-14 |
+ | g g -> ~s_R ~s_Rbar                           1223 |         347         17         17 |   4.462e-13  5.945e-14 |
+ | g g -> ~c_R ~c_Rbar                           1224 |         349          9          9 |   3.228e-13  5.012e-14 |
+ | g g -> ~b_2 ~b_2bar                           1225 |         374         16         16 |   3.844e-13  5.919e-14 |
+ | g g -> ~t_2 ~t_2bar                           1226 |         353         16         16 |   5.050e-13  6.985e-14 |
+ | q qbar' -> ~d_L ~d_Lbar                       1231 |         380         16         16 |   4.546e-13  6.291e-14 |
+ | q qbar' -> ~d_L ~s_Lbar                       1232 |          88          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~s_L ~d_Lbar                       1233 |          10          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~d_L ~b_1bar                       1234 |          27          1          1 |   4.646e-14  4.646e-14 |
+ | q qbar' -> ~b_1 ~d_Lbar                       1235 |           5          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~d_L ~d_Rbar                       1236 |         819         22         22 |   9.539e-13  8.364e-14 |
+ | q qbar' -> ~d_R ~d_Lbar                       1237 |         770         24         24 |   9.192e-13  8.986e-14 |
+ | q qbar' -> ~d_L ~s_Rbar                       1238 |         402         11         11 |   4.806e-13  6.021e-14 |
+ | q qbar' -> ~s_R ~d_Lbar                       1239 |          62          2          2 |   7.889e-14  2.592e-14 |
+ | q qbar' -> ~d_L ~b_2bar                       1240 |         103          4          4 |   1.313e-13  3.046e-14 |
+ | q qbar' -> ~b_2 ~d_Lbar                       1241 |          16          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~u_L ~u_Lbar                       1242 |         548         14         14 |   5.265e-13  5.768e-14 |
+ | q qbar' -> ~u_L ~c_Lbar                       1243 |          67          1          1 |   8.719e-14  8.719e-14 |
+ | q qbar' -> ~c_L ~u_Lbar                       1244 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~u_L ~u_Rbar                       1247 |        1326         58         58 |   2.154e-12  1.300e-13 |
+ | q qbar' -> ~u_R ~u_Lbar                       1248 |        1442         58         58 |   1.882e-12  1.122e-13 |
+ | q qbar' -> ~u_L ~c_Rbar                       1249 |         369         20         20 |   6.875e-13  7.774e-14 |
+ | q qbar' -> ~c_R ~u_Lbar                       1250 |          15          1          1 |   1.405e-14  1.405e-14 |
+ | q qbar' -> ~u_L ~d_Lbar + c.c.                1253 |         459         13         13 |   5.844e-13  6.585e-14 |
+ | q qbar' -> ~u_L ~s_Lbar + c.c.                1254 |         231          5          5 |   2.141e-13  3.349e-14 |
+ | q qbar' -> ~u_L ~b_1bar + c.c.                1255 |          83          2          2 |   8.721e-14  1.971e-14 |
+ | q qbar' -> ~u_L ~d_Rbar + c.c.                1256 |        2545        103        103 |   3.867e-12  1.748e-13 |
+ | q qbar' -> ~u_L ~s_Rbar + c.c.                1257 |         934         42         42 |   1.450e-12  1.031e-13 |
+ | q qbar' -> ~u_L ~b_2bar + c.c.                1258 |         253         13         13 |   4.547e-13  5.885e-14 |
+ | q qbar' -> ~s_L ~s_Lbar                       1259 |         226          5          5 |   1.860e-13  3.095e-14 |
+ | q qbar' -> ~s_L ~b_1bar                       1260 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~b_1 ~s_Lbar                       1261 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~s_L ~d_Rbar                       1262 |          54          1          1 |   3.256e-14  3.256e-14 |
+ | q qbar' -> ~d_R ~s_Lbar                       1263 |         359         14         14 |   4.502e-13  6.280e-14 |
+ | q qbar' -> ~s_L ~s_Rbar                       1264 |          23          1          1 |   7.921e-15  7.921e-15 |
+ | q qbar' -> ~s_R ~s_Lbar                       1265 |          27          1          1 |   2.327e-14  2.327e-14 |
+ | q qbar' -> ~s_L ~b_2bar                       1266 |           6          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~b_2 ~s_Lbar                       1267 |          10          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~c_L ~c_Lbar                       1268 |         255         12         12 |   2.810e-13  4.286e-14 |
+ | q qbar' -> ~c_L ~u_Rbar                       1271 |          16          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~u_R ~c_Lbar                       1272 |         390         16         16 |   6.255e-13  7.246e-14 |
+ | q qbar' -> ~c_L ~c_Rbar                       1273 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~c_R ~c_Lbar                       1274 |           3          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~c_L ~d_Lbar + c.c.                1277 |          43          1          1 |   3.373e-14  3.373e-14 |
+ | q qbar' -> ~c_L ~s_Lbar + c.c.                1278 |          15          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~c_L ~b_1bar + c.c.                1279 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~c_L ~d_Rbar + c.c.                1280 |         157          6          6 |   2.396e-13  5.234e-14 |
+ | q qbar' -> ~c_L ~s_Rbar + c.c.                1281 |          20          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~c_L ~b_2bar + c.c.                1282 |           3          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~b_1 ~b_1bar                       1283 |         387         20         20 |   6.174e-13  7.370e-14 |
+ | q qbar' -> ~b_1 ~d_Rbar                       1284 |          22          1          1 |   5.199e-15  5.199e-15 |
+ | q qbar' -> ~d_R ~b_1bar                       1285 |         121         11         11 |   2.711e-13  5.204e-14 |
+ | q qbar' -> ~b_1 ~s_Rbar                       1286 |           6          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~s_R ~b_1bar                       1287 |           5          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~b_1 ~b_2bar                       1288 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~b_2 ~b_1bar                       1289 |           4          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~t_1 ~t_1bar                       1290 |        1478         59         59 |   1.931e-12  1.184e-13 |
+ | q qbar' -> ~t_1 ~t_2bar                       1295 |           2          1          1 |   9.284e-15  9.284e-15 |
+ | q qbar' -> ~t_2 ~t_1bar                       1296 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~t_1 ~d_Lbar + c.c.                1297 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~t_1 ~s_Lbar + c.c.                1298 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~t_1 ~b_1bar + c.c.                1299 |          10          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~t_1 ~b_2bar + c.c.                1302 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~d_R ~d_Rbar                       1303 |         537         13         13 |   6.069e-13  7.362e-14 |
+ | q qbar' -> ~d_R ~s_Rbar                       1304 |         106          1          1 |   7.302e-14  7.302e-14 |
+ | q qbar' -> ~s_R ~d_Rbar                       1305 |          14          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~d_R ~b_2bar                       1306 |          29          1          1 |   3.039e-14  3.039e-14 |
+ | q qbar' -> ~b_2 ~d_Rbar                       1307 |           4          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~u_R ~u_Rbar                       1308 |         688         21         21 |   9.216e-13  8.492e-14 |
+ | q qbar' -> ~u_R ~c_Rbar                       1309 |         115          5          5 |   1.645e-13  4.009e-14 |
+ | q qbar' -> ~c_R ~u_Rbar                       1310 |           3          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~u_R ~d_Lbar + c.c.                1313 |        2425        116        116 |   3.560e-12  1.627e-13 |
+ | q qbar' -> ~u_R ~s_Lbar + c.c.                1314 |         885         51         51 |   1.550e-12  1.096e-13 |
+ | q qbar' -> ~u_R ~b_1bar + c.c.                1315 |         296         18         18 |   5.550e-13  7.093e-14 |
+ | q qbar' -> ~u_R ~d_Rbar + c.c.                1316 |         782         24         24 |   9.364e-13  9.040e-14 |
+ | q qbar' -> ~u_R ~s_Rbar + c.c.                1317 |         268          8          8 |   3.438e-13  5.450e-14 |
+ | q qbar' -> ~u_R ~b_2bar + c.c.                1318 |          76          5          5 |   1.365e-13  2.790e-14 |
+ | q qbar' -> ~s_R ~s_Rbar                       1319 |         317         15         15 |   4.194e-13  5.413e-14 |
+ | q qbar' -> ~s_R ~b_2bar                       1320 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~b_2 ~s_Rbar                       1321 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~c_R ~c_Rbar                       1322 |         294          6          6 |   2.711e-13  4.018e-14 |
+ | q qbar' -> ~c_R ~d_Lbar + c.c.                1325 |         189         11         11 |   3.521e-13  5.395e-14 |
+ | q qbar' -> ~c_R ~s_Lbar + c.c.                1326 |          18          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~c_R ~b_1bar + c.c.                1327 |          10          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~c_R ~d_Rbar + c.c.                1328 |          50          2          2 |   3.035e-14  1.416e-14 |
+ | q qbar' -> ~c_R ~s_Rbar + c.c.                1329 |           5          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~c_R ~b_2bar + c.c.                1330 |           3          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~b_2 ~b_2bar                       1331 |         303          9          9 |   3.562e-13  5.658e-14 |
+ | q qbar' -> ~t_2 ~t_2bar                       1332 |         306          8          8 |   3.393e-13  4.973e-14 |
+ | q qbar' -> ~t_2 ~d_Lbar + c.c.                1333 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~t_2 ~s_Lbar + c.c.                1334 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~t_2 ~b_1bar + c.c.                1335 |          24          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~t_2 ~b_2bar + c.c.                1338 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~d_L ~d_L + c.c.                      1351 |        2196        110        110 |   3.144e-12  1.530e-13 |
+ | q q' -> ~d_L ~s_L + c.c.                      1352 |         355         10         10 |   4.194e-13  5.182e-14 |
+ | q q' -> ~d_L ~b_1 + c.c.                      1353 |         147          6          6 |   1.481e-13  3.127e-14 |
+ | q q' -> ~d_L ~d_R + c.c.                      1354 |        1211         49         49 |   1.849e-12  1.333e-13 |
+ | q q' -> ~d_L ~s_R + c.c.                      1355 |          69          3          3 |   7.402e-14  2.845e-14 |
+ | q q' -> ~d_L ~b_2 + c.c.                      1356 |          21          2          2 |   6.687e-14  2.463e-14 |
+ | q q' -> ~u_L ~u_L + c.c.                      1357 |       12091        605        605 |   2.109e-11  3.921e-13 |
+ | q q' -> ~u_L ~c_L + c.c.                      1358 |         345         15         15 |   5.430e-13  6.730e-14 |
+ | q q' -> ~u_L ~u_R + c.c.                      1360 |        8962        376        376 |   1.401e-11  3.477e-13 |
+ | q q' -> ~u_L ~c_R + c.c.                      1361 |          90          6          6 |   1.745e-13  3.941e-14 |
+ | q q' -> ~u_L ~d_L + c.c.                      1363 |       18200        795        795 |   2.607e-11  4.329e-13 |
+ | q q' -> ~u_L ~s_L + c.c.                      1364 |         796         33         33 |   1.414e-12  1.093e-13 |
+ | q q' -> ~u_L ~b_1 + c.c.                      1365 |          98          3          3 |   1.750e-13  3.552e-14 |
+ | q q' -> ~u_L ~d_R + c.c.                      1366 |        5388        146        146 |   4.971e-12  1.863e-13 |
+ | q q' -> ~u_L ~s_R + c.c.                      1367 |         237         10         10 |   2.099e-13  3.542e-14 |
+ | q q' -> ~u_L ~b_2 + c.c.                      1368 |         216         10         10 |   3.709e-13  5.441e-14 |
+ | q q' -> ~s_L ~s_L + c.c.                      1369 |          17          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~s_L ~b_1 + c.c.                      1370 |          11          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~s_L ~d_R + c.c.                      1371 |          69          3          3 |   7.309e-14  2.055e-14 |
+ | q q' -> ~s_L ~s_R + c.c.                      1372 |           9          1          1 |   9.450e-15  9.450e-15 |
+ | q q' -> ~s_L ~b_2 + c.c.                      1373 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~c_L ~c_L + c.c.                      1374 |           3          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~c_L ~u_R + c.c.                      1376 |          85          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~c_L ~c_R + c.c.                      1377 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~c_L ~d_L + c.c.                      1379 |         238         17         17 |   3.443e-13  4.965e-14 |
+ | q q' -> ~c_L ~s_L + c.c.                      1380 |          29          1          1 |   2.416e-14  2.416e-14 |
+ | q q' -> ~c_L ~b_1 + c.c.                      1381 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~c_L ~d_R + c.c.                      1382 |          39          1          1 |   3.587e-14  3.587e-14 |
+ | q q' -> ~c_L ~s_R + c.c.                      1383 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~c_L ~b_2 + c.c.                      1384 |           8          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~b_1 ~b_1 + c.c.                      1385 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~b_1 ~d_R + c.c.                      1386 |          37          3          3 |   5.571e-14  2.087e-14 |
+ | q q' -> ~b_1 ~s_R + c.c.                      1387 |           4          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~b_1 ~b_2 + c.c.                      1388 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~t_1 ~d_L + c.c.                      1393 |          27          1          1 |   9.072e-14  9.072e-14 |
+ | q q' -> ~t_1 ~s_L + c.c.                      1394 |           3          1          1 |   5.424e-15  5.424e-15 |
+ | q q' -> ~t_1 ~b_1 + c.c.                      1395 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~t_1 ~b_2 + c.c.                      1398 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~d_R ~d_R + c.c.                      1399 |        2066        113        113 |   3.220e-12  1.578e-13 |
+ | q q' -> ~d_R ~s_R + c.c.                      1400 |         470         11         11 |   5.156e-13  6.413e-14 |
+ | q q' -> ~d_R ~b_2 + c.c.                      1401 |         135          7          7 |   1.614e-13  2.944e-14 |
+ | q q' -> ~u_R ~u_R + c.c.                      1402 |       11252        629        629 |   2.200e-11  4.161e-13 |
+ | q q' -> ~u_R ~c_R + c.c.                      1403 |         530         17         17 |   6.795e-13  6.640e-14 |
+ | q q' -> ~u_R ~d_L + c.c.                      1405 |        5287        179        179 |   5.104e-12  1.906e-13 |
+ | q q' -> ~u_R ~s_L + c.c.                      1406 |         221          6          6 |   2.672e-13  4.827e-14 |
+ | q q' -> ~u_R ~b_1 + c.c.                      1407 |         278         13         13 |   4.467e-13  5.807e-14 |
+ | q q' -> ~u_R ~d_R + c.c.                      1408 |       15296        668        668 |   2.298e-11  4.207e-13 |
+ | q q' -> ~u_R ~s_R + c.c.                      1409 |        1037         46         46 |   1.774e-12  1.203e-13 |
+ | q q' -> ~u_R ~b_2 + c.c.                      1410 |         102          3          3 |   1.081e-13  2.649e-14 |
+ | q q' -> ~s_R ~s_R + c.c.                      1411 |          23          1          1 |   2.430e-14  2.430e-14 |
+ | q q' -> ~s_R ~b_2 + c.c.                      1412 |          12          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~c_R ~c_R + c.c.                      1413 |           5          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~c_R ~d_L + c.c.                      1415 |          39          1          1 |   2.237e-14  2.237e-14 |
+ | q q' -> ~c_R ~s_L + c.c.                      1416 |           6          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~c_R ~b_1 + c.c.                      1417 |           7          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~c_R ~d_R + c.c.                      1418 |         253          7          7 |   2.526e-13  4.583e-14 |
+ | q q' -> ~c_R ~s_R + c.c.                      1419 |          27          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~c_R ~b_2 + c.c.                      1420 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~b_2 ~b_2 + c.c.                      1421 |           1          1          1 |   3.821e-15  3.821e-15 |
+ | q q' -> ~t_2 ~d_L + c.c.                      1423 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~t_2 ~s_L + c.c.                      1424 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~t_2 ~b_1 + c.c.                      1425 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q q' -> ~t_2 ~b_2 + c.c.                      1428 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_10 ~d_L + c.c. (q=d,s,b)          1431 |          52          2          2 |   1.103e-13  2.895e-14 |
+ | q g -> ~chi_10 ~u_L + c.c. (q=u,c)            1432 |          79         11         11 |   2.911e-13  5.522e-14 |
+ | q g -> ~chi_10 ~s_L + c.c. (q=d,s,b)          1433 |          10          1          1 |   9.974e-15  9.974e-15 |
+ | q g -> ~chi_10 ~c_L + c.c. (q=u,c)            1434 |           4          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_10 ~b_1 + c.c. (q=d,s,b)          1435 |           4          1          1 |   5.970e-15  5.970e-15 |
+ | q g -> ~chi_10 ~d_R + c.c. (q=d,s,b)          1437 |         225         15         15 |   6.357e-13  8.896e-14 |
+ | q g -> ~chi_10 ~u_R + c.c. (q=u,c)            1438 |        1999        164        164 |   5.690e-12  2.322e-13 |
+ | q g -> ~chi_10 ~s_R + c.c. (q=d,s,b)          1439 |          42          2          2 |   7.276e-14  2.521e-14 |
+ | q g -> ~chi_10 ~c_R + c.c. (q=u,c)            1440 |          90          4          4 |   1.487e-13  3.557e-14 |
+ | q g -> ~chi_10 ~b_2 + c.c. (q=d,s,b)          1441 |          11          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_20 ~d_L + c.c. (q=d,s,b)          1443 |        1076         56         56 |   1.978e-12  1.334e-13 |
+ | q g -> ~chi_20 ~u_L + c.c. (q=u,c)            1444 |        2402        125        125 |   4.519e-12  1.937e-13 |
+ | q g -> ~chi_20 ~s_L + c.c. (q=d,s,b)          1445 |         178          8          8 |   2.260e-13  4.269e-14 |
+ | q g -> ~chi_20 ~c_L + c.c. (q=u,c)            1446 |          94          5          5 |   1.543e-13  3.460e-14 |
+ | q g -> ~chi_20 ~b_1 + c.c. (q=d,s,b)          1447 |          72          3          3 |   8.715e-14  2.890e-14 |
+ | q g -> ~chi_20 ~d_R + c.c. (q=d,s,b)          1449 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_20 ~u_R + c.c. (q=u,c)            1450 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_20 ~s_R + c.c. (q=d,s,b)          1451 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_20 ~c_R + c.c. (q=u,c)            1452 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_20 ~b_2 + c.c. (q=d,s,b)          1453 |           4          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_30 ~d_L + c.c. (q=d,s,b)          1455 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_30 ~u_L + c.c. (q=u,c)            1456 |           6          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_30 ~s_L + c.c. (q=d,s,b)          1457 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_30 ~c_L + c.c. (q=u,c)            1458 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_30 ~b_1 + c.c. (q=d,s,b)          1459 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_30 ~d_R + c.c. (q=d,s,b)          1461 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_30 ~u_R + c.c. (q=u,c)            1462 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_30 ~s_R + c.c. (q=d,s,b)          1463 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_30 ~c_R + c.c. (q=u,c)            1464 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_30 ~b_2 + c.c. (q=d,s,b)          1465 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_40 ~d_L + c.c. (q=d,s,b)          1467 |          42          1          1 |   6.690e-14  6.690e-14 |
+ | q g -> ~chi_40 ~u_L + c.c. (q=u,c)            1468 |          44          3          3 |   1.039e-13  3.328e-14 |
+ | q g -> ~chi_40 ~s_L + c.c. (q=d,s,b)          1469 |           8          1          1 |   5.242e-15  5.242e-15 |
+ | q g -> ~chi_40 ~c_L + c.c. (q=u,c)            1470 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_40 ~b_1 + c.c. (q=d,s,b)          1471 |           4          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_40 ~d_R + c.c. (q=d,s,b)          1473 |           1          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_40 ~u_R + c.c. (q=u,c)            1474 |           3          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_40 ~s_R + c.c. (q=d,s,b)          1475 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_40 ~c_R + c.c. (q=u,c)            1476 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_40 ~b_2 + c.c. (q=d,s,b)          1477 |           3          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_1+ ~d_L + c.c. (q=u,c)            1491 |       11626        693        693 |   2.323e-11  4.298e-13 |
+ | q g -> ~chi_1- ~u_L + c.c. (q=d,s,b)          1492 |        5413        278        278 |   9.475e-12  2.841e-13 |
+ | q g -> ~chi_1+ ~s_L + c.c. (q=u,c)            1493 |         981         53         53 |   1.684e-12  1.089e-13 |
+ | q g -> ~chi_1- ~c_L + c.c. (q=d,s,b)          1494 |        1186         50         50 |   1.804e-12  1.180e-13 |
+ | q g -> ~chi_1+ ~b_1 + c.c. (q=u,c)            1495 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_1- ~t_1 + c.c. (q=d,s,b)          1496 |        1178         45         45 |   1.783e-12  1.231e-13 |
+ | q g -> ~chi_1+ ~b_2 + c.c. (q=u,c)            1501 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_1- ~t_2 + c.c. (q=d,s,b)          1502 |          16          1          1 |   2.284e-14  2.284e-14 |
+ | q g -> ~chi_2+ ~d_L + c.c. (q=u,c)            1503 |         393         20         20 |   7.406e-13  8.199e-14 |
+ | q g -> ~chi_2- ~u_L + c.c. (q=d,s,b)          1504 |         210         11         11 |   3.911e-13  5.821e-14 |
+ | q g -> ~chi_2+ ~s_L + c.c. (q=u,c)            1505 |          39          1          1 |   4.052e-14  4.052e-14 |
+ | q g -> ~chi_2- ~c_L + c.c. (q=d,s,b)          1506 |          31          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_2+ ~b_1 + c.c. (q=u,c)            1507 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_2- ~t_1 + c.c. (q=d,s,b)          1508 |         680         27         27 |   8.315e-13  8.476e-14 |
+ | q g -> ~chi_2+ ~b_2 + c.c. (q=u,c)            1513 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q g -> ~chi_2- ~t_2 + c.c. (q=d,s,b)          1514 |          18          2          2 |   4.876e-14  2.374e-14 |
+ | q qbar' -> ~chi_10 ~chi_10                    1551 |         154         15         15 |   4.265e-13  6.527e-14 |
+ | q qbar' -> ~chi_10 ~chi_20                    1552 |          30          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~chi_20 ~chi_20                    1553 |         274         12         12 |   4.081e-13  5.522e-14 |
+ | q qbar' -> ~chi_10 ~chi_30                    1554 |           7          1          1 |   1.148e-14  1.148e-14 |
+ | q qbar' -> ~chi_20 ~chi_30                    1555 |          68          3          3 |   1.141e-13  2.565e-14 |
+ | q qbar' -> ~chi_30 ~chi_30                    1556 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~chi_10 ~chi_40                    1557 |           4          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~chi_20 ~chi_40                    1558 |          19          1          1 |   1.825e-14  1.825e-14 |
+ | q qbar' -> ~chi_30 ~chi_40                    1559 |         271         14         14 |   4.654e-13  5.979e-14 |
+ | q qbar' -> ~chi_40 ~chi_40                    1560 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~chi_1+ ~chi_10                    1571 |          10          1          1 |   3.231e-14  3.231e-14 |
+ | q qbar' -> ~chi_1- ~chi_10                    1572 |           9          1          1 |   3.426e-14  3.426e-14 |
+ | q qbar' -> ~chi_2+ ~chi_10                    1573 |           2          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~chi_2- ~chi_10                    1574 |           3          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~chi_1+ ~chi_20                    1575 |        1466        112        112 |   3.689e-12  1.749e-13 |
+ | q qbar' -> ~chi_1- ~chi_20                    1576 |        1156         71         71 |   2.432e-12  1.422e-13 |
+ | q qbar' -> ~chi_2+ ~chi_20                    1577 |           2          1          1 |   1.902e-15  1.902e-15 |
+ | q qbar' -> ~chi_2- ~chi_20                    1578 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~chi_1+ ~chi_30                    1579 |          13          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~chi_1- ~chi_30                    1580 |          12          1          1 |   1.881e-14  1.881e-14 |
+ | q qbar' -> ~chi_2+ ~chi_30                    1581 |          66          6          6 |   1.616e-13  4.014e-14 |
+ | q qbar' -> ~chi_2- ~chi_30                    1582 |          33          2          2 |   5.931e-14  2.376e-14 |
+ | q qbar' -> ~chi_1+ ~chi_40                    1583 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~chi_1- ~chi_40                    1584 |           0          0          0 |   0.000e+00  0.000e+00 |
+ | q qbar' -> ~chi_2+ ~chi_40                    1585 |          76          9          9 |   2.233e-13  4.019e-14 |
+ | q qbar' -> ~chi_2- ~chi_40                    1586 |          35          3          3 |   8.002e-14  3.248e-14 |
+ | q qbar' -> ~chi_1+ ~chi_1-                    1591 |        5487        409        409 |   1.381e-11  3.394e-13 |
+ | q qbar' -> ~chi_1+ ~chi_2-                    1592 |          33          2          2 |   5.608e-14  1.694e-14 |
+ | q qbar' -> ~chi_2+ ~chi_1-                    1593 |          28          4          4 |   4.867e-14  2.096e-14 |
+ | q qbar' -> ~chi_2+ ~chi_2-                    1594 |         310         17         17 |   6.183e-13  6.751e-14 |
+ |                                                    |                                   |                        |
+ | sum                                                |      215685      10000      10000 |   3.409e-10  1.648e-12 |
+ |                                                                                                                 |
+ *-------  End PYTHIA Event and Cross Section Statistics ----------------------------------------------------------*
+
+ *-------  PYTHIA Error and Warning Messages Statistics  ----------------------------------------------------------* 
+ |                                                                                                                 | 
+ |  times   message                                                                                                | 
+ |                                                                                                                 | 
+ |      3   Warning in ParticleDataEntry::initBWmass: switching off width                                          | 
+ |      1   Warning in PhaseSpace2to2tauyz::trialKin: maximum for cross section violated                           | 
+ |     48   Warning in PhaseSpace2to2tauyz::trialKin: negative cross section set 0                                 | 
+ |   9551   Warning in TauDecays::decay: unknown tau production, assuming unpolarized and uncorrelated             | 
+ |                                                                                                                 | 
+ *-------  End PYTHIA Error and Warning Messages Statistics  ------------------------------------------------------* 
+
+
+  2012-01-23 11:25       deviation from energy-momentum conservation
+
+        1.00*10^ 4  X                                                                                                   
+        0.96*10^ 4  X                                                                                                   
+        0.92*10^ 4  X                                                                                                   
+        0.88*10^ 4  X                                                                                                   
+        0.84*10^ 4  X                                                                                                   
+        0.80*10^ 4  X                                                                                                   
+        0.76*10^ 4  X                                                                                                   
+        0.72*10^ 4  X                                                                                                   
+        0.68*10^ 4  X                                                                                                   
+        0.64*10^ 4  X                                                                                                   
+        0.60*10^ 4  X                                                                                                   
+        0.56*10^ 4  X                                                                                                   
+        0.52*10^ 4  X                                                                                                   
+        0.48*10^ 4  X                                                                                                   
+        0.44*10^ 4  X                                                                                                   
+        0.40*10^ 4  X                                                                                                   
+        0.36*10^ 4  X                                                                                                   
+        0.32*10^ 4  X                                                                                                   
+        0.28*10^ 4  X                                                                                                   
+        0.24*10^ 4  X                                                                                                   
+        0.20*10^ 4  X                                                                                                   
+        0.16*10^ 4  X                                                                                                   
+        0.12*10^ 4  X                                                                                                   
+        0.08*10^ 4  X                                                                                                   
+        0.04*10^ 4  X                                                                                                   
+
+          Contents                                                                                                      
+            *10^ 4  1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            *10^ 3  0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            *10^ 2  0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            *10^ 1  0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+          Low edge                                                                                                      
+            *10^-3  0000000000111111111122222222223333333333444444444455555555556666666666777777777788888888889999999999
+            *10^-4  0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+            *10^-5  0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+   Entries  =       10000    Mean =  5.0000e-05    Underflow =  0.0000e+00    Low edge  =  0.0000e+00
+   All chan =  1.0000e+04    Rms  =  0.0000e+00    Overflow  =  0.0000e+00    High edge =  1.0000e-02
+
+
+  2012-01-23 11:25       final particle multiplicity
+
+        6.00*10^ 3   6                                                                                                  
+        5.80*10^ 3   X                                                                                                  
+        5.60*10^ 3   X                                                                                                  
+        5.40*10^ 3   X                                                                                                  
+        5.20*10^ 3   X                                                                                                  
+        5.00*10^ 3   X                                                                                                  
+        4.80*10^ 3   X                                                                                                  
+        4.60*10^ 3   X                                                                                                  
+        4.40*10^ 3   X                                                                                                  
+        4.20*10^ 3   X                                                                                                  
+        4.00*10^ 3   X                                                                                                  
+        3.80*10^ 3   X                                                                                                  
+        3.60*10^ 3   X                                                                                                  
+        3.40*10^ 3   X                                                                                                  
+        3.20*10^ 3   X                                                                                                  
+        3.00*10^ 3   X                                                                                                  
+        2.80*10^ 3   X                                                                                                  
+        2.60*10^ 3   X4                                                                                                 
+        2.40*10^ 3   XX                                                                                                 
+        2.20*10^ 3   XX                                                                                                 
+        2.00*10^ 3   XX                                                                                                 
+        1.80*10^ 3   XX                                                                                                 
+        1.60*10^ 3   XX                                                                                                 
+        1.40*10^ 3  XXX                                                                                                 
+        1.20*10^ 3  XXX                                                                                                 
+        1.00*10^ 3  XXX                                                                                                 
+        0.80*10^ 3  XXX                                                                                                 
+        0.60*10^ 3  XXX                                                                                                 
+        0.40*10^ 3  XXX                                                                                                 
+        0.20*10^ 3  XXX9                                                                                                
+
+          Contents                                                                                                      
+            *10^ 3  1520000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            *10^ 2  3941000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            *10^ 1  9288000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            *10^ 0  8293800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+          Low edge  -                                                                                                   
+            *10^ 2  0000000000000111111111111222222222222233333333333344444444444445555555555556666666666666777777777777
+            *10^ 1  0012344567889012234566789001234456788901223456678900123445678890122345667890012344567889012234566789
+            *10^ 0  1864208642086420864208642086420864208642086420864208642086420864208642086420864208642086420864208642
+
+   Entries  =       10000    Mean =  1.2685e+01    Underflow =  0.0000e+00    Low edge  = -5.0000e-01
+   All chan =  1.0000e+04    Rms  =  5.3496e+00    Overflow  =  0.0000e+00    High edge =  7.9950e+02
+
+
+  2012-01-23 11:25       dn/dy for particles
+
+        8.10*10^ 3                                                   75                                                 
+        7.80*10^ 3                                                  XXX                                                 
+        7.50*10^ 3                                                  XXX6                                                
+        7.20*10^ 3                                                  XXXX                                                
+        6.90*10^ 3                                                 8XXXX7                                               
+        6.60*10^ 3                                                 XXXXXX                                               
+        6.30*10^ 3                                                 XXXXXX                                               
+        6.00*10^ 3                                                XXXXXXX8                                              
+        5.70*10^ 3                                                XXXXXXXX                                              
+        5.40*10^ 3                                                XXXXXXXX                                              
+        5.10*10^ 3                                               3XXXXXXXX7                                             
+        4.80*10^ 3                                               XXXXXXXXXX                                             
+        4.50*10^ 3                                              1XXXXXXXXXX                                             
+        4.20*10^ 3                                              XXXXXXXXXXX5                                            
+        3.90*10^ 3                                              XXXXXXXXXXXX                                            
+        3.60*10^ 3                                              XXXXXXXXXXXX3                                           
+        3.30*10^ 3                                             8XXXXXXXXXXXXX                                           
+        3.00*10^ 3                                             XXXXXXXXXXXXXX                                           
+        2.70*10^ 3                                             XXXXXXXXXXXXXX                                           
+        2.40*10^ 3                                            9XXXXXXXXXXXXXX5                                          
+        2.10*10^ 3         2                                 2XXXXXXXXXXXXXXXX                                  41      
+        1.80*10^ 3        9X5                                XXXXXXXXXXXXXXXXX7                                4XX      
+        1.50*10^ 3       9XXX3                              1XXXXXXXXXXXXXXXXXX                               1XXXX     
+        1.20*10^ 3      6XXXXX                              XXXXXXXXXXXXXXXXXXX9                              XXXXX5    
+        0.90*10^ 3      XXXXXXX                           18XXXXXXXXXXXXXXXXXXXXX1                          2XXXXXXX    
+        0.60*10^ 3     7XXXXXXXX63                       4XXXXXXXXXXXXXXXXXXXXXXXX4                      136XXXXXXXX7   
+        0.30*10^ 3   16XXXXXXXXXXXXX897665544533332334579XXXXXXXXXXXXXXXXXXXXXXXXXXX76443333343445577899XXXXXXXXXXXXX61 
+
+          Contents                                                                                                      
+            *10^ 3  0000111111000000000000000000000000000000112344667877655432110000000000000000000000000000001111110000
+            *10^ 2  0015047862964332222111111100000001122468283228087093890042718642211110000101111122222334692698405100
+            *10^ 1  1270875468119919550875432478787981507324366349148059231506169308082008889091255903769498403111960830
+            *10^ 0  1975249745221910173372513268872765831072151236366264136921041375296918346694798591009200679426344528
+
+          Low edge  --------------------------------------------------                                                  
+            *10^ 1  1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+            *10^ 0  0999998888877777666665555544444333332222211111000000000111112222233333444445555566666777778888899999
+            *10^-1  0864208642086420864208642086420864208642086420864202468024680246802468024680246802468024680246802468
+
+   Entries  =      128191    Mean =  8.3753e-03    Underflow =  4.0000e+00    Low edge  = -1.0000e+01
+   All chan =  1.2819e+05    Rms  =  4.0200e+00    Overflow  =  1.0000e+00    High edge =  1.0000e+01

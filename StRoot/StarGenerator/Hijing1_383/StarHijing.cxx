@@ -29,7 +29,7 @@ TGenericTable *regtable( const Char_t *type, const Char_t *name, void *address )
 // Remap hijing's random number generator to StarRandom
 extern "C" {
   float rlustar_( Int_t *idummy ){    return StarRandom::Instance().flat();  };
-  float rndmstar_( Int_t *idummy ){    return StarRandom::Instance().flat();  };
+  float  rndmstar_( Int_t *idummy ){    return StarRandom::Instance().flat();  };
 };
 Double_t rndm(){ return StarRandom::Instance().flat(); }
 // ----------------------------------------------------------------------------
@@ -194,26 +194,6 @@ Int_t StarHijing::Init()
   mNumberOfBeamNeutrons[1]=A[mYell]-mNumberOfBeamProtons[1];
 
   //
-  // Grab the computed maximum impact parameter for the collision and report it.  Test
-  // against user's impact parameter and report if it's too large, and truncate.
-  //
-  Float_t bmax = hiparnt().hipr1(34)+hiparnt().hipr1(35);
-  if ( mImpactMax < 0 )
-    {
-      mImpactMax = bmax;
-    }
-  cout << Form("HIJING impact parametr allowed range is 0 .. %f fm", bmax) << endl;
-  if ( mImpactMax > bmax )
-    {
-      cout << Form("     >>> user's value too large, truncating to %f fm <<< ", bmax) << endl;
-      mImpactMax = bmax;
-    }
-  cout <<      "------------------------------------------------------------------------------" << endl;
-  cout <<      "------------------------------------------------------------------------------" << endl;
-  cout << Form("HIJING events will be generated with impact parameter %f .. %f fm", mImpactMin, mImpactMax ) << endl;
-  cout <<      "------------------------------------------------------------------------------" << endl;
-  cout <<      "------------------------------------------------------------------------------" << endl;
-  //
   // PDG id for heavy ions
   //
   //if ( mBlue != "p" && mBlue != "n" )  mBlueId = 10 * A[mBlue] + 10000 * Z[mBlue] + 1000000000;
@@ -238,7 +218,14 @@ extern "C" {
 Int_t StarHijing::Generate()
 {
 
+  Hijset();
 
+  float bmax = hiparnt().hipr1(34)+hiparnt().hipr1(35);
+  if ( mImpactMax < 0 )    
+      mImpactMax = bmax;    
+  else if ( mImpactMax > bmax )    
+      mImpactMax = bmax;
+      
   cout << "-----------------> Generate() <--------------------" << endl;
 
   // Generate one hijing event

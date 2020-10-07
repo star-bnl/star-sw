@@ -13,6 +13,8 @@ using namespace std;
 
 /// Configuration of HIJING
 void Hijset( float   efrm, string frame, string proj, string targ, int ap, int zp, int at, int zt );
+void Hijset( );
+
 /// Generation of one event in hijing
 void Hijing( string frame, float bmin, float bmax );
 
