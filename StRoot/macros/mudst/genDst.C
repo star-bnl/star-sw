@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: genDst.C,v 1.8 2020/08/19 15:27:33 genevb Exp $
+// $Id: genDst.C,v 1.9 2020/10/10 07:16:56 genevb Exp $
 // Author: G. Van Buren (BNL)
 //
 // Description:
@@ -180,6 +180,7 @@ void genDst(unsigned int First,
   TTree* muDstTreeOut = 0;
 
   // Basic decisions based on options
+  TString CasedOptions = options;
   TString Options = options;
   Options.ToLower();
   TString optDelim = " ,";
@@ -339,15 +340,32 @@ void genDst(unsigned int First,
       }
 
       // assign attributes
+      StMaker* attrMaker = processMaker;
       Ssiz_t delim = Tag.First(':');
+      // look for "::" to set attributes for a different maker
+      if (delim > 0 && Tag[delim+1] == ':') {
+        TString altMakerName = Tag(0,delim);
+        // GetMaker...() functions are case sensitive, so find original case
+        Ssiz_t casedMakerNameIdx = CasedOptions.Index(altMakerName,0,TString::ECaseCompare::kIgnoreCase);
+        if (casedMakerNameIdx >= 0) altMakerName = CasedOptions(casedMakerNameIdx,delim);
+        StMaker* altMaker = fullChain.GetMaker(altMakerName.Data());
+        if (!altMaker) altMaker = fullChain.GetMakerInheritsFrom(altMakerName.Data());
+        if (!altMaker) {
+          gMessMgr->Warning() << "No maker found with name or class " << altMakerName.Data() << endm;
+          continue;
+        }
+        attrMaker = altMaker;
+        Tag.Remove(0,delim+2);
+        delim = Tag.First(':');
+      }
       if (delim < 0) {
-        processMaker->SetAttr(Tag.Data(),1);
+        attrMaker->SetAttr(Tag.Data(),1);
       } else {
         TString key(Tag(0,delim));
         TString& val = Tag.Remove(0,delim+1);
-        if (val.IsDigit()) { processMaker->SetAttr(key.Data(),val.Atoi()); }
-        else if (val.IsFloat()) { processMaker->SetAttr(key.Data(),val.Atof()); }
-        else { processMaker->SetAttr(key.Data(),val.Data()); }
+        if (val.IsDigit()) { attrMaker->SetAttr(key.Data(),val.Atoi()); }
+        else if (val.IsFloat()) { attrMaker->SetAttr(key.Data(),val.Atof()); }
+        else { attrMaker->SetAttr(key.Data(),val.Data()); }
       }
     }
     processMaker->PrintAttr();
@@ -413,6 +431,9 @@ void genDst(unsigned int Last,
 /////////////////////////////////////////////////////////////////////////////
 //
 // $Log: genDst.C,v $
+// Revision 1.9  2020/10/10 07:16:56  genevb
+// Specify makers to set attributes
+//
 // Revision 1.8  2020/08/19 15:27:33  genevb
 // Add DB flavors
 //
