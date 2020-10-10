@@ -52,12 +52,12 @@ if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/) {
   print "PICOPATH = $PICOPATH\n" if ($debug);
   if (! -r $PICOPATH) {exit 1;}
   if    ($pwd =~ /2010\/11GeV/)               {$glob = "/2010/11GeV";}
-  elsif ($pwd =~ /2010\/19GeV_/)              {$glob = "/2010/19GeV";}
+  elsif ($pwd =~ /2010\/19GeV/)               {$glob = "/2010/19GeV";}
+  elsif ($pwd =~ /2010\/7GeV/)                {$glob = "/2010/7GeV";}
+
 
   elsif ($pwd =~ /2011\/27GeV/)               {$glob = "/2011/27GeV";}
   elsif ($pwd =~ /2018\/27GeV/)               {$PICOPATH = "/gpfs01/star/data*"; $glob = "/reco/production_27GeV_fixedTarget_2018/ReversedFullField/P19ie/2018";}
-  elsif ($pwd =~ /2010\/7GeV/)                 {$glob = "/2010/7GeV";}
-
   elsif ($pwd =~ /2018\/3p85GeV_fixedTarget/) {$glob = "/2018/3p85GeV_fixedTarget";}
 
   elsif ($pwd =~ /2019\/14GeV/)               {$glob = "/2019/14GeV_2019_TFG19e";}
