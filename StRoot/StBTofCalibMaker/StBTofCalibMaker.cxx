@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.20 2020/07/03 21:51:24 geurts Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.21 2020/10/10 04:31:03 zye20 Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -15,6 +15,9 @@
  *add a flag mFXTMode: 0 for Collider mode, 1 for FXT mode
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.21  2020/10/10 04:31:03  zye20
+ * new added chain option btofFXT which could turn on FXTMode of StBTofCalibMaker
+ *
  * Revision 1.20  2020/07/03 21:51:24  geurts
  * Removed unnecessary warning messages and replaced them with counters.
  *
@@ -221,6 +224,8 @@ Int_t StBTofCalibMaker::Init()
 {
     resetPars();
     resetVpd();
+
+	if (IAttr("btofFXT")) mFXTMode = kTRUE; //True for FXT mode calib, default as false for collider mode calib
 
     mUseEventVertex = ! IAttr("UseProjectedVertex");
     if (mUseEventVertex) {
