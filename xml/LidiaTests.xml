@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job name="NewTest" fileListSyntax="paths" nProcesses="125"  filesPerHour="25" simulateSubmission="false">
+<job name="NewTest" fileListSyntax="paths" nProcesses="125"  simulateSubmission="false">
 
 <command>
-FPE_OFF
 #source /afs/rhic.bnl.gov/star/packages/.DEV2/setupDEV2.csh
 ln -s ~/.rootrc_nightly .rootrc
 #setenv STARFPE NO
@@ -42,15 +41,16 @@ switch (${SUBMITTINGDIRECTORY}) # STAR version
   case "*TFG20g*":
     starver TFG20g
     breaksw
+  case "*TFG20h*":
+    starver TFG20h
+    breaksw
+  case "*TFG20i*":
+    starver TFG20i
+    breaksw
   default:
     starver .DEV2
     breaksw
 endsw # 
-
-if (! $?) then
-else
-endif
-echo 
 #set controlFile = /star/u/starreco/newtest/sampleList_nonopt.txt 
 #set controlFile = $STAR/StRoot/StBFChain/sampleList.txt
 set controlFile = /afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StBFChain/sampleList.txt
@@ -77,7 +77,6 @@ if ( -r ${out_dir}/${logFile}) exit 0;
 if (! -d ${out_dir}) mkdir -p ${out_dir}
 #cd $SCRATCH
 cd ${out_dir}
-#starver SL19c
 
 echo $STAR
 
@@ -88,8 +87,6 @@ setenv StarEndMakerShell
 #cp ${inputfile} $SCRATCH
 #grep sse /proc/cpuinfo | sort -u | tee  ${logFile}
 #echo $SCRATCH/${infile0}
-echo ${inputfile} | grep fzd
-if (! $?) then
 switch (${SUBMITTINGDIRECTORY})  # gcc
   case "*gcc1010*":
     exit 0;
@@ -97,10 +94,14 @@ switch (${SUBMITTINGDIRECTORY})  # gcc
   default:
   breaksw
 endsw # 
-
-  root4star -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${inputfile}\&quot;\) &gt;&amp; ${logFile}
+setenv STARFPE NO
+dir $STAR_BIN/root4star  &gt;&amp; ${logFile}
+STAR_LEVELS    &gt;&gt;&amp; ${logFile}
+echo ${inputfile} | grep fzd
+if (! $?) then
+  root4star -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${inputfile}\&quot;\) &gt;&gt;&amp; ${logFile}
 else
-  root.exe -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${inputfile}\&quot;\) &gt;&amp; ${logFile}
+  root.exe -b -q bfc.C\($nevents,\&quot;${chain}\&quot;,\&quot;${inputfile}\&quot;\) &gt;&gt;&amp; ${logFile}
 endif
 #cp ${logFile} ${out_dir}
 #
