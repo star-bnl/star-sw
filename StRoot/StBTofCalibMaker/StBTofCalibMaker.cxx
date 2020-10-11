@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.20 2020/07/03 21:51:24 geurts Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.22 2020/10/10 04:36:00 zye20 Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,11 +10,21 @@
  *              - store into StBTofPidTraits
  *
  *****************************************************************
- *Revision 1.19 2020/04/09 4pm, Zaochen
+ *Revision 1.23 2020/10/09 11pm, Zaochen
+ *add (if (IAttr("btofFXT")) mFXTMode = kTRUE;) in the Init(),
+ *it could allow the chain option "btofFXT" to turn on the FXTMode easily 
+ 
+ *Revision 1.22 2020/04/09 4pm, Zaochen
  *implement Xin's updates to allow more pions and protons for the T0s in FXT mode
  *add a flag mFXTMode: 0 for Collider mode, 1 for FXT mode 
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.22  2020/10/10 04:36:00  zye20
+ * new added chain option btofFXT which could turn on FXTMode of StBTofCalibMaker
+ *
+ * Revision 1.21  2020/10/10 04:31:03  zye20
+ * new added chain option btofFXT which could turn on FXTMode of StBTofCalibMaker
+ *
  * Revision 1.20  2020/07/03 21:51:24  geurts
  * Removed unnecessary warning messages and replaced them with counters.
  *
@@ -243,7 +253,9 @@ Int_t StBTofCalibMaker::Init()
 {
     resetPars();
     resetVpd();
-
+#ifndef __TFG__VERSION__
+	if (IAttr("btofFXT")) mFXTMode = kTRUE; //True for FXT mode calib, default as false for collider mode calib
+#endif
     mUseEventVertex = ! IAttr("UseProjectedVertex");
     if (mUseEventVertex) {
         LOG_INFO << "Use event vertex position." << endm;

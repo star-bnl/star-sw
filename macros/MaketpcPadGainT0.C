@@ -1,3 +1,10 @@
+/*
+  root.exe lDb.C 'MaketpcPadGainT0.C+("itpc_gains.txt.20200626.084156")'
+  root.exe lDb.C 'MaketpcPadGainT0.C+("tpx_gains.txt.20200807.104403")'
+  foreach f (`ls -d *txt.2*`)
+    root.exe -q -b lDb.C 'MaketpcPadGainT0.C+("'${f}'")' >& ${f}.log
+  end
+ */
 #if !defined(__CINT__)
 #include "TString.h"
 #include <stdio.h>
@@ -5,7 +12,7 @@
 #include "TClassTable.h"
 #include "TSystem.h"
 #include "TFile.h"
-#incude "TString.h"
+#include "TString.h"
 #include "tables/St_tpcPadGainT0_Table.h"
 #include "tables/St_itpcPadGainT0_Table.h"
 #endif
@@ -20,16 +27,21 @@ void MaketpcPadGainT0(TString FileName="itpc_gains.txt.20191030.050318") {
   Int_t d = 0;
   Int_t t = 0;
   Bool_t itpc = kFALSE;
-  if (FileName.BeginsWith("tpx_gain.txt.")) {
-    Int_t n = sscan(FileName.Data(),"tpx_gains.txt.%0d.%0d",&d,&t);
+  if (FileName.BeginsWith("tpx_gains.txt.")) {
+    Int_t n = sscanf(FileName.Data(),"tpx_gains.txt.%0d.%0d",&d,&t);
     if (n != 2) {cout << "Illegal file name " << FileName.Data() << endl; return;}
-  } else  if (ileName.BeginsWith("itpc_gain.txt.")) {
-    Int_t n = sscan(FileName.Data(),"itpc_gains.txt.%0d.%0d",&d,&t);
+  } else  if (FileName.BeginsWith("itpc_gains.txt.")) {
+    Int_t n = sscanf(FileName.Data(),"itpc_gains.txt.%0d.%0d",&d,&t);
     if (n != 2) {cout << "Illegal file name " << FileName.Data() << endl; return;}
     itpc = kTRUE;
   }
+  if (! d ) {
+    cout << "Illegal file " << FileName.Data() << endl;
+    return;
+  }
   Char_t line[121];
   TFile *f = 0;
+  Int_t nEntry = 0;
   if (! itpc) {
     St_tpcPadGainT0 *tpcPadGainT0 = new St_tpcPadGainT0("tpcPadGainT0",1);
     tpcPadGainT0_st GainT0; 
@@ -52,6 +64,10 @@ void MaketpcPadGainT0(TString FileName="itpc_gains.txt.20191030.050318") {
       if (pad < 1 || pad > 182) continue;
       GainT0.Gain[sec-1][row-1][pad-1] = gain;
       GainT0.T0[sec-1][row-1][pad-1] = t0;
+      nEntry++;
+      if (nEntry%1000 == 1) {
+	printf("%7i: %2d %2d %3d %8.3f %8.3f\n",nEntry,sec,row,pad, GainT0.Gain[sec-1][row-1][pad-1], GainT0.T0[sec-1][row-1][pad-1]);
+      }
     }
     tpcPadGainT0->AddAt(&GainT0);
     //  tpcPadGainT0->Print(0,1);
@@ -65,7 +81,7 @@ void MaketpcPadGainT0(TString FileName="itpc_gains.txt.20191030.050318") {
     St_itpcPadGainT0 *itpcPadGainT0 = new St_itpcPadGainT0("itpcPadGainT0",1);
     itpcPadGainT0_st GainT0; 
     memset (&GainT0, 0, sizeof(GainT0));
-    Int_t run = 0, sec, row, pad;
+    Int_t run = 0, sec, row, pad, rdo,port,ch;
     Float_t gain, t0;
     Int_t n = 0;
     while (fgets(&line[0],120,fp)) {
@@ -77,12 +93,17 @@ void MaketpcPadGainT0(TString FileName="itpc_gains.txt.20191030.050318") {
 	GainT0.run = run;
 	continue;
       }
-      n = sscanf(&line[0],"%d%d%d%f%f",&sec,&row,&pad,&gain,&t0);
+      // printf("%d %d %d %d %d %d %.3f %.3f%s\n",s+1,rdo,port,ch,r,p,g,t0,g==0.0?comment:"") ;
+      n = sscanf(&line[0],"%d%d%d%d%d%d%f%f",&sec,&rdo,&port,&ch,&row,&pad,&gain,&t0);
       if (sec < 1 || sec > 24) continue;
       if (row < 1 || row > 45) continue;
       if (pad < 1 || pad > 182) continue;
       GainT0.Gain[sec-1][row-1][pad-1] = gain;
       GainT0.T0[sec-1][row-1][pad-1] = t0;
+      nEntry++;
+      if (nEntry%1000 == 1) {
+	printf("%7i: %2d %2d %3d %3d %3d %3d %8.3f %8.3f\n",nEntry,sec,row,pad, rdo, port, ch,GainT0.Gain[sec-1][row-1][pad-1], GainT0.T0[sec-1][row-1][pad-1]);
+      }
     }
     itpcPadGainT0->AddAt(&GainT0);
     //  itpcPadGainT0->Print(0,1);

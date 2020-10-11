@@ -1,1 +1,1 @@
-/net/l402/data/fisyak/STAR/packages/.DEV2/garfield/macros/tpcP10.C
+../garfield/macros/tpcP10.C
