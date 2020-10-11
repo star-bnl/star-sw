@@ -7,7 +7,7 @@ set top = `basename  ${topdir}`
 #cd ~/reco/2020/TFG19m/RF/${dir}
 set log =  rsynchPico.`date +%m%d%y%H`.log;
 touch ${log}
-foreach d (`ls -1d ???`)
+foreach d (`ls -1d 2??`)
   cd ${d}
 rsync -avrz -h                        \
     --include='*picoDst.root'                  \

@@ -537,3 +537,7 @@ foreach d (17 18 19 20 21 22 23)
 foreach d (16 24)
  root.exe -q -b 'lMuDst.C(-1,"./'${d}'*/*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","MuTpcG'${d}'.root")'  MuTpcG.C+ >& MuTpcG${d}.log &
 end
+################################################################################
+foreach d (`ls -1d  ???/*`)
+  set b = `basename ${d}; mv *${b}*.root ${d}
+end
