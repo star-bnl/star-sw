@@ -396,7 +396,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		    BPoint.xL = lTpc.position().x();
 		    BPoint.yL = lTpc.position().y();
 		    BPoint.zL = lTpc.position().z();
-		    Float_t DV = 1e-6*StTpcDb::instance()->DriftVelocity(sector,row);  // cm/musec
+		    Float_t DV = 1e-6*StTpcDb::instance()->DriftVelocity(sector); //,row);  // cm/musec
 		    Float_t freq = StTpcDb::instance()->Electronics()->samplingFrequency(); // MHz
 		    BPoint.time = BPoint.zL/DV; //musec
 		    BPoint.timeb = BPoint.time*freq; // bucket
