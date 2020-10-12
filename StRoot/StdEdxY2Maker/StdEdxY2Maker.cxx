@@ -2,7 +2,10 @@
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
-#define __NEGATIVE_ONLY__
+//#define __NEGATIVE_ONLY__
+#ifndef  __NEGATIVE_ONLY__
+#define __NEGATIVE_AND_POSITIVE__
+#endif
 //#define __TEST_DX__
 //#define __ZDC3__
 //#define __LogProb__
@@ -828,7 +831,14 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   if (fUsedNdx) {
     Hists3D::NtotHist = 9;
   }
+#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
   static Hists3D SecRow3("SecRow3","<log(dEdx/Pion)>","sector","row",numberOfSectors,NoRows);
+#else
+  static Hists3D SecRow3("SecRow3","<log(dEdx/Pion)> for negative","sector","row",numberOfSectors,NoRows);
+#ifdef __NEGATIVE_AND_POSITIVE__
+  static Hists3D SecRow3P("SecRow3P","<log(dEdx/Pion)> for positive","sector","row",numberOfSectors,NoRows);
+#endif
+#endif
   Hists3D::NtotHist = 2;
   static Hists3D ADC3("ADC3","<logADC)>","sector","row",numberOfSectors,
 		      NoRows,0,-1, 
@@ -1205,9 +1215,6 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	hdEMO->Fill(TMath::Log10(FdEdx[k].C[StTpcdEdxCorrection::kMultiplicity].dE));
       }
       if (pMomentum > pMomin && pMomentum < pMomax &&PiD.fFit.TrackLength() > 40 ) continue; // { // Momentum cut
-#ifdef     __NEGATIVE_ONLY__
-      if (sCharge != 1)  continue;
-#endif /*  __NEGATIVE_ONLY__ */
 #if 0
 	if (tpcGas) {
 	  if (inputTPCGasPressureP) inputTPCGasPressureP->Fill(tpcGas->inputTPCGasPressure,FdEdx[k].F.dEdxN);
@@ -1284,7 +1291,14 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	};
 	Double_t Pad2Edge = FdEdx[k].edge;
 	if (TMath::Abs(Pad2Edge) > 5) {
+#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
 	  SecRow3.Fill(sector,row,Vars);
+#else /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
+	  if (sCharge == 1)  SecRow3.Fill(sector,row,Vars);
+#ifdef __NEGATIVE_AND_POSITIVE__
+      if (sCharge == 0)  SecRow3P.Fill(sector,row,Vars);
+#endif /* __NEGATIVE_AND_POSITIVE__ */
+#endif /*  ! _NEGATIVE_ONLY__ && !  __NEGATIVE_AND_POSITIVE__ */
 	  if (FdEdx[k].adc > 0) {
 	    Double_t ADCL = TMath::Log(FdEdx[k].adc);
 	    ADC3.Fill(sector,row,&ADCL);
