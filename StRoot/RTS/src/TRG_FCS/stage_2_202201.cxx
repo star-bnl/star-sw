@@ -197,14 +197,14 @@ void  fcs_trg_base::stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], 
     
     //Ecal sub-crate sum
     u_int esub[4];
-    esub[0] = esum[ns][ 0][0]+esum[ns][ 0][2]+esum[ns][ 0][4]+esum[ns][ 0][8]
-	    + esum[ns][ 2][0]+esum[ns][ 2][2]+esum[ns][ 2][4]+esum[ns][ 2][8];
-    esub[1] = esum[ns][ 4][0]+esum[ns][ 4][2]+esum[ns][ 4][4]+esum[ns][ 4][8]
-	    + esum[ns][ 6][0]+esum[ns][ 6][2]+esum[ns][ 6][4]+esum[ns][ 6][8];
-    esub[2] = esum[ns][ 8][0]+esum[ns][ 8][2]+esum[ns][ 8][4]+esum[ns][ 8][8]
-	    + esum[ns][10][0]+esum[ns][10][2]+esum[ns][10][4]+esum[ns][10][8];
-    esub[3] = esum[ns][12][0]+esum[ns][12][2]+esum[ns][12][4]+esum[ns][12][8]
-	    + esum[ns][14][0]+esum[ns][14][2]+esum[ns][14][4]+esum[ns][14][8];
+    esub[0] = esum[ns][ 0][0]+esum[ns][ 0][2]+esum[ns][ 0][4]+esum[ns][ 0][6]+esum[ns][ 0][8]
+	    + esum[ns][ 2][0]+esum[ns][ 2][2]+esum[ns][ 2][4]+esum[ns][ 2][6]+esum[ns][ 2][8];
+    esub[1] = esum[ns][ 4][0]+esum[ns][ 4][2]+esum[ns][ 4][4]+esum[ns][ 4][6]+esum[ns][ 4][8]
+	    + esum[ns][ 6][0]+esum[ns][ 6][2]+esum[ns][ 6][4]+esum[ns][ 6][6]+esum[ns][ 6][8];
+    esub[2] = esum[ns][ 8][0]+esum[ns][ 8][2]+esum[ns][ 8][4]+esum[ns][ 8][6]+esum[ns][ 8][8]
+	    + esum[ns][10][0]+esum[ns][10][2]+esum[ns][10][4]+esum[ns][10][6]+esum[ns][10][8];
+    esub[3] = esum[ns][12][0]+esum[ns][12][2]+esum[ns][12][4]+esum[ns][12][6]+esum[ns][12][8]
+	    + esum[ns][14][0]+esum[ns][14][2]+esum[ns][14][4]+esum[ns][14][6]+esum[ns][14][8];
     for(int i=0; i<4; i++) if(esub[i]>0xff) esub[i]=0xff;
     
     //Hcal sub-crate sum
