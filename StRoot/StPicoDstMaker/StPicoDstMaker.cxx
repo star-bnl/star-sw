@@ -96,6 +96,7 @@
 #include "StPicoDstMaker/StPicoDstMaker.h"
 #if defined (__TFG__VERSION__)
 #include "StarRoot/TDirIter.h"
+#include "StarRoot/TUnixTime.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 #include "StMuDSTMaker/COMMON/StMuProbPidTraits.h"
@@ -765,6 +766,7 @@ int StPicoDstMaker::Make() {
     returnStarCode = MakeRead();
 #if defined (__TFG__VERSION__)
     if ( !mPicoDst->IsGoodTrigger()) return kStSkip;
+    if (GetDateTime().GetYear() == 2011) StPicoTrack::setdEdxErrorScale(0.5); // Account a bug in dE/dx error for y2011
 #endif /* __TFG__VERSION__ */
   }
 
@@ -906,7 +908,13 @@ void StPicoDstMaker::fillEventHeader() const {
   StEvtHddr* header=GetEvtHddr();
   header->SetRunNumber(event->runId());
   header->SetEventNumber(event->eventId());
+#if defined (__TFG__VERSION__)
+  Int_t id, it;
+  TUnixTime ut(event->time()); ut.GetGTime(id,it);
+  header->SetDateTime(id,it);
+#else /* ! __TFG__VERSION__ */
   header->SetGMTime( (UInt_t) (event->time()) );
+#endif
 }
 
 //_________________
