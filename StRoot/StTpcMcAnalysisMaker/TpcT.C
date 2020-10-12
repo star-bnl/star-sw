@@ -12,7 +12,7 @@
     cd -
   end
 
-	     foreach d (`ls -1d [1-9]*GeV*`)
+	     foreach d (`ls -1dr TpcRS_[1-9]*GeV*`)
 	     cd ${d}; pwd;
 	     root.exe -q *.Plots.root FitTpcT.C
              cd -
