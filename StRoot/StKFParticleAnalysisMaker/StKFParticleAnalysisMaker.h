@@ -45,7 +45,7 @@ class StKFParticleAnalysisMaker : public StMaker {
   Char_t                mEnd[1];        //!
   std::vector<float> fTMVAParticleParameters[fNNTuples];
   int fNTrackTMVACuts;
-  bool fIsPicoAnalysis;
+  Bool_t fIsPicoAnalysis;
   int fdEdXMode;
   Bool_t fStoreTmvaNTuples;
   Bool_t fProcessSignal;
@@ -62,13 +62,13 @@ class StKFParticleAnalysisMaker : public StMaker {
   std::vector<TString> fFlowFiles;
   std::map<long, int> fFlowMap;
   
-  bool fRunCentralityAnalysis;
+  Bool_t fRunCentralityAnalysis;
   StRefMultCorr *fRefmultCorrUtil;
   TString fCentralityFile;
   
-  bool fAnalyseDsPhiPi;
+  Bool_t fAnalyseDsPhiPi;
   std::vector<int> fDecays;
-
+  
   void GetDaughterParameters(const int iReader, int& iDaughterTrack, int& iDaughterParticle, KFParticle& particle);
   void GetParticleParameters(const int iReader, KFParticle& particle);
   long  GetUniqueEventId(const int iRun, const int iEvent) const;

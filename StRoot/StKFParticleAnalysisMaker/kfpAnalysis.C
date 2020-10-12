@@ -97,6 +97,8 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   kfpAnalysis->AddDecayToReconstructionList( 9004); // pK+
   kfpAnalysis->AddDecayToReconstructionList(-9004); // p-K-
 #endif  
+  StMaker *dbMk = chain->GetMaker("db");
+  if (dbMk) dbMk->SetDebug(1);
   chain->Init();
 
   if(isPico)

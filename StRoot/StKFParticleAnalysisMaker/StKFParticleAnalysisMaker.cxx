@@ -281,7 +281,7 @@ void StKFParticleAnalysisMaker::BookVertexPlots()
   fStKFParticleInterface = new StKFParticleInterface;
   for(unsigned int iDecay=0; iDecay<fDecays.size(); iDecay++)
     fStKFParticleInterface->AddDecayToReconstructionList( fDecays[iDecay] );
-  bool storeMCHistograms = false;
+  Bool_t storeMCHistograms = false;
   if(!fIsPicoAnalysis && fProcessSignal) storeMCHistograms = true;
   fStKFParticlePerformanceInterface = new StKFParticlePerformanceInterface(fStKFParticleInterface->GetTopoReconstructor(), storeMCHistograms);
   dirs[0]->cd();
@@ -346,7 +346,7 @@ Int_t StKFParticleAnalysisMaker::Make()
 //   fStKFParticleInterface->SetChi2CutCharm2D(3);
   
   vector<int> triggeredTracks;
-  bool isGoodEvent = false;
+  Bool_t isGoodEvent = false;
   
   //Process the event
   if(maxGBTrackIndex > 0)
@@ -356,7 +356,7 @@ Int_t StKFParticleAnalysisMaker::Make()
   else
     isGoodEvent = fStKFParticleInterface->ProcessEvent(fMuDst, mcTracks, mcIndices, fProcessSignal);
 
-//   bool openCharmTrigger = false;
+//   Bool_t openCharmTrigger = false;
 //   if(isGoodEvent) openCharmTrigger =  fStKFParticleInterface->OpenCharmTrigger();
 //   fStKFParticleInterface->OpenCharmTriggerCompression(triggeredTracks.size(), fPicoDst->numberOfTracks(), openCharmTrigger);
   //collect histograms
@@ -448,7 +448,7 @@ Int_t StKFParticleAnalysisMaker::Make()
         const KFParticle currentVertex = fStKFParticleInterface->GetParticles()[iCurrentVertex];
         for(int iD=0; iD<currentVertex.NDaughters(); iD++) {
           const int daughterId = currentVertex.DaughterIds()[iD];
-          bool isNewTrack = true;
+          Bool_t isNewTrack = true;
           for(unsigned int iTrack=0; iTrack<trackIndices.size(); iTrack++) {
             if(daughterId == trackIndices[iTrack]) {
               isNewTrack = false;
@@ -543,7 +543,7 @@ Int_t StKFParticleAnalysisMaker::Make()
         KFParticle proton   = fStKFParticleInterface->GetParticles()[particle.DaughterIds()[2]];
 
         float m, dm, l, dl;
-        bool ok = true;
+        Bool_t ok = true;
         
         KFParticle ppi;
         ppi += pion;
@@ -780,7 +780,7 @@ Int_t StKFParticleAnalysisMaker::Make()
           KFParticle v[3];
           int index[3][2] = { {1,2}, {0,2}, {0,1} }; 
           
-          bool ok = true;
+          Bool_t ok = true;
           for(int iD=0; iD<3; iD++){
             
             const KFParticle* vd[2] = {&d[index[iD][0]], &d[index[iD][1]]};
@@ -862,7 +862,7 @@ Int_t StKFParticleAnalysisMaker::Make()
       for(int iParticle=0; iParticle<fStKFParticlePerformanceInterface->GetNReconstructedParticles(); iParticle++)
       {
         KFParticle particle;
-        bool isMCParticle = fStKFParticlePerformanceInterface->GetParticle(particle, iParticle);
+        Bool_t isMCParticle = fStKFParticlePerformanceInterface->GetParticle(particle, iParticle);
               
         if( !( (fProcessSignal && isMCParticle) || (!fProcessSignal && !isMCParticle) ) ) continue;
                   
@@ -939,7 +939,7 @@ void StKFParticleAnalysisMaker::GetDaughterParameters(const int iReader, int& iD
 
 void StKFParticleAnalysisMaker::GetParticleParameters(const int iReader, KFParticle& particle)
 {
-  bool isBMeson = abs(particle.GetPDG()) == 511 || abs(particle.GetPDG()) == 521;
+  Bool_t isBMeson = abs(particle.GetPDG()) == 511 || abs(particle.GetPDG()) == 521;
 //   if( !isBMeson ) return;
   
   int iDaughterTrack = 0;

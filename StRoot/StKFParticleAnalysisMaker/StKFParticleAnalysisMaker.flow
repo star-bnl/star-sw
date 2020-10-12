@@ -47,4 +47,5 @@ or
      StKFParticleInterface::ProcessEvent(fMuDst, mcTracks, mcIndices, fProcessSignal);
      ...
      StKFParticleInterface::PerformanceAnalysis
-        KFTopoPerformance::FillParticleParameters
+       KFTopoPerformance::FillHistos
+         KFTopoPerformance::FillParticleParameters
