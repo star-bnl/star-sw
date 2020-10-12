@@ -432,10 +432,12 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(Form("new StMuDstMaker(0,0,\"\",\"%s\",\"st:MuDst.root\",1e9)",fInFile.Data()));
 	mk = GetMaker("MuDst");
 #endif
-	//	if (mk) mk->SetName("RMuDst");
+	if (GetOption("RMuDst")) 
+	  NoMakersWithInput++;
       } else if (maker == "StPicoDstMaker") {
 	Int_t io = 1; // IoWrite=1
 	if (GetOption("RpicoDst")) {
+	  NoMakersWithInput++;
 	  io = 2; // IoRead=2
 #if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
 	  mk = new StPicoDstMaker(io,fInFile.Data());
