@@ -468,6 +468,10 @@ my $pyear = 0;
        @prt =split("_", $dirF[6]);
        $pyear = $prt[1]; 
 
+       if( $pyear =~ /AgML/ ) {
+	   $pyear = substr($pyear,0,-5) ;
+       }
+
   }elsif($SITE eq "pdsf" or $SITE eq "pdsf_embed") {
         $libL = $dirF[6];
        $platf = $dirF[7];
