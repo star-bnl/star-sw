@@ -945,6 +945,7 @@ MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
 #include "St_itpcPadGainT0C.h"
 MakeChairInstance(itpcPadGainT0,Calibrations/tpc/itpcPadGainT0);
 #include "St_tpcPadGainT0BC.h"
+// tpcPadGainT0B table (indexed) is not used any more. tpcPadGainT0BChair combines nonindexed tpcPadGainT0 and itpcPadGainT0
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::fgInstance = 0;
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {if (! fgInstance) fgInstance = new St_tpcPadGainT0BC(); return fgInstance;}
 //________________________________________________________________________________
