@@ -119,9 +119,11 @@ class StPicoTrack : public TObject {
   /// Return dE/dx (GeV/cm) of the track
   Float_t dEdx() const                   { return mDedx; }
   /// Return dE/dx error of the track
+#if !defined(__TFG__VERSION__)
   Float_t dEdxError() const              { return mDedxError; }
-
-#if defined (__TFG__VERSION__)
+#else /* __TFG__VERSION__ */
+  static  void    setdEdxErrorScale(Float_t scale=1) {fgdEdxErrorScale = scale;}
+  Float_t dEdxError() const              { return fgdEdxErrorScale*mDedxError; }
   Float_t dEdxPull(Float_t mass, UChar_t fit = 1, Int_t charge = 1) const;
   Float_t dEdxPullToF(Float_t mass, UChar_t fit = 1, Int_t charge = 1) const;
   Float_t dEdxPullPion()      const { return dEdxPull(0.13956995,1); }
@@ -346,6 +348,7 @@ class StPicoTrack : public TObject {
   Short_t  mETofPidTraitsIndex;
 #ifdef __TFG__VERSION__ 
   static Int_t fgdEdXMode; // type - 0 => I70, 1 => dEdxFit, 2 => dNdx
+  static Float_t fgdEdxErrorScale; // correction for Y2011 bug on dE/dx error parametrization
 #endif /* __TFG__VERSION__ */
   /// Index of the BEMC-matched tower. The indexing scheme was chosen so that
   /// towers with an exact match are stored with the softid (1, 4800), towers
