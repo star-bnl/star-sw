@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
 	dd = dr->det("tpx")->get("cld") ;
 	while(dd && dd->iterate()) {
 		for(u_int i=0;i<dd->ncontent;i++) {
+#if 0
 			switch(dd->cld[i].flags) {
 			case 0 :	// normal
 			case 1 :	// normal
@@ -50,7 +51,9 @@ int main(int argc, char *argv[])
 			default :
 				break ;
 			}
-
+#else
+			if (dd->cld[i].flags == 3) continue;
+#endif
 			printf("in file: row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X\n",dd->row,
 			       dd->cld[i].pad,
 			       dd->cld[i].p1,
@@ -69,7 +72,7 @@ int main(int argc, char *argv[])
 		
 #endif
 
-//#define DO_CLD
+#define DO_CLD
 #ifdef DO_CLD
 	dd = dr->det("tpx")->get("adc") ;	// get the ADC data
 	if(dd == 0) {
@@ -134,6 +137,7 @@ int main(int argc, char *argv[])
 #endif
 
 #if 1
+#if 0
 			switch(dd->sim_cld[i].cld.flags) {
 			case 0 :
 			case 2 :
@@ -141,7 +145,7 @@ int main(int argc, char *argv[])
 			default:
 				break ;
 			}
-
+#endif
 //			if(dd->sim_cld[i].cld.tb < 15.0) 
 			printf("rerun: row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X: track %d, Q %d\n",dd->row,
 			       dd->sim_cld[i].cld.pad,
