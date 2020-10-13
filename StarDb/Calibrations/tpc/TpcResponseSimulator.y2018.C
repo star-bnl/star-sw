@@ -121,7 +121,6 @@ TDataSet *CreateTable() {
   for (Int_t i = 0; i < 8; i++) {
     a[i] = RowMuTrs[i];
   }
-#endif
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
   //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
