@@ -584,6 +584,7 @@ foreach  my $eachOutLDir (@OUT_DIR) {
             next if !$fname;
             next if $fname =~ /^\.\.?$/;
             next if $fname =~ /hijing.log/;
+            next if $fname =~ /macro_hijing/; 
             next if $fname =~ /starsim.log/;
             next if $fname =~ /simu.log/;
 
@@ -663,7 +664,12 @@ foreach  my $eachOutLDir (@OUT_DIR) {
        		$libL = $dirF[4];
        		$platf = $dirF[5];
        		@prt =split("_", $dirF[7]);
-       		$pyear = $prt[1];
+		$pyear = $prt[1];
+                if( $pyear =~ /AgML/ ) {
+		    $pyear = substr($pyear,0,-5) ;
+		}
+
+#		print "Check year  ",$dirF[7],"   ", $pyear, "\n";
       		next if ($mpath =~ /ppl_minbias/);
        		$logName = $fname;
 #      $Fname =  $mpath . "/" . $fname;
