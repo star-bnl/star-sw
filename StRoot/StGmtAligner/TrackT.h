@@ -30,7 +30,7 @@ class TrackT : public TObject {
  public:
   TrackT() { Clear(); }
   virtual ~TrackT() {Clear();}
-  void          Clear(Option_t *option="") {if (option); memset(&beg, 0, &end - &beg);}
+  void          Clear(Option_t *option="") {if (option) {}; memset(&beg, 0, &end - &beg);}
   Double32_t    GetpX()      { return GetpT()*TMath::Cos(fPhi);}
   Double32_t    GetpY()      { return GetpT()*TMath::Sin(fPhi);}
   Double32_t    GetpZ()      { return GetpT()*fTanL;}

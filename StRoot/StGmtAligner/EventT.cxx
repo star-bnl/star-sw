@@ -18,6 +18,7 @@
 #include "TGeoMatrix.h"
 #include "StarRoot/THelixTrack.h"
 #include "EventT.h"
+#include "TBaseGMT.h"
 #include "TrackT.h"
 #include "HitT.h"
 #include "TKey.h"
@@ -33,7 +34,6 @@ ClassImp(EventTHeader);
 ClassImp(EventT);
 ClassImp(TrackT);
 ClassImp(HitT);  
-
 TClonesArray *EventT::fgTracks = 0;
 TClonesArray *EventT::fgHits = 0;
 THashList *EventT::fRotList = 0;
@@ -401,7 +401,17 @@ void EventT::RestoreListOfRotations() {
   }
 }
 //________________________________________________________________________________
-void TBase::Loop(Int_t Nevents) {  
+void     TBaseGMT::Init(TTree *tree) {
+  if (!tree) return;
+  fChain = tree;
+  fCurrent = -1;
+  fChain->SetMakeClass(1);
+  fEvent = new EventT();
+  TBranch *branch = fChain->GetBranch("EventT");
+     branch->SetAddress(&fEvent);
+}
+//________________________________________________________________________________
+void TBaseGMT::Loop(Int_t Nevents) {  
 #if 1
   struct PlotPar_t {
     Char_t *Name;
@@ -421,7 +431,7 @@ void TBase::Loop(Int_t Nevents) {
   
   const  PlotPar_t plotDuv = // plots for du & dv
     { "Du","Du cuts", 200, 3, -1.,1., 0.,3. };
-  
+  if (fOutFileName == "") fOutFileName = "GmtOut.root";
   TFile *fOut = new TFile(fOutFileName,"recreate");
   TString Name;
   TString Title;
