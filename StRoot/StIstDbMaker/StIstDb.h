@@ -55,14 +55,14 @@ public:
    const TGeoHMatrix *getGeoHMatrixSensorOnLadder(Int_t ladder, Int_t sensor) const	{return &mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1]; }
    static const TGeoHMatrix *getHMatrixSensorOnGlobal(int ladder, int sensor);
 
-   const istPedNoise_st *getPedNoise() const 		{return ((St_istPedNoise   *) St_istPedNoiseC::instance()->Table())->GetTable();}
-   const istGain_st *getGain() const     		{return ((St_istGain       *) St_istGainC::instance()->Table())->GetTable();    }
-   const istMapping_st *getMapping() const  		{return ((St_istMapping    *) St_istMappingC::instance()->Table())->GetTable(); }
-   const istControl_st *getControl() const  		{return ((St_istControl    *) St_istControlC::instance()->Table())->GetTable(); }
-   const istChipConfig_st *getChipStatus() const 	{return ((St_istChipConfig *) St_istChipConfigC::instance()->Table())->GetTable(); }
+   const istPedNoise_st *getPedNoise() const 		{return St_istPedNoiseC::instance()->Struct();}
+   const istGain_st *getGain() const     		{return St_istGainC::instance()->Struct();    }
+   const istMapping_st *getMapping() const  		{return St_istMappingC::instance()->Struct(); }
+   const istControl_st *getControl() const  		{return St_istControlC::instance()->Struct(); }
+   const istChipConfig_st *getChipStatus() const 	{return St_istChipConfigC::instance()->Struct(); }
 
    /*! Simulator parameters -hft efficiency for both fast and slow*/
-   const istSimPar_st *istSimPar()                      {return ((St_istSimPar     *) St_istSimParC::instance()->Table())->GetTable();}
+   const istSimPar_st *istSimPar()                      {return  St_istSimParC::instance()->Struct();}
       
    Int_t setGeoHMatrices(Survey_st **tables);
 #if 0

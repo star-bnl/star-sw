@@ -30,7 +30,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 {
    mReady = kStFatal;
    LOG_DEBUG << "StIstDbMaker::InitRun() - Access data from database" << endm;
-
+#if 0
    // Get IDS positionment relative to TPC
    const St_Survey *st_idsOnTpc = (const St_Survey *) StidsOnTpc::instance()->Table();
    if (!st_idsOnTpc) {
@@ -83,6 +83,11 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    Survey_st *tables[5] = {st_idsOnTpc->GetTable(), st_pstOnIds->GetTable(), st_istOnPst->GetTable(),
                            st_istLadderOnIst->GetTable(), st_istSensorOnLadder->GetTable()
                           };
+#else
+   Survey_st *tables[5] = {StidsOnTpc::instance()->Struct(), StpstOnIds::instance()->Struct(), StistOnPst::instance()->Struct(),
+                           StLadderOnIst::instance()->Struct(), StistSensorOnLadder::instance()->Struct()
+                          };
+#endif
    mIstDb->setGeoHMatrices(tables);  
 #if 0
    // Now access IST pedestal and noise tables
