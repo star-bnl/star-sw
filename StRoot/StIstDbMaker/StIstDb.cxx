@@ -27,13 +27,15 @@ ClassImp(StIstDb)
 StIstDb::StIstDb() : StObject()
 {
    mGeoHMatrixTpcOnGlobal = NULL;
+#if 0
    mIstPedNoise = NULL;
    mIstGain	= NULL;
    mIstMapping  = NULL;
    mIstControl  = NULL;
    mIstChipStatus = NULL;
-   fgInstance = this;
    mIstSimPar = 0;
+#endif
+   fgInstance = this;
 }
 //_____________________________________________________________________________
 Int_t StIstDb::setGeoHMatrices(Survey_st **tables)

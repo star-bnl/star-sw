@@ -7,15 +7,15 @@
 #include "THashList.h"
 #include "TGeoMatrix.h"
 #include "StEvent/StEnumerations.h"
+#include "StDetectorDbMaker/St_istPedNoiseC.h"
+#include "StDetectorDbMaker/St_istGainC.h"
+#include "StDetectorDbMaker/St_istMappingC.h"
+#include "StDetectorDbMaker/St_istControlC.h"
+#include "StDetectorDbMaker/St_istChipConfigC.h"
+#include "StDetectorDbMaker/St_istSimParC.h"
 using namespace StIstConsts;
 
 class Survey_st;
-class istPedNoise_st;
-class istControl_st;
-class istGain_st;
-class istMapping_st;
-class istChipConfig_st;
-class istSimPar_st;
 
 
 /**
@@ -55,23 +55,24 @@ public:
    const TGeoHMatrix *getGeoHMatrixSensorOnLadder(Int_t ladder, Int_t sensor) const	{return &mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1]; }
    static const TGeoHMatrix *getHMatrixSensorOnGlobal(int ladder, int sensor);
 
-   const istPedNoise_st *getPedNoise() const 		{return mIstPedNoise;}
-   const istGain_st *getGain() const     		{return mIstGain;    }
-   const istMapping_st *getMapping() const  		{return mIstMapping; }
-   const istControl_st *getControl() const  		{return mIstControl; }
-   const istChipConfig_st *getChipStatus() const 	{return mIstChipStatus; }
+   const istPedNoise_st *getPedNoise() const 		{return ((St_istPedNoise   *) St_istPedNoiseC::instance()->Table())->GetTable();}
+   const istGain_st *getGain() const     		{return ((St_istGain       *) St_istGainC::instance()->Table())->GetTable();    }
+   const istMapping_st *getMapping() const  		{return ((St_istMapping    *) St_istMappingC::instance()->Table())->GetTable(); }
+   const istControl_st *getControl() const  		{return ((St_istControl    *) St_istControlC::instance()->Table())->GetTable(); }
+   const istChipConfig_st *getChipStatus() const 	{return ((St_istChipConfig *) St_istChipConfigC::instance()->Table())->GetTable(); }
 
    /*! Simulator parameters -hft efficiency for both fast and slow*/
-   const istSimPar_st *istSimPar() {return mIstSimPar;}
+   const istSimPar_st *istSimPar()                      {return ((St_istSimPar     *) St_istSimParC::instance()->Table())->GetTable();}
       
    Int_t setGeoHMatrices(Survey_st **tables);
+#if 0
    void setPedNoise(istPedNoise_st *pedNoise) 	{mIstPedNoise = pedNoise;}
    void setGain(istGain_st *gain)		{mIstGain     = gain;}
    void setMapping(istMapping_st *mapping)    	{mIstMapping  = mapping;}
    void setControl(istControl_st *control)    	{mIstControl  = control;}
    void setChipStatus(istChipConfig_st *chipStatus) {mIstChipStatus = chipStatus;}
    void setIstSimPar(istSimPar_st *istSimPar) {mIstSimPar = istSimPar;}
-   
+#endif   
    virtual void Print(Option_t *opt = "") const;
 
    virtual const char *GetCVS() const
@@ -85,15 +86,15 @@ private:
    TGeoHMatrix mGeoHMatrixIstOnPst;
    TGeoHMatrix mGeoHMatrixLadderOnIst[kIstNumLadders];
    TGeoHMatrix mGeoHMatrixSensorOnLadder[kIstNumLadders][kIstNumSensorsPerLadder];
-
+#if 0
    istPedNoise_st 	*mIstPedNoise;
    istGain_st 		*mIstGain;
    istMapping_st 	*mIstMapping;
    istControl_st 	*mIstControl;
    istChipConfig_st 	*mIstChipStatus;
-   static StIstDb       *fgInstance;
-
    istSimPar_st 	*mIstSimPar; ///< simulator parameters - hit efficiency
+#endif
+   static StIstDb       *fgInstance;
    
    ClassDef(StIstDb, 1)
 };

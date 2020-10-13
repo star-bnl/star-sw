@@ -5,13 +5,7 @@
 #include "St_base/StMessMgr.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StDetectorDbMaker/StIstSurveyC.h"
-#include "StDetectorDbMaker/St_istPedNoiseC.h"
-#include "StDetectorDbMaker/St_istGainC.h"
-#include "StDetectorDbMaker/St_istMappingC.h"
-#include "StDetectorDbMaker/St_istControlC.h"
-#include "StDetectorDbMaker/St_istChipConfigC.h"
 #include "TEnv.h"
-#include "tables/St_istSimPar_Table.h"
 
 ClassImp(StIstDbMaker)
 
@@ -90,6 +84,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
                            st_istLadderOnIst->GetTable(), st_istSensorOnLadder->GetTable()
                           };
    mIstDb->setGeoHMatrices(tables);  
+#if 0
    // Now access IST pedestal and noise tables
    const St_istPedNoise *mPedNoise = (St_istPedNoise *) St_istPedNoiseC::instance()->Table();
    mIstDb->setPedNoise(mPedNoise->GetTable());
@@ -130,7 +125,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
      return kStErr;
    }
    istSimPar->Print(0,1);
-                                    
+#endif                                    
    if ( GetDebug() >= 2)
       mIstDb->Print();
 
