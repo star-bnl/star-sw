@@ -755,13 +755,12 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   if (mk->fUpdateMode && !val->IsModified())    return kPrune;
 
   TDatime currenTime = mk->GetDateTime();
-  Int_t uevent = currenTime.Get();
+  UInt_t uevent = currenTime.Get();
 
   //            Check validity
-  Int_t u1 = val->fTimeMin.Get();
-  Int_t u2 = val->fTimeMax.Get();
-    if (u1 <= uevent
-     && u2 >  uevent)          return kPrune;
+
+    if (val->fTimeMin.Get() <= uevent
+     && val->fTimeMax.Get() >  uevent)          return kPrune;
 
    TObjectSet set("dbSnapshot",0);                                                                                                                   
    const char *fname = mk->SAttr("dbSnapshot");                                                                                                      
