@@ -12,11 +12,16 @@
 #include "tables/St_istMapping_Table.h"
 #include "tables/St_istControl_Table.h"
 #include "tables/St_istChipConfig_Table.h"
+#ifdef __TFG__VERSION__
 #include "TEnv.h"
+#endif /* __TFG__VERSION__ */
 #include "tables/St_istSimPar_Table.h"
 
 THashList *StIstDb::mgRotList = 0;
+
+#ifdef __TFG__VERSION__
 StIstDb* StIstDb::fgInstance = 0;
+#endif /* __TFG__VERSION__ */
 ClassImp(StIstDb)
 
 
@@ -27,15 +32,16 @@ ClassImp(StIstDb)
 StIstDb::StIstDb() : StObject()
 {
    mGeoHMatrixTpcOnGlobal = NULL;
-#if 0
+#ifndef __TFG__VERSION__
    mIstPedNoise = NULL;
    mIstGain	= NULL;
    mIstMapping  = NULL;
    mIstControl  = NULL;
    mIstChipStatus = NULL;
    mIstSimPar = 0;
-#endif
+#else /* __TFG__VERSION__ */
    fgInstance = this;
+#endif /* !__TFG__VERSION__ */
 }
 //_____________________________________________________________________________
 Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
@@ -47,7 +53,19 @@ Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
    mgRotList->SetOwner(kFALSE);
 
    //get TPC positionement relative to STAR
+#ifndef __TFG__VERSION__
+   if (gStTpcDb) {
+      mGeoHMatrixTpcOnGlobal = (TGeoHMatrix *)&gStTpcDb->Tpc2GlobalMatrix();
+   }
+   else {
+      if (mGeoHMatrixTpcOnGlobal) delete mGeoHMatrixTpcOnGlobal;
+
+      mGeoHMatrixTpcOnGlobal = new TGeoHMatrix("tpcOnGlobal");
+      LOG_WARN << "No gStTpcDb, use null transformation for tpc on global" << endm;
+   }
+#else /* __TFG__VERSION__ */
    mGeoHMatrixTpcOnGlobal = (TGeoHMatrix *)&gStTpcDb->Tpc2GlobalMatrix();
+#endif /* __TFG__VERSION__ */
 
    //obtain IST geomery tables
    Survey_st *idsOnTpc          = tables[0];

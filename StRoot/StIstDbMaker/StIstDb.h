@@ -7,15 +7,25 @@
 #include "THashList.h"
 #include "TGeoMatrix.h"
 #include "StEvent/StEnumerations.h"
+#ifdef __TFG__VERSION__
 #include "StDetectorDbMaker/St_istPedNoiseC.h"
 #include "StDetectorDbMaker/St_istGainC.h"
 #include "StDetectorDbMaker/St_istMappingC.h"
 #include "StDetectorDbMaker/St_istControlC.h"
 #include "StDetectorDbMaker/St_istChipConfigC.h"
 #include "StDetectorDbMaker/St_istSimParC.h"
+#endif /* __TFG__VERSION__ */
 using namespace StIstConsts;
 
 class Survey_st;
+#ifndef __TFG__VERSION__
+class istPedNoise_st;
+class istControl_st;
+class istGain_st;
+class istMapping_st;
+class istChipConfig_st;
+class istSimPar_st;
+#endif /* ! __TFG__VERSION__ */
 
 
 /**
@@ -44,8 +54,10 @@ class StIstDb : public StObject
 
 public:
    StIstDb();
+#ifdef __TFG__VERSION__
    virtual ~StIstDb() {fgInstance = 0;}
    static StIstDb* 	instance() {return fgInstance;}
+#endif /* __TFG__VERSION__ */
    THashList *getRotations() const      	{return mgRotList; }
    const TGeoHMatrix *getGeoHMatrixTpcOnGlobal() const	{return mGeoHMatrixTpcOnGlobal; }
    const TGeoHMatrix *getGeoHMatrixIdsOnTpc() const     	{return &mGeoHMatrixIdsOnTpc; }
@@ -55,24 +67,37 @@ public:
    const TGeoHMatrix *getGeoHMatrixSensorOnLadder(Int_t ladder, Int_t sensor) const	{return &mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1]; }
    static const TGeoHMatrix *getHMatrixSensorOnGlobal(int ladder, int sensor);
 
+#ifndef __TFG__VERSION__
+   const istPedNoise_st *getPedNoise() const 		{return mIstPedNoise;}
+   const istGain_st *getGain() const     		{return mIstGain;    }
+   const istMapping_st *getMapping() const  		{return mIstMapping; }
+   const istControl_st *getControl() const  		{return mIstControl; }
+   const istChipConfig_st *getChipStatus() const 	{return mIstChipStatus; }
+#else /* __TFG__VERSION__ */
    const istPedNoise_st *getPedNoise() const 		{return St_istPedNoiseC::instance()->Struct();}
    const istGain_st *getGain() const     		{return St_istGainC::instance()->Struct();    }
    const istMapping_st *getMapping() const  		{return St_istMappingC::instance()->Struct(); }
    const istControl_st *getControl() const  		{return St_istControlC::instance()->Struct(); }
    const istChipConfig_st *getChipStatus() const 	{return St_istChipConfigC::instance()->Struct(); }
+#endif /* __TFG__VERSION__ */
 
    /*! Simulator parameters -hft efficiency for both fast and slow*/
+#ifndef __TFG__VERSION__
+   const istSimPar_st *istSimPar() {return mIstSimPar;}
+#else /* __TFG__VERSION__ */
    const istSimPar_st *istSimPar()                      {return  St_istSimParC::instance()->Struct();}
+#endif /* __TFG__VERSION__ */
       
    Int_t setGeoHMatrices(Survey_st **tables);
-#if 0
+#ifndef __TFG__VERSION__
    void setPedNoise(istPedNoise_st *pedNoise) 	{mIstPedNoise = pedNoise;}
    void setGain(istGain_st *gain)		{mIstGain     = gain;}
    void setMapping(istMapping_st *mapping)    	{mIstMapping  = mapping;}
    void setControl(istControl_st *control)    	{mIstControl  = control;}
    void setChipStatus(istChipConfig_st *chipStatus) {mIstChipStatus = chipStatus;}
    void setIstSimPar(istSimPar_st *istSimPar) {mIstSimPar = istSimPar;}
-#endif   
+   
+#endif /* !__TFG__VERSION__ */
    virtual void Print(Option_t *opt = "") const;
 
    virtual const char *GetCVS() const
@@ -86,15 +111,17 @@ private:
    TGeoHMatrix mGeoHMatrixIstOnPst;
    TGeoHMatrix mGeoHMatrixLadderOnIst[kIstNumLadders];
    TGeoHMatrix mGeoHMatrixSensorOnLadder[kIstNumLadders][kIstNumSensorsPerLadder];
-#if 0
+#ifndef __TFG__VERSION__
+
    istPedNoise_st 	*mIstPedNoise;
    istGain_st 		*mIstGain;
    istMapping_st 	*mIstMapping;
    istControl_st 	*mIstControl;
    istChipConfig_st 	*mIstChipStatus;
    istSimPar_st 	*mIstSimPar; ///< simulator parameters - hit efficiency
-#endif
+#else /* __TFG__VERSION__ */
    static StIstDb       *fgInstance;
+#endif /* !__TFG__VERSION__ */
    
    ClassDef(StIstDb, 1)
 };
