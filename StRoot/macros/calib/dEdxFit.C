@@ -30,9 +30,9 @@
 #else
 // source code suitable for a standalone executable
 #endif
-//#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
-//#define __USE_ROOFIT__
-//#endif
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
+#define __USE_ROOFIT__
+#endif
 //________________________________________________________________________________
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -661,9 +661,9 @@ TF1 *FitRL5(TH1 *hist, Bool_t outer = kFALSE)
   }
   Double_t X = l5xg_mult->GetParameter(1);
   Double_t Y = 0;
-  static TPolyMarker *pm = 0;
-  if (pm) delete pm;
-  pm = new TPolyMarker(1, &X, &Y);
+  //  static TPolyMarker *pm = 0;
+  //  if (pm) delete pm;
+  TPolyMarker *pm = new TPolyMarker(1, &X, &Y);
   hist->GetListOfFunctions()->Add(pm);
   pm->SetMarkerStyle(23);
   pm->SetMarkerColor(kRed);
