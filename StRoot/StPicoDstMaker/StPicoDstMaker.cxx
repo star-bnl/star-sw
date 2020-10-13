@@ -449,7 +449,13 @@ Int_t StPicoDstMaker::InitRun(Int_t const runnumber) {
       LOG_ERROR << " MTD initialization error!!! " << endm;
       return kStErr;
     }
+  } 
+#if defined (__TFG__VERSION__)
+  else {
+    if (GetDateTime().GetYear() == 2011) StPicoTrack::setdEdxErrorScale(0.5); // Account a bug in dE/dx error for y2011
   }
+#endif /* __TFG__VERSION__ */
+
   return kStOK;
 }
 
@@ -766,7 +772,6 @@ int StPicoDstMaker::Make() {
     returnStarCode = MakeRead();
 #if defined (__TFG__VERSION__)
     if ( !mPicoDst->IsGoodTrigger()) return kStSkip;
-    if (GetDateTime().GetYear() == 2011) StPicoTrack::setdEdxErrorScale(0.5); // Account a bug in dE/dx error for y2011
 #endif /* __TFG__VERSION__ */
   }
 

@@ -30,6 +30,7 @@ Int_t StPicoTrack::fgdEdXMode = 1;
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
 #include "StBichsel/StdEdxPull.h"
+Float_t StPicoTrack::fgdEdxErrorScale = 1;
 #endif /* __TFG__VERSION__ */
 
 ClassImp(StPicoTrack)
