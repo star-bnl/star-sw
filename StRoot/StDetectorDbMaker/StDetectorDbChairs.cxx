@@ -2052,6 +2052,8 @@ MakeChairInstance(istControl,Calibrations/ist/istControl);
 MakeChairInstance(istGain,Calibrations/ist/istGain);
 #include "St_istMappingC.h"
 MakeChairInstance(istMapping,Calibrations/ist/istMapping);
+#include "St_istSimParC.h"
+MakeChairInstance(istSimPar,Calibrations/ist/istSimPar);
 //____________________________Calibrations/pxl____________________________________________________
 #include "St_pxlHotPixelsC.h"
 //MakeChairInstance(pxlHotPixels,Calibrations/pxl/pxlHotPixels);
