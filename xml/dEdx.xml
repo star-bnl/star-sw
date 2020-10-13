@@ -14,7 +14,7 @@
 #   setenv NODEBUG yess
 #   setup 64b
 #   starver TFG18m
-#   starver .DEV2 
+#   starver TFG20i
   set fileB = `basename ${INPUTFILE0}`;
   set file = `basename ${fileB} .event.root`;
   echo "${file}"
