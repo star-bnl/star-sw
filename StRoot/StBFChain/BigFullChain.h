@@ -1582,7 +1582,7 @@ Bfc_st BFC[] = { // standard chains
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
   {"Trs","Trs","tpcChain","scl,tpcDB,TrsToF,StEvent,EmbeddingShortCut","StTrsMaker","StTrsMaker","",kFALSE},
   {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut,TTreeFile","StTpcRSMaker"
-   ,"libMathMore,StdEdxY2Maker,StTpcRSMaker",                          "New Tpc Response Simulator",kFALSE},
+   ,"libMathMore,StPicoEvent,StdEdxY2Maker,StTpcRSMaker",              "New Tpc Response Simulator",kFALSE},
   {"tfs"     ,"","","TpcFastSim" ,"","","WARNING *** Option is OBSOLETE *** use TpcFastSim instead",kFALSE},
   {"TpcFastSim"  ,"tpc_hits","tpcChain","MakeEvent,Simu,-trs,-TpcRS,-tcl,-tpxclu,-fcf,-tpc_daq,StEvent,"
    "-TpcHitMover,EmbeddingShortCut" ,"StTpcFastSimMaker","St_tcl_Maker","use tfs (no Trs or TpcRS)",kFALSE},
@@ -1901,7 +1901,7 @@ Bfc_st BFC[] = { // standard chains
 #else
   {"BeamBack" ,"","","StEvent",                          "","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif
-  {"LdEdxY2"     ,"","","tpcDb,StEvent",             "","libMinuit,StdEdxY2Maker","Load dEdx Maker",kFALSE},
+  {"LdEdxY2"     ,"","","tpcDb,StEvent", "","libMinuit,StPicoEvent,StdEdxY2Maker","Load dEdx Maker",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","LdEdxY2","StdEdxY2Maker","",         "Bichsel method used for dEdx",kFALSE},
   {"dEdxCalib"    ,"","","dEdxY2","",                       "switch on dEdx calibration histograms",kFALSE},
   {"ForcedX"     ,"","","dEdxY2","",                      "Force recalculation of dX using Helices",kFALSE},

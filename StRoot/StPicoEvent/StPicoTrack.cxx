@@ -16,20 +16,17 @@
 #include "TF1.h"
 #include "St_base/StMessMgr.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
-#include "StPicoEvent/StPicoTrack.h"
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
 #include "StBichsel/StdEdxPull.h"
-Int_t StPicoTrack::fgdEdXMode = 1;
-#endif /* __TFG__VERSION__ */
-
-#if defined (__TFG__VERSION__)
 #include "TF1.h"
 #include "St_base/StMessMgr.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
 #include "StBichsel/StdEdxPull.h"
+
+Int_t StPicoTrack::fgdEdXMode = 1;
 Float_t StPicoTrack::fgdEdxErrorScale = 1;
 #endif /* __TFG__VERSION__ */
 
