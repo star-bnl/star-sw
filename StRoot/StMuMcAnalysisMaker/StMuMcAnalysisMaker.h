@@ -67,6 +67,7 @@ enum TrackType {
 enum TrackMatchType {
   kNotDefined = -1, kMcTk = 0, kMcTpcTk, kRecoTk   , kCloneTk   , kGhostTk   , kLostTk
   ,                            kMcToFTk, kRecoToFTk,              kGhostToFTk, kLostToFTk
+  ,                            kMcEToFTk, kRecoEToFTk,            kGhostEToFTk, kLostEToFTk
   ,                            kMcHftTk, kRecoHftTk,              kGhostHftTk, kLostHftTk 
   ,                            kTotalTkTypes                       
   ,                 kMcVx = 0, kMcTpcVx, kRecoVx   , kCloneVx   , kGhostVx   , kLostVx
