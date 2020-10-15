@@ -51,7 +51,7 @@ StMuMcTrack::StMuMcTrack(const g2t_track_st &t) : TObject(),mEgLabel(t.eg_label)
 }
 //________________________________________________________________________________
 ostream&              operator<<(ostream& os,  const StMuMcTrack& v) {
-  os << Form("McTk:%4i Vx:%4i Ge:%4i NoHits:%3i",v.Id(),v.IdVx(),v.GePid(),v.NoHits());
+  os << Form("McTk:%4i Vx:%4i Ge:%4i Pdg:%i7 NoHits:%3i",v.Id(),v.IdVx(),v.GePid(),v.Pdg(),v.NoHits());
   os << Form(" q:%2i pT:%7.3f eta:%6.3f phi:%6.3f p:%8.3f px:%8.3f py:%8.3f pz:%8.3f",v.Charge(),v.pT(), v.Eta(), 
 	     TMath::ATan2(v.Pxyz().y(),v.Pxyz().x()), v.Ptot(), v.Pxyz().x(),v.Pxyz().y(),v.Pxyz().z());
   return os;
@@ -103,6 +103,41 @@ const Char_t *StMuMcTrack::GeName() {
 }
 //________________________________________________________________________________
 void StMuMcTrack::Print(Option_t *option) const {cout << *this << endl;}
+//________________________________________________________________________________
+void StMuMcTrack::PrintHits(Option_t *option) const {
+  cout << *this << endl << "No hits:\t";
+  if (No_ctb_hit() ) cout << No_ctb_hit() << " ctb\t";			     
+  if (No_eem_hit() ) cout << No_eem_hit() << " eem (endcap em cal)\t";	     
+  if (No_emc_hit() ) cout << No_emc_hit() << " emc\t";			     
+  if (No_esm_hit() ) cout << No_esm_hit() << " esm (endcap shower max)\t";	     
+  if (No_ftp_hit() ) cout << No_ftp_hit() << " forward tpc\t";		     
+  if (No_gem_hit() ) cout << No_gem_hit() << " gem barrel\t";		   	     
+  if (No_hpd_hit() ) cout << No_hpd_hit() << " hpd\t";			     
+  if (No_ist_hit() ) cout << No_ist_hit() << " ist\t";			     
+  if (No_igt_hit() ) cout << No_igt_hit() << " igt\t";			     
+  if (No_fst_hit() ) cout << No_fst_hit() << " fst\t";			     
+  if (No_fgt_hit() ) cout << No_fgt_hit() << " fgt\t";			     
+  if (No_fpd_hit() ) cout << No_fpd_hit() << " fpd\t";			     
+  if (No_mwc_hit() ) cout << No_mwc_hit() << " mwc\t";			     
+  if (No_pgc_hit() ) cout << No_pgc_hit() << " pgc  ??? \t";		   	     
+  if (No_pmd_hit() ) cout << No_pmd_hit() << " pmd (PMD)\t";		   	     
+  if (No_smd_hit() ) cout << No_smd_hit() << " shower max\t";	     
+  if (No_ssd_hit() ) cout << No_ssd_hit() << " ssd\t";			     
+  if (No_svt_hit() ) cout << No_svt_hit() << " svt\t";			     
+  if (No_pix_hit() ) cout << No_pix_hit() << " pix\t";			     
+  if (No_tof_hit() ) cout << No_tof_hit() << " tof\t";			     
+  if (No_tpc_hitA()) cout << No_tpc_hitA()<< " tpc\t";			     
+  if (No_tpc_hit() ) cout << No_tpc_hit() << " tpc excluding pseudo pad rows\t";   
+  if (No_vpd_hit() ) cout << No_vpd_hit() << " vpd\t";                    	     
+  if (No_etr_hit() ) cout << No_etr_hit() << " etr\t";                    	     
+  if (No_hca_hit() ) cout << No_hca_hit() << " hca\t";                    	     
+  if (No_fts_hit() ) cout << No_fts_hit() << " fts\t";                    	     
+  if (No_eto_hit() ) cout << No_eto_hit() << " etof\t";                    	     
+  if (No_epd_hit() ) cout << No_epd_hit() << " epd\t";                    	     
+  if (No_stg_hit() ) cout << No_stg_hit() << " stg\t";                    	     
+  if (No_wca_hit() ) cout << No_wca_hit() << " wca";
+  cout << endl;                             
+}
 //________________________________________________________________________________
 void StMuMcTrack::FillKFMCTrack(KFMCTrack &mcTrackKF) {
   Float_t q = Charge();
