@@ -348,6 +348,7 @@
             <var name="DeadZone" type="float"  />
             <var name="dAnode(2)" type="float"  />
 	    <var name="tofmax" />
+	    <var name="IDeadZone" type="float" />
         </Structure>
         
 
@@ -499,17 +500,24 @@
             <var name="dAnode" value="{0.2 ,0.4 }" comment="// Inner/Outer anode width "  />
             <var name="zGatingGrid" value="TPCG_LengthV/2 -(TPCG_dGateGround+2*TPCG_dAnode(2))" comment="//  "  />
             <var name="zGroundGrid" value="TPCG_zGatingGrid+TPCG_dGateGround" comment="// "  />
-            <var name="DeadZone" value="12." comment="// Dead zone before GatingGrid. No hits there "  />
+            <var name="DeadZone" value="12." comment="// Dead zone before GatingGrid. (outer) No hits there "  />
+            <var name="IDeadZone" value="12." comment="// Dead zone before GatingGrid. (inner) No hits there "  />
 	    <var name="tofmax"   value="1.0E-6" comment="// Max time of flight" />
         </Fill>
 	<Fill name="TPCG" comment="Subversion 1">
 	  <var name="version"  value="3.1"     comment="selector" />
 	  <var name="rmax"     value="207.77"  comment="Max envelope radius" />
-	  <var name="deadzone" value="14"      comment="Extend deadzone before gating grid" />
+	  <var name="deadzone" value="14"      comment="Extend deadzone before gating grid (outer)" />
+	  <var name="Ideadzone" value="14"      comment="Extend deadzone before gating grid (inner)" />
 	  <var name="tofmax"   value="32.0E-6" comment="Increase maximum TOF for particles" />
 	</Fill>
 	<Fill name="TPCG" comment="Subversion 2 -- flags mixed iTPC / TPC year">
 	  <var name="version"  value="3.2"     comment="selector" />
+	</Fill>
+	<Fill name="TPCG" comment="Subversion 2.1 -- flags mixed iTPC / TPC year">
+	  <var name="version"   value="3.21"     comment="selector" />
+	  <var name="deadzone"  value="13.0" comment="Reduce outer deadzone by 1 cm" />
+	  <var name="ideadzone" value="12.4" comment="Reduce inner deadzone by 1.6 cm" />
 	</Fill>
         
 	<Use struct="TPCC"                                             />
@@ -1966,7 +1974,8 @@ iShape = kTrd1;
 		zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK 
 		zBeg     = TPCG_MembTHK/2 
 		zEnd     = TPCG_zGroundGrid + TPRS_dAnode*2
-		zDed     = TPCG_zGatingGrid - TPCG_DeadZone
+		<If expr="i_sec==1"> zDed     = TPCG_zGatingGrid - TPCG_DeadZone  </If>
+		<If expr="i_sec==2"> zDed     = TPCG_zGatingGrid - TPCG_IDeadZone </If>
 		zPmt     = TPCG_zGatingGrid
 		dx       = tprs_width/2
 
