@@ -348,6 +348,7 @@
             <var name="DeadZone" type="float"  />
             <var name="dAnode(2)" type="float"  />
 	    <var name="tofmax" />
+	    <var name="IDeadZone" type="float" />
         </Structure>
         
 
@@ -500,12 +501,19 @@
             <var name="zGatingGrid" value="TPCG_LengthV/2 -(TPCG_dGateGround+2*TPCG_dAnode(2))" comment="//  "  />
             <var name="zGroundGrid" value="TPCG_zGatingGrid+TPCG_dGateGround" comment="// "  />
             <var name="DeadZone" value="14." comment="// Dead zone before GatingGrid. No hits there "  />
+            <var name="IDeadZone" value="14." comment="// Dead zone before GatingGrid. (inner) No hits there "  />
 	    <var name="tofmax"   value="32.0E-6" comment="// Max time of flight" />
         </Fill>
 
+        <Fill name="TPCG" comment="// TPC basic dimensions"  >
+            <var name="version" value="6.1" comment="// version    =&gt; current version "  />
+            <var name="DeadZone" value="13." comment="// Dead zone before GatingGrid. No hits there "  />
+            <var name="IDeadZone" value="12.4" comment="// Dead zone before GatingGrid. (inner) No hits there "  />
+	</Fill>
+
         
 	<Use struct="TPCC" />
-        <Use struct="TPCG" />
+        <Use struct="TPCG" select="version" value="TPCC_version" />
 
         <Fill name="TPRS" comment="// sector of padrows"  >
             <var name="sec" value="1" comment="// sector number: 1 for inner, 2 for outer "  />
@@ -658,9 +666,10 @@
 
         <Use struct="TECW"  />
         <Use struct="TPCR"  />
-
+<!--
 	<Use struct="TPCC"                                             />
         <Use struct="TPCG"    select="version"    value="TPCC_version" />
+-->
 
 
 
@@ -1958,7 +1967,8 @@ iShape = kTrd1;
 		zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK 
 		zBeg     = TPCG_MembTHK/2 
 		zEnd     = TPCG_zGroundGrid + TPRS_dAnode*2
-		zDed     = TPCG_zGatingGrid - TPCG_DeadZone
+		<If expr="i_sec==1"> zDed     = TPCG_zGatingGrid - TPCG_DeadZone  </If>
+		<If expr="i_sec==2"> zDed     = TPCG_zGatingGrid - TPCG_IDeadZone </If>
 		zPmt     = TPCG_zGatingGrid
 		dx       = tprs_width/2
 
