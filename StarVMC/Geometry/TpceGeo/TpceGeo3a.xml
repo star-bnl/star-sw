@@ -1974,8 +1974,8 @@ iShape = kTrd1;
 		zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK 
 		zBeg     = TPCG_MembTHK/2 
 		zEnd     = TPCG_zGroundGrid + TPRS_dAnode*2
-		<If expr="i_sec==1"> zDed     = TPCG_zGatingGrid - TPCG_DeadZone  </If>
-		<If expr="i_sec==2"> zDed     = TPCG_zGatingGrid - TPCG_IDeadZone </If>
+		<If expr="i_sec==1"> zDed     = TPCG_zGatingGrid - TPCG_IDeadZone  </If>
+		<If expr="i_sec==2"> zDed     = TPCG_zGatingGrid - TPCG_DeadZone </If>
 		zPmt     = TPCG_zGatingGrid
 		dx       = tprs_width/2
 
