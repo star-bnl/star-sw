@@ -1,6 +1,5 @@
 <Document file="StarVMC/Geometry/GeometryTags.xml">
   <StarGeometry default="y2016" >
-
     <!-- 
       This one can stay the same
 	 F forward
@@ -97,7 +96,7 @@
     <!--Construct sys="pipe" config="PIPE12"-->
     <Construct sys="pipe" config="PIPE12ft" />
     <Construct sys="targ" config="TARGv1a"  /> <!-- fixed target geometry -->
-    <Construct sys="tpce" config="TPCEv6"  />
+    <Construct sys="tpce" config="TPCEv61"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
     <Construct sys="calb" config="CALB02"  />
@@ -162,7 +161,7 @@
     <!--Construct sys="pipe" config="PIPE12"-->
     <Construct sys="pipe" config="PIPE12ft" />
     <Construct sys="targ" config="TARGv1a"  /> <!-- fixed target geometry -->
-    <Construct sys="tpce" config="TPCEv6"  />
+    <Construct sys="tpce" config="TPCEv61"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
     <Construct sys="calb" config="CALB02"  />
@@ -272,7 +271,7 @@
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="scon" config="SCON14"  />
     <Construct sys="pipe" config="PIPE12"  />
-    <Construct sys="tpce" config="TPCE32"  />
+    <Construct sys="tpce" config="TPCE32a"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
     <Construct sys="calb" config="CALB02"  />
