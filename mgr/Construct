@@ -245,6 +245,12 @@ if ($STAR_HOST_SYS =~ /gcc447/) {# no c++11
 if ($ROOT_LEVEL !~ /^5/ ){
    push @items, "GeoTestMaker";
    push @items, "garfield";
+   push @items, "Pythia6_2_22";
+   push @items, "Pythia6_2_23";
+   push @items, "Pythia6_2_28";
+   push @items, "Pythia8_1_62";
+   push @items, "Pythia8_1_86";
+   push @items, "Pythia8_2_25";
 }
 #push @items, "StiCA";
 #push @items, "StarVMC/xgeometry";
