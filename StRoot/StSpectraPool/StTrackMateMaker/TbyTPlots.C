@@ -174,12 +174,14 @@ void DrawPng(TCanvas *c) {
   pngName.ReplaceAll("__","_");
   pngName.ReplaceAll("__","_");
   pngName.ReplaceAll("#","");
-  pngName += ".png"; 
+  //  pngName += ".png"; 
+  pngName += ".svg"; 
   c->SaveAs(pngName);
   nPng++;
   cout << "Draw #\t" << nPng << "\t" << pngName << endl;
 #ifdef __SAVE_ROOT_PICTURES_
-  pngName.ReplaceAll(".png",".root");
+  //  pngName.ReplaceAll(".png",".root");
+  pngName.ReplaceAll(".svg",".root");
   c->SaveAs(pngName);
 #endif
 }
