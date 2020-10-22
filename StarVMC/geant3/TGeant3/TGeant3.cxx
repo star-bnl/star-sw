@@ -6553,8 +6553,8 @@ Bool_t TGeant3::IsExclusiveSDScoring() const
 {
    return fExclusiveSDScoring;
 }
-
-
+#else
+#if 0
 //_____________________________________________________________________________
 void TGeant3::SetSensitiveDetector(const TString & /*volumeName*/, TVirtualMCSensitiveDetector * /*sd*/)
 {
@@ -6574,7 +6574,7 @@ TVirtualMCSensitiveDetector *TGeant3::GetCurrentSensitiveDetector() const
    Warning("GetCurrentSensitiveDetector(...)", "New function - requires ROOT version >= 6.14/00.");
    return NULL;
 }
-
+#endif
 //_____________________________________________________________________________
 void TGeant3::SetExclusiveSDScoring(Bool_t /*exclusiveSDScoring*/)
 {
@@ -7577,4 +7577,5 @@ void TGeant3::EndOfEventForSDs()
          break;
    }
 }
+
 #endif

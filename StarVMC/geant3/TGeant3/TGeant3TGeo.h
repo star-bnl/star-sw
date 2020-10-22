@@ -15,9 +15,8 @@
 #include <set>
 
 class TGeoMaterial;
-#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
 class TVirtualMCSensitiveDetector;
-#endif /* ROOT_VERSION(6,13,4) */
+
 //______________________________________________________________
 //
 //       Geant3 prototypes for commons
@@ -108,9 +107,8 @@ public:
 
    // functions from GBASE
    virtual void Ggclos();
-#if 0
    virtual void Gprint(const char *name);
-#endif
+
    // functions from GCONS
    virtual void Gsmate(Int_t imat, const char *name, Float_t a, Float_t z, Float_t dens, Float_t radl, Float_t absl);
    virtual void Gsmixt(Int_t imat, const char *name, Float_t *a, Float_t *z, Float_t dens, Int_t nlmat, Float_t *wmat);
@@ -132,8 +130,8 @@ public:
    virtual void Gsdvs(const char *name, const char *mother, Float_t step, Int_t iaxis, Int_t numed);
    virtual void Gsdvs2(const char *name, const char *mother, Float_t step, Int_t iaxis, Float_t c0, Int_t numed);
    virtual void Gsdvt(const char *name, const char *mother, Double_t step, Int_t iaxis, Int_t numed, Int_t ndvmx);
-   virtual  void  Gsdvt2(const char *name, const char *mother, Double_t step, Int_t iaxis,
-			 Double_t c0, Int_t numed, Int_t ndvmx);
+   virtual void
+   Gsdvt2(const char *name, const char *mother, Double_t step, Int_t iaxis, Double_t c0, Int_t numed, Int_t ndvmx);
    virtual void Gsord(const char *name, Int_t iax);
    virtual void Gspos(const char *name, Int_t nr, const char *mother, Double_t x, Double_t y, Double_t z, Int_t irot,
                       const char *konly = "ONLY");
@@ -195,11 +193,11 @@ public:
    // Control Methods
 
    virtual void FinishGeometry();
-#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+
    // methods for sensitive detectors
    virtual void SetSensitiveDetector(const TString &volumeName, TVirtualMCSensitiveDetector *sd);
    virtual TVirtualMCSensitiveDetector *GetCurrentSensitiveDetector() const;
-#endif /* ROOT_VERSION(6,13,4) */
+
    //
    virtual void SetColors();
    virtual void SetCollectTracks(Bool_t flag = kTRUE) { fCollectTracks = flag; }
@@ -212,9 +210,9 @@ protected:
    Bool_t fCollectTracks;       //! Tracks get collected via TGeoTrack
    Bool_t fIsComputeNextMatrix; //! Compute systematically the matrix to the next crossed node.
    Gcvol1_t *fGcvol1;           //! GCVOLU common structure
-#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
+
    std::map<TVirtualMCSensitiveDetector *, TGeoRCExtension *> fUserSDTGeoMap; //!
-#endif /* ROOT_VERSION(6,13,4) */
+
 private:
    TGeant3TGeo(const TGeant3TGeo &) : TGeant3() {}
    TGeant3TGeo &operator=(const TGeant3TGeo &) { return *this; }

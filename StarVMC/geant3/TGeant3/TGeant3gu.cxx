@@ -905,6 +905,7 @@ extern "C" type_of_call
       }
       // --- Particle leaving the setup ?
       if (!geant3->IsTrackOut()) {
+#if 0
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 14, 0)
          TVirtualMCSensitiveDetector *userSD = geant3->GetCurrentSensitiveDetector();
          if (userSD) {
@@ -914,6 +915,9 @@ extern "C" type_of_call
          if (!geant3->IsExclusiveSDScoring()) {
             vmcApplication->Stepping();
          }
+#else
+         vmcApplication->Stepping();
+#endif
 #else
          vmcApplication->Stepping();
 #endif

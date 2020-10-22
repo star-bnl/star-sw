@@ -549,12 +549,7 @@ R__EXTERN void (*fggperp)(Float_t *, Float_t *, Int_t &);
 //____________________________________________________________________________
 TGeant3TGeo::TGeant3TGeo()
    : TGeant3(), fMCGeo(0), fImportRootGeometry(kFALSE), fCollectTracks(kFALSE), fIsComputeNextMatrix(kFALSE),
-     fGcvol1(0)
-#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
-   , fUserSDTGeoMap(),
-    fGcvol1(0),
-    fUserSDTGeoMap()
-#endif /* ROOT_VERSION(6,13,4) */
+     fGcvol1(0), fUserSDTGeoMap()
 {
    //
    // Default constructor
@@ -564,12 +559,7 @@ TGeant3TGeo::TGeant3TGeo()
 //____________________________________________________________________________
 TGeant3TGeo::TGeant3TGeo(const char *title, Int_t nwgeant)
    : TGeant3(title, nwgeant), fImportRootGeometry(kFALSE), fCollectTracks(kFALSE), fIsComputeNextMatrix(kFALSE),
-#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
-         fGcvol1(0),
-	 fUserSDTGeoMap()
-#else
-	 fGcvol1(0)
-#endif /* ROOT_VERSION(6,13,4) */
+     fGcvol1(0), fUserSDTGeoMap()
 {
    //
    // Standard constructor for TGeant3 with ZEBRA initialisation
@@ -1230,7 +1220,6 @@ void TGeant3TGeo::Ggclos()
    //
    fVolNames = 0;
 }
-#if 0
 //_____________________________________________________________________________
 void TGeant3TGeo::Gprint(const char * /*name*/)
 {
@@ -1239,7 +1228,6 @@ void TGeant3TGeo::Gprint(const char * /*name*/)
    // CHNAME   name of a data structure
    //
 }
-#endif
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //
 //                        Functions from GCONS
@@ -2227,7 +2215,7 @@ TVirtualMCSensitiveDetector *TGeant3TGeo::GetCurrentSensitiveDetector() const
    // Using static cast require exclusive use of TGeoVolume extension for VMC senistive detectors
    return static_cast<TVirtualMCSensitiveDetector *>(static_cast<TGeoRCExtension *>(extension)->GetUserObject());
 }
-
+#else
 //_____________________________________________________________________________
 void TGeant3TGeo::SetSensitiveDetector(const TString & /*volumeName*/, TVirtualMCSensitiveDetector * /*sd*/)
 {

@@ -1065,15 +1065,15 @@ public:
    virtual void
    Trspsc(Float_t *ps, Float_t *rs, Float_t *pc, Float_t *rc, Float_t *h, Float_t *ch, Int_t *ierr, Float_t *spx);
 
-#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
    // Methods for sensitive detectors
 
+#if ROOT_VERSION_CODE >= 396548 /* ROOT_VERSION(6,13,4) */
    virtual void SetSensitiveDetector(const TString &volumeName, TVirtualMCSensitiveDetector *sd);
    virtual TVirtualMCSensitiveDetector *GetSensitiveDetector(const TString &volumeName) const;
    virtual TVirtualMCSensitiveDetector *GetCurrentSensitiveDetector() const;
+#endif /* ROOT_VERSION(6,13,4) */
    virtual void SetExclusiveSDScoring(Bool_t exclusiveSDScoring);
    Bool_t IsExclusiveSDScoring() const;
-#endif /* ROOT_VERSION(6,13,4) */
    // Control Methods
 
    virtual void FinishGeometry();
