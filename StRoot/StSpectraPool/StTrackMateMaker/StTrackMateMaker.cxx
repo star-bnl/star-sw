@@ -6,23 +6,22 @@
 #include <set>
 
 #include "StTrackMateMaker.h"
-#include "TH2.h"
-#include "TFile.h"
-#include "TTree.h"
+#include "StContainers.h"
+#include "StTpcHitCollection.h"
 #include "StEvent.h"
 #include "StPrimaryVertex.h"
-#include "StTpcHitCollection.h"
-#include "StContainers.h"
 #include "StTrackNode.h"
 #include "StPrimaryTrack.h"
-#include "StTrack.h"
-#include "StTrackDetectorInfo.h"
-#include "StTpcHit.h"
 #include "StTrackGeometry.h"
 #include "StDcaGeometry.h"
-#include "StEventUtilities/StuRefMult.hh"
 #include "StDedxPidTraits.h"
+#include "StTrackDetectorInfo.h"
+#include "StGlobalTrack.h"
+#include "StTrack.h"
+#include "StTpcHit.h"
 #include "StMessMgr.h"
+#include "StDbUtilities/StTpcCoordinateTransform.hh"
+#include "StDbUtilities/StCoordinates.hh" 
 #define __DEBUG__
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTrackMaterMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
@@ -56,10 +55,15 @@ Int_t StTrackMateMaker::Init() {
     f->cd();
   }
   LOG_INFO << "StTrackMateMaker::Init() - creating histogram" << endm;
-  TString evNames = "refMult/F";
   trackTree = new TTree("trackMateComp","trackMateComp");
   fTrackMatch = new TrackMatch;
   trackBr = trackTree->Branch("TrackMatch",&fTrackMatch);
+#define __HIT_MATCH__
+#ifdef __HIT_MATCH__
+  hitTree = new TTree("hitMateComp","hitMateComp");
+  fHitMatch = new HitMatch;
+  hitBr = hitTree->Branch("HitMatch",&fHitMatch);
+#endif /* __HIT_MATCH__ */
   LOG_INFO << "StTrackMateMaker::Init() - successful" << endm;
   
   return StMaker::Init();
@@ -132,17 +136,16 @@ Int_t StTrackMateMaker::Make(){
   else {
     LOG_INFO << "Event2: Vertex Not Found" << endm;
   }
-  LOG_INFO << "Size of track containers" << endm;
+  LOG_INFO << "Size of track containers";
   const StSPtrVecTrackNode& trackNodes1 = rEvent1->trackNodes();
-  LOG_INFO << "Event1: Track Nodes " << trackNodes1.size() << endm;
+  LOG_INFO << "\tEvent1: Track Nodes " << trackNodes1.size();
   
   const StSPtrVecTrackNode& trackNodes2 = rEvent2->trackNodes();
-  LOG_INFO << "Event2: Track Nodes " << trackNodes2.size() << endm;
+  LOG_INFO << "\tEvent2: Track Nodes " << trackNodes2.size() << endm;
   if (! trackNodes1.size() || ! trackNodes2.size()) return kStWarn;
   //eventwise info
   //  evOutput[0] = uncorrectedNumberOfPrimaries(*rEvent2);
   //eventBr->Fill();
-  LOG_INFO << "Tpc Hits" << endm;
   // Note:
   // For StTpcHits: sector = [1-24], padrow = [1-72]
   // For StTpcHitCollections: sector [0-23], padrow = [0,71]
@@ -152,6 +155,9 @@ Int_t StTrackMateMaker::Make(){
     LOG_WARN << "Empty tpc hit collection in one of the events" << endm;
     return kStWarn;
   }
+  LOG_INFO << "Size of Tpc hit containers";
+  LOG_INFO << "\tEvent1: " << tpchitcoll1->numberOfHits();
+  LOG_INFO << "\tEvent2: " << tpchitcoll2->numberOfHits() << endm;
   if (Debug()>2) {
     for (size_t iSec=0; iSec<tpchitcoll1->numberOfSectors(); ++iSec) { // [0,23]
       const StTpcSectorHitCollection* sectorcoll1 = tpchitcoll1->sector(iSec);
@@ -231,40 +237,6 @@ Int_t StTrackMateMaker::Make(){
   // could rewrite using
   // max_element...
   // track1 => track2
-#if 0
-  for (auto it = Track1ToTrack2.begin(), end =  Track1ToTrack2.end(); it != end; it = Track1ToTrack2.upper_bound(it->first)) {
-    StGlobalTrack *track1 = it->first;
-    if (! track1) continue;
-    Int_t nt2 = Track1ToTrack2.count(track1);
-    if (! nt2) {
-      FillMatch(track1);
-    } else {
-      auto ret = Track1ToTrack2.equal_range(track1);
-      for (auto it2 = ret.first; it2 != ret.second; ++it2) {
-	StGlobalTrack *track2 = it2->second;
-	FillMatch(track1, track2);
-      }
-    }
-  }
-  // track2 => track1 
-  for (auto it = Track2ToTrack1.begin(), end =  Track2ToTrack1.end(); it != end; it = Track2ToTrack1.upper_bound(it->first)) {
-    StGlobalTrack *track2 = it->first;
-    if (! track2) continue;
-    Int_t nt1 = Track2ToTrack1.count(track2);
-    if (nt1 == 1) continue;g
-    if (! nt1) {
-      FillMatch(0,track2);
-    } else {
-      auto ret = Track2ToTrack1.equal_range(track2);
-      Int_t matchstatus1 = 0;
-      for (auto it2 = ret.first; it2 != ret.second; ++it2) {
-	StGlobalTrack *track1 = it2->second;
-	if (track1 ) matchstatus1++;
-	FillMatch(track1, track2);
-      }
-    }
-  }
-#else
   for (auto x1 : Track1ToTrack2) {
     StGlobalTrack *trk1 = x1.first;
     if (! trk1 ) continue;
@@ -285,14 +257,28 @@ Int_t StTrackMateMaker::Make(){
       FillMatch(trk1,trk2);
     }
   }
-#endif
   return kStOK;
 }
 //________________________________________________________________________________
-void StTrackMateMaker::FillMatch(StGlobalTrack* trk1, StGlobalTrack* trk2) {
-  fTrackMatch->newP = TrackParametersFill(trk1);
-  fTrackMatch->oldP = TrackParametersFill(trk2);
+void StTrackMateMaker::FillMatch(const StGlobalTrack* trk1, const StGlobalTrack* trk2) {
+  fTrackMatch->oldP = TrackParametersFill(trk1);
+  fTrackMatch->newP = TrackParametersFill(trk2);
   trackTree->Fill();
+}
+//________________________________________________________________________________
+void StTrackMateMaker::FillMatch(const StTpcHit* hit1,const  StTpcHit* hit2) {
+  fHitMatch->oldP = HitParametersFill(hit1);
+  fHitMatch->newP = HitParametersFill(hit2);
+  if (Debug()) {
+    cout << "newP\t"; fHitMatch->newP.Print();
+    cout << "oldP\t"; fHitMatch->oldP.Print();
+    if (fHitMatch->newP.sector < 0 || fHitMatch->newP.sector > 24 ||
+	fHitMatch->oldP.sector < 0 || fHitMatch->oldP.sector > 24) {
+      static Int_t ibreak = 0;
+      ibreak++;
+    }
+  }
+  hitTree->Fill();
 }
 //________________________________________________________________________________
 size_t StTrackMateMaker::buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,Hit2TrackMap& htMap){
@@ -306,20 +292,6 @@ size_t StTrackMateMaker::buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,Hit
       StTpcHit* h = (StTpcHit *) *hIterTrk;
       if (! h) continue;
       htMap.insert(HitTrackPair(h,track));
-#if 0
-      StTpcHit* hit = (StTpcHit*) h;
-      StGlobalTrack* trackO = htMap[hit];
-      if (trackO && track != trackO) {
-	LOG_INFO << "Double track associated with hit \n" << *hit
-		 << "\nOld Track : " << *trackO << " and \nNew Track : " << *track << endm;
-	if (track->fitTraits().numberOfFitPoints() > trackO->fitTraits().numberOfFitPoints()) htMap[hit] = track;
-	failedInserts++;
-      } else {
-	htMap[hit] = track;
-      }
-//       pair<Hit2TrackMap::iterator,bool> insRes = htMap.insert(Hit2TrackMap::value_type(hit,track));
-//       if (insRes.second==false) ++failedInserts;	    
-#endif
     }//hits in track loop
   }// track loop
   return failedInserts;
@@ -342,11 +314,11 @@ void StTrackMateMaker::buildHit2HitMaps(const StTpcHitCollection *tpchitcoll1, c
       for (UInt_t it1 = 0; it1 < N1; it1++) {
 	const StTpcHit *hit1 = hits1[it1];
 	if (! hit1) continue;
-	if (hit1->flag()) continue;
+	//	if (hit1->flag()) continue;
 	for (UInt_t it2 = 0; it2 < N2; it2++) {
 	  const StTpcHit *hit2 = hits2[it2];
 	  if (! hit2) continue;
-	  if (hit2->flag()) continue;
+	  //	  if (hit2->flag()) continue;
 	  assert(hit1->sector() == hit2->sector() &&
 		 hit1->padrow() == hit2->padrow());
 	  Double_t R = 
@@ -377,10 +349,27 @@ void StTrackMateMaker::buildHit2HitMaps(const StTpcHitCollection *tpchitcoll1, c
 	      }
 	    }
 	  }
-	}
+	} // hit2 loop
+      } // hit1 loop
+#ifdef __HIT_MATCH__
+      for (UInt_t it1 = 0; it1 < N1; it1++) {
+	const StTpcHit *hit1 = hits1[it1];
+	if (! hit1) continue;
+	//	if (hit1->flag()) continue;
+	const StTpcHit *hit2 = Hit1ToHit2[hit1];
+	FillMatch(hit1, hit2);
       }
-    }
-  }
+      for (UInt_t it2 = 0; it2 < N2; it2++) {
+	const StTpcHit *hit2 = hits2[it2];
+	if (! hit2) continue;
+	//	if (hit2->flag()) continue;
+	const StTpcHit *hit1 = Hit2ToHit1[hit2];
+	if (hit1) continue;
+	FillMatch(hit1, hit2);
+      }
+#endif /* __HIT_MATCH__ */
+    } // row loop
+  } // sector loop
 }
 //________________________________________________________________________________
 void    StTrackMateMaker::buildTrack2TrackMap(const StSPtrVecTrackNode &trackNodes1, 
@@ -495,15 +484,53 @@ void StTrackMateMaker::checkConsistency(Track2TrackMap &Track1ToTrack2, Track2Tr
   }
 }
 //________________________________________________________________________________
-TrackParameters StTrackMateMaker::TrackParametersFill(StGlobalTrack *gTrack) {
-  static TrackParameters par;
+HitParameters StTrackMateMaker::HitParametersFill(const StTpcHit *tpcHit) {
+  HitParameters P;
+  if (! tpcHit) return P;
+  const StThreeVectorF& xyz = tpcHit->position();
+  P.sector = tpcHit->sector();
+  P.row    = tpcHit->padrow();
+  static StTpcCoordinateTransform tran;
+  StGlobalCoordinate glob(xyz);
+  //		    StTpcLocalCoordinate lTpc;
+  StTpcLocalSectorCoordinate lTpc;
+  tran(glob,lTpc,P.sector,P.row);
+  P.x = xyz.x();
+  P.y = xyz.y();
+  P.z = xyz.z();
+  P.xL = lTpc.position().x();
+  P.yL = lTpc.position().y();
+  P.zL = lTpc.position().z();
+  P.q = 1.e6*tpcHit->charge();
+  P.adc = tpcHit->adc();
+  P.pad = tpcHit->pad();
+  P.timebucket = tpcHit->timeBucket();
+  P.IdTruth =  tpcHit->idTruth();
+  P.npads   =  tpcHit->padsInHit();
+  P.ntbks   =  tpcHit->maxTmbk() - tpcHit->minTmbk() + 1;
+  P.trigId  = 0;
+  P.us      = tpcHit->usedInFit();
+  P.fl      = tpcHit->flag();
+  if (Debug()) {
+    cout << "P\t"; P.Print();
+    if (P.sector <= 0 || P.sector > 24) {
+      static Int_t ibreak = 0;
+      ibreak++;
+    }
+  }
+  return P;
+}
+//________________________________________________________________________________
+TrackParameters StTrackMateMaker::TrackParametersFill(const StGlobalTrack *gTrack) {
+  TrackParameters par;
+  if (! gTrack) return par;
   par.set();
   if (! gTrack) return par;
   par.Id = gTrack->key();
   StPrimaryTrack* pTrack = (StPrimaryTrack*) gTrack->node()->track(primary);
   par.MatchStatus = gTrack->flagExtension() + 1;
-  gTrack->setFlagExtension(par.MatchStatus);
-  StTrackDetectorInfo *det = gTrack->detectorInfo();
+  ((StGlobalTrack *)gTrack)->setFlagExtension(par.MatchStatus);
+  const StTrackDetectorInfo *det = gTrack->detectorInfo();
   if (det) {
     par.FirstPointX = det->firstPoint().x();
     par.FirstPointY = det->firstPoint().y();
@@ -523,7 +550,7 @@ TrackParameters StTrackMateMaker::TrackParametersFill(StGlobalTrack *gTrack) {
     if (p && p->detector() == kTpcId && p->method() == kTruncatedMeanId) mTraits = p;
   }
   if (mTraits) par.Dedx = mTraits->mean();
-  StDcaGeometry *dca = gTrack->dcaGeometry();
+  const StDcaGeometry *dca = gTrack->dcaGeometry();
   StThreeVectorF mom;
   if (dca) mom = dca->momentum();
   else      mom = gTrack->geometry()->momentum();
