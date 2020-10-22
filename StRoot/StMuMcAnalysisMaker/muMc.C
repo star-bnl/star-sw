@@ -8,7 +8,7 @@ void muMc(Int_t N = 1000000, const Char_t *input = "*.MuDst.root", const Char_t 
 #else
   //  gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
   gROOT->LoadMacro("lMuDst.C");
-#if 0
+#if 1
   Char_t *file = gSystem->Which("./",output,kReadPermission);
 #else
   Char_t *file = 0;

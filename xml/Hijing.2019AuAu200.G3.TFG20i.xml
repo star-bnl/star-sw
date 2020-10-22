@@ -10,7 +10,7 @@
 #   starver TFG19a
 #  starver .DEV2 
 #  starver TFG17u 
-  starver SL20c
+  starver TFG20i
   set file = $INPUTFILE0;
 #  set rung = `echo $file | awk -F\: '{print $1}'`
 #  set f    = `echo $file | awk -F\: '{print $2}'`
