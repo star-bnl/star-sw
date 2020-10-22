@@ -12,7 +12,7 @@ void RunTbyT(Int_t nevents=999,
   gROOT->LoadMacro("bfc.C");
   TString Chain("StEvent,StiLib,detDb,tpcDb,mysql,nodefault");
   bfc(-1,Chain.Data(),0,0,tFile);
-  gSystem->Load("StTrackMateMaker");
+  gSystem->Load("StTbyTMaker");
   cout << "Job will run on    File: " << eventFile1 << endl;
   cout << "Correspondibg new  File: " << eventFile2 << endl;
   gSystem->Load("StIOMaker");
@@ -22,7 +22,7 @@ void RunTbyT(Int_t nevents=999,
   // 2nd IOMaker, for ittf file
   StIOMaker* ioMaker2 = new StIOMaker("IO2","r",eventFile2);//,"bfcTree");
   chain->AddBefore("db",ioMaker2);
-  StTrackMateMaker*  goodStuff      = new StTrackMateMaker;
+  StTbyTMaker*  goodStuff      = new StTbyTMaker;
   //  chain->SetDEBUG(2);
   // now execute the chain member functions
   StMaker::lsMakers(chain);

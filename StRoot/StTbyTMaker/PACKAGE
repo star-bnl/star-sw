@@ -1,0 +1,5 @@
+# $Id $
+# package StTbyTMaker
+# author: 
+Library:libStTbyTMaker.so:LIBS +=   -lStChain  -lStEvent
+#Library:libStTbyTMaker.so:LIBS +=   -lStChain  -lStEvent

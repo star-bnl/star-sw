@@ -1,11 +1,11 @@
 //
-// $Id: StTrackMateMaker.cxx,v 1.4 2013/01/16 21:56:45 fisyak Exp $
+// $Id: StTbyTMaker.cxx,v 1.4 2013/01/16 21:56:45 fisyak Exp $
 //
 #include <iostream>
 #include <algorithm>
 #include <set>
 
-#include "StTrackMateMaker.h"
+#include "StTbyTMaker.h"
 #include "StContainers.h"
 #include "StTpcHitCollection.h"
 #include "StEvent.h"
@@ -46,15 +46,15 @@ bool compStTrackPing(const StTrackPing& rhs, const StTrackPing& lhs){
     return rhs.mNPings>lhs.mNPings;
 }
 
-static const char rcsid[] = "$Id: StTrackMateMaker.cxx,v 1.4 2013/01/16 21:56:45 fisyak Exp $";
-ClassImp(StTrackMateMaker);
+static const char rcsid[] = "$Id: StTbyTMaker.cxx,v 1.4 2013/01/16 21:56:45 fisyak Exp $";
+ClassImp(StTbyTMaker);
 //________________________________________________________________________________
-Int_t StTrackMateMaker::Init() {
+Int_t StTbyTMaker::Init() {
   TFile *f = GetTFile();
   if (f) {
     f->cd();
   }
-  LOG_INFO << "StTrackMateMaker::Init() - creating histogram" << endm;
+  LOG_INFO << "StTbyTMaker::Init() - creating histogram" << endm;
   trackTree = new TTree("trackMateComp","trackMateComp");
   fTrackMatch = new TrackMatch;
   trackBr = trackTree->Branch("TrackMatch",&fTrackMatch);
@@ -64,24 +64,24 @@ Int_t StTrackMateMaker::Init() {
   fHitMatch = new HitMatch;
   hitBr = hitTree->Branch("HitMatch",&fHitMatch);
 #endif /* __HIT_MATCH__ */
-  LOG_INFO << "StTrackMateMaker::Init() - successful" << endm;
+  LOG_INFO << "StTbyTMaker::Init() - successful" << endm;
   
   return StMaker::Init();
 }
 //________________________________________________________________________________
-void StTrackMateMaker::Clear(const char* c)
+void StTbyTMaker::Clear(const char* c)
 {
   return StMaker::Clear(c);
 }
 //________________________________________________________________________________
-Bool_t StTrackMateMaker::GoodTrack(StTrack* trk) {
+Bool_t StTbyTMaker::GoodTrack(StTrack* trk) {
   if (! trk || trk->flag()<=0 || trk->topologyMap().trackFtpc()) return kFALSE;
   if (! trk->detectorInfo())  return kFALSE;
   if ( trk->fitTraits().numberOfFitPoints(kTpcId) < 15) return kFALSE;
   return kTRUE;
 }
 //________________________________________________________________________________
-Bool_t StTrackMateMaker::GoodMatch(StTrack* trk1, StTrack* trk2, UInt_t NPings) {
+Bool_t StTbyTMaker::GoodMatch(StTrack* trk1, StTrack* trk2, UInt_t NPings) {
   if (NPings < 5) return kFALSE;
   if (! trk1)    return kFALSE;
   if (! trk2)    return kFALSE;
@@ -102,8 +102,8 @@ Bool_t StTrackMateMaker::GoodMatch(StTrack* trk1, StTrack* trk2, UInt_t NPings) 
   return kTRUE;
 }
 //________________________________________________________________________________
-Int_t StTrackMateMaker::Make(){
-  LOG_INFO << "In StTrackMateMaker::Make " << endm;
+Int_t StTbyTMaker::Make(){
+  LOG_INFO << "In StTbyTMaker::Make " << endm;
   StEvent* rEvent1 = 0;
   StEvent* rEvent2 = 0;
   
@@ -260,13 +260,13 @@ Int_t StTrackMateMaker::Make(){
   return kStOK;
 }
 //________________________________________________________________________________
-void StTrackMateMaker::FillMatch(const StGlobalTrack* trk1, const StGlobalTrack* trk2) {
+void StTbyTMaker::FillMatch(const StGlobalTrack* trk1, const StGlobalTrack* trk2) {
   fTrackMatch->oldP = TrackParametersFill(trk1);
   fTrackMatch->newP = TrackParametersFill(trk2);
   trackTree->Fill();
 }
 //________________________________________________________________________________
-void StTrackMateMaker::FillMatch(const StTpcHit* hit1,const  StTpcHit* hit2) {
+void StTbyTMaker::FillMatch(const StTpcHit* hit1,const  StTpcHit* hit2) {
   fHitMatch->oldP = HitParametersFill(hit1);
   fHitMatch->newP = HitParametersFill(hit2);
   if (Debug()) {
@@ -281,7 +281,7 @@ void StTrackMateMaker::FillMatch(const StTpcHit* hit1,const  StTpcHit* hit2) {
   hitTree->Fill();
 }
 //________________________________________________________________________________
-size_t StTrackMateMaker::buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,Hit2TrackMap& htMap){
+size_t StTbyTMaker::buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,Hit2TrackMap& htMap){
   size_t failedInserts = 0;
   for (size_t it = 0; it<nodes.size(); ++it) {
     StGlobalTrack* track = (StGlobalTrack*)nodes[it]->track(global);
@@ -297,7 +297,7 @@ size_t StTrackMateMaker::buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,Hit
   return failedInserts;
 }
 //________________________________________________________________________________
-void StTrackMateMaker::buildHit2HitMaps(const StTpcHitCollection *tpchitcoll1, const StTpcHitCollection *tpchitcoll2,
+void StTbyTMaker::buildHit2HitMaps(const StTpcHitCollection *tpchitcoll1, const StTpcHitCollection *tpchitcoll2,
 		       Hit2HitMap &Hit1ToHit2,Hit2HitMap &Hit2ToHit1) {
   for (Int_t s = 0; s < 24; s++) {
     const StTpcSectorHitCollection* sectorcoll1 = tpchitcoll1->sector(s);
@@ -372,7 +372,7 @@ void StTrackMateMaker::buildHit2HitMaps(const StTpcHitCollection *tpchitcoll1, c
   } // sector loop
 }
 //________________________________________________________________________________
-void    StTrackMateMaker::buildTrack2TrackMap(const StSPtrVecTrackNode &trackNodes1, 
+void    StTbyTMaker::buildTrack2TrackMap(const StSPtrVecTrackNode &trackNodes1, 
 					      const StSPtrVecTrackNode &trackNodes2, 
 					      Hit2HitMap &Hit1ToHit2, 
 					      Hit2TrackMap &hitTrackMap2,
@@ -436,7 +436,7 @@ void    StTrackMateMaker::buildTrack2TrackMap(const StSPtrVecTrackNode &trackNod
   }//track1 loop
 }
 //________________________________________________________________________________
-void StTrackMateMaker::checkConsistency(Track2TrackMap &Track1ToTrack2, Track2TrackMap &Track2ToTrack1) {
+void StTbyTMaker::checkConsistency(Track2TrackMap &Track1ToTrack2, Track2TrackMap &Track2ToTrack1) {
   // Check consistency of the maps Track1 <=> Track2 
   for (auto it = Track1ToTrack2.begin(), end =  Track1ToTrack2.end(); it != end; it = Track1ToTrack2.upper_bound(it->first)) {
     StGlobalTrack *track1 = it->first;
@@ -484,7 +484,7 @@ void StTrackMateMaker::checkConsistency(Track2TrackMap &Track1ToTrack2, Track2Tr
   }
 }
 //________________________________________________________________________________
-HitParameters StTrackMateMaker::HitParametersFill(const StTpcHit *tpcHit) {
+HitParameters StTbyTMaker::HitParametersFill(const StTpcHit *tpcHit) {
   HitParameters P;
   if (! tpcHit) return P;
   const StThreeVectorF& xyz = tpcHit->position();
@@ -521,7 +521,7 @@ HitParameters StTrackMateMaker::HitParametersFill(const StTpcHit *tpcHit) {
   return P;
 }
 //________________________________________________________________________________
-TrackParameters StTrackMateMaker::TrackParametersFill(const StGlobalTrack *gTrack) {
+TrackParameters StTbyTMaker::TrackParametersFill(const StGlobalTrack *gTrack) {
   TrackParameters par;
   if (! gTrack) return par;
   par.set();

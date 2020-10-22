@@ -1,5 +1,5 @@
 //
-// $Id: StTrackMateMaker.h,v 1.2 2009/11/10 20:57:28 fisyak Exp $
+// $Id: StTbyTMaker.h,v 1.2 2009/11/10 20:57:28 fisyak Exp $
 //
 #ifndef STAR_St_TrackMate_Maker
 #define STAR_St_TrackMate_Maker
@@ -123,11 +123,11 @@ StTrackPing(StTrack *t=0, UInt_t ping=0) : mTrack(t), mNPings(ping) {};
 };
 
 bool compStTrackPing(const StTrackPing& rhs,const StTrackPing& lhs);
-class StTrackMateMaker : public StMaker {
+class StTbyTMaker : public StMaker {
  public: 
- StTrackMateMaker(const char *name="TrackMate") : StMaker(name),
+ StTbyTMaker(const char *name="TrackMate") : StMaker(name),
     trackTree(0), trackBr(0), fTrackMatch(0), hitTree(0), hitBr(0), fHitMatch(0)  {}
-  ~StTrackMateMaker() {}
+  ~StTbyTMaker() {}
   Int_t  Init();
   virtual void Clear(const char* opt="");
   Int_t  Make();
@@ -154,10 +154,10 @@ class StTrackMateMaker : public StMaker {
   TBranch* hitBr;
   HitMatch *fHitMatch;
   virtual const char *GetCVS() const {
-    static const char cvs[]= "Tag $Name:  $ $Id: StTrackMateMaker.h,v 1.2 2009/11/10 20:57:28 fisyak Exp $ built __DATE__ __TIME__" ; 
+    static const char cvs[]= "Tag $Name:  $ $Id: StTbyTMaker.h,v 1.2 2009/11/10 20:57:28 fisyak Exp $ built __DATE__ __TIME__" ; 
     return cvs;
   }
-  ClassDef(StTrackMateMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StTbyTMaker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
 	
