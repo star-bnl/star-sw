@@ -10,7 +10,7 @@
 #   starver TFG19a
 #  starver .DEV2 
 #  starver TFG17u 
-  starver SL20c
+  starver SL20d
   set file = $INPUTFILE0;
 #  set rung = `echo $file | awk -F\: '{print $1}'`
 #  set f    = `echo $file | awk -F\: '{print $2}'`
@@ -39,7 +39,7 @@
 #   root4star -q -b -x 'bfc.C(100,"fzin,y2020a,sdt20191115.160010,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,CorrY,VFMinuit,tpcDB,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth,-geantout,big,MiniMcMk,StiCA,NewTpcAlignment,AgML,picoWrite,PicoVtxVpd,NewTpcAlignment,ExB,geant,-etofsim,-hitfilt,-geantOut,-evout,OSpaceZ2,OGridLeakFull,-useXgeom","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
 #   root4star -q -b -x 'bfc.C(100,"genIn,y2020a,sdt20190311,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,CorrY,VFMinuit,tpcDB,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth,-geantout,big,MiniMcMk,StiCA,NewTpcAlignment,AgML,picoWrite,PicoVtxVpd,NewTpcAlignment,ExB,geant,-etofsim,-hitfilt,-geantOut,-evout,OSpaceZ2,OGridLeakFull,-useXgeom","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
 #   root4star -q -b -x 'bfc.C(100,"ntIn,y2019a,sdt20190311,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,CorrY,VFMinuit,tpcDB,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth,-geantout,big,MiniMcMk,StiCA,NewTpcAlignment,AgML,picoWrite,PicoVtxVpd,NewTpcAlignment,ExB,geant,-etofsim,-hitfilt,-geantOut,-evout,OSpaceZ2,OGridLeakFull,-useXgeom","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
-    root4star -q -b -x 'bfc.C(100,"ntIn,y2019a,sdt20190311,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,CorrY,VFMinuit,tpcDB,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth,-geantout,big,StiCA,NewTpcAlignment,AgML,picoWrite,PicoVtxVpd,geant,-etofsim,-hitfilt,-geantOut,-evout,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
+    root4star -q -b -x 'bfc.C(100,"ntIn,y2019a,sdt20190311,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,CorrY,VFMinuit,tpcDB,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth,-geantout,big,StiCA,NewTpcAlignment,AgML,picoWrite,PicoVtxVpd,geant,-etofsim,-hitfilt,-geantOut,-evout,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,ITTF","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
 #  endif
 </command>
 <!-- <input URL="file:/net/l404/data/fisyak/reco/2019/hijingAuAu200.DEV2.StiCA.Minuit.newCut/*.event.root" /> -->
