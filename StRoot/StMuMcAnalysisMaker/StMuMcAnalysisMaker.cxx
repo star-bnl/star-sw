@@ -766,7 +766,11 @@ void StMuMcAnalysisMaker::FillTrackPlots()
     }
     if (IdVx != 1) continue; // original vertex 
     IdVx = mcTrack->IdVx(); // for the track
-    Bool_t McTpc = mcTrack->No_tpc_hit() >= StMuDst::MinNoTpcMcHits;
+    Int_t noTpcHits =  mcTrack->No_tpc_hit();
+    if (noTpcHits == 0 && mcTrack->No_tpc_hitA() > 0) {
+      noTpcHits = mcTrack->No_tpc_hitA() - 1; // only for year >= 2019
+    }
+    Bool_t McTpc = noTpcHits >= StMuDst::MinNoTpcMcHits;
     Bool_t McHft = mcTrack->No_pix_hit() >= 2 && mcTrack->No_ist_hit()+mcTrack->No_ssd_hit() >= 1;
     Bool_t McToF = mcTrack->No_tof_hit() > 0;
     Bool_t McEToF = mcTrack->No_eto_hit() > 0;
@@ -2049,7 +2053,7 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3[2], Int_t animate, Double_t min, Doub
       TString xName(h1[0]->GetXaxis()->GetTitle());
       if (Debug()) {
 	for (Int_t pm = kPositive; pm < kTotalSigns; pm++) {
-	  cpm[pm] = new TCanvas(pmNames[pm],pmNames[pm]); //,700,500);
+	  cpm[pm] = new TCanvas(pmNames[pm],pmNames[pm],400,400); //,700,500);
 	  if (xName.Contains("pT",TString::kIgnoreCase)) cpm[pm]->SetLogx(1);
 	  cpm[p]->SetLogz(1);
 	  h2[pm]->Draw("colz");
@@ -2058,7 +2062,7 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3[2], Int_t animate, Double_t min, Doub
 	}
       }
       TString &Name = FormName(h1[0]); 
-      TCanvas *c = new TCanvas(Name.Data(),Name.Data()); //,700,500);
+      TCanvas *c = new TCanvas(Name.Data(),Name.Data(),400,400); //,700,500);
       if (max > 0) max *= 1.1;
       else         max *= 0.9;
       if (min > 0) min *= 0.9;
@@ -2219,7 +2223,7 @@ void StMuMcAnalysisMaker::DrawEff(Double_t ymax, Double_t pTmin, Int_t animate) 
   if (Debug()) {
     c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
     if (c1) c1->Clear();
-    else    c1 = new TCanvas();
+    else    c1 = new TCanvas("c1","c1",400,400);
   }
   //                        Eta pT  Phi
   const Char_t *proj3[3] = {"x","y","z"};
