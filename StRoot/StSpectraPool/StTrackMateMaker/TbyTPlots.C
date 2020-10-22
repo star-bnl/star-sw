@@ -820,30 +820,30 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
     for (Int_t gp = 0; gp < 2; gp++) {// Global Primary
       Double_t Vars[2][kVAR] = {0}; // 2 -> New/Old; 3 -> pT/Eta/Phi
       Int_t c[kCharge] = {0};
-      Int_t iOld = T->oldP.MatchStatus; // 0 - lost, 1 - match, > 1 - clone, 
-      Int_t iNew = T->newP.MatchStatus;
+      Int_t iOld = T->newP.MatchStatus; // 0 - lost, 1 - match, > 1 - clone, 
+      Int_t iNew = T->oldP.MatchStatus;
       if (_debug && iOld != iNew) {
 	static Int_t iBreak = 0;
 	iBreak++;
       }
       if (gp == 0) {
-	if (iOld && T->oldP.FitPtsGl < effNFP) iOld = 0;
-	if (iNew && T->newP.FitPtsGl < effNFP) iNew = 0;
-	if (iOld) {Vars[kold][kpT] = T->oldP.PtGl; Vars[kold][kEta] = T->oldP.EtaGl; Vars[kold][kPhi] = TMath::RadToDeg()*T->oldP.PhiGl; c[kold] = T->oldP.charge();}
-	if (iNew) {Vars[knew][kpT] = T->newP.PtGl; Vars[knew][kEta] = T->newP.EtaGl; Vars[knew][kPhi] = TMath::RadToDeg()*T->newP.PhiGl; c[knew] = T->newP.charge();}
+	if (iOld && T->newP.FitPtsGl < effNFP) iOld = 0;
+	if (iNew && T->oldP.FitPtsGl < effNFP) iNew = 0;
+	if (iOld) {Vars[kold][kpT] = T->newP.PtGl; Vars[kold][kEta] = T->newP.EtaGl; Vars[kold][kPhi] = TMath::RadToDeg()*T->newP.PhiGl; c[kold] = T->newP.charge();}
+	if (iNew) {Vars[knew][kpT] = T->oldP.PtGl; Vars[knew][kEta] = T->oldP.EtaGl; Vars[knew][kPhi] = TMath::RadToDeg()*T->oldP.PhiGl; c[knew] = T->oldP.charge();}
       } else {
-	if (iOld && T->oldP.FitPtsPr < effNFP) iOld = 0;
-	if (iNew && T->newP.FitPtsPr < effNFP) iNew = 0;
-	if (iOld) {Vars[kold][kpT] = T->oldP.PtPr; Vars[kold][kEta] = T->oldP.EtaPr; Vars[kold][kPhi] = TMath::RadToDeg()*T->oldP.PhiPr; c[kold] = T->oldP.charge();}
-	if (iNew) {Vars[knew][kpT] = T->newP.PtPr; Vars[knew][kEta] = T->newP.EtaPr; Vars[knew][kPhi] = TMath::RadToDeg()*T->newP.PhiPr; c[knew] = T->newP.charge();}
+	if (iOld && T->newP.FitPtsPr < effNFP) iOld = 0;
+	if (iNew && T->oldP.FitPtsPr < effNFP) iNew = 0;
+	if (iOld) {Vars[kold][kpT] = T->newP.PtPr; Vars[kold][kEta] = T->newP.EtaPr; Vars[kold][kPhi] = TMath::RadToDeg()*T->newP.PhiPr; c[kold] = T->newP.charge();}
+	if (iNew) {Vars[knew][kpT] = T->oldP.PtPr; Vars[knew][kEta] = T->oldP.EtaPr; Vars[knew][kPhi] = TMath::RadToDeg()*T->oldP.PhiPr; c[knew] = T->oldP.charge();}
       }
       if (iOld == 0 && iNew == 0) continue;
       Double_t LostOld = iOld == 0 ? 1 : 0, MatchedOld = iOld >= 1 ? 1 : 0, CloneOld = iNew > 1 ? 1 : 0;
       Double_t LostNew = iNew == 0 ? 1 : 0, MatchedNew = iNew >= 1 ? 1 : 0, CloneNew = iOld > 1 ? 1 : 0;
       if (_debug) {
-	cout << ientry << "\tgp = " << gp << "\tOld " << iOld << " Id = " << T->oldP.Id << "\tL/M/C = " << LostOld << "/" << MatchedOld << "/" << CloneOld 
+	cout << ientry << "\tgp = " << gp << "\tOld " << iOld << " Id = " << T->newP.Id << "\tL/M/C = " << LostOld << "/" << MatchedOld << "/" << CloneOld 
 	     << "\tc/pT/eta/phi" << c[kold] << "/" << Vars[kold][kpT] << "/" << Vars[kold][kEta] << "/" << Vars[kold][kPhi] << endl; 
-	cout << ientry << "\tgp = " << gp << "\tNew " << iNew << " Id = " << T->newP.Id << "\tL/M/C = " << LostNew << "/" << MatchedNew << "/" << CloneNew 
+	cout << ientry << "\tgp = " << gp << "\tNew " << iNew << " Id = " << T->oldP.Id << "\tL/M/C = " << LostNew << "/" << MatchedNew << "/" << CloneNew 
 	     << "\tc/pT/eta/phi" << c[knew] << "/" << Vars[knew][kpT] << "/" << Vars[knew][kpT] << "/" << Vars[knew][kPhi] << endl; 
       }
       for (Int_t var = 0; var < 3 ; var++) {
@@ -864,30 +864,30 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
       if (iOld != 1 || iNew != 1) continue;
       // |eta| < 1.0
       if (TMath::Abs(Vars[knew][kEta]) > 1 || TMath::Abs(Vars[knew][kEta]) > 1) continue;
-      if (gp == 0) fitPtsHist->Fill(T->newP.FitPtsGl,T->oldP.FitPtsGl);
+      if (gp == 0) fitPtsHist->Fill(T->oldP.FitPtsGl,T->newP.FitPtsGl);
       Double_t pTdiff     = Vars[knew][kpT] - Vars[kold][kpT]; // pT_new - pT_old
       Double_t pTdiffR    = 1 - Vars[kold][kpT]/Vars[knew][kpT]; // (pT_new - pT_old)/pT_new = 1 - pT_old/pT_new;
       Double_t pTInvdiffR = 1 - Vars[knew][kpT]/Vars[kold][kpT]; // (1/pt_new - 1/pT_old)/(1/pT_new) = 1 - pT_new/pT_old;
       Double_t phiNew = Vars[knew][kPhi];
       Double_t phiOld = Vars[kold][kPhi];
       if (gp == 1) {
-	DifPvX->Fill(T->newP.PrimX - T->oldP.PrimX);
-	DifPvY->Fill(T->newP.PrimY - T->oldP.PrimY);
-	DifPvZ->Fill(T->newP.PrimZ - T->oldP.PrimZ);
+	DifPvX->Fill(T->oldP.PrimX - T->newP.PrimX);
+	DifPvY->Fill(T->oldP.PrimY - T->newP.PrimY);
+	DifPvZ->Fill(T->oldP.PrimZ - T->newP.PrimZ);
       }
       Int_t chsign = 0;
-      if ((T->newP.Charge && T->newP.Charge < 0) ||
-	  (T->oldP.Charge && T->oldP.Charge < 0)) chsign = 1;
+      if ((T->oldP.Charge && T->oldP.Charge < 0) ||
+	  (T->newP.Charge && T->newP.Charge < 0)) chsign = 1;
       if (gp == 0) {
-	Charge->Fill(T->oldP.Charge,T->newP.Charge);
-	pTDifNFP[0][chsign]->Fill(T->newP.FitPtsGl,pTdiffR); 
-	if (Vars[knew][kEta] > 0.5)  pTDifNFP5[0][chsign]->Fill(T->newP.FitPtsGl,pTdiffR); 
+	Charge->Fill(T->newP.Charge,T->oldP.Charge);
+	pTDifNFP[0][chsign]->Fill(T->oldP.FitPtsGl,pTdiffR); 
+	if (Vars[knew][kEta] > 0.5)  pTDifNFP5[0][chsign]->Fill(T->oldP.FitPtsGl,pTdiffR); 
       }
       pTDiff[gp][chsign]->Fill(Vars[knew][kpT],pTdiff);
       pTDiffR[gp][chsign]->Fill(Vars[knew][kpT],pTdiffR);
       pTInvDiffR[gp][chsign]->Fill(Vars[knew][kpT],pTInvdiffR);
       PhiDiffR[0][gp][chsign]->Fill(Vars[knew][kPhi],pTdiffR);
-      if (T->newP.EtaGl > 0) PhiDiffR[1][gp][chsign]->Fill(Vars[knew][kPhi],pTdiffR);
+      if (T->oldP.EtaGl > 0) PhiDiffR[1][gp][chsign]->Fill(Vars[knew][kPhi],pTdiffR);
       else                   PhiDiffR[2][gp][chsign]->Fill(Vars[knew][kPhi],pTdiffR);
     } // Global Primary loop 
   } // entires loop
