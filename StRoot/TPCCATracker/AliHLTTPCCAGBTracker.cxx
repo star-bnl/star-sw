@@ -467,6 +467,12 @@ void AliHLTTPCCAGBTracker::Merge()
     fStatTime[13+i] = merger.Timer(i);
   }
 //  std::cout<<" --- Merger - Reconstruct - timers - ok\n";
+#ifdef CALC_DCA_ON
+  dca_left.clear();
+  dca_right.clear();
+  dca_left = std::move( merger.GetLeftDCA() );
+  dca_right = std::move( merger.GetRightDCA() );
+#endif
 
 /**
 #ifdef MAIN_DRAW

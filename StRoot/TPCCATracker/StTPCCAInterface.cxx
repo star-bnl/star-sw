@@ -50,6 +50,20 @@ void StTPCCAInterface::Run()
   std::cout<<" - CA FindTracks() start -\n";
   fTracker->FindTracks();
   std::cout<<" - fTracker->NTracks(): "<<fTracker->NTracks()<<"\n";
+  
+  // --- DCA test ---
+  std::cout<<" ------- FindTracks - done - dca test -------\n";
+  auto dca_left = fTracker->GetLeftDCA();	// dca_right, GetRightDCA
+  std::cout<<" - sca_left.size: "<<dca_left.size()<<"\n";
+  for( int i = 0; i < dca_left.size(); i++ ) {
+    std::cout<<" - > i: "<<i<<"; x: "<<dca_left[i].x<<"; y: "<<dca_left[i].y<<"; z: "<<dca_left[i].z<<"\n";
+  }
+  auto dca_right = fTracker->GetRightDCA();
+  std::cout<<" - sca_right.size: "<<dca_right.size()<<"\n";
+  for( int i = 0; i < dca_right.size(); i++ ) {
+    std::cout<<" - > i: "<<i<<"; x: "<<dca_right[i].x<<"; y: "<<dca_right[i].y<<"; z: "<<dca_right[i].z<<"\n";
+  }
+  // ---
 
   // copy hits
   timer.Start();

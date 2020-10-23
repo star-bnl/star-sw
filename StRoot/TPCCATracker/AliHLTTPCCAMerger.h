@@ -104,6 +104,10 @@ class AliHLTTPCCAMerger
     // process
   void UnpackSlices();
   void Reconstruct();
+#ifdef CALC_DCA_ON
+  vector<point_3d>& GetLeftDCA() { return dca_left; }
+  vector<point_3d>& GetRightDCA() { return dca_right; }
+#endif
  private:
   void FindNeighbourTracks(int number=0);
   void Merging(int number=0);
@@ -234,6 +238,11 @@ class AliHLTTPCCAMerger
   TrSort* fTrList;
 
   Vc::vector<AliHLTTPCCASliceTrackInfoV> fTrackInfosV; //* additional information for slice tracks
+  
+#ifdef CALC_DCA_ON
+  vector<point_3d> dca_left;
+  vector<point_3d> dca_right;
+#endif
 
   struct HitInfo {
     int id;

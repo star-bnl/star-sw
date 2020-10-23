@@ -720,8 +720,12 @@ void AliHLTTPCCAMerger::UnpackSlices()
         if(!fitted[iV]) continue;
           // if the track fitted correctly store the track
         AliHLTTPCCASliceTrackInfo &track = fTrackInfos[nTracksCurrent];
-
+#ifdef CALC_DCA_ON
+        auto inTrPar = AliHLTTPCCATrackParam( vStartPoint, iV );
+        track.SetInnerParam( inTrPar );
+#else
         track.SetInnerParam( AliHLTTPCCATrackParam( vStartPoint, iV ) );
+#endif
         track.SetInnerAlpha( vStartAlpha[iV] );
         track.SetOuterParam( AliHLTTPCCATrackParam( vEndPoint,   iV ) );
         track.SetOuterAlpha( vEndAlpha[iV] );
@@ -734,6 +738,12 @@ void AliHLTTPCCAMerger::UnpackSlices()
 #endif // DO_TPCCATRACKER_EFF_PERFORMANCE
         track.fInnerRow = (fClusterInfos[hits[0][iV]]).IRow();
         track.fOuterRow = (fClusterInfos[hits[(unsigned int)nHits[iV]-1][iV]]).IRow();
+#ifdef CALC_DCA_ON
+        point_3d dca;
+        inTrPar.GetDCAPoint( 0.f, 0.f, 0.f, dca.x, dca.y, dca.z, fSliceParam.cBz() );
+        if( inTrPar.GetZ() < 0 ) dca_left.push_back( dca );
+        else dca_right.push_back( dca );
+#endif
 
         for ( unsigned int i = 0; i < nHits[iV]; i++ )
           fClusterInfos[nClustersCurrent + i] = fClusterInfos[hits[i][iV]];
