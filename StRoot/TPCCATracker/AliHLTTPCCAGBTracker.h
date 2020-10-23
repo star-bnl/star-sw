@@ -108,6 +108,12 @@ class AliHLTTPCCAGBTracker
 
       /// Try to group close hits in row formed by one track. After sort hits.
 //     void GroupHits(); // iklm
+
+#ifdef CALC_DCA_ON
+    vector<point_3d>& GetLeftDCA() { return dca_left; }
+    vector<point_3d>& GetRightDCA() { return dca_right; }
+#endif
+
   friend class AliHLTTPCCAPerformance; //dbg
   protected:
 
@@ -121,6 +127,10 @@ class AliHLTTPCCAGBTracker
     AliHLTTPCCAGBTrack *fTracks; //* array of tracks
     int fNTracks;              //* N tracks
     AliHLTTPCCAMerger *fMerger;  //* global merger
+#ifdef CALC_DCA_ON
+    vector<point_3d> dca_left;
+    vector<point_3d> dca_right;
+#endif
 
     AliHLTResizableArray<AliHLTTPCCAClusterData, 1, AliHLTFullyCacheLineAligned> fClusterData;
 

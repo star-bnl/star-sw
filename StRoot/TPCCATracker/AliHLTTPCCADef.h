@@ -16,6 +16,7 @@
 //#define AVX1V
 //#define TETA
 //#define FOURHITSEGMENTS
+#define CALC_DCA_ON
 
 
 #define NDEBUG
@@ -67,6 +68,12 @@ static inline uint_m validHitIndexes( const uint_v &v )
 //   }
 // }
 #endif //USE_TBB
+
+#ifdef CALC_DCA_ON
+struct point_3d {
+  float x, y, z;
+};
+#endif
 
 // ---------
 
