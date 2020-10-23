@@ -92,6 +92,7 @@ class HitParameters : public TObject {
   Int_t    adc;
   Float_t pad,timebucket;
   Int_t    npads, ntbks, IdTruth;
+  Int_t    pmin, pmax, tmin, tmax;
   Float_t  xL,yL,zL,dX;
   Int_t    trigId, us,fl;
   Float_t  time, timeb;

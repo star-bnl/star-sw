@@ -504,6 +504,10 @@ HitParameters StTbyTMaker::HitParametersFill(const StTpcHit *tpcHit) {
   P.q = 1.e6*tpcHit->charge();
   P.adc = tpcHit->adc();
   P.pad = tpcHit->pad();
+  P.pmin = tpcHit->minPad();
+  P.pmax = tpcHit->maxPad();
+  P.tmin = tpcHit->minTmbk();
+  P.tmax = tpcHit->maxTmbk();
   P.timebucket = tpcHit->timeBucket();
   P.IdTruth =  tpcHit->idTruth();
   P.npads   =  tpcHit->padsInHit();
