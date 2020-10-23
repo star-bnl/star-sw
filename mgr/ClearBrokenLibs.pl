@@ -6,15 +6,18 @@ foreach my $logfile (glob "b*.log") {
 #  print "logfile = $logfile\n";
   while (my $line = <In>) {
 #    if ($line !~ /unrecognized relocation (0x2a) in section/) {next;}
-    if ($line !~ /unrecognized relocation/) {next;}
-#    print "$line\n";
+    if ($line !~ /unrecognized relocation/ &&
+	$line !~ /access beyond end of merged section/) {next;}
+							 #    print "$line\n";
     my ($dummy,$lib) = split(":",$line);
 #    print "=> $lib\n";
-    my $pkg = File::Basename::dirname($lib);
-    $ListOfBrokenLibraries .= " " . $pkg;
-    last;
+    my $pkg;
+    if ($lib =~ /\.a\(/) {$pkg = $lib; $pkg =~ s/a\(.*/a/;}
+    else {    $pkg = File::Basename::dirname($lib);}
+    $ListOfBrokenLibraries .= " " . $pkg . "\n";
+#    last;
   }
   close(In);
 }
-print "$ListOfBrokenLibraries\n";
+print "$ListOfBrokenLibraries";
 
