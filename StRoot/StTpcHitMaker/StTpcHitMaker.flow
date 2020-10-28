@@ -1,0 +1,39 @@
+StTpcRTSHitMaker::Make
+	daq_dta::finalize
+	daq_tpx::get
+		
+		daq_tpx::handle_cld_sim
+                        for each sim->iterate
+              1744                            LOG(NOTE,"No algo assigned for sector %d -- creating one!",sim->sec) ;
+1745                            fcf_algo[sim->sec] = new tpxFCF ;
+1746                            fcf_algo[sim->sec]->config(0x3F,1,sim_row_count,sim_tpx_rowlen) ;       // assume all 6 RDOs; extra data + annotations
+1747                            fcf_algo[sim->sec]->run_compatibility = fcf_run_compatibility ;
+1748                            fcf_algo[sim->sec]->do_cuts = fcf_do_cuts ;
+1749
+1750                            fcf_algo[sim->sec]->apply_gains(sim->sec,gain_algo) ;
+1751
+1752                            fcf_algo[sim->sec]->start_evt() ;
+1753
+1754                            if(fcf_tmp_storage==0) {
+1755                                    fcf_tmp_storage = (u_int *)valloc(FCF_TMP_BYTES) ;
+1756                            }
+            
+			tpxFCF::apply_gains
+			tpxFCF::tpxFCF	
+			tpxFCF::config
+				do_cuts = 2 ;   // 1 means always, 2 means don't cut edges (for i.e. pulser run), 0 means don't... 
+						   tpxFCF::tpxFCF (this=0x7dc7df0) at .sl73_x8664_gcc485/obj/StRoot/RTS/src/DAQ_TPX/tpxFCF.cxx:314
+		online/RTS/src/ESB/tpx.C:1186
+		if(run_type == RUN_TYPE_PULSER) fcf[i]->do_cuts = 2 ;	// to get even the bad edge
+		else fcf[i]->do_cuts = 1 ;	// just cut em...
+
+
+                        tpxFCF::stage2
+				tpxFCF::dump(tpxFCF_cl*, int)
+
+	daq_itpc::get
+		daq_itpc::handle_cld_sim
+			itpc_fcf_c::do_fc
+
+	dtaX = fTpx->get("cld_sim")       
+		handle_cld_sim(sec,row) daq_tpx::handle_cld_sim (this=0x75faa70, sec=-1, row=-1)
