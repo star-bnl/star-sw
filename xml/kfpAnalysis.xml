@@ -56,14 +56,14 @@ end
         </command>
     <ResourceUsage>
       <Priority>99</Priority>
+<!--
+    <Memory>
+      <MinMemory>2700</MinMemory>
+    </Memory>
+-->
     </ResourceUsage>
     <stdout URL="file:./sched$JOBID.log" />
     <stderr URL="file:./sched$JOBID.err" />
      <input URL="command:PicoL.pl" /> 
- <ResourceUsage>
-    <Memory>
-      <MinMemory>2700</MinMemory>
-    </Memory>
-  </ResourceUsage>
 </job>
 
