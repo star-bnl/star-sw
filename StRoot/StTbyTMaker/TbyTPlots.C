@@ -4,9 +4,12 @@
   .L TbyTPlots.C+
   Init();
   Draw();
- */
+*/
 //#define __SAVE_ROOT_PICTURES_
-#
+
+//#if !defined(__CINT__) && !defined(__CLING__) && defined(__MAKECINT__)
+// code that should be seen ONLY by the compiler
+
 #include "Riostream.h"
 #include <stdio.h>
 #include "TSystem.h"
@@ -897,29 +900,3 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
   }
   Draw(Out);
 }
-#if 0
-// Clusters
-.x Chain.C+("trackMateFilest_physics_adc*.root","hitMateComp")
-  TFile *f = new TFile("hit.root","recreate");
-TCanvas *c1 = new TCanvas();
-c1->SetLogz(1);
-tChain->Draw("newP.pmin:newP.row>>PminRnew(72,0.5,72.5,145,0.5,145.5)","oldP.sector<=0","colz");
-tChain->Draw("newP.pmax:newP.row>>PmaxRnew(72,0.5,72.5,145,0.5,145.5)","oldP.sector<=0","colz");
-
-tChain->Draw("newP.pmin:newP.row>>PminRnewAll(72,0.5,72.5,145,0.5,145.5)","","colz");
-tChain->Draw("newP.pmax:newP.row>>PmaxRnewall(72,0.5,72.5,145,0.5,145.5)","","colz");
-TH2F *PminRnew = (TH2F *) gDirectory->Get("PminRnew");
-TH2F *Pmin = new TH2F(*PminRnew);
-Pmin->SetName("Pmin");
-TH2F *PminRnewAll = (TH2F *) gDirectory->Get("PminRnewAll");
-Pmin->Divide(PminRnewAll);
-Pmin->Draw("colz");
-
-TH2F *PmaxRnew = (TH2F *) gDirectory->Get("PmaxRnew");
-TH2F *Pmax = new TH2F(*PmaxRnew);
-Pmax->SetName("Pmax");
-TH2F *PmaxRnewAll = (TH2F *) gDirectory->Get("PmaxRnewAll");
-Pmax->Divide(PmaxRnewAll);
-Pmax->Draw("colz");
-
-#endif
