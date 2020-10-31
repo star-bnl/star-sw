@@ -3,7 +3,7 @@
         <command>
   set CURRENT_DIR = `pwd`
   echo "pwd = ${CURRENT_DIR}"
-#         cd ${SUBMITTINGDIRECTORY}
+  cd ${SUBMITTINGDIRECTORY}
 #   setenv StarEndMakerShell
    setenv STARFPE NO
 #   setup debug
@@ -28,12 +28,12 @@
 #  if (-r ${SUBMITTINGDIRECTORY}/${muFile}) exit 0;
   set piFile = ${filel}.picoDst.root
   if (-r ${SUBMITTINGDIRECTORY}/${piFile}) exit 0;
-  set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
-  if (-r ${bla}) exit 0;
-  touch ${bla}
-  if (-r ${SUBMITTINGDIRECTORY}/Submitted) then 
-    rm ${SUBMITTINGDIRECTORY}/Submitted
-  endif
+#  set bla = ${SUBMITTINGDIRECTORY}/${filel}.bla.root
+#  if (-r ${bla}) exit 0;
+#  touch ${bla}
+#  if (-r ${SUBMITTINGDIRECTORY}/Submitted) then 
+#    rm ${SUBMITTINGDIRECTORY}/Submitted
+#  endif
 #  echo "cp ${evtsFile} ${evtsFileB}"
 #  cp ${evtsFile} ${evtsFileB}
 # TFG19m, TFG20a 12/26/2019 12/29/2019
@@ -44,9 +44,9 @@
 #  gzip ${logFile}
 #  rm ${muFile}
 #  rm ${piFile}
-  cp  ${filel}* ${SUBMITTINGDIRECTORY}
-  rm ${bla}
-  rm -rf ${CURRENT_DIR}
+#  cp  ${filel}* ${SUBMITTINGDIRECTORY}
+#  rm ${bla}
+#  rm -rf ${CURRENT_DIR}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
