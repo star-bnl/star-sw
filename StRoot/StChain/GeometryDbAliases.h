@@ -170,57 +170,59 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2017a",      20161215,     1, "y2017a",   "y2017 production  geometry, AgML,xgeometry"},   
   {"r2017a",      20161220,     1, "y2017a",   "y2017 production  geometry, AgML,xgeometry"},   
  
-  // development tags
-//{"dev2005",     20190101,     0, "dev2005",  "non-production"},
-//{"complete",    20190101,     1, "complete", "non-production"},
-//{"ist1",        20190101,     2, "ist1",     "non-production"},
-//{"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
 //{"y2018x",      20171215,     0, "y2018x",   "y2018x experimental TPC geometry, AgML,xgeometry"},   
-  {"y2018",       20171210,     0, "y2018",    "y2018, no HFT,xgeometry, sector 20 with iTPC"},//
-//{"y2018a",      20171215,     3, "y2018a",   "y2018a physics production geometry version A, AgML,xgeometry"},//  not read yet
-//{"r2018",       20171220,     0, "y2018a",   "y2018a, no HFT,xgeometry"}, // 
+  {"y2018",       20171215,     2, "y2018",    "y2018 development geometry, AgML,xgeometry"},   
+//{"y2018a",      20171215,     3, "y2018a",   "y2018a physics production geometry version A, AgML,xgeometry"},   
+//{"y2018b",      20171215,     4, "y2018b",   "y2018b physics production geometry version B, AgML,xgeometry"},   
+//{"y2018c",      20171215,     5, "y2018b",   "y2018c physics production geometry version C (FXT @ 200.7 cm), AgML,xgeometry"},   
   {"r2018",       20171220,     0, "y2018",    "y2018, no HFT,xgeometry"}, // 
-  {"y2018a",      20171215,     3, "y2018",    "y2018a physics production geometry version A, AgML,xgeometry"},   
-  {"y2018b",      20171215,     4, "y2018",    "y2018b physics production geometry version B, AgML,xgeometry"},   
-  {"y2019",       20181215,     0, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
-  {"y2019a",      20181215,     1, "y2019",    "y2019a first production release geometry, AgML,xgeometry"},   
+
+  {"y2019",       20181215,     0, "y2019",    "y2019 development geometry, AgML,xgeometry"},   
+//{"y2019a",      20181215,     1, "y2019a",   "y2019a first production release geometry, AgML,xgeometry"},   
+//{"y2019b",      20181215,     1, "y2019a",   "y2019a production geometry (FXT @ 200.7cm), AgML,xgeometry"},   
   {"r2019",       20181220,     0, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
-  {"y2020",       20191115,160010, "y2019",    "y2019 development geometry, AgML,xgeometry"},   
-  {"y2020a",      20191115,160011, "y2019",    "y2019a first production release geometry, AgML,xgeometry"},   
+
+  {"y2020",       20191120,     0, "y2019",    "y2020 development geometry, AgML,xgeometry"},   
+  {"y2020a",      20191120,     1, "y2019",    "y2020 fast-offline geometry, AgML,xgeometry"},   
+  {"y2020b",      20191120,     2, "y2019",    "y2020 production geometry (FXT @ 200.7 cm), AgML,xgeometry"},   
   {"r2020",       20191120,180000, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
   {"r2020a",      20191120,180001, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
+ 
   {"y2021",       20201115,160010, "y2019",    "y2019 development geometry, AgML,xgeometry"},   
   {"y2021a",      20201115,160011, "y2019",    "y2019a first production release geometry, AgML,xgeometry"},   
   {"r2021",       20201120,180000, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
   {"r2021a",      20201120,180001, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
-//{"devTA",       20181210,     0, "y2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 1,xgeometry"}, // 
-//{"devTB",       20181210,     0, "y2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 2,xgeometry"}, // 
-//{"devTC",       20181210,     0, "y2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 3,xgeometry"}, // 
-//{"devTD",       20181210,     0, "y2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 4,xgeometry"}, // 
-//{"devTE",       20181210,     0, "y2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 5,xgeometry"}, // 
-//{"devTF",       20181210,     0, "y2019",     "dev geo for Inner Tpc Sector Upgrade, Variant 5,xgeometry"}, // 
-//{"devTX",       20181210,     0, "y2019",     "dev geo for Inner Tpc Sector Upgrade, Tonko 09/05/14,xgeometry"}, // 
-//{"devTY",       20181210,     0, "y2019",     "dev geo for Inner Tpc Sector Upgrade, Jim Thomas 04/02/15,xgeometry"}, // 
-//{"devTZ",       20181210,     0, "y2019",     "devTY with no HFT,xgeometry"}, // 
+//{"dev2021",     20211210,     1, "dev2021",  "development geometry for 2021+ forward program,AgML,xgeometry"},
 
-//{"upgr01",      20190101,     4, "upgr01",   ""},
-//{"upgr02",      20190101,     5, "upgr02",   ""},
-//{"upgr03",      20190101,     6, "upgr03",   ""},
-//{"upgr04",      20190101,     7, "upgr04",   ""},
-//{"upgr05",      20190101,     8, "upgr05",   ""},
-//{"upgr06",      20190101,     9, "upgr06",   ""},  // what happened to 6? Historical not re-used
-//{"upgr07",      20190101,    10, "upgr07",   ""},
-//{"upgr08",      20190101,    11, "upgr08",   ""},
-//{"upgr09",      20190101,    12, "upgr09",   ""},
-//{"upgr10",      20190101,    13, "upgr10",   ""},
-//{"upgr11",      20190101,    14, "upgr11",   ""},
-//{"upgr12",      20190101,    15, "upgr12",   ""},
-//{"upgr13",      20190101,    16, "upgr13",   ""},
-//{"upgr14",      20190101,    17, "upgr14",   ""},
-//{"upgr15",      20190101,    18, "upgr15",   ""},
-//{"upgr16",      20190101,    19, "upgr16",   ""},
-//{"upgr17",      20190101,    20, "upgr17",   ""},
-//{"upgr16a",     20190101,    21, "upgr16a",  ""},
+  //
+  // Move DEVT and upgrade series +100 years along timeline else they interfere with y2018+ runs
+  //
+//{"devT",        21170101,     0, "devT",      "dev geo for Inner Tpc Sector Upgrade, Variant 1,AgML,xgeometry"}, // 
+//{"devTA",       21170101,     1, "devTA",     "dev geo for Inner Tpc Sector Upgrade, Variant 1"}, // 
+//{"devTB",       21170101,     2, "devTB",     "dev geo for Inner Tpc Sector Upgrade, Variant 2"}, // 
+//{"devTC",       21170101,     3, "devTC",     "dev geo for Inner Tpc Sector Upgrade, Variant 3"}, // 
+//{"devTD",       21170101,     4, "devTD",     "dev geo for Inner Tpc Sector Upgrade, Variant 4"}, // 
+//{"devTE",       21170101,     5, "devTE",     "dev geo for Inner Tpc Sector Upgrade, Variant 5"}, // 
+//{"devTF",       21170101,     6, "devTF",     "dev geo for Inner Tpc Sector Upgrade, Variant 5"}, // 
+
+//{"upgr01",      21190101,     4, "upgr01",   ""},
+//{"upgr02",      21190101,     5, "upgr02",   ""},
+//{"upgr03",      21190101,     6, "upgr03",   ""},
+//{"upgr04",      21190101,     7, "upgr04",   ""},
+//{"upgr05",      21190101,     8, "upgr05",   ""},
+//{"upgr06",      21190101,     9, "upgr06",   ""},  // what happened to 6? Historical not re-used
+//{"upgr07",      21190101,    10, "upgr07",   ""},
+//{"upgr08",      21190101,    11, "upgr08",   ""},
+//{"upgr09",      21190101,    12, "upgr09",   ""},
+//{"upgr10",      21190101,    13, "upgr10",   ""},
+//{"upgr11",      21190101,    14, "upgr11",   ""},
+//{"upgr12",      21190101,    15, "upgr12",   ""},
+//{"upgr13",      21190101,    16, "upgr13",   ""},
+//{"upgr14",      21190101,    17, "upgr14",   ""},
+//{"upgr15",      21190101,    18, "upgr15",   ""},
+//{"upgr16",      21190101,    19, "upgr16",   ""},
+//{"upgr17",      21190101,    20, "upgr17",   ""},
+//{"upgr16a",     21190101,    21, "upgr16a",  ""},
   // Future development:
 //{"simpletpc",   20200102,    16, "simpletpc",""},
 //{"upgr20",      20200102,    17, "upgr20",   "y2007 +  one TOF"}, // advertized simu 20061101
