@@ -23,7 +23,7 @@
  if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; } # print "OPTSTAR = $OPTSTAR\n"; die;
  if ( !$XOPTSTAR or $XOPTSTAR eq '/dev/null') { $XOPTSTAR = $OPTSTAR;} # print "OPTSTAR = $OPTSTAR\n"; die;
  my $host = hostname;
- $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD on host $host, STAR_OB = $STAR_OBJ, STAR_LIB = $STAR_LIB,STAR_BIN = $STAR_BIN\n" unless ($param::quiet);
+ $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD on host $host, STAR_OBJ = $STAR_OBJ, STAR_LIB = $STAR_LIB,STAR_BIN = $STAR_BIN\n" unless ($param::quiet);
  $INCLUDE = $BUILD  . "/include";
  
  @search_files = ();
