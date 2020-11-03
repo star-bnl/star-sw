@@ -1,0 +1,5 @@
+# $Id $
+# package StTrackMateMaker
+# author: 
+Library:libStTrackMateMaker.so:LIBS +=   -lStChain  -lStEvent
+#Library:libStTrackMateMaker.so:LIBS +=   -lStChain  -lStEvent

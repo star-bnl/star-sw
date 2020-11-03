@@ -1,4 +1,4 @@
-//#define __ASK__
+#define __ASK__
 #ifdef __ASK__
 #include "Ask.h"
 #endif
@@ -10,22 +10,21 @@ void RunTbyT(Int_t nevents=999,
 	     //"./new/st_physics_11035026_raw_2010001_1_200.event.root",
 	     const char* tFile="TbyT.root") {
   gROOT->LoadMacro("bfc.C");
-  TString Chain("StEvent,StiLib,detDb,tpcDb,mysql,nodefault");
-  bfc(-1,Chain.Data(),0,0,tFile);
-  gSystem->Load("StTbyTMaker");
+  TString Chain("StEvent,StiLib,nodefault");
+  bfc(-2,Chain.Data(),0,0,tFile);
+  gSystem->Load("StTrackMateMaker");
   cout << "Job will run on    File: " << eventFile1 << endl;
   cout << "Correspondibg new  File: " << eventFile2 << endl;
   gSystem->Load("StIOMaker");
   // 1st IOMaker, for tpt file
   StIOMaker* ioMaker1 = new StIOMaker("IO1","r",eventFile1);//,"bfcTree");
-  chain->AddBefore("db",ioMaker1);
   // 2nd IOMaker, for ittf file
   StIOMaker* ioMaker2 = new StIOMaker("IO2","r",eventFile2);//,"bfcTree");
-  chain->AddBefore("db",ioMaker2);
-  StTbyTMaker*  goodStuff      = new StTbyTMaker;
+
+  StTrackMateMaker*  goodStuff      = new StTrackMateMaker;
   //  chain->SetDEBUG(2);
   // now execute the chain member functions
-  StMaker::lsMakers(chain);
+  
   chain->PrintInfo();
   Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
   if (initStat) chain->Fatal(initStat, "during Init()");
