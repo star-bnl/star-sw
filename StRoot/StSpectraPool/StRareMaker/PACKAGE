@@ -1,5 +1,0 @@
-# $Id $
-# package StRareMaker
-# author: 
-Library:libStRareMaker.so:LIBS +=   -lStChain   -lStEvent
-#Library:libStRareMaker.so:LIBS +=   -lStChain  -lStEvent
