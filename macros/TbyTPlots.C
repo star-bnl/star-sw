@@ -1,1 +1,1 @@
-../StRoot/StSpectraPool/StTrackMateMaker/TbyTPlots.C
+../StRoot/StTbyTMaker/TbyTPlots.C

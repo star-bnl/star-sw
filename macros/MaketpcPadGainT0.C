@@ -122,7 +122,22 @@ void MaketpcPadGainT0(TString FileName="itpc_gains.txt.20191030.050318") {
    /star/u/stardb/dbcron/macros-new/Fill_tpcPadGainT0B.C
 
 ================================================================================
-robinson
+heston
+mysql -h heston.star.bnl.gov --port=3501 -u "" -p""  Conditions_rts
+
+
+robinsonMySQL [Conditions_rts]> select  entryTime,elementID,beginTime,flavor,deactive,run from tpcPadGainT0 order by beginTime;;
++---------------------+-----------+---------------------+--------+----------+---------+
+| entryTime           | elementID | beginTime           | flavor | deactive | run     |
++---------------------+-----------+---------------------+--------+----------+---------+
+| 2019-01-19 13:10:44 |         0 | 2019-01-19 13:10:44 | ofl    |        0 | 1105317 |
+| 2019-01-19 13:23:00 |         0 | 2019-01-19 13:23:00 | ofl    |        0 | 1105317 |
+| 2019-01-29 13:19:17 |         0 | 2019-01-29 13:19:17 | ofl    |        0 | 1105317 |
+| 2019-02-27 08:36:38 |         0 | 2019-02-27 08:36:38 | ofl    |        0 | 1105317 |
+| 2019-10-30 08:56:56 |         0 | 2019-10-30 04:56:56 | ofl    |        0 | 1106137 |
++---------------------+-----------+---------------------+--------+----------+---------+
+5 rows in set (0.06 sec)
+
 MySQL [Calibrations_tpc]> select entryTime,elementID,beginTime,flavor,deactive,run from tpcPadGainT0B where elementID=1 order by beginTime;
 +---------------------+-----------+---------------------+--------+------------+---------+
 | entryTime           | elementID | beginTime           | flavor | deactive   | run     |
