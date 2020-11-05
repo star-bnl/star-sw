@@ -1831,7 +1831,7 @@ Bfc_st BFC[] = { // standard chains
   {"StvPulls" ,"","",""                                         ,"","", "Request to make Stv Pulls",kFALSE},
   {"StiLib"   ,"","",""                                           ,"","Sti,StiUtilities","Load Sti",kFALSE},
   {"KeepStiLib"   ,"","",""                                                  ,"","","Keep Sti Libs",kFALSE},
-  {"TPCCA"   ,"","",""                                              ,"","TPCCATracker","Load TPCCA",kFALSE},
+  {"TPCCA"   ,"","",""                                     ,"","Spectrum,TPCCATracker","Load TPCCA",kFALSE},
   {"StiCALib" ,"","","StiLib,TPCCA"                                       ,"","StiCA","Load Sti+CA",kFALSE},
   {"StiTpc"   ,"","","TpcDb,tpc_T,dbutil,detDb,StarMagField,magF"        ,"","StiTpc","Load StiTpc",kFALSE},
   {"StiSvt"   ,"",""," "                  ,"","StSvtClassLibrary,StSvtDbMaker,StiSvt","Load StiSvt",kFALSE},
