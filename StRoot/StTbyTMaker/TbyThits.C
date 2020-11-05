@@ -95,4 +95,44 @@ void TbyThits() {
   }
   fOut->Write();
 }
+/*
+// 2020 
+c1->SetLogz();
+gStyle->SetOptStat(0)
+RPadFC->SetTitle("Ratio of lost Online Clusters wrt Offline ones")
+RPadFC->SetXTitle("row")
+RPadFC->SetYTitle("pad")
+RPadFC->GetXaxis()->SetRange(1,45);
+RPadFC->Draw("colz");
 
+RPadOC->SetTitle("Ratio of lost Offline Clusters wrt Online ones")
+RPadOC->SetXTitle("row")
+RPadOC->SetYTitle("pad")
+RPadOC->GetXaxis()->SetRange(1,45);
+RPadOC->SetMaximum(1)
+RPadOC->Draw("colz")
+
+PadFCAll->SetTitle("All offline clusters")
+PadFCAll->SetXTitle("row")
+PadFCAll->SetYTitle("pad")
+PadFCAll->GetXaxis()->SetRange(1,45);
+PadFCAll->Draw("colz")
+
+PadOCAll->SetTitle("All online clusters")
+PadOCAll->SetXTitle("row")
+PadOCAll->SetYTitle("pad")
+PadOCAll->GetXaxis()->SetRange(1,45);
+PadOCAll->Draw("colz")
+
+PminFCAll->SetTitle("All offline clusters")
+PminFCAll->SetXTitle("row")
+PminFCAll->SetYTitle("min pad")
+PminFCAll->GetXaxis()->SetRange(1,45);
+PminFCAll->Draw("colz")
+
+PminOCAll->SetTitle("All online clusters")
+PminOCAll->SetXTitle("row")
+PminOCAll->SetYTitle("min pad")
+PminOCAll->GetXaxis()->SetRange(1,45);
+PminOCAll->Draw("colz")
+*/
