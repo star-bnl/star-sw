@@ -250,7 +250,7 @@ void StKFParticleInterface::CollectTrackHistograms()
   if (! fTrackHistograms[2]) fTrackHistograms[2] = new TH1F("hPrimaryRatio", "hPrimaryRatio", 100, 0, 1);
   
   fTrackHistograms2D[7] = (TH2F *)   dirs[1]->Get("hGlobalVsPrimaryTracks");
-  if (! fTrackHistograms2D[7]) fTrackHistograms2D[7] = new TH2F("hGlobalVsPrimaryTracks", "Log_{10} No. Global vs Log_{10}) No. Primary Tracks", 350, 0.0, 3.5, 350, 0, 3.5);
+  if (! fTrackHistograms2D[7]) fTrackHistograms2D[7] = new TH2F("hGlobalVsPrimaryTracks", "Log_{10} No. Global vs Log_{10} No. Primary Tracks", 350, 0.0, 3.5, 350, 0, 3.5);
   fTrackHistograms2D[8] = (TH2F *)   dirs[1]->Get("EtaVspT");
   if (! fTrackHistograms2D[8]) fTrackHistograms2D[8] = new TH2F("EtaVspT", "Eta vs Log_{10}p_{T} for Primary tracks", 350, -2, 1.5, 600, -3.0, 3.0);
   fTrackHistograms2D[13] = (TH2F *)   dirs[1]->Get("EtaVspTAll");
