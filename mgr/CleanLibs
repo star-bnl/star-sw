@@ -100,6 +100,8 @@ if ( $#dirs == -1){
     push(@dirs,$SYSNM."OBJ");
     push(@dirs,$SYSNM."IOBJ");
     push(@dirs,$SYSNM."GOBJ");
+    push(@dirs,$SYSNM."obj6");
+    push(@dirs,$SYSNM."OBJ6");
 }
 
 
