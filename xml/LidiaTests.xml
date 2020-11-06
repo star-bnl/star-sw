@@ -48,7 +48,7 @@ switch (${SUBMITTINGDIRECTORY}) # STAR version
     starver TFG20i
     breaksw
   case "*TFG20j*":
-    starver TFG20i
+    starver TFG20j
     breaksw
   default:
     starver .DEV2
