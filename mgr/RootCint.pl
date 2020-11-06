@@ -6,8 +6,8 @@
 #
 use Env;
 use File::Basename;
+use Cwd;
 
-#
 # my $Lib = "";
 # my $Pcm = "";
 # if ($ROOT_LEVEL =~ /^6/) {
@@ -442,7 +442,9 @@ if ($h_files) {
   #	print "cmd (+extra) = ",$cmd,"\n";
   #} else {
 #  if (! $Lib) {
-    $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+#    $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+my $CintF = cwd() . "/" . $Cint_cxx;
+    $cmd  = "rootcint -f $CintF -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
 #   } else {
 # #    $cmd  = "rootcling -f $Cint_cxx -c -rmf $RootMap  -rml $Lib -s $Lib -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
 # # rootcling -rootbuild -f K_Dict.cc -s libK -rml libA.so -rml libC.so -rml libG.so -rmf libK.rootmap -c -p -I[INCLUDES] K1.hh K2.hh K3.hh LinkDef.hh

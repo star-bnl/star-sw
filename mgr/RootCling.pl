@@ -25,7 +25,7 @@ my $LinkDefDirName;
 
 my $sources  = shift; 				#print "sources =", $sources,"\n";
 my $CPPFLAGS = shift; 				#print "CPPFLAGS = ", $CPPFLAGS, "\n";
-my @cpps = split / /,$CPPFLAGS;			#print "cpps: @cpps \n";
+#my @cpps = split / /,$CPPFLAGS;			#print "cpps: @cpps \n";
 
 my %class_hfile = (); 		# class h-file map
 my %class_hfile_depens_on = (); #
@@ -383,17 +383,24 @@ my $hfile = $DirName . "/Stypes.h";
 if (-f $hfile) {$h_files .= " Stypes.h";}
 if ($h_files) {
   $h_files .= " " . "LinkDef.h";
-  $CPPFLAGS = " -I" . $DirName . " " . $IncDirName . $CPPFLAGS;
+#  $CPPFLAGS = " -I" . $DirName . " " . $IncDirName . $CPPFLAGS;
+  $CPPFLAGS = " -I" . cwd() . "/" . $DirName . " " . $IncDirName . $CPPFLAGS;
 #  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -rml $Lib -rmf $RootMap";
 #  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -s $Lib -rml $Lib -rmf $RootMap";
 #  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -cxxmodule  -s $Lib";
 #  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -s $Lib";
 #  my $cmd  = "rootcling -rootbuild -f $Cint_cxx -cxxmodule -s $Lib -rmf $RootMap";
   $ENV{ROOTIGNOREPREFIX} = 1;
+  $ENV{ROOT_MODULES} = 1;
   my $cmd  = "rootcling -rootbuild -f $Cint_cxx";
 #  $cmd .= " -cxxmodule";
-  $cmd .= " -inlineInputHeader -s $Lib -rmf $RootMap";
+#  $cmd .= " -inlineInputHeader -s $Lib -rmf $RootMap";
   my $bLib = File::Basename::basename($Lib);
+#  my $RootMapF =   cwd() . "/" . $RootMap;
+  $cmd .= " -inlineInputHeader -s $Lib -rml $bLib -rmf $RootMap";
+#  $cmd .= " -inlineInputHeader -s $Lib -rml $bLib -rmf $RootMapF";
+#  my $LibF = cwd() . $Lib;
+#  $cmd .= " -inlineInputHeader -s $Lib -rml $bLib -rmf $RootMap";
   if ($LibDep) {
     my @libs = split(' ',$LibDep);
     foreach my $l (@libs) {
