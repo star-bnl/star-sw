@@ -78,6 +78,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SafeDelete(fTpx);
   fTpx = new daq_tpx() ; 
   if (GetDate() >= 20091215) fTpx->fcf_run_compatibility = 10 ;
+  // change default value 2 to 
+  fTpx->fcf_do_cuts = 1; // 1 means always, 2 means don't cut edges (for i.e. pulser run), 0 means don't...
   if (GetDate() <= 20090101) fminCharge = 40;
   // Check presence iTPC
   SafeDelete(fiTpc);
@@ -102,40 +104,76 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   Int_t livePads = 0;
   Int_t totalPads = 0;
   Float_t liveFrac = 1;
+  // Load gains
+  daq_det_gain *gain = 0;
   for(Int_t sector=1;sector<=24;sector++) {
     if (!((1U<<(sector-1)) & mask)) continue; // sector masking
     Int_t liveSecPads = 0;
     Int_t totalSecPads = 0;
-    for(Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
+    // Tpx
+    daq_dta *dta = dta_Tpx;
+    for(Int_t rowO = 1; rowO <= 45; rowO++) {
+      Int_t row = rowO;
+      if (St_tpcPadConfigC::instance()->iTPC(sector) && rowO > 13)  row = rowO + 40 - 13;
       Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
-      daq_det_gain *gain = 0;
-      daq_dta *dta = 0;
-      if (dta_iTpc &&
-	  St_tpcPadConfigC::instance()->iTPC(sector) && 
-	  St_tpcPadConfigC::instance()->IsRowInner(sector,row)) {// iTPC
-	dta = dta_iTpc;
-      } else {// Tpx
-	dta = dta_Tpx;
-      }
-      assert(dta);
       gain = (daq_det_gain *) dta->request(numPadsAtRow+1);	// max pad+1		
-      assert(gain);
       gain[0].gain = 0.0;	// kill pad0 just in case..
       gain[0].t0   = 0.0;
+#if 0
+      gain[1].gain = 0.0;	// kill pad0 just in case..
+      gain[1].t0   = 0.0;
+      gain[numPadsAtRow].gain = 0.0;	// kill pad0 just in case..
+      gain[numPadsAtRow].t0   = 0.0;
+      for(Int_t pad = 2; pad <= numPadsAtRow-1; pad++) {
+	gain[pad].gain = 0.; // be sure that dead pads are killed
+	gain[pad].t0   = 0.;
+	if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
+	gain[pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
+	gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
+      }
+#else
       for(Int_t pad = 1; pad <= numPadsAtRow; pad++) {
 	gain[pad].gain = 0.; // be sure that dead pads are killed
 	gain[pad].t0   = 0.;
-	if (St_tpcPadGainT0BC::instance()->Gain(sector,row,pad) <= 0) continue;
-	gain[pad].gain = St_tpcPadGainT0BC::instance()->Gain(sector,row,pad);
-	gain[pad].t0   = St_tpcPadGainT0BC::instance()->T0(sector,row,pad);
+	if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
+	gain[pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
+	gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
       }
-      dta->finalize(numPadsAtRow+1,sector,row);
+#endif
+      // daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
+      dta->finalize(numPadsAtRow+1,sector,rowO);
       if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
 	totalSecPads += numPadsAtRow;
 	if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
 	    St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
 	  liveSecPads += numPadsAtRow;
       }
+    }
+    // iTpc
+    if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    daq_dta *dta = dta_iTpc;
+    for(Int_t rowO = 1; rowO <= 40; rowO++) {
+      Int_t row = rowO;
+      Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
+      gain = (daq_det_gain *) dta->request(numPadsAtRow+1);	// max pad+1		
+      gain[0].gain = 0.0;	// kill pad0 just in case..
+      gain[0].t0   = 0.0;
+      for(Int_t pad = 1; pad <= numPadsAtRow; pad++) {
+	gain[pad].gain = 0.; // be sure that dead pads are killed
+	gain[pad].t0   = 0.;
+	if (St_itpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
+	gain[pad].gain = St_itpcPadGainT0C::instance()->Gain(sector,row,pad);
+	gain[pad].t0   = St_itpcPadGainT0C::instance()->T0(sector,row,pad);
+      }
+      // daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
+      dta->finalize(numPadsAtRow+1,sector,rowO);
+      if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
+	totalSecPads += numPadsAtRow;
+	if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
+	    St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
+	  liveSecPads += numPadsAtRow;
+      }
+    }
     }
     livePads += liveSecPads;
     totalPads += totalSecPads;
@@ -184,12 +222,18 @@ Int_t StTpcRTSHitMaker::Make() {
   }
   static Short_t ADCs[__MaxNumberOfTimeBins__];
   static Int_t IDTs[__MaxNumberOfTimeBins__];
+  static StTpcCoordinateTransform transform;
+  static StThreeVectorF hard_coded_errors;
   StEvent*   rEvent      = (StEvent*)    GetInputDS("StEvent");
   if (! rEvent) {
     LOG_WARN << "There is no StEvent" << endm;
     return kStWarn;
   }
   StTpcHitCollection *hitCollection = rEvent->tpcHitCollection();
+  if (! hitCollection )  {
+    hitCollection = new StTpcHitCollection();
+    rEvent->setTpcHitCollection(hitCollection);
+  }
   TDataSet*  tpcRawEvent =               GetInputDS("Event");
   if (! tpcRawEvent) {
     LOG_WARN << "There is not Tpc Raw Event" << endm;
@@ -208,81 +252,127 @@ Int_t StTpcRTSHitMaker::Make() {
   static Int_t  minRow    = IAttr("minRow");
   static Int_t  maxRow    = IAttr("maxRow");
   bin0Hits = 0;
-  daq_dta *dta  = 0;
-  daq_dta *dtaX = 0;
-  for (Int_t sec = minSector; sec <= maxSector; sec++) {
-    StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
+  for (Int_t sector = minSector; sector <= maxSector; sector++) {
+    StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sector);
     if (! digitalSector) continue;
     UShort_t Id = 0;
     Int_t hitsAdded = 0;
+    for (Int_t iTpcType  = 0; iTpcType < 2; iTpcType++) {// Tpx iTPC
+      if (iTpcType == 0 && ! fTpx ) continue; 
+      if (iTpcType == 1 && ! fiTpc) continue; 
+      Int_t row1 = minRow;
+      Int_t row2 = maxRow;
+      // Check presense of iTPC and adjust row range
+      daq_dta *dta  = 0;
+      if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+	//  daq_tpx::get(const char *bank="*", int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0)
+	//           put(const char *bank="*", int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0)
+	// daq_itpc::get(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0)
+	//           put(const char *in_bank="*", int sector=-1, int row=-1, int pad=-1, void *p1=0, void *p2=0)
+	if (! iTpcType) {
+	  row1 = TMath::Max(row1, 41); dta = fTpx  ?  fTpx->put("adc_sim") /* ,0,45,0,mTpx_RowLen[sector-1]) */ : 0;
+	} else            {
+	  if (! fiTpc) continue;
+	  row2 = TMath::Min(40, row2); dta = fiTpc ? fiTpc->put("adc_sim") /*,0,40,0,mTpx_RowLen[sector-1]) */  : 0;
+	}
+      } else {
+	row2 = TMath::Min(45, row2);
+	dta = fTpx  ?  fTpx->put("adc_sim") /* ,0,45,0,mTpx_RowLen[sector-1]) */ : 0;
+      }
+      assert(dta);
+      Int_t NoAdcs = 0;
+      for (Int_t row = row1; row <= row2; row++) {
+	if (! St_tpcPadGainT0BC::instance()->livePadrow(sector,row)) continue;
+	Int_t Npads = digitalSector->numberOfPadsInRow(row);
+	Int_t rowO = row;
+	Int_t padMin = 1;
+	Int_t padMax = Npads;
 #if 0
-    Int_t nup = 0;
-#endif
-    Int_t NoAdcs = 0;
-    daq_dta *dtas[2] = {
-      fTpx ?  fTpx->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec),0,mTpx_RowLen[sec-1]) : 0,
-      St_tpcPadConfigC::instance()->iTPC(sec) && fiTpc ? fiTpc->put("adc_sim",0,St_tpcPadConfigC::instance()->numberOfRows(sec),0,mTpx_RowLen[sec-1]) : 0
-    };
-    for (Int_t row = minRow; row <= TMath::Min(maxRow,digitalSector->numberOfRows()); row++) {
-      if (! St_tpcPadGainT0BC::instance()->livePadrow(sec,row)) continue;
-      Int_t Npads = digitalSector->numberOfPadsInRow(row);
-      dtaX = dtas[0];
-      if (St_tpcPadConfigC::instance()->iTPC(sec) && St_tpcPadConfigC::instance()->IsRowInner(sec,row)) dtaX = dtas[1];
-      if (! dtaX) continue;
-      dta = dtaX;
-      for(Int_t pad = 1; pad <= Npads; pad++) {
-	UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
-	if (! ntimebins) continue;
-	// allocate space for at least 512 pixels (timebins)
-	daq_sim_adc_tb *d = (daq_sim_adc_tb *) dta->request(__MaxNumberOfTimeBins__);
-	// add adc data for this specific sector:row:pad
-	digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
-	UInt_t l = 0;
-	for (UInt_t k = 0; k < __MaxNumberOfTimeBins__; k++) {
-	  if (ADCs[k]) {
-	    d[l].adc = ADCs[k];
-	    d[l].tb  = k;
-	    d[l].track_id = IDTs[k];
-	    l++;
+	if (! iTpcType) {// Tpx
+	  if (St_tpcPadConfigC::instance()->iTPC(sector) && row > 40) { // sector with iTPC
+	    rowO = row - 40 + 13;
+	    Int_t nBadPads = 3;
+	    if (/* row == 41 || */
+		row == 46 || 
+		row == 50 || 
+		row == 51 || 
+		row == 56 || 
+		row == 60 || 
+		row == 61 || 
+		row == 66 || 
+		row == 70 ) nBadPads = 2;
+	    else if (row >= 71) nBadPads = 1;
+	    padMin = nBadPads + 1;
+	    padMax = Npads - nBadPads;
+	  } else { // sector without iTPC
+	    Int_t nBadPads = 3;
+	    if (row ==  1 || 
+		row >= 5 && row <= 14 || 
+		row == 19 ||
+		row == 23 ||
+		row == 24 ||
+		row == 29 ||
+		row == 33 ||
+		row == 34 ||
+		row == 39 ||
+		row == 43)  nBadPads = 2;
+	    else if (row >= 44) nBadPads = 1;
+	    padMin = nBadPads + 1;
+	    padMax = Npads - nBadPads;
+	    
 	  }
 	}
-	if (l > 0) {
-	  myBenchmark->Start("StTpcRTSHitMaker::Make::finalize");
-	  dta->finalize(l,sec,row,pad);
-	  myBenchmark->Stop("StTpcRTSHitMaker::Make::finalize");
-	  NoAdcs += l;
-	}
-      } // pad loop
-    }      
-    if (! NoAdcs) continue;
-    if (Debug() > 1) {
-      // verify data!
-      for (Int_t iTpcType  = 0; iTpcType < 2; iTpcType++) {
-	dtaX = 0;
-	if (iTpcType) {
+#endif
+	for(Int_t pad = padMin; pad <= padMax; pad++) {
+	  UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
+	  if (! ntimebins) continue;
+	  // allocate space for at least 512 pixels (timebins)
+	  daq_sim_adc_tb *d = (daq_sim_adc_tb *) dta->request(__MaxNumberOfTimeBins__);
+	  // add adc data for this specific sector:row:pad
+	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
+	  UInt_t l = 0;
+	  for (UInt_t k = 0; k < __MaxNumberOfTimeBins__; k++) {
+	    if (ADCs[k]) {
+	      d[l].adc = ADCs[k];
+	      d[l].tb  = k;
+	      d[l].track_id = IDTs[k];
+	      l++;
+	    }
+	  }
+	  if (l > 0) {
+	    //	    myBenchmark->Start("StTpcRTSHitMaker::Make::finalize");
+	    // daq_dta::finalize(u_int obj_cou, int s=0, int row=0, int pad=0) ;
+	    dta->finalize(l,sector,rowO,pad);
+	    //	    myBenchmark->Stop("StTpcRTSHitMaker::Make::finalize");
+	    NoAdcs += l;
+	  }
+	} // pad loop
+      } // row loop      
+      if (! NoAdcs) continue;
+      if (Debug() > 1) {
+	// verify data!
+	daq_dta *dtaX  = 0;
+	if (! iTpcType) {
 	  if (fTpx) dtaX = fTpx->get("adc_sim");
 	} else {
 	  if (fiTpc) dtaX = fiTpc->get("adc_sim");
 	}
-	dta = dtaX;
-	while(dta && dta->iterate()) {
-	  LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dta->sec,dta->row,dta->pad,dta->ncontent) << endm;
-	  for(UInt_t i=0;i<dta->ncontent;i++) {
-	    if (Debug() > 1 || dta->sim_adc[i].track_id) {
+	assert(dtaX);
+	while(dtaX && dtaX->iterate()) {
+	  LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dtaX->sec,dtaX->row,dtaX->pad,dtaX->ncontent) << endm;
+	  for(UInt_t i=0;i<dtaX->ncontent;i++) {
+	    if (Debug() > 1 || dtaX->sim_adc[i].track_id) {
 	      LOG_INFO << Form("    %2d: adc %4d, tb %3d: track %4d",i,
-			       dta->sim_adc[i].adc,
-			       dta->sim_adc[i].tb,
-			       dta->sim_adc[i].track_id
+			       dtaX->sim_adc[i].adc,
+			       dtaX->sim_adc[i].tb,
+			       dtaX->sim_adc[i].track_id
 			       ) << endm;
 	    }
 	  }
 	}
       }
-    }
-    static StTpcCoordinateTransform transform(gStTpcDb);
-    static StThreeVectorF hard_coded_errors;
-    for (Int_t iTpcType  = 0; iTpcType < 2; iTpcType++) {
-      if (iTpcType) { //Tpx
+      daq_dta *dtaX  = 0;
+      if (! iTpcType) { //Tpx
 	if (! fTpx) continue;
 	if (IAttr("TpxClu2D")) {
 	  dtaX = fTpx->get("cld_2d_sim"); // rerun the 2D cluster finder on the simulated data...
@@ -291,7 +381,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	}
       } else { // iTpc
 	if (! fiTpc) continue;
-	dtaX = fiTpc->get("cld_sim",sec); // rerun the cluster finder on the simulated data...
+	dtaX = fiTpc->get("cld_sim",sector); // rerun the cluster finder on the simulated data...
       }
       if (! dtaX) continue;
       daq_dta *dd = dtaX;
@@ -306,7 +396,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	  daq_cld cld;
 	  Int_t IdTruth = 0;
 	  UShort_t quality  = 0;
-	  if (iTpcType) {
+	  if (! iTpcType) {
 	    daq_sim_cld   &dc   = ((daq_sim_cld   *) dd->Void)[i] ;
 	    cld      = dc.cld;
 	    IdTruth = dc.track_id;
@@ -349,21 +439,19 @@ Int_t StTpcRTSHitMaker::Make() {
 	  */
 	  if ( cld.flags &&
 	       (cld.flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE))) continue;
-	  if (! hitCollection )  {
-	    hitCollection = new StTpcHitCollection();
-	    rEvent->setTpcHitCollection(hitCollection);
-	  }
-	  StTpcPadCoordinate Pad(dd->sec, dd->row, cld.pad, cld.tb); PrPP(Make,Pad);
+	  Int_t row = dd->row;
+	  if (! iTpcType && St_tpcPadConfigC::instance()->iTPC(sector) && row > 13)  row = row + 40 - 13;
+	  StTpcPadCoordinate Pad(dd->sec, row, cld.pad, cld.tb); PrPP(Make,Pad);
 	  static StTpcLocalSectorCoordinate LS;
 	  static StTpcLocalCoordinate L;
 	  transform(Pad,LS,kFALSE,kTRUE); PrPP(Make,LS); // don't useT0, useTau                  
 	  transform(LS,L);                                                                             PrPP(Make,L);
-	  if (dd->row != rowOld) {
-	    rowOld = dd->row;
-	    Double_t gain = St_tpcPadConfigC::instance()->IsRowInner(dd->sec,dd->row) ? 
+	  if (row != rowOld) {
+	    rowOld = row;
+	    Double_t gain = St_tpcPadConfigC::instance()->IsRowInner(dd->sec,row) ? 
 	      St_tss_tssparC::instance()->gain_in() : 
 	      St_tss_tssparC::instance()->gain_out();
-	    Double_t wire_coupling = St_tpcPadConfigC::instance()->IsRowInner(dd->sec,dd->row) ? 
+	    Double_t wire_coupling = St_tpcPadConfigC::instance()->IsRowInner(dd->sec,row) ? 
 	      St_tss_tssparC::instance()->wire_coupling_in() : 
 	      St_tss_tssparC::instance()->wire_coupling_out();
 	    ADC2GeV = ((Double_t) St_tss_tssparC::instance()->ave_ion_pot() * 
@@ -372,7 +460,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	  UInt_t hw = 1;   // detid_tpc
 	  //yf        if (isiTpcSector) hw += 1U << 1;
 	  hw += dd->sec << 4;     // (row/100 << 4);   // sector
-	  hw += dd->row << 9;     // (row%100 << 9);   // row
+	  hw +=     row << 9;     // (row%100 << 9);   // row
 #if 1
 	  Double_t q = ADC2GeV*cld.charge;
 #else /* used in TFG till 07/31/20 */
@@ -396,13 +484,14 @@ Int_t StTpcRTSHitMaker::Make() {
 	  if (hit->minTmbk() == 0) bin0Hits++;
 	  if (Debug()) hit->Print();
 	  hitCollection->addHit(hit);
+	  if (Debug()) {cout << "Add hit #" << hitCollection->numberOfHits() << endl;}
 	}
       }
 #if 0
       // Set IdTruth from cluster finder
       for (Int_t row = minRow; row <= digitalSector->numberOfRows(); row++) {
 	dtaX = 0;
-	if (iTpcType) {
+	if (! iTpcType) {
 	  if (fTpx) dtaX = fTpx->get("adc_sim");
 	} else {
 	  if (fiTpc) dtaX = fiTpc->get("adc_sim");
@@ -421,7 +510,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	    Int_t secC  = dta->sec;
 	    Int_t rowC  = dta->row;
 	    Int_t padC  = dta->pad;
-	    if (secC != sec || rowC != row || padC != pad) continue;
+	    if (secC != sector || rowC != row || padC != pad) continue;
 	    for(UInt_t i=0;i<dta->ncontent;i++) {
 	      Int_t tb = dta->sim_adc[i].tb;
 	      if (ADCs[tb] != dta->sim_adc[i].adc ||
@@ -443,14 +532,14 @@ Int_t StTpcRTSHitMaker::Make() {
 	  }
 	}
 	if (nup && Debug() > 1) {
-	  LOG_INFO << "Update total " << nup << " pixels from Sector / row = " << sec << " / " << row <<   endm;
+	  LOG_INFO << "Update total " << nup << " pixels from Sector / row = " << sector << " / " << row <<   endm;
 	}
       }
 #endif
     } // end iTpcType loop
-    if (maxHits[sec-1] && hitsAdded > maxHits[sec-1]) {
+    if (maxHits[sector-1] && hitsAdded > maxHits[sector-1]) {
       LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
-                << sec << "). Skipping event." << endm;
+                << sector << "). Skipping event." << endm;
       return kStSkip;
     }
   }  // end sec loop
