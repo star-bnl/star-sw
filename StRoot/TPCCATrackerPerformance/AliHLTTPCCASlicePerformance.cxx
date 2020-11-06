@@ -456,7 +456,7 @@ void AliHLTTPCCASlicePerformance::FillHistos()
       }*/
         // ---
         double mcY =  points[iMCPoint].X() * cosA + points[iMCPoint].Y() * sinA;
-        double mcX = -(-points[iMCPoint].X() * sinA + points[iMCPoint].Y() * cosA);
+//         double mcX = -(-points[iMCPoint].X() * sinA + points[iMCPoint].Y() * cosA);
 //        std::cout<<"     p.x: "<<p.GetX()<<";   mcX: "<<mcX<<";   p.y: "<<p.GetY()<<";   mcY: "<<mcY<<";   p.z: "<<p.GetZ()<<";   mcZ: "<<points[iMCPoint].Z()<<"\n";
         // ---
         if(points[iMCPoint].IRow() == hit.IRow())

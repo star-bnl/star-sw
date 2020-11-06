@@ -42,7 +42,7 @@ void AliHLTTPCCALooperMerger::FillSegments()
 
     float x_seg_1(hit1r.X()), x_seg_2(hit2r.X()), x_seg_3(hit3r.X());
     float y_seg_1(hit1r.Y()), y_seg_2(hit2r.Y()), y_seg_3(hit3r.Y());
-    float z_seg_1(hit1r.Z()), z_seg_2(hit2r.Z()), z_seg_3(hit3r.Z());
+    float z_seg_1(hit1r.Z()), /* z_seg_2(hit2r.Z()),*/ z_seg_3(hit3r.Z());
     //
     float cos11(slices[hit1r.ISlice()]->Param().SinAlpha());
     float sin11(slices[hit1r.ISlice()]->Param().CosAlpha());
@@ -57,8 +57,8 @@ void AliHLTTPCCALooperMerger::FillSegments()
     float x_seg_3_g = -(y_seg_3 * cos33 - x_seg_3 * sin33);
     float y_seg_3_g = x_seg_3 * cos33 + y_seg_3 * sin33;
       // Center of the circle in global coords
-    float cos1(slices[hit2r.ISlice()]->Param().SinAlpha());
-    float sin1(slices[hit2r.ISlice()]->Param().CosAlpha());
+//    float cos1(slices[hit2r.ISlice()]->Param().SinAlpha());
+//    float sin1(slices[hit2r.ISlice()]->Param().CosAlpha());
     float A_g = x_seg_2_g - x_seg_1_g;
     float B_g = y_seg_2_g - y_seg_1_g;
     float C_g = x_seg_3_g - x_seg_1_g;
@@ -104,8 +104,8 @@ void AliHLTTPCCALooperMerger::FillSegments()
     sinPhi =  TMath::Min(1.0, TMath::Max(-1.0, 0.5*BC_xy_up/Cr));
     float BC_xy_up_curve = 2*Cr*asin( sinPhi );
     float AB_z = fabs( z_seg_1 - z_seg_3 );
-    float BC_z_dn = AB_z*BC_xy_dn/AB_xy;
-    float BC_z_up = AB_z*BC_xy_up/AB_xy;
+//     float BC_z_dn = AB_z*BC_xy_dn/AB_xy;
+//     float BC_z_up = AB_z*BC_xy_up/AB_xy;
     float dz_dn = ( AB_z*BC_xy_dn_curve ) / AB_xy_curve;
     float dz_up = ( AB_z*BC_xy_up_curve ) / AB_xy_curve;
     float h = 2*3.14*Cr*AB_z/AB_xy_curve;
@@ -153,17 +153,17 @@ disp.DrawTPC();
 #endif
 //  std::sort( fSegments.begin(), fSegments.end(), LooperSegment::CompareL );
   vector<int> loopers;
-  for( int iSeg = 0; iSeg < fSegments.size(); iSeg++ ) {
-    bool newLooper = true;
+  for(unsigned int iSeg = 0; iSeg < fSegments.size(); iSeg++ ) {
+    //    bool newLooper = true;
     if( fSegments[iSeg].isUsed ) {
-      newLooper = false;
+      //      newLooper = false;
     } else {
       fSegments[iSeg].isUsed = true;
       fSegments[iSeg].iLooper = fNLoopers;
       loopers.push_back(1);
       fNLoopers++;
     }
-    for( int jSeg = iSeg+1; jSeg < fSegments.size(); jSeg++ ) {
+    for(unsigned int jSeg = iSeg+1; jSeg < fSegments.size(); jSeg++ ) {
 //      if( fSegments[jSeg].isUsed ) continue;
       if( fSegments[iSeg].x_h_up == fSegments[jSeg].x_h_up && fSegments[iSeg].y_h_up == fSegments[jSeg].y_h_up
 	  && fSegments[iSeg].x_h_dn == fSegments[jSeg].x_h_dn && fSegments[iSeg].y_h_dn == fSegments[jSeg].y_h_dn ) continue;
@@ -342,7 +342,7 @@ void AliHLTTPCCALooperMerger::SaveSegments()
     }
   };
   SortSegments segments[fSegments.size()];
-  for( int iSeg = 0; iSeg < fSegments.size(); iSeg++ ) {
+  for(unsigned int iSeg = 0; iSeg < fSegments.size(); iSeg++ ) {
     segments[iSeg].iLooper = fSegments[iSeg].iLooper;
     segments[iSeg].iTrack = fSegments[iSeg].iTr;
     segments[iSeg].z_h_dn = fSegments[iSeg].z_h_dn;
@@ -355,10 +355,10 @@ void AliHLTTPCCALooperMerger::SaveSegments()
   int tLooper = segments[0].iLooper;
   float tQPt = fSegments[segments[0].iOrigSeg].QPt_abs;
   int tNSeg = 1;
-  for( int iSeg = 0; iSeg < fSegments.size()-1; iSeg++ ) {
+  for(unsigned int iSeg = 0; iSeg < fSegments.size()-1; iSeg++ ) {
     if( segments[iSeg].iLooper != tLooper ) {
       if( tQPt > fSegments[segments[iSeg-1].iOrigSeg].QPt_abs ) {
-	for( int i = iSeg - tNSeg; i < iSeg; i++ ) segments[i].revers = true;
+	for(unsigned int i = iSeg - tNSeg; i < iSeg; i++ ) segments[i].revers = true;
       }
       tLooper = segments[iSeg].iLooper;
       tQPt = fSegments[segments[iSeg].iOrigSeg].QPt_abs;
@@ -368,7 +368,7 @@ void AliHLTTPCCALooperMerger::SaveSegments()
   }
   std::sort( &(segments[0]), &(segments[fSegments.size()-1]), SortSegments::comp );
   int iLooper = 0;
-  for( int iSeg = 1; iSeg < fSegments.size()-1; iSeg++ ) {
+  for(unsigned int iSeg = 1; iSeg < fSegments.size()-1; iSeg++ ) {
     int prevTr = -1;
     iLooper = segments[iSeg].iLooper;
     while( segments[iSeg].iLooper == iLooper && iSeg < fSegments.size() ) {

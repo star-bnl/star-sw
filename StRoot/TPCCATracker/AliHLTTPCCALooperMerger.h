@@ -46,9 +46,7 @@ class AliHLTTPCCALooperMerger
 
 //  AliHLTTPCCALooperMerger();
   AliHLTTPCCALooperMerger( AliHLTTPCCAMergerOutput& in_out, AliHLTResizableArray<AliHLTTPCCAGBHit>& hits )
-   : fOutput( in_out )
-   , fGBHits( hits )
-  {}
+    : fGBHits( hits ),fOutput( in_out )  {}
 
   ~AliHLTTPCCALooperMerger()
   {

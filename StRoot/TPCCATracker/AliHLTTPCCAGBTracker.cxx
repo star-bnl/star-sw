@@ -539,7 +539,7 @@ void AliHLTTPCCAGBTracker::Merge()
     if( track.IsLooper() ) {
       if( track.LpPrevNb() == -1 ) {
 	int iSegment = 0;
-	int nLooperHits = track.NClusters();
+	//	int nLooperHits = track.NClusters();
 	AliHLTTPCCAGBTrack &trackGB = fTracks[fNTracks];
 	trackGB.SetFirstHitRef( nTrackHits );
 //	trackGB.SetInnerParam( track.InnerParam() );
@@ -558,9 +558,9 @@ void AliHLTTPCCAGBTracker::Merge()
 	if( track.IsMerged() ) trackGB.SetMerged();
 	if( track.LpNextNb() != -1 ) trackGB.SetLooper();
 if( track.IsRevers() ) trackGB.SetReverse();
-	int icl_start = 0;
-	int icl_end = track.NClusters();
-	int iter = 1;
+//	int icl_start = 0;
+//	int icl_end = track.NClusters();
+//	int iter = 1;
 	for ( int icl0 = 0; icl0 < track.NClusters(); icl0++ ) {
 	  int icl = icl0;
 	  if( (!track.IsGrow() && !track.IsRevers()) || (track.IsGrow() && track.IsRevers()) ) icl = track.NClusters() - icl0 - 1;
@@ -589,9 +589,9 @@ if( track.IsRevers() ) trackGB.SetReverse();
 	while( nextTr != -1 ) {
 	  const AliHLTTPCCAMergedTrack &trackNext = out.Track( nextTr );
 	  trackGB.SetLooper();
-	  icl_start = 0;
-	  icl_end = trackNext.NClusters();
-	  iter = 1;
+// 	  icl_start = 0;
+// 	  icl_end = trackNext.NClusters();
+// 	  iter = 1;
 	  iSegment++;
 	  for ( int icl0 = 0; icl0 < trackNext.NClusters(); icl0++ ) {
 	    int icl = icl0;

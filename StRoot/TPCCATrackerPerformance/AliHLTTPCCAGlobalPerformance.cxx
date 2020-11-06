@@ -296,7 +296,7 @@ void AliHLTTPCCAGlobalPerformance::MatchTracks()
     tCA1.SetReco( 0 );
     tCA1.SetClone( false );
 // --- For merging debug and tuning only ---
-    const AliHLTTPCCATracker& slice = fTracker->Slice(0);
+//    const AliHLTTPCCATracker& slice = fTracker->Slice(0);
 //    std::cout<<" > itr: "<<itr<<"Merged: "<<tCA.IsMerged()<<"\n";
 //    std::cout<<"-itr: "<<itr<<";   DzDs0: "<<tCA.DzDs0()<<";   QPt0: "<<tCA.QPt0()<<"\n";
 // ---
@@ -354,7 +354,7 @@ void AliHLTTPCCAGlobalPerformance::MatchTracks()
     if( traLabels < 0 ) { traPurity = 0; continue; }
     // ---
 //    std::cout<<" ---> itr: "<<itr<<";   nhits: "<<nhits<<";   lmax: "<<lmax<<";   traPurity: "<<traPurity<<";   traLabels: "<<traLabels<<"\n";
-    const AliHLTTPCCAMCTrack &mct = (*fMCTracks)[traLabels];
+//    const AliHLTTPCCAMCTrack &mct = (*fMCTracks)[traLabels];
 //    std::cout<<" -----> MC Track: PDG: "<<mct.PDG()<<";   NMCRows: "<<mct.NMCRows()<<";   NMCPoints: "<<mct.NMCPoints()<<"\n";
     if ( lb ) delete[] lb;
 
@@ -424,7 +424,7 @@ void AliHLTTPCCAGlobalPerformance::MatchTracks()
 	mcData[traLabels].AddReconstructed();
 	tCA1.SetReco( 1 );
 if( mcData[traLabels].NReconstructed() == 1 ) {
-    AliHLTTPCCAGBTrack &tCA1 = fTracker->Tracks()[itr];
+//    AliHLTTPCCAGBTrack &tCA1 = fTracker->Tracks()[itr];
 //    tCA1.SetFirstMC(traLabels);
     mcData[traLabels].SetFirstTrackID(itr);
 }
@@ -521,14 +521,14 @@ void AliHLTTPCCAGlobalPerformance::EfficiencyPerformance( )
     const bool reco = mc.IsReconstructed();
     const int clones = mc.GetNClones();
     // ---
-    const int clones1 = mc.GetNClones1();
+    //    const int clones1 = mc.GetNClones1();
     const bool reco11 = mc.IsReconstructed1();
     // ---
-    const int clones4 = mc.GetNClones_mc4_15_r4();
-    const bool reco4 = mc.IsReconstructed_mc4_15_r4();
+    //    const int clones4 = mc.GetNClones_mc4_15_r4();
+    //    const bool reco4 = mc.IsReconstructed_mc4_15_r4();
 
-    const bool reco_all4 = mc.IsReconstructed_mc4_15_r4() || mc.IsReconstructed();
-    const int clones_all4 = mc.GetNClones_all4();
+//     const bool reco_all4 = mc.IsReconstructed_mc4_15_r4() || mc.IsReconstructed();
+//     const int clones_all4 = mc.GetNClones_all4();
     // ---
 //    std::cout<<" --- iMCTr: "<<iMCTr<<";   reco: "<<reco<<";   clones: "<<clones<<";   clones1: "<<clones1<<";   reco11: "<<reco11<<"\n";
 //    int clones = 0;
@@ -743,17 +743,17 @@ if( mcTrackNRecoHits[i] < 30 ) continue;
     AliHLTTPCCAPerformanceRecoTrackData &recoD = recoData[iRTr];
 //std::cout<<"   iRTr: "<<iRTr<<";   reco: "<<recoD.IsReconstructed()<<";   clone: "<<recoD.IsClone()<<"\n";
     // ---
-    const AliHLTTPCCAGBTrack &tCA = fTracker->Tracks()[iRTr];
+ //    const AliHLTTPCCAGBTrack &tCA = fTracker->Tracks()[iRTr];
 //if( tCA.NHits() < 4 ) {
 //    std::cout<<" ---!!!--- bad tracklet with nHits: "<<tCA.NHits()<<"\n";
 //    int aaa;
 //    std::cin>>aaa;
 //}
-    int mct = tCA.GetFirstMC();
+//    int mct = tCA.GetFirstMC();
 //    if( mct < 0 ) std::cout<<" --- iRTr: "<<iRTr<<";   is ghost;   nHits: "<<tCA.NHits()<<"\n";
 //    if (  recoD.IsGhost(0) ) std::cout<<" ----- is ghost 0\n";
     // ---
-    AliHLTTPCCAMCTrack &mcTr1 = (*fMCTracks)[ recoD.GetMCTrackId() ];
+    //    AliHLTTPCCAMCTrack &mcTr1 = (*fMCTracks)[ recoD.GetMCTrackId() ];
 //    if( mcTr1.Set30() <= 0 ) continue;
 //    if (  recoD.IsGhost(0) ) std::cout<<" ----- is ghost 1\n";
     if( recoD.IsClone() ) continue;
@@ -826,10 +826,10 @@ if( mcTrackNRecoHits[i] < 30 ) continue;
       if( recoD.IsClone() ) continue;
       if( tCA.NHits() < 15 ) continue;
 
-      const int nhits = tCA.NHits();
-      for ( int ihit = 0; ihit < nhits; ihit++ ) {
-        const int index = fTracker->TrackHit( tCA.FirstHitRef() + ihit );
-        const AliHLTTPCCAGBHit &hit = fTracker->Hit( index );
+      //      const int nhits = tCA.NHits();
+//       for ( int ihit = 0; ihit < nhits; ihit++ ) {
+//         const int index = fTracker->TrackHit( tCA.FirstHitRef() + ihit );
+	//        const AliHLTTPCCAGBHit &hit = fTracker->Hit( index );
 //        std::cout<<" ------->>> hit: "<<ihit<<";   x: "<<hit.X()<<";   y: "<<hit.Y()<<";   z: "<<hit.Z()<<"\n";
 //        int iSlice = hit.ISlice();
 //	  float alpha = fTracker->Slice( iSlice ).Param().Alpha();
@@ -844,7 +844,7 @@ if( mcTrackNRecoHits[i] < 30 ) continue;
 //	  float gy1 = -gx;
 //	  float gz = z;
 //	  std::cout<<" -----. gx: "<<gx<<";   gy: "<<gy<<";   gx1: "<<gx1<<";   gy1: "<<gy1<<"\n";
-      }
+//      }
       // ---
 //      if ( mc.P() < 1 ) continue;
 //      if ( mc.MotherId() != -1 ) continue;
@@ -861,12 +861,12 @@ if( mcTrackNRecoHits[i] < 30 ) continue;
       float alpha = fTracker->Slice( iSlice ).Param().Alpha();
       float x = p.X();
       float y = p.Y();
-      float z = p.Z();
+      //      float z = p.Z();
       float gx = x * cos(alpha) - y * sin(alpha);
       float gy = y * cos(alpha) + x * sin(alpha);
       float gx1 = gy;
       float gy1 = -gx;
-      float gz = z;
+      //      float gz = z;
 //      std::cout<<" -----. gx: "<<gx<<";   gy: "<<gy<<";   gx1: "<<gx1<<";   gy1: "<<gy1<<"\n";
       // ---
       int MCindex=-1;
@@ -920,20 +920,20 @@ if( mcTrackNRecoHits[i] < 30 ) continue;
 
         double mcY0 =  points[MCindex].X() * cosA + points[MCindex].Y() * sinA;
         double mcX0 = -(-points[MCindex].X() * sinA + points[MCindex].Y() * cosA);
-        double mcZ0 =  points[MCindex].Z();
+	//        double mcZ0 =  points[MCindex].Z();
 //	  double mcY0 =  -points[MCindex].X() * cosA + points[MCindex].Y() * sinA;
 //	  double mcX0 = points[MCindex].X() * sinA + points[MCindex].Y() * cosA;
 //	  double mcZ0 =  points[MCindex].Z();
         double mcEy0 =  mc.Par(3) * cosA + mc.Par(4) * sinA;
         double mcEx0 = -(-mc.Par(3) * sinA + mc.Par(4) * cosA);
-        double mcEz0 =  mc.Par(5);
-        double mcEt0 = TMath::Sqrt( mcEx0 * mcEx0 + mcEy0 * mcEy0 );
+	//        double mcEz0 =  mc.Par(5);
+	//        double mcEt0 = TMath::Sqrt( mcEx0 * mcEx0 + mcEy0 * mcEy0 );
 //        if ( TMath::Abs( mcEt ) < 1.e-4 ) break;
-        double mcSinPhi0 = mcEy0 / mcEt0;
-        double mcDzDs0   = mcEz0 / mcEt0;
-        double mcQPt0 = mc.Par(6) / mcEt0;
+//        double mcSinPhi0 = mcEy0 / mcEt0;
+//        double mcDzDs0   = mcEz0 / mcEt0;
+//        double mcQPt0 = mc.Par(6) / mcEt0;
 //        if ( TMath::Abs( mcQPt ) < 1.e-4 ) break;
-        double mcPt0 = 1. / TMath::Abs( mcQPt0 );
+//        double mcPt0 = 1. / TMath::Abs( mcQPt0 );
 //        if ( mcPt < Parameters::RefThreshold ) break;
 //        if ( t.NHits() <  PParameters::MinimumHitsForMCTrack ) break;
 //        double bz = fTracker->Slice( 0 ).Param().Bz();
@@ -943,14 +943,14 @@ if( mcTrackNRecoHits[i] < 30 ) continue;
         double py0_ = points[MCindex].Px() * cosA + points[MCindex].Py() * sinA;
         double mcEx_ = px0_*mcQP_;
         double mcEy_ = py0_*mcQP_;
-        double mcEz_ = points[MCindex].Pz()*mcQP_;
+	//        double mcEz_ = points[MCindex].Pz()*mcQP_;
         double mcEt_ = TMath::Sqrt( mcEx_ * mcEx_ + mcEy_ * mcEy_ );
         double mcSinPhi_ = mcEy_ / mcEt_;
         // ---
 	
 	
-        double mcX =  points[MCindex].X();
-        double mcY =  points[MCindex].Y();
+//         double mcX =  points[MCindex].X();
+//         double mcY =  points[MCindex].Y();
         double mcZ =  points[MCindex].Z();
         double mcQP = points[MCindex].QP();
         double mcEx = points[MCindex].Px()*mcQP;
@@ -973,12 +973,12 @@ if( mcTrackNRecoHits[i] < 30 ) continue;
 //              float alpha = fTracker->Slice( iSlice ).Param().Alpha();
               float xc = p.X();
               float yc = p.Y();
-              float zc = p.Z();
-              float gxc = xc * cos(alpha) - yc * sin(alpha);
-              float gyc = yc * cos(alpha) + xc * sin(alpha);
-              float gx1c = gyc;
-              float gy1c = -gx;
-              float gzc = zc;
+	      //              float zc = p.Z();
+	      //              float gxc = xc * cos(alpha) - yc * sin(alpha);
+	      //              float gyc = yc * cos(alpha) + xc * sin(alpha);
+	      //              float gx1c = gyc;
+	      //              float gy1c = -gx;
+	      //              float gzc = zc;
 //              std::cout<<" -----. gxc: "<<gxc<<";   gy: "<<gyc<<";   gx1c: "<<gx1c<<";   gy1c: "<<gy1c<<"\n";
               // ---
         if ( p.GetCosPhi()*mcEx < 0 ) { // change direction
