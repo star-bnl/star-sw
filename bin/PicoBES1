@@ -80,3 +80,9 @@ redo
 foreach f (`ls -1d */*/MuDst.list.Done`)
   set d = `dirname ${f}`; set b = `basename ${f} .Done`; mv  ${f} ${d}/${b}
 end
+================================================================================
+To HPSS
+/gpfs01/star/pwg/fisyak/Pico/2019
+hsi
+cd /home/fisyak/reco/Pico/2019
+cput -R TFG19e
