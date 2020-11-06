@@ -179,9 +179,9 @@ Short_t HMapSCBRA[10];
 Short_t HMapSCPP[10];
 Short_t HMapSCJ[10];
 
-char* colW[4]={"Green ","Brown ","Orange","Blue  "};
-char* colJ[8]={"Blue  ","Orange","Violet","Yellow",
-	       "Green ","Red   ","Grey  ","Black "};
+const char* colW[4]={"Green ","Brown ","Orange","Blue  "};
+const char* colJ[8]={"Blue  ","Orange","Violet","Yellow",
+		     "Green ","Red   ","Grey  ","Black "};
 
 ClassImp(StFcsDbMaker)
 
@@ -310,7 +310,7 @@ Int_t StFcsDbMaker::getDepCh(Int_t dep, Int_t ch) const{
 }                                                                                        
 
 void StFcsDbMaker::getName(Int_t det, Int_t id, char name[]) const{
-  char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
+  const char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
   int ehp,ns,crt,slt,dep,ch;
   int c=getColumnNumber(det,id);
   int r=getRowNumber(det,id);
@@ -320,7 +320,7 @@ void StFcsDbMaker::getName(Int_t det, Int_t id, char name[]) const{
 }
 
 void StFcsDbMaker::getName(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, char name[]) const{
-  char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
+  const char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
   int det,id,crt,slt;
   getIdfromDep(ehp,ns,dep,ch,det,id,crt,slt);
   // printf("%1d %1d %2d %2d : %1d %3d\n",ehp,ns,dep,ch,det,id);
@@ -1130,9 +1130,9 @@ void StFcsDbMaker::printMap(){
     FILE *f7  = fopen("fcsEpdMap.txt","w");    
     FILE *fpp = fopen("fcsPPMap.txt","w");    
 
-    char* EHP[3]={"Ecal","Hcal","Pres"};
-    char* CRT[5]={"EN","MN","MA","MS","ES"};
-    char* DET[6]={"EN","ES","HN","HS","PN","PS"};
+    const char* EHP[3]={"Ecal","Hcal","Pres"};
+    const char* CRT[5]={"EN","MN","MA","MS","ES"};
+    const char* DET[6]={"EN","ES","HN","HS","PN","PS"};
     
     //Ecal
     for(ns=0; ns<2; ns++){
@@ -1416,7 +1416,7 @@ void StFcsDbMaker::printMap(){
 	    for(dep=0; dep<kFcsMaxDepBd; dep++){
 		if(ehp==1 && dep>8) break;
 		if(ehp==2 && dep>3) break;
-		int flag=0;
+		//		int flag=0;
 		for(int bra=0; bra<kFcsMaxBranch; bra++){
 		    for(int add=0; add<kFcsMaxAddr; add++){
 			for(int sipm=0; sipm<kFcsMaxSiPM; sipm++){

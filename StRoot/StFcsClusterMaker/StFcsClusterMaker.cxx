@@ -351,7 +351,7 @@ float StFcsClusterMaker::getSigma(StFcsCluster* clu, double theta, float ecut){
     int nhit=clu->hits().size();
     for (int i=0; i<nhit; i++){ // loop over all hits in cluster
 	StFcsHit* hit = clu->hits()[i];
-        int det=hit->detectorId();
+	//        int det=hit->detectorId();
 	float x,y;
 	mDb->getLocalXYinCell(hit,x,y);
 	// the 2-d vector from the "center" of cluster to tower

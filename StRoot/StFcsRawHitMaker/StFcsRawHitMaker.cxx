@@ -53,7 +53,7 @@ Int_t StFcsRawHitMaker::Make() {
     StRtsTable* dd=0;
     prepareEnvironment();    
     int ndata=0, nvaliddata=0;
-    char* mode[2]={"adc","zs"};
+    const char* mode[2]={"adc","zs"};
     char node[20];
     sprintf(node,"fcs/%s",mode[mReadMode]);
     while((dd = GetNextDaqElement(node))){   
