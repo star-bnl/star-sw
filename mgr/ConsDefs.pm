@@ -23,7 +23,7 @@
  if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; } # print "OPTSTAR = $OPTSTAR\n"; die;
  if ( !$XOPTSTAR or $XOPTSTAR eq '/dev/null') { $XOPTSTAR = $OPTSTAR;} # print "OPTSTAR = $OPTSTAR\n"; die;
  my $host = hostname;
- $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD on host $host, STAR_OB = $STAR_OBJ, STAR_LIB = $STAR_LIB,STAR_BIN = $STAR_BIN\n" unless ($param::quiet);
+ $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD on host $host, STAR_OBJ = $STAR_OBJ, STAR_LIB = $STAR_LIB,STAR_BIN = $STAR_BIN\n" unless ($param::quiet);
  $INCLUDE = $BUILD  . "/include";
  
  @search_files = ();
@@ -84,19 +84,26 @@
  my $RLIBMAP    = $ROOTSYS . "/bin/rlibmap";
  if ($RLIBMAP and ! -e $RLIBMAP) {$RLIBMAP = "";}
  my $RCINTPL    = "";
- my $ROOTCLING  = $ROOTSYS . "/bin/rootcling";
- if ($ROOTCLING and ! -e $ROOTCLING) {
+ my $ROOTCLING  = ""; # switch off cling
+#  my $ROOTCLING  = $ROOTSYS . "/bin/rootcling";
+ if (! -e $ROOTCLING) {
    $ROOTCLING = "";
    $RCINTPL = cwd() . "/mgr/RootCint.pl";
-   if (! -e $RCINTPL) {
-     $RCINTPL = $STAR . "/mgr/RootCint.pl";
-   }
  } else {
    $RCINTPL = cwd() . "/mgr/RootCling.pl";
-   if (! -e $RCINTPL) {
-     $RCINTPL = $STAR . "/mgr/RootCling.pl";
-   }
  }
+#  if (! -e $ROOTCLING) {
+#    $RCINTPL = cwd() . "/mgr/RootCint.pl";
+#    if (! -e $RCINTPL) {
+#      $RCINTPL = $STAR . "/mgr/RootCint.pl";
+#    }
+#  } else {q
+#    $ROOTCLING  = "";q
+#    $RCINTPL = cwd() . "/mgr/RootCling.pl";
+#    if (! -e $RCINTPL) {
+#      $RCINTPL = $STAR . "/mgr/RootCling.pl";
+#    }
+#  }
  if ($RLIBMAP) {
    my ($M,$S,$V) = split('\.',$ROOT_LEVEL);
    if ($M <4 or $M == 4 and $S == 0) {$RLIBMAP = "";}
