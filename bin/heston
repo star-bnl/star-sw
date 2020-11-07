@@ -1,0 +1,2 @@
+#! /bin/tcsh -f
+ mysql -h heston.star.bnl.gov --port=3501 -u "" -p""  Conditions_rts
