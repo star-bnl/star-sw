@@ -33,8 +33,8 @@
 # 2017    root4star -b -q 'bfc.C(2000,"pp2017,btof,mtd,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,StiCA,PicoVtxDefault,evout,","'${evtsFile}'")' &gt;&amp; ${logFile}
 # 2019    root4star -b -q 'bfc.C(1000,"P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,evout,-beamline3D","'${evtsFile}'")' &gt;&amp; ${logFile}
 #         root.exe -b -q  'bfc.C(1000,"P2019a,StiCA,PicoVtxDefault,BEmcChkStat,OSpaceZ2,OGridLeakFull,-OPr13,OPr40,-hitfilt,evout,-beamline3D","'${evtsFile}'")' &gt;&amp; ${logFile}
-#         root.exe -b -q  'bfc.C(500,"P2019a,StiCA,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
-          root.exe -b -q  'bfc.C(500,"DbV20191001,P2019a,StiCA,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+          root.exe -b -q  'bfc.C(5000,"P2019a,StiCA,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#          root.exe -b -q  'bfc.C(500,"DbV20191001,P2019a,StiCA,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 # 2020    root4star -b -q 'bfc.C(6000,"P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
 #         root.exe  -b -q 'bfc.C(6000,"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   cp  ${filel}* ${SUBMITTINGDIRECTORY}
