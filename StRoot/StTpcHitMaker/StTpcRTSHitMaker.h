@@ -65,8 +65,6 @@ class StTpcDigitalSector;
 #include "StDAQMaker/StRtsReaderMaker.h"
 class daq_tpx;
 class daq_itpc;
-class daq_dta;
-class daq_cld;
 class StTpcRTSHitMaker : public StMaker {
  public:
  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
@@ -75,8 +73,6 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t               Init();
   Int_t               InitRun(Int_t runnumber);
   Int_t               Make();
-  void PrintCld(daq_cld *cld = 0, Int_t IdTruth = 0, Int_t quality=0);
-  void PrintAdc(daq_dta *dta  = 0);
  private:
   daq_tpx  *fTpx; //!
   daq_itpc *fiTpc; //!
