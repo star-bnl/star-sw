@@ -16,7 +16,7 @@ if (! $?NODEBUG) then
 else
     set ROOTBUILD="opt"
 endif
-setenv LDFLAGS -m32
+#setenv LDFLAGS -m32
 setenv VC_ROOT ../../Vc/
 switch ( $STAR_HOST_SYS )  
 #    case *x8664_gcc7*:
