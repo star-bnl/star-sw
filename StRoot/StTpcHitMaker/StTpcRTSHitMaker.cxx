@@ -25,6 +25,8 @@
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_itpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcStatusC.h"
 #include "StMessMgr.h" 
@@ -80,6 +82,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   if (GetDate() >= 20091215) fTpx->fcf_run_compatibility = 10 ;
   // change default value 2 to 
   fTpx->fcf_do_cuts = 1; // 1 means always, 2 means don't cut edges (for i.e. pulser run), 0 means don't...
+  if (GetDate() >= 20121215) fTpx->fcf_style = 2 ;  // from online/RTS/src/ESB/tpx.C new for FY13!
   if (GetDate() <= 20090101) fminCharge = 40;
   // Check presence iTPC
   SafeDelete(fiTpc);
@@ -112,74 +115,78 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     Int_t totalSecPads = 0;
     // Tpx
     daq_dta *dta = dta_Tpx;
+    Int_t rowMin = 1;
+    if (St_tpcPadConfigC::instance()->iTPC(sector)) rowMin = 14; 
     for(Int_t rowO = 1; rowO <= 45; rowO++) {
-      Int_t row = rowO;
-      if (St_tpcPadConfigC::instance()->iTPC(sector) && rowO > 13)  row = rowO + 40 - 13;
-      Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
-      gain = (daq_det_gain *) dta->request(numPadsAtRow+1);	// max pad+1		
-      gain[0].gain = 0.0;	// kill pad0 just in case..
-      gain[0].t0   = 0.0;
+      Int_t Npads = St_tpcPadPlanesC::instance()->padsPerRow(rowO);
 #if 0
-      gain[1].gain = 0.0;	// kill pad0 just in case..
-      gain[1].t0   = 0.0;
-      gain[numPadsAtRow].gain = 0.0;	// kill pad0 just in case..
-      gain[numPadsAtRow].t0   = 0.0;
-      for(Int_t pad = 2; pad <= numPadsAtRow-1; pad++) {
-	gain[pad].gain = 0.; // be sure that dead pads are killed
-	gain[pad].t0   = 0.;
-	if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
-	gain[pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
-	gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
-      }
+      Int_t nBadPads = 3;
+      if (rowO ==  1 || 
+	  (rowO >= 5 && rowO <= 14) || 
+	  rowO == 19 ||
+	  rowO == 23 ||
+	  rowO == 24 ||
+	  rowO == 29 ||
+	  rowO == 33 ||
+	  rowO == 34 ||
+	  rowO == 39 ||
+	  rowO == 43)  nBadPads = 2;
+      else if (rowO >= 44) nBadPads = 1;
+      Int_t padMin = nBadPads + 1;
+      Int_t padMax = Npads - nBadPads;
 #else
-      for(Int_t pad = 1; pad <= numPadsAtRow; pad++) {
+      Int_t padMin = 1;
+      Int_t padMax = Npads;
+#endif
+      gain = (daq_det_gain *) dta->request(Npads+1);    // max pad+1            
+      for(Int_t pad = 0; pad <= Npads; pad++) {
 	gain[pad].gain = 0.; // be sure that dead pads are killed
 	gain[pad].t0   = 0.;
-	if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
-	gain[pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
-	gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
+	if (rowO >= rowMin && pad >= padMin && pad <= padMax) {
+	  if (St_tpcPadGainT0C::instance()->Gain(sector,rowO,pad) <= 0) continue;
+	  gain[pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,rowO,pad);
+	  gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,rowO,pad);
+	}
       }
-#endif
       // daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
-      dta->finalize(numPadsAtRow+1,sector,rowO);
+      dta->finalize(Npads+1,sector,rowO);
       if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
-	totalSecPads += numPadsAtRow;
+	totalSecPads += Npads;
+	Int_t row = rowO;
+	if (St_tpcPadConfigC::instance()->iTPC(sector) && rowO > 13)  row = rowO + 40 - 13;
 	if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
 	    St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
-	  liveSecPads += numPadsAtRow;
+	  liveSecPads += Npads;
       }
     }
     // iTpc
-    if (St_tpcPadConfigC::instance()->iTPC(sector)) {
-    daq_dta *dta = dta_iTpc;
-    for(Int_t rowO = 1; rowO <= 40; rowO++) {
-      Int_t row = rowO;
-      Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
-      gain = (daq_det_gain *) dta->request(numPadsAtRow+1);	// max pad+1		
-      gain[0].gain = 0.0;	// kill pad0 just in case..
-      gain[0].t0   = 0.0;
-      for(Int_t pad = 1; pad <= numPadsAtRow; pad++) {
+    if (! St_tpcPadConfigC::instance()->iTPC(sector) || ! dta_iTpc) continue;
+    dta = dta_iTpc;
+    for(Int_t row = 1; row <= 40; row++) {
+      Int_t Npads = St_itpcPadPlanesC::instance()->padsPerRow(row);
+      gain = (daq_det_gain *) dta->request(Npads+1);	// max pad+1		
+      for(Int_t pad = 0; pad <= Npads; pad++) {
 	gain[pad].gain = 0.; // be sure that dead pads are killed
 	gain[pad].t0   = 0.;
+	if (pad < 1) continue; // kill pad0 just in case..
 	if (St_itpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
 	gain[pad].gain = St_itpcPadGainT0C::instance()->Gain(sector,row,pad);
 	gain[pad].t0   = St_itpcPadGainT0C::instance()->T0(sector,row,pad);
       }
       // daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
-      dta->finalize(numPadsAtRow+1,sector,rowO);
+      dta->finalize(Npads+1,sector,row);
       if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
-	totalSecPads += numPadsAtRow;
+	totalSecPads += Npads;
 	if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
 	    St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
-	  liveSecPads += numPadsAtRow;
+	  liveSecPads += Npads;
       }
-    }
     }
     livePads += liveSecPads;
     totalPads += totalSecPads;
     if (maxHitsPerSector > 0) {
       liveFrac = TMath::Max(0.1f,
-			  ((Float_t) liveSecPads) / (1e-15f + (Float_t) totalSecPads));
+			    ((Float_t) liveSecPads) / (1e-15f + (Float_t) totalSecPads));
       maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
       if (Debug()) {LOG_INFO << "maxHits in sector " << sector
 			     << " = " << maxHits[sector-1] << endm;}
@@ -212,10 +219,47 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   return kStOK;
 }
 //________________________________________________________________________________
+void StTpcRTSHitMaker::PrintCld(daq_cld *cld, Int_t IdTruth, Int_t quality) {
+  if (cld) {
+    LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
+		     cld->pad,
+		     cld->p1,
+		     cld->p2,
+		     cld->tb,
+		     cld->t1,
+		     cld->t2,
+		     cld->charge,
+		     cld->flags,
+		     IdTruth,
+		     quality
+		     ) << endm;
+  }
+}
+//________________________________________________________________________________
+void StTpcRTSHitMaker::PrintAdc(daq_dta *dta) {
+  if (dta) {
+    // verify data!
+    while(dta && dta->iterate()) {
+      LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dta->sec,dta->row,dta->pad,dta->ncontent) << endm;
+      for(UInt_t i=0;i<dta->ncontent;i++) {
+	if (Debug() > 1 || dta->sim_adc[i].track_id) {
+	  LOG_INFO << Form("    %2d: adc %4d, tb %3d: track %4d",i,
+			   dta->sim_adc[i].adc,
+			   dta->sim_adc[i].tb,
+			   dta->sim_adc[i].track_id
+			   ) << endm;
+	}
+      }
+    }
+  }
+}
+//________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Make() {
+#ifdef __BENCHMARK__
   TBenchmark *myBenchmark = new TBenchmark();
   myBenchmark->Reset();
   //  myBenchmark->Start("StTpcRTSHitMaker::Make");
+#endif
   if (St_tpcStatusC::instance()->isDead()) {
     LOG_WARN << "TPC status indicates it is unusable for this event. Ignoring hits." << endm;
     return kStOK;
@@ -239,7 +283,7 @@ Int_t StTpcRTSHitMaker::Make() {
     LOG_WARN << "There is not Tpc Raw Event" << endm;
     return kStWarn;
   }
-  if (Debug()) tpcRawEvent->ls();
+  //  if (Debug()) tpcRawEvent->ls();
   StTpcRawData *tpcRawData = (StTpcRawData *) tpcRawEvent->GetObject();
   if (! tpcRawData) {
     LOG_WARN << "There is not Tpc Raw Data" << endm;
@@ -258,72 +302,47 @@ Int_t StTpcRTSHitMaker::Make() {
     UShort_t Id = 0;
     Int_t hitsAdded = 0;
     for (Int_t iTpcType  = 0; iTpcType < 2; iTpcType++) {// Tpx iTPC
-      if (iTpcType == 0 && ! fTpx ) continue; 
-      if (iTpcType == 1 && ! fiTpc) continue; 
+      daq_dta *dta  = 0;
       Int_t row1 = minRow;
       Int_t row2 = maxRow;
       // Check presense of iTPC and adjust row range
-      daq_dta *dta  = 0;
       if (St_tpcPadConfigC::instance()->iTPC(sector)) {
 	//  daq_tpx::get(const char *bank="*", int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0)
 	//           put(const char *bank="*", int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0)
 	// daq_itpc::get(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0)
 	//           put(const char *in_bank="*", int sector=-1, int row=-1, int pad=-1, void *p1=0, void *p2=0)
-	if (! iTpcType) {
-	  row1 = TMath::Max(row1, 41); dta = fTpx  ?  fTpx->put("adc_sim") /* ,0,45,0,mTpx_RowLen[sector-1]) */ : 0;
-	} else            {
+	if (! iTpcType) { // Tpx
+	  if (! fTpx) continue;
+	  row1 = TMath::Max(row1, 41); 
+	  //	  dta = fTpx->put("adc_sim",sector); //,45,0, &mTpx_RowLen[sector-1][40-13]); /*, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO])  ,0,45,0,mTpx_RowLen[sector-1]) */
+	  dta = fTpx->put("adc_sim", 0, 45,0, &mTpx_RowLen[sector-1][40-13]); /*, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO])  ,0,45,0,mTpx_RowLen[sector-1]) */
+	} else { // iTpc           {
 	  if (! fiTpc) continue;
-	  row2 = TMath::Min(40, row2); dta = fiTpc ? fiTpc->put("adc_sim") /*,0,40,0,mTpx_RowLen[sector-1]) */  : 0;
+	  row2 = TMath::Min(40, row2); 
+	  //	  dta = fiTpc->put("adc_sim", sector); //, 40, 0, mTpx_RowLen[sector-1]);  /*, sector, row, 0, mTpx_RowLen[sector-1]) ,0,40,0,mTpx_RowLen[sector-1]) */ 
+	  dta = fiTpc->put("adc_sim", 0, 40, 0, mTpx_RowLen[sector-1]);  /*, sector, row, 0, mTpx_RowLen[sector-1]) ,0,40,0,mTpx_RowLen[sector-1]) */ 
 	}
-      } else {
+      } else { // no iTPC
+	if (! fTpx) continue;
 	row2 = TMath::Min(45, row2);
-	dta = fTpx  ?  fTpx->put("adc_sim") /* ,0,45,0,mTpx_RowLen[sector-1]) */ : 0;
+	//	dta = fTpx->put("adc_sim",sector); //,45,0, &mTpx_RowLen[sector-1]); /*, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO])  ,0,45,0,mTpx_RowLen[sector-1]) */
+	dta = fTpx->put("adc_sim",0,45); //,45,0, &mTpx_RowLen[sector-1]); /*, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO])  ,0,45,0,mTpx_RowLen[sector-1]) */
       }
-      assert(dta);
       Int_t NoAdcs = 0;
       for (Int_t row = row1; row <= row2; row++) {
 	if (! St_tpcPadGainT0BC::instance()->livePadrow(sector,row)) continue;
 	Int_t Npads = digitalSector->numberOfPadsInRow(row);
 	Int_t rowO = row;
-	Int_t padMin = 1;
-	Int_t padMax = Npads;
-#if 0
-	if (! iTpcType) {// Tpx
-	  if (St_tpcPadConfigC::instance()->iTPC(sector) && row > 40) { // sector with iTPC
-	    rowO = row - 40 + 13;
-	    Int_t nBadPads = 3;
-	    if (/* row == 41 || */
-		row == 46 || 
-		row == 50 || 
-		row == 51 || 
-		row == 56 || 
-		row == 60 || 
-		row == 61 || 
-		row == 66 || 
-		row == 70 ) nBadPads = 2;
-	    else if (row >= 71) nBadPads = 1;
-	    padMin = nBadPads + 1;
-	    padMax = Npads - nBadPads;
-	  } else { // sector without iTPC
-	    Int_t nBadPads = 3;
-	    if (row ==  1 || 
-		row >= 5 && row <= 14 || 
-		row == 19 ||
-		row == 23 ||
-		row == 24 ||
-		row == 29 ||
-		row == 33 ||
-		row == 34 ||
-		row == 39 ||
-		row == 43)  nBadPads = 2;
-	    else if (row >= 44) nBadPads = 1;
-	    padMin = nBadPads + 1;
-	    padMax = Npads - nBadPads;
-	    
+	//	daq_dta *dta  = 0;
+	if (! iTpcType) {
+	  if (St_tpcPadConfigC::instance()->iTPC(sector) && row > 40) { // Tpx sector with iTPC
+	    rowO = row - 40 + 13; // old row count
 	  }
+	  //	  dta = fTpx  ?  fTpx->put("adc_sim", sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO]) /* ,0,45,0,mTpx_RowLen[sector-1]) */ : 0; 
+	  //	} else {
+	  //	  dta = fiTpc ? fiTpc->put("adc_sim", sector, row, 0, mTpx_RowLen[sector-1]) /*,0,40,0,mTpx_RowLen[sector-1]) */  : 0;
 	}
-#endif
-	for(Int_t pad = padMin; pad <= padMax; pad++) {
+	for(Int_t pad = 1; pad <= Npads; pad++) {
 	  UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
 	  if (! ntimebins) continue;
 	  // allocate space for at least 512 pixels (timebins)
@@ -340,202 +359,140 @@ Int_t StTpcRTSHitMaker::Make() {
 	    }
 	  }
 	  if (l > 0) {
+#ifdef __BENCHMARK__
 	    //	    myBenchmark->Start("StTpcRTSHitMaker::Make::finalize");
+#endif
 	    // daq_dta::finalize(u_int obj_cou, int s=0, int row=0, int pad=0) ;
 	    dta->finalize(l,sector,rowO,pad);
+#ifdef __BENCHMARK__
 	    //	    myBenchmark->Stop("StTpcRTSHitMaker::Make::finalize");
+#endif
 	    NoAdcs += l;
 	  }
 	} // pad loop
-      } // row loop      
-      if (! NoAdcs) continue;
-      if (Debug() > 1) {
-	// verify data!
-	daq_dta *dtaX  = 0;
-	if (! iTpcType) {
-	  if (fTpx) dtaX = fTpx->get("adc_sim");
-	} else {
-	  if (fiTpc) dtaX = fiTpc->get("adc_sim");
-	}
-	assert(dtaX);
-	while(dtaX && dtaX->iterate()) {
-	  LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dtaX->sec,dtaX->row,dtaX->pad,dtaX->ncontent) << endm;
-	  for(UInt_t i=0;i<dtaX->ncontent;i++) {
-	    if (Debug() > 1 || dtaX->sim_adc[i].track_id) {
-	      LOG_INFO << Form("    %2d: adc %4d, tb %3d: track %4d",i,
-			       dtaX->sim_adc[i].adc,
-			       dtaX->sim_adc[i].tb,
-			       dtaX->sim_adc[i].track_id
-			       ) << endm;
-	    }
-	  }
-	}
-      }
-      daq_dta *dtaX  = 0;
-      if (! iTpcType) { //Tpx
-	if (! fTpx) continue;
-	if (IAttr("TpxClu2D")) {
-	  dtaX = fTpx->get("cld_2d_sim"); // rerun the 2D cluster finder on the simulated data...
-	} else {
-	  dtaX = fTpx->get("cld_sim"); // rerun the cluster finder on the simulated data...
-	}
-      } else { // iTpc
-	if (! fiTpc) continue;
-	dtaX = fiTpc->get("cld_sim",sector); // rerun the cluster finder on the simulated data...
-      }
-      if (! dtaX) continue;
-      daq_dta *dd = dtaX;
-      Double_t ADC2GeV = 0;
-      Int_t rowOld = -1;
-      static Int_t iBreak = 0;
-      while(dd && dd->iterate()) {
-	if (Debug() > 0) {
-	  LOG_INFO << Form("CLD sec %2d: row %2d: %d clusters",dd->sec, dd->row, dd->ncontent) << endm;
-	}
-	for(UInt_t i=0;i<dd->ncontent;i++) {
-	  daq_cld cld;
-	  Int_t IdTruth = 0;
-	  UShort_t quality  = 0;
-	  if (! iTpcType) {
-	    daq_sim_cld   &dc   = ((daq_sim_cld   *) dd->Void)[i] ;
-	    cld      = dc.cld;
-	    IdTruth = dc.track_id;
-	    quality  = dc.quality;
-	  } else {
-	    daq_sim_cld_x &dc_x = ((daq_sim_cld_x *) dd->Void)[i] ;
-	    cld      = dc_x.cld;
-	    IdTruth = dc_x.track_id;
-	    quality  = dc_x.quality;
-	  }
-	  if (Debug()) {
-	    LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
-			     cld.pad,
-			     cld.p1,
-			     cld.p2,
-			     cld.tb,
-			     cld.t1,
-			     cld.t2,
-			     cld.charge,
-			     cld.flags,
-			     IdTruth,
-			     quality
-			     ) << endm;
-	    iBreak++;
-	  }
-	  if (cld.p1 > cld.p2) continue;
-	  if (cld.t1 > cld.t2) continue;
-	  if (cld.tb >= __MaxNumberOfTimeBins__) continue;
-	  if (cld.charge < fminCharge) continue;
-	  if ( ! (cld.pad >  0 && cld.pad <= 182 && 
-		  cld.tb  >= 0 && cld.tb  <  512)) continue;
-	  /*tpxFCF.h
-	    #define FCF_ONEPAD              1
-	    #define FCF_DOUBLE_PAD          2       // offline: merged
-	    #define FCF_MERGED              2
-	    #define FCF_BIG_CHARGE          8
-	    #define FCF_ROW_EDGE           16      // 0x10 touched end of row
-	    #define FCF_BROKEN_EDGE        32      // 0x20 touches one of the mezzanine edges
-	    #define FCF_DEAD_EDGE          64      // 0x40 touches a dead pad 
-	  */
-	  if ( cld.flags &&
-	       (cld.flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE))) continue;
-	  Int_t row = dd->row;
-	  if (! iTpcType && St_tpcPadConfigC::instance()->iTPC(sector) && row > 13)  row = row + 40 - 13;
-	  StTpcPadCoordinate Pad(dd->sec, row, cld.pad, cld.tb); PrPP(Make,Pad);
-	  static StTpcLocalSectorCoordinate LS;
-	  static StTpcLocalCoordinate L;
-	  transform(Pad,LS,kFALSE,kTRUE); PrPP(Make,LS); // don't useT0, useTau                  
-	  transform(LS,L);                                                                             PrPP(Make,L);
-	  if (row != rowOld) {
-	    rowOld = row;
-	    Double_t gain = St_tpcPadConfigC::instance()->IsRowInner(dd->sec,row) ? 
-	      St_tss_tssparC::instance()->gain_in() : 
-	      St_tss_tssparC::instance()->gain_out();
-	    Double_t wire_coupling = St_tpcPadConfigC::instance()->IsRowInner(dd->sec,row) ? 
-	      St_tss_tssparC::instance()->wire_coupling_in() : 
-	      St_tss_tssparC::instance()->wire_coupling_out();
-	    ADC2GeV = ((Double_t) St_tss_tssparC::instance()->ave_ion_pot() * 
-		       (Double_t) St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
-	  }
-	  UInt_t hw = 1;   // detid_tpc
-	  //yf        if (isiTpcSector) hw += 1U << 1;
-	  hw += dd->sec << 4;     // (row/100 << 4);   // sector
-	  hw +=     row << 9;     // (row%100 << 9);   // row
-#if 1
-	  Double_t q = ADC2GeV*cld.charge;
-#else /* used in TFG till 07/31/20 */
-	  Double_t q = 0; 
-#endif
-	  Id++;
-	  StTpcHit *hit = StTpcHitMaker::StTpcHitFlag(L.position(),hard_coded_errors,hw,q
-						      , (UChar_t ) 0  // counter 
-						      , IdTruth
-						      , quality
-						      , Id                                   // id =0,
-						      , cld.p1 //  mnpad
-						      , cld.p2 //  mxpad
-						      , cld.t1 //  mntmbk
-						      , cld.t2 //  mxtmbk
-						      , cld.pad
-						      , cld.tb 
-						      , cld.charge
-						      , cld.flags);
-	  hitsAdded++;
-	  if (hit->minTmbk() == 0) bin0Hits++;
-	  if (Debug()) hit->Print();
-	  hitCollection->addHit(hit);
-	  if (Debug()) {cout << "Add hit #" << hitCollection->numberOfHits() << endl;}
-	}
-      }
-#if 0
-      // Set IdTruth from cluster finder
-      for (Int_t row = minRow; row <= digitalSector->numberOfRows(); row++) {
-	dtaX = 0;
-	if (! iTpcType) {
-	  if (fTpx) dtaX = fTpx->get("adc_sim");
-	} else {
-	  if (fiTpc) dtaX = fiTpc->get("adc_sim");
-	}
-	if (! dtaX) continue;
-	Int_t Npads = digitalSector->numberOfPadsInRow(row);
-	for(Int_t pad = 1; pad <= Npads; pad++) {
-	  UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
-	  if (! ntimebins) continue;
-	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
-	  // Update pixels if any (for data)
-	  //	  dta = fTpx->get("adc_sim",sec);
-	  Int_t Updated = 0;
-	  dta = dtaX;
+	if (! NoAdcs) continue;
+	if (Debug()) {
+	  //	  PrintAdc(dta);
+	  // verify data!
 	  while(dta && dta->iterate()) {
-	    Int_t secC  = dta->sec;
-	    Int_t rowC  = dta->row;
-	    Int_t padC  = dta->pad;
-	    if (secC != sector || rowC != row || padC != pad) continue;
+	    LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dta->sec,dta->row,dta->pad,dta->ncontent) << endm;
 	    for(UInt_t i=0;i<dta->ncontent;i++) {
-	      Int_t tb = dta->sim_adc[i].tb;
-	      if (ADCs[tb] != dta->sim_adc[i].adc ||
-		  IDTs[tb] != dta->sim_adc[i].track_id) {
-		if (Debug() > 1) {
-		  LOG_INFO << Form("tb %3d    adc %4d => %4d, track %4d => %4d",tb,
-				   ADCs[tb],dta->sim_adc[i].adc,
-				   IDTs[tb],dta->sim_adc[i].track_id) << endm;
-		}
-		ADCs[tb] = dta->sim_adc[i].adc;
-		IDTs[tb] = dta->sim_adc[i].track_id;
-		Updated++;
+	      if (Debug() > 1 || dta->sim_adc[i].track_id) {
+		LOG_INFO << Form("    %2d: adc %4d, tb %3d: track %4d",i,
+			   dta->sim_adc[i].adc,
+				 dta->sim_adc[i].tb,
+				 dta->sim_adc[i].track_id
+				 ) << endm;
 	      }
 	    }
 	  }
-	  if (Updated) {
-	    digitalSector->putTimeAdc(row,pad,ADCs,IDTs);
-	    nup += Updated;
+	}
+	daq_dta *dtaX  = 0;
+	if (! iTpcType) { //Tpx
+	  if (! fTpx) continue;
+	  if (IAttr("TpxClu2D")) {
+	    dtaX = fTpx->get("cld_2d_sim"); //, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO]); // rerun the 2D cluster finder on the simulated data...
+	  } else {
+	    dtaX = fTpx->get("cld_sim");;   //, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO]); // rerun the cluster finder on the simulated data...
+	  }
+	} else { // iTpc
+	  if (! fiTpc) continue;
+	  dtaX = fiTpc->get("cld_sim"); // ,sector, sector, row, 0, mTpx_RowLen[sector-1]); // rerun the cluster finder on the simulated data...
+	}
+	if (! dtaX) continue;
+	daq_dta *dd = dtaX;
+	Double_t ADC2GeV = 0;
+	Int_t rowOld = -1;
+	static Int_t iBreak = 0;
+	while(dd && dd->iterate()) {
+	  if (Debug() > 0) {
+	    LOG_INFO << Form("CLD sec %2d: row %2d: %d clusters",dd->sec, dd->row, dd->ncontent) << endm;
+	  }
+	  for(UInt_t i=0;i<dd->ncontent;i++) {
+	    daq_cld cld;
+	    Int_t IdTruth = 0;
+	    UShort_t quality  = 0;
+	    if (! iTpcType) {
+	      daq_sim_cld   &dc   = ((daq_sim_cld   *) dd->Void)[i] ;
+	      cld      = dc.cld;
+	      IdTruth = dc.track_id;
+	      quality  = dc.quality;
+	    } else {
+	      daq_sim_cld_x &dc_x = ((daq_sim_cld_x *) dd->Void)[i] ;
+	      cld      = dc_x.cld;
+	      IdTruth = dc_x.track_id;
+	      quality  = dc_x.quality;
+	    }
+	    if (Debug()) {
+	      PrintCld(&cld, IdTruth, quality);
+	      iBreak++;
+	    }
+	    if (cld.p1 > cld.p2) continue;
+	    if (cld.t1 > cld.t2) continue;
+	    if (cld.tb >= __MaxNumberOfTimeBins__) continue;
+	    if (cld.charge < fminCharge) continue;
+	    if ( ! (cld.pad >  0 && cld.pad <= 182 && 
+		    cld.tb  >= 0 && cld.tb  <  512)) continue;
+	    /*tpxFCF.h
+	      #define FCF_ONEPAD              1
+	      #define FCF_DOUBLE_PAD          2       // offline: merged
+	      #define FCF_MERGED              2
+	      #define FCF_BIG_CHARGE          8
+	      #define FCF_ROW_EDGE           16      // 0x10 touched end of row
+	      #define FCF_BROKEN_EDGE        32      // 0x20 touches one of the mezzanine edges
+	      #define FCF_DEAD_EDGE          64      // 0x40 touches a dead pad 
+	    */
+	    if ( cld.flags && (cld.flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE))) continue;
+	    Int_t rowO = dd->row;
+	    Int_t row  = rowO;
+	    if (! iTpcType && St_tpcPadConfigC::instance()->iTPC(sector) && rowO > 13)  row = rowO + 40 - 13;
+	    StTpcPadCoordinate Pad(dd->sec, row, cld.pad, cld.tb); PrPP(Make,Pad);
+	    static StTpcLocalSectorCoordinate LS;
+	    static StTpcLocalCoordinate L;
+	    transform(Pad,LS,kFALSE,kTRUE); PrPP(Make,LS); // don't useT0, useTau                  
+	    transform(LS,L);                                                                             PrPP(Make,L);
+	    if (row != rowOld) {
+	      rowOld = row;
+	      Double_t gain = St_tpcPadConfigC::instance()->IsRowInner(dd->sec,row) ? 
+		St_tss_tssparC::instance()->gain_in() : 
+		St_tss_tssparC::instance()->gain_out();
+	      Double_t wire_coupling = St_tpcPadConfigC::instance()->IsRowInner(dd->sec,row) ? 
+		St_tss_tssparC::instance()->wire_coupling_in() : 
+		St_tss_tssparC::instance()->wire_coupling_out();
+	      ADC2GeV = ((Double_t) St_tss_tssparC::instance()->ave_ion_pot() * 
+			 (Double_t) St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
+	    }
+	    UInt_t hw = 1;   // detid_tpc
+	    //yf        if (isiTpcSector) hw += 1U << 1;
+	    hw += dd->sec << 4;     // (row/100 << 4);   // sector
+	    hw +=     row << 9;     // (row%100 << 9);   // row
+#if 1
+	    Double_t q = ADC2GeV*cld.charge;
+#else /* used in TFG till 07/31/20 */
+	    Double_t q = 0; 
+#endif
+	    Id++;
+	    StTpcHit *hit = StTpcHitMaker::StTpcHitFlag(L.position(),hard_coded_errors,hw,q
+							, (UChar_t ) 0  // counter 
+							, IdTruth
+							, quality
+							, Id                                   // id =0,
+							, cld.p1 //  mnpad
+							, cld.p2 //  mxpad
+							, cld.t1 //  mntmbk
+							, cld.t2 //  mxtmbk
+							, cld.pad
+							, cld.tb 
+							, cld.charge
+							, cld.flags);
+	    hitsAdded++;
+	    if (hit->minTmbk() == 0) bin0Hits++;
+	    if (Debug()) hit->Print();
+	    hitCollection->addHit(hit);
+	    if (Debug()) {cout << "Add hit #" << hitCollection->numberOfHits() << endl;}
 	  }
 	}
-	if (nup && Debug() > 1) {
-	  LOG_INFO << "Update total " << nup << " pixels from Sector / row = " << sector << " / " << row <<   endm;
-	}
-      }
-#endif
+      } // row loop      
     } // end iTpcType loop
     if (maxHits[sector-1] && hitsAdded > maxHits[sector-1]) {
       LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
@@ -549,9 +506,11 @@ Int_t StTpcRTSHitMaker::Make() {
     return kStSkip;
   }
   if (! IAttr("NoTpxAfterBurner")) StTpcHitMaker::AfterBurner(hitCollection);
+#ifdef __BENCHMARK__
   myBenchmark->Stop("StTpcRTSHitMaker::Make");
   myBenchmark->Show("StTpcRTSHitMaker::Make");
   myBenchmark->Show("StTpcRTSHitMaker::Make::finalize");
   delete myBenchmark;
+#endif
   return kStOK;
 }
