@@ -116,7 +116,7 @@ for my $h  (split /\s/,$sources) {
     next if $h =~ /Ttypes/;
     
     if ($h =~ /Stypes/)  {
-	$h_files .= " " . basename($h); 
+	$h_files .= " " .  basename($h); 
 	next;
     } 
     $h_dir = dirname($h);
@@ -216,7 +216,7 @@ for my $h  (split /\s/,$sources) {
 	    $inc_h =~ s/\"//g; 
 	    # print "inc_h = $inc_h\n";
 	  
-	    my $inc_hh = basename($inc_h);
+	    my $inc_hh = $inc_h; # basename($inc_h);
 	    if ($sources =~ /$inc_hh/) {
 		$includes .= ":" . $inc_hh;   	
 		# print "--includes for $h: $includes\n";
@@ -249,7 +249,7 @@ for my $h  (split /\s/,$sources) {
 	}
 	if ($line =~ /\#define/) { next;}
 	if ($line =~ /StCollectionDef/) {
-	    $coll++;  #print "$coll, $line\n";
+	    $coll++;#  print "$coll, $line\n";
 	}
     }
     close (In);
@@ -413,7 +413,7 @@ for my $class (@classes) {	#loop over classes
       next;
   }
 
-  my $hh = " " . basename($h) . " "; 				#print "hh = $hh\n";
+  my $hh = " " . $h . ""; # basename($h) . " "; 				#print "hh = $hh\n";
   if ($h_files !~ /$hh/ )  {$h_files .= $hh;}
 }#end loop over classes
 
