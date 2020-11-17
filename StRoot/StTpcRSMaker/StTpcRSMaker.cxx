@@ -611,10 +611,8 @@ return kStOK;
 Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   static Int_t minSector = IAttr("minSector");
   static Int_t maxSector = IAttr("maxSector");
-#if 0
   static Int_t minRow    = IAttr("minRow");
   static Int_t maxRow    = IAttr("maxRow");
-#endif
   // constants
   static Int_t iBreak = 0;
 #ifdef __DEBUG__
@@ -701,6 +699,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       tpc_hit = tpc_hit_begin + indx;
       Int_t volId = tpc_hit->volume_id%10000;
       Int_t iSector = volId/100;
+      Int_t row = volId%100;
+      if (row < minRow || row > maxRow) continue;
       if (iSector != sector) {
 	if (! ( iSector > sector ) ) {
 	  LOG_ERROR << "StTpcRSMaker::Make: g2t_tpc_hit table has not been ordered by sector no. " << sector << endm;
