@@ -163,6 +163,7 @@ public:
     void   Clear(const Option_t *opt = ""); 
     StTpcRawData &operator+= (StTpcRawData& v);
     virtual void Print(const Option_t *opt="") const; 
+    const std::vector<StTpcDigitalSector*> &Sectors() {return *&mSectors;}
 private:
     std::vector<StTpcDigitalSector*> mSectors;
     ClassDef(StTpcRawData,1)
