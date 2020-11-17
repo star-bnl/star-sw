@@ -483,9 +483,9 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     Float_t ds = particle.GetDStoPoint(vx.xyz(),dsdr.GetArray());    PrPP3(ds);
     particle.TransportToDS( ds,dsdr.GetArray() );                     if (Debug() > 2) {cout << "Trans."; PrPP(particle);}
     KFParticleBase *pb = (KFParticleBase *) &particle;
-    Int_t charge = 0;
-    if   (particle.GetQ() > 0) charge = 1;
-    else (particle.GetQ() < 0) charge = -1;                    
+    Int_t q = particle.GetQ();
+    Int_t charge = 1;
+    if (q < 0) charge = 2;
     const Float_t *pars = &pb->Parameter(0);
     TRSymMatrix C(3,&pb->Covariance(0)); PrPP(C);
     C += CVx;   PrPP(C);
@@ -512,13 +512,13 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     dYS->Fill(sector,x.z(),d.y());
     dZS->Fill(sector,x.z(),d.z());
     if (charge == 1) {
-      dXSP->Fill(sector,x,d.x());
-      dYSP->Fill(sector,x,d.y());
-      dZSP->Fill(sector,x,d.z());
-    } else if (charge == -1) {
-      dXSN->Fill(sector,x,d.x());
-      dYSN->Fill(sector,x,d.y());
-      dZSN->Fill(sector,x,d.z());
+      dXS2P->Fill(sector,d.x());
+      dYS2P->Fill(sector,d.y());
+      dZS2P->Fill(sector,d.z());
+    } else if (charge == 2) {
+      dXS2N->Fill(sector,d.x());
+      dYS2N->Fill(sector,d.y());
+      dZS2N->Fill(sector,d.z());
     }
     dXSPhi->Fill(sector,Phi,d.x());
     dYSPhi->Fill(sector,Phi,d.y());
@@ -633,9 +633,6 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     TRVector AmX(A,TRArray::kATxB,mGX);  PrPP2(AmX);
     TRSymMatrix SX(A,TRArray::kATxSxA,G);   PrPP2(SX);
     Int_t sec = sector-1;
-    Int_t q = particle.GetQ();
-    Int_t charge = 1;
-    if (q < 0) charge = 2;
     for (Int_t k = 0; k < 2; k++) {
       Int_t i = 0;
       if (! k) i = charge;
