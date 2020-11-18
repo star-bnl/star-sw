@@ -220,8 +220,6 @@ Double_t Chi2Vx(StMuPrimaryVertex *VtxH, StMuPrimaryVertex *Vtx) {
 void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
   static TH2F *dZ = 0,  *dX, *dY, *X, *Y,    *Zchisq, *dZT, *dT;
   static TH3F *dXS,   *dYS,   *dZS, *dXYS, *dXTpcS,   *dYTpcS,   *dZTpcS;
-  static TH2F *dXS2P,   *dYS2P,   *dZS2P;
-  static TH2F *dXS2N,   *dYS2N,   *dZS2N;
   static TH3F *dXSPhi,   *dYSPhi,   *dZSPhi, *dXSDip,   *dYSDip,   *dZSDip;
   static TH2F *pTSP, *pTSN;
   static TH3F ***plots3D;
@@ -237,8 +235,8 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
   const Double_t Zmax = 250;
 #else
   const Int_t nZ = 2000;
-  const Double_t Zmin = -200;
-  const Double_t Zmax =  200;
+  const Double_t Zmin = -100;
+  const Double_t Zmax =  100;
 #endif  
   if (! dZ) {
     NPART = new TH1D("npart","no accepted particles",500,0,5000);
@@ -276,15 +274,6 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     dYSDip = new TH3F("dYSDip","dY in SCS versus sector and Dip",24,0.5,24.5,100,-0.2,1.2,500,-1.0,1.0);
     dZSDip = new TH3F("dZSDip","dZ in SCS versus sector and Dip",24,0.5,24.5,100,-0.2,1.2,500,-1.0,1.0);
     plots3D = new TH3F**[3];
-
-    dXS2P = new TH2F("dXS2P","dX in SCS versus sector (positive)",24,0.5,24.5,500,-1.0,1.0);
-    dYS2P = new TH2F("dYS2P","dY in SCS versus sector (positive)",24,0.5,24.5,500,-1.0,1.0);
-    dZS2P = new TH2F("dZS2P","dZ in SCS versus sector (positive)",24,0.5,24.5,500,-1.0,1.0);
-
-    dXS2N = new TH2F("dXS2N","dX in SCS versus sector (negative)",24,0.5,24.5,500,-1.0,1.0);
-    dYS2N = new TH2F("dYS2N","dY in SCS versus sector (negative)",24,0.5,24.5,500,-1.0,1.0);
-    dZS2N = new TH2F("dZS2N","dZ in SCS versus sector (negative)",24,0.5,24.5,500,-1.0,1.0);
-
     for (Int_t charge = 0; charge < 3; charge++) {
       plots3D[charge] = new TH3F*[NPlots];
       for (Int_t sec = 1; sec <= 24; sec++) 
@@ -483,9 +472,6 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     Float_t ds = particle.GetDStoPoint(vx.xyz(),dsdr.GetArray());    PrPP3(ds);
     particle.TransportToDS( ds,dsdr.GetArray() );                     if (Debug() > 2) {cout << "Trans."; PrPP(particle);}
     KFParticleBase *pb = (KFParticleBase *) &particle;
-    Int_t charge = 0;
-    if   (particle.GetQ() > 0) charge = 1;
-    else (particle.GetQ() < 0) charge = -1;                    
     const Float_t *pars = &pb->Parameter(0);
     TRSymMatrix C(3,&pb->Covariance(0)); PrPP(C);
     C += CVx;   PrPP(C);
@@ -511,15 +497,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     dXS->Fill(sector,x.z(),d.x());
     dYS->Fill(sector,x.z(),d.y());
     dZS->Fill(sector,x.z(),d.z());
-    if (charge == 1) {
-      dXSP->Fill(sector,x,d.x());
-      dYSP->Fill(sector,x,d.y());
-      dZSP->Fill(sector,x,d.z());
-    } else if (charge == -1) {
-      dXSN->Fill(sector,x,d.x());
-      dYSN->Fill(sector,x,d.y());
-      dZSN->Fill(sector,x,d.z());
-    }
+
     dXSPhi->Fill(sector,Phi,d.x());
     dYSPhi->Fill(sector,Phi,d.y());
     dZSPhi->Fill(sector,Phi,d.z());

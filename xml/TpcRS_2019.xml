@@ -13,7 +13,6 @@ setenv STARFPE NO
 #  starver TFG17j
 #   starver TFG19e
 #  starver .DEV2
-  starver TFG20j
   limit stacksize 16m
   set file = $INPUTFILE0;
 #  set rung = `echo $file | awk -F\_ '{print $2}'`
@@ -28,8 +27,7 @@ setenv STARFPE NO
  root.exe -q -b 'bfc.C(500,"mtin,MC.2019,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
 </command>
 <!-- <input URL="command:TpcRS_Part.pl" /> -->
-<!-- <input URL="command:daq2020TpcRS.pl" /> -->
-<input URL="file:/hlt/cephfs/reco/2019/TFG20j/RF/19GeV/*MuDst.root" />
+<input URL="command:daq2020TpcRS.pl" />
 <!-- <input URL="command:TpcRS_Part.pl" />  -->
 
 </job>

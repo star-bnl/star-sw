@@ -1,6 +1,6 @@
 /* 
    root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
-   root.exe -q -b 'Chain.C+("*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
+   root.exe -q -b 'Chain.C+("../*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
 
    Fit
    root.exe -q -b TpcHit.root TpcPrompt.C+
@@ -520,7 +520,6 @@ FitP->Draw("(mu-208.707)-(-4.34622712046779991e-01):y>>ZO(72,0.5,72.5)","i&&j&&j
 TProfile *z = new TProfile(*ZI)
 z->Add(ZO)
 
-FitP->Draw("((mu-208.707)-(-1.42279472751408842e-01))/208.707:y>>z(72,0.5,72.5)","i&&j","prof")
 FitP->Draw("((mu-208.707)-(-1.42279472751408842e-01))/208.707:y>>zI(72,0.5,72.5)","i&&j&&j<=40","prof")
 FitP->Draw("((mu-208.707)-(-4.34622712046779991e-01))/208.07:y>>zO(72,0.5,72.5)","i&&j&&j>40","prof")
 TProfile *z = new TProfile(*zI)

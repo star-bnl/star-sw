@@ -37,22 +37,3 @@ StTpcRTSHitMaker::Make
 
 	dtaX = fTpx->get("cld_sim")       
 		handle_cld_sim(sec,row) daq_tpx::handle_cld_sim (this=0x75faa70, sec=-1, row=-1)
-
-
-================================================================================
-online/RTS/src/ESB/ddl.C
-	DET = new tpxHandler(sector) ;
-	DET->rb_mask = 1 << rb ;
-//	DET->rb[rb] = ddl ;
-	DET->set_mask(0,DET->rb_mask) ;
-
-	DET->subdet_id = sector ;
-
-	DET->run_type = RUN_TYPE_PED ;	// as the default...
-	DET->tcd_in_use = 0 ;		// default is self triggering...
-
-	DET->standalone = 1 ;
-================================================================================
-daq_tpx::put
-	daq_dta::create
-		daq_dta::release

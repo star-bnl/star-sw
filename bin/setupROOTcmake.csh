@@ -40,7 +40,7 @@ cmake ${ROOT}/${ROOT_LEVEL}/root -DCMAKE_INSTALL_PREFIX=${ROOTSYS} -DCMAKE_BUILD
 -DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse4.2" \
 -Dbuiltin_afterimage=ON \
 -Dtable=ON \
--Druntime_cxxmodules=ON
+-Druntime_cxxmodules=On
 #-D builtin_tbb=OFF \
 # -Dbuiltin_cfitsio=On 
 #  -Dbuiltin_xrootd=ON 
