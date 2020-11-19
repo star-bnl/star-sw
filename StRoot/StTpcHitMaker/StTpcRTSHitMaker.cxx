@@ -172,6 +172,10 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	if (St_itpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
 	gain[pad].gain = St_itpcPadGainT0C::instance()->Gain(sector,row,pad);
 	gain[pad].t0   = St_itpcPadGainT0C::instance()->T0(sector,row,pad);
+	//#define __DEBUG_GAIN__
+#ifdef __DEBUG_GAIN__
+	cout << Form("Gain/T0 s/r/p %3i/%3i/%3i %7.2f %7.2f",sector,row,pad,gain[pad].gain,gain[pad].t0) << endl;
+#endif /* __DEBUG_GAIN__ */
       }
       // daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
       dta->finalize(Npads+1,sector,row);
@@ -239,17 +243,32 @@ void StTpcRTSHitMaker::PrintCld(daq_cld *cld, Int_t IdTruth, Int_t quality) {
 void StTpcRTSHitMaker::PrintAdc(daq_dta *dta) {
   if (dta) {
     // verify data!
+    Int_t sectorOld = -1;
+    Int_t rowOld = -1;
+    Int_t adcSum = 0;
     while(dta && dta->iterate()) {
-      LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dta->sec,dta->row,dta->pad,dta->ncontent) << endm;
+      if (sectorOld != dta->sec || rowOld != dta->row) {
+	if (sectorOld > 0) {
+	  LOG_INFO << Form("*** sec %2d, row %2d, Sum adc = %d",sectorOld,rowOld,adcSum) << endm;
+	}
+	sectorOld = dta->sec;
+        rowOld = dta->row;
+	adcSum = 0;
+      }
+      if (Debug() > 1) {LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dta->sec,dta->row,dta->pad,dta->ncontent) << endm;}
       for(UInt_t i=0;i<dta->ncontent;i++) {
-	if (Debug() > 1 || dta->sim_adc[i].track_id) {
+	if (Debug() > 1) {
 	  LOG_INFO << Form("    %2d: adc %4d, tb %3d: track %4d",i,
 			   dta->sim_adc[i].adc,
 			   dta->sim_adc[i].tb,
 			   dta->sim_adc[i].track_id
 			   ) << endm;
 	}
+	adcSum += dta->sim_adc[i].adc;
       }
+    }
+    if (sectorOld > 0) {
+      LOG_INFO << Form("*** sec %2d, row %2d, Sum adc = %d",sectorOld,rowOld,adcSum) << endm;
     }
   }
 }
@@ -373,13 +392,13 @@ Int_t StTpcRTSHitMaker::Make() {
       } // row loop      
 	if (! NoAdcs) continue;
 	daq_dta *dtaX = 0;
+	if (! iTpcType) {
+	  if (fTpx) dtaX = fTpx->get("adc_sim");
+	} else {
+	  if (fiTpc) dtaX = fiTpc->get("adc_sim");
+	}
+	dta = dtaX;
 	if (Debug()) {
-	  if (! iTpcType) {
-	    if (fTpx) dtaX = fTpx->get("adc_sim");
-	  } else {
-	    if (fiTpc) dtaX = fiTpc->get("adc_sim");
-	  }
-	  dta = dtaX;
 	  PrintAdc(dta);
 #if 0
 	  // verify data!
@@ -415,7 +434,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	Int_t rowOld = -1;
 	static Int_t iBreak = 0;
 	while(dd && dd->iterate()) {
-	  if (Debug() > 0) {
+	  if (Debug()) {
 	    LOG_INFO << Form("CLD sec %2d: row %2d: %d clusters",dd->sec, dd->row, dd->ncontent) << endm;
 	  }
 	  for(UInt_t i=0;i<dd->ncontent;i++) {
@@ -497,9 +516,9 @@ Int_t StTpcRTSHitMaker::Make() {
 							, cld.flags);
 	    hitsAdded++;
 	    if (hit->minTmbk() == 0) bin0Hits++;
-	    if (Debug()) hit->Print();
+	    if (Debug() > 1) hit->Print();
 	    hitCollection->addHit(hit);
-	    if (Debug()) {cout << "Add hit #" << hitCollection->numberOfHits() << endl;}
+	    if (Debug() > 1) {cout << "Add hit #" << hitCollection->numberOfHits() << endl;}
 	  }
 	}
     } // end iTpcType loop
