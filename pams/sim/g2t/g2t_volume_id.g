@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.97 2020/02/25 22:53:08 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.98 2020/11/20 14:45:06 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.98  2020/11/20 14:45:06  jwebb
+* Reduce verbosity
+*
 * Revision 1.97  2020/02/25 22:53:08  jwebb
 * Add FCS preshower volume ID
 *
@@ -1434,8 +1437,6 @@ c           write (*,*) csys, volume_id
       Integer          Iprin,Nvb
       Character(len=4)              cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
-
-      write (*,*) cd, numbv(1:5)
 
       IF (cd=='FTUS' ) then     
 
