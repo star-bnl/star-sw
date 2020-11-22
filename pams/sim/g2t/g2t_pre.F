@@ -30,7 +30,6 @@
          g2t_track(trac).hit_pre_p    = i
          g2t_track(trac).n_pre_hit    = g2t_track(trac).n_pre_hit + 1
 
-         write(*,*) 'PRES ',volume,Elos
       enddo    
 
       RETURN
