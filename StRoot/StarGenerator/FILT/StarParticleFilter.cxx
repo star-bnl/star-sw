@@ -9,9 +9,9 @@ StarParticleFilter::StarParticleFilter( const char* name ) : StarFilterMaker(nam
 
 }
 //______________________________________________________________________________________________
-void StarParticleFilter::AddTrigger( int id, double mnpt, double mxpt, double mneta, double mxeta )
+void StarParticleFilter::AddTrigger( int id, double mnpt, double mxpt, double mneta, double mxeta, int idm )
 {
-  mTriggers.push_back( Trigger_t( id, mnpt, mxpt, mneta, mxeta ) );
+  mTriggers.push_back( Trigger_t( id, mnpt, mxpt, mneta, mxeta, idm ) );
 }
 //______________________________________________________________________________________________
 int StarParticleFilter::Filter( StarGenEvent *_event ) 
@@ -26,9 +26,11 @@ int StarParticleFilter::Filter( StarGenEvent *_event )
 	ipart++ )
     {
       StarGenParticle *part = event[ipart];
+
       // Make sure we're looking at something with no color
       if ( TMath::Abs(part->GetId()) < 10 ) continue;
 
+      if ( part->GetStatus() != StarGenParticle::kFinal ) continue; // Must be a final state particle
 
       TLorentzVector momentum = part->momentum();
       double pT  = momentum.Perp();
@@ -38,10 +40,16 @@ int StarParticleFilter::Filter( StarGenEvent *_event )
       for ( auto trig : mTriggers )
 	{
 	  if ( trig.pdgid != part->GetId() )              continue;
+	  if ( trig.pdgid_parent ) {
+	    int idx = part->GetFirstMother();
+	    int pdgidm = (event[idx])? event[idx]->GetId() : 0;
+	    if ( pdgidm != trig.pdgid_parent )            continue;
+	  }
 	  if ( pT  < trig.ptmn  )                         continue;
 	  if ( pT  > trig.ptmx && trig.ptmn < trig.ptmx ) continue;
 	  if ( eta < trig.etamn )                         continue;
 	  if ( eta > trig.etamx )                         continue;
+
 	  return StarGenEvent::kAccept;	  
 	}
 
