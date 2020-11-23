@@ -86,7 +86,9 @@ void rcd(const Char_t *dir = "") {
   }
 }
 //________________________________________________________________________________
-//void chdir(const Char_t *dir = "") {rcd(dir);}
+void chdir(const Char_t *dir = "") {
+  TDirectory::CurrentDirectory()->cd(dir);
+}
 //________________________________________________________________________________
 void rdir(const Char_t *dir="") {
   TString Current(gDirectory->GetName());
