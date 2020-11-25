@@ -1,5 +1,15 @@
 <Document file="StarVMC/Geometry/FstmGeo/FstmGeo.xml">
 
+
+<!--
+November 1, 2020  F.Videbaek
+  There was a misplaced FTUR that went outside the master volume
+November 22, 2020 F.Videbaek
+  Add assembly="true" for FSTW
+  
+
+
+-->
     <Replace match="GeV">*1.0E+0;</Replace>    
     <Replace match="MeV">*1.0E-3;</Replace>    
     <Replace match="keV">*1.0E-6;</Replace>
@@ -364,7 +374,7 @@
             <var name="rmax"     value="33.5" />
             <var name="phi1"     value="15.0" />
             <var name="phi2"     value="7.08451" />
-            <var name="dz"       value="0.8/2" />
+            <var name="dz"       value="0.8/4" />
         </Fill>
 
         <Fill name="outerbase" comment="outer mechanical base" >
@@ -711,31 +721,45 @@
             <Material  name="air" />               <!-- access material   -->
             <Material  name="air" isvol="0" />     <!-- hack to create local copy -->
             <Medium    name="standard"      />     <!-- can change medium paramters here -->
-            <Attribute for="FSTD" seen="0" colo="1" />
+            <Attribute for="FSTD" seen="1" colo="1" />
 
             <!-- Shape will be dynamically sized to include all disks placed -->
 	    <!--  not so from the geant 3 version  -->
             <Shape     type="TUBE" rmin="4.8" rmax="34" dz="5" />
 
             <!-- 12 wedges -->
-            <Create block="FTUO" />
+            <Create block="FTUO" /> 
             <Create block="FSTW" />
             <For var="iwedge" from="0" to="5">  <!-- even wedges -->
-                <!-- Support ring outside wedge -->
-                <Placement block="FTUO" in="FSTD" x="0" y="0" z="0.5*ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="0.5*ring_dz" />
-                <Placement block="FTUO" in="FSTD" x="0" y="0" z="0.5*ring_dz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="0.5*ring_dz" />
-                <Placement block="FTUO" in="FSTD" x="0" y="0" z="0.5*ring_dz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="0.5*ring_dz" />
                 <!-- Wedge -->
                 <Placement block="FSTW" in="FSTD" x="0" y="0" z="-wholewedge_dz" >
                     <Rotation alphax="180"/>
                     <Rotation alphaz="15+30*2*iwedge"/>
                 </Placement>
+                <!-- Support ring outside wedge -->
+                <Placement block="FTUO" in="FSTD" x="0" y="0" z="ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="ring_dz" >
+                    <Rotation alphaz="15+30*2*iwedge"/>
+                </Placement>
+                <Placement block="FTUO" in="FSTD" x="0" y="0" z="ring_dz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="ring_dz" >
+                    <Rotation alphaz="15+30*2*iwedge"/>
+                </Placement>
+                  <Placement block="FTUO" in="FSTD" x="0" y="0" z="ring_dz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="ring_dz" >
+                    <Rotation alphaz="15+30*2*iwedge"/>
+                </Placement>
             </For>
             <For var="iwedge" from="0" to="5">  <!-- odd wedges -->
                 <!-- Support ring outside wedge -->
-                <Placement block="FTUO" in="FSTD" x="0" y="0" z="-0.5*ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="0.5*ring_dz" />
-                <Placement block="FTUO" in="FSTD" x="0" y="0" z="-0.5*ring_dz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="0.5*ring_dz" />
-                <Placement block="FTUO" in="FSTD" x="0" y="0" z="-0.5*ring_dz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="0.5*ring_dz" />
+                <!-- Support ring outside wedge -->
+                <Placement block="FTUO" in="FSTD" x="0" y="0" z="-ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="ring_dz" >
+                    <Rotation alphaz="15+30*(2*iwedge+1)"/>
+                </Placement>
+                <Placement block="FTUO" in="FSTD" x="0" y="0" z="-ring_dz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="ring_dz" >
+                    <Rotation alphaz="15+30*(2*iwedge+1)"/>
+                </Placement>
+                  <Placement block="FTUO" in="FSTD" x="0" y="0" z="-ring_dz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="ring_dz" >
+                    <Rotation alphaz="15+30*(2*iwedge+1)"/>
+                </Placement>
+
                 <!-- Wedge -->
                 <Placement block="FSTW" in="FSTD" x="0" y="0" z="wholewedge_dz" >
                     <Rotation alphaz="15+30*(2*iwedge+1)"/>
@@ -744,7 +768,7 @@
         </Volume>
 
         <!-- Whole wedge container -->
-        <Volume name="FSTW" comment="Whole wedge container">
+        <Volume name="FSTW" comment="Whole wedge container" assembly="true" >
             <Attribute for="FSTW" seen="1" colo="3" />
             <Material name="air" />
             <Material name="air" isvol="0" />
@@ -756,9 +780,9 @@
             <!-- ///////////////////////////// -->
 
             <Create    block="FTUR" />
-            <Placement block="FTUR" in="FSTW" x="0" y="0" z="-wholewedge_dz+0.5*ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="ring_dz" />
-            <Placement block="FTUR" in="FSTW" x="0" y="0" z="-wholewedge_dz+0.5*ring_dz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="ring_dz" />
-            <Placement block="FTUR" in="FSTW" x="0" y="0" z="-wholewedge_dz+0.5*ring_dz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="ring_dz" />
+            <Placement block="FTUR" in="FSTW" x="0" y="0" z="-wholewedge_dz+ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="ring_dz" />
+            <Placement block="FTUR" in="FSTW" x="0" y="0" z="-wholewedge_dz+ring_dz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="ring_dz" />
+            <Placement block="FTUR" in="FSTW" x="0" y="0" z="-wholewedge_dz+ring_dz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="ring_dz" />
 
             <!-- ///////////////////////////// -->
             <!--    Mechanical structure -->
