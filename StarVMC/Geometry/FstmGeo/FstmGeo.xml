@@ -1313,7 +1313,7 @@ November 22, 2020 F.Videbaek
                 <Hit meas="cy" nbits="10"  />
                 <Hit meas="cz" nbits="10"  />
                 <Hit meas="sleng" nbits="16" min="0" max="500"  />
-                <Hit meas="tof" nbits="16"  />
+                <Hit meas="tof" nbits="0"  />
                 <Hit meas="step" bins=".0001"  />
                 <Hit meas="eloss" nbits="16"  />
             </Instrument>   
