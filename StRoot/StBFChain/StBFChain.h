@@ -7,7 +7,7 @@
  \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
  \date   1999/07/29 , 2001-2011
- @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.57 2016/05/17 12:05:33 jeromel Exp $
+ @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.59 2019/11/19 17:26:17 jeromel Exp $
 
  Class to control "BFC" chain
 
@@ -42,10 +42,17 @@ class StBFChain : public StChain {
   Int_t               FTimeS;     // floating timestamp time (DateTime)
   TString             fFiltTrg;   // trigger filtering properties (flavor, inc/exc)
   Int_t               fRunG;      // on fly simulation run no. & set for RDNM
+  TString             fFmsGainCorrTag; // FMS GainCorrection Flavor Tag
   Int_t               fNoChainOptions;
+#ifndef __TFG__VERSION__
+  vector<TString>     Gproperty;  // a global property name
+  vector<TString>     Gpattern;   // a global pattern
+  vector<TString>     Gvalue;     // a global value
+#else /* __TFG__VERSION__ */
   TString             Gproperty;  // a global property name
   TString             Gpattern;   // a global pattern
   TString             Gvalue;     // a global value
+#endif /* __TFG__VERSION__ */
 #ifdef USE_BFCTIMESTAMP
   StVecBFCTS          GTSOptions; // global set of detector specific timestamps
 #endif /*  USE_BFCTIMESTAMP */
@@ -53,10 +60,27 @@ class StBFChain : public StChain {
   Int_t               fkChain;    // Master chain option
 
  public:
+#ifndef __TFG__VERSION__
+  StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE) :
+           StChain(name,UseOwnHeader)
+	     ,fBFC(0), fSetFiles(0),fInFile(""),fFileOut(""),fTFile(0)
+	     ,FDate(0),FTime(0),FDateS(0),FTimeS(0),fFiltTrg(""),fRunG(0)
+	     ,fNoChainOptions(0), fchainOpt(0), fkChain(-1) {}
+
+#if 0
+    StBFChain(Int_t /* mode */, const char *name="bfc",const Bool_t UseOwnHeader = kFALSE) :
+            StChain(name,UseOwnHeader)
+           ,fSetFiles(0),fInFile(""),fFileOut(""),fTFile(0)
+	   ,fNoChainOptions(0), fchainOpt(0), fkChain(-1) {}
+#endif
+#else /* __TFG__VERSION__ */
   StBFChain(const Char_t *name="bfc", const Bool_t UseOwnHeader = kFALSE);
+#endif /* __TFG__VERSION__ */
   void Setup(Int_t mode=1);
    virtual            ~StBFChain();
+#ifdef __TFG__VERSION__
    virtual void        Clear(Option_t *option="");
+#endif /* __TFG__VERSION__ */
    virtual Int_t       Make(int number){ SetIventNumber(number); return StChain::Make(number);};
    virtual Int_t       Make(){return StChain::Make();};
    virtual Int_t       Load();             
@@ -66,7 +90,7 @@ class StBFChain : public StChain {
    virtual Int_t       AddAfter  (const Char_t *after, const StMaker *maker) {return AddAB (after,maker);}
    virtual Int_t       AddBefore (const Char_t *before,const StMaker *maker) {return AddAB (before,maker,-1);}
    static  Int_t       ParseString (const TString &tChain, TObjArray &Opt, Bool_t Sort=kFALSE);
-   void                SetFlags(const Char_t *Chain=""); // *MENU*
+   void                SetFlags(const Char_t *Chain="gstar tfs"); // *MENU*
    void                Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0); // *MENU
    void                SetInputFile(const Char_t *infile=0);                          // *MENU
    void                SetOutputFile(const Char_t *outfile=0);                        // *MENU
@@ -94,7 +118,7 @@ class StBFChain : public StChain {
                TString GetGeometry() const;
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.57 2016/05/17 12:05:33 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.59 2019/11/19 17:26:17 jeromel Exp $ built " __DATE__ " " __TIME__ ;
        return cvs;
    }
    /// StBFChain control class
