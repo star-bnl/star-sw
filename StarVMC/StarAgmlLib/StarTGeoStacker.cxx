@@ -311,7 +311,7 @@ TGeoMaterial *BuildMaterial( AgMaterial &ag_material )
       mixture = new TGeoMixture( mat_name, nc, dd );
       for ( ic = 0; ic<nc; ic++ )
 	{
-	  if ( aa<=zz ) {
+	  if ( aa<zz ) {
 	    LOG_INFO << mat_name.Data() << " invalid component: " << name << " A=" << aa << " Z=" << zz << " weight=" << ww << ENDL;
 	  }
 	  ag_material.Component(ic,name,aa,zz,ww); mixture->DefineElement(ic,aa,zz,ww); assert(aa>=zz);
