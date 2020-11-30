@@ -266,7 +266,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                                       "","","",kFALSE},
   {"MC.y2019","","","MC2019",                                                              "","","",kFALSE},
   {"MC2019.Ideal","","","MC.2019,MC.Sti,vmc,NewTpcAlignment,ExB"                          ,"","","",kFALSE},
-  {"MC2019",      "","","MC.2019,sdt20190401,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
+  {"MC2019",      "","","MC.2019,sdt20190401,MC.Sti,vmc,NewTpcAlignment,CorrY"            ,"","","",kFALSE},
   {"MC2019a"  ,"","","MC.2019a",                                                           "","","",kFALSE},
   {"MC.2019a","","","y2019a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.Sti,NewTpcAlignment,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
@@ -1968,7 +1968,7 @@ Bfc_st BFC[] = { // standard chains
   {"Xisvt"       ,"","",""                              ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"SCEbyE"      ,"scebye","","MuDSTDeps","StSpaceChargeEbyEMaker"
    ,        "StMuDSTMaker,StPicoEvent,StPass0CalibMaker","Determine EbyE SpaceCharge using StEvent",kFALSE},
-  {"SCScalerCal" ,"scscalercal","","MuDSTDeps,picoDeos","StSpaceChargeEbyEMaker"
+  {"SCScalerCal" ,"scscalercal","","MuDSTDeps,picoDst","StSpaceChargeEbyEMaker"
    ,                              "StMuDSTMaker,StPass0CalibMaker","Calibrate SpaceCharge scalers",kFALSE},
   {"compend"     ,"","","event,detDb","StEventCompendiumMaker","StEventCompendiumMaker"
    ,                                                             "Fill event summary in ITTF Chain",kFALSE},
