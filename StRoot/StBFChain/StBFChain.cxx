@@ -391,7 +391,7 @@ Int_t StBFChain::Instantiate()
 	    "tpc_hitsBranch","trgBranch",0};
 	  for (Int_t i = 0; allBranches[i]; i++) inpMk->SetBranch(allBranches[i],0,"r");
 	}
-        if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
+        if (GetOption("adcOnly")) mk->SetAttr("adcOnly",kTRUE);                        ;
 	NoMakersWithInput++;
 	goto Add2Chain;
       }
@@ -476,13 +476,13 @@ Int_t StBFChain::Instantiate()
       }
     }
     
-    if (maker == "StTpcDbMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,1);
+    if (maker == "StTpcDbMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
     if (maker == "StDAQMaker") {
-      if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
+      if (GetOption("adcOnly")) mk->SetAttr("adcOnly",kTRUE);
       NoMakersWithInput++;
     }
     if (maker == "StarPrimaryMaker") {
-      if (GetOption("genIn") || GetOption("mtIn")) mk->SetAttr("FreezePV", 1);
+      if (GetOption("genIn") || GetOption("mtIn")) mk->SetAttr("FreezePV", kTRUE);
     }
     if ((maker == "StarGenEventReader" || maker == "StarMuEventReader") &&  fInFile != "") {
       mk->SetAttr("InputFile",fInFile.Data());
@@ -512,12 +512,12 @@ Int_t StBFChain::Instantiate()
 	  CintF != "") {
 	mk->SetActive(kTRUE);
 	//	if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
-	if (GetOption("Embedding") || GetOption("PrepEmbed") || GetOption("pythiaEmbed") || GetOption("fzinSDT")) mk->SetAttr("Don'tTouchTimeStamp",1);
-	if (GetOption("flux"))      mk->SetAttr("flux",1);
-	if (GetOption("fzout"))     mk->SetAttr("fzout",1);
-	if (GetOption("beamLine"))  mk->SetAttr("beamLine",1);
-	if (GetOption("Wenu"))      mk->SetAttr("Wenu",1);
-	if (GetOption("mickey"))    mk->SetAttr("Mickey",1);
+	if (GetOption("Embedding") || GetOption("PrepEmbed") || GetOption("pythiaEmbed") || GetOption("fzinSDT")) mk->SetAttr("Don'tTouchTimeStamp",kTRUE);
+	if (GetOption("flux"))      mk->SetAttr("flux",kTRUE);
+	if (GetOption("fzout"))     mk->SetAttr("fzout",kTRUE);
+	if (GetOption("beamLine"))  mk->SetAttr("beamLine",kTRUE);
+	if (GetOption("Wenu"))      mk->SetAttr("Wenu",kTRUE);
+	if (GetOption("mickey"))    mk->SetAttr("Mickey",kTRUE);
 	if (CintF != "")            mk->SetAttr("GeneratorFile",CintF.Data());
       } else if (GetOption("Generators")) {
 	// Keep it active
@@ -543,17 +543,17 @@ Int_t StBFChain::Instantiate()
     //        z = 1 Mixer Modex1
     if (maker == "StVMCMaker") {
       if (GetOption("VMCPassive")) {// don't use mk->SetActive(kFALSE) because we want to have InitRun
-	mk->SetAttr("VMCPassive",1);
+	mk->SetAttr("VMCPassive",kTRUE);
       }  else {
-	if (GetOption("beamLine")) mk->SetAttr("beamLine",1);
-	if (GetOption("phys_off")) mk->SetAttr("phys_off",1);
-	if (GetOption("hadr_off")) mk->SetAttr("hadr_off",1);
+	if (GetOption("beamLine")) mk->SetAttr("beamLine",kTRUE);
+	if (GetOption("phys_off")) mk->SetAttr("phys_off",kTRUE);
+	if (GetOption("hadr_off")) mk->SetAttr("hadr_off",kTRUE);
 	if (GetOption("VMCAlignment")) {
-	  mk->SetAttr("VMCAlignment",1);
+	  mk->SetAttr("VMCAlignment",kTRUE);
 	} else if (GetOption("NoVMCAlignment")) {
-	  mk->SetAttr("NoVMCAlignment",1);
+	  mk->SetAttr("NoVMCAlignment",kTRUE);
 	}
-	if (GetOption("Embedding")) mk->SetAttr("Embedding",1);
+	if (GetOption("Embedding")) mk->SetAttr("Embedding",kTRUE);
 	if (fRunG > 0) mk->SetAttr("RunG",fRunG);
 	TString CintF(SAttr("GeneratorFile"));
 	if (CintF != "") mk->SetAttr("GeneratorFile",CintF.Data());
@@ -563,7 +563,7 @@ Int_t StBFChain::Instantiate()
     //		Sti(ITTF) start
     // ---
     if (maker == "StxMaker" && GetOption("StxCA")) {
-      mk->SetAttr("Undefined", 1); // switch off Fit
+      mk->SetAttr("Undefined", kTRUE); // switch off Fit
     }
     if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "StvMaker" || maker == "StxMaker") {
       if ( maker == "StvMaker" &&  GetOption("StvCA")) {
@@ -586,115 +586,115 @@ Int_t StBFChain::Instantiate()
       
       // old logic for svt and ssd
       if (GetOption("NoSvtIT")){
-	mk->SetAttr("useSvt"	,0);
+	mk->SetAttr("useSvt"	,kFALSE);
       } else {
 	if (GetOption("SvtIT")){
-	  mk->SetAttr("useSvt"	  ,1);
-	  mk->SetAttr("activeSvt" ,1);
+	  mk->SetAttr("useSvt"	  ,kTRUE);
+	  mk->SetAttr("activeSvt" ,kTRUE);
 	}
       }
       if (   GetOption("NoSsdIT") &&
 	     !GetOption("SstIT") ){
-	mk->SetAttr("useSsd"	,0);
+	mk->SetAttr("useSsd"	,kFALSE);
       } else {
 	if (GetOption("SsdIT")){
-	  mk->SetAttr("useSsd"	  ,1);
-	  mk->SetAttr("activeSsd" ,1);
+	  mk->SetAttr("useSsd"	  ,kTRUE);
+	  mk->SetAttr("activeSsd" ,kTRUE);
 	}
       }
       
       // this was an R&D detector never implemented
       // simulations were made nonetheless
       if (GetOption("HpdIT")){
-	mk->SetAttr("useHpd"     ,1);
-	mk->SetAttr("activeHpd"  ,1);
+	mk->SetAttr("useHpd"     ,kTRUE);
+	mk->SetAttr("activeHpd"  ,kTRUE);
       }
       
       // back to the HFT sub-system
       if (GetOption("NoPxlIT")) {
-	mk->SetAttr("usePxl"	 ,1);
-	mk->SetAttr("usePixel"	 ,1);
+	mk->SetAttr("usePxl"	 ,kTRUE);
+	mk->SetAttr("usePixel"	 ,kTRUE);
       } else {
 	if (GetOption("PixelIT") || GetOption("PxlIT") ){
-	  mk->SetAttr("usePxl"     ,1);
-	  mk->SetAttr("usePixel"	 ,1);
-	  mk->SetAttr("activePxl"  ,1);
-	  mk->SetAttr("activePixel",1);
-	  mk->SetAttr("useSvt"	,0);
-	  mk->SetAttr("useSsd"	,0);
+	  mk->SetAttr("usePxl"     ,kTRUE);
+	  mk->SetAttr("usePixel"	 ,kTRUE);
+	  mk->SetAttr("activePxl"  ,kTRUE);
+	  mk->SetAttr("activePixel",kTRUE);
+	  mk->SetAttr("useSvt"	,kFALSE);
+	  mk->SetAttr("useSsd"	,kFALSE);
 	}
       }
       if (GetOption("NoIstIT")) {
-	mk->SetAttr("useIst"	 ,1);
+	mk->SetAttr("useIst"	 ,kTRUE);
       } else {
 	if (GetOption("IstIT")){
-	  mk->SetAttr("useIst"     ,1);
-	  mk->SetAttr("activeIst"  ,1);
+	  mk->SetAttr("useIst"     ,kTRUE);
+	  mk->SetAttr("activeIst"  ,kTRUE);
 	}
       }
       if (GetOption("NoSstIT")) {
-	mk->SetAttr("useSst"	 ,1);
+	mk->SetAttr("useSst"	 ,kTRUE);
       } else {
 	if (GetOption("SstIT")){
-	  mk->SetAttr("useSst"	 ,1);
-	  mk->SetAttr("activeSst"  ,1);
-	  mk->SetAttr("useSvt"	,0);
-	  mk->SetAttr("useSsd"	,0);
+	  mk->SetAttr("useSst"	 ,kTRUE);
+	  mk->SetAttr("activeSst"  ,kTRUE);
+	  mk->SetAttr("useSvt"	,kFALSE);
+	  mk->SetAttr("useSsd"	,kFALSE);
 	}
       }
       
       // other sub-systems
       if (GetOption("BTofIT")){
-	mk->SetAttr("useBTof"    ,1);
-	mk->SetAttr("activeBTof" ,1);
+	mk->SetAttr("useBTof"    ,kTRUE);
+	mk->SetAttr("activeBTof" ,kTRUE);
       }
       
       if (GetOption("StiPulls") || 
-	  GetOption("StvPulls"))  mk->SetAttr("makePulls"  ,1);
-      if (GetOption("skip1row"))  mk->SetAttr("skip1row"   ,1);
-      if (GetOption("EastOff"))   mk->SetAttr("EastOff"    ,1);
-      if (GetOption("WestOff"))   mk->SetAttr("WestOff"    ,1);
-      if (GetOption("laserIT"))   mk->SetAttr("laserIT"    ,1);
-      if (GetOption("Alignment")) mk->SetAttr("Alignment"  ,1);
-      if (GetOption("Cosmics"))   mk->SetAttr("Cosmics"    ,1);
+	  GetOption("StvPulls"))  mk->SetAttr("makePulls"  ,kTRUE);
+      if (GetOption("skip1row"))  mk->SetAttr("skip1row"   ,kTRUE);
+      if (GetOption("EastOff"))   mk->SetAttr("EastOff"    ,kTRUE);
+      if (GetOption("WestOff"))   mk->SetAttr("WestOff"    ,kTRUE);
+      if (GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
+      if (GetOption("Alignment")) mk->SetAttr("Alignment"  ,kTRUE);
+      if (GetOption("Cosmics"))   mk->SetAttr("Cosmics"    ,kTRUE);
       mk->PrintAttr();
     }
     if (maker== "StGmtClusterMaker") {
-      if (GetOption("gmtCosmics"))  mk->SetAttr("gmtCosmics",  1);
+      if (GetOption("gmtCosmics"))  mk->SetAttr("gmtCosmics",  kTRUE);
     }
-    if (maker=="StiKFVertexMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,1);
+    if (maker=="StiKFVertexMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
     //		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {
       // VertexFinder methods
       if (GetOption("Sti") || GetOption("StiCA") ||
 	  GetOption("Stv") || GetOption("Stx") ||
-	  GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , 1);
-      if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, 1);
-      if (GetOption("VFMinuitX"  ) ) mk->SetAttr("VFMinuitX"  	, 1);
-      if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, 1);
-      if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, 1);
-      if (GetOption("VFPPV"      ) ) mk->SetAttr("VFPPV"      	, 1);
+	  GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , kTRUE);
+      if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, kTRUE);
+      if (GetOption("VFMinuitX"  ) ) mk->SetAttr("VFMinuitX"  	, kTRUE);
+      if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
+      if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, kTRUE);
+      if (GetOption("VFPPV"      ) ) mk->SetAttr("VFPPV"      	, kTRUE);
       if ((GetOption("VFPPV") && GetOption("Stv")) || GetOption("VFPPVEv") ) {
 	gSystem->Load("StBTofUtil.so");
-	mk->SetAttr("VFPPVEv"      , 1);
-      } else if (GetOption("VFPPV") && GetOption("Sti")) mk->SetAttr(    "VFPPV", 1);
+	mk->SetAttr("VFPPVEv"      , kTRUE);
+      } else if (GetOption("VFPPV") && GetOption("Sti")) mk->SetAttr(    "VFPPV", kTRUE);
       if (GetOption("VFPPVEvNoBtof")){
 	gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
-	mk->SetAttr("VFPPVEvNoBtof", 1);
+	mk->SetAttr("VFPPVEvNoBtof", kTRUE);
       }
-      if (GetOption("VFPPVnoCTB" ) )      mk->SetAttr("VFPPVnoCTB" 	, 1);
-      if (GetOption("VFFV"       ) )      mk->SetAttr("VFFV"       	, 1);
-      if (GetOption("VFMCE"      ) )      mk->SetAttr("VFMCE"      	, 1);
-      if (GetOption("VFMinuit2"  ) )      mk->SetAttr("VFMinuit2"  	, 1);
-      if (GetOption("VFMinuit3"  ) )      mk->SetAttr("VFMinuit3"  	, 1);
-      if (GetOption("beamLine"   ) )      mk->SetAttr("BeamLine"   	, 1);
-      if (GetOption("beamLine3D" ) )      mk->SetAttr("BeamLine3D"  	, 1);
-      if (GetOption("CtbMatchVtx") )      mk->SetAttr("CTB"        	, 1);
+      if (GetOption("VFPPVnoCTB" ) )      mk->SetAttr("VFPPVnoCTB" 	, kTRUE);
+      if (GetOption("VFFV"       ) )      mk->SetAttr("VFFV"       	, kTRUE);
+      if (GetOption("VFMCE"      ) )      mk->SetAttr("VFMCE"      	, kTRUE);
+      if (GetOption("VFMinuit2"  ) )      mk->SetAttr("VFMinuit2"  	, kTRUE);
+      if (GetOption("VFMinuit3"  ) )      mk->SetAttr("VFMinuit3"  	, kTRUE);
+      if (GetOption("beamLine"   ) )      mk->SetAttr("BeamLine"   	, kTRUE);
+      if (GetOption("beamLine3D" ) )      mk->SetAttr("BeamLine3D"  	, kTRUE);
+      if (GetOption("CtbMatchVtx") )      mk->SetAttr("CTB"        	, kTRUE);
       if (GetOption("min2trkVtx" ) )      mk->SetAttr("minTracks" 	, 2);
-      if (GetOption("VtxSeedCalG") )      mk->SetAttr("calibBeamline" 	, 1);
-      if (GetOption("usePct4Vtx" ) )      mk->SetAttr("PCT"           	, 1);
-      if (GetOption("useBTOF4Vtx") )      mk->SetAttr("BTOF"          	, 1);
-      if (GetOption("useBTOFmatchOnly") ) mk->SetAttr("useBTOFmatchOnly", 1);
+      if (GetOption("VtxSeedCalG") )      mk->SetAttr("calibBeamline" 	, kTRUE);
+      if (GetOption("usePct4Vtx" ) )      mk->SetAttr("PCT"           	, kTRUE);
+      if (GetOption("useBTOF4Vtx") )      mk->SetAttr("BTOF"          	, kTRUE);
+      if (GetOption("useBTOFmatchOnly") ) mk->SetAttr("useBTOFmatchOnly", kTRUE);
       
       // X-tended works only for VFPPV, VFPPVnoCTB, VFPPVev for now but could be re-used
       // However, we will change this to a more flexible arbitrarry setting later
@@ -702,10 +702,10 @@ Int_t StBFChain::Instantiate()
       mk->PrintAttr();
     }
     if (maker=="StKFVertexMaker" || maker=="StiKFVertexMaker") {
-      if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, 1);
-      if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, 1);
-      if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, 1);
-      if (GetOption("VFMinuitX"  ) ) mk->SetAttr("VFMinuitX"  	, 1);
+      if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, kTRUE);
+      if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, kTRUE);
+      if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, kTRUE);
+      if (GetOption("VFMinuitX"  ) ) mk->SetAttr("VFMinuitX"  	, kTRUE);
     }
     if (maker=="StAssociationMaker") {
       
@@ -768,7 +768,7 @@ Int_t StBFChain::Instantiate()
     
     // Use status tables for raw BEMC data (helpful for QA)
     if ( maker == "StEmcRawMaker" && GetOption("BEmcChkStat"))
-      mk->SetAttr("BEmcCheckStatus",1);
+      mk->SetAttr("BEmcCheckStatus",kTRUE);
     
     // MuDST and ezTree. Combinations are
     //  ezTree         -> ezTree only
@@ -829,8 +829,8 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("SpcChgCal") ||
 	   GetOption("SpcChgCalG"))   mk->SetMode(2);
       if ( GetOption("SCScalerCal") ) mk->SetMode(4);
-      if ( GetOption("EastOff"))      mk->SetAttr("EastOff",1);
-      if ( GetOption("WestOff"))      mk->SetAttr("WestOff",1);
+      if ( GetOption("EastOff"))      mk->SetAttr("EastOff",kTRUE);
+      if ( GetOption("WestOff"))      mk->SetAttr("WestOff",kTRUE);
     }
     if (maker == "StEventQAMaker" && GetOption("QAalltrigs"))
       ProcessLine(Form("((StEventQAMaker *) %p)->AllTriggers();",mk));
@@ -853,26 +853,26 @@ Int_t StBFChain::Instantiate()
     
     // TPC
     if (maker == "StTpcRTSHitMaker") {
-      if ( GetOption("TpxClu2D")) mk->SetAttr("TpxClu2D", 1);
-      if ( GetOption("NoiTPCLu")) mk->SetAttr("NoiTPCLu", 1);
+      if ( GetOption("TpxClu2D")) mk->SetAttr("TpxClu2D", kTRUE);
+      if ( GetOption("NoiTPCLu")) mk->SetAttr("NoiTPCLu", kTRUE);
     }
     if (GetOption("NoTpxAfterBurner") && (maker == "StTpcHitMaker" || maker == "StTpcRTSHitMaker")) {
-      mk->SetAttr("NoTpxAfterBurner", 1);
+      mk->SetAttr("NoTpxAfterBurner", kTRUE);
     }
     if (maker == "StTpcHitMaker"  && GetOption("NoAnnotateCL")) {
-      mk->SetAttr("UseTonkoClusterAnnotation", 0);
+      mk->SetAttr("UseTonkoClusterAnnotation", kFALSE);
     }
-    if (GetOption("Cosmics") && (maker == "StTpcHitMaker" || maker == "StTpcRTSHitMaker")) mk->SetAttr("Cosmics"    ,1);
+    if (GetOption("Cosmics") && (maker == "StTpcHitMaker" || maker == "StTpcRTSHitMaker")) mk->SetAttr("Cosmics"    ,kTRUE);
     
     if (maker == "StTpcDbMaker"){
-      if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",1);
-      if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",1) ;// uses laserDV database
-      if ( GetOption("useCDV")    ) mk->SetAttr("useCDV",1) ;// uses ofl database
-      if ( GetOption("useNewLDV") ) mk->SetAttr("useNewLDV",1);// uses new laserDV
+      if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",kTRUE);
+      if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",kTRUE) ;// uses laserDV database
+      if ( GetOption("useCDV")    ) mk->SetAttr("useCDV",kTRUE) ;// uses ofl database
+      if ( GetOption("useNewLDV") ) mk->SetAttr("useNewLDV",kTRUE);// uses new laserDV
       if (GetOption("ExB")){
-	mk->SetAttr("ExB", 1);	// bit 0 is ExB ON or OFF
-	if      ( GetOption("EB1") ) mk->SetAttr("EB1", 1);
-	else if ( GetOption("EB2") ) mk->SetAttr("EB2", 1);
+	mk->SetAttr("ExB", kTRUE);	// bit 0 is ExB ON or OFF
+	if      ( GetOption("EB1") ) mk->SetAttr("EB1", kTRUE);
+	else if ( GetOption("EB2") ) mk->SetAttr("EB2", kTRUE);
 	else {
 	  // depend on RY option i.e. take default for that RealYear data
 	  // expectations.
@@ -881,7 +881,7 @@ Int_t StBFChain::Instantiate()
 	     GetOption("RY2001")  ||
 	     GetOption("RY2001N") ||
 	     GetOption("RY2003")  ||
-	     GetOption("RY2003X"))   mk->SetAttr("OldRuns", 1);
+	     GetOption("RY2003X"))   mk->SetAttr("OldRuns", kTRUE);
 	}
 	// Other options introduced in October 2001 for distortion corrections
 	// studies and year1 re-production. Those are OR additive to the mask.
@@ -912,7 +912,7 @@ Int_t StBFChain::Instantiate()
     }
     if ((maker == "StdEdxY2Maker"  || maker == "StTpcHitMover") &&
 	GetOption("EmbeddingShortCut"))  {
-      mk->SetAttr("EmbeddingShortCut", 1);
+      mk->SetAttr("EmbeddingShortCut", kTRUE);
       mk->PrintAttr();
     }
     if (maker == "StdEdxY2Maker" && GetOption("dEdxCalib")) {
@@ -924,7 +924,7 @@ Int_t StBFChain::Instantiate()
       SETBIT(Mode,StdEdxY2Maker::kAlignment);
       LOG_INFO << " set dEdxY2 Mode " << Mode << " =======================================" << endm;
       mk->SetMode(Mode); 
-      if (GetOption("ForcedX")) mk->SetAttr("ForcedX", 1);
+      if (GetOption("ForcedX")) mk->SetAttr("ForcedX", kTRUE);
     }
 #if 0
     if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){
@@ -948,11 +948,11 @@ Int_t StBFChain::Instantiate()
     
     // PMD
     if ( maker == "StPmdReadMaker"         &&
-	 GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw", 1);
+	 GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw", kTRUE);
     
     // HFT
     if (maker == "StPxlSimMaker"           &&
-	GetOption("pxlSlowSim"))               mk->SetAttr("useDIGMAPSSim", 1);
+	GetOption("pxlSlowSim"))               mk->SetAttr("useDIGMAPSSim", kTRUE);
     
     // Hit filtering will be made from a single maker in
     // future with flexible filtering method
@@ -1008,12 +1008,12 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
     if (maker == "StBTofCalibMaker") {
-      if  (GetOption("UseMCTstart")) mk->SetAttr("UseMCTstart",1);
-      if  (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",1);
+      if  (GetOption("UseMCTstart")) mk->SetAttr("UseMCTstart",kTRUE);
+      if  (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
       if  (GetOption("UseMCTstart") || 
-	   ! GetOption("vpdCalib"))         mk->SetAttr("UseMCTstart",1);
+	   ! GetOption("vpdCalib"))         mk->SetAttr("UseMCTstart",kTRUE);
     }
-    if (maker == "StEventMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT",1);
+    if (maker == "StEventMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT",kTRUE);
     if (maker == "StEventMaker" && fFiltTrg.Length()) {
       mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));
       TString FiltTrgFlavor = fFiltTrg(1,128);
@@ -1021,7 +1021,7 @@ Int_t StBFChain::Instantiate()
 	SetFlavor((FiltTrgFlavor += "+ofl").Data(),"trgOfflineFilter");
     }
     if (maker == "StIstRawHitMaker" && GetOption("istEmbed")) {
-      mk->SetAttr("DoEmbedding", 1);
+      mk->SetAttr("DoEmbedding", kTRUE);
     }
     
     if (maker == "StTagsMaker"){
@@ -1050,8 +1050,8 @@ Int_t StBFChain::Instantiate()
   if (GetOption("Debug"))    SetDEBUG(1);
   if (GetOption("Debug1"))   SetDEBUG(1);
   if (GetOption("Debug2"))   SetDEBUG(2);
-  if (GetOption("nohistos")) SetAttr(".histos",0,"*");
-  else                       SetAttr(".histos",1,"*");
+  if (GetOption("nohistos")) SetAttr(".histos",kFALSE,"*");
+  else                       SetAttr(".histos",kTRUE,"*");
   if (GetOption("NoRepeat")) gMessMgr->IgnoreRepeats();
   
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Sti");
@@ -1903,16 +1903,16 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
     }
     if (! found) gMessMgr->QAInfo() << "StBFChain::SetGeantOptions() Chain has not found geometry tag. Use " << GeomVersion << endm;
     TString GeometryOpt;
-    if (GetOption("phys_off")) {GeometryOpt += "detp phys_off=1;"; geantMk->SetAttr("phys_off",1);}
-    if (GetOption("hadr_off")) {GeometryOpt += "detp hadr_off=1;"; geantMk->SetAttr("hadr_off",1);}
+    if (GetOption("phys_off")) {GeometryOpt += "detp phys_off=1;"; geantMk->SetAttr("phys_off",kTRUE);}
+    if (GetOption("hadr_off")) {GeometryOpt += "detp hadr_off=1;"; geantMk->SetAttr("hadr_off",kTRUE);}
     GeometryOpt += ("detp geom ");
     GeometryOpt += GeomVersion;
     ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
   }
 #else
   if (! GetOption("fzin") && !  GetOption("fzinSDT")) {
-    if (GetOption("phys_off")) {geantMk->SetAttr("phys_off",1);}
-    if (GetOption("hadr_off")) {geantMk->SetAttr("hadr_off",1);}
+    if (GetOption("phys_off")) {geantMk->SetAttr("phys_off",kTRUE);}
+    if (GetOption("hadr_off")) {geantMk->SetAttr("hadr_off",kTRUE);}
   }
 #endif      
   if ((GetOption("fzin") || GetOption("fzinSDT") ||GetOption("ntin") || fInFile.Data()[0] == ';') && fInFile != "") {
