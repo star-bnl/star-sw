@@ -311,7 +311,7 @@ TGeoMaterial *BuildMaterial( AgMaterial &ag_material )
       mixture = new TGeoMixture( mat_name, nc, dd );
       for ( ic = 0; ic<nc; ic++ )
 	{
-	  if ( aa<=zz ) {
+	  if ( aa<zz ) {
 	    LOG_INFO << mat_name.Data() << " invalid component: " << name << " A=" << aa << " Z=" << zz << " weight=" << ww << ENDL;
 	  }
 	  ag_material.Component(ic,name,aa,zz,ww); mixture->DefineElement(ic,aa,zz,ww); assert(aa>=zz);
@@ -838,22 +838,33 @@ TGeoVolume *makeCopyVolume( TGeoVolume *org, AgShape shape, Bool_t copyDaughters
 //
 Bool_t sanityCheck( TGeoVolume *volume )
 {
-  
-  TGeoShape *shape = volume->GetShape();
-  
-  // Shape with volume=0 is probably an error
-  if ( shape->Capacity() <= 0. )
-    { Int_t old=gErrorIgnoreLevel;    
-      gErrorIgnoreLevel=1; // Some warnings will not be supressed
-      AgBlock::module()->Warning(AgModule::module()->GetName(),Form("Volume %s shape parameters invalid.  NULL bounding box capacity.",volume->GetName()));
-      //      volume -> Print();
-      //      volume -> InspectShape();
-      gErrorIgnoreLevel=old;
-      return false;
+
+  bool result = false;
+
+  if ( volume->IsAssembly() ) {
+    result = true;
+  } 
+  else { 
+
+    TGeoShape *shape = volume->GetShape();
+    if ( 0==shape ) { 
+      result = false;
     }
+    else { 
+      if ( shape->Capacity() > 0 ) {
+	result = true;
+      }
+      else {
+	result = false;
+      }
+    }
+  }
 
+  if ( result == false ) {
+    LOG_WARN << "Invalid shape for volume " << volume->GetName() << endm;
+  }
 
-  return true;
+  return result;
 }
 
 

@@ -59,7 +59,8 @@ if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/ or $pwd =~ /P20ic/) {
 
   elsif ($pwd =~ /2011\/27GeV/)               {$glob = "/2011/27GeV";}
   elsif ($pwd =~ /2018\/27GeV/)               {$PICOPATH = "/gpfs01/star/data*"; $glob = "/reco/production_27GeV_fixedTarget_2018/ReversedFullField/P19ie/2018";}
-  elsif ($pwd =~ /2018\/3p85GeV_fixedTarget/) {$glob = "/2018/3p85GeV_fixedTarget";}
+#  elsif ($pwd =~ /2018\/3p85GeV_fixedTarget/) {$glob = "/2018/3p85GeV_fixedTarget";}
+  elsif ($pwd =~ /2018\/3p85GeV_fixedTarget/) {$PICOPATH = "/gpfs01/star/data*";$glob = "/reco/production_3p85GeV_fixedTarget_2018/ReversedFullField/P19ie.SL20d/2018";}
 
   elsif ($pwd =~ /2019\/14GeV/)               {$glob = "/2019/14GeV_2019_TFG19e";}
   elsif ($pwd =~ /2019\/19GeV/)               {$glob = "/2019/19GeV_2019_TFG19e";}
