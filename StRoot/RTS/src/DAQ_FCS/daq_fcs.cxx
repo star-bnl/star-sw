@@ -602,11 +602,13 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 	else {
 		if(t_lo==0) {
+			LOG(ERR,"%d: token-0 in event HDR 0x%04X: trg_cmd 0x%05X: trg %d, daq %d",rdo,hdr,trg_word,trg_cmd,daq_cmd) ;
+
 			if(trg_cmd==5) {	// allowed for self-triggered!
 				t_lo = 4095 ;	// use this particular token!
 			}
 			else {
-				LOG(ERR,"%d: token-0 in event HDR 0x%04X: trg_cmd 0x%05X",rdo,hdr,trg_word) ;
+				//LOG(ERR,"%d: token-0 in event HDR 0x%04X: trg_cmd 0x%05X: trg %d, daq %d",rdo,hdr,trg_word,trg_cmd,daq_cmd) ;
 
 				u_short *d16 = (u_short *)d ;
 				for(int i=0;i<16;i++) {
