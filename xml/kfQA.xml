@@ -16,6 +16,6 @@
     </ResourceUsage>
     <stdout URL="file:./sched$JOBID.log" />
     <stderr URL="file:./sched$JOBID.err" />
-     <input URL="command:kfQA.csh" /> 
+      <input URL="command:kfQA.csh" /> 
 </job>
 

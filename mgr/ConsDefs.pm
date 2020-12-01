@@ -75,7 +75,7 @@
  $F77LDFLAGS    = $LDFLAGS;
  $STIC          = "stic";
  $STICFLAGS     = "";
- $AGETOF        = "agetof";
+ $AGETOF        = `which agetof`; chop ($AGETOF); # print "AGETOF = $AGETOF ================================================================================\n";
  $AGETOFLAGS    = "-V 1";
  
  $KUIP          = $CERN_ROOT . "/bin/kuipc";
