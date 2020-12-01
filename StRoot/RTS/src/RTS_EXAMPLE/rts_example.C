@@ -2448,7 +2448,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 				}
 
 				if(do_print) {
-					if(dd->ncontent) printf("ITPC ADC: sector %2d, row %2d, pad %3d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+					if(dd->ncontent) printf("ITPC ADC %d: sector %2d, row %2d, pad %3d: %3d timebins\n",rdr->seq,dd->sec,dd->row,dd->pad,dd->ncontent) ;
 
 					for(u_int i=0;i<dd->ncontent;i++) {
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb,dd->adc[i].adc) ;

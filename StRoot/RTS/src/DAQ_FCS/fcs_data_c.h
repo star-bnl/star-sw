@@ -64,7 +64,7 @@ public:
 	int accum_pre_fy19(u_int ch, u_int tb, u_short adc) ;
 
 
-	void set_rdo(int rdo1) ;
+	u_short set_rdo(int rdo1) ;
 
 	u_char log_level ;
 	u_int events ;		// for this instance
@@ -147,6 +147,9 @@ public:
 		u_char det ;	//0=ECAL,1=HCAL,2=PRE,3=Main
 		u_char ns ;	//0=North,1=South
 		u_char dep ;	// from 0 ;
+		u_char crate ;	// 0..4
+		u_char slot ;	// 0..19
+
 		unsigned long long ch_mask ;
 	} ;
 
@@ -184,6 +187,7 @@ public:
 	static struct statistics_t {
 		float temperature ;
 		float deadtime ;
+		float rx_throttle ;
 		int ht_rate ;
 	} statistics[8] ;
 

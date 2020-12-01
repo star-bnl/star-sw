@@ -451,10 +451,10 @@ int fcs_data_c::hdr_event()
 							ped_unlock() ;
 
 							if(f_val > 50.0) {
-								LOG(WARN,"%d: deadtime %.1f",rdo,f_val) ;
+								LOG(WARN,"S%d:%d: deadtime %.1f",sector,rdo,f_val) ;
 							}
 							else {
-								LOG(INFO,"%d: deadtime %.1f",rdo,f_val) ;
+								LOG(TERR,"S%d:%d: deadtime %.1f",sector,rdo,f_val) ;
 							}
 						}
 						else if((c=strstr(ctmp,"b "))) {
@@ -469,11 +469,16 @@ int fcs_data_c::hdr_event()
 
 							f_val = 100.0*(double)(i_val & 0x3ff)/1023.0 ;
 
+							
+							ped_lock() ;
+							statistics[rdo-1].rx_throttle = f_val ;
+							ped_unlock() ;
+
 							if(f_val > 50.0) {
-								LOG(WARN,"%d: RX-throttle %.1f",rdo,f_val) ;
+								LOG(WARN,"S%d:%d: RX-throttle %.1f",sector,rdo,f_val) ;
 							}
 							else {
-								LOG(INFO,"%d: RX-throttle %.1f",rdo,f_val) ;
+								LOG(TERR,"S%d:%d: RX-throttle %.1f",sector,rdo,f_val) ;
 							}
 						}
 					   
@@ -735,6 +740,7 @@ int fcs_data_c::ana_ch()
 
 	switch(run_type) {
 	case 1 :
+	case 2 :
 //	case 5 :
 		break ;
 	default:
@@ -794,6 +800,7 @@ int fcs_data_c::accum_pre_fy19(u_int ch, u_int tb, u_short sadc)
 
 	switch(run_type) {
 	case 1 :
+	case 2 :
 //	case 5 :
 		ped[sector-1][rdo-1].mean[ch] += (double)sadc ;
 		ped[sector-1][rdo-1].rms[ch] += (double)sadc * (double)sadc ;
@@ -833,6 +840,7 @@ void fcs_data_c::run_start(u_int run, int type)
 
 	switch(run_type) {
 	case 1 :
+	case 2 :
 //	case 5 :
 		ped_start() ;
 		break ;
@@ -853,6 +861,7 @@ void fcs_data_c::run_stop(int bad_ped)
 {
 	switch(run_type) {
 	case 1 :
+	case 2 :
 //	case 5 :
 		ped_stop(bad_ped) ;
 		break ;
@@ -961,7 +970,7 @@ void fcs_data_c::ped_stop(int bad_ped)
 	char fname[128] ;
 
 	if(run_number) {
-		sprintf(fname,"/RTScache/fcs_pedestals_s%02d_r%d_%08u_f%u.txt",sector,rdo,run_number,rhic_freq) ;
+		sprintf(fname,"/RTScache/fcs_pedestals_s%02d_r%d_t%d_%08u_f%u.txt",sector,rdo,run_type,run_number,rhic_freq) ;
 	}
 	else {
 		sprintf(fname,"/RTScache/fcs_pedestals_%d_%d_%d_%d_%d.txt",
@@ -993,10 +1002,27 @@ void fcs_data_c::ped_stop(int bad_ped)
 	fprintf(pedf,"\n") ;
 
 	for(int c=0;c<32;c++) {
-		LOG(TERR,"PEDs: S%02d:%d: %d: %.1f [0x%03X] %.2f - %.1f %.1f [cou %d]",sector,rdo,c,
-		    ped[s][r].mean[c],(int)ped[s][r].mean[c],
-		    ped[s][r].rms[c],
-		    ped[s][r].mean_8[c],ped[s][r].rms_8[c],ped[s][r].cou[c]) ;
+		int err = 0 ;
+		double m = ped[s][r].mean[c] ;
+		double rms = ped[s][r].rms[c] ;
+
+		switch(run_type) {
+		case 1 :
+			if((m<10.0)||(m>120.0)||(rms<0.3)||(rms>1.0)) err = 1 ;
+			break ;
+		case 2 :
+			if((m != 2047.5)||(rms != 682.5)) err = 1 ;
+			break ;
+		}
+		
+		if(err) {
+			LOG(ERR,"S%02d:%d ch %02d: ped %.1f, rms %.1f",sector,rdo,c,m,rms) ;
+		}
+
+		//LOG(TERR,"PEDs: S%02d:%d: %d: %.1f [0x%03X] %.2f - %.1f %.1f [cou %d]",sector,rdo,c,
+		//    ped[s][r].mean[c],(int)ped[s][r].mean[c],
+		//    ped[s][r].rms[c],
+		//    ped[s][r].mean_8[c],ped[s][r].rms_8[c],ped[s][r].cou[c]) ;
 
 		
 		fprintf(pedf,"%d %d %d %d %d %d %f %f %f %f\n",sector,rdo,d,n,p,c,
@@ -1317,9 +1343,86 @@ int fcs_data_c::load_rdo_map(const char *fname)
 {
 //	if(id != 0) return 0 ;
 
+
+
 	rdo_map_loaded = 0 ;
 	memset(rdo_map,0,sizeof(rdo_map)) ;
 	memset(det_map,0,sizeof(det_map)) ;
+
+
+	// set up defaults so that non-existing entries in
+	// the map file map to non-existing nodes
+	for(int s=0;s<12;s++) {
+	for(int r=0;r<8;r++) {
+		rdo_map[s][r].det = 3 ;		//pseudo-main
+		rdo_map[s][r].ns = 0 ;		//pseudo-side
+		rdo_map[s][r].dep = 10 ;	// dummy!!!
+	}}
+
+	// physical crate map: done by hand
+	for(int r=0;r<8;r++) {
+		// Crate 0 
+
+		rdo_map[0][r].crate = 0 ;
+		rdo_map[0][r].slot = r ;
+
+		rdo_map[1][r].crate = 0 ;
+		rdo_map[1][r].slot = r+8 ;
+
+		if(r < 4) {
+			rdo_map[2][r].crate = 0 ;
+			rdo_map[2][r].slot = r+16 ;
+		}
+		else {
+			rdo_map[2][r].crate = 1 ;
+			rdo_map[2][r].slot = r+16-4 ;
+		}
+
+
+		// Crate 1
+		rdo_map[3][r].crate = 1 ;
+		rdo_map[3][r].slot = r ;
+
+		rdo_map[4][r].crate = 1 ;
+		rdo_map[4][r].slot = r+8 ;
+
+
+		// crate 2 aka Main
+		if(r < 3) {
+			rdo_map[10][r].crate = 2 ;
+			rdo_map[10][r].slot = r ;
+		}
+
+		rdo_map[5][r].crate = 4 ;
+		rdo_map[5][r].slot = r ;
+
+		rdo_map[6][r].crate = 4 ;
+		rdo_map[6][r].slot = r+8 ;
+
+		if(r < 4) {
+			rdo_map[7][r].crate = 4 ;
+			rdo_map[7][r].slot = r+16 ;
+		}
+		else {
+			rdo_map[7][r].crate = 3 ;
+			rdo_map[7][r].slot = r+16-4 ;
+		}
+
+
+		// Crate 3
+		rdo_map[8][r].crate = 3 ;
+		rdo_map[8][r].slot = r ;
+
+		rdo_map[9][r].crate = 3 ;
+		rdo_map[9][r].slot = r+8 ;
+
+
+	}
+
+	//special cases and remaps
+	rdo_map[5-1][2-1] = rdo_map[7-1][8-1] ;	// moved 7-8 to 5-2
+	rdo_map[10-1][2-1] = rdo_map[10-1][8-1] ;	// moved 10-8 to 10-2
+			
 
 	if(fname==0) {
 		fname = "/RTS/conf/fcs/fcs_daq_map.txt" ;
@@ -1357,7 +1460,12 @@ int fcs_data_c::load_rdo_map(const char *fname)
 		r-- ;
 		s-- ;
 
-		LOG(TERR,"Mapping S%d:%d --> %d,%d,%d, mask 0x%llX",s+1,r+1,d,n,b,mask) ;
+
+		if((s<0) || (r<0)) {
+			
+			LOG(ERR,"Mapping S%d:%d --> %d,%d,%d, mask 0x%llX",s+1,r+1,d,n,b,mask) ;
+			continue ;
+		}
 
 		// forward and reverse
 		rdo_map[s][r].det = d ;
@@ -1376,11 +1484,11 @@ int fcs_data_c::load_rdo_map(const char *fname)
 	return 0 ;
 }
 
-void fcs_data_c::set_rdo(int rdo1)
+u_short fcs_data_c::set_rdo(int rdo1)
 {
 	rdo = rdo1 ;
 
-	set_board_id() ;
+	return set_board_id() ;
 } ;
 
 
@@ -1388,6 +1496,11 @@ u_short fcs_data_c::set_board_id()
 {
 	int sec = sector - 1 ;
 	int r = rdo - 1 ;
+
+
+	if((sec<0)||(r<0)) {
+		LOG(ERR,"bad %d %d",sec,r) ;
+	}
 
 	int det = rdo_map[sec][r].det ;
 	int ns = rdo_map[sec][r].ns ;
