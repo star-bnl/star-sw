@@ -1980,7 +1980,8 @@ my $NEvents = 100000;
 #$hist = "RunXX32"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/07/20  TpcSecRowB.20191121.000031.root
 #$hist = "RunXX33"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/08/20  reset Adc3MDF to zero, reset TpcSecRowB
 #$hist = "RunXX34"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/09/20  TpcSecRowB.20191121.000033.root
-$hist = "RunXX35"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/09/20  TpcSecRowB.20191121.000033.root
+#$hist = "RunXX35"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/09/20  TpcSecRowB.20191121.000033.root
+$hist = "RunXX36"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 11/21/20  check status 
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();

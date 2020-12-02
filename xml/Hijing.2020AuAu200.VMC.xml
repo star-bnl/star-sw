@@ -20,6 +20,7 @@
   set name  = `basename ${file1} .daq`;
   echo "${name}"
   set logName  = ${name}B.log
+  if (-r ${logName}) exit 0;
   set generF   = ${name}.MuDst.root
   set tagf     = ${name}.root
 #  setenv StarEndMakerShell

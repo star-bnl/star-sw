@@ -32,18 +32,20 @@ void Cint2Root(TString topDir = ".") {
     TInterpreter::EErrorCode ee;
     gInterpreter->ProcessLine(command,&ee);
     assert(!ee);
-    TDataSet *newdat = (TDataSet *) gInterpreter->Calc("CreateTable()",&ee);
+    TTable *newdat = (TTable *) gInterpreter->Calc("CreateTable()",&ee);
     assert(!ee);
     command.ReplaceAll(".L ",".U ");
     gInterpreter->ProcessLine(command,&ee);
     assert(!ee);
     if (! newdat) {
-      cout << "\tFail to make TDataSet from " << path.Data() << endl;
+      cout << "\tFail to make TTable from " << path.Data() << endl;
       continue;
+    } else {
+      newdat->Print(0,10);
     }
     TFile *f = new TFile(rootf,"recreate");
     newdat->Write();
-    delete f;
+    //    delete f;
     delete newdat;
     delete gGeoManager;
     gGeoManager = 0;
