@@ -92,9 +92,13 @@ C.
       GOTO 999
 *
    60 WRITE(CHFOR,'(''(F'',I1,''.2)'')') JSL-JBEG
+#if 0
       READ(CHTIT(JBEG:JSL-1),CHFOR) HMAIN
       READ(CHTIT(JSL+1:JEND),'(I2)')   ISUBV
       HVERS=HMAIN+ISUBV*.001
+#else
+      HVERS = 3.218
+#endif
       NCHA=JEND-JBEG+1
       CHVER=' '
       IF(NCHA.EQ.8) THEN
