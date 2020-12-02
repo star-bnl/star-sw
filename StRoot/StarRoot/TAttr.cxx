@@ -63,6 +63,11 @@ int TAttr::SetAttr(const TAttr *att)
    return add;
 }
 //_____________________________________________________________________________
+void TAttr::SetAttr(const char *key, Bool_t val)
+{
+  TString ts; ts+=(char)val; SetAttr(key, ts.Data());
+}
+//_____________________________________________________________________________
 void TAttr::SetAttr(const char *key, Long_t val)
 {
    TString ts; ts+=val; SetAttr(key, ts.Data());

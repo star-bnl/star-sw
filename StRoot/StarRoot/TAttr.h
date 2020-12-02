@@ -20,6 +20,7 @@ public:
             TAttr(const char *name="");
            ~TAttr();
 void        SetAttr(const char *key,const char* val);
+void        SetAttr(const char *key,Bool_t val);
 void        SetAttr(const char *key,Long_t         val);
 void        SetAttr(const char *key,ULong_t     val);
 void        SetAttr(const char *key,double      val);
