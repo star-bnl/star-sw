@@ -19,7 +19,7 @@
   }
   TString StarVersion(gSystem->Getenv("STAR_VERSION"));
   rootlogon_fpe =StarVersion == ".DEV" ||StarVersion == "DEV2" ||StarVersion == "DEV6";
-#if 1
+#if 0
   if (! rootlogon_fpe && gClassTable->GetID("TGiant3") < 0) { // ! root4star
     rootlogon_fpe = StarVersion == ".DEV2";
   }
@@ -48,6 +48,7 @@
   gStyle->SetStatColor(10);
   gStyle->SetTitleFillColor(10);
   gStyle->SetPadColor(10);
+  gStyle->SetPadRightMargin(0.15);
 #if 0
   gStyle->SetFillStyle(4010);
   gStyle->SetFillColor(kBlue);
