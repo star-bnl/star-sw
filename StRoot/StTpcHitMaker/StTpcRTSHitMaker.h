@@ -77,6 +77,7 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t               Make();
   void PrintCld(daq_cld *cld = 0, Int_t IdTruth = 0, Int_t quality=0);
   void PrintAdc(daq_dta *dta  = 0);
+  void ConfigureFCF();
  private:
   daq_tpx  *fTpx; //!
   daq_itpc *fiTpc; //!
@@ -85,7 +86,8 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t     maxHits[24];
   Int_t     maxBin0Hits;
   Int_t     bin0Hits;
-  UChar_t  *mTpx_RowLen[24];
+  static UChar_t mTpx_RowLen[46];
+  static UChar_t miTpc_RowLen[41];
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $ $Id: StTpcRTSHitMaker.h,v 1.17 2018/10/17 20:45:27 fisyak Exp $  built " __DATE__ " " __TIME__ ; return cvs;

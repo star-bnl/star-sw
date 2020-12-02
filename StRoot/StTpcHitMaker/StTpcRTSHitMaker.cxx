@@ -37,6 +37,12 @@
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daqReader.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
+#include "RTS/src/DAQ_TPX/daq_tpx.h"
+#include "RTS/src/DAQ_TPX/tpxCore.h"
+#include "RTS/src/DAQ_TPX/tpxPed.h"
+#include "RTS/src/DAQ_TPX/tpxGain.h"
+#include "RTS/src/DAQ_TPX/tpxFCF.h"
+#include "RTS/src/DAQ_TPX/tpxStat.h"
 #include "TBenchmark.h"
 ClassImp(StTpcRTSHitMaker); 
 #define __DEBUG__
@@ -45,13 +51,12 @@ ClassImp(StTpcRTSHitMaker);
 #else
 #define PrPP(A,B)
 #endif
+UChar_t StTpcRTSHitMaker::mTpx_RowLen[46]  = {0};
+UChar_t StTpcRTSHitMaker::miTpc_RowLen[41] = {0};
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
   SafeDelete(fTpx);
   SafeDelete(fiTpc);
-  for (Int_t sec = 0; sec < 24; sec++) {
-    if (mTpx_RowLen[sec]) delete [] mTpx_RowLen[sec];
-  }
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Init() {
@@ -61,31 +66,116 @@ Int_t StTpcRTSHitMaker::Init() {
   return StMaker::Init();
 }
 //________________________________________________________________________________
+void StTpcRTSHitMaker::ConfigureFCF() { // online/RTS/src/ESB/tpx.C
+  if (! fTpx) return;
+#if 0
+ 	// configure FCF
+	LOG(NOTE,"New fcf_style") ;
+	static int first_time ;
+	for(int i=0;i<Cntrl.thr_max_count;i++) {
+		if(!fcf[i]) {
+#ifdef USE_FCF2D
+			fcf[i] = new fcf2d ;
+#else
+			fcf[i] = new tpxFCF ;
+#endif
+			fcf[i]->set_id(i) ;
+			fcf[i]->fcf_style = 2 ;
+
+			first_time = 1 ;
+
+		}
+
+		fcf[i]->run_compatibility = 10 ;
+
+		if(run_type == RUN_TYPE_PULSER) fcf[i]->do_cuts = 2 ;	// to get even the bad edge
+		else fcf[i]->do_cuts = 1 ;	// just cut em...
+	}
+
+
+	//LOG(TERR,"Before config2") ;
+
+	if(first_time) {
+		for(int r=0;r<4;r++) {
+			int s_real, r_real ;
+			tpx36_to_real(subdet_id,r+1,s_real,r_real) ;
+			
+			//LOG(TERR,"config2: s_real %d, r_real %d",s_real,r_real) ;
+			fcf[0]->config2(s_real,r_real) ;
+		}
+	}
+
+	first_time = 0 ;
+
+
+	//LOG(TERR,"Before gains") ;
+
+	LOG(NOTE,"New fcf_style") ;
+
+	// should I reload gains?
+	if(gains->from_file(TPX_GAIN_MASTER_FILE,0)) {
+		// gains have changed and have been reloded
+		LOG(INFO,"Gains reloaded from \"%s\", sector %d",TPX_GAIN_MASTER_FILE, 0) ;
+
+		// reapply gains to FCF
+
+		fcf[0]->apply_gains2(gains) ;
+
+		if(peds_in_altro) {
+			LOG(INFO,"\tGain file changed -- forcing ped load...") ;
+		}
+		peds_in_altro = 0 ;
+	}
+
+
+
+	if(peds_in_altro && (setup.gain_mode != last_gain_mode)) {
+		LOG(INFO,"Current gain mode %d differs from last gain mode %d -- forcing ped load...",setup.gain_mode, last_gain_mode) ;
+		peds_in_altro = 0 ;
+	}
+
+	last_gain_mode = setup.gain_mode ;
+
+       
+
+#endif
+}
+//________________________________________________________________________________
 Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
   if (IAttr("Cosmics")) StTpcHitMaker::SetCosmics();
-  static Bool_t fNoiTPCLu  = IAttr("NoiTPCLu");
-  for (Int_t sec = 0; sec < 24; sec++) {
-    Int_t sector = sec + 1;
-    // Fill no. of pad per row 
-    mTpx_RowLen[sec] = new UChar_t[St_tpcPadConfigC::instance()->numberOfRows(sector)+1];
-    mTpx_RowLen[sec][0] = 0;
-    for (Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
-      mTpx_RowLen[sec][row] = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
+  Int_t sector = 20;
+  // Fill no. of pad per row 
+  //    mTpx_RowLen = new UChar_t[St_tpcPadConfigC::instance()->numberOfRows(sector)+1];
+  for (Int_t row = 1; row <= St_tpcPadPlanesC::instance()->padRows(); row++) {
+    mTpx_RowLen[row] = St_tpcPadPlanesC::instance()->padsPerRow(row);
+  }
+  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    for (Int_t row = 1; row <= St_tpcPadPlanesC::instance()->innerPadRows(); row++) {
+      mTpx_RowLen[row] = St_tpcPadPlanesC::instance()->padsPerRow(row);
     }
   }
+#if 0
+  cout << "sec:" << sector<< endl << " Tpx:";
+  for (Int_t row = 0; row <= 45; row++) {cout << "\t" << (int) mTpx_RowLen[row]; if (row%10 == 0) cout << endl;} 
+  cout << endl;
+  cout << "\tiTpc:";
+  for (Int_t row = 0; row <= 40; row++) {cout << "\t" << (int) miTpc_RowLen[row]; if (row%10 == 0) cout << endl;} 
+  cout << endl;
+#endif
   SetAttr("maxRow",St_tpcPadConfigC::instance()->numberOfRows(20));
   SafeDelete(fTpx);
   fTpx = new daq_tpx() ; 
   if (GetDate() >= 20091215) fTpx->fcf_run_compatibility = 10 ;
   // change default value 2 to 
   fTpx->fcf_do_cuts = 1; // 1 means always, 2 means don't cut edges (for i.e. pulser run), 0 means don't...
-  if (GetDate() >= 20121215) fTpx->fcf_style = 2 ;  // from online/RTS/src/ESB/tpx.C new for FY13!
+  //  if (GetDate() >= 20121215) fTpx->fcf_style = 2 ;  // from online/RTS/src/ESB/tpx.C new for FY13!
   if (GetDate() <= 20090101) fminCharge = 40;
   // Check presence iTPC
   SafeDelete(fiTpc);
+  static Bool_t fNoiTPCLu  = IAttr("NoiTPCLu");
   if (! fNoiTPCLu) {
     for(Int_t sector=1;sector<=24;sector++) {
       if (St_tpcPadConfigC::instance()->iTPC(sector)) {
@@ -96,25 +186,29 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   }
   StMaker* maskMk = GetMakerInheritsFrom("StMtdTrackingMaskMaker");
   unsigned int mask = (maskMk ? maskMk->UAttr("TpcSectorsByMtd") : ~0U); // 24 bit masking for sectors 1..24
-  // do gains example; one loads them from database but I don't know how...
-  daq_dta *dta_Tpx  = fTpx->put("gain");
-  daq_dta *dta_iTpc = 0;
-  if (fiTpc) dta_iTpc = fiTpc->put("gain");
-  // Prepare scaled hit maxima
+#if 0 
+ // Prepare scaled hit maxima
   // No hit maxima if these DB params are 0
   Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
   Int_t maxBinZeroHits = St_tpcMaxHitsC::instance()->maxBinZeroHits();
   Int_t livePads = 0;
   Int_t totalPads = 0;
   Float_t liveFrac = 1;
+#endif
   // Load gains
   daq_det_gain *gain = 0;
+  // do gains example; one loads themfrom database but I don't know how...
+  daq_dta *dta_Tpx  = fTpx->put("gain"); // , 0, 45,0, mTpx_RowLen);
+#if 0
+  Int_t totalSecPads = 0;
+#endif
   for(Int_t sector=1;sector<=24;sector++) {
     if (!((1U<<(sector-1)) & mask)) continue; // sector masking
+#if 0
     Int_t liveSecPads = 0;
-    Int_t totalSecPads = 0;
+    totalSecPads = 0;
+#endif
     // Tpx
-    daq_dta *dta = dta_Tpx;
     Int_t rowMin = 1;
     if (St_tpcPadConfigC::instance()->iTPC(sector)) rowMin = 14; 
     for(Int_t rowO = 1; rowO <= 45; rowO++) {
@@ -138,7 +232,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
       Int_t padMin = 1;
       Int_t padMax = Npads;
 #endif
-      gain = (daq_det_gain *) dta->request(Npads+1);    // max pad+1            
+      gain = (daq_det_gain *) dta_Tpx->request(Npads+1);    // max pad+1            
       for(Int_t pad = 0; pad <= Npads; pad++) {
 	gain[pad].gain = 0.; // be sure that dead pads are killed
 	gain[pad].t0   = 0.;
@@ -149,7 +243,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	}
       }
       // daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
-      dta->finalize(Npads+1,sector,rowO);
+      dta_Tpx->finalize(Npads+1,sector,rowO);
+#if 0
       if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
 	totalSecPads += Npads;
 	Int_t row = rowO;
@@ -158,13 +253,17 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	    St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
 	  liveSecPads += Npads;
       }
+#endif
     }
-    // iTpc
-    if (! St_tpcPadConfigC::instance()->iTPC(sector) || ! dta_iTpc) continue;
-    dta = dta_iTpc;
+  }
+  // iTpc
+  daq_dta *dta_iTpc = 0;
+  if (fiTpc) dta_iTpc = fiTpc->put("gain"); // , 0, 40, 0, miTpc_RowLen);
+  for(Int_t sector=1;sector<=24;sector++) {
+    if (! St_tpcPadConfigC::instance()->iTPC(sector)) continue;
     for(Int_t row = 1; row <= 40; row++) {
       Int_t Npads = St_itpcPadPlanesC::instance()->padsPerRow(row);
-      gain = (daq_det_gain *) dta->request(Npads+1);	// max pad+1		
+      gain = (daq_det_gain *) dta_iTpc->request(Npads+1);	// max pad+1		
       for(Int_t pad = 0; pad <= Npads; pad++) {
 	gain[pad].gain = 0.; // be sure that dead pads are killed
 	gain[pad].t0   = 0.;
@@ -178,14 +277,17 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 #endif /* __DEBUG_GAIN__ */
       }
       // daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
-      dta->finalize(Npads+1,sector,row);
+      dta_iTpc->finalize(Npads+1,sector,row);
+#if 0
       if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
 	totalSecPads += Npads;
 	if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
 	    St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
 	  liveSecPads += Npads;
       }
+#endif
     }
+#if 0
     livePads += liveSecPads;
     totalPads += totalSecPads;
     if (maxHitsPerSector > 0) {
@@ -207,6 +309,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
       maxBin0Hits = 0;
       if (Debug()) {LOG_INFO << "No maxBinZeroHits" << endm;}
     }
+#endif
   }
   /*
     InitRun will setup the internal representations of gain 
@@ -333,19 +436,16 @@ Int_t StTpcRTSHitMaker::Make() {
 	if (! iTpcType) { // Tpx
 	  if (! fTpx) continue;
 	  row1 = TMath::Max(row1, 41); 
-	  //	  dta = fTpx->put("adc_sim",sector); //,45,0, &mTpx_RowLen[sector-1][40-13]); /*, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO])  ,0,45,0,mTpx_RowLen[sector-1]) */
-	  dta = fTpx->put("adc_sim", 0, 45,0, &mTpx_RowLen[sector-1][40-13]); /*, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO])  ,0,45,0,mTpx_RowLen[sector-1]) */
+	  dta = fTpx->put("adc_sim"); // , 0, 45,0, mTpx_RowLen); 
 	} else { // iTpc           {
 	  if (! fiTpc) continue;
 	  row2 = TMath::Min(40, row2); 
-	  //	  dta = fiTpc->put("adc_sim", sector); //, 40, 0, mTpx_RowLen[sector-1]);  /*, sector, row, 0, mTpx_RowLen[sector-1]) ,0,40,0,mTpx_RowLen[sector-1]) */ 
-	  dta = fiTpc->put("adc_sim", 0, 40, 0, mTpx_RowLen[sector-1]);  /*, sector, row, 0, mTpx_RowLen[sector-1]) ,0,40,0,mTpx_RowLen[sector-1]) */ 
+	  dta = fiTpc->put("adc_sim"); // , 0, 40, 0, miTpc_RowLen); 
 	}
       } else { // no iTPC
 	if (! fTpx) continue;
 	row2 = TMath::Min(45, row2);
-	//	dta = fTpx->put("adc_sim",sector); //,45,0, &mTpx_RowLen[sector-1]); /*, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO])  ,0,45,0,mTpx_RowLen[sector-1]) */
-	dta = fTpx->put("adc_sim",0,45); //,45,0, &mTpx_RowLen[sector-1]); /*, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO])  ,0,45,0,mTpx_RowLen[sector-1]) */
+	dta = fTpx->put("adc_sim"); // , 0, 45,0, mTpx_RowLen);
       }
       Int_t NoAdcs = 0;
       for (Int_t row = row1; row <= row2; row++) {
@@ -357,9 +457,6 @@ Int_t StTpcRTSHitMaker::Make() {
 	  if (St_tpcPadConfigC::instance()->iTPC(sector) && row > 40) { // Tpx sector with iTPC
 	    rowO = row - 40 + 13; // old row count
 	  }
-	  //	  dta = fTpx  ?  fTpx->put("adc_sim", sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO]) /* ,0,45,0,mTpx_RowLen[sector-1]) */ : 0; 
-	  //	} else {
-	  //	  dta = fiTpc ? fiTpc->put("adc_sim", sector, row, 0, mTpx_RowLen[sector-1]) /*,0,40,0,mTpx_RowLen[sector-1]) */  : 0;
 	}
 	for(Int_t pad = 1; pad <= Npads; pad++) {
 	  UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
@@ -420,13 +517,13 @@ Int_t StTpcRTSHitMaker::Make() {
 	if (! iTpcType) { //Tpx
 	  if (! fTpx) continue;
 	  if (IAttr("TpxClu2D")) {
-	    dtaX = fTpx->get("cld_2d_sim"); //, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO]); // rerun the 2D cluster finder on the simulated data...
+	    dtaX = fTpx->get("cld_2d_sim"); //, sector, rowO, 0, &mTpx_RowLen); // rerun the 2D cluster finder on the simulated data...
 	  } else {
-	    dtaX = fTpx->get("cld_sim");;   //, sector, rowO, 0, &mTpx_RowLen[sector-1][row-rowO]); // rerun the cluster finder on the simulated data...
+	    dtaX = fTpx->get("cld_sim");;   //, sector, rowO, 0, &mTpx_RowLen); // rerun the cluster finder on the simulated data...
 	  }
 	} else { // iTpc
 	  if (! fiTpc) continue;
-	  dtaX = fiTpc->get("cld_sim"); // ,sector, sector, row, 0, mTpx_RowLen[sector-1]); // rerun the cluster finder on the simulated data...
+	  dtaX = fiTpc->get("cld_sim"); // ,sector, sector, row, 0, mTpx_RowLen); // rerun the cluster finder on the simulated data...
 	}
 	if (! dtaX) continue;
 	daq_dta *dd = dtaX;

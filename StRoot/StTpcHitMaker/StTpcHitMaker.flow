@@ -56,3 +56,301 @@ online/RTS/src/ESB/ddl.C
 daq_tpx::put
 	daq_dta::create
 		daq_dta::release
+================================================================================
+StTpcRTSHitMaker::Make
+	dta = daq_itpc::put (this=0x59636f0, in_bank=0x7fffc3abda6a "adc_sim", sec=0, row=40, pad=0, p1=0x596c490, p2=0x0) 
+		adc_sim->create(32*1024,(char *)"adc_sim",rts_id,DAQ_DTA_STRUCT(daq_sim_adc_tb)) ;
+	daq_dta::finalize (this=0x5963ad0, obj_cou=3, sec=20, row=1, pad=21)
+		*store_cur = {sec = 20, row = 1, pad = 21, type = -90 '\246', nitems = 3}
+                   int bytes = sizeof(daq_store) + store_cur->nitems * hdr->obj_bytes ;
+(gdb) ptyp *hdr
+type = struct daq_store_hdr {
+    int hdr_bytes;
+    int hdr_version;
+    u_int endianess;
+    int obj_bytes;
+    char obj_name[32];
+    u_int bytes_used;
+    char describe[128];
+}
+p *hdr = {hdr_bytes = 180, hdr_version = 0, endianess = 67305985, obj_bytes = 8, obj_name = "daq_sim_adc_tb", '\000' <repeats 17 times>, bytes_used = 200,   describe = "adc_sim[31]:daq_sim_adc_tb[8 bytes]:Nov  8 2020\0..."}
+
+StTpcRTSHitMaker:INFO  - *** sec 20, row  1, pad  21:   3 pixels
+StTpcRTSHitMaker:INFO  -      0: adc   13, tb 326: track    1
+StTpcRTSHitMaker:INFO  -      1: adc   11, tb 327: track    1
+StTpcRTSHitMaker:INFO  -      2: adc    7, tb 328: track    1
+StTpcRTSHitMaker:INFO  - *** sec 20, row  1, pad  22:   5 pixels
+StTpcRTSHitMaker:INFO  -      0: adc    9, tb 325: track    1
+StTpcRTSHitMaker:INFO  -      1: adc   25, tb 326: track    1
+StTpcRTSHitMaker:INFO  -      2: adc   31, tb 327: track    1
+StTpcRTSHitMaker:INFO  -      3: adc   17, tb 328: track    1
+StTpcRTSHitMaker:INFO  -      4: adc    5, tb 329: track    1
+StTpcRTSHitMaker:INFO  - *** sec 20, row  1, pad  23:   4 pixels
+StTpcRTSHitMaker:INFO  -      0: adc    5, tb 325: track    1
+StTpcRTSHitMaker:INFO  -      1: adc    9, tb 326: track    1
+StTpcRTSHitMaker:INFO  -      2: adc   13, tb 327: track    1
+StTpcRTSHitMaker:INFO  -      3: adc    7, tb 328: track    1
+StTpcRTSHitMaker:INFO  - CLD sec 20: row  1: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 22.015625[21:23], tb 326.828125[325:329], cha 153, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - StTpcRTSHitMaker::Make Pad =   (sector= 20, row= 1, pad= 22.0156, tbuck= 326.828)
+StTpcRTSHitMaker:INFO  - StTpcRTSHitMaker::Make LS =    TPC_Local_Sector( (( (2.23985, 55.8, 192.403) , 20,1 )
+StTpcRTSHitMaker:INFO  - StTpcRTSHitMaker::Make L =     TPC_Local( (( (47.1942, -29.8889, -16.315) , 20,1 )
+Tpc s/r  20/  1 id     1 xyz:    47.194   -29.889   -16.315 q(keV)   1.15 idT     1 qa 100 fl  0 us 0 dX  0.00 pmin/max  21/ 23 np  3 tmin/max 325/329 nt  5 tm 326.83 pad  22.02 adc  153
+
+
+	dtaX = daq_itpc::get (this=0x59636f0, bank=0x7fffc3abda86 "cld_sim", sec=-1, row=-1, pad=-1, p1=0x0, p2=0x0)
+		daq_det::Make 
+			daq_det::presence
+                daq_itpc::handle_cld_sim (this=0x59636f0, sec=-1
+			itpc_fcf_c::itpc_fcf_c()
+			itpc_fcf_c::init (this=0x60480e0, sec=20, fname=0x0)
+			itpc_fcf_c::init (this=0x60480e0, gain=0x5963b90)
+			fcf[s]->do_ch_sim(sim->row,sim->pad,sim_array,track_array) ;
+
+
+Continuing.
+StTpcRTSHitMaker:INFO  - CLD sec 20: row  1: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 21.968750[21:23], tb 327.203125[326:330], cha 112, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - StTpcRTSHitMaker::Make Pad =   (sector= 20, row= 1, pad= 21.9688, tbuck= 327.203)
+StTpcRTSHitMaker:INFO  - StTpcRTSHitMaker::Make LS =    TPC_Local_Sector( (( (2.26329, 55.8, 192.631) , 20,1 )
+StTpcRTSHitMaker:INFO  - StTpcRTSHitMaker::Make L =     TPC_Local( (( (47.1825, -29.9092, -16.0864) , 20,1 )
+
+
+
+StTpcRTSHitMaker:INFO  - *** sec 20, row  1, Sum adc = 60
+StTpcRTSHitMaker:INFO  - *** sec 20, row  2, Sum adc = 154
+StTpcRTSHitMaker:INFO  - *** sec 20, row  3, Sum adc = 497
+StTpcRTSHitMaker:INFO  - *** sec 20, row  4, Sum adc = 319
+StTpcRTSHitMaker:INFO  - *** sec 20, row  5, Sum adc = 175
+StTpcRTSHitMaker:INFO  - *** sec 20, row  6, Sum adc = 159
+StTpcRTSHitMaker:INFO  - *** sec 20, row  7, Sum adc = 208
+StTpcRTSHitMaker:INFO  - *** sec 20, row  8, Sum adc = 220
+StTpcRTSHitMaker:INFO  - *** sec 20, row  9, Sum adc = 286
+StTpcRTSHitMaker:INFO  - *** sec 20, row 10, Sum adc = 154
+StTpcRTSHitMaker:INFO  - *** sec 20, row 11, Sum adc = 203
+StTpcRTSHitMaker:INFO  - *** sec 20, row 12, Sum adc = 293
+StTpcRTSHitMaker:INFO  - *** sec 20, row 13, Sum adc = 100
+StTpcRTSHitMaker:INFO  - *** sec 20, row 14, Sum adc = 212
+StTpcRTSHitMaker:INFO  - *** sec 20, row 15, Sum adc = 308
+StTpcRTSHitMaker:INFO  - *** sec 20, row 16, Sum adc = 115
+StTpcRTSHitMaker:INFO  - *** sec 20, row 17, Sum adc = 198
+StTpcRTSHitMaker:INFO  - *** sec 20, row 18, Sum adc = 709
+StTpcRTSHitMaker:INFO  - *** sec 20, row 19, Sum adc = 175
+StTpcRTSHitMaker:INFO  - *** sec 20, row 20, Sum adc = 228
+StTpcRTSHitMaker:INFO  - *** sec 20, row 21, Sum adc = 130
+StTpcRTSHitMaker:INFO  - *** sec 20, row 22, Sum adc = 202
+StTpcRTSHitMaker:INFO  - *** sec 20, row 23, Sum adc = 83
+StTpcRTSHitMaker:INFO  - *** sec 20, row 24, Sum adc = 168
+StTpcRTSHitMaker:INFO  - *** sec 20, row 25, Sum adc = 124
+StTpcRTSHitMaker:INFO  - *** sec 20, row 26, Sum adc = 538
+StTpcRTSHitMaker:INFO  - *** sec 20, row 27, Sum adc = 355
+StTpcRTSHitMaker:INFO  - *** sec 20, row 28, Sum adc = 66
+StTpcRTSHitMaker:INFO  - *** sec 20, row 29, Sum adc = 113
+StTpcRTSHitMaker:INFO  - *** sec 20, row 30, Sum adc = 82
+StTpcRTSHitMaker:INFO  - *** sec 20, row 31, Sum adc = 135
+StTpcRTSHitMaker:INFO  - *** sec 20, row 32, Sum adc = 268
+StTpcRTSHitMaker:INFO  - *** sec 20, row 33, Sum adc = 160
+StTpcRTSHitMaker:INFO  - *** sec 20, row 34, Sum adc = 171
+StTpcRTSHitMaker:INFO  - *** sec 20, row 35, Sum adc = 234
+StTpcRTSHitMaker:INFO  - *** sec 20, row 36, Sum adc = 247
+StTpcRTSHitMaker:INFO  - *** sec 20, row 37, Sum adc = 134
+StTpcRTSHitMaker:INFO  - *** sec 20, row 38, Sum adc = 111
+StTpcRTSHitMaker:INFO  - *** sec 20, row 39, Sum adc = 92
+StTpcRTSHitMaker:INFO  - *** sec 20, row 40, Sum adc = 212
+StTpcRTSHitMaker:INFO  - CLD sec 20: row  1: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 22.281250[22:23], tb 326.656250[325:328], cha 60, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row  2: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 23.078125[22:24], tb 326.531250[325:329], cha 154, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row  3: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 24.125000[23:26], tb 326.437500[324:329], cha 508, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row  4: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 24.984375[24:26], tb 326.281250[324:329], cha 323, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row  5: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 26.093750[25:27], tb 325.718750[324:328], cha 166, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row  6: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 27.140625[26:28], tb 325.500000[324:327], cha 161, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row  7: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 27.140625[26:28], tb 325.468750[324:328], cha 211, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row  8: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 28.156250[27:29], tb 325.109375[323:328], cha 225, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row  9: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 29.125000[28:30], tb 324.718750[323:327], cha 291, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 10: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 30.078125[29:31], tb 324.578125[323:327], cha 156, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 11: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 31.203125[30:32], tb 324.093750[322:326], cha 202, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 12: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 32.312500[31:34], tb 324.015625[322:326], cha 292, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 13: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 33.218750[32:34], tb 323.640625[322:326], cha 100, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 14: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 33.328125[32:34], tb 323.437500[321:326], cha 212, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 15: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 34.375000[33:36], tb 323.265625[321:326], cha 312, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 16: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 35.750000[35:37], tb 322.640625[321:324], cha 116, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 17: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 36.828125[36:38], tb 322.765625[321:325], cha 197, fla 0x10, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 18: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 37.906250[36:39], tb 322.562500[320:330], cha 714, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 19: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 38.875000[38:40], tb 322.203125[320:324], cha 166, fla 0x10, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 20: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 40.046875[39:42], tb 321.968750[320:324], cha 211, fla 0x10, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 21: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 40.250000[39:41], tb 321.312500[319:323], cha 134, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 22: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 41.593750[41:43], tb 321.718750[320:324], cha 209, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 24: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 43.734375[43:45], tb 320.843750[319:323], cha 167, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 25: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 44.640625[44:45], tb 320.437500[319:322], cha 127, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 26: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 46.000000[45:47], tb 320.296875[318:323], cha 559, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 27: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 47.140625[46:48], tb 320.187500[318:323], cha 360, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 29: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 48.781250[48:50], tb 319.609375[318:321], cha 113, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 30: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 49.687500[49:50], tb 319.125000[318:321], cha 82, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 31: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 50.859375[50:52], tb 319.062500[318:321], cha 134, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 32: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 52.281250[51:53], tb 318.593750[317:321], cha 269, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 33: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 53.406250[52:54], tb 318.468750[316:321], cha 160, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 34: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 54.703125[53:56], tb 317.968750[316:320], cha 162, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 35: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 55.031250[54:56], tb 318.000000[316:320], cha 238, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 36: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 56.218750[55:58], tb 317.937500[316:321], cha 242, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 37: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 57.343750[56:58], tb 317.343750[315:320], cha 136, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 39: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 59.703125[59:61], tb 316.734375[315:318], cha 93, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 40: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 61.140625[60:62], tb 316.718750[315:320], cha 216, fla 0x0, Id 1, Q 100 
+
+
+
+StTpcRTSHitMaker:INFO  - *** sec 20, row 14, Sum adc = 130
+StTpcRTSHitMaker:INFO  - *** sec 20, row 15, Sum adc = 95
+StTpcRTSHitMaker:INFO  - *** sec 20, row 16, Sum adc = 36
+StTpcRTSHitMaker:INFO  - *** sec 20, row 17, Sum adc = 122
+StTpcRTSHitMaker:INFO  - *** sec 20, row 18, Sum adc = 155
+StTpcRTSHitMaker:INFO  - *** sec 20, row 19, Sum adc = 106
+StTpcRTSHitMaker:INFO  - *** sec 20, row 20, Sum adc = 72
+StTpcRTSHitMaker:INFO  - *** sec 20, row 21, Sum adc = 148
+StTpcRTSHitMaker:INFO  - *** sec 20, row 22, Sum adc = 34
+StTpcRTSHitMaker:INFO  - *** sec 20, row 23, Sum adc = 68
+StTpcRTSHitMaker:INFO  - *** sec 20, row 24, Sum adc = 91
+StTpcRTSHitMaker:INFO  - *** sec 20, row 25, Sum adc = 106
+StTpcRTSHitMaker:INFO  - *** sec 20, row 26, Sum adc = 83
+StTpcRTSHitMaker:INFO  - *** sec 20, row 27, Sum adc = 186
+StTpcRTSHitMaker:INFO  - *** sec 20, row 28, Sum adc = 164
+StTpcRTSHitMaker:INFO  - *** sec 20, row 29, Sum adc = 126
+StTpcRTSHitMaker:INFO  - *** sec 20, row 30, Sum adc = 105
+StTpcRTSHitMaker:INFO  - *** sec 20, row 31, Sum adc = 248
+StTpcRTSHitMaker:INFO  - *** sec 20, row 32, Sum adc = 102
+StTpcRTSHitMaker:INFO  - *** sec 20, row 33, Sum adc = 125
+StTpcRTSHitMaker:INFO  - *** sec 20, row 34, Sum adc = 79
+StTpcRTSHitMaker:INFO  - *** sec 20, row 35, Sum adc = 56
+StTpcRTSHitMaker:INFO  - *** sec 20, row 36, Sum adc = 60
+StTpcRTSHitMaker:INFO  - *** sec 20, row 37, Sum adc = 128
+StTpcRTSHitMaker:INFO  - *** sec 20, row 38, Sum adc = 74
+StTpcRTSHitMaker:INFO  - *** sec 20, row 39, Sum adc = 124
+StTpcRTSHitMaker:INFO  - *** sec 20, row 40, Sum adc = 47
+StTpcRTSHitMaker:INFO  - *** sec 20, row 41, Sum adc = 208
+StTpcRTSHitMaker:INFO  - *** sec 20, row 42, Sum adc = 84
+StTpcRTSHitMaker:INFO  - *** sec 20, row 43, Sum adc = 69
+StTpcRTSHitMaker:INFO  - *** sec 20, row 44, Sum adc = 76
+StTpcRTSHitMaker:INFO  - *** sec 20, row 45, Sum adc = 56
+
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 14: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 51.250000[50:52], tb 308.859375[307:311], cha 130, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 15: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 52.531250[52:53], tb 308.718750[307:311], cha 95, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 16: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 54.000000[54:54], tb 308.281250[307:310], cha 36, fla 0x1, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 17: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 55.406250[55:56], tb 307.812500[306:310], cha 122, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 18: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 56.765625[56:58], tb 307.500000[306:310], cha 155, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 19: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 57.031250[56:58], tb 307.218750[306:309], cha 106, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 20: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 58.406250[58:59], tb 306.625000[305:308], cha 72, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 21: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 59.703125[59:61], tb 306.562500[305:309], cha 148, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 22: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 61.000000[61:61], tb 306.296875[305:308], cha 34, fla 0x1, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 23: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 61.562500[61:62], tb 305.875000[304:308], cha 68, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 24: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 62.875000[62:64], tb 305.609375[304:307], cha 91, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 25: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 64.312500[63:65], tb 305.171875[304:307], cha 106, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 26: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 65.593750[65:66], tb 304.953125[303:307], cha 83, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 27: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 67.125000[66:68], tb 304.484375[303:307], cha 186, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 28: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 68.671875[68:70], tb 304.218750[302:307], cha 164, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 29: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 69.000000[68:70], tb 303.765625[302:306], cha 126, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 30: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 70.421875[69:71], tb 303.406250[302:305], cha 105, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 31: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 71.921875[71:73], tb 303.156250[301:306], cha 248, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 32: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 73.281250[72:74], tb 302.718750[301:305], cha 102, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 33: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 73.906250[73:75], tb 302.421875[301:304], cha 125, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 34: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 75.359375[75:76], tb 302.203125[301:304], cha 79, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 35: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 76.609375[76:77], tb 301.593750[300:303], cha 56, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 36: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 78.390625[78:79], tb 301.265625[300:303], cha 60, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 37: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 79.906250[79:81], tb 301.125000[299:303], cha 128, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 38: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 81.421875[81:82], tb 301.062500[300:303], cha 74, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 39: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 81.812500[81:83], tb 300.531250[299:303], cha 124, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 40: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 83.468750[83:84], tb 300.125000[299:302], cha 47, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 41: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 85.078125[84:86], tb 299.671875[298:302], cha 208, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 42: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 86.468750[86:87], tb 299.406250[298:301], cha 84, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 44: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 87.562500[87:88], tb 298.671875[297:300], cha 76, fla 0x0, Id 1, Q 100 
+StTpcRTSHitMaker:INFO  - CLD sec 20: row 45: 1 clusters
+StTpcRTSHitMaker:INFO  -     pad 88.453125[88:89], tb 298.218750[297:300], cha 56, fla 0x0, Id 1, Q 100 
+================================================================================
+type = struct tpxFCF::stage1 {
+    unsigned short count;
+    unsigned short f;
+    double g;
+    double t0;
+    tpxFCF_cl cl[64];
+}
+
+struct stage1  *get_working(int row, int pad) => working_storage[s][row]
+struct stage1 *get_stage1(int row, int pad)   => storage + row_ix[row] + (pad-1) 
+================================================================================
+sec:20
+ Tpx:   0
+        0       0       0       0       0       0       0       0       0       0
+        0       0       0       142     144     144     144     144     0       0
+        0       51      51      102     102     154     153     205     204     0
+        0       51      51      102     102     51      51      0       0       205
+        204     154     153     102     102
+        iTpc:   0
+        52      54      56      58      60      62      62      64      66      68
+        70      72      74      74      76      78      80      82      84      86
+        86      88      90      92      94      96      98      98      100     102
+        104     106     108     110     110     112     114     116     118     120
+
