@@ -5316,11 +5316,11 @@ c    write(*,*) 'BTOF'
 *     CONSTRUCT etofgeo0; }
 *}
 * - targ system should be on (for year 19):      DETP BTOF BTOG.choice=2
-   If (TARG) { CONSTRUCT targgeo0; }
+   If (TARG) { CONSTRUCT targgeo; }
 *    write(*,*) 'TARG'
 *     call AgDETP new ('TARG')
 *     call AgDETP add ('etog.choice=',TargConfig,1)
-*     CONSTRUCT targgeo0; }
+*     CONSTRUCT targgeo; }
 *}
 * - epdm system should be on (for year 19):      DETP BTOF BTOG.choice=2
    If (EPDM) { CONSTRUCT epdmgeo0; }
