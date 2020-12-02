@@ -1,40 +1,146 @@
+#if !defined(__CINT__) && !defined(__CLING__) && ! defined(__MAKECINT__)
+// code that should be seen ONLY by the compiler
+#else
+#if !defined(__CINT__) && !defined(__CLING__) || defined(__MAKECINT__)
+// code that should be seen by the compiler AND rootcint
+#else
+// code that should always be seen
+#endif
+#endif
+//    ROOT5
+#if defined(__CINT__) && !defined(__MAKECINT__)
+// source code being actually interpreted by cint
+#elif defined(__MAKECINT__)
+// source code seen by rootcint only
+#elif defined(__ACLIC__)
+// source code being actually compiled by ACLiC
+#else
+// source code suitable for a standalone executable
+#endif
+//    ROOT6 
+#if defined(__CLING__) && !defined(__ROOTCLING__)
+// source code being actually interpreted by Cling
+#elif defined(__ROOTCLING__)
+// source code seen by rootcling only
+#elif defined(__ACLIC__)
+// source code being actually compiled by ACLiC
+#else
+// source code suitable for a standalone executable
+#endif
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
+#define __USE_ROOFIT__
+#endif
+//________________________________________________________________________________
+#if !defined(__CINT__) || defined(__MAKECINT__)
+#include "Riostream.h"
+#include <stdio.h>
+#include "TROOT.h"
+#include "TSystem.h"
+#include "TMath.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TH3.h"
+#include "THnSparse.h"
+#include "TStyle.h"
+#include "TF1.h"
+#include "TProfile.h"
+#include "TTree.h"
+#include "TChain.h"
+#include "TFile.h"
+#include "TNtuple.h"
+#include "TFitResult.h"
+#include "TCanvas.h"
+#include "TFileSet.h"
+#include "TDataSetIter.h"
+#include "TDataSet.h"
+#include "TClassTable.h"
+//#include "DeDxTree.C"
+#include "TMinuit.h"
+#include "TSpectrum.h"
+#include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
+#include "TString.h"
+#include "TLine.h"
+#include "TText.h"
+#include "TList.h"
+#include "TPolyMarker.h"
+#include "TKey.h"
+#include "TLegend.h"
+#include "TPaletteAxis.h"
+#include "TDirIter.h"
+#endif
 // Clusters
+struct Name_t {
+  const Char_t *histName;
+  const Char_t *varName;
+  const Char_t *cutName;
+};
+Name_t Names[24] = {
+  {"PadFC",       "newP.pad:newP.row","oldP.sector<=0&&newP.sector!=20"},
+  {"PminFC",     "newP.pmin:newP.row","oldP.sector<=0&&newP.sector!=20"},
+  {"PmaxFC",     "newP.pmax:newP.row","oldP.sector<=0&&newP.sector!=20"},
+  {"PadFCAll",    "newP.pad:newP.row","newP.sector!=20"},
+  {"PminFCAll",  "newP.pmin:newP.row","newP.sector!=20"},
+  {"PmaxFCAll",  "newP.pmax:newP.row","newP.sector!=20"},
+  
+  {"PadOC",       "oldP.pad:oldP.row","newP.sector<=0&&oldP.sector!=20"},
+  {"PminOC",     "oldP.pmin:oldP.row","newP.sector<=0&&oldP.sector!=20"},
+  {"PmaxOC",     "oldP.pmax:oldP.row","newP.sector<=0&&oldP.sector!=20"},
+  {"PadOCAll",    "oldP.pad:oldP.row","oldP.sector!=20"},
+  {"PminOCAll",  "oldP.pmin:oldP.row","oldP.sector!=20"},
+  {"PmaxOCAll",  "oldP.pmax:oldP.row","oldP.sector!=20"},
+  
+  {"PadFC20",       "newP.pad:newP.row","oldP.sector<=0&&newP.sector==20"},
+  {"PminFC20",     "newP.pmin:newP.row","oldP.sector<=0&&newP.sector==20"},
+  {"PmaxFC20",     "newP.pmax:newP.row","oldP.sector<=0&&newP.sector==20"},
+  {"PadFC20All",    "newP.pad:newP.row","newP.sector==20"},
+  {"PminFC20All",  "newP.pmin:newP.row","newP.sector==20"},
+  {"PmaxFC20All",  "newP.pmax:newP.row","newP.sector==20"},
+  
+  {"PadOC20",       "oldP.pad:oldP.row","newP.sector<=0&&oldP.sector==20"},
+  {"PminOC20",     "oldP.pmin:oldP.row","newP.sector<=0&&oldP.sector==20"},
+  {"PmaxOC20",     "oldP.pmax:oldP.row","newP.sector<=0&&oldP.sector==20"},
+  {"PadOC20All",    "oldP.pad:oldP.row","oldP.sector==20"},
+  {"PminOC20All",  "oldP.pmin:oldP.row","oldP.sector==20"},
+  {"PmaxOC20All",  "oldP.pmax:oldP.row","oldP.sector==20"}
+  
+};
+//________________________________________________________________________________
+TH2 *DrawRatio(TCanvas *c1, TH2F *P, TH2F *PAll) {
+  
+  TH2 *R = new TH2F(*P); // (TH2 *) P->Project3D("yz");
+  R->SetName(Form("R%s",R->GetName()));
+  //      TH2 *RAll = (TH2 *) PAll->Project3D("yz");
+  //      R->Divide(RAll);
+  R->Divide(PAll);
+  R->SetStats(0);
+  R->SetTitle(Form("Ratio of %s", P->GetName()));
+  R->Draw("colz");
+  c1->Update();
+  TPaletteAxis *palette = (TPaletteAxis*)R->GetListOfFunctions()->FindObject("palette");
+  if (palette) {
+    palette->SetX2NDC(0.94);
+    c1->Update();
+  }
+  return R;
+}
+//________________________________________________________________________________
+void DrawAll() {
+  for (Int_t l = 0; l < 4; l++) {
+    for (Int_t k = 0; k < 3; k++) {
+      TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(Form("c%i",l));
+      if (! c1 ) c1 = new TCanvas(Form("c%i",Names[6*l+k]));
+      c1->SetLogz(1);
+      TH2F *P = (TH2F *) gDirectory->Get(Names[6*l+k].histName);
+      TH2F *PAll = (TH2F *) gDirectory->Get(Names[6*l+k+3].histName);
+      DrawRatio(c1, P, PAll);
+      if (! P || ! PAll) continue;
+      TH2 *R = DrawRatio(c1, P, PAll);
+    }
+  }
+}
+//________________________________________________________________________________
 void TbyThits() {
-  struct Name_t {
-    Char_t *histName;
-    Char_t *varName;
-    Char_t *cutName;
-  };
-  Name_t Names[24] = {
-    {"PadFC",       "newP.pad:newP.row","oldP.sector<=0&&newP.sector!=20"},
-    {"PminFC",     "newP.pmin:newP.row","oldP.sector<=0&&newP.sector!=20"},
-    {"PmaxFC",     "newP.pmax:newP.row","oldP.sector<=0&&newP.sector!=20"},
-    {"PadFCAll",    "newP.pad:newP.row","newP.sector!=20"},
-    {"PminFCAll",  "newP.pmin:newP.row","newP.sector!=20"},
-    {"PmaxFCAll",  "newP.pmax:newP.row","newP.sector!=20"},
-
-    {"PadOC",       "oldP.pad:oldP.row","newP.sector<=0&&oldP.sector!=20"},
-    {"PminOC",     "oldP.pmin:oldP.row","newP.sector<=0&&oldP.sector!=20"},
-    {"PmaxOC",     "oldP.pmax:oldP.row","newP.sector<=0&&oldP.sector!=20"},
-    {"PadOCAll",    "oldP.pad:oldP.row","oldP.sector!=20"},
-    {"PminOCAll",  "oldP.pmin:oldP.row","oldP.sector!=20"},
-    {"PmaxOCAll",  "oldP.pmax:oldP.row","oldP.sector!=20"}
-
-    {"PadFC20",       "newP.pad:newP.row","oldP.sector<=0&&newP.sector==20"},
-    {"PminFC20",     "newP.pmin:newP.row","oldP.sector<=0&&newP.sector==20"},
-    {"PmaxFC20",     "newP.pmax:newP.row","oldP.sector<=0&&newP.sector==20"},
-    {"PadFC20All",    "newP.pad:newP.row","newP.sector==20"},
-    {"PminFC20All",  "newP.pmin:newP.row","newP.sector==20"},
-    {"PmaxFC20All",  "newP.pmax:newP.row","newP.sector==20"},
-
-    {"PadOC20",       "oldP.pad:oldP.row","newP.sector<=0&&oldP.sector==20"},
-    {"PminOC20",     "oldP.pmin:oldP.row","newP.sector<=0&&oldP.sector==20"},
-    {"PmaxOC20",     "oldP.pmax:oldP.row","newP.sector<=0&&oldP.sector==20"},
-    {"PadOC20All",    "oldP.pad:oldP.row","oldP.sector==20"},
-    {"PminOC20All",  "oldP.pmin:oldP.row","oldP.sector==20"},
-    {"PmaxOC20All",  "oldP.pmax:oldP.row","oldP.sector==20"}
-
-  };
   TChain *tChain = 0;
   TFile *fOut = 0;
   //  fOut = new TFile("hit.root","update");
@@ -72,27 +178,14 @@ void TbyThits() {
     for (Int_t k = 0; k < 24; k++) {
       TH2F *hist = (TH2F *) gDirectory->Get("Names[k].histName");
       if ( hist) continue;
-      tChain->Draw(Form("%s>>%s(72,0.5,72.5,182,0.5,182.5)",Names[k].varName,Names[k].histName),Form("%s",Names[k].cutName),"goff");
+      tChain->Draw(Form("%s>>%s(72,0.5,72.5,182,0.5,182.5)",Names[k].varName,Names[k].histName),Form("%s",Names[k].cutName),"goff",100000000);
       hist = (TH2F *) gDirectory->Get("Names[k].histName");
       if (! hist) continue;
       hist->SetXTitle("row");
       hist->SetYTitle("pad");
     }
   }
-  for (Int_t l = 0; l < 4; l++) {
-    for (Int_t k = 0; k < 3; k++) {
-      TH2F *P = (TH2F *) gDirectory->Get(Names[6*l+k].histName);
-      TH2F *PAll = (TH2F *) gDirectory->Get(Names[6*l+k+3].histName);
-      if (! P || ! PAll) continue;
-      TH2 *R = new TH2F(*P); // (TH2 *) P->Project3D("yz");
-      R->SetName(Form("R%s",R->GetName()));
-      //      TH2 *RAll = (TH2 *) PAll->Project3D("yz");
-      //      R->Divide(RAll);
-      R->Divide(PAll);
-      R->SetTitle("Ratio");
-      R->Draw("colz");
-    }
-  }
+  DrawAll();
   fOut->Write();
 }
 /*
