@@ -41,7 +41,7 @@ void SetReject(Bool_t r = kFALSE) {reject = r;}
 //________________________________________________________________________________
 void SetNoBackground(Bool_t r = kTRUE) {NoBackground = r;}
 //________________________________________________________________________________
-Double_t pcmax(Double_t m,Double_t m1, Double_t m2){
+Double_t pcmax(Double_t m,Double_t m1 = mpi, Double_t m2 = mpi){
   Double_t res = 0.0;
   if (m > m1 + m2) {
     res = TMath::Sqrt ((m - m1 + m2)*
