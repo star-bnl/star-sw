@@ -294,8 +294,9 @@ $(OBJDIR)/MediumMagboltz.o: \
 	$(INCDIR)/FundamentalConstants.hh $(INCDIR)/Random.hh
 	@echo $@
 	$(CXX) $(CFLAGS) $< -o $@
+#	$(SRCDIR)/magboltz-11.9.f
 $(OBJDIR)/magboltz.o: \
-	$(SRCDIR)/magboltz-11.9.f
+	$(SRCDIR)/magboltz-9.01.f
 	@echo $@
 	$(FC) $(FFLAGS) $< -o $@
 $(OBJDIR)/MediumSilicon.o: \
