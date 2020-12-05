@@ -257,35 +257,36 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     }
   }
   // iTpc
-  daq_dta *dta_iTpc = 0;
-  if (fiTpc) dta_iTpc = fiTpc->put("gain"); // , 0, 40, 0, miTpc_RowLen);
-  for(Int_t sector=1;sector<=24;sector++) {
-    if (! St_tpcPadConfigC::instance()->iTPC(sector)) continue;
-    for(Int_t row = 1; row <= 40; row++) {
-      Int_t Npads = St_itpcPadPlanesC::instance()->padsPerRow(row);
-      gain = (daq_det_gain *) dta_iTpc->request(Npads+1);	// max pad+1		
-      for(Int_t pad = 0; pad <= Npads; pad++) {
-	gain[pad].gain = 0.; // be sure that dead pads are killed
-	gain[pad].t0   = 0.;
-	if (pad < 1) continue; // kill pad0 just in case..
-	if (St_itpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
-	gain[pad].gain = St_itpcPadGainT0C::instance()->Gain(sector,row,pad);
-	gain[pad].t0   = St_itpcPadGainT0C::instance()->T0(sector,row,pad);
-	//#define __DEBUG_GAIN__
+  if (fiTpc) {
+    daq_dta * dta_iTpc = fiTpc->put("gain"); // , 0, 40, 0, miTpc_RowLen);
+    for(Int_t sector=1;sector<=24;sector++) {
+      if (! St_tpcPadConfigC::instance()->iTPC(sector)) continue;
+      for(Int_t row = 1; row <= 40; row++) {
+	Int_t Npads = St_itpcPadPlanesC::instance()->padsPerRow(row);
+	gain = (daq_det_gain *) dta_iTpc->request(Npads+1);	// max pad+1		
+	for(Int_t pad = 0; pad <= Npads; pad++) {
+	  gain[pad].gain = 0.; // be sure that dead pads are killed
+	  gain[pad].t0   = 0.;
+	  if (pad < 1) continue; // kill pad0 just in case..
+	  if (St_itpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
+	  gain[pad].gain = St_itpcPadGainT0C::instance()->Gain(sector,row,pad);
+	  gain[pad].t0   = St_itpcPadGainT0C::instance()->T0(sector,row,pad);
+	  //#define __DEBUG_GAIN__
 #ifdef __DEBUG_GAIN__
-	cout << Form("Gain/T0 s/r/p %3i/%3i/%3i %7.2f %7.2f",sector,row,pad,gain[pad].gain,gain[pad].t0) << endl;
+	  cout << Form("Gain/T0 s/r/p %3i/%3i/%3i %7.2f %7.2f",sector,row,pad,gain[pad].gain,gain[pad].t0) << endl;
 #endif /* __DEBUG_GAIN__ */
-      }
-      // daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
-      dta_iTpc->finalize(Npads+1,sector,row);
+	}
+	// daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
+	dta_iTpc->finalize(Npads+1,sector,row);
 #if 0
-      if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
-	totalSecPads += Npads;
-	if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
-	    St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
-	  liveSecPads += Npads;
-      }
+	if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
+	  totalSecPads += Npads;
+	  if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
+	      St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
+	    liveSecPads += Npads;
+	}
 #endif
+    }
     }
 #if 0
     livePads += liveSecPads;
