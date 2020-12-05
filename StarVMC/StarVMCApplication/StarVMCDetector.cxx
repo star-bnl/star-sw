@@ -7,7 +7,9 @@
 #include "TMath.h"
 #include "TClass.h"
 #include "TROOT.h"
-#include "TCallf77.h"
+#ifndef DEFCHARD
+//#include "TCallf77.h"
+#endif
 #include "TEnv.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"

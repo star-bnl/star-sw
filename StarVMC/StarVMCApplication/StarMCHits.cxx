@@ -34,7 +34,9 @@
 #include "tables/St_g2t_gepart_Table.h"
 #include "StEnumerations.h"
 #include "TGeoExtension.h"
+#ifndef DEFCHARD
 #include "TCallf77.h"
+#endif
 #include "StarMCHits.h"
 StarMCHits *StarMCHits::fgInstance = 0;
 ClassImp(StarMCHits);
