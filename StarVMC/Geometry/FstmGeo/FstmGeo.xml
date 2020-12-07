@@ -6,6 +6,9 @@ November 1, 2020  F.Videbaek
   There was a misplaced FTUR that went outside the master volume
 November 22, 2020 F.Videbaek
   Add assembly="true" for FSTW
+December 4, 2020 F.Videbaek
+  Changed the z location of the disks to those gitten from Felix
+  on this dat. About 4 cm further out than previous
   
 
 
@@ -96,6 +99,7 @@ November 22, 2020 F.Videbaek
             <var name="rmin"      type="float" />
             <var name="rmax"      type="float" />
             <var name="dz"        type="float" />
+	    <var name="zdisk(3)"  type="float" />
         </Structure>
 
         <Structure name="wholewedge" comment="whole wedge shape">
@@ -356,6 +360,7 @@ November 22, 2020 F.Videbaek
             <var name="rmin"     value="4.1" />
             <var name="rmax"     value="34.00" />
             <var name="dz"       value="30.0" />
+	    <var name="zdisk"    value="{144.633,158.204,171.271}" />
         </Fill>
 
         <Fill name="wholewedge" comment="whole wedge shape" >
@@ -707,13 +712,13 @@ November 22, 2020 F.Videbaek
             <Medium    name="standard"      />     <!-- can change medium paramters here -->
             <Attribute for="FSTM" seen="0" colo="1" />
 
-            <!-- Shape will be dynamically sized to include all disks placed -->
+            <!-- Shape should be sized to include all disks placed -->
             <Shape     type="TUBE" rmin="4.8" rmax="mothervol_rmax" dz="mothervol_dz" />
 
             <Create    block="FSTD" />
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="140.0-zcenter" ncopy="4" />
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="154.0-zcenter" ncopy="5" />
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="168.0-zcenter" ncopy="6" />
+            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(1)-zcenter" ncopy="4" />
+            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(2)-zcenter" ncopy="5" />
+            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(3)-zcenter" ncopy="6" />
         </Volume>
 
         <!-- FST disk container -->
