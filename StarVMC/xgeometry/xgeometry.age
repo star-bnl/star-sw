@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.39 2020/04/29 14:01:29 jwebb Exp $
+* $Id: xgeometry.age,v 1.40 2020/12/10 19:58:02 jwebb Exp $
 
 
 
@@ -2532,6 +2532,9 @@ If LL>0
   case y2020 { y2020: y2020 first cut geometry; Geom =        'y2020     '; call geom_y2020;} 
   case y2020a { y2020a: y2020a production; Geom =        'y2020a    '; call geom_y2020a;} 
 
+  case y2021 { y2021: y2021 first cut geometry; Geom =        'y2021     '; call geom_y2021;} 
+
+
   case dev2021 { dev2021:  First cut forward upgrades; Geom =        'dev2021   '; call geom_dev2021;} 
 
   Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
@@ -4502,9 +4505,13 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.39 2020/04/29 14:01:29 jwebb Exp $
+* $Id: xgeometry.age,v 1.40 2020/12/10 19:58:02 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.40  2020/12/10 19:58:02  jwebb
+* y2021 geometry rough cut @ 20201215
+*
 * Revision 1.39  2020/04/29 14:01:29  jwebb
+*
 * Add y2018b geometry tag (add fixed target into geometry).
 *
 * Enable y2020a geometry tag in xgeometry.
