@@ -52,32 +52,32 @@ KFParticleDatabase::KFParticleDatabase():
   /** The default constructor. Initialises masses and widths of the peaks. 
    ** Be aware, that widths of the peaks are experiment specific.
    **/
-  fMass[ 0] = 0.000510999;
-  fMass[ 1] = 0.105658;
-  fMass[ 2] = 0.13957;
-  fMass[ 3] = 0.493667;
-  fMass[ 4] = 0.9382723;
-  fMass[ 5] = 1.876124;
-  fMass[ 6] = 2.809432;
-  fMass[ 7] = 2.809413;
-  fMass[ 8] = 3.727379;
-  fMass[ 9] = 5.6055375;
-  fMass[10] = 5.6015181;
-  fMass[11] = 6.5338336;
-  fMass[12] = 6.5341844;
-  fMass[13] = 1.197449;
-  fMass[14] = 1.18937;
-  fMass[15] = 1.32171;
-  fMass[16] = 1.67245;
-  
+  fMass[ 0] = 0.5109989461E-03; // e
+  fMass[ 1] = 0.1056583745;     // mu
+  fMass[ 2] = 0.13957039;       // pi
+  fMass[ 3] = 0.493677;         // K
+  fMass[ 4] = 0.9382720813;     // p
+  fMass[ 5] = 1.87561294257;    // d
+  fMass[ 6] = 2.80892113298;    // t
+  fMass[ 7] = 2.80839160743;    // He3
+  fMass[ 8] = 3.7273794066;     // He4
+  fMass[ 9] = 5.6055375;        // He6
+  fMass[10] = 5.6015181;        // Li6
+  fMass[11] = 6.5338336;        // Li7
+  fMass[12] = 6.5341844;        // Be7
+  fMass[13] = 1.197449;         // Sigma-
+  fMass[14] = 1.18937;          // Sigma+
+  fMass[15] = 1.32171;          // Xi
+  fMass[16] = 1.67245;          // Omega
+
   fMassSecPDG[0] = 0.497614; //K0
   fMassSecPDG[1] = 1.115683; //Lambda
   fMassSecPDG[2] = 1.32171; //Xi  
   fMassSecPDG[3] = 0; //gamma
   fMassSecPDG[4] = 1.67245; //Omega
-  fMassSecPDG[5] = 2.99339; //H3L
-  fMassSecPDG[6] = 3.93070; //He4L
-  fMassSecPDG[7] = 4.86824; //He5L
+  fMassSecPDG[5] = 2.9924; //H3L
+  fMassSecPDG[6] = 3.9216; //He4L
+  fMassSecPDG[7] = 4.8392; //He5L
   
 #ifdef PANDA_STT
   fMassSecPDGSigma[0]=12.0e-3; //K0 TODO tune
