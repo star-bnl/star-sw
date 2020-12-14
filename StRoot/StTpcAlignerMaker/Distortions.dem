@@ -1,0 +1,9 @@
+tardisp: true$
+/* ============= rotation ============= */
+disp("M:");
+M:  matrix([     1/tau,-omega_z,   omega_y],
+           [ omega_z, 1/tau, -omega_x],
+           [ -omega_y, omega_x, 1/tau]);
+ trigsimp(%);ratsimp(%);radcan(%);tex(%); 
+
+MI: invert(M); trigsimp(%);ratsimp(%);radcan(%);tex(%); 
