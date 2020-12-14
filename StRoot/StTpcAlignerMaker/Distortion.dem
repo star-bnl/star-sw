@@ -1,0 +1,178 @@
+/*
+kill(all);
+done;
+
+(load("vect.mac"),done);
+done;
+declare([M,MInv],nonscalar);
+done;
+*/
+/* ======================================== 
+   Motion of electrons in E x B             
+   q*E + q * (u x B) = K*u                  
+   m - mass of electron
+   q   - electrin charge
+   E_i - electric field vector
+   B_i - magnetic field vector
+   K   - frictional force coeffcient
+   u_i - vector of drift velocity
+   tau = m/K
+   w_i = (e/m) * B_i                        
+   e_i = (e/m) * E_i
+  
+   w_i * tau = v_i
+   M * u_i =   tau*e_i
+   ======================================== 
+
+    (  1 -g  b  x)    (cos(phi-phi_0) -sin(phi-phi_0) 0) (1   0 -psi) 
+R = (  g  1 -a  y) => (sin(phi-phi_0)  cos(phi-phi_0) 0) (0   1    0)
+    ( -b  a  1  z)    (            0                0 1) (psi 0    1)
+    (  0  0  0  1)
+                           (B_x/|B_z|)           (<u_x/|u_z|>)
+electron stab direction =  (B_y/|B_z|)  + 1/2 *  (<u_y/|u_z|>)
+                           (        1)           (          1)
+
+
+*/
+stardisp: true$
+/* subscrmap:true$ */
+/* globalsolve: true$ */
+/* simp: true$ */
+algebraic: true$ /* must be set to `true' in order for the simplification of algebraic integers to take effect.*/
+/* R: matrix([1,-gamma,beta],[gamma,1,-alpha],[-beta,alpha,1]);*/
+/* rotation of mag. field */
+/* phi : 0;
+phi0: 0;
+psi : 0; */
+s: 1; /* == B_z/|B_z|, projection B to E, FF,West and RFF,East s = -1; FF,East and RFF,West s = 1; */
+bx: s*br; /* B_r/B_z */
+by:   0;
+e_z:  1;
+e_x:  0; /* E_r / E_z */
+e_y:  0;
+disp("Rz is");
+Rz : matrix([cos(phi-phi0), -sin(phi-phi0), 0],
+            [sin(phi-phi0),  cos(phi-phi0), 0],
+            [            0,              0, 1]);
+tex(Rz);
+disp("Rx is");
+Rx : matrix([  1,   0,    0],
+            [  0,   1,  psi],
+            [  0,-psi,    1]);
+tex(Rx);
+disp("R is");
+R: Rz.Rx;
+ratsimp(%);
+radcan(%);
+tex(%);
+disp("t is ");
+t: matrix([bx],[by],[s]); /* mag.field unit vector in TpcLS CS */
+tex(t);
+disp("tr is ");
+tr : R.t;
+tex(tr);
+disp("t_X is");
+tr_X : tr[1];
+disp("tr_Y is");
+tr_Y : tr[2];
+wr_z: tan(lambda)/tau;
+wr_x : tr_X * wr_z;
+wr_y : tr_Y * wr_z;
+e: matrix([e_x], [e_y], [e_z]);
+disp("e is",e);
+disp("Mr is");
+Mr:  matrix([1/tau, -wr_z, wr_y],
+            [wr_z, 1/tau, -wr_x],
+            [-wr_y, wr_x, 1/tau]);
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+tex(%);
+disp("Mr^1 is");
+MrInv: invert(Mr);
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+tex(%);
+/* 
+D: diag_matrix((1+tau**2*(wr_x**2+wr_y**2+wr_z**2))/tau,(1+tau**2*(wr_x**2+wr_y**2+wr_z**2))/tau,(1+tau**2*(wr_x**2+wr_y**2+wr_z**2))/tau);
+disp("F is");
+F: D.MInv;
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+tex(%);
+*/
+disp("ur is");
+ur: MrInv.e;
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+tex(%);
+ur_x : ur[1]/ur[3];
+ur_y : ur[2]/ur[3];
+disp("vr is ");
+vr: Mratrix([ur_x],[ur_y]);
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+tex(%);
+/*
+d: Matrix([t_X],[t_Y]) + v;
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+d = %;
+disp("d is",d);
+tex(d);
+*/
+/* non rotated */
+disp("t_X is");
+t_X : t[1];
+disp("t_Y is");
+t_Y : t[2];
+w_z: tan(lambda)/tau;
+w_x : t_X * w_z;
+w_y : t_Y * w_z;
+e: matrix([e_x], [e_y], [e_z]);
+disp("e is",e);
+disp("M is");
+M:  matrix([1/tau, -w_z, w_y],
+           [w_z, 1/tau, -w_x],
+           [-w_y, w_x, 1/tau]);
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+tex(%);
+disp("M^1 is");
+MInv: invert(M);
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+tex(%);
+disp("u is");
+u: MInv.e;
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+tex(%);
+u_x : u[1]/u[3];
+u_y : u[2]/u[3];
+disp("v is ");
+v: Matrix([u_x],[u_y]);
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+tex(%);
+/* diff */
+disp("dv is");
+dv1: vr[1] - v[1];
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+tex(%);
+dv2: vr[2] - v[2];
+trigsimp(%);
+ratsimp(%);
+radcan(%);
+tex(%);
