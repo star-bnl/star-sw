@@ -193,48 +193,6 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"r2021",       20201120,180000, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
   {"r2021a",      20201120,180001, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
 //{"dev2021",     20211210,     1, "dev2021",  "development geometry for 2021+ forward program,AgML,xgeometry"},
-
-  //
-  // Move DEVT and upgrade series +100 years along timeline else they interfere with y2018+ runs
-  //
-//{"devT",        21170101,     0, "devT",      "dev geo for Inner Tpc Sector Upgrade, Variant 1,AgML,xgeometry"}, // 
-//{"devTA",       21170101,     1, "devTA",     "dev geo for Inner Tpc Sector Upgrade, Variant 1"}, // 
-//{"devTB",       21170101,     2, "devTB",     "dev geo for Inner Tpc Sector Upgrade, Variant 2"}, // 
-//{"devTC",       21170101,     3, "devTC",     "dev geo for Inner Tpc Sector Upgrade, Variant 3"}, // 
-//{"devTD",       21170101,     4, "devTD",     "dev geo for Inner Tpc Sector Upgrade, Variant 4"}, // 
-//{"devTE",       21170101,     5, "devTE",     "dev geo for Inner Tpc Sector Upgrade, Variant 5"}, // 
-//{"devTF",       21170101,     6, "devTF",     "dev geo for Inner Tpc Sector Upgrade, Variant 5"}, // 
-
-//{"upgr01",      21190101,     4, "upgr01",   ""},
-//{"upgr02",      21190101,     5, "upgr02",   ""},
-//{"upgr03",      21190101,     6, "upgr03",   ""},
-//{"upgr04",      21190101,     7, "upgr04",   ""},
-//{"upgr05",      21190101,     8, "upgr05",   ""},
-//{"upgr06",      21190101,     9, "upgr06",   ""},  // what happened to 6? Historical not re-used
-//{"upgr07",      21190101,    10, "upgr07",   ""},
-//{"upgr08",      21190101,    11, "upgr08",   ""},
-//{"upgr09",      21190101,    12, "upgr09",   ""},
-//{"upgr10",      21190101,    13, "upgr10",   ""},
-//{"upgr11",      21190101,    14, "upgr11",   ""},
-//{"upgr12",      21190101,    15, "upgr12",   ""},
-//{"upgr13",      21190101,    16, "upgr13",   ""},
-//{"upgr14",      21190101,    17, "upgr14",   ""},
-//{"upgr15",      21190101,    18, "upgr15",   ""},
-//{"upgr16",      21190101,    19, "upgr16",   ""},
-//{"upgr17",      21190101,    20, "upgr17",   ""},
-//{"upgr16a",     21190101,    21, "upgr16a",  ""},
-  // Future development:
-//{"simpletpc",   20200102,    16, "simpletpc",""},
-//{"upgr20",      20200102,    17, "upgr20",   "y2007 +  one TOF"}, // advertized simu 20061101
-//{"upgr21",      20200102,    18, "upgr21",   "y2007 + full TOF"}, // advertized simu 20061101
-//{"dev13",       20200102,    19, "dev13",    "dev geo for 2013"}, // 
-//{"devE",        20200102,    20, "devE",     "dev geo for Erick"}, // 
-//{"dev14",       20200102,    21, "dev14",    "dev geo for 2014,AgML,xgeometry"},  
-//{"eStar2",      20200102,    22, "eStar2",   "dev geometry for eStar"},
-// eStar simulations starting w/ timestamp 12/10/2020
-//  {"eStar2",      20201210,     0, "eStar2",   "dev geometry for eStar,AgML,xgeometry"},
-//  {"dev2020",     20201210,     1, "dev2020",  "development geometry for 2020+,AgML,xgeometry"},
-
   {0,                    0,     0,        0,    0}
 };
 #endif /*  __GeometryDbAliases__ */
