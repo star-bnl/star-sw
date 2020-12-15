@@ -1,0 +1,952 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[12pt]{article} % use larger type; default would be 10pt
+%\documentclass[12pt]{report} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+\usepackage{amsmath}
+\usepackage{mathtools}
+% These packages are all incorporated in the memoir class to one degree or another...
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+\usepackage{tikz}
+%\newcommand{\Mypm}{\mathbin{\tikz [x=1.4ex,y=1.4ex,line width=.ex] \draw (0.0,0) -- (1.0,0) (0.5,0.08) -- (0.5,0.92) (0.0,0.5) -- (1.0,0.5);}}%
+\newcommand{\Mypm}{\mathbin{\tikz [x=1.4ex,y=1.4ex,line width=.3ex] \draw (0.0,0) -- (1.0,0) (0.5,0.08) -- (0.5,0.92) (0.0,0.5) -- (1.0,0.5);}}%
+%\newcommand{\Mymp}{\mathbin{\tikz [x=1.4ex,y=1.4ex,line width=.3ex] \draw (0.0,0) -- (1.0,0) (0.5,0.08) -- (0.5,0.92) (0.0,0.5) -- (1.0,0.5);}}%
+%%% END Article customizations
+\usepackage{hyperref}
+%\hypersetup{
+%    colorlinks=true,
+%    linkcolor=blue,
+%    filecolor=magenta,      
+%    urlcolor=cyan,
+%}
+
+%%% The "real" document content comes below...
+
+\title{TPC Distortions}
+\author{Yuri Fisyak}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\maketitle
+%1================================================================================
+\section{Introduction}
+\par
+In this paper it is reevaluated treatment of the STAR TPC distortions due to deviation of the electric and magnetic fields from the ideal (parallel) case. The main point is the difference between the distortion in the West and East parts of TPC due to inversion of the main component of the electric and magnetic fields. 
+%2================================================================================
+\section{Langevin's equation}
+\par
+The motion of charged particle under the influence of electric and magnetic fields\cite{Blum},  $\mathbf{\overrightarrow{E}}$ and 
+$\overrightarrow{\mathbf{B}}$ in the TPC Coordinate System ({\bf TPCS}),  can be described by P.Langevin's equation of motion:
+\begin{equation}
+   m \frac{d\overrightarrow{\mathbf{u}}}{dt} = q \overrightarrow{\mathbf{E}} + q [ \overrightarrow{\mathbf{u}} \times \overrightarrow{\mathbf{B}} ] - K \overrightarrow{\mathbf{u}},
+\end{equation} 
+were $m$ and $q$ are the mass and electric charge of the particle, 
+$\overrightarrow{\mathbf{u}}$ is its velocity vector,  
+and  $K$ describes a frictional force  proportional to  $\overrightarrow{\mathbf{u}}$, 
+which is causes by the interaction of the particle with the gas.
+With $K = \frac{m}{\tau}$, $\mu = \frac{q}{K} = \frac{q}{m} \tau$, 
+$\overrightarrow{\mathbf{\omega}} = \frac{q}{m} \overrightarrow{\mathbf{B}}$, 
+$\overrightarrow{\mathbf{\nu}} = \frac{q}{m} \overrightarrow{\mathbf{E}}$  and $ \frac{d\overrightarrow{\mathbf{u}}}{dt}  = 0 $ the drift velocity
+\begin{equation*}
+ \overrightarrow{\mathbf{E}} + q [ \overrightarrow{\mathbf{u}} \times \overrightarrow{\mathbf{B}} ] - \frac{m}{\tau}  \overrightarrow{\mathbf{u}} = 0, 
+  \mathbf{\frac{\overrightarrow{u}}{\tau}}  - [\overrightarrow{\mathbf{u}} \times \overrightarrow{\mathbf{\omega}} ] =   \overrightarrow{\mathbf{\nu}},  
+\end{equation*}
+ \begin{equation*} 
+  M \overrightarrow{\mathbf{u}} = \overrightarrow{\mathbf{\nu}} 
+\end{equation*} 
+with 
+\begin{equation*}
+M = 
+\begin{pmatrix} % eq. 4
+1/\tau           & -\omega_{z} & \omega_{y} \cr
+\omega_{z} & 1/\tau            & -\omega_{x} \cr
+-\omega_{y}& \omega_{x}  & 1/\tau \cr
+\end{pmatrix}
+,
+\end{equation*}
+and its inversion
+\begin{equation*} % eq. 5
+ M^{-1} = 
+\ifx\endpmatrix\undefined\pmatrix{\else\begin{pmatrix}\fi {{
+ {\it \omega_{x}}^2\,\tau^3+\tau}\over{\left({\it \omega_{z}}^2+
+ {\it \omega_{y}}^2+{\it \omega_{x}}^2\right)\,\tau^2+1}}&{{
+ {\it \omega_{x}}\,{\it \omega_{y}}\,\tau^3+{\it \omega_{z}}\,\tau^2}\over{
+ \left({\it \omega_{z}}^2+{\it \omega_{y}}^2+{\it \omega_{x}}^2\right)\,
+ \tau^2+1}}&{{{\it \omega_{x}}\,{\it \omega_{z}}\,\tau^3-{\it \omega_{y}}\,
+ \tau^2}\over{\left({\it \omega_{z}}^2+{\it \omega_{y}}^2+{\it \omega_{x}}^
+ 2\right)\,\tau^2+1}}\cr {{{\it \omega_{x}}\,{\it \omega_{y}}\,\tau^3-
+ {\it \omega_{z}}\,\tau^2}\over{\left({\it \omega_{z}}^2+{\it \omega_{y}}^2
+ +{\it \omega_{x}}^2\right)\,\tau^2+1}}&{{{\it \omega_{y}}^2\,\tau^3+\tau
+ }\over{\left({\it \omega_{z}}^2+{\it \omega_{y}}^2+{\it \omega_{x}}^2
+ \right)\,\tau^2+1}}&{{{\it \omega_{y}}\,{\it \omega_{z}}\,\tau^3+
+ {\it \omega_{x}}\,\tau^2}\over{\left({\it \omega_{z}}^2+{\it \omega_{y}}^2
+ +{\it \omega_{x}}^2\right)\,\tau^2+1}}\cr {{{\it \omega_{x}}\,
+ {\it \omega_{z}}\,\tau^3+{\it \omega_{y}}\,\tau^2}\over{\left(
+ {\it \omega_{z}}^2+{\it \omega_{y}}^2+{\it \omega_{x}}^2\right)\,\tau^2+1
+ }}&{{{\it \omega_{y}}\,{\it \omega_{z}}\,\tau^3-{\it \omega_{x}}\,\tau^2
+ }\over{\left({\it \omega_{z}}^2+{\it \omega_{y}}^2+{\it \omega_{x}}^2
+ \right)\,\tau^2+1}}&{{{\it \omega_{z}}^2\,\tau^3+\tau}\over{\left(
+ {\it \omega_{z}}^2+{\it \omega_{y}}^2+{\it \omega_{x}}^2\right)\,\tau^2+1
+ }}\cr \ifx\endpmatrix\undefined}\else\end{pmatrix}\fi 
+\end{equation*}
+\begin{equation*} 
+\omega^{2}\tau^{2} = \left(
+{
+{\it \omega_{z}}^2 + 
+{\it \omega_{y}}^2 +
+{\it \omega_{x}}^2}
+\right) 
+\tau^2, 
+\end{equation*}
+\begin{equation*} 
+ M^{-1} =  {\it \frac{\tau}{1 + \omega^2\tau^2}}
+\begin{pmatrix} 
+1 + \omega_{x}^2 \tau^2                           & \omega_{z} \tau  + \omega_{x} \omega_{y} \tau^2 & - \omega_{y} \tau + \omega_{x} \omega_{z} \tau^2 \cr
+- \omega_{z} \tau + \omega_{x} \omega_{y} \tau^2  & 1 + \omega_{y}^2 \tau^2                         &   \omega_{x} \tau + \omega_{y} \omega_{z} \tau^2 \cr
+  \omega_{y} \tau + \omega_{x} \omega_{z} \tau^2  & - \omega_{x}\tau + \omega_{y} \omega_{z} \tau^2 & 1 + \omega_{z}^2 \tau^2              \cr           
+\end{pmatrix}
+\end{equation*}
+or
+\begin{equation*} 
+ M^{-1} =  \frac{\tau}{1 + \omega^2\tau^2} \left[ I + \tau 
+\begin{pmatrix} 
+          0  &   \omega_{z} & - \omega_{y} \cr
+- \omega_{z} &           0  &   \omega_{x} \cr
+  \omega_{y} & - \omega_{x} &           0  \cr           
+\end{pmatrix}
++ \tau^2
+\begin{pmatrix} 
+          \omega_{x}^2   & \omega_{x} \omega_{y}    &  \omega_{x} \omega_{z}  \cr
+ \omega_{x} \omega_{y}   &            \omega_{y}^2  &  \omega_{y} \omega_{z}  \cr
+ \omega_{x} \omega_{z}   & \omega_{y} \omega_{z}    &           \omega_{z}^2  \cr           
+\end{pmatrix}
+\right]
+\end{equation*}
+
+or
+\begin{equation*} 
+ M^{-1} =  \frac{\tau}{1 + \omega^2\tau^2} \left[ I + \tau 
+\begin{pmatrix} 
+          0  &   \omega_{z} & - \omega_{y} \cr
+- \omega_{z} &           0  &   \omega_{x} \cr
+  \omega_{y} & - \omega_{x} &           0  \cr           
+\end{pmatrix}
++ \tau^2
+\begin{pmatrix} 
+          \omega_{x}  \cr 
+          \omega_{y}  \cr  
+          \omega_{z}  \cr
+\end{pmatrix}
+\begin{pmatrix} 
+          \omega_{x}   & \omega_{y}    &  \omega_{z}  \cr
+\end{pmatrix}
+\right]
+\end{equation*}
+
+
+The drift velocity
+
+\begin{equation*} 
+ \overrightarrow{\mathbf{u}}= M^{-1} \overrightarrow{\mathbf{\nu}} = M^{-1} \frac{q}{m} \overrightarrow{\mathbf{E}}
+\end{equation*}
+\begin{equation*} 
+ \overrightarrow{\mathbf{u}}=
+  \frac{\tau}{1 + \omega^2\tau^2} \left[ I + \tau 
+\begin{pmatrix} 
+          0  &   \omega_{z} & - \omega_{y} \cr
+- \omega_{z} &           0  &   \omega_{x} \cr
+  \omega_{y} & - \omega_{x} &           0  \cr           
+\end{pmatrix}
++ \tau^2
+\begin{pmatrix} 
+          \omega_{x}  \cr 
+          \omega_{y}  \cr  
+          \omega_{z}  \cr
+\end{pmatrix}
+\begin{pmatrix} 
+          \omega_{x}   & \omega_{y}    &  \omega_{z}  \cr
+\end{pmatrix}
+\right]
+\frac{q}{m} \overrightarrow{\mathbf{E}}
+\end{equation*}
+
+
+\begin{equation*} 
+ \overrightarrow{\mathbf{u}}=
+\frac{q}{m}  \frac{\tau}{1 + \omega^2\tau^2} 
+\left(
+\overrightarrow{\mathbf{E}} + 
+\tau [\overrightarrow{\mathbf{E}} \times \overrightarrow{\mathbf{\omega}}] + 
+\tau^2 (\overrightarrow{\mathbf{E}} \cdot \overrightarrow{\mathbf{\omega}}) \overrightarrow{\mathbf{\omega}} 
+\right)
+\end{equation*}
+Remember that $\overrightarrow{\mathbf{\omega}} = \frac{q}{m} \overrightarrow{\mathbf{B}}$ 
+and $\mu = \frac{q}{m} \tau$
+% Introduce \mu
+\begin{equation*} 
+ \overrightarrow{\mathbf{u}}=
+\frac{\mu}{1 + \omega^2\tau^2} 
+\left(
+\overrightarrow{\mathbf{E}} + 
+ \frac{\tau q}{m}    [\overrightarrow{\mathbf{E}} \times \overrightarrow{\mathbf{B}}] + 
+(\frac{\tau q}{m})^2 (\overrightarrow{\mathbf{E}} \cdot  \overrightarrow{\mathbf{B}}) \overrightarrow{\mathbf{B}} 
+\right)
+\end{equation*}
+and $\omega^2 = (q/m)^2 B^2$, $q/m = \omega/B$
+\begin{equation*} 
+ \overrightarrow{\mathbf{u}}=
+\frac{\mu}{1 + \omega^2\tau^2} 
+\left(
+\overrightarrow{\mathbf{E}} + 
+\frac{\omega \tau}{B}     [\overrightarrow{\mathbf{E}} \times \overrightarrow{\mathbf{B}}] + 
+(\frac{\omega \tau}{B})^2 (\overrightarrow{\mathbf{E}} \cdot  \overrightarrow{\mathbf{B}}) \overrightarrow{\mathbf{B}} 
+\right)
+\end{equation*}
+or using unit vectors $\overrightarrow{\mathbf{e}} = \overrightarrow{\mathbf{E}}/E$ and $\overrightarrow{\mathbf{b}} = \overrightarrow{\mathbf{B}}/B$
+with E = 
+$\left| \overrightarrow{\mathbf{E}} \right|$ and  
+B = $\left|\overrightarrow{\mathbf{B}} \right|$ 
+
+\begin{equation} \label{ueq}
+ \overrightarrow{\mathbf{u}}=
+\frac{\mu E}{1 + \omega^2\tau^2} 
+\left(
+ \overrightarrow{\mathbf{e}} + 
+ \omega \tau    [ \overrightarrow{\mathbf{e}} \times \overrightarrow{\mathbf{b}}] + 
+(\omega \tau)^2 ( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}}) \overrightarrow{\mathbf{b}} 
+\right)
+\end{equation}
+and total drift velocity 
+$u = \left| \overrightarrow{\mathbf{u}} \right| = \mu ( E ) E$
+at STAR is in the saturation mode i.e. $ u \approx u_{0} = \mu ( E_{0} ) E_{0}$ is almost constant and $\mu (E) \approx \mu_{0} / E $
+and
+\begin{equation} \label{ueq}
+ \overrightarrow{\mathbf{u}}= u
+\left(
+ \overrightarrow{\mathbf{e}} + 
+ \omega \tau    [ \overrightarrow{\mathbf{e}} \times \overrightarrow{\mathbf{b}}] + 
+(\omega \tau)^2 ( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}}) \overrightarrow{\mathbf{b}} 
+\right)
+\end{equation}
+
+%\begin{equation}
+%\begin{matrix}
+%\overrightarrow{\mathbf{u}} \cdot \overrightarrow{\mathbf{u}} =
+%1 + (\omega \tau)^{2} ( \overrightarrow{\mathbf{e}} \cdot \overrightarrow{\mathbf{b}})^{2} +
+%2 (\omega \tau)^{2} \left|  [ \overrightarrow{\mathbf{e}} \times \overrightarrow{\mathbf{b}} ]  \right|^{2} +
+%(\omega \tau)^{4} \left|  ( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}}) \overrightarrow{\mathbf{b}} \righ| ^{2}
+%\approx (1 + (\omega \tau )^2)^2 
+%\end{matrix}
+%\end{equation}
+
+Let's define constants 
+\begin{equation}\label{C_consts}
+C_{n} = \frac{(\omega \tau )^{n}}{1 + \omega^2\tau^2},
+\end{equation}
+where $C_{0} + C_{2} = 1$.
+Then equation (\ref{ueq}) can be rewritten as
+
+\begin{equation} \label{ueqC}
+\overrightarrow{\mathbf{u}}=
+\mu E 
+\left[
+ C_{0} \overrightarrow{\mathbf{e}} + 
+ C_{1} \left[ \overrightarrow{\mathbf{e}} \times \overrightarrow{\mathbf{b}} \right] + 
+ C_{2} \left( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}} \right) \overrightarrow{\mathbf{b}} 
+\right]
+\end{equation}
+
+In the right handed coordinate system where 
+$\overrightarrow{\mathbf{E'}}$ = E 
+$\overrightarrow{\mathbf{e'}}$, 
+$\overrightarrow{\mathbf{e'}}$ = (0,0,1), which will be called Drift Coordinate System ({\bf DS}) and  
+$\overrightarrow{\mathbf{B'}}$ = 
+$(B'_{x},B'_{y}, B'_{z})$ = B 
+$\overrightarrow{\mathbf{b'}}$, 
+$\overrightarrow{\mathbf{b'}} = (b'_{x}, b'_{y}, b'_{z})$, $b'_{z} \approx \pm 1$, where ``+'' and ``-'' corresponds to parallel and antiparallel electric and magnetic fields, and
+$ \left| B'_{x} \right|,  \left| B'_{y} \right| \ll \left| B'_{z} \right|$, $C = \frac{\mu E}{1 + \omega^2\tau^2} $
+\begin{equation*} 
+ [ \overrightarrow{\mathbf{e'}} \times \overrightarrow{\mathbf{b'}}] = 
+\begin{pmatrix} 
+ e'_{y} b'_{z} - e'_{z} b'_{y} \cr 
+-e'_{x} b'_{z} + e'_{z} b'_{x} \cr 
+ e'_{x} b'_{y} - e'_{y} b'_{x} 
+\end{pmatrix}
+=
+\begin{pmatrix} 
+- b'_{y} \cr 
+  b'_{x} \cr 
+  0 
+\end{pmatrix}
+\end{equation*}
+\begin{equation*} 
+(\overrightarrow{\mathbf{e'}} \cdot  \overrightarrow{\mathbf{b'}}) \overrightarrow{\mathbf{b'}} 
+= b'_{z} \overrightarrow{\mathbf{b'}}
+\end{equation*}
+
+The drift velocity in this coordinate system
+\begin{equation*} 
+\begin{matrix} 
+u'_{x} = C (  -  \omega \tau b'_{y} + (\omega \tau )^2  b'_{x} b'_{z} )\cr
+u'_{y} = C (     \omega \tau b'_{x} + (\omega \tau )^2  b'_{y} b'_{z} )\cr
+u'_{z} = C (1                       + (\omega \tau )^2  b'_{z} b'_{z} ) \approx 
+         C (1                       + (\omega \tau )^2 ) = \mu E .
+\end{matrix}
+\end{equation*}
+
+The drift directions are 
+\begin{equation}\label{direq}
+\begin{pmatrix}
+u'_{x}/u'_{z} \cr
+u'_{y}/u'_{z}
+\end{pmatrix}
+=
+\frac{1}{1 + (\omega \tau )^2  }
+\begin{pmatrix}
+-\omega \tau b'_{y} + (\omega \tau )^2  b'_{x} b'_{z} \cr
+ \omega \tau b'_{x} + (\omega \tau )^2  b'_{y} b'_{z}    
+\end{pmatrix}
+=
+\frac{\omega \tau}{1 + (\omega \tau )^2  }
+\begin{pmatrix}
+-  b'_{y} + \omega \tau  b'_{x} b'_{z} \cr
+   b'_{x} + \omega \tau  b'_{y} b'_{z}    
+\end{pmatrix}
+\end{equation}
+The distortions are integrals over drift distance $L = \left| Z - z \right|$
+\begin{equation*} 
+\begin{matrix}
+\delta_{x} = \int_{z}^{Z} \frac{u_{x}}{u_{z}}  \,dz  \approx L < \frac{u_{x}}{u_{z}} > \cr
+\delta_{y} = \int_{z}^{Z} \frac{u_{y}}{u_{z}}  \,dz  \approx L < \frac{u_{y}}{u_{z}} >
+\end{matrix}
+\end{equation*}
+
+
+We do reproduce eq.(2.10) from \cite{Blum} for the right handed coordinate system (due to the vector product) for $ \overrightarrow{\mathbf{E}} = (0, 0, E)$ and 
+$ \overrightarrow{\mathbf{B}} = (B_{x}, B_{y}, B_{z})$ almost parallel to axis Z. Let's call this coordinate system as the TPC drift system ({\bf DS}) 
+in order to distinguish it from TPC coordinate system where we will apply distortions ({\bf TPCS}). %and use them.
+
+%3================================================================================
+\section{Slightly distorted  magnetic and  electric fields}
+The transformation to and from  {\bf DS} to {\bf TPCS} can be described as rotations 
+\begin{equation*} 
+R \approx
+\begin{pmatrix} 
+    e_{z} & 0    & -e_{x} \cr
+    0     &    1 & -e_{y} \cr
+    e_{x} & e_{y}&  e_{z}
+\end{pmatrix}
+, R^{-1} \approx  
+\begin{pmatrix} 
+     e_{z} &     0 & e_{x} \cr
+     0     &     1 & e_{y} \cr
+    -e_{x} & -e_{y}& e_{z}
+\end{pmatrix}
+\end{equation*}
+The magnetic field in {\bf DS}
+
+\begin{equation*} 
+\overrightarrow{\mathbf{b'}} = R \overrightarrow{\mathbf{b}} =
+\begin{pmatrix} 
+    e_{z} & 0    & -e_{x} \cr
+    0     &    1 & -e_{y} \cr
+    e_{x} & e_{y}&  e_{z}
+\end{pmatrix}
+\begin{pmatrix} 
+b_{x} \cr
+b_{y} \cr
+b_{z} 
+\end{pmatrix}
+\approx
+\begin{pmatrix} 
+e_{z} b_{x} - e_{x} b_{z}\cr
+b_{y} -e_{y} b_{z} \cr
+e_{z} b_{z} 
+\end{pmatrix}
+\end{equation*}
+The drift directions in  {\bf DS} from equation (\ref{direq}) 
+\begin{equation*}
+\begin{pmatrix}
+u'_{x}/u'_{z} \cr
+u'_{y}/u'_{z}
+\end{pmatrix}
+=
+\frac{\omega \tau}{1 + (\omega \tau )^2  }
+\begin{pmatrix}
+-  b'_{y} + \omega \tau  b'_{x} b'_{z} \cr
+   b'_{x} + \omega \tau  b'_{y} b'_{z}    
+\end{pmatrix}
+=
+\frac{\omega \tau}{1 + (\omega \tau )^2  }
+\begin{pmatrix}
+-  (b_{y} -e_{y} b_{z}) + \omega \tau  (e_{z} b_{x} - e_{x} b_{z}) (e_{z} b_{z} ) \cr
+   (e_{z} b_{x} - e_{x} b_{z})  + \omega \tau  (b_{y} -e_{y} b_{z}) (e_{z} b_{z} ) \cr 
+\end{pmatrix}
+\end{equation*}
+\begin{equation*}
+=
+\frac{\omega \tau}{1 + (\omega \tau )^2 }
+\begin{pmatrix}
+-  b_{y}       + e_{y} b_{z} + \omega \tau (e_{z} b_{x} e_{z} b_{z} - e_{x} b_{z} e_{z} b_{z})  \cr
+   e_{z} b_{x} - e_{x} b_{z} + \omega \tau (b_{y} e_{z} b_{z}        -e_{y} b_{z} e_{z} b_{z})  \cr 
+\end{pmatrix}
+\end{equation*}
+\begin{equation*}
+=
+\frac{\omega \tau }{1 + (\omega \tau )^2}
+\begin{pmatrix}
+-  b_{y}       + e_{y} b_{z} +       \omega \tau (b_{x} b_{z} - e_{x} e_{z} )  \cr
+   e_{z} b_{x} - e_{x} b_{z} + e_{z} \omega \tau (b_{y} b_{z} - e_{y}       )  \cr 
+\end{pmatrix}
+\end{equation*}
+Direction in {\bf TPCS} can obtain by back rotation $R_{E}$
+\begin{equation*}
+\begin{pmatrix}
+{u_{x}}/{u_{z}} \cr
+{u_{y}}/{u_{z}} \cr
+ e_{z}
+\end{pmatrix}
+= R^{-1}
+\begin{pmatrix}
+{u'_{x}}/{u'_{z}} \cr
+{u'_{y}}/{u'_{z}} \cr
+1
+\end{pmatrix}
+=
+\begin{pmatrix} 
+     e_{z} &     0 & e_{x} \cr
+     0     &     1 & e_{y} \cr
+    -e_{x} & -e_{y}& e_{z}
+\end{pmatrix}
+\frac{\omega \tau }{1 + (\omega \tau )^2}
+\begin{pmatrix}
+-  b_{y}       + e_{y} b_{z} +       \omega \tau (b_{x} b_{z} - e_{x} e_{z} )  \cr
+   e_{z} b_{x} - e_{x} b_{z} + e_{z} \omega \tau (b_{y} b_{z} - e_{y}       )  \cr 
+   1
+\end{pmatrix}
+\end{equation*}
+\begin{equation*}
+=
+\frac{\omega \tau }{1 + (\omega \tau )^2}
+\begin{pmatrix}
+e_{z} (-  b_{y}       + e_{y} b_{z} +       \omega \tau (b_{x} b_{z} - e_{x} e_{z} )  ) + e_{x} \cr
+   e_{z} b_{x} - e_{x} b_{z} + e_{z} \omega \tau (b_{y} b_{z} - e_{y}       )          + e_{y}  \cr 
+   e_{z}
+\end{pmatrix}
+\end{equation*}
+\begin{equation*}
+=
+\frac{\omega \tau }{1 + (\omega \tau )^2}
+\begin{pmatrix}
+ - e_{z} b_{y} + e_{z} e_{y} b_{z} + e_{z} \omega \tau (b_{x} b_{z} - e_{x} e_{z} )  ) + e_{x} \cr
+   e_{z} b_{x} -       e_{x} b_{z} + e_{z} \omega \tau (b_{y} b_{z} - e_{y}       )    + e_{y} \cr 
+   e_{z}
+\end{pmatrix}
+\end{equation*}
+and finaly
+\begin{equation}\label{finaleq}
+\begin{pmatrix}
+{u_{x}}/{u_{z}} \cr
+{u_{y}}/{u_{z}} \cr
+\end{pmatrix}
+=
+\frac{\omega \tau }{1 + (\omega \tau )^2}
+\begin{pmatrix}
+ - e_{z} b_{y} + e_{z} e_{y} b_{z} + \omega \tau (e_{z} b_{x} b_{z} - e_{x}       ) + e_{x} \cr
+   e_{z} b_{x} -       e_{x} b_{z} + \omega \tau (e_{z} b_{y} b_{z} - e_{y} e_{z} ) + e_{y} \cr 
+\end{pmatrix}
+\end{equation}
+%Just remember that $e_{z} = \Mypm 1$ for the West (+) and East (-) TPC, and $b_{z} = \pm 1$ for the forward (+) and reverse (-) magnetic fields, respectevely.
+%\begin{equation}
+%\begin{pmatrix}
+%{u_{x}}/{u_{z}} \cr
+%{u_{y}}/{u_{z}} \cr
+%\end{pmatrix}
+%=
+%\frac{\omega \tau }{1 + (\omega \tau )^2}
+%\begin{pmatrix}
+% - \Mypm b_{y} + \Mypm \pm e_{y} + \omega \tau (\Mypm \pm b_{x} -       e_{x} ) + e_{x} \cr
+%   \Mypm b_{x} -       \pm e_{x} + \omega \tau (\Mypm \pm b_{y} - \Mypm e_{y} ) + e_{y} \cr 
+%\end{pmatrix}
+%\end{equation}
+The ideal magnetic field $b_{x} = b_{y} = 0 $
+\begin{equation}
+\begin{pmatrix}
+{u_{x}}/{u_{z}} \cr
+{u_{y}}/{u_{z}} \cr
+\end{pmatrix}
+=
+\frac{\omega \tau }{1 + (\omega \tau )^2}
+\begin{pmatrix}
+  e_{z} e_{y} b_{z} - \omega \tau  e_{x}        + e_{x} \cr
+- e_{x} b_{z}       - \omega \tau  e_{y} e_{z}  + e_{y} \cr 
+\end{pmatrix}
+%=
+%\frac{\omega \tau }{1 + (\omega \tau )^2}
+%\begin{pmatrix}
+% e_{x} (1  -       \omega \tau )  \Mypm \pm e_{y} \cr
+% e_{y} (1  - \Mypm \omega \tau )     -  \pm e_{x} \cr 
+%\end{pmatrix}
+\end{equation}
+The ideal electric field $e_{x} = e_{y} = 0 $
+\begin{equation}
+\begin{pmatrix}
+{u_{x}}/{u_{z}} \cr
+{u_{y}}/{u_{z}} \cr
+\end{pmatrix}
+=
+\frac{\omega \tau }{1 + (\omega \tau )^2}
+\begin{pmatrix}
+ - e_{z} b_{y} + \omega \tau e_{z} b_{x} b_{z} \cr
+   e_{z} b_{x} + \omega \tau e_{z} b_{y} b_{z} \cr 
+\end{pmatrix}
+%=
+%\frac{\omega \tau }{1 + (\omega \tau )^2}
+%\begin{pmatrix}
+% - \Mypm b_{y} \Mypm \pm \omega \tau b_{x} \cr
+%   \Mypm b_{x} \Mypm \pm \omega \tau b_{y} \cr 
+%\end{pmatrix}
+\end{equation}
+%4. ================================================================================
+\section{Compare with the previous  STAR calculations\cite{Gene}}
+Using $\overrightarrow{\mathbf{E}}$ and $\overrightarrow{\mathbf{B}}$
+and notaions from \cite{Gene} : $\overrightarrow{\mathbf{u}} \rightarrow \overrightarrow{\mathbf{v}} , x \rightarrow \phi$, and $y \rightarrow r$)
+we rewrite eq. (\ref{finaleq}) as 
+\begin{equation}
+\begin{pmatrix}
+{v_{x}}/{v_{z}} \cr
+{v_{y}}/{v_{z}} \cr
+\end{pmatrix}
+=
+\frac{\omega \tau }{1 + (\omega \tau )^2}
+\begin{pmatrix}
+ - \frac{E_{z}}{E} \frac{B_{r}}{B} + \frac{E_{z}}{E} \frac{E_{r}}{E} \frac{B_{z}}{B} + \omega \tau (\frac{E_{z}}{E} \frac{B_{\phi}}{B} \frac{B_{z}}{B} - \frac{E_{\phi}}{E}       ) + \frac{E_{\phi}}{E} \cr
+   \frac{E_{z}}{E} \frac{B_{\phi}}{B} -       \frac{E_{\phi}}{E} \frac{B_{z}}{B} + \omega \tau (\frac{E_{z}}{E} \frac{B_{r}}{B} \frac{B_{z}}{B} - \frac{E_{r}}{E} \frac{E_{z}}{E} ) + \frac{E_{r}}{E} \cr 
+\end{pmatrix}
+\end{equation}
+or 
+\begin{equation}
+\begin{pmatrix}
+{v_{x}}/{v_{z}} \cr
+{v_{y}}/{v_{z}} \cr
+\end{pmatrix}
+=
+\frac{\omega \tau }{1 + (\omega \tau )^2}
+\begin{pmatrix}
+ - \frac{E_{z}}{E} \frac{B_{r}}{B} + \frac{E_{z}}{E} \frac{E_{r}}{E} \frac{B_{z}}{B} + \omega \tau (\frac{E_{z}}{E} \frac{B_{\phi}}{B} \frac{B_{z}}{B} - \frac{E_{\phi}}{E}       ) + \frac{E_{\phi}}{E} \cr
+   \frac{E_{z}}{E} \frac{B_{\phi}}{B} -       \frac{E_{\phi}}{E} \frac{B_{z}}{B} + \omega \tau (\frac{E_{z}}{E} \frac{B_{r}}{B} \frac{B_{z}}{B} - \frac{E_{r}}{E} \frac{E_{z}}{E} ) + \frac{E_{r}}{E} \cr 
+\end{pmatrix}
+\end{equation}
+Let's compare these equations with equation (5-6) presetned in \cite{Gene} (using notation $\phi \rightarrow x$ and $r \rightarrow y$)
+\begin{equation}
+v_{\phi} = \frac{\mu E_{z}}{1 + (\omega \tau)^2}
+\left[ \
+\frac{ E_{\phi} }{ E_{z}} + (\omega \tau )     \frac{E_{z} B_{r}          - E_{r} B_{z}                                 }{B_{z}}
+                          + (\omega \tau )^{2} \frac{E_{z} B_{\phi} B_{z} + E_{\phi} B_{\phi}^{2} + E_{r} B_{\phi} B_{r}}{B_{z}^{2}} 
+\right]
+\end{equation}
+
+
+%6================================================================================
+\section{Check with respect to Alice calculations, the $2^{nd}$ order Teylor expansion.}
+\par
+For the above calculation Blum and Rolandi notation \cite{Blum} has been used.
+Let's repeat the same calculation using Alice notation\cite{Rossegger}.
+The start equition is exactly the same as [\ref{ueq}]. 
+\begin{equation*} 
+ \overrightarrow{\mathbf{u}}=
+\frac{\mu \left| \overrightarrow{\mathbf{E}} \right|}{1 + \omega^2\tau^2} 
+\left(
+ \overrightarrow{\mathbf{e}} + 
+ \omega \tau    [ \overrightarrow{\mathbf{e}} \times \overrightarrow{\mathbf{b}}] + 
+(\omega \tau)^2 ( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}}) \overrightarrow{\mathbf{b}} 
+\right)
+\end{equation*}
+The Cartesian components are 
+\begin{equation*} 
+\begin{matrix}
+u_{x} = 
+\frac{\mu \left| \overrightarrow{\mathbf{E}} \right|}{1 + \omega^2\tau^2} 
+\left[
+e_{x} + \omega \tau (e_{y} b_{z} - e_{z} b_{y}) + \omega^2 \tau^2 ( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}}) b_{x})
+\right] \cr
+u_{y} = 
+\frac{\mu \left| \overrightarrow{\mathbf{E}} \right|}{1 + \omega^2\tau^2} 
+\left[
+e_{y} + \omega \tau (e_{z} b_{x} - e_{x} b_{z}) + \omega^2 \tau^2 ( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}}) b_{y})
+\right] \cr
+u_{z} = 
+\frac{\mu \left| \overrightarrow{\mathbf{E}} \right|}{1 + \omega^2\tau^2} 
+\left[
+e_{z} + \omega \tau (e_{x} b_{y} - e_{y} b_{x}) + \omega^2 \tau^2 ( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}}) b_{z})
+\right] \cr
+\end{matrix}
+\end{equation*}
+During the $2^{nd}$ order expansion of 
+$\overrightarrow{\mathbf{e}} = \overrightarrow{E} / \left|\overrightarrow{E} \right| $ and  
+$\overrightarrow{\mathbf{b}} = \overrightarrow{B} / \left|\overrightarrow{B} \right| $ around the ideal field values in Alice note\cite{Rossegger}
+it was replaced $\mathbf{ \left|\overrightarrow{E} \right| }$ by $E_{z}$ and
+lost sign of $e_{z}$ component of electric field which is different in the West and East parts of TPC:
+
+\begin{equation*} 
+\begin{matrix}
+b_{x} = B_{x}/B_{z}, b_{y} = B_{y}/B_{z}, b_{z} = 1 - \frac{1}{2}( b_{x}^2 + b_{y}^2) \cr
+e_{x} = E_{x}/E_{z}, e_{y} = E_{y}/E_{z}, e_{z} = 1 - \frac{1}{2}( e_{x}^2 + e_{y}^2) \cr
+\end{matrix}
+\end{equation*}
+and this is {\bf wrong}.
+\par
+The right expansion should be with 
+E = $ \left|\overrightarrow{\mathbf{E}} \right| $ and 
+B = $ \left|\overrightarrow{\mathbf{B}} \right| $
+with $\epsilon_{z} = E_{z} / E \approx \Mypm 1$ and $\beta_{z} = B_{z} / B \approx \pm 1$,
+where $\pm 1$ correspond to forward or reverse magnetic field and $\mathbf{\Mypm} 1$ the West of East part of TPC, respectively.
+\begin{equation*} 
+\begin{matrix}
+e_{x} = E_{x}/E, e_{y} = E_{y}/E, e_{z} = E_{z}/E \approx \epsilon_{z}  (1 - \frac{1}{2}( e_{x}^2 + e_{y}^2)) \cr % e_x, e_y, e_z
+b_{x} = B_{x}/B, b_{y} = B_{y}/B, b_{z} = B_{z}/B \approx \beta_{z}     (1 - \frac{1}{2}( b_{x}^2 + b_{y}^2)) \cr % b_x, b_y, b_z
+\end{matrix}
+\end{equation*}
+%================================================================================
+%================================================================================
+Then 
+\begin{equation*} 
+\begin{matrix}
+\overrightarrow{\mathbf{e}} \cdot \overrightarrow{\mathbf{b}} \approx 
+e_{x} b_{x} + e_{y} b_{y} +
+\left[ \epsilon_{z}  (1 - \frac{1}{2}( e_{x}^2 + e_{y}^2)) \beta_{z}     (1 - \frac{1}{2}( b_{x}^2 + b_{y}^2))\right] \cr
+\approx e_{x} b_{x} + e_{y} b_{y} + \epsilon_{z}  \beta_{z} \left[ 1 - \frac{1}{2}(e_{x}^2 + e_{y}^2 +  b_{x}^2 + b_{y}^2) \right] \cr
+\end{matrix}
+\end{equation*}
+% e * b * b
+and
+\begin{equation*} 
+\begin{matrix}
+\overrightarrow{\mathbf{e}} \cdot \overrightarrow{\mathbf{b}} b_{x} \approx %(eb)b_x
+\epsilon_{z}  \beta_{z} b_{x} \cr
+\overrightarrow{\mathbf{e}} \cdot \overrightarrow{\mathbf{b}} b_{y} \approx % (eb)b_y
+\epsilon_{z}  \beta_{z} b_{y} \cr
+\overrightarrow{\mathbf{e}} \cdot \overrightarrow{\mathbf{b}} b_{z} \approx 
+\left[  e_{x} b_{x} + e_{y} b_{y} + \epsilon_{z}  \beta_{z} \left[ 1 - \frac{1}{2}(e_{x}^2 + e_{y}^2 +  b_{x}^2 + b_{y}^2) \right] \right]
+\beta_{z}     (1 - \frac{1}{2}( b_{x}^2 + b_{y}^2)) \cr
+\approx \beta_{z} (e_{x} b_{x} + e_{y} b_{y}) + 
+\epsilon_{z} \beta_{z}^{2} (1  - \frac{1}{2}(e_{x}^2 + e_{y}^2 +  b_{x}^2 + b_{y}^2) - \frac{1}{2}( b_{x}^2 + b_{y}^2))
+\cr
+\approx %(eb)b_z
+\beta_{z} (e_{x} b_{x} + e_{y} b_{y}) + \epsilon_{z} \left[ (1  - \frac{1}{2}(e_{x}^2 + e_{y}^2) - ( b_{x}^2 + b_{y}^2) \right]
+\cr
+\end{matrix}
+\end{equation*}
+Back to the Langevin's equation
+\begin{equation*} 
+\begin{matrix}
+u_{x} = 
+\frac{\mu \left| \overrightarrow{\mathbf{E}} \right|}{1 + \omega^2\tau^2} 
+[ e_{x} + \omega \tau (e_{y} b_{z} - e_{z} b_{y}) + \omega^2 \tau^2 ( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}}) b_{x}) ] \cr
+u_{y} = 
+\frac{\mu \left| \overrightarrow{\mathbf{E}} \right|}{1 + \omega^2\tau^2} 
+[ e_{y} + \omega \tau (e_{z} b_{x} - e_{x} b_{z}) + \omega^2 \tau^2 ( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}}) b_{y}) ] \cr
+u_{z} = 
+\frac{\mu \left| \overrightarrow{\mathbf{E}} \right|}{1 + \omega^2\tau^2} 
+[  e_{z} + \omega \tau (e_{x} b_{y} - e_{y} b_{x}) + \omega^2 \tau^2 ( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}}) b_{z}) ] \cr
+\end{matrix}
+\end{equation*}
+or using $C_{n}$
+\begin{equation*} 
+\begin{matrix}
+u_{x} = 
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ C_{0} e_{x} + C_{1} \left(e_{y} b_{z} - e_{z} b_{y}\right) + C_{2} \left( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}} \right) b_{x} \right] \cr
+u_{y} = 
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ C_{0} e_{y} + C_{1} \left(e_{z} b_{x} - e_{x} b_{z}\right) + C_{2} \left( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}} \right) b_{y} \right] \cr
+u_{z} = 
+\mu \left| \overrightarrow{ \mathbf{E} } \right| 
+\left[ C_{0} e_{z} + C_{1} \left(e_{x} b_{y} - e_{y} b_{x}\right) + C_{2} \left( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}} \right) b_{z} \right] \cr
+\end{matrix}
+\end{equation*}
+Substitute expanded values
+
+\begin{equation}  % u_x
+\begin{matrix}
+u_{x} = \mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ C_{0} e_{x} + C_{1} \left(e_{y} b_{z} - e_{z} b_{y}\right) + C_{2} \left( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}} \right) b_{x} \right] \cr
+\approx
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ C_{0} e_{x}
++ C_{1} \left(e_{y}     (1 - \frac{1}{2}( b_{x}^2 + b_{y}^2)) - \epsilon_{z}  (1 - \frac{1}{2}( e_{x}^2 + e_{y}^2))  b_{y}\right)
++ C_{2} \epsilon_{z}  \beta_{z} b_{x}
+\right]
+\cr
+\approx
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ C_{0} e_{x}
+ + C_{1} \left( e_{y} \beta_{z}  - \epsilon_{z}  b_{y}\right)
+ + C_{2} \epsilon_{z}  \beta_{z} b_{x}
+\right]
+\cr
+\end{matrix}
+\end{equation}
+
+\begin{equation}  % u_y
+\begin{matrix}
+u_{y} = 
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ C_{0} e_{y} + C_{1} \left(e_{z} b_{x} - e_{x} b_{z}\right) + C_{2} \left( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}} \right) b_{y} \right] \cr
+\cr
+\approx
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ C_{0} e_{y} 
+ + C_{1} \left(  \epsilon_{z}  (1 - \frac{1}{2}( e_{x}^2 + e_{y}^2)) b_{x} - e_{x} \beta_{z}     (1 - \frac{1}{2}( b_{x}^2 + b_{y}^2)) \right)
+ + C_{2} \epsilon_{z}  \beta_{z} b_{y} 
+\right]
+\cr
+\approx
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ C_{0} e_{y} 
+ + C_{1} \left(  \epsilon_{z} b_{x} - e_{x} \beta_{z} \right)
+ + C_{2} \epsilon_{z}  \beta_{z} b_{y} 
+\right]
+\cr
+\end{matrix}
+\end{equation}
+
+\begin{equation}  % u_z
+\begin{matrix}
+u_{z} = 
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ C_{0} e_{z} 
++ C_{1} \left(e_{x} b_{y} - e_{y} b_{x}\right) + C_{2} \left( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}} \right) b_{z}
+\right]
+\cr
+\approx
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ 
+  C_{0}   \epsilon_{z}  (1 - \frac{1}{2}( e_{x}^2 + e_{y}^2))
+\right]
+%  C_{0}   e_{z}
+\cr
++ \mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[
+C_{1} 
+\left(
+e_{x} b_{y} - e_{y} b_{x} 
+\right) 
++ C_{2} 
+%\left( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}} \right) b_{z}
+\left( 
+\beta_{z} (e_{x} b_{x} + e_{y} b_{y}) + \epsilon_{z} \left[ (1  - \frac{1}{2}(e_{x}^2 + e_{y}^2) - ( b_{x}^2 + b_{y}^2) \right]
+\right)
+\right]
+\cr
+\end{matrix}
+\end{equation}
+%================================================================================
+or once again
+\begin{equation}  % u_x
+\begin{matrix}
+u_{x} \approx
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ C_{0} e_{x}
+ + C_{1} \left( e_{y} \beta_{z}  - \epsilon_{z}  b_{y}\right)
+ + C_{2} \epsilon_{z}  \beta_{z} b_{x}
+\right]
+\cr
+u_{y} \approx
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ C_{0} e_{y} 
+ + C_{1} \left(  \epsilon_{z} b_{x} - e_{x} \beta_{z} \right)
+ + C_{2} \epsilon_{z}  \beta_{z} b_{y} 
+\right]
+\cr
+u_{z} 
+\approx
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ 
+  C_{0}   \epsilon_{z}  (1 - \frac{1}{2}( e_{x}^2 + e_{y}^2))
+\right]
+%  C_{0}   e_{z}
+\cr
++ \mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[
+C_{1} 
+\left(
+e_{x} b_{y} - e_{y} b_{x} 
+\right) 
++ C_{2} 
+%\left( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}} \right) b_{z}
+\left( 
+\beta_{z} (e_{x} b_{x} + e_{y} b_{y}) + \epsilon_{z} \left[ (1  - \frac{1}{2}(e_{x}^2 + e_{y}^2) - ( b_{x}^2 + b_{y}^2) \right]
+\right)
+\right]
+\cr
+\end{matrix}
+\end{equation}
+
+The total drift velocity is 
+\begin{equation}
+\begin{matrix}
+(\mu \left| \overrightarrow{ \mathbf{E} }\right|)^{-2} u^2 = u_{x}^2 + u_{y}^2 +u_{z}^2 = \cr
+\left[ C_{0} e_{x}
+ + C_{1} \left( e_{y} \beta_{z}  - \epsilon_{z}  b_{y}\right)
+ + C_{2} \epsilon_{z}  \beta_{z} b_{x}
+\right]^2
++
+\left[ C_{0} e_{y} 
+ + C_{1} \left(  \epsilon_{z} b_{x} - e_{x} \beta_{z} \right)
+ + C_{2} \epsilon_{z}  \beta_{z} b_{y} 
+\right]^{2} 
++ \cr
+\left[
+C_{1} 
+\left(
+e_{x} b_{y} - e_{y} b_{x} 
+\right) 
++ C_{2} 
+%\left( \overrightarrow{\mathbf{e}} \cdot  \overrightarrow{\mathbf{b}} \right) b_{z}
+\left( 
+\beta_{z} (e_{x} b_{x} + e_{y} b_{y}) + \epsilon_{z} \left[ (1  - \frac{1}{2}(e_{x}^2 + e_{y}^2) - ( b_{x}^2 + b_{y}^2) \right]
+\right)
+\right]^2
+\end{matrix}
+\end{equation}
+total
+To the first order expansion
+
+\begin{equation}  % u_z
+\begin{matrix}
+u_{z}^{0} \approx
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\left[ 
+  \epsilon_{z} ( C_{0} + C_{2}
+\right]
+= \epsilon_{z} \mu \left| \overrightarrow{ \mathbf{E} }\right| = \epsilon_{z} u
+\cr
+\end{matrix}
+\end{equation}
+
+
+The directions of motion 
+%{\tiny
+\begin{equation}
+\begin{matrix}
+\frac{u_{x}}{u_{z}} = 
+\frac{C_{0} e_{x}
+    + C_{1} \left( e_{y} \beta_{z}  - \epsilon_{z}  b_{y}\right)
+    + C_{2} \epsilon_{z}  \beta_{z} b_{x}
+}{
+C_{0} \epsilon_{z}  (1 - \frac{1}{2}( e_{x}^2 + e_{y}^2)) +
+C_{1} \left( e_{x} b_{y} - e_{y} b_{x} \right) 
++ C_{2} 
+\left( 
+\beta_{z} (e_{x} b_{x} + e_{y} b_{y}) + \epsilon_{z} \left[ (1  - \frac{1}{2}(e_{x}^2 + e_{y}^2) - ( b_{x}^2 + b_{y}^2) \right]
+\right)
+} \cr
+\frac{u_{y}}{u_{z}} = 
+\frac{
+   C_{0} e_{y} 
+ + C_{1} \left(  \epsilon_{z} b_{x} - e_{x} \beta_{z} \right)
+ + C_{2} \epsilon_{z}  \beta_{z} b_{y} 
+}{
+C_{0} \epsilon_{z}  (1 - \frac{1}{2}( e_{x}^2 + e_{y}^2)) +
+C_{1} \left( e_{x} b_{y} - e_{y} b_{x} \right) 
++ C_{2} 
+\left( 
+\beta_{z} (e_{x} b_{x} + e_{y} b_{y}) + \epsilon_{z} \left[ (1  - \frac{1}{2}(e_{x}^2 + e_{y}^2) - ( b_{x}^2 + b_{y}^2) \right]
+\right)
+}
+\end{matrix}
+\end{equation}
+%}
+To the first order expansion
+
+\begin{equation}  % u_z
+\begin{matrix}
+u_{z}^{0} \approx
+\mu \left| \overrightarrow{ \mathbf{E} }\right| 
+  \epsilon_{z} ( C_{0} + C_{2} )
+= \epsilon_{z} \mu \left| \overrightarrow{ \mathbf{E} }\right| 
+\cr
+\end{matrix}
+\end{equation}
+
+
+The directions of motion 
+\begin{equation}
+\begin{matrix}
+\frac{u_{z}}{u_{z}^{0}} = \epsilon_{z} [
+ C_{0} \epsilon_{z}  (1 - \frac{1}{2}( e_{x}^2 + e_{y}^2)) +
+ C_{1} \left(e_{x} b_{y} - e_{y} b_{x}\right) + \cr
+ C_{2} \left( \beta_{z} (e_{x} b_{x} + e_{y} b_{y}) + \epsilon_{z} \left[ (1  - \frac{1}{2}(e_{x}^2 + e_{y}^2) - ( b_{x}^2 + b_{y}^2) \right] \right)
+] = \cr
+ C_{0}  (1 - \frac{1}{2}( e_{x}^2 + e_{y}^2)) +
+ C_{1} \epsilon_{z} \left(e_{x} b_{y} - e_{y} b_{x}\right) + 
+ C_{2} \left( \epsilon_{z} \beta_{z} (e_{x} b_{x} + e_{y} b_{y}) + \left[ (1  - \frac{1}{2}(e_{x}^2 + e_{y}^2) - ( b_{x}^2 + b_{y}^2) \right] \right)
+ = \cr
+ C_{0} + C_{2} +
+ (- \frac{1}{2}( e_{x}^2 + e_{y}^2)) (C_{0} + C_{2}) +
+ \epsilon_{z} \left(e_{x} b_{y} - e_{y} b_{x}\right) C_{1}  + 
+ C_{2} \left( \epsilon_{z} \beta_{z} (e_{x} b_{x} + e_{y} b_{y}) + \left[ ( - ( b_{x}^2 + b_{y}^2) \right] \right)
+ = \cr
+ 1 +
+ (- \frac{1}{2}( e_{x}^2 + e_{y}^2)) 
+ \epsilon_{z} \left(e_{x} b_{y} - e_{y} b_{x}\right) C_{1}  + 
+ C_{2} \left( \epsilon_{z} \beta_{z} (e_{x} b_{x} + e_{y} b_{y}) + \left[ ( - ( b_{x}^2 + b_{y}^2) \right] \right)
+
+\end{matrix}
+\end{equation}
+
+
+%===========================================================================
+\begin{thebibliography}{99}
+\bibitem{Blum} W.Blum and L. Rolandi, ``Particle Detection with Drift Chambers''
+\bibitem{Gene} G. Van Buren, J. H. Thomas, ``TPC Distortion Equations in the Sub-100 $\mu m$ Era'',
+\url{https://drupal.star.bnl.gov/STAR/system/files/DistortionEqtns.pdf}
+\bibitem{Rossegger} Magnus Mager, Stefan Rossegger and Jim Thomas, ``The Langevin Equation expanded to 2nd order and commentson using the equation to correct for space point distortions in a TPC'', ALICE-INT-2010-016 version 1.0
+\end{thebibliography}
+\end{document}
