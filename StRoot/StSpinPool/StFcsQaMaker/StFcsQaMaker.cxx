@@ -37,9 +37,13 @@ Int_t StFcsQaMaker::Init(){
 
   if(mPedSub>0 || mDump>0) mFcsDbMkr->readPedFromText();
 
-  int yday=mRun/1000;
-  sprintf(mFilename,"%d/%d.root",yday,mRun);
-  printf("StFcsQaMaker::Init - Opening %s\n",mFilename);
+  if(mSetFile==0){
+      int yday=mRun/1000;
+      sprintf(mFilename,"%d/%d.root",yday,mRun);
+      printf("StFcsQaMaker::Init - Opening %s\n",mFilename);
+  }else{
+      sprintf(mFilename,"%s",mSetFile);
+  }
   mFile=new TFile(mFilename,"RECREATE");
 
   char* nameEHP[kFcsEHP] = {"Ecal","Hcal","Pres"};
@@ -47,6 +51,10 @@ Int_t StFcsQaMaker::Init(){
   char t[100],t2[100];
 
   mDataSize = new TH1F("DataSize","DataSize",100,-1.0,7.0);
+  mEsum[0] = new TH1F("EcalESum","EcalESum",100,0.0,10.0);
+  mEsum[1] = new TH1F("HcalESum","HcalESum",100,0.0,10.0);
+  mEsum[2] = new TH1F("TotESum", "TotESum", 100,0.0,10.0);
+
   for(int det=0; det<kFcsNDet; det++){
     int ns  = mFcsDbMkr->northSouth(det);
     int ehp = mFcsDbMkr->ecalHcalPres(det);
@@ -134,10 +142,10 @@ Int_t StFcsQaMaker::Make() {
   }
 
   //tof multiplicity from trigger data
-  int tofmult = trg->tofMultiplicity();
-
+  int tofmult = 0;
   //check if FCS was readout for this event
   if(trg){
+      tofmult = trg->tofMultiplicity(); 
       unsigned short detmask=trg->getTrgDetMask();
       printf("TrgDetMask = %4x\n",detmask);
       if(! ((detmask >> 30) & 0x1)){   //FCS_ID=30 but detmask is 16bit:O
@@ -163,6 +171,8 @@ Int_t StFcsQaMaker::Make() {
   int nfcsdata=0;
   int nh[kFcsNDet]; memset(nh,0,sizeof(nh));
   int sum[kFcsNDet][kFcsEcalMaxId]; memset(sum,0,sizeof(sum));
+  int esum[kFcsNDet][kFcsEcalMaxId]; memset(esum,0,sizeof(sum));
+  float atot[kFcsNDet]; memset(atot,0,sizeof(atot));
   float etot[kFcsNDet]; memset(etot,0,sizeof(etot));
 
   for(int det=0; det<kFcsNDet+1; det++){  //det==kFcsDet is for empty channel
@@ -200,6 +210,10 @@ Int_t StFcsQaMaker::Make() {
 	  }
 	}
       }
+      if(det<kFcsNDet && ch<32){
+	  float e = hits[i]->energy();
+	  etot[det] += e;
+      }
     }
     if(det<kFcsNDet){
       int maxid = mFcsDbMkr->maxId(det);
@@ -207,11 +221,14 @@ Int_t StFcsQaMaker::Make() {
 	if(sum[det][id]>0){
 	  mAdcSumId[det]->Fill((float)id, float(sum[det][id]));
 	  nh[det]++;
-	  etot[det]+=sum[det][id];
+	  atot[det]+=sum[det][id];
 	}
       }
       mNHit[det]->Fill(float(nh[det]));
-      
+      mEsum[0]->Fill(etot[0]+etot[1]);
+      mEsum[1]->Fill(etot[2]+etot[3]);
+      mEsum[2]->Fill(etot[0]+etot[1]+etot[2]+etot[3]);
+
       if(mDump>0){
 	int oldid=-1;
 	for (int i=0; i<nhit; i++){
@@ -266,7 +283,7 @@ Int_t StFcsQaMaker::Make() {
 	mNTowEClu[det][htid]->Fill(ntow,cluster->energy());
 	if(nnei==0) {
 	  mNTowECluIso[det][htid]->Fill(ntow,cluster->energy());
-	  if(etot[3]>100){
+	  if(atot[3]>100){
 	    mNTowECluIsoH[det][htid]->Fill(ntow,cluster->energy());
 	  }
 	}
@@ -289,8 +306,11 @@ Int_t StFcsQaMaker::Finish(){
 ClassImp(StFcsQaMaker);
 
 /*
- * $Id: StFcsQaMaker.cxx,v 1.5 2019/07/19 15:16:29 akio Exp $
+ * $Id: StFcsQaMaker.cxx,v 1.6 2020/12/17 21:09:54 akio Exp $
  * $Log: StFcsQaMaker.cxx,v $
+ * Revision 1.6  2020/12/17 21:09:54  akio
+ * add esum
+ *
  * Revision 1.5  2019/07/19 15:16:29  akio
  * add tofmult
  *

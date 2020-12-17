@@ -30,6 +30,7 @@ class StFcsQaMaker : public StMaker {
    void setMaxAdcSum(int v) {mMaxAdcSum=v;}
    void setDump(int v) {mDump=v;}
    void setPedSub(int v) {mPedSub=v;}
+   void setFilename(char* v) {mSetFile=v;}
 
  protected:
 
@@ -38,6 +39,7 @@ class StFcsQaMaker : public StMaker {
    StFcsCollection *mFcsCollection=0;
    int mRun=0; 
    TFile *mFile=0;
+   char* mSetFile=0;
    char mFilename[100];
    int mNTimeBins=16;
    int mMinTB=210;   
@@ -50,6 +52,8 @@ class StFcsQaMaker : public StMaker {
    static const int mNTRG=64;
 
    TH1F* mDataSize;
+   TH1F* mEsum[3];
+
    TH2F* mAdcTb2[kFcsNDet];
    TH2F* mAdcTb[kFcsNDet][kFcsEcalMaxId];
    TH2F* mAdcId[kFcsNDet];
@@ -71,8 +75,11 @@ class StFcsQaMaker : public StMaker {
 #endif
 
 /*
- * $Id: StFcsQaMaker.h,v 1.2 2019/06/21 17:44:47 akio Exp $
+ * $Id: StFcsQaMaker.h,v 1.3 2020/12/17 21:09:54 akio Exp $
  * $Log: StFcsQaMaker.h,v $
+ * Revision 1.3  2020/12/17 21:09:54  akio
+ * add esum
+ *
  * Revision 1.2  2019/06/21 17:44:47  akio
  * added cluster plots
  *
