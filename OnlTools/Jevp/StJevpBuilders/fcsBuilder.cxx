@@ -16,11 +16,12 @@
 
 #include "fcsMap.h"
 
-const int TBMAX=100;
-const int TBTRG=20;
+const int TBMAX=300;
+const int TBTRG=210;
+const int MAXSUM=1024;
 const int OFF[2]  = {4,2};
 const int mReadMode=0;
-const int mFakeData=1;
+const int mFakeData=0;
     
 ClassImp(fcsBuilder);
   
@@ -57,17 +58,17 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
 
     int ecal_xmax = nColumn(0)+OFF[0];
     int ecal_ymax = nRow(0);
-    contents.h_fcs_det_hitmap[0] = new TH2F("Ecal","Ecal; View from back",
+    contents.h_fcs_det_hitmap[0] = new TH2F("Ecal",Form("Ecal; +-(Col+%d)   North <-> South; %d-Row",OFF[0],nRow(0)+1),
 					    ecal_xmax*2+1,-ecal_xmax-0.5,ecal_xmax+0.5,
 					    ecal_ymax,0.0,ecal_ymax); 
     int hcal_xmax = nColumn(2)+OFF[1];
     int hcal_ymax = nRow(2);
-    contents.h_fcs_det_hitmap[1] = new TH2F("Hcal","Hcal; View from back",
+    contents.h_fcs_det_hitmap[1] = new TH2F("Hcal",Form("Hcal; +-(Col+%d)  North <-> South; %d-Row",OFF[1],nRow(2)+1),
 					    hcal_xmax*2+1,-hcal_xmax-0.5,hcal_xmax+0.5,
 					    hcal_ymax,0.0,hcal_ymax); 
     int pres_xmax = nColumn(4);
     int pres_ymax = nRow(4);
-    contents.h_fcs_det_hitmap[2] = new TH2F("Pres","Pres; View from back",
+    contents.h_fcs_det_hitmap[2] = new TH2F("Pres","Pres; +-Radius (North <-> South); Phi",
     					    pres_xmax*2+1,-pres_xmax-0.5,pres_xmax+0.5,
     					    pres_ymax,0.0,pres_ymax); 
     //contents.h_fcs_det_hitmap[2] = new TH2F("Pres","Pres; View from back",
@@ -76,12 +77,12 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
 
     char csum[30];
     sprintf(csum,"AdcSum(TB=%d-%d)",TBTRG-3,TBTRG+4);
-    contents.h_fcs_ehpns_id_adcsum[0][0] = new TH2F("Ecal_N_Id_Adcsum",Form("EcalNorth; Id/22; %s",csum),maxId(0),0,maxId(0)/22.0,256,0,4096);
-    contents.h_fcs_ehpns_id_adcsum[0][1] = new TH2F("Ecal_S_Id_Adcsum",Form("EcalSouth; Id/22; %s",csum),maxId(1),0,maxId(1)/22.0,256,0,4096);
-    contents.h_fcs_ehpns_id_adcsum[1][0] = new TH2F("Hcal_N_Id_Adcsum",Form("HcalNorth; Id/13; %s",csum),maxId(2),0,maxId(2)/13.0,256,0,4096);
-    contents.h_fcs_ehpns_id_adcsum[1][1] = new TH2F("Hcal_S_Id_Adcsum",Form("HcalSouth; Id/13; %s",csum),maxId(3),0,maxId(3)/13.0,256,0,4096);
-    contents.h_fcs_ehpns_id_adcsum[2][0] = new TH2F("Pres_N_Id_Adcsum",Form("PresNorth; Id/16; %s",csum),maxId(4),0,maxId(4)/16.0,256,0,4096);
-    contents.h_fcs_ehpns_id_adcsum[2][1] = new TH2F("Pres_S_Id_Adcsum",Form("PresSouth; Id/16; %s",csum),maxId(5),0,maxId(5)/16.0,256,0,4096);
+    contents.h_fcs_ehpns_id_adcsum[0][0] = new TH2F("Ecal_N_Id_Adcsum",Form("EcalNorth; Id/22; %s",csum),maxId(0),0,maxId(0)/22.0,256,0,MAXSUM);
+    contents.h_fcs_ehpns_id_adcsum[0][1] = new TH2F("Ecal_S_Id_Adcsum",Form("EcalSouth; Id/22; %s",csum),maxId(1),0,maxId(1)/22.0,256,0,MAXSUM);
+    contents.h_fcs_ehpns_id_adcsum[1][0] = new TH2F("Hcal_N_Id_Adcsum",Form("HcalNorth; Id/13; %s",csum),maxId(2),0,maxId(2)/13.0,256,0,MAXSUM);
+    contents.h_fcs_ehpns_id_adcsum[1][1] = new TH2F("Hcal_S_Id_Adcsum",Form("HcalSouth; Id/13; %s",csum),maxId(3),0,maxId(3)/13.0,256,0,MAXSUM);
+    contents.h_fcs_ehpns_id_adcsum[2][0] = new TH2F("Pres_N_Id_Adcsum",Form("PresNorth; Id/16; %s",csum),maxId(4),0,maxId(4)/16.0,256,0,MAXSUM);
+    contents.h_fcs_ehpns_id_adcsum[2][1] = new TH2F("Pres_S_Id_Adcsum",Form("PresSouth; Id/16; %s",csum),maxId(5),0,maxId(5)/16.0,256,0,MAXSUM);
     contents.h_fcs_ehpns_id_adcsum[0][0]->GetXaxis()->SetNdivisions(-nRow(0));
     contents.h_fcs_ehpns_id_adcsum[0][1]->GetXaxis()->SetNdivisions(-nRow(1));
     contents.h_fcs_ehpns_id_adcsum[1][0]->GetXaxis()->SetNdivisions(-nRow(2));
@@ -171,21 +172,21 @@ void fcsBuilder::event(daqReader *rdr){
 	    u_short tb, adc;
 	    u_int sum=0;
 	    for(u_int i=0; i<n; i++) {		
-		if(mReadMode==0){ //none ZS data
+	        if(mReadMode==0){ //none ZS data
 		    tb  = i;
-		    adc = dd->adc[i].adc;		    
+		    adc = d16[i] & 0xFFF;		    
 		}else{            // ZS data
 		    tb  = dd->adc[i].tb;                                                               
 		    adc = dd->adc[i].adc;    
 		}
 		contents.h_fcs_crt_depch_tbin[crt]->Fill(slt+float(ch+0.5)/32.0,float(tb),float(adc));		
-		int c = getColumnNumber(detid,id);
-		int r = getRowNumber(detid,id);
-		float x = (c+OFF[ehp]) * (ns*2-1);
-		float y = (nRow(detid) - r + 0.5);
-		contents.h_fcs_det_hitmap[ehp]->Fill(x,y,float(adc));		
 		if(TBTRG-3 <= tb && tb <= TBTRG+4) sum+=adc;
 	    }
+	    int c = getColumnNumber(detid,id);
+	    int r = getRowNumber(detid,id);
+	    float x = (c+OFF[ehp]) * (ns*2-1);
+	    float y = (nRow(detid) - r + 0.5);
+	    contents.h_fcs_det_hitmap[ehp]->Fill(x,y,float(sum));		
 	    contents.h_fcs_ehpns_id_adcsum[ehp][ns]->Fill((id+0.5)/nColumn(detid),float(sum));
 	}
     }
