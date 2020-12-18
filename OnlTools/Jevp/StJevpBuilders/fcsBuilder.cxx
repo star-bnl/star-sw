@@ -18,7 +18,7 @@
 
 const int TBMAX=300;
 const int TBTRG=210;
-const int MAXSUM=1024;
+const int MAXSUM=12000;
 const int OFF[2]  = {4,2};
 const int mReadMode=0;
 const int mFakeData=0;
