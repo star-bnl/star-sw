@@ -104,12 +104,6 @@ class AliHLTTPCCATrackParam
     float GetErr2DzDs()   const { return fC[9]; }
     float GetErr2QPt()    const { return fC[14]; }
 
-  float GetErrY()      const { return fC[0] > 0 ? CAMath::Sqrt(fC[0]) : 0; }
-  float GetErrZ()      const { return fC[2] > 0 ? CAMath::Sqrt(fC[2]) : 0; }
-  float GetErrSinPhi() const { return fC[5] > 0 ? CAMath::Sqrt(fC[5]) : 0; }
-  float GetErrDzDs()   const { return fC[9] > 0 ? CAMath::Sqrt(fC[9]) : 0; }
-  float GetErrQPt()    const { return fC[14] > 0 ? CAMath::Sqrt(fC[14]) : 0; }
-
     const float *Par() const { return fP; }
     const float *Cov() const { return fC; }
 
@@ -201,7 +195,6 @@ class AliHLTTPCCATrackParam
 
     void ReversePar() {
       fP[2] = -fP[2];
-      fP[3] = -fP[3];
       fP[4] = -fP[4];
       fSignCosPhi = -fSignCosPhi;
     }
@@ -490,8 +483,6 @@ inline bool  AliHLTTPCCATrackParam::TransportToX( float x, AliHLTTPCCATrackLinea
   fC[13] = fC[13];
   fC[14] = fC[14];
 #endif
-
-//std::cout << fC[0] << "  "<<fC1[0]<<"       "<<fC[2] << "  "<<fC1[2]<<"       "<<fC[5] << "  "<<fC1[5]<<"       "<<fC[9] << "  "<<fC1[9]<<"       "<<fC[14] << "  "<<fC1[14]<<std::endl;
   return 1;
 }
 
@@ -524,7 +515,6 @@ inline bool AliHLTTPCCATrackParam::CorrectForMeanMaterial( float xOverX0,  float
   fC[13] *= corr;
   fC[14] *= corr * corr;
   fC[14] += par.fSigmadE2 * CAMath::Abs( dE );
-//  std::cout << "dE "<<dE<<"    corr "<<corr<<"  fBethe  " <<par.fBethe<<"  XxRo  "<<xTimesRho<<std::endl;
 
   //Multiple scattering******************
 

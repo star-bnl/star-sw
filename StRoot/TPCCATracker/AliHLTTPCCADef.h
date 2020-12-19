@@ -12,11 +12,39 @@
  * Definitions needed for AliHLTTPCCATracker
  *
  */
-#define V5
+
+/**
+ * Obsolete and testing-only definitions
+ */
 //#define AVX1V
 //#define TETA
+//#define NO_NTRACKLET_FIX
 //#define FOURHITSEGMENTS
+#define LOOPER_TEST
+//#define VC_GATHER_SCATTER
+
+/**
+ * Technical options
+ */
 #define CALC_DCA_ON
+
+/**
+ * Basic options
+ */
+#define ITPC_TCUT		// Chi2cut on triplets (first iteration only) x3.5 for iTPC(72)
+#define TRACKLET_EXT		// Use wider cuts on track fittinig and track extension in TrackletConstructor
+#define EXTEND_ALL_TRAKCS	// Extend all tracks in TrackletConstructor
+
+
+/**
+ * Tracking algorithm versions
+ * V6 - basic variant
+ * If none of the versions is selected, standard CA tracking with two iterations will be used.
+ */
+#define V6	// [2 iterations CA] + [saved 3-hit seeds]
+//#define V6_1	// Only with V6. Faster, more clones and ghosts. A bit more efficient(?). [1 iteration CA] + [saved 3-hit seeds]
+//#define V7	// Without V6(V6_1) options. [1 iteration CA] + [new 3-hit seeds (exV5)]
+
 
 
 #define NDEBUG
@@ -60,6 +88,19 @@ static inline uint_m validHitIndexes( const uint_v &v )
   return (static_cast<int_v>( v ) >= int_v( Vc::Zero ) && v < 100000000);
 
 }
+
+#ifdef V6
+struct hit_link {
+  hit_link( int r, int h, int l )
+    : row(r)
+    , hit(h)
+    , link(l)
+  {}
+  int row;
+  int hit;
+  int link;
+};
+#endif
 	
 #ifdef USE_TBB
 // static void AtomicMax( unsigned int volatile *addr, uint_v val ) {
@@ -70,9 +111,9 @@ static inline uint_m validHitIndexes( const uint_v &v )
 #endif //USE_TBB
 
 #ifdef CALC_DCA_ON
-struct point_3d {
-  float x, y, z;
-};
+  struct point_3d{
+    float x, y, z;
+  };
 #endif
 
 // ---------

@@ -42,43 +42,8 @@
 // only when all rows are done, is NTracklets known
 //////////////////////////////////////////////////////////////////////////////
 
-//X template<typename Int, typename Float>
-//X struct SeedRowData {
-//X   Int fRow;
-//X   Int fHitIndex;
-//X };
-//X 
-//X typedef std::vector<SeedRowData<uint_v, sfloat_v> > SeedDataVector; // contains uint_v::Size complete seeds
-//X typedef std::vector<SeedRowData<unsigned int, float> > SeedDataScalar; // contains one complete seed
-//X 
-//X void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, const SliceData &data )
-//X {
-//X   SeedDataVector seed;
-//X   const int lastRow = Parameters::NumberOfRows - 4;
-//X   for ( int rowIndex = 2; rowIndex <= lastRow; ++rowIndex ) {
-//X     // inside the row we're looking for hits that are linked upwards but not downwards, those start
-//X     // a seed
-//X     const int maxStorageSize = ( row.NHits() + int_v::Size - 1 ) / int_v::Size;
-//X     int_v linkUpCompressedStorage[maxStorageSize];
-//X     uint_v hitIndexesCompressedStorage[maxStorageSize];
-//X     int *linkUpCompressed = &linkUpCompressedStorage[0];
-//X     unsigned int *hitIndexesCompressed = &hitIndexesCompressedStorage[0];
-//X     for ( int hitIndex = 0; hitIndex < row.NHits(); hitIndex += int_v::Size ) {
-//X       const int_v linkUp = data.HitLinkUpData( row, hitIndex );
-//X       foreach_bit( int i, linkUp != -1 ) {
-//X         *linkUpCompressed++ = linkUp[i];
-//X         *hitIndexesCompressed++ = hitIndex + i;
-//X       }
-//X     }
-//X   }
-//X }
-
 void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &data, int iter )
 {
-  // enum {
-  //   kArraySize = 10240,
-  //   kMaxStartHits = kArraySize - 1 - int_v::Size
-  // };
 
   Vc::vector<AliHLTTPCCAStartHitId>& startHits = tracker.TrackletStartHits();
 
@@ -94,31 +59,23 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &da
 #endif //USE_TBB
     //X   int_m leftMask( Vc::Zero );
     const AliHLTTPCCARow &row = data.Row( rowIndex );
-//    const AliHLTTPCCARow &middleRow = data.Row( rowIndex + rowStep );
     int startHitsCount = 0;
 
 
     // look through all the hits and look for
     const int numberOfHits = row.NHits();
-//std::cout<<"numberOfHits: "<<numberOfHits<<"\n";
     for ( int hitIndex = 0; hitIndex < numberOfHits; hitIndex += int_v::Size ) {
       const int_v hitIndexes = int_v( Vc::IndexesFromZero ) + hitIndex;
       int_m validHitsMask = hitIndexes < numberOfHits;
-//std::cout<<"validHitsMask: "<<validHitsMask<<" -> ";
-//      validHitsMask &= ( int_v(data.HitDataIsUsed( row ), static_cast<uint_v>(hitIndexes) ) == int_v( Vc::Zero ) ); // not-used hits can be connected only with not-used, so only one check is needed
       int_v hitDataTemp;
       for( unsigned int ii = 0; ii < float_v::Size; ii++ ) {
       	hitDataTemp[ii] = data.HitDataIsUsed( row )[(unsigned int)hitIndexes[ii]];
       }
       validHitsMask &= ( hitDataTemp == int_v( Vc::Zero ) );
-//std::cout<<validHitsMask<<" -> ";
       
       // hits that have a link up but none down == the start of a Track
       const int_v &middleHitIndexes = data.HitLinkUpData( row, hitIndex );
       validHitsMask &= ( data.HitLinkDownData( row, hitIndex ) < int_v( Vc::Zero ) ) && ( middleHitIndexes >= int_v( Vc::Zero ) );
-//std::cout<<validHitsMask<<"\n";
-//std::cout<<"HitLinkDownData( "<<rowIndex<<", "<<hitIndex<<" ): "<<data.HitLinkDownData( row, hitIndex )
-//    <<";   middleHitIndexes: "<<middleHitIndexes<<"\n";
       if ( !validHitsMask.isEmpty() ) { // start hit has been found
 
           // find the length
@@ -126,7 +83,6 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &da
         int nRows = 2;
         int_v upperHitIndexes = middleHitIndexes;
         for (;!validHitsMask.isEmpty() && nRows < AliHLTTPCCAParameters::NeighboursChainMinLength[iter];) {
-//          upperHitIndexes = int_v( data.HitLinkUpData( data.Row( iRow ) ), static_cast<uint_v>( upperHitIndexes ), validHitsMask );
           for( unsigned int i = 0; i < float_v::Size; i++ ) {
             if( !validHitsMask[i] ) continue;
             upperHitIndexes[i] = data.HitLinkUpData( data.Row( iRow ) )[(unsigned int)upperHitIndexes[i]];
@@ -150,7 +106,6 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &da
             curRow2 = data.Row( iRow2 );
 
             data.SetHitAsUsed( curRow2, static_cast<uint_v>( upperHitIndexes2 ), goodChains );
-//            upperHitIndexes2 = int_v( data.HitLinkUpData( curRow2 ), static_cast<uint_v>( upperHitIndexes2 ), goodChains );
             for( unsigned int i = 0; i < float_v::Size; i++ ) {
               if( !goodChains[i] ) continue;
               upperHitIndexes2[i] = data.HitLinkUpData( curRow2 )[(unsigned int)upperHitIndexes2[i]];
@@ -163,9 +118,7 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &da
           for(int i=0; i<int_v::Size; i++)
           {
             if(!validHitsMask[i]) continue;
-//           foreach_bit( int i, validHitsMask ) {
             startHits[hitsStartOffset + startHitsCount++].Set( rowIndex, hitIndex + i, nHits[i] );
-//            std::cout<<" - StartHit: rowIndex: "<<rowIndex<<";   hitIndex: "<<hitIndex<<";   i: "<<i<<";   nHits[i]: "<<nHits[i]<<"\n";
           }
 
           //   // check free space
@@ -184,7 +137,6 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &da
 #endif //USE_TBB
   } // for rowIndex
 
-//   std::cout << *tracker.NTracklets() << " start hits have been found." << std::endl;
 #ifdef USE_TBB
   tbb::parallel_sort( startHits, startHits + *tracker.NTracklets() );
 #else //USE_TBB

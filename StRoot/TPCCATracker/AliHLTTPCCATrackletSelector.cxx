@@ -44,9 +44,7 @@ using std::endl;
 
 void AliHLTTPCCATrackletSelector::run()
 {
-//  fTracks.resize( fTrackletVectors.Size() * uint_v::Size * AliHLTTPCCAParameters::MaxNumberOfRows8 / AliHLTTPCCAParameters::MinimumHitsForTrack ); // should be less, the factor is for safety, since the tracks can be broken into pieces
   fTracks.resize( fNumberOfTracks * uint_v::Size * AliHLTTPCCAParameters::MaxNumberOfRows8 / AliHLTTPCCAParameters::MinimumHitsForTrack ); // should be less, the factor is for safety, since the tracks can be broken into pieces
-//  std::cout<<"\nfTracks.size: "<<fTracks.size()<<"\n";
 #ifdef USE_TBB
   tbb::atomic<int> numberOfTracks;
   tbb::fatomic<int> NHitsTotal;
@@ -59,34 +57,24 @@ void AliHLTTPCCATrackletSelector::run()
   NHitsTotal = 0;
 
   const int NTracklets = fTracker.NTracklets();
-//  std::cout<<"NTracklets: "<<NTracklets<<"\n";
   for ( int iTrackletV = 0; iTrackletV * int_v::Size < NTracklets; ++iTrackletV ) {
-//      std::cout<<"> iTrackletV: "<<iTrackletV<<"\n";
     const TrackletVector &tracklet = fTrackletVectors[iTrackletV];
     const uint_v trackIndexes = uint_v( Vc::IndexesFromZero ) + uint_v(iTrackletV * int_v::Size);
-//    std::cout<<"- trackIndexes: "<<trackIndexes<<"\n";
 
     const uint_v &NTrackletHits = tracklet.NHits();
-//    const uint_m &validTracklets = trackIndexes < NTracklets && NTrackletHits >= uint_v(AliHLTTPCCAParameters::MinimumHitsForTracklet);
     const uint_m &validTracklets = trackIndexes < NTracklets+4 && NTrackletHits >= uint_v(AliHLTTPCCAParameters::MinimumHitsForTracklet);
-//    std::cout<<"- NTrackletHits: "<<NTrackletHits<<"\n";
-//    std::cout<<"- validTracklets: "<<validTracklets<<"\n";
 
     const float_v kMaximumSharedPerHits = 1.f / AliHLTTPCCAParameters::MinimumHitsPerShared;
 
     const uint_v &firstRow = tracklet.FirstRow();
     const uint_v &lastRow  = tracklet.LastRow();
-//    std::cout<<"- firstRow: "<<firstRow<<";   lastRow: "<<lastRow<<"\n";
 
     uint_v nTrackHits( Vc::Zero );
-
-//    const uint_v &weight = SliceData::CalculateHitWeight( NTrackletHits, trackIndexes );
 
     Track *trackCandidates[int_v::Size];
     for(int iV=0; iV<uint_v::Size; iV++)
     {
       if(!validTracklets[iV]) continue;
-//    foreach_bit ( int iV, validTracklets ) {
       trackCandidates[iV] = new Track;
     }
 
@@ -96,7 +84,6 @@ void AliHLTTPCCATrackletSelector::run()
       ++gap;
       const uint_v &hitIndexes = tracklet.HitIndexAtRow( rowIndex ); // hit index for the current row
       const uint_m &validHits = validTracklets && validHitIndexes( hitIndexes );
-//      const uint_m &ownHitsMask = fData.TakeOwnHits( fData.Row( rowIndex ), hitIndexes, validHits, weight );
       const uint_m &ownHitsMask = fData.TakeOwnHits( fData.Row( rowIndex ), hitIndexes, validHits, NTrackletHits );
       const uint_m &canShareHitMask = nShared < static_cast<uint_v>( static_cast<float_v>( nTrackHits ) * kMaximumSharedPerHits );
       const uint_m &saveHitMask = validHits && ( ownHitsMask || canShareHitMask );
@@ -105,7 +92,6 @@ void AliHLTTPCCATrackletSelector::run()
       for(int iV=0; iV<uint_v::Size; iV++)
       {
         if(!validTracklets[iV]) continue;
-//       foreach_bit ( int iV, validTracklets ) {
         if ( saveHitMask[iV] ) {
           assert( hitIndexes[iV] < fData.Row( rowIndex ).NHits() );
           trackCandidates[iV]->fHitIdArray[nTrackHits[iV]].Set( rowIndex, hitIndexes[iV] );
@@ -116,7 +102,6 @@ void AliHLTTPCCATrackletSelector::run()
           fTracks[numberOfTracks] = trackCandidates[iV];
           fTracks[numberOfTracks]->fNumberOfHits = nTrackHits[iV];
           fTracks[numberOfTracks]->fParam = TrackParam( tracklet.Param(), iV );
-//          std::cout<<" --- numberOfTracks: "<<numberOfTracks<<";   NumberOfHits: "<<nTrackHits[iV]<<" - save1\n";
           numberOfTracks++;
         
           trackCandidates[iV] = new Track;
@@ -131,10 +116,7 @@ void AliHLTTPCCATrackletSelector::run()
     for(int iV=0; iV<uint_v::Size; iV++)
     {
       if(!validTracklets[iV]) continue;
-//      std::cout<<" - numberOfTracks: "<<numberOfTracks<<";   nTrackHits[iV]: "<<nTrackHits[iV]<<"\n";
-//     foreach_bit ( int iV, validTracklets ) {
       if ( nTrackHits[iV] >= static_cast<unsigned int>(AliHLTTPCCAParameters::MinimumHitsForTrack) ) {
-//	  std::cout<<"-track - numberOfTracks: "<<numberOfTracks<<";   NumberOfHits: "<<nTrackHits[iV]<<" - save2\n";
         NHitsTotal += nTrackHits[iV];
         
         fTracks[numberOfTracks] = trackCandidates[iV];
@@ -142,7 +124,6 @@ void AliHLTTPCCATrackletSelector::run()
         fTracks[numberOfTracks]->fParam = TrackParam( tracklet.Param(), iV );
         numberOfTracks++;
       } else {
-//	  std::cout<<"!!!delete tracklet!!!\n";
         delete trackCandidates[iV];
       }
     }
@@ -150,6 +131,5 @@ void AliHLTTPCCATrackletSelector::run()
   } // for iTrackletV
   fNumberOfHits = NHitsTotal;
   fTracks.resize( numberOfTracks );
-//  std::cout<<" --- numberOfTracks: "<<numberOfTracks<<"\n";
   fNumberOfTracks = numberOfTracks;
 }

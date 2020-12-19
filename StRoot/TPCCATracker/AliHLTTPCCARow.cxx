@@ -22,30 +22,18 @@
 #include "AliHLTTPCCARow.h"
 
 
-//X AliHLTTPCCARow::AliHLTTPCCARow()
-//X   :
-//X   fFirstHit(0), fNHits(0), fX(0), fMaxY(0), fGrid(),
-//X   fHy0(0),fHz0(0), fHstepY(0),fHstepZ(0), fHstepYi(0), fHstepZi(0),
-//X   fFullSize(0), fFullOffset(0), fFullGridOffset(0),fFullLinkOffset(0)
-//X {
-//X   // dummy constructor
-//X }
-
 #include "BinaryStoreHelper.h"
 
 void AliHLTTPCCARow::StoreToFile( FILE *f, const char *startPointer ) const
 {
   BinaryStoreWrite( fGrid, f );
   BinaryStoreWrite( fNHits, f );
-  //BinaryStoreWrite( fX, f );
   BinaryStoreWrite( fMaxY, f );
   BinaryStoreWrite( fHitNumberOffset, f );
 
   BinaryStoreWrite( fLinkUpData, startPointer, f );
   BinaryStoreWrite( fLinkDownData, startPointer, f );
 
-  // BinaryStoreWrite( fHitDataY, startPointer, f );
-  // BinaryStoreWrite( fHitDataZ, startPointer, f );
   BinaryStoreWrite( fHitPDataY, startPointer, f );
   BinaryStoreWrite( fHitPDataZ, startPointer, f );
   
@@ -60,15 +48,12 @@ void AliHLTTPCCARow::RestoreFromFile( FILE *f, char *startPtr )
 {
   BinaryStoreRead( fGrid, f );
   BinaryStoreRead( fNHits, f );
-  //BinaryStoreRead( fX, f );
   BinaryStoreRead( fMaxY, f );
   BinaryStoreRead( fHitNumberOffset, f );
 
   BinaryStoreRead( fLinkUpData, startPtr, f );
   BinaryStoreRead( fLinkDownData, startPtr, f );
 
-  // BinaryStoreRead( fHitDataY, startPtr, f );
-  // BinaryStoreRead( fHitDataZ, startPtr, f );
   BinaryStoreRead( fHitPDataY, startPtr, f );
   BinaryStoreRead( fHitPDataZ, startPtr, f );
   

@@ -34,7 +34,21 @@ class AliHLTTPCCAGBTrack
     friend std::ostream &operator<<( std::ostream &, const AliHLTTPCCAGBTrack & );
   public:
 
-    AliHLTTPCCAGBTrack(): fFirstHitRef( 0 ), fNHits( 0 ), fInnerParam(), fOuterParam(), fAlpha( 0 ), fNDeDx(0), fDeDx( 0 ), tIsLooper(0), tIsMerged(false), tReverse(false) { ; }
+    AliHLTTPCCAGBTrack()
+      : fInnerParam()
+      , fOuterParam()
+      , fAlpha( 0 )
+      , fDeDx( 0 )
+      , fOuterAlpha( 0 )
+      , fNDeDx(0)
+      , fFirstHitRef( 0 )
+      , fNHits( 0 )
+      , fIsLooper(0)
+      , fReco(false)
+      , fIsClone(false)
+      , fIsMerged(false)
+      , fReverse(false)
+    {}
 
     int NHits()               const { return fNHits; }
     int FirstHitRef()         const { return fFirstHitRef; }
@@ -42,7 +56,6 @@ class AliHLTTPCCAGBTrack
     const AliHLTTPCCATrackParam &InnerParam() const { return fInnerParam; }
     const AliHLTTPCCATrackParam &OuterParam() const { return fOuterParam; }
     float Alpha()            const { return fAlpha; }
-    float OuterAlpha()       const { return fOuterAlpha; }
     int   NDeDx()            const { return fNDeDx; }
     float DeDx()             const { return fDeDx; }
 
@@ -52,7 +65,6 @@ class AliHLTTPCCAGBTrack
     void SetInnerParam( const AliHLTTPCCATrackParam &v ) {  fInnerParam = v; }
     void SetOuterParam( const AliHLTTPCCATrackParam &v ) {  fOuterParam = v; }
     void SetAlpha( float v )               {  fAlpha = v; }
-    void SetOuterAlpha( float v )          {  fOuterAlpha = v; }
     void SetNDeDx( int n)                  {  fNDeDx = n; }
     void SetDeDx( float v )                {  fDeDx = v; }
 
@@ -61,63 +73,47 @@ class AliHLTTPCCAGBTrack
       return ( a->fNHits > b->fNHits );
     }
 
-    // ---
-    void SetMerged() { tIsMerged = true; }
-    bool IsMerged() const { return tIsMerged; }
-    void SetQPt0( float qpt ) { tQPt0 = qpt; }
-    float QPt0() const { return tQPt0; }
-    void SetDzDs0( float dzds ) { tDzDs0 = dzds; }
-    float DzDs0() const { return tDzDs0; }
-    void SetQPt1( float qpt ) { tQPt1 = qpt; }
-    float QPt1() const { return tQPt1; }
-    void SetDzDs1( float dzds ) { tDzDs1 = dzds; }
-    float DzDs1() const { return tDzDs1; }
-    void SetClone( bool c = true ) { tIsClone = c; }
-    bool IsClone() const { return tIsClone; }
-    void SetFirstMC( int mc ) { tFirstMC = mc; }
-    int GetFirstMC() const { return tFirstMC; }
-
-    void SetReco( bool r ) { tReco = r; }
-    bool IsReco() const { return tReco; }
-
-    void SetLooper() { tIsLooper++; }
-    void SetLooperClone() { tIsLooper = -1; }
-    int IsLooper() { return tIsLooper; }
-    int IsLooper() const { return tIsLooper; }
-
-    void SetReverse( bool r = true ) { tReverse = r; }
-    bool IsReverse() const { return tReverse; }
+    void SetMerged() { fIsMerged = true; }
+    bool IsMerged() const { return fIsMerged; }
+    void SetClone( bool c = true ) { fIsClone = c; }
+    bool IsClone() const { return fIsClone; }
+#ifdef LOOPER_TEST
+    void SetFirstMC( int mc ) { fFirstMC = mc; }
+    int GetFirstMC() const { return fFirstMC; }
+#endif
+    float OuterAlpha()            const { return fOuterAlpha; }
+    void SetOuterAlpha( float v )               {  fOuterAlpha = v; }
+    void SetReco( bool r ) { fReco = r; }
+    bool IsReco() const { return fReco; }
+    void SetLooper() { fIsLooper++; }
+    void SetLooperClone() { fIsLooper = -1; }
+    int IsLooper() { return fIsLooper; }
+    int IsLooper() const { return fIsLooper; }
+    void SetReverse( bool r = true ) { fReverse = r; }
+    bool IsReverse() const { return fReverse; }
 
     void ReverseInnerPar() { fInnerParam.ReversePar(); }
     void ReverseOuterPar() { fOuterParam.ReversePar(); }
-    // ---
 
   protected:
 
-    int fFirstHitRef;        // index of the first hit reference in track->hit reference array
-    int fNHits;              // number of track hits
     AliHLTTPCCATrackParam fInnerParam; // fitted track parameters
     AliHLTTPCCATrackParam fOuterParam;
     float fAlpha;             //* Alpha angle of the parametrerisation
+    float fDeDx;              //* DE/DX
     float fOuterAlpha;
     int   fNDeDx;
-    float fDeDx;              //* DE/DX
+    int fFirstHitRef;        // index of the first hit reference in track->hit reference array
+    int fNHits;              // number of track hits
+    int fIsLooper;
+#ifdef LOOPER_TEST
+    int fFirstMC;
+#endif
 
-    // ---
-    float tQPt0;
-    float tDzDs0;
-    float tQPt1;
-    float tDzDs1;
-    int tFirstMC;
-
-    int tIsLooper;
-
-    bool tReco;
-    bool tIsClone;
-    bool tIsMerged;
-
-    bool tReverse;
-    // ---
+    bool fReco;
+    bool fIsClone;
+    bool fIsMerged;
+    bool fReverse;
 };
 
 std::istream &operator>>( std::istream &, AliHLTTPCCAGBTrack & );

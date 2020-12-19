@@ -127,7 +127,9 @@ namespace AliHLTTPCCAParameters
 //  static const float NeighbourCurvCutY[3] = {0.03,  .1, 3.};//{0.03,  .1, 3.};
 //  static const float NeighbourCurvCutZ[3] = {0.03,  .1, 3.};//{0.03,  .1, 3.};
 #else
-  static const float NeighbourChiCut[3] = {0.2,  3., 3.};//{0.2,  3., 3.};
+
+  static const float NeighbourChiCut[3] = {0.2,  3., 3.};
+
 #endif // 1
 
    /**

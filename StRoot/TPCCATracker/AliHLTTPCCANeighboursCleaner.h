@@ -18,7 +18,11 @@ class AliHLTTPCCASliceData;
  *
  */
 struct AliHLTTPCCANeighboursCleaner {
+#ifndef V6
   static void run( const int numberOfRows, AliHLTTPCCASliceData &data, const AliHLTTPCCAParam &param );
+#else
+  static void run( const int numberOfRows, AliHLTTPCCASliceData &data, const AliHLTTPCCAParam &param, int it, std::vector<hit_link>& save_up_links );
+#endif
 };
 
 #endif

@@ -313,8 +313,6 @@ bool AliHLTTPCCATrackParam::Rotate( float alpha, float maxSinPhi )
   //                      {  0, 0, j2, 0,  0 }, // SinPhi
   //                    {  0, 0, 0,  1,  0 }, // DzDs
   //                    {  0, 0, 0,  0,  1 } }; // Kappa
-  //cout<<"alpha="<<alpha<<" "<<x<<" "<<y<<" "<<sP<<" "<<cP<<" "<<j0<<" "<<j2<<endl;
-  //cout<<"      "<<fC[0]<<" "<<fC[1]<<" "<<fC[6]<<" "<<fC[10]<<" "<<fC[4]<<" "<<fC[5]<<" "<<fC[8]<<" "<<fC[12]<<endl;
   fC[0] *= j0 * j0;
   fC[1] *= j0;
   fC[3] *= j0;
@@ -374,73 +372,6 @@ bool AliHLTTPCCATrackParam::Rotate( float alpha, AliHLTTPCCATrackLinearisation &
   return 1;
 }
 
-
-
-/*bool AliHLTTPCCATrackParam::Filter( float y, float z, float err2Y, float err2Z, float maxSinPhi )
-{
-  assert( maxSinPhi > 0.f );
-  /// Add the y,z measurement with the Kalman filter
-
-  float
-  c00 = fC[ 0],
-  c11 = fC[ 2],
-  c20 = fC[ 3],
-  c31 = fC[ 7],
-  c40 = fC[10];
-
-  err2Y += c00;
-  err2Z += c11;
-
-  float
-  z0 = y - fP[0],
-  z1 = z - fP[1];
-
-  if ( ISUNLIKELY( err2Y < 1.e-8f ) || ISUNLIKELY( err2Z < 1.e-8f ) ) return 0;
-
-  float mS0 = 1.f / err2Y;
-  float mS2 = 1.f / err2Z;
-
-  // K = CHtS
-
-  float k00, k11, k20, k31, k40;
-
-  k00 = c00 * mS0;
-  k20 = c20 * mS0;
-  k40 = c40 * mS0;
-
-  k11 = c11 * mS2;
-  k31 = c31 * mS2;
-
-  float sinPhi = fP[2] + k20 * z0  ;
-
-  if ( ISUNLIKELY( CAMath::Abs( sinPhi ) >= maxSinPhi ) ) return 0;
-
-  fNDF  += 2;
-  fChi2 += mS0 * z0 * z0 + mS2 * z1 * z1 ;
-
-  fP[ 0] += k00 * z0 ;
-  fP[ 1] += k11 * z1 ;
-  fP[ 2] = sinPhi ;
-  fP[ 3] += k31 * z1 ;
-  fP[ 4] += k40 * z0 ;
-
-  fC[ 0] -= k00 * c00 ;
-  fC[ 3] -= k20 * c00 ;
-  fC[ 5] -= k20 * c20 ;
-  fC[10] -= k40 * c00 ;
-  fC[12] -= k40 * c20 ;
-  fC[14] -= k40 * c40 ;
-
-  fC[ 2] -= k11 * c11 ;
-  fC[ 7] -= k31 * c11 ;
-  fC[ 9] -= k31 * c31 ;
-
-  return 1;
-}*/
-
-
-
-
 #if !defined(HLTCA_GPUCODE)
 #include <iostream>
 #endif
@@ -450,14 +381,8 @@ void AliHLTTPCCATrackParam::Print() const
   //* print parameters
 
 #if !defined(HLTCA_GPUCODE)
-    std::cout << "track: x=" << GetX() << " c=" << GetSignCosPhi() 
-             << ", y = " << GetY() << " +/- " << GetErrY() 
-             << ", z = " << GetZ() << " +/- " << GetErrZ() 
-             << " sinphi =  " << GetSinPhi() << " +/- " << GetErrSinPhi()
-             << " dZ/ds = " << GetDzDs() << " +/- " << GetErrDzDs()
-             << " q/pT = " << GetQPt()  << " +/- " << GetErrQPt()
-             << std::endl;
-  //  std::cout << "errs2: " << GetErr2Y() << " " << GetErr2Z() << " " << GetErr2SinPhi() << " " << GetErr2DzDs() << " " << GetErr2QPt() << std::endl;
+  std::cout << "track: x=" << GetX() << " c=" << GetSignCosPhi() << ", P= " << GetY() << " " << GetZ() << " " << GetSinPhi() << " " << GetDzDs() << " " << GetQPt() << std::endl;
+  std::cout << "errs2: " << GetErr2Y() << " " << GetErr2Z() << " " << GetErr2SinPhi() << " " << GetErr2DzDs() << " " << GetErr2QPt() << std::endl;
 #endif
 }
 

@@ -613,8 +613,6 @@ inline float_m AliHLTTPCCATrackParamVector::Rotate( const float_v &alpha, const 
   //                      {  0, 0, j2, 0,  0 }, // SinPhi
   //                    {  0, 0, 0,  1,  0 }, // DzDs
   //                    {  0, 0, 0,  0,  1 } }; // Kappa
-  //cout<<"alpha="<<alpha<<" "<<x<<" "<<y<<" "<<sP<<" "<<cP<<" "<<j0<<" "<<j2<<endl;
-  //cout<<"      "<<fC[0]<<" "<<fC[1]<<" "<<fC[6]<<" "<<fC[10]<<" "<<fC[4]<<" "<<fC[5]<<" "<<fC[8]<<" "<<fC[12]<<endl;
   fC[0](mReturn) *= j0 * j0;
   fC[1](mReturn) *= j0;
   fC[3](mReturn) *= j0;
@@ -626,7 +624,6 @@ inline float_m AliHLTTPCCATrackParamVector::Rotate( const float_v &alpha, const 
   fC[5](mReturn) *= j2 * j2;
   fC[8](mReturn) *= j2;
   fC[12](mReturn) *= j2;
-  //cout<<"      "<<fC[0]<<" "<<fC[1]<<" "<<fC[6]<<" "<<fC[10]<<" "<<fC[4]<<" "<<fC[5]<<" "<<fC[8]<<" "<<fC[12]<<endl;
   return mReturn;
 }
 

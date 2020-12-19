@@ -79,6 +79,7 @@ class AliHLTTPCCASliceData
     int_v HitLinkDownData( const AliHLTTPCCARow &row, const int_i &hitIndex ) const;
     int_v HitLinkUpData  ( const AliHLTTPCCARow &row, const uint_v &hitIndexes ) const;
     int_v HitLinkDownData( const AliHLTTPCCARow &row, const uint_v &hitIndexes ) const;
+    void SetHitLinkUpData( const AliHLTTPCCARow &row, int hitIndex, int value );
     void SetHitLinkUpData  ( const AliHLTTPCCARow &row, const int_i &hitIndex, const int_v &value );
     void SetHitLinkDownData( const AliHLTTPCCARow &row, const int_i &hitIndex, const int_v &value );
     void SetHitLinkUpData  ( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_v &value, const int_m &mask );
@@ -101,18 +102,10 @@ class AliHLTTPCCASliceData
      * Return the y and z coordinate(s) of the given hit(s).
      */
     float HitDataXS( const AliHLTTPCCARow &row, int hitIndex ) const;
-    // float HitDataYS( const AliHLTTPCCARow &row, int hitIndex ) const;
-    // float HitDataZS( const AliHLTTPCCARow &row, int hitIndex ) const;
     float HitPDataYS( const AliHLTTPCCARow &row, int hitIndex ) const;
     float HitPDataZS( const AliHLTTPCCARow &row, int hitIndex ) const;
 
-    // const float *HitDataY( const AliHLTTPCCARow &row ) const;
-    // const float *HitDataZ( const AliHLTTPCCARow &row ) const;
     const int *HitDataIsUsed( const AliHLTTPCCARow &row ) const;
-    // float_v HitDataY( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const;
-    // float_v HitDataZ( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const;
-    // float_v HitDataY( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const float_m &mask ) const;
-    // float_v HitDataZ( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const float_m &mask ) const;
     float_v HitPDataY( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const;
     float_v HitPDataZ( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const;
     float_v HitPDataY( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const float_m &mask ) const;
@@ -123,12 +116,6 @@ class AliHLTTPCCASliceData
     float UnusedHitPDataZ( const AliHLTTPCCARow &row, const unsigned int hitIndex );
     void SetHitAsUsed( const AliHLTTPCCARow &row, const unsigned int hitIndex );
 
-    // ---
-//    float_v UnusedHitPDataYV( const AliHLTTPCCARow &row, const unsigned int hitIndex, const float_m &mask ) const;
-//    float_v UnusedHitPDataZV( const AliHLTTPCCARow &row, const unsigned int hitIndex, const float_m &mask ) const;
-    // ---
-
-    //int_v  HitDataIsUsed( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const;
     void SetHitAsUsed( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_m &mask );
     void SetHitAsUsedInTrackFit( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_m &mask );
     void SetHitAsUsedInTrackExtend( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_m &mask );
@@ -159,7 +146,6 @@ class AliHLTTPCCASliceData
      * only one. So a unique number ( row index is good ) is added in the least significant part of
      * the weight
      */
-//    static uint_v CalculateHitWeight( uint_v numberOfHits, uint_v unique );
 
     uint_m TakeOwnHits( const AliHLTTPCCARow &row, const uint_v &hitIndex, const uint_m &mask,
         const uint_v &weights ) const;
@@ -197,15 +183,11 @@ class AliHLTTPCCASliceData
     const float *RowX() const { return fParam->RowX(); }
     float RowX( int i ) const { return fParam->RowX( i ); }
 
-    // --- test grig structure
-//    const AliHLTTPCCAGrid &Grid( const unsigned int iRow ) const { return fGrid[iRow]; }
-
   private:
     enum {
       VectorSizeFactor = uint_v::Size / float_v::Size
     };
 
-//    void createGrid( AliHLTTPCCARow *row, const AliHLTTPCCAClusterData &data, const int clusterDataOffset );
     void createGrid( AliHLTTPCCARow *row, const AliHLTTPCCAClusterData &data, const int clusterDataOffset, const int iRow );
 
     AliHLTFixedArray<AliHLTTPCCARow, AliHLTArraySize<AliHLTTPCCAParameters::MaxNumberOfRows8+1>, AliHLTFullyCacheLineAligned> fRows; // The row objects needed for most accessor functions
@@ -214,8 +196,6 @@ class AliHLTTPCCASliceData
     int fMemorySize;           // size of the allocated memory in bytes
     char *fMemory;             // pointer to the allocated memory where all the following arrays reside in
     const AliHLTTPCCAParam *fParam;  // pointer to the Param object for gathering X coordinates of rows
-    // --- test grig structure
-//    AliHLTTPCCAGrid fGrid[45];   // grid of hits
 };
 
 inline int AliHLTTPCCASliceData::HitLinkUpDataS  ( const AliHLTTPCCARow &row, int hitIndex ) const
@@ -252,7 +232,6 @@ inline int_v AliHLTTPCCASliceData::HitLinkDownData( const AliHLTTPCCARow &row, c
 
 inline int_v AliHLTTPCCASliceData::HitLinkUpData  ( const AliHLTTPCCARow &row, const uint_v &hitIndexes ) const
 {
-//  return int_v( row.fLinkUpData, hitIndexes );
   int_v r;
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     r[i] = row.fLinkUpData[(unsigned int)hitIndexes[i]];
@@ -262,12 +241,16 @@ inline int_v AliHLTTPCCASliceData::HitLinkUpData  ( const AliHLTTPCCARow &row, c
 
 inline int_v AliHLTTPCCASliceData::HitLinkDownData( const AliHLTTPCCARow &row, const uint_v &hitIndexes ) const
 {
-//  return int_v( row.fLinkDownData, hitIndexes );
   int_v r;
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     r[i] = row.fLinkDownData[(unsigned int)hitIndexes[i]];
   }
   return r;
+}
+
+inline void AliHLTTPCCASliceData::SetHitLinkUpData( const AliHLTTPCCARow &row, int hitIndex, int value )
+{
+  row.fLinkUpData[hitIndex] = value;
 }
 
 inline void AliHLTTPCCASliceData::SetHitLinkUpData  ( const AliHLTTPCCARow &row, const int_i &hitIndex, const int_v &value )
@@ -284,28 +267,37 @@ inline void AliHLTTPCCASliceData::SetHitLinkDownData( const AliHLTTPCCARow &row,
 
 inline void AliHLTTPCCASliceData::SetHitLinkUpData  ( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_v &value, const int_m &mask )
 { 
-//   value.scatter( row.fLinkUpData, hitIndexes, mask );
+#ifdef VC_GATHER_SCATTER
+   value.scatter( row.fLinkUpData, hitIndexes, mask );
+#else
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !mask[i] ) continue;
     row.fLinkUpData[(unsigned int)hitIndexes[i]] = value[i];
   }
+#endif
 }
 
 inline void AliHLTTPCCASliceData::SetHitLinkDownData( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_v &value, const int_m &mask )
 { 
-//  value.scatter( row.fLinkDownData, hitIndexes, mask );
+#ifdef VC_GATHER_SCATTER
+  value.scatter( row.fLinkDownData, hitIndexes, mask );
+#else
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !mask[i] ) continue;
     row.fLinkDownData[(unsigned int)hitIndexes[i]] = value[i];
   }
+#endif
 }
 
 inline void AliHLTTPCCASliceData::SetHitLinkUpData  ( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_v &value)
 {
-//  value.scatter( row.fLinkUpData, hitIndexes);
+#ifdef VC_GATHER_SCATTER
+  value.scatter( row.fLinkUpData, hitIndexes);
+#else
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     row.fLinkUpData[(unsigned int)hitIndexes[i]] = value[i];
   }
+#endif
 }
 
 inline void AliHLTTPCCASliceData::SetHitLinkUpData  ( const AliHLTTPCCARow &row, const unsigned int hitIndex, const int value )
@@ -316,14 +308,18 @@ inline void AliHLTTPCCASliceData::SetHitLinkUpData  ( const AliHLTTPCCARow &row,
 
 inline void AliHLTTPCCASliceData::SetHitLinkDownData( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_v &value)
 {
-//  value.scatter( row.fLinkDownData, hitIndexes);
+#ifdef VC_GATHER_SCATTER
+  value.scatter( row.fLinkDownData, hitIndexes);
+#else
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     row.fLinkDownData[(unsigned int)hitIndexes[i]] = value[i];
   }
+#endif
 }
 
 inline void AliHLTTPCCASliceData::SetUnusedHitLinkUpData( const AliHLTTPCCARow &row, const AliHLTTPCCARow &rowUp, const uint_v &hitIndexes, const int_v &value, const int_m &mask )
 {
+#ifndef VC_GATHER_SCATTER
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !mask[i] ) continue;
     if( value[i] == -1 ) {
@@ -332,15 +328,18 @@ inline void AliHLTTPCCASliceData::SetUnusedHitLinkUpData( const AliHLTTPCCARow &
     }
     row.fLinkUpData[(unsigned int)row.fHitIndex[(unsigned int)hitIndexes[i]]] = rowUp.fHitIndex[(unsigned int)value[i]];
   }
-//  const uint_v ind( row.fHitIndex, hitIndexes, mask );
-//  uint_v val(rowUp.fHitIndex, static_cast<uint_v>(value), mask && value != -1);
-//  int_v val2(val);
-//  val2(value == -1) = value;
-//  val2.scatter( row.fLinkUpData, ind, mask );
+#else
+  const uint_v ind( row.fHitIndex, hitIndexes, mask );
+  uint_v val(rowUp.fHitIndex, static_cast<uint_v>(value), mask && value != -1);
+  int_v val2(val);
+  val2(value == -1) = value;
+  val2.scatter( row.fLinkUpData, ind, mask );
+#endif
 }
 
 inline void AliHLTTPCCASliceData::SetUnusedHitLinkDownData( const AliHLTTPCCARow &row, const AliHLTTPCCARow &rowDn, const uint_v &hitIndexes, const int_v &value, const int_m &mask )
 {
+#ifndef VC_GATHER_SCATTER
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !mask[i] ) continue;
     if( value[i] == -1 ) {
@@ -349,33 +348,29 @@ inline void AliHLTTPCCASliceData::SetUnusedHitLinkDownData( const AliHLTTPCCARow
     }
     row.fLinkDownData[(unsigned int)row.fHitIndex[(unsigned int)hitIndexes[i]]] = rowDn.fHitIndex[(unsigned int)value[i]];
   }
-//  const uint_v ind( row.fHitIndex, hitIndexes, mask );
-//  uint_v val(rowDn.fHitIndex, static_cast<uint_v>(value), mask && value != -1);
-//  int_v val2(val);
-//  val2(value == -1) = value;
-//  val2.scatter( row.fLinkDownData, ind, mask );
+#else
+  const uint_v ind( row.fHitIndex, hitIndexes, mask );
+  uint_v val(rowDn.fHitIndex, static_cast<uint_v>(value), mask && value != -1);
+  int_v val2(val);
+  val2(value == -1) = value;
+  val2.scatter( row.fLinkDownData, ind, mask );
+#endif
 }
 
 inline void AliHLTTPCCASliceData::SetUnusedHitLinkDataScalar( const AliHLTTPCCARow &row, const AliHLTTPCCARow &rowUp, const AliHLTTPCCARow &rowDn, unsigned int *hitIndexes )
 {
   row.fLinkUpData[(unsigned int)row.fHitIndex[hitIndexes[1]]] = rowUp.fHitIndex[hitIndexes[2]];
   row.fLinkDownData[(unsigned int)row.fHitIndex[hitIndexes[1]]] = rowDn.fHitIndex[hitIndexes[0]];
-//  std::cout<<">nBinDn: "<<hitIndexes[0]<<";   Index: "<<rowDn.fHitIndex[hitIndexes[0]]<<"\n";
-//  std::cout<<">nBinUp: "<<hitIndexes[2]<<";   Index: "<<rowUp.fHitIndex[hitIndexes[2]]<<"\n---\n";
 }
 
 inline void AliHLTTPCCASliceData::GetHitCoordinateVectors( const AliHLTTPCCARow &row, const vector<unsigned int> &indexes, float_v *Y, float_v *Z )
 {
-//  std::cout<<">1> Y: "<<Y<<"\n";
   for( unsigned int iHv = 0; iHv < std::min(indexes.size(), float_v::Size); iHv++ ) {	//TODO indexes.size() - slow!
-//    std::cout<<">>> set Y["<<iHv<<"] with index "<<indexes[iHv]<<" to "<<row.fUnusedHitPDataY[indexes[iHv]]<<"\n";
-//      std::cout<<"vecsize: "<<indexes.size()<<"\n";
     (*Y)[iHv] = row.fUnusedHitPDataY[indexes[iHv]];
     (*Z)[iHv] = row.fUnusedHitPDataZ[indexes[iHv]];
   }
   (*Y) *= float_v(1e-2);
   (*Z) *= float_v(1e-2);
-//  std::cout<<">2> Y: "<<Y<<"\n";
 }
 
 
@@ -389,26 +384,6 @@ inline float AliHLTTPCCASliceData::HitDataXS( const AliHLTTPCCARow &row, int hit
   }
   return RowX(i); 
 }
-
-// inline float AliHLTTPCCASliceData::HitDataYS( const AliHLTTPCCARow &row, int hitIndex ) const
-// {
-//   return row.fHitDataY[hitIndex];
-// }
-
-// inline float AliHLTTPCCASliceData::HitDataZS( const AliHLTTPCCARow &row, int hitIndex ) const
-// {
-//   return row.fHitDataZ[hitIndex];
-// }
-
-// inline const float *AliHLTTPCCASliceData::HitDataY( const AliHLTTPCCARow &row ) const
-// {
-//   return row.fHitDataY;
-// }
-
-// inline const float *AliHLTTPCCASliceData::HitDataZ( const AliHLTTPCCARow &row ) const
-// {
-//   return row.fHitDataZ;
-// }
 
 inline float AliHLTTPCCASliceData::HitPDataYS( const AliHLTTPCCARow &row, int hitIndex ) const
 {
@@ -427,15 +402,10 @@ inline const int *AliHLTTPCCASliceData::HitDataIsUsed( const AliHLTTPCCARow &row
 
 inline void AliHLTTPCCASliceData::SetHitAsUsed( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_m &mask )
 {
-//  int_v(Vc::One).scatter( row.fHitDataIsUsed, static_cast<uint_v>(hitIndexes), mask); // TODO why don't work w\o cast????
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !mask[i] ) continue;
     row.fHitDataIsUsed[(unsigned int)hitIndexes[i]] = 1;
   }
-  // int *array = row.fHitDataIsUsed; // TODO don't work with scatter!
-  // foreach_bit(int i, mask){
-  //   array[hitIndexes[i]] = 1;
-  // }
 }
 
 inline void AliHLTTPCCASliceData::SetHitAsUsed( const AliHLTTPCCARow &row, const unsigned int hitIndex )
@@ -445,41 +415,26 @@ inline void AliHLTTPCCASliceData::SetHitAsUsed( const AliHLTTPCCARow &row, const
 
 inline void AliHLTTPCCASliceData::SetHitAsUsedInStartSegment( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_m &mask )
 {
-//  int_v(Vc::One).scatter( row.fHitDataIsUsed, static_cast<uint_v>(hitIndexes), mask); // TODO why don't work w\o cast????
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !mask[i] ) continue;
     row.fHitDataIsUsed[(unsigned int)hitIndexes[i]] = 3;
   }
-  // int *array = row.fHitDataIsUsed; // TODO don't work with scatter!
-  // foreach_bit(int i, mask){
-  //   array[hitIndexes[i]] = 1;
-  // }
 }
 
 inline void AliHLTTPCCASliceData::SetHitAsUsedInTrackFit( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_m &mask )
 {
-//  int_v(2).scatter( row.fHitDataIsUsed, static_cast<uint_v>(hitIndexes), mask);
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !mask[i] ) continue;
     row.fHitDataIsUsed[(unsigned int)hitIndexes[i]] = 2;
   }
-  // int *array = row.fHitDataIsUsed;
-  // foreach_bit(int i, mask){
-  //   array[hitIndexes[i]] = 2;
-  // }
 }
 
 inline void AliHLTTPCCASliceData::SetHitAsUsedInTrackExtend( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_m &mask )
 {
-//  int_v(3).scatter( row.fHitDataIsUsed, static_cast<uint_v>(hitIndexes), mask);
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !mask[i] ) continue;
     row.fHitDataIsUsed[(unsigned int)hitIndexes[i]] = 3;
   }
-  // int *array = row.fHitDataIsUsed;
-  // foreach_bit(int i, mask){
-  //   array[hitIndexes[i]] = 3;
-  // }
 }
 
 inline void AliHLTTPCCASliceData::CleanUsedHits( int rowIndex, bool isFirst )
@@ -496,11 +451,14 @@ inline void AliHLTTPCCASliceData::CleanUsedHits( int rowIndex, bool isFirst )
     for ( unsigned int i = 0; i < numberOfHits; i += uint_v::Size ) {
       const uint_v hitIndexes = uint_v( Vc::IndexesFromZero ) + i;
       const int_m validHitsMask = (hitIndexes < numberOfHits);
-//      hitIndexes.scatter( row.fHitIndex, hitIndexes, validHitsMask );
+#ifdef VC_GATHER_SCATTER
+      hitIndexes.scatter( row.fHitIndex, hitIndexes, validHitsMask );
+#else
       for( unsigned int j = 0; j < float_v::Size; j++ ) {
 	if( !validHitsMask[j] ) continue;
 	row.fHitIndex[(unsigned int)hitIndexes[j]] = hitIndexes[j];
       }
+#endif
     }
     row.fNUnusedHits = numberOfHits;
   }
@@ -509,18 +467,14 @@ inline void AliHLTTPCCASliceData::CleanUsedHits( int rowIndex, bool isFirst )
     unsigned int iUH = 0;
     for ( unsigned int i = 0; i < numberOfHits; i += uint_v::Size ) {
       const uint_v hitIndexes = uint_v( Vc::IndexesFromZero ) + i;
-//      const int_m validHitsMask = (hitIndexes < numberOfHits)
-//        && ( int_v( HitDataIsUsed( row ), static_cast<uint_v>(hitIndexes) ) == int_v( Vc::Zero ) );
       int_v hitDataTemp;
       for( unsigned int ii = 0; ii < float_v::Size; ii++ ) {
 	hitDataTemp[ii] = HitDataIsUsed( row )[(unsigned int)hitIndexes[ii]];
       }
-//      std::cout<<"hitDataTemp: "<<hitDataTemp<<"\n";
       const int_m validHitsMask = (hitIndexes < numberOfHits) && ( hitDataTemp == int_v( Vc::Zero ) );
       for(unsigned int iV=0; iV<int_v::Size; iV++)
       {
         if(!validHitsMask[iV]) continue;
-//         foreach_bit( int iV, validHitsMask ) {
         row.fUnusedHitPDataY[iUH] = row.fHitPDataY[(unsigned int)hitIndexes[iV]];
         row.fUnusedHitPDataZ[iUH] = row.fHitPDataZ[(unsigned int)hitIndexes[iV]];
         row.fHitIndex[iUH] = hitIndexes[iV];
@@ -558,18 +512,14 @@ inline void AliHLTTPCCASliceData::CleanUsedHitsType( int rowIndex, int type )
     unsigned int iUH = 0;
     for ( unsigned int i = 0; i < numberOfHits; i += uint_v::Size ) {
       const uint_v hitIndexes = uint_v( Vc::IndexesFromZero ) + i;
-//      const int_m validHitsMask = (hitIndexes < numberOfHits)
-//        && ( int_v( HitDataIsUsed( row ), static_cast<uint_v>(hitIndexes) ) == int_v( Vc::Zero ) );
       int_v hitDataTemp;
       for( unsigned int ii = 0; ii < float_v::Size; ii++ ) {
 	hitDataTemp[ii] = HitDataIsUsed( row )[(unsigned int)hitIndexes[ii]];
       }
-//      std::cout<<"hitDataTemp: "<<hitDataTemp<<"\n";
       const int_m validHitsMask = (hitIndexes < numberOfHits) && ( hitDataTemp != int_v( type ) );
       for(unsigned int iV=0; iV<int_v::Size; iV++)
       {
         if(!validHitsMask[iV]) continue;
-//         foreach_bit( int iV, validHitsMask ) {
         row.fUnusedHitPDataY[iUH] = row.fHitPDataY[(unsigned int)hitIndexes[iV]];
         row.fUnusedHitPDataZ[iUH] = row.fHitPDataZ[(unsigned int)hitIndexes[iV]];
         row.fHitIndex[iUH] = hitIndexes[iV];
@@ -595,118 +545,73 @@ inline void AliHLTTPCCASliceData::CleanUsedHitsType( int rowIndex, int type )
     }
 }
 
-// inline float_v AliHLTTPCCASliceData::HitDataY( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const
-// {
-//   //Matthias 01.24.13  assert( hitIndex * sizeof( float_v::EntryType ) % VectorAlignment == 0 );
-//   return float_v( &row.fHitDataY[hitIndex] );
-// }
-
-// inline float_v AliHLTTPCCASliceData::HitDataZ( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const
-// {
-//   //Matthias 01.24.13  assert( hitIndex * sizeof( float_v::EntryType ) % VectorAlignment == 0 );
-//   return float_v( &row.fHitDataZ[hitIndex] );
-// }
-
-// inline float_v AliHLTTPCCASliceData::HitDataY( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const float_m &mask ) const
-// {
-//   return float_v( row.fHitDataY, hitIndexes, mask );
-// }
-
-// inline float_v AliHLTTPCCASliceData::HitDataZ( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const float_m &mask ) const
-// {
-//   return float_v( row.fHitDataZ, hitIndexes, mask );
-// }
-
 inline float_v AliHLTTPCCASliceData::HitPDataY( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const
 {
-//  PackHelper::TPackedY_v r;
   float_v r;
   for(unsigned  int i = 0; i < float_v::Size; i++){
     r[i] = row.fHitPDataY[hitIndex + i];
   }
-//  return PackHelper::UnpackY( row, r );
   r *= float_v(1e-2);
   return r;
 }
 
 inline float_v AliHLTTPCCASliceData::HitPDataZ( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const
 {
-//  PackHelper::TPackedZ_v r;
   float_v r;
   for(unsigned  int i = 0; i < float_v::Size; i++){ 
     r[i] = row.fHitPDataZ[hitIndex + i];
   }
-//  return PackHelper::UnpackZ( row, r );
   r *= float_v(1e-2);
   return r;
 }
 
 inline float_v AliHLTTPCCASliceData::HitPDataY( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const float_m &mask ) const
 {
-//  PackHelper::TPackedY_v r;
   float_v r;
   for(unsigned int i=0; i<float_v::Size; i++)
   {
     if(!mask[i]) continue;
-//   foreach_bit(int i, mask){ 
     r[i] = row.fHitPDataY[(unsigned int)hitIndexes[i]];
   }
-//  return PackHelper::UnpackY( row, r );
   r *= float_v(1e-2);
   return r;
 }
 
 inline float_v AliHLTTPCCASliceData::HitPDataZ( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const float_m &mask ) const
 {
-//  PackHelper::TPackedZ_v r;
   float_v r;
   for(unsigned int i=0; i<float_v::Size; i++)
   {
     if(!mask[i]) continue;
-//   foreach_bit(int i, mask){ 
     r[i] = row.fHitPDataZ[(unsigned int)hitIndexes[i]];
   }
-//  return PackHelper::UnpackZ( row, r );
   r *= float_v(1e-2);
   return r;
 }
 
 inline float_v AliHLTTPCCASliceData::UnusedHitPDataY( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const float_m &mask ) const
 {
-//  PackHelper::TPackedY_v r;
   float_v r;
   for(unsigned int i=0; i<float_v::Size; i++)
   {
     if(!mask[i]) continue;
-//   foreach_bit(int i, mask){ 
     r[i] = row.fUnusedHitPDataY[(unsigned int)hitIndexes[i]];
   }
-//  return PackHelper::UnpackY( row, r );
   r *= float_v(1e-2);
   return r;
 }
 
 inline float_v AliHLTTPCCASliceData::UnusedHitPDataZ( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const float_m &mask ) const
 {
-//  PackHelper::TPackedZ_v r;
   float_v r;
   for(unsigned int i=0; i<float_v::Size; i++)
   {
     if(!mask[i]) continue;
-//   foreach_bit(int i, mask){ 
     r[i] = row.fUnusedHitPDataZ[(unsigned int)hitIndexes[i]];
   }
-//  return PackHelper::UnpackZ( row, r );
   r *= float_v(1e-2);
   return r;
 }
-
-// ---
-//inline float_v AliHLTTPCCASliceData::UnusedHitPDataYV( const AliHLTTPCCARow &row, const unsigned int hitIndex, const float_m &mask )
-//{
-//  //
-//}
-// ---
 
 inline float AliHLTTPCCASliceData::UnusedHitPDataY( const AliHLTTPCCARow &row, const unsigned int hitIndex )
 {
@@ -718,14 +623,8 @@ inline float AliHLTTPCCASliceData::UnusedHitPDataZ( const AliHLTTPCCARow &row, c
   return row.fUnusedHitPDataZ[hitIndex] * 1e-2;
 }
 
-// inline int_v AliHLTTPCCASliceData::HitDataIsUsed( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const
-// { // don't really need this
-//   return int_v( &row.fHitDataIsUsed[hitIndex] );
-// }
-
 inline uint_v AliHLTTPCCASliceData::FirstHitInBin( const AliHLTTPCCARow &row, uint_v binIndexes ) const
 {
-//  const uint_v tmp( row.fFirstHitInBin, binIndexes );
   uint_v tmp;
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     tmp[i] = row.fFirstHitInBin[(unsigned int)binIndexes[i]];
@@ -750,7 +649,6 @@ inline unsigned int AliHLTTPCCASliceData::FirstUnusedHitInBin( const AliHLTTPCCA
 
 inline uint_v AliHLTTPCCASliceData::FirstUnusedHitInBin( const AliHLTTPCCARow &row, uint_v binIndexes ) const
 {
-//  const uint_v tmp( row.fFirstUnusedHitInBin, binIndexes );
   uint_v tmp;
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     tmp[i] = row.fFirstUnusedHitInBin[(unsigned int)binIndexes[i]];
@@ -773,16 +671,9 @@ inline const AliHLTTPCCARow &AliHLTTPCCASliceData::Row( int rowIndex ) const
   return fRows[rowIndex];
 }
 
-//inline uint_v AliHLTTPCCASliceData::CalculateHitWeight( uint_v numberOfHits, uint_v unique )
-//{
-////  return ( numberOfHits << 8 ) | ( unique & 0xff ); // CHECKME we don't need this unique?
-//  return numberOfHits( numberOfHits << 8 ) | ( unique & 0 );
-//}
-
 inline uint_m AliHLTTPCCASliceData::TakeOwnHits( const AliHLTTPCCARow &row,
     const uint_v &hitIndex, const uint_m &mask, const uint_v &weights ) const
 {
-//  const uint_v storedWeights( row.fHitWeights, hitIndex, mask );
   int_v storedWeights;
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !mask[i] ) continue;
@@ -790,18 +681,20 @@ inline uint_m AliHLTTPCCASliceData::TakeOwnHits( const AliHLTTPCCARow &row,
   }
   const uint_m own = storedWeights == weights && mask;
   const uint_v takenMarker = std::numeric_limits<uint_v>::max();
-//  takenMarker.scatter( row.fHitWeights, hitIndex, own );
+#ifdef VC_GATHER_SCATTER
+  takenMarker.scatter( row.fHitWeights, hitIndex, own );
+#else
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !own[i] ) continue;
     row.fHitWeights[(unsigned int)hitIndex[i]] = takenMarker[i];
   }
+#endif
   return own;
 }
 
 inline void AliHLTTPCCASliceData::MaximizeHitWeight( const AliHLTTPCCARow &row,
     const uint_v &hitIndex, const uint_v &weight )
 {
-//std::cout<<">>>>>MaximizeHitWeight - start\n";
   const int_m mask = validHitIndexes( hitIndex );
   VALGRIND_CHECK_VALUE_IS_DEFINED( weight );
 #ifndef NVALGRIND
@@ -812,27 +705,17 @@ inline void AliHLTTPCCASliceData::MaximizeHitWeight( const AliHLTTPCCARow &row,
   }
 #endif
   // XXX critical section if the TrackletConstructor gets multi-threaded
-//  const uint_v oldWeight( row.fHitWeights, hitIndex, mask );
-//std::cout<<">>>>>MaximizeHitWeight - 1\n";
   int_v oldWeight;
-//std::cout<<">>>>>>>oldWeight: "<<oldWeight<<";   mask: "<<mask<<"\n";
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !mask[i] ) continue;
-//std::cout<<"-------i "<<i;
-//std::cout<<";   hitIndexS: "<<hitIndex[i];
-//std::cout<<";   hitIndexU: "<<(unsigned int)hitIndex[i];
-//std::cout<<";   add weight: "<<row.fHitWeights[(unsigned int)hitIndex[i]]<<"\n";
     oldWeight[i] = row.fHitWeights[(unsigned int)hitIndex[i]];
   }
-//std::cout<<">>>>>MaximizeHitWeight - 2\n";
   debugF() << "scatter HitWeigths " << weight << " to " << hitIndex << ( weight > oldWeight && mask ) << " old: " << oldWeight << std::endl;
-//  weight.scatter( row.fHitWeights, hitIndex, weight > oldWeight && mask );
   int_m maskTemp = weight > oldWeight && mask;
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     if( !maskTemp[i] ) continue;
     row.fHitWeights[(unsigned int)hitIndex[i]] = weight[i];
   }
-//std::cout<<">>>>>MaximizeHitWeight - 3\n";
 }
 
 inline uint_v AliHLTTPCCASliceData::HitWeight( const AliHLTTPCCARow &row, const uint_v &hitIndex, const uint_m &mask ) const
@@ -866,25 +749,21 @@ static inline float fastInvSqrt( float _x )
   return x.f;
 }
 
-//inline void AliHLTTPCCASliceData::createGrid( AliHLTTPCCARow *row, const AliHLTTPCCAClusterData &data, const int clusterDataOffset )
 inline void AliHLTTPCCASliceData::createGrid( AliHLTTPCCARow *row, const AliHLTTPCCAClusterData &data, const int clusterDataOffset, const int iRow )
 {
   const float minCellSize = AliHLTTPCCAParameters::MinCellSize;
   if ( row->NHits() <= 0 ) { // no hits or invalid data
     // grid coordinates don't matter, since there are no hits
     row->fGrid.CreateEmpty();
-//fGrid[iRow].CreateEmpty();
     return;
   } else if ( row->NHits() == 1 ) {
     const float y = data.Y( clusterDataOffset );
     const float z = data.Z( clusterDataOffset );
     row->fGrid.Create1( y, z, minCellSize, minCellSize );
-//fGrid[iRow].Create1( y, z, minCellSize, minCellSize );
     return;
   }
 
   const float norm = fastInvSqrt( AliHLTTPCCAParameters::GridCreationCoeff*row->fNHits ); // TODO parameter
-//  const float norm = 1./sqrt( 5*row->fNHits );
 
   float yMin =  1.e3f;
   float yMax = -1.e3f;
@@ -898,8 +777,6 @@ inline void AliHLTTPCCASliceData::createGrid( AliHLTTPCCARow *row, const AliHLTT
       float tmp[4] = { data.Y( i ), data.Z( i ), 0.f, 0.f };
       float_v r;
       r.load( tmp, Vc::Unaligned);
-//      const float_v r = float_v::loadUnaligned( tmp );
-      //std::cout << r << std::endl;
       min = CAMath::Min( min, r );
       max = CAMath::Max( max, r );
     }
@@ -936,7 +813,6 @@ inline void AliHLTTPCCASliceData::createGrid( AliHLTTPCCARow *row, const AliHLTT
 //   sz = ( zMax - zMin ) * norm;
   
   row->fGrid.Create( yMin, yMax, zMin, zMax, sy, sz );
-//fGrid[iRow].Create( yMin, yMax, zMin, zMax, sy, sz );
 }
 
 

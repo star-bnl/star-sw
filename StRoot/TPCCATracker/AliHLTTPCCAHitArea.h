@@ -17,10 +17,6 @@
 #include "AliHLTTPCCARow.h"
 #include "AliHLTTPCCASliceDataVector.h"
 
-//struct AliHLTTPCCAGrid;
-//class AliHLTTPCCARow;
-//class AliHLTTPCCASliceData;
-
 /**
  * @class ALIHLTTPCCAHitArea
  *
@@ -101,7 +97,6 @@ class AliHLTTPCCAHitAreaScalar
 
 typedef AliHLTTPCCAHitAreaScalar HitAreaScalar;
 
-//inline AliHLTTPCCAHitAreaScalar::AliHLTTPCCAHitAreaScalar( const AliHLTTPCCARow &row, const unsigned int iRow, const AliHLTTPCCASliceData &slice, const float &y, const float &z, float dy, float dz )
 inline AliHLTTPCCAHitAreaScalar::AliHLTTPCCAHitAreaScalar( const AliHLTTPCCARow &row, const unsigned int iRow, const AliHLTTPCCASliceData &slice, float minY, float minZ, float maxY, float maxZ )
   : fRow( row ), fSlice( slice )
   , fHitYlst( 0 )

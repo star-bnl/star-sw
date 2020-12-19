@@ -15,7 +15,7 @@
 #ifdef DRAW_L
 #include "AliHLTTPCCADisplay.h"
 #endif
-#include "TMath.h"
+
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -35,14 +35,13 @@ void AliHLTTPCCALooperMerger::FillSegments()
     int iHit1 = fFirstSliceHit[iDsrc1.Slice()] + slices[iDsrc1.Slice()]->ClusterData().RowOffset( iDsrc1.Row() ) + iDsrc1.Cluster();
     int iHit2 = fFirstSliceHit[iDsrc2.Slice()] + slices[iDsrc2.Slice()]->ClusterData().RowOffset( iDsrc2.Row() ) + iDsrc2.Cluster();
     int iHit3 = fFirstSliceHit[iDsrc3.Slice()] + slices[iDsrc3.Slice()]->ClusterData().RowOffset( iDsrc3.Row() ) + iDsrc3.Cluster();
-    if (iHit1 == iHit3) continue;
     const AliHLTTPCCAGBHit &hit1r = fGBHits[iHit1];
     const AliHLTTPCCAGBHit &hit2r = fGBHits[iHit2];
     const AliHLTTPCCAGBHit &hit3r = fGBHits[iHit3];
 
     float x_seg_1(hit1r.X()), x_seg_2(hit2r.X()), x_seg_3(hit3r.X());
     float y_seg_1(hit1r.Y()), y_seg_2(hit2r.Y()), y_seg_3(hit3r.Y());
-    float z_seg_1(hit1r.Z()), /* z_seg_2(hit2r.Z()),*/ z_seg_3(hit3r.Z());
+    float z_seg_1(hit1r.Z()), z_seg_2(hit2r.Z()), z_seg_3(hit3r.Z());
     //
     float cos11(slices[hit1r.ISlice()]->Param().SinAlpha());
     float sin11(slices[hit1r.ISlice()]->Param().CosAlpha());
@@ -57,8 +56,8 @@ void AliHLTTPCCALooperMerger::FillSegments()
     float x_seg_3_g = -(y_seg_3 * cos33 - x_seg_3 * sin33);
     float y_seg_3_g = x_seg_3 * cos33 + y_seg_3 * sin33;
       // Center of the circle in global coords
-//    float cos1(slices[hit2r.ISlice()]->Param().SinAlpha());
-//    float sin1(slices[hit2r.ISlice()]->Param().CosAlpha());
+    float cos1(slices[hit2r.ISlice()]->Param().SinAlpha());
+    float sin1(slices[hit2r.ISlice()]->Param().CosAlpha());
     float A_g = x_seg_2_g - x_seg_1_g;
     float B_g = y_seg_2_g - y_seg_1_g;
     float C_g = x_seg_3_g - x_seg_1_g;
@@ -73,6 +72,7 @@ void AliHLTTPCCALooperMerger::FillSegments()
       Cr = sqrt( (x_seg_1_g-Cxg)*(x_seg_1_g-Cxg) + (y_seg_1_g-Cyg)*(y_seg_1_g-Cyg) );
     }
       // Nearest end farthest points of the circle to (0;0)
+    if( fOutput.ClusterIDsrc( track.FirstClusterRef() ).Row() == fOutput.ClusterIDsrc( track.FirstClusterRef()+track.NClusters()-1 ).Row() ) continue;
     float k_cl_g = Cyg / Cxg;
     float b_cl_g = Cyg - k_cl_g*Cxg;
     float d_cl_g = (pow((2*k_cl_g*b_cl_g - 2*Cxg-2*Cyg*k_cl_g),2)-(4+4*k_cl_g*k_cl_g)*(b_cl_g*b_cl_g-Cr*Cr+Cxg*Cxg+Cyg*Cyg-2*Cyg*b_cl_g));
@@ -91,21 +91,12 @@ void AliHLTTPCCALooperMerger::FillSegments()
     float AB_xy = sqrt( (x_seg_1_g-x_seg_3_g)*(x_seg_1_g-x_seg_3_g) + (y_seg_1_g-y_seg_3_g)*(y_seg_1_g-y_seg_3_g) );
     float BC_xy_dn = sqrt( (x_dn_r_g-x_seg_1_g)*(x_dn_r_g-x_seg_1_g) + (y_dn_r_g-y_seg_1_g)*(y_dn_r_g-y_seg_1_g) );
     float BC_xy_up = sqrt( (x_up_r_g-x_seg_3_g)*(x_up_r_g-x_seg_3_g) + (y_up_r_g-y_seg_3_g)*(y_up_r_g-y_seg_3_g) );
-    float AB_xy_curve = 0;
-    if (TMath::Abs(Cr) > 0) {
-      if (TMath::Abs( 0.5*AB_xy/Cr ) < 1) {
-	AB_xy_curve = 2*Cr*asin( 0.5*AB_xy/Cr );
-      } else {
-	AB_xy_curve = 2*Cr*TMath::Sign( TMath::PiOver2(), 0.5*AB_xy/Cr );
-      }
-    }
-    float sinPhi =  TMath::Min(1.0, TMath::Max(-1.0,0.5*BC_xy_dn/Cr));
-    float BC_xy_dn_curve = 2*Cr*asin( sinPhi );
-    sinPhi =  TMath::Min(1.0, TMath::Max(-1.0, 0.5*BC_xy_up/Cr));
-    float BC_xy_up_curve = 2*Cr*asin( sinPhi );
+    float AB_xy_curve = 2*Cr*asin( 0.5*AB_xy/Cr );
+    float BC_xy_dn_curve = 2*Cr*asin( 0.5*BC_xy_dn/Cr );
+    float BC_xy_up_curve = 2*Cr*asin( 0.5*BC_xy_up/Cr );
     float AB_z = fabs( z_seg_1 - z_seg_3 );
-//     float BC_z_dn = AB_z*BC_xy_dn/AB_xy;
-//     float BC_z_up = AB_z*BC_xy_up/AB_xy;
+    float BC_z_dn = AB_z*BC_xy_dn/AB_xy;
+    float BC_z_up = AB_z*BC_xy_up/AB_xy;
     float dz_dn = ( AB_z*BC_xy_dn_curve ) / AB_xy_curve;
     float dz_up = ( AB_z*BC_xy_up_curve ) / AB_xy_curve;
     float h = 2*3.14*Cr*AB_z/AB_xy_curve;
@@ -140,7 +131,6 @@ void AliHLTTPCCALooperMerger::FillSegments()
     segment->isUsed = false;
     fSegments.push_back( *segment );
   }
-//  std::sort( fSegments.begin(), fSegments.end(), LooperSegment::CompareL );
 }
 
 void AliHLTTPCCALooperMerger::CheckSegments()
@@ -151,40 +141,32 @@ disp.SetTPC( slices[0]->Param() );
 disp.SetTPCView();
 disp.DrawTPC();
 #endif
-//  std::sort( fSegments.begin(), fSegments.end(), LooperSegment::CompareL );
   vector<int> loopers;
-  for(unsigned int iSeg = 0; iSeg < fSegments.size(); iSeg++ ) {
-    //    bool newLooper = true;
+  for( int iSeg = 0; iSeg < fSegments.size(); iSeg++ ) {
+    bool newLooper = true;
     if( fSegments[iSeg].isUsed ) {
-      //      newLooper = false;
+      newLooper = false;
     } else {
       fSegments[iSeg].isUsed = true;
       fSegments[iSeg].iLooper = fNLoopers;
       loopers.push_back(1);
       fNLoopers++;
     }
-    for(unsigned int jSeg = iSeg+1; jSeg < fSegments.size(); jSeg++ ) {
-//      if( fSegments[jSeg].isUsed ) continue;
+    for( int jSeg = iSeg+1; jSeg < fSegments.size(); jSeg++ ) {
       if( fSegments[iSeg].x_h_up == fSegments[jSeg].x_h_up && fSegments[iSeg].y_h_up == fSegments[jSeg].y_h_up
 	  && fSegments[iSeg].x_h_dn == fSegments[jSeg].x_h_dn && fSegments[iSeg].y_h_dn == fSegments[jSeg].y_h_dn ) continue;
-//      if( fabs(fSegments[iSeg].z_dn - fSegments[jSeg].z_dn) < 0.3*fSegments[iSeg].h ) continue;
       if( fabs(fSegments[iSeg].z_dn - fSegments[jSeg].z_up) < 0.25*fSegments[iSeg].h ) continue;
       if( fabs(fSegments[iSeg].z_up - fSegments[jSeg].z_dn) < 0.25*fSegments[iSeg].h ) continue;
-//      if( fSegments[iSeg].z_h_up > fSegments[jSeg].z_h_dn && fSegments[iSeg].z_h_dn < fSegments[jSeg].z_h_up ) continue;
-//      if( fSegments[iSeg].z_h_up < fSegments[jSeg].z_h_dn && fSegments[iSeg].z_h_dn > fSegments[jSeg].z_h_up ) continue;
       float i_left = std::min( fSegments[iSeg].z_h_up, fSegments[iSeg].z_h_dn );
       float i_right = std::max( fSegments[iSeg].z_h_up, fSegments[iSeg].z_h_dn );
       float j_left = std::min( fSegments[jSeg].z_h_up, fSegments[jSeg].z_h_dn );
       float j_right = std::max( fSegments[jSeg].z_h_up, fSegments[jSeg].z_h_dn );
-//      if( std::min( fSegments[iSeg].z_h_up, fSegments[iSeg].z_h_dn ) < std::max( fSegments[jSeg].z_h_up, fSegments[jSeg].z_h_dn )
-//      && std::max( fSegments[iSeg].z_h_up, fSegments[iSeg].z_h_dn ) > std::min( fSegments[jSeg].z_h_up, fSegments[jSeg].z_h_dn ) ) continue;
       if( i_right > j_left && i_left < j_right ) continue;
       if( fabs(fSegments[iSeg].DzDs_abs - fSegments[jSeg].DzDs_abs) > 0.4 ) continue;
       float z_i_mid = (fSegments[iSeg].z_up + fSegments[iSeg].z_dn)*0.5;
       float z_j_mid = (fSegments[jSeg].z_up + fSegments[jSeg].z_dn)*0.5;
       if( (fabs( z_i_mid - z_j_mid ) > fSegments[iSeg].h*2 || fabs( z_i_mid - z_j_mid ) > fSegments[jSeg].h*2) && fSegments[iSeg].Cr > 15 ) continue;
       float r_mid = (fSegments[iSeg].Cr + fSegments[jSeg].Cr)/2;
-//      	float r_lim = 0.25*r_mid;
       float r_lim = 0.25*fSegments[iSeg].Cr;
       if( fabs(fSegments[iSeg].Cr - fSegments[jSeg].Cr) < r_lim ) {
       	float xy_lim = 5;//0.2*r_mid;
@@ -236,80 +218,65 @@ disp.DrawTPC();
     if( loopers[i] != 1 ) continue;
     for( int iSeg = 0; iSeg < fSegments.size(); iSeg++ ) {
       if( fSegments[iSeg].iLooper != i ) continue;
-const AliHLTTPCCAMergedTrack &track = fOutput.Track( fSegments[iSeg].iTr );
-float x0, y0, z0;
-if( track.NClusters() > 65 ) continue;
-for( int ih = 0; ih < track.NClusters(); ih++ ) {
-  const DataCompressor::SliceRowCluster &iDsrc1 = fOutput.ClusterIDsrc( track.FirstClusterRef() + ih );
-  int iHit1 = fFirstSliceHit[iDsrc1.Slice()] + slices[iDsrc1.Slice()]->ClusterData().RowOffset( iDsrc1.Row() ) + iDsrc1.Cluster();
-  const AliHLTTPCCAGBHit &hit1r = fGBHits[iHit1];
-  float x_seg_1(hit1r.X());
-  float y_seg_1(hit1r.Y());
-  float z_seg_1(hit1r.Z());
-  float cos11(slices[hit1r.ISlice()]->Param().SinAlpha());
-  float sin11(slices[hit1r.ISlice()]->Param().CosAlpha());
-  float x_seg_1_g = -(y_seg_1 * cos11 - x_seg_1 * sin11);
-  float y_seg_1_g = x_seg_1 * cos11 + y_seg_1 * sin11;
-  disp.DrawHitGlobal( x_seg_1_g, y_seg_1_g, z_seg_1, kGreen, 0.25 );
-//  if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, 45, 0.15 );
-  if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, kGreen, 0.15 );
-//  if( ih == 0 && counter > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0s, y0s, z0s, kRed, 0.15 );
-  x0 = x_seg_1_g;
-  y0 = y_seg_1_g;
-  z0 = z_seg_1;
-//  counter++;
-//  if( ih == track.NClusters()-1 ) {
-//    x0s = x_seg_1_g;
-//    y0s = y_seg_1_g;
-//    z0s = z_seg_1;
-//  }
-}
+      const AliHLTTPCCAMergedTrack &track = fOutput.Track( fSegments[iSeg].iTr );
+      float x0, y0, z0;
+      if( track.NClusters() > 65 ) continue;
+      for( int ih = 0; ih < track.NClusters(); ih++ ) {
+        const DataCompressor::SliceRowCluster &iDsrc1 = fOutput.ClusterIDsrc( track.FirstClusterRef() + ih );
+        int iHit1 = fFirstSliceHit[iDsrc1.Slice()] + slices[iDsrc1.Slice()]->ClusterData().RowOffset( iDsrc1.Row() ) + iDsrc1.Cluster();
+        const AliHLTTPCCAGBHit &hit1r = fGBHits[iHit1];
+        float x_seg_1(hit1r.X());
+        float y_seg_1(hit1r.Y());
+        float z_seg_1(hit1r.Z());
+        float cos11(slices[hit1r.ISlice()]->Param().SinAlpha());
+        float sin11(slices[hit1r.ISlice()]->Param().CosAlpha());
+        float x_seg_1_g = -(y_seg_1 * cos11 - x_seg_1 * sin11);
+        float y_seg_1_g = x_seg_1 * cos11 + y_seg_1 * sin11;
+        disp.DrawHitGlobal( x_seg_1_g, y_seg_1_g, z_seg_1, kGreen, 0.25 );
+//      if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, 45, 0.15 );
+        if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, kGreen, 0.15 );
+//      if( ih == 0 && counter > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0s, y0s, z0s, kRed, 0.15 );
+        x0 = x_seg_1_g;
+        y0 = y_seg_1_g;
+        z0 = z_seg_1;
+      }
     }
   }
   //
   for( int i = 0; i < fNLoopers; i++ ) {
-    std::cout<<"> looper: "<<i<<";   nSegments: "<<loopers[i]<<"\n";
-//disp.DrawTPC();
     if( loopers[i] < 2 ) continue;
-float x0s(-1000), y0s(-1000), z0s(-1000);
-int counter = 0;
+    float x0s(-1000), y0s(-1000), z0s(-1000)
+    int counter = 0;
     for( int iSeg = 0; iSeg < fSegments.size(); iSeg++ ) {
       if( fSegments[iSeg].iLooper != i ) continue;
-//if( !(fSegments[iSeg].QPt_abs > 14.33 && fSegments[iSeg].QPt_abs < 14.34) && !(fSegments[iSeg].QPt_abs > 13.89 && fSegments[iSeg].QPt_abs < 13.91) ) continue;
-      std::cout<<" --- iSeg: "<<iSeg<<";   Cx: "<<fSegments[iSeg].Cx<<";   Cy: "<<fSegments[iSeg].Cy<<";   Cr: "<<fSegments[iSeg].Cr<<";   DzDs: "<<fSegments[iSeg].DzDs_abs<<"\n";
-      std::cout<<"         x_up: "<<fSegments[iSeg].x_up<<";   x_dn: "<<fSegments[iSeg].x_dn<<";   y_up: "<<fSegments[iSeg].y_up<<";   y_dn: "<<fSegments[iSeg].y_dn<<"\n";
-      std::cout<<"         iLooper: "<<fSegments[iSeg].iLooper<<"\n";
-//disp.DrawHitGlobal( fSegments[iSeg].Cx, fSegments[iSeg].Cy, fSegments[iSeg].z_dn, kBlack, 0.5 );
-//disp.DrawHitGlobal( fSegments[iSeg].x_dn, fSegments[iSeg].y_dn, fSegments[iSeg].z_dn, kGreen, 0.75 );
-//disp.DrawHitGlobal( fSegments[iSeg].x_up, fSegments[iSeg].y_up, fSegments[iSeg].z_up, kOrange, 0.75 );
-const AliHLTTPCCAMergedTrack &track = fOutput.Track( fSegments[iSeg].iTr );
-float x0, y0, z0;
-for( int ih = 0; ih < track.NClusters(); ih++ ) {
-  const DataCompressor::SliceRowCluster &iDsrc1 = fOutput.ClusterIDsrc( track.FirstClusterRef() + ih );
-  int iHit1 = fFirstSliceHit[iDsrc1.Slice()] + slices[iDsrc1.Slice()]->ClusterData().RowOffset( iDsrc1.Row() ) + iDsrc1.Cluster();
-  const AliHLTTPCCAGBHit &hit1r = fGBHits[iHit1];
-  float x_seg_1(hit1r.X());
-  float y_seg_1(hit1r.Y());
-  float z_seg_1(hit1r.Z());
-  float cos11(slices[hit1r.ISlice()]->Param().SinAlpha());
-  float sin11(slices[hit1r.ISlice()]->Param().CosAlpha());
-  float x_seg_1_g = -(y_seg_1 * cos11 - x_seg_1 * sin11);
-  float y_seg_1_g = x_seg_1 * cos11 + y_seg_1 * sin11;
-  disp.DrawHitGlobal( x_seg_1_g, y_seg_1_g, z_seg_1, kBlue, 0.25 );
-  if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, kBlue, 0.15 );
+      const AliHLTTPCCAMergedTrack &track = fOutput.Track( fSegments[iSeg].iTr );
+      float x0, y0, z0;
+      for( int ih = 0; ih < track.NClusters(); ih++ ) {
+	const DataCompressor::SliceRowCluster &iDsrc1 = fOutput.ClusterIDsrc( track.FirstClusterRef() + ih );
+	int iHit1 = fFirstSliceHit[iDsrc1.Slice()] + slices[iDsrc1.Slice()]->ClusterData().RowOffset( iDsrc1.Row() ) + iDsrc1.Cluster();
+	const AliHLTTPCCAGBHit &hit1r = fGBHits[iHit1];
+	float x_seg_1(hit1r.X());
+	float y_seg_1(hit1r.Y());
+	float z_seg_1(hit1r.Z());
+	float cos11(slices[hit1r.ISlice()]->Param().SinAlpha());
+	float sin11(slices[hit1r.ISlice()]->Param().CosAlpha());
+	float x_seg_1_g = -(y_seg_1 * cos11 - x_seg_1 * sin11);
+	float y_seg_1_g = x_seg_1 * cos11 + y_seg_1 * sin11;
+	disp.DrawHitGlobal( x_seg_1_g, y_seg_1_g, z_seg_1, kBlue, 0.25 );
+	if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, kBlue, 0.15 );
 //  disp.DrawHitGlobal( x_seg_1_g, y_seg_1_g, z_seg_1, kGreen, 0.25 );
 //  if( ih > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0, y0, z0, kGreen, 0.15 );
 //  if( ih == 0 && counter > 0 ) disp.SpecDrawLineG( x_seg_1_g, y_seg_1_g, z_seg_1, x0s, y0s, z0s, kRed, 0.15 );
-  x0 = x_seg_1_g;
-  y0 = y_seg_1_g;
-  z0 = z_seg_1;
-  counter++;
-  if( ih == track.NClusters()-1 ) {
-    x0s = x_seg_1_g;
-    y0s = y_seg_1_g;
-    z0s = z_seg_1;
-  }
-}
+	x0 = x_seg_1_g;
+	y0 = y_seg_1_g;
+	z0 = z_seg_1;
+	counter++;
+	if( ih == track.NClusters()-1 ) {
+	  x0s = x_seg_1_g;
+	  y0s = y_seg_1_g;
+	  z0s = z_seg_1;
+	}
+      }
     }
 //disp.Ask();
   }
@@ -322,11 +289,6 @@ void AliHLTTPCCALooperMerger::SaveSegments()
 {
   if( !fSegments.size() ) return;
   struct SortSegments {
-//    SortSegments( LooperSegment* seg ) {
-//      iLooper = seg->iLooper;
-//      iTrack = seg->iTr;
-//      z_h_dn = seg->z_h_dn;
-//    }
     int iOrigSeg;
     int iLooper;
     int iTrack;
@@ -342,7 +304,7 @@ void AliHLTTPCCALooperMerger::SaveSegments()
     }
   };
   SortSegments segments[fSegments.size()];
-  for(unsigned int iSeg = 0; iSeg < fSegments.size(); iSeg++ ) {
+  for( int iSeg = 0; iSeg < fSegments.size(); iSeg++ ) {
     segments[iSeg].iLooper = fSegments[iSeg].iLooper;
     segments[iSeg].iTrack = fSegments[iSeg].iTr;
     segments[iSeg].z_h_dn = fSegments[iSeg].z_h_dn;
@@ -355,10 +317,10 @@ void AliHLTTPCCALooperMerger::SaveSegments()
   int tLooper = segments[0].iLooper;
   float tQPt = fSegments[segments[0].iOrigSeg].QPt_abs;
   int tNSeg = 1;
-  for(unsigned int iSeg = 0; iSeg < fSegments.size()-1; iSeg++ ) {
+  for( int iSeg = 0; iSeg < fSegments.size()-1; iSeg++ ) {
     if( segments[iSeg].iLooper != tLooper ) {
       if( tQPt > fSegments[segments[iSeg-1].iOrigSeg].QPt_abs ) {
-	for(unsigned int i = iSeg - tNSeg; i < iSeg; i++ ) segments[i].revers = true;
+	for( int i = iSeg - tNSeg; i < iSeg; i++ ) segments[i].revers = true;
       }
       tLooper = segments[iSeg].iLooper;
       tQPt = fSegments[segments[iSeg].iOrigSeg].QPt_abs;
@@ -368,7 +330,7 @@ void AliHLTTPCCALooperMerger::SaveSegments()
   }
   std::sort( &(segments[0]), &(segments[fSegments.size()-1]), SortSegments::comp );
   int iLooper = 0;
-  for(unsigned int iSeg = 1; iSeg < fSegments.size()-1; iSeg++ ) {
+  for( int iSeg = 1; iSeg < fSegments.size()-1; iSeg++ ) {
     int prevTr = -1;
     iLooper = segments[iSeg].iLooper;
     while( segments[iSeg].iLooper == iLooper && iSeg < fSegments.size() ) {

@@ -30,12 +30,6 @@
 class AliHLTTPCCATrack;
 class AliHLTTPCCATrackParam;
 class AliHLTTPCCAClusterData;
-//class AliHLTTPCCASliceOutput;
-
-//X using Vc::int_v;
-//X using Vc::uint_v;
-//X using Vc::float_v;
-//X using Vc::Mask;
 
 /**
  * @class AliHLTTPCCATracker
@@ -211,25 +205,6 @@ inline void AliHLTTPCCATracker::GetErrors2( const uint_v &rowIndexes, const AliH
 
   fParam.GetClusterErrors2( rowIndexes, t, Err2Y, Err2Z );
 }
-///mvz start 20.01.2010
-/*
-inline void AliHLTTPCCATracker::GetErrors2( int iRow, const float_v &z, const float_v &sinPhi,
-    const float_v &DzDs, float_v *Err2Y, float_v *Err2Z ) const
-{
-  //
-  // Use calibrated cluster error from OCDB
-  //
-
-  VALGRIND_CHECK_VALUE_IS_DEFINED( z );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( DzDs );
-
-  fParam.GetClusterErrors2( iRow, z, sinPhi, DzDs, *Err2Y, *Err2Z );
-}
-inline void AliHLTTPCCATracker::GetErrors2( const uint_v &iRow, const float_v &z, const float_v &sinPhi,
-    const float_v &DzDs, float_v *Err2Y, float_v *Err2Z ) const {
-  fParam.GetClusterErrors2( iRow, z, sinPhi, DzDs, *Err2Y, *Err2Z );
-}*/
-///mvz end 20.01.2010
 typedef AliHLTTPCCATracker Tracker;
 
 #endif

@@ -62,14 +62,10 @@ void AliHLTTPCCAGrid::Create( float yMin, float yMax, float zMin, float zMax, fl
   fYMinOverStep = yMin * fStepYInv;
   fZMinOverStep = zMin * fStepZInv;
 
-//   std::cout << "fYMinOverStep " << yMax * fStepYInv - fYMinOverStep  << "fZMinOverStep " << zMax * fStepZInv - fZMinOverStep   << std::endl;
   fNy = static_cast<unsigned int>( yMax * fStepYInv - fYMinOverStep + 1.f );
   fNz = static_cast<unsigned int>( zMax * fStepZInv - fZMinOverStep + 1.f );
 
-//   std::cout << "fNy " << fNy  << "fNz " << fNz   << std::endl;
   fN = fNy * fNz;
-
-  //printf( "Grid::Create( %f, %f, %f, %f, %f, %f ): %d (%d x %d) with %f, %f\n", yMin, yMax, zMin, zMax, sy, sz, fN, fNy, fNz, fYMinOverStep, fZMinOverStep );
 }
 
 

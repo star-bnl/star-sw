@@ -33,7 +33,9 @@ class AliHLTTPCCATracker::NeighboursFinder
   
   private:
     void executeOnRow( int rowIndex ) const;
+#if 0
     void executeOnRowV1( int rowIndex ) const;
+#endif
 
     AliHLTTPCCATracker *fTracker;
     SliceData &fData;
@@ -111,6 +113,10 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
   static const float kAreaSizeZ = AliHLTTPCCAParameters::NeighbourAreaSizeTgZ[fIter];
   static const int kMaxN = 20; // TODO minimaze
 
+  float koeff = 1.;
+#ifdef ITPC_TCUT
+  if( fTracker->Param().NRows() > 45 ) koeff = 3.5;
+#endif
 //#define USE_CURV_CUT // TODO don't work, problem with error estimation
 #ifdef USE_CURV_CUT  
   float curv2Cut =  AliHLTTPCCAParameters::NeighbourCurvCut[fIter] * .5 * ( UpDx * DnDx * ( UpDx - DnDx ) ); // max curv^2*(dx1*dx2*(dx1+dx2))^2 = (dslopeY^2+dslopeZ^2)*(dx1*dx2)^2 = (dy1*dx2-dy2*dx1)^2+(dz1*dx2-dz2*dx1)^2
@@ -118,7 +124,7 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
   const float UpErr2 = (rowIndex - rowStep < AliHLTTPCCAParameters::NumberOfInnerRows) ? 0.06*0.06 : 0.12*0.12,
               DnErr2 = (rowIndex + rowStep < AliHLTTPCCAParameters::NumberOfInnerRows) ? 0.06*0.06 : 0.12*0.12;
 #else // USE_CURV_CUT  
-  const float chi2Cut = AliHLTTPCCAParameters::NeighbourChiCut[fIter]*AliHLTTPCCAParameters::NeighbourChiCut[fIter] * 4.f * ( UpDx * UpDx + DnDx * DnDx );
+  const float chi2Cut = AliHLTTPCCAParameters::NeighbourChiCut[fIter]*AliHLTTPCCAParameters::NeighbourChiCut[fIter] * 4.f * ( UpDx * UpDx + DnDx * DnDx ) * koeff;
 #endif // USE_CURV_CUT  
   // some step sizes on the current row. the uints in hits multiplied with the step size give
   // the offset on the grid
@@ -261,20 +267,11 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
     assert( ((bestDn >= -1) && (bestDn < rowDn.NUnusedHits()) && validHitsMask) == validHitsMask );
     fData.SetUnusedHitLinkUpData( row, rowUp, hitIndexes, bestUp, validHitsMask);
     fData.SetUnusedHitLinkDownData( row, rowDn, hitIndexes, bestDn, validHitsMask);
-
-// #ifdef DRAW TODO uncomment and fix problem with DRAW_EVERY_LINK
-//     if ( DRAW_EVERY_LINK ) {
-//       foreach_bit ( int i, validHitsMask && bestUp != -1 && bestDn != -1 ) {
-//         AliHLTTPCCADisplay::Instance().DrawSliceLink( rowIndex, hitIndex + i, -1, -1, 1 );
-//       }
-//       AliHLTTPCCADisplay::Instance().Update();
-//     }
-// #endif
   } // for hitIndex
 
 }
 
-
+#if 0
 inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRowV1( int rowIndex ) const
 {
   // references to the rows above and below
@@ -512,6 +509,7 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRowV1( int rowIndex )
     hits1.clear();
     hits2.clear();
 }
+#endif
 
 
 #endif

@@ -60,20 +60,23 @@ AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTT
     fIz.setZero( invalidMask );
 
       // for given fIz (which is min atm.) get
-//    fIh.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin, mask ); // first and
+#ifdef VC_GATHER_SCATTER
+    fIh.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin, mask ); // first and
+    fHitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin + fBDY, mask ); // last hit index in the bin
+#else
     for( unsigned int i = 0; i < float_v::Size; i++ ) {
       if( !mask[i] ) continue;
       fIh[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)fIndYmin[i]];
       fHitYlst[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)(fIndYmin[i] + fBDY[i])];
     }
-//    fHitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin + fBDY, mask ); // last hit index in the bin
+#endif
   } else {
-//    fIh = fSlice.FirstUnusedHitInBin( fRow, fIndYmin );
-//    fHitYlst = fSlice.FirstUnusedHitInBin( fRow, fIndYmin + fBDY );
-    for( unsigned int i = 0; i < float_v::Size; i++ ) {
-      fIh[i] = (int)fSlice.FirstUnusedHitInBin( fRow, fIndYmin )[i];
-      fHitYlst[i] = (int)fSlice.FirstUnusedHitInBin( fRow, fIndYmin + fBDY )[i];
-    }
+    fIh = fSlice.FirstUnusedHitInBin( fRow, fIndYmin );
+    fHitYlst = fSlice.FirstUnusedHitInBin( fRow, fIndYmin + fBDY );
+//    for( unsigned int i = 0; i < float_v::Size; i++ ) {
+//      fIh[i] = (int)fSlice.FirstUnusedHitInBin( fRow, fIndYmin )[i];
+//      fHitYlst[i] = (int)fSlice.FirstUnusedHitInBin( fRow, fIndYmin + fBDY )[i];
+//    }
   }
 
   debugS() << "HitArea created:\n"
@@ -114,14 +117,16 @@ uint_m AliHLTTPCCAHitArea::GetNext( NeighbourData *data )
     
       // get next hit
     fIndYmin( needNextZ ) += fNy;
-//    fIh.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin, needNextZ ); // get first hit in cell, if z-line is new
-//    fHitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin + fBDY, needNextZ );
+#ifdef VC_GATHER_SCATTER
+    fIh.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin, needNextZ ); // get first hit in cell, if z-line is new
+    fHitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), fIndYmin + fBDY, needNextZ );
+#else
     for( unsigned int i = 0; i < float_v::Size; i++ ) {
       if( !needNextZ[i] ) continue;
       fIh[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)fIndYmin[i]];
       fHitYlst[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)(fIndYmin[i] + fBDY[i])];
-//      int_v test = reinterpret_cast<int_v&>(fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)fIndYmin[i]]);
     }
+#endif
     assert( (fHitYlst <= fRow.NUnusedHits() || !needNextZ).isFull() );
     
     yIndexOutOfRange = fIh >= fHitYlst;
@@ -155,13 +160,16 @@ uint_v AliHLTTPCCAHitArea::NHits()
   while ( !needNextZ.isEmpty() ) {
     ++iz( needNextZ );   // get new z-line
     indYmin( needNextZ ) += fNy;
-//    ih.gather( fSlice.FirstUnusedHitInBin( fRow ), indYmin, needNextZ ); // get first hit in cell, if z-line is new
+#ifdef VC_GATHER_SCATTER
+    ih.gather( fSlice.FirstUnusedHitInBin( fRow ), indYmin, needNextZ ); // get first hit in cell, if z-line is new
+    hitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), indYmin + fBDY, needNextZ );
+#else
     for( unsigned int i = 0; i < float_v::Size; i++ ) {
       if( !needNextZ[i] ) continue;
       ih[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)indYmin[i]];
       hitYlst[i] = (int)fSlice.FirstUnusedHitInBin( fRow )[(unsigned int)(indYmin[i] + fBDY[i])];
     }
-//    hitYlst.gather( fSlice.FirstUnusedHitInBin( fRow ), indYmin + fBDY, needNextZ );
+#endif
     nHits( needNextZ ) += hitYlst - ih;
     
     needNextZ = iz < fBZmax;

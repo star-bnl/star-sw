@@ -106,14 +106,13 @@ class AliHLTTPCCAGBTracker
     void SetSettings( const std::vector<AliHLTTPCCAParam>& settings ); // need for StRoot
     int  GetHitsSize() const {return fHits.Size();}
 
-      /// Try to group close hits in row formed by one track. After sort hits.
-//     void GroupHits(); // iklm
-
 #ifdef CALC_DCA_ON
-    vector<point_3d>& GetLeftDCA() { return dca_left; }
-    vector<point_3d>& GetRightDCA() { return dca_right; }
+  vector<point_3d>& GetLeftDCA() { return dca_left; }
+  vector<point_3d>& GetRightDCA() { return dca_right; }
 #endif
 
+      /// Try to group close hits in row formed by one track. After sort hits.
+//     void GroupHits(); // iklm
   friend class AliHLTTPCCAPerformance; //dbg
   protected:
 
@@ -135,7 +134,7 @@ class AliHLTTPCCAGBTracker
     AliHLTResizableArray<AliHLTTPCCAClusterData, 1, AliHLTFullyCacheLineAligned> fClusterData;
 
     double fTime; //* total time
-    enum  {fNTimers = 25};
+    static const int fNTimers = 25;
     double fStatTime[fNTimers]; //* timers
     int fStatNEvents;    //* n events proceed
     int fFirstSliceHit[100]; // hit array

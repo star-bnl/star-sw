@@ -14,12 +14,6 @@
 #include "AliHLTTPCCAGrid.h"
 #include "AliHLTTPCCAPackHelper.h"
 
-// #ifdef HAVE_FLOAT16
-// typedef float16 StoredFloat;
-// #else
-// typedef float StoredFloat;
-// #endif
-
 typedef int StoredIsUsed;
 
 /**
@@ -37,7 +31,6 @@ class AliHLTTPCCARow
     AliHLTTPCCARow() {}
 
     int NHits()    const { return fNHits; }
-    //float X()        const { return fX; }
     float MaxY()     const { return fMaxY; }
     float MaxZ()     const { return 250.f; }
     const AliHLTTPCCAGrid &Grid() const { return fGrid; }
@@ -47,26 +40,18 @@ class AliHLTTPCCARow
     void StoreToFile( FILE *f, const char *startPtr ) const;
     void RestoreFromFile( FILE *f, char *startPtr );
 
-//     static inline int_v NHits( const AliHLTTPCCARow *array, const uint_v &indexes ) { return int_v( array, &AliHLTTPCCARow::fNHits, indexes ); }
-//     static inline int_v NHits( const AliHLTTPCCARow *array, const uint_v &indexes, const uint_m &mask ) { return int_v( array, &AliHLTTPCCARow::fNHits, indexes, mask ); }
-//    int GetLinkUpS( unsigned int h ) const { return fLinkUpData[h]; }
-
   int NUnusedHits()    const { return fNUnusedHits; }
   unsigned int* HitIndex() const { return fHitIndex; }
   private:
     AliHLTTPCCAGrid fGrid;   // grid of hits
 
     int fNHits;            // number of hits in this row
-    //float fX;              // X coordinate of the row
     float fMaxY;           // maximal Y coordinate of the row
 
     int fHitNumberOffset;  // index of the first hit in the hit array, used as
 
     int *fLinkUpData;   // hit index in the row above which is linked to the given (global) hit index
     int *fLinkDownData; // hit index in the row below which is linked to the given (global) hit index
-
-    // StoredFloat *fHitDataY;         // packed y coordinate of the given (global) hit index
-    // StoredFloat *fHitDataZ;         // packed z coordinate of the given (global) hit index
 
     PackHelper::TPackedY *fHitPDataY;        // memory optimized packed data
     PackHelper::TPackedZ *fHitPDataZ;

@@ -99,12 +99,9 @@ void AliHLTTPCCATracker::StartEvent()
 
 void  AliHLTTPCCATracker::SetupCommonMemory()
 {
-//   std::cout << " SetupCommonMemory0 " << std::endl; //iklm debug
 //   if (fHitMemory) delete[] fHitMemory;
-// //   std::cout << " SetupCommonMemory1 " << std::endl; //iklm debug
 //   fHitMemory = 0;
   if (fTrackMemory) delete[] fTrackMemory;
-//   std::cout << " SetupCommonMemory2 " << std::endl; //iklm debug
   fTrackMemory = 0;
 
   fData.Clear();
@@ -121,17 +118,11 @@ void  AliHLTTPCCATracker::SetPointersHits( int MaxNHits )
 {
 //   assert( fHitMemory );
 //   assert( fHitMemorySize > 0 );
-
   // set all pointers to the event memory
-
 //   char *mem = fHitMemory;
-
   // extra arrays for tpc clusters
-
   fTrackletStartHits.resize(MaxNHits);
   //AssignMemory( fTrackletStartHits, mem, MaxNHits );
-  
-
   // arrays for track hits
 //   assert( fHitMemorySize >= mem - fHitMemory );
 }
@@ -170,12 +161,9 @@ void  AliHLTTPCCATracker::SetPointersTracks( int MaxNTracks, int MaxNHits )
 void AliHLTTPCCATracker::ReadEvent( AliHLTTPCCAClusterData *clusterData )
 {
   fClusterData = clusterData;
-//   std::cout << " cat0 " << std::endl; //iklm debug
   StartEvent();
-//   std::cout << " cat1 " << std::endl; //iklm debug
   //* Convert input hits, create grids, etc.
   fData.InitFromClusterData( *clusterData );
-//   std::cout << " cat2 " << std::endl; //iklm debug
   {
     RecalculateHitsSize( fData.NumberOfHits() ); // to calculate the size
 //     fHitMemory = new char[fHitMemorySize + 1600];
@@ -201,8 +189,6 @@ void AliHLTTPCCATracker::WriteOutput()
   Stopwatch timer;
   timer.Start();
 #endif // USE_TIMERS
-  
-  //cout<<"output: nTracks = "<< fTracks.size() <<", nHitsTotal="<<fData.NumberOfHits()<<std::endl;
 
   debugWO() << "numberOfTracks = " << fNumberOfTracks << std::endl;
   fOutput->SetNTracks( fNumberOfTracks );
@@ -236,14 +222,11 @@ void AliHLTTPCCATracker::WriteOutput()
   }
   std::sort(&(tr_sort_helper[0]), &(tr_sort_helper[fNumberOfTracks]), TrSort::trComp);
 #endif
-//  std::cout<<" > > > Tracker - write output. fNumberOfTracks: "<<fNumberOfTracks<<";   fNTrackHits: "<<fNTrackHits<<"\n";
   for ( int trackIndex = 0; trackIndex < tracksSize; ++trackIndex ) {
     // if (!fTracks[trackIndex]) continue;
 #ifndef TETA
     const Track &track = *fTracks[trackIndex];
     const int numberOfHits = track.NumberOfHits();
-//    std::cout<<" - - - > trackIndex: "<<trackIndex<<";   numberOfHits: "<<numberOfHits<<"\n";
-//    if( numberOfHits == 70 ) continue;
 
     {
       AliHLTTPCCASliceTrack out;
@@ -284,7 +267,6 @@ void AliHLTTPCCATracker::WriteOutput()
 #endif
     ++iTr;
     nStoredHits += numberOfHits;
-//    if( numberOfHits == 70 ) std::cout<<" >>>>>>> Track is stored\n";
 
     for ( int hitIdIndex = 0; hitIdIndex < numberOfHits; ++hitIdIndex ) {
       const HitId &hitId = track.HitId( hitIdIndex );
@@ -295,12 +277,13 @@ void AliHLTTPCCATracker::WriteOutput()
       const int inpIdOffset = fClusterData->RowOffset( rowIndex );
       const int inpIdtot = fData.ClusterDataIndex( row, hitIndex );
       const int inpId = inpIdtot - inpIdOffset;
-//      std::cout<<" - - - - - > hitIdIndex: "<<hitIdIndex<<";   rowIndex: "<<rowIndex<<";   hitIndex: "<<hitIndex<<"\n";
+#if 0
       VALGRIND_CHECK_VALUE_IS_DEFINED( rowIndex );
       VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
       VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdOffset );
       VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdtot );
       VALGRIND_CHECK_VALUE_IS_DEFINED( inpId );
+#endif
 
       const float origX = fClusterData->X( inpIdtot );
       const float origY = fClusterData->Y( inpIdtot );
@@ -397,19 +380,7 @@ void AliHLTTPCCATracker::StoreToFile( FILE *f ) const
 
   BinaryStoreWrite( fTimers, 10, f );
 
-  //BinaryStoreWrite( fLinkUpData  , startPointer, f );
-  //BinaryStoreWrite( fLinkDownData, startPointer, f );
-  //BinaryStoreWrite( fHitDataY    , startPointer, f );
-  //BinaryStoreWrite( fHitDataZ    , startPointer, f );
-
-  //BinaryStoreWrite( fHitWeights, startPointer, f );
-
   BinaryStoreWrite( fNTracklets, f );
-  //BinaryStoreWrite( fTrackletStartHits, startPointer, f );
-  // TODO BinaryStoreWrite( fTracklets, startPointer, f );
-
-  //BinaryStoreWrite( fTracks, startPointer, f );
-  //BinaryStoreWrite( fNTrackHits, startPointer, f );
 #if 0
   BinaryStoreWrite( fNOutTracks, f );
   //BinaryStoreWrite( fOutTracks, startPointer, f );
@@ -428,19 +399,7 @@ void AliHLTTPCCATracker::RestoreFromFile( FILE *f )
   Byte_t alignment;
   BinaryStoreRead( alignment, f );
 
-  //BinaryStoreRead( fLinkUpData   , startPointer, f );
-  //BinaryStoreRead( fLinkDownData , startPointer, f );
-  //BinaryStoreRead( fHitDataY     , startPointer, f );
-  //BinaryStoreRead( fHitDataZ     , startPointer, f );
-
-  //BinaryStoreRead( fHitWeights   , startPointer, f );
-
   BinaryStoreRead( fNTracklets, f );
-  //BinaryStoreRead( fTrackletStartHits, startPointer, f );
-  // TODO BinaryStoreRead( fTracklets    , startPointer, f );
-
-  //BinaryStoreRead( fTracks       , startPointer, f );
-  //BinaryStoreRead( fNTrackHits   , startPointer, f );
 #if 0
   BinaryStoreRead( fNOutTracks   , f );
   //BinaryStoreRead( fOutTracks    , startPointer, f );

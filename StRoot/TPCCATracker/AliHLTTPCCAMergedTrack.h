@@ -89,7 +89,6 @@ class AliHLTTPCCAMergedTrack
     bool IsGrow() const { return fIsGrow; }
     void SetRevers( bool r = true ) { tRevers = r; }
     bool IsRevers() const { return tRevers; }
-    // ---
   
   private:
 
@@ -99,7 +98,7 @@ class AliHLTTPCCAMergedTrack
     float fOuterAlpha;               //* alpha angle for the outer parameters
     int fFirstClusterRef;            //* index of the first track cluster in corresponding cluster arrays
     int fNClusters;                  //* number of track clusters
-    // ---
+
     int fPrevSegment;
     int fNextSegment;
     bool tIsMerged;
@@ -109,7 +108,6 @@ class AliHLTTPCCAMergedTrack
     bool fIsGrow;
 
     bool tRevers;
-    // ---
 };
 
 

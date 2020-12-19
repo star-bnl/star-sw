@@ -12,7 +12,6 @@
 #include <map>
 
 class AliHLTTPCCAMergedTrack;
-//class AliHLTTPCCAMergerOutput;
 class AliHLTTPCCATracker;
 
 /**
@@ -37,16 +36,15 @@ class AliHLTTPCCALooperMerger
     bool isUsed;
     static bool CompareL( const LooperSegment &a, const LooperSegment &b )
     {
-//      if ( a.slice_mid < b.slice_mid ) return 1;
-//      if ( a.slice_mid > b.slice_mid ) return 0;
       return ( a.z_h_dn < b.z_h_dn );
     }
   };
  public:
 
-//  AliHLTTPCCALooperMerger();
   AliHLTTPCCALooperMerger( AliHLTTPCCAMergerOutput& in_out, AliHLTResizableArray<AliHLTTPCCAGBHit>& hits )
-    : fGBHits( hits ),fOutput( in_out )  {}
+   : fOutput( in_out )
+   , fGBHits( hits )
+  {}
 
   ~AliHLTTPCCALooperMerger()
   {

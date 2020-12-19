@@ -84,8 +84,6 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
 
   int *linkUpData;
   int *linkDownData;
-  // StoredFloat *hitDataY;
-  // StoredFloat *hitDataZ;
   PackHelper::TPackedY *hitPDataY;
   PackHelper::TPackedZ *hitPDataZ;
   StoredIsUsed *hitDataIsUsed;
@@ -100,8 +98,6 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
   char *mem = fMemory;
   AssignMemoryAligned<VectorAlignment>( linkUpData,   mem, numberOfHitsWithPadding );
   AssignMemoryAligned<VectorAlignment>( linkDownData, mem, numberOfHitsWithPadding );
-  // AssignMemoryAligned<VectorAlignment>( hitDataY,     mem, numberOfHitsWithPadding );
-  // AssignMemoryAligned<VectorAlignment>( hitDataZ,     mem, numberOfHitsWithPadding );
   AssignMemoryAligned<VectorAlignment>( hitPDataY,    mem, numberOfHitsWithPadding );
   AssignMemoryAligned<VectorAlignment>( hitPDataZ,    mem, numberOfHitsWithPadding );
   AssignMemoryAligned<VectorAlignment>( hitDataIsUsed,     mem, numberOfHitsWithPadding );
@@ -123,16 +119,16 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
   // 1.5. fill HitData with 0 for valgrind
   ////////////////////////////////////
 
-  {
-    const float_v zero( Vc::Zero );
-    for ( int i = 0; i < numberOfHitsWithPadding; i += float_v::Size ) {
-      // zero.store( &hitDataY[i] );
-      // zero.store( &hitDataZ[i] );
-      // zero.store( &hitPDataY[i] );
-      // zero.store( &hitPDataZ[i] );
-      // zero.store( &hitDataIsUsed[i] );
-    }
-  }
+//  {
+//    const float_v zero( Vc::Zero );
+//    for ( int i = 0; i < numberOfHitsWithPadding; i += float_v::Size ) {
+//      // zero.store( &hitDataY[i] );
+//      // zero.store( &hitDataZ[i] );
+//      // zero.store( &hitPDataY[i] );
+//      // zero.store( &hitPDataZ[i] );
+//      // zero.store( &hitDataIsUsed[i] );
+//    }
+//  }
 #endif
 
   ////////////////////////////////////
@@ -142,12 +138,9 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
   for ( int rowIndex = 0; rowIndex < data.FirstRow(); ++rowIndex ) {
     AliHLTTPCCARow &row = fRows[rowIndex];
     row.fGrid.CreateEmpty();
-//fGrid[rowIndex].CreateEmpty();
     row.fNHits = 0;
     row.fLinkUpData = linkUpData;
     row.fLinkDownData = linkDownData;
-    // row.fHitDataY = hitDataY;
-    // row.fHitDataZ = hitDataZ;
     row.fHitPDataY = hitPDataY;
     row.fHitPDataZ = hitPDataZ;
     row.fHitDataIsUsed = hitDataIsUsed;
@@ -160,7 +153,6 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     row.fUnusedHitPDataZ = unusedHitPDataZ;
     row.fHitIndex = hitIndex;
     row.fFirstUnusedHitInBin = firstUnusedHitInBin;
-//fGrid[rowIndex].fFirstUnusedHitInBin = firstUnusedHitInBin;
   }
 
   AliHLTResizableArray<float> binSortedHitsY( fNumberOfHits );
@@ -182,8 +174,6 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
 
     row.fLinkUpData = &linkUpData[hitNumberOffset];
     row.fLinkDownData = &linkDownData[hitNumberOffset];
-    // row.fHitDataY = &hitDataY[hitNumberOffset];
-    // row.fHitDataZ = &hitDataZ[hitNumberOffset];
     row.fHitPDataY = &hitPDataY[hitNumberOffset];
     row.fHitPDataZ = &hitPDataZ[hitNumberOffset];
     row.fHitDataIsUsed = &hitDataIsUsed[hitNumberOffset];
@@ -198,16 +188,10 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     row.fUnusedHitPDataZ = &unusedHitPDataZ[hitNumberOffset];
     row.fHitIndex = &hitIndex[hitNumberOffset];
     row.fFirstUnusedHitInBin = &firstUnusedHitInBin[gridContentOffset];
-//fGrid[rowIndex].fFirstUnusedHitInBin = &firstUnusedHitInBin[gridContentOffset];
 
-//    createGrid( &row, data, clusterDataOffset );
     createGrid( &row, data, clusterDataOffset, rowIndex );
     const AliHLTTPCCAGrid &grid = row.fGrid;
-//    std::cout<<"Grid is created\n";
-//    const AliHLTTPCCAGrid &grid = fGrid[rowIndex];
     const int numberOfBins = grid.N();
-//    std::cout<<" - numberOfBins: "<<numberOfBins<<"\n";
-//    std::cout<<" -  newGridBins: "<<fGrid[rowIndex].N()<<"\n";
 
     int binCreationMemorySizeNew;
     if ( ( binCreationMemorySizeNew = numberOfBins * 2 + 6 + row.fNHits ) > binCreationMemorySize ) {
@@ -226,7 +210,6 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     for ( int iH = 0; iH < row.fNHits; ++iH ) {
       const int globalHitIndex = clusterDataOffset + iH;
       const unsigned int bin = row.fGrid.GetBin( data.Y( globalHitIndex ), data.Z( globalHitIndex ) );
-//      const unsigned int bin = fGrid[rowIndex].GetBin( data.Y( globalHitIndex ), data.Z( globalHitIndex ) );
       bins[iH] = bin;
       ++filled[bin];
     }
@@ -250,8 +233,6 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
       // allows to find the global hit index / coordinates from a global bin sorted hit index
       VALGRIND_CHECK_VALUE_IS_DEFINED( globalHitIndex );
       row.fClusterDataIndex[ind] = globalHitIndex;
-      // row.fHitDataY[ind] = data.Y( globalHitIndex );
-      // row.fHitDataZ[ind] = data.Z( globalHitIndex );
       row.fHitPDataY[ind] = PackHelper::PackY( row, data.Y( globalHitIndex ) );
       row.fHitPDataZ[ind] = PackHelper::PackZ( row, data.Z( globalHitIndex ) );
       row.fHitDataIsUsed[ind] = 0;
@@ -259,16 +240,13 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
 
     for ( int i = 0; i < numberOfBins; ++i ) {
       row.fFirstHitInBin[i] = c[i]; // global bin-sorted hit index
-//fGrid[rowIndex].fFirstHitInBin[i] = c[i];
     }
     const unsigned int a = c[numberOfBins];
-    // grid.N is <= row.fNHits
     const int nn = numberOfBins + grid.Ny() + 3;
     ASSERT( static_cast<int>( gridContentOffset ) + nn - 1 < firstHitInBinSize,
       static_cast<int>( gridContentOffset ) << " + " << nn << " - 1 < " << firstHitInBinSize);
     for ( int i = numberOfBins; i < nn; ++i ) {
       row.fFirstHitInBin[i] = a;
-//fGrid[rowIndex].fFirstHitInBin[i] = a;
     }
 
     gridContentOffset += nn;
@@ -278,12 +256,9 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
   for ( int rowIndex = data.LastRow() + 1; rowIndex < AliHLTTPCCAParameters::MaxNumberOfRows8; ++rowIndex ) { // later data members of fRows[NRows()] will be used as end pointers for loops over rows
     AliHLTTPCCARow &row = fRows[rowIndex];
     row.fGrid.CreateEmpty();
-//fGrid[rowIndex].CreateEmpty();	// for more than 45 rows
     row.fNHits = 0;
     row.fLinkUpData = &linkUpData[hitNumberOffset];
     row.fLinkDownData = &linkDownData[hitNumberOffset];
-    // row.fHitDataY = &hitDataY[hitNumberOffset];
-    // row.fHitDataZ = &hitDataZ[hitNumberOffset];
     row.fHitPDataY = &hitPDataY[hitNumberOffset];
     row.fHitPDataZ = &hitPDataZ[hitNumberOffset];
     row.fHitDataIsUsed = &hitDataIsUsed[hitNumberOffset];
@@ -296,7 +271,6 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     row.fUnusedHitPDataZ = &unusedHitPDataZ[hitNumberOffset];
     row.fHitIndex = &hitIndex[hitNumberOffset];
     row.fFirstUnusedHitInBin = &firstUnusedHitInBin[gridContentOffset];
-//fGrid[rowIndex].fFirstUnusedHitInBin = &firstUnusedHitInBin[gridContentOffset];
   }
 }
 
@@ -305,7 +279,6 @@ void AliHLTTPCCASliceData::ClearHitWeights()
   const uint_v v0( Vc::Zero );
   const unsigned int *const end = fRows[fParam->NRows()].fHitWeights;
   for ( unsigned int *mem = fRows[0].fHitWeights; mem < end; mem += v0.Size ) {
-//    v0.store( mem );
     for( unsigned int i = 0; i < float_v::Size; i++ ) {
       mem[i] = v0[i];
     }
@@ -317,14 +290,12 @@ void AliHLTTPCCASliceData::ClearLinks()
   const int_v v0( -1 );
   const int *const end1 = fRows[fParam->NRows()].fLinkUpData;
   for ( int *mem = fRows[0].fLinkUpData; mem < end1; mem += v0.Size ) {
-//    v0.store( mem );
     for( unsigned int i = 0; i < float_v::Size; i++ ) {
       mem[i] = v0[i];
     }
   }
   const int *const end2 = fRows[fParam->NRows()].fLinkDownData;
   for ( int *mem = fRows[0].fLinkDownData; mem < end2; mem += v0.Size ) {
-//    v0.store( mem );
     for( unsigned int i = 0; i < float_v::Size; i++ ) {
       mem[i] = v0[i];
     }

@@ -58,9 +58,6 @@ class AliHLTTPCCATracklet
       std::cout<<"!WARNING: unused function, should be deleted\n";
       const int_v zero( Vc::Zero );
       STATIC_ASSERT( AliHLTTPCCAParameters::MaxNumberOfRows8 % int_v::Size == 0, Size_of_fRowHits_array_needs_to_be_a_multiple_of_int_v__Size );
-      for ( int i = 0; i < AliHLTTPCCAParameters::MaxNumberOfRows8; i += int_v::Size ) {
-//        zero.store( &fRowHits[i] );
-      }
     }
 
   private:

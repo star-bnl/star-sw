@@ -28,8 +28,11 @@
 // *
 // * kill link to the neighbour if the neighbour is not pointed to the hit
 // *
-
+#ifndef V6
 void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data, const AliHLTTPCCAParam &param )
+#else
+void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, AliHLTTPCCASliceData &data, const AliHLTTPCCAParam &param, int it, std::vector<hit_link>& save_up_links )
+#endif
 {
   float_v X,Y,Z,Xup,Yup,Zup,Xdown,Ydown,Zdown, X4,Y4,Z4;
   float_v Yx1, Yx2, Yxx1, Yxx2, Yxxx, Zx1, Zx2, Zxx1, Zxx2, Zxxx, iX;
@@ -42,14 +45,12 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
     const AliHLTTPCCARow &row = data.Row( rowIndex );
     const AliHLTTPCCARow &rowUp = data.Row( rowIndex + rowStep );
     const AliHLTTPCCARow &rowDown = data.Row( rowIndex - rowStep );
-//    std::cout<<" ----- rowDn: "<<rowIndex-rowStep<<";   NHits: "<<rowDown.NHits()<<";   NUnusedHits: "<<rowDown.NUnusedHits()<<"\n";
     const int numberOfHits = row.NHits();
 
     // - look at up link, if it's valid but the down link in the row above doesn't link to us remove
     //   the link
     // - look at down link, if it's valid but the up link in the row below doesn't link to us remove
     //   the link
-//    std::cout<<" <----- rowIndex: "<<rowIndex<<" ----->\n";
     for ( int hitIndex = 0; hitIndex < numberOfHits; hitIndex += int_v::Size ) {
 
       const uint_v hitIndexes = uint_v( Vc::IndexesFromZero ) + hitIndex;
@@ -66,56 +67,54 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
         // collect information
         // up part
       assert( ( validHitsMask && ((hitIndexes   >= 0 ) && (hitIndexes   < row.NHits()   )) ) == validHitsMask );
-//      const int_v up = int_v(data.HitLinkUpData( row ), hitIndexes, validHitsMask );
       int_v up;
       for( unsigned int i = 0; i < float_v::Size; i++ ) {
 	if( !validHitsMask[i] ) continue;
 	up[i] = data.HitLinkUpData( row )[(unsigned int)hitIndexes[i]];
       }
-//      std::cout<<"\n - up: "<<up<<"\n";
       VALGRIND_CHECK_VALUE_IS_DEFINED( up );
       const uint_v upIndexes = up.staticCast<uint_v>();
       assert ( (validHitsMask && (up >= minusOne) ) == validHitsMask );
       int_m upMask = validHitsMask && up >= int_v( Vc::Zero );
       assert( ( upMask && ((upIndexes   >= 0 ) && (upIndexes   < rowUp.NHits()   )) ) == upMask );
-//      int_v downFromUp = int_v(data.HitLinkDownData( rowUp ), upIndexes, upMask );
       int_v downFromUp;
       for( unsigned int i = 0; i < float_v::Size; i++ ) {
 	if( !upMask[i] ) continue;
 	downFromUp[i] = data.HitLinkDownData( rowUp )[(unsigned int)upIndexes[i]];
       }
-//      std::cout<<" - downFromUp: "<<downFromUp<<"\n";
         // down part
-//      const int_v dn = int_v(data.HitLinkDownData( row ), hitIndexes, validHitsMask );
       int_v dn;
       for( unsigned int i = 0; i < float_v::Size; i++ ) {
       	if( !validHitsMask[i] ) continue;
       	dn[i] = data.HitLinkDownData( row )[(unsigned int)hitIndexes[i]];
       }
-//      std::cout<<" - dn: "<<dn<<"\n";
       assert ( ( validHitsMask && (dn >= minusOne) ) == validHitsMask );
       VALGRIND_CHECK_VALUE_IS_DEFINED( dn );
       const uint_v downIndexes = dn.staticCast<uint_v>();
       int_m dnMask = validHitsMask && dn >= int_v( Vc::Zero );
       assert( ( dnMask && ((downIndexes   >= 0 ) && (downIndexes   < rowDown.NHits()   )) ) == dnMask );
-//      int_v upFromDown = int_v(data.HitLinkUpData( rowDown ), downIndexes, dnMask );
       int_v upFromDown;
       for( unsigned int i = 0; i < float_v::Size; i++ ) {
       	if( !dnMask[i] ) continue;
       	upFromDown[i] = data.HitLinkUpData( rowDown )[(unsigned int)downIndexes[i]];
       }
-//      std::cout<<" - upFromDown: "<<upFromDown<<"\n";
-      
+#ifdef V6	// Triplet saver
+      if( it == 0 ) {
+        int_m trs_mask( upMask && dnMask && int_m( up >= 0 && downFromUp < 0 ) && int_m( dn >= 0 && upFromDown < 0 ) );
+        for( unsigned int i = 0; i < float_v::Size; i++ ) {
+	  if( !trs_mask[i] ) continue;
+	  save_up_links.push_back( hit_link( rowIndex-rowStep, dn[i], hitIndex+i ) );
+	  save_up_links.push_back( hit_link( rowIndex, hitIndex+i, up[i] ) );
+        }
+      }
+#endif
         // -- make clean --
 
            // check if some one-way links can be good
 #define USE_EDGE_HITS // use edge links, which are not reciprocall
 #ifdef USE_EDGE_HITS
-//       std::cout << "downFromUp " << downFromUp   << " upFromDown " << upFromDown << " validHitsMask " << validHitsMask << " dnMask " << dnMask << " upMask " << upMask << std::endl; // IKu debug
-//      std::cout<<" - upMask: "<<upMask<<";   dnMask: "<<dnMask<<"\n";
       upMask &= (downFromUp == -1) && (upFromDown == static_cast<int_v>(hitIndexes));  // have mutual link only downwards. is   up-link good?
       dnMask &= (upFromDown == -1) && (downFromUp == static_cast<int_v>(hitIndexes)); // have mutual link only upwards.   is down-link good?
-//      std::cout<<" - upMask: "<<upMask<<";   dnMask: "<<dnMask<<";   downFromUp: "<<downFromUp<<";   upFromDown: "<<upFromDown<<";   hitIndexes: "<<hitIndexes<<"\n";
       
       dnMask &= int_m(rowIndex + 2*rowStep < numberOfRows);  // will use up & upup hits for check. If no one there then have to delete link
       upMask &= int_m(rowIndex - 2*rowStep >= 0);
@@ -203,7 +202,6 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
           float_v err2Y, err2Z;
           param.GetClusterErrors2(upIndexes,Xup,Yup,Zup,err2Y, err2Z);
 
-          //std::cout << upMask << "     "<<CAMath::Abs((Yxx2 - Yup)/CAMath::Sqrt(err2Y))<< "   " << (CAMath::Abs((Yxx2 - Yup)/CAMath::Sqrt(err2Y))+CAMath::Abs((Zxx2 - Zup)/CAMath::Sqrt(err2Z)))<<std::endl;
           const float_v ch = CAMath::Abs((Yxx2 - Yup)*CAMath::RSqrt(err2Y));
           upMask &= static_cast<int_m>(ch < 50.f);
 //          upMask &= static_cast<int_m>(CAMath::Abs((Yxx2 - Yup)/CAMath::Sqrt(err2Y)) < 50.f);

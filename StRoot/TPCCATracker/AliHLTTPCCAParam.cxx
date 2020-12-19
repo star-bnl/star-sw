@@ -203,22 +203,7 @@ float AliHLTTPCCAParam::GetClusterError2( int yz, int type, float z, float angle
 //std::cout << v << std::endl;
   return CAMath::Abs( v );
 }
-///mvz start 20.01.2010
-/*
-void AliHLTTPCCAParam::GetClusterErrors2( int iRow, float z, float sinPhi, float cosPhi, float DzDs, float &Err2Y, float &Err2Z ) const
-{
-  //
-  // Use calibrated cluster error from OCDB
-  //
 
-  z = CAMath::Abs( ( 250. - 0.275 ) - CAMath::Abs( z ) );
-  const int type = errorType( iRow );
-  float cosPhiInv = CAMath::Abs( cosPhi ) > 1.e-2 ? 1. / cosPhi : 0;
-  float angleY = sinPhi * cosPhiInv ;
-  float angleZ = DzDs * cosPhiInv ; // SG was bug???
-  Err2Y = GetClusterError2( 0, type, z, angleY );
-  Err2Z = GetClusterError2( 1, type, z, angleZ );
-}*/
 void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const AliHLTTPCCATrackParam &t, float &Err2Y, float &Err2Z ) const
 {
 enum {kYErr=0,kZErr=1,kWidTrk=2,kThkDet=3,kYDiff=4,kZDiff=5};
@@ -309,8 +294,11 @@ std::istream &operator>>( std::istream &in, AliHLTTPCCAParam &p )
 
   in >> p.fISlice;
   in >> p.fNRows;
-//  p.SetNInnerRows( 13 ); // TODO move to input file
-  p.SetNInnerRows( 30 ); // TODO move to input file
+  if( p.fNRows < 45 ) {
+    p.SetNInnerRows( 13 ); // TODO move to input file
+  } else {
+    p.SetNInnerRows( 40 ); // TODO move to input file
+  }
   p.SetNTpcRows( p.fNRows );
   in >> p.fAlpha;
   in >> p.fDAlpha;

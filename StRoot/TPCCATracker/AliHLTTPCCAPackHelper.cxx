@@ -39,22 +39,3 @@ float PackHelper::UnpackZ( const AliHLTTPCCARow& row, PackHelper::TPackedZ z ) {
   return static_cast<float>(z)*1e-2f;
 }
 
-
-//PackHelper::TPackedY_v PackHelper::PackY( const AliHLTTPCCARow& row, float_v y ) {
-//  UNUSED_PARAM1(row);
-//  return static_cast<PackHelper::TPackedY_v>(y*1e2f);
-//}
-//PackHelper::TPackedZ_v PackHelper::PackZ( const AliHLTTPCCARow& row, float_v z ) {
-//  UNUSED_PARAM1(row);
-//  return static_cast<PackHelper::TPackedZ_v>(z*1e2f);
-//}
-//
-//float_v PackHelper::UnpackY( const AliHLTTPCCARow& row, PackHelper::TPackedY_v y ) {
-//  UNUSED_PARAM1(row);
-//  return static_cast<float_v>(y)*1e-2f;
-//}
-//float_v PackHelper::UnpackZ( const AliHLTTPCCARow& row, PackHelper::TPackedZ_v z ) {
-//  UNUSED_PARAM1(row);
-//  return static_cast<float_v>(z)*1e-2f;
-//}
-
