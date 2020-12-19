@@ -1,6 +1,9 @@
-// $Id: StFcsClusterMaker.cxx,v 1.15 2020/09/03 19:42:24 akio Exp $
+// $Id: StFcsClusterMaker.cxx,v 1.16 2020/12/17 21:18:01 akio Exp $
 //
 // $Log: StFcsClusterMaker.cxx,v $
+// Revision 1.16  2020/12/17 21:18:01  akio
+// Separate RATIO2SPLIT for ecal/hcal
+//
 // Revision 1.15  2020/09/03 19:42:24  akio
 // moving sum & fit to StFcsWaveformFitMaker
 //
@@ -65,6 +68,8 @@
 #include <cmath>
 #include "TMath.h"
 #include "TVector2.h"
+
+ClassImp(StFcsClusterMaker)
 
 StFcsClusterMaker::StFcsClusterMaker(const char* name) : StMaker(name) {}
 
@@ -148,6 +153,10 @@ int StFcsClusterMaker::makeCluster(int det) {
   std::sort(hits.begin(), hits.end(), [](StFcsHit* a, StFcsHit* b) {
       return b->energy() < a->energy();
     });
+
+  float r2split;
+  if(det<2) r2split=m_TOWER_E_RATIO2SPLIT_Ecal;
+  else      r2split=m_TOWER_E_RATIO2SPLIT_Hcal;
   
   for(int i=0; i<nhit; i++){ //loop over all hits 
     StFcsHit* hit=hits[i];
@@ -164,7 +173,7 @@ int StFcsClusterMaker::makeCluster(int det) {
       if(neighborTowerE>0.0) { //found neighbor cluster
 	neighbor[nNeighbor]=clu;
 	nNeighbor++;	      
-	if(neighborTowerE * m_TOWER_E_RATIO2SPLIT > e){ //merge to existing cluster
+	if(neighborTowerE * r2split > e){ //merge to existing cluster
 	  float d = distance(hit,clu);
 	  if(d * m_DISTANCE_ADVANTAGE < minDistance){
 	    neighborClusterId=j;
@@ -210,8 +219,10 @@ int StFcsClusterMaker::makeCluster(int det) {
   int nc = clusters.size();
   for(int j=0; j<nc; j++){
     StFcsCluster* clu=clusters[j];
-    StThreeVectorF xyz = mDb->getStarXYZfromColumnRow(det,clu->x(),clu->y());
+    StThreeVectorD xyz = mDb->getStarXYZfromColumnRow(det,clu->x(),clu->y());
     clu->setFourMomentum(mDb->getLorentzVector(xyz,clu->energy(),0.0));
+    const StLorentzVectorD& p = clu->fourMomentum();
+    //LOG_DEBUG << Form("momentum= %lf %lf %lf %lf", p.px(), p.py(), p.pz(), p.e()) << endm;
     clusterMomentAnalysis(clu);
     categorization(clu);
   }

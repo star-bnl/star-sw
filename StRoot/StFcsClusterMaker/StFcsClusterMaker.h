@@ -1,5 +1,8 @@
-// $Id: StFcsClusterMaker.h,v 1.10 2020/09/03 19:42:24 akio Exp $
+// $Id: StFcsClusterMaker.h,v 1.11 2020/12/17 21:18:01 akio Exp $
 // $Log: StFcsClusterMaker.h,v $
+// Revision 1.11  2020/12/17 21:18:01  akio
+// Separate RATIO2SPLIT for ecal/hcal
+//
 // Revision 1.10  2020/09/03 19:42:24  akio
 // moving sum & fit to StFcsWaveformFitMaker
 //
@@ -67,7 +70,7 @@ public:
     void set_DISTANCE_ADVANTAGE(float v){m_DISTANCE_ADVANTAGE=v;}
     void set_TOWER_E_THRESHOLD(float v){m_TOWER_E_THRESHOLD=v;}
     void set_TOWER_E_THRE_MOMENT(float v){m_TOWER_E_THRE_MOMENT=v;}
-    void set_TOWER_E_RATIO2SPLIT(float v){m_TOWER_E_RATIO2SPLIT=v;}
+    void set_TOWER_E_RATIO2SPLIT(float e, float h){m_TOWER_E_RATIO2SPLIT_Ecal=e; m_TOWER_E_RATIO2SPLIT_Hcal=h;}
 
  private:
     //move those to StFcsWaveformFitMaker   
@@ -95,12 +98,15 @@ public:
     //Int_t mMaxTB=60;                       //! max timebin for sum
 
     Float_t m_NEIGHBOR_DISTANCE_Ecal=1.01; //! Distance to make it neignbor for Ecal and Hcal
-    Float_t m_NEIGHBOR_DISTANCE_Hcal=1.42; //! 1.01 for 4 towers around
+    Float_t m_NEIGHBOR_DISTANCE_Hcal=2.01; //! 1.01 for 4 towers around
                                            //! 1.42 for 8 surrounding)
+
     Float_t m_DISTANCE_ADVANTAGE  = 1.2;   //! if similar distanced cluster found, higher E cluster takes it
     Float_t m_TOWER_E_THRESHOLD   = 0.01;  //! Tower E threshold for clustering [GeV]
     Float_t m_TOWER_E_THRE_MOMENT = 0.1;   //! Tower E threshold for moment analysis [GeV]
-    Float_t m_TOWER_E_RATIO2SPLIT = 1.5;   //! Neighbor E * threshold > tower E to split cluster
+
+    Float_t m_TOWER_E_RATIO2SPLIT_Ecal = 1.5; //! Neighbor E * threshold > tower E to merge cluster, otherwise split
+    Float_t m_TOWER_E_RATIO2SPLIT_Hcal = 2.0; //! Neighbor E * threshold > tower E to merge cluster, otherwise split
 
     //Int_t readMuDst();
     //Int_t mReadMuDst=0;  //! 0= Do clustering

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDbMaker.cxx,v 1.21 2020/09/03 19:43:20 akio Exp $
+ * $Id: StFcsDbMaker.cxx,v 1.22 2020/12/17 21:01:04 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.cxx,v $
+ * Revision 1.22  2020/12/17 21:01:04  akio
+ * fix slt problem in sc map
+ *
  * Revision 1.21  2020/09/03 19:43:20  akio
  * Updating SC map and adding patchpanel & cable color map
  *
@@ -180,8 +183,14 @@ Short_t HMapSCPP[10];
 Short_t HMapSCJ[10];
 
 const char* colW[4]={"Green ","Brown ","Orange","Blue  "};
-const char* colJ[8]={"Blue  ","Orange","Violet","Yellow",
-		     "Green ","Red   ","Grey  ","Black "};
+//char* colJ[8]={"Blue  ","Orange","Violet","Yellow",
+//	       "Green ","Red   ","Grey  ","Black"};
+const char* colJ[8]={"Blue  ","Orange","Violet","Black ",
+	       "Yellow","Red   ","Grey  ","Blue  "};
+float leng[8]={     6.5,     6.5,     5.0,    5.0,
+      	            3.5,     3.5,     8.0,    8.0};
+float lengH[8]={    6.5,     6.5,     6.5,    6.5,
+      	            6.5,     6.5,     6.5,    6.5};
 
 ClassImp(StFcsDbMaker)
 
@@ -525,6 +534,9 @@ StLorentzVectorD StFcsDbMaker::getLorentzVector(const StThreeVectorD& xyz, Float
     xyznew.rotateY(-thetaX);
     double e=energy;
     StThreeVectorD mom3 = xyznew.unit() * e;
+    LOG_DEBUG << Form("xyz     = %lf %lf %lf",xyz.x(), xyz.y(), xyz.z()) << endm;
+    LOG_DEBUG << Form("xyz rot = %lf %lf %lf",xyznew.x(), xyznew.y(), xyznew.z()) << endm;
+    LOG_DEBUG << Form("p       = %lf %lf %lf %lf",mom3.x(), mom3.y(), mom3.z(),e) << endm;
     return StLorentzVectorD(mom3, e);
 }
 
@@ -633,7 +645,9 @@ int StFcsDbMaker::jacketColor(int ehp, int dep, int ch){
     case 0: 
 	if(dep<=19) return dep%5;
 	switch(dep){
-	case 20: case 21: return ch/4;
+	case 20: case 21:
+	    if(ch<4) return 7;
+	    return ch/4;
 	case 22: return 6;
 	case 23: return 5;
 	default: return -1;
@@ -745,10 +759,10 @@ void  StFcsDbMaker::makeMap(){
 	det = ns;
         for(int row=1; row<=kFcsEcalNRow; row++){
             for(int col=1; col<=kFcsEcalNCol; col++){
-                if     (row== 1){crt=1+ns*2; slt=15; dep=20; ch=col-1;} //top row    (ch0-21)  
-                else if(row==34){crt=1+ns*2; slt=16; dep=21; ch=col-1;} //bottom row (ch0-21)
-		else if(col== 1){crt=1+ns*2; slt=17; dep=22; ch=row-2;} //near side column (ch0-31)
-                else if(col==22){crt=1+ns*2; slt=18; dep=23; ch=row-2;} //far side column (ch0-31)
+                if     (row== 1){crt=1+ns*2; slt=16; dep=20; ch=col-1;} //top row    (ch0-21)  
+                else if(row==34){crt=1+ns*2; slt=17; dep=21; ch=col-1;} //bottom row (ch0-21)
+		else if(col== 1){crt=1+ns*2; slt=18; dep=22; ch=row-2;} //near side column (ch0-31)
+                else if(col==22){crt=1+ns*2; slt=19; dep=23; ch=row-2;} //far side column (ch0-31)
                 else{
                     crt=ns*4;
                     dep=(col-2)/4 + (row-2)/8*5;
@@ -887,7 +901,7 @@ void  StFcsDbMaker::makeMap(){
 	crt = 1+ns*2;
 	for(int dep=0; dep<6; dep++){
             for(int ch=0; ch<32; ch++){
-		slt=dep+9;
+		slt=dep+10;
 		id=dep*32+ch;
 		mMap_ehp[det][id] = ehp; 
 		mMap_ns [det][id] = ns; 
@@ -1054,17 +1068,18 @@ void StFcsDbMaker::printHeader(FILE* f, int flag=0, int csv=0){
   fprintf(f,"#pph : PatchPanel Header#      [1-24]\n");
   fprintf(f,"#jcol: Cable Jacket color\n");
   fprintf(f,"#wcol: Cable Wire color\n");  
+  fprintf(f,"#length: Cable length\n");
   if(csv==0){
       if(flag==0){
-	  fprintf(f,"#det id row col     ehp  ns crt slt dep  ch   Frow Fcol SiPM ppb ppp pph jcol   wcol\n");
+	  fprintf(f,"#det id row col     ehp  ns crt slt dep  ch   Frow Fcol SiPM ppb ppp pph jcol   wcol  length\n");
       }else{
-	  fprintf(f,"#ehp ns dep  ch   crt slt   det  id row col   Frow Fcol SiPM ppb ppp pph jcol   wcol\n");
+	  fprintf(f,"#ehp ns dep  ch   crt slt   det  id row col   Frow Fcol SiPM ppb ppp pph jcol   wcol  length\n");
       }
   }else{
       if(flag==0){
-	  fprintf(f,"#det,id,row,col,ehp,ns,crt,slt,dep,ch,Frow,Fcol,SiPM,ppb,ppp,pph,jcol,wcol\n");
+	  fprintf(f,"#det,id,row,col,ehp,ns,crt,slt,dep,ch,Frow,Fcol,SiPM,ppb,ppp,pph,jcol,wcol,length\n");
       }else{
-	  fprintf(f,"#ehp,ns,dep,ch,crt,slt,det,id,row,col,Frow,Fcol,SiPM,ppb,ppp,pph,jcol,wcol\n");
+	  fprintf(f,"#ehp,ns,dep,ch,crt,slt,det,id,row,col,Frow,Fcol,SiPM,ppb,ppp,pph,jcol,wcol,length\n");
       }
   }
 }
@@ -1142,7 +1157,7 @@ void StFcsDbMaker::printMap(){
 	for(row=1; row<=nRow(det); row++){
 	    for(col=1; col<=nColumn(det); col++){
 		if(mMap_ehp[det][id]>=0){
-		    fprintf(f1,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d    %2d  %2d  %2d     %2d  P%1d H%02d %6s %6s\n",
+		    fprintf(f1,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d    %2d  %2d  %2d     %2d  P%1d H%02d %6s %6s %3.1f\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
 			    mMap_ns [det][id], 
@@ -1157,8 +1172,9 @@ void StFcsDbMaker::printMap(){
 			    mMap_ppp[det][id],
 			    mMap_pph[det][id],
 			    colJ[mMap_jcol[det][id]],
-			    colW[mMap_wcol[det][id]]);
-		    fprintf(f1c,"%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%2d,%2d,%2d,%2d,P%1d,H%02d,%6s,%6s\n",
+			    colW[mMap_wcol[det][id]],
+			    leng[mMap_jcol[det][id]]);
+		    fprintf(f1c,"%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%2d,%2d,%2d,%2d,P%1d,H%02d,%6s,%6s,%3.1f\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
 			    mMap_ns [det][id], 
@@ -1173,7 +1189,8 @@ void StFcsDbMaker::printMap(){
 			    mMap_ppp[det][id],
 			    mMap_pph[det][id],
 			    colJ[mMap_jcol[det][id]],
-			    colW[mMap_wcol[det][id]]);
+			    colW[mMap_wcol[det][id]],
+			    leng[mMap_jcol[det][id]]);
 		    fprintf(f1e,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
@@ -1220,7 +1237,7 @@ void StFcsDbMaker::printMap(){
 	for(row=1; row<=nRow(det); row++){
 	    for(col=1; col<=nColumn(det); col++){
 		if(mMap_ehp[det][id]>=0){
-		    fprintf(f1,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d    %2d  %2d  %2d     %2d  P%1d H%02d %6s %6s\n",
+		    fprintf(f1,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d    %2d  %2d  %2d     %2d  P%1d H%02d %6s %6s %3.1f\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
 			    mMap_ns[det][id], 
@@ -1235,8 +1252,9 @@ void StFcsDbMaker::printMap(){
 			    mMap_ppp[det][id],
 			    mMap_pph[det][id],
 			    colJ[mMap_jcol[det][id]],
-			    colW[mMap_wcol[det][id]]); 
-		    fprintf(f1c,"%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%2d,%2d,%2d,%2d,P%1d,H%02d,%6s,%6s\n",
+			    colW[mMap_wcol[det][id]], 
+			    lengH[mMap_jcol[det][id]]);
+		    fprintf(f1c,"%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%2d,%2d,%2d,%2d,P%1d,H%02d,%6s,%6s,%3.1f\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
 			    mMap_ns[det][id], 
@@ -1251,7 +1269,8 @@ void StFcsDbMaker::printMap(){
 			    mMap_ppp[det][id],
 			    mMap_pph[det][id],
 			    colJ[mMap_jcol[det][id]],
-			    colW[mMap_wcol[det][id]]); 
+			    colW[mMap_wcol[det][id]],
+			    lengH[mMap_jcol[det][id]]); 
 		    fprintf(f1h,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
@@ -1298,14 +1317,24 @@ void StFcsDbMaker::printMap(){
 	for(row=1; row<=nRow(det); row++){
 	    for(col=1; col<=nColumn(det); col++){
 		if(mMap_ehp[det][id]>=0){
-		    fprintf(f1,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
+		    fprintf(f1,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d    %2d  %2d  %2d     %2d  P%1d H%02d %6s %6s %3.1f\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
 			    mMap_ns[det][id], 
 			    mMap_crt[det][id],
 			    mMap_slt[det][id],
 			    mMap_dep[det][id],
-			    mMap_ch[det][id]); 
+			    mMap_ch[det][id],
+			    0,0,0,0,0,0,"x","x",0.0); 
+		    fprintf(f1c,"%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%2d,%2d,%2d,%2d,P%1d,H%02d,%6s,%6s,%3.1f\n",
+			    det,id,row,col,
+			    mMap_ehp[det][id], 
+			    mMap_ns[det][id], 
+			    mMap_crt[det][id],
+			    mMap_slt[det][id],
+			    mMap_dep[det][id],
+			    mMap_ch[det][id],
+			    0,0,0,0,0,0,"x","x",0.0); 
 		    fprintf(f1p,"%3d %3d %3d %3d     %3d %3d %3d %3d %3d %3d\n",
 			    det,id,row,col,
 			    mMap_ehp[det][id], 
@@ -1368,7 +1397,7 @@ void StFcsDbMaker::printMap(){
 			row=getRowNumber(det,id);
 			col=getColumnNumber(det,id);
 			if(ehp<2){
- 			    fprintf(f3,"%3d %3d %3d %3d   %2s %2d   %3d %3d %3d %3d      %2d  %2d  %2d     %2d  P%1d H%02d %6s %6s\n",
+ 			    fprintf(f3,"%3d %3d %3d %3d   %2s %2d   %3d %3d %3d %3d      %2d  %2d  %2d     %2d  P%1d H%02d %6s %6s %3.1f\n",
 				    ehp,ns,dep,ch,
 				    CRT[crt],slt,
 				    det,id,row,col,
@@ -1379,8 +1408,9 @@ void StFcsDbMaker::printMap(){
 				    mMap_ppp[det][id],
 				    mMap_pph[det][id],
 				    colJ[mMap_jcol[det][id]],
-				    colW[mMap_wcol[det][id]]); 
-			    fprintf(f3c,"%3d,%3d,%3d,%3d,%2s,%2d,%3d,%3d,%3d,%3d,%2d,%2d,%2d,%2d,P%1d,H%02d,%6s,%6s\n",
+				    colW[mMap_wcol[det][id]],
+				    leng[mMap_jcol[det][id]]); 
+			    fprintf(f3c,"%3d,%3d,%3d,%3d,%2s,%2d,%3d,%3d,%3d,%3d,%2d,%2d,%2d,%2d,P%1d,H%02d,%6s,%6s,%3.1f\n",
 				    ehp,ns,dep,ch,
 				    CRT[crt],slt,
 				    det,id,row,col,
@@ -1391,7 +1421,8 @@ void StFcsDbMaker::printMap(){
 				    mMap_ppp[det][id],
 				    mMap_pph[det][id],
 				    colJ[mMap_jcol[det][id]],
-				    colW[mMap_wcol[det][id]]);
+				    colW[mMap_wcol[det][id]],
+				    leng[mMap_jcol[det][id]]); 
 			}else{
  			    fprintf(f3,"%3d %3d %3d %3d   %2s %2d   %3d %3d %3d %3d\n",
 				    ehp,ns,dep,ch,
