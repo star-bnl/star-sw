@@ -23,7 +23,8 @@ void DrawPng(TCanvas *c) {
   pngName.ReplaceAll("__","_");
   pngName.ReplaceAll("#","");
   //  pngName += ".png"; 
-  pngName += ".svg"; 
+  //  pngName += ".svg"; 
+  pngName += ".pdf"; 
   c->SaveAs(pngName);
   nPng++;
   cout << "Draw #\t" << nPng << "\t" << pngName << endl;
@@ -67,21 +68,21 @@ void CheckDistortion(const Char_t *opt="CorrY,OSpaceZ2,OGridLeakFull", const Cha
   Double_t Rmax = 192;
   TString Name("dX");
   TString Opt(opt);
-  Int_t index = Opt.Index(",New");
-  TString Title("R*Phi Distortion ( cm) versus R and Z at X = 0 for ");
+  Int_t index = TMath::Min(Opt.Index(",New"),Opt.Index(",sdt"));
+  TString Title("dX (cm) at X = 0 for ");
   Title += Opt(0,index); Title += " and "; Title += magF;
   TH2F *dX    = new TH2F(Name,  Title, nz, zmin, zmax, nr, Rmin, Rmax);
   dX->SetXTitle("Z (cm)");
   dX->SetYTitle("R (cm)");
   TString Name("dY");
-  TString Title("Radial Distortion ( cm) versus R and Z at X = 0 for ");
+  TString Title("dY (cm) X = 0 for ");
   Title += Opt(0,index); Title += " and "; Title += magF;
   TH2F *dY    = new TH2F(Name,  Title, nz, zmin, zmax, nr, Rmin, Rmax);
   dY->SetXTitle("Z (cm)");
   dY->SetYTitle("R (cm)");
-#if 0
+#if 1
   Name = "dZ";
-  Title = "dZ ( cm) versus Y and Z at   X = 0 for ";
+  Title = "dZ (cm) at X = 0 for ";
   Title += Opt(0,index); Title += " and "; Title += magF;
   TH2F *DZ = new TH2F(Name,Title, nz, zmin, zmax, nr, Rmin, Rmax);
   DZ->SetXTitle("Z (cm)");
@@ -109,7 +110,7 @@ void CheckDistortion(const Char_t *opt="CorrY,OSpaceZ2,OGridLeakFull", const Cha
       //      cout << "Y = " << xIn[1] << "\tZ = " << xIn[2] << "\t dX/dY/dZ = " << dx << " / " << dy << " / " << dz << endl;
       dX->Fill(xIn[2],xIn[1], dx);
       dY->Fill(xIn[2],xIn[1], dy);
-#if 0
+#if 1
       dZ->Fill(xIn[2],xIn[1], dz);
 #endif
     }
@@ -129,5 +130,11 @@ void CheckDistortion(const Char_t *opt="CorrY,OSpaceZ2,OGridLeakFull", const Cha
   dY->Draw("colz");
   c1dY->Update();
   DrawPng(c1dY);
+  TString cNameZ("dZ"); cNameZ += Opt(0,index);
+  TCanvas *c1dZ = new TCanvas(cNameZ,cNameZ);
+  //  c1dZ->SetRightMargin(0.2);
+  dZ->Draw("colz");
+  c1dZ->Update();
+  DrawPng(c1dZ);
   fOut->Write();
 }
