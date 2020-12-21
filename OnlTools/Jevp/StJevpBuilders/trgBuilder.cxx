@@ -99,13 +99,13 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     contents.h266_bbc_bunchid_b = new TH1D("h266_bbc_bunchid_b","Bunch Crossing Counter (Blue)",128,-0.5,127.5);
 
     contents.h442_bunch_yellow_fill = new TH1D("h442_bunch_yellow_fill","h442_bunch_yellow_fill",128,-0.5,127.5);
-    contents.h443_bunch_yellow_up = new TH1D("h443_bunch_yellow_up","h443_bunch_yellow_up",128,-0.5,127.5);
-    contents.h444_bunch_yellow_down = new TH1D("h444_bunch_yellow_down","h444_bunch_yellow_down",128,-0.5,127.5);
-    contents.h445_bunch_yellow_unpol = new TH1D("h445_bunch_yellow_unpol","h445_bunch_yellow_unpol",128,-0.5,127.5);
+    //contents.h443_bunch_yellow_up = new TH1D("h443_bunch_yellow_up","h443_bunch_yellow_up",128,-0.5,127.5);
+    //contents.h444_bunch_yellow_down = new TH1D("h444_bunch_yellow_down","h444_bunch_yellow_down",128,-0.5,127.5);
+    //contents.h445_bunch_yellow_unpol = new TH1D("h445_bunch_yellow_unpol","h445_bunch_yellow_unpol",128,-0.5,127.5);
     contents.h446_bunch_blue_fill = new TH1D("h446_bunch_blue_fill","h446_bunch_blue_fill",128,-0.5,127.5);
-    contents.h447_bunch_blue_up = new TH1D("h447_bunch_blue_up","h447_bunch_blue_up",128,-0.5,127.5);
-    contents.h448_bunch_blue_down = new TH1D("h448_bunch_blue_down","h448_bunch_blue_down",128,-0.5,127.5);
-    contents.h449_bunch_blue_unpol = new TH1D("h449_bunch_blue_unpol","h449_bunch_blue_unpol",128,-0.5,127.5);
+    //contents.h447_bunch_blue_up = new TH1D("h447_bunch_blue_up","h447_bunch_blue_up",128,-0.5,127.5);
+    //contents.h448_bunch_blue_down = new TH1D("h448_bunch_blue_down","h448_bunch_blue_down",128,-0.5,127.5);
+    //contents.h449_bunch_blue_unpol = new TH1D("h449_bunch_blue_unpol","h449_bunch_blue_unpol",128,-0.5,127.5);
 
     // zdcsmd
     contents.h329_zdcsmd_w_v_N = new TH1D("h329_zdcsmd_w_v_N","ZDC_SMD_west_ver_N",8,0.5,8.5);
@@ -224,6 +224,7 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     ph->setLegArgs("F");
     ph->histo->SetFillColor(2); ph->histo->SetLineColor(2);
     plots[n]->addHisto(ph);
+    /*
     ph = new PlotHisto(contents.h443_bunch_yellow_up);
     ph->setLegText("Y Up");
     ph->setLegArgs("F");
@@ -239,8 +240,10 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     ph->setLegArgs("F");
     ph->histo->SetFillColor(5); ph->histo->SetLineColor(5);
     plots[n]->addHisto(ph);
+    */
     plots[n]->setLegend(.7,.6,.95,.95);
     plots[n]->setOptStat(0);
+   
 
     plots[++n] = new JevpPlot();
     ph = new PlotHisto(contents.h266_bbc_bunchid_b);
@@ -253,6 +256,7 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     ph->setLegArgs("F");
     ph->histo->SetFillColor(2); ph->histo->SetLineColor(2);
     plots[n]->addHisto(ph);
+    /*
     ph = new PlotHisto(contents.h447_bunch_blue_up);
     ph->setLegText("B Up");
     ph->setLegArgs("F");
@@ -268,6 +272,7 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     ph->setLegArgs("F");
     ph->histo->SetFillColor(5); ph->histo->SetLineColor(5);
     plots[n]->addHisto(ph);
+    */
     plots[n]->setLegend(.7,.6,.95,.95);
     plots[n]->setOptStat(0);
 
@@ -615,15 +620,18 @@ void trgBuilder::event(daqReader *rdr)
     
     //Spin Bits    
     // int ispinb = trgd->spinBit();
-    if(trgd->spinBitYellowFilled()) contents.h442_bunch_yellow_fill->Fill(bunch7bit);  
+    if(trgd->spinBitYellowFilled()) contents.h442_bunch_yellow_fill->Fill(bunch7bit);
+    /*  
     if(trgd->spinBitYellowUp()) contents.h443_bunch_yellow_up->Fill(bunch7bit);  
     if(trgd->spinBitYellowDown()) contents.h444_bunch_yellow_down->Fill(bunch7bit);  
-    if(trgd->spinBitYellowUnpol()) contents.h445_bunch_yellow_unpol->Fill(bunch7bit);  
+    if(trgd->spinBitYellowUnpol()) contents.h445_bunch_yellow_unpol->Fill(bunch7bit); 
+    */ 
     if(trgd->spinBitBlueFilled()) contents.h446_bunch_blue_fill->Fill(bunch7bit);  
+    /*
     if(trgd->spinBitBlueUp()) contents.h447_bunch_blue_up->Fill(bunch7bit);  
     if(trgd->spinBitBlueDown()) contents.h448_bunch_blue_down->Fill(bunch7bit);  
     if(trgd->spinBitBlueUnpol()) contents.h449_bunch_blue_unpol->Fill(bunch7bit); 
-
+    */
     
     // zdcsmd...
     TH1D *zdcsmd[8];
