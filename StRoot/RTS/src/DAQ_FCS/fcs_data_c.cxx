@@ -6,7 +6,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdio.h>
-
+#include <stdlib.h>
 
 #include <rtsLog.h>
 
@@ -40,11 +40,14 @@ float fcs_data_c::n_sigma ;
 short fcs_data_c::n_pre ;
 short fcs_data_c::n_post ;
 short fcs_data_c::n_cou ;
+char fcs_data_c::n_mode ;
 
 // set in send_config, for shared access during data-checking
 u_short fcs_data_c::ht_threshold ;
 u_short fcs_data_c::tb_pre ;
 u_short fcs_data_c::tb_all ;
+
+u_char fcs_data_c::ascii_no ;
 
 pthread_mutex_t fcs_data_c::ped_mutex ;
 	
@@ -74,7 +77,15 @@ int fcs_data_c::zs_start(u_short *buff)
 		    (float)n_sigma,
 		    (float)ped[sector-1][rdo-1].rms[ch]) ;
 
-		thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma * ped[sector-1][rdo-1].rms[ch] + 0.5) ;
+		// I don't think that a threshold as a function of RMS is a good idea.
+		// I should do what the ASICs do and have a fixed digital threshold
+		if(n_mode==0) {
+			thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma * ped[sector-1][rdo-1].rms[ch] + 0.5) ;
+		}
+		else {
+			thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma + 0.5) ;
+		}
+
 		l_cou = n_cou ;
 		l_pre = n_pre ;
 		l_post = n_post ;
@@ -85,9 +96,14 @@ int fcs_data_c::zs_start(u_short *buff)
 	int t_stop ;
 	int got_one = 0 ;
 
+	int q_ped = 0 ;
 	
 	for(int i=0;i<tb_cou;i++) {
 		short d = adc[i] & 0xFFF ;
+
+		if(i<4) {
+			q_ped += d ;
+		}
 
 //		printf("CH %d: %d = %d < thr %d: t_start %d, t_cou %d\n",ch,i,d,thr,t_start,t_cou) ;
 
@@ -121,7 +137,19 @@ int fcs_data_c::zs_start(u_short *buff)
 
 	}
 
+	
+	int i_ped = (int)(ped[sector-1][rdo-1].mean[ch]+0.5) ;
 
+
+	if(!is_trg) {
+		q_ped /= 4 ;	// quick ped
+		LOG(DBG,"RDO %d, ch %d, q_ped %d, i_ped %d",rdo,ch,q_ped,i_ped) ;
+
+		q_ped -= i_ped ;
+		if(abs(q_ped)>3) {
+			statistics[rdo-1].odd_ped[ch]++ ;
+		}
+	}
 
 	//finalize
 	if(t_cou >= l_cou) {
@@ -156,10 +184,7 @@ int fcs_data_c::zs_start(u_short *buff)
 
 
 	
-	int i_ped ;
-
 	if(is_trg) i_ped = 0 ;
-	else i_ped = (int)(ped[sector-1][rdo-1].mean[ch]+0.5) ;
 
 	int seq_cou = 0 ;
 
@@ -392,7 +417,9 @@ int fcs_data_c::hdr_event()
 	// skip to first datum
 	dta_p += 8 ;
 
-	has_ascii = 0 ;
+//	has_ascii = 0 ;
+	ascii_p = 0 ;
+	ascii_words = 0 ;
 
 	if(dta_p[0]==0xEEEE && dta_p[1]==0xEEEE) {	// start of ASCII
 		char ctmp[64] ;
@@ -402,8 +429,11 @@ int fcs_data_c::hdr_event()
 
 		int words = (dta_shorts - 8 - 2)/2 ;	// adjust
 
-		has_ascii = 1 ;
-		LOG(TERR,"ASCII contribution - words %d[%d]: sector %d, rdo %d, hdr_trg_word 0x%X, hdr_board 0x%X",words,dta_shorts,sector,rdo,hdr_trg_word,hdr_board_id) ;
+//		has_ascii = 1 ;
+		ascii_p = (char *)dta_p ;
+		ascii_words = words ;
+
+		if(ascii_no==0) LOG(TERR,"ASCII contribution - words %d[%d]: sector %d, rdo %d, hdr_trg_word 0x%X, hdr_board 0x%X",words,dta_shorts,sector,rdo,hdr_trg_word,hdr_board_id) ;
 
 		int end_marker = 0 ;
 		u_int cou = 0 ;
@@ -419,9 +449,10 @@ int fcs_data_c::hdr_event()
 						float f_val = 0.0 ;
 						u_int i_val = 0 ;
 						char *c ;
+						int ret ;
 
 						ctmp[cou] = 0 ;
-						LOG(TERR,"S%d:%d:%d: \"%s\"",sector,rdo,events,ctmp) ;
+						if(ascii_no==0) LOG(TERR,"S%d:%d:%d: \"%s\"",sector,rdo,events,ctmp) ;
 						cou = 0 ;
 
 					
@@ -450,12 +481,12 @@ int fcs_data_c::hdr_event()
 							statistics[rdo-1].deadtime = f_val ;
 							ped_unlock() ;
 
-							if(f_val > 50.0) {
-								LOG(WARN,"S%d:%d: deadtime %.1f",sector,rdo,f_val) ;
-							}
-							else {
-								LOG(TERR,"S%d:%d: deadtime %.1f",sector,rdo,f_val) ;
-							}
+							//if(f_val > 50.0) {
+							//	LOG(WARN,"S%d:%d: deadtime %.1f",sector,rdo,f_val) ;
+							//}
+							//else {
+							//	LOG(TERR,"S%d:%d: deadtime %.1f",sector,rdo,f_val) ;
+							//}
 						}
 						else if((c=strstr(ctmp,"b "))) {
 							sscanf(c,"b %f",&f_val) ;
@@ -474,14 +505,14 @@ int fcs_data_c::hdr_event()
 							statistics[rdo-1].rx_throttle = f_val ;
 							ped_unlock() ;
 
-							if(f_val > 50.0) {
-								LOG(WARN,"S%d:%d: RX-throttle %.1f",sector,rdo,f_val) ;
-							}
-							else {
-								LOG(TERR,"S%d:%d: RX-throttle %.1f",sector,rdo,f_val) ;
-							}
+							//if(f_val > 50.0) {
+							//	LOG(WARN,"S%d:%d: RX-throttle %.1f",sector,rdo,f_val) ;
+							//}
+							//else {
+							//	LOG(TERR,"S%d:%d: RX-throttle %.1f",sector,rdo,f_val) ;
+							//}
 						}
-					   
+											   
 
 					}
 					else {
@@ -1103,8 +1134,8 @@ int fcs_data_c::gain_from_cache(const char *fname)
 				break ;
 			}
 
-			if(v==0) c_typ = "electronics" ;
-			else c_typ = "et" ;
+			if(v==0) c_typ = "electronics" ;		// was "electronics"
+			else c_typ = "et" ;			// was "et"
 
 			sprintf(ff,"%s/fcs_%s_%s_gains.txt",file_name,c_det,c_typ) ;
 		}
@@ -1388,11 +1419,20 @@ int fcs_data_c::load_rdo_map(const char *fname)
 
 
 		// crate 2 aka Main
+#if 0
+	
 		if(r < 3) {
 			rdo_map[10][r].crate = 2 ;
 			rdo_map[10][r].slot = r ;
 		}
+#else
+		// moved fibers from 1,2,3 to 5,6,7
 
+		if(r>=4 && r<=7) {
+			rdo_map[10][r].crate = 2 ;
+			rdo_map[10][r].slot = r - 4 ;
+		}
+#endif
 		rdo_map[5][r].crate = 4 ;
 		rdo_map[5][r].slot = r ;
 

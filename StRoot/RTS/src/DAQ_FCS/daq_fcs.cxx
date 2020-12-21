@@ -626,7 +626,7 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			case 10 :	// pulser
 				break ;
 			default :
-				LOG(WARN,"%d: unusual trg_cmd=0x%X in event 0x%04X",rdo,trg_cmd,hdr) ;
+				LOG(WARN,"%d: unusual trg_cmd=0x%X in event 0x%04X: T %d, daq 0x%X",rdo,trg_cmd,hdr,t_lo,daq_cmd) ;
 				break ;
 			}
 		}
