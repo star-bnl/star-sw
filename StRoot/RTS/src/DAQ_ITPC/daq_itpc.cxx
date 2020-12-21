@@ -741,6 +741,29 @@ static inline u_int sw16(u_int d)
         return d ;
 }
 
+// HACK for Dec 2019 Trigger Cable problem of TPC Sector 12
+// 3rd and 4th bit were reversed on the TCD cable.
+static u_int swap_s12(u_int dta)
+{
+	u_int n_dta = (dta & 0xFFF00000) ;
+	for(int n=0;n<5;n++) {
+		int dd = (dta>>(n*4)) & 0xF ;
+				
+		int b4 = (dd & 0x8)?1:0 ;
+		int b3 = (dd & 0x4)?1:0 ;
+		int b2 = (dd & 0x2)?1:0 ;
+		int b1 = (dd & 0x1)?1:0 ;
+
+		int sdd = (b3<<3)|(b4<<2)|(b2<<1)|(b1<<0) ;
+		//LOG(TERR,"   %d: 0x%X %d %d %d %d 0x%X",n,dd,b4,b3,b2,b1,sdd) ;
+
+		n_dta |= (sdd<<(n*4)) ;
+	}
+
+	return n_dta ;
+
+}
+
 
 // knows how to get a/the L2 command out of the event...
 int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
@@ -772,9 +795,15 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	char buff[128] ;
 	int buff_cou ;
 	u_int want_dump = 0 ;
+	int sector = 0 ;
 
 	u_int *d = (u_int *)addr + 4 ;	// skip header
 	words -= 4 ;
+
+
+	//from Dec 2019
+	sector = rdo>>4 ;
+	rdo &= 0xF ;
 
 	// NOTE that since Dec 2017 the 16 bit words are swapped!!!
 	// eh, are you sure???
@@ -999,7 +1028,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			daq_cmd = (v>>4) & 0xF ;
 
 
-			LOG(TERR,"%d: %d/%d = 0x%08X = %d %d %d",rdo,i,trg_cou,trg[i].reserved[0],t,trg_cmd,daq_cmd) ;
+			LOG(TERR,"%d: %d/%d = 0x%08X = T %d, trg %d, daq %d",rdo,i,trg_cou,trg[i].reserved[0],t,trg_cmd,daq_cmd) ;
 		}
 	}
 #endif
@@ -1027,6 +1056,10 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		u_int trg_cmd ;
 		u_int daq_cmd ;
 
+//		if(sector==12) {		// HACK for bad TCD nibble in FY20
+//			v = swap_s12(v) ;
+//		}
+
 		t = ((v>>8)&0xF)<<8 ;
 		t |= ((v>>12)&0xF)<<4 ;
 		t |= ((v>>16)&0xF) ;
@@ -1034,6 +1067,17 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		trg_cmd = v & 0xF ;
 		daq_cmd = (v>>4) & 0xF ;
 
+
+#if 0
+		LOG(TERR,"RDO %d: prompt T %d, trg %d, daq %d",rdo,t,trg_cmd,daq_cmd) ;
+#endif
+
+#if 0
+		if(sector==12 && rdo==1 && trg_cmd != 4) {
+			LOG(TERR,"Prompt: RDO %d: T %d, trg %d, daq %d",
+			    rdo,t,trg_cmd,daq_cmd) ;
+		}
+#endif
 
 		if(((v&0xFFF00000) != 0x04300000)&&((v&0xFFF00000)!=0x08300000)) {	// 0x043 external trigger, 0x083 local trigger
 			LOG(ERR,"%d: trigger odd: 0x%08X: %d %d %d",rdo,v,t,trg_cmd,daq_cmd) ;
@@ -1079,6 +1123,10 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			continue ;	// eh?
 		}
 
+		
+		// HACK for Sector 12
+//		if(sector==12) v = swap_s12(v) ;
+
 		t = ((v>>8)&0xF)<<8 ;
 		t |= ((v>>12)&0xF)<<4 ;
 		t |= ((v>>16)&0xF) ;
@@ -1087,11 +1135,21 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		trg[t_cou].daq = (v>>4) & 0xF ;
 		trg[t_cou].t = t ; 
 
+
+#if 0
+		// HACK for Sector 12
+		if(sector==12 && rdo==1 && trg[t_cou].trg != 4) {
+			LOG(TERR,"%d/%d: RDO %d: T %d, trg %d, daq %d",i,(trg_cou+1),
+			    rdo,t,trg[t_cou].trg,trg[t_cou].daq) ;
+		}
+#endif
+
 		if(t==0 || trg[t_cou].trg==0) {
 			want_dump |= 2 ;
 			continue ;
 		}
 
+#if 0
 		if(trg[t_cou].trg==4 || trg[t_cou].trg==8 || trg[t_cou].trg==10 || trg[t_cou].trg==14 || trg[t_cou].trg==15) ;
 		else {
 			if(trg[t_cou].trg==2 && trg[t_cou].daq==3 && trg[t_cou].t==10) ;	// skip the special clear at run-start
@@ -1100,7 +1158,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			}
 		}
 
-		//LOG(TERR,"trg %d: 0x%08X: trg %d",i,v,v&0xF) ;
+#endif		//LOG(TERR,"trg %d: 0x%08X: trg %d",i,v,v&0xF) ;
 
 		if(trg[t_cou].trg>=4 && trg[t_cou].trg<13) {	// FIFO trg
 			//LOG(WARN,"RDO %d: %d/%d: 0x%08X: %d %d %d",rdo,i,(trg_cou+1),
