@@ -165,6 +165,9 @@ void fcsBuilder::event(daqReader *rdr){
 	    int detid,id,crt,slt;
 	    getIdfromDep(ehp,ns,dep,ch,detid,id,crt,slt);
 
+	    //printf("sec=%2d ehp=%1d ns=%1d dep=%2d ch=%2d  det=%1d id=%3d crt=%1d slt=%2d\n",
+	    //        sec,ehp,ns,dep,ch,detid,id,crt,slt);
+	    if(detid>=6) continue; //skip unmapped data
 	    if(ch>=32) continue; //skip trigger data
 	    if(ehp>=3) continue; //skip main crates for now
 
