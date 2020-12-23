@@ -152,7 +152,10 @@ void fcsBuilder::event(daqReader *rdr){
     if(!dd){
       LOG(DBG,"No fcs_%s found",mode[mReadMode].c_str());
     }else{
-	while(dd->iterate()) {
+        int trgcmd = rdr->trgcmd;      
+        if(trgcmd!=4 && trgcmd !=10) return;
+      
+        while(dd->iterate()) {
 	    int sec = ((dd->sec >> 11) & 0x1F) + 1;
 	    int rdo = ((dd->sec >> 8) & 0x7) + 1;
 	    int ehp = (dd->sec >> 6) & 0x3;
