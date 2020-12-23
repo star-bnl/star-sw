@@ -715,7 +715,13 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       Double_t mass = 0;
       if (tpc_track) {
 	id3        = tpc_track[Id-1].start_vertex_p;
-	assert(id3 > 0 && id3 <= NV);
+	//	assert(id3 > 0 && id3 <= NV);
+	if (id3 <= 0 || id3 > NV) {
+	  LOG_ERROR << "StTpcRSMaker::Make: g2t_tpc_hit table does not matched with g2t_trac: id3 = " << id3 << " and NV = " << NV << " skip the hit" << endm;
+	  g2t_tpc_hit->Print(indx,1);
+	  if (Id > 0) g2t_track->Print(Id-1,1);
+	  continue;
+	}
 	ipart      = tpc_track[Id-1].ge_pid;
 	charge     = (Int_t) tpc_track[Id-1].charge;
 	StParticleDefinition *particle = StParticleTable::instance()->findParticleByGeantId(ipart);
