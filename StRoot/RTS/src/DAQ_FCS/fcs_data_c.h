@@ -106,7 +106,10 @@ public:
 	u_char trg_cmd ;
 
 	u_char trgd_event ;
-	u_char has_ascii ;
+//	u_char has_ascii ;
+	char *ascii_p ;
+	int ascii_words ;
+	static u_char ascii_no ;
 
 	// temprorary storage for the current board, event and for a single channel
 	int ch ;			// channel [0..32]
@@ -168,13 +171,14 @@ public:
 	static short n_pre ;
 	static short n_post ;
 	static short n_cou ;
+	static char n_mode ;	// 0: use rms, 1: fixed threshold in n_sigma
 
 	// set in send_config, for shared access during data-checking
 	static u_short ht_threshold ;
 	static u_short tb_pre ;
 	static u_short tb_all ;
 
-	static struct fcs_ped_t ped[16][8] ;	// sector,rdo
+	static struct fcs_ped_t ped[16][8] ;		// sector,rdo
 	static struct rdo_map_t rdo_map[16][8] ;	// sector,rdo
 	static struct det_map_t det_map[4][2][24] ;	// reverse map: det,ns,dep
 	static u_char rdo_map_loaded ;			// boolean
@@ -189,6 +193,7 @@ public:
 		float deadtime ;
 		float rx_throttle ;
 		int ht_rate ;
+		u_int odd_ped[32] ;
 	} statistics[8] ;
 
 #ifndef __CINT__
