@@ -178,8 +178,7 @@ int main(int argc, char *argv[])
 	}
 
 	if(sim_mode) f_t->sim_mode = 1 ;
-	f_t->init() ;
-
+	f_t->init(".") ;
 
 	// overrides...
 	f_t->ht_threshold[2] = 90 ;
