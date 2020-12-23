@@ -1,24 +1,26 @@
-// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.6 2012/08/14 16:30:42 fisyak Exp $
-// **************************************************************************
-// This file is property of and copyright by the ALICE HLT Project          *
-// ALICE Experiment at CERN, All rights reserved.                           *
-//                                                                          *
-// Primary Authors: Sergey Gorbunov <sergey.gorbunov@kip.uni-heidelberg.de> *
-//                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
-//                  for The ALICE HLT Project.                              *
-//                                                                          *
-// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
-//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
-//                                                                          *
-// Permission to use, copy, modify and distribute this software and its     *
-// documentation strictly for non-commercial purposes is hereby granted     *
-// without fee, provided that the above copyright notice appears in all     *
-// copies and that both the copyright notice and this permission notice     *
-// appear in the supporting documentation. The authors make no claims       *
-// about the suitability of this software for any purpose. It is            *
-// provided "as is" without express or implied warranty.                    *
-//                                                                          *
-//***************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #include "AliHLTTPCCATrackletSelector.h"
@@ -56,8 +58,8 @@ void AliHLTTPCCATrackletSelector::run()
   numberOfTracks = 0;
   NHitsTotal = 0;
 
-  const int NTracklets = fTracker.NTracklets();
-  for ( int iTrackletV = 0; iTrackletV * int_v::Size < NTracklets; ++iTrackletV ) {
+  const unsigned int NTracklets = fTracker.NTracklets();
+  for ( unsigned int iTrackletV = 0; iTrackletV * int_v::Size < NTracklets; ++iTrackletV ) {
     const TrackletVector &tracklet = fTrackletVectors[iTrackletV];
     const uint_v trackIndexes = uint_v( Vc::IndexesFromZero ) + uint_v(iTrackletV * int_v::Size);
 
@@ -72,8 +74,7 @@ void AliHLTTPCCATrackletSelector::run()
     uint_v nTrackHits( Vc::Zero );
 
     Track *trackCandidates[int_v::Size];
-    for(int iV=0; iV<uint_v::Size; iV++)
-    {
+    for( unsigned int iV=0; iV<uint_v::Size; iV++ ) {
       if(!validTracklets[iV]) continue;
       trackCandidates[iV] = new Track;
     }
@@ -89,8 +90,7 @@ void AliHLTTPCCATrackletSelector::run()
       const uint_m &saveHitMask = validHits && ( ownHitsMask || canShareHitMask );
       const uint_m &bigGapMask = gap > static_cast<unsigned int>(AliHLTTPCCAParameters::MaximumRowGap);
       const uint_m &brokenTrackMask = bigGapMask && (nTrackHits >= static_cast<unsigned int>(AliHLTTPCCAParameters::MinimumHitsForTrack));
-      for(int iV=0; iV<uint_v::Size; iV++)
-      {
+      for( unsigned int iV=0; iV<uint_v::Size; iV++ ) {
         if(!validTracklets[iV]) continue;
         if ( saveHitMask[iV] ) {
           assert( hitIndexes[iV] < fData.Row( rowIndex ).NHits() );
@@ -113,8 +113,7 @@ void AliHLTTPCCATrackletSelector::run()
       gap.setZero( saveHitMask || brokenTrackMask );
     }
 
-    for(int iV=0; iV<uint_v::Size; iV++)
-    {
+    for( unsigned int iV=0; iV<uint_v::Size; iV++ ) {
       if(!validTracklets[iV]) continue;
       if ( nTrackHits[iV] >= static_cast<unsigned int>(AliHLTTPCCAParameters::MinimumHitsForTrack) ) {
         NHitsTotal += nTrackHits[iV];

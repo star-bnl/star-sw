@@ -1,8 +1,26 @@
-//-*- Mode: C++ -*-
-
-//* This file is property of and copyright by the ALICE HLT Project        *
-//* ALICE Experiment at CERN, All rights reserved.                         *
-//* See cxx source for full Copyright notice                               *
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef ALIHLTTPCCADEF_H
 #define ALIHLTTPCCADEF_H
@@ -34,6 +52,7 @@
 #define ITPC_TCUT		// Chi2cut on triplets (first iteration only) x3.5 for iTPC(72)
 #define TRACKLET_EXT		// Use wider cuts on track fittinig and track extension in TrackletConstructor
 #define EXTEND_ALL_TRAKCS	// Extend all tracks in TrackletConstructor
+#define MERGE_LOOPERS		// Switch on LooperMerger
 
 
 /**
@@ -88,6 +107,12 @@ static inline uint_m validHitIndexes( const uint_v &v )
   return (static_cast<int_v>( v ) >= int_v( Vc::Zero ) && v < 100000000);
 
 }
+
+
+/*
+ * Cut for track segments to count as looper parts if QPt is less
+ */
+const int looperQPtCut = 5;
 
 #ifdef V6
 struct hit_link {

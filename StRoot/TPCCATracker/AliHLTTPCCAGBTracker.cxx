@@ -1,24 +1,26 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.12 2010/09/01 10:38:27 ikulakov Exp $
-// **************************************************************************
-// This file is property of and copyright by the ALICE HLT Project          *
-// ALICE Experiment at CERN, All rights reserved.                           *
-//                                                                          *
-// Primary Authors: Sergey Gorbunov <sergey.gorbunov@kip.uni-heidelberg.de> *
-//                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
-//                  for The ALICE HLT Project.                              *
-//                                                                          *
-// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
-//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
-//                                                                          *
-// Permission to use, copy, modify and distribute this software and its     *
-// documentation strictly for non-commercial purposes is hereby granted     *
-// without fee, provided that the above copyright notice appears in all     *
-// copies and that both the copyright notice and this permission notice     *
-// appear in the supporting documentation. The authors make no claims       *
-// about the suitability of this software for any purpose. It is            *
-// provided "as is" without express or implied warranty.                    *
-//                                                                          *
-//***************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 
@@ -386,6 +388,7 @@ void AliHLTTPCCAGBTracker::Merge()
 ///mvz end
 
   AliHLTTPCCAMergerOutput &out = *( merger.Output() );
+#ifdef MERGE_LOOPERS
   AliHLTTPCCALooperMerger* lmerger = new AliHLTTPCCALooperMerger( out, fHits );
   lmerger->SetSliceParam( fSlices[0].Param() );
   for ( int i = 0; i < fNSlices; i++ ) {
@@ -397,6 +400,8 @@ void AliHLTTPCCAGBTracker::Merge()
   lmerger->FillSegments();
   lmerger->CheckSegments();
   lmerger->SaveSegments();
+  delete lmerger;
+#endif
 
   int newNTr(0), newNHits(0);
   for ( int itr = 0; itr < out.NTracks(); itr++ ) {
@@ -430,7 +435,6 @@ void AliHLTTPCCAGBTracker::Merge()
     if( track.IsLooper() ) {
       if( track.LpPrevNb() == -1 ) {
 	int iSegment = 0;
-	int nLooperHits = track.NClusters();
 	AliHLTTPCCAGBTrack &trackGB = fTracks[fNTracks];
 	trackGB.SetFirstHitRef( nTrackHits );
 	if( (!track.IsRevers() && track.IsGrow()) || (track.IsRevers() && !track.IsGrow()) ) {
@@ -448,9 +452,6 @@ void AliHLTTPCCAGBTracker::Merge()
 
         if( track.IsRevers() ) trackGB.SetReverse();
 
-	int icl_start = 0;
-	int icl_end = track.NClusters();
-	int iter = 1;
 	for ( int icl0 = 0; icl0 < track.NClusters(); icl0++ ) {
 	  int icl = icl0;
 	  if( (!track.IsGrow() && !track.IsRevers()) || (track.IsGrow() && track.IsRevers()) ) icl = track.NClusters() - icl0 - 1;
@@ -477,9 +478,6 @@ void AliHLTTPCCAGBTracker::Merge()
 	while( nextTr != -1 ) {
 	  const AliHLTTPCCAMergedTrack &trackNext = out.Track( nextTr );
 	  trackGB.SetLooper();
-	  icl_start = 0;
-	  icl_end = trackNext.NClusters();
-	  iter = 1;
 	  iSegment++;
 	  for ( int icl0 = 0; icl0 < trackNext.NClusters(); icl0++ ) {
 	    int icl = icl0;
@@ -590,7 +588,6 @@ void AliHLTTPCCAGBTracker::Merge()
     }
   }
 #endif
-  delete lmerger;
 }
 
 

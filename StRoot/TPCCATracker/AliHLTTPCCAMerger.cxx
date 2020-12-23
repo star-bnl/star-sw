@@ -1,24 +1,26 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.13 2012/08/13 19:35:05 fisyak Exp $
-// **************************************************************************
-// This file is property of and copyright by the ALICE HLT Project          *
-// ALICE Experiment at CERN, All rights reserved.                           *
-//                                                                          *
-// Primary Authors: Sergey Gorbunov <sergey.gorbunov@kip.uni-heidelberg.de> *
-//                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
-//                  for The ALICE HLT Project.                              *
-//                                                                          *
-// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
-//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
-//                                                                          *
-// Permission to use, copy, modify and distribute this software and its     *
-// documentation strictly for non-commercial purposes is hereby granted     *
-// without fee, provided that the above copyright notice appears in all     *
-// copies and that both the copyright notice and this permission notice     *
-// appear in the supporting documentation. The authors make no claims       *
-// about the suitability of this software for any purpose. It is            *
-// provided "as is" without express or implied warranty.                    *
-//                                                                          *
-//***************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 //#include "AliHLTTPCCASliceTrack.h"
@@ -642,7 +644,7 @@ void AliHLTTPCCAMerger::UnpackSlices()
     for ( int itr = 0; itr < slice.NTracks(); itr += uint_v::Size ) {
 
       int nTracksVector = uint_v::Size;
-      if(slice.NTracks() - itr < uint_v::Size )
+      if(slice.NTracks() - itr < int(uint_v::Size) )
         nTracksVector = slice.NTracks() - itr;
 
       float_v startAlpha;
@@ -717,8 +719,7 @@ void AliHLTTPCCAMerger::UnpackSlices()
         // if chi2 per degree of freedom > 3. sigma - mark track with 0
       fitted &= vStartPoint.Chi2() < 9.f*static_cast<float_v>(vStartPoint.NDF());
 #endif
-      for(int iV=0; iV<float_v::Size; iV++)
-      {
+      for( unsigned int iV=0; iV<float_v::Size; iV++ ) {
         if(!fitted[iV]) continue;
           // if the track fitted correctly store the track
         AliHLTTPCCASliceTrackInfo &track = fTrackInfos[nTracksCurrent];
@@ -788,7 +789,6 @@ float_m AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParamVector &t, float_v &Al
   nHits.setZero(static_cast<uint_m>(!active0));
 
   int nHitsMax = nHits.max();
-  int nHitsMin = nHits.min();
 
     // pack hits
   float_v xVs[MaxNHits];
@@ -904,7 +904,7 @@ float_m AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParamVector &t, float_v &Al
   nHits.setZero(static_cast<uint_m>(!active0));
 
   int nHitsMax = nHits.max();
-  int nHitsMin = nHits.min();
+//  int nHitsMin = nHits.min();
 
     // pack hits
   float_v xVs[MaxNHits];
@@ -1022,7 +1022,6 @@ float_m AliHLTTPCCAMerger::FitTrackMerged( AliHLTTPCCATrackParamVector &t, float
   nHits.setZero(static_cast<uint_m>(!active0));
 
   int nHitsMax = nHits.max();
-  int nHitsMin = nHits.min();
 
     // pack hits
   float xVs[MaxNHits*float_v::Size] __attribute__ ((aligned(float_v::Size*4)));
@@ -1032,7 +1031,7 @@ float_m AliHLTTPCCAMerger::FitTrackMerged( AliHLTTPCCATrackParamVector &t, float
   unsigned int RowVs[MaxNHits*float_v::Size] __attribute__ ((aligned(float_v::Size*4)));
 
   // ---
-  float slVs[MaxNHits*float_v::Size] __attribute__ ((aligned(float_v::Size*4)));
+//  float slVs[MaxNHits*float_v::Size] __attribute__ ((aligned(float_v::Size*4)));
   // ---
 
   for ( int ihit = 0; ihit < nHitsMax; ihit++ ) {
@@ -1050,10 +1049,6 @@ float_m AliHLTTPCCAMerger::FitTrackMerged( AliHLTTPCCATrackParamVector &t, float
       yVs[ihit*float_v::Size+iV] = h.Y();
       zVs[ihit*float_v::Size+iV] = h.Z();
       RowVs[ihit*uint_v::Size+iV] = (unsigned int)h.IRow();
-
-      // ---
-      slVs[ihit*float_v::Size+iV] = h.ISlice();
-      // ---
     }
   }
 
@@ -1070,8 +1065,6 @@ float_m AliHLTTPCCAMerger::FitTrackMerged( AliHLTTPCCATrackParamVector &t, float
     const float_v &zV = reinterpret_cast<float_v&>(zVs[ihit*float_v::Size]);
     const float_v &sliceAlphaV = reinterpret_cast<float_v&>(sliceAlphaVs[ihit*float_v::Size]);
     const uint_v &RowV = reinterpret_cast<uint_v&>(RowVs[ihit*uint_v::Size]);
-
-    const float_v &slV = reinterpret_cast<float_v&>(slVs[ihit*float_v::Size]);
 
     const float_m savedActive = active;
     const float_v rotateA = sliceAlphaV - Alpha0V;
@@ -1132,11 +1125,10 @@ void AliHLTTPCCAMerger::MakeBorderTracks( AliHLTTPCCABorderTrack B[], unsigned i
 {
   //* prepare slice tracks for merging with next/previous/same sector
 
-  for ( int itr = 0; itr < fSliceNTrackInfos[iSlice]; itr++ )
-  {
+  for ( int itr = 0; itr < fSliceNTrackInfos[iSlice]; itr++ ) {
     const AliHLTTPCCASliceTrackInfo &track = fTrackInfos[ fSliceTrackInfoStart[iSlice] + itr ];
 
-    if(track.NClusters() > fSliceParam.NRows()-3) continue;
+    if( int(track.NClusters()) > fSliceParam.NRows()-3 ) continue;
 
     AliHLTTPCCABorderTrack &bTr = B[nB];
 
@@ -1421,7 +1413,7 @@ void AliHLTTPCCAMerger::MergeBorderTracks( AliHLTTPCCABorderTrack B1[], int N1, 
 
     for ( int i2 = ifirst2; ; ) {
       int nVecElements = 0;
-      for( ; nVecElements < uint_v::Size && dir*i2 <= dir*ilast2; i2 += dir ) {
+      for( ; nVecElements < int(uint_v::Size) && dir*i2 <= dir*ilast2; i2 += dir ) {
 
         const AliHLTTPCCABorderTrack &b2 = B2[i2];
 
@@ -2582,7 +2574,7 @@ void AliHLTTPCCAMerger::Merging(int number)
 #endif
 
 // merge tracks, using obtained links to neighbours
-  for ( int iSlice = 0; iSlice < fgkNSlices; iSlice++ ) {
+  for ( unsigned int iSlice = 0; iSlice < fgkNSlices; iSlice++ ) {
     tmpSliceTrackInfoStart[iSlice] = nEndTracks;
     assert( iSlice == 0 || nEndTracks == tmpSliceTrackInfoStart[iSlice-1] + nTrNew[iSlice-1] );
 
@@ -2599,11 +2591,6 @@ void AliHLTTPCCAMerger::Merging(int number)
      // -- Resort tracks to proceed faster
     vector<unsigned int> firstInChainIndex(fSliceNTrackInfos[iSlice]);
     int nChains = 0;
-    for(int iT=0; iT< fSliceNTrackInfos[iSlice]; iT++) {
-      const int index = fSliceTrackInfoStart[iSlice] + iT;
-      const AliHLTTPCCASliceTrackInfo& tr = fTrackInfos[index];
-    }
-
       // store tracks, which are not merged. And save indexes of the most previous(inner) merged tracks
     for(int iT=0; iT< fSliceNTrackInfos[iSlice]; iT++) {
       const int index = fSliceTrackInfoStart[iSlice] + iT;
@@ -2723,7 +2710,7 @@ void AliHLTTPCCAMerger::Merging(int number)
         // pack data
       int nVecElements = 0;
       uint_v iIndexes(Vc::Zero);
-      for ( ; nVecElements < uint_v::Size && itr < nChains; itr++ ) {
+      for ( ; nVecElements < int(uint_v::Size) && itr < nChains; itr++ ) {
         const unsigned int sI = firstInChainIndex[itr];
         AliHLTTPCCASliceTrackInfo& trackOld = fTrackInfos[sI];
 
@@ -2778,8 +2765,7 @@ void AliHLTTPCCAMerger::Merging(int number)
       for ( unsigned int jhit = 0; jhit < vNHits.max(); jhit++ ) {
         const int_m mask = int_m(active) && int_m(jhit < vNHits);
         int_v id = vFirstClusterRef + static_cast<int>(jhit);
-        for(int iV=0; iV<int_v::Size; iV++)
-        {
+        for( unsigned int iV=0; iV<int_v::Size; iV++ ) {
           if(!mask[iV]) continue;
           hits[static_cast <unsigned int>(firstHit[iV])+jhit][iV] = id[iV];
         }
@@ -2836,8 +2822,7 @@ void AliHLTTPCCAMerger::Merging(int number)
 
       const float_m &swap = active && (vEndPoint.X() < vStartPoint.X());
       if( !(swap.isEmpty())) {
-        for(int iV=0; iV<float_v::Size; iV++)
-        {
+        for( unsigned int iV=0; iV<float_v::Size; iV++ ) {
           if(!swap[iV]) continue;
           for ( unsigned int i = 0; i < (unsigned int)vNHits[iV]; i++ ) hits[i][iV] = hits[(unsigned int)(firstHit[iV]+vNHits[iV]-1-i)][iV];
         }
@@ -2863,7 +2848,7 @@ void AliHLTTPCCAMerger::Merging(int number)
       vNHits = nHits;
 
         // store tracks
-      for(int iV=0; iV<float_v::Size; iV++) {
+      for( unsigned int iV=0; iV<float_v::Size; iV++ ) {
         if(!active[iV]) continue;
 
         int h[1000];
@@ -2955,7 +2940,7 @@ void AliHLTTPCCAMerger::Merging(int number)
     } // for itr
   } // for iSlice
 #ifdef MERGEFIX
-  for( int i = 0; i < mergedSermentsOldIndexes.size(); i++ ) {
+  for( unsigned int i = 0; i < mergedSermentsOldIndexes.size(); i++ ) {
     tmpT[oldToNewTrackIndexes[mergedSermentsOldIndexes[i]]].SetUsed(1);
   }
 #endif
@@ -3002,8 +2987,6 @@ float_m AliHLTTPCCAMerger::AddNeighbour( const uint_v& jIndexes, const int& nVec
 int hits[2000][uint_v::Size], uint_v& firstHit, AliHLTTPCCATrackParamVector& vStartPoint, AliHLTTPCCATrackParamVector& vEndPoint, float_v& vStartAlpha, float_v& vEndAlpha, uint_v& vNHits )
 {
   float_m mask = isNeighbour;
-
-  const int_m &maskI = static_cast<int_m>(mask);
   const uint_m &maskU = static_cast<uint_m>(mask);
   uint_v jNHits(Vc::Zero);
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
@@ -3023,10 +3006,8 @@ int hits[2000][uint_v::Size], uint_v& firstHit, AliHLTTPCCATrackParamVector& vSt
 
   const AliHLTTPCCATrackParam *pInnerParam[int_v::Size] = {0};
   const AliHLTTPCCATrackParam *pOuterParam[int_v::Size] = {0};
-  for(int iV=0; iV<float_v::Size; iV++)
-  {
+  for( unsigned int iV = 0; iV < float_v::Size; iV++ ) {
     if(!mask[iV]) continue;
-//   foreach_bit(int iV, mask) {
     AliHLTTPCCASliceTrackInfo &segment = fTrackInfos[jIndexes[iV]];
     pInnerParam[iV] = &segment.InnerParam();
     pOuterParam[iV] = &segment.OuterParam();
@@ -3134,8 +3115,7 @@ int hits[2000][uint_v::Size], uint_v& firstHit, AliHLTTPCCATrackParamVector& vSt
     jFirstClusterRef[i] = fTrackInfos[(unsigned int)jIndexes[i]].FirstClusterRef();
   }
 
-  for(int iV=0; iV<float_v::Size; iV++)
-  {
+  for( unsigned int iV=0; iV<float_v::Size; iV++ ) {
     if(!mask[iV]) continue;
     for ( unsigned int jhit = 0; jhit < jNHits[iV]; jhit++ ) {
       const int& id = jFirstClusterRef[iV] + jhit;

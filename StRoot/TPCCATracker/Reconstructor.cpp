@@ -469,7 +469,7 @@ int AliHLTTPCCATracker::Reconstructor::execute()
   startHits.clear();
   int nseeds = 0;
   const int hitsStartOffset = *d->NTracklets();
-  for( unsigned int i = 0; i < save_up_links.size(); i+=2 ) {
+  for( unsigned int i = 0; i < save_up_links.size(); i += 2 ) {
     const AliHLTTPCCARow &row = d->fData.Row( save_up_links[i].row );
     const AliHLTTPCCARow &row1 = d->fData.Row( save_up_links[i].row + 1 );
     const AliHLTTPCCARow &row2 = d->fData.Row( save_up_links[i].row + 2 );
@@ -478,17 +478,17 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     if(  d->fData.HitDataIsUsed( row2 )[save_up_links[i+1].link] > 0 ) continue;
     d->fData.SetHitLinkUpData( row, save_up_links[i].hit, save_up_links[i].link );
     d->fData.SetHitLinkUpData( row1, save_up_links[i].link, save_up_links[i+1].link );
-    Vc::vector<AliHLTTPCCAStartHitId>& startHits = d->TrackletStartHits();
-    startHits[hitsStartOffset+nseeds].Set( save_up_links[i].row, save_up_links[i].hit, 3 );
-    nseeds++;
-  }
+    Vc::vector<AliHLTTPCCAStartHitId>& startHits1 = d->TrackletStartHits();
+    startHits1[hitsStartOffset+nseeds].Set( save_up_links[i].row, save_up_links[i].hit, 3 );
+      nseeds++;
+    }
   d->SetNTracklets(hitsStartOffset+nseeds);
   AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(0, tracksSaved);
 #endif
 
 #ifdef V7
-  Vc::vector<AliHLTTPCCAStartHitId>& startHits = d->TrackletStartHits();
-  startHits.clear();
+  Vc::vector<AliHLTTPCCAStartHitId>& startHits2 = d->TrackletStartHits();
+  startHits2.clear();
   for( int i = 0; i < d->Param().NRows()-4; i += 2 ) {
     AliHLTTPCCATrackletConstructor( *d, d->fData, d->fTrackletVectors ).run(i, tracksSaved, 1);
   }

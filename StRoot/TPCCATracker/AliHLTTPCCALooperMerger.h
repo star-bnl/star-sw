@@ -1,3 +1,24 @@
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef ALIHLTTPCCALOOPERMERGER_H
 #define ALIHLTTPCCALOOPERMERGER_H
 
@@ -42,8 +63,10 @@ class AliHLTTPCCALooperMerger
  public:
 
   AliHLTTPCCALooperMerger( AliHLTTPCCAMergerOutput& in_out, AliHLTResizableArray<AliHLTTPCCAGBHit>& hits )
-   : fOutput( in_out )
+   : fSliceParam()
    , fGBHits( hits )
+   , fOutput( in_out )
+   , fNLoopers( 0 )
   {}
 
   ~AliHLTTPCCALooperMerger()

@@ -1,18 +1,20 @@
-/**************************************************************************
- * This file is property of and copyright by the ALICE HLT Project        *
- * All rights reserved.                                                   *
- *                                                                        *
- * Primary Authors:                                                       *
- *     Copyright 2009       Matthias Kretz <kretz@kde.org>                *
- *                                                                        *
- * Permission to use, copy, modify and distribute this software and its   *
- * documentation strictly for non-commercial purposes is hereby granted   *
- * without fee, provided that the above copyright notice appears in all   *
- * copies and that both the copyright notice and this permission notice   *
- * appear in the supporting documentation. The authors make no claims     *
- * about the suitability of this software for any purpose. It is          *
- * provided "as is" without express or implied warranty.                  *
- **************************************************************************/
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2009 Matthias Kretz <kretz@kde.org>
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef ALIHLTTPCCATRACKLETVECTOR_H
 #define ALIHLTTPCCATRACKLETVECTOR_H
@@ -23,9 +25,9 @@
 
 #include "debug.h"
 
-#ifndef NVALGRIND
-#include <valgrind/memcheck.h>
-#endif
+//#ifndef NVALGRIND
+//#include <valgrind/memcheck.h>
+//#endif
 
 class AliHLTTPCCATrackletVector
 {
@@ -93,18 +95,18 @@ inline void AliHLTTPCCATrackletVector::SetRowHits( int rowIndex, const uint_v &t
   for( unsigned int i = 0; i < float_v::Size; i++ ) {
     fRowHits[rowIndex][i] = hitIndex[i];
   }
-  VALGRIND_CHECK_MEM_IS_DEFINED( &fRowHits[rowIndex], sizeof( uint_v ) );
+//  VALGRIND_CHECK_MEM_IS_DEFINED( &fRowHits[rowIndex], sizeof( uint_v ) );
 }
 
-inline void AliHLTTPCCATrackletVector::SetRowHits( const uint_v &rowIndexes, const uint_v &trackIndex,
-    const uint_v &hitIndex )
-{
-  assert( (trackIndex[0] + uint_v( Vc::IndexesFromZero ) == trackIndex).isFull() );
-  assert( uint_m(( trackIndex[0] % uint_v::Size ) == 0).isFull() );
-  UNUSED_PARAM1( trackIndex );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
-  std::cout<<"<!!!ERROR!!!> SetRowHits - Does not work now. Has to be changed or deleted\n";
-}
+//inline void AliHLTTPCCATrackletVector::SetRowHits( const uint_v &rowIndexes, const uint_v &trackIndex,
+//    const uint_v &hitIndex )
+//{
+//  assert( (trackIndex[0] + uint_v( Vc::IndexesFromZero ) == trackIndex).isFull() );
+//  assert( uint_m(( trackIndex[0] % uint_v::Size ) == 0).isFull() );
+//  UNUSED_PARAM1( trackIndex );
+//  VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
+//  std::cout<<"<!!!ERROR!!!> SetRowHits - Does not work now. Has to be changed or deleted\n";
+//}
 
 inline void AliHLTTPCCATrackletVector::SetRowHits( int rowIndex, const uint_v &trackIndex,
     const uint_v &hitIndex, const int_m &mask )
@@ -127,18 +129,18 @@ inline void AliHLTTPCCATrackletVector::SetRowHits( int rowIndex, const uint_v &t
     fRowHits[rowIndex][i] = hitIndex[i];
   }
 //   debugF() << " done: " << uint_v( fRowHits[rowIndex] ) << std::endl;
-  VALGRIND_CHECK_MEM_IS_DEFINED( &fRowHits[rowIndex], sizeof( uint_v ) );
+//  VALGRIND_CHECK_MEM_IS_DEFINED( &fRowHits[rowIndex], sizeof( uint_v ) );
 }
 
-inline void AliHLTTPCCATrackletVector::SetRowHits( const uint_v &rowIndexes, const uint_v &trackIndex,
-    const uint_v &hitIndex, const int_m &mask )
-{
-  assert( (trackIndex[0] + uint_v( Vc::IndexesFromZero ) == trackIndex).isFull() );
-  assert( uint_m(( trackIndex[0] % uint_v::Size ) == 0).isFull() );
-  UNUSED_PARAM1( trackIndex );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
-  std::cout<<"<!!!ERROR!!!> SetRowHits - Does not work now. Has to be changed or deleted\n";
-}
+//inline void AliHLTTPCCATrackletVector::SetRowHits( const uint_v &rowIndexes, const uint_v &trackIndex,
+//    const uint_v &hitIndex, const int_m &mask )
+//{
+//  assert( (trackIndex[0] + uint_v( Vc::IndexesFromZero ) == trackIndex).isFull() );
+//  assert( uint_m(( trackIndex[0] % uint_v::Size ) == 0).isFull() );
+//  UNUSED_PARAM1( trackIndex );
+//  VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
+//  std::cout<<"<!!!ERROR!!!> SetRowHits - Does not work now. Has to be changed or deleted\n";
+//}
 
 typedef AliHLTTPCCATrackletVector TrackletVector;
 

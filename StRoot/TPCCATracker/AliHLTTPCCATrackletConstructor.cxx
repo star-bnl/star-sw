@@ -1,24 +1,26 @@
-// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.8 2012/08/14 16:30:42 fisyak Exp $
-// **************************************************************************
-// This file is property of and copyright by the ALICE HLT Project          *
-// ALICE Experiment at CERN, All rights reserved.                           *
-//                                                                          *
-// Primary Authors: Sergey Gorbunov <sergey.gorbunov@kip.uni-heidelberg.de> *
-//                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
-//                  for The ALICE HLT Project.                              *
-//                                                                          *
-// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
-//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
-//                                                                          *
-// Permission to use, copy, modify and distribute this software and its     *
-// documentation strictly for non-commercial purposes is hereby granted     *
-// without fee, provided that the above copyright notice appears in all     *
-// copies and that both the copyright notice and this permission notice     *
-// appear in the supporting documentation. The authors make no claims       *
-// about the suitability of this software for any purpose. It is            *
-// provided "as is" without express or implied warranty.                    *
-//                                                                          *
-//***************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #include "AliHLTTPCCATracker.h"
@@ -244,8 +246,7 @@ void AliHLTTPCCATrackletConstructor::FindNextHit( TrackMemory &r, const AliHLTTP
 
   int_v fHitIndexes(-1);
 
-  for(int trackletIndex =0; trackletIndex<int_v::Size; trackletIndex++)
-  {
+  for( unsigned int trackletIndex = 0; trackletIndex < int_v::Size; trackletIndex++ ) {
     if(!active[trackletIndex]) continue;
     float minRadius2 = std::numeric_limits<float>::max();
 
@@ -595,10 +596,10 @@ void AliHLTTPCCATrackletConstructor::CreateStartSegmentV( const int rowIndex, co
   const AliHLTTPCCARow &rowDn = fData.Row( rowIndex - rowStep );
   const AliHLTTPCCARow &rowUpUp = fData.Row( rowIndex + rowStep + rowStep );
 
-  const int numberOfHits = row.NUnusedHits();
-  const int numberOfHitsUp = rowUp.NUnusedHits();
-  const int numberOfHitsUpUp = rowUpUp.NUnusedHits();
-  const int numberOfHitsDown = rowDn.NUnusedHits();
+  const unsigned int numberOfHits = row.NUnusedHits();
+  const unsigned int numberOfHitsUp = rowUp.NUnusedHits();
+  const unsigned int numberOfHitsUpUp = rowUpUp.NUnusedHits();
+  const unsigned int numberOfHitsDown = rowDn.NUnusedHits();
   if ( numberOfHits == 0 ) {
     debugS() << "no hits in this row" << std::endl;
     return;
@@ -612,7 +613,7 @@ void AliHLTTPCCATrackletConstructor::CreateStartSegmentV( const int rowIndex, co
   const float xDn = fData.RowX( rowIndex - rowStep );
   const float x   = fData.RowX( rowIndex     );
   const float xUp = fData.RowX( rowIndex + rowStep );
-  const float xUpUp = fData.RowX( rowIndex + rowStep + rowStep );
+//  const float xUpUp = fData.RowX( rowIndex + rowStep + rowStep );
 
   // distance of the rows (absolute and relative)
   const float UpDx = xUp - x;
@@ -625,7 +626,6 @@ void AliHLTTPCCATrackletConstructor::CreateStartSegmentV( const int rowIndex, co
   unsigned int startHitsCount = 0;
 
   std::vector<int> hitsDn, hitsMid, hitsUp;
-  int currentHit = 0;
 
   static const float kAreaSizeY = AliHLTTPCCAParameters::NeighbourAreaSizeTgY[iter];
   static const float kAreaSizeZ = AliHLTTPCCAParameters::NeighbourAreaSizeTgZ[iter];
@@ -679,7 +679,6 @@ void AliHLTTPCCATrackletConstructor::CreateStartSegmentV( const int rowIndex, co
     int_v bestUp(-1);
     float_v bestD = chi2Cut; // d must be smaller than chi2Cut to be considered at all
     int_v bestUpUp(-1);
-    float_v bestUU = chi2Cut;
     NeighbourData neighDn;
 
       // iterate over all hits in lower area
@@ -725,6 +724,8 @@ void AliHLTTPCCATrackletConstructor::CreateStartSegmentV( const int rowIndex, co
     assert( ((bestDn >= -1) && (bestDn < rowDn.NUnusedHits()) && validHitsMask) == validHitsMask );
     int_m setSegment(validHitsMask && bestDn >= int_v(Vc::Zero) && bestUp >= int_v(Vc::Zero));
 #ifdef FOURHITSEGMENTS
+    int currentHit = 0;
+    float_v bestUU = chi2Cut;
     for( unsigned int iV = 0; iV < float_v::Size; iV++ ) {
       if( !setSegment[iV] ) continue;
       hitsDn.push_back(bestDn[iV]);
@@ -824,18 +825,19 @@ void AliHLTTPCCATrackletConstructor::run( unsigned int firstRow, unsigned int &t
     }
 #endif
   }
-
+#else
+  UNUSED_PARAM1(firstRow);
 #endif
   //
   assert( *fTracker.NTracklets() < 32768 );
-  const int nTracks = *fTracker.NTracklets();
+  const unsigned int nTracks = *fTracker.NTracklets();
 
 #ifndef NO_NTRACKLET_FIX
   int newTr = 0;
 #endif
 
   unsigned int tracksSavedV = tracksSaved / float_v::Size;
-  for ( int trackIteration = tracksSavedV; trackIteration * uint_v::Size < nTracks; ++trackIteration ) {
+  for ( unsigned int trackIteration = tracksSavedV; trackIteration * uint_v::Size < nTracks; ++trackIteration ) {
     const uint_v trackIndex( uint_v( Vc::IndexesFromZero ) + uint_v(trackIteration * uint_v::Size) );
     const uint_m active = trackIndex < nTracks && trackIndex >= tracksSaved;
     if( active.isEmpty() ) continue;
@@ -1124,7 +1126,7 @@ r.fIsFragile = uint_m(true);
       tracklet.SetParam( r.fParam, (float_m)active );
 
 #ifndef NO_NTRACKLET_FIX
-      for( int iV = 0; iV < float_v::Size; iV++ ) {
+      for( unsigned int iV = 0; iV < float_v::Size; iV++ ) {
 	if( active[iV] ) newTr++;
       }
 #endif

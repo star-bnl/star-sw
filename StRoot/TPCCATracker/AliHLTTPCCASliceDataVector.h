@@ -1,18 +1,20 @@
-/**************************************************************************
- * This file is property of and copyright by the ALICE HLT Project        *
- * All rights reserved.                                                   *
- *                                                                        *
- * Primary Authors:                                                       *
- *     Copyright 2009       Matthias Kretz <kretz@kde.org>                *
- *                                                                        *
- * Permission to use, copy, modify and distribute this software and its   *
- * documentation strictly for non-commercial purposes is hereby granted   *
- * without fee, provided that the above copyright notice appears in all   *
- * copies and that both the copyright notice and this permission notice   *
- * appear in the supporting documentation. The authors make no claims     *
- * about the suitability of this software for any purpose. It is          *
- * provided "as is" without express or implied warranty.                  *
- **************************************************************************/
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2009 Matthias Kretz <kretz@kde.org>
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef SLICEDATAVECTOR_H
 #define SLICEDATAVECTOR_H
@@ -80,8 +82,8 @@ class AliHLTTPCCASliceData
     int_v HitLinkUpData  ( const AliHLTTPCCARow &row, const uint_v &hitIndexes ) const;
     int_v HitLinkDownData( const AliHLTTPCCARow &row, const uint_v &hitIndexes ) const;
     void SetHitLinkUpData( const AliHLTTPCCARow &row, int hitIndex, int value );
-    void SetHitLinkUpData  ( const AliHLTTPCCARow &row, const int_i &hitIndex, const int_v &value );
-    void SetHitLinkDownData( const AliHLTTPCCARow &row, const int_i &hitIndex, const int_v &value );
+//    void SetHitLinkUpData  ( const AliHLTTPCCARow &row, const int_i &hitIndex, const int_v &value );
+//    void SetHitLinkDownData( const AliHLTTPCCARow &row, const int_i &hitIndex, const int_v &value );
     void SetHitLinkUpData  ( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_v &value, const int_m &mask );
     void SetHitLinkDownData( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_v &value, const int_m &mask );
     void SetHitLinkUpData  ( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_v &value );
@@ -251,18 +253,6 @@ inline int_v AliHLTTPCCASliceData::HitLinkDownData( const AliHLTTPCCARow &row, c
 inline void AliHLTTPCCASliceData::SetHitLinkUpData( const AliHLTTPCCARow &row, int hitIndex, int value )
 {
   row.fLinkUpData[hitIndex] = value;
-}
-
-inline void AliHLTTPCCASliceData::SetHitLinkUpData  ( const AliHLTTPCCARow &row, const int_i &hitIndex, const int_v &value )
-{
-  //Matthias 01.24.13  assert( hitIndex * sizeof( int_v::EntryType ) % VectorAlignment == 0 );
-//  value.store( &row.fLinkUpData[hitIndex] );
-}
-
-inline void AliHLTTPCCASliceData::SetHitLinkDownData( const AliHLTTPCCARow &row, const int_i &hitIndex, const int_v &value )
-{
-  //Matthias 01.24.13  assert( hitIndex * sizeof( int_v::EntryType ) % VectorAlignment == 0 );
-//  value.store( &row.fLinkDownData[hitIndex] );
 }
 
 inline void AliHLTTPCCASliceData::SetHitLinkUpData  ( const AliHLTTPCCARow &row, const uint_v &hitIndexes, const int_v &value, const int_m &mask )
@@ -751,6 +741,7 @@ static inline float fastInvSqrt( float _x )
 
 inline void AliHLTTPCCASliceData::createGrid( AliHLTTPCCARow *row, const AliHLTTPCCAClusterData &data, const int clusterDataOffset, const int iRow )
 {
+  UNUSED_PARAM1( iRow );
   const float minCellSize = AliHLTTPCCAParameters::MinCellSize;
   if ( row->NHits() <= 0 ) { // no hits or invalid data
     // grid coordinates don't matter, since there are no hits
