@@ -8,9 +8,9 @@
 TDataSet *CreateTable(const Char_t *theFile) {
   TString NameP(gSystem->BaseName(theFile));
   NameP.ReplaceAll("M.C","-.C");
-  NameP.ReplaceAll("MFixed.C","-Fixed.C");
+  NameP.ReplaceAll("MFixed","-Fixed");
   NameP.ReplaceAll("P.C","+.C");
-  NameP.ReplaceAll("PFixed.C","+Fixed.C");
+  NameP.ReplaceAll("PFixed","+Fixed");
   NameP.ReplaceAll(".C","");
   Bool_t isFixed = kFALSE;
   Double_t pTlow  =    0;
@@ -31,6 +31,11 @@ TDataSet *CreateTable(const Char_t *theFile) {
     Zlow   =  200; 
     Zhigh  =  200; 
     opt = "GmTsqy"; // rapidity
+    if (NameP.Contains("Flat")) {
+      opt ="G";
+      pThigh =   5;
+      NameP.ReplaceAll("Flat","");
+    }
   }
   const Char_t *nameP = NameP.Data();
   cout << "nameP = " << nameP << "\tfile = " << theFile << endl;
@@ -61,7 +66,7 @@ TDataSet *CreateTable(const Char_t *theFile) {
     cflag->iswit[1] = 2;
     cflag->iswit[2] = 2; 
 #endif
-    TObjArray *obj = NameP.Tokenize(":]");
+    TObjArray *obj = NameP.Tokenize(":");
     Int_t nParsed = obj->GetEntries();
     Int_t iDD = 0;
     for (Int_t k = 0; k < nParsed; k++) {
