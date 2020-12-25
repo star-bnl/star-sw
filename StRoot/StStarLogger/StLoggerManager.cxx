@@ -86,8 +86,9 @@ static void Log4cxx4RootErrorHandler(Int_t level, Bool_t abort, const char *loca
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,00,0)
 if (gErrorIgnoreLevel == kUnset) {
-
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,23,0)
        R__LOCKGUARD2(gErrorMutex);
+#endif
 #else
        {
 #endif
