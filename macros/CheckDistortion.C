@@ -60,12 +60,12 @@ void CheckDistortion(const Char_t *opt="CorrY,OSpaceZ2,OGridLeakFull", const Cha
   }
   TString File(Out);
   TFile *fOut = new TFile(File,"recreate");
-  Int_t nz = 210;
-  Double_t zmin = -210;
+  Int_t nz = 209;
+  Double_t zmin = -209;
   Double_t zmax = - zmin;
-  Int_t nr = 135;
-  Double_t Rmin =  57;
-  Double_t Rmax = 192;
+  Int_t nr = 153;
+  Double_t Rmin =  47.5;
+  Double_t Rmax = 200.5;
   TString Name("dX");
   TString Opt(opt);
   Int_t index = TMath::Min(Opt.Index(",New"),Opt.Index(",sdt"));
