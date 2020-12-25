@@ -36,6 +36,7 @@
 ClassImp(StarVMCDetectorSet);
 StarVMCDetectorSet *StarVMCDetectorSet::fgInstance = 0;
 TDataSet           *StarVMCDetectorSet::fDetectorDescriptors = 0;
+static Int_t _debug = 0;
 //________________________________________________________________________________
 StarVMCDetectorSet::StarVMCDetectorSet(const Char_t *name,const Char_t *title) : 
   TDataSet(name,title),  fDetHash(0) { 
@@ -71,52 +72,55 @@ Int_t StarVMCDetectorSet::LoopOverTgeo(TGeoNode *nodeT, TString pathT) {
     nodeT = gGeoManager->GetCurrentNode();
     if (! nodeT) return NoSensVolumes;
     TString path = nodeT->GetName();
-#if 0
-    LOG_INFO << "top " << nodeT->GetName() << "\t" << nodeT->GetVolume()->GetName() 
-	 << "\t" << path << endm;
-#endif
+    if (_debug) {
+      LOG_INFO << "top " << nodeT->GetName() << "\t" << nodeT->GetVolume()->GetName() 
+	       << "\t" << path << endm;
+    }
     NoSensVolumes += LoopOverTgeo(nodeT,path);
     return NoSensVolumes;
   } 
   TGeoVolume *vol = nodeT->GetVolume();
   TObjArray *nodes = vol->GetNodes();
   Int_t nd = nodeT->GetNdaughters();
-#if 0
-  LOG_INFO << nd << "\t" << nodeT->GetName() 
-	   << "\t" << vol->GetName() 
-	   << "\t" << gGeoManager->GetCurrentNode()->GetName() << "\t" << pathT 
-	   << endm;
-  if (pathT.Contains("TpcRefSys")) {
-    LOG_INFO << "Got TpcRefSys" << endm;
+  if (_debug) {
+    LOG_INFO << nd << "\t" << nodeT->GetName() 
+	     << "\t" << vol->GetName() 
+	     << "\t" << gGeoManager->GetCurrentNode()->GetName() << "\t" << pathT 
+	     << endm;
+    if (pathT.Contains("TpcRefSys")) {
+      LOG_INFO << "Got TpcRefSys" << endm;
+    }
   }
-#endif
   Int_t NoSensDauthers = 0;
   for (Int_t id = 0; id < nd; id++) {
     TGeoNode *node = (TGeoNode*)nodes->UncheckedAt(id);
     if (! node) continue;
-    vol = node->GetVolume();
-    if (! vol) continue; 
+    TGeoVolume *volD = node->GetVolume();
+    if (! volD) continue; 
     TString path = pathT;
     if (path != "") path += "/";
     path += node->GetName();
     //      gGeoManager->cdDown(node->GetIndex());
     Int_t nodeid = gGeoManager->GetCurrentNode()->GetVolume()->GetIndex(node);
     gGeoManager->CdDown(nodeid);
-#if 0
-    cout << "path " << path << endl;
-#endif
+    if (_debug) {
+      cout << "path " << path << endl;
+    }
     //      gGeoManager->cd(node->GetName());
     //      gGeoManager->cdNode(node->GetIndex());
     NoSensDauthers += LoopOverTgeo(node,path);
     gGeoManager->CdUp();
   }
   NoSensVolumes += NoSensDauthers;
+  
   TGeoMedium     *med = vol->GetMedium();
   Int_t           isvol = 0;
   if (med)        isvol = (Int_t) med->GetParam(0);
   TString Name(vol->GetName());
   if (NoSensDauthers == 0 && isvol) {
-    //      cout << "sens. vol. " << pathT << endl;
+    if (_debug) {
+      cout << "sens. vol. " << pathT << " with medium " << med->GetName() << endl;
+    }
     if (! vol->GetUserExtension()) {
       StarVMCDetector *det = (StarVMCDetector *) fDetHash->FindObject(vol->GetName());
       if (! det) {
