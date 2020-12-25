@@ -30,7 +30,7 @@ TDataSet *CreateTable() {
  configGeom ->SetValue("emcg_version",6.1);
  configGeom ->SetValue("emcg_onoff",1);
  configGeom ->SetValue("emcg_fillmode",3);
- configGeom ->SetValue("fmcg_version",8);
+ configGeom ->SetValue("fmcg_version",9);
  configGeom ->SetValue("mtdg_version",1);
   return CreateGeometry("y2015b",configGeom);
 }
