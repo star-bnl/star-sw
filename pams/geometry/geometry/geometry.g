@@ -2632,6 +2632,7 @@ REPLACE [exe dev15b;] with ["Y2014 first cut geometry";
 
 REPLACE [exe y2017;] with ["Y2017 first cut geometry";
 
+    exe SCON14;      "support cone without SVT and new cable weight estimates and SROD fix";
     exe TPCE31;      "agstar version of yf model with reduced Rmax";
     exe BTOFv8;      "time of flight";
     exe CALB02;      "updated bemc model";
@@ -2665,6 +2666,7 @@ REPLACE [exe y2017a;] with ["Y2017 development tag";
 ];
 REPLACE [exe y2018;] with ["Y2018 development tag";
 
+    exe SCON14;      "support cone without SVT and new cable weight estimates and SROD fix";
     exe TPCE05rZ;   "Z : iTPC (40 inner pad rows 0.500 x 1.60) only in sector 20"; 
     exe BTOFv8;      "time of flight";
     exe CALB02;      "updated bemc model";
@@ -2697,6 +2699,7 @@ REPLACE [exe y2019;] with ["Y2019 development tag";
 *                                          
 * yCaveGeo3 xUpstGeo xShldGeo xZcalGeo xSconGeo xPipeGeo xTargGeo xTpceGeo5a xBtofGeo8 xVpddGeo3 xCalbGeo2 xEcalGeo6 xBbcmGeo xEpdmGeo0 xMagpGeo xMutdGeo7 xEtofGeo0
 
+    exe SCON14;      "support cone without SVT and new cable weight estimates and SROD fix";
     exe TPCE05rY;   "Y : TPC upgrade studies 40 inner pad rows 0.500 x 1.60"; 
     exe BTOFv8;      "time of flight";
     exe ETOF;        "EToF";
@@ -2726,6 +2729,7 @@ REPLACE [exe dev2020;] with ["DEV 2020 first cut";
 
 
 REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2014."
+    exe SCON14;      "support cone without SVT and new cable weight estimates and SROD fix";
     exe TPCE05r;     "agstar version of yf model with reduced Rmax";
     exe BTOF67;      "time of flight";
     exe CALB02;      "updated bemc model";
