@@ -32,15 +32,14 @@ endsw
 #    -DCMAKE_CXX_FLAGS=$LDFLAGS \
 which cmake
 cmake -L                                        \
-    -DCMAKE_BUILD_TYPE=$ROOTBUILD           \
     -DCMAKE_INSTALL_PREFIX=$XOPTSTAR    \
+    -DCMAKE_BUILD_TYPE=$ROOTBUILD           \
     -DBUILD_TESTING=OFF                          \
     -DCMAKE_C_COMPILER_FORCED=OFF \
     -DCMAKE_C_FLAGS=\"`root-config --cflags`\" \
     -DCMAKE_C_COMPILER=gcc \
-    -DCMAKE_C_FLAGS=$LDFLAGS \
     -DCMAKE_CXX_COMPILER=g++ \
-    -DCMAKE_CXX_FLAGS=$LDFLAGS \
+    -DCMAKE_CXX_FLAGS=\"`root-config --ldflags`\" \
     ${VC_ROOT}
 
 make -j 10 install

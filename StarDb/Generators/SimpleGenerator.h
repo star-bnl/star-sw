@@ -7,19 +7,19 @@
 #endif
 TDataSet *CreateTable(const Char_t *theFile) {
   TString NameP(gSystem->BaseName(theFile));
+  NameP.ReplaceAll("XiM_bar"   ,"Xi+");
+  NameP.ReplaceAll("XiM"       ,"Xi-");
+  NameP.ReplaceAll("Omega_bar" ,"Omega+");
+  NameP.ReplaceAll("Omega"     ,"Omega-");
   NameP.ReplaceAll("M.C","-.C");
-  NameP.ReplaceAll("MFixed.C","-Fixed.C");
+  NameP.ReplaceAll("MFixed","-Fixed");
   NameP.ReplaceAll("M_bar.C","-bar.C");
-  NameP.ReplaceAll("M_barFixed.C","-barFixed.C");
+  NameP.ReplaceAll("M_barFixed","-barFixed");
   NameP.ReplaceAll("P.C","+.C");
-  NameP.ReplaceAll("PFixed.C","+Fixed.C");
+  NameP.ReplaceAll("PFixed","+Fixed");
   NameP.ReplaceAll("P_bar.C","+_bar.C");
-  NameP.ReplaceAll("P_barFixed.C","+_barFixed.C");
+  NameP.ReplaceAll("P_barFixed","+_barFixed");
   NameP.ReplaceAll(".C","");
-  if      (NameP == "XiM_bar")   NameP = "Xi+";
-  else if (NameP == "XiM")       NameP = "Xi-";
-  else if (NameP == "Omega_bar") NameP = "Omega+";
-  else if (NameP == "Omega")     NameP = "Omega-";
   Bool_t isFixed = kFALSE;
   Double_t pTlow  =    0;
   Double_t pThigh =   20;
@@ -39,6 +39,11 @@ TDataSet *CreateTable(const Char_t *theFile) {
     Zlow   =  200; 
     Zhigh  =  200; 
     opt = "GmTsqy"; // rapidity
+    if (NameP.Contains("Flat")) {
+      opt ="G";
+      pThigh =   5;
+      NameP.ReplaceAll("Flat","");
+    }
   }
   const Char_t *nameP = NameP.Data();
   cout << "nameP = " << nameP << "\tfile = " << theFile << endl;
@@ -69,7 +74,7 @@ TDataSet *CreateTable(const Char_t *theFile) {
     cflag->iswit[1] = 2;
     cflag->iswit[2] = 2; 
 #endif
-    TObjArray *obj = NameP.Tokenize(":]");
+    TObjArray *obj = NameP.Tokenize(":");
     Int_t nParsed = obj->GetEntries();
     Int_t iDD = 0;
     for (Int_t k = 0; k < nParsed; k++) {

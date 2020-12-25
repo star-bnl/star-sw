@@ -30,7 +30,7 @@ void DrawPng(TCanvas *c) {
   cout << "Draw #\t" << nPng << "\t" << pngName << endl;
 #ifdef __SAVE_ROOT_PICTURES_
   //  pngName.ReplaceAll(".png",".root");
-  pngName.ReplaceAll(".svg",".root");
+  pngName.ReplaceAll(".pdf",".root");
   c->SaveAs(pngName);
 #endif
 }
