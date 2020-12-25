@@ -756,7 +756,30 @@ void StarVMCApplication::ForceDecay(const Char_t *nameP,
   for (Int_t m = 0; m < 3; m++) {
     if (branches[m] > 0 && modes[m][0]) {NB++; total += branches[m];}
   }
-  if (total <= 0) return;
+  // Default forced branching 
+  if (total <= 0) {
+    TString name(nameP);
+    if      (name == "Lambda0"    )  
+      ForceDecay(name, "proton",     "pi-", 0, 100);
+    else if (name == "Lambda0_bar")  
+      ForceDecay(name, "antiproton", "pi+", 0, 100);
+    else if (name == "Xi-bar"        ) {
+      ForceDecay(name, "Lambda0_bar", "pi+", 0, 100);
+      ForceDecay("Lambda0_bar", "antiproton", "pi+", 0, 100);
+    } else if (name == "Xi-"        ) {
+      ForceDecay(name, "Lambda0", "pi-", 0, 100);
+      ForceDecay("Lambda0", "proton", "pi-", 0, 100);
+    } else if (name == "Omega-")  {
+      ForceDecay(name, "Lambda0", "K-", 0, 100);
+	ForceDecay("Lambda0", "proton", "pi-", 0, 100);
+    } else if (name == "Omega+")  {
+      ForceDecay(name, "Lambda0", "K-", 0, 100);
+      ForceDecay("Lambda0", "proton", "pi-", 0, 100);
+    } else if (name == "K_S0") {
+      ForceDecay(name, "pi+", "pi-", 0, 100);
+    }
+    return;
+  }
   Int_t mode[6] = {0};
   Float_t bratio[6] = {0};
   for (Int_t m = 0; m < NB; m++) {
