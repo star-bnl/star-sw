@@ -9,9 +9,17 @@ TDataSet *CreateTable(const Char_t *theFile) {
   TString NameP(gSystem->BaseName(theFile));
   NameP.ReplaceAll("M.C","-.C");
   NameP.ReplaceAll("MFixed.C","-Fixed.C");
+  NameP.ReplaceAll("M_bar.C","-bar.C");
+  NameP.ReplaceAll("M_barFixed.C","-barFixed.C");
   NameP.ReplaceAll("P.C","+.C");
   NameP.ReplaceAll("PFixed.C","+Fixed.C");
+  NameP.ReplaceAll("P_bar.C","+_bar.C");
+  NameP.ReplaceAll("P_barFixed.C","+_barFixed.C");
   NameP.ReplaceAll(".C","");
+  if      (NameP == "XiM_bar")   NameP = "Xi+";
+  else if (NameP == "XiM")       NameP = "Xi-";
+  else if (NameP == "Omega_bar") NameP = "Omega+";
+  else if (NameP == "Omega")     NameP = "Omega-";
   Bool_t isFixed = kFALSE;
   Double_t pTlow  =    0;
   Double_t pThigh =   20;
@@ -85,8 +93,7 @@ TDataSet *CreateTable(const Char_t *theFile) {
       }
       if (iDD > 0) iDD *= 1000;
       iDD += iD;
-      if      (name == "Lambda0"    )  StarVMCApplication::Instance()->ForceDecay(name, "proton",     "pi-", 0, 100);
-      else if (name == "Lambda0_bar")  StarVMCApplication::Instance()->ForceDecay(name, "antiproton", "pi+", 0, 100);
+      StarVMCApplication::Instance()->ForceDecay(name);
       cout << "iD = " << iD << "\tiDD = " << iDD << endl;
       // StarVMCApplication::Instance()->ForceDecay(name, "K+", "K-", "", 100);
     }
