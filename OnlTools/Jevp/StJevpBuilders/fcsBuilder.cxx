@@ -17,8 +17,8 @@
 #include "fcsMap.h"
 
 const int TBMAX=300;
-const int TBTRG=210;
-const int MAXSUM=12000;
+const int TBTRG[2]={50,208};
+const int MAXSUM=20000;
 const int OFF[2]  = {4,2};
 const int mReadMode=0;
 const int mFakeData=0;
@@ -53,8 +53,10 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
     contents.h_fcs_crt_depch_tbin[1]->GetXaxis()->SetNdivisions(-20);
     contents.h_fcs_crt_depch_tbin[3]->GetXaxis()->SetNdivisions(-20);
     contents.h_fcs_crt_depch_tbin[4]->GetXaxis()->SetNdivisions(-20);
-    TLine* l1 = new TLine(0,TBTRG-3,20,TBTRG-3); l1->SetLineColor(kMagenta);
-    TLine* l2 = new TLine(0,TBTRG+4,20,TBTRG+4); l2->SetLineColor(kMagenta);
+    TLine* l1 = new TLine(0,TBTRG[0]-3,20,TBTRG[0]-3); l1->SetLineColor(kMagenta);
+    TLine* l2 = new TLine(0,TBTRG[0]+4,20,TBTRG[0]+4); l2->SetLineColor(kMagenta);
+    TLine* l3 = new TLine(0,TBTRG[1]-3,20,TBTRG[1]-3); l3->SetLineColor(kMagenta);
+    TLine* l4 = new TLine(0,TBTRG[1]+4,20,TBTRG[1]+4); l4->SetLineColor(kMagenta);
 
     int ecal_xmax = nColumn(0)+OFF[0];
     int ecal_ymax = nRow(0);
@@ -69,20 +71,20 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
     int pres_xmax = nColumn(4);
     int pres_ymax = nRow(4);
     contents.h_fcs_det_hitmap[2] = new TH2F("Pres","Pres; +-Radius (North <-> South); Phi",
-    					    pres_xmax*2+1,-pres_xmax-0.5,pres_xmax+0.5,
-    					    pres_ymax,0.0,pres_ymax); 
+					    pres_xmax*2+1,-pres_xmax-0.5,pres_xmax+0.5,
+					    pres_ymax,0.0,pres_ymax); 
     //contents.h_fcs_det_hitmap[2] = new TH2F("Pres","Pres; View from back",
     //				    pres_ymax*2,-pres_ymax,pres_ymax,
     //					    pres_xmax+1,0.0,pres_xmax+1);
-
+     
     char csum[30];
-    sprintf(csum,"AdcSum(TB=%d-%d)",TBTRG-3,TBTRG+4);
-    contents.h_fcs_ehpns_id_adcsum[0][0] = new TH2F("Ecal_N_Id_Adcsum",Form("EcalNorth; Id/22; %s",csum),maxId(0),0,maxId(0)/22.0,256,0,MAXSUM);
-    contents.h_fcs_ehpns_id_adcsum[0][1] = new TH2F("Ecal_S_Id_Adcsum",Form("EcalSouth; Id/22; %s",csum),maxId(1),0,maxId(1)/22.0,256,0,MAXSUM);
-    contents.h_fcs_ehpns_id_adcsum[1][0] = new TH2F("Hcal_N_Id_Adcsum",Form("HcalNorth; Id/13; %s",csum),maxId(2),0,maxId(2)/13.0,256,0,MAXSUM);
-    contents.h_fcs_ehpns_id_adcsum[1][1] = new TH2F("Hcal_S_Id_Adcsum",Form("HcalSouth; Id/13; %s",csum),maxId(3),0,maxId(3)/13.0,256,0,MAXSUM);
-    contents.h_fcs_ehpns_id_adcsum[2][0] = new TH2F("Pres_N_Id_Adcsum",Form("PresNorth; Id/16; %s",csum),maxId(4),0,maxId(4)/16.0,256,0,MAXSUM);
-    contents.h_fcs_ehpns_id_adcsum[2][1] = new TH2F("Pres_S_Id_Adcsum",Form("PresSouth; Id/16; %s",csum),maxId(5),0,maxId(5)/16.0,256,0,MAXSUM);
+    sprintf(csum,"AdcSum(TB=%d-%d)",TBTRG[0]-3,TBTRG[0]+4);
+    contents.h_fcs_ehpns_id_adcsum[0][0] = new TH2F("Ecal_N_Id_Adcsum",Form("EcalNorth; Id/22; %s",csum),maxId(0),0.0,maxId(0)/22.0,500,0.0,MAXSUM);
+    contents.h_fcs_ehpns_id_adcsum[0][1] = new TH2F("Ecal_S_Id_Adcsum",Form("EcalSouth; Id/22; %s",csum),maxId(1),0.0,maxId(1)/22.0,500,0.0,MAXSUM);
+    contents.h_fcs_ehpns_id_adcsum[1][0] = new TH2F("Hcal_N_Id_Adcsum",Form("HcalNorth; Id/13; %s",csum),maxId(2),0.0,maxId(2)/13.0,500,0.0,MAXSUM);
+    contents.h_fcs_ehpns_id_adcsum[1][1] = new TH2F("Hcal_S_Id_Adcsum",Form("HcalSouth; Id/13; %s",csum),maxId(3),0.0,maxId(3)/13.0,500,0.0,MAXSUM);
+    contents.h_fcs_ehpns_id_adcsum[2][0] = new TH2F("Pres_N_Id_Adcsum",Form("PresNorth; Id/16; %s",csum),maxId(4),0.0,maxId(4)/16.0,500,0.0,MAXSUM);
+    contents.h_fcs_ehpns_id_adcsum[2][1] = new TH2F("Pres_S_Id_Adcsum",Form("PresSouth; Id/16; %s",csum),maxId(5),0.0,maxId(5)/16.0,500,0.0,MAXSUM);
     contents.h_fcs_ehpns_id_adcsum[0][0]->GetXaxis()->SetNdivisions(-nRow(0));
     contents.h_fcs_ehpns_id_adcsum[0][1]->GetXaxis()->SetNdivisions(-nRow(1));
     contents.h_fcs_ehpns_id_adcsum[1][0]->GetXaxis()->SetNdivisions(-nRow(2));
@@ -97,37 +99,47 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
     contents.h_fcs_ehpns_id_adcsum[1][1]->GetYaxis()->SetLabelSize(0.02);
     contents.h_fcs_ehpns_id_adcsum[2][0]->GetYaxis()->SetLabelSize(0.02);
     contents.h_fcs_ehpns_id_adcsum[2][1]->GetYaxis()->SetLabelSize(0.02);
-
+    
     // Add root histograms to Plots
     int np = sizeof(contents) / sizeof(TH1 *);
     JevpPlot *plots[np];
-    
+    mPlots = plots;
+
     int n=0;
     plots[n] = new JevpPlot(contents.h_evt_size); n++;
-
+    
+    mCrtDepT=n;
     plots[n] = new JevpPlot(contents.h_fcs_crt_depch_tbin[0]); plots[n]->setDrawOpts("colz");
-    plots[n]->addElement(l1); plots[n]->addElement(l2); n++;
+    plots[n]->addElement(l1); plots[n]->addElement(l2);
+    plots[n]->addElement(l3); plots[n]->addElement(l4); 
+    n++;
     plots[n] = new JevpPlot(contents.h_fcs_crt_depch_tbin[1]); plots[n]->setDrawOpts("colz"); 
-    plots[n]->addElement(l1); plots[n]->addElement(l2); n++;
+    plots[n]->addElement(l1); plots[n]->addElement(l2);
+    plots[n]->addElement(l3); plots[n]->addElement(l4); 
+    n++;
     plots[n] = new JevpPlot(contents.h_fcs_crt_depch_tbin[3]); plots[n]->setDrawOpts("colz"); 
-    plots[n]->addElement(l1); plots[n]->addElement(l2); n++;
+    plots[n]->addElement(l1); plots[n]->addElement(l2);
+    plots[n]->addElement(l3); plots[n]->addElement(l4); 
+    n++;
     plots[n] = new JevpPlot(contents.h_fcs_crt_depch_tbin[4]); plots[n]->setDrawOpts("colz"); 
-    plots[n]->addElement(l1); plots[n]->addElement(l2); n++;
+    plots[n]->addElement(l1); plots[n]->addElement(l2);
+    plots[n]->addElement(l3); plots[n]->addElement(l4); 
+    n++;
     
     plots[n] = new JevpPlot(contents.h_fcs_det_hitmap[0]);     plots[n]->setDrawOpts("colz"); n++;
     plots[n] = new JevpPlot(contents.h_fcs_det_hitmap[1]);     plots[n]->setDrawOpts("colz"); n++;
     plots[n] = new JevpPlot(contents.h_fcs_det_hitmap[2]);     plots[n]->setDrawOpts("colz"); n++;
-
+    
     plots[n] = new JevpPlot(contents.h_fcs_ehpns_id_adcsum[0][0]); plots[n]->setDrawOpts("colz"); n++;
     plots[n] = new JevpPlot(contents.h_fcs_ehpns_id_adcsum[0][1]); plots[n]->setDrawOpts("colz"); n++;
     plots[n] = new JevpPlot(contents.h_fcs_ehpns_id_adcsum[1][0]); plots[n]->setDrawOpts("colz"); n++;
     plots[n] = new JevpPlot(contents.h_fcs_ehpns_id_adcsum[1][1]); plots[n]->setDrawOpts("colz"); n++;
     plots[n] = new JevpPlot(contents.h_fcs_ehpns_id_adcsum[2][0]); plots[n]->setDrawOpts("colz"); n++;
     plots[n] = new JevpPlot(contents.h_fcs_ehpns_id_adcsum[2][1]); plots[n]->setDrawOpts("colz"); n++;
-
+    
     for(int i=0; i<n; i++){
       plots[i]->optlogz = 1;
-	plots[i]->optstat = 0;
+      plots[i]->optstat = 0;
 	LOG(DBG, "Adding plot %d = %s",i,plots[i]->GetPlotName());
 	addPlot(plots[i]);
     }
@@ -154,6 +166,38 @@ void fcsBuilder::event(daqReader *rdr){
     }else{
         int trgcmd = rdr->trgcmd;      
         if(trgcmd!=4 && trgcmd !=10) return;
+	static int phyled=-1;
+	if(phyled<0){
+	  if(trgcmd==4) {
+	    phyled=0;
+	    contents.h_fcs_crt_depch_tbin[0]->GetYaxis()->SetRange(0,100);
+	    contents.h_fcs_crt_depch_tbin[1]->GetYaxis()->SetRange(0,100);
+	    contents.h_fcs_crt_depch_tbin[3]->GetYaxis()->SetRange(0,100);
+	    contents.h_fcs_crt_depch_tbin[4]->GetYaxis()->SetRange(0,100);
+	  }else{
+	    phyled=1;
+	    char csum[30];    
+	    sprintf(csum,"AdcSum(TB=%d-%d)",TBTRG[1]-3,TBTRG[1]+4);
+	    contents.h_fcs_ehpns_id_adcsum[0][0]->SetTitle(Form("EcalNorth; Id/22; %s",csum));
+	    contents.h_fcs_ehpns_id_adcsum[0][1]->SetTitle(Form("EcalSouth; Id/22; %s",csum));
+	    contents.h_fcs_ehpns_id_adcsum[1][0]->SetTitle(Form("HcalNorth; Id/13; %s",csum));
+	    contents.h_fcs_ehpns_id_adcsum[1][1]->SetTitle(Form("HcalSouth; Id/13; %s",csum));
+	    contents.h_fcs_ehpns_id_adcsum[2][0]->SetTitle(Form("PresNorth; Id/16; %s",csum));
+	    contents.h_fcs_ehpns_id_adcsum[2][1]->SetTitle(Form("PresSouth; Id/16; %s",csum));
+	    contents.h_fcs_crt_depch_tbin[0]->GetYaxis()->SetRange(150,300);
+	    contents.h_fcs_crt_depch_tbin[1]->GetYaxis()->SetRange(150,300);
+	    contents.h_fcs_crt_depch_tbin[3]->GetYaxis()->SetRange(150,300);
+	    contents.h_fcs_crt_depch_tbin[4]->GetYaxis()->SetRange(150,300);
+	  }	  
+	  /*
+	  TLine* l1 = new TLine(0,TBTRG[phyled]-3,20,TBTRG[phyled]-3); l1->SetLineColor(kMagenta);
+	  TLine* l2 = new TLine(0,TBTRG[phyled]+4,20,TBTRG[phyled]+4); l2->SetLineColor(kMagenta);	  
+	  mPlots[mCrtDepT+0]->addElement(l1); mPlots[mCrtDepT+0]->addElement(l2);
+	  mPlots[mCrtDepT+1]->addElement(l1); mPlots[mCrtDepT+1]->addElement(l2);
+	  mPlots[mCrtDepT+2]->addElement(l1); mPlots[mCrtDepT+2]->addElement(l2);
+	  mPlots[mCrtDepT+3]->addElement(l1); mPlots[mCrtDepT+3]->addElement(l2);
+	  */
+	}
       
         while(dd->iterate()) {
 	    int sec = ((dd->sec >> 11) & 0x1F) + 1;
@@ -186,7 +230,7 @@ void fcsBuilder::event(daqReader *rdr){
 		    adc = dd->adc[i].adc;    
 		}
 		contents.h_fcs_crt_depch_tbin[crt]->Fill(slt+float(ch+0.5)/32.0,float(tb),float(adc));		
-		if(TBTRG-3 <= tb && tb <= TBTRG+4) sum+=adc;
+		if(TBTRG[phyled]-3 <= tb && tb <= TBTRG[phyled]+4) sum+=adc;
 	    }
 	    int c = getColumnNumber(detid,id);
 	    int r = getRowNumber(detid,id);
@@ -198,7 +242,7 @@ void fcsBuilder::event(daqReader *rdr){
     }
     
     //fake data
-    if(mFakeData==0) return;
+    if(mFakeData==0) return;    
     for(int ehp=0; ehp<3; ehp++){
       for(int ns=0; ns<2; ns++){
 	for(int dep=0; dep<getNDep(ehp,ns); dep++){
@@ -207,15 +251,15 @@ void fcsBuilder::event(daqReader *rdr){
 	    getIdfromDep(ehp,ns,dep,ch,detid,id,crt,slt);
 	    if(detid==6) continue;
 	    u_int sum=0;	    
-	    for(u_short tb=TBTRG-3; tb<TBTRG+3; tb++){
-	      u_short adc=1000 - 333 * abs(tb-TBTRG);
+	    for(u_short tb=TBTRG[0]-3; tb<TBTRG[0]+3; tb++){
+	      u_short adc=1000 - 333 * abs(tb-TBTRG[0]);
 	      contents.h_fcs_crt_depch_tbin[crt]->Fill(slt+float(ch+0.5)/32.0,float(tb),float(adc));
 	      int c = getColumnNumber(detid,id);
 	      int r = getRowNumber(detid,id);
 	      float x = (c+OFF[ehp]) * (ns*2-1);
 	      float y = (nRow(detid) - r + 0.5);
 	      contents.h_fcs_det_hitmap[ehp]->Fill(x,y,float(adc));		
-	      if(TBTRG-3 <= tb && tb <= TBTRG+4) sum+=adc;
+	      if(TBTRG[0]-3 <= tb && tb <= TBTRG[0]+4) sum+=adc;
 	    }
 	    contents.h_fcs_ehpns_id_adcsum[ehp][ns]->Fill((id+0.5)/nColumn(detid),float(sum));
 	  }
