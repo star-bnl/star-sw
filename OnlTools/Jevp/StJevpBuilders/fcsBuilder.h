@@ -27,7 +27,9 @@ public:
 private:
     
     daq_dta *dd;
-    
+    JevpPlot **mPlots;
+    int mCrtDepT=0;
+
     //*** Histogram Declarations...
     //*** Use the union to be able to treat in bulk
     //*** As well as by name...
