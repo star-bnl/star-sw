@@ -643,7 +643,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     gver = g2t_ver->GetTable();
     NV = g2t_ver->GetNRows();
     StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent")); 
-    if (pEvent && StTpcBXT0CorrEPDC::instance()->nrows()) {
+    if (pEvent && StTpcBXT0CorrEPDC::instance()->nrows() && pEvent->epdCollection() ) {
         int TAC = 0;
 	int maxTAC = -1;
 	StEpdCollection * epdCol = pEvent->epdCollection();

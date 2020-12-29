@@ -240,7 +240,6 @@ void StPicoDstMaker::streamerOff() {
   StPicoBTofPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoBEmcPidTraits::Class()->IgnoreTObjectStreamer();
   StPicoMtdPidTraits::Class()->IgnoreTObjectStreamer();
-  StPicoTrackCovMatrix::Class()->IgnoreTObjectStreamer();
   StPicoETofHit::Class()->IgnoreTObjectStreamer();
   StPicoETofPidTraits::Class()->IgnoreTObjectStreamer();
 }
@@ -1096,9 +1095,14 @@ void StPicoDstMaker::fillTracks() {
     static TString prodYear(Production.Data()+2,2);
     static Int_t defY = prodYear.Atoi();
     static StDedxMethod defaultdEdxMethod = (defY > 0 && defY < 14) ? kTruncatedMeanId : kLikelihoodFitId;
-#else
+#else /* __TFG__VERSION__ */
     static StDedxMethod defaultdEdxMethod = kLikelihoodFitId;
-#endif
+    if ( gTrk->primaryTrack() ) {
+      picoTrk->setStatus(1);      
+    } else {
+      picoTrk->setStatus(0);
+    }
+#endif /* ! __TFG__VERSION__ */
     if (defaultdEdxMethod == kTruncatedMeanId) {
       picoTrk->setDedx( gTrk->probPidTraits().dEdxTruncated() );
       picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorTruncated() );

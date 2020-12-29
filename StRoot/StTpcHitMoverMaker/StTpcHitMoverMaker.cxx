@@ -51,10 +51,12 @@ Int_t StTpcHitMover::Make() {
   Bool_t EmbeddingShortCut = IAttr("EmbeddingShortCut");
   StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
   Double_t triggerOffset = 0;
+  int doEPDT0Correction = 0;
   if (! pEvent) {
     LOG_WARN << "StTpcHitMover::Make there is no StEvent " << endm;
     return kStWarn;
   }
+  if (pEvent->epdCollection()) {
 //	EPD based event-by-event correction for the hit timing
 	double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
 
@@ -62,7 +64,7 @@ Int_t StTpcHitMover::Make() {
         int TAC = 0;
 	int maxTAC = -1;
 
-	int doEPDT0Correction = StTpcBXT0CorrEPDC::instance()->nrows();
+	doEPDT0Correction = StTpcBXT0CorrEPDC::instance()->nrows();
 
 	if (doEPDT0Correction) {
 		StEpdCollection * epdCol = pEvent->epdCollection();
@@ -85,6 +87,7 @@ Int_t StTpcHitMover::Make() {
 		triggerOffset = StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth);
 	}
 //	======================================================
+  }
 //  gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
   if (! gStTpcDb) {
     gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
