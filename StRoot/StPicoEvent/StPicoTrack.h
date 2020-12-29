@@ -132,6 +132,7 @@ class StPicoTrack : public TObject {
   Float_t dEdxPullElectron()  const { return dEdxPull(0.51099907e-3,1); }
   Float_t dNdx() const              { return mDnDx; }
   Float_t dNdxError() const         { return mDnDxError; }
+  Char_t  status()            const { return mStatus;}
 #endif
 
   /// Return nSigma(pion)
@@ -248,6 +249,7 @@ class StPicoTrack : public TObject {
   void setDndx(Float_t dNdx)               { mDnDx = dNdx;}
   /// Set dN/dx error of the track
   void setDndxError(Float_t dNdxError)     { mDnDxError = dNdxError; }
+  void setStatus(Char_t k = 0)             { mStatus = k;}
 #endif
   
   /// Set nHitsFit ( charge * nHitsFit )
@@ -361,7 +363,8 @@ class StPicoTrack : public TObject {
   ULong64_t mTopoMap_iTpc;
   ClassDef(StPicoTrack, 7)
 #else
-  ClassDef(StPicoTrack, 8)
+    Char_t mStatus; // =1 if fitted in a vertex
+  ClassDef(StPicoTrack, 9)
 #endif
 
 };
