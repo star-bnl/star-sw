@@ -96,14 +96,14 @@ int fcs_data_c::zs_start(u_short *buff)
 	int t_stop ;
 	int got_one = 0 ;
 
-	int q_ped = 0 ;
+//	int q_ped = 0 ;
 	
 	for(int i=0;i<tb_cou;i++) {
 		short d = adc[i] & 0xFFF ;
 
-		if(i<4) {
-			q_ped += d ;
-		}
+//		if(i<4) {
+//			q_ped += d ;
+//		}
 
 //		printf("CH %d: %d = %d < thr %d: t_start %d, t_cou %d\n",ch,i,d,thr,t_start,t_cou) ;
 
@@ -140,7 +140,7 @@ int fcs_data_c::zs_start(u_short *buff)
 	
 	int i_ped = (int)(ped[sector-1][rdo-1].mean[ch]+0.5) ;
 
-
+#if 0
 	if(!is_trg) {
 		q_ped /= 4 ;	// quick ped
 		LOG(DBG,"RDO %d, ch %d, q_ped %d, i_ped %d",rdo,ch,q_ped,i_ped) ;
@@ -150,6 +150,7 @@ int fcs_data_c::zs_start(u_short *buff)
 			statistics[rdo-1].odd_ped[ch]++ ;
 		}
 	}
+#endif
 
 	//finalize
 	if(t_cou >= l_cou) {
@@ -449,7 +450,7 @@ int fcs_data_c::hdr_event()
 						float f_val = 0.0 ;
 						u_int i_val = 0 ;
 						char *c ;
-						int ret ;
+						//int ret ;
 
 						ctmp[cou] = 0 ;
 						if(ascii_no==0) LOG(TERR,"S%d:%d:%d: \"%s\"",sector,rdo,events,ctmp) ;
@@ -990,7 +991,9 @@ void fcs_data_c::ped_stop(int bad_ped)
 
 		LOG(ERR,"S%d:%d pedestals %s",sector,rdo,status) ;
 	}
-	else status[0] = 0 ;
+	else {
+		strcpy(status," -- Status OK") ;
+	}
 
 	//pedestal dump...
 	FILE *pedf ;
@@ -1039,10 +1042,12 @@ void fcs_data_c::ped_stop(int bad_ped)
 
 		switch(run_type) {
 		case 1 :
-			if((m<10.0)||(m>120.0)||(rms<0.3)||(rms>1.0)) err = 1 ;
+			if((m<6.0)||(m>200.0)||(rms<0.3)||(rms>1.0)) err = 1 ;
 			break ;
 		case 2 :
-			if((m != 2047.5)||(rms != 682.5)) err = 1 ;
+			if((m != 2047.5)||(rms != 682.5)) {
+				err = 1 ;
+			}
 			break ;
 		}
 		

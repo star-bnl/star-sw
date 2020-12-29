@@ -193,7 +193,7 @@ public:
 		float deadtime ;
 		float rx_throttle ;
 		int ht_rate ;
-		u_int odd_ped[32] ;
+//		u_int odd_ped[32] ;
 	} statistics[8] ;
 
 #ifndef __CINT__

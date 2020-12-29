@@ -621,8 +621,9 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		else {
 			switch(trg_cmd) {
 			case 4 :
-			case 5 :
+			//case 5 :
 			case 6 :	// local trigger
+			case 7 :	// first event
 			case 10 :	// pulser
 				break ;
 			default :
