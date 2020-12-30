@@ -19,7 +19,7 @@
 const int TBMAX=300;
 const int TBTRG[2]={50,208};
 const int MAXSUM=20000;
-const int OFF[2]  = {4,2};
+const int OFF[2]  = {0,0};
 const int mReadMode=0;
 const int mFakeData=0;
     
@@ -60,12 +60,12 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
 
     int ecal_xmax = nColumn(0)+OFF[0];
     int ecal_ymax = nRow(0);
-    contents.h_fcs_det_hitmap[0] = new TH2F("Ecal",Form("Ecal; +-(Col+%d)   North <-> South; %d-Row",OFF[0],nRow(0)+1),
+    contents.h_fcs_det_hitmap[0] = new TH2F("Ecal",Form("Ecal; +-Col   North <-> South; %d-Row",OFF[0],nRow(0)+1),
 					    ecal_xmax*2+1,-ecal_xmax-0.5,ecal_xmax+0.5,
 					    ecal_ymax,0.0,ecal_ymax); 
     int hcal_xmax = nColumn(2)+OFF[1];
     int hcal_ymax = nRow(2);
-    contents.h_fcs_det_hitmap[1] = new TH2F("Hcal",Form("Hcal; +-(Col+%d)  North <-> South; %d-Row",OFF[1],nRow(2)+1),
+    contents.h_fcs_det_hitmap[1] = new TH2F("Hcal",Form("Hcal; +-Col   North <-> South; %d-Row",OFF[1],nRow(2)+1),
 					    hcal_xmax*2+1,-hcal_xmax-0.5,hcal_xmax+0.5,
 					    hcal_ymax,0.0,hcal_ymax); 
     int pres_xmax = nColumn(4);
