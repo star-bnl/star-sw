@@ -932,6 +932,17 @@ void StMuMcAnalysisMaker::FillTrackPlots()
 	  const StMuProbPidTraits &PiD = Track->probPidTraits();
 	  Double_t I[3] = {PiD.dEdxTruncated(), PiD.dEdxFit(), PiD.dNdxFit()};
 	  Double_t TrackLength = PiD.dEdxTrackLength();
+	  //#define __DEBUG_dEdx__
+#ifdef 	__DEBUG_dEdx__
+	  Double_t dEdxFitL10 = TMath::Log10(	1e6*PiD.dEdxFit() );
+          if ((TMath::Abs(pMomentum - 1.0) < 0.1 && dEdxFitL10 > 0.5 && dEdxFitL10 < 0.8) ||
+	      (TMath::Abs(pMomentum - 0.5) < 0.1 && dEdxFitL10 > 1.0 && dEdxFitL10 < 1.4)) {
+	    static Int_t ibreak = 0;
+	    Track->Print();
+	    mcTrack->Print();
+	    ibreak++;
+	  }
+#endif
 	  Int_t Gid = mcTrack->GePid();
 	  // ToF
 	  const StMuBTofPidTraits &btofPid = Track->btofPidTraits();

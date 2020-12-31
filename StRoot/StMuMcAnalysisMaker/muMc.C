@@ -3,7 +3,7 @@
   root.exe -q -b -x 'muMc.C(1e6,"../*MuDst.root")'
 */
 void muMc(Int_t N = 1000000, 
-	  const Char_t *input = "MuDst/*.MuDst.root", 
+	  const Char_t *input = "*.MuDst.root", 
 	  const Char_t *output = "muMc.root", 
 	  const Char_t *ChainOpt = "RMuDst,KFPInter,MuMc,quiet,mysql,nodefault,y2019") {
 #if !defined(__CINT__)
@@ -22,6 +22,7 @@ void muMc(Int_t N = 1000000,
     StMuMcAnalysisMaker *muMc = StMuMcAnalysisMaker::instance();
     if (muMc) {cout << "MuMcAnalysis has been found" << endl;}
     muMc->SetAttr("TrackPlots",1);
+    muMc->SetAttr("PiDPlots",1);
     //    muMc->SetAttr("VertexPlots",1);
     //    muMc->SetAttr("StoreCutNTuples",1);
     chain->Init();

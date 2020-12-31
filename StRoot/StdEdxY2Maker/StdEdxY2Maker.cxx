@@ -10,6 +10,7 @@
 //#define __ZDC3__
 //#define __LogProb__
 #define __BEST_VERTEX__
+//#define __DEBUG_dEdx__
 //#define __iTPCOnly__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -67,7 +68,7 @@ using namespace units;
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StPidStatus.h"
 #include "dEdxHist.h"
-#ifdef  __CHECK_LargedEdx__
+#if defined(__CHECK_LargedEdx__) || defined( __DEBUG_dEdx__)
 #include "tables/St_g2t_track_Table.h" 
 #endif
 const static Int_t tZero= 19950101;
@@ -732,6 +733,22 @@ Int_t StdEdxY2Maker::Make(){
 	    dedx.method    = kLikelihoodFitId;
 	    AddEdxTraits(tracks, dedx);
 	  }
+#ifdef 	__DEBUG_dEdx__
+	  StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
+	  Double_t pMomentum = g3.mag();
+	  Double_t dEdxFitL10 = TMath::Log10(	1e6*dedx.dedx[0]);
+	  if ((TMath::Abs(pMomentum - 1.0) < 0.1 && dEdxFitL10 > 0.5 && dEdxFitL10 < 0.8) ||
+	      (TMath::Abs(pMomentum - 0.5) < 0.1 && dEdxFitL10 > 1.0 && dEdxFitL10 < 1.4)) {
+	    static Int_t ibreak = 0;
+	    gTrack->Print();
+	    if (gTrack->idTruth() > 0) {
+	      St_g2t_track  *g2t_track  = (St_g2t_track  *) GetDataSet("geant/g2t_track");
+	      if (g2t_track) g2t_track->Print(gTrack->idTruth()-1,1);
+	    }
+	    PrintdEdx(2);
+	    ibreak++;
+	  }
+#endif
 	}
 	if (fUsedNdx) {
 	  // likelihood fit of no. of primary cluster per cm

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDbMaker.h,v 1.14 2020/09/03 19:43:20 akio Exp $
+ * $Id: StFcsDbMaker.h,v 1.15 2020/12/30 20:17:55 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.h,v $
+ * Revision 1.15  2020/12/30 20:17:55  akio
+ * adding SC map access
+ *
  * Revision 1.14  2020/09/03 19:43:20  akio
  * Updating SC map and adding patchpanel & cable color map
  *
@@ -154,10 +157,13 @@ class StFcsDbMaker : public StMaker {
   void getDepfromId(Int_t detectorId, Int_t id, Int_t &ehp, Int_t &ns, Int_t &crt, Int_t &slt, Int_t &dep, Int_t &ch) const;
   void getIdfromDep(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, Int_t &detectorId, Int_t &id, Int_t &crt, Int_t &slt) const;
   int  getNDep(Int_t ehp, int ns) const;
+  void getSCmap(Int_t det, Int_t id, 
+		Int_t &ehp, Int_t &ns, Int_t &scdep, Int_t &branch, Int_t &fee_i2c, Int_t &sipm, 
+		Int_t &pp, Int_t &jacket) const;
   
   void makeMap();
   void makePPMap();
-  int  jacketColor(int ehp, int dep, int ch);
+  int  jacketColor(int ehp, int ns, int dep, int ch);
   void makeMap2019();
   void printMap();
   void printHeader(FILE* f, int flag, int csv);
