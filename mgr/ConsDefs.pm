@@ -89,8 +89,10 @@
  if (! -e $ROOTCLING) {
    $ROOTCLING = "";
    $RCINTPL = cwd() . "/mgr/RootCint.pl";
+   if (! -x $RCINTPL) {$RCINTPL = $STAR . "/mgr/RootCint.pl";}
  } else {
    $RCINTPL = cwd() . "/mgr/RootCling.pl";
+   if (! -x $RCINTPL) {$RCINTPL= $STAR . "/mgr/RootCling.pl";}
  }
 #  if (! -e $ROOTCLING) {
 #    $RCINTPL = cwd() . "/mgr/RootCint.pl";
