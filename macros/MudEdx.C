@@ -1,4 +1,5 @@
 /*
+  root.exe 'lMuDst.C(-2,"*.MuDst.root","RMuDst","MuOut.root")' MudEdx.C+  >& MudEdx.log &
   root.exe 'lMuDst.C(-2,"/gpfs01/star/subsys-tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/*.MuDst.root","RMuDst","MuOut.root")' MudEdx.C+
   root.exe lMuDst.C 'MudEdx.C+("/gpfs01/star/subsys-tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/st_physics_15130037_raw_3000030_5368_5369.MuDst.root")'
   root.exe MudEdx1_Sparse_pT100_eta24.NewdX.root doFractionFit.C
