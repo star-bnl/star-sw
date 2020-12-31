@@ -799,6 +799,39 @@ Int_t StdEdxY2Maker::Make(){
 		       << pEvent->trackNodes().size() << endm;
   }
   if (mHitsUsage) mHitsUsage->Fill(TMath::Log10(TotalNoOfTpcHits+1.), TMath::Log10(NoOfTpcHitsUsed+1.));
+#define __SpaceCharge__
+#ifdef  __SpaceCharge__
+  static TH2F *AdcSC = 0, *AdcOnTrack = 0, *dEOnTrack = 0;
+  if (! AdcSC) {
+    AdcSC      = new TH2F("AdcSC","ADC total versus z and r",210,-210,210, 70, 50, 190);
+    AdcOnTrack = new TH2F("AdcOnTrack","ADC on Track versus z and r",210,-210,210, 70, 50, 190);
+    dEOnTrack  = new TH2F("dEOnTrack","Corrected dE on Track versus z and r",210,-210,210, 70, 50, 190);
+  }
+  for (UInt_t i = 0; i <= TpcHitCollection->numberOfSectors(); i++) {
+    StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
+    if (sectorCollection) {
+      Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
+      for (Int_t j = 0; j < numberOfPadrows; j++) {
+	StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
+	if (rowCollection) {
+	  StSPtrVecTpcHit &hits = rowCollection->hits();
+	  Long_t NoHits = hits.size();
+	  for (Long64_t k = 0; k < NoHits; k++) {
+	    const StTpcHit *tpcHit = static_cast<const StTpcHit *> (hits[k]);
+	    if (!tpcHit) continue;
+	    Double_t R = tpcHit->position().perp();
+	    Double_t Z = tpcHit->position().z();
+	    AdcSC->Fill(Z,R, tpcHit->adc());
+	    if (tpcHit->chargeModified() > 0) {
+	      AdcOnTrack->Fill(Z,R, tpcHit->adc());
+	      dEOnTrack->Fill(Z,R, tpcHit->chargeModified());
+	    }
+	  }
+	}
+      }
+    }
+  }
+#endif /* __SpaceCharge__ */
   return kStOK;
 }
 //________________________________________________________________________________
