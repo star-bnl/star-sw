@@ -48,8 +48,10 @@
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StDetectorDbMaker/St_tpcBXT0CorrEPDC.h"
 #include "StDetectorDbMaker/St_beamInfoC.h"
+#if 0
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
+#endif
 #include "Altro.h"
 #include "TRVector.h"
 #include "StBichsel/Bichsel.h"
@@ -724,11 +726,13 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	}
 	ipart      = tpc_track[Id-1].ge_pid;
 	charge     = (Int_t) tpc_track[Id-1].charge;
+#if 0
 	StParticleDefinition *particle = StParticleTable::instance()->findParticleByGeantId(ipart);
 	if (particle) {
 	  mass = particle->mass();
 	  charge = particle->charge();
 	}
+#endif
 #if 0
 	if (tpc_track[Id-1].next_parent_p && ipart == 3) { // delta electrons ?
 	  Id = tpc_track[Id-1].next_parent_p;
@@ -748,8 +752,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  continue;
 	}
       } // special treatment for electron/positron 
-      if (ipart == 2) charge =  101;
-      if (ipart == 3) charge = -101;
+      Int_t qcharge  = charge;
+      if (ipart == 2) qcharge =  101;
+      if (ipart == 3) qcharge = -101;
       // Track segment to propagate
       enum {NoMaxTrackSegmentHits = 100};
       static HitPoint_t TrackSegmentHits[NoMaxTrackSegmentHits];
@@ -984,7 +989,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	NP = 100;
 #else /* !  __LASERINO__ */
 	if (mdNdx || mdNdxL10) {
-	  NP = GetNoPrimaryClusters(betaGamma,charge); // per cm
+	  NP = GetNoPrimaryClusters(betaGamma,qcharge); // per cm
 #ifdef __DEBUG__
 	  if (NP <= 0.0) {
 	    iBreak++; continue;
@@ -1018,7 +1023,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    bg = TMath::Sqrt(gamma*gamma - 1.);
 	    Tmax = 0.5*m_e*(gamma - 1);
 	    if (Tmax <= St_TpcResponseSimulatorC::instance()->W()/2*eV) break;
-	    NP = GetNoPrimaryClusters(betaGamma,charge); 
+	    NP = GetNoPrimaryClusters(betaGamma,qcharge); 
 	    dE = TMath::Exp(cLog10*mdNdEL10->GetRandom());
 	  } else {
 	    if (charge) {
@@ -1189,6 +1194,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  tpc_hitC->ds = dSSum; 
 	  //	  tpc_hitC->adc = TotalSignal;
 	  tpc_hitC->np = nP;
+	  tpc_hitC->ne = nTotal;
 	  if (row > 1)       tpc_hitC->adcs[0]  += rowsdEH[row-2];
 	  tpc_hitC->adcs[1]                     += rowsdEH[row-1];
 	  if (row <= kRowMax) tpc_hitC->adcs[2] += rowsdEH[row];
