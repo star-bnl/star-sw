@@ -69,6 +69,8 @@ JevpPlotSet::JevpPlotSet(JevpServer *server)
   hello_cmds = (char *)"client";
   diska = NULL;
   daqfile = NULL;
+  ifile = 0;
+  nfile = 0;
   pdf = NULL;
   loglevel = NULL;
   current_run = -1;
@@ -79,7 +81,7 @@ JevpPlotSet::JevpPlotSet(JevpServer *server)
   builderStatus.setStatus("stopped");
   pause = 0;
   xml = NULL;
-
+  
   processingTimer = new RtsTimer_root();
   processingTime = 0;
   numberOfEventsRun = 0;
@@ -472,7 +474,6 @@ void JevpPlotSet::Main(int argc, char *argv[])
 
     // initialize reader
     daqReader *reader = new daqReader(daqfile);
-
   
     // Do this after the reader...
     rtsLogOutput(RTS_LOG_STDERR);
@@ -584,6 +585,15 @@ void JevpPlotSet::Main(int argc, char *argv[])
 		PCP;
 		LOG(DBG, "EVP_STAT_EOR stat=%s",builderStatus.status);
 	
+		if(nfile>0 && ifile+1<nfile){ //reading mltiple files
+		  ifile++;
+		  delete reader;
+		  LOG(DBG,"Deleting previous reader and opening new file %d =%s",ifile,daqfiles[ifile]);
+		  printf("Deleting previous reader and opening new file %d =%s\n",ifile,daqfiles[ifile]);
+		  reader = new daqReader(daqfiles[ifile]);
+		  continue;
+		}
+
 		if(!builderStatus.running()) {
 		    LOG(NOTE, "Already end of run, don't stop it again... %d",builderStatus.running());
 		    // already end of run, don't stop it again...
@@ -767,6 +777,21 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
 	else if (memcmp(argv[i], "-file", 5) == 0) {
 	    i++;
 	    daqfile = argv[i];
+	}
+	else if (strcmp(argv[i], "-beginfiles") == 0) {
+	    i++;
+	    daqfile = argv[i];
+	    LOG(DBG, "Reading multiple files");
+	    printf("Reading multiple files\n");
+	    while(i<argc && strcmp(argv[i], "-endfiles") != 0) {
+	      daqfiles[nfile] = argv[i];
+	      LOG(DBG, "Reading multiple files n=%d file=%s",nfile,daqfiles[nfile]);
+	      printf("Reading multiple files n=%d file=%s\n",nfile,daqfiles[nfile]);
+	      i++;
+	      nfile++;
+            }
+            LOG(DBG, "Reading %d files", nfile);
+            printf("Reading %d files\n", nfile);
 	}
 	else if (memcmp(argv[i], "-pdf", 4) == 0) {
 	    i++;
