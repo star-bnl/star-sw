@@ -60,6 +60,7 @@
 #include "Jevp/StJevpBuilders/epdBuilder.h"
 //#include "Jevp/StJevpBuilders/itpcBuilder.h"
 #include "Jevp/StJevpBuilders/etofBuilder.h"
+#include "Jevp/StJevpBuilders/fcsBuilder.h"
 
 #include <RTS/include/SUNRT/clockClass.h>
 
@@ -539,6 +540,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
     cdaqfilename = 0;
 
     for(int i=1;i<argc;i++) {
+	// Individual options...
 	if(strcmp(argv[i], "-dd")==0) {
 	    i++;
 	    displays_fn = argv[i];
@@ -570,19 +572,12 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    i++;
 	    myport = atoi(argv[i]);
 	}
-	else if (strcmp(argv[i], "-justPallete") == 0) {
-	    justUpdateDisplayPallete = 1;
-	}
 	else if (strcmp(argv[i], "-file")==0) {
 	    i++;
 	    daqfilename = argv[i];
 	}
 	else if (strcmp(argv[i], "-log") == 0) {
 	    logevent=1;
-	}
-	else if (strcmp(argv[i], "-pallete") == 0) {
-	    log_output = RTS_LOG_STDERR;
-	    justUpdateDisplayPallete = 1;
 	}
 	else if (strcmp(argv[i], "-files") == 0) {
 	    i++;
@@ -602,11 +597,63 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	else if (strcmp(argv[i], "-die")==0) {
 	    die = 1;
 	}
+	else if (strcmp(argv[i], "-nodie") == 0) {
+	    die = 0;
+	}
+	else if (strcmp(argv[i], "-buildpdf") == 0) {
+	    LOG("JEFF", "-buildpdf");
+	    log_output = RTS_LOG_STDERR;
+	    nodb = 1;
+	    myport = JEVP_PORT+10;
+	    die = 1;
+	    log_level = (char *)WARN;
+	    throttle_time = .005;
+	    pdfdir = (char *)".";	    
+	}
+
+	else if (strcmp(argv[i], "-padd")==0) {
+	    myport = JEVP_PORT + 10;
+	}
+	else if (strcmp(argv[i], "-diska")==0) {   // used only to pass to builders on launch...
+	    i++;
+	    diska = argv[i];
+	}
+
+	// Production server
 	else if (strcmp(argv[i], "-production") == 0) {
 	    nodb = 0;
 	    myport = JEVP_PORT;
 	    runCanvasImageBuilder = 1;
 	}
+	else if (strcmp(argv[i], "-updatedb")==0) {
+	    log_output = RTS_LOG_STDERR;
+	    nodb = 0;
+	    myport = JEVP_PORT+10;
+	    die = 1;
+	    log_level = (char *)WARN;
+	    runCanvasImageBuilder=1;
+	    imagewriterdir = (char *)"rebuildJevpPlots";
+	    throttle_time = .05;
+	}
+	else if (strcmp(argv[i], "-test")==0) {
+	    nodb = 1;
+	    log_dest = (char *)"172.16.0.1";
+	    //log_output = RTS_LOG_STDERR;
+	    basedir = (char *)"/RTScache/conf/jevp";
+	    //pdfdir = (char *)"/a/jevp_test/pdf";
+	    //refplotdir = (char *)"/a/jevp_test/refplots";
+	    //rootfiledir = (char *)"/a/jevp_test/rootfiles";
+	    myport = JEVP_PORT + 10;
+	    maxevts = 10000001;
+	    die = 1;
+	    runCanvasImageBuilder = 0;
+	}
+	else if (strcmp(argv[i], "-pallete") == 0) {
+	    log_output = RTS_LOG_STDERR;
+	    justUpdateDisplayPallete = 1;
+	}
+
+	// L4 server
 	else if (strcmp(argv[i], "-l4production") == 0) {
 	    log_port = 8009;
 	    printEventCount=2000;
@@ -626,8 +673,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    log_dest = (char *)"172.17.0.1";
 	    log_port = 8009;
 	    printEventCount=2000;
-	    //log_output = RTS_LOG_STDERR;
-	    LOG("JEFF", "Using L4 test");
+	    //log_output = RTS_LOG_STDERR; 
 	    isL4 = 1;
 	    nodb = 1;
 	    myport = JEVP_PORT+10;
@@ -636,48 +682,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    pdfdir = (char *)"/a/l4jevp/pdf";
 	    refplotdir = (char *)"/a/l4jevp/refplots";
 	    rootfiledir = (char *)"/a/l4jevp/rootfiles"; 
-	    //log_output = RTS_LOG_STDERR;
-	    //maxevts = 1001;
-	    runCanvasImageBuilder = 1;
-	    imagewriterdir = (char *)"jevptest";
+	    runCanvasImageBuilder = 0;
+	    //imagewriterdir = (char *)"jevptest";
 	    die = 1;
-	}
-	else if (strcmp(argv[i], "-updatedb")==0) {
-	  log_output = RTS_LOG_STDERR;
-	  nodb = 0;
-	  myport = JEVP_PORT+10;
-	  die = 1;
-	  log_level = (char *)WARN;
-	  throttle_time = .05;
-	}
-	else if (strcmp(argv[i], "-test")==0) {
-	    nodb = 1;
-	    log_dest = (char *)"172.16.0.1";
-	    //log_output = RTS_LOG_STDERR;
-	    basedir = (char *)"/RTScache/conf/jevp";
-	    pdfdir = (char *)"/a/jevp_test/pdf";
-	    //pdfdir = NULL;
-	    refplotdir = (char *)"/a/jevp_test/refplots";
-	    rootfiledir = (char *)"/a/jevp_test/rootfiles";
-	    imagewriterdir = (char *)"jevptest";
-
-	    myport = JEVP_PORT + 10;
-	    maxevts = 10000001;
-	    die = 1;
-	    runCanvasImageBuilder = 1;
-	}
-	else if (strcmp(argv[i], "-nodie") == 0) {
-	  die = 0;
-	}
-	else if (strcmp(argv[i], "-buildpdf") == 0) {
-	    LOG("JEFF", "-buildpdf");
-	    log_output = RTS_LOG_STDERR;
-	    nodb = 1;
-	    myport = JEVP_PORT+10;
-	    die = 1;
-	    log_level = (char *)WARN;
-	    throttle_time = .005;
-	    pdfdir = (char *)".";	    
 	}
 	else if (strcmp(argv[i], "-l4updatedb")==0) {
 	    nodb = 0;
@@ -694,27 +701,38 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    pdfdir = (char *)"/a/l4jevp/pdf";
 	    refplotdir = (char *)"/a/l4jevp/refplots";
 	    rootfiledir = (char *)"/a/l4jevp/rootfiles";
+	    runCanvasImageBuilder = 1;
+	    imagewriterdir = (char *)"rebuildJevpPlots";
 	}
-	else if (strcmp(argv[i], "-padd")==0) {
-	  myport = JEVP_PORT + 10;
-	}
-	else if (strcmp(argv[i], "-diska")==0) {   // used only to pass to builders on launch...
-	    i++;
-	    diska = argv[i];
+	else if (strcmp(argv[i], "-l4pallete") == 0) {
+	    log_output = RTS_LOG_STDERR;
+	    basedir = (char *)"/RTScache/conf/l4jevp";
+	    isL4 = 1;
+	    justUpdateDisplayPallete = 1;
 	}
 	else {
 	    printf("\n\nUsage for %s:  (bad arg %s)\n",argv[0],argv[i]);
+	    
+	    printf("\n---------------------\nMain Server:\n--------------------\n");
 
-	    printf("\t[-production]        \n");   
-	    printf("\t[-test]              port to %d, no dbs, /jevp_test config directorys\n",myport+10);
-	    printf("\t[-updatedb]          run on test port, but to real DB, for re-analysis...\n");
+	    printf("\t[-production]        \n"); 
+	    printf("\t[-updatedb]          rebuild db/plots, use with -file(s)\n");  
+	    printf("\t[-test]              no output, use with -file(s) and -pdf,-db,etc... \n");
+	    printf("\t[-pallete            just add pallete file to histodefs.txt\n");
 
-	    printf("\t[-l4production       L4 jevp\n");
-	    printf("\t[-l4test]            L4 test\n");
-	    printf("\t[-l4updatedb]\n");
+	    printf("\n---------------------\nL4 server:  \n--------------------\n");
 
-	    printf("\t[-file daqfilename]  file to analyze\n");
-	    printf("\t[-die]               exit after end of run...\n");
+	    printf("\t[-l4production       \n");
+	    printf("\t[-l4updatedb]        rebuild db/plots, use with -file(s)\n");
+	    printf("\t[-l4test]            no output, use with -file(s) and -pdf,-db,etc...\n");
+	    printf("\t[-l4pallete]\n");
+
+	    printf("\n---------------------\nIndividual Options:\n----------------------\n");
+
+	    printf("\t[-file daqfilename]\n");
+	    printf("\t[-files f1.daq f2.daq f3.daq -endfiles]\n");
+
+	    printf("\t[-die]\n");
 
 	    printf("\t[-dd filename]       explicit HistoDefs.txt file:\n");
 	    printf("\t[-basedir basedir]   basedirectory\n");
@@ -723,15 +741,13 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    printf("\t[-port]              port]\n");
 	
 
-
-	
 	    printf("\t[-diska [/net/a]]    used to pass to builders on launch\n");
 	    printf("\t[-nothrottle]\n");
 	    printf("\t[-log]               log each event\n");
 	    printf("\t[-stderr]            log to standard error\n");
 	    printf("\t[-maxevts ###]       maximum number of events in run\n");
 	    printf("\t[-nopdf]\n");
-	    printf("\t[-pallete            just add pallete file to histodefs.txt\n");
+	   
 	    printf("\n\n");
 	    printf("\t[-testdd filename]   test the display description file.\n");
 	    printf("\n\n");
@@ -900,6 +916,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	builders.Add(new epdBuilder(this));
 	//builders.Add(new itpcBuilder(this));
 	builders.Add(new etofBuilder(this));
+	builders.Add(new fcsBuilder(this));
     }
     else {
 	builders.Add(new trgBuilder(this));
