@@ -140,6 +140,11 @@ class JevpPlotSet : public TObject {
 
   char *diska;      // event pool path
   char *daqfile;    // data file / null for live
+
+  char *daqfiles[20]; //multiple input files
+  int  ifile;         //current working file
+  int  nfile;         //number of files
+
   char *pdf;        // direct pdf file output
   char *loglevel;
   char *buildxml;
