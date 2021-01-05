@@ -906,8 +906,8 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	builders.Add(new upcBuilder(this));
 	//builders.Add(new fgtBuilder(this));
 	builders.Add(new vpdBuilder(this));
-	builders.Add(new fmsBuilder(this));
-	builders.Add(new fpsBuilder(this));
+	//builders.Add(new fmsBuilder(this));
+	//builders.Add(new fpsBuilder(this));
 	builders.Add(new gmtBuilder(this));
 	//builders.Add(new pxlBuilder(this));
 	//builders.Add(new istBuilder(this));
