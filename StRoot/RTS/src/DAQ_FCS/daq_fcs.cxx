@@ -58,6 +58,7 @@ daq_fcs::daq_fcs(daqReader *rts_caller)
 	raw = new daq_dta ;
 	adc = new daq_dta ;
 	zs = new daq_dta ;
+	ped = new daq_dta ;
 
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
@@ -70,6 +71,7 @@ daq_fcs::~daq_fcs()
 	delete raw ;
 	delete adc ;
 	delete zs ;
+	delete ped ;
 
 	return ;
 }
@@ -100,11 +102,69 @@ daq_dta *daq_fcs::get(const char *bank, int sec, int raw, int pad, void *p1, voi
 		if((present & DET_PRESENT_SFS)==0) return 0 ;		// no DDL
 		return handle_zs() ;		// actually sec, rdo; r1 is the number of bytes
 	}
+	else if(strcasecmp(bank,"ped")==0) {
+		if((present & DET_PRESENT_SFS)==0) return 0 ;		// no DDL
+		return handle_ped() ;		// actually sec, rdo; r1 is the number of bytes
+	}
 	else {
 		LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
 	}
 
 	return 0 ;
+}
+
+
+daq_dta *daq_fcs::handle_ped()
+{
+	char str[128] ;
+	int min_rdo = 1 ;
+	int max_rdo = 8 ;
+	char *full_name ;
+	int got_any = 0 ;
+
+	// bring in the bacon from the SFS file....
+	assert(caller) ;
+
+	ped->create(1024,"fcs_ped",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+
+
+	for(int s=1;s<=12;s++) {
+	for(int r=min_rdo;r<=max_rdo;r++) {
+		sprintf(str,"%s/sec%02d/rdo%d/ped",sfs_name,s,r) ;
+		full_name = caller->get_sfs_name(str) ;
+
+
+		if(full_name==0) continue ;
+		
+		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+		LOG(DBG,"S%d:%d: Got size %d",1,r,size) ;
+		if(size <= 0) {
+			LOG(NOTE,"%s: %s: not found in this event",name,str) ;
+			return 0 ;
+		}
+
+		got_any = 1 ;
+
+		char *st = (char *) ped->request(size) ;
+
+		caller->sfs->read(full_name, st, size) ;
+
+		LOG(DBG,"sfs read succeeded") ;
+
+		ped->finalize(size,s,r,0) ;
+
+		full_name = 0 ;
+	}
+	}
+
+	ped->rewind() ;
+
+	if(got_any) {
+		return ped ;
+	}
+	else return 0 ;
+
 }
 
 daq_dta *daq_fcs::handle_raw()

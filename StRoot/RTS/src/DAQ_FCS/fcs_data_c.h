@@ -130,6 +130,8 @@ public:
 		double rms[32] ;
 		u_int cou[32] ;
 
+		u_int bad_4[32] ;
+
 		double mean_8[32] ;
 		double rms_8[32] ;
 		u_int cou_8[32] ;
@@ -150,8 +152,18 @@ public:
 		u_char det ;	//0=ECAL,1=HCAL,2=PRE,3=Main
 		u_char ns ;	//0=North,1=South
 		u_char dep ;	// from 0 ;
+
 		u_char crate ;	// 0..4
 		u_char slot ;	// 0..19
+
+		u_char crt ;	// from Akio's file
+		u_char slt ;	// from Akio's file
+
+		struct {	// from Akio's file
+			u_short id ;
+			u_char row ;
+			u_char col ;
+		} ch[32] ;
 
 		unsigned long long ch_mask ;
 	} ;
@@ -186,6 +198,7 @@ public:
 	static int ped_from_cache(const char *fname) ;
         static int gain_from_cache(const char *fname=0) ;
 	static int load_rdo_map(const char *fname=0) ;
+	static int load_readout_map(const char *fname=0) ;
 
 	// mutex for pedestals but also for statistics
 	static struct statistics_t {
