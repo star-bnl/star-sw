@@ -638,8 +638,13 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	case 0x9800 :
 		trg_word = sw16(d[3]) ;	// trigger
 		break ;
+	case 0x9810 :
+		trg_word = d[2] ;
+//		LOG(ERR,"%d: streaming trg_word 0x%08X",rdo,trg_word) ;
+		break ;
+
 	default :
-		LOG(ERR,"%d: unexpected HDR 0x%04X",hdr) ;
+		LOG(ERR,"%d: unexpected HDR 0x%04X",rdo,hdr) ;
 		goto err_end ;	
 	}
 
@@ -685,6 +690,7 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			case 6 :	// local trigger
 			case 7 :	// first event
 			case 10 :	// pulser
+			case 12 :	// slice
 				break ;
 			default :
 				LOG(WARN,"%d: unusual trg_cmd=0x%X in event 0x%04X: T %d, daq 0x%X",rdo,trg_cmd,hdr,t_lo,daq_cmd) ;
@@ -693,12 +699,13 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		}
 	}
 
-	if(0) {
-		u_short *d16 = (u_short *)d ;
-		for(int i=0;i<16;i++) {
-			LOG(TERR,"... %d = 0x%04X",i,d16[i]) ;
-		}
+#if 0
+	u_short *d16 = (u_short *)d ;
+	for(int i=0;i<16;i++) {
+		LOG(TERR,"... %d = 0x%04X",i,d16[i]) ;
 	}
+#endif
+
 
 	trg[t_cou].t = t_lo ;
 	trg[t_cou].trg = trg_cmd ;

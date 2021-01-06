@@ -25,9 +25,9 @@ static inline u_int sw16(u_int d)
 
 // this shouldn't really be static when running offline!
 //unsigned long long fcs_data_c::ch_mask[8] ;		// channel masks for the 8 RDOs; where are they? map file!
-struct fcs_data_c::fcs_ped_t fcs_data_c::ped[16][8] ;	// 8 RDO
+struct fcs_data_c::fcs_ped_t fcs_data_c::ped[FCS_SECTOR_COU][8] ;	// 8 RDO
 
-struct fcs_data_c::rdo_map_t fcs_data_c::rdo_map[16][8] ;	// 16 sectors, 8 RDOs each --> det,ns,dep
+struct fcs_data_c::rdo_map_t fcs_data_c::rdo_map[FCS_SECTOR_COU][8] ;	// FCS_SECTOR_COU sectors, 8 RDOs each --> det,ns,dep
 struct fcs_data_c::det_map_t fcs_data_c::det_map[4][2][24] ;	// det,ns,dep --> sector RDO
 u_char fcs_data_c::rdo_map_loaded ;
 
@@ -320,6 +320,13 @@ int fcs_data_c::start(u_short *d16, int shorts)
 
 				return hdr_event() ;
 
+			case 0x9810 :	// experimental streaming, May 2020
+				version = 0x30050000 ;
+
+				dta_p = d16 ;
+
+				return hdr_event() ;
+
 			}
 
 			LOG(ERR,"uknown version 0x%04X",d16[2]) ;
@@ -373,7 +380,7 @@ int fcs_data_c::hdr_event()
 //		LOG(TERR,"... %d 0x%04X",i,dta_p[i]) ;
 //	}
 
-
+//	has_ascii = 0 ;
 	first_tb_cou = 0 ;
 
 	//I will need the board id as a sector/id combo
@@ -415,12 +422,21 @@ int fcs_data_c::hdr_event()
 
 	LOG(NOTE,"HDR: token %d, trg_cmd %d, daq_cmd %d",token,trg_cmd,daq_cmd) ;
 
+	if(version == 0x30050000) {
+		// leave dta_p
+
+		trgd_event = 0 ;	// need to check what this really means?
+		return 0 ;
+	}		
+
+
 	// skip to first datum
 	dta_p += 8 ;
 
 //	has_ascii = 0 ;
 	ascii_p = 0 ;
 	ascii_words = 0 ;
+
 
 	if(dta_p[0]==0xEEEE && dta_p[1]==0xEEEE) {	// start of ASCII
 		char ctmp[64] ;
@@ -553,8 +569,16 @@ int fcs_data_c::hdr_event()
 	}
 #if 1
 	else if(dta_p[0]==0xFFFF) {
-		LOG(ERR,"BAD 0xFFFF bug") ;
-		dta_p++ ;
+		LOG(ERR,"BAD 0xFFFF bug -- 0x%08X",*((u_int *)dta_p)) ;
+
+		u_int *d32 = (u_int *)start_p ;
+
+		for(int i=0;i<32;i++) {
+			LOG(ERR,"... %d = 0x%04X",i,d32[i]) ;
+		}
+
+		
+		dta_p++ ;	// this is super bad for streaming!@@
 	}
 #endif
 
@@ -587,11 +611,255 @@ int fcs_data_c::event_end(int how)
 	return 0 ;
 }
 
+int fcs_data_c::event_stream()
+{
+	u_int *d = (u_int *)dta_p ;
+	u_int *d_stop = (u_int *)dta_stop ;
+	u_int xings = 0 ;
+	u_int deadtime = 0 ;
+	u_int trgs = 0 ;
+	u_char want_log = 0 ;
+	u_char end_seen = 0 ;
+	
+	ch = -1 ;
+	tb_cou = 0 ;
+	d += 1 ;	// d[0] is now at version
+
+//	LOG(TERR,"start packet 0x%08X, end 0x%08X",d[0],d_stop[0]) ;
+
+
+	if(d_stop[0]==0x5C || d_stop[0]==0xAAAABBBB) ;
+	else {
+		want_log |= 1 ;
+
+		for(int i=-8;i<=8;i++) {
+			LOG(ERR,"%d: d_stop 0x%08X",i,d_stop[i]) ;
+		}
+	}
+
+
+	u_int slice = d[1] ;
+	u_int old_slice = d[2] ;
+	u_int pkt_counter = d[5] ;
+
+	u_int end_slice = 0xdeadbeef ;
+	u_int pkt_status = 0xdeadbeef ;
+
+
+	double mean[32] ;
+	double rms[32] ;
+	u_int cou[32] ;
+
+	memset(mean,0,sizeof(mean)) ;
+	memset(rms,0,sizeof(rms)) ;
+	memset(cou,0,sizeof(cou)) ;
+
+
+	u_int ch_dead[32] ;
+	memset(ch_dead,0,sizeof(ch_dead)) ;
+
+	// skip header
+	d += 7 ;
+
+
+//	for(int i=0;i<16;i++) {
+//		LOG(TERR,"%d: 0x%08X",i,d[i]) ;
+//	}
+
+
+	u_int *adc32 = (u_int *)adc ;	// re-use instance storage 
+	int adc_cou = 0 ;
+	int adc_ch = 0 ;
+
+
+	u_char sync = 0xFF ;
+
+	u_int got_adc_end = 0 ;
+
+	u_int bad_sync = 0 ;
+
+	while(d < d_stop) {
+		u_int dta = *d ;
+		u_int t = dta>>28 ;	// type
+
+
+		switch(t) {
+		case 0xE :	// trg last
+			//LOG(WARN,"TRG last 0x%08X at RHIC %u(%u), sync %d",dta,d[1],d[1]&0xFFFF,(dta>>20)&3) ;
+			d++ ;
+			break ;
+		case 0xA :	// trg
+			//LOG(WARN,"TRG norm 0x%08X at RHIC %u(%u), sync %d",dta,d[1],d[1]&0xFFFF,(dta>>20)&3) ;
+			if((dta & 0xF)==0xC) {
+				sync = (dta>>20) & 3 ;
+			}
+			trgs++ ;
+			d++ ;
+			break ;
+		case 0xC :	// ADC slice-end
+			adc_ch = dta & 0x1F ;
+
+			if(got_adc_end & (1<<adc_ch)) {
+				LOG(ERR,"Ch %d -- adc-slice_end already received",adc_ch) ;
+			}
+			got_adc_end |= (1<<adc_ch) ;
+
+			LOG(WARN,"ADC slice-end 0x%08X at RHIC %u, sync %d, ch %d",dta,(dta>>8)&0xFFFF,(dta>>24)&3,
+				dta&0x1F) ; 
+			break ;
+		case 0x8 :	// ADC ch end
+			adc_ch = dta & 0x1F ;
+
+			if(((dta>>24)&0x3)!= sync) {
+				bad_sync++ ;
+				//LOG(ERR,"Bad sync 0x%08X: ch %d: expect %d, have %d",dta,adc_ch,sync,(dta>>24)&3) ;
+			}
+			
+			//LOG(TERR,"CH %d: adc_cou %d",adc_ch,adc_cou) ;
+
+			// check for error: can happen if there's deadtime...
+			if(adc_cou%4 || adc_cou==0) {
+				LOG(ERR,"ADC ch %d, adc_cou %d??",adc_ch,adc_cou) ;
+				for(int i=2;i>=-20;i--) {
+					LOG(ERR,"   prev %d 0x%08X",i,d[i]) ;
+				}
+				adc_cou = 0 ;
+				break ;
+			}
+
+			xings += adc_cou / 4 ;	// 2adcs per entry, 
+
+			for(int i=0;i<adc_cou;i++) {
+				u_int d_lo = adc32[i] & 0xFFF ;
+				u_int d_hi = (adc32[i]>>16) & 0xFFF ;
+
+				mean[adc_ch] += d_lo ;
+				rms[adc_ch] += d_lo * d_lo ;
+				cou[adc_ch]++ ;
+
+				mean[adc_ch] += d_hi ;
+				rms[adc_ch] += d_hi * d_hi ;
+				cou[adc_ch]++ ;
+
+#if 0
+				if(((adc32[i]>>13)&3)!=sync) {
+					LOG(ERR,"ADC ch %d: 0x%08X: bad sync: expect %d",adc_ch,adc32[i],sync) ;
+				}
+				if(((adc32[i]>>(13+16))&3)!=sync) {
+					LOG(ERR,"ADC ch %d: 0x%08X: bad sync: expect %d",adc_ch,adc32[i],sync) ;
+				}
+#endif
+			}
+
+			adc_cou = 0 ;
+
+			break ;
+		case 0x9 :	// deadtime
+			// can happen that the high value is already on the next slice!
+			//
+			if(adc_cou != 1) {	// must be 1 because I counted the 0x7....
+				LOG(WARN,"DEAD but unfinished ADCs %d on ch %d",adc_cou,adc_ch) ;
+			}
+
+			adc_cou = 0 ;
+
+			//for(int i=2;i>-8;i--) {
+			//	LOG(ERR,"   dead %d 0x%08X",i,d[i]) ;
+			//}
+
+			{
+				want_log |= 2 ;
+				//u_int d_start = (d[-1]>>8)&0xFFFF ;
+				u_int d_end = (dta>>8) & 0xFFFF ;
+				u_int ch = dta & 0x1F ;
+
+				//LOG(ERR,"DEAD 0x%08X 0x%08X - %u %u",dta,d[-1],d_end,d_start) ;
+
+				deadtime += d_end ;
+				ch_dead[ch] += d_end ;
+
+			}
+			break ;
+		case 0xF :	// end
+			end_slice = d[1] ;
+			pkt_status = d[5] ;
+			end_seen = 1 ;
+			goto event_end ;
+			break ;
+		default :
+			if(t&8) {
+				LOG(ERR,"Unknown packet 0x%X",t) ;
+			}
+			else {
+				if(adc_cou>=128) {
+					LOG(ERR,"Too many ADCs %d after ch %d",adc_cou,adc_ch) ;
+				}
+				else {
+					adc32[adc_cou] = dta ;
+					adc_cou++ ;
+				}
+			}
+			break ;
+		}
+		
+		d++ ;
+	}
+
+	event_end: ;
+
+	if(got_adc_end != 0xFFFFFFFF) {
+		LOG(ERR,"ADCs got end 0x%08X",got_adc_end) ;
+		want_log |= 4 ;
+	}
+
+	if(bad_sync) {
+		LOG(ERR,"ADCs with bad sync %d",bad_sync) ;
+		want_log |= 4 ;
+	}
+
+	if(want_log || !end_seen || deadtime || pkt_status || (slice==old_slice) || (slice != end_slice)) {
+
+		LOG(ERR,"Packet 0x%08X:0x%08X:0x%08X:%d, shorts %d - status 0x%08X: xings %d, trgs %d, deadtime %d",
+			slice,old_slice,end_slice,pkt_counter,dta_shorts,
+			pkt_status,
+			xings,trgs,deadtime) ;
+
+		if(deadtime) {
+			for(int i=0;i<32;i++) {
+				if(ch_dead[i]) {
+					LOG(ERR,"\t deadtime %d=%d",i,ch_dead[i]) ;
+				}
+			}
+		}
+	}
+
+
+	for(int i=0;i<32;i++) {
+		if(cou[i]==0) continue ;
+
+		mean[i] /= cou[i] ;		
+		rms[i] /= cou[i] ;
+
+		rms[i] = sqrt(rms[i]-mean[i]*mean[i]) ;
+	
+		if(cou[i]>10000) LOG(TERR,"Ch %d: %f +- %f, cou %d -- %d",i,mean[i],rms[i],cou[i],(int)(mean[i]*8.0+0.5)) ;
+
+		if(run_type==1) printf("PED %d %f %f %d %d\n",i,mean[i],rms[i],cou[i],(int)(mean[i]*8.0+0.5)) ;
+	}
+
+
+
+	return 0 ;
+}
+
 // this gets called over and over again for each channel!
 int fcs_data_c::event()
 {
 
 	if(version != 0x18110000) {
+		if(version == 0x30050000) {
+			return event_stream() ;
+		}
 		return event_pre_fy19() ;
 	}
 
@@ -1109,7 +1377,7 @@ int fcs_data_c::gain_from_cache(const char *fname)
 	}
 
 	// set defaults!
-	for(int s=0;s<16;s++) {
+	for(int s=0;s<FCS_SECTOR_COU;s++) {
 		for(int i=0;i<8;i++) {
 			for(int c=0;c<32;c++) {
 				ped[s][i].el_gain[c] = 1.0 ;
@@ -1223,7 +1491,7 @@ int fcs_data_c::gain_from_cache(const char *fname)
 
 	read_done: ;
 
-	for(int s=0;s<16;s++) {
+	for(int s=0;s<FCS_SECTOR_COU;s++) {
 	for(int i=0;i<8;i++) {
 		for(int c=0;c<32;c++) {
 
@@ -1277,6 +1545,7 @@ int fcs_data_c::ped_from_cache(const char *ff)
 		int ret = sscanf(buff,"%d %d %d %d %d %d %f %f %f %f",&ss,&rrd,&dd,&nn,&ppp,&c,&p,&r,&pp,&rr) ;
 
 		if(ret!=10) continue ;
+
 
 		// single timebin: for ZS
 		ped[ss-1][rrd-1].mean[c] =  p ;

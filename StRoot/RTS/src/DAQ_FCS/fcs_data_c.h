@@ -3,14 +3,22 @@
 
 #include <pthread.h>
 
+
+#define FCS_SECTOR_COU	12
+
+
+
 #include <sys/types.h>
 typedef unsigned int u_int;
 typedef unsigned short u_short;
 typedef unsigned char u_char;
 
+
 // Helper class for various things (data extraction, pedestal calculation etc)
 class fcs_data_c {
 public:
+
+
 	fcs_data_c() {
 		sector = 0 ;
 		rdo = 0 ;
@@ -60,11 +68,15 @@ public:
 	int ana_ch() ;
 	int event_end(int how) ;
 
+	int event_stream() ;
 	int event_pre_fy19() ;
 	int accum_pre_fy19(u_int ch, u_int tb, u_short adc) ;
 
 
 	u_short set_rdo(int rdo1) ;
+
+
+
 
 	u_char log_level ;
 	u_int events ;		// for this instance
@@ -77,6 +89,15 @@ public:
 	u_short *dta_stop ;
 	u_short *dta_start ;
 	int dta_shorts ;
+
+
+	// streaming specific
+
+	// count of xings per run entered in the worker thread
+	// and later summed and presented/saved at the end of the run
+
+	// occupancy
+	u_int adc_xings[FCS_SECTOR_COU][8][32] ;	// sector,rdo,channel
 
 	// for ZS
 	int zs_start(u_short *results) ;
@@ -123,6 +144,8 @@ public:
 	// I don't remember what the stuff is? Pre FY19.
 //	int first_rhic_strobe_tick ;
 //	int trigger_tick ;
+
+
 
 
 	struct fcs_ped_t {
@@ -190,8 +213,9 @@ public:
 	static u_short tb_pre ;
 	static u_short tb_all ;
 
-	static struct fcs_ped_t ped[16][8] ;		// sector,rdo
-	static struct rdo_map_t rdo_map[16][8] ;	// sector,rdo
+
+	static struct fcs_ped_t ped[FCS_SECTOR_COU][8] ;	// sector,rdo
+	static struct rdo_map_t rdo_map[FCS_SECTOR_COU][8] ;	// sector,rdo
 	static struct det_map_t det_map[4][2][24] ;	// reverse map: det,ns,dep
 	static u_char rdo_map_loaded ;			// boolean
 
@@ -208,6 +232,10 @@ public:
 		int ht_rate ;
 //		u_int odd_ped[32] ;
 	} statistics[8] ;
+
+
+
+
 
 #ifndef __CINT__
 	static pthread_mutex_t ped_mutex ;
