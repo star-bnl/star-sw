@@ -83,7 +83,7 @@ int fcs_data_c::zs_start(u_short *buff)
 			thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma * ped[sector-1][rdo-1].rms[ch] + 0.5) ;
 		}
 		else {
-			thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma + 0.5) ;
+			thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma) ;
 		}
 
 		l_cou = n_cou ;
@@ -781,8 +781,26 @@ int fcs_data_c::ana_ch()
 
 	ped_lock() ;
 
+	u_int aaa[2] ;
+
+	aaa[0] = 0xAAA ;
+	aaa[1] = 0x555 ;
+
+	if((adc[0] & 0xFFF)==0x555) {
+		aaa[0] = 0x555 ;
+		aaa[1] = 0xAAA ;
+	}
+
 	for(int tb=0;tb<tb_cou;tb++) {
-		double sadc = (double)(adc[tb] & 0xFFF) ;
+		u_int iadc = adc[tb] & 0xFFF ;
+
+		if(run_type==2) {	
+			if(aaa[tb%2] != iadc) {
+				ped[sector-1][rdo-1].bad_4[ch]++ ;
+			}
+		}
+
+		double sadc = (double)iadc ;
 
 		ped[sector-1][rdo-1].mean[ch] += sadc ;
 		ped[sector-1][rdo-1].rms[ch] += sadc * sadc ;
@@ -792,6 +810,7 @@ int fcs_data_c::ana_ch()
 		ped[sector-1][rdo-1].tmp_val_8[ch] += sadc ;
 		ped[sector-1][rdo-1].tmp_cou_8[ch]++ ;
 
+		
 		if(ped[sector-1][rdo-1].tmp_cou_8[ch]==8) {
 			double d = ped[sector-1][rdo-1].tmp_val_8[ch] ;
 
@@ -910,6 +929,8 @@ void fcs_data_c::ped_start()
 	memset(ped[s][r].mean,0,sizeof(ped[s][r].mean)) ;
 	memset(ped[s][r].rms,0,sizeof(ped[s][r].rms)) ;
 	memset(ped[s][r].cou,0,sizeof(ped[s][r].cou)) ;
+
+	memset(ped[s][r].bad_4,0,sizeof(ped[s][r].bad_4)) ;
 
 	memset(ped[s][r].mean_8,0,sizeof(ped[s][r].mean_8)) ;
 	memset(ped[s][r].rms_8,0,sizeof(ped[s][r].rms_8)) ;
@@ -1045,14 +1066,15 @@ void fcs_data_c::ped_stop(int bad_ped)
 			if((m<6.0)||(m>200.0)||(rms<0.3)||(rms>1.0)) err = 1 ;
 			break ;
 		case 2 :
-			if((m != 2047.5)||(rms != 682.5)) {
+			if(ped[s][r].bad_4[c]) {
+//			if((m != 2047.5)||(rms != 682.5)) {
 				err = 1 ;
 			}
 			break ;
 		}
 		
 		if(err) {
-			LOG(ERR,"S%02d:%d ch %02d: ped %.1f, rms %.1f",sector,rdo,c,m,rms) ;
+			LOG(WARN,"S%02d:%d ch %02d: ped %.1f, rms %.1f: bad cou %u",sector,rdo,c,m,rms,ped[s][r].bad_4[c]) ;
 		}
 
 		//LOG(TERR,"PEDs: S%02d:%d: %d: %.1f [0x%03X] %.2f - %.1f %.1f [cou %d]",sector,rdo,c,
@@ -1060,10 +1082,13 @@ void fcs_data_c::ped_stop(int bad_ped)
 		//    ped[s][r].rms[c],
 		//    ped[s][r].mean_8[c],ped[s][r].rms_8[c],ped[s][r].cou[c]) ;
 
+		double rms8 = ped[s][r].rms_8[c] ;
+
+		if(run_type==2) rms8 = ped[s][r].bad_4[c] ;
 		
 		fprintf(pedf,"%d %d %d %d %d %d %f %f %f %f\n",sector,rdo,d,n,p,c,
 			ped[s][r].mean[c],ped[s][r].rms[c],
-			ped[s][r].mean_8[c],ped[s][r].rms_8[c]) ;
+			ped[s][r].mean_8[c],rms8) ;
 
 	}
 
@@ -1371,6 +1396,98 @@ int fcs_data_c::event_pre_fy19()
 //	LOG(TERR,"RHIC ticks %u",rhic_end-rhic_start) ;
 
 	//LOG(TERR,"0x%08X 0x%08X 0x%08X: 0x%08X",dta_p[0],dta_p[1],dta_p[2],rhic_end) ;	
+
+	return 0 ;
+}
+
+int fcs_data_c::load_readout_map(const char *fname)
+{
+	char buff[256] ;
+	const char *fn ;
+
+	if(rdo_map_loaded==0) {
+		LOG(ERR,"rdo_map not loaded!") ;
+		return -1 ;
+	}
+
+	for(u_int dd=0;dd<3;dd++) {
+
+
+	switch(dd) {
+	case 0 :
+		fn = "/RTS/conf/fcs/fcs_ecal_readout_map.csv" ;
+		break ;
+	case 1 :
+		fn = "/RTS/conf/fcs/fcs_hcal_readout_map.csv" ;
+		break ;
+	case 2 :
+		fn = "/RTS/conf/fcs/fcs_pres_readout_map.csv" ;
+		break ;
+	}
+		
+
+	
+
+	FILE *f = fopen(fn,"r") ;
+
+	if(f) LOG(INFO,"load_readout_map: opened %s",fn) ;
+	else {
+		LOG(ERR,"load_readout_map: %s [%s]",fn,strerror(errno)) ;
+		return -1 ;
+	}
+
+	while(!feof(f)) {
+		u_int adet, id ;
+		u_int row, col ;
+		u_int det, ns, dep, ch ;
+		u_int crt, slt ;
+
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+		if(buff[0]=='#') continue ;
+		if(buff[0]=='\n') continue ;
+		if(buff[0]==0) continue ;
+
+		int ret = sscanf(buff,"%d %d %d %d %d %d %d %d %d %d",
+				 &adet,&id,&row,&col,
+				 &det,&ns,&crt,&slt,&dep,&ch) ;
+
+		if(ret!=10) continue ;
+
+
+		if(det != dd) {
+			LOG(ERR,"expect det %d, not %d",dd,det) ;
+			continue ;
+		}
+
+		if(ns>=2) {
+			LOG(ERR,"bad ns %d",ns) ;
+			continue ;
+		}
+
+		if(dep>=24) {
+			LOG(ERR,"bad dep %d",dep) ;
+			continue ;
+		}
+
+		if(ch>=32) {
+			LOG(ERR,"bad ch %d",ch) ;
+			continue ;
+		}
+
+		int sec = det_map[det][ns][dep].sector ;
+		int rdo = det_map[det][ns][dep].rdo ;
+
+		rdo_map[sec-1][rdo-1].ch[ch].id = id ;
+		rdo_map[sec-1][rdo-1].ch[ch].row = row ;
+		rdo_map[sec-1][rdo-1].ch[ch].col = col ;
+		rdo_map[sec-1][rdo-1].crt = crt ;
+		rdo_map[sec-1][rdo-1].slt = slt ;
+	}
+
+	fclose(f) ;
+
+	}
 
 	return 0 ;
 }
