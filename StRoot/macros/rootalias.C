@@ -85,10 +85,12 @@ void rcd(const Char_t *dir = "") {
     //    cout << gSystem->BaseName(f->GetName()) << " does not match with requested " << Dir << endl;
   }
 }
+#ifndef __CLING__
 //________________________________________________________________________________
 void chdir(const Char_t *dir = "") {
   TDirectory::CurrentDirectory()->cd(dir);
 }
+#endif
 //________________________________________________________________________________
 void rdir(const Char_t *dir="") {
   TString Current(gDirectory->GetName());
