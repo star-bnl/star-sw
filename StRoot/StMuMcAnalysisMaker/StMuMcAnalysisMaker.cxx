@@ -2034,7 +2034,7 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3[2], Int_t animate, Double_t min, Doub
 	MinMax(h1[pm],min,max,500);
       } else {
 	h2[pm]->FitSlicesY(0,0,-1,10,"qeg3s");
-	h1[pm] = (TH1 *) TDirectory::CurrentDirectory()->Get(Form("%s_1",h2[pm]->GetName()));
+	h1[pm] = (TH1 *) ((TDirectory *)(TDirectory::CurrentDirectory()))->Get(Form("%s_1",h2[pm]->GetName()));
 	if (h1[pm]) {
 	  h1[pm]->SetTitle(Form("Fitted %s",Title.Data()));
 	  h1[pm]->SetStats(0);
@@ -2043,7 +2043,7 @@ void StMuMcAnalysisMaker::DrawH3s(TH3F *h3[2], Int_t animate, Double_t min, Doub
 	  h1[pm]->GetXaxis()->SetTitle(h2[pm]->GetXaxis()->GetTitle());
 	  h1[pm]->GetYaxis()->SetTitle(h2[pm]->GetYaxis()->GetTitle());
 	  MinMax(h1[pm],min,max,10);
-	  s1[pm] = (TH1 *) TDirectory::CurrentDirectory()->Get(Form("%s_2",h2[pm]->GetName()));
+	  s1[pm] = (TH1 *) ((TDirectory *)(TDirectory::CurrentDirectory()))->Get(Form("%s_2",h2[pm]->GetName()));
 	  if (s1[pm]) {
 	    s1[pm]->SetTitle(Form("#sigma %s",Title.Data()));
 	    s1[pm]->SetMarkerStyle(21);
