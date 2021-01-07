@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.cxx,v $
+ * Revision 1.26  2021/01/05 18:15:01  akio
+ * added setPedestal()
+ *
  * Revision 1.25  2020/12/30 20:45:20  akio
  * fix format
  *
@@ -1666,6 +1669,10 @@ void  StFcsDbMaker::printEtGain(){
 
 float StFcsDbMaker::pedestal(Int_t ehp, Int_t ns, Int_t dep, Int_t ch){
   return mPed[ehp][ns][dep][ch];
+}
+
+float StFcsDbMaker::setPedestal(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, Float_t ped){
+  mPed[ehp][ns][dep][ch]=ped;
 }
 
 void StFcsDbMaker::readPedFromText(const char* file){

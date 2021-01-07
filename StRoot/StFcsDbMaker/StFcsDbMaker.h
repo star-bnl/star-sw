@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDbMaker.h,v 1.15 2020/12/30 20:17:55 akio Exp $
+ * $Id: StFcsDbMaker.h,v 1.16 2021/01/05 18:15:01 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.h,v $
+ * Revision 1.16  2021/01/05 18:15:01  akio
+ * added setPedestal()
+ *
  * Revision 1.15  2020/12/30 20:17:55  akio
  * adding SC map access
  *
@@ -177,6 +180,7 @@ class StFcsDbMaker : public StMaker {
 
   //! Pedestal
   float pedestal(Int_t ehp, Int_t ns, Int_t dep, Int_t ch);
+  float setPedestal(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, float ped);
   void readPedFromText(const char* file="fcsped.txt");
   
  private:

@@ -12,10 +12,12 @@ private:
 	class daq_dta *handle_raw() ;
 	class daq_dta *handle_adc() ;
 	class daq_dta *handle_zs() ;
+	class daq_dta *handle_ped() ;
 
 	class daq_dta *raw ;
 	class daq_dta *adc ;
 	class daq_dta *zs ;
+	class daq_dta *ped ;
 
 	static const char *help_string ;
 protected:
