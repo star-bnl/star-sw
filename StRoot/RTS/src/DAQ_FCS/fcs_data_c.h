@@ -3,14 +3,22 @@
 
 #include <pthread.h>
 
+
+#define FCS_SECTOR_COU	12
+
+
+
 #include <sys/types.h>
 typedef unsigned int u_int;
 typedef unsigned short u_short;
 typedef unsigned char u_char;
 
+
 // Helper class for various things (data extraction, pedestal calculation etc)
 class fcs_data_c {
 public:
+
+
 	fcs_data_c() {
 		sector = 0 ;
 		rdo = 0 ;
@@ -60,11 +68,15 @@ public:
 	int ana_ch() ;
 	int event_end(int how) ;
 
+	int event_stream() ;
 	int event_pre_fy19() ;
 	int accum_pre_fy19(u_int ch, u_int tb, u_short adc) ;
 
 
 	u_short set_rdo(int rdo1) ;
+
+
+
 
 	u_char log_level ;
 	u_int events ;		// for this instance
@@ -77,6 +89,15 @@ public:
 	u_short *dta_stop ;
 	u_short *dta_start ;
 	int dta_shorts ;
+
+
+	// streaming specific
+
+	// count of xings per run entered in the worker thread
+	// and later summed and presented/saved at the end of the run
+
+	// occupancy
+	u_int adc_xings[FCS_SECTOR_COU][8][32] ;	// sector,rdo,channel
 
 	// for ZS
 	int zs_start(u_short *results) ;
@@ -125,10 +146,14 @@ public:
 //	int trigger_tick ;
 
 
+
+
 	struct fcs_ped_t {
 		double mean[32] ;
 		double rms[32] ;
 		u_int cou[32] ;
+
+		u_int bad_4[32] ;
 
 		double mean_8[32] ;
 		double rms_8[32] ;
@@ -150,8 +175,18 @@ public:
 		u_char det ;	//0=ECAL,1=HCAL,2=PRE,3=Main
 		u_char ns ;	//0=North,1=South
 		u_char dep ;	// from 0 ;
+
 		u_char crate ;	// 0..4
 		u_char slot ;	// 0..19
+
+		u_char crt ;	// from Akio's file
+		u_char slt ;	// from Akio's file
+
+		struct {	// from Akio's file
+			u_short id ;
+			u_char row ;
+			u_char col ;
+		} ch[32] ;
 
 		unsigned long long ch_mask ;
 	} ;
@@ -178,14 +213,16 @@ public:
 	static u_short tb_pre ;
 	static u_short tb_all ;
 
-	static struct fcs_ped_t ped[16][8] ;		// sector,rdo
-	static struct rdo_map_t rdo_map[16][8] ;	// sector,rdo
+
+	static struct fcs_ped_t ped[FCS_SECTOR_COU][8] ;	// sector,rdo
+	static struct rdo_map_t rdo_map[FCS_SECTOR_COU][8] ;	// sector,rdo
 	static struct det_map_t det_map[4][2][24] ;	// reverse map: det,ns,dep
 	static u_char rdo_map_loaded ;			// boolean
 
 	static int ped_from_cache(const char *fname) ;
         static int gain_from_cache(const char *fname=0) ;
 	static int load_rdo_map(const char *fname=0) ;
+	static int load_readout_map(const char *fname=0) ;
 
 	// mutex for pedestals but also for statistics
 	static struct statistics_t {
@@ -195,6 +232,10 @@ public:
 		int ht_rate ;
 //		u_int odd_ped[32] ;
 	} statistics[8] ;
+
+
+
+
 
 #ifndef __CINT__
 	static pthread_mutex_t ped_mutex ;

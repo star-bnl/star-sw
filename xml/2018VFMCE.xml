@@ -21,7 +21,9 @@
   endif
   set name = ""
 #  foreach name (K_S0 Lambda0Z200cm Lambda0Z200cmFlat  Lambda0_bar Lambda0 XiM_bar XiM  Omega_bar Omega H3L)
-  foreach name (piPFixedFlat piMFixedFlat \
+  foreach name (\
+                ALPHAFixedFlat \
+                piPFixedFlat piMFixedFlat \
                 K_S0FixedFlat  Lambda0_barFixedFlat Lambda0FixedFlat XiM_barFixedFlat XiMFixedFlat  Omega_barFixedFlat OmegaFixedFlat \
                 DEUTERON:Lambda0Fixed  DEUTERON:Lambda0 \
                 K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed \
@@ -70,13 +72,15 @@
   if (! $?) set noiTPClu = ",noiTPClu";
 #  setenv StarEndMakerShell
 # set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
-  set chain = "MC.2018,vmc,VMCAlignment,UseMCTstart,NoiTPCLu,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name}${noiTPClu};
+   set chain = "MC.2018,vmc,VMCAlignment,UseMCTstart,NoiTPCLu,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name}${noiTPClu};
+#  set chain = "MC.2018,McTpcAna,vmc,VMCAlignment,UseMCTstart,NoiTPCLu,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name}${noiTPClu};
 #  set sdt = ",sdt20180426.135000"
   set sdt = ",sdt20180531.080000"
   set VFMCE = ",VFMCE";
   set Chain = ${chain}${VFMCE}${sdt}",Rung."${rung}
   set base = ${name}_${rung}_${f}_${N};
-  set file = ${base}.event.root
+#  set file = ${base}.event.root
+  set file = ${base}.root
   set tag  = ${base}.tags.root
   set logFile  = ${base}B.log
   echo "${file}"
@@ -87,7 +91,6 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<!-- <input URL="command:RunId.pl 1 1000 500 K_S0" /> -->
-<input URL="command:RunId.pl 2 100 500 K_S0" />
+<input URL="command:RunId.pl 1 500 5000 K_S0" />
 <!-- <input URL="command:RunId.pl 1 1 10 K_S0" /> -->
 </job>
