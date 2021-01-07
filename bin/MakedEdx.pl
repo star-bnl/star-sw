@@ -1981,7 +1981,8 @@ my $NEvents = 100000;
 #$hist = "RunXX33"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/08/20  reset Adc3MDF to zero, reset TpcSecRowB
 #$hist = "RunXX34"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/09/20  TpcSecRowB.20191121.000033.root
 #$hist = "RunXX35"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/09/20  TpcSecRowB.20191121.000033.root
-$hist = "RunXX36"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 11/21/20  check status 
+#$hist = "RunXX36"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 11/21/20  check status 
+$hist = "RunXX37"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 11/29/20  check space charge
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2166,17 +2167,17 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #      print OUT "source /afs/rhic.bnl.gov/star/users/fisyak/.tcshrc;\n";
 #      print OUT "source $GROUP_DIR/setup 64b;\n";
 #      print OUT "source $GROUP_DIR/setup gcc451;\n";
-      if ($STAR_LEVEL ne "\.DEV2") {
+#      if ($STAR_LEVEL ne "\.DEV2") {
 #	print OUT "source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh;\n";
-	print OUT "source $GROUP_DIR/setup gcc;\n";
-	print OUT "source $GROUP_DIR/setup 32b;\n";
-	print OUT "source $GROUP_DIR/setup nodebug;\n";
-	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
-      }  else {
+#	print OUT "source $GROUP_DIR/setup gcc;\n";
+#	print OUT "source $GROUP_DIR/setup 32b;\n";
+#	print OUT "source $GROUP_DIR/setup nodebug;\n";
+#	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+#      }  else {
 #	print OUT "setenv NODEBUG yes\n";
 #        print OUT "source $GROUP_DIR/setup 64b;\n";
 #        print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
-      }
+#      }
 #     print OUT "setenv Calibrations_tpc reconYuri\n";
 #      print OUT " unsetenv Calibrations_tpc\n";
 #      print OUT "cd $homedir; \n"; 

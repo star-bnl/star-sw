@@ -23,7 +23,7 @@
   end
 </command>
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
-<input URL="command:dEdxSample.pl" /> 
+<!-- <input URL="command:dEdxSample.pl" />  -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5/*event.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/reco/2014/TFG17vnoV5.Altro4/*event.root" /> -->
 <!-- <input URL="file:/net/l401/data/scratch2/fisyak/reco/2019/StiCA/054/*/*event.root" /> -->
@@ -31,4 +31,5 @@
 <!-- <input URL="file:/hlt/cephfs/daq/2019/06*/*/hlt*.daq" /> -->
 <!-- <input URL="file:/gpfs01/star/daq/2019/091/20091*/*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2019/TFG20j/RF/19GeV/*event.root" /> -->
+<input URL="file:/hlt/cephfs/reco/2019/.DEV2/RF/19GeV/*.event.root" />
 </job>

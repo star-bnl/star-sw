@@ -11,7 +11,7 @@
 #   source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh
 #   setup 32b
 #   starver SL20d
-#   starver TFG20j
+#    starver TFG20k
      set evtsFile = $INPUTFILE0;
 #     set f        = 1
 #     set l        = 5000000

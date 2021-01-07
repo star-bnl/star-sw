@@ -64,6 +64,7 @@ void TpcAligner(Int_t nevents=1e8,
   //  TString Chain("in,StarMagField,mysql,tpcDb,StEvent,Event,Stu,analysis,TpcAligner,OPr40,CorrX,useCDV,TpcHitMover,quiet,");// ,BAna,Tree,"); //StiCA,CMuDst,"); // No corrections
   TString Chain("in,StarMagField,mysql,tpcDb,detDb,StEvent,Event,Stu,analysis,TpcAligner,CorrY,OSpaceZ2,TpcHitMover,StiCA,");// ,BAna,Tree,"); //StiCA,CMuDst,"); // No corrections
   Chain += Tag;
+  //  Chain += "P2019a";
   //  Chain += ",AgML,NoHistos,noTags,noRunco,NoDefault";
   Chain += ",NoHistos,noTags,noRunco,NoDefault,-evout,-hitfilt";
   TString rFile(output);

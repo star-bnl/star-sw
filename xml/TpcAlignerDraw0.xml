@@ -14,6 +14,7 @@
   set file  = `basename ${fileF} .root`;
   set logFile  = ${file}B.log
   if ( -r $logFile) continue;
+  ln -s ~/macros/.sl* .
   root.exe -q -b 'TpcAlignerDraw.C+(0,"../*'${run}'*Aligner.root")' &gt;&amp;  ${logFile}
   end
 	</command>

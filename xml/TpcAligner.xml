@@ -23,7 +23,7 @@
 	</command>
 	<stdout URL="file:./sched$JOBID.log" />
 	<stderr URL="file:./sched$JOBID.err" />
-<!-- <input URL="command:TpcAlignerSample.pl" /> -->
+<!-- <input URL="command:TpcAlignerSample.pl" />  -->
 <!-- <input URL="command:dEdxSample.pl" />  -->
 <!-- <input URL="file:/gpfs01/star/daq/2019/189/20189035/*.daq" /> -->
 <!-- <input URL="command:CosmicsAnalysis.pl" /> -->
@@ -43,7 +43,9 @@
 <!-- <input URL="file:/hlt/cephfs/reco/2019/TFG20j/RF/14p5GeV/*.event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2019/.DEV2/FF/Cosmic/*.event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2019/.DEV2/RF/Cosmic/*.event.root" /> -->
-<!-- <input URL="file:/hlt/cephfs/reco/2019/.DEV2/RF/19GeV/*.event.root" />  -->
+<input URL="file:/hlt/cephfs/reco/2019/TFG20k/RF/19GeV/*.event.root" />
+<input URL="file:/hlt/cephfs/reco/2019/TFG20k/RF/14p5GeV/*.event.root" />
 <!-- <input URL="file:/hlt/cephfs/reco/2019/.DEV2/RF/14p5GeV/*.event.root" /> -->
-<input URL="file:/net/l404/data/fisyak/Tpc/Alignment/2019/Pass637/*/*event.root" />
+<!-- <input URL="file:/net/l404/data/fisyak/Tpc/Alignment/2019/Pass637/*/*event.root" /> -->
+
 </job>

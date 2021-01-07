@@ -3,12 +3,16 @@ use File::Basename;
 use Cwd;
 my $pwd = cwd(); #print "pwd = $pwd\n";
 my $FIELD = "";
+my $year  = "";
+if ($pwd =~ /2019/)    {$year = "2019";}
+elsif ($pwd =~ /2020/) {$year = "2020"};
 if ($pwd =~ /FF/)    {$FIELD = "FF";}
 elsif ($pwd =~ /RF/) {$FIELD = "RF"};
 #print "FIELD = $FIELD\n";
 if (! $FIELD) {die "Field is not defined";}
 #my $glob = "/hlt/cephfs/reco/2019/" . $FIELD . "/*.event.root"; #print "glob = $glob\n";
-my $glob = "/net/l401/data/scratch1/reco/2019/" . $FIELD . "/*.event.root"; #print "glob = $glob\n";
+#my $glob = "/net/l401/data/scratch1/reco/2019/" . $FIELD . "/*.event.root"; #print "glob = $glob\n";
+my $glob = "/hlt/cephfs/reco/" . $year . "/.DEV2/" . $FIELD . "/Cosmic/*.event.root"; #print "glob = $glob\n";
 my @Files = glob $glob; #print "Files = @Files\n";
 my $n = 0;
 foreach my $file (@Files) {
