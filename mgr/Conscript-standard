@@ -792,6 +792,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     } elsif ( $pkg =~ m/^StJetFinder$/ ){
 	$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
 
+    } elsif ( $pkg =~ m/^StFwdTrackMaker$/ ){ 
+		$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
     } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
 	$LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
 	$SO_PKG = "";
