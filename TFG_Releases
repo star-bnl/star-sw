@@ -60,5 +60,5 @@
  TFG20i KFParticle (07/2020) and geant3 version 3, Add more fixes    2020-10-14 11:00:10 -0400  (HEAD -> master, tag: TFG20i_5)
 -DEV6  head of TFG git repository build with ROOT6 merged with TFG20j
  TFG20j add ROOT6 usage via ROOT_VERSION for standard libraries      2020-11-16 15:24:43 -0500  (HEAD -> master, tag: TFG20j_7)
- TFG20k freeze before modifying StMagUtility                         2021-01-07 17:03:10 -0500  (HEAD -> master, tag: TFG20k_2)
+ TFG20k freeze before modifying StMagUtility                         2021-01-07 11:11:11 -0500  (HEAD -> master, tag: TFG20k_2)
 .DEV2  head of TFG git repository
