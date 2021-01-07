@@ -1,10 +1,7 @@
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_Survey")) return 0;
-  Survey_st row = {
-    //             -gamma      beta     gamma              -alpha     -beta     alpha                 x0       y0       z0
-    1, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000,  0.0000,  0.0000,  0.0000,0,0,0,0,0,0,"Ideal"
-  };
-  St_Survey *tableSet = new St_Survey("TpcOuterSectorPositionB",24);
-  for (Int_t i = 0; i < 24; i++) {row.Id = i+1; tableSet->AddAt(&row.Id, i);}
+  Survey_st row = {0, 1,0,0, 0,1,0, 0,0,1, 0,0,0, 1e-5,1e-5,1e-4,4e-3,4e-3,4e-3,"Ideal"};
+  St_Survey *tableSet = new St_Survey("TpcOuterSectorPositionB",48);
+  for (Int_t i = 0; i < 48; i++) {row.Id = i%24+1; tableSet->AddAt(&row.Id, i);}
   return (TDataSet *)tableSet;
 }
