@@ -541,6 +541,9 @@ StMagUtilities::StMagUtilities (StTpcDb* /* dbin */, Int_t mode )
     SafeDelete(fgInstance);
   }
   fgInstance = this;
+#ifdef __TFG__VERSION__
+  memset(mBeg,0,mEnd-mBeg+1);
+#endif /* ! __TFG__VERSION__ */
   GetDistoSmearing(mode);    // Get distortion smearing from the DB
   GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
   GetTPCParams()        ;    // Get the TPC parameters from the DB
@@ -565,6 +568,9 @@ StMagUtilities::StMagUtilities ( const StarMagField::EBField map, const Float_t 
     SafeDelete(fgInstance);
     }
   fgInstance = this;
+#ifdef __TFG__VERSION__
+  memset(mBeg,0,mEnd-mBeg+1);
+#endif /* ! __TFG__VERSION__ */
   GetDistoSmearing(0)   ;        // Do not get distortion smearing out of the DB
   GetMagFactor()        ;        // Get the magnetic field scale factor from the StarMagField
   fTpcVolts      =  0   ;        // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
@@ -1121,8 +1127,11 @@ void StMagUtilities::CommonStart ( Int_t mode )
  
   Float_t  B[3], X[3] = { 0, 0, 0 } ;
   Float_t  OmegaTau ;                       // For an electron, OmegaTau carries the sign opposite of B 
+#ifdef __TFG__VERSION__
+  BFieldTpc(X,B) ;                          // Work in kGauss, cm and assume Bz dominates
+#else /*!  _TFG__VERSION__ */
   BField(X,B) ;                             // Work in kGauss, cm and assume Bz dominates
-
+#endif /* ! __TFG__VERSION__ */
   // Theoretically, OmegaTau is defined as shown in the next line.  
   // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
   // Instead, we will use scaled values from Amendolia et al NIM A235 (1986) 296 and include their
@@ -1462,6 +1471,7 @@ void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] , Int_
   for ( Int_t i = 1; i <= NSTEPS; ++i )                // Simpson's Integration Loop
     {
       if ( i == NSTEPS ) index = 1 ;
+#ifndef __TFG__VERSION__
       Xprime[2] +=  index*(ah/3) ;
       B3DFieldTpc( Xprime, B , Sector) ;               // Work in kGauss, cm (uses Cartesian coordinates)
       if ( TMath::Abs(B[2]) > 0.001 )                  // Protect From Divide by Zero Faults
@@ -1469,6 +1479,21 @@ void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] , Int_
 	  Xprime[0] +=  index*(ah/3)*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;
 	  Xprime[1] +=  index*(ah/3)*( Const_2*B[1] + Const_1*B[0] ) / B[2] ;
 	}
+#else /*  _TFG__VERSION__ */
+      Float_t step = index*(ah/3) ;
+      Xprime[2] += step;
+      B3DFieldTpc( Xprime, B , Sector) ;               // Work in kGauss, cm (uses Cartesian coordinates)
+      if ( TMath::Abs(B[2]) > 0.001 )                  // Protect From Divide by Zero Faults
+	{
+	  Float_t dX =  step*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;
+	  Float_t dY =  step*( Const_2*B[1] + Const_1*B[0] ) / B[2] ;
+	  Float_t dZ =  step*(1./TMath::Sqrt(1.0 + TMath::Power(dX/step,2) + TMath::Power(dY/step,2)) - 1.);
+	  Xprime[0] +=  dX;
+	  Xprime[1] +=  dY;
+	  Xprime[2] +=  dZ;
+	}
+#endif /* ! __TFG__VERSION__ */
+
       if ( index != 4 ) index = 4; else index = 2 ;
     }    
 
@@ -1482,9 +1507,14 @@ void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] , Int_
 */
 void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
+ // NOTE: x[],Xprime[] must be Cartesian for this function!
 
-  // NOTE: x[],Xprime[] must be Cartesian for this function!
-
+#ifdef __TFG__VERSION__
+  if (! StTpcDb::IsOldScheme()) { // new schema
+    cout << "StMagUtilities::Undo2DBDistortion  This routine was made obosolete on 12/27/2020.  Do not use it." << endl ;
+    assert(0) ;
+  }
+#endif /* __TFG__VERSION__ */
   Double_t ah ;                             // ah carries the sign opposite of E (for forward integration)
   Float_t  B[3] ; 
   Int_t    sign, index = 1 , NSTEPS ;              
@@ -1517,6 +1547,53 @@ void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] , In
 
 
 }
+#ifdef __TFG__VERSION__
+//________________________________________________________________________________
+TArrayF StMagUtilities::Centers2Edges(Int_t nbins,  Float_t xmin, Float_t xmax) {
+  TArrayF x(nbins+1);
+  Float_t dx = (xmax - xmin)/nbins;
+  x[0] = xmin;
+  for (Int_t i = 0; i < nbins; i++) x[i+1] = x[i] + dx;
+  return x;
+}
+//________________________________________________________________________________
+TArrayF StMagUtilities::Centers2Edges(Int_t nbins, const Float_t y[]) {
+  TArrayF x(2*nbins+1);
+#if 0
+  for (Int_t i = 0; i < nbins; i++) {cout << "\t" << y[i]; if ((i+1)%10 == 0) cout << endl;}
+  cout << endl;
+#endif
+  Int_t j = 0;
+  Float_t dy1, dy2;
+  for (Int_t i = 0; i < nbins; i++) {
+    if      (i == 0)         {dy1 = dy2 = 0.5* (y[i+1] - y[i]);}
+    else if (i == nbins - 1) {dy1 = dy2 = 0.5*(y[i] - y[i-1]);}
+    else {
+      dy1 = 0.5*(y[i] - y[i-1]);
+      dy2 = 0.5*(y[i+1] - y[i]);
+    }
+    Float_t dy = TMath::Min(dy1, dy2);
+    if (i == 0) { x[0] = y[i] - dy; x[1] = y[i] + dy; j++;}
+    else {
+      if (x[j] < y[i] - dy) {
+	j++;;
+	x[j] = y[i] - dy;
+      } 
+      j++;
+      x[j] = y[i] + dy;
+    }
+  }
+  Int_t N = j + 1;
+  x.Set(N);
+#if 0
+  for (Int_t j = 1, i = 0; j < x.GetSize(); j++)  {
+    cout << "\tx[" << j-1 << "] = " << x[j-1] << "\tx[" << j << "]= "<< x[j] << " => " << 0.5*(x[j-1] +x[j]) << "\ty = " << y[i] << endl;
+    if (x[j-1] < y[i] && y[i] < x[j]) i++;
+  }
+#endif
+  return x;
+}
+#endif /* ! __TFG__VERSION__ */
 
 /// 3D - B field distortions (Table) - calculate the distortions due to the shape of the B field
 /*! 
@@ -1526,7 +1603,7 @@ void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] , In
 */
 void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
-
+#ifndef __TFG__VERSION__
   static  Float_t dx3D[EMap_nPhi][EMap_nR][EMap_nZ], dy3D[EMap_nPhi][EMap_nR][EMap_nZ] ;
   static  Int_t   ilow = 0, jlow = 0, klow = 0 ;
   const   Int_t   PHIORDER = 1 ;                    // Linear interpolation = 1, Quadratic = 2 ... PHI Table is crude so use linear interp
@@ -1583,7 +1660,7 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] , 
       saved_x[k-klow]  = Interpolate( &eRList[ilow], save_x, ORDER, r )   ; 
       saved_y[k-klow]  = Interpolate( &eRList[ilow], save_y, ORDER, r )   ; 
     }
-  
+
   if (usingCartesian) {
     Xprime[0] = Interpolate( &ePhiList[klow], saved_x, PHIORDER, phi ) + x[0] ;
     Xprime[1] = Interpolate( &ePhiList[klow], saved_y, PHIORDER, phi ) + x[1];
@@ -1595,6 +1672,50 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] , 
   }
   Xprime[2] = x[2] ;
 
+#else /* __TFG__VERSION__ */
+  Float_t xx[3];
+  if (! fFastUndoBDistortiondX) {
+    Int_t nPhi = 37, nR = 90, nZ = 212;
+    fFastUndoBDistortiondX = new TH3F("FastUndoBDistortiondX","FastUndoBDistortion dX", nPhi, -TMath::Pi()/(nPhi-1), 2*TMath::Pi()+TMath::Pi()/(nPhi-1), nR, 41.5,201.5, nZ, -nZ, nZ);
+    fFastUndoBDistortiondY = new TH3F("FastUndoBDistortiondY","FastUndoBDistortiond Y", nPhi, -TMath::Pi()/(nPhi-1), 2*TMath::Pi()+TMath::Pi()/(nPhi-1), nR, 41.5,201.5, nZ, -nZ, nZ);
+    fFastUndoBDistortiondZ = new TH3F("FastUndoBDistortiondZ","FastUndoBDistortion dZ", nPhi, -TMath::Pi()/(nPhi-1), 2*TMath::Pi()+TMath::Pi()/(nPhi-1), nR, 41.5,201.5, nZ, -nZ, nZ);
+    for (Int_t i = 1; i <= nPhi; i++) {
+      Float_t phi  =  fFastUndoBDistortiondX->GetXaxis()->GetBinCenter(i);
+      for (Int_t j = 1; j <= nR; j++) {
+	Float_t r  =  fFastUndoBDistortiondX->GetYaxis()->GetBinCenter(j);
+	xx[0] = r * TMath::Cos(phi) ;
+	xx[1] = r * TMath::Sin(phi) ;
+	for (Int_t k = 1; k <= nZ; k++) {
+	  xx[2]  =  fFastUndoBDistortiondX->GetZaxis()->GetBinCenter(k);
+	  UndoBDistortion(xx,Xprime) ;  // uses Cartesian coordinates
+	  fFastUndoBDistortiondX->SetBinContent(i,j,k,Xprime[0] - xx[0]);
+	  fFastUndoBDistortiondY->SetBinContent(i,j,k,Xprime[1] - xx[1]);
+	  fFastUndoBDistortiondZ->SetBinContent(i,j,k,Xprime[2] - xx[2]);
+	}
+      }
+    }
+  }
+  Float_t r, phi ; 
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
+  //  Double_t Zdrift =  TPC_Z0 - TMath::Abs(z) ;
+  Double_t dX = fFastUndoBDistortiondX->Interpolate(phi, r, z);
+  Double_t dY = fFastUndoBDistortiondY->Interpolate(phi, r, z);
+  Double_t dZ = fFastUndoBDistortiondZ->Interpolate(phi, r, z);
+  //  Double_t dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dX*dX + dY*dY) - Zdrift)*TMath::Sign(1.f, x[2]);
+  if (usingCartesian) {
+    Xprime[0] = dX + x[0];
+    Xprime[1] =	dY + x[1];
+  } else {
+    Polar2Cart(x[0],x[1],xx);
+    xx[0] += dX;
+    xx[1] += dY;
+    Cart2Polar(xx,Xprime[0],Xprime[1]);
+  }
+  Xprime[2] = dZ + x[2];
+#endif /* ! __TFG__VERSION__ */
 }
 
 
@@ -1611,6 +1732,7 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] , 
 void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
+#ifndef __TFG__VERSION__
   static  Float_t dR[EMap_nR][EMap_nZ], dRPhi[EMap_nR][EMap_nZ] ;
   static  Int_t   ilow = 0, jlow = 0 ;
   const   Int_t   ORDER  = 1 ;                      // Linear interpolation = 1, Quadratic = 2         
@@ -1670,7 +1792,50 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
   if (usingCartesian) Polar2Cart(r,phi,Xprime);
   else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
-  
+
+#else  /* __TFG__VERSION__ */
+  if (! StTpcDb::IsOldScheme()) { // new schema
+    cout << "StMagUtilities::FastUndo2DBDistortion  This routine was made obosolete on 12/27/2020.  Do not use it." << endl ;
+    assert(0) ;
+  }
+  Float_t xx[3];
+  if (! fFastUndo2DBDistortiondX) {
+    Int_t nR = 90, nZ = 212;
+    fFastUndo2DBDistortiondX = new TH2F("FastUndo2DBDistortiondX","FastUndo2DBDistortion dX", nR, 41.5,201.5, nZ, -nZ, nZ);
+    fFastUndo2DBDistortiondY = new TH2F("FastUndo2DBDistortiondY","FastUndo2DBDistortion d[Y", nR, 41.5,201.5, nZ, -nZ, nZ);
+    for (Int_t i = 1; i <= nR; i++) {
+      Float_t r  =  fFastUndo2DBDistortiondX->GetXaxis()->GetBinCenter(i);
+      xx[0] = r;
+      xx[1] = 0;
+      for (Int_t j = 1; j <= nZ; j++) {
+	Float_t z  =  fFastUndo2DBDistortiondX->GetYaxis()->GetBinCenter(j);
+	xx[2] = z;
+	Undo2DBDistortion(xx,Xprime) ; // uses Cartesian coords
+	fFastUndo2DBDistortiondX->SetBinContent(i,j,Xprime[0] - xx[0]);
+	fFastUndo2DBDistortiondY->SetBinContent(i,j,Xprime[1] - xx[1]);
+      }
+    }
+  }
+  Float_t r, phi ; 
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
+  Double_t Zdrift =  TPC_Z0 - TMath::Abs(z) ;
+  Double_t dX = fFastUndo2DBDistortiondX->Interpolate(r, z);
+  Double_t dY = fFastUndo2DBDistortiondY->Interpolate(r, z);
+  Double_t dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dX*dX + dY*dY) - Zdrift)*TMath::Sign(1.f, x[2]);
+  if (usingCartesian) {
+    Xprime[0] = dX + x[0];
+    Xprime[1] =	dY + x[1];
+  } else {
+    Polar2Cart(x[0],x[1],xx);
+    xx[0] += dX;
+    xx[1] += dY;
+    Cart2Polar(xx,Xprime[0],Xprime[1]);
+  }
+  Xprime[2] = dZ + x[2];
+#endif /* ! __TFG__VERSION__ */
 }
 
 
@@ -1686,6 +1851,12 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
 void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
+#ifdef __TFG__VERSION__
+  if (! StTpcDb::IsOldScheme()) { // new schema
+    cout << "StMagUtilities::UndoTwistDistortion  This routine was made obosolete on 12/27/2020.  Do not use it." << endl ;
+    assert(0) ;
+  }
+#endif /*  __TFG__VERSION__ */
   Double_t        Zdrift ;
   Int_t           sign ;
 
@@ -1724,7 +1895,9 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] , 
 void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
+#ifndef __TFG__VERSION__1
   const Int_t   ORDER    =  2           ;         // ORDER = 1 is linear, ORDER = 2 is quadratice interpolation (Leave at 2 for legacy reasons)
+#endif /*  !__TFG__VERSION__ */
   const Int_t   NZDRIFT  =  19          ;         // Dimension of the vector to contain ZDriftArray
   const Int_t   NYARRAY  =  37          ;         // Dimension of the vector to contain the YArray
   const Int_t   TERMS    =  400         ;         // Number of terms in the sum
@@ -1754,12 +1927,16 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
 				     198., 200. } ;  
 
   static Double_t C[TERMS] ;                     // Coefficients for series
+#ifndef __TFG__VERSION__1
   static Float_t  SumArray[NZDRIFT][NYARRAY] ;
   static Int_t    ilow = 0, jlow = 0 ;
-  
   Float_t  y, z, Zdrift, save_sum[3] ;
+#else /*  __TFG__VERSION__1 */
+  Float_t  y, z, Zdrift;
+#endif /*  !__TFG__VERSION__1 */
   Double_t r, phi, phi0, sum = 0.0 ;
 
+#ifndef __TFG__VERSION__1
   if ( DoOnce ) 
     {                          // Put these coefficients in a table to save time
       cout << "StMagUtilities::PadRow13   Please wait for the tables to fill ...  ~5 seconds" << endl ;
@@ -1782,6 +1959,29 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
 	    }
 	}
     }
+#else  /* __TFG__VERSION__1 */
+  if (! fUndoPad13DistortiondY) {
+    cout << "StMagUtilities::PadRow13   Please wait for the tables to fill ...  ~5 seconds" << endl ;
+    C[0] = WIREGAP * GG * SCALE / ( 2 * BOX ) ;   
+    for ( Int_t i = 1 ; i < TERMS ; i++ )
+      C[i] = 2 * GG * SCALE * TMath::Sin( WIREGAP*i*PI/( 2*BOX ) ) / ( i * PI ) ;
+    TArrayF X = Centers2Edges(NZDRIFT, ZDriftArray);
+    TArrayF Y = Centers2Edges(NYARRAY, YArray);
+    fUndoPad13DistortiondY = new TH2F("UndoPad13DistortiondY","UndoPad13DistortiondY", X.GetSize(), X.GetArray(), Y.GetSize(), Y.GetArray());
+    for (Int_t i = 1; i <= fUndoPad13DistortiondY->GetXaxis()->GetNbins() ; i++) {
+      Zdrift = fUndoPad13DistortiondY->GetXaxis()->GetBinCenter(i);
+      for (Int_t j = 1; j <= fUndoPad13DistortiondY->GetYaxis()->GetNbins() ; j++) {
+	y = fUndoPad13DistortiondY->GetYaxis()->GetBinCenter(j);
+	sum = 0.0 ;
+	for ( Int_t k = 1 ; k < TERMS ; k++ ) {
+	  sum += ( C[k] / StarMagE ) * ( 1. - TMath::Exp(-1*k*PI*Zdrift/BOX) )
+	    * TMath::Sin(k*PI*(y-GAPRADIUS)/BOX) ;
+	}
+	fUndoPad13DistortiondY->SetBinContent(i,j,sum);
+      }
+    }
+  }
+#endif /* ! __TFG__VERSION__1 */
   
   if (usingCartesian) Cart2Polar(x,r,phi);
   else { r = x[0]; phi = x[1]; }               // Phi ranges from pi to -pi
@@ -1790,6 +1990,7 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
   y      =  r * TMath::Cos( phi0 - phi ) ;
   z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
   Zdrift =  TPC_Z0 - TMath::Abs(z) ;
+#ifndef __TFG__VERSION__1
 
   Search ( NZDRIFT, ZDriftArray,  Zdrift, ilow ) ;
   Search ( NYARRAY, YArray, y, jlow ) ;
@@ -1806,7 +2007,8 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
 
   sum  = Interpolate( &ZDriftArray[ilow], save_sum, ORDER, Zdrift )   ; 
 
-  if ( r > 0.0 )
+ #ifndef __TFG__VERSION__
+ if ( r > 0.0 )
     {
       phi =  phi - ( Const_1*(-1*sum)*TMath::Cos(phi0-phi) + Const_0*sum*TMath::Sin(phi0-phi) ) / r ;      
       r   =  r   - ( Const_0*sum*TMath::Cos(phi0-phi) - Const_1*(-1*sum)*TMath::Sin(phi0-phi) ) ;  
@@ -1816,6 +2018,38 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
   else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
   
+#else  /* __TFG__VERSION__ */
+  Float_t dZ = 0;
+  if (z < 0) sum *= -1;
+  if ( r > 0.0 )
+    {
+      Double_t dphi = - ( Const_1*(-1*sum)*TMath::Cos(phi0-phi) + Const_0*sum*TMath::Sin(phi0-phi) ) / r ;      
+      Double_t dr  = - ( Const_0*sum*TMath::Cos(phi0-phi) - Const_1*(-1*sum)*TMath::Sin(phi0-phi) ) ;  
+      phi += dphi;
+      r   += dr;
+      dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dr*dr*(1 + dphi*dphi)) - Zdrift)*TMath::Sign(1.f, x[2]);
+    }                                               // Subtract to Undo the distortions
+
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
+  Xprime[2] = x[2]  + dZ;
+#endif /* ! __TFG__VERSION__ */
+#else  /* __TFG__VERSION__1 */
+  sum  = TMath::Sign(fUndoPad13DistortiondY->Interpolate(Zdrift,y), (Double_t) x[2])   ; 
+  Float_t dZ = 0;
+  if ( r > 0.0 )
+    {
+      Double_t dphi = - ( Const_1*(-1*sum)*TMath::Cos(phi0-phi) + Const_0*sum*TMath::Sin(phi0-phi) ) / r ;      
+      Double_t dr  = - ( Const_0*sum*TMath::Cos(phi0-phi) - Const_1*(-1*sum)*TMath::Sin(phi0-phi) ) ;  
+      phi += dphi;
+      r   += dr;
+      dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dr*dr*(1 + dphi*dphi)) - Zdrift)*TMath::Sign(1.f, x[2]);
+    }                                               // Subtract to Undo the distortions
+
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
+  Xprime[2] = x[2]  + dZ;
+#endif /* ! __TFG__VERSION__1 */
 }
 
 
@@ -1875,7 +2109,9 @@ void StMagUtilities::UndoPad40Distortion( const Float_t x[], Float_t Xprime[], I
   const Int_t   nTERMS         =    800              ;   // Number of terms in the Fourier sum (unique to a set of calculated maps)
   const Int_t   nZDRIFT        =     20              ;   // Dimension of the vector that contains ZDriftArray
   const Int_t   nYARRAY        =     61              ;   // Dimension of the vector that contains YArray
+#ifndef __TFG__VERSION__1
   const Int_t   ORDER          =      2              ;   // ORDER = 1 linear, ORDER = 2 quadratic interpolation (Leave at 2 for legacy reasons)
+#endif /* ! __TFG__VERSION__1 */
   const Float_t BOX = (COLUMNS-1)/(GPPMM*10.0)       ;   // Width of the relaxation grid (in mm) that created DataInTheGap
   const Float_t PI             =  TMath::Pi()        ;
 
@@ -1884,9 +2120,13 @@ void StMagUtilities::UndoPad40Distortion( const Float_t x[], Float_t Xprime[], I
   // Radial points in YARRAY lie over the pads for the first few pad rows on either side of the gap for both
   // the old and new TPC padplanes.
 
+#ifndef __TFG__VERSION__1
   static Int_t   ilow = 0, jlow = 0                  ;   // Remember location in interpolation table
+#endif /* ! __TFG__VERSION__1 */
   static Float_t Bn[nTERMS+1]                        ;   // Coefficients for series
+#ifndef __TFG__VERSION__1
   static Float_t SumArray[nMAPS][nZDRIFT][nYARRAY]   ;   // Array containing distortion integrals for interpolation
+#endif /* ! __TFG__VERSION__1 */
   static Float_t ZDriftArray[nZDRIFT] = {0,1,2,3,4,5,7.5,10,12.5,15,17.5,20,22.5,25,30,50,75,100,210,220} ;
 
   static Float_t YArray[nYARRAY] =  { 50.0,   75.0,  100.0,   102.0, 
@@ -1908,7 +2148,11 @@ void StMagUtilities::UndoPad40Distortion( const Float_t x[], Float_t Xprime[], I
 
   Float_t r, phi, phi0, totalSum      ; 
   Float_t cosPhi0Phi, sinPhi0Phi      ;
+#ifndef __TFG__VERSION__1
   Float_t y, z, save_sum[nMAPS][3]    ;
+#else /* TFG__VERSION__1 */
+  Float_t y, z;
+#endif /* ! __TFG__VERSION__1 */
   Float_t Zdrift, sum                 ;
   Float_t MapSum[nMAPS]               ;
   Float_t DataInTheGap[SAVEDCOLUMNS]  ;
@@ -1919,7 +2163,7 @@ void StMagUtilities::UndoPad40Distortion( const Float_t x[], Float_t Xprime[], I
     {                                                                
       cout << "StMagUtilities::PadRow40   Filling tables ..." << endl ;
       Int_t OFFSET = (COLUMNS-SAVEDCOLUMNS)/2 ;                                            // Explicitly plan for zero'd out data
-
+#ifndef __TFG__VERSION__1
       for ( Int_t MapID = 0 ; MapID < nMAPS ; MapID++ )                                    // Read maps and store locally
 	{
 
@@ -1954,6 +2198,46 @@ void StMagUtilities::UndoPad40Distortion( const Float_t x[], Float_t Xprime[], I
 	    }  
 
 	}
+#else  /* __TFG__VERSION__1 */
+      if (! fUndoPad40DistortiondY) {
+	fUndoPad40DistortiondY = new TH2F*[nMAPS];
+	TArrayF X = Centers2Edges(nZDRIFT, ZDriftArray);
+	TArrayF Y = Centers2Edges(nYARRAY, YArray);
+	for ( Int_t MapID = 0 ; MapID < nMAPS ; MapID++ )                                    // Read maps and store locally
+	  {
+	    fUndoPad40DistortiondY[MapID] = new TH2F(Form("UndoPad40DistortiondY-%i",MapID),Form("UndoPad40DistortiondY-%i",MapID), X.GetSize(), X.GetArray(), Y.GetSize(), Y.GetArray());
+	    GetGLWallData ( MapID, DataInTheGap ) ;
+	    for ( Int_t n = 1 ; n <= nTERMS ; n++ )                                          // Calculate Bn[] coefficients 
+	      {                                                                              // Integrate by Simpsons Rule 
+		Float_t COEFFICIENT = n*PI/(COLUMNS-1)                                   ;   // Reduce multiple calculations
+		sum = DataInTheGap[0] * TMath::Sin(COEFFICIENT*OFFSET)                   ;   // Addition of first point with wt=1
+		for ( Int_t i = 1 ; i < SAVEDCOLUMNS ; i+=2 ) sum += 4 * DataInTheGap[i] * TMath::Sin(COEFFICIENT*(i+OFFSET)) ;
+		for ( Int_t i = 2 ; i < SAVEDCOLUMNS ; i+=2 ) sum += 2 * DataInTheGap[i] * TMath::Sin(COEFFICIENT*(i+OFFSET)) ;
+		sum -= DataInTheGap[SAVEDCOLUMNS-1]*TMath::Sin(COEFFICIENT*(SAVEDCOLUMNS-1+OFFSET)) ; // Subtraction of last point 
+		sum *= 2.0/(3.0*(COLUMNS-1))                                             ;  
+		Bn[n] = sum ;
+	      }
+	    
+	    for ( Int_t i = 1 ; i <= fUndoPad40DistortiondY[MapID]->GetXaxis()->GetNbins() ; i++ )
+	    {
+	      z = fUndoPad40DistortiondY[MapID]->GetXaxis()->GetBinCenter(i);
+	      if ( z > (ROWS-1)/(10.0*GPPMM) ) z = (ROWS-1)/(10.0*GPPMM) ;
+	      for ( Int_t j = 1; j < fUndoPad40DistortiondY[MapID]->GetYaxis()->GetNbins() ; j++ )
+		{
+		  sum = 0.0 ;
+		  y = fUndoPad40DistortiondY[MapID]->GetYaxis()->GetBinCenter(j);
+		  if ( y <= GAPRADIUS-BOX/2 || y >= GAPRADIUS+BOX/2 ) continue ;
+		  for ( Int_t n = 1 ; n <= nTERMS ; n++ )
+		    {
+		      sum += ( Bn[n]/StarMagE ) * ( 1. - TMath::Exp((-1*n*PI*z)/BOX) ) * TMath::Cos((n*PI*(y-GAPRADIUS+BOX/2))/BOX) ; 
+		    }
+		  fUndoPad40DistortiondY[MapID]->SetBinContent(i,j,sum);
+		}
+	    }  
+
+	}
+      }
+#endif /* ! __TFG__VERSION__1 */
       DoOnceLocal = false ;
     }
 
@@ -1967,6 +2251,7 @@ void StMagUtilities::UndoPad40Distortion( const Float_t x[], Float_t Xprime[], I
   z = LimitZ( Sector, x )                 ;             // Protect against discontinuity at CM
   Zdrift =  TPC_Z0 - TMath::Abs(z)        ;
 
+#ifndef __TFG__VERSION__1
   Search ( nZDRIFT, ZDriftArray,  Zdrift, ilow ) ;
   Search ( nYARRAY, YArray, y, jlow )            ;
 
@@ -1987,7 +2272,7 @@ void StMagUtilities::UndoPad40Distortion( const Float_t x[], Float_t Xprime[], I
   if ( Inner_GLW_Voltage[Sector-1] >= 100.0 ) totalSum = MapSum[0] ;
   else totalSum = MapSum[3] - ((Outer_GLW_Voltage[Sector-1]+113.0)/100.0)*MapSum[1] + ((Inner_GLW_Voltage[Sector-1]+113.0)/100.0)*MapSum[2] ;
   totalSum = -totalSum; // arrays feeding MapSum were calculated for wrong sign voltage
-  
+#ifndef __TFG__VERSION__
   if ( r > 0.0 )
     {
       phi =  phi - ( Const_1*(-1*totalSum)*cosPhi0Phi + Const_0*totalSum*sinPhi0Phi ) / r  ;      
@@ -1997,6 +2282,45 @@ void StMagUtilities::UndoPad40Distortion( const Float_t x[], Float_t Xprime[], I
   if (usingCartesian) Polar2Cart(r,phi,Xprime) ;
   else { Xprime[0] = r ; Xprime[1] = phi ; }
   Xprime[2] = x[2] ;
+#else  /* __TFG__VERSION__ */
+  if (z < 0) totalSum *= -1.;
+  Float_t dZ = 0;
+  if ( r > 0.0 )
+    {
+      Double_t dphi = - ( Const_1*(-1*totalSum)*cosPhi0Phi + Const_0*totalSum*sinPhi0Phi ) / r  ;      
+      Double_t dr  =  - ( Const_0*totalSum*cosPhi0Phi - Const_1*(-1*totalSum)*sinPhi0Phi )      ;  
+      phi += dphi;
+      r   += dr;
+      dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dr*dr*(1 + dphi*dphi)) - Zdrift)*TMath::Sign(1.f, x[2]);
+    }                                                                        // Subtract to Undo the distortions
+  
+  if (usingCartesian) Polar2Cart(r,phi,Xprime) ;
+  else { Xprime[0] = r ; Xprime[1] = phi ; }
+  Xprime[2] = x[2] + dZ;
+#endif /* ! __TFG__VERSION__ */
+#else  /* __TFG__VERSION__1 */
+  for ( Int_t MapID = 0 ; MapID < nMAPS ; MapID++ ) {                                   
+    MapSum[MapID]  = fUndoPad40DistortiondY[MapID]->Interpolate(Zdrift, y ) ; 
+  }
+  
+  if ( Inner_GLW_Voltage[Sector-1] >= 100.0 ) totalSum = MapSum[0] ;
+  else totalSum = MapSum[3] - ((Outer_GLW_Voltage[Sector-1]+113.0)/100.0)*MapSum[1] + ((Inner_GLW_Voltage[Sector-1]+113.0)/100.0)*MapSum[2] ;
+  totalSum = -totalSum*TMath::Sign(1.f, x[2]); // arrays feeding MapSum were calculated for wrong sign voltage
+  
+  Float_t dZ = 0;
+  if ( r > 0.0 )
+    {
+      Double_t dphi = - ( Const_1*(-1*totalSum)*cosPhi0Phi + Const_0*totalSum*sinPhi0Phi ) / r  ;      
+      Double_t dr  =  - ( Const_0*totalSum*cosPhi0Phi - Const_1*(-1*totalSum)*sinPhi0Phi )      ;  
+      phi += dphi;
+      r   += dr;
+      dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dr*dr*(1 + dphi*dphi)) - Zdrift)*TMath::Sign(1.f, x[2]);
+    }                                                                        // Subtract to Undo the distortions
+  
+  if (usingCartesian) Polar2Cart(r,phi,Xprime) ;
+  else { Xprime[0] = r ; Xprime[1] = phi ; }
+  Xprime[2] = x[2] + dZ;
+#endif /* ! __TFG__VERSION__1 */
   
 }
 
@@ -2465,6 +2789,12 @@ void StMagUtilities::GetGLWallData ( const Int_t select, Float_t DataInTheGap[] 
  */
 void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
+#ifdef __TFG__VERSION__
+  if (! StTpcDb::IsOldScheme()) { // new schema
+    cout << "StMagUtilities::UndoClockDistortion  This routine was made obosolete on 12/27/2020.  Do not use it." << endl ;
+    assert(0) ;
+  }
+#endif /*  __TFG__VERSION__ */
 
   Double_t r, phi, z ;
 
@@ -2495,7 +2825,7 @@ void StMagUtilities::UndoMembraneDistortion( const Float_t x[], Float_t Xprime[]
 {
 
   cout << "StMagUtilities::UndoMembrane  This routine was made obosolete on 10/1/2009.  Do not use it." << endl ;
-  exit(0) ;
+  assert(0) ;
 
   // Membrane Distortion correction is Obsolete.  Disabled by JT 2009
   /*
@@ -2539,7 +2869,7 @@ void StMagUtilities::UndoEndcapDistortion( const Float_t x[], Float_t Xprime[] ,
 {
 
   cout << "StMagUtilities::UndoEndcap  This routine was made obosolete on 10/1/2009.  Do not use it." << endl ;
-  exit(0) ;
+  assert(0) ;
 
   // EndCap Distortion correction is Obsolete.  Disabled by JT 2009
   /*
@@ -2638,6 +2968,7 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
   Ephi_integral = 0.0 ;  // Efield is symmetric in phi
 
   // Subtract to Undo the distortions
+#ifndef __TFG__VERSION__
   if ( r > 0.0 ) 
     {
       phi =  phi - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
@@ -2647,6 +2978,23 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
   if (usingCartesian) Polar2Cart(r,phi,Xprime);
   else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
+#else /* __TFG__VERSION__ */
+  Float_t Zdrift =  TPC_Z0 - TMath::Abs(z)        ;
+  Double_t dZ = 0;
+  if ( r > 0.0 ) 
+    {
+      Double_t dphi = - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      Double_t dr   = - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+      phi += dphi;
+      r   += dr;
+      dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dr*dr*(1 + dphi*dphi)) - Zdrift)*TMath::Sign(1.f, x[2]);
+    }
+
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
+  Xprime[2] = x[2] + dZ;
+     
+#endif /*  !__TFG__VERSION__ */
 
 }
 
@@ -2689,6 +3037,12 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 void StMagUtilities::UndoSpaceChargeR0Distortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
   
+#ifdef __TFG__VERSION__
+  if (! StTpcDb::IsOldScheme()) { // new schema
+    cout << "StMagUtilities::UndoSpaceChargeR0Distortion  This routine was made obosolete on 12/29/2020.  Do not use it." << endl ;
+    assert(0) ;
+  }
+#endif /*  __TFG__VERSION__ */
   Float_t  Er_integral, Ephi_integral ;
   Double_t r, phi, z ;
 
@@ -2782,7 +3136,6 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 { 
   
   const Int_t     ORDER       =    1 ;  // Linear interpolation = 1, Quadratic = 2         
-
   Float_t   Er_integral, Ephi_integral ;
   Double_t  r, phi, z ;
 
@@ -2824,7 +3177,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	      // Next line is for Uniform charge deposition in the TPC; then integrated in Z due to drifting ions
 	      // Charge(i,j) =  2. * zterm / (OFCRadius*OFCRadius - IFCRadius*IFCRadius) ;  
 	      // Next few lines are for linearly decreasing charge deposition in R; then integrated in Z 
-	      // Double_t IORatio = 4.0 ;  // Ratio of charge density at IFC divided by charge density at OFC
+	      // Double_t IORatio = 4.0 ;  // Ratio ofsofic charge density at IFC divided by charge density at OFC
 	      // Charge(i,j) = zterm * ( 1 - Radius*(IORatio-1)/(IORatio*OFCRadius-IFCRadius) ) / 
 	      //  ( (OFCRadius-IFCRadius)*(OFCRadius-IFCRadius)*(OFCRadius-IFCRadius)*(IORatio-1) /
 	      //  ( -3. * (IORatio*OFCRadius-IFCRadius) ) + 
@@ -2850,7 +3203,6 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	}
 
       PoissonRelaxation( ArrayV, Charge, EroverEz, ITERATIONS ) ;
-
       //Interpolate results onto standard grid for Electric Fields
       Int_t ilow=0, jlow=0 ;
       Float_t save_Er[2] ;	      
@@ -2887,6 +3239,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
   //if (fSpaceChargeR2) GetSpaceChargeR2(); // need to reset it. 
 
   // Subtract to Undo the distortions and apply the EWRatio on the East end of the TPC 
+#ifndef __TFG__VERSION__
   if ( r > 0.0 ) 
     {
       double Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC : 1.0);
@@ -2898,6 +3251,24 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
   if (usingCartesian) Polar2Cart(r,phi,Xprime);
   else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
+#else /*  __TFG__VERSION__ */
+  Float_t Zdrift =  TPC_Z0 - TMath::Abs(z)        ;
+  Double_t dZ = 0;
+  if ( r > 0.0 ) 
+    {
+      double Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC : 1.0);
+      if ( z < 0) Weight *= -SpaceChargeEWRatio ;  // Account swap of E_z sign
+      Double_t dphi = - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      Double_t dr   = - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+      phi += dphi;
+      r   += dr;
+      dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dr*dr*(1 + dphi*dphi)) - Zdrift)*TMath::Sign(1.f, x[2]);
+    }
+
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
+  Xprime[2] = x[2] + dZ;
+#endif /* ! __TFG__VERSION__ */
 
 }
 
@@ -3275,6 +3646,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   Ephi_integral = 0.0 ;  // Efield is symmetric in phi
 
   // Subtract to Undo the distortions
+#ifndef __TFG__VERSION__
   if ( r > 0.0 ) 
     {
       phi =  phi - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
@@ -3285,6 +3657,22 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
 
+#else /*  __TFG__VERSION__ */
+  Float_t Zdrift =  TPC_Z0 - TMath::Abs(z)        ;
+  //   if (z < 0) Er_integral = -Er_integral; // YF : I am not sure that the E_z swop has not been accounted in the intergral
+  Double_t dZ = 0;
+  if ( r > 0.0 ) 
+    {
+      Double_t dphi = - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      Double_t dr   = - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+      phi += dphi;
+      r   += dr;
+      dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dr*dr*(1 + dphi*dphi)) - Zdrift)*TMath::Sign(1.f, x[2]);
+    }
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
+  Xprime[2] = x[2] + dZ;
+#endif /* ! __TFG__VERSION__ */
 }
 
   
@@ -3367,7 +3755,8 @@ void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprim
   Ephi_integral = 0.0 ;  // Efield is symmetric in phi
 
   // Subtract to Undo the distortions
-  if ( r > 0.0 ) 
+#ifndef __TFG__VERSION__
+ if ( r > 0.0 ) 
     {
       phi =  phi - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
       r   =  r   - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
@@ -3377,6 +3766,22 @@ void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprim
   else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
 
+#else /*  __TFG__VERSION__ */
+  Float_t Zdrift =  TPC_Z0 - TMath::Abs(z)        ;
+  //  if (z < 0) Er_integral = -Er_integral; // YF : I am not sure that the E_z swop has not been accounted inthe intergral
+  Double_t dZ = 0;
+  if ( r > 0.0 ) 
+    {
+      Double_t dphi = - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      Double_t dr   = - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+      phi += dphi;
+      r   += dr;
+      dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dr*dr*(1 + dphi*dphi)) - Zdrift)*TMath::Sign(1.f, x[2]);
+    }
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
+  Xprime[2] = x[2] + dZ;
+#endif /* ! __TFG__VERSION__ */
 }
 
 //________________________________________
@@ -5164,6 +5569,12 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
 */
 void StMagUtilities::Undo2DGridLeakDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
+#ifdef __TFG__VERSION__
+  if (! StTpcDb::IsOldScheme()) { // new schema
+    cout << "StMagUtilities::Undo2DGridLeakDistortion  This routine was made obosolete on 12/27/2020.  Do not use it." << endl ;
+    assert(0) ;
+  }
+#endif /* __TFG__VERSION__ */
   
   const  Int_t     ORDER       =  1   ;  // Linear interpolation = 1, Quadratic = 2         
   const  Int_t     ROWS        =  513 ;  // ( 2**n + 1 )  eg. 65, 129, 257, 513, 1025  (513 or above for natural width gap)
@@ -5272,6 +5683,12 @@ void StMagUtilities::Undo2DGridLeakDistortion( const Float_t x[], Float_t Xprime
 */
 void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
+#ifdef __TFG__VERSION__
+  if (! StTpcDb::IsOldScheme()) { // new schema
+    cout << "StMagUtilities::Undo3DBDistortion  This routine was made obosolete on 12/27/2020.  Do not use it." << endl ;
+    assert(0) ;
+  }
+#endif /* __TFG__VERSION__ */
      
   const Int_t   ORDER       =    1  ;  // Linear interpolation = 1, Quadratic = 2         
   const Int_t   neR3D       =   73  ;  // Number of rows in the interpolation table for the Electric field
@@ -5716,6 +6133,7 @@ void StMagUtilities::UndoFullGridLeakDistortion( const Float_t x[], Float_t Xpri
 
   // Subtract to Undo the distortions and apply the EWRatio factor to the data on the East end of the TPC
 
+#ifndef __TFG__VERSION__
   if ( r > 0.0 ) 
     {
       Float_t Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC*SmearCoefGL : 1.0);
@@ -5728,8 +6146,25 @@ void StMagUtilities::UndoFullGridLeakDistortion( const Float_t x[], Float_t Xpri
   else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
 
+#else /*  __TFG__VERSION__ */
+  Float_t Zdrift =  TPC_Z0 - TMath::Abs(z)        ;
+  //  if (z < 0) Er_integral = -Er_integral; // YF : I am not sure that the E_z swop has not been accounted inthe intergral
+  Double_t dZ = 0;
+  if ( r > 0.0 ) 
+    {
+      Float_t Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC*SmearCoefGL : 1.0);
+      if ( z < 0 ) Weight *= -SpaceChargeEWRatio ;
+      Double_t dphi = - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      Double_t dr   = - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+      phi += dphi;
+      r   += dr;
+      dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dr*dr*(1 + dphi*dphi)) - Zdrift)*TMath::Sign(1.f, x[2]);
+    }
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
+  Xprime[2] = x[2] + dZ;
+#endif /* ! __TFG__VERSION__ */
 }
-
 //________________________________________
 
   
@@ -6007,6 +6442,7 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
   Er_integral   = Interpolate3DTable( ORDER, r, z, phi, neR3D, EMap_nZ, PHISLICES1, eRadius, eZList, Philist, ArrayoftiltEr )   ;
   Ephi_integral = Interpolate3DTable( ORDER, r, z, phi, neR3D, EMap_nZ, PHISLICES1, eRadius, eZList, Philist, ArrayoftiltEphi ) ;
   
+#ifndef __TFG__VERSION__
   if ( r > 0.0 ) 
     {
       phi =  phi - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
@@ -6017,6 +6453,22 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
   else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
   
+#else /*  __TFG__VERSION__ */
+  Float_t Zdrift =  TPC_Z0 - TMath::Abs(z)        ;
+  //YF It has been accounted for separate  Poisson3DRelaxation  for West and East TPC.  if (z < 0) {Er_integral = -Er_integral; Ephi_integral = -Ephi_integral;}
+  Double_t dZ = 0;
+  if ( r > 0.0 ) 
+    {
+      Double_t dphi =  - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      Double_t dr   =  - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+      phi += dphi;
+      r   += dr;
+      dZ = - ( TMath::Sqrt(Zdrift*Zdrift + dr*dr*(1 + dphi*dphi)) - Zdrift)*TMath::Sign(1.f, x[2]);
+    }
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
+  Xprime[2] = x[2] + dZ;
+#endif /* ! __TFG__VERSION__ */
 }
 
 
@@ -6037,7 +6489,7 @@ Int_t StMagUtilities::IterationFailCount()
 //________________________________________________________________________________
 void StMagUtilities::BFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector ) {
   if (StTpcDb::IsOldScheme()) {
-      BField( xTpc, BTpc) ; 
+      StarMagField::Instance()->BField( xTpc, BTpc) ; 
   } else {
   // mag. field in Tpc local coordinate system
     Double_t Tpc[3] =  {xTpc[0], xTpc[1], xTpc[2]};
@@ -6045,7 +6497,7 @@ void StMagUtilities::BFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sec
     StTpcDb::instance()->Tpc2GlobalMatrix().LocalToMaster(Tpc,coorG);
     Float_t xyzG[3] = {(Float_t) coorG[0], (Float_t) coorG[1], (Float_t) coorG[2]};
     Float_t BG[3];
-    BField( xyzG, BG) ; 
+    StarMagField::Instance()->BField( xyzG, BG) ; 
     Double_t    BGD[3] = {BG[0], BG[1], BG[2]};
     Double_t    BTpcL[3];
     StTpcDb::instance()->Tpc2GlobalMatrix().MasterToLocalVect(BGD,BTpcL);
@@ -6057,7 +6509,7 @@ void StMagUtilities::BFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sec
 //________________________________________________________________________________
 void StMagUtilities::B3DFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector ) {
   if (StTpcDb::IsOldScheme()) {
-    B3DField( xTpc, BTpc) ; 
+    StarMagField::Instance()->B3DField( xTpc, BTpc) ; 
   } else {
     BFieldTpc(xTpc, BTpc, Sector);
   }  
