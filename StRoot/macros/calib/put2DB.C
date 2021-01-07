@@ -37,7 +37,7 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
     //  1996-12-01 23:59:59
     //  Int_t d=19960101;
     Int_t d=20000101;
-    Int_t t =      0;
+    Int_t t =      1;
     //  sscanf(Time.Data(),"%d",&d);
     TString flavor(Flavor);
     Int_t n = sscanf(Time.Data(),"%d.%d",&d,&t);
