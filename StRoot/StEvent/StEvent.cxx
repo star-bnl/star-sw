@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.59 2018/12/11 19:53:10 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.60 2021/01/11 20:27:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.60  2021/01/11 20:27:40  ullrich
+ * Updated to add FCS elements (Akio).
+ *
  * Revision 2.59  2018/12/11 19:53:10  ullrich
  * Added RICHf.
  *
@@ -217,6 +220,7 @@
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StEpdCollection.h"
+#include "StFcsCollection.h"
 #include "StFmsCollection.h"
 #include "StRHICfCollection.h"
 #include "StRichCollection.h"
@@ -251,8 +255,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.59 2018/12/11 19:53:10 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.59 2018/12/11 19:53:10 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.60 2021/01/11 20:27:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.60 2021/01/11 20:27:40 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -560,6 +564,22 @@ StEvent::emcCollection() const
     StEmcCollection *emc = 0;
     _lookup(emc, mContent);
     return emc;
+}
+
+StFcsCollection*
+StEvent::fcsCollection()
+{
+    StFcsCollection *fcs = 0;
+    _lookup(fcs, mContent);
+    return fcs;
+}
+
+const StFcsCollection*
+StEvent::fcsCollection() const
+{
+    StFcsCollection *fcs = 0;
+    _lookup(fcs, mContent);
+    return fcs;
 }
 
 StFmsCollection*

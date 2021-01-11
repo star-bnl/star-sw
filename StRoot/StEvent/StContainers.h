@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.42 2018/07/09 14:54:37 ullrich Exp $
+ * $Id: StContainers.h,v 2.43 2021/01/11 20:27:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.43  2021/01/11 20:27:40  ullrich
+ * Updated to add FCS elements (Akio).
+ *
  * Revision 2.42  2018/07/09 14:54:37  ullrich
  * Changed to add ETof.
  *
@@ -140,6 +143,9 @@ class StEmcPoint;
 class StEmcRawHit;
 class StEpdHit;
 class StEtrHit;
+class StFcsCluster;
+class StFcsHit;
+class StFcsPoint;
 class StFgtHit;
 class StFgtPoint;
 class StFgtStrip;
@@ -209,6 +215,9 @@ StCollectionDef(EmcPoint)
 StCollectionDef(EmcRawHit)
 StCollectionDef(EpdHit)    // MAL
 StCollectionDef(EtrHit)
+StCollectionDef(FcsCluster)
+StCollectionDef(FcsHit)
+StCollectionDef(FcsPoint)
 StCollectionDef(FgtHit)
 StCollectionDef(FgtPoint)
 StCollectionDef(FgtStrip)
