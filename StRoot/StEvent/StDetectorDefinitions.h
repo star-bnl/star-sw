@@ -41,6 +41,9 @@
 ** FTS             = 38
 ** iTPC            = 39
 ** ETof            = 40
+** FCS Wcal        = 41
+** FCS Hcal        = 42
+** FCS Pres        = 43
 */
 
 
@@ -132,6 +135,12 @@
  */
 #define kETofIdentifier               40
 
+/*
+** Add the FCS Wcal and Hcal
+*/
+#define kFcsWcalIdentifier            41 
+#define kFcsHcalIdentifier            42 
+#define kFcsPresIdentifier            43 
 
 /*
 **  The following are more or less virtual detectors.
@@ -149,9 +158,12 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.15 2019/02/11 18:49:59 ullrich Exp $
+/* $Id: StDetectorDefinitions.h,v 2.16 2021/01/11 20:27:40 ullrich Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.16  2021/01/11 20:27:40  ullrich
+** Updated to add FCS elements (Akio).
+**
 ** Revision 2.15  2019/02/11 18:49:59  ullrich
 ** Added EToF.
 **

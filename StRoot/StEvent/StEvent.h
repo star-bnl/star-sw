@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.51 2018/12/11 19:53:10 ullrich Exp $
+ * $Id: StEvent.h,v 2.52 2021/01/11 20:27:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.52  2021/01/11 20:27:40  ullrich
+ * Updated to add FCS elements (Akio).
+ *
  * Revision 2.51  2018/12/11 19:53:10  ullrich
  * Added RICHf.
  *
@@ -195,6 +198,7 @@ class StSstHitCollection;
 class StEtrHitCollection;
 class StEmcCollection;
 class StEpdCollection;
+class StFcsCollection;
 class StFmsCollection;
 class StRHICfCollection;
 class StRichCollection;
@@ -257,6 +261,8 @@ public:
     const StSstHitCollection*           sstHitCollection() const;
     StEmcCollection*                    emcCollection();
     const StEmcCollection*              emcCollection() const;
+    StFcsCollection*                    fcsCollection();
+    const StFcsCollection*              fcsCollection() const;
     StFmsCollection*                    fmsCollection();
     const StFmsCollection*              fmsCollection() const;
     StRHICfCollection*                  rhicfCollection();
@@ -364,6 +370,7 @@ public:
     void setIstHitCollection(StIstHitCollection*);
     void setEmcCollection(StEmcCollection*);
     void setEpdCollection(StEpdCollection*);
+    void setFcsCollection(StFcsCollection*);
     void setFmsCollection(StFmsCollection*);
     void setRHICfCollection(StRHICfCollection*);
     void setRichCollection(StRichCollection*);

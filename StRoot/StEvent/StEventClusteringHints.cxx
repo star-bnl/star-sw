@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.42 2019/01/07 15:50:12 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.43 2021/01/11 20:27:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.43  2021/01/11 20:27:40  ullrich
+ * Updated to add FCS elements (Akio).
+ *
  * Revision 2.42  2019/01/07 15:50:12  ullrich
  * Added StTriggerData2019.
  *
@@ -140,7 +143,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.42 2019/01/07 15:50:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.43 2021/01/11 20:27:40 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -184,6 +187,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StSPtrVecCalibrationVertex",  "evt_vertices", 5);
     setBranch("StEmcCollection",             "evt_emc",      6);
     setBranch("StFmsCollection",             "evt_emc",      6);
+    setBranch("StFcsCollection",             "evt_emc",      6);
     setBranch("StRHICfCollection",           "evt_emc",      6);
     setBranch("StRichCollection",            "evt_aux",      7);
     setBranch("StTofCollection",             "evt_aux",      7);
@@ -213,6 +217,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StEventClusteringHints",      "event", 1);
     setBranch("StEmcCollection",             "event", 1);
     setBranch("StFmsCollection",             "event", 1);
+    setBranch("StFcsCollection",             "event", 1);
     setBranch("StRHICfCollection",           "event", 1);
     setBranch("StRichCollection",            "event", 1);
     setBranch("StTofCollection",             "event", 1);
