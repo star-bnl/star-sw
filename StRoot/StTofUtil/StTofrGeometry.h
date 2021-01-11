@@ -397,9 +397,9 @@ class StTofrGeometry : public TNamed {
 
    static Bool_t   mDebug;     //!Control message printing of this class
 
-   static char* const sectorPref ;//= "BSEC";
-   static char* const trayPref   ;//= "BTRA";
-   static char* const senPref    ;//= "BRMD";
+   static const Char_t* const sectorPref ;//= "BSEC";
+   static const Char_t* const trayPref   ;//= "BTRA";
+   static const Char_t* const senPref    ;//= "BRMD";
 
  protected:
    //void        InitFromXdf(const char* xdffile);
