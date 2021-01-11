@@ -50,6 +50,9 @@ switch (${SUBMITTINGDIRECTORY}) # STAR version
   case "*TFG20j*":
     starver TFG20j
     breaksw
+  case "*TFG20k*":
+    starver TFG20k
+    breaksw
   default:
     starver .DEV2
     breaksw
