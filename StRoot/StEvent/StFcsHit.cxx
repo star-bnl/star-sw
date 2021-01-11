@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFcsHit.cxx,v 1.6 2019/07/15 16:58:09 akio Exp $
+ * $Id: StFcsHit.cxx,v 1.8 2021/01/11 14:42:09 akio Exp $
  *
  * Author: Akio Ogawa, Aug 2018
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StFcsHit.cxx,v $
+ * Revision 1.8  2021/01/11 14:42:09  akio
+ * Adding nPeak
+ *
+ * Revision 1.7  2020/09/03 19:30:57  akio
+ * adding fit chi2
+ *
  * Revision 1.6  2019/07/15 16:58:09  akio
  * Adding hit->cluster pointer
  *
@@ -84,6 +90,8 @@ unsigned short StFcsHit::flag(int i) const {
 int   StFcsHit::adcSum()   const {return mAdcSum;}
 float StFcsHit::fitPeak()  const {return mFitPeak;}
 float StFcsHit::fitSigma() const {return mFitSigma;}
+float StFcsHit::fitChi2()  const {return mFitChi2;}
+int   StFcsHit::nPeak()    const {return mNPeak;}
 float StFcsHit::energy()   const {return mEnergy;}
 
 void StFcsHit::setDepCh(unsigned short ns, unsigned short ehp, unsigned short dep, unsigned short ch){ 
@@ -113,10 +121,12 @@ void StFcsHit::setAdcFlag(int i, unsigned short adc, unsigned short flag) { mDat
 void StFcsHit::setAdc(int i, unsigned short val)                          { setAdcFlag(i,val,flag(i)); }
 void StFcsHit::setFlag(int i, unsigned short val)                         { setAdcFlag(i,adc(i),val); }
 
-void StFcsHit::setAdcSum(int val)              { mAdcSum     = val; }
-void StFcsHit::setFitPeak(float val)           { mFitPeak    = val; }
-void StFcsHit::setFitSigma(float val)          { mFitSigma   = val; }
-void StFcsHit::setEnergy(float val)            { mEnergy     = val; }
+void StFcsHit::setAdcSum(int val)              { mAdcSum   = val; }
+void StFcsHit::setFitPeak(float val)           { mFitPeak  = val; }
+void StFcsHit::setFitSigma(float val)          { mFitSigma = val; }
+void StFcsHit::setFitChi2(float val)           { mFitChi2  = val; }
+void StFcsHit::setNPeak(int val)               { mNPeak    = val; }
+void StFcsHit::setEnergy(float val)            { mEnergy   = val; }
 
 void StFcsHit::setFcsHit(unsigned short zs, unsigned short det, unsigned short id,
 			 unsigned short ns, unsigned short ehp, unsigned short dep, unsigned short ch, 

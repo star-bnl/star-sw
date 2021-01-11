@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFcsHit.h,v 1.7 2019/07/15 16:58:09 akio Exp $
+ * $Id: StFcsHit.h,v 1.10 2021/01/11 14:42:09 akio Exp $
  *
  * Author: Akio Ogawaa, Aug 2018
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StFcsHit.h,v $
+ * Revision 1.10  2021/01/11 14:42:09  akio
+ * Adding nPeak
+ *
+ * Revision 1.9  2020/12/17 21:08:05  akio
+ * Switching from F to D for LorentVector
+ *
+ * Revision 1.8  2020/09/03 19:30:57  akio
+ * adding fit chi2
+ *
  * Revision 1.7  2019/07/15 16:58:09  akio
  * Adding hit->cluster pointer
  *
@@ -67,6 +76,8 @@ public:
     int   adcSum() const;
     float fitPeak() const;
     float fitSigma() const;
+    float fitChi2() const;
+    int   nPeak() const;
     float energy() const;
     
     void setDepCh(unsigned short ns, unsigned short ehp, unsigned short dep, unsigned short ch);
@@ -90,6 +101,8 @@ public:
     void setAdcSum(int v);
     void setFitPeak(float v);
     void setFitSigma(float v);
+    void setFitChi2(float v);
+    void setNPeak(int v);
     void setEnergy(float v);
 
     void setFcsHit(unsigned short zs, unsigned short det, unsigned short id,
@@ -107,14 +120,17 @@ public:
 protected:
     UShort_t mDetId=0;        // 1 bit ZS, 3 bits DetectorId, 12 bits id
     UShort_t mDepCh=0;        // 1 bit for NS, 2 bits for EHP, 5 bits for DEP, 8 bits for channal
-    UInt_t   mAdcSum=0;       // ADC sum of specified timebins
-    Float_t  mFitPeak=0.0;    // gaussian fit result
-    Float_t  mFitSigma=0.0;   // gaussian fit result
+    UInt_t   mAdcSum=0;       // ADC sum 
+    Float_t  mFitPeak=0.0;    // fit peak position
+    Float_t  mFitSigma=0.0;   // fit sigma
+    Float_t  mFitChi2=0.0;    // fit chi2
+    UInt_t   mNPeak=0;        // number of peaks found
     Float_t  mEnergy=0.0;     // corrected energy
     StFcsCluster* mCluster=0; // pointer to cluster this hit belongs
     TArrayS* mData=0;         // 12bit ADC values + flag at highest 4 bits, array of timebin
     
-    ClassDef(StFcsHit,3)
+    ClassDef(StFcsHit,5)
+
 };
 
 #endif

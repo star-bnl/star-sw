@@ -54,20 +54,20 @@ StFcsRawDaqReader::~StFcsRawDaqReader(){
 Int_t StFcsRawDaqReader::prepareEnvironment(){
   mEvent = (StEvent*)GetInputDS("StEvent");  
   if(mEvent) {
-    LOG_INFO <<"::prepareEnvironment() found StEvent"<<endm;
+    LOG_DEBUG <<"::prepareEnvironment() found StEvent"<<endm;
   } else {
     mEvent=new StEvent();
     AddData(mEvent);
-    LOG_INFO <<"::prepareEnvironment() has added StEvent"<<endm;
+    LOG_DEBUG <<"::prepareEnvironment() has added StEvent"<<endm;
   }
   mFcsCollectionPtr=mEvent->fcsCollection();
   if(!mFcsCollectionPtr) {
     mFcsCollectionPtr=new StFcsCollection();
     mEvent->setFcsCollection(mFcsCollectionPtr);
-    LOG_INFO <<"::prepareEnvironment() has added StFcsCollection"<<endm;
+    LOG_DEBUG<<"::prepareEnvironment() has added StFcsCollection"<<endm;
   } else {
     mFcsCollectionPtr=mEvent->fcsCollection();
-    LOG_INFO <<"::prepareEnvironment() found StFcsCollection"<<endm;
+    LOG_DEBUG <<"::prepareEnvironment() found StFcsCollection"<<endm;
   };
   return kStOK;
 };
@@ -98,14 +98,90 @@ Int_t StFcsRawDaqReader::Init(){
 };
 
 Int_t StFcsRawDaqReader::Make() {
+  static int nskip=0;
+  static int nskiptot=0;
   mTrg=0;
   prepareEnvironment();
   
+  /*
   mRdr->get(0,EVP_TYPE_ANY);
-  if(mRdr->status == EVP_STAT_EOR) {
-    LOG_DEBUG <<"End of File reached..."<<endm;
-    return kStEOF;	
+  if(mRdr->status == EVP_STAT_EOR || (mMaxSector>0 && nInSec>=mMaxEvtPerSector)) {
+    LOG_INFO <<"End of File reached..."<<endm;
+    if(mMaxSector==0){
+      return kStEOF;
+    }else{
+      mSector++;
+      if(mSector>mMaxSector) return kStEOF;
+      TString fn(mDaqFileName.data());
+      fn.ReplaceAll("_s01_",Form("_s%02d_",mSector));
+      LOG_INFO << "Opening "<< fn.Data() <<endm;
+      delete mRdr;
+      mRdr = new daqReader( const_cast< Char_t* >( fn.Data() ) );
+      if(!mRdr) {
+	LOG_FATAL << "Error constructing daqReader" << endm;
+	return kStFatal;
+      }
+      mRdr->get(0,EVP_TYPE_ANY);
+      nInSec=0;
+      nskip=0;
+    }    
   }
+  int trgcmd = mRdr->trgcmd;
+  if(trgcmd != 4 && trgcmd !=10){  // 4=phys/ped 10=LED
+    nskip++;
+    nskiptot++;
+    printf("trgcmd=%d skipping nskip=%d nskiptot=%d\n",trgcmd,nskip,nskiptot);
+    return kStOK;
+  }
+  */
+
+  int GoodOrEOR=0;
+  while(GoodOrEOR==0){
+    mRdr->get(0,EVP_TYPE_ANY);
+    if(mRdr->status != EVP_STAT_EOR){
+      int trgcmd = mRdr->trgcmd;
+      if(trgcmd != 4 && trgcmd !=10){  // 4=phys/ped 10=LED
+	nskip++;
+	nskiptot++;
+	//printf("trgcmd=%d skipping nskip=%d nskiptot=%d\n",trgcmd,nskip,nskiptot);
+	continue;
+      }
+    }
+    if(mRdr->status==EVP_STAT_EOR || (mMaxSector>0 && mEvtInSector>=mMaxEvtPerSector)) {
+      if(mMaxSector==0){
+	LOG_INFO <<"End of File reached..."<<endm;
+        return kStEOF;
+      }else{
+	LOG_INFO <<"EOF or max event for a sector file..."<<endm;
+        mSector++;
+        if(mSector>mMaxSector) return kStEOF;
+        TString fn(mDaqFileName.data());
+        fn.ReplaceAll("_s01_",Form("_s%02d_",mSector));
+        LOG_INFO << "Opening "<< fn.Data() <<endm;
+        delete mRdr;
+        mRdr = new daqReader( const_cast< Char_t* >( fn.Data() ) );
+        if(!mRdr) {
+          LOG_FATAL << "Error constructing daqReader" << endm;
+          return kStFatal;
+        }
+        mEvtInSector=0;
+        nskip=0;
+	continue;
+      }
+    }else{
+      GoodOrEOR=1;
+    }
+  }
+  int trgcmd = mRdr->trgcmd;
+  if(trgcmd != 4 && trgcmd !=10){  // 4=phys/ped 10=LED
+    printf("This should not happen!!!  trgcmd=%d skipping nskip=%d nskiptot=%d\n",trgcmd,nskip,nskiptot);
+    return kStOK;
+  }
+  if(nskip>0){
+    printf("Skipped nskip=%d nskiptot=%d\n",nskip,nskiptot);
+    nskip=0;
+  }
+  mEvtInSector++; //only count for valid trgCmd
   
   mTrgMask = mRdr->daqbits64;
   if(mDebug){
@@ -120,7 +196,7 @@ Int_t StFcsRawDaqReader::Make() {
   daq_dta *dd = 0;
   dd = mRdr->det("trg")->get("raw");
   if(!dd){
-    printf("trg/raw not found\n");
+    //printf("trg/raw not found\n");
   }else{
     while(dd->iterate()) {
       u_char *trg_raw = dd->Byte;
@@ -176,6 +252,7 @@ Int_t StFcsRawDaqReader::Make() {
 	  u_int data = dd->adc[i].adc;
 	  tmp[i*2  ]=data;
 	  tmp[i*2+1]=tb;
+
 	  printf("AAA %4d : %4d %4d : %4d %4d\n",i,data&0xfff,d16[i*2]&0xfff,tb,d16[i*2+1]);
 	}	
 	hit = new StFcsHit(1,detid,id,ns,ehp,dep,ch,2*n,tmp);
@@ -195,9 +272,9 @@ Int_t StFcsRawDaqReader::Make() {
       }
     }
   }   
-  LOG_INFO <<Form("FCS found %d data lines, and %d valid data lines",
+  LOG_DEBUG <<Form("FCS found %d data lines, and %d valid data lines",
 		   ndata,nvaliddata)<<endm;
-  if(mDebug) mFcsCollectionPtr->print(3);
+  if(mDebug>3) mFcsCollectionPtr->print(3);
 
   ndata=0;
   dd = mRdr->det("stgc")->get("raw");
@@ -217,7 +294,7 @@ Int_t StFcsRawDaqReader::Make() {
       if(mDebug) printf("\n");
     }
   }
-  LOG_INFO <<Form("STGC found %d data lines",ndata)<<endm;
+  LOG_DEBUG <<Form("STGC found %d data lines",ndata)<<endm;
 
   return kStOK;
 };
@@ -233,8 +310,12 @@ void StFcsRawDaqReader::Clear( Option_t *opts ){
 ClassImp(StFcsRawDaqReader);
 
 /*
- * $Id: StFcsRawDaqReader.cxx,v 1.4 2019/07/10 07:47:37 akio Exp $
+ * $Id: StFcsRawDaqReader.cxx,v 1.5 2021/01/11 14:39:12 akio Exp $
  * $Log: StFcsRawDaqReader.cxx,v $
+ * Revision 1.5  2021/01/11 14:39:12  akio
+ * Change logic to skip over none standard events at the begining of files.
+ * Added function to get event# in a sector=file.
+ *
  * Revision 1.4  2019/07/10 07:47:37  akio
  * minor fix for compilation warnings
  *
