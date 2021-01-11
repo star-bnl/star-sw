@@ -35,7 +35,7 @@ Int_t StFcsQaMaker::Init(){
     return kStFatal;
   }
 
-  if(mPedSub>0 || mDump>0) mFcsDbMkr->readPedFromText();
+  //  if(mPedSub>0 || mDump>0) mFcsDbMkr->readPedFromText();
 
   if(mSetFile==0){
       int yday=mRun/1000;
@@ -48,7 +48,7 @@ Int_t StFcsQaMaker::Init(){
 
   char* nameEHP[kFcsEHP] = {"Ecal","Hcal","Pres"};
   char* nameNS[kFcsNorthSouth] = {"N","S"};
-  char t[100],t2[100];
+  char t[100],t2[100],t3[100];
 
   mDataSize = new TH1F("DataSize","DataSize",100,-1.0,7.0);
   mEsum[0] = new TH1F("EcalESum","EcalESum",100,0.0,10.0);
@@ -63,34 +63,74 @@ Int_t StFcsQaMaker::Init(){
     if(maxid==0) continue; 
     
     sprintf(t,"%4s_%1s_IdTbinAdc",nameEHP[ehp],nameNS[ns]);
-    mAdcTb2[det] = new TH2F(t,t,
+    sprintf(t2,"%4s_%1s; Id; Tbin",nameEHP[ehp],nameNS[ns]);
+    mAdcTb2[det] = new TH2F(t,t2,
 			    maxid, 0.0, float(maxid),
 			    mNTimeBins, 0.0, float(mNTimeBins));
+
     for(int id=0; id<maxid; id++){      
+      mFcsDbMkr->getName(det,id,t3);	
       int c=mFcsDbMkr->getColumnNumber(det,id);
       int r=mFcsDbMkr->getRowNumber(det,id);
       int ehp2,ns2,crt,sub,dep,ch;
       mFcsDbMkr->getDepfromId(det,id,ehp2,ns2,crt,sub,dep,ch);
       sprintf(t ,"%4s_%1s_TbinAdc_id%03d",nameEHP[ehp],nameNS[ns],id);
-      sprintf(t2,"%1s%1s%03d_r%02dc%02d_Dep%02dCh%02d",
-	      nameEHP[ehp],nameNS[ns],id,r,c,dep,ch);
-      printf("%s %s\n",t,t2);
+      sprintf(t2,"%s; TBin; ADC",t3);
+      //printf("%s %s\n",t,t2);
       mAdcTb[det][id] = new TH2F(t,t2,
 				 mNTimeBins, 0.0, float(mNTimeBins),
-				 mMaxAdc, 0.0, float(mMaxAdc));
+				 512, 0.0, float(mMaxAdc));
     }
+
     sprintf(t,"%4s_%1s_Adc",nameEHP[ehp],nameNS[ns]);
+    sprintf(t2,"%4s_%1s; DEP+ch/32; ADC",nameEHP[ehp],nameNS[ns]);
     int maxdep = mFcsDbMkr->getNDep(ehp,ns);
     int maxdepch = maxdep * kFcsMaxDepCh;
-    mAdcId[det] = new TH2F(t,t,
-			   maxdepch, 0.0, float(maxdepch),
-			   mMaxAdc, 0.0, float(mMaxAdc));
+    mAdcId[det] = new TH2F(t,t2,
+			   maxdepch, 0.0, float(maxdep),
+			   256, 0.0, float(mMaxAdc));
+    mAdcId[det]->GetXaxis()->SetNdivisions(-maxdep);
+
+    sprintf(t,"%4s_%1s_ped",nameEHP[ehp],nameNS[ns]);
+    sprintf(t2,"%4s_%1s_Ped; DEP+ch/32; ADC",nameEHP[ehp],nameNS[ns]);
+    mAdcIdp[det] = new TH2F(t,t2,
+			   maxdepch, 0.0, float(maxdep),
+			   4096, 0.0, 4096);
+    mAdcId[det]->GetXaxis()->SetNdivisions(-maxdep);
+
     sprintf(t,"%4s_%1s_IdSum",nameEHP[ehp],nameNS[ns]);
-    mAdcSumId[det] = new TH2F(t,t,
+    sprintf(t2,"%4s_%1s; id; AdcSum(TB=%d-%d)",nameEHP[ehp],nameNS[ns],mMinTB,mMaxTB);
+    mAdcSumId[det] = new TH2F(t,t2,
 			      maxid, 0.0, float(maxid),
-			      mMaxAdcSum, 0.0, float(mMaxAdcSum));
+			      200, 0.0, float(mMaxAdcSum));
+
+    sprintf(t,"%4s_%1s_FitIntg",nameEHP[ehp],nameNS[ns]);
+    sprintf(t2,"%4s_%1s; DEP+ch/32; FitIntegral",nameEHP[ehp],nameNS[ns]);
+    mFitIntg[det] = new TH2F(t,t2,
+			     maxdepch, 0.0, float(maxdep),
+			     400, 0.0, float(mMaxAdcSum));
+
+    sprintf(t,"%4s_%1s_FitSigm",nameEHP[ehp],nameNS[ns]);
+    sprintf(t2,"%4s_%1s; DEP+ch/32; FitSigma[TB]",nameEHP[ehp],nameNS[ns]);
+    mFitSigm[det] = new TH2F(t,t2,
+			     maxdepch, 0.0, float(maxdep),
+			     100, 0.0, 5.0);
+    
+    sprintf(t,"%4s_%1s_FitTime",nameEHP[ehp],nameNS[ns]);
+    sprintf(t2,"%4s_%1s; DEP+ch/32; FitPeakTime[TB]",nameEHP[ehp],nameNS[ns]);
+    mFitTime[det] = new TH2F(t,t2,
+			     maxdepch, 0.0, float(maxdep),
+			     200, mMinTB, mMaxTB);
+    
+    sprintf(t,"%4s_%1s_FitChi2",nameEHP[ehp],nameNS[ns]);
+    sprintf(t2,"%4s_%1s; DEP+ch/32; FitChi2",nameEHP[ehp],nameNS[ns]);
+    mFitChi2[det] = new TH2F(t,t2,
+			     maxdepch, 0.0, float(maxdep),
+			     100, 0.0, 400.0);
+    
     sprintf(t,"%4s_%1s_NHit",nameEHP[ehp],nameNS[ns]);
-    mNHit[det] = new TH1F(t,t,maxid,0.0,float(maxid+1));
+    sprintf(t2,"%4s_%1s; NHit",nameEHP[ehp],nameNS[ns]);
+    mNHit[det] = new TH1F(t,t2,maxid,0.0,float(maxid+1));
     
     if(ehp<2){ //clusters for Ecasl/Hcal
       sprintf(t,"%4s_%1s_NCluster",nameEHP[ehp],nameNS[ns]);
@@ -118,6 +158,26 @@ Int_t StFcsQaMaker::Init(){
       }      
     }
   }  
+
+  
+  int ecal_xmax = mFcsDbMkr->nColumn(0);
+  int ecal_ymax = mFcsDbMkr->nRow(0);
+  mHitMap[0] = new TH2F("EcalView","Ecal View from Back; +-Col (North <-> South); -Row (Bottom <-> Top)",
+			ecal_xmax*2+1,-ecal_xmax-0.5,ecal_xmax+0.5,
+			ecal_ymax,-ecal_ymax-0.5,-0.5);
+  
+  int hcal_xmax = mFcsDbMkr->nColumn(2);
+  int hcal_ymax = mFcsDbMkr->nRow(2);
+  mHitMap[1] = new TH2F("HcalView","Hcal View from Back; +-Col (North <-> South); -Row (Bottom <-> Top)",
+			hcal_xmax*2+1,-hcal_xmax-0.5,hcal_xmax+0.5,
+			hcal_ymax,-hcal_ymax-0.5,-0.5);
+  
+  int pres_xmax = mFcsDbMkr->nColumn(4);
+  int pres_ymax = mFcsDbMkr->nRow(4);
+  mHitMap[2] = new TH2F("PresView","Pres View from Back; +-Radius (North <-> South); -Phi (Bottom <-> Top)",
+			pres_xmax*2+1,-pres_xmax-0.5,pres_xmax+0.5,
+			pres_ymax,-pres_ymax-0.5,-0.5);
+  
   return kStOK;
 };
 
@@ -132,12 +192,12 @@ Int_t StFcsQaMaker::Make() {
       //Getting trigger data (if daq file)
       trg = fcsraw->trgdata();
       if(!trg){
-	  LOG_INFO << "Canot find Trigger Data from StFcsRawDaqReader" << endm;
+	  LOG_DEBUG << "Canot find Trigger Data from StFcsRawDaqReader" << endm;
       }
   }else if(event){
       trg=event->triggerData();
       if(!trg){
-	  LOG_INFO << "Canot find Trigger Data from StEvent" << endm;
+	  LOG_DEBUG << "Canot find Trigger Data from StEvent" << endm;
       }
   }
 
@@ -175,9 +235,9 @@ Int_t StFcsQaMaker::Make() {
   float atot[kFcsNDet]; memset(atot,0,sizeof(atot));
   float etot[kFcsNDet]; memset(etot,0,sizeof(etot));
 
-  for(int det=0; det<kFcsNDet+1; det++){  //det==kFcsDet is for empty channel
+  for(int det=0; det<kFcsNDet; det++){  //det==kFcsDet is for empty channel
     int nhit=mFcsCollection->numberOfHits(det);
-    printf("StFcsQaMaker found %d hits for det=%d in event#=%d\n",nhit,det,nevt);
+    // printf("StFcsQaMaker found %d hits for det=%d in event#=%d\n",nhit,det,nevt);
     if(nhit<=0) continue;       
     StSPtrVecFcsHit& hits = mFcsCollection->hits(det); 
     for (int i=0; i<nhit; i++){
@@ -187,10 +247,28 @@ Int_t StFcsQaMaker::Make() {
       int ns  = hits[i]->ns();
       int dep = hits[i]->dep();
       int ch  = hits[i]->channel();
-      int depch=mFcsDbMkr->getDepCh(dep,ch);
+      float depch=dep+(ch+0.5)/32.0;
       int ntb = hits[i]->nTimeBin();
       float ped=0.0;
       if(mPedSub>0)  ped=mFcsDbMkr->pedestal(ehp,ns,dep,ch);
+
+      float chi2=hits[i]->fitChi2();
+      if(chi2>0.0){
+	mFitIntg[det]->Fill(depch,hits[i]->adcSum());
+	mFitSigm[det]->Fill(depch,hits[i]->fitSigma());
+	mFitTime[det]->Fill(depch,hits[i]->fitPeak());
+	mFitChi2[det]->Fill(depch,chi2);      
+      }
+
+      /*
+      int c = mFcsDbMkr->getColumnNumber(det,id);
+      int r = mFcsDbMkr->getRowNumber(det,id);
+      float x = c * (ns*2-1);
+      float y = -r;
+      printf("ehp=%d x=%f y=%f adcsum=%f\n",ehp,x,y,hits[i]->adcSum());
+      mHitMap[ehp]->Fill(x,y,hits[i]->adcSum());
+      */
+
       for(int j=0; j<ntb; j++){
 	unsigned short adc = hits[i]->adc(j);
 	unsigned short tb  = hits[i]->timebin(j);
@@ -198,8 +276,12 @@ Int_t StFcsQaMaker::Make() {
 	  //printf("%1d %1d %2d %2d %4d %f %f\n",ehp,ns,dep,ch,adc,ped,adc-ped);
 	  mAdcTb2[det]->Fill(id,tb,adc);
 	  mAdcTb[det][id]->Fill(tb,adc);
-	  if(tb>=mMinTB && tb<=mMaxTB) sum[det][id] += (adc - ped);
-	  mAdcId[det]->Fill(float(depch),float(adc));
+	  if(tb>=mMinTB && tb<=mMaxTB) {
+	    sum[det][id] += (adc - ped);
+	    //	    printf("det=%1d id=%3d tb=%3d adc=%4d ped=%6.2f adc-ped=%6.2f\n",det,id,tb,adc,ped,adc-ped);
+	  }
+	  mAdcId[det]->Fill(depch,float(adc));
+	  if(tb>=mMinTBp && tb<=mMaxTBp) mAdcIdp[det]->Fill(depch,float(adc));	  
 	}else{ // empty channel
 	  if(ch<32){
 	    int ns2 = hits[i]->ns();
@@ -217,11 +299,19 @@ Int_t StFcsQaMaker::Make() {
     }
     if(det<kFcsNDet){
       int maxid = mFcsDbMkr->maxId(det);
+      int ehp=det/2;
+      int ns=det%2;
       for(int id=0; id<maxid; id++){
 	if(sum[det][id]>0){
 	  mAdcSumId[det]->Fill((float)id, float(sum[det][id]));
 	  nh[det]++;
 	  atot[det]+=sum[det][id];
+
+	  int c = mFcsDbMkr->getColumnNumber(det,id);
+	  int r = mFcsDbMkr->getRowNumber(det,id);
+	  float x = c * (ns*2-1);
+	  float y = -r;
+	  mHitMap[ehp]->Fill(x,y,float(sum[det][id]));
 	}
       }
       mNHit[det]->Fill(float(nh[det]));
@@ -268,7 +358,7 @@ Int_t StFcsQaMaker::Make() {
   for(int det=0; det<kFcsNDet; det++){        
     if(det<=kFcsHcalSouthDetId){ 
       int nclu=mFcsCollection->numberOfClusters(det);
-      printf("StFcsQaMaker found %d cluster for det=%d in event#=%d\n",nclu,det,nevt);
+      //printf("StFcsQaMaker found %d cluster for det=%d in event#=%d\n",nclu,det,nevt);
       if(nclu<=0) continue;       
       StSPtrVecFcsCluster& clusters = mFcsCollection->clusters(det); 
       mNClu[det]->Fill(nclu);
@@ -306,8 +396,12 @@ Int_t StFcsQaMaker::Finish(){
 ClassImp(StFcsQaMaker);
 
 /*
- * $Id: StFcsQaMaker.cxx,v 1.6 2020/12/17 21:09:54 akio Exp $
+ * $Id: StFcsQaMaker.cxx,v 1.7 2021/01/11 14:40:31 akio Exp $
  * $Log: StFcsQaMaker.cxx,v $
+ * Revision 1.7  2021/01/11 14:40:31  akio
+ * Many changes for FCS 2021 comissioning & LED monitor.
+ * Includingplots for backview, fit plots and more.
+ *
  * Revision 1.6  2020/12/17 21:09:54  akio
  * add esum
  *
