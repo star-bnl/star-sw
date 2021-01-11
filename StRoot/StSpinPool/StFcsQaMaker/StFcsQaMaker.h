@@ -26,6 +26,7 @@ class StFcsQaMaker : public StMaker {
    void setRun(int v) {mRun=v;}
    void setMaxTimeBins(int v) {mNTimeBins=v;}
    void setSumTimeBins(int min, int max) {mMinTB=min; mMaxTB=max;}
+   void setPedTimeBins(int min, int max) {mMinTBp=min; mMaxTBp=max;}
    void setMaxAdc(int v) {mMaxAdc=v;}
    void setMaxAdcSum(int v) {mMaxAdcSum=v;}
    void setDump(int v) {mDump=v;}
@@ -42,10 +43,12 @@ class StFcsQaMaker : public StMaker {
    char* mSetFile=0;
    char mFilename[100];
    int mNTimeBins=16;
-   int mMinTB=210;   
-   int mMaxTB=225;
+   int mMinTB=103;   
+   int mMaxTB=109;
+   int mMinTBp=0;   
+   int mMaxTBp=10;
    int mMaxAdc=4096;
-   int mMaxAdcSum=7000;
+   int mMaxAdcSum=12000;
    int mDump=0;
    int mPedSub=0;
 
@@ -57,10 +60,15 @@ class StFcsQaMaker : public StMaker {
    TH2F* mAdcTb2[kFcsNDet];
    TH2F* mAdcTb[kFcsNDet][kFcsEcalMaxId];
    TH2F* mAdcId[kFcsNDet];
+   TH2F* mAdcIdp[kFcsNDet];
    TH2F* mAdcSumId[kFcsNDet];
+   TH2F* mFitIntg[kFcsNDet];
+   TH2F* mFitSigm[kFcsNDet];
+   TH2F* mFitTime[kFcsNDet];
+   TH2F* mFitChi2[kFcsNDet];
    TH1F* mAdcSum[kFcsNDet][kFcsEcalMaxId];
    TH1F* mNHit[kFcsNDet];
-   TH2F* mHitmap[kFcsNDet];
+   TH2F* mHitMap[3];
 
    TH1F* mNClu[kFcsNDet];
    TH1F* mNTowClu[kFcsNDet];
@@ -75,8 +83,12 @@ class StFcsQaMaker : public StMaker {
 #endif
 
 /*
- * $Id: StFcsQaMaker.h,v 1.3 2020/12/17 21:09:54 akio Exp $
+ * $Id: StFcsQaMaker.h,v 1.4 2021/01/11 14:40:31 akio Exp $
  * $Log: StFcsQaMaker.h,v $
+ * Revision 1.4  2021/01/11 14:40:31  akio
+ * Many changes for FCS 2021 comissioning & LED monitor.
+ * Includingplots for backview, fit plots and more.
+ *
  * Revision 1.3  2020/12/17 21:09:54  akio
  * add esum
  *

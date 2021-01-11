@@ -84,9 +84,9 @@ ClassImp(StTofrNode)
 
 Bool_t StTofrNode::mDebug = kFALSE;
 Double_t const StTofrGeomSensor::mSensorDy = 10.35;   // Actual module length;
-char* const StTofrGeometry::sectorPref = "BSEC";
-char* const StTofrGeometry::trayPref   = "BTRA";
-char* const StTofrGeometry::senPref    = "BRMD";
+const Char_t* const StTofrGeometry::sectorPref = "BSEC";
+const Char_t* const StTofrGeometry::trayPref   = "BTRA";
+const Char_t* const StTofrGeometry::senPref    = "BRMD";
 
 //_____________________________________________________________________________
 StTofrNode::StTofrNode(TVolumeView *element, TVolumeView *top)
@@ -1335,9 +1335,11 @@ void StTofrGeometry::InitFromStar(TVolume *starHall)
   mTrays = 0;     // non-emtry tray number
   while ( (secVolume = (TVolumeView *)nextSector()) ) {
     TVolumeView *trayVolume = (TVolumeView *)secVolume->First();
-    if ( trayVolume->GetListSize() ) {
+    if (trayVolume && trayVolume->GetListSize() ) {
       mTrays++;
       mModulesInTray = trayVolume->GetListSize();
+    } else {
+      gMessMgr->Error("","OS") << " Sector Volume " <<  secVolume->GetName() << " does not have trays" << endm;
     }
   }
   mTofrConf = 0;
@@ -1356,7 +1358,7 @@ void StTofrGeometry::InitFromStar(TVolume *starHall)
   for(Int_t i=0;i<list->GetSize();i++) {
     sectorVolume = dynamic_cast<TVolumeView*> (list->At(i));
     TVolumeView *trayVolume = (TVolumeView *)sectorVolume->First();
-    if( !trayVolume->GetListSize() ) continue;
+    if(!trayVolume ||  !trayVolume->GetListSize() ) continue;
     if ( i>=60 ) ibtoh = 1;
     //    gMessMgr->Info("","OS") << " test sector size = " << trayVolume->GetListSize() << endm;
     mTofrTray[mNValidTrays] = new StTofrGeomTray(ibtoh, sectorVolume, mTopNode);
