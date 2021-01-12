@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.51 2018/12/11 19:53:10 ullrich Exp $
+ * $Id: StEvent.h,v 2.52 2021/01/11 20:27:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,8 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 1.2  2019/07/24 17:47:50  akio
- * added stgc from jdb
+ * Revision 2.52  2021/01/11 20:27:40  ullrich
+ * Updated to add FCS elements (Akio).
+ *
  * Revision 2.51  2018/12/11 19:53:10  ullrich
  * Added RICHf.
  *
@@ -197,6 +198,7 @@ class StSstHitCollection;
 class StEtrHitCollection;
 class StEmcCollection;
 class StEpdCollection;
+class StFcsCollection;
 class StFmsCollection;
 class StFcsCollection;
 class StStgcCollection;
@@ -262,12 +264,12 @@ public:
     const StSstHitCollection*           sstHitCollection() const;
     StEmcCollection*                    emcCollection();
     const StEmcCollection*              emcCollection() const;
-    StFmsCollection*                    fmsCollection();
-    const StFmsCollection*              fmsCollection() const;
     StFcsCollection*                    fcsCollection();
     const StFcsCollection*              fcsCollection() const;
     StStgcCollection*                   stgcCollection();
     const StStgcCollection*             stgcCollection() const;
+    StFmsCollection*                    fmsCollection();
+    const StFmsCollection*              fmsCollection() const;
     StRHICfCollection*                  rhicfCollection();
     const StRHICfCollection*            rhicfCollection() const;
     StRichCollection*                   richCollection();
@@ -378,9 +380,9 @@ public:
     void setIstHitCollection(StIstHitCollection*);
     void setEmcCollection(StEmcCollection*);
     void setEpdCollection(StEpdCollection*);
-    void setFmsCollection(StFmsCollection*);
     void setFcsCollection(StFcsCollection*);
     void setStgcCollection(StStgcCollection*);
+    void setFmsCollection(StFmsCollection*);
     void setRHICfCollection(StRHICfCollection*);
     void setRichCollection(StRichCollection*);
     void setRpsCollection(StRpsCollection*);

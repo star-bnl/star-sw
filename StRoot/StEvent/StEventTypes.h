@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.52 2019/02/11 18:51:10 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.53 2021/01/11 20:27:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
- * Revision 1.2  2019/07/24 17:47:50  akio
- * added stgc from jdb
+ * Revision 2.53  2021/01/11 20:27:40  ullrich
+ * Updated to add FCS elements (Akio).
+ *
  * Revision 2.52  2019/02/11 18:51:10  ullrich
  * Added new EToF classes.
  *
@@ -209,6 +210,10 @@
 #include "StStgcCollection.h"
 #include "StFtsStgcHit.h"
 #include "StRHICfCollection.h"
+#include "StFcsCollection.h"
+#include "StFcsCluster.h"
+#include "StFcsHit.h"
+#include "StFcsPoint.h"
 #include "StFmsCollection.h"
 #include "StFmsCluster.h"
 #include "StFmsHit.h"
