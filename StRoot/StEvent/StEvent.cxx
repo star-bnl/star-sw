@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.59 2018/12/11 19:53:10 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.60 2021/01/11 20:27:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,8 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 1.2  2019/07/24 17:47:50  akio
- * added stgc from jdb
+ * Revision 2.60  2021/01/11 20:27:40  ullrich
+ * Updated to add FCS elements (Akio).
+ *
  * Revision 2.59  2018/12/11 19:53:10  ullrich
  * Added RICHf.
  *
@@ -227,6 +228,7 @@
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StEpdCollection.h"
+#include "StFcsCollection.h"
 #include "StFmsCollection.h"
 #include "StFcsCollection.h"
 #include "StStgcCollection.h"
@@ -264,8 +266,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.59 2018/12/11 19:53:10 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.59 2018/12/11 19:53:10 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.60 2021/01/11 20:27:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.60 2021/01/11 20:27:40 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -575,6 +577,22 @@ StEvent::emcCollection() const
     return emc;
 }
 
+StFcsCollection*
+StEvent::fcsCollection()
+{
+    StFcsCollection *fcs = 0;
+    _lookup(fcs, mContent);
+    return fcs;
+}
+
+const StFcsCollection*
+StEvent::fcsCollection() const
+{
+    StFcsCollection *fcs = 0;
+    _lookup(fcs, mContent);
+    return fcs;
+}
+
 StFmsCollection*
 StEvent::fmsCollection()
 {
@@ -591,21 +609,6 @@ StEvent::fmsCollection() const
     return fms;
 }
 
-StFcsCollection*
-StEvent::fcsCollection()
-{
-    StFcsCollection *fcs = 0;
-    _lookup(fcs, mContent);
-    return fcs;
-}
-
-const StFcsCollection*
-StEvent::fcsCollection() const
-{
-    StFcsCollection *fcs = 0;
-    _lookup(fcs, mContent);
-    return fcs;
-}
 StRHICfCollection*
 StEvent::rhicfCollection()
 {
@@ -614,13 +617,6 @@ StEvent::rhicfCollection()
     return rhicf;
 }
 
-StStgcCollection*
-StEvent::stgcCollection()
-{
-    StStgcCollection *stgc = 0;
-    _lookup(stgc, mContent);
-    return stgc;
-}
 const StRHICfCollection*
 StEvent::rhicfCollection() const
 {
@@ -628,15 +624,6 @@ StEvent::rhicfCollection() const
     _lookup(rhicf, mContent);
     return rhicf;
 }
-
-const StStgcCollection*
-StEvent::stgcCollection() const
-{
-    StStgcCollection *stgc = 0;
-    _lookup(stgc, mContent);
-    return stgc;
-}
-
 
 StRichCollection*
 StEvent::richCollection()
@@ -654,6 +641,21 @@ StEvent::richCollection() const
     return rich;
 }
 
+StStgcCollection*
+StEvent::stgcCollection()
+{
+    StStgcCollection *stgc = 0;
+    _lookup(stgc, mContent);
+    return stgc;
+}
+const StStgcCollection*
+StEvent::stgcCollection() const
+{
+    StStgcCollection *stgc = 0;
+    _lookup(stgc, mContent);
+    return stgc;
+}
+ 
 StRpsCollection*
 StEvent::rpsCollection()
 {
@@ -1301,16 +1303,6 @@ StEvent::setFmsCollection(StFmsCollection* val)
 }
 
 void
-StEvent::setFcsCollection(StFcsCollection* val)
-{
-    _lookupAndSet(val, mContent);
-}
-void
-StEvent::setStgcCollection(StStgcCollection* val)
-{
-    _lookupAndSet(val, mContent);
-}
-void
 StEvent::setRHICfCollection(StRHICfCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1321,6 +1313,17 @@ StEvent::setRichCollection(StRichCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
+void
+StEvent::setFcsCollection(StFcsCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+void
+StEvent::setStgcCollection(StStgcCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
 void
 StEvent::setRpsCollection(StRpsCollection* val)
 {

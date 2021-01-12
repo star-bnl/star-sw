@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.69 2020/01/27 21:28:31 genevb Exp $
+ * $Id: StEnumerations.h,v 2.70 2021/01/11 20:27:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,8 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 1.3  2020/05/29 18:57:04  akio
- * adding some enum for EPD as PRES and 4x4 trigger patch
+ * Revision 2.70  2021/01/11 20:27:40  ullrich
+ * Updated to add FCS elements (Akio).
+ *
  * Revision 2.69  2020/01/27 21:28:31  genevb
  * Add short tracks toward ETOF
  *
@@ -306,14 +307,14 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kSstId       = kSstIdentifier,
 		   kGmtId       = kGmtIdentifier,
 		   kFtsId       = kFtsIdentifier,
-		   kFcsWcalId   = kFcsWcalIdentifier,
-		   kFcsHcalId   = kFcsHcalIdentifier,
-		   kFcsPresId   = kFcsPresIdentifier,
                    kStgcId      = kStgcIdentifier,		   
                    kiTpcId      = kiTpcIdentifier,
                    kETofId      = kETofIdentifier,
+		   kFcsWcalId   = kFcsWcalIdentifier,
+		   kFcsHcalId   = kFcsHcalIdentifier,
+		   kFcsPresId   = kFcsPresIdentifier,		   
                    kEpdId       = kEpdIdentifier,
-                   kMaxDetectorId = 42};
+                   kMaxDetectorId = 45};
 
 /*!
  * \enum StTrackType
@@ -685,12 +686,13 @@ enum StStgcConstants {
     kStgcVerticalStrips=1,
     kStgcHorizontalStrips=2
 };
+
 enum StRHICfConstants{
-    kRHICfNtower=2,     // 0=small, 1=large                                                                                    
-    kRHICfNplate=16,    // longitudinal segmentations      
-    kRHICfNlayer=4,     // bar layers (longitudinal)                                                                           
-    kRHICfNxy=2,        // 0=x, 1=y                                                                                            
-    kRHICfNbarSmall=20, // bar# (0-19 for small)                                                                               
+    kRHICfNtower=2,     // 0=small, 1=large                                                        
+    kRHICfNplate=16,    // longitudinal segmentations
+    kRHICfNlayer=4,     // bar layers (longitudinal)
+    kRHICfNxy=2,        // 0=x, 1=y 
+    kRHICfNbarSmall=20, // bar# (0-19 for small) 
     kRHICfNbarLarge=40, // bar# (0-39 for large)
     kRHICfNcad=10,      // Local counts for DAQ
     kRHICfNtdc=256,     // TDC

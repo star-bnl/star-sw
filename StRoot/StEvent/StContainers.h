@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.42 2018/07/09 14:54:37 ullrich Exp $
+ * $Id: StContainers.h,v 2.43 2021/01/11 20:27:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,15 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
- * Revision 1.2  2019/07/24 17:47:50  akio
- * added stgc from jdb
+ * Revision 2.43  2021/01/11 20:27:40  ullrich
+ * Updated to add FCS elements (Akio).
  *
- * Revision 1.1  2018/11/14 16:48:57  akio
- * FCS codes in offline/upgrade/akio
- *
- * Revision 2.41.4.1  2018/08/24 15:46:49  jwebb
- *
- * ... and need to declare types...
  * Revision 2.42  2018/07/09 14:54:37  ullrich
  * Changed to add ETof.
  *
@@ -156,13 +150,13 @@ class StEmcPoint;
 class StEmcRawHit;
 class StEpdHit;
 class StEtrHit;
-class StFgtHit;
-class StFgtPoint;
-class StFgtStrip;
 class StFcsCluster;
 class StFcsHit;
 class StFcsPoint;
 class StFtsStgcHit;
+class StFgtHit;
+class StFgtPoint;
+class StFgtStrip;
 class StFmsCluster;
 class StFmsHit;
 class StFmsPoint;
