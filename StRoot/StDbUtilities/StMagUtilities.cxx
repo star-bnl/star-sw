@@ -1967,7 +1967,7 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
       C[i] = 2 * GG * SCALE * TMath::Sin( WIREGAP*i*PI/( 2*BOX ) ) / ( i * PI ) ;
     TArrayF X = Centers2Edges(NZDRIFT, ZDriftArray);
     TArrayF Y = Centers2Edges(NYARRAY, YArray);
-    fUndoPad13DistortiondY = new TH2F("UndoPad13DistortiondY","UndoPad13DistortiondY", X.GetSize(), X.GetArray(), Y.GetSize(), Y.GetArray());
+    fUndoPad13DistortiondY = new TH2F("UndoPad13DistortiondY","UndoPad13DistortiondY", X.GetSize()-1, X.GetArray(), Y.GetSize()-1, Y.GetArray());
     for (Int_t i = 1; i <= fUndoPad13DistortiondY->GetXaxis()->GetNbins() ; i++) {
       Zdrift = fUndoPad13DistortiondY->GetXaxis()->GetBinCenter(i);
       for (Int_t j = 1; j <= fUndoPad13DistortiondY->GetYaxis()->GetNbins() ; j++) {
@@ -2007,7 +2007,7 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
 
   sum  = Interpolate( &ZDriftArray[ilow], save_sum, ORDER, Zdrift )   ; 
 
- #ifndef __TFG__VERSION__
+#ifndef __TFG__VERSION__
  if ( r > 0.0 )
     {
       phi =  phi - ( Const_1*(-1*sum)*TMath::Cos(phi0-phi) + Const_0*sum*TMath::Sin(phi0-phi) ) / r ;      
@@ -2205,7 +2205,7 @@ void StMagUtilities::UndoPad40Distortion( const Float_t x[], Float_t Xprime[], I
 	TArrayF Y = Centers2Edges(nYARRAY, YArray);
 	for ( Int_t MapID = 0 ; MapID < nMAPS ; MapID++ )                                    // Read maps and store locally
 	  {
-	    fUndoPad40DistortiondY[MapID] = new TH2F(Form("UndoPad40DistortiondY-%i",MapID),Form("UndoPad40DistortiondY-%i",MapID), X.GetSize(), X.GetArray(), Y.GetSize(), Y.GetArray());
+	    fUndoPad40DistortiondY[MapID] = new TH2F(Form("UndoPad40DistortiondY-%i",MapID),Form("UndoPad40DistortiondY-%i",MapID), X.GetSize()-1, X.GetArray(), Y.GetSize()-1, Y.GetArray());
 	    GetGLWallData ( MapID, DataInTheGap ) ;
 	    for ( Int_t n = 1 ; n <= nTERMS ; n++ )                                          // Calculate Bn[] coefficients 
 	      {                                                                              // Integrate by Simpsons Rule 
@@ -3206,6 +3206,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
       //Interpolate results onto standard grid for Electric Fields
       Int_t ilow=0, jlow=0 ;
       Float_t save_Er[2] ;	      
+      //#ifndef __TFG__VERSION__
       for ( Int_t i = 0 ; i < EMap_nZ ; ++i ) 
 	{
 	  z = TMath::Abs( eZList[i] ) ;
@@ -3223,6 +3224,28 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	      spaceR2Er[i][j] = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ;
 	    }
 	}
+      //#else /*  __TFG__VERSION__ */
+#ifdef  __TFG__VERSION__ 
+      TArrayF X = Centers2Edges(EMap_nZ, eZList);
+      TArrayF Y = Centers2Edges(EMap_nR, eRList);
+      fUndoSpaceChargeR2DistortiondY = new TH2F("UndoSpaceChargeR2DistortiondY","UndoSpaceChargeR2DistortiondY versus Z and R",X.GetSize()-1, X.GetArray(), Y.GetSize()-1, Y.GetArray());
+      for (Int_t i = 1; i <= fUndoSpaceChargeR2DistortiondY->GetXaxis()->GetNbins() ; i++) {
+	z = TMath::Abs(fUndoSpaceChargeR2DistortiondY->GetXaxis()->GetBinCenter(i));
+	for (Int_t j = 1; j <= fUndoSpaceChargeR2DistortiondY->GetYaxis()->GetNbins() ; j++) {
+	  r = fUndoSpaceChargeR2DistortiondY->GetYaxis()->GetBinCenter(j);
+	  Search( ROWS,   Rlist, r, ilow ) ;  // Note switch - R in rows and Z in columns
+	  Search( COLUMNS, Zedlist, z, jlow ) ;
+	  if ( ilow < 0 ) ilow = 0 ;  // artifact of Root's binsearch, returns -1 if out of range
+	  if ( jlow < 0 ) jlow = 0 ;   
+	  if ( ilow + 1  >=  ROWS - 1 ) ilow =  ROWS - 2 ;	      
+	  if ( jlow + 1  >=  COLUMNS - 1 ) jlow =  COLUMNS - 2 ; 
+	  save_Er[0] = EroverEz(ilow,jlow) + (EroverEz(ilow,jlow+1)-EroverEz(ilow,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+	  save_Er[1] = EroverEz(ilow+1,jlow) + (EroverEz(ilow+1,jlow+1)-EroverEz(ilow+1,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+	  Double_t spaceR2Erij = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ;
+	  fUndoSpaceChargeR2DistortiondY->SetBinContent(i,j,spaceR2Erij);
+	}
+      }
+#endif /* ! __TFG__VERSION__ */
 
     }
   
