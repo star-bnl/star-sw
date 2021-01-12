@@ -1,37 +1,40 @@
-/** FCS detectorId **/
-enum StFcsDetectorId{
-    kFcsEcalNorthDetId=0,
-    kFcsEcalSouthDetId=1,
-    kFcsHcalNorthDetId=2,
-    kFcsHcalSouthDetId=3,
-    kFcsPresNorthDetId=4,
-    kFcsPresSouthDetId=5
-};
+//   jml, commented out due to autobuild errors 1/12/21
+//
+///*  /\** FCS detectorId **\/ */
+/* enum StFcsDetectorId{ */
+/*     kFcsEcalNorthDetId=0, */
+/*     kFcsEcalSouthDetId=1, */
+/*     kFcsHcalNorthDetId=2, */
+/*     kFcsHcalSouthDetId=3, */
+/*     kFcsPresNorthDetId=4, */
+/*     kFcsPresSouthDetId=5 */
+/* }; */
 
-/** FCS basic constants **/
-enum StFcsConstants {
-    kFcsNDet=6,
-    kFcsEHP=3,
-    kFcsEcalHcal=2,
-    kFcsNorthSouth=2,
-    kFcsMaxId=748,
-    kFcsEcalNCol=22,
-    kFcsEcalNRow=34,
-    kFcsEcalMaxId=748,
-    kFcsHcalNCol=13,
-    kFcsHcalNRow=20,
-    kFcsHcalMaxId=260,
-    kFcsPresMaxId=192,
-    kFcsPresNCol=16,
-    kFcsPresNRow=12,
-    kFcsMaxDepCrate=5,
-    kFcsMaxDepBd=24,
-    kFcsMaxDepCh=32,
-    kFcsEcal4x4NCol=9,
-    kFcsEcal4x4NRow=15,
-    kFcsHcal4x4NCol=5,
-    kFcsHcal4x4NRow=9
-};
+
+/* /\** FCS basic constants **\/ */
+/* enum StFcsConstants { */
+/*     kFcsNDet=6, */
+/*     kFcsEHP=3, */
+/*     kFcsEcalHcal=2, */
+/*     kFcsNorthSouth=2, */
+/*     kFcsMaxId=748, */
+/*     kFcsEcalNCol=22, */
+/*     kFcsEcalNRow=34, */
+/*     kFcsEcalMaxId=748, */
+/*     kFcsHcalNCol=13, */
+/*     kFcsHcalNRow=20, */
+/*     kFcsHcalMaxId=260, */
+/*     kFcsPresMaxId=192, */
+/*     kFcsPresNCol=16, */
+/*     kFcsPresNRow=12, */
+/*     kFcsMaxDepCrate=5, */
+/*     kFcsMaxDepBd=24, */
+/*     kFcsMaxDepCh=32, */
+/*     kFcsEcal4x4NCol=9, */
+/*     kFcsEcal4x4NRow=15, */
+/*     kFcsHcal4x4NCol=5, */
+/*     kFcsHcal4x4NRow=9 */
+/* }; */
 
 //DEP map
 Short_t mMap_ehp[kFcsNDet][kFcsMaxId];
