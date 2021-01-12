@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTypes.hh,v 1.3 2014/06/25 14:19:24 jwebb Exp $
+ * $Id: StParticleTypes.hh,v 1.4 2021/01/12 14:34:12 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StParticleTypes.hh,v $
+ * Revision 1.4  2021/01/12 14:34:12  jwebb
+ * Update to gstar_part.g and StarClassLibrary to support simulation of
+ * H4 Lambda , He4 Lambda  and He5 Lambda hypernuclei.
+ *
  * Revision 1.3  2014/06/25 14:19:24  jwebb
  * Added psi prime --> e+e-
  *
@@ -116,5 +120,8 @@
 #include "StDeuteron.hh"
 #include "StHe3.hh"
 #include "StTriton.hh"
+
+// Hyper nuclei
+#include "StHyperNuclei.hh"
 
 #endif
