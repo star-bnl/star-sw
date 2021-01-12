@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleDefinition.hh,v 1.4 2005/09/22 20:09:20 fisyak Exp $
+ * $Id: StParticleDefinition.hh,v 1.5 2021/01/12 14:34:12 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StParticleDefinition.hh,v $
+ * Revision 1.5  2021/01/12 14:34:12  jwebb
+ * Update to gstar_part.g and StarClassLibrary to support simulation of
+ * H4 Lambda , He4 Lambda  and He5 Lambda hypernuclei.
+ *
  * Revision 1.4  2005/09/22 20:09:20  fisyak
  * Make StLorentzVector persistent
  *
@@ -124,6 +128,7 @@ private:
 };
 
 ostream& operator<<(ostream&, const StParticleDefinition&);
+
 
 #endif
 

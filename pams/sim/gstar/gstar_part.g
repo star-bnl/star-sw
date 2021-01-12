@@ -1,6 +1,10 @@
-* $Id: gstar_part.g,v 1.59 2020/06/12 14:10:12 jwebb Exp $
+* $Id: gstar_part.g,v 1.60 2021/01/12 14:34:20 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.60  2021/01/12 14:34:20  jwebb
+* Update to gstar_part.g and StarClassLibrary to support simulation of
+* H4 Lambda , He4 Lambda  and He5 Lambda hypernuclei.
+*
 * Revision 1.59  2020/06/12 14:10:12  jwebb
 * Fix cut-n-paste error on K0short definition
 *
@@ -238,7 +242,8 @@ INTEGER FUNCTION PDG_ION_ID( Z, A )
 END FUNCTION PDG_ION_ID
 
 INTEGER FUNCTION PDG_HYP_ID( Z, A, L )
-   PDG_HYP_ID = PDG_ION_ID + 10000000 * L
+   INTEGER PDG_ION_ID
+   PDG_HYP_ID = PDG_ION_ID(Z,A) + 10000000 * L
 END FUNCTION PDG_HYP_ID
 
 
@@ -775,6 +780,34 @@ Particle anti_hyperTriton_db_pb_pi code      = 62054  ,
                                   trktyp    = kGtHADR          ,
                                   bratio    = {1,}             ,
                                   mode      = {081553,}
+
+
+Particle H4Lambda_He4_pi_minus    code = 61055       , 
+                                  mass = 3.92727     , 
+                                  tlife = 2.6329e-10 , 
+                                  charge = +1        , 
+                                  pdg  = UNDEFINED   , 
+                                  trktyp = kGtHadr  ,  
+                                  bratio = {1,}      , 
+                                  mode = {004709,}
+
+Particle He4Lambda_He3_p_pi_minus code = 61057       , 
+                                  mass = 3.92168     , 
+                                  tlife = 2.6320e-10 , 
+                                  charge = +2        , 
+                                  pdg = UNDEFINED    , 
+                                  trktyp = kGtHadr  , 
+                                  bratio = {1,}      , 
+                                  mode = {144909,}
+
+Particle He5Lambda_He4_p_pi_minus code = 61059       , 
+                                  mass = 4.83978     , 
+                                  tlife = 2.6320e-10 , 
+                                  charge = +2        , 
+                                  pdg = UNDEFINED    , 
+                                  trktyp = kGtHadr  , 
+                                  bratio = {1,}      , 
+                                  mode = {144709,}
 
 
    """Define all dibaryons / dimesons with offset=60000 """
