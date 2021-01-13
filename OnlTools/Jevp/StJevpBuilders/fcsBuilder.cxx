@@ -17,7 +17,7 @@
 #include "fcsMap.h"
 
 const int TBMAX=300;
-const int TBTRG[2]={50,208};
+const int TBTRG[2]={50,207+8};
 const int MAXSUM=20000;
 const int OFF[2]  = {0,0};
 const int mReadMode=0;
