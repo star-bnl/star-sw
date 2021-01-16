@@ -1,3 +1,4 @@
+class StChain;
 class St_db_Maker;
 St_db_Maker *dbMk = 0;
 class TTable;
@@ -6,13 +7,13 @@ class StTpcCoordinateTransform;
 StTpcCoordinateTransform *transform = 0;
 //________________________________________________________________________________
 void Load() {
-#if 0
+#if 1
   if (gClassTable->GetID("TTable") < 0) {
     gSystem->Load("libTable");
   }
   if (gClassTable->GetID("StDbManager") < 0) {
     gROOT->LoadMacro("bfc.C");
-    TString Chain("db,tpcDb,NoDefault");
+    TString Chain("db,tpcDb,mysql,NoDefault");
     bfc(-1,Chain.Data(),0,0,0);
     dbMk = (St_db_Maker *)chain->GetMaker("db");
     dbMk->SetDebug(1);
@@ -36,7 +37,7 @@ void Print(Int_t sector = 1, Int_t row = 24, Int_t pad = 1, Int_t time = 1,
   cout << endl; cout << endl;
   cout << "Directions =============================" << endl;
   StTpcLocalSectorDirection   dirLS(rx,ry,rz,sector,row);      cout << dirLS << endl;
-  StTpcLocalSectorAlignedDirection     dirLSA(sector,row);//cout << dirLSA << endl;
+  StTpcLocalSectorAlignedDirection     dirLSA;//cout << dirLSA << endl;
   transform->operator()(dirLS,dirLSA);                     cout << dirLSA << endl;
   StTpcLocalDirection                  dirL;
   transform->operator()(dirLSA,dirL);                      cout << dirL << endl;
@@ -50,14 +51,14 @@ void Print(Int_t sector = 1, Int_t row = 24, Int_t pad = 1, Int_t time = 1,
   StTpcPadCoordinate coorP(sector, row, pad, time);             cout << coorP << endl; 
   StTpcLocalSectorCoordinate  coorLS;
   transform->operator()(coorP,coorLS);                     cout << coorLS << endl;
-  StTpcLocalSectorAlignedCoordinate  coorLSA(sector,row);
+  StTpcLocalSectorAlignedCoordinate  coorLSA;
   transform->operator()(coorLS,coorLSA);                   cout << coorLSA << endl;
   StTpcLocalCoordinate  coorL;
   transform->operator()(coorLSA,coorL);                    cout << coorL << endl;
   StGlobalCoordinate    coorG;
   transform->operator()(coorL,coorG);                      cout << coorG << endl;
   cout << "Back ===================================" << endl;
-  transform->operator()(coorG,coorL);                      cout << coorL << endl;
+  transform->operator()(coorG,coorL, sector, row);         cout << coorL << endl;
   transform->operator()(coorL,coorLSA);                    cout << coorLSA << endl;
   transform->operator()(coorLSA,coorLS);                   cout << coorLS  << endl;
   transform->operator()(coorLS,coorP);                     cout << coorP << endl; 
