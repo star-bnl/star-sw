@@ -162,14 +162,14 @@ StParticleTable::~StParticleTable() {/* noop */}
 /// @param a Atomic number of the heavy ion                                                                                                                                                                    
 /// @param l Number of lambdas in a hypernucleus                                                                                                                                                               
 // lift into StarPDGEncoding
-Int_t hid( Int_t z, Int_t a, Int_t l=0 )
-{
-  //         10LZZZAAAI                                                                                                                                                                                        
-  return (   1000000000
-         +     10000000*l
-         +        10000*z
-	     +           10*a );
-}
+// Int_t hid( Int_t z, Int_t a, Int_t l=0 )
+// {
+//   //         10LZZZAAAI                                                                                                                                                                                        
+//   return (   1000000000
+//          +     10000000*l
+//          +        10000*z
+// 	     +           10*a );
+// }
 
 
 
