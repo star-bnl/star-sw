@@ -201,12 +201,6 @@
 #include <Stiostream.h>
 
 #include "TMatrix.h"      // TMatrix keeps changing ... keep it here until proven otherwise.
-#ifdef __TFG__VERSION__
-#include "TH2.h"
-#include "TH3.h"
-#include "TArrayF.h"
-#endif /* ! __TFG__VERSION__ */
-
 #include "StarMagField/StarMagField.h"
 class TFile;
 class TNtuple;
@@ -320,14 +314,12 @@ class StMagUtilities {
 				       const Int_t  nx,    const Int_t  ny,    const Int_t  nz,
 				       const Float_t XV[], const Float_t YV[], const Float_t ZV[],
 				       TMatrix **ArrayofArrays ) ;
-#ifndef __TFG__VERSION__
   virtual void    Interpolate2DBfield ( const Float_t r, const Float_t z, 
 					Float_t &Br_value, Float_t &Bz_value ) 
   {StarMagField::Instance()->Interpolate2DBfield ( r, z, Br_value, Bz_value );}
   virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi, 
 					Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) 
   {StarMagField::Instance()->Interpolate3DBfield ( r, z, phi, Br_value, Bz_value, Bphi_value );}
-#endif
   virtual void    Interpolate2DEdistortion ( const Int_t ORDER, const Float_t r, const Float_t z, 
 					     const Float_t Er[EMap_nZ][EMap_nR], Float_t &Er_value ) ;
   virtual void    Interpolate3DEdistortion ( const Int_t ORDER, const Float_t r, const Float_t phi, const Float_t z, 
@@ -429,24 +421,19 @@ class StMagUtilities {
   StMagUtilities ( const StarMagField::EBField map, const Float_t factor, Int_t mode );
   virtual ~StMagUtilities () {fgInstance = 0;}
   static StMagUtilities *Instance();
-#ifndef __TFG__VERSION__
+
   virtual void    BField ( const Float_t x[], Float_t B[] ) 
   {StarMagField::Instance()->BField(x,B);}
   virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) 
   {StarMagField::Instance()->BrBzField(r,z,Br_value,Bz_value );}
   virtual void    B3DField ( const Float_t x[], Float_t B[] )
   {StarMagField::Instance()->B3DField(x,B);}
-#endif /* ! __TFG__VERSION__ */
   virtual void    B3DFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector = -1 );
   virtual void    BFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector = -1 );
-#ifndef __TFG__VERSION__
   virtual void    BrBz3DField ( const Float_t r, const Float_t z, const Float_t phi,
 				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) 
   {StarMagField::Instance()->BrBz3DField(r, z, phi, Br_value, Bz_value, Bphi_value);}
-#else /* __TFG__VERSION__ */
-  static TArrayF Centers2Edges(Int_t nbins, Float_t xmin, Float_t xmax);
-  static TArrayF Centers2Edges(Int_t nbins, const Float_t xCenters[]);
-#endif /* ! __TFG__VERSION__ */
+
   virtual bool    UsingDistortion( const DistortSelect distortion ) { return ((mDistortionMode & distortion) ? true : false); }
    
   virtual void    DoDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
@@ -563,20 +550,7 @@ class StMagUtilities {
     Xprime[0] = r * TMath::Cos(phi) ;
     Xprime[1] = r * TMath::Sin(phi) ;
   }
-#ifdef __TFG__VERSION__
-  Char_t                mBeg[1];        //!
-  TH3F *fFastUndoBDistortiondX;
-  TH3F *fFastUndoBDistortiondY;
-  TH3F *fFastUndoBDistortiondZ;
-  TH2F *fFastUndo2DBDistortiondX;
-  TH2F *fFastUndo2DBDistortiondY;
-#ifdef __TFG__VERSION__1
-  TH2F *fUndoPad13DistortiondY;
-  TH2F **fUndoPad40DistortiondY;
-#endif /* __TFG__VERSION__1 */
-  TH2F *fUndoSpaceChargeR2DistortiondY;
-  Char_t                mEnd[1];        //!
-#endif /* __TFG__VERSION__ */
+ 
 
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
