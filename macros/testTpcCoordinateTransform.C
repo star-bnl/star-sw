@@ -6,10 +6,10 @@ class StTpcCoordinateTransform;
 StTpcCoordinateTransform *transform = 0;
 //________________________________________________________________________________
 void Load() {
-#if 0
   if (gClassTable->GetID("TTable") < 0) {
     gSystem->Load("libTable");
   }
+#if 1
   if (gClassTable->GetID("StDbManager") < 0) {
     gROOT->LoadMacro("bfc.C");
     TString Chain("db,tpcDb,NoDefault");
@@ -21,6 +21,7 @@ void Load() {
 #else
   // rootmap version
   gSystem->Load("libSt_base");
+  gSystem->Load("libStChain");
   gSystem->Load("libStUtilities");
   StChain *chain = new StChain();
   St_db_Maker *dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
