@@ -91,7 +91,7 @@
 #endif
 #ifdef __Y2019__
 static Int_t NoInnerRows = 40; //-1; // Tpx
-static Int_t NoOfRows    = 72;; //-1;
+static Int_t NoOfRows    = 72; //-1;
 #else
 static Int_t NoInnerRows = 13;
 static Int_t NoOfRows    = 45;
@@ -4618,19 +4618,32 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
   cout << "Output for " << output << endl;
   if (! fOut) fOut = new TFile(output,"recreate");
   TH2D *T[2] = {
-    new TH2D("TI","time bucket difference for Inner sector versus Z",210,-210,210,800,-2,2),
-    new TH2D("TO","time bucket difference for Outer sector versus Z",210,-210,210,800,-2,2)
+    new TH2D("TI","time bucket difference for Inner sector versus Z",210,-210,210,800,-5,5),
+    new TH2D("TO","time bucket difference for Outer sector versus Z",210,-210,210,800,-5,5)
+  };
+  TH2D *TR[2] = {
+    new TH2D("TRI","time bucket for Inner difference versus row",72,0.5,72.5,800,-5,5),
+    new TH2D("TRO","time bucket for Outer difference versus row",72,0.5,72.5,800,-5,5)
   };
   TH2D *D[2] = {
-    new TH2D("DI","time bucket difference for Inner sector versus tanL",200,-2,2,800,-2,2),
-    new TH2D("DO","time bucket difference for Outer sector versus tanL",200,-2,2,800,-2,2)
+    new TH2D("DI","time bucket difference for Inner sector versus tanL",200,-2,2,800,-5,5),
+    new TH2D("DO","time bucket difference for Outer sector versus tanL",200,-2,2,800,-5,5)
   };
   TH2D *B[2] = {
-    new TH2D("BI","time bucket difference for Inner sector versus no. of time buckets",50,0.5,50.5,800,-2,2),
-    new TH2D("BO","time bucket difference for Outer sector versus no. of time buckets",50,0.5,50.5,800,-2,2)
+    new TH2D("BI","time bucket difference for Inner sector versus no. of time buckets",50,0.5,50.5,800,-5,5),
+    new TH2D("BO","time bucket difference for Outer sector versus no. of time buckets",50,0.5,50.5,800,-5,5)
+  };
+  TH2D *Z[2] = {
+    new TH2D("ZI","Z difference for Inner sector versus Z",210,-210,210,800,-5,5),
+    new TH2D("ZO","Z difference for Outer sector versus Z",210,-210,210,800,-5,5)
+  };
+  TH2D *ZR[2] = {
+    new TH2D("ZRI","Z difference for Inner sector versus row",72,0.5,72.5,800,-5,5),
+    new TH2D("ZRO","Z difference for Outer sector versus row",72,0.5,72.5,800,-5,5)
   };
   // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>TI(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90&&fMcHit.mVolumeId%100<=13","colz"); TI->FitSlicesY(); TI_1->Fit("pol2","er","",-100,100);
   // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>TO(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90&&fMcHit.mVolumeId%100>13","colz"); TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
+  const Int_t&       fRun                                     = iter("fRun");
   const Float_t&     Frequency                                = iter("Frequency");
   const Int_t&       fNoMcHit                                 = iter("fNoMcHit");
   const Int_t&       fNoRcHit                                 = iter("fNoRcHit");
@@ -4648,6 +4661,7 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
   const UChar_t*&    fRcHit_mMintmbk                          = iter("fRcHit.mMintmbk");
   const UChar_t*&    fRcHit_mMaxtmbk                          = iter("fRcHit.mMaxtmbk");
   const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
+  const Float_t*&    fRcHit_mPosition_mX3                     = iter("fRcHit.mPosition.mX3");
   const Int_t&       fNoRcTrack                               = iter("fNoRcTrack");
   const Float_t*&    fRcTrack_fpx                             = iter("fRcTrack.fpx");
   const Float_t*&    fRcTrack_fpy                             = iter("fRcTrack.fpy");
@@ -4655,11 +4669,20 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
   const UInt_t*&     fRcHit_mHardwarePosition                 = iter("fRcHit.mHardwarePosition");
   Int_t ev = 0;
   while (iter.Next()) {
+    Int_t year = fRun/1e6 - 1; //  20.332.022
     if (fNoMcHit != 1 || fNoRcHit !=1 ) continue;
     for (Int_t l = 0; l < fNoRcHit; l++) {
       Int_t IdTruth = fRcHit_mIdTruth[l];
       Int_t row = padrow(fRcHit_mHardwarePosition[l]);
       Int_t sec = sector(fRcHit_mHardwarePosition[l]);
+      NoInnerRows = 13;
+      NoOfRows    = 45;
+      if (year == 18) {
+	if (sec == 20) { NoInnerRows = 40; NoOfRows    = 72;}
+      } else if (year > 18) {
+	 NoInnerRows = 40; 
+	 NoOfRows    = 72;
+      }
       Int_t k = -1;
       for (Int_t k1 = 0; k1 < fNoMcHit; k1++) {
 	Int_t key = fMcHit_mKey[k1];
@@ -4676,7 +4699,11 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
       if (fRcHit_mQuality[l] < 90) continue;
       //      Double_t dT = fMcHit_mMcl_t[k]+(0.165+1e6*fMcHit_mTof[k])*Frequency-fRcHit_mMcl_t[l]/64.;
       Double_t dT = fMcHit_mMcl_t[k]+(0.165+1e6*fMcHit_mTof[k])*Frequency-fRcHit_tb[k];
+      Double_t dZ = fMcHit_mPosition_mX3[k] - fRcHit_mPosition_mX3[k];
       T[io]->Fill(fMcHit_mPosition_mX3[k],dT);
+      Z[io]->Fill(fMcHit_mPosition_mX3[k],dZ);
+      TR[io]->Fill(row,dT);
+      ZR[io]->Fill(row,dZ);
       Int_t ntbk = fRcHit_mMaxtmbk[l] + fRcHit_mMintmbk[l] + 1;
       B[io]->Fill(ntbk,dT);
       Double_t pT = TMath::Sqrt(fMcHit_mLocalMomentum_mX1[k]*fMcHit_mLocalMomentum_mX1[k] + fMcHit_mLocalMomentum_mX2[k]*fMcHit_mLocalMomentum_mX2[k]);

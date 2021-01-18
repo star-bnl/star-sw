@@ -136,6 +136,7 @@ Int_t StTpcMcAnalysisMaker::MultiCluster() {
     UInt_t NoRows = St_tpcPadConfigC::instance()->numberOfRows(sector);
     for (UInt_t row = 1; row <= NoRows; row++) {
       fCluster->Clear();
+      fCluster->SetRunNo(GetRunNumber());
       fCluster->SetEventNo(GetEventNumber());
       fCluster->SetDriftVelocities(gStTpcDb->DriftVelocity(1,0),gStTpcDb->DriftVelocity(13,0));
       fCluster->SetFrequency(gStTpcDb->Electronics()->samplingFrequency());
@@ -352,6 +353,11 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 		     I70, TrackLength70);
       //	if (rHit->flag()) continue;
       fCluster->Clear();
+      Int_t run = GetRunNumber();
+      if (run < 1000000) { // MC take run from year
+	run = 1000000*(GetDateTime().GetYear()%100+1);
+      }
+      fCluster->SetRunNo(run);
       fCluster->SetEventNo(GetEventNumber());
       fCluster->AddRcTrack(&track);
       fCluster->AddRcHit(rHit);
@@ -435,7 +441,8 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
       mTpcT->Fill();
     }
   }
-#if 0
+#define __ALL_CLUSTERS__
+#ifdef  __ALL_CLUSTERS__
   // non matched hits
   if (rcHits) {
     UInt_t numberOfSectors = rcHits->numberOfSectors();
@@ -469,6 +476,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 		transform(dirLSA,dirLS);
 		// Track prediction 
 		fCluster->Clear();
+		fCluster->SetRunNo(GetRunNumber());
 		fCluster->SetEventNo(GetEventNumber());
 		fCluster->AddRcHit(rHit);
 		fCluster->SetDriftVelocities(gStTpcDb->DriftVelocity(1,0),gStTpcDb->DriftVelocity(13,0));
@@ -574,7 +582,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
       }
     }
   }
-#endif
+#endif /*  __ALL_CLUSTERS__ */
   return kStOK;
 }
 
