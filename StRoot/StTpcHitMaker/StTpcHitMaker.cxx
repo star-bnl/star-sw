@@ -1197,6 +1197,7 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	    StTpcHit* kHit = rowCollection->hits().at(k);
 	    if (_debug) {cout << "k " << k; kHit->Print();}
 	    if (kHit->flag())                          continue;
+	    if (kHit->adc() <= 0.0)                    continue;
 #ifdef __MAKE_NTUPLE__
 	    pairC.sec    = sec;
 	    pairC.row    = row;
@@ -1213,7 +1214,8 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	    for (UInt_t l = k+1; l < NoHits; l++) {
 	      StTpcHit* lHit = rowCollection->hits().at(l);
 	      if (_debug) {cout << "l " << l; lHit->Print();}
-	      if (lHit->flag()) continue;
+	      if (lHit->flag())                          continue;
+	      if (lHit->adc() <= 0.0)                    continue;
 	      // Most stringent tests first to reduce calls
 	      // check hits near by
 	      bool notNear =  (TMath::Abs(kHit->pad()        - lHit->pad())        > padDiff ||
@@ -1329,7 +1331,6 @@ StTpcHit* StTpcHitMaker::StTpcHitFlag(const StThreeVectorF& p,
              UShort_t flag) {
   // New hit
   StTpcHit* hit = new StTpcHit(p,e,hw,q,c,idTruth,quality,id,mnpad,mxpad,mntmbk,mxtmbk,cl_x,cl_t,adc);
-  
   // Check for sanity
   if ( mntmbk<0 || mxtmbk<0 || mntmbk>500 || mxtmbk>500
     || mnpad <0 || mxpad <0 || mnpad >500 || mxpad >500
@@ -1341,6 +1342,7 @@ StTpcHit* StTpcHitMaker::StTpcHitFlag(const StThreeVectorF& p,
   if (fgCosmics && TMath::Abs(p.z()) > 150) flag |= FCF_SANITY;
 #endif
   hit->setFlag(flag);
+  assert(! ( TMath::IsNaN(hit->position().x()) || TMath::IsNaN(hit->position().y())  || TMath::IsNaN(hit->position().x())));
   return hit;
 }
 #ifdef __USE__THnSparse__

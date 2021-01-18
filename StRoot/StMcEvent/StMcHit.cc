@@ -66,16 +66,16 @@ int StMcHit::operator==(const StMcHit& h) const
 ostream& operator<<(ostream& os, const StMcHit& h)
 {
     if (h.parentTrack())
-      os << "Key, parent Key : " << Form("%5i/%5i",(int)h.key(),(int)h.parentTrack()->key()) << endl;
+      os << "Key, parent Key : " << Form("%5i/%5i",(int)h.key(),(int)h.parentTrack()->key());
     else 
-      os << "Key             : " << Form("%5i/undef",int(h.key())) << endl;
+      os << "Key             : " << Form("%5i/undef",int(h.key()));
     
-    os << "Position xyz    : " << Form("%8.2f%8.2f%8.2f",h.position().x(), h.position().y(), h.position().z()) << endl;
-    os << "Local Momentum  : " << Form("%8.2f%8.2f%8.2f",h.localMomentum().x()  ,h.localMomentum().y()  ,h.localMomentum().z())  << endl;
-    os << "dE              : " << Form("%8.2f keV",1e6*h.dE())  << endl;
-    os << "dS              : " << Form("%8.2f cm",h.dS()) << endl;
-    os << "tof             : " << Form("%8.2f ns",h.tof()*1e9) << endl;
-    os << "VolId           : " << h.volumeId() << endl;
+    os << " Position xyz    : " << Form("%8.2f%8.2f%8.2f",h.position().x(), h.position().y(), h.position().z());
+    os << " Local Momentum  : " << Form("%8.2f%8.2f%8.2f",h.localMomentum().x()  ,h.localMomentum().y()  ,h.localMomentum().z()) ;
+    os << " dE              : " << Form("%8.2f keV",1e6*h.dE()) ;
+    os << " dS              : " << Form("%8.2f cm",h.dS());
+    os << " tof             : " << Form("%8.2f ns",h.tof()*1e9);
+    os << " VolId           : " << h.volumeId() << endl;
     return os;
 }
 //________________________________________________________________________________

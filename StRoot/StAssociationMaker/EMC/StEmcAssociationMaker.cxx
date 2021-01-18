@@ -277,7 +277,7 @@ Float_t StEmcAssociationMaker::dEToEnergy(StMcCalorimeterHit* hit, Int_t detnum)
   Float_t hitEnergy = 0;
 
   StEmcGeom* emcGeom=StEmcGeom::instance(detnum+1);
-  Float_t Eta;
+  Float_t Eta = 0;
   emcGeom->getEta(m,e,Eta);
   Float_t x=fabs(Eta);
   Float_t sf=P0[detnum]+P1[detnum]*x+P2[detnum]*x*x;

@@ -52,6 +52,7 @@ class TpcCluster : public TObject {
   void AddRcHit(const StTpcHit   *rcHit);
   void AddRcTrack(const TpcTrack   *track);
   void AddRcTHit(const StTpcHit   *rcHit);
+  void SetRunNo(Int_t run) {fRun = run;}
   void SetEventNo(Int_t ev) {fEvent = ev;}
   void SetDriftVelocities(Double_t dvWest = 0, Double_t dvEast = 0) {DVelWest=dvWest; DVelEast=dvEast;}
   void SetFrequency(Double_t f = 0) {Frequency = f;}
@@ -65,6 +66,7 @@ class TpcCluster : public TObject {
   TClonesArray *RcTrack(){return fRcTrack;}
   TClonesArray *RcTHit()  {return fRcHit;}
 private:
+  Int_t fRun;
   Int_t fEvent;
   Int_t fNoPixels;
   Int_t fNoMcHit;

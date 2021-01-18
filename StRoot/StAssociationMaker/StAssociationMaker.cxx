@@ -932,9 +932,9 @@ Int_t StAssociationMaker::Make()
 	    yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
 	    zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
 	    if (! mDistanceAssoc &&
-		( fabs(xDiff)>= parDB->xCutTpc() ||
-		  fabs(yDiff)>= parDB->yCutTpc() ||
-		  fabs(zDiff)>= parDB->zCutTpc())) continue;
+		( fabs(xDiff)>= 10.*parDB->xCutTpc() ||
+		  fabs(yDiff)>= 10.*parDB->yCutTpc() ||
+		  fabs(zDiff)>= 10.*parDB->zCutTpc())) continue;
 	    float distance  = xDiff*xDiff + yDiff*yDiff+zDiff*zDiff;
 	    if (distance < tpcHitDistance) {
 	      tpcHitDistance=distance;
