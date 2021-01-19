@@ -1855,6 +1855,10 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
     fFileOut.ReplaceAll(".root","");
     fFileOut.ReplaceAll(".list","");
     fFileOut.ReplaceAll(".lis","");
+    fFileOut.ReplaceAll(".event","");
+    fFileOut.ReplaceAll(".MuDst","");
+    fFileOut.ReplaceAll(".tags","");
+    fFileOut.ReplaceAll(".picoDst","");
     fFileOut.Strip();
     fFileOut.Append(".root");
   }
