@@ -65,7 +65,7 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   } else {
     fGunIds.push_back(Id);
   }
-  LOG_INFO << "Generate " << fNofPrimaries << " primary tracks of type ";
+  LOG_INFO << "Generate " << fNofPrimaries << " primary tracks with option :" << fOption.Data() << " of type ";
   for (auto xId : fGunIds) {
     LOG_INFO << "\t"<< xId;
   }
@@ -141,36 +141,46 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
       Double_t eta       = fEta_min + (fEta_max - fEta_min)*gRandom->Rndm();
       Double_t phi       = fPhi_min + (fPhi_max - fPhi_min)*gRandom->Rndm();
       Double_t pT        = 0;
-      if (fOption.Contains("BL",TString::kIgnoreCase)) {
-	Double_t p = -1;
-	Double_t bgL10   = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
-	Double_t bg      = TMath::Power(10.,bgL10);
-	p       = mass*bg;
-	pT               = p/TMath::CosH(eta);
-      } else if (fOption.Contains("mtsq",TString::kIgnoreCase)) {
-	if (! dNdpT) {
-	  dNdpT = new TF1("dNdpT","x*TMath::Exp(-TMath::Sqrt(x*x+[0]*[0])/[1])", fpT_min,fpT_max);
-	  dNdpT->SetParameters(mass,Temperature());
-	}
-	pT = dNdpT->GetRandom();
-      } else if (fOption.Contains("mt",TString::kIgnoreCase)) {
-	while (pT < fpT_min || pT > fpT_max) {
-	  Double_t mT = mass -Temperature()*TMath::Log(gRandom->Rndm());
-	  Double_t pT2 = mT*mT - mass*mass;
-	  pT  = TMath::Sqrt(pT2);
-	}
-      } else {
-	pT               = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
-      }
-      // Particle momentum
-      px = pT*TMath::Cos(phi); 
-      py = pT*TMath::Sin(phi);
-      if (fOption.Contains("y",TString::kIgnoreCase)) {
-	Double_t mT = TMath::Sqrt(pT*pT + mass*mass);
-	eta = gRandom->Gaus( fEta_min, fEta_max);
-	pz = mT*TMath::SinH(eta);
-      } else {
+      if (fOption.Contains("pflat",TString::kIgnoreCase)) {
+	// Flat in momentum
+	Double_t p = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
+	pT = p/TMath::CosH(eta);
+	px = pT*TMath::Cos(phi); 
+	py = pT*TMath::Sin(phi);
 	pz = pT*TMath::SinH(eta);
+	  
+      } else {
+	if (fOption.Contains("BL",TString::kIgnoreCase)) {
+	  Double_t p = -1;
+	  Double_t bgL10   = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
+	  Double_t bg      = TMath::Power(10.,bgL10);
+	  p       = mass*bg;
+	  pT               = p/TMath::CosH(eta);
+	} else if (fOption.Contains("mtsq",TString::kIgnoreCase)) {
+	  if (! dNdpT) {
+	    dNdpT = new TF1("dNdpT","x*TMath::Exp(-TMath::Sqrt(x*x+[0]*[0])/[1])", fpT_min,fpT_max);
+	    dNdpT->SetParameters(mass,Temperature());
+	}
+	  pT = dNdpT->GetRandom();
+	} else if (fOption.Contains("mt",TString::kIgnoreCase)) {
+	  while (pT < fpT_min || pT > fpT_max) {
+	    Double_t mT = mass -Temperature()*TMath::Log(gRandom->Rndm());
+	    Double_t pT2 = mT*mT - mass*mass;
+	    pT  = TMath::Sqrt(pT2);
+	  }
+	} else {
+	  pT               = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
+	}
+	// Particle momentum
+	px = pT*TMath::Cos(phi); 
+	py = pT*TMath::Sin(phi);
+	if (fOption.Contains("y",TString::kIgnoreCase)) {
+	  Double_t mT = TMath::Sqrt(pT*pT + mass*mass);
+	  eta = gRandom->Gaus( fEta_min, fEta_max);
+	  pz = mT*TMath::SinH(eta);
+	} else {
+	  pz = pT*TMath::SinH(eta);
+	}
       }
     }
     // Double_t kinEnergy = 0.050;  
