@@ -56,6 +56,7 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
   static const Int_t*&      PrimaryTracks_mNSigmaPion                = (*fMuDstIter)("PrimaryTracks.mNSigmaPion");
   static const Int_t*&      PrimaryTracks_mNSigmaKaon                = (*fMuDstIter)("PrimaryTracks.mNSigmaKaon");
   static const Int_t*&      PrimaryTracks_mNSigmaProton              = (*fMuDstIter)("PrimaryTracks.mNSigmaProton");
+  static const Int_t&       NoGlobalTracks                           = (*fMuDstIter)("GlobalTracks");
   static const Short_t*&    GlobalTracks_mFlag                       = (*fMuDstIter)("GlobalTracks.mFlag");
   static const Double_t __SIGMA_SCALE__ = 1000.;
   if (! fMuDstIter->Next()) {fStatus =  kStEOF; return fStatus;}
@@ -67,6 +68,7 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
     fEvtHddr->SetDateTime(id,it);
     fEvtHddr->SetRunNumber(RunId[0]);
     fEvtHddr->SetEventNumber(Id[0]);
+    if (Debug()) fEvtHddr->Print();
   }
   Float_t v[4];
   Float_t plab[4];
@@ -78,7 +80,13 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
     {"proton","antiproton"},
     {"pi+","pi-"}
   };
+  if (Debug()) {
+    cout << "NoPrimaryVertices = " << NoPrimaryVertices 
+	 << "\tNoPrimaryTracks = " << NoPrimaryTracks
+	 << "\tNoGlobalTracks  = " << NoGlobalTracks << endl;
+  }
   for (Int_t l = 0; l < NoPrimaryVertices; l++) {
+    if (l) continue; // only 1st primary vertex
     v[0] = PrimaryVertices_mPosition_mX1[l];
     v[1] = PrimaryVertices_mPosition_mX2[l];
     v[2] = PrimaryVertices_mPosition_mX3[l];
