@@ -612,6 +612,7 @@ Int_t StTpcRTSHitMaker::Make() {
 							, cld.tb 
 							, cld.charge
 							, cld.flags);
+	    if (! hit) continue;
 	    hitsAdded++;
 	    if (hit->minTmbk() == 0) bin0Hits++;
 	    if (Debug() > 1) hit->Print();
