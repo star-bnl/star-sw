@@ -525,6 +525,7 @@ public:
     
   virtual void Print(Option_t *option = "") const; //< Print basic event info
   static void printPrimaryTracks();
+  static void printAllPrimaryTracks();
   static void printGlobalTracks() ;
   static void printVertices() ;
   void printKFVertices(); 
