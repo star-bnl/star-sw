@@ -11,7 +11,7 @@ void muMc(Int_t N = 1000000,
 #else
   //  gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
   gROOT->LoadMacro("lMuDst.C");
-#if 0
+#if 0 //=> 1 if you want to replot
   Char_t *file = gSystem->Which("./",output,kReadPermission);
 #else
   Char_t *file = 0;
