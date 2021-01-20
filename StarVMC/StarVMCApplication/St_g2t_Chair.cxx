@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "Stiostream.h"
 #include "StarMCHits.h"
 #include "St_g2t_Chair.h"
@@ -210,6 +211,7 @@ void St_g2t_tpc_hitC::Fill(GHit_t &vect) {
   g2t_tpc_hit.length        = vect.Sleng;
   G2TFillTrackHit(tpc,tpc);
   if (Debug()) table->Print(nok-1,2);		
+  assert(g2t_tpc_hit.volume_id > 100);
 }
 //________________________________________________________________________________
 void St_g2t_etr_hitC::Fill(GHit_t &vect) {

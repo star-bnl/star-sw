@@ -334,7 +334,8 @@ Int_t StBbcSimulationMaker::Make()
    {
      St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track"); //  if (!g2t_track)    return kStWarn;
      g2t_track_st *track = 0;
-     if (g2t_track) track = g2t_track->GetTable();
+     Int_t NT = 0;
+     if (g2t_track) {track = g2t_track->GetTable(); NT = g2t_track->GetNRows();}
      St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
      g2t_vertex_st     *gver = 0;
      Int_t NV = 0;
@@ -350,8 +351,19 @@ Int_t StBbcSimulationMaker::Make()
      {
        Int_t Id         = bbc_hit[iBBChit].track_p;
        Int_t id3 = 0;
+       if (Id <= 0 || Id > NT) {
+	 LOG_ERROR << "StBbcSimulationMaker::Make: g2t_bbc_hit table does not matched with g2t_track: track Id = " << Id << " and NT = " <<  NT << " skip the hit" << endm;
+	 g2t_bbc_hit->Print(iBBChit,1);
+	 continue;
+       }
        if (track)  id3        = track[Id-1].start_vertex_p;
-       assert(id3 > 0 && id3 <= NV);
+       if (id3 <= 0 || id3 > NV) {
+	 LOG_ERROR << "StBbcSimulationMaker::Make: g2t_bbc_hit table does not matched with g2t_vertex: id3 = " << id3 << " and NV = " << NV << " skip the hit" << endm;
+	 g2t_bbc_hit->Print(iBBChit,1);
+	 if (Id > 0) g2t_track->Print(Id-1,1);
+	 continue;
+       }
+       //       assert(id3 > 0 && id3 <= NV);
        Double_t tof = 0;
        if (gver) tof = gver[id3-1].ge_tof;
        //       if (TMath::Abs(tof) > 50e-9) continue; // 50 ns cut

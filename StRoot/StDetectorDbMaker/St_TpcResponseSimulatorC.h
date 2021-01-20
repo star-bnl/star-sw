@@ -60,7 +60,7 @@ class St_TpcResponseSimulatorC : public TChair {
   Float_t       T0offsetI(Int_t i = 0)      const {return  Struct(i)->T0offsetI;}
   Float_t       T0offsetO(Int_t i = 0)      const {return  Struct(i)->T0offsetO;}
   Float_t       FirstRowC(Int_t i = 0)      const {return  Struct(i)->FirstRowC;}
-  
+  Float_t       betaStar(Int_t i = 0)       const {return  Struct(i)->betaStar;}  
  protected:
   St_TpcResponseSimulatorC(St_TpcResponseSimulator *table=0) : TChair(table) {}
   virtual ~St_TpcResponseSimulatorC() {fgInstance = 0;}

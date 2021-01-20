@@ -998,6 +998,18 @@ void StMuDst::printPrimaryTracks() {
   }
 }
 
+void StMuDst::printAllPrimaryTracks() {
+  UInt_t N = allPrimaryTracks()->GetEntriesFast();
+  if (N == 0) {
+    cout << "No primary tracks found!" << endl;
+    return;
+  }
+  cout << "+++++++++ all primary track list ( " << N << " entries )" << endl << endl;
+  for (UInt_t i_trk = 0; i_trk < N; i_trk++) {
+    ((StMuTrack *)  allPrimaryTracks()->UncheckedAt(i_trk))->Print();
+  }
+}
+
 void StMuDst::printGlobalTracks()  {
   if (numberOfGlobalTracks() == 0) {
     cout << "No global tracks found!" << endl;

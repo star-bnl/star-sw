@@ -39,11 +39,15 @@ TDataSet *CreateTable(const Char_t *theFile) {
     Zlow   =  200; 
     Zhigh  =  200; 
     opt = "GmTsqy"; // rapidity
-    if (NameP.Contains("Flat")) {
+    if (NameP.Contains("pFlat")) {
+      opt ="pFlatG";
+      pThigh =   15;
+      NameP.ReplaceAll("pFlat","");
+    } else if (NameP.Contains("Flat")) {
       opt ="G";
       pThigh =   5;
       NameP.ReplaceAll("Flat","");
-    }
+    } 
   }
   const Char_t *nameP = NameP.Data();
   cout << "nameP = " << nameP << "\tfile = " << theFile << endl;
