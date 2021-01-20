@@ -705,21 +705,27 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       if (row < minRow || row > maxRow) continue;
       if (iSector != sector) {
 	if (! ( iSector > sector ) ) {
-	  LOG_ERROR << "StTpcRSMaker::Make: g2t_tpc_hit table has not been ordered by sector no. " << sector << endm;
+	  LOG_ERROR << "StTpcRSMaker::Make: g2t_tpc_hit table has not been ordered by sector no. " << sector << " and iSector = " << iSector << ". Skip the hit." <<  endm;
 	  g2t_tpc_hit->Print(indx,1);
-	  assert( iSector > sector );
+	  continue;
+	  //	  assert( iSector > sector );
 	}
 	break;
       }
       if (tpc_hit->volume_id <= 0 || tpc_hit->volume_id > 1000000) continue;
       Int_t Id  = tpc_hit->track_p;
+      if (Id <= 0 || Id > NoTpcTracks) {
+	LOG_ERROR << "StTpcRSMaker::Make: g2t_tpc_hit table does not matched with g2t_track: track Id = " << Id << " and NoTpcTracks = " <<  NoTpcTracks << " skip the hit" << endm;
+	g2t_tpc_hit->Print(indx,1);
+	continue;
+      }
       Int_t id3 = 0, ipart = 8, charge = 1;
       Double_t mass = 0;
       if (tpc_track) {
 	id3        = tpc_track[Id-1].start_vertex_p;
 	//	assert(id3 > 0 && id3 <= NV);
 	if (id3 <= 0 || id3 > NV) {
-	  LOG_ERROR << "StTpcRSMaker::Make: g2t_tpc_hit table does not matched with g2t_trac: id3 = " << id3 << " and NV = " << NV << " skip the hit" << endm;
+	  LOG_ERROR << "StTpcRSMaker::Make: g2t_tpc_hit table does not matched with g2t_vertex: id3 = " << id3 << " and NV = " << NV << " skip the hit" << endm;
 	  g2t_tpc_hit->Print(indx,1);
 	  if (Id > 0) g2t_track->Print(Id-1,1);
 	  continue;
