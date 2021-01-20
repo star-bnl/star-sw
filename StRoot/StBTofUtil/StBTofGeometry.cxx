@@ -807,17 +807,17 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoMan
      }
 
      if(maker->Debug()) {
-       LOG_DEBUG << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
+       LOG_INFO << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
      }
    }
 
-   if ( geoManager )
-     InitFrom( *geoManager );
-   else if ( starHall )
+   if ( starHall )
      InitFrom( *starHall );
-   else
-     LOG_ERROR << "StBTofGeometry::Init - Cannot build BTOF geometry without Geant or TGeo input\n";
-
+   else if ( geoManager )
+     InitFrom( *geoManager );
+   else {
+     LOG_ERROR << "StBTofGeometry::Init - Cannot build BTOF geometry without Geant or TGeo input" << endm;
+   }
 
 /* Starting with geometry tags in Y2013, GMT units were installed into tof trays 8,23,93, & 108.
  * This caused a shift in the module index for geant[1-24] instead of daqs [5-28].
@@ -918,7 +918,9 @@ void StBTofGeometry::InitFrom(TVolume &starHall)
       if ( isec>60 ) ibtoh = 1;
       int sectorsInBTOH = mTopNode->GetListSize()/2;
       int trayIndex = ibtoh * sectorsInBTOH + secVolume->GetPosition()->GetId(); // secVolume
-      LOG_DEBUG << " Tray # " << trayIndex << " has # of modules = " << detVolume->GetListSize() << endm;
+      if(mDebug) {
+	LOG_INFO << " Tray # " << trayIndex << " has # of modules = " << detVolume->GetListSize() << endm;
+      }
       isensor = 0;   // clear for this tray
       if(detVolume->GetListSize()) {   // valid tray
 
@@ -933,8 +935,8 @@ void StBTofGeometry::InitFrom(TVolume &starHall)
         delete transPos;  transPos = 0;
 
         if(mDebug) {
-          LOG_DEBUG << "   Initialize and save tray # " << mBTofTray[mNValidTrays-1]->Index() << " with " << detVolume->GetListSize() << " modules" << endm;
-          LOG_DEBUG << "   alignment parameters \t" << mTrayX0[itray] << " " <<  mTrayY0[itray] << " " <<  mTrayZ0[itray] << endm;
+          LOG_INFO << "   Initialize and save tray # " << mBTofTray[mNValidTrays-1]->Index() << " with " << detVolume->GetListSize() << " modules" << endm;
+          LOG_INFO << "   alignment parameters \t" << mTrayX0[itray] << " " <<  mTrayY0[itray] << " " <<  mTrayZ0[itray] << endm;
           mBTofTray[mNValidTrays-1]->Print();
         }
 
