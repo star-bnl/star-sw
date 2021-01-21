@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.40 2020/12/10 19:58:02 jwebb Exp $
+* $Id: xgeometry.age,v 1.41 2021/01/21 02:31:31 jwebb Exp $
 
 
 
@@ -2524,6 +2524,7 @@ If LL>0
   case y2018 { y2018: y2018 first cut geometry; Geom =        'y2018     '; call geom_y2018;} 
   case y2018a { y2018a: y2018 first cut geometry; Geom =        'y2018a    '; call geom_y2018a;} 
   case y2018b { y2018a: y2018 + FXT; Geom =        'y2018b    '; call geom_y2018b;} 
+  case y2018c { y2018a: y2018 + FXT; Geom =        'y2018c    '; call geom_y2018c;} 
   case y2018x { y2018x: y2018 experimentap TPC geometry; Geom =        'y2018x    '; call geom_y2018x;} 
 
   case y2019 { y2019: y2019 first cut geometry; Geom =        'y2019     '; call geom_y2019;} 
@@ -4505,8 +4506,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.40 2020/12/10 19:58:02 jwebb Exp $
+* $Id: xgeometry.age,v 1.41 2021/01/21 02:31:31 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.41  2021/01/21 02:31:31  jwebb
+* Add y2018c option
+*
 * Revision 1.40  2020/12/10 19:58:02  jwebb
 * y2021 geometry rough cut @ 20201215
 *
