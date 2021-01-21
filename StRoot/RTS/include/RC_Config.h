@@ -328,6 +328,8 @@ struct PrescaleReturnInfo {
     float py_desiredRate[TRIGGERS_MAX];
     float py_scalerRate[TRIGGERS_MAX];
     float py_predictedRate[TRIGGERS_MAX];
+
+    float measuredFrequency;
 };
 
 #define HLT_UDP_PORT 8062
