@@ -19,6 +19,7 @@
 #include <daqFormats.h>
 #include <daq100Decision.h>
 #include <XMLCFG/SimpleXmlDoc.h>
+#include <stdlib.h>
 
 class Lxgbx {
  public:
