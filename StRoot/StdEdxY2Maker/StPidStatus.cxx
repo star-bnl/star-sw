@@ -91,6 +91,9 @@ StPidStatus::StPidStatus(StPicoTrack *picoTrack) : PiDStatus(-1) {
   pidFit = StDedxPidTraits(kTpcId, kLikelihoodFitId, picoTrack->nHitsDedx(), 
 			   1e-6*picoTrack->dEdx(), picoTrack->dEdxError());
   fFit = StdEdxStatus(&pidFit);
+  pidNdx = StDedxPidTraits(kTpcId, kOtherMethodId, picoTrack->nHitsDedx(),
+			    picoTrack->dNdx(), picoTrack->dNdxError());
+  fdNdx = StdEdxStatus(&pidNdx);
   Set();
 }
 //________________________________________________________________________________
