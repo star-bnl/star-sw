@@ -23,7 +23,7 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   TString Chain("r");
   Chain += triggerSet;
   //  if (! isPico) Chain += ",RMuDst";
-  if (! isPico) {Chain += ",RMuDst,PicoWrite"; isPico = kTRUE;}
+  if (! isPico) {Chain += ",RMuDst,PicoWrite";}//  isPico = kTRUE;}
   else          Chain += ",RpicoDst";
   Chain += ",kfpAna,mysql,detDb,nodefault,quiet";
   //  lMuDst(0,input,"ry2016,RpicoDst,mysql,PicoAnalysis,quiet,nodefault",output);
@@ -136,7 +136,7 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   if (! isPico) {
     StKFParticleAnalysisMaker *ana = ( StKFParticleAnalysisMaker *) chain->Maker("KFParticleAnalysis");
     if (! ana) return;
-    ana->AnalyseMuDst();
+    //    ana->AnalyseMuDst();
     StMuDstMaker * MuMk = (StMuDstMaker *) StMaker::GetTopChain()->Maker("MuDst");
     if (! MuMk) return;
     MuMk->SetStatus("*",1);
