@@ -217,7 +217,7 @@ class Lxgbx {
 	if(seed == 0) {
 	    seed = (long int)(currtime * 1e6);
 	    srand48(seed);
-	    LOG("JEFF", "seed48=%llx %d", seed, sizeof(seed));
+	    LOG(NOTE, "seed48=%llx %d", seed, sizeof(seed));
 	}
 
 	if(currtime > 15 + resettime) {
