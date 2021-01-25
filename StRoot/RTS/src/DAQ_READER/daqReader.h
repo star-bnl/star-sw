@@ -225,6 +225,9 @@ class daqReader {
   u_int detectors ;	// detectors present bit mask according to DAQ!
   UINT64 detectors64;
 
+  float triggerFrequency;   // rhic frequency
+  u_int triggerFrequency_valid;
+
   int streaming_seq;        // -1 if not streaming
   int streaming_evb;        // evb + seq is the key here, there are multiple seq per run
   char streaming_node[12];

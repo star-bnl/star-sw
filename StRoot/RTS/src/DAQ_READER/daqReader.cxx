@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.71 2019/07/08 15:21:30 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.72 2021/01/25 03:47:52 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -690,6 +690,15 @@ char *daqReader::get(int num, int type)
 	detsinrun = evbsum->detectorsInRun;
 	detsinrun64 = evbsum->detectorsInRun;
 	evpgroupsinrun = 0xffffffff;
+	
+	if(evbsum->version > 2) {
+	    triggerFrequency = evbsum->triggerFrequency;
+	    triggerFrequency_valid = 1;
+	}
+	else {
+	    triggerFrequency = 9.3e6;
+	    triggerFrequency_valid = 0;
+	}
     }
     else {
 	LOG(DBG, "No EvbSummary Record");
