@@ -1,8 +1,12 @@
 /* 
- *  $Id: StHyperNuclei.hh,v 1.1 2021/01/13 12:16:39 jwebb Exp $ 
+ *  $Id: StHyperNuclei.hh,v 1.2 2021/01/25 11:19:23 jwebb Exp $ 
  *
  *  $Log: StHyperNuclei.hh,v $
+ *  Revision 1.2  2021/01/25 11:19:23  jwebb
+ *  Ensure that an instance of the particle data is available.
+ *
  *  Revision 1.1  2021/01/13 12:16:39  jwebb
+ *
  *  Definitions for H4-Lambda, He4-Lambda and He5-Lambda hypernuclei.
  *
  *
@@ -18,11 +22,11 @@
 class StH4Lambda : public StIon {
 public:
     static StH4Lambda* instance() {
-      return (mH4Lambda)?mH4Lambda:new StH4Lambda();
+      return &mH4Lambda;
     };
     
 private:
-    static StH4Lambda* mH4Lambda;
+    static StH4Lambda mH4Lambda;
     
     StH4Lambda(const string  &aName="H4Lambda",  
 		  double mass =3.92727 *GeV,
@@ -45,11 +49,11 @@ private:
 class StHe4Lambda : public StIon {
 public:
     static StHe4Lambda* instance() {
-      return (mHe4Lambda)?mHe4Lambda:new StHe4Lambda();
+      return &mHe4Lambda;
     };
     
 private:
-    static StHe4Lambda* mHe4Lambda;
+    static StHe4Lambda mHe4Lambda;
     
     StHe4Lambda(const string  &aName="He4Lambda",  
 		  double mass =3.92168 *GeV,
@@ -72,11 +76,11 @@ private:
 class StHe5Lambda : public StIon {
 public:
     static StHe5Lambda* instance() {
-      return (mHe5Lambda)?mHe5Lambda:new StHe5Lambda();
+      return &mHe5Lambda;
     };
     
 private:
-    static StHe5Lambda* mHe5Lambda;
+    static StHe5Lambda mHe5Lambda;
     
     StHe5Lambda(const string  &aName="He5Lambda",  
 		  double mass =4.83978 *GeV,
