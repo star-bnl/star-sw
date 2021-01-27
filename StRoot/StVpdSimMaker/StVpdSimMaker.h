@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdSimMaker.h,v 1.1 2017/03/02 18:38:17 jeromel Exp $
+ * $Id: StVpdSimMaker.h,v 1.2 2021/01/27 04:33:30 geurts Exp $
  *
  * Author: Nickolas Luttrell (Rice University)
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StVpdSimMaker.h,v $
+ * Revision 1.2  2021/01/27 04:33:30  geurts
+ * move StVpdSimConfig.h to StBTofUtil area for shared used between StBTofCalibMaker and StVpdSimMaker
+ *
  * Revision 1.1  2017/03/02 18:38:17  jeromel
  * First version of Vpd simulations
  *
@@ -33,7 +36,7 @@ class StVpdSimConfig;
 #include "tables/St_g2t_vpd_hit_Table.h"
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcBTofHitCollection.hh"
-#include "StVpdSimConfig.h"
+#include "StBTofUtil/StVpdSimConfig.h"
 
 #include <vector>
 #ifndef ST_NO_NAMESPACES
@@ -52,21 +55,21 @@ public:
 	int          FinishRun(int);
 	virtual int  Make();
 	virtual int  Finish();
-    
+
     // Define get and set functions
 
     //! Returns the StBTofCollection of Vpd hits
 	StBTofCollection*  GetVpdCollection()  const { return mVpdCollection; }
     //! Returns the StMcBTofHitCollection of Mc Vpd hits
 	StMcBTofHitCollection* GetMcBTofHitCollection() const { return mMcBTofHitCollection; }
-    
+
 	string   pullHistFileName();
     string   getParamsFileName() { return mParamsFileName; }
     void    setParamsFile(string fileName = "db/vpdSimParams/vpdSimParams.dat") { mParamsFileName = fileName; }
     void    setBookHisto(bool bookHist) { mBookHisto = bookHist; }
 
 	virtual const char *GetCVS() const{
-		static const char cvs[] = "Tag $Name:  $ $Id: StVpdSimMaker.h,v 1.1 2017/03/02 18:38:17 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;
+		static const char cvs[] = "Tag $Name:  $ $Id: StVpdSimMaker.h,v 1.2 2021/01/27 04:33:30 geurts Exp $ built " __DATE__ " " __TIME__; return cvs;
 	}
 
 protected:
