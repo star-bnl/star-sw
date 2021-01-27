@@ -19,7 +19,7 @@ VPATH += ../DAQ_BSMD ../DAQ_BTOW ../DAQ_EMC ../DAQ_ESMD ../DAQ_FPD ../DAQ_FTP ..
 	../DAQ_READER  ../SFS ../LOG 
 
 
-BINS = daqFileMerger daqFileHacker daqFileChopper testReader testReader2 rts_example tpc_rerun tpx_read_gains
+BINS = rts_example daqFileMerger daqFileHacker daqFileChopper testReader testReader2 tpc_rerun tpx_read_gains
 
 all:   $(BINS)
 
@@ -82,6 +82,7 @@ daqFileHacker.o: ../../../../StRoot/RTS/include/rts.h
 daqFileHacker.o: ../DAQ_READER/daq_dta_structs.h
 daqFileHacker.o: ../DAQ_BTOW/daq_btow.h
 daqFileHacker.o: ../DAQ_EMC/daq_emc.h
+daqFileHacker.o: ../DAQ_L4/daq_l4.h
 daqFileMerger.o: ../../../../StRoot/RTS/include/rtsLog.h
 daqFileMerger.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daqFileMerger.o: ../DAQ_READER/daqReader.h
