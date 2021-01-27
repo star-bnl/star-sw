@@ -1,17 +1,20 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.13 2020/04/10 20:41:38 zye20 Exp $
+ * $Id: StBTofCalibMaker.h,v 1.14 2021/01/27 04:06:25 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
  *
- * Description: Tof Calibration Maker to do the calibration for VPD 
+ * Description: Tof Calibration Maker to do the calibration for VPD
  *              (start timing) , TOF tray
  *              store into StBTofPidTraits
  *
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.14  2021/01/27 04:06:25  geurts
+ * Introducing meaningful nTofSigma calculations in VPDstartless mode.
+ *
  * Revision 1.13  2020/04/10 20:41:38  zye20
  * Xin add more pions and add protons for T0s in the FXT mode
  *
@@ -90,7 +93,11 @@ class StBTofPidTraits;
 class StMuDst;
 class StMuPrimaryVertex;
 class StMuBTofPidTraits;
+class StVpdSimConfig;
+class StBTofSimResParams;
+
 #include "StPhysicalHelixD.hh"
+#include "StBTofUtil/StVpdSimConfig.h"
 
 typedef std::vector<Int_t>  IntVec;
 typedef std::vector<Double_t>  DoubleVec;
@@ -102,14 +109,14 @@ public:
   StBTofCalibMaker(const char* name="btofCalib");
   /// Destructor
   virtual ~StBTofCalibMaker();
-    
+
   virtual Int_t Init();
   virtual Int_t InitRun(int);
   virtual Int_t FinishRun(int);
   virtual Int_t Make();
   virtual Int_t Finish();
 
-  /// switch to select the Helix Geometry  
+  /// switch to select the Helix Geometry
   void setOuterGeometry(const bool val=kTRUE);
   /// switch to turn on slewing correction or not - maybe only T0 in the first step.
   void setSlewingCorr(const bool val=kTRUE);
@@ -156,7 +163,7 @@ private:
   void writeStartTime();
   /// Initialize the calibration parameters from dbase
   Int_t initParameters(Int_t runnumber);
-        
+
   ///
   void processStEvent();
   ///
@@ -164,27 +171,29 @@ private:
 
   void cleanCalibMuDst();
   void cleanCalib(StMuBTofPidTraits&);  //! functions to clean up calib done before in MuDst
-        
+
   /// calculate tstart from Vpd
   void tstart(const Double_t Vz, Double_t *tstart, Double_t *tdiff);  //! tstart calculation splitted into 2 steps
   /// full calibration function for tray hits
   Double_t tofAllCorr(const Double_t tof, const Double_t tot, const Double_t zlocal, const Int_t iTray, const Int_t iModuleChan);
-  
+
   ///
   void tstart_NoVpd(const StBTofCollection *btofCollection, const StPrimaryVertex *pVtx, Double_t *tstart);
   void tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVertex *pVtx, Double_t *tstart);
-    
-  
+
+  ///
+  float tofCellResolution(const Int_t iTray, const Int_t iModuleChan);
+
   /// book histograms
   void bookHistograms();
   /// write histograms
   void writeHistograms();
-        
+
 private:
   enum{
     mNTOF = 192,        // 192 for tof in Run 8++
     mNTDIG = 8,         // 8 per tray in Run 8++
-    mNModule = 32,      // 32 for tofr5++ 
+    mNModule = 32,      // 32 for tofr5++
     mNVPD = 19,         // 19 tubes at each side
     mNCell = 6,         // 6 cells per module
     mNBinMax = 60,      // 60 bins for T-Tot, T-Z correction
@@ -210,16 +219,18 @@ private:
     Int_t      mVPDEastHitsCut = 0;
     Int_t      mVPDWestHitsCut = 0;
 
-    Float_t   mTofTotEdge[mNTray][mNModule][mNCell][mNBinMax];//!From Double_t to Float_t 
+    Float_t   mTofTotEdge[mNTray][mNModule][mNCell][mNBinMax];//!From Double_t to Float_t
     Float_t   mTofTotCorr[mNTray][mNModule][mNCell][mNBinMax];//! from board-by-board to cell-by-cell
     Float_t   mTofZEdge[mNTray][mNModule][mNCell][mNBinMax];//! boards now filled 24 times
     Float_t   mTofZCorr[mNTray][mNModule][mNCell][mNBinMax];
     Double_t  mTofTZero[mNTray][mNModule][mNCell];  //! cell-by-cell T0
 
     Double_t   mVPDLeTime[2*mNVPD];
-    
+
     Double_t   mTSumEast = 0.0;
     Double_t   mTSumWest = 0.0;
+    Double_t   mTSumEastSigma = 0.0;
+    Double_t   mTSumWestSigma = 0.0;
     UInt_t     mVPDHitPatternEast = 0;
     UInt_t     mVPDHitPatternWest = 0;
     Int_t      mNEast = 0;
@@ -247,6 +258,10 @@ private:
     Bool_t            mForceTStartZero = false; //!switch to allow totally startless bTOF
     Bool_t            mFXTMode = kFALSE; //! FXT mode, protons included in calculating T0
 
+    StVpdSimConfig*     mVpdResConfig; //! database access VPD resolutions
+    std::map<int, StVpdSimConfig::SingleTubeParams>     mVpdRes;
+    StBTofSimResParams* mBTofRes; //! database access BTOF resolutions
+
     string mCalibFilePvpd; //! filename for pvpd calibration parameters
     string mCalibFileTot;  //! filename for ToT calibration parameters
     string mCalibFileZhit; //! filename for Zhit calibration parameters
@@ -255,10 +270,10 @@ private:
     Bool_t   mHisto;            //! switch to fill QA histograms
     string   mHistoFileName;    //! histogram file name
     TH1D*    hEventCounter = nullptr;     //!
-            
-    virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.13 2020/04/10 20:41:38 zye20 Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
-    
+
+    virtual const char *GetCVS() const
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.14 2021/01/27 04:06:25 geurts Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+
     ClassDef(StBTofCalibMaker,3)
 };
 

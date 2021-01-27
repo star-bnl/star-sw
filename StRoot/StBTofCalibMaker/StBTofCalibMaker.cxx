@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.22 2020/10/10 04:36:00 zye20 Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.23 2021/01/27 04:06:25 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,13 +12,16 @@
  *****************************************************************
  *Revision 1.23 2020/10/09 11pm, Zaochen
  *add (if (IAttr("btofFXT")) mFXTMode = kTRUE;) in the Init(),
- *it could allow the chain option "btofFXT" to turn on the FXTMode easily 
- 
+ *it could allow the chain option "btofFXT" to turn on the FXTMode easily
+
  *Revision 1.22 2020/04/09 4pm, Zaochen
  *implement Xin's updates to allow more pions and protons for the T0s in FXT mode
  *add a flag mFXTMode: 0 for Collider mode, 1 for FXT mode
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.23  2021/01/27 04:06:25  geurts
+ * Introducing meaningful nTofSigma calculations in VPDstartless mode.
+ *
  * Revision 1.22  2020/10/10 04:36:00  zye20
  * new added chain option btofFXT which could turn on FXTMode of StBTofCalibMaker
  *
@@ -130,7 +133,6 @@
 #include "StBTofUtil/tofPathLength.hh"
 #include "StBTofUtil/StBTofHitCollection.h"
 #include "StBTofUtil/StBTofGeometry.h"
-
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
@@ -140,6 +142,8 @@
 
 #include "StBTofCalibMaker.h"
 #include "StVpdCalibMaker/StVpdCalibMaker.h"
+#include "StBTofUtil/StBTofSimResParams.h"
+#include "StBTofUtil/StVpdSimConfig.h"
 
 
 /// Very High resolution mode, pico-second per bin
@@ -276,6 +280,15 @@ Int_t StBTofCalibMaker::InitRun(int runnumber)
 
     /// Look for StVpdCalibMaker and decide on its setting (based on its dbase entry) to use VPD for TOF start-timing
     StVpdCalibMaker *vpdCalib = (StVpdCalibMaker *)GetMaker("vpdCalib");
+
+    /// Get VPD and BTOF resolutions from database
+    mVpdResConfig = new StVpdSimConfig;
+    mVpdResConfig->loadVpdSimParams(); // do i really need this?
+    mVpdRes = mVpdResConfig->getParams();
+    mBTofRes = new StBTofSimResParams;
+    mBTofRes->loadParams();
+
+
     if(vpdCalib) {
         mUseVpdStart = vpdCalib->useVpdStart();
 
@@ -884,6 +897,9 @@ Int_t StBTofCalibMaker::FinishRun(int runnumber)
     if(mBeamHelix) delete mBeamHelix;
     mBeamHelix = 0;
 
+    if (mBTofRes){delete mBTofRes; mBTofRes = 0;}
+    if (mVpdResConfig) {delete mVpdResConfig;  mVpdResConfig = 0;}
+
     return kStOK;
 }
 
@@ -1180,12 +1196,13 @@ void StBTofCalibMaker::processStEvent()
         float sigmapi = -9999.;
         float sigmak = -9999.;
         float sigmap = -9999.;
-        float res = 0.013;  // 0.013 by default - 1/beta resolution
+//        float res = 0.013;  // 0.013 by default - 1/beta resolution
+        float res = tofCellResolution(trayId, moduleChan);
         if(fabs(res)>1.e-5) {
-            sigmae = (Float_t)((1./beta-1./b_e)/res);
-            sigmapi = (Float_t)((1./beta-1./b_pi)/res);
-            sigmak = (Float_t)((1./beta-1./b_k)/res);
-            sigmap = (Float_t)((1./beta-1./b_p)/res);
+            sigmae = (Float_t)(L*(1./beta-1./b_e)/res);
+            sigmapi = (Float_t)(L*(1./beta-1./b_pi)/res);
+            sigmak = (Float_t)(L*(1./beta-1./b_k)/res);
+            sigmap = (Float_t)(L*(1./beta-1./b_p)/res);
         }
 
         pidTof->setPathLength((Float_t)L);
@@ -1431,12 +1448,13 @@ void StBTofCalibMaker::processMuDst()
             float sigmapi = -9999.;
             float sigmak = -9999.;
             float sigmap = -9999.;
-            float res = 0.013;  // 0.013 by default - 1/beta resolution
-            if(fabs(res)>1.e-5) {
-                sigmae = (Float_t)((1./beta-1./b_e)/res);
-                sigmapi = (Float_t)((1./beta-1./b_pi)/res);
-                sigmak = (Float_t)((1./beta-1./b_k)/res);
-                sigmap = (Float_t)((1./beta-1./b_p)/res);
+//            float res = 0.013;  // 0.013 by default - 1/beta resolution
+            float res = tofCellResolution(trayId, moduleChan);
+           if(fabs(res)>1.e-5) {
+                sigmae = (Float_t)(L*(1./beta-1./b_e)/res);
+                sigmapi = (Float_t)(L*(1./beta-1./b_pi)/res);
+                sigmak = (Float_t)(L*(1./beta-1./b_k)/res);
+                sigmap = (Float_t)(L*(1./beta-1./b_p)/res);
             }
 
             pidTof.setPathLength((Float_t)L);
@@ -1550,6 +1568,8 @@ void StBTofCalibMaker::loadVpdData()
 
     mTSumWest = 0;
     mTSumEast = 0;
+    mTSumWestSigma = 0;
+    mTSumEastSigma = 0;
     mVPDHitPatternWest = mBTofHeader->vpdHitPattern(west);
     mVPDHitPatternEast = mBTofHeader->vpdHitPattern(east);
     mNWest = mBTofHeader->numberOfVpdHits(west);
@@ -1558,8 +1578,10 @@ void StBTofCalibMaker::loadVpdData()
 
     for(int i=0;i<mNVPD;i++) {
         mVPDLeTime[i] = mBTofHeader->vpdTime(west, i+1);
-        if(mVPDLeTime[i]>0.) mTSumWest += mVPDLeTime[i];
-
+        if(mVPDLeTime[i]>0.) {
+          mTSumWest += mVPDLeTime[i];
+ //fg add here the mTSumEastSigma based on what tubes were used.
+        }
         if(Debug()) {
             LOG_DEBUG << " loading VPD West tubeId = " << i+1 << " time = " << mVPDLeTime[i] << endm;
         }
@@ -1936,4 +1958,38 @@ void StBTofCalibMaker::writeHistograms()
         hEventCounter->Write();
     }
     return;
+}
+
+float StBTofCalibMaker::tofCellResolution(const Int_t itray, const Int_t iModuleChan)
+{
+
+ float resolution(0.013); // 0.013 by default - 1/beta resolution
+ if (itray<0){return resolution;}
+
+ int module = iModuleChan/6 + 1;
+ int cell   = iModuleChan%6 + 1;
+ float stop_resolution  = mBTofRes->timeres_tof(itray, module, cell);
+
+float start_resolution(0);
+ if (mUseVpdStart){
+
+   // For VPD timing determine the VPD starttime by combing the resolutions of
+   //   tray == 122 (east)
+   //   mSimParams[singleHit.tubeId-1+19].singleTubeRes
+   //   tray 121 (west)
+   //   mSimParams[singleHit.tubeId-1].singleTubeRes
+   //
+   // needs to be implemented
+
+ }
+ else {
+   // combine an average BTOF resolution based on NT0
+   // more sophisticated: figure out what BTOF cells actually went into the NT0 count.
+
+   start_resolution = mBTofRes->average_timeres_tof()/sqrt(mNTzero);
+ }
+
+ resolution = sqrt(stop_resolution*stop_resolution + start_resolution*start_resolution);
+
+return resolution;
 }
