@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.17 2021/01/27 04:31:52 geurts Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.18 2021/01/27 16:24:27 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -41,7 +41,7 @@
 #include "tables/St_g2t_ctf_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "StMcTrack.hh"
-#include "StVpdSimMaker/StVpdSimConfig.h"
+#include "StBTofUtil/StVpdSimConfig.h"
 
 #include "StBTofUtil/StBTofDaqMap.h"
 #include "StTofUtil/tofPathLength.hh"
