@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdSimMaker.cxx,v 1.2 2017/03/21 23:43:25 nluttrel Exp $
+ * $Id: StVpdSimMaker.cxx,v 1.3 2021/01/27 04:33:30 geurts Exp $
  *
  * Author: Nickolas Luttrell (Rice University)
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StVpdSimMaker.cxx,v $
+ * Revision 1.3  2021/01/27 04:33:30  geurts
+ * move StVpdSimConfig.h to StBTofUtil area for shared used between StBTofCalibMaker and StVpdSimMaker
+ *
  * Revision 1.2  2017/03/21 23:43:25  nluttrel
  * Added checks for Mc vertex and tube Id
  *
@@ -27,7 +30,7 @@
 #include <cstddef>         // std::size_t
 #include <math.h>
 #include "StVpdSimMaker.h"
-#include "StVpdSimConfig.h"
+#include "StBTofUtil/StVpdSimConfig.h"
 
 #include <TRandom3.h>
 #include "SystemOfUnits.h"
@@ -75,7 +78,7 @@ StVpdSimMaker::~StVpdSimMaker()
     /**
      * Delete any DaqMaps or similar that are no longer needed.
      */
-    
+
     delete mSimConfig;
 }
 
@@ -86,7 +89,7 @@ int StVpdSimMaker::Init()
     /**
      * Reset values, create histograms
      */
-    
+
     Reset();
     if (mBookHisto) {
         bookHistograms();
@@ -98,7 +101,7 @@ int StVpdSimMaker::Init()
 void StVpdSimMaker::Reset()
 {
     //! Reset values
-    
+
     mGeantData = 0;
     mEvent = 0;
     mMcEvent = 0;
@@ -180,7 +183,7 @@ int StVpdSimMaker::Make()
         LOG_WARN << "No primary vertex in McEvent! Bailing out ..." << endm;
         return kStWarn;
     }
-    
+
     //! Look for Vpd hits
     St_g2t_vpd_hit* g2t_vpd_hits = 0;
     g2t_vpd_hits = dynamic_cast<St_g2t_vpd_hit*>(mGeantData->Find("g2t_vpd_hit"));
@@ -202,12 +205,12 @@ int StVpdSimMaker::Make()
                 int vId = vpd_hit->volume_id;  //! volume id used the tube index
                 int iTray = vId/1000 + 120;    //! 121: west, 122: east
                 int tubeIndex = (vId % 100)-1; //! index of the tube [0,18]
-                
+
                 if ( (tubeIndex<0) || (tubeIndex>18) ) { //! Check that tube is within accepted range
                     LOG_WARN << "Invalid Vpd Tube Id!" << endm;
                     continue;
                 }
-                
+
                 /** Check tray number and status flag of the current tube hit
                  * then calculate tof, extract relevant values and append hits
                  * to a vector
@@ -320,7 +323,7 @@ double StVpdSimMaker::thresholdCut(std::vector<VpdSingleHit> singleHitsVec, std:
     std::vector<double> timesVec;
     mSumTubeTime = 0;
     mTubeTAvg = 0;
-    
+
     int mCounter = 0;
 
     for(int i = 0; i < (int)tubeCounts.size(); i++) {   //! Iterate through each of the 19 tubes
