@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.h,v 1.9 2018/03/28 02:01:50 jdb Exp $
+ * $Id: StBTofSimMaker.h,v 1.10 2021/01/27 14:58:56 geurts Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.h,v $
+ * Revision 1.10  2021/01/27 14:58:56  geurts
+ * change path to StVpdSimConfig.h from StVpdSimMaker to StBTofUtil
+ *
  * Revision 1.9  2018/03/28 02:01:50  jdb
  * update to StBTofSimMaker to use cell-by-cell time resolution for FastSim
  *
@@ -47,7 +50,7 @@
  *
  * Revision 1.1  2009/12/09 21:56:41  dthein
  * First version of StBTofSimMaker
- * 
+ *
  *
  **************************************************************************/
 #ifndef STBTOFSIMMAKER_HH
@@ -70,7 +73,7 @@ class StBTofHeader;
 #include "tables/St_g2t_ctf_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
-#include "StVpdSimMaker/StVpdSimConfig.h"
+#include "StBTofUtil/StVpdSimConfig.h"
 
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcBTofHitCollection.hh"
@@ -103,7 +106,7 @@ protected:
         mNTray = 120,   //!< 120 TOF trays
         mNModule = 32,  //!< 32 modules per tray
         mNCell = 6,     //!< 6 cells per module
-        mAMP = 50000,     
+        mAMP = 50000,
         mADCBINWIDTH = 25,
         mTDCBINWIDTH = 50
     };
@@ -177,7 +180,7 @@ protected:
     TH1F* momBinRaw6;
     TH1F* momBinRaw7;
     TH1F* momBinRaw8;
-    
+
     TH1F* momBin1;
     TH1F* momBin2;
     TH1F* momBin3;
@@ -203,7 +206,7 @@ protected:
     TH2F* mNCellReco;    //!< # of cells after recon
     TH1F* mTDCReco;      //!< TDC recon
     TH1F* mADCReco;      //!< ADC recon -- empty
-    TH1F* mT0Reco;   //!< 
+    TH1F* mT0Reco;   //!<
     TH1F* mTofResReco;   //!< time resolution after recon
     TH2F* mTACorr;       //!< T-A Slewing Correlation
     TH1F* mModHist;       //!< T-A Slewing Correlation
@@ -269,7 +272,7 @@ public:
     void   writeStEvent(bool val = kTRUE) {mWriteStEvent = val;}
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.9 2018/03/28 02:01:50 jdb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.10 2021/01/27 14:58:56 geurts Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
     ClassDef(StBTofSimMaker,2)
 };
