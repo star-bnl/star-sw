@@ -1,10 +1,14 @@
+// 2021/01/28 Zaochen Ye modified it with the latest time stamp
 // 2019/12/10 Zaochen Ye modified it with the latest time stamp
 
-// $Id: tof_reload.C,v 1.7 2021/01/28 17:16:35 zye20 Exp $
+// $Id: tof_reload.C,v 1.8 2021/01/28 17:22:39 zye20 Exp $
 // TOF annual database reload script
 // expects table_reupload.C to be in the same directory
 //
 // $Log: tof_reload.C,v $
+// Revision 1.8  2021/01/28 17:22:39  zye20
+// modified for initialize Run21
+//
 // Revision 1.7  2021/01/28 17:16:35  zye20
 // OBCVS: ----------------------------------------------------------------------
 // :qi
