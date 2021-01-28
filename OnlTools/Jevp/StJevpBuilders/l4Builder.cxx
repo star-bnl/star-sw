@@ -890,8 +890,10 @@ void l4Builder::event(daqReader *rdr)
     XX(0);
     unsigned int decision = hlt_eve->hltDecision;
 
+#ifdef _OPENMP
     omp_set_nested(1);
     omp_set_dynamic(0);
+#endif // _OPENMP    
     XX(0);
 
     
