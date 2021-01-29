@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.h,v 1.5 2020/01/16 03:39:39 fseck Exp $
+ * $Id: StETofHitMaker.h,v 1.6 2021/01/29 15:08:31 weidenkaff Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.h,v $
+ * Revision 1.6  2021/01/29 15:08:31  weidenkaff
+ * fixed memory leak in StEtofHitMaker.cxx by adding a delete to merged hits
+ *
  * Revision 1.5  2020/01/16 03:39:39  fseck
  * add possibility to calculate VPD start time
  *
@@ -78,6 +81,8 @@ public:
     void setDoQA( const bool doQA );
     void setDebug( const bool debug );
 
+    void updateClockJumpMap( const std::map< int, int >& clockJumpDir );
+
 private:
     // internal subfunctions ----------------------------------------------------------------------
     void bookHistograms();
@@ -136,6 +141,8 @@ private:
 
     Double_t mSoftwareDeadTime;      // dead time introduced in software to reject after pulses on the same channel
     Bool_t   mDoClockJumpShift;      // correct for clock jumps on one side
+
+    std::map< Int_t, Int_t >     mClockJumpDirection;  // stores direction of clock jump for time correction
 
     // histograms for QA --------------------------------------------------------
     Bool_t                    mDoQA;
