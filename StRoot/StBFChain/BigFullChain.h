@@ -1131,6 +1131,15 @@ Bfc_st BFC[] = { // standard chains
    "B2020a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    ,    "","",        "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
+  // 2021 initial chains
+  {"B2021a" ,"","",
+   "ry2021a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+   "","",                                                      "Base chain for run 2020 data (tpc)",kFALSE},
+
+  {"P2021a","" ,"",
+   "B2021a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   ,    "","",        "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+
 
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
