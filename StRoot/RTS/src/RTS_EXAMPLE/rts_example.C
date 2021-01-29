@@ -1886,10 +1886,11 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		if(crate_bx_time[i] > 0xffffll) {
 		    corrupt = 1;
 
-		    printf("CORRUPT evt %d:  %s bxtime %lld\n",
+		    printf("CORRUPT evt %d:  %s bxtime %lld %lld\n",
 			   rdr->seq,
 			   confnum2str[i],
-			   crate_bx_time[i]);
+			   crate_bx_time[i],
+			   bx64);
 		}
 	    }
 
