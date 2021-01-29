@@ -997,7 +997,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		goto err_end ;
 	}
 	else if (trg_cou > 60) {
-		LOG(WARN,"%d: Lots of triggers %d",rdo,trg_cou) ;
+
 	}
 
 	for(u_int i=0;i<trg_cou;i++) {
@@ -1011,6 +1011,27 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		}
 	}
 	
+	if(trg_cou > 60) {
+		LOG(WARN,"%d: Lots of triggers %d",rdo,trg_cou) ;
+
+		for(int i=0;i<5;i++) {
+			u_int v = trg[i].reserved[0];
+			u_int t ;
+			u_int trg_cmd ;
+			u_int daq_cmd ;
+
+			t = ((v>>8)&0xF)<<8 ;
+			t |= ((v>>12)&0xF)<<4 ;
+			t |= ((v>>16)&0xF) ;
+
+			trg_cmd = v & 0xF ;
+			daq_cmd = (v>>4) & 0xF ;
+
+
+			LOG(WARN,"    %d: %d/%d = 0x%08X = T %d, trg %d, daq %d",rdo,i,trg_cou,trg[i].reserved[0],t,trg_cmd,daq_cmd) ;
+		}
+
+	}
 	// switch on logging...
 #if 0
 	if(1) {
