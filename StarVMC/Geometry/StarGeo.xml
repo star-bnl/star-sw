@@ -68,6 +68,32 @@
     <Construct sys="etof" config="ETOFv14f"  />
   </Geometry>
 
+  <Geometry tag="y2021a" comment="STAR production tag w/ FCS installation">
+    <Construct sys="cave" config="CAVE06"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="scon" config="SCON14"  />
+<!-- Temporarily removed so that we do not need to introduce overlapping volumes -->
+    <Construct sys="pipe" config="PIPE12ft"/>
+    <Construct sys="targ" config="TARGv1"  /> --><!-- fixed target geometry -->
+    <Construct sys="tpce" config="TPCEv6"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMin"  />
+    <Construct sys="epdm" config="EPDMv1"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+    <!-- Construct sys="etof" config="ETOFv14f"  -->
+    <Construct sys="wcal" config="WCALv1" simu="1" />
+    <Construct sys="hcal" config="HCALv1" simu="1" />
+    <Construct sys="plat" config="PLATon" simu="2" />
+    <!-- No preshower -->
+    <Construct sys="etof" config="ETOFv14f"  />
+  </Geometry>
+
   <Geometry tag="y2020"  check="false" comment="Y2020 rough cut geometry">
 
     <Construct sys="cave" config="CAVE06"  />
