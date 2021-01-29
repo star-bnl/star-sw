@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.41 2021/01/21 02:31:31 jwebb Exp $
+* $Id: xgeometry.age,v 1.42 2021/01/29 14:22:14 jwebb Exp $
 
 
 
@@ -2534,6 +2534,7 @@ If LL>0
   case y2020a { y2020a: y2020a production; Geom =        'y2020a    '; call geom_y2020a;} 
 
   case y2021 { y2021: y2021 first cut geometry; Geom =        'y2021     '; call geom_y2021;} 
+  case y2021a { y2021a: y2021 first production geometry; Geom =        'y2021a    '; call geom_y2021a;} 
 
 
   case dev2021 { dev2021:  First cut forward upgrades; Geom =        'dev2021   '; call geom_dev2021;} 
@@ -4506,8 +4507,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.41 2021/01/21 02:31:31 jwebb Exp $
+* $Id: xgeometry.age,v 1.42 2021/01/29 14:22:14 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.42  2021/01/29 14:22:14  jwebb
+* Commit y2021a production geometry
+*
 * Revision 1.41  2021/01/21 02:31:31  jwebb
 * Add y2018c option
 *
