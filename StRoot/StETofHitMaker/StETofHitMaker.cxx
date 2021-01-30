@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHitMaker.cxx,v 1.8 2021/01/29 15:08:31 weidenkaff Exp $
+ * $Id: StETofHitMaker.cxx,v 1.9 2021/01/30 19:19:16 weidenkaff Exp $
  *
  * Author: Philipp Weidenkaff & Florian Seck, April 2018
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StETofHitMaker.cxx,v $
+ * Revision 1.9  2021/01/30 19:19:16  weidenkaff
+ * fixed deleting of created hits with StEvent data
+ *
  * Revision 1.8  2021/01/29 15:08:31  weidenkaff
  * fixed memory leak in StEtofHitMaker.cxx by adding a delete to merged hits
  *
@@ -1100,7 +1103,6 @@ StETofHitMaker::matchSides()
                 }
 
                 time     -= eTofConst::coarseClockCycle * 0.5 * mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 );
-                //time     += eTofConst::coarseClockCycle * 0.5 * mClockJumpDirection.at( detIndex * 10 + ( strip - 1 ) / 4 + 1 ); //debug PW.
                 timeDiff -= eTofConst::coarseClockCycle * ( ( timeDiff < 0 ) ? -1 : ( timeDiff > 0 ) );
 
                 if( mDoQA ) {
@@ -1557,10 +1559,14 @@ StETofHitMaker::mergeClusters( const bool isMuDst )
                     LOG_DEBUG << "mergeClusters(): size of digi vector for combined hit " << nHitsOnDet << " on the counter: " << mMapHitIndexDigiIndices.at( mMuDst->numberOfETofHit() - 1 ).size() << endm;
                 }
             }
-            delete combinedHit;
+
+            if( isMuDst ) {
+ 					//MuDst copies the combined hit over into new format. Not deleting the hits afterwards causes a memory leak as the created hits are never deleted. In StEvent, etofCollection->Clear() takes care of this.
+            	delete combinedHit;
+				}
             nHitsOnDet++;
         } // end of loop over hits
-		assert(hitVec->size() == 0 );
+
     } // end of loop over detectors
 
     if( mDebug ) {
@@ -1648,6 +1654,7 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
             updateCyclicRunningMean( aHit->time(), averageETofHitTime, nHitsETof, eTofConst::bTofClockCycle );
 
             // fill histogram to be saved in .hist.root file
+
             string histNamePos = "etofHit_pos_s" + std::to_string( aHit->sector() ) + "m" + std::to_string( aHit->zPlane() ) + "c" + std::to_string( aHit->counter() );
             mHistograms.at( histNamePos )->Fill( aHit->localX(), aHit->localY() );
 
@@ -1708,14 +1715,12 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
                 if( tof < 0 ) {
                     tof += eTofConst::bTofClockCycle;
                 }
-
                 mHistograms.at( "btofHit_tof_fullrange" )->Fill( tof );
             }
         }
 
         float diff = averageETofHitTime - averageBTofHitTime;
         if( diff < -800 ) diff += eTofConst::bTofClockCycle;
-
         mHistograms.at( "averageTimeDiff_etofHits_btofHits" )->Fill( diff );
         mHistograms.at( "multiplicity_etofHits_btofHits"    )->Fill( nHitsETof, nHitsBTof );
 
@@ -1764,7 +1769,6 @@ StETofHitMaker::fillHitQA( const bool isMuDst, const double& tstart )
                 nHitsEpdEast += 5;  //high hits are dominated by landau fluctuations
             }
         }
-
         mHistograms.at( "multiplicity_etofHits_epdEast" )->Fill( nHitsETof, nHitsEpdEast );
         if( mDoQA ) {
             mHistograms.at( "multiplicity_btofHits_epdEast" )->Fill( nHitsBTof, nHitsEpdEast );
