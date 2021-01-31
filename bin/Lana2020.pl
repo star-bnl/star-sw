@@ -3,10 +3,10 @@ use File::Basename;
 use Cwd;
 #my @list = glob "/gpfs01/star/scratch/fisyak/daq/2017/*/*/st_laser*.daq";
 my @list = ();
-if (-d "/hlt/cephfs/daq/2019/" or -d  "/hlt/cephfs/daq/2020/") {
-  @list = glob "/hlt/cephfs/daq/2019/*/*/*laser*.daq /hlt/cephfs/daq/2020/*/*/*laser*.daq";
+if (-d  "/hlt/cephfs/daq/2021/") {
+  @list = glob "/hlt/cephfs/daq/2021/*/*/*laser*.daq";
 } else {
-  @list = glob "/star/data03/daq/2019/*/*/st_laser*.daq";
+  @list = glob "/star/data03/daq/2021/*/*/st_laser*.daq";
 }
 #print "list = @list\n";
 my $NoJobs = 0;

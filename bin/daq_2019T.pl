@@ -2,7 +2,8 @@
 use File::Basename;
 use Cwd;
 use Env;
-use lib $STAR . "/bin";#$ENV{ConstructLocation}; 
+#use lib $STAR . "/bin";#$ENV{ConstructLocation}; 
+use lib "/net/l402/data/fisyak/STAR/packages/.DEV2/bin";#$ENV{ConstructLocation}; 
 use RunXIXDefs;
 my $debug = 0;
 if ($#ARGV >= 0) {

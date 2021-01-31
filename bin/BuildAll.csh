@@ -30,6 +30,8 @@ foreach root (root5 root6)
         setup ${bit}
         setup ${root}
         starver ${STAR_LEVEL}
+	which rootcint
+	if ($?) continue;
         set log = build.${STAR_HOST_SYS}.${opt}.`date +%m%d%y:%H%M.`${HOST}.${root}.log;
 	echo "Build ${log}"
 #       printenv > ${log};

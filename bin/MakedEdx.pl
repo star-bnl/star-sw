@@ -1946,7 +1946,7 @@ my $NEvents = 100000;
 # 9p8GeV_fixedTarget      20200130.005840, 20200131.050328, 20200131.050328
 # 9p2GeV                  20200131.012112, 20200131.012112, 20200203.20253
 # 19p5GeV_fixedTarget     20200201.191904
-# 13p5GeV_fixedTarget     20200202.160409
+# 13p5GeV_fixedTarget     20200202.160409x[
 # 7p3GeV_fixedTarget      20200204.053518
 # 9p2GeV                  20200205.144626
 # 5p75GeV_fixedTarget     20200213.152339, 20200213.152339
@@ -1978,11 +1978,47 @@ my $NEvents = 100000;
 #$hist = "RunXX30"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/03/20  start from scratch
 #$hist = "RunXX31"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/06/20  add scale to TpcAdcCorrection3MDF.r2020.C
 #$hist = "RunXX32"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/07/20  TpcSecRowB.20191121.000031.root
+
 #$hist = "RunXX33"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/08/20  reset Adc3MDF to zero, reset TpcSecRowB
+
 #$hist = "RunXX34"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/09/20  TpcSecRowB.20191121.000033.root
 #$hist = "RunXX35"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/09/20  TpcSecRowB.20191121.000033.root
 #$hist = "RunXX36"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 11/21/20  check status 
-$hist = "RunXX37"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 11/29/20  check space charge
+#$hist = "RunXX37"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 11/29/20  check space charge
+#$hist = "RunXX40"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/20/21 back to RunXX30
+#$hist = "RunXX41"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/21/21 remove  TpcAdcCorrectionMDF.20191120.180000.C and TpcSecRowB.20191121.000033.root
+#$hist = "RunXX42"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/22/21 mv TpcAdcCorrectionMDF.r2020.C TpcAdcCorrectionMDF.r2020.C.HOLD.012221
+#$hist = "RunXX43"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/23/21 restart from .DEV2.081520/StarDb/Calibrations/tpc 
+# Problem with secrot 19 row 1-19 ??? TpcAdcCorrection3MDF.y2020.C ???. save StarDb/Calibrations/tpc to  tpc.012521/
+# remove  TpcAdcCorrection3MDF.y2020.C and TpcAdcCorrectionMDF.r2020.C i.e. use TpcAdcCorrectionB.y2019.C for Run XX
+#$hist = "RunXX50"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/23/21 restart from express productioon TFG20a h with TpcAdcCorrectionB.y2019.C
+#$hist = "RunXX50"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/25/21 restart from express productioon TFG20a h with TpcAdcCorrectionB.y2019.C
+# restore ln -s TpcAdcCorrectionB.y2019.C TpcAdcCorrectionB.y2020.C; mv TpcAdcCorrectionB.r2020.C TpcAdcCorrectionB.r2020.C.HOLD.012621
+# TpcAdcCorrectionB.y2020.C
+# TpcAvgPowerSupply.y2020.C
+# TpcLengthCorrectionB.y2020.C
+# TpcLengthCorrectionMDF.20191120.190003.C
+# TpcLengthCorrectionMDF.y2020.C
+# TpcPadCorrectionMDF.20191120.180016.C
+# TpcPadCorrectionMDF.y2020.C
+# TpcPadCorrection.y2020.C
+# TpcRowQ.y2019.C
+# TpcRowQ.y2020.C
+# TpcSecRowB.20191120.190002.root
+# TpcZCorrectionB.20191120.190001.C
+#$hist = "RunXX51"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/26/21 
+# TpcAdcCorrectionB.y2020.C : empty TpcAdcCorrectionMDF.C, TpcAdcCorrection3MDF
+# TpcAccumulatedQ Validity:20190225/322 -----   20371231/120000 ??
+# TpcSecRowB.20191120.190050.C
+# tpcGainCorrection Validity:20181220/0  ??
+#$hist = "RunXX52"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG21b/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/27/21  repeat with TFG21b
+#$hist = "RunXX53"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/27/21 reset TpcAccumulatedQ
+#$hist = "RunXX54"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/27/21 TpcSecRowB.20191121.000053.root
+#$hist = "RunXX55"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/28/21 TpcZCorrectionB*RunXX054*
+#$hist = "RunXX56"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/29/21 new TpcSecRowB for COL and FXT
+#$hist = "RunXX57"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/29/21 split Z3 for negative and positive tracks
+$hist = "RunXX58"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/30/21 fix bug for Z3 plots
+ 
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2130,7 +2166,12 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     next if -r $root;
 #    print "file=$file $Disk $prod $Year Day=$Day Run=$Run \n";
     $fileno++;
-    if ($keep and $fileno%$keep != 1) {goto ENDL;} # skip all except each "keep"-th file
+    if ($keep and $fileno%$keep != 1) {
+      open(REM,">>skipped.csh") or die "Can't open skipped.csh";
+      print REM "rm $file\n";
+      close (REM);
+      goto ENDL;
+    } # skip all except each "keep"-th file
 #    if ($fileno > 105) {goto ENDL;} # skip all except each 10-th file
     if ($opened && $count == $maxFjob ) {
       close (OUT); $opened = 0; $count = 0;

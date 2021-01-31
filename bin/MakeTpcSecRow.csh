@@ -354,4 +354,54 @@
 #end
 # Run XX
 #root.exe -q -b  ~/work/Histograms/RunXX/RunXX31/SecRow3CGFRunXX31Col.root 'MakeTpcSecRowB.C(20191121,31,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,31.log
-root.exe -q -b  ~/work/Histograms/RunXX/RunXX33/SecRow3CGFRunXX33COL.root 'MakeTpcSecRowB.C(20191121,33,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,33.log
+#root.exe -q -b  ~/work/Histograms/RunXX/RunXX33/SecRow3CGFRunXX33COL.root 'MakeTpcSecRowB.C(20191121,33,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,33.log
+#dEdx RunXX43
+# SecRow3CGF11p5GeV.root              TpcSecRowB.11p5GeV.root		    
+# SecRow3CGF13p5GeV_fixedTarget.root  TpcSecRowB.13p5GeV_fixedTarget.root 
+# SecRow3CGF19p5GeV_fixedTarget.root  TpcSecRowB.19p5GeV_fixedTarget.root 
+# SecRow3CGF26p5GeV_fixedTarget.root  
+# SecRow3CGF31p2GeV_fixedTarget.root  TpcSecRowB.31p2GeV_fixedTarget.root 
+# SecRow3CGF5p75GeV_fixedTarget.root  TpcSecRowB.5p75GeV_fixedTarget.root 
+# SecRow3CGF7p3GeV_fixedTarget.root   TpcSecRowB.7p3GeV_fixedTarget.root      
+# SecRow3CGF7p7GeV.root		         
+# SecRow3CGF9p2GeVb.root              TpcSecRowB.9p2GeVb.root	        
+# SecRow3CGF9p2GeVc.root		     
+# SecRow3CGF9p2GeV.root		      TpcSecRowB.9p2GeV.root	       
+# SecRow3CGF9p8GeV_fixedTarget.root   TpcSecRowB.9p8GeV_fixedTarget.root 
+# 
+# 11p5GeV              20191210.185902 
+# 5p75GeV_fixedTarget  20191221.154021 
+# 11p5GeV              20191221.190032 
+# 31p2GeV_fixedTarget  20200128.182912 
+# 9p8GeV_fixedTarget   20200130.005840 
+# 9p2GeV               20200131.012112 
+# 9p8GeV_fixedTarget   20200131.050328 
+# 19p5GeV_fixedTarget  20200201.191904 
+# 13p5GeV_fixedTarget  20200202.160409 
+# 9p2GeV               20200203.202534 
+# 7p3GeV_fixedTarget   20200204.053518 
+# 9p2GeV               20200205.144626 
+# 11p5GeV              20200210.220428 
+# 5p75GeV_fixedTarget  20200213.152339 
+# 11p5GeV              20200214.143742 
+# 9p2GeVb              20200224.230740 
+# 9p2GeVc              20200617.233208 
+# 26p5GeV_fixedTarget  20200730.015354 
+# 9p2GeVc              20200730.042836 
+# 26p5GeV_fixedTarget  20200813.213251 
+# 9p2GeVc              20200814.054357 
+# 26p5GeV_fixedTarget  20200819.192253 
+# 9p2GeVc              20200820.055402 
+# 26p5GeV_fixedTarget  20200827.143507 
+# 9p2GeVc              20200828.064250 
+# 7p7GeV               20200902.105440 
+# 26p5GeV_fixedTarget  20200907.221141 
+# 7p7GeV               20200910.041639 
+# 26p5GeV_fixedTarget  20200912.102033 
+#root.exe -q -b   SecRow3CGFRunXX053.root 'MakeTpcSecRowB.C(20191121,53,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,53.log
+foreach b (COL FXT)
+    set f = SecRow3CGF${b}.root
+    echo "${f} => ${b}"
+    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000053.root ${f} 'MakeTpcSecRowB.C(20191121,55,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,055.log
+    mv TpcSecRowB.20191121.000055.root  TpcSecRowB.${b}RunXX55.root; mv  MakeTpcSecRowB.20191121,055.log MakeTpcSecRowB.${b}.log
+end
