@@ -1225,6 +1225,21 @@ Bfc_st BFC[] = { // standard chains
   {"P2020a","" ,"",
    "B2020a,ITTF,VFMinuit,etofa,btof,gmt,mtd,emcDY2,epdHit,trgd,ZDCvtx,BAna,picoWrite,picoVtxDefault,picoCovMtxWrite"
    ,            "","", "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+  // 2021 initial chains
+  {"B2021" ,"","",
+   "ry2021,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree",
+   "","",                                                      "Base chain for run 2021 data (tpc)",kFALSE},
+
+  {"P2021","" ,"",
+   "B2021,ITTF,VFMinuit,etofa,btof,gmt,mtd,emcDY2,epdHit,trgd,ZDCvtx,BAna,picoWrite,picoVtxDefault,picoCovMtxWrite"
+   ,            "","", "Base chain for year 2021 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+  {"B2021a" ,"","",
+   "ry2021a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree",
+   "","",                                                      "Base chain for run 2021 data (tpc)",kFALSE},
+
+  {"P2021a","" ,"",
+   "B2021a,ITTF,VFMinuit,etofa,btof,gmt,mtd,emcDY2,epdHit,trgd,ZDCvtx,BAna,picoWrite,picoVtxDefault,picoCovMtxWrite"
+   ,            "","", "Base chain for year 2021 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
 
   // Other chains/Calibration
