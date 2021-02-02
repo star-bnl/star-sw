@@ -795,7 +795,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	char buff[128] ;
 	int buff_cou ;
 	u_int want_dump = 0 ;
-	int sector = 0 ;
+	int sector ;
 
 	u_int *d = (u_int *)addr + 4 ;	// skip header
 	words -= 4 ;
