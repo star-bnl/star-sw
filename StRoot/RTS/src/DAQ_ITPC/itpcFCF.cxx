@@ -216,7 +216,78 @@ float itpc_fcf_c::get_gain(int sec1, int row1, int pad1)
 
 }
 
+void itpc_fcf_c::set_gain(int sec1, int row1, int pad1, float gain)
+{
+//	if(row1==0 || pad1==0) return 0.0 ;
 
+	gain_rp_t (*gain_p)[MAX_PHYS_PAD+1] ;
+	
+	if(sec_gains[sec1]==0) return ;	// bad
+
+	gain_p = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sec1] ;
+
+	gain_p[row1][pad1].gain = gain ;
+}
+
+u_char itpc_fcf_c::get_flags(int sec1, int row1, int pad1)
+{
+	if(row1==0 || pad1==0) return 255 ;
+
+	gain_rp_t (*gain_p)[MAX_PHYS_PAD+1] ;
+	
+	if(sec_gains[sec1]==0) return 255 ;	// bad
+
+	gain_p = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sec1] ;
+
+	return gain_p[row1][pad1].flags ;
+
+}
+
+void itpc_fcf_c::set_flags(int sec1, int row1, int pad1, u_char flags)
+{
+
+	gain_rp_t (*gain_p)[MAX_PHYS_PAD+1] ;
+	
+	if(sec_gains[sec1]==0) return ;	// bad
+
+	gain_p = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sec1] ;
+
+	gain_p[row1][pad1].flags = flags ;
+}
+
+void itpc_fcf_c::zap_fee(int sec1, int rdo1, int port1) 
+{
+	itpcInterpreter *itpc ;
+
+	int padplane_id = itpc->itpc_fee_map[sec1-1][rdo1-1][port1-1] ;
+	
+	for(int c=0;c<64;c++) {
+		u_char flags ;
+		int row, pad ;
+
+		itpc_ifee_to_rowpad(padplane_id,c,row,pad) ;
+
+		int p1 = pad - 1 ;
+		int p2 = pad + 1 ;
+
+		if(p1<1) p1 = 1 ;
+		if(p2<x_max(row,0)) p2 = x_max(row,0) ;
+
+		set_gain(sec1,row,pad,0.0) ;
+
+		flags = get_flags(sec1,row,pad) ;
+		set_flags(sec1,row,pad,flags|3) ;
+
+		flags = get_flags(sec1,row,p1) ;
+		set_flags(sec1,row,p1,flags|2) ;
+
+		flags = get_flags(sec1,row,p2) ;
+		set_flags(sec1,row,p2,flags|1) ;
+		
+	}
+
+	return ;
+}
 
 struct itpc_fcf_c::rp_t *itpc_fcf_c::get_row_pad(int row, int pad)
 {
@@ -414,6 +485,7 @@ int itpc_fcf_c::init(int sec, const char *fname)
 
 	int ch_bad = 0 ;
 	int ch_all = 0 ;
+	int fee_bad = 0 ;
 
 	// we now have an opened gain file
 	while(!feof(f)) {
@@ -434,7 +506,9 @@ int itpc_fcf_c::init(int sec, const char *fname)
 		if(sec_gains[sec]==0) continue ;	// not for me!
 
 		if(ch<0) {	// kill entire FEE!
-			LOG(ERR,"%d %d %d kill FEE not implemented",sec,rdo,port) ;
+			zap_fee(sec,rdo,port) ;
+			fee_bad++ ;
+			LOG(TERR,"%d %d %d kill FEE implemented",sec,rdo,port) ;
 			continue ;
 		}
 
@@ -466,8 +540,8 @@ int itpc_fcf_c::init(int sec, const char *fname)
 
 	fclose(f) ;
 
-	if(ch_bad) LOG(WARN,"...with %d/%d bad channels",ch_bad,ch_all) ;
-	else LOG(TERR,"...with %d/%d no bad channels",ch_bad,ch_all) ;
+	if(ch_bad) LOG(WARN,"...with %d/%d bad channels, %d bad_fees",ch_bad,ch_all,fee_bad) ;
+	else LOG(TERR,"...with %d/%d no bad channels, %d bad_fees",ch_bad,ch_all,fee_bad) ;
 
 	return 0 ;
 }
