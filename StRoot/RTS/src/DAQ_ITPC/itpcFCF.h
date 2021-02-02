@@ -56,6 +56,13 @@ public:
 
 	static int get_bad(int sec1, int row1, int pad1) ;
 	static float get_gain(int sec1, int row1, int pad1) ;
+	static void set_gain(int sec1, int row1, int pad1, float gain) ;
+
+	static u_char get_flags(int sec1, int row1, int pad1) ;
+	static void set_flags(int sec1, int row1, int pad1, u_char flags) ;
+
+	void zap_fee(int sec1, int rdo1, int port1) ;
+	
 	static int fcf_decode(unsigned int *p_buff, daq_cld *dc, unsigned int version) ;
 	static int fcf_decode(unsigned int *p_buff, daq_sim_cld_x *dc, unsigned int version) ;
 
@@ -90,6 +97,8 @@ public:
 	int max_slice ;		// rows or timebins e.g. 40 ITPC, 45 TPC or 512 for across-timebin
 
 	int pad_to_x(int pad, int y) ;
+
+	int x_max(int slice, int y) ;
 private:
 
 	static const int MAX_SEC = 24 ;		// sectors; stay as a constant
@@ -111,7 +120,7 @@ private:
 
 //	static int rowlen[45+1] ;	// depends on ITPC vs TPX; but is _constant_ 120 or 182 for timebin-across
 					// so I will dimension it for the largest case and that is 45!
-	int x_max(int slice, int y) ;
+
 	int x_min(int slice, int y) ;
 	int y_max() ;
 	int y_min() ;

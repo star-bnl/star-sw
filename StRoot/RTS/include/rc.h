@@ -33,6 +33,7 @@
 #define GS_STOPPING	9
 #define GS_ERROR	10
 #define GS_WAITING	11	// mix of states for multinode detectors...
+#define GS_SYNCING	12	// for FCS serial links
 #define GS_ANY		100	// I want to move this to a sane value like 12
 
 // Reason for last run stop...
