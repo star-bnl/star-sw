@@ -8,6 +8,12 @@
 #ifndef _PLATFORM_H_
 #define _PLATFORM_H_
 
+#ifndef unix
+#ifdef __unix__
+#define unix
+#endif
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -22,7 +28,7 @@
 #ifdef sun
 //#include <thread.h>
 #include <synch.h>
-#elif unix
+#elif defined unix
 //#include <pthread.h>
 #include <semaphore.h>
 #endif
@@ -164,7 +170,7 @@ inline int pChangePriority(int prio)
 {
 #ifdef sun
   return -1;
-#elif linux
+#elif defined linux
 //   pTASKID tid = pthread_self();
 //   struct sched_param sched;
 //   int policy;
@@ -211,7 +217,7 @@ inline void pTaskDelete(pTASKID tid)
 {
 #ifdef sun
   LOG(WARN, "thread cancelation not supported in solaris");
-#elif unix
+#elif defined unix
   pthread_cancel(tid);
 #else
   taskDelete(tid);
@@ -229,7 +235,7 @@ inline void pTaskDelete(pTASKID tid)
 #ifdef sun
 typedef sema_t* SEM_ID;
 typedef mutex_t* MUX_ID;
-#elif unix
+#elif defined unix
 typedef sem_t* SEM_ID;
 typedef pthread_mutex_t* MUX_ID;
 #endif
@@ -242,7 +248,7 @@ typedef SEM_ID MUX_ID;
 #ifdef sun
 #define pSEM_PROTO(semName) sema_t rp_##semName; SEM_ID semName = &rp_##semName
 #define pMUX_PROTO(muxName) mutex_t rp_##muxName; MUX_ID muxName = &rp_##muxName
-#elif unix
+#elif defined unix
 #define pSEM_PROTO(semName) sem_t rp_##semName; SEM_ID semName = &rp_##semName
 #define pMUX_PROTO(muxName) pthread_mutex_t rp_##muxName; MUX_ID muxName = &rp_##muxName
 #else
@@ -288,7 +294,7 @@ inline void pMuxInit(MUX_ID &mux)
 {
 #ifdef sun
   mutex_init(mux, USYNC_THREAD, NULL);
-#elif unix  // linux
+#elif defined unix  // linux
   pthread_mutex_init(mux, NULL);
 #else // vxworks
   mux = semBCreate(SEM_Q_PRIORITY, SEM_FULL);
@@ -347,7 +353,7 @@ inline void pSemGive(SEM_ID sem)
 {
 #ifdef sun
   sema_post(sem);
-#elif unix
+#elif defined unix
   sem_post(sem);
 #else // vxworks
   semGive(sem);
@@ -358,7 +364,7 @@ inline void pMuxLock(MUX_ID mux)
 {
 #ifdef sun
   mutex_lock(mux);
-#elif unix
+#elif defined unix
   pthread_mutex_lock(mux);
 #else
   semTake(mux,WAIT_FOREVER);
@@ -374,7 +380,7 @@ inline bool pMuxTryLock(MUX_ID mux)
 #ifdef sun
   mutex_lock(mux);
   return true;
-#elif unix
+#elif defined unix
   int ret = pthread_mutex_trylock(mux);
   if(ret == 0) return true;
   return false;
@@ -390,7 +396,7 @@ inline void pMuxUnlock(MUX_ID mux)
 #ifdef sun
   mutex_unlock(mux);
   //  usleep(1); // thr_yield();
-#elif unix
+#elif defined unix
   pthread_mutex_unlock(mux);
 #else
   semGive(mux);

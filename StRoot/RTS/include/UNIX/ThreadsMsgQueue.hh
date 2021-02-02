@@ -1,6 +1,19 @@
 #ifndef TMSGQUEUE_HH
 #define TMSGQUEUE_HH
 
+#ifdef __unix__
+#ifndef unix
+#define unix
+#endif
+#endif
+
+#ifdef __linux__
+#ifndef linux
+#define linux
+#endif
+#endif
+
+
 #ifdef sun
 #include <synch.h>
 #include <thread.h>
@@ -18,7 +31,7 @@ template <class T> class thrMsgQueue
 public:
   thrMsgQueue(int s) ; // number of elements of type T deep
   ~thrMsgQueue() ;
-  int send(T* a, int prio = 0 ) ;  // 0 = low  prio != 0 == high  
+    int send(T* a, int prio = 0 ) ;  // 0 = low  prio != 0 == high  
     int receive(T*, int block=1) ;              // Blocking  
 #ifndef sun
   int peek(T* a);           
