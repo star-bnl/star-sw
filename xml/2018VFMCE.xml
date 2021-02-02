@@ -6,10 +6,12 @@
   cd ${SUBMITTINGDIRECTORY}  
   set Name = `basename $PWD`
 #  if ($?NODEBUG) unsetenv NODEBUG 
-  setenv NODEBUG yes
+#  setenv NODEBUG yes
   setenv STARFPE NO
 #  setup 64b
+#  setup 32b
 #  starver TFG20c
+#  starver .DEV2
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -22,6 +24,9 @@
   set name = ""
 #  foreach name (K_S0 Lambda0Z200cm Lambda0Z200cmFlat  Lambda0_bar Lambda0 XiM_bar XiM  Omega_bar Omega H3L)
   foreach name (\
+                HE3FixedpFlat  ALPHAFixedpFlat \
+                piPFixedpFlat piMFixedpFlat \
+                K_S0FixedpFlat  Lambda0_barFixedpFlat Lambda0FixedpFlat XiM_barFixedpFlat XiMFixedpFlat  Omega_barFixedpFlat OmegaFixedpFlat \
                 HE3FixedFlat  ALPHAFixedFlat \
                 piPFixedFlat piMFixedFlat \
                 K_S0FixedFlat  Lambda0_barFixedFlat Lambda0FixedFlat XiM_barFixedFlat XiMFixedFlat  Omega_barFixedFlat OmegaFixedFlat \
@@ -29,6 +34,16 @@
                 K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed \
                 K_S0       Lambda0_bar      Lambda0      XiM_bar      XiM       Omega_bar      Omega      \
                 LNNFixed LNFixed \
+                H2LrFixedpFlat H2LFixedpFlat \
+                H3LdpFixedpFlat H3LFixedpFlat H3LrFixedpFlat H3RLFixedpFlat \
+                H4LtpFixedpFlat H4L2dFixedpFlat H4LFixedpFlat H5LFixedpFlat H6L3FixedpFlat H6LFixedpFlat \
+                He4LFixedpFlat  \
+                He5L3FixedpFlat He5LFixedpFlat He5Li5FixedpFlat \
+                He6L3adFixedpFlat He6L3FixedpFlat He6LFixedpFlat \
+                He7L3FixedpFlat He7LFixedpFlat \
+                Li6LFixedpFlat \
+                Li7L3FixedpFlat Li7LFixedpFlat \
+                Li8LFixedpFlat \
                 H2LrFixedFlat H2LFixedFlat \
                 H3LdpFixedFlat H3LFixedFlat H3LrFixedFlat H3RLFixedFlat \
                 H4LtpFixedFlat H4L2dFixedFlat H4LFixedFlat H5LFixedFlat H6L3FixedFlat H6LFixedFlat \
@@ -91,7 +106,7 @@
     root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 100 100 K_S0" />
+<input URL="command:RunId.pl 1 1500 200 K_S0" />
 <!-- <input URL="command:RunId.pl 1 500 500 K_S0" /> -->
 <!-- <input URL="command:RunId.pl 1 1 10 K_S0" /> -->
 </job>

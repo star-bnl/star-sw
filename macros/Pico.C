@@ -254,8 +254,9 @@ void Pico(const Char_t *files ="./*.picoDst.root",
   TH2F *dEdxP  = new TH2F("dEdxP","dEdx vesus regidity",250,-2.5,2.5,500,0,100);
   TH2F *betaToF  = new TH2F("beta","BToF 1/beta -1 versus regity",350,-3.5,3.5,500,-0.6,4.4);
   TH2F *betaEToF  = new TH2F("Ebeta","EToF 1/beta -1 versus regity",350,-3.5,3.5,500,-0.6,4.4);
+#define  __Use_dNdx__
 #ifdef     __Use_dNdx__
-  enum  {kTotalMethods = 6};
+  enum  {kTotalMethods = 3};
 #else
   enum  {kTotalMethods = 1};
 #endif
@@ -263,10 +264,10 @@ void Pico(const Char_t *files ="./*.picoDst.root",
     kLikelihoodFitId         // F
 #ifdef     __Use_dNdx__
     ,kTruncatedMeanId         // 70
-    ,kWeightedTruncatedMeanId // FU
-    ,kEnsembleTruncatedMeanId  // 70U
+    //    ,kWeightedTruncatedMeanId // FU
+    //    ,kEnsembleTruncatedMeanId  // 70U
     ,kOtherMethodId           // N
-    ,kOtherMethodId2          // NU
+    //    ,kOtherMethodId2          // NU
 #endif
   };
   static TH2F *fTdEdx[3][5];
@@ -275,7 +276,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
     const Char_t *parT[5] = {"All","|nSigmaPion| < 1","|nSigmaElectron| < 1","|nSigmaKaon| < 1","|nSigmaProton| < 1"};
     const Char_t *FitName[3] = {"F","I70","N"};
     Double_t ymin = 0, ymax = 2.5;
-    if (k == 2) {ymin = 0.75; ymax = 3.25;}
+    if (k == 2) {ymin = 1.2; ymax = 4.2;}
     for (Int_t t = 0; t < 1; t++) {//5; t++) {
       TString Title(Form("log10(dE/dx(%s)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",FitName[k],parT[t]));
       if (k == 2) Title = Form("log10(dN/dx) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",parT[t]);
@@ -304,25 +305,26 @@ void Pico(const Char_t *files ="./*.picoDst.root",
   delete [] phiBins;
   delete [] zBins;
   delete [] LBins;
-#if 1
+  //#define __fit__
+#ifdef __fit__
   Hists2D I70("I70");
   Hists2D fitZ("fitZ");
   Hists2D fitN("fitN");
-#endif
-  static TH2F *Eta[2] = {0};     // 0 -> F, 1 -> 70
+  static TH2F *Eta[3] = {0};     // 0 -> F, 1 -> 70, 2 -> N
   // TPoints block
-  for (Int_t t = 0; t < 2; t++) {
-    const Char_t *N[6] = {"F","70","FU","70U","N", "NU"};
+  for (Int_t t = 0; t < 3; t++) {
+    const Char_t *N[6] = {"F","70","N", "FU","70U","NU"};
     const Char_t *T[6] = {"dEdx(fit)/Pion",
 			  "dEdx(I70)/Pion",
+			  "dNdx/Pion",
 			  "dEdx(fit_uncorrected)/Pion ",
 			  "dEdx(I70_uncorrected)/Pion",
-			  "dNdx/Pion",
 			  "dNdx(uncorrected)/Pion"};
     Eta[t] = new TH2F(Form("Eta%s",N[t]),
 		      Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, TPC - iTPC",T[t]),
 		      100,-2.5,2.5,500,-1.,4.);
   }
+#endif
 #if 1
   maker = new StPicoDstMaker(StPicoDstMaker::IoRead,files);
   maker->Init();
@@ -452,29 +454,40 @@ void Pico(const Char_t *files ="./*.picoDst.root",
       if (dEdx[0] <= 0 || dEdx[1] <= 0) continue;
       Double_t dEdxL[3]   = {TMath::Log(dEdx[0]), TMath::Log(dEdx[1]), dEdx[2] > 0 ? TMath::Log(dEdx[2]):0};
       Double_t dEdxL10[3] = {TMath::Log10(dEdx[0]), TMath::Log10(dEdx[1]), dEdx[2] > 0 ? TMath::Log10(dEdx[2]):0};
-      Double_t sigmas[3] = {pTrack->dEdxError(), pTrack->dEdxError(), 0};
+      Double_t sigmas[3] = {pTrack->dEdxError(), pTrack->dEdxError(), pTrack->dEdxError()};
       Double_t nSigmasPi[3] = {PiD.fI70.D(), PiD.fFit.D(), PiD.fdNdx.D()};
       Double_t Zs[3] = {PiD.fI70.dev[kPidPion], PiD.fFit.dev[kPidPion], PiD.fdNdx.dev[kPidPion]};
       for (Int_t k = 0; k < kTotalMethods; k++) {// I70 && Fit && dNdx
 	StDedxMethod m = kTPoints[k];
 	if (! PiD.Status(m)) continue;
-	if (sigmas[m] > 0) {
+	if (sigmas[k] > 0) {
 	  Var.hyp = -1;
-	  Var.z = Zs[m];
-	  //	  if (TPs[m])	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
-	  //	  if (Pulls[m])	  Pulls[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]/sigmas[m]);
-	  fTdEdx[k][0]->Fill(TMath::Log10(p), dEdxL10[k]+6);
+	  Var.z = Zs[k]; //	  if (TPs[m])	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
+	  //	  if (Pulls[k])	  Pulls[k]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[k]/sigmas[k]);
+	  if (k < 2) fTdEdx[k][0]->Fill(TMath::Log10(p), dEdxL10[k]+6);
+	  else       fTdEdx[k][0]->Fill(TMath::Log10(p), dEdxL10[k]);
+	  if (k == 1 && (
+			 (TMath::Abs(p-0.5) < 0.1 && dEdxL10[k]+6 > 1.0 && dEdxL10[k]+6 < 1.5) ||
+			 (TMath::Abs(p-1.0) < 0.1 && dEdxL10[k]+6 > 0.5 && dEdxL10[k]+6 < 0.8)
+			 )
+	      ) {
+	    TChain *tc = maker->chain();
+	    if (tc) {
+	      cout << tc->GetCurrentFile()->GetName() << "\thas abnormal dEdx : p = " << p << "\tdEdxL10 = " << dEdxL10[k]+6 << endl;
+	    }
+	  }
 	  dEdxP->Fill(rigity, 1e6*PiD.fFit.I());
+#ifdef __fit__
 	  if (pMom >= 0.4 && pMom <= 0.5) {
 	    Eta[k]->Fill(pTrack->pMom().Eta(),Zs[k]);
 	  }
+#endif
 	}
       }
-#if 1
+#ifdef __fit__
       for (Int_t l = kPidElectron; l < KPidParticles; l++) {
 	Int_t k = PiD.PiDkeyU3;
 	if (PiD.fI70.fPiD) {
-	  
 	  I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
 	  I70.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
 	  if (Debug()) cout << "I70.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fI70.dev[l] << endl;

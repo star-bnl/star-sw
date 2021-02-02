@@ -1836,7 +1836,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 {
     int found = 0;
     
-    printf("tinfo: seq = #%d (%s %d %d)  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x\n",
+    printf("tinfo: seq = #%d (%s %d %d)  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x freq=%f\n",
 	   rdr->seq,
 	   rdr->streaming_node,
 	   rdr->streaming_evb,
@@ -1847,7 +1847,8 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	   rdr->daqbits64_l2,
 	   rdr->daqbits64,
 	   rdr->evpgroups,
-	   rdr->flags);
+	   rdr->flags,
+	   rdr->triggerFrequency);
     
     daq_dta *dd;
     dd = rdr->det("trg")->get("raw") ;
@@ -1885,10 +1886,11 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		if(crate_bx_time[i] > 0xffffll) {
 		    corrupt = 1;
 
-		    printf("CORRUPT evt %d:  %s bxtime %lld\n",
+		    printf("CORRUPT evt %d:  %s bxtime %lld %lld\n",
 			   rdr->seq,
 			   confnum2str[i],
-			   crate_bx_time[i]);
+			   crate_bx_time[i],
+			   bx64);
 		}
 	    }
 
@@ -1902,6 +1904,8 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
 
 
+	    printf("l1Dsm offset %d\n",swap32(trg->L1_DSM_ofl.offset)) ;	// should NOT be 0!
+
 	    u_int bc2 = swap16(l1Dsm->BCdata[2]) ;
             u_int bc7bit = bc2  & 0x7F ;
 
@@ -1910,11 +1914,21 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    for(int i=0;i<8;i++) {
 
 		lastdsm[i] = swap16(l1Dsm->lastDSM[i]) ;
-		printf(".... %d: 0x%04X\n",i,lastdsm[i]) ;
+		printf(".... lastdsm[%d]: 0x%04X\n",i,lastdsm[i]) ;
 	    }
-            u_int fcs2019 = (lastdsm[4] >> 10) & 1 ;
 
-            printf("bc7bit %d, fcs2019 %d : 0x%04X 0x%04X 0x%04X 0x%04X\n",bc7bit,fcs2019,
+            u_int fcs2019 = (lastdsm[4] >> 10) & 1 ;
+	    fcs2019 |= ((lastdsm[4] >> 5) & 1) << 1 ;
+	    fcs2019 |= ((lastdsm[4] >> 7) & 1) << 2 ;
+	    fcs2019 |= ((lastdsm[4] >> 8) & 1) << 3 ;
+	    fcs2019 |= ((lastdsm[4] >> 9) & 1) << 4 ;
+	    fcs2019 |= ((lastdsm[4] >> 12) & 1) << 5 ;
+	    fcs2019 |= ((lastdsm[4] >> 13) & 1) << 6 ;
+	    fcs2019 |= ((lastdsm[4] >> 14) & 1) << 7 ;
+	    fcs2019 |= ((lastdsm[4] >> 15) & 1) << 8 ;
+
+
+            printf("bc7bit %d, fcs2019 0x%04X : 0x%04X 0x%04X 0x%04X 0x%04X\n",bc7bit,fcs2019,
 		   lastdsm[0],lastdsm[1],lastdsm[2],lastdsm[3]) ;
 
 	    printf("ids: ");

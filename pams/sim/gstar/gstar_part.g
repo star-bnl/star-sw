@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.60 2021/01/12 14:34:20 jwebb Exp $
+* $Id: gstar_part.g,v 1.61 2021/01/29 17:30:15 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.61  2021/01/29 17:30:15  jwebb
+* Remove the STOP, as we may be passed stable nuclei here
+*
 * Revision 1.60  2021/01/12 14:34:20  jwebb
 * Update to gstar_part.g and StarClassLibrary to support simulation of
 * H4 Lambda , He4 Lambda  and He5 Lambda hypernuclei.
@@ -923,14 +926,14 @@ Particle H_dibaryon               code      = 60001,
 *  What follows is a snippet of code to explore a few variables the
 * user might need:
 *
-*      real P_PART(4)
-*
-*      DO I=1,4
-*         P_PART(I)=VECT(I+3)*VECT(7)
-*      ENDDO
-*
+       real P_PART(4)
+ 
+       DO I=1,4
+          P_PART(I)=VECT(I+3)*VECT(7)
+       ENDDO
+ 
        write(*,*) 'agudcay ivert, ipart: ', ivert, ipart
-STOP 
+***STOP 
 
 *       write(*,*) 'p1, p2, p3: ', P_PART(1), P_PART(2), P_PART(3)
 *

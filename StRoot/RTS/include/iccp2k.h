@@ -219,7 +219,15 @@ struct evtDoneMsg {
   u_short status;
 };
 
-#define EVB_SUMMARY_VERSION 2
+#define EVB_SUMMARY_VERSION 3
+
+struct EvbSummary_v3 {
+    u_int version;
+    u_int sz;
+    UINT64 detectorsInRun;
+    float triggerFrequency;
+    u_int runNumber;
+};
 
 struct EvbSummary_v2 {
     u_int version;
@@ -233,7 +241,7 @@ struct EvbSummary_v1 {
   u_int detectorsInRun;
 };
 
-typedef EvbSummary_v2 EvbSummary;
+typedef EvbSummary_v3 EvbSummary;
 
 #pragma pack()
 
