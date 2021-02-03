@@ -110,13 +110,15 @@ void StGmtClusterMaker::ClusterBuilder(ULong_t events, UInt_t module, StGmtStrip
   if(!profX[module]) {
     name="PedestalX_"; name += module;
     profX[module]=new TProfile(name,name,CLUS_BINS,CLUS_MIN,CLUS_MAX,"s");
+    profX[module]->SetDirectory(0);
   }
   if(!profY[module]) {
     name = "PedestalY_"; name += module;
     profY[module]=new TProfile(name,name,CLUS_BINS,CLUS_MIN,CLUS_MAX,"s");
+    profY[module]->SetDirectory(0);
   }
-  if(!histX) histX=new TH1F("ClusterX","ClusterX",CLUS_BINS,CLUS_MIN,CLUS_MAX);
-  if(!histY) histY=new TH1F("ClusterY","ClusterY",CLUS_BINS,CLUS_MIN,CLUS_MAX);
+  if(!histX) {histX=new TH1F("ClusterX","ClusterX",CLUS_BINS,CLUS_MIN,CLUS_MAX); histX->SetDirectory(0);}
+  if(!histY) {histY=new TH1F("ClusterY","ClusterY",CLUS_BINS,CLUS_MIN,CLUS_MAX); histY->SetDirectory(0);}
 
   if(Debug()>3) {
     canv = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("GmtClusters");
