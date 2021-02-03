@@ -240,13 +240,15 @@ StTrack::operator=(const StTrack& track) {
         else
             mOuterGeometry = 0;
 #ifdef  __kfpAtFirstHit__
-	if (track.mKFPTrackAtFirstHit)
-	  *mKFPTrackAtFirstHit = *track.mKFPTrackAtFirstHit;
-	else
+	if (track.mKFPTrackAtFirstHit) {
+	  delete mKFPTrackAtFirstHit;
+	  mKFPTrackAtFirstHit = new KFPTrack(*track.mKFPTrackAtFirstHit);
+	} else
 	  mKFPTrackAtFirstHit = 0;
-	if (track.mKFPTrackAtLastHit)
-	  *mKFPTrackAtLastHit = *track.mKFPTrackAtLastHit;
-	else
+	if (track.mKFPTrackAtLastHit) {
+	  delete mKFPTrackAtLastHit;
+	  mKFPTrackAtLastHit = new KFPTrack(*track.mKFPTrackAtLastHit);
+	} else
 	  mKFPTrackAtLastHit = 0;
 #endif
         mDetectorInfo = track.mDetectorInfo;       // not owner anyhow

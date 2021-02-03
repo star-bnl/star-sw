@@ -60,7 +60,7 @@
 #include <Stiostream.h>
 #include "StObject.h"
 #include "StEnumerations.h"
-//#define __kfpAtFirstHit__
+#define __kfpAtFirstHit__
 class StTrackTopologyMap : public StObject {
  public:
   StTrackTopologyMap(UInt_t m1 = 0, UInt_t m2 = 0, UInt_t m3 = 0) : mMap0(m1), mMap1(m2), mMap2(m3) {}
