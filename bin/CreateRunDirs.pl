@@ -3,7 +3,8 @@ use File::Basename;
 use Cwd;
 use Env;
 use lib "/net/l402/data/fisyak/STAR/packages/.DEV2/bin";#$ENV{ConstructLocation}; 
-use RunXXDefs;
+#use RunXXDefs;
+use RunXXIDefs;
 my $pwd = cwd();
 #my $day = File::Basename::basename(File::Basename::dirname($pwd));
 #my $run =  File::Basename::basename($pwd);
@@ -49,9 +50,10 @@ my $def = {@Runs};# print "Runs = @Runs\n";
 PrintHash($def,"Runs") if ($debug);
 #die;
 #my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /hlt/cephfs/daq/2020/???/*";  print "runs = @runs\n" if ($debug);
-my  @runs  = glob "/hlt/cephfs/daq/2020/2??/*";  print "runs = @runs\n" if ($debug);
+#my  @runs  = glob "/hlt/cephfs/daq/2020/2??/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2019/350/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2020/012/2101202?";  print "runs = @runs\n" if ($debug);
+my  @runs  = glob "/hlt/cephfs/daq/2021/???/*";  print "runs = @runs\n" if ($debug);
 foreach my $run (@runs) {
   my $r = File::Basename::basename($run);
   if (GoodRun($def,$r) < 0) {next;}

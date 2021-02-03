@@ -8,6 +8,7 @@ use Cwd;
 my @list = glob "./*.laser.root";
 my %runs = ();
 my $debug = 0;
+my $noRuns = 0;
 foreach my $file (@list) {
   my $run = File::Basename::basename($file,".laser.root");
   my $dir = File::Basename::dirname($file);
@@ -18,10 +19,16 @@ foreach my $file (@list) {
   my $r = $words[0];
   print "$file => $r\n" if ($debug);
   my $outfile = "LaserPlots." . $r . ".root";
-  if (-r $outfile) {next;}
+  if (-r $outfile) {
+    print "\t$outfile is Done\n" if ($debug);
+    next;
+  }
   if ($runs{$r}) {next;}
   $runs{$r} = $dir;
+  print "r = $r = $runs{$r}\n" if ($debug);
+  $noRuns++;
 }
+print "noRuns = $noRuns\n" if ($debug);
 my $Njobs = 0;
 my $now = time();
 my $dtmin = 999999;
