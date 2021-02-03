@@ -9,12 +9,21 @@
 
 // statics
 fcs_trg_base::marker_t fcs_trg_base::marker ;
-ped_gain_t fcs_trg_base::p_g[2][3][24][32] ;
-u_int fcs_trg_base::ht_threshold[3] ;
+
 u_int fcs_trg_base::stage_version[4] ;
 
-u_int fcs_trg_base::s2_ch_mask[NS_COU] ;
-u_int fcs_trg_base::s3_ch_mask ;
+u_short fcs_trg_base::stage_params[4][16] ;
+
+ped_gain_t fcs_trg_base::p_g[NS_COU][ADC_DET_COU][DEP_COU][32] ;
+u_short fcs_trg_base::ht_threshold[ADC_DET_COU] ;
+
+
+unsigned long long fcs_trg_base::s2_ch_mask[NS_COU] ;
+u_char fcs_trg_base::s2_ch_phase[NS_COU][34] ;
+
+u_char fcs_trg_base::s3_ch_mask ;
+u_char fcs_trg_base::s3_ch_phase[4] ;
+u_char fcs_trg_base::s3_out_phase ;
 
 int fcs_trg_base::fcs_trgDebug ;
 int fcs_trg_base::fcs_readPresMaskFromText;
@@ -33,6 +42,11 @@ u_short        fcs_trg_base::JETTHR2 ;
 u_short        fcs_trg_base::ETOTTHR ;
 u_short        fcs_trg_base::HTOTTHR ;
 
+u_int fcs_trg_base::data_format ;
+
+
+
+
 fcs_trg_base::fcs_trg_base()
 {
 //	LOG(TERR,"%s (sizeof class %u)",__PRETTY_FUNCTION__,sizeof(*this)) ;
@@ -41,12 +55,13 @@ fcs_trg_base::fcs_trg_base()
 	realtime = 0 ;
 	id = 0 ;
 	sim_mode = 0 ;
+	data_format = 0 ;
 }
 
 
 fcs_trg_base::~fcs_trg_base()
 {
-	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
+//	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
 }
 
 u_int fcs_trg_base::get_version()
@@ -60,16 +75,24 @@ void fcs_trg_base::init(const char* fname)
 	if(id != 0) return ;	// just one guy
 
 
-	// zap peds to 0
+	// zap input params 
+
+	memset(stage_params,0,sizeof(stage_params)) ;
 	memset(p_g,0,sizeof(p_g)) ;
 
+	memset(s2_ch_phase,0,sizeof(s2_ch_phase)) ;
+	memset(s2_ch_mask,0,sizeof(s2_ch_mask)) ;
+
+	memset(s3_ch_phase,0,sizeof(s3_ch_phase)) ;
+	s3_ch_mask = 0 ;
+	s3_out_phase = 0 ;
 
 	// and then set all gains to 1
 	for(int i=0;i<NS_COU;i++) {
 	for(int j=0;j<ADC_DET_COU;j++) {
 	for(int k=0;k<DEP_COU;k++) {
 	for(int c=0;c<32;c++) {
-		p_g[i][j][k][c].gain = (1<<6) ;	// set gains to 1
+		p_g[i][j][k][c].gain = (1<<6) ;	// set gains to 1: THIS IS FY19 -- need to override in code
 	}}}}
 
 
@@ -103,7 +126,7 @@ void fcs_trg_base::init(const char* fname)
 
 	}
 	else if(!sim_mode) {
-		LOG(INFO,"init:realtime: threshold is %d",fcs_data_c::ht_threshold) ;
+		LOG(INFO,"init:realtime: ht_threshold is %d",fcs_data_c::ht_threshold) ;
 
 		for(int i=0;i<3;i++) {	// known in realtime
 			ht_threshold[i] = fcs_data_c::ht_threshold ;
@@ -124,8 +147,8 @@ void fcs_trg_base::init(const char* fname)
 			u_short p = fcs_data_c::ped[sec][rdo].i_ped[c] ;
 			u_short g = fcs_data_c::ped[sec][rdo].i_gain[c] ;
 
-			if(p) {
-				LOG(TERR,"S%d:%d = ns %d, det %d, dep %d, ch %d = ped %d, gain %d",sec+1,rdo+1,i,j,k,c,p,g) ;
+			if(p && log_level>5 && c==0) {	// just a sample, to check sanity
+				LOG(TERR,"S%d:%d: %d:%d:%d: ch %d = i_ped %d, i_gain %d",sec+1,rdo+1,j,i,k,c,p,g) ;
 			}
 			
 			//u_int mask = fcs_data_c::rdo_map[sec][rdo].ch_mask & 0xFFFFFFFFll ;
@@ -280,22 +303,52 @@ void fcs_trg_base::fill_event(int det, int ns, int dep, int c, u_short *d16, int
 					d_in[xing].s1[ns][det][dep].adc[c].d[xou] = dta ;
 				}
 
-				if(c==0 && (fla & 0x1)) {
+				switch(data_format) {
+				case 0 :
 
-					if(is_tcd < 0) is_tcd = t ;
-
-					if(log_level > 10) {
-						printf("ADC tcd_marker -- at xing  %d:%d(%d)\n",xing,xou,t) ;
-					}
+					if(c==0 && (fla & 0x1)) {
 					
-				}
 
-				if(c==0 && (fla & 0x2)) {
-					if(is_self < 0) is_self = t ;
+						if(is_tcd < 0) is_tcd = t ;
 
-					if(log_level>101) {
-						printf("ADC self_trg -- at xing  %d:%d(%d)\n",xing,xou,t) ;
+						if(log_level > 10) {
+							printf("ADC tcd_marker -- at xing  %d:%d(%d)\n",xing,xou,t) ;
+						}
+					
 					}
+
+					if(c==0 && (fla & 0x2)) {
+					
+						if(is_self < 0) is_self = t ;
+
+						if(log_level>101) {
+							printf("ADC self_trg -- at xing  %d:%d(%d)\n",xing,xou,t) ;
+						}
+					}
+
+					break ;
+				case 1 :
+
+					if(c==3 && (fla&4)) {
+
+						if(is_tcd < 0) is_tcd = t ;
+
+						if(log_level > 10) {
+							printf("ADC tcd_marker -- at xing  %d:%d(%d)\n",xing,xou,t) ;
+						}
+					
+					}
+
+					if(c==1 && (fla&4)) {
+						if(is_self < 0) is_self = t ;
+
+						if(log_level>101) {
+							printf("ADC self_trg -- at xing  %d:%d(%d)\n",xing,xou,t) ;
+						}
+					}
+
+
+					break ;
 				}
 
 			}
@@ -372,9 +425,7 @@ void fcs_trg_base::fill_event(int det, int ns, int dep, int c, u_short *d16, int
 	}
 
 	if(is_self>0) {
-//		LOG(TERR,"self at %d",is_self) ;
 		statistics.self_trgs++ ;
-
 		statistics.self_trg_marker = is_self ;
 	}
 	
@@ -393,9 +444,14 @@ int fcs_trg_base::end_event()
 	int dsmout=0;
 
 	for(int xing=0;xing<marker.last_xing;xing++) {
-    
+    		if(log_level>1) {
+			LOG(TERR,"run_event_sim: xing %d",xing) ;
+		}
+
 		dsmout = run_event_sim(xing,sim_mode) ;
 		
+		//dump_event_sim(xing) ;
+
 		if(sim_mode) {
 			dump_event_sim(xing) ;
 		}
@@ -419,7 +475,7 @@ int fcs_trg_base::run_stop()
 		err = 1 ;
 	}
 
-	LOG(TERR,"thread %d: self_trg_marker %d, tcd_marker %d",id,statistics.self_trg_marker,statistics.tcd_marker) ;
+	LOG(INFO,"thread %d: self_trg_marker %d, tcd_marker %d",id,statistics.self_trg_marker,statistics.tcd_marker) ;
 
 	if(err) {
 	LOG(ERR,"thread %d: %d/%d events in run %d: errs sim %u %u %u; io [%u %u %u %u] %u",id,
@@ -563,7 +619,7 @@ int fcs_trg_base::dump_event_sim(int xing)
 		for(int t=0;t<8;t++) {
 			int d_sim = d_out.s1[i][j][k].s1_to_s2.d[t] ;
 
-			if(d_sim) printf("S1 out: %d:%d:%d - xing %d:%d, dta %d\n",
+			if(d_sim) printf("S1 sim: %d:%d:%d - xing %d:%d, dta %d\n",
 			       i,j,k,xing,t,d_sim) ;
 		}
 	}
@@ -579,13 +635,13 @@ int fcs_trg_base::dump_event_sim(int xing)
 		for(int t=0;t<8;t++) {
 			int d_sim = d_out.s2[i].s2_to_s3[j].d[t] ;
 
-			printf("S2 out: %d:%d - xing %d:%d, dta 0x%03X\n",
+			printf("S2 sim: %d:%d - xing %d:%d, dta 0x%03X\n",
 			       i,j,xing,t,d_sim) ;
 		}
 	}
 	}
 
-	printf("S3 out: to DSM 0x%04X\n",d_out.s3.dsm_out) ;
+	printf("S3 sim: to DSM 0x%04X\n",d_out.s3.dsm_out) ;
 
 	return 0 ;
 }
@@ -626,10 +682,10 @@ int fcs_trg_base::verify_event_sim(int xing)
 			int d_i = d_in[xing].s1[i][j][k].s1_to_s2.d[t] ;
 
 			if(want_log && log_level>0) {
-				LOG(ERR,"evt %d: S1 sim: %d:%d:%d - xing %d:%d: sim %d, dta %d",evts,i,j,k,
+				LOG(ERR,"evt %d: S1 sim: %d:%d:%d - xing %d:%d: sim %d, dta %d %c",evts,i,j,k,
 				    xing,t,
 				    d_sim,
-				    d_i) ;
+				    d_i,d_sim!=d_i?'*':' ') ;
 			}
 
 			if(want_print && log_level>3) {
@@ -772,6 +828,9 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 					stage_0(d_in[xing].s1[i][j][k].adc[c],geo,&(p_g[i][j][k][c]),&res) ;
 
 					s0_to_s1[c] = res ;
+
+					if(log_level>100) printf("... S0: xing %d: %d:%d:%d: ch %d = %d (ped %d, gain %d)\n",xing,i,j,k,c,res,
+								p_g[i][j][k][c].ped,p_g[i][j][k][c].gain) ;
 				}
 
 				// so that we compare d_out.s1_to_s2 and d_in.s1_to_s2
@@ -855,14 +914,12 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 
 void fcs_trg_base::stage_0(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *dta_out)
 {
-	if(stage_version[0] != 0) {
-		LOG(ERR,"stage_0: unknown version %d",stage_version[0]) ;
-		// but continue
-	}
-
 	switch(stage_version[0]) {
 	case 0 :
 		stage_0_201900(adc, geo, pg, dta_out) ;
+		break ;
+	case 1 :
+		stage_0_202101(adc, geo, pg, dta_out) ;
 		break ;
 	default :
 		*dta_out = 0 ;

@@ -215,14 +215,20 @@ class Lxgbx {
 	double currtime = mygettime();
 
 	if(seed == 0) {
+#ifndef __vxworks
+
 	    seed = (long int)(currtime * 1e6);
 	    srand48(seed);
-	    LOG(NOTE, "seed48=%llx %d", seed, sizeof(seed));
+	    LOG("JEFF", "seed48=%llx %d", seed, sizeof(seed),0,0,0);
+#endif
 	}
 
 	if(currtime > 15 + resettime) {
+#ifdef __vxworks
+	    resettime = currtime;
+#else
 	    resettime = currtime + drand48();
-	    
+#endif	    
 	    for(int i=0;i<EVP_GROUP_MAX;i++) {
 		evpCtrs.cnt[i] = 0;
 	    }
