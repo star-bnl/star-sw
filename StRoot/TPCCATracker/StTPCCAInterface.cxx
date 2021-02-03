@@ -1,4 +1,5 @@
 //#define __ESTIMATE_Primary_Vertex_Z__
+#define __TPCCA_TIMING__
 #include "StTPCCAInterface.h"
 #include "TPCCATracker/AliHLTTPCCAGBHit.h"
 #include "TPCCATracker/AliHLTTPCCAGBTrack.h"
@@ -147,7 +148,7 @@ void StTPCCAInterface::Run()
     }
   }
 #endif /* __ESTIMATE_Primary_Vertex_Z__ */
-#if 1
+#ifdef __TPCCA_TIMING__
   timer.Start();
   // --- Tracking time ---
   const int NTimers = fTracker->NTimers();
@@ -196,13 +197,14 @@ void StTPCCAInterface::Run()
 	;
     }
   }
-#endif
+#endif /* __TPCCA_TIMING__ */
   //
   MakeSeeds();
-
+#ifdef __TPCCA_TIMING__
   timer.Stop();
   fPreparationTime_real += timer.RealTime();
   fPreparationTime_cpu += timer.CpuTime();
+#endif /* __TPCCA_TIMING__ */
 } // void StTPCCAInterface::Run()
 //________________________________________________________________________________
 void StTPCCAInterface::RunPerformance()
