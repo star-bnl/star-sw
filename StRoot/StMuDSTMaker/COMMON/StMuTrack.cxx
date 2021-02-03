@@ -661,8 +661,12 @@ TArrayI StMuTrack::getTower(Bool_t useExitRadius,Int_t det) const{ //1=BTOW, 3=B
 	
 	StEmcPosition mEmcPosition;
 	Bool_t goodProjection;
+#if 0
 	if(this) goodProjection = mEmcPosition.trackOnEmc(&position,&momentum,this,mField,radius);
 	else return tower;
+#else
+	goodProjection = mEmcPosition.trackOnEmc(&position,&momentum,this,mField,radius);
+#endif
 	if(goodProjection){
 		Int_t m,e,s,id=0;
 		Float_t eta=position.pseudoRapidity();

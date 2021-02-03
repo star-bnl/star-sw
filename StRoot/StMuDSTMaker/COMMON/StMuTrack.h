@@ -15,7 +15,6 @@
 
 #ifndef StMuTrack_h
 #define StMuTrack_h
-
 #include "StMuDst.h"
 #include "StMuEvent.h"
 #include "StMuHelix.h"
@@ -25,8 +24,6 @@
 #include "StMuETofPidTraits.h" /// fseck
 #include "StMuMtdPidTraits.h" /// Bingchu
 #include "StMuPrimaryTrackCovariance.h"
-
-
 #include "StEvent/StTrackTopologyMap.h"
 #include "StEvent/StRunInfo.h"
 #include "StEvent/StDcaGeometry.h"
