@@ -45,15 +45,15 @@ double _magfield  = -5.005;
 
 int     _npart = 10;  // floor number of tracks per event
 float   _fpart = 0.05;  // fraction of track multiplicity to embed
-int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007,45,50045,49,50049,37,61053,61054,62053,62054}; //geant3 particle ID
-TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0","deuteron","antideuteron","he3","antihe3","D0","HyperT_2body","HyperT_bar_2body","HyperT_3body","HyperT_bar_3body"}; // particle names
+int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007,45,50045,49,50049,37,61053,61054,62053,62054,60008,60009}; //geant3 particle ID
+TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0","deuteron","antideuteron","he3","antihe3","D0","HyperT_2body","HyperT_bar_2body","HyperT_3body","HyperT_bar_3body","PQ1730_k0lam","PQ1730_kpluslam"}; // particle names
 TString _part  = "pi+"; // particle to simulate, default pi+
 TString _part_save;
 float   _ptmn  = 0.100; // min pT to simulate [GeV]
 float   _ptmx  = 7.000; // max pT to simulate [GeV]
 float   _etamn = -2.0;  // min eta to simulate
 float   _etamx = +2.0;  // max eta to simulate
-bool    _rapiditymode = false; //default is flat in pseudorapidity (eta)
+bool    _rapiditymode = true; //default is flat in pseudorapidity (eta)
 //float   _mnvtx = -5.0;  // min z vertex
 //float   _mxvtx = +5.0;  // max z vertex
 
@@ -305,6 +305,10 @@ void runEmbeddingSimulation2014(
 
   Kinematics();
 
+  // Particle data
+  StarParticleData& data = StarParticleData::instance();
+
+
 #if 0 
   // Only for nucleus listed below
   // Load STAR Particle DataBase and add the hypertriton definitions.  Map to the
@@ -330,10 +334,6 @@ void runEmbeddingSimulation2014(
   StarPythia8Decayer *decayPy8 = new StarPythia8Decayer();
   decayMgr->AddDecayer(    0, decayPy8 ); // Handle any decay requested 
   decayPy8->SetDebug(1);
-  //  decayPy8->Set("WeakSingleBoson:all = on");
-
-  // Particle data
-  StarParticleData& data = StarParticleData::instance();
 
   if(_part == "D0"){
      //  One can add a particle to G3 using...
@@ -376,6 +376,22 @@ void runEmbeddingSimulation2014(
      TParticlePDG* antideuteron     = data.GetParticle("antideuteron");    
      antideuteron->Print();
   }
+
+  if(_part == "PQ1730_k0lam") {
+    double bratio[] = { 0.5, 0.5, 0.0, 0., 0., 0.0 };
+    int    mode[]   = {9598,9597, 0, 0, 0, 0 };
+    data.AddParticleToG3( "PQ1730_k0lam", 0.1730E+01, 1E-16, 0., 3, 912323, 60008, bratio, mode );
+    TParticlePDG* mypart     = data.GetParticle("PQ1730_k0lam");    
+    mypart->Print();
+  }
+  if(_part == "PQ1730_kpluslam") {
+    double bratio[] = { 0.5, 0.5, 0.0, 0., 0., 0.0 };
+    int    mode[]   = {9698,9697, 0, 0, 0, 0 };
+    data.AddParticleToG3( "PQ1730_kpluslam", 0.1730E+01, 1E-16, 0., 3, 912323, 60009, bratio, mode );
+    TParticlePDG* mypart     = data.GetParticle("PQ1730_kpluslam");    
+    mypart->Print();
+  }
+
 
 #endif
 
