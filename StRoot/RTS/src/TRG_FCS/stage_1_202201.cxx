@@ -56,6 +56,8 @@ void fcs_trg_base::stage_1_202201(u_int s0[], geom_t geo, link_t *output)
 		for(int i=0;i<8;i++) {
 			//fprintf(stderr,"SUM %d: %d: %d\n",i,sum[i],sum[i]>>7) ;
 
+			//printf(" IN S1: ix %d: %d\n",i,sum[i]) ;
+
 		        //if(sum[i]>131071) output->d[i] = 0xFF ;
 		        if(sum[i]>0x7FFF) output->d[i] = 0xFF ;
 			else output->d[i] = sum[i]>>7 ;
@@ -73,6 +75,8 @@ void fcs_trg_base::stage_1_202201(u_int s0[], geom_t geo, link_t *output)
 			// It seems to be inconsistent - akio
 
 			output->d[i] &= 0xFF ;
+
+			//printf("  IN S1: ix %d: %d out\n",i,output->d[i]) ;
 
 		}
 	}

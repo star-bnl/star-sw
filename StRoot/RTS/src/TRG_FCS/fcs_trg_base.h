@@ -48,6 +48,7 @@ public:
 	// stage_0 and stage_1 are running in DEP/ADC
 	void stage_0(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
 	void stage_0_201900(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
+	void stage_0_202101(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
 
 	void stage_1(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
 	void stage_1_201900(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
@@ -184,7 +185,7 @@ public:
 	} d_out ;
 
 	// statics below
-
+	static u_int data_format ;	// 0:pre FY21, 1=FY21
 
 
 	// Stage versions for this invocation
@@ -211,19 +212,31 @@ public:
 
 	} marker ;
 
+	static int fcs_trgDebug ;
+
+	// stage_x algo params (same as in firmware)
+	static u_short stage_params[4][16] ;	// [stage][param_ix] ;
+
 	// for use by stage_0; loaded in init()
 	static ped_gain_t p_g[NS_COU][ADC_DET_COU][DEP_COU][32] ;		
 
+
 	// for use by stage_1:
 	// various thresholds indexed by det
-	static u_int ht_threshold[ADC_DET_COU] ;
-	
+	static u_short ht_threshold[ADC_DET_COU] ;
+
 
 	// for use by stage_2:
-	static u_int s2_ch_mask[NS_COU] ;
-	static int fcs_trgDebug ;
+	static unsigned long long s2_ch_mask[NS_COU] ;	// up to 34 bits
+	static u_char s2_ch_phase[NS_COU][34] ;			// phase used to align data
+
         static int fcs_readPresMaskFromText;
         static u_int PRES_MASK[15][9][6];
+
+	// for use by stage_3
+	static u_char s3_ch_mask ;			// if '1' corresponding input masked
+	static u_char s3_ch_phase[4] ;			// phasing of the 4 inputs
+	static u_char s3_out_phase ;			// phasing of the 1 output to Trigger
 
 	// various thresholds
 	static u_short EM_HERATIO_THR ;
@@ -239,9 +252,9 @@ public:
 	static u_short ETOTTHR ;       
 	static u_short HTOTTHR ;       
 
-	// for use by stage_3:
+
 	// various stuff...
-	static u_int s3_ch_mask ;
+
 
         // Ecal and Hcal 4x4 sums, Ecal+nearest Hcal sum, and Pres(EPD) hit pattern at stage2
         u_int esum[2][15][9];
