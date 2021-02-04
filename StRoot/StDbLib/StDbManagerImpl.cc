@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.52 2021/02/04 16:59:03 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.53 2021/02/04 16:59:45 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.53  2021/02/04 16:59:45  dmitry
+ * oops, typo
+ *
  * Revision 1.52  2021/02/04 16:59:03  dmitry
  * adding new db domain: FCS
  *
@@ -444,7 +447,7 @@ addDbDomain(dbSst,"sst");
 addDbDomain(dbEpd,"epd");
 addDbDomain(dbRhicf,"rhicf");
 addDbDomain(dbEtof,"etof");
-addDbDomain(dbEtof,"fcs");
+addDbDomain(dbFcs,"fcs");
 }
 
 ////////////////////////////////////////////////////////////////
