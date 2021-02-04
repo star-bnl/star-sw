@@ -2018,8 +2018,25 @@ my $NEvents = 100000;
 #$hist = "RunXX56"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/29/21 new TpcSecRowB for COL and FXT
 #$hist = "RunXX57"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/29/21 split Z3 for negative and positive tracks
 #$hist = "RunXX58"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/30/21 fix bug for Z3 plots
-$hist = "RunXX59"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/31/21 TpcPadCorrectionMDF.20191120.180058.C
- 
+#$hist = "RunXX59"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/31/21 TpcPadCorrectionMDF.20191120.180058.C
+# dE/dx Tables               2019 TFG19e            2020 TFG20a     2021  .DEV2
+# TpcAccumulatedQ            2019-02-25 00:03:22    default         default
+# TpcAdcCorrectionB          y2019                  r2020           r2021-> r2020
+# TpcAdcCorrection3MDF       default
+# tpcAltroParams             y2019                  y2020           y2021
+# tpcGainCorrection          2018-12-20 00:00:00    -"-             -"-
+# TpcLengthCorrectionB       default since 2015-01-31 00:00:08
+# TpcLengthCorrectionMDF     2019-02-01+ FXT        20191120.190003->y2021
+# TpcdXCorrectionB           default                -"-             -"-
+# TpcPadCorrection           default                -"-             -"-
+# TpcPadCorrectionMDF        2019-02-02 00:03:26    20191120.180058->r2021
+# TpcRowQ                    2019-02-25 00:03:21    default         -"- 
+# TpcSecRowB                 2019-02-01+ FXT        20191210 +FXT   r2021.root -> TpcSecRowB.20191120.190002.root
+# TpcSecRowC                 default
+# TpcTanL                    default
+# tpcPressureB               2019-02-01 00:07:03    -"-             -"-
+# tpcTimeDependence          default
+# TpcZCorrectionB            2019-02-01+ FXT        20191210 +FXT   r2021.C -> TpcZCorrectionB.20191120.190001.C
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
