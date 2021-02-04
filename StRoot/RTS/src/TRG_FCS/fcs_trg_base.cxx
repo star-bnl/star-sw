@@ -957,6 +957,11 @@ void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t g
 	case 1 :
 		stage_2_202201(ecal,hcal,pres,geo,output) ;
 		break ;
+
+	// debugging versions below
+	case 0xFF210201 :
+		stage_2_tonko_202101(ecal,hcal,pres,geo,output) ;
+		break ;
 	default :
 		LOG(ERR,"Unknown stage_2 version %d",stage_version[2]) ;
 		break ;
@@ -976,6 +981,11 @@ void fcs_trg_base::stage_3(link_t link[4], u_short *dsm_out)
 	case 1 :
 		stage_3_202201(link,dsm_out) ;
 		break ;
+	// debugging versions below
+	case 0xFF210201 :
+		stage_3_tonko_202101(link, dsm_out) ;
+		break ;
+
 	default :
 		LOG(ERR,"Unknown stage_3 version %d",stage_version[3]) ;
 		break ;
