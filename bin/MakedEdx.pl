@@ -2039,8 +2039,9 @@ my $NEvents = 100000;
 # TpcZCorrectionB            2019-02-01+ FXT        20191210 +FXT   r2021.C -> TpcZCorrectionB.20191120.190001.C
 # start from RunXIX
 #$hist = "RunXX100"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/03/21 start from extpress production
-$hist = "RunXX101"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 start from scratch
-
+#$hist = "RunXX101"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 start from scratch
+######################################## Run XXI ########################################
+$hist = "RunXXI101"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 start from 2020 expres production
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
