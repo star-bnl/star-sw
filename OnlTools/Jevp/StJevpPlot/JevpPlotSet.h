@@ -125,6 +125,9 @@ class JevpPlotSet : public TObject {
 
   //StTriggerData *getStTriggerData(daqReader *rdr);
 
+  void logDbVariable(char *variable_name,
+		     double value) {};
+
  private:
 
   JevpServer *parent;
@@ -163,7 +166,7 @@ class JevpPlotSet : public TObject {
   double n_pertrg[64];
   double avg_time_pertrg[64];
 
-
+ 
 
  public:
   ClassDef(JevpPlotSet, 1);
