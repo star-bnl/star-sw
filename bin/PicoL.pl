@@ -20,7 +20,8 @@ my $dayMin =  0;
 my $dayMax =  0;
 my $year = "y2020";
 my $Njobs = 0;
-if    ($pwd =~ /2020/) { $year = "y2020";}
+if    ($pwd =~ /2021/) { $year = "y2021";}
+elsif ($pwd =~ /2020/) { $year = "y2020";}
 elsif ($pwd =~ /2019/) { $year = "y2019";} 
 elsif ($pwd =~ /2018/) { $year = "y2018";} 
 elsif ($pwd =~ /2017/) { $year = "y2017";} 
@@ -46,6 +47,7 @@ if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/ or $pwd =~ /P20ic/) {
   elsif ($pwd =~ /2020\/9p8GeV_fixedTarget/)  {$glob = "/reco/production_9p8GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2019\/19GeV_2019/)          {$glob = "/reco/production_19GeV_2019/ReversedFullField/P20ic_calib/2019";}
   elsif ($pwd =~ /2017\/pp500/)               {$glob = "/reco/pp500_production_2017/ReversedFullField/P20ic/2017";}
+  elsif ($pwd =~ /2021\/7p7GeV/)              {$glob = "/reco/production_7p7GeV_2021/ReversedFullField/dev/2021/";}
 } else {# TFG
   $PICOPATH = "/gpfs01/star/pwg_tasks/tfg02"; 
 #  if (! -r  $PICOPATH) {$PICOPATH = "/net/l401/data/scratch1/reco";}
@@ -111,7 +113,12 @@ if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/ or $pwd =~ /P20ic/) {
   elsif ($pwd =~ /2020\/7p3GeV_fixedTarget/)  {$glob = "/2020/TFG20a/RF/7p3GeV_fixedTarget";}
   elsif ($pwd =~ /2020\/9p2GeV/)              {$glob = "/2020/TFG20a/RF/9p2GeV";}
   elsif ($pwd =~ /2020\/7p7GeV/)              {$glob = "/2020/TFG20a/RF/7p7GeV";}
-  
+  elsif ($pwd =~ /2021/) {
+    $PICOPATH = "/hlt/cephfs/reco";
+    print "PICOPATH = $PICOPATH\n" if ($debug);
+    if ($pwd =~ /7p7GeV_2021/)                {$glob = "/2021/RF/DEV2/7p7GeV_2021.C";}
+    else {die "Not set yet";}
+  }
 }
 print "PICOPATH = $PICOPATH; days = $dayMin  - $dayMax : glob = $glob\n" if ($debug);
 if (! $glob) {die "glob = $glob";}
