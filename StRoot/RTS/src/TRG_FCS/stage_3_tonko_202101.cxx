@@ -26,6 +26,7 @@ void  fcs_trg_base::stage_3_tonko_202101(link_t s2[], u_short *dsm)
 {    
 	u_short out_s ;
 	u_short out_n ;
+	u_short big_or ;
 
 	out_s = 0 ;
 	out_n = 0 ;
@@ -34,6 +35,11 @@ void  fcs_trg_base::stage_3_tonko_202101(link_t s2[], u_short *dsm)
 		out_n |= (or_reduce(s2[0].d[i]) || or_reduce(s2[1].d[i]))<<i ;
 		out_s |= (or_reduce(s2[2].d[i]) || or_reduce(s2[3].d[i]))<<i ;
 	}
+
+	if(out_n || out_s) big_or = 1 ;	// _any_ bit set
+	else big_or = 0 ;
+
+	out_n |= big_or ;	// bit(0) is a HT-like indicator
 
 	int sel = (stage_params[3][0]>>1)&0x7 ;
 
