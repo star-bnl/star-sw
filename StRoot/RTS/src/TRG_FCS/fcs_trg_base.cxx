@@ -353,7 +353,7 @@ void fcs_trg_base::fill_event(int det, int ns, int dep, int c, u_short *d16, int
 
 			}
 		}
-		else {			// DEP/Trigger in FY19
+		else if(data_format==0) {			// DEP/Trigger in FY19
 			switch(c) {
 			case 4 :	// data from stage_2 to stage_3
 				tix = t - marker.s2_to_s3_start ;
@@ -421,6 +421,60 @@ void fcs_trg_base::fill_event(int det, int ns, int dep, int c, u_short *d16, int
 				break ;
 			}
 						
+		}
+		else if(dep==0) {	// FY21 stage 3
+			switch(c) {
+			case 4 :	// dsm out lo bots
+				tix = t - marker.dsm_out_start ;
+
+				xing = tix/8 ;
+				xou = tix%8 ;
+
+				if(fla & 0x4) {
+
+				}
+
+				if(dta && log_level>10) {
+
+				}
+
+				if(tix>=0 && xing<XING_COU) {
+					d_in[xing].s3.dsm_out.d[xou] = dta & 0xFF ;	// link
+				}
+				break ;
+			case 5 :	// DSM out hi
+				tix = t - marker.dsm_out_start ;
+
+				xing = tix/8 ;
+				xou = tix%8 ;
+
+				if(fla & 0x4) {
+					if(log_level>10) {
+
+					}
+				}
+
+				if(dta && log_level>10) {
+
+				}
+
+				if(tix>=0 && xing<XING_COU) {
+					d_in[xing].s3.dsm_out.d[xou] |= (dta & 0xFF)<<8 ;
+				}
+				break ;
+			default :	
+				tix = t - marker.s3_in_start ;
+
+				xing = tix/8 ;
+				xou = tix%8 ;
+
+				if(tix>=0 && xing<XING_COU) {
+					d_in[xing].s3.s3_from_s2[c].d[xou] = dta & 0xFF ;
+				}
+				
+
+				break ;
+			}
 		}
 	}
 

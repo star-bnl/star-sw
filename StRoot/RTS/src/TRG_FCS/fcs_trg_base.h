@@ -33,7 +33,7 @@ struct ped_gain_t {
 class fcs_trg_base {
 public:
 //	static const int XING_COU = 20 ;	// maximum xings we will look at in simulation and verification
-	static const int XING_COU = 32 ;	// maximum xings we will look at in simulation and verification
+	static const int XING_COU = 40 ;	// maximum xings we will look at in simulation and verification
 	static const int DET_COU = 4 ;		// including Trigger DEPs
 	static const int ADC_DET_COU = 3 ;	// dets with ADCs (just 3)
 	static const int NS_COU = 2 ;
