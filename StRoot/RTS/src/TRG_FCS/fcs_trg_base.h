@@ -33,7 +33,7 @@ struct ped_gain_t {
 class fcs_trg_base {
 public:
 //	static const int XING_COU = 20 ;	// maximum xings we will look at in simulation and verification
-	static const int XING_COU = 32 ;	// maximum xings we will look at in simulation and verification
+	static const int XING_COU = 40 ;	// maximum xings we will look at in simulation and verification
 	static const int DET_COU = 4 ;		// including Trigger DEPs
 	static const int ADC_DET_COU = 3 ;	// dets with ADCs (just 3)
 	static const int NS_COU = 2 ;
@@ -57,11 +57,13 @@ public:
 	void stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_tonko_202101(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 
 	// stage_3 is running in DEP/IO (1 Main) connected to STAR Trigger RAT/DSM
 	void stage_3(link_t from_s2[], u_short *to_dsm) ;
 	void stage_3_201900(link_t from_s2[], u_short *to_dsm) ;
 	void stage_3_202201(link_t from_s2[], u_short *to_dsm) ;
+	void stage_3_tonko_202101(link_t from_s2[], u_short *to_dsm) ;
 
 	virtual u_int get_version() ;
 
