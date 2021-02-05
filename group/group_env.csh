@@ -999,12 +999,12 @@ if (-r /opt/rh/httpd24/enable ) then
 # setenv LIBRARY_PATH /opt/rh/httpd24/root/usr/lib64:${LIBRARY_PATH}
   setenv LD_LIBRARY_PATH /opt/rh/httpd24/root/usr/lib64:${LD_LIBRARY_PATH}
 endif
-if (-r /opt/rh/rh-git29/enable) then 
-  setenv PATH /opt/rh/rh-git29/root/usr/bin:${PATH}
-  setenv MANPATH /opt/rh/rh-git29/root/usr/share/man:${MANPATH}
-  setenv PERL5LIB /opt/rh/rh-git29/root/usr/share/perl5/vendor_perl:${PERL5LIB}
-  setenv LD_LIBRARY_PATH /opt/rh/httpd24/root/usr/lib64:${LD_LIBRARY_PATH}
-endif
+#if (-r /opt/rh/rh-git218/enable) then 
+#  setenv PATH /opt/rh/rh-git218/root/usr/bin:${PATH}
+#  setenv MANPATH /opt/rh/rh-git218/root/usr/share/man:${MANPATH}
+#  setenv PERL5LIB /opt/rh/rh-git218/root/usr/share/perl5/vendor_perl:${PERL5LIB}
+#  setenv LD_LIBRARY_PATH /opt/rh/httpd24/root/usr/lib64:${LD_LIBRARY_PATH}
+#endif
 if (-r ${HOME}/bin)                   setenv PATH ${HOME}/bin:${PATH}
 if (-r ${HOME}/bin/.${STAR_HOST_SYS}) setenv PATH ${HOME}/bin/.${STAR_HOST_SYS}:${PATH}
 if (-r ${STAR}/scripts/RCF)           setenv PATH ${PATH}:${STAR}/scripts/RCF
@@ -1024,3 +1024,5 @@ if (-x ${GROUP_DIR}/dropit)           setenv PATH `${GROUP_DIR}/dropit`
 
 #echo "${STAR}"
 #echo "$LD_LIBRARY_PATH"
+which xtitl >& /dev/null
+if (! $?) xtitl
