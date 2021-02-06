@@ -399,9 +399,12 @@
 # 7p7GeV               20200910.041639 
 # 26p5GeV_fixedTarget  20200912.102033 
 #root.exe -q -b   SecRow3CGFRunXX053.root 'MakeTpcSecRowB.C(20191121,53,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,53.log
-foreach b (COL FXT)
-    set f = SecRow3CGF${b}.root
-    echo "${f} => ${b}"
-    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000053.root ${f} 'MakeTpcSecRowB.C(20191121,55,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,055.log
-    mv TpcSecRowB.20191121.000055.root  TpcSecRowB.${b}RunXX55.root; mv  MakeTpcSecRowB.20191121,055.log MakeTpcSecRowB.${b}.log
-end
+#set v = `basename ${PWD}`
+#foreach b (COL FXT)
+#    set f = SecRow3CGF${b}.root
+#    echo "${f} => ${b}"
+#    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000053.root  ${f} 'MakeTpcSecRowB.C(20191121,101,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,101.log
+#    mv TpcSecRowB.20191121.000101.root  TpcSecRowB.${b}.${v}.root; mv  MakeTpcSecRowB.20191121,101.log MakeTpcSecRowB.${b}.${v}.log
+#end
+#################################### Run XXI ############################################
+root.exe -q -b   SecRow3CGFRunXXI102.root Se 'MakeTpcSecRowB.C(20210129,2,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,2.log
