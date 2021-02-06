@@ -407,4 +407,5 @@
 #    mv TpcSecRowB.20191121.000101.root  TpcSecRowB.${b}.${v}.root; mv  MakeTpcSecRowB.20191121,101.log MakeTpcSecRowB.${b}.${v}.log
 #end
 #################################### Run XXI ############################################
-root.exe -q -b   SecRow3CGFRunXXI102.root Se 'MakeTpcSecRowB.C(20210129,2,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,2.log
+#root.exe -q -b   SecRow3CGFRunXXI102.root  'MakeTpcSecRowB.C(20210129,2,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,2.log
+root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000002.root T SecRow3CGFRunXXI04.root  'MakeTpcSecRowB.C(20210129,4,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,4.log
