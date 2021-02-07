@@ -353,7 +353,7 @@ void fcs_trg_base::fill_event(int det, int ns, int dep, int c, u_short *d16, int
 
 			}
 		}
-		else {			// DEP/Trigger in FY19
+		else if(data_format==0) {			// DEP/Trigger in FY19
 			switch(c) {
 			case 4 :	// data from stage_2 to stage_3
 				tix = t - marker.s2_to_s3_start ;
@@ -421,6 +421,60 @@ void fcs_trg_base::fill_event(int det, int ns, int dep, int c, u_short *d16, int
 				break ;
 			}
 						
+		}
+		else if(dep==0) {	// FY21 stage 3
+			switch(c) {
+			case 4 :	// dsm out lo bots
+				tix = t - marker.dsm_out_start ;
+
+				xing = tix/8 ;
+				xou = tix%8 ;
+
+				if(fla & 0x4) {
+
+				}
+
+				if(dta && log_level>10) {
+
+				}
+
+				if(tix>=0 && xing<XING_COU) {
+					d_in[xing].s3.dsm_out.d[xou] = dta & 0xFF ;	// link
+				}
+				break ;
+			case 5 :	// DSM out hi
+				tix = t - marker.dsm_out_start ;
+
+				xing = tix/8 ;
+				xou = tix%8 ;
+
+				if(fla & 0x4) {
+					if(log_level>10) {
+
+					}
+				}
+
+				if(dta && log_level>10) {
+
+				}
+
+				if(tix>=0 && xing<XING_COU) {
+					d_in[xing].s3.dsm_out.d[xou] |= (dta & 0xFF)<<8 ;
+				}
+				break ;
+			default :	
+				tix = t - marker.s3_in_start ;
+
+				xing = tix/8 ;
+				xou = tix%8 ;
+
+				if(tix>=0 && xing<XING_COU) {
+					d_in[xing].s3.s3_from_s2[c].d[xou] = dta & 0xFF ;
+				}
+				
+
+				break ;
+			}
 		}
 	}
 
@@ -957,6 +1011,11 @@ void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t g
 	case 1 :
 		stage_2_202201(ecal,hcal,pres,geo,output) ;
 		break ;
+
+	// debugging versions below
+	case 0xFF210201 :
+		stage_2_tonko_202101(ecal,hcal,pres,geo,output) ;
+		break ;
 	default :
 		LOG(ERR,"Unknown stage_2 version %d",stage_version[2]) ;
 		break ;
@@ -976,6 +1035,11 @@ void fcs_trg_base::stage_3(link_t link[4], u_short *dsm_out)
 	case 1 :
 		stage_3_202201(link,dsm_out) ;
 		break ;
+	// debugging versions below
+	case 0xFF210201 :
+		stage_3_tonko_202101(link, dsm_out) ;
+		break ;
+
 	default :
 		LOG(ERR,"Unknown stage_3 version %d",stage_version[3]) ;
 		break ;

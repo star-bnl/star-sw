@@ -8,6 +8,10 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.cxx,v $
+ * Revision 1.27  2021/02/05 17:23:25  akio
+ * Adding access to STAR offline DB tables.
+ * Adding getFromName/getDetFromName from David.
+ *
  * Revision 1.26  2021/01/05 18:15:01  akio
  * added setPedestal()
  *
@@ -98,6 +102,14 @@
 #include "StEvent/StFcsHit.h"
 #include "StEvent/StFcsCluster.h"
 #include "StEvent/StFcsPoint.h"
+
+#include "tables/St_fcsDetectorPosition_Table.h"
+#include "tables/St_fcsEcalGain_Table.h"
+#include "tables/St_fcsHcalGain_Table.h"
+#include "tables/St_fcsPresGain_Table.h"
+#include "tables/St_fcsEcalGainCorr_Table.h"
+#include "tables/St_fcsHcalGainCorr_Table.h"
+#include "tables/St_fcsPresValley_Table.h"
 #include "tables/St_vertexSeed_Table.h"
 
 #include <math.h>
@@ -136,6 +148,7 @@ Short_t mScMap_add[kFcsNDet][kFcsMaxId];
 Short_t mScMap_sipm[kFcsNDet][kFcsMaxId];
 Short_t mScMap_pp[kFcsNDet][kFcsMaxId];
 Short_t mScMap_j[kFcsNDet][kFcsMaxId];
+
 //Reverse SC map
 Short_t mRScMap_det[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxBranch][kFcsMaxAddr][kFcsMaxSiPM];
 Short_t mRScMap_id[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxBranch][kFcsMaxAddr][kFcsMaxSiPM];
@@ -195,21 +208,21 @@ Short_t HMapSCPP[10];
 Short_t HMapSCJ[10];
 
 const char* colW[4]={"Green ","Brown ","Orange","Blue  "};
-//char* colJ[8]={"Blue  ","Orange","Violet","Yellow",
-//	       "Green ","Red   ","Grey  ","Black"};
 const char* colJ[8]={"Blue  ","Orange","Violet","Black ",
 	       "Yellow","Red   ","Grey  ","Blue  "};
 float leng[8]={     6.5,     6.5,     5.0,    5.0,
       	            3.5,     3.5,     8.0,    8.0};
-char* colJH[8]={"Red   ","Grey  ","Orange","Yellow",
-		"Orange","Blue  ","Red   ","Yellow"};
+const char* colJH[8]={"Red   ","Grey  ","Orange","Yellow",
+		      "Orange","Blue  ","Red   ","Yellow"};
 float lengH[8]={    6.5,     5.0,     5.0,    5.0,
       	            6.5,     5.0,     5.0,    5.0};
 
 ClassImp(StFcsDbMaker)
 
 StFcsDbMaker::StFcsDbMaker(const Char_t *name) : StMaker(name) {}; 
+
 StFcsDbMaker::~StFcsDbMaker() {}
+
 Int_t StFcsDbMaker::Init(){
   LOG_DEBUG<<"StFcsDbMaker Init Start"<<endm; 
   if(mRun19==0){
@@ -227,6 +240,7 @@ Int_t StFcsDbMaker::Make(){LOG_DEBUG<<"StFcsDbMaker Make"<<endm; return kStOK;}
 void StFcsDbMaker::Clear(const Char_t*){LOG_DEBUG<<"StFcsDbMaker Clear"<<endm; StMaker::Clear();}
 Int_t StFcsDbMaker::Finish(){LOG_DEBUG<<"StFcsDbMaker Finish"<<endm; return kStOK;}
 
+void StFcsDbMaker::setDbAccess(Int_t v) {mDbAccess =  v;}
 void StFcsDbMaker::setRun(Int_t run) {mRun = run;}
 void StFcsDbMaker::setDebug(Int_t debug) {mDebug = debug;}
 void StFcsDbMaker::setRun19(Int_t v) {mRun19=v;}
@@ -234,12 +248,82 @@ void StFcsDbMaker::setLeakyHcal(Int_t v) {mLeakyHcal=v;}
 
 Int_t StFcsDbMaker::InitRun(Int_t runNumber) {
     LOG_DEBUG << "StFcsDbMaker::InitRun - run = " << runNumber << endm;
+    
     //! Accessing DBs
-    if(mDebug>0) {
+    if(mDbAccess>0) {
 	St_db_Maker* dbmaker = (St_db_Maker*)GetMaker("db");
-	if(dbmaker)
-	  LOG_INFO << "StFcsDbMaker::InitRun - Date&time from St_db_Maker="<<dbmaker->GetDate()<<","<< dbmaker->GetTime() << endm;
-    }    
+	if(dbmaker){
+	    LOG_INFO << "StFcsDbMaker::InitRun - Date&time from St_db_Maker="<<dbmaker->GetDate()<<","<< dbmaker->GetTime() << endm;       
+	}else{
+	    LOG_ERROR << "StFcsDbMaker::InitRun - No St_db_Maker"<<endm; return kStFatal;
+	}
+
+	//Get to Geometry/fcs
+	TDataSet *DBgeom = 0;    
+	DBgeom = GetInputDB("Geometry/fcs");
+	if(!DBgeom) {LOG_ERROR << "StFcsDbMaker::InitRun - No Geometry/fcs"<<endm; return kStFatal;}
+
+	//Get to Calibrations/fcs
+	TDataSet *DBcalib = 0;    
+	DBcalib = GetInputDB("Calibrations/fcs");
+	if(!DBcalib) {LOG_ERROR << "StFcsDbMaker::InitRun - No Calibration/fcs"<<endm; return kStFatal;}
+	
+	//!Getting DB tables 
+	St_fcsDetectorPosition *dbFcsDetPos       = (St_fcsDetectorPosition*)DBgeom ->Find("fcsDetectorPosition");
+	St_fcsEcalGain         *dbFcsEcalGain     = (St_fcsEcalGain*)        DBcalib->Find("fcsEcalGain");
+	St_fcsHcalGain         *dbFcsHcalGain     = (St_fcsHcalGain*)        DBcalib->Find("fcsHcalGain");
+	St_fcsPresGain         *dbFcsPresGain     = (St_fcsPresGain*)        DBcalib->Find("fcsPresGain");
+	St_fcsEcalGainCorr     *dbFcsEcalGainCorr = (St_fcsEcalGainCorr*)    DBcalib->Find("fcsEcalGainCorr");
+	St_fcsHcalGainCorr     *dbFcsHcalGainCorr = (St_fcsHcalGainCorr*)    DBcalib->Find("fcsHcalGainCorr");
+	St_fcsPresValley       *dbFcsPresValley   = (St_fcsPresValley*)      DBcalib->Find("fcsPresValley");
+	if(!dbFcsDetPos)       {LOG_ERROR << "StFcsDbMaker::InitRun - No Geometry/fcs/fcsDetectorPosition"<<endm;return kStFatal;}
+	if(!dbFcsEcalGain)     {LOG_ERROR << "StFcsDbMaker::InitRun - No Calibration/fcs/fcsEcalGain"<<endm;     return kStFatal;}
+	if(!dbFcsHcalGain)     {LOG_ERROR << "StFcsDbMaker::InitRun - No Calibration/fcs/fcsHcalGain"<<endm;     return kStFatal;}
+	if(!dbFcsPresGain)     {LOG_ERROR << "StFcsDbMaker::InitRun - No Calibration/fcs/fcsPresGain"<<endm;     return kStFatal;}
+	if(!dbFcsEcalGainCorr) {LOG_ERROR << "StFcsDbMaker::InitRun - No Calibration/fcs/fcsEcalGainCorr"<<endm; return kStFatal;}
+	if(!dbFcsHcalGainCorr) {LOG_ERROR << "StFcsDbMaker::InitRun - No Calibration/fcs/fcsHcalGainCorr"<<endm; return kStFatal;}
+	if(!dbFcsPresValley)   {LOG_ERROR << "StFcsDbMaker::InitRun - No Calibration/fcs/fcsPresValley"<<endm;   return kStFatal;}
+	
+	//storing DetectorPosition
+	fcsDetectorPosition_st *tDetectorPosition = (fcsDetectorPosition_st*) dbFcsDetPos->GetTable();
+	if(mFcsDetectorPosition) delete mFcsDetectorPosition;
+	mFcsDetectorPosition = new fcsDetectorPosition_st;
+	memcpy(mFcsDetectorPosition,tDetectorPosition,sizeof(fcsDetectorPosition_st));
+
+	//storing pointer to the whole table
+	mFcsEcalGain         = (fcsEcalGain_st*)         dbFcsEcalGain->GetTable();
+	mFcsHcalGain         = (fcsHcalGain_st*)         dbFcsHcalGain->GetTable();
+	mFcsPresGain         = (fcsPresGain_st*)         dbFcsPresGain->GetTable();
+	mFcsEcalGainCorr     = (fcsEcalGainCorr_st*)     dbFcsEcalGainCorr->GetTable();
+	mFcsHcalGainCorr     = (fcsHcalGainCorr_st*)     dbFcsHcalGainCorr->GetTable();
+	mFcsPresValley       = (fcsPresValley_st*)       dbFcsPresValley->GetTable();
+	
+	//storing in DEP sorted table
+	int ie=0, ih=0, ip=0, ehp, ns, crt, slt, dep, ch;
+	for(Int_t ins=0; ins<kFcsNorthSouth; ins++){
+	    int det=kFcsEcalNorthDetId+ins; 
+	    for(Int_t id=0; id<maxId(det); id++){ 
+		getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+		mGain[ehp][ns][dep][ch]=mFcsEcalGain[0].gain[ie]; 
+		mGainCorr[ehp][ns][dep][ch]=mFcsEcalGainCorr[0].gaincorr[ie]; 
+		ie++;
+	    }
+	    det=kFcsHcalNorthDetId+ins; 
+	    for(Int_t id=0; id<maxId(det); id++){ 
+		getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+		mGain[ehp][ns][dep][ch]=mFcsHcalGain[0].gain[ih]; 
+		mGainCorr[ehp][ns][dep][ch]=mFcsHcalGainCorr[0].gaincorr[ie]; 
+		ih++;
+	    }
+	    det=kFcsPresNorthDetId+ins; 
+	    for(Int_t id=0; id<maxId(det); id++){ 
+		getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+		mGain[ehp][ns][dep][ch]=mFcsPresGain[0].gain[ip]; 
+		mGainCorr[ehp][ns][dep][ch]=mFcsPresValley[0].valley[ip]; 
+		ip++;
+	    }
+	}
+    }
     return kStOK;
 }
 
@@ -363,23 +447,54 @@ void StFcsDbMaker::getName(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, char name[]
   }
 }
 
+void StFcsDbMaker::getFromName(const char name[], Int_t &det, Int_t &id){
+    char detname[5];
+    int r,c,dep,ch,scdep,br,i2c,sipm;
+    sscanf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
+	   detname,&id,&r,&c,&dep,&ch,&scdep,&br,&i2c,&sipm);
+    det = getDetFromName(detname);
+    return;
+}
+
+Int_t StFcsDbMaker::getDetFromName(const std::string& detname){
+    if     ( detname=="EN") {return 0;}
+    else if( detname=="ES") {return 1;}
+    else if( detname=="HN") {return 2;}
+    else if( detname=="HS") {return 3;}
+    else if( detname=="HN") {return 4;}
+    else if( detname=="PN") {return 5;}
+    else if( detname=="PS") {return 6;}
+    else {
+	LOG_ERROR << "ERROR:Invalid name for detector;Input:"<<detname<<endm;
+	return -1;
+    }
+}
+
 StThreeVectorD StFcsDbMaker::getDetectorOffset(Int_t det) const{ 
   if(mRun19==0){
-      double a = getDetectorAngle(det) / 180.0 * M_PI;
-      if(det==0){
-	  double x = -16.69 - 13.9*sin(a);
-	  double z = 710.16 + 13.9*cos(a);
-	  return StThreeVectorD(x, 0.0, z);
+      if(mDbAccess==0){ //no DB
+	  double a = getDetectorAngle(det) / 180.0 * M_PI;
+	  if(det==0){
+	      double x = -16.69 - 13.9*sin(a);
+	      double z = 710.16 + 13.9*cos(a);
+	      return StThreeVectorD(x, 0.0, z);
+	  }
+	  if(det==1){
+	      double x =  16.69 + 13.9*sin(a);
+	      double z = 710.16 + 13.9*cos(a);
+	      return StThreeVectorD(x, 0.0, z);
+	  }
+	  if(det==2) return StThreeVectorD(-18.87, 0.0, 782.63);
+	  if(det==3) return StThreeVectorD( 18.87, 0.0, 782.63);
+	  return StThreeVectorD(0.0, 0.0, 0.0);	  
+      }else{ //from DB
+	  if(det>=0 && det<4) 	  
+	      return  StThreeVectorD(mFcsDetectorPosition->xoff[det], 
+				     mFcsDetectorPosition->yoff[det],
+				     mFcsDetectorPosition->zoff[det]);	  
+	  return StThreeVectorD(0.0, 0.0, 0.0);
       }
-      if(det==1){
-	  double x =  16.69 + 13.9*sin(a);
-	  double z = 710.16 + 13.9*cos(a);
-	  return StThreeVectorD(x, 0.0, z);
-      }
-      if(det==2) return StThreeVectorD(-18.87, 0.0, 782.63);
-      if(det==3) return StThreeVectorD( 18.87, 0.0, 782.63);
-      return  StThreeVectorD(0.0, 0.0, 0.0);
-  }else{
+  }else{ //run19
     const float bOffY=-(17.0*5.81);   //40in=101.6cm and 17*5.81=98.76 so I will leave this unchanged
     if(det==1) return StThreeVectorD( 25.25*2.54, bOffY + getYWidth(det)*nRow(det)/2.0, 710.16);
     if(det==3) return StThreeVectorD( 27.50*2.54, bOffY + getYWidth(det)*nRow(det)/2.0, 782.63);
@@ -572,33 +687,47 @@ Float_t StFcsDbMaker::getGain(StFcsHit* hit) const  {
 }
 
 Float_t StFcsDbMaker::getGain(Int_t det, Int_t id) const  {
-  if(det>=0 && det<kFcsNDet && id>=0 && id<maxId(det)) {
-      if(mForceUniformGain>0.0) return mForceUniformGain;
-      if(mReadGainFromText){
-	  int ehp,ns,dep,ch,crt,slt;
-	  getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
-	  return mGain[ehp][ns][dep][ch];
-      }
-      if(det<=kFcsHcalSouthDetId) return 0.0053; //default 5.3MeV/ch
-      return 100; //100ch for MIP for Pres
-  }
-  return 1.0;
+    if(det>=0 && det<kFcsNDet && id>=0 && id<maxId(det)) {
+	if(mForceUniformGain<0.0){ //default fixed value
+	    if(det<=kFcsHcalSouthDetId) return 0.0053; //default 5.3MeV/ch
+	    return 100;                                //100ch for MIP for Pres
+	}else if(mForceUniformGain>0.0){ //force to uniform gain
+	    return mForceUniformGain;
+	}else{  // value from DB or readText
+	    int ehp,ns,dep,ch,crt,slt;
+	    getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+	    return mGain[ehp][ns][dep][ch];
+	}
+    }
+    return 1.0;
 }
 
 Float_t StFcsDbMaker::getGainCorrection(StFcsHit* hit) const  {
-  return getGainCorrection(hit->detectorId(), hit->id());
+    return getGainCorrection(hit->detectorId(), hit->id());
 }
 
 Float_t StFcsDbMaker::getGainCorrection(Int_t det, Int_t id) const  {
-  if(det>=0 && det<kFcsNDet && id>0 && id<maxId(det)) {
-    if(mForceUniformGainCorrection>0.0) return mForceUniformGainCorrection;  
-    if(mReadGainCorrectionFromText){
-	int ehp,ns,dep,ch,crt,slt;
-	getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
-	return mGainCorr[ehp][ns][dep][ch];
+    if(det>=0 && det<kFcsNDet && id>=0 && id<maxId(det)) {
+	if(mForceUniformGain<0.0){ //default fixed value
+	    if(det<=kFcsHcalSouthDetId) return 1.0;    //default 
+	    return 0.5;                                //0.5 MIP for Pres
+	}else if(mForceUniformGainCorrection>0.0){ //force to uniform gaincorr
+	    return mForceUniformGainCorrection;
+	}else{  // value from DB or readText
+	    int ehp,ns,dep,ch,crt,slt;
+	    getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+	    return mGainCorr[ehp][ns][dep][ch];
+	}
     }
-  }
-  return 1.0;
+    return 1.0;
+}
+
+Float_t StFcsDbMaker::getPresValley(StFcsHit* hit) const  {
+    return getGainCorrection(hit->detectorId(), hit->id());
+}
+
+Float_t StFcsDbMaker::getPresValley(Int_t det, Int_t id) const  {
+    return getGainCorrection(det,id);
 }
 
 Float_t StFcsDbMaker::getGain8(StFcsHit* hit) const  {
@@ -1426,7 +1555,7 @@ void StFcsDbMaker::printMap(){
 			row=getRowNumber(det,id);
 			col=getColumnNumber(det,id);
 			if(ehp<2){
-			    char* colj; float len;
+			    const char* colj; float len;
 			    if(ehp==0) { colj=colJ[mMap_jcol[det][id]];  len=leng[mMap_jcol[det][id]]; }
 			    else       { colj=colJH[mMap_jcol[det][id]]; len=lengH[mMap_jcol[det][id]];}
  			    fprintf(f3,"%3d %3d %3d %3d   %2s %2d   %3d %3d %3d %3d      %2d  %2d  %2d     %2d  P%1d H%02d %6s %6s %3.1f\n",
@@ -1671,7 +1800,7 @@ float StFcsDbMaker::pedestal(Int_t ehp, Int_t ns, Int_t dep, Int_t ch){
   return mPed[ehp][ns][dep][ch];
 }
 
-float StFcsDbMaker::setPedestal(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, Float_t ped){
+void StFcsDbMaker::setPedestal(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, Float_t ped){
   mPed[ehp][ns][dep][ch]=ped;
 }
 

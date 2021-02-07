@@ -79,7 +79,7 @@ use RunDAQ;
 use CRSQueues;
 
 
-$ThisYear = 2020;                 # Block to consider. Completely artificial
+$ThisYear = 2021;                 # Block to consider. Completely artificial
                                   # and used to preserve older options in if
                                   # block along with current option.
 $HPSS     = 1;                    # turn to 0 for UNIX staging only
@@ -486,7 +486,8 @@ if ( $ThisYear == 2005 ){
           $ThisYear == 2017 ||
           $ThisYear == 2018 ||
           $ThisYear == 2019 ||
-          $ThisYear == 2020 ) {
+          $ThisYear == 2020 ||
+          $ThisYear == 2021) {
     $TREEMODE= 1;
     $LIB     = "dev";
 

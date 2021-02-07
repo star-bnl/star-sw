@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.51 2019/01/08 19:12:54 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.53 2021/02/04 16:59:45 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.53  2021/02/04 16:59:45  dmitry
+ * oops, typo
+ *
+ * Revision 1.52  2021/02/04 16:59:03  dmitry
+ * adding new db domain: FCS
+ *
  * Revision 1.51  2019/01/08 19:12:54  dmitry
  * new subsystem: ETOF
  *
@@ -441,6 +447,7 @@ addDbDomain(dbSst,"sst");
 addDbDomain(dbEpd,"epd");
 addDbDomain(dbRhicf,"rhicf");
 addDbDomain(dbEtof,"etof");
+addDbDomain(dbFcs,"fcs");
 }
 
 ////////////////////////////////////////////////////////////////

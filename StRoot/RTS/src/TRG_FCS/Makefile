@@ -33,7 +33,9 @@ fcs_trg_lib.a : fcs_trg_base.o \
 	stage_0_202101.o \
 	stage_1_202201.o \
 	stage_2_202201.o \
-	stage_3_202201.o
+	stage_3_202201.o \
+	stage_2_tonko_202101.o \
+	stage_3_tonko_202101.o
 	$(RTS_AR)
 
 # DO NOT DELETE
@@ -42,9 +44,18 @@ fcs_trg_base.o: ../../../../StRoot/RTS/include/rtsLog.h
 fcs_trg_base.o: ../DAQ_FCS/fcs_data_c.h
 fcs_trg_base.o: fcs_trg_base.h
 stage_0_201900.o: fcs_trg_base.h
+stage_0_202101.o: fcs_trg_base.h
 stage_1_201900.o: fcs_trg_base.h
+stage_1_202201.o: fcs_trg_base.h
 stage_2_201900.o: fcs_trg_base.h
+stage_2_202201.o: fcs_trg_base.h
+stage_2_202201.o: fcs_ecal_epd_mask.h
+stage_2_tonko_202101.o: fcs_trg_base.h
+stage_2_tonko_202101.o: fcs_ecal_epd_mask.h
 stage_3_201900.o: fcs_trg_base.h
+stage_3_202201.o: fcs_trg_base.h
+stage_3_tonko_202101.o: fcs_trg_base.h
+stage_3_tonko_202101.o: fcs_ecal_epd_mask.h
 fcs_trg_run.o: ../../../../StRoot/RTS/include/rtsLog.h
 fcs_trg_run.o: ../../../../StRoot/RTS/include/rtsSystems.h
 fcs_trg_run.o: ../../../../StRoot/RTS/include/daqFormats.h
