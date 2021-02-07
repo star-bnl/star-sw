@@ -406,7 +406,15 @@
 #    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20191121.000053.root  ${f} 'MakeTpcSecRowB.C(20191121,101,"TpcSecRowB",0)' >& MakeTpcSecRowB.20191121,101.log
 #    mv TpcSecRowB.20191121.000101.root  TpcSecRowB.${b}.${v}.root; mv  MakeTpcSecRowB.20191121,101.log MakeTpcSecRowB.${b}.${v}.log
 #end
+set v = `basename ${PWD}`
+foreach b (`ls -1d SecRow3CGF*GeV*.root | sed -e 's/SecRow3CGF//g' -e 's/\.root//g'`)
+    set f = SecRow3CGF${b}.root
+    echo "${f} => ${b}"
+    if (! -r $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root) break;
+    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.${b}.root  ${f} 'MakeTpcSecRowB.C(20191121,101,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
+    mv TpcSecRowB.20191121.000101.root  TpcSecRowB.${b}.${v}.root; 
+end
 #################################### Run XXI ############################################
 #root.exe -q -b   SecRow3CGFRunXXI102.root  'MakeTpcSecRowB.C(20210129,2,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,2.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000002.root T SecRow3CGFRunXXI04.root  'MakeTpcSecRowB.C(20210129,4,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,4.log
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000004.root T SecRow3CGFRunXXI06.root  'MakeTpcSecRowB.C(20210129,6,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,6.log
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000004.root T SecRow3CGFRunXXI06.root  'MakeTpcSecRowB.C(20210129,6,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,6.log
