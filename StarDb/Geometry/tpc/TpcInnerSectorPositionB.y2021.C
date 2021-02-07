@@ -1,1 +1,1 @@
-TpcInnerSectorPositionB.y2020.C
+TpcInnerSectorPositionB.C
