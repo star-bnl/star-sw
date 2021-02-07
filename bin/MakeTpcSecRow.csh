@@ -408,4 +408,5 @@
 #end
 #################################### Run XXI ############################################
 #root.exe -q -b   SecRow3CGFRunXXI102.root  'MakeTpcSecRowB.C(20210129,2,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,2.log
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000002.root T SecRow3CGFRunXXI04.root  'MakeTpcSecRowB.C(20210129,4,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,4.log
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000002.root T SecRow3CGFRunXXI04.root  'MakeTpcSecRowB.C(20210129,4,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,4.log
+root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000004.root T SecRow3CGFRunXXI06.root  'MakeTpcSecRowB.C(20210129,6,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,6.log
