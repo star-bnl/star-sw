@@ -1,5 +1,5 @@
  /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.35 2018/03/01 15:58:34 akio Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.34 2018/02/12 20:15:06 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,9 +8,6 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
- * Revision 1.35  2018/03/01 15:58:34  akio
- * fixed a typo
- *
  * Revision 1.34  2018/02/12 20:15:06  akio
  * fixing typo
  *
@@ -494,7 +491,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
 		  mMaxGainCorrection++;
 		  mmGainCorrection[d][c-1].detectorId=d;
 		  mmGainCorrection[d][c-1].ch=c;
-		  mmGainCorrection[d][c-1].corr=mGainCorrectionB[0].corr[i];;
+		  mmGainCorrection[d][c-1].ch=mGainCorrectionB[0].corr[i];;
 	      }else{
 		  LOG_ERROR << "StFmsDbMaker::InitRun - Calibration/fms/fmsGainCorrectionB detectorId="<<d<<" ch="<<c<<" double entry, skipping"<<endm;
 	      }
@@ -1550,8 +1547,8 @@ void StFmsDbMaker::dumpFmsGain(const Char_t* filename) {
 		    if(cc>0){
 			fprintf(fp,"%5d%6d%6d%8.3f\n",
 				i,dd,cc,getGain(d,cc));
-			//printf("%5d%6d%6d%8.3f\n",
-			//       i,dd,cc,getGain(d,cc));
+			printf("%5d%6d%6d%8.3f\n",
+			       i,dd,cc,getGain(d,cc));
 			i++;
 		    }
 		}
@@ -1576,8 +1573,6 @@ void StFmsDbMaker::dumpFmsGainCorrection(const Char_t* filename) {
 		    if(cc>0){
 			fprintf(fp,"%5d%6d%6d%8.3f\n",
 				i,dd,cc,getGainCorrection(d,cc));
-			//printf("%5d%6d%6d%8.3f\n",
-			//       i,dd,cc,getGainCorrection(d,cc));
 			i++;
 		    }
 		}
