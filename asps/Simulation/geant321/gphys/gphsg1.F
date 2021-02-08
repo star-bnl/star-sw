@@ -1,8 +1,12 @@
 *
-* $Id: gphsg1.F,v 1.1.1.1 2004/01/15 00:12:14 potekhin Exp $
+* $Id: gphsg1.F,v 1.2 2020/06/04 22:27:12 jwebb Exp $
 *
 * $Log: gphsg1.F,v $
+* Revision 1.2  2020/06/04 22:27:12  jwebb
+* Make array lookup save from roundoff error
+*
 * Revision 1.1.1.1  2004/01/15 00:12:14  potekhin
+*
 *
 * Revision 1.1.1.1  1997/11/03 15:30:40  atlascvs
 * Importing CERNLIB version 08.21.
@@ -45,17 +49,20 @@ C.
       IF(E.LT.G10EV) GO TO 20
 C Use Sandia data
       JPHXS = LQ(JPHOT-1)
-      IPOINT = JPHXS+Q(JPHXS+1)*3+2
-      IMAX = Q(IPOINT)
+      IPOINT =       Q(JPHXS+1)*3.0+2.0 
+      IMAX = Q(JPHXS+IPOINT)
       IPOINT = IPOINT+1
       ECUR = E*1.E6
-      IF(ECUR.LT.Q(IPOINT)) GO TO 20
+      IF(ECUR.LT.Q(JPHXS+IPOINT)) GO TO 20
       EINV = ONE/ECUR
       DO 10 I = 2,IMAX
          IPOINT = IPOINT+5
-         IF(ECUR.LT.Q(IPOINT)) THEN
+         IF(ECUR.LT.Q(JPHXS+IPOINT)) THEN
             J = IPOINT+1
-            RES = EINV*(Q(J)+EINV*(Q(J+1)+EINV*(Q(J+2)+EINV*Q(J+3))))
+            RES = EINV*(Q(JPHXS+J)+
+     >            EINV*(Q(JPHXS+J+1)+
+     >            EINV*(Q(JPHXS+J+2)+
+     >            EINV*Q(JPHXS+J+3))))
             GO TO 20
          ENDIF
    10 CONTINUE
