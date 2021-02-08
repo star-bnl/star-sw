@@ -9,7 +9,7 @@
 #define StPicoMtdTrigger_h
 
 /// ROOT headers
-#include <TObject.h>
+#include "TObject.h"
 
 //_________________
 class StPicoMtdTrigger : public TObject {

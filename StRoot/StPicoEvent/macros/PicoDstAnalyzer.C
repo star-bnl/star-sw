@@ -15,14 +15,14 @@
 #include <iostream>
 
 /// ROOT headers
-#include <TROOT.h>
-#include <TFile.h>
-#include <TChain.h>
-#include <TTree.h>
-#include <TSystem.h>
-#include <TH1.h>
-#include <TH2.h>
-#include <TMath.h>
+#include "TROOT.h"
+#include "TFile.h"
+#include "TChain.h"
+#include "TTree.h"
+#include "TSystem.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TMath.h"
 
 /// PicoDst headers
 #include "../StPicoDstReader.h"
@@ -32,6 +32,7 @@
 #include "../StPicoBTofHit.h"
 #include "../StPicoBTowHit.h"
 #include "../StPicoEmcTrigger.h"
+#include "../StPicoBTofPidTraits.h"
 #include "../StPicoTrackCovMatrix.h"
 
 /// Load libraries (for ROOT_VERSTION_CODE >= 393215)
@@ -58,9 +59,10 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
   picoReader->SetStatus("*",0);
   picoReader->SetStatus("Event",1);
   picoReader->SetStatus("Track",1);
-  //picoReader->SetStatus("BTofHit",1);
-  picoReader->SetStatus("BTowHit",1);
-  picoReader->SetStatus("EmcTrigger",1);
+  picoReader->SetStatus("BTofHit",1);
+  picoReader->SetStatus("BTofPidTraits",1);
+  //picoReader->SetStatus("BTowHit",0);
+  //picoReader->SetStatus("EmcTrigger",0);
   //picoReader->SetStatus("TrackCovMatrix",1);
   std::cout << "Status has been set" << std::endl;
 
@@ -103,9 +105,26 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
   TH1F *hTransvMomentum = new TH1F("hTransvMomentum",
 				   "Track transverse momentum;p_{T} (GeV/c)",
 				   200, 0., 2.);
+  TH2F *hGlobalPhiVsPt[2];
+  for(int i=0; i<2; i++) {
+    hGlobalPhiVsPt[i] = new TH2F(Form("hGlobalPhiVsPt_%d",i),
+				 Form("#phi vs. p_{T} for charge: %d;p_{T} (GeV/c);#phi (rad)", (i==0) ? 1 : -1),
+				 300, 0., 3.,
+				 630, -3.15, 3.15);
+  }
   TH1F *hNSigmaPion = new TH1F("hNSigmaPion",
 			       "n#sigma(#pi);n#sigma(#pi)",
 			       400, -10., 10.);
+  TH1F *hNSigmaElectron = new TH1F("hNSigmaElectron",
+				   "n#sigma(e);n#sigma(e)",
+				   400,-10.,10.);
+  TH1F *hNSigmaKaon = new TH1F("hNSigmaKaon",
+			       "n#sigma(K);n#sigma(K)",
+			       400, -10., 10.);
+  TH1F *hNSigmaProton = new TH1F("hNSigmaProton",
+				 "n#sigma(p);n#sigma(p)",
+				 400, -10., 10.);
+    
   // TofPidTrait
   TH1F *hTofBeta = new TH1F("hTofBeta",
 			    "BTofPidTraits #beta;#beta",
@@ -177,17 +196,30 @@ void PicoDstAnalyzer(const Char_t *inFile = "../files/st_physics_12126101_raw_30
       if( picoTrack->isPrimary() ) {
 	hPrimaryPtotCut->Fill( picoTrack->pMom().Mag() );
       }
+      if( picoTrack->charge() > 0 ) {
+	hGlobalPhiVsPt[0]->Fill( picoTrack->gMom().Pt(),
+				 picoTrack->gMom().Phi() );
+      }
+      else {
+	hGlobalPhiVsPt[1]->Fill( picoTrack->gMom().Pt(),
+				 picoTrack->gMom().Phi() );	
+      }
+      hNSigmaElectron->Fill( picoTrack->nSigmaElectron() );
       hNSigmaPion->Fill( picoTrack->nSigmaPion() );
+      hNSigmaKaon->Fill( picoTrack->nSigmaKaon() );
+      hNSigmaProton->Fill( picoTrack->nSigmaProton() );
+      
       hTransvMomentum->Fill( picoTrack->gMom().Pt() );
 
       /// Check if track has TOF signal
-      if( isTofTrack() ) {
+      if( picoTrack->isTofTrack() ) {
 	/// Retrieve corresponding trait
 	StPicoBTofPidTraits *trait = dst->btofPidTraits( picoTrack->bTofPidTraitsIndex() );
 	if( !trait ) {
 	  std::cout << "O-oh... No BTofPidTrait # " << picoTrack->bTofPidTraitsIndex()
 		    << " for track # " << iTrk << std::endl;
-	  break;
+	  std::cout << "Check that you turned on the branch!" << std::endl;
+	  continue;
 	}
 	/// Fill beta
 	hTofBeta->Fill( trait->btofBeta() );

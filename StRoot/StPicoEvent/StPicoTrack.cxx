@@ -2,7 +2,7 @@
 #include <limits>
 
 /// ROOT headers
-#include <TMath.h>
+#include "TMath.h"
 
 /// PicoDst headers
 #include "StPicoMessMgr.h"
@@ -19,8 +19,10 @@ StPicoTrack::StPicoTrack() : TObject(),
   mOriginX(0),mOriginY(0), mOriginZ(0),
   mDedx(0), mDedxError(0), /*mDnDx(0),mDnDxError(0)*/
   mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0),
-  mNSigmaPion(-30), mNSigmaKaon(-30), mNSigmaProton(-30),
-  mNSigmaElectron(-30),
+  mNSigmaPion( std::numeric_limits<short>::min() ),
+  mNSigmaKaon( std::numeric_limits<short>::min() ),
+  mNSigmaProton( std::numeric_limits<short>::min() ),
+  mNSigmaElectron( std::numeric_limits<short>::min() ),
   mTopologyMap{}, mBEmcPidTraitsIndex(-1), mBTofPidTraitsIndex(-1),
   mMtdPidTraitsIndex(-1) {
   /* empty */
@@ -96,20 +98,15 @@ TVector3 StPicoTrack::gDCA(TVector3 pVtx) const {
 
 //_________________
 void StPicoTrack::setChi2(Float_t chi2) {
-  mChi2 = (chi2 * 1000. > std::numeric_limits<unsigned short>::max()) ?
-    std::numeric_limits<unsigned short>::max() : (UShort_t)(TMath::Nint(chi2 * 1000.));
+  mChi2 = ( (chi2 * 1000.) > std::numeric_limits<unsigned short>::max() ?
+	    std::numeric_limits<unsigned short>::max() :
+	    (UShort_t)( TMath::Nint( chi2 * 1000. ) ) );
 }
 
 //_________________
 void StPicoTrack::setDedx(Float_t dEdx) {
   /// In KeV/cm
   mDedx = dEdx * 1.e6;
-}
-
-//_________________
-void StPicoTrack::setDedxError(Float_t dEdxError) {
-  /// In KeV/cm
-  mDedxError = dEdxError * 1.e6;
 }
 
 //_________________
@@ -136,6 +133,38 @@ void StPicoTrack::setTopologyMap(Int_t id, UInt_t word) {
   else {
     /// Shouldn't here be a protection?
   }
+}
+
+//_________________
+void StPicoTrack::setNSigmaPion(Float_t ns) {
+  mNSigmaPion = ( fabs(ns * 1000.) > std::numeric_limits<short>::max() ?
+		  ( (ns > 0) ? std::numeric_limits<short>::max() :
+		    std::numeric_limits<short>::min() ) :
+		  (Short_t)( TMath::Nint( ns * 1000. ) ) );
+}
+
+//_________________
+void StPicoTrack::setNSigmaKaon(Float_t ns) {
+  mNSigmaKaon = ( fabs(ns * 1000.) > std::numeric_limits<short>::max() ?
+		  ( (ns > 0) ? std::numeric_limits<short>::max() :
+		    std::numeric_limits<short>::min() ) :
+		  (Short_t)( TMath::Nint( ns * 1000. ) ) );
+}
+
+//_________________
+void StPicoTrack::setNSigmaProton(Float_t ns) {
+  mNSigmaProton = ( fabs(ns * 1000.) > std::numeric_limits<short>::max() ?
+		    ( (ns > 0) ? std::numeric_limits<short>::max() :
+		      std::numeric_limits<short>::min() ) :
+		    (Short_t)( TMath::Nint( ns * 1000. ) ) );
+}
+
+//_________________
+void StPicoTrack::setNSigmaElectron(Float_t ns) {
+  mNSigmaElectron = ( fabs(ns * 1000.) > std::numeric_limits<short>::max() ?
+		      ( (ns > 0) ? std::numeric_limits<short>::max() :
+			std::numeric_limits<short>::min() ) :
+		      (Short_t)( TMath::Nint( ns * 1000. ) ) );
 }
 
 //_________________

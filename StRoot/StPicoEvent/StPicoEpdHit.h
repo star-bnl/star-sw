@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 /// ROOT headers
-#include <TObject.h>
+#include "TObject.h"
 
 //
 // \class StPicoEpdHit

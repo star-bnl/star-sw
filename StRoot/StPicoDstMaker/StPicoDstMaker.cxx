@@ -33,6 +33,7 @@
 #include "StEvent/StEmcModule.h"
 #include "StEvent/StEmcRawHit.h"
 #include "StEvent/StTriggerData.h"
+#include "StEvent/StEnumerations.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -82,8 +83,6 @@
 #include "StPicoDstMaker/StPicoDstMaker.h"
 #include "StPicoDstMaker/StPicoUtilities.h"
 
-
-
 //_________________
 StPicoDstMaker::StPicoDstMaker(char const* name) :
   StMaker(name),
@@ -93,7 +92,7 @@ StPicoDstMaker::StPicoDstMaker(char const* name) :
   mEmcGeom{}, mEmcIndex{},
   mBField(0),
   mVtxMode(PicoVtxMode::NotSet), // This should always be ::NotSet, do not change it, see ::Init()
-  mCovMtxMode(PicoCovMtxMode::NotDefined),
+  mCovMtxMode(PicoCovMtxMode::Skip),
   mInputFileName(), mOutputFileName(), mOutputFile(nullptr),
   mChain(nullptr), mTTree(nullptr), mEventCounter(0), mSplit(99), mCompression(9), mBufferSize(65536 * 4),
   mModuleToQT{}, mModuleToQTPos{}, mQTtoModule{}, mQTSlewBinEdge{}, mQTSlewCorr{},
@@ -226,13 +225,11 @@ Int_t StPicoDstMaker::Init() {
     } //if (mVtxMode == PicoVtxMode::NotSet)
 
     /// To write or not to write covariance matrices into the branch
-    if (mCovMtxMode == PicoCovMtxMode::NotDefined) {
-      if (setCovMtxModeAttr() != kStOK) {
-	LOG_ERROR << "Pico covariance matrix I/O mode is not set ..." << endm;
-	return kStErr;
-      }
-    } //if (mCovMtxMode == PicoCovMtxMode::NotSet)
-
+    if (setCovMtxModeAttr() != kStOK) {
+      LOG_ERROR << "Pico covariance matrix I/O mode is not set ..." << endm;
+      return kStErr;
+    }
+    
     if (mInputFileName.Length() == 0) {
       // No input file
       mOutputFileName = GetChainOpt()->GetFileOut();
@@ -268,7 +265,10 @@ Int_t StPicoDstMaker::Init() {
 //_________________
 Int_t StPicoDstMaker::setVtxModeAttr(){
 
-  mTpcVpdVzDiffCut = DAttr("TpcVpdVzDiffCut"); //Read the Tpc-Vpd cut from the input
+  //Read the Tpc-Vpd cut from the input
+  Float_t cut = DAttr("TpcVpdVzDiffCut"); 
+  if ( cut != 0.0)  mTpcVpdVzDiffCut = cut;
+  LOG_INFO << " mTpcVpdVzDiffCut = " << mTpcVpdVzDiffCut << endm;
 
   if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxDefault") == 0) {
     setVtxMode(PicoVtxMode::Default);
@@ -293,6 +293,19 @@ Int_t StPicoDstMaker::setVtxModeAttr(){
 Int_t StPicoDstMaker::setCovMtxModeAttr() {
 
   /// Choose the writing method: skip - do not write; write - write
+
+  if (strcasecmp(SAttr("PicoCovMtxMode"), "PicoCovMtxWrite") == 0) {
+    setCovMtxMode(PicoCovMtxMode::Write);
+    LOG_INFO << " PicoCovMtxWrite is being used " << endm;
+    return kStOK;
+  }
+  else if ( (strcasecmp(SAttr("PicoCovMtxMode"), "") == 0) ||
+	    (strcasecmp(SAttr("PicoCovMtxMode"), "PicoCovMtxSkip") == 0) ){
+    setCovMtxMode(PicoCovMtxMode::Skip);
+    LOG_INFO << " PicoCovMtxSkip is being used " << endm;
+    return kStOK;
+  }
+  /*
   if (strcasecmp(SAttr("PicoCovMtxMode"), "PicoCovMtxSkip") == 0) {
     setCovMtxMode(PicoCovMtxMode::Skip);
     LOG_INFO << " PicoCovMtxSkip is being used " << endm;
@@ -303,7 +316,9 @@ Int_t StPicoDstMaker::setCovMtxModeAttr() {
     LOG_INFO << " PicoCovMtxWrite is being used " << endm;
     return kStOK;
   }
+  */
 
+  /// Only if something went wrong
   return kStErr;
 }
 
@@ -771,10 +786,22 @@ void StPicoDstMaker::fillTracks() {
     /// Fill basic track information here
     picoTrk->setId( gTrk->id() );
     picoTrk->setChi2( gTrk->chi2() );
-    /// Store dE/dx in KeV/cm
-    picoTrk->setDedx( gTrk->dEdx() );
-    /// Store dEdx error (fit) in KeV/cm
-    picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
+    /// Store dE/dx in KeV/cm and its error. Next lines are needed
+    /// in order to store the values obrained with the same method:
+    /// either truncated mean of fit. Starting SL14 the default was
+    /// changed from thuncated mean to fit.
+    static TString Production(mMuDst->event()->runInfo().productionVersion());
+    static TString prodYear(Production.Data()+2,2);
+    static Int_t defY = prodYear.Atoi();
+    static StDedxMethod defaultdEdxMethod = (defY > 0 && defY < 14) ? kTruncatedMeanId : kLikelihoodFitId;
+    if (defaultdEdxMethod == kTruncatedMeanId) {
+      picoTrk->setDedx( gTrk->probPidTraits().dEdxTruncated() );
+      picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorTruncated() );
+    }
+    else {
+      picoTrk->setDedx( gTrk->probPidTraits().dEdxFit() );
+      picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
+    }
 
     /// Fill track's hit information
     picoTrk->setNHitsDedx( gTrk->nHitsDedx() );

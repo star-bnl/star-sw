@@ -15,11 +15,11 @@
 #define StPicoDstReader_h
 
 /// ROOT headers
-#include <TChain.h>
-#include <TTree.h>
-#include <TFile.h>
-#include <TString.h>
-#include <TClonesArray.h>
+#include "TChain.h"
+#include "TTree.h"
+#include "TFile.h"
+#include "TString.h"
+#include "TClonesArray.h"
 
 /// PicoDst headers
 #include "StPicoDst.h"

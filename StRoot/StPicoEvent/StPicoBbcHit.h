@@ -2,7 +2,7 @@
 #define StPicoBbcHit_h
 
 /// ROOT headers
-#include <TObject.h>
+#include "TObject.h"
 
 //
 // \class StPicoBbcHit

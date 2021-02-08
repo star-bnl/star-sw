@@ -5,7 +5,7 @@
 #include <utility>
 
 /// ROOT headers
-#include <TObject.h>
+#include "TObject.h"
 
 //_________________
 class StPicoMtdHit : public TObject {

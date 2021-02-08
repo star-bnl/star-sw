@@ -2,7 +2,7 @@
 #define StPicoDst_h
 
 /// ROOT headers
-#include <TClonesArray.h>
+#include "TClonesArray.h"
 
 /// PicoDst headers
 #include "StPicoArrays.h"

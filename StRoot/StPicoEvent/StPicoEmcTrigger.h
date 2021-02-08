@@ -2,7 +2,7 @@
 #define StPicoEmcTrigger_h
 
 /// ROOT headers
-#include <TObject.h>
+#include "TObject.h"
 
 //_________________
 class StPicoEmcTrigger : public TObject {

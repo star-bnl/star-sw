@@ -2,7 +2,7 @@
 #define StPicoMessMgr_h
 
 #if defined(_VANILLA_ROOT_)
-#include <Riostream.h>
+#include "Riostream.h"
 #define LOG_INFO  std::cout
 #define LOG_DEBUG std::cout
 #define LOG_WARN  std::cout

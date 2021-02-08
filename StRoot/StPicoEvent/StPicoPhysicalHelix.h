@@ -10,7 +10,7 @@
 #define StPicoPhysicalHelix_h
 
 /// ROOT headers
-#include <TVector3.h>
+#include "TVector3.h"
 
 /// PicoDst headers
 #include "StPicoHelix.h"
