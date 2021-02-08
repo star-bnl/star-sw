@@ -14,11 +14,81 @@
 	    module = "FtsdGeo"
 	    onoff  = "on"  > 
     </Setup> 
+
     <Setup  name   = "FTSDv0"
 	    comment= "Default configuration for the Endcap EMC"
 	    module = "FtsdGeo"
 	    onoff  = "on"  > 
+
     </Setup> 
+
+    <Setup  name   = "FTSDv1"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="1.0" />
+
+    </Setup> 
+    <Setup  name   = "FTSDv2"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="2.0" />
+
+    </Setup> 
+    <Setup  name   = "FTSDv3"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="1.0" />
+
+    </Setup> 
+
+    <Setup  name   = "FTSDv4"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="4.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+
+    </Setup> 
+
+    <Setup  name   = "FTSDv5"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="5.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+
+    </Setup>  
+
+    <Setup  name   = "FTSDr1"
+	    comment= "FTS Geometry Reference 1"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="5.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{1,1,1,1,1,1, 1,1,1,1,1,1}" />
+
+    </Setup>  
+
+    <Setup  name   = "FTSDr2"
+	    comment= "FTS Geometry Reference 1"
+	    module = "FtsdGeo"
+	    onoff  = "on"  > 
+
+      <Init struct="MAIN" var="version" value="5.0" />
+      <Init struct="MAIN" var="useids"  value="0.0" />
+      <Init struct="MAIN" var="active"  value="{1,0,1,0,0,0, 1,1,1,1,1,1}" />
+
+    </Setup>  
+
 
   </Detector> 
   

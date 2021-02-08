@@ -5,8 +5,8 @@ UpstGeo
 </Modules>
 
 <!-- Only most recent -->
-<Setup name="UPSTof" onoff="off" comment="OFF" module="UpstGeo" />
-<Setup name="UPSTon" onoff="on"  comment="Upstream" module="UpstGeo"/>
+<Setup name="UPSTof" onoff="off" comment="OFF" module="UpstGeo"  simu="1"/>
+<Setup name="UPSTon" onoff="on"  comment="Upstream" module="UpstGeo"  simu="1"/>
 
 </Detector>
 </Document>

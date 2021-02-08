@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.20 2016/11/03 13:49:01 jwebb Exp $
+* $Id: xgeometry.age,v 1.29 2018/01/09 17:11:32 jwebb Exp $
 
 
 
@@ -276,6 +276,8 @@ replace [exe BTOFb7;] with [;btof_addr=setup_btofb7();     " call btofgeo7 ";]
 replace [exe BTOFc6;] with [;btof_addr=setup_btofc6();     " call btofgeo6 ";]
 replace [exe BTOFc7;] with [;btof_addr=setup_btofc7();     " call btofgeo7 ";]
 replace [exe BTOFv8;] with [;btof_addr=setup_btofv8();     " call btofgeo8 ";]
+
+replace [exe ETOFv14s;] with [;etof_addr=setup_etofv14s();]
 
 """ ----------------------------------------------------------------------- """
 """ TPC Configurations                                                      """
@@ -1748,6 +1750,8 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
                             setup_btofb6, setup_btofb7, setup_btofc6, setup_btofc7,
                             setup_btofv8 
 
+  Integer :: etof_addr=0,   setup_etofv14s
+
   Integer :: tpce_addr=0,   setup_tpce00, setup_tpce01, setup_tpce02, setup_tpce03,
                             setup_tpce04, setup_tpce04r,setup_tpce30, setup_tpce31 
 
@@ -1888,6 +1892,9 @@ replace[;Case#{#;] with [
 * but the request for the next geometry should be saved in a temp. par arrray
    call ASLGETBA ('GEOM','DETP',1000,LL,Par); LL = (LL-1)*4;
    If (JVOLUM>0) call AGDROP ('*')
+
+   dcay={450,2000,0.1,0.01}
+   If LL>0 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 
 * -------------------- set GSTAR absolute default ------------------------
 * before parsing the request, set some default values:
@@ -2386,6 +2393,9 @@ If LL>0
                  Geom = 'Y2011a  ';
                  call geom_y2011a; }
 
+  Case y2011b   { Y2011b: Production quality tag
+                 Geom = 'Y2011b  ';
+                 call geom_y2011b; }
 
 
   Case upgr2012 { y2012 : Y2012 geometry first cut;
@@ -2470,12 +2480,13 @@ If LL>0
   Case y2014a   { y2014a : y2014 production level;
                   Geom = 'y2014a    '; call geom_y2014a;  }
 
-  Case y2014b   { y2014b : y2014a plus hcal prototype;
-                  Geom = 'y2014b    '; call geom_y2014b; }
+  Case y2014b   { y2014b : y2014a plus hcal prototype; Geom = 'y2014b    '; 
+                 call geom_y2014b; }
+  Case y2014x   { y2014x : y2014a plus hcal prototype; Geom = 'y2014x    '; 
+                 call geom_y2014x; }
 
   Case y2015    { y2015  : y2015 baseline, is y2014a plus FMS preshower;
-                  Geom = 'y2015     '; 
-                  call geom_y2015; }
+                  Geom = 'y2015     '; call geom_y2015; }
                   
 
   Case y2015a   { y2015a : y2015a production baseline, is y2015 with pixel Al cables;
@@ -2486,17 +2497,34 @@ If LL>0
   Case y2015b   { y2015b : y2015b production baseline, is y2015 with mtd radii corrections;
                   Geom = 'y2015b    '; call geom_y2015b; }
 
-  Case y2015c   { y2015c : y2015c production baseline, is y2015 with mtd radii corrections;
+  Case y2015c   { y2015c : y2015c production baseline, is y2015 with mtd radii corrections; 
                   Geom = 'y2015c    '; call geom_y2015c; }
+  Case y2015x   { y2015x : y2015c production baseline, is y2015 with mtd radii corrections; 
+                  Geom = 'y2015x    '; call geom_y2015x; }
 
-  Case y2016   { y2016 : y2016 baseline;     Geom = 'y2016     '; call geom_y2016;  }
-  Case y2016a  { y2016 : y2016 production;  Geom = 'y2016a    ' ; call geom_y2016a; }
+  Case y2016   { y2016  : y2016 baseline;     Geom = 'y2016     '; call geom_y2016;  }
+  Case y2016a  { y2016a : y2016 production;  Geom = 'y2016a    ' ; call geom_y2016a; }
+  Case y2016x  { y2016x : y2016 production;  Geom = 'y2016x    ' ; call geom_y2016x; }
 
-  Case y2017   { y2017 : y2017 baseline;     Geom = 'y2017     '; call geom_y2017;  }
+  Case y2017   { y2017  : y2017 baseline;     Geom = 'y2017     '; call geom_y2017;  }
+  Case y2017a  { y2017a : y2017 production;   Geom = 'y2017a    '; call geom_y2017a;  } 
+
+  case y2018 { y2018: y2018 first cut geometry; Geom =        'y2018     '; call geom_y2018;} 
+  case y2018x { y2018x: y2018 experimentap TPC geometry; Geom =        'y2018x    '; call geom_y2018x;} 
+
+  Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
+  Case ftsver2  { y2017 : y2017 baseline w/ ids and fts v2;     Geom = 'ftsver2   '; call geom_ftsver2;}
+  Case ftsver3  { y2017 : y2017 baseline w/ ids and fts v3;     Geom = 'ftsver3   '; call geom_ftsver3;}
+  Case ftsver4  { y2017 : y2017 baseline w/ ids and fts v4;     Geom = 'ftsver4   '; call geom_ftsver4;}
+
+  Case ftsref1  { y2017 : y2017 baseline w/ ids and fts r1;     Geom = 'ftsref1   '; call geom_ftsref1;}
+  Case ftsref2  { y2017 : y2017 baseline w/ ids and fts r2;     Geom = 'ftsref2   '; call geom_ftsref2;}
 
 
-  Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
-  Case epdwest { epdwest: epd test geometry; Geom = 'epdwest   '; call geom_epdwest;}
+* Case epdtest { epdtest: epd test geometry; Geom = 'epdtest   '; call geom_epdtest;}
+* Case epdwest { epdwest: epd test geometry; Geom = 'epdwest   '; call geom_epdwest;}
+
+
 
 
   Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
@@ -3893,9 +3921,9 @@ If LL>0
 
 !// here Rxy & aZ for all STAR sensetive volumes
 !// when it is too much, use card like "DETP TRAC DCAY 210 210 0.1 0.01"
-   dcay={450,2000,0.1,0.01}
 
-   If LL>0 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
+!  dcay={450,2000,0.1,0.01}
+!  If LL>0 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 
    if ( verbose ) {
    write(*,*) '****** ATTENTION ACHTUNG ATTENZIONE VNIMANIE UVAGA WEI ******'
@@ -4151,6 +4179,10 @@ c  }
    IF (btof_addr.gt.0) THEN
       CALL CsJcal(btof_addr,0, 0,0,0,0,0, 0,0,0,0,0)
    ENDIF
+
+   IF (etof_addr.gt.0) THEN
+      CALL CsJcal(btof_addr,0, 0,0,0,0,0, 0,0,0,0,0)
+   ENDIF 
 
    Call AGSFLAG('SIMU',1)
 
@@ -4607,8 +4639,50 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.20 2016/11/03 13:49:01 jwebb Exp $
+* $Id: xgeometry.age,v 1.29 2018/01/09 17:11:32 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.29  2018/01/09 17:11:32  jwebb
+* The geometry is steered by a set of user commands, input using the DETP
+* facility, e.g.
+*
+*    DETP GEOM y2014a field=-5.0 gcalor_on=1 ...
+*
+* In AgML 1, the list of commands was iterated over.  Each command which was
+* recognized resulted in several variables being set, which would steer the
+* execution of the geometry modules at a later point in the code.
+*
+* Prior to executing the modules, a volume was defined where secondary
+* tracks would be saved.
+*
+* With AgML 2, the geometry tag is executed during the loop as soon as it is
+* recognized.  Thus, the definition of the volume where secondardies are
+* saved has to be moved earlier in the code.
+*
+* Revision 1.28  2017/12/19 17:19:59  jwebb
+*
+* EPD test tags deprecated.  y2018x defined.
+*
+* Revision 1.27  2017/11/13 19:15:09  jwebb
+* Enable y2014x
+*
+* Revision 1.26  2017/10/19 18:26:38  jwebb
+* Implement the y2014x,15x,16x geometries in xgeom.  Usage printout for loadAgML.  Switch in the misalignable modules in the 'x' geometries.
+*
+* Revision 1.25  2017/09/28 21:33:51  jwebb
+* First cut y2018.  Not ready for prime time: contains full ETOF, and lacks the upgraded iTPC sector.
+*
+* Revision 1.24  2017/09/18 22:13:50  jwebb
+* y2017a production geometry added
+*
+* Revision 1.23  2017/04/20 16:59:00  jwebb
+* Add y2011b case statement.
+*
+* Revision 1.22  2016/11/17 23:40:48  jwebb
+* FTS Reference 1 and 2
+*
+* Revision 1.21  2016/11/16 14:50:42  jwebb
+* Enable FTS versions 1-3 in starsim.
+*
 * Revision 1.20  2016/11/03 13:49:01  jwebb
 * Integrate EPD into framework.
 *

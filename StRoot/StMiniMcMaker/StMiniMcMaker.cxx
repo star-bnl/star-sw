@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.48 2015/07/29 16:34:31 smirnovd Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.49 2018/01/03 18:18:10 genevb Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -68,7 +68,7 @@ static int StMiniMcMakerErrorCount=0;
 
 //______________________________________________________________________________
 //helper funtion prototypes
-void dominatrackInfo(const StTrack*, short& dominatrackKey, short&, float&);
+void dominatrackInfo(const StTrack*, int& dominatrackKey, short&, float&);
 
 //______________________________________________________________________________
 // increasing order
@@ -1257,7 +1257,8 @@ void StMiniMcMaker::fillTrackPairInfo(	StMiniMcPair* miniMcPair,
   miniMcPair->setNCommonHit(commonHits);
   miniMcPair->setIsBestContam(isBestContam);
   // 
-  short aeonFlux(-999),aeonFluxHits(0);
+  int aeonFlux(-999);
+  short aeonFluxHits(0);
   float aeonFluxQuality(-999); // MCBS: name suggested by Jerome.
   if (prTrack) dominatrackInfo(prTrack,aeonFlux,aeonFluxHits,aeonFluxQuality);
   else if (glTrack) dominatrackInfo(glTrack,aeonFlux,aeonFluxHits,aeonFluxQuality);
@@ -2338,6 +2339,9 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 }
 /*
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.49  2018/01/03 18:18:10  genevb
+ * idTruths and keys moved from short to int
+ *
  * Revision 1.48  2015/07/29 16:34:31  smirnovd
  * Do not store output from function call as it is not used anyway
  *
@@ -2530,7 +2534,7 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.48 2015/07/29 16:34:31 smirnovd Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.49 2018/01/03 18:18:10 genevb Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:

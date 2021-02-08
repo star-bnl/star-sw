@@ -48,6 +48,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     //    ChainOpt += ",CMuDst,McAna,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
     ChainOpt += ",CMuDst,IdTruth,useInTracker,tree,KFVertex,xgeometry,";
     ChainOpt += "bbcSim,btofsim,,btofMatch,btofCalib,";
+    ChainOpt += "McTpcAna,";
     // ChainOpt += ",tree,";
 #if 1
     if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2" ||
@@ -207,6 +208,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     if (kuip) {
       TString Kuip(kuip);
       geant->Do(kuip);
+    } else if ( RunOpt.Contains("Mickey",TString::kIgnoreCase)) {
     } else if ( Opt.Contains("laser",TString::kIgnoreCase)) {
       gSystem->Load("gstar.so");
       geant->Do("call gstar");
@@ -253,10 +255,10 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       TRandom3 R(0);
       Double_t bgMin10 = TMath::Log10(bgMin);
       Double_t bgMax10 = TMath::Log10(bgMax);
+      TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
+      cout << "Set kinematics: " << Kine.Data() << endl;
+      geant->Do(Kine.Data());
     }
-    TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
-    cout << "Set kinematics: " << Kine.Data() << endl;
-    geant->Do(Kine.Data());
     
   }
   if (Last > 0)  chain->EventLoop(First,Last);
