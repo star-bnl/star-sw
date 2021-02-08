@@ -1,0 +1,14 @@
+/* tofSimResParams.idl:
+*
+* Table: tofSimResParams
+*
+* description: Parameters used to set the BTOF time resolution in simulation
+*
+* author: Daniel Brandenburg (Rice University)
+*
+*/
+ 
+struct tofSimResParams {
+	unsigned short resolution[23040]; /* cell resolution in picoseconds*/
+	octet algoFlag[120];              /* granularity of parameters*/
+};

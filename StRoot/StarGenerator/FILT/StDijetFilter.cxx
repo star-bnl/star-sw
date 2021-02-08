@@ -446,15 +446,15 @@ vector< vector<JetFourVec*> > StDijetFilter::doSplitMerge(vector< vector<JetFour
 	      jetFour.erase(njit2);
 	      jetFour.erase(njit1);
 	      jetFour.insert(jetFour.begin(),mj);
-	      //delete nj;
+	      if(nj) delete nj;
 	      continue;
 	    }else{
 	      split(*njit1,*njit2);
-	      //delete nj;
+	      if(nj) delete nj;
 	      continue;
 	    }
 	  }
-	delete nj; // was deleted on both branches if (oe>mSplitFraction) ... else ...
+	if(nj)delete nj; // was deleted on both branches if (oe>mSplitFraction) ... else ...
       }
       delete j;
     }
