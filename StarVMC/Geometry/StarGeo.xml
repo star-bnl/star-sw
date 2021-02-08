@@ -1,5 +1,4 @@
 <Document file="StarVMC/Geometry/GeometryTags.xml">
-
   <StarGeometry default="y2016" >
 
     <!-- 
@@ -22,9 +21,10 @@
     <Construct sys="shld" config="SHLDon"  />
     <Construct sys="zcal" config="ZCALon"  />
     <Construct sys="scon" config="SCON14"  />
-    <!--Construct sys="pipe" config="PIPE12"-->
-    <Construct sys="pipe" config="PIPE12ft" />
-    <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
+    <Construct sys="pipe" config="PIPE12"/>
+<!-- Temporarily removed so that we do not need to introduce overlapping volumes -->
+<!--    <Construct sys="pipe" config="PIPE12ft" -->
+<!--    <Construct sys="targ" config="TARGv1"  /> --><!-- fixed target geometry -->
     <Construct sys="tpce" config="TPCEv6"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
@@ -40,6 +40,7 @@
     <Construct sys="wcal" config="WCALv1" simu="1" />
     <Construct sys="hcal" config="HCALv1" simu="1" />
     <Construct sys="plat" config="PLATon" simu="2" />
+    <Construct sys="pres" config="PRESv1" simu="2" /> 
   </Geometry>
 
   <Geometry tag="y2020"  check="false" comment="Y2020 rough cut geometry">
@@ -52,6 +53,50 @@
     <!--Construct sys="pipe" config="PIPE12"-->
     <Construct sys="pipe" config="PIPE12ft" />
     <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
+    <Construct sys="tpce" config="TPCEv6"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMin"  />
+    <Construct sys="epdm" config="EPDMv1"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="etof" config="ETOFv14f"  />
+  </Geometry>
+
+  <Geometry tag="y2020a"  check="false" comment="Y2020a NOTE: Fixed target off my 0.3 cm">
+
+    <Construct sys="cave" config="CAVE06"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="scon" config="SCON14"  />
+    <!--Construct sys="pipe" config="PIPE12"-->
+    <Construct sys="pipe" config="PIPE12ft" />
+    <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
+    <Construct sys="tpce" config="TPCEv6"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMin"  />
+    <Construct sys="epdm" config="EPDMv1"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="etof" config="ETOFv14f"  />
+  </Geometry>
+
+  <Geometry tag="y2020b"  check="false" comment="Y2020b places fixed target at proper z=200.7 position">
+
+    <Construct sys="cave" config="CAVE06"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="scon" config="SCON14"  />
+    <!--Construct sys="pipe" config="PIPE12"-->
+    <Construct sys="pipe" config="PIPE12ft" />
+    <Construct sys="targ" config="TARGv1a"  /> <!-- fixed target geometry -->
     <Construct sys="tpce" config="TPCEv6"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
@@ -96,6 +141,27 @@
     <!--Construct sys="pipe" config="PIPE12"-->
     <Construct sys="pipe" config="PIPE12ft" />
     <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
+    <Construct sys="tpce" config="TPCEv6"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMin"  />
+    <Construct sys="epdm" config="EPDMv1"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="etof" config="ETOFv14f"  />
+  </Geometry>
+  <Geometry tag="y2019b"  check="false" comment="Y2019 rough cut geometry">
+
+    <Construct sys="cave" config="CAVE06"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="scon" config="SCON14"  />
+    <!--Construct sys="pipe" config="PIPE12"-->
+    <Construct sys="pipe" config="PIPE12ft" />
+    <Construct sys="targ" config="TARGv1a"  /> <!-- fixed target geometry -->
     <Construct sys="tpce" config="TPCEv6"  />
     <Construct sys="btof" config="BTOFv8"  />
     <Construct sys="vpdd" config="VPDD08"  />
@@ -166,6 +232,58 @@
     <Construct sys="magp" config="MAGPon"  />
     <Construct sys="mutd" config="MUTD16"  />
     <Construct sys="etof" config="ETOFv14s"  />
+  </Geometry>
+
+  <Geometry tag="y2018b"  check="false" comment="Y2018b physics production geometry (version A + FXT)">
+    <!--
+
+       y2018a with fixed target geometry added
+
+    -->
+    <Construct sys="cave" config="CAVE05"  />
+    <Construct sys="upst" config="UPSTon"  /> 
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="tpce" config="TPCE32"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMin"  />
+    <Construct sys="epdm" config="EPDMv1"  />
+    <Construct sys="fpdm" config="FPDMv4"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="etof" config="ETOFv14s"  />
+    <Construct sys="targ" config="TARGv1"  /> <!-- fixed target geometry -->
+  </Geometry>
+
+  <Geometry tag="y2018c"  check="false" comment="Y2018b physics production geometry (version A + FXT)">
+    <!--
+
+       y2018b with fixed target geometry added at correct z position
+
+    -->
+    <Construct sys="cave" config="CAVE05"  />
+    <Construct sys="upst" config="UPSTon"  /> 
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="tpce" config="TPCE32"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMin"  />
+    <Construct sys="epdm" config="EPDMv1"  />
+    <Construct sys="fpdm" config="FPDMv4"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="etof" config="ETOFv14s"  />
+    <Construct sys="targ" config="TARGv1a"  /> <!-- fixed target geometry -->
   </Geometry>
 
 

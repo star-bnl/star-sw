@@ -46,6 +46,8 @@
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "StDetectorDbMaker/St_tpcBXT0CorrEPDC.h"
+#include "StDetectorDbMaker/St_beamInfoC.h"
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
 #include "Altro.h"
@@ -56,6 +58,7 @@
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h" 
 #include "tables/St_g2t_tpc_hit_Table.h"
+#include "StEventTypes.h"
 struct HitPoint_t {
   Int_t indx;
   Int_t TrackId;
@@ -77,7 +80,7 @@ struct HitPoint_t {
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.89 2019/05/22 21:30:58 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.92 2020/05/22 20:49:19 fisyak Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -87,6 +90,7 @@ static       Double_t t0IO[2]   = {1.20868e-9, 1.43615e-9}; // recalculated in I
 static const Double_t tauC[2]   = {999.655e-9, 919.183e-9}; 
 TF1F*     StTpcRSMaker::fgTimeShape3[2]    = {0, 0};
 TF1F*     StTpcRSMaker::fgTimeShape0[2]    = {0, 0};
+static Double_t fgTriggerT0 = 0;             //! TPC trigger T0 (seconds) is supposed to set for the primary ineraction Z = 0
 //________________________________________________________________________________
 static const Int_t nx[2] = {200,500};
 static const Double_t xmin[2] =  {-10., -6};
@@ -633,9 +637,44 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
   g2t_vertex_st     *gver = 0;
   Int_t NV = 0;
+  fgTriggerT0 = 0;
   if (g2t_ver) {
     gver = g2t_ver->GetTable();
     NV = g2t_ver->GetNRows();
+    StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent")); 
+    if (pEvent && StTpcBXT0CorrEPDC::instance()->nrows()) {
+        int TAC = 0;
+	int maxTAC = -1;
+	StEpdCollection * epdCol = pEvent->epdCollection();
+	if (epdCol) {
+	  StSPtrVecEpdHit &epdHits = epdCol->epdHits();
+	  int nEpdHits = epdHits.size();
+	  
+	  for(int i = 0; i < nEpdHits; i++) {
+	    StEpdHit * epdHit = dynamic_cast<StEpdHit*>(epdHits[i]);
+	    TAC = 0;
+	    if (epdHit->tile() > 9)  continue; // only tiles 1 - 9 have timing info
+	    // 				if (epdHit->id() < 0) ew = -1; // tile is on the east
+	    // 				else ew = 1;
+	    if (epdHit->adc() < 100) continue;
+	    TAC = epdHit->tac(); // this is the timing
+	    if (TAC > maxTAC) maxTAC = TAC;
+	  }
+	}
+	double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
+	double driftVelocity = StTpcDb::instance()->DriftVelocity(1);
+	fgTriggerT0 = - StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth)*mTimeBinWidth*1e-6;
+      } else if (g2t_ver->GetNRows() > 0) {
+      const Double_t kAu2Gev=0.9314943228;
+      UInt_t un = St_beamInfoC::instance()->getYellowMassNumber();
+      Double_t M = kAu2Gev*un;
+      if (!un) {un = 1; M = 0.93827231;}
+      //      if (un == 197) { M = 196.966570*kAu2Gev;}
+      Double_t KinE = un*St_beamInfoC::instance()->getYellowEnergy();
+      Double_t gamma = TMath::Sqrt((KinE+M)*(KinE+M))/M;
+      Double_t beta  = gamma/TMath::Sqrt(gamma*gamma+1);
+      fgTriggerT0 = -gver->ge_x[2]/(beta*TMath::Ccgs());
+    }
   }
   g2t_tpc_hit_st *tpc_hit_begin = g2t_tpc_hit->GetTable();
   g2t_tpc_hit_st *tpc_hit = tpc_hit_begin;
@@ -1194,6 +1233,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  if (! ntimebins) continue;
 	  static  Short_t ADCs[__MaxNumberOfTimeBins__];
 	  static UShort_t IDTs[__MaxNumberOfTimeBins__];
+	  //	  static Int_t IDTs[__MaxNumberOfTimeBins__];
 	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
 	  for (UInt_t t = 0; t < __MaxNumberOfTimeBins__; t++) {
 	    if (ADCs[t] > 0 && IDTs[t]) {
@@ -1911,7 +1951,7 @@ Bool_t StTpcRSMaker::TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex
   transform(coorLT,TrackSegmentHits.coorLS); PrPP(Make,TrackSegmentHits.coorLS);
   transform( dirLT, TrackSegmentHits.dirLS); PrPP(Make,TrackSegmentHits.dirLS); 
   transform(   BLT,   TrackSegmentHits.BLS); PrPP(Make,TrackSegmentHits.BLS);   
-  Double_t tof = gver->ge_tof;
+  Double_t tof = gver->ge_tof  + fgTriggerT0;
   //	if (! TESTBIT(m_Mode, kNoToflight)) 
   tof += tpc_hitC->tof;
   Double_t driftLength = TrackSegmentHits.coorLS.position().z() + tof*gStTpcDb->DriftVelocity(sector); // ,row); 
@@ -2110,8 +2150,17 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
 //________________________________________________________________________________
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.89 2019/05/22 21:30:58 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.92 2020/05/22 20:49:19 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.92  2020/05/22 20:49:19  fisyak
+// Wrong alarm, take it back
+//
+// Revision 1.91  2020/05/22 20:15:15  fisyak
+// Fix bug in fgTriggerT0 (seconds <=> microseconds)
+//
+// Revision 1.90  2020/05/17 15:43:49  fisyak
+// Acount StTpcBXT0CorrEPDC correction
+//
 // Revision 1.89  2019/05/22 21:30:58  fisyak
 // Fix bug3390 (thanks to Irakli), add St_TpcAdcCorrectionMDF
 //

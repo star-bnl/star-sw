@@ -41,6 +41,8 @@
 #include "TError.h"
 #include "TBrowser.h"
 #include "TBenchmark.h"
+#include <sys/times.h>
+#include <time.h>
 #include "TSystem.h"
 #include "StChain.h"
 #include "StEvtHddr.h"
@@ -129,6 +131,13 @@ const StChainOpt *StChain::GetChainOpt()    const
 Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk) 
 {
   TBenchmark evnt;
+  struct tms cpt;
+  Double_t userCpuTime=0;
+  Double_t systemCpuTime=0;
+  Double_t childUserCpuTime=0;
+  Double_t childSystemCpuTime=0;
+  Double_t gTicks = (Double_t) sysconf(_SC_CLK_TCK);
+  struct timespec ts;
   int jCur=0,iMake=0;
 #ifdef STAR_TRACKING 
 #ifdef OLDTRACKING    
@@ -183,6 +192,15 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
   } endOfTime;
   for (jCur=jBeg; jCur<=jEnd; jCur++) {
      evnt.Reset(); evnt.Start("QAInfo:");
+     gTicks = (Double_t) sysconf(_SC_CLK_TCK);
+     times(&cpt);
+     userCpuTime = ((Double_t) cpt.tms_utime) / gTicks;
+     systemCpuTime = ((Double_t) cpt.tms_stime) / gTicks;
+     childUserCpuTime = ((Double_t) cpt.tms_cutime) / gTicks;
+     childSystemCpuTime = ((Double_t) cpt.tms_cstime) / gTicks;
+     clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
+     time_t start_tv_sec = ts.tv_sec;
+     long  start_tv_nsec = ts.tv_nsec;
 
      Clear();
      iMake = Make(jCur);
@@ -192,6 +210,18 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
      mNTotal++;
      evnt.Stop("QAInfo:");
      //  evnt.Show("QAInfo:");
+     times(&cpt);
+     userCpuTime = ((Double_t) cpt.tms_utime) / gTicks - userCpuTime;
+     systemCpuTime = ((Double_t) cpt.tms_stime) / gTicks - systemCpuTime;
+     childUserCpuTime = ((Double_t) cpt.tms_cutime) / gTicks - childUserCpuTime;
+     childSystemCpuTime = ((Double_t) cpt.tms_cstime) / gTicks - childSystemCpuTime;
+     clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
+     time_t stop_tv_sec = ts.tv_sec;
+     long  stop_tv_nsec = ts.tv_nsec;
+     if (stop_tv_nsec < start_tv_nsec) { stop_tv_nsec += 1000000000; stop_tv_sec -= 1; }
+     stop_tv_nsec -= start_tv_nsec;
+     stop_tv_sec -= start_tv_sec;
+     double tv_diff = ((double) stop_tv_sec) + (((double) stop_tv_nsec)*1e-9);
      
      //
      // ATTENTION - please DO NOT change the format of the next line,
@@ -204,6 +234,9 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 	jCur,GetRunNumber(),GetEventNumber(),GetDate(), GetTime(),
 	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:")) 
      << endm;
+     LOG_QA << Form("QAInfo: Cpu Times: user / system / user children / system children = %8.2f / %8.2f / %8.2f / %8.2f seconds (tick = %8.2f, cps = %ld)",
+                    userCpuTime,systemCpuTime,childUserCpuTime,childSystemCpuTime,gTicks,CLOCKS_PER_SEC) << endm;
+     LOG_QA << Form("QAInfo: Cpu Times: all threads = %15.9f seconds",tv_diff) << endm;
 
 #ifdef STAR_TRACKING 
 #ifdef OLDTRACKING    
@@ -291,8 +324,17 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.83 2019/03/21 18:56:46 jeromel Exp $
+// $Id: StChain.cxx,v 1.86 2020/02/27 23:22:24 genevb Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.86  2020/02/27 23:22:24  genevb
+// Even more timing/clock info
+//
+// Revision 1.85  2020/02/25 15:29:25  genevb
+// Track complete CPU time usage
+//
+// Revision 1.84  2020/02/24 23:20:08  genevb
+// Add timer for user CPU time (TBenchmark reports user+system)
+//
 // Revision 1.83  2019/03/21 18:56:46  jeromel
 // Added ATTENTION message
 //

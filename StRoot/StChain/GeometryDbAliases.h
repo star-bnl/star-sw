@@ -90,6 +90,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2011",       20101215,     0, "y2011",    "y2011 TOF fix & TPCE redused & honey,AgML"},
   {"y2011a",      20101215,     1, "y2011a",   "y2011a == y2011 now ,AgML"},
   {"y2011b",      20101215,     2, "y2011b",   "y2011a + wall "},
+  {"y2011c",      20101215,     3, "y2011c",   "same as y2011b"},
 
   {"y2012",       20111215,     0, "y2012",    "y2012 Very preliminary,AgML"},
   {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry (MTD missing),AgML"},
@@ -141,11 +142,16 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2018x",      20171215,     0, "y2018x",   "y2018x experimental TPC geometry, AgML,xgeometry"},   
   {"y2018",       20171215,     2, "y2018",    "y2018 development geometry, AgML,xgeometry"},   
   {"y2018a",      20171215,     3, "y2018a",   "y2018a physics production geometry version A, AgML,xgeometry"},   
+  {"y2018b",      20171215,     4, "y2018b",   "y2018b physics production geometry version B, AgML,xgeometry"},   
+  {"y2018c",      20171215,     5, "y2018b",   "y2018c physics production geometry version C (FXT @ 200.7 cm), AgML,xgeometry"},   
 
   {"y2019",       20181215,     0, "y2019",    "y2019 development geometry, AgML,xgeometry"},   
   {"y2019a",      20181215,     1, "y2019a",   "y2019a first production release geometry, AgML,xgeometry"},   
+  {"y2019b",      20181215,     1, "y2019a",   "y2019a production geometry (FXT @ 200.7cm), AgML,xgeometry"},   
 
-  {"y2020",       20191215,     0, "y2020",    "y2020 development geometry, AgML,xgeometry"},   
+  {"y2020",       20191120,     0, "y2020",    "y2020 development geometry, AgML,xgeometry"},   
+  {"y2020a",      20191120,     1, "y2020a",   "y2020 fast-offline geometry, AgML,xgeometry"},   
+  {"y2020b",      20191120,     2, "y2020b",   "y2020 production geometry (FXT @ 200.7 cm), AgML,xgeometry"},   
   
   {"dev2021",     20211210,     1, "dev2021",  "development geometry for 2021+ forward program,AgML,xgeometry"},
 
