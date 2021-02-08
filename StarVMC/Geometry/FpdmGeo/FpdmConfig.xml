@@ -9,16 +9,36 @@
 
   <Setup name="FPDMof" comment="OFF" module="FpdmGeo1" onoff="off" />
   
-  <Setup name="FPDM00" comment="Forward pion detector" module="FpdmGeo1" onoff="on" /> <!-- should be FpdmGeo -->
-  <Setup name="FPDM01" comment="Forward pion detector" module="FpdmGeo1" onoff="on" />
-  <Setup name="FPDM02" comment="Forward pion detector" module="FpdmGeo2" onoff="on" />
-  <Setup name="FPDM03" comment="FPD/FMS"               module="FpdmGeo3" onoff="on" />
-  <Setup name="FPDM04" comment="FPD/FMS/FPS"           module="FpdmGeo4" onoff="on" />
+  <Setup name="FPDM00" comment="Forward pion detector" module="FpdmGeo1" onoff="on" simu="1" /> <!-- should be FpdmGeo -->
+  <Setup name="FPDM01" comment="Forward pion detector" module="FpdmGeo1" onoff="on" simu="1" />
+  <Setup name="FPDM02" comment="Forward pion detector" module="FpdmGeo2" onoff="on" simu="1" />
 
-  <Setup name="FPDM13" comment="FPD/FMS in open position" module="FpdmGeo3" onoff="on"  >
+  <Setup name="FPDM03"   comment="FPD/FMS"                module="FpdmGeo3" onoff="on" simu="1" />
+  <Setup name="FPDM03at" comment="FPD/FMS attenuation on" module="FpdmGeo3" onoff="on" simu="1"  >
+    <Init struct="FMCG" var="atten" value="1.0" />
+  </Setup>
+  
+  <Setup name="FPDM04"    comment="FPD/FMS/FPS"           module="FpdmGeo4" onoff="on" simu="1"/>
+  <Setup name="FPDM04at"  comment="FMS attenuation on"    module="FpdmGeo4" onoff="on" simu="1" >
+    <Init struct="FMCG" var="atten" value="1.0" />
+  </Setup>
+
+  <Setup name="FPDMv4"    comment="FPD/FMS/FPS"           module="FpdmGeo4" onoff="on" simu="1" >
+    <Init struct="FMCG" var="postshower" value="1" />
+  </Setup>
+  <Setup name="FPDMv4at"  comment="FMS attenuation on"    module="FpdmGeo4" onoff="on" simu="1" >
+    <Init struct="FMCG" var="atten" value="1.0" />
+    <Init struct="FMCG" var="postshower" value="1" />
+  </Setup>
+
+  <Setup name="FPDM13" comment="FPD/FMS in open position" module="FpdmGeo3" onoff="on" simu="1"  >
     <Init struct="fmcg" var="fmsnorthx" value="-50.3" />
     <Init struct="fmcg" var="fmssouthx" value="+50.3" />
   </Setup>
+
+
+
+
 
 </Detector>
 </Document>

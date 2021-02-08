@@ -1,0 +1,13 @@
+/*    epdStatus.idl
+*
+*  Table: epdStatus
+*
+*       description: //  EPD Status table 
+*/
+
+struct epdStatus { 
+  unsigned short ew[768];   /* ew=0 East EPD, ew=1 West EPD */
+  unsigned short pp[768];   /*pp=1-12, SuperSector number */
+  unsigned short tile[768]; /* tile=1-31, tile number in a super sector*/
+  short status[768];        /*  -1 for non existing channels, 0-dead, 1-good*/
+};  

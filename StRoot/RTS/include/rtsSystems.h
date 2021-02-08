@@ -414,8 +414,6 @@ extern inline char *getTrgDetBitName(int x) {
 #define TRG_EPQ_INSTANCE 23
 
 #define TRG_TCD_NEW_INSTANCE	24
-#define TRG_FQ1_INSTANCE 25
-#define TRG_FQ2_INSTANCE 26
 
 #define L3EVP_INSTANCE      1
 #define L3DISP_INSTANCE     2
@@ -591,7 +589,6 @@ extern inline char *getTrgDetBitName(int x) {
 #define TRG_MXQ_NODE    ((TRG_SYSTEM<<12) | TRG_MXQ_INSTANCE)
 //#define TRG_FEQ_NODE    ((TRG_SYSTEM<<12) | TRG_FEQ_INSTANCE)
 #define TRG_FEQ_NODE    ((TRG_SYSTEM<<12) | TRG_EPQ_INSTANCE)
-#define TRG_EPQ_NODE    ((TRG_SYSTEM<<12) | TRG_EPQ_INSTANCE)
 #define TRG_FQ1_NODE    ((TRG_SYSTEM<<12) | TRG_FQ1_INSTANCE)
 #define TRG_FQ2_NODE    ((TRG_SYSTEM<<12) | TRG_FQ2_INSTANCE)
 

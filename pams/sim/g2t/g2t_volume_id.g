@@ -1,5 +1,9 @@
-* $Id: g2t_volume_id.g,v 1.80 2015/10/12 20:46:57 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.83 2017/10/18 14:33:39 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.83  2017/10/18 14:33:39  jwebb
+* Modifications of g2t_volume_id to support alternate paths to pxl, ist, sst
+* active sensors, while maintaining the same absolute volume ID.
+*
 * Revision 1.80  2015/10/12 20:46:57  jwebb
 * Hit definition and starsim to root interface for FTS.
 *
@@ -193,14 +197,15 @@
       Integer          ftpc_hash(6,2)   / 1, 6, 5, 4, 3, 2, 
                                           6, 1, 2, 3, 4, 5/
 
-      Integer          innout,sector,sub_sector,volume_id
+      Integer          innout,sector,sub_sector,volume_id,sensor,unknown
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          ftpv,padrow,ftpc_sector,innour,lnumber,wafer,lsub,phi_30d
       Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder,nwafer
       Integer          module,layer,nch
       Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
-      Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/,ifsc/0/,imtd/0/
+      Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/,ifsc/0/,imtd/0/,ipxl/0/
+      Integer          iist/0/,isst/0/ !
       Integer          istVersion/0/,istLayer/0/
 *     FPD
       Integer          n1,n2,ew,nstb,ch,sl,quad,layr,slat
@@ -237,6 +242,9 @@
       Integer hcal_cell   "HCAL cells  3x3"
       Integer hcal_fiber  "HCAL fibers 15x15 or 16x16"
       Integer hcal_sl     "HCAL short long cell, 1 short,2 long"
+
+      Integer etof_sector, etof_plane, etof_counter, etof_gap, etof_cell
+      Integer pixl_alignment/0/ "Pixel alignment level"
  
       Structure  SVTG  {version}
       Structure  TPCG  {version, tpadconfig }
@@ -253,6 +261,10 @@
       Structure  FPDG { Version }         ! FPD geometry
       Structure  FSCG { Version }         ! FSC geometry
       Structure  MTDG { Version, Config } ! MTD geometry
+
+      Structure  PIXL { Version, int sector, int ladder, int sensor, phiNum(10), int on(1), int misalign }
+      Structure  ISTC { version, int misalign }
+      Structure  SSDP { version, int contig, int placement, int misalign }
 
 
       logical    first/.true./
@@ -278,6 +290,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           USE  /DETM/FSCM/FSCG  stat=ifsc
           USE  /DETM/MUTD/MTDG  stat=imtd
 
+          USE  /DETM/PIXL/PIXL  stat=ipxl
+          USE  /DETM/ISTD/ISTC  stat=iist
+          USE  /DETM/SISD/SSDP  stat=isst
+        
           call RBPOPD
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
           if (ivpd>=0) print *,'              : VPD version =',vpdg_version
@@ -290,6 +306,15 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *             print *,'              : ISTB version of code=', ismg_code
              istVersion=ismg_code
           endif
+
+
+   """This is a hack.  For some reason that I have yet to determine, the PIXL"""
+   """structure is not being loaded... maybe the name PIXL gets confused with"""
+   """the data struct associated w/ pixlgeo?  Maybe reasonas?"""
+             pixl_alignment = 1
+             pixl_misalign  = 1
+
+
 
 
           """ Intialize TPADs based on TPC version """
@@ -422,7 +447,41 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         endif
         
       else if (Csys=='ssd') then
+
+        if ( isst.lt.0 ) then
+
         volume_id = 7000+100*numbv(2)+numbv(1)
+
+        else if ( ssdp_misalign .eq. 0 ) then
+
+        ladder = numbv(1)
+        sensor = numbv(2)
+        volume_id = 7000+100*numbv(2)+numbv(1)
+
+        WRITE(*,*) 'Aligned SST:'
+
+        write (*,*) '  uncoded numbv  = ', numbv(1:4)
+        write (*,*) '          ladder = ', ladder
+        write (*,*) '          sensor = ', sensor
+        write (*,*) '  encoded volume = ', volume_id
+
+        else if( ssdp_misalign.eq.1 ) then
+
+        ladder = numbv(1) - 1
+        sensor = mod( ladder , 16 ) + 1
+        ladder =      ladder / 16   + 1
+
+        volume_id = 7000 + 100*sensor + ladder
+
+        write (*,*) 'Misaligned SST: '
+        write (*,*) '  uncoded numbv  = ', numbv(1:4)
+        write (*,*) '          ladder = ', ladder
+        write (*,*) '          sensor = ', sensor
+        write (*,*) '  encoded volume = ', volume_id
+    
+        endif
+
+
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else if (Csys=='tpc') then
 *2*                                        Peter M. Jacobs
@@ -811,14 +870,92 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 *16*                          Mikhail Kopytine for the BBC group
       else if (Csys=='bbc') then
-*        
+*         
 *       BBC has 4 levels: west/east, annulus, triple module, single module
         volume_id = numbv(1)*1000 + numbv(2)*100 + numbv(3)*10 + numbv(4)    
 *17*                                 Kai Schweda
       else if (Csys=='pix') then
-        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 
-*18*                                 Maxim Potekhin
+c$$$    write (*,*) numbv
+
+        """ Old numbering scheme """
+        if ( pixl_alignment .eq. 0 ) then
+        write (*,*) 'old numbering'
+        sector = numbv(1)
+        ladder = numbv(2)
+        sensor = numbv(3)
+        unknown = numbv(4)
+        endif
+
+        """ New numbering scheme (ladders in pxmo)"""
+        if ( pixl_alignment .eq. 1 ) then
+!       write (*,*) 'new numbering'
+
+        sector =    ( numbv(1)-1)/4   + 1
+        ladder = mod( numbv(1)-1, 4 ) + 1
+        sensor = numbv(2)
+
+!       write (*,*) '----------------------------------------------'
+!       write (*,*) numbv(1:4)
+!       write (*,*) 'sector=', sector     
+!       write (*,*) 'ladder=', ladder
+!       write (*,*) 'sensor=', sensor
+
+        endif
+
+        write (*,*) 'PIXL_MISALIGN = ', pixl_misalign
+
+
+        if ( pixl_misalign .eq. 1 ) then
+
+        sensor = numbv(1) - 1     ! 0 ... 399
+        sector = sensor / 40 + 1
+        ladder = mod ( sensor / 10, 4 ) + 1
+        sensor = mod ( sensor, 10 ) + 1
+        write (*,*) 'PIXEL ----------------------------------------------'
+        write (*,*) numbv(1:4)
+        write (*,*) 'sector=', sector     
+        write (*,*) 'ladder=', ladder
+        write (*,*) 'sensor=', sensor
+
+        endif
+
+        "volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)"
+        volume_id = 1000000*sector + 10000*ladder + 100*sensor
+
+*18* 
+      else if ( Csys=='ist' .and. iist>= 0 ) then
+
+          " The extra offset on the ladder number looks odd here...      "
+          " But it was used in the legacy encoding (ver != 3 or 4 below) "
+          " which we end up falling through to in the ist.               "
+
+          if      ( ISTC_misalign .eq. 1 ) then
+
+              sensor = numbv(1) - 1         ! 0 to 143
+              ladder = sensor / 6 + 1 + 1   ! extra +1 as per legacy below...
+              sensor = mod( sensor, 6 ) + 1 !
+
+              write (*,*) 'Misaligned IST: ', numbv(1:4), ' : ', ladder, sensor
+
+          else if ( ISTC_misalign .eq. 0 ) then
+              ladder = numbv(1) + 1 ! IBAM
+              sensor = numbv(2)     ! IBLM
+          write (*,*) 'Ideal IST: ', ladder, sensor
+
+          else
+              STOP "IST misalignment in ambiguous state / test mode"
+          endif
+          volume_id = ladder * 1000000  +   
+                      sensor *   10000  
+
+          write (*,*) '  uncoded numbv  = ', numbv(1:4)
+          write (*,*) '  encoded volume = ', volume_id
+          write (*,*) '  decoded ladder = ', volume_id/1000000 - 1
+          write (*,*) '  decoded sensor = ', mod(volume_id,1000000) /10000
+
+
+
       else if (Csys=='ist') then
         if(istVersion.ne.3.and.istVersion.ne.4) then
             istLayer=numbv(1)+1
@@ -1009,17 +1146,47 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 *******************************************************************************************
 ** 27                                                                            Jason Webb
-
       ELSE IF (CSYS=='fts') THEN
          
            "Disk number is 1st entry in numbv"
            volume_id = numbv(1)
-      
+*******************************************************************************************
+** 28                                                                           Jason Webb
+      ELSE IF (CSYS=='epd') THEN
+         
+           "East / west is first in numbv, paddle number is second"           
+           volume_id = 100*numbv(1) + numbv(2)
+
+
+*******************************************************************************************
+** 29                                                                           Jason Webb
+      ELSE IF (CSYS=='eto') THEN
+
+         """Endcap TIME OF FLIGHT"""
+
+         etof_plane    = numbv(1)/100          "1 closest to IP, 3 furthest from IP"
+         etof_sector   = mod( numbv(1), 100 )  "matches TPC scheme 13 to 24"
+         etof_counter  = numbv(2)              "3 counters per gas volume"
+         etof_gap      = numbv(3)              "12 gaps between glass"
+         etof_cell     = numbv(4)              "32 cells per gap"
+
+        
+
+         volume_id = etof_cell               + 
+                     100      * etof_gap     +
+                     10000    * etof_counter + 
+                     100000   * etof_sector  +   
+                     10000000 * etof_plane
+
+         """ Note: this last part could just be 100000*numbv(1).  We break it """
+         """ into plane and sector just to make explicit the numbering scheme """
+                     
       else
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
-    g2t_volume_id = volume_id
 
+
+    g2t_volume_id = volume_id
 
     end
       

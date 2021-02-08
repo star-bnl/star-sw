@@ -8,7 +8,7 @@ import os
 import re
 
 # Exception handling
-from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError, MixtureComponentError
+from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError, MixtureComponentError, AgmlMissingAttributeWarning
 
 #enable_warnings = os.getenv('AGML_WARNINGS',False)
 #enable_warnings = ( os.getenv('STAR','...adev').find('adev') < 0 )
@@ -230,6 +230,45 @@ def requireAttributes( tag, attr, mylist, warning=True ):
         if value==None:            
             RaiseWarning( AgmlAttributeWarning(current_block, tag, key, warning ) )
 
+def requireAnyAttributes( tag, attr, mylist, warning=True ):
+    """
+    Require that at least one keys in mylist appears in the attribute list
+    """
+    
+    for key in mylist:
+        if key in attr.keys():
+            return
+
+    RaiseWarning( AgmlMissingAttributeWarning(current_block, tag, mylist ) )
+
+
+# ----------------------------------------------------------------------------------------------------
+def parseArray(array):
+    """
+    Given a string which is interpreted as an array, i.e.
+
+    array="{1,2,3;4,5,6;7,8,9;}"   ! 2D array
+    array="{1,2,3}"                ! 1D array
+
+    returns a (nested) list representing the (2D) 1D array
+    
+    """
+
+    work = array.strip()
+    work = work.lstrip('{')
+    work = work.rstrip('}')
+    work = work.rstrip(';')
+    work = work.replace(' ','')
+    work = work.replace('\n','')
+    
+    out = []
+    nline = 0
+    for line in work.split(';'):
+        out.append( list(line.split(',')) )
+        nline = nline + 1
+
+    if nline==1: out = out[0]
+    return list(out)
 
 # ----------------------------------------------------------------------------------------------------
 
@@ -636,6 +675,9 @@ class StarGeometry(Handler):
         public:
         /// Construct geometry with the specified tag, and return wrapped in a TDataSet
         static TDataSet* Construct( const char* name = "%s" );
+        static bool      List     ( const char* name = "%s");
+        StarGeometry(){ /* nada */ };
+        virtual ~StarGeometry(){ /* nada */ }
         private:
         protected:
         ClassDef(StarGeometry,1);
@@ -645,10 +687,12 @@ class StarGeometry(Handler):
         class Geometry : public StarGeometry {
         public:
         static TDataSet *ConstructGeometry( const char* name ){ return Construct(name); }
+        Geometry():StarGeometry(){ /* nada */ };
+        virtual ~Geometry(){ /* nada */ }
         ClassDef(Geometry,1);
         };
 #endif        
-        """%self.tag
+        """%(self.tag,self.tag)
         document.head(header)
 
         implement1 = """
@@ -670,6 +714,21 @@ class StarGeometry(Handler):
         document.impl( 'return (TDataSet*)dataset;', unit='global' )
         document.impl( '};',              unit='global' )        
         
+        implement1 = """
+        bool   StarGeometry::List( const char* name )
+        {
+        std::string tag = name;
+        bool all = name==std::string("all");
+        bool found = false;
+        """
+        document.impl( implement1, unit='global' )
+        for geom in self.geoms:
+            name    = geom.name;
+            output = '             if (all||tag=="%s") { %s::list(); found = true; }'  %(name,name)         
+            document.impl( output, unit='global' )
+        document.impl( 'if ( 0==found ) LOG_INFO << tag << " not defined" << endm;', unit='global' )
+        document.impl( 'return true;};',              unit='global' )        
+        
 
         
         
@@ -685,7 +744,8 @@ class Geometry( Handler ):
         self.constructs = []
         self.sys    = [] # subsystems
         self.config = {} # subsystem configuration
-        self.includes = [] # include files for dstector tags        
+        self.includes = ['StMessMgr.h'] # include files for dstector tags
+
         Handler.__init__(self)
 
     def addModule(self, module):
@@ -725,6 +785,7 @@ class Geometry( Handler ):
 #       document.head( 'namespace Star { //$NMSPC' )
         document.head( 'struct %s {' % self.name )
         document.head( 'static bool construct();' )
+        document.head( 'static bool list();' )
         #document.head( '#if 0\n  ClassDef(%s,1);\n#endif\n'%self.name )
         document.head( '};' )
 #       document.head( '};' )
@@ -733,7 +794,8 @@ class Geometry( Handler ):
 
         for i in self.includes:
             document.impl('#include "%s"'%i, unit='global' )
- 
+
+        # Setup the builder code
         document.impl( 'bool %s::construct() {'%self.name, unit='global' )
         document.impl( 'bool result = true;',                    unit='global' )
         # Loop over detector tags.  Create in order and construct
@@ -745,17 +807,21 @@ class Geometry( Handler ):
         document.impl( 'return result;\n',                      unit='global' )
         document.impl( '};',                                      unit='global' )
 
-        ## for pmod in self.pmodules:
-        ##     document.impl( 'if(_%s) _%s -> ConstructGeometry(); // Make template function' % (pmod,pmod), unit='global' )
-        ## document.impl( 'return result;', unit='global' )
-        ## document.impl( '}', unit='global' )
+        # Setup code to list
+        document.impl( 'bool %s::list() {'%self.name, unit='global' )
+        document.impl( 'bool result = true;',                    unit='global' )
+        # Loop over detector tags.  Create in order and construct
+        for sub in self.sys:
+            subup = sub.upper();
+            cfg = self.config[sub]
+            #ocument.impl( '%s::%s::setup();'%(subup,cfg), unit='global' )
+            #ocument.impl( '%s::%s::construct();'%(subup,cfg), unit='global' )
+            document.impl( 'LOG_INFO << "%s %s" << endm;'%(subup,cfg), unit='global' )
+            document.impl( '%s::%s::list();'%(subup,cfg), unit='global' );
+        document.impl( 'return result;\n',                      unit='global' )
+        document.impl( '};',                                      unit='global' )
         
-        ## print self.name
-        ## print self.docum
-        ## for mod in self.modules:
-        ##     print mod
-        ## for pmod in self.pmodules:
-        ##     print pmod
+
     
 class Construct( Handler ):
     def __init__(self):
@@ -846,13 +912,13 @@ class Setup( Handler ):
         self.topvolume = None
         # flags (call agsflag ...)
         self.prin = None
-#       self.grap = None
-#       self.hist = None
-#       self.geom = None
-#       self.mfld = None
+        self.grap = None
+        self.hist = None
+        self.geom = None
+        self.mfld = None
         self.debu = None
         self.simu = None
-        
+        self.flags = {}
         self.inits = []
         Handler.__init__(self);
 
@@ -865,6 +931,11 @@ class Setup( Handler ):
         self.module  = attr.get('module',  None)
         self.onoff   = attr.get('onoff',   None)
         self.topvolume = attr.get('top',   None)
+        # Flags set by agsflag
+        for flag in [ 'prin', 'grap', 'hist', 'geom', 'mfld', 'debu', 'simu' ]:
+            myflag = attr.get(flag, None)
+            if myflag:
+                self.flags[flag] = int(myflag)
 
 
     def endElement(self, tag):
@@ -874,7 +945,8 @@ class Setup( Handler ):
         output += 'struct %s {\n' % self.name 
         output +=  '  static const char *name()    { return "%s"; }\n'  % self.name 
         output +=  '  static const char *comment() { return "%s"; }\n'  % self.comment 
-        output +=  '  static const char *module()  { return "%s"; }\n'  % self.module  
+        output +=  '  static const char *module()  { return "%s"; }\n'  % self.module
+        output +=  '  static       bool  list();\n'
         output +=  '  typedef %s::%s Module;\n'%( self.module.upper(), self.module ) 
         #output +=  '  static       bool  active; // true if detector configuration has been built\n' 
         #document.impl( '  bool %s::active = false;\n'%self.name );
@@ -888,33 +960,21 @@ class Setup( Handler ):
         output +=  '  static       void  setup();\n'
         output +=  '  static       AgModule* construct();\n'
         
-        output +=  '#if 0\n'
+#       output +=  '#if 0\n'
 #       output +=  'ClassDef(%s,1);\n'%self.name
-        output +=  '#endif\n'
+#       output +=  '#endif\n'
         output +=  '};\n'
         output +=  '};\n'
-        
-# No need for dictionary in AgML2
-#$$$    output += "#if 0\n ClassDef(%s,1)\n#endif\n"% self.name # insert into ROOT dictionary
+
+        # 
         self.parent.setups.append(output)
-
         
-        # Not sure the following has any effect...
-        #output +=  '      AgStructure::AgDetpNew( module(), comment() );\n'
-        #for init in self.inits:
-        #    output += '   // %s.%s = %s;\n'%(init.struct,init.variable,init.value) 
-        #output +=  '  };\n'                
-
-        # Now implementation
-        #output +=  '      AgStructure::AgDetpNew( module(), comment() );\n'
-        #for init in self.inits:
-        #    output += '   // %s.%s = %s;\n'%(init.struct,init.variable,init.value) 
-        #output +=  '  };\n'                
-
         # Wrap in namespace
         nmspc = self.module.upper()[:4]
 
+        #
         # Add SETUP
+        #
         output = "\n"
         output += "void %s::%s::setup() {\n"%(nmspc,self.name)
         document.impl( output, unit='global' )
@@ -925,7 +985,31 @@ class Setup( Handler ):
         output = "\n};\n"
         document.impl( output, unit='global' )
 
+        #
+        # Add List
+        #
+        output = "\n"
+        output += "bool %s::%s::list() {\n"%(nmspc,self.name)
+        flaglist = "";
+        for flag in [ 'prin', 'grap', 'hist', 'geom', 'mfld', 'debu', 'simu' ]:
+            try:
+                value = self.flags[flag]
+                #                output += 'LOG_INFO << "  FLAG %s = %i" << endm;'%(flag,value)
+                flaglist += '" %s = %i" << '%(flag,value)
+            except KeyError:
+                pass
+
+        output += 'LOG_INFO << name() << " " << module() << %s " [" << comment() << "]" << endm;\n'%flaglist
+        document.impl( output, unit='global' )
+        for init in self.inits:
+            init.list()
+        output  = "return true;\n};\n"
+        document.impl( output, unit='global' )
+
+
+        #
         # Add CONSTRUCT
+        #
         output = "\n"
         output += "AgModule* %s::%s::construct() {\n"%(nmspc,self.name)
         output += 'LOG_INFO << "Construct module " << %s::%s::module() << endm;\n'%(nmspc,self.name)
@@ -980,19 +1064,26 @@ class Init( Handler ):
         output += "{\n";
         template = "%s,%s,%s"%(sinfo,minfo,tinfo)
         output += "AgMLDetp<%s>* %s_detp = \n\tAgMLDetp<%s>::New();\n"%( template, self.struct, template )
-
         output += "\t{\n"        
         output += "\t   %s temp = %s;"%(tinfo,self.value)
         output += "\t   memcpy( &%s_detp->member_value, &temp, sizeof(temp) );\n"%self.struct
         output += '\t   LOG_INFO << "  [AgML2.0] Runtime configure detector parameter %s.%s = %s" << endm;\n'%(self.struct,self.variable,self.value)
-#       output += "\t   %s_detp->member_value = %s;"%(self.struct,self.value)
-#       output += "\t   %s_detp->Add( temp );\n"%self.struct
 
         output += "\t}\n"
         output += "}\n"
-        
-        
+                
         document.impl( output, unit='global' )
+
+    def list(self):
+        
+        output  = "\n";
+        output += '\t   LOG_INFO << "  [AgML2.0] Runtime configure detector parameter %s.%s = %s" << endm;\n'%(self.struct,self.variable,self.value)
+                
+        document.impl( output, unit='global' )
+
+
+
+
 class Modules( Handler ):
     """
     class Modules
@@ -1957,7 +2048,7 @@ class Struct( Handler ): # new style structures
         # Make type dictionary persistent
         _struct_table[ self.name ] = self.var_dict
 
-        # Name of the structure wrapper which handles the fill/use interface
+        # Name of the structure wrapper which handles the fill/use interface 
         wrap = name.upper()
 
         # First stage: declare plain c-structure
@@ -3112,6 +3203,9 @@ class Placement(Handler):
         cond  = attr.get('if',None)   # conditional placement
         matrix= attr.get('matrix',None)
 
+        table = attr.get('table',None) # DB table
+        row   = attr.get('row','0')    # row
+
 
         if cond:
             cond = replacements(cond)
@@ -3165,6 +3259,10 @@ class Placement(Handler):
         self.into  = into
         self.pos   = [x, y, z, only, copy]
 
+        # Convert matrix into a nested list of elements
+        if matrix:
+            matrix = parseArray(matrix)
+
         # If provided, add the conditional to the placement
         if cond:            document.impl( 'if ( %s )'%cond, unit=current )
 
@@ -3189,6 +3287,23 @@ class Placement(Handler):
         if ( z != None ):
             document.impl( 'place.TranslateZ(%s);'% z, unit=current )
             document.impl( '/// Translate z = %s'%z, unit=current )
+
+        if ( matrix != None ):
+            array = ""
+            for element in matrix:
+                array += '{%s},'%','.join(element)
+            array = array.rstrip(',')
+            # Matrix assignment 
+            document.impl( '{ double matrix[4][4] = {%s}; place.SetOrder( AgPosition::kGeneral ); place.Matrix( matrix ); }'%array, unit=current )
+            document.impl( '/// Rotation Matrix = %s'%array, unit=current )
+
+
+        if ( table != None ):
+            chair = table.split('/')[-1]
+            
+            document.impl( 'place.SetTable("%s",%s); // Use DB table to position object (if available)'%(table,row), unit=current )
+            document.impl( 'place.SetChair("%s");    // Use DB table to position object (if available)'%(chair    ), unit=current )            
+
         
         if ( only != None ):
             document.impl( 'place.par("only")=%s;'% only, unit=current )
@@ -3241,7 +3356,7 @@ class Rotation(Handler):
     def startElement(self,tag,attr):
 
         # Validate attributes
-        checkAttributes( tag, attr, ['alphax','alphay','alphaz','thetax','thetay','thetaz','phix','phiy','phiz','ort'] )
+        checkAttributes( tag, attr, ['matrix','alphax','alphay','alphaz','thetax','thetay','thetaz','phix','phiy','phiz','ort'] )
 
         list = ['alphax','alphay','alphaz' ]
         func = {'alphax' : 'AlphaX',
@@ -3296,8 +3411,27 @@ class Rotation(Handler):
             document.impl( 'place.Ortho( "%s" ); // ORT=%s'%( ortho, ortho ), unit=current )
             document.impl( '/// Axis substitution: XYZ --> %s'%ortho, unit=current )
      
+        matrix = attr.get('matrix',None)
+        if matrix:
+            document.impl( '{ // rotation matrix (overwrites any prior rotation)', unit=current )
+            document.impl( '  double _rotm[] = %s;'%matrix,                        unit=current )
+            document.impl( '  place.RotationMatrix( _rotm );',                     unit=current )
+            document.impl( '}',                                                    unit=current )
 
                
+class Misalign(Handler):
+    def __init__(self):
+        Handler.__init__(self)
+    def setParent(self,p):
+        self.parent = p
+    def startElement(self,tag,attr):        
+        matrix = attr.pop('matrix',None) # get transformation matrix
+        table  = attr.pop('table', None) # alternatively get db table
+        row    = attr.pop('row',    '0') # ... and row of table
+        opts   = attr.pop('opts','+xyzr')
+        document.impl( 'place.Misalign("%s",%s,"%s");'%(table,row,opts), unit=current )
+    def endElement(self,tag):
+        pass
         
 # ----------------------------------------------------------------------------------------------------
 class For(Handler):
@@ -3417,6 +3551,14 @@ class If(Handler):
                 content += ';'
 
             document.impl( content, unit=current )
+#   def characters(self,content):        MAIN differs from AgML100417 in For/Do loops... keep MAIN
+#       content = content.lstrip()
+#       content = content.rstrip()
+#       content = content.lower()
+#       content = replacements(content)        
+#       if ( not re.match(';$',content) ):
+#           content += ';'
+#       document.impl( content, unit=current )
                 
 class Then(Handler): # always ignoring thens
     def setParent(self,p):

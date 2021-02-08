@@ -10,7 +10,7 @@ class StarGenEvent;
 StarGenEvent     *event       = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary     = 0;
+StarPrimaryMaker *_primary     = 0;
 
 // ----------------------------------------------------------------------------
 void geometry( TString tag, Bool_t agm1=true )
@@ -32,7 +32,7 @@ void trig( Int_t n=1 )
   {
     chain->Clear();
     chain->Make();
-    primary->event()->Print();
+    _primary->event()->Print();
   }
 }
 // ----------------------------------------------------------------------------
@@ -51,7 +51,7 @@ void STARlight( TString mode="pp" )
     starlight->SetYell("proton");
   }
 
-  primary->AddGenerator(starlight);
+  _primary->AddGenerator(starlight);
 }
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -79,15 +79,15 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   StarRandom::capture();
 
   //
-  primary = new StarPrimaryMaker();
+  _primary = new StarPrimaryMaker();
   {
-    primary->SetFileName( "StarLight.starsim.root" );
-    chain->AddBefore("geant",primary);
+    _primary->SetFileName( "StarLight.starsim.root" );
+    chain->AddBefore("geant",_primary);
   }
 
   STARlight( "pp" );
 
-  primary->Init();
+  _primary->Init();
 
   geometry( "y2012" );
   command( "gkine -4 0" );

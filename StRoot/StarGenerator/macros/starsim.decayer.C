@@ -10,7 +10,7 @@ class StarGenEvent;
 StarGenEvent   *event       = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary = 0;
+StarPrimaryMaker *_primary = 0;
 
 class StarKinematics;
 StarKinematics *kinematics = 0;
@@ -41,25 +41,16 @@ void trig( Int_t n=1 )
     chain->Clear();
 
     // Generate 1 mu minus at high pT
-    kinematics->Kine( 1, "MyD0", 10.0, 100.0, -2.0, 2.0 );
-
-    //    kinematics->Kine( 1, "pi0", 0.5, 5 0, -2.0, 2.0 );
-
-    // Generate 4 muons flat in pT and eta 
-    //    kinematics->Kine(4, "mu+", 0., 5., -2.0, +2.0 );
-
-    // Generate 4 neutral pions according to a PT and ETA distribution
-    //    kinematics->Dist(4, "pi0", ptDist, etaDist );
+    kinematics->Kine( 1, "D0", 10.0, 100.0, -2.0, 2.0 );
 
     // Generate the event
     chain->Make();
 
     // Print the event
-    primary->event()->Print();
+    _primary->event()->Print();
+    command("gprint kine");
   }
 }
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 void Kinematics()
 {
@@ -68,10 +59,8 @@ void Kinematics()
   gSystem->Load( "libKinematics.so");
   kinematics = new StarKinematics();
     
-  primary->AddGenerator(kinematics);
+  _primary->AddGenerator(kinematics);
 }
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
 { 
@@ -104,10 +93,10 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   // before the geant maker
   //
   //  StarPrimaryMaker *
-  primary = new StarPrimaryMaker();
+  _primary = new StarPrimaryMaker();
   {
-    primary -> SetFileName( "kinematics.starsim.root");
-    chain -> AddBefore( "geant", primary );
+    _primary -> SetFileName( "kinematics.starsim.root");
+    chain -> AddBefore( "geant", _primary );
   }
 
   Kinematics();
@@ -119,7 +108,7 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   //
   StarDecayManager   *decayMgr = AgUDecay::Manager();
   StarPythia8Decayer *decayPy8 = new StarPythia8Decayer();
-  decayMgr->AddDecayer( 0, decayPy8 ); // Handle any decay requested 
+  decayMgr->AddDecayer(    0, decayPy8 ); // Handle any decay requested 
   decayPy8->SetDebug(1);
   decayPy8->Set("WeakSingleBoson:all = on");
 
@@ -133,14 +122,19 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   // Particle data
   StarParticleData& data = StarParticleData::instance();
   //  One can add a particle to G3 using...
-  data.AddParticleToG3( "MyD0", 0.1865E+01, 0.42800E-12, 0., 3, 421, 37, 0, 0 );
-
+  //data.AddParticleToG3( "MyD0", 0.1865E+01, 0.42800E-12, 0., 3, 421, 37, 0, 0 );
+  TParticlePDG* D0     = data.GetParticle("D0");
+  TParticlePDG* rho_pl = data.GetParticle("rho+");
+  TParticlePDG* rho_mn = data.GetParticle("rho-");
+  data.AddParticleToG3( D0, 37 );
+  data.AddParticleToG3( rho_pl, 153 );
+  data.AddParticleToG3( rho_mn, 154 );
 
 
   //
   // Initialize primary event generator and all sub makers
   //
-  primary -> Init();
+  _primary -> Init();
 
   //
   // Setup geometry and set starsim to use agusread for input
@@ -152,10 +146,39 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   //
   // Trigger on nevents
   //
-  trig( nevents );
+  //  trig( nevents );
 
-  command("call agexit");  // Make sure that STARSIM exits properly
+  //  command("call agexit");  // Make sure that STARSIM exits properly
+
+  trig(1); Validate();
 
 }
 // ----------------------------------------------------------------------------
 
+void Validate()
+{
+  StarGenEvent*    event = _primary->event();
+  StarGenParticle* part  = (*event)[1];
+  part->Print();
+  double Etotal = part->GetEnergy();
+
+  // loop over MC particles
+  TTable* gtable = (TTable* ) chain->GetDataSet("g2t_track");
+  assert(gtable);
+  int     ntable = gtable->GetNRows();
+
+  //  gtable->Print(0,ntable);
+  return;
+
+  double Etest = 0;
+  for ( int itable=1; itable<ntable; itable++ )
+    {
+      g2t_track_st* track = (g2t_track_st*)gtable->At(itable);
+      if ( 0 == track->eg_label ) {       Etest += track->e; }
+    }
+
+  cout << "Egener = " << Etotal << endl;
+  cout << "Egeant = " << Etest  << endl;
+  cout << "Violation = " << 100*(Etest / Etotal - 1) << "%" << endl;
+  
+}

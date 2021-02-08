@@ -1,0 +1,13 @@
+/*    istSimPar
+*
+*  Table: istSimPar
+*
+* description: simulation parameters for IST (fast or slow)
+* 
+*/ 
+
+struct istSimPar {
+  octet mode;      /* effMode: 0-ideal; 1 (default) -momentum depenent; 2 nomimal */
+  float pCut;         /* momentum cut for momentum depenent efficiency */
+  float effIst;       /* IST efficiency */
+};

@@ -2,39 +2,225 @@
 
   <StarGeometry default="y2016" >
 
+  <!-- Quick test geometry for FTS deveolpment -->
+  <Geometry tag="ftsver1" comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="mutd" config="MUTD15" />
+
+    <Construct sys="ftsd" config="FTSDv1" />
+  
+  </Geometry>
+  <Geometry tag="ftsver2" comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="mutd" config="MUTD15" />
+
+    <Construct sys="ftsd" config="FTSDv2" />
+  
+  </Geometry>
+  <Geometry tag="ftsver3" comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="mutd" config="MUTD15" />
+
+    <Construct sys="ftsd" config="FTSDv3" />
+  
+  </Geometry>
+  <Geometry tag="ftsver4" comment="Forward Tracking test setup">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDv4" />
+    <Construct sys="epdm" config="EPDMon"  />
+
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+
+  <Geometry tag="ftsref1" comment="Forward Tracking reference 1">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr1" />
+    <Construct sys="epdm" config="EPDMon"  />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+
+  <Geometry tag="ftsref2" comment="Forward Tracking reference 1">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="ftsd" config="FTSDr2" />
+    <Construct sys="epdm" config="EPDMon"  />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="mutd" config="MUTD15" />
+    <Construct sys="calb" config="CALB02" />
+
+  </Geometry>
+
+
   <!-- Just the CAVE and upstream area -->
   <Geometry tag="blackhole" check="false" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="idsm" config="IDSMof" simu="1" />
-    <Construct sys="pipe" config="PIPEof" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDon" simu="1" />
-    <Construct sys="quad" config="QUADon" simu="1" />
-    <Construct sys="scon" config="SCONof" simu="2" />
-    <Construct sys="svtt" config="SVTTof" simu="2" />
-    <Construct sys="tpce" config="TPCEof" simu="2" />
-    <Construct sys="ftpc" config="FTPCof" simu="2" />
-    <Construct sys="supo" config="SUPOof" simu="2" />
-    <Construct sys="ftro" config="FTROof" simu="2" />
-    <Construct sys="btof" config="BTOFof" simu="2" />
-    <Construct sys="vpdd" config="VPDDof" simu="1" />
-    <Construct sys="calb" config="CALBof" simu="1" />
-    <Construct sys="ecal" config="ECALof" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDMof" simu="1" />
-    <Construct sys="hcal" config="HCALof" simu="1" />
-    <Construct sys="zcal" config="ZCALof" simu="1" />
-    <Construct sys="magp" config="MAGPof" simu="1" />
-    <Construct sys="sisd" config="SISDof" simu="2" />
-    <Construct sys="istd" config="ISTDof" simu="2" />
-    <Construct sys="pxst" config="PXSTof" simu="2" />
-    <Construct sys="mutd" config="MUTDof" simu="1" />
-    <Construct sys="pixl" config="PIXLof" simu="2" />    
-    <Construct sys="dtub" config="DTUBof" simu="2" />
-    <Construct sys="psup" config="PSUPof" simu="2" />
-    <Construct sys="fgtd" config="FGTDof" simu="2" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="idsm" config="IDSMof"  />
+    <Construct sys="pipe" config="PIPEof"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDon"  />
+    <Construct sys="quad" config="QUADon"  />
+    <Construct sys="scon" config="SCONof"  />
+    <Construct sys="svtt" config="SVTTof"  />
+    <Construct sys="tpce" config="TPCEof"  />
+    <Construct sys="ftpc" config="FTPCof"  />
+    <Construct sys="supo" config="SUPOof"  />
+    <Construct sys="ftro" config="FTROof"  />
+    <Construct sys="btof" config="BTOFof"  />
+    <Construct sys="vpdd" config="VPDDof"  />
+    <Construct sys="calb" config="CALBof"  />
+    <Construct sys="ecal" config="ECALof"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDMof"  />
+    <Construct sys="hcal" config="HCALof"  />
+    <Construct sys="zcal" config="ZCALof"  />
+    <Construct sys="magp" config="MAGPof"  />
+    <Construct sys="sisd" config="SISDof"  />
+    <Construct sys="istd" config="ISTDof"  />
+    <Construct sys="pxst" config="PXSTof"  />
+    <Construct sys="mutd" config="MUTDof"  />
+    <Construct sys="pixl" config="PIXLof"  />    
+    <Construct sys="dtub" config="DTUBof"  />
+    <Construct sys="psup" config="PSUPof"  />
+    <Construct sys="fgtd" config="FGTDof"  />
+    <Construct sys="phmd" config="PHMDof"  />
 </Geometry>
+<!-- y2018 series geometry tags -->
+  <Geometry tag="y2018"  check="false" comment="Y2018 rough cut geometry">
+
+    <Construct sys="cave" config="CAVE05"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="tpce" config="TPCE31"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMin"  />
+    <Construct sys="epdm" config="EPDMv1"  />
+    <Construct sys="fpdm" config="FPDMv4"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="etof" config="ETOFv14s"  />
+  </Geometry>
+
+  <Geometry tag="y2018x"  check="false" comment="Y2018 with experimental TPC">
+
+    <Construct sys="cave" config="CAVE05"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="tpce" config="TPCEv5"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMin"  />
+    <Construct sys="epdm" config="EPDMv1"  />
+    <Construct sys="fpdm" config="FPDMv4"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+    <Construct sys="etof" config="ETOFv14s"  />
+  </Geometry>
+
+<!-- y2017 series geometry tags -->
+  <Geometry tag="y2017"  check="false" comment="Y2017 rough cut geometry">
+
+    <Construct sys="cave" config="CAVE05"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="tpce" config="TPCE31"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM04"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD15"  />
+  </Geometry>
+
+
+  <Geometry tag="y2017a"  check="false" comment="Y2017a production geometry">
+
+    <Construct sys="cave" config="CAVE05"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="tpce" config="TPCE31"  />
+    <Construct sys="btof" config="BTOFv8"  />
+    <Construct sys="vpdd" config="VPDD08"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDMv4"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD16"  />
+  </Geometry>
+
+
+
 
   <!-- y2016 series geometry tags -->
   <Geometry tag="y2016"  check="false" comment="Y2016 rough cut geometry">
@@ -61,8 +247,6 @@
     <Construct sys="psup" config="PSUP01" />
 
   </Geometry>
-
-   <!-- y2016 series geometry tags -->
   <Geometry tag="y2016a"  check="false" comment="Y2016 production geometry">
 
     <Construct sys="cave" config="CAVE05" />
@@ -83,6 +267,31 @@
     <Construct sys="pxst" config="PXST01" />
     <Construct sys="mutd" config="MUTD16" />
     <Construct sys="pixl" config="PIXL62" />
+    <Construct sys="dtub" config="DTUB01" />
+    <Construct sys="psup" config="PSUP01" />
+
+  </Geometry>
+
+  <Geometry tag="y2016x"  check="false" comment="Y2016 production geometry">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14a" />
+    <Construct sys="pipe" config="PIPEv3" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31a" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM04" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="sisd" config="SISD85a" />
+    <Construct sys="istd" config="ISTD02a" />
+    <Construct sys="pxst" config="PXST01" />
+    <Construct sys="mutd" config="MUTD16" />
+    <Construct sys="pixl" config="PIXL62b" />
     <Construct sys="dtub" config="DTUB01" />
     <Construct sys="psup" config="PSUP01" />
 
@@ -185,6 +394,55 @@
     <Construct sys="psup" config="PSUP01" />
 
   </Geometry>
+  <Geometry tag="y2015d" check="false" comment="Y2015 production correct mtd radii">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14" />
+    <Construct sys="pipe" config="PIPEv3" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM04" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="sisd" config="SISD85" />
+    <Construct sys="istd" config="ISTD03" />
+    <Construct sys="pxst" config="PXST01" />
+    <Construct sys="mutd" config="MUTD16" />
+    <Construct sys="pixl" config="PIXL62" />
+    <Construct sys="dtub" config="DTUB01" />
+    <Construct sys="psup" config="PSUP01" />
+
+  </Geometry>
+
+  <Geometry tag="y2015x" check="false" comment="Y2015 production correct mtd radii">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14a" />
+    <Construct sys="pipe" config="PIPEv3" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31a" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD08" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="fpdm" config="FPDM04" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="sisd" config="SISD85a" />
+    <Construct sys="istd" config="ISTD02a" />
+    <Construct sys="pxst" config="PXST01" />
+    <Construct sys="mutd" config="MUTD16" />
+    <Construct sys="pixl" config="PIXL62b" />
+    <Construct sys="dtub" config="DTUB01" />
+    <Construct sys="psup" config="PSUP01" />
+
+  </Geometry>
 
   <!-- y2014 series geometry tags -->
   <Geometry tag="y2014"  check="false" comment="Y2014 rough cut geometry">
@@ -278,6 +536,34 @@
     <Construct sys="psup" config="PSUP01" />
 
   </Geometry>
+
+  <Geometry tag="y2014x" check="false" comment="Y2014 production geometry">
+
+    <Construct sys="cave" config="CAVE05" />
+    <Construct sys="idsm" config="IDSM14a" />
+    <Construct sys="pipe" config="PIPEv3" />
+    <Construct sys="upst" config="UPSTon" />
+    <Construct sys="tpce" config="TPCE31a" />
+    <Construct sys="btof" config="BTOFv8" />
+    <Construct sys="vpdd" config="VPDD07" />
+    <Construct sys="calb" config="CALB02" />
+    <Construct sys="ecal" config="ECALv6" />
+    <Construct sys="bbcm" config="BBCMon" />
+    <Construct sys="zcal" config="ZCALon" />
+    <Construct sys="magp" config="MAGPon" />
+    <Construct sys="sisd" config="SISD85a" />
+    <Construct sys="istd" config="ISTD02a" />
+    <Construct sys="pxst" config="PXST01" />
+    <Construct sys="mutd" config="MUTD14" />
+    <Construct sys="pixl" config="PIXL06b" />
+    <Construct sys="dtub" config="DTUB01" />
+    <Construct sys="psup" config="PSUP01" />
+
+  </Geometry>
+
+
+
+
   <!-- y2013 series geometry tags -->
   <Geometry tag="y2013"   check="false" comment="Y2013 rough cut geometry">
 
@@ -298,7 +584,7 @@
     <Construct sys="mutd" config="MUTD13" />
     <Construct sys="pixl" config="PIXL05" />
     <Construct sys="dtub" config="DTUB01" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
   <Geometry tag="y2013_1" check="false" comment="Y2013 rough cut geometry">
@@ -320,7 +606,7 @@
     <Construct sys="mutd" config="MUTD13" />
     <Construct sys="pixl" config="PIXL05" />
     <Construct sys="dtub" config="DTUB01" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
   <Geometry tag="y2013_2" check="false" comment="Y2013 rough cut geometry">
@@ -340,7 +626,7 @@
     <Construct sys="magp" config="MAGPv1" />
     <Construct sys="pxst" config="PXST01" />
     <Construct sys="mutd" config="MUTD13" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
 
@@ -363,7 +649,7 @@
     <Construct sys="mutd" config="MUTD13" />
     <Construct sys="pixl" config="PIXL05" />
     <Construct sys="dtub" config="DTUB01" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
   <Geometry tag="y2013_1a" check="false" comment="DO NOT USE IN PRODUCTION">
@@ -387,7 +673,7 @@
     <Construct sys="mutd" config="MUTD13" />
     <Construct sys="pixl" config="PIXL05" />
     <Construct sys="dtub" config="DTUB01" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
   <Geometry tag="y2013_2a" check="false" comment="DO NOT USE IN PRODUCTION">
@@ -409,7 +695,7 @@
     <Construct sys="mutd" config="MUTD13" />
     <Construct sys="pixl" config="PIXLof" />
     <Construct sys="dtub" config="DTUBof" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
   </Geometry>
 
   <Geometry tag="y2013b"   check="false" comment="Y2013 first production geometry [pixel in]">
@@ -432,7 +718,7 @@
     <Construct sys="pixl" config="PIXL05" />
     <Construct sys="dtub" config="DTUB01" />
     <Construct sys="psup" config="PSUP01" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
   <Geometry tag="y2013_1b" check="false" comment="Y2013 first production geometry [pixel in]">
@@ -455,7 +741,7 @@
     <Construct sys="pixl" config="PIXL05" />
     <Construct sys="dtub" config="DTUB01" />
     <Construct sys="psup" config="PSUP01" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
   </Geometry>
   <Geometry tag="y2013_2b" check="false" comment="Y2013 first production geometry [pixel out]">
 
@@ -477,7 +763,7 @@
     <Construct sys="pixl" config="PIXLof" />
     <Construct sys="dtub" config="DTUBof" />
     <Construct sys="psup" config="PSUPof" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
 
@@ -501,7 +787,7 @@
     <Construct sys="pixl" config="PIXL05" />
     <Construct sys="dtub" config="DTUB01" />
     <Construct sys="psup" config="PSUP01" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
   <Geometry tag="y2013_1c" check="false" comment="Y2013 production geometry [pixel in]">
@@ -524,7 +810,7 @@
     <Construct sys="pixl" config="PIXL05" />
     <Construct sys="dtub" config="DTUB01" />
     <Construct sys="psup" config="PSUP01" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
   <Geometry tag="y2013_2c" check="false" comment="Y2013 production geometry [pixel out]">
@@ -547,7 +833,7 @@
     <Construct sys="pixl" config="PIXLof" />
     <Construct sys="dtub" config="DTUBof" />
     <Construct sys="psup" config="PSUPof" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
 
@@ -573,7 +859,7 @@
     <Construct sys="pixl" config="PIXL05" />
     <Construct sys="dtub" config="DTUB01" />
     <Construct sys="psup" config="PSUP01" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
   <Geometry tag="y2013_1x" check="false" comment="Y2013 asymptotic          [pixel in]">
@@ -596,7 +882,7 @@
     <Construct sys="pixl" config="PIXL05" />
     <Construct sys="dtub" config="DTUB01" />
     <Construct sys="psup" config="PSUP01" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
   <Geometry tag="y2013_2x" check="false" comment="Y2013 asymptotic          [pixel out]">
@@ -619,693 +905,715 @@
     <Construct sys="pixl" config="PIXLof" />
     <Construct sys="dtub" config="DTUBof" />
     <Construct sys="psup" config="PSUPof" />
-    <Construct sys="fgtd" config="FGTD32" simu="2" />
+    <Construct sys="fgtd" config="FGTD32"  />
 
   </Geometry>
 
   <!-- y2012 series geometry tags -->
   <Geometry tag="y2012"  check="false" comment="Y2012 rough cut geometry">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="idsm" config="IDSM01" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="btof" config="BTOF67" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTDof" simu="1" />
-    <Construct sys="fgtd" config="FGTD31" simu="2" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="idsm" config="IDSM01"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="btof" config="BTOF67"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTDof"  />
+    <Construct sys="fgtd" config="FGTD31"  />
   </Geometry>
   <Geometry tag="y2012a" check="false" comment="Y2012 DO NOT USE IN PRODUCTION ... NO MTD">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="idsm" config="IDSM01" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="btof" config="BTOF67" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTDof" simu="1" />
-    <Construct sys="fgtd" config="FGTD31" simu="2" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="idsm" config="IDSM01"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="btof" config="BTOF67"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTDof"  />
+    <Construct sys="fgtd" config="FGTD31"  />
   </Geometry>
   <Geometry tag="y2012b" check="false" comment="Y2012 production geometry">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="idsm" config="IDSM01" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="btof" config="BTOF67" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD12" simu="1" />
-    <Construct sys="fgtd" config="FGTD31" simu="2" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="idsm" config="IDSM01"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="btof" config="BTOF67"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD12"  />
+    <Construct sys="fgtd" config="FGTD31"  />
   </Geometry>
 
   <!-- y2011 series geometry tags -->
   <Geometry tag="y2011"  check="true" comment="Y2011 rough cut geometry">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON14" simu="2" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF67" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD04" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF67"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD04"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2011a" check="true" comment="Y2011 production geometry">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON14" simu="2" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF67" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD04" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF67"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD04"  />
+    <Construct sys="phmd" config="PHMD02"  />
+   </Geometry>
+  <Geometry tag="y2011b" check="true" comment="Y2011 production geometry">
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF67"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03at"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD04"  />
+    <Construct sys="phmd" config="PHMD02"  />
    </Geometry>
 
   <!-- y2010 series geometry tags -->
   <Geometry tag="y2010"  check="true" comment="Y2010 rough cut geometry">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON13" simu="2" />
-    <Construct sys="tpce" config="TPCE04" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF66" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON13"  />
+    <Construct sys="tpce" config="TPCE04"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF66"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2010a" check="true" comment="Y2010 first production geometry">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON13" simu="2" />
-    <Construct sys="tpce" config="TPCE04" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF66" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON13"  />
+    <Construct sys="tpce" config="TPCE04"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF66"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2010b" check="true" comment="Y2010 second production geometry">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON13" simu="2" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF67" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON13"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF67"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2010c" check="true" comment="Y2010 production geometry">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON14" simu="2" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF67" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF67"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
 
   <!-- y2009 series geometry tags -->
   <Geometry tag="y2009"  check="true" comment="Y2009 rough cut geometry">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON13" simu="2" />
-    <Construct sys="tpce" config="TPCE04" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFc6" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON13"  />
+    <Construct sys="tpce" config="TPCE04"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFc6"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
   <Geometry tag="y2009a" check="true" comment="Y2009 first production geomery">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON13" simu="2" />
-    <Construct sys="tpce" config="TPCE04" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFc6" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON13"  />
+    <Construct sys="tpce" config="TPCE04"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFc6"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
   <Geometry tag="y2009b" check="true" comment="Y2009 special geometry, not appropriate for EEMC">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON13" simu="2" />
-    <Construct sys="tpce" config="TPCE04" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFc6" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6_cut00" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON13"  />
+    <Construct sys="tpce" config="TPCE04"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFc6"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6_cut00"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
   <Geometry tag="y2009c" check="true" comment="Y2009 second production geomery">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON13" simu="2" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFc7" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON13"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFc7"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
   <Geometry tag="y2009d" check="true" comment="Y2009 production geomery">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON14" simu="2" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFc7" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFc7"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
 
   <!-- y2008 series geometry tags -->
   <Geometry tag="y2008"  check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="tpce" config="TPCE03" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFb6" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="tpce" config="TPCE03"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFb6"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
   <Geometry tag="y2008a" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON13" simu="2" />
-    <Construct sys="tpce" config="TPCE03" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFb6" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON13"  />
+    <Construct sys="tpce" config="TPCE03"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFb6"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
   <Geometry tag="y2008b" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON13" simu="2" />
-    <Construct sys="tpce" config="TPCE04" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFb6" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECALv6_cut00" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON13"  />
+    <Construct sys="tpce" config="TPCE04"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFb6"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECALv6_cut00"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
   <Geometry tag="y2008c" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON13" simu="2" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFb7" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECALv6_cut00" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON13"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFb7"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECALv6_cut00"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
   <Geometry tag="y2008d" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON14" simu="2" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFb7" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECALv6_cut00" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFb7"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECALv6_cut00"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
   <Geometry tag="y2008e" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPE12" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON14" simu="2" />
-    <Construct sys="tpce" config="TPCE04r" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFb7" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="mutd" config="MUTD03" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPE12"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON14"  />
+    <Construct sys="tpce" config="TPCE04r"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFb7"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="mutd" config="MUTD03"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
 
   <!-- y2007 series geometry tags -->
   <Geometry tag="y2007"  check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT306x" simu="2" />
-    <Construct sys="tpce" config="TPCE03" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFa5" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD55" simu="2" />
-    <Construct sys="mutd" config="MUTD01" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT306x"  />
+    <Construct sys="tpce" config="TPCE03"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFa5"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD55"  />
+    <Construct sys="mutd" config="MUTD01"  />
+    <Construct sys="phmd" config="PHMD02"  />
 </Geometry>
   <Geometry tag="y2007a" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT310x" simu="2" />
-    <Construct sys="tpce" config="TPCE03" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFa5" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD55" simu="2" />
-    <Construct sys="mutd" config="MUTD01" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT310x"  />
+    <Construct sys="tpce" config="TPCE03"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFa5"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD55"  />
+    <Construct sys="mutd" config="MUTD01"  />
+    <Construct sys="phmd" config="PHMD02"  />
 </Geometry>
   <Geometry tag="y2007g" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT312x" simu="2" />
-    <Construct sys="tpce" config="TPCE03" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFa5" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD75" simu="2" />
-    <Construct sys="mutd" config="MUTD01" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT312x"  />
+    <Construct sys="tpce" config="TPCE03"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFa5"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD75"  />
+    <Construct sys="mutd" config="MUTD01"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2007h" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE04" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT312x" simu="2" />
-    <Construct sys="tpce" config="TPCE04" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOFa5" simu="2" />
-    <Construct sys="vpdd" config="VPDD07" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM03" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD75" simu="2" />
-    <Construct sys="mutd" config="MUTD01" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE04"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT312x"  />
+    <Construct sys="tpce" config="TPCE04"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOFa5"  />
+    <Construct sys="vpdd" config="VPDD07"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM03"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD75"  />
+    <Construct sys="mutd" config="MUTD01"  />
+    <Construct sys="phmd" config="PHMD02"  />
 </Geometry>
 
   <!-- y2006 series geometry tags -->
   <Geometry tag="y2006"  check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE03" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT306" simu="2" />
-    <Construct sys="tpce" config="TPCE03" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD35" simu="2" />
-    <Construct sys="mutd" config="MUTD01" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE03"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT306"  />
+    <Construct sys="tpce" config="TPCE03"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD35"  />
+    <Construct sys="mutd" config="MUTD01"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2006a" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE03" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT306" simu="2" />
-    <Construct sys="tpce" config="TPCE03" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM02" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD35" simu="2" />
-    <Construct sys="mutd" config="MUTD01" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE03"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT306"  />
+    <Construct sys="tpce" config="TPCE03"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM02"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD35"  />
+    <Construct sys="mutd" config="MUTD01"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2006b" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE03" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT306" simu="2" />
-    <Construct sys="tpce" config="TPCE03" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM02" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD55" simu="2" />
-    <Construct sys="mutd" config="MUTD01" simu="1" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVE03"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT306"  />
+    <Construct sys="tpce" config="TPCE03"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM02"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD55"  />
+    <Construct sys="mutd" config="MUTD01"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2006c" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE03" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT306" simu="2" />
-    <Construct sys="tpce" config="TPCE03" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM02" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD55" simu="2" />
-    <Construct sys="mutd" config="MUTD01" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE03"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT306"  />
+    <Construct sys="tpce" config="TPCE03"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM02"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD55"  />
+    <Construct sys="mutd" config="MUTD01"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
   <Geometry tag="y2006g" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE03" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT312" simu="2" />
-    <Construct sys="tpce" config="TPCE03" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM02" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD75" simu="2" />
-    <Construct sys="mutd" config="MUTD01" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE03"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT312"  />
+    <Construct sys="tpce" config="TPCE03"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM02"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD75"  />
+    <Construct sys="mutd" config="MUTD01"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
   <Geometry tag="y2006h" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVE03" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT312" simu="2" />
-    <Construct sys="tpce" config="TPCE04" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM02" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD75" simu="2" />
-    <Construct sys="mutd" config="MUTD01" simu="1" />
-    <Construct sys="phmd" config="PHMDof" simu="1" />
+    <Construct sys="cave" config="CAVE03"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT312"  />
+    <Construct sys="tpce" config="TPCE04"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM02"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD75"  />
+    <Construct sys="mutd" config="MUTD01"  />
+    <Construct sys="phmd" config="PHMDof"  />
   </Geometry>
 
   <!-- y2005 series geometry tags -->
@@ -1315,211 +1623,211 @@
     That module was never updated to AgML, and so this version relies on the later TpceGeo1
     module.  It is a non-production quality geometry.
 
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT203" simu="2" />
-    <Construct sys="tpce" config="TPCE01" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF72" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD23" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT203"  />
+    <Construct sys="tpce" config="TPCE01"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF72"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD23"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2005b" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT204" simu="2" />
-    <Construct sys="tpce" config="TPCE02" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF72" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD24" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT204"  />
+    <Construct sys="tpce" config="TPCE02"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF72"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD24"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2005c" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT204" simu="2" />
-    <Construct sys="tpce" config="TPCE02" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD24" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT204"  />
+    <Construct sys="tpce" config="TPCE02"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD24"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2005d" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT206" simu="2" />
-    <Construct sys="tpce" config="TPCE02" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD24" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT206"  />
+    <Construct sys="tpce" config="TPCE02"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD24"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2005e" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT306" simu="2" />
-    <Construct sys="tpce" config="TPCE02" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD35" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT306"  />
+    <Construct sys="tpce" config="TPCE02"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD35"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2005f" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT306" simu="2" />
-    <Construct sys="tpce" config="TPCE02" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD55" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT306"  />
+    <Construct sys="tpce" config="TPCE02"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD55"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2005g" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT312" simu="2" />
-    <Construct sys="tpce" config="TPCE02" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD75" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT312"  />
+    <Construct sys="tpce" config="TPCE02"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD75"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2005h" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT312" simu="2" />
-    <Construct sys="tpce" config="TPCE04" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB02_cut00" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD75" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT312"  />
+    <Construct sys="tpce" config="TPCE04"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB02_cut00"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD75"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2005i" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT312" simu="2" />
-    <Construct sys="tpce" config="TPCE04" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF84" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB02" simu="1" />
-    <Construct sys="ecal" config="ECALv6" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD75" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT312"  />
+    <Construct sys="tpce" config="TPCE04"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF84"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB02"  />
+    <Construct sys="ecal" config="ECALv6"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD75"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
 
   <!-- y2004 series geometry tags -->
@@ -1529,188 +1837,188 @@
     That module was never updated to AgML, and so this version relies on the later TpceGeo1
     module.  It is a non-production quality geometry.
 
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="svtt" config="SVT103" simu="2" />
-    <Construct sys="tpce" config="TPCE01" simu="2" />
-    <Construct sys="ftpc" config="FTPC00" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="btof" config="BTOF72" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD02" simu="2" />
-    <Construct sys="phmd" config="PHMD01" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="svtt" config="SVT103"  />
+    <Construct sys="tpce" config="TPCE01"  />
+    <Construct sys="ftpc" config="FTPC00"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="btof" config="BTOF72"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD02"  />
+    <Construct sys="phmd" config="PHMD01"  />
   </Geometry>
   <Geometry tag="y2004a" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="svtt" config="SVT103" simu="2" />
-    <Construct sys="tpce" config="TPCE01" simu="2" />
-    <Construct sys="ftpc" config="FTPC00" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="btof" config="BTOF72" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD02" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="svtt" config="SVT103"  />
+    <Construct sys="tpce" config="TPCE01"  />
+    <Construct sys="ftpc" config="FTPC00"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="btof" config="BTOF72"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD02"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2004b" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="svtt" config="SVT103" simu="2" />
-    <Construct sys="tpce" config="TPCE01" simu="2" />
-    <Construct sys="ftpc" config="FTPC00" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="btof" config="BTOF72" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD12" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="svtt" config="SVT103"  />
+    <Construct sys="tpce" config="TPCE01"  />
+    <Construct sys="ftpc" config="FTPC00"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="btof" config="BTOF72"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD12"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2004c" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT204" simu="2" />
-    <Construct sys="tpce" config="TPCE02" simu="2" />
-    <Construct sys="ftpc" config="FTPC00" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="btof" config="BTOF72" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD12" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT204"  />
+    <Construct sys="tpce" config="TPCE02"  />
+    <Construct sys="ftpc" config="FTPC00"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="btof" config="BTOF72"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD12"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
   <Geometry tag="y2004d" check="true" comment="All detectors off">
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="scon" config="SCON02" simu="2" />
-    <Construct sys="svtt" config="SVT206" simu="2" />
-    <Construct sys="tpce" config="TPCE02" simu="2" />
-    <Construct sys="ftpc" config="FTPC01" simu="2" />
-    <Construct sys="supo" config="SUPO01" simu="2" />
-    <Construct sys="ftro" config="FTRO01" simu="2" />
-    <Construct sys="btof" config="BTOF72" simu="2" />
-    <Construct sys="vpdd" config="VPDD04" simu="1" />
-    <Construct sys="calb" config="CALB01" simu="1" />
-    <Construct sys="ecal" config="ECAL31" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM01" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />
-    <Construct sys="sisd" config="SISD22" simu="2" />
-    <Construct sys="phmd" config="PHMD02" simu="1" />
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="scon" config="SCON02"  />
+    <Construct sys="svtt" config="SVT206"  />
+    <Construct sys="tpce" config="TPCE02"  />
+    <Construct sys="ftpc" config="FTPC01"  />
+    <Construct sys="supo" config="SUPO01"  />
+    <Construct sys="ftro" config="FTRO01"  />
+    <Construct sys="btof" config="BTOF72"  />
+    <Construct sys="vpdd" config="VPDD04"  />
+    <Construct sys="calb" config="CALB01"  />
+    <Construct sys="ecal" config="ECAL31"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM01"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />
+    <Construct sys="sisd" config="SISD22"  />
+    <Construct sys="phmd" config="PHMD02"  />
   </Geometry>
 
   <!-- y2003 series geometry tags (may not be 100% compatible with past productions -->
   <Geometry tag="y2003" comment="Y2003 geometry [With later TPC model]">  
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="svtt" config="SVT100" simu="2" />
-    <Construct sys="tpce" config="TPCE01" simu="2" />
-    <Construct sys="btof" config="BTOF52" simu="2" />
-    <Construct sys="vpdd" config="VPDD03" simu="1" />
-    <Construct sys="calb" config="CALBb0" simu="1" />
-    <Construct sys="ecal" config="ECAL11" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM00" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />     
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="svtt" config="SVT100"  />
+    <Construct sys="tpce" config="TPCE01"  />
+    <Construct sys="btof" config="BTOF52"  />
+    <Construct sys="vpdd" config="VPDD03"  />
+    <Construct sys="calb" config="CALBb0"  />
+    <Construct sys="ecal" config="ECAL11"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM00"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />     
   </Geometry>
   <Geometry tag="y2003a" comment="Y2003 geometry [With later TPC model]">  
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="svtt" config="SVT100" simu="2" />
-    <Construct sys="tpce" config="TPCE01" simu="2" />
-    <Construct sys="ftpc" config="FTPC00" simu="2" />
-    <Construct sys="supo" config="SUPO00" simu="2" />
-    <Construct sys="btof" config="BTOF52" simu="2" />
-    <Construct sys="vpdd" config="VPDD03" simu="1" />
-    <Construct sys="calb" config="CALBd0" simu="1" />
-    <Construct sys="ecal" config="ECAL11" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM00" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />     
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="svtt" config="SVT100"  />
+    <Construct sys="tpce" config="TPCE01"  />
+    <Construct sys="ftpc" config="FTPC00"  />
+    <Construct sys="supo" config="SUPO00"  />
+    <Construct sys="btof" config="BTOF52"  />
+    <Construct sys="vpdd" config="VPDD03"  />
+    <Construct sys="calb" config="CALBd0"  />
+    <Construct sys="ecal" config="ECAL11"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM00"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />     
   </Geometry>
   <Geometry tag="y2003b" comment="Y2003 geometry [With later TPC model]">  
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="svtt" config="SVT102" simu="2" />
-    <Construct sys="tpce" config="TPCE01" simu="2" />
-    <Construct sys="ftpc" config="FTPC00" simu="2" />
-    <Construct sys="supo" config="SUPO00" simu="2" />
-    <Construct sys="btof" config="BTOF52" simu="2" />
-    <Construct sys="vpdd" config="VPDD03" simu="1" />
-    <Construct sys="calb" config="CALBd0" simu="1" />
-    <Construct sys="ecal" config="ECAL11" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM00" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />     
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="svtt" config="SVT102"  />
+    <Construct sys="tpce" config="TPCE01"  />
+    <Construct sys="ftpc" config="FTPC00"  />
+    <Construct sys="supo" config="SUPO00"  />
+    <Construct sys="btof" config="BTOF52"  />
+    <Construct sys="vpdd" config="VPDD03"  />
+    <Construct sys="calb" config="CALBd0"  />
+    <Construct sys="ecal" config="ECAL11"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM00"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />     
   </Geometry>
   <Geometry tag="y2003c" comment="Y2003 geometry [With later TPC model]">  
-    <Construct sys="cave" config="CAVEon" simu="1" />
-    <Construct sys="pipe" config="PIPEon" simu="1" />
-    <Construct sys="upst" config="UPSTon" simu="1" />
-    <Construct sys="shld" config="SHLDof" simu="1" />
-    <Construct sys="quad" config="QUADof" simu="1" />
-    <Construct sys="svtt" config="SVT106" simu="2" />
-    <Construct sys="tpce" config="TPCE01" simu="2" />
-    <Construct sys="ftpc" config="FTPC00" simu="2" />
-    <Construct sys="supo" config="SUPO00" simu="2" />
-    <Construct sys="btof" config="BTOF52" simu="2" />
-    <Construct sys="vpdd" config="VPDD03" simu="1" />
-    <Construct sys="calb" config="CALBd0" simu="1" />
-    <Construct sys="ecal" config="ECAL11" simu="1" />
-    <Construct sys="bbcm" config="BBCMon" simu="1" />
-    <Construct sys="fpdm" config="FPDM00" simu="1" />
-    <Construct sys="zcal" config="ZCALon" simu="1" />
-    <Construct sys="magp" config="MAGPon" simu="1" />     
+    <Construct sys="cave" config="CAVEon"  />
+    <Construct sys="pipe" config="PIPEon"  />
+    <Construct sys="upst" config="UPSTon"  />
+    <Construct sys="shld" config="SHLDof"  />
+    <Construct sys="quad" config="QUADof"  />
+    <Construct sys="svtt" config="SVT106"  />
+    <Construct sys="tpce" config="TPCE01"  />
+    <Construct sys="ftpc" config="FTPC00"  />
+    <Construct sys="supo" config="SUPO00"  />
+    <Construct sys="btof" config="BTOF52"  />
+    <Construct sys="vpdd" config="VPDD03"  />
+    <Construct sys="calb" config="CALBd0"  />
+    <Construct sys="ecal" config="ECAL11"  />
+    <Construct sys="bbcm" config="BBCMon"  />
+    <Construct sys="fpdm" config="FPDM00"  />
+    <Construct sys="zcal" config="ZCALon"  />
+    <Construct sys="magp" config="MAGPon"  />     
   </Geometry>
 
 
