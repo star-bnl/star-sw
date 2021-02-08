@@ -1,6 +1,18 @@
-* $Id: gstar_part.g,v 1.46 2014/06/25 14:19:25 jwebb Exp $
+* $Id: gstar_part.g,v 1.49 2014/07/16 21:30:40 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.49  2014/07/16 21:30:40  jwebb
+* Added J/Psi --> mu+m- 100% branching ratio with geant ID 168.
+*
+* Revision 1.48  2014/07/09 18:29:28  jwebb
+* Added (pnXi-) "dibaryon" and it's antiparticle to gstar_part.g.  Required
+* modification of gdecay.F in order to accept arbitrary geant IDs for decay
+* daughters.
+*
+* Revision 1.47  2014/07/07 20:10:04  jwebb
+* Forgot to specify particle tracking type (used to determine which routine
+* is used to handle physics processes, e.g. decays, for the particle).
+*
 * Revision 1.46  2014/06/25 14:19:25  jwebb
 * Added psi prime --> e+e-
 *
@@ -209,6 +221,10 @@ MODULE gstar_part Is the STAR Particle Database
 
    Real *8 HBAR / 6.58211928E-16 / "eV * s"
 
+   Integer, Parameter :: nw = 3     ! Number of user words for gspart direct calls
+   Real               :: uw(nw)     ! buffer
+
+
 * For meaning of paramters see G3 manual
 * http://wwwasdoc.web.cern.ch/wwwasdoc/geant_html3/node72.html#SECTION024000000000000000000000
 
@@ -314,6 +330,9 @@ MODULE gstar_part Is the STAR Particle Database
   Particle Jpsi       code=160 TrkTyp=4 mass=3.096  charge=0  tlife=7.48e-21,
                       pdg=443  bratio= { 1, }       mode= { 203, }
 
+  Particle Jpsi_mu    code=168 TrkTyp=4 mass=3.096  charge=0  tlife=7.48e-21,
+                      pdg=0    bratio= { 1, }       mode= { 0506, }
+
   Particle Upsilon    code=161 TrkTyp=4 mass=9.460  charge=0  tlife=1.254e-20,
                       pdg=553  bratio= { 1, }       mode= { 203, }
 
@@ -334,7 +353,7 @@ MODULE gstar_part Is the STAR Particle Database
   Particle Ups3S_mu   code=166 TrkTyp=4 mass=10.355 charge=0  tlife=2.556e-20,
                       pdg=500553  bratio= { 1, }    mode= { 506, }
 
-  Particle psi2s_ee   "Psi(2S)-->e+e-" code=167,
+  Particle psi2s_ee   "Psi(2S)-->e+e-" code=167,  TrkTyp=4,
                       mass=3.68609 charge=0 tlife=hbar/2380.0,
                       pdg=100443 bratio={ 1, } mode={ 0203, }
 
@@ -722,15 +741,32 @@ Particle H_dibaryon               code      = 60001,
                       mode   = {1423, 1818}                    
 
   PARTICLE AntiLamXi2430 "Lambda0 Xi0 bound state " _
-                      code = 60003       pdg=0             ,
-                      trktyp = kGtNeut   mass=2.430543-0.002,
-                      charge = 0         tlife = 1.0e-10,    
-                      bratio = {0.5,  0.5 }                ,
+                      code = 60003       pdg=0                ,
+                      trktyp = kGtNeut   mass=2.430543-0.002  ,
+                      charge = 0         tlife = 1.0e-10      ,    
+                      bratio = {0.5,  0.5 }                   ,
                       mode   = {1531, 2626}
-                      
- 
 
 
+  PARTICLE P_N_XI     "(pnXi-) --> (hyper triton) pi-" _ 
+                      code   = 60004     pdg   = 0             ,
+                      trktyp = kGtNeut   mass  = 3.1975        ,
+                      charge = 0         tlife = 1.6378e-10    
+
+     """ Append actual decay mode in user buffer.  Up to 3 body decay """
+     """ (phase space decay) supported """
+     uw = { 0, 61053, 09 }
+     Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
+
+   PARTICLE Anti_P_N_XI     "(pnXi-) --> (hyper triton) pi-" _ 
+                      code   = 60005     pdg   = 0             ,
+                      trktyp = kGtNeut   mass  = 3.1975        ,
+                      charge = 0         tlife = 1.6378e-10    
+
+     """ Append actual decay mode in user buffer.  Up to 3 body decay """
+     """ (phase space decay) supported """
+     uw = { 0, 61054, 08 }
+     Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
 
                         
 
@@ -748,23 +784,23 @@ Particle H_dibaryon               code      = 60001,
 *
 * --------------------------------------------------------------------------
 *
-      Subroutine aGuDCAY
-+CDE,gctrak,gckine,gcking.
+*$$$  Subroutine aGuDCAY
+*CDE,gctrak,gckine,gcking.
 *
 *  If decay modes are not set, this routine will be called to decay the particle
 *
 *  What follows is a snippet of code to explore a few variables the
 * user might need:
-
+*
 *      real P_PART(4)
-
+*
 *      DO I=1,4
 *         P_PART(I)=VECT(I+3)*VECT(7)
 *      ENDDO
-
+*
 *      write(*,*) 'ivert, ipart: ', ivert, ipart
 *      write(*,*) 'p1, p2, p3: ', P_PART(1), P_PART(2), P_PART(3)
-
+*
 *      NGKINE = NGKINE + 1
 *      DO I = 1, 4
 *          GKIN(I,NGKINE) = 1.0
@@ -775,8 +811,8 @@ Particle H_dibaryon               code      = 60001,
 *     DO I = 1, 3
 *         GPOS(I,NGKINE) = VECT(I)
 *     ENDDO
-
-      end
+*
+*$$$  end
 *
 * --------------------------------------------------------------------------
 *

@@ -4,8 +4,14 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.19 2012/05/15 16:41:27 cpowell Exp $
+# $Id: get_embedding_xml.pl,v 1.21 2015/04/23 01:50:47 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.21  2015/04/23 01:50:47  zhux
+# force overwrite the log files.
+#
+# Revision 1.20  2015/04/19 08:50:21  zhux
+# Added 'sl64' support for PDSF.
+#
 # Revision 1.19  2012/05/15 16:41:27  cpowell
 # Added line to gzip log files
 #
@@ -410,10 +416,12 @@ print OUT "\n\n";
 #----------------------------------------------------------------------------------------------------
 print OUT "<!-- Make output and list directory (if they don't exist) -->\n";
 print OUT "if ( ! -f \$EMOUTPUT ) then \n";
+print OUT "  umask 2\n";
 print OUT "  mkdir -pv \$EMOUTPUT\n";
 print OUT "  chmod -R ug+rw \$EMOUTPUT\n";
 print OUT "endif\n";
 print OUT "if ( ! -f \$EMLIST ) then \n";
+print OUT "  umask 2\n";
 print OUT "  mkdir -pv \$EMLIST\n";
 print OUT "  chmod -R ug+rw \$EMLIST\n";
 print OUT "endif\n";
@@ -433,8 +441,8 @@ printDebug("Set errfilename: $errFileName ...");
 print OUT "<!-- Move LOG files and csh to eliza disk, remove list files -->\n";
 print OUT "mv -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.log \$EMOUTPUT/$logFileName\n";
 print OUT "mv -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog \$EMOUTPUT/$errFileName\n";
-print OUT "gzip " . "\$EMOUTPUT/$logFileName\n";
-print OUT "gzip " . "\$EMOUTPUT/$errFileName\n";
+print OUT "gzip -f " . "\$EMOUTPUT/$logFileName\n";
+print OUT "gzip -f " . "\$EMOUTPUT/$errFileName\n";
 print OUT "mv -v $generatorDir/sched\$JOBID.csh \$EMLIST/\n";
 print OUT "rm -v $generatorDir/sched\$JOBID.list\n";
 print OUT "\n";
@@ -890,6 +898,9 @@ sub getLocalLibraryPath {
   }
   elsif ( $chos =~ "sl53" ){
     return ".sl53_gcc432";
+  }
+  elsif ( $chos =~ "sl64" ){
+    return ".sl64_gcc447";
   }
   else{
     print "Unknown OS : $chos. Set the sl44 path\n";

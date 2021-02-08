@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.34 2013/03/20 01:08:39 huck Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.35 2015/04/19 01:46:59 zhux Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.35  2015/04/19 01:46:59  zhux
+ * Wrong particle name (under sl64) is fixed in ::getParticleName().
+ *
  * Revision 1.34  2013/03/20 01:08:39  huck
  * use mu- to compare to pi-
  *
@@ -931,7 +934,8 @@ const Char_t* StEmbeddingQADraw::getParticleName(const Int_t geantid) const
   /// recognized as directory so that output will be disappeared if "/"
   /// is included in the filename
   /// Remove "()" and replace "*" to "start"
-  TString name(particle->name().c_str());
+  static TString name;
+  name = particle->name().c_str();
   while( name.Contains("/") ) name.Remove(name.Index("/"), 1); // Remove "/" from particle name
   while( name.Contains("(") ) name.Remove(name.Index("("), 1); // Remove "(" from particle name
   while( name.Contains(")") ) name.Remove(name.Index(")"), 1); // Remove "/" from particle name

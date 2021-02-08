@@ -26,18 +26,7 @@ extern "C" {
 StarLight::StarLight(const Char_t *name) : StarGenerator(name)
 {
 
-  /// Create the new instance of STARlight, specifying the path to
-  /// to the auxilliary files required by STARlight.
-  // NOTE: if we end up with multiple versions of STARlight we 
-  // we have to specify the version in the path.
-  //TString path = "pams/gen/"; path+=STARlight::_version;
-  TString path = "pams/gen/STARlight/";
-  try        { ifstream in(path);    }
-  catch(...) { path = "$STAR/"+path; }
 
-  Info(GetName(),Form("MC is StarLight. data at %s",path.Data()));
-
-  //mSTARlight = new STARlight::STARlight( path.Data() );
   mSTARlight = new starlight();
 
    /// Default values for the initialization parameters.

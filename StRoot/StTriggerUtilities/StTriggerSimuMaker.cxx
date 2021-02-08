@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.58 2013/12/12 18:20:09 zchang Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.59 2014/07/02 02:11:24 zchang Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -639,12 +639,12 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 	  sscanf(row[2],"%ud",&triggers[idx_trigger].offbits);
 	  sscanf(row[1],"%ud",&triggers[idx_trigger].onbits0);
 	  sscanf(row[2],"%ud",&triggers[idx_trigger].offbits0);
-	  sscanf(row[3],"%ud",&triggers[idx_trigger].onbits1);
-	  sscanf(row[4],"%ud",&triggers[idx_trigger].onbits2);
-	  sscanf(row[5],"%ud",&triggers[idx_trigger].onbits3);
-	  sscanf(row[6],"%ud",&triggers[idx_trigger].offbits1);
-	  sscanf(row[7],"%ud",&triggers[idx_trigger].offbits2);
-	  sscanf(row[8],"%ud",&triggers[idx_trigger].offbits3);
+	  if(row[3]) sscanf(row[3],"%ud",&triggers[idx_trigger].onbits1);
+	  if(row[4]) sscanf(row[4],"%ud",&triggers[idx_trigger].onbits2);
+	  if(row[5]) sscanf(row[5],"%ud",&triggers[idx_trigger].onbits3);
+	  if(row[6]) sscanf(row[6],"%ud",&triggers[idx_trigger].offbits1);
+	  if(row[7]) sscanf(row[7],"%ud",&triggers[idx_trigger].offbits2);
+	  if(row[8]) sscanf(row[8],"%ud",&triggers[idx_trigger].offbits3);
 	  
 	  emc->defineTrigger(triggers[idx_trigger],mYear);
 	  
@@ -740,12 +740,12 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 	      sscanf(row[4],"%ud",&triggers[cntr].offbits);
 	      sscanf(row[3],"%ud",&triggers[cntr].onbits0);
 	      sscanf(row[4],"%ud",&triggers[cntr].offbits0);
-	      sscanf(row[5],"%ud",&triggers[cntr].onbits1);
-	      sscanf(row[6],"%ud",&triggers[cntr].onbits2);
-	      sscanf(row[7],"%ud",&triggers[cntr].onbits3);
-	      sscanf(row[8],"%ud",&triggers[cntr].offbits1);
-	      sscanf(row[9],"%ud",&triggers[cntr].offbits2);
-	      sscanf(row[10],"%ud",&triggers[cntr].offbits3);
+	      if(row[5]) sscanf(row[5],"%ud",&triggers[cntr].onbits1);
+	      if(row[6]) sscanf(row[6],"%ud",&triggers[cntr].onbits2);
+	      if(row[7]) sscanf(row[7],"%ud",&triggers[cntr].onbits3);
+	      if(row[8]) sscanf(row[8],"%ud",&triggers[cntr].offbits1);
+	      if(row[9]) sscanf(row[9],"%ud",&triggers[cntr].offbits2);
+	      if(row[10]) sscanf(row[10],"%ud",&triggers[cntr].offbits3);
 
 	      emc->defineTrigger(triggers[cntr],mYear);
 	      
@@ -875,6 +875,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.59  2014/07/02 02:11:24  zchang
+ * Add conditions to read none-NULL onbits and offbits in database, compatible with early run9 trigger definitions.CVS: ----------------------------------------------------------------------
+ *
  * Revision 1.58  2013/12/12 18:20:09  zchang
  * use new database node "db04.star.bnl.gov", wait till it's back.
  *

@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StGenParticle.cxx,v 1.8 2014/06/25 13:34:41 jwebb Exp $
+// @(#)root/eg:$Id: StGenParticle.cxx,v 1.10 2015/12/03 23:19:22 jwebb Exp $
 
 
 //______________________________________________________________________________
@@ -6,19 +6,21 @@
 #include "math.h"
 #include <map>
 #include "StGenParticle.h"
-#include "StMessMgr.h"
+#include <iostream>
+using namespace std;
+//#include "StMessMgr.h"
 //______________________________________________________________________________
 void StGenParticle::Print(const char *opt) const
 {
   static int nCall=0; nCall++;
-  LOG_INFO << GetIdx() << " -" ;
-  LOG_INFO << " Ist=" << GetStatusCode() ;
-  LOG_INFO << " Pdg=" << GetPdgCode() ;
-  LOG_INFO << " Gea=" << GetGeaCode() ;
+  cout << GetIdx() << " -"  << endl;
+  cout << " Ist=" << GetStatusCode() << endl;
+  cout << " Pdg=" << GetPdgCode() << endl;
+  cout << " Gea=" << GetGeaCode() << endl;
 
-  double V[3];  Vertex(V); LOG_INFO << " Z=" << V[2] ;
+  double V[3];  Vertex(V); cout << " Z=" << V[2] << endl;
 
-  if (GetNDaughters()) LOG_INFO << "\tKids=" << GetNDaughters() ;
+  if (GetNDaughters()) cout << "\tKids=" << GetNDaughters() << endl;
 
   int moth1 = -1,moth2=-1;
   const StGenParticle *m = GetMother(0);
@@ -27,14 +29,14 @@ void StGenParticle::Print(const char *opt) const
   if (m) moth2 = m->GetIdx();
 
   if (moth1>=0 || moth2>=0) {
-    LOG_INFO << "\tMoth=(" ;
-    if (moth1>=0) {LOG_INFO << moth1 ;} else {LOG_INFO << "_" ;}
-    LOG_INFO << " " ;
-    if (moth2>=0) {LOG_INFO << moth2 ;} else {LOG_INFO << "_" ;}
-    LOG_INFO << ")" ;
+    cout << "\tMoth=(" << endl;
+    if (moth1>=0) {cout << moth1 << endl;} else {cout << "_" <<endl;}
+    cout << " " << endl;
+    if (moth2>=0) {cout << moth2 << endl;} else {cout << "_" << endl;}
+    cout << ")" <<endl;
   }
 
-  LOG_INFO << endm;
+  //  cout << endl;
 
 }
 //______________________________________________________________________________
@@ -103,17 +105,17 @@ int  StGenParticle::GetGeaCode() const { return StGenParticleMaster::Pdg2Gea(Get
 void StGenParticleMaster::Print(const char *tit) const
 {
    if (!tit) tit = "";
-   LOG_INFO << "StGenParticleMaster::Print(" << tit << ")" << endm;
+   cout << "StGenParticleMaster::Print(" << tit << ")" << endl;
    const StGenParticle *p=0;
 
    // Loop over all particles stored by the particle master list and print them
-   Int_t i = 0;
+   int i = 0;
    p = (*this)(i);
    while (p) {
      p->Print();
      p = (*this)(++i);
    };
-   LOG_INFO << endm;
+   cout << endl;
 
 }
 

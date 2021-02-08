@@ -14,9 +14,13 @@ TDataSet *CreateGeometry(const Char_t *name="y2011") {
   TString filename = "";  
   if  (chain)  { filename = chain->GetFileOut(); if ( filename=="" ) filename = chain->GetFileIn();  }
   else { filename = name;  }
-  filename.ReplaceAll(".root",""); 
-  filename.ReplaceAll("@",""); 
-  filename.ReplaceAll(".list","");
+
+  // Strip out @ symbol
+  filename = filename.ReplaceAll("@",""); 
+  // Strip off the last extention in the filename
+  filename = filename( 0, filename.Last('.') );
+  // Append geom.root to the extentionless filename
+  filename+=".geom.root";
 
   // Detect second call to the system
   if ( AgModule::Find("HALL") ) {

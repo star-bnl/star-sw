@@ -1,11 +1,14 @@
 /*
- * $Id: StPxlSimMaker.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.5 2014/07/03 19:46:37 mstftsm Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.5  2014/07/03 19:46:37  mstftsm
+ * Revereted the changes made for the pileup adder. That does not belong to the master branch.
+ *
  * Revision 1.3  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
@@ -74,7 +77,7 @@ class StPxlSimMaker : public StMaker
    *  of all maker versions in use.
   */
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.5 2014/07/03 19:46:37 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
     StPxlISim* mPxlSimulator;
@@ -92,11 +95,14 @@ private:
 #endif
 
 /*
- * $Id: StPxlSimMaker.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.5 2014/07/03 19:46:37 mstftsm Exp $
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.5  2014/07/03 19:46:37  mstftsm
+ * Revereted the changes made for the pileup adder. That does not belong to the master branch.
+ *
  * Revision 1.3  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *

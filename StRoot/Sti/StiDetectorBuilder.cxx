@@ -20,6 +20,8 @@ StiDetectorBuilder* StiDetectorBuilder::fCurrentDetectorBuilder = 0;
 int StiDetectorBuilder::_debug = 0;
 StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active, const string & inputFile)
   : Named(name+"Builder"),
+    mThkSplit(0.5),
+    mMaxSplit( 20),
     _groupId(-1),
     _active(active),
     _detectorFactory( StiToolkit::instance()->getDetectorFactory() ),
@@ -267,9 +269,21 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
   pDetector->setMaterial(matS);
   pDetector->setElossCalculator(ElossCalculator);
-  Int_t layer = getNRows();
+
+  if (mThkSplit>0 && mMaxSplit>1) {//	try to split
+    StiDetVect dv;
+    pDetector->splitIt(dv,mThkSplit,mMaxSplit);
+    for (int i=0;i<(int)dv.size();i++) {
+      int layer = getNRows();
+      add(layer,0,dv[i]);
+      cout << "StiDetectorBuilder::AverageVolume build detector " << dv[i]->getName() << " at layer " << layer << endl;
+    } }
+  else {
+   int layer = getNRows();
   add(layer,0,pDetector); 
   cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
+}
+
 }
 ///Returns the number of sectors (or segments) in a the
 ///given row. Sector are expected to be azimuthally

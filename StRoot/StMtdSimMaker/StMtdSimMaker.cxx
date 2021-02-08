@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.cxx,v 1.5 2014/05/06 20:12:02 marr Exp $
+ * $Id: StMtdSimMaker.cxx,v 1.9 2014/08/25 16:59:03 marr Exp $
  *
  * Author: Frank Geurts
  *
@@ -43,10 +43,68 @@
 static RanluxEngine engine;
 static RandGauss ranGauss(engine);
 
+Int_t geant2backlegIDMap[30]; 
+
 ClassImp(StMtdSimMaker)
 
 //_____________________________________________________________________________
-StMtdSimMaker::StMtdSimMaker(const char *name):StMaker(name) {
+StMtdSimMaker::StMtdSimMaker(const char *name):StMaker(name),
+  mGeantData(0),
+  mEvent(0),
+  mMtdCollection(0),
+  mNMtdHits(0),
+  mMtdHitsFromGeant(0),
+
+  mBetaHist(0),
+  mPathLHist(0),
+  mTofHist(0),
+  mRecMass(0),
+
+  mCellGeant(0),
+  mVpdGeant(0),
+  mNCellGeant(0),
+  mNVpdGeant(0),
+  mDeGeant(0),
+  mTofGeant(0),
+
+  mCellSeen(0),
+  mVpdSeen(0), 
+  mNCellSeen(0), 
+  mNVpdSeen(0),
+  mDeSeen(0),
+  mT0Seen(0),
+  mTofSeen(0), 
+  mTofResSeen(0),
+  mVpdResSeen(0),
+
+  mCellReco(0),
+  mVpdReco(0),
+  mNCellReco(0), 
+  mNVpdReco(0), 
+  mTDCReco(0), 
+  mADCReco(0),
+  mT0Reco(0), 
+  mTofResReco(0),
+  mVpdResReco(0),
+  mTACorr(0), 
+  mModHist(0), 
+  QABacklegChannel(0),
+
+  /// TOFp histograms
+  mdE(0),
+  mdS(0),
+  mNumberOfPhotoelectrons(0),
+  mT(0), 
+  mTime(0), 
+  mTime1(0), 
+  mPMlength(0),
+  mAdc(0), 
+  mTdc(0),
+
+  starHall(0) {
+
+  memset(mModuleChannel,0,5*24*sizeof(Int_t));
+
   mBookHisto=kTRUE;
   mHistFile="mtdsim.root";
   mWriteStEvent=kTRUE;
@@ -73,6 +131,22 @@ void StMtdSimMaker::Reset() {
 }
 //_____________________________________________________________________________
 Int_t StMtdSimMaker::InitRun(Int_t runnumber) {
+
+    // Load geant2backlegID Map 
+    // Extract MTD maps from database
+    LOG_INFO << "Retrieving geant2backlegID table from database ..." << endm;
+    TDataSet *dataset = GetDataBase("Geometry/mtd/mtdGeant2BacklegIDMap");
+    St_mtdGeant2BacklegIDMap *mtdGeant2BacklegIDMap = static_cast<St_mtdGeant2BacklegIDMap*>(dataset->Find("mtdGeant2BacklegIDMap"));
+    if ( !mtdGeant2BacklegIDMap ){
+        LOG_ERROR << "No mtdTrayToTdigMap table found in database" << endm;
+        return kStErr;
+    }
+    mtdGeant2BacklegIDMap_st *mGeant2BLTable = static_cast<mtdGeant2BacklegIDMap_st*>(mtdGeant2BacklegIDMap->GetTable());
+    for ( Int_t i = 0; i < 30; i++ ){
+        geant2backlegIDMap[i] = 0;
+        geant2backlegIDMap[i] = (Int_t)mGeant2BLTable->geant2backlegID[i];
+    }
+
 
   /// Channel group mapping for each module. Basic initialization below. Will move to database eventually.
   int channel(0);
@@ -143,23 +217,6 @@ Int_t StMtdSimMaker::Make() {
 ///This will calculate the cell ID as well as decode the module # and backleg # to store in an MTD Collection. Done from volume_id produced by GEANT.
 int StMtdSimMaker::CalcCellId(Int_t volume_id, Float_t ylocal, int &ibackleg,int &imodule,int &icell) 
 {
-
-    Int_t geant2backlegIDMap[30]; 
-    // Load geant2backlegID Map 
-    // Extract MTD maps from database
-    LOG_INFO << "Retrieving geant2backlegID table from database ..." << endm;
-    TDataSet *dataset = GetDataBase("Geometry/mtd/mtdGeant2BacklegIDMap");
-    St_mtdGeant2BacklegIDMap *mtdGeant2BacklegIDMap = static_cast<St_mtdGeant2BacklegIDMap*>(dataset->Find("mtdGeant2BacklegIDMap"));
-    if ( !mtdGeant2BacklegIDMap ){
-        LOG_ERROR << "No mtdTrayToTdigMap table found in database" << endm;
-        return kStErr;
-    }
-    mtdGeant2BacklegIDMap_st *mGeant2BLTable = static_cast<mtdGeant2BacklegIDMap_st*>(mtdGeant2BacklegIDMap->GetTable());
-    for ( Int_t i = 0; i < 30; i++ ){
-        geant2backlegIDMap[i] = 0;
-        geant2backlegIDMap[i] = (Int_t)mGeant2BLTable->geant2backlegID[i];
-    }
-
     ///Decode GEANT volume_id
     Int_t backlegTemp;
     Int_t ires    = volume_id/100;
@@ -257,6 +314,8 @@ Int_t StMtdSimMaker::FastCellResponse()
     mEvent->setMtdCollection(mMtdCollection);
     LOG_INFO << "... StMtdCollection Stored in StEvent! " << endm;
   }
+
+  return kStOK;
 }
 
 

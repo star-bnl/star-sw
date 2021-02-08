@@ -83,10 +83,14 @@ public:
   virtual void useVMCGeometry() {}
   void    setGasMat(StiMaterial    *m) {_gasMat = m;}
   StiMaterial *getGasMat()   {return _gasMat;}
+  void setSplit(double relThick=0.5, int maxSplit=20)	{mThkSplit=relThick;mMaxSplit=maxSplit;}
+
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
  protected:
  
+  float               mThkSplit;	//wide/thickness/mThkSplit = nSplits
+  int                 mMaxSplit;	//max number of splittings allowed
   int                 _groupId;
   bool                _active;
   materialMap         mMaterialMap;
