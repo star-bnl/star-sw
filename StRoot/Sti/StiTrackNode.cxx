@@ -26,8 +26,8 @@ static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
                               ,MIN1ERR[3]*MIN1ERR[3]
                               ,MIN1ERR[4]*MIN1ERR[4]
                               ,MIN1ERR[5]*MIN1ERR[5]};
-static const double recvCORRMAX  = 0.99;
-static const double chekCORRMAX  = 0.999;
+static const double recvCORRMAX  = 0.99999;
+static const double chekCORRMAX  = 0.99999;
 static double MAXPARS[]={250,250,250,1.5,100,100};
 
 //______________________________________________________________________________
@@ -383,7 +383,7 @@ assert(sign()>0); ///???
   int i0=0; if (!_cXX) i0 = 1;
   for (i=i0;i<kNPars;i++) {
     aii = A[idx66[i][i]];
-    if (aii<MIN2ERR[i]) {kase = 1; break;}
+    if (aii<0) {kase = 1; break;}	//Diagonal must be positive
   }
   if (kase) goto RETN;
   for (i=i0;i<kNPars;i++) {

@@ -122,7 +122,7 @@
         </Mixture>
         
         <Create    block="MUTD"  />
-        <Placement block="MUTD" in="Cave" />
+        <Placement block="MUTD" in="CAVE" group="MagRefSys" />
 
 <Volume name="MUTD" comment="is the muon detector mother"  >
 
@@ -398,18 +398,19 @@
             <Material name="RPCgas"  />
             <Medium   name="RPCgas_sensitive" isvol="1" />
             <Shape type="BOX"  />
+<!--        <Instrument block="MIGG"  >                <Hit meas="x" opts="S" bins=".01"  />                <Hit meas="y" bins=".01"  />                <Hit meas="z" bins=".01"  />                <Hit meas="ptot" nbits="18" min="0" max="100"  />                <Hit meas="cx" nbits="10"  />                <Hit meas="cy" nbits="10"  />                <Hit meas="cz" nbits="10"  />                <Hit meas="sleng" min="0" max="500" bins=".1"  />                <Hit meas="tof" nbits="16"  />                <Hit meas="step" bins=".01"  />                <Hit meas="eloss" nbits="16"  />            </Instrument>   Improve timing, energy resolution -->
             <Instrument block="MIGG"  >
-                <Hit meas="x" opts="S" bins=".01"  />
-                <Hit meas="y" bins=".01"  />
-                <Hit meas="z" bins=".01"  />
+                <Hit meas="x"    opts="S" bins=".01"  />
+                <Hit meas="y"             bins=".01"  />
+                <Hit meas="z"             bins=".01"  />
                 <Hit meas="ptot" nbits="18" min="0" max="100"  />
                 <Hit meas="cx" nbits="10"  />
                 <Hit meas="cy" nbits="10"  />
                 <Hit meas="cz" nbits="10"  />
                 <Hit meas="sleng" min="0" max="500" bins=".1"  />
-                <Hit meas="tof" nbits="16"  />
-                <Hit meas="step" bins=".01"  />
-                <Hit meas="eloss" nbits="16"  />
+                <Hit meas="tof"   nbits="16"  min="0" max="1.0E-7"   />
+                <Hit meas="step"   bins=".01"    />
+                <Hit meas="eloss" nbits="16"  min="0" max="1.0E-6"   />
             </Instrument>
         </Volume>
         

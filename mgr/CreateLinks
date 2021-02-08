@@ -140,7 +140,7 @@ foreach arch ( _ _x8664_ )
     if ( -e .$refos || -e $refos ) then
         # *** PLACEHOLDER ***
 	foreach ospf ( sl rh )
-	    foreach vers ( 65 66 )
+	    foreach vers ( 65 )
 		set dir=$ospf$vers$arch"gcc447"
 		if ( ! -e .$dir && -e .$refos ) then
 		    echo "  Backward compatibility assumed between $dir -> $refos "

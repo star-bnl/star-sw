@@ -48,7 +48,6 @@ extern "C" {
 #define RTS_LOG_PORT_L3		8009
 #define RTS_LOG_PORT_DET	8010
 #define RTS_LOG_PORT_EMAIL	8013
-#define RTS_LOG_PORT_DCS	8014
 
 #define RTS_LOG_PORT	RTS_LOG_PORT_TEST	/* default, test.log, port */
 
@@ -85,7 +84,6 @@ void rtsLogAddJmlFile (char *fname);
 #define U_JEFF	"U_JEFF"		/* Jeff gets email */
 #define U_IST	"U_IST"			/* IST manager gets email currently Gerrit */
 #define U_TOF	"U_TOF"			/* TOF/MTD manager, Geary */
-#define U_RP2	"U_RP2"			/* New pp2pp */
 #define SAVEme	"SAVEme"	/* gets saved in saved.log */
 
 
