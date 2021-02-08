@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.31 2018/02/26 23:29:12 smirnovd Exp $
+ * $Id: StBTofGeometry.cxx,v 1.32 2019/08/07 15:56:52 geurts Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -1035,7 +1035,9 @@ std::string StBTofGeometry::FormTGeoPath(TGeoManager &geoManager,
 
   std::ostringstream geoPath;
 
-  geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/BTOF_1"
+  // Node paths depend on using TpcRefSys
+  bool trs = geoManager.FindVolumeFast("TpcRefSys");
+  geoPath << "/HALL_1/CAVE_1/" << ((trs) ? "TpcRefSys_1/" : "") << "BTOF_1"
           << (halfId == 1 ? "/BTOH_" : "/BTO1_") << halfId;
 
   // Node names depend on whether this sector contains GMT modules
@@ -1808,6 +1810,9 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
 /*******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.32  2019/08/07 15:56:52  geurts
+ * Fix node paths when using TpcRefSys (affects runs before 2013)
+ *
  * Revision 1.31  2018/02/26 23:29:12  smirnovd
  * StBTofGeometry: Missing flag set to initialize geometry once
  *
