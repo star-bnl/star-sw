@@ -92,8 +92,8 @@ inline Int_t   StPicoBEmcPidTraits::bemcSmdNEta() const { return (Int_t)mBemcSmd
 inline Int_t   StPicoBEmcPidTraits::bemcSmdNPhi() const { return (Int_t)mBemcSmdNPhi; }
 
 inline Int_t   StPicoBEmcPidTraits::btowId() const { return (Int_t)mBtowId; }
-inline Int_t   StPicoBEmcPidTraits::btowId2() const { return (Int_t)mBtowId23 / 10; }
-inline Int_t   StPicoBEmcPidTraits::btowId3() const { return (Int_t)mBtowId23 % 10; }
+inline Int_t   StPicoBEmcPidTraits::btowId2() const { return ( ((Int_t)mBtowId23 / 10) == 9 ? -1 : (Int_t)mBtowId23 / 10 ); }
+inline Int_t   StPicoBEmcPidTraits::btowId3() const { return ( ((Int_t)mBtowId23 % 10) == 9 ? -1 : (Int_t)mBtowId23 % 10 ); }
 inline Float_t StPicoBEmcPidTraits::btowE() const { return (Float_t)mBtowE / 1000.; }
 inline Float_t StPicoBEmcPidTraits::btowE2() const { return (Float_t)mBtowE2 / 1000.; }
 inline Float_t StPicoBEmcPidTraits::btowE3() const { return (Float_t)mBtowE3 / 1000.; }

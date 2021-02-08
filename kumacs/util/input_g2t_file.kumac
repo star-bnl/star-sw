@@ -1,0 +1,64 @@
+**************************************************************************
+
+ MACRO init input_g2t_file
+macro/global/import *
+   
+ 
+*** make place to keep the input
+ cd /dui
+
+*** open input streams
+
+ message 'Opening input file:' [input_g2t_file]
+ newfilestream G2Tfile [input_g2t_file] r
+ 
+  if (STAF_STATUS(1).ne. 1) then
+    message ' INPUT_G2T_FILE#INIT ERROR initializing!!'
+    goto EOF
+    endif
+ 
+*** read first "non-information" event (from G2T)
+
+ stream/getevent G2Tfile [geantR]
+  
+   if (STAF_STATUS(1).ne. 1) then
+    message ' INPUT_G2T_FILE#INIT ERROR reading Run info!!'
+   endif
+  
+ 
+ 
+return 
+
+****************************************************************
+
+MACRO read 
+macro/global/import *
+
+ cd /dui
+ 
+
+ stream/getevent G2Tfile [geantE]
+ 
+ if (STAF_STATUS(1).ne. 1) then
+   message ' INPUT_G2T_FILE#READ ERROR reading Event info!!'
+ endif
+  
+
+return
+*******************************************************************
+
+MACRO close
+macro/global/import *
+
+  cd /dui
+
+  stream/close G2Tfile
+  soc/object/oid G2Tfile
+  oid = staf_result(1)
+  soc/deleteoid [oid]
+  
+return
+
+*******************************************************************
+
+

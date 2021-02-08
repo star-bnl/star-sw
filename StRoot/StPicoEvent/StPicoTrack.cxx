@@ -41,7 +41,7 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
     mPMomentum = pTrk->p();
   }
 
-  // Calculate global momentum and position at point of DCA to the pVtx
+  /// Calculate global momentum and position at point of DCA to the pVtx
   StPhysicalHelixD gHelix = dcaG.helix();
   gHelix.moveOrigin(gHelix.pathLength(pVtx));
   mGMomentum = gHelix.momentum(B * kilogauss);
@@ -52,11 +52,11 @@ StPicoTrack::StPicoTrack(StMuTrack const* const gTrk, StMuTrack const* const pTr
   //mDnDxError = gTrk->probPidTraits().dNdxErrorFit();
 
   int flag = gTrk->flag();
-  if (flag / 100 < 7) { // TPC tracks
+  if (flag / 100 < 7) { /// TPC tracks
     mNHitsFit  = (Char_t)(gTrk->nHitsFit(kTpcId) * gTrk->charge());
     mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kTpcId));
   }
-  else {    // FTPC tracks
+  else {    /// FTPC tracks
     if (gTrk->helix().momentum(B * kilogauss).pseudoRapidity() > 0.) {
       mNHitsFit  = (Char_t)(gTrk->nHitsFit(kFtpcWestId) * gTrk->charge());
       mNHitsMax  = (UChar_t)(gTrk->nHitsPoss(kFtpcWestId));
@@ -118,4 +118,16 @@ void StPicoTrack::Print(Char_t const* option) const {
            << "nSigma pi/K/p/e: " << nSigmaPion()   << "/" << nSigmaKaon() << "/"
            << nSigmaProton() << "/" << nSigmaElectron()
            << endm;
+}
+
+//_________________
+Float_t StPicoTrack::gDCAxy(Float_t x, Float_t y) {
+  return ::sqrt( (mOrigin.x()-x)*(mOrigin.x()-x) + (mOrigin.y()-y)*(mOrigin.y()-y) );
+}
+
+//_________________
+Float_t StPicoTrack::gDCA(Float_t x, Float_t y, Float_t z) {
+  return ::sqrt( (mOrigin.x()-x)*(mOrigin.x()-x) + 
+		 (mOrigin.y()-y)*(mOrigin.y()-y) +
+		 (mOrigin.z()-z)*(mOrigin.z()-z) );
 }
