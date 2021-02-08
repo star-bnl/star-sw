@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.67 2017/11/13 21:14:27 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.68 2018/04/11 02:39:49 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.68  2018/04/11 02:39:49  genevb
+ * Distortion smearing by calibration resolutions
+ *
  * Revision 1.67  2017/11/13 21:14:27  fisyak
  * Enable Mag.Field depending flavor
  *
@@ -291,6 +294,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     if( IAttr("OGridLeakFull")) mask |= ( kFullGridLeak   << 1);
     if( IAttr("OGGVoltErr") ) mask |= ( kGGVoltError  << 1);
     if( IAttr("OSectorAlign"))mask |= ( kSectorAlign  << 1);
+    if( IAttr("ODistoSmear")) mask |= ( kDistoSmearing<< 1);
     LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;

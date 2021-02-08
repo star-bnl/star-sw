@@ -56,31 +56,28 @@ StPicoMtdTrigger::StPicoMtdTrigger(const StMuDst& muDst, const int QTtoModule[8]
 
     for (Int_t i = 0; i < 32; i++) {
       Int_t type = (i / 4) % 2;
-      if (year == 2016) {
-        for (int im = 0; im < kNQTboard; im++) {
-          if (type == 0) {
-	    mtdQTadc[im][i - i / 4 * 2] = trigger->mtdQtAtCh(im + 1, i, 0);
-	  }
-          else {
-	    mtdQTtac[im][i - i / 4 * 2 - 2] = trigger->mtdQtAtCh(im + 1, i, 0);
-	  }
-        } //for (int im = 0; im < kNQTboard; im++)
-      } //if (year == 2016)
-      else {
+      if(year<=2015) {
         if (type == 1) {
           mtdQTtac[0][i - i / 4 * 2 - 2] = trigger->mtdAtAddress(i, 0);
           mtdQTtac[1][i - i / 4 * 2 - 2] = trigger->mtdgemAtAddress(i, 0);
           mtdQTtac[2][i - i / 4 * 2 - 2] = trigger->mtd3AtAddress(i, 0);
           mtdQTtac[3][i - i / 4 * 2 - 2] = trigger->mtd4AtAddress(i, 0);
-        } //if (type == 1)
+        }
         else {
           mtdQTadc[0][i - i / 4 * 2] = trigger->mtdAtAddress(i, 0);
           mtdQTadc[1][i - i / 4 * 2] = trigger->mtdgemAtAddress(i, 0);
           mtdQTadc[2][i - i / 4 * 2] = trigger->mtd3AtAddress(i, 0);
           mtdQTadc[3][i - i / 4 * 2] = trigger->mtd4AtAddress(i, 0);
-        } //else
-      } //else
-    } //for (Int_t i = 0; i < 32; i++)
+        }//else
+      }//if(year<=2015)
+      else {
+        for (int im = 0; im < kNQTboard; im++) {
+	  if (year != 2016 && im>=4) continue;
+          if (type == 0) mtdQTadc[im][i - i / 4 * 2] = trigger->mtdQtAtCh(im + 1, i, 0);
+          else        mtdQTtac[im][i - i / 4 * 2 - 2] = trigger->mtdQtAtCh(im + 1, i, 0);
+        }//for (int im = 0; im < kNQTboard; im++)
+      }//else
+    }//for (Int_t i = 0; i < 32; i++)
 
     Int_t j[2], a[2];
     for (Int_t im = 0; im < kNQTboard; im++) {

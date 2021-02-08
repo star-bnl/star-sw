@@ -12,7 +12,7 @@
 
 #include "StPicoDstVtxSeedMaker.h"
 #include "StPicoDstMaker/StPicoDstMaker.h"
-#include "StPicoDstMaker/StPicoDst.h"
+#include "StPicoEvent/StPicoDst.h"
 #include "StPicoEvent/StPicoEvent.h"
 #include "StPicoEvent/StPicoTrack.h"
 #include "StMessMgr.h"
@@ -120,14 +120,17 @@ int StPicoDstVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StPicoDstVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StPicoDstVtxSeedMaker.cxx,v 1.1 2017/08/08 03:58:20 genevb Exp $"
+           << "\n* $Id: StPicoDstVtxSeedMaker.cxx,v 1.2 2018/04/04 11:01:39 jeromel Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StPicoDstVtxSeedMaker.cxx,v 1.1 2017/08/08 03:58:20 genevb Exp $
+// $Id: StPicoDstVtxSeedMaker.cxx,v 1.2 2018/04/04 11:01:39 jeromel Exp $
 // $Log: StPicoDstVtxSeedMaker.cxx,v $
+// Revision 1.2  2018/04/04 11:01:39  jeromel
+// Changed location pf include
+//
 // Revision 1.1  2017/08/08 03:58:20  genevb
 // Add vertex-seed-finding with picoDsts
 //

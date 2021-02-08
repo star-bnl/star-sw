@@ -58,7 +58,7 @@
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h" 
 //#define ElectronHack
-#define Old_dNdx_Table
+//#define Old_dNdx_Table // IRAKLI
 #define __STOPPED_ELECTRONS__
 #define __DEBUG__
 #if defined(__DEBUG__)
@@ -66,7 +66,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.77 2018/02/18 21:08:54 perev Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.75.4.1 2019/05/15 12:20:37 didenko Exp $";
 #define __ClusterProfile__
 static Bool_t ClusterProfile = kFALSE;
 #define Laserino 170
@@ -87,6 +87,7 @@ static const Double_t zmax = -zmin;
 static TProfile2D *hist[5][2];
 static const Int_t nChecks = 21;
 static TH1  *checkList[2][21];
+static TString TpcMedium("TPCE_SENSITIVE_GAS");
 //________________________________________________________________________________
 ClassImp(StTpcRSMaker);
 //________________________________________________________________________________
@@ -143,25 +144,16 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     LOG_ERROR << "Database Missing! Can't initialize TpcRS" << endm;
     return kStFatal;
   }
+  mCutEle = GetCutEle();
+  if (mCutEle > 0) {
+    LOG_INFO << "StTpcRSMaker::InitRun: mCutEle set to = " << mCutEle << " from geant \"" << TpcMedium.Data() << "\" parameters" << endm;
+  } else {
+    mCutEle = 1e-4;
+    LOG_ERROR << "StTpcRSMaker::InitRun: mCutEle has not been found in GEANT3 for \"" << TpcMedium.Data() << "\" parameters." 
+	      << "Probably due to missing  Set it to default " << mCutEle << endm;
+  }
   NoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
   NoOfRows      = NoOfInnerRows + St_tpcPadPlanesC::instance()->outerPadRows();
-#if 0
-  if (! gMC) {
-    LOG_INFO << "TVirtualMC has not been instantiated" << endm;
-    return kStFatal;
-  }
-  TString cmd("Gccuts_t *ccuts  = (Gccuts_t *) ((");// TGeant3 *) gMC
-  if (gClassTable->GetID("TGiant3") >= 0) { // root4star
-    cmd += "TGiant";
-  } else {
-    cmd += "TGeant";
-  }
-  cmd += Form(" *) %p))->Gccuts();",gMC); 
-  cmd += Form("((StTpcRSMaker *) %p)->SetCutEle(ccuts->cutele);",this);
-  TInterpreter::EErrorCode error = TInterpreter::kNoError;
-  gInterpreter->ProcessLine(cmd.Data(), &error);
-  assert(error == TInterpreter::kNoError);
-#endif
   if (TESTBIT(m_Mode, kBICHSEL)) {
     LOG_INFO << "StTpcRSMaker:: use H.Bichsel model for dE/dx simulation" << endm;
     if (! mdNdEL10 || ! mdNdx) {
@@ -765,7 +757,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t tof = 0;
 	if (gver) tof = gver[id3-1].ge_tof;
 	//	if (! TESTBIT(m_Mode, kNoToflight)) 
-	tof += tpc_hit->tof;
+	tof += tpc_hitC->tof; // IRAKLI
 	Double_t driftLength = TrackSegmentHits[nSegHits].coorLS.position().z() + tof*gStTpcDb->DriftVelocity(sector); 
 	// Ignore hits outside of drift region with off ser margin
 	if (driftLength > 250. || driftLength < -1.0) {continue;}
@@ -806,15 +798,15 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	// Generate signal 
 	Double_t Gain = St_tss_tssparC::instance()->gain(sector,row); 
 	TF1F *mShaperResponse = mShaperResponses[io][sector-1];
-	Double_t dY   = TMath::Abs(tpc_hitC->ds)/2 + mChargeFraction[io]->GetXmax();
-	Double_t yLmin = TrackSegmentHits[iSegHits].coorLS.position().y() - dY;
-	Double_t yLmax = yLmin + 2*dY;
-	Int_t    rowMin  = transform.rowFromLocalY(yLmin);
-	Int_t    rowMax  = transform.rowFromLocalY(yLmax);
-	Double_t yRmin = transform.yFromRow(rowMin);
-	Double_t yRmax = transform.yFromRow(rowMax);
-	if (yRmin > yLmax) continue;
-	if (yRmax < yLmin) continue;
+//	Double_t dY   = TMath::Abs(tpc_hitC->ds)/2 + mChargeFraction[io]->GetXmax();
+//	Double_t yLmin = TrackSegmentHits[iSegHits].coorLS.position().y() - dY;
+//	Double_t yLmax = yLmin + 2*dY;
+//	Int_t    rowMin  = transform.rowFromLocalY(yLmin);
+//	Int_t    rowMax  = transform.rowFromLocalY(yLmax);
+//	Double_t yRmin = transform.yFromRow(rowMin);
+//	Double_t yRmax = transform.yFromRow(rowMax);
+//	if (yRmin > yLmax) continue;
+//	if (yRmax < yLmin) continue;
     if (ClusterProfile) {
 	checkList[io][2]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),Gain);
     }
@@ -1035,6 +1027,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  }
 #endif
 	  Double_t E = dE*eV;
+	  newPosition += dS; // IRAKLI
+	  if (newPosition > s_upper) break; // IRAKLI
 	  if (dE < St_TpcResponseSimulatorC::instance()->W()/2 || E > Tmax) continue;
 	  if (eKin > 0) {
 	    if (eKin >= E) {eKin -= E;}
@@ -1043,13 +1037,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  dESum += dE;
 	  dSSum += dS;
 	  nP++;
-	  newPosition += dS;
 #ifdef __DEBUG__
 	  if (Debug() > 12) {
 	    LOG_INFO << "dESum = " << dESum << " /\tdSSum " << dSSum << " /\t newPostion " << newPosition << endm;
 	  }
 #endif
-	  if (newPosition > s_upper) break;
 	  Double_t xRange = 0;
 	  if (dE > ElectronRangeEnergy) xRange = ElectronRange*TMath::Power((dE+dEr)/ElectronRangeEnergy,ElectronRangePower);
 	  Int_t Nt = 0; // HeedCsize(dE, dEr,rs);
@@ -1103,13 +1095,14 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    Double_t y = xyzE.position().y();
 	    Double_t alphaVariation = InnerAlphaVariation;
 	    // Transport to wire
-	    if (y < lastInnerSectorAnodeWire) {
-	      WireIndex = TMath::Nint((y - firstInnerSectorAnodeWire)/anodeWirePitch);
-	      yOnWire = firstInnerSectorAnodeWire + WireIndex*anodeWirePitch;
+	    // IRAKLI : removed gain from the field wire
+	    if (y <= lastInnerSectorAnodeWire) {
+	      WireIndex = TMath::Nint((y - firstInnerSectorAnodeWire)/anodeWirePitch) + 1;
+	      yOnWire = firstInnerSectorAnodeWire + (WireIndex - 1)*anodeWirePitch;
 	    }
 	    else {
-	      WireIndex = TMath::Nint((y - firstOuterSectorAnodeWire)/anodeWirePitch);
-	      yOnWire = firstOuterSectorAnodeWire + WireIndex*anodeWirePitch;
+	      WireIndex = TMath::Nint((y - firstOuterSectorAnodeWire)/anodeWirePitch) + 1;
+	      yOnWire = firstOuterSectorAnodeWire + (WireIndex - 1)*anodeWirePitch;
 	      alphaVariation = OuterAlphaVariation;
 	    }
 	    Double_t distanceToWire = y - yOnWire; // Calculated effective distance to wire affected by Lorentz shift 
@@ -1131,6 +1124,22 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     if (ClusterProfile) {
 	    checkList[io][9]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),QAv);
     }
+//	IRAKLI
+	Double_t dY   = TMath::Abs(tpc_hitC->ds)/2 + mChargeFraction[io]->GetXmax();
+	Double_t yLmin = TrackSegmentHits[iSegHits].coorLS.position().y() - dY;
+	Double_t yLmax = yLmin + 2*dY;
+	Int_t    rowMin  = transform.rowFromLocalY(yLmin);
+	Int_t    rowMax  = transform.rowFromLocalY(yLmax);
+
+//	IRAKLI
+	double lowerEdge = rowMin < 14 ? 0.575 : 0.975;
+	double upperEdge = rowMax < 14 ? 0.575 : 0.975;
+
+	Double_t yRmin = transform.yFromRow(rowMin) - lowerEdge;
+	Double_t yRmax = transform.yFromRow(rowMax) + upperEdge;
+
+	if (yRmin > yLmax || yRmax < yLmin) continue;
+
 	    for(Int_t r = rowMin; r <= rowMax; r++) {              
 	      if (NoOfRows == 45) { // ! iTpx
 		Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(r);
@@ -1446,7 +1455,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
   assert(data);
   SignalSum_t *SignalSum = GetSignalSum();
   Double_t ped    = 0; 
-  Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
+  Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMSX(); // IRAKLI
   Int_t adc = 0;
   Int_t index = 0;
   Double_t gain = 1;
@@ -1775,11 +1784,132 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
   f->SetParameter(0,w);
   return f;
 }
+//________________________________________________________________________________
+#ifndef WIN32
+# define gcomad gcomad_
+#else
+# define gcomad  GCOMAD
+#endif
+//______________________________________________________________________
+extern "C"
+{
+  void type_of_call gcomad(DEFCHARD, Int_t*& DEFCHARL);
+}
+Float_t StTpcRSMaker::GetCutEle() {
+  //----------GCBANK
+  //      COMMON/GCBANK/NZEBRA,GVERSN,ZVERSN,IXSTOR,IXDIV,IXCONS,FENDQ(16)
+  //     +             ,LMAIN,LR1,WS(KWBANK)
+  struct Gcbank_t {
+    Int_t nzebra;
+    Float_t gversn;
+    Float_t zversn;
+    Int_t ixstor;
+    Int_t ixdiv;
+    Int_t ixcons;
+    Float_t fendq[16];
+    Int_t lmain;
+    Int_t lr1;
+  };
+  Gcbank_t *fGcbank;          //! GCBANK common structure
+  gcomad(PASSCHARD("GCBANK"),(int*&) fGcbank  PASSCHARL("GCBANK"));
+//----------GCLINK
+//      COMMON/GCLINK/JDIGI ,JDRAW ,JHEAD ,JHITS ,JKINE ,JMATE ,JPART
+//     +      ,JROTM ,JRUNG ,JSET  ,JSTAK ,JGSTAT,JTMED ,JTRACK,JVERTX
+//     +      ,JVOLUM,JXYZ  ,JGPAR ,JGPAR2,JSKLT
+typedef struct {
+  Int_t    jdigi;
+  Int_t    jdraw;
+  Int_t    jhead;
+  Int_t    jhits;
+  Int_t    jkine;
+  Int_t    jmate;
+  Int_t    jpart;
+  Int_t    jrotm;
+  Int_t    jrung;
+  Int_t    jset;
+  Int_t    jstak;
+  Int_t    jgstat;
+  Int_t    jtmed;
+  Int_t    jtrack;
+  Int_t    jvertx;
+  Int_t    jvolum;
+  Int_t    jxyz;
+  Int_t    jgpar;
+  Int_t    jgpar2;
+  Int_t    jsklt;
+} Gclink_t;
+  Gclink_t *fGclink;          //! GCLINK common structure
+  gcomad(PASSCHARD("GCLINK"),(int*&) fGclink  PASSCHARL("GCLINK"));
 
+  //----------GCCUTS
+  //  COMMON/GCCUTS/CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM
+  //   +             ,DCUTE ,DCUTM ,PPCUTM,TOFMAX,GCUTS(5)
+  struct  Gccuts_t {
+    Float_t cutgam;
+    Float_t cutele;
+    Float_t cutneu;
+    Float_t cuthad;
+    Float_t cutmuo;
+    Float_t bcute;
+    Float_t bcutm;
+    Float_t dcute;
+    Float_t dcutm;
+    Float_t ppcutm;
+    Float_t tofmax;
+    Float_t gcuts[5];
+  };
+  Gccuts_t *fGccuts;          //! GCCUTS common structure
+  gcomad(PASSCHARD("GCCUTS"),(int*&) fGccuts  PASSCHARL("GCCUTS"));
+  //----------GCNUM
+  //   COMMON/GCNUM/NMATE ,NVOLUM,NROTM,NTMED,NTMULT,NTRACK,NPART
+  //  +            ,NSTMAX,NVERTX,NHEAD,NBIT
+  struct  Gcnum_t {
+    Int_t    nmate;
+    Int_t    nvolum;
+    Int_t    nrotm;
+    Int_t    ntmed;
+    Int_t    ntmult;
+    Int_t    ntrack;
+    Int_t    npart;
+    Int_t    nstmax;
+    Int_t    nvertx;
+    Int_t    nhead;
+    Int_t    nbit;
+  };
+  Gcnum_t  *fGcnum;           //! GCNUM common structure
+  gcomad(PASSCHARD("GCNUM"), (int*&) fGcnum   PASSCHARL("GCNUM"));
+  Int_t *addr;
+  // Variables for ZEBRA store
+  gcomad(PASSCHARD("IQ"), addr  PASSCHARL("IQ"));
+  Int_t   *fZiq = addr;
+  gcomad(PASSCHARD("LQ"), addr  PASSCHARL("LQ"));
+  Int_t   *fZlq = addr;
+  Float_t *fZq       = (float*)fZiq;
+  Int_t   ITPAR = 2; // IF(CHPAR.EQ.'CUTELE')ITPAR=2
+  Int_t JTMED = fGclink->jtmed;
+  for (Int_t i = 1; i <= fGcnum->ntmed; i++) {
+    Int_t JTM = fZlq[JTMED-i];
+    if (! JTM) continue;
+    TString Medium((Char_t *)(&fZiq[JTM+1]),20);
+    if (!Medium.BeginsWith(TpcMedium)) continue;
+    Int_t JTMN = fZlq[JTM];
+    if (! JTMN) continue;
+    Float_t cutele = fZq[JTMN+ITPAR];
+    return cutele;
+  }
+  LOG_INFO << "StTpcRSMaker::GetCutEle: specific CutEle for medium \"" << TpcMedium.Data() << "\" has not been found. Use default." << endm;
+  return fGccuts->cutele;
+}
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.77 2018/02/18 21:08:54 perev Exp $
+// $Id: StTpcRSMaker.cxx,v 1.75.4.1 2019/05/15 12:20:37 didenko Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.75.4.1  2019/05/15 12:20:37  didenko
+// branch patch for SL17id_embed
+//
+// Revision 1.77.2.1  2018/11/11 15:56:09  didenko
+// branch updates for S18c_embed
+//
 // Revision 1.77  2018/02/18 21:08:54  perev
 // Move back DSmirnov correction
 //

@@ -15,6 +15,8 @@
 #include "StBTofUtil/StBTofTables.h"
 #include "StEvent/StBTofCollection.h"
 
+#include "TGeoManager.h"
+
 
 //==========================================================
 //==========================================================
@@ -56,8 +58,8 @@ BtofHitList::initRun(St_db_Maker* db_maker) {
   } 
   if(geometry && !geometry->IsInitDone()) {
     LOG_INFO << " BTofGeometry initialization ... " << endm;
-    TVolume *starHall = (TVolume *)db_maker->GetDataSet("HALL");
-    geometry->Init(db_maker, starHall);
+    TVolume *starHall = gGeoManager ? nullptr : (TVolume *) (db_maker->GetDataSet("HALL"));
+    geometry->Init(db_maker, starHall, gGeoManager);
   }
 
 

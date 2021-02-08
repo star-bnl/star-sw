@@ -22,6 +22,7 @@
 #include "StEvent/StEmcDetector.h"
 #include "StEvent/StEmcModule.h"
 #include "StEvent/StEmcRawHit.h"
+#include "StEvent/StTriggerData.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -33,6 +34,7 @@
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
 #include "StMuDSTMaker/COMMON/StMuEmcPoint.h"
 #include "StMuDSTMaker/COMMON/StMuFmsUtil.h"
+#include "StMuDSTMaker/COMMON/StMuEpdHit.h"
 
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
@@ -53,8 +55,8 @@
 #include "StPicoEvent/StPicoTrack.h"
 #include "StPicoEvent/StPicoEmcTrigger.h"
 #include "StPicoEvent/StPicoMtdTrigger.h"
-#include "StPicoEvent/StPicoBbcTile.h"
-#include "StPicoEvent/StPicoEpdTile.h"
+#include "StPicoEvent/StPicoBbcHit.h"
+#include "StPicoEvent/StPicoEpdHit.h"
 #include "StPicoEvent/StPicoBTowHit.h"
 #include "StPicoEvent/StPicoBTofHit.h"
 #include "StPicoEvent/StPicoMtdHit.h"
@@ -62,10 +64,9 @@
 #include "StPicoEvent/StPicoBEmcPidTraits.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"
 #include "StPicoEvent/StPicoMtdPidTraits.h"
+#include "StPicoEvent/StPicoArrays.h"
+#include "StPicoEvent/StPicoDst.h"
 #include "StPicoDstMaker/StPicoDstMaker.h"
-#include "StPicoDstMaker/StPicoArrays.h"
-#include "StPicoDstMaker/StPicoDst.h"
-
 
 //_________________
 StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
@@ -79,8 +80,6 @@ StPicoDstMaker::StPicoDstMaker(char const* name) : StMaker(name),
   mChain(nullptr), mTTree(nullptr), mEventCounter(0), mSplit(99), mCompression(9), mBufferSize(65536 * 4),
   mModuleToQT{}, mModuleToQTPos{}, mQTtoModule{}, mQTSlewBinEdge{}, mQTSlewCorr{},
   mPicoArrays{}, mStatusArrays{},
-  mBbcFiller(*mPicoDst),
-  mEpdFiller(*mPicoDst),
   mFmsFiller(*mPicoDst) {
 
   streamerOff();
@@ -171,8 +170,8 @@ void StPicoDstMaker::streamerOff() {
   StPicoBTofHit::Class()->IgnoreTObjectStreamer();
   StPicoBTowHit::Class()->IgnoreTObjectStreamer();
   StPicoMtdHit::Class()->IgnoreTObjectStreamer();
-  StPicoBbcTile::Class()->IgnoreTObjectStreamer();
-  StPicoEpdTile::Class()->IgnoreTObjectStreamer();
+  StPicoBbcHit::Class()->IgnoreTObjectStreamer();
+  StPicoEpdHit::Class()->IgnoreTObjectStreamer();
   StPicoFmsHit::Class()->IgnoreTObjectStreamer();
   StPicoEmcTrigger::Class()->IgnoreTObjectStreamer();
   StPicoMtdTrigger::Class()->IgnoreTObjectStreamer();
@@ -603,8 +602,8 @@ Int_t StPicoDstMaker::MakeWrite() {
   fillMtdTrigger();
   fillBTofHits();
   fillMtdHits();
-  mBbcFiller.fill(*mMuDst);
-  mEpdFiller.fill(*mMuDst);
+  fillEpdHits();
+  fillBbcHits();
 
   // Could be a good idea to move this call to Init() or InitRun()
   StFmsDbMaker* fmsDbMaker = static_cast<StFmsDbMaker*>(GetMaker("fmsDb"));
@@ -1006,7 +1005,32 @@ void StPicoDstMaker::fillBTofHits() {
     new((*(mPicoArrays[StPicoArrays::BTofHit]))[counter]) StPicoBTofHit(cellId);
   }
 }
-
+//_________________
+void StPicoDstMaker::fillBbcHits() {
+  StMuEvent* muEvent = mMuDst->event();
+  const StTriggerData* trg = muEvent->triggerData();
+  for (int ew=-1; ew<2; ew+=2){            // note loop -1,+1
+    StBeamDirection dir = (ew<0)?east:west;
+    for (int pmt=1; pmt<17; pmt++){
+      int adc = trg->bbcADC(dir,pmt);
+      if (adc>0){
+	int tdc = trg->bbcTDC5bit(dir,pmt);
+	int tac = trg->bbcTDC(dir,pmt);
+	bool trueval = kTRUE;
+	int counter = mPicoArrays[StPicoArrays::BbcHit]->GetEntries();
+	new((*(mPicoArrays[StPicoArrays::BbcHit]))[counter]) StPicoBbcHit(pmt,ew,adc,tac,tdc,trueval,trueval);
+      }
+    }
+  }
+}
+//_________________
+void StPicoDstMaker::fillEpdHits() {
+  for (unsigned int i=0; i < mMuDst->numberOfEpdHit(); i++){
+    StMuEpdHit* aHit = mMuDst->epdHit(i);
+    int counter = mPicoArrays[StPicoArrays::EpdHit]->GetEntries();
+    new((*(mPicoArrays[StPicoArrays::EpdHit]))[counter]) StPicoEpdHit(aHit->id(), aHit->qtData(), aHit->nMIP());
+  }
+}
 //_________________
 void StPicoDstMaker::fillMtdHits() {
 

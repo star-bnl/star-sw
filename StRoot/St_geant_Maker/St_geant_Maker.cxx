@@ -1,6 +1,10 @@
-// $Id: St_geant_Maker.cxx,v 1.168 2017/12/28 19:10:33 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.16.2.1 2018/11/11 16:12:38 didenko Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.16.2.1  2018/11/11 16:12:38  didenko
+// branch updates for S18c_embed
+//
 // Revision 1.168  2017/12/28 19:10:33  jwebb
+//
 // Update sensitive volume names in St_geant_Maker and g2t_epd.F for interface
 // to C++.
 //
@@ -1407,6 +1411,7 @@ Int_t St_geant_Maker::Make() {
   if (nhits>0) {
     St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
     AddData(g2t_emc_hit);
+    iRes = g2t_emc(g2t_track,g2t_emc_hit); if (Debug() > 1) g2t_emc_hit->Print(0,10);
     //           ==============================
   }
   

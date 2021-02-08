@@ -32,7 +32,7 @@ public:
     virtual int  Finish();
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StBTofMixerMaker.h,v 1.2 2017/10/20 17:50:33 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StBTofMixerMaker.h,v 1.3 2018/06/21 03:38:46 jdb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofMixerMaker,2)
     
@@ -47,7 +47,7 @@ protected:
     bool mIsEmbedding = kFALSE;                     //!< Embedding flag
     
     //! Find duplicate hits between the BTofCollections
-    void findDuplicates(std::vector<StBTofHit*> eventHits, StBTofCollection *simHits);
+    void findDuplicates(std::vector<StBTofHit*> &eventHits, StBTofCollection *simHits);
     
 };
 
