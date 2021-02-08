@@ -44,10 +44,9 @@ do
 
    fset=`echo $emdata | awk -F"${particle}_|_$reqid" '{print $2}'`
    echo FSET number: $fset
-   if [[ $# -gt 0 && ! "$*" =~ $fset ]] ; then
-	echo "skipped..."
-	continue
-   fi
+   #if [ $fset -lt $2 ] ; then
+   #continue
+   #fi
 
    datadirtmp=`echo $emdata | awk -F"${particle}_|_$reqid" '{print $1}'`
    datadir=`echo $datadirtmp | awk '{print $3}'`
@@ -116,11 +115,10 @@ do
 	   minicheck=`grep $minifile tmpminimc$$.list`
 	   aborted=`$cgrep "StChain::Embedding" $logfile`
 	   buserr=`$cgrep "Bus error" $logfile`
-	   trunc=`$cgrep "This event is truncated" $logfile`
-	   if [[ -z "$minicheck" || -z "$aborted" || ! -z "$buserr" || ! -z "$trunc" ]] ; then
+	   if [[ -z "$minicheck" || -z "$aborted" || ! -z "$buserr" ]] ; then
 		eofcheck=`$cgrep "StIOMaker::Make() == StEOF" $logfile`
 		zeroevent=`$cgrep "StAnalysisMaker::Finish() Processed 0 events" $logfile`
-		if [[ -z "$eofcheck" || -z "$zeroevent" || ! -z "$trunc" ]] ; then
+		if [[ -z "$eofcheck" || -z "$zeroevent" ]] ; then
 		   echo "found one possible failed task, ${bn}_${ijob}, its log file is:"
 		   echo $logfile
 

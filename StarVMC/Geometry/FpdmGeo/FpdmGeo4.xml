@@ -213,16 +213,16 @@
   <External routine="FPCTSTEP"  />
 
   <Fill name="FMCG" comment="Fpd Calorimeter basic data"  >
-    <var name="Version" value="9.0" comment=" Geometry version  "  />
+    <var name="Version" value="8.0" comment=" Geometry version  "  />
     <var name="ChkvSim" value="0" comment=" = 0 dE, = 1 Cherenkov simulation for PbG "  />
+    <var name="Atten" value="0.0" comment="default, no attenuation, 1 = attenuation" />
     <var name="PbPlate" value="0" comment=" =0 no plate, =1 with plate "  />
     <var name="FmsNorthX" value="-2.0" comment="Default x-position" />
     <var name="FmsSouthX" value="+5.0" comment="Default x-position" />
-    <var name="Atten" value="0.0" comment="default, no attenuation, 1 = attenuation" />
     <var name="postshower" value="0" comment="0: no postshower 1: yes postshower" />
   </Fill>
 
-  <Use struct="FMCG" select="version" value="9.0" />
+  <Use struct="FMCG" select="version" value="8.0" />
 
 
   <Fill name="FPOS" comment="Fpd EN positioning"  >
@@ -1731,20 +1731,18 @@
     <Material name="FMSPS_scint" isvol="1"  />
     <Attribute for="FPSC" seen="1" colo="4" />
     <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
-
     <Cut name="CUTGAM" value="0.00008" />
     <Cut name="CUTELE" value="0.001"   />
     <Cut name="BCUTE" value="0.0001"   />
     <Par name="BIRK1" value="1."       />
     <Par name="BIRK2" value="0.013"    />
     <Par name="BIRK3" value="9.6E-6"   />
-
     <Instrument block="FPSC">
-    <Hit meas="birk" nbits="0" min="0" max="10" />
+      <Hit meas="birk" nbits="0" min="0" max="10" />
     </Instrument>
   </Block>
 
-  <Block name="FOSC" comment="is a piece of scintillator in FMS POST shower"  >
+  <Block name="FOSC" comment="is a piece of scintillator in FMS Preshower"  >
     <Material name="Polystyren"  />
     <Material name="FMSPOST_scint" isvol="1"  />
     <Attribute for="FOSC" seen="1" colo="2" />
@@ -1756,7 +1754,7 @@
     <Par name="BIRK2" value="0.013"    />
     <Par name="BIRK3" value="9.6E-6"   />
     <Instrument block="FOSC">
-      <Hit meas="birk" nbits="0" min="0" max="10" opts="S" />
+      <Hit meas="birk" nbits="0" min="0" max="10" />
     </Instrument>
   </Block>
   
@@ -1893,8 +1891,7 @@
   LOGICAL doAttenuation /.false./
   character*4 name
 
-  STRUCTURE FMCG { Version,ChkvSim,PbPlate,FmsNorthX,FmsSouthX,Atten,int postshower}
-
+  Structure FMCG { version, chkvsim, pbplane, fmsnx, fmssx, atten }
 
   ENTRY FLGR HIT (jj,hit) """Entry point for FLGR hits"""
   IF (isSet.eqv..FALSE.) THEN

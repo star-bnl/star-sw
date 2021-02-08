@@ -17,14 +17,14 @@
       "The geometry contains deprecated sensitive volume FSTA."
       "Only setup readout for volume TGCG"
 
-      CALL g2r_get_sys('STGM','TGCG',Iprin,Idigi)      
+      CALL g2r_get_sys('STGH','TGCG',Iprin,Idigi)      
       IF (Iprin.lt.0) go to 99
 
        Do While (G2R_GET_HIT('stg') .eq. 0)
-*         print *,i,id,trac,next,volume,
-*    >            x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
-*    >            p(1),p(2),p(3),p(4),r,rr,phi,the,eta,tdr,tof,
-*    >            Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
+          print *,i,id,trac,next,volume,
+     >            x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
+     >            p(1),p(2),p(3),p(4),r,rr,phi,the,eta,tdr,tof,
+     >            Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
 
          i=i+1
          g2t_fts_hit_h.nok            = i

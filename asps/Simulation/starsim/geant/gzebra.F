@@ -1,8 +1,5 @@
-* $Id: gzebra.F,v 1.6 2019/10/04 16:08:44 jwebb Exp $
+* $Id: gzebra.F,v 1.5 2019/10/03 22:11:16 jwebb Exp $
 * $Log: gzebra.F,v $
-* Revision 1.6  2019/10/04 16:08:44  jwebb
-* Remove redundant initialization of ZEBRA.  Reduce logging level.
-*
 * Revision 1.5  2019/10/03 22:11:16  jwebb
 * Revert back to 20MW.
 *
@@ -36,7 +33,6 @@ C.    *       Author    R.Brun  *********                              *
 C.    *                                                                *
 C.    *       Modifications:                                           *
 C.    *   PN: Ellastic zebra inspired by V.Perevozchikov               *
-C.    *       + removed for 64bit support                              *
 C.    ******************************************************************
 C.
 #include "geant321/gcbank.inc"
@@ -49,10 +45,10 @@ C.    ------------------------------------------------------------------
 C.
 #if 1
       NZEBRA = locf(IGCZ)-locf(iq(1)) 
-*     CALL MZEBRA(-1) ! ZEBRA alreay initialized in agmain
+      CALL MZEBRA(-1)
       CALL MZSTOR(IXSTOR,'/GCBANK/',' ',FENDQ,LQ,LR1,WS,LQ(KWWORK+100)
      +            ,LQ(NZEBRA-30))
-      IF (IDEBUG.GE.3) CALL MZLOGL(IXSTOR,0)
+      CALL MZLOGL(IXSTOR,0)
 #endif
 C
       END
