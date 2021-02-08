@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.145 2018/04/11 19:03:11 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.147 2020/02/26 15:55:22 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -135,7 +135,7 @@
 	$LLIB = "lib";
     }
 
-    if ( ( -x "/usr/bin/gfortran" or -x "/sw/bin/gfortran" ) && !defined($ENV{USE_G77}) ){
+    if ( ( -x "/usr/bin/gfortran" || -x "/sw/bin/gfortran" ) && !defined($ENV{USE_G77}) ){
 	# JL 200908 - give preference to gfortran for now 
 	# JL 201004 - added possibility to revertto g77 by defining USE_G77 but 
 	#             this is at your own risk
@@ -148,12 +148,10 @@
 	}
 
 	$G77FLAGS .= " -std=legacy -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
-	$FFLAGS    = $G77FLAGS;
+	
+	$FFLAGS    = $G77FLAGS;     # will be overwritten below, ignore
 	$FLIBS     = "-lgfortran";
-#	$FLIBS      = `$FC $FFLAGS -print-file-name=libgfortran.$SOEXT`; chomp($FLIBS);
-#	if ($FLIBS eq "libgfortran.$SOEXT") {
-#	  $FLIBS    = `$FC $FFLAGS -print-file-name=libgfortran.a`; chomp($FLIBS);
-#	}
+
     } else {
 	$G77       = "g77";
 	$G77FLAGS  = "$XMACHOPT -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
@@ -179,8 +177,10 @@
 
     $FCPATH        = "";
     $EXTRA_FCPATH  = "";
+
     $FFLAGS        = $G77FLAGS;
     $FEXTEND       = $G77EXTEND;
+
     $CPPCERN       = " -DCERNLIB_TYPE -DCERNLIB_DOUBLE -DCERNLIB_NOQUAD -DCERNLIB_LINUX ";
     $FPPFLAGS      = $CPPCERN;
     $EXTRA_FPPFLAGS= "";
@@ -191,18 +191,16 @@
     $AR            = "ar";
     $ARFLAGS       = "rvu";
     $LD            = $CXX;
-#    $LDFLAGS       = "$XMACHOPT ";#--no-warn-mismatch";#$CXXFLAGS;
- if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
-    $LDEXPORT      = " -Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
-    $LDALL         = " -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs";
-    $LDNONE        = " -Wl,--no-whole-archive -Wl,-Bdynamic";
-  } 
+
+    if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
+	$LDEXPORT      = " -Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
+	$LDALL         = " -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs";
+	$LDNONE        = " -Wl,--no-whole-archive -Wl,-Bdynamic";
+    } 
     $EXTRA_LDFLAGS = "";
     $F77LD         = $LD;
     $F77LDFLAGS    = $LDFLAGS;
-#    $F77LDFLAGS    = "$XMACHOPT ";#$LDFLAGS;
     $SO            = $CXX;
-#    $SOFLAGS       = "$XMACHOPT";
     $STIC          = "stic";
     $STICFLAGS     = "";
     $AGETOF        = "agetof";
@@ -420,9 +418,6 @@
 	}
 	$FLIBS      .= " -lg2c";
 	$FFLAGS        = "-save";
-#	$F77LIBS      .= " -lg2c";
-#	$FLIBS         = $F77LIBS;
-#	$FFLAGS        = "$XMACHOPT -save";
 	$FEXTEND       = "-132";
 	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
 	$SYSLIBS       = "-lm -ldl -lrt";# -rdynamic";
@@ -553,13 +548,29 @@
         #print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
         $CXX_VERSION  = `$CXX -dumpversion`;
         chomp($CXX_VERSION);
-	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;
+	($CXX_MAJOR,$CXX_MINOR,$CXX_LOWER) = split '\.', $CXX_VERSION;
 	$CERNLIB_FPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
 	$CERNLIB_CPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
         print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
 
         $CXXFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Woverloaded-virtual";
 
+	# some fortran initial options
+        if ($PGI) {
+	  # under SL5 where PGI is installed, this test make PGI used
+	    # but eventually fail at link-time - TBC [TODO: JL 200908]
+	    $FC      = "pgf77";
+	    $FFLAGS  = "";
+	    $FEXTEND = "-Mextend";
+	} else {
+	    $FC      = $G77;
+	    $FFLAGS  = $G77FLAGS;
+	    $FEXTEND = $G77EXTEND;
+	}
+
+
+	# ---- compiler version fixes and command line option adjustements
+	# general and using standards
         if ($CXX_VERSION < 3) {
 	    $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
 	} else {
@@ -581,10 +592,22 @@
 	    }
 	}
 
-        # -fpermissive ?
-	if ($CXX_MAJOR == 3 && $CXX_MINOR < 4) {
+        # use of pendantic / permissive 
+	if ($CXX_MAJOR == 3 && $CXX_MINOR < 4 ) {
 	    $CXXFLAGS    .= " -pedantic"; 
 	}
+
+	# compiler bug / calo tower and zebra Q() bank
+	if ( $CXX_MAJOR >= 4 && $CXX_MINOR >= 8 && $CXX_LOWER > 2 && 
+	     $FC =~ m/gfortran/ && ! $USE_64BITS ){
+
+	    # seems that legacy and sse are clashing
+	    $FFLAGS   .= " -mno-sse -mno-sse2 -mno-sse3";  
+	}
+
+	# <--- end compiler version conditional option settings
+	
+
 	$CXXFLAGS    .= " -Wno-long-long";
 
 	#
@@ -607,6 +630,7 @@
 		#   2015 NB: does it make sense to align on 2 bytes nowadays?
 		$optflags = "-falign-loops -falign-jumps -falign-functions";
 	    }
+
 
 	    # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
 	    if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
@@ -670,22 +694,9 @@
 	$CLIBS     .= " -lrt -rdynamic";
 	# print "*** $CXX_VERSION $SYSLIBS\n";
 	
-        if ($PGI) {
-	  # under SL5 where PGI is installed, this test make PGI used
-	    # but eventually fail at link-time - TBC [TODO: JL 200908]
-	  $FC    = "pgf77";
-	  $FFLAGS = "";
-	  $FEXTEND = "-Mextend";
-	} else {
-	    $FC      = $G77;
-	    $FFLAGS  = $G77FLAGS;
-	    $FEXTEND = $G77EXTEND;
-	}
 
 	if ( $G77 =~ m/gfortran/ ){
-#	  $LIBIFCPATH  = `$FC -print-file-name=libgfortranbegin.a`; chomp($LIBIFCPATH);
-#	  $FLIBS     =  $LIBFRTBEGIN;
-#	  $FLIBS    .= " -lgfortran";
+	    # nothing to set - used to be -lgfortran
 	} else {
 	    if ($CXX_VERSION >= 4 && $STAR_HOST_SYS =~ m/^x86_darwin/ ){
 		# Same comment, not sure if V4 or a Mac issue
@@ -695,6 +706,7 @@
 		$FLIBS = " -lg2c -lnsl";
 	    }
 	}
+
     } elsif ( $STAR_HOST_SYS =~ /x86_darwin/) {
       $CXX_VERSION  = `$CXX -dumpversion`;
       chomp($CXX_VERSION);
@@ -803,9 +815,6 @@
 #	$CXX          = "g++-4";
 	$FFLAGS       = "-funroll-loops -fomit-frame-pointer -ftree-vectorize -fno-second-underscore";
 	$FFLAGS      .= " -w -fno-automatic -fd-lines-as-comments -Wall -W -Wsurprising -fPIC";
-#	$FFLAGS      .= "-std=legacy";
-#	$FFLAGS      .= " -fd-lines-as-comments"; # -fd-lines-as-code
-#	$FFLAGS      .= " -ff2c";
 	$FEXTEND      = $G77EXTEND;
         $FPPFLAGS    .= " -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX -DCERNLIB_QMGLIBC -DCERNLIB_MACOSX -DCERNLIB_GFORTRAN";
 #	$FLIBS      = `$F77 -print-file-name=libgfortran.$SOEXT`; chomp($FLIBS);

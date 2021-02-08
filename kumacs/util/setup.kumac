@@ -1,0 +1,147 @@
+* editted 7/9/98 Kathy Turner - don't create subdirectores for GSTAR
+* editted 7/10/98 K. Turner - change geant macro definitions to geant_Run 
+*                             and geant_Event
+* editted 8/31/98 K. Turner - put stafcv_ok,bad aliases in
+* editted 9/1/98 K. Turner - define counters nevdsttot,nevdstgood
+*                            which are incremented in bfc_util
+* editted 9/23/98 K. Turner - remove event counters that aren't needed
+*                           - and move all macro creates to correct place
+**************************************************
+ 
+macro setup 
+
+  macro/global/import *
+    
+ if $vexist(setup_done)=0 then
+   exec setup#set_aliases
+   exec setup#set_globals
+   exec setup#set_dir
+   vec/cre setup_done
+ endif
+ 
+return
+ 
+**************************************************
+ 
+macro set_aliases
+
+ macro/global/import *
+
+ alias/create stafcv_ok 1
+ alias/create stafcv_bad 0
+
+return
+**************************************************
+ 
+macro set_globals
+
+ macro/global/import *
+   
+ macro/global/create nevents  0   'no. of events processed so far'
+   
+ macro/global/create nev_proc 0
+ macro/global/create nev_pass 0
+ macro/global/create nev_total 0    
+   
+ macro/global/create ievent           1          'Event counter'
+      
+ macro/global/create run       /dui/run
+ macro/global/create event     /dui/event
+ macro/global/create calib     /dui/calib
+     
+ macro/global/create constants  [run]
+ macro/global/create params     [constants]/params
+ macro/global/create geometry   [constants]/params
+ macro/global/create geantR     [run]/geant    
+ macro/global/create geant_Run  [geantR]/Run
+ macro/global/create run_dst    [run]/dst    
+   
+ macro/global/create evgen       [event]/evgen    
+ macro/global/create geantE      [event]/geant    
+ macro/global/create geant_Event [geantE]/Event
+ macro/global/create raw_data    [event]/raw_data 
+ macro/global/create data        [event]/data
+ macro/global/create dst         [event]/data/global/dst   
+   
+return
+
+**************************************************
+macro set_dir
+  
+  macro/global/import *
+   
+ MESSAGE ********************************
+ MESSAGE *** Setting up directory tree **
+ MESSAGE ********************************
+
+
+
+***************** make directories *************************************
+   
+* top level directories--------------------------
+ mkdir  [run]
+ mkdir  [calib]
+ mkdir  [event]
+ 
+* ===================================================================
+* tables under run or calib directory ********************************
+ 
+* constants tables ----------------------------------
+ mkdir  [run_dst]
+ mkdir  [geantR]
+ mkdir  [geant_Run]
+ mkdir  [params]
+  for sys in ctf emc ftpc global l3 mwc svt tpc trg ebye strange
+    mkdir [params]/[sys]
+    mkdir [calib]/[sys]
+  endfor
+  mkdir [params]/global/magnetic_field
+  mkdir [params]/strange/smdst
+ 
+* ============================================================
+* tables under event directory *****************************
+ 
+*  event generator tables ----------------------------
+ mkdir  [evgen]
+ 
+* geant event tables ---------------------------------
+ mkdir [geantE]
+ mkdir [geant_Event]
+
+*  raw data tables ------------------------------------
+ mkdir  [raw_data] 
+  for sys in  ctf emc ftpc global l3  mwc svt tpc trg
+   mkdir  [raw_data]/[sys]
+   mkdir  [raw_data]/[sys]/pixels
+ endfor
+ 
+*  data tables ----------------------------------------
+ mkdir  [data]  
+ for sys in ctf emc ftpc global l3 mwc svt tpc trg ebye strange
+   mkdir  [data]/[sys]
+   if [sys].ne.ebye.and.[sys].ne.strange then
+     mkdir  [data]/[sys]/tracks
+   endif   
+   if [sys]=global then
+     mkdir  [data]/global/vertices
+     mkdir  [dst]
+   elseif [sys]=ebye then
+     mkdir [data]/ebye/sca
+   elseif [sys]=strange then
+     mkdir [data]/strange/smdst
+   elseif [sys]<>global then
+     mkdir  [data]/[sys]/hits
+   endif
+ endfor
+ 
+*  dst information ---------------------------------------
+ mkdir  [dst]
+ 
+ 
+ 
+ 
+return
+ 
+******************************************************
+ 
+
