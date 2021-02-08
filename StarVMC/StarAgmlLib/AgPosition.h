@@ -45,6 +45,9 @@ public:
 
   /// Perform Ortho transformation.  (Must respect order of operations, so overrides base class).
   
+  /// Rotation matrix (nullifies all prior rotations)
+  void RotationMatrix( Double_t rotm[9] ){ for (int i=0;i<9;i++ ) mRotationMatrix[i]=rotm[i]; mHasRotm=true; }
+
 
 
   /// Referrence sets the six G3 angles.  It is proceeded by a reset of the
@@ -76,6 +79,8 @@ protected:
 
   int         mOrderOps;
   double      mX, mY, mZ;
+  double      mRotationMatrix[9];
+  bool        mHasRotm;
 
 
   ClassDef(AgPosition,1);

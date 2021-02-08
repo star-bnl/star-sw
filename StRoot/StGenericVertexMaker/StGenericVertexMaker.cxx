@@ -159,6 +159,7 @@ Int_t StGenericVertexMaker::Init()
     if ( IAttr("useBTOFmatchOnly") ){
       LOG_INFO << "StGenericVertexMaker::Init: UseBTOFmatchOnly option enabled" << endm; 
       ((StPPVertexFinder*)theFinder)->UseBTOFmatchOnly();
+      useBTOF = 1;
     }
 
   } else if ( IAttr("VFPPVEv") ||  IAttr("VFPPVEvNoBTof")

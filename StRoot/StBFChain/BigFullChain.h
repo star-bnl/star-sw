@@ -1213,6 +1213,8 @@ Bfc_st BFC[] = { // standard chains
   // See related code in StBFChain.cxx for details
   {"usePct4Vtx"     ,""  ,"","",""                ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
   {"useBTOF4Vtx"    ,""  ,"","",""                 ,"","Use BTOF track matching for vertex ranking",kFALSE},
+  {"useBTOFmatchOnly","","","useBTOF4Vtx",""                     ,"","Use BTOF track matching only",kFALSE},
+
   {"svt1hit"        ,""  ,"","",""                             ,"","Use 1 SVT hit only combination",kFALSE},
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
@@ -1632,7 +1634,7 @@ Bfc_st BFC[] = { // standard chains
   {"VFMCE"          ,""  ,"","genvtx"                        ,"","","... Fixed vertex from MCEvent",kFALSE},
   {"VFppLMV"        ,""  ,"","genvtx"                ,"","","... VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5"       ,""  ,"","VFppLMV"       ,"","","... VertexMaker will use ppLMV method (tuned)",kFALSE},
-  {"VFStoreX"       ,""  ,"","genvtx"  ,"","","... VertexMaker will use save at least 100 vertices",kFALSE},
+  {"VFStoreX"       ,""  ,"",""        ,"","","... VertexMaker will use save at least 100 vertices",kFALSE},
 
   // Sti options
   {"StiPulls" ,"","",""                                         ,"","", "Request to make Sti Pulls",kFALSE},

@@ -1,0 +1,526 @@
+<Document cmdline="{'path_name': './', 'language': 'AgML', 'topvolume': 'TOP', 'filename': 'tof_v14s.root', 'mode': 'G3', 'module_name': 'EtofGeo0'}" file="tof_v14s.root"  >
+
+  <Module name="EtofGeo0" comment="Imported from tof_v14s.root"  >
+    <Author name="root2agml"  />
+    <Created date="now"  />
+    <CDE  >
+      AGECOM,GCONST,GCUNIT
+    </CDE>
+
+    <!--
+	module_0  = ETOF,
+	gas_box   = EGAS,
+	counter   = ECOU,
+	tof_glass = EGLA,
+	Gap       = EGAP,
+	Cell      = ECEL,
+	pcb       = EPCB
+    -->
+    <Content  >
+      ETOF,EGAS,ECOU,EGLA,EGAP,ECEL,EPCB
+    </Content>
+    
+	<Structure name="ETOG" comment="ETOF geometry master configuration">
+	<var name="version"    type="float" />
+        <var name="zplane(3)" type="float" />
+	</Structure>
+
+        <Fill name="ETOG" comment="ETOF config from etof_v14s.root">
+	<var  name="version" value="14.0" comment="default version, not ready for prime time" />
+	<var  name="zplane" value="{489.010,501.01,513.01}"   comment="z position of the three planes" />
+        </Fill>
+
+<!-- I assume these have been placed relative to the fixed target (and also on the wrong side of star) -->
+
+        <Fill name="ETOG" comment="ETOF config from etof_v14s.root, placed on east poletip of STAR (exact position TBD)">
+	<var  name="version" value="14.1" comment="default version, not ready for prime time" />
+	<var  name="zplane" value="{209-489.010,209-501.01,209-513.01}"   comment="z position of the three planes" />
+        </Fill>
+
+
+        <Use struct="ETOG" select="version" value="14.1" />
+
+      <Create block="ETOF"  />
+      <Placement in="CAVE" y="0.0" x="158.350006104" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{1.0, 0.0, 0.0,
+			   0.0, 1.0, 0.0,
+			   0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="79.1750030518" x="137.135131836" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.8660254037844387, -0.49999999999999994, 0.0,
+			  0.49999999999999994, 0.8660254037844387,
+			  0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="137.135131836" x="79.1750030518" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.5000000000000001, -0.8660254037844386, 0.0, 0.8660254037844386, 0.5000000000000001, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="158.350006104" x="-6.84152837493e-06" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{6.123233995736766e-17, -1.0, 0.0, 1.0, 6.123233995736766e-17, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="137.135116577" x="-79.1750106812" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.4999999999999998, -0.8660254037844387, -0.0, 0.8660254037844387, -0.4999999999999998, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="79.1749954224" x="-137.135131836" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.8660254037844387, -0.49999999999999994, -0.0, 0.49999999999999994, -0.8660254037844387, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="-1.36830567499e-05" x="-158.350006104" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-1.0, -1.2246467991473532e-16, -0.0, 1.2246467991473532e-16, -1.0, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="-79.1750183105" x="-137.135116577" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.8660254037844386, 0.5000000000000001, 0.0, -0.5000000000000001, -0.8660254037844386, -0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="-137.135131836" x="-79.174987793" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.5000000000000004, 0.8660254037844384, 0.0, -0.8660254037844384, -0.5000000000000004, -0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="-158.350006104" x="2.05245851248e-05" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-1.8369701987210297e-16, 1.0, 0.0, -1.0, -1.8369701987210297e-16, -0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="-137.135116577" x="79.1750259399" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.5000000000000001, 0.8660254037844386, 0.0, -0.8660254037844386, 0.5000000000000001, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="-79.1749801636" x="137.135147095" z="ETOG_zplane(1)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.8660254037844384, 0.5000000000000004, 0.0, -0.5000000000000004, 0.8660254037844384, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="27.3538990021" x="164.874313354" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="106.126327515" x="129.108398438" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.8660254037844387, -0.49999999999999994, 0.0, 0.49999999999999994, 0.8660254037844387, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="156.462295532" x="58.7479820251" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.5000000000000001, -0.8660254037844386, 0.0, 0.8660254037844386, 0.5000000000000001, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="164.874313354" x="-27.3539066315" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{6.123233995736766e-17, -1.0, 0.0, 1.0, 6.123233995736766e-17, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="129.108383179" x="-106.126335144" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.4999999999999998, -0.8660254037844387, -0.0, 0.8660254037844387, -0.4999999999999998, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="58.7479743958" x="-156.462295532" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.8660254037844387, -0.49999999999999994, -0.0, 0.49999999999999994, -0.8660254037844387, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="-27.3539142609" x="-164.874313354" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-1.0, -1.2246467991473532e-16, -0.0, 1.2246467991473532e-16, -1.0, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="-106.126342773" x="-129.108383179" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.8660254037844386, 0.5000000000000001, 0.0, -0.5000000000000001, -0.8660254037844386, -0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="-156.462295532" x="-58.7479667664" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.5000000000000004, 0.8660254037844384, 0.0, -0.8660254037844384, -0.5000000000000004, -0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="-164.874313354" x="27.3539199829" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-1.8369701987210297e-16, 1.0, 0.0, -1.0, -1.8369701987210297e-16, -0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="-129.108383179" x="106.126350403" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.5000000000000001, 0.8660254037844386, 0.0, -0.8660254037844386, 0.5000000000000001, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="-58.747959137" x="156.462310791" z="ETOG_zplane(2)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.8660254037844384, 0.5000000000000004, 0.0, -0.5000000000000004, 0.8660254037844384, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="-28.2132396698" x="174.831771851" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="62.9825057983" x="165.515380859" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.8660254037844387, -0.49999999999999994, 0.0, 0.49999999999999994, 0.8660254037844387, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="137.302139282" x="111.849266052" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.5000000000000001, -0.8660254037844386, 0.0, 0.8660254037844386, 0.5000000000000001, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="174.831771851" x="28.2132320404" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{6.123233995736766e-17, -1.0, 0.0, 1.0, 6.123233995736766e-17, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="165.515365601" x="-62.9825134277" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.4999999999999998, -0.8660254037844387, -0.0, 0.8660254037844387, -0.4999999999999998, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="111.849258423" x="-137.302139282" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.8660254037844387, -0.49999999999999994, -0.0, 0.49999999999999994, -0.8660254037844387, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="28.213224411" x="-174.831771851" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-1.0, -1.2246467991473532e-16, -0.0, 1.2246467991473532e-16, -1.0, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="-62.9825172424" x="-165.515365601" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.8660254037844386, 0.5000000000000001, 0.0, -0.5000000000000001, -0.8660254037844386, -0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="-137.302154541" x="-111.849250793" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-0.5000000000000004, 0.8660254037844384, 0.0, -0.8660254037844384, -0.5000000000000004, -0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+      
+      <Placement in="CAVE" y="-174.831771851" x="-28.2132167816" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{-1.8369701987210297e-16, 1.0, 0.0, -1.0, -1.8369701987210297e-16, -0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="-165.515365601" x="62.9825248718" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.5000000000000001, 0.8660254037844386, 0.0, -0.8660254037844386, 0.5000000000000001, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+      <Placement in="CAVE" y="-111.849243164" x="137.302154541" z="ETOG_zplane(3)" konly="ONLY" block="ETOF"  >
+        <Rotation matrix="{0.8660254037844384, 0.5000000000000004, 0.0, -0.5000000000000004, 0.8660254037844384, 0.0, 0.0, 0.0, 1.0}"  />
+      </Placement>
+            
+
+        
+        <Volume name="ETOF" comment=""  >
+            <Material a="26.98" dens="2.7" z="13.0" name="aluminium"  />
+            <Medium epsil="0.001" name="aluminium" tmaxfd="-1.0" stmin="-1.0" ifield="1.0" deemax="-1.0" fieldm="20.0" stemax="-1.0"  />
+            <Attribute for="ETOF" lwid="1" seen="1" colo="416"  />
+            <Shape type="BBox" dz="5.55000019073" dx="51.0750007629" dy="24.1499996185"  />
+            <Create block="EGAS"  />
+            <Placement in="ETOF" y="0.0" x="0.449999988079" z="0.0" konly="ONLY" block="EGAS"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+        </Volume>
+        
+        <Volume name="EGAS" comment=""  >
+            <Material a="17.4875239923" dens="0.00427" z="8.3896353167" name="RPCgas_noact"  />
+            <Medium epsil="0.001" name="RPCgas_noact" tmaxfd="-1.0" stmin="-1.0" ifield="1.0" deemax="-1.0" fieldm="15.0" stemax="-1.0"  />
+            <Attribute for="EGAS" lwid="1" seen="1" colo="600"  />
+            <Shape type="BBox" dz="5.4500002861" dx="50.5250015259" dy="24.0499992371"  />
+            <Create block="ECOU"  />
+            <Placement in="EGAS" y="0.0" x="-27.7399997711" z="0.0" konly="ONLY" block="ECOU"  >
+                <Rotation matrix="{0.9884938873122234, 0.0, 0.15126081695657112, 0.0, 1.0, 0.0, -0.15126081695657112, 0.0, 0.9884938873122234}"  />
+            </Placement>
+            
+            <Placement in="EGAS" y="0.0" x="3.51700019836" z="0.0" konly="ONLY" block="ECOU"  >
+                <Rotation matrix="{0.9884938873122234, 0.0, 0.15126081695657112, 0.0, 1.0, 0.0, -0.15126081695657112, 0.0, 0.9884938873122234}"  />
+            </Placement>
+            
+            <Placement in="EGAS" y="0.0" x="34.7740020752" z="0.0" konly="ONLY" block="ECOU"  >
+                <Rotation matrix="{0.9884938873122234, 0.0, 0.15126081695657112, 0.0, 1.0, 0.0, -0.15126081695657112, 0.0, 0.9884938873122234}"  />
+            </Placement>
+            
+        </Volume>
+        
+        <Volume name="ECOU" comment=""  >
+            <Material a="17.4875239923" dens="0.00427" z="8.3896353167" name="RPCgas_noact"  />
+            <Medium epsil="0.001" name="RPCgas_noact" tmaxfd="-1.0" stmin="-1.0" ifield="1.0" deemax="-1.0" fieldm="15.0" stemax="-1.0"  />
+            <Attribute for="ECOU" lwid="1" seen="1" colo="432"  />
+            <Shape type="BBox" dz="0.366000026464" dx="17.1000003815" dy="23.6000003815"  />
+            <Create block="EGLA"  />
+            <Create block="EPCB"  />
+            <Create block="EGAP"  />
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.352000027895" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.331000030041" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.310000032187" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.289000034332" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.268000006676" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.247000023723" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.226000010967" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.205000013113" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.184000015259" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.163000017405" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.14200001955" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.121000021696" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.0999999940395" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.0789999961853" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.0579999983311" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.0370000004768" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="-0.0160000026226" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="0.00499999523163" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="0.0259999930859" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="0.0469999909401" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="0.0679999887943" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="0.0889999866486" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="0.110000014305" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="0.131000012159" konly="ONLY" block="EGAP"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="0.0" x="0.0" z="0.194000035524" konly="ONLY" block="EGLA"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="-18.5" x="0.0" z="0.0" konly="ONLY" block="EPCB"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="ECOU" y="18.5" x="0.0" z="0.0" konly="ONLY" block="EPCB"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+        </Volume>
+        
+        <Volume name="EGLA" comment=""  >
+            <Material a="22.3680270836" dens="2.5" z="11.1529065514" name="RPCglass"  />
+            <Medium epsil="0.001" name="RPCglass" tmaxfd="-1.0" stmin="-1.0" ifield="1.0" deemax="-1.0" fieldm="15.0" stemax="-1.0"  />
+            <Attribute for="EGLA" lwid="1" seen="1" colo="616"  />
+            <Shape type="BBox" dz="0.0140000004321" dx="16.0" dy="13.5"  />
+        </Volume>
+        
+        <Volume name="EGAP" comment=""  >
+            <Material a="17.4875239923" dens="0.00427" z="8.3896353167" name="RPCgas"  />
+            <Medium name="RPCgas" epsil="0.001" tmaxfd="-1.0" stmin="-1.0" ifield="1.0" deemax="-1.0" fieldm="15.0" isvol="0" stemax="-1.0"  />
+
+            <Attribute for="EGAP" lwid="1" seen="1" colo="632"  />
+            <Shape type="BBox" dz="0.00700000021607" dx="16.0" dy="13.5"  />
+            <Create block="ECEL"  />
+            <Placement in="EGAP" y="0.0" x="-15.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-14.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-13.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-12.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-11.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-10.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-9.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-8.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-7.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-6.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-5.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-4.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-3.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-2.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-1.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="-0.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="0.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="1.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="2.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="3.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="4.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="5.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="6.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="7.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="8.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="9.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="10.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="11.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="12.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="13.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="14.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+            <Placement in="EGAP" y="0.0" x="15.5" z="0.0" konly="ONLY" block="ECEL"  >
+                <Rotation matrix="{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}"  />
+            </Placement>
+            
+        </Volume>
+        
+        <Volume name="ECEL" comment=""  >
+            <Material a="17.4875239923" dens="0.00427" z="8.3896353167" name="RPCgas"  />
+            <Medium epsil="0.001" name="RPCgas_sens" tmaxfd="-1.0" stmin="-1.0" ifield="1.0" deemax="-1.0" fieldm="15.0" isvol="1.0" stemax="-1.0"  />
+            <Attribute for="ECEL" lwid="1" seen="1" colo="1"  />
+            <Shape type="BBox" dz="0.00700000021607" dx="0.5" dy="13.5"  />
+
+
+            <Instrument block="ECEL">
+
+	      <!-- options are applied to all hits, not just the one in which it 
+	      is specified.  S means hit is evaluated as if geant took a single
+	      step to cross the volume... i.e. one hit per track crossing volume -->
+                <Hit meas="X" bins="0.01" opts="HS" />
+                <Hit meas="Y" bins="0.01"          />
+                <Hit meas="Z" bins="0.01"          />
+
+                <Hit meas="ptot" nbits="18" min="0.0" max="100.0"  />
+
+                <Hit meas="sleng"  bins="0.1" min="0"   max="500"    />
+                <Hit meas="tof"   nbits="16"  min="0.0" max="1.0E-7" />
+                <Hit meas="step"   bins="0.01" />
+                
+                <Hit meas="eloss" nbits="16" min="0.0" max="1.0E-6"    />
+                
+            </Instrument>
+
+        </Volume>
+        
+        <Volume name="EPCB" comment=""  >
+            <Material a="12.011" dens="2.265" z="6.0" name="carbon"  />
+            <Medium epsil="0.001" name="carbon" tmaxfd="-1.0" stmin="-1.0" ifield="1.0" deemax="-1.0" fieldm="20.0" stemax="-1.0"  />
+            <Attribute for="EPCB" lwid="1" seen="1" colo="416"  />
+            <Shape type="BBox" dz="0.15000000596" dx="17.0" dy="5.0"  />
+        </Volume>
+        
+    </Module>
+    
+</Document>
+
