@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.11 2017/03/08 23:59:20 jdb Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.14 2018/01/04 18:42:21 jdb Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -57,7 +57,6 @@
 static RanluxEngine engine;
 static RandGauss ranGauss(engine);
 
-ClassImp(StBTofSimMaker)
 
 const float StBTofSimMaker::mVHRBIN2PS = 24.4;    //! Very High resolution mode, ps/bin
 const float StBTofSimMaker::mHRBIN2PS = 97.7;     //! High resolution mode, ps/bin
@@ -608,7 +607,7 @@ int StBTofSimMaker::fillEvent()
               mBTofCollection->setHeader(new StBTofHeader(aHead));
          }
         else {
-        tofHeader = (StBTofHeader *) mBTofCollection->tofHeader();
+        	tofHeader = (StBTofHeader *) mBTofCollection->tofHeader();
         }
 
         LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
@@ -870,9 +869,16 @@ int StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant, StBTofCol
     else {
         if ( mUseVpdStart && btofColl ) {   //!< VpdSimMaker not present, check for vpdstart, add vpd resolution to tof
             mBTofHeader = btofColl->tofHeader();
-            int mNWest = mBTofHeader->numberOfVpdHits(west);
-            int mNEast = mBTofHeader->numberOfVpdHits(east);
-            tof += mVpdSimConfig->getVpdResolution(mNWest, mNEast);
+
+            if ( mBTofHeader != NULL ){
+            	int mNWest = mBTofHeader->numberOfVpdHits(west);
+            	int mNEast = mBTofHeader->numberOfVpdHits(east);
+				
+            	tof += mVpdSimConfig->getVpdResolution(mNWest, mNEast);
+            } else {
+            	tof -= 999;
+            }
+            
         }
         else {
             // do nothing

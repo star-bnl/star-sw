@@ -43,10 +43,12 @@ public:
         double randNum = 0;
         double vpdRes = 0;
         int counter = 0;
-        double tubeTimeWest = 0;
-        double tubeTimeEast = 0;
+        double tSum = 0;
+        
         TRandom3 randEngine(0);
         
+
+        // this can be further improved to just use the tube resolution when sampling, like is done in VPD Sim Maker
         for (int i=0; i<MAX_ARRAY_INDEX; i++) {
             if (mSimParams[i].tubeStatusFlag) {
                 vpdRes += mSimParams[i].singleTubeRes;
@@ -58,25 +60,23 @@ public:
             vpdRes = vpdRes/counter;    //! Take an average
         }
         else {
-            LOG_WARN << "No resolutions found! Exit!" << endm;
-            return 0.;
+            LOG_WARN << "No resolutions found in DB! Using DEFAULT avg of 120 ps single tube res- maybe a terrible guess for your dataset!" << endm;
+            vpdRes = 120; 
         }
-        
-        for (int j=0;j<nWest;j++) {    //! Loop through West tubes
+
+        if ( 0 == nWest && 0 == nEast ){
+            LOG_WARN << "No VPD tubes hit, resolution = 999" << endm;
+            return -999;
+        }
+
+        for (int j=0;j< (nWest + nEast); j++) {    //! Loop through hit tubes
             randNum = randEngine.Gaus(0, vpdRes);
-            tubeTimeWest += randNum;
+            tSum += randNum;
         }
-        
-        for (int j=0;j<nEast;j++) {   //! Loop through East tubes
-            randNum = randEngine.Gaus(0, vpdRes);
-            tubeTimeEast += randNum;
-        }
-        
-        tubeTimeWest = tubeTimeWest/nWest; //! Avg on west in ps
-        tubeTimeEast = tubeTimeEast/nEast; //! Avg on east in ps
-        
-        LOG_INFO << "The resolution returned is: " << (tubeTimeEast - tubeTimeWest)/2 << endm;
-        return (tubeTimeEast - tubeTimeWest)/2;
+
+        float result = tSum / ((float)(nWest + nEast));
+        LOG_INFO << "tof blur from vpd resolution (nEast + nWest = " << (nEast+nWest) << ": " << result << endm;
+        return result;
     }
 
     //! Loads Vpd Sim Params from database
@@ -84,11 +84,12 @@ public:
 	void loadVpdSimParams(const int date = 20160913, const int time = 175725, const char* Default_time = "2016-09-13 17:57:25")
 	{
     
-        St_db_Maker *dbMk = 0;
+        St_db_Maker *dbMk = dynamic_cast<St_db_Maker*>( GetChain()->GetMakerInheritsFrom("St_db_Maker") );
 
         TDataSet *DB = GetDataBase("Calibrations/tof/vpdSimParams");
+        
         if (!DB) {
-            LOG_INFO << "No data set found, creating new St_db_Maker..." << endm;
+            LOG_WARN << "No data set found, creating new St_db_Maker... with date/time" << date << "/" << time << endm;
             dbMk = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
             dbMk->SetDebug();
             dbMk->SetDateTime(date,time); //! event or run start time, set to your liking

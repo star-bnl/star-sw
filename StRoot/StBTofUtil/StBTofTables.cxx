@@ -1,10 +1,13 @@
 /*******************************************************************
  *
- * $Id: StBTofTables.cxx,v 1.2 2012/12/14 06:35:41 geurts Exp $
+ * $Id: StBTofTables.cxx,v 1.3 2017/10/03 22:54:45 geurts Exp $
  *
  *****************************************************************
  *
  * $Log: StBTofTables.cxx,v $
+ * Revision 1.3  2017/10/03 22:54:45  geurts
+ * restore access to TOF status table (Calibrations/tof/tofStatus)
+ *
  * Revision 1.2  2012/12/14 06:35:41  geurts
  * Changed global database calls to direct table access and/or removed deprecated database access code.
  *
@@ -41,7 +44,7 @@ void StBTofTables::loadTables(StMaker* maker) {
 
   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTrayConfig");
   if(!mDbTOFDataSet) {
-    LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
+    LOG_ERROR << "unable to access Calibrations TOF parameters for config" << endm;
     //    assert(mDbTOFDataSet);
     return; // kStErr;
   }
@@ -64,6 +67,12 @@ void StBTofTables::loadTables(StMaker* maker) {
   }
   if(maker->Debug()) { LOG_INFO << endm; }
 
+  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofStatus");
+  if(!mDbTOFDataSet) {
+    LOG_ERROR << "unable to access Calibrations TOF parameters for status" << endm;
+    //    assert(mDbTOFDataSet);
+    return; // kStErr;
+  }
   St_tofStatus* tofStatus = static_cast<St_tofStatus*>(mDbTOFDataSet->Find("tofStatus"));
   if(!tofStatus) {
     LOG_ERROR << "unable to get tof status table" << endm;

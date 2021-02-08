@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: VtxRecoMuDst.C,v 1.1 2017/05/24 05:14:13 genevb Exp $
+// $Id: VtxRecoMuDst.C,v 1.4 2017/10/03 20:55:22 genevb Exp $
 // Author: G. Van Buren (BNL)
 //
 // Description:
@@ -55,6 +55,7 @@ void loadLibs()
    gSystem->Load("St_db_Maker");
    gSystem->Load("Sti");
    gSystem->Load("StEEmcUtil");
+   gSystem->Load("StBTofUtil");
    gSystem->Load("StGenericVertexMaker");
 }
 
@@ -72,16 +73,10 @@ int VtxRecoMuDst(unsigned int nEventsUser, char* inputFileName, char* outputFile
    //                                          10      maximum number of file to read
 
    // Specify (active) branches to read but first disable all branches
-   muDstMaker.SetStatus("*", 0);
-   muDstMaker.SetStatus("*",0);
-   muDstMaker.SetStatus("MuEvent",1);
-   muDstMaker.SetStatus("GlobalTracks",1);
-   muDstMaker.SetStatus("CovGlobTrack",1);
-   muDstMaker.SetStatus("EmcTow",1);
-   muDstMaker.SetStatus("BTowHit",1);
-   muDstMaker.SetStatus("BTofHeader",1);
-   muDstMaker.SetStatus("StStMuMcVertex",1);
-   muDstMaker.SetStatus("StStMuMcTrack",1);
+   muDstMaker.SetStatus("*",1);
+   muDstMaker.SetStatus("PrimaryTracks",0);
+   muDstMaker.SetStatus("PrimaryVertices",0);
+
 
    TChain& muDstChain = *muDstMaker.chain();
    unsigned int nEntries      = muDstChain.GetEntries();
@@ -90,7 +85,7 @@ int VtxRecoMuDst(unsigned int nEventsUser, char* inputFileName, char* outputFile
 
    // Create new branch
    TClonesArray* verticesRefitted = new TClonesArray("StMuPrimaryVertex", 1000);
-   TFile* outFile = new TFile(outputFileName, "RECREATE");
+   TFile* outFile      = new TFile(outputFileName, "RECREATE");
    TTree* muDstTreeOut = muDstChain.CloneTree(0);
    muDstTreeOut->Branch("PrimaryVertices", &verticesRefitted, 65536, 99);
 
@@ -129,7 +124,7 @@ int VtxRecoMuDst(unsigned int nEventsUser, char* inputFileName, char* outputFile
       fullChain.Clear();
    }
 
-   muDstTreeOut->Write();
+   outFile->Write();
    outFile->Close();
 
    delete st_db_maker;
@@ -140,6 +135,15 @@ int VtxRecoMuDst(unsigned int nEventsUser, char* inputFileName, char* outputFile
 /////////////////////////////////////////////////////////////////////////////
 //
 // $Log: VtxRecoMuDst.C,v $
+// Revision 1.4  2017/10/03 20:55:22  genevb
+// Add StBTofUtil lib dependence
+//
+// Revision 1.3  2017/09/28 13:54:07  jeromel
+// Fix from Leszek Adamczyk
+//
+// Revision 1.2  2017/08/24 19:38:19  genevb
+// Correct the MuDst branches loaded - old primary tracks and vertices no longer kept
+//
 // Revision 1.1  2017/05/24 05:14:13  genevb
 // Introduce new macro to re-find vertices in MuDsts
 //

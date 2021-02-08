@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.154 2017/03/02 18:24:50 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.163 2017/10/03 20:43:23 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -973,7 +973,18 @@ Bfc_st BFC[] = {
    , "Base chain for run 2017 data (tpc)",kFALSE},
   {"pp2017","" ,"",
    "B2017,Sti,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
-   , "","","Base chain for year 2017 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+   , "","","Base chain for year 2017 pp data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"P2017","" ,"",
+   "B2017,Sti,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   , "","","Base chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"B2017a" ,"","","ry2017a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
+   , "Production chain for run 2017 data (tpc)",kFALSE},
+  {"pp2017a","" ,"",
+   "B2017a,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline3D,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   , "","","Production chain for year 2017 pp data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"P2017a","" ,"",
+   "B2017a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   , "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
@@ -1085,6 +1096,7 @@ Bfc_st BFC[] = {
   {"hitreuseon" ,"" ,"","","" ,"","...do re-use hits for other tracks in Sti",kFALSE},
   {"usePct4Vtx" ,"" ,"","","" ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
   {"useBTOF4Vtx" ,"" ,"","","" ,"","Use BTOF track matching for vertex ranking",kFALSE},
+  {"useBTOFmatchOnly","","","useBTOF4Vtx","" ,"","Use BTOF track matching only",kFALSE},
   {"svt1hit" ,"" ,"","","" ,"","Use 1 SVT hit only combination",kFALSE},
   {"onlcl" ,"" ,"","","" ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,"" ,"","","" ,"","Read/use TPC raw hits",kFALSE},
@@ -1206,6 +1218,7 @@ Bfc_st BFC[] = {
   {"fgtDb" ,"fgtDb","","db,fgtutil", "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb" ,"pxlDb","","tpcDb PxlUtil", "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb" ,"istDb","","tpcDb", "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
+  {"epdDb" ,"epdDb","","epdDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1323,6 +1336,8 @@ Bfc_st BFC[] = {
   {"Event" , "","","MakeEvent", "","","Request to initialize event",kFALSE},
   {"pxlFastSim" ,"","","StMcEvent,StEvent"
    , "StPxlSimMaker","StPxlSimMaker","PXL Fast Simulator",kFALSE},
+  {"pxlSlowSim" ,"","","StMcEvent,StEvent"
+   , "StPxlSimMaker","StPxlSimMaker","PXL Slow Simulator",kFALSE},
   {"pxlRaw" ,"","","pxlDb", "StPxlRawHitMaker", "StPxlRawHitMaker", "PXL raw hit maker",kFALSE},
   {"pxlCluster" ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker", "PXL cluster maker",kFALSE},
   {"pxlHit" ,"","","event pxlCluster", "StPxlHitMaker", "StPxlHitMaker", "PXL hit maker",kFALSE},
@@ -1378,7 +1393,7 @@ Bfc_st BFC[] = {
   {"vpdSim" ,"","VpdChain","BTofUtil","StVpdSimMaker","StEvent,StMcEvent,StBTofHitMaker,StVpdSimMaker"
    , "Vpd Simulator",kFALSE},
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker" ,"StVpdCalibMaker","VPD calibration",kFALSE},
-  {"btofSim" ,"","BTofChain","BTofUtil",
+  {"btofSim" ,"","BTofChain","BTofUtil" ,"StBTofSimMaker",
                        "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
   {"btofMixer" ,"","BTofChain","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
    , "BTof Mixer",kFALSE},
@@ -1436,8 +1451,9 @@ Bfc_st BFC[] = {
   {"VFMinuit3" ,"" ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 3",kFALSE},
   {"VFFV" ,"" ,"","genvtx" ,"","","... Fixed dummy VF method",kFALSE},
   {"VFMCE" ,"" ,"","genvtx" ,"","","... Fixed vertex from MCEvent",kFALSE},
-  {"VFppLMV" ,"" ,"","genvtx" ,"","","...VertexMaker will use ppLMV method",kFALSE},
-  {"VFppLMV5" ,"" ,"","VFppLMV" ,"","","...VertexMaker will use ppLMV method (tuned)",kFALSE},
+  {"VFppLMV" ,"" ,"","genvtx" ,"","","... VertexMaker will use ppLMV method",kFALSE},
+  {"VFppLMV5" ,"" ,"","VFppLMV" ,"","","... VertexMaker will use ppLMV method (tuned)",kFALSE},
+  {"VFStoreX" ,"" ,"","" ,"","","... VertexMaker will use save at least 100 vertices",kFALSE},
   {"StiPulls" ,"","","" ,"","", "Request to make Sti Pulls",kFALSE},
   {"StvPulls" ,"","","" ,"","", "Request to make Stv Pulls",kFALSE},
   {"StiLib" ,"","","" ,"","Sti,StiUtilities","Load Sti",kFALSE},
@@ -1504,9 +1520,9 @@ Bfc_st BFC[] = {
   {"mtdMatch" ,"","","db,MtdUtil", "StMtdMatchMaker","StMtdMatchMaker","TPC-MTD track matching",kFALSE},
   {"mtdCalib" ,"","","db", "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
   {"mtdEvtFilt" ,"","","db", "StMtdEvtFilterMaker","StMtdEvtFilterMaker","MTD event filter" ,kFALSE},
-  {"FindVtxSeed" ,"FindVtxSeed" ,"","globT,MuDSTDeps","StVertexSeedMaker"
+  {"FindVtxSeed" ,"FindVtxSeed" ,"","globT,MuDSTDeps,picoDst","StVertexSeedMaker"
    , "StPass0CalibMaker", "Performs vertex seed finding",kFALSE},
-  {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
+  {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps,picoDst","StEvtVtxSeedMaker"
    , "StPass0CalibMaker","Performs vertex seed finding using StEvent",kFALSE},
   {"Ftpc" ,"ftpcChain" ,"","ftpcT,fcl,fpt" ,"StMaker","StChain","",kFALSE},
   {"fss" ,"ftpc_raw","ftpcChain","SCL,Simu","StFtpcSlowSimMaker"
@@ -1537,10 +1553,10 @@ Bfc_st BFC[] = {
    , "Xis AND V0s from StEvent",kFALSE},
   {"V0svt" ,"","","" ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Xisvt" ,"","","" ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
-  {"SCEbyE" ,"scebye","","MuDSTDeps","StSpaceChargeEbyEMaker","StMuDSTMaker,StPass0CalibMaker"
-   , "Determine EbyE SpaceCharge using StEvent",kFALSE},
-  {"SCScalerCal" ,"scscalercal","","MuDSTDeps","StSpaceChargeEbyEMaker","StMuDSTMaker,StPass0CalibMaker"
-   , "Calibrate SpaceCharge scalers",kFALSE},
+  {"SCEbyE" ,"scebye","","MuDSTDeps,picoDst","StSpaceChargeEbyEMaker"
+   , "StMuDSTMaker,StPass0CalibMaker","Determine EbyE SpaceCharge using StEvent",kFALSE},
+  {"SCScalerCal" ,"scscalercal","","MuDSTDeps,picoDst","StSpaceChargeEbyEMaker"
+   , "StMuDSTMaker,StPass0CalibMaker","Calibrate SpaceCharge scalers",kFALSE},
   {"compend" ,"","","event,detDb","StEventCompendiumMaker","StEventCompendiumMaker"
    , "Fill event summary in ITTF Chain",kFALSE},
   {"TpcAligner" ,"","","Alignment" ,"StTpcAlignerMaker","StTpcAlignerMaker","TpcAligner",kFALSE},
@@ -1566,8 +1582,8 @@ Bfc_st BFC[] = {
   {"RMuDST" ,"","","CMuDST" ,"","","reads Common MuDST, do not disactivate if no output files",kFALSE},
   {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"Writes picoDST format",kFALSE},
   {"picoRead" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"WritesRead picoDST format",kFALSE},
-  {"PicoVtxDefault","","","" ,"","pico Vtx default mode",kFALSE},
-  {"PicoVtxVpd","","","" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxDefault" ,"","","" ,"" ,"","pico Vtx default mode",kFALSE},
+  {"PicoVtxVpd" ,"","","" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
   {"St_geom" ,"" ,"","" , "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display" ,"","","", "","","WARNING *** Option is OBSOLETE *** use Ed.C macro instead",kFALSE},
   {"Mc" ,"McChain","McEvent","sim_T,globT,McAss,McAna" ,"StMaker","StChain","",kFALSE},
@@ -2571,7 +2587,18 @@ Bfc_st BFC[] = {
    , "Base chain for run 2017 data (tpc)",kFALSE},
   {"pp2017","" ,"",
    "B2017,Sti,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
-   , "","","Base chain for year 2017 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+   , "","","Base chain for year 2017 pp data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"P2017","" ,"",
+   "B2017,Sti,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   , "","","Base chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"B2017a" ,"","","ry2017a,in,tpcX,CorrX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite","",""
+   , "Production chain for run 2017 data (tpc)",kFALSE},
+  {"pp2017a","" ,"",
+   "B2017a,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline3D,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   , "","","Production chain for year 2017 pp data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"P2017a","" ,"",
+   "B2017a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,beamline3D,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   , "","","Production chain for year 2017 AA data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
@@ -2683,6 +2710,7 @@ Bfc_st BFC[] = {
   {"hitreuseon" ,"" ,"","","" ,"","...do re-use hits for other tracks in Sti",kFALSE},
   {"usePct4Vtx" ,"" ,"","","" ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
   {"useBTOF4Vtx" ,"" ,"","","" ,"","Use BTOF track matching for vertex ranking",kFALSE},
+  {"useBTOFmatchOnly","","","useBTOF4Vtx","" ,"","Use BTOF track matching only",kFALSE},
   {"svt1hit" ,"" ,"","","" ,"","Use 1 SVT hit only combination",kFALSE},
   {"onlcl" ,"" ,"","","" ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,"" ,"","","" ,"","Read/use TPC raw hits",kFALSE},
@@ -2804,6 +2832,7 @@ Bfc_st BFC[] = {
   {"fgtDb" ,"fgtDb","","db,fgtutil", "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb" ,"pxlDb","","tpcDb PxlUtil", "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb" ,"istDb","","tpcDb", "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
+  {"epdDb" ,"epdDb","","epdDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -2921,6 +2950,8 @@ Bfc_st BFC[] = {
   {"Event" , "","","MakeEvent", "","","Request to initialize event",kFALSE},
   {"pxlFastSim" ,"","","StMcEvent,StEvent"
    , "StPxlSimMaker","StPxlSimMaker","PXL Fast Simulator",kFALSE},
+  {"pxlSlowSim" ,"","","StMcEvent,StEvent"
+   , "StPxlSimMaker","StPxlSimMaker","PXL Slow Simulator",kFALSE},
   {"pxlRaw" ,"","","pxlDb", "StPxlRawHitMaker", "StPxlRawHitMaker", "PXL raw hit maker",kFALSE},
   {"pxlCluster" ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker", "PXL cluster maker",kFALSE},
   {"pxlHit" ,"","","event pxlCluster", "StPxlHitMaker", "StPxlHitMaker", "PXL hit maker",kFALSE},
@@ -2976,7 +3007,7 @@ Bfc_st BFC[] = {
   {"vpdSim" ,"","VpdChain","BTofUtil","StVpdSimMaker","StEvent,StMcEvent,StBTofHitMaker,StVpdSimMaker"
    , "Vpd Simulator",kFALSE},
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker" ,"StVpdCalibMaker","VPD calibration",kFALSE},
-  {"btofSim" ,"","BTofChain","BTofUtil",
+  {"btofSim" ,"","BTofChain","BTofUtil" ,"StBTofSimMaker",
                        "StEvent,StMcEvent,StTofUtil,StBTofHitMaker,StBTofSimMaker","BTOF Simulator",kFALSE},
   {"btofMixer" ,"","BTofChain","BTofUtil","StBTofMixerMaker","StEvent,StBTofHitMaker,StBTofMixerMaker"
    , "BTof Mixer",kFALSE},
@@ -3034,8 +3065,9 @@ Bfc_st BFC[] = {
   {"VFMinuit3" ,"" ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 3",kFALSE},
   {"VFFV" ,"" ,"","genvtx" ,"","","... Fixed dummy VF method",kFALSE},
   {"VFMCE" ,"" ,"","genvtx" ,"","","... Fixed vertex from MCEvent",kFALSE},
-  {"VFppLMV" ,"" ,"","genvtx" ,"","","...VertexMaker will use ppLMV method",kFALSE},
-  {"VFppLMV5" ,"" ,"","VFppLMV" ,"","","...VertexMaker will use ppLMV method (tuned)",kFALSE},
+  {"VFppLMV" ,"" ,"","genvtx" ,"","","... VertexMaker will use ppLMV method",kFALSE},
+  {"VFppLMV5" ,"" ,"","VFppLMV" ,"","","... VertexMaker will use ppLMV method (tuned)",kFALSE},
+  {"VFStoreX" ,"" ,"","" ,"","","... VertexMaker will use save at least 100 vertices",kFALSE},
   {"StiPulls" ,"","","" ,"","", "Request to make Sti Pulls",kFALSE},
   {"StvPulls" ,"","","" ,"","", "Request to make Stv Pulls",kFALSE},
   {"StiLib" ,"","","" ,"","Sti,StiUtilities","Load Sti",kFALSE},
@@ -3102,9 +3134,9 @@ Bfc_st BFC[] = {
   {"mtdMatch" ,"","","db,MtdUtil", "StMtdMatchMaker","StMtdMatchMaker","TPC-MTD track matching",kFALSE},
   {"mtdCalib" ,"","","db", "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
   {"mtdEvtFilt" ,"","","db", "StMtdEvtFilterMaker","StMtdEvtFilterMaker","MTD event filter" ,kFALSE},
-  {"FindVtxSeed" ,"FindVtxSeed" ,"","globT,MuDSTDeps","StVertexSeedMaker"
+  {"FindVtxSeed" ,"FindVtxSeed" ,"","globT,MuDSTDeps,picoDst","StVertexSeedMaker"
    , "StPass0CalibMaker", "Performs vertex seed finding",kFALSE},
-  {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
+  {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps,picoDst","StEvtVtxSeedMaker"
    , "StPass0CalibMaker","Performs vertex seed finding using StEvent",kFALSE},
   {"Ftpc" ,"ftpcChain" ,"","ftpcT,fcl,fpt" ,"StMaker","StChain","",kFALSE},
   {"fss" ,"ftpc_raw","ftpcChain","SCL,Simu","StFtpcSlowSimMaker"
@@ -3135,10 +3167,10 @@ Bfc_st BFC[] = {
    , "Xis AND V0s from StEvent",kFALSE},
   {"V0svt" ,"","","" ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Xisvt" ,"","","" ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
-  {"SCEbyE" ,"scebye","","MuDSTDeps","StSpaceChargeEbyEMaker","StMuDSTMaker,StPass0CalibMaker"
-   , "Determine EbyE SpaceCharge using StEvent",kFALSE},
-  {"SCScalerCal" ,"scscalercal","","MuDSTDeps","StSpaceChargeEbyEMaker","StMuDSTMaker,StPass0CalibMaker"
-   , "Calibrate SpaceCharge scalers",kFALSE},
+  {"SCEbyE" ,"scebye","","MuDSTDeps,picoDst","StSpaceChargeEbyEMaker"
+   , "StMuDSTMaker,StPass0CalibMaker","Determine EbyE SpaceCharge using StEvent",kFALSE},
+  {"SCScalerCal" ,"scscalercal","","MuDSTDeps,picoDst","StSpaceChargeEbyEMaker"
+   , "StMuDSTMaker,StPass0CalibMaker","Calibrate SpaceCharge scalers",kFALSE},
   {"compend" ,"","","event,detDb","StEventCompendiumMaker","StEventCompendiumMaker"
    , "Fill event summary in ITTF Chain",kFALSE},
   {"TpcAligner" ,"","","Alignment" ,"StTpcAlignerMaker","StTpcAlignerMaker","TpcAligner",kFALSE},
@@ -3164,8 +3196,8 @@ Bfc_st BFC[] = {
   {"RMuDST" ,"","","CMuDST" ,"","","reads Common MuDST, do not disactivate if no output files",kFALSE},
   {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"Writes picoDST format",kFALSE},
   {"picoRead" ,"","PicoChain","picoDst","StPicoDstMaker","" ,"WritesRead picoDST format",kFALSE},
-  {"PicoVtxDefault","","","" ,"","pico Vtx default mode",kFALSE},
-  {"PicoVtxVpd","","","" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
+  {"PicoVtxDefault" ,"","","" ,"" ,"","pico Vtx default mode",kFALSE},
+  {"PicoVtxVpd" ,"","","" ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
   {"St_geom" ,"" ,"","" , "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display" ,"","","", "","","WARNING *** Option is OBSOLETE *** use Ed.C macro instead",kFALSE},
   {"Mc" ,"McChain","McEvent","sim_T,globT,McAss,McAna" ,"StMaker","StChain","",kFALSE},
@@ -3752,18 +3784,23 @@ Int_t StBFChain::Instantiate()
         gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
         mk->SetAttr("VFPPVEvNoBtof", kTRUE);
       }
-      if (GetOption("VFPPVnoCTB" ) ) mk->SetAttr("VFPPVnoCTB" 	, kTRUE);
-      if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, kTRUE);
-      if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, kTRUE);
-      if (GetOption("VFMinuit2"  ) ) mk->SetAttr("VFMinuit2"  	, kTRUE);
-      if (GetOption("VFMinuit3"  ) ) mk->SetAttr("VFMinuit3"  	, kTRUE);
-      if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, kTRUE);
-      if (GetOption("beamLine3D" ) ) mk->SetAttr("BeamLine3D"  	, kTRUE);
-      if (GetOption("CtbMatchVtx") ) mk->SetAttr("CTB"        	, kTRUE);
-      if (GetOption("min2trkVtx" ) ) mk->SetAttr("minTracks" 	, 2);
-      if (GetOption("VtxSeedCalG") ) mk->SetAttr("calibBeamline", kTRUE);
-      if (GetOption("usePct4Vtx" ) ) mk->SetAttr("PCT"          , kTRUE);
-      if (GetOption("useBTOF4Vtx") ) mk->SetAttr("BTOF"         , kTRUE);
+      if (GetOption("VFPPVnoCTB" ) )      mk->SetAttr("VFPPVnoCTB" 	, kTRUE);
+      if (GetOption("VFFV"       ) )      mk->SetAttr("VFFV"       	, kTRUE);
+      if (GetOption("VFMCE"      ) )      mk->SetAttr("VFMCE"      	, kTRUE);
+      if (GetOption("VFMinuit2"  ) )      mk->SetAttr("VFMinuit2"  	, kTRUE);
+      if (GetOption("VFMinuit3"  ) )      mk->SetAttr("VFMinuit3"  	, kTRUE);
+      if (GetOption("beamLine"   ) )      mk->SetAttr("BeamLine"   	, kTRUE);
+      if (GetOption("beamLine3D" ) )      mk->SetAttr("BeamLine3D"  	, kTRUE);
+      if (GetOption("CtbMatchVtx") )      mk->SetAttr("CTB"        	, kTRUE);
+      if (GetOption("min2trkVtx" ) )      mk->SetAttr("minTracks" 	, 2);
+      if (GetOption("VtxSeedCalG") )      mk->SetAttr("calibBeamline" 	, kTRUE);
+      if (GetOption("usePct4Vtx" ) )      mk->SetAttr("PCT"           	, kTRUE);
+      if (GetOption("useBTOF4Vtx") )      mk->SetAttr("BTOF"          	, kTRUE);
+      if (GetOption("useBTOFmatchOnly") ) mk->SetAttr("useBTOFmatchOnly", kTRUE);
+
+      // X-tended works only for VFPPV, VFPPVnoCTB, VFPPVev for now but could be re-used
+      // However, we will change this to a more flexible arbitrarry setting later
+      if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100); 
       mk->PrintAttr();
     }
     if (maker=="StKFVertexMaker") {
@@ -3899,6 +3936,8 @@ Int_t StBFChain::Instantiate()
       cmd += "Ximk->SetXiLanguageUsage(5);";
       ProcessLine(cmd);
     }
+
+    // TPC
     if (maker == "StTpcRTSHitMaker") {
       if ( GetOption("TpxClu2D")) mk->SetAttr("TpxClu2D", kTRUE);
     }
@@ -3968,12 +4007,16 @@ Int_t StBFChain::Instantiate()
 	 maker == "StFtpcTrackMaker"    )  &&
 	GetOption("fgain"))                    mk->SetMode(mk->GetMode()+4);
 
-    // FTPC
 
     // PMD
     if ( maker == "StPmdReadMaker"         &&
          GetOption("pmdRaw"))                  mk->SetAttr("pmdRaw",kTRUE);
-    // PMD
+
+    // HFT
+    if (maker == "StPxlSimMaker"           &&
+	GetOption("pxlSlowSim"))               mk->SetAttr("useDIGMAPSSim",kTRUE);
+
+
 
     // Hit filtering will be made from a single maker in
     // future with flexible filtering method
@@ -4254,7 +4297,7 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
   //
   // Gopt for arbitrary property on 3 letter name (wildcard would be added) and length
   // 6 for a value. Not advertized / not used and implementation is not complete (needed
-  // a case and di not have a clear one). TBD.
+  // a case and do not have a clear one). TBD.
   //
   // 2011/11 added the possibility of detector sub-system specific timestamps.
   // DBV only for now, logic is similar if we equally parse.
@@ -4388,6 +4431,8 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  }
 
 	} else if ( Tag.BeginsWith("gopt") && Tag.Length() == 13){
+	  // TODO option best as gopt.$ATTRR.$VAL for arbitrary attribute and value
+	  //      parsing to extend
 	  char GOptName[4],GOptValue[7];
 	  //TString property(".gopt.");
 	  //TString pattern("*");
