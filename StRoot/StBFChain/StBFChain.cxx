@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.647 2017/12/08 20:15:55 jwebb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.646 2017/10/23 11:25:48 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -938,9 +938,9 @@ Int_t StBFChain::Init() {
 
 
     if (fNoChainOptions) {
-      if (GetOption("misalign") && TClass::GetClass("AgPosition") ) 
+      if (GetOption("misalign") ) 
 	gROOT->ProcessLine("AgPosition::SetReal();");
-      else if ( TClass::GetClass("AgPosition") )                        
+      else                        
 	gROOT->ProcessLine("AgPosition::SetIdeal();");
     }
 

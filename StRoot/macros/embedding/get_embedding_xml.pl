@@ -4,11 +4,8 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.35 2017/12/06 06:54:39 zhux Exp $
+# $Id: get_embedding_xml.pl,v 1.34 2017/11/17 13:02:36 zhux Exp $
 # $Log: get_embedding_xml.pl,v $
-# Revision 1.35  2017/12/06 06:54:39  zhux
-# open read permission for log file.
-#
 # Revision 1.34  2017/11/17 13:02:36  zhux
 # added 'StarDb' and 'Input' to sandbox
 #
@@ -505,7 +502,7 @@ printDebug("Set errfilename: $errFileName ...");
 print OUT "<!-- Move LOG files and csh to eliza disk, remove list files -->\n";
 print OUT "cp -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.log \$EMOUTPUT/$logFileName\n";
 #print OUT "cp -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog \$EMOUTPUT/$errFileName\n";
-print OUT "chmod 664 \$EMOUTPUT/$logFileName\n";
+print OUT "chmod g+w \$EMOUTPUT/$logFileName\n";
 print OUT "rm -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.log\n";
 print OUT "rm -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.oldlog\n";
 print OUT "rm -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.oldelog\n";

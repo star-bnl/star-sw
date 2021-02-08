@@ -1231,7 +1231,7 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"tables"      ,"","","StDbT,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,sim_T,svt_T,tpc_T","","","",kFALSE},
+  {"tables","","","StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,sim_T,svt_T,tpc_T","","","",kFALSE},
   {"StDbT"       ,""  ,"","",""                                   ,"StDb_Tables","Load StDb_Tables",kFALSE},
   {"ctf_T"       ,""  ,"","",""                                     ,"ctf_Tables","Load ctf_Tables",kFALSE},
   {"ebyeT"       ,""  ,"","",""                                   ,"ebye_Tables","Load ebye_Tables",kFALSE},
@@ -1626,8 +1626,8 @@ Bfc_st BFC[] = { // standard chains
   {"fgtPoint"   ,"","", "event",      "StFgtPointMaker",    "StFgtPointMaker", "Creates FGT points",kFALSE},
 
   // Some global Sti stuff including vertexing
-  {"genvtx"    ,""  ,"","EEmcUtil","StGenericVertexMaker"
-   ,                        "Minuit,StGenericVertexMakerNoSti"
+  {"genvtx","","","ctf_T,EEmcUtil","StGenericVertexMaker"
+   ,"ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMakerNoSti"
    ,                                "Generic Vertex Finder library (default is MinuitVertexFinder)",kFALSE},
   {"VFMinuit"  ,""  ,""  ,"genvtx"                   ,"","","... Generic VF will use Minuit method",kFALSE},
   {"CtbMatchVtx"    ,""  ,"","VFMinuit",""              ,"","... CTB Matching ON in Vertex Finding",kFALSE},
@@ -1661,11 +1661,11 @@ Bfc_st BFC[] = { // standard chains
    ,                                                        "","Enables complete Hft (PXL+IST+SST)",kFALSE},
 
   // depends on Sti symbols
-  {"VFPPV"    ,""  ,"","      eemcDb,StiLib,-VFMinuit,-VFMinuit2,-VFMinuit3,","StGenericVertexMaker"
-   ,                                "Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
+  {"VFPPV"    ,""  ,"","ctf_T,eemcDb,StiLib,-VFMinuit,-VFMinuit2,-VFMinuit3,","StGenericVertexMaker"
+   ,        "ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
   {"VFPPVnoCTB"     ,""  ,"","VFPPV",""                ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
-  {"VFPPVEv"    ,""     ,""	,"eemcDb"	,"StGenericVertexMaker"
-   ,                        "Minui,StGenericVertexMaker"          ,"... StEvent based VFPPV, noCTB",kFALSE},
+  {"VFPPVEv"    ,""     ,""	,"ctf_T,eemcDb"	,"StGenericVertexMaker"
+   ,"ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker"	,  "... StEvent based VFPPV, noCTB",kFALSE},
   {"VFPPVEvNoBtof"     	,""  ,""	,"VFPPVEv"	,""	     ,"","...VFPPVEv with no Btof ",kFALSE},
 
 

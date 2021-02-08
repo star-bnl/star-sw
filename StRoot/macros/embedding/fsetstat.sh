@@ -27,12 +27,12 @@ else
    outp="/global/projecta/projectdirs/starprod/embedding"
 fi
 
-part=`grep -a "\-particle" $PWD/preparexmlslr.sh | awk -F"-particle |-mode" '{print $2}'`
+part=`grep "\-particle" $PWD/preparexmlslr.sh | awk -F"-particle |-mode" '{print $2}'`
 particle=`echo $part`
-trg=`grep -a "\-trg" $PWD/preparexmlslr.sh | awk -F"-trg |-production" '{print $2}'`
+trg=`grep "\-trg" $PWD/preparexmlslr.sh | awk -F"-trg |-production" '{print $2}'`
 trgset=`echo $trg`
-reqid=`grep -a "\-r" $PWD/preparexmlslr.sh | awk '{print $2}'`
-daqdir=`grep -a "\-daq" $PWD/preparexmlslr.sh | awk '{print $2}'`
+reqid=`grep "\-r" $PWD/preparexmlslr.sh | awk '{print $2}'`
+daqdir=`grep "\-daq" $PWD/preparexmlslr.sh | awk '{print $2}'`
 ndaq=`find $daqdir/*.daq | wc -l`
 
 for (( ifset=$begin ; $ifset - $end ; ifset++ ))
@@ -65,7 +65,7 @@ if [ -f tmplog.txt ] ; then
    rm -f tmplog.txt
 fi
 gzip -cd $i | tail -n 1000 > tmplog.txt
-jtime=`grep -a "StChain::Embedding" tmplog.txt | awk -F '=' '{print $2}' | awk '{print $1}'`
+jtime=`grep "StChain::Embedding" tmplog.txt | awk -F '=' '{print $2}' | awk '{print $1}'`
 if [ -z $jtime ] ; then
    echo CAUTION: corrupted task found!
    echo $i
@@ -73,9 +73,9 @@ if [ -z $jtime ] ; then
 fi
 count=$(($count+1))
 total=`echo "$total+$jtime" |bc -l`
-nevents=`grep -a "Total events processed" tmplog.txt | awk -F ':' '{print $4}' | awk '{print $1}'`
+nevents=`grep "Total events processed" tmplog.txt | awk -F ':' '{print $4}' | awk '{print $1}'`
 #echo $nevents events in this daq file
-nanaevents=`grep -a "StAnalysisMaker::Finish" tmplog.txt | awk '{print $5}'`
+nanaevents=`grep "StAnalysisMaker::Finish" tmplog.txt | awk '{print $5}'`
 #echo $nanaevents events accepted for embedding in this daq file
 allevts=`echo "$allevts+$nevents" |bc -l`
 storedevts=`echo "$storedevts+$nanaevents" |bc -l`
@@ -85,7 +85,7 @@ if [ -f tmplog.txt ] ; then
 fi
 
 echo "Scanned Fset# $ifset data:" 
-echo "total # of daq files:" $ndaq "; total # of good log files:" $count "; total # of daq events:" $allevts
+echo "total # of daq files:" $ndaq "; total # of log files:" $count "; total # of daq events:" $allevts
 echo "total # of embedded events:" $storedevts "; total CPU*Hours:" `echo "$total/3600+0.5" | bc -l | cut -d. -f1` "; average CPU*Hours per daq file:" `echo "$total/$count/3600+0.5" | bc -l | cut -d. -f1`
 if [ $count -lt $ndaq ] ; then
    echo CAUTION: $(($ndaq-$count))/$ndaq daq files have not been processed properly!

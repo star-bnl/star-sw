@@ -74,7 +74,7 @@ StPidStatus::StPidStatus(StMuTrack *muTrack) : PiDStatus(-1) {
 }
 //________________________________________________________________________________
 void StPidStatus::Set() {
-  if (! fI70.fPiD && ! fFit.fPiD && ! fdNdx.fPiD) return;
+  if (! fI70.fPiD || ! fFit.fPiD || ! fdNdx.fPiD) return;
   PiDStatus = 0;
   Double_t pMomentum = g3.mag();
   //  Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());

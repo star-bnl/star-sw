@@ -34,7 +34,7 @@ allgood=""
 #echo "#!/bin/sh" > $subfile
 echo "cd "$PWD > $subfile
 
-for i in `find $PWD/*.session.xml`
+for i in `find $PWD -name "*.session.xml"`
 do
    echo found a session.xml file:
    ls -l $i
@@ -56,14 +56,14 @@ do
    cshdir=`echo $cshdirtmp | awk '{print $3}' |xargs dirname`
    echo csh script directory: $cshdir
 
-   nlogs=`find ${datadir}${particle}_${fset}_${reqid}/ -name "*.log.gz" |wc -l`
+   nlogs=`find ${datadir}/${particle}_${fset}_${reqid}/ -name "*.log.gz" |wc -l`
    echo Number of non-zero size log files: $nlogs
 
    #if [ $nlogs -lt 890 ] ; then
    echo "checking FSET "$fset"..."
    echo -n "sbatch --array=" >> $subfile
-   find ${datadir}${particle}_${fset}_${reqid}/ -name "*.log.gz" > tmplog.list
-   find ${datadir}${particle}_${fset}_${reqid}/ -name "*.minimc.root" > tmpminimc.list
+   find ${datadir}/${particle}_${fset}_${reqid}/ -name "*.log.gz" > tmplog.list
+   find ${datadir}/${particle}_${fset}_${reqid}/ -name "*.minimc.root" > tmpminimc.list
    #fi
 
    nfailed=0
@@ -72,7 +72,6 @@ do
 	logfile=`grep "${bn}_${ijob}\." tmplog.list`
 	#echo $logfile
 	if [ -z "$logfile" ] ; then
-	   echo "found one possible failed task, ${bn}_${ijob}, no log file!"
 	   if [ $nfailed -ne "0" ] ; then
 		echo -n "," >> $subfile
 	   fi
@@ -90,9 +89,9 @@ do
 		eofcheck=`zgrep "StIOMaker::Make() == StEOF" $logfile`
 		zeroevent=`zgrep "StAnalysisMaker::Finish() Processed 0 events" $logfile`
 		if [[ -z "$eofcheck" || -z "$zeroevent" ]] ; then
-		   echo "found one possible failed task, ${bn}_${ijob}, its log file is:"
+		   echo "found one possible failed task, its log file is:"
 		   echo $logfile
-		   cshfile=`find ${datadir}${particle}_${reqid}/ -name "sched${bn}_${ijob}.csh"`
+		   cshfile=`find ${datadir}/${particle}_${reqid}/ -name "sched${bn}_${ijob}.csh"`
 		   if [ ! -z "$cshfile" ] ; then
 			echo "its csh file has been moved to $cshfile"
 			echo "move it back to $cshdir"
