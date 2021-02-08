@@ -279,7 +279,8 @@
                 <Create block="MTRA"  />
                 <Placement y="0" x="MTDG_Radii(Ntray)+(MTRY_SupFullH+MTRY_height+MTRY_StripT)/2.0" z="-128.81" block="MTRA"  >
                 </Placement>
-                
+
+            </Do>                
 
                 <Create block="MPMT"  />
                 <Placement y="0" x="3.12/2+1.5+MTDG_Rpmtin" z="0" block="MPMT"  >
@@ -289,7 +290,6 @@
                 <Placement y="0" x="2.50/2.+MTDG_Rmrpcin" z="-128.81" block="MMRP"  >
                 </Placement>
                 
-            </Do>
             
 
         </Block>

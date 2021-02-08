@@ -1,0 +1,10 @@
+MACRO geom tag=y2017
+DETP GEOM [tag]
+GEXE $STAR_LIB/StarAgmlUtil.so
+library=.$ENV(STAR_HOST_SYS)/lib
+IF $FEXIST([library]) .eq. 1 THEN
+   GEXE [library]/xgeometry.so
+ELSE
+   GEXE $STAR_LIB/xgeometry.so
+ENDIF
+RETURN

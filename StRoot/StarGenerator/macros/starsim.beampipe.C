@@ -15,7 +15,7 @@ class StarGenEvent;
 StarGenEvent   *event       = 0;
 
 class StarPrimaryMaker;
-StarPrimaryMaker *primary = 0;
+StarPrimaryMaker *_primary = 0;
 
 class StarHijing;
 StarHijing *hijing = 0;
@@ -134,8 +134,8 @@ void vertex()
   Double_t x = circle.X();
   Double_t y = circle.Y();
 
-  primary->SetSigma ( 0, 0, 0, 0);
-  primary->SetVertex( x, y, z );
+  _primary->SetSigma ( 0, 0, 0, 0);
+  _primary->SetVertex( x, y, z );
   
 
 };
@@ -242,10 +242,10 @@ void starsim( const Char_t *basename="rcf14000",
   // Create the primary event generator and insert it
   // before the geant maker
   //
-  primary = new StarPrimaryMaker();
+  _primary = new StarPrimaryMaker();
   {
-    primary -> SetFileName( Form("%s.genevents.root",name.Data()) );
-    chain -> AddBefore( "geant", primary );
+    _primary -> SetFileName( Form("%s.genevents.root",name.Data()) );
+    chain -> AddBefore( "geant", _primary );
   }
 
 
@@ -262,8 +262,8 @@ void starsim( const Char_t *basename="rcf14000",
   // For more configuration options, see the HIJING manual
   // http://ntc0.lbl.gov/~xnwang/hijing/doc.html
 
-  primary -> AddGenerator(hijing);
-  primary -> SetCuts( 1.0E-6 , -1., -2.5, +2.5 );
+  _primary -> AddGenerator(hijing);
+  _primary -> SetCuts( 1.0E-6 , -1., -2.5, +2.5 );
 
 
 
@@ -271,7 +271,7 @@ void starsim( const Char_t *basename="rcf14000",
   //
   // Initialize primary event generator and all sub makers
   //
-  primary -> Init();
+  _primary -> Init();
 
   hijing->SetImpact(0.0, 30.0);       // Impact parameter min/max (fm)    0.   30.
   hijing->hiparnt().ihpr2(4)  = 0;    // Jet quenching (1=yes/0=no)       0

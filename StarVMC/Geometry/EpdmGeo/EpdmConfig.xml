@@ -1,0 +1,39 @@
+<Document  file="StarVMC/Geometry/EpdmGeo/EpdmConfig.xml">
+ 
+  <Detector name="EPDM" comment="Beam Beam Counter configurations"> 
+ 
+
+    <Modules>EpdmGeo0</Modules>
+    
+    <Setup  name  = "EPDMof" comment="No EPDM" module="EpdmGeo0" onoff="off" />
+
+    <Setup  name   = "EPDMon"
+	    comment= "Default configuration for the Beam Beam counter"
+	    module = "EpdmGeo0" 
+	    onoff  = "on"
+            simu   = "2"
+	    >     
+
+    </Setup>
+
+
+    <Setup  name   = "EPDMv1"
+	    comment= "Default configuration for the Beam Beam counter"
+	    module = "EpdmGeo0" 
+	    onoff  = "on"
+            simu   = "2"
+	    >     
+
+    </Setup>
+
+
+
+  </Detector> 
+   
+</Document>
+  
+ 
+  
+ 
+ 
+

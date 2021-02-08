@@ -18,6 +18,10 @@ struct tpcCorrection {
                 // type = 11 (== log(1. + OffSet/x) + poly(x,npar) for log(ADC) and |Z|
                 // type = 200 cut on range [min,max]
                 // type = 300 don't correct out of range [min,max]
+                // type = 1000      ; gaus(0)+pol0(3);
+                // type = 1000 + 100; gaus(0)+pol1(3)
+                // type = 1000 + 200; gaus(0)+pol2(3)
+                // type = 1000 + 300; gaus(0)+pol3(3)
   long   idx; // row index
   long   nrows; // total no. of real rows in the table; For Db interface (where nrows = 50)
   long   npar;  // npar < 0, X = exp(x) paramterization; abs(npar) >= 100 cut on range [min.max]

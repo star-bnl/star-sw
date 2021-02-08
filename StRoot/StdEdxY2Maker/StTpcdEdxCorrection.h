@@ -1,15 +1,12 @@
-// $Id: StTpcdEdxCorrection.h,v 1.7 2015/12/24 00:23:03 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.8 2016/09/18 22:40:31 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
 #include "TObject.h"
 #include "Stiostream.h"
 #include "StDetectorDbMaker/St_tpcCorrectionC.h"
-#include "StDetectorDbMaker/St_MDFCorrectionC.h"
-#include "tables/St_tpcGas_Table.h"
-#include "tables/St_TpcSecRowCor_Table.h"
-#include "tables/St_tpcGas_Table.h"
-//#include "tables/St_trigDetSums_Table.h"
+#include "StDetectorDbMaker/St_tpcGasC.h"
+//#include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StTrackPidTraits.h"
 //class St_trigDetSums;
 //class trigDetSums_st;
@@ -17,126 +14,23 @@
 struct dE_t {
  public:
   Double_t dE;
+  Double_t dx;
   Double_t dEdx;
   Double_t dEdxL;
   Double_t dEdxN;
 };
 //________________________________________________________________________________
 struct dEdxCorrection_t {
-  dEdxCorrection_t(const Char_t *name = 0,const  Char_t *title = 0, St_tpcCorrectionC *chair=0, Int_t n=0) 
-  {Name = name, Chair = chair; Title = title; nrows = n; dE = 0;} 
+  dEdxCorrection_t(const Char_t *name = "",const  Char_t *title = "", TChair *chair=0, Int_t n=0) : 
+    Name(name), Title(title), Chair(chair), nrows(n), dE(0) {}
   const Char_t *Name;
   const Char_t *Title;
   TChair       *Chair;
   Int_t   nrows;
   Double_t dE;
 };
-class dEdxY2_t;
 //________________________________________________________________________________
-class StTpcdEdxCorrection : public TObject {
- public:
-  enum ESector  {kTpcOuter = 0, kTpcInner = 1};
-  enum EOptions {
-    kUncorrected   = 0, //U
-    kEdge             , //E correction near edge of chamber
-    kAdcCorrection    , //R
-    kTpcdCharge       , //D
-    kTpcrCharge       , //D
-    kTpcCurrentCorrection,
-    kTpcRowQ          ,
-    kTpcSecRowB       , //S
-    kTpcSecRowC       , //S
-    ktpcPressure      , //P
-    ktpcTime          , //t
-    kDrift            , //O
-    kMultiplicity     , //M
-    kzCorrection      , //Z
-    ktpcMethaneIn     , //m
-    ktpcGasTemperature, //T
-    ktpcWaterOut      , //W 
-    kSpaceCharge      , //C space charge near the wire
-    kPhiDirection     , //p correction wrt local interception angle 
-    kdXCorrection     , //X
-    kTpcPadTBins      , //d
-    kTpcZDC           ,
-    kTpcNoAnodeVGainC ,
-    kTpcLast          ,
-    kTpcLengthCorrection,
-    kTpcLengthCorrectionMDF,
-    kTpcdEdxCor       ,
-    kTpcAllCorrections
-  };
-  StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
-  ~StTpcdEdxCorrection();
-  Int_t dEdxCorrection(dEdxY2_t &dEdx, Bool_t doIT=kTRUE); 
-  Int_t dEdxTrackCorrection(Int_t type, dst_dedx_st &dedx);
-  Int_t dEdxTrackCorrection(EOptions k, Int_t type, dst_dedx_st &dedx);
-  void SettpcGas               (St_tpcGas          *m = 0);
-  //  void SettrigDetSums          (St_trigDetSums     *m = 0);
-  void SetTpcSecRowB           (St_TpcSecRowCor    *m = 0);
-  void SetTpcSecRowC           (St_TpcSecRowCor    *m = 0);
-  void SetCorrection           (Int_t k = 0, St_tpcCorrection   *m = 0);
-  void SetCorrectionMDF        (Int_t k = 0, St_MDFCorrection   *m = 0);
-  void Setdrift                (St_tpcCorrection   *m = 0) {SetCorrection (kDrift               , m);}
-  void SetMultiplicity         (St_tpcCorrection   *m = 0) {SetCorrection (kMultiplicity        , m);}
-  void SetAdcCorrection        (St_tpcCorrection   *m = 0) {SetCorrection (kAdcCorrection       , m);}
-  void SetzCorrection          (St_tpcCorrection   *m = 0) {SetCorrection (kzCorrection         , m);}
-  void SetdXCorrection         (St_tpcCorrection   *m = 0) {SetCorrection (kdXCorrection        , m);}
-  void SetTpcdEdxCor           (St_tpcCorrection   *m = 0) {SetCorrection (kTpcdEdxCor          , m);}
-  void SetTpcLengthCorrection  (St_tpcCorrection   *m = 0) {SetCorrection (kTpcLengthCorrection , m);}
-  void SettpcPressure          (St_tpcCorrection   *m = 0) {SetCorrection (ktpcPressure         , m);}
-  void SettpcMethaneIn         (St_tpcCorrection   *m = 0) {SetCorrection (ktpcMethaneIn        , m);}
-  void SettpcGasTemperature    (St_tpcCorrection   *m = 0) {SetCorrection (ktpcGasTemperature   , m);}
-  void SettpcWaterOut          (St_tpcCorrection   *m = 0) {SetCorrection (ktpcWaterOut         , m);}
-  void SetTpcPadTBins          (St_tpcCorrection   *m = 0) {SetCorrection (kTpcPadTBins         , m);}
-  
-  void SetDebug(Int_t m=0) {m_Debug = m;}
-  void SetMask (Int_t m=0) {m_Mask = m;}
-  void ReSetCorrections();
-
-  St_tpcGas         *tpcGas()              {return m_tpcGas;}
-  //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
-
-  St_TpcSecRowCor  *TpcSecRowB()           {return m_TpcSecRowB;}
-  St_TpcSecRowCor  *TpcSecRowC()           {return m_TpcSecRowC;}
-
-  St_tpcCorrectionC *Correction(Int_t k = 0) {
-    return (St_tpcCorrectionC *)((k > kTpcSecRowC && k < kTpcAllCorrections && m_Corrections[k].Chair) ? (m_Corrections[k].Chair) : 0);
-  }
-  St_tpcCorrectionC *drift()               {return Correction(kDrift);}
-  St_tpcCorrectionC *Multiplicity()        {return Correction(kMultiplicity);}
-  St_tpcCorrectionC *AdcCorrection()       {return Correction(kAdcCorrection);}
-  St_tpcCorrectionC *zCorrection()         {return Correction(kzCorrection);}
-  St_tpcCorrectionC *dXCorrection()        {return Correction(kdXCorrection);}
-  St_tpcCorrectionC *TpcdEdxCor()          {return Correction(kTpcdEdxCor);}
-  St_tpcCorrectionC *TpcLengthCorrection() {return Correction(kTpcLengthCorrection);}
-  St_tpcCorrectionC *tpcPressure()         {return Correction(ktpcPressure);}
-  St_tpcCorrectionC *tpcMethaneIn()        {return Correction(ktpcMethaneIn);}
-  St_tpcCorrectionC *tpcGasTemperature()   {return Correction(ktpcGasTemperature);}
-  St_tpcCorrectionC *tpcWaterOut()         {return Correction(ktpcWaterOut);}
-  St_tpcCorrectionC *TpcPadTBins()         {return Correction(kTpcPadTBins);}
-  Int_t Debug()                            {return m_Debug;}
-  Int_t Mask()                             {return m_Mask;}
-  Double_t          Adc2GeV()              {return mAdc2GeV;}
-  void Print(Option_t *opt = "") const;
- private:
-  Int_t                m_Mask;                 //!
-  St_tpcGas           *m_tpcGas;               //!
-  dEdxY2_t            *mdEdx;
-  //  St_trigDetSums      *m_trigDetSums;          //!
-  //  trigDetSums_st      *m_trig;                 //!
-
-  St_TpcSecRowCor     *m_TpcSecRowB;            //!
-  St_TpcSecRowCor     *m_TpcSecRowC;            //!
-  Double_t             mAdc2GeV;               //! Outer/Inner conversion factors from ADC -> GeV
-  dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
-  Int_t                mNumberOfRows;
-  Int_t                mNumberOfInnerRows;
-  Int_t                m_Debug;                //!
-  ClassDef(StTpcdEdxCorrection,0)   //StAF chain virtual base class for Makers
-};
-//________________________________________________________________________________
-class dEdxY2_t : public TObject {
+class dEdxY2_t {
  public:
   dEdxY2_t() {}
   virtual ~dEdxY2_t() {}
@@ -147,6 +41,7 @@ class dEdxY2_t : public TObject {
   Char_t   first[1];
   Int_t    sector;
   Int_t    row;
+  Int_t    channel;
   Float_t  pad;
   Int_t    Npads;
   Int_t    Ntbins;
@@ -157,9 +52,9 @@ class dEdxY2_t : public TObject {
   Double_t QRatio;             // Ratio to previous cluster Charge 
   Double_t QRatioA;            // Ratio to Sum of all previous cluster Charge 
   Double_t QSumA;              // Sum of all previous cluster Charge 
-  Double_t dx;                 // dx with accounting distortions
   Double_t dxC;                // corrected dx which should be used with FitN
   Double_t dE;
+  Double_t dx;                 // dx with accounting distortions
   Double_t dEdx;   // after all corrections
   Double_t dEdxL;  // log of dEdx
   Double_t dEdxN;  // normolized to BB
@@ -181,10 +76,86 @@ class dEdxY2_t : public TObject {
   Double_t Zdc;     // ZDC rate from trigger
   Double_t Weight;  // 1/.sigma^2 of TpcSecRow gas gain correction
   Double_t adc;     //  adc count from cluster finder
-  dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections]; //!
+  Double_t TanL;
+  Double_t Voltage; // Anode Voltage
+  dE_t     C[29]; //! StTpcdEdxCorrection::kTpcAllCorrections
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
-  ClassDef(dEdxY2_t,1)
 }; 
+//________________________________________________________________________________
+class StTpcdEdxCorrection : public TObject {
+ public:
+  enum ESector : int {kTpcOuter = 0, kTpcInner = 1};
+  enum EOptions : int {
+    kUncorrected           =  0,//U   				           
+    kEdge                  =  1,//E   correction near edge of chamber	     
+    kAdcCorrection         =  2,//R  					     
+    kTpcdCharge            =  3,//D  					     
+    kTpcrCharge            =  4,//D  					     
+    kTpcCurrentCorrection  =  5,//      					     
+    kTpcRowQ               =  6,//   	 					       	   
+    kTpcSecRowB            =  7,//S  					     
+    kTpcSecRowC            =  8,//S  					     
+    ktpcPressure           =  9,//P  					     
+    ktpcTime               = 10,//t  					     
+    kDrift                 = 11,//O  					     
+    kMultiplicity          = 12,//M  					     
+    kzCorrection           = 13,//Z  					     
+    ktpcMethaneIn          = 14,//m  					     
+    ktpcGasTemperature     = 15,//T  					     
+    ktpcWaterOut           = 16,//W   				7       	   
+    kSpaceCharge           = 17,//C   space charge near the wire	       	   
+    kPhiDirection          = 18,//p   correction wrt local interception angle  
+    kTanL                  = 19,//p   correction wrt local tan(lambda)  
+    kdXCorrection          = 20,//X  					     
+    kTpcEffectivedX        = 21,//X   Effective pad row height
+    kTpcPadTBins           = 22,//d  					     
+    kTpcZDC                = 23,//   					     
+    kTpcLast               = 24,//                                             
+    kTpcNoAnodeVGainC      = 25,//   					     
+    kTpcLengthCorrection   = 26,//                                             
+    kTpcLengthCorrectionMDF= 27,//   					   
+    kTpcdEdxCor            = 28,//   					   
+    kTpcAllCorrections     = 29 //                                             
+  };
+  StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
+  ~StTpcdEdxCorrection();
+  Int_t dEdxCorrection(dEdxY2_t &dEdx, Bool_t doIT=kTRUE); 
+  Int_t dEdxTrackCorrection(Int_t type, dst_dedx_st &dedx);
+  Int_t dEdxTrackCorrection(EOptions k, Int_t type, dst_dedx_st &dedx);
+  void SettpcGas               (St_tpcGas          *m = 0) {m_tpcGas = m;}
+  
+  void SetDebug(Int_t m=0) {m_Debug = m;}
+  void SetMask (Int_t m=0) {m_Mask = m;}
+  void ReSetCorrections();
+  St_tpcGas         *tpcGas()              {return m_tpcGas;}
+  //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
 
+  St_tpcCorrectionC *Correction(Int_t k = 0) { return dynamic_cast<St_tpcCorrectionC *>(m_Corrections[k].Chair);}
+  St_tpcCorrectionC *drift()               {return Correction(kDrift);}
+  St_tpcCorrectionC *Multiplicity()        {return Correction(kMultiplicity);}
+  St_tpcCorrectionC *AdcCorrection()       {return Correction(kAdcCorrection);}
+  St_tpcCorrectionC *zCorrection()         {return Correction(kzCorrection);}
+  St_tpcCorrectionC *dXCorrection()        {return Correction(kdXCorrection);}
+  St_tpcCorrectionC *TpcdEdxCor()          {return Correction(kTpcdEdxCor);}
+  St_tpcCorrectionC *TpcLengthCorrection() {return Correction(kTpcLengthCorrection);}
+  St_tpcCorrectionC *tpcPressure()         {return Correction(ktpcPressure);}
+  St_tpcCorrectionC *tpcMethaneIn()        {return Correction(ktpcMethaneIn);}
+  St_tpcCorrectionC *tpcGasTemperature()   {return Correction(ktpcGasTemperature);}
+  St_tpcCorrectionC *tpcWaterOut()         {return Correction(ktpcWaterOut);}
+  St_tpcCorrectionC *TpcPadTBins()         {return Correction(kTpcPadTBins);}
+  Int_t Debug()                            {return m_Debug;}
+  Int_t Mask()                             {return m_Mask;}
+  Double_t          Adc2GeV()              {return mAdc2GeV;}
+  void Print(Option_t *opt = "") const;
+ private:
+  Int_t                m_Mask;                  //!
+  St_tpcGas           *m_tpcGas;                //!
+  dEdxY2_t            *mdEdx;
+  Double_t             mAdc2GeV;                //! Outer/Inner conversion factors from ADC -> GeV
+  dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
+  Int_t                mNumberOfRows;
+  Int_t                mNumberOfInnerRows;
+  Int_t                m_Debug;                 //!
+};
 #endif

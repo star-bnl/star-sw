@@ -1,0 +1,39 @@
+<Document  file="StarVMC/Geometry/HcalGeo/HcalConfig.xml">
+ 
+  <Detector name="HCAL" comment="Endcap EMC"> 
+
+
+    <Modules>
+      HcalGeo, HcalGeo1
+      HcalGeoF
+    </Modules> 
+
+    <Setup  name   = "HCALof" comment="OFF" module="HcalGeo" onoff="off" />
+
+    <Setup  name   = "HCALon"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "HcalGeo"
+	    onoff  = "on" simu="1"  > 
+    </Setup> 
+    <Setup  name   = "HCALv0"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "HcalGeo"
+	    onoff  = "on" simu="1"  > 
+    </Setup> 
+    <Setup  name   = "HCALv1"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "HcalGeo1"
+	    onoff  = "on" simu="1"  > 
+    </Setup> 
+    <Setup  name   = "HCALvF"
+	    comment= "Default configuration for the Endcap EMC"
+	    module = "HcalGeoF"
+	    onoff  = "on" simu="1"  > 
+    </Setup> 
+
+  </Detector> 
+  
+  
+</Document>
+  
+ 

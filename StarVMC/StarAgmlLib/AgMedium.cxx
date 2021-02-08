@@ -166,16 +166,12 @@ AgMedium &AgMedium::Get( const Char_t *name )
 {
 
 	  AgModule   *module = AgBlock::module();
-	  AgBlock    *block  = 0; //  AgBlock::active(); // uncomment to ensure independent media per volume when declared by user
+  //	  AgBlock    *block  = 0; //  AgBlock::active(); // uncomment to ensure independent media per volume when declared by user
 	  AgMedium   *medium = 0;
 
 	  TString modname="None";
 	  if ( module ) {
 		  modname = module->GetName();
-		  if ( block ) {
-			  modname += "_";
-			  modname += block->GetName();
-		  }
 	  }
 
 
@@ -258,7 +254,8 @@ AgMedium &AgMedium::Get( const Char_t *name )
 	  mMediumList.push_back(medname);
 
 	  return (*mMediumTable[medname]);
-  return (*medium);
+
+  //  return (*medium);
 }
 
 // -----------------------------------------------------------------------------------------------------------

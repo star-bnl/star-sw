@@ -6,8 +6,6 @@ struct StvKonst {
       float 	mXi2Joi;		/*Xi2 in Refit join left & right subtrack*/
       float 	mXi2Trk;		/*Xi2 for track */
       float 	mXi2Hlx;		/*Xi2 in Helix	*/
-      float	mRxyMax;		/*Max radius for tracking*/
-      float	mZMax;			/*Max Z      for tracking*/
       float     mDca2dZeroXY;		/*max 2d dca to X=Y=0  for primary track*/
       float     mDca3dVertex;  		/*max 3d dca to vertex for primary track*/
       float     mMaxCurv;		/*Maximal allowed curvature*/
@@ -16,6 +14,9 @@ struct StvKonst {
       float     mMaxRes;		/*Maximal allowed residual */
       float     mCoeWindow;		/*Error coeficient for searching window*/
       float     mMaxWindow;		/*Maximal window to search hits*/
+
+      long      mMinSeedHits;		/*Min number of seed hits allowed MidEta*/
+      long      mMaxSeedHits;		/*Max number of seed hits allowed MidEta*/
 
       long      mMinHits;		/*Min number of hits allowed MidEta*/
       long      mNorHits;		/*Normal number of hits allowed MidEta*/
@@ -26,6 +27,12 @@ struct StvKonst {
       long 	mMinContHits;		/*Min length of good hit sequence*/
       long 	mMaxContNits;		/*Max length of acceptable non hit sequence*/
       long 	mMaxTotNits;		/*Max number of acceptable non hits*/
+      float	mRxyMax;		/*Max radius for tracking*/
+      float	mZMax;			/*Max Z      for tracking*/
+
+
+      long      mMinSeedHitsFw;		/*Min number of seed hits allowed MidEta*/
+      long      mMaxSeedHitsFw;		/*Max number of seed hits allowed MidEta*/
 
       long      mMinHitsFw;		/*Min number of hits allowed forwEta*/
       long      mNorHitsFw;		/*Normal number of hits allowed forwEta*/
@@ -36,6 +43,8 @@ struct StvKonst {
       long 	mMinContHitsFw;		/*Min length of good hit sequence forwEta*/
       long 	mMaxContNitsFw;		/*Max length of acceptable non hit sequence forwEta*/
       long 	mMaxTotNitsFw;		/*Max number of acceptable non hits*/
+      float	mRxyMaxFw;		/*Max radius for tracking*/
+      float	mZMaxFw;		/*Max Z      for tracking*/
 
 
 };

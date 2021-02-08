@@ -6,6 +6,9 @@ ClassImp(StarParticleData);
 #include "THashList.h"
 #include "assert.h"
 #include <iostream>
+#include <map>
+
+#include "AgStarParticle.h"
 
 using namespace std;
 
@@ -23,6 +26,13 @@ Int_t hid( Int_t z, Int_t a, Int_t l=0 )
 }
 
 
+
+
+
+
+
+
+
 // Functor class which converts PDG code to STAR definition.
 class StarTrackingCode { 
 public: 
@@ -30,21 +40,29 @@ public:
 };
 class G3TrackingCode : public StarTrackingCode { 
 public:
-  virtual Int_t operator()( Int_t ipdg ){ return TDatabasePDG::Instance()->ConvertPdgToGeant3(ipdg); }
+  virtual Int_t operator()( Int_t ipdg )
+  { 
+    int g3id = TDatabasePDG::Instance()->ConvertPdgToGeant3(ipdg); 
+    if ( ipdg == 12 || ipdg == -12 ) g3id = 4; // nu_e
+    if ( ipdg == 14 || ipdg == -14 ) g3id = 4; // nu_mu
+    if ( ipdg == 16 || ipdg == -16 ) g3id = 4; // nu_tau
+    return g3id;
+  }
 };
 
+// Instance should exist from the start
+StarParticleData StarParticleData::sInstance;
 
-
-  StarParticleData StarParticleData::sInstance;
 // ---------------------------------------------------------------------------------------------
 StarParticleData::~StarParticleData()
 {
 
 }
 // ---------------------------------------------------------------------------------------------
-StarParticleData::StarParticleData( const Char_t *name, TDataSet *parent ) :
-  TObjectSet(name)
+StarParticleData::StarParticleData( const Char_t *_name, TDataSet *parent ) :
+  TObjectSet(_name)
 {
+
 
   if ( parent )                Shunt(parent); 
 
@@ -179,6 +197,10 @@ void StarParticleData::AddParticle( const Char_t *name, TParticlePDG *particle )
 // ---------------------------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------------------------
 TParticlePDG *StarParticleData::AddParticle( const Char_t *name, const Char_t *title, Double_t mass, 
 Bool_t stable, Double_t width, Double_t charge3, const char* particleClass, Int_t PdgCode, Int_t Anti, Int_t geantCode )
 {
@@ -192,6 +214,109 @@ Bool_t stable, Double_t width, Double_t charge3, const char* particleClass, Int_
 // ---------------------------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------------------------
+TParticlePDG *StarParticleData::AddParticleToG3( TParticlePDG *part, int g3code )
+{
+  TString name = part->GetName();
+  TString type = part->ParticleClass();
+  type.ToLower();
+  double mass = part->Mass();
+  double life = part->Lifetime();
+  double charge = part->Charge() / 3.0;
+  int pdgcode = part->PdgCode();
+
+  int tracktype = 0;
+  if ( type.Contains("meson") || type.Contains("baryon") || type.Contains("hadron") )
+    {
+      if ( charge == 0 ) tracktype = AgStarParticle::kGtNeut;
+      else               tracktype = AgStarParticle::kGtHadr;
+    }
+  if ( type.Contains("photon") || type.Contains("gamma") )
+    {
+      tracktype = AgStarParticle::kGtGama;
+    }
+  if ( type.Contains("lepton") )
+    {
+      if ( charge == 0 ) tracktype = AgStarParticle::kGtNeut;
+      else               tracktype = AgStarParticle::kGtHadr;
+    }
+  if ( name == "e-" || name == "e+" )
+    {
+      tracktype = AgStarParticle::kGtElec;
+    }
+  if ( name == "mu-" || name == "mu+" )
+    {
+      tracktype = AgStarParticle::kGtMuon;
+    }
+  if ( type.Contains("heavyion") )
+    {
+      tracktype = AgStarParticle::kGtHion;
+    }
+
+  return AddParticleToG3( name.Data(), mass, life, charge, tracktype, pdgcode, g3code );
+
+  
+}
+// ---------------------------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------------------------
+TParticlePDG *StarParticleData::AddParticleToG3( const char* name, 
+						 const double mass, 
+						 const double lifetime, 
+						 const double charge, 
+						 const int type, 
+						 const int pdgcode, 
+						 const int g3code,
+						 const double *bratio,
+						 const int    *mode
+						 
+
+ )
+{
+
+  static std::map< int, TString > ParticleClass =
+    {
+      { 1, "Photon" },
+      { 2, "Leptom" },
+      { 3, "Hadron" }, 
+      { 4, "Hadron" },
+      { 5, "Lepton" },
+      { 6, "Geantino" },
+      { 7, "Cherenkov" },
+      { 8, "Heavyion" },
+      { 9, "Monopole" }
+    };
+
+  const double kHbar = 6.58211889e-25; // GeV s
+  double width   = (lifetime > 0 )? kHbar / lifetime : 0.;
+  double charge3 = 3*charge;
+
+  bool stable = (lifetime<=0);
+
+  TParticlePDG *part = AddParticle( name, Form("%s [geant3 id=%i]",name,g3code), mass, stable, width, charge3, ParticleClass[type], pdgcode, 0, g3code );
+  /// TODO: Add decay channels to PDG particle
+
+  /// Register particle and its decay modes with G3
+  float fbratio[6]; 
+  if ( bratio ) { for ( int i=0;i<6;i++ ) fbratio[i] = bratio[i];
+    AgStarParticle::Add( name, g3code, type, float(mass), float(charge), float(lifetime), fbratio, mode, pdgcode );
+  }
+  else {
+    AgStarParticle::Add( name, g3code, type, float(mass), float(charge), float(lifetime), 0, 0, pdgcode );
+  }
+
+  TParticlePDG *myparticle = part;
+  mParticleList. Add( myparticle );   
+  mParticleNameMap[ name ] = myparticle;
+  mParticleIdMap[ pdgcode ]   = myparticle; 
+  mParticleG3IdMap[ g3code ] = myparticle;
+
+  return part;
+  
+}
+
+// ---------------------------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------------------------
 void StarParticleData::AddAlias( const Char_t *alias, const Char_t *name )
 {
   TParticlePDG *particle = GetParticle(name);
@@ -200,3 +325,28 @@ void StarParticleData::AddAlias( const Char_t *alias, const Char_t *name )
 // ---------------------------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------------------------
+TParticlePDG *StarParticleData::SetTrackingCode( const int pdgid, const int g3id )
+{
+  TParticlePDG *particle = GetParticle(pdgid);
+
+  TString   name   = particle->GetName();
+  TString   title  = particle->GetTitle();
+  double    mass   = particle->Mass();
+  bool      stable = particle->Stable();
+  double    width  = particle->Width();
+  double    charge = particle->Charge();
+  TString   class_ = particle->ParticleClass();
+  
+  int   code = particle->PdgCode();
+  int   anti = 0; if ( particle->AntiParticle() == particle ) anti = -code;
+      
+  TParticlePDG *myparticle = new TParticlePDG( name, title, mass, stable, width, charge, class_, code, anti, g3id );
+      
+  mParticleList. Add( myparticle );   
+  mParticleNameMap[ name ] = myparticle;
+  mParticleIdMap[ code ]   = myparticle; 
+  mParticleG3IdMap[ g3id ] = myparticle;
+
+  return myparticle;
+
+}

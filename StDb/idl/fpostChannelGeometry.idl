@@ -1,0 +1,12 @@
+/*    fpostChannelGeometry.idl
+*
+*  Table: fpostChannelGeometry
+*
+*       description: //  FPOST number of slats for each quad & layer
+*/ 
+
+struct fpostChannelGeometry { 
+  unsigned short quad; /* 1=South, 2=North */
+  unsigned short layer; /* 1=layer1, 2=layer2, 3=layer3 4=layer4 5=layer5 6=layer6 */
+  unsigned short nslat; /* # of slat (9,14,25,43, or 34) */ 
+};  

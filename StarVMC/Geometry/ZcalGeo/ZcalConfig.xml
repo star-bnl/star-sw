@@ -1,0 +1,12 @@
+<Document file="StarVMC/Geometry/ZcalGeo/ZcalConfig.xml">
+<Detector name="ZCAL" comment="STAR Zcalream Area">
+<Modules>
+ZcalGeo
+</Modules>
+
+<!-- Only most recent -->
+<Setup name="ZCALof" onoff="off" comment="OFF" module="ZcalGeo" />
+<Setup name="ZCALon" onoff="on" simu="1"  comment="Zcalream" module="ZcalGeo"/>
+
+</Detector>
+</Document>

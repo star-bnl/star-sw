@@ -91,7 +91,10 @@ class IOHandler:
         self.table[ unit ] = file;
 
     def unit(self,name):
-        return self.table[name]
+        try:
+            return self.table[name]
+        except KeyError:
+            return None
 
     def write(self,text):
         self(text)
