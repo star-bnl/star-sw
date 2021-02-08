@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.39 2014/06/26 21:31:42 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.40 2015/04/09 19:54:03 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -75,6 +75,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   fTpx = new daq_tpx() ; 
   if (GetDate() >= 20091215) fTpx->fcf_run_compatibility = 10 ;
   if (GetDate() <= 20090101) fminCharge = 40;
+  StMaker* maskMk = GetMakerInheritsFrom("StMtdTrackingMaskMaker");
+  unsigned int mask = (maskMk ? maskMk->UAttr("TpcSectorsByMtd") : ~0U); // 24 bit masking for sectors 1..24
   // do gains example; one loads them from database but I don't know how...
   if (NoRows <= 45) { // hack for now take Tonko's defaults for iTpx
     daq_dta *dta  = fTpx->put("gain");
@@ -88,6 +90,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     Int_t totalPads = 0;
     Float_t liveFrac = 1;
     for(Int_t sector=1;sector<=24;sector++) {
+      if (!((1U<<(sector-1)) & mask)) continue; // sector masking
       Int_t liveSecPads = 0;
       Int_t totalSecPads = 0;
       for(Int_t row=1;row<=NoRows;row++) {

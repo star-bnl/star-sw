@@ -1009,9 +1009,12 @@ Bfc_st BFC[] = { // standard chains
    ,                                                               "Base chain for 2015 ITTF (tpc)",kFALSE},
 
   {"pp2015","" ,"",
-   "B2015,ITTF,UseXgeom,BAna,hitfilt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   "B2015,ITTF,UseXgeom,BAna,hitfilt,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
+  {"P2015","" ,"",
+   "B2015,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
+   ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
   // TEST
   //{"B2013_X","","","ry2012,in,tpcX,ITTF,AgML,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
@@ -1289,6 +1292,15 @@ Bfc_st BFC[] = { // standard chains
   {"mwc"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"ppMCTrig"    ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"pp2pp"       ,"","","",                              "St_pp2pp_Maker","St_pp2pp_Maker","pp->pp",kFALSE},
+
+  // Note: MTD related chains - because of the TrkMask, need to happen before TpcHitMaker
+  {"mtdFilt"  ,"","","", "StMtdEvtFilterApplyMaker","StDataFilterMaker","MTD-based event filtering",kFALSE},
+  {"mtd"      ,"MtdChain","","mtdDat,mtdMatch","StMaker",                     "StChain","MTD Chain",kFALSE},
+  {"mtdDat"   ,"mtd_raw","MtdChain","db,MuDst","StMtdHitMaker","StEvent,StMtdHitMaker"
+   ,                                                                                "MTD hit maker",kFALSE},
+  {"mtdTrkMask","","","db","StMtdTrackingMaskMaker","StMtdEvtFilterMaker","MTD track masking",kFALSE},  
+
+
   {"tpc" ,"","","TpxRaw,TpxClu,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use TpxClu instead",kFALSE},
   {"tpcI" ,"tpcChain","","db,tpcDB,TpcHitMover",                "StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
@@ -1304,13 +1316,15 @@ Bfc_st BFC[] = { // standard chains
   {"Mixer"       ,"tpc_raw","","daq","StMixerMaker"                   ,"StTrsMaker,StMixerMaker","",kFALSE},
   {"St_tpc"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"St_svt"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+
   {"tpc_daq"  ,"","","TpxRaw",        "","","WARNING *** Option is OBSOLETE *** use TpxRaw instead",kFALSE},
   {"tcl","","","TpxRaw,TpxClu,MakeEvent","",""
   ,                 "WARNING *** Option is OBSOLETE *** use option TpxRaw,TpxClu,MakeEvent instead",kFALSE},
-
   {"fcf"      ,"","","-tcl,tpcX",       "","","WARNING *** Option is OBSOLETE *** use tpcX instead",kFALSE},
   {"tpx"         ,"tpc_hits","tpcChain","MakeEvent,tpc_T,StEvent,rts,detDb"
    ,                  "StTpcHitMaker","StTpcHitMaker","TPC hit reader for tpc + tpx via EVP_READER",kFALSE},
+
+
   // GMT
   {"gmt"        ,"GmtChain","","gmtDat,gmtClu"                ,"StMaker","StChain","Gmt data Chain",kFALSE},
   {"gmtDat"     ,"","GmtChain", "event","StGmtRawMaker","StGmtRawMaker",          "GMT Data reader",kFALSE},
@@ -1430,13 +1444,12 @@ Bfc_st BFC[] = { // standard chains
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker"   ,"StVpdCalibMaker","VPD calibration",kFALSE},
   {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker"
    ,                                                                               "BTOF Simulator",kFALSE},
-  // MTD related chains
-  {"mtd"      ,"MtdChain","","mtdDat,mtdMatch","StMaker",                     "StChain","MTD Chain",kFALSE},
-  //{"mtdDat"   ,"mtd_raw","MtdChain","db,MtdUtil","StMtdHitMaker","StEvent,StMtdHitMaker"
-  // ,                                                                              "MTD hit maker",kFALSE},
-  {"mtdDat"   ,"mtd_raw","MtdChain","db","StMtdHitMaker","StEvent,StMtdHitMaker"
-   ,                                                                                "MTD hit maker",kFALSE},
+
+
+  // left MTD chain for sumulation alone here
   {"mtdSim"    ,"","MtdChain","","StMtdSimMaker",           "StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
+
+
   // Time Of Flight related options
   {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
   {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
@@ -1478,6 +1491,10 @@ Bfc_st BFC[] = { // standard chains
    "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",                                  kFALSE},
   //{"fmsPoint"     ,"","", "event,fmsDb","StFmsPointMaker","StFmsPointMaker",
   // "Fill FMS clusters",                                                                             kFALSE},
+  //
+  {"fpsDat"     ,"","", "StEvent,fmsdb",
+   "StFpsRawHitMaker","StFpsRawHitMaker","Fill FPS struct",                                         kFALSE},
+
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 #else
@@ -1584,8 +1601,12 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                      "TPC-BTOF track matching",kFALSE},
   {"btofCalib","","","db,BTofUtil",        "StBTofCalibMaker","StBTofCalibMaker","BTOF calibration",kFALSE},
 
-  {"mtdMatch" ,"","","db,MtdUtil",     "StMtdMatchMaker","StMtdMatchMaker","TPC-MTD track matching",kFALSE},
-  {"mtdCalib" ,"","","db",                    "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
+  // the below needs to be done earlier to save time - leaving here for documentation purposes as two
+  // makers are part of the same library (let's not forget this)
+  //{"mtdTrkMask"  ,"","","db",    "StMtdTrackingMaskMaker","StMtdEvtFilterMaker","MTD track masking",kFALSE},
+  {"mtdMatch"    ,"","","db,MtdUtil",  "StMtdMatchMaker","StMtdMatchMaker","TPC-MTD track matching",kFALSE},
+  {"mtdCalib"    ,"","","db",                 "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
+  {"mtdEvtFilt"  ,"","","db",       "StMtdEvtFilterMaker","StMtdEvtFilterMaker","MTD event filter" ,kFALSE},
 
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},

@@ -6,11 +6,23 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.10 2014/09/09 14:00:39 marr Exp $
+ * $Id: StMtdMatchMaker.h,v 1.13 2015/07/10 16:07:40 marr Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.13  2015/07/10 16:07:40  marr
+ * Add the distance along radius to the calculation of the distance between
+ * a MTD hit and a projected track position
+ *
+ * Revision 1.12  2015/04/24 19:55:16  marr
+ * Add a member function cleanUpMtdPidTraits() to clean up the MTD pidTraits for
+ * all global and primary tracks before the matching process. This is needed when
+ * running MuDst in afterburner mode.
+ *
+ * Revision 1.11  2015/04/10 18:21:38  marr
+ * Comment on the meaning of different values of matchFlag
+ *
  * Revision 1.10  2014/09/09 14:00:39  marr
  * Fill the expected time-of-flight calculated via track extrapolation
  *
@@ -269,6 +281,10 @@ class StMtdMatchMaker: public StMaker
 		bool validTrack(StTrack *track);
 		bool validTrack(StMuTrack *track);
 
+                // calcuate global z of MTD hit
+                Float_t getMtdHitGlobalZ(Float_t leadingWestTime, Float_t leadingEastTime, Int_t module);
+		Int_t   getProjModule(Float_t local_z, Float_t global_z);
+
 
 	protected:
 		string		 mOutName;
@@ -370,7 +386,12 @@ class StMtdMatchMaker: public StMaker
 			Int_t cell;
 			StThreeVector<double> hitPosition;
 			idVector trackIdVec;
-			Int_t matchFlag;  // 1,2,3 for singly matched hits; 2 is for 1 track associated with 2 hits, drop the smaller tot one; 3 for same tots drop the larger distance hit.  7,8,9 for multi track matched hits, closest track is assigned.
+		        Int_t matchFlag;  // 1: one hit - one track 
+		                          // 2: multiple hits - one track; only 1 hit left after tot cut 
+		                          // 3: mulitple hits - one track; pick the cloest hit after tot cut 
+		                          // 7: one hit - multiple tracks; pick the closest track
+		                          // 8: multiple hits - multiple tracks; only 1 hit left after tot cut, pick the closest track
+		                          // 9: mulitple hits - multiple tracks; pick the closest track and cloest hit after tot cut 
 			Float_t zhit;
 			Float_t yhit;
 			pair<Double_t,Double_t> tot;
@@ -400,6 +421,8 @@ class StMtdMatchMaker: public StMaker
 		void bookHistograms();
 		/// set QA tree 
 		void bookTree();
+		/// clean up mtdPidTraits in MuDst when running afterburner mode
+		void cleanUpMtdPidTraits();
 		/// read mtd hits from StMuDst and StEvent
 		Bool_t readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& validModuleVec);
 		/// project a track to MTD geometry, return the hit position and strip index
@@ -426,7 +449,7 @@ class StMtdMatchMaker: public StMaker
 		void fillTrackInfo(StMuTrack *t, float mField, UInt_t iNode);
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.10 2014/09/09 14:00:39 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.13 2015/07/10 16:07:40 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,2)
 };
 

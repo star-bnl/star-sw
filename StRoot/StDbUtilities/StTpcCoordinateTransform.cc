@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.41 2014/07/01 20:29:02 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.42 2015/07/19 22:20:42 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.42  2015/07/19 22:20:42  fisyak
+ * Add recalculation of pad row during transformation
+ *
  * Revision 1.41  2014/07/01 20:29:02  fisyak
  * Clean up
  *
@@ -242,9 +245,12 @@ using namespace units;
 static Int_t _debug = 0;
 StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* /* globalDbPointer */)
  {
-    if (StTpcDb::instance()->PadPlaneGeometry() &&
-	StTpcDb::instance()->Electronics() &&
-        StTpcDb::instance()->GlobalPosition()) { 
+    if (StTpcDb::instance()->PadPlaneGeometry() 
+	&& StTpcDb::instance()->Electronics() 
+#if 0
+	&& StTpcDb::instance()->GlobalPosition()
+#endif
+	) {
 	mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
         mInnerSectorzOffset = StTpcDb::instance()->Dimensions()->zInnerOffset();
         mOuterSectorzOffset = StTpcDb::instance()->Dimensions()->zOuterOffset();
@@ -257,7 +263,9 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* /* globalDbPointer *
 	gMessMgr->Error() << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endm;
 	assert(StTpcDb::instance()->PadPlaneGeometry());
 	assert(StTpcDb::instance()->Electronics());
+#if 0
         assert(StTpcDb::instance()->GlobalPosition());
+#endif
     }
     mNoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
     mNoOfRows      = mNoOfInnerRows + St_tpcPadPlanesC::instance()->outerPadRows();
@@ -403,7 +411,11 @@ void  StTpcCoordinateTransform::operator()(const        StTpcLocalSectorCoordina
 void  StTpcCoordinateTransform::operator()(const              StTpcLocalCoordinate& a, StTpcLocalSectorCoordinate& b     ) 
 { 
   Int_t row    = a.fromRow();
-  assert(row >= 1 && row <= mNoOfRows);
+  if ( ! (row >= 1 && row <= mNoOfRows)) {
+    StThreeVectorD xyzS;
+    StTpcDb::instance()->SupS2Tpc(a.sector()).MasterToLocalVect(a.position().xyz(),xyzS.xyz());
+    row = rowFromLocalY(xyzS[0]);
+  }
   const Double_t *trans = StTpcDb::instance()->Pad2Tpc(a.sector(),row).GetTranslation(); // 4
   TGeoTranslation GG2TPC(trans[0],trans[1],trans[2]);
   StThreeVectorD xGG;

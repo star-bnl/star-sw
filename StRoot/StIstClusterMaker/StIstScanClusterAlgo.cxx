@@ -173,7 +173,7 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 
          if (clustersVec[sensorIdx][columnIdx1].size() > 0 && clustersVec[sensorIdx][columnIdx2].size() > 0) {
             for (clusterIt1 = clustersVec[sensorIdx][columnIdx1].begin(); clusterIt1 != clustersVec[sensorIdx][columnIdx1].end() && !clustersVec[sensorIdx][columnIdx1].empty(); clusterIt1++) {
-               for (clusterIt2 = clustersVec[sensorIdx][columnIdx2].begin(); clusterIt2 != clustersVec[sensorIdx][columnIdx2].end() && !clustersVec[sensorIdx][columnIdx2].empty(); clusterIt2++) {
+               for (clusterIt2 = clustersVec[sensorIdx][columnIdx2].begin(); clusterIt2 != clustersVec[sensorIdx][columnIdx2].end() && !clustersVec[sensorIdx][columnIdx1].empty(); clusterIt2++) {
                   float rowDistance = (*clusterIt1)->getMeanRow() - (*clusterIt2)->getMeanRow();
 
                   if (TMath::Abs(rowDistance) < 0.5) { //here 0.5 means the distance between two clusters' weighted centers in row direction smaller than 0.5
@@ -195,7 +195,6 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 
                      int distance1 = std::distance(clustersVec[sensorIdx][columnIdx1].begin(), clusterIt1);
                      clustersVec[sensorIdx][columnIdx1].erase(clusterIt1);
-		     if(clustersVec[sensorIdx][columnIdx1].empty()) continue;
 
                      if (distance1 == 0)
                         clusterIt1 = clustersVec[sensorIdx][columnIdx1].begin();
@@ -230,8 +229,15 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
-* Revision 1.14  2015/03/03 04:07:45  ypwang
-* empty check was added for the to-be-merged column-wise proto-clusters container, to fix the RT #3056 oberserved by Lidia
+* Revision 1.16  2015/03/04 16:17:16  smirnovd
+* Added a check for empty container of to-be-merged proto-clusters
+*
+* This is done to avoid a situation when we run out of column-wise clusters in the
+* current (happens when all clusters are merged and removed from the temporary
+* container) column but the next one still has some cluster left.
+*
+* Revision 1.15  2015/03/04 16:17:07  smirnovd
+* Revert "empty check was added for the to-be-merged column-wise proto-clusters container, to fix the RT #3056 oberserved by Lidia"
 *
 * Revision 1.13  2014/09/18 06:27:25  ypwang
 * remove unneccessary check for raw hit electroincis ID check

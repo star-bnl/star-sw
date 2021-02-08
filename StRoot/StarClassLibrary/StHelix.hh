@@ -8,7 +8,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHelix.hh,v 1.13 2010/10/18 21:55:11 fisyak Exp $
+ * $Id: StHelix.hh,v 1.14 2015/04/22 18:02:01 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.hh,v $
+ * Revision 1.14  2015/04/22 18:02:01  ullrich
+ * Added two default argument to dca of two helices for HFT.
+ *
  * Revision 1.13  2010/10/18 21:55:11  fisyak
  * Warn off for gcc4.5.1 64bits
  *
@@ -52,6 +55,7 @@
 #include <utility>
 #include <algorithm>
 #include "StThreeVector.hh"
+#include "SystemOfUnits.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::pair;
 using std::swap;
@@ -113,7 +117,9 @@ public:
     double       pathLength(double x, double y) const;
 
     /// path lengths at dca between two helices 
-    pair<double, double> pathLengths(const StHelix&) const;
+    pair<double, double> pathLengths(const StHelix&,
+                                     double minStepSize = 10*micrometer,
+                                     double minRange = 10*centimeter) const;
     
     /// minimal distance between point and helix
     double       distance(const StThreeVector<double>& p, bool scanPeriods = true) const;    
@@ -149,6 +155,7 @@ protected:
     double                 mSinDipAngle;
     double                 mCosPhase;
     double                 mSinPhase;
+    
 #ifdef __ROOT__
   ClassDef(StHelix,1)
 #endif

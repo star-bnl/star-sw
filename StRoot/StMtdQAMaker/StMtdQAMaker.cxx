@@ -1567,7 +1567,7 @@ Double_t StMtdQAMaker::getMtdHitGlobalZ(StMtdHit *hit) const
 //_____________________________________________________________________________
 Double_t StMtdQAMaker::getMtdHitGlobalZ(Double_t leadingWestTime, Double_t leadingEastTime, Int_t module) const
 {
-  Double_t z = (module-3)*gMtdCellLength - (leadingWestTime-leadingEastTime)/2./vDrift*1e3;
+  Double_t z = (module-3)*gMtdCellLength - (leadingWestTime-leadingEastTime)/2./gMtdCellDriftV*1e3;
   return z;
 }
 
@@ -1763,8 +1763,11 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.7 2015/02/01 16:26:31 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.8 2015/04/08 14:03:17 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.8  2015/04/08 14:03:17  marr
+//// change to use gMtdCellDriftV from StMtdConstants.h
+////
 //// Revision 1.7  2015/02/01 16:26:31  marr
 //// 1) Add a new histogram to store the run indices
 //// 2) Change the titles of some histograms for better readability

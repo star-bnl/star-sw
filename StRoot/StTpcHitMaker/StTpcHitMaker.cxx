@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.52 2015/03/02 21:10:15 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.53 2015/04/09 19:54:03 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.53  2015/04/09 19:54:03  genevb
+ * Introduce sector masking (only MTD-based so far)
+ *
  * Revision 1.52  2015/03/02 21:10:15  genevb
  * pad and timebucket sanity units were off by x64, mistakenly using units of StTpcHit data members (RT 3507)
  *
@@ -412,9 +415,12 @@ Int_t StTpcHitMaker::Make() {
     InitializeHistograms(0);
 #endif
   }  
+  StMaker* maskMk = GetMakerInheritsFrom("StMtdTrackingMaskMaker");
+  unsigned int mask = (maskMk ? maskMk->UAttr("TpcSectorsByMtd") : ~0U); // 24 bit masking for sectors 1..24
   bin0Hits = 0;
   if (fSectCounts) fSectCounts->Fill(0);
   for (Int_t sector = minSector; sector <= maxSector; sector++) {
+    if (!((1U<<(sector-1)) & mask)) continue; // sector masking
     fId = 0;
     // invoke tpcReader to fill the TPC DAQ sector structure
     TString cldadc("cld");

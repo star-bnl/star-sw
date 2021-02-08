@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.22 2014/06/25 14:19:24 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.27 2016/07/29 15:38:51 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,21 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.27  2016/07/29 15:38:51  jwebb
+ * Fixed error in G3ID to PDGid mapping.
+ *
+ * Revision 1.26  2015/07/31 21:32:58  jwebb
+ * Attempt to propagate a PDG id for antideuteron.
+ *
+ * Revision 1.25  2015/06/23 14:53:36  jwebb
+ * StarClassLibrary support for H0 dibaryon.
+ *
+ * Revision 1.24  2015/06/08 16:24:34  jwebb
+ * Correct mapping between G3 id and pdg id.  The G3 is the key and must be unique.  THe pdg id is the value, and can repeat.
+ *
+ * Revision 1.23  2015/06/05 14:01:34  jwebb
+ * JPsi (id=168, dimuon channel) added to particle table
+ *
  * Revision 1.22  2014/06/25 14:19:24  jwebb
  * Added psi prime --> e+e-
  *
@@ -132,6 +147,21 @@ StParticleTable* StParticleTable::mParticleTable = 0;
 
 StParticleTable::~StParticleTable() {/* noop */}
 
+/// Helper function to define PDG ids for heavy ions                                                                                                                                                           
+/// @param z Charge of the heavy ion                                                                                                                                                                           
+/// @param a Atomic number of the heavy ion                                                                                                                                                                    
+/// @param l Number of lambdas in a hypernucleus                                                                                                                                                               
+Int_t hid( Int_t z, Int_t a, Int_t l=0 )
+{
+  //         10LZZZAAAI                                                                                                                                                                                        
+  return (   1000000000
+         +     10000000*l
+         +        10000*z
+	     +           10*a );
+}
+
+
+
 StParticleTable::StParticleTable()
 {
     //
@@ -199,14 +229,14 @@ StParticleTable::StParticleTable()
     Geant2Pdg(43, -24,   W- );    // W-  (STAR def.)
     Geant2Pdg(44, 23,    Z0 );     // Z0  (STAR def.)
 
-    Geant2Pdg(45, kUndefined, Deuteron ); // The deuteron
-    Geant2Pdg(46, kUndefined, Triton )  ; // The triton
-    Geant2Pdg(47, kUndefined, Alpha )   ; // The alpha
+    Geant2Pdg(45, hid(1,2)  , Deuteron ); // The deuteron
+    Geant2Pdg(46, hid(1,3)  , Triton )  ; // The triton
+    Geant2Pdg(47, hid(2,4)  , Alpha )   ; // The alpha
     Geant2Pdg(48, kUndefined, Geantino ); // The mythical geantino 
-    Geant2Pdg(49, kUndefined, Helium3  ); // Helium3
+    Geant2Pdg(49, hid(2,3)  , Helium3  ); // Helium3
     Geant2Pdg(50, 22,         Cerenkov ); // Cerenkov photons
 
-    Geant2Pdg(54, kUndefined, AntiHelium3 ); // AntiHelium3 );
+    Geant2Pdg(54, -hid(2,3) , AntiHelium3 ); // AntiHelium3 );
 
     ///@} 
 
@@ -274,6 +304,8 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 164,    553, Upsilon1S); // Upsilon(1S) -- mu+ mu- channel w/ incorrect partial width
        Geant2Pdg( 165, 100553, Upsilon2S); // Upsilon(2S) -- mu+ mu- channel w/ incorrect partial width
        Geant2Pdg( 166, 200553, Upsilon3S); // Uspilon(3S) -- mu+ mu- channel w/ incorrect partial width
+
+       Geant2Pdg( 168,    443, JPsi); // JPsi -- mu+ mu- channel w/ incorrect partial widths
     ///@}
 
     ///@addtogroup NONSTANDARD_DECAY_MODES
@@ -293,7 +325,7 @@ StParticleTable::StParticleTable()
     /// Embedding particle definitions
     ///@{
 
-    Geant2Pdg( 10007, 130, pi0 --> e+ e- gamma );
+    Geant2Pdg( 10007, 111, pi0 --> e+ e- gamma );
 
     Geant2Pdg( 10010, 130, K0 Long --> nu e- pi+ );
     Geant2Pdg( 10110, 130, K0 Long --> nu e+ pi- );
@@ -347,10 +379,10 @@ StParticleTable::StParticleTable()
     ///@addtogroup ANTINUCLEI
     /// Definitions of anti nuclei
     ///@{
-       Geant2Pdg( 50045, kUndefined, anti-deuteron );
-       Geant2Pdg( 50046, kUndefined, anti-triton );
-       Geant2Pdg( 50047, kUndefined, anti-alpha );
-       Geant2Pdg( 50048, kUndefined, anti-He3 );
+       Geant2Pdg( 50045, -hid(1,2) , anti-deuteron );
+       Geant2Pdg( 50046, -hid(1,3) , anti-triton );
+       Geant2Pdg( 50047, -hid(2,4) , anti-alpha );
+       Geant2Pdg( 50048, -hid(2,3) , anti-He3 );
     ///@}
 
     ///@addtogroup ANTIHYPERNUCLEI
@@ -366,6 +398,9 @@ StParticleTable::StParticleTable()
     ///Definitions of exotics, e.g. H-dibaryon
     ///@{
        Geant2Pdg( 60001, kUndefined,         H-Dibaryon --> Lambda + piminus + proton );
+
+       Geant2Pdg( 60801, 801,                H0-strangelet --> proton + Sigma- );
+
     ///@}
 
 

@@ -371,6 +371,8 @@ int StDbServiceBroker::RecommendHost()
   srand ( unsigned ( time (NULL) ) );                                                                                                                        
   random_shuffle( MyHostList.begin(), MyHostList.end() ); 
 
+  int scanned_hosts = 0;
+  bool host_found = false;
   for (vector<ChapiDbHost>::const_iterator I=MyHostList.begin(); I!=MyHostList.end(); ++I)
     {
       conn = mysql_init(0);
@@ -441,12 +443,18 @@ int StDbServiceBroker::RecommendHost()
 #endif
       mysql_close(conn);
 
-      if (dproc<dproc_min && nproc<(*I).Cap)
-        {
+
+      if ( dproc<dproc_min && nproc<(*I).Cap ) {
           	dproc_min = dproc;
 	  		MyBestHost = I;
+			host_found = true;
         }
+	  	scanned_hosts += 1;
 
+		if (scanned_hosts > 2 && host_found == true ) {
+			LOG_INFO << "StDbLib: db server found in " << scanned_hosts << " iterations" << endm;
+			return 0;
+		}
     }
 
     if ( MyBestHost != MyHostList.end() ) {                                                                                                                  
