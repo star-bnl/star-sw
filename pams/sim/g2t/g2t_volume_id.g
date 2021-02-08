@@ -1,5 +1,25 @@
-* $Id: g2t_volume_id.g,v 1.90 2018/12/03 21:08:53 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.91 2019/09/03 20:12:55 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.91  2019/09/03 20:12:55  jwebb
+* Proposed fix for ticket 3399--
+* https://www.star.bnl.gov/rt3/Ticket/Display.html?id=3399&results=8b3b60b210def723798e28371b984406
+*
+* Relies on changes to the geometry which flag the mixed iTPC/TPC mode.
+* -- StarGeo.xml v1.29 / TpceConfig.xml v1.7 / TpceGeo3a.xml v1.20
+*
+* When the mixed iTPC/TPC mode is detected, the outer padrows in sector
+* 20 are renumbered to match the iTPC numbering scheme (41 through 72).
+*
+* The inner padrows keep the old TPC numbering scheme (1 through 13) with 3
+* pseudopadrows per real padrow.  To hopefully avoid confusion, we place these
+* in a fake sector 99.  TpcRS should skip these in the hit processing loop.
+* We place them in a fake sector 99.  TpcRS should skip these in the hit processing
+* loop.
+*
+* Code has been minimally tested as per the recipe in the trouble ticket.
+* Sector 20 shows reasonable (as many as 32) matched hits in the small sample
+* generated.
+*
 * Revision 1.90  2018/12/03 21:08:53  jwebb
 * g2t_volume_id for TPC is split out into a separate subroutine.
 *
@@ -301,6 +321,7 @@
       Structure  ISTC { version, int misalign }
       Structure  SSDP { version, int contig, int placement, int misalign }
 
+      Structure  GDAT {real mfscale, char gtag(2)}
 
       logical    first/.true./
       logical    printOnce/.true./
@@ -1202,6 +1223,7 @@ c$$$    write (*,*) numbv
     g2t_volume_id = volume_id
 
     end
+
       
     Integer function g2t_tpc_volume_id ( numbv )
       Integer, intent(in) :: numbv(15)
@@ -1221,9 +1243,11 @@ c$$$    write (*,*) numbv
       Integer,Parameter :: fpad = 1
       Integer,Parameter :: fsec = 100
 
-      Integer :: tpads(156), isdet(156), i, j, n, m
+      Integer :: tpads(156,24), isdet(156,24), i, j, n, m
 
       Integer :: tpgv, tpss, pad, det, prompt, sector
+
+      
 
 
       if ( first ) then
@@ -1248,8 +1272,8 @@ c$$$    write (*,*) numbv
 
 
          ! zero out both arrays to start
-         tpads(1:156) = 0
-         isdet(1:156) = 0  
+         tpads(1:156,:) = 0
+         isdet(1:156,:) = 0  
 
          ! Default will be the TPC pre iTPC upgrade
 
@@ -1257,7 +1281,8 @@ c$$$    write (*,*) numbv
 
          npad = 73 """13 inner + 2x13 fake + 32 outer + 2 fake """
 
-         tpads(1:73) = (/     1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 
+       DO I=1,24
+         tpads(1:73,I) = (/     1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 
                               4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 
                               7, 8, 8, 8, 9, 9, 9,10,10,10, 
                              11,11,11,12,12,12,13,13,13,14, 
@@ -1266,7 +1291,7 @@ c$$$    write (*,*) numbv
                              34,35,36,37,38,39,40,41,42,43, 
                              44,45,45   /)
 
-         isdet(1:73) = (/ 1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+         isdet(1:73,I) = (/ 1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
                           0, 2, 1, 0, 2, 1, 0, 2, 1, 0,
                           2, 1, 0, 2, 1, 0, 2, 1, 0, 2,
 	                  1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
@@ -1274,6 +1299,7 @@ c$$$    write (*,*) numbv
 		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                           0, 0, 2 /)
+        ENDDO
 
          ! Otherwise handle the iTPC upgrade inner = 40 rows outer = 32
          if (TPCC_version.ge.6) then
@@ -1282,7 +1308,8 @@ c$$$    write (*,*) numbv
 
          npad = 76 """ 40 inner + 2 fake + 32 outer + 2 fake """
 
-         tpads(1:76) = (/   1,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+        DO I=1,24
+         tpads(1:76,I) = (/   1,  1,  2,  3,  4,  5,  6,  7,  8,  9,
                            10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
                            20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
                            30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
@@ -1291,7 +1318,7 @@ c$$$    write (*,*) numbv
                            60, 61, 62, 63, 64, 65, 66, 67, 68, 69,
                            70, 71, 72, 72 /)
                       
-         isdet(1:76) = (/   1,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+         isdet(1:76,I) = (/   1,  0,  0,  0,  0,  0,  0,  0,  0,  0,
                             0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
                             0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
                             0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -1299,9 +1326,32 @@ c$$$    write (*,*) numbv
                             0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
                             0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
                             0,  0,  0,  2 /)
+        ENDDO
                       
-
          endif
+
+
+      ! Detect and handle the mixed scenario
+      IF ( tpcc_version .eq. 3.2 ) THEN
+         I = 20
+         tpads(1:73,I) = (/   1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 
+                              4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 
+                              7, 8, 8, 8, 9, 9, 9,10,10,10, 
+                             11,11,11,12,12,12,13,13,13,41, 
+                             41,42,43,44,45,46,47,48,49,50, 
+                             51,52,53,54,55,56,57,58,59,60, 
+                             61,62,63,64,65,66,67,68,69,70, 
+                             71,72,72   /)
+         isdet(1:73,I) = (/ 1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+                          0, 2, 1, 0, 2, 1, 0, 2, 1, 0,
+                          2, 1, 0, 2, 1, 0, 2, 1, 0, 2,
+	                  1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+	                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                          0, 0, 2 /)
+
+      ENDIF
 
       endif!first           
 
@@ -1322,13 +1372,14 @@ c$$$    write (*,*) numbv
 
           if (pad .gt. npad) pad = pad - npad
 
-          det = isdet(pad); ! flag as fake or not
-          pad = tpads(pad); ! remap fake padrows onto nearest real one
-
+          det = isdet(pad,sector); ! flag as fake or not
+          pad = tpads(pad,sector); ! remap fake padrows onto nearest real one
+          IF ( tpcc_version .eq. 3.2 .and. sector.eq.20 .and. pad .lt.14 ) THEN
+             sector = 99 "Effectively blind TpcRS to these hits"
+          ENDIF
         endif      
 
       g2t_tpc_volume_id = 100000*det + 100*sector + pad
-
 
       RETURN
     end

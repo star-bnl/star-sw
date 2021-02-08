@@ -1,0 +1,53 @@
+ macro run _
+       chain
+   
+  macro/global/import *
+     
+  message ' Now running BFC_cleanup'
+     
+  message ' --> bfc_cleanup - delete directories'     
+* delete directories/tables
+   ls
+   rmdir run
+   rmdir event
+* 
+* rmdir calib
+   ls
+   
+  message ' --> bfc_cleanup - delete vectors'      
+* delete vectors
+  if ($vexist(havedstrunsum).ne.0) then      
+    vec/delete havedstrunsum
+  endif
+  if ($vexist(totime).ne.0) then      
+    vec/delete totime
+  endif
+  if ($vexist(cpupev).ne.0) then      
+    vec/delete cpupev
+  endif
+  if ($vexist(setup_done).ne.0) then      
+    vec/delete setup_done
+  endif
+  if ($vexist(readprob).ne.0) then      
+    vec/delete readprob
+  endif
+  if ($vexist(randst).ne.0) then      
+    vec/delete randst
+  endif
+    
+  
+* do only if you want to re-load stuff
+* vec/delete make_done
+
+   
+  test = [chain]
+  nw = $words([test])
+  do i = 1, [nw]
+    mod = $word([test],[i],1)
+    vec/delete v[mod]
+    vec/delete t[mod] 
+  enddo
+ 
+ return
+ 
+* **********************************************************************

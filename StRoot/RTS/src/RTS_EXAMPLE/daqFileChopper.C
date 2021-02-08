@@ -174,7 +174,7 @@ void doChopInstead(int argc, char *argv[]) {
     char basename[256];
 
     int i=0;
-    for(i=0;i<255;i++) {
+    for(i=0;i<256;i++) {
 	if(argv[1][i] == '\0') break;
 	if(argv[1][i] == '.') break;
 	

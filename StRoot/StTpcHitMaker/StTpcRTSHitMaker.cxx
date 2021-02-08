@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.55 2019/02/14 17:40:39 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.56 2019/05/11 02:20:34 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -26,6 +26,7 @@
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
+#include "StDetectorDbMaker/St_tpcStatusC.h"
 #include "StMessMgr.h" 
 #include "StDAQMaker/StDAQReader.h"
 #include "StRtsTable.h"
@@ -176,6 +177,10 @@ Int_t StTpcRTSHitMaker::Make() {
   TBenchmark *myBenchmark = new TBenchmark();
   myBenchmark->Reset();
   //  myBenchmark->Start("StTpcRTSHitMaker::Make");
+  if (St_tpcStatusC::instance()->isDead()) {
+    LOG_WARN << "TPC status indicates it is unusable for this event. Ignoring hits." << endm;
+    return kStOK;
+  }
   static  Short_t ADCs[__MaxNumberOfTimeBins__];
   static UShort_t IDTs[__MaxNumberOfTimeBins__];
   StEvent*   rEvent      = (StEvent*)    GetInputDS("StEvent");

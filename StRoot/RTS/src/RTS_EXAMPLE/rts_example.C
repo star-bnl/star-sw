@@ -1,8 +1,3 @@
-//#define JMLSECSZ
-//#define JMLADC
-#define JMLEVTMIN 206150 
-#define JMLEVTMAX 206200
-
 #include <stdio.h>
 #include <unistd.h>
 #include <getopt.h>
@@ -108,6 +103,7 @@ static int run_number ;
 
 
 //trigger related globals
+u_int bunch_xing ;
 u_int rcc_timestamp ;
 
 
@@ -633,9 +629,6 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 	for(int s=1;s<=24;s++) {
 
-	    double adctb[100];
-	    memset(adctb, 0, sizeof(adctb));
-
 /* stop using legacy, even in the example...
 		dd = rdr->det("tpx")->get("legacy",s) ;	// uses tpc_t
 		while(dd && dd->iterate()) {
@@ -654,7 +647,6 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 		}
 */
 
-	    int pcount = 0;
 		int pixel_count[46] ;	// as an example we'll count pixels per row
 		memset(pixel_count,0,sizeof(pixel_count)) ;
 		int sec_found = 0 ;
@@ -673,7 +665,6 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				}
 
 				pixel_count[dd->row] += dd->ncontent ;
-				pcount += dd->ncontent;
 
 				int seq = 0 ;
 				int last_tb = -1 ;
@@ -682,10 +673,6 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				for(u_int i=0;i<dd->ncontent;i++) {
 					int tb = dd->adc[i].tb ;
 					int adc = dd->adc[i].adc ;
-
-					if(tb < 100) {
-					    adctb[tb] += adc;
-					}
 
 					if(adc > 80) {
 						//printf("ADC %d: tb %d, last_tb %d: seq %d\n",adc,tb,last_tb,seq) ;
@@ -744,22 +731,6 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 					}
 				}
 			}
-
-#ifdef JMLADC
-			if((rdr->seq > JMLEVTMIN) && (rdr->seq < JMLEVTMAX)) {
-			    for(int i=0;i<100;i++) {
-				printf("%d %d %d %d %lf %d\n",
-				       rdr->run,
-				       rdr->seq,
-				       s,
-				       i,
-				       adctb[i],
-				       1);
-			    }
-			}
-		
-
-#endif
 		}
 
 		LOG(DBG,"Doing TPX get CLD, s %d",s) ;
@@ -809,18 +780,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				}
 			}
 		}
-	       
-#ifdef JMLSECSZ
 
-		printf("%d %d %d %d %d %d\n",
-		       rdr->run,
-		       rdr->seq,
-		       rdr->evt_time,
-		       1,
-		       s,
-		       pcount);
-		
-#endif
 	
 		// will only exist in token 0 of a pedestal run!
 		dd = rdr->det("tpx")->get("pedrms",s) ;
@@ -885,6 +845,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 	if(found) {
 		LOG(INFO,"TPX found [%s;%d]",fstr,s_cou) ;
+//		printf("TPX pixels %u xing %d\n",tot_pixels,bunch_xing) ;
 	}
 
 
@@ -1712,25 +1673,20 @@ static int mtd_doer(daqReader *rdr, const char *do_print)
 
 // This is called by tinfo flag:
 
-int QtParse(int conf_num, TriggerDataBlk *trg, int *sz, int *internal_usecs, UINT64 *bx_time, UINT64 bx64) {
+void QtParse(int conf_num, TriggerDataBlk *trg, int *sz, int *usecs) {
     *sz = 0;
-    *internal_usecs = 0;
-    if(trg->MainX[conf_num].offset == 0) {
-	*sz = -1;  *internal_usecs = -1; *bx_time = 0ll;
-	return -1;
-    }
+    *usecs = 0;
+    if(trg->MainX[conf_num].offset == 0) return;
+
   
     char *base = (char *)trg;
     QTBlock *qtb = (QTBlock *)(base + swap32(trg->MainX[conf_num].offset));
     int len = swap32(trg->MainX[conf_num].length);
     *sz = len;
-    
+
     if((len - swap32(qtb->length)) != 12) {
-	LOG(DBG, "Conf num %d not a QT board!", conf_num);
-	*sz = -1;
-	*internal_usecs = -1;
-	*bx_time = 0ll;
-	return -1;
+	LOG(ERR, "Conf num %d not a QT board!");
+	return;
     }
     
     // loop over boards
@@ -1750,8 +1706,8 @@ int QtParse(int conf_num, TriggerDataBlk *trg, int *sz, int *internal_usecs, UIN
 	    
 	    LOG(DBG, "addr=%d nlines=%d usec=%d", addr, nlines, usec);
 	    
-	    *internal_usecs += usec;
-	    
+	    *usecs += usec;
+	    	    
 	    while(nlines--) {
 		dword++;
 	    }
@@ -1759,70 +1715,7 @@ int QtParse(int conf_num, TriggerDataBlk *trg, int *sz, int *internal_usecs, UIN
 	}
     }
     
-    TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
-    
-    UINT64 tms = trgSum->LocalClocks[conf_num];
-    if(tms) {
-	while(tms < bx64) tms += 0xffffffffll;
-	tms = tms - bx64;
-    }
-    
-    *bx_time = tms;
-    return conf_num;
 }
-
-
-static const char *confnum2str[] = {
-    "rcc",
-    "l1",
-    "bc1",
-    "mxq",
-    "mix",
-    "bcw",
-    "bce",
-    "eq3",
-    "bbc",
-    "bbq",
-    "fms",
-    "qt1",
-    "qt2",
-    "qt3",
-    "qt4",
-    "eq1",
-    "eq2",
-    "inf",
-    NULL,
-    NULL,
-    NULL,
-    NULL };
-
-
-
-int tinfo_fps(daqReader *rdr, UINT64 bx64) {
-    UINT32 fpre_bx=0;
-    UINT32 fpost_bx=0;
-    UINT32 fpre_sz=0;
-    UINT32 fpost_sz = 0;
-    daq_dta *dd;
-    dd = rdr->det("fps")->get("adc",1);
-    if(dd) {
-	fpre_bx = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
-	fpre_sz = ((fps_evt_hdr_t *)(dd->meta))->words * 4;
-    }
-    dd = rdr->det("fps")->get("adc",2);
-    if(dd) {
-	fpost_bx = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
-	fpost_sz = ((fps_evt_hdr_t *)(dd->meta))->words * 4;
-    }
-
-    // Get FPS timing...
-    if(fpre_bx && fpost_bx) 
-	printf("%d %u %u %u %d %d 0x%llx #FPS seq bx fpre fpost fpresz fpostsz trg\n",
-	       rdr->seq,
-	       (UINT32)bx64, fpre_bx, fpost_bx, fpre_sz, fpost_sz, rdr->daqbits64_l1);
-}
-
-
 
 static int tinfo_doer(daqReader *rdr, const char *do_print)
 {
@@ -1838,86 +1731,233 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	   rdr->evpgroups,
 	   rdr->flags);
     
+
+
+    UINT32 fpre_bx=0;
+    UINT32 fpost_bx=0;
+    UINT32 fpre_sz=0;
+    UINT32 fpost_sz = 0;
     daq_dta *dd;
+    dd = rdr->det("fps")->get("adc",1);
+    if(dd) {
+	fpre_bx = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+	fpre_sz = ((fps_evt_hdr_t *)(dd->meta))->words * 4;
+    }
+    dd = rdr->det("fps")->get("adc",2);
+    if(dd) {
+	fpost_bx = ((fps_evt_hdr_t *)(dd->meta))->reserved[1];
+	fpost_sz = ((fps_evt_hdr_t *)(dd->meta))->words * 4;
+    }
+    
     dd = rdr->det("trg")->get("raw") ;
     if(dd) {
 	if(dd->iterate()) {
 	    found = 1;
+
+	    //printf("there\n");
+
+	    //      int sz = dd->get_size_t();
 	    TriggerDataBlk *trg = (TriggerDataBlk *)dd->Byte;
 
-
+	    int qt1_sz = 0;
+	    int qt1_usec = 0;
+	    int qt2_sz = 0;
+	    int qt2_usec = 0;
+	    int qt3_sz = 0;
+	    int qt3_usec = 0;
+	    int qt4_sz = 0;
+	    int qt4_usec = 0;
 	    
+	    QtParse(QT1_CONF_NUM, trg, &qt1_sz, &qt1_usec);
+	    QtParse(QT2_CONF_NUM, trg, &qt2_sz, &qt2_usec);	   
+	    QtParse(QT3_CONF_NUM, trg, &qt3_sz, &qt3_usec);
+	    QtParse(QT4_CONF_NUM, trg, &qt4_sz, &qt4_usec);
+
+	    int mxq_sz;
+	    int mxq_usec;
+	    int epq_sz;
+	    int epq_usec;
+	    int bbq_sz;
+	    int bbq_usec;
+
+	    QtParse(MXQ_CONF_NUM, trg, &mxq_sz, &mxq_usec);
+	    QtParse(EQ1_CONF_NUM, trg, &epq_sz, &epq_usec);
+	    QtParse(BBQ_CONF_NUM, trg, &bbq_sz, &bbq_usec);
+
+
 	    EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
+
+	    bunch_xing = swap32(evtDesc->bunchXing_lo) ;
+	    bunch_xing = bunch_xing % 120 ;
+
+
 	    int trgDetMask = swap16(evtDesc->trgDetMask);
+      
 	    int pre = swap16(evtDesc->npre);
 	    int post = swap16(evtDesc->npost);
 	    int res1 = swap16(evtDesc->res1);
-      	    int trgCrateMask =  (res1 & 0xfff0) << 20 | (post & 0xfff0) << 8 | (pre & 0xfff0) >> 4;
-      	    UINT32 bx_high = swap32(evtDesc->bunchXing_hi);
+      
+	    int trgCrateMask =  (res1 & 0xfff0) << 20 | (post & 0xfff0) << 8 | (pre & 0xfff0) >> 4;
+      
+	    UINT32 bunches_h = swap16(evtDesc->tcuCtrBunch_hi);
+	    UINT32 bunches = swap16(evtDesc->DSMAddress) & 0xffff;
+	    
+	    UINT32 bx_high = swap32(evtDesc->bunchXing_hi);
 	    UINT32 bx_low = swap32(evtDesc->bunchXing_lo);
 	    UINT64 bx64 = bx_high;
 	    bx64 = (bx64 << 32) + bx_low;
-	    float bx_sec = bx64/9.3e6;
-	    int bx7 = bx64 % 120;
+	    
+	    double bx_sec = bunches/9.3e6;
+	   
+	    TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
 
-	    int crate_sz[MAX_CONF_NUM];
-	    int crate_internal_usec[MAX_CONF_NUM];
-	    UINT64 crate_bx_time[MAX_CONF_NUM];
-	    
-	    for(int i=0;i<MAX_CONF_NUM;i++) {
-		QtParse(i, trg, &crate_sz[i], &crate_internal_usec[i], &crate_bx_time[i], bx64);
+	    UINT32 tms[32];
+	    for(int i=0;i<32;i++) {
+		tms[i] = trgSum->LocalClocks[i];
+		if(tms[i]) tms[i] = tms[i] - bunches;
 	    }
-	    
-	    
-	    int corrupt = 0;
-      	    for(int i=0;i<MAX_CONF_NUM;i++) {
-		if(crate_bx_time[i] > 0xffffll) {
-		    corrupt = 1;
 
-		    printf("CORRUPT evt %d:  %s bxtime %lld\n",
-			   rdr->seq,
-			   confnum2str[i],
-			   crate_bx_time[i]);
-		}
+	    printf("%d ", rdr->seq);
+	    for(int i=0;i<32;i++) {
+		printf("%u ",tms[i]);
 	    }
+	    printf("CONFNUM_TM\n");
+
+	    
+		
+	    // Get FPS timing...
+	    if(fpre_bx && fpost_bx) 
+		printf("%d %u %u %u %d %d 0x%llx #FPS seq bx fpre fpost fpresz fpostsz trg\n",
+		       rdr->seq,
+		       bunches, fpre_bx, fpost_bx, fpre_sz, fpost_sz, rdr->daqbits64_l1);
+	    
+
+//	    UINT32 l1_bx = trgSum->LocalClocks[L1_CONF_NUM];
+	    UINT32 mxq_bx = trgSum->LocalClocks[MXQ_CONF_NUM] ;
+	    UINT32 bbq_bx = trgSum->LocalClocks[BBQ_CONF_NUM];
+	    UINT32 epq_bx = trgSum->LocalClocks[EQ1_CONF_NUM];
+
+	    printf("%d %d 0x%llx %d %d %d %d %d %d %d MXSIZE\n",
+		   rdr->seq,
+		   rdr->token,
+		   rdr->daqbits64_l1,
+		   mxq_usec,
+		   bbq_usec,
+		   epq_usec,
+		   mxq_bx,
+		   bbq_bx,
+		   epq_bx,
+		   bunches
+		   );
+	    
+	    printf("%d %d 0x%llx %d %d %d %d %u %u %u %u %u %d %d %d %d--> %x %x %x  QTSIZE\n",
+		   rdr->seq,
+		   rdr->token,
+		   rdr->daqbits64_l1,
+		   qt1_usec,
+		   qt2_usec,
+		   qt3_usec,
+		   qt4_usec,
+		   (UINT32)trgSum->LocalClocks[QT1_CONF_NUM]-bunches,
+		   (UINT32)trgSum->LocalClocks[QT2_CONF_NUM]-bunches,
+		   (UINT32)trgSum->LocalClocks[QT3_CONF_NUM]-bunches,
+		   (UINT32)trgSum->LocalClocks[QT4_CONF_NUM]-bunches,
+		   bunches,
+		   qt1_sz,
+		   qt2_sz,
+		   qt3_sz,
+		   qt4_sz,
+		   (UINT32)trgSum->LocalClocks[QT3_CONF_NUM],
+		   (UINT32)trgSum->LocalClocks[QT4_CONF_NUM],
+		   bunches
+		   );
+
+
+            printf("tinfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evpgroups=0x%x flags=0x%x trgDet=0x%x trgCrate=0x%x bx_sec=%lf\n",
+		   rdr->seq,
+		   rdr->token,
+		   rdr->detectors,
+		   rdr->daqbits64_l1,
+		   rdr->daqbits64_l2,
+		   rdr->daqbits64,
+		   rdr->evpgroups,
+		   rdr->flags,
+		   trgDetMask,
+		   trgCrateMask,
+		   bx_sec);
 
 	    // seq, size, bx, bx % 120
-	    //printf("L4BUG: %d %d %lld %lld\n", rdr->seq, rdr->event_size, bx64, bx64 % 120);
+	    printf("L4BUG: %d %d %lld %lld\n", rdr->seq, rdr->event_size, bx64, bx64 % 120);
 	    
-	    //printf("EvtDescData %d %d %d\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,0) ;
+	    printf("EvtDescData %d %d %d\n",evtDesc->tcuCtrBunch_hi,evtDesc->DSMAddress,0) ;
 
+	    //TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
+//	    L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
 
+	    //printf("L1 trg = 0x%x-%x\n",swap32(trgSum->L1Sum[1]),swap32(trgSum->L1Sum[0]));
+	    //printf("L2 trg = 0x%x-%x\n",swap32(trgSum->L2Sum[1]),swap32(trgSum->L2Sum[0]));
+	    //for(int i=0;i<64;i++) {
+	    //printf("L2Result[%d]=0x%x\n",i,swap32(trgSum->L2Result[i]));
+	    //}
+	    //for(int i=0;i<8;i++) {
+	    //		printf("lastDsm[%d] = 0x%x\n",i,swap16(l1Dsm->lastDSM[i]));
+	    //}
 	    printf("ids: ");
 	    for(int i=0;i<64;i++) {
 		if(rdr->daqbits64 & (1ll << i)) {
 		    printf("{%d}",rdr->getOfflineId(i));
 		}
 	    }
+	    // printf("\n");
 
+	    static const char *confnum2str[] = {
+		"rcc",
+		"l1",
+		"bc1",
+		"mxq",
+		"mix",
+		"bcw",
+		"bce",
+		"epq",
+		"bbc",
+		"bbq",
+		"fms",
+		"qt1",
+		"qt2",
+		"qt3",
+		"qt4",
+		NULL,
+		NULL,
+		NULL,NULL,
+		NULL,NULL,NULL };
 	    
 	    printf("   l1=0x%llx   trgDetMask=0%x   trgCrateMask=0x%x\n",rdr->daqbits64_l1,trgDetMask,trgCrateMask);
-
-	    /*
-	    for(int i=2;i<MAX_OFFLEN-1;i++) {
+	    /*printf("ids: crate %s(0x%x):\toffset=%d\tsize=%d\n", 
+		   "l1",
+		   1<<1,
+		   swap32(trg->L1_DSM_ofl.offset),
+		   swap32(trg->L1_DSM_ofl.length));
+	    */
+	      for(int i=2;i<MAX_OFFLEN-1;i++) {
 		if(swap32(trg->MainX[i].length)) {
 
-		    char *nm = (char *)trg + swap32(trg->MainX[i].offset);
-		    nm[4] =0 ;
+			char *nm = (char *)trg + swap32(trg->MainX[i].offset);
+			nm[4] =0 ;
 
-		    //		if(confnum2str[i]) {
+//		if(confnum2str[i]) {
 		    printf("ids %2d: crate %s[%s](0x%x):\toffset=%d\tsize=%d\n",i,
 			   confnum2str[i],nm,
 			   1<<i,
 			   swap32(trg->MainX[i].offset),
 			   swap32(trg->MainX[i].length));
-		}
+			   }
 
-	    }
-	    */
+			//printf("---> [%s]\n",nm) ;
+		}
+      
 	}
     }
   
-
     return found;
 }
 
@@ -2401,9 +2441,6 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 #if 1
 		// In Row/Pad form
-		double adctb[512];
-		memset(adctb, 0, sizeof(adctb));
-
 		dd = rdr->det("itpc")->get("adc",s) ;
 		if(dd) {
 			while(dd->iterate()) {
@@ -2413,37 +2450,15 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 
 
-				for(int i=0;i<dd->ncontent;i++) {
-				    adctb[dd->adc[i].tb] += dd->adc[i].adc;
-				}
-
 				if(do_print) {
 					if(dd->ncontent) printf("ITPC ADC: sector %2d, row %2d, pad %3d: %3d timebins\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 
 					for(u_int i=0;i<dd->ncontent;i++) {
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb,dd->adc[i].adc) ;
-					
 					}
 				}
 			}
-	         }
-
-
-#ifdef JMLADC
-		if((rdr->seq > JMLEVTMIN) && rdr->seq < JMLEVTMAX) {
-		    for(int i=0;i<100;i++) {
-			printf("%d %d %d %d %lf %d\n", 
-			       rdr->run,
-			       rdr->seq,
-			       s,
-			       i,
-			       adctb[i], 
-			       0);
-		    }
 		}
-#endif   
-
-	
 #endif
 
 		// CLD data
@@ -2528,21 +2543,6 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 	fstr[0] = 0 ;
 
 	if(adc_found) {
-
-#ifdef JMLSECSZ
-	    for(int i=1;i<=24;i++) {
-		// run, seq, time, in/out, sector, size
-		printf("%d %d %d %d %d %d\n",
-		       rdr->run,
-		       rdr->seq,
-		       rdr->evt_time,
-		       0,
-		       i,
-		       sec[i]);
-	    }
-
-#endif
-
 		sprintf(fstr,"ADC ") ;
 
 //		for(int i=1;i<=24;i++) {
@@ -2632,7 +2632,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
 	}
 
-       	dd = rdr->det("fcs")->get("zs") ;
+	dd = rdr->det("fcs")->get("zs") ;
 	if(dd) {
 		while(dd->iterate()) {
 			zs_found = 1  ;
@@ -2654,7 +2654,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 			}
 		}
 	}
-	
+
 	char fstr[128] ;
 	fstr[0] = 0 ;
 

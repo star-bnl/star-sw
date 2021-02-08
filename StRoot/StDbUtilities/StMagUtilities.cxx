@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.118 2019/04/22 20:47:11 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.119 2019/05/18 04:39:24 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.119  2019/05/18 04:39:24  genevb
+ * Properly include ion pile-up of Abort Gap Cleaning, plus a little clean-up
+ *
  * Revision 1.118  2019/04/22 20:47:11  genevb
  * Introducing codes for AbortGapCleaning distortion corrections
  *
@@ -2791,7 +2794,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
       const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
       const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
       TMatrix  ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS) ;
-      TMatrix  ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
+      TMatrix  EroverEz(ROWS,COLUMNS) ;
       Float_t  Rlist[ROWS], Zedlist[COLUMNS] ;
       //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.      
 
@@ -2944,7 +2947,7 @@ void StMagUtilities::UndoAbortGapDistortion( const Float_t x[], Float_t Xprime[]
   static  Bool_t DoOnceLocal = true ;
   Float_t   Er_integral, Ephi_integral ;
   Double_t  r, phi, z ;
-  const Int_t     TIMEBINS    =  15  ;  // Each time bin is 0.05 seconds          
+  const Int_t     TIMEBINS    =  20  ;  // Each time bin is 0.05 seconds          
 
   static Float_t abortR2Er[TIMEBINS][EMap_nZ][EMap_nR] ;
   //  static Float_t abortR2Er_Calc[EMap_nZ][EMap_nR] ;
@@ -2952,36 +2955,38 @@ void StMagUtilities::UndoAbortGapDistortion( const Float_t x[], Float_t Xprime[]
   const Int_t     ROWS        =  257 ;  // (2**n + 1)                             
   const Int_t     COLUMNS     =  129 ;  // (2**m + 1)                             
 
-  cout << "StMagUtilities::UndoAbortGap TimeSinceDeposition=" << TimeSinceDeposition << endl;
+  //cout << "StMagUtilities::UndoAbortGap TimeSinceDeposition=" << TimeSinceDeposition << endl;
 
-  Float_t AbortGapCharge = 0;
-  if (fAbortGapCharge) GetAbortGapCharge();
-  if (TimeSinceDeposition < 0) {
-    if (AbortGapCharges->GetSize() == 0) { memcpy(Xprime,x,threeFloats);  return ; }
-    AbortGapCharge = AbortGapChargeCoef * (*AbortGapCharges)[0];
-    TimeSinceDeposition = (Float_t) (*AbortGapTimes)[0];
-  } else {
-    if (fSpaceChargeR2) { GetSpaceChargeR2();} // need to reset it. 
-    AbortGapCharge = SpaceChargeR2; // test charge
-    TimeSinceDeposition = 0.1; // test time
+  Float_t AbortGapCharge = 0.0;
+  Int_t AbortGapChargeSize = 1;
+
+  Bool_t testCase = (TimeSinceDeposition >= 0);
+  if (!testCase) {
+    if (fAbortGapCharge) GetAbortGapCharge();
+    AbortGapChargeSize = AbortGapCharges->GetSize();
+    if (AbortGapChargeSize == 0) { memcpy(Xprime,x,threeFloats);  return ; }
   }
   
 
+  Double_t fullDriftTime = TPC_Z0 / IonDriftVel;
+
   if (DoOnceLocal )
     {
-      //      cout << "TPC_Z0/IonDriftVel: " << TPC_Z0 / IonDriftVel << endl;
+      //      cout << "fullDriftTime: " << fullDriftTime << endl;
       cout << "StMagUtilities::UndoAbortGap  Please wait for the tables to fill ... ~5 seconds" << endl;
       const Int_t     ITERATIONS  =  100 ;  // About 0.05 seconds per iteration       
       const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
       const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
       Float_t  Rlist[ROWS], Zedlist[COLUMNS] ;
      
+      Double_t timeBinLength = TPC_Z0 / TIMEBINS;
+      Double_t zterm = OFCRadius*OFCRadius - IFCRadius*IFCRadius ;
+
+      TMatrix ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
       //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.                                                                                   
       for ( Int_t k = 0 ; k < TIMEBINS ; k++ )
 	{
-	  Double_t driftZ = k * TPC_Z0 / TIMEBINS ;
-
-	  TMatrix ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS), ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
+	  Double_t driftZ = k * timeBinLength ;
 
 	  for ( Int_t j = 0 ; j < COLUMNS ; j++ )
 	    {
@@ -2992,6 +2997,7 @@ void StMagUtilities::UndoAbortGapDistortion( const Float_t x[], Float_t Xprime[]
 		  Double_t Radius = IFCRadius + i*GRIDSIZER ;
 		  ArrayV(i,j) = 0 ;
 		  Charge(i,j) = 0 ;
+		  EroverEz(i,j) = 0 ;
 		  Rlist[i] = Radius ;
 		}
 	    }
@@ -2999,18 +3005,15 @@ void StMagUtilities::UndoAbortGapDistortion( const Float_t x[], Float_t Xprime[]
 	  for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )
 	    {
 	      Double_t zed = j*GRIDSIZEZ ;
-	      //int count = 0;
-	      for ( Int_t i = 1 ; i < ROWS-1 ; i++ )
-		{
-		  // section needs to be modified to produce different space charge distributions for each different map                                                     
-		  Double_t Radius = IFCRadius + i*GRIDSIZER ;
-		  Double_t zterm = OFCRadius*OFCRadius - IFCRadius*IFCRadius ;
-
-		  if ( zed <= TPC_Z0 - driftZ ) 
+	      if ( zed <= TPC_Z0 - driftZ ) 
+                {
+	          for ( Int_t i = 1 ; i < ROWS-1 ; i++ )
 		    {
+		      Double_t Radius = IFCRadius + i*GRIDSIZER ;
 		      Charge(i,j) = zterm * SpaceChargeRadialDependence(Radius) ;
 		    }
-		  else Charge(i,j) = 0.0 ;
+		} else {
+	          for ( Int_t i = 1 ; i < ROWS-1 ; i++ ) Charge(i,j) = 0.0 ;
 		}
 	    }
 	  
@@ -3046,34 +3049,49 @@ void StMagUtilities::UndoAbortGapDistortion( const Float_t x[], Float_t Xprime[]
   if ( phi < 0 ) phi += TMath::TwoPi() ;      // Table uses phi from 0 to 2*Pi        
   z = LimitZ( Sector, x ) ;                   // Protect against discontinuity at CM  
   
-  // Determine which time slice is closest                                            
-  Int_t timeSlice ;
-  Double_t closestTime = 1.0 ;
-  Double_t timeDiff ;
+  Double_t timeBinDuration = fullDriftTime / TIMEBINS;
 
-  for ( Int_t k = 0 ; k < TIMEBINS ; k++ )
+  for ( Int_t i=0 ; i<AbortGapChargeSize ; i++)
     {
-      timeDiff = abs(TimeSinceDeposition - ( k * (TPC_Z0/TIMEBINS) / IonDriftVel ) ) ;
-      if ( timeDiff < abs(TimeSinceDeposition - closestTime) )
-	{
-	  closestTime = k * (TPC_Z0/TIMEBINS) / IonDriftVel ;
-	  timeSlice = k ;
-	}
-      if ( TimeSinceDeposition >= TPC_Z0/IonDriftVel ) timeSlice = -999 ;
-    }
-
-  if ( timeSlice != -999 )
-    {
-      Interpolate2DEdistortion( ORDER, r, z, abortR2Er[timeSlice], Er_integral ) ;
-      Ephi_integral = 0.0 ;  // E field is symmetric in phi                               
-      // Subtract to Undo the distortions and apply the EWRatio on the East end of the TPC
-      if ( r > 0.0 ) 
+      if (testCase)
         {
-          double Weight = AbortGapCharge * (doingDistortion ? SmearCoefSC : 1.0);
-          phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;     
-          r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+          if (fSpaceChargeR2) { GetSpaceChargeR2();} // need to reset it. 
+          AbortGapCharge = SpaceChargeR2; // test charge
+        } else {
+          TimeSinceDeposition = (Float_t) (*AbortGapTimes)[i];
+          if ( TimeSinceDeposition >= fullDriftTime ) continue;
+          AbortGapCharge = AbortGapChargeCoef * (*AbortGapCharges)[i];
         }
-    } 
+
+      // Determine which time slice is closest                                            
+      Int_t timeSlice = TIMEBINS;
+      Double_t closestTime = 25.0 ;
+
+      for ( Int_t k = 0 ; k < TIMEBINS ; k++ )
+        {
+          Double_t timeSliceTime = k * timeBinDuration;
+          Double_t timeDiff = abs(TimeSinceDeposition - timeSliceTime ) ;
+          if ( timeDiff < abs(TimeSinceDeposition - closestTime) )
+            {
+              closestTime = timeSliceTime;
+              timeSlice = k ;
+            }
+        }
+
+      if ( timeSlice >=0 && timeSlice < TIMEBINS)
+        {
+	  //	  cout << "timeSlice: " << timeSlice << endl;
+          Interpolate2DEdistortion( ORDER, r, z, abortR2Er[timeSlice], Er_integral ) ;
+          Ephi_integral = 0.0 ;  // E field is symmetric in phi                               
+          // Subtract to Undo the distortions and apply the EWRatio on the East end of the TPC
+          if ( r > 0.0 ) 
+            {
+              double Weight = AbortGapCharge * (doingDistortion ? SmearCoefSC : 1.0);
+              phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;     
+              r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+            }
+        } 
+    }
   
   if (usingCartesian) Polar2Cart(r,phi,Xprime);
   else { Xprime[0] = r; Xprime[1] = phi; }
@@ -5152,7 +5170,7 @@ void StMagUtilities::Undo2DGridLeakDistortion( const Float_t x[], Float_t Xprime
   if ( DoOnce )
     {
       cout << "StMagUtilities::UndoGridL  Please wait for the tables to fill ... ~30 seconds" << endl ;
-      TMatrix  ArrayE(ROWS,COLUMNS), ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS) ;
+      TMatrix  ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS) ;
       //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.      
 
       for ( Int_t j = 0 ; j < COLUMNS ; j++ )  

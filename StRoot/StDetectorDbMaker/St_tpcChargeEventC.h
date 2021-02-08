@@ -42,7 +42,7 @@ class St_tpcChargeEventC : public TChair {
 
   // must call findChargeTimes() before getCharges() and getTimes()
   int findChargeTimes(unsigned long long bunchCrossingNumber, unsigned long long bunchCrossingWindow);
-  int findChargeTimes(unsigned long long bunchCrossingNumber, double timeWindow=1.0);
+  int findChargeTimes(unsigned long long bunchCrossingNumber, double timeWindow=1.9);
   TArrayF* getCharges() { return &localStoreCharges; }
   TArrayD* getTimes() { return &localStoreTimesSinceCharges; }
 
