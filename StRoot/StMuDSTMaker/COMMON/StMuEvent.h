@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.30 2010/05/28 19:47:51 tone421 Exp $
+ * $Id: StMuEvent.h,v 1.31 2015/03/06 20:02:01 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -111,6 +111,10 @@ class StMuEvent : public TObject {
   float vpdTdiff(); 
   float vpdVz();
 
+  unsigned int numberOfPxlInnerHits();
+  unsigned int numberOfPxlOuterHits();
+  unsigned int numberOfIstHits();
+  unsigned int numberOfSsdHits();
 
  protected:
   void clear();
@@ -141,6 +145,8 @@ class StMuEvent : public TObject {
   UShort_t mRefMultFtpcWest;
   Float_t mReactionPlane[2];              
   Float_t mReactionPlanePtWgt[2];
+  
+  UShort_t mNHitsHFT[4];
 
   StThreeVectorF mPrimaryVertexError;
 
@@ -215,10 +221,18 @@ inline unsigned int StMuEvent::numberOfVpdWestHits() {
 inline float StMuEvent::vpdTstart() { return mVpdTstart; }
 inline float StMuEvent::vpdTdiff() { return mVpdTdiff; }
 inline float StMuEvent::vpdVz() { return mVpdVz; }
+inline unsigned int StMuEvent::numberOfPxlInnerHits() { return mNHitsHFT[0]; }
+inline unsigned int StMuEvent::numberOfPxlOuterHits() { return mNHitsHFT[1]; }
+inline unsigned int StMuEvent::numberOfIstHits() { return mNHitsHFT[2]; }
+inline unsigned int StMuEvent::numberOfSsdHits() { return mNHitsHFT[3]; }
+
 #endif
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.31  2015/03/06 20:02:01  jdb
+ * Added 4 unsigned shorts to StMuEvent at request of Xin Dong. Change StMuEvent.{h, cxx}
+ *
  * Revision 1.30  2010/05/28 19:47:51  tone421
  * Removed a cout needed for test purposes in StMuDstMaker. Made sure StTriggerData objects copied into the MuDst have a debug value of 0..
  *
