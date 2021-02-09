@@ -280,8 +280,16 @@ Bfc_st BFC[] = { // standard chains
   {"MC2020",      "","","MC.2020,sdt20200292,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
   {"MC.2020"  ,"","","MC.2020a",                                                           "","","",kFALSE},
   {"MC2020a"  ,"","","MC.2020a",                                                           "","","",kFALSE},
+  {"MC.y2021","","","MC2021",                                                              "","","",kFALSE},
+  {"MC2021.Ideal","","","MC.2021,MC.Sti,vmc,NewTpcAlignment,ExB"                          ,"","","",kFALSE},
+  {"MC2021",      "","","MC.2021,sdt20210209,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
+  {"MC.2021"  ,"","","MC.2021a",                                                           "","","",kFALSE},
+  {"MC2021a"  ,"","","MC.2021a",                                                           "","","",kFALSE},
 #if  ROOT_VERSION_CODE < 393216 /* ROOT_VERSION(6,0,0) */
   {"MC.2020a","","","y2020a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.Sti,CorrY,vmc"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
+   ",geantout,big,MiniMcMk,Sti,NewTpcAlignment,AgML",                                     "","","/",kFALSE},
+  {"MC.2021a","","","y2021a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.Sti,CorrY,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
    ",geantout,big,MiniMcMk,Sti,NewTpcAlignment,AgML",                                     "","","/",kFALSE},
   {"MC.Sti",   "","","Sti,geantOut,noRunco,noHistos,picoWrite,PicoVtxVpd,McTpcAna,tags"   ,"","","",kFALSE},
@@ -290,7 +298,11 @@ Bfc_st BFC[] = { // standard chains
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
    ",geantout,big,Sti,NewTpcAlignment,AgML",                                              "","","/",kFALSE},
   {"MC.Sti",   "","","Sti,geantOut,noRunco,noHistos,McTpcAna,tags"                        ,"","","",kFALSE},
+  {"MC.2021a","","","y2021a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,MC.Sti,CorrY,vmc"
+   ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
+   ",geantout,big,Sti,NewTpcAlignment,AgML",                                              "","","/",kFALSE},
 #endif
+
   {"MC.StiCA",   "","","MC.Sti,StiCA"                                                     ,"","","",kFALSE},
   {"XC",          "","","TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
    "OSpaceZ2,OGridLeak3D,CorrX,tpcDB,TpcHitMover"
