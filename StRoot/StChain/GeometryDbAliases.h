@@ -182,9 +182,9 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2019b",      20181215,     1, "y2019",    "y2019a production geometry (FXT @ 200.7cm), AgML,xgeometry"},   
   {"r2019",       20181220,     0, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
 
-  {"y2020",       20191120,     0, "y2019",    "y2020 development geometry, AgML,xgeometry"},   
-  {"y2020a",      20191120,     1, "y2019",    "y2020 fast-offline geometry, AgML,xgeometry"},   
-  {"y2020b",      20191120,     2, "y2019",    "y2020 production geometry (FXT @ 200.7 cm), AgML,xgeometry"},   
+  {"y2020",       20191115,     0, "y2019",    "y2020 development geometry, AgML,xgeometry"},   
+  {"y2020a",      20191115,     1, "y2019",    "y2020 fast-offline geometry, AgML,xgeometry"},   
+  {"y2020b",      20191115,     2, "y2019",    "y2020 production geometry (FXT @ 200.7 cm), AgML,xgeometry"},   
   {"r2020",       20191120,180000, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
   {"r2020a",      20191120,180001, "y2019",    "y2019, iTPC, Jim Thomas 05/31/16, no HFT,xgeometry"}, // 
  
