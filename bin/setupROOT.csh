@@ -150,6 +150,8 @@ switch ( $STAR_HOST_SYS )
 endsw
 switch ( $STAR_HOST_SYS )  
     case *gcc10*:
+     setenv EXTRA_FLAGS " $EXTRA_FLAGS" # --cflags=--std=c++17"
+     breaksw
     case *gcc9*:
     case *gcc8*:
     case *gcc7*:
