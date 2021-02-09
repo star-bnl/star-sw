@@ -2500,6 +2500,10 @@ bool StPicoDstMaker::selectVertex() {
       // Retrieve z-position of pVtx estimated from VPD information
       float vzVpd = mBTofHeader->vpdVz();
 
+#if defined(__TFG__VERSION__)
+      Float_t dZMin = 9999;
+      Int_t   iVtxMin = -1;
+#endif /* __TFG__VERSION__ */
       // Loop over primary vertices
       for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx) {
 
@@ -2515,14 +2519,30 @@ bool StPicoDstMaker::selectVertex() {
 	    mTpcVpdVzDiffCut
 #endif 
 	    ) {
+#if !defined(__TFG__VERSION__)
 	  // Reset vertex index
           mMuDst->setVertexIndex( iVtx );
 	  // Reset pointer to the primary vertex
           selectedVertex = mMuDst->primaryVertex();
 	  // Quit vertex loop
           break;
+#else /* __TFG__VERSION__ */
+	  Float_t dZ = TMath::Abs(vzVpd - vtx->position().z());
+	  if (dZ < dZMin) {
+	    dZMin = dZ;
+	    iVtxMin = iVtx;
+	  }
+#endif /* ! __TFG__VERSION__ */
         } //if (fabs(vzVpd - vtx->position().z()) < mTpcVpdVzDiffCut)
       } //for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx)
+#if defined(__TFG__VERSION__)
+      // Reset vertex index
+      if (iVtxMin > -1) {
+	mMuDst->setVertexIndex( iVtxMin );
+	// Reset pointer to the primary vertex
+	selectedVertex = mMuDst->primaryVertex();
+      }
+#endif /* __TFG__VERSION__ */     
     } //if (mBTofHeader && fabs(mBTofHeader->vpdVz()) < 200)
   } //else if (mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault)
   else if ( mVtxMode == PicoVtxMode::Mtd ) {
