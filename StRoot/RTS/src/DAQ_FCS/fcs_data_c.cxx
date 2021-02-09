@@ -59,6 +59,7 @@ int fcs_data_c::zs_start(u_short *buff)
 	int l_cou ;
 	int l_pre, l_post ;
 	int is_trg = 0 ;
+	int i_ped ;
 
 	// trigger channels are special so figure this out
 	if(ch >= 32) is_trg = 1 ;
@@ -69,8 +70,11 @@ int fcs_data_c::zs_start(u_short *buff)
 		l_cou = 1 ;
 		l_pre = 0 ;
 		l_post = 0 ;
+		i_ped = 0 ;
 	}
 	else {
+		i_ped = (int)(ped[sector-1][rdo-1].mean[ch]+0.5) ;
+
 		LOG(DBG,"S%d:%d:%d mean %f, n_sigma %f, rms %f",
 		    sector,rdo,ch,
 		    (float)ped[sector-1][rdo-1].mean[ch],
@@ -137,8 +141,6 @@ int fcs_data_c::zs_start(u_short *buff)
 
 	}
 
-	
-	int i_ped = (int)(ped[sector-1][rdo-1].mean[ch]+0.5) ;
 
 #if 0
 	if(!is_trg) {
@@ -185,7 +187,6 @@ int fcs_data_c::zs_start(u_short *buff)
 
 
 	
-	if(is_trg) i_ped = 0 ;
 
 	int seq_cou = 0 ;
 
@@ -439,7 +440,7 @@ int fcs_data_c::hdr_event()
 
 
 	if(dta_p[0]==0xEEEE && dta_p[1]==0xEEEE) {	// start of ASCII
-		char ctmp[64] ;
+		char ctmp[1024] ;
 
 		dta_p += 2 ;	// adjust
 		u_int *d32 = (u_int *)dta_p ;
@@ -604,7 +605,7 @@ int fcs_data_c::event_end(int how)
 	if(!trgd_event) return 0 ;
 
 	if(rdo_map_loaded && (ch_mask_seen != rdo_map[sector-1][rdo-1].ch_mask)) {
-		LOG(ERR,"%d: event_end: %d: RDO %d: mask not-complete 0x%llX (T %d)",id,events,rdo,ch_mask_seen,token) ;
+		LOG(ERR,"%d: event_end: %d: S%02d:%d: mask not-complete 0x%llX (T %d)",id,events,sector,rdo,ch_mask_seen,token) ;
 	}
 
 
@@ -932,7 +933,7 @@ int fcs_data_c::event()
 		//complain = 1 ;
 		if(realtime && (board_id_xpect != board)) complain = 1 ;
 
-		if(ch>33) complain = 1 ;
+		if(ch>35) complain = 1 ;
 		else {
 			if(ch_mask_seen & (1LL<<ch)) {
 				LOG(ERR,"event %d: ch duplicate %d",events,ch) ;
@@ -1679,7 +1680,7 @@ int fcs_data_c::load_readout_map(const char *fname)
 		return -1 ;
 	}
 
-	for(u_int dd=0;dd<3;dd++) {
+	for(u_int dd=0;dd<4;dd++) {
 
 
 	switch(dd) {
@@ -1690,7 +1691,10 @@ int fcs_data_c::load_readout_map(const char *fname)
 		fn = "/RTS/conf/fcs/fcs_hcal_readout_map.csv" ;
 		break ;
 	case 2 :
-		fn = "/RTS/conf/fcs/fcs_pres_readout_map.csv" ;
+		fn = "/RTS/conf/fcs/fcs_fpre_readout_map.csv" ;
+		break ;
+	case 3 :
+		fn = "/RTS/conf/fcs/fcs_main_readout_map.csv" ;
 		break ;
 	}
 		

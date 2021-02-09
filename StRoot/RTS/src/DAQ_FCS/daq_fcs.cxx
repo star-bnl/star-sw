@@ -253,6 +253,8 @@ daq_dta *daq_fcs::handle_zs()
 
 	// first check the global zs (new in May 2019)
 
+	zs->create(8*1024,"fcs_zs",rts_id,DAQ_DTA_STRUCT(daq_adc_tb)) ;
+
 	for(int s=1;s<=12;s++) {
 
 	sprintf(str,"%s/sec%02d/zs",sfs_name,s) ;
@@ -267,7 +269,7 @@ daq_dta *daq_fcs::handle_zs()
 		int sec, rdo ;
 		int bytes ;
 
-		zs->create(8*1024,"fcs_zs",rts_id,DAQ_DTA_STRUCT(daq_adc_tb)) ;
+//		zs->create(8*1024,"fcs_zs",rts_id,DAQ_DTA_STRUCT(daq_adc_tb)) ;
 
 		bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
 		
@@ -382,15 +384,19 @@ daq_dta *daq_fcs::handle_zs()
 
 		if(m_st) free(m_st) ;
 
-		zs->rewind() ;
+		//zs->rewind() ;
 
-		if(got_any) {
-			return zs ;
-		}
-		else return 0 ;
+		//if(got_any) {
+		//	return zs ;
+		//}
+		//else return 0 ;
 
 	}
 	}
+
+	zs->rewind() ;
+	if(got_any) return zs ;
+	else return 0 ;
 
 	// OLD stuff, pre FY19
 	for(u_int r=min_rdo;r<=max_rdo;r++) {
