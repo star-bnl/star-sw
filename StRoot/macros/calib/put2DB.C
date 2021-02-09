@@ -136,7 +136,7 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
       tpcCorrection_st row;
       memset(&row, 0, sizeof(tpcCorrection_st));
       for (Int_t i = N; i < Nmax; i++) myTable->AddAt(&row);
-      tpcCorrection_st *r = myTable->GetTable();
+      tpcCorrection_st *r = (tpcCorrection_st *) myTable->GetTable();
       for (Int_t i = 0; i < N; i++, r++) {
 	r->idx = i+1;
 	r->nrows = N;
