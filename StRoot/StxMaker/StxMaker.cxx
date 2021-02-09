@@ -987,12 +987,12 @@ void StxMaker::FillGeometry(StTrack* gTrack, genfit::Track * track, Bool_t outer
   Double_t CovXyzp[21];
   Int_t ij = 0;
   for (Int_t i = 0; i < 6; i++)
-    for (Int_t j = 0; j < = i; j++) {
+    for (Int_t j = 0; j <= i; j++) {
       CovXyzp[ij] = cov(i,j); ij++;
     }
   KFPTrack *KFPTrackAtHit = new KFPTrack();
   KFPTrackAtHit->SetID(gTrack->key());
-  KFPTrackAtHit->SetCharge(track->getCharge());
+  KFPTrackAtHit->SetCharge(track->getCardinalRep()->getPDGCharge());
   KFPTrackAtHit->SetParameters(xyzp);
   KFPTrackAtHit->SetCovarianceMatrix(CovXyzp);
   if (outer) gTrack->setKFPTrackatLastHit(KFPTrackAtHit);
