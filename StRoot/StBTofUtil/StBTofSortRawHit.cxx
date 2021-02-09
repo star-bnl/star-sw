@@ -18,8 +18,8 @@
 #include "StBTofCollection.h"
 #include "StBTofRawHit.h"
 #include "StBTofDaqMap.h"
-#include "tables/St_tofTrgWindow_Table.h"
-#include "tables/St_vpdDelay_Table.h"
+#include "StDetectorDbMaker/St_tofTrgWindowC.h"
+#include "StDetectorDbMaker/St_vpdDelayC.h"
 
 StBTofSortRawHit::StBTofSortRawHit() {
   mDaqMap = 0;
@@ -50,12 +50,12 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
   ///initial time windows
   LOG_INFO << "[StBTofSortRawHit] retrieving BTOF trigger time window cuts" << endm;
   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTrgWindow");
-  St_tofTrgWindow* tofTrgWindow = static_cast<St_tofTrgWindow*>(mDbTOFDataSet->Find("tofTrgWindow"));
+  const St_tofTrgWindow* tofTrgWindow = (const St_tofTrgWindow*) St_tofTrgWindowC::instance()->Table();
   if(!tofTrgWindow) {
     LOG_ERROR << "unable to get tof Module map table" << endm;
     return; // kStErr;
   }
-  tofTrgWindow_st* trgWin = static_cast<tofTrgWindow_st*>(tofTrgWindow->GetArray());
+  const tofTrgWindow_st* trgWin = tofTrgWindow->GetTable();
   for (Int_t i=0;i<mNTRAY;i++) {
     mTriggerTimeWindow[i][0] = (Float_t)trgWin[i].trgWindow_Min;
     mTriggerTimeWindow[i][1] = (Float_t)trgWin[i].trgWindow_Max;
@@ -69,16 +69,14 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
   if(maker->Debug()) mDebug = kTRUE;
 
   LOG_INFO << "[StBTofSortRawHit] retrieving VPD delay settings" << endm;
-  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/vpdDelay");
-
   //fg  
   if (mDbTOFDataSet){
-    St_vpdDelay *vpdDelayTable = static_cast<St_vpdDelay*>(mDbTOFDataSet->Find("vpdDelay"));
+    const St_vpdDelay *vpdDelayTable = (const St_vpdDelay *) St_vpdDelayC::instance()->Table();
     if (!vpdDelayTable) {
       LOG_ERROR << "unable to find vpdDelay table" << endm;
       return;
     }
-    vpdDelay_st* vpdDelay = static_cast<vpdDelay_st*>(vpdDelayTable->GetArray());
+    const vpdDelay_st* vpdDelay = vpdDelayTable->GetTable();
     if (!vpdDelay) {
       LOG_ERROR << "unable to get vpdDelay data" << endm;
       return;

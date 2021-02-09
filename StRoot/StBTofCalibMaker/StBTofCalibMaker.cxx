@@ -950,7 +950,7 @@ Int_t StBTofCalibMaker::Finish()
 {
 #ifndef __TFG__VERSION__
     if (mHistoFileName!="") writeHistograms();
-#endif 
+#endif /* ! __TFG__VERSION__ */
     return kStOK;
 }
 
@@ -1739,11 +1739,9 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
 	  LOG_DEBUG << " Z out of range! EXIT! " << endm;
 	  return -9999.;
         } 
-	LOG_DEBUG << "zHit correction: "<<dcorr<<endm;
 	tofcorr -= dcorr;
 	LOG_DEBUG << "zHit correction: "<<dcorr<<endm;
 #endif /* ! __TFG__VERSION__ */
-
     }
 
     LOG_DEBUG << "  Corrected tof: tofcorr = " << tofcorr << endm;
@@ -1875,11 +1873,11 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
     Int_t nTzero = nCan;
     if(nCan>1) { // remove hits too far from others
         for(int i=0;i<nCan;i++) {
+	  if (nTzero < 2) {nTzero = 0;break;}
             double tdiff = t0[i] - (tSum-t0[i])/(nTzero-1);
             if(fabs(tdiff)>5.0) {
                 tSum -= t0[i];
                 nTzero--;
-		if (nTzero < 2) {nTzero = 0;break;}
             }
         }
     }

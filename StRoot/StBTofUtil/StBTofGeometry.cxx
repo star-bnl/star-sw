@@ -17,7 +17,7 @@
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
-#include "tables/St_tofGeomAlign_Table.h"
+#include "StDetectorDbMaker/St_tofGeomAlignC.h"
 
 #include "StBTofGeometry.h"
 #include "TFile.h"
@@ -769,22 +769,13 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoMan
      inData.close();
    } else {
      LOG_INFO << "[StBTofGeometry] retrieving geometry alignment parameters from database" << endm;
-     TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofGeomAlign");
-     if (!mDbTOFDataSet) {
-       LOG_WARN << "[StBTofGeometry] unable to find Calibrations/tof/tofGeomAlign! Use ideal geometry!" << endm;
-     } else {
-       St_tofGeomAlign* tofGeomAlign = static_cast<St_tofGeomAlign*>(mDbTOFDataSet->Find("tofGeomAlign"));
-       if(!tofGeomAlign) {
-	 LOG_WARN << "Unable to get tof geometry align parameter! Use ideal geometry!" << endm;
-       } else {
-         tofGeomAlign_st* geomAlign = static_cast<tofGeomAlign_st*>(tofGeomAlign->GetArray());
+     const St_tofGeomAlign* tofGeomAlign = (const St_tofGeomAlign*) St_tofGeomAlignC::instance()->Table();
+     const tofGeomAlign_st* geomAlign = static_cast<tofGeomAlign_st*>(tofGeomAlign->GetArray());
      
-         for (Int_t i=0;i<mNTrays;i++) {
-           phi0[i] = geomAlign[i].phi0;
-           x0[i]   = geomAlign[i].x0;
-           z0[i]   = geomAlign[i].z0;
-         }
-       }
+     for (Int_t i=0;i<mNTrays;i++) {
+       phi0[i] = geomAlign[i].phi0;
+       x0[i]   = geomAlign[i].x0;
+       z0[i]   = geomAlign[i].z0;
      }
    }
 

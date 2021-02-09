@@ -47,8 +47,8 @@
  *
  *******************************************************************/
 #include <iostream>
-#include "tables/St_tofTDIGOnTray_Table.h"
-#include "tables/St_tofINLSCorr_Table.h"
+#include "StDetectorDbMaker/St_tofTDIGOnTrayC.h"
+#include "StDetectorDbMaker/St_tofINLSCorrC.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
 #include "StBTofINLCorr.h"
@@ -79,13 +79,12 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
   // Load configuration parameters from dbase
   ///////////////////////////////////////////////////////
 
-  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTDIGOnTray");
-  St_tofTDIGOnTray* tofTDIGOnTray = static_cast<St_tofTDIGOnTray*>(mDbTOFDataSet->Find("tofTDIGOnTray"));
+    const St_tofTDIGOnTray* tofTDIGOnTray = (const St_tofTDIGOnTray*) St_tofTDIGOnTrayC::instance()->Table();
   if(!tofTDIGOnTray) {
     LOG_ERROR << "unable to get tofTDIGOnTray table" << endm;
     return;
   }
-  tofTDIGOnTray_st* tdigOnTray = static_cast<tofTDIGOnTray_st*>(tofTDIGOnTray->GetArray());
+  const tofTDIGOnTray_st* tdigOnTray = static_cast<const tofTDIGOnTray_st*>(tofTDIGOnTray->GetArray());
 
   Int_t numRows = tofTDIGOnTray->GetNRows();
   for (Int_t i=0;i<mNTray+2;i++) {
@@ -103,13 +102,12 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
     }
   }
 
-  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofINLSCorr");
-  St_tofINLSCorr* tofINLCorr = static_cast<St_tofINLSCorr*>(mDbTOFDataSet->Find("tofINLSCorr"));
+  const St_tofINLSCorr* tofINLCorr = (const St_tofINLSCorr*) St_tofINLSCorrC::instance()->Table();
   if(!tofINLCorr) {
     LOG_ERROR << "unable to get tofINLSCorr table" << endm;
     return;
   }
-  tofINLSCorr_st* inlcorr = static_cast<tofINLSCorr_st*>(tofINLCorr->GetArray());
+  const tofINLSCorr_st* inlcorr = static_cast<const tofINLSCorr_st*>(tofINLCorr->GetArray());
   numRows = tofINLCorr->GetNRows();
   if(numRows>mNTDIGMAX*mNChanOnTDIG) {
     { LOG_WARN << "number of rows in tofINLSCorr table ("<< numRows<<") exceeds the array limit ("<<mNTDIGMAX*mNChanOnTDIG << ") in this function! Entries truncated !!!" << endm; }
