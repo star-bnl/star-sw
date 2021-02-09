@@ -75,7 +75,8 @@ public:
    T         *operator->() 		{return   (T*)fLink; }
    const T   *operator->() const	{return   (const T*)fLink; }
               operator const T *() const{return   (const T*)fLink; }
-   	      operator T *&() 		{return   (     T*&)fLink; }
+	      operator T *&() 		{return   (     T*&)fLink; }
+	      //	      operator T *&() 		{return          dynamic_cast<T*&>(fLink); }
 };
 
 
