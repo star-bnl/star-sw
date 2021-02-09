@@ -145,8 +145,23 @@ public:
 //	int first_rhic_strobe_tick ;
 //	int trigger_tick ;
 
+	struct fcs_ped_inline_t {
+		u_char fmt_version ;
+		u_char det ;
+		u_char ns ;
+		u_char dep ;
 
+		u_short params[16] ;	// stage params
 
+		union {
+			struct {
+				u_short ped ;
+				u_short gain ;
+			} ped[32] ;
+
+			unsigned long long ch_mask ;
+		} ;
+	} ;
 
 	struct fcs_ped_t {
 		double mean[32] ;
