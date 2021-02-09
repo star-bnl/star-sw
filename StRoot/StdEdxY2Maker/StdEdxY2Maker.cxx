@@ -73,7 +73,7 @@ using namespace units;
 #endif
 const static Int_t tZero= 19950101;
 static Int_t tMin = 20000101;
-static Int_t tMax = 20210101;
+static Int_t tMax = 20220101;
 const static TDatime t0(tZero,0);
 const static Int_t timeOffSet = t0.Convert();
 static Double_t tpcTime = -1;
@@ -905,7 +905,14 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static Hists3D Zdc3("Zdc3","<log(dEdx/Pion)>","row","log10(ZdcCoincidenceRate)",-NoRows,100,0.,10.);
 #endif /* __ZDC3__ */
   Hists3D::NtotHist = 9;
+#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
   static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",-NoRows,220,-5,215);
+#else
+  static Hists3D Z3("Z3","<log(dEdx/Pion)> for negative","row","Drift Distance",-NoRows,220,-5,215);
+#ifdef __NEGATIVE_AND_POSITIVE__
+  static Hists3D Z3P("Z3P","<log(dEdx/Pion)> for positive","row","Drift Distance",-NoRows,220,-5,215);
+#endif
+#endif
   Hists3D::NtotHist = 2;
 #ifdef __iTPCOnly__
   static Hists3D Z3iTPC("Z3iTPC","<log(dEdx/Pion)>","row","Drift Distance",-NoRows,220,-5,215);
@@ -915,7 +922,14 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   Hists3D::NtotHist = 2;
   static Hists3D Edge3("Edge3","log(dEdx/Pion)","sector*row"," Edge",numberOfSectors*NoRows, 201,-100.5,100.5);
 #endif
+#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
   static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
+#else
+  static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1] for negative"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
+#ifdef __NEGATIVE_AND_POSITIVE__
+  static Hists3D xyPad3P("xyPad3P","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1] for positive"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
+#endif
+#endif
 #if 0
   static Hists3D dX3("dX3","log(dEdx/Pion)","row"," dX(cm)",-NoRows, 100,0,10.);
 #ifdef __iTPCOnly__
@@ -1397,7 +1411,14 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #ifdef __iTPCOnly__
 	if (! St_tpcPadConfigC::instance()->iTPC(sector)) {
 #endif
+#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
 	  Z3.Fill(rowS,FdEdx[k].ZdriftDistance,Vars);
+#else /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
+	  if (sCharge == 1)  Z3.Fill(rowS,FdEdx[k].ZdriftDistance,Vars);
+#ifdef __NEGATIVE_AND_POSITIVE__
+	  if (sCharge == 0)  Z3P.Fill(rowS,FdEdx[k].ZdriftDistance,Vars);
+#endif /* __NEGATIVE_AND_POSITIVE__ */
+#endif /*  ! _NEGATIVE_ONLY__ && !  __NEGATIVE_AND_POSITIVE__ */
 #if 0
 	  dX3.Fill(rowS,FdEdx[k].F.dx, Vars);
 #endif
@@ -1413,7 +1434,14 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #if 0
 	Edge3.Fill(St_tpcPadConfigC::instance()->numberOfRows(20)*(sector-1)+row,FdEdx[k].edge, Vars);
 #endif
+#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
 	xyPad3.Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars);
+#else /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
+	  if (sCharge == 1)  xyPad3.Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars);
+#ifdef __NEGATIVE_AND_POSITIVE__
+	  if (sCharge == 0)  xyPad3P.Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars);
+#endif /* __NEGATIVE_AND_POSITIVE__ */
+#endif
 	//      } end loop of dE/dx samples
     }
   }
