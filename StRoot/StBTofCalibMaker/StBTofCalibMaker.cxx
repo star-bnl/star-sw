@@ -1,24 +1,27 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.22 2020/10/10 04:36:00 zye20 Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.23 2021/01/27 04:06:25 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
  *
- * Description: - Tof Calibration Maker to do the calibration for pVPD 
+ * Description: - Tof Calibration Maker to do the calibration for pVPD
  *              (start timing) , TOF
  *              - store into StBTofPidTraits
  *
  *****************************************************************
  *Revision 1.23 2020/10/09 11pm, Zaochen
  *add (if (IAttr("btofFXT")) mFXTMode = kTRUE;) in the Init(),
- *it could allow the chain option "btofFXT" to turn on the FXTMode easily 
- 
+ *it could allow the chain option "btofFXT" to turn on the FXTMode easily
+
  *Revision 1.22 2020/04/09 4pm, Zaochen
  *implement Xin's updates to allow more pions and protons for the T0s in FXT mode
- *add a flag mFXTMode: 0 for Collider mode, 1 for FXT mode 
+ *add a flag mFXTMode: 0 for Collider mode, 1 for FXT mode
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.23  2021/01/27 04:06:25  geurts
+ * Introducing meaningful nTofSigma calculations in VPDstartless mode.
+ *
  * Revision 1.22  2020/10/10 04:36:00  zye20
  * new added chain option btofFXT which could turn on FXTMode of StBTofCalibMaker
  *
@@ -140,7 +143,6 @@
 #include "StBTofUtil/tofPathLength.hh"
 #include "StBTofUtil/StBTofHitCollection.h"
 #include "StBTofUtil/StBTofGeometry.h"
-
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
@@ -150,6 +152,8 @@
 
 #include "StBTofCalibMaker.h"
 #include "StVpdCalibMaker/StVpdCalibMaker.h"
+#include "StBTofUtil/StBTofSimResParams.h"
+#include "StBTofUtil/StVpdSimConfig.h"
 #ifdef __TFG__VERSION__
 #include "StVpdSimMaker/StVpdSimConfig.h"
 #include "StDetectorDbMaker/St_beamInfoC.h"
@@ -253,9 +257,9 @@ Int_t StBTofCalibMaker::Init()
 {
     resetPars();
     resetVpd();
-#ifndef __TFG__VERSION__
+
 	if (IAttr("btofFXT")) mFXTMode = kTRUE; //True for FXT mode calib, default as false for collider mode calib
-#endif
+
     mUseEventVertex = ! IAttr("UseProjectedVertex");
     if (mUseEventVertex) {
         LOG_INFO << "Use event vertex position." << endm;
@@ -307,6 +311,15 @@ Int_t StBTofCalibMaker::InitRun(int runnumber)
 
     /// Look for StVpdCalibMaker and decide on its setting (based on its dbase entry) to use VPD for TOF start-timing
     StVpdCalibMaker *vpdCalib = (StVpdCalibMaker *)GetMaker("vpdCalib");
+
+    /// Get VPD and BTOF resolutions from database
+    mVpdResConfig = new StVpdSimConfig;
+    mVpdResConfig->loadVpdSimParams(); // do i really need this?
+    mVpdRes = mVpdResConfig->getParams();
+    mBTofRes = new StBTofSimResParams;
+    mBTofRes->loadParams();
+
+
     if(vpdCalib) {
         mUseVpdStart = vpdCalib->useVpdStart();
 
@@ -324,7 +337,10 @@ Int_t StBTofCalibMaker::InitRun(int runnumber)
     }
 
     return kStOK;
+
 }
+
+
 
 //_____________________________________________________________________________
 Int_t StBTofCalibMaker::initParameters(int runnumber)
@@ -856,9 +872,11 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
             }
         }
     }
+#endif /* __TFG__VERSION__ */
 
 
     // ========== Set Beam Line =====================
+#ifndef __TFG__VERSION__
     double x0 = 0.;
     double y0 = 0.;
     double dxdz = 0.;
@@ -878,7 +896,13 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     else {
         LOG_WARN << "No database for beamline (Calibrations/rhic/vertexSeed)" << endm;
     }
-
+#else /* __TFG__VERSION__ */
+    St_vertexSeedC* vSeed = St_vertexSeedC::instance();
+    Float_t x0   = vSeed->x0()  ; 
+    Float_t y0   = vSeed->y0()  ; 
+    Float_t dxdz = vSeed->dxdz(); 
+    Float_t dydz = vSeed->dydz(); 
+#endif /* __TFG__VERSION__ */
     LOG_INFO << "BeamLine Constraint: " << endm;
     LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
     LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
@@ -887,13 +911,13 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     //beam line not be calibrated yet
     //x0 shift by 0.5
     //x0 = 0.5;
-    //**********
+     //**********
     StThreeVectorD origin(x0,y0,0.0);
     double pt = 88889999;
     double nxy=::sqrt(dxdz*dxdz +  dydz*dydz);
     if(nxy<1.e-5){ // beam line _MUST_ be tilted
-        LOG_WARN << "Beam line must be tilted!" << endm;
-        nxy=dxdz=1.e-5;
+      LOG_WARN << "Beam line must be tilted!" << endm;
+      nxy=dxdz=1.e-5;
     }
     double p0=pt/nxy;
     double px   = p0*dxdz;
@@ -902,38 +926,9 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
     if(mBeamHelix) delete mBeamHelix;
     mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
-
-
+    
+  
     return kStOK;
-#else /* __TFG__VERSION__ */
-  
-  // ========== Set Beam Line =====================
-  St_vertexSeedC* vSeed = St_vertexSeedC::instance();
-  Float_t x0   = vSeed->x0()  ; 
-  Float_t y0   = vSeed->y0()  ; 
-  Float_t dxdz = vSeed->dxdz(); 
-  Float_t dydz = vSeed->dydz(); 
-  LOG_INFO << "BeamLine Constraint: " << endm;
-  LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
-  LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
-  StThreeVectorD origin(x0,y0,0.0);
-  double pt = 88889999;
-  double nxy=::sqrt(dxdz*dxdz +  dydz*dydz);
-  if(nxy<1.e-5){ // beam line _MUST_ be tilted
-    LOG_WARN << "Beam line must be tilted!" << endm;
-    nxy=dxdz=1.e-5;
-  }
-  double p0=pt/nxy;
-  double px   = p0*dxdz;
-  double py   = p0*dydz;
-  double pz   = p0; // approximation: nx,ny<<0
-  StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
-  if(mBeamHelix) delete mBeamHelix;
-  mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
-  
-  
-  return kStOK;
-#endif /* __TFG__VERSION__ */
 }
 
 //____________________________________________________________________________
@@ -941,6 +936,9 @@ Int_t StBTofCalibMaker::FinishRun(int runnumber)
 {
     if(mBeamHelix) delete mBeamHelix;
     mBeamHelix = 0;
+
+    if (mBTofRes){delete mBTofRes; mBTofRes = 0;}
+    if (mVpdResConfig) {delete mVpdResConfig;  mVpdResConfig = 0;}
 
     return kStOK;
 }
@@ -1199,7 +1197,11 @@ void StBTofCalibMaker::processStEvent()
         /// PID calculation if the track is a "primary" track.
         Double_t L = -9999.;
         Double_t ptot = -9999.;
+#ifndef  __TFG__VERSION__
+        Bool_t doPID = kFALSE;     //! switch indicating to calculate PID or not
+#else /*  __TFG__VERSION__ */
         Int_t doPID = 0;     //! switch indicating to calculate PID or not
+#endif /*  __TFG__VERSION__ */
         if(mUseEventVertex) {
             if(!pTrack) {
                 LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
@@ -1212,7 +1214,11 @@ void StBTofCalibMaker::processStEvent()
                     StThreeVectorF primPos = thisVertex->position();
                     L = tofPathLength(&primPos, &pidTof->position(), theTrackGeometry->helix().curvature());
                     ptot = pTrack->geometry()->momentum().mag();
+#ifndef  __TFG__VERSION__
+                    doPID = kTRUE;
+#else /*  __TFG__VERSION__ */
                     doPID = 1;
+#endif /*  __TFG__VERSION__ */
                     LOG_DEBUG << "Pathlength and ptot set." << endm;
                 }
             }
@@ -1232,13 +1238,21 @@ void StBTofCalibMaker::processStEvent()
                 if(gTrack->dcaGeometry()) {
                     ptot = gTrack->dcaGeometry()->momentum().mag();
                 }
+#ifndef  __TFG__VERSION__
+                doPID = kTRUE;
+#else /*  __TFG__VERSION__ */
                 doPID = 1;
+#endif /*  __TFG__VERSION__ */
             }
 
         }
 
         if(!doPID) continue;
+#ifndef  __TFG__VERSION__
+        doPID++;
+#else /*  __TFG__VERSION__ */
 	doPID++;
+#endif /*  __TFG__VERSION__ */
 
         Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
 
@@ -1251,12 +1265,13 @@ void StBTofCalibMaker::processStEvent()
         float sigmapi = -9999.;
         float sigmak = -9999.;
         float sigmap = -9999.;
-        float res = 0.013;  // 0.013 by default - 1/beta resolution
+//        float res = 0.013;  // 0.013 by default - 1/beta resolution
+        float res = tofCellResolution(trayId, moduleChan);
         if(fabs(res)>1.e-5) {
-            sigmae = (Float_t)((1./beta-1./b_e)/res);
-            sigmapi = (Float_t)((1./beta-1./b_pi)/res);
-            sigmak = (Float_t)((1./beta-1./b_k)/res);
-            sigmap = (Float_t)((1./beta-1./b_p)/res);
+            sigmae = (Float_t)(L*(1./beta-1./b_e)/res);
+            sigmapi = (Float_t)(L*(1./beta-1./b_pi)/res);
+            sigmak = (Float_t)(L*(1./beta-1./b_k)/res);
+            sigmap = (Float_t)(L*(1./beta-1./b_p)/res);
         }
 
         pidTof->setPathLength((Float_t)L);
@@ -1455,7 +1470,11 @@ void StBTofCalibMaker::processMuDst()
         /// PID calculation if the track is a "primary" track.
         Double_t L = -9999.;
         Double_t ptot = -9999.;
+#ifndef __TFG__VERSION__
+        Bool_t doPID = kFALSE;
+#else /* __TFG__VERSION__ */
         Int_t doPID = 0;
+#endif /* __TFG__VERSION__ */
         if(mUseEventVertex) {
             if(!pTrack) {
                 LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
@@ -1469,7 +1488,11 @@ void StBTofCalibMaker::processMuDst()
                     StPhysicalHelixD thisHelix = pTrack->helix();
                     L = tofPathLength(&primPos, &pidTof.position(), thisHelix.curvature());
                     ptot = pTrack->momentum().mag();
+#ifndef __TFG__VERSION__
+                    doPID = kTRUE;
+#else /* __TFG__VERSION__ */
                     doPID = 1;
+#endif /* __TFG__VERSION__ */
                 }
             }
 
@@ -1485,12 +1508,20 @@ void StBTofCalibMaker::processMuDst()
             } else {
                 L = tofPathLength(&tofPos, &pidTof.position(), gHelix.curvature());
                 ptot = gTrack->momentum().mag();
+#ifndef __TFG__VERSION__
+                doPID = kTRUE;
+#else /* __TFG__VERSION__ */
                 doPID = 1;
+#endif /* __TFG__VERSION__ */
             }
         }
 
         if(doPID) {
+#ifndef __TFG__VERSION__
+            doPID++;
+#else /* __TFG__VERSION__ */
 	    doPID++;
+#endif /* __TFG__VERSION__ */
             Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
 
             Double_t b_e  = ptot/sqrt(ptot*ptot+M_ELECTRON*M_ELECTRON);
@@ -1502,12 +1533,13 @@ void StBTofCalibMaker::processMuDst()
             float sigmapi = -9999.;
             float sigmak = -9999.;
             float sigmap = -9999.;
-            float res = 0.013;  // 0.013 by default - 1/beta resolution
-            if(fabs(res)>1.e-5) {
-                sigmae = (Float_t)((1./beta-1./b_e)/res);
-                sigmapi = (Float_t)((1./beta-1./b_pi)/res);
-                sigmak = (Float_t)((1./beta-1./b_k)/res);
-                sigmap = (Float_t)((1./beta-1./b_p)/res);
+//            float res = 0.013;  // 0.013 by default - 1/beta resolution
+            float res = tofCellResolution(trayId, moduleChan);
+           if(fabs(res)>1.e-5) {
+                sigmae = (Float_t)(L*(1./beta-1./b_e)/res);
+                sigmapi = (Float_t)(L*(1./beta-1./b_pi)/res);
+                sigmak = (Float_t)(L*(1./beta-1./b_k)/res);
+                sigmap = (Float_t)(L*(1./beta-1./b_p)/res);
             }
 
             pidTof.setPathLength((Float_t)L);
@@ -1621,6 +1653,10 @@ void StBTofCalibMaker::loadVpdData()
 
     mTSumWest = 0;
     mTSumEast = 0;
+#ifndef __TFG__VERSION__
+    mTSumWestSigma = 0;
+    mTSumEastSigma = 0;
+#endif /* ! __TFG__VERSION__ */
     mVPDHitPatternWest = mBTofHeader->vpdHitPattern(west);
     mVPDHitPatternEast = mBTofHeader->vpdHitPattern(east);
     mNWest = mBTofHeader->numberOfVpdHits(west);
@@ -1629,8 +1665,10 @@ void StBTofCalibMaker::loadVpdData()
 
     for(int i=0;i<mNVPD;i++) {
         mVPDLeTime[i] = mBTofHeader->vpdTime(west, i+1);
-        if(mVPDLeTime[i]>0.) mTSumWest += mVPDLeTime[i];
-
+        if(mVPDLeTime[i]>0.) {
+          mTSumWest += mVPDLeTime[i];
+ //fg add here the mTSumEastSigma based on what tubes were used.
+        }
         if(Debug()) {
             LOG_DEBUG << " loading VPD West tubeId = " << i+1 << " time = " << mVPDLeTime[i] << endm;
         }
@@ -1703,6 +1741,7 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
             LOG_DEBUG << " TOT out of range! EXIT! " << endm;
             return -9999.;
         }
+
 #else /* __TFG__VERSION__ */
 	Double_t dcorr = St_tofTotbCorrC::instance()->Corr(tray,module,cell,tot);
 	if (dcorr <= -9999.0) {
@@ -1736,15 +1775,24 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
 #else /* __TFG__VERSION__ */
 	dcorr = St_tofZbCorrC::instance()->Corr(tray,module,cell,z);
 	if (dcorr <= -9999.0) {
-	  LOG_DEBUG << " Z out of range! EXIT! " << endm;
+	  if (Debug()) {
+	  LOG_INFO << " Z out of range! EXIT! " << endm;
+	  }
 	  return -9999.;
         } 
 	tofcorr -= dcorr;
-	LOG_DEBUG << "zHit correction: "<<dcorr<<endm;
+	if (Debug()) {
+	  LOG_INFO << "zHit correction: "<<dcorr<<endm;
+	}
 #endif /* ! __TFG__VERSION__ */
     }
 
-    LOG_DEBUG << "  Corrected tof: tofcorr = " << tofcorr << endm;
+#ifndef __TFG__VERSION__
+    if (Debug()) {
+      LOG_INFO << "  Corrected tof: tofcorr = " << tofcorr << endm;
+    }
+#else /* __TFG__VERSION__ */
+#endif /* ! __TFG__VERSION__ */
     return tofcorr;
 }
 
@@ -1878,6 +1926,9 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
             if(fabs(tdiff)>5.0) {
                 tSum -= t0[i];
                 nTzero--;
+#ifdef __TFG__VERSION__
+		if (nTzero < 2) {nTzero = 0;break;}
+#endif /* __TFG__VERSION__ */
             }
         }
     }
@@ -2031,6 +2082,40 @@ void StBTofCalibMaker::writeHistograms()
     if(mHisto) {
         hEventCounter->Write();
     }
+#endif /*! __TFG__VERSION__ */
     return;
-#endif /* __TFG__VERSION__ */
+}
+
+float StBTofCalibMaker::tofCellResolution(const Int_t itray, const Int_t iModuleChan)
+{
+
+ float resolution(0.013); // 0.013 by default - 1/beta resolution
+ if (itray<0){return resolution;}
+
+ int module = iModuleChan/6 + 1;
+ int cell   = iModuleChan%6 + 1;
+ float stop_resolution  = mBTofRes->timeres_tof(itray, module, cell);
+
+float start_resolution(0);
+ if (mUseVpdStart){
+
+   // For VPD timing determine the VPD starttime by combing the resolutions of
+   //   tray == 122 (east)
+   //   mSimParams[singleHit.tubeId-1+19].singleTubeRes
+   //   tray 121 (west)
+   //   mSimParams[singleHit.tubeId-1].singleTubeRes
+   //
+   // needs to be implemented
+
+ }
+ else {
+   // combine an average BTOF resolution based on NT0
+   // more sophisticated: figure out what BTOF cells actually went into the NT0 count.
+
+   start_resolution = mBTofRes->average_timeres_tof()/sqrt(mNTzero);
+ }
+
+ resolution = sqrt(stop_resolution*stop_resolution + start_resolution*start_resolution);
+
+return resolution;
 }
