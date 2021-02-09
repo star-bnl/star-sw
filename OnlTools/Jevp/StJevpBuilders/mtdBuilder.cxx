@@ -484,109 +484,102 @@ void mtdBuilder::event(daqReader *rdr) {
 
   daq_dta *dd = rdr->det("mtd")->get("legacy");
   mtd_t *mtd;
-  if (!dd){		//WJL ...pointer to mtd data not found
-  	return;
-  } else {
+  if (dd) {
     while(dd->iterate()) {
       mtd = (mtd_t *)dd->Void;
-	  for (int ifib=0;ifib<2;ifib++){				// THUB-S is fiber 0, THUB-N is fiber 1
-		  int ndataword = mtd->ddl_words[ifib];    
-		  if(ndataword<=0) continue;
-		  contents.MTD_EventCount->Fill(ifib+1);
-		  for(int iword=0;iword<ndataword;iword++){
-			int dataword=mtd->ddl[ifib][iword];
+      for (int ifib=0;ifib<2;ifib++){				// THUB-S is fiber 0, THUB-N is fiber 1
+	int ndataword = mtd->ddl_words[ifib];    
+	if(ndataword<=0) continue;
+	contents.MTD_EventCount->Fill(ifib+1);
+	cout << "ndataword = " << ndataword << endl;
+	for(int iword=0;iword<ndataword;iword++){
+	  int dataword=mtd->ddl[ifib][iword];
 						
-			int packetid = (dataword&0xF0000000)>>28;
-			if(!ValidDataword(packetid)){ contents.MTD_Error1->Fill(ifib); }
+	  int packetid = (dataword&0xF0000000)>>28;
+	  if(!ValidDataword(packetid)){ contents.MTD_Error1->Fill(ifib); }
 		
-		//	if( (dataword&0xF0000000)>>28 == 0x2) continue;  //TDC header, moved to later
-			if( (dataword&0xF0000000)>>28 == 0xD) continue;  //Header tag
-			if( (dataword&0xF0000000)>>28 == 0xE) continue;  //TDIG Separator
-			if( (dataword&0xF0000000)>>28 == 0xA) {  // header trigger data flag
-			  // do nothing at this moment.
-			  continue;
-			}
+	  //	if( (dataword&0xF0000000)>>28 == 0x2) continue;  //TDC header, moved to later
+	  if( (dataword&0xF0000000)>>28 == 0xD) continue;  //Header tag
+	  if( (dataword&0xF0000000)>>28 == 0xE) continue;  //TDIG Separator
+	  if( (dataword&0xF0000000)>>28 == 0xA) {  // header trigger data flag
+	    // do nothing at this moment.
+	    continue;
+	  }
 						
-			// geographical data words for tray number.
-			if( (dataword&0xF0000000)>>28 == 0xC) { //Geographical Data
-			  halftrayid = dataword&0x01;    
-			  trayid     = (dataword&0x0FE)>>1;
-			  continue;
-			}
+	  // geographical data words for tray number.
+	  if( (dataword&0xF0000000)>>28 == 0xC) { //Geographical Data
+	    halftrayid = dataword&0x01;    
+	    trayid     = (dataword&0x0FE)>>1;
+	    continue;
+	  }
 		
-			if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
+	  if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
 						
-			if( (dataword&0xF0000000)>>28 == 0x6) {continue;} //error
+	  if( (dataword&0xF0000000)>>28 == 0x6) {continue;} //error
 		
-			if( (dataword&0xF0000000)>>28 == 0x2) {
-			  bunchid=dataword&0xFFF;
-			  allbunchid[halftrayid][trayid-1] = bunchid;
-			  if(triggerTimeStamp[ifib]==0) triggerTimeStamp[ifib] = dataword;
-			  continue;  
-			}
+	  if( (dataword&0xF0000000)>>28 == 0x2) {
+	    bunchid=dataword&0xFFF;
+	    allbunchid[halftrayid][trayid-1] = bunchid;
+	    if(triggerTimeStamp[ifib]==0) triggerTimeStamp[ifib] = dataword;
+	    continue;  
+	  }
 
-			int edgeid =int( (dataword & 0xf0000000)>>28 );
-			//if((edgeid !=4) && (edgeid!=5)) continue; //leading edge or trailing edge
-			if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
+	  int edgeid =int( (dataword & 0xf0000000)>>28 );
+	  //if((edgeid !=4) && (edgeid!=5)) continue; //leading edge or trailing edge
+	  if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
 						
-			int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
-			int tdigboardid= ( (tdcid & 0xC) >> 2) + halftrayid*4;
-			int tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
-			//int globaltdcchan=tdcchan + (tdcid%4)*8+tdigboardid*24+96*halftrayid; // 0-191 for tray
-			timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
-			time = timeinbin * 25./1024;   // time in ns 
-						
-			//int moduleid=-1;
-			int globalstripid=-1;
-			int stripid=-1;
-			int zendid=-1;
-			int slot=-1;
-			//				
-			if(trayid){
-			  globalstripid=tdcchan2globalstrip(tdigboardid,tdcid,tdcchan);
-			  stripid=(globalstripid-1)%12+1;
-			  zendid=(globalstripid-1)/12; //0 for Lo Z end; 1 for Hi Z end
-			  slot=tdig2slot(tdigboardid, trayid);
-			}				
-		
-			if( istray3bl(trayid) && (slot<2||slot>4) ) continue;
-			if( istray5bl(trayid) && (slot<1||slot>5) ) continue;
-			if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
+	  int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
+	  int tdigboardid= ( (tdcid & 0xC) >> 2) + halftrayid*4;
+	  int tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
+	  timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
+	  time = timeinbin * 25./1024;   // time in ns 
 			
-//			contents.hMTD_hitmap2D->Fill(trayid,24*(slot-1)+globalstripid);
-			contents.hMTD_hitmap2D->Fill(HitmapXbyTray[trayid-1],24*(slot-1)+globalstripid);
-			contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);        
+						
+	  int globalstripid=-1;
+	  int stripid=-1;
+	  int zendid=-1;
+	  int slot=-1;				
+	  if(trayid){
+	    globalstripid=tdcchan2globalstrip(tdigboardid,tdcid,tdcchan);
+	    stripid=(globalstripid-1)%12+1;
+	    zendid=(globalstripid-1)/12; //0 for Lo Z end; 1 for Hi Z end
+	    slot=tdig2slot(tdigboardid, trayid);
+	  }				
+		
+	  if( istray3bl(trayid) && (slot<2||slot>4) ) continue;
+	  if( istray5bl(trayid) && (slot<1||slot>5) ) continue;
+	  if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
+			
+	  contents.hMTD_hitmap2D->Fill(HitmapXbyTray[trayid-1],24*(slot-1)+globalstripid);
+	  contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);        
 
-			// apply rough trigger time window cut to select good MTD hits
-			float timeDiff = time - 25.*(triggerTimeStamp[ifib] & 0xfff);
-			while(timeDiff<0) timeDiff += 51200;
-			contents.hMTD_timeDiff->Fill(HitmapXbyTray[trayid-1], timeDiff);
-			if(timeDiff>trigTimeCut_min[ifib] && timeDiff<trigTimeCut_max[ifib])
-			  {
-			    contents.hMTD_hitmap2D_good->Fill(HitmapXbyTray[trayid-1],24*(slot-1)+globalstripid);
-			  }
+	  // apply rough trigger time window cut to select good MTD hits
+	  float timeDiff = time - 25.*(triggerTimeStamp[ifib] & 0xfff);
+	  while(timeDiff<0) timeDiff += 51200;
+	  contents.hMTD_timeDiff->Fill(HitmapXbyTray[trayid-1], timeDiff);
+	  if(timeDiff>trigTimeCut_min[ifib] && timeDiff<trigTimeCut_max[ifib])
+	    {
+	      contents.hMTD_hitmap2D_good->Fill(HitmapXbyTray[trayid-1],24*(slot-1)+globalstripid);
+	    }
 
-//			contents.MTD_Tray_hits->Fill(iGlobalSlot(trayid,slot));
-			int ntrayonbl	= 5;
-			//if (trayid>=12&&trayid<=20) ntrayonbl = 3;
-			contents.MTD_Tray_hits->Fill(ntrayonbl*(HitmapXbyTray[trayid-1]-1)+slot);
-			if (HitmapXbyTray[trayid-1]%2==0){
-				contents.MTD_Tray_hitsBinEven->Fill(ntrayonbl*(HitmapXbyTray[trayid-1]-1)+slot);
-			} else {
-				contents.MTD_Tray_hitsEvenOdd->Fill(ntrayonbl*(HitmapXbyTray[trayid-1]-1)+slot);
-			}
-		  }  // end loop nword
+	  int ntrayonbl	= 5;
+	  contents.MTD_Tray_hits->Fill(ntrayonbl*(HitmapXbyTray[trayid-1]-1)+slot);
+	  if (HitmapXbyTray[trayid-1]%2==0){
+	    contents.MTD_Tray_hitsBinEven->Fill(ntrayonbl*(HitmapXbyTray[trayid-1]-1)+slot);
+	  } else {
+	    contents.MTD_Tray_hitsEvenOdd->Fill(ntrayonbl*(HitmapXbyTray[trayid-1]-1)+slot);
+	  }
+	}  // end loop nword
       } // end loop over fibers
     } //end dd iterate
   } //end if dd
 	  
   //check bunchid
-//  int mReferenceTray=26;				// now read from config file
   int bunchidref1 	= allbunchid[0][mReferenceTray-1];
   int bunchidref2 	= allbunchid[1][mReferenceTray-1];
   int diff 			= bunchidref2-bunchidref1;
-  if (diff> 2048){ diff = diff-4096; } else 
-  if (diff<-2048){ diff = diff+4096; }
+  if (diff> 2048){ diff = diff-4096; } 
+  else if (diff<-2048){ diff = diff+4096; }
   
   contents.MTD_bunchid->Fill(mReferenceTray, diff);
   if(bunchidref2!=-9999 && diff) contents.MTD_Error2->Fill(mReferenceTray);
@@ -595,30 +588,31 @@ void mtdBuilder::event(daqReader *rdr) {
   int BunchIdError	= 1;
   for(int ihalf=0; ihalf<2; ihalf++){
     for(int i=0; i<ntray; i++){
-	  int traynum	= tray[i]; 
-	  if (traynum != mReferenceTray){		// skip reference tray here...
-		  int itray		= traynum-1;
-          int irdo		= TrayToRDO[itray] - 1;
-		  diff 			= allbunchid[ihalf][itray]-allbunchid[0][mReferenceTray-1];
-		  if (diff>= 2048){ diff -= 4096; }
-		  if (diff<=-2048){ diff += 4096; }
-		  //
-		  BunchIdError		= 0;
-		  if (diff!=mValidShiftTray[0][irdo]&&diff!=mValidShiftTray[1][irdo]){
-			  BunchIdError	= 1;
-		  }
-          //
-          if (MaskoutTray[traynum]) continue;
-          //
-		  if (BunchIdError){
-		    LOG("====MTD====","bunchid error or not found ... tray=%d   ref=%d,%d   bunchid=%d   diff=%d",
-		  			traynum,allbunchid[0][mReferenceTray-1],allbunchid[1][mReferenceTray-1],
-		  			allbunchid[ihalf][itray],diff);
-		  }
-		  //
-		  if(allbunchid[ihalf][itray]!=-9999)                 contents.MTD_bunchid->Fill(traynum, diff);
-		  if(allbunchid[ihalf][itray]!=-9999 && BunchIdError) contents.MTD_Error2->Fill(traynum); 	// real bunchid errors
-		  if(allbunchid[ihalf][itray]==-9999)                 contents.MTD_Error3->Fill(traynum); 	// missing bunchids
+      int traynum	= tray[i]; 
+      if (traynum != mReferenceTray){		// skip reference tray here...
+	int itray		= traynum-1;
+	int irdo		= TrayToRDO[itray] - 1;
+	diff 			= allbunchid[ihalf][itray]-allbunchid[0][mReferenceTray-1];
+	if (diff>= 2048){ diff -= 4096; }
+	if (diff<=-2048){ diff += 4096; }
+	//
+	BunchIdError		= 0;
+	if (diff!=mValidShiftTray[0][irdo]&&diff!=mValidShiftTray[1][irdo]){
+	  BunchIdError	= 1;
+	}
+	//
+	if (MaskoutTray[traynum]) continue;
+	//
+	if (BunchIdError){
+	  //LOG("====MTD====","bunchid error or not found ... tray=%d   ref=%d,%d   bunchid=%d   diff=%d",
+	  //			traynum,allbunchid[0][mReferenceTray-1],allbunchid[1][mReferenceTray-1],
+	  //			allbunchid[ihalf][itray],diff);
+	}
+	//
+	//printf("ihalf = %d, trayid = %d, allbunchid = %d\n",ihalf,traynum,allbunchid[ihalf][itray]);
+	if(allbunchid[ihalf][itray]!=-9999)                 contents.MTD_bunchid->Fill(traynum, diff);
+	if(allbunchid[ihalf][itray]!=-9999 && BunchIdError) contents.MTD_Error2->Fill(traynum); 	// real bunchid errors
+	if(allbunchid[ihalf][itray]==-9999)                 contents.MTD_Error3->Fill(traynum); 	// missing bunchids
       }
     }
   }
@@ -665,74 +659,74 @@ void mtdBuilder::event(daqReader *rdr) {
   
   // now do the trigger plots...
   StTriggerData *trgd = getStTriggerData(rdr);
-  if(!trgd) {
-    //LOG(WARN, "No trigger data");	//WJL should not be a warning. perfectly normal for some configs
-    return;
-  }
+  cout << "New event" << endl;
+  if(trgd) 
+    {
+      //MTD trigger Run12
+      // for backleg 27-2
+      //   float outadc0= trgd->mtdAtAddress(8, 0); if(outadc0) contents.hMTD_trig[0]->Fill(outadc0);
+      //   float outtdc0= trgd->mtdAtAddress(12, 0); if(outtdc0) contents.hMTD_trig[1]->Fill(outtdc0);
+      //   float inadc0= trgd->mtdAtAddress(9, 0); if(inadc0) contents.hMTD_trig[2]->Fill(inadc0);
+      //   float intdc0= trgd->mtdAtAddress(13, 0); if(intdc0) contents.hMTD_trig[3]->Fill(intdc0);
+      //   
+      //   //for backleg 27-3
+      //   float outadc1= trgd->mtdAtAddress(16, 0); if(outadc1) contents.hMTD_trig[4]->Fill(outadc1);
+      //   float outtdc1= trgd->mtdAtAddress(20, 0); if(outtdc1) contents.hMTD_trig[5]->Fill(outtdc1);
+      //   float inadc1= trgd->mtdAtAddress(17, 0); if(inadc1) contents.hMTD_trig[6]->Fill(inadc1);
+      //   float intdc1= trgd->mtdAtAddress(21, 0); if(intdc1) contents.hMTD_trig[7]->Fill(intdc1);
+      //   
+      //   //for backleg 27-4
+      //   float outadc2= trgd->mtdAtAddress(24, 0); if(outadc2) contents.hMTD_trig[8]->Fill(outadc2);
+      //   float outtdc2= trgd->mtdAtAddress(28, 0); if(outtdc2) contents.hMTD_trig[9]->Fill(outtdc2);
+      //   float inadc2= trgd->mtdAtAddress(25, 0); if(inadc2) contents.hMTD_trig[10]->Fill(inadc2);
+      //   float intdc2= trgd->mtdAtAddress(29, 0);  if(intdc2) contents.hMTD_trig[11]->Fill(intdc2);
+      //   
+      //   // for backleg 27-1
+      //   float outadc3= trgd->mtdgemAtAddress(8, 0); if(outadc3) contents.hMTD_trig[12]->Fill(outadc3);
+      //   float outtdc3= trgd->mtdgemAtAddress(12, 0); if(outtdc3) contents.hMTD_trig[13]->Fill(outtdc3);
+      //   float inadc3= trgd->mtdgemAtAddress(9, 0); if(inadc3) contents.hMTD_trig[14]->Fill(inadc3);
+      //   float intdc3= trgd->mtdgemAtAddress(13, 0); if(intdc3) contents.hMTD_trig[15]->Fill(intdc3);
+      //   
+      //   //for backleg 27-5
+      //   float outadc4= trgd->mtdgemAtAddress(16, 0); if(outadc4) contents.hMTD_trig[16]->Fill(outadc4);
+      //   float outtdc4= trgd->mtdgemAtAddress(20, 0); if(outtdc4) contents.hMTD_trig[17]->Fill(outtdc4);
+      //   float inadc4= trgd->mtdgemAtAddress(17, 0); if(inadc4) contents.hMTD_trig[18]->Fill(inadc4);
+      //   float intdc4= trgd->mtdgemAtAddress(21, 0); if(intdc4) contents.hMTD_trig[19]->Fill(intdc4);
 
-  //MTD trigger Run12
-  // for backleg 27-2
-//   float outadc0= trgd->mtdAtAddress(8, 0); if(outadc0) contents.hMTD_trig[0]->Fill(outadc0);
-//   float outtdc0= trgd->mtdAtAddress(12, 0); if(outtdc0) contents.hMTD_trig[1]->Fill(outtdc0);
-//   float inadc0= trgd->mtdAtAddress(9, 0); if(inadc0) contents.hMTD_trig[2]->Fill(inadc0);
-//   float intdc0= trgd->mtdAtAddress(13, 0); if(intdc0) contents.hMTD_trig[3]->Fill(intdc0);
-//   
-//   //for backleg 27-3
-//   float outadc1= trgd->mtdAtAddress(16, 0); if(outadc1) contents.hMTD_trig[4]->Fill(outadc1);
-//   float outtdc1= trgd->mtdAtAddress(20, 0); if(outtdc1) contents.hMTD_trig[5]->Fill(outtdc1);
-//   float inadc1= trgd->mtdAtAddress(17, 0); if(inadc1) contents.hMTD_trig[6]->Fill(inadc1);
-//   float intdc1= trgd->mtdAtAddress(21, 0); if(intdc1) contents.hMTD_trig[7]->Fill(intdc1);
-//   
-//   //for backleg 27-4
-//   float outadc2= trgd->mtdAtAddress(24, 0); if(outadc2) contents.hMTD_trig[8]->Fill(outadc2);
-//   float outtdc2= trgd->mtdAtAddress(28, 0); if(outtdc2) contents.hMTD_trig[9]->Fill(outtdc2);
-//   float inadc2= trgd->mtdAtAddress(25, 0); if(inadc2) contents.hMTD_trig[10]->Fill(inadc2);
-//   float intdc2= trgd->mtdAtAddress(29, 0);  if(intdc2) contents.hMTD_trig[11]->Fill(intdc2);
-//   
-//   // for backleg 27-1
-//   float outadc3= trgd->mtdgemAtAddress(8, 0); if(outadc3) contents.hMTD_trig[12]->Fill(outadc3);
-//   float outtdc3= trgd->mtdgemAtAddress(12, 0); if(outtdc3) contents.hMTD_trig[13]->Fill(outtdc3);
-//   float inadc3= trgd->mtdgemAtAddress(9, 0); if(inadc3) contents.hMTD_trig[14]->Fill(inadc3);
-//   float intdc3= trgd->mtdgemAtAddress(13, 0); if(intdc3) contents.hMTD_trig[15]->Fill(intdc3);
-//   
-//   //for backleg 27-5
-//   float outadc4= trgd->mtdgemAtAddress(16, 0); if(outadc4) contents.hMTD_trig[16]->Fill(outadc4);
-//   float outtdc4= trgd->mtdgemAtAddress(20, 0); if(outtdc4) contents.hMTD_trig[17]->Fill(outtdc4);
-//   float inadc4= trgd->mtdgemAtAddress(17, 0); if(inadc4) contents.hMTD_trig[18]->Fill(inadc4);
-//   float intdc4= trgd->mtdgemAtAddress(21, 0); if(intdc4) contents.hMTD_trig[19]->Fill(intdc4);
+      //	mtdAtAddress(ich,iprepost=0) -> mxq[iprepost=0][0][ich]			ich=[0,31]
+      //	mtdgemAtAddress(ich,iprepost=0) -> mxq[iprepost=0][10][ich]		ich=[0,31]
 
-//	mtdAtAddress(ich,iprepost=0) -> mxq[iprepost=0][0][ich]			ich=[0,31]
-//	mtdgemAtAddress(ich,iprepost=0) -> mxq[iprepost=0][10][ich]		ich=[0,31]
-
-  //const int nslots 	= 8; // Run16 configuration
-  //int slots[nslots]	= {0,9,10,11,12,13,14,15};
-  const int nslots 	= 4;
-  int slots[nslots]	= {0,9,11,13};
-  int mh		= 0;
-  int kbin;
-  for (int kslot=0;kslot<nslots;kslot++){
-    int islot		= slots[kslot];
-    for (int iaddr=0;iaddr<32;iaddr++){
-      int val = trgd->mxqAtSlotAddress(iaddr,0,islot);
-      int kh  = islot*32 + iaddr;
-      if(val) contents.hMTD_trig2D->Fill(kh,val); 
-      //if(iaddr%4==0 || iaddr%4==1) continue;  // Run16 configuration
-      if (val){					
-	contents.hMTD_trig[mh]->Fill(val);
-	if (isADC[mh]){
-	  kbin	= isADC[mh];
-	  contents.hMTD_trig2D_adc->Fill(kbin,val); 				
-	} else if (isTAC[mh]){
-	  kbin	= isTAC[mh];
-	  contents.hMTD_trig2D_tac->Fill(kbin,val); 				
-	} 
+      //const int nslots 	= 8; // Run16 configuration
+      //int slots[nslots]	= {0,9,10,11,12,13,14,15};
+      const int nslots 	= 4;
+      int slots[nslots]	= {0,9,11,13};
+      int mh		= 0;
+      int kbin;
+      for (int kslot=0;kslot<nslots;kslot++){
+	int islot		= slots[kslot];
+	for (int iaddr=0;iaddr<32;iaddr++){
+	  int val = trgd->mxqAtSlotAddress(iaddr,0,islot);
+	  int kh  = islot*32 + iaddr;
+	  if(val) contents.hMTD_trig2D->Fill(kh,val); 
+	  //if(iaddr%4==0 || iaddr%4==1) continue;  // Run16 configuration
+	  //printf("RR: kslot = %d, iaddr = %d, val = %d, mh = %d, isADC[mh] = %d, isTAC[mh] = %d\n", kslot, iaddr, val, mh, isADC[mh], isTAC[mh]);
+	  if (val){	
+	    printf("RR: kslot = %d, iaddr = %d, val = %d, mh = %d, isADC[mh] = %d, isTAC[mh] = %d\n", kslot, iaddr, val, mh, isADC[mh], isTAC[mh]);				
+	    contents.hMTD_trig[mh]->Fill(val);
+	    if (isADC[mh]){
+	      kbin	= isADC[mh];
+	      contents.hMTD_trig2D_adc->Fill(kbin,val); 				
+	    } else if (isTAC[mh]){
+	      kbin	= isTAC[mh];
+	      contents.hMTD_trig2D_tac->Fill(kbin,val); 				
+	    } 
+	  }
+	  ++mh;
+	}
       }
-      ++mh;
+      delete trgd;
     }
-  }
- 
-	
-  if(trgd) delete trgd;
+
   return;
 }
 
