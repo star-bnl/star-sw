@@ -26,6 +26,8 @@ const int MAXSUM[2]={20000,1000};
 const int OFF[2]  = {0,0};
 const int mFakeData=0;
     
+const int FCS_DEBUG=0;
+
 ClassImp(fcsBuilder);
   
 fcsBuilder::fcsBuilder(JevpServer *parent) : JevpBuilder(parent) {
@@ -201,8 +203,14 @@ void fcsBuilder::event(daqReader *rdr){
 	unsigned short fcs6   = (lastdsm4 >> 13) & 0x1;
 	unsigned short fcs7   = (lastdsm4 >> 14) & 0x1;
 	unsigned short fcs8   = (lastdsm4 >> 15) & 0x1;
-	printf("evt=%8d fcs2019=fcs0=%1d 1=%1d 2=%1d 3=%1d 4=%1d 5=%1d 6=%1d 7=%1d 8=%1d\n",
-	       evt,fcs2019,fcs1,fcs2,fcs3,fcs4,fcs5,fcs6,fcs7,fcs8);
+
+	if(FCS_DEBUG) {
+	    printf("evt=%8d fcs2019=fcs0=%1d 1=%1d 2=%1d 3=%1d 4=%1d 5=%1d 6=%1d 7=%1d 8=%1d\n",
+		   evt,fcs2019,fcs1,fcs2,fcs3,fcs4,fcs5,fcs6,fcs7,fcs8);
+	}
+	
+	delete trg;
+	trg = NULL;
       }
     }
 
