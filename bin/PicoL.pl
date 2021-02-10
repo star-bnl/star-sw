@@ -116,7 +116,8 @@ if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/ or $pwd =~ /P20ic/) {
   elsif ($pwd =~ /2021/) {
     $PICOPATH = "/hlt/cephfs/reco";
     print "PICOPATH = $PICOPATH\n" if ($debug);
-    if ($pwd =~ /7p7GeV_2021/)                {$glob = "/2021/RF/DEV2/7p7GeV_2021.C";}
+#    if ($pwd =~ /7p7GeV_2021/)                {$glob = "/2021/RF/DEV2/7p7GeV_2021.C";}
+    if ($pwd =~ /7p7GeV_2021/)                {$glob = "/2021/RF/TFG21c/7p7GeV_2021";}
     else {die "Not set yet";}
   }
 }
