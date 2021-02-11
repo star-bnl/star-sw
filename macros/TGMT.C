@@ -1,1 +1,0 @@
-../StRoot/StGmtAligner/TGMT.C

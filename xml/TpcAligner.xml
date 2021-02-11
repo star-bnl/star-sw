@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- <job maxFilesPerProcess="50" fileListSyntax="paths" copyInputLocally="false"> -->
-<job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false">
+<job maxFilesPerProcess="10" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false">
 	<command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
@@ -43,9 +43,9 @@
 <!-- <input URL="file:/hlt/cephfs/reco/2019/TFG20j/RF/14p5GeV/*.event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2019/.DEV2/FF/Cosmic/*.event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2019/.DEV2/RF/Cosmic/*.event.root" /> -->
-<input URL="file:/hlt/cephfs/reco/2019/TFG20k/RF/19GeV/*.event.root" />
-<input URL="file:/hlt/cephfs/reco/2019/TFG20k/RF/14p5GeV/*.event.root" />
+<!-- <input URL="file:/hlt/cephfs/reco/2019/TFG20k/RF/19GeV/*.event.root" /> -->
+<!-- <input URL="file:/hlt/cephfs/reco/2019/TFG20k/RF/14p5GeV/*.event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2019/.DEV2/RF/14p5GeV/*.event.root" /> -->
 <!-- <input URL="file:/net/l404/data/fisyak/Tpc/Alignment/2019/Pass637/*/*event.root" /> -->
-
+<input URL="file:/hlt/cephfs/reco/2021/RF/DEV2/Cosmic_gmt_*/*/*/*.event.root" />
 </job>

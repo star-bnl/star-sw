@@ -39,9 +39,10 @@ void ppbarM2() {
   m2pbar->SetStats(0);
   m2pbar->Fit("func");
   //  func = (TF1*) m2pbar->GetListOfFunctions()->FindObject("func");
-  cout << Title.Data() << endl;
+  cout << gDirectory->GetName() << endl;
+  cout << "\t" << Title.Data() << endl;
   Title = Form("pbar: %6.4f + %6.4f log_{10}P(%%)",100*func->GetParameter(1), 100*func->GetParameter(2));
-  cout << Title.Data() << endl;
+  cout << "\t" << Title.Data() << endl;
   l->AddEntry(m2pbar,Title);
   TLine *line = new TLine(-0.5, m2P, 0.5, m2P);
 #endif

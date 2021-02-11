@@ -5,9 +5,12 @@
 #  setenv StarEndMakerShell
    setenv STARFPE NO
    setenv NODEBUG yes
-#   setup  gcc631
-#   setup 64b
-#   starver TFG19e
+   setup  gcc
+#   setup 32b
+#   if (! -r dbLoadBalancerLocalConfig_HLT.xml) ln -s $STAR/StDb/servers/dbLoadBalancerLocalConfig_HLT.xml .
+#   if (! -r dbLoadBalancerGlobalConfig.xml)    ln -s $STAR/StDb/servers/dbLoadBalancerGlobalConfig.xml .
+   if (! -r StarDb)                            ln -s $STAR/StarDb .
+#  starver TFG19e
    source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh
    setup 32b
    starver SL20d

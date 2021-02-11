@@ -1,3 +1,4 @@
+// root.exe SecRow3C*.root FitPDraw.C+
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
 #else
@@ -54,7 +55,8 @@ static  const Char_t *Names[8] = {
 #else /* RunXX */
 static Int_t N = 14;
 static const Char_t *Names[14] = {
-  "RunXX22B",
+  "COL", // "RunXX22B",
+  "FXT",
   "11p5GeV",
   "13p5GeV_fixedTarget",
   "19p5GeV_fixedTarget",
@@ -66,8 +68,8 @@ static const Char_t *Names[14] = {
   "9p2GeVb",
   "9p2GeVc",
   "9p2GeV",
-  "9p8GeV_fixedTarget",
-  "Cosmic"
+  "9p8GeV_fixedTarget"
+  //  "Cosmic"
 };
 /*                                                       DB                                                              calc     laser
 11p5GeV              20191208.091308  20191208.091308:   9.0833e+06 : 11p5GeV              9.3374e+06	            ?  : 9.292252 run = 20346051, Freq = 9.3374e+06 11p5GeV	       
@@ -150,7 +152,7 @@ void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)",
   TString Current(gDirectory->GetName());
   gStyle->SetOptStat(0);
   Int_t icol = 0;
-  TLegend *leg = new TLegend(0.5,0.7,1.0,1.0);
+  TLegend *leg = new TLegend(0.6,0.6,0.9,0.9);
   //  gStyle->SetMarkerSize(0.4);
   for (Int_t k = 0; k < N; k++) {
     if (! F[k]) continue;
@@ -263,14 +265,15 @@ void DrawHist(const Char_t *dir="TPoints70BG",
 }
 //________________________________________________________________________________
 void FitPMu(const Char_t *draw="mu", 
-	      const Char_t *ext = "P",
-	      Int_t    nx = 0,   // 45,
-	      Double_t xMin = 0, //  0.5,
-	      Double_t xMax = 0, // 45.5,
 	      const Char_t *cut = "i&&j", 
-	      const Char_t *opt = "",
-	      Double_t ymin = -1,
-	      Double_t ymax =  1) {
+	      const Char_t *opt = ""
+// 	      const Char_t *ext = "P",
+// 	      Int_t    nx = 0,   // 45,
+// 	      Double_t xMin = 0, //  0.5,
+// 	      Double_t xMax = 0, // 45.5,
+// 	      Double_t ymin = -1,
+// 	      Double_t ymax =  1
+	    ) {
   Int_t NF = SetFileList();
   if (! NF) return;
   TString Current(gDirectory->GetName());

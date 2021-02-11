@@ -11,7 +11,7 @@
 #   source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh
 #   setup 32b
 #   starver SL20d
-   starver TFG20j
+#   starver TFG20j
      set evtsFile = $INPUTFILE0;
 #     set f        = 1
 #     set l        = 5000000
@@ -32,7 +32,7 @@
 # 2016    root4star -b -q 'bfc.C(200," P2016a,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,StiCA,PicoVtxDefault,evout,","'${evtsFile}'")' &gt;&amp; ${logFile}
 # 2017    root4star -b -q 'bfc.C(2000,"pp2017,btof,mtd,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,StiCA,PicoVtxDefault,evout,","'${evtsFile}'")' &gt;&amp; ${logFile}
 # 2020    root4star -b -q 'bfc.C(6000,"P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
-          root.exe  -b -q 'bfc.C(6000,"P2020a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+          root.exe  -b -q 'bfc.C(6000,"P2020a,StiCA,gmt,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   cp  ${filel}* ${SUBMITTINGDIRECTORY}
 #   rm ${bla}
         </command>
@@ -44,6 +44,6 @@
 <!-- <input URL="command:daq_2019T.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/embed/daq/2014/auau200_vpdmb_chop_added/st_physics_adc*.daq" /> -->
 <!-- <input URL="file:/gpfs01/star/daq/2017/*/*/st_W_*.daq" /> -->
-<input URL="file:/star/data03/daq/2020/005/21005010/st_physics_*.daq" />
-
+<!-- <input URL="file:/star/data03/daq/2020/005/21005010/st_physics_*.daq" /> -->
+<input URL="command:daq_2020.pl" />
 </job>

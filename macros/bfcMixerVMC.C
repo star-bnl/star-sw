@@ -1,1 +1,0 @@
-/gpfs01/star/subsys-tpc/fisyak/STAR/packages/.DEV2/StRoot/macros/embedding/bfcMixerVMC.C
