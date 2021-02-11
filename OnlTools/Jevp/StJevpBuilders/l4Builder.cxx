@@ -136,6 +136,7 @@ void l4Builder::initialize(int argc, char *argv[])
 	innerGainPara = -999;
 	outerGainPara = -999;
 	eventCounter = 0;
+	T0 = 0.0;
 
 	sprintf(dEdxTheoDir, "/a/l4jevp/client/dedx");
 	LOG(DBG, "Index now %d %s\n",index, dEdxTheoDir);	
@@ -488,7 +489,7 @@ void l4Builder::stoprun(daqReader *rdr)
 	hHLTGood2VzT_2->GetYaxis()->SetTitle("#sigma(Vz) [cm]");
 	HLTGood2Plots[5]->getHisto(0)->histo = hHLTGood2VzT_2;
 
-	hHLTGood2VertexZ->Fit("gaus", "", "", -100, 100);
+	hHLTGood2VertexZ->Fit("gaus", "", "", -150, 150);
 
 	float low = -13.12;
 	float high = -12.8;
@@ -1223,17 +1224,17 @@ void l4Builder::event(daqReader *rdr)
 
                 int   q  = pTrack.q;
                 float pt = pTrack.pt;
-                float pz = pTrack.tanl * gTrack.pt;
+                float pz = pTrack.tanl * pTrack.pt;
                 float p  = sqrt(pt*pt + pz*pz);
 
                 const double mass_pi = 0.13957; // pi inv_m GeV
-                double beta_pi = 1. / sqrt( 1. + mass_pi*mass_pi / p*p );
+                double beta_pi = 1. / sqrt( 1. + mass_pi*mass_pi / (p*p) );
                 double deltaT = hlt_node->node[i].etofPi * ( ( beta_pi / hlt_node->node[i].etofBeta ) - 1 );
-                hEtofDeltaT->Fill(deltaT);
+                if (q < 0) hEtofDeltaT->Fill(deltaT);
 
-                if (0 == T0 && hEtofDeltaT->GetEntries()>2000) {
+                if (0 == T0 && hEtofDeltaT->GetEntries()>1000) {
                     T0 = hEtofDeltaT->GetBinCenter(hEtofDeltaT->GetMaximumBin());
-                    cout << "Event: " << eventCounter << " T0 = " << T0 << "\n";
+		    LOG(INFO, "ETOF Starting time: Event: %d, T0 = %f\n", eventCounter, T0);
                 }
                 double invBeta = (1 / hlt_node->node[i].etofBeta) - (T0 / (hlt_node->node[i].etofPi * beta_pi ) );
                 hEtofInvBeta->Fill(q*p, invBeta);
