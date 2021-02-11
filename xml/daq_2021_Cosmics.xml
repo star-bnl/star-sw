@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job maxFilesPerProcess="10" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
+        <command>
+#         cd ${SUBMITTINGDIRECTORY}
+   setenv STARFPE NO
+#   setenv NODEBUG yes
+#   setup 64b
+#   starver TFG19a
+#  echo $INPUTFILE0 | grep ':'
+#  if (! $?) then
+#    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+#    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+#    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+#  else
+     set evtsFile = $INPUTFILE0;
+     set f        = 1
+     set l        = 5000000
+#  endif
+  foreach  evtsFile(`cat $FILELIST`) 
+    echo "${evtsFile}"
+    if (! -r ${evtsFile}) continue;
+    set filel        = `basename $evtsFile .daq`
+    set bf           = `basename $filel .root`
+    set output  = ${bf}.event.root
+    set logFile  = ${bf}B.log
+    if ( -r $logFile) continue;
+    set llogFile = log/${logFile}
+    if ( -r $llogFile) continue;
+    set muFile = ${SUBMITTINGDIRECTORY}/${bf}.MuDst.root
+   if (-r $muFile) continue;
+    set mmuFile = ${SUBMITTINGDIRECTORY}/MuDst/${bf}.MuDst.root
+   if (-r $mmuFile) continue;
+#   cp ${evtsFile} ${SCRATCH}/
+#   set input = ${SCRATCH}/${bf}.daq
+    set bla = ${SUBMITTINGDIRECTORY}/${bf}.bla.root
+    if (-r ${bla}) continue;
+    touch ${bla}
+    set input = ${evtsFile};
+root.exe -q -b 'bfc.C(100000,"P2021a,evout,NoHistos,noTags,noRunco,StiCA,-picoWrite,-picoDst,Cosmics","'${input}'")' &gt;&amp; ${logFile}
+    cp -p ${logFile} ${SUBMITTINGDIRECTORY}/
+    cp -p ${bf}*.root ${SUBMITTINGDIRECTORY}/
+    rm ${SUBMITTINGDIRECTORY}/${bf}.bla.root
+  end
+        </command>
+        <stdout URL="file:./sched$JOBID.log" />
+        <stderr URL="file:./sched$JOBID.err" />
+<!-- <input URL="file:/star/data03/daq/2018/*/*/st_cosmic_adc_*.daq" /> -->
+<!-- <input URL="file:/star/data03/daq/2018/108/*/st_cosmic*.daq" /> -->
+<!-- <input URL="file:/gpfs01/star/pwg/iraklic/iTPC/Cosmics/Cosmics2018/*event.root" /> -->
+<!-- <input URL="file:/star/data03/daq/2018/108/19108054/st_cosmic_adc_19108054_raw_5500008.daq" /> -->
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2019/*/*/st_cosmic_*.daq" /> -->
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2019/019/*/st_cosmic_*.daq" /> -->
+<!-- <input URL="file:/hlt/cephfs/daq/2019/*/*/st_cosmic_*.daq" /> -->
+<!-- <input URL="command:2020Cosmic.pl" /> -->
+<input URL="command:daq_2021dR.pl" />
+<!-- <output fromScratch="*.root" toURL="file./"/> -->
+<!-- <output fromScratch="*B.log" toURL="file:./"/> -->
+<!--
+ <ResourceUsage>
+    <Memory>
+      <MinMemory>2000</MinMemory>
+    </Memory>
+  </ResourceUsage>
+-->
+</job>

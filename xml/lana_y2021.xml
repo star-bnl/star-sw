@@ -1,0 +1,37 @@
+<job  name="lana" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+<command> 
+#  source ~/.tcshrc
+  cd ${SUBMITTINGDIRECTORY}  
+#  starver TFG20b
+#  starver TFG19k
+#  setenv NODEBUG yes
+#  setup 64b
+#  setup gcc
+#  setup gcc631
+#  setup gcc
+#  starver dev
+#  starver .DEV2 
+#  starver TFG20k
+  set evtsFile = $INPUTFILE0;
+  set file     = `basename $evtsFile .daq`
+  echo "${evtsFile}"
+  if (! -r ${evtsFile}) exit 1;
+  set logFile  = ${file}B.log
+  set f=`find . -maxdepth 1 -type f -name "${file}*.root"`
+  setenv STARFPE NO
+  if ("$f" == "") then
+    if (-r $logFile) rm $logFile
+      root.exe -q -b -x 'bfc.C(99999,"lana,B2021,trgd,Tpx,LaserIT,StiCA,StiKFVertex,CorrY,OGridLeakFull,OSpaceZ2,analysis,NoHistos,NoRunco,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#      root.exe -q -b -x 'bfc.C(99999,"lana,B2020,trgd,Tpx,LaserIT,StiCA,StiKFVertex,CorrY,OGridLeakFull,OSpaceZ2,analysis,NoHistos,NoRunco,-evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<!-- <input URL="file:/star/data03/daq/2018/*/*/st_laser_adc*.daq"/>  -->
+<input URL="command:Lana2020.pl"/>
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/088/19088006/st_laser_19088006_raw_0000007.daq" /> -->
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/169/*/st_laser_adc_19169021*.daq" /> -->
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/*/*/st_laser_*.daq" /> -->
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2019/*/*/st_laser_*.daq" /> -->
+<!-- <input URL="file:/hlt/cephfs/daq/2019/*/*/st_laser_*.daq" /> -->
+</job>
