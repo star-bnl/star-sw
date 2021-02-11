@@ -2,7 +2,7 @@ Requirements   = CpuModelNumber == 45 # l402 - l403,  48 slots, oldest cpu, have
                               request_afs = 1
 Requirements   = CpuModelNumber == 62 # l405 - l408, 144 slots       l409 
 Requirements   = CpuModelNumber == 63 # l410 - l427, 792 slots, newest cpu, 48 cpu per node
-
+                                        l410 - l414 used for HLT production
 star-submit -p bnl_condor_online_CpuModelNumber45 myJobs.xml
 star-submit -p bnl_condor_online_CpuModelNumber62 myJobs.xml
 star-submit -p bnl_condor_online_CpuModelNumber63 myJobs.xml

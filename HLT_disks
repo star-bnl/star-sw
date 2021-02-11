@@ -264,3 +264,53 @@ l401:/data/scratch1   17T   15T  2.1T  88% /net/l401/data/scratch1
 1.5T    146
 2.8T    147
 13K     148
+================================================================================
+01/24/21
+	                   Size  Used Avail Use% Mounted on
+l402:/data                  11T  5.1T  4.6T  53% /net/l402/data           STAR
+l403:/data                  11T  9.5T  232G  98% /net/l403/data           reco(7p3GeV_fixedTarget 7.3T, 9p2GeVb 2.2T)
+l404:/data                  11T  6.9T  2.8T  72% /net/l404/data           work
+l401:/data/scratch1         17T  7.3T  9.5T  44% /net/l401/data/scratch1 (
+l401:/data/scratch2         17T  8.4T  8.4T  50% /net/l401/data/scratch2
+172.17.27.2:6789:/         262T  197T   66T  76% /hlt/cephfs
+
+16T     /net/l401/data
+0       /net/l401.l4.bnl.local/data
+4.0T    /net/l402/data
+6.9T    /net/l404/data
+254G    /hlt/cephfs/aihong
+18T     /hlt/cephfs/daq
+22G     /hlt/cephfs/dshen
+512     /hlt/cephfs/fisyak
+58G     /hlt/cephfs/kehw
+5.5G    /hlt/cephfs/linyf
+0       /hlt/cephfs/mpoat
+0       /hlt/cephfs/mzyzak
+37T     /hlt/cephfs/Pico
+45T     /hlt/cephfs/reco
+0       /hlt/cephfs/tmp
+0       /hlt/cephfs/zye20
+================================================================================
+01/28/21
+Filesystem           Size  Used Avail Use% Mounted on
+l401:/data/scratch1   17T  7.3T  9.5T  44% /net/l401/data/scratch1
+                           47G     2020 -> 2020/Cosmics/RF/ 02/12/19 => Alignment => remove
+                           2.6T    Tpc  -> TpcRS tune. 06/2020 => remove
+Filesystem           Size  Used Avail Use% Mounted on
+l401:/data/scratch1   17T  4.7T   13T  28% /net/l401/data/scratch1
+                           1.1T    2020 -> Cosmic  03/20       => remove 
+Filesystem           Size  Used Avail Use% Mounted on
+l401:/data/scratch1   17T  3.6T   14T  22% /net/l401/data/scratch1
+                           2.7T    daq/
+#Filesystem           Size  Used Avail Use% Mounted on
+#l401:/data/scratch1   17T  3.6T   14T  22% /net/l401/data/scratch1
+#l401:/data/scratch1   17T  4.1T   13T  25% /net/l401/data/scratch1  after move 2019
+#l401:/data/scratch1   17T  5.2T   12T  32% /net/l401/data/scratch1  after move 2020
+#l401:/data/scratch2   17T  7.6T  9.2T  46% /net/l401/data/scratch2  Pico for 2010,2011 (6.3T), simu/Hijing/AuAu200/ (6.2G)
+/hlt/cephfs/daq 761G    2019 hlt only 553 files
+                 14T    2020 hlt only 19274 files
+                561G    2021
+
+
+l401:/data/scratch1 daq files 
+l401:/data/scratch2 Pico dsts
