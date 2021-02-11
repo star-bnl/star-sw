@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDbMaker.h,v 1.17 2021/02/05 17:23:25 akio Exp $
+ * $Id: StFcsDbMaker.h,v 1.18 2021/02/09 21:54:23 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.h,v $
+ * Revision 1.18  2021/02/09 21:54:23  akio
+ * Using StEnumeration
+ *
  * Revision 1.17  2021/02/05 17:23:25  akio
  * Adding access to STAR offline DB tables.
  * Adding getFromName/getDetFromName from David.
@@ -70,6 +73,7 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "StEvent/StEnumerations.h"
 #include "StThreeVectorD.hh"
 #include "StLorentzVectorD.hh"
 
@@ -221,9 +225,9 @@ class StFcsDbMaker : public StMaker {
   Int_t   mReadGainCorrectionFromText=0;    //!
  
   //DEP sorted ped/gain/corr
-  Float_t mPed[3][2][2][32];
-  Float_t mGain[3][2][2][32];
-  Float_t mGainCorr[3][2][2][32]; //Valley value for PRES
+  Float_t mPed[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];
+  Float_t mGain[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];
+  Float_t mGainCorr[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //Valley value for PRES
    
   //tables from DB
   fcsDetectorPosition_st* mFcsDetectorPosition=0;

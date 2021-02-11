@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.cxx,v $
+ * Revision 1.28  2021/02/09 21:54:23  akio
+ * Using StEnumeration
+ *
  * Revision 1.27  2021/02/05 17:23:25  akio
  * Adding access to STAR offline DB tables.
  * Adding getFromName/getDetFromName from David.
@@ -98,7 +101,6 @@
 #include "StFcsDbMaker.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StMessMgr.h"
-#include "StEvent/StEnumerations.h"
 #include "StEvent/StFcsHit.h"
 #include "StEvent/StFcsCluster.h"
 #include "StEvent/StFcsPoint.h"
