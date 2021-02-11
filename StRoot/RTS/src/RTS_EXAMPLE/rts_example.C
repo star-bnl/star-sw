@@ -58,6 +58,8 @@
 #include <TPC/rowlen.h>
 
 #include <DAQ_FCS/daq_fcs.h>
+#include <DAQ_FCS/fcs_data_c.h>
+
 #include <DAQ_STGC/daq_stgc.h>
 
 
@@ -2618,8 +2620,11 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 {
 	int raw_found = 0 ;
 	int zs_found = 0 ;
+	int ped_found = 0 ;
+
 	char want_adc = 0 ;
 	char want_zs = 0 ;
+	char want_ped = 0 ;
 
 	daq_dta *dd ;
 
@@ -2629,6 +2634,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 	if(print_mode==0) {	// default 
 		want_adc = 1 ;
 		want_zs = 1 ;
+		want_ped = 1 ;
 	}
 
 	if(print_mode & 1) {
@@ -2638,7 +2644,31 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 		want_zs = 1 ;
 	}
 
+	if(print_mode & 3) {
+		want_ped = 1 ;
+	}
 
+
+	dd = rdr->det("fcs")->get("ped") ;
+	while(dd && dd->iterate()) {
+		struct fcs_data_c::fcs_ped_inline_t *p ;
+
+		ped_found = 1 ;
+
+		p = (fcs_data_c::fcs_ped_inline_t *)dd->Void ;
+
+		if(do_print && want_ped) {
+			printf("FCS PED: %d: S%02d:%d: %d:%d:%d (V%d)\n",good,dd->sec,dd->rdo,
+			       p->det,p->ns,p->dep,p->fmt_version) ;
+
+			for(int c=0;c<32;c++) {
+				printf(" ch %02d: ped %6.3f, gain %6.3f\n",c,
+				       (double)p->ped[c].ped/8.0,(double)p->ped[c].gain/256.0) ;
+			}
+
+		}
+
+	}
 #if 0
 
 	dd = rdr->det("fcs")->get("raw") ;
@@ -2727,7 +2757,12 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 		strcat(fstr,"ADC") ;
 	}
 
-	if(raw_found || zs_found) {
+	if(ped_found) {
+		strcat(fstr," PED") ;
+	}
+
+
+	if(raw_found || zs_found || ped_found) {
 		LOG(INFO,"FCS found [%s]",fstr) ;
 	}
 
