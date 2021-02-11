@@ -295,18 +295,24 @@ void l4Builder::initialize(int argc, char *argv[])
 	defineUPCDiElectronPlots();
 	defineHltPlots_UPC();
 	defineDiElectron2TwrPlots();
+
 	setAllPlots();
+
 	for(int i = 0; i < nHltPlots; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HltPlots[i]);
 	}
-	for(int i = 0; i < nHLTGood2Plots; i++) {
+	for(int i = 0; i < nBeamPlots; ++i) {
 		LOG(DBG, "Adding plot %d", i);
-		addPlot(HLTGood2Plots[i]);
+		addPlot(BeamPlots[i]);
 	}
 	for(int i = 0; i < nBesGoodPlots; i++) {
        	        LOG(DBG, "Adding plot %d", i);
 	        addPlot(BesGoodPlots[i]);
+	}
+	for(int i = 0; i < nHLTGood2Plots; i++) {
+		LOG(DBG, "Adding plot %d", i);
+		addPlot(HLTGood2Plots[i]);
 	}
 	for(int i = 0; i < 4; i++) {
             addPlot(BesMonitorPlots[i]);
@@ -317,7 +323,6 @@ void l4Builder::initialize(int argc, char *argv[])
 	for(int i=0;i<6;i++) {
 	    addPlot(FixedTargetMonitorPlots[i]);
 	}
-	    
 	for(int i = 0; i < 1; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(HeavyFragmentPlots[i]);
@@ -330,11 +335,23 @@ void l4Builder::initialize(int argc, char *argv[])
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(DiElectron2TwrPlots[i]);
 	}
+	for(int i = 0; i < 2; ++i) {
+		LOG(DBG, "Adding plot %d", i);
+		addPlot(DiPionPlots[i]);
+	}
 	for(int i = 0; i < 14; i++) {
 		LOG(DBG, "Adding plot %d", i);
 		addPlot(DiMuonPlots[i]);
 	}
-
+	for(int i = 0; i < 6; ++i) {
+		LOG(DBG, "Adding plot %d", i);
+		addPlot(UPCDiElectronPlots[i]);
+	}
+	for(int i = 0; i < 30; ++i) {
+		LOG(DBG, "Adding plot %d", i);
+		addPlot(HltPlots_UPC[i]);
+	}
+	
 	cout << "Initialization Done" << endl;
 }
 
@@ -347,44 +364,46 @@ void l4Builder::startrun(daqReader *rdr)
     T0 = 0;
     runnumber = rdr->run;
 
-	for(int i = 0; i < nHltPlots; i++) {
-		getPlotByIndex(i)->getHisto(0)->histo->Reset();
-	}
-	for(int i = 0; i < nBesGoodPlots; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
-	for(int i = 0; i < nHLTGood2Plots; i++)HLTGood2Plots[i]->getHisto(0)->histo->Reset();
-	for(int i = 0; i < 4; i++)BesMonitorPlots[i]->getHisto(0)->histo->Reset();
-	for(int i = 0; i < 12; i++)FixedTargetPlots[i]->getHisto(0)->histo->Reset();
-	for(int i = 0; i < 6; i++)FixedTargetMonitorPlots[i]->getHisto(0)->histo->Reset();
-	for(int i = 0; i < 1; i++){
-		for(int i = 3; i < 10; i++)DiElectronPlots[i]->getHisto(0)->histo->Reset();
-		for(int i = 0; i < 3; i++)
-		{
-			DiElectronPlots[i]->getHisto(0)->histo->Reset();
-			DiElectronPlots[i]->getHisto(1)->histo->Reset();
-		}
-	}
-	for(int i = 0; i < 1; i++){
-		for(int i = 3; i < 10; i++)DiElectron2TwrPlots[i]->getHisto(0)->histo->Reset();
-		for(int i = 0; i < 3; i++)
-		{
-			DiElectron2TwrPlots[i]->getHisto(0)->histo->Reset();
-			DiElectron2TwrPlots[i]->getHisto(1)->histo->Reset();
-		}
-	}
-	for(int i = 0; i < 2; i++)DiPionPlots[i]->getHisto(0)->histo->Reset();
+    resetAllPlots();
+
+	// for(int i = 0; i < nHltPlots; i++) {
+	// 	getPlotByIndex(i)->getHisto(0)->histo->Reset();
+	// }
+	// for(int i = 0; i < nBesGoodPlots; i++)BesGoodPlots[i]->getHisto(0)->histo->Reset();
+	// for(int i = 0; i < nHLTGood2Plots; i++)HLTGood2Plots[i]->getHisto(0)->histo->Reset();
+	// for(int i = 0; i < 4; i++)BesMonitorPlots[i]->getHisto(0)->histo->Reset();
+	// for(int i = 0; i < 12; i++)FixedTargetPlots[i]->getHisto(0)->histo->Reset();
+	// for(int i = 0; i < 6; i++)FixedTargetMonitorPlots[i]->getHisto(0)->histo->Reset();
+	// for(int i = 0; i < 1; i++){
+	// 	for(int i = 3; i < 10; i++)DiElectronPlots[i]->getHisto(0)->histo->Reset();
+	// 	for(int i = 0; i < 3; i++)
+	// 	{
+	// 		DiElectronPlots[i]->getHisto(0)->histo->Reset();
+	// 		DiElectronPlots[i]->getHisto(1)->histo->Reset();
+	// 	}
+	// }
+	// for(int i = 0; i < 1; i++){
+	// 	for(int i = 3; i < 10; i++)DiElectron2TwrPlots[i]->getHisto(0)->histo->Reset();
+	// 	for(int i = 0; i < 3; i++)
+	// 	{
+	// 		DiElectron2TwrPlots[i]->getHisto(0)->histo->Reset();
+	// 		DiElectron2TwrPlots[i]->getHisto(1)->histo->Reset();
+	// 	}
+	// }
+	// for(int i = 0; i < 2; i++)DiPionPlots[i]->getHisto(0)->histo->Reset();
 
 
-	for(int i = 0; i < 1; i++){
-		DiMuonPlots[i]->getHisto(0)->histo->Reset();
-		DiMuonPlots[i]->getHisto(1)->histo->Reset();
-	}
-	for(int i = 1; i < 7; i++)DiMuonPlots[i]->getHisto(0)->histo->Reset();
-	for(int i = 7; i < 14; i++){
-		DiMuonPlots[i]->getHisto(0)->histo->Reset();
-		DiMuonPlots[i]->getHisto(1)->histo->Reset();
-	}
-	for(int i = 0; i < 6; i++)UPCDiElectronPlots[i]->getHisto(0)->histo->Reset();
-	for(int i = 0; i < 30; i++)HltPlots_UPC[i]->getHisto(0)->histo->Reset();
+	// for(int i = 0; i < 1; i++){
+	// 	DiMuonPlots[i]->getHisto(0)->histo->Reset();
+	// 	DiMuonPlots[i]->getHisto(1)->histo->Reset();
+	// }
+	// for(int i = 1; i < 7; i++)DiMuonPlots[i]->getHisto(0)->histo->Reset();
+	// for(int i = 7; i < 14; i++){
+	// 	DiMuonPlots[i]->getHisto(0)->histo->Reset();
+	// 	DiMuonPlots[i]->getHisto(1)->histo->Reset();
+	// }
+	// for(int i = 0; i < 6; i++)UPCDiElectronPlots[i]->getHisto(0)->histo->Reset();
+	// for(int i = 0; i < 30; i++)HltPlots_UPC[i]->getHisto(0)->histo->Reset();
 
 	TriggerFilled = false;
 	EventFilled = false;
@@ -493,28 +512,28 @@ void l4Builder::stoprun(daqReader *rdr)
 	hHLTGood2VertexZ->Fit("gaus", "", "", -150, 150);
 
         // 47
-	hVertexXZ_pfx = hVertexXZ->ProfileX("_pfx", 41, 60); // TProfile with the same name exists, this doe not chcnge the value of hVertexXZ_pfx
-
-        TF1* hVertexXZ_pfx_fitfunc = new TF1("hVertexXZ_pfx_fitfunc", "pol1", -200, 200);
-        hVertexXZ_pfx_fitfunc->SetLineColor(kRed);
-        hVertexXZ_pfx_fitfunc->SetLineWidth(0.5);
-        hVertexXZ_pfx->Fit(hVertexXZ_pfx_fitfunc);
-
-	hVertexXZ_pfx_fit_res->SetText(TString::Format("Vx = %f + %f Vz",
-						       hVertexXZ_pfx_fitfunc->GetParameter(0),
-						       hVertexXZ_pfx_fitfunc->GetParameter(1)).Data());
-
+	// TProfile with the same name exists, this does not chcnge the value of hVertexXZ_pfx
+	hVertexXZ_pfx = hVertexXZ->ProfileX("_pfx", 41, 60); 
+        hVertexXZ_pfx->Fit("pol1");
+	TF1* hVertexXZ_pfx_fitfunc = hVertexXZ_pfx->GetFunction("pol1");
+	if (hVertexXZ_pfx_fitfunc) {
+	    hVertexXZ_pfx_fitfunc->SetLineColor(kRed);
+	    hVertexXZ_pfx_fitfunc->SetLineWidth(0.5);
+	    hVertexXZ_pfx_fit_res->SetText(TString::Format("Vx = %f + %f Vz",
+							   hVertexXZ_pfx_fitfunc->GetParameter(0),
+							   hVertexXZ_pfx_fitfunc->GetParameter(1)).Data());
+	}
         // 48
 	hVertexYZ_pfx = hVertexYZ->ProfileX("_pfx", 41, 60);
-
-        TF1* hVertexYZ_pfx_fitfunc = new TF1("hVertexYZ_pfx_fitfunc", "pol1", -200, 200);
-        hVertexYZ_pfx_fitfunc->SetLineColor(kRed);
-        hVertexYZ_pfx_fitfunc->SetLineWidth(0.5);
-        hVertexYZ_pfx->Fit(hVertexYZ_pfx_fitfunc);
-
-	hVertexYZ_pfx_fit_res->SetText(TString::Format("Vy = %f + %f Vz",
-						       hVertexYZ_pfx_fitfunc->GetParameter(0),
-						       hVertexYZ_pfx_fitfunc->GetParameter(1)).Data());
+        hVertexYZ_pfx->Fit("pol1");
+        TF1* hVertexYZ_pfx_fitfunc = hVertexYZ_pfx->GetFunction("pol1");
+	if (hVertexYZ_pfx_fitfunc) {
+	    hVertexYZ_pfx_fitfunc->SetLineColor(kRed);
+	    hVertexYZ_pfx_fitfunc->SetLineWidth(0.5);
+	    hVertexYZ_pfx_fit_res->SetText(TString::Format("Vy = %f + %f Vz",
+							   hVertexYZ_pfx_fitfunc->GetParameter(0),
+							   hVertexYZ_pfx_fitfunc->GetParameter(1)).Data());
+	}
 
 	float low = -13.12;
 	float high = -12.8;
