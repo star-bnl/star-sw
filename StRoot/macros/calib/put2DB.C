@@ -122,7 +122,7 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
     if (N == 1) offset = 0;
     if (TName.Contains("tpcDriftVelocity") ||TName.Contains("ssdConfiguration") || TName.Contains("trgTimeOffset")) offset = 0;
     if (TName.Contains("svtWafersPosition")) {cout << "Un comment SvtIndexMap include" << endl; return;}
-#if 1
+#if 0 /* Take care about this in Cint files */
     Bool_t ok = myTable->IsA()->InheritsFrom( "St_tpcCorrection" );
     if ( ok ) {
       cout << "==================== St_tpcCorrection ====================" << endl;
@@ -138,8 +138,8 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
       for (Int_t i = N; i < Nmax; i++) myTable->AddAt(&row);
       tpcCorrection_st *r = (tpcCorrection_st *) myTable->GetTable();
       for (Int_t i = 0; i < N; i++, r++) {
-	r->idx = i+1;
-	r->nrows = N;
+	r->idx = 0;
+	r->nrows = 0;
       }
       myTable->Print(0,N+1);
       N = Nmax;
