@@ -46,7 +46,8 @@ class l4Builder : public JevpBuilder {
                 static const int nHltPlots = 61;
                 JevpPlot *HltPlots[nHltPlots];
 
-		JevpPlot *BeamPlots[3];
+		static const int nBeamPlots = 3;
+		JevpPlot *BeamPlots[nBeamPlots];
 
 		static const int nBesGoodPlots = 10;
 		JevpPlot *BesGoodPlots[nBesGoodPlots];
@@ -62,7 +63,7 @@ class l4Builder : public JevpBuilder {
 		JevpPlot *DiElectron2TwrPlots[10];
 		JevpPlot *DiPionPlots[2];
 		JevpPlot *DiMuonPlots[14];
-		JevpPlot *UPCDiElectronPlots[10];   
+		JevpPlot *UPCDiElectronPlots[6];   
 		JevpPlot *HltPlots_UPC[30];
 		PlotHisto *ph;
 
@@ -369,8 +370,10 @@ class l4Builder : public JevpBuilder {
 		TH1D *hVzDiff;
 
                 TH2D *hVertexRZ;
-                TH2D *hVertexXZ;
-                TH2D *hVertexYZ;
+                TH2D *hVertexXZ; 
+		TProfile *hVertexXZ_pfx; JLatex* hVertexXZ_pfx_fit_res;
+                TH2D *hVertexYZ; 
+                TProfile *hVertexYZ_pfx; JLatex* hVertexYZ_pfx_fit_res;
                 TH1D *hBunchId;
                 TH1D *hBbceTAC;
                 TH1D *hBbcwTAC;
