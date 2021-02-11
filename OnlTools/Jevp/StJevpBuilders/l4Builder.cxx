@@ -405,7 +405,8 @@ void l4Builder::startrun(daqReader *rdr)
 	MTDQuarkoniumFilled = false;
 	DiElectron2TwrFilled = false;
 
-
+	hVertexXZ_pfx_fit_res->SetText("");
+	hVertexYZ_pfx_fit_res->SetText("");
 	//printf("Starting run #%d\n", runnumber);
 }
 
@@ -492,34 +493,28 @@ void l4Builder::stoprun(daqReader *rdr)
 	hHLTGood2VertexZ->Fit("gaus", "", "", -150, 150);
 
         // 47
-	TProfile* hVertexXZ_pfx = hVertexXZ->ProfileX("_pfx", 41, 60);
-        HltPlots[47]->addHisto(hVertexXZ_pfx);
+	hVertexXZ_pfx = hVertexXZ->ProfileX("_pfx", 41, 60); // TProfile with the same name exists, this doe not chcnge the value of hVertexXZ_pfx
+
         TF1* hVertexXZ_pfx_fitfunc = new TF1("hVertexXZ_pfx_fitfunc", "pol1", -200, 200);
         hVertexXZ_pfx_fitfunc->SetLineColor(kRed);
         hVertexXZ_pfx_fitfunc->SetLineWidth(0.5);
         hVertexXZ_pfx->Fit(hVertexXZ_pfx_fitfunc);
 
-        JLatex* hVertexXZ_pfx_fit_res = new JLatex(-150, 2, "");
-	hVertexXZ_pfx_fit_res->SetTextSize(0.05);
 	hVertexXZ_pfx_fit_res->SetText(TString::Format("Vx = %f + %f Vz",
-                                                 hVertexXZ_pfx_fitfunc->GetParameter(0),
-                                                 hVertexXZ_pfx_fitfunc->GetParameter(1)).Data());
-	HltPlots[47]->addElement(hVertexXZ_pfx_fit_res);
+						       hVertexXZ_pfx_fitfunc->GetParameter(0),
+						       hVertexXZ_pfx_fitfunc->GetParameter(1)).Data());
 
         // 48
-	TProfile* hVertexYZ_pfx = hVertexYZ->ProfileX("_pfx", 41, 60);
-        HltPlots[48]->addHisto(hVertexYZ_pfx);
+	hVertexYZ_pfx = hVertexYZ->ProfileX("_pfx", 41, 60);
+
         TF1* hVertexYZ_pfx_fitfunc = new TF1("hVertexYZ_pfx_fitfunc", "pol1", -200, 200);
         hVertexYZ_pfx_fitfunc->SetLineColor(kRed);
         hVertexYZ_pfx_fitfunc->SetLineWidth(0.5);
         hVertexYZ_pfx->Fit(hVertexYZ_pfx_fitfunc);
 
-        JLatex* hVertexYZ_pfx_fit_res = new JLatex(-150, 2, "");
-	hVertexYZ_pfx_fit_res->SetTextSize(0.05);
 	hVertexYZ_pfx_fit_res->SetText(TString::Format("Vy = %f + %f Vz",
-                                                 hVertexYZ_pfx_fitfunc->GetParameter(0),
-                                                 hVertexYZ_pfx_fitfunc->GetParameter(1)).Data());
-	HltPlots[48]->addElement(hVertexYZ_pfx_fit_res);
+						       hVertexYZ_pfx_fitfunc->GetParameter(0),
+						       hVertexYZ_pfx_fitfunc->GetParameter(1)).Data());
 
 	float low = -13.12;
 	float high = -12.8;
@@ -2912,9 +2907,24 @@ void l4Builder::defineHltPlots()
 	hVertexXZ = new TH2D("VertexXZ", "Vertex X vs Z;Vertex Z (cm);Vertex X (cm) ", 420, -210, 210, 100, -5, 5);
 	HltPlots[index]->addHisto(new PlotHisto(hVertexXZ));
 
+	hVertexXZ_pfx = new TProfile("VertexXZ_pfx", "", 420, -210, 210);
+	HltPlots[index]->addHisto(hVertexXZ_pfx);
+
+	hVertexXZ_pfx_fit_res = new JLatex(-150, 2, "");
+	hVertexXZ_pfx_fit_res->SetTextSize(0.05);
+	HltPlots[index]->addElement(hVertexXZ_pfx_fit_res);
+
+
         index++; // 48
 	hVertexYZ = new TH2D("VertexYZ", "Vertex Y vs Z;Vertex Z (cm);Vertex Y (cm) ", 420, -210, 210, 100, -5, 5);
 	HltPlots[index]->addHisto(new PlotHisto(hVertexYZ));
+
+	hVertexYZ_pfx = new TProfile("VertexYZ_pfx", "", 420, -210, 210);
+	HltPlots[index]->addHisto(hVertexYZ_pfx);
+
+        hVertexYZ_pfx_fit_res = new JLatex(-150, 2, "");
+	hVertexYZ_pfx_fit_res->SetTextSize(0.05);
+	HltPlots[index]->addElement(hVertexYZ_pfx_fit_res);
 
         index++; // 49
         hBunchId = new TH1D("BunchId", "All Event Bunch ID;Bunch ID", 130, -5, 125);
