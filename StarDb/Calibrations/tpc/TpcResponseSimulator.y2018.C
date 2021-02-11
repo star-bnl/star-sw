@@ -1,10 +1,7 @@
-// $Id: TpcResponseSimulator.20180531.071409.C,v 1.1 2020/05/23 22:33:31 fisyak Exp $
-// $Log: TpcResponseSimulator.20180531.071409.C,v $
-// Revision 1.1  2020/05/23 22:33:31  fisyak
-// Guannan parameters for 3p85GeV2018
-//
-// Revision 1.1  2019/10/09 20:40:02  iraklic
-// added 10% gap correction to lower the outer sector dEdx for Run18 AuAu27 GeV
+// $Id: TpcResponseSimulator.y2018.C,v 1.4 2020/04/27 21:20:13 fisyak Exp $
+// $Log: TpcResponseSimulator.y2018.C,v $
+// Revision 1.4  2020/04/27 21:20:13  fisyak
+// Move to MySQL
 //
 // Revision 1.3  2018/10/17 20:45:17  fisyak
 // Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
@@ -111,16 +108,26 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  
-  const Double_t RowMuTrs[8] = {
-    4.45505e-02,  3.63901e-03,  // Inner W
-    3.52547e-02,  3.85726e-03,  // Outer W
-    5.28188e-02,  3.94541e-03,  // Inner E
-    -9.11388e-03, 2.63198e-03};  // Outer E
-  Float_t *a = &row.SecRowCorIW[0];
+#if 0
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02;
+  // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
+  //                                          3.22907e-01                          2.72715e-01
+  // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
+  // diff                                   : 9.13675e-02                          6.29849e-02
+  // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
+  const Double_t RowSigmaTrs[4] = {
+    9.13675e-02, 0,  // Inner
+    6.29849e-02, 0}; // Outer
+  Float_t *b = &row.SecRowSigIW[0];
   for (Int_t i = 0; i < 8; i++) {
-    a[i] = RowMuTrs[i];
+    b[i] = RowSigmaTrs[i%4];
   }
+  /* Sigmas 
+     Tpx inner = 0.395
+     Tpx outer = 0.314
+     iTpc      = 0.322 Outer  0.316 */
+#endif
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
   //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
@@ -128,13 +135,12 @@ TDataSet *CreateTable() {
   // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   // The corection has to be added                                                                    M             P
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
-  // row.T0offset   = 0.50 -1.43663e-01;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
-  row.T0offset   = 0.50 -1.43663e-01 -0.0839244;
+  row.T0offset   = 0.50 -1.43663e-01;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
   // root.exe T0offset.C
   // TI->FitSlicesY(); TI_1->Fit("pol2","er","",-100,100);
-  row.T0offsetI =  1.17437e-01 + 8.43584e-03 + 7.537344e-02 - 0.73383303057411764; 
+  row.T0offsetI =  1.17437e-01 + 8.43584e-03; 
   // TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
-  row.T0offsetO = -9.36725e-03 + 5.74947e-03 + 1.140144e-01 - 0.73383303057411764;
+  row.T0offsetO = -9.36725e-03 + 5.74947e-03;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
