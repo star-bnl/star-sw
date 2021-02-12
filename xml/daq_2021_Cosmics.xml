@@ -5,7 +5,7 @@
    setenv STARFPE NO
 #   setenv NODEBUG yes
 #   setup 64b
-#   starver TFG19a
+   starver TFG21c
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
