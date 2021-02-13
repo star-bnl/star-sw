@@ -619,7 +619,10 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 			 ) << endm;
       }
       if (! cld->pad || ! cld->charge) continue;
-      if (cld->tb >= __MaxNumberOfTimeBins__) continue;
+      if (! cld->tb) continue;
+      if (cld->tb <  0 || cld->tb >= __MaxNumberOfTimeBins__) continue;
+      if (cld->t1 <  0 || cld->t1 >= __MaxNumberOfTimeBins__) continue;
+      if (cld->t2 <  0 || cld->t2 >= __MaxNumberOfTimeBins__) continue;
       if (cld->flags &&
 	 (cld->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
       Int_t iok = hitCollection->addHit(CreateTpcHit(*cld,sector,row));
