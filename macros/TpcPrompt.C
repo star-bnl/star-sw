@@ -1,5 +1,6 @@
 /* 
    root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
+   root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
    root.exe -q -b 'Chain.C+("*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
 
    Fit
@@ -23,7 +24,7 @@ Draw();
 #endif
 #endif
 //________________________________________________________________________________
-#if !defined(__CINT__)
+#ifndef __CINT__
 #include "Riostream.h"
 #include <stdio.h>
 #include "TROOT.h"
@@ -59,7 +60,7 @@ Draw();
 #include "TLegend.h"
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
 //#define __USE_ROOFIT__
-#endif
+#endif /* ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18) */
 #ifdef __USE_ROOFIT__
 #include "RooRealVar.h"
 #include "RooDataSet.h"
@@ -79,7 +80,7 @@ Draw();
 using namespace RooFit ;
 #endif /* __USE_ROOFIT__ */
 #include "TObjectTable.h"
-#endif
+#endif /*  __USE_ROOFIT__ */
 #define TpcHit_cxx
 #include "TpcHit.h"
 void  TpcHit::Fill(Long64_t entry) {
@@ -473,7 +474,7 @@ void TpcPrompt(TChain *chain) {
 //________________________________________________________________________________
 void TpcPrompt(Int_t Nevents = 1000000, 
 	       //	       const Char_t *daqfile = "/star/data03/daq/2014/100/15100085/st_physics_15100085_raw_2500013.daq",
-	       const Char_t *daqfile = "./*.*event.root",
+	       const Char_t *daqfile = "*/*/*.*event.root",
 	       const Char_t *treefile = "TpcHit.root") {
   gROOT->LoadMacro("bfc.C");
 

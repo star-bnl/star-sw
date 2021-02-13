@@ -8,7 +8,7 @@ git ci -m "Update" RunXXIDefs.pm
 #cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/9p2GeV
 #cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/9p2GeVb
 #cd /hlt/cephfs/reco/2021/RF/DEV2/7p7GeV_2021.C
-cd /hlt/cephfs/reco/2021/RF/TFG21c/7p7GeV_2021
+cd /hlt/cephfs/reco/2021/RF/TFG21c.B/7p7GeV_2021
 CreateRunDirs.pl
 foreach d (`ls -1d ???/2*`)
   cd $d;
@@ -20,7 +20,7 @@ foreach d (`ls -1d ???/2*`)
   if ($?) then
     ls -1d *bla.root
     if ($?) then
-      rm sched* *xml;
+      rm sched* *xml fisyak.log;
       touch Done
     endif
     cd -;
