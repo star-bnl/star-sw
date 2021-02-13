@@ -70,8 +70,6 @@ Int_t StFcsQaMaker::Init(){
 
     for(int id=0; id<maxid; id++){      
       mFcsDbMkr->getName(det,id,t3);	
-      int c=mFcsDbMkr->getColumnNumber(det,id);
-      int r=mFcsDbMkr->getRowNumber(det,id);
       int ehp2,ns2,crt,sub,dep,ch;
       mFcsDbMkr->getDepfromId(det,id,ehp2,ns2,crt,sub,dep,ch);
       sprintf(t ,"%4s_%1s_TbinAdc_id%03d",nameEHP[ehp],nameNS[ns],id);
@@ -103,6 +101,12 @@ Int_t StFcsQaMaker::Init(){
     mAdcSumId[det] = new TH2F(t,t2,
 			      maxid, 0.0, float(maxid),
 			      200, 0.0, float(mMaxAdcSum));
+
+    sprintf(t,"%4s_%1s_IdTime",nameEHP[ehp],nameNS[ns]);
+    sprintf(t2,"%4s_%1s; id; MeanTimeBin",nameEHP[ehp],nameNS[ns]);
+    mTimeId[det] = new TH2F(t,t2,
+			    maxid, 0.0, float(maxid),
+			    200, mMinTB, mMaxTB);
 
     sprintf(t,"%4s_%1s_FitIntg",nameEHP[ehp],nameNS[ns]);
     sprintf(t2,"%4s_%1s; DEP+ch/32; FitIntegral",nameEHP[ehp],nameNS[ns]);
@@ -158,7 +162,8 @@ Int_t StFcsQaMaker::Init(){
       }      
     }
   }  
-
+  mTimeEvt=new TH2F("TimeEvt","TimeEvent; Event; Sector Avg MeanTB",100,0,100,500,mMinTB+1.5,mMaxTB-1.5);
+  memset(mTimeE,0,sizeof(mTimeE));
   
   int ecal_xmax = mFcsDbMkr->nColumn(0);
   int ecal_ymax = mFcsDbMkr->nRow(0);
@@ -234,6 +239,8 @@ Int_t StFcsQaMaker::Make() {
   int esum[kFcsNDet][kFcsEcalMaxId]; memset(esum,0,sizeof(sum));
   float atot[kFcsNDet]; memset(atot,0,sizeof(atot));
   float etot[kFcsNDet]; memset(etot,0,sizeof(etot));
+  float meantb=0;
+  int   nmean=0;
 
   for(int det=0; det<kFcsNDet; det++){  //det==kFcsDet is for empty channel
     int nhit=mFcsCollection->numberOfHits(det);
@@ -252,6 +259,15 @@ Int_t StFcsQaMaker::Make() {
       float ped=0.0;
       if(mPedSub>0)  ped=mFcsDbMkr->pedestal(ehp,ns,dep,ch);
 
+      //time from StFcsHit
+      mTimeId[det]->Fill((float)id, hits[i]->fitPeak());
+      if(det<4 && hits[i]->adcSum() > 100){
+	nmean++;
+	meantb+=hits[i]->fitPeak();
+      }
+      mTimeE[det][id][mEvent]=hits[i]->fitPeak();
+
+      //from fits
       float chi2=hits[i]->fitChi2();
       if(chi2>0.0){
 	mFitIntg[det]->Fill(depch,hits[i]->adcSum());
@@ -331,8 +347,8 @@ Int_t StFcsQaMaker::Make() {
 	  float ped = mFcsDbMkr->pedestal(ehp,ns,dep,ch);
 	  char name[22];
 	  mFcsDbMkr->getName(det,id,name);
-	  if(mDump==1 && sum[det][id]>250){
-	    printf("\nFCSDump %5d %22s %5.1f %5d ",nevt,name,ped,sum[det][id]);
+	  if(mDump==1 && sum[det][id]>50){
+	    printf("\nFCSDump %5d %22s %4d %5.1f %5d ",nevt,name,ntb,ped,sum[det][id]);
 	    for(int j=0; j<ntb; j++) printf("%4d ",hits[i]->adc(j));
 	    //	  }else if(mDump==2 && det==1 && id==50){
 	    //	  }else if(mDump==2 && det==1 && (id==32 || id==18)){
@@ -353,6 +369,10 @@ Int_t StFcsQaMaker::Make() {
       }
     }
   }
+  float avg=0.0;
+  if(nmean>0) avg=meantb/float(nmean);  
+  //  printf("EVT=%3d SECTOR Avg Mean TB= %f / %d = %f \n",mEvent,meantb,nmean,avg);
+  mTimeEvt->Fill((float)mEvent,avg);
 
   //for Ecal/Hcal only for clusters
   for(int det=0; det<kFcsNDet; det++){        
@@ -389,6 +409,40 @@ Int_t StFcsQaMaker::Make() {
 Int_t StFcsQaMaker::Finish(){
   mFile->Write();
   mFile->Close();
+
+  /*
+  float avg[kFcsNDet][kFcsEcalMaxId];
+  char* nameEHP[kFcsEHP] = {"E","H","P"};
+  char* nameNS[kFcsNorthSouth] = {"N","S"};
+  for(int det=0; det<4; det++){
+    int maxid=mFcsDbMkr->maxId(det);
+    for(int id=0; id<maxid; id++){
+      for(int evt=0; evt<100; evt++){
+	avg[det][id]+=mTimeE[det][id][evt];	
+      }
+      avg[det][id]/=100.0;
+    }
+  }  
+  char name[100];
+  for(int ehp=0; ehp<2; ehp++){
+    for(int ns=0; ns<kFcsNorthSouth; ns++){
+      int ndep=mFcsDbMkr->getNDep(ehp,ns);
+      for(int dep=0; dep<ndep; dep++){	
+	for(int evt=0; evt<100; evt++){	  
+	  printf("MT %1s%1sDEP%02d %2d : ",nameEHP[ehp],nameNS[ns],dep,evt);
+	  for(int ch=0; ch<kFcsMaxDepCh; ch++){
+	    int det,id,crt,slt;
+	    mFcsDbMkr->getIdfromDep(ehp,ns,dep,ch,det,id,crt,slt);	  
+	    printf("%5.1f ",0.5+107.0/8.0*(mTimeE[det][id][evt]-avg[det][id]));
+	    //	    if(ch%8==7) printf("| ");
+	  }
+	  printf("\n",name);
+	}
+      }
+    }
+  }
+  */
+
   printf("StFcsQaMaker::Finish - Closing %s\n",mFilename);
   return kStOK;
 };
@@ -396,8 +450,11 @@ Int_t StFcsQaMaker::Finish(){
 ClassImp(StFcsQaMaker);
 
 /*
- * $Id: StFcsQaMaker.cxx,v 1.7 2021/01/11 14:40:31 akio Exp $
+ * $Id: StFcsQaMaker.cxx,v 1.8 2021/02/13 21:41:09 akio Exp $
  * $Log: StFcsQaMaker.cxx,v $
+ * Revision 1.8  2021/02/13 21:41:09  akio
+ * sector avg peak time
+ *
  * Revision 1.7  2021/01/11 14:40:31  akio
  * Many changes for FCS 2021 comissioning & LED monitor.
  * Includingplots for backview, fit plots and more.
