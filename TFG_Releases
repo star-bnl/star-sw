@@ -63,5 +63,5 @@
  TFG20k freeze before modifying StMagUtility                         2021-01-07 11:11:11 -0500  (HEAD -> master, tag: TFG20k_2)
  TFG21a modifying StMagUtility                                       2021-01-07 11:56:30 -0500  (HEAD -> master, tag: TFG21a)
  TFG21b back StMagUtility, __kfpAtFirstHit__=1,TPC calib from TFG20a 2021-01-21 19:34:06 -0500  (HEAD -> master, tag: TFG21b)
- TFG21c express production release for Run XXI, fix bug in MagScale  2021-02-12 09:09:56 -0500  (HEAD -> master, tag: TFG21c_4)
+ TFG21c express production release for Run XXI, add fix TpcHitMaker  2021-02-13 18:59:04 -0500  (HEAD -> master, tag: TFG20c_5)
 .DEV2  head of TFG git repository
