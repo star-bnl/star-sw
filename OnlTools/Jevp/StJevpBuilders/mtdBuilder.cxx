@@ -491,7 +491,7 @@ void mtdBuilder::event(daqReader *rdr) {
 	int ndataword = mtd->ddl_words[ifib];    
 	if(ndataword<=0) continue;
 	contents.MTD_EventCount->Fill(ifib+1);
-	cout << "ndataword = " << ndataword << endl;
+	//cout << "ndataword = " << ndataword << endl;
 	for(int iword=0;iword<ndataword;iword++){
 	  int dataword=mtd->ddl[ifib][iword];
 						
@@ -659,9 +659,9 @@ void mtdBuilder::event(daqReader *rdr) {
   
   // now do the trigger plots...
   StTriggerData *trgd = getStTriggerData(rdr);
-  cout << "New event" << endl;
   if(trgd) 
     {
+      addServerTags("mtdtrg");
       //MTD trigger Run12
       // for backleg 27-2
       //   float outadc0= trgd->mtdAtAddress(8, 0); if(outadc0) contents.hMTD_trig[0]->Fill(outadc0);
@@ -709,9 +709,7 @@ void mtdBuilder::event(daqReader *rdr) {
 	  int kh  = islot*32 + iaddr;
 	  if(val) contents.hMTD_trig2D->Fill(kh,val); 
 	  //if(iaddr%4==0 || iaddr%4==1) continue;  // Run16 configuration
-	  //printf("RR: kslot = %d, iaddr = %d, val = %d, mh = %d, isADC[mh] = %d, isTAC[mh] = %d\n", kslot, iaddr, val, mh, isADC[mh], isTAC[mh]);
-	  if (val){	
-	    printf("RR: kslot = %d, iaddr = %d, val = %d, mh = %d, isADC[mh] = %d, isTAC[mh] = %d\n", kslot, iaddr, val, mh, isADC[mh], isTAC[mh]);				
+	  if (val){					
 	    contents.hMTD_trig[mh]->Fill(val);
 	    if (isADC[mh]){
 	      kbin	= isADC[mh];
