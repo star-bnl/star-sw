@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDbMaker.h,v 1.18 2021/02/09 21:54:23 akio Exp $
+ * $Id: StFcsDbMaker.h,v 1.19 2021/02/12 20:09:50 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.h,v $
+ * Revision 1.19  2021/02/12 20:09:50  akio
+ * Adding getIdfromSCmap()
+ *
  * Revision 1.18  2021/02/09 21:54:23  akio
  * Using StEnumeration
  *
@@ -192,6 +195,8 @@ class StFcsDbMaker : public StMaker {
   void getSCmap(Int_t det, Int_t id, 
 		Int_t &ehp, Int_t &ns, Int_t &scdep, Int_t &branch, Int_t &fee_i2c, Int_t &sipm, 
 		Int_t &pp, Int_t &jacket) const;
+  void getIdfromSCmap(Int_t ehp, Int_t ns, Int_t scdep, Int_t branch, Int_t fee_i2c, Int_t sipm,
+		      Int_t &det, Int_t &id) const;
   
   void makeMap();
   void makePPMap();

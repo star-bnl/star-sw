@@ -1,8 +1,11 @@
 // \class StFmsEventDisplay
 // \author Akio Ogawa
 //
-//  $Id: StFcsEventDisplay.cxx,v 1.13 2020/05/29 18:54:29 akio Exp $
+//  $Id: StFcsEventDisplay.cxx,v 1.14 2021/02/13 21:37:31 akio Exp $
 //  $Log: StFcsEventDisplay.cxx,v $
+//  Revision 1.14  2021/02/13 21:37:31  akio
+//  #ifdef ___USESTGC___
+//
 //  Revision 1.13  2020/05/29 18:54:29  akio
 //  Adding EPD as PRES
 //
@@ -53,9 +56,11 @@
 
 #include "StThreeVectorF.hh"
 #include "StFcsDbMaker/StFcsDbMaker.h"
-#include "StStgcDbMaker/StStgcDbMaker.h"
+#include "StRoot/StEpdUtil/StEpdGeom.h"
 
-#include "StEpdUtil/StEpdGeom.h"
+#ifdef ___USESTGC___
+#include "StStgcDbMaker/StStgcDbMaker.h"
+#endif
 
 //#include "TApplication.h"
 #include "TCanvas.h"
@@ -84,11 +89,14 @@ Int_t StFcsEventDisplay::Init(){
 	LOG_ERROR  << "StFcsEventDisplay::InitRun Failed to get StFcsDbMaker" << endm;
 	return kStFatal;
     }
+
+#ifdef ___USESTGC___
     mStgcDbMaker=static_cast<StStgcDbMaker*>(GetMaker("stgcDb"));  
     if(!mStgcDbMaker){
 	LOG_WARN  << "StFcsEventDisplay::InitRun Failed to get StStgcDbMaker" << endm;
 	//return kStFatal;
     }
+#endif
     
     //mApplication = new TApplication("EvtDsp",0,0);
     mCanvas=new TCanvas("FCSEventtDisplay","FCSEventtDisplay",10,10,2000,2000);
@@ -139,8 +147,11 @@ Int_t StFcsEventDisplay::Make(){
     if(!event) {LOG_ERROR << "StFcsEventDisplay::Make did not find StEvent"<<endm; return kStErr;}
     mFcsColl = event->fcsCollection();
     if(!mFcsColl) {LOG_ERROR << "StFcsEventDisplay::Make did not find StEvent->StFcsCollection"<<endm; return kStErr;}
+
+#ifdef ___USESTGC___
     mStgcColl = event->stgcCollection();
     if(!mStgcColl) {LOG_ERROR << "StFcsEventDisplay::Make did not find StEvent->StStgcCollection"<<endm;}
+#endif
     
     if(mNAccepted < mMaxEvents){
 	mNEvents++;	
@@ -294,6 +305,7 @@ Int_t StFcsEventDisplay::Make(){
 	    }
 	}
 
+#ifdef ___USESTGC___
 	//STGC
 	if(mStgcColl){
 	    for(int det=0; det<kStgcNDet; det++){
@@ -318,6 +330,7 @@ Int_t StFcsEventDisplay::Make(){
 	    }
 	    
 	}
+#endif
 	
 	mCanvas->Update();
 	TString f(mFilename);

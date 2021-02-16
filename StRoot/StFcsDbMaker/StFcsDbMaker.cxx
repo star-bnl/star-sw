@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.cxx,v $
+ * Revision 1.29  2021/02/12 20:09:50  akio
+ * Adding getIdfromSCmap()
+ *
  * Revision 1.28  2021/02/09 21:54:23  akio
  * Using StEnumeration
  *
@@ -804,6 +807,21 @@ void StFcsDbMaker::getSCmap(Int_t det, Int_t id,
     return;
 }
 
+void StFcsDbMaker::getIdfromSCmap(Int_t ehp, Int_t ns, Int_t scdep, Int_t branch, Int_t fee_i2c, Int_t sipm,
+				  Int_t &det, Int_t &id)const{
+  det=-1; 
+  id=-1;
+  if(ehp<0 || det>=kFcsEHP) return;
+  if(ns<0 || ns>=kFcsNorthSouth) return;
+  if(scdep<0 || scdep>=kFcsMaxDepBd) return;
+  if(branch<0 || branch>=kFcsMaxBranch) return;
+  if(fee_i2c<0 || fee_i2c>=kFcsMaxAddr) return;
+  if(sipm<0 || sipm>=kFcsMaxSiPM) return;
+  det=mRScMap_det[ehp][ns][scdep][branch][fee_i2c][sipm];
+  id =mRScMap_id [ehp][ns][scdep][branch][fee_i2c][sipm]; 
+  return;
+}
+
 int StFcsDbMaker::jacketColor(int ehp, int ns, int dep, int ch){
     // char* colJ[8]={"Blue  ","Orange","Violet","Yellow",
     //                "Green ","Red   ","Grey  ","Black "};
@@ -905,6 +923,7 @@ void  StFcsDbMaker::makeMap(){
 	    for(int add=0; add<kFcsMaxAddr; add++){
 	      for(int sipm=0; sipm<kFcsMaxSiPM; sipm++){
 		mRScMap_det[ehp][ns][dep][bra][add][sipm]=-1;
+		mRScMap_id [ehp][ns][dep][bra][add][sipm]=-1;
 	      }
 	    }
 	  }
