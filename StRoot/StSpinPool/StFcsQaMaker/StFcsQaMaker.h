@@ -24,6 +24,7 @@ class StFcsQaMaker : public StMaker {
    virtual Int_t Make();
    virtual Int_t Finish();
    void setRun(int v) {mRun=v;}
+   void setEvent(int v) {mEvent=v;}
    void setMaxTimeBins(int v) {mNTimeBins=v;}
    void setSumTimeBins(int min, int max) {mMinTB=min; mMaxTB=max;}
    void setPedTimeBins(int min, int max) {mMinTBp=min; mMaxTBp=max;}
@@ -39,6 +40,7 @@ class StFcsQaMaker : public StMaker {
    StFcsDbMaker *mFcsDbMkr=0;
    StFcsCollection *mFcsCollection=0;
    int mRun=0; 
+   int mEvent=0; 
    TFile *mFile=0;
    char* mSetFile=0;
    char mFilename[100];
@@ -62,6 +64,7 @@ class StFcsQaMaker : public StMaker {
    TH2F* mAdcId[kFcsNDet];
    TH2F* mAdcIdp[kFcsNDet];
    TH2F* mAdcSumId[kFcsNDet];
+   TH2F* mTimeId[kFcsNDet];
    TH2F* mFitIntg[kFcsNDet];
    TH2F* mFitSigm[kFcsNDet];
    TH2F* mFitTime[kFcsNDet];
@@ -69,6 +72,8 @@ class StFcsQaMaker : public StMaker {
    TH1F* mAdcSum[kFcsNDet][kFcsEcalMaxId];
    TH1F* mNHit[kFcsNDet];
    TH2F* mHitMap[3];
+   TH2F* mTimeEvt;
+   float mTimeE[kFcsNDet][kFcsEcalMaxId][100];
 
    TH1F* mNClu[kFcsNDet];
    TH1F* mNTowClu[kFcsNDet];
@@ -83,8 +88,11 @@ class StFcsQaMaker : public StMaker {
 #endif
 
 /*
- * $Id: StFcsQaMaker.h,v 1.4 2021/01/11 14:40:31 akio Exp $
+ * $Id: StFcsQaMaker.h,v 1.5 2021/02/13 21:41:09 akio Exp $
  * $Log: StFcsQaMaker.h,v $
+ * Revision 1.5  2021/02/13 21:41:09  akio
+ * sector avg peak time
+ *
  * Revision 1.4  2021/01/11 14:40:31  akio
  * Many changes for FCS 2021 comissioning & LED monitor.
  * Includingplots for backview, fit plots and more.

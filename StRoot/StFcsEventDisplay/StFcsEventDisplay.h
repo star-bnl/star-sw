@@ -3,8 +3,11 @@
 //
 //   This is FCS event display.
 // 
-//  $Id: StFcsEventDisplay.h,v 1.5 2020/05/29 18:54:29 akio Exp $
+//  $Id: StFcsEventDisplay.h,v 1.6 2021/02/13 21:37:31 akio Exp $
 //  $Log: StFcsEventDisplay.h,v $
+//  Revision 1.6  2021/02/13 21:37:31  akio
+//  #ifdef ___USESTGC___
+//
 //  Revision 1.5  2020/05/29 18:54:29  akio
 //  Adding EPD as PRES
 //
@@ -31,8 +34,10 @@ class TCanvas;
 class TApplication;
 class StFcsDbMaker;
 class StFcsCollection;
+#ifdef ___USESTGC___
 class StStgcDbMaker;
 class StStgcCollection;
+#endif
 class StEpdGeom;
 
 class StFcsEventDisplay : public StMaker{
@@ -52,8 +57,10 @@ public:
 private:
     StFcsDbMaker* mFcsDbMaker=0;
     StFcsCollection* mFcsColl=0;
+#ifdef ___USESTGC___
     StStgcDbMaker* mStgcDbMaker=0;
     StStgcCollection* mStgcColl=0;
+#endif
     StEpdGeom* mEpdgeo=0;
 
     TApplication* mApplication=0;
@@ -68,7 +75,7 @@ private:
     TFile* mFile=0;
     
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFcsEventDisplay.h,v 1.5 2020/05/29 18:54:29 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFcsEventDisplay.h,v 1.6 2021/02/13 21:37:31 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFcsEventDisplay,0);
 };

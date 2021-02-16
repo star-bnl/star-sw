@@ -47,5 +47,6 @@
 <!-- <input URL="file:/hlt/cephfs/reco/2019/TFG20k/RF/14p5GeV/*.event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2019/.DEV2/RF/14p5GeV/*.event.root" /> -->
 <!-- <input URL="file:/net/l404/data/fisyak/Tpc/Alignment/2019/Pass637/*/*event.root" /> -->
-<input URL="file:/hlt/cephfs/reco/2021/RF/DEV2/Cosmic_gmt_*/*/*/*.event.root" />
+<!-- <input URL="file:/hlt/cephfs/reco/2021/RF/DEV2/Cosmic_gmt_*/*/*/*.event.root" /> -->
+	<input URL="file:/star/data06/iraklic/Run2019/Cosmics/*.event.root" />
 </job>

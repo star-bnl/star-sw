@@ -143,7 +143,7 @@ Int_t StFcsRawDaqReader::Make() {
       if(trgcmd != 4 && trgcmd !=10){  // 4=phys/ped 10=LED
 	nskip++;
 	nskiptot++;
-	//printf("trgcmd=%d skipping nskip=%d nskiptot=%d\n",trgcmd,nskip,nskiptot);
+	if(mDebug) printf("trgcmd=%d skipping nskip=%d nskiptot=%d\n",trgcmd,nskip,nskiptot);
 	continue;
       }
     }
@@ -310,8 +310,11 @@ void StFcsRawDaqReader::Clear( Option_t *opts ){
 ClassImp(StFcsRawDaqReader);
 
 /*
- * $Id: StFcsRawDaqReader.cxx,v 1.5 2021/01/11 14:39:12 akio Exp $
+ * $Id: StFcsRawDaqReader.cxx,v 1.6 2021/02/13 21:39:17 akio Exp $
  * $Log: StFcsRawDaqReader.cxx,v $
+ * Revision 1.6  2021/02/13 21:39:17  akio
+ * debug printouts
+ *
  * Revision 1.5  2021/01/11 14:39:12  akio
  * Change logic to skip over none standard events at the begining of files.
  * Added function to get event# in a sector=file.
