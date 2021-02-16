@@ -151,6 +151,7 @@ class JNode {
 		 n.equals("doc") ||
 		 n.equals("histogram"))) {
 		
+		//System.out.printf("node = %s\n",n);
 		Node tt = curr.getFirstChild();
 		String val = tt.getNodeValue();
 		if(val == null) val = "";

@@ -7,8 +7,8 @@ void runViewer(char *args)
   if(firsttime) {
     firsttime=0;
     gROOT->Macro("Load.C");
-    gSystem->Load("libQtRootGui.so");
-    gSystem->Load("libQt3Support.so");
+//    gSystem->Load("libQtRootGui.so");
+ //   gSystem->Load("libQt3Support.so");
     gSystem->Load("RTS");
     gSystem->Load("StDaqLib");
     gSystem->Load("StDbLib");
