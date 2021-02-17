@@ -353,7 +353,7 @@ foreach done (`ls -1d ???/*/Done`)
   cd -;
 end
 sleep 60; 
-touch `grep total ???/2*/Chain.log | awk 'BEGIN{n= 0}{n += $6}END{printf("%7.3fM\n", n/1.e6)}'`
+touch `grep total ???/2*/Chain.log | awk 'BEGIN{n= 0; s = 0}{n += $6; s += $10}END{printf("%7.3fM_%fGB\n", n/1.e6,s)}'`
 ################################################################################
 root.exe -q -b 'Chain.C+("*/*/*picoDst.root","PicoDst")' | tee Chain.logxf
 foreach f (`grep missing Chain.log | awk '{print $3}'`)
