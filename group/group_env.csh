@@ -42,7 +42,7 @@ if (! $?STAR_LEVEL ) then
 endif
 if ( $?DECHO && $?STAR_LEVEL ) then
     # set ECHO = 1
-    echo "$self :: Receiving STAR_LEVEL ${STAR_LEVEL}"
+    if ($INTERACTIVE) echo "$self :: Receiving STAR_LEVEL ${STAR_LEVEL}"
 endif
 
 source $GROUP_DIR/unix_programs.csh
@@ -70,7 +70,7 @@ if (! $?STAR_ROOT) then
 	    setenv STAR_ROOT /usr/local/star
        else
 	    # We will fail (we know that)
-	    echo "$self ::  Did not find a valid STAR_ROOT"
+	    if ($INTERACTIVE) echo "$self ::  Did not find a valid STAR_ROOT"
 	    setenv STAR_ROOT /Path_Not_Found_STAR_Login_Failure
 	    set FAIL="$FAIL STAR_ROOT"
        endif
@@ -165,7 +165,7 @@ if ( "$FAIL" != "") then
 	if( ! $?DECHO) set ECHO = 0
     endif
 else
-    if ($?DECHO) echo "$self :: FAIL is NULL, we are fine so far"
+    if ($?DECHO && $INTERACTIVE) echo "$self :: FAIL is NULL, we are fine so far"
     if ($ECHO) then
 	echo ""
 	echo "         ----- STAR Group Login from $GROUP_DIR/ -----"
@@ -539,7 +539,7 @@ if ( -f ${STAR}/mgr/ROOT_LEVEL${ROOT_VERSION}  && -f ${STAR}/mgr/CERN_LEVEL ) th
   endif
 
 else
-    echo "CERN_LEVEL and ROOT_LEVEL has not been set. ABORT."
+    if ($INTERACTIVE) echo "CERN_LEVEL and ROOT_LEVEL has not been set. ABORT."
 endif
 
 if ($ECHO) echo   "Setting up ROOT_LEVEL= ${ROOT_LEVEL}"
