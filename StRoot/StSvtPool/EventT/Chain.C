@@ -9,9 +9,11 @@ TChain *Chain(const Char_t *TreeName = "MuDst") {
   Int_t NFiles = 0;
   ULong64_t nEvents = 0;
   ULong64_t nEvTot = 0;
+  Float_t   TotSize = 0;
   while ( (f = (TFile *) next()) ) {   
     TTree *tree = (TTree *) f->Get(TreeName);
-    cout << "#\t" << NFiles << "\t" << f->GetName();
+    cout << "#\t" << NFiles << "\t" << f->GetName() << "\t" << f->GetSize() << endl;
+    TotSize += f->GetSize();
     if (tree) {
       NFiles++;
       nEvents = tree->GetEntries();
@@ -25,6 +27,7 @@ TChain *Chain(const Char_t *TreeName = "MuDst") {
   }
   cout	<< "chained " << NFiles  << " files \t" 
 	<< "with total " << nEvTot << " events \t" 
+	<< "with size " << TotSize/(1024.*1024.*1024.)  << " GB\t"
   	<< "chain returned pointer: " << tChain << endl;
   return tChain;
 }
@@ -41,6 +44,7 @@ TChain *Chain(const Char_t *files = "./*.MuDst.root",const Char_t *TreeName = "M
   //  iter.AddFile(files);
   TFile *f = 0;
   tChain = new TChain(TreeName);
+  Float_t   TotSize = 0;
   Int_t NFiles = 0;
   ULong64_t nEvents = 0;
   ULong64_t nEvTot = 0;
@@ -53,6 +57,8 @@ TChain *Chain(const Char_t *files = "./*.MuDst.root",const Char_t *TreeName = "M
     if (tree) {
       NFiles++;
       nEvents = tree->GetEntries();
+      cout  << "\tsize = " << f->GetSize();
+      TotSize += f->GetSize();
       cout << "\tNo,Events = " << nEvents << endl;
       nEvTot += nEvents;
       tChain->Add(f->GetName());
@@ -63,6 +69,7 @@ TChain *Chain(const Char_t *files = "./*.MuDst.root",const Char_t *TreeName = "M
   }
   cout	<< "chained " << NFiles  << " files \t" 
 	<< "with total " << nEvTot << " events \t" 
+	<< "with size " << TotSize/(1024.*1024.*1024.)  << " GB\t"
   	<< "chain returned pointer: " << tChain << endl;
   return tChain;
 }
