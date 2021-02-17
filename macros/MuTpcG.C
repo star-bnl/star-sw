@@ -8,6 +8,12 @@
      root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
      cd -
    end
+   foreach d (`ls -1d ???`)
+     cd ${d}
+     ln -s ../.sl* .
+     root.exe -q -b 'lMuDst.C(-1,"*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
+     cd -
+   end
    root.exe lMuDst.C MuTpcG.root
    .L MuTpcG.C+
    Draw();
