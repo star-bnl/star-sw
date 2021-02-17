@@ -45,8 +45,8 @@ double _magfield  = -5.005;
 
 int     _npart = 10;  // floor number of tracks per event
 float   _fpart = 0.05;  // fraction of track multiplicity to embed
-int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007,45,50045,49,50049,37,61053,61054,62053,62054,60008,60009,95,97,98}; //geant3 particle ID
-TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0","deuteron","antideuteron","he3","antihe3","D0","HyperT_2body","HyperT_bar_2body","HyperT_3body","HyperT_bar_3body","PQ1730_k0lam","PQ1730_kpluslam","K0s_piplus_piminus","lambda_pbar_piplus","lambdabar_p_piminus"}; // particle names
+int     _pid[50]={1,2,3,8,9,11,12,14,15,10017,10007,45,50045,49,50049,37,61053,61054,62053,62054,60008,60009,95,98,97}; //geant3 particle ID
+TString _pnm[50]={"gamma","positron","electron","pi+","pi-","K+","K-","proton","antiproton","eta","pi0","deuteron","antideuteron","he3","antihe3","D0","HyperT_2body","HyperT_bar_2body","HyperT_3body","HyperT_bar_3body","PQ1730_k0lam","PQ1730_kpluslam","K0s_piplus_piminus","lambda_p_piminus","lambdabar_pbar_piplus"}; // particle names
 TString _part  = "pi+"; // particle to simulate, default pi+
 TString _part_save;
 float   _ptmn  = 0.100; // min pT to simulate [GeV]
@@ -398,19 +398,20 @@ void runEmbeddingSimulation2014(
     TParticlePDG* mypart     = data.GetParticle("K0s_piplus_piminus");    
     mypart->Print();  
   }
-
-  if(_part =="lambdabar_p_piminus") {
+  // lambda --> p pi-        g3id = 98 
+  // lambdabar -- pbar pi+   g3id = 97
+  if(_part =="lambdabar_pbar_piplus") {
     double bratio[] = { 0.5, 0.5, 0.0, 0., 0., 0.0 };
     int    mode[]   = {914,1409, 0, 0, 0, 0 };
-    data.AddParticleToG3( "lambdabar_p_piminus", 0.1116E+1, 0.2632E-9, 0., 3, -3122, 98, bratio, mode );
-    TParticlePDG* mypart     = data.GetParticle("lambdabar_p_piminus");    
+    data.AddParticleToG3( "lambdabar_pbar_piplus", 0.1116E+1, 0.2632E-9, 0., 3, -3122, 97, bratio, mode );
+    TParticlePDG* mypart     = data.GetParticle("lambdabar_pbar_piplus");    
     mypart->Print();
   }
-  if(_part =="lambda_pbar_piplus") {
+  if(_part =="lambda_p_piminus") {
     double bratio[] = { 0.5, 0.5, 0.0, 0., 0., 0.0 };
     int    mode[]   = {815,1508, 0, 0, 0, 0 };
-    data.AddParticleToG3( "lambda_pbar_piplus", 0.1116E+1, 0.2632E-9, 0., 3, 3122, 97, bratio, mode );
-    TParticlePDG* mypart     = data.GetParticle("lambda_pbar_piplus");    
+    data.AddParticleToG3( "lambda_p_piminus", 0.1116E+1, 0.2632E-9, 0., 3, 3122, 98, bratio, mode );
+    TParticlePDG* mypart     = data.GetParticle("lambda_p_piminus");    
     mypart->Print();
   }
 
