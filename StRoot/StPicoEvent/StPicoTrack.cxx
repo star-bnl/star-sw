@@ -43,9 +43,10 @@ StPicoTrack::StPicoTrack() : TObject(),
   mMtdPidTraitsIndex(-1), mETofPidTraitsIndex(-1),
   mBEmcMatchedTowerIndex(-1)
 #if !defined (__TFG__VERSION__)
-  , mTopoMap_iTpc(0)
+  , mTopoMap_iTpc(0),
 #endif
-  {
+  mIdTruth(0), mQATruth(0), mVertexIndex(-1) {
+  // Default constructor
   /* empty */
 }
 
@@ -86,6 +87,9 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
 #if !defined (__TFG__VERSION__)
   mTopoMap_iTpc = track.mTopoMap_iTpc;
 #endif
+  mIdTruth = track.mIdTruth;
+  mQATruth = track.mQATruth;
+  mVertexIndex = track.mVertexIndex;
 }
 
 //_________________
@@ -94,17 +98,18 @@ StPicoTrack::~StPicoTrack() {
 }
 
 //_________________
-void StPicoTrack::Print(const Char_t* option __attribute__((unused)) ) const {
+void StPicoTrack::Print(const Char_t* option __attribute__((unused))) const {
   LOG_INFO << "id: " << id() << " chi2: " << chi2() << "\n"
            << "pMom: " << pMom().X() << " " << pMom().Y() << " " << pMom().Z() << "\n"
-	   << "gMom: " << gMom().X() << " " << gMom().Y() << " " << gMom().Z() << "\n"
-	   << "origin: " << origin().X() << " " << origin().Y() << " " << origin().Z() << "\n"
+           << "gMom: " << gMom().X() << " " << gMom().Y() << " " << gMom().Z() << "\n"
+           << "origin: " << origin().X() << " " << origin().Y() << " " << origin().Z() << "\n"
            << "nHitsFit: " << nHitsFit()
            << " nHitsdEdx: " << nHitsDedx() << "\n"
            << "nSigma pi/K/p/e: " << nSigmaPion()   << "/" << nSigmaKaon() << "/"
            << nSigmaProton() << "/" << nSigmaElectron() << "\n"
-	   << "Hit index in BEMC/BTof/MTD/ETof: " << mBEmcPidTraitsIndex << "/"
-	   << mBTofPidTraitsIndex << "/" << mMtdPidTraitsIndex << "/" << mETofPidTraitsIndex << "\n"
+           << "Hit index in BEMC/BTof/MTD/ETof: " << mBEmcPidTraitsIndex << "/"
+           << mBTofPidTraitsIndex << "/" << mMtdPidTraitsIndex << "/" << mETofPidTraitsIndex << "\n"
+           << "idTruth: " << idTruth() << " qaTruth: " << qaTruth() << "\n"
            << endm;
 }
 
@@ -421,4 +426,14 @@ Float_t StPicoTrack::gDCAs(TVector3 point) const {
   // Return DCA vector to the point (origin - point)
   TVector3 dca = gDCA( point );
   return -dir.Y()/cosl * dca.X() + dir.X()/cosl * dca.Y();
+}
+
+//_________________
+void StPicoTrack::setVertexIndex(Int_t index) {
+  if ( index<=-2 || index>std::numeric_limits<char>::max() ) {
+    mVertexIndex = -2;
+  }
+  else {
+    mVertexIndex = (Char_t)index;
+  }
 }

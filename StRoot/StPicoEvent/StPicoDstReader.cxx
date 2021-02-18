@@ -30,6 +30,8 @@
 #include "StPicoBEmcSmdPHit.h"
 #include "StPicoETofHit.h"
 #include "StPicoETofPidTraits.h"
+#include "StPicoMcVertex.h"
+#include "StPicoMcTrack.h"
 #include "StPicoArrays.h"
 #include "StPicoDst.h"
 
@@ -129,6 +131,8 @@ void StPicoDstReader::streamerOff() {
   StPicoBEmcSmdPHit::Class()->IgnoreTObjectStreamer();
   StPicoETofHit::Class()->IgnoreTObjectStreamer();
   StPicoETofPidTraits::Class()->IgnoreTObjectStreamer();
+  StPicoMcVertex::Class()->IgnoreTObjectStreamer();
+  StPicoMcTrack::Class()->IgnoreTObjectStreamer();
 }
 
 //_________________
