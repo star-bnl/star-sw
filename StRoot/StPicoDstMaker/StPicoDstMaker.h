@@ -18,8 +18,6 @@
  *   d) Mtd - sets the first primary vertex as a default and then loops
  *      over all primary vertices. The first one that has at least
  *      2 MTD-matched primary tracks is selected.
- *   e) FXT - set the first vertex that was reconstructed in z 
- *      from 198 to 202 cm along z axis.
  * Default is NotSet. In this case the program execution will be terminated.
  * Has to be explicitly set.
  *
@@ -89,8 +87,7 @@ class StPicoDstMaker : public StMaker {
   /// \par 2 Vpd
   /// \par 3 VpdOrDefault
   /// \par 4 Mtd
-  /// \par 5 FXT
-  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3, Mtd=4, FXT=5};
+  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3, Mtd=4};
 #endif /* ! __TFG__VERSION__ */
   /// Write or not write covariance matrix: 0-skip, 1-write
   enum PicoCovMtxMode {Skip=0, Write=1};
@@ -185,7 +182,7 @@ class StPicoDstMaker : public StMaker {
   void setBranchAddresses(TChain*);
 
   /// Build EMC indexes
-  void buildEmcIndex();
+  void buildEmcIndex(StEmcCollection*);
   /// Initialize EMC related arrays
   void initEmc();
   /// Finish EMC
@@ -225,6 +222,11 @@ class StPicoDstMaker : public StMaker {
   void fillBbcHits();
   /// Fill ETOF information
   void fillETofHits();
+  /// Fill MC vertex information
+  void fillMcVertices();
+  /// Fill MC track information
+  void fillMcTracks();
+
 
  /**
   * Returns various measurements by the BEMC and BSMD detectors corresponding to
@@ -340,7 +342,7 @@ class StPicoDstMaker : public StMaker {
 
   /// Get CVS status
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.28 2020/08/28 16:47:28 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.29 2021/02/18 07:00:49 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 
