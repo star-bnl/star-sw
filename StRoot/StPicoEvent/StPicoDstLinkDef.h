@@ -6,6 +6,8 @@
 
 // Main PicoDst classes
 #pragma link C++ class StPicoTrack+;
+#pragma link C++ class StPicoMcVertex+;
+#pragma link C++ class StPicoMcTrack+;
 #pragma link C++ class StPicoMtdTrigger+;
 #pragma link C++ class StPicoMtdPidTraits+;
 #pragma link C++ class StPicoMtdHit+;

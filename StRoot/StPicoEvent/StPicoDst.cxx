@@ -19,6 +19,8 @@
 #include "StPicoBEmcSmdPHit.h"
 #include "StPicoETofHit.h"
 #include "StPicoETofPidTraits.h"
+#include "StPicoMcVertex.h"
+#include "StPicoMcTrack.h"
 #include "StPicoDst.h"          //MUST be the last one
 
 TClonesArray** StPicoDst::picoArrays = 0;
@@ -51,6 +53,40 @@ void StPicoDst::printTracks() {
   for(UInt_t iTrk=0; iTrk<numberOfTracks(); iTrk++) {
     LOG_INFO << "+++ track " << iTrk << "\n";
     track(iTrk)->Print();
+    LOG_INFO << "\n";
+  }
+
+  LOG_INFO << endm;
+}
+
+//_________________
+void StPicoDst::printMcVertices() {
+  if(numberOfMcVertices() == 0) {
+    LOG_INFO << "No MC vertices found!" << endm;
+    return;
+  }
+
+  LOG_INFO << "\n+++++++++ vertex list ( " << numberOfMcTracks() << " entries )\n\n";
+  for(UInt_t iVtx=0; iVtx<numberOfMcVertices(); iVtx++) {
+    LOG_INFO << "+++ vertex " << iVtx << "\n";
+    mcVertex(iVtx)->Print();
+    LOG_INFO << "\n";
+  }
+
+  LOG_INFO << endm;
+}
+
+//_________________
+void StPicoDst::printMcTracks() {
+  if(numberOfMcTracks() == 0) {
+    LOG_INFO << "No MC tracks found!" << endm;
+    return;
+  }
+
+  LOG_INFO << "\n+++++++++ track list ( " << numberOfMcTracks() << " entries )\n\n";
+  for(UInt_t iTrk=0; iTrk<numberOfMcTracks(); iTrk++) {
+    LOG_INFO << "+++ track " << iTrk << "\n";
+    mcTrack(iTrk)->Print();
     LOG_INFO << "\n";
   }
 

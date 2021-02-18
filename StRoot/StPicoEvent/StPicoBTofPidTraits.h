@@ -59,6 +59,15 @@ class StPicoBTofPidTraits : public TObject {
   /// Return z comonent of hit position
   Float_t btofHitPosZ() const    { return (Float_t)mBTofHitPosZ / 100.; }
 
+  /// Return nSigma(electron)
+  Float_t nSigmaElectron() const { return (Float_t)mNSigmaElectron / 1000.; }
+  /// Return nSigma(pion)
+  Float_t nSigmaPion() const     { return (Float_t)mNSigmaPion / 1000.; }
+  /// Return nSigma(kaon)
+  Float_t nSigmaKaon() const     { return (Float_t)mNSigmaKaon / 1000.; }
+  /// Return nSigma(proton)
+  Float_t nSigmaProton() const   { return (Float_t)mNSigmaProton / 1000.; }
+
   //
   // Setters
   //
@@ -88,6 +97,15 @@ class StPicoBTofPidTraits : public TObject {
   /// Set zLocal
   void setZLocal(Float_t zLocal);
 
+  /// Set nsigma(electron)
+  void setNSigmaElectron(Float_t sigma);
+  /// Set nsigma(pion)
+  void setNSigmaPion(Float_t sigma);
+  /// Set nsigma(kaon)
+  void setNSigmaKaon(Float_t sigma);
+  /// Set nsigma(proton)
+  void setNSigmaProton(Float_t sigma);
+  
  private:
 
   /// Index to the associated picoTrack in the event
@@ -111,7 +129,16 @@ class StPicoBTofPidTraits : public TObject {
   /// Hit position projected on Z plane (compression = position * 100)
   Short_t   mBTofHitPosZ;
 
-  ClassDef(StPicoBTofPidTraits, 3);
+  /// nSigma of particle to be electron (compression = nsigma * 1000)
+  Short_t mNSigmaElectron;
+  /// nSigma of particle to be pion (compression = nsigma * 1000)
+  Short_t mNSigmaPion;
+  /// nSigma of particle to be kaon (compression = nsigma * 1000)
+  Short_t mNSigmaKaon;
+  /// nSigma of particle to be proton (compression = nsigma * 1000)
+  Short_t mNSigmaProton;
+
+  ClassDef(StPicoBTofPidTraits, 4);
 };
 
 #endif
