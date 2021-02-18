@@ -34,7 +34,7 @@ set(CMAKE_MODULE_PATH
 #--- Project definitions -------------------------------------------------------
 project(Geant3)
 set(${PROJECT_NAME}_VERSION_MAJOR "2")
-set(${PROJECT_NAME}_VERSION_MINOR "7")
+set(${PROJECT_NAME}_VERSION_MINOR "8")
 set(${PROJECT_NAME}_VERSION_PATCH "0")
 set(${PROJECT_NAME}_VERSION
     ${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH})

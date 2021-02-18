@@ -104,8 +104,8 @@
 *
 * *** Decode character option
 *
-      CHOPTI = CHOPT
-      CALL UOPTC (CHOPT, 'BELMOPVXZC', IOPT)
+      CHOPTI = CHOPT(1:len(CHOPT))
+      CALL UOPTC (CHOPTI, 'BELMOPVXZC', IOPT)
 *     'B'   'Backward tracking' - i.e. energy loss added to the current energy
       IF (IOPTB.EQ.0) THEN
          BACKTR = 1.
