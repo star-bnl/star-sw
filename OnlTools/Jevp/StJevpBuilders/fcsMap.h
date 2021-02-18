@@ -274,6 +274,38 @@ int getNDep(Int_t ehp, Int_t ns) {
     }
 }
 
+void getSCmap(Int_t det, Int_t id,
+	      Int_t &ehp, Int_t &ns, Int_t &scdep, Int_t &branch, Int_t &fee_i2c, Int_t &sipm,
+	      Int_t &pp, Int_t &jacket) {
+  ehp=-1; ns=-1; scdep=-1; branch=-1; fee_i2c=-1; sipm=-1, pp=-1; jacket=-1;
+  if(det<0 || det>=kFcsNDet) return;
+  if(id<0 || id>=kFcsMaxId) return;
+  ehp=mScMap_ehp[det][id];
+  ns=mScMap_ns[det][id];
+  scdep=mScMap_dep[det][id];
+  branch=mScMap_bra[det][id];
+  fee_i2c= mScMap_add[det][id];
+  sipm=mScMap_sipm[det][id];
+  pp=mScMap_pp[det][id];
+  jacket=mScMap_j[det][id];
+  return;
+}
+
+void getIdfromSCmap(Int_t ehp, Int_t ns, Int_t scdep, Int_t branch, Int_t fee_i2c, Int_t sipm,
+		    Int_t &det, Int_t &id) {
+  det=-1;
+  id=-1;
+  if(ehp<0 || det>=kFcsEHP) return;
+  if(ns<0 || ns>=kFcsNorthSouth) return;
+  if(scdep<0 || scdep>=kFcsMaxDepBd) return;
+  if(branch<0 || branch>=kFcsMaxBranch) return;
+  if(fee_i2c<0 || fee_i2c>=kFcsMaxAddr) return;
+  if(sipm<0 || sipm>=kFcsMaxSiPM) return;
+  det=mRScMap_det[ehp][ns][scdep][branch][fee_i2c][sipm];
+  id =mRScMap_id [ehp][ns][scdep][branch][fee_i2c][sipm];
+  return;
+}
+
 int jacketColor(int ehp, int dep, int ch){
     // char* colJ[8]={"Blue  ","Orange","Violet","Yellow",
     //                "Green ","Red   ","Grey  ","Black "};
@@ -312,6 +344,37 @@ int jacketColor(int ehp, int dep, int ch){
     default:
 	return -1;
     }
+}
+
+void getName(Int_t det, Int_t id, char name[]){
+  char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
+  int ehp,ns,crt,slt,dep,ch;
+  int c=getColumnNumber(det,id);
+  int r=getRowNumber(det,id);
+  getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+  int scehp,scns,scdep,br,i2c,sipm,pp,j;
+  getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
+  sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
+          nameDET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+}
+
+void getName(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, char name[]){
+  char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
+  int det,id,crt,slt;
+  getIdfromDep(ehp,ns,dep,ch,det,id,crt,slt);
+  // printf("%1d %1d %2d %2d : %1d %3d\n",ehp,ns,dep,ch,det,id);                                                                                     
+  if(id==-1){
+    det = detectorId(ehp, ns);
+    sprintf(name,"%2s---_r--c--_Dep%02dCh%02d_F--/-/--/-",
+            nameDET[det],dep,ch);
+  }else{
+    int c=getColumnNumber(det,id);
+    int r=getRowNumber(det,id);
+    int scehp,scns,scdep,br,i2c,sipm,pp,j;
+    getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
+    sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
+            nameDET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+  }
 }
     
 void  makePPMap(){

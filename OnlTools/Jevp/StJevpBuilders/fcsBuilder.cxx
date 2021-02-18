@@ -183,37 +183,37 @@ void fcsBuilder::event(daqReader *rdr){
 
     static int evt=-1;
     evt++;
-    dd = rdr->det("trg")->get("raw");
-    if(!dd){
-      //printf("trg/raw not found\n");
-    }else{
-      while(dd->iterate()) {
-	u_char *trg_raw = dd->Byte;
-	int mRun=22921001;
-	TriggerDataBlk2019* trgdata2019 = (TriggerDataBlk2019*)dd->Byte;  
-	StTriggerData* trg = (StTriggerData*) new StTriggerData2019(trgdata2019,mRun,1,0);
-	//printf("Creating StTriggerData for ver=0x46 (2019) with run=%d\n",mRun);
-	unsigned short lastdsm4 = trg->lastDSM(4);
-	unsigned short fcs1   = (lastdsm4 >>  5) & 0x1;
-	unsigned short fcs2   = (lastdsm4 >>  7) & 0x1;
-	unsigned short fcs3   = (lastdsm4 >>  8) & 0x1;
-	unsigned short fcs4   = (lastdsm4 >>  9) & 0x1;
-	unsigned short fcs2019= (lastdsm4 >> 10) & 0x1;
-	unsigned short fcs5   = (lastdsm4 >> 12) & 0x1;
-	unsigned short fcs6   = (lastdsm4 >> 13) & 0x1;
-	unsigned short fcs7   = (lastdsm4 >> 14) & 0x1;
-	unsigned short fcs8   = (lastdsm4 >> 15) & 0x1;
 
-	if(FCS_DEBUG) {
-	    printf("evt=%8d fcs2019=fcs0=%1d 1=%1d 2=%1d 3=%1d 4=%1d 5=%1d 6=%1d 7=%1d 8=%1d\n",
-		   evt,fcs2019,fcs1,fcs2,fcs3,fcs4,fcs5,fcs6,fcs7,fcs8);
-	}
-	
-	delete trg;
-	trg = NULL;
+
+    if(FCS_DEBUG) {
+      dd = rdr->det("trg")->get("raw");
+      if(!dd){
+	//printf("trg/raw not found\n");
+      }else{
+	while(dd->iterate()) {
+	  u_char *trg_raw = dd->Byte;
+	  int mRun=22921001;
+	  TriggerDataBlk2019* trgdata2019 = (TriggerDataBlk2019*)dd->Byte;  
+	  StTriggerData* trg = (StTriggerData*) new StTriggerData2019(trgdata2019,mRun,1,0);
+	  //printf("Creating StTriggerData for ver=0x46 (2019) with run=%d\n",mRun);
+	  unsigned short lastdsm4 = trg->lastDSM(4);
+	  unsigned short fcs1   = (lastdsm4 >>  5) & 0x1;
+	  unsigned short fcs2   = (lastdsm4 >>  7) & 0x1;
+	  unsigned short fcs3   = (lastdsm4 >>  8) & 0x1;
+	  unsigned short fcs4   = (lastdsm4 >>  9) & 0x1;
+	  unsigned short fcs2019= (lastdsm4 >> 10) & 0x1;
+	  unsigned short fcs5   = (lastdsm4 >> 12) & 0x1;
+	  unsigned short fcs6   = (lastdsm4 >> 13) & 0x1;
+	  unsigned short fcs7   = (lastdsm4 >> 14) & 0x1;
+	  unsigned short fcs8   = (lastdsm4 >> 15) & 0x1;	  
+	  printf("evt=%8d fcs2019=fcs0=%1d 1=%1d 2=%1d 3=%1d 4=%1d 5=%1d 6=%1d 7=%1d 8=%1d\n",
+		 evt,fcs2019,fcs1,fcs2,fcs3,fcs4,fcs5,fcs6,fcs7,fcs8);
+	  delete trg;
+	  trg = NULL;
+	}	
       }
     }
-
+    
     int fcs_size = rdr->getDetectorSize("fcs");
     int sz = rdr->getDetectorSize("/");
     LOG(DBG, "getDetectorSize(fcs) = %d,  evtSize = %d (diff=%d)", sz, rdr->event_size,rdr->event_size-sz);
