@@ -35,6 +35,9 @@ switch (${SUBMITTINGDIRECTORY})  # gcc
 endsw # 
 
 switch (${SUBMITTINGDIRECTORY}) # STAR version
+  case "*TFG21c*":
+    starver TFG21c
+    breaksw
   case "*TFG20c*":
     starver TFG20c
     breaksw

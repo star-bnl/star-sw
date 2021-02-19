@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job maxFilesPerProcess="2" simulateSubmission="false" fileListSyntax="paths">
+	<Generator><Location>./</Location></Generator>
+
+<!--	<stdout URL="file:/gpfs01/star/pwg/iraklic/myCondorDump/$JOBID_$JOBINDEX.out" />
+	<stderr URL="file:/gpfs01/star/pwg/iraklic/myCondorDump/$JOBID_$JOBINDEX.err" />
+	<stdout URL="file:./$JOBID_$JOBINDEX.out" />
+	<stderr URL="file:./$JOBID_$JOBINDEX.err" />
+
+
+	<SandBox installer="ZIP">
+		<Package name="sched">
+			<File>file:/star/u/iraklic/STAR/macros/TpcAligner.C</File>
+			<File>file:/gpfs01/star/pwg/iraklic/Run2019/Cosmics/Alignment/CleanRerun/StarDb/</File>
+		</Package>
+	</SandBox>
+ -->
+	<command>
+#		starver dev
+#		starver .DEV2
+#		source $STAR/setupDEV2.csh
+#		setenv NODEBUG yes
+#		setenv STARFPE NO
+#		setup gcc485
+#		setup 64b
+#		starver TFG20g
+
+		set file = `basename $INPUTFILE0`;
+		set logFile  = ${file}B.log
+
+		root.exe -q -b 'TpcAligner.C(200000,"'$INPUTFILE0'")' &gt;&amp;  ${logFile}
+
+	</command>
+
+	<output fromScratch="*.root" toURL="file:$SUBMITTINGDIRECTORY/"/>
+	<output fromScratch="*B.log" toURL="file:$SUBMITTINGDIRECTORY/"/>
+
+	<!--input URL="file:/star/subsys/tpc/iraklic/Run2019/Cosmics/*.event.root" /-->
+	<input URL="file:/star/data06/iraklic/Run2019/Cosmics/*.event.root" />
+</job>
