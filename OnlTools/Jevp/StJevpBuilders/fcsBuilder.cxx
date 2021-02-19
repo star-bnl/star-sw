@@ -20,7 +20,8 @@
 #include "fcsMap.h"
 
 const int TBMAX=300;
-const int TBTRG[2]={51,207+8};
+//const int TBTRG[2]={51,207+8};
+const int TBTRG[2]={50,207+4};
 const int MAXADC[2]={4096,512};
 const int MAXSUM[2]={20000,1000};
 const int OFF[2]  = {0,0};
