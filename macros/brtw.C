@@ -5,6 +5,8 @@
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TMath.h"
@@ -138,6 +140,9 @@ TH1F *SubstracF(TH1F *hist, TF1* total, const Option_t *opt="b") {
 //________________________________________________________________________________
 TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, Double_t m2 = mpi, Int_t l = 0, Bool_t baryon = kFALSE) {
   if (! hist) return 0;
+  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
+  if (! c1) c1 = new TCanvas("c1","brtw");
+  else      c1->Clear();
   M1 = m1;
   M2 = m2;
   Baryon = baryon;
@@ -239,30 +244,50 @@ TF1 *brtw(TH1 *hist, Double_t MMin=0.3, Double_t MMax = 1.3, Double_t m1 = mpi, 
   Double_t S = Signal->Integral(params[1]-3*params[2],params[1]+3*params[2])/binWidth;
   Double_t B = Background->Integral(params[1]-2*params[2],params[1]+2*params[2])/binWidth;
   Double_t T = Total->Integral(params[1]-2*params[2],params[1]+2*params[2])/binWidth;
-  
+  TString Out("Title.txt");
+  ofstream out;
+  out.open(Out.Data());
   cout << gSystem->BaseName(gDirectory->GetName()) << "\t";
   cout << hist->GetName() << "\t S = " << S << "\tB = " << B;
-  if (B > 0) cout<< "\tS/B = " << S/B;
+  out << gSystem->BaseName(gDirectory->GetName()) << "\t";
+  out << hist->GetName() << "\t S = " << S << "\tB = " << B << endl;
+  if (B > 0) {
+    cout<< "\tS/B = " << S/B;
+    out<< "\tS/B = " << S/B;
+  }
   cout << "\tS/sqrt(T) = " << S/TMath::Sqrt(T);
   cout << "\tSignificance = " << 1./Total->GetParError(0);
+  out << "\tS/sqrt(T) = " << S/TMath::Sqrt(T);
+  out << "\tSignificance = " << 1./Total->GetParError(0) << endl;
   TH1F *z = (TH1F *) gDirectory->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/z");
   if (z) {
     Double_t nevents = z->GetEntries();
     if (nevents > 0) {
       Double_t SperE = S/nevents;
       cout << "\tSignal per Event(";
-      if (nevents < 1000) 
+      out << "\tSignal per Event(";
+      if (nevents < 1000) {
 	cout << Form("%7.0f",nevents);
-      else if (nevents < 1e6)
+	out << Form("%7.0f",nevents);
+      } else if (nevents < 1e6) {
 	cout << Form("%7.3fK",nevents/1e3);
-      else 
+	out << Form("%7.3fK",nevents/1e3);
+      } else {
 	cout << Form("%7.3fM",nevents/1e6);
+	out << Form("%7.3fM",nevents/1e6);
+      }
       cout << ")  = " << SperE;
+      out << ")  = " << SperE << endl;
     }
   }
   cout << Form("\tM = %7.2f +/- %5.2f",1e3*Total->GetParameter(1),1e3*Total->GetParError(1))
        << Form("\tW = %7.2f +/- %5.2f",1e3*Total->GetParameter(2),1e3*Total->GetParError(2)) 
        << " (MeV)" << endl;
+  out << Form("\tM = %7.2f +/- %5.2f",1e3*Total->GetParameter(1),1e3*Total->GetParError(1))
+       << Form("\tW = %7.2f +/- %5.2f",1e3*Total->GetParameter(2),1e3*Total->GetParError(2)) 
+       << " (MeV)" << endl;
+  out.close();
+  c1->SaveAs("K0s.png");
   return Total;
 }
 //________________________________________________________________________________
@@ -270,6 +295,19 @@ TF1 *K0BW(TH1F *M) {
   if (! M) return 0;
   TH1F *m = new TH1F(*M);
   m->SetName(Form("%s_BW",M->GetName()));
+  TString Title(m->GetTitle());
+  Title.ReplaceAll("z projection","");
+  TH1F *z = (TH1F *) gDirectory->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/z");
+  if (z) {
+   Double_t nevents = z->GetEntries();
+   if (nevents < 1000) 
+     Title += Form(" %7.0f",nevents);
+   else if (nevents < 1e6)
+     Title += Form(" %7.3fK",nevents/1e3);
+   else 
+     Title += Form(" %7.3fM",nevents/1e6);
+  }
+  m->SetTitle(Title);
   Masses[0] = 0.497611; // Initail parameters
   Widths[0] = 0.0107;
   nameP = "K_S0";
@@ -280,7 +318,6 @@ TF1 *K0BW(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Param
   TH1F *M = (TH1F *) gDirectory->Get(histN);
   if (! M) return 0;
   return K0BW(M);
-  TH1F *m = new TH1F(*M);
 }
 //________________________________________________________________________________
 TF1 *K0G(const Char_t *histN = "/Particles/KFParticlesFinder/Particles/Ks/Parameters/M") {

@@ -352,12 +352,12 @@ void DrawSignalBg7(TString nSt="") {
     std::cout << "S/B  " << i << " " << pName[i] << "  " << S/B << std::endl;
   }
 
-  TCanvas *c1;
-  c1 = new TCanvas("c1","Particles",0,0,1500,800);
-  c1 -> UseCurrentStyle();
-//  c1 -> Divide(3,3);
-  c1 -> Divide(3,2);
-//  c1 -> Divide(2,2);
+  TCanvas *c3;
+  c3 = new TCanvas("c3","Particles",0,0,1500,800);
+  c3 -> UseCurrentStyle();
+//  c3 -> Divide(3,3);
+  c3 -> Divide(3,2);
+//  c3 -> Divide(2,2);
 
   TLegend *legends[9];
   for(int i=0; i<9; i++)
@@ -384,7 +384,7 @@ void DrawSignalBg7(TString nSt="") {
     if(!isDraw[i]) 
       continue;
     
-    c1->cd(padMap[i]);
+    c3->cd(padMap[i]);
     //hPart[i] -> UseCurrentStyle();
     hPart[i] -> GetXaxis()-> SetTitle(AxisName[i].data());
     hPart[i] -> GetXaxis()-> SetTitleSize(0.08);
@@ -431,7 +431,8 @@ void DrawSignalBg7(TString nSt="") {
     legends[NPad-1]->Draw();
     NPad++;
   }
-  TString pngName(gDirectory->GetName());
-  pngName.ReplaceAll(".root",".png");
-  c1->SaveAs(pngName);
+  TString pngName = "Hyperons.png";
+  //   pngName += gDirectory->GetName();
+  //  pngName.ReplaceAll(".root",".png");
+  c3->SaveAs(pngName);
 }

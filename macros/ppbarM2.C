@@ -13,6 +13,9 @@
 #include "TStyle.h"
 #endif
 void ppbarM2() {
+  TCanvas *c2 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c2");
+  if (c2) c2->Clear();
+  else    c2 = new TCanvas("c2","ppbarM2",10,510,700,500);
   //  gStyle->SetOptStat(0);
   TF1 *func = new TF1("func","[0]*(1+[1]+[2]*x)",-0.5,0.5);
   Double_t m2P = 0.9382723*0.9382723;
@@ -46,10 +49,7 @@ void ppbarM2() {
   l->AddEntry(m2pbar,Title);
   TLine *line = new TLine(-0.5, m2P, 0.5, m2P);
 #endif
-  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
-  if (c1) c1->Clear();
-  else    c1 = new TCanvas("c1","c1");
-  TH1F *frame = c1->DrawFrame(-0.5,0.70,0.5,1.00);
+  TH1F *frame = c2->DrawFrame(-0.5,0.70,0.5,1.00);
   frame->SetTitle("p/pbar Mass^{2} versus log_{10}P");
   frame->SetXTitle("log_{10}(p[GeV/c])");
   frame->SetYTitle("M^{2}"); //[GeV/c^{2}]^{2}");
@@ -57,4 +57,5 @@ void ppbarM2() {
   m2pbar->Draw("sames");
   line->Draw();
   l->Draw();
+  c2->SaveAs("ppbarM2.png");
 }
