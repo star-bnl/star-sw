@@ -175,16 +175,15 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
 void fcsBuilder::startrun(daqReader *rdr) {
     LOG(NOTE, "fcsBuilder starting run #%d",rdr->run);
     resetAllPlots();    
+    mEvt=-1;
+    mPhyLed=-1;
 }
 
 #define safelog(x) ((x > 0) ? log10(x) : 0)
 
 // Fill Histograms...
 void fcsBuilder::event(daqReader *rdr){  
-
-    static int evt=-1;
-    evt++;
-
+    mEvt++;
 
     if(FCS_DEBUG) {
       dd = rdr->det("trg")->get("raw");
@@ -208,7 +207,7 @@ void fcsBuilder::event(daqReader *rdr){
 	  unsigned short fcs7   = (lastdsm4 >> 14) & 0x1;
 	  unsigned short fcs8   = (lastdsm4 >> 15) & 0x1;	  
 	  printf("evt=%8d fcs2019=fcs0=%1d 1=%1d 2=%1d 3=%1d 4=%1d 5=%1d 6=%1d 7=%1d 8=%1d\n",
-		 evt,fcs2019,fcs1,fcs2,fcs3,fcs4,fcs5,fcs6,fcs7,fcs8);
+		 mEvt,fcs2019,fcs1,fcs2,fcs3,fcs4,fcs5,fcs6,fcs7,fcs8);
 	  delete trg;
 	  trg = NULL;
 	}	
@@ -219,7 +218,6 @@ void fcsBuilder::event(daqReader *rdr){
     int sz = rdr->getDetectorSize("/");
     LOG(DBG, "getDetectorSize(fcs) = %d,  evtSize = %d (diff=%d)", sz, rdr->event_size,rdr->event_size-sz);
     contents.h_evt_size->Fill(safelog(fcs_size));
-
     
     int mReadMode=-1;
     int trgcmd = rdr->trgcmd;
@@ -229,20 +227,15 @@ void fcsBuilder::event(daqReader *rdr){
     case 10: mReadMode=0; break;
     default: return;
     }
-    
-    
+        
     string mode[2]={"adc","zs"};
     dd = rdr->det("fcs")->get(mode[mReadMode].c_str());
     if(!dd){
       LOG(DBG,"No fcs_%s found",mode[mReadMode].c_str());
     }else{
-      //int trgcmd2 = rdr->trgcmd;      
-      //printf("trgcmd2=%d\n",trgcmd2);
-      //if(trgcmd2!=4 && trgcmd !=10) return;
-      static int phyled=-1;
-      if(phyled<0){
+      if(mPhyLed<0){
 	if(trgcmd==4) {
-	  phyled=0;
+	  mPhyLed=0;
 	  contents.h_fcs_crt_depch_tbin[0]->GetYaxis()->SetRange(0,100);
 	  contents.h_fcs_crt_depch_tbin[1]->GetYaxis()->SetRange(0,100);
 	  contents.h_fcs_crt_depch_tbin[3]->GetYaxis()->SetRange(0,100);
@@ -260,7 +253,7 @@ void fcsBuilder::event(daqReader *rdr){
 	  contents.h_fcs_ehpns_id_adcsum[2][0]->GetYaxis()->SetRangeUser(0,1000);
 	  contents.h_fcs_ehpns_id_adcsum[2][1]->GetYaxis()->SetRangeUser(0,1000);
 	}else{
-	  phyled=1;
+	  mPhyLed=1;
 	  char csum[30];    
 	  sprintf(csum,"AdcSum(TB=%d-%d)",TBTRG[1]-3,TBTRG[1]+4);
 	  contents.h_fcs_ehpns_id_adcsum[0][0]->SetTitle(Form("EcalNorth; Id/22; %s",csum));
@@ -311,7 +304,7 @@ void fcsBuilder::event(daqReader *rdr){
 	  }
 	  contents.h_fcs_crt_depch_tbin[crt]->Fill(slt+float(ch+0.5)/32.0,float(tb),float(adc));		
 	  contents.h_fcs_det_tbin_adc[ehp]->Fill(float(tb),float(adc));
-	  if(TBTRG[phyled]-3 <= tb && tb <= TBTRG[phyled]+4) sum+=adc;
+	  if(TBTRG[mPhyLed]-3 <= tb && tb <= TBTRG[mPhyLed]+4) sum+=adc;
 	}
 	int c = getColumnNumber(detid,id);
 	int r = getRowNumber(detid,id);
