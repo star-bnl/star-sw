@@ -262,6 +262,8 @@ int fcs_data_c::start(u_short *d16, int shorts)
 	//class members
 	events++ ;
 
+	bad_error = 0 ;
+
 	dta_start = dta_p = d16 ;
 	dta_stop = d16 + shorts ;
 	dta_shorts = shorts ;
@@ -331,6 +333,7 @@ int fcs_data_c::start(u_short *d16, int shorts)
 			}
 
 			LOG(ERR,"uknown version 0x%04X",d16[2]) ;
+			bad_error |= 1 ;
 			return 0 ;
 
 			break ;
@@ -400,11 +403,13 @@ int fcs_data_c::hdr_event()
 
 
 	if((sector != hdr_sector) || (rdo != hdr_rdo)) {
+		bad_error |= 2 ;
 		LOG(ERR,"%d: sector %d:%d expected, received %d:%d [0x%X]",id,sector,rdo,hdr_sector,hdr_rdo,hdr_board_id) ;
 	}
 
 	// this won't work Offline because I don't have the real board id...
 	if(realtime && (hdr_board_id != board_id)) {
+		bad_error |= 2 ;
 		LOG(ERR,"%d: evt %d: board_id: expected 0x%04X, received 0x%04X",id,events,board_id,hdr_board_id) ;
 	}
 
@@ -540,6 +545,7 @@ int fcs_data_c::hdr_event()
 				}
 			}
 			else if(asc != 0xFFFFFFFF) {
+				bad_error |= 4 ;
 				LOG(ERR,"ASCII wha %d: 0x%08X",i,asc) ;
 			}
 
@@ -554,14 +560,17 @@ int fcs_data_c::hdr_event()
 
 		ctmp[cou] = 0 ;
 		if(!end_marker) {
+			bad_error |= 8 ;
 			LOG(ERR,"S%d:%d:%d: ASCII[%d] but no end-marker \"%s\"",sector,rdo,events,cou,ctmp) ;
 		}
 		else if(cou) {
+			bad_error |= 8 ;
 			LOG(ERR,"S%d:%d:%d: ASCII[%d] \"%s\"",sector,rdo,events,cou,ctmp) ;
 		}
 
 	}
 	else if(dta_p[0]==0xFFFF && dta_p[1]==0xFFFF) {	// bug: end-of-ascii without ascii
+		bad_error |= 8 ;
 		LOG(ERR,"S%d:%d:%d: ASCII bug: 0x%X, 0x%X",sector,rdo,events,hdr_trg_word,dta_p[2]) ;
 		for(int i=0;i<32;i++) {
 			LOG(TERR,"... %d = 0x%04X",i,start_p[i]) ;
@@ -570,6 +579,8 @@ int fcs_data_c::hdr_event()
 	}
 #if 1
 	else if(dta_p[0]==0xFFFF) {
+		bad_error |= 8 ;
+
 		LOG(ERR,"BAD 0xFFFF bug -- 0x%08X",*((u_int *)dta_p)) ;
 
 		u_int *d32 = (u_int *)start_p ;
@@ -605,6 +616,7 @@ int fcs_data_c::event_end(int how)
 	if(!trgd_event) return 0 ;
 
 	if(rdo_map_loaded && (ch_mask_seen != rdo_map[sector-1][rdo-1].ch_mask)) {
+		bad_error |= 0x10 ;
 		LOG(ERR,"%d: event_end: %d: S%02d:%d: mask not-complete 0x%llX (T %d)",id,events,sector,rdo,ch_mask_seen,token) ;
 	}
 
@@ -879,6 +891,8 @@ int fcs_data_c::event()
 	while(*dta_p == 0xFFFF) {
 		want_saved = 1 ;
 
+		bad_error |= 0x20 ;
+
 		LOG(ERR,"S%d:%d: events %d: BUG 0xFFFF: ch %d, bytes left %d",sector,rdo,events,ch_count,dta_stop-dta_p) ;
 		LOG(ERR,"   0x%X 0x%X 0x%X",dta_p[1],dta_p[2],dta_p[3]) ;
 
@@ -931,12 +945,12 @@ int fcs_data_c::event()
 //		LOG(TERR,"ch %d: 0x%X 0x%X 0x%X",ch,h[0],h[1],h[2]) ;
 
 		//complain = 1 ;
-		if(realtime && (board_id_xpect != board)) complain = 1 ;
+		if(board_id_xpect != board) complain = 1 ;
 
 		if(ch>35) complain = 1 ;
 		else {
 			if(ch_mask_seen & (1LL<<ch)) {
-				LOG(ERR,"event %d: ch duplicate %d",events,ch) ;
+				if(realtime) LOG(ERR,"event %d: ch duplicate %d",events,ch) ;
 				complain = 1 ;
 			}
 			ch_mask_seen |= (1LL<<ch) ;
@@ -947,13 +961,18 @@ int fcs_data_c::event()
 		}
 
 		if(complain) {
-			LOG(ERR,"%d: S%d:%d: Evt %d, ch %d[%d]: 0x%X 0x%05X %d expected: 0x%X 0x%05X %d seen",id,sector,rdo,
-			    events,ch,ch_count,
-			    board_id_xpect,hdr_trg_word,rhic_cou_xpect,
-			    board,trg_word,rhic_cou) ;
+			bad_error |= 0x40 ;
 
-			LOG(ERR,"%d:   0x%04X 0x%04X 0x%04X 0x%04X",id,dbg_h[-1],dbg_h[0],dbg_h[1],dbg_h[2]) ;
+			if(realtime && err_count<10) {
+				LOG(ERR,"%d: S%d:%d: Evt %d, ch %d[%d]: 0x%X 0x%05X %d expected: 0x%X 0x%05X %d seen",id,sector,rdo,
+				    events,ch,ch_count,
+				    board_id_xpect,hdr_trg_word,rhic_cou_xpect,
+				    board,trg_word,rhic_cou) ;
 
+				LOG(ERR,"%d:   0x%04X 0x%04X 0x%04X 0x%04X",id,dbg_h[-1],dbg_h[0],dbg_h[1],dbg_h[2]) ;
+			}
+
+			err_count++ ;
 		}
 	
 
@@ -967,11 +986,13 @@ int fcs_data_c::event()
 				break ;
 			}
 			else if(d & 0x8000) {
-				LOG(ERR,"... ch %d: tb_cou %d: 0x%04X",ch,tb_cou,d) ;
+				bad_error |= 0x80 ;
+				if(realtime) LOG(ERR,"... ch %d: tb_cou %d: 0x%04X",ch,tb_cou,d) ;
 			}
 
 			//protect structures
 			if((u_int)tb_cou>=(sizeof(adc)/sizeof(adc[0]))) {
+				bad_error |= 0x80 ;
 				LOG(ERR,"Event too big, ch %d, tb %d",ch,tb_cou) ;
 				event_end(1) ;
 				return 0 ;
@@ -983,29 +1004,6 @@ int fcs_data_c::event()
 
 			adc[tb_cou] = d ;	//but store the full data, with flags
 
-			// do I need any of this below? Nah...
-#if 0
-			if(d & 0x2000) {
-				if(first_rhic_strobe_tick < 0) {
-					first_rhic_strobe_tick = tb_cou ;
-					//LOG(TERR,"... first rhic strobe at %d",tb_cou) ;
-				}
-			}
-			if(d & 0x4000) {
-				if(trigger_tick < 0) {
-					trigger_tick = tb_cou ;
-					//LOG(TERR,"... trigger tick at %d",tb_cou) ;
-				}
-			}
-
-
-
-//			if(accum(ch,tb_cou,d)<0) {
-//				LOG(ERR,"Event too big, ch %d, tb %d",ch,tb_cou) ;
-//				event_end(1) ;
-//				return 0 ;
-//			}
-#endif
 
 			tb_cou++ ;
 		}
@@ -1014,7 +1012,8 @@ int fcs_data_c::event()
 			first_tb_cou = tb_cou ;
 		}
 		else if(tb_cou != first_tb_cou) {
-			LOG(ERR,"%d: ch length mismatch: expect %d, is %d: ch %d(%d)",rdo,first_tb_cou,tb_cou,ch,ch_count) ;
+			bad_error |= 0x80 ;
+			if(complain) LOG(ERR,"%d: ch length mismatch: expect %d, is %d: ch %d(%d)",rdo,first_tb_cou,tb_cou,ch,ch_count) ;
 		}
 
 		ana_ch() ;
@@ -1156,7 +1155,7 @@ void fcs_data_c::run_start(u_int run, int type)
 {
 
 	events = 0 ;
-
+	err_count = 0 ;
 
 	switch(run_type) {
 	case 1 :
@@ -1756,6 +1755,120 @@ int fcs_data_c::load_readout_map(const char *fname)
 		rdo_map[sec-1][rdo-1].ch[ch].col = col ;
 		rdo_map[sec-1][rdo-1].crt = crt ;
 		rdo_map[sec-1][rdo-1].slt = slt ;
+	}
+
+	fclose(f) ;
+
+	}
+
+	return 0 ;
+}
+
+
+int fcs_data_c::load_sc_map(const char *fname)
+{
+	char buff[256] ;
+	const char *fn ;
+
+	if(rdo_map_loaded==0) {
+		LOG(ERR,"rdo_map not loaded!") ;
+		return -1 ;
+	}
+
+	for(u_int dd=0;dd<2;dd++) {
+
+
+	switch(dd) {
+	case 0 :
+		fn = "/RTS/conf/fcs/fcs_ecal_sc_map.csv" ;
+		break ;
+	case 1 :
+		fn = "/RTS/conf/fcs/fcs_hcal_sc_map.csv" ;
+		break ;
+	case 2 :
+		fn = "/RTS/conf/fcs/fcs_fpre_sc_map.csv" ;
+		break ;
+	case 3 :
+		fn = "/RTS/conf/fcs/fcs_main_sc_map.csv" ;
+		break ;
+	}
+		
+
+	
+
+	FILE *f = fopen(fn,"r") ;
+
+	if(f) LOG(INFO,"load_sc_map: opened %s",fn) ;
+	else {
+		LOG(ERR,"load_sc_map: %s [%s]",fn,strerror(errno)) ;
+		return -1 ;
+	}
+
+	while(!feof(f)) {
+		u_int adet, id ;
+		u_int row, col ;
+		u_int det, ns, dep ;	//NOTE: this is the DEP where the FEE is connected!
+		u_int bra, add, sipm ;
+
+
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+		if(buff[0]=='#') continue ;
+		if(buff[0]=='\n') continue ;
+		if(buff[0]==0) continue ;
+
+		int ret = sscanf(buff,"%d %d %d %d %d %d %d %d %d %d",
+				 &adet,&id,&row,&col,
+				 &det,&ns,&dep,&bra,&add,&sipm) ;
+
+		if(ret!=10) continue ;
+
+
+		if(det != dd) {
+			LOG(ERR,"expect det %d, not %d",dd,det) ;
+			continue ;
+		}
+
+		if(ns>=2) {
+			LOG(ERR,"bad ns %d",ns) ;
+			continue ;
+		}
+
+		if(dep>=24) {
+			LOG(ERR,"bad dep %d",dep) ;
+			continue ;
+		}
+
+		if(bra>=2) {
+			LOG(ERR,"bad bra %d",bra) ;
+			continue ;
+		}
+
+		int found_it = 0 ;
+
+		for(int s=0;s<10;s++) {
+		for(int r=0;r<8;r++) {
+			if(rdo_map[s][r].det != dd) continue ;
+			if(rdo_map[s][r].ns != ns) continue ;
+
+			for(int c=0;c<32;c++) {
+				if(rdo_map[s][r].ch[c].id != id) continue ;
+
+				rdo_map[s][r].ch[c].sc_dep = dep ;
+				rdo_map[s][r].ch[c].sc_bra = bra ;
+				rdo_map[s][r].ch[c].sc_add = add ;
+				rdo_map[s][r].ch[c].sc_sipm = sipm ;
+
+				found_it = 1 ;
+				goto done ;
+			}
+		}}
+
+		done: ;
+
+		if(!found_it) {
+			LOG(ERR,"DET %d: can't find id %d",dd,id) ;
+		}
 	}
 
 	fclose(f) ;

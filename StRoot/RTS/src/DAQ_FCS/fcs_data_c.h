@@ -43,6 +43,8 @@ public:
 		rhic_freq = 0 ;
 		fee_state = 0 ;
 
+		bad_error = 0 ;
+		err_count = 0 ;
 	} ;
 
 	~fcs_data_c() {
@@ -90,6 +92,8 @@ public:
 	u_short *dta_start ;
 	int dta_shorts ;
 
+	u_int bad_error ;
+	u_int err_count ;
 
 	// streaming specific
 
@@ -154,13 +158,20 @@ public:
 		u_short params[16] ;	// stage params
 
 		union {
-			struct {
+			struct {	// DEP/ADC
 				u_short ped ;
 				u_short gain ;
 			} ped[32] ;
 
-			unsigned long long ch_mask ;
+			struct {	// STAGE2 & 3
+				unsigned long long ch_mask ;
+				u_char dsm_delay ;
+				u_char dsm_mode ;
+				u_char dsm_pattern ;
+			} ;
 		} ;
+
+		u_char s1_delay ;	// delay of the strobe_in
 	} ;
 
 	struct fcs_ped_t {
@@ -201,6 +212,10 @@ public:
 			u_short id ;
 			u_char row ;
 			u_char col ;
+			u_char sc_dep ;
+			u_char sc_bra ;
+			u_char sc_add ;
+			u_char sc_sipm ;
 		} ch[32] ;
 
 		unsigned long long ch_mask ;
@@ -238,6 +253,7 @@ public:
         static int gain_from_cache(const char *fname=0) ;
 	static int load_rdo_map(const char *fname=0) ;
 	static int load_readout_map(const char *fname=0) ;
+	static int load_sc_map(const char *fname=0) ;
 
 	// mutex for pedestals but also for statistics
 	static struct statistics_t {
