@@ -1472,7 +1472,26 @@ void TGeant3::AddParticlesToPdgDataBase()
     {"Li7L"         ,"Li7L"         ,6.711                ,kFALSE,  widthLambda,     9, kPTHadron,           3025,  {"Be7"     , "pi-"     ,     0}}, // -> Be7 pi-    	             	             
     {"Li7L3"        ,"Li7L3"        ,6.711                ,kFALSE,  widthLambda,     9, kPTHadron,           3026,  {"ALPHA"   , "HE3"     , "pi-"}}, // -> He4 He3 pi-	             	             
     {"Li8L"         ,"Li8L"         ,7.65                 ,kFALSE,  widthLambda,     9, kPTHadron,           3027,  {"ALPHA"   , "ALPHA"   , "pi-"}}, // -> He4 He4 pi-                              
-    {"H5LL"         ,"H5LL"         ,5.047                ,kFALSE,  widthLambda,     3, kPTHadron,        2003015,  {"He5L"    , "pi-"     ,     0}}  // -> He5L  pi-    		             
+    {"H5LL"         ,"H5LL"         ,5.047                ,kFALSE,  widthLambda,     3, kPTHadron,        2003015,  {"He5L"    , "pi-"     ,     0}}, // -> He5L  pi-    		             
+    /* Vipul Bairathy 02/20/21
+1. Name  = "PQ1730LamK0s";
+    Decay Channel: Lambda K0s   (Strong decay)
+    Mass = 1730 MeV 
+    Width = 0.0
+    Charge = 0
+    PDG code   = 912323
+    Geant code  = 60008
+
+2. Name  = "PQ1730LamK+";
+    Decay Channel: Lambda K+   (Strong decay)
+    Mass = 1730 MeV 
+    Width = 0.0
+    Charge = 1
+    PDG code   = 912313
+    Geant code  = 60009
+     */
+    {"PQ1730LamK0s" ,"PQ1730LamK0s" ,1.730                ,kFALSE,1e10*widthLambda,     0, kPTHadron,          912323,  {"Lambda0"   , "K_S0"     ,     0}}, // -> Lambda K0s
+    {"PQ1730LamK+"  ,"PQ1730LamK+"  ,1.730                ,kFALSE,1e10*widthLambda,     3, kPTHadron,          912313,  {"Lambda0"   , "K+"       ,     0}}  // -> Lambda K+
   };
   Int_t nIons = sizeof(Nuclei)/sizeof(Particle_t);
   for (Int_t i = 0; i < nIons; i++) {
