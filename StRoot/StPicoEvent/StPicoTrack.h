@@ -26,7 +26,7 @@
 #include "StPicoDst.h"
 #include "StarClassLibrary/SystemOfUnits.h"
 #include "StarClassLibrary/PhysicalConstants.h"
-#ifdef  __TFG__VERSION__
+#if defined(__TFG__VERSION__)
 #include "StPicoTrackCovMatrix.h"
 #endif /* __TFG__VERSION__ */
 #endif
@@ -202,6 +202,12 @@ class StPicoTrack : public TObject {
   /// If true, the track was found in the material between towers, not in 
   /// a scintillating pad
   Bool_t isBemcMatchedExact() const      { return mBEmcMatchedTowerIndex > 0;}
+  /// Index of the corresponding MC track
+  Int_t idTruth() const                  { return mIdTruth; }
+  /// Qualtiy of the MC track
+  Int_t qaTruth() const                  { return mQATruth; }
+  /// Return parent vertex index (-2 if not fitted to any vertex)
+  Int_t vertexIndex() const              { return (Int_t)mVertexIndex; }
 
   //
   // Setters
@@ -285,6 +291,10 @@ class StPicoTrack : public TObject {
   void setETofPidTraitsIndex(Int_t index)  { mETofPidTraitsIndex = (Short_t)index; }
   /// Set index of the BEMC tower that matches the track
   void setBEmcMatchedTowerIndex(Int_t index) { mBEmcMatchedTowerIndex = (Short_t)index; }
+  /// Set index of the corresonding MC track
+  void setMcTruth(Int_t index, Int_t qa)   { mIdTruth = (UShort_t)index; mQATruth = (UShort_t)qa; }
+  /// Set vertex index to which the track was fitted
+  void setVertexIndex(Int_t index);
 
  protected:
 
@@ -361,12 +371,22 @@ class StPicoTrack : public TObject {
 #if !defined (__TFG__VERSION__)
   /// Topology map for the iTPC
   ULong64_t mTopoMap_iTpc;
-  ClassDef(StPicoTrack, 7)
 #else
     Char_t mStatus; // =1 if fitted in a vertex
-  ClassDef(StPicoTrack, 9)
 #endif
 
+  /// MC track id
+  UShort_t mIdTruth;
+  /// MC track quality (percentage of hits coming from corresponding MC track)
+  UShort_t mQATruth;
+  /// Parent vertex index. -2 if no vertex.
+  Char_t   mVertexIndex;
+
+#if !defined (__TFG__VERSION__)
+  ClassDef(StPicoTrack, 8)
+#else
+  ClassDef(StPicoTrack, 10)
+#endif
 };
 
 #endif

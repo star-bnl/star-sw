@@ -23,7 +23,11 @@ StPicoBTofPidTraits::StPicoBTofPidTraits() : TObject(),
   mBTofZLocal( std::numeric_limits<short>::min() ),
   mBTofHitPosX( std::numeric_limits<short>::min() ),
   mBTofHitPosY( std::numeric_limits<short>::min() ),
-  mBTofHitPosZ( std::numeric_limits<short>::min() ) {
+  mBTofHitPosZ( std::numeric_limits<short>::min() ),
+  mNSigmaElectron( std::numeric_limits<short>::min() ),
+  mNSigmaPion( std::numeric_limits<short>::min() ),
+  mNSigmaKaon( std::numeric_limits<short>::min() ),
+  mNSigmaProton( std::numeric_limits<short>::min() ) {
   /* empty */
 }
 
@@ -39,6 +43,10 @@ StPicoBTofPidTraits::StPicoBTofPidTraits(const StPicoBTofPidTraits &traits) : TO
   mBTofHitPosX = traits.mBTofHitPosX;
   mBTofHitPosY = traits.mBTofHitPosY;
   mBTofHitPosZ = traits.mBTofHitPosZ;
+  mNSigmaElectron = traits.mNSigmaElectron;
+  mNSigmaPion = traits.mNSigmaPion;
+  mNSigmaKaon = traits.mNSigmaKaon;
+  mNSigmaProton = traits.mNSigmaProton;
 }
 
 //_________________
@@ -101,6 +109,38 @@ void StPicoBTofPidTraits::setHitPositionZ(Float_t z) {
 //_________________
 void StPicoBTofPidTraits::setHitPositionXYZ(Float_t x, Float_t y, Float_t z) {
   setHitPositionX( x ); setHitPositionY( y ); setHitPositionZ( z );
+}
+
+//_________________
+void StPicoBTofPidTraits::setNSigmaElectron(Float_t sigma) {
+  mNSigmaElectron = ( fabs(sigma * 1000.) > std::numeric_limits<short>::max() ?
+		      ( (sigma > 0) ? std::numeric_limits<short>::max() :
+			std::numeric_limits<short>::min() ) :
+		      (Short_t)( TMath::Nint( sigma * 1000. ) ) );
+}
+
+//_________________
+void StPicoBTofPidTraits::setNSigmaPion(Float_t sigma) {
+  mNSigmaPion = ( fabs(sigma * 1000.) > std::numeric_limits<short>::max() ?
+		  ( (sigma > 0) ? std::numeric_limits<short>::max() :
+		    std::numeric_limits<short>::min() ) :
+		  (Short_t)( TMath::Nint( sigma * 1000. ) ) );
+}
+
+//_________________
+void StPicoBTofPidTraits::setNSigmaKaon(Float_t sigma) {
+  mNSigmaKaon = ( fabs(sigma * 1000.) > std::numeric_limits<short>::max() ?
+		  ( (sigma > 0) ? std::numeric_limits<short>::max() :
+		    std::numeric_limits<short>::min() ) :
+		  (Short_t)( TMath::Nint( sigma * 1000. ) ) );
+}
+
+//_________________
+void StPicoBTofPidTraits::setNSigmaProton(Float_t sigma) {
+  mNSigmaProton = ( fabs(sigma * 1000.) > std::numeric_limits<short>::max() ?
+		    ( (sigma > 0) ? std::numeric_limits<short>::max() :
+		      std::numeric_limits<short>::min() ) :
+		    (Short_t)( TMath::Nint( sigma * 1000. ) ) );
 }
 
 //_________________

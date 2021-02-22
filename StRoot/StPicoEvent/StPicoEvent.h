@@ -69,9 +69,9 @@ class StPicoEvent : public TObject {
   bool isTrigger(unsigned int) const;
 
 #if defined (__TFG__VERSION__)
-  virtual  Bool_t IsGoodTrigger();                    
+  virtual  Bool_t IsGoodTrigger();
 #endif /* __TFG__VERSION__ */
-  
+
   /// Return RefMult estimated via positive tracks (-0.5<eta<0.5)
   Int_t    refMultPos() const          { return (Int_t)mRefMultPos; }
   /// Return RefMult estimated via negative tracks (-0.5<eta<0.5)
@@ -142,6 +142,10 @@ class StPicoEvent : public TObject {
   UShort_t etofHitMultiplicity() const   { return mETofHitMultiplicity; }
   /// Return number of digis in ETOF modules
   UShort_t etofDigiMultiplicity() const  { return mETofDigiMultiplicity; }
+  /// Return number of primary tracks
+  UShort_t numberOfPrimaryTracks() const { return mNumberOfPrimaryTracks; }
+  /// Return FXT multiplicity (corresponds to the number of primary tracks)
+  UShort_t fxtMult() const               { return numberOfPrimaryTracks(); }
 
   /// Return number of hits in the east VPD
   Int_t    nVpdHitsEast() const          { return (Int_t)mNVpdHitsEast; }
@@ -170,6 +174,11 @@ class StPicoEvent : public TObject {
   Float_t  zdcEastRate() const           { return mZdcEastRate; }
   /// Return west ZDC rate
   Float_t  zdcWestRate() const           { return mZdcWestRate; }
+
+  /// Return unattenuated ZDC east
+  Float_t zdcUnAttenuatedEast() const    { return mZdcUnAttenuated[0]; }
+  /// Return unattenuated ZDC west
+  Float_t zdcUnAttenuatedWest() const    { return mZdcUnAttenuated[1]; }
 
   /// Return sum of east ADC from ZDC
   Float_t  ZdcSumAdcEast() const         { return (Float_t)mZdcSumAdcEast; }
@@ -242,6 +251,8 @@ class StPicoEvent : public TObject {
   void setETofHitMultiplicity(UShort_t mult)    { mETofHitMultiplicity = (UShort_t)mult; }
   /// Set total number of digis in ETOF modules
   void setETofDigiMultiplicity(UShort_t mult)   { mETofDigiMultiplicity = (UShort_t)mult; }
+  /// Set number of primary tracks
+  void setNumberOfPrimaryTracks(UShort_t mult)  { mNumberOfPrimaryTracks = (UShort_t)mult; }
 
   /// Set trigger id
   void setTriggerId(UInt_t id);
@@ -252,7 +263,7 @@ class StPicoEvent : public TObject {
   void setRefMultFtpcEast(UShort_t mult)        { mRefMultFtpcEast = (UShort_t)mult; }
   /// Set west RefMult (-1<eta<0.5) estimated by FTPC
   void setRefMultFtpcWest(UShort_t mult)        { mRefMultFtpcWest = (UShort_t)mult; }
-  /// Set RefMult negative (|eta|<0.5)  
+  /// Set RefMult negative (|eta|<0.5)
   void setRefMultNeg(UShort_t mult)             { mRefMultNeg = (UShort_t)mult; }
   /// Set RefMult positive (|eta|<0.5)
   void setRefMultPos(UShort_t mult)             { mRefMultPos = (UShort_t)mult; }
@@ -295,7 +306,7 @@ class StPicoEvent : public TObject {
   /// Set number of hits in the west VPD
   void setNVpdHitsWest(UShort_t nHits)          { mNVpdHitsWest = (UChar_t)nHits; };
   /// Set number of T0 particles in BTOF self calibration
-  void setNTofT0(Int_t t0)                      { mNTofT0 = (UShort_t)t0; } 
+  void setNTofT0(Int_t t0)                      { mNTofT0 = (UShort_t)t0; }
   /// Set Vz of the primary vertex reconstructed by VPD
   void setVzVpd(Float_t vpdVz)                  { mVzVpd = vpdVz; }
 
@@ -319,9 +330,9 @@ class StPicoEvent : public TObject {
   /// Set west ZDC rate
   void setZdcWestRate(Float_t zdcWestRate)      { mZdcWestRate = (Float_t)zdcWestRate; }
 
-  /// Set sum of east ZDC ADC 
+  /// Set sum of east ZDC ADC
   void setZdcSumAdcEast(Float_t zdcSumAdcEast)  { mZdcSumAdcEast = (UShort_t)zdcSumAdcEast; }
-  /// Set sum of west ZDC ADC 
+  /// Set sum of west ZDC ADC
   void setZdcSumAdcWest(Float_t zdcSumAdcWest)  { mZdcSumAdcWest = (UShort_t)zdcSumAdcWest; }
   /// Set ZDC for the east horizontal ZDC i-th strip
   void setZdcSmdEastHorizontal(Int_t strip, Float_t zdcSmdEastHorizontal);
@@ -331,6 +342,14 @@ class StPicoEvent : public TObject {
   void setZdcSmdWestHorizontal(Int_t strip, Float_t zdcSmdWestHorizontal);
   /// Set ZDC for the west vertical ZDC i-th strip
   void setZdcSmdWestVertical(Int_t strip, Float_t zdcSmdWestVertical);
+
+  /// Set unattenuated ZDC signal. Side: 0 - east, 1 - west
+  void setZdcUnAttenuated(Int_t side, Float_t adc)
+  { if ( side == 0 || side == 1 ) { mZdcUnAttenuated[side] = (UShort_t)adc; } }
+  /// Set unattenuated east ZDC signal
+  void setZdcUnAttenuatedEast(Float_t adc) { mZdcUnAttenuated[0] = (UShort_t)adc; }
+  /// Set unattenuated west ZDC signal
+  void setZdcUnAttenuatedWest(Float_t adc) { mZdcUnAttenuated[1] = (UShort_t)adc; }
 
   /// Set i-th PMT of east BBC
   void setBbcAdcEast(Int_t iPMT, Float_t bbcAdcEast);
@@ -350,7 +369,7 @@ protected:
 #if defined (__TFG__VERSION__)
   /// Production version
   TString mProductionVersion;
-#endif /* __TFG__VERSION__ */ 
+#endif /* __TFG__VERSION__ */
 
   /// Run number (or runId)
   Int_t    mRunId;
@@ -361,7 +380,7 @@ protected:
   /// Magnetic field strength
   Float_t  mBField;
 
-  /// To set timestamp for St_db_Maker. This is what StMuDstMaker used to 
+  /// To set timestamp for St_db_Maker. This is what StMuDstMaker used to
   /// GetEvtHddr()->SetGMTime(cast into unsigned int). Peifeng Liu
   Int_t    mTime;
 
@@ -380,8 +399,8 @@ protected:
 
 #if defined (__TFG__VERSION__)
   Float16_t mPrimaryVertexCorr[3];
-#endif /* __TFG__VERSION__ */ 
-  
+#endif /* __TFG__VERSION__ */
+
   /// Primary vertex ranking
   Float_t  mRanking;
   /// Number of BEMC-matched tracks
@@ -407,7 +426,7 @@ protected:
   /// TPC refMult2 neg (0.5<eta<1.0)
   UShort_t mRefMult2NegWest;
   /// TPC refMult2 pos (0.5<eta<1.0)
-  UShort_t mRefMult2PosWest; 
+  UShort_t mRefMult2PosWest;
   UShort_t mRefMult3NegEast;
   UShort_t mRefMult3PosEast;
   UShort_t mRefMult3NegWest;
@@ -485,7 +504,7 @@ protected:
   UShort_t mZdcSumAdcWest;
   /// ADC measured in 8 east horizontal ZDC strips
   UShort_t mZdcSmdEastHorizontal[8];
-  /// ADC measured in 8 east vertical ZDC strips 
+  /// ADC measured in 8 east vertical ZDC strips
   UShort_t mZdcSmdEastVertical[8];
   /// ADC measured in 8 west horizontal ZDC strips
   UShort_t mZdcSmdWestHorizontal[8];
@@ -510,10 +529,16 @@ protected:
   /// Total digi multiplicity in ETOF modules
   UShort_t mETofDigiMultiplicity ;
 
+  /// Number of primary tracks
+  UShort_t mNumberOfPrimaryTracks;
+
+  /// ZDC unattenuated: 0 - east, 1 - west
+  UShort_t mZdcUnAttenuated[2];
+
 #if defined (__TFG__VERSION__)
-  ClassDef(StPicoEvent, 6)
+  ClassDef(StPicoEvent, 7)
 #else /* ! __TFG__VERSION__ */
-  ClassDef(StPicoEvent, 4)
+  ClassDef(StPicoEvent, 5)
 #endif /* __TFG__VERSION__ */
 };
 

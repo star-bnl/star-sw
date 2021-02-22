@@ -7,9 +7,6 @@
 
 #ifndef StPicoDst_h
 #define StPicoDst_h
-#if !defined (_VANILLA_ROOT_)
-//#define __TFG__VERSION__
-#endif /* ! _VANILLA_ROOT_ */
 
 // ROOT headers
 #include "TClonesArray.h"
@@ -38,6 +35,8 @@ class StPicoBEmcSmdEHit;
 class StPicoBEmcSmdPHit;
 class StPicoETofHit;
 class StPicoETofPidTraits;
+class StPicoMcVertex;
+class StPicoMcTrack;
 
 //_________________
 class StPicoDst {
@@ -96,42 +95,48 @@ class StPicoDst {
   static StPicoETofHit* etofHit(Int_t i) { return (StPicoETofHit*)picoArrays[StPicoArrays::ETofHit]->UncheckedAt(i); }
   /// Return pointer to i-th etof pidTraits
   static StPicoETofPidTraits* etofPidTraits(Int_t i) { return (StPicoETofPidTraits*)picoArrays[StPicoArrays::ETofPidTraits]->UncheckedAt(i); }
-
+  /// Return pointer to i-th MC vertex
+  static StPicoMcVertex* mcVertex(Int_t i) { return (StPicoMcVertex*)picoArrays[StPicoArrays::McVertex]->UncheckedAt(i); }
+  /// Return pointer to i-th MC track
+  static StPicoMcTrack* mcTrack(Int_t i) { return (StPicoMcTrack*)picoArrays[StPicoArrays::McTrack]->UncheckedAt(i); }
   /// Return number of tracks
-  static UInt_t numberOfTracks() { return picoArrays[StPicoArrays::Track]->GetEntries(); }
+  static UInt_t numberOfTracks() { return picoArrays[StPicoArrays::Track]->GetEntriesFast(); }
   /// Return number of Emc triggers
-  static UInt_t numberOfEmcTriggers() { return picoArrays[StPicoArrays::EmcTrigger]->GetEntries(); }
+  static UInt_t numberOfEmcTriggers() { return picoArrays[StPicoArrays::EmcTrigger]->GetEntriesFast(); }
   /// Return number of MTD triggers
-  static UInt_t numberOfMtdTriggers() { return picoArrays[StPicoArrays::MtdTrigger]->GetEntries(); }
+  static UInt_t numberOfMtdTriggers() { return picoArrays[StPicoArrays::MtdTrigger]->GetEntriesFast(); }
   /// Return number of BTow hits
-  static UInt_t numberOfBTowHits() { return picoArrays[StPicoArrays::BTowHit]->GetEntries(); }
+  static UInt_t numberOfBTowHits() { return picoArrays[StPicoArrays::BTowHit]->GetEntriesFast(); }
   /// Return number of BTof hits
-  static UInt_t numberOfBTofHits() { return picoArrays[StPicoArrays::BTofHit]->GetEntries(); }
+  static UInt_t numberOfBTofHits() { return picoArrays[StPicoArrays::BTofHit]->GetEntriesFast(); }
   /// Return number of MTD hits
-  static UInt_t numberOfMtdHits() { return picoArrays[StPicoArrays::MtdHit]->GetEntries(); }
+  static UInt_t numberOfMtdHits() { return picoArrays[StPicoArrays::MtdHit]->GetEntriesFast(); }
   /// Return number of BBC hits
-  static UInt_t numberOfBbcHits() { return picoArrays[StPicoArrays::BbcHit]->GetEntries(); }
+  static UInt_t numberOfBbcHits() { return picoArrays[StPicoArrays::BbcHit]->GetEntriesFast(); }
   /// Return number of EPD hits
-  static UInt_t numberOfEpdHits() { return picoArrays[StPicoArrays::EpdHit]->GetEntries(); }
+  static UInt_t numberOfEpdHits() { return picoArrays[StPicoArrays::EpdHit]->GetEntriesFast(); }
   /// Return number of FMS hits
-  static UInt_t numberOfFmsHits() { return picoArrays[StPicoArrays::FmsHit]->GetEntries(); }
+  static UInt_t numberOfFmsHits() { return picoArrays[StPicoArrays::FmsHit]->GetEntriesFast(); }
   /// Return number of BEMC PID traits
-  static UInt_t numberOfBEmcPidTraits() { return picoArrays[StPicoArrays::BEmcPidTraits] ->GetEntries(); }
+  static UInt_t numberOfBEmcPidTraits() { return picoArrays[StPicoArrays::BEmcPidTraits]->GetEntriesFast(); }
   /// Return number of BTof PID traits
-  static UInt_t numberOfBTofPidTraits() { return picoArrays[StPicoArrays::BTofPidTraits]->GetEntries(); }
+  static UInt_t numberOfBTofPidTraits() { return picoArrays[StPicoArrays::BTofPidTraits]->GetEntriesFast(); }
   /// Return number of MTD traits
-  static UInt_t numberOfMtdPidTraits() { return picoArrays[StPicoArrays::MtdPidTraits]->GetEntries(); }
+  static UInt_t numberOfMtdPidTraits() { return picoArrays[StPicoArrays::MtdPidTraits]->GetEntriesFast(); }
   /// Return number of track covariance matrices
-  static UInt_t numberOfTrackCovMatrices() { return picoArrays[StPicoArrays::TrackCovMatrix]->GetEntries(); }
+  static UInt_t numberOfTrackCovMatrices() { return picoArrays[StPicoArrays::TrackCovMatrix]->GetEntriesFast(); }
   /// Return number of BEMC SMD eta hits
-  static UInt_t numberOfBEmcSmdEHits() { return picoArrays[StPicoArrays::BEmcSmdEHit]->GetEntries(); }
+  static UInt_t numberOfBEmcSmdEHits() { return picoArrays[StPicoArrays::BEmcSmdEHit]->GetEntriesFast(); }
   /// Return number of BEMC SMD phi hits
-  static UInt_t numberOfBEmcSmdPHits() { return picoArrays[StPicoArrays::BEmcSmdPHit]->GetEntries(); }
+  static UInt_t numberOfBEmcSmdPHits() { return picoArrays[StPicoArrays::BEmcSmdPHit]->GetEntriesFast(); }
   /// Return number of ETof hits
-  static UInt_t numberOfETofHits() { return picoArrays[StPicoArrays::ETofHit]->GetEntries(); }
+  static UInt_t numberOfETofHits() { return picoArrays[StPicoArrays::ETofHit]->GetEntriesFast(); }
   /// Return number of ETOF PID traits
-  static UInt_t numberOfETofPidTraits() { return picoArrays[StPicoArrays::ETofPidTraits]->GetEntries(); }
-
+  static UInt_t numberOfETofPidTraits() { return picoArrays[StPicoArrays::ETofPidTraits]->GetEntriesFast(); }
+  /// Return number of MC vertices
+  static UInt_t numberOfMcVertices() { return picoArrays[StPicoArrays::McVertex]->GetEntriesFast(); }
+  /// Return number of MC tracks
+  static UInt_t numberOfMcTracks() { return picoArrays[StPicoArrays::McTrack]->GetEntriesFast(); }
 
   /// Print information
   void print() const;
@@ -159,10 +164,14 @@ class StPicoDst {
   static void printBEmcSmdEHits();
   /// Print BEMC SMD phi info
   static void printBEmcSmdPHits();
-    /// Print ETOF hit info
+  /// Print ETOF hit info
   static void printETofHits();
-    /// Print ETOF PID trait info
+  /// Print ETOF PID trait info
   static void printETofPidTraits();
+  /// Print MC vertex info
+  static void printMcVertices();
+  /// Print MC track info
+  static void printMcTracks();
 
 #if defined (__TFG__VERSION__)
   static StPicoDst *instance() {return fgPicoDst;}
