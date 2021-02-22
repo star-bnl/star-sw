@@ -2108,14 +2108,12 @@ float start_resolution(0);
    // needs to be implemented
 
  }
- else {
+ else if (mNTzero > 0) {
    // combine an average BTOF resolution based on NT0
    // more sophisticated: figure out what BTOF cells actually went into the NT0 count.
 
    start_resolution = mBTofRes->average_timeres_tof()/sqrt(mNTzero);
+   resolution = sqrt(stop_resolution*stop_resolution + start_resolution*start_resolution);
  }
-
- resolution = sqrt(stop_resolution*stop_resolution + start_resolution*start_resolution);
-
-return resolution;
+ return resolution;
 }
