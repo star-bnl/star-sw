@@ -83,7 +83,7 @@ StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 ClassImp(StTpcHit)
 //________________________________________________________________________________
 void StTpcHit::setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk) {
-  assert(cl_x > 0 && cl_t > 0 && mAdc > 0);
+  assert(cl_x > 0 && cl_t > 0); // && mAdc > 0); mAdc == 0 may come from StTpcFastSimMaker
   setPadTmbk(cl_x, cl_t);
   Short_t pad  = TMath::Nint(mMcl_x/64.);
   Short_t time = TMath::Nint(mMcl_t/64.);
