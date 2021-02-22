@@ -1762,6 +1762,22 @@ Bool_t StMuDst::selectVertex() {
       setVertexIndex(iVtx);
       selectedVertex = kTRUE;
       break;
+    } else if ( mVtxMode == PicoVtxMode::FXT ) {
+      // Loop over primary vertices
+      for (unsigned int iVtx = 0; iVtx < numberOfPrimaryVertices(); ++iVtx) {
+	// Return pointer to i-th primary vertex
+	StMuPrimaryVertex* vtx = primaryVertex(iVtx);
+	if (!vtx) continue;
+	// Check that vertex in Fixed Target
+	if (vtx->position().z() > 198. && vtx->position().z() < 202.) {
+	  // Reset vertex index
+	  setVertexIndex( iVtx );
+	  // Reset pointer to the primary vertex
+	  selectedVertex = primaryVertex();
+	  // Quit vertex loop
+	  break;
+	}
+      }
     } else {// default case
       LOG_ERROR << "Pico Vtx Mode not set!" << endm;
     }
