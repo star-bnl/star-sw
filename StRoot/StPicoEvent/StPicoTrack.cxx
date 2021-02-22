@@ -11,7 +11,7 @@
 // PicoDst headers
 #include "StPicoMessMgr.h"
 #include "StPicoTrack.h"
-#ifdef  __TFG__VERSION__
+#if defined(__TFG__VERSION__)
 #include "TMath.h"
 #include "TF1.h"
 #include "St_base/StMessMgr.h"
@@ -54,7 +54,8 @@ StPicoTrack::StPicoTrack() : TObject(),
 #if !defined (__TFG__VERSION__)
   , mTopoMap_iTpc(0)
 #endif
-  {
+  , mIdTruth(0), mQATruth(0), mVertexIndex(-1) {
+  // Default constructor
   /* empty */
 }
 
@@ -96,6 +97,9 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
 #if !defined (__TFG__VERSION__)
   mTopoMap_iTpc = track.mTopoMap_iTpc;
 #endif
+  mIdTruth = track.mIdTruth;
+  mQATruth = track.mQATruth;
+  mVertexIndex = track.mVertexIndex;
 }
 
 //_________________
@@ -105,16 +109,30 @@ StPicoTrack::~StPicoTrack() {
 
 //_________________
 void StPicoTrack::Print(const Char_t* option __attribute__((unused)) ) const {
+#if defined (__TFG__VERSION__)
   LOG_INFO << "id: " << id() << " chi2: " << chi2() << "\t"
            << "pMom: " << pMom().X() << " " << pMom().Y() << " " << pMom().Z() << "\t"
 	   << "gMom: " << gMom().X() << " " << gMom().Y() << " " << gMom().Z() << "\t"
 	   << "origin: " << origin().X() << " " << origin().Y() << " " << origin().Z() << "\t"
+#else  /* ! __TFG__VERSION__ */
+  LOG_INFO << "id: " << id() << " chi2: " << chi2() << "\n"
+           << "pMom: " << pMom().X() << " " << pMom().Y() << " " << pMom().Z() << "\n"
+           << "gMom: " << gMom().X() << " " << gMom().Y() << " " << gMom().Z() << "\n"
+           << "origin: " << origin().X() << " " << origin().Y() << " " << origin().Z() << "\n"
+#endif /* __TFG__VERSION__ */
            << "nHitsFit: " << nHitsFit()
            << " nHitsdEdx: " << nHitsDedx() << "\t"
            << "nSigma pi/K/p/e: " << nSigmaPion()   << "/" << nSigmaKaon() << "/"
+#if defined (__TFG__VERSION__)
            << nSigmaProton() << "/" << nSigmaElectron() << "\t"
 	   << "Hit index in BEMC/BTof/MTD/ETof: " << mBEmcPidTraitsIndex << "/"
 	   << mBTofPidTraitsIndex << "/" << mMtdPidTraitsIndex << "/" << mETofPidTraitsIndex 
+#else  /* ! __TFG__VERSION__ */
+           << nSigmaProton() << "/" << nSigmaElectron() << "\n"
+           << "Hit index in BEMC/BTof/MTD/ETof: " << mBEmcPidTraitsIndex << "/"
+           << mBTofPidTraitsIndex << "/" << mMtdPidTraitsIndex << "/" << mETofPidTraitsIndex << "\n"
+           << "idTruth: " << idTruth() << " qaTruth: " << qaTruth() << "\n"
+#endif /* __TFG__VERSION__ */
            << endm;
 }
 
@@ -431,4 +449,14 @@ Float_t StPicoTrack::gDCAs(TVector3 point) const {
   // Return DCA vector to the point (origin - point)
   TVector3 dca = gDCA( point );
   return -dir.Y()/cosl * dca.X() + dir.X()/cosl * dca.Y();
+}
+
+//_________________
+void StPicoTrack::setVertexIndex(Int_t index) {
+  if ( index<=-2 || index>std::numeric_limits<char>::max() ) {
+    mVertexIndex = -2;
+  }
+  else {
+    mVertexIndex = (Char_t)index;
+  }
 }

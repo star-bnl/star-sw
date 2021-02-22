@@ -4,7 +4,7 @@
 // ROOT headers
 #include "TObject.h"
 #include "StPicoDst.h"
-#ifdef  __TFG__VERSION__
+#if defined (__TFG__VERSION__)
 #include "StEvent/StDcaGeometry.h"
 #endif /* __TFG__VERSION__ */
 
@@ -114,7 +114,11 @@ class StPicoTrackCovMatrix : public TObject {
   /// Off-diagonal elements
   Float16_t mCorr[10];   //[-1,1,20] 
 
+#if defined (__TFG__VERSION__) /* add StPicoTrackCovMatrix::Class()->IgnoreTObjectStreamer(); */
+  ClassDef(StPicoTrackCovMatrix, 2)
+#else 
   ClassDef(StPicoTrackCovMatrix, 1)
+#endif /* __TFG__VERSION__ */
 };
 
 #endif

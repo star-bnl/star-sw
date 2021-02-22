@@ -139,8 +139,8 @@ class StPicoDstMaker : public StMaker {
   /// Sets the compression level for the file and all branches. 0 means no compression,
   /// 9 is the higher compression level.
   void setCompression(int comp = 9);
-#ifdef __TFG__VERSION__
 
+#if defined(__TFG__VERSION__)
   PicoVtxMode vtxMode()                 { return StMuDst::instance()->vtxMode(); }
   void setVtxMode(const PicoVtxMode vtxMode)
   { StMuDst::instance()->setVtxMode(vtxMode); }
@@ -187,7 +187,7 @@ class StPicoDstMaker : public StMaker {
   void setBranchAddresses(TChain*);
 
   /// Build EMC indexes
-  void buildEmcIndex();
+  void buildEmcIndex(StEmcCollection*);
   /// Initialize EMC related arrays
   void initEmc();
   /// Finish EMC
@@ -227,6 +227,11 @@ class StPicoDstMaker : public StMaker {
   void fillBbcHits();
   /// Fill ETOF information
   void fillETofHits();
+  /// Fill MC vertex information
+  void fillMcVertices();
+  /// Fill MC track information
+  void fillMcTracks();
+
 
  /**
   * Returns various measurements by the BEMC and BSMD detectors corresponding to
@@ -261,6 +266,8 @@ class StPicoDstMaker : public StMaker {
   /// vertex selection mode `mVtxMode` specified by the user.
   Bool_t selectVertex()     { return StMuDst::instance()->selectVertex(); }
 #else /* ! __TFG__VERSION__ */
+  /// Selects a primary vertex from `muDst` vertex collection according to the
+  /// vertex selection mode `mVtxMode` specified by the user.
   Bool_t selectVertex();
   /// VpdVz-Vz cut value. Default is 5 cm.
   Float_t   mTpcVpdVzDiffCut;
@@ -340,7 +347,8 @@ class StPicoDstMaker : public StMaker {
 
   /// Get CVS status
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.28 2020/08/28 16:47:28 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.29 2021/02/18 07:00:49 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
+
     return cvs;
   }
 

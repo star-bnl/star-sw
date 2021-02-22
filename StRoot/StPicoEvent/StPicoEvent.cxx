@@ -6,8 +6,8 @@
 #include <algorithm>
 #include <limits>
 
+#if defined(__TFG__VERSION__)
 #include "StPicoDst.h"
-#ifdef __TFG__VERSION__
 #include "StEvent/StBTofHeader.h"
 #include "StEvent/StEventTypes.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -24,13 +24,13 @@ ClassImp(StPicoEvent)
 
 //_________________
 StPicoEvent::StPicoEvent(): TObject(),
-#ifdef __TFG__VERSION__
+#if defined(__TFG__VERSION__)
   mProductionVersion(gEnv->GetValue("STAR_GIT_VERSION","Unknown")),
 #endif /* __TFG__VERSION__ */
   mRunId(0), mEventId(0), mFillId(0), mBField(0), mTime(0),
   mPrimaryVertexX(0), mPrimaryVertexY(0), mPrimaryVertexZ(0),
   mPrimaryVertexErrorX(0), mPrimaryVertexErrorY(0), mPrimaryVertexErrorZ(0),
-#ifdef __TFG__VERSION__
+#if defined(__TFG__VERSION__)
   mPrimaryVertexCorr{0,0,0},	
 #endif /* __TFG__VERSION__ */
   mRanking(-999), mNBEMCMatch(0), mNBTOFMatch(0),
@@ -48,7 +48,7 @@ StPicoEvent::StPicoEvent(): TObject(),
   mZdcSumAdcEast(0), mZdcSumAdcWest(0),
   mZdcSmdEastHorizontal{}, mZdcSmdEastVertical{}, mZdcSmdWestHorizontal{}, mZdcSmdWestVertical{},
   mBbcAdcEast{}, mBbcAdcWest{}, mHighTowerThreshold{}, mJetPatchThreshold{},
-  mETofHitMultiplicity(0), mETofDigiMultiplicity(0) {
+  mETofHitMultiplicity(0), mETofDigiMultiplicity(0), mNumberOfPrimaryTracks(0), mZdcUnAttenuated{} {
 
   // Default constructor
   if( !mTriggerIds.empty() ) {
@@ -108,6 +108,7 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
 
   mGRefMult = event.mGRefMult;
   mNumberOfGlobalTracks = event.mNumberOfGlobalTracks;
+  mNumberOfPrimaryTracks = event.mNumberOfPrimaryTracks;
 
   // Hit mulitplicities
   mbTofTrayMultiplicity = event.mbTofTrayMultiplicity;
@@ -143,6 +144,10 @@ StPicoEvent::StPicoEvent(const StPicoEvent &event) : TObject() {
     mZdcSmdWestVertical[iIter] = event.mZdcSmdWestVertical[iIter];
   }
 
+  for(int iSide=0; iSide<2; iSide++) {
+    mZdcUnAttenuated[iSide] = event.mZdcUnAttenuated[iSide];
+  }
+
   for(int iIter=0; iIter<24; iIter++) {
     mBbcAdcEast[iIter] = event.mBbcAdcEast[iIter];
     mBbcAdcWest[iIter] = event.mBbcAdcWest[iIter];
@@ -166,7 +171,7 @@ void StPicoEvent::Print(const Char_t *option __attribute__((unused)) ) const {
   LOG_INFO << " year = " << year()
 	   << " day = " << day() << "\n"
 	   << " fill/run/event Id = " << fillId() << "/" << runId() << "/" << eventId() << "\n"
-	   
+
 	   << " vertex x = " << primaryVertex().X()
 	   << " vertex y = " << primaryVertex().Y()
 	   << " vertex z = " << primaryVertex().Z() << "\n"
@@ -191,7 +196,7 @@ Int_t StPicoEvent::day() const {
 Bool_t StPicoEvent::isTrigger(unsigned int id) const {
   return std::find(mTriggerIds.begin(), mTriggerIds.end(), id) != mTriggerIds.end();
 }
-#ifdef __TFG__VERSION__
+#if defined(__TFG__VERSION__)
 //_________________
 Bool_t StPicoEvent::IsGoodTrigger() {
   if (! StGoodTrigger::instance()) return kTRUE;
@@ -240,7 +245,7 @@ void StPicoEvent::setTriggerIds(std::vector<unsigned int> newIds) {
 
       // For each entry in the input vector
       for (UInt_t iIter1= 0; iIter1<newIds.size(); iIter1++) {
-	
+
         // Assume that the new trigger is not in the list
         Bool_t isUsed = false;
 

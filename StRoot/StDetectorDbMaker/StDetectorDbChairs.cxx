@@ -1984,6 +1984,8 @@ Float_t St_tofTOffsetC::t0(Int_t tray, Int_t module, Int_t cell) const {
 MakeChairInstance(tofTrgWindow,Calibrations/tof/tofTrgWindow);
 #include "St_tofTzeroC.h"
 MakeChairInstance(tofTzero,Calibrations/tof/tofTzero);
+#include "St_tofSimResParamsC.h"
+MakeChairInstance(tofSimResParams,Calibrations/tof/tofSimResParams);
 #include "St_vpdDelayC.h"
 MakeChairInstance(vpdDelay,Calibrations/tof/vpdDelay);
 #include "St_vpdTotCorrC.h"
