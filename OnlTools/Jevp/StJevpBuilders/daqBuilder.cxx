@@ -185,7 +185,8 @@ void daqBuilder::event(daqReader *rdr)
 }
 
 void daqBuilder::stoprun(daqReader *rdr) {
-  
+    logDbVariable("seq", (double)rdr->seq);
+    logDbVariable("modseq", (double)(rdr->seq % 200));
 }
 
 void daqBuilder::main(int argc, char *argv[])
