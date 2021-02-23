@@ -15,6 +15,11 @@
  *   c) Vpd - checks if BTof info is available then loops over primary
  *      vertices and checks if |Vz - VpdVz|<mTpcVpdVzDiffCut. The first
  *      vertex that satisfies the cut is selected.
+ *   d) Mtd - sets the first primary vertex as a default and then loops
+ *      over all primary vertices. The first one that has at least
+ *      2 MTD-matched primary tracks is selected.
+ *   e) FXT - set the first vertex that was reconstructed in z 
+ *      from 198 to 202 cm along z axis.
  * Default is NotSet. In this case the program execution will be terminated.
  * Has to be explicitly set.
  *
@@ -74,8 +79,14 @@ class StPicoDstMaker : public StMaker {
   /// Write/Read mode: 1-write, 2-read
   enum PicoIoMode {IoWrite=1, IoRead=2};
 #if !defined (__TFG__VERSION__)
-  /// Primary vertex selection mode: 0-NotSet, 1-Default, 2-Vpd, 3-VpdOrDefault
-  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3};
+  /// Primary vertex selection mode
+  /// \par 0 NotSet
+  /// \par 1 Default
+  /// \par 2 Vpd
+  /// \par 3 VpdOrDefault
+  /// \par 4 Mtd
+  /// \par 5 FXT
+  enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3, Mtd=4, FXT=5};
 #endif /* ! __TFG__VERSION__ */
   /// Write or not write covariance matrix: 0-skip, 1-write
   enum PicoCovMtxMode {Skip=0, Write=1};
@@ -320,7 +331,7 @@ class StPicoDstMaker : public StMaker {
 
   /// Get CVS status
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.26 2020/02/14 17:05:53 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.30 2021/02/23 17:27:01 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 
