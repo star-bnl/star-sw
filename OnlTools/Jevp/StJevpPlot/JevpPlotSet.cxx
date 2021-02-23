@@ -90,6 +90,20 @@ JevpPlotSet::JevpPlotSet(JevpServer *server)
   PCP;
 }
 
+void JevpPlotSet::logDbVariable(char *name, double value) {
+    char fn[256];
+    sprintf(fn, "%s/%s", clientdatadir, "dbVariable.tosend");
+    
+    FILE *f = fopen(fn, "a");
+    if(!f) {
+	LOG(WARN, "Error opening %s (%s)", fn, strerror(errno));
+	return;
+    }
+    
+    fprintf(f, "%s %s %d %d %lf\n", plotsetname, name, lastevttm, current_run, value); 
+    fclose(f);
+}
+
 int JevpPlotSet::addPlot(JevpPlot *hist)
 {
   PCP;
@@ -389,7 +403,11 @@ void JevpPlotSet::_event(daqReader *rdr)
     builderStatus.events++;
     builderStatus.lastEventTime = time(NULL);
     LOG(NOTE, "call event");
+    lastevttm = rdr->evt_time;
+    
     event(rdr);
+
+
     PCPC(0);
 
     //unsigned long long int post_mem = getMemUse();
