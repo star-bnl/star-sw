@@ -1,6 +1,9 @@
-// $Id: StFcsFastSimulatorMaker.h,v 1.5 2020/05/29 18:51:02 akio Exp $
+// $Id: StFcsFastSimulatorMaker.h,v 1.6 2021/02/23 16:25:51 akio Exp $
 //
 // $Log: StFcsFastSimulatorMaker.h,v $
+// Revision 1.6  2021/02/23 16:25:51  akio
+// Modification to attend comments from STAR code review (Jason)
+//
 // Revision 1.5  2020/05/29 18:51:02  akio
 // adding EPD g2t reading as PRES
 //
@@ -22,47 +25,50 @@
 #ifndef ST_FCS_SIMULATOR_MAKER_H
 #define ST_FCS_SIMULATOR_MAKER_H
 
-class g2t_emc_hit_st;
-class StFcsHit;
 class StEvent;
+class StFcsHit;
 
 #include "StChain/StMaker.h"
+#include "StEvent/StEnumerations.h"
 
-/**
- The FCS fast simulator maker.
- Populates the FCS hit collection in StEvent with StFcsHits, using 
- Geant hits from the g2t table as input.
- (Simulates digitisation of ADC using gains from the database - not yet, hardcoded)
-**/
+/// The FCS fast simulator maker.
+/// Populates the FCS hit collection in StEvent with StFcsHits, using Geant hits 
+/// from the g2t table as input.
+/// This also read from EPD g2t table emulating what happens at actual electronics
+/// and DAQ file reading code (StFcsRawHitMaker).
+/// Currently no pulse shape & timebin simulation yet, and to be done
 
 class StFcsFastSimulatorMaker : public StMaker {
 
 public:
     
-    explicit StFcsFastSimulatorMaker(const Char_t* name = "fcsSim");
-    virtual ~StFcsFastSimulatorMaker() { }
-    
+    StFcsFastSimulatorMaker(const Char_t* name = "fcsSim"); 
+    virtual ~StFcsFastSimulatorMaker() {}
+    Int_t Init();
+    void  Clear(Option_t *option="");
     Int_t Make();
+ 
+    /// switching light collection models in xml file 
+    ///	 0 = straight Birk				   
+    ///	 1 = leaky hcal					   
+    ///  2 = xy dep light collection eff 1 side(not leaky)
+    ///  3 = xy dep light collection eff 2 side(leaky)    
+    void setLeakyHcal(int v=1) {SetAttr("FcsLeakyHcal",v);}
 
-    void setDebug(int v=1) {mDebug=v;}
-    void setLeakyHcal(int v=1){mLeakyHcal=v;} // 0 = straight Birk, 1=leaky hcal, 
-                                              // 2 = xy dep light collection eff 1 side(not leaky)
-                                              // 3 = xy dep light collection eff 2 side(leaky)
-    void setHcalZDepEff(int v=1) {mHcalZdepEff=v;} //  0 = straight Birk
-                                                   //  1 = "noarmal"
-                                                   //  2 = "bad"
-private:
-    
-    Int_t getDetectorId(const g2t_emc_hit_st& hit) const;
-    void fillStEvent(StEvent* event);
-    void printStEventSummary(const StEvent* event);
-
-    Int_t mDebug=0;
-    Int_t mLeakyHcal=0;
-    Int_t mHcalZdepEff=0;
+    /// switching z dependent light collection eff in xml file
+    ///  0 = straight Birk	
+    ///  1 = "noarmal"	
+    ///	 2 = "bad"         
+    void setHcalZDepEff(int v=1) {SetAttr("FcsHcalZDepEff",v);}
+                                                                                                      
+private:    
+    void fillStEvent(StEvent* event);   // Filling StEvent with StFcsHits    
+    StFcsHit* mEcalMap[kFcsNorthSouth][kFcsEcalMaxId]; // table to keep pointers to Ecal hits
+    StFcsHit* mHcalMap[kFcsNorthSouth][kFcsHcalMaxId]; // table to keep pointers to Hcal hits
+    StFcsHit* mPresMap[kFcsNorthSouth][kFcsPresMaxId]; // table to keep pointers to Pres hits
 
     virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}  
-    ClassDef(StFcsFastSimulatorMaker, 0)
+    ClassDef(StFcsFastSimulatorMaker, 1)
 };
 
 #endif  // ST_FCS_SIMULATOR_MAKER_H

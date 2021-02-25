@@ -347,8 +347,7 @@ class StPicoDstMaker : public StMaker {
 
   /// Get CVS status
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.29 2021/02/18 07:00:49 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
-
+    static const char cvs[]="Tag $Name:  $ $Id: StPicoDstMaker.h,v 1.30 2021/02/23 17:27:01 gnigmat Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 

@@ -383,13 +383,11 @@ Int_t StPicoDstMaker::setVtxModeAttr(){
     LOG_INFO << " PicoVtxVpdOrDefault is being used " << endm;
     return kStOK;
   }
-#if defined(__TFG__VERSION__)
   else if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxFXT") == 0) {
     setVtxMode( PicoVtxMode::FXT );
     LOG_INFO << " PicoVtxFXT is being used " << endm;
     return kStOK;
   }
-#endif /* __TFG__VERSION__ */
   else if (strcasecmp(SAttr("PicoVtxMode"), "PicoVtxMtd") == 0) {
     setVtxMode( PicoVtxMode::Mtd );
     LOG_INFO << " PicoVtxMtd is being used " << endm;
@@ -2572,6 +2570,26 @@ bool StPicoDstMaker::selectVertex() {
     // Choose the default vertex, i.e. the first vertex
     mMuDst->setVertexIndex(0);
     selectedVertex = mMuDst->primaryVertex();
+  }
+  else if ( mVtxMode == PicoVtxMode::FXT ) {
+    
+    // Loop over primary vertices
+    for (unsigned int iVtx = 0; iVtx < mMuDst->numberOfPrimaryVertices(); ++iVtx) {
+      
+      // Return pointer to i-th primary vertex
+      StMuPrimaryVertex* vtx = mMuDst->primaryVertex(iVtx);
+      if (!vtx) continue;
+      
+      // Check TpcVz and VpdVz difference
+      if (vtx->position().z() > 198. && vtx->position().z() < 202.) {
+	// Reset vertex index
+	mMuDst->setVertexIndex( iVtx );
+	// Reset pointer to the primary vertex
+	selectedVertex = mMuDst->primaryVertex();
+	// Quit vertex loop
+	break;
+      }
+    }
   }
   else if ( mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault ) {
 
