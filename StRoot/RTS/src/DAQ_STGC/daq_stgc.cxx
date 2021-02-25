@@ -170,6 +170,7 @@ daq_dta *daq_stgc::handle_altro(int sec, int rdo)
 	}
 	}
 
+	LOG(DBG,"handle_altro: secs %d to %d, rdos %d to %d",min_sec,max_sec,min_rdo,max_rdo) ;
 
 	//IMPORTANT:
 	tpx_is_stgc = 1 ;
