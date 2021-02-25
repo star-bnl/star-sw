@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDbMaker.h,v 1.20 2021/02/23 22:18:23 akio Exp $
+ * $Id: StFcsDbMaker.h,v 1.21 2021/02/24 22:56:19 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.h,v $
+ * Revision 1.21  2021/02/24 22:56:19  akio
+ * Modified for STAR code review (Dmitry)
+ *
  * Revision 1.20  2021/02/23 22:18:23  akio
  * Modified for STAr code review (Jason)
  *
@@ -181,8 +184,11 @@ public:
   Float_t getPresValley(Int_t det, Int_t id) const;      //! get the pres valley position for cut
   Float_t getPresValley(StFcsHit* hit) const;            //! get the pres valley position for cut
 
-  void forceUniformGain(float v)           {mForceUniformGain=v;          }   //! force gain to be specified value               
-    void forceUniformGainCorrection(float v) {mForceUniformGainCorrection=v;} //! force gaincorr to be specified value
+  enum GAINMODE { FIXED, DB, FORCED }; //! Gain mode switch
+  void forceFixGain(float v)               {mGainMode=GAINMODE::FIXED;    }   //! fixed default gain
+  void forceFixGainCorrection(float v)     {mGainCorrMode=GAINMODE::FIXED;}   //! fixed default gaincorr
+  void forceUniformGain(float v)           {mGainMode=GAINMODE::FORCED;     mForceUniformGain=v;         }  //! force a specified value               
+  void forceUniformGainCorrection(float v) {mGainCorrMode=GAINMODE::FORCED; mForceUniformGainCorrection=v;} //! force a specified value
   void readGainFromText(const char* file="fcsgain.txt");                      //! reading gain from text file
   void readGainCorrFromText(const char* file="fcsgaincorr.txt");              //! reading gaincorr from text file
 
@@ -226,9 +232,12 @@ public:
   Int_t   mRun19=0;                        //! run19 flag
   Int_t   mLeakyHcal=0;                    //! LeakyHcal has different center positions
 
-  Float_t mForceUniformGain=-1.0;           //! -1 for fixed vale, 0 for DB/readtext, >0 for forcing a value
+  GAINMODE mGainMode = GAINMODE::DB;        //! Gain mode selection 
+  Float_t mForceUniformGain=-1.0;           //! forcing a value
   Int_t   mReadGainFromText=0;              //! flag for reading gain from text
-  Float_t mForceUniformGainCorrection=-1.0; //! -1 for fixed vale, 0 for DB/readtext, >0 for forcing a value
+
+  GAINMODE mGainCorrMode = GAINMODE::DB;    //! GainCorr mode selection 
+  Float_t mForceUniformGainCorrection=-1.0; //! forcing a value
   Int_t   mReadGainCorrectionFromText=0;    //! flag for reading gaincorr from text 
  
   //DEP sorted ped/gain/corr
