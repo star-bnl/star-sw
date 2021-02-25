@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job  name="LcKppi" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+#  setenv NODEBUG yes
+  setenv STARFPE NO
+#  setup 64b
+#  starver TFG20c
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set N     = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+#   set name  = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+  else
+    exit 1;
+  endif
+  set name = ""
+#  foreach name (K_S0 Lambda0Z200cm Lambda0Z200cmFlat  Lambda0_bar Lambda0 XiM_bar XiM  Omega_bar Omega H3L K3pi)
+# DEUTERON:Lambda0Fixed  DEUTERON:Lambda0 \
+#                K_S0Fixed  Lambda0_barFixed Lambda0Fixed XiM_barFixed XiMFixed  Omega_barFixed OmegaFixed \
+#                K_S0       Lambda0_bar      Lambda0      XiM_bar      XiM       Omega_bar      Omega      \
+#                LNNFixed LNFixed \
+#                H2LrFixed H2LFixed \
+#                H3LdpFixed H3LFixed H3LrFixed H3RLFixed \
+#                H4LtpFixed H4L2dFixed H4LFixed H5LFixed H6L3Fixed H6LFixed \
+#                He4LFixed  \
+#                He5L3Fixed He5LFixed He5Li5Fixed \
+#                He6L3adFixed He6L3Fixed He6LFixed \
+#                He7L3Fixed He7LFixed \
+#                Li6LFixed \
+#                Li7L3Fixed Li7LFixed \
+#                Li8LFixed \
+#                LNN LN \
+#                H3Ldp H3L H3Lr H3RL \
+#                H2Lr  H2L \
+#                H4Ltp H4L2d H4L H5L H6L3 H6L \
+#                He4L  \
+#                He5L3 He5L He5Li5 \
+#                He6L3ad He6L3 He6L \
+#                He7L3 He7L \
+#                Li6L \
+#                Li7L3 Li7L \
+#                Li8L \ 
+#    if ($name == $Name) break;
+  set Name = `basename $PWD`
+
+  foreach name (                PQ1730LamK0s PQ1730LamK+ )
+    echo $Name | grep $name
+    if (! $?) break;
+  end
+  echo "name = $name";
+  if ($name == "") exit 1;
+#  set noiTPClu = ""
+#  echo $Name | grep 'noiTPClu' 
+#  if (! $?) set noiTPClu = ",noiTPClu";
+#  setenv StarEndMakerShell
+# set chain = "MC.2019a,P2019a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,Stx,KFVertex,VFMinuitX,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
+#  set chain = "MC.2018,vmc,VMCAlignment,UseMCTstart,NoiTPCLu,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name}${noiTPClu};
+#StiCA
+  set chain = "MC.2021a,P2021a,btof,BEmcChkStat,CorrY,OSpaceZ2,OGridLeakFull,-evout,NoHistos,noTags,noRunco,StiCA,StiKFVertex,picoWrite,PicoVtxVpdOrDefault,-geantOut,-evout,-useXgeom,"${name};
+  set sdt = ",sdt20210203"
+#  set sdt = ",sdt20180426.135000"
+#  set sdt = ",sdt20180531.080000"
+  set VFMCE = ",VFMCE";
+  set Chain = ${chain}${VFMCE}${sdt}",Rung."${rung}
+  set base = ${name}_${rung}_${f}_${N};
+  set file = ${base}.MuDst.root
+  set tag  = ${base}.tags.root
+  set logFile  = ${base}B.log
+  echo "${file}"
+  if (! -r  PVxyz.root) then
+    if ( -r ../xyz.root) ln -s ../xyz.root PVxyz.root 
+  endif
+  if ( ! -r ${file}) then
+    root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
+  endif
+</command>
+<!-- <input URL="command:RunId.pl 1 500 500 K_S0" /> -->
+<input URL="command:RunId.pl 1 10 100 K_S0" /> 
+</job>
