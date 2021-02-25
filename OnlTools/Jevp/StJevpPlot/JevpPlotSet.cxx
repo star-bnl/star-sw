@@ -100,7 +100,7 @@ void JevpPlotSet::logDbVariable(char *name, double value) {
 	return;
     }
     
-    fprintf(f, "%s %s %d %d %lf\n", plotsetname, name, lastevttm, current_run, value); 
+    fprintf(f, "%s %s %d %d %lf\n", plotsetname, name, lastevttm, run, value); 
     fclose(f);
 }
 
