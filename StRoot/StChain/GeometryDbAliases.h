@@ -156,7 +156,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2021",       20201215,     0, "y2021",    "y2021 development geometry, AgML,xgeometry"},   
   {"y2021a",      20201215,     1, "y2021a",   "y2021 first production geometry, AgML,xgeometry"},   
   
-  {"dev2021",     20221210,     1, "dev2021",  "development geometry for 2021+ forward program,AgML,xgeometry"},
+  {"dev2021",     20221210,     0, "dev2021",  "-deprecated- geometry for 2021+ forward program,AgML,xgeometry"},
+  {"dev2022",     20221210,     1, "dev2022",  "development geometry for 2022+ forward program,AgML,xgeometry"},
 
   //
   // Move DEVT and upgrade series +100 years along timeline else they interfere with y2018+ runs
