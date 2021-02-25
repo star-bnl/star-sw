@@ -1,4 +1,4 @@
-* $Id: xgeometry.age,v 1.42 2021/01/29 14:22:14 jwebb Exp $
+* $Id: xgeometry.age,v 1.43 2021/02/25 15:48:34 jwebb Exp $
 
 
 
@@ -2538,6 +2538,7 @@ If LL>0
 
 
   case dev2021 { dev2021:  First cut forward upgrades; Geom =        'dev2021   '; call geom_dev2021;} 
+  case dev2022 { dev2022:  First cut forward upgrades; Geom =        'dev2022   '; call geom_dev2022;} 
 
   Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
   Case ftsver2  { y2017 : y2017 baseline w/ ids and fts v2;     Geom = 'ftsver2   '; call geom_ftsver2;}
@@ -4507,8 +4508,11 @@ c  =============================================================================
       <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
       END! Module xgeometry
 
-* $Id: xgeometry.age,v 1.42 2021/01/29 14:22:14 jwebb Exp $
+* $Id: xgeometry.age,v 1.43 2021/02/25 15:48:34 jwebb Exp $
 * $Log: xgeometry.age,v $
+* Revision 1.43  2021/02/25 15:48:34  jwebb
+* And add in the xgeometry interface for dev2022 geometry
+*
 * Revision 1.42  2021/01/29 14:22:14  jwebb
 * Commit y2021a production geometry
 *
