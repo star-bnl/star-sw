@@ -2803,24 +2803,22 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 #endif
 
 	
-	for(int r=1;r<=6;r++) {
-		dd = rdr->det("stgc")->get("altro",r) ;	
 
-		while(dd && dd->iterate()) {	//per xing and per RDO
-//			if(raw_found==0 && do_print) printf("STGC event\n") ;
-			raw_found = 1 ;
+	dd = rdr->det("stgc")->get("altro") ;	
 
-			if(do_print) {
-				printf("STGC ALTRO: sec %02d, RDO %d: ALTRO %3d:%d\n",dd->sec,r,dd->row,dd->pad) ;
+	while(dd && dd->iterate()) {	
+		raw_found = 1 ;
 
-				for(u_int i=0;i<dd->ncontent;i++) {
-					printf("    %3d %3d\n",dd->adc[i].tb,dd->adc[i].adc) ;
-				}
+		if(do_print) {
+			// there is NO RDO in the bank
+			printf("STGC ALTRO: evt %d: sec %d, ALTRO %2d(FEE%02d):%02d\n",good,dd->sec,dd->row,dd->row/2,dd->pad) ;
+
+			for(u_int i=0;i<dd->ncontent;i++) {
+				printf("    %3d %3d\n",dd->adc[i].tb,dd->adc[i].adc) ;
 			}
-
 		}
-
 	}
+
 
 
 	if(raw_found) {
