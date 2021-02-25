@@ -1919,18 +1919,24 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		printf(".... lastdsm[%d]: 0x%04X\n",i,lastdsm[i]) ;
 	    }
 
-            u_int fcs2019 = (lastdsm[4] >> 10) & 1 ;
-	    fcs2019 |= ((lastdsm[4] >> 5) & 1) << 1 ;
-	    fcs2019 |= ((lastdsm[4] >> 7) & 1) << 2 ;
-	    fcs2019 |= ((lastdsm[4] >> 8) & 1) << 3 ;
-	    fcs2019 |= ((lastdsm[4] >> 9) & 1) << 4 ;
-	    fcs2019 |= ((lastdsm[4] >> 12) & 1) << 5 ;
-	    fcs2019 |= ((lastdsm[4] >> 13) & 1) << 6 ;
-	    fcs2019 |= ((lastdsm[4] >> 14) & 1) << 7 ;
-	    fcs2019 |= ((lastdsm[4] >> 15) & 1) << 8 ;
+	    // The first line is bit 10 in Hank's list counting from the top
+	    // of his list. This translates to my FCS bit 0.
+	    // And so on... look at the shifts (>>) in lastdsm[4] to get to
+	    // "Hank's bits". And note the mess...
+	    // On the right, in comments is Hank's name of the bit...
+
+            u_int fcs2019 = (lastdsm[4] >> 10) & 1 ;	// bit 0: REVTICKIN-4
+	    fcs2019 |= ((lastdsm[4] >> 5) & 1) << 1 ;	// bit 1: FCSIN-0
+	    fcs2019 |= ((lastdsm[4] >> 7) & 1) << 2 ;	// bit 2: FCSIN-1	
+	    fcs2019 |= ((lastdsm[4] >> 8) & 1) << 3 ;	// bit 3: FCSIN-2
+	    fcs2019 |= ((lastdsm[4] >> 9) & 1) << 4 ;	// bit 4: FCSIN-3
+	    fcs2019 |= ((lastdsm[4] >> 12) & 1) << 5 ;	// bit 5: FCSIN-4
+	    fcs2019 |= ((lastdsm[4] >> 13) & 1) << 6 ;	// bit 6: FCSIN-5
+	    fcs2019 |= ((lastdsm[4] >> 14) & 1) << 7 ;	// bit 7: FCSIN-6
+	    fcs2019 |= ((lastdsm[4] >> 15) & 1) << 8 ;	// bit 8: FCSIN-7 -- never fires?
 
 
-            printf("bc7bit %d, fcs2019 0x%04X : 0x%04X 0x%04X 0x%04X 0x%04X\n",bc7bit,fcs2019,
+            printf("bc7bit %3d, fcs2019 0x%04X : 0x%04X 0x%04X 0x%04X 0x%04X\n",bc7bit,fcs2019,
 		   lastdsm[0],lastdsm[1],lastdsm[2],lastdsm[3]) ;
 
 	    printf("ids: ");
