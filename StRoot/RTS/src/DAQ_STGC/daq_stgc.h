@@ -23,7 +23,7 @@ private:
 	class daq_dta *raw ;	
 	class daq_dta *altro ;
 
-	static const int MAX_SEC = 4 ;
+	static const int MAX_SEC = 7 ;
 	static const int MAX_RDO = 6 ;
 
 	static const char *help_string ;
