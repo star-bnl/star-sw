@@ -21,12 +21,13 @@
 
 const int TBMAX=300;
 //const int TBTRG[2]={51,207+8};
-const int TBTRG[2]={50,207+4};
-const int MAXADC[2]={4096,512};
-const int MAXSUM[2]={20000,1000};
+const int TBTRG[2] ={  50,207+4};
+const int MINTB[2] ={   0,150};
+const int MAXTB[2] ={ 100,300};
+const int MAXADC[2]={ 512,4096};
+const int MAXSUM[2]={1000,20000};
 const int OFF[2]  = {0,0};
-const int mFakeData=0;
-    
+const int mFakeData=0;    
 const int FCS_DEBUG=0;
 
 ClassImp(fcsBuilder);
@@ -93,12 +94,12 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
      
     char csum[30];
     sprintf(csum,"AdcSum(TB=%d-%d)",TBTRG[0]-3,TBTRG[0]+4);
-    contents.h_fcs_ehpns_id_adcsum[0][0] = new TH2F("Ecal_N_Id_Adcsum",Form("EcalNorth; Id/22; %s",csum),maxId(0),0.0,maxId(0)/22.0,1000,0.0,MAXSUM[0]);
-    contents.h_fcs_ehpns_id_adcsum[0][1] = new TH2F("Ecal_S_Id_Adcsum",Form("EcalSouth; Id/22; %s",csum),maxId(1),0.0,maxId(1)/22.0,1000,0.0,MAXSUM[0]);
-    contents.h_fcs_ehpns_id_adcsum[1][0] = new TH2F("Hcal_N_Id_Adcsum",Form("HcalNorth; Id/13; %s",csum),maxId(2),0.0,maxId(2)/13.0,1000,0.0,MAXSUM[0]);
-    contents.h_fcs_ehpns_id_adcsum[1][1] = new TH2F("Hcal_S_Id_Adcsum",Form("HcalSouth; Id/13; %s",csum),maxId(3),0.0,maxId(3)/13.0,1000,0.0,MAXSUM[0]);
-    contents.h_fcs_ehpns_id_adcsum[2][0] = new TH2F("Pres_N_Id_Adcsum",Form("PresNorth; Id/16; %s",csum),maxId(4),0.0,maxId(4)/16.0,1000,0.0,MAXSUM[0]);
-    contents.h_fcs_ehpns_id_adcsum[2][1] = new TH2F("Pres_S_Id_Adcsum",Form("PresSouth; Id/16; %s",csum),maxId(5),0.0,maxId(5)/16.0,1000,0.0,MAXSUM[0]);
+    contents.h_fcs_ehpns_id_adcsum[0][0] = new TH2F("Ecal_N_Id_Adcsum",Form("EcalNorth; Id/22; %s",csum),maxId(0),0.0,maxId(0)/22.0,1000,0.0,MAXSUM[1]);
+    contents.h_fcs_ehpns_id_adcsum[0][1] = new TH2F("Ecal_S_Id_Adcsum",Form("EcalSouth; Id/22; %s",csum),maxId(1),0.0,maxId(1)/22.0,1000,0.0,MAXSUM[1]);
+    contents.h_fcs_ehpns_id_adcsum[1][0] = new TH2F("Hcal_N_Id_Adcsum",Form("HcalNorth; Id/13; %s",csum),maxId(2),0.0,maxId(2)/13.0,1000,0.0,MAXSUM[1]);
+    contents.h_fcs_ehpns_id_adcsum[1][1] = new TH2F("Hcal_S_Id_Adcsum",Form("HcalSouth; Id/13; %s",csum),maxId(3),0.0,maxId(3)/13.0,1000,0.0,MAXSUM[1]);
+    contents.h_fcs_ehpns_id_adcsum[2][0] = new TH2F("Pres_N_Id_Adcsum",Form("PresNorth; Id/16; %s",csum),maxId(4),0.0,maxId(4)/16.0,1000,0.0,MAXSUM[1]);
+    contents.h_fcs_ehpns_id_adcsum[2][1] = new TH2F("Pres_S_Id_Adcsum",Form("PresSouth; Id/16; %s",csum),maxId(5),0.0,maxId(5)/16.0,1000,0.0,MAXSUM[1]);
     contents.h_fcs_ehpns_id_adcsum[0][0]->GetXaxis()->SetNdivisions(-nRow(0));
     contents.h_fcs_ehpns_id_adcsum[0][1]->GetXaxis()->SetNdivisions(-nRow(1));
     contents.h_fcs_ehpns_id_adcsum[1][0]->GetXaxis()->SetNdivisions(-nRow(2));
@@ -122,7 +123,6 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
     int n=0;
     plots[n] = new JevpPlot(contents.h_evt_size); n++;
     
-    mCrtDepT=n;
     plots[n] = new JevpPlot(contents.h_fcs_crt_depch_tbin[0]); plots[n]->setDrawOpts("colz");
     plots[n]->addElement(l1); plots[n]->addElement(l2);
     plots[n]->addElement(l3); plots[n]->addElement(l4); 
@@ -223,8 +223,8 @@ void fcsBuilder::event(daqReader *rdr){
     int trgcmd = rdr->trgcmd;
     //printf("trgcmd=%d\n",trgcmd);
     switch(trgcmd){
-    case  4: mReadMode=1; break;
-    case 10: mReadMode=0; break;
+    case  4: mReadMode=1; break; //ZS bank for Physics
+    case 10: mReadMode=0; break; //ADC bank for LED
     default: return;
     }
         
@@ -233,43 +233,36 @@ void fcsBuilder::event(daqReader *rdr){
     if(!dd){
       LOG(DBG,"No fcs_%s found",mode[mReadMode].c_str());
     }else{
-      if(mPhyLed<0){
+      if(mPhyLed<0){ //first time in the run
 	if(trgcmd==4) {
-	  mPhyLed=0;
-	  contents.h_fcs_crt_depch_tbin[0]->GetYaxis()->SetRange(0,100);
-	  contents.h_fcs_crt_depch_tbin[1]->GetYaxis()->SetRange(0,100);
-	  contents.h_fcs_crt_depch_tbin[3]->GetYaxis()->SetRange(0,100);
-	  contents.h_fcs_crt_depch_tbin[4]->GetYaxis()->SetRange(0,100);
-	  contents.h_fcs_det_tbin_adc[0]->GetXaxis()->SetRangeUser(0,100);
-	  contents.h_fcs_det_tbin_adc[1]->GetXaxis()->SetRangeUser(0,100);
-	  contents.h_fcs_det_tbin_adc[2]->GetXaxis()->SetRangeUser(0,100);
-	  contents.h_fcs_det_tbin_adc[0]->GetYaxis()->SetRangeUser(0,512);
-	  contents.h_fcs_det_tbin_adc[1]->GetYaxis()->SetRangeUser(0,512);
-	  contents.h_fcs_det_tbin_adc[2]->GetYaxis()->SetRangeUser(0,512);	  
-	  contents.h_fcs_ehpns_id_adcsum[0][0]->GetYaxis()->SetRangeUser(0,1000);
-	  contents.h_fcs_ehpns_id_adcsum[0][1]->GetYaxis()->SetRangeUser(0,1000);
-	  contents.h_fcs_ehpns_id_adcsum[1][0]->GetYaxis()->SetRangeUser(0,1000);
-	  contents.h_fcs_ehpns_id_adcsum[1][1]->GetYaxis()->SetRangeUser(0,1000);
-	  contents.h_fcs_ehpns_id_adcsum[2][0]->GetYaxis()->SetRangeUser(0,1000);
-	  contents.h_fcs_ehpns_id_adcsum[2][1]->GetYaxis()->SetRangeUser(0,1000);
-	}else{
+	  mPhyLed=0;  
+	}else{ 
 	  mPhyLed=1;
-	  char csum[30];    
-	  sprintf(csum,"AdcSum(TB=%d-%d)",TBTRG[1]-3,TBTRG[1]+4);
-	  contents.h_fcs_ehpns_id_adcsum[0][0]->SetTitle(Form("EcalNorth; Id/22; %s",csum));
-	  contents.h_fcs_ehpns_id_adcsum[0][1]->SetTitle(Form("EcalSouth; Id/22; %s",csum));
-	  contents.h_fcs_ehpns_id_adcsum[1][0]->SetTitle(Form("HcalNorth; Id/13; %s",csum));
-	  contents.h_fcs_ehpns_id_adcsum[1][1]->SetTitle(Form("HcalSouth; Id/13; %s",csum));
-	  contents.h_fcs_ehpns_id_adcsum[2][0]->SetTitle(Form("PresNorth; Id/16; %s",csum));
-	  contents.h_fcs_ehpns_id_adcsum[2][1]->SetTitle(Form("PresSouth; Id/16; %s",csum));
-	  contents.h_fcs_crt_depch_tbin[0]->GetYaxis()->SetRange(150,300);
-	  contents.h_fcs_crt_depch_tbin[1]->GetYaxis()->SetRange(150,300);
-	  contents.h_fcs_crt_depch_tbin[3]->GetYaxis()->SetRange(150,300);
-	  contents.h_fcs_crt_depch_tbin[4]->GetYaxis()->SetRange(150,300);
-	  contents.h_fcs_det_tbin_adc[0]->GetXaxis()->SetRange(150,300);
-	  contents.h_fcs_det_tbin_adc[1]->GetXaxis()->SetRange(150,300);
-	  contents.h_fcs_det_tbin_adc[2]->GetXaxis()->SetRange(150,300);
-	}	  
+	}
+	char csum[30];    
+	sprintf(csum,"AdcSum(TB=%d-%d)",TBTRG[mPhyLed]-3,TBTRG[mPhyLed]+4);
+	contents.h_fcs_ehpns_id_adcsum[0][0]->SetTitle(Form("EcalNorth; Id/22; %s",csum));
+	contents.h_fcs_ehpns_id_adcsum[0][1]->SetTitle(Form("EcalSouth; Id/22; %s",csum));
+	contents.h_fcs_ehpns_id_adcsum[1][0]->SetTitle(Form("HcalNorth; Id/13; %s",csum));
+	contents.h_fcs_ehpns_id_adcsum[1][1]->SetTitle(Form("HcalSouth; Id/13; %s",csum));
+	contents.h_fcs_ehpns_id_adcsum[2][0]->SetTitle(Form("PresNorth; Id/16; %s",csum));
+	contents.h_fcs_ehpns_id_adcsum[2][1]->SetTitle(Form("PresSouth; Id/16; %s",csum));
+	contents.h_fcs_crt_depch_tbin[0]->GetYaxis()->SetRange(MINTB[mPhyLed],MAXTB[mPhyLed]);
+	contents.h_fcs_crt_depch_tbin[1]->GetYaxis()->SetRange(MINTB[mPhyLed],MAXTB[mPhyLed]);
+	contents.h_fcs_crt_depch_tbin[3]->GetYaxis()->SetRange(MINTB[mPhyLed],MAXTB[mPhyLed]);
+	contents.h_fcs_crt_depch_tbin[4]->GetYaxis()->SetRange(MINTB[mPhyLed],MAXTB[mPhyLed]);
+	contents.h_fcs_det_tbin_adc[0]->GetXaxis()->SetRangeUser(MINTB[mPhyLed],MAXTB[mPhyLed]);
+	contents.h_fcs_det_tbin_adc[1]->GetXaxis()->SetRangeUser(MINTB[mPhyLed],MAXTB[mPhyLed]);
+	contents.h_fcs_det_tbin_adc[2]->GetXaxis()->SetRangeUser(MINTB[mPhyLed],MAXTB[mPhyLed]);
+	contents.h_fcs_det_tbin_adc[0]->GetYaxis()->SetRangeUser(0,MAXADC[mPhyLed]);
+	contents.h_fcs_det_tbin_adc[1]->GetYaxis()->SetRangeUser(0,MAXADC[mPhyLed]);
+	contents.h_fcs_det_tbin_adc[2]->GetYaxis()->SetRangeUser(0,MAXADC[mPhyLed]);	  
+	contents.h_fcs_ehpns_id_adcsum[0][0]->GetYaxis()->SetRangeUser(0,MAXSUM[mPhyLed]);
+	contents.h_fcs_ehpns_id_adcsum[0][1]->GetYaxis()->SetRangeUser(0,MAXSUM[mPhyLed]);
+	contents.h_fcs_ehpns_id_adcsum[1][0]->GetYaxis()->SetRangeUser(0,MAXSUM[mPhyLed]);
+	contents.h_fcs_ehpns_id_adcsum[1][1]->GetYaxis()->SetRangeUser(0,MAXSUM[mPhyLed]);
+	contents.h_fcs_ehpns_id_adcsum[2][0]->GetYaxis()->SetRangeUser(0,MAXSUM[mPhyLed]);
+	contents.h_fcs_ehpns_id_adcsum[2][1]->GetYaxis()->SetRangeUser(0,MAXSUM[mPhyLed]);
       }
       
       while(dd->iterate()) {

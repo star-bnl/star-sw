@@ -28,7 +28,6 @@ private:
     
     daq_dta *dd;
     JevpPlot **mPlots;
-    int mCrtDepT=0;
     int mEvt=-1;
     int mPhyLed=-1;
 
