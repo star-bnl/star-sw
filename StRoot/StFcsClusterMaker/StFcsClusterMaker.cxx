@@ -1,6 +1,12 @@
-// $Id: StFcsClusterMaker.cxx,v 1.16 2020/12/17 21:18:01 akio Exp $
+// $Id: StFcsClusterMaker.cxx,v 1.18 2021/02/25 21:52:57 akio Exp $
 //
 // $Log: StFcsClusterMaker.cxx,v $
+// Revision 1.18  2021/02/25 21:52:57  akio
+// Int_t -> int
+//
+// Revision 1.17  2021/02/25 19:24:15  akio
+// Modified for STAR code review (Hongwei)
+//
 // Revision 1.16  2020/12/17 21:18:01  akio
 // Separate RATIO2SPLIT for ecal/hcal
 //
@@ -63,7 +69,6 @@
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
-#include "tables/St_vertexSeed_Table.h"
 
 #include <cmath>
 #include "TMath.h"
@@ -79,7 +84,7 @@ void StFcsClusterMaker::Clear(Option_t* option) {
     StMaker::Clear(option);
 }
 
-Int_t StFcsClusterMaker::InitRun(Int_t runNumber) {
+int StFcsClusterMaker::InitRun(int runNumber) {
     // Ensure we can access database information
     LOG_DEBUG << "StFcsClusterMaker initializing run" << endm;
     mDb = static_cast<StFcsDbMaker*>(GetMaker("fcsDb"));
@@ -90,10 +95,8 @@ Int_t StFcsClusterMaker::InitRun(Int_t runNumber) {
     return StMaker::InitRun(runNumber);
 }
 
-Int_t StFcsClusterMaker::Make() {
+int StFcsClusterMaker::Make() {
     LOG_DEBUG << "StFcsClusterMaker Make!!!" << endm;
-    
-    //if(mReadMuDst) return readMuDst();
     
     StEvent* event = static_cast<StEvent*>(GetInputDS("StEvent"));
     mFcsCollection=0;
@@ -103,44 +106,12 @@ Int_t StFcsClusterMaker::Make() {
 	return kStWarn;	
     }
     
-    /*  move this to StFcsWaveformFitMaker
-    for(int det=0; det<=kFcsNDet; det++) {
-      if      (mEnergySelect==1) {makeSum(det);}
-      else if (mEnergySelect==2) {makeFit(det);}
-    }
-    */
-
     for(int det=0; det<=kFcsHcalSouthDetId; det++) {
       makeCluster(det);	
     }
-    if(mDebug>0) mFcsCollection->print(3);
+    if(GetDebug()>0) mFcsCollection->print(3);
     return kStOk;
 }
-
-//move those to StFcsWaveformFitMaker
-/* 
-int StFcsClusterMaker::makeSum(int det) {
-  StSPtrVecFcsHit& hits = mFcsCollection->hits(det);
-  int nhit=hits.size();
-  for(int i=0; i<nhit; i++){ //loop over all hits       
-    int sum=0;   
-    int n=hits[i]->nTimeBin();
-    for(int j=0; j<n; j++){
-      unsigned short tb=hits[i]->timebin(j);
-      if(tb>=mMinTB && tb<=mMaxTB) sum += hits[i]->adc(j);
-    }
-    hits[i]->setAdcSum(sum);
-    float gain = mDb->getGain(hits[i]);
-    float gaincorr = mDb->getGainCorrection(hits[i]);
-    hits[i]->setEnergy(sum*gain*gaincorr);
-  }
-  return 0;
-}
-
-int StFcsClusterMaker::makeFit(int det) {
-  return 0;
-}
-*/
 
 int StFcsClusterMaker::makeCluster(int det) {
   StSPtrVecFcsHit&      hits = mFcsCollection->hits(det);
@@ -166,12 +137,12 @@ int StFcsClusterMaker::makeCluster(int det) {
     float minDistance=999.0;
     int ncluster = clusters.size();
     int nNeighbor= 0;
-    StFcsCluster* neighbor[4];
+    StPtrVecFcsCluster neighbor;
     for(int j=0; j<ncluster; j++){ //check all existing cluster
       StFcsCluster* clu=clusters[j];
       float neighborTowerE = isNeighbor(hit,clu);
       if(neighborTowerE>0.0) { //found neighbor cluster
-	neighbor[nNeighbor]=clu;
+	neighbor.push_back(clu);
 	nNeighbor++;	      
 	if(neighborTowerE * r2split > e){ //merge to existing cluster
 	  float d = distance(hit,clu);
@@ -181,7 +152,8 @@ int StFcsClusterMaker::makeCluster(int det) {
 	  }
 	}
       }
-      //      printf("AAA hit=%3d cluster=%3d e=%4.2f neighbor=%4.2f cluid=%2d minDist=%4.2f\n",i,j,e,neighborTowerE,neighborClusterId,minDistance);
+      // printf("AAA hit=%3d cluster=%3d e=%4.2f neighbor=%4.2f cluid=%2d minDist=%4.2f\n",
+      //        i,j,e,neighborTowerE,neighborClusterId,minDistance);
     }
     StFcsCluster* cluster=0;
     if(neighborClusterId==-1){ 
@@ -193,7 +165,8 @@ int StFcsClusterMaker::makeCluster(int det) {
       hit->setCluster(cluster);
       updateCluster(cluster);
       mFcsCollection->addCluster(det,cluster); 
-      neighbor[nNeighbor]=cluster;
+      neighbor.push_back(cluster);
+      //      neighbor[nNeighbor]=cluster;
       nNeighbor++;
     }else{ 
       //found neighbor tower which has higher energy
@@ -395,31 +368,3 @@ void StFcsClusterMaker::categorization(StFcsCluster* cluster){
         }	
     }    
 }
-
-/*
-  Int_t StFcsClusterMaker::readMuDst(){
-  StEvent* event = (StEvent*)GetInputDS("StEvent");
-  if(!event){LOG_INFO<<"StFcsClusterMaker::readMuDst found no StEvent"<<endm; return kStErr;}
-  StFcsCollection* fcscol = event->fcsCollection();
-  if(!fcscol){LOG_INFO<<"StFcsClusterMaker::readMuDst found no FcsCollection"<<endm; return kStErr;}
-  for (unsigned i(0); i < fcscol->numberOfClusters(); ++i) {
-      StFcsCluster* c = fcscol->clusters()[i];
-      if(c){
-	  StThreeVectorF xyz = mDb->getStarXYZfromColumnRow(c->detectorId(),c->x(),c->y());
-	  //c->setFourMomentum(compute4Momentum(xyz, c->energy()));
-	  c->setFourMomentum(mDb->getLorentzVector(xyz,c->energy()));
-      }
-  }
-  for (unsigned i(0); i < fcscol->numberOfPoints(); ++i) {
-    StFcsCluster* p = fcscol->points()[i];
-    if(p){
-      StThreeVectorF xyz  = mDb->getStarXYZ(p->detectorId(),p->x(),p->y());
-      p->setXYZ(xyz);
-      //p->setFourMomentum(compute4Momentum(xyz, p->energy()));
-      p->setFourMomentum(mDb->getLorentzVector(xyz,p->energy()));
-    }
-  }
-  fcscol->sortPointsByET();
-  return kStOk;
-}
-*/

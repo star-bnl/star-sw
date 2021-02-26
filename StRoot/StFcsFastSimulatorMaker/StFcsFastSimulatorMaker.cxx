@@ -1,6 +1,12 @@
-// $Id: StFcsFastSimulatorMaker.cxx,v 1.8 2021/02/23 16:25:50 akio Exp $                                            
+// $Id: StFcsFastSimulatorMaker.cxx,v 1.10 2021/02/25 21:54:41 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFcsFastSimulatorMaker.cxx,v $
+// Revision 1.10  2021/02/25 21:54:41  akio
+// Int_t -> int
+//
+// Revision 1.9  2021/02/25 19:25:48  akio
+// Code modified for STAR code review
+//
 // Revision 1.8  2021/02/23 16:25:50  akio
 // Modification to attend comments from STAR code review (Jason)
 //
@@ -42,12 +48,12 @@
 
 static const char name[kFcsEHP][4]={"wca","hca","pre"};
 
-StFcsFastSimulatorMaker::StFcsFastSimulatorMaker(const Char_t* name) : StMaker(name) {
+StFcsFastSimulatorMaker::StFcsFastSimulatorMaker(const char* name) : StMaker(name) {
   setLeakyHcal(0);
   setHcalZDepEff(0);
 }
 
-Int_t StFcsFastSimulatorMaker::Init() {
+int StFcsFastSimulatorMaker::Init() {
   memset(mEcalMap,0,sizeof(mEcalMap));
   memset(mHcalMap,0,sizeof(mHcalMap));
   memset(mPresMap,0,sizeof(mPresMap));
@@ -62,7 +68,7 @@ void StFcsFastSimulatorMaker::Clear(Option_t *option){
   return;
 }
 
-Int_t StFcsFastSimulatorMaker::Make() {
+int StFcsFastSimulatorMaker::Make() {
   LOG_DEBUG << "StFcsFastSimulatorMaker::Make" << endm;
   
   if (!GetMaker("fcsDb")) {
@@ -103,7 +109,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
   if (!hitTable) {
     LOG_INFO << Form("g2t_%3s_hit table is empty",name[ehp]) << endm;
   }else{
-    const Int_t nHits = hitTable->GetNRows(); 
+    const int nHits = hitTable->GetNRows(); 
     ng2thit[ehp]=nHits;
     LOG_INFO << Form("g2t_%s_hit table has %d hit",name[ehp],nHits) << endm;
     if(nHits>0){
@@ -111,11 +117,11 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
       if(!hit){
 	LOG_INFO << Form("g2t_%3s_hit GetTable failed",name[ehp]) << endm;
       }else{
-	for (Int_t i=0; i < nHits; ++i) {
+	for (int i=0; i < nHits; ++i) {
 	  if (!hit) {hit++; continue;}
-	  const Int_t ns  = hit->volume_id / 1000 - 1;
-	  const Int_t id  = hit->volume_id % 1000 - 1;
-	  const Int_t det = dbMaker->detectorId(ehp,ns);
+	  const int ns  = hit->volume_id / 1000 - 1;
+	  const int id  = hit->volume_id % 1000 - 1;
+	  const int det = dbMaker->detectorId(ehp,ns);
 	  if(det<0 || det>=kFcsNDet || id<0 || id>=kFcsEcalMaxId){
 	    LOG_WARN << Form("ECAL det=%1d id=%3d volid=%5d e=%f out of range (%d)",
 			     det,id,hit->volume_id,hit->de,kFcsMaxId) << endm;
@@ -125,10 +131,10 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	    LOG_INFO << Form("ECAL det=%1d id=%3d volid=%4d e=%f",
 			     det,id,hit->volume_id,hit->de) << endm;
 	  }
-	  Float_t de = hit->de;
+	  float de = hit->de;
 	  StFcsHit* fcshit=0;
 	  if(mEcalMap[ns][id]==0){ // New hit
-	    Int_t ehp=0, rns=0, crt=0, sub=0, dep=0, ch=0;
+	    int ehp=0, rns=0, crt=0, sub=0, dep=0, ch=0;
 	    dbMaker->getDepfromId(det, id, ehp, rns, crt, sub, dep, ch);
 	    fcshit = new StFcsHit(1, det, id, rns, ehp, dep, ch, de);
 	    hits.push_back(fcshit);
@@ -149,7 +155,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
   if (!hitTable_h) {
     LOG_INFO << Form("g2t_%3s_hit table is empty",name[ehp]) << endm;
   }else{
-    const Int_t nHits = hitTable_h->GetNRows();
+    const int nHits = hitTable_h->GetNRows();
     ng2thit[ehp]=nHits;
     LOG_INFO << Form("g2t_%s_hit table has %d hit",name[ehp],nHits) << endm;
     if(nHits>0){	    
@@ -157,11 +163,11 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
       if(!hit){
 	LOG_INFO << Form("g2t_%3s_hit GetTable failed",name[ehp]) << endm;
       }else{
-	for (Int_t i=0; i < nHits; i++) {
+	for (int i=0; i < nHits; i++) {
 	  if (!hit) {hit++; continue;}
-	  const Int_t ns  = hit->volume_id / 1000 - 1;
-	  const Int_t id  = hit->volume_id % 1000 - 1;
-	  const Int_t det = dbMaker->detectorId(ehp,ns);
+	  const int ns  = hit->volume_id / 1000 - 1;
+	  const int id  = hit->volume_id % 1000 - 1;
+	  const int det = dbMaker->detectorId(ehp,ns);
 	  if(det<0 || det>=kFcsNDet || id<0 || id>=kFcsHcalMaxId){
 	    LOG_WARN << Form("HCAL det=%d id=%d volid=%5d e=%f out of range (%d)",
 			     det,id,hit->volume_id,hit->de,kFcsMaxId) << endm;
@@ -172,10 +178,10 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 			     det,id,hit->volume_id,hit->de) << endm;
 	  }
 	  StFcsHit* fcshit=0;
-	  Int_t ehp=0, rns=0, crt=0, sub=0, dep=0, ch=0;
+	  int ehp=0, rns=0, crt=0, sub=0, dep=0, ch=0;
 	  dbMaker->getDepfromId(det, id, ehp, rns, crt, sub, dep, ch);
 	  if(leakyHcal==0  || leakyHcal==2){
-	    Float_t de;
+	    float de;
 	    de = hit->de;
 	    //if(leakyHcal==2) de = hit->de2;
 	    if(hcalZdepEff==1) de = hit->deA;
@@ -213,7 +219,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	      else                        {id2=id+jj;} // add leaked lights to its neighbors
 	      dbMaker-> getDepfromId(det, id2, ehp, rns, crt, sub, dep, ch);
 	      if(mHcalMap[ns][id2]==0){ // New hit
-		Int_t ehp=0, rns=0, crt=0, sub=0, dep=0, ch=0;
+		int ehp=0, rns=0, crt=0, sub=0, dep=0, ch=0;
 		dbMaker-> getDepfromId(det, id2, ehp, rns, crt, sub, dep, ch);
 		fcshit = new StFcsHit(1, det, id2, rns, ehp, dep, ch, de[j]);
 		hits.push_back(fcshit);
@@ -236,7 +242,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
   if (!hitTable_p) {
     LOG_INFO << Form("g2t_epd_hit table is empty") << endm;
   }else{
-    const Int_t nHits = hitTable_p->GetNRows(); 
+    const int nHits = hitTable_p->GetNRows(); 
     ng2thit[ehp]=nHits;
     LOG_INFO << Form("g2t_epd_hit table has %d hit",nHits) << endm;
     if(nHits>0){
@@ -244,7 +250,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
       if(!hit){
 	LOG_INFO << Form("g2t_epd_hit GetTable failed") << endm;
       }else{
-	for (Int_t i=0; i < nHits; ++i) {
+	for (int i=0; i < nHits; ++i) {
 	  if (!hit) {hit++; continue;}
 	  const int volume_id = hit->volume_id;
 	  const int ew        = volume_id/100000;  
@@ -290,13 +296,13 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
   float etot[kFcsEHP]={};
   // Loop over hits and digitize & push to StEvent if it survives ZS
   for(int i=0; i<nhittot; i++){
-    const Int_t det = hits[i]->detectorId();
-    const Int_t id = hits[i]->id();
+    const int det = hits[i]->detectorId();
+    const int id = hits[i]->id();
     float de  = hits[i]->energy();
     float sf  = dbMaker->getSamplingFraction(det);
     float gain= dbMaker->getGain(det, id);
     float corr= dbMaker->getGainCorrection(det, id);
-    int adc = static_cast<Int_t>(de / (sf * gain * corr));
+    int adc = static_cast<int>(de / (sf * gain * corr));
     adc = std::min(adc, 4095*8);  // Cap maximum ADC =12bit * 8 tim
     zs  = dbMaker->getZeroSuppression(det);
     if(GetDebug()) LOG_INFO << Form("Det=%1d id=%3d dE=%8.3f SF=%6.3f gain=%6.3f corr=%6.3f ADC=%4d ZS=%2d digiE=%8.3f",
@@ -309,7 +315,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
       fcscollection->addHit(det,hits[i]); 
       etot[ehp] += digi_energy;
 	     nhit[ehp]++;
-    }else{ // just delete hits bellow ZS threshold
+    }else{ // just delete hits bellow ZS threshold      
       delete hits[i];
     }	    
   }

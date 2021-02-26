@@ -8,6 +8,12 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.cxx,v $
+ * Revision 1.32  2021/02/25 21:53:50  akio
+ * Int_t -> int
+ *
+ * Revision 1.31  2021/02/24 22:56:19  akio
+ * Modified for STAR code review (Dmitry)
+ *
  * Revision 1.30  2021/02/23 22:18:23  akio
  * Modified for STAr code review (Jason)
  *
@@ -110,47 +116,48 @@
 #include "StEvent/StFcsHit.h"
 #include <math.h>
 
-//Gain factors 
-Float_t mEtGain[kFcsNDet][kFcsMaxId];
-
-//DEP map                                                                                                                         
-Short_t mMap_ehp[kFcsNDet][kFcsMaxId];
-Short_t mMap_ns [kFcsNDet][kFcsMaxId];
-Short_t mMap_crt[kFcsNDet][kFcsMaxId];
-Short_t mMap_slt[kFcsNDet][kFcsMaxId];
-Short_t mMap_dep[kFcsNDet][kFcsMaxId];
-Short_t mMap_ch [kFcsNDet][kFcsMaxId];
-Short_t mMap_ppb[kFcsNDet][kFcsMaxId];
-Short_t mMap_ppp[kFcsNDet][kFcsMaxId];
-Short_t mMap_pph[kFcsNDet][kFcsMaxId];
-Short_t mMap_wcol[kFcsNDet][kFcsMaxId];
-Short_t mMap_jcol[kFcsNDet][kFcsMaxId];
-
-//Reverse map                                                                                                                     
-Short_t mRMap_det[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];                                              
-Short_t mRMap_id [kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];                                              
-Short_t mRMap_crt[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];                                              
-Short_t mRMap_slt[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];
-
-//SC map
-const unsigned short kFcsMaxBranch=2;
-const unsigned short kFcsMaxAddr=16;
-const unsigned short kFcsMaxSiPM=4;
-Short_t mScMap_ehp[kFcsNDet][kFcsMaxId];
-Short_t mScMap_ns[kFcsNDet][kFcsMaxId];
-Short_t mScMap_dep[kFcsNDet][kFcsMaxId];
-Short_t mScMap_bra[kFcsNDet][kFcsMaxId];
-Short_t mScMap_add[kFcsNDet][kFcsMaxId];
-Short_t mScMap_sipm[kFcsNDet][kFcsMaxId];
-Short_t mScMap_pp[kFcsNDet][kFcsMaxId];
-Short_t mScMap_j[kFcsNDet][kFcsMaxId];
-
-//Reverse SC map
-Short_t mRScMap_det[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxBranch][kFcsMaxAddr][kFcsMaxSiPM];
-Short_t mRScMap_id[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxBranch][kFcsMaxAddr][kFcsMaxSiPM];
-
-//PatchPanel Map
-const short EPPMap[8][6][3]={ // {dep#,low_ch/high_ch,pwr&ctrl row#}
+namespace {
+  //Gain factors 
+  float mEtGain[kFcsNDet][kFcsMaxId];
+  
+  //DEP map                                                                                                                         
+  short mMap_ehp[kFcsNDet][kFcsMaxId];
+  short mMap_ns [kFcsNDet][kFcsMaxId];
+  short mMap_crt[kFcsNDet][kFcsMaxId];
+  short mMap_slt[kFcsNDet][kFcsMaxId];
+  short mMap_dep[kFcsNDet][kFcsMaxId];
+  short mMap_ch [kFcsNDet][kFcsMaxId];
+  short mMap_ppb[kFcsNDet][kFcsMaxId];
+  short mMap_ppp[kFcsNDet][kFcsMaxId];
+  short mMap_pph[kFcsNDet][kFcsMaxId];
+  short mMap_wcol[kFcsNDet][kFcsMaxId];
+  short mMap_jcol[kFcsNDet][kFcsMaxId];
+  
+  //Reverse map                                                                                                                     
+  short mRMap_det[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];                                              
+  short mRMap_id [kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];                                              
+  short mRMap_crt[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];                                              
+  short mRMap_slt[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh];
+  
+  //SC map
+  const unsigned short kFcsMaxBranch=2;
+  const unsigned short kFcsMaxAddr=16;
+  const unsigned short kFcsMaxSiPM=4;
+  short mScMap_ehp[kFcsNDet][kFcsMaxId];
+  short mScMap_ns[kFcsNDet][kFcsMaxId];
+  short mScMap_dep[kFcsNDet][kFcsMaxId];
+  short mScMap_bra[kFcsNDet][kFcsMaxId];
+  short mScMap_add[kFcsNDet][kFcsMaxId];
+  short mScMap_sipm[kFcsNDet][kFcsMaxId];
+  short mScMap_pp[kFcsNDet][kFcsMaxId];
+  short mScMap_j[kFcsNDet][kFcsMaxId];
+  
+  //Reverse SC map
+  short mRScMap_det[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxBranch][kFcsMaxAddr][kFcsMaxSiPM];
+  short mRScMap_id[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxBranch][kFcsMaxAddr][kFcsMaxSiPM];
+  
+  //PatchPanel Map
+  const short EPPMap[8][6][3]={ // {dep#,low_ch/high_ch,pwr&ctrl row#}
     {{20, 0, 1},{20, 1,-1},  //PPB1 P2,P3
      { 0, 0, 2},{ 0, 1,-1},  //PPB1 P4,P5
      { 1, 0, 3},{ 1, 1,-1}}, //PPB1 P6,P7
@@ -175,8 +182,8 @@ const short EPPMap[8][6][3]={ // {dep#,low_ch/high_ch,pwr&ctrl row#}
     {{18, 0,16},{18, 1,-1},  //PPB8 P2,P3
      {19, 0,17},{19, 1,-1},  //PPB8 P4,P5
      {21, 0,-1},{21, 1,-1}}  //PPB8 P6,P7
-};
-const short HPPMap[4][6][3]={ // {dep#,low_ch/high_ch,pwr&ctrl row#}
+  };
+  const short HPPMap[4][6][3]={ // {dep#,low_ch/high_ch,pwr&ctrl row#}
     {{ 6, 0, 1},{ 6, 1,-1},  //PPB1 P2,P3
      { 0, 0, 2},{ 1, 0,-1},  //PPB1 P4,P5
      {-1,-1,-1},{-1,-1,-1}}, //PPB1 P6,P7
@@ -189,41 +196,47 @@ const short HPPMap[4][6][3]={ // {dep#,low_ch/high_ch,pwr&ctrl row#}
     {{ 4, 1, 9},{ 5, 1,-1},  //PPB4 P2,P3
      { 7, 0,10},{ 7, 1,-1},  //PPB4 P4,P5
      {-1,-1,-1},{-1,-1,-1}}  //PPB4 P6,P7
-};
-Short_t	EMapPPB[24][2];
-Short_t EMapPPP[24][2];
-Short_t EMapSCDEP[17];
-Short_t EMapSCBRA[17];
-Short_t EMapSCPP[17];
-Short_t EMapSCJ[17];
-Short_t	HMapPPB[24][2];
-Short_t HMapPPP[24][2];
-Short_t HMapSCDEP[10];
-Short_t HMapSCBRA[10];
-Short_t HMapSCPP[10];
-Short_t HMapSCJ[10];
+  };
 
-const char* colW[4]={"Green ","Brown ","Orange","Blue  "};
-const char* colJ[8]={"Blue  ","Orange","Violet","Black ",
-	       "Yellow","Red   ","Grey  ","Blue  "};
-float leng[8]={     6.5,     6.5,     5.0,    5.0,
-		    3.5,     3.5,     8.0,    8.0};
-const char* colJH[8]={"Red   ","Grey  ","Orange","Yellow",
-		"Orange","Blue  ","Red   ","Yellow"};
-float lengH[8]={    6.5,     5.0,     5.0,    5.0,
-		    6.5,     5.0,     5.0,    5.0};
+  short EMapPPB[24][2];
+  short EMapPPP[24][2];
+  short EMapSCDEP[17];
+  short EMapSCBRA[17];
+  short EMapSCPP[17];
+  short EMapSCJ[17];
+  short	HMapPPB[24][2];
+  short HMapPPP[24][2];
+  short HMapSCDEP[10];
+  short HMapSCBRA[10];
+  short HMapSCPP[10];
+  short HMapSCJ[10];
+  
+  const char* colW[4]={"Green ","Brown ","Orange","Blue  "};
+  const char* colJ[8]={"Blue  ","Orange","Violet","Black ",
+		       "Yellow","Red   ","Grey  ","Blue  "};
+  const float leng[8]={     6.5,     6.5,     5.0,    5.0,
+			    3.5,     3.5,     8.0,    8.0};
+  const char* colJH[8]={"Red   ","Grey  ","Orange","Yellow",
+			"Orange","Blue  ","Red   ","Yellow"};
+  const float lengH[8]={    6.5,     5.0,     5.0,    5.0,
+			    6.5,     5.0,     5.0,    5.0};
+
+  const char* EHP[3]={"Ecal","Hcal","Pres"};
+  const char* CRT[5]={"EN","MN","MA","MS","ES"};
+  const char* DET[6]={"EN","ES","HN","HS","PN","PS"};
+}
 
 ClassImp(StFcsDbMaker)
 
-StFcsDbMaker::StFcsDbMaker(const Char_t *name) : StMaker(name) {}; 
+StFcsDbMaker::StFcsDbMaker(const char *name) : StMaker(name) {}; 
 
 StFcsDbMaker::~StFcsDbMaker() {}
 
-Int_t StFcsDbMaker::Init(){
-  if(mRun19==0){
-    makeMap();
-  }else{
+int StFcsDbMaker::Init(){
+  if(mRun19>0){
     makeMap2019();
+  }else{
+    makeMap();
   }
   if(GetDebug()) {
     printMap();
@@ -231,16 +244,16 @@ Int_t StFcsDbMaker::Init(){
   }
   return StMaker::Init();
 }
-Int_t StFcsDbMaker::Make(){return kStOK;}
-void StFcsDbMaker::Clear(const Char_t*){StMaker::Clear();}
-Int_t StFcsDbMaker::Finish(){return kStOK;}
+int StFcsDbMaker::Make(){return kStOK;}
+void StFcsDbMaker::Clear(const char*){StMaker::Clear();}
+int StFcsDbMaker::Finish(){return kStOK;}
 
-void StFcsDbMaker::setDbAccess(Int_t v) {mDbAccess =  v;}
-void StFcsDbMaker::setRun(Int_t run) {mRun = run;}
-void StFcsDbMaker::setRun19(Int_t v) {mRun19=v;}
-void StFcsDbMaker::setLeakyHcal(Int_t v) {mLeakyHcal=v;}
+void StFcsDbMaker::setDbAccess(int v) {mDbAccess =  v;}
+void StFcsDbMaker::setRun(int run) {mRun = run;}
+void StFcsDbMaker::setRun19(int v) {mRun19=v;}
+void StFcsDbMaker::setLeakyHcal(int v) {mLeakyHcal=v;}
 
-Int_t StFcsDbMaker::InitRun(Int_t runNumber) {
+int StFcsDbMaker::InitRun(int runNumber) {
     LOG_INFO << "StFcsDbMaker::InitRun - run = " << runNumber << endm;
     mRun=runNumber;
     
@@ -343,23 +356,23 @@ Int_t StFcsDbMaker::InitRun(Int_t runNumber) {
 	
 	//storing in DEP sorted table
 	int ie=0, ih=0, ip=0, ehp, ns, crt, slt, dep, ch;
-	for(Int_t ins=0; ins<kFcsNorthSouth; ins++){
+	for(int ins=0; ins<kFcsNorthSouth; ins++){
 	    int det=kFcsEcalNorthDetId+ins; 
-	    for(Int_t id=0; id<maxId(det); id++){ 
+	    for(int id=0; id<maxId(det); id++){ 
 		getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
 		mGain[ehp][ns][dep][ch]=mFcsEcalGain.gain[ie]; 
 		mGainCorr[ehp][ns][dep][ch]=mFcsEcalGainCorr.gaincorr[ie]; 
 		ie++;
 	    }
 	    det=kFcsHcalNorthDetId+ins; 
-	    for(Int_t id=0; id<maxId(det); id++){ 
+	    for(int id=0; id<maxId(det); id++){ 
 		getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
 		mGain[ehp][ns][dep][ch]=mFcsHcalGain.gain[ih]; 
 		mGainCorr[ehp][ns][dep][ch]=mFcsHcalGainCorr.gaincorr[ie]; 
 		ih++;
 	    }
 	    det=kFcsPresNorthDetId+ins; 
-	    for(Int_t id=0; id<maxId(det); id++){ 
+	    for(int id=0; id<maxId(det); id++){ 
 		getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
 		mGain[ehp][ns][dep][ch]=mFcsPresGain.gain[ip]; 
 		mGainCorr[ehp][ns][dep][ch]=mFcsPresValley.valley[ip]; 
@@ -385,97 +398,96 @@ Int_t StFcsDbMaker::InitRun(Int_t runNumber) {
     return kStOK;
 }
 
-Int_t StFcsDbMaker::maxDetectorId() const {return kFcsNDet;}
+int StFcsDbMaker::maxDetectorId() const {return kFcsNDet;}
 
-Int_t StFcsDbMaker::detectorId(int eh, int ns) const { 
+int StFcsDbMaker::detectorId(int eh, int ns) const { 
     if(eh>=0 && eh<kFcsEHP && ns>=0 && ns<kFcsNorthSouth) return eh*2 + ns;
     return -1;
 }
 
-Int_t StFcsDbMaker::ecalHcalPres(Int_t det) const {
+int StFcsDbMaker::ecalHcalPres(int det) const {
     if(det==0 || det==1) return 0;
     if(det==2 || det==3) return 1;
     if(det==4 || det==5) return 2;
     return -1;
 }
 
-Int_t StFcsDbMaker::northSouth(Int_t det) const{   
+int StFcsDbMaker::northSouth(int det) const{   
     return det%2;
 }
 
-Int_t StFcsDbMaker::nRow(Int_t det) const{ 
+int StFcsDbMaker::nRow(int det) const{ 
     int ehp=ecalHcalPres(det);
-    if(mRun19==0){
-      if     (ehp==0){return kFcsEcalNRow;}
-      else if(ehp==1){return kFcsHcalNRow;}
-      else if(ehp==2){return kFcsPresNRow;}
-      return -1;
-    }else{
+    if(mRun19>0){
       int ns = northSouth(det);
       if(ns==0) return 0;
       if     (ehp==0){return 8;}
       else if(ehp==1){return 4;}
       else if(ehp==2){return 9;}
       return -1;
+    }else{
+      if     (ehp==0){return kFcsEcalNRow;}
+      else if(ehp==1){return kFcsHcalNRow;}
+      else if(ehp==2){return kFcsPresNRow;}
+      return -1;
     }
 }
 
-Int_t StFcsDbMaker::nColumn(Int_t det) const{ 
+int StFcsDbMaker::nColumn(int det) const{ 
     int ehp=ecalHcalPres(det);
-    if(mRun19==0){
-      if     (ehp==0){return kFcsEcalNCol;}
-      else if(ehp==1){return kFcsHcalNCol;}
-      else if(ehp==2){return kFcsPresNCol;}
-      return -1;
-    }else{
+    if(mRun19>0){
       int ns = northSouth(det);
       if(ns==0) return 0;
       if     (ehp==0){return 8;}
       else if(ehp==1){return 4;}
       else if(ehp==2){return 1;}
       return -1;
+    }else{
+      if     (ehp==0){return kFcsEcalNCol;}
+      else if(ehp==1){return kFcsHcalNCol;}
+      else if(ehp==2){return kFcsPresNCol;}
+      return -1;
     }
 }
 
-Int_t StFcsDbMaker::maxId(Int_t det) const{ 
+int StFcsDbMaker::maxId(int det) const{ 
     int ehp=ecalHcalPres(det);
-    if(mRun19==0){
-      if     (ehp==0){return kFcsEcalMaxId;}
-      else if(ehp==1){return kFcsHcalMaxId;}
-      else if(ehp==2){return kFcsPresMaxId;}
-      return -1;
-    }else{
+    if(mRun19>0){
       int ns = northSouth(det);
       if(ns==0) return 0;
       if     (ehp==0){return 64;}
       else if(ehp==1){return 16;}
       else if(ehp==2){return 9;}
       return -1;
+    }else{
+      if     (ehp==0){return kFcsEcalMaxId;}
+      else if(ehp==1){return kFcsHcalMaxId;}
+      else if(ehp==2){return kFcsPresMaxId;}
+      return -1;
     }
 }
 
-Int_t StFcsDbMaker::getRowNumber(Int_t det, Int_t id) const{ 
+int StFcsDbMaker::getRowNumber(int det, int id) const{ 
     if(id<0 || id>=maxId(det)) return -1;
     return id/nColumn(det) + 1;
 }
 
-Int_t StFcsDbMaker::getColumnNumber(Int_t det, Int_t id) const{ 
+int StFcsDbMaker::getColumnNumber(int det, int id) const{ 
     if(id<0 || id>=maxId(det)) return -1;
     return id%nColumn(det) + 1;
 }
 
-Int_t StFcsDbMaker::getId(Int_t det, Int_t row, Int_t col) const{ 
+int StFcsDbMaker::getId(int det, int row, int col) const{ 
     if(row<=0 || row>nRow(det) || nRow(det)<0) return -1;
     if(col<=0 || col>nColumn(det) || nRow(det)<0) return -1;    
     return col - 1 + nColumn(det)*(row-1);
 }                                                                                        
 
-Int_t StFcsDbMaker::getDepCh(Int_t dep, Int_t ch) const{ 
+int StFcsDbMaker::getDepCh(int dep, int ch) const{ 
   return dep*kFcsMaxDepCh + ch;
 }                                                                                        
 
-void StFcsDbMaker::getName(Int_t det, Int_t id, char name[]) const{
-  const char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
+void StFcsDbMaker::getName(int det, int id, char name[]) const{
   int ehp,ns,crt,slt,dep,ch;
   int c=getColumnNumber(det,id);
   int r=getRowNumber(det,id);
@@ -483,28 +495,27 @@ void StFcsDbMaker::getName(Int_t det, Int_t id, char name[]) const{
   int scehp,scns,scdep,br,i2c,sipm,pp,j;
   getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
   sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
-	  nameDET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+	  DET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
 }
 
-void StFcsDbMaker::getName(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, char name[]) const{
-  const char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
+void StFcsDbMaker::getName(int ehp, int ns, int dep, int ch, char name[]) const{
   int det,id,crt,slt;
   getIdfromDep(ehp,ns,dep,ch,det,id,crt,slt);
   if(id==-1){
     det = detectorId(ehp, ns);
     sprintf(name,"%2s---_r--c--_Dep%02dCh%02d_F--/-/--/-",
-	    nameDET[det],dep,ch);
+	    DET[det],dep,ch);
   }else{
     int c=getColumnNumber(det,id);
     int r=getRowNumber(det,id);
     int scehp,scns,scdep,br,i2c,sipm,pp,j;
     getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
     sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
-	    nameDET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+	    DET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
   }
 }
 
-void StFcsDbMaker::getFromName(const char name[], Int_t &det, Int_t &id){
+void StFcsDbMaker::getFromName(const char name[], int &det, int &id){
     char detname[5];
     int r,c,dep,ch,scdep,br,i2c,sipm;
     sscanf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
@@ -513,7 +524,7 @@ void StFcsDbMaker::getFromName(const char name[], Int_t &det, Int_t &id){
     return;
 }
 
-Int_t StFcsDbMaker::getDetFromName(const std::string& detname){
+int StFcsDbMaker::getDetFromName(const std::string& detname){
     if     ( detname=="EN") {return 0;}
     else if( detname=="ES") {return 1;}
     else if( detname=="HN") {return 2;}
@@ -527,31 +538,8 @@ Int_t StFcsDbMaker::getDetFromName(const std::string& detname){
     }
 }
 
-StThreeVectorD StFcsDbMaker::getDetectorOffset(Int_t det) const{ 
-  if(mRun19==0){
-      if(mDbAccess==0){ //no DB
-	  double a = getDetectorAngle(det) / 180.0 * M_PI;
-	  if(det==0){
-	      double x = -16.69 - 13.9*sin(a);
-	      double z = 710.16 + 13.9*cos(a);
-	      return StThreeVectorD(x, 0.0, z);
-	  }
-	  if(det==1){
-	      double x =  16.69 + 13.9*sin(a);
-	      double z = 710.16 + 13.9*cos(a);
-	      return StThreeVectorD(x, 0.0, z);
-	  }
-	  if(det==2) return StThreeVectorD(-18.87, 0.0, 782.63);
-	  if(det==3) return StThreeVectorD( 18.87, 0.0, 782.63);
-	  return StThreeVectorD(0.0, 0.0, 0.0);	  
-      }else{ //from DB
-	  if(det>=0 && det<4) 	  
-	      return  StThreeVectorD(mFcsDetectorPosition.xoff[det], 
-				     mFcsDetectorPosition.yoff[det],
-				     mFcsDetectorPosition.zoff[det]);	  
-	  return StThreeVectorD(0.0, 0.0, 0.0);
-      }
-  }else{ //run19
+StThreeVectorD StFcsDbMaker::getDetectorOffset(int det) const{ 
+  if(mRun19>0){
     const float bOffY=-(17.0*5.81);   //40in=101.6cm and 17*5.81=98.76 so I will leave this unchanged
     if(det==1) return StThreeVectorD( 25.25*2.54, bOffY + getYWidth(det)*nRow(det)/2.0, 710.16);
     if(det==3) return StThreeVectorD( 27.50*2.54, bOffY + getYWidth(det)*nRow(det)/2.0, 782.63);
@@ -563,11 +551,34 @@ StThreeVectorD StFcsDbMaker::getDetectorOffset(Int_t det) const{
       //after June19, added 4 inches due to cooling & mounted on STGC supoort structure
       return StThreeVectorD( 14*2.54,    bOffY + 2.875 + 2.54 + getYWidth(det)*nRow(det)/2.0 + 4.0*2.54, 700.00);
     }
-      return  StThreeVectorD(0.0, 0.0, 0.0);
+    return  StThreeVectorD(0.0, 0.0, 0.0);
+  }else{
+    if(mDbAccess==0){ //no DB
+      double a = getDetectorAngle(det) / 180.0 * M_PI;
+      if(det==0){
+	double x = -16.69 - 13.9*sin(a);
+	double z = 710.16 + 13.9*cos(a);
+	return StThreeVectorD(x, 0.0, z);
+      }
+      if(det==1){
+	double x =  16.69 + 13.9*sin(a);
+	double z = 710.16 + 13.9*cos(a);
+	return StThreeVectorD(x, 0.0, z);
+      }
+      if(det==2) return StThreeVectorD(-18.87, 0.0, 782.63);
+      if(det==3) return StThreeVectorD( 18.87, 0.0, 782.63);
+      return StThreeVectorD(0.0, 0.0, 0.0);	  
+    }else{ //from DB
+      if(det>=0 && det<4) 	  
+	return  StThreeVectorD(mFcsDetectorPosition.xoff[det], 
+			       mFcsDetectorPosition.yoff[det],
+			       mFcsDetectorPosition.zoff[det]);	  
+      return StThreeVectorD(0.0, 0.0, 0.0);
+    }
   }
 }
 
-Float_t StFcsDbMaker::getDetectorAngle(Int_t det) const{ 
+float StFcsDbMaker::getDetectorAngle(int det) const{ 
     if(det==0) return  1.73;
     if(det==1) return  1.73;
     if(det==2) return  1.73;
@@ -577,7 +588,7 @@ Float_t StFcsDbMaker::getDetectorAngle(Int_t det) const{
     return 0.0;
 }
 
-Float_t StFcsDbMaker::getXWidth(Int_t det) const{ 
+float StFcsDbMaker::getXWidth(int det) const{ 
     if(det==0) return  5.542+0.05;
     if(det==1) return  5.542+0.05;
     if(det==2) return  10.00+0.02;
@@ -587,34 +598,34 @@ Float_t StFcsDbMaker::getXWidth(Int_t det) const{
     return 0.0;
 }
 
-Float_t StFcsDbMaker::getYWidth(Int_t det) const{ 
+float StFcsDbMaker::getYWidth(int det) const{ 
     if(det==4) return  5.00+0.02;
     if(det==5) return  5.00+0.02;
     return getXWidth(det);
 }
 
-Float_t StFcsDbMaker::getZDepth(Int_t det) const{
+float StFcsDbMaker::getZDepth(int det) const{
     if(det==0 || det==1) {return 30.97;} //66*(0.4+0.01+0.01)+(66-1)*0.05
     if(det==2 || det==3) {return 84.24;} //36*2.34
     else                 {return 1.0;}
 }
 
-Float_t StFcsDbMaker::getShowerMaxZ(Int_t det) const{ 
+float StFcsDbMaker::getShowerMaxZ(int det) const{ 
     if(det==0 || det==1) return 15.0;
     if(det==2 || det==3) return 25.0;
     return 0.0;
 }
 
 //! Get xy of center of the cell in local cell coordinate
-void StFcsDbMaker::getLocalXYinCell(StFcsHit* hit, Float_t &x, Float_t &y) const{
+void StFcsDbMaker::getLocalXYinCell(StFcsHit* hit, float &x, float &y) const{
     getLocalXYinCell(hit->detectorId(),hit->id(),x,y);
 }
 
-void StFcsDbMaker::getLocalXYinCell(Int_t det, Int_t id, Float_t &x, Float_t &y) const{
+void StFcsDbMaker::getLocalXYinCell(int det, int id, float &x, float &y) const{
     getLocalXYinCell(det,getColumnNumber(det,id),getRowNumber(det,id),x,y);
 }
 
-void StFcsDbMaker::getLocalXYinCell(Int_t det, Int_t col, Int_t row, Float_t &x, Float_t &y) const{    
+void StFcsDbMaker::getLocalXYinCell(int det, int col, int row, float &x, float &y) const{    
     if(mLeakyHcal==1 && (det==kFcsHcalNorthDetId || det==kFcsHcalSouthDetId)){
 	if(col==1){
 	    x=float(col)-0.4;
@@ -632,7 +643,7 @@ void StFcsDbMaker::getLocalXYinCell(Int_t det, Int_t col, Int_t row, Float_t &x,
 //! get coordinates of center of 4x4 sums in STAR frame 
 //! Ecal 4x4 : col goes 1-9 row goes 1-15
 //! Hcal 4x4 : col goes 1-5 row goes 1-9
-StThreeVectorD StFcsDbMaker::getStarXYZ_4x4(Int_t det,Int_t col, Int_t row) const{
+StThreeVectorD StFcsDbMaker::getStarXYZ_4x4(int det,int col, int row) const{
     int c1=0, c2=0, r1=0, r2=0;
     if(det<=kFcsEcalSouthDetId){
 	c1=(col-1)*2 + 2;
@@ -649,29 +660,29 @@ StThreeVectorD StFcsDbMaker::getStarXYZ_4x4(Int_t det,Int_t col, Int_t row) cons
 }
 
 //! get coordinates of center of the cell STAR frame from StFcsHit
-StThreeVectorD StFcsDbMaker::getStarXYZ(StFcsHit* hit, Float_t FcsZ) const{ 
+StThreeVectorD StFcsDbMaker::getStarXYZ(StFcsHit* hit, float FcsZ) const{ 
     return getStarXYZ(hit->detectorId(),hit->id(),FcsZ);
 }
 
 //! get coordinates of center of the cell in STAR frame from det/id
-StThreeVectorD StFcsDbMaker::getStarXYZ(Int_t det, Int_t id, Float_t FcsZ) const{ 
+StThreeVectorD StFcsDbMaker::getStarXYZ(int det, int id, float FcsZ) const{ 
     return getStarXYZ(det,getColumnNumber(det,id),getRowNumber(det,id),FcsZ);   
 }
 
 //! get coordinates of center of the cell STAR frame from det/row/column
-StThreeVectorD StFcsDbMaker::getStarXYZ(Int_t det, Int_t col, Int_t row, Float_t FcsZ) const{ 
+StThreeVectorD StFcsDbMaker::getStarXYZ(int det, int col, int row, float FcsZ) const{ 
     float x,y;
     getLocalXYinCell(det,col,row,x,y);
     return getStarXYZfromColumnRow(det,x,y,FcsZ);
 }
 
 //! get coordinates in STAR frame from det/row/column grid space [unit is cell size in float]
-StThreeVectorD StFcsDbMaker::getStarXYZfromColumnRow(Int_t det, Float_t col, Float_t row, Float_t FcsZ) const{ 
+StThreeVectorD StFcsDbMaker::getStarXYZfromColumnRow(int det, float col, float row, float FcsZ) const{ 
     return getStarXYZ(det,col*getXWidth(det),row*getYWidth(det),FcsZ); 
 }
 
 //! get coordinates in STAR frame from local XY (in row/column space [cm])
-StThreeVectorD StFcsDbMaker::getStarXYZ(Int_t det, Float_t FcsX, Float_t FcsY, Float_t FcsZ, Float_t zVertex) const{ 
+StThreeVectorD StFcsDbMaker::getStarXYZ(int det, float FcsX, float FcsY, float FcsZ, float zVertex) const{ 
     if(FcsZ<0.0) FcsZ = getShowerMaxZ(det);
     double x = 0.0, y=0.0, z=0.0;
     StThreeVectorD off = getDetectorOffset(det);
@@ -690,15 +701,15 @@ StThreeVectorD StFcsDbMaker::getStarXYZ(Int_t det, Float_t FcsX, Float_t FcsY, F
     return StThreeVectorD(x,y,z);
 }
 
-Float_t StFcsDbMaker::getPhi(Int_t det,Float_t FcsX, Float_t FcsY, Float_t FcsZ) const{  
+float StFcsDbMaker::getPhi(int det,float FcsX, float FcsY, float FcsZ) const{  
     return (getStarXYZ(det,FcsX,FcsY,FcsZ)).phi();
 }
  
-Float_t StFcsDbMaker::getEta(Int_t det,Float_t FcsX, Float_t FcsY, Float_t FcsZ, Float_t zVertex)  const{  
+float StFcsDbMaker::getEta(int det,float FcsX, float FcsY, float FcsZ, float zVertex)  const{  
     return (getStarXYZ(det,FcsX,FcsY,FcsZ,zVertex)).pseudoRapidity();
 }
 
-StLorentzVectorD StFcsDbMaker::getLorentzVector(const StThreeVectorD& xyz, Float_t energy, Float_t zVertex){
+StLorentzVectorD StFcsDbMaker::getLorentzVector(const StThreeVectorD& xyz, float energy, float zVertex){
     // Calculate a 4 momentum from a direction/momentum vector and energy assuming zero mass i.e. E=p
     // Taking into account beamline offsets and angles from DB
     StThreeVectorD xyznew(xyz.x()-mVx,xyz.y()-mVy,xyz.z()-zVertex);
@@ -714,74 +725,78 @@ StLorentzVectorD StFcsDbMaker::getLorentzVector(const StThreeVectorD& xyz, Float
     return StLorentzVectorD(mom3, e);
 }
 
-Float_t StFcsDbMaker::getSamplingFraction(Int_t det) const{
+float StFcsDbMaker::getSamplingFraction(int det) const{
     if(det==0 || det==1) return  0.2;
     if(det==2 || det==3) return  0.0145;
     if(det==4 || det==5) return  2.0; //2MeV for MIP
     return 0.0;
 }
 
-Int_t   StFcsDbMaker::getZeroSuppression(Int_t det) const {
+int   StFcsDbMaker::getZeroSuppression(int det) const {
   return 1;
 }
 
-Float_t StFcsDbMaker::getGain(StFcsHit* hit) const  {
+float StFcsDbMaker::getGain(StFcsHit* hit) const  {
   return getGain(hit->detectorId(), hit->id());
 }
 
-Float_t StFcsDbMaker::getGain(Int_t det, Int_t id) const  {
-    if(det>=0 && det<kFcsNDet && id>=0 && id<maxId(det)) {
-	if(mForceUniformGain<0.0){ //default fixed value
-	    if(det<=kFcsHcalSouthDetId) return 0.0053; //default 5.3MeV/ch
-	    return 100;                                //100ch for MIP for Pres
-	}else if(mForceUniformGain>0.0){ //force to uniform gain
-	    return mForceUniformGain;
-	}else{  // value from DB or readText
-	    int ehp,ns,dep,ch,crt,slt;
-	    getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
-	    return mGain[ehp][ns][dep][ch];
-	}
+float StFcsDbMaker::getGain(int det, int id) const  {
+  if(det>=0 && det<kFcsNDet && id>=0 && id<maxId(det)) {
+    switch(mGainMode){
+    case GAINMODE::FIXED :
+      if(det<=kFcsHcalSouthDetId) return 0.0053; //default 5.3MeV/ch
+      return 100;                                //100ch for MIP for Pres
+    case GAINMODE::FORCED :
+      return mForceUniformGain;
+    case GAINMODE::DB :
+    default:
+      int ehp,ns,dep,ch,crt,slt;
+      getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+      return mGain[ehp][ns][dep][ch];
     }
-    return 1.0;
+  }
+  return 1.0;
 }
 
-Float_t StFcsDbMaker::getGainCorrection(StFcsHit* hit) const  {
+float StFcsDbMaker::getGainCorrection(StFcsHit* hit) const  {
     return getGainCorrection(hit->detectorId(), hit->id());
 }
 
-Float_t StFcsDbMaker::getGainCorrection(Int_t det, Int_t id) const  {
-    if(det>=0 && det<kFcsNDet && id>=0 && id<maxId(det)) {
-	if(mForceUniformGain<0.0){ //default fixed value
-	    if(det<=kFcsHcalSouthDetId) return 1.0;    //default 
-	    return 0.5;                                //0.5 MIP for Pres
-	}else if(mForceUniformGainCorrection>0.0){ //force to uniform gaincorr
-	    return mForceUniformGainCorrection;
-	}else{  // value from DB or readText
-	    int ehp,ns,dep,ch,crt,slt;
-	    getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
-	    return mGainCorr[ehp][ns][dep][ch];
-	}
+float StFcsDbMaker::getGainCorrection(int det, int id) const  {
+  if(det>=0 && det<kFcsNDet && id>=0 && id<maxId(det)) {
+    switch(mGainCorrMode){
+    case GAINMODE::FIXED :
+      if(det<=kFcsHcalSouthDetId) return 1.0;   // default 1.0
+      return 0.5;                               // 1/2 MIP for Pres
+    case GAINMODE::FORCED :
+      return mForceUniformGain;
+    case GAINMODE::DB :
+    default:
+      int ehp,ns,dep,ch,crt,slt;
+      getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+      return mGainCorr[ehp][ns][dep][ch];
     }
-    return 1.0;
+  }
+  return 1.0;
 }
 
-Float_t StFcsDbMaker::getPresValley(StFcsHit* hit) const  {
+float StFcsDbMaker::getPresValley(StFcsHit* hit) const  {
     return getGainCorrection(hit->detectorId(), hit->id());
 }
 
-Float_t StFcsDbMaker::getPresValley(Int_t det, Int_t id) const  {
+float StFcsDbMaker::getPresValley(int det, int id) const  {
     return getGainCorrection(det,id);
 }
 
-Float_t StFcsDbMaker::getGain8(StFcsHit* hit) const  {
+float StFcsDbMaker::getGain8(StFcsHit* hit) const  {
   return getGain8(hit->detectorId(), hit->id());
 }
 
-Float_t StFcsDbMaker::getGain8(Int_t det, Int_t id) const {
+float StFcsDbMaker::getGain8(int det, int id) const {
   return getGain(det,id)*0.0070/0.0053;
 }
 
-void StFcsDbMaker::getDepfromId(Int_t detectorId, Int_t id, Int_t &ehp, Int_t &ns, Int_t &crt, Int_t &slt, Int_t &dep, Int_t &ch) const{
+void StFcsDbMaker::getDepfromId(int detectorId, int id, int &ehp, int &ns, int &crt, int &slt, int &dep, int &ch) const{
     ehp=-1; ns=-1; crt=-1; slt=-1; dep=-1; ch=-1;
     if(detectorId<0 || detectorId>=kFcsNDet) return;
     if(id<0 || id>=kFcsMaxId) return;
@@ -794,7 +809,7 @@ void StFcsDbMaker::getDepfromId(Int_t detectorId, Int_t id, Int_t &ehp, Int_t &n
     return;
 }
 
-void StFcsDbMaker::getIdfromDep(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, Int_t &detectorId, Int_t &id, Int_t &crt, Int_t &slt) const{
+void StFcsDbMaker::getIdfromDep(int ehp, int ns, int dep, int ch, int &detectorId, int &id, int &crt, int &slt) const{
     detectorId=6; id=4095; crt=0; slt=0;
     if(ehp<0 || ehp>=kFcsEHP) return;
     if(ns<0  || ns>=kFcsNorthSouth) return;
@@ -807,8 +822,8 @@ void StFcsDbMaker::getIdfromDep(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, Int_t 
     return;
 }
 
-int StFcsDbMaker::getNDep(Int_t ehp, Int_t ns) const{
-  if(mRun19==1){
+int StFcsDbMaker::getNDep(int ehp, int ns) const{
+  if(mRun19>0){
     if(ns==0) return 0;
     switch(ehp){
     case 0: return 2;
@@ -828,9 +843,9 @@ int StFcsDbMaker::getNDep(Int_t ehp, Int_t ns) const{
   }
 }
 
-void StFcsDbMaker::getSCmap(Int_t det, Int_t id, 
-			    Int_t &ehp, Int_t &ns, Int_t &scdep, Int_t &branch, Int_t &fee_i2c, Int_t &sipm, 
-			    Int_t &pp, Int_t &jacket) const{
+void StFcsDbMaker::getSCmap(int det, int id, 
+			    int &ehp, int &ns, int &scdep, int &branch, int &fee_i2c, int &sipm, 
+			    int &pp, int &jacket) const{
     ehp=-1; ns=-1; scdep=-1; branch=-1; fee_i2c=-1; sipm=-1, pp=-1; jacket=-1;
     if(det<0 || det>=kFcsNDet) return;
     if(id<0 || id>=kFcsMaxId) return;
@@ -845,8 +860,8 @@ void StFcsDbMaker::getSCmap(Int_t det, Int_t id,
     return;
 }
 
-void StFcsDbMaker::getIdfromSCmap(Int_t ehp, Int_t ns, Int_t scdep, Int_t branch, Int_t fee_i2c, Int_t sipm,
-				  Int_t &det, Int_t &id)const{
+void StFcsDbMaker::getIdfromSCmap(int ehp, int ns, int scdep, int branch, int fee_i2c, int sipm,
+				  int &det, int &id)const{
   det=-1; 
   id=-1;
   if(ehp<0 || det>=kFcsEHP) return;
@@ -861,10 +876,6 @@ void StFcsDbMaker::getIdfromSCmap(Int_t ehp, Int_t ns, Int_t scdep, Int_t branch
 }
 
 int StFcsDbMaker::jacketColor(int ehp, int ns, int dep, int ch){
-    // char* colJ[8]={"Blue  ","Orange","Violet","Yellow",
-    //                "Green ","Red   ","Grey  ","Black "};
-    // char* colJH[8]={"Red   ","Grey  ","Orange","Yellow",
-    //   	       "Orange","Blue  ","Red   ","Yellow"};
     switch(ehp){
     case 0: 
 	if(dep<=19) return dep%5;
@@ -1234,7 +1245,7 @@ void  StFcsDbMaker::makeMap2019(){
   }
 }
 
-void StFcsDbMaker::getIdfromEPD(Int_t pp, Int_t tt, Int_t& det, Int_t &id){
+void StFcsDbMaker::getIdfromEPD(int pp, int tt, int& det, int &id){
     det=-1; 
     id=-1;
     int row,col;
@@ -1251,7 +1262,7 @@ void StFcsDbMaker::getIdfromEPD(Int_t pp, Int_t tt, Int_t& det, Int_t &id){
     id=(row-1)*16 + col;
 }
 
-void StFcsDbMaker::getEPDfromId(Int_t det, Int_t id, Int_t &pp, Int_t &tt){
+void StFcsDbMaker::getEPDfromId(int det, int id, int &pp, int &tt){
     int row=id/16 + 1;
     int col=id%16 + 1;
     if(det==4){
@@ -1361,10 +1372,6 @@ void StFcsDbMaker::printMap(){
 
     FILE *f7  = fopen("fcsEpdMap.txt","w");    
     FILE *fpp = fopen("fcsPPMap.txt","w");    
-
-    const char* EHP[3]={"Ecal","Hcal","Pres"};
-    const char* CRT[5]={"EN","MN","MA","MS","ES"};
-    const char* DET[6]={"EN","ES","HN","HS","PN","PS"};
     
     //Ecal
     for(ns=0; ns<2; ns++){
@@ -1780,7 +1787,7 @@ void StFcsDbMaker::printMap(){
     fclose(fpp);
 }
 
-Float_t StFcsDbMaker::getEtGain(Int_t det, Int_t id) const{
+float StFcsDbMaker::getEtGain(int det, int id) const{
   if(det<0 || det>=kFcsNDet) return 0.0;
   if(id<0 || id>=kFcsMaxId) return 0.0;
   return  mEtGain[det][id];
@@ -1854,11 +1861,11 @@ void  StFcsDbMaker::printEtGain(){
     fclose(f7);
 }
 
-float StFcsDbMaker::pedestal(Int_t ehp, Int_t ns, Int_t dep, Int_t ch){
+float StFcsDbMaker::pedestal(int ehp, int ns, int dep, int ch){
   return mPed[ehp][ns][dep][ch];
 }
 
-void StFcsDbMaker::setPedestal(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, Float_t ped){
+void StFcsDbMaker::setPedestal(int ehp, int ns, int dep, int ch, float ped){
   mPed[ehp][ns][dep][ch]=ped;
 }
 

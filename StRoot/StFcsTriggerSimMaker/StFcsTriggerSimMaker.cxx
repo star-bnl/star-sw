@@ -1,8 +1,11 @@
 // \class StFmsTriggerSimMaker
 // \author Akio Ogawa
 //
-//  $Id: StFcsTriggerSimMaker.cxx,v 1.6 2020/07/24 17:22:39 akio Exp $
+//  $Id: StFcsTriggerSimMaker.cxx,v 1.7 2021/02/25 21:56:10 akio Exp $
 //  $Log: StFcsTriggerSimMaker.cxx,v $
+//  Revision 1.7  2021/02/25 21:56:10  akio
+//  Int_t -> int
+//
 //  Revision 1.6  2020/07/24 17:22:39  akio
 //  adding option to reading in EPD masks
 //
@@ -49,11 +52,11 @@ u_short fcs_trg_pedestal[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
 
 ClassImp(StFcsTriggerSimMaker);
 
-StFcsTriggerSimMaker::StFcsTriggerSimMaker(const Char_t* name): StMaker(name) {}
+StFcsTriggerSimMaker::StFcsTriggerSimMaker(const char* name): StMaker(name) {}
 
 StFcsTriggerSimMaker::~StFcsTriggerSimMaker(){}
 
-Int_t StFcsTriggerSimMaker::Init(){  
+int StFcsTriggerSimMaker::Init(){  
     LOG_INFO << "StFcsTriggerSimMaker::Init" << endm;
     mFcsDbMaker=static_cast<StFcsDbMaker*>(GetMaker("fcsDb"));  
     if(!mFcsDbMaker){
@@ -102,7 +105,7 @@ Int_t StFcsTriggerSimMaker::Init(){
     return kStOK;
 }
 
-Int_t StFcsTriggerSimMaker::InitRun(Int_t runNumber){
+int StFcsTriggerSimMaker::InitRun(int runNumber){
     LOG_INFO << "StFcsTriggerSimMaker::InitRun" << endm;
     //print out 4x4 and JP info
     if(mDebug>0){
@@ -155,7 +158,7 @@ Int_t StFcsTriggerSimMaker::InitRun(Int_t runNumber){
     return kStOK;
 }
 
-Int_t StFcsTriggerSimMaker::Finish(){
+int StFcsTriggerSimMaker::Finish(){
     mTrgSim->run_stop();
     if(mFile) {
 	printf("Closing %s\n",mFilename);
@@ -169,7 +172,7 @@ Int_t StFcsTriggerSimMaker::Finish(){
     return kStOK;
 }
 
-Int_t StFcsTriggerSimMaker::Make(){
+int StFcsTriggerSimMaker::Make(){
     StEvent* event = (StEvent*)GetInputDS("StEvent");
     if(!event) {LOG_ERROR << "StFcsTriggerSimMaker::Make did not find StEvent"<<endm; return kStErr;}
     mFcsColl = event->fcsCollection();

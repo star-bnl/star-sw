@@ -11,7 +11,7 @@
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_TPX/daq_tpx.h>
-
+#include <DAQ_TPX/tpxGain.h>
 
 
 int main(int argc, char *argv[])
@@ -21,13 +21,17 @@ int main(int argc, char *argv[])
 
 	daqReader *dr = new daqReader(argv[1]) ;	// open file
 
-
-	// need this specific construct so that the cluster finder can initialize!
+	// need this specific construct so that the cluster finder can initialized!
 	daq_tpx *tpx = new daq_tpx(dr) ;	// insert the TPX detector explicitly in the DAQ_READER
+	// set compatibility flsgs
 	tpx->fcf_run_compatibility = 10 ;
+	tpx->fcf_do_cuts = 1 ;
 
-	tpx->InitRun(123) ;			// initialize the run with some dummy run number...
+	// we'll skip this so that we can load our own gaons
+//	tpx->InitRun(123) ;			// initialize the run with some dummy run number...
 
+	// load our own gain file here
+	tpx->gain_algo->from_file((char *)"tpx_gains.txt.20191216.060513",0) ;
 
 	while(dr->get(0,0)) {			// zip through the input files...
 
@@ -41,19 +45,18 @@ int main(int argc, char *argv[])
 	dd = dr->det("tpx")->get("cld") ;
 	while(dd && dd->iterate()) {
 		for(u_int i=0;i<dd->ncontent;i++) {
-#if 0
-			switch(dd->cld[i].flags) {
-			case 0 :	// normal
-			case 1 :	// normal
-			case 2 :	// normal
-			case 3 :	// should not really use
-				continue ;
-			default :
-				break ;
-			}
-#else
-			if (dd->cld[i].flags == 3) continue;
-#endif
+
+// Here we can blow off clusters we don't care about
+//			switch(dd->cld[i].flags) {
+//			case 0 :	// normal
+//			case 1 :	// normal
+//			case 2 :	// normal
+//			case 3 :	// should not really use
+//				continue ;
+//			default :
+//				break ;
+//			}
+
 			printf("in file: row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X\n",dd->row,
 			       dd->cld[i].pad,
 			       dd->cld[i].p1,
@@ -137,15 +140,17 @@ int main(int argc, char *argv[])
 #endif
 
 #if 1
-#if 0
-			switch(dd->sim_cld[i].cld.flags) {
-			case 0 :
-			case 2 :
-				continue ;
-			default:
-				break ;
-			}
-#endif
+// Here we can blow off clusters we don't care about
+//			if(dd->sim_cld[i].cld.flags != 0) continue ;
+//			if((dd->sim_cld[i].cld.p2 - dd->sim_cld[i].cld.p1) != 2) continue ;
+//			switch(dd->sim_cld[i].cld.flags) {
+//			case 0 :
+//			case 2 :
+//				continue ;
+//			default:
+//				break ;
+//			}
+//
 //			if(dd->sim_cld[i].cld.tb < 15.0) 
 			printf("rerun: row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X: track %d, Q %d\n",dd->row,
 			       dd->sim_cld[i].cld.pad,

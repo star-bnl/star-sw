@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.120 2019/08/30 20:16:54 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.121 2021/02/26 16:54:01 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.121  2021/02/26 16:54:01  genevb
+ * Pass a padrow to alignment codes to determine inner vs. outer sector alignment matrix
+ *
  * Revision 1.120  2019/08/30 20:16:54  genevb
  * Be sure to restore SpaceCharge settings in PredictSpaceCharge()
  *
@@ -5890,7 +5893,7 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
 #if 0
                   iAlignMatrix.LocalToMaster(local,master);
 #else
-		  StTpcLocalSectorCoordinate lSec(local[0],local[1],local[2],Seclist[k]);
+		  StTpcLocalSectorCoordinate lSec(local[0],local[1],local[2],Seclist[k],1);
 		  tran(lSec,locP);
 #endif
                   iOffsetFirst = (TPC_Z0 + m * master[2]) * StarMagE;
@@ -5900,7 +5903,7 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
 #if 0
                   iAlignMatrix.LocalToMaster(local,master);
 #else
-		  lSec = StTpcLocalSectorCoordinate(local[0],local[1],local[2],Seclist[k]);
+		  lSec = StTpcLocalSectorCoordinate(local[0],local[1],local[2],Seclist[k],INNER[Seclist[k]-1]);
 		  tran(lSec,locP);
 #endif
                   iOffsetLast  = (TPC_Z0 + m * master[2]) * StarMagE;
@@ -5910,7 +5913,7 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
 #if 0
                   oAlignMatrix.LocalToMaster(local,master);
 #else
-		  lSec = StTpcLocalSectorCoordinate(local[0],local[1],local[2],Seclist[k]);
+		  lSec = StTpcLocalSectorCoordinate(local[0],local[1],local[2],Seclist[k],INNER[Seclist[k]-1]+1);
 		  tran(lSec,locP);
 #endif
                   oOffsetFirst = (TPC_Z0 + m * master[2]) * StarMagE;
@@ -5920,7 +5923,7 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
 #if 0
                   oAlignMatrix.LocalToMaster(local,master);
 #else
-		  lSec = StTpcLocalSectorCoordinate(local[0],local[1],local[2],Seclist[k]);
+		  lSec = StTpcLocalSectorCoordinate(local[0],local[1],local[2],Seclist[k],TPCROWS[Seclist[k]-1]);
 		  tran(lSec,locP);
 #endif
                   oOffsetLast  = (TPC_Z0 + m * master[2]) * StarMagE;
