@@ -1,6 +1,12 @@
-// $Id: StFcsFastSimulatorMaker.h,v 1.6 2021/02/23 16:25:51 akio Exp $
+// $Id: StFcsFastSimulatorMaker.h,v 1.8 2021/02/25 21:54:41 akio Exp $
 //
 // $Log: StFcsFastSimulatorMaker.h,v $
+// Revision 1.8  2021/02/25 21:54:41  akio
+// Int_t -> int
+//
+// Revision 1.7  2021/02/25 19:25:48  akio
+// Code modified for STAR code review
+//
 // Revision 1.6  2021/02/23 16:25:51  akio
 // Modification to attend comments from STAR code review (Jason)
 //
@@ -42,11 +48,12 @@ class StFcsFastSimulatorMaker : public StMaker {
 
 public:
     
-    StFcsFastSimulatorMaker(const Char_t* name = "fcsSim"); 
+    StFcsFastSimulatorMaker(const char* name = "fcsSim"); 
     virtual ~StFcsFastSimulatorMaker() {}
-    Int_t Init();
+    int Init();
     void  Clear(Option_t *option="");
-    Int_t Make();
+    int Make();
+    void setDebug(int v=1) {SetDebug(v);}  //!backward compatibility 
  
     /// switching light collection models in xml file 
     ///	 0 = straight Birk				   

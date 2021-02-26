@@ -3,8 +3,11 @@
 //
 //   This is FCS event display.
 // 
-//  $Id: StFcsEventDisplay.h,v 1.6 2021/02/13 21:37:31 akio Exp $
+//  $Id: StFcsEventDisplay.h,v 1.7 2021/02/25 21:28:07 akio Exp $
 //  $Log: StFcsEventDisplay.h,v $
+//  Revision 1.7  2021/02/25 21:28:07  akio
+//  Int_t -> int
+//
 //  Revision 1.6  2021/02/13 21:37:31  akio
 //  #ifdef ___USESTGC___
 //
@@ -42,11 +45,11 @@ class StEpdGeom;
 
 class StFcsEventDisplay : public StMaker{
 public: 
-    StFcsEventDisplay(const Char_t* name="FcsED");
+    StFcsEventDisplay(const char* name="FcsED");
     ~StFcsEventDisplay();
-    Int_t Init();
-    Int_t Make();
-    Int_t Finish();
+    int Init();
+    int Make();
+    int Finish();
 
     void setFilter(int v){mFilter=v;}
     void setMaxEvents(int v){mMaxEvents=v;}         
@@ -75,7 +78,7 @@ private:
     TFile* mFile=0;
     
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFcsEventDisplay.h,v 1.6 2021/02/13 21:37:31 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFcsEventDisplay.h,v 1.7 2021/02/25 21:28:07 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFcsEventDisplay,0);
 };

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDbMaker.h,v 1.21 2021/02/24 22:56:19 akio Exp $
+ * $Id: StFcsDbMaker.h,v 1.22 2021/02/25 21:53:50 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.h,v $
+ * Revision 1.22  2021/02/25 21:53:50  akio
+ * Int_t -> int
+ *
  * Revision 1.21  2021/02/24 22:56:19  akio
  * Modified for STAR code review (Dmitry)
  *
@@ -99,19 +102,19 @@ class StFcsHit;
 class StFcsDbMaker : public StMaker {
 
 public: 
-  StFcsDbMaker(const Char_t *name="fcsDb");
+  StFcsDbMaker(const char *name="fcsDb");
   virtual       ~StFcsDbMaker();
-  virtual Int_t  Init();
-  virtual Int_t  InitRun(Int_t runNumber);
-  virtual Int_t  Make();
-  virtual Int_t  Finish();
-  virtual void   Clear(const Char_t *opt);
+  virtual int  Init();
+  virtual int  InitRun(int runNumber);
+  virtual int  Make();
+  virtual int  Finish();
+  virtual void  Clear(const char *opt);
  
-  void setDebug(Int_t v=1) {SetDebug(v);}  //!backward compatibility 
-  void setDbAccess(Int_t v=1);  //! enable(1) or disable(0) offline DB access
-  void setRun(Int_t run);       //! set run# 
-  void setRun19(Int_t v=1);     //! set run19 geometry, otherwise final run21
-  void setLeakyHcal(Int_t v=1); //! set leaky Hcal
+  void setDebug(int v=1) {SetDebug(v);}  //!backward compatibility 
+  void setDbAccess(int v=1);  //! enable(1) or disable(0) offline DB access
+  void setRun(int run);       //! set run# 
+  void setRun19(int v=1);     //! set run19 geometry, otherwise final run21
+  void setLeakyHcal(int v=1); //! set leaky Hcal
 
   //! Getting the whole DB table
   fcsDetectorPosition_st* fcsDetectorPosition(); //! get fcsDetectorPosition_st*
@@ -123,66 +126,66 @@ public:
   fcsPresValley_st* fcsPresValley();             //! get fcsPresValley_st*
 
   //! Utility functions related to FCS ChannelGeometry
-  Int_t maxDetectorId() const;              //! 6
-  Int_t detectorId(int eh, int ns) const;   //! Ecal North=0, Ecal South=1, Hcal North=2, Hcal South=3, Pres=4/5
-  Int_t ecalHcalPres(Int_t det) const;      //! Ecal=0, Hcal=1, Pres=2
-  Int_t northSouth(Int_t det) const;        //! north or south side
-  Int_t nRow(Int_t det) const;              //! number of rows
-  Int_t nColumn(Int_t det) const;           //! number of column
-  Int_t maxId(Int_t det) const;             //! maximum number of id
-  Int_t getRowNumber(Int_t det, Int_t id) const;       //! get the row number for the channel
-  Int_t getColumnNumber(Int_t det, Int_t id) const ;   //! get the column number for the channel
-  Int_t getId(Int_t det, Int_t row, Int_t col) const ; //! get the id from row/col
-  Int_t getDepCh(Int_t dep, Int_t ch) const ; //! get the DEP/ch id
-  void getName(Int_t det, Int_t id, char name[]) const; //! Get Name of a channel
-  void getName(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, char name[]) const; //! Get Name of a channel 
-  static void getFromName(const char name[], Int_t& det, Int_t& id); //! Get det/id from name
-  static Int_t getDetFromName(const std::string& detname);  //! Get det from name
+  int maxDetectorId() const;              //! 6
+  int detectorId(int eh, int ns) const;   //! Ecal North=0, Ecal South=1, Hcal North=2, Hcal South=3, Pres=4/5
+  int ecalHcalPres(int det) const;      //! Ecal=0, Hcal=1, Pres=2
+  int northSouth(int det) const;        //! north or south side
+  int nRow(int det) const;              //! number of rows
+  int nColumn(int det) const;           //! number of column
+  int maxId(int det) const;             //! maximum number of id
+  int getRowNumber(int det, int id) const;       //! get the row number for the channel
+  int getColumnNumber(int det, int id) const ;   //! get the column number for the channel
+  int getId(int det, int row, int col) const ; //! get the id from row/col
+  int getDepCh(int dep, int ch) const ; //! get the DEP/ch id
+  void getName(int det, int id, char name[]) const; //! Get Name of a channel
+  void getName(int ehp, int ns, int dep, int ch, char name[]) const; //! Get Name of a channel 
+  static void getFromName(const char name[], int& det, int& id); //! Get det/id from name
+  static int getDetFromName(const std::string& detname);  //! Get det from name
 
   //! Utility functions related to DetectorPosition
-  StThreeVectorD getDetectorOffset(Int_t det) const;  //! get the offset of the detector
-  Float_t getDetectorAngle(Int_t det) const;  //! get the angle of the detector
-  Float_t getXWidth(Int_t det) const; //! get the X width of the cell
-  Float_t getYWidth(Int_t det) const; //! get the Y width of the cell
+  StThreeVectorD getDetectorOffset(int det) const;  //! get the offset of the detector
+  float getDetectorAngle(int det) const;  //! get the angle of the detector
+  float getXWidth(int det) const; //! get the X width of the cell
+  float getYWidth(int det) const; //! get the Y width of the cell
   
-  Float_t getZDepth(Int_t det) const;       // z depth of active detector
-  Float_t getShowerMaxZ(Int_t det) const;   // default z[cm] from front face for where it measure x/y (shower max) 
+  float getZDepth(int det) const;       // z depth of active detector
+  float getShowerMaxZ(int det) const;   // default z[cm] from front face for where it measure x/y (shower max) 
   
   //! getting XY in local cell coordinate
-  void getLocalXYinCell(StFcsHit* hit, Float_t &x, Float_t &y) const; 
-  void getLocalXYinCell(Int_t det, Int_t id, Float_t &x, Float_t &y) const;
-  void getLocalXYinCell(Int_t det, Int_t col, Int_t row, Float_t &x, Float_t &y) const;
+  void getLocalXYinCell(StFcsHit* hit, float &x, float &y) const; 
+  void getLocalXYinCell(int det, int id, float &x, float &y) const;
+  void getLocalXYinCell(int det, int col, int row, float &x, float &y) const;
 
   //! get the STAR frame cooridnates from local XYZ [cm]
-  StThreeVectorD getStarXYZ(Int_t det,Float_t FcsX, Float_t FcsY, Float_t FcsZ=-1.0, Float_t zVertex=0.0) const;
+  StThreeVectorD getStarXYZ(int det,float FcsX, float FcsY, float FcsZ=-1.0, float zVertex=0.0) const;
   //! get the STAR frame phi angle from from local X/Y [cm]
-  Float_t getPhi(Int_t det,Float_t FcsX, Float_t FcsY, Float_t FcsZ=-1.0) const; 
+  float getPhi(int det,float FcsX, float FcsY, float FcsZ=-1.0) const; 
   //! get the STAR frame pseudo rapidity from the vertex from local X/Y [cm]
-  Float_t getEta(Int_t det,Float_t FcsX, Float_t FcsY, Float_t FcsZ=-1.0, Float_t zVertex=0.0) const; 
+  float getEta(int det,float FcsX, float FcsY, float FcsZ=-1.0, float zVertex=0.0) const; 
   
   //! get the STAR frame cooridnates from other way
-  StThreeVectorD getStarXYZfromColumnRow(Int_t det,Float_t col, Float_t row, Float_t FcsZ=-1.0) const; //from column/row[cell size unit]
-  StThreeVectorD getStarXYZ(Int_t det, Int_t col, int row, Float_t FcsZ=-1.0) const;   //from column/row [cell unit]
-  StThreeVectorD getStarXYZ(StFcsHit* hit, Float_t FcsZ=-1.0) const;                   //from StFcsHit
-  StThreeVectorD getStarXYZ(Int_t det, Int_t id, Float_t FcsZ=-1.0) const;             //center of the cell
+  StThreeVectorD getStarXYZfromColumnRow(int det,float col, float row, float FcsZ=-1.0) const; //from column/row[cell size unit]
+  StThreeVectorD getStarXYZ(int det, int col, int row, float FcsZ=-1.0) const;   //from column/row [cell unit]
+  StThreeVectorD getStarXYZ(StFcsHit* hit, float FcsZ=-1.0) const;                   //from StFcsHit
+  StThreeVectorD getStarXYZ(int det, int id, float FcsZ=-1.0) const;             //center of the cell
   
   //! Get the STAR frame cooridnates for 4x4 sum
-  StThreeVectorD getStarXYZ_4x4(Int_t det,Int_t col, Int_t row) const; 
+  StThreeVectorD getStarXYZ_4x4(int det,int col, int row) const; 
 
   //! Get get 4 vector assuing m=0 and taking beamline from DB
-  StLorentzVectorD getLorentzVector(const StThreeVectorD& xyz, Float_t energy, Float_t zVertex=0.0);
+  StLorentzVectorD getLorentzVector(const StThreeVectorD& xyz, float energy, float zVertex=0.0);
   
   //! fcsGain/GainCorrection related
-  Int_t   getZeroSuppression(Int_t det) const;           //! get zero suppression threshold
-  Float_t getSamplingFraction(Int_t det) const;          //! get sampling fraction
-  Float_t getGain(Int_t det, Int_t id) const;            //! get the gain for the channel for 16 timebin sum
-  Float_t getGain(StFcsHit* hit) const;                  //! get the gain for the channel for 16 timebin sum
-  Float_t getGain8(Int_t det, Int_t id) const;           //! get the gain for the channel for 8 timebin sum
-  Float_t getGain8(StFcsHit* hit) const;                 //! get the gain for the channel for 8 timebin sum
-  Float_t getGainCorrection(Int_t det, Int_t id) const;  //! get the gain correction for the channel    
-  Float_t getGainCorrection(StFcsHit* hit) const;        //! get the gain correction for the channel    
-  Float_t getPresValley(Int_t det, Int_t id) const;      //! get the pres valley position for cut
-  Float_t getPresValley(StFcsHit* hit) const;            //! get the pres valley position for cut
+  int   getZeroSuppression(int det) const;           //! get zero suppression threshold
+  float getSamplingFraction(int det) const;          //! get sampling fraction
+  float getGain(int det, int id) const;            //! get the gain for the channel for 16 timebin sum
+  float getGain(StFcsHit* hit) const;                  //! get the gain for the channel for 16 timebin sum
+  float getGain8(int det, int id) const;           //! get the gain for the channel for 8 timebin sum
+  float getGain8(StFcsHit* hit) const;                 //! get the gain for the channel for 8 timebin sum
+  float getGainCorrection(int det, int id) const;  //! get the gain correction for the channel    
+  float getGainCorrection(StFcsHit* hit) const;        //! get the gain correction for the channel    
+  float getPresValley(int det, int id) const;      //! get the pres valley position for cut
+  float getPresValley(StFcsHit* hit) const;            //! get the pres valley position for cut
 
   enum GAINMODE { FIXED, DB, FORCED }; //! Gain mode switch
   void forceFixGain(float v)               {mGainMode=GAINMODE::FIXED;    }   //! fixed default gain
@@ -193,18 +196,18 @@ public:
   void readGainCorrFromText(const char* file="fcsgaincorr.txt");              //! reading gaincorr from text file
 
   //ETGain
-  Float_t getEtGain(Int_t det, Int_t id) const;  //! ET Gain
+  float getEtGain(int det, int id) const;  //! ET Gain
   void printEtGain();                            //! print ET gain
   
   //! Fcs Map
-  void getDepfromId(Int_t detectorId, Int_t id, Int_t &ehp, Int_t &ns, Int_t &crt, Int_t &slt, Int_t &dep, Int_t &ch) const; //! Get DEP map
-  void getIdfromDep(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, Int_t &detectorId, Int_t &id, Int_t &crt, Int_t &slt) const;   //! Get Det map
-  int  getNDep(Int_t ehp, int ns) const;  //! # of DEP
-  void getSCmap(Int_t det, Int_t id,      
-		Int_t &ehp, Int_t &ns, Int_t &scdep, Int_t &branch, Int_t &fee_i2c, Int_t &sipm, 
-		Int_t &pp, Int_t &jacket) const; //! Get SC map
-  void getIdfromSCmap(Int_t ehp, Int_t ns, Int_t scdep, Int_t branch, Int_t fee_i2c, Int_t sipm,
-		      Int_t &det, Int_t &id) const;  //!Get Id from SC
+  void getDepfromId(int detectorId, int id, int &ehp, int &ns, int &crt, int &slt, int &dep, int &ch) const; //! Get DEP map
+  void getIdfromDep(int ehp, int ns, int dep, int ch, int &detectorId, int &id, int &crt, int &slt) const;   //! Get Det map
+  int  getNDep(int ehp, int ns) const;  //! # of DEP
+  void getSCmap(int det, int id,      
+		int &ehp, int &ns, int &scdep, int &branch, int &fee_i2c, int &sipm, 
+		int &pp, int &jacket) const; //! Get SC map
+  void getIdfromSCmap(int ehp, int ns, int scdep, int branch, int fee_i2c, int sipm,
+		      int &det, int &id) const;  //!Get Id from SC
   
   void makeMap(); //! Generate maps (this is the origin of the map)
   void makePPMap();  //! Generate Patchpanel map
@@ -217,33 +220,33 @@ public:
   void printHeader4(FILE* f, int flag);          //! Map header 
 
   //EPD as PRES
-  void getIdfromEPD(Int_t pp, Int_t tt, Int_t &det, Int_t &id);  //! Get FCS's EPD map foom EPD mapping 
-  void getEPDfromId(Int_t det, Int_t id, Int_t &pp, Int_t &tt);  //! Get EPD's EPD map from FCS mapping
+  void getIdfromEPD(int pp, int tt, int &det, int &id);  //! Get FCS's EPD map foom EPD mapping 
+  void getEPDfromId(int det, int id, int &pp, int &tt);  //! Get EPD's EPD map from FCS mapping
 
   //! Pedestal
-  float pedestal(Int_t ehp, Int_t ns, Int_t dep, Int_t ch);   //! get Pedestal
-  void setPedestal(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, float ped); //! setting pedestal
+  float pedestal(int ehp, int ns, int dep, int ch);   //! get Pedestal
+  void setPedestal(int ehp, int ns, int dep, int ch, float ped); //! setting pedestal
   void readPedFromText(const char* file="fcsped.txt"); //! reading pedestal from text
   
  private:
-  Int_t   mDbAccess=1;                     //! enable(1) or disabe(0) DB access
-  Int_t   mRun=0;                          //! run#
-  Int_t   mDebug=0;                        //! >0 dump tables to text files    
-  Int_t   mRun19=0;                        //! run19 flag
-  Int_t   mLeakyHcal=0;                    //! LeakyHcal has different center positions
+  int   mDbAccess=1;                     //! enable(1) or disabe(0) DB access
+  int   mRun=0;                          //! run#
+  int   mDebug=0;                        //! >0 dump tables to text files    
+  int   mRun19=0;                        //! run19 flag
+  int   mLeakyHcal=0;                    //! LeakyHcal has different center positions
 
   GAINMODE mGainMode = GAINMODE::DB;        //! Gain mode selection 
-  Float_t mForceUniformGain=-1.0;           //! forcing a value
-  Int_t   mReadGainFromText=0;              //! flag for reading gain from text
+  float mForceUniformGain=-1.0;           //! forcing a value
+  int   mReadGainFromText=0;              //! flag for reading gain from text
 
   GAINMODE mGainCorrMode = GAINMODE::DB;    //! GainCorr mode selection 
-  Float_t mForceUniformGainCorrection=-1.0; //! forcing a value
-  Int_t   mReadGainCorrectionFromText=0;    //! flag for reading gaincorr from text 
+  float mForceUniformGainCorrection=-1.0; //! forcing a value
+  int   mReadGainCorrectionFromText=0;    //! flag for reading gaincorr from text 
  
   //DEP sorted ped/gain/corr
-  Float_t mPed[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! Pedestal   
-  Float_t mGain[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! Gain
-  Float_t mGainCorr[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! GainCorr (Valley value for PRES) 
+  float mPed[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! Pedestal   
+  float mGain[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! Gain
+  float mGainCorr[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! GainCorr (Valley value for PRES) 
    
   //Beam line parameters
   double mVx=0.0;      //! beamline x offset

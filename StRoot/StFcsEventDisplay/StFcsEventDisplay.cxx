@@ -1,8 +1,11 @@
 // \class StFmsEventDisplay
 // \author Akio Ogawa
 //
-//  $Id: StFcsEventDisplay.cxx,v 1.14 2021/02/13 21:37:31 akio Exp $
+//  $Id: StFcsEventDisplay.cxx,v 1.15 2021/02/25 21:27:50 akio Exp $
 //  $Log: StFcsEventDisplay.cxx,v $
+//  Revision 1.15  2021/02/25 21:27:50  akio
+//  Int_t -> int
+//
 //  Revision 1.14  2021/02/13 21:37:31  akio
 //  #ifdef ___USESTGC___
 //
@@ -76,14 +79,14 @@
 #include "TText.h"
 #include "TROOT.h"
 
-ClassImp(StFcsEventDisplay);
+ClassImp(StFcsEventDisplay)
 
-StFcsEventDisplay::StFcsEventDisplay(const Char_t* name):
+StFcsEventDisplay::StFcsEventDisplay(const char* name):
     StMaker(name),mFilename((char *)"fcsEventDisplay.pdf"){}
 
 StFcsEventDisplay::~StFcsEventDisplay(){}
 
-Int_t StFcsEventDisplay::Init(){  
+int StFcsEventDisplay::Init(){  
     mFcsDbMaker=static_cast<StFcsDbMaker*>(GetMaker("fcsDb"));  
     if(!mFcsDbMaker){
 	LOG_ERROR  << "StFcsEventDisplay::InitRun Failed to get StFcsDbMaker" << endm;
@@ -108,7 +111,7 @@ Int_t StFcsEventDisplay::Init(){
     return kStOK;
 }
 
-Int_t StFcsEventDisplay::Finish(){
+int StFcsEventDisplay::Finish(){
     //mApplication->Terminate();
     return kStOK;
 }
@@ -142,7 +145,7 @@ void scale(float x=160.0, float dx=5.0, float ymin=-220.0, float ymax=220.0, int
     }
 }
 
-Int_t StFcsEventDisplay::Make(){
+int StFcsEventDisplay::Make(){
     StEvent* event = (StEvent*)GetInputDS("StEvent");
     if(!event) {LOG_ERROR << "StFcsEventDisplay::Make did not find StEvent"<<endm; return kStErr;}
     mFcsColl = event->fcsCollection();

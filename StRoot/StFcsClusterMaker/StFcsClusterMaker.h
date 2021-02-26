@@ -1,5 +1,11 @@
-// $Id: StFcsClusterMaker.h,v 1.11 2020/12/17 21:18:01 akio Exp $
+// $Id: StFcsClusterMaker.h,v 1.13 2021/02/25 21:52:57 akio Exp $
 // $Log: StFcsClusterMaker.h,v $
+// Revision 1.13  2021/02/25 21:52:57  akio
+// Int_t -> int
+//
+// Revision 1.12  2021/02/25 19:24:15  akio
+// Modified for STAR code review (Hongwei)
+//
 // Revision 1.11  2020/12/17 21:18:01  akio
 // Separate RATIO2SPLIT for ecal/hcal
 //
@@ -54,17 +60,11 @@ public:
     
     StFcsClusterMaker(const char* name = "StFcsClusterMaker");
     ~StFcsClusterMaker();
-    Int_t InitRun(Int_t runNumber);
-    Int_t Make();
+    int InitRun(int runNumber);
+    int Make();
     void Clear(Option_t* option = "");
     
-    /** Set to read MuDST, then only this maker does is recalc point position using DB values */
-    /** and does NOT perform cluster finding nor fitting */
-    //void SetReadMuDst(int v=1) {mReadMuDst=v;} 
-    
-    void setDebug(int v) {mDebug=v;}
-    //void setEnergySelect(int v) {mEnergySelect=v;}
-    //void setSumTimeBins(int min, int max) {mMinTB=min; mMaxTB=max;}
+    void setDebug(int v) {SetDebug(v);}
 
     void set_NEIGHBOR_DISTANCE(float e, float h){m_NEIGHBOR_DISTANCE_Ecal=e; m_NEIGHBOR_DISTANCE_Hcal=h;}
     void set_DISTANCE_ADVANTAGE(float v){m_DISTANCE_ADVANTAGE=v;}
@@ -90,27 +90,16 @@ public:
     StFcsDbMaker* mDb=0;               //!
     StFcsCollection* mFcsCollection=0; //!
 
-    Int_t mDebug=0;                        //! debug opption
-
-    //move those to StFcsWaveformFitMaker   
-    //Int_t mEnergySelect=0;                 //! 0=MC(straight from dE), 1=Sum of timebins, 2=Fit
-    //Int_t mMinTB=35;                       //! min timebin for sum
-    //Int_t mMaxTB=60;                       //! max timebin for sum
-
-    Float_t m_NEIGHBOR_DISTANCE_Ecal=1.01; //! Distance to make it neignbor for Ecal and Hcal
-    Float_t m_NEIGHBOR_DISTANCE_Hcal=2.01; //! 1.01 for 4 towers around
+    float m_NEIGHBOR_DISTANCE_Ecal=1.01; //! Distance to make it neignbor for Ecal and Hcal
+    float m_NEIGHBOR_DISTANCE_Hcal=2.01; //! 1.01 for 4 towers around
                                            //! 1.42 for 8 surrounding)
 
-    Float_t m_DISTANCE_ADVANTAGE  = 1.2;   //! if similar distanced cluster found, higher E cluster takes it
-    Float_t m_TOWER_E_THRESHOLD   = 0.01;  //! Tower E threshold for clustering [GeV]
-    Float_t m_TOWER_E_THRE_MOMENT = 0.1;   //! Tower E threshold for moment analysis [GeV]
+    float m_DISTANCE_ADVANTAGE  = 1.2;   //! if similar distanced cluster found, higher E cluster takes it
+    float m_TOWER_E_THRESHOLD   = 0.01;  //! Tower E threshold for clustering [GeV]
+    float m_TOWER_E_THRE_MOMENT = 0.1;   //! Tower E threshold for moment analysis [GeV]
 
-    Float_t m_TOWER_E_RATIO2SPLIT_Ecal = 1.5; //! Neighbor E * threshold > tower E to merge cluster, otherwise split
-    Float_t m_TOWER_E_RATIO2SPLIT_Hcal = 2.0; //! Neighbor E * threshold > tower E to merge cluster, otherwise split
-
-    //Int_t readMuDst();
-    //Int_t mReadMuDst=0;  //! 0= Do clustering
-    //                     //! 1= Just read Mudst and recalc positions based on DB values
+    float m_TOWER_E_RATIO2SPLIT_Ecal = 1.5; //! Neighbor E * threshold > tower E to merge cluster, otherwise split
+    float m_TOWER_E_RATIO2SPLIT_Hcal = 2.0; //! Neighbor E * threshold > tower E to merge cluster, otherwise split
 
     virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
     ClassDef(StFcsClusterMaker, 1)

@@ -17,12 +17,12 @@ class TFile;
 
 class StFcsTriggerSimMaker : public StMaker{
 public: 
-    StFcsTriggerSimMaker(const Char_t* name="FcsTrgSim");
+    StFcsTriggerSimMaker(const char* name="FcsTrgSim");
     ~StFcsTriggerSimMaker();
-    Int_t Init();
-    Int_t InitRun(Int_t runNumber);
-    Int_t Make();
-    Int_t Finish();    
+    int Init();
+    int InitRun(int runNumber);
+    int Make();
+    int Finish();    
     
     void setTrigger(int v) {mTrgSelect=v;};
     void setDebug(int v) {mDebug=v;};
@@ -35,8 +35,8 @@ public:
 private:
     StFcsDbMaker* mFcsDbMaker=0;
     StFcsCollection* mFcsColl=0;
-    Int_t mTrgSelect=0;
-    Int_t mDebug=0;
+    int mTrgSelect=0;
+    int mDebug=0;
     char* mFilename=0;
     FILE* mFile=0;
 
@@ -47,14 +47,14 @@ private:
     char* mQaFilename=0;
     TFile* mQaFile=0;
     TTree* mTree=0;
-    Int_t mFlt=0;
-    Int_t mTrg=0;
+    int mFlt=0;
+    int mTrg=0;
 
     void print4B4();
     void printJP();
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFcsTriggerSimMaker.h,v 1.3 2020/07/24 17:22:39 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFcsTriggerSimMaker.h,v 1.4 2021/02/25 21:56:10 akio Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StFcsTriggerSimMaker,0);
 };
