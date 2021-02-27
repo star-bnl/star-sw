@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.60 2021/01/11 20:27:40 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.61 2021/02/27 17:07:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.61  2021/02/27 17:07:50  ullrich
+ * Added setFcsCollection method (Akio)
+ *
  * Revision 2.60  2021/01/11 20:27:40  ullrich
  * Updated to add FCS elements (Akio).
  *
@@ -255,8 +258,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.60 2021/01/11 20:27:40 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.60 2021/01/11 20:27:40 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.61 2021/02/27 17:07:50 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.61 2021/02/27 17:07:50 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -1257,6 +1260,12 @@ void
 StEvent::setFmsCollection(StFmsCollection* val)
 {
     _lookupAndSet(val, mContent);
+}
+
+void
+StEvent::setFcsCollection(StFcsCollection* val)
+{
+  _lookupAndSet(val, mContent);
 }
 
 void
