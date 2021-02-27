@@ -366,6 +366,9 @@ void l4Builder::startrun(daqReader *rdr)
 
     resetAllPlots();
 
+    if (hMatchId_fiberId_copy)  hMatchId_fiberId_copy->Reset();
+    if (hMatchId_fiberId_copy2) hMatchId_fiberId_copy2->Reset();
+
 	// for(int i = 0; i < nHltPlots; i++) {
 	// 	getPlotByIndex(i)->getHisto(0)->histo->Reset();
 	// }
@@ -436,13 +439,6 @@ void l4Builder::stoprun(daqReader *rdr)
 	//**********add parallel copy**********
 	hMatchId_fiberId->Add(hMatchId_fiberId_copy);
 	hMatchId_fiberId->Add(hMatchId_fiberId_copy2);
-
-#ifdef ILLEGAL
-	gStyle->SetOptStat(000000);
-	gStyle->SetStatW(0.13);
-	gStyle->SetStatH(0.08);
-	gStyle->SetOptFit(111);
-#endif
 
 	hDiElectronInvMassTpxEmc->SetLineColor(4);
 	hDiElectronInvMassFullRange->SetLineColor(4);
@@ -563,11 +559,11 @@ void l4Builder::stoprun(daqReader *rdr)
 	int maxBin = hDcaXy->GetMaximumBin();
 	double maxVal = -6. + 0.1 * maxBin;
 	hDcaXy->Fit(func, "EMR", "", maxVal - 1.8, maxVal + 1.8);
-
 	double meanpar = func->GetParameter(1);
-	int maxBin_UPC = hDcaXy_UPC->GetMaximumBin();
-	double maxVal_UPC = -6. + 0.1 * maxBin_UPC;
-	hDcaXy_UPC->Fit(func, "EMR", "", maxVal_UPC - 1.8, maxVal_UPC + 1.8);
+
+	// int maxBin_UPC = hDcaXy_UPC->GetMaximumBin();
+	// double maxVal_UPC = -6. + 0.1 * maxBin_UPC;
+	// hDcaXy_UPC->Fit(func, "EMR", "", maxVal_UPC - 1.8, maxVal_UPC + 1.8);
 
 	char OutParas[256];
 	sprintf(OutParas, "%s/HLT_paras/%d.dat", clientdatadir, runnumber);//qiao
@@ -2845,14 +2841,14 @@ void l4Builder::defineHltPlots()
 
 	index++; //38
 	HltPlots[index]->setDrawOpts("colz");
-	hMatchId_fiberId = new TH2F("Tof_matchId_fireId", "Tof_matchId_fireId", 200, 0, 200, 200, 0, 200);
+	hMatchId_fiberId = new TH2F("Tof_matchId_fiberId", "Tof_matchId_fiberId", 200, 0, 200, 200, 0, 200);
 	ph = new PlotHisto();
 	ph->histo = hMatchId_fiberId;
 	HltPlots[index]->addHisto(ph);
 
-	hMatchId_fiberId_copy = new TH2F("Tof_matchId_fireId_copy", "Tof_matchId_fireId_copy", 200, 0, 200, 200, 0, 200);
+	hMatchId_fiberId_copy = new TH2F("Tof_matchId_fiberId_copy", "Tof_matchId_fiberId_copy", 200, 0, 200, 200, 0, 200);
 
-	hMatchId_fiberId_copy2 = new TH2F("Tof_matchId_fireId_copy2", "Tof_matchId_fireId_copy2", 200, 0, 200, 200, 0, 200);
+	hMatchId_fiberId_copy2 = new TH2F("Tof_matchId_fiberId_copy2", "Tof_matchId_fiberId_copy2", 200, 0, 200, 200, 0, 200);
 
 	index++; //39
 	HltPlots[index]->setDrawOpts("colz");
