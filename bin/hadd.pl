@@ -18,7 +18,8 @@ my %ARG = (files => '*.root',
 #	   gcc => 'gcc451',
 	   keep => 'yes',
 	   prefix => '',
-	   option => ''
+	   option => '',
+	   debug  => 0
 	  );
 while (@ARGV) {
   $_ = shift @ARGV;
@@ -36,31 +37,36 @@ if ($ARG{all}) {
 # 	      'FF'    => {first => '12154050', second => '12159034', list => ''},
 # 	      'ZeroF' => {first => '12166021', second => '12166045', list => ''}
 # 	     );
-# Run XIX
-  @periods = (
-'production_19GeV_AuAu_1'                            => { first=> '20056032',         second => '20093036',   list => '',  beginTime => '20190225.202320'}, #        2019-02-25      20:23:20        2019-04-04      09:44:05
-'production_14p5GeV_AuAu_1'                          => { first=> '20094048',         second => '20107026',   list => '',  beginTime => '20190404.094405'}, #        2019-04-04      09:44:05        2019-04-17      13:34:01
-'production_7.3GeV_fixedTarget_1'                    => { first=> '20107029',         second => '20107029',   list => '',  beginTime => '20190417.133401'}, #        2019-04-17      13:34:01        2019-04-17      14:12:46
-'production_14p5GeV_AuAu_2'                          => { first=> '20107030',         second => '20113041',   list => '',  beginTime => '20190417.141246'}, #        2019-04-17      14:12:46        2019-04-23      15:54:18
-'production_7.3GeV_fixedTarget_2'                    => { first=> '20113042',         second => '20113048',   list => '',  beginTime => '20190423.155418'}, #        2019-04-23      15:54:18        2019-04-23      18:11:58
-'production_14p5GeV_AuAu_3'                          => { first=> '20113051',         second => '20154013',   list => '',  beginTime => '20190423.181158'}, #        2019-04-23      18:11:58        2019-06-03      22:36:55
-'production_7p7GeV_AuAu_1'                           => { first=> '20154047',         second => '20158026',   list => '',  beginTime => '20190603.223655'}, #        2019-06-03      22:36:55        2019-06-07      16:03:57
-'production_3p85GeV_fixedTarget_1'                   => { first=> '20158028',         second => '20158028',   list => '',  beginTime => '20190607.160357'}, #        2019-06-07      16:03:57        2019-06-07      17:03:52
-'production_7p7GeV_AuAu_2'                           => { first=> '20158036',         second => '20158036',   list => '',  beginTime => '20190607.170352'}, #        2019-06-07      17:03:52        2019-06-07      17:41:23
-'production_3p85GeV_fixedTarget_2'                   => { first=> '20158040',         second => '20158042',   list => '',  beginTime => '20190607.174123'}, #        2019-06-07      17:41:23        2019-06-07      20:14:27
-'production_7p7GeV_AuAu_3'                           => { first=> '20158047',         second => '20160022',   list => '',  beginTime => '20190607.201427'}, #        2019-06-07      20:14:27        2019-06-09      12:45:28
-'production_3p85GeV_fixedTarget_3'                   => { first=> '20160023',         second => '20160027',   list => '',  beginTime => '20190609.124528'}, #        2019-06-09      12:45:28        2019-06-10      02:31:52
-'production_7p7GeV_AuAu_4'                           => { first=> '20160035',         second => '20169025',   list => '',  beginTime => '20190610.023152'}, #        2019-06-10      02:31:52        2019-06-18      14:36:58
-'production_7.3GeV_fixedTarget_4'                    => { first=> '20169028',         second => '20169055',   list => '',  beginTime => '20190618.143658'}, #        2019-06-18      14:36:58        2019-06-19      02:51:26
-'production_7p7GeV_AuAu_5'                           => { first=> '20169058',         second => '20178014',   list => '',  beginTime => '20190619.025126'}, #        2019-06-19      02:51:26        2019-06-28      08:19:31
-'production_9p2GeV_AuAu_1'                           => { first=> '20179015',         second => '20179028',   list => '',  beginTime => '20190628.081931'}, #        2019-06-28      08:19:31        2019-06-29      03:28:34
-'production_4p59GeV_fixedTarget_1'                   => { first=> '20179039',         second => '20183005',   list => '',  beginTime => '20190629.032834'}, #        2019-06-29      03:28:34        2019-07-02      06:10:59
-'production_9p2GeV_AuAu_2'                           => { first=> '20183006',         second => '20183007',   list => '',  beginTime => '20190702.061059'}, #        2019-07-02      06:10:59        2019-07-02      06:22:10
-'production_4p59GeV_fixedTarget_2'                   => { first=> '20183008',         second => '20183025',   list => '',  beginTime => '20190702.062210'}, #        2019-07-02      06:22:10        2019-07-02      14:41:51
-'production_9p2GeV_AuAu_3'                           => { first=> '20183026',         second => '20189017',   list => '',  beginTime => '20190702.144151'}, #        2019-07-02      14:41:51        2019-07-09      03:23:12
-'production_31GeV_fixedTarget_1'                     => { first=> '20189035',         second => '20190024',   list => '',  beginTime => '20190709.032312'}, #        2019-07-09      03:23:12        2019-07-09      19:15:24
-'production_200GeV_AuAu_1'                           => { first=> '20190042',         second => '20193026',   list => '',  beginTime => '20190709.191524'}, #        2019-07-09      19:15:24        2019-07-15      08:50:04
-'production_9p2GeV_AuAu_4'                           => { first=> '20196005',         second => '20196017',   list => '',  beginTime => '20190715.085004'}, #        2019-07-15      08:50:04        2019-07-15      11:43:38
+# # Run XIX
+#   @periods = (
+# 'production_19GeV_AuAu_1'                            => { first=> '20056032',         second => '20093036',   list => '',  beginTime => '20190225.202320'}, #        2019-02-25      20:23:20        2019-04-04      09:44:05
+# 'production_14p5GeV_AuAu_1'                          => { first=> '20094048',         second => '20107026',   list => '',  beginTime => '20190404.094405'}, #        2019-04-04      09:44:05        2019-04-17      13:34:01
+# 'production_7.3GeV_fixedTarget_1'                    => { first=> '20107029',         second => '20107029',   list => '',  beginTime => '20190417.133401'}, #        2019-04-17      13:34:01        2019-04-17      14:12:46
+# 'production_14p5GeV_AuAu_2'                          => { first=> '20107030',         second => '20113041',   list => '',  beginTime => '20190417.141246'}, #        2019-04-17      14:12:46        2019-04-23      15:54:18
+# 'production_7.3GeV_fixedTarget_2'                    => { first=> '20113042',         second => '20113048',   list => '',  beginTime => '20190423.155418'}, #        2019-04-23      15:54:18        2019-04-23      18:11:58
+# 'production_14p5GeV_AuAu_3'                          => { first=> '20113051',         second => '20154013',   list => '',  beginTime => '20190423.181158'}, #        2019-04-23      18:11:58        2019-06-03      22:36:55
+# 'production_7p7GeV_AuAu_1'                           => { first=> '20154047',         second => '20158026',   list => '',  beginTime => '20190603.223655'}, #        2019-06-03      22:36:55        2019-06-07      16:03:57
+# 'production_3p85GeV_fixedTarget_1'                   => { first=> '20158028',         second => '20158028',   list => '',  beginTime => '20190607.160357'}, #        2019-06-07      16:03:57        2019-06-07      17:03:52
+# 'production_7p7GeV_AuAu_2'                           => { first=> '20158036',         second => '20158036',   list => '',  beginTime => '20190607.170352'}, #        2019-06-07      17:03:52        2019-06-07      17:41:23
+# 'production_3p85GeV_fixedTarget_2'                   => { first=> '20158040',         second => '20158042',   list => '',  beginTime => '20190607.174123'}, #        2019-06-07      17:41:23        2019-06-07      20:14:27
+# 'production_7p7GeV_AuAu_3'                           => { first=> '20158047',         second => '20160022',   list => '',  beginTime => '20190607.201427'}, #        2019-06-07      20:14:27        2019-06-09      12:45:28
+# 'production_3p85GeV_fixedTarget_3'                   => { first=> '20160023',         second => '20160027',   list => '',  beginTime => '20190609.124528'}, #        2019-06-09      12:45:28        2019-06-10      02:31:52
+# 'production_7p7GeV_AuAu_4'                           => { first=> '20160035',         second => '20169025',   list => '',  beginTime => '20190610.023152'}, #        2019-06-10      02:31:52        2019-06-18      14:36:58
+# 'production_7.3GeV_fixedTarget_4'                    => { first=> '20169028',         second => '20169055',   list => '',  beginTime => '20190618.143658'}, #        2019-06-18      14:36:58        2019-06-19      02:51:26
+# 'production_7p7GeV_AuAu_5'                           => { first=> '20169058',         second => '20178014',   list => '',  beginTime => '20190619.025126'}, #        2019-06-19      02:51:26        2019-06-28      08:19:31
+# 'production_9p2GeV_AuAu_1'                           => { first=> '20179015',         second => '20179028',   list => '',  beginTime => '20190628.081931'}, #        2019-06-28      08:19:31        2019-06-29      03:28:34
+# 'production_4p59GeV_fixedTarget_1'                   => { first=> '20179039',         second => '20183005',   list => '',  beginTime => '20190629.032834'}, #        2019-06-29      03:28:34        2019-07-02      06:10:59
+# 'production_9p2GeV_AuAu_2'                           => { first=> '20183006',         second => '20183007',   list => '',  beginTime => '20190702.061059'}, #        2019-07-02      06:10:59        2019-07-02      06:22:10
+# 'production_4p59GeV_fixedTarget_2'                   => { first=> '20183008',         second => '20183025',   list => '',  beginTime => '20190702.062210'}, #        2019-07-02      06:22:10        2019-07-02      14:41:51
+# 'production_9p2GeV_AuAu_3'                           => { first=> '20183026',         second => '20189017',   list => '',  beginTime => '20190702.144151'}, #        2019-07-02      14:41:51        2019-07-09      03:23:12
+# 'production_31GeV_fixedTarget_1'                     => { first=> '20189035',         second => '20190024',   list => '',  beginTime => '20190709.032312'}, #        2019-07-09      03:23:12        2019-07-09      19:15:24
+# 'production_200GeV_AuAu_1'                           => { first=> '20190042',         second => '20193026',   list => '',  beginTime => '20190709.191524'}, #        2019-07-09      19:15:24        2019-07-15      08:50:04
+# 'production_9p2GeV_AuAu_4'                           => { first=> '20196005',         second => '20196017',   list => '',  beginTime => '20190715.085004'}, #        2019-07-15      08:50:04        2019-07-15      11:43:38
+# 	     );
+# Run XXI before and after calibrations
+  @periods = ( 
+	      '7p7GeV_2021_1',  => { first => '22033001',	 second => '22039999',	 list => '',  beginTime => '20210202.065915'},
+	      '7p7GeV_2021_2',  => { first => '22040001',	 second => '99999999',	 list => '',  beginTime => '20210202.065915'},
 	     );
 }
 my @tags = ();
@@ -106,7 +112,7 @@ foreach my $file (@Files) {
   $f =~ s/hlt_//;
   $f =~ s/physics_//;
   my @ss = split /_/, $f; 
-  $f = $ss[0]; # print " $file ==> $f\n";
+  $f = $ss[0];  print " $file ==> $f\n"  if ($ARG{debug});
   foreach my $r (@runXIbadList) {
 #    if ($f =~/12112053/) {print "match $f with $r\n";}
     if ($f =~ /$r/) {
@@ -119,10 +125,10 @@ foreach my $file (@Files) {
     if ($f >= $def->{$key}->{first} and $f <= $def->{$key}->{second}) {
       if (! $def->{$key}->{list}) { $def->{$key}->{list} =                              $file; }
       else                        { $def->{$key}->{list} = $def->{$key}->{list} . ' ' . $file; }
-#      print "$f : $key => ( $def->{$key}->{first} - $def->{$key}->{second})  => $def->{$key}->{list}\n";
+      print "$f : $key => ( $def->{$key}->{first} - $def->{$key}->{second})  => $def->{$key}->{list}\n"  if ($ARG{debug});
       last;
     } else {
-#      print "$f : $key is not in  ( $def->{$key}->{first} - $def->{$key}->{second})\n";
+      print "$f : $key is not in  ( $def->{$key}->{first} - $def->{$key}->{second})\n"  if ($ARG{debug});
     }
   }
  ENDL:
@@ -151,7 +157,7 @@ print XML '<?xml version="1.0" encoding="utf-8" ?>
 ';
 foreach my $key (sort keys %TagList) {
   #  print "\n\n";
-#  print "$key => $TagList{$key}\n";
+  print "$key => $TagList{$key}\n" if ($ARG{debug});
   my @ListAll = split ' ', $TagList{$key};
   my $NJB = ($#ListAll+1)/$FilesPerJob+1;
   my $j = 0;
