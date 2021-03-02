@@ -19,8 +19,8 @@ DisplayProperty::DisplayProperty()
 
 DisplayProperty::~DisplayProperty()
 {
-  if(name) delete name;
-  if(value) delete value;
+  if(name) delete [] name;
+  if(value) delete [] value;
 }
 
 DisplayProperty::DisplayProperty(DisplayProperty &x) {
@@ -39,14 +39,14 @@ void DisplayProperty::dump(int indent)
 
 void DisplayProperty::setName(const char *s)
 {
-  if(name) delete name;
+  if(name) delete [] name;
   name = new char[strlen(s)+1];
   strcpy(name, s);
 }
 
 void DisplayProperty::setValue(const char *s)
 {
-  if(value) delete value;
+  if(value) delete [] value;
   value = new char[strlen(s)+1];
   strcpy(value, s);
 }
@@ -89,7 +89,7 @@ DisplayNode::DisplayNode(DisplayNode &x)
 
 DisplayNode::~DisplayNode()
 {
-  if(name) delete name;
+  if(name) delete [] name;
   
   DisplayProperty *p = properties;
   while(p) {
@@ -140,7 +140,7 @@ void DisplayNode::dump(int indent, const char *str)
 
 void DisplayNode::setName(const char *s)
 {
-  if(name) delete name;
+  if(name) delete [] name;
   name = new char[strlen(s)+1];
   strcpy(name, s);
 }

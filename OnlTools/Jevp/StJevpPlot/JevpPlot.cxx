@@ -47,14 +47,14 @@ PlotHisto::PlotHisto(PlotHisto &x)
 
 void PlotHisto::setLegText(const char *text)
 {
-  if(legendText) delete legendText;
+  if(legendText) delete [] legendText;
   legendText = new char[strlen(text)+1];
   strcpy(legendText, text);
 }
 
 void PlotHisto::setLegArgs(const char *text)
 {
-  if(legendArgs) delete legendText;
+  if(legendArgs) delete [] legendText;
   legendArgs = new char[strlen(text)+1];
   strcpy(legendArgs, text);
 }
@@ -80,13 +80,13 @@ PlotHisto::~PlotHisto()
   LOG(DBG, "Delete histo: %s can %d must %d",histo->GetName(), histo->TestBit(kCanDelete), histo->TestBit(kMustCleanup));
 
   if(histo) delete histo;
-  if(legendText) delete legendText;
-  if(legendArgs) delete legendArgs;
+  if(legendText) delete [] legendText;
+  if(legendArgs) delete [] legendArgs;
 }
 
 void JevpPlot::setDrawOpts(const char *opts)
 {
-  if(drawopts) delete drawopts;
+  if(drawopts) delete [] drawopts;
   drawopts = new char[strlen(opts)+1];
   strcpy(drawopts, opts);
 }
@@ -165,7 +165,7 @@ void JevpPlot::reset()
 
 void JevpPlot::setParent(char *par)
 {
-  if(parent) delete parent;
+  if(parent) delete [] parent;
   
   parent = new char[strlen(par) + 1];
   strcpy(parent, par);
@@ -264,7 +264,7 @@ JevpPlot::JevpPlot(JevpPlot &x)
 
 void JevpPlot::setRefComment(char *text)
 {
-  if(refcomment) delete refcomment;
+  if(refcomment) delete [] refcomment;
   refcomment = new char[strlen(text)+1];
   strcpy(refcomment, text);
 }
@@ -306,7 +306,7 @@ JevpPlot::~JevpPlot() {
   LOG(DBG, "Elements.size = %d histos.size = %d",elements.GetSize(),histos.GetSize());
 
   if(drawopts) {
-    delete drawopts;
+    delete [] drawopts;
   }
   
   if(legend) {
@@ -316,7 +316,7 @@ JevpPlot::~JevpPlot() {
   }
   
   if(refcomment) {
-    delete refcomment;
+    delete [] refcomment;
   }
 
   LOG(DBG,"Done with jevpplot destructor...\n");
