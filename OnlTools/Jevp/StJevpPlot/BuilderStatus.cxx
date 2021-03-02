@@ -19,13 +19,13 @@ BuilderStatus::BuilderStatus()
 
 BuilderStatus::~BuilderStatus()
 {
-  if(name) delete name;
-  if(status) delete status;
+  if(name) delete [] name;
+  if(status) delete [] status;
 }
 
 void BuilderStatus::setName(const char *s)
 {
-  if(name) delete name;
+  if(name) delete [] name;
   int l = strlen(s);
   name = new char[l+1];
   strcpy(name, s);
@@ -33,7 +33,7 @@ void BuilderStatus::setName(const char *s)
 
 void BuilderStatus::setStatus(const char *s)
 { 
-  if(status) delete status;
+  if(status) delete [] status;
   int l = strlen(s);
   status = new char[l+1];
   strcpy(status, s);

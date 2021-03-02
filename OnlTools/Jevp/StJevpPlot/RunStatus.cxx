@@ -12,7 +12,7 @@ RunStatus::RunStatus()
 
 RunStatus::~RunStatus()
 {
-  if(status) delete status;
+  if(status) delete [] status;
 }
 
 void RunStatus::setStatus(const char *s)
@@ -35,7 +35,7 @@ void RunStatus::setStatus(const char *s)
 	}
     }
     
-    if(status) delete status;
+    if(status) delete [] status;
     status = new char[strlen(s)+1];
     strcpy(status, s);
     timeOfLastChange = time(NULL);
