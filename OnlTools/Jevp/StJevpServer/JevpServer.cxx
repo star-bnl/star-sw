@@ -1305,7 +1305,16 @@ void JevpServer::performStartRun()
   eventsThisRun = 0;
   lastImageBuilderSendTime = time(NULL);
 
-  LOG("JEFF", "Start run #%d  (mem: %d)",runStatus.run, getMemUse());
+  double mem = getMemUse();
+  mem /= 1024.0;
+  LOG("JEFF", "Start run #%d  (mem: %.1lfMB)",runStatus.run, mem);
+
+  char *servername = "JevpServer";
+  if(isL4) {
+      servername = "L4JevpServer";
+  }
+  JevpPlotSet::staticLogDbVariable("MB_used", mem, runStatus.run, time(NULL), servername, clientdatadir);
+
   clearForNewRun();
 
   runStatus.setStatus("running");
