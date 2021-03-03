@@ -80,7 +80,9 @@ foreach my $run (sort keys %Runs) {
     if (-r $blafile) {next;}
     print "string:$file\n";
       $fNo++;
+#    if ($fNo > 10) {last;}
   }
+#    if ($fNo > 10) {last;}
 }
 if (! $fNo) {die "Don't have input files\n";}
 
