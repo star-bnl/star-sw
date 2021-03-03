@@ -125,9 +125,9 @@ class JevpPlotSet : public TObject {
 
   //StTriggerData *getStTriggerData(daqReader *rdr);
 
-  void logDbVariable(char *variable_name,
-		     double value);
-
+  void logDbVariable(char *variable_name, double value);
+  static void staticLogDbVariable(char *name, double value, int my_run, int my_time, char *my_plotsetname, char *my_clientdatadir);
+  
  private:
 
   JevpServer *parent;
