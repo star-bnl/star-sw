@@ -11,7 +11,7 @@ foreach D (`ls -d /hlt/cephfs/reco/2021/RF/TFG21c.B/Cosmic*`)
 #foreach D (`ls -d /hlt/cephfs/reco/2021/FF/TFG21c.B/Cosmic*`)
   cd ${D}
   CreateRunDirs.pl
-  foreach d (`ls -1d ???/2*`)
+  foreach d (`ls -1dr ???/2*`)
     cd $d;
     if (-r Done || -r Submitted) then
       cd -
