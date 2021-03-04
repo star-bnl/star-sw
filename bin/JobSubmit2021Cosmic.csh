@@ -7,7 +7,7 @@ git ci -m "Update" .
 #cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/9p8GeV_fixedTarget
 #cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/9p2GeV
 #cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/9p2GeVb
-foreach D (`ls -d /hlt/cephfs/reco/2021/RF/TFG21c/Cosmic*`)
+foreach D (`ls -d /hlt/cephfs/reco/2021/RF/TFG21c.B/Cosmic*`)
 #foreach D (`ls -d /hlt/cephfs/reco/2021/FF/TFG21c.B/Cosmic*`)
   cd ${D}
   CreateRunDirs.pl
