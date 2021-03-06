@@ -5,15 +5,9 @@
 #include "fcs_trg_base.h"
 #include "fcs_ecal_epd_mask.h"
 
-// Processing on the North or South DEP/IO flavoured board. 
-// Inputs are up to 32 links but I already organized them according to strawman.
-// output is 1 link over the external OUT connector.
-// Right now we assume we have 20 inputs from ECAL, 6 from HCAL and 4 from PRE.
-// We also assume there is no need to know if this is North or South as
-// the processing is exactly the same. Right??
+// Modifed from stage_2_202201.cxx -- Ting 
 
-namespace{
-
+namespace {
   //version2 with top2 & bottom2 rows in trigger, missing far side column
   static const int EtoHmap[15][9][2] = {
     { { 0, 0},{ 0, 1},{ 0, 1},{ 0, 2},{ 0, 2},{ 0, 3},{ 0, 4},{ 0, 4},{ 0, 4}},
@@ -32,9 +26,27 @@ namespace{
     { { 8, 0},{ 8, 1},{ 8, 1},{ 8, 2},{ 8, 2},{ 8, 3},{ 8, 4},{ 8, 4},{ 8, 4}},
     { { 8, 0},{ 8, 1},{ 8, 1},{ 8, 2},{ 8, 2},{ 8, 3},{ 8, 4},{ 8, 4},{ 8, 4}}
   } ;
+  
+  static const int EtoH3map[15][9][4] = {
+    {{-1,-1,-1, 0},{-1,-1, 0, 1},{-1,-1, 1, 2},{-1,-1, 1, 2},{-1,-1, 2, 3},{-1,-1, 2, 3},{-1,-1, 3, 4},{-1,-1, 4,-1},{-1,-1, 4,-1}},
+    {{-1, 0,-1, 5},{ 0, 1, 5, 6},{ 1, 2, 6, 7},{ 1, 2, 6, 7},{ 2, 3, 7, 8},{ 2, 3, 7, 8},{ 3, 4, 8, 9},{ 4,-1, 9,-1},{ 4,-1, 9,-1}},
+    {{-1, 0,-1, 5},{ 0, 1, 5, 6},{ 1, 2, 6, 7},{ 1, 2, 6, 7},{ 2, 3, 7, 8},{ 2, 3, 7, 8},{ 3, 4, 8, 9},{ 4,-1, 9,-1},{ 4,-1, 9,-1}},
+    {{-1, 5,-1,10},{ 5, 6,10,11},{ 6, 7,11,12},{ 6, 7,11,12},{ 7, 8,12,13},{ 7, 8,12,13},{ 8, 9,13,14},{ 9,-1,14,-1},{ 9,-1,14,-1}},
+    {{-1,10,-1,15},{10,11,15,16},{11,12,16,17},{11,12,16,17},{12,13,17,18},{12,13,17,18},{13,14,18,19},{14,-1,19,-1},{14,-1,19,-1}},
+    {{-1,10,-1,15},{10,11,15,16},{11,12,16,17},{11,12,16,17},{12,13,17,18},{12,13,17,18},{13,14,18,19},{14,-1,19,-1},{14,-1,19,-1}},
+    {{-1,15,-1,20},{15,16,20,21},{16,17,21,22},{16,17,21,22},{17,18,22,23},{17,18,22,23},{18,19,23,24},{19,-1,24,-1},{19,-1,24,-1}},
+    {{-1,20,-1,25},{20,21,25,26},{21,22,26,27},{21,22,26,27},{22,23,27,28},{22,23,27,28},{23,24,28,29},{24,-1,29,-1},{24,-1,29,-1}},
+    {{-1,20,-1,25},{20,21,25,26},{21,22,26,27},{21,22,26,27},{22,23,27,28},{22,23,27,28},{23,24,28,29},{24,-1,29,-1},{24,-1,29,-1}},
+    {{-1,25,-1,30},{25,26,30,31},{26,27,31,32},{26,27,31,32},{27,28,32,33},{27,28,32,33},{28,29,33,34},{29,-1,34,-1},{29,-1,34,-1}},
+    {{-1,25,-1,30},{25,26,30,31},{26,27,31,32},{26,27,31,32},{27,28,32,33},{27,28,32,33},{28,29,33,34},{29,-1,34,-1},{29,-1,34,-1}},
+    {{-1,30,-1,35},{30,31,35,36},{31,32,36,37},{31,32,36,37},{32,33,37,38},{32,33,37,38},{33,34,38,39},{34,-1,39,-1},{34,-1,39,-1}},
+    {{-1,35,-1,40},{35,36,40,41},{36,37,41,42},{36,37,41,42},{37,38,42,43},{37,38,42,43},{38,39,43,44},{39,-1,44,-1},{39,-1,44,-1}},
+    {{-1,35,-1,40},{35,36,40,41},{36,37,41,42},{36,37,41,42},{37,38,42,43},{37,38,42,43},{38,39,43,44},{39,-1,44,-1},{39,-1,44,-1}},
+    {{-1,40,-1,-1},{40,41,-1,-1},{41,42,-1,-1},{41,42,-1,-1},{42,43,-1,-1},{42,43,-1,-1},{43,44,-1,-1},{44,-1,-1,-1},{44,-1,-1,-1}}
+  };
 }
 
-void  fcs_trg_base::stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[])
+void  fcs_trg_base::stage_2_TAMU_202202(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[])
 {    
     int ns=geo.ns;
     if(fcs_trgDebug>=2) printf("Stage2v1 ns=%d\n",ns);
@@ -138,7 +150,19 @@ void  fcs_trg_base::stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], 
 
 	    // locate the closest hcal
             u_int h=hsum[ns][EtoHmap[r][c][0]][EtoHmap[r][c][1]];
-                                 
+
+            // locate the max 2x2 hcal
+            u_int hmax=0;
+            for(int iz=0; iz<4; iz++){
+              int iHCalID = EtoH3map[r][c][iz];
+              if(iHCalID < 0) continue;
+              int irow = iHCalID/5;
+              int icol = iHCalID%5;
+              if(hmax < hsum[ns][irow][icol]) hmax = hsum[ns][irow][icol];
+            }
+
+            //if(h > 0 || hmax > 0) printf("Checking: %d, %d\n", h, hmax);
+ 
 	    // E+H sum
             sum[ns][r][c] = esum[ns][r][c] + h;
 
@@ -170,23 +194,26 @@ void  fcs_trg_base::stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], 
 	    // integer multiplication as in VHDL!
 	    // ratio thresholds are in fixed point integer where 1.0==128
 	    u_int h128 = h*128 ;
-	    if(h128 < esum[ns][r][c] * EM_HERATIO_THR){
-		if(sum[ns][r][c] > EMTHR1){
+            u_int hmax128 = hmax*128 ;
+
+          if(hmax128 < esum[ns][r][c] * EM_HERATIO_THR){
+		if(esum[ns][r][c] > EMTHR1){
 		    EM1 = 1;
 		    if(epdcoin[ns][r][c]==0) {GAM1 = 1;} 
 		    else                     {ELE1 = 1;}
 		}
-		if(sum[ns][r][c] > EMTHR2){
+		if(esum[ns][r][c] > EMTHR2){
 		    EM2 = 1;		
 		    if(epdcoin[ns][r][c]==0) {GAM2 = 1;} 
 		    else                     {ELE2 = 1;}
 		}
-		if(sum[ns][r][c] > EMTHR3){
+		if(esum[ns][r][c] > EMTHR3){
 		    EM3 = 1;		
 		    if(epdcoin[ns][r][c]==0) {GAM3 = 1;} 
 		    else                     {ELE3 = 1;}
 		}
 	    }
+
 	    if(h128 > esum[ns][r][c] * HAD_HERATIO_THR){
 		if(sum[ns][r][c] > HADTHR1) HAD1 = 1;
 		if(sum[ns][r][c] > HADTHR2) HAD2 = 1;

@@ -1011,6 +1011,9 @@ void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t g
 	case 1 :
 		stage_2_202201(ecal,hcal,pres,geo,output) ;
 		break ;
+	case 2 :
+		stage_2_TAMU_202202(ecal,hcal,pres,geo,output) ;
+		break ;
 
 	// debugging versions below
 	case 0xFF210201 :
