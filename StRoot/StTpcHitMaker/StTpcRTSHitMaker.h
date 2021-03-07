@@ -77,7 +77,6 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t               Make();
   void PrintCld(daq_cld *cld = 0, Int_t IdTruth = 0, Int_t quality=0);
   void PrintAdc(daq_dta *dta  = 0);
-  void ConfigureFCF();
  private:
   daq_tpx  *fTpx; //!
   daq_itpc *fiTpc; //!
