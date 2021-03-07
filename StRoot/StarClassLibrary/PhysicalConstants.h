@@ -126,7 +126,6 @@ static const double k_Boltzmann = 8.617385e-11 * MeV/kelvin;
 static const double STP_Temperature = 273.15*kelvin;
 static const double STP_Pressure    = 1.*atmosphere;
 static const double kGasThreshold   = 1.e-2*gram/centimeter3;
-#endif /* !__CINT__ */
 inline int dummyPhysicalConstants() 
 {
   return 0;
@@ -167,6 +166,7 @@ pi
 +kGasThreshold;
 #endif
 }
+#endif /* !__CINT__ */
 
 
 #endif /* HEP_PHYSICAL_CONSTANTS_H */
