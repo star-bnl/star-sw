@@ -315,9 +315,18 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
     Float_t  x,y,z,q,adc,pad,timebucket,IdTruth,npads,ntbks,xL,yL,zL,dX;
     Int_t    trigId, us,fl;
     Float_t  time, timeb;
+    Float_t  vpdE, vpdW;
   };
-  static const Char_t *vname = "sector/I:row/I:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:dX:trigId/I:us/I:fl/I:time:timeb";
+  static const Char_t *vname = "sector/I:row/I:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:dX:trigId/I:us/I:fl/I:time:timeb:vpdE:vpdW";
   BPoint_t BPoint;
+  BPoint.vpdE = BPoint.vpdW = 0;
+  StEvent  *event = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (event->triggerData()) {
+    BPoint.vpdE = event->triggerData()->vpdEarliestTDC(east);
+    BPoint.vpdW = event->triggerData()->vpdEarliestTDC(west);
+    LOG_QA  << ": ZdcZ:" << Form("%7.2f",event->triggerData()->zdcVertexZ());
+  }
+
   static TNtuple *Nt = 0;
   if (plot && Nt == 0) {
     TFile *tf =  StMaker::GetTopChain()->GetTFile();
