@@ -183,7 +183,6 @@ void Db(const Char_t *tabNam  =
 }
 //________________________________________________________________________________
 void Db(const Char_t *tabNam,  const Char_t *tag){ 
-  if (dbMk == 0) Load();
   cout << "Db(" << tabNam << "," << tag << ")" << endl;
   Int_t date = StMaker::AliasDate(tag);
   Int_t time = StMaker::AliasTime(tag);
