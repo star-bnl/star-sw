@@ -13,6 +13,7 @@
 #include <fstream>
 #include <vector>
 #include "St_db_Maker/St_db_Maker.h"
+#include "StMessMgr.h"
 #include "tables/St_vpdSimParams_Table.h"
 #include "phys_constants.h"
 #include <TRandom3.h>
@@ -71,12 +72,16 @@ double singleTubeRes(UInt_t mVPDHitPatternEast, UInt_t mVPDHitPatternWest){
             vpdRes = vpdRes/counter;    //! Take an average
         }
         else {
-            LOG_WARN << "No resolutions found in DB! Using DEFAULT avg of 120 ps single tube res- maybe a terrible guess for your dataset!" << endm;
+#ifndef __ROOTCLING__ 
+           LOG_WARN << "No resolutions found in DB! Using DEFAULT avg of 120 ps single tube res- maybe a terrible guess for your dataset!" << endm;
+#endif
             vpdRes = 120;
         }
 
         if ( 0 == nWest && 0 == nEast ){
+#ifndef __ROOTCLING__ 
             LOG_WARN << "No VPD tubes hit, resolution = 999" << endm;
+#endif
             return -999;
         }
 
@@ -86,7 +91,9 @@ double singleTubeRes(UInt_t mVPDHitPatternEast, UInt_t mVPDHitPatternWest){
         }
 
         float result = tSum / ((float)(nWest + nEast));
+#ifndef __ROOTCLING__ 
         LOG_INFO << "tof blur from vpd resolution (nEast + nWest = " << (nEast+nWest) << ": " << result << endm;
+#endif
         return result;
     }
 
@@ -100,7 +107,9 @@ double singleTubeRes(UInt_t mVPDHitPatternEast, UInt_t mVPDHitPatternWest){
         TDataSet *DB = GetDataBase("Calibrations/tof/vpdSimParams");
 
         if (!DB) {
+#ifndef __ROOTCLING__ 
             LOG_WARN << "No data set found, creating new St_db_Maker... with date/time" << date << "/" << time << endm;
+#endif
             dbMk = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
             dbMk->SetDebug();
             dbMk->SetDateTime(date,time); //! event or run start time, set to your liking
@@ -110,7 +119,9 @@ double singleTubeRes(UInt_t mVPDHitPatternEast, UInt_t mVPDHitPatternWest){
         }
 
 		if (!DB) {
+#ifndef __ROOTCLING__ 
 			LOG_WARN << "Failed to connect to Database!" << endm;
+#endif
             return;
         }
 
@@ -135,7 +146,9 @@ double singleTubeRes(UInt_t mVPDHitPatternEast, UInt_t mVPDHitPatternWest){
 			return;
 		}
 		else {
+#ifndef __ROOTCLING__ 
 			LOG_WARN << "ERROR: dataset does not contain requested table" << endm;
+#endif
 			return;
 		}
 	}

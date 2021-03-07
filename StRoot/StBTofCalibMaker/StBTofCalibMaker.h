@@ -79,6 +79,7 @@
 #include "phys_constants.h"
 #include "TMath.h"
 #include "StMaker.h"
+#include "StMessMgr.h"
 
 #include <string>
 #include <vector>
