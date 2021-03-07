@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-
-<job  name="TpcPrompt" maxFilesPerProcess="10"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<!-- <job  name="TpcPrompt" maxFilesPerProcess="10"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false"> -->
+<job  name="TpcPrompt" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
 <stdout URL="file:./sched$JOBID.log" />
 <stderr URL="file:./sched$JOBID.err" />
 <command> 
@@ -32,5 +32,8 @@
 <!-- <input URL="file:/gpfs01/star/daq/2019/091/20091*/*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2019/TFG20j/RF/19GeV/*event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2019/.DEV2/RF/19GeV/*.event.root" /> -->
-<input URL="file:/hlt/cephfs/reco/2021/RF/DEV2/7p7GeV_2021/*/*/*event.root" />
+<!-- <input URL="file:/hlt/cephfs/reco/2021/RF/DEV2/7p7GeV_2021/*/*/*event.root" /> -->
+<!-- <input URL="command:daq_2019T.pl" /> -->
+<!-- <input URL="command:daq_2020T.pl" /> -->
+<input URL="file:/hlt/cephfs/reco/2021/RF/TFG21c.B/7p7GeV_2021/*/*/*.event.root" />
 </job>

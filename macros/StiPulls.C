@@ -1,5 +1,6 @@
 /*
-  root.exe 'bfc.C(-1)' 'StiPulls.C+(1e9,"./*tags.root")'
+  root.exe 'bfc.C(-1,"Sti")' StiPulls.C+
+// (1e9,"./*tags.root")'
 
 StiPulls->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==27","colz")
 TChain *chain =  Chain.C+("*.tags.root","StiPulls")

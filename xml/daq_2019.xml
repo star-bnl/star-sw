@@ -44,6 +44,7 @@
 #          root.exe -b -q  'bfc.C(5000,"P2019a,CorrY,-beamLine3D,OSpaceZ2,-HitFilt,StiCA,gmt,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #          root.exe -b -q  'bfc.C(3000,"P2019a,CorrY,-beamLine3D,OSpaceZ2,-HitFilt,StiCA,gmt,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #          root.exe -b -q  'bfc.C(3000,"P2019a,CorrY,-OGridLeakFull,-beamLine3D,OSpaceZ2,-HitFilt,StiCA,gmt,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+#          root.exe -b -q  'bfc.C(3000,"P2019a,CorrY,-beamLine3D,OSpaceZ2,-HitFilt,StiCA,StiPulls,gmt,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
           root.exe -b -q  'bfc.C(3000,"P2019a,CorrY,-beamLine3D,OSpaceZ2,-HitFilt,StiCA,gmt,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #          root.exe -b -q  'bfc.C(5000,"P2019a,DbV20190430,StiCA,gmt,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #         root.exe -b -q  'bfc.C(5000,"P2019a,StiCA,gmt,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout,-OSpaceZ2","'${evtsFile}'")' &gt;&amp; ${logFile}

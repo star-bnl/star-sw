@@ -325,6 +325,7 @@ MySQL [Conditions_rts]> select entryTime,elementID,beginTime,deactive,run from  
        if ($1 == "revision") printf("cvs co -r %s -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >",$2);\
        if ($1 == "Version") printf("itpc_gains.txt.%08i.%06i\n",$4,$5);\
        }' itpc.log
+cvs co -r 1.27 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210220.125428
 cvs co -r 1.26 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210201.073202
 cvs co -r 1.25 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210128.023247
 cvs co -r 1.24 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210126.042220

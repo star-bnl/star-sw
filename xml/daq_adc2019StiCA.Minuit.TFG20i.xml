@@ -57,5 +57,6 @@
 <!-- <input URL="command:daq_2020.pl" /> -->
 <!-- <input URL="command:daq_2020dR.pl" /> -->
 <!-- <input URL="command:daq_2020d.pl" /> -->
-<input URL="file:/hlt/cephfs/daq/2019B/*/*/st_physics_adc*.daq" />
+<!-- <input URL="file:/hlt/cephfs/daq/2019B/*/*/st_physics_adc*.daq" /> -->
+<input URL="file:/hlt/cephfs/daq/2019B/087/20087007/st_physics_adc_20087007_raw_0000005.daq" />
 </job>

@@ -120,7 +120,8 @@ if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/ or $pwd =~ /P20ic/) {
 #    if    ($pwd =~ /7p7GeV_2021\/TFG21c\.A/)   {$glob = "/2021/RF/TFG21c.A/7p7GeV_2021";}
 #    elsif ($pwd =~ /7p7GeV_2021\/TFG21c\.B/)   {
 #    else {die "Not set yet";}
-    $glob = "/2021/RF/TFG21c.B/7p7GeV_2021";
+    if ($pwd =~ /7p7GeV_2021_FF/)                {$glob = "/2021/FF/TFG21c.B/7p7GeV_2021";}
+    else                                         {$glob = "/2021/RF/TFG21c.B/7p7GeV_2021";}
   }
 }
 print "PICOPATH = $PICOPATH; days = $dayMin  - $dayMax : glob = $glob\n" if ($debug);

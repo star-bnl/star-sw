@@ -3,6 +3,7 @@
         <command>
   cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
+  setup  debug
   set l        = 5000000
   set evtsFile = $INPUTFILE0;
   echo "${evtsFile}"
@@ -12,7 +13,9 @@
   if ( -r $output) exit 0;
   set logFile  = Mu${filel}B.log
   if ( -r $logFile) exit 0;
-  root.exe -q -b lMuDst.C 'MuTpcG.C+('$l',"'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+  ln -s ~/macros/.sl* .
+#  root.exe -q -b lMuDst.C 'MuTpcG.C+('$l',"'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'lMuDst.C(-1,"'${evtsFile}'/*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","'$output'")' MuTpcG.C+ &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./MuTpcG$JOBID.log" />
         <stderr URL="file:./MuTpcG$JOBID.err" />
@@ -23,5 +26,9 @@
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/daq/2014/*/*/st_physics_15*.daq" /> -->
 <!-- <input URL="command:Cosmics2014.pl" /> -->
 <!-- <input URL="file:/gpfs01/star/scratch/fisyak/reco/2014/AuAu200A701/*.MuDst.root" /> -->
-<input URL="command:ListMuDst.pl" />
+<!-- <input URL="command:ListMuDst.pl" /> -->
+<!-- <input URL="file:/hlt/cephfs/reco/2021/RF/TFG21c.B/7p7GeV_2021/*/2*" /> -->
+<!-- <input URL="command:ListMuDstD.pl '/hlt/cephfs/reco/2021/RF/TFG21c.B/7p7GeV_2021/*/2*'" />  -->
+<!-- <input URL="command:ListMuDstD.pl '/hlt/cephfs/reco/2021/FF/TFG21c.B/7p7GeV_2021/*/2*'" />  -->
+<input URL="command:ListMuDstD.pl '/hlt/cephfs/reco/2021/FF/TFG21c.B/7p7GeV_2021.WorngField/*/2*'" /> 
 </job>
