@@ -76,8 +76,8 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
     double zWheel = (mom->Z()<0.0)?-zEPD:zEPD;   // east or west
     double deltaZ = abs(zWheel-PrimVertex.Z());      // how far to project  -- the abs is important!!
 
-    double xHit = PrimVertex.X() + deltaZ*sin(mom->Theta())*cos(mom->Phi());
-    double yHit = PrimVertex.Y() + deltaZ*sin(mom->Theta())*sin(mom->Phi());
+    double xHit = PrimVertex.X() + deltaZ*fabs(tan(mom->Theta()))*cos(mom->Phi());//Fixed bug: sin(theta)->fabs(tan(theta)) Xiaoyu Liu 03/09/2021
+    double yHit = PrimVertex.Y() + deltaZ*fabs(tan(mom->Theta()))*sin(mom->Phi());//Xiaoyu Liu 03/09/2021 
     TVector3 xyHit(xHit,yHit,zWheel);
 
     short UniqueID = FindStruckTile(xyHit);   // returns the unique ID of the struck tile (see comments in StEpdHit), or zero if the EPD is not struck at all.
@@ -100,6 +100,7 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
 	theHit = (StPicoEpdHit*)mTheHits->ConstructedAt(mTheHits->GetEntriesFast());
 	theHit->setId(UniqueID);
 	theHit->setnMIP(dE);
+	theHit->setQTdata(pow(2,30));//w/o this step, theHit->nMIP() will return zero. Xiaoyu Liu 03/09/2021
 	mHitsEast[abs(UniqueID)] = theHit;
       }
     }
@@ -113,6 +114,7 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
 	theHit = (StPicoEpdHit*)mTheHits->ConstructedAt(mTheHits->GetEntriesFast());
 	theHit->setId(UniqueID);
 	theHit->setnMIP(dE);
+	theHit->setQTdata(pow(2,30));//w/o this step, theHit->nMIP() will return zero. Xiaoyu Liu 03/09/2021
 	mHitsWest[abs(UniqueID)] = theHit;
       }
     }
