@@ -9,5 +9,10 @@
 #pragma link C++ class StEpdGeom+;
 #pragma link C++ class StEpdEpInfo+;
 #pragma link C++ class StEpdEpFinder+;
+//IncFile=StEpdFastSim/StEpdTrivialEventGenerator.h
+#pragma link C++ class StEpdTrivialEventGenerator;
+//IncFile=StEpdFastSim/StEpdFastSim.h
+#pragma link C++ class StEpdFastSim;
+
 
 #endif
