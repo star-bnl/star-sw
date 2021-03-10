@@ -16,7 +16,8 @@ my $Day =  "*"; # File::Basename::basename($pwd);
 print "Day = $Day\n" if ($debug);
 my $glob;
 if (-r "/hlt/cephfs/daq/2019B/") {
-  @globs = ("/hlt/cephfs/daq/2019B/" . $Day . "/*/*.daq", );  print "globs = @globs\n" if ($debug);
+#  @globs = ("/hlt/cephfs/daq/2019B/" . $Day . "/*/*.daq", );  print "globs = @globs\n" if ($debug);
+  @globs = ("/hlt/cephfs/daq/2019B/" . $Day . "/*/hlt*.daq", );  print "globs = @globs\n" if ($debug);
 }
 if (-r "/gpfs01/star/daq/2019/") {
 #  @globs = ("/gpfs01/star/daq/2019/*/*/st_physics_adc*.daq");  print "globs = @globs\n" if ($debug);
@@ -80,9 +81,9 @@ foreach my $run (sort keys %Runs) {
     if (-r $blafile) {next;}
     print "string:$file\n";
       $fNo++;
-#    if ($fNo > 10) {last;}
+    if ($fNo > 20) {last;}
   }
-#    if ($fNo > 10) {last;}
+    if ($fNo > 20) {last;}
 }
 if (! $fNo) {die "Don't have input files\n";}
 
