@@ -9,7 +9,7 @@ trgTimeOffset_st row;
 St_trgTimeOffset *tableSet = new St_trgTimeOffset("trgTimeOffsetB",1);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.offset	 =   2.505249 -0.1068 -0.0080 -0.0182 -0.0047 ; // standard trigger offset in micro-seconds  ;
+ row.offset	         =     2.3974; // standard trigger offset in micro-seconds  ;
     row.laserOffset	 =      1.469; // laser trigger offset in micro-seconds  ;
     row.laserOffsetW	 =     0.0429; // laser extra trigger offset for West laser ;
 tableSet->AddAt(&row);
