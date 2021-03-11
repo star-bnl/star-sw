@@ -17,6 +17,8 @@
    root.exe lMuDst.C MuTpcG.root
    .L MuTpcG.C+
    Draw();
+   root.exe MuTpcG.root dMuTpcGPrint.C YS.C
+   
 */
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
@@ -1116,7 +1118,7 @@ c1->cd(2);
 dYS_zx_1->Fit("pol0","er","same", 0.5,12.5); cout << Form("dYW = %8.4f +/- %8.4f",pol0->GetParameter(0),pol0->GetParError(0)) << endl;
 dYS_zx_1->Fit("pol0","er+","same",12.5,24.5); cout << Form("dYE = %8.4f +/- %8.4f",pol0->GetParameter(0),pol0->GetParError(0)) << endl;
 
-TCanvas *c2 = new TCanvas(); c2->Divide(1,4);
+TCanvas *c2 = new TCanvas("c2","c2"); c2->Divide(1,4);
 c2->cd(1);  dT->ProjectionY()->Fit("gaus"); cout << Form(" dT: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
 c2->cd(2);  dZ->ProjectionY()->Fit("gaus"); cout << Form(" dZ: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
 c2->cd(3);  dX->ProjectionY()->Fit("gaus"); cout << Form(" dX: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
