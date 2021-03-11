@@ -4,7 +4,7 @@ use Cwd;
 use Env;
 #use lib $STAR . "/bin";#$ENV{ConstructLocation}; 
 use lib "/net/l402/data/fisyak/STAR/packages/.DEV2/bin";#$ENV{ConstructLocation}; 
-use RunXIXDefs;
+use RunXXDefs;
 my $debug = 0;
 if ($#ARGV >= 0) {
   $debug = $ARGV[0]; print "debug $debug\n" if ($debug);
@@ -15,13 +15,12 @@ my $pwd = cwd();
 my $Day =  "*"; # File::Basename::basename($pwd);
 print "Day = $Day\n" if ($debug);
 my $glob;
-if (-r "/hlt/cephfs/daq/2019B/") {
-#  @globs = ("/hlt/cephfs/daq/2019B/" . $Day . "/*/*.daq", );  print "globs = @globs\n" if ($debug);
-  @globs = ("/hlt/cephfs/daq/2019B/" . $Day . "/*/hlt*.daq", );  print "globs = @globs\n" if ($debug);
+if (-r "/hlt/cephfs/daq/2020/") {
+  @globs = ("/hlt/cephfs/daq/2020/" . $Day . "/*/*.daq", );  print "globs = @globs\n" if ($debug);
 }
-if (-r "/gpfs01/star/daq/2019/") {
-#  @globs = ("/gpfs01/star/daq/2019/*/*/st_physics_adc*.daq");  print "globs = @globs\n" if ($debug);
-  @globs = ("/gpfs01/star/daq/2019/*/*/st_physics*.daq");  print "globs = @globs\n" if ($debug);
+if (-r "/gpfs01/star/daq/2020/") {
+#  @globs = ("/gpfs01/star/daq/2020/*/*/st_physics_adc*.daq");  print "globs = @globs\n" if ($debug);
+  @globs = ("/gpfs01/star/daq/2020/*/*/st_physics*.daq");  print "globs = @globs\n" if ($debug);
 }
 sub PrintHash($$) {
   my $env = shift; # print "Call PrintHash\n";
@@ -81,9 +80,9 @@ foreach my $run (sort keys %Runs) {
     if (-r $blafile) {next;}
     print "string:$file\n";
       $fNo++;
-    if ($fNo > 50) {last;}
+#    if ($fNo > 10) {last;}
   }
-    if ($fNo > 50) {last;}
+#    if ($fNo > 10) {last;}
 }
 if (! $fNo) {die "Don't have input files\n";}
 
