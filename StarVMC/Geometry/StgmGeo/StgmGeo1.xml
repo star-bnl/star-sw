@@ -866,7 +866,7 @@
   <!-- sTGC chamber -->
 <Volume name="TGCG" comment="sTGC gas volume">
     <Material  name="NPCO2" />
-    <Material  name="NPCO2" isvol="1" />
+    <Material  name="NPCO2_sens" isvol="1" /> <!-- new name required to pick up the isvol flag" -->
     <Attribute for="TGCG" seen="1" colo="2" serial="station" />
     <Shape type="box" dx="0" dy="0" dz="0" />
     
