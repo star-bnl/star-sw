@@ -101,11 +101,11 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   if (dbMk) dbMk->SetDebug(1);
   chain->Init();
 
-  if(isPico)
-  {
-    StKFParticleInterface::instance()->CleanLowPVTrackEvents();
-//     StKFParticleInterface::instance()->UseHFTTracksOnly();
-  }
+  //  if(isPico)
+  //  {
+  StKFParticleInterface::instance()->CleanLowPVTrackEvents();
+  //     StKFParticleInterface::instance()->UseHFTTracksOnly();
+  //}
   
 //   StKFParticleInterface::instance()->SetSoftKaonPIDMode();
   StKFParticleInterface::instance()->SetSoftTofPidMode();
@@ -141,6 +141,10 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
     if (! MuMk) return;
     MuMk->SetStatus("*",1);
     tree = MuMk->chain();
+    // enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3, Mtd=4, FXT=5};
+    StMuDst::setVtxMode(3);    // 2019 AuAu 19GeV
+    StMuDst::SetVxXYrange(-0.4,0.4, -0.6, 0.0);
+    StMuDst::SetVxZrange(-150.,150.);
   } else {
     StPicoDstMaker * picoMk = (StPicoDstMaker *) StMaker::GetTopChain()->Maker("PicoDst");
     if (! picoMk) return;
