@@ -100,7 +100,7 @@ my $fno = 0;
 foreach my $file (@Files) { 
   my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, 
       $mtim, $ctime, $blksize,$blocks) = stat($file );
-#  next if $size < 500000; # 0.5 MB limit
+  next if $size < 500000; # 0.5 MB limit
   my $f = File::Basename::basename($file);# print "$file";
   my $dir = File::Basename::dirname($file);# print "$file";
   next if ($f =~ /^($tags)/);
