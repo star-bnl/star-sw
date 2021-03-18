@@ -1320,23 +1320,20 @@ Bool_t        St_beamInfoC::IsFixedTarget() {
 //________________________________________________________________________________
 Float_t        St_beamInfoC::GammaYellow() {
   Float_t gamma = 1;
-  if (blueIntensity() < 10*yellowIntensity()) { 
   Int_t N = TMath::Nint(getYellowMassNumber()); // no. of nucleons
   if (N < 1) N = 1;
-  Double_t E = N*getYellowEnergy();
+  Double_t E = N*getYellowEnergy(); // total energy per nucleon 
   Double_t M = kuAtomicMassUnit*N;
-  if (E < M) E = M;
   gamma = E/M;
-  }
   return gamma;
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::GammaBlue() {
   Float_t gamma = 1;
-  if (blueIntensity() > 10*yellowIntensity()) { 
+  if (! IsFixedTarget()) { 
     Int_t N = TMath::Nint(getBlueMassNumber()); // no. of nucleons
     if (N < 1) N = 1;
-    Double_t E = N*getBlueEnergy();
+    Double_t E = N*getBlueEnergy(); // total energy
     Double_t M = kuAtomicMassUnit*N;
     if (E < M) E = M;
     gamma = E/M;
@@ -1345,8 +1342,7 @@ Float_t        St_beamInfoC::GammaBlue() {
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::Gamma() {
-  if (blueIntensity() > yellowIntensity()) return GammaBlue();
-  else                                     return GammaYellow();
+  return GammaYellow();
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::BetaBlue() {
@@ -1360,13 +1356,12 @@ Float_t        St_beamInfoC::BetaYellow() {
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::Beta() {
-  if (blueIntensity() > yellowIntensity()) return BetaBlue();
-  else                                     return BetaYellow();
+  return -BetaBlue();
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::SqrtS() {
   static Double_t mP = kuAtomicMassUnit*1.00727646662; // proton mass 
-  Double_t eBlue = mP*GammaBlue(); 
+  Double_t eBlue   = mP*GammaBlue(); 
   Double_t eYellow = mP*GammaYellow();
   return TMath::Sqrt(2*mP*mP + 2*eBlue*eYellow*(1 - BetaBlue()*BetaYellow()));
 }
@@ -1384,9 +1379,9 @@ Float_t        St_beamInfoC::Ycms() {
 //________________________________________________________________________________
 Float_t        St_beamInfoC::Frequency() {
   static Double_t l       = 3833.845*9.99999253982746361e-01;// *9.99988614393081399e-01;// *9.99998896969437556e-01;  // RHIC perimetr
-  static Double_t NB = 120;      // no. of buches
+  static Double_t NB = 120;      // no. of buches, can be changed
   Double_t frequency = 1e-6*NB*Beta()*TMath::C()/l;
-  return frequency;
+  return TMath::Abs(frequency);
 }
 //________________________________________________________________________________
 #include "St_tpcRDOMasksC.h"

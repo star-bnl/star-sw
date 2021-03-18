@@ -6,7 +6,7 @@
 #include "StiHitErrorCalculator.h"
 ClassImp(StiHitErrorCalculator);
 //________________________________________________________________________________
-void StiHitErrorCalculator::calculateError(Double_t _z,  Double_t _eta, Double_t _tanl, Double_t &ecross, Double_t &edip) const {
+void StiHitErrorCalculator::calculateError(Double_t _z,  Double_t _eta, Double_t _tanl, Double_t &ecross, Double_t &edip, Double_t fudgeCactor) const {
   static const Double_t tenMicrons = 1e-3;
   static const Double_t min2Err = tenMicrons*tenMicrons;
   static const Double_t max2Err = 1.;
@@ -27,12 +27,12 @@ void StiHitErrorCalculator::calculateError(Double_t _z,  Double_t _eta, Double_t
   Double_t sinCA = TMath::Sin(Phi);
   if (TMath::Abs(cosCA)<0.01) cosCA=0.01;
   Double_t tanCA = sinCA/cosCA;
-  ecross=Coeff[0]+Coeff[1]*dz/(cosCA*cosCA) +Coeff[2]*tanCA*tanCA;
+  ecross=fudgeCactor*fudgeCactor*(Coeff[0]+Coeff[1]*dz/(cosCA*cosCA) +Coeff[2]*tanCA*tanCA);
   if (ecross< min2Err) ecross = min2Err;
   if (ecross> max2Err) ecross = max2Err;
   Double_t tanDip=_tanl;
   Double_t cosDipInv2=1+tanDip*tanDip;
-         edip=Coeff[3]+Coeff[4]*dz*cosDipInv2+Coeff[5]*tanDip*tanDip;
+  edip=fudgeCactor*fudgeCactor*(Coeff[3]+Coeff[4]*dz*cosDipInv2+Coeff[5]*tanDip*tanDip);
   if (edip< min2Err) edip = min2Err;
   if (edip> max2Err) edip = max2Err;
 //	Temporary hack for Gene. Increase prompt hit errors
