@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.108 2019/05/22 21:24:30 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.109 2021/03/18 21:37:39 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.109  2021/03/18 21:37:39  genevb
+// Update styles of numerous histograms
+//
 // Revision 2.108  2019/05/22 21:24:30  genevb
 // Add sDCA vs. time-in-run
 //
@@ -659,7 +662,6 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 
   //set Style of Plots
   const Int_t numPads = m_PadColumns*m_PadRows;  
-  gStyle->SetOptStat(111111);
   gStyle->SetStatStyle(0);
   gStyle->SetOptDate(0);
   gStyle->SetPalette(1);
@@ -816,7 +818,6 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
       if (started) {
 	if (oName.CompareTo(m_LastHistName)==0) started = kFALSE;
 	histCounter++;
-
 //...........................................................................
 
 
@@ -905,11 +906,11 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             if (SingleTpcSectorReference && onamebase.Contains("iTpcSector")) {
               // last parameter is the single sector to use for reference:
               // e.g. TpcSector14 => TpcSector20 if the number is "20"
-              onamebase.Replace(onamebase.Index("iTpcSector")+10,2,"17");
+              onamebase.Replace(onamebase.Index("iTpcSector")+10,2,"16");
             } else if (SingleTpcSectorReference && onamebase.Contains("TpcSector")) {
               // last parameter is the single sector to use for reference:
               // e.g. TpcSector20 => TpcSector14 if the number is "14"
-              onamebase.Replace(onamebase.Index("TpcSector")+9,2,"14");
+              onamebase.Replace(onamebase.Index("TpcSector")+9,2,"9");
             }
             hobjR = (TH1*) (dirListR->FindObject(onamebase.Data()));
             if (!hobjR) {
@@ -945,7 +946,34 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 
           // set x & y grid off by default
 	  gPad->SetGridy(0);
-	  gPad->SetGridx(0);
+          if (oName.Contains("H_matchCand")) {
+            gPad->SetGridx(1);
+            gStyle->SetGridStyle(6);
+            gStyle->SetGridColor(kOrange);
+          } else {
+	    gPad->SetGridx(0);
+            gStyle->SetGridStyle(3);
+            gStyle->SetGridColor(kGray);
+          }
+
+          // set stats to draw
+          if (oName.Contains("TpcSector") ||
+              oName.Contains("PointRPTpc") ||
+              oName.Contains("PointXYTpc") ||
+              oName.Contains("TrigBits")) {
+            gStyle->SetOptStat(11);
+          } else if (oName.Contains("NullPrim")) {
+            gStyle->SetOptStat(1111);
+          } else {
+            gStyle->SetOptStat(111111);
+          }
+
+          // set bottom margin of pad
+          if (oName.Contains("TrigBits")) {
+            gPad->SetBottomMargin(0.35);
+          } else {
+            gPad->SetBottomMargin(0.10);
+          }
 
           if (oName.Contains("GtrkPadfT")) hobj->SetMinimum(0.8);
 	  
@@ -976,12 +1004,15 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             if (!analRepeat) {LOG_INFO << "       -- Will draw in logX scale: " << oname <<endm;}
 	  } else gPad->SetLogx(0);
 
-
 // Set logZ scale
           if (oName.EndsWith("PVsDedx") ||
               oName.Contains("fms_qt_") ||
               oName.Contains("fpd_channel_") ||
               oName.Contains("TofPID") ||
+              oName.Contains("multiplicity_etofHits") ||
+              oName.Contains("eTofHits") ||
+              oName.Contains("etofMult") ||
+              oName.Contains("G_matchCand_") ||
               oName.Contains("RP_cluster_xy") ||
               oName.Contains("TpcSector") ||
               oName.Contains("PointRPTpc") ||
@@ -1029,6 +1060,11 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           if (oName.Contains("VtxFtpc")&&oName.Contains("TpcXY")&&m_RunYear!=7){
             hobj->GetXaxis()->SetRangeUser(-2.0,2.0);
             hobj->GetYaxis()->SetRangeUser(-2.0,2.0);
+          }
+
+// Limit x (time) range for some ETOF histograms
+          if (oName.Contains("Diff_etofHits")) {
+            hobj->GetXaxis()->SetRangeUser(0.0,100.0);
           }
 
           // actually draw,print
@@ -1103,6 +1139,9 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           } else if ((chkdim == 2) &&
                      (oName.EndsWith("SImpactTime"))) {
             hobj->SetMarkerStyle(7);
+            ((TH2F*) hobj)->Rebin2D(100,1,0);
+            hobj->SetXTitle("Time in run [sec]");
+            hobj->SetYTitle("signed impact (sDCA) [cm]");
             ((TH2F*) hobj)->ProfileX()->Draw();
           } else if ((chkdim == 2) &&
                      (oName.EndsWith("SvtLoc") ||
@@ -1114,6 +1153,12 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
                       oName.Contains("PointXYTpc") ||
                       oName.Contains("SectorvsSensor") ||
                       oName.Contains("LaddervsSensor"))) {
+            if (oName.Contains("TpcSector")) {
+              // method to suppress a single hot channel
+              Double_t max1 = hobj->GetMaximum();
+              Double_t max2 = hobj->GetMaximum(max1);
+              if (max1/max2 > 5) hobj->SetBinContent(hobj->GetMaximumBin(),max2);
+            }
             hobj->Draw("ZCol");
           } else if ((chkdim == 2) && (!hobj->InheritsFrom("StMultiH1F"))) {
             hobj->Draw("Col");
@@ -1128,10 +1173,14 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
                 (oName.Contains("QaFpd") && !oName.Contains("Sums"))) {
               hobj->SetBarOffset();
             }
-	    hobj->SetLineWidth(2);
-            if (oName.EndsWith("Mass")) hobj->Draw("e");
-	    else hobj->Draw();
-	    if (oName.BeginsWith("fcl_radial") && (hobj->GetEntries() > 0)) {
+            if (oName.Contains("TrigBits")) {
+              hobj->SetLineWidth(1);
+            } else {
+              hobj->SetLineWidth(2);
+            }
+           if (oName.EndsWith("Mass")) hobj->Draw("e");
+           else hobj->Draw();
+           if (oName.BeginsWith("fcl_radial") && (hobj->GetEntries() > 0)) {
               //Fits to radial steps FTPCE+W/////05/14/08///nav+gvb
 	      hobj->GetXaxis()->SetRangeUser(6.5,9.0);
 	      hobj->Fit("pol0","","", 6.5, 7.2);
@@ -1317,7 +1366,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             // between RDOs 1-2, outer 24(68) pads [12(34) at each end] are in RDO 1
             pitch = 0.335/2.0; // 3.35mm pitch
             int row_width = 134; int in_step = 68; float row1=6.5;
-            if (m_RunYear < 17) { row_width = 142; in_step = 24; row1=7.5; }
+            //if (m_RunYear < 17) { row_width = 142; in_step = 24; row1=7.5; }
             float row2 = row1+1.0;
             ruler.DrawLine(-(row_width-in_step)*pitch,row2,(row_width-in_step)*pitch,row2);
             ruler.DrawLine(-row_width*pitch,row1,-(row_width-in_step)*pitch,row1);
@@ -2542,7 +2591,8 @@ void StHistUtil::SetDefaultPrintList(const Char_t *dirName, const Char_t *analTy
             ilgString.BeginsWith("fms_qt_") ||
             ilgString.BeginsWith("Z3A") ||
             ilgString.Contains("etof",TString::ECaseCompare::kIgnoreCase) ||
-            ilgString.BeginsWith("G_matchCand_") ||
+            ilgString.Contains("_matchCand_") ||
+            ilgString.BeginsWith("G_primary") ||
             ilgString.BeginsWith("fpd_channel_"))) {
         for (Int_t k=0; k<numOfPosPrefixes; k++) {
           TString listString = type;
