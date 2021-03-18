@@ -327,6 +327,10 @@ void tofBuilder::startrun(daqReader *rdr) {
 
   long TOF_L0_trg_idx = ((long)&contents.TOF_L0_trg[0] - (long)&contents) / 4;
 
+  TOF_Error1_list->SetText(.15,.6,"");
+  TOF_Error2_list->SetText(.15,.6,"");
+  TOF_Error3_list->SetText(.15,.6,"");
+
   for(int i=0;i<NTRAYS;i++) {
     LOG(DBG, "tray %d   (idx=%d)",i, TOF_L0_trg_idx);
 
