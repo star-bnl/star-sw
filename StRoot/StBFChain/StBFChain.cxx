@@ -1,4 +1,4 @@
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.668 2020/08/28 19:46:47 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.669 2021/03/19 01:44:46 genevb Exp $
 
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -783,6 +783,9 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OAbortGap"))   mk->SetAttr("OAbortGap"  , kTRUE);
       }
       mk->PrintAttr();
+    }
+    if (maker == "StTpcHitMover" && GetOption("EbyET0")) {
+      mk->SetAttr("EbyET0", kTRUE);
     }
     if ((maker == "StdEdxY2Maker"  || maker == "StTpcHitMover") &&
 	GetOption("EmbeddingShortCut"))  {
