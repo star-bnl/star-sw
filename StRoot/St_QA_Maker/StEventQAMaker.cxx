@@ -355,20 +355,19 @@ Int_t StEventQAMaker::Make() {
   if (run_year < 13) ftpHists = kTRUE; // Removed for run12 on
 
   
+  if (!doEvent) {
+    gMessMgr->Message() << "StEventQAMaker::Make(): "
+    << "skipping because trigger word=" << tword << endm;
+    return kStOk;
+  }
+
   StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
-  for (unsigned int iTrg = 0; iTrg < dbTriggerId->getIDNumRows() ; iTrg++){
+  for (unsigned int iTrg=0; iTrg < (dbTriggerId ? dbTriggerId->getIDNumRows() : 0); iTrg++) {
     UInt_t daqid = dbTriggerId->getDaqTrgId(iTrg);
     if (tword>>(daqid) & 1U)
       mTrigBits->Fill((Float_t) daqid);
     if (strlen(mTrigBits->GetXaxis()->GetBinLabel(daqid+1))<2)
       mTrigBits->GetXaxis()->SetBinLabel(daqid+1,dbTriggerId->getName(iTrg));
-  }
-
-  
-  if (!doEvent) {
-    gMessMgr->Message() << "StEventQAMaker::Make(): "
-    << "skipping because trigger word=" << tword << endm;
-    return kStOk;
   }
   
   if (!mNullPrimVtx) BookHist();
@@ -2942,8 +2941,11 @@ void StEventQAMaker::MakeHistiTPC() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.139 2021/03/18 21:35:48 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.140 2021/03/19 15:21:29 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.140  2021/03/19 15:21:29  genevb
+// Only look at trigger information if trigger word is valid
+//
 // Revision 2.139  2021/03/18 21:35:48  genevb
 // Re-work the trigger bits plot to have actual trigger names
 //
