@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHeader.cxx,v 2.2 2018/07/27 13:44:55 jeromel Exp $
+ * $Id: StETofHeader.cxx,v 2.3 2021/03/19 19:55:56 ullrich Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHeader.cxx,v $
+ * Revision 2.3  2021/03/19 19:55:56  ullrich
+ * include the front-end missmatch
+ *
  * Revision 2.2  2018/07/27 13:44:55  jeromel
  * Changes by Florian
  *
@@ -22,6 +25,8 @@
  ***************************************************************************/
 #include "StETofHeader.h"
 #include <map>
+#include <vector>
+#include <iostream>
 
 StETofHeader::StETofHeader()
 : mTrgGdpbFullTime( 0 ),
@@ -31,8 +36,8 @@ StETofHeader::StETofHeader()
   mStarTrgCmdIn( 0 ),
   mEventStatusFlag( 0 )
 {
-  mRocGdpbTs.clear();
-  mRocStarTs.clear();
+    mRocGdpbTs.clear();
+    mRocStarTs.clear();
 }
 
 
@@ -46,10 +51,33 @@ StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime
   mStarDaqCmdIn( starDaqCmdIn ),
   mStarTrgCmdIn( starTrgCmdIn ),
   mEventStatusFlag( eventStatusFlag )
-
 {
     setRocGdpbTs( gdpbTs );
     setRocStarTs( starTs );
+    const size_t kNbGet4sInSystem = 1728;
+    mMissMatchFlagVec = vector<bool>( kNbGet4sInSystem, false ); 
+}
+
+StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime,
+                            const map< unsigned int, uint64_t >& gdpbTs, const map< unsigned int, uint64_t >& starTs,
+                            const unsigned int& starToken, const unsigned int& starDaqCmdIn, const unsigned int& starTrgCmdIn,
+                            const uint64_t& eventStatusFlag, const vector<bool>& MissMatchFlagVec )
+: mTrgGdpbFullTime( trgGdpbTime ),
+  mTrgStarFullTime( trgStarTime ),
+  mStarToken( starToken ),
+  mStarDaqCmdIn( starDaqCmdIn ),
+  mStarTrgCmdIn( starTrgCmdIn ),
+  mEventStatusFlag( eventStatusFlag ),
+  mMissMatchFlagVec( MissMatchFlagVec )
+{
+    setRocGdpbTs( gdpbTs );
+    setRocStarTs( starTs );
+    //const size_t kNbGet4sInSystem = 1728;
+    //mMissMatchFlagVec.resize( kNbGet4sInSystem );
+    //for( auto mapcheck : mMissMatchFlagVec ){
+    //	cout << mapcheck << endl;
+    // }
+
 }
 
 
@@ -114,6 +142,11 @@ StETofHeader::eventStatusFlag() const
     return mEventStatusFlag;
 }
 
+vector <bool>
+StETofHeader::missMatchFlagVec() const
+{
+    return mMissMatchFlagVec;
+}
 
 void
 StETofHeader::setTrgGdpbFullTime( const double& gdpbFullTime )
