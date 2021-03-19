@@ -34,6 +34,9 @@ rts_example: rts_example.o $(VOBJS)
 tpc_rerun: tpc_rerun.o $(VOBJS)
 	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
+tpx_rerun: tpx_rerun.o $(VOBJS)
+	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
+
 tpx_read_gains: tpx_read_gains.o $(VOBJS)
 	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
@@ -83,6 +86,7 @@ daqFileHacker.o: ../DAQ_READER/daq_dta_structs.h
 daqFileHacker.o: ../DAQ_BTOW/daq_btow.h
 daqFileHacker.o: ../DAQ_EMC/daq_emc.h
 daqFileHacker.o: ../DAQ_L4/daq_l4.h
+daqFileHacker.o: ../../../../StRoot/RTS/include/HLT/HLTFormats.h
 daqFileMerger.o: ../../../../StRoot/RTS/include/rtsLog.h
 daqFileMerger.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daqFileMerger.o: ../DAQ_READER/daqReader.h
@@ -137,6 +141,7 @@ rts_example.o: ../DAQ_ITPC/itpcCore.h
 rts_example.o: ../DAQ_READER/daq_dta_structs.h
 rts_example.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
 rts_example.o: ../DAQ_FCS/daq_fcs.h
+rts_example.o: ../DAQ_FCS/fcs_data_c.h
 rts_example.o: ../DAQ_STGC/daq_stgc.h
 rts_example.o: ../DAQ_FGT/fgtPed.h
 rts_example.o: ../DAQ_FGT/daq_fgt.h
@@ -198,7 +203,23 @@ tpc_rerun.o: ../../../../StRoot/RTS/include/rts.h
 tpc_rerun.o: ../DAQ_READER/daq_dta_structs.h
 tpc_rerun.o: ../DAQ_TPX/daq_tpx.h
 tpc_rerun.o: ../DAQ_READER/daq_det.h
+tpc_rerun.o: ../DAQ_TPX/tpxGain.h
+tpc_rerun.o: ../DAQ_TPX/tpxCore.h
+tpc_rerun.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpx_read_gains.o: ../DAQ_TPX/tpxGain.h
 tpx_read_gains.o: ../DAQ_TPX/tpxCore.h
 tpx_read_gains.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpx_read_gains.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
+tpx_rerun.o: ../../../../StRoot/RTS/include/rtsLog.h
+tpx_rerun.o: ../DAQ_READER/daqReader.h
+tpx_rerun.o: ../DAQ_READER/daqConfig.h
+tpx_rerun.o: ../DAQ_READER/daq_dta.h
+tpx_rerun.o: ../../../../StRoot/RTS/include/rts.h
+tpx_rerun.o: ../DAQ_READER/daq_dta_structs.h
+tpx_rerun.o: ../DAQ_TPX/daq_tpx.h
+tpx_rerun.o: ../DAQ_READER/daq_det.h
+tpx_rerun.o: ../DAQ_TPX/tpxGain.h
+tpx_rerun.o: ../DAQ_TPX/tpxCore.h
+tpx_rerun.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
+tpx_rerun.o: ../DAQ_TPX/tpxFCF.h
+tpx_rerun.o: ../DAQ_TPX/tpxFCF_flags.h
