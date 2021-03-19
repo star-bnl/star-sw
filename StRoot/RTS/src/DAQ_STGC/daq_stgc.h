@@ -4,24 +4,26 @@
 
 #include <DAQ_READER/daq_det.h>
 
+struct stgc_vmm_t {
+	u_char feb_vmm ;	
+	u_char ch ;
+	u_short adc ;
+	u_short bcid ;
+} ;
 
-// forward decls
-//class stgcPed ;
-//class stgcGain ;
-//class stgcFCF ;
-//class stgcStat ;
 class daqReader;
-//class stgcFCF_2D ;
 
 class daq_stgc : public daq_det {
 private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
 	class daq_dta *handle_altro(int sec, int rdo) ;
 	class daq_dta *handle_ped(int sec) ;
+	class daq_dta *handle_vmm(int sec) ;
 
 	// direct maps to file content:
 	class daq_dta *raw ;	
 	class daq_dta *altro ;
+	class daq_dta *vmm ;
 
 	static const int MAX_SEC = 7 ;
 	static const int MAX_RDO = 6 ;
@@ -41,15 +43,14 @@ public:
 	int get_token(char *buff, int buff_bytes) ;
 	int get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt=0) ;
 
-
-
 	// trivial stuff below...
 	virtual const char *GetCVS() const {	// Offline
 		static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
 	}
 
 	void help() const ;
-
+private:
+	int get_l2_vmm(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt=0) ;
 } ;
 
 
