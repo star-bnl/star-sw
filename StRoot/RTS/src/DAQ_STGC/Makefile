@@ -27,7 +27,7 @@ endif
 
 
 
-OBJS := stgcPed.o daq_stgc.o
+OBJS := stgcPed.o daq_stgc.o stgc_data_c.o
 
 LIBS = libstgc.a
 
@@ -54,8 +54,13 @@ daq_stgc.o: ../DAQ_READER/daq_dta_structs.h
 daq_stgc.o: ../../../../StRoot/RTS/include/DAQ1000/ddl_struct.h
 daq_stgc.o: daq_stgc.h
 daq_stgc.o: ../DAQ_READER/daq_det.h
+daq_stgc.o: stgc_data_c.h
 daq_stgc.o: ../DAQ_TPX/tpxCore.h
 daq_stgc.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
+stgc_data_c.o: ../../../../StRoot/RTS/include/rtsLog.h
+stgc_data_c.o: daq_stgc.h
+stgc_data_c.o: ../DAQ_READER/daq_det.h
+stgc_data_c.o: stgc_data_c.h
 stgcPed.o: ../../../../StRoot/RTS/include/rtsLog.h
 stgcPed.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
 stgcPed.o: ../../../../StRoot/RTS/include/daqModes.h
