@@ -13,6 +13,7 @@
 #include "StDetectorDbMaker/St_spaceChargeCorC.h"
 #include "StDetectorDbMaker/St_tpcChargeEventC.h"
 #include "StDetectorDbMaker/St_tpcBXT0CorrEPDC.h"
+#include "StEventUtilities/StEbyET0.h"
 #include "TMath.h"
 ClassImp(StTpcHitMover)
 #define __DEBUG__
@@ -56,7 +57,10 @@ Int_t StTpcHitMover::Make() {
     LOG_WARN << "StTpcHitMover::Make there is no StEvent " << endm;
     return kStWarn;
   }
+
+  double ebyeT0 = (IAttr("EbyET0") ? StEbyET0::Instance()->getT0(pEvent) : 0);
   if (pEvent->epdCollection()) {
+
 //	EPD based event-by-event correction for the hit timing
 	double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
 
@@ -158,6 +162,7 @@ Int_t StTpcHitMover::Make() {
 		  }
 //		THIS IS A BLOCK TO CORRECT TIMING IN FXT MODE FOR DATA
 		  if (doEPDT0Correction) time += triggerOffset;
+                  time += ebyeT0;
 //		======================================================
 		  tpcHit->setTimeBucket(time);
 		  StTpcPadCoordinate padcoord(sector, row, pad, time);
@@ -208,8 +213,11 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.32 2019/11/14 23:07:48 iraklic Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.33 2021/03/19 01:44:48 genevb Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
+// Revision 1.33  2021/03/19 01:44:48  genevb
+// Introduce Event-by-Event T0 corrections
+//
 // Revision 1.32  2019/11/14 23:07:48  iraklic
 // added timebucket and drift velocity into epd-based T0 correction calculation
 //

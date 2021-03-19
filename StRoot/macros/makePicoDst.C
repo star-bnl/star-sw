@@ -25,6 +25,7 @@ void loadLibs()
   gSystem->Load("StTriggerDataMaker"); // new starting from April 2003
   gSystem->Load("StBichsel");
   gSystem->Load("StEvent");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StEventUtilities");
   gSystem->Load("StDbLib");
   gSystem->Load("StEmcUtil");
@@ -35,7 +36,6 @@ void loadLibs()
   gSystem->Load("StMuDSTMaker");
   gSystem->Load("libStarAgmlUtil");
 
-  gSystem->Load("StTpcDb");
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
   gSystem->Load("StDaqLib");

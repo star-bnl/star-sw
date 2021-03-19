@@ -1938,7 +1938,8 @@ my $NEvents = 100000;
 #$hist = "Run329"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/04/20 new TpcLengthCorrectionMDF and TpcSecRowB bug in Run328
 #$hist = "Run330"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/05/20 new TpcSecRowB 
 #$hist = "Run331"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/production_19GeV_2019/ReversedFullField";  $Production = "/P20ic_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 07/08/20 check dev  
-
+#                                           /gpfs01/star/data100/reco/production_19GeV_2019/ReversedFullField/P21ia_calib/2019
+$hist = "RunXIX01"; $NEvents = 2000; $disk = "data*/"; $RECO = "/reco/production_19GeV_2019/ReversedFullField";  $Production = "/P21ia_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/18/21 Test production with alignment from Run XX
 ################## Run XX ##############################################################
 # 11p5GeV                 20191208.100905, 20191221.190032, 20200210.220428, 20200214.143742, 20200214.143742
 # 5p75GeV_fixedTarget     20191221.154021, 
@@ -2062,7 +2063,7 @@ my $NEvents = 100000;
 #$hist = "RunXXI06"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/06/21 TpcPadCorrectionMDF.20210129.000005.C
 #$hist = "RunXXI07"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/06/21 add TpcSecRowB.20210129.000006.root and TpcLengthCorrectionMDF.20210129.000006.C Done with express dE/dx calibration for Run XXI 7p7GeV
 ######################################## Run XXI ########################################
-$hist = "RunXXI10"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/TFG21c.B/"; $RECO = "/7p7GeV_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/06/21 add TpcSecRowB.20210129.000006.root and TpcLengthCorrectionMDF.20210129.000006.C Done with express dE/dx calibration for Run XXI 7p7GeV
+#$hist = "RunXXI10"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/TFG21c.B/"; $RECO = "/7p7GeV_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/06/21 add TpcSecRowB.20210129.000006.root and TpcLengthCorrectionMDF.20210129.000006.C Done with express dE/dx calibration for Run XXI 7p7GeV
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();

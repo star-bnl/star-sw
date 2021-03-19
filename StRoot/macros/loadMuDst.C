@@ -11,6 +11,8 @@ void loadMuDst() {
   gSystem->Load("StEvent");
   gSystem->Load("StTriggerDataMaker"); // new starting from April 2003
   gSystem->Load("StBichsel");
+  gSystem->Load("StEvent");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StEventUtilities");
   gSystem->Load("StTriggerDataMaker"); // new starting from April 2003
   gSystem->Load("StDbLib");

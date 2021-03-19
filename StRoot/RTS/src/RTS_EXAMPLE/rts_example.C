@@ -1942,7 +1942,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    printf("ids: ");
 	    for(int i=0;i<64;i++) {
 		if(rdr->daqbits64 & (1ll << i)) {
-		    printf("{%d}",rdr->getOfflineId(i));
+		    printf("{%d=%d}",i,rdr->getOfflineId(i));
 		}
 	    }
 
@@ -2465,7 +2465,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 
 
-				for(int i=0;i<dd->ncontent;i++) {
+				for(u_int i=0;i<dd->ncontent;i++) {
 				    adctb[dd->adc[i].tb] += dd->adc[i].adc;
 				}
 
@@ -2778,7 +2778,9 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
 static int stgc_doer(daqReader *rdr, const char *do_print)
 {
-	int raw_found = 0 ;
+	int altro_found = 0 ;
+	int vmm_found = 0 ;
+
 	daq_dta *dd ;
 
 	if(strcasestr(do_print,"stgc")) ;	// leave as is...
@@ -2792,7 +2794,7 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 
 	if(dd) {
 		while(dd->iterate()) {	//per xing and per RDO
-			raw_found = 1 ;
+			altro_found = 1 ;
 
 			if(do_print) {
 				printf("STGC RAW: sec %02d, RDO %d: bytes %d\n",dd->sec,dd->rdo,dd->ncontent) ;
@@ -2813,7 +2815,7 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 	dd = rdr->det("stgc")->get("altro") ;	
 
 	while(dd && dd->iterate()) {	
-		raw_found = 1 ;
+		altro_found = 1 ;
 
 		if(do_print) {
 			// there is NO RDO in the bank
@@ -2826,12 +2828,38 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 	}
 
 
+	dd = rdr->det("stgc")->get("vmm") ;
 
-	if(raw_found) {
-		LOG(INFO,"STGC found") ;
+	while(dd && dd->iterate()) {	
+		vmm_found = 1 ;
+
+		if(do_print) {
+			// there is NO RDO in the bank
+			printf("STGC VMM: evt %d: sec %d, RDO %d\n",good,dd->sec,dd->rdo) ;
+
+			struct stgc_vmm_t *vmm = (stgc_vmm_t *)dd->Void ;
+			for(u_int i=0;i<dd->ncontent;i++) {
+				u_char feb = vmm[i].feb_vmm >> 2 ;	// feb [0..5]
+				u_char vm = vmm[i].feb_vmm & 3 ;	// VMM [0..3]
+
+				printf("  FEB %d:%d, ch %02d: ADC %d, BCID %d\n",feb,vm,vmm[i].ch,
+				       vmm[i].adc,vmm[i].bcid) ;
+			}
+		}
 	}
 
-	return raw_found ;
+	if(altro_found || vmm_found) {
+		char fstr[64] ;
+
+		strcpy(fstr,"STGC found: ") ;
+
+		if(altro_found) strcat(fstr,"ALTRO ") ;
+		if(vmm_found) strcat(fstr,"VMM ") ;
+
+		LOG(INFO,"%s",fstr) ;
+	}
+
+	return (altro_found || vmm_found) ;
 
 }
 
