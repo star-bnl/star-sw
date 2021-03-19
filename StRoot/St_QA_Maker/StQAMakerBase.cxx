@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.55 2019/12/17 19:08:01 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.56 2021/03/18 21:35:48 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.56  2021/03/18 21:35:48  genevb
+// Re-work the trigger bits plot to have actual trigger names
+//
 // Revision 2.55  2019/12/17 19:08:01  genevb
 // Add more ETOF histograms
 //
@@ -475,7 +478,7 @@ void StQAMakerBase::BookHistTrigger(){
   if (mTrigWord) return;
   mTrigWord = QAH::H1F("QaTrigWord","trigger word",8,0.5,8.5);
   mTrigWord->SetXTitle("1:MinBias 2:Central 3:HiPt 4:Jet 5:HiTower 6:OtherPhys");
-  mTrigBits = QAH::H1F("QaTrigBits","trigger bits",32,-0.5,31.5);
+  mTrigBits = QAH::H1F("QaTrigBits","trigger bits",64,-0.5,63.5);
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistDE(){

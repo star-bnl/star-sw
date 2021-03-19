@@ -20,7 +20,7 @@
 #include <DAQ1000/ddl_struct.h>	// for the misc DDL hardware constructs
 
 #include "daq_stgc.h"
-
+#include "stgc_data_c.h"
 
 #include <DAQ_TPX/tpxCore.h>
 
@@ -80,8 +80,12 @@ daq_stgc::daq_stgc(daqReader *rts_caller)
 
 	raw = new daq_dta ;	// in file, compressed
 	altro = new daq_dta ;
+	vmm = new daq_dta ;
+
+	event_mode = 0 ;	// 0: TPX, 1:VMM
 
 	LOG(DBG,"%s: constructor: caller %p",name, caller) ;
+
 	return ;
 }
 
@@ -92,6 +96,7 @@ daq_stgc::~daq_stgc()
 	// daq data 
 	delete raw ;
 	delete altro ;
+	delete vmm ;
 
 	LOG(DBG,"%s: DEstructor done",name) ;
 	return ;
@@ -125,6 +130,9 @@ daq_dta *daq_stgc::get(const char *in_bank, int sec, int row, int pad, void *p1,
 	}
 	else if(strcasecmp(bank,"altro")==0) {
 		return handle_altro(sec,row) ;	// actually sec, rdo:
+	}
+	else if(strcasecmp(bank,"vmm")==0) {
+		return handle_vmm(sec) ;
 	}
 	else {
 		LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
@@ -381,6 +389,129 @@ daq_dta *daq_stgc::handle_raw(int sec, int rdo)
 
 }
 
+daq_dta *daq_stgc::handle_vmm(int sec)
+{
+	char str[128] ;
+	int tot_bytes ;
+	int min_sec, max_sec, min_rdo, max_rdo ;
+	struct {
+		u_int bytes ;
+		u_char rb ;
+		u_char sec ;
+	} obj[8*4] ;
+	stgc_data_c stgc ;
+
+	assert(caller) ;
+
+	LOG(DBG,"sizeof stgc_vmm_t %d",sizeof(stgc_vmm_t)) ;
+
+	// sanity
+	if(sec <= 0) {		// ALL sectors
+		min_sec = 1 ;
+		max_sec = 4 ;
+	}
+	else {
+		min_sec = max_sec = sec ;
+	}
+
+	min_rdo = 1 ;
+	max_rdo = 4 ;
+
+
+	// calc total bytes
+	tot_bytes = 0 ;
+	int o_cou = 0 ;
+
+	for(int s=min_sec;s<=max_sec;s++) {
+	for(int r=min_rdo;r<=max_rdo;r++) {
+
+		sprintf(str,"%s/sec%02d/rdo%d/vmm_raw",sfs_name, s, r) ;
+	
+		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
+
+		char *full_name = caller->get_sfs_name(str) ;
+		if(full_name == 0) continue ;
+
+		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+		LOG(DBG,"%s: sector %d, rdo %d : raw size %d",name,s,r,size) ;
+
+		if(size <= 0) {
+			if(size < 0) {
+				LOG(DBG,"%s: %s: not found in this event",name,str) ;
+			}
+			continue ;
+		}
+		else {
+			tot_bytes += size ;
+	
+			obj[o_cou].bytes = size ;
+			obj[o_cou].rb = r ;
+			obj[o_cou].sec = s ;
+			o_cou++ ;
+
+		}
+	}
+	}
+
+	vmm->create(tot_bytes/sizeof(stgc_vmm_t),(char *)"vmm",rts_id,DAQ_DTA_STRUCT(stgc_vmm_t)) ;
+
+	// bring in the bacon from the SFS file....
+	for(int i=0;i<o_cou;i++) {
+		int vmm_max = obj[i].bytes/sizeof(stgc_vmm_t) ;
+
+		sprintf(str,"%s/sec%02d/rdo%d/vmm_raw",sfs_name,obj[i].sec, obj[i].rb) ;
+		char *full_name = caller->get_sfs_name(str) ;
+		if(!full_name) continue ;
+
+		LOG(NOTE,"%s: request %d bytes",name,obj[i].bytes) ;
+		
+		stgc_vmm_t *vm = (stgc_vmm_t *) vmm->request(vmm_max) ;
+
+		char *mem = (char *)malloc(obj[i].bytes) ;
+
+		int ret = caller->sfs->read(full_name, mem, obj[i].bytes) ;
+
+		if(ret != (int)obj[i].bytes) {
+			LOG(ERR,"%s: %s: read failed, expect %d, got %d [%s]",name,str,
+				obj[i].bytes,ret,strerror(errno)) ;
+		}
+		else {
+			LOG(NOTE,"%s: %s read %d bytes",name,str,ret) ;
+		}
+
+		int hits = 0 ;		
+		stgc.start((u_short *)mem,obj[i].bytes/2) ;
+		while(stgc.event()) {
+			vm[hits] = stgc.vmm ;
+			hits++ ;
+			if(hits > vmm_max) {
+				LOG(ERR,"S%d:%d -- too many hits %d",obj[i].sec,obj[i].rb,hits) ;
+				break ;
+			}
+		}
+
+#if 0
+
+		// d[16] event type
+		// d[17] data starts e.g. 0x1011
+
+		for(int j=0;j<32;j++) {
+			LOG(TERR,"%d = 0x%04X",j,d[j]) ;
+		}
+#endif
+
+		vmm->finalize(hits, obj[i].sec, obj[i].rb, 0) ;
+		free(mem) ;
+	}
+
+	
+	LOG(DBG,"Returning from vmm_handler") ;
+	vmm->rewind() ;
+	return vmm ;
+
+}
+
 // knows how to get the token out of an event while trying also find a l0 command
 int daq_stgc::get_token(char *addr, int words)
 {
@@ -400,11 +531,47 @@ int daq_stgc::get_token(char *addr, int words)
 
 }
 
+int daq_stgc::get_l2_vmm(char *addr, int words, struct daq_trg_word *trgs, int do_log)
+{
+	int t_hi, t_mid, t_lo ;
+
+
+	u_short *d = (u_short *)addr ;
+
+	if(d[16] != 0x4544) {	// non-data e.g. timer or echo
+		trgs[0].t = 4096 ;
+		trgs[0].trg = 0 ;
+		trgs[0].daq = 0 ;
+
+		return 1 ;
+	}
+
+	trgs[0].trg = d[11]&0xF ;
+	trgs[0].daq = d[12]&0xF ;
+
+        t_hi = (d[12]>>4)&0xF ;
+        t_mid = (d[12]>>8)&0xF ;
+        t_lo = (d[12]>>12)&0xF ;
+
+        trgs[0].t = (t_hi<<8)|(t_mid<<4)|t_lo ;
+
+//	for(int i=0;i<20;i++) {
+//		LOG(TERR,"%d: 0x%04X",i,d[i]) ;
+//	}
+
+	return 1 ;
+}
+
 // dumps the known accept/abort trigger decisions from
 // the FIFO part of the event.
 // returns the count
 int daq_stgc::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log)
 {
+	if(event_mode) {
+		int ret = get_l2_vmm(addr, words, trgs, do_log)	;
+		return ret ;
+	}
+
 	struct tpx_rdo_event rdo ;
 	int cou = 0 ;
 	u_int collision = 0 ;

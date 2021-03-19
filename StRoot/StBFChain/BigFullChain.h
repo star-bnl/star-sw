@@ -1369,6 +1369,7 @@ Bfc_st BFC[] = { // standard chains
   {"ODistoSmear" ,""  ,"","",""    ,"","Distortion smearing accounting for calibration resolutions",kFALSE},
   {"OAbortGap"   ,""  ,"","",""                ,"","Abort gap cleaning event distortion correction",kFALSE},
   {"AlignSectors",""  ,"","",""                                             ,"",STAR_CHAIN_OBSOLETE,kFALSE},
+  {"EbyET0"      ,""  ,"","",""                                 ,"","Event-by-event T0 corrections",kFALSE},
   {"DbRichSca"   ,""  ,"","detdb","","",                    "Force reading of Rich scalers from DB",kFALSE},
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
@@ -1471,6 +1472,7 @@ Bfc_st BFC[] = { // standard chains
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
   {"EmcTrig"     ,""  ,"","","",                                             "StEmcTriggerMaker","",kFALSE},
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
+
 #ifndef  __NoStrangeMuDst__
   {"MuDSTDeps"   ,"","","StEvent,Stu,StBichsel",""
    ,                        "Tree,StStrangeMuDstMaker,StMuDSTMaker","Load MuDST misc. dependencies",kFALSE},

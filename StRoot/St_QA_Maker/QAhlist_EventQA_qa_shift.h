@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.53 2019/12/17 19:08:01 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.54 2021/03/18 21:36:34 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.54  2021/03/18 21:36:34  genevb
+// Get histogram lists up-to-date
+//
 // Revision 2.53  2019/12/17 19:08:01  genevb
 // Add more ETOF histograms
 //
@@ -167,6 +170,7 @@
 // must be recompiled
 // See StHistUtil::DetectorIn() for format of detector requirement
 
+  "QaTrigBits",
   "QaMultClass",
 
   ":itpc;tpx;tpc:QaPointTpc",
@@ -248,6 +252,7 @@
   ":itpc;tpx;tpc:QaGtrkSImpactT",
   ":itpc;tpx;tpc:QaGtrkImpactTTS",
   ":itpc;tpx;tpc:QaGtrkImpactrTTS",
+  ":itpc;tpx;tpc:QaGtrkSImpactTime",
   ":itpc;tpx;tpc:QaGtrkDetId",
   ":itpc;tpx;tpc:QaGtrkTanlzf",
   ":itpc;tpx;tpc:QaGtrkTanlzfTS",

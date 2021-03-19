@@ -1243,6 +1243,19 @@ St_trigDetSumsC *St_trigDetSumsC::instance() {
   return fgInstance;
 }
 ClassImp(St_trigDetSumsC);
+#include "St_EbyET0C.h"
+MakeChairInstance(EbyET0,Calibrations/trg/EbyET0);
+Double_t St_EbyET0C::time(Int_t i, Double_t x) {
+  Double_t* pars = par(i);
+  Double_t t = 0;
+  switch (func(i)) {
+    case 0 : // polynomial
+      t = pars[3];
+      for (Int_t n=2; n>=0; n--) t += x*t + pars[n];
+      break;
+  }
+  return t;
+}
 //___________________tpc_____________________________________________________________
 #include "St_tss_tssparC.h"
 MakeChairInstance(tss_tsspar,tpc/tsspars/tsspar);
