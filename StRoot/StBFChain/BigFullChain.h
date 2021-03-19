@@ -282,7 +282,7 @@ Bfc_st BFC[] = { // standard chains
   {"MC2020a"  ,"","","MC.2020a",                                                           "","","",kFALSE},
   {"MC.y2021","","","MC2021",                                                              "","","",kFALSE},
   {"MC2021.Ideal","","","MC.2021,MC.Sti,vmc,NewTpcAlignment,ExB"                          ,"","","",kFALSE},
-  {"MC2021",      "","","MC.2021,sdt20210209,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
+  {"MC2021",      "","","MC.2021,sdt20210209,MC.StiCA,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
   {"MC.2021"  ,"","","MC.2021a",                                                           "","","",kFALSE},
   {"MC2021a"  ,"","","MC.2021a",                                                           "","","",kFALSE},
 #if  ROOT_VERSION_CODE < 393216 /* ROOT_VERSION(6,0,0) */
