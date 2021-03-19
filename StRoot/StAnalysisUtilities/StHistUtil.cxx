@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.109 2021/03/18 21:37:39 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.110 2021/03/19 19:27:35 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.110  2021/03/19 19:27:35  genevb
+// Small adjustment to label size
+//
 // Revision 2.109  2021/03/18 21:37:39  genevb
 // Update styles of numerous histograms
 //
@@ -971,6 +974,8 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           // set bottom margin of pad
           if (oName.Contains("TrigBits")) {
             gPad->SetBottomMargin(0.35);
+            hobj->GetXaxis()->SetLabelSize(0.03);
+            hobj->GetXaxis()->SetLabelFont(42);
           } else {
             gPad->SetBottomMargin(0.10);
           }
