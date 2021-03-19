@@ -1,5 +1,0 @@
-# $Id $
-# package StSsdDbMaker
-# author: 
-Library:libStSsdDbMaker.so:LIBS +=   -lStChain  -lStDb_Tables  -lStSsdUtil
-#Library:libStSsdDbMaker.so:LIBS +=   -lStChain  -lStDb_Tables  -lStSsdUtil

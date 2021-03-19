@@ -1,8 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbPIXcal  <comment>  *    EEMC calibration for every pixel ( PMT and MAPMT)  </comment>
-  <dbString> name <length> 16000 </length> <comment>   pixel name </comment> </dbString> 
-  <dbFloat> gain <length> 1000 </length> <comment>  gain of the pixel  </comment> </dbFloat> 
-  <dbFloat> egain <length> 1000 </length> <comment>  error of the gain   </comment> </dbFloat> 
-  <dbString> comment <length> 160 </length> </dbString>
-</StDbTable> 
-</StarDataBase>

@@ -1,2 +1,0 @@
-how to run:
-./runmakeMuDstQA.csh kplus_200_20192929.list 10 0 test.histo.root

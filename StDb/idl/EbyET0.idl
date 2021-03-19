@@ -1,7 +1,0 @@
-struct EbyET0 {
-  long   detector; // row index
-  double min;   // correction range
-  double max;   // 
-  long  func;   // function
-  double par[4];  // parameters
-};
