@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHeader.h,v 2.2 2019/08/01 22:52:19 smirnovd Exp $
+ * $Id: StETofHeader.h,v 2.3 2021/03/19 19:56:50 ullrich Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHeader.h,v $
+ * Revision 2.3  2021/03/19 19:56:50  ullrich
+ * include the front-end missmatch pattern (Philipp)
+ *
  * Revision 2.2  2019/08/01 22:52:19  smirnovd
  * Add non-c++ include defining uint64_t for rootcint
  *
@@ -28,6 +31,7 @@
 
 #include <stdint.h>
 #include <map>
+#include <vector>
 
 
 #include <Stiostream.h>
@@ -39,6 +43,8 @@ public:
     StETofHeader();
     StETofHeader( const double&, const double&, const map< unsigned int, uint64_t >&, const map< unsigned int, uint64_t >& ,
                   const unsigned int&, const unsigned int&, const unsigned int&, const uint64_t& );
+    StETofHeader( const double&, const double&, const map< unsigned int, uint64_t >&, const map< unsigned int, uint64_t >& ,
+                  const unsigned int&, const unsigned int&, const unsigned int&, const uint64_t&, const vector<bool>& );
 
     ~StETofHeader();
 
@@ -52,6 +58,8 @@ public:
     unsigned int      starDaqCmdIn()      const;
     unsigned int      starTrgCmdIn()      const;
     uint64_t          eventStatusFlag()   const;
+    
+    vector<bool>       missMatchFlagVec()  const;
 
 
     void    setTrgGdpbFullTime( const double& gdpbFullTime );
@@ -79,8 +87,9 @@ private:
     
     ULong64_t   mEventStatusFlag;
 
+    vector< Bool_t > mMissMatchFlagVec; 
 
-    ClassDef( StETofHeader, 1 )
+    ClassDef( StETofHeader, 2 )
 };
 
 #endif // STETOFHEADER_H
