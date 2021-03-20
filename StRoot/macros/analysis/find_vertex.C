@@ -97,7 +97,6 @@ void find_vertex(char * fname="high_053/st_physics_6053108_raw_2020002.event.roo
     gSystem->Load("StTriggerDataMaker"); // new starting from April 2003
     gSystem->Load("StBichsel");
     gSystem->Load("StEvent");
-    gSystem->Load("StTpcDb");
     gSystem->Load("StEventUtilities");
     gSystem->Load("StEmcUtil"); 
     gSystem->Load("StTofUtil");
@@ -247,8 +246,11 @@ void find_vertex(char * fname="high_053/st_physics_6053108_raw_2020002.event.roo
 
 
 //
-// $Id: find_vertex.C,v 3.2 2021/03/19 14:49:29 genevb Exp $
+// $Id: find_vertex.C,v 3.3 2021/03/20 02:38:13 genevb Exp $
 // $Log: find_vertex.C,v $
+// Revision 3.3  2021/03/20 02:38:13  genevb
+// Remove StTpcDb dependence for StEventUtilities
+//
 // Revision 3.2  2021/03/19 14:49:29  genevb
 // Add StTpcDb dependency for StEvenntUtilities
 //
