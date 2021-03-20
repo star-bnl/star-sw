@@ -67,7 +67,7 @@ StETofDigiMaker::Init()
 {
     LOG_INFO << "StETofDigiMaker::Init" << endm;
 
-    return StMaker::Init();
+    return kStOk;
 }
 
 //_____________________________________________________________
@@ -172,7 +172,7 @@ StETofDigiMaker::Make()
 
     // ------------------------------------------------------------------------------------------------------
     // determine number of full messages to read:
-    // the packed version sent to the STAR DAQ systems is made of a 256 bit header (4 long unsigned integers)
+    // the packed version sent to the STAR DAQ systems is made of a 256 bit header (4 long UInt_tegers)
     // followed by a buffer of gdpb::FullMessage (128 bit each).
     //
     // gdbp(v100)::Message     = 64 bit message as received from the eTOF gDPB boards
@@ -246,8 +246,8 @@ StETofDigiMaker::processEvent( ULong64_t* messageBuffer, size_t nFullMessagesToR
  */
 void
 StETofDigiMaker::convertTriggerMessages( vector< gdpbv100::FullMessage >& triggerMessages,
-                                         map< unsigned int, ULong64_t >&    gdpbTsMap,
-                                         map< unsigned int, ULong64_t >&    starTsMap )
+                                         map< UInt_t, ULong64_t >&    gdpbTsMap,
+                                         map< UInt_t, ULong64_t >&    starTsMap )
 {
     if( mDebug ) {
         LOG_DEBUG << "StETofDigiMaker::convertTriggerMessages() - do the conversion... " << endm; 
@@ -264,7 +264,7 @@ StETofDigiMaker::convertTriggerMessages( vector< gdpbv100::FullMessage >& trigge
 
     array< int, 4 > messageTypesTemplate = { 0, 1, 2, 3 };
 
-    for( unsigned int i=0; i<nTriggerMessages; i+=4 ) {
+    for( UInt_t i=0; i<nTriggerMessages; i+=4 ) {
         
         array< int, 4 > messageTypes;
         messageTypes.at( 0 ) = triggerMessages.at( i   ).getStarTrigMsgIndex();
@@ -299,9 +299,9 @@ StETofDigiMaker::convertTriggerMessages( vector< gdpbv100::FullMessage >& trigge
                            + ( starTsMid <<  8 )
                            + triggerMessages.at( i+3 ).getStarTsLsbStarD();
 
-        //unsigned int rocToken   = triggerMessages.at( i+3 ).getStarTokenStarD();
-        //unsigned int rocDaqCmd  = triggerMessages.at( i+3 ).getStarDaqCmdStarD();
-        //unsigned int rocTrigCmd = triggerMessages.at( i+3 ).getStarTrigCmdStarD();
+        //UInt_t rocToken   = triggerMessages.at( i+3 ).getStarTokenStarD();
+        //UInt_t rocDaqCmd  = triggerMessages.at( i+3 ).getStarDaqCmdStarD();
+        //UInt_t rocTrigCmd = triggerMessages.at( i+3 ).getStarTrigCmdStarD();
 
         gdpbTsMap[ rocIds.at( 0 ) ] = rocGdpbTs;
         starTsMap[ rocIds.at( 0 ) ] = rocStarTs;
@@ -314,9 +314,9 @@ StETofDigiMaker::fillETofHeader( ULong64_t* messageBuffer, vector< gdpbv100::Ful
 {
     ULong64_t     trgGdpbFullTs   =   messageBuffer[ 0 ]; // time since last eTOF clock reset in ns
     ULong64_t     trgStarFullTs   =   messageBuffer[ 1 ]; // time since last bTOF clock reset in ns
-    unsigned int starToken       = ( messageBuffer[ 2 ] >> 32 ) & 0xFFF;
-    unsigned int starDaqCmdIn    = ( messageBuffer[ 2 ] >> 16 ) & 0x00F;
-    unsigned int starTrigCmdIn   = ( messageBuffer[ 2 ]       ) & 0x00F;
+    UInt_t starToken       = ( messageBuffer[ 2 ] >> 32 ) & 0xFFF;
+    UInt_t starDaqCmdIn    = ( messageBuffer[ 2 ] >> 16 ) & 0x00F;
+    UInt_t starTrigCmdIn   = ( messageBuffer[ 2 ]       ) & 0x00F;
     ULong64_t     eventStatusFlag =   messageBuffer[ 3 ];
 
     if( mDebug ) {
@@ -329,8 +329,8 @@ StETofDigiMaker::fillETofHeader( ULong64_t* messageBuffer, vector< gdpbv100::Ful
         LOG_DEBUG << "eventStatusFlag=" << eventStatusFlag << endm;
     }
     
-    map< unsigned int, ULong64_t > gdpbTsMap;
-    map< unsigned int, ULong64_t > starTsMap;
+    map< UInt_t, ULong64_t > gdpbTsMap;
+    map< UInt_t, ULong64_t > starTsMap;
 
     convertTriggerMessages( triggerMessages, gdpbTsMap, starTsMap );
 
@@ -459,8 +459,8 @@ StETofDigiMaker::processEvent2018( ULong64_t* messageBuffer, size_t nFullMessage
  */
 void
 StETofDigiMaker::convertTriggerMessages( vector< gdpb::FullMessage >& triggerMessages,
-                                         map< unsigned int, ULong64_t >&    gdpbTsMap,
-                                         map< unsigned int, ULong64_t >&    starTsMap )
+                                         map< UInt_t, ULong64_t >&    gdpbTsMap,
+                                         map< UInt_t, ULong64_t >&    starTsMap )
 {
     if( mDebug ) {
         LOG_DEBUG << "StETofDigiMaker::convertTriggerMessages() - do the conversion... " << endm; 
@@ -475,7 +475,7 @@ StETofDigiMaker::convertTriggerMessages( vector< gdpb::FullMessage >& triggerMes
         return;
     }
 
-    for( unsigned int i=0; i<nTriggerMessages; i+=4 ) {
+    for( UInt_t i=0; i<nTriggerMessages; i+=4 ) {
         array< int, 4 > rocIds;
         rocIds.at( 0 ) = triggerMessages.at( i   ).getRocNumber();
         rocIds.at( 1 ) = triggerMessages.at( i+1 ).getRocNumber();
@@ -502,9 +502,9 @@ StETofDigiMaker::convertTriggerMessages( vector< gdpb::FullMessage >& triggerMes
                            + ( starTsMid <<  8 )
                            + triggerMessages.at( i+3 ).getStarTsLsbStarD();
 
-        //unsigned int rocToken   = triggerMessages.at( i+3 ).getStarTokenStarD();
-        //unsigned int rocDaqCmd  = triggerMessages.at( i+3 ).getStarDaqCmdStarD();
-        //unsigned int rocTrigCmd = triggerMessages.at( i+3 ).getStarTrigCmdStarD();
+        //UInt_t rocToken   = triggerMessages.at( i+3 ).getStarTokenStarD();
+        //UInt_t rocDaqCmd  = triggerMessages.at( i+3 ).getStarDaqCmdStarD();
+        //UInt_t rocTrigCmd = triggerMessages.at( i+3 ).getStarTrigCmdStarD();
 
         gdpbTsMap[ rocIds.at( 0 ) ] = rocGdpbTs;
         starTsMap[ rocIds.at( 0 ) ] = rocStarTs;
@@ -517,9 +517,9 @@ StETofDigiMaker::fillETofHeader( ULong64_t* messageBuffer, vector< gdpb::FullMes
 {
     ULong64_t     trgGdpbFullTs   =   messageBuffer[ 0 ]; // time since last eTOF clock reset in ns
     ULong64_t     trgStarFullTs   =   messageBuffer[ 1 ]; // time since last bTOF clock reset in ns
-    unsigned int starToken       = ( messageBuffer[ 2 ] >> 32 ) & 0xFFF;
-    unsigned int starDaqCmdIn    = ( messageBuffer[ 2 ] >> 16 ) & 0x00F;
-    unsigned int starTrigCmdIn   = ( messageBuffer[ 2 ]       ) & 0x00F;
+    UInt_t starToken       = ( messageBuffer[ 2 ] >> 32 ) & 0xFFF;
+    UInt_t starDaqCmdIn    = ( messageBuffer[ 2 ] >> 16 ) & 0x00F;
+    UInt_t starTrigCmdIn   = ( messageBuffer[ 2 ]       ) & 0x00F;
     ULong64_t     eventStatusFlag =   messageBuffer[ 3 ]; // filled from Apr 24th 2018 on
 
     if( mDebug ) {
@@ -531,8 +531,8 @@ StETofDigiMaker::fillETofHeader( ULong64_t* messageBuffer, vector< gdpb::FullMes
         LOG_DEBUG << "starTrigCmdIn="   << starTrigCmdIn   << endm;
         LOG_DEBUG << "eventStatusFlag=" << eventStatusFlag << endm;
     }
-    map< unsigned int, ULong64_t > gdpbTsMap;
-    map< unsigned int, ULong64_t > starTsMap;
+    map< UInt_t, ULong64_t > gdpbTsMap;
+    map< UInt_t, ULong64_t > starTsMap;
 
     convertTriggerMessages( triggerMessages, gdpbTsMap, starTsMap );
 

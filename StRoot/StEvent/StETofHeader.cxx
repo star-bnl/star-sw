@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHeader.cxx,v 2.2 2018/07/27 13:44:55 jeromel Exp $
+ * $Id: StETofHeader.cxx,v 2.3 2021/03/19 19:55:56 ullrich Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHeader.cxx,v $
+ * Revision 2.3  2021/03/19 19:55:56  ullrich
+ * include the front-end missmatch
+ *
  * Revision 2.2  2018/07/27 13:44:55  jeromel
  * Changes by Florian
  *
@@ -22,6 +25,8 @@
  ***************************************************************************/
 #include "StETofHeader.h"
 #include <map>
+#include <vector>
+#include <iostream>
 
 StETofHeader::StETofHeader()
 : mTrgGdpbFullTime( 0 ),
@@ -31,14 +36,14 @@ StETofHeader::StETofHeader()
   mStarTrgCmdIn( 0 ),
   mEventStatusFlag( 0 )
 {
-  mRocGdpbTs.clear();
-  mRocStarTs.clear();
+    mRocGdpbTs.clear();
+    mRocStarTs.clear();
 }
 
 
-StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime,
-                            const map< unsigned int, ULong64_t >& gdpbTs, const map< unsigned int, ULong64_t >& starTs,
-                            const unsigned int& starToken, const unsigned int& starDaqCmdIn, const unsigned int& starTrgCmdIn,
+StETofHeader::StETofHeader( const Double_t& trgGdpbTime, const Double_t& trgStarTime,
+                            const map< UInt_t, ULong64_t >& gdpbTs, const map< UInt_t, ULong64_t >& starTs,
+                            const UInt_t& starToken, const UInt_t& starDaqCmdIn, const UInt_t& starTrgCmdIn,
                             const ULong64_t& eventStatusFlag )
 : mTrgGdpbFullTime( trgGdpbTime ),
   mTrgStarFullTime( trgStarTime ),
@@ -46,62 +51,85 @@ StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime
   mStarDaqCmdIn( starDaqCmdIn ),
   mStarTrgCmdIn( starTrgCmdIn ),
   mEventStatusFlag( eventStatusFlag )
-
 {
     setRocGdpbTs( gdpbTs );
     setRocStarTs( starTs );
+    const size_t kNbGet4sInSystem = 1728;
+    mMissMatchFlagVec = vector<Bool_t>( kNbGet4sInSystem, false ); 
+}
+
+StETofHeader::StETofHeader( const Double_t& trgGdpbTime, const Double_t& trgStarTime,
+                            const map< UInt_t, ULong64_t >& gdpbTs, const map< UInt_t, ULong64_t >& starTs,
+                            const UInt_t& starToken, const UInt_t& starDaqCmdIn, const UInt_t& starTrgCmdIn,
+                            const ULong64_t& eventStatusFlag, const vector<Bool_t>& MissMatchFlagVec )
+: mTrgGdpbFullTime( trgGdpbTime ),
+  mTrgStarFullTime( trgStarTime ),
+  mStarToken( starToken ),
+  mStarDaqCmdIn( starDaqCmdIn ),
+  mStarTrgCmdIn( starTrgCmdIn ),
+  mEventStatusFlag( eventStatusFlag ),
+  mMissMatchFlagVec( MissMatchFlagVec )
+{
+    setRocGdpbTs( gdpbTs );
+    setRocStarTs( starTs );
+    //const size_t kNbGet4sInSystem = 1728;
+    //mMissMatchFlagVec.resize( kNbGet4sInSystem );
+    //for( auto mapcheck : mMissMatchFlagVec ){
+    //	cout << mapcheck << endl;
+    // }
+
 }
 
 
 StETofHeader::~StETofHeader()
 {/* no op */}
 
-double
+Double_t
 StETofHeader::trgGdpbFullTime() const
 {
     return mTrgGdpbFullTime;
 }
 
-double
+Double_t
 StETofHeader::trgStarFullTime() const
 {
     return mTrgStarFullTime;
 }
 
 
-map< unsigned int, ULong64_t >
+map< UInt_t, ULong64_t >
 StETofHeader::rocGdpbTs() const
 {
-    map< unsigned int, ULong64_t > map_root_type( mRocGdpbTs.begin(), mRocGdpbTs.end() );
+    map< UInt_t, ULong64_t > map_root_type( mRocGdpbTs.begin(), mRocGdpbTs.end() );
 
     return map_root_type;
 }
 
 
-map< unsigned int, ULong64_t >
+map< UInt_t, ULong64_t >
 StETofHeader::rocStarTs() const
 {
-    map< unsigned int, ULong64_t > map_root_type( mRocStarTs.begin(), mRocStarTs.end() );
+    map< UInt_t, ULong64_t > map_root_type( mRocStarTs.begin(), mRocStarTs.end() );
 
     return map_root_type;
 }
 
 
-unsigned int
+UInt_t
 StETofHeader::starToken() const
 {
     return mStarToken;
 }
 
 
-unsigned int
+UInt_t
 StETofHeader::starDaqCmdIn() const
 {
     return mStarDaqCmdIn;
 }
 
 
-unsigned int
+UInt_t
 StETofHeader::starTrgCmdIn() const
 {
     return mStarTrgCmdIn;
@@ -114,51 +142,56 @@ StETofHeader::eventStatusFlag() const
     return mEventStatusFlag;
 }
 
+vector <Bool_t>
+StETofHeader::missMatchFlagVec() const
+{
+    return mMissMatchFlagVec;
+}
 
 void
-StETofHeader::setTrgGdpbFullTime( const double& gdpbFullTime )
+StETofHeader::setTrgGdpbFullTime( const Double_t& gdpbFullTime )
 {
     mTrgGdpbFullTime = gdpbFullTime;
 }
 
 
 void
-StETofHeader::setTrgStarFullTime( const double& starFullTime )
+StETofHeader::setTrgStarFullTime( const Double_t& starFullTime )
 {
     mTrgStarFullTime = starFullTime;
 }
 
 
 void
-StETofHeader::setRocGdpbTs( const map< unsigned int, ULong64_t >& gdpbTs )
+StETofHeader::setRocGdpbTs( const map< UInt_t, ULong64_t >& gdpbTs )
 {
     mRocGdpbTs.insert( gdpbTs.begin(), gdpbTs.end() );
 }
 
 
 void
-StETofHeader::setRocStarTs( const map< unsigned int, ULong64_t >& starTs )
+StETofHeader::setRocStarTs( const map< UInt_t, ULong64_t >& starTs )
 {
     mRocStarTs.insert( starTs.begin(), starTs.end() );
 }
 
 
 void
-StETofHeader::setStarToken( const unsigned int& token )
+StETofHeader::setStarToken( const UInt_t& token )
 {
     mStarToken = token;
 }
 
 
 void
-StETofHeader::setStarDaqCmdIn( const unsigned int& daqCmdIn )
+StETofHeader::setStarDaqCmdIn( const UInt_t& daqCmdIn )
 {
     mStarDaqCmdIn = daqCmdIn;
 }
 
 
 void
-StETofHeader::setStarTrgCmdIn( const unsigned int& trgCmdIn )
+StETofHeader::setStarTrgCmdIn( const UInt_t& trgCmdIn )
 {
     mStarTrgCmdIn = trgCmdIn;
 }

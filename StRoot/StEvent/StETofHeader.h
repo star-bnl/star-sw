@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHeader.h,v 2.2 2019/08/01 22:52:19 smirnovd Exp $
+ * $Id: StETofHeader.h,v 2.3 2021/03/19 19:56:50 ullrich Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHeader.h,v $
+ * Revision 2.3  2021/03/19 19:56:50  ullrich
+ * include the front-end missmatch pattern (Philipp)
+ *
  * Revision 2.2  2019/08/01 22:52:19  smirnovd
  * Add non-c++ include defining uint64_t for rootcint
  *
@@ -28,6 +31,7 @@
 
 #include <stdint.h>
 #include <map>
+#include <vector>
 
 
 #include <Stiostream.h>
@@ -35,33 +39,41 @@
 
 class StETofHeader : public StObject {
 public:
-
+ 
     StETofHeader();
-    StETofHeader( const double&, const double&, const map< unsigned int, ULong64_t >&, const map< unsigned int, ULong64_t >& ,
-                  const unsigned int&, const unsigned int&, const unsigned int&, const ULong64_t& );
+    StETofHeader( const Double_t& trgGdpbTime, const Double_t& trgStarTime,
+		  const map< UInt_t, ULong64_t >& gdpbTs, const map< UInt_t, ULong64_t >& starTs,
+		  const UInt_t& starToken, const UInt_t& starDaqCmdIn, const UInt_t& starTrgCmdIn,
+		  const ULong64_t& eventStatusFlag );
+    StETofHeader( const Double_t& trgGdpbTime, const Double_t& trgStarTime,
+		  const map< UInt_t, ULong64_t >& gdpbTs, const map< UInt_t, ULong64_t >& starTs,
+		  const UInt_t& starToken, const UInt_t& starDaqCmdIn, const UInt_t& starTrgCmdIn,
+		  const ULong64_t& eventStatusFlag, const vector<Bool_t>& MissMatchFlagVec );
 
     ~StETofHeader();
 
-    double    trgGdpbFullTime()   const;
-    double    trgStarFullTime()   const;
+    Double_t    trgGdpbFullTime()   const;
+    Double_t    trgStarFullTime()   const;
 
-    map< unsigned int, ULong64_t > rocGdpbTs()  const;
-    map< unsigned int, ULong64_t > rocStarTs()  const;
+    map< UInt_t, ULong64_t > rocGdpbTs()  const;
+    map< UInt_t, ULong64_t > rocStarTs()  const;
 
-    unsigned int      starToken()         const;
-    unsigned int      starDaqCmdIn()      const;
-    unsigned int      starTrgCmdIn()      const;
-    ULong64_t          eventStatusFlag()   const;
+    UInt_t      starToken()         const;
+    UInt_t      starDaqCmdIn()      const;
+    UInt_t      starTrgCmdIn()      const;
+    ULong64_t   eventStatusFlag()   const;
+    
+    vector<Bool_t>       missMatchFlagVec()  const;
 
 
-    void    setTrgGdpbFullTime( const double& gdpbFullTime );
-    void    setTrgStarFullTime( const double& starFullTime );
+    void    setTrgGdpbFullTime( const Double_t& gdpbFullTime );
+    void    setTrgStarFullTime( const Double_t& starFullTime );
 
-    void    setRocGdpbTs( const map< unsigned int, ULong64_t >& gdpbTs );
-    void    setRocStarTs( const map< unsigned int, ULong64_t >& starTs );
+    void    setRocGdpbTs( const map< UInt_t, ULong64_t >& gdpbTs );
+    void    setRocStarTs( const map< UInt_t, ULong64_t >& starTs );
 
-    void    setStarToken(    const unsigned int& token    );
-    void    setStarDaqCmdIn( const unsigned int& daqCmdIn );
+    void    setStarToken(    const UInt_t& token    );
+    void    setStarDaqCmdIn( const UInt_t& daqCmdIn );
     void    setStarTrgCmdIn( const unsigned int& trgCmdIn );
 
     void    setEventStatusFlag( const ULong64_t& statusFlag );
@@ -79,8 +91,9 @@ private:
     
     ULong64_t   mEventStatusFlag;
 
+    vector< Bool_t > mMissMatchFlagVec; 
 
-    ClassDef( StETofHeader, 1 )
+    ClassDef( StETofHeader, 2 )
 };
 
 #endif // STETOFHEADER_H

@@ -8,11 +8,13 @@
 #include "StEvent/StTpcHit.h"
 #include "StEvent/StTpcHitCollection.h"
 #include "StEvent/StTriggerData.h"
+#include "StDetectorDbMaker/St_EbyET0C.h"
+/*
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcTimeBucketCorC.h"
-#include "StDetectorDbMaker/St_EbyET0C.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StTpcDb/StTpcDb.h"
+*/
 #include "TFile.h"
 #include "TNtupleD.h"
 #include "StEbyET0.h"
@@ -52,7 +54,6 @@ double StEbyET0::getTime(StEvent* event, int mode) {
   St_EbyET0C* ebyeTable = St_EbyET0C::instance();
   for (int row = 0; row < ebyeTable->GetNRows(); row++) {
     int detector = ebyeTable->detector(row);
-printf("EbyET0 : trying %d\n",detector);
     if (detector < 0) break; // end of active rows in the table
 
     double coordinate = -9e23;
@@ -93,7 +94,6 @@ printf("EbyET0 : trying %d\n",detector);
     break;
   }
 
-printf("YYY %d\n",sizeof(EbyET0_st));
   return mTime;
 }
 //_____________________________________________________________________________
@@ -158,12 +158,6 @@ void StEbyET0::getTriggerInfo(StEvent* event, trigDetType trigDet, double* info)
 //_____________________________________________________________________________
 void StEbyET0::getTpcInfo(StEvent* event, double* info) {
 
-  // parameters: prompt hit windows
-  static const double innerMinTB = 7.7;
-  static const double innerMaxTB = 10.5;
-  static const double outerMinTB = 2.0;
-  static const double outerMaxTB = 5.0;
-
   // counters
   double tie = 0.; // hit times sum
   double tiw = 0.;
@@ -177,6 +171,13 @@ void StEbyET0::getTpcInfo(StEvent* event, double* info) {
   double riw = 0.;
   double roe = 0.;
   double row = 0.;
+
+/*
+  // parameters: prompt hit windows
+  static const double innerMinTB = 7.7;
+  static const double innerMaxTB = 10.5;
+  static const double outerMinTB = 2.0;
+  static const double outerMaxTB = 5.0;
 
   // coordinate transform to get time of hit
   static StTpcCoordinateTransform* mTpcTransForm = 0;
@@ -238,6 +239,7 @@ void StEbyET0::getTpcInfo(StEvent* event, double* info) {
       } // padrow for-loop
     } // sector for-loop
   } // tpcHits
+*/
 
   // pass back the average time, number of hits, and average padrow
   info[ 0] = (nie > 0 ? tie/nie : 0); info[ 1] = nie; info[ 2] = (nie > 0 ? rie/nie : 0);
@@ -248,8 +250,11 @@ void StEbyET0::getTpcInfo(StEvent* event, double* info) {
   return;
 }
 //_____________________________________________________________________________
-// $Id: StEbyET0.cxx,v 1.1 2021/03/19 01:44:47 genevb Exp $
+// $Id: StEbyET0.cxx,v 1.2 2021/03/20 02:38:13 genevb Exp $
 // $Log: StEbyET0.cxx,v $
+// Revision 1.2  2021/03/20 02:38:13  genevb
+// Remove StTpcDb dependence for StEventUtilities
+//
 // Revision 1.1  2021/03/19 01:44:47  genevb
 // Introduce Event-by-Event T0 corrections
 //
