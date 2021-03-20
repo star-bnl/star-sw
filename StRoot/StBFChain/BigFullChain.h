@@ -1338,7 +1338,7 @@ Bfc_st BFC[] = { // standard chains
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
 
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
-  {"Stu"         ,""  ,"","","",                 "StTpcDb,StEventUtilities","Load StEventUtilities",kFALSE},
+  {"Stu"         ,""  ,"","","",                         "StEventUtilities","Load StEventUtilities",kFALSE},
 
 #ifndef  __NoStrangeMuDst__
   {"MuDSTDeps"   ,"","","StEvent,Stu,StBichsel",""
