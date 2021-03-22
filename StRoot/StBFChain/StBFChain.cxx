@@ -1,4 +1,4 @@
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.669 2021/03/19 01:44:46 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.670 2021/03/21 03:32:28 genevb Exp $
 
 #include "TROOT.h"
 #include "TPRegexp.h"
