@@ -367,7 +367,8 @@ Int_t StEventQAMaker::Make() {
     UInt_t daqid = dbTriggerId->getDaqTrgId(iTrg);
     if (tword>>(daqid) & 1U)
       mTrigBits->Fill((Float_t) daqid);
-    if (strlen(mTrigBits->GetXaxis()->GetBinLabel(daqid+1))<2)
+    // getName() via L0 doesn't work in year 2000 (run_year=1)
+    if (run_year > 1 && strlen(mTrigBits->GetXaxis()->GetBinLabel(daqid+1))<2)
       mTrigBits->GetXaxis()->SetBinLabel(daqid+1,dbTriggerId->getName(iTrg));
   }
   
@@ -2944,8 +2945,11 @@ void StEventQAMaker::MakeHistiTPC() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.140 2021/03/19 15:21:29 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.141 2021/03/20 16:10:54 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.141  2021/03/20 16:10:54  genevb
+// Trigger ID names only available from year 2001 on
+//
 // Revision 2.140  2021/03/19 15:21:29  genevb
 // Only look at trigger information if trigger word is valid
 //
