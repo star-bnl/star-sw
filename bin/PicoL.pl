@@ -33,7 +33,7 @@ elsif ($pwd =~ /2013/) { $year = "y2013";}
 elsif ($pwd =~ /2012/) { $year = "y2012";} 
 elsif ($pwd =~ /2011/) { $year = "y2011";} 
 elsif ($pwd =~ /2010/) { $year = "y2010";} 
-if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/ or $pwd =~ /P20ic/ or $pwd =~ /P21ia_calib/ or $pwd =~ /19GeV_2019_DEV/) {
+if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/ or $pwd =~ /P20ic/ or $pwd =~ /P21ia_calib/ or $pwd =~ /19GeV_2019_DEV/ or $pwd =~ /14p5GeV_2019_DEV/) {
   $PICOPATH = "/gpfs01/star/data*";
   if    ($pwd =~ /2020\/5p75GeV_fixedTarget/) {$glob = "/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/11p5GeV.C/)           {$glob = "/reco/production_11p5GeV_2020/ReversedFullField/dev/20*"; $dayMin = 42;}
@@ -48,6 +48,7 @@ if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/ or $pwd =~ /P20ic/ or $pwd =~ /P21ia_
   elsif ($pwd =~ /2020\/9p8GeV_fixedTarget/)  {$glob = "/reco/production_9p8GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2019\/19GeV_2019_P20ic/)    {$glob = "/reco/production_19GeV_2019/ReversedFullField/P20ic_calib/2019"; $muDST = 1;}
   elsif ($pwd =~ /2019\/19GeV_2019_P21ia/)    {$glob = "/reco/production_19GeV_2019/ReversedFullField/P21ia_calib/2019"; $muDST = 1}
+  elsif ($pwd =~ /2019\/14p5GeV_2019_DEV/)    {$glob = "/reco/production_14p5GeV_2019/ReversedFullField/DEV_calib/2019";}
   elsif ($pwd =~ /2019\/19GeV_2019_DEV/)      {$PICOPATH = "/gpfs01/star/subsys-tpc/fisyak/Pico/2019/production_19GeV_2019_DEV"; $glob = "";}
   elsif ($pwd =~ /2017\/pp500/)               {$glob = "/reco/pp500_production_2017/ReversedFullField/P20ic/2017";}
   elsif ($pwd =~ /2021\/7p7GeV/)              {$glob = "/reco/production_7p7GeV_2021/ReversedFullField/dev/2021/";}
@@ -172,14 +173,14 @@ foreach my $run (glob $GLOB) {
   if ($#picos > -1 and ! $muDST) {
     print "string:$run:$ana:$year:picoDst\n";
     $Njobs++;
-  } else {
-    my $MuGlob = $run . "/*MuDst.root";
-    my @Mus = glob $MuGlob;
-    if ($#Mus > -1) {
-      print "string:$run:$ana:$year:MuDst\n";
-      $Njobs++;
-    }
-  }
+#   } else {
+#     my $MuGlob = $run . "/*MuDst.root";
+#     my @Mus = glob $MuGlob;
+#     if ($#Mus > -1) {
+#       print "string:$run:$ana:$year:MuDst\n";
+#       $Njobs++;
+#     }
+xs  }
 #  last;
 #  die;
 }
