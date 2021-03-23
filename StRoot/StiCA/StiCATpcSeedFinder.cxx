@@ -56,7 +56,9 @@ StiTrack *StiCATpcSeedFinder::findTrack(double rMin)
     { 
      const StiHit *ah = a->hit;
      const StiHit *bh = b->hit;
-     return (ah->x_g()*ah->x_g()+ah->y_g()*ah->y_g())>(bh->x_g()*bh->x_g()+bh->y_g()*bh->y_g());
+     if (ah==bh) return 0.;
+     return double((ah->x_g()-bh->x_g())*(ah->x_g()+bh->x_g())+(ah->y_g()-bh->y_g())*(ah->y_g()+bh->y_g()));
+     
     };
 
     StiHit *preHit = aSeed.vhit[      0]->hit;
