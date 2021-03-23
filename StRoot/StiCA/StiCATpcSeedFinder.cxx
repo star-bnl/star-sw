@@ -56,7 +56,15 @@ StiTrack *StiCATpcSeedFinder::findTrack(double rMin)
     { 
      const StiHit *ah = a->hit;
      const StiHit *bh = b->hit;
-     if (ah==bh) return false;
+     if (ah==bh) return false; // don't do the math for identical hits
+
+     // HK, VP, GVB:
+     // Test: a's x^2 + y^2 <>=? b's x^2 + y^2
+     // ...but re-arranging the math lets us avoid doing
+     // squares, and converting to double gives more precision
+     // (A^2 + B^2) - (C^2 + D^2) =
+     // (A^2 - C^2) + (B^2 - D^2) =
+     // (A-C)*(A+C) + (B-D)*(B+D)
      double ax = ah->x_g(),ay = ah->y_g();
      double bx = bh->x_g(),by = bh->y_g();
      return (ax-bx)*(ax+bx) + (ay-by)*(ay+by)>0;
