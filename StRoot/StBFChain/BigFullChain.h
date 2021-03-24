@@ -1655,7 +1655,7 @@ Bfc_st BFC[] = { // standard chains
   {"TpcAvCluster","TpcAvCluster","tpcChain","rts,detDb","StTpcAvClusterMaker","StTpcHitMaker"
    ,                       "TPC+TPX averaging laser events into Sparse histogram on cluster level", kFALSE},
   {"Velo"        ,"","tpcChain","tpc_T"                             ,"StVeloMaker","StVeloMaker","",kFALSE},
-  {"TpcHitMover" ,"tpc_hit_mover","tpcChain","tpcDb,StEvent"
+  {"TpcHitMover" ,"tpc_hit_mover","tpcChain","tpcDb,StEvent,Stu"
    ,                  "StTpcHitMover","StTpcHitMoverMaker","TPC hits coord transform + corrections",kFALSE},
   {"tpt","","ITTF","",                          "","","WARNING *** Option is OBSOLETE *** use ITTF",kFALSE},
   {"tpt_old","","ITTF","",                      "","","WARNING *** Option is OBSOLETE *** use ITTF",kFALSE},

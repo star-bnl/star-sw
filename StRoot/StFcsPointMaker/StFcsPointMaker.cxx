@@ -1,4 +1,4 @@
-// $Id: StFcsPointMaker.cxx,v 1.5 2020/06/01 19:36:52 akio Exp $
+// $Id: StFcsPointMaker.cxx,v 1.8 2021/02/25 21:55:05 akio Exp $
 
 #include "StFcsPointMaker.h"
 #include "StLorentzVectorF.hh"
@@ -16,20 +16,25 @@
 #include "tables/St_vertexSeed_Table.h"
 
 #include <cmath>
+#include <limits>
 #include "TMath.h"
 #include "TVector2.h"
 
-// global shower shape parameters 
-static const int NPMAX=60;
-std::array<double,NPMAX> mShowerShapeParameters;
+namespace{
+  // shower shape parameters 
+  static const int NPMAX=60;
+  std::array<double,NPMAX> mShowerShapeParameters;
+  
+  // tower data for current working cluster
+  static int mNHit;           // # of hit in current working cluster
+  static float mEtot;         // total energy of the cluster
+  std::vector<float> mX; // x of hit
+  std::vector<float> mY; // y of hit 
+  std::vector<float> mE; // E of hit
+}
 
-// global tower data for current working cluster
-static Int_t mNHit;    // # of hit in current working cluster
-static Float_t mEtot;  // total energy of the cluster
-static Float_t* mX;    // x of hit
-static Float_t* mY;    // y of hit
-static Float_t* mE;    // E of hit
-
+ClassImp(StFcsPointMaker)
+    
 StFcsPointMaker::StFcsPointMaker(const char* name) : StMaker(name) , mMinuit(7) {
     mMinuit.SetPrintLevel(-1);
 }
@@ -40,7 +45,7 @@ void StFcsPointMaker::Clear(Option_t* option) {
     StMaker::Clear(option);
 }
 
-Int_t StFcsPointMaker::InitRun(Int_t runNumber) {
+int StFcsPointMaker::InitRun(int runNumber) {
     // Ensure we can access database information
     LOG_DEBUG << "StFcsPointMaker initializing run" << endm;
     mDb = static_cast<StFcsDbMaker*>(GetMaker("fcsDb"));
@@ -117,7 +122,7 @@ void StFcsPointMaker::setShowerShapeParameters(int det){
 	    mShowerShapeParameters[i*10+7]=(z0 + z)/(z0+smax);
 	}
     }
-    if(mDebug>0) {
+    if(GetDebug()>0) {
 	for(int i=0; i<6; i++){
 	    LOG_INFO << Form("Shower Shape Parameters det=%1d slice=%1d : ",det,i);
 	    for(int j=0; j<10; j++) {LOG_INFO << Form(" %10.6f",mShowerShapeParameters[i*10+j]);}
@@ -126,10 +131,8 @@ void StFcsPointMaker::setShowerShapeParameters(int det){
     }
 }
 
-Int_t StFcsPointMaker::Make() {
+int StFcsPointMaker::Make() {
     LOG_DEBUG << "StFcsPointMaker Make!!!" << endm;
-    
-    //if(mReadMuDst) return readMuDst();
     
     StEvent* event = static_cast<StEvent*>(GetInputDS("StEvent"));
     mFcsCollection=0;
@@ -142,7 +145,7 @@ Int_t StFcsPointMaker::Make() {
     for(int det=0; det<=kFcsEcalSouthDetId; det++) {
       fitClusters(det);	
     }
-    if(mDebug>0) mFcsCollection->print(3);
+    if(GetDebug()>0) mFcsCollection->print(3);
     return kStOk;
 }
 
@@ -156,50 +159,56 @@ void StFcsPointMaker::fitClusters(int det) {
 
   setShowerShapeParameters(det);
 
+  StFcsPoint point0,point1,point2;
   for(int i=0; i<nclu; i++){ //loop over all clusters
     StFcsCluster* c=clusters[i];
-    StFcsPoint* p0=new StFcsPoint();
-    StFcsPoint* p1=new StFcsPoint();
-    StFcsPoint* p2=new StFcsPoint();
     mNHit=c->nTowers();
     mEtot=c->energy();
-    mX=new float[mNHit];
-    mY=new float[mNHit];
-    mE=new float[mNHit];
+    //mX=new float[mNHit];
+    //mY=new float[mNHit];
+    //mE=new float[mNHit];
+    mE.clear(); mX.clear(); mY.clear();
     for(int j=0; j<mNHit; j++){
-	StFcsHit* h=c->hits()[j];
-	mE[j]=h->energy();
-	mDb->getLocalXYinCell(h, mX[j], mY[j]);
+        StFcsHit* h=c->hits()[j];	
+        float x,y;
+        mDb->getLocalXYinCell(h, x, y);
+        mE.push_back(h->energy());
+        mX.push_back(x);
+        mY.push_back(y);
+        //mE[j]=h->energy();
+        //mX[j]=x;
+        //mY[j]=y;
     }
-    double chi1=99999.0, chi2=99999.0;
+    double chi1=std::numeric_limits<double>::max();
+    double chi2=std::numeric_limits<double>::max();
     switch(c->category()){
     case 0:
-	chi1 = fit1PhotonCluster(c,p0);
-	chi2 = fit2PhotonCluster(c,p1,p2);
-	break;
+      chi1 = fit1PhotonCluster(c,&point0);
+      chi2 = fit2PhotonCluster(c,&point1,&point2);
+      break;
     case 1:
-	chi1 = fit1PhotonCluster(c,p0);
-	break;
+      chi1 = fit1PhotonCluster(c,&point0);
+      break;
     case 2:
-	chi2 = fit2PhotonCluster(c,p1,p2);
-	break;
+      chi2 = fit2PhotonCluster(c,&point1,&point2);
+      break;
     }	
     // sotre chi2 for both
     c->setChi2Ndf1Photon(chi1);
     c->setChi2Ndf2Photon(chi2);
     // pick better one
     if(chi1<chi2){	
-	p0->setDetectorId(det);
-	p0->setCluster(c);
+        StFcsPoint* p0=new StFcsPoint(point0);
+        p0->setDetectorId(det);
+        p0->setCluster(c);
 	p0->setNParentClusterPhotons(1);
 	StThreeVectorD xyz=mDb->getStarXYZfromColumnRow(det,p0->x(),p0->y());
 	p0->setXYZ(xyz);
 	p0->setFourMomentum(mDb->getLorentzVector(xyz,p0->energy()));
 	mFcsCollection->addPoint(det,p0);
 	c->addPoint(p0);
-	delete p1;
-	delete p2;
     }else{
+        StFcsPoint* p1=new StFcsPoint(point1);
 	p1->setDetectorId(det);
 	p1->setCluster(c);
 	p1->setNParentClusterPhotons(2);
@@ -208,6 +217,7 @@ void StFcsPointMaker::fitClusters(int det) {
 	p1->setFourMomentum(mDb->getLorentzVector(xyz1,p1->energy()));
 	mFcsCollection->addPoint(det,p1);
 
+	StFcsPoint* p2=new StFcsPoint(point2);
 	p2->setDetectorId(det);
 	p2->setCluster(c);
 	p2->setNParentClusterPhotons(2);
@@ -217,12 +227,7 @@ void StFcsPointMaker::fitClusters(int det) {
 	mFcsCollection->addPoint(det,p2);
 
 	c->addPoint(p1,p2);
-	delete p0;
     }
-    // delete hit arrays
-    delete [] mX;
-    delete [] mY;
-    delete [] mE;
   }
   
   //loop over all found points and fill fourMomentum
@@ -235,9 +240,9 @@ void StFcsPointMaker::fitClusters(int det) {
 }
 
 
-Double_t StFcsPointMaker::fit1PhotonCluster(StFcsCluster* c, StFcsPoint* p){
+double StFcsPointMaker::fit1PhotonCluster(StFcsCluster* c, StFcsPoint* p){
     int err;
-    Double_t chi2 = -1.0;
+    double chi2 = -1.0;
     mMinuit.SetFCN(minimizationFunctionNPhoton);
     mMinuit.mncler();
     if(mMinuit.GetNumFixedPars() > 0) {mMinuit.mnfree(0);}
@@ -273,9 +278,9 @@ Double_t StFcsPointMaker::fit1PhotonCluster(StFcsCluster* c, StFcsPoint* p){
     return chi2;
 } 
 
-Double_t StFcsPointMaker::fit2PhotonCluster(StFcsCluster* c, StFcsPoint* p1, StFcsPoint* p2){ 
+double StFcsPointMaker::fit2PhotonCluster(StFcsCluster* c, StFcsPoint* p1, StFcsPoint* p2){ 
     int err;
-    Double_t chi2 = -1.0;
+    double chi2 = -1.0;
     mMinuit.SetFCN(minimizationFunction2Photon);
     mMinuit.mncler();
     if(mMinuit.GetNumFixedPars() > 0) {mMinuit.mnfree(0);}
@@ -336,7 +341,7 @@ Double_t StFcsPointMaker::fit2PhotonCluster(StFcsCluster* c, StFcsPoint* p1, StF
 }
 
 // Minimization function to be called from TMinuit
-void StFcsPointMaker::minimizationFunctionNPhoton(Int_t& npara, Double_t* grad, Double_t& fval, Double_t* para, Int_t){
+void StFcsPointMaker::minimizationFunctionNPhoton(int& npara, double* grad, double& fval, double* para, int){
     fval = 0.0;
     const int nPhotons = static_cast<int>(para[0]);
     for(int i=0; i<mNHit; i++){
@@ -357,7 +362,7 @@ void StFcsPointMaker::minimizationFunctionNPhoton(Int_t& npara, Double_t* grad, 
 }
 
 // Minimization function to be called from TMinuit for 2 photon case only
-void StFcsPointMaker::minimizationFunction2Photon(Int_t& npara, Double_t* grad, Double_t& fval, Double_t* para, Int_t){
+void StFcsPointMaker::minimizationFunction2Photon(int& npara, double* grad, double& fval, double* para, int){
     // Only need to translate into the old parameterization
     const double dgg   = para[3];
     const double zgg   = para[5];
@@ -380,10 +385,10 @@ void StFcsPointMaker::minimizationFunction2Photon(Int_t& npara, Double_t* grad, 
 //  xun,yun are photon position in cell coordinate at Z=shower max
 //  xc,yc are photon position at z of the slice 
 //     (scale factor = mShowerShapeParameters[istart+7] calculated in setShowerShapeParameters()
-Double_t StFcsPointMaker::energyDepositionInTower(Double_t x, Double_t y,Double_t xun, Double_t yun){
+double StFcsPointMaker::energyDepositionInTower(double x, double y,double xun, double yun){
     double sum = 0.0;
-    for(Int_t i=0; i<6; i++){       
-        Int_t istart = i*10;
+    for(int i=0; i<6; i++){       
+        int istart = i*10;
 	if(mShowerShapeParameters[istart]>0.0){
 	    double xc = xun * mShowerShapeParameters[istart+7];
 	    double yc = yun * mShowerShapeParameters[istart+7];
@@ -393,30 +398,3 @@ Double_t StFcsPointMaker::energyDepositionInTower(Double_t x, Double_t y,Double_
     return sum;
 }
 
-/*
-  Int_t StFcsPointMaker::readMuDst(){
-  StEvent* event = (StEvent*)GetInputDS("StEvent");
-  if(!event){LOG_INFO<<"StFcsPointMaker::readMuDst found no StEvent"<<endm; return kStErr;}
-  StFcsCollection* fcscol = event->fcsCollection();
-  if(!fcscol){LOG_INFO<<"StFcsPointMaker::readMuDst found no FcsCollection"<<endm; return kStErr;}
-  for (unsigned i(0); i < fcscol->numberOfClusters(); ++i) {
-      StFcsCluster* c = fcscol->clusters()[i];
-      if(c){
-	  StThreeVectorF xyz = mDb->getStarXYZfromColumnRow(c->detectorId(),c->x(),c->y());
-	  //c->setFourMomentum(compute4Momentum(xyz, c->energy()));
-	  c->setFourMomentum(mDb->getLorentzVector(xyz,c->energy()));
-      }
-  }
-  for (unsigned i(0); i < fcscol->numberOfPoints(); ++i) {
-    StFcsCluster* p = fcscol->points()[i];
-    if(p){
-      StThreeVectorF xyz  = mDb->getStarXYZ(p->detectorId(),p->x(),p->y());
-      p->setXYZ(xyz);
-      //p->setFourMomentum(compute4Momentum(xyz, p->energy()));
-      p->setFourMomentum(mDb->getLorentzVector(xyz,p->energy()));
-    }
-  }
-  fcscol->sortPointsByET();
-  return kStOk;
-}
-*/
