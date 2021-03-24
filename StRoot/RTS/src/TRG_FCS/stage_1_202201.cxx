@@ -5,6 +5,8 @@
 // VERSION 0x1  (May 2020)
 void fcs_trg_base::stage_1_202201(u_int s0[], geom_t geo, link_t *output) 
 {
+	u_char mrkr ;	// marker
+
          if(fcs_trgDebug>=2) printf("Stage1v1 ns=%1d det=%1d dep=%2d\n",geo.ns,geo.det,geo.dep);
 
 	// Tonko: I will run this basic "high-towerish" trigger always
@@ -23,6 +25,16 @@ void fcs_trg_base::stage_1_202201(u_int s0[], geom_t geo, link_t *output)
 		}
 	}
 
+	// Tonko: new 16-Feb-21
+	// stage_params[0][2] overrides the algo
+	if((stage_params[0][2]&0x3)==1) geo.det = 2 ;	// force FPRE "high tower lookalike"
+
+	// debugging marker in the stream, only for FPRE algo
+	if(stage_params[0][2]&4) {
+		mrkr = 0xAA ;
+	}
+	else mrkr = 0 ;
+
 	// algorithm depends on detector
 	if(geo.det == 2) {	// BASIC algo for fPRE
 	    if(fcs_trgDebug>0){
@@ -36,7 +48,7 @@ void fcs_trg_base::stage_1_202201(u_int s0[], geom_t geo, link_t *output)
 	    output->d[3] = (t[31]<<7)|(t[30]<<6)|(t[29]<<5)|(t[28]<<4)|(t[27]<<3)|(t[26]<<2)|(t[25]<<1)|(t[24]<<0);
 	    output->d[4] = 0 ;
 	    output->d[5] = 0 ;
-	    output->d[6] = 0 ;
+	    output->d[6] = mrkr ;	// marker 0xAA if params[2] & 4
 	    output->d[7] = mask?0x80:0 ;
 	}
 	else {	// BASIC algo for ECAL/HCAL

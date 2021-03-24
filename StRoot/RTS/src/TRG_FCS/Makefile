@@ -35,7 +35,8 @@ fcs_trg_lib.a : fcs_trg_base.o \
 	stage_2_202201.o \
 	stage_3_202201.o \
 	stage_2_tonko_202101.o \
-	stage_3_tonko_202101.o
+	stage_3_tonko_202101.o \
+	stage_2_TAMU_202202.o	
 	$(RTS_AR)
 
 # DO NOT DELETE

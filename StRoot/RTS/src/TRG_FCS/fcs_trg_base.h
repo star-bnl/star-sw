@@ -89,8 +89,10 @@ public:
 	int run_stop() ;	// for statistics dumps et...
 
 
+	u_char want_stage_2_io ;	// only if I have full events
+	u_char want_stage_3_io ;	// only for eother full events or in sector 11
 
-	// cleared at run start; printent at run stop
+	// cleared at run start; logged at run stop
 	struct errors_t {
 		u_int sim_s1 ;	
 		u_int sim_s2 ;
@@ -100,7 +102,7 @@ public:
 		u_int io_s1_to_s2[4] ;
 		u_int io_s2_to_s3 ;
 		
-	} errs ;
+	} errs, good ;
 
 	// only for S3
 	struct statistics_t {
@@ -149,7 +151,7 @@ public:
 		// Stage_2 DEP data for each of the 2 DEP/Stage_2
 		struct {
 			// stage_2 data received by the stage_2 DEP/IO from a stage_1 DEP/ADC
-			link_t s2_from_s1[32] ;		// stage_1 data _received_ by stage_2; ns,ch
+			link_t s2_from_s1[34] ;		// stage_1 data _received_ by stage_2; ns,ch
 
 			// stage_2 data sent by DEP/ADC in stage_2 (ns,ch)
 			link_t s2_to_s3[2] ;			// stage_2 data _sent_ to stage_3; ns,ch
@@ -216,6 +218,11 @@ public:
 	} marker ;
 
 	static int fcs_trgDebug ;
+
+	// per event 
+	int s1_bad ;
+	int s2_bad ;
+	int s3_bad ;
 
 	// stage_x algo params (same as in firmware)
 	static u_short stage_params[4][16] ;	// [stage][param_ix] ;

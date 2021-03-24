@@ -24,9 +24,11 @@ static int or_reduce(int d8)
 
 void  fcs_trg_base::stage_3_tonko_202101(link_t s2[], u_short *dsm)
 {    
-	u_short out_s ;
+ 	u_short out_s ;
 	u_short out_n ;
-	u_short big_or ;
+	u_short n_or = 0 ;
+	u_short s_or = 0 ;
+	u_short big_or = 0 ;
 
 	out_s = 0 ;
 	out_n = 0 ;
@@ -36,13 +38,29 @@ void  fcs_trg_base::stage_3_tonko_202101(link_t s2[], u_short *dsm)
 		out_s |= (or_reduce(s2[2].d[i]) || or_reduce(s2[3].d[i]))<<i ;
 	}
 
-	if(out_n || out_s) big_or = 1 ;	// _any_ bit set
+	big_or = s2[0].d[7] & 0x80 ;
+	big_or |= s2[1].d[7] & 0x80 ;
+	big_or |= s2[2].d[7] & 0x80 ;
+	big_or |= s2[3].d[7] & 0x80 ;
+
+	if(big_or) big_or = 1 ;
 	else big_or = 0 ;
 
-	out_n |= big_or ;	// bit(0) is a HT-like indicator
+	n_or = s2[0].d[7] & 0x80 ;
+	n_or |= s2[1].d[7] & 0x80 ;
+	s_or = s2[2].d[7] & 0x80 ;
+	s_or |= s2[3].d[7] & 0x80 ;
+
+	if(n_or) n_or = 1 ;
+	if(s_or) s_or = 1 ;
+
+	
+	out_n &= 0xF8 ;
+	out_n |= (s_or<<2)|(n_or<<1)|big_or ;	// bit(0) is a HT-like indicator
+
 
 	int sel = (stage_params[3][0]>>1)&0x7 ;
-
+	
 	switch(sel) {
 	case 0 :
 		*dsm = (out_s<<8)|out_n ;
@@ -55,6 +73,12 @@ void  fcs_trg_base::stage_3_tonko_202101(link_t s2[], u_short *dsm)
 		break ;
 	}
 
+#if 0
+	for(int i=0;i<8;i++) {
+		printf("%d: 0x%X 0x%X 0x%X 0x%X\n",i,s2[0].d[i],s2[1].d[i],s2[2].d[i],s2[3].d[i]) ;
+	}
+	printf("  sel is %d, dsm is 0x%04X\n",sel,*dsm) ;
+#endif
 	return ;
 }
 
