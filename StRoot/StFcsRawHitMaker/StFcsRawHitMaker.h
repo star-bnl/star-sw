@@ -16,42 +16,47 @@ class StFcsDbMaker;
 
 class StFcsRawHitMaker : public StRTSBaseMaker {
 public: 
-    StFcsRawHitMaker( const Char_t* name = "fcsHit");
+    StFcsRawHitMaker( const char* name = "fcsHit");
     ~StFcsRawHitMaker();
     
-    Int_t InitRun(Int_t runNumber);
-    Int_t Make();
+    int InitRun(int runNumber);
+    int Make();
     void Clear( Option_t *opts = "" );
-    
+
     void setReadMode(int v) {mReadMode=v;}
-    void setDebug(int v=1) {mDebug=v;}
+    void setDebug(int v=1) {SetDebug(v);}  //!backward compatubility     
     
     // Get CVS
     virtual const char *GetCVS() const;
     
 private:
-    Int_t prepareEnvironment();   
+    int prepareEnvironment();   
     StEvent *mEvent;
     StFcsCollection *mFcsCollectionPtr;
     unsigned int mRun=0;
     StFcsDbMaker* mFcsDbMkr=0;
     unsigned int mReadMode=0;
-    int mDebug=0;
-    
+
     ClassDef(StFcsRawHitMaker,1);
 };
 
 // inline functions
 inline const char *StFcsRawHitMaker::GetCVS() const {
-    static const char cvs[] = "Tag $Name:  $ $Id: StFcsRawHitMaker.h,v 1.2 2019/07/05 15:00:52 akio Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[] = "Tag $Name:  $ $Id: StFcsRawHitMaker.h,v 1.4 2021/02/25 21:55:32 akio Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
 };
 
 #endif
 
 /*
- * $Id: StFcsRawHitMaker.h,v 1.2 2019/07/05 15:00:52 akio Exp $
+ * $Id: StFcsRawHitMaker.h,v 1.4 2021/02/25 21:55:32 akio Exp $
  * $Log: StFcsRawHitMaker.h,v $
+ * Revision 1.4  2021/02/25 21:55:32  akio
+ * Int_t -> int
+ *
+ * Revision 1.3  2021/02/25 19:27:10  akio
+ * Modified for STAR code review (Hongwei)
+ *
  * Revision 1.2  2019/07/05 15:00:52  akio
  * small corrections
  *

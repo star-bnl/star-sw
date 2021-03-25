@@ -197,6 +197,7 @@ void DrawSignalBg_HL34(TString nSt="") {
   for(int i=0; i<NParticles; i++)
   {
     hPart[i] = (TH1D*) f1->Get(sPart[i].data());
+    if (! hPart[i]) continue;
 #if 0
     hPartCT_SR[i] = (TH1D*) f1->Get(sPartCT_SR[i].data());
     hPartCT_BGR[i] = (TH1D*) f1->Get(sPartCT_BGR[i].data());
