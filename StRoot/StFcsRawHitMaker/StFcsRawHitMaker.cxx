@@ -12,13 +12,13 @@
 #include "StRoot/StEvent/StFcsHit.h"
 #include "StRoot/StFcsDbMaker/StFcsDbMaker.h"
 
-StFcsRawHitMaker::StFcsRawHitMaker( const Char_t* name) :
+StFcsRawHitMaker::StFcsRawHitMaker( const char* name) :
     StRTSBaseMaker("fcs",name){
 };
 
 StFcsRawHitMaker::~StFcsRawHitMaker(){};
 
-Int_t StFcsRawHitMaker::prepareEnvironment(){
+int StFcsRawHitMaker::prepareEnvironment(){
   mEvent = (StEvent*)GetInputDS("StEvent");  
   if(mEvent) {
     LOG_INFO <<"::prepareEnvironment() found StEvent"<<endm;
@@ -39,7 +39,7 @@ Int_t StFcsRawHitMaker::prepareEnvironment(){
   return kStOK;
 };
 
-Int_t StFcsRawHitMaker::InitRun(Int_t runNumber){
+int StFcsRawHitMaker::InitRun(int runNumber){
     mRun=runNumber;
     mFcsDbMkr = static_cast< StFcsDbMaker*>(GetMaker("fcsDb"));
     if(!mFcsDbMkr){
@@ -49,21 +49,21 @@ Int_t StFcsRawHitMaker::InitRun(Int_t runNumber){
     return kStOK;
 };
 
-Int_t StFcsRawHitMaker::Make() {
+int StFcsRawHitMaker::Make() {
     StRtsTable* dd=0;
     prepareEnvironment();    
-    int ndata=0, nvaliddata=0;
+    int nData=0, nValidData=0;
     const char* mode[2]={"adc","zs"};
     char node[20];
     sprintf(node,"fcs/%s",mode[mReadMode]);
     while((dd = GetNextDaqElement(node))){   
 	int s = dd->Sector();
-	int sec = ((s >> 11) & 0x1F) + 1;
-	int rdo = ((s >> 8) & 0x7) + 1;
-	int ehp = (s >> 6) & 0x3;
-	int ns  = (s >> 5) & 1;
-	int dep = dd->Row() ;
-	int ch = dd->Pad() ;
+	int sec = ((s >> 11) & 0x1F) + 1;  // sector = fcs DAQ computer (1~10)
+	int rdo = ((s >> 8) & 0x7) + 1;    // fiber connecion # (0~7)
+	int ehp = (s >> 6) & 0x3;          // 0=Ecal/1=Hcal/2=Pres
+	int ns  = (s >> 5) & 1;            // 0=north/1=south  
+	int dep = dd->Row() ;              // DEP Board# (0-23)
+	int ch = dd->Pad() ;               // Channel (0-31)
 	u_int n=dd->GetNRows();   
 	int detid,id,crt,sub;
 	mFcsDbMkr->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
@@ -75,9 +75,9 @@ Int_t StFcsRawHitMaker::Make() {
 	    hit = new StFcsHit(1,detid,id,ns,ehp,dep,ch,2*n,d16);
 	}
 	mFcsCollectionPtr->addHit(detid,hit);
-	ndata++;      
-	if(detid<6) nvaliddata++;      	
-	if(mDebug){
+	nData++;      
+	if(detid<6) nValidData++;      	
+	if(GetDebug()){
 	    printf("FCS %3s : S%d:%d [det %d, ns %d, dep %d ch %2d] det=%1d id=%4d : size=%2d : adc=",
 		   mode[mReadMode],sec,rdo,ehp,ns,dep,ch,detid,id,n) ;
 	    int sum=0;
@@ -90,22 +90,24 @@ Int_t StFcsRawHitMaker::Make() {
 	}
     }
     LOG_INFO <<Form("FCS found %d data lines, and %d valid data lines",
-		    ndata,nvaliddata)<<endm;
-    if(ndata>0 && mDebug) mFcsCollectionPtr->print(3);
+		    nData,nValidData)<<endm;
+    if(nData>0 && GetDebug()) mFcsCollectionPtr->print(3);
     return kStOK;
 };
 
-void StFcsRawHitMaker::Clear( Option_t *opts ){
-    //if(mFcsCollectionPtr){
-    //	for(int d=0; d<kFcsNDet+1; d++) { mFcsCollectionPtr->hits(d).clear(); }
-    //}
-};
+void StFcsRawHitMaker::Clear( Option_t *opts ){};
 
 ClassImp(StFcsRawHitMaker);
 
 /*
- * $Id: StFcsRawHitMaker.cxx,v 1.4 2019/08/01 18:38:00 akio Exp $
+ * $Id: StFcsRawHitMaker.cxx,v 1.6 2021/02/25 21:55:32 akio Exp $
  * $Log: StFcsRawHitMaker.cxx,v $
+ * Revision 1.6  2021/02/25 21:55:32  akio
+ * Int_t -> int
+ *
+ * Revision 1.5  2021/02/25 19:27:10  akio
+ * Modified for STAR code review (Hongwei)
+ *
  * Revision 1.4  2019/08/01 18:38:00  akio
  * added debug info
  *
