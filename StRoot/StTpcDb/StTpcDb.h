@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.45 2018/06/29 21:46:22 smirnovd Exp $
+ * $Id: StTpcDb.h,v 1.46 2021/03/26 20:26:48 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,18 +14,14 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
- * Revision 1.45  2018/06/29 21:46:22  smirnovd
- * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
+ * Revision 1.46  2021/03/26 20:26:48  fisyak
+ * Synchronize with TFG version, new schema for Inner Sector alignment (thank to Hongwei)
  *
- * Revert "NoDead option added"
- * Revert "Fill mag field more carefully"
- * Revert "Assert commented out"
- * Revert "Merging with TPC group code"
- * Revert "Remove too strong assert"
- * Revert "Restore removed by mistake line"
- * Revert "Remove not used anymore file"
- * Revert "iTPCheckIn"
+ * Revision 1.44  2018/06/21 01:47:16  perev
+ * iTPCheckIn
  *
+ * Revision 1.41.10.1  2018/02/16 22:14:59  perev
+ * iTPC
  * Revision 1.43  2018/06/07 04:30:35  genevb
  * Remove unnecessary dependence on StMagUtilities.h
  *
@@ -141,10 +137,8 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-class StMagUtilities;
 #include "StMessMgr.h"
 #include "StEnumerations.h"
-#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcWirePlanesC.h"
 #include "StDetectorDbMaker/St_tpcDimensionsC.h"
@@ -156,6 +150,7 @@ class StMagUtilities;
 #include "StDetectorDbMaker/St_tpcPedestalC.h"
 #include "StDetectorDbMaker/St_tpcPadResponseC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
+#include "StDbUtilities/StMagUtilities.h"
 #include "StDetectorDbMaker/St_trgTimeOffsetC.h"
 #include "TGeoMatrix.h"
 #include "TString.h"
@@ -193,9 +188,8 @@ class StTpcDb {
 			       kTotalTpcSectorRotaions =14}; 
  private:
   Char_t                mBeg[1];        //!
-  StMagUtilities*       mExB;           //!
   Int_t                 m_Debug;        //!
-  TGeoTranslation      *mSwap[2];       //! 
+  TGeoTranslation      *mShift[2];       //! 
   TGeoHMatrix          *mFlip;          //!
   TGeoHMatrix          *mTpc2GlobMatrix;//!
   TGeoHMatrix          *mHalf[2];       //!
@@ -210,7 +204,6 @@ class StTpcDb {
   StTpcDb();
  public:
   virtual ~StTpcDb();
-  St_tpcPadPlanesC      *PadPlaneGeometry() {return St_tpcPadPlanesC::instance();}
   St_tpcWirePlanesC     *WirePlaneGeometry() {return St_tpcWirePlanesC::instance();}
   St_tpcDimensionsC     *Dimensions() {return St_tpcDimensionsC::instance();}
   St_tpcSlowControlSimC *SlowControlSim() {return St_tpcSlowControlSimC::instance();}
@@ -222,22 +215,15 @@ class StTpcDb {
   St_tpcPadGainT0BC     *tpcGain() {return St_tpcPadGainT0BC::instance();}
   St_tpcPadGainT0BC     *tpcT0()   {return St_tpcPadGainT0BC::instance();}
   St_tpcPadResponseC    *PadResponse() {return St_tpcPadResponseC::instance();}
-  Float_t                triggerTimeOffset()     {return St_trgTimeOffsetC::instance()->triggerTimeOffset();}
-  Float_t                triggerTimeOffsetWest() {return St_trgTimeOffsetC::instance()->triggerTimeOffsetWest();}
-  static Bool_t          IsOldScheme()    {return mOldScheme;}
-#if 0
-  Float_t                ScaleY();
-#endif
+  Float_t                triggerTimeOffset()     {return 1e-6*(IsLaser() ? St_trgTimeOffsetC::instance()->laserOffset() : St_trgTimeOffsetC::instance()->offset());} // usec
+  Float_t                triggerTimeOffsetWest() {return 1e-6*(IsLaser() ? St_trgTimeOffsetC::instance()->laserOffsetW():         0);} // usec
+  Bool_t                 IsLaser()               {return mTriggerId != 0;}
+  static Bool_t          IsOldScheme()           {return mOldScheme;}
   Double_t               zGG() {return mzGG;}
   //small pieces of data:
   void    SetDriftVelocity();
-#if 0
-  Float_t DriftVelocity(Int_t sector=24, Double_t Y = 0);
-#else
-  Float_t DriftVelocity(Int_t sector=24);
-#endif
-  StMagUtilities* ExB() {return mExB;}
-  void SetExB(StMagUtilities *m) {mExB = m;}
+  Float_t DriftVelocity(Int_t sector=24) {return DriftVelocity(sector, 0);}
+  Float_t DriftVelocity(Int_t sector, Int_t row);
   void SetTpcRotations();
   void SetTpc2GlobalMatrix(TGeoHMatrix *m) {SetTpcRotationMatrix(m);}
   void SetTpcRotationMatrix(TGeoHMatrix *m, Int_t sector = 0, Int_t k = kSupS2Tpc) {
@@ -246,11 +232,11 @@ class StTpcDb {
   }
   void  SetDebug(Int_t m) {m_Debug = m;}
   Int_t Debug() {return m_Debug;}
-  void  SetTriggerId(Int_t m) {mTriggerId = m;}
+  void  SetTriggerId(Int_t m) {mTriggerId = m;} // Laser Trigger
   Int_t TriggerId() {return mTriggerId;}
   const TGeoHMatrix &Flip()                           const {return *mFlip;}
   const TGeoHMatrix &TpcHalf(StBeamDirection part)    const {return *mHalf[part];}
-  const TGeoTranslation &Swap(StBeamDirection part)   const {return *mSwap[part];}
+  const TGeoTranslation &Shift(StBeamDirection part)   const {return *mShift[part];}
   const TGeoHMatrix &Tpc2GlobalMatrix()               const {return *mTpc2GlobMatrix;}
   const TGeoHMatrix &TpcRot(Int_t sector, Int_t k)    const {return *mTpcSectorRotations[sector-1][k];}
   const TGeoHMatrix &SupS2Tpc(Int_t sector = 1)       const {return TpcRot(sector,kSupS2Tpc);}
