@@ -53,7 +53,7 @@ void dEdx(Int_t nevents=1000,
   gROOT->LoadMacro("bfc.C");
   TString Chain("in,TpcHitMover,OSpaceZ2,OGridLeakFull,dEdxY2,magF,StEvent,mysql,NoDefault");
   if        (Year.Contains("2019")) { Chain += ",CorrY"; // ,analysis to add OPr40 for y2019
-  } else if (Year.Contains("2020")) { Chain += ",CorrY"; // ,analysis to add OPr40 for y2020
+  } else if (Year.Contains("202")) { Chain += ",CorrY"; // ,analysis to add OPr40 for y2020
   } else if (Year.Contains("2005")) { Chain += ",SCEbyE,OGridLeak,OShortR,OSpaceZ2,";
   } else                            { Chain += ",CorrX"; // ,analysis to add OPr40 for <= 2018
   }

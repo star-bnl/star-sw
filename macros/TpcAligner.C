@@ -46,7 +46,6 @@ void TpcAligner(Int_t nevents=1e8,
 		//	  "/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
 		//		const char* rootFile="TpcAlignerFullFieldOldHelix.root")
 		const char *Tag = "", // "y2018,CorrX",
-// 		const char *Tag = "y2014a,Corr4"
 		const Char_t *output = 0) 
 {
   if (gClassTable->GetID("TTable") < 0) {
@@ -67,10 +66,13 @@ void TpcAligner(Int_t nevents=1e8,
   //  Chain += "P2019a";
   //  Chain += ",AgML,NoHistos,noTags,noRunco,NoDefault";
   Chain += ",NoHistos,noTags,noRunco,NoDefault,-evout,-hitfilt";
+  if (TString(MainFile).Contains("daq")) Chain += ",Tpx";
+  if (TString(MainFile).Contains("laser")) Chain += ",LaserIT";
   TString rFile(output);
   if (rFile == "") {
     rFile = gSystem->BaseName(MainFile);
     rFile.ReplaceAll("*","");
+    rFile.ReplaceAll(".daq","");
     rFile.ReplaceAll(".event","");
     rFile.ReplaceAll(".root","");
     rFile.ReplaceAll("..",".");

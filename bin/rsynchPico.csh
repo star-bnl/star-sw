@@ -7,11 +7,20 @@ set top = `basename  ${topdir}`
 #cd ~/reco/2020/TFG19m/RF/${dir}
 set log =  rsynchPico.`date +%m%d%y%H`.log;
 touch ${log}
-foreach d (`ls -1d 2??`)
+foreach d (`ls -1d 0??`)
   cd ${d}
-rsync -avrz -h                        \
+  rsync -avrz -h                        \
     --include='*picoDst.root'                  \
     --exclude='*.*'  --exclude='Sub*' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  \
-    ./ rftpexp01.rhic.bnl.gov:/gpfs01/star/pwg_tasks/tfg02/2020/TFG20a/RF/${dir}/${d} >>& ../${log}
-cd -
+    ./ /direct/gpfs01/star/pwg/fisyak/Pico/2021/RF/TFG21c.B/${dir}/${d} >>& ../${log}
+  cd -
 end
+
+#    ./ sftp.sdcc.bnl.gov:/gpfs01/star/pwg/fisyak/Pico/2021/RF/TFG21c.B/{dir}/${d} >>& ../${log}
+
+#rsync -avrz -h                        \
+#    --include='*picoDst.root'                  \
+#    --exclude='*.*'  --exclude='Sub*' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  \
+#    ./ rftpexp01.rhic.bnl.gov:/gpfs01/star/pwg_tasks/tfg02/2020/TFG20a/RF/${dir}/${d} >>& ../${log}
+#
+#  rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/subsysg/TFG/Pico/2021/RF/TFG21c.B/7p7GeV_2021 

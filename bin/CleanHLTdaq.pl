@@ -17,44 +17,31 @@ foreach my $file (@List) {
   my @EventList = glob $globEv;
   my $count = $#EventList;  print "$globEv = > EventList = @EventList, count = $count\n" if ($debug);
   my @daqs = ();
+  my $kept = 0;
   foreach my $pico (@PicoList) {
     my $tag = File::Basename::basename($pico,".picoDst.root");
-    my $daq = "/hlt/cephfs/daq/2019/" . $Dir . "/" . $tag . ".daq";
-    if (! -r $daq) {
-      $daq = "/hlt/cephfs/daq/2020/" . $Dir . "/" . $tag . ".daq";
-      if (! -r $daq) {next;}
+    my $daq = "/hlt/cephfs/daq/2021/" . $Dir . "/" . $tag . ".daq";
+#     if (! -r $daq) {
+#       $daq = "/hlt/cephfs/daq/2020/" . $Dir . "/" . $tag . ".daq";
+#       if (! -r $daq) {next;}
+#     }
+    if (! -r $daq) {next;}
+    my $event = $Dir . "/" . $tag . ".event.root";
+    if (-r $event)  {
+      print "# keep $daq because of $event\n";# if ($debug);
+      $kept++;
+      next;
     }
     push @daqs, $daq;
   }
   my $Ndaqs = $#daqs; print "Ndaqs = $Ndaqs, @daqs\n" if ($debug);
   if ($Ndaqs <= 0.5*$nPicos) {next;}
-  foreach my $pico (@PicoList) {
-    my $tag = File::Basename::basename($pico,".picoDst.root");
-    my $event = $Dir . "/" . $tag . ".event.root";
-    print "tag = $tag; count = $count\n" if ($debug);
-    if (-r $event and $debug) {
-      print "$pico => $event\n";
-    }
-    if (-r $event) {
-      if ($debug) {
-	if (-r $event) { print "$count : $pico => $event\n";}
-	else           { print "$count : $pico\n";}
-      }
-      $count++;
-      print "keep $daq" if ($debug);
-      next;
-    }
-    my $daq = "/hlt/cephfs/daq/2019/" . $Dir . "/" . $tag . ".daq";
-    if (! -r $daq) {
-      $daq = "/hlt/cephfs/daq/2020/" . $Dir . "/" . $tag . ".daq";
-    }
-    if (! -r $daq) {
-      print "daq = $daq is not found \n" if ($debug);
-      next;
-    }
-    $count++;
-    if ($count%50 == 2) {
+  my $j = 0;
+  foreach my $daq (@daqs) {
+    $j++;
+    if ($j%50 == 2 && $kept < 2 ) {
       print "# keep $daq\n";# if ($debug);
+      $kept++;
       next;
     }
     print "rm $daq\n";

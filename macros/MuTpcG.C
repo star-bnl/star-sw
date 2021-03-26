@@ -17,7 +17,7 @@
    root.exe lMuDst.C MuTpcG.root
    .L MuTpcG.C+
    Draw();
-   root.exe MuTpcG.root dMuTpcGPrint.C YS.C
+   root.exe MuTpcG.root MuTpcGPrint.C YS.C
    
 */
 #if !defined(__CINT__) || defined(__MAKECINT__)

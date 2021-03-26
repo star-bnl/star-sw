@@ -270,7 +270,8 @@ void Pico(const Char_t *files ="./*.picoDst.root",
     //    ,kOtherMethodId2          // NU
 #endif
   };
-  static TH2F *fTdEdx[3][5];
+  static TH2F *fTdEdx[3][5] = {0};
+  static TH2F *fdEdxVsdNdx = 0;
   for (Int_t k = 0; k < kTotalMethods; k++) {
     const Char_t *parN[5] = {"","pi","e","K","P"};
     const Char_t *parT[5] = {"All","|nSigmaPion| < 1","|nSigmaElectron| < 1","|nSigmaKaon| < 1","|nSigmaProton| < 1"};
@@ -284,6 +285,9 @@ void Pico(const Char_t *files ="./*.picoDst.root",
 			      350,-1.5,2., 500, ymin, ymax);
       fTdEdx[k][t]->SetMarkerStyle(1);
       fTdEdx[k][t]->SetMarkerColor(t+1);
+      if (k == 2 && t == 0) {
+	fdEdxVsdNdx = new TH2F("dEdN","Log10(dN/dx) versus Log10(dE/dx)",350,0,2.5,350,1.2,4.2);
+      }
     }
   } 
   TString TitleX("z - z_{#pi} versus ");
@@ -455,6 +459,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
       Double_t dEdxL[3]   = {TMath::Log(dEdx[0]), TMath::Log(dEdx[1]), dEdx[2] > 0 ? TMath::Log(dEdx[2]):0};
       Double_t dEdxL10[3] = {TMath::Log10(dEdx[0]), TMath::Log10(dEdx[1]), dEdx[2] > 0 ? TMath::Log10(dEdx[2]):0};
       Double_t sigmas[3] = {pTrack->dEdxError(), pTrack->dEdxError(), pTrack->dEdxError()};
+      if (fdEdxVsdNdx && dEdx[1] > 0 && dEdx[2] > 0) fdEdxVsdNdx->Fill(dEdxL10[1]+6,dEdxL10[2]);
       Double_t nSigmasPi[3] = {PiD.fI70.D(), PiD.fFit.D(), PiD.fdNdx.D()};
       Double_t Zs[3] = {PiD.fI70.dev[kPidPion], PiD.fFit.dev[kPidPion], PiD.fdNdx.dev[kPidPion]};
       for (Int_t k = 0; k < kTotalMethods; k++) {// I70 && Fit && dNdx
@@ -466,6 +471,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
 	  //	  if (Pulls[k])	  Pulls[k]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[k]/sigmas[k]);
 	  if (k < 2) fTdEdx[k][0]->Fill(TMath::Log10(p), dEdxL10[k]+6);
 	  else       fTdEdx[k][0]->Fill(TMath::Log10(p), dEdxL10[k]);
+#ifdef __DEBUG__
 	  if (k == 1 && (
 			 (TMath::Abs(p-0.5) < 0.1 && dEdxL10[k]+6 > 1.0 && dEdxL10[k]+6 < 1.5) ||
 			 (TMath::Abs(p-1.0) < 0.1 && dEdxL10[k]+6 > 0.5 && dEdxL10[k]+6 < 0.8)
@@ -476,6 +482,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
 	      cout << tc->GetCurrentFile()->GetName() << "\thas abnormal dEdx : p = " << p << "\tdEdxL10 = " << dEdxL10[k]+6 << endl;
 	    }
 	  }
+#endif
 	  dEdxP->Fill(rigity, 1e6*PiD.fFit.I());
 #ifdef __fit__
 	  if (pMom >= 0.4 && pMom <= 0.5) {

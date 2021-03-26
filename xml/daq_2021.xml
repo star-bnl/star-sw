@@ -36,7 +36,7 @@
 #  echo "cp ${evtsFile} ${evtsFileB}"
 #  cp ${evtsFile} ${evtsFileB}
 # .DEV2
-  root.exe -b -q 'bfc.C('${f}','${l}',"P2021a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -b -q 'bfc.C('${f}','${l}',"P2021a,StiCA,evout,StiPulls,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
    cp  ${filel}* ${SUBMITTINGDIRECTORY}
   rm ${bla}
@@ -50,5 +50,21 @@
 <!-- <input URL="file:/gpfs01/star/daq/2019/071/20071001/st_physics_2007100*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2019/354/20354003/hlt*.daq" /> -->
 <!-- <input URL="command:daq_2020.pl" /> -->
-<input URL="command:daq_2021dR.pl" />
+<!-- <input URL="command:daq_2021dR.pl" /> -->
+<input URL="file:/hlt/cephfs/daq/2021/048/22048003/hlt_22048003_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048004/hlt_22048004_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048005/hlt_22048005_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048006/hlt_22048006_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048008/hlt_22048008_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048009/hlt_22048009_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048010/hlt_22048010_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048011/hlt_22048011_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048012/hlt_22048012_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048013/hlt_22048013_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048014/hlt_22048014_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048040/hlt_22048040_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048041/hlt_22048041_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048042/hlt_22048042_11_01_000.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/048/22048053/hlt_22048053_11_01_000.daq" />
+
 </job>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- <job maxFilesPerProcess="50" fileListSyntax="paths" copyInputLocally="false"> -->
-<job maxFilesPerProcess="10" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false">
+<job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false">
 	<command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
@@ -12,11 +12,13 @@
 #  set evtsFile = $INPUTFILE0;
   echo "${evtsFile}"
   if (! -r ${evtsFile}) continue;
-  set file     = `basename $evtsFile .event.root`
+  set file1    = `basename $evtsFile .event.root`
+  set file     = `basename $file1 .daq`
   set dir      = `dirname  $evtsFile`;          
   set logFile  = ${file}B.log
   if ( -r ${SUBMITTINGDIRECTORY}/$logFile) continue;
-  root.exe -q -b 'TpcAligner.C(9999999,"'${evtsFile}'")' &gt;&amp;  ${logFile}
+#  root.exe -q -b 'TpcAligner.C(9999999,"'${evtsFile}'")' &gt;&amp;  ${logFile}
+  root.exe -q -b 'TpcAligner.C(9999999,"'${evtsFile}'",",-OSectorAlign")' &gt;&amp;  ${logFile}
 #  mv ${file}* ${SUBMITTINGDIRECTORY}/
   end
 
@@ -49,5 +51,8 @@
 <!-- <input URL="file:/net/l404/data/fisyak/Tpc/Alignment/2019/Pass637/*/*event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2021/RF/DEV2/Cosmic_gmt_*/*/*/*.event.root" /> -->
 <!--	<input URL="file:/star/data06/iraklic/Run2019/Cosmics/*.event.root" /> -->
-	<input URL="file:/net/l404/data/fisyak/Tpc/Alignment/2019/RF/Cosmic/*.event.root" />
+<!--	<input URL="file:/net/l404/data/fisyak/Tpc/Alignment/2019/RF/Cosmic/*.event.root" /> -->
+<!-- <input URL="file:/hlt/cephfs/daq/2021/062/*/*laser*.daq" /> -->
+<input URL="file:/hlt/cephfs/reco/2021/RF/TFG21c.B/Cosmic/*/*/*event.root" /> 
+<!-- <input URL="file:/hlt/cephfs/reco/2021/FF/TFG21c.B/Cosmic/*/*/*event.root" /> -->
 </job>

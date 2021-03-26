@@ -1,7 +1,7 @@
 /* 
    root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
    root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
-   root.exe -q -b 'Chain.C+("*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
+   root.exe -q -b 'Chain.C+("TpcHit*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
 
    Fit
    root.exe -q -b TpcHit.root TpcPrompt.C+
@@ -12,6 +12,12 @@ Draw();
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("T","GP","R",-1,-1,1,1,10,1,0,12.0)' >& T.log &
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZLM","Freq","R",-1,-1,1,1,10,1,200,220.0)' >& ZLMFreq.log &
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("TM","Freq","R",-1,-1,1,1,10,1,200,220.0)' >& TMFreq.log &
+
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("Z1400","GP","R",-1,-1,1,1,10,1,206,212)' >& Z.log &
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZL1400","GP","R",-1,-1,1,1,10,1,0,3.0)' >& ZL.log &
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("T1400","GP","R",-1,-1,1,1,10,1,0,12.0)' >& T.log &
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZLM1400","Freq","R",-1,-1,1,1,10,1,200,220.0)' >& ZLMFreq.log &
+ root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("TM1400","Freq","R",-1,-1,1,1,10,1,200,220.0)' >& TMFreq.log &
 */
 #if !defined(__CINT__)
 
@@ -46,7 +52,6 @@ Draw();
 #include "TDataSetIter.h"
 #include "TDataSet.h"
 #include "TClassTable.h"
-//#include "DeDxTree.C"
 #include "TMinuit.h"
 #include "TVirtualFitter.h"
 #include "TSpectrum.h"
@@ -58,34 +63,14 @@ Draw();
 #include "TPolyMarker.h"
 #include "TKey.h"
 #include "TLegend.h"
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
-//#define __USE_ROOFIT__
-#endif /* ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18) */
-#ifdef __USE_ROOFIT__
-#include "RooRealVar.h"
-#include "RooDataSet.h"
-#include "RooGaussian.h"
-#include "RooFFTConvPdf.h"
-#include "RooPlot.h"
-#include "RooCFunction1Binding.h" 
-#include "RooCFunction3Binding.h"
-#include "RooTFnBinding.h" 
-#include "RooDataHist.h"
-#include "RooAbsPdf.h"
-#include "RooRealProxy.h"
-#include "RooFit.h"
-#include "RooRandom.h"
-#include "RooFitResult.h"
-#include "RooWorkspace.h"
-using namespace RooFit ;
-#endif /* __USE_ROOFIT__ */
-#include "TObjectTable.h"
-#endif /*  __USE_ROOFIT__ */
+#endif
 #define TpcHit_cxx
 #include "TpcHit.h"
 void  TpcHit::Fill(Long64_t entry) {
   static TH3F *hist3DZ = 0, *hist3DT = 0, *hist3DZL = 0;
   static TH3F *hist3DMZ = 0, *hist3DMT = 0, *hist3DMZL = 0;
+  static TH3F *hist3DZ1400 = 0, *hist3DT1400 = 0, *hist3DZL1400 = 0;
+  static TH3F *hist3DMZ1400 = 0, *hist3DMT1400 = 0, *hist3DMZL1400 = 0;
   if (! hist3DZ) {
     TDirectory *old = gDirectory;
     TString newF("TpcHitZTMfl0.root");
@@ -96,6 +81,13 @@ void  TpcHit::Fill(Long64_t entry) {
     hist3DMZ  = new TH3F("ZM","Membrane |z| versus sector and row",24,0.5,24.5,72,0.5,72.5,400,-10,10);
     hist3DMZL = new TH3F("ZLM","Membrane Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,400,200,220);
     hist3DMT  = new TH3F("TM","Membrane time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,400,320,360);
+    //  (VPDE+VPDW)/2 and cut on a narrow window 1400+-100 (2ns cut)
+    hist3DZ1400  = new TH3F("Z1400","|z| versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,260,200,213);
+    hist3DZL1400 = new TH3F("ZL1400","Drift distance sector local versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,500,-10,10);
+    hist3DT1400  = new TH3F("T1400","time bucket versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,500,0,20);
+    hist3DMZ1400  = new TH3F("ZM1400","Membrane |z| versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,400,-10,10);
+    hist3DMZL1400 = new TH3F("ZLM1400","Membrane Drift distance sector local versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,400,200,220);
+    hist3DMT1400  = new TH3F("TM1400","Membrane time bucket versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,400,320,360);
     gDirectory = old;
   }
   if (! fl) {
@@ -105,6 +97,14 @@ void  TpcHit::Fill(Long64_t entry) {
     hist3DMZ->Fill(sector,row,z);
     hist3DMZL->Fill(sector,row,zL);
     hist3DMT->Fill(sector,row,timebucket);
+    if (TMath::Abs((vpdW+vpdE)/2-1400)<50) {
+      hist3DZ1400->Fill(sector,row,TMath::Abs(z));
+      hist3DZL1400->Fill(sector,row,zL);
+      hist3DT1400->Fill(sector,row,timebucket);
+      hist3DMZ1400->Fill(sector,row,z);
+      hist3DMZL1400->Fill(sector,row,zL);
+      hist3DMT1400->Fill(sector,row,timebucket);
+    }
   }
 }
 //________________________________________________________________________________
@@ -160,9 +160,6 @@ class TSystem;
 class Bichsel;
 // Refer to a class implemented in libRooFit to force its loading
 // via the autoloader.
-#ifdef __USE_ROOFIT__
-class Roo2DKeysPdf;
-#endif /* __USE_ROOFIT__ */
 class TpcHit;
 #endif
 #if !defined(__CINT__) || defined(__MAKECINT__)
@@ -474,7 +471,7 @@ void TpcPrompt(TChain *chain) {
 //________________________________________________________________________________
 void TpcPrompt(Int_t Nevents = 1000000, 
 	       //	       const Char_t *daqfile = "/star/data03/daq/2014/100/15100085/st_physics_15100085_raw_2500013.daq",
-	       const Char_t *daqfile = "*/*/*.*event.root",
+	       const Char_t *daqfile = "./*event.root",
 	       const Char_t *treefile = "TpcHit.root") {
   gROOT->LoadMacro("bfc.C");
 

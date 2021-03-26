@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Dec 18 09:15:12 2019 by ROOT version 5.34/39
+// Mon Mar  8 11:54:26 2021 by ROOT version 5.34/39
 // from TTree TpcHit/TpcHit
-// found on file: hlt_20349015_10_01_000.root
+// found on file: hlt_22065028_11_01_000.root
 //////////////////////////////////////////////////////////
 
 #ifndef TpcHit_h
@@ -43,6 +43,8 @@ public :
    Int_t           fl;
    Float_t         time;
    Float_t         timeb;
+   Float_t         vpdE;
+   Float_t         vpdW;
 
    // List of branches
    TBranch        *b_sector;   //!
@@ -66,6 +68,8 @@ public :
    TBranch        *b_fl;   //!
    TBranch        *b_time;   //!
    TBranch        *b_timeb;   //!
+   TBranch        *b_vpdE;   //!
+   TBranch        *b_vpdW;   //!
 
    TpcHit(TTree *tree=0);
    virtual ~TpcHit();
@@ -87,9 +91,9 @@ TpcHit::TpcHit(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("hlt_20349015_10_01_000.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("hlt_22065028_11_01_000.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("hlt_20349015_10_01_000.root");
+         f = new TFile("hlt_22065028_11_01_000.root");
       }
       f->GetObject("TpcHit",tree);
 
@@ -160,6 +164,8 @@ void TpcHit::Init(TTree *tree)
    fChain->SetBranchAddress("fl/I", &fl, &b_fl);
    fChain->SetBranchAddress("time", &time, &b_time);
    fChain->SetBranchAddress("timeb", &timeb, &b_timeb);
+   fChain->SetBranchAddress("vpdE", &vpdE, &b_vpdE);
+   fChain->SetBranchAddress("vpdW", &vpdW, &b_vpdW);
    Notify();
 }
 
