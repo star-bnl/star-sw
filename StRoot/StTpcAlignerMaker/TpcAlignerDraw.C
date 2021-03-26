@@ -226,7 +226,7 @@ void TpcAlignerDrawIO(const Char_t *files = "*.root", Bool_t laser = kFALSE) {
     } else         {if (TriggerId < 310811 || TriggerId > 310813) continue; // not Cosmic
     }
 #endif
-    if (TMath::Abs(field) < 1.0) continue;
+    //    if (TMath::Abs(field) < 1.0) continue;
     if (In_sector != Out_sector) continue;
     if (In_Chi2 > 5.0 || Out_Chi2 > 5.0) continue;
     TVector3 pxyz(pX,pY,pZ);

@@ -523,6 +523,10 @@ Int_t StTpcAlignerMaker::Make(){
 	    err2xy[0] = tpcHits[idx[i]].err2xy;
 	    err2z     = tpcHits[idx[i]].err2z;
 	  }
+	  if (TMath::IsNaN(err2xy[0]) || TMath::IsNaN(err2z)) {
+	    static Int_t iBreak = 0;
+	    iBreak++;
+	  }
 	  vHelices[io].AddErr(err2xy,err2z);
 	}
 	vHelices[io].Fit();
