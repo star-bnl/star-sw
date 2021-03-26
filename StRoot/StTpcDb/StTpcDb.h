@@ -219,7 +219,8 @@ class StTpcDb {
   Double_t               zGG() {return mzGG;}
   //small pieces of data:
   void    SetDriftVelocity();
-  Float_t DriftVelocity(Int_t sector=24, Int_t row=0);
+  Float_t DriftVelocity(Int_t sector=24) {return DriftVelocity(sector, 0);}
+  Float_t DriftVelocity(Int_t sector, Int_t row);
   void SetTpcRotations();
   void SetTpc2GlobalMatrix(TGeoHMatrix *m) {SetTpcRotationMatrix(m);}
   void SetTpcRotationMatrix(TGeoHMatrix *m, Int_t sector = 0, Int_t k = kSupS2Tpc) {
