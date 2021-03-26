@@ -57,7 +57,6 @@
 #include "TDataSetIter.h"
 #include "TDataSet.h"
 #include "TClassTable.h"
-//#include "DeDxTree.C"
 #include "TMinuit.h"
 #include "TSpectrum.h"
 #include "StBichsel/Bichsel.h"
