@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.77 2019/04/22 20:47:15 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.78 2021/03/26 20:26:48 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.78  2021/03/26 20:26:48  fisyak
+ * Synchronize with TFG version, new schema for Inner Sector alignment (thank to Hongwei)
+ *
  * Revision 1.77  2019/04/22 20:47:15  genevb
  * Introducing codes for AbortGapCleaning distortion corrections
  *

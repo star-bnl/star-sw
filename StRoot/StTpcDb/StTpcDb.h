@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.44 2018/06/21 01:47:16 perev Exp $
+ * $Id: StTpcDb.h,v 1.46 2021/03/26 20:26:48 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.46  2021/03/26 20:26:48  fisyak
+ * Synchronize with TFG version, new schema for Inner Sector alignment (thank to Hongwei)
+ *
  * Revision 1.44  2018/06/21 01:47:16  perev
  * iTPCheckIn
  *
