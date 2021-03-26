@@ -94,7 +94,7 @@ public:
      return (Sector()-1)/5 + 1;
    }
    virtual void      Print(Option_t *opt = "") const {
-     cout << "HitMatchT\t" << detId 
+     std::cout << "HitMatchT\t" << detId 
 	  << " Layer = "   << Layer() 
 	  << " Sector = "  << Sector() 
 	  << " Ladder = "  << Ladder() 
@@ -103,7 +103,7 @@ public:
 	  << Form(" GP: %8.3f %8.3f %8.3f",xGP,yGP,zGP)  
 	  << Form(" TPC: %8.3f %8.3f %8.3f",xTPC,yTPC,zTPC)  
 	  << Form(" TPCP: %8.3f %8.3f %8.3f",xTPCP,yTPCP,zTPCP)  
-	  << " Diff = "    << Diff() << endl;
+	       << " Diff = "    << Diff() << std::endl;
    }
    ClassDef(HitMatchT, 4)
 };
