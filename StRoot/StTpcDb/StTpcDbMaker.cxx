@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.77 2019/04/22 20:47:15 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.78 2021/03/26 20:26:48 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.78  2021/03/26 20:26:48  fisyak
+ * Synchronize with TFG version, new schema for Inner Sector alignment (thank to Hongwei)
+ *
  * Revision 1.77  2019/04/22 20:47:15  genevb
  * Introducing codes for AbortGapCleaning distortion corrections
  *
@@ -23,36 +26,19 @@
  * Revision 1.74  2018/07/06 22:13:16  smirnovd
  * [Cosmetic] Remove unused variables and commented code
  *
- * Revision 1.73  2018/06/29 21:46:22  smirnovd
- * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
+ * Revision 1.71  2018/06/21 01:47:18  perev
+ * iTPCheckIn
  *
- * Revert "NoDead option added"
- * Revert "Fill mag field more carefully"
- * Revert "Assert commented out"
- * Revert "Merging with TPC group code"
- * Revert "Remove too strong assert"
- * Revert "Restore removed by mistake line"
- * Revert "Remove not used anymore file"
- * Revert "iTPCheckIn"
- *
+ * Revision 1.67.2.1  2018/02/16 22:14:59  perev
+ * iTPC
  * Revision 1.70  2018/06/08 18:18:37  genevb
  * Introduce padrow 40 correction for iTPC GridLeak Wall, reduce includes dependencies
  *
  * Revision 1.69  2018/04/30 23:18:11  smirnovd
  * [Cosmetic] Minor changes in various files
  *
- * - Renamed data member s/m/mMass/ in StikalmanTrack
- * - Changes in white space
- * - Return STAR code
- *
- * Revision 1.68  2018/04/11 02:39:49  genevb
- * Distortion smearing by calibration resolutions
- *
- * Revision 1.67  2017/11/13 21:14:27  fisyak
- * Enable Mag.Field depending flavor
- *
- * Revision 1.66  2017/01/30 17:59:13  fisyak
- * Undo commit
+ * Revision 1.65  2017/01/30 17:54:18  fisyak
+ * Remove dependce on StEvent
  *
  * Revision 1.64  2017/01/06 22:30:45  genevb
  * Introduce FullGridLeak distortion correction
@@ -248,39 +234,51 @@
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcChargeEventC.h"
-#include "StEventTypes.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
 #include "TCernLib.h"
 #endif
+#include "TEnv.h"
 ClassImp(StTpcDbMaker)
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
+  static Bool_t Done = kFALSE;
+  if (Done) return kStOK;
+  Done = kTRUE;
+  Int_t iNewTpcAlignment = 0;
+  if (GetDateTime().GetYear() >= 2013) {
+    iNewTpcAlignment = 1;
+  }
+  Int_t iNewTpcAlignmentOld = gEnv->GetValue("NewTpcAlignment",0);
+  if (iNewTpcAlignment != iNewTpcAlignmentOld) {
+    gMessMgr->QAInfo() << "ReSet environment NewTpcAlignment (year >= 2013)  from " << iNewTpcAlignmentOld << " to " << iNewTpcAlignment << endm;
+    gEnv->SetValue("NewTpcAlignment", iNewTpcAlignment);
+  }
+ 
   // Create Needed Tables:    
-  //Float_t gFactor = StarMagField::Instance()->GetFactor();
-  // Set Table Flavors
   if (! IAttr("Simu")) {
     Float_t gFactor = StarMagField::Instance()->GetFactor();
+    // Set Table Flavors
     if (gFactor<-0.8) {
       gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+FullMagFNegative","tpcGlobalPosition");
+      SetFlavor("ofl+TFG+FullMagFNegative","tpcGlobalPosition");
     }
     else if (gFactor<-0.2) {
       gMessMgr->Info() << "StTpcDbMaker::Half Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+HalfMagFNegative","tpcGlobalPosition");
+      SetFlavor("ofl+TFG+HalfMagFNegative","tpcGlobalPosition");
     }
     else if (gFactor<0.2) {
       gMessMgr->Info() << "StTpcDbMaker::Zero Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+ZeroMagF","tpcGlobalPosition");
+      SetFlavor("ofl+TFG+ZeroMagF","tpcGlobalPosition");
     }
     else if (gFactor<0.8) {
       gMessMgr->Info() << "StTpcDbMaker::Half Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+HalfMagFPositive","tpcGlobalPosition");
+      SetFlavor("ofl+TFG+HalfMagFPositive","tpcGlobalPosition");
     }
     else if (gFactor<1.2) {
       gMessMgr->Info() << "StTpcDbMaker::Full Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ofl+FullMagFPositive","tpcGlobalPosition");
+      SetFlavor("ofl+TFG+FullMagFPositive","tpcGlobalPosition");
     }
   }
   if         (IAttr("useLDV")) {
@@ -290,15 +288,15 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     SetFlavor("NewlaserDV","tpcDriftVelocity");
     gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from New laser analysis" << endm;
   } else if (IAttr("useCDV")) {
-    SetFlavor("ofl","tpcDriftVelocity");
+    SetFlavor("ofl+TFG","tpcDriftVelocity");
     gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from T0 analysis" << endm;
   } else {
-    SetFlavor("ofl+laserDV","tpcDriftVelocity");
+    SetFlavor("ofl+TFG+laserDV","tpcDriftVelocity");
     gMessMgr->Info() << "StTpcDbMaker::Using any drift velocity" << endm;
   }
   StTpcDb::instance()->SetDriftVelocity();
   
-  if (IAttr("ExB") && !((StTpcDb::instance()->ExB()) && IAttr("NoReset"))) {
+  if (IAttr("ExB")) { 
     // Backward compatibility preserved.
     Int_t mask=1;                                    // Al Saulys request
     if        ( IAttr("EB1") ){      // Do nothing (i.e. bit 1 at 0)
@@ -335,11 +333,10 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;
 #ifndef __NEW_MagUtilities__
-    StMagUtilities *magU = new StMagUtilities(gStTpcDb, GetDataBase("RunLog"), option);
+    new StMagUtilities(gStTpcDb, GetDataBase("RunLog"), option);
 #else
-    StMagUtilities *magU = new StMagUtilities(gStTpcDb, option);
+    new StMagUtilities(gStTpcDb, option);
 #endif
-    StTpcDb::instance()->SetExB(magU);
   }
   StTpcDb::instance()->SetTpcRotations();
   return kStOK;
@@ -352,10 +349,9 @@ Int_t StTpcDbMaker::Make(){
     return kStEOF;
   }
   StTpcDb::instance()->SetDriftVelocity();
-  St_trgTimeOffsetC::instance()->SetLaser(kFALSE);
+#if 0
   if (IAttr("laserIT")) {
-    St_trgTimeOffsetC::instance()->SetLaser(kTRUE);
-  } else {
+    St_trgTimeOffsetC::instance()->SetLaser(kFALSE);
     StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
     if (pEvent) {
       const StTriggerIdCollection* trig = pEvent->triggerIdCollection();
@@ -379,7 +375,9 @@ Int_t StTpcDbMaker::Make(){
         if (trg) St_tpcChargeEventC::instance()->findChargeTimes(trg->bunchCounter());
       }
     }
+    if (! St_trgTimeOffsetC::instance()->IsLaser()) return kStSkip;
   }
+#endif
   //  SetTpcRotations();
   return kStOK;
 }

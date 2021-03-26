@@ -1,7 +1,6 @@
-
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.68 2018/09/06 14:21:13 genevb Exp $
+ * $Id: StTpcDb.cxx,v 1.69 2021/03/26 20:26:48 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,30 +14,14 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
- * Revision 1.68  2018/09/06 14:21:13  genevb
- * SafeDelete requires class definition, not just declaration
+ * Revision 1.69  2021/03/26 20:26:48  fisyak
+ * Synchronize with TFG version, new schema for Inner Sector alignment (thank to Hongwei)
  *
- * Revision 1.67  2018/07/06 22:13:16  smirnovd
- * [Cosmetic] Remove unused variables and commented code
+ * Revision 1.65  2018/06/21 01:47:14  perev
+ * iTPCheckIn
  *
- * Revision 1.66  2018/06/29 21:46:21  smirnovd
- * Revert iTPC-related changes committed on 2018-06-20 through 2018-06-28
- *
- * Revert "NoDead option added"
- * Revert "Fill mag field more carefully"
- * Revert "Assert commented out"
- * Revert "Merging with TPC group code"
- * Revert "Remove too strong assert"
- * Revert "Restore removed by mistake line"
- * Revert "Remove not used anymore file"
- * Revert "iTPCheckIn"
- *
- * Revision 1.64  2018/04/11 02:43:22  smirnovd
- * Enable TPC/iTPC switch via St_tpcPadConfig
- *
- * This is accomplished by substituting St_tpcPadPlanes with St_tpcPadConfig.
- * A sector ID is passed to St_tpcPadConfig in order to extract parameters for
- * either TPC or iTPC
+ * Revision 1.63.6.1  2018/02/16 22:14:59  perev
+ * iTPC
  *
  * Revision 1.63  2015/05/17 22:53:52  fisyak
  * Remove duplicted line
@@ -210,8 +193,8 @@
 #include "TGeoManager.h"
 #include "StDetectorDbMaker/StTpcSurveyC.h"
 #include "StDetectorDbMaker/St_tpcDriftVelocityC.h"
+#include "StDetectorDbMaker/St_TpcDriftVelRowCorC.h"
 #include "StarMagField.h"
-#include "StDbUtilities/StMagUtilities.h"
 #include "TEnv.h"
 StTpcDb* gStTpcDb = 0;
 Bool_t StTpcDb::mOldScheme = kTRUE;
@@ -235,8 +218,8 @@ StTpcDb::StTpcDb() {
 			  0, 0,-1};
   //  Double_t Translation[3] = {0, 0, mzGG};
   mFlip->SetName("Flip"); mFlip->SetRotation(Rotation);// mFlip->SetTranslation(Translation);
-  mSwap[0] = new TGeoTranslation("Signed Drift distance to z for East", 0, 0, -mzGG);
-  mSwap[1] = new TGeoTranslation("Signed Drift distance to z for West", 0, 0,  mzGG);
+  mShift[0] = new TGeoTranslation("Signed Drift distance to z for East", 0, 0, -mzGG);
+  mShift[1] = new TGeoTranslation("Signed Drift distance to z for West", 0, 0,  mzGG);
   mHalf[0] = new TGeoHMatrix("Default for east part of TPC");
   mHalf[1] = new TGeoHMatrix("Default for west part of TPC");
   gStTpcDb = this;
@@ -250,36 +233,28 @@ StTpcDb::~StTpcDb() {
   }
   SafeDelete(mHalf[0]);  
   SafeDelete(mHalf[1]);
-  SafeDelete(mSwap[0]);  
-  SafeDelete(mSwap[1]);
-  SafeDelete(mExB);
+  SafeDelete(mShift[0]);  
+  SafeDelete(mShift[1]);
   SafeDelete(mTpc2GlobMatrix);
   SafeDelete(mFlip);
   gStTpcDb = 0;
 }
-#if 0
-//________________________________________________________________________________
-Float_t StTpcDb::ScaleY() {return St_tpcDriftVelocityC::instance()->scaleY();}
 //-----------------------------------------------------------------------------
-float StTpcDb::DriftVelocity(Int_t sector, Double_t Y) {
+float StTpcDb::DriftVelocity(Int_t sector, Int_t row) {
   static UInt_t u2007 = TUnixTime(20070101,0,1).GetUTime(); // 
   assert(mUc > 0);
   if (mUc < u2007) sector = 24;
   UInt_t kase = 1;
   if (sector <= 12) kase = 0;
-  return 1e6*mDriftVel[kase]*(1 + ScaleY()*Y);
+  Float_t DV =1e6*mDriftVel[kase];
+  if (row > 0) {
+    // Extra row correction
+    if (St_TpcDriftVelRowCorC::instance()->idx()) {
+      DV *= (1. - St_TpcDriftVelRowCorC::instance()->CalcCorrection(0,row));
+    }
+  }
+  return DV;
 }
-#else
-//-----------------------------------------------------------------------------
-float StTpcDb::DriftVelocity(Int_t sector) {
-  static UInt_t u2007 = TUnixTime(20070101,0,1).GetUTime(); // 
-  assert(mUc > 0);
-  if (mUc < u2007) sector = 24;
-  UInt_t kase = 1;
-  if (sector <= 12) kase = 0;
-  return 1e6*mDriftVel[kase];
-}
-#endif
 //-----------------------------------------------------------------------------
 void StTpcDb::SetDriftVelocity() {
   static UInt_t u0 = 0; // beginTime of current Table
@@ -354,14 +329,14 @@ void StTpcDb::SetTpcRotations() {
   // Pad [== sector12 == localsector (SecL, ideal)] => subsector (SubS,local sector aligned) => flip => sector (SupS) => tpc => global
   //                                    ------        
   //old:  global = Tpc2GlobalMatrix() * SupS2Tpc(sector) *                                    Flip() * {SubSInner2SupS(sector) | SubSOuter2SupS(sector)}
-  //new:  global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {                     I | StTpcOuterSectorPosition(sector)}
+  //new:  global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {StTpcInnerSectorPosition(sector)} | StTpcOuterSectorPosition(sector)}
   //      StTpcSuperSectorPosition(sector) * Flip() = Flip() * SubSInner2SupS(sector) 
   // =>  StTpcSuperSectorPosition(sector) = Flip() * SubSInner2SupS(sector) * Flip()^-1
   //      StTpcSuperSectorPosition(sector) * Flip() * StTpcOuterSectorPosition(sector) = Flip() *  SubSOuter2SupS(sector)
   // =>  StTpcOuterSectorPosition(sector) = Flip()^-1 * StTpcSuperSectorPosition(sector)^-1 *  Flip() *  SubSOuter2SupS(sector)
   /*
     .                                                                                             <-- the system of coordinate where Outer to Inner Alignment done -->
-    global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {                     I | StTpcOuterSectorPosition(sector)} * local
+    global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {    StTpcInnerSectorPosition(sector) | StTpcOuterSectorPosition(sector)} * local
     .                                                result of super sector alignment                                      result of Outer to Inner sub sector alignment
   */
   /* 03/07/14
@@ -381,10 +356,27 @@ void StTpcDb::SetTpcRotations() {
              (0 0 -1 zGG) ( z )    ( zGG - z)
              (0 0  0 1  ) ( 1 )    ( 1 )
      Z_tpc is not changed during any sector transformation  !!!
+     ================================================================================
+     10/17/18 Just checking new schema
+          TPCE        (           TPGV                      ) * (              TPSS                                   )
+     StTpcPosition * ((Shift(half) * StTpcHalfPosition(half)) * (rotmS(sector,iPhi) * StTpcSuperSectorPosition) * Flip) * (StTpcInnerSectorPosition || StTpcOuterSectorPosition)
+        kTpcRefSys *          kTpcHalf                        *               kTpcPad       
+        kTpcRefSys *          kSupS2Tpc                                                           
 
-
-   */
-  //  TGeoTranslation T123(0,123,0); T123.SetName("T123"); if (Debug() > 1) T123.Print();
+	kTpc2GlobalMatrix := StTpcPosition
+	kSupS2Tpc       :=                 (Shift(half) * StTpcHalfPosition(half)) * (rotmS(sector,iPhi) * StTpcSuperSectorPosition)
+	kSupS2Glob      := StTpcPosition * kSupS2Tpc
+        kSubSInner2SupS := Flip * StTpcInnerSectorPosition
+        kSubSOuter2SupS := Flip * StTpcOuterSectorPosition
+        kSubSInner2Tpc  := kSupS2Tpc * kSubSInner2SupS
+        kSubSOuter2Tpc  := kSupS2Tpc * kSubSOuter2SupS
+	kPadInner2SupS  := kSubSInner2SupS
+        kPadOuter2SupS  := kSubSOuter2SupS
+        kPadInner2Tpc   := kSupS2Tpc * kPadInner2SupS                              == kSubSInner2Tpc
+	kPadOuter2Tpc   := kSupS2Tpc * PadOuter2SupS  = kSupS2Tpc * kSubSOuter2SupS = kSubSOuter2Tpc
+	kPadInner2Glob  := kTpc2GlobalMatrix * kPadInner2Tpc = kTpc2GlobalMatrix * kSubSInner2Tpc
+	kPadOuter2Glob  := kTpc2GlobalMatrix * kPadOuter2Tpc = kTpc2GlobalMatrix * kSubSOuter2Tpc
+  */
   assert(Dimensions()->numberOfSectors() == 24);
   Float_t gFactor = StarMagField::Instance()->GetFactor();
   Double_t phi, theta, psi;
@@ -398,6 +390,7 @@ void StTpcDb::SetTpcRotations() {
   } else {
     LOG_INFO << "StTpcDb::SetTpcRotations use old schema for Rotation matrices" << endm;
   }
+  St_SurveyC *chair = 0;
   for (Int_t sector = 0; sector <= 24; sector++) {// loop over Tpc as whole, sectors, inner and outer subsectors
     Int_t k;
     Int_t k1 = kSupS2Tpc;
@@ -406,6 +399,7 @@ void StTpcDb::SetTpcRotations() {
     for (k = k1; k < k2; k++) {
       Int_t Id     = 0;
       TGeoHMatrix rotA; // After alignment
+      chair = 0;
       if (!sector ) { // TPC Reference System
 	if (mOldScheme) { // old scheme
 	  St_tpcGlobalPositionC *tpcGlobalPosition = St_tpcGlobalPositionC::instance();
@@ -444,7 +438,7 @@ void StTpcDb::SetTpcRotations() {
 	    else              rotm = new TGeoRotation(Rot,   90.0,    0.0,  90.0,  -90.0,  180.0,    0.00); // Flip (x,y,z) => ( x,-y,-z)
 	    rotm->RotateZ(iphi);
 	  }
-	  rotA = (*mSwap[part]) * (*mHalf[part]) * (*rotm);
+	  rotA = (*mShift[part]) * (*mHalf[part]) * (*rotm);
 	  rotA *= StTpcSuperSectorPosition::instance()->GetMatrix(sector-1);
 	  if (gGeoManager) rotm->RegisterYourself();
 	  else             SafeDelete(rotm);
@@ -453,19 +447,17 @@ void StTpcDb::SetTpcRotations() {
 	  rotA = Tpc2GlobalMatrix() * SupS2Tpc(sector); 
 	  break; 
 	case kSubSInner2SupS: 
-	  if (mOldScheme) 	  rotA = Flip(); 
-	  else                    rotA = Flip() * StTpcInnerSectorPosition::instance()->GetMatrix(sector-1); 
-	  break;
+	  if (mOldScheme) 	  {rotA = Flip(); break;}
+	  chair = StTpcInnerSectorPosition::instance();
 	case kSubSOuter2SupS: 
-	  if (mOldScheme) rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); 
-	  else           {
-	    rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); 
-	    if (StTpcOuterSectorPosition::instance()->GetNRows() > 24) {
-	      if (gFactor > 0.2) {
-		rotA *= StTpcOuterSectorPosition::instance()->GetMatrix(sector-1+24);
-	      } else if (gFactor < -0.2) {
-		rotA *= StTpcOuterSectorPosition::instance()->GetMatrix(sector-1+24).Inverse();
-	      }
+	  if (mOldScheme) {rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); break;}
+	  if (! chair) chair = StTpcOuterSectorPosition::instance();
+	  rotA = Flip() * chair->GetMatrix(sector-1); 
+	  if (chair->GetNRows() > 24) {
+	    if (gFactor > 0.2) {
+	      rotA *= chair->GetMatrix(sector-1+24);
+	    } else if (gFactor < -0.2) {
+	      rotA *= chair->GetMatrix(sector-1+24).Inverse();
 	    }
 	  }
 	  break;
