@@ -4,6 +4,8 @@
 #include "StiTrackNodeHelper.h"
 #include "StiElossCalculator.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
+#include "StEvent/StHit.h"
+#include "StEvent/StEnumerations.h"
 #include "StMessMgr.h"
 #include "TArrayD.h"
 #include "TSystem.h"
@@ -1110,7 +1112,16 @@ int StiTrackNodeHelper::getHitErrors(const StiHit *hit,const StiNodePars *pars,S
   const StiDetector *det = hit->detector();
   const StiHitErrorCalculator *calc = (det)? det->getHitErrorCalculator():0;
   if (calc) {//calculate it
-     calc->calculateError(pars,hrr->hYY,hrr->hZZ);
+    Double_t fudgeFactor = 1;
+    StHit *sthit = (StHit*) hit->stHit();
+    if (sthit) {
+      if ((sthit->detector() == kTpcId || sthit->detector() == kiTpcId)) {
+	if (sthit->flag() == 2) {
+	  fudgeFactor = 16.;
+	}
+      }
+    }
+    calc->calculateError(pars,hrr->hYY,hrr->hZZ, fudgeFactor);
   } else    {//get from hit
     const float *ermx = hit->errMtx();    
     for (int i=0;i<6;i++){hrr->G()[i]=ermx[i];}
