@@ -54,7 +54,7 @@ StEpdFastSim::~StEpdFastSim(){
 /*  =================================================================================================== */
 TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVertex){
   double zEPD=375.0;  // cm
-  if (fabs(PrimVertex.Z()>zEPD) || fabs(PrimVertex.X()>0.5) || fabs(PrimVertex.Y()>0.5)){
+  if (TMath::Abs(PrimVertex.Z()>zEPD) || TMath::Abs(PrimVertex.X()>0.5) || TMath::Abs(PrimVertex.Y()>0.5)){
     std::cout << "Invalid vertex --- I'm giving you an empty event - Tchau!\n";
     return 0;
   }
@@ -74,10 +74,10 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
     TVector3* mom = (TVector3*)momenta->At(itrk);
     int EW = (mom->Z()<0.0)?0:1;
     double zWheel = (mom->Z()<0.0)?-zEPD:zEPD;   // east or west
-    double deltaZ = abs(zWheel-PrimVertex.Z());      // how far to project  -- the abs is important!!
+    double deltaZ = TMath::Abs(zWheel-PrimVertex.Z());      // how far to project  -- the TMath::Abs is important!!
 
-    double xHit = PrimVertex.X() + deltaZ*fabs(tan(mom->Theta()))*cos(mom->Phi());//Fixed bug: sin(theta)->fabs(tan(theta)) Xiaoyu Liu 03/09/2021
-    double yHit = PrimVertex.Y() + deltaZ*fabs(tan(mom->Theta()))*sin(mom->Phi());//Xiaoyu Liu 03/09/2021 
+    double xHit = PrimVertex.X() + deltaZ*TMath::Abs(tan(mom->Theta()))*cos(mom->Phi());//Fixed bug: sin(theta)->TMath::Abs(tan(theta)) Xiaoyu Liu 03/09/2021
+    double yHit = PrimVertex.Y() + deltaZ*TMath::Abs(tan(mom->Theta()))*sin(mom->Phi());//Xiaoyu Liu 03/09/2021 
     TVector3 xyHit(xHit,yHit,zWheel);
 
     short UniqueID = FindStruckTile(xyHit);   // returns the unique ID of the struck tile (see comments in StEpdHit), or zero if the EPD is not struck at all.
@@ -101,7 +101,7 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
 	theHit->setId(UniqueID);
 	theHit->setnMIP(dE);
 	theHit->setQTdata(pow(2,30));//w/o this step, theHit->nMIP() will return zero. Xiaoyu Liu 03/09/2021
-	mHitsEast[abs(UniqueID)] = theHit;
+	mHitsEast[TMath::Abs(UniqueID)] = theHit;
       }
     }
     else{              // west
@@ -115,7 +115,7 @@ TClonesArray* StEpdFastSim::GetPicoHits(TClonesArray* momenta, TVector3 PrimVert
 	theHit->setId(UniqueID);
 	theHit->setnMIP(dE);
 	theHit->setQTdata(pow(2,30));//w/o this step, theHit->nMIP() will return zero. Xiaoyu Liu 03/09/2021
-	mHitsWest[abs(UniqueID)] = theHit;
+	mHitsWest[TMath::Abs(UniqueID)] = theHit;
       }
     }
   } // end loop over particles
