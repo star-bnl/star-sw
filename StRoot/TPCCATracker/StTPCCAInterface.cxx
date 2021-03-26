@@ -1,4 +1,3 @@
-//#define __ESTIMATE_Primary_Vertex_Z__
 #define __TPCCA_TIMING__
 #include "StTPCCAInterface.h"
 #include "TPCCATracker/AliHLTTPCCAGBHit.h"
@@ -27,9 +26,10 @@
 #include <vector>
 #include <algorithm>
 using std::vector;
-#ifdef  __ESTIMATE_Primary_Vertex_Z__
 TH1F *StTPCCAInterface::fVertexZPlots[3] = {0};
+TH2F *StTPCCAInterface::fVertexXYPlots[3] = {0};
 TSpectrum *StTPCCAInterface::fSpectrum = 0;
+static Int_t _debug = 0;
 //________________________________________________________________________________
 void StTPCCAInterface::FillZHist(TH1F *hist, Double_t Z, Double_t sigmaZ) {
   static Double_t fzWindow = 2.0;
@@ -45,7 +45,6 @@ void StTPCCAInterface::FillZHist(TH1F *hist, Double_t Z, Double_t sigmaZ) {
     hist->Fill(z,(TMath::Erfc((z - Z - fzWindow)/SigmaZ) - TMath::Erfc((z - Z + fzWindow)/SigmaZ))/2.);
   }
 }
-#endif /* __ESTIMATE_Primary_Vertex_Z__ */
 //________________________________________________________________________________
 void StTPCCAInterface::SetNewEvent()
 {
@@ -75,79 +74,87 @@ void StTPCCAInterface::Run()
   std::cout<<" - CA FindTracks() start -\n";
   fTracker->FindTracks();
   std::cout<<" - fTracker->NTracks(): "<<fTracker->NTracks()<<"\n";
-#ifdef  __ESTIMATE_Primary_Vertex_Z__
-  // --- DCA test ---
-  if (! fSpectrum) {
-    TFile *f = 0;
-    if (StMaker::GetTopChain()) {
-      f = StMaker::GetTopChain()->GetTFile();
-      if (f) f->cd();
-    }
-    Int_t NzBins = 2500;
-    Int_t npeaks = 250;
-    Double_t zmin = -250;
-    Double_t zmax = 250;
-    const Char_t *side[3] = {"East","West","All"};
-    for (Int_t i = 0; i < 3; i++) {
-      fVertexZPlots[i] = new TH1F(Form("VertexZPlot%s",side[i]),Form("z-dca distribution for side = %s",side[i]),NzBins,zmin,zmax);
-      fVertexZPlots[i]->SetDirectory(f);
-      if (i != 2) {
-	fVertexZPlots[i]->SetMarkerColor(i+2); 
-	fVertexZPlots[i]->SetLineColor(i+2); 
+  if (fSpectrum) {
+    // --- DCA test ---
+    std::cout<<" ------- FindTracks - done - dca test -------\n";
+    auto dca_left = fTracker->GetLeftDCA();	// dca_right, GetRightDCA
+    std::cout<<" - sca_left.size: "<<dca_left.size()<<"\n";
+    for( UInt_t i = 0; i < dca_left.size(); i++ ) {
+      if (_debug) {
+	std::cout<<" - > i: "<<i<<"; x: "<<dca_left[i].x<<"; y: "<< -dca_left[i].y<<"; z: "<< -dca_left[i].z<<"\n";
       }
+      if (TMath::Sqrt(dca_left[i].x*dca_left[i].x + dca_left[i].y*dca_left[i].y) > 4.0) continue;
+      FillZHist(fVertexZPlots[0],-dca_left[i].z, 0.0);
+      FillZHist(fVertexZPlots[2],-dca_left[i].z, 0.0);
     }
-    fSpectrum = new TSpectrum(npeaks);
-  } else {
+    auto dca_right = fTracker->GetRightDCA();
+    std::cout<<" - sca_right.size: "<<dca_right.size()<<"\n";
+    for( UInt_t i = 0; i < dca_right.size(); i++ ) {
+      if (_debug) {
+	std::cout<<" - > i: "<<i<<"; x: "<<dca_right[i].x<<"; y: "<<-dca_right[i].y<<"; z: "<< -dca_right[i].z<<"\n";
+      }
+      if (TMath::Sqrt(dca_right[i].x*dca_right[i].x + dca_right[i].y*dca_right[i].y) > 4.0) continue;
+      FillZHist(fVertexZPlots[1],-dca_right[i].z, 0.0);
+      FillZHist(fVertexZPlots[2],-dca_right[i].z, 0.0);
+    }
+    // --- Find Z of primary vertex
+    TString opt("new");
+    if (gROOT->IsBatch())  opt = "goff";
     for (Int_t i = 0; i < 3; i++) {
-      fVertexZPlots[i]->Reset();
-    }
-  }
-  std::cout<<" ------- FindTracks - done - dca test -------\n";
-  auto dca_left = fTracker->GetLeftDCA();	// dca_right, GetRightDCA
-  std::cout<<" - sca_left.size: "<<dca_left.size()<<"\n";
-  for( UInt_t i = 0; i < dca_left.size(); i++ ) {
-    std::cout<<" - > i: "<<i<<"; x: "<<dca_left[i].x<<"; y: "<< -dca_left[i].y<<"; z: "<< -dca_left[i].z<<"\n";
-    if (TMath::Sqrt(dca_left[i].x*dca_left[i].x + dca_left[i].y*dca_left[i].y) > 4.0) continue;
-    FillZHist(fVertexZPlots[0],-dca_left[i].z, 0.0);
-    FillZHist(fVertexZPlots[2],-dca_left[i].z, 0.0);
-  }
-  auto dca_right = fTracker->GetRightDCA();
-  std::cout<<" - sca_right.size: "<<dca_right.size()<<"\n";
-  for( UInt_t i = 0; i < dca_right.size(); i++ ) {
-    std::cout<<" - > i: "<<i<<"; x: "<<dca_right[i].x<<"; y: "<<-dca_right[i].y<<"; z: "<< -dca_right[i].z<<"\n";
-    if (TMath::Sqrt(dca_right[i].x*dca_right[i].x + dca_right[i].y*dca_right[i].y) > 4.0) continue;
-    FillZHist(fVertexZPlots[1],-dca_left[i].z, 0.0);
-    FillZHist(fVertexZPlots[2],-dca_left[i].z, 0.0);
-  }
-  // --- Find Z of primary vertex
-  TString opt("new");
-  if (gROOT->IsBatch())  opt = "goff";
-  for (Int_t i = 0; i < 3; i++) {
-    Int_t nfound = fSpectrum->Search(fVertexZPlots[i],-1,opt,0.1); //TMath::Min(0.1,5./nAccepted));
-    if (nfound > 0) {
-      LOG_INFO << "Found in " << fVertexZPlots[i]->GetName() << "\t" << nfound  << " peaks" << endm;
-      Double_t *zOfPeaks = new Double_t[nfound];
-      Int_t npeaks = 0;
+      Int_t nfound = fSpectrum->Search(fVertexZPlots[i],-1,opt,0.1); //TMath::Min(0.1,5./nAccepted));
+      if (nfound > 0) {
+	LOG_INFO << "Found in " << fVertexZPlots[i]->GetName() << "\t" << nfound  << " peaks" << endm;
+	Double_t *zOfPeaks = new Double_t[nfound];
+	Int_t npeaks = 0;
 #if  ROOT_VERSION_CODE < 395523
-      Float_t *xpeaks = fSpectrum->GetPositionX();
-      Float_t xp = 0;
+	Float_t *xpeaks = fSpectrum->GetPositionX();
+	Float_t xp = 0;
 #else
-      Double_t *xpeaks = fSpectrum->GetPositionX();
-      Double_t xp = 0;
+	Double_t *xpeaks = fSpectrum->GetPositionX();
+	Double_t xp = 0;
 #endif
-      for (Int_t p = 0; p < nfound; p++) {
-	xp = xpeaks[p];
-	Int_t bin = fVertexZPlots[i]->GetXaxis()->FindBin(xp);
-	Double_t yp = fVertexZPlots[i]->GetBinContent(bin);
-	Double_t ep = fVertexZPlots[i]->GetBinError(bin);
-	if (yp-1.25*ep < 0) continue;
-	zOfPeaks[npeaks] = xp;
-	LOG_INFO << "z = " << xp << " with " << yp << " +/- " << ep << endm;
-	npeaks++;
+	for (Int_t p = 0; p < nfound; p++) {
+	  xp = xpeaks[p];
+	  Int_t bin = fVertexZPlots[i]->GetXaxis()->FindBin(xp);
+	  Double_t yp = fVertexZPlots[i]->GetBinContent(bin);
+	  Double_t ep = fVertexZPlots[i]->GetBinError(bin);
+	  if (yp-1.25*ep < 0) continue;
+	  zOfPeaks[npeaks] = xp;
+	  LOG_INFO << "z = " << xp << " with " << yp << " +/- " << ep << endm;
+	  npeaks++;
+	}
+	if (npeaks > 0) {
+	  Double_t rms = fVertexZPlots[i]->GetRMS();
+	  if (rms > 3) rms = 3;
+	  fVertexZPlots[i]->Fit("gaus","er","",zOfPeaks[0]-3*rms,zOfPeaks[0]+3*rms);
+	  TF1 *gaus = (TF1 *) fVertexZPlots[i]->GetListOfFunctions()->FindObject("gaus");
+	  if (gaus) {
+	    Double_t mu = gaus->GetParameter(1);
+	    Double_t sigma = gaus->GetParameter(2);
+	    fVertexZPlots[i]->Fit(gaus,"er","",mu-3*sigma,mu+3*sigma);
+	    mu = gaus->GetParameter(1);
+	    sigma = gaus->GetParameter(2);
+	    if (i == 0 || i == 2) {
+	      for( UInt_t j = 0; j < dca_left.size(); j++ ) {
+		Double_t z = -dca_left[j].z;
+		if (TMath::Abs(z - mu) < 3*sigma) {
+		  fVertexXYPlots[i]->Fill(dca_left[j].x,dca_left[j].y);
+		}
+	      }
+	    }
+	    if (i == 1 || i == 2) {
+	      for( UInt_t j = 0; j < dca_right.size(); j++ ) {
+		Double_t z = -dca_right[j].z;
+		if (TMath::Abs(z - mu) < 3*sigma) {
+		  fVertexXYPlots[i]->Fill(dca_right[j].x,dca_right[j].y);
+		}
+	      }
+	    }
+	  }
+	}
       }
     }
-  }
-#endif /* __ESTIMATE_Primary_Vertex_Z__ */
+  } // end of CA Vertex
 #ifdef __TPCCA_TIMING__
   timer.Start();
   // --- Tracking time ---

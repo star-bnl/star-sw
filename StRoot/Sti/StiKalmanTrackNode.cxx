@@ -671,7 +671,7 @@ static const int    idx66[6][6] =
 bool StiKalmanTrackNode::useCalculatedHitError = true;
 TString StiKalmanTrackNode::comment("Legend: \tE - extapolation\tM Multiple scattering\tV at Vertex\tB at beam\tR at Radius\tU Updated\n");
 TString StiKalmanTrackNode::commentdEdx(""); 
-Float_t StiKalmanTrackNode::fExternalZofPVX = 0;
+Float_t StiKalmanTrackNode::fExternalTriggerOffset = 0;
 //debug vars
 //#define STI_ERROR_TEST
 //#define STI_DERIV_TEST
@@ -2381,7 +2381,6 @@ double StiKalmanTrackNode::getTime() const
   double time = 0;
   if (! _laser) {
     double d = sqrt(mFP.x()*mFP.x()+mFP.y()*mFP.y());
-    Double_t z = fExternalZofPVX; // mFP.z() - d*mFP.tanl();
     double sn = fabs(mFP._cosCA*mFP.y() - mFP._sinCA*mFP.x())/d;
     if (sn> 0.99) sn =  0.99;
     if (sn<0.2) {
@@ -2401,7 +2400,7 @@ double StiKalmanTrackNode::getTime() const
       double beta2=p2/e2;
       beta = TMath::Sqrt(beta2);
     }
-    time = (d/beta + z)/(TMath::Ccgs()*1e-6); // mksec  
+    time = (d/beta)/(TMath::Ccgs()*1e-6) + fExternalTriggerOffset; // mksec  
   } else {
     if (TMath::Abs(mFP.z()) > 20.0) {
 static const double Radius = 197.;

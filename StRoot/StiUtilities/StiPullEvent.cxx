@@ -165,7 +165,7 @@ static int nCall=0; nCall++;
         nHits++;
         hiP->mTrackNumber=iTkG+1; hiP->mVertex=vertex;
       }
-      assert(nHits==trkP->nAllHits || nHits-1==trkP->nAllHits);
+      //yf?      assert(nHits==trkP->nAllHits || nHits-1==trkP->nAllHits);
       trkP->mTrackNumber= iTkG+1; iTkP++;
     }//end It is a primary
     int nHits=0;

@@ -2,20 +2,27 @@
 #include "TPCCATracker/AliHLTTPCCAGBHit.h"
 #include "TPCCATracker/AliHLTTPCCAGBTrack.h"
 #include "TPCCATracker/AliHLTTPCCAParam.h"
-  // need for hits data
+// need for hits data
+#include "StMaker.h"
+#include "StMessMgr.h"
 #include "StTpcHit.h"                
 #include "StTpcDb/StTpcDb.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
-  // for MCdata
+// for MCdata
 #include "tables/St_g2t_track_Table.h" 
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "TDatabasePDG.h"
-  //to obtain error coefficients
+#include "TF1.h"
+//to obtain error coefficients
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTPCHitErrorCalculator.h"
-  //to get Magnetic Field
+#include "Sti/StiKalmanTrackNode.h"
+#include "StEvent/StEnumerations.h"
+#include "StEvent/StEvent.h"
+#include "StEvent/StEventSummary.h"
+//to get Magnetic Field
 #include "StarMagField/StarMagField.h"
 #include "TStopwatch.h"
 #include <vector>
@@ -28,7 +35,43 @@ StiCATpcTrackerInterface &StiCATpcTrackerInterface::Instance() {
   return *fgStiCATpcTrackerInterface;
 }
 //________________________________________________________________________________
-StiCATpcTrackerInterface::StiCATpcTrackerInterface() : StTPCCAInterface() {
+void StiCATpcTrackerInterface::SetNewEvent() {
+  fSeedFinder = 0; 
+  fSeeds.clear(); 
+  fSeedHits.clear(); 
+  fHitsMap = 0; 
+  StTPCCAInterface::SetNewEvent();
+  if (! fSpectrum) {
+    TFile *f = 0;
+    if (StMaker::GetTopChain()) {
+      f = StMaker::GetTopChain()->GetTFile();
+      if (f) f->cd();
+    }
+    Int_t NzBins = 2500;
+    Int_t npeaks = 250;
+    Double_t zmin = -250;
+    Double_t zmax = 250;
+    const Char_t *side[3] = {"East","West","All"};
+    for (Int_t i = 0; i < 3; i++) {
+      fVertexZPlots[i] = new TH1F(Form("VertexZPlot%s",side[i]),Form("z-dca distribution for side = %s",side[i]),NzBins,zmin,zmax);
+      fVertexZPlots[i]->SetDirectory(f);
+      fVertexXYPlots[i] = new TH2F(Form("VertexXYPlot%s",side[i]),Form("xy-dca distribution for side = %s at Z +/- 10 cm of the 1st peak",side[i]),100,-5,5,100,-5,5);
+      fVertexXYPlots[i]->SetDirectory(f);
+      if (i != 2) {
+	fVertexZPlots[i]->SetMarkerColor(i+2); 
+	fVertexZPlots[i]->SetLineColor(i+2); 
+	fVertexXYPlots[i]->SetMarkerColor(i+2); 
+	fVertexXYPlots[i]->SetLineColor(i+2); 
+      }
+    }
+    fSpectrum = new TSpectrum(npeaks);
+  } else {
+    for (Int_t i = 0; i < 3; i++) {
+      fVertexZPlots[i]->Reset();  fVertexZPlots[i]->GetXaxis()->SetRange(0,-1);
+      fVertexXYPlots[i]->Reset();
+    }
+  }
+  StiKalmanTrackNode::SetExternalTriggerOffset(0);
 }
 //________________________________________________________________________________
 void StiCATpcTrackerInterface::MakeHits()
@@ -208,5 +251,50 @@ void StiCATpcTrackerInterface::MakeSeeds()
 
     fSeeds.push_back(seed);
   }
+  // Reset trigger offset from CA
+  if (fVertexZPlots[east] && fVertexZPlots[west]) {
+    StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+    StEventSummary *summary = pEvent->summary();
+    L4CAVertex *l4Vx[3] = {&summary->L4VxEast, &summary->L4VxWest, &summary->L4Vx};
+    for (Int_t i = 0; i < 3; i++) {
+      //      memset (&(l4Vx->Const), 0, sizeof(L4CAVertex));
+      TF1 *gaus = (TF1 *) fVertexZPlots[i]->GetListOfFunctions()->FindObject("gaus");
+      if (! gaus) continue;
+      l4Vx[i]->Const = gaus->GetParameter(0); l4Vx[i]->dConst = gaus->GetParError(0); 
+      l4Vx[i]->Mu    = gaus->GetParameter(1); l4Vx[i]->dMu = gaus->GetParError(1); 
+      l4Vx[i]->Sigma = gaus->GetParameter(2); l4Vx[i]->dSigma = gaus->GetParError(2); 
+      l4Vx[i]->Chisq = gaus->GetChisquare();
+      l4Vx[i]->Ndf   = gaus->GetNDF();
+      l4Vx[i]->Prob  = gaus->GetProb();
+      l4Vx[i]->X     = fVertexXYPlots[i]->GetMean(1);
+      l4Vx[i]->Y     = fVertexXYPlots[i]->GetMean(2);
+    }
+#if 0
+    Double_t Z[2] = {0};
+    Double_t dZ[2] = {0};
+    for (Int_t i = 0; i < 2; i++) {
+      if (gaus[i]) {
+	if (gaus[i]->GetProb() > 1e-5) {
+	  if (gaus[i]->GetParError(1) < 1.0) {
+	    dZ[i] = gaus[i]->GetParError(1);
+	    Z[i] = gaus[i]->GetParameter(1);
+	  }
+	}
+      }
+    }
+    if (dZ[0] > 0 && dZ[1] > 0) {
+      Double_t Zdiff = 0.5*(Z[1] - Z[0]);
+      Double_t dZdiff = 0.5*TMath::Sqrt(dZ[0]*dZ[0] + dZ[1]*dZ[1]);
+      if (TMath::Abs(Zdiff) > 3*dZdiff) {
+	Double_t dT = Zdiff/StTpcDb::instance()->DriftVelocity()*1e6; // 
+	if (TMath::Abs(dT) < 1) {
+	  LOG_INFO << "dZW_E/2 = " << Zdiff << " +/- " << dZdiff << ". Set trigger offset = " << dT << " musec" << endm;
+	  StiKalmanTrackNode::SetExternalTriggerOffset(dT);
+	}
+      }
+    }
+#endif
+  }
 } // void StiCATpcTrackerInterface::MakeSeeds()
+//________________________________________________________________________________
 

@@ -442,7 +442,6 @@ Int_t StiMaker::Make()
   StEventHelper::Remove(event,"StSPtrVecV0Vertex");
   StEventHelper::Remove(event,"StSPtrVecXiVertex");
   StEventHelper::Remove(event,"StSPtrVecKinkVertex");
-  StiKalmanTrackNode::SetExternalZofPVX(0);
 #if 0
   StBTofCollection *btofcol = event->btofCollection();
   if (btofcol) {
