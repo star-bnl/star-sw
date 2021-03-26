@@ -118,8 +118,8 @@ if ($pwd =~ /dev/ or $pwd =~ /P20ic_calib/ or $pwd =~ /P20ic/ or $pwd =~ /P21ia_
   elsif ($pwd =~ /2020\/9p2GeV/)              {$glob = "/2020/TFG20a/RF/9p2GeV";}
   elsif ($pwd =~ /2020\/7p7GeV/)              {$glob = "/2020/TFG20a/RF/7p7GeV";}
   elsif ($pwd =~ /2021/) {
-    $PICOPATH = "/hlt/cephfs/reco";
-    print "PICOPATH = $PICOPATH\n" if ($debug);
+#    $PICOPATH = "/hlt/cephfs/reco";
+#    print "PICOPATH = $PICOPATH\n" if ($debug);
 #    if ($pwd =~ /7p7GeV_2021/)                {$glob = "/2021/RF/DEV2/7p7GeV_2021.C";}
 #    if    ($pwd =~ /7p7GeV_2021\/TFG21c\.A/)   {$glob = "/2021/RF/TFG21c.A/7p7GeV_2021";}
 #    elsif ($pwd =~ /7p7GeV_2021\/TFG21c\.B/)   {
