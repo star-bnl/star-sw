@@ -212,6 +212,7 @@
 #pragma link C++ class BELayerBlock2019+;
 #pragma link C++ class FMSBlock2019+;
 #pragma link C++ class TrgOfflen2019+;
+#pragma link C++ class L4CAVertex+;
 
 #pragma link C++ function operator<<(ostream&, const StPxlHit&);        
 #pragma link C++ function operator<<(ostream&, const StIstHit&); 

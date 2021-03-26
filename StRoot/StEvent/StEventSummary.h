@@ -53,7 +53,17 @@
 #include "TString.h"
 #include "TArrayF.h"
 #include "TArrayL.h"
-
+class L4CAVertex {
+ public:
+  Float_t Const, dConst;
+  Float_t Mu, dMu;
+  Float_t Sigma, dSigma;
+  Float_t Chisq;
+  Float_t Prob;
+  Int_t   Ndf;
+  Float_t X;
+  Float_t Y;
+};
 class StEventSummary : public StObject {
 public:
     StEventSummary();
@@ -141,8 +151,11 @@ protected:
     TArrayF        mEneryVsEtaHisto;
     TArrayF        mEnergyVsPhiHisto;
     Double_t       mMagneticFieldZ;
-    
-    ClassDef(StEventSummary,2)
+ public:
+    L4CAVertex L4Vx;
+    L4CAVertex L4VxWest;
+    L4CAVertex L4VxEast;
+    ClassDef(StEventSummary,3)
 };
 
 #endif
