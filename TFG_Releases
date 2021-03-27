@@ -64,4 +64,5 @@
  TFG21a modifying StMagUtility                                       2021-01-07 11:56:30 -0500  (HEAD -> master, tag: TFG21a)
  TFG21b back StMagUtility, __kfpAtFirstHit__=1,TPC calib from TFG20a 2021-01-21 19:34:06 -0500  (HEAD -> master, tag: TFG21b)
  TFG21c express production release for Run XXI, add fix TpcHitMaker  2021-02-13 19:02:40 -0500  (HEAD -> master, tag: TFG21c_5)
+ TFG21d freeze VMC, CAVx,                                            2021-03-27 18:59:05 -0400  (HEAD -> master, tag: TFG21d)
 .DEV2  head of TFG git repository
