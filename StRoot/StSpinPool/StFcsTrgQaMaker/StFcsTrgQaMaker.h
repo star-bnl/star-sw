@@ -11,7 +11,7 @@
 #include "StRoot/StEvent/StEnumerations.h"
 #include "StMaker.h"
 
-class StFcsDbMaker;
+class StFcsDb;
 class StFcsCollection;
 class StFcsTriggerSimMaker;
 class TH1F;
@@ -33,7 +33,7 @@ public:
 protected:
     
 private:
-    StFcsDbMaker *mFcsDbMkr=0;
+    StFcsDb *mFcsDb=0;
     StFcsTriggerSimMaker *mFcsTrgSimMkr=0;
     TFile *mFile=0;
     char* mFilename=0;
@@ -54,8 +54,11 @@ private:
 #endif
 
 /*
- * $Id: StFcsTrgQaMaker.h,v 1.3 2020/07/24 17:21:31 akio Exp $
+ * $Id: StFcsTrgQaMaker.h,v 1.4 2021/03/30 13:31:27 akio Exp $
  * $Log: StFcsTrgQaMaker.h,v $
+ * Revision 1.4  2021/03/30 13:31:27  akio
+ * StFcsDbMAker->StFcsDB
+ *
  * Revision 1.3  2020/07/24 17:21:31  akio
  * adding hist for DsmOut
  *

@@ -12,7 +12,7 @@
 #include "StRoot/StEvent/StFcsCollection.h"
 #include "StRoot/StEvent/StFcsHit.h"
 #include "StRoot/StEvent/StFcsCluster.h"
-#include "StRoot/StFcsDbMaker/StFcsDbMaker.h"
+#include "StRoot/StFcsDbMaker/StFcsDb.h"
 #include "StRoot/StFcsTriggerSimMaker/StFcsTriggerSimMaker.h"
 
 #include "TH1F.h"
@@ -28,9 +28,9 @@ StFcsTrgQaMaker::StFcsTrgQaMaker(const Char_t* name) : StMaker(name) {};
 StFcsTrgQaMaker::~StFcsTrgQaMaker(){};
 
 Int_t StFcsTrgQaMaker::Init(){
-  mFcsDbMkr = static_cast< StFcsDbMaker*>(GetMaker("fcsDb"));
-  if(!mFcsDbMkr){
-    LOG_FATAL << "Error finding StFcsDbMaker"<< endm;
+  mFcsDb = static_cast< StFcsDb*>(GetDataSet("fcsDb"));
+  if(!mFcsDb){
+    LOG_FATAL << "Error finding StFcsDb"<< endm;
     return kStFatal;
   }
   mFcsTrgSimMkr = static_cast< StFcsTriggerSimMaker*>(GetMaker("FcsTrgSim"));
@@ -147,8 +147,11 @@ Int_t StFcsTrgQaMaker::Finish(){
 ClassImp(StFcsTrgQaMaker);
 
 /*
- * $Id: StFcsTrgQaMaker.cxx,v 1.3 2020/07/24 17:21:31 akio Exp $
+ * $Id: StFcsTrgQaMaker.cxx,v 1.4 2021/03/30 13:31:27 akio Exp $
  * $Log: StFcsTrgQaMaker.cxx,v $
+ * Revision 1.4  2021/03/30 13:31:27  akio
+ * StFcsDbMAker->StFcsDB
+ *
  * Revision 1.3  2020/07/24 17:21:31  akio
  * adding hist for DsmOut
  *
