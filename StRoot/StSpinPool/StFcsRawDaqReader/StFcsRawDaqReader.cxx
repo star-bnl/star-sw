@@ -37,6 +37,7 @@
 #include "StRoot/StEvent/StFcsCollection.h"
 #include "StRoot/StEvent/StFcsHit.h"
 #include "StRoot/StFcsDbMaker/StFcsDbMaker.h"
+#include "StRoot/StFcsDbMaker/StFcsDb.h"
 #include "RTS/src/DAQ_READER/daqReader.h"
 
 #include <string.h>
@@ -75,6 +76,7 @@ Int_t StFcsRawDaqReader::prepareEnvironment(){
 Int_t StFcsRawDaqReader::Init(){
    GetEvtHddr()->SetEventNumber(1);
    LOG_INFO << "Opening "<< mDaqFileName.data() <<endm;
+
    mRdr = new daqReader( const_cast< Char_t* >( mDaqFileName.data() ) ); 	
    if(!mRdr) {
      LOG_FATAL << "Error constructing daqReader" << endm;
@@ -86,14 +88,21 @@ Int_t StFcsRawDaqReader::Init(){
    int date=(local->tm_year+1900)*10000 + (local->tm_mon+1)*100 + local->tm_mday;
    int time=local->tm_hour*10000 + local->tm_min*100 + local->tm_sec;
    printf("Event Unix Time = %d %0d %06d\n",mRdr->evt_time,date,time);   
-   mFcsDbMkr = static_cast< StFcsDbMaker*>(GetMaker("fcsDb"));
+
+   StFcsDbMaker* mFcsDbMkr = static_cast<StFcsDbMaker*>(GetMaker("fcsDbMkr"));
    if(!mFcsDbMkr){
      LOG_FATAL << "Error finding StFcsDbMaker"<< endm;
      return kStFatal;
-   }
+   }   
    mFcsDbMkr->SetDateTime(date,time);
    LOG_INFO << "Using date and time " << mFcsDbMkr->GetDateTime().GetDate() << ", "
 	    << mFcsDbMkr->GetDateTime().GetTime() << endm;
+
+   mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
+   if(!mFcsDb){
+     LOG_FATAL << "Error finding StFcsDb"<< endm;
+     return kStFatal;
+   }   
    return kStOK;
 };
 
@@ -238,7 +247,7 @@ Int_t StFcsRawDaqReader::Make() {
       int ch = dd->pad ;
       u_int n=dd->ncontent;      
       int detid,id,crt,sub;
-      mFcsDbMkr->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
+      mFcsDb->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
       //if(ch>=32) continue;
       u_short *d16 = (u_short *)dd->Void;
       StFcsHit* hit=0;
@@ -310,8 +319,11 @@ void StFcsRawDaqReader::Clear( Option_t *opts ){
 ClassImp(StFcsRawDaqReader);
 
 /*
- * $Id: StFcsRawDaqReader.cxx,v 1.6 2021/02/13 21:39:17 akio Exp $
+ * $Id: StFcsRawDaqReader.cxx,v 1.7 2021/03/30 13:30:11 akio Exp $
  * $Log: StFcsRawDaqReader.cxx,v $
+ * Revision 1.7  2021/03/30 13:30:11  akio
+ * StFcsDbMAker->StFcsDB
+ *
  * Revision 1.6  2021/02/13 21:39:17  akio
  * debug printouts
  *

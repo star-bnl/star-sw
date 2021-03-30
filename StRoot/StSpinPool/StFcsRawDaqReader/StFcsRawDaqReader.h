@@ -14,7 +14,7 @@ class daqReader;
 class StEvent;
 class StFcsCollection;
 class StTriggerData;
-class StFcsDbMaker;
+class StFcsDb;
 
 class StFcsRawDaqReader : public StMaker {
  public: 
@@ -56,7 +56,7 @@ class StFcsRawDaqReader : public StMaker {
    unsigned int mMaxEvtPerSector=100;
    unsigned int mEvtInSector=0;
    StTriggerData* mTrg=0;
-   StFcsDbMaker* mFcsDbMkr=0;
+   StFcsDb* mFcsDb=0;
    unsigned int mReadMode=0;
    unsigned long long mTrgMask=0;
    int mDebug=0;
@@ -68,8 +68,11 @@ class StFcsRawDaqReader : public StMaker {
 #endif
 
 /*
- * $Id: StFcsRawDaqReader.h,v 1.2 2021/01/11 14:39:12 akio Exp $
+ * $Id: StFcsRawDaqReader.h,v 1.3 2021/03/30 13:30:11 akio Exp $
  * $Log: StFcsRawDaqReader.h,v $
+ * Revision 1.3  2021/03/30 13:30:11  akio
+ * StFcsDbMAker->StFcsDB
+ *
  * Revision 1.2  2021/01/11 14:39:12  akio
  * Change logic to skip over none standard events at the begining of files.
  * Added function to get event# in a sector=file.
