@@ -11,7 +11,7 @@
 #include "StRoot/StEvent/StEnumerations.h"
 #include "StMaker.h"
 
-class StFcsDbMaker;
+class StFcsDb;
 class StFcsCollection;
 class TH1F;
 class TH2F;
@@ -37,7 +37,7 @@ class StFcsQaMaker : public StMaker {
  protected:
 
  private:
-   StFcsDbMaker *mFcsDbMkr=0;
+   StFcsDb *mFcsDb=0;
    StFcsCollection *mFcsCollection=0;
    int mRun=0; 
    int mEvent=0; 
@@ -88,8 +88,11 @@ class StFcsQaMaker : public StMaker {
 #endif
 
 /*
- * $Id: StFcsQaMaker.h,v 1.5 2021/02/13 21:41:09 akio Exp $
+ * $Id: StFcsQaMaker.h,v 1.6 2021/03/30 13:29:27 akio Exp $
  * $Log: StFcsQaMaker.h,v $
+ * Revision 1.6  2021/03/30 13:29:27  akio
+ * StFcsDbMaker->StFcsDb
+ *
  * Revision 1.5  2021/02/13 21:41:09  akio
  * sector avg peak time
  *
