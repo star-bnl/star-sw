@@ -12,7 +12,7 @@
 #include "StRoot/StEvent/StFcsCollection.h"
 #include "StRoot/StEvent/StFcsHit.h"
 #include "StRoot/StEvent/StFcsCluster.h"
-#include "StRoot/StFcsDbMaker/StFcsDbMaker.h"
+#include "StRoot/StFcsDbMaker/StFcsDb.h"
 #include "StRoot/StSpinPool/StFcsRawDaqReader/StFcsRawDaqReader.h"
 
 #include "TH1F.h"
@@ -29,9 +29,9 @@ StFcsQaMaker::StFcsQaMaker(const Char_t* name) : StMaker(name) {};
 StFcsQaMaker::~StFcsQaMaker(){};
 
 Int_t StFcsQaMaker::Init(){
-  mFcsDbMkr = static_cast< StFcsDbMaker*>(GetMaker("fcsDb"));
-  if(!mFcsDbMkr){
-    LOG_FATAL << "Error finding StFcsDbMaker"<< endm;
+  mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
+  if(!mFcsDb){
+    LOG_FATAL << "Error finding StFcsDb"<< endm;
     return kStFatal;
   }
 
@@ -56,9 +56,9 @@ Int_t StFcsQaMaker::Init(){
   mEsum[2] = new TH1F("TotESum", "TotESum", 100,0.0,10.0);
 
   for(int det=0; det<kFcsNDet; det++){
-    int ns  = mFcsDbMkr->northSouth(det);
-    int ehp = mFcsDbMkr->ecalHcalPres(det);
-    int maxid = mFcsDbMkr->maxId(det);
+    int ns  = mFcsDb->northSouth(det);
+    int ehp = mFcsDb->ecalHcalPres(det);
+    int maxid = mFcsDb->maxId(det);
 
     if(maxid==0) continue; 
     
@@ -69,9 +69,9 @@ Int_t StFcsQaMaker::Init(){
 			    mNTimeBins, 0.0, float(mNTimeBins));
 
     for(int id=0; id<maxid; id++){      
-      mFcsDbMkr->getName(det,id,t3);	
+      mFcsDb->getName(det,id,t3);	
       int ehp2,ns2,crt,sub,dep,ch;
-      mFcsDbMkr->getDepfromId(det,id,ehp2,ns2,crt,sub,dep,ch);
+      mFcsDb->getDepfromId(det,id,ehp2,ns2,crt,sub,dep,ch);
       sprintf(t ,"%4s_%1s_TbinAdc_id%03d",nameEHP[ehp],nameNS[ns],id);
       sprintf(t2,"%s; TBin; ADC",t3);
       //printf("%s %s\n",t,t2);
@@ -82,7 +82,7 @@ Int_t StFcsQaMaker::Init(){
 
     sprintf(t,"%4s_%1s_Adc",nameEHP[ehp],nameNS[ns]);
     sprintf(t2,"%4s_%1s; DEP+ch/32; ADC",nameEHP[ehp],nameNS[ns]);
-    int maxdep = mFcsDbMkr->getNDep(ehp,ns);
+    int maxdep = mFcsDb->getNDep(ehp,ns);
     int maxdepch = maxdep * kFcsMaxDepCh;
     mAdcId[det] = new TH2F(t,t2,
 			   maxdepch, 0.0, float(maxdep),
@@ -147,7 +147,7 @@ Int_t StFcsQaMaker::Init(){
       mNNeiClu[det] = new TH1F(t,t,10,0.0,10.0);
 
       for(int id=0; id<maxid; id++){      
-	mFcsDbMkr->getName(det,id,t2);	
+	mFcsDb->getName(det,id,t2);	
 	sprintf(t ,"%1s%1s%03d_NTowClu_E",nameEHP[ehp],nameNS[ns],id);
 	sprintf(t2 ,"%22s_NTowClu_E",t2);
 	mNTowEClu[det][id] =  new TH2F(t,t2,10,1.0,11.0,100,0.0,10.0);
@@ -165,20 +165,20 @@ Int_t StFcsQaMaker::Init(){
   mTimeEvt=new TH2F("TimeEvt","TimeEvent; Event; Sector Avg MeanTB",100,0,100,500,mMinTB+1.5,mMaxTB-1.5);
   memset(mTimeE,0,sizeof(mTimeE));
   
-  int ecal_xmax = mFcsDbMkr->nColumn(0);
-  int ecal_ymax = mFcsDbMkr->nRow(0);
+  int ecal_xmax = mFcsDb->nColumn(0);
+  int ecal_ymax = mFcsDb->nRow(0);
   mHitMap[0] = new TH2F("EcalView","Ecal View from Back; +-Col (North <-> South); -Row (Bottom <-> Top)",
 			ecal_xmax*2+1,-ecal_xmax-0.5,ecal_xmax+0.5,
 			ecal_ymax,-ecal_ymax-0.5,-0.5);
   
-  int hcal_xmax = mFcsDbMkr->nColumn(2);
-  int hcal_ymax = mFcsDbMkr->nRow(2);
+  int hcal_xmax = mFcsDb->nColumn(2);
+  int hcal_ymax = mFcsDb->nRow(2);
   mHitMap[1] = new TH2F("HcalView","Hcal View from Back; +-Col (North <-> South); -Row (Bottom <-> Top)",
 			hcal_xmax*2+1,-hcal_xmax-0.5,hcal_xmax+0.5,
 			hcal_ymax,-hcal_ymax-0.5,-0.5);
   
-  int pres_xmax = mFcsDbMkr->nColumn(4);
-  int pres_ymax = mFcsDbMkr->nRow(4);
+  int pres_xmax = mFcsDb->nColumn(4);
+  int pres_ymax = mFcsDb->nRow(4);
   mHitMap[2] = new TH2F("PresView","Pres View from Back; +-Radius (North <-> South); -Phi (Bottom <-> Top)",
 			pres_xmax*2+1,-pres_xmax-0.5,pres_xmax+0.5,
 			pres_ymax,-pres_ymax-0.5,-0.5);
@@ -257,7 +257,7 @@ Int_t StFcsQaMaker::Make() {
       float depch=dep+(ch+0.5)/32.0;
       int ntb = hits[i]->nTimeBin();
       float ped=0.0;
-      if(mPedSub>0)  ped=mFcsDbMkr->pedestal(ehp,ns,dep,ch);
+      if(mPedSub>0)  ped=mFcsDb->pedestal(ehp,ns,dep,ch);
 
       //time from StFcsHit
       mTimeId[det]->Fill((float)id, hits[i]->fitPeak());
@@ -277,8 +277,8 @@ Int_t StFcsQaMaker::Make() {
       }
 
       /*
-      int c = mFcsDbMkr->getColumnNumber(det,id);
-      int r = mFcsDbMkr->getRowNumber(det,id);
+      int c = mFcsDb->getColumnNumber(det,id);
+      int r = mFcsDb->getRowNumber(det,id);
       float x = c * (ns*2-1);
       float y = -r;
       printf("ehp=%d x=%f y=%f adcsum=%f\n",ehp,x,y,hits[i]->adcSum());
@@ -302,7 +302,7 @@ Int_t StFcsQaMaker::Make() {
 	  if(ch<32){
 	    int ns2 = hits[i]->ns();
 	    int ehp2= hits[i]->ehp();
-	    int det2=mFcsDbMkr->detectorId(ehp2,ns2);
+	    int det2=mFcsDb->detectorId(ehp2,ns2);
 	    if(det2>=0 && det2<kFcsNDet)
 	      mAdcId[det2]->Fill(float(depch),float(adc));
 	  }
@@ -314,7 +314,7 @@ Int_t StFcsQaMaker::Make() {
       }
     }
     if(det<kFcsNDet){
-      int maxid = mFcsDbMkr->maxId(det);
+      int maxid = mFcsDb->maxId(det);
       int ehp=det/2;
       int ns=det%2;
       for(int id=0; id<maxid; id++){
@@ -323,8 +323,8 @@ Int_t StFcsQaMaker::Make() {
 	  nh[det]++;
 	  atot[det]+=sum[det][id];
 
-	  int c = mFcsDbMkr->getColumnNumber(det,id);
-	  int r = mFcsDbMkr->getRowNumber(det,id);
+	  int c = mFcsDb->getColumnNumber(det,id);
+	  int r = mFcsDb->getRowNumber(det,id);
 	  float x = c * (ns*2-1);
 	  float y = -r;
 	  mHitMap[ehp]->Fill(x,y,float(sum[det][id]));
@@ -344,9 +344,9 @@ Int_t StFcsQaMaker::Make() {
 	  int dep = hits[i]->dep();
 	  int ch  = hits[i]->channel();
 	  int ntb = hits[i]->nTimeBin();
-	  float ped = mFcsDbMkr->pedestal(ehp,ns,dep,ch);
+	  float ped = mFcsDb->pedestal(ehp,ns,dep,ch);
 	  char name[22];
-	  mFcsDbMkr->getName(det,id,name);
+	  mFcsDb->getName(det,id,name);
 	  if(mDump==1 && sum[det][id]>50){
 	    printf("\nFCSDump %5d %22s %4d %5.1f %5d ",nevt,name,ntb,ped,sum[det][id]);
 	    for(int j=0; j<ntb; j++) printf("%4d ",hits[i]->adc(j));
@@ -415,7 +415,7 @@ Int_t StFcsQaMaker::Finish(){
   char* nameEHP[kFcsEHP] = {"E","H","P"};
   char* nameNS[kFcsNorthSouth] = {"N","S"};
   for(int det=0; det<4; det++){
-    int maxid=mFcsDbMkr->maxId(det);
+    int maxid=mFcsDb->maxId(det);
     for(int id=0; id<maxid; id++){
       for(int evt=0; evt<100; evt++){
 	avg[det][id]+=mTimeE[det][id][evt];	
@@ -426,13 +426,13 @@ Int_t StFcsQaMaker::Finish(){
   char name[100];
   for(int ehp=0; ehp<2; ehp++){
     for(int ns=0; ns<kFcsNorthSouth; ns++){
-      int ndep=mFcsDbMkr->getNDep(ehp,ns);
+      int ndep=mFcsDb->getNDep(ehp,ns);
       for(int dep=0; dep<ndep; dep++){	
 	for(int evt=0; evt<100; evt++){	  
 	  printf("MT %1s%1sDEP%02d %2d : ",nameEHP[ehp],nameNS[ns],dep,evt);
 	  for(int ch=0; ch<kFcsMaxDepCh; ch++){
 	    int det,id,crt,slt;
-	    mFcsDbMkr->getIdfromDep(ehp,ns,dep,ch,det,id,crt,slt);	  
+	    mFcsDb->getIdfromDep(ehp,ns,dep,ch,det,id,crt,slt);	  
 	    printf("%5.1f ",0.5+107.0/8.0*(mTimeE[det][id][evt]-avg[det][id]));
 	    //	    if(ch%8==7) printf("| ");
 	  }
@@ -450,8 +450,11 @@ Int_t StFcsQaMaker::Finish(){
 ClassImp(StFcsQaMaker);
 
 /*
- * $Id: StFcsQaMaker.cxx,v 1.8 2021/02/13 21:41:09 akio Exp $
+ * $Id: StFcsQaMaker.cxx,v 1.9 2021/03/30 13:29:27 akio Exp $
  * $Log: StFcsQaMaker.cxx,v $
+ * Revision 1.9  2021/03/30 13:29:27  akio
+ * StFcsDbMaker->StFcsDb
+ *
  * Revision 1.8  2021/02/13 21:41:09  akio
  * sector avg peak time
  *
