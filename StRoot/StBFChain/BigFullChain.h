@@ -1399,6 +1399,7 @@ Bfc_st BFC[] = { // standard chains
 
   {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
+  {"fcsDb"       ,"fcsDbMkr","","",                 "StFcsDbMaker","StFcsDbMaker","Load FcsDbMaker",kFALSE},
   {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb"       ,"pxlDb","","tpcDb PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
@@ -1674,6 +1675,17 @@ Bfc_st BFC[] = { // standard chains
    "StFmsPointMaker","StFmsPointMaker","Fill FMS clusters and points",                              kFALSE},
   {"fmsfps"   ,"","", "event,fmsDb",
    "StFmsFpsMaker","StFmsFpsMaker","Fill FPS association in FMS points",                            kFALSE},
+  // FCS                              
+  {"fcsSim",""    ,"","StEvent,fcsDb",
+   "StFcsFastSimulatorMaker","StFcsFastSimulatorMaker","FCS Fast Simulator",                        kFALSE},
+  {"fcsDat",""    ,"","StEvent,fcsDb",
+   "StFcsRawHitMaker","StFcsRawHitMaker","FCS daq file reader/hit maker",                           kFALSE},
+  {"fcsWFF"       ,"","", "StEvent,fcsDb",
+   "StFcsWaveformFitMaker","StFcsWaveformFitMaker","Fit FCS waveform",                              kFALSE},
+  {"fcsCluster"   ,"","", "StEvent,fcsDb",
+   "StFcsClusterMaker","StFcsClusterMaker","Fill FCS clusters",                                     kFALSE},
+  {"fcsPoint"   ,"","", "StEvent,fcsDb",
+   "StFcsPointMaker","StFcsPointMaker,libMinuit","Fill FCS points",                                 kFALSE},
 
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
