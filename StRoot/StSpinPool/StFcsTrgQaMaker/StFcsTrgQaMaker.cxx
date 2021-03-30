@@ -13,7 +13,7 @@
 #include "StRoot/StEvent/StFcsHit.h"
 #include "StRoot/StEvent/StFcsCluster.h"
 #include "StRoot/StFcsDbMaker/StFcsDb.h"
-#include "StRoot/StFcsTriggerSimMaker/StFcsTriggerSimMaker.h"
+#include "StRoot/StSpinPool/StFcsTriggerSimMaker/StFcsTriggerSimMaker.h"
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -147,8 +147,11 @@ Int_t StFcsTrgQaMaker::Finish(){
 ClassImp(StFcsTrgQaMaker);
 
 /*
- * $Id: StFcsTrgQaMaker.cxx,v 1.4 2021/03/30 13:31:27 akio Exp $
+ * $Id: StFcsTrgQaMaker.cxx,v 1.5 2021/03/30 13:36:51 akio Exp $
  * $Log: StFcsTrgQaMaker.cxx,v $
+ * Revision 1.5  2021/03/30 13:36:51  akio
+ * change to StSpinPoll for include
+ *
  * Revision 1.4  2021/03/30 13:31:27  akio
  * StFcsDbMAker->StFcsDB
  *
