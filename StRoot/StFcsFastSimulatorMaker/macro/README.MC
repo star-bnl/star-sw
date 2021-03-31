@@ -1,11 +1,14 @@
 *** How to get codes and compile for MC
 
+stardev
 tokens
-(make sure you have token for afs)
+(make sure you have token for afs, if not klog)
 <cd to your dir>
-cvs co StROOT/StSpinPool/StFcs*
+cvs co StRoot/StSpinPool/StFcsEventDisplay
+cvs co StRoot/StSpinPool/StFcsTrgQaMaker
 cvs co StRoot/StFcsFastSimulatorMaker/macro
 cp StRoot/StFcsFastSimulatorMaker/macro/???* .
+cons
 
 starsim -w 1 -b fcs.kumac
 exit
