@@ -1,4 +1,4 @@
-*** How to get codes and compile for MC
+*** How to get codes, compile and run for MC
 
 stardev
 tokens
@@ -6,8 +6,10 @@ tokens
 <cd to your dir>
 cvs co StRoot/StSpinPool/StFcsEventDisplay
 cvs co StRoot/StSpinPool/StFcsTrgQaMaker
+cvs co StRoot/StSpinPool/StFcsTriggerSimMaker
 cvs co StRoot/StFcsFastSimulatorMaker/macro
 cp StRoot/StFcsFastSimulatorMaker/macro/???* .
+ln -s StRoot/StSpinPool/StFcsTriggerSimMaker/mask
 cons
 
 starsim -w 1 -b fcs.kumac
@@ -15,7 +17,7 @@ exit
 
 root4star -b -q runSimFlat.C'(1,1,"mu+",30,0,0,100)' > log
 root4star -b -q runSimBfc.C'(1,1,"mu+",30)' > log2
-display test_mu+_run1.1.eventDisplay.png
+display mu+.e30.vz0.run1.0.eventDisplay.png 
 (ctrl-c)
 
 ** Running single particle simmulation 
