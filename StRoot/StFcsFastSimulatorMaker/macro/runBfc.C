@@ -1,4 +1,4 @@
-TString opt = "in MakeEvent evout trgd fcsDat fcsWFF fcsCluster fcsPoint";
+TString opt = "in MakeEvent evout tpcDb trgd fcsDat fcsWFF fcsCluster fcsPoint";
 
 void runBfc(const Char_t *file="/gpfs01/star/subsysg/FPS/fcs2021/st_physics_22066021_raw_0000002.daq",
 	    Int_t nevents=10, Int_t pedLedPhy=2, Int_t eventDisplay=10, Int_t debug=1){
