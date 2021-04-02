@@ -61,10 +61,11 @@ Int_t StTpcHitMover::Make() {
     return kStWarn;
   }
 
-  double ebyeT0 = (IAttr("EbyET0") ? StEbyET0::Instance()->getT0(pEvent) : 0);
 
-//	EPD based event-by-event correction for the hit timing
+//	EPD (or other trigger detector) based event-by-event correction for the hit timing
 	double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
+        // StEbyET0 returns microsec, will need it in time buckets
+        double ebyeT0 = (IAttr("EbyET0") ? StEbyET0::Instance()->getT0(pEvent) / mTimeBinWidth : 0);
 
 	int ew = 0;
         int TAC = 0;
@@ -215,8 +216,11 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.33 2021/03/19 01:44:48 genevb Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.34 2021/04/02 04:09:26 genevb Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
+// Revision 1.34  2021/04/02 04:09:26  genevb
+// Event-by-event T0 needs converted to time buckets
+//
 // Revision 1.33  2021/03/19 01:44:48  genevb
 // Introduce Event-by-Event T0 corrections
 //
