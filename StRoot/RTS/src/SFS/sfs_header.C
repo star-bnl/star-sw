@@ -22,7 +22,7 @@ void printittr(SFS_ittr *ittr, int ctr) {
   char type[5];
   memcpy(type, ittr->entry.type, 4);
   type[4] = '\0';
-  printf("#%05d@%12lld: %s %s %s [S:%s] [P:%s] [F:%s] (totsz=%d)\n",
+  printf("#%05d@%12lld: %s %s %s [S:%s] [P:%s] [F:%s] (totsz=%d) (skipped %d)\n",
 	 ctr,ittr->fileoffset,
 	 type,
 	 attr,
@@ -30,7 +30,8 @@ void printittr(SFS_ittr *ittr, int ctr) {
 	 ittr->stickypath,
 	 ittr->ppath,
 	 ittr->fullpath,
-	 ittr->entry.sz + ittr->entry.head_sz);
+	 ittr->entry.sz + ittr->entry.head_sz,
+	 ittr->skipped_bytes);
 }
 
 int main(int argc, char *argv[])
@@ -62,7 +63,9 @@ int main(int argc, char *argv[])
   while((ittr.next() >=0)  && (ittr.filepos >= 0)) {
     printittr(&ittr,ctr);
     ctr++;
-    pos += ittr.entry.sz + ittr.entry.head_sz;
+    //printf("pos = %lld + %d + %d\n",pos, ittr.entry.sz, ittr.entry.head_sz); 
+    pos += ittr.entry.sz + ittr.entry.head_sz + ittr.skipped_bytes;
+    //printf("pos = %lld  (%llx)\n",pos,pos);
   }
 
   printf("Filesz = %lld   Position = %lld\n",sz,pos);
