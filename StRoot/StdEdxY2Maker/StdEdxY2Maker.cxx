@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.100 2020/07/05 15:57:03 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.100.2.1 2021/03/23 17:43:45 genevb Exp $
 //#define CompareWithToF 
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
@@ -160,8 +160,9 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
 
   if (! DoOnce) {
     DoOnce = 1;
-    if ((GetDate() > 20171201 && m_TpcdEdxCorrection->IsFixedTarget()) ||
-	(GetDate() > 20181201)) fUsedNdx = kTRUE; // use dN/dx for fixed target for Run XVIII and year >= XIX
+    //dNdx slows chains by ~10-15% ... deactivating on branch pending demonstration of physics value
+    //if ((GetDate() > 20171201 && m_TpcdEdxCorrection->IsFixedTarget()) ||
+    //  (GetDate() > 20181201)) fUsedNdx = kTRUE; // use dN/dx for fixed target for Run XVIII and year >= XIX
     if (TESTBIT(m_Mode, kCalibration)) {// calibration mode
       if (Debug()) LOG_WARN << "StdEdxY2Maker::InitRun Calibration Mode is On (make calibration histograms)" << endm;
       TFile *f = GetTFile();

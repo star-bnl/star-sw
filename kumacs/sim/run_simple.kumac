@@ -2,9 +2,9 @@ MACRO SIMPLE nevent=1
 * generate a standard geometry with a drawing 
 * and a keyword explanation:
 
-detp geometry y2016 
-gexe $STAR_LIB/libStarAgmlUtil.so
-gexe $STAR_LIB/xgeometry.so
+detp geometry year_1a debug_on help split_off
+make geometry
+make sim/gstar
 
 * create one pion tracks
 
