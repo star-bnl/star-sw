@@ -4,7 +4,7 @@
 #include "TStyle.h"
 #include "TDatime.h"
 #include "TPolyMarker.h"
-void DrawTime(TH1 *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:00") {// "%y\/%m\/%d\/%H%F1995-01-01 00:00:00") {
+void DrawTime(TH1 *h, const Char_t *opt="%m\/%d\/%y\%F2000-01-01 00:00:00") {// "%y\/%m\/%d\/%H%F1995-01-01 00:00:00") {
   //  FitP->Draw("sum_curr_1:utime-788936400","sum_curr_1>=-8&&sum_curr_1<=8&&utime>=1146339600&&utime<1146347789")
   //                               time of set
   if (! h) return;

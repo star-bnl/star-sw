@@ -17,7 +17,7 @@
    root.exe lMuDst.C MuTpcG.root
    .L MuTpcG.C+
    Draw();
-   root.exe MuTpcG.root MuTpcGPrint.C YS.C
+   root.exe MuTpcG.root MuTpcGPrint.C
    
 */
 #if !defined(__CINT__) || defined(__MAKECINT__)
@@ -327,6 +327,7 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
   StMuEvent* muEvent = mu->event(); // get a pointer to the class holding event-wise information
   Double_t Bz = muEvent->magneticField();
   Double_t vpdZ = muEvent->vpdVz();
+  // Trigger stuff
   
   KFParticle::SetField(Bz);
   //  KFParticle::SetField(-Bz);

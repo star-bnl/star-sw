@@ -42,8 +42,21 @@ StBFChain *bfc(Int_t First, const Char_t *Chain = "MC2016,20Muons,vmc,Rung.1",
 //________________________________________________________________________________
 void dEdx(Int_t nevents=1000,
 	  const char *MainFile=	"/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
-	  const char* rootFile="", Int_t mode = 2, const Char_t *year = "y2020") {
+	  const char* rootFile="", Int_t mode = 2, const Char_t *year = "") {
   TString Year(year);
+  if (Year == "") {
+    Year = "y2021";
+    TString input(gSystem->BaseName(MainFile));
+    TObjArray *obj = input.Tokenize("_");
+    Int_t n = obj->GetSize();
+    Int_t run = 0;
+    for (Int_t k = 0; k < n; k++) {
+      if (run = TString(obj->At(k)->GetName()).Atoi()) break;
+    }
+    Int_t yy = run/1000000 - 1;
+    Year = Form("y20%02i",yy);
+    //    cout << "set from  " << MainFile << "\tyear == " << Year.Data() << endl;
+  }
   if (gClassTable->GetID("TTable") < 0) {
     gSystem->Load("libTable");
   }
@@ -73,7 +86,7 @@ void dEdx(Int_t nevents=1000,
   StdEdxY2Maker *dEdxY2 = (StdEdxY2Maker *) chain->Maker("dEdxY2"); 
   if (dEdxY2) {
     Int_t tMin = 20000101;
-    Int_t tMax = 20210101;
+    Int_t tMax = 20220101;
     for (Int_t y = 2000; y < 2026; y++) {
       TString Y;
       Y += y;

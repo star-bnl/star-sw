@@ -7,6 +7,9 @@ TChain *chain =  Chain.C+("*.tags.root","StiPulls")
 chain->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==27","colz") // Pxl sigma =  77 um
 chain->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==28","colz") // Ist sigma = 238 um
 chain->Draw("mHitsR.lZPul>>Z(100,-0.02,0.02)","mHitsR.mDetector==36","colz") // Sst sigma = 990 um
+
+StiPulls->Draw("mHitsG.lZPul:mHitsG.gRFit>>dZGE(150,50,200,100,-1,1)","mHitsG.lZHit<0","colz")
+
  */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
