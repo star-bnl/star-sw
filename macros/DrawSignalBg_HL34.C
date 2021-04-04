@@ -289,7 +289,7 @@ void DrawSignalBg_HL34(TString nSt="") {
     LegendEntry[i][0] += " MeV/c^{2}";
     LegendEntry[i][1] = " #sigma = ";
     LegendEntry[i][1] += SigmaString;
-    LegendEntry[i][1] += " 1.7 MeV/c^{2}";
+    LegendEntry[i][1] += " MeV/c^{2}";
     LegendEntry[i][1] += " S = ";
 
     if((S)<10)
