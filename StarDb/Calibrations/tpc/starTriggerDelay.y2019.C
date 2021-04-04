@@ -9,8 +9,8 @@ TDataSet *CreateTable() {
   St_starTriggerDelay *tableSet = new St_starTriggerDelay("starTriggerDelay",1);
   //
   memset(&row,0,tableSet->GetRowSize());
-  row.clocks     = 21; // from Run XIX scan 
-  row.tZero	 =  0; // -"-
+  row.clocks     = 17; // from Run XIX + XX + XXI scan 
+  row.tZero	 = 0.435; // -"-
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
