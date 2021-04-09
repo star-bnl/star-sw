@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDb.h,v 1.1 2021/03/30 13:40:07 akio Exp $
+ * $Id: StFcsDb.h,v 1.2 2021/04/09 15:11:18 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDb.h,v $
+ * Revision 1.2  2021/04/09 15:11:18  akio
+ * Adding projection of Hcal local position to Ecal local position
+ *
  * Revision 1.1  2021/03/30 13:40:07  akio
  * FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
  *
@@ -100,6 +103,8 @@
 #include "tables/St_fcsPresValley_Table.h"
 #include "tables/St_vertexSeed_Table.h"
 class StFcsHit;
+class StFcsCluster;
+class StFcsPoint;
 
 class StFcsDb : public TDataSet {
 
@@ -175,6 +180,13 @@ public:
   //! Get get 4 vector assuing m=0 and taking beamline from DB
   StLorentzVectorD getLorentzVector(const StThreeVectorD& xyz, float energy, float zVertex=0.0);
   
+  //! Project Hcal local x/y to Ecal local x/y [cm]
+  //! See https://www.star.bnl.gov/protected/spin/akio/fcs/fcsProjection.pdf
+  double getHcalProjectedToEcalX(int ns, double hcalLocalX, double zvtx=0.0);
+  double getHcalProjectedToEcalY(int ns, double hcalLocalY, double zvtx=0.0);
+  double getProjectedDistance(StFcsCluster* ecal, StFcsCluster* hcal, double zvtx=0.0);
+  double getProjectedDistance(StFcsPoint*   ecal, StFcsCluster* hcal, double zvtx=0.0);
+
   //! fcsGain/GainCorrection related
   int   getZeroSuppression(int det) const;           //! get zero suppression threshold
   float getSamplingFraction(int det) const;          //! get sampling fraction

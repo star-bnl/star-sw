@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDb.cxx,v $
+ * Revision 1.2  2021/04/09 15:11:18  akio
+ * Adding projection of Hcal local position to Ecal local position
+ *
  * Revision 1.1  2021/03/30 13:40:07  akio
  * FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
  *
@@ -117,6 +120,8 @@
 #include "StMaker.h"
 #include "StMessMgr.h"
 #include "StEvent/StFcsHit.h"
+#include "StEvent/StFcsCluster.h"
+#include "StEvent/StFcsPoint.h"
 #include <math.h>
 
 namespace {
@@ -595,6 +600,62 @@ StThreeVectorD StFcsDb::getStarXYZ_4x4(int det,int col, int row) const{
     }	     
     return (getStarXYZ(det,c1,r1)+getStarXYZ(det,c2,r2))/2.0;
 }
+
+//! Project Hcal local X to Ecal local X [cm]
+double StFcsDb::getHcalProjectedToEcalX(int ns, double hcalLocalX, double zvtx){
+    if(zvtx==0.0){
+	StThreeVectorD ecalfront = getDetectorOffset(ns);
+	StThreeVectorD hcalfront = getDetectorOffset(ns+2);
+	double ecalD   = sqrt(ecalfront.x()*ecalfront.x() + ecalfront.z()*ecalfront.z());
+	double hcalD   = sqrt(hcalfront.x()*hcalfront.x() + ecalfront.z()*hcalfront.z());
+	double ecalSMD = ecalD + getShowerMaxZ(ns);
+	double hcalSMD = hcalD + getShowerMaxZ(ns+2);
+	double hcalLocalcm = hcalLocalX * getXWidth(ns+2); //convert to [cm]
+	return hcalLocalcm*ecalSMD/hcalSMD;
+    }else{
+	//to be impremented
+	LOG_INFO << "Need to be implememted!!!"<<endm;
+	return 1000;
+    }
+};
+
+//! Project Hcal local Y to Ecal local Y [cm]
+double StFcsDb::getHcalProjectedToEcalY(int ns, double hcalLocalY, double zvtx){
+    StThreeVectorD ecalfront = getDetectorOffset(ns);
+    StThreeVectorD hcalfront = getDetectorOffset(ns+2);
+    double ecalSMD = ecalfront.z() + getShowerMaxZ(ns) - zvtx;
+    double hcalSMD = hcalfront.z() + getShowerMaxZ(ns+2) - zvtx;
+    double hcalLocalcm = hcalLocalY * getYWidth(ns+2); //convert to [cm]  
+    return (hcalLocalcm + hcalfront.y())*ecalSMD/hcalSMD - ecalfront.y(); 
+};
+
+//! Project Hcal cluster to Ecal plane and get distance from Ecal cluster [cm]
+double StFcsDb::getProjectedDistance(StFcsCluster* ecal,StFcsCluster* hcal, double zvtx){
+    int eNS = northSouth(ecal->detectorId());
+    int hNS = northSouth(hcal->detectorId());
+    if(eNS!=hNS) return 1000;
+    double hX = getHcalProjectedToEcalX(hNS,hcal->x(),zvtx);
+    double hY = getHcalProjectedToEcalY(hNS,hcal->y(),zvtx); 
+    double eX = ecal->x() * getXWidth(eNS);
+    double eY = ecal->y() * getYWidth(eNS);
+    double dX = eX-hX;
+    double dY = eY-hY;
+    return sqrt(dX*dX + dY*dY);
+};
+
+//! Project Hcal cluster to Ecal plane and get distance from Ecal point [cm]
+double StFcsDb::getProjectedDistance(StFcsPoint* ecal,  StFcsCluster* hcal, double zvtx){
+    int eNS = northSouth(ecal->detectorId());
+    int hNS = northSouth(hcal->detectorId());
+    if(eNS!=hNS) return 1000;
+    double hX = getHcalProjectedToEcalX(hNS,hcal->x(),zvtx);
+    double hY = getHcalProjectedToEcalY(hNS,hcal->y(),zvtx); 
+    double eX = ecal->x() * getXWidth(eNS);
+    double eY = ecal->y() * getYWidth(eNS);
+    double dX = eX-hX;
+    double dY = eY-hY;
+    return sqrt(dX*dX + dY*dY);
+};
 
 //! get coordinates of center of the cell STAR frame from StFcsHit
 StThreeVectorD StFcsDb::getStarXYZ(StFcsHit* hit, float FcsZ) const{ 
