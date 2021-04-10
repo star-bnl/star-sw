@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.30 2021/01/12 14:34:12 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.31 2021/04/09 15:59:26 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.31  2021/04/09 15:59:26  jwebb
+ * Add particle definitions to support H3lambda quasi two body decay
+ *
  * Revision 1.30  2021/01/12 14:34:12  jwebb
  * Update to gstar_part.g and StarClassLibrary to support simulation of
  * H4 Lambda , He4 Lambda  and He5 Lambda hypernuclei.
@@ -406,6 +409,8 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 61054, kAntiHyperTriton, AntiH3(Lambda) --> AntiHe3 piplus );
        Geant2Pdg( 62053, kHyperTriton,         H3(Lambda) --> d p piminus );
        Geant2Pdg( 62054, kAntiHyperTriton, AntiH3(Lambda) --> dbar pbar piplus );	
+       Geant2Pdg( 63053, kHyperTriton,         H3(Lambda) --> quasi 2 body);
+       Geant2Pdg( 63054, kAntiHyperTriton, AntiH3(Lambda) --> quasi 2 body);
 
        Geant2Pdg( 61055, hid(1,3,1), H4(Lambda) --> He4 proton piminus );
        Geant2Pdg( 61057, hid(2,3,1), He4(Lambda) --> He3 proton piminus );
@@ -520,11 +525,13 @@ StParticleDefinition* StParticleTable::findParticleByGeantId(int geantId) const
     case 60053:
     case 61053:
     case 62053:
+    case 63053:
       p = StHyperTriton::instance();
       break;
     case 60054:
     case 61054:
     case 62054:
+    case 63054:
       p = StAntiHyperTriton::instance();      
       break;
       
