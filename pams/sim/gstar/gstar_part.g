@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.61 2021/01/29 17:30:15 jwebb Exp $
+* $Id: gstar_part.g,v 1.62 2021/04/09 15:49:01 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.62  2021/04/09 15:49:01  jwebb
+* Add particle definitions to support H3lambda quasi two body decay
+*
 * Revision 1.61  2021/01/29 17:30:15  jwebb
 * Remove the STOP, as we may be passed stable nuclei here
 *
@@ -643,6 +646,26 @@ MODULE gstar_part Is the STAR Particle Database
                       mode    = {1508,}              ,
                       trktyp  = kGtNEUT
 
+  """Fast decay lambdas to support hypertritons"""
+  PARTICLE FastLambda     code    = 11018                ,
+                      pdg     = 0                    ,
+                      mass    = 1.115683             ,  
+                      tlife   = 0.26320E-9           ,
+                      charge  = 0                    ,
+                      bratio  = {1.000,}             ,
+                      mode    = {1409,}              ,
+                      trktyp  = kGtNEUT
+ 
+  PARTICLE FastLambdaBar  code    = 11026                ,
+                      pdg     = 0                    ,
+                      mass    = 1.115683             ,  
+                      tlife   = 0.26320E-9           ,
+                      charge  = 0                    ,
+                      bratio  = {1.000,}             ,
+                      mode    = {1508,}              ,
+                      trktyp  = kGtNEUT
+
+
   ! The eta dalitz decay
   PARTICLE eta_dalitz code    = 10017                ,
                       pdg     = 0                    ,
@@ -688,7 +711,7 @@ MODULE gstar_part Is the STAR Particle Database
                                 mode      = {1112,}        ,
                                 trktyp    = kGtNEUT   
 
-  ! Some nice anti-nuclei defined w/ offset 50000
+  ! Some nice anti-nuclei defined w/ offset 50000 
 
   PARTICLE antiDeuteron code      = 50045            , 
                         mass      = 1.876            ,
@@ -734,6 +757,13 @@ MODULE gstar_part Is the STAR Particle Database
                              pdg       = -PDG_ION_ID(2,3) ,
                              trktyp    = kGtHION
 
+  PARTICLE Deuteron code      = 51045            , 
+                    mass      = 1.876            ,
+                    charge    = 1.0             ,
+                    tlife     = STABLE           ,
+                    pdg       = PDG_ION_ID(1,2) ,
+                    trktyp    = kGtHION
+
 
    """Define all hyper-nuclei and exotics with offset 60000"""
 * Particle hyperTriton  code      = 60053            ,   ! Placeholder for hypertriton
@@ -746,6 +776,8 @@ MODULE gstar_part Is the STAR Particle Database
 *                       mode      = { , ...}      
                         
 * Particle antiHyperTriton code   = 60054 , ...
+
+""" Hyper tritons (H3lambda) """
 
 Particle hyperTriton_he3_pi_minus code      = 61053            ,
                                   mass      = 2.99131          , 
@@ -783,6 +815,28 @@ Particle anti_hyperTriton_db_pb_pi code      = 62054  ,
                                   trktyp    = kGtHADR          ,
                                   bratio    = {1,}             ,
                                   mode      = {081553,}
+
+Particle hypertriton_quasi_DL     code      = 63053            ,
+                                  mass      = 2.99089          ,
+                                  charge    = +1               ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          
+
+     uw = { 0, 11018, 51045 }
+     Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
+
+Particle anti_hypertriton_quasi_DL  code      = 63054       ,
+                                  mass      = 2.99089          ,
+                                  charge    = -1               ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          
+
+     uw = { 0, 11026, 50045 }
+     Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
+
+                 
 
 
 Particle H4Lambda_He4_pi_minus    code = 61055       , 
