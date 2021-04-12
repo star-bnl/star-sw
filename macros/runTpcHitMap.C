@@ -1,0 +1,1 @@
+../StRoot/StTpcHitMap/runTpcHitMap.C
