@@ -2064,7 +2064,8 @@ my $NEvents = 100000;
 #$hist = "RunXXI07"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/06/21 add TpcSecRowB.20210129.000006.root and TpcLengthCorrectionMDF.20210129.000006.C Done with express dE/dx calibration for Run XXI 7p7GeV
 ######################################## Run XXI ########################################
 #$hist = "RunXXI10"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/TFG21c.B/"; $RECO = "/7p7GeV_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/06/21 add TpcSecRowB.20210129.000006.root and TpcLengthCorrectionMDF.20210129.000006.C Done with express dE/dx calibration for Run XXI 7p7GeV
-$hist = "RunXXI10FF"; $NEvents = 10000; $disk = "/hlt/cephfs/reco/2021/FF/TFG21c.B"; $RECO = "/7p7GeV_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/06/21 add TpcSecRowB.20210129.000006.root and TpcLengthCorrectionMDF.20210129.000006.C Done with express dE/dx calibration for Run XXI 7p7GeV
+#$hist = "RunXXI10FF"; $NEvents = 10000; $disk = "/hlt/cephfs/reco/2021/FF/TFG21c.B"; $RECO = "/7p7GeV_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/06/21 add TpcSecRowB.20210129.000006.root and TpcLengthCorrectionMDF.20210129.000006.C Done with express dE/dx calibration for Run XXI 7p7GeV
+$hist = "RunXXI11"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/TFG21c.B/"; $RECO = "/7p7GeV_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/01/21 recheck Time
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2280,7 +2281,8 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     my $cmd = "test ! -r " . $root . " && root.exe -q -b  '" . $macro;
 #    if ($Production =~ /P02gi2/ || $Production =~ /P02gi3/) {$cmd .= "N";}
 #    if ($Production =~ /^dAu/ or $Production =~ /^AuAu/) {$cmd .= "S";}
-    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ",\"$Year\")\' >& $log";
+#    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ",\"$Year\")\' >& $log";
+    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\")\' >& $log";
 #    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\' >& $logL";
 #    $cmd .= "; cp -p $logL $log;";
 #    $cmd .= ".C(10000,\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\'";
