@@ -66,7 +66,7 @@ void dEdx(Int_t nevents=1000,
   gROOT->LoadMacro("bfc.C");
   TString Chain("in,TpcHitMover,OSpaceZ2,OGridLeakFull,dEdxY2,magF,StEvent,mysql,NoDefault");
   if        (Year.Contains("2019")) { Chain += ",CorrY"; // ,analysis to add OPr40 for y2019
-  } else if (Year.Contains("202")) { Chain += ",CorrY"; // ,analysis to add OPr40 for y2020
+  } else if (Year.Contains("202"))  { Chain += ",CorrY"; // ,analysis to add OPr40 for y2020
   } else if (Year.Contains("2005")) { Chain += ",SCEbyE,OGridLeak,OShortR,OSpaceZ2,";
   } else                            { Chain += ",CorrX"; // ,analysis to add OPr40 for <= 2018
   }
@@ -93,7 +93,7 @@ void dEdx(Int_t nevents=1000,
       //      cout << "Year = " << Year.Data() << "\tyear " << Y.Data() << endl;
       if (Year.Contains(Y)) {
 	tMin = 10000*(y-1) + 1101;
-	tMax = 10000* y    +  831;
+	tMax = 10000* y    + 1031;
 	//	cout << "Year for year " << Y.Data() << "\ttMin = " << tMin << "\ttMax = " << tMax << endl;
 	dEdxY2->RemAttr("tMin"); dEdxY2->SetAttr("tMin",tMin);
 	dEdxY2->RemAttr("tMax"); dEdxY2->SetAttr("tMax",tMax);
