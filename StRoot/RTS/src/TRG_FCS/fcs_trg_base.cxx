@@ -130,7 +130,7 @@ void fcs_trg_base::init(const char* fname)
 
 	}
 	else if(!sim_mode) {
-		LOG(TERR,"init:realtime: ht_threshold is %d",fcs_data_c::ht_threshold) ;
+//		LOG(TERR,"init:realtime: ht_threshold is %d",fcs_data_c::ht_threshold) ;
 
 		for(int i=0;i<3;i++) {	// known in realtime
 			ht_threshold[i] = fcs_data_c::ht_threshold ;
@@ -232,6 +232,10 @@ void fcs_trg_base::run_start(u_int run)
 	memset(&errs,0,sizeof(errs)) ;
 	memset(&good,0,sizeof(good)) ;
 	memset(&statistics,0,sizeof(statistics)) ;
+
+	// cleanup, just in case
+	memset(d_in,0,sizeof(d_in)); 
+	memset(&d_out,0,sizeof(d_out)); 
 
 	start_event() ;	// just in case
 
@@ -449,15 +453,14 @@ void fcs_trg_base::fill_event(int det, int ns, int dep, int c, u_short *d16, int
 
 int fcs_trg_base::end_event()
 {
+	event_bad = 0 ;
+
 	if(!got_one) return 0 ;	// nothing to do; let's not waste time
 
 	verify_event_io() ;	// verify interconnectivity 
 
 	int dsmout = 0;
 
-	s1_bad = 0 ;
-	s2_bad = 0 ;
-	s3_bad = 0 ;
 
 	for(int xing=0;xing<marker.last_xing;xing++) {
     		if(log_level>1) {
@@ -572,6 +575,7 @@ int fcs_trg_base::verify_event_io()
 					}
 
 					if(s2_from_s1[i] != s1_to_s2[i]) {
+						event_bad |= 0x10 ;
 
 						if(log_level>1) LOG(ERR,"evt %d: S1_to_S2 IO: NS %d: ch %d: xing %d:%d: out 0x%02X, in 0x%02X\n",
 						    good,ns,i,x,t,s1_to_s2[i],s2_from_s1[i]) ;
@@ -627,6 +631,8 @@ int fcs_trg_base::verify_event_io()
 				int s2_to_s3 = d_in[x].s2[c/2].s2_to_s3[cc].d[t] ;
 
 				if(s2_to_s3 != s3_from_s2) {
+					event_bad |= 0x20 ;
+
 					errs.io_s2_to_s3++ ;
 					err = 1 ;
 				}
@@ -785,7 +791,9 @@ int fcs_trg_base::verify_event_sim(int xing)
 
 	}}}
 	
-	if(s1_failed) s1_bad++ ;
+	if(s1_failed) {
+		event_bad |= 1 ;
+	}
 
 	// verify stage_2 data locally to stage_2 DEP
 	for(int i=0;i<NS_COU;i++) {
@@ -841,7 +849,9 @@ int fcs_trg_base::verify_event_sim(int xing)
 	}}
 
 
-	if(s2_failed) s2_bad++ ;
+	if(s2_failed) {
+		event_bad |= 2 ;
+	}
 
 	// verify stage_3 locally to stage_2 DEP
 	if(tb_cou[0][3][0]==0) return bad ;	// no stage_3 in data
@@ -873,23 +883,25 @@ int fcs_trg_base::verify_event_sim(int xing)
 	}
 
 	// in case I want printouts
-	for(int t=0;t<8;t++) {
+	for(int t=0;t<4;t++) {
 		int d_sim = d_out.s3.dsm_out ;
 		int d_i = d_in[xing].s3.dsm_out.d[t] ;
 
 		if(want_log && log_level>0) {
-			LOG(ERR,"evt %d: S3 sim: xing %d:%d: sim 0x%03X, dta 0x%03X %s",evts,xing,t,
+			LOG(ERR,"evt %d: S3 sim: xing %d:%d: sim 0x%04X, dta 0x%04X %s",evts,xing,t,
 			       d_sim,d_i,want_log?"ERROR":"") ;
 
 		}
 		if(want_print && log_level > 3) {
-			printf("evt %d: S3 sim: xing %d:%d: sim 0x%03X, dta 0x%03X %s\n",evts,xing,t,
+			printf("evt %d: S3 sim: xing %d:%d: sim 0x%04X, dta 0x%04X %s\n",evts,xing,t,
 			       d_sim,d_i,want_log?"ERROR":"") ;
 		}
 	}
 			    
 
-	if(s3_failed) s3_bad++ ;
+	if(s3_failed) {
+		event_bad |= 4 ;
+	}
 
 	return bad ;
 }
@@ -1033,6 +1045,9 @@ void fcs_trg_base::stage_0(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *dt
 	case 1 :
 		stage_0_202101(adc, geo, pg, dta_out) ;
 		break ;
+	case 2 :
+		stage_0_202103(adc, geo, pg, dta_out) ;
+		break ;
 	default :
 		*dta_out = 0 ;
 		LOG(ERR,"stage_0: unknown version %d",stage_version[0]) ;
@@ -1076,6 +1091,9 @@ void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t g
 	// debugging versions below
 	case 0xFF210201 :
 		stage_2_tonko_202101(ecal,hcal,pres,geo,output) ;
+		break ;
+	case 0xFF210204 :
+		stage_2_tonko_202104(ecal,hcal,pres,geo,output) ;
 		break ;
 	default :
 		LOG(ERR,"Unknown stage_2 version %d",stage_version[2]) ;
