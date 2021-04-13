@@ -35,8 +35,10 @@ fcs_trg_lib.a : fcs_trg_base.o \
 	stage_2_202201.o \
 	stage_3_202201.o \
 	stage_2_tonko_202101.o \
+	stage_2_tonko_202104.o \
 	stage_3_tonko_202101.o \
-	stage_2_TAMU_202202.o	
+	stage_2_TAMU_202202.o \
+	stage_0_202103.o
 	$(RTS_AR)
 
 # DO NOT DELETE
@@ -51,6 +53,8 @@ stage_1_202201.o: fcs_trg_base.h
 stage_2_201900.o: fcs_trg_base.h
 stage_2_202201.o: fcs_trg_base.h
 stage_2_202201.o: fcs_ecal_epd_mask.h
+stage_2_TAMU_202202.o: fcs_trg_base.h
+stage_2_TAMU_202202.o: fcs_ecal_epd_mask.h
 stage_2_tonko_202101.o: fcs_trg_base.h
 stage_2_tonko_202101.o: fcs_ecal_epd_mask.h
 stage_3_201900.o: fcs_trg_base.h

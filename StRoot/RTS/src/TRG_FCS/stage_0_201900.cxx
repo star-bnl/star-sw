@@ -5,8 +5,8 @@
 void fcs_trg_base::stage_0_201900(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *dta_out)
 {
 	int sum = 0 ;
-	int peak = 0 ;
-	int last = 0 ;
+//	int peak = 0 ;
+//	int last = 0 ;
 
 	for(int tb=0;tb<8;tb++) {
 		u_short radc = adc.d[tb] ;
@@ -14,8 +14,8 @@ void fcs_trg_base::stage_0_201900(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_
 		switch(tb) {
 		case 0 :
 			sum = radc ;
-			peak = 0 ;
-			last = 0 ;
+//			peak = 0 ;
+//			last = 0 ;
 			break ;
 		default :
 			sum += radc ;
