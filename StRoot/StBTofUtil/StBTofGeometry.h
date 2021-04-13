@@ -1,7 +1,7 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.25 2018/03/09 21:36:17 smirnovd Exp $
- * 
+ * $Id: StBTofGeometry.h,v 1.26 2021/04/13 22:35:50 geurts Exp $
+ *
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
  *
@@ -56,13 +56,13 @@ class TGeoManager;
 /**
    \class StBTofNode
    Basic TOF geometry class
- */ 
+ */
 class StBTofNode : public TObject {
  protected:
   TVolumeView *fView;
   TVolumePosition  *pView;
   TVolumeView *mMasterNode;
-   
+
    Double_t  mTransMRS[3];   //Translate vector in MRS
    Double_t  mRotMRS[9];     //RotateMatrix from MRS to this
    Bool_t    mTransFlag;     //Flag, kTRUE=if translation/matrix updated
@@ -83,7 +83,7 @@ class StBTofNode : public TObject {
     StBTofNode(TVolumeView *element, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos=0);
 
     StBTofNode(const TGeoPhysicalNode& gpNode, const StThreeVectorD& align);
-    
+
 
     void      UpdateMatrix();
     void      BuildMembers();
@@ -103,7 +103,7 @@ class StBTofNode : public TObject {
    TVolumeView*    GetfView() const { return fView; }
    TVolumePosition* GetpView() const { return pView; }
    TVolumeView*    GetTopNode() const { return mMasterNode; }
-   static void     DebugOn()   { mDebug = kTRUE; }     
+   static void     DebugOn()   { mDebug = kTRUE; }
    static void     DebugOff()  { mDebug = kFALSE; }
    static Bool_t   IsDebugOn() { return mDebug; }
 
@@ -114,7 +114,7 @@ class StBTofNode : public TObject {
    void            Local2Master(const Double_t* local, Double_t* master);
    void            Master2Local(const Double_t* master, Double_t* local);
    TShape         *GetShape() const { return fView->GetPosition()->GetNode()->GetShape();}
-   
+
    StThreeVectorD  YZPlaneNormal();
    StThreeVectorD  GetCenterPosition() const;
 //   Double_t        GetCenterRxy() const { return mCenterRxy; }
@@ -179,7 +179,7 @@ class StBTofGeomTray : public StBTofNode {
    StBTofGeomTray() {}
    ~StBTofGeomTray() {};
 
-   static void       DebugOn()   { mDebug = kTRUE; }     
+   static void       DebugOn()   { mDebug = kTRUE; }
    static void       DebugOff()  { mDebug = kFALSE; }
    static Bool_t     IsDebugOn() { return mDebug; }
 
@@ -222,7 +222,7 @@ class StBTofGeomSensor : public StBTofNode {
    StBTofGeomSensor() {}
    ~StBTofGeomSensor() {}
 
-   static void       DebugOn()   { mDebug = kTRUE; }     
+   static void       DebugOn()   { mDebug = kTRUE; }
    static void       DebugOff()  { mDebug = kFALSE; }
    static Bool_t     IsDebugOn() { return mDebug; }
 
@@ -280,10 +280,8 @@ class StBTofGeometry : public TNamed {
 
    std::string FormTGeoPath(TGeoManager &geoManager, int trayId, bool hasGmt = false, int moduleId = -1);
 
-   static bool TrayHasGmtModules(int trayId)
-   {
-      return trayId == 8 || trayId == 23 || trayId == 93 || trayId == 108;
-   }
+   static bool mGemTofGeom; //! indicate whether this geometry has GEMTOF trays (consider default "true" for all Runs13+)
+   static bool TrayHasGmtModules(int trayId); //! flag a tray as a GEMTOF tray
 
    void InitFrom(TVolume &starHall);
 
@@ -305,13 +303,13 @@ class StBTofGeometry : public TNamed {
 
    Bool_t          mIsMC;      //!Control MC input (ignore alignment corrections)
    static Bool_t   mDebug;     //!Control message printing of this class
-   
+
    string  mAlignFile;  //! filename for alignment input
 
    static const char* sectorPref ;//= "BSEC";
    static const char* trayPref   ;//= "BTRA";
    static const char* senPref    ;//= "BRMD";
-   
+
    /// Alignment parameters
    Double_t    mTrayX0[mNTrays];
    Double_t    mTrayY0[mNTrays];
@@ -333,7 +331,7 @@ class StBTofGeometry : public TNamed {
 
    static Bool_t      LackThis(const char* fromWhere);
 
-   static void   DebugOn()   { mDebug = kTRUE; }     
+   static void   DebugOn()   { mDebug = kTRUE; }
    static void   DebugOff()  { mDebug = kFALSE; }
    static Bool_t IsDebugOn() { return mDebug; }
    void          SetMCOn()   { mIsMC = kTRUE; }
@@ -399,6 +397,10 @@ R__EXTERN  StBTofGeometry* gBTofGeometry;
 
 /*******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.26  2021/04/13 22:35:50  geurts
+ * Fixed geomtry serious bug in accounting of valid trays and in the handling of GEM-trays pre-Run13 (introduced with v1.14.2.13)
+ * h/t to Leszek Kosarzewski.
+ *
  * Revision 1.25  2018/03/09 21:36:17  smirnovd
  * Remove declared but undefined function
  *
