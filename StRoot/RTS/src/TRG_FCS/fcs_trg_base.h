@@ -49,6 +49,7 @@ public:
 	void stage_0(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
 	void stage_0_201900(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
 	void stage_0_202101(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
+	void stage_0_202103(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
 
 	void stage_1(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
 	void stage_1_201900(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
@@ -59,6 +60,7 @@ public:
 	void stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_TAMU_202202(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_tonko_202101(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_tonko_202104(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 
 	// stage_3 is running in DEP/IO (1 Main) connected to STAR Trigger RAT/DSM
 	void stage_3(link_t from_s2[], u_short *to_dsm) ;
@@ -220,9 +222,7 @@ public:
 	static int fcs_trgDebug ;
 
 	// per event 
-	int s1_bad ;
-	int s2_bad ;
-	int s3_bad ;
+	int event_bad ;
 
 	// stage_x algo params (same as in firmware)
 	static u_short stage_params[4][16] ;	// [stage][param_ix] ;
