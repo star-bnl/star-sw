@@ -41,6 +41,9 @@ public:
 	static const int DEP_HCAL_COU = 9 ;
 	static const int DEP_ECAL_COU = 24 ;
 	static const int DEP_PRE_COU = 6 ;
+	static const int DEP_HCAL_TRG_COU = 8 ;
+	static const int DEP_ECAL_TRG_COU = 20 ;
+	static const int DEP_PRE_TRG_COU = 6 ;
 
 	fcs_trg_base() ;
 	virtual ~fcs_trg_base() ;
@@ -59,6 +62,7 @@ public:
 	void stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_TAMU_202202(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_tonko_202101(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_tonko_202104(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 
@@ -66,6 +70,7 @@ public:
 	void stage_3(link_t from_s2[], u_short *to_dsm) ;
 	void stage_3_201900(link_t from_s2[], u_short *to_dsm) ;
 	void stage_3_202201(link_t from_s2[], u_short *to_dsm) ;
+	void stage_3_202203(link_t from_s2[], u_short *to_dsm) ;
 	void stage_3_tonko_202101(link_t from_s2[], u_short *to_dsm) ;
 
 	virtual u_int get_version() ;
@@ -261,7 +266,9 @@ public:
 	static u_short JETTHR2 ;       
 	static u_short ETOTTHR ;       
 	static u_short HTOTTHR ;       
-
+	static u_short EHTTHR ;
+	static u_short HHTTHR ;
+	static u_short PHTTHR ;
 
 	// various stuff...
 

@@ -42,6 +42,9 @@ u_short        fcs_trg_base::JETTHR1 ;
 u_short        fcs_trg_base::JETTHR2 ;
 u_short        fcs_trg_base::ETOTTHR ;
 u_short        fcs_trg_base::HTOTTHR ;
+u_short        fcs_trg_base::EHTTHR ;
+u_short        fcs_trg_base::HHTTHR ;
+u_short        fcs_trg_base::PHTTHR ;
 
 u_int fcs_trg_base::data_format ;
 
@@ -209,6 +212,9 @@ void fcs_trg_base::init(const char* fname)
 	JETTHR2 = 128;
 	ETOTTHR = 10 ;
 	HTOTTHR = 10 ;
+	EHTTHR = 32 ;
+	HHTTHR = 32 ;
+	PHTTHR = 0 ;
 
 	// IMPORTANT: Requested Stage_x versions defaults
 	// Either set by the user to her/his wishes or picked up from the DAQ file
@@ -1087,6 +1093,9 @@ void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t g
 	case 2 :
 		stage_2_TAMU_202202(ecal,hcal,pres,geo,output) ;
 		break ;
+	case 3 :
+		stage_2_202203(ecal,hcal,pres,geo,output) ;
+		break ;
 
 	// debugging versions below
 	case 0xFF210201 :
@@ -1113,6 +1122,9 @@ void fcs_trg_base::stage_3(link_t link[4], u_short *dsm_out)
 		break ;
 	case 1 :
 		stage_3_202201(link,dsm_out) ;
+		break ;
+	case 3 :
+		stage_3_202203(link,dsm_out) ;
 		break ;
 	// debugging versions below
 	case 0xFF210201 :
