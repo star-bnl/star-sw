@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.62 2021/04/09 15:49:01 jwebb Exp $
+* $Id: gstar_part.g,v 1.63 2021/04/14 19:45:18 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.63  2021/04/14 19:45:18  jwebb
+* Tweaks to mass, lifetime requested as part of the quasi two body decay
+*
 * Revision 1.62  2021/04/09 15:49:01  jwebb
 * Add particle definitions to support H3lambda quasi two body decay
 *
@@ -649,8 +652,8 @@ MODULE gstar_part Is the STAR Particle Database
   """Fast decay lambdas to support hypertritons"""
   PARTICLE FastLambda     code    = 11018                ,
                       pdg     = 0                    ,
-                      mass    = 1.115683             ,  
-                      tlife   = 0.26320E-9           ,
+                      mass    = 1.115 "683"          ,  
+                      tlife   = 1.0E-26              ,
                       charge  = 0                    ,
                       bratio  = {1.000,}             ,
                       mode    = {1409,}              ,
@@ -658,8 +661,8 @@ MODULE gstar_part Is the STAR Particle Database
  
   PARTICLE FastLambdaBar  code    = 11026                ,
                       pdg     = 0                    ,
-                      mass    = 1.115683             ,  
-                      tlife   = 0.26320E-9           ,
+                      mass    = 1.115 "683"          ,  
+                      tlife   = 1.0E-26              ,
                       charge  = 0                    ,
                       bratio  = {1.000,}             ,
                       mode    = {1508,}              ,
@@ -817,7 +820,7 @@ Particle anti_hyperTriton_db_pb_pi code      = 62054  ,
                                   mode      = {081553,}
 
 Particle hypertriton_quasi_DL     code      = 63053            ,
-                                  mass      = 2.99089          ,
+                                  mass      = 2.99130          ,
                                   charge    = +1               ,
                                   tlife     = 2.6320e-10       ,
                                   pdg       = UNDEFINED        ,
@@ -827,7 +830,7 @@ Particle hypertriton_quasi_DL     code      = 63053            ,
      Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
 
 Particle anti_hypertriton_quasi_DL  code      = 63054       ,
-                                  mass      = 2.99089          ,
+                                  mass      = 2.99130          ,
                                   charge    = -1               ,
                                   tlife     = 2.6320e-10       ,
                                   pdg       = UNDEFINED        ,
