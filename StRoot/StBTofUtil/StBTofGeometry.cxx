@@ -1,7 +1,7 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.32 2019/08/07 15:56:52 geurts Exp $
- * 
+ * $Id: StBTofGeometry.cxx,v 1.33 2021/04/13 22:35:49 geurts Exp $
+ *
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
  *
@@ -197,7 +197,7 @@ void StBTofNode::CalcMatrix(StBTofNode* son, Double_t* align,
    // Alignment parameters;
    trans[0] += align[0];
    trans[1] += align[1];
-   trans[2] += align[2];   
+   trans[2] += align[2];
 
    return;
 }
@@ -294,7 +294,7 @@ void StBTofNode::Local2Master(const Double_t* local, Double_t* master)
      } else {
        TVolumeView *son = GetfView();
        TVolumeView *mrs = GetTopNode();
-     
+
        TVolumePosition *pos = 0;
        pos = son->Local2Master(son, mrs);
        pos->Local2Master(local, master);
@@ -376,7 +376,7 @@ const
 }
 
 //_____________________________________________________________________________
-Bool_t StBTofNode::IsLocalPointIn(const Double_t x, const Double_t y, 
+Bool_t StBTofNode::IsLocalPointIn(const Double_t x, const Double_t y,
                                       const Double_t z)
 {
    TBRIK *brik = dynamic_cast<TBRIK*> (GetShape());
@@ -548,7 +548,7 @@ void StBTofGeomTray::Print(const Option_t *opt) const
 Bool_t StBTofGeomSensor::mDebug = kFALSE;
 
 //_____________________________________________________________________________
-StBTofGeomSensor::StBTofGeomSensor(TVolumeView *element, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos) 
+StBTofGeomSensor::StBTofGeomSensor(TVolumeView *element, TVolumeView *top, const StThreeVectorD& align, TVolumePosition *pos)
   : StBTofNode(element, top, align, pos)
 {
    mModuleIndex = element->GetPosition()->GetId();
@@ -638,7 +638,7 @@ StThreeVectorD StBTofGeomSensor::GetCellPosition(const Int_t icell)
       xg[2] = 0.;
    }
 
-   return StThreeVectorD(xg[0],xg[1],xg[2]);  
+   return StThreeVectorD(xg[0],xg[1],xg[2]);
 }
 
 
@@ -651,12 +651,12 @@ Int_t StBTofGeomSensor::FindCellIndex(const Double_t* local)
 
    Int_t icell=-1;
    if ( IsLocalPointIn(local[0],local[1],local[2]) ) {
-    
+
       for (Int_t i=0; i<mCells; i++) {
          if (mCellY[i]<= local[1] && local[1]<=mCellY[i+1]) {
             icell = i+1;
             break;
-	    
+
 	 }
       }
    }
@@ -688,6 +688,8 @@ static const Int_t CELLSINMODULE = 6;
 
 
 Bool_t StBTofGeometry::mDebug = kFALSE;
+bool StBTofGeometry::mGemTofGeom = true; // Consider this default: GEMtof trays are in all Runs13+
+
 
 //_____________________________________________________________________________
 StBTofGeometry::StBTofGeometry(const char* name, const char* title)
@@ -732,7 +734,7 @@ StBTofGeometry::~StBTofGeometry()
        mBTofSensor[i][j] = 0;
      }
    }
-   
+
 }
 
 //_____________________________________________________________________________
@@ -740,7 +742,7 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoMan
 {
    //
    //Define geometry parameters and establish the geometry
-   //  
+   //
    if(maker->Debug()) DebugOn();
 
    // Zero out internal alignment arrays
@@ -802,6 +804,12 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoMan
      }
    }
 
+/* GEM trays appear in Runs13+
+ * Be certain that you select the correct geometry tag when using this. Y2012 tag and Y2013+ data will generate a bug!
+*/
+
+   mGemTofGeom = (maker->GetDateTime().GetYear() >=2013);
+
    if ( starHall )
      InitFrom( *starHall );
    else if ( geoManager )
@@ -814,9 +822,8 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoMan
  * This caused a shift in the module index for geant[1-24] instead of daqs [5-28].
  * This is a correction to shift the geant modules such that they can match with daq info
  *
- * Be certain that you select the correct geometry tag when using this. Y2012 tag and Y2013+ data will generate a bug!
- */ 
-   if( maker->GetDateTime().GetYear() >= 2013 ){
+ */
+   if(mGemTofGeom){
      LOG_INFO << "StBTofGeometry::Init -- GEMTOF-tray module indexes will be corrected for year " <<  maker->GetDateTime().GetYear() << endm;
      for(Int_t j=0;j<mModulesInTray;j++){
        Int_t imod(0);
@@ -835,12 +842,23 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoMan
        if(mBTofSensor[107][j]){
 	 imod = mBTofSensor[107][j]->Index();
 	 mBTofSensor[107][j]->SetIndex(imod+4);
-       }  
+       }
      }//for j
    }//if Year
 
    mInitFlag = true;
 }
+
+//_____________________________________________________________________________
+bool StBTofGeometry::TrayHasGmtModules(int trayId)
+{
+ // only tag GEM trays 8, 23, 93, and 108 for Runs 13+
+ if (mGemTofGeom) // mGemTofGeom is determined in StBTofGeometry::Init()
+   return trayId == 8 || trayId == 23 || trayId == 93 || trayId == 108;
+ else
+   return false;
+}
+
 //_____________________________________________________________________________
 void StBTofGeometry::InitFrom(TVolume &starHall)
 {
@@ -861,11 +879,11 @@ void StBTofGeometry::InitFrom(TVolume &starHall)
 
 	starDetectorElement->SetVisibility(TVolume::kBothVisible);
 	starDetectorElement->Mark();
-	if (starDetectorElement->GetLineColor()==1 || starDetectorElement->GetLineColor()==7) 
+	if (starDetectorElement->GetLineColor()==1 || starDetectorElement->GetLineColor()==7)
 	  starDetectorElement->SetLineColor(14);
-	
+
       } else {
-	
+
 	starDetectorElement->UnMark();
 	starDetectorElement->SetVisibility(TVolume::kThisUnvisible);
 
@@ -984,7 +1002,7 @@ void StBTofGeometry::InitFrom(TGeoManager &geoManager)
 
     StThreeVectorD align(mTrayX0[trayId-1], mTrayY0[trayId-1], mTrayZ0[trayId-1]);
 
-    mBTofTray[trayId-1] = new StBTofGeomTray(trayId, *gpNode, align);
+    mBTofTray[mNValidTrays-1] = new StBTofGeomTray(trayId, *gpNode, align);
 
     // Loop over the max number of modules (mNModules) that can be present in a tray
     int maxModuleId = hasGmt ? 24 : mNModules;
@@ -1001,7 +1019,7 @@ void StBTofGeometry::InitFrom(TGeoManager &geoManager)
 
       const TGeoPhysicalNode* gpNode = geoManager.MakePhysicalNode( geoPath.c_str() );
 
-      mBTofSensor[trayId-1][moduleId-1] = new StBTofGeomSensor(moduleId, *gpNode, align);
+      mBTofSensor[mNValidTrays-1][moduleId-1] = new StBTofGeomSensor(moduleId, *gpNode, align);
     }
   }
 
@@ -1220,7 +1238,7 @@ const
 
    Int_t sensorId = CalcSensorId(imodule,itray);
    if (sensorId<0) return cellId;                 //Invalid sensorId
-   
+
    cellId = icell-1 + mCellsInModule*sensorId;
 
    return cellId;
@@ -1468,7 +1486,7 @@ const
 	 LOG_INFO << " No sensors in tray " << itray << endm;
 	 return cellId;
        }
-       
+
        for( int j=0;j<mModulesInTray;j++) {
 	 if(!mBTofSensor[i][j]) continue;
 	 if ( mBTofSensor[i][j]->IsGlobalPointIn(point) ) {
@@ -1542,7 +1560,7 @@ const
      for(int j=0;j<mModulesInTray;j++) {
        if(!mBTofSensor[i][j]) continue;
        int moduleId = mBTofSensor[i][j]->Index();
-       if ( mBTofSensor[i][j]->HelixCross(helix,pathLen,cross) ) {	   
+       if ( mBTofSensor[i][j]->HelixCross(helix,pathLen,cross) ) {
 	 Double_t global[3], local[3];
 	 global[0] = cross.x();
 	 global[1] = cross.y();
@@ -1558,7 +1576,7 @@ const
        }
      } // end for (j)
    } // end for (i)
-   
+
    if (idVec.size()>0) {
      //     mleak1.PrintMem(" normal return true");
      return kTRUE;
@@ -1662,7 +1680,7 @@ const
 {
   /////////////////////////////////////////////////////////
   // optimized :
-  // input : helix, validModuleVec from DAQ, 
+  // input : helix, validModuleVec from DAQ,
   //         projTrayVec possible hit tray from this helix
   //                                   Xin Dong
   /////////////////////////////////////////////////////////
@@ -1705,7 +1723,7 @@ const
 	 int validtrayId = validModuleVec[iv]/100;
 	 int validmoduleId = validModuleVec[iv]%100;
 	 if(validtrayId==trayId&&validmoduleId==moduleId) {
-	   if ( mBTofSensor[i][j]->HelixCross(helix,pathLen,cross) ) {	   
+	   if ( mBTofSensor[i][j]->HelixCross(helix,pathLen,cross) ) {
 	     Double_t global[3], local[3];
 	     global[0] = cross.x();
 	     global[1] = cross.y();
@@ -1787,7 +1805,7 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
       if(found) continue;
 
       trayVec.push_back(itray[k]);
-    } // end loop k  
+    } // end loop k
   } // end loop i
 
 /*
@@ -1797,13 +1815,17 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
    }
    cout << endl;
 */
-  
+
   if(trayVec.size()>0) return kTRUE;
   else return kFALSE;
 }
 
 /*******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.33  2021/04/13 22:35:49  geurts
+ * Fixed geomtry serious bug in accounting of valid trays and in the handling of GEM-trays pre-Run13 (introduced with v1.14.2.13)
+ * h/t to Leszek Kosarzewski.
+ *
  * Revision 1.32  2019/08/07 15:56:52  geurts
  * Fix node paths when using TpcRefSys (affects runs before 2013)
  *
