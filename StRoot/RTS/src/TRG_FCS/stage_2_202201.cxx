@@ -82,10 +82,10 @@ void  fcs_trg_base::stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], 
         if(fcs_trgDebug>=2) printf("H4x4 ");
         for(int c=0; c<5; c++){
             hsum[ns][r][c]
-                = hcal[ETbTdep[r  ][c  ]].d[HTbTadr[r  ][c  ]]
-                + hcal[ETbTdep[r  ][c+1]].d[HTbTadr[r  ][c+1]]
-                + hcal[ETbTdep[r+1][c  ]].d[HTbTadr[r+1][c  ]]
-                + hcal[ETbTdep[r+1][c+1]].d[HTbTadr[r+1][c+1]];
+                = hcal[HTbTdep[r  ][c  ]].d[HTbTadr[r  ][c  ]]
+                + hcal[HTbTdep[r  ][c+1]].d[HTbTadr[r  ][c+1]]
+                + hcal[HTbTdep[r+1][c  ]].d[HTbTadr[r+1][c  ]]
+                + hcal[HTbTdep[r+1][c+1]].d[HTbTadr[r+1][c+1]];
             //if(hsum[r][c] > 0xff) hsum[r][c]=0xff;  //Tonko says no point to saturate at 8bit here
             if(fcs_trgDebug>=2) printf("%5d ",hsum[ns][r][c]);
         }
