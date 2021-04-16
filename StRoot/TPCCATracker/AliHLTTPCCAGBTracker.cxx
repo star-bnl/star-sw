@@ -452,6 +452,7 @@ void AliHLTTPCCAGBTracker::Merge()
 
         if( track.IsRevers() ) trackGB.SetReverse();
 
+	int skp(0);
 	for ( int icl0 = 0; icl0 < track.NClusters(); icl0++ ) {
 	  int icl = icl0;
 	  if( (!track.IsGrow() && !track.IsRevers()) || (track.IsGrow() && track.IsRevers()) ) icl = track.NClusters() - icl0 - 1;
@@ -486,20 +487,26 @@ void AliHLTTPCCAGBTracker::Merge()
 	    unsigned int iSlice = iDsrc.Slice();
 	    unsigned int iRow   = iDsrc.Row();
 	    unsigned int iClu   = iDsrc.Cluster();
-	    fTrackHits[nTrackHits + nTrackHitsTmp + icl0] = fFirstSliceHit[iSlice] + fSlices[iSlice].ClusterData().RowOffset( iRow ) + iClu;
-	    fTrackHitsSegmentsId[nTrackHits + nTrackHitsTmp + icl0] = fNTracks + iSegment + 1;
+	    if( (unsigned int)fTrackHits[nTrackHits + nTrackHitsTmp + icl0 - skp - 1] == fFirstSliceHit[iSlice] + fSlices[iSlice].ClusterData().RowOffset( iRow ) + iClu ) {
+	      skp++;
+	      continue;
+	    }
+	    fTrackHits[nTrackHits + nTrackHitsTmp + icl0 - skp] = fFirstSliceHit[iSlice] + fSlices[iSlice].ClusterData().RowOffset( iRow ) + iClu;
+	    fTrackHitsSegmentsId[nTrackHits + nTrackHitsTmp + icl0 - skp] = fNTracks + iSegment + 1;
 	  }
+
 	  AliHLTTPCCAGBTrack &trackGBseg1 = fTracks[fNTracks + iSegment + 1];
 	  trackGBseg1.SetFirstHitRef( nTrackHits + nTrackHitsTmp );
 	  trackGBseg1.SetInnerParam( trackNext.InnerParam() );
 	  trackGBseg1.SetOuterParam( trackNext.OuterParam() );
 	  trackGBseg1.SetAlpha( trackNext.InnerAlpha() );
 	  trackGBseg1.SetDeDx( 0 );
-	  trackGBseg1.SetNHits( trackNext.NClusters() );
+	  trackGBseg1.SetNHits( trackNext.NClusters() - skp );
 	  trackGBseg1.SetLooperClone();
 	  if( (trackNext.IsRevers() && trackNext.IsGrow()) || (!trackNext.IsRevers() && !trackNext.IsGrow()) ) trackGBseg1.SetReverse();
 
-	  nTrackHitsTmp += trackNext.NClusters();
+	  nTrackHitsTmp += trackNext.NClusters() - skp;
+	  skp = 0;
 	  nextTr = trackNext.LpNextNb();
 	  if( nextTr == -1 ) {
 	    if( (!trackNext.IsRevers() && trackNext.IsGrow()) || (trackNext.IsRevers() && !trackNext.IsGrow()) ) {
