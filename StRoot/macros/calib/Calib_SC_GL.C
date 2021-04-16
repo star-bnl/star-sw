@@ -128,7 +128,7 @@
 
 // Switches for users? Needs better arrangement
 Int_t EWmode = 0; // -1 east, 0 both, 1 west
-Int_t EW_ASYMMETRY = kTRUE;
+Int_t EW_ASYMMETRY = kFALSE;
 
 // Switches and constants for experts
 Bool_t USE_OLD_STDDEV = kTRUE; // method for determining STDDEV
@@ -138,6 +138,8 @@ Bool_t FORCE_g4_same  = kTRUE;
 Bool_t FORCE_g5_same  = kTRUE; // if g4_same, then g3_same and g5_same are equivalent
 Bool_t NO_PLOTS       = kFALSE;
 Bool_t BY_SECTOR      = kFALSE;
+Bool_t FIX_GL         = kFALSE;
+double GUESS_GL       = 9.0; // auto-sets to 0.5 for runs>20000000 (iTPC) unless FIX_GL is true
 double GUESS_g5       = 15.0;
 double MAX_DEV        = 4.0;
 double REF_CONST1     = 0.318;
@@ -482,6 +484,7 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
       memcpy(&(m_ugl[nMeasures]),SCi[i]->GetV1(),nMeasuresI*sizeof(Double_t));
       ugl[i] = m_ugl[nMeasures];
     } else for (k=0; k<nMeasuresI; k++) m_ugl[k+nMeasures] = ugl[i]; // if not in the ntuple
+    if (!FIX_GL && (m_runs[0] > 20000000)) GUESS_GL = 0.5;
     for (k=0; k<nMeasuresI; k++) {
       m_set[k+nMeasures] = i;
       m_runIdx[k+nMeasures] = k+nMeasures;
@@ -517,7 +520,7 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
     STDDEV = STDDEV_SC;
 
     // Set starting values and step sizes for parameters
-    double sce_init = 25.0; // approximate guess on (g5 + GL)
+    double sce_init = GUESS_g5 + GUESS_GL; // approximate guess on (g5 + GL)
     if (DO_PCA) {
       if (!ITER0) sce_init = fitParsSCGL[1]+fitParsSCGL[4];
     } else {
@@ -695,10 +698,10 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
   int npar = 9;
   TString fname[9] = {"g2","log(g5)","log(SC)","SO","log(GL)","GLO","log(g5r)","log(g4r)","log(ewratio)"};
   Double_t fstart[9] = {fitParsGL[0], TMath::Log(fitParsSC[2]), TMath::Log(scp),
-    sop, TMath::Log(9.0), GLO, 0, 0, TMath::Log(ewp)};
+    sop, TMath::Log(GUESS_GL), GLO, 0, 0, TMath::Log(ewp)};
   Double_t fstep[9]  = {fitParErrsGL[0], fitParErrsSC[2]/fitParsSC[2], escp/scp,
     esop, 0.1, eGLO, 0.001, 0.001, 0.001};
-  Bool_t ffix[9] = {kFALSE, kFALSE, kFALSE, kFALSE, kFALSE,
+  Bool_t ffix[9] = {kFALSE, kFALSE, kFALSE, kFALSE, FIX_GL,
     FORCE_GLO_SO, (FORCE_g3_same || FORCE_g5_same), FORCE_g4_same, !EW_ASYMMETRY};
   SetMinuitPars(9,fname,fstart,fstep,debug,ffix);
   minuit->SetFCN(fnchSCGapf);
@@ -2302,8 +2305,11 @@ void PrintResult(double scp, double escp, double sop, double esop,
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 2.10 2019/10/21 15:20:57 genevb Exp $
+// $Id: Calib_SC_GL.C,v 2.11 2021/04/16 16:11:57 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 2.11  2021/04/16 16:11:57  genevb
+// Introduce FIX_GL switch for fixed GL fits
+//
 // Revision 2.10  2019/10/21 15:20:57  genevb
 // Avoid Minuit complaint when asking about a fixed parameter
 //
