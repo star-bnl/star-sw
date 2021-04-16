@@ -39,9 +39,9 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     if(fcs_trgDebug>=2) printf("Stage2v3 ns=%d\n",ns);
 
     // NS Marker
-    u_short params ;
-    if(ns==0) params = 0xBBAA ;
-    else params = 0xDDCC ;
+//    u_short params ;
+//  if(ns==0) params = 0xBBAA ;
+//    else params = 0xDDCC ;
 
     // Creating 2x2 row/column address map when called first time
     static u_int ETbTdep[16][10]; //DEP#
