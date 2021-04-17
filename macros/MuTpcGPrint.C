@@ -6,8 +6,8 @@
 #include "PrintTH1.C"
 #include "TCanvas.h"
 void MuTpcGPrint() {
-  cout << gDirectory->GetName() << endl;
 #if 0
+  cout << gDirectory->GetName() << endl;
   TCanvas *c1 = new TCanvas("c1","c1",10,10,700,900); c1->Divide(1,3);
 c1->cd(1)->SetLogz(1);  dXS->Project3D("zx")->Draw("colz"); dXS_zx->FitSlicesY(); dXS_zx_1->Draw("same"); PrintTH1(dXS_zx_1);
 c1->cd(2)->SetLogz(1);  dYS->Project3D("zx")->Draw("colz"); dYS_zx->FitSlicesY(); dYS_zx_1->Draw("same"); PrintTH1(dYS_zx_1); 
@@ -22,6 +22,11 @@ c2->cd(2);  dZ->ProjectionY()->Fit("gaus"); cout << Form(" dZ: %6.4f +/- %6.4f",
 c2->cd(3);  dX->ProjectionY()->Fit("gaus"); cout << Form(" dX: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
 c2->cd(4);  dY->ProjectionY()->Fit("gaus"); cout << Form(" dY: %6.4f +/- %6.4f",gaus->GetParameter(1), gaus->GetParameter(2)) << endl;
 #else
- dT->FitSlicesY(); dT_1->Fit("pol2");  cout << gDirectory->GetName() << Form("\t dT: %8.6f +/- %8.6f",pol2->GetParameter(0), pol2->GetParError(0)) << endl;
+ TH1D *dTpy = (TH1D *) dT->ProjectionY(); dTpy->Fit("gaus","q"); TF1 *gaus = (TF1 *) dTpy->GetListOfFunctions()->FindObject("gaus"); 
+ dT->FitSlicesY(); dT_1->Fit("pol2","q");  TF1 *pol2 = (TF1 *) dT_1->GetListOfFunctions()->FindObject("pol2"); 
+ cout << gDirectory->GetName() 		    
+      << Form("\t dT: %8.6f +/- %8.6f",gaus->GetParameter(1), gaus->GetParameter(2)) 
+      << Form("\t dT: %8.6f +/- %8.6f",pol2->GetParameter(0), pol2->GetParError(0)) << endl;
 #endif
 }
+//________________________________________________________________________________

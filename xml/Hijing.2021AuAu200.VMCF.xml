@@ -31,7 +31,7 @@
   if (! $?) set KFVertex = ",KFVertex";
   if (! -r ${generF} ) then
 #    root.exe -q -b -x 'bfc.C(100,"In,P2020a,readAll,sdt20200111.052520,StiCA,StiKFVertex,-hitfilt,-geantOut,-evout,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,-useXgeom,NoHistos,noTags,noRunco","'${file}'")' &gt;&amp; ${logName}
-   root.exe -q -b -x 'bfc.C(100,"genIn,MC.2020,McTpcAna,-bbcSim,StiCA,-hitfilt,geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,ODistoSmear,useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
+   root.exe -q -b -x 'bfc.C(100,"genIn,MC.2021,McTpcAna,-bbcSim,StiCA,-hitfilt,geantOut,evout,vmc,VMCAlignment,CorrY,OSpaceZ2,OGridLeakFull,ODistoSmear,useXgeom,NoHistos,noTags,noRunco'${sdt}',RunG.1","'${file}'",0,"'${tagf}'")' &gt;&amp; ${logName}
   endif
 </command>
 <!-- <input URL="file:/net/l404/data/fisyak/reco/2019/hijingAuAu200.DEV2.StiCA.Minuit.newCut/*.event.root" /> -->

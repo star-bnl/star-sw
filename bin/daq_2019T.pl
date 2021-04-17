@@ -63,6 +63,7 @@ foreach my $glob (@globs) {
   }
 }
 #____________________________________________________________
+my @list = ();
 foreach my $run (sort keys %Runs) {
   my $r = File::Basename::basename($run);
   if (GoodRun($def,$r) < 0) {next;}
@@ -79,11 +80,25 @@ foreach my $run (sort keys %Runs) {
     if (-r $pifile) {next;}
     my $blafile = $b . ".bla.root";
     if (-r $blafile) {next;}
-    print "string:$file\n";
+    push @list, $file;
+#    print "string:$file\n";
       $fNo++;
-    if ($fNo > 20) {last;}
+#    if ($fNo > 20) {last;}
   }
-    if ($fNo > 20) {last;}
+#    if ($fNo > 20) {last;}
 }
 if (! $fNo) {die "Don't have input files\n";}
-
+my $N = $#list;
+my $NT = 20;
+my $step = int ($N / $NT) + 1; 
+$NT = int ($N / $step);
+print "N = $N, NT = $NT, step = $step\n" if ($debug);
+my $i = 0;
+$fNo = 0;
+foreach my $file (@list) {
+  $i++;
+  if ($i % $step != 1) {next}
+  print "string:$file\n";
+  $fNo++;
+}
+if (! $fNo) {die "Don't have input files\n";}

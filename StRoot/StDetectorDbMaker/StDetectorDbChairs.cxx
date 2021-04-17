@@ -1226,7 +1226,42 @@ double StTpcBXT0CorrEPDC::getCorrection (double epdTAC, double driftVelocity, do
   if (epdTAC == -1) return timeBucketShiftScale*generalOffset;
   else return timeBucketShiftScale*(generalOffset + a(0)[1] + a(0)[2]*epdTAC);
 }
-
+#include "St_tpcT0BXC.h"
+MakeChairInstance(tpcT0BX,Calibrations/tpc/tpcT0BX);
+Double_t St_tpcT0BXC::getT0(Double_t values[6]) const { // xxxEarliestTDC (W+E)/2 variables for "vpd","bbc","epd","zdc", "TAC", "CAVdt"
+  Double_t T0 = 0;
+  Double_t T0W = 0, T0WW = 0;
+  static Int_t __debug = 0;
+  if (__debug > 0) {
+    LOG_INFO << "St_tpcT0BXC::getT0:";
+  }
+  for (Int_t i = 0; i < 6; i++) {
+    if (values[i] < xmin(i) || values[i] > xmax(i)) continue;
+    if (detId(i) < 0) continue;
+    //    if (detId(i) != 6 && (CountPs(i) < 10 || CountPs(i) > 100)) continue;
+    if (detId(i) != i+1) {
+      LOG_WARN << "St_tpcT0BXC::getT0 : table is unsorted detId(" << i << ") != " << i+1 << "  Skip entry" << endl;
+      continue;
+    }
+    Double_t t0 = toff(i) +  slope(i)*(values[i] - vMean(i));
+    Double_t w  = dtoff(i)* dtoff(i) +  dslope(i)*(values[i] - vMean(i)) * dslope(i)*(values[i] - vMean(i));
+    if (w < 1e-14) continue;
+    T0W  += t0/w;
+    T0WW += 1./w;
+    if (__debug > 0) {
+      LOG_INFO << Form("%s = %7.2f -> %7.2f +/- %7.2f nsec ",name(i),values[i], 1e3*t0, 1e3*TMath::Sqrt(w));
+    }
+  }
+  if (T0WW > 0) {
+    T0 = T0W/T0WW;
+    if (__debug > 0) {
+      LOG_INFO << Form(" : T0 = %7.2f +/- %7.2f nsec", 1e3*T0, 1e3/TMath::Sqrt(T0WW)) <<  endm;
+    }
+  }
+  return T0;
+}
+#include "St_starTriggerDelayC.h"
+MakeChairOptionalInstance2(starTriggerDelay,St_starTriggerDelayC,Calibrations/tpc/starTriggerDelay);
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);

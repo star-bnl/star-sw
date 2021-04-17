@@ -40,7 +40,10 @@ cmake ${ROOT}/${ROOT_LEVEL}/root -DCMAKE_INSTALL_PREFIX=${ROOTSYS} -DCMAKE_BUILD
 -DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse4.2" \
 -Dbuiltin_afterimage=ON \
 -Dtable=ON \
+-Dimt=OFF \
 -Druntime_cxxmodules=ON
+# problems with tbb => -Dimt=OFF 
+#-Dtbb=OFF  \
 #-D builtin_tbb=OFF \
 # -Dbuiltin_cfitsio=On 
 #  -Dbuiltin_xrootd=ON 
@@ -49,3 +52,4 @@ cmake ${ROOT}/${ROOT_LEVEL}/root -DCMAKE_INSTALL_PREFIX=${ROOTSYS} -DCMAKE_BUILD
 #-DPYTHIA8_INCLUDE_DIR=${XOPTSTAR}}/include \
 #-Dbuiltin_cfitsio=On -DCMAKE_CXX_FLAGS="-fdiagnostics-color=always -msse -msse2 -msse3 -msse4.1 -mssse3" \
 #-DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse -msse2 -msse3 -msse4.1 -mssse3" \
+# cmake --build . -- install -j8

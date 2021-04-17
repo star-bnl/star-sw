@@ -32,7 +32,9 @@
 # 2016    root4star -b -q 'bfc.C(200," P2016a,btof,mtd,pxlHit,istHit,sstHit,picoWrite,PicoVtxVpd,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,StiCA,PicoVtxDefault,evout,","'${evtsFile}'")' &gt;&amp; ${logFile}
 # 2017    root4star -b -q 'bfc.C(2000,"pp2017,btof,mtd,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt,StiCA,PicoVtxDefault,evout,","'${evtsFile}'")' &gt;&amp; ${logFile}
 # 2020    root4star -b -q 'bfc.C(6000,"P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,picoVtxDefault,PicoCovMtxWrite,-hitfilt,QAalltrigs,evout,NoHistos,noTags,noRunco","'${evtsFile}'")' &gt;&amp; ${logFile}
-          root.exe  -b -q 'bfc.C(6000,"P2020a,StiCA,gmt,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#          root.exe  -b -q 'bfc.C(6000,"P2020a,StiCA,gmt,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#          root.exe  -b -q 'bfc.C(3000,"P2020a,StiCA,StiPulls,gmt,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+          root.exe  -b -q 'bfc.C(3000,"P2020a,StiCA,gmt,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   cp  ${filel}* ${SUBMITTINGDIRECTORY}
 #   rm ${bla}
         </command>

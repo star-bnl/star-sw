@@ -1,17 +1,23 @@
 /* Global Alignment
    FPE_OFF
    setup debug
-   root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
+   root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,tpcDb,detDb,mysql,magF,nodefault,CorrY,quiet","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
    foreach d (`ls -1d ???/2*`)
      cd ${d}
      ln -s ../../.sl* .
-     root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
+     root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,tpcDb,detDb,mysql,magF,nodefault,CorrY,quiet","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
      cd -
    end
    foreach d (`ls -1d ???`)
      cd ${d}
      ln -s ../.sl* .
-     root.exe -q -b 'lMuDst.C(-1,"*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
+     root.exe -q -b 'lMuDst.C(-1,"*MuDst.root","RMuDst,tpcDb,detDb,mysql,magF,nodefault,CorrY,quiet","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
+     cd -
+   end
+   foreach d (`ls -1d *`)
+     cd ${d}
+     ln -s ~/macros/.sl* .
+     root.exe -q -b 'lMuDst.C(-1,"*MuDst.root","RMuDst,tpcDb,detDb,mysql,magF,nodefault,CorrY,quiet","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
      cd -
    end
    root.exe lMuDst.C MuTpcG.root
@@ -27,7 +33,9 @@
 #include "Riostream.h"
 #include "Rtypes.h"
 #include "TROOT.h"
+#include "TMath.h"
 #include "TSystem.h"
+#include "TAxis.h"
 #include "TH2.h"
 #include "TH3.h"
 #include "TF1.h"
@@ -55,6 +63,10 @@
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryTrackCovariance.h"
+#include "StMuDSTMaker/COMMON/StMuEpdHitCollection.h"
+#include "StDetectorDbMaker/St_beamInfoC.h"
+#include "StDetectorDbMaker/St_tpcT0BXC.h"
+#include "StEvent/StTriggerData.h"
 #include "StarRoot/TPolynomial.h"
 #include "StDcaGeometry.h"
 #include "TRSymMatrix.h"
@@ -242,22 +254,40 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
   static TH1D *LSF[3][24];
   static TH1D *Chi2T[3];
   static TH1D *NPART;
+  //
+  enum {kvpd = 0, kbbc, kepd, kzdc, kTAC, kCAV, kTrgTotal};
+  static TH2F *trg[6];
+  static TH2F *trgDS[6];
+  static TH2F *trgSumZ[6];
+  static TH2F *trgDifZ[6];
+  static TH2F *CAdifVtrgSum[6-1];
+  static TH2F *CAdTdifVtrgSum[6-1];
+  static TH2F *CAdTCdifVtrgSum[6-1];
+  static TH2F *dTtrgSum[6];
+  static TH2F *dTCtrgSum[6];
+  static TH2F *dTtrgDif[6+1];
+  static TH2F *dTCtrgDif[6+1];
+  static TH2F *epdTAC[2];
+  
   const static Int_t tZero= 19950101;
   const static TDatime t0(tZero,0);
   const static Int_t timeOffSet = t0.Convert();
-#ifdef __FIXED_TARGET__
-  const Int_t nZ = 1000;
-  const Double_t Zmin = 150;
-  const Double_t Zmax = 250;
-#else
-  const Int_t nZ = 2000;
-  const Double_t Zmin = -200;
-  const Double_t Zmax =  200;
-#endif  
   if (! dZ) {
+    StMaker::GetTopChain()->GetTFile()->cd();
+    Bool_t IsFixedTarget = St_beamInfoC::instance()->IsFixedTarget();
+    Int_t nZ = 1000;
+    Double_t Zmin = 150;
+    Double_t Zmax = 250;
+    if (! IsFixedTarget) {
+      nZ = 4200;
+      Zmin = -210;
+      Zmax =  210;
+    }
+    Int_t nT = 200;
+    Double_t dTmax = 0.1;
     NPART = new TH1D("npart","no accepted particles",500,0,5000);
     dZ = new TH2F("dZ","dZ (W - E)/2 versus Z",nZ,Zmin,Zmax,400,-2.,2.);
-    dT = new TH2F("dT","dT(#musec) (W - E)/2 versus Z",nZ,Zmin,Zmax,500,-0.5,0.5);
+    dT = new TH2F("dT","dT(#musec) (W - E)/2 versus Z",nZ,Zmin,Zmax,nT,-dTmax,dTmax);
 #if 0
     const static Int_t tMin = 20190225;;
     const static Int_t tMax = 20140411;
@@ -320,6 +350,61 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
       }
       Chi2T[charge] = new TH1D(Form("Chi2T%s",NCharge[charge]), Form("Chi2 for %s",TCharge[charge]),2500,0.,2.5e4);
     }
+    struct Hist_t {
+      const Char_t *name;
+      const Char_t *title;
+      Int_t nx;
+      Double_t xmin;
+      Double_t xmax;
+      Double_t xdif;
+    };
+    Hist_t histT[kTrgTotal] = {
+      {"vpd", "Earlest",300,  0.5, 3000.5, 300},
+      {"bbc", "Earlest",300,  0.5, 3000.5, 500},
+      {"epd", "Earlest",300,  0.5, 3000.5, 300},
+      {"zdc", "Earlest",300,  0.5,  600.5, 100},
+      {"TAC", "epd"    ,300,  0.5, 3000.5, 300},
+      {"CAV", "Z"      ,500, -250,  250, 2.5}
+    };
+    
+    for (Int_t k = 0; k < kTrgTotal; k++) {
+      trg[k]     = new TH2F(Form("%s"  ,histT[k].name),Form("%s  %s West vs %s East"       ,histT[k].name,histT[k].title,histT[k].title,histT[k].title),
+			    histT[k].nx, histT[k].xmin, histT[k].xmax,histT[k].nx, histT[k].xmin, histT[k].xmax); 
+      trgDS[k]   = new TH2F(Form("%sDS"  ,histT[k].name),Form("%s  %s (West-East)/2 vs %s (West+East)2"  ,histT[k].name,histT[k].title,histT[k].title,histT[k].title),
+			    histT[k].nx, histT[k].xmin, histT[k].xmax,histT[k].nx, -histT[k].xdif, histT[k].xdif); 
+      trgSumZ[k] = new TH2F(Form("s%s",histT[k].name),Form("%s (%s West + %s East)/2 vs Z",histT[k].name,histT[k].title,histT[k].title,histT[k].title),
+			    nZ,Zmin,Zmax,histT[k].nx, histT[k].xmin, histT[k].xmax); 
+      trgDifZ[k] = new TH2F(Form("d%s",histT[k].name),Form("%s (%s West - %s East)/2 vs Z",histT[k].name,histT[k].title,histT[k].title,histT[k].title),
+			    nZ,Zmin,Zmax,histT[k].nx, -histT[k].xdif, histT[k].xdif); 
+      if (k < kCAV) {
+	CAdifVtrgSum[k] = new TH2F(Form("dCAvs%s",histT[k].name),Form("CA (West - Easst)/2 versus half sum of %s",histT[k].name),
+				   histT[k].nx, histT[k].xmin, histT[k].xmax,histT[kCAV].nx, -histT[kCAV].xdif, histT[kCAV].xdif); 
+	CAdTdifVtrgSum[k] = new TH2F(Form("dTCAvs%s",histT[k].name),Form("dT (musec) CA (West - East)/2 versus half sum of %s",histT[k].name),
+				   histT[k].nx, histT[k].xmin, histT[k].xmax,histT[kCAV].nx, -histT[kCAV].xdif/5., histT[kCAV].xdif/5.); 
+	CAdTCdifVtrgSum[k] = new TH2F(Form("dTCCAvs%s",histT[k].name),Form("dT (musec) CA (West - East)/2 versus half sum of %s",histT[k].name),
+				      histT[k].nx, histT[k].xmin, histT[k].xmax,histT[kCAV].nx, -histT[kCAV].xdif/5., histT[kCAV].xdif/5.); 
+      }
+      dTtrgSum[k] = new TH2F(Form("dT%s",histT[k].name),Form("dT (musec) VX (West - East)/2 versus half sum of %s",histT[k].name),
+				   histT[k].nx, histT[k].xmin, histT[k].xmax,nT,-dTmax,dTmax); 
+      dTCtrgSum[k] = new TH2F(Form("dTC%s",histT[k].name),Form("dT (musec) VX (West - East)/2 versus half sum of %s",histT[k].name),
+				      histT[k].nx, histT[k].xmin, histT[k].xmax,nT,-dTmax,dTmax); 
+      dTtrgDif[k] = new TH2F(Form("dT%sD",histT[k].name),Form("dT (musec) VX (West - East)/2 versus half difference of dT %s",histT[k].name),
+				   histT[k].nx, -histT[k].xdif, histT[k].xdif,nT,-dTmax,dTmax); 
+      dTCtrgDif[k] = new TH2F(Form("dTC%sD",histT[k].name),Form("dT (musec) VX (West - East)/2 versus half difference of %s",histT[k].name),
+				   histT[k].nx, -histT[k].xdif, histT[k].xdif,nT,-dTmax,dTmax); 
+			      
+      if (k == kCAV) {
+      dTtrgDif[k+1] = new TH2F(Form("dT%sdT",histT[k].name),Form("dT (musec) VX (West - East)/2 versus half difference of%s",histT[k].name),
+			       nT,-dTmax,dTmax,nT,-dTmax,dTmax);
+      dTCtrgDif[k+1] = new TH2F(Form("dTC%sdT",histT[k].name),Form("dT (musec) VX (West - East)/2 versus half difference of dT %s",histT[k].name),
+			       nT,-dTmax,dTmax,nT,-dTmax,dTmax);
+      }
+    }
+    epdTAC[east] = new TH2F(Form("%s%sEast"  ,histT[kepd].name, histT[kTAC].name),Form("%s East vs %s East"       ,histT[kepd].name,histT[kTAC].name),
+			    histT[kTAC].nx, histT[kTAC].xmin, histT[kTAC].xmax,histT[kepd].nx, histT[kepd].xmin, histT[kepd].xmax); 
+    epdTAC[west] = new TH2F(Form("%s%sWest"  ,histT[kepd].name, histT[kTAC].name),Form("%s West vs %s West"       ,histT[kepd].name,histT[kTAC].name),
+			    histT[kTAC].nx, histT[kTAC].xmin, histT[kTAC].xmax,histT[kepd].nx, histT[kepd].xmin, histT[kepd].xmax); 
+
   }
   if (! mu) return;
   Int_t date = MuDstMaker->GetDateTime().Convert() - timeOffSet;
@@ -327,8 +412,73 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
   StMuEvent* muEvent = mu->event(); // get a pointer to the class holding event-wise information
   Double_t Bz = muEvent->magneticField();
   Double_t vpdZ = muEvent->vpdVz();
+  Double_t driftVel = StTpcDb::instance()->DriftVelocity()*1e-6;
+  // CA
+  StEventSummary &summary = muEvent->eventSummary();
+  Double_t zV  = summary.primaryVertexPosition().z();
+  L4CAVertex &L4Vx = summary.L4Vx;
+  L4CAVertex &L4VxWest = summary.L4VxWest;
+  L4CAVertex &L4VxEast = summary.L4VxEast;
+  Double_t caE = L4VxEast.Mu, caW =  L4VxWest.Mu;
   // Trigger stuff
-  
+  const StTriggerData  *trigger = muEvent->triggerData();
+  Double_t trgV[kTrgTotal][2] = {0};
+  if (trigger) {
+    trgV[kvpd][east] = trigger->vpdEarliestTDC(east); trgV[kvpd][west] = trigger->vpdEarliestTDC(west);
+    trgV[kbbc][east] = trigger->bbcEarliestTDC(east); trgV[kbbc][west] = trigger->bbcEarliestTDC(west);
+    trgV[kepd][east] = trigger->epdEarliestTDC(east); trgV[kepd][west] = trigger->epdEarliestTDC(west);
+    trgV[kTAC][east] =                            -1; trgV[kTAC][west] =                            -1;
+    trgV[kzdc][east] = trigger->zdcEarliestTDC(east); trgV[kzdc][west] = trigger->zdcEarliestTDC(west);
+  }
+  trgV[kCAV][east] =                   L4VxEast.Mu; trgV[kCAV][west] =                   L4VxWest.Mu;
+  Double_t dCAVz[2] = { L4VxEast.dMu,  L4VxWest.dMu};
+  if (dCAVz[0] < 1e-7 || dCAVz[0] > 0.3) dCAVz[0] = -1e9;
+  if (dCAVz[1] < 1e-7 || dCAVz[1] > 0.3) dCAVz[1] = -1e9;
+  UInt_t noEpdhits = mu->numberOfEpdHit();
+  for (UInt_t i = 0; i < noEpdhits; i++) {
+    auto *epdHit = mu->epdHit(i);
+    if (epdHit->tile() > 9)  continue; // only tiles 1 - 9 have timing info
+    StBeamDirection ew = west;
+    if (epdHit->id() < 0) ew = east; // tile is on the east
+    if (epdHit->adc() < 100) continue;
+    Int_t TAC = epdHit->tac(); // this is the timing
+    if (TAC > trgV[kTAC][ew]) trgV[kTAC][ew] = TAC;
+  }
+  Double_t trgSum[kTrgTotal];
+  Double_t trgDif[kTrgTotal+1];
+  for (Int_t k = 0; k < kTrgTotal; k++) {
+    trgSum[k] = -1;
+    trgDif[k] = -1e9;
+    if ((k == kCAV &&  dCAVz[east] > 0 &&  dCAVz[east] > 0) || 
+	(trgV[k][east] > 0 && trgV[k][west] > 0)) {
+      trgSum[k] = 0.5*(  trgV[k][east] + trgV[k][west]);
+      trgDif[k] = 0.5*(- trgV[k][east] + trgV[k][west]);
+    } else if (trgV[k][east] > 0) {
+      trgSum[k] = trgV[k][east];
+    } else if (trgV[k][west] > 0) {
+      trgSum[k] = trgV[k][west];
+    }
+    if (k == kCAV) {
+      trgDif[kCAV+1] = trgDif[kCAV]/driftVel; // in usec
+    }
+  } 
+  Double_t T0 = - St_tpcT0BXC::instance()->getT0(trgSum);
+  for (Int_t k = 0; k < kTrgTotal; k++) {
+    trg[k]->Fill(trgV[k][west],trgV[k][east]);
+    trgSumZ[k]->Fill(zV, trgSum[k]);
+    trgDifZ[k]->Fill(zV, trgDif[k]);
+    
+    if (k < kCAV && TMath::Abs(trgSum[k]) > 1e-7) {
+      trgDS[k]->Fill(trgSum[k],trgDif[k]);
+      if (k < kCAV) {
+	CAdifVtrgSum[k]->Fill(trgSum[k], trgDif[kCAV]);
+	CAdTdifVtrgSum[k]->Fill(trgSum[k], trgDif[kCAV+1]);
+	CAdTCdifVtrgSum[k]->Fill(trgSum[k], trgDif[kCAV+1]+T0);
+      }
+    }
+    epdTAC[east]->Fill(trgV[kepd][east],trgV[kTAC][east]);
+    epdTAC[west]->Fill(trgV[kepd][west],trgV[kTAC][west]);
+  }
   KFParticle::SetField(Bz);
   //  KFParticle::SetField(-Bz);
   // cout << " #" << ev; 
@@ -455,7 +605,6 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
     PrPP(Vertex[ivx]);
     delete [] parts;
   }
-  Double_t driftVel =StTpcDb::instance()->DriftVelocity()*1e-6;
   if (Vertex[1].GetChi2() > 0 && Vertex[2].GetChi2() > 0) {
     StThreeVectorD W(Vertex[1].GetX(), Vertex[1].GetY(), Vertex[1].GetZ());
     StThreeVectorD E(Vertex[2].GetX(), Vertex[2].GetY(), Vertex[2].GetZ());
@@ -468,7 +617,23 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
       dX->Fill(sum.z(),dif.x());
       dY->Fill(sum.z(),dif.y());
       dZ->Fill(sum.z(),dif.z());
-      dT->Fill(sum.z(),dif.z()/driftVel);
+      Double_t dTWE = dif.z()/driftVel;
+      dT->Fill(sum.z(),dTWE);
+      for (Int_t k = 0; k < kTrgTotal; k++) {
+	if (TMath::Abs(trgSum[k]) > 1e-7) {
+	  if (k < kCAV) {
+	    dTtrgSum[k]->Fill(trgSum[k], dTWE);
+	    dTCtrgSum[k]->Fill(trgSum[k], dTWE+T0);
+	    dTtrgDif[k]->Fill(trgDif[k], dTWE);
+	    dTCtrgDif[k]->Fill(trgDif[k], dTWE+T0);
+	  } else {
+	    dTtrgDif[k]->Fill(trgDif[k], dTWE);
+	    dTCtrgDif[k]->Fill(trgDif[k], dTWE+T0);
+	    dTtrgDif[k+1]->Fill(trgDif[k+1], dTWE);
+	    dTCtrgDif[k+1]->Fill(trgDif[k+1], dTWE+T0);
+	  }
+	}
+      }
 #if 0
       dZT->Fill(date,dif.z());
 #endif
@@ -671,7 +836,6 @@ void Process1Event(StMuDst* mu = 0, Long64_t ev = 0) {
 }
 //________________________________________________________________________________
 void MuTpcG(Long64_t nEvents = 10000000) {
-  Process1Event();
   StBFChain *chain = (StBFChain *) StMaker::GetTopChain();
   MuDstMaker = (StMuDstMaker *) chain->Maker("MuDst");
   if (! MuDstMaker) return;
@@ -692,6 +856,7 @@ void MuTpcG(Long64_t nEvents = 10000000) {
 				    ,"KFTracks"
 				    ,"KFVertices"
 #endif
+				    ,"EpdHit"
   };
   chain->SetDebug(0);
   StMaker::lsMakers(chain);
@@ -1108,6 +1273,144 @@ void Draw() {
   out.close();
   outC.close();
 }
+//________________________________________________________________________________
+void FitSlopes(const Char_t *opt="") {
+  enum {No = 6};
+  const Char_t *det[No] = {"vpd","bbc","epd","zdc", "TAC", "CAVdT"};
+  TString tag("2019_14p5GeV");
+  TString input(gSystem->DirName(gDirectory->GetName()));
+  TObjArray *obj = input.Tokenize("/");
+  Int_t n = obj->GetSize();
+  Int_t y = 0;
+  for (Int_t k = 0; k < n; k++) {
+    TString t = TString(obj->At(k)->GetName());
+    if (t.Atoi() >= 2000 && t.Atoi() <= 2030) {
+      y = t.Atoi();
+      tag = t; tag += "_";
+    }
+    if (y > 0 && (t.Contains("GeV") || t.Contains("AuAu"))) {
+      tag += t; 
+      break;
+    }
+  }
+  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(tag);
+  if (c1) c1->Clear();
+  else     c1 = new TCanvas(tag,tag,200,10,800,2000);;
+  c1->Divide(1,No);
+  TF1 *fit = new TF1("fit","[0]+[2]+[3]*(x-[1])",0,3000);
+  TObjArray* arr =  new TObjArray(4);
+  cout << gDirectory->GetName() << endl; 
+  TString Out("tpcT0BX.");
+  Out += tag;
+  Out += ".C";
+  ofstream out;
+  //  if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
+  //  else                              out.open(Out, ios::app);
+  out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
+  out << "TDataSet *CreateTable() {" << endl;
+  out << "  if (!TClass::GetClass(\"St_tpcT0BX\")) return 0;" << endl;
+  out << "  tpcT0BX_st row[" << No << "] = {" << endl;
+  out << "    //   name.      xmin,     xmax     tMean    vMean      toff     dtoff        slope       dslope   CountPs   dCountPs" << endl;
+
+  for (Int_t i = 0; i < No; i++) {
+    c1->cd(i+1)->SetLogz(1);
+    //    TH2F *hist = (TH2F *) gDirectory->Get(Form("dTC%sAvs%s",opt,det[i]));
+    Double_t Counts = 0, dCounts = 0;
+    // (W - E)/2 versus Z 
+    TString nameD(Form("d%s",det[i]));
+    TH2F *h = (TH2F *) gDirectory->Get(nameD);
+    if (h && h->GetEntries() > 100) {
+      h->FitSlicesY(0,0,-1,10,"qlg3s",arr);
+      TH1D *mu =  (TH1D *) (*arr)[1];
+      if (mu->GetEntries() > 10) {
+	mu->Fit("pol1","q");
+	TF1 *pol1 = mu->GetFunction("pol1"); 
+	if (pol1) {
+	  Counts = 1e12/(pol1->GetParameter(1)*TMath::Ccgs());
+	  dCounts = TMath::Abs( pol1->GetParError(1)/pol1->GetParameter(1)*Counts);
+	  //	cout << det[i] << "\tCounts per picosecond = " << Counts << " +/- " << dCounts << endl;
+	}
+      }
+    }
+    TString name(Form("dT%s%s",opt,det[i]));
+    TH2F *hist = (TH2F *) gDirectory->Get(name);
+    if (! hist) {
+      cout << "Histogram " << name.Data() << " hst not found." << endl;
+      continue;
+    }
+    hist->GetXaxis()->SetRange(0,-1);
+    hist->GetYaxis()->SetRange(0,-1);
+    Int_t iy1 = hist->GetYaxis()->FindBin(-0.10);
+    Int_t iy2 = hist->GetYaxis()->FindBin( 0.10);
+    hist->GetYaxis()->SetRange(iy1,iy2);
+    //    hist->GetYaxis()->SetRange(0,-1);
+    hist->Draw("colz");
+    c1->Update();
+    fit->FixParameter(0,hist->GetMean(2));
+    fit->FixParameter(1,hist->GetMean(1));
+    fit->SetParameter(2,0);
+    fit->SetParameter(3,0);
+#if 0
+    hist->Fit(fit,"q");
+#else
+    TH1D *px = hist->ProjectionX();
+    Int_t imax = px->GetMaximumBin();
+    Double_t ymax = px->GetBinContent(imax);
+    Int_t i1 = imax;
+    for (;i1 > 0; i1--) {
+      if (px->GetBinContent(i1) < 0.01*ymax) break;
+    }
+    Int_t nx = px->GetNbinsX();
+    Int_t i2 = imax;
+    for (;i2 <= nx; i2++) {
+      if (px->GetBinContent(i2) < 0.01*ymax) break;
+    }
+    TAxis *xax = px->GetXaxis();
+    Double_t xmin = xax->GetBinLowEdge(i1);
+    Double_t xmax = xax->GetBinUpEdge(i2);
+    hist->GetXaxis()->SetRange(i1,i2);
+    //    cout << name.Data() << "\ti1 = " << i1 << "\timax = " << imax << "\ti2 = " << i2 << endl;
+    hist->FitSlicesY(0,i1,i2,10,"qlg3s",arr);
+    TH1D *mu = (TH1D *) (*arr)[1];
+    mu->Fit(fit,"q","same");
+    hist->Draw("colz");
+    mu->Draw("sames");
+#endif
+    Int_t j = i + 1;
+    if (i == 4) j = -j;
+    TString comma(",");
+    if (i == No - 1) comma = "";
+    TString Det(Form("\"%s\"",det[i]));
+    TString Line(Form("    {%2i,%8s", j, Det.Data()));
+    Line += Form(",%8.2f, %8.2f, %8.5f, %7.2f, %8.5f, %8.5f, %11.5g, %11.5g, %8.3f, %8.3f}%s",
+		 xmin, xmax, 
+		 fit->GetParameter(0),fit->GetParameter(1),
+		 fit->GetParameter(2),fit->GetParError(2),
+		 fit->GetParameter(3),fit->GetParError(3), 
+		 Counts, dCounts,
+		 comma.Data());
+    cout << Line << endl;
+    out  << Line << endl;
+  }
+  out << "  };" << endl;
+  out << "  St_tpcT0BX *tableSet = new St_tpcT0BX(\"tpcT0BX\"," << No << ");" << endl;
+  out << "  for (Int_t i = 0; i < " << No << "; i++) tableSet->AddAt(&row[i].detId);" << endl;
+  out << "  return (TDataSet *)tableSet;" << endl;
+  out << "}" << endl;
+  out.close();
+  c1->SaveAs(tag+".png");
+}
+//________________________________________________________________________________
+void LoopOverFiles(const Char_t *opt="") {
+  TSeqCollection *files = gROOT->GetListOfFiles();
+  TIter next(files);
+  TFile *f = 0;
+  while ( (f = (TFile *) next()) ) { 
+    f->cd();
+    FitSlopes(opt);
+  }  
+}
+//________________________________________________________________________________
 /*
   dZ->FitSlicesY(0,0,-1,0,"QNRG3S")
 .L PrintTH1.C

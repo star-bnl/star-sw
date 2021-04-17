@@ -261,6 +261,7 @@
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_iTPCSurveyC.h"
+#include "StDetectorDbMaker/St_starTriggerDelayC.h"
 #include "TMath.h"
 #include "StThreeVectorD.hh"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
@@ -415,12 +416,19 @@ Double_t StTpcCoordinateTransform::xFromPad(Int_t sector, Int_t row, Double_t pa
 //________________________________________________________________________________
 Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row, Int_t pad) const {
   if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
-  Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
+  Double_t trigT0 = 0;
+  Double_t elecT0 = 0;
+  if (! St_starTriggerDelayC::instance()->Table()->IsMarked()) {// new scheme: offset  = clocks*timebin + t0
+    trigT0 = St_starTriggerDelayC::instance()->clocks()*mTimeBinWidth;
+    elecT0 = St_starTriggerDelayC::instance()->tZero();
+  } else { // old scheme 
+    trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
 #if 0
-  if ((sector <= 12 && tb <= 350) || // extra West laser off set, membrane cluster with time bucket > 350
-      (sector >  12 && tb >  350)) {trigT0 +=  StTpcDb::instance()->triggerTimeOffsetWest()*1e6;}
+    if ((sector <= 12 && tb <= 350) || // extra West laser off set, membrane cluster with time bucket > 350
+	(sector >  12 && tb >  350)) {trigT0 +=  StTpcDb::instance()->triggerTimeOffsetWest()*1e6;}
 #endif
-  Double_t elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
+    elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
+  }
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
   Int_t l = sector;
@@ -436,12 +444,19 @@ Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row,
 //________________________________________________________________________________
 Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row, Int_t pad) const {
   if (row > St_tpcPadConfigC::instance()->numberOfRows(sector)) row = St_tpcPadConfigC::instance()->numberOfRows(sector);
-  Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
+  Double_t trigT0 = 0;
+  Double_t elecT0 = 0;
+  if (! St_starTriggerDelayC::instance()->Table()->IsMarked()) {// new scheme: offset  = clocks*timebin + t0
+    trigT0 = St_starTriggerDelayC::instance()->clocks()*mTimeBinWidth;
+    elecT0 = St_starTriggerDelayC::instance()->tZero();
+  } else { // old scheme 
+    trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
 #if 0
-  if ((sector <= 12 && z < 195) || // extra West laser off set, membrane cluster with time z < 195
-      (sector >  12 && z > 195)) {trigT0 +=  StTpcDb::instance()->triggerTimeOffsetWest()*1e6;}
+    if ((sector <= 12 && z < 195) || // extra West laser off set, membrane cluster with time z < 195
+	(sector >  12 && z > 195)) {trigT0 +=  StTpcDb::instance()->triggerTimeOffsetWest()*1e6;}
 #endif
-  Double_t elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
+    elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
+  }
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
   Double_t time = z / (StTpcDb::instance()->DriftVelocity(sector,row)*1e-6);

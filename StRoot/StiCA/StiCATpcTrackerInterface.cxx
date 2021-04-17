@@ -18,7 +18,9 @@
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTPCHitErrorCalculator.h"
-#include "Sti/StiKalmanTrackNode.h"
+#include "StDetectorDbMaker/St_tpcT0BXC.h"
+#include "StEvent/StTriggerData.h"
+//#include "Sti/StiKalmanTrackNode.h"
 #include "StEvent/StEnumerations.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventSummary.h"
@@ -71,7 +73,7 @@ void StiCATpcTrackerInterface::SetNewEvent() {
       fVertexXYPlots[i]->Reset();
     }
   }
-  StiKalmanTrackNode::SetExternalTriggerOffset(0);
+  //  StiKalmanTrackNode::SetExternalTriggerOffset(0);
 }
 //________________________________________________________________________________
 void StiCATpcTrackerInterface::MakeHits()
@@ -115,7 +117,6 @@ void StiCATpcTrackerInterface::MakeHits()
 
       // convert to CA Hit
       AliHLTTPCCAGBHit caHit;
-      caHit.SetIRow( hitc.padrow );
 //      caHit.SetX( hit->x() );
       caHit.SetX( hit->position() ); // take position of the row
       caHit.SetY( - hit->y() );
@@ -251,10 +252,10 @@ void StiCATpcTrackerInterface::MakeSeeds()
 
     fSeeds.push_back(seed);
   }
-  // Reset trigger offset from CA
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  StEventSummary *summary = pEvent->summary();
+  // Save CA results
   if (fVertexZPlots[east] && fVertexZPlots[west]) {
-    StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
-    StEventSummary *summary = pEvent->summary();
     L4CAVertex *l4Vx[3] = {&summary->L4VxEast, &summary->L4VxWest, &summary->L4Vx};
     for (Int_t i = 0; i < 3; i++) {
       //      memset (&(l4Vx->Const), 0, sizeof(L4CAVertex));
@@ -269,31 +270,49 @@ void StiCATpcTrackerInterface::MakeSeeds()
       l4Vx[i]->X     = fVertexXYPlots[i]->GetMean(1);
       l4Vx[i]->Y     = fVertexXYPlots[i]->GetMean(2);
     }
-#if 0
-    Double_t Z[2] = {0};
-    Double_t dZ[2] = {0};
-    for (Int_t i = 0; i < 2; i++) {
-      if (gaus[i]) {
-	if (gaus[i]->GetProb() > 1e-5) {
-	  if (gaus[i]->GetParError(1) < 1.0) {
-	    dZ[i] = gaus[i]->GetParError(1);
-	    Z[i] = gaus[i]->GetParameter(1);
-	  }
-	}
+  }
+  // Trigger stuff
+  Int_t NoTrigDet = 0;
+  enum {kvpd = 0, kbbc, kepd, kzdc, kTAC, kCAV, kTrgTotal};
+  Double_t trgV[kTrgTotal][2] = {0};
+  Double_t trgSum[kTrgTotal] = {0};
+  StTriggerData *trigger = pEvent->triggerData();
+  if (trigger) {
+    trgV[kvpd][east] = trigger->vpdEarliestTDC(east); trgV[kvpd][west] = trigger->vpdEarliestTDC(west);
+    trgV[kbbc][east] = trigger->bbcEarliestTDC(east); trgV[kbbc][west] = trigger->bbcEarliestTDC(west);
+    trgV[kepd][east] = trigger->epdEarliestTDC(east); trgV[kepd][west] = trigger->epdEarliestTDC(west);
+    trgV[kzdc][east] = trigger->zdcEarliestTDC(east); trgV[kzdc][west] = trigger->zdcEarliestTDC(west);
+    trgV[kTAC][east] =                            -1; trgV[kTAC][west] =                            -1;
+    for (Int_t k = 0; k < kCAV; k++) {
+      trgSum[k] = -1;
+      if (trgV[k][east] > 0 && trgV[k][west] > 0) {
+	trgSum[k] = 0.5*(  trgV[k][east] + trgV[k][west]); NoTrigDet++;
+      } else if (trgV[k][east] > 0) {
+	trgSum[k] = trgV[k][east]; NoTrigDet++;
+      } else if (trgV[k][west] > 0) {
+	trgSum[k] = trgV[k][west]; NoTrigDet++;
       }
     }
-    if (dZ[0] > 0 && dZ[1] > 0) {
-      Double_t Zdiff = 0.5*(Z[1] - Z[0]);
-      Double_t dZdiff = 0.5*TMath::Sqrt(dZ[0]*dZ[0] + dZ[1]*dZ[1]);
-      if (TMath::Abs(Zdiff) > 3*dZdiff) {
-	Double_t dT = Zdiff/StTpcDb::instance()->DriftVelocity()*1e6; // 
-	if (TMath::Abs(dT) < 1) {
-	  LOG_INFO << "dZW_E/2 = " << Zdiff << " +/- " << dZdiff << ". Set trigger offset = " << dT << " musec" << endm;
-	  StiKalmanTrackNode::SetExternalTriggerOffset(dT);
-	}
-      }
-    }
-#endif
+  }
+  // CA
+  //  L4CAVertex &L4Vx = summary->L4Vx;
+  L4CAVertex &L4VxWest = summary->L4VxWest;
+  L4CAVertex &L4VxEast = summary->L4VxEast;
+  trgSum[kCAV] = -1e9;
+  Double_t dCAVz[2] = { L4VxEast.dMu,  L4VxWest.dMu};
+  if (dCAVz[0] < 1e-7 || dCAVz[0] > 0.3) dCAVz[0] = -1e9;
+  if (dCAVz[1] < 1e-7 || dCAVz[1] > 0.3) dCAVz[1] = -1e9;
+  if (dCAVz[0] > 0 && dCAVz[1] > 0) {
+    trgV[kCAV][east] =                   L4VxEast.Mu; trgV[kCAV][west] =                   L4VxWest.Mu;
+    Double_t driftVel = StTpcDb::instance()->DriftVelocity()*1e-6;
+    trgSum[kCAV] = 0.5*(- trgV[kCAV][east] + trgV[kCAV][west])/driftVel; // in usec, for CAV use difference instead of sum
+    NoTrigDet++;
+  }
+  if (NoTrigDet) {
+    Double_t T0 = St_tpcT0BXC::instance()->getT0(trgSum);
+    StiKalmanTrackNode::SetExternalTriggerOffset(T0);
+  } else {
+    StiKalmanTrackNode::SetExternalTriggerOffset(0);
   }
 } // void StiCATpcTrackerInterface::MakeSeeds()
 //________________________________________________________________________________
