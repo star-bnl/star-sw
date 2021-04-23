@@ -1023,7 +1023,11 @@ StTpcDigitalSector *StTpcHitMaker::GetDigitalSector(Int_t sector) {
 Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
   static Int_t TonkoAnn  = IAttr("UseTonkoClusterAnnotation");
   Short_t  ADCs2[512];
+#ifndef __TFG__VERSION__
+  UShort_t IDTs2[512];
+#else
   Int_t IDTs2[512];
+#endif
   memset(ADCs, 0, sizeof(ADCs));
   memset(IDTs, 0, sizeof(IDTs));
   StTpcDigitalSector *digitalSector = 0;

@@ -133,7 +133,11 @@ class StTpcHitMaker : public StRTSBaseMaker {
   TString mQuery;
   tpc_t   *fTpc;
   Short_t  ADCs[512];
+#ifdef __TFG__VERSION__
   Int_t    IDTs[512];
+#else
+  UShort_t IDTs[512];
+#endif
   UShort_t fId; // current cluster Id
   Int_t    maxHits[24];
   Int_t    maxBin0Hits;

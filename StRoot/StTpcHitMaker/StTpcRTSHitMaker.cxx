@@ -313,7 +313,11 @@ Int_t StTpcRTSHitMaker::Make() {
     return kStOK;
   }
   static Short_t ADCs[__MaxNumberOfTimeBins__];
+#ifdef __TFG__VERSION__
   static Int_t IDTs[__MaxNumberOfTimeBins__];
+#else
+  static UShort_t IDTs[__MaxNumberOfTimeBins__];
+#endif
   static StTpcCoordinateTransform transform;
   static StThreeVectorF hard_coded_errors;
   StEvent*   rEvent      = (StEvent*)    GetInputDS("StEvent");
