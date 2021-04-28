@@ -99,13 +99,14 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 0.57692996501735538; // /net/l404/data/fisyak/Tpc/TpcRS/TpcRS2019.DEV2.Real4/dEdx/Fit/SecRow3CGFpionMIP.root
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.11982875000493309-1.27992e-01;
-  // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
-  //                                          3.22907e-01                          2.72715e-01
-  // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
-  // diff                                   : 9.13675e-02                          6.29849e-02
-  // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 0.57692996501735538 + 5.13440e-02 ; 
+  row.SecRowCorIW[1] = row.SecRowCorIE[1] = -5.40702e-04;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.11982875000493309-1.27992e-01 + 2.52297e-02;
+  row.SecRowCorOW[1] = row.SecRowCorOE[1] = -3.73511e-04;
+  // SecRow3CGF7p7GeV_2021.root: FitP->Draw("sigma:y","i&&j","prof")
+  //                                     Inner            3.10477e-01, Outer   2.70452e-01
+  // RunXXI/Hijing.2021AuAu200.VMCF
+  //                                     Inner            2.93912e-01  Iuter   2.76624e-01    
   const Double_t RowSigmaTrs[4] = {
     9.13675e-02, 0,  // Inner
     6.29849e-02, 0}; // Outer
@@ -115,20 +116,7 @@ TDataSet *CreateTable() {
   }
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
-  //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
-  // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>T(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
-  // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
-  // The corection has to be added                                                                    M             P
-  //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
   row.T0offset   = 0.50 -1.43663e-01 -0.00932877;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
-  /* 
-     0.05  => -0.154  
-    -0.05  => -0.054
-    -0.104 => -0.006  but very big sigma 0.298 => 0.303 
-    row.FirstRowC  = -0.104;  // extra correction for pad row 1 due to disabled firth 3 anode wires, check with X7
-    No. cut on 3 first wires => -9.21881e-02 ; X9
-    row.FirstRowC  = -0.104;  // extra correction for pad row 1 due to disabled firth 3 anode wires
-   */
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
