@@ -178,7 +178,7 @@ class AliHLTTPCCAParam
 
     vector<float> fRowX;// X-coordinate of rows 
     int   fRecoType;		   // 0=Sti error parametrization; 1=Stv
-    float fParamS0Par[2][4][7];    // cluster error parameterization coeficients; 0 -> iTPC, 1 -> oTPC, 2 -> BToF, 3 -> EToF
+    float fParamS0Par[2][4][7] = {{{0}}};  // cluster error parameterization coeficients; 0 -> iTPC, 1 -> oTPC, 2 -> BToF, 3 -> EToF
     float fPolinomialFieldBz[6];   // field coefficients
 
   private:
