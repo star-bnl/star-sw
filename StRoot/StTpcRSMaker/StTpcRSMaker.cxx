@@ -667,9 +667,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
 	double driftVelocity = StTpcDb::instance()->DriftVelocity(1);
 	fgTriggerT0 = - StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth)*mTimeBinWidth*1e-6;
+#if 0
       } else if (g2t_ver->GetNRows() > 0) {
       Double_t beta  = St_beamInfoC::instance()->BetaYellow();
       fgTriggerT0 = gver->ge_x[2]/(beta*TMath::Ccgs()); // swap sign 01/11/21
+#endif
     }
   }
   g2t_tpc_hit_st *tpc_hit_begin = g2t_tpc_hit->GetTable();
