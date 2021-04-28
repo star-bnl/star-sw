@@ -127,7 +127,8 @@ class KFParticleFinder
                           std::vector< std::vector<KFParticle> >* vMotherPrim,
                           std::vector<KFParticle>* vMotherSec );
   
-  void NeutralDaughterDecay(KFPTrackVector* vTracks, std::vector<KFParticle>& Particles);
+  void NeutralDaughterDecay(KFPTrackVector* vTracks, std::vector<KFParticle>& Particles,
+                            std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx);
 
   void FindTrackV0Decay(std::vector<KFParticle>& vV0,
                         const int V0PDG,
@@ -164,6 +165,10 @@ class KFParticleFinder
                        std::vector<KFParticle>* vMotherSec = 0,
                        float massMotherPDG = 0.f,
                        float massMotherPDGSigma = 0.f);
+  
+  void MatchKaons(KFPTrackVector* vTracks, 
+                  std::vector<KFParticleSIMD, KFPSimdAllocator<KFParticleSIMD> >& PrimVtx,
+                  std::vector<KFParticle>& Particles);
 
   //Set Emc clusters containing gammas
   void SetEmcClusters(KFPEmcCluster* clusters) { fEmcClusters = clusters; } ///< Set a pointer to the gamma-clusters from the electromagnetic calorimeter.
@@ -439,6 +444,7 @@ class KFParticleFinder
   std::vector<KFParticle> fHe5L;     ///< Vector with temporary He4_Lambda->He4 p pi- candidates
   std::vector<KFParticle> fLLn;      ///< Vector with temporary H3_Lambda pi- candidates
   std::vector<KFParticle> fH5LL;     ///< Vector with temporary H5_LL->He5_Lambda pi- candidates
+  std::vector<KFParticle> fPipi;     ///< all pi+pi- combinations
   std::vector<KFParticle> fPpi;      ///< all ppi- combinations
   std::vector<KFParticle> fPpiBar;   ///< all p-pi+ combinations
   std::vector<KFParticle> fPPpi;     ///< pppi- combinations
@@ -448,10 +454,11 @@ class KFParticleFinder
   static const int fNSecCandidatesSets = 5; ///< Number of sets of secondary particle candidates.
   /** \brief Array of vectors with secondary candidates: 0) \f$K_s^0\f$, 1) \f$\Lambda\f$, 2) \f$\overline{\Lambda}\f$, 3) \f$\gamma\f$, 4) \f$\pi^0\f$. */
   std::vector<KFParticle> fSecCandidates[fNSecCandidatesSets];
-  static const int fNPrimCandidatesSets = 11; ///< Number of sets of primary particle candidates.
+  static const int fNPrimCandidatesSets = 13; ///< Number of sets of primary particle candidates.
   /** \brief Array of vectors with primary candidates for each primary vertex: 
    ** 0) \f$K_s^0\f$, 1) \f$\Lambda\f$, 2) \f$\overline{\Lambda}\f$, 3) \f$\gamma\f$, 4) \f$\pi^0\f$, 
-   ** 5) \f$\Xi^-\f$, 6) \f$\overline{\Xi}^+\f$, 7) \f$\Omega^-\f$, 8) \f$\overline{\Omega}^+\f$, 9) \f$\Xi^{0*}\f$, 10) \f$\overline{\Xi}^{0*}\f$. */
+   ** 5) \f$\Xi^-\f$, 6) \f$\overline{\Xi}^+\f$, 7) \f$\Omega^-\f$, 8) \f$\overline{\Omega}^+\f$, 9) \f$\Xi^{0*}\f$, 10) \f$\overline{\Xi}^{0*}\f$,
+   ** 11) \f$K^+\f$, 12) \f$K^-\f$. */
   std::vector< std::vector<KFParticle> > fPrimCandidates[fNPrimCandidatesSets]; //
   static const int fNPrimCandidatesTopoSets = 9; ///< Number of sets of primary particle candidates with topological constraint.
   /** \brief Array of vectors with primary candidates for each primary vertex with a topological constraint set:

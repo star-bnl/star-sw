@@ -5,6 +5,7 @@
 
 #include "KFParticle.h"
 #include "TObject.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 
 class KFParticleTopoReconstructor;
 class KFParticleFinder;
@@ -28,6 +29,9 @@ class StKFParticleInterface: public TObject
   ~StKFParticleInterface();
   
   void InitParticles();
+#ifdef __kfpAtFirstHit__
+  void InitParticlesAtFirstAndLastHit();
+#endif
   void ReconstructParticles();
   void ReconstructTopology();
   
@@ -89,11 +93,16 @@ class StKFParticleInterface: public TObject
   void SetStrictTofPidMode() { fStrictTofPID = true;  }
   void SetSoftTofPidMode()   { fStrictTofPID = false; }
   void SetSoftKaonPIDMode()  { fCleanKaonsWitTof = false; }
-  static void SetdEdXType(Int_t type = 1)  { fdEdXMode = type; } // type - 0 => I70, 1 => dEdxFit, 2 => dNdx
+#ifndef __TFG__VERSION__
+  void UseCorrecteddEdX()    { fdEdXMode = 2; }
+#else /* __TFG__VERSION__ */
+  void SetdEdXType(Int_t type = 1)  { fdEdXMode = type; } // type - 0 => I70, 1 => dEdxFit, 2 => dNdx
   void UseCorrecteddEdX()    { SetdEdXType(2); }
+#endif /* __TFG__VERSION__ */
   void SetTriggerMode()      { fTriggerMode = true; }
   //KF Particle Finder cuts
   void SetChiPrimaryCut(float cut)  { fChiPrimaryCut = cut; }
+  void SetChiPrimaryCutFragments(float cut)  { fChiPrimaryCutFragments = cut; }
   void SetChiPrimaryMaxCut(float cut)  { fChiPrimaryMaxCut = cut; }
   //Event cuts
   void CleanLowPVTrackEvents() { fCleanLowPVTrackEvents = true; }
@@ -122,24 +131,39 @@ class StKFParticleInterface: public TObject
   void SetLdLCutCharm2D(float cut);
   void SetChi2TopoCutCharm2D(float cut);
   void SetChi2CutCharm2D(float cut);
+#ifdef __TFG__VERSION__
   void SetSecondaryCuts(const float sigmaMass, const float chi2Topo, const float ldl);
+#endif /* __TFG__VERSION__ */
   static StKFParticleInterface *instance() {return fgStKFParticleInterface;}
+#ifdef __TFG__VERSION__
   void              SetFixedTarget(Bool_t k=kTRUE) {fIsFixedTarget = k;}
   Bool_t            IsFixedTarget()        {return fIsFixedTarget;}
+#endif /* __TFG__VERSION__ */
  private:
   
   double InversedChi2Prob(double p, int ndf) const;
   bool IsGoodPV(const KFVertex& pv);
   bool GetTrack(const StDcaGeometry& dcaG, KFPTrack& track, int q, int index);
   std::vector<int> GetTofPID(double m2, double p, int q, const int trackId);
-  std::vector<int> GetPID(double m2, double p, int q, double dEdX, double dEdXPull[7], bool isTofm2, const int trackId);
+  std::vector<int> GetPID(double m2, double p, int q, double dEdX, double dEdXPull[8], bool isTofm2, const int trackId);
+#ifndef __TFG__VERSION__
+  void AddTrackToParticleList(const KFPTrack& track, int nHftHitsInTrack, int index, const std::vector<int>& totalPDG, KFVertex& pv, std::vector<int>& primaryTrackList,
+                              std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved,
+                              const KFPTrack* trackAtLastHit=nullptr, std::vector<KFParticle>* particlesAtLastHit=nullptr);
+  void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof);
+  void FillPIDHistograms(StMuTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof);
+#else /* __TFG__VERSION__ */
   void AddTrackToParticleList(const KFPTrack& track, int nHftHitsInTrack, int index, const std::vector<int>& totalPDG, KFVertex& pv, std::vector<int>& primaryTrackList,
                               std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved, Float_t chi2 = 0, Int_t NDF = -1);
   void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2 = kFALSE, float m2tof = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1);
   void FillPIDHistograms(StMuTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2 = kFALSE, float m2tof = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1);
+#endif /* __TFG__VERSION__ */
   
   KFParticleTopoReconstructor* fKFParticleTopoReconstructor;
   std::vector<KFParticle> fParticles;
+#ifdef __kfpAtFirstHit__
+  std::vector<KFParticle> fParticlesAtLastHit;
+#endif
   std::vector<int> fParticlesPdg;
   std::vector<int> fNHftHits;
   
@@ -148,26 +172,35 @@ class StKFParticleInterface: public TObject
   bool fCollectPIDHistograms;
   //0 - N HFT hits in track, 1 - PV error distribution, 2 - pv tracks ratio
   TH1F* fTrackHistograms[3];
-  // 0 - dEdX, 1 - dEdX positive tracks, 2 - dEdX negative tracks, 3 - dEdX tracks with ToF,
+#ifndef __TFG__VERSION__
+  // 0 - dEdX, 1 - dEdX positive tracks, 2 - dEdX negative tracks, 3 - dEdX tracks with ToF, 4 - ToF PID, 5 - PV errors vs N tracks, 6 - PV errors vs N PV tracks, 7 - N secondary vs N prim
+  TH2F* fTrackHistograms2D[8];
+#else /* __TFG__VERSION__ */
+  // 0 - dEdX, 1 - dEdX positive tracks, 2 - dEdX negative tracks, 3 - dEdX tracks with ToF or ETof,
   // 4 - ToF PID, 5 - PV errors vs N tracks, 6 - PV errors vs N PV tracks, 7 - N Global vs N Primary
   // 8 - pT^2 versus eta for primary tracks
-  // 9 - dNdX, 10 - dNdX positive tracks, 11 - dNdX negative tracks, 12 - dNdX tracks with ToF,
+  // 9 - dNdX, 10 - dNdX positive tracks, 11 - dNdX negative tracks, 12 - dNdX tracks with ToF or ETof.
   // 13 - pT^2 versus eta for all tracks
   // 14 - EToF PID
   TH2F* fTrackHistograms2D[15];
+#endif /* __TFG__VERSION__ */
   //PID histograms
   static const int NTrackHistoFolders = 26;
   TH2F* fHistodEdXTracks[NTrackHistoFolders];
   TH2F* fHistodEdXwithToFTracks[NTrackHistoFolders];
   TH2F* fHistoTofPIDTracks[NTrackHistoFolders];
+#ifdef __TFG__VERSION__
   TH2F* fHistoETofPIDTracks[NTrackHistoFolders];
+#endif /* __TFG__VERSION__ */
   TH1F* fHistoMomentumTracks[NTrackHistoFolders];
   TH2F* fHistodEdXPull[NTrackHistoFolders];
   TH2F* fHistodEdXZ[NTrackHistoFolders];
+#ifdef __TFG__VERSION__
   TH2F* fHistodNdXTracks[NTrackHistoFolders];
   TH2F* fHistodNdXwithToFTracks[NTrackHistoFolders];
   TH2F* fHistodNdXPull[NTrackHistoFolders];
   //  TH2F* fHistodNdXZ[NTrackHistoFolders];
+#endif /* __TFG__VERSION__ */
   std::map<int, int> fTrackPdgToHistoIndex;
   
   //PID information with respect to the trackID
@@ -177,17 +210,20 @@ class StKFParticleInterface: public TObject
   //PID cuts
   bool fStrictTofPID;
   bool fCleanKaonsWitTof;
-  static Int_t fdEdXMode;
+  int fdEdXMode;
   //trigger cuts
   bool fTriggerMode;
   //KF Particle Finder cuts
   float fChiPrimaryCut;
+  float fChiPrimaryCutFragments;
   float fChiPrimaryMaxCut;
   static StKFParticleInterface* fgStKFParticleInterface;
   //Event cuts
   bool fCleanLowPVTrackEvents;
   bool fUseHFTTracksOnly;
+#ifdef __TFG__VERSION__
   Bool_t            fIsFixedTarget;
+#endif /* __TFG__VERSION__ */
   ClassDef(StKFParticleInterface,1)
 };
 

@@ -35,6 +35,8 @@
 #include "AliHLTTPCCAMCPoint.h"
 #endif
 
+#include "THnSparse.h"
+
 #include "KFPartEfficiencies.h"
 #include "KFPVEfficiencies.h"
 
@@ -46,9 +48,10 @@ class TH1F;
 class TH2F;
 class TH3F;
 
-class KFParticle;
 class TProfile;
 class TProfile2D;
+
+class KFParticle;
 
 /** @class KFParticlePerformanceBase
  ** @brief The base class for KFTopoPerformance.
@@ -64,7 +67,6 @@ class TProfile2D;
  ** fit QA of primary tracks; contamination of ghost, secondary (background) tracks and tracks from
  ** another primary vertex; efficiency.
  **/
-
 class KFParticlePerformanceBase
 #ifdef KFPWITHTRACKER
 : public AliHLTTPCPerformanceBase
@@ -88,7 +90,10 @@ class KFParticlePerformanceBase
   /** Switch off collection of Z-R histograms. Not to allocate memory should be called 
    ** before KFParticlePerformanceBase::CreateHistos(). **/
   void DoNotStoreZRHistograms()      { fStoreZRHistograms = 0; }
-  void DoNotStoreFitPullHistograms()      { fStoreFitPullHistograms = 0; }
+  /** Switch on collection of 3D efficiency plots. Should be called 
+   ** before KFParticlePerformanceBase::CreateHistos(). **/
+  void Store3DEfficiency()           { fStore3DEfficiency = true; }
+
   /** Returns residual histogram with "iParameter" parameter for decay with "iDecay" number. */
   const TH1F* GetDecayResidual(const int iDecay, const int iParameter) const { return hFitQA[iDecay][iParameter];          }
   /** Returns pull histogram with "iParameter" parameter for decay with "iDecay" number. */
@@ -107,13 +112,12 @@ class KFParticlePerformanceBase
   bool fStoreMCHistograms; ///< Flag showing if histograms requiring Monte Carlo information should be created and collected. "True" by default.
   bool fStorePrimSecHistograms; ///< Flag showing if histograms for primary and secondary candidates should be created and collected. "True" by default.
   bool fStoreZRHistograms; ///< Flag showing if Z-R histograms should be created and collected. "True" by default.
-  bool fStoreFitPullHistograms; ///< Flag showing if histograms for fit secondary candidates should be created and collected. "True" by default.
+  bool fStore3DEfficiency; ///< Flag showing if 3D efficiency histograms should be created and collected. "False" by default.
 
 //histos
   static const int nFitQA = 16; ///< Number of fit QA histograms: residuals and pulls in X, Y, Z, Px, Py, Pz, E, M.
   TH1F *hFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of daughter particles at production point.
   TH1F *hFitQA[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the reconstructed particle: X, Y, Z at decay point, P, E, M - at production point
-  TH1F *hFitQAPull[KFPartEfficiencies::nParticles][nFitQA][3]; ///< Residuals and pulls of the reconstructed particle: X, Y, Z at decay point, P, E, M - at production point from Fit "FitQAPull", 0 -> mother, 1/2 -> +/- daughter
   TH1F *hFitQANoConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with no constraints set.
   TH1F *hFitQAMassConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with the mass constraint. 
   TH1F *hFitQATopoConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with the production point constraint.
@@ -123,8 +127,9 @@ class KFParticlePerformanceBase
   TH1F *hDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA]; ///< Histograms to evaluate KFParticleSIMD::GetDStoParticle() function
   
   /** \brief Number of histograms with parameter distributions: mass, p, pt, rapidity, decay length, c*tau, 
-   ** chi/ndf, prob, theta, phi, X, Y, Z, R, L, L/dL, Mt, multiplicity. **/
-  static const int nHistoPartParam = 19;
+   ** chi/ndf, prob, theta, phi, X, Y, Z, R, L, L/dL, Mt, multiplicity,
+   ** dX, dY, dZ, dPx, dPy, dPz, dE, dM **/
+  static const int nHistoPartParam = 26;
   /** Number of sets of histograms with parameter distributions: 0 - all candidates, 1 - reconstructed signal, 2 - physics background from other decays, 3 - combinatorial
    ** background (ghost), 4 - reconstructed signal for side bands method, 5- reconstructed background for side bands method, 6 - MC signal. **/
   static const int nParametersSet = 7;
@@ -145,14 +150,16 @@ class KFParticlePerformanceBase
   TH2F *hPartParam2DSecondary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; ///< 2D for secondary candidates.
   TH2F *hPartParam2DSecondaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; ///< 2D for secondary candidates with mass constraint.
 
-  static const int nHistoPartParam3D = 14; ///< Number of 3D histograms: y-pt-M, y-mt-M, b-pt-M, b-y-M, b-mt-M, ct-pt-M, y-phi-M for pT > 1 GeV/c, y-pt-dM
+  static const int nHistoPartParam3D = 12; ///< Number of 3D histograms: y-pt-M, y-mt-M, b-pt-M, b-y-M, b-mt-M, ct-pt-M, dalitz1-4
   TH3F *hPartParam3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D]; ///< 3D histograms.
 
   static const int nPartEfficiency = 9; ///< Number of efficiency plots for each decay: vs p, pt, y, z, c*tau, decay length, l, r, Mt.
   TProfile* hPartEfficiency[KFPartEfficiencies::nParticles][3][nPartEfficiency]; ///< Efficiency plots.
   static const int nPartEfficiency2D = 2;  ///< Number of 2D efficiency plots for each decay: y-pt, y-mt.
   TProfile2D* hPartEfficiency2D[KFPartEfficiencies::nParticles][3][nPartEfficiency2D]; ///< 2D efficiency plots.
-  
+  THnSparseF* hPartEfficiencyMulti[KFPartEfficiencies::nParticles][4]; ///< Multidimensional efficiency: phi-theta-p-ctau-z, 0 - N reco, 1 - N mc
+                                                                       ///< pt-y-p-ctau, 2 - N reco, 3 - N mc
+
   static const int nHistosPV = 7; ///< Number of QA histograms for primary vertices: residuals, pulls, number of lost tracks.
   TH1F *hPVFitQa[2][nHistosPV]; ///< Fit QA of primary vertices, 1D histograms.
   TH2F *hPVFitQa2D[2][2][nHistosPV-1]; ///< Fit QA of primary vertices, 2D histograms.
@@ -191,7 +198,7 @@ class KFParticlePerformanceBase
   KFParticlePerformanceBase(const KFParticlePerformanceBase&); ///< Copying of objects of this class is forbidden.
   
   void CreateFitHistograms(TH1F* histo[nFitQA], int iPart);
-  void CreateEfficiencyHistograms(TProfile* histo[3][nPartEfficiency], TProfile2D* histo2[3][nPartEfficiency2D]);
+  void CreateEfficiencyHistograms(TProfile* histo[3][nPartEfficiency], TProfile2D* histo2[3][nPartEfficiency2D], THnSparseF* histoN[4]);
   void CreateParameterHistograms(TH1F* histoParameters[KFPartEfficiencies::nParticles][nHistoPartParam],
                                  TH2F *histoParameters2D[KFPartEfficiencies::nParticles][nHistoPartParam2D],
                                  TH3F *histoParameters3D[KFPartEfficiencies::nParticles][nHistoPartParam3D],

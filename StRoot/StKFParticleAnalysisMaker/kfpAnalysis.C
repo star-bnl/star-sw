@@ -42,16 +42,23 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   kfpAnalysis->CollectPIDHistograms();
   kfpAnalysis->CollectTrackHistograms();
   
-  kfpAnalysis->AddDecayToReconstructionList( 310);  // K0
+  kfpAnalysis->AddDecayToReconstructionList( 310);    // K0
+  kfpAnalysis->AddDecayToReconstructionList( 100321); // K -> 3pi
+  kfpAnalysis->AddDecayToReconstructionList(-100321); 
+  kfpAnalysis->AddDecayToReconstructionList( 200321); // K+3piK
+  kfpAnalysis->AddDecayToReconstructionList(-200321);
   kfpAnalysis->AddDecayToReconstructionList( 3122); // Lambda
   kfpAnalysis->AddDecayToReconstructionList(-3122); // Lambda_bar
   kfpAnalysis->AddDecayToReconstructionList( 3312); // Xi-
   kfpAnalysis->AddDecayToReconstructionList(-3312); // Xi+
   kfpAnalysis->AddDecayToReconstructionList( 3334); // Omega-
   kfpAnalysis->AddDecayToReconstructionList(-3334); // Omega+
+
+  kfpAnalysis->AddDecayToReconstructionList( 22);   // gamma
+  kfpAnalysis->AddDecayToReconstructionList( 111);  // pi0
+  kfpAnalysis->AddDecayToReconstructionList( 333);  // phi
 //   
 //   kfpAnalysis->AddDecayToReconstructionList( 113);  // rho
-  kfpAnalysis->AddDecayToReconstructionList( 333);  // phi
 //   kfpAnalysis->AddDecayToReconstructionList( 313);  // K*0
 //   kfpAnalysis->AddDecayToReconstructionList(-313);  // K*0_bar
 //   kfpAnalysis->AddDecayToReconstructionList( 323);  // K*+
@@ -61,14 +68,13 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
 //   kfpAnalysis->AddDecayToReconstructionList( 3124); // Lambda*
 //   kfpAnalysis->AddDecayToReconstructionList( 3224); // Sigma*+
 //   kfpAnalysis->AddDecayToReconstructionList( 3114); // Sigma*-
-//   kfpAnalysis->AddDecayToReconstructionList( 3324); // Xi*0
-//   kfpAnalysis->AddDecayToReconstructionList(-3324); // Xi*0
+  kfpAnalysis->AddDecayToReconstructionList( 3324); // Xi*0
+  kfpAnalysis->AddDecayToReconstructionList(-3324); // Xi*0
   
-  kfpAnalysis->AddDecayToReconstructionList( 22);   // gamma
-  kfpAnalysis->AddDecayToReconstructionList( 111);  // pi0
-//   kfpAnalysis->AddDecayToReconstructionList( 3212);  // Sigma0
 //   
 #if 1 /* Hyoer Nuclears */
+  kfpAnalysis->AddDecayToReconstructionList( 3000); // LL
+  kfpAnalysis->AddDecayToReconstructionList( 3001); // Lppi
   kfpAnalysis->AddDecayToReconstructionList( 3003); // Ln
   //  kfpAnalysis->AddDecayToReconstructionList(-3003); // Ln_bar
   kfpAnalysis->AddDecayToReconstructionList( 3103); // Lnn
@@ -83,9 +89,10 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   kfpAnalysis->AddDecayToReconstructionList( 3008); // H4LL
   kfpAnalysis->AddDecayToReconstructionList( 3009); // H4LL
   
-  kfpAnalysis->AddDecayToReconstructionList( 3000); // LL
-  kfpAnalysis->AddDecayToReconstructionList( 3001); // Lppi
 #endif  
+  kfpAnalysis->AddDecayToReconstructionList( 3212);  // Sigma0
+  kfpAnalysis->AddDecayToReconstructionList( 3012);  // H3L_{dppi}
+  kfpAnalysis->AddDecayToReconstructionList( 3013);  // H4L_{tppi}
   
 #if 0  
   kfpAnalysis->AddDecayToReconstructionList( 9001); // pi+pi+
@@ -97,6 +104,11 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   kfpAnalysis->AddDecayToReconstructionList( 9004); // pK+
   kfpAnalysis->AddDecayToReconstructionList(-9004); // p-K-
 #endif  
+  kfpAnalysis->AddDecayToReconstructionList( 1003004); // H3L*
+  kfpAnalysis->AddDecayToReconstructionList( 1003005); // H4L*
+  kfpAnalysis->AddDecayToReconstructionList( 1003006); // He4L*
+  kfpAnalysis->AddDecayToReconstructionList( 1003007); // He5L*
+
   StMaker *dbMk = chain->GetMaker("db");
   if (dbMk) dbMk->SetDebug(1);
   chain->Init();
@@ -107,23 +119,30 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   //     StKFParticleInterface::instance()->UseHFTTracksOnly();
   //}
   
-//   StKFParticleInterface::instance()->SetSoftKaonPIDMode();
+  StKFParticleInterface::instance()->SetSoftKaonPIDMode();
   StKFParticleInterface::instance()->SetSoftTofPidMode();
 
 //   StKFParticleInterface::instance()->SetChiPrimaryMaxCut(5.e3);
-  StKFParticleInterface::instance()->SetChiPrimaryCut(12);
+//  StKFParticleInterface::instance()->SetChiPrimaryCut(12);
+  StKFParticleInterface::instance()->SetChiPrimaryCut(18.f);
+  StKFParticleInterface::instance()->SetChiPrimaryCutFragments(8.f);
   
   StKFParticleInterface::instance()->SetMaxDistanceBetweenParticlesCut(1);
   StKFParticleInterface::instance()->SetLCut(0.f);
   
-  StKFParticleInterface::instance()->SetChiPrimaryCut2D(8);
+  //  StKFParticleInterface::instance()->SetChiPrimaryCut2D(8);
+  StKFParticleInterface::instance()->SetChiPrimaryCut2D(0);
   StKFParticleInterface::instance()->SetChi2Cut2D(3);
   StKFParticleInterface::instance()->SetLdLCut2D(5);
   
   StKFParticleInterface::instance()->SetChi2CutXiOmega(3);
   StKFParticleInterface::instance()->SetChi2TopoCutXiOmega(3);
   StKFParticleInterface::instance()->SetLdLCutXiOmega(5);  
-  ((KFParticlePerformanceBase *)StKFParticleInterface::instance()->GetTopoReconstructor())->DoNotStoreFitPullHistograms(); 
+
+  StKFParticleInterface::instance()->SetChi2CutCharmManybodyDecays(3);
+  StKFParticleInterface::instance()->SetChi2TopoCutCharmManybodyDecays(3);
+  StKFParticleInterface::instance()->SetLdLCutCharmManybodyDecays(5);
+  
   
 //   StKFParticleInterface::instance()->SetSecondaryCuts(3, 3, 5);
 //________________________________________________________________________________

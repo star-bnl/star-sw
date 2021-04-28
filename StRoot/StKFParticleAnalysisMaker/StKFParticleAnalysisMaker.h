@@ -13,6 +13,8 @@
 #endif
 #include "TMVA/Reader.h"
 
+#include "KFParticle.h"
+
 class StKFParticleInterface;
 class StKFParticlePerformanceInterface;
 class KFParticle;
@@ -21,6 +23,7 @@ class StMuDst;
 class TNtuple;
 class TFile;
 class TChain;
+class TTree;
 class StRefMultCorr;
 
 class StKFParticleAnalysisMaker : public StMaker {
@@ -45,7 +48,7 @@ class StKFParticleAnalysisMaker : public StMaker {
   Char_t                mEnd[1];        //!
   std::vector<float> fTMVAParticleParameters[fNNTuples];
   int fNTrackTMVACuts;
-  Bool_t fIsPicoAnalysis;
+  bool fIsPicoAnalysis;
   int fdEdXMode;
   Bool_t fStoreTmvaNTuples;
   Bool_t fProcessSignal;
@@ -62,13 +65,16 @@ class StKFParticleAnalysisMaker : public StMaker {
   std::vector<TString> fFlowFiles;
   std::map<long, int> fFlowMap;
   
-  Bool_t fRunCentralityAnalysis;
+  bool fRunCentralityAnalysis;
   StRefMultCorr *fRefmultCorrUtil;
   TString fCentralityFile;
   
-  Bool_t fAnalyseDsPhiPi;
+  bool fAnalyseDsPhiPi;
   std::vector<int> fDecays;
-  
+
+  bool fIsProduce3DEfficiencyFile;
+  TString f3DEfficiencyFile;
+
   void GetDaughterParameters(const int iReader, int& iDaughterTrack, int& iDaughterParticle, KFParticle& particle);
   void GetParticleParameters(const int iReader, KFParticle& particle);
   long  GetUniqueEventId(const int iRun, const int iEvent) const;
@@ -78,9 +84,15 @@ class StKFParticleAnalysisMaker : public StMaker {
   void SetTMVACentralityBins(int iReader, TString bins);
   void SetTMVAPtBins(int iReader, TString bins);
   void SetTMVABins(int iReader, TString centralityBins="-1:1000", TString ptBins="-1.:1000.");
-  
+
   void GetParticles(std::vector<KFParticle>* particles, const int pdg) const;
   
+  bool fStoreCandidates;
+  KFParticle fPartcileCandidate;
+  std::vector<bool> fIsStoreCandidate;
+  TFile* fCandidateFile;
+  TTree* fCandidatesTree;
+
  public: 
   StKFParticleAnalysisMaker(const char *name="KFParticleAnalysis");
   virtual       ~StKFParticleAnalysisMaker();
@@ -128,6 +140,11 @@ class StKFParticleAnalysisMaker : public StMaker {
   void AnalyseDsPhiPi() { fAnalyseDsPhiPi = true; }
   
   void AddDecayToReconstructionList( int iDecay );
+  
+  void Produce3DEfficiencyFile() { fIsProduce3DEfficiencyFile = true; }
+  void Set3DEfficiency(TString fileName) { f3DEfficiencyFile = fileName; }
+
+  void AddCandidateToStore(int pdg);
   
   ClassDef(StKFParticleAnalysisMaker,0)   //
 };

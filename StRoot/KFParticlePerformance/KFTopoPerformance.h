@@ -40,6 +40,8 @@ class AliHLTTPCCAGBTracker;
 class KFParticleTopoReconstructor;
 class KFPHistogram;
 
+class TFile;
+
 /** @class KFTopoPerformance
  ** @brief The class to collect histograms.
  ** @author  M.Zyzak, I.Kisel
@@ -106,7 +108,9 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   
   void SetCentralityBin(const int iBin) { fCentralityBin = iBin; } ///< Sets centrality bin of the current event.
   void SetCentralityWeight(const float weight) { fCentralityWeight = weight; } ///< Sets weight of the centrality bin of the current event.
-  
+
+  void Set3DEfficiency(TString fileName);
+
  private:
 
   const KFTopoPerformance& operator = (const KFTopoPerformance&); ///< Copying of objects of this class is forbidden.
@@ -128,10 +132,11 @@ class KFTopoPerformance: public KFParticlePerformanceBase
                               TH2F* histoParameters2D[4][KFPartEfficiencies::nParticles][nHistoPartParam2D],
                               TH3F* histoParameters3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D],
                               TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA] = 0,
-                              TH1F* histoFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA] = 0,                             
+                              TH1F* histoFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA] = 0,
                               TH1F* histoDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA] = 0,
-                              std::vector<int>* multiplicities = 0,
-			      TH1F* histoFitQAPull[KFPartEfficiencies::nParticles][nFitQA][3] = 0);
+                              std::vector<int>* multiplicities = 0);
+  float GetAcceptanceWeight(const double* point, const int iParticle);
+  float GetCutsEffWeight(const double* point, const int iParticle);
   
   const KFParticleTopoReconstructor *fTopoReconstructor; ///< Pointer to the KFParticleTopoReconstructor object with particles and vertices to be analysed.
 
@@ -164,7 +169,12 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   
   int fCentralityBin; ///< Centrality bin for the current event. 
   float fCentralityWeight; ///< Centrality weight for the current event.
-    ClassDef(KFTopoPerformance,0)
+
+  TFile*                   fEfficiencyMapFile;
+  std::vector<THnSparseF*> fAcceptanceMapReco;
+  std::vector<THnSparseF*> fAcceptanceMapMC;
+  std::vector<THnSparseF*> fCutsEfficiencyMapReco;
+  std::vector<THnSparseF*> fCutsEfficiencyMapMC;
 };
 
 #endif

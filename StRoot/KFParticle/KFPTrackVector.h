@@ -43,7 +43,7 @@
  ** allows fast vectorised access to the aligned data providing the
  ** maximum possible speed for data reading, and at the same time easy
  ** random access to the data members. Tracks are sorted by KFParticleTopoReconstructor::SortTracks():
- ** electrons, muons, pions, tracks without PID, kaons, protons, deuterons, tritons, He3, He4, He6, Li6, Li7, Be7.
+ ** electrons, muons, pions, tracks without PID, kaons, protons, deuterons, tritons, He3, He4, He6, Li6, Li7, Be7, Sigmas.
  **/
 
 class KFPTrackVector
@@ -51,7 +51,7 @@ class KFPTrackVector
   friend class KFParticleTopoReconstructor;
  public:
   KFPTrackVector():fId(), fPDG(), fQ(), fPVIndex(), fNPixelHits(), fNE(0), fNMu(0), fNPi(0), fNK(0), fNP(0),
-                   fND(0), fNT(0), fNHe3(0), fNHe4(0), fNHe6(0), fNLi6(0), fNLi7(0), fNBe7(0) { }
+                   fND(0), fNT(0), fNHe3(0), fNHe4(0), fNHe6(0), fNLi6(0), fNLi7(0), fNBe7(0), fNSigma(0) { }
   virtual ~KFPTrackVector() { }
 
   /**Returns size of the vectors. All data vectors have the same size. */
@@ -123,12 +123,13 @@ class KFPTrackVector
   void SetLastLi6     (int n)              { fNLi6 = n; }                ///< Sets index of the last Li6.
   void SetLastLi7     (int n)              { fNLi7 = n; }                ///< Sets index of the last Li7.
   void SetLastBe7     (int n)              { fNBe7 = n; }                ///< Sets index of the last Be7.
+  void SetLastSigma   (int n)              { fNSigma = n; }              ///< Sets index of the last Sigma.
   
   void RecalculateLastIndex()
   {
     /** Recalculate the last index of each track specie. Should be called after track sorting. */
     fNE = 0; fNMu = 0; fNPi = 0; fNK = 0; fNP = 0;
-    fND = 0; fNT = 0; fNHe3 = 0; fNHe4 = 0; fNHe6 = 0; fNLi6 = 0; fNLi7 = 0; fNBe7 = 0;
+    fND = 0; fNT = 0; fNHe3 = 0; fNHe4 = 0; fNHe6 = 0; fNLi6 = 0; fNLi7 = 0; fNBe7 = 0; fNSigma = 0;
     for(int i=0; i<Size(); i++)
     {
       switch (abs(fPDG[i]))
@@ -149,12 +150,14 @@ class KFPTrackVector
         case 1000030060: fNLi6++; break;
         case 1000030070: fNLi7++; break;
         case 1000040070: fNBe7++; break;
+        case 2000003112: fNSigma++; break;
       }
     }
     
     fNMu += fNE; fNPi += fNMu; fNK  += fNPi; fNP  += fNK;
     fND += fNP; fNT += fND; fNHe3 += fNT; fNHe4 += fNHe3;
     fNHe6 += fNHe4; fNLi6 += fNHe6; fNLi7 += fNLi6; fNBe7 += fNLi7;
+    fNSigma += fNBe7;
   }
   
   int FirstElectron()  { return 0; } ///< Returns index of the first electron.
@@ -196,20 +199,24 @@ class KFPTrackVector
   int FirstBe7()  { return int(fNLi7/float_vLen)*float_vLen; } ///< Returns index of the first element of the SIMD vector with the first Be7.
   const int& LastBe7()  const { return fNBe7; } ///< Returns index of the last Be7.
   int NBe7s() { return fNBe7 - fNLi7; } ///< Returns number of Be7 tracks.
+  int FirstSigma()  { return int(fNBe7/float_vLen)*float_vLen; } ///< Returns index of the first element of the SIMD vector with the first Sigma.
+  const int& LastSigma()  const { return fNSigma; } ///< Returns index of the last Sigma.
+  int NSigmas() { return fNSigma - fNBe7; } ///< Returns number of Sigma tracks.
   
-  void AddElectron() {fNE++;}   ///< Increases by one index of the last electron.
-  void AddMuon()     {fNMu++;}  ///< Increases by one index of the last muon.
-  void AddPion()     {fNPi++;}  ///< Increases by one index of the last pion.
-  void AddKaon()     {fNK++;}   ///< Increases by one index of the last kaon.
-  void AddProton()   {fNP++;}   ///< Increases by one index of the last proton.
-  void AddDeuteron() {fND++;}   ///< Increases by one index of the last deuteron.
-  void AddTririum()  {fNT++;}   ///< Increases by one index of the last triton.
-  void AddHe3()      {fNHe3++;} ///< Increases by one index of the last He3.
-  void AddHe4()      {fNHe4++;} ///< Increases by one index of the last He4.
-  void AddHe6()      {fNHe6++;} ///< Increases by one index of the last He6.
-  void AddLi6()      {fNLi6++;} ///< Increases by one index of the last Li6.
-  void AddLi7()      {fNLi7++;} ///< Increases by one index of the last Li7.
-  void AddBe7()      {fNBe7++;} ///< Increases by one index of the last Be7.
+  void AddElectron() {fNE++;}     ///< Increases by one index of the last electron.
+  void AddMuon()     {fNMu++;}    ///< Increases by one index of the last muon.
+  void AddPion()     {fNPi++;}    ///< Increases by one index of the last pion.
+  void AddKaon()     {fNK++;}     ///< Increases by one index of the last kaon.
+  void AddProton()   {fNP++;}     ///< Increases by one index of the last proton.
+  void AddDeuteron() {fND++;}     ///< Increases by one index of the last deuteron.
+  void AddTririum()  {fNT++;}     ///< Increases by one index of the last triton.
+  void AddHe3()      {fNHe3++;}   ///< Increases by one index of the last He3.
+  void AddHe4()      {fNHe4++;}   ///< Increases by one index of the last He4.
+  void AddHe6()      {fNHe6++;}   ///< Increases by one index of the last He6.
+  void AddLi6()      {fNLi6++;}   ///< Increases by one index of the last Li6.
+  void AddLi7()      {fNLi7++;}   ///< Increases by one index of the last Li7.
+  void AddBe7()      {fNBe7++;}   ///< Increases by one index of the last Be7.
+  void AddSigma()    {fNSigma++;} ///< Increases by one index of the last Sigma.
   
   void RotateXY( float_v alpha, int firstElement );
   
@@ -264,19 +271,20 @@ class KFPTrackVector
     for(int n=0; n<localSize; n++)
       fNPixelHits[n] = track.fNPixelHits[n];
     
-    fNE   = track.fNE;
-    fNMu  = track.fNMu;
-    fNPi  = track.fNPi;
-    fNK   = track.fNK;
-    fNP   = track.fNP;
-    fND   = track.fND;
-    fNT   = track.fNT;
-    fNHe3 = track.fNHe3;
-    fNHe4 = track.fNHe4;
-    fNHe6 = track.fNHe6;
-    fNLi6 = track.fNLi6;
-    fNLi7 = track.fNLi7;
-    fNBe7 = track.fNBe7;
+    fNE     = track.fNE;
+    fNMu    = track.fNMu;
+    fNPi    = track.fNPi;
+    fNK     = track.fNK;
+    fNP     = track.fNP;
+    fND     = track.fND;
+    fNT     = track.fNT;
+    fNHe3   = track.fNHe3;
+    fNHe4   = track.fNHe4;
+    fNHe6   = track.fNHe6;
+    fNLi6   = track.fNLi6;
+    fNLi7   = track.fNLi7;
+    fNBe7   = track.fNBe7;
+    fNSigma = track.fNSigma;
     
     return *this;
   }
@@ -326,19 +334,20 @@ class KFPTrackVector
     }
 #endif
 
-    data[offset] = fNE;   offset++;
-    data[offset] = fNMu;  offset++;
-    data[offset] = fNPi;  offset++;
-    data[offset] = fNK;   offset++;
-    data[offset] = fNP;   offset++;
-    data[offset] = fND;   offset++;
-    data[offset] = fNT;   offset++;
-    data[offset] = fNHe3; offset++;
-    data[offset] = fNHe4; offset++;
-    data[offset] = fNHe6; offset++;
-    data[offset] = fNLi6; offset++;
-    data[offset] = fNLi7; offset++;
-    data[offset] = fNBe7; offset++;
+    data[offset] = fNE;     offset++;
+    data[offset] = fNMu;    offset++;
+    data[offset] = fNPi;    offset++;
+    data[offset] = fNK;     offset++;
+    data[offset] = fNP;     offset++;
+    data[offset] = fND;     offset++;
+    data[offset] = fNT;     offset++;
+    data[offset] = fNHe3;   offset++;
+    data[offset] = fNHe4;   offset++;
+    data[offset] = fNHe6;   offset++;
+    data[offset] = fNLi6;   offset++;
+    data[offset] = fNLi7;   offset++;
+    data[offset] = fNBe7;   offset++;
+    data[offset] = fNSigma; offset++;
   }
   
   void ReadDataFromVector(int* data, int& offset)
@@ -386,19 +395,20 @@ class KFPTrackVector
     }
 #endif
 
-    fNE = data[offset];   offset++;
-    fNMu = data[offset];  offset++;
-    fNPi = data[offset];  offset++;
-    fNK = data[offset];   offset++;
-    fNP = data[offset];   offset++;
-    fND = data[offset];   offset++;
-    fNT = data[offset];   offset++;
-    fNHe3 = data[offset]; offset++;
-    fNHe4 = data[offset]; offset++;
-    fNHe6 = data[offset]; offset++;
-    fNLi6 = data[offset]; offset++;
-    fNLi7 = data[offset]; offset++;
-    fNBe7 = data[offset]; offset++;
+    fNE = data[offset];     offset++;
+    fNMu = data[offset];    offset++;
+    fNPi = data[offset];    offset++;
+    fNK = data[offset];     offset++;
+    fNP = data[offset];     offset++;
+    fND = data[offset];     offset++;
+    fNT = data[offset];     offset++;
+    fNHe3 = data[offset];   offset++;
+    fNHe4 = data[offset];   offset++;
+    fNHe6 = data[offset];   offset++;
+    fNLi6 = data[offset];   offset++;
+    fNLi7 = data[offset];   offset++;
+    fNBe7 = data[offset];   offset++;
+    fNSigma = data[offset]; offset++;
   }
   
   void *operator new(size_t size) { return _mm_malloc(size, sizeof(float_v)); }     ///< new operator for allocation of the SIMD-alligned dynamic memory allocation
@@ -431,19 +441,20 @@ class KFPTrackVector
   kfvector_float fField[10];
 #endif
   
-  int fNE;   ///< Index of the last electron.
-  int fNMu;  ///< Index of the last muon.
-  int fNPi;  ///< Index of the last pion (plus tracks without PID).
-  int fNK;   ///< Index of the last kaon.
-  int fNP;   ///< Index of the last proton.
-  int fND;   ///< Index of the last deuteron.
-  int fNT;   ///< Index of the last triton.
-  int fNHe3; ///< Index of the last He3.
-  int fNHe4; ///< Index of the last He4.
-  int fNHe6; ///< Index of the last He6.
-  int fNLi6; ///< Index of the last Li6.
-  int fNLi7; ///< Index of the last Li7.
-  int fNBe7; ///< Index of the last Be7.
+  int fNE;     ///< Index of the last electron.
+  int fNMu;    ///< Index of the last muon.
+  int fNPi;    ///< Index of the last pion (plus tracks without PID).
+  int fNK;     ///< Index of the last kaon.
+  int fNP;     ///< Index of the last proton.
+  int fND;     ///< Index of the last deuteron.
+  int fNT;     ///< Index of the last triton.
+  int fNHe3;   ///< Index of the last He3.
+  int fNHe4;   ///< Index of the last He4.
+  int fNHe6;   ///< Index of the last He6.
+  int fNLi6;   ///< Index of the last Li6.
+  int fNLi7;   ///< Index of the last Li7.
+  int fNBe7;   ///< Index of the last Be7.
+  int fNSigma; ///< Index of the last Sigma.
 } __attribute__((aligned(sizeof(float_v))));
 
 #endif

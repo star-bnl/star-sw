@@ -16,7 +16,7 @@ class TFile;
 class StKFParticlePerformanceInterface: public TObject
 {
  public:
-  StKFParticlePerformanceInterface(const KFParticleTopoReconstructor* tr, bool storeMCHistograms = true, TString outFileName="CbmKFParticleFinderQA.root");
+  StKFParticlePerformanceInterface(const KFParticleTopoReconstructor* tr, bool storeMCHistograms = true, bool produce3DEfficiencyFile = false, TString outFileName="");
   ~StKFParticlePerformanceInterface();
   
   void PerformanceAnalysis();
@@ -32,6 +32,7 @@ class StKFParticlePerformanceInterface: public TObject
   int  GetNReconstructedParticles();
   bool GetParticle(KFParticle& particle, const int iParticle);
   
+  void Set3DEfficiency(TString fileName);
  private:
 #if 1  
   void WriteHistosCurFile( TObject *obj );

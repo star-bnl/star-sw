@@ -8,7 +8,7 @@
 
 ClassImp(StKFParticlePerformanceInterface)
 
-StKFParticlePerformanceInterface::StKFParticlePerformanceInterface(const KFParticleTopoReconstructor* tr, bool storeMCHistograms, TString outFileName): 
+StKFParticlePerformanceInterface::StKFParticlePerformanceInterface(const KFParticleTopoReconstructor* tr, bool storeMCHistograms, bool produce3DEfficiencyFile, TString outFileName): 
   fOutFileName(outFileName), fOutFile(0), fEfffileName("Efficiency.txt"),fKFTopoPerformance(0), fMCTracks(0), fMCIndexes(0)
 {
   fKFTopoPerformance = new KFTopoPerformance();
@@ -21,6 +21,11 @@ StKFParticlePerformanceInterface::StKFParticlePerformanceInterface(const KFParti
   TDirectory *dir = TDirectory::CurrentDirectory();
   if(!storeMCHistograms)
     fKFTopoPerformance->DoNotStoreMCHistograms();
+  if(storeMCHistograms && produce3DEfficiencyFile) {
+    fKFTopoPerformance->DoNotStorePrimSecHistograms();
+    fKFTopoPerformance->DoNotStoreZRHistograms();
+    fKFTopoPerformance->Store3DEfficiency();
+  }
   fKFTopoPerformance->CreateHistos("",dir,tr->GetKFParticleFinder()->GetReconstructionList());
   
   TFile::CurrentFile() = curFile;
@@ -119,4 +124,9 @@ bool StKFParticlePerformanceInterface::GetParticle(KFParticle& particle, const i
   particle = fKFTopoPerformance->GetTopoReconstructor()->GetParticles()[iParticle];
   bool isMatched = fKFTopoPerformance->ParticlesMatch()[iParticle].IsMatchedWithPdg();
   return isMatched;
+}
+
+void StKFParticlePerformanceInterface::Set3DEfficiency(TString fileName)
+{
+  fKFTopoPerformance->Set3DEfficiency(fileName);
 }

@@ -205,6 +205,7 @@ class KFParticleBaseSIMD {
 
   void AddDaughter( const KFParticleBaseSIMD &Daughter );
   void SubtractDaughter( const KFParticleBaseSIMD &Daughter );
+  void ReconstructMissingMass(const KFParticleBaseSIMD &Daughter, KFParticleBaseSIMD &MotherFiltered, KFParticleBaseSIMD &cDaughterFiltered, float_v neutralmasshypo );
 
   void AddDaughterWithEnergyFit( const KFParticleBaseSIMD &Daughter );
   void AddDaughterWithEnergyFitMC( const KFParticleBaseSIMD &Daughter ); 

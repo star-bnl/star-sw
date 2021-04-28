@@ -1047,6 +1047,236 @@ void KFParticleBaseSIMD::SubtractDaughter( const KFParticleBaseSIMD &Daughter )
       +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2];
 }
 
+void KFParticleBaseSIMD::ReconstructMissingMass(const KFParticleBaseSIMD &Daughter, KFParticleBaseSIMD &MotherFiltered, KFParticleBaseSIMD &cDaughterFiltered, float_v neutralmasshypo )
+{
+  float_v mothermasshypo, cdaughtermasshypo, massErr;
+  GetMass(mothermasshypo, massErr);
+  Daughter.GetMass(cdaughtermasshypo, massErr);
+  
+  AddDaughterId( Daughter.Id() );
+  //* Energy considered as an independent variable, fitted independently from momentum, without any constraints on mass
+  //* Add daughter 
+
+  float_v m[8], mV[36];
+
+  float_v D[3][3];
+  GetMeasurement(Daughter, m, mV, D);
+  
+//     std::cout << "X: " << fC[0] << " " << mV[0] << " Y: " << fC[2] << " "<< mV[2] << " Z: "<< fC[5] << " "<< mV[5] << std::endl;
+  
+  float_v mS[6]= { fC[0]+mV[0], 
+                     fC[1]+mV[1], fC[2]+mV[2], 
+                     fC[3]+mV[3], fC[4]+mV[4], fC[5]+mV[5] };    
+    InvertCholetsky3(mS);
+    //* Residual (measured - estimated)
+    
+    float_v zeta[3] = { m[0]-fP[0], m[1]-fP[1], m[2]-fP[2] };    
+
+    float_v K[3][3];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        K[i][j] = 0;
+        for(int k=0; k<3; k++)
+          K[i][j] += fC[IJ(i,k)] * mS[IJ(k,j)];
+      }
+    //////////////////////
+    //////////////////////
+    float_v mCHt0[6], mCHt1[6], mCHt2[6];
+    
+    mCHt0[0]=fC[ 0] ; mCHt1[0]=fC[ 1] ; mCHt2[0]=fC[ 3] ;
+    mCHt0[1]=fC[ 1] ; mCHt1[1]=fC[ 2] ; mCHt2[1]=fC[ 4] ;
+    mCHt0[2]=fC[ 3] ; mCHt1[2]=fC[ 4] ; mCHt2[2]=fC[ 5] ;
+    mCHt0[3]=fC[ 6] ; mCHt1[3]=fC[ 7] ; mCHt2[3]=fC[ 8] ;
+    mCHt0[4]=fC[10] ; mCHt1[4]=fC[11] ; mCHt2[4]=fC[12] ;
+    mCHt0[5]=fC[15] ; mCHt1[5]=fC[16] ; mCHt2[5]=fC[17] ;
+  
+    //* Kalman gain K = mCH'*S
+    
+    float_v kmf0[6], kmf1[6], kmf2[6];
+    
+    for(Int_t i=0;i<6;++i){
+      kmf0[i] = mCHt0[i]*mS[0] + mCHt1[i]*mS[1] + mCHt2[i]*mS[3];
+      kmf1[i] = mCHt0[i]*mS[1] + mCHt1[i]*mS[2] + mCHt2[i]*mS[4];
+      kmf2[i] = mCHt0[i]*mS[3] + mCHt1[i]*mS[4] + mCHt2[i]*mS[5];
+    }
+
+    // last itearation -> update the particle
+
+    //* VHt = VH'
+    
+    float_v mVHt0[6], mVHt1[6], mVHt2[6];
+    
+    mVHt0[0]=mV[ 0] ; mVHt1[0]=mV[ 1] ; mVHt2[0]=mV[ 3] ;
+    mVHt0[1]=mV[ 1] ; mVHt1[1]=mV[ 2] ; mVHt2[1]=mV[ 4] ;
+    mVHt0[2]=mV[ 3] ; mVHt1[2]=mV[ 4] ; mVHt2[2]=mV[ 5] ;
+    mVHt0[3]=mV[ 6] ; mVHt1[3]=mV[ 7] ; mVHt2[3]=mV[ 8] ;
+    mVHt0[4]=mV[10] ; mVHt1[4]=mV[11] ; mVHt2[4]=mV[12] ;
+    mVHt0[5]=mV[15] ; mVHt1[5]=mV[16] ; mVHt2[5]=mV[17] ;
+  
+    //* Kalman gain Km = mCH'*S
+    
+    float_v kcdm0[6], kcdm1[6], kcdm2[6];
+    
+    for(Int_t i=0;i<6;++i){
+      kcdm0[i] = mVHt0[i]*mS[0] + mVHt1[i]*mS[1] + mVHt2[i]*mS[3];
+      kcdm1[i] = mVHt0[i]*mS[1] + mVHt1[i]*mS[2] + mVHt2[i]*mS[4];
+      kcdm2[i] = mVHt0[i]*mS[3] + mVHt1[i]*mS[4] + mVHt2[i]*mS[5];
+    }
+
+    //mother filtered
+    for(Int_t i=0;i<6;++i) 
+      MotherFiltered.fP[i] = fP[i] + kmf0[i]*zeta[0] + kmf1[i]*zeta[1] + kmf2[i]*zeta[2];
+
+    for(Int_t i=0, k=0;i<6;++i){
+      for(Int_t j=0;j<=i;++j,++k){
+        MotherFiltered.fC[k] = fC[k] - (kmf0[i]*mCHt0[j] + kmf1[i]*mCHt1[j] + kmf2[i]*mCHt2[j] );
+      }
+    }
+    
+    //cd filtered
+    for(Int_t i=0;i<6;++i) 
+      cDaughterFiltered.fP[i] = m[i] - kcdm0[i]*zeta[0] - kcdm1[i]*zeta[1] - kcdm2[i]*zeta[2];
+    
+    for(Int_t i=0, k=0;i<6;++i){
+      for(Int_t j=0;j<=i;++j,++k){
+        cDaughterFiltered.fC[k] = mV[k] - (kcdm0[i]*mVHt0[j] + kcdm1[i]*mVHt1[j] + kcdm2[i]*mVHt2[j] );
+      }
+    }
+    
+    ////////////////////
+    //* CHt = CH' - D'
+  //  float_v mCHt0[7], mCHt1[7], mCHt2[7];
+
+    mCHt0[0]=fC[ 0] ;       mCHt1[0]=fC[ 1] ;       mCHt2[0]=fC[ 3] ;
+    mCHt0[1]=fC[ 1] ;       mCHt1[1]=fC[ 2] ;       mCHt2[1]=fC[ 4] ;
+    mCHt0[2]=fC[ 3] ;       mCHt1[2]=fC[ 4] ;       mCHt2[2]=fC[ 5] ;
+    mCHt0[3]=fC[ 6]+mV[ 6]; mCHt1[3]=fC[ 7]+mV[ 7]; mCHt2[3]=fC[ 8]+mV[ 8];
+    mCHt0[4]=fC[10]+mV[10]; mCHt1[4]=fC[11]+mV[11]; mCHt2[4]=fC[12]+mV[12];
+    mCHt0[5]=fC[15]+mV[15]; mCHt1[5]=fC[16]+mV[16]; mCHt2[5]=fC[17]+mV[17];
+//     mCHt0[6]=fC[21]+mV[21]; mCHt1[6]=fC[22]+mV[22]; mCHt2[6]=fC[23]+mV[23];
+  
+    //* Kalman gain K = mCH'*S
+    
+    float_v k0[6], k1[6], k2[6];
+    
+    for(Int_t i=0;i<6;++i){
+      k0[i] = mCHt0[i]*mS[0] + mCHt1[i]*mS[1] + mCHt2[i]*mS[3];
+      k1[i] = mCHt0[i]*mS[1] + mCHt1[i]*mS[2] + mCHt2[i]*mS[4];
+      k2[i] = mCHt0[i]*mS[3] + mCHt1[i]*mS[4] + mCHt2[i]*mS[5];
+    }
+
+    //* Add the daughter momentum to the particle momentum
+    
+    fP[ 3] -= m[ 3];
+    fP[ 4] -= m[ 4];
+    fP[ 5] -= m[ 5];
+//     fP[ 6] -= m[ 6];
+  
+    fC[ 9] += mV[ 9];
+    fC[13] += mV[13];
+    fC[14] += mV[14];
+    fC[18] += mV[18];
+    fC[19] += mV[19];
+    fC[20] += mV[20];
+//     fC[24] += mV[24];
+//     fC[25] += mV[25];
+//     fC[26] += mV[26];
+//     fC[27] += mV[27];
+    
+ 
+   //* New estimation of the vertex position r += K*zeta
+    //neutral
+    for(Int_t i=0;i<6;++i) 
+      fP[i] = fP[i] + k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2];
+    
+   //* New covariance matrix C -= K*(mCH')'
+    //neutral
+    for(Int_t i=0, k=0;i<6;++i){
+      for(Int_t j=0;j<=i;++j,++k){
+        fC[k] = fC[k] - (k0[i]*mCHt0[j] + k1[i]*mCHt1[j] + k2[i]*mCHt2[j] );
+      }
+    }
+
+    float_v K2[3][3];
+    for(int i=0; i<3; i++)
+    {
+      for(int j=0; j<3; j++)
+        K2[i][j] = -K[j][i];
+      K2[i][i] += 1;
+    }
+
+    float_v A[3][3];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        A[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          A[i][j] += D[i][k] * K2[k][j];
+        }
+      }
+    
+    float_v M[3][3];
+    for(int i=0; i<3; i++)
+      for(int j=0; j<3; j++)
+      {
+        M[i][j] = 0;
+        for(int k=0; k<3; k++)
+        {
+          M[i][j] += K[i][k] * A[k][j];
+        }
+      }
+
+    fC[0] += 2.f*M[0][0];
+    fC[1] += M[0][1] + M[1][0];
+    fC[2] += 2.f*M[1][1];
+    fC[3] += M[0][2] + M[2][0];
+    fC[4] += M[1][2] + M[2][1];
+    fC[5] += 2.f*M[2][2];
+    
+    MotherFiltered.fC[0] += 2.f*M[0][0];
+    MotherFiltered.fC[1] += M[0][1] + M[1][0];
+    MotherFiltered.fC[2] += 2.f*M[1][1];
+    MotherFiltered.fC[3] += M[0][2] + M[2][0];
+    MotherFiltered.fC[4] += M[1][2] + M[2][1];
+    MotherFiltered.fC[5] += 2.f*M[2][2];
+    
+    cDaughterFiltered.fC[0] += 2.f*M[0][0];
+    cDaughterFiltered.fC[1] += M[0][1] + M[1][0];
+    cDaughterFiltered.fC[2] += 2.f*M[1][1];
+    cDaughterFiltered.fC[3] += M[0][2] + M[2][0];
+    cDaughterFiltered.fC[4] += M[1][2] + M[2][1];
+    cDaughterFiltered.fC[5] += 2.f*M[2][2];
+  
+    //* Calculate Chi^2 
+
+    fNDF  += 2;
+    fQ    -=  Daughter.GetQ();
+    fSFromDecay = 0;    
+    fChi2 += (mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
+      +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
+      +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2];
+    MotherFiltered.Chi2()=fChi2;
+    cDaughterFiltered.Chi2()=fChi2;
+    MotherFiltered.NDF()=fNDF;
+    cDaughterFiltered.NDF()=fNDF;
+    
+    ////////energy calculations/////////
+    float_v neutralenergytemp, motherenergytemp, cdaughterenergytemp;
+    
+    motherenergytemp = sqrt(mothermasshypo*mothermasshypo+MotherFiltered.fP[3]*MotherFiltered.fP[3]+MotherFiltered.fP[4]*MotherFiltered.fP[4]+MotherFiltered.fP[5]*MotherFiltered.fP[5]);
+    
+    cdaughterenergytemp = sqrt(cdaughtermasshypo*cdaughtermasshypo+cDaughterFiltered.fP[3]*cDaughterFiltered.fP[3]+cDaughterFiltered.fP[4]*cDaughterFiltered.fP[4]+cDaughterFiltered.fP[5]*cDaughterFiltered.fP[5]);
+    
+    neutralenergytemp = sqrt(neutralmasshypo*neutralmasshypo + fP[3]*fP[3] + fP[4]*fP[4] + fP[5]*fP[5]);
+    
+    fP[6] = motherenergytemp - cdaughterenergytemp; //neutral
+    MotherFiltered.fP[6] = cdaughterenergytemp + neutralenergytemp;
+    cDaughterFiltered.fP[6] = motherenergytemp - neutralenergytemp;
+    
+}
+
 void KFParticleBaseSIMD::SetProductionVertex( const KFParticleBaseSIMD &Vtx )
 {
   /** Adds a vertex as a point-like measurement to the current particle.

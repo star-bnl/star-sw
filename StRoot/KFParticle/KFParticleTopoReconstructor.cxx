@@ -532,6 +532,17 @@ void KFParticleTopoReconstructor::SortTracks()
     }
   }
   
+  if(fTracks[6].Size() > 0)
+  {
+    for(int iTrack=0; iTrack<fTracks[2].Size(); iTrack++)
+      fTracks[6].SetPVIndex(fTracks[2].PVIndex()[iTrack], iTrack);
+  }
+  if(fTracks[7].Size() > 0)
+  {
+    for(int iTrack=0; iTrack<fTracks[3].Size(); iTrack++)
+      fTracks[7].SetPVIndex(fTracks[3].PVIndex()[iTrack], iTrack);
+  }
+  
   fChiToPrimVtx[0].resize(fTracks[0].Size(), -1);
   fChiToPrimVtx[1].resize(fTracks[1].Size(), -1);
   
@@ -976,6 +987,7 @@ bool KFParticleTopoReconstructor::ParticleHasRepeatingDaughters(const KFParticle
    ** chains. Such candidates should be rejected.
    **/
   if(particle.NDaughters() < 2) return 0;
+  if((abs(particle.GetPDG()) > 7e6) && (abs(particle.GetPDG()) < 1e7)) return 0; // missing mass 
   
   vector<int> daughters;
   GetListOfDaughterTracks(particle, daughters);
