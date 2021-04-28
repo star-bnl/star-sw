@@ -94,6 +94,11 @@ class StMuTrack : public TObject {
     Double_t nSigmaKaon()      const {return unPack(mNSigmaKaon,     __SIGMA_SCALE__);} ///< Returns Craig's distance to the calculated dE/dx band for kaons in units of sigma.
     Double_t nSigmaProton()    const {return unPack(mNSigmaProton,   __SIGMA_SCALE__);} ///< Returns Craig's distance to the calculated dE/dx band for protons in units of sigma.
     Double_t dEdxPull(Double_t mass, UChar_t fit = 0, Int_t charge=1) const;
+    Double_t dEdxPullElectron(UChar_t fit=1) const {return dEdxPull(0.51099907e-3, fit);}
+    Double_t dEdxPullPion(UChar_t fit=1)     const {return dEdxPull(0.13956995, fit);}
+    Double_t dEdxPullKaon(UChar_t fit=1)     const {return dEdxPull(0.493677, fit);}
+    Double_t dEdxPullProton(UChar_t fit=1)   const {return dEdxPull(0.93827231, fit);}
+
     Double_t dEdxPullElectronI70() const {return dEdxPull(0.51099907e-3);}
     Double_t dEdxPullPionI70()     const {return dEdxPull(0.13956995);}
     Double_t dEdxPullKaonI70()     const {return dEdxPull(0.493677);}

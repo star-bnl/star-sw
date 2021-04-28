@@ -116,20 +116,22 @@ class StPicoTrack : public TObject {
   Int_t   nHitsDedx() const              { return (Int_t)mNHitsDedx; }
   /// Return a map of hits in HFT
   UInt_t  hftHitsMap() const             { return topologyMap(0) >> 1 & 0x7F; }
+#if !defined(__TFG__VERSION__)
   /// Return dE/dx (GeV/cm) of the track
   Float_t dEdx() const                   { return mDedx; }
   /// Return dE/dx error of the track
-#if !defined(__TFG__VERSION__)
   Float_t dEdxError() const              { return mDedxError; }
 #else /* __TFG__VERSION__ */
-  static  void    setdEdxErrorScale(Float_t scale=1) {fgdEdxErrorScale = scale;}
-  Float_t dEdxError() const              { return fgdEdxErrorScale*mDedxError; }
+  /// Return dE/dx (GeV/cm) of the track
+  Float_t dEdx(UChar_t fit = 1) const  { return (fit == 2) ? mDnDx : mDedx; }
+  Float_t dEdxError(UChar_t fit = 1) const  { return (fit == 2) ?  mDnDxError: fgdEdxErrorScale*mDedxError; }
+  static  void    setdEdxErrorScale(Float_t scale = 1) {fgdEdxErrorScale = scale;}
   Float_t dEdxPull(Float_t mass, UChar_t fit = 1, Int_t charge = 1) const;
   Float_t dEdxPullToF(Float_t mass, UChar_t fit = 1, Int_t charge = 1) const;
-  Float_t dEdxPullPion()      const { return dEdxPull(0.13956995,1); }
-  Float_t dEdxPullKaon()      const { return dEdxPull(0.493677,1); }
-  Float_t dEdxPullProton()    const { return dEdxPull(0.93827231,1); }
-  Float_t dEdxPullElectron()  const { return dEdxPull(0.51099907e-3,1); }
+  Float_t dEdxPullPion(UChar_t fit = 1)      const { return dEdxPull(0.13956995, fit); }
+  Float_t dEdxPullKaon(UChar_t fit = 1)      const { return dEdxPull(0.493677, fit); }
+  Float_t dEdxPullProton(UChar_t fit = 1)    const { return dEdxPull(0.93827231, fit); }
+  Float_t dEdxPullElectron(UChar_t fit = 1)  const { return dEdxPull(0.51099907e-3, fit); }
   Float_t dNdx() const              { return mDnDx; }
   Float_t dNdxError() const         { return mDnDxError; }
   Char_t  status()            const { return mStatus;}
