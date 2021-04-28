@@ -644,6 +644,7 @@
 #include "tables/St_geom_gdat_Table.h"
 #include "tables/St_kine_gdat_Table.h"
 #include "StDetectorDbMaker/St_starMagOnlC.h"
+#include "StDetectorDbMaker/St_starMagAvgC.h"
 #include "tables/St_det_user_Table.h"
 #include "tables/St_det_hit_Table.h"
 #include "tables/St_det_path_Table.h"
@@ -1059,6 +1060,9 @@ Int_t St_geant_Maker::InitRun(Int_t run){
     } else {
       // set mag. field from already simulated data, only 5 option allowed
       Float_t  fScale = St_starMagOnlC::instance()->ScaleFactor();
+      if (! St_starMagAvgC::instance()->Table()->IsMarked()) {
+	fScale = St_starMagAvgC::instance()->ScaleFactor();
+      }
       if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
       if (MuDstIter) {
 	// set mag field
@@ -2423,9 +2427,16 @@ Int_t St_geant_Maker::SetDatimeFromMuDst() {
   if (! StarMagField::Instance()) {
     double fScale = 1;
     if (*SAttr("magFactor")) {fScale = DAttr("magFactor");}
-    else                     {fScale = St_starMagOnlC::instance()->ScaleFactor();}
-    if (fabs(fScale) < 1e-3) fScale = 1e-3;
-    new StarMagField(StarMagField::kMapped, fScale);
+    else {                    {
+	fScale = St_starMagOnlC::instance()->ScaleFactor();
+	if (! St_starMagAvgC::instance()->Table()->IsMarked()) {
+	  fScale = St_starMagAvgC::instance()->ScaleFactor();
+	}
+	if (fabs(fScale) < 1e-3) fScale = 1e-3;
+      }
+      
+      new StarMagField(StarMagField::kMapped, fScale);
+    }
   }
   return kStOK;
 }

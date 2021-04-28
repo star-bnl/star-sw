@@ -79,6 +79,7 @@
 #include <Stiostream.h>
 #include "StMagFMaker.h"
 #include "StDetectorDbMaker/St_starMagOnlC.h"
+#include "StDetectorDbMaker/St_starMagAvgC.h"
 #include "StMessMgr.h" 
 #include "StMagF.h"
 #include "StarMagField.h"
@@ -109,6 +110,9 @@ Int_t StMagFMaker::InitRun(Int_t RunNo)
   } else {
     gMessMgr->Info() << "StMagFMaker::InitRun active mode " << endm;
     Float_t  fScale = St_starMagOnlC::instance()->ScaleFactor();
+    if (! St_starMagAvgC::instance()->Table()->IsMarked()) {
+      fScale = St_starMagAvgC::instance()->ScaleFactor();
+    }
 #if 0
     assert(TMath::Abs(fScale)>0.005);
 #else 
