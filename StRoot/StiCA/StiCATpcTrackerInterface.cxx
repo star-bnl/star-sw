@@ -309,7 +309,7 @@ void StiCATpcTrackerInterface::MakeSeeds()
     NoTrigDet++;
   }
   if (NoTrigDet) {
-    Double_t T0 = St_tpcT0BXC::instance()->getT0(trgSum);
+    Double_t T0 = - St_tpcT0BXC::instance()->getT0(trgSum);
     StiKalmanTrackNode::SetExternalTriggerOffset(T0);
   } else {
     StiKalmanTrackNode::SetExternalTriggerOffset(0);
