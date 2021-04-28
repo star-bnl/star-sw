@@ -7,7 +7,7 @@
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
 #  setenv NODEBUG yes
-#  starver TFG17o
+  starver TFG21d
 #  setup 64b
 #  ln -s $STAR/.sl* .
 #  cd $SCRATCH
@@ -48,7 +48,8 @@
   echo ${SUBMITTINGDIRECTORY} | grep dNdx 
   if (! $? )  set idNdx = kTRUE;
 #    root.exe -q -b -x  'kfpAnalysis.C(1000000,"./*.'${dstype}'.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
-   root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${input}'/*.'${dstype}'.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
+#   root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${input}'/*.'${dstype}'.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
+   root.exe -q -b -x  '$STAR/StRoot/StKFParticleAnalysisMaker/kfpAnalysis.C(1000000,"'${input}'/*.'${dstype}'.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
 #    mv ${outputb} ${output}
 #    mv ${logb} ${log}
 #    rm ${bla}
