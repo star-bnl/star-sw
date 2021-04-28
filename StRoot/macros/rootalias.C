@@ -103,11 +103,12 @@ void rdir(const Char_t *dir="") {
   Int_t n = 0;
   while ((f = (TFile *) next())) {
     TString name(gSystem->BaseName(f->GetName()));
-    if (Dir != "" && Dir != "*" && ! name.Contains(reg)) continue; 
-    name.ReplaceAll(".root","");
-    cout << "_file" << n << "\t" << name << "\t" << f->GetName();
-    if (Current == TString(f->GetName())) cout << "\t <======= ";
-    cout << endl;
+    if (! (Dir != "" && Dir != "*" && !name.Contains(reg))) {
+      name.ReplaceAll(".root","");
+      cout << "_file" << n << "\t" << name << "\t" << f->GetName();
+      if (Current == TString(f->GetName())) cout << "\t <======= ";
+      cout << endl;
+    }
     n++;
   }
 }
