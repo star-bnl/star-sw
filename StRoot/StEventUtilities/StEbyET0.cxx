@@ -53,6 +53,7 @@ double StEbyET0::getTime(StEvent* event, int mode) {
   double info[12];
   St_EbyET0C* ebyeTable = St_EbyET0C::instance();
   for (int row = 0; row < ebyeTable->GetNRows(); row++) {
+    memset(info,0,12*sizeof(double));
     int detector = ebyeTable->detector(row);
     if (detector < 0) break; // end of active rows in the table
 
@@ -120,6 +121,7 @@ void StEbyET0::fillTree(StEvent* event) {
   }
 
   double info[23];
+  memset(info,0,23*sizeof(double));
   info[0] = (double) mRunId;
   info[1] = (double) mEventId;
   info[2] = (double) (event->time());
@@ -136,6 +138,7 @@ void StEbyET0::fillTree(StEvent* event) {
 void StEbyET0::getTriggerInfo(StEvent* event, trigDetType trigDet, double* info) {
 
   StTriggerData* trigdata = event->triggerData();
+  if (!trigdata) return;
   switch (trigDet) {
     case kVPD : info[0] = (double) (trigdata->vpdEarliestTDC(StBeamDirection::east,0));
                 info[1] = (double) (trigdata->vpdEarliestTDC(StBeamDirection::west,0));
@@ -250,8 +253,11 @@ void StEbyET0::getTpcInfo(StEvent* event, double* info) {
   return;
 }
 //_____________________________________________________________________________
-// $Id: StEbyET0.cxx,v 1.2 2021/03/20 02:38:13 genevb Exp $
+// $Id: StEbyET0.cxx,v 1.3 2021/04/27 20:58:52 genevb Exp $
 // $Log: StEbyET0.cxx,v $
+// Revision 1.3  2021/04/27 20:58:52  genevb
+// Handle missing trigger data
+//
 // Revision 1.2  2021/03/20 02:38:13  genevb
 // Remove StTpcDb dependence for StEventUtilities
 //
