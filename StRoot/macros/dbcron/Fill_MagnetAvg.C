@@ -11,6 +11,7 @@
 #include "OnDb.h"
 #include "TMath.h"
 #include "TDatime.h"
+static Int_t _debug = 0;
 TString database_RunLog;;
 TString database_mq_collector_Conditions_rhic;
 // Writes stuct into database
@@ -61,7 +62,7 @@ int Fill_MagnetAvg(unsigned int runNumber,unsigned int startRunTime,unsigned int
   unsigned int firstTime = 0;
   double firstCurrent = 0;
   unsigned int firstStatus = 0;
-  unsigned int bitMask = 1 << 15;
+  unsigned int bitMask = 1 << 15; // => 32768 => 100000
   
   //    db = TSQLServer::Connect("mysql://heston.star.bnl.gov:3502/Conditions_rhic","","");
   //    database = OnDb(year,"dev_mainMagnet2,cdev_mainMagnetm");
@@ -69,14 +70,16 @@ int Fill_MagnetAvg(unsigned int runNumber,unsigned int startRunTime,unsigned int
   db = TSQLServer::Connect(database_mq_collector_Conditions_rhic.Data(),"","");
   sprintf(query,
 	  //	  "select UNIX_TIMESTAMP(beginTime),mainMagnetCurrent,mainMagnetStatus from starMagnet where beginTime <= from_unixtime(%u) order by 1 desc limit 1",startRunTime);
-	  "select UNIX_TIMESTAMP(beginTime),cdev_mainMagnet2,cdev_mainMagnetm,beginTime  from starMagnet where beginTime >= from_unixtime(%u) and beginTime <=  from_unixtime(%u)",startRunTime,endRunTime);
+	  "select UNIX_TIMESTAMP(beginTime),cdev_mainMagnet2,cdev_mainMagnetm,beginTime  from starMagnet where beginTime >= from_unixtime(%u) and beginTime <=  from_unixtime(%u) and cdev_mainMagnetB != ''",startRunTime,endRunTime);
   
   // new source of magnet data:
   // wfgRamp.mainMagnet.wM,wfgRamp.pttEast.wM,wfgRamp.pttWest.wM,wfgRamp.trimEast.wM,wfgRamp.trimWest.wM
   
   res = db->Query(query);
   nrows = res->GetRowCount();
-  cout << "runNumber = " << runNumber << "\tnrows = " << nrows << endl;
+  if (_debug) {
+    cout << "runNumber = " << runNumber << "\tnrows = " << nrows << endl;
+  }
   if(nrows==0)
     {
       delete row;
@@ -99,6 +102,8 @@ int Fill_MagnetAvg(unsigned int runNumber,unsigned int startRunTime,unsigned int
     tempTime = atoul(row->GetField(0));
     tempCurrent = fabs(atod(row->GetField(1)));
     if (TMath::Abs(tempCurrent) < 10000) {
+      // cdev_mainMagnetm = 32778 => 100012
+      //                    32768 => 100000
       tempStatus = atoul(row->GetField(2));
       if( bitMask & tempStatus )  // If 16th bit is set, then current is negative
 	tempCurrent *= -1;
@@ -125,7 +130,7 @@ int Fill_MagnetAvg(unsigned int runNumber,unsigned int startRunTime,unsigned int
     }
     delete row;
   }
-  if (N > 0) {
+  if (N > 0 && RMS < 4.0) {
     cout << "write " << Out.Data() << endl;
     ofstream out;
     out.open(Out, ios::out); 
@@ -137,8 +142,8 @@ int Fill_MagnetAvg(unsigned int runNumber,unsigned int startRunTime,unsigned int
     out << "  return (TDataSet *)tableSet;" << endl;
     out << "}" << endl;
     out.close();
-    
-
+  } else {
+    cout << "skip " << Out.Data() << "with N = " << N << " and RMS = " << RMS << endl;
   }
   // write values in
   int value = write(writeFields,runNumber,startRunTime,time,current);
@@ -234,7 +239,9 @@ void Fill_MagnetAvg(Int_t year=2021){
       runNumber = atoul(row->GetField(0));
       startRunTime = atoul(row->GetField(1));
       endRunTime = atoul(row->GetField(2));
-      cout << "runNumber = " << runNumber << "\tbeginTime = " << row->GetField(3) << endl;
+      if (_debug) {
+	cout << "runNumber = " << runNumber << "\tbeginTime = " << row->GetField(3) << endl;
+      }
       TDatime tGMT(row->GetField(3));
       TString Out(Form("starMagAvg.%8i.%06i.C",tGMT.GetDate(),tGMT.GetTime()));
       TString OutH = Out;
