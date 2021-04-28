@@ -1,3 +1,8 @@
+/*
+  root.exe sqlstarMagAvg.C+
+  T->Draw("current:time-978307200>>Avg(1000,633e6,641e6,100,-4520,-4500","","sames")
+  
+*/
 #ifndef __CINT__
 #include "Riostream.h"
 #include "TSQLServer.h"
@@ -10,7 +15,7 @@
 using namespace std;
 #endif
    
-void sqlstarMagOnl()
+void sqlstarMagAvg()
 {
    TSQLServer *db = TSQLServer::Connect("mysql://dbx.star.bnl.gov:3316","", "");
 
@@ -18,22 +23,22 @@ void sqlstarMagOnl()
    
    TSQLRow *row;
    TSQLResult *res;
-   struct starMagOnl_t {
+   struct starMagAvg_t {
      Int_t time; 
      Float_t current;
    };
-   static starMagOnl_t vertex;
+   static starMagAvg_t vertex;
    static Float_t *x = &vertex.current - 1;
-   TFile *fOut = new TFile("starMagOnl.root","recreate");
-   TTree *tree = new TTree("T","star Mag Onl");
+   TFile *fOut = new TFile("starMagAvg.root","recreate");
+   TTree *tree = new TTree("T","star Mag Avg");
    tree->Branch("mag",&vertex,"time/I:current/F");
    // start timer
    TStopwatch timer;
    timer.Start();
    // query database and print results 30 secs average
-   const char *sql = "select UNIX_TIMESTAMP(beginTime),current from RunLog_onl.starMagOnl "
-                     "WHERE flavor='ofl' and deactive=0";
-//   const char *sql = "select count(*) from Calibrations_rhic.starMagOnl "
+   const char *sql = "select UNIX_TIMESTAMP(beginTime),current from RunLog_onl.starMagAvg "
+                     "WHERE flavor='ofl' and deactive=0 and rms > 0 and rms < 10";
+//   const char *sql = "select count(*) from Calibrations_rhic.starMagAvg "
 //                     "WHERE tag&(1<<2)";
    
    res = db->Query(sql);
@@ -50,7 +55,6 @@ void sqlstarMagOnl()
    for (int i = 0; i < nfields*40; i++)
       printf("=");
    printf("\n");
-   debugP--;
    }
    for (int i = 0; i < nrows; i++) {
       row = res->Next();
@@ -64,6 +68,7 @@ void sqlstarMagOnl()
       }
       if (debugP > 0) {
       printf("\n");
+   debugP--;
       }
       delete row;
       tree->Fill();

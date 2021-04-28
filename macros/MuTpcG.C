@@ -1278,7 +1278,9 @@ void FitSlopes(const Char_t *opt="") {
   enum {No = 6};
   const Char_t *det[No] = {"vpd","bbc","epd","zdc", "TAC", "CAVdT"};
   TString tag("2019_14p5GeV");
-  TString input(gSystem->DirName(gDirectory->GetName()));
+  TString input(gSystem->WorkingDirectory());
+  input += "/";
+  input += gSystem->DirName(gDirectory->GetName());
   TObjArray *obj = input.Tokenize("/");
   Int_t n = obj->GetSize();
   Int_t y = 0;

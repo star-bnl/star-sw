@@ -1,0 +1,1 @@
+../StRoot/macros/dbcron/Fill_MagnetAvg.C
