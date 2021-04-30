@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.18 2018/10/12 13:44:49 zhux Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.20 2020/09/01 09:47:27 starembd Exp $
  *
  */
 
@@ -115,8 +115,20 @@ StPrepEmbedMaker::~StPrepEmbedMaker() {
 Int_t StPrepEmbedMaker::Init() 
 {
   srand((unsigned)time(0));
-  mSettings->rnd1 = abs(int(rand()*10000)+getpid());
-  mSettings->rnd2 = abs(int(rand()*10000)+getpid());
+  // use the SUMS_name environment variable as a flag to fix the random number
+  // generator seeds; Dev/Eval/NewTest are for library tests (e.g. nightly tests)
+  TString jobName = gSystem->Getenv("SUMS_name");
+  if (jobName.Contains("FixRandomSeeds") ||
+      jobName == "DevTest" ||
+      jobName == "EvalTest" ||
+      jobName == "NewTest") {
+    LOG_WARN << "StPrepEmbedMaker::Init  Using fixed random number generator seeds!" << endm;
+    mSettings->rnd1 = 12345;
+    mSettings->rnd2 = 67890;
+  } else {
+    mSettings->rnd1 = abs(int(rand()*10000)+getpid());
+    mSettings->rnd2 = abs(int(rand()*10000)+getpid());
+  }
 
   if (mSettings->mode.CompareTo("strange", TString::kIgnoreCase) == 0)
   {
@@ -480,51 +492,45 @@ Int_t StPrepEmbedMaker::Make()
   //Z vertex will be forced in vxyz statement.
 
   Double_t xyzerr[3] = {0.,0.,0.};
-//  Double_t vzlow = xyz[2];
-//  Double_t vzhigh = xyz[2];
    
-  if(mSettings->mode.CompareTo("strange", TString::kIgnoreCase) == 0)
-  {
-      // For this embedding type, we smear the start position of the particle
-      // with the vertex errors. Old embedding (2007 through 2009) needs an
-      // external file (moretags.root).
-      nFound=0;
-      nFound = (Int_t) mTree->Draw("sigmaPVX:sigmaPVY:sigmaPVZ",
-				   Form("mRunNumber==%i&&mEventNumber==%i",
-					EvtHddr->GetRunNumber(),
-					EvtHddr->GetEventNumber()),"goff");
+  //get primary vertex errors from tags.root
+  nFound=0;
+  nFound = (Int_t) mTree->Draw("sigmaPVX:sigmaPVY:sigmaPVZ",
+	  Form("mRunNumber==%i&&mEventNumber==%i",
+	     EvtHddr->GetRunNumber(),
+	     EvtHddr->GetEventNumber()),"goff");
 
-      //get primary vertex errors from moretags.root
-      if( mMoreTree ) {
-        nFound = (Int_t) mMoreTree->Draw("VXsigma:VYsigma:VZsigma",
-             Form("RunId==%i&&EvtId==%i",
-                  EvtHddr->GetRunNumber(),
-                  EvtHddr->GetEventNumber()),
-             "goff");
+  //get primary vertex errors from moretags.root
+  if( mMoreTree ) {
+     nFound = (Int_t) mMoreTree->Draw("VXsigma:VYsigma:VZsigma",
+	     Form("RunId==%i&&EvtId==%i",
+		  EvtHddr->GetRunNumber(),
+		  EvtHddr->GetEventNumber()),
+	     "goff");
 
-        LOG_INFO << "StPrepEmbedMaker::Make Use moretags file to extract vertex errors, nFound =" << nFound << endm ;
-      }
-
-      if ( mMoreTree ) {
-	   xyzerr[0] = mMoreTree->GetV1()[0];
-	   xyzerr[1] = mMoreTree->GetV2()[0];
-	   xyzerr[2] = mMoreTree->GetV3()[0];
-	}
-	else {
-	   xyzerr[0] = mTree->GetV1()[0];
-	   xyzerr[1] = mTree->GetV2()[0];
-	   xyzerr[2] = mTree->GetV3()[0];
-	}
-
-     LOG_INFO << xyzerr[0] << " " << xyzerr[1] << " " << xyzerr[2] << endm;
-//     vzlow = -100.0;
-//     vzhigh = 100.0;
-
-     //Set the vertex for StEvent with StGenericVertexMaker
-     StGenericVertexMaker * vmaker = (StGenericVertexMaker*) GetMaker("GenericVertex");
-     StFixedVertexFinder * vfinder = (StFixedVertexFinder *) vmaker->GetGenericFinder();
-     vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
+     LOG_INFO << "StPrepEmbedMaker::Make Use moretags file to extract vertex errors, nFound =" << nFound << endm ;
   }
+
+  if ( mMoreTree ) {
+     xyzerr[0] = mMoreTree->GetV1()[0];
+     xyzerr[1] = mMoreTree->GetV2()[0];
+     xyzerr[2] = mMoreTree->GetV3()[0];
+  }
+  else {
+     xyzerr[0] = mTree->GetV1()[0];
+     xyzerr[1] = mTree->GetV2()[0];
+     xyzerr[2] = mTree->GetV3()[0];
+  }
+
+  LOG_INFO << "StPrepEmbedMaker::Make  Event " << EvtHddr->GetEventNumber()
+     << " has tags with vertex errors of (" << xyzerr[0] << "," << xyzerr[1] << "," << xyzerr[2]
+     << ")" << endm;
+
+  //Set the vertex for StEvent with StGenericVertexMaker
+  StGenericVertexMaker * vmaker = (StGenericVertexMaker*) GetMaker("GenericVertex");
+  StFixedVertexFinder * vfinder = (StFixedVertexFinder *) vmaker->GetGenericFinder();
+  vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
+  vfinder->SetVertexError(xyzerr[0],xyzerr[1],xyzerr[2]);
 
   if( mPrimeMode && !mPrimed ) {
      mSavePid = mSettings->pid;
@@ -540,6 +546,8 @@ Int_t StPrepEmbedMaker::Make()
   Do(Form("gvertex %f %f %f",xyz[0],xyz[1],xyz[2]));
   if( mSettings->mode.CompareTo("strange", TString::kIgnoreCase) == 0 )
     {
+      // For this embedding type, we smear the start position of the particle
+      // with the vertex errors. 
 	Do(Form("gspread %f %f %f", xyzerr[0],xyzerr[1],xyzerr[2]));
     }
   else
@@ -893,6 +901,12 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.20  2020/09/01 09:47:27  starembd
+ * Set primary vertex errors with (more)tags.root
+ *
+ * Revision 1.19  2020/03/19 20:17:10  genevb
+ * Enabled fixed random number generator seeds
+ *
  * Revision 1.18  2018/10/12 13:44:49  zhux
  * updated vertex errors from moretags
  *

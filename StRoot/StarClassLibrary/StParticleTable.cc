@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.29 2017/10/30 15:23:54 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.31 2021/04/09 15:59:26 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,13 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.31  2021/04/09 15:59:26  jwebb
+ * Add particle definitions to support H3lambda quasi two body decay
+ *
+ * Revision 1.30  2021/01/12 14:34:12  jwebb
+ * Update to gstar_part.g and StarClassLibrary to support simulation of
+ * H4 Lambda , He4 Lambda  and He5 Lambda hypernuclei.
+ *
  * Revision 1.29  2017/10/30 15:23:54  jwebb
  * Add K*0(892) aka pdg 313 to gstar with g3id = 10013
  *
@@ -147,7 +154,7 @@ long _undefined_particle_id = 2000000000; /* Unique PDG ID for each undefined pa
 #include "StAntiHyperTriton.hh"
 #include "StHyperTriton.hh"
 #include "StHDibaryon.hh"
-
+#include "StHyperNuclei.hh"
 
 StParticleTable* StParticleTable::mParticleTable = 0;
 
@@ -157,14 +164,15 @@ StParticleTable::~StParticleTable() {/* noop */}
 /// @param z Charge of the heavy ion                                                                                                                                                                           
 /// @param a Atomic number of the heavy ion                                                                                                                                                                    
 /// @param l Number of lambdas in a hypernucleus                                                                                                                                                               
-Int_t hid( Int_t z, Int_t a, Int_t l=0 )
-{
-  //         10LZZZAAAI                                                                                                                                                                                        
-  return (   1000000000
-         +     10000000*l
-         +        10000*z
-	     +           10*a );
-}
+// lift into StarPDGEncoding
+// Int_t hid( Int_t z, Int_t a, Int_t l=0 )
+// {
+//   //         10LZZZAAAI                                                                                                                                                                                        
+//   return (   1000000000
+//          +     10000000*l
+//          +        10000*z
+// 	     +           10*a );
+// }
 
 
 
@@ -394,13 +402,20 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 50048, -hid(2,3) , anti-He3 );
     ///@}
 
-    ///@addtogroup ANTIHYPERNUCLEI
-    ///Definitions of anti-hypernuclei
+    ///@addtogroup HYPERNUCLEI
+    ///Definitions of hypernuclei and antihypernuclei
     ///@{
        Geant2Pdg( 61053, kHyperTriton,         H3(Lambda) --> He3 piminus );
        Geant2Pdg( 61054, kAntiHyperTriton, AntiH3(Lambda) --> AntiHe3 piplus );
        Geant2Pdg( 62053, kHyperTriton,         H3(Lambda) --> d p piminus );
        Geant2Pdg( 62054, kAntiHyperTriton, AntiH3(Lambda) --> dbar pbar piplus );	
+       Geant2Pdg( 63053, kHyperTriton,         H3(Lambda) --> quasi 2 body);
+       Geant2Pdg( 63054, kAntiHyperTriton, AntiH3(Lambda) --> quasi 2 body);
+
+       Geant2Pdg( 61055, hid(1,3,1), H4(Lambda) --> He4 proton piminus );
+       Geant2Pdg( 61057, hid(2,3,1), He4(Lambda) --> He3 proton piminus );
+       Geant2Pdg( 61059, hid(2,4,1), He5(Lambda) --> He4 proton piminus );
+
     ///@}
 
     ///@addtogroup EXOTICS
@@ -510,11 +525,13 @@ StParticleDefinition* StParticleTable::findParticleByGeantId(int geantId) const
     case 60053:
     case 61053:
     case 62053:
+    case 63053:
       p = StHyperTriton::instance();
       break;
     case 60054:
     case 61054:
     case 62054:
+    case 63054:
       p = StAntiHyperTriton::instance();      
       break;
       

@@ -1,8 +1,12 @@
 void loadAgML( const char* name=0, char* opts="sdt20160216 misalign newtpcalignment" )
 {
   gROOT->LoadMacro("bfc.C");
-//  bfc(0,"agml nodefault mysql db detdb misalign sdt20150216");
-  bfc(0,Form("agml nodefault mysql db detdb %s",opts));
+  TString pname(gProgName);
+  if ( pname != "root4star" ) {
+    gSystem->Load("/usr/lib/mysql/libmysqlclient.so");
+  }
+  
+  bfc(0,Form("agml nodefault db detdb %s",opts));
 
   AgModule::SetStacker( new StarTGeoStacker() );
 AgPosition::SetDebug(2); 

@@ -11,7 +11,7 @@
 	    comment= "Default configuration for the Beam Beam counter"
 	    module = "BbcmGeo"
 	    onoff  = "on"
-	    simu   = "2">
+	    simu   = "1">
 	   
 
       <!-- Select version of the BBC -->
@@ -23,7 +23,7 @@
 	    comment= "BBC with inner tiles only"
 	    module = "BbcmGeo"
 	    onoff  = "on"
-	    simu   = "2">
+	    simu   = "1">
 
       <!-- Select version of the BBC -->
       <Init struct="BBCG" var="version" value="2.0" />

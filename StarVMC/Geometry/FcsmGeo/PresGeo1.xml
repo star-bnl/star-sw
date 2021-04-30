@@ -1,141 +1,335 @@
 <Document file="StarVMC/Geometry/FcsmGeo/PresGeo1.xml">
   
-<Replace match="GeV">*1.0E+0;</Replace>
-<Replace match="MeV">*1.0E-3;</Replace>
-<Replace match="keV">*1.0E-6;</Replace>
-<Replace match="SET EmCuts(#)"  >                 
-  Call GsTPar( ag_imed, 'CUTGAM', #1_CUTGAM );
-  Call GsTPar( ag_imed, 'CUTELE', #1_CUTELE );
-  Call GsTPar( ag_imed, 'CUTHAD', #1_CUTHAD );
-  Call GsTPar( ag_imed, 'CUTNEU', #1_CUTNEU );
-  Call GsTPar( ag_imed, 'CUTMUO', #1_CUTMUO );
-  Call GsTPar( ag_imed, 'DCUTE', #1_DCUTE );  
-  Call GsTPar( ag_imed, 'DCUTM', #1_DCUTM );  
-  Call GsTPar( ag_imed, 'BCUTE', #1_BCUTE );  
-  Call GsTPar( ag_imed, 'BCUTM', #1_BCUTM );  
-</Replace>
-
-<Module name="PRESGEO0" comment=" is the Forward Calorimeter System PREShower GEOmetry "  >
-
-  <Created date="   10 May 2019 "  />
-  <Author name="Akio Ogawa"  />
-  <CDE  >
-    AGECOM
-    GCONST
-    GCUNIT
-  </CDE>
-        
-  <Content  >
-    PMOD
-  </Content>
-
-  <Structure name="PVER"   > 
-    <var name="Version"   />
-  </Structure>
-
-  <Structure name="PGEO"  > 
-    <var name="DBox(3)"      type="float"   /> ! PRES mother BOX dimension
-    <var name="Angle"        type="float"   /> ! Angle around IR
-    <var name="ScThick"      type="float"   /> ! scintillatr thickness, cm  
-    <var name="ScWidth"      type="float"   /> ! scintillatr width, cm
-    <var name="ScWrap"       type="float"   /> ! scintillatr wrapping thickness, cm
-    <var name="ScLth(10)"    type="float"   /> ! scintillatr length, 10 types, s1, s2, s3, s3-1-7     
-    <var name="Xoff(6,2)"    type="float"   /> ! x of each layer
-    <var name="Yoff(6,2)"    type="float"   /> ! y of each layer
-    <var name="Zoff(6,2)"    type="float"   /> ! z of each layer (front surface)
-    <var name="Nslat(6,2)"   type="integer" /> ! number of slats
-    <var name="AngSlat(6,2)" type="float"   /> ! angle 
-    <var name="BPdz"         type="float"   /> ! backplane thickness
-  </Structure>
+  <Replace match="GeV">*1.0E+0;</Replace>
+  <Replace match="MeV">*1.0E-3;</Replace>
+  <Replace match="keV">*1.0E-6;</Replace>
+  <Replace match="SET EmCuts(#)"  >                 
+    Call GsTPar( ag_imed, 'CUTGAM', #1_CUTGAM );
+    Call GsTPar( ag_imed, 'CUTELE', #1_CUTELE );
+    Call GsTPar( ag_imed, 'CUTHAD', #1_CUTHAD );
+    Call GsTPar( ag_imed, 'CUTNEU', #1_CUTNEU );
+    Call GsTPar( ag_imed, 'CUTMUO', #1_CUTMUO );
+    Call GsTPar( ag_imed, 'DCUTE', #1_DCUTE );  
+    Call GsTPar( ag_imed, 'DCUTM', #1_DCUTM );  
+    Call GsTPar( ag_imed, 'BCUTE', #1_BCUTE );  
+    Call GsTPar( ag_imed, 'BCUTM', #1_BCUTM );  
+  </Replace>
   
-  <Structure name="PCUT"  >
-    <var name="CUTGAM" type="float"  />
-    <var name="CUTELE" type="float"  />
-    <var name="CUTNEU" type="float"  />
-    <var name="CUTHAD" type="float"  />
-    <var name="CUTMUO" type="float"  />
-    <var name="DCUTE" type="float"  />
-    <var name="DCUTM" type="float"  />
-    <var name="BCUTE" type="float"  />
-    <var name="BCUTM" type="float"  />
-  </Structure>
-
-  <varlist type="INTEGER"  >
-     i,j,k,ns
-  </varlist>
-
-  <varlist type="REAL"  >
-    dtr,xtot,ztot,x,y,z,a,aa
-  </varlist>
-
-  <Fill name="PVER" comment="FCS Preshower basic data "  >
-    <var name="Version" value="1.0" comment=" Geometry version  "  />
-  </Fill>
-  <Use struct="PVER" select="version" value="1.0" />
-  
-  <Fill name="PGEO" comment="PreShower geometry" >
-    <var name="DBox"    value="{140.0,210.0,30.0}"  comment="Mother volume box" />
-    <var name="Angle"   value="1.73"   comment="Angle aroud y axis [degree] " />
-    <var name="ScThick" value="1.0"    comment="Scintillator thickness, cm" />
-    <var name="ScWidth" value="5.0"    comment="Scintillator width"/>
-    <var name="ScWrap"  value="0.025"  comment="Scintillator wrapping thickness"/>    
-    <var name="ScLth"   value="{108.0,85.0,113.137,103.087,93.037,82.987,72.937,62.887,52.837,42.787}" 
-                        comment="length of type s1,s2,s3,s3-1,s3-2,s3-3,s3-4,s3-5,s3-6,s3-7"/> 
-    <var name="Xoff"    value="{ 15.0,  39.085,  0.0,  67.925,  67.925,  68.125;
-                                  0.0,  0.0,  -39.085,  -67.925,  -67.925,  -68.125}"  />
-    <var name="Yoff"    value="{ 65.5, 65.5,  0.0,   0.877,   0.0,   0.0;
-                                  0.0,  0.0, 65.5,   0.877,   0.0,   0.0}"  />
-    <var name="Zoff"    value="{680.0  , 838.259,   0.000, 848.419, 857.944, 867.469;
-                                  0.000,   0.000, 840.529, 847.784, 857.309, 866.834}" />
-    <var name="Nslat"   value="{9, 14,  0, 25, 43, 34;
-                                0,  0, 14, 25, 43, 34}" />
-    <var name="AngSlat" value="{  0.0, -45.0, 999.0, -45.0, -90.0, 0.0;
-                                999.0, 999.0, 225.0, 225.0, 90.0, 0.0}" />
-    <var name="BPdz"    value="2.54/4.0"  /> 
-  </Fill>
-  <Use struct="PGEO" />
-
-  dtr=pi/180.0
-  xtot=PGEO_DBOX(1)
-  ztot=PGEO_DBOX(3)
-  a= PGEO_Angle*dtr
-
-  <Create block="PMOD"  />
-  <Do var="ns" from="1" to="2"  >
-    x= PGEO_XOff(1,ns) + xtot/2.0*cos(a) + ztot/2.0*sin(a)
-    y= PGEO_YOff(1,ns)
-    z= PGEO_ZOff(1,ns) + ztot/2.0*cos(a) - xtot/2.0*sin(a)
-    <If expr="ns.eq.1" >
-      x=-x
-      aa=-PGEO_Angle
-    <Else>
-      aa=PGEO_Angle
-    </Else> </If>
-
-    <Info format="FCS Pres Module xpos={10.5f}">x</Info>
-    <Info format="FCS Pres Module ypos={10.5f}">y</Info>
-    <Info format="FCS Pres Module zpos={10.5f}">z</Info>
-
-    <Placement block="PMOD" in="CAVE" group="WestRefSys" >
-      x="x" 
-      y="y" 
-      z="z" 
-      konly="ONLY" >
-      <Rotation alphay="aa"  />
-    </Placement>
-  </Do>
-  
-  <Block name="PMOD" comment="is the mother volume for Pres Layers"  >
-    <Material name="Air"  />
-    <Medium name="standard"  />
-    <Attribute for="PMOD" seen="1" colo="4" fill="0" />
-    <Shape type="BOX" 
-	   dx="PGEO_DBOX(1)/2.0" 
-	   dy="PGEO_DBOX(2)/2.0" 
-	   dz="PGEO_DBOX(3)/2.0" />
+  <Module name="PRESGEO1" comment=" is the Forward Calorimeter System PREShower GEOmetry "  >
     
-  </Block>
-  
-</Module>
-
+    <Created date="   10 May 2019 "  />
+    <Author name="Akio Ogawa"  />
+    <CDE  >
+      AGECOM
+      GCONST
+      GCUNIT
+    </CDE>
+    
+    <Content >
+      PMOD,PLAY,PSCI,PBKB
+    </Content>
+    
+    <Structure name="PVER"   > 
+      <var name="Version"   />
+      <var name="active"  type="int"  />
+    </Structure>
+    
+    <Structure name="PGEO"  > 
+      <var name="DBox(3)"      type="float"   /> ! PRES mother BOX dimension
+      <var name="DHole"        type="float"   /> ! size of central hole of mother PGON
+      <var name="ScThick"      type="float"   /> ! scintillatr thickness, cm  
+      <var name="ScWidth"      type="float"   /> ! scintillatr width, cm
+      <var name="ScWrap"       type="float"   /> ! scintillatr wrapping thickness, cm
+      <var name="ScLth(10)"    type="float"   /> ! scintillatr length, 10 types, s1, s2, s3, s3-1-7     
+      <var name="Xoff(6,2)"    type="float"   /> ! x of each layer
+      <var name="Yoff(6,2)"    type="float"   /> ! y of each layer
+      <var name="Zoff(6,2)"    type="float"   /> ! z of each layer (front surface)
+      <var name="Nslat(6,2)"   type="integer" /> ! number of slats
+      <var name="AngSlat(6,2)" type="float"   /> ! angle 
+      <var name="BPdz"         type="float"   /> ! backplane thickness
+    </Structure>
+    
+    <Structure name="PCUT"  >
+      <var name="CUTGAM" type="float"  />
+      <var name="CUTELE" type="float"  />
+      <var name="CUTNEU" type="float"  />
+      <var name="CUTHAD" type="float"  />
+      <var name="CUTMUO" type="float"  />
+      <var name="DCUTE" type="float"  />
+      <var name="DCUTM" type="float"  />
+      <var name="BCUTE" type="float"  />
+      <var name="BCUTM" type="float"  />
+    </Structure>
+    
+    <varlist type="INTEGER"  >
+      i,j,k,debug,sern,sn,layr,id
+    </varlist>
+    
+    <varlist type="REAL"  >
+      dtr,xtot,ztot,x,y,z,wid,ang,gx,gy,gz
+      dx,dy,dz,xx,yy,zz,xxx,yyy,zzz,dyy,dxx,dzz
+    </varlist>
+    <varlist type="REAL"  > sqrt2/1.414213562373095/</varlist>
+    
+    <Fill name="PVER" comment="FCS Preshower basic data "  >
+      <var name="Version" value="1.0" comment=" Geometry version  "  />
+      <var name="active"  value="1"   comment=" 1=active, 0=gone" /> 
+    </Fill>
+    <Use struct="PVER" select="version" value="1.0" />
+    
+    <Fill name="PGEO" comment="PreShower geometry" >
+      <var name="DBox"    value="{245.0,250.0,35.0}"  comment="Mother volume box" />
+      <var name="DHole"   value="42.00"  />
+      <var name="ScThick" value="1.0"    comment="Scintillator thickness, cm" />
+      <var name="ScWidth" value="5.0"    comment="Scintillator width"/>
+      <var name="ScWrap"  value="0.025"  comment="Scintillator wrapping thickness"/>    
+      <var name="ScLth"   value="{108.0,85.0,113.137,103.087,93.037,82.987,72.937,62.887,52.837,42.787}" 
+           comment="length of type s1,s2,s3,s3-1,s3-2,s3-3,s3-4,s3-5,s3-6,s3-7"/> 
+      <!--    
+	   <var name="Xoff"    value="{ 15.0,  39.085,  0.0,     67.925,   67.925,   68.125;
+                                         0.0,  0.0,   -39.085,  -67.925,  -67.925,  -68.125}"  />
+      -->
+      <var name="Xoff"    value="{ 15.0,  49.085,  0.0,     77.925,   77.925,   78.125;
+                                 0.0,  0.0,   -49.085,  -77.925,  -77.925,  -78.125}"  />
+      <var name="Yoff"    value="{ 65.5, 65.5,  0.0,   0.877,   0.0,   0.0;
+                                 0.0,  0.0, 65.5,   0.877,   0.0,   0.0}"  />
+      <var name="Zoff"    value="{615.899, 638.259,   0.000, 648.419, 657.944, 667.469;
+                                 0.000,   0.000, 640.529, 647.784, 657.309, 666.834}" />
+      <var name="Nslat"   value="{9, 14,  0, 25, 43, 34;
+                                 0,  0, 14, 25, 43, 34}" />
+      <var name="AngSlat" value="{  0.0, -45.0, 999.0, -45.0, -90.0, 0.0;
+                                 999.0, 999.0, 225.0, 225.0, 90.0, 0.0}" />
+      <var name="BPdz"    value="2.54/4.0"  /> 
+    </Fill>
+    <Use struct="PGEO" />
+    
+    <Fill name="PCUT" comment="EM cuts in FCS Pres"  >
+      <var name="CutGAM" value="10 keV" comment=" gamma transport cut "  />
+      <var name="CutELE" value="10 keV" comment=" electron transport cut "  />
+      <var name="CutHAD" value="1 MeV" comment=" hadron transport cut "  />
+      <var name="CutNEU" value="1 MeV" comment=" neutron transport cut "  />
+      <var name="CutMUO" value="1 MeV" comment=" muon transport cut "  />
+      <var name="DCutE" value="10 keV" comment=" electron delta ray cut "  />
+      <var name="DCutM" value="10 keV" comment=" muon delta ray cut "  />
+      <var name="BCutE" value="10 keV" comment=" electron brem cut "  />
+      <var name="BCutM" value="10 keV" comment=" muon brem cut "  />
+    </Fill>
+    <Use struct="PCUT" />                     
+    
+    dtr=pi/180.0
+    xtot=PGEO_DBOX(1)
+    ztot=PGEO_DBOX(3)
+    
+    <If expr="PVER_active.eq.1">
+      <Create block="PMOD"  />
+      <Placement block = "PMOD"
+                 in    = "CAVE"
+                 konly = "ONLY"
+                 group = "WestRefSys"
+                 x     = "0.0"
+                 y     = "0.0"
+                 z     = "PGEO_Zoff(2,1)-2.0+PGEO_Dbox(3)/2.0" />
+    <Else>
+    <Info format="PresGeo switched off on PVER.active={1i}">PVER_active</Info>
+    </Else> 
+    </If> 
+    
+    <Block name="PMOD" comment="is mother volume for FCS Pres" >
+      <Material  name="Air"  />
+      <Medium    name="standard"  />
+      <Attribute for="PMOD"
+		 seen="1"
+		 colo="2"
+		 />
+      <Shape type="PGON"
+             phi1="45" dphi="360" npdiv="4" nz="2"
+             zi="{-PGEO_DBox(3)/2.0,PGEO_DBox(3)/2.0}"
+             rmn="{PGEO_DHole/2.0,PGEO_DHole/2.0}"
+             rmx="{PGEO_DBox(1)/2.0,PGEO_DBox(1)/2.0}"
+             />                                                      
+      
+      debug=1
+      <If expr="debug.ge.1" >
+	<Export language="Mortran"> open(12,file='presgeom.txt',status='REPLACE')</Export>
+      </If>                                                                                                               
+      wid=PGEO_ScWidth+PGEO_ScWrap      
+      
+      id=0
+      serN=0                                                                                                              
+      <For var="sn" from="1" to="2" step="1" >
+	<For var="layr" from="2" to="6" step="1" >
+          <If expr="PGEO_Nslat(layr,sn).gt.0" >
+            <If expr="layr.eq.1">                                                                                        
+              dx=wid*9+1.0                                                                                               
+              dy=PGEO_ScLth(2)/2.0+1.0                                                                                   
+              <Elif expr="layr.le.3">                                                                                      
+		dx=64.0 <!-- range from -24.0021 to 102.1727 -->                                                           
+		dy=PGEO_ScLth(2)/2.0 <!-- range from 23.73226 to 107.2681 -->
+              </Elif>
+              <Else >                                                                                                      
+		dx=PGEO_ScLth(2)/2.0+1.0                                                                                   
+		dy=PGEO_ScLth(1)+1.0                                                                                       
+              </Else>
+            </If>                                                                                                        
+            xx=PGEO_Xoff(layr,sn)                                                                                        
+            yy=PGEO_Yoff(layr,sn)                                                                                        
+            dz=(PGEO_ScThick+PGEO_BPdz)/2.0                                                                              
+            zz=PGEO_Zoff(layr,sn)-(PGEO_Zoff(2,1)+PGEO_Dbox(3)/2.0-2.0)+PGEO_BPdz/2.0                                    
+            <If expr="layr.eq.3">                                                                                        
+              zz=PGEO_Zoff(layr,sn)-(PGEO_Zoff(2,1)+PGEO_Dbox(3)/2.0-2.0)-PGEO_BPdz/2.0                                    
+            </If>                                                                                                        
+            serN=serN+1                                                                                                  
+            <Create    block="PLAY" />
+            <Placement block="PLAY" in="PMOD" x="xx" y="yy" z="zz" konly="ONLY" />
+          </If>
+	</For>
+      </For>  
+      
+      <If expr="debug.ge.1" >
+	<Export language="Mortran"> close(12) </Export>
+      </If>                                                                                                               
+    </Block>
+    
+    <!--                                                    Postshower Layer:  FTLY -->
+    <Block name="PLAY" comment="is a layer of FCS PRES"  >
+      <Material  name="Air"  />
+      <Medium    name="standard"  />
+      <Attribute for="PLAY" seen="1" colo="3" serial="serN" />
+      <Shape type="BOX" dx="dx" dy="dy" dz="dz" />
+      
+      <Create block="PSCI" />
+      
+      <!-- Fill channels in each layer -->
+      <For var="i" from="1" to="PGEO_Nslat(layr,sn)" step="1" >
+	<If expr="PGEO_Nslat(layr,sn).gt.0" >
+	  <If expr="layr.eq.1">                                                                                             
+            xxx=wid*(i-5)                                                                                                   
+            yyy=0.0                                                                                                         
+            dyy=PGEO_ScLth(2)/2.0                                                                                           
+            
+            <Elif expr="layr.le.3">
+              <If expr="i.le.7">                                                                                            
+		xxx=-1.5*wid*sqrt2+wid*i/sqrt2-39.085                                                                       
+		yyy=wid*8/sqrt2-wid*i/sqrt2                                                                                 
+		dyy=PGEO_ScLth(11-i)/2.0                                                                                    
+		<Elif expr="i.gt.7" >                                                                                     
+                  xxx=2.5*wid*sqrt2+wid*(i-8)*sqrt2-39.085                                                                
+                  yyy=0.0                                                                                                 
+                  dyy=PGEO_ScLth(3)/2.0                                                                                   
+		</Elif>
+              </If>
+            </Elif>
+	    
+	    <Elif expr="layr.eq.4" >
+              <If expr="i.le.19" >                                                                                          
+		xxx=0.0                                                                                                     
+		yyy=-108.0375+(60+PGEO_scWrap)/sqrt2+wid/2.0+wid*sqrt2*19-PGEO_Yoff(layr,sn)-wid*i*sqrt2                    
+		dyy=PGEO_ScLth(3)/2.0                                                                                       
+		<Else >                                                                                                     
+		  xxx=wid*(i-19)/sqrt2                                                                                      
+		  yyy=-108.0375+(60+PGEO_scWrap)/sqrt2+wid/2.0-PGEO_Yoff(layr,sn)-wid*(i-19)/sqrt2                          
+		  dyy=PGEO_ScLth(i-16)/2.0                                                                                  
+		</Else>
+              </If>
+	    </Elif>
+	    
+	    <Elif expr="layr.eq.5" >                                                                                        
+              yyy=wid*(22-i)                                                                                               
+              xxx=0.0                                                                                                      
+              dyy=PGEO_ScLth(2)/2.0                                                                                        
+	    </Elif>
+	    
+	    <Elif expr="layr.eq.6" >                                                                                        
+              dyy=PGEO_ScLth(1)/2.0                                                                                         
+              yyy=54.0                                                                                                      
+              xxx=wid*(i-9)                                                                                                 
+              
+              <If expr="i.gt.17" >                                                                                          
+		xxx=wid*(i-26)                                                                                              
+		yyy=-yyy                                                                                                    
+              </If>
+	    </Elif>
+	  </If>
+	  
+	  <If expr="sn.eq.2"> xxx=-xxx </If>                                                                                
+          ang=PGEO_AngSlat(layr,sn)                                                                                       
+          dzz=PGEO_scThick/2.0                                                                                            
+          dxx=PGEO_scWidth/2.0                                                                                            
+          zzz=-dz+PGEO_ScThick/2.0                                                                                        
+	  <If expr="layr.eq.3"> zzz=-zzz </If>
+	  
+	  <Placement block="PSCI" x="xxx" y="yyy" z="zzz" dx="dxx" dy="dyy" dz="dzz" >
+	    <Rotation alphaz="ang" />
+	  </Placement>
+	  
+	  gx = xxx+PGEO_Xoff(layr,sn)
+	  gy = yyy+PGEO_Yoff(layr,sn)
+	  gz = zzz+PGEO_Zoff(layr,sn)-PGEO_BPdz/2.0
+	  <If expr="debug.ge.1" >                                                                                             
+	    <Export language="Mortran">                                                                                     
+              write(12,'(4I3,7F8.2)')id,sn,layr,i,dxx*2,dyy*2,dzz*2,gx,gy,gz,ang
+	    </Export>                                                                                                       
+	  </If>                                        
+	  
+	  id=id+1
+	</If>
+      </For>
+      
+      <If expr="PGEO_Nslat(layr,sn).gt.0" >
+        <If expr="layr.eq.1">                                                                                          
+          dxx=wid*9+1.0                                                                                                
+          dyy=PGEO_ScLth(2)/2.0+1.0                                                                                    
+          <Elif expr="layr.le.3">                                                                                        
+            dxx=64.0 <!-- range from -24.0021 to 102.1727 -->                                                            
+            dyy=PGEO_ScLth(2)/2.0 <!-- range from 23.73226 to 107.2681 -->
+          </Elif>
+          <Else >                                                                                                        
+            dxx=PGEO_ScLth(2)/2.0+1.0                                                                                    
+            dyy=PGEO_ScLth(1)+1.0                                                                                        
+          </Else>
+        </If>                                                                                                          
+        xxx=0.0                                                                                                        
+        yyy=0.0                                                                                                        
+        dzz=PGEO_BPdz/2.0                                                                                              
+        zzz=dz-PGEO_BPdz/2.0                                                                                           
+        <If expr="layr.eq.3"> zzz=-zzz </If>
+	
+	<Create block="PBKB"  />
+        <Placement block="PBKB" x="xxx" y="yyy" z="zzz" dx="dxx" dy="dyy" dz="dzz" />
+      </If>
+    </Block>
+    
+    <Block name="PSCI" comment="is a piece of scintillator in FMS Preshower"  >
+      <Material name="Polystyren"  />
+      <Material name="PRES_scint" isvol="1"  />
+      <Attribute for="PSCI" seen="1" colo="6" />
+      <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
+      
+      <Export language="Mortran">                                                                                         
+	Set EmCuts (PCUT)                                                                                                 
+      </Export>
+      <Par name="BIRK1" value="1."  />
+      <Par name="BIRK2" value="0.013"  />
+      <Par name="BIRK3" value="9.6E-6"  />
+      <Instrument block="PSCI">
+	<Hit meas="birk" nbits="0" min="0" max="10" />
+      </Instrument>
+    </Block>
+    
+    <Block name="PBKB" comment="is the G10 back board" >
+      <Mixture name="g10" dens="1.7"  >
+	<Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
+	<Component name="O" a="16" z="8" w="0.6*2*16./60."  />
+	<Component name="C" a="12" z="6" w="0.4*8*12./174."  />
+	<Component name="H" a="1" z="1" w="0.4*14*1./174."  />
+	<Component name="O" a="16" z="8" w="0.4*4*16./174."  />
+      </Mixture>
+      <Attribute for="PBKB" seen="1" colo="7"  />
+      <Shape type="BOX" dx="0.0" dy="0.0" dz="0.0" />
+      <Export language="Mortran">                                                                                         
+	Set EmCuts (PCUT)                                                                                                 
+      </Export>
+    </Block>
+    
+  </Module>
 </Document>

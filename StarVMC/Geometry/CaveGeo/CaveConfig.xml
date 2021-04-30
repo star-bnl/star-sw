@@ -8,24 +8,24 @@
 
   <Setup  name  = "CAVEof" comment="No CAVE" module="CaveGeo" onoff="off" />
 
-  <Setup name="CAVEon" comment="The STAR Wide Angle Hall" module="CaveGeo" onoff="on" top="HALL" simu="2" >
+  <Setup name="CAVEon" comment="The STAR Wide Angle Hall" module="CaveGeo" onoff="on" top="HALL" simu="1" >
     <Init struct="cvcf" var="config"      value="1" />
     <Init struct="cvcf" var="tpcrefsys"   value="0" />
   </Setup>
 
-  <Setup name="CAVE03" comment="The STAR Wide Angle Hall" module="CaveGeo" onoff="on" top="HALL" simu="2" >
+  <Setup name="CAVE03" comment="The STAR Wide Angle Hall" module="CaveGeo" onoff="on" top="HALL" simu="1" >
     <Init struct="cvcf" var="config"      value="3" />
     <Init struct="cvcf" var="tpcrefsys"   value="0" />
   </Setup>
-  <Setup name="CAVE04" comment="The STAR Wide Angle Hall" module="CaveGeo" onoff="on" top="HALL"  simu="2">
+  <Setup name="CAVE04" comment="The STAR Wide Angle Hall" module="CaveGeo" onoff="on" top="HALL"  simu="1">
     <Init struct="cvcf" var="config"      value="4" />
     <Init struct="cvcf" var="tpcrefsys"   value="0" />
   </Setup>
-  <Setup name="CAVE05" comment="The STAR Wide Angle Hall" module="CaveGeo2" onoff="on" top="HALL"  simu="2">
+  <Setup name="CAVE05" comment="The STAR Wide Angle Hall" module="CaveGeo2" onoff="on" top="HALL"  simu="1">
     <Init struct="cvcf" var="config"      value="5" />
     <Init struct="cvcf" var="tpcrefsys"   value="1" />
   </Setup>
-  <Setup name="CAVE06" comment="The STAR Wide Angle Hall" module="CaveGeo3" onoff="on" top="HALL"  simu="2">
+  <Setup name="CAVE06" comment="The STAR Wide Angle Hall" module="CaveGeo3" onoff="on" top="HALL"  simu="1">
     <Init struct="cvcf" var="config"      value="6" /> 
     <Init struct="cvcf" var="tpcrefsys"   value="1" />
   </Setup>

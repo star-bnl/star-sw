@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.268 2019/07/22 18:27:11 smirnovd Exp $
+// $Id: StMaker.cxx,v 1.269 2020/02/20 22:26:33 genevb Exp $
 //
 //
 /*!
@@ -516,7 +516,10 @@ Int_t icol,islas;
     dataset = 0;
     if (actInput.IsNull()) continue;
   //		Direct try
-    if (actInput.Contains("."))  dataset = Find(actInput);
+    //if (actInput.Contains("."))  dataset = Find(actInput);
+    // GVB: The use of TString::Contains() [above] is time-expensive for
+    // finding a single character. Using strchr() [below] is much faster.
+    if (strchr(actInput.Data(),'.')) dataset = Find(actInput);
     if (dataset) goto FOUND;
 
     if (actInput==GetName()) dataset = m_DataSet;
@@ -1806,6 +1809,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.269  2020/02/20 22:26:33  genevb
+// Replace TString::Contains() with faster strchr()
+//
 // Revision 1.268  2019/07/22 18:27:11  smirnovd
 // Move doPs function from StMaker to StMemStat
 //

@@ -1,6 +1,34 @@
-* $Id: gstar_part.g,v 1.55 2018/03/30 14:11:07 jwebb Exp $
+* $Id: gstar_part.g,v 1.64 2021/04/30 19:37:58 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.64  2021/04/30 19:37:58  jwebb
+* Use the eta lifetime, so that energy smearing in gdecay does not (completely) break energy conservation
+*
+* Revision 1.63  2021/04/14 19:45:18  jwebb
+* Tweaks to mass, lifetime requested as part of the quasi two body decay
+*
+* Revision 1.62  2021/04/09 15:49:01  jwebb
+* Add particle definitions to support H3lambda quasi two body decay
+*
+* Revision 1.61  2021/01/29 17:30:15  jwebb
+* Remove the STOP, as we may be passed stable nuclei here
+*
+* Revision 1.60  2021/01/12 14:34:20  jwebb
+* Update to gstar_part.g and StarClassLibrary to support simulation of
+* H4 Lambda , He4 Lambda  and He5 Lambda hypernuclei.
+*
+* Revision 1.59  2020/06/12 14:10:12  jwebb
+* Fix cut-n-paste error on K0short definition
+*
+* Revision 1.58  2020/05/06 20:33:38  jwebb
+* Pentaquark decay chain, all daughters decay to charged states
+*
+* Revision 1.57  2020/05/05 21:34:33  jwebb
+* Add two pentaquark states... small hack for single decay mode.
+*
+* Revision 1.56  2020/05/05 21:24:10  jwebb
+* Add two pentaquark states
+*
 * Revision 1.55  2018/03/30 14:11:07  jwebb
 * Added Lambda_c- with G3 id of 208.  (note: requires corresponding update to
 * StarClassLibrary...)
@@ -226,7 +254,8 @@ INTEGER FUNCTION PDG_ION_ID( Z, A )
 END FUNCTION PDG_ION_ID
 
 INTEGER FUNCTION PDG_HYP_ID( Z, A, L )
-   PDG_HYP_ID = PDG_ION_ID + 10000000 * L
+   INTEGER PDG_ION_ID
+   PDG_HYP_ID = PDG_ION_ID(Z,A) + 10000000 * L
 END FUNCTION PDG_HYP_ID
 
 
@@ -623,6 +652,26 @@ MODULE gstar_part Is the STAR Particle Database
                       mode    = {1508,}              ,
                       trktyp  = kGtNEUT
 
+  """Fast decay lambdas to support hypertritons"""
+  PARTICLE FastLambda     code    = 11018                ,
+                      pdg     = 0                    ,
+                      mass    = 1.115 "683"          ,  
+                      tlife   = 0.54850E-18          ,
+                      charge  = 0                    ,
+                      bratio  = {1.000,}             ,
+                      mode    = {1409,}              ,
+                      trktyp  = kGtNEUT
+ 
+  PARTICLE FastLambdaBar  code    = 11026                ,
+                      pdg     = 0                    ,
+                      mass    = 1.115 "683"          ,  
+                      tlife   = 0.54850E-18          ,   
+                      charge  = 0                    ,
+                      bratio  = {1.000,}             ,
+                      mode    = {1508,}              ,
+                      trktyp  = kGtNEUT
+
+
   ! The eta dalitz decay
   PARTICLE eta_dalitz code    = 10017                ,
                       pdg     = 0                    ,
@@ -668,7 +717,7 @@ MODULE gstar_part Is the STAR Particle Database
                                 mode      = {1112,}        ,
                                 trktyp    = kGtNEUT   
 
-  ! Some nice anti-nuclei defined w/ offset 50000
+  ! Some nice anti-nuclei defined w/ offset 50000 
 
   PARTICLE antiDeuteron code      = 50045            , 
                         mass      = 1.876            ,
@@ -714,6 +763,13 @@ MODULE gstar_part Is the STAR Particle Database
                              pdg       = -PDG_ION_ID(2,3) ,
                              trktyp    = kGtHION
 
+  PARTICLE Deuteron code      = 51045            , 
+                    mass      = 1.876            ,
+                    charge    = 1.0             ,
+                    tlife     = STABLE           ,
+                    pdg       = PDG_ION_ID(1,2) ,
+                    trktyp    = kGtHION
+
 
    """Define all hyper-nuclei and exotics with offset 60000"""
 * Particle hyperTriton  code      = 60053            ,   ! Placeholder for hypertriton
@@ -726,6 +782,8 @@ MODULE gstar_part Is the STAR Particle Database
 *                       mode      = { , ...}      
                         
 * Particle antiHyperTriton code   = 60054 , ...
+
+""" Hyper tritons (H3lambda) """
 
 Particle hyperTriton_he3_pi_minus code      = 61053            ,
                                   mass      = 2.99131          , 
@@ -763,6 +821,56 @@ Particle anti_hyperTriton_db_pb_pi code      = 62054  ,
                                   trktyp    = kGtHADR          ,
                                   bratio    = {1,}             ,
                                   mode      = {081553,}
+
+Particle hypertriton_quasi_DL     code      = 63053            ,
+                                  mass      = 2.99130          ,
+                                  charge    = +1               ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          
+
+     uw = { 0, 11018, 51045 }
+     Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
+
+Particle anti_hypertriton_quasi_DL  code      = 63054       ,
+                                  mass      = 2.99130          ,
+                                  charge    = -1               ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          
+
+     uw = { 0, 11026, 50045 }
+     Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
+
+                 
+
+
+Particle H4Lambda_He4_pi_minus    code = 61055       , 
+                                  mass = 3.92727     , 
+                                  tlife = 2.6329e-10 , 
+                                  charge = +1        , 
+                                  pdg  = UNDEFINED   , 
+                                  trktyp = kGtHadr  ,  
+                                  bratio = {1,}      , 
+                                  mode = {004709,}
+
+Particle He4Lambda_He3_p_pi_minus code = 61057       , 
+                                  mass = 3.92168     , 
+                                  tlife = 2.6320e-10 , 
+                                  charge = +2        , 
+                                  pdg = UNDEFINED    , 
+                                  trktyp = kGtHadr  , 
+                                  bratio = {1,}      , 
+                                  mode = {144909,}
+
+Particle He5Lambda_He4_p_pi_minus code = 61059       , 
+                                  mass = 4.83978     , 
+                                  tlife = 2.6320e-10 , 
+                                  charge = +2        , 
+                                  pdg = UNDEFINED    , 
+                                  trktyp = kGtHadr  , 
+                                  bratio = {1,}      , 
+                                  mode = {144709,}
 
 
    """Define all dibaryons / dimesons with offset=60000 """
@@ -827,6 +935,25 @@ Particle H_dibaryon               code      = 60001,
                        charge = +1       tlife = 1.6378e-10  ,
                        bratio = {0.5, 0.5}  mode = { 30 26 08, 31 26 07 }
 
+   Particle PQ1730 "Pentaquark 1730 --> lambda K0s, phase space" _
+            code   = 60008              pdg = 912323         ,
+            trktyp = kGtHadr            mass = 1.730         ,
+            charge = 0                  tlife = 1.0E-16      ,
+            bratio = {0.5,0.5}  mode = {9598,9597} 
+
+   Particle PQ1730 "Pentaquark 1730 --> lambda K0s, phase space" _
+            code   = 60009              pdg = 912323         ,
+            trktyp = kGtHadr            mass = 1.730         ,
+            charge = 1                  tlife = 1.0E-16      ,
+            bratio = {0.5,0.5}  mode = {9698,9697} 
+
+
+   PARTICLE KAON_PLUS code=96 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={080809,}
+
+  Particle K0short        code=95 TrkTyp=4 mass=.4977  charge=0  tlife= 1.e-24,
+                     pdg=311  bratio= { 0.5, 0.5}    mode= { 809, 908 }
+
 
 ***************************************************************************
 **
@@ -851,22 +978,25 @@ Particle H_dibaryon               code      = 60001,
 *
 * --------------------------------------------------------------------------
 *
-*$$$  Subroutine aGuDCAY
-*CDE,gctrak,gckine,gcking.
+  Subroutine aGuDCAY
++CDE,gctrak,gckine,gcking.
 *
 *  If decay modes are not set, this routine will be called to decay the particle
 *
 *  What follows is a snippet of code to explore a few variables the
 * user might need:
 *
-*      real P_PART(4)
-*
-*      DO I=1,4
-*         P_PART(I)=VECT(I+3)*VECT(7)
-*      ENDDO
-*
-*      write(*,*) 'ivert, ipart: ', ivert, ipart
+       real P_PART(4)
+ 
+       DO I=1,4
+          P_PART(I)=VECT(I+3)*VECT(7)
+       ENDDO
+ 
+       write(*,*) 'agudcay ivert, ipart: ', ivert, ipart
 *      write(*,*) 'p1, p2, p3: ', P_PART(1), P_PART(2), P_PART(3)
+***STOP 
+
+
 *
 *      NGKINE = NGKINE + 1
 *      DO I = 1, 4
@@ -879,7 +1009,7 @@ Particle H_dibaryon               code      = 60001,
 *         GPOS(I,NGKINE) = VECT(I)
 *     ENDDO
 *
-*$$$  end
+  end
 *
 * --------------------------------------------------------------------------
 *
