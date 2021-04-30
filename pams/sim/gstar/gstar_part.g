@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.63 2021/04/14 19:45:18 jwebb Exp $
+* $Id: gstar_part.g,v 1.64 2021/04/30 19:37:58 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.64  2021/04/30 19:37:58  jwebb
+* Use the eta lifetime, so that energy smearing in gdecay does not (completely) break energy conservation
+*
 * Revision 1.63  2021/04/14 19:45:18  jwebb
 * Tweaks to mass, lifetime requested as part of the quasi two body decay
 *
@@ -653,7 +656,7 @@ MODULE gstar_part Is the STAR Particle Database
   PARTICLE FastLambda     code    = 11018                ,
                       pdg     = 0                    ,
                       mass    = 1.115 "683"          ,  
-                      tlife   = 1.0E-26              ,
+                      tlife   = 0.54850E-18          ,
                       charge  = 0                    ,
                       bratio  = {1.000,}             ,
                       mode    = {1409,}              ,
@@ -662,7 +665,7 @@ MODULE gstar_part Is the STAR Particle Database
   PARTICLE FastLambdaBar  code    = 11026                ,
                       pdg     = 0                    ,
                       mass    = 1.115 "683"          ,  
-                      tlife   = 1.0E-26              ,
+                      tlife   = 0.54850E-18          ,   
                       charge  = 0                    ,
                       bratio  = {1.000,}             ,
                       mode    = {1508,}              ,
@@ -990,9 +993,10 @@ Particle H_dibaryon               code      = 60001,
        ENDDO
  
        write(*,*) 'agudcay ivert, ipart: ', ivert, ipart
+*      write(*,*) 'p1, p2, p3: ', P_PART(1), P_PART(2), P_PART(3)
 ***STOP 
 
-*       write(*,*) 'p1, p2, p3: ', P_PART(1), P_PART(2), P_PART(3)
+
 *
 *      NGKINE = NGKINE + 1
 *      DO I = 1, 4
