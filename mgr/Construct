@@ -262,12 +262,20 @@ if ($ROOT_LEVEL !~ /^5/ ){
 #push @items, "GenFit";
 # closing exclusion list
 my $items = "";# print "items $#items  = @items\n";
-if ( defined($SKIP_DIRS) ){ $items = join("|",split(" ",$SKIP_DIRS));}
-if ( $#items > -1){
+if ( $#items){
   if (! $item) {$items  =       join("|",@items);}
   else         {$items .= "|" . join("|",@items);}
+}
+#print "SKIP_DIRS = $SKIP_DIRS\n";
+#die;
+if ( defined($SKIP_DIRS) ){ 
+  if ($items) {$items .= "|";}
+  $items .= join("|",split(" ",$SKIP_DIRS));
+}
+if ($items) {
   print "SKIP_DIRS is now: $#items $items\n";
 }
+#die;
 # Search for directories (one level down) and make
 # list of targets
 #
