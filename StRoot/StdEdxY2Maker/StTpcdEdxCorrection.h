@@ -47,7 +47,7 @@ class StTpcdEdxCorrection : public TObject {
     kTpcSecRowB            =  8,//S  					     
     kTpcSecRowC            =  9,//S  					     
     kTpcRowQ               = 10,//   	 					       	   
-    kTpcAccumlatedQ        = 11,//   	 					       	   
+    kTpcAccumulatedQ       = 11,//   	 					       	   
     ktpcPressure           = 12,//P  					     
     ktpcTime               = 13,//t  					     
     kDrift                 = 14,//O  					     
