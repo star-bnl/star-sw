@@ -134,7 +134,8 @@ class KFTopoPerformance: public KFParticlePerformanceBase
                               TH1F* histoFit[KFPartEfficiencies::nParticles][nFitQA] = 0,
                               TH1F* histoFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA] = 0,
                               TH1F* histoDSToParticleQA[KFPartEfficiencies::nParticles][nDSToParticleQA] = 0,
-                              std::vector<int>* multiplicities = 0);
+                              std::vector<int>* multiplicities = 0,
+			      TH1F* histoFitQAPull[KFPartEfficiencies::nParticles][nFitQA][3] = 0);
   float GetAcceptanceWeight(const double* point, const int iParticle);
   float GetCutsEffWeight(const double* point, const int iParticle);
   
@@ -175,6 +176,9 @@ class KFTopoPerformance: public KFParticlePerformanceBase
   std::vector<THnSparseF*> fAcceptanceMapMC;
   std::vector<THnSparseF*> fCutsEfficiencyMapReco;
   std::vector<THnSparseF*> fCutsEfficiencyMapMC;
+#ifdef __TFG__VERSION__
+    ClassDef(KFTopoPerformance,0)
+#endif /* __TFG__VERSION__ */
 };
 
 #endif

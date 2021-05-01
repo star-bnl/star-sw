@@ -43,10 +43,10 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   kfpAnalysis->CollectTrackHistograms();
   
   kfpAnalysis->AddDecayToReconstructionList( 310);    // K0
-  kfpAnalysis->AddDecayToReconstructionList( 100321); // K -> 3pi
-  kfpAnalysis->AddDecayToReconstructionList(-100321); 
-  kfpAnalysis->AddDecayToReconstructionList( 200321); // K+3piK
-  kfpAnalysis->AddDecayToReconstructionList(-200321);
+  //  kfpAnalysis->AddDecayToReconstructionList( 100321); // K -> 3pi
+  //  kfpAnalysis->AddDecayToReconstructionList(-100321); 
+  //  kfpAnalysis->AddDecayToReconstructionList( 200321); // K+3piK
+  //  kfpAnalysis->AddDecayToReconstructionList(-200321);
   kfpAnalysis->AddDecayToReconstructionList( 3122); // Lambda
   kfpAnalysis->AddDecayToReconstructionList(-3122); // Lambda_bar
   kfpAnalysis->AddDecayToReconstructionList( 3312); // Xi-
@@ -64,12 +64,13 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
 //   kfpAnalysis->AddDecayToReconstructionList( 323);  // K*+
 //   kfpAnalysis->AddDecayToReconstructionList(-323);  // K*-
   
+//  kfpAnalysis->AddDecayToReconstructionList( 3212);  // Sigma0
 //   kfpAnalysis->AddDecayToReconstructionList( 3124); // Lambda*
 //   kfpAnalysis->AddDecayToReconstructionList( 3124); // Lambda*
 //   kfpAnalysis->AddDecayToReconstructionList( 3224); // Sigma*+
 //   kfpAnalysis->AddDecayToReconstructionList( 3114); // Sigma*-
-  kfpAnalysis->AddDecayToReconstructionList( 3324); // Xi*0
-  kfpAnalysis->AddDecayToReconstructionList(-3324); // Xi*0
+//  kfpAnalysis->AddDecayToReconstructionList( 3324); // Xi*0
+//  kfpAnalysis->AddDecayToReconstructionList(-3324); // Xi*0
   
 //   
 #if 1 /* Hyoer Nuclears */
@@ -89,10 +90,9 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   kfpAnalysis->AddDecayToReconstructionList( 3008); // H4LL
   kfpAnalysis->AddDecayToReconstructionList( 3009); // H4LL
   
-#endif  
-  kfpAnalysis->AddDecayToReconstructionList( 3212);  // Sigma0
   kfpAnalysis->AddDecayToReconstructionList( 3012);  // H3L_{dppi}
   kfpAnalysis->AddDecayToReconstructionList( 3013);  // H4L_{tppi}
+#endif  
   
 #if 0  
   kfpAnalysis->AddDecayToReconstructionList( 9001); // pi+pi+

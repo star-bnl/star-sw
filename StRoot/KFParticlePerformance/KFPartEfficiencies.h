@@ -97,6 +97,7 @@ class KFPartEfficiencies :public TObject
   /** \brief The default constructor. Defines the list of decays to be analysed and their properties. Please, see the code for indexing scheme. */
   KFPartEfficiencies():
     partDaughterPdg(0),
+#ifndef __TFG__VERSION__
     names(),
     indices(),
     fPdgToIndex(),
@@ -112,6 +113,7 @@ class KFPartEfficiencies :public TObject
     ratio_clone(),
     ghost(),
     bg(),
+#endif /* __TFG__VERSION__ */
     clone()
   {
     KFEfficiencyParticleInfo particleInfo[nParticles] = 

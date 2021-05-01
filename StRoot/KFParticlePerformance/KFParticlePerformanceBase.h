@@ -94,6 +94,9 @@ class KFParticlePerformanceBase
    ** before KFParticlePerformanceBase::CreateHistos(). **/
   void Store3DEfficiency()           { fStore3DEfficiency = true; }
 
+#ifdef __TFG__VERSION__
+  void StoreFitPullHistograms(Int_t flag = 0)      { fStoreFitPullHistograms = flag; }
+#endif /* __TFG__VERSION__ */
   /** Returns residual histogram with "iParameter" parameter for decay with "iDecay" number. */
   const TH1F* GetDecayResidual(const int iDecay, const int iParameter) const { return hFitQA[iDecay][iParameter];          }
   /** Returns pull histogram with "iParameter" parameter for decay with "iDecay" number. */
@@ -113,11 +116,17 @@ class KFParticlePerformanceBase
   bool fStorePrimSecHistograms; ///< Flag showing if histograms for primary and secondary candidates should be created and collected. "True" by default.
   bool fStoreZRHistograms; ///< Flag showing if Z-R histograms should be created and collected. "True" by default.
   bool fStore3DEfficiency; ///< Flag showing if 3D efficiency histograms should be created and collected. "False" by default.
+#ifdef __TFG__VERSION__
+  bool fStoreFitPullHistograms; ///< Flag showing if histograms for fit secondary candidates should be created and collected. "True" by default.
+#endif /* __TFG__VERSION__ */
 
 //histos
   static const int nFitQA = 16; ///< Number of fit QA histograms: residuals and pulls in X, Y, Z, Px, Py, Pz, E, M.
   TH1F *hFitDaughtersQA[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of daughter particles at production point.
   TH1F *hFitQA[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the reconstructed particle: X, Y, Z at decay point, P, E, M - at production point
+#ifdef __TFG__VERSION__
+  TH1F *hFitQAPull[KFPartEfficiencies::nParticles][nFitQA][3]; ///< Residuals and pulls of the reconstructed particle: X, Y, Z at decay point, P, E, M - at production point from Fit "FitQAPull", 0 -> mother, 1/2 -> +/- daughter
+#endif /* __TFG__VERSION__ */
   TH1F *hFitQANoConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with no constraints set.
   TH1F *hFitQAMassConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with the mass constraint. 
   TH1F *hFitQATopoConstraint[KFPartEfficiencies::nParticles][nFitQA]; ///< Residuals and pulls of the particle with the production point constraint.
@@ -150,7 +159,11 @@ class KFParticlePerformanceBase
   TH2F *hPartParam2DSecondary[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; ///< 2D for secondary candidates.
   TH2F *hPartParam2DSecondaryMass[nParametersSet][KFPartEfficiencies::nParticles][nHistoPartParam2D]; ///< 2D for secondary candidates with mass constraint.
 
+#ifndef __TFG__VERSION__
   static const int nHistoPartParam3D = 12; ///< Number of 3D histograms: y-pt-M, y-mt-M, b-pt-M, b-y-M, b-mt-M, ct-pt-M, dalitz1-4
+#else /* __TFG__VERSION__ */
+  static const int nHistoPartParam3D = 14; ///< Number of 3D histograms: y-pt-M, y-mt-M, b-pt-M, b-y-M, b-mt-M, ct-pt-M, dalitz1-4, y-phi-M for pT > 1 GeV/c, y-pt-dM
+#endif /* __TFG__VERSION__ */
   TH3F *hPartParam3D[1][KFPartEfficiencies::nParticles][nHistoPartParam3D]; ///< 3D histograms.
 
   static const int nPartEfficiency = 9; ///< Number of efficiency plots for each decay: vs p, pt, y, z, c*tau, decay length, l, r, Mt.

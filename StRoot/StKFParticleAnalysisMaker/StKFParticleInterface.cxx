@@ -30,6 +30,7 @@
 // #define USETOF
 #else /* __TFG__VERSION__ */
 #define USETOF
+//#define __USE_HFT__
 #define dEdxL10min 0.0
 #define dNdxL10min 1.25
 #define __BOOK_hdEdx__(dir,hist,Name,Title)				\
@@ -294,6 +295,10 @@ void StKFParticleInterface::CollectTrackHistograms()
   if (! fTrackHistograms2D[4]) {
     fTrackHistograms2D[4] = new TH2F("hTofPID", "hTofPID", 300, -2, 2, 1100, -1, 10);
     fTrackHistograms2D[4]->SetXTitle("log_{10}P");
+    fTrackHistograms2D[15] = new TH2F("hTofPIDP", "hTofPID eta > 0", 300, -2, 2, 1100, -1, 10);
+    fTrackHistograms2D[15]->SetXTitle("log_{10}P");
+    fTrackHistograms2D[16] = new TH2F("hTofPID", "hTofPID eta <= 0", 300, -2, 2, 1100, -1, 10);
+    fTrackHistograms2D[16]->SetXTitle("log_{10}P");
   }
   fTrackHistograms2D[14] = (TH2F *)   dirs[1]->Get("hETofPID");
   if (! fTrackHistograms2D[14]) {
@@ -301,9 +306,10 @@ void StKFParticleInterface::CollectTrackHistograms()
     fTrackHistograms2D[14]->SetXTitle("log_{10}P");
   }
 #endif /* __TFG__VERSION__ */
+#ifdef __USE_HFT__
   fTrackHistograms[0] = (TH1F *)   dirs[1]->Get("hNHFTHits");
   if (! fTrackHistograms[0]) fTrackHistograms[0] = new TH1F("hNHFTHits", "hNHFTHits",11, -0.5, 10.5);
-  
+#endif /*  __USE_HFT__ */
   fTrackHistograms[1] = (TH1F *)   dirs[1]->Get("hPVError");
   if (! fTrackHistograms[1]) fTrackHistograms[1] = new TH1F("hPVError", "hPVError", 10000, 0, 1);
 
@@ -1259,18 +1265,22 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     
     //FIXME temporary solution!!!
     nHftHitsInTrack = gTrack->nHitsFit();
-    
+#ifdef __USE_HFT__  
     if(fCollectTrackHistograms) fTrackHistograms[0]->Fill(nHftHitsInTrack);
-    
 //     if(fUseHFTTracksOnly && nHftHitsInTrack < 3) continue;
     if(fUseHFTTracksOnly && !gTrack->hasIstHit()) continue;
-    
+#endif /*  __USE_HFT__ */        
     StPicoTrackCovMatrix *cov = picoDst->trackCovMatrix(iTrack);
     const StDcaGeometry dcaG = cov->dcaGeometry();
     Int_t q = 1; if (gTrack->charge() < 0) q = -1;
     KFPTrack track;
     if( !GetTrack(dcaG, track, q, index) ) continue;
-    
+#ifdef __TFG__VERSION__
+    Double_t pL10 = (track.GetP() > 0) ? TMath::Log10(track.GetP()) : -2;
+    Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()) : dEdxL10min;
+    Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
+    Double_t eta = gTrack->gMom().Eta();
+#endif /* __TFG__VERSION__ */    
     if(fCollectTrackHistograms)
     {
 #ifndef __TFG__VERSION__
@@ -1278,9 +1288,6 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
       if(q>0) fTrackHistograms2D[1]->Fill(track.GetP(), gTrack->dEdx());
       else    fTrackHistograms2D[2]->Fill(track.GetP(), gTrack->dEdx());  
 #else /* __TFG__VERSION__ */
-      Double_t pL10 = (track.GetP() > 0) ? TMath::Log10(track.GetP()) : -2;
-      Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()) : dEdxL10min;
-      Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
       fTrackHistograms2D[0]->Fill(pL10, dEdxL10);
       if(q>0) fTrackHistograms2D[1]->Fill(pL10, dEdxL10);
       else    fTrackHistograms2D[2]->Fill(pL10, dEdxL10);  
@@ -1299,9 +1306,6 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
 #ifdef __TFG__VERSION__
     double m2Etof = -1.e6;
     bool isETofm2 = false;
-    Double_t pL10 = (track.GetP() > 0) ? TMath::Log10(track.GetP()) : -2;
-    Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()) : dEdxL10min;
-    Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
 #endif /* __TFG__VERSION__ */
 #ifdef USETOF
     if(gTrack->bTofPidTraitsIndex() >= 0)
@@ -1329,7 +1333,9 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
       if(fCollectTrackHistograms && isTofm2) {
         fTrackHistograms2D[3]->Fill(pL10, dEdxL10);
         fTrackHistograms2D[12]->Fill(pL10, dNdxL10);
-        fTrackHistograms2D[4]->Fill(pL10, m2tof);
+	fTrackHistograms2D[4]->Fill(pL10, m2tof);
+	if (eta > 0) fTrackHistograms2D[15]->Fill(pL10, m2tof);
+	else         fTrackHistograms2D[16]->Fill(pL10, m2tof);
       }
     }
     if(gTrack->eTofPidTraitsIndex() >= 0)
@@ -1369,7 +1375,11 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
 	Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
         fTrackHistograms2D[3]->Fill(pL10, dEdxL10);
         fTrackHistograms2D[12]->Fill(pL10, dNdxL10);
-        if (isTofm2) fTrackHistograms2D[4]->Fill(pL10, m2tof);
+        if (isTofm2)  {
+	  fTrackHistograms2D[4]->Fill(pL10, m2tof);
+	  if (eta > 0) fTrackHistograms2D[15]->Fill(pL10, m2tof);
+	  else         fTrackHistograms2D[16]->Fill(pL10, m2tof);
+	}
         if (isETofm2) fTrackHistograms2D[14]->Fill(pL10, m2Etof);
     }
     
@@ -1547,11 +1557,11 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     if (  gTrack->flag() > 1000) continue;  // pile up track in TPC
     if (  gTrack->nHitsFit() < 15) continue;
     if (  gTrack->probPidTraits().dEdxErrorFit() < 0.04 || gTrack->probPidTraits().dEdxErrorFit() > 0.12 ) continue;
-    
     int nHftHitsInTrack = gTrack->nHitsFit(kIstId) + gTrack->nHitsFit(kSsdId) + gTrack->nHitsFit(kPxlId);
+#ifdef __USE_HFT__
     if(fCollectTrackHistograms) fTrackHistograms[0]->Fill(nHftHitsInTrack);
     if(fUseHFTTracksOnly && nHftHitsInTrack < 3) continue;
-    
+#endif /*  __USE_HFT__ */       
     const UInt_t index = gTrack->id();
     
     if(index >= trakIdToI.size()) trakIdToI.resize(index+1);
@@ -1634,6 +1644,7 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
 #ifdef __TFG__VERSION__
     double m2Etof = -1.e6;
     bool isETofm2 = false;
+    Double_t eta  = gTrack->eta();
     const StMuETofPidTraits &etofPid = gTrack->etofPidTraits();
     double timeETof = etofPid.timeOfFlight();
     if (timeETof > 0) {
@@ -1661,7 +1672,11 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
 	
         fTrackHistograms2D[3]->Fill(pL10, dEdxL10);
         fTrackHistograms2D[12]->Fill(pL10, dNdxL10);
-        if (isTofm2)  fTrackHistograms2D[4]->Fill(pL10, m2tof);
+        if (isTofm2)  {
+	  fTrackHistograms2D[4]->Fill(pL10, m2tof);
+	  if (eta > 0) fTrackHistograms2D[15]->Fill(pL10, m2tof);
+	  else         fTrackHistograms2D[16]->Fill(pL10, m2tof);
+	}
         if (isETofm2) fTrackHistograms2D[14]->Fill(pL10, m2Etof);
       }
 #endif /* __TFG__VERSION__ */

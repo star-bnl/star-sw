@@ -182,7 +182,9 @@ class StKFParticleInterface: public TObject
   // 9 - dNdX, 10 - dNdX positive tracks, 11 - dNdX negative tracks, 12 - dNdX tracks with ToF or ETof.
   // 13 - pT^2 versus eta for all tracks
   // 14 - EToF PID
-  TH2F* fTrackHistograms2D[15];
+  // 15 - ToF PID, eta > 0
+  // 16 - ToF PID, eta < 0
+  TH2F* fTrackHistograms2D[17];
 #endif /* __TFG__VERSION__ */
   //PID histograms
   static const int NTrackHistoFolders = 26;
