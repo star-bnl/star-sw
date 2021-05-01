@@ -15,17 +15,16 @@ class St_starMagAvgC : public TChair {
   UInt_t 	noEntries(Int_t i = 0) 	const {return Struct(i)->noEntries;}
   Double_t 	current(Int_t i = 0) 	const {return Struct(i)->current;}
   Double_t 	rms(Int_t i = 0) 	const {return Struct(i)->rms;}
-  Double_t      ScaleFactor(Int_t i = 0){return current()/(4500/(9.98071899596718826e-01));} // 12/03/20 scale Run 2020 11p5GeV K0s (pcmax(0.49827)/pcmax(0.497611)) to PDG value 
-  Double_t      getScaleFactor(UInt_t time=0) {return currentToScaleFactor(getMagnetCurrent(time));}
-  StMagnetPolarity           getMagneticField(UInt_t time=0) {
+  Double_t      ScaleFactor(Int_t i = 0){return current()/(4500/(9.98071899596718826e-01));} // 12/03/20 scale Run 2020 11p5GeV K_s^0 (pcmax(0.49827)/pcmax(0.497611)) to PDG value 
+  StMagnetPolarity           getMagneticField() {
     StMagnetPolarity value = eUnknownMField;
     if (! instance()) return value;
-    Double_t scaleFactor = getScaleFactor(time);
-    if(scaleFactor == 1.0)	value = eFullMFieldPolA;
-    if(scaleFactor == 0.5)	value = eHalfMFieldPolA;
-    if(scaleFactor == 0.0)	value = eZeroMField;
-    if(scaleFactor == -0.5)	value = eHalfMFieldPolB;
-    if(scaleFactor == -1.0)	value = eFullMFieldPolB;
+    Double_t scaleFactor = ScaleFactor();
+    if      (scaleFactor >  0.75)	value = eFullMFieldPolA;
+    else if (scaleFactor >  0.10)	value = eHalfMFieldPolA;
+    else if (scaleFactor > -0.10)	value = eZeroMField;
+    else if (scaleFactor > -0.75)	value = eHalfMFieldPolB;
+    else if (scaleFactor > -1.25)	value = eFullMFieldPolB;
     return value;
   }
  protected:
