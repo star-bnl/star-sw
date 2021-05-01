@@ -42,10 +42,14 @@ TF1* FitTH1R(TH1 *hist, const Char_t *fitF = "pol1") {
     TF1::InitStandardFunctions();
     f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fitF);
     if (! f) return f;
+    if (f->GetNpar() > 2) {
+      f->SetParLimits(2,-100,1e-7);
+    }
   }
   //  f->SetParLimits(1,-100,0.);
   
   Int_t n = hist->GetNbinsX();
+#if 1
   Double_t *x = new Double_t[n];
   Double_t *y = new Double_t[n];
   Double_t *e = new Double_t[n];
@@ -57,21 +61,36 @@ TF1* FitTH1R(TH1 *hist, const Char_t *fitF = "pol1") {
     e[N] = hist->GetBinError(i);
     N++;
   }
-  gr = new TGraphErrors(N, x, y, 0, e);
-  //  Int_t iok = gr->Fit(fitF,"+rob=0.75");
-  Int_t iok = gr->Fit(fitF);
-  if (iok < 0) f = 0;
-  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
-  if (c1) c1->Clear();
-  else    c1 = new TCanvas("c1","c1");
-  gr->SetMaximum(0.1);
-  gr->SetMinimum(-.1);
-  gr->Draw("axp");
-  c1->Update();
-  delete [] x;
-  delete [] y;
-  delete [] e;
-  if (! gROOT->IsBatch() && Ask()) return f;
+#else 
+  Int_t N = n;
+#endif
+  if (N > 2) {
+#if 1
+    gr = new TGraphErrors(N, x, y, 0, e);
+    //    Int_t iok = gr->Fit(fitF,"+rob=0.75");
+    Int_t iok = gr->Fit(fitF,"e");
+    if (iok < 0) f = 0;
+    TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
+    if (c1) c1->Clear();
+    else    c1 = new TCanvas("c1","c1");
+    gr->SetMaximum(0.1);
+    gr->SetMinimum(-.1);
+    gr->Draw("axp");
+    c1->Update();
+    delete [] x;
+    delete [] y;
+    delete [] e;
+#else
+    TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
+    if (c1) c1->Clear();
+    else    c1 = new TCanvas("c1","c1");
+    Int_t iok = hist->Fit(f);
+    c1->Update();
+    if (iok < 0) f = 0;
+#endif
+  } else {
+    f = 0;
+  }
   return f;
 }
 //________________________________________________________________________________
@@ -98,6 +117,7 @@ void MakeRow(TH2 *mu=0, const Char_t *fName="pol1") {
       }
     }
     Line = Form("  tableSet->AddAt(&row); // row %3i",i); cout << Line.Data() << endl;  out << Line.Data() << endl;  
+    if (! gROOT->IsBatch() && Ask()) break;
   }
   out.close();
 }

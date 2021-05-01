@@ -52,9 +52,12 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20i/ or $pwd =~ /P21i/) {
   elsif ($pwd =~ /2020\/9p8GeV_fixedTarget/)  {$glob = "/reco/production_9p8GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2019\/19GeV_2019_P20ic/)    {$glob = "/reco/production_19GeV_2019/ReversedFullField/P20ic_calib/2019"; $muDST = 1;}
   elsif ($pwd =~ /2019\/19GeV_2019_P21ia/)    {$glob = "/reco/production_19GeV_2019/ReversedFullField/P21ia_calib/2019"; $muDST = 1}
-  elsif ($pwd =~ /2019\/19GeV_2019_P21ib/)    {$glob = "/reco/production_19GeV_2019/ReversedFullField/P21ib_calib/2019"; }
+#  elsif ($pwd =~ /2019\/19GeV_2019_P21ib2/)   {$PICOPATH = "/gpfs01/star/data101"; $glob = "/reco/production_19GeV_2019/ReversedFullField/P21ib_calib/2019"; }
+  elsif ($pwd =~ /2019\/19GeV_2019_P21ib2/)   {$PICOPATH = "/gpfs01/star/data97"; $glob = "/reco/production_19GeV_2019/ReversedFullField/P21ib_calib/2019"; }
+  elsif ($pwd =~ /2019\/19GeV_2019_P21ib/)    {$PICOPATH = "/gpfs01/star/data100"; $glob = "/reco/production_19GeV_2019/ReversedFullField/P21ib_calib/2019"; }
   elsif ($pwd =~ /2019\/19GeV_2019_DEV/)      {$PICOPATH = "/gpfs01/star/subsys-tpc/fisyak/Pico/2019/production_19GeV_2019_DEV"; $glob = "";}
   elsif ($pwd =~ /2019\/14p5GeV_2019_DEV/)    {$glob = "/reco/production_14p5GeV_2019/ReversedFullField/DEV_calib/2019";}
+  elsif ($pwd =~ /2019\/14p5GeV_2019_P21ib2/)  {$PICOPATH = "/gpfs01/star/data97"; $glob = "/reco/production_14p5GeV_2019/ReversedFullField/P21ib_calib/2019"; }
   elsif ($pwd =~ /2019\/14p5GeV_2019_P21ib/)  {$glob = "/reco/production_14p5GeV_2019/ReversedFullField/P21ib_calib/2019"; }
   elsif ($pwd =~ /2017\/pp500/)               {$glob = "/reco/pp500_production_2017/ReversedFullField/P20ic/2017";}
   elsif ($pwd =~ /2021\/7p7GeV/)              {$glob = "/reco/production_7p7GeV_2021/ReversedFullField/dev/2021/";}
