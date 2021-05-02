@@ -295,9 +295,9 @@ void StKFParticleInterface::CollectTrackHistograms()
   if (! fTrackHistograms2D[4]) {
     fTrackHistograms2D[4] = new TH2F("hTofPID", "hTofPID", 300, -2, 2, 1100, -1, 10);
     fTrackHistograms2D[4]->SetXTitle("log_{10}P");
-    fTrackHistograms2D[15] = new TH2F("hTofPIDP", "hTofPID eta > 0", 300, -2, 2, 1100, -1, 10);
+    fTrackHistograms2D[15] = new TH2F("hTofPIDP", "hTofPIDP eta >  0", 300, -2, 2, 1100, -1, 10);
     fTrackHistograms2D[15]->SetXTitle("log_{10}P");
-    fTrackHistograms2D[16] = new TH2F("hTofPID", "hTofPID eta <= 0", 300, -2, 2, 1100, -1, 10);
+    fTrackHistograms2D[16] = new TH2F("hTofPIDN", "hTofPIDN eta <= 0", 300, -2, 2, 1100, -1, 10);
     fTrackHistograms2D[16]->SetXTitle("log_{10}P");
   }
   fTrackHistograms2D[14] = (TH2F *)   dirs[1]->Get("hETofPID");
