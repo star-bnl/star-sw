@@ -13,7 +13,8 @@ git ci -m "Update" RunXXIDefs.pm
 #cd /hlt/cephfs/reco/2021/RF/DEV2/3p85GeV_fixedTarget_2021
 cd /hlt/cephfs/reco/2021/RF/TFG21e/3p85GeV_fixedTarget_2021
 CreateRunDirs.pl
-foreach d (`ls -1d ???/2*`)
+#foreach d (`ls -1d ???/2*`)
+foreach d (`ls -1d 121/22121031`)
   cd $d;
   if (-r Done || -r Submitted) then
     cd -

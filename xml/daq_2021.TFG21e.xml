@@ -45,7 +45,13 @@
   rm ${bla}
   rm -rf ${CURRENT_DIR}
         </command>
-        <stdout URL="file:./sched$JOBID.log" />
+     <ResourceUsage>
+      <Priority>99</Priority>
+    <Memory>
+      <MinMemory>2500</MinMemory>
+    </Memory>
+    </ResourceUsage>
+       <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
 <!-- <input URL="file:/hlt/cephfs/daq/2019/054/20054064/hlt*.daq" /> -->
 <!-- <input URL="command:daq_2019.pl" /> -->
