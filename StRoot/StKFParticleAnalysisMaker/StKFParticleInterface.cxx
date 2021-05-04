@@ -293,11 +293,11 @@ void StKFParticleInterface::CollectTrackHistograms()
 
 #else /* __TFG__VERSION__ */
   if (! fTrackHistograms2D[4]) {
-    fTrackHistograms2D[4] = new TH2F("hTofPID", "hTofPID", 300, -2, 2, 1100, -1, 10);
+    fTrackHistograms2D[4] = new TH2F("hTofPID", "hTofPID", 200, -1, 1, 1100, -1, 10);
     fTrackHistograms2D[4]->SetXTitle("log_{10}P");
-    fTrackHistograms2D[15] = new TH2F("hTofPIDP", "hTofPIDP eta >  0", 300, -2, 2, 1100, -1, 10);
+    fTrackHistograms2D[15] = new TH2F("hTofPIDP", "hTofPIDP eta >  0", 200, -1, 1, 1100, -1, 10);
     fTrackHistograms2D[15]->SetXTitle("log_{10}P");
-    fTrackHistograms2D[16] = new TH2F("hTofPIDN", "hTofPIDN eta <= 0", 300, -2, 2, 1100, -1, 10);
+    fTrackHistograms2D[16] = new TH2F("hTofPIDN", "hTofPIDN eta <= 0", 200, -1, 1, 1100, -1, 10);
     fTrackHistograms2D[16]->SetXTitle("log_{10}P");
   }
   fTrackHistograms2D[14] = (TH2F *)   dirs[1]->Get("hETofPID");
@@ -397,13 +397,23 @@ void StKFParticleInterface::CollectPIDHistograms()
     __BOOK_hdNdx__(dirs[2],fHistodNdXwithToFTracks[iTrackHisto], "hdNdXwithToF", "hdNdXwithToF");
 #endif /* __TFG__VERSION__ */
   
-    fHistoTofPIDTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hTofPID");
+    fHistoTofPIDTracks[iTrackHisto][0] = (TH2F *)   dirs[2]->Get("hTofPID");
 #ifndef __TFG__VERSION__
-    if (! fHistoTofPIDTracks[iTrackHisto]) fHistoTofPIDTracks[iTrackHisto] = new TH2F("hTofPID", "hTofPID", 300, 0, 15, 1100, -1, 10);
+    if (! fHistoTofPIDTracks[iTrackHisto][0]) fHistoTofPIDTracks[iTrackHisto][0] = new TH2F("hTofPID", "hTofPID", 300, 0, 15, 1100, -1, 10);
 #else /* __TFG__VERSION__ */
-    if (! fHistoTofPIDTracks[iTrackHisto]) fHistoTofPIDTracks[iTrackHisto] = new TH2F("hTofPID", "hTofPID", 400, -2, 2, 1100, -1, 10);
+    if (! fHistoTofPIDTracks[iTrackHisto][0]) {
+      fHistoTofPIDTracks[iTrackHisto][0] = new TH2F("hTofPID", "hTofPID", 200, -1, 1, 1100, -1, 10);
+      fHistoTofPIDTracks[iTrackHisto][0]->SetXTitle("log_{10}P");
+      fHistoTofPIDTracks[iTrackHisto][1] = new TH2F("hTofPIDP", "hTofPID eta >  0", 200, -1, 1, 1100, -1, 10);
+      fHistoTofPIDTracks[iTrackHisto][1]->SetXTitle("log_{10}P");
+      fHistoTofPIDTracks[iTrackHisto][2] = new TH2F("hTofPIDN", "hTofPID eta <= 0", 200, -1, 1, 1100, -1, 10);
+      fHistoTofPIDTracks[iTrackHisto][2]->SetXTitle("log_{10}P");
+    }
     fHistoETofPIDTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hETofPID");
-    if (! fHistoETofPIDTracks[iTrackHisto]) fHistoETofPIDTracks[iTrackHisto] = new TH2F("hETofPID", "hETofPID", 400, -2, 2, 1100, -1, 10);
+    if (! fHistoETofPIDTracks[iTrackHisto]) {
+      fHistoETofPIDTracks[iTrackHisto] = new TH2F("hETofPID", "hETofPID", 200, -1, 1, 1100, -1, 10);
+      fHistoETofPIDTracks[iTrackHisto]->SetXTitle("log_{10}P");
+    }
 #endif /* __TFG__VERSION__ */
   
     fHistoMomentumTracks[iTrackHisto] = (TH1F *)   dirs[2]->Get("hMomentum");
@@ -980,6 +990,7 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
       Double_t pL10 = TMath::Log10(momentum);
       Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()) : dEdxL10min;
       Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
+      Double_t eta  = gTrack->gMom().Eta();
       fHistodEdXTracks[iTrackHisto] -> Fill(pL10, dEdxL10);
       fHistodNdXTracks[iTrackHisto] -> Fill(pL10, dNdxL10);
       if(isTofm2 || isETofm2)
@@ -987,10 +998,14 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
       {
 #ifndef __TFG__VERSION__
         fHistodEdXwithToFTracks[iTrackHisto] -> Fill(momentum, gTrack->dEdx());
-        fHistoTofPIDTracks[iTrackHisto] -> Fill(momentum, m2tof);
+        fHistoTofPIDTracks[iTrackHisto][0] -> Fill(momentum, m2tof);
 #else /* __TFG__VERSION__ */
         fHistodEdXwithToFTracks[iTrackHisto] -> Fill(pL10, dEdxL10);
-        if (isTofm2) fHistoTofPIDTracks[iTrackHisto] -> Fill(pL10, m2tof);
+        if (isTofm2) {
+	  fHistoTofPIDTracks[iTrackHisto][0] -> Fill(pL10, m2tof);
+	  if (eta > 0) fHistoTofPIDTracks[iTrackHisto][1] -> Fill(pL10, m2tof);
+	  else         fHistoTofPIDTracks[iTrackHisto][2] -> Fill(pL10, m2tof);
+	}
         if (isETofm2) fHistoETofPIDTracks[iTrackHisto] -> Fill(pL10, m2Etof);
 #endif /* __TFG__VERSION__ */
         
@@ -1118,6 +1133,7 @@ void StKFParticleInterface::FillPIDHistograms(StMuTrack *gTrack, const std::vect
 #endif /* __TFG__VERSION__ */
 {
   float momentum = gTrack->p().mag();
+  Double_t pL10 = TMath::Log10(momentum);
   for(unsigned int iPdg = 0; iPdg<pdgVector.size(); iPdg++)
   {
     int pdg = pdgVector[iPdg];
@@ -1129,8 +1145,11 @@ void StKFParticleInterface::FillPIDHistograms(StMuTrack *gTrack, const std::vect
       if(isTofm2)
       {
         fHistodEdXwithToFTracks[iTrackHisto] -> Fill(momentum, gTrack->dEdx()*1.e6);
-        fHistoTofPIDTracks[iTrackHisto] -> Fill(momentum, m2tof);
-        
+#ifndef __TFG__VERSION__	
+        fHistoTofPIDTracks[iTrackHisto][0] -> Fill(momentum, m2tof);
+#else /* __TFG__VERSION__ */
+        fHistoTofPIDTracks[iTrackHisto][0] -> Fill(pL10, m2tof);
+#endif /* __TFG__VERSION__ */  
         if(abs(pdg)==211)
           fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.139570, fdEdXMode, 1));
         if(abs(pdg)==321)

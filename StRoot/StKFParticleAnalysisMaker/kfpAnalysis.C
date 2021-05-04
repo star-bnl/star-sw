@@ -57,35 +57,33 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   kfpAnalysis->AddDecayToReconstructionList( 22);   // gamma
   kfpAnalysis->AddDecayToReconstructionList( 111);  // pi0
   kfpAnalysis->AddDecayToReconstructionList( 333);  // phi
-//   
-//   kfpAnalysis->AddDecayToReconstructionList( 113);  // rho
-//   kfpAnalysis->AddDecayToReconstructionList( 313);  // K*0
-//   kfpAnalysis->AddDecayToReconstructionList(-313);  // K*0_bar
-//   kfpAnalysis->AddDecayToReconstructionList( 323);  // K*+
-//   kfpAnalysis->AddDecayToReconstructionList(-323);  // K*-
+#if 0
+  //   
+  kfpAnalysis->AddDecayToReconstructionList( 113);  // rho
+  kfpAnalysis->AddDecayToReconstructionList( 313);  // K*0
+  kfpAnalysis->AddDecayToReconstructionList(-313);  // K*0_bar
+  kfpAnalysis->AddDecayToReconstructionList( 323);  // K*+
+  kfpAnalysis->AddDecayToReconstructionList(-323);  // K*-
   
-//  kfpAnalysis->AddDecayToReconstructionList( 3212);  // Sigma0
-//   kfpAnalysis->AddDecayToReconstructionList( 3124); // Lambda*
-//   kfpAnalysis->AddDecayToReconstructionList( 3124); // Lambda*
-//   kfpAnalysis->AddDecayToReconstructionList( 3224); // Sigma*+
-//   kfpAnalysis->AddDecayToReconstructionList( 3114); // Sigma*-
-//  kfpAnalysis->AddDecayToReconstructionList( 3324); // Xi*0
-//  kfpAnalysis->AddDecayToReconstructionList(-3324); // Xi*0
-  
-//   
-#if 1 /* Hyoer Nuclears */
+  kfpAnalysis->AddDecayToReconstructionList( 3212);  // Sigma0
+  kfpAnalysis->AddDecayToReconstructionList( 3124); // Lambda*
+  kfpAnalysis->AddDecayToReconstructionList( 3124); // Lambda*
+  kfpAnalysis->AddDecayToReconstructionList( 3224); // Sigma*+
+  kfpAnalysis->AddDecayToReconstructionList( 3114); // Sigma*-
+  kfpAnalysis->AddDecayToReconstructionList( 3324); // Xi*0
+  kfpAnalysis->AddDecayToReconstructionList(-3324); // Xi*0
+#endif  
+//   Hyoer Nuclears 
+  kfpAnalysis->AddDecayToReconstructionList( 3004); // H3L
+  kfpAnalysis->AddDecayToReconstructionList( 3005); // H4L
+  kfpAnalysis->AddDecayToReconstructionList( 3006); // He4L
+  kfpAnalysis->AddDecayToReconstructionList( 3007); // He5L
+#if 0 
   kfpAnalysis->AddDecayToReconstructionList( 3000); // LL
   kfpAnalysis->AddDecayToReconstructionList( 3001); // Lppi
   kfpAnalysis->AddDecayToReconstructionList( 3003); // Ln
   //  kfpAnalysis->AddDecayToReconstructionList(-3003); // Ln_bar
   kfpAnalysis->AddDecayToReconstructionList( 3103); // Lnn
-  
-  kfpAnalysis->AddDecayToReconstructionList( 3004); // H3L
-  kfpAnalysis->AddDecayToReconstructionList( 3005); // H4L
-  
-  kfpAnalysis->AddDecayToReconstructionList( 3006); // He4L
-
-  kfpAnalysis->AddDecayToReconstructionList( 3007); // He5L
   kfpAnalysis->AddDecayToReconstructionList( 3203); // LLn
   kfpAnalysis->AddDecayToReconstructionList( 3008); // H4LL
   kfpAnalysis->AddDecayToReconstructionList( 3009); // H4LL
@@ -103,11 +101,11 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   kfpAnalysis->AddDecayToReconstructionList(-9003); // K-K-
   kfpAnalysis->AddDecayToReconstructionList( 9004); // pK+
   kfpAnalysis->AddDecayToReconstructionList(-9004); // p-K-
-#endif  
   kfpAnalysis->AddDecayToReconstructionList( 1003004); // H3L*
   kfpAnalysis->AddDecayToReconstructionList( 1003005); // H4L*
   kfpAnalysis->AddDecayToReconstructionList( 1003006); // He4L*
   kfpAnalysis->AddDecayToReconstructionList( 1003007); // He5L*
+#endif  
 
   StMaker *dbMk = chain->GetMaker("db");
   if (dbMk) dbMk->SetDebug(1);

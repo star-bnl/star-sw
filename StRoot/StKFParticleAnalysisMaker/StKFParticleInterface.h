@@ -190,7 +190,7 @@ class StKFParticleInterface: public TObject
   static const int NTrackHistoFolders = 26;
   TH2F* fHistodEdXTracks[NTrackHistoFolders];
   TH2F* fHistodEdXwithToFTracks[NTrackHistoFolders];
-  TH2F* fHistoTofPIDTracks[NTrackHistoFolders];
+  TH2F* fHistoTofPIDTracks[NTrackHistoFolders][3];
 #ifdef __TFG__VERSION__
   TH2F* fHistoETofPIDTracks[NTrackHistoFolders];
 #endif /* __TFG__VERSION__ */
