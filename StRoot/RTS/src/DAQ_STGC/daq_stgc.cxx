@@ -483,6 +483,8 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 		int hits = 0 ;		
 		stgc.start((u_short *)mem,obj[i].bytes/2) ;
 		while(stgc.event()) {
+			if(stgc.vmm.feb_vmm==0 && stgc.vmm.adc==0 && stgc.vmm.bcid==0 && stgc.vmm.ch==0) continue ;
+
 			vm[hits] = stgc.vmm ;
 			hits++ ;
 			if(hits > vmm_max) {
@@ -537,6 +539,67 @@ int daq_stgc::get_l2_vmm(char *addr, int words, struct daq_trg_word *trgs, int d
 
 
 	u_short *d = (u_short *)addr ;
+
+	if(d[10]==0x0001) {	// new version
+		int shorts = words*2 ;
+		shorts -= 8 ;	// remove the TEF header
+		d += 8 ;	// skip the TEF header
+
+		u_short type = d[8] ;		
+
+		if(type==0x4544) {	// triggered!
+			u_char trg_cmd ;
+			u_char daq_cmd ;
+			u_short t, t_lo, t_mid, t_hi ;
+
+			trg_cmd = d[3]&0xF ;
+			daq_cmd = d[4]&0xF ;
+			t_hi = (d[4]>>4)&0xF ;
+			t_mid = (d[4]>>8)&0xF ;
+			t_lo = (d[4]>>12)&0xF ;
+
+			t = (t_hi<<8)|(t_mid<<4)|t_lo ;
+
+			if((trg_cmd>=4)&&(trg_cmd<=12)&&(t!=0)) {
+				trgs[0].t = t ;
+				trgs[0].trg = trg_cmd ;
+				trgs[0].daq = daq_cmd ;
+			}
+			else {
+				LOG(ERR,"get_l2_vmm: shorts %d: type 0x%04X: T %d, trg %d, daq %d [0x%04X]",shorts,type,
+				    trgs[0].t,trgs[0].trg,trgs[0].daq,d[4]) ;
+
+				trgs[0].t = 4096 ;
+				trgs[0].trg = 0 ;
+				trgs[0].daq =  0 ;
+			}
+			
+//			LOG(ERR,"get_l2_vmm: shorts %d: type 0x%04X: T %d, trg %d, daq %d [0x%04X]",shorts,type,
+//			    trgs[0].t,trgs[0].trg,trgs[0].daq,d[4]) ;
+
+		}
+		else {
+			trgs[0].t = 4096 ;
+			trgs[0].trg = 0 ;
+			trgs[0].daq = 0 ;
+
+
+//			LOG(WARN,"get_l2_vmm: shorts %d: type 0x%04X: T %d, trg %d, daq %d",shorts,type,
+//			    trgs[0].t,trgs[0].trg,trgs[0].daq) ;
+
+		}
+
+
+#if 0
+		int cou = shorts>32?32:shorts ;
+		for(int i=0;i<cou;i++) {
+			LOG(TERR,"  %d/%d = 0x%04X",i,shorts,d[i]) ;
+		}
+#endif
+		return 1 ;
+
+
+	}
 
 	if(d[16] != 0x4544) {	// non-data e.g. timer or echo
 		trgs[0].t = 4096 ;
