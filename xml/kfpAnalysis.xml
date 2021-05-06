@@ -51,9 +51,11 @@
         </command>
     <ResourceUsage>
       <Priority>99</Priority>
+<!--
     <Memory>
       <MinMemory>3500</MinMemory>
     </Memory>
+-->
     </ResourceUsage>
     <stdout URL="file:./sched$JOBID.log" />
     <stderr URL="file:./sched$JOBID.err" />
