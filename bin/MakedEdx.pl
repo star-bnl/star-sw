@@ -2071,7 +2071,11 @@ my $NEvents = 100000;
 #$hist = "P21ib02"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/26/21 Test production with alignment from Run XX and XXI
 #$hist = "P21ib02_0"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/29/21 Reset TpcAccumulatedQ.20190225.230000.C, TpcLengthCorrectionMDF.20190225.230000.C, TpcPadCorrectionMDF.20190225.230000.C, TpcRowQ.20190225.230000.C, TpcSecRowB.20190225.230000.C, TpcZCorrectionB.20190225.230000.C
 #$hist = "P21ib02_2"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/30/21  TpcSecRowB.20190225.230001.root
-$hist = "P21ib02_3"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/01/21 TpcAccumulatedQ.20190225.230002.C
+#$hist = "P21ib02_3"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/01/21 TpcAccumulatedQ.20190225.230002.C
+#$hist = "P21ib02_4"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/03/21 TpcSecRowB.20190225.230003.root, TpcSecRowB.20190404.000003.root
+#$hist = "P21ib02_5"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/04/21 TpcZCorrectionB.20190225.230004.C
+#$hist = "P21ib02_5"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/04/21 TpcZCorrectionB.20190225.230004.C
+$hist = "P21ib02_6"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/05/21 fix bug TpcZCorrectionB.20190225.230004.C
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2288,12 +2292,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #    if ($Production =~ /P02gi2/ || $Production =~ /P02gi3/) {$cmd .= "N";}
 #    if ($Production =~ /^dAu/ or $Production =~ /^AuAu/) {$cmd .= "S";}
 #    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ",\"$Year\")\' >& $log";
-<<<<<<< HEAD
-    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\")\' >& $log";
-#    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\' >& $logL";
-=======
     $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\' >& $log";
->>>>>>> 8ce86e66ccfb6b299ee4605978ff9a7b0331de0d
 #    $cmd .= "; cp -p $logL $log;";
 #    $cmd .= ".C(10000,\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\'";
 #    $cmd .= ".C(10000,\"" . $ffile . "\",\"" . $root . "\")\'";
@@ -2331,4 +2330,3 @@ close (XML);
 my $GB = $Total_Size/1024/1024/1024;
 print "Total size = $GB GB\n"; 
 }
-

@@ -15,7 +15,7 @@ if ($#ARGV >= 0) {
   $debug = $ARGV[0];
 }
 my $pwd = Cwd::cwd(); print "pwd = $pwd\n" if ($debug);
-my $glob;
+my $glob = "";
 my $dayMin =  0;
 my $dayMax =  0;
 my $year = "y2020";
@@ -133,8 +133,9 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20i/ or $pwd =~ /P21i/) {
 #    if    ($pwd =~ /7p7GeV_2021\/TFG21c\.A/)   {$glob = "/2021/RF/TFG21c.A/7p7GeV_2021";}
 #    elsif ($pwd =~ /7p7GeV_2021\/TFG21c\.B/)   {
 #    else {die "Not set yet";}
-    if ($pwd =~ /7p7GeV_2021_FF/)                {$glob = "/2021/FF/TFG21c.B/7p7GeV_2021";}
-    else                                         {$glob = "/2021/RF/TFG21c.B/7p7GeV_2021";}
+    if ($pwd =~ /3p85GeV_fixedTarget_2021/)   {$glob = "/2021/FF/TFG21e/3p85GeV_fixedTarget_2021";}
+    elsif ($pwd =~ /7p7GeV_2021_FF/)          {$glob = "/2021/FF/TFG21c.B/7p7GeV_2021";}
+    elsif ($pwd =~ /7p7GeV_2021/)             {$glob = "/2021/RF/TFG21c.B/7p7GeV_2021";}
   }
   elsif ($pwd =~ /2021\/3p85GeV_fixedTarget_2021/) {$glob = "/2021/RF/TFG21e/3p85GeV_fixedTarget_2021";}
 }
@@ -143,9 +144,14 @@ print "PICOPATH = $PICOPATH; days = $dayMin  - $dayMax : glob = $glob\n" if ($de
 if (! $PICOPATH) {die "PICOPATH = $PICOPATH";}
 #if ($glob == "" or $PICOPATH == "") {die "glob = $glob, PICOPATH = $PICOPATH";}
 my $GLOB = $PICOPATH . $glob . "/???/*";
+my @files = glob $GLOB; print "$GLOB => found $#files\n" if ($debug);
+# if ($#files < 0) {
+#   $GLOB = $PICOPATH . $glob; 
+#   @files = glob $GLOB; print "$GLOB => found $#files\n" if ($debug);
+# }
 print "PICOPATH = $PICOPATH; days = $dayMin  - $dayMax : GLOB = $GLOB\n" if ($debug);
 my %Runs= ();
-foreach my $run (glob $GLOB) {
+foreach my $run (@files) {
   my $f = File::Basename::basename($run);
   my $day = int ($f/1000);       # print "day = $day\n";
   my $Y = int ($day/1000);    # print "Y = $Y\n";

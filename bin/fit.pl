@@ -57,7 +57,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 
 	      );
 #		 EtaiTPCF EtaiTPC70 TPoints70iTPC TPointsFiTPC TPoints70UiTPC TPointsFUiTPC  TPointsNiTPC TPointsNUiTPC
 #	      );
-  @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N SecRow3PN dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
+#  @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N SecRow3PN dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
   #  @histXF = @histNF;
   @opt = qw (GF GP NF);# XF);# RL5);
 }

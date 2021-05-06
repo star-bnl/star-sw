@@ -6,6 +6,7 @@
 #C
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
+#  setup debug
 #  setenv NODEBUG yes
 #  setenv StarEndMakerShell
 #  starver TFG21d
@@ -49,12 +50,14 @@
 #C end
 ##  rm -rf ${CURRENT_DIR}
         </command>
+<!--
     <ResourceUsage>
       <Priority>99</Priority>
     <Memory>
       <MinMemory>3500</MinMemory>
     </Memory>
     </ResourceUsage>
+-->
     <stdout URL="file:./sched$JOBID.log" />
     <stderr URL="file:./sched$JOBID.err" />
      <input URL="command:PicoL.pl" /> 
