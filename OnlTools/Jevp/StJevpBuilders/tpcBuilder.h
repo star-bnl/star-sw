@@ -75,6 +75,31 @@ class tpcBuilder : public JevpBuilder {
       TH1 *h_tpc_sec23;
       TH1 *h_tpc_sec24;
 
+      TH1 *hcl_tpc_sec1;
+      TH1 *hcl_tpc_sec2;
+      TH1 *hcl_tpc_sec3;
+      TH1 *hcl_tpc_sec4;
+      TH1 *hcl_tpc_sec5;
+      TH1 *hcl_tpc_sec6;
+      TH1 *hcl_tpc_sec7;
+      TH1 *hcl_tpc_sec8;
+      TH1 *hcl_tpc_sec9;
+      TH1 *hcl_tpc_sec10;
+      TH1 *hcl_tpc_sec11;
+      TH1 *hcl_tpc_sec12;
+      TH1 *hcl_tpc_sec13;
+      TH1 *hcl_tpc_sec14;
+      TH1 *hcl_tpc_sec15;
+      TH1 *hcl_tpc_sec16;
+      TH1 *hcl_tpc_sec17;
+      TH1 *hcl_tpc_sec18;
+      TH1 *hcl_tpc_sec19;
+      TH1 *hcl_tpc_sec20;
+      TH1 *hcl_tpc_sec21;
+      TH1 *hcl_tpc_sec22;
+      TH1 *hcl_tpc_sec23;
+      TH1 *hcl_tpc_sec24;
+
       TH1 *e_tpc_sec1;
       TH1 *e_tpc_sec2;
       TH1 *e_tpc_sec3;

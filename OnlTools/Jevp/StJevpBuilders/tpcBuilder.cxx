@@ -1,4 +1,4 @@
-// $Id: tpcBuilder.cxx,v 1.14 2020/08/04 13:42:46 evpops Exp $
+// $Id: tpcBuilder.cxx,v 1.15 2021/05/06 17:24:01 videbaks Exp $
 //
 #include <stdio.h>
 #include <stdlib.h>
@@ -125,6 +125,31 @@ void tpcBuilder::initialize(int argc, char *argv[]) {
   contents.h_tpc_sec23 = new TH2D("h_tpc_sec23","TPC Sec. 23 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
   contents.h_tpc_sec24 = new TH2D("h_tpc_sec24","TPC Sec. 24 charge per pad",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
 
+  contents.hcl_tpc_sec1 = new TH2D("hcl_tpc_sec1","TPC Sec. 1 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec2 = new TH2D("hcl_tpc_sec2","TPC Sec. 2 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec3 = new TH2D("hcl_tpc_sec3","TPC Sec. 3 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec4 = new TH2D("hcl_tpc_sec4","TPC Sec. 4 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec5 = new TH2D("hcl_tpc_sec5","TPC Sec. 5 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec6 = new TH2D("hcl_tpc_sec6","TPC Sec. 6 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec7 = new TH2D("hcl_tpc_sec7","TPC Sec. 7 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec8 = new TH2D("hcl_tpc_sec8","TPC Sec. 8 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec9 = new TH2D("hcl_tpc_sec9","TPC Sec. 9 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec10 = new TH2D("hcl_tpc_sec10","TPC Sec. 10 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec11 = new TH2D("hcl_tpc_sec11","TPC Sec. 11 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec12 = new TH2D("hcl_tpc_sec12","TPC Sec. 12 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec13 = new TH2D("hcl_tpc_sec13","TPC Sec. 13 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec14 = new TH2D("hcl_tpc_sec14","TPC Sec. 14 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec15 = new TH2D("hcl_tpc_sec15","TPC Sec. 15 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec16 = new TH2D("hcl_tpc_sec16","TPC Sec. 16 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec17 = new TH2D("hcl_tpc_sec17","TPC Sec. 17 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec18 = new TH2D("hcl_tpc_sec18","TPC Sec. 18 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec19 = new TH2D("hcl_tpc_sec19","TPC Sec. 19 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec20 = new TH2D("hcl_tpc_sec20","TPC Sec. 20 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec21 = new TH2D("hcl_tpc_sec21","TPC Sec. 21 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec22 = new TH2D("hcl_tpc_sec22","TPC Sec. 22 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec23 = new TH2D("hcl_tpc_sec23","TPC Sec. 23 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+  contents.hcl_tpc_sec24 = new TH2D("hcl_tpc_sec24","TPC Sec. 24 charge per clust  ",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
+
   contents.e_tpc_sec1 = new TH2D("e_tpc_sec1","TPC Sec. 1 charge per clust (Event)",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
   contents.e_tpc_sec2 = new TH2D("e_tpc_sec2","TPC Sec. 2 charge per clust (Event)",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
   contents.e_tpc_sec3 = new TH2D("e_tpc_sec3","TPC Sec. 3 charge per clust (Event)",Npads,0.5,Npads+0.5,Nrows,0.5,Nrows+0.5);
@@ -215,9 +240,11 @@ void tpcBuilder::initialize(int argc, char *argv[]) {
   contents.cl_width_itpc_tb = new TH2D("cl_width_itpc_tb","iTPC clusterwidth (time)",
 				       24,0.5,24.5,
 				       30,0.5,30.5);
+  contents.cl_width_itpc_tb->GetXaxis()->SetTitle("sector");
   contents.cl_width_itpc_pad = new TH2D("cl_width_itpc_pad","iTPC clusterwidth (pad)",
 					24,0.5,24.5,
 					30,0.5,30.5);
+  contents.cl_width_itpc_pad->GetXaxis()->SetTitle("sector");
   contents.cl_width_tpx_tb = new TH2D("cl_width_tpx_tb","TPX clusterwidth (time)",
 				       24,0.5,24.5,
 				       30,0.5,30.5);
@@ -404,6 +431,33 @@ void tpcBuilder::initialize(int argc, char *argv[]) {
   plots[++n] = new JevpPlot(contents.h_tpc_sec22);
   plots[++n] = new JevpPlot(contents.h_tpc_sec23);
   plots[++n] = new JevpPlot(contents.h_tpc_sec24);
+
+
+  int pl_qcl_idx = n+1;
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec1);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec2);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec3);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec4);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec5);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec6);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec7);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec8);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec9);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec10);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec11);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec12);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec13);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec14);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec15);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec16);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec17);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec18);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec19);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec20);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec21);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec22);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec23);
+  plots[++n] = new JevpPlot(contents.hcl_tpc_sec24);
 
   int pl_qe_idx = n+1;
   plots[++n] = new JevpPlot(contents.e_tpc_sec1);
@@ -614,6 +668,8 @@ void tpcBuilder::initialize(int argc, char *argv[]) {
   for(int i=0;i<24;i++) {
     plots[i+pl_q_idx]->setDrawOpts((char *)"colz");
     plots[i+pl_q_idx]->optstat = 0;
+    plots[i+pl_qcl_idx]->setDrawOpts((char *)"colz");
+    plots[i+pl_qcl_idx]->optstat = 0;
     plots[i+pl_qe_idx]->setDrawOpts((char *)"colz");
     plots[i+pl_qe_idx]->optstat = 0;
 
@@ -676,6 +732,7 @@ void tpcBuilder::event(daqReader *rdr)
 
 
   long q_idx = ((long)&contents.h_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
+  long qcl_idx = ((long)&contents.hcl_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
   long qe_idx = ((long)&contents.e_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
   long qs_idx = ((long)&contents.h_itpc_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
   long cl_qs_idx = ((long)&extras.cl_itpc_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
@@ -780,6 +837,7 @@ void tpcBuilder::event(daqReader *rdr)
 	    // remove timebins where GG osc is important.
 	    if(tb>32 && tb<430) {
 
+	      /*
 	      // this pad is sometimes hot mask out
 	      //
 	      if(s==10){
@@ -796,7 +854,7 @@ void tpcBuilder::event(daqReader *rdr)
 		if(dd->pad==41 && dd->row==38)
 		  continue;
 	      }
-
+	      */
 	      charge_counts[dd->pad][dd->row] += adc;
 	    }
 	    tb_charge_counts[tb] += adc;
@@ -958,7 +1016,7 @@ void tpcBuilder::event(daqReader *rdr)
       while(dd->iterate()) {
 	for(u_int i=0;i<dd->ncontent;i++) {
 	  noClustiTPC++;
-	  if((dd->cld[i].flags==0)) {
+	  if((dd->cld[i].flags==0) || (dd->cld[i].flags==2)) {
 	    pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);
 	    itpc_pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);
 	    itpc_pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);
@@ -983,6 +1041,7 @@ void tpcBuilder::event(daqReader *rdr)
       for(int j=1;j<41;j++) {
 	if(charge_counts_cl[i][j]) {
 	  ((TH2D *)contents.array[s + qe_idx - 1])->Fill(i, j, charge_counts_cl[i][j]);
+	  ((TH2D *)contents.array[s + qcl_idx - 1])->Fill(i, j, charge_counts_cl[i][j]);
 	  extras.cl_itpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts_cl[i][j]);
 	}
       }
@@ -1030,6 +1089,7 @@ void tpcBuilder::event(daqReader *rdr)
       for(int j=41;j<Nrows1;j++) {
 	if(charge_counts_cl[i][j]) {
 	  ((TH2D *)contents.array[s + qe_idx - 1])->Fill(i, j, charge_counts_cl[i][j]);
+	  ((TH2D *)contents.array[s + qcl_idx - 1])->Fill(i, j, charge_counts_cl[i][j]);
 	  extras.cl_tpx_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts_cl[i][j]);
 	}
       }
