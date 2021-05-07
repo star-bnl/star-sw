@@ -454,7 +454,7 @@ Int_t StdEdxY2Maker::Make(){
 	      scaledX = TMath::Abs(xyz[2].z())/dZ;
 	    }
 	    static Int_t ibreak = 0;
-	    if (Debug()) {
+	    if (Debug() > 1) {
 	      cout << "Cross Membrane : upper " << xyz[1] << endl;
 	      cout << "                 hit   " << xyz[3] << endl;
 	      cout << "                 lower " << xyz[2] << "\tscale dX = " << scaledX << endl;
