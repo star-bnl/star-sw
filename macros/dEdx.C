@@ -71,8 +71,11 @@ void dEdx(Int_t nevents=1000,
   } else                            { Chain += ",CorrX"; // ,analysis to add OPr40 for <= 2018
   }
   TString STAR_VERSION(gSystem->Getenv("STAR_VERSION"));
+  Bool_t tfgV = kFALSE;
   if (STAR_VERSION.BeginsWith("TFG") || STAR_VERSION.Contains("DEV2")) {
+    tfgV = kTRUE;
     Chain += ",quiet,ForcedX";
+    if (mode == 2) Chain += ",dEdxCalib";
   } 
   //  Chain += ",CMuDst,picoWrite,noHistos,noRunco,-evout"; // For PicoDst
   TString RootFile(rootFile);
@@ -105,17 +108,20 @@ void dEdx(Int_t nevents=1000,
   StMaker *tofCalib = chain->Maker("tofCalib");
   if (tofCalib) chain->AddAfter("tofCalib",dEdxY2);
   Int_t Mode = 0;
-  if (mode%10 == 2) 
-    SETBIT(Mode,StdEdxY2Maker::kCalibration);
-  SETBIT(Mode,StdEdxY2Maker::kGASHISTOGRAMS);
+  // Additional cailbration modes to default in TFG : kCalibration, kGASHISTOGRAMS, kPadSelection, kAlignment
+  if (! tfgV) {
+    if (mode%10 == 2) SETBIT(Mode,StdEdxY2Maker::kCalibration);
+    SETBIT(Mode,StdEdxY2Maker::kGASHISTOGRAMS);
+    SETBIT(Mode,StdEdxY2Maker::kPadSelection); 
+    SETBIT(Mode,StdEdxY2Maker::kPadSelection);
+    SETBIT(Mode,StdEdxY2Maker::kAlignment);
+  }
+  //  if (mode%10 == 2) 
   //    SETBIT(Mode,StdEdxY2Maker::kProbabilityPlot);
   //  SETBIT(Mode,StdEdxY2Maker::kZBGX);
-  if ((mode/100)%10) 
-    SETBIT(Mode,StdEdxY2Maker::kDoNotCorrectdEdx);
+    if ((mode/100)%10) 
+      SETBIT(Mode,StdEdxY2Maker::kDoNotCorrectdEdx);
   if ((mode/1000)%10) SETBIT(Mode,StdEdxY2Maker::kMakeTree);
-  SETBIT(Mode,StdEdxY2Maker::kPadSelection); 
-  SETBIT(Mode,StdEdxY2Maker::kPadSelection);
-  SETBIT(Mode,StdEdxY2Maker::kAlignment);
   //  SETBIT(Mode,StdEdxY2Maker::kMip);
   //  SETBIT(Mode,StdEdxY2Maker::kAdcHistos);
   //  SETBIT(Mode,StdEdxY2Maker::kXYZcheck);

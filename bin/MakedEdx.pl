@@ -2071,7 +2071,9 @@ my $NEvents = 100000;
 #$hist = "RunXXI14"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/TFG21e/"; $RECO = "/3p85GeV_fixedTarget_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/05/21 TpcZCorrectionB.20210501.16013.C
 #$hist = "RunXXI15"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/TFG21e/"; $RECO = "/3p85GeV_fixedTarget_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/05/21 TpcZCorrectionB.20210501.16013.C => TpcZCorrectionB.20210501.160013.C, default TpcLengthCorrectionMDF.C
 #$hist = "RunXXI16"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/TFG21e/"; $RECO = "/3p85GeV_fixedTarget_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/05/21 TpcZCorrectionB.20210129.000003+20210501.160013.C = 160015, TpcLengthCorrectionMDF.C
-$hist = "RunXXI17"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/TFG21e/"; $RECO = "/3p85GeV_fixedTarget_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/05/21 TpcSecRowB.20210501.160016.root
+#$hist = "RunXXI17"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/TFG21e/"; $RECO = "/3p85GeV_fixedTarget_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/05/21 TpcSecRowB.20210501.160016.root
+#$hist = "RunXXI18"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/TFG21e/"; $RECO = "/3p85GeV_fixedTarget_2021/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/07/21 reset TpcSecRowB to 7p7GeV, TpcZCorrectionB, TpcLengthCorrectionMDF to zero
+$hist = "RunXXI19"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TFG21e"; $year = "/*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/07/21 TpcSecRowB.20210501.160018.root
 ######################################## Run XIX + XX
 #$hist = "P21ib01"; $NEvents = 2000; $disk = "data*/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/11/21 Test production with alignment from Run XX and XXI
 #$hist = "P21ib02"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 04/26/21 Test production with alignment from Run XX and XXI
@@ -2133,7 +2135,7 @@ my $hostname = `hostname`; chomp($hostname);
 #  $homedir = "/usatlas/projects/dc0/deexx/Jobs";
 #}
 $scr = $SCR . $hist . "/";
-print "Production = $Production ==> $hist\n";
+print "Production = $Production, disk = $disk, RECO = $RECO, year = $year ==> $hist\n";
 my $glb = "";
 if ($#ARGV >= 0) {$glb = $ARGV[0];}
 else {
@@ -2146,7 +2148,7 @@ else {
 	$glb =  "/star/" . $disk . $RECO . $Production . $year . $FILE . $select . ".event.root";
       }
     } else {
-      $glb =  $disk . $RECO . $Production . "*" . $year . $FILE . $select . ".event.root";
+      $glb =  $disk . $RECO . $Production . "*" . $year . $FILE . $select . ".event.root"; print "glb = $glb\n";
     }
   } 
 #  if ($Production) {$glb =  "/star/" . $disk . $RECO . $Production . "*calib*/" . $year . $FILE . $select . ".event.root";}

@@ -40,6 +40,7 @@ cmake ${ROOT}/${ROOT_LEVEL}/root -DCMAKE_INSTALL_PREFIX=${ROOTSYS} -DCMAKE_BUILD
 -DCMAKE_C_FLAGS="-fdiagnostics-color=always -msse4.2" \
 -Dbuiltin_afterimage=ON \
 -Dtable=ON \
+-Dvmc=ON \
 -Dimt=OFF \
 -Druntime_cxxmodules=ON
 # problems with tbb => -Dimt=OFF 

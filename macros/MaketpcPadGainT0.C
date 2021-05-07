@@ -2,7 +2,8 @@
   root.exe lDb.C 'MaketpcPadGainT0.C+("itpc_gains.txt.20200626.084156")'
   root.exe lDb.C 'MaketpcPadGainT0.C+("tpx_gains.txt.20200807.104403")'
     root.exe -q -b lDb.C 'MaketpcPadGainT0.C+("'${f}'")' >& ${f}.log
-  foreach f (`ls -d *txt.2*`)
+#  foreach f (`find . -name "*.txt*" -amin -360`)   
+   foreach f (`ls -d *txt.2*`)
     root.exe -q -b lRTS.C 'MaketpcPadGainT0.C+("'${f}'")' >& ${f}.log
   end
  */
@@ -16,7 +17,7 @@
 #include "TString.h"
 #include "tables/St_tpcPadGainT0_Table.h"
 #include "tables/St_itpcPadGainT0_Table.h"
-#define __USE__RTS__
+//#define __USE__RTS__
 #ifdef __USE__RTS__
 #include "RTS/src/DAQ_TPX/tpxGain.h"
 #endif /* __USE__RTS__ */
@@ -24,7 +25,7 @@
 void MaketpcPadGainT0(TString FileName="tpx_gains.txt.20180326.052426"){ //"itpc_gains.txt.20191030.050318") {
   if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
 #ifndef __USE__RTS__
-  if (gClassTable__USE__RTS__->GetID("St_tpcPadGainT0") < 0) gSystem->Load("libStDb_Tables.so");
+  if (gClassTable->GetID("St_tpcPadGainT0") < 0) gSystem->Load("libStDb_Tables.so");
   FILE *fp = fopen(FileName.Data(),"r");
   if (! fp) {
     cout << "Can't open" << FileName.Data() << endl;
@@ -45,6 +46,9 @@ void MaketpcPadGainT0(TString FileName="tpx_gains.txt.20180326.052426"){ //"itpc
     cout << "Illegal file " << FileName.Data() << endl;
     return;
   }
+  TDatime timeET(d,t);
+  UInt_t uGMT = timeET.Convert(kTRUE);
+  TDatime time(uGMT);
   Char_t line[121];
   TFile *f = 0;
   Int_t nEntry = 0;
@@ -115,9 +119,6 @@ void MaketpcPadGainT0(TString FileName="tpx_gains.txt.20180326.052426"){ //"itpc
     }
     itpcPadGainT0->AddAt(&GainT0);
     //  itpcPadGainT0->Print(0,1);
-    TDatime timeET(d,t);
-    UInt_t uGMT = timeET.Convert(kTRUE);
-    TDatime time(uGMT);
     TString filename(Form("itpcPadGainT0.%08d.%06d",time.GetDate(),time.GetTime()));
     printf("Create %s\n",filename.Data());
     filename += ".root";
@@ -325,6 +326,14 @@ MySQL [Conditions_rts]> select entryTime,elementID,beginTime,deactive,run from  
        if ($1 == "revision") printf("cvs co -r %s -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >",$2);\
        if ($1 == "Version") printf("itpc_gains.txt.%08i.%06i\n",$4,$5);\
        }' itpc.log
+
+cvs co -r 1.33 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210423.082447
+cvs co -r 1.32 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210407.073736
+cvs co -r 1.31 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210319.064311
+cvs co -r 1.30 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210315.104408
+cvs co -r 1.29 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210228.094832
+cvs co -r 1.28 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210225.044533
+
 cvs co -r 1.27 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210220.125428
 cvs co -r 1.26 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210201.073202
 cvs co -r 1.25 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210128.023247
@@ -358,6 +367,10 @@ cvs log $STAR/online/RTS/src/TPX_SUPPORT/tpx_gains.txt > tpx.log
        if ($1 == "revision") printf("cvs co -r %s -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >",$2);\
        if ($1 == "Version") printf("tpc_gains.txt.%08i.%06i\n",$4,$5);\
        }' tpx.log
+cvs co -r 1.99 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20210503.085129
+cvs co -r 1.98 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20210401.085802
+cvs co -r 1.97 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20210226.061422
+
 cvs co -r 1.96 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20210114.112304
 cvs co -r 1.95 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20200807.104403
 cvs co -r 1.94 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20200807.101659

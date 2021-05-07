@@ -418,9 +418,10 @@
 #root.exe -q -b   SecRow3CGFRunXXI102.root  'MakeTpcSecRowB.C(20210129,2,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,2.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000002.root T SecRow3CGFRunXXI04.root  'MakeTpcSecRowB.C(20210129,4,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,4.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000004.root T SecRow3CGFRunXXI06.root  'MakeTpcSecRowB.C(20210129,6,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210129,6.log
+#root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000006.root ~/work/Histograms/RunXXI/RunXXI12/SecRow3CGF3p85GeV_fixedTarget_2021.root  'MakeTpcSecRowB.C(20210501,160000,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210501,160000.log
+#root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210501.160000.root  /net/l404/data/fisyak/Histograms/RunXXI/RunXXI16/SecRow3CGF3p85GeV_fixedTarget_2021.root  'MakeTpcSecRowB.C(20210501,160016)' >& MakeTpcSecRowB.20210501,160016.log
+root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000006.root SecRow3CGF3p85GeV_fixedTarget_2021.root 'MakeTpcSecRowB.C(20210501,160018,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210501,160018.log
 ###################################### Run XIX recalibration ##########################################
 #root.exe -q -b SecRow3CGFP21ib02_0.root 'MakeTpcSecRowB.C(20190225,230001,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225.230001.log
-#root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210129.000006.root ~/work/Histograms/RunXXI/RunXXI12/SecRow3CGF3p85GeV_fixedTarget_2021.root  'MakeTpcSecRowB.C(20210501,160000,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210501,160000.log
-root.exe -q -b $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210501.160000.root  /net/l404/data/fisyak/Histograms/RunXXI/RunXXI16/SecRow3CGF3p85GeV_fixedTarget_2021.root  'MakeTpcSecRowB.C(20210501,160016)' >& MakeTpcSecRowB.20210501,160016.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190225.230001.root  SecRow3CGF19GeV.root 'MakeTpcSecRowB.C(20190225,230003,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225.230003.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190225.230001.root  SecRow3CGF14p5GeV.root 'MakeTpcSecRowB.C(20190404,3,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190404.000003.log
