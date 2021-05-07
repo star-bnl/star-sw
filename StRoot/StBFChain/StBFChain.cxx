@@ -918,15 +918,17 @@ Int_t StBFChain::Instantiate()
       mk->SetAttr("EmbeddingShortCut", kTRUE);
       mk->PrintAttr();
     }
-    if (maker == "StdEdxY2Maker" && GetOption("dEdxCalib")) {
-      Int_t Mode = 0;
-      SETBIT(Mode,StdEdxY2Maker::kCalibration);
-      SETBIT(Mode,StdEdxY2Maker::kGASHISTOGRAMS);
-      SETBIT(Mode,StdEdxY2Maker::kPadSelection); 
-      SETBIT(Mode,StdEdxY2Maker::kPadSelection);
-      SETBIT(Mode,StdEdxY2Maker::kAlignment);
-      LOG_INFO << " set dEdxY2 Mode " << Mode << " =======================================" << endm;
-      mk->SetMode(Mode); 
+    if (maker == "StdEdxY2Maker") {
+      if (GetOption("dEdxCalib")) {
+	Int_t Mode = 0;
+	SETBIT(Mode,StdEdxY2Maker::kCalibration);
+	SETBIT(Mode,StdEdxY2Maker::kGASHISTOGRAMS);
+	SETBIT(Mode,StdEdxY2Maker::kPadSelection); 
+	SETBIT(Mode,StdEdxY2Maker::kPadSelection);
+	SETBIT(Mode,StdEdxY2Maker::kAlignment);
+	LOG_INFO << " set dEdxY2 Mode " << Mode << " =======================================" << endm;
+	mk->SetMode(Mode);
+      } 
       if (GetOption("ForcedX")) mk->SetAttr("ForcedX", kTRUE);
     }
 #if 0
