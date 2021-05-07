@@ -3,6 +3,7 @@
 //#define __USEZ3A__
 //#define __CHECK_LargedEdx__
 //#define __NEGATIVE_ONLY__
+//#define __KEEP_DX__
 #define __SpaceCharge__
 #ifndef  __NEGATIVE_ONLY__
 #define __NEGATIVE_AND_POSITIVE__
@@ -256,7 +257,9 @@ void StdEdxY2Maker::AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx){
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Make(){ 
+#ifdef __KEEP_DX__
   static Bool_t ForcedX = IAttr("ForcedX");
+#endif /* __KEEP_DX__ */
 #ifdef __TEST_DX__
   Double_t dX_GenFit = 0;
   TH3F *dXTest = 0;
@@ -401,8 +404,12 @@ Int_t StdEdxY2Maker::Make(){
 	if (! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
+#ifdef __KEEP_DX__
 	dx = tpcHit->dX();
 	if (ForcedX) dx = 0;
+#else /* ! __KEEP_DX__ */
+	dx = 0;
+#endif /* __KEEP_DX__ */
 #ifdef __TEST_DX__
 	dX_GenFit = dx;
 	dx = 0;
@@ -437,6 +444,24 @@ Int_t StdEdxY2Maker::Make(){
 	  if (Propagate(upper,normal,helixI,helixO,xyz[1],dirG,s_out,w_out)) {BadHit(2,tpcHit->position()); continue;}
 	  if (Propagate(lower,normal,helixI,helixO,xyz[2],dirG,s_in ,w_in )) {BadHit(2,tpcHit->position()); continue;}
 	  dx = ((s_out[0] - s_in[0])*w[1] + (s_out[1] - s_in[1])*w[0]);
+	  // Check for Membernane
+	  if (xyz[1].z() * xyz[2].z() < 0) {
+	    Double_t dZ = TMath::Abs(xyz[1].z()) + TMath::Abs(xyz[2].z());
+	    Double_t scaledX = 1;
+	    if        (xyz[1].z() * xyz[3].z() > 0) {
+	      scaledX = TMath::Abs(xyz[1].z())/dZ;
+	    } else if (xyz[2].z() * xyz[3].z() > 0) {
+	      scaledX = TMath::Abs(xyz[2].z())/dZ;
+	    }
+	    static Int_t ibreak = 0;
+	    if (Debug()) {
+	      cout << "Cross Membrane : upper " << xyz[1] << endl;
+	      cout << "                 hit   " << xyz[3] << endl;
+	      cout << "                 lower " << xyz[2] << "\tscale dX = " << scaledX << endl;
+	    }
+	    dx *= scaledX;
+	    ibreak++;
+	  }
 #ifdef __TEST_DX__
 	  dXTest->Fill(sector, dX_GenFit, dX_GenFit - dx);
 #endif /* __TEST_DX__ */
