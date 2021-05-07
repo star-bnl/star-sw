@@ -8,9 +8,8 @@ TDataSet *CreateTable() {
 StvTpcHitErrs_st row;
 St_StvTpcHitErrs *tableSet = new St_StvTpcHitErrs("StvTpcOuterHitErrs",1);
 //
-float yErrFact = 1.4; yErrFact*=yErrFact;
-float zErrFact = 1.4; zErrFact*=zErrFact;
-yErrFact=1;zErrFact=1;
+float yErrFact = 1;
+float zErrFact = 1;
 
 memset(&row,0,tableSet->GetRowSize());
     row.yErr	 = 0.0006493898; // Intrinsic resolution, padrow or Y direction		;
