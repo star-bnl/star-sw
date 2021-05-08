@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.h,v 1.9.2.1 2017/12/04 19:58:34 perev Exp $
+// $Id: StTGeoProxy.h,v 1.9.2.2 2021/05/08 21:59:07 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -49,6 +49,9 @@ typedef StHitPlaneHardMap::const_iterator       StHitPlaneHardMapIter;
 class StVoluInfo;
 typedef std::map< unsigned int, StVoluInfo*>    StVoluInfoMap;
 typedef StVoluInfoMap::const_iterator           StVoluInfoMapIter;
+
+typedef std::multimap< double, StHitPlane*>     StHitPlaneNear;
+typedef StHitPlaneNear::const_iterator          StHitPlaneNearIter;
 
 
 class StVoidArr:public std::vector<void*>{};
@@ -148,7 +151,7 @@ virtual const float    *GetOrg(const float *) const {return fOrg;}
 virtual const float    *GetPnt()        const {return fOrg;}
 virtual       void  AddHit(void *hit,const float xyz[3]);
 virtual       int   Kind() const 	{return 0;}
-              int   GetVoluId()  	{return GetUniqueID(); }
+              int   GetVoluId() const 	{return GetUniqueID(); }
              void   ToLocal(const float xyz[3],float uv[3]) const;
      StDetectorId   GetDetId() const 	{ return fDetId;}    
              void   SetDetId(StDetectorId id){ fDetId=id;}    
@@ -328,10 +331,11 @@ int fGoodHit;  //1=last loaded hit inside of sensitive volume
 StDetectorId    fDetId;
 Long64_t	fActiveModu;
 StVoluInfoMap  *fVoluInfoArr;           // array of all StVoluIinfo
-TObjArray      *fHitPlaneArr;           // array of StHitPlane's
+TObjArray      *fHitPlaneArr;		// array of ghit plabes
 StVoidArr      *fSeedHits;              // Vector for hits used in seed finder
 StVoidArr      *fAllHits;               // Vector of all hits, mainly for debug
 StTGeoHitShape *fHitShape;
+StHitPlaneNear  fHitPlaneNear;          // multmap of StHitPlane's
 
 //	Actor functorss
 StActorFunctor *fHitLoadActor;		// functor used in AddHit

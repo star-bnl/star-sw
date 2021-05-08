@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.cxx,v 1.14.2.2 2018/03/15 15:41:09 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.14.2.3 2021/05/08 21:59:07 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -30,6 +30,9 @@
 
 #include "StTGeoProxy.h"
 #include "StMultiKeyMap.h"
+
+#include "StvSeed/StvSeedConst.h"
+
 
 int StTGeoProxy::StTGeoProxy::fgKount[3] = {0};
 
@@ -294,7 +297,7 @@ int StTGeoProxy::SetActive (StDetectorId did,int akt,StActorFunctor *af)
   const char *modu = ModName(did);
   if (!*modu)  { Warning("SetActive","DetId %d Unknown",did);return 0;}
   if (af) af->SetDetId(did);
-  int n = SetActive(modu,akt,af); 
+  int n = SetActive(modu,akt,af); if (n){};
   Long64_t mask = 1; mask = mask<<(int)did;
   if (akt) { fActiveModu |=  mask; }
   else     { fActiveModu &= ~mask; }
@@ -899,12 +902,24 @@ enum 		{kMaxTest=1000,kMaxFail=100};
    if (seed) {//add to seed hit collection
      fSeedHits->push_back(hit);
   } 
-  hp->AddHit(hit,xyz);
+  StHitPlane* again[100];
+  int ngain = 0;
+  for (auto iter = fHitPlaneNear.begin(); iter != fHitPlaneNear.end();++iter)
+  {
+    if (ngain>3) break;
+    hp = (*iter).second;
+    int ygain = 0;
+    for (int igain=0;igain<ngain;igain++) {
+      if (hp != again[igain]) continue;
+      ygain=1946; break;
+    }
+    if (ygain) continue;
+    again[ngain++] = hp;
+    hp->AddHit(hit,xyz);
+    if (hp->GetNHits()==1) AddHitPlane(hp);
+  }
+
 //printf("Hit(%g %g %g) added to %s\n",xyz[0],xyz[1],xyz[2],hp->GetName());
-
-  if (hp->GetNHits()==1) AddHitPlane(hp);
-
-
   return hp;
 }
 //_____________________________________________________________________________
@@ -969,6 +984,11 @@ enum {kNDIRS = sizeof(dirs)/(3*sizeof(**dirs))};
 static int nCall=0; nCall++;
   double pnt[3]={xyz[0],xyz[1],xyz[2]};
   const TGeoNode *node = gGeoManager->FindNode(pnt[0],pnt[1],pnt[2]);
+  fHitPlaneNear.clear();
+
+  double rad = fabs(xyz[0])+fabs(xyz[1]);
+  double myEps = SEED_ERR(rad*3);
+
   if (fHitLoadActor) {
     int act = (*fHitLoadActor)(pnt);
     if (act) node = gGeoManager->GetCurrentNode();
@@ -976,30 +996,32 @@ static int nCall=0; nCall++;
   assert(node);
   StHitPlane *hp = GetCurrentHitPlane();     
   sure = 1;
-  if (hp  && hp->GetHitErrCalc() && IsHitted(pnt)) 	return hp;
-
+  if (hp  && hp->GetHitErrCalc() && IsHitted(pnt)) {
+    fHitPlaneNear.insert(std::pair <double,StHitPlane*>(0.,hp));
+  } 
 //	volume is sensitive but not active but still sure
-  if (hp) 						return 0;
   sure = 0;
   double Rxy = sqrt(pnt[0]*pnt[0]+pnt[1]*pnt[1]);
   double myCos= pnt[0]/Rxy,mySin=pnt[1]/Rxy;
   double myDir[3];
-  double minDist=(fabs(xyz[0])+fabs(xyz[1]))/10+5;
-  StHitPlane *minHitPlane=0;
+  double minDist= 1e11;
+  StHitPlane *minHitPlane=hp;
   for (int idir=0;idir<kNDIRS; idir++) {
     gGeoManager->SetCurrentPoint(pnt);
     node = gGeoManager->FindNode();
     myDir[0] = dirs[idir][0]*myCos - dirs[idir][1]*mySin; 
     myDir[1] = dirs[idir][0]*mySin + dirs[idir][1]*myCos; 
     myDir[2] = dirs[idir][2];
-    double myStep = Look(minDist,pnt,myDir);
-    if (myStep > minDist) 			continue;
+    double myStep = Look(myEps,pnt,myDir);
+    if (myStep > myEps) 			continue;
     hp = GetCurrentHitPlane();     
     if (!hp ) 		  			continue;
     if (!hp->GetHitErrCalc())			continue;	
     if (!IsHitted(gGeoManager->GetLastPoint()))	continue;
     if (fDetId != hp->GetDetId())		continue;
-    minDist = myStep; minHitPlane = hp; 	
+    fHitPlaneNear.insert(std::pair <double,StHitPlane*>(myStep,hp));
+    if (myStep<minDist) { 
+       minDist = myStep; minHitPlane = hp;} 	
   }
   return minHitPlane;  
 }       
@@ -1523,10 +1545,11 @@ double StTGeoProxy::Look(double maxDist,const double pnt[3],const double dir[3])
 //  returns distance
   double myPnt[3]={ pnt[0], pnt[1], pnt[2]};
   double myDir[3]={ dir[0], dir[1], dir[2]};
+  double ans = 1e11;
 
   gGeoManager->SetCurrentPoint(myPnt);
   const TGeoNode *node = gGeoManager->FindNode();
-  if (!node) return 0;
+  if (!node) return ans;
   gGeoManager->SetCurrentDirection(myDir);
   TString prevPath(gGeoManager->GetPath());
   double myStep = 0,epsStp = 1e-4+maxDist*1e-3,minStp = epsStp,stp=0;
@@ -1552,9 +1575,10 @@ double StTGeoProxy::Look(double maxDist,const double pnt[3],const double dir[3])
     StHitPlaneInfo* inf = IsHitPlane(node) ;
     if (!inf) 				continue;
     StHitPlane *hp = inf->GetHitPlane(currPath);
-    if (hp) 				break;
+    if (!hp) 				continue;
+    ans = myStep; break;
   }
-  return myStep;
+  return ans;
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
