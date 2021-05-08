@@ -20,10 +20,12 @@ int main(int argcp, char **argv)
 #ifndef WIN32
    char appname[] = "Rint";
 #else
-   char appname[] = "Root_Rint";
+///   char appname[] = "Root_Rint";
+   char appname[] = "root4star";
 #endif 
 
-   TRint *theApp = new TRint(appname, &argc, argv, 0, 0);
+///   TRint *theApp = new TRint(appname, &argc, argv, 0, 0);
+   TRint theApp(appname, &argc, argv, 0, 0);
 
  __argc_save=argc; __argv_save= argv; 
        xargc=argc;      xargv = argv;
@@ -32,9 +34,10 @@ int main(int argcp, char **argv)
 
  
    // Init Intrinsics, build all windows, and enter event loop
-   theApp->Run();
+///   theApp->Run();
+   theApp.Run();
  
-   delete theApp;
+//   delete theApp;
  
    return(0);
 }
