@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGiant3.h,v 1.4 2020/06/05 19:42:44 perev Exp $ */
+/* $Id: TGiant3.h,v 1.4.2.1 2021/05/08 21:39:34 perev Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -90,7 +90,7 @@ typedef struct {
 #endif
 
 struct Gcflag_t {
-#if 0
+#if 1
   ClassDef(Gcflag_t,1);
 #endif
   Int_t    idebug; 
