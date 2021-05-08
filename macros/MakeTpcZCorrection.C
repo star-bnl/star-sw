@@ -108,11 +108,11 @@ void MakeTpcZCorrection1() {
     out << "  row.idx   = " << idx << ";" << endl;
     out << "  row.nrows = nrows;" << endl;
     if (idx % 2 == 1) { // Outer
-      min = 22;
-      max = 210;
+      min = 25;
+      max = 207;
     } else {            // Inner
       min =  20;
-      max = 208;
+      max = 207;
     }
     out << "  row.min = " << Form("%5.1f", min)  << ";" << endl;
     out << "  row.max = " << Form("%5.1f", max)  << ";" << endl;
