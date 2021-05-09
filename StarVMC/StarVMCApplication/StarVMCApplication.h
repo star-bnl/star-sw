@@ -1,4 +1,4 @@
-// $Id: StarVMCApplication.h,v 1.3 2006/08/17 13:37:12 fisyak Exp $
+// $Id: StarVMCApplication.h,v 1.4 2021/05/09 02:32:52 perev Exp $
 // Class StarVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -7,6 +7,7 @@
 #ifndef Star_MC_APPLICATION_H
 #define Star_MC_APPLICATION_H
 
+#include "TVirtualMC.h"
 #include "TVirtualMCApplication.h"
 #include "StarMCPrimaryGenerator.h"
 #include "StarMCStack.h"
