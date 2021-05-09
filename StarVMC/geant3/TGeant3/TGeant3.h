@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.7 2015/07/21 16:22:21 jwebb Exp $ */
+/* $Id: TGeant3.h,v 1.8 2021/05/09 02:40:49 perev Exp $ */
 
 ////////////////////////////////////////////////
 //  C++ interface to Geant3 basic routines    //
@@ -620,9 +620,12 @@ public:
   Double_t Xsec(char* reac, Double_t energy, Int_t part, Int_t mate);
   void  TrackPosition(TLorentzVector &xyz) const;
   void  TrackPosition(Double_t &x, Double_t &y, Double_t &z) const;
+  void  TrackPosition(float &x,float &y, float &z) const {assert(0);}
   void  TrackMomentum(TLorentzVector &xyz) const;
   void  TrackMomentum(Double_t &px, Double_t &py, Double_t &pz,
                       Double_t &etot) const;
+  void  TrackMomentum(Float_t &px, Float_t &py, Float_t &pz,
+                      Float_t &etot) const {assert(0);};
   Int_t NofVolumes() const;
   Int_t NofVolDaughters(const char* volName) const;
   const char*  VolDaughterName(const char* volName, Int_t i) const;
