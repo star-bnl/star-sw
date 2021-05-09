@@ -1,4 +1,4 @@
-// $Id: StMCInitApp.h,v 1.1 2010/02/11 19:50:52 jwebb Exp $
+// $Id: StMCInitApp.h,v 1.1.2.1 2021/05/09 02:26:14 perev Exp $
 //
 //
 // Class StMCInitApp
@@ -7,6 +7,7 @@
 
 #ifndef STMC_INITAPP_H
 #define STMC_INITAPP_H
+#include "TVirtualMC.h"
 
 class StMCSimplePrimaryGenerator;
 
