@@ -1,9 +1,12 @@
 /*
- * $Id: locf.c,v 1.3 2020/06/04 21:57:16 perev Exp $
+ * $Id: locf.c,v 1.4 2021/05/09 02:58:12 perev Exp $
  *
  * $Log: locf.c,v $
- * Revision 1.3  2020/06/04 21:57:16  perev
- * 64b
+ * Revision 1.4  2021/05/09 02:58:12  perev
+ * ClearUp
+ *
+ * Revision 1.5  2020/06/04 23:22:40  perev
+ * assert added
  *
  * Revision 1.4  2018/12/03 00:50:44  perev
  * locf & locb use csvptokn
@@ -60,8 +63,18 @@ unsigned long  csPoter( int token);
 #define isToken(A) ((A&kMAZK)==kMASK) 
 
 unsigned long csvplong (         int  tokn);
-  static unsigned long myBase=(unsigned long)&myBase;
-
+static unsigned long gBase=0;
+//______________________________________________________________________________
+void setBase(unsigned long addr)
+{
+  if (!gBase) {
+    gBase = addr;
+  } else {
+    long dif = addr-gBase;
+    if (dif <0) dif = -dif;
+    assert(dif < 0xEFFFFF);
+  }
+}
 //______________________________________________________________________________
 __UINT64_TYPE__ longf_(char *iadr )
 {
@@ -76,64 +89,27 @@ __UINT64_TYPE__ longb_(char *iadr )
 //______________________________________________________________________________
 int  locf_(char *iadr )
 {
-static int db=0;
-  int myDif = (((unsigned long)iadr)>>2) - ((myBase)>>2);
-  if (db) fprintf(stderr,"myDif=%d \n",myDif);
-  int jk=0;
-  do {
-//    if ((((myBase>>2)+myDif)<<2) !=(unsigned long)iadr) break;
-    int qwe = ((((myBase>>2)+myDif)<<2) != (unsigned long)iadr);
-    if (db) fprintf(stderr,"qwe=%d \n",qwe);
-    jk = 1;
-    if (qwe) break;
-    qwe = isToken(myDif);
-    if (db) fprintf(stderr,"isToken=%d \n",qwe);
-    jk = 2;
-    if (isToken(myDif)) 				break;
-    return myDif;
-    assert(0);
-  } while(0);
-    if (db) fprintf(stderr,"jk=%d \n",jk);
-    assert(0);
-  return csvptokn_(iadr); 
+  setBase((unsigned long)iadr);
+  int myDif = (((unsigned long)iadr) - gBase)/sizeof(int);
+  return myDif;
 }
-
 //______________________________________________________________________________
 int  locb_(char *iadr )
 {
-  assert(myBase>=0);
-  int myDif = (unsigned long)iadr - myBase;
-  do {
-    if ((myBase+myDif)!=(unsigned long)iadr) 	break;
-    if (isToken(myDif)) 			break;
-    return myDif;
-  } while(0);
-  assert(0);
-  return csvptokn_(iadr); 
+  setBase((unsigned long)iadr);
+  int myDif = (((unsigned long)iadr) - gBase)/sizeof(int);
+  return myDif;
 }
+
 //______________________________________________________________________________
 char *getPntF(int myDif)
 {
-  if (!myDif) return 0;
-  if (isToken(myDif)) {
-assert(0);
-    char *ret = (char*)csvplong(myDif);
-    return ret;
-  } else {
-    return (((myBase)>>2)+myDif)<<2;
-  }
+  return (char*)gBase+myDif;
 }
 //______________________________________________________________________________
 char *getPntB(int myDif)
 {
-  if (!myDif) return 0;
-  if (isToken(myDif)) {
-assert(0);
-    char *ret = (char*)csvplong(myDif);
-    return ret;
-  } else {
-    return (char*)myBase+myDif;
-  }
+    return (char*)gBase+myDif;
 }
 //______________________________________________________________________________
 int getbyteb_(int *myDif)
