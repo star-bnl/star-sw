@@ -21,7 +21,7 @@ class StarAgmlViewer : public StMaker
 
  private:
  protected:
-  ClassDef(StarAgmlViewer,1);
+  ClassDef(StarAgmlViewer,0);
 
   TEveManager *mEve; // EVE manager
   

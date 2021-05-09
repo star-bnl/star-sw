@@ -156,7 +156,7 @@ class StarAgmlChecker : public TGeoChecker
 
   void Update( CheckSum_t *sum, TGeoVolume *);
 
-  ClassDef(StarAgmlChecker,1);
+  ClassDef(StarAgmlChecker,0);
 
 };
 

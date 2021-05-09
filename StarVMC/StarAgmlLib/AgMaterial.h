@@ -123,7 +123,7 @@ class AgMaterial : public TNamed, public AgParameterList<double>
 
   friend class _MaterialDummy;
 
-  ClassDef(AgMaterial,1);
+  ClassDef(AgMaterial,0);
 };
 
 // ------------------------------------------------------------------------------------------------------------
