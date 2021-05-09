@@ -64,7 +64,7 @@ template <typename T> class Array_t
   Int_t _n, _m;
   Int_t _min, _max;
 
-  ClassDef(Array_t,1);
+  ClassDef(Array_t,0);
    
 };
 

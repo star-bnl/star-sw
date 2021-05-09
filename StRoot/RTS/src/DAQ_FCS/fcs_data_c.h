@@ -281,6 +281,8 @@ public:
 	} ;
 #endif
 
+	static long dep_to_char(int det, int ns, int dep) ;
+
 private:
 	u_short set_board_id() ;
 
