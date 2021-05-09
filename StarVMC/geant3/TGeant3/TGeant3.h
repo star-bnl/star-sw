@@ -3,12 +3,12 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.8 2021/05/09 02:40:49 perev Exp $ */
+/* $Id: TGeant3.h,v 1.9 2021/05/09 15:15:00 perev Exp $ */
 
 ////////////////////////////////////////////////
 //  C++ interface to Geant3 basic routines    //
 ////////////////////////////////////////////////
-
+#include <assert.h>
 #define WITHG3
 #ifdef WITHROOT
 #undef WITHG3
