@@ -1,4 +1,4 @@
-// $Id: StarVMCApplication.cxx,v 1.8 2009/02/03 16:01:05 fisyak Exp $
+// $Id: StarVMCApplication.cxx,v 1.9 2021/05/09 02:36:45 perev Exp $
 // Class StarVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -45,7 +45,6 @@ StarVMCApplication::~StarVMCApplication() {  // Destructor
   delete fStack;
   delete fFieldB;
   delete gMC;
-  gMC = 0;
 }
 //_____________________________________________________________________________
 void StarVMCApplication::InitMC(const char* setup) {  // Initialize MC.
