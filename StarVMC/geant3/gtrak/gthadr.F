@@ -166,8 +166,14 @@ C.    ------------------------------------------------------------------
          XCOEF2 = Q(JCOEF+I1+1)
          XCOEF3 = Q(JCOEF+I1+2)
          IF(XCOEF1.NE.0) THEN
-            STOPP = -XCOEF2+SIGN(ONE,XCOEF1)* SQRT(XCOEF2
-     +      **2 -(XCOEF3-GEKIN*RMASS/XCOEF1))
+            STOPP = XCOEF2**2 -(XCOEF3-GEKIN*RMASS/XCOEF1)
+            if (STOPP.gt.0) then
+	       STOPP = -XCOEF2+SIGN(ONE,XCOEF1)* SQRT(STOPP)
+	    else
+               STOPP = - (XCOEF3-GEKIN*RMASS)/XCOEF2  
+            endif
+!//	       STOPP = -XCOEF2+SIGN(ONE,XCOEF1)* SQRT(XCOEF2
+!//     +      **2 -(XCOEF3-GEKIN*RMASS/XCOEF1))
          ELSE
             STOPP = - (XCOEF3-GEKIN*RMASS)/XCOEF2
          ENDIF
