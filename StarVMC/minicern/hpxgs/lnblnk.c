@@ -1,8 +1,12 @@
 /*
- * $Id: lnblnk.c,v 1.1.1.1 2005/05/25 20:36:46 fisyak Exp $
+ * $Id: lnblnk.c,v 1.2 2021/05/09 03:01:03 perev Exp $
  *
  * $Log: lnblnk.c,v $
+ * Revision 1.2  2021/05/09 03:01:03  perev
+ * ClearUp
+ *
  * Revision 1.1.1.1  2005/05/25 20:36:46  fisyak
+ *
  *
  * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
  * initial import into CVS
@@ -20,12 +24,7 @@
 
   N = LNBLNK (CHLINE)   find last non-blank character in CHLINE
 */
-#if defined(CERNLIB_QX_SC)
       int lnblnk_(chline, len)
-#endif
-#if defined(CERNLIB_QXNO_SC)
-      int lnblnk(chline, len)
-#endif
       char  *chline;
       int   len;
 {
