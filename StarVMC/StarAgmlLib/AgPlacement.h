@@ -91,8 +91,8 @@ class AgPlacement : public TNamed, public AgParameterList<double>
   enum { kAlphaX,  kAlphaY, kAlphaZ };
 
   Translation             mTranslation;
-  std::vector< Rotation > mRotation;
-  std::vector< Int_t    > mType;
+  std::vector< Rotation > mRotation;		//!
+  std::vector< Int_t    > mType;		//!
   double                  mRotationMatrix[9];
 
  public:
@@ -101,7 +101,7 @@ class AgPlacement : public TNamed, public AgParameterList<double>
     return cvs;
   }
 
-  ClassDef(AgPlacement,1);
+  ClassDef(AgPlacement,0);
 };
 
 #endif

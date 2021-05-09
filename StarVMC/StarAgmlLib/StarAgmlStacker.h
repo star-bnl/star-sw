@@ -77,7 +77,7 @@ static  std::map   < TString, TString >                mRealnames;
   }
 
 
-  ClassDef(StarAgmlStacker,1);
+  ClassDef(StarAgmlStacker,0);
 
 };
 

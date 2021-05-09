@@ -31,7 +31,7 @@ protected:
   bool    mSensitive;  // volume sensitivity
   short   mTracking;   // 0=blackhole, 1=calorimeter, 2=tracking region
 
-  ClassDef(AgMLExtension,1);
+  ClassDef(AgMLExtension,0);
 
 };
 

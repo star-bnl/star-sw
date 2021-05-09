@@ -9,6 +9,7 @@ struct stgc_vmm_t {
 	u_char ch ;
 	u_short adc ;
 	u_short bcid ;
+	short tb ;	// from the trigger
 } ;
 
 class daqReader;

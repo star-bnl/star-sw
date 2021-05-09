@@ -44,8 +44,19 @@ public:
 
 	static struct feb_t {
 		u_char present ;
+		struct {
+			u_short threshold ;
+			struct {
+				u_char threshold ;
+				u_char mask ;
+			} ch[64] ;
+		} vmm[STGC_VMM_COU] ;
 	} feb[STGC_SECTOR_COU][STGC_RDO_COU][STGC_FEE_COU] ;
 
+
+	static struct errs_t {
+		u_int fifo ;
+	} errs[STGC_RDO_COU] ;
 
 	int adc_cou ;
 

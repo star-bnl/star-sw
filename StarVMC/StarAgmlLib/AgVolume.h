@@ -27,7 +27,7 @@ class AgVolume : public TNamed
   }
 
 
-  ClassDef(AgVolume,1);
+  ClassDef(AgVolume,0);
 };
 
 #endif

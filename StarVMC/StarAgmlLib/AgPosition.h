@@ -101,7 +101,7 @@ protected:
   bool        mHasRotm;
 
 
-  ClassDef(AgPosition,1);
+  ClassDef(AgPosition,0);
 };
 
 #endif

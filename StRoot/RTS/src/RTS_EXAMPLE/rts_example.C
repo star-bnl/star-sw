@@ -1935,6 +1935,9 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    fcs2019 |= ((lastdsm[4] >> 14) & 1) << 7 ;	// bit 7: FCSIN-6
 	    fcs2019 |= ((lastdsm[4] >> 15) & 1) << 8 ;	// bit 8: FCSIN-7 -- never fires?
 
+	    u_int fcs2021 = lastdsm[5] ;
+
+	    printf("fcs2021 0x%04X\n",fcs2021) ;
 
             printf("bc7bit %3d, fcs2019 0x%04X : 0x%04X 0x%04X 0x%04X 0x%04X\n",bc7bit,fcs2019,
 		   lastdsm[0],lastdsm[1],lastdsm[2],lastdsm[3]) ;
@@ -2835,15 +2838,15 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 
 		if(do_print) {
 			// there is NO RDO in the bank
-			printf("STGC VMM: evt %d: sec %d, RDO %d\n",good,dd->sec,dd->rdo) ;
+			printf("STGC VMM: evt %d: sec %d, RDO %d: hits %d\n",good,dd->sec,dd->rdo,dd->ncontent) ;
 
 			struct stgc_vmm_t *vmm = (stgc_vmm_t *)dd->Void ;
 			for(u_int i=0;i<dd->ncontent;i++) {
 				u_char feb = vmm[i].feb_vmm >> 2 ;	// feb [0..5]
 				u_char vm = vmm[i].feb_vmm & 3 ;	// VMM [0..3]
 
-				printf("  FEB %d:%d, ch %02d: ADC %d, BCID %d\n",feb,vm,vmm[i].ch,
-				       vmm[i].adc,vmm[i].bcid) ;
+				printf("  FEB %d:%d, ch %02d: ADC %3d, BCID %4d, tb %4d\n",feb,vm,vmm[i].ch,
+				       vmm[i].adc,vmm[i].bcid,vmm[i].tb) ;
 			}
 		}
 	}

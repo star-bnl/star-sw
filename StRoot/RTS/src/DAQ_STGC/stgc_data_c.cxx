@@ -10,6 +10,7 @@
 #include "stgc_data_c.h"
 
 stgc_data_c::feb_t stgc_data_c::feb[STGC_SECTOR_COU][4][6] ;
+stgc_data_c::errs_t stgc_data_c::errs[4] ;
 
 u_int stgc_data_c::run_type ;
 u_int stgc_data_c::run_number ;
@@ -40,6 +41,7 @@ stgc_data_c::stgc_data_c()
 	version = 0 ;
 
 	bad_error = 0 ;
+	want_saved = 0 ;
 
 	sector1 = 1 ;
 	rdo1 = 1 ;
@@ -137,6 +139,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
  	adc_cou = d16_last - d16_data + 1 ;	// effective ADC length
 	adc_cou -= 2 ;	// remove the stop_mhz 2 shorts...
 	
+	if(realtime) {
 	if(adc_cou%4) {
 		LOG(ERR,"%d: len is %d!?",rdo1,adc_cou) ;
 		for(int i=0;i<32;i++) {
@@ -144,6 +147,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 			LOG(TERR,"last %d = 0x%04X",i,d16_last[-i]) ;
 		}
 	
+	}
 	}
 
 	adc_cou /= 4 ;	// number of ADCs....
@@ -219,7 +223,10 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 		LOG(ERR,"%d: %s: RHICx5 PLL not locked",rdo1,c_type) ;
 	}
 	if((d[3] & (1<<8))) {
-		LOG(ERR,"%d: %s: EVENT FIFO FULL latched",rdo1,c_type) ;
+		if(realtime && errs[rdo1-1].fifo==0) {
+			LOG(ERR,"%d: %s: EVENT FIFO FULL latched",rdo1,c_type) ;
+		}
+		errs[rdo1-1].fifo = 1 ;
 	}
 	if((d[3] & (1<<4))==0) {
 		LOG(ERR,"%d: %s: FEB Config FIFO",rdo1,c_type) ;
@@ -232,7 +239,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 		case 0 :	//not present
 			break ;
 		default :
-			LOG(ERR,"%d: %s: FEB %d status: 0x%X",rdo1,c_type,i,st[i]) ;
+			if(realtime) LOG(ERR,"%d: %s: FEB %d status: 0x%X",rdo1,c_type,i,st[i]) ;
 			break ;
 		}
 	}
@@ -283,16 +290,16 @@ int stgc_data_c::event_0001()
 		t = (t_hi<<8)|(t_mid<<4)|t_lo ;
 
 		trg_counter = (d[0]>>4)&0x1FF ;
-		mhz_trg_marker = (d[2]<<16)|d[3] ;
+		mhz_trg_marker = (d[2]<<16)|d[3] ;	// or RHIC clock
 
-		if((mhz_trg_marker+1) < mhz_start_evt_marker) err = 1 ;
-		if(mhz_trg_marker > (mhz_start_evt_marker+1)) err = 1 ;
+//		if((mhz_trg_marker+1) < mhz_start_evt_marker) err = 1 ;
+//		if(mhz_trg_marker > (mhz_start_evt_marker+1)) err = 1 ;
 
 		if((t != token)||(t_cmd != trg_cmd)||(d_cmd != daq_cmd)) err = 1 ;
 			
 
 		if(err) {
-			LOG(ERR,"%d: trg_cou %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_counter,t,t_cmd,d_cmd,mhz_trg_marker) ;
+			if(realtime) LOG(ERR,"%d: trg_cou %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_counter,t,t_cmd,d_cmd,mhz_trg_marker) ;
 		}
 		else {
 			//LOG(INFO,"%d: trg_cou %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_counter,t,t_cmd,d_cmd,mhz_trg_marker) ;
@@ -303,7 +310,7 @@ int stgc_data_c::event_0001()
 		vmm.ch = 0 ;
 		vmm.adc = 0 ;
 		vmm.bcid = 0 ;
-
+		vmm.tb = 0 ;
 
 		adc_cou-- ;
 		return 1 ;
@@ -315,7 +322,7 @@ int stgc_data_c::event_0001()
 	}
 
 
-//	u_int mhz_adc_marker = dd & 0x1FFFFFFF ;	// 29 bits of trigger
+	u_int mhz_adc_marker = dd & 0x1FFFFFFF ;	// 29 bits of trigger
 
 	int vmm_id = (d[2]>>13)&0x7 ;
 	int crc_ok = (d[2]>>12)&1 ;
@@ -337,10 +344,11 @@ int stgc_data_c::event_0001()
 		vmm.ch = 0 ;
 		vmm.adc = 0 ;
 		vmm.bcid = 0 ;
+		vmm.tb = 0 ;
 
 		bad_error |= evt_err ;
 
-		LOG(ERR,"S%d:%d evt_err 0x%X at adc_cou %d",sector1,rdo1,evt_err,adc_cou) ;	
+		if(realtime) LOG(ERR,"S%d:%d evt_err 0x%X at adc_cou %d",sector1,rdo1,evt_err,adc_cou) ;	
 		return 0 ;
 	}
 
@@ -348,7 +356,15 @@ int stgc_data_c::event_0001()
 	vmm.ch = channel ;
 	vmm.adc = pdo ;
 	vmm.bcid = bcid ;
-	
+//	vmm.tb = (int)mhz_adc_marker - (int)(mhz_trg_marker&0x1FFFFFFF) ;
+
+	int tb = (int)mhz_adc_marker - (int)(mhz_trg_marker&0x1FFFFFFF) ;
+
+	if(tb<-32000) vmm.tb = 0x8000 ;
+	else if(tb>32000) vmm.tb = 0x7FFF ;
+	else vmm.tb = tb ;
+
+
 	adc_cou-- ;
 	return 1 ;
 }
@@ -388,6 +404,7 @@ int stgc_data_c::start(u_short *d, int shorts)
 	switch(version) {
 	case 0x0001 :
 	case 0x0002 :
+	case 0x0003 :
 		return start_0001(d,shorts) ;
 	default :
 		break ;
@@ -485,6 +502,7 @@ int stgc_data_c::event()
 	switch(version) {
 	case 0x0001 :
 	case 0x0002 :
+	case 0x0003 :
 		return event_0001() ;
 	default:
 		break ;

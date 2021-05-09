@@ -52,7 +52,42 @@ u_char fcs_data_c::ascii_no ;
 pthread_mutex_t fcs_data_c::ped_mutex ;
 	
 fcs_data_c::statistics_t fcs_data_c::statistics[8] ;
-	
+
+long fcs_data_c::dep_to_char(int det, int ns, int dep)
+{
+        long ret ;
+        char *ctmp = (char *)&ret ;
+
+        switch(det) {
+        case 0 :
+                ctmp[0] = 'E' ;
+                break ;
+        case 1 :
+                ctmp[0] = 'H' ;
+                break ;
+        case 2 :
+                ctmp[0] = 'P' ;
+                break ;
+        case 3 :
+                ctmp[0] = 'M' ;
+                break ;
+        default :
+                ctmp[0] = 'X' ;
+                break ;
+	}
+
+
+        if(ns==0) ctmp[1] = 'N' ;
+        else ctmp[1] = 'S' ;
+
+        sprintf(ctmp+2,"%02d",dep) ;
+
+        return ret ;
+
+
+}
+
+
 int fcs_data_c::zs_start(u_short *buff)
 {
 	int thr ;
@@ -102,8 +137,9 @@ int fcs_data_c::zs_start(u_short *buff)
 
 //	int q_ped = 0 ;
 	
+	// form sequences including the l_pre and l_post bits
 	for(int i=0;i<tb_cou;i++) {
-		short d = adc[i] & 0xFFF ;
+		short i_adc = adc[i] & 0xFFF ;
 
 //		if(i<4) {
 //			q_ped += d ;
@@ -111,7 +147,7 @@ int fcs_data_c::zs_start(u_short *buff)
 
 //		printf("CH %d: %d = %d < thr %d: t_start %d, t_cou %d\n",ch,i,d,thr,t_start,t_cou) ;
 
-		if(d <= thr) {	// datum needs to be greater than the threshold
+		if(i_adc <= thr) {	// datum needs to be greater than the threshold
 			if(t_cou >= l_cou) {
 				t_stop = t_start + t_cou ;
 
@@ -154,7 +190,7 @@ int fcs_data_c::zs_start(u_short *buff)
 	}
 #endif
 
-	//finalize
+	//finalize the last sequence
 	if(t_cou >= l_cou) {
 		t_stop = t_start + t_cou ;
 
@@ -186,8 +222,6 @@ int fcs_data_c::zs_start(u_short *buff)
 	dp = (u_short *)buff ;
 
 
-	
-
 	int seq_cou = 0 ;
 
 	// and now go through the "mark"
@@ -215,10 +249,14 @@ int fcs_data_c::zs_start(u_short *buff)
 			short i_adc = adc[i] & 0xFFF ;
 			short fla = adc[i] >> 12 ;
 
-			i_adc -= i_ped ;
-			if(i_adc < 0) i_adc = 0 ;
+			// Akio's request to see if the ADC pegged
+			if(i_adc==4095) ;	// leave it!
+			else {
+				i_adc -= i_ped ;
+				if(i_adc < 0) i_adc = 0 ;	// no stinkin' negative numbers
+			}
 
-			i_adc |= (fla<<12) ;
+			i_adc |= (fla<<12) ;			// put the flags back
 
 //			printf("adc[%d] = %d\n",i,i_adc&0xFFF) ;
 			*dp++ = i_adc ;
@@ -1774,6 +1812,12 @@ int fcs_data_c::load_sc_map(const char *fname)
 		LOG(ERR,"rdo_map not loaded!") ;
 		return -1 ;
 	}
+
+	for(int s=0;s<10;s++) {
+	for(int r=0;r<8;r++) {
+	for(int c=0;c<32;c++) {
+		rdo_map[s][r].ch[c].sc_sipm = 0xFF ;
+	}}}
 
 	for(u_int dd=0;dd<2;dd++) {
 
