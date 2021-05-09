@@ -44,7 +44,7 @@ class AgCreate : public TNamed, public AgParameterList<double>
   //  std::map<TString, Double_t>                   mParameters;  
 
   /// Root dictionary interface
-  ClassDef(AgCreate,1);
+  ClassDef(AgCreate,0);
 
  public:
   virtual const Char_t *GetCVS() const {

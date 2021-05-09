@@ -41,7 +41,7 @@ class StarAgmlChecker : public TGeoChecker
  protected:
   void Fill( TObjectSet *set, Double_t rmin, Double_t rmax, Double_t zmin, Double_t zmax );
 
-  ClassDef(StarAgmlChecker,1);
+  ClassDef(StarAgmlChecker,0);
 
 };
 

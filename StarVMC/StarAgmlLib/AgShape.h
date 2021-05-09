@@ -102,7 +102,7 @@ class AgShape : public TNamed, public AgParameterList<double>
     return cvs;
   }
 
-  ClassDef(AgShape,1);
+  ClassDef(AgShape,0);
 };
 
 #endif
