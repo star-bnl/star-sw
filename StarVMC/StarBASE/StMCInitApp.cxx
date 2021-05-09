@@ -1,4 +1,4 @@
-// $Id: StMCInitApp.cxx,v 1.1 2010/02/11 19:50:51 jwebb Exp $
+// $Id: StMCInitApp.cxx,v 1.1.2.1 2021/05/09 02:28:29 perev Exp $
 //
 //
 // Class StMCInitApp
@@ -44,8 +44,9 @@ int  StMCInitApp::Fun()
 {
 
   StVMCApplication  *app = (StVMCApplication*)TVirtualMCApplication::Instance();
-  gMC  = new TGeant3TGeo("C++ Interface to Geant3"); 
-  Info("Init","TGeant3TGeo has been created.");
+  assert(!gMC);
+  new TGeant3TGeo("C++ Interface to Geant3"); 
+  assert( gMC);
 
   StMCConstructGeometry *geo = new StMCConstructGeometry(app->GetName());
   app->SetConstructGeometry(geo);
