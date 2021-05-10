@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.62 2016/05/24 17:44:16 dmitry Exp $
+ * $Id: StDbBroker.cxx,v 1.63 2021/05/10 21:15:08 perev Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.63  2021/05/10 21:15:08  perev
+ * RemoveApi.h
+ *
  * Revision 1.62  2016/05/24 17:44:16  dmitry
  * first batch of fixes for Coverity findings
  *
@@ -222,7 +225,6 @@
 #include "TDataMember.h"
 #include "TDataType.h"
 
-#include "Api.h"
 #include "StDbBroker.h"
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbConfigNode.hh"
