@@ -3,11 +3,11 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.29 2020/02/20 18:36:54 genevb Exp $
+ * $Id: StTpcHitMaker.h,v 1.30 2021/05/10 21:13:19 fisyak Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
- * Revision 1.29  2020/02/20 18:36:54  genevb
- * Reduce time-expenseive calls to GetInputDS(), some coverity cleanup
+ * Revision 1.30  2021/05/10 21:13:19  fisyak
+ * Clean up
  *
  * Revision 1.28  2018/10/17 20:45:27  fisyak
  * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
@@ -97,7 +97,6 @@ class StTpcHit;
 class tpc_cl;
 class daq_cld;
 class tpc_t;
-class StEvent;
 class StTpcHitCollection;
 class StTpcHitMaker : public StRTSBaseMaker {
  public:
@@ -137,7 +136,11 @@ class StTpcHitMaker : public StRTSBaseMaker {
   TString mQuery;
   tpc_t   *fTpc;
   Short_t  ADCs[512];
+#ifdef __TFG__VERSION__
+  Int_t    IDTs[512];
+#else
   UShort_t IDTs[512];
+#endif
   UShort_t fId; // current cluster Id
   Int_t    maxHits[24];
   Int_t    maxBin0Hits;
@@ -150,25 +153,24 @@ class StTpcHitMaker : public StRTSBaseMaker {
   TH1F        *fSectCounts;
   Int_t        RowNumber();
  protected:
-  StEvent* pEvent;
-  StTpcHitCollection* pHitCollection;
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);
     
  public:
   static void AfterBurner(StTpcHitCollection *hitCollection);
-  static StTpcHit* StTpcHitFlag(const StThreeVectorF& p,
+  static  StTpcHit* StTpcHitFlag(const StThreeVectorF& p,
              const StThreeVectorF& e,
              UInt_t hw, float q, UChar_t c,
-             UShort_t idTruth, UShort_t quality,
+             Int_t idTruth, UShort_t quality,
              UShort_t id,
              UShort_t mnpad, UShort_t mxpad, UShort_t mntmbk,
              UShort_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
              UShort_t flag);
+  static void SetCosmics() {fgCosmics = kTRUE;}
   static Float_t fgDp;             // hardcoded errors
   static Float_t fgDt;
   static Float_t fgDperp;
-
+  static Bool_t  fgCosmics;
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
