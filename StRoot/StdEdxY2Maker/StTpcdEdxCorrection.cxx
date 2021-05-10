@@ -87,8 +87,8 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kTpcdCharge            ] = dEdxCorrection_t("TpcdCharge"          ,"ADC/Clustering undershoot correction"				,St_TpcdChargeC::instance());		     
   m_Corrections[kTpcrCharge            ] = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction"					,St_TpcrChargeC::instance());		     
   m_Corrections[kTpcCurrentCorrection  ] = dEdxCorrection_t("TpcCurrentCorrection","Correction due to sagg of Voltage due to anode current"		,St_TpcCurrentCorrectionC::instance());     
-  m_Corrections[kTpcRowQ               ] = dEdxCorrection_t("TpcRowQ"             ,"Gas gain correction for row versus accumulated charge,"             ,St_TpcRowQC::instance());		           
-  m_Corrections[kTpcAccumlatedQ        ] = dEdxCorrection_t("TpcAccumlatedQ"      ,"Gas gain correction for HV channel versus accumulated charge,"      ,St_TpcAccumulatedQC::instance());		           
+  m_Corrections[kTpcRowQ               ] = dEdxCorrection_t("TpcRowQ"             ,"Gas gain correction for row versus accumulated charge,"             ,St_TpcRowQC::instance());
+  m_Corrections[kTpcAccumulatedQ       ] = dEdxCorrection_t("TpcAccumulatedQ"     ,"Gas gain correction for HV channel versus accumulated charge,"      ,St_TpcAccumulatedQC::instance());
   m_Corrections[kTpcSecRowB            ] = dEdxCorrection_t("TpcSecRowB"          ,"Gas gain correction for sector/row"					,St_TpcSecRowBC::instance());		     
   m_Corrections[kTpcSecRowC            ] = dEdxCorrection_t("TpcSecRowC"          ,"Additional Gas gain correction for sector/row"			,St_TpcSecRowCC::instance());		     
   m_Corrections[ktpcPressure           ] = dEdxCorrection_t("tpcPressureB"        ,"Gain on Gas Density due to Pressure"			        ,St_tpcPressureBC::instance());	     
@@ -321,7 +321,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[kTpcCurrentCorrection] = CdEdx.Crow;                                   
   VarXs[kTpcrCharge]           = CdEdx.rCharge;                               
   VarXs[kTpcRowQ]              = CdEdx.Qcm;
-  VarXs[kTpcAccumlatedQ]       = CdEdx.Qcm;
+  VarXs[kTpcAccumulatedQ]      = CdEdx.Qcm;
   VarXs[kTpcPadTBins]          = CdEdx.Npads*CdEdx.Ntbins;     
   VarXs[ktpcPressure]          = TMath::Log(gas->barometricPressure);     
   VarXs[kDrift]                = ZdriftDistanceO2;      // Blair correction 
