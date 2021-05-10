@@ -196,6 +196,10 @@ public:
 
 	} d_out ;
 
+	// if there's any output to DSM
+	u_int dsm_any ;
+	int dsm_xing ;
+
 	// statics below
 	static u_int data_format ;	// 0:pre FY21, 1=FY21
 
