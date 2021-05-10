@@ -1,0 +1,15 @@
+/*    starTriggerDelay.idl
+*
+*  Table: starTriggerDelay
+*
+*       description:
+*          trigger delay clocks*timebinWidth + tZero;
+*/ 
+
+
+struct starTriggerDelay { 
+
+   float  clocks;  /* 23      time buckets */
+   float  tZero;   /* 0.2478  micro seconds */
+
+ };  
