@@ -945,6 +945,7 @@ MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
 #include "St_itpcPadGainT0C.h"
 MakeChairInstance(itpcPadGainT0,Calibrations/tpc/itpcPadGainT0);
 #include "St_tpcPadGainT0BC.h"
+// tpcPadGainT0B table (indexed) is not used any more. tpcPadGainT0BChair combines nonindexed tpcPadGainT0 and itpcPadGainT0
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::fgInstance = 0;
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {if (! fgInstance) fgInstance = new St_tpcPadGainT0BC(); return fgInstance;}
 //________________________________________________________________________________
@@ -1225,7 +1226,42 @@ double StTpcBXT0CorrEPDC::getCorrection (double epdTAC, double driftVelocity, do
   if (epdTAC == -1) return timeBucketShiftScale*generalOffset;
   else return timeBucketShiftScale*(generalOffset + a(0)[1] + a(0)[2]*epdTAC);
 }
-
+#include "St_tpcT0BXC.h"
+MakeChairInstance(tpcT0BX,Calibrations/tpc/tpcT0BX);
+Double_t St_tpcT0BXC::getT0(Double_t values[6]) const { // xxxEarliestTDC (W+E)/2 variables for "vpd","bbc","epd","zdc", "TAC", "CAVdt"
+  Double_t T0 = 0;
+  Double_t T0W = 0, T0WW = 0;
+  static Int_t __debug = 0;
+  if (__debug > 0) {
+    LOG_INFO << "St_tpcT0BXC::getT0:";
+  }
+  for (Int_t i = 0; i < 6; i++) {
+    if (values[i] < xmin(i) || values[i] > xmax(i)) continue;
+    if (detId(i) < 0) continue;
+    //    if (detId(i) != 6 && (CountPs(i) < 10 || CountPs(i) > 100)) continue;
+    if (detId(i) != i+1) {
+      LOG_WARN << "St_tpcT0BXC::getT0 : table is unsorted detId(" << i << ") != " << i+1 << "  Skip entry" << endl;
+      continue;
+    }
+    Double_t t0 = toff(i) +  slope(i)*(values[i] - vMean(i));
+    Double_t w  = dtoff(i)* dtoff(i) +  dslope(i)*(values[i] - vMean(i)) * dslope(i)*(values[i] - vMean(i));
+    if (w < 1e-14) continue;
+    T0W  += t0/w;
+    T0WW += 1./w;
+    if (__debug > 0) {
+      LOG_INFO << Form("%s = %7.2f -> %7.2f +/- %7.2f nsec ",name(i),values[i], 1e3*t0, 1e3*TMath::Sqrt(w));
+    }
+  }
+  if (T0WW > 0) {
+    T0 = T0W/T0WW;
+    if (__debug > 0) {
+      LOG_INFO << Form(" : T0 = %7.2f +/- %7.2f nsec", 1e3*T0, 1e3/TMath::Sqrt(T0WW)) <<  endm;
+    }
+  }
+  return T0;
+}
+#include "St_starTriggerDelayC.h"
+MakeChairOptionalInstance2(starTriggerDelay,St_starTriggerDelayC,Calibrations/tpc/starTriggerDelay);
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
@@ -1317,6 +1353,8 @@ starClockOnl_st *St_starClockOnlC::Struct(Int_t i) {
 }
 #include "St_starMagOnlC.h"
 MakeChairInstance(starMagOnl,RunLog/onl/starMagOnl);
+#include "St_starMagAvgC.h"
+MakeChairOptionalInstance(starMagAvg,RunLog/onl/starMagAvg);
 #include "St_beamInfoC.h"
 MakeChairInstance(beamInfo,RunLog/onl/beamInfo);
 static Double_t kuAtomicMassUnit = 931.4940054e-3; 
@@ -1332,49 +1370,48 @@ Bool_t        St_beamInfoC::IsFixedTarget() {
 //________________________________________________________________________________
 Float_t        St_beamInfoC::GammaYellow() {
   Float_t gamma = 1;
-  if (blueIntensity() < 10*yellowIntensity()) { 
   Int_t N = TMath::Nint(getYellowMassNumber()); // no. of nucleons
-  Double_t E = N*getYellowEnergy();
-  Double_t M = kuAtomicMassUnit*getYellowMassNumber();
-    gamma = E/M;
-  }
+  if (N < 1) N = 1;
+  Double_t E = N*getYellowEnergy(); // total energy per nucleon 
+  Double_t M = kuAtomicMassUnit*N;
+  gamma = E/M;
   return gamma;
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::GammaBlue() {
   Float_t gamma = 1;
-  if (blueIntensity() > 10*yellowIntensity()) { 
+  if (! IsFixedTarget()) { 
     Int_t N = TMath::Nint(getBlueMassNumber()); // no. of nucleons
-    Double_t E = N*getBlueEnergy();
-    Double_t M = kuAtomicMassUnit*getBlueMassNumber();
+    if (N < 1) N = 1;
+    Double_t E = N*getBlueEnergy(); // total energy
+    Double_t M = kuAtomicMassUnit*N;
+    if (E < M) E = M;
     gamma = E/M;
   }
   return gamma;
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::Gamma() {
-  if (blueIntensity() > yellowIntensity()) return GammaBlue();
-  else                                     return GammaYellow();
+  return GammaYellow();
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::BetaBlue() {
-  Float_t beta =  TMath::Sqrt(1 - 1./(GammaBlue()*GammaBlue()));
-  return beta;
+  Float_t gamma = GammaBlue();
+  return TMath::Sqrt(1 - 1./(gamma*gamma));
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::BetaYellow() {
-  Float_t beta = -TMath::Sqrt(1 - 1./(GammaYellow()*GammaYellow()));
-  return beta;
+  Float_t gamma = GammaYellow();
+  return -TMath::Sqrt(1 - 1./(gamma*gamma));
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::Beta() {
-  Float_t beta = TMath::Sqrt(1 - 1./(Gamma()*Gamma()));
-  return beta;
+  return -BetaBlue();
 }
 //________________________________________________________________________________
 Float_t        St_beamInfoC::SqrtS() {
   static Double_t mP = kuAtomicMassUnit*1.00727646662; // proton mass 
-  Double_t eBlue = mP*GammaBlue(); 
+  Double_t eBlue   = mP*GammaBlue(); 
   Double_t eYellow = mP*GammaYellow();
   return TMath::Sqrt(2*mP*mP + 2*eBlue*eYellow*(1 - BetaBlue()*BetaYellow()));
 }
@@ -1392,9 +1429,9 @@ Float_t        St_beamInfoC::Ycms() {
 //________________________________________________________________________________
 Float_t        St_beamInfoC::Frequency() {
   static Double_t l       = 3833.845*9.99999253982746361e-01;// *9.99988614393081399e-01;// *9.99998896969437556e-01;  // RHIC perimetr
-  static Double_t NB = 120;      // no. of buches
+  static Double_t NB = 120;      // no. of buches, can be changed
   Double_t frequency = 1e-6*NB*Beta()*TMath::C()/l;
-  return frequency;
+  return TMath::Abs(frequency);
 }
 //________________________________________________________________________________
 #include "St_tpcRDOMasksC.h"
@@ -1992,6 +2029,8 @@ Float_t St_tofTOffsetC::t0(Int_t tray, Int_t module, Int_t cell) const {
 MakeChairInstance(tofTrgWindow,Calibrations/tof/tofTrgWindow);
 #include "St_tofTzeroC.h"
 MakeChairInstance(tofTzero,Calibrations/tof/tofTzero);
+#include "St_tofSimResParamsC.h"
+MakeChairInstance(tofSimResParams,Calibrations/tof/tofSimResParams);
 #include "St_vpdDelayC.h"
 MakeChairInstance(vpdDelay,Calibrations/tof/vpdDelay);
 #include "St_vpdTotCorrC.h"
@@ -2060,6 +2099,8 @@ MakeChairInstance(istControl,Calibrations/ist/istControl);
 MakeChairInstance(istGain,Calibrations/ist/istGain);
 #include "St_istMappingC.h"
 MakeChairInstance(istMapping,Calibrations/ist/istMapping);
+#include "St_istSimParC.h"
+MakeChairInstance(istSimPar,Calibrations/ist/istSimPar);
 //____________________________Calibrations/pxl____________________________________________________
 #include "St_pxlHotPixelsC.h"
 //MakeChairInstance(pxlHotPixels,Calibrations/pxl/pxlHotPixels);
