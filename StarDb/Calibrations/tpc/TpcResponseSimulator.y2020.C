@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2019.C,v 1.4 2020/04/03 23:47:14 fisyak Exp $
-// $Log: TpcResponseSimulator.y2019.C,v $
+// $Id: TpcResponseSimulator.y2020.C,v 1.1 2021/05/10 21:02:56 fisyak Exp $
+// $Log: TpcResponseSimulator.y2020.C,v $
+// Revision 1.1  2021/05/10 21:02:56  fisyak
+// Clean up and synch with TFG
+//
 // Revision 1.4  2020/04/03 23:47:14  fisyak
 // rename tpcSectorT0offset.20190223.080000.C to tpcSectorT0offset.20190101.000000.C, remove intermidiate tpcSectorT0offset.20190*.C
 //
