@@ -1,6 +1,10 @@
-// $Id: St_geant_Maker.cxx,v 1.181 2020/03/05 16:28:31 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.182 2021/05/10 20:23:53 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.182  2021/05/10 20:23:53  jwebb
+// Add text file input option.
+//
 // Revision 1.181  2020/03/05 16:28:31  jwebb
+//
 // Fix two errors in FCS preshower hits.
 //
 // Revision 1.180  2020/02/26 21:26:20  jwebb
@@ -913,6 +917,7 @@ int St_geant_Maker::Init(){
     TString kuip("");
     if      (InputFile.Contains(".fz"))    {ifz = 1; kuip = "gfile p ";         kuip += InputFile;}
     else if (InputFile.Contains(".nt"))    {kuip = "user/input user "; kuip += InputFile;}
+    else if (InputFile.Contains(".tx"))    {kuip = "user/input tx   "; kuip += InputFile;}
     else if (InputFile.Contains(".MuDst")) {
       if (! MuDstIter) MuDstIter = new TTreeIter();
       MuDstIter->AddFile(InputFile); 
