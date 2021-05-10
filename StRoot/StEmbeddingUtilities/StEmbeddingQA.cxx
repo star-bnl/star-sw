@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.25 2021/05/10 21:22:32 perev Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.26 2021/05/10 21:46:20 perev Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.26  2021/05/10 21:46:20  perev
+ * Rollback kCanRebin not in Root6
+ *
  * Revision 1.25  2021/05/10 21:22:32  perev
  * Remove kCanRebin not in Root6
  *
@@ -365,7 +368,7 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   mhRunNumber->SetXTitle("Run number");
 
   // Set bit to automatic bin extention
-//No rebin ROO6  mhEventId->SetBit(TH1::kCanRebin);
+  mhEventId->SetBit(TH1::kCanRebin);
 
   utility->setStyle( mhEventId   ) ;
   utility->setStyle( mhRunNumber ) ;
