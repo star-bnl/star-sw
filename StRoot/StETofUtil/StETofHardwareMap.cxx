@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHardwareMap.cxx,v 1.3 2019/02/19 20:15:21 fseck Exp $
+ * $Id: StETofHardwareMap.cxx,v 1.4 2021/05/10 21:18:48 perev Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHardwareMap.cxx,v $
+ * Revision 1.4  2021/05/10 21:18:48  perev
+ * Fix add std::
+ *
  * Revision 1.3  2019/02/19 20:15:21  fseck
  * update to allow initialization from database
  *
@@ -42,7 +45,7 @@ StETofHardwareMap::StETofHardwareMap( St_etofElectronicsMap* etofElectronicsMap,
     init( etofElectronicsMap );
 }
 
-StETofHardwareMap::StETofHardwareMap( string fileName, unsigned int year )
+StETofHardwareMap::StETofHardwareMap( std::string fileName, unsigned int year )
 {
     mYear = year;
 
@@ -124,10 +127,10 @@ StETofHardwareMap::init( std::string fileName )
 
     unsigned int nAfcks    = 0;
     unsigned int nChannels = 0;
-    vector< unsigned int > afckAddress;
-    vector< unsigned int > sector;
-    vector< unsigned int > channelNumber;
-    vector< unsigned int > geometryId;
+    std::vector< unsigned int > afckAddress;
+    std::vector< unsigned int > sector;
+    std::vector< unsigned int > channelNumber;
+    std::vector< unsigned int > geometryId;
 
 
 
