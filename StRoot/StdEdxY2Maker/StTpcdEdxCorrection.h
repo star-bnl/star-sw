@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.16 2020/07/05 15:57:03 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.17 2021/05/10 16:54:45 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -47,7 +47,7 @@ class StTpcdEdxCorrection : public TObject {
     kTpcSecRowB            =  8,//S  					     
     kTpcSecRowC            =  9,//S  					     
     kTpcRowQ               = 10,//   	 					       	   
-    kTpcAccumlatedQ        = 11,//   	 					       	   
+    kTpcAccumulatedQ       = 11,//   	 					       	   
     ktpcPressure           = 12,//P  					     
     ktpcTime               = 13,//t  					     
     kDrift                 = 14,//O  					     
