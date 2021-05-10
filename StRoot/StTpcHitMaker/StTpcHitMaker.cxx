@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.81 2020/03/20 02:25:35 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.82 2021/05/10 21:13:19 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.82  2021/05/10 21:13:19  fisyak
+ * Clean up
+ *
  * Revision 1.81  2020/03/20 02:25:35  genevb
  * Only look for StEvent when needed, e.g. not for raw modes such as in embedding
  *

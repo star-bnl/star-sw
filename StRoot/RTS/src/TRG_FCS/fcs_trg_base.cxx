@@ -467,6 +467,8 @@ int fcs_trg_base::end_event()
 
 	int dsmout = 0;
 
+	dsm_any = 0 ;
+	dsm_xing = 0 ;
 
 	for(int xing=0;xing<marker.last_xing;xing++) {
     		if(log_level>1) {
@@ -474,6 +476,11 @@ int fcs_trg_base::end_event()
 		}
 
 		dsmout = run_event_sim(xing,sim_mode) ;
+
+		if(dsmout) {
+			dsm_any = dsmout ;
+			dsm_xing = xing ;
+		}
 
 		if(sim_mode) {	// when running offline
 			dump_event_sim(xing) ;
