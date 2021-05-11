@@ -2767,14 +2767,14 @@ void l4Builder::defineHltPlots()
 
 	index++; //27
 	HltPlots[index]->logy = 1;
-	hglobalMult = new TH1I("globalMult", "globalMult", 100, 0, 7000);
+	hglobalMult = new TH1I("globalMult", "globalMult", 2000, 0, 2000);
 	ph = new PlotHisto();
 	ph->histo = hglobalMult;
 	HltPlots[index]->addHisto(ph);
 
 	index++; //28
 	HltPlots[index]->logy = 1;
-	hprimaryMult = new TH1I("primaryMult", "primaryMult", 100, 0, 1600);
+	hprimaryMult = new TH1I("primaryMult", "primaryMult", 500, 0, 500);
 	ph = new PlotHisto();
 	ph->histo = hprimaryMult;
 	HltPlots[index]->addHisto(ph);
@@ -3058,7 +3058,7 @@ void l4Builder::defineBesGoodPlots()
 
 	index++; //3
 	BesGoodPlots[index]->logy=1;
-	hBesGoodprimaryMult = new TH1I("BesGood_primaryMult", "BesGood_primaryMult",500,0,1600);
+	hBesGoodprimaryMult = new TH1I("BesGood_primaryMult", "BesGood_primaryMult",500,0,500);
 	ph = new PlotHisto();
 	ph->histo = hBesGoodprimaryMult;
 	BesGoodPlots[index]->addHisto(ph);
