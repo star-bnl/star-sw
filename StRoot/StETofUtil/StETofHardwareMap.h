@@ -47,7 +47,9 @@ public:
     void          init( std::string fileName );
 
     void          mapToGeom( unsigned int rocId, unsigned int chipId, unsigned int chanId, std::vector< unsigned int >& geomVec );
+    void          mapToSector( unsigned int rocId, unsigned int& sector );
     unsigned int  module( unsigned int sector, unsigned int plane );
+
 
 protected:
     UInt_t mYear;

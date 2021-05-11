@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuETofCollection.h,v 1.1 2019/02/21 13:32:54 jdb Exp $
+ * $Id: StMuETofCollection.h,v 1.2 2021/05/11 19:40:43 jdb Exp $
  *
  * Author: Florian Seck, October 2018
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMuETofCollection.h,v $
+ * Revision 1.2  2021/05/11 19:40:43  jdb
+ * StETofHeader update from philipp W. modified classes to include the front-end missmatch pattern
+ *
  * Revision 1.1  2019/02/21 13:32:54  jdb
  * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
  *
@@ -54,7 +57,7 @@ protected:
     std::vector< StMuETofHit    > mETofHits;  
     
 
-    ClassDef( StMuETofCollection, 1 )
+    ClassDef( StMuETofCollection, 2 )
 };
 
 #endif // STMUETOFCOLLECTION_H
