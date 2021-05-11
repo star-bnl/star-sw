@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.65 2019/02/21 14:00:02 jdb Exp $
+ * $Id: StMuDstMaker.h,v 1.66 2021/05/11 19:40:43 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -176,7 +176,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.65 2019/02/21 14:00:02 jdb Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.66 2021/05/11 19:40:43 jdb Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 
@@ -369,7 +369,7 @@ virtual   void closeRead();
   //  StMuEpdHitCollection *mMuEpdHitCollection;   // MALisa
 
   // Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDstMaker, 5)
+  ClassDef(StMuDstMaker, 6)
 };
 
 inline StMuDst* StMuDstMaker::muDst() { return mStMuDst;}
@@ -409,6 +409,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.66  2021/05/11 19:40:43  jdb
+ * StETofHeader update from philipp W. modified classes to include the front-end missmatch pattern
+ *
  * Revision 1.65  2019/02/21 14:00:02  jdb
  * Bumped the ClassDef versions in MuDst where eTOF was added. I also added the etofTypes to the LinkDef file
  *
