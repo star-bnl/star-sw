@@ -236,6 +236,10 @@
  * StTpcHitMaker - class to fille the StEvewnt from DAQ reader
  *
  **************************************************************************/
+//#define __MAKE_NTUPLE__
+//#define __CORRECT_S_SHAPE__
+//#define __TOKENIZED__
+//#define __USE__THnSparse__
 #include <assert.h>
 #include "StEvent/StTpcHit.h"
 #include <algorithm>
@@ -259,7 +263,9 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
+#ifdef __CORRECT_S_SHAPE__
 #include "StDetectorDbMaker/St_TpcPadCorrectionC.h"
+#endif /* __CORRECT_S_SHAPE__ */
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
@@ -286,10 +292,6 @@ Float_t StTpcHitMaker::fgDt    = .2;
 Float_t StTpcHitMaker::fgDperp = .1;
 Bool_t  StTpcHitMaker::fgCosmics = kFALSE;
 static Int_t _debug = 0;
-//#define __MAKE_NTUPLE__
-//#define __CORRECT_S_SHAPE__
-//#define __TOKENIZED__
-//#define __USE__THnSparse__
 #ifdef  __TOKENIZED__
 #define __NOT_ZERO_SUPPRESSED_DATA__
 #endif

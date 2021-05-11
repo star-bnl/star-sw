@@ -422,8 +422,12 @@
 # 44p5GeV_fixedTarget_2021 begin 2021-05-06	07:01:46      2021-05-06 18:27:53 GMT 
 #  70GeV_fixedTarget_2021        2021-05-07	03:16:39      2021-05-07 16:04:17 GMT
 # 100GeV_fixedTarget_2021        2021-05-08	04:15:26     +2021-05-08 11:19:55 GMT
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210501.160018.root SecRow3CGF3p85GeV.root 'MakeTpcSecRowB.C(20210501,160020,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210501,160020.log 
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210501.160018.root SecRow3CGF44p5GeV.root 'MakeTpcSecRowB.C(20210506,20,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210506,20.log
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210501.160018.root SecRow3CGF3p85GeV.root 'MakeTpcSecRowB.C(20210501,160020,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210501,160020.log 
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210501.160018.root SecRow3CGF44p5GeV.root 'MakeTpcSecRowB.C(20210506,20,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210506,20.log
+root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210501.160020.root SecRow3CGF3p85GeV.root 'MakeTpcSecRowB.C(20210501,160023,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210501,160023.log 
+root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210506.000020.root SecRow3CGF44p5GeV.root 'MakeTpcSecRowB.C(20210506,23,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210506,23.log
+root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210506.000020.root SecRow3CGF70GeV.root 'MakeTpcSecRowB.C(20210507,23,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210507,23.log
+root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210506.000020.root SecRow3CGF100GeV.root 'MakeTpcSecRowB.C(20210508,23,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210508,23.log
 
 ###################################### Run XIX recalibration ##########################################
 #root.exe -q -b SecRow3CGFP21ib02_0.root 'MakeTpcSecRowB.C(20190225,230001,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225.230001.log
