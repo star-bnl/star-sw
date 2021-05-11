@@ -29,7 +29,7 @@
 #include "StMessMgr.h"
 
 #include "tables/St_etofElectronicsMap_Table.h"
-using namespace std;
+
 
 StETofHardwareMap::StETofHardwareMap( St_etofElectronicsMap* etofElectronicsMap, unsigned int year )
 {
@@ -246,6 +246,23 @@ StETofHardwareMap::mapToGeom( unsigned int rocId, unsigned int chipId, unsigned 
     geomVec.push_back( ( geometryId % 10000 ) / 1000 );
     geomVec.push_back( ( geometryId % 1000  ) / 10   );
     geomVec.push_back(   geometryId % 10             );
+
+    return;
+}
+
+void
+StETofHardwareMap::mapToSector( unsigned int rocId, unsigned int& sector )
+{
+    sector = 0;
+
+    if( mAfckAddressMap.count( rocId ) == 0 ) {
+        LOG_INFO << "StETofHardwareMap::Map  - rocId is out of range: 0x" << std::hex << rocId << std::dec << endm;
+        return;
+    }
+
+    unsigned int rocIndex = mAfckAddressMap.at( rocId );
+
+    sector = mAfckToSector.at( rocIndex );
 
     return;
 }

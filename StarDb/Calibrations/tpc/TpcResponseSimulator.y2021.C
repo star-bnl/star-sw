@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2019.C,v 1.3 2019/05/23 11:50:01 fisyak Exp $
-// $Log: TpcResponseSimulator.y2019.C,v $
+// $Id: TpcResponseSimulator.y2021.C,v 1.1 2021/05/10 21:02:56 fisyak Exp $
+// $Log: TpcResponseSimulator.y2021.C,v $
+// Revision 1.1  2021/05/10 21:02:56  fisyak
+// Clean up and synch with TFG
+//
 // Revision 1.3  2019/05/23 11:50:01  fisyak
 // Add default TpcAdcCorrectionMDF, 2019 version of TpcResponseSimulator
 //

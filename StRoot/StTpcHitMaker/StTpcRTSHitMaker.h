@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.17 2018/10/17 20:45:27 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.19 2021/05/10 21:13:19 fisyak Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.19  2021/05/10 21:13:19  fisyak
+ * Clean up
+ *
  * Revision 1.17  2018/10/17 20:45:27  fisyak
  * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
  *
@@ -89,7 +92,7 @@ class StTpcRTSHitMaker : public StMaker {
   static UChar_t miTpc_RowLen[41];
   // cvs
   virtual const char *GetCVS() const    {
-    static const char cvs[]="Tag $Name:  $ $Id: StTpcRTSHitMaker.h,v 1.17 2018/10/17 20:45:27 fisyak Exp $  built " __DATE__ " " __TIME__ ; return cvs;
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcRTSHitMaker.h,v 1.19 2021/05/10 21:13:19 fisyak Exp $  built " __DATE__ " " __TIME__ ; return cvs;
   }
   ClassDef(StTpcRTSHitMaker, 1)    //StTpcRTSHitMaker - class to fille the StEvewnt from DAQ reader
 };

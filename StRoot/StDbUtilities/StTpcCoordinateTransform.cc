@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.52 2018/12/05 14:56:28 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.53 2021/05/10 16:46:10 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.53  2021/05/10 16:46:10  fisyak
+ * Add new scheme: offset  = clocks*timebin + t0
+ *
  * Revision 1.52  2018/12/05 14:56:28  fisyak
  * Fix a bug with radial row position
  *

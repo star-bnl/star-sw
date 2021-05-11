@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofDigiMaker.cxx,v 1.4 2019/03/08 18:45:40 fseck Exp $
+ * $Id: StETofDigiMaker.cxx,v 1.5 2021/05/10 10:45:30 weidenkaff Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StETofDigiMaker.cxx,v $
+ * Revision 1.5  2021/05/10 10:45:30  weidenkaff
+ * Added unpacking of status pattern to be written to Event header. PW.StETofDigiMaker.cxx
+ *
  * Revision 1.4  2019/03/08 18:45:40  fseck
  * save middle value of tot bin as raw tot of the digi
  *
@@ -25,7 +28,6 @@
  *
  *
  ***************************************************************************/
-#include <vector>
 #include <map>
 #include <array>
 #include <algorithm>    // std::is_sorted
@@ -41,7 +43,10 @@
 
 #include "StETofDigiMaker.h"
 #include "StETofUtil/StETofConstants.h"
+#include "StETofUtil/StETofHardwareMap.h"
 #include "StETofUtil/StETofMessageFormat.h"
+
+#include "tables/St_etofElectronicsMap_Table.h"
 
 
 //_____________________________________________________________
@@ -50,9 +55,14 @@ StETofDigiMaker::StETofDigiMaker( const char* name )
   mEvent( 0 ),          /// pointer to StEvent
   mETofCollection( 0 ), /// pointer to StETofCollection
   mRunYear( 0 ),        /// year in which the data was taken (switch at 1st Oct)
+  mHwMap( nullptr ),    /// hardware map class
+  mFileNameElectronicsMap( "" ), ///parameter file path to load hardware map from local file
   mDebug( false )       /// print out of all full messages for debugging
 {
     LOG_DEBUG << "StETofDigiMaker::ctor"  << endm;
+	 const size_t kNbGet4sInSystem = 1728;
+    mMissMatchFlagVec = vector< bool >( kNbGet4sInSystem, false ); 
+	 mGet4ActiveMap.clear();
 }
 
 //_____________________________________________________________
@@ -77,6 +87,55 @@ StETofDigiMaker::InitRun( Int_t runnumber )
     mRunYear = ( runnumber + 727000 ) / 1000000 + 1999;
 
     LOG_INFO << "runnumber: " << runnumber << "  --> year: " << mRunYear << endm;
+
+	 mGet4ActiveMap.clear();
+    TDataSet* dbDataSet = nullptr;
+
+    //load electronics-to-hardware map for missmatch pattern. PW
+    if( mFileNameElectronicsMap.empty() ) {
+        LOG_INFO << "StETofDigiMaker::InitRun: no electronics map filename provided --> load database table" << endm;
+
+        dbDataSet = GetDataBase( "Geometry/etof/etofElectronicsMap" );
+
+        St_etofElectronicsMap* etofElectronicsMap = static_cast< St_etofElectronicsMap* > ( dbDataSet->Find( "etofElectronicsMap" ) );
+        if( !etofElectronicsMap ) {
+            LOG_ERROR << "unable to get the electronics map from the database" << endm;
+            return kStFatal;
+        }
+
+        mHwMap = new StETofHardwareMap( etofElectronicsMap, mRunYear );
+			//debug PW
+			 etofElectronicsMap_st* table = etofElectronicsMap->GetTable();
+			 LOG_INFO << "StETofDigiMaker::InitRun: PRINTING CHANNEL MAP: " << endm;
+			 for( size_t i=0; i<576; i++ ) {
+				  //LOG_INFO << "Ch " <<table->channelNumber[ i ] <<" Geo "<< table->geometryId[ i ] <<  endm;
+			 	  mGet4ActiveMap[ table->channelNumber[ i ] ] = true;			
+			 }
+    }
+    else {
+        LOG_INFO << "StETofDigiMaker::InitRun: etofElectronicsMap: filename provided --> use parameter file: " << mFileNameElectronicsMap.c_str() << endm;
+
+        mHwMap = new StETofHardwareMap( mFileNameElectronicsMap, mRunYear );
+
+		 // get local parameter file
+		 std::ifstream paramFile;
+
+		 paramFile.open( mFileNameElectronicsMap.c_str() );
+
+		 if( !paramFile.is_open() ) {
+		     LOG_ERROR << "StETofHardwareMap -- unable to get the parameters from local file --> file does not exist" << endm;
+		     return kStFatal;
+		 }
+
+		 unsigned int temp;
+
+		 for( int i=0; i<576; i++ ) {
+		     if( !paramFile.eof() ) {
+		         paramFile >> std::dec >> temp;
+				 mGet4ActiveMap[ temp ] = true;
+		     }
+		 }
+    }
 
     return kStOk;
 }
@@ -208,6 +267,9 @@ StETofDigiMaker::processEvent( ULong64_t* messageBuffer, size_t nFullMessagesToR
 {
     // create vector to store the trigger messages
     vector< gdpbv100::FullMessage > triggerMessages;
+	 const size_t kNbGet4sInSystem = 1728;
+	 mMissMatchFlagVec.clear();
+	 mMissMatchFlagVec.resize( kNbGet4sInSystem, 0 ); 
 
     // loop over gdpb messages
     for( size_t msgIndex = 0; msgIndex < nFullMessagesToRead; msgIndex++ ) {
@@ -230,6 +292,56 @@ StETofDigiMaker::processEvent( ULong64_t* messageBuffer, size_t nFullMessagesToR
             triggerMessages.push_back( mess );
         }
 
+		  if( mess.isSysMsg() ) {
+            // only care about pattern messages
+            if( mess.getGdpbSysSubType() != 3 ) continue;
+
+            int patternType  = mess.getGdpbSysPattType();
+            int patternIndex = mess.getGdpbSysPattIndex();
+            int pattern      = mess.getGdpbSysPattPattern();
+
+				int rocId  = mess.getGdpbGenGdpbId();
+		 		unsigned int sector;
+				mHwMap->mapToSector( rocId, sector );
+
+            // only care about the status bits
+            if( patternType != 3 ) continue;
+
+            int nBits = ( 7 == patternIndex ? 16 : 32 );
+
+							 LOG_INFO << "Found Pattern Message: "<< sector << endm;
+           
+            for( int bit = 0; bit < nBits; ++bit ) {
+                if( ( pattern >> bit ) & 0x1 ) {
+
+		         	 int get4Id = 32 * patternIndex + bit;
+						 if ( mGet4ActiveMap.count( 10*get4Id ) ){ 
+							 std::vector< unsigned int > geomVec;
+							 mHwMap->mapToGeom( rocId, get4Id, 0, geomVec );
+
+							 LOG_INFO << " "<< sector << endm;
+							 LOG_INFO << "-----------------------------"<< sector << endm;
+							 LOG_INFO << "FOUND ACTIVE PATTERN! Sector: "<< sector << endm;
+							 LOG_INFO << "-----------------------------"<< sector << endm;
+							 LOG_INFO << " "<< sector << endm;
+
+							 if( geomVec.size() < 5 ) {
+								  LOG_WARN << "geometry vector has wrong size !!! --> skip message. size: "<< geomVec.size() << endm;
+								  continue;
+							 }
+							 //unsigned int sector  = geomVec.at( 0 );
+							 unsigned int zplane  = geomVec.at( 1 );
+							 unsigned int counter = geomVec.at( 2 );
+							 unsigned int strip   = geomVec.at( 3 );
+							 unsigned int side    = geomVec.at( 4 );
+
+				 		 	 mMissMatchFlagVec.at( 144 * ( sector - 13 ) + 48 * ( zplane -1 ) + 16 * ( counter - 1 ) + 8 * ( side - 1 ) + ( ( strip - 1 ) / 4 ) ) = true;
+						}else{
+							LOG_DEBUG << "Wrongly mapped get4 chip in message pattern --> skip message. ID: "<< get4Id << endm;
+						}
+              }
+			 }			
+       }
     } // end message loop
 
     // fill eTOF collection with eTOF header
@@ -351,7 +463,8 @@ StETofDigiMaker::fillETofHeader( ULong64_t* messageBuffer, vector< gdpbv100::Ful
                                                  starToken,
                                                  starDaqCmdIn,
                                                  starTrigCmdIn,
-                                                 eventStatusFlag
+                                                 eventStatusFlag,
+																 mMissMatchFlagVec
                                                 );
 
     mETofCollection->setHeader( etofHeader );

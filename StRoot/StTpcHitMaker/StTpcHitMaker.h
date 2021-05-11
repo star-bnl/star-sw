@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.28 2018/10/17 20:45:27 fisyak Exp $
+ * $Id: StTpcHitMaker.h,v 1.30 2021/05/10 21:13:19 fisyak Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.30  2021/05/10 21:13:19  fisyak
+ * Clean up
+ *
  * Revision 1.28  2018/10/17 20:45:27  fisyak
  * Restore update for Run XVIII dE/dx calibration removed by Gene on 08/07/2018
  *

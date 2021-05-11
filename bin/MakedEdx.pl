@@ -2092,6 +2092,11 @@ $hist = "RunXXI23"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021
 #$hist = "P21ib02_7"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/06/21 TpcSecRowB.20190404.000006.root & TpcSecRowB.20190225.230006.root
 #$hist = "P21ib02_8"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/07/21 disable TpcSecRowB.20190404.000006.root & TpcSecRowB.20190225.230006.root, new TpcZCorrectionB.20190225.230004.C
 #$hist = "P21ib02_9"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/07/21 TpcSecRowB 20190225.230008.root & 20190404.000008.root
+#$hist = "P21ib02_10"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/08/21  TpcPadCorrectionMDF.20190225.230009.C
+#$hist = "P21ib02_11"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/08/21  TpcSecRowB.20190225.230010.root  TpcSecRowB.20190404.000010.root
+#$hist = "P21ib02_12"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/09/21 TpcLengthCorrectionMDF.20190225.230011.C TpcLengthCorrectionMDF.20190404.000011.C
+#$hist = "P21ib02_13"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/10/21 test with cleaned StarDb
+
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();

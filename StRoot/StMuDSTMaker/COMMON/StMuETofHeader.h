@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuETofHeader.h,v 1.1 2019/02/21 13:32:54 jdb Exp $
+ * $Id: StMuETofHeader.h,v 1.2 2021/05/11 19:40:43 jdb Exp $
  *
  * Author: Florian Seck, November 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMuETofHeader.h,v $
+ * Revision 1.2  2021/05/11 19:40:43  jdb
+ * StETofHeader update from philipp W. modified classes to include the front-end missmatch pattern
+ *
  * Revision 1.1  2019/02/21 13:32:54  jdb
  * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
  *
@@ -21,6 +24,7 @@
 #define STMUETOFHEADER_H
 
 #include <map>
+#include <vector>
 
 #include "TObject.h"
 
@@ -32,32 +36,35 @@ public:
 
     StMuETofHeader();
     StMuETofHeader( const StETofHeader* header );
-    StMuETofHeader( const double&, const double&, const std::map< unsigned int, ULong64_t >&, const std::map< unsigned int, ULong64_t >& ,
-                    const unsigned int&, const unsigned int&, const unsigned int&, const ULong64_t& );
+    StMuETofHeader( const double&, const double&, const std::map< UInt_t, ULong64_t >&, const std::map< UInt_t, ULong64_t >& ,
+                    const UInt_t&, const UInt_t&, const UInt_t&, const ULong64_t& );
+    StMuETofHeader( const double&, const double&, const std::map< UInt_t, ULong64_t >&, const std::map< UInt_t, ULong64_t >& ,
+                    const UInt_t&, const UInt_t&, const UInt_t&, const ULong64_t&, const std::vector< Bool_t >& );
 
     ~StMuETofHeader();
 
     double    trgGdpbFullTime()   const;
     double    trgStarFullTime()   const;
 
-    std::map< unsigned int, ULong64_t > rocGdpbTs()  const;
-    std::map< unsigned int, ULong64_t > rocStarTs()  const;
+    std::map< UInt_t, ULong64_t > rocGdpbTs()  const;
+    std::map< UInt_t, ULong64_t > rocStarTs()  const;
 
-    unsigned int      starToken()         const;
-    unsigned int      starDaqCmdIn()      const;
-    unsigned int      starTrgCmdIn()      const;
-    ULong64_t          eventStatusFlag()   const;
+    UInt_t      starToken()         const;
+    UInt_t      starDaqCmdIn()      const;
+    UInt_t      starTrgCmdIn()      const;
+    ULong64_t         eventStatusFlag()   const;
+	 std::vector< Bool_t >  missMatchFlagVec()  const;
 
 
     void    setTrgGdpbFullTime( const double& gdpbFullTime );
     void    setTrgStarFullTime( const double& starFullTime );
 
-    void    setRocGdpbTs( const std::map< unsigned int, ULong64_t >& gdpbTs );
-    void    setRocStarTs( const std::map< unsigned int, ULong64_t >& starTs );
+    void    setRocGdpbTs( const std::map< UInt_t, ULong64_t >& gdpbTs );
+    void    setRocStarTs( const std::map< UInt_t, ULong64_t >& starTs );
 
-    void    setStarToken(    const unsigned int& token    );
-    void    setStarDaqCmdIn( const unsigned int& daqCmdIn );
-    void    setStarTrgCmdIn( const unsigned int& trgCmdIn );
+    void    setStarToken(    const UInt_t& token    );
+    void    setStarDaqCmdIn( const UInt_t& daqCmdIn );
+    void    setStarTrgCmdIn( const UInt_t& trgCmdIn );
 
     void    setEventStatusFlag( const ULong64_t& statusFlag );
 
@@ -74,8 +81,9 @@ private:
     
     ULong64_t   mEventStatusFlag;
 
+	 std::vector< Bool_t > mMissMatchFlagVec; 
 
-    ClassDef( StMuETofHeader, 1 )
+    ClassDef( StMuETofHeader, 2 )
 };
 
 #endif // STMUETOFHEADER_H
