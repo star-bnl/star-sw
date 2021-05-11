@@ -576,12 +576,16 @@ int fcs_trg_base::verify_event_io()
 				}
 
 			
+				
+
 				//LOG(WARN,"xing %d:%d, ns %d: mask 0x%llX, ix %d",x,t,ns,mask,ix) ;
 
 				for(int i=0;i<34;i++) {
 					if(mask & (1ll<<i)) ;
 					else continue ;
 
+					// separate mask
+					if(s2_ch_mask[ns] & (1ll<<i)) continue ;
 
 					if(s2_from_s1[i] || s1_to_s2[i]) {
 						//printf("... xing %d:%d, ns %d: %d: s2_in 0x%02X, s1_out 0x%02X\n",x,t,ns,i,s2_from_s1[i],s1_to_s2[i]) ;
@@ -590,8 +594,8 @@ int fcs_trg_base::verify_event_io()
 					if(s2_from_s1[i] != s1_to_s2[i]) {
 						event_bad |= 0x10 ;
 
-						if(log_level>1) LOG(ERR,"evt %d: S1_to_S2 IO: NS %d: ch %d: xing %d:%d: out 0x%02X, in 0x%02X\n",
-						    good,ns,i,x,t,s1_to_s2[i],s2_from_s1[i]) ;
+						if(log_level>1) LOG(ERR,"evt %d: S1_to_S2 IO: NS %d: ch %d: xing %d:%d: out 0x%02X, in 0x%02X",
+						    evts,ns,i,x,t,s1_to_s2[i],s2_from_s1[i]) ;
 
 						if(ns==0 && i<17) errs.io_s1_to_s2[0]++ ;
 						else if(ns==0) errs.io_s1_to_s2[1]++ ;
