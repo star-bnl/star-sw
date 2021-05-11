@@ -1,6 +1,12 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.24 2019/07/10 05:44:17 zhux Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.26 2021/05/10 21:46:20 perev Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.26  2021/05/10 21:46:20  perev
+ * Rollback kCanRebin not in Root6
+ *
+ * Revision 1.25  2021/05/10 21:22:32  perev
+ * Remove kCanRebin not in Root6
+ *
  * Revision 1.24  2019/07/10 05:44:17  zhux
  * added option for btof pid for primary real tracks
  *
