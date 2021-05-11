@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuETofHeader.h,v 1.1 2019/02/21 13:32:54 jdb Exp $
+ * $Id: StMuETofHeader.h,v 1.2 2021/05/11 19:40:43 jdb Exp $
  *
  * Author: Florian Seck, November 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMuETofHeader.h,v $
+ * Revision 1.2  2021/05/11 19:40:43  jdb
+ * StETofHeader update from philipp W. modified classes to include the front-end missmatch pattern
+ *
  * Revision 1.1  2019/02/21 13:32:54  jdb
  * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
  *
@@ -21,6 +24,7 @@
 #define STMUETOFHEADER_H
 
 #include <map>
+#include <vector>
 
 #include "TObject.h"
 
@@ -34,6 +38,8 @@ public:
     StMuETofHeader( const StETofHeader* header );
     StMuETofHeader( const double&, const double&, const std::map< unsigned int, uint64_t >&, const std::map< unsigned int, uint64_t >& ,
                     const unsigned int&, const unsigned int&, const unsigned int&, const uint64_t& );
+    StMuETofHeader( const double&, const double&, const std::map< unsigned int, uint64_t >&, const std::map< unsigned int, uint64_t >& ,
+                    const unsigned int&, const unsigned int&, const unsigned int&, const uint64_t&, const std::vector< Bool_t >& );
 
     ~StMuETofHeader();
 
@@ -47,6 +53,7 @@ public:
     unsigned int      starDaqCmdIn()      const;
     unsigned int      starTrgCmdIn()      const;
     uint64_t          eventStatusFlag()   const;
+	 std::vector< Bool_t >  missMatchFlagVec()  const;
 
 
     void    setTrgGdpbFullTime( const double& gdpbFullTime );
@@ -74,8 +81,9 @@ private:
     
     ULong64_t   mEventStatusFlag;
 
+	 std::vector< Bool_t > mMissMatchFlagVec; 
 
-    ClassDef( StMuETofHeader, 1 )
+    ClassDef( StMuETofHeader, 2 )
 };
 
 #endif // STMUETOFHEADER_H
