@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHardwareMap.cxx,v 1.4 2021/05/10 21:18:48 perev Exp $
+ * $Id: StETofHardwareMap.cxx,v 1.5 2021/05/12 16:30:45 weidenkaff Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHardwareMap.cxx,v $
+ * Revision 1.5  2021/05/12 16:30:45  weidenkaff
+ * adjusted mapping to fit with pattern mapping in digimaker
+ *
  * Revision 1.4  2021/05/10 21:18:48  perev
  * Fix add std::
  *
@@ -249,6 +252,23 @@ StETofHardwareMap::mapToGeom( unsigned int rocId, unsigned int chipId, unsigned 
     geomVec.push_back( ( geometryId % 10000 ) / 1000 );
     geomVec.push_back( ( geometryId % 1000  ) / 10   );
     geomVec.push_back(   geometryId % 10             );
+
+    return;
+}
+
+void
+StETofHardwareMap::mapToSector( unsigned int rocId, unsigned int& sector )
+{
+    sector = 0;
+
+    if( mAfckAddressMap.count( rocId ) == 0 ) {
+        LOG_INFO << "StETofHardwareMap::Map  - rocId is out of range: 0x" << std::hex << rocId << std::dec << endm;
+        return;
+    }
+
+    unsigned int rocIndex = mAfckAddressMap.at( rocId );
+
+    sector = mAfckToSector.at( rocIndex );
 
     return;
 }
