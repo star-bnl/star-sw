@@ -507,9 +507,10 @@ if ( $ThisYear == 2005 ){
 
     # Those are taken from previous yera - agreed upon as per rate, etc...
     # and documented on our Web pages.
-    $LASERTP =
-	rdaq_string2ftype("laser")."|".
-	rdaq_string2ftype("laser_adc");
+    # 2021-03-24 GVB: TPC group stopped wanting lasers processed a couple years ago
+    $LASERTP = 0;
+	#rdaq_string2ftype("laser")."|".
+	#rdaq_string2ftype("laser_adc");
 
     $PHYSTP  =  
 	rdaq_string2ftype("physics")    ."|".
@@ -630,9 +631,8 @@ if ( $ThisYear == 2005 ){
        $DCHAIN{"AuAu"} = "P2020a,StiCA,btof,mtd,BEmcChkStat,-hitfilt";
 
    } elsif ($ThisYear == 2021) {
-       # can eventualy move btof/mtd to the base chain later
-       $DCHAIN{"AuAu"} = "P2021a,StiCA,BEmcChkStat,-hitfilt";
-
+       $DCHAIN{"AuAu"} = "P2021a,StiCA,EbyET0,BEmcChkStat,-hitfilt";
+       $DCHAIN{"OO"} = "P2021a,StiCA,EbyET0,BEmcChkStat,-hitfilt";
 
    #} else {
    #     $DCHAIN{"PPPP"} =
@@ -2079,7 +2079,7 @@ sub Submit
 
 	    #$chain = "LanaDVtpx,AgML,ITTF,StiCA,iTpcIT,CorrX,OSpaceZ2,OGridLeakFull,-OPr13,OPr40";
 	    # 2020 and beyond
-	    $chain = "LanaDVtpx,AgML,ITTF,StiCA,iTpcIT,CorrY";
+	    $chain = "LanaDVtpx,AgML,ITTF,StiCA,iTpcIT,CorrY,-OPr13";
 
 	    # ------------------------------------------------------------------
 	    # THIS IS A CALIBRATION PRE-PASS -- IT REQUIRES AN ADDITIONAL INPUT

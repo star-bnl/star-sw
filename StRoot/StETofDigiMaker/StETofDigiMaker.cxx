@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofDigiMaker.cxx,v 1.5 2021/05/10 10:45:30 weidenkaff Exp $
+ * $Id: StETofDigiMaker.cxx,v 1.6 2021/05/12 16:31:47 weidenkaff Exp $
  *
  * Author: Florian Seck, April 2018
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StETofDigiMaker.cxx,v $
+ * Revision 1.6  2021/05/12 16:31:47  weidenkaff
+ * removed some clutter messages from text output
+ *
  * Revision 1.5  2021/05/10 10:45:30  weidenkaff
  * Added unpacking of status pattern to be written to Event header. PW.StETofDigiMaker.cxx
  *
@@ -309,7 +312,7 @@ StETofDigiMaker::processEvent( ULong64_t* messageBuffer, size_t nFullMessagesToR
 
             int nBits = ( 7 == patternIndex ? 16 : 32 );
 
-							 LOG_INFO << "Found Pattern Message: "<< sector << endm;
+						//	 LOG_INFO << "Found Pattern Message: "<< sector << endm;
            
             for( int bit = 0; bit < nBits; ++bit ) {
                 if( ( pattern >> bit ) & 0x1 ) {

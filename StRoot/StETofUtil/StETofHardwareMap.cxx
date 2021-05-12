@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHardwareMap.cxx,v 1.3 2019/02/19 20:15:21 fseck Exp $
+ * $Id: StETofHardwareMap.cxx,v 1.5 2021/05/12 16:30:45 weidenkaff Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,6 +12,12 @@
  ***************************************************************************
  *
  * $Log: StETofHardwareMap.cxx,v $
+ * Revision 1.5  2021/05/12 16:30:45  weidenkaff
+ * adjusted mapping to fit with pattern mapping in digimaker
+ *
+ * Revision 1.4  2021/05/10 21:18:48  perev
+ * Fix add std::
+ *
  * Revision 1.3  2019/02/19 20:15:21  fseck
  * update to allow initialization from database
  *

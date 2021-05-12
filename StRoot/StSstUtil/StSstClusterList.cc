@@ -1,6 +1,9 @@
-//$Id: StSstClusterList.cc,v 1.3 2016/05/26 14:10:34 bouchet Exp $
+//$Id: StSstClusterList.cc,v 1.4 2021/05/12 00:06:10 perev Exp $
 //
 //$Log: StSstClusterList.cc,v $
+//Revision 1.4  2021/05/12 00:06:10  perev
+//Add std::
+//
 //Revision 1.3  2016/05/26 14:10:34  bouchet
 //cpp-check for leak in splitCluster()
 //
@@ -16,6 +19,7 @@
 
 //fork from the SSD code, move along - see history therein
 
+#include <vector>
 #include "StSstUtil/StSstClusterList.hh"
 #include "StSstUtil/StSstClusterControl.h"
 #include "StSstUtil/StSstCluster.hh"
@@ -190,9 +194,9 @@ Int_t StSstClusterList::splitCluster(StSstClusterControl *clusterControl, StSstC
   Int_t isClimbOrFall = 0;
   
   Float_t testTolerance = clusterControl->getTestTolerance();//20%
-  vector<int> minima(CurrentClusterSize,0);
-  vector<int> maxima(CurrentClusterSize,0);
-  vector<int> keyToIdStrip(CurrentClusterSize,0);
+  std::vector<int> minima(CurrentClusterSize,0);
+  std::vector<int> maxima(CurrentClusterSize,0);
+  std::vector<int> keyToIdStrip(CurrentClusterSize,0);
   Int_t nMinima = 0;
   Int_t nMaxima = 0; 
   Int_t iStrip = 0;
