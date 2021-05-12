@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHitMaker.cxx,v 1.7 2018/02/26 23:26:50 smirnovd Exp $
+ * $Id: StTofHitMaker.cxx,v 1.8 2021/05/12 00:08:44 perev Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -27,7 +27,7 @@
 #  include "StRtsTable.h"
 #  include "DAQ_TOF/daq_tof.h"
 #else /* NEW_DAQ_READER */
-#  include "RTS/src/EVP_READER/tofReader.h"
+#  include "RTS/src/DAQ_TOF/tofReader.h"
 #endif /* NEW_DAQ_READER */
 
 #ifdef NEW_DAQ_READER
@@ -298,6 +298,9 @@ void StTofHitMaker::fillStEvent() {
  * Revision 1.7, 02/09/2008, Jing liu
  *
  * $Log: StTofHitMaker.cxx,v $
+ * Revision 1.8  2021/05/12 00:08:44  perev
+ * Change include directory
+ *
  * Revision 1.7  2018/02/26 23:26:50  smirnovd
  * StTof: Remove outdated ClassImp macro
  *
