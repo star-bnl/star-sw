@@ -2082,7 +2082,8 @@ my $NEvents = 100000;
 #$hist = "P21ib02_10"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/08/21  TpcPadCorrectionMDF.20190225.230009.C
 #$hist = "P21ib02_11"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/08/21  TpcSecRowB.20190225.230010.root  TpcSecRowB.20190404.000010.root
 #$hist = "P21ib02_12"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/09/21 TpcLengthCorrectionMDF.20190225.230011.C TpcLengthCorrectionMDF.20190404.000011.C
-$hist = "P21ib02_13"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/10/21 test with cleaned StarDb
+#$hist = "P21ib02_13"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/10/21 test with cleaned StarDb
+$hist = "P21ib02_14"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "adev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/11/21 test adev
 
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
@@ -2273,30 +2274,30 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #      print OUT "source /afs/rhic.bnl.gov/star/users/fisyak/.tcshrc;\n";
 #      print OUT "source $GROUP_DIR/setup 64b;\n";
 #      print OUT "source $GROUP_DIR/setup gcc451;\n";
-#      if ($STAR_LEVEL ne "\.DEV2") {
-#	print OUT "source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh;\n";
-#	print OUT "source $GROUP_DIR/setup gcc;\n";
-#	print OUT "source $GROUP_DIR/setup 32b;\n";
-#	print OUT "source $GROUP_DIR/setup nodebug;\n";
-#	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
-#      }  else {
-#	print OUT "setenv NODEBUG yes\n";
-#        print OUT "source $GROUP_DIR/setup 64b;\n";
-#        print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
-#      }
+      if ($STAR_LEVEL ne "\.DEV2") {
+# 	print OUT "source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh;\n";
+# 	print OUT "source $GROUP_DIR/setup gcc;\n";
+# 	print OUT "source $GROUP_DIR/setup 32b;\n";
+# 	print OUT "source $GROUP_DIR/setup nodebug;\n";
+	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+      }  else {
+# 	print OUT "setenv NODEBUG yes\n";
+#         print OUT "source $GROUP_DIR/setup 64b;\n";
+        print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+      }
 #     print OUT "setenv Calibrations_tpc reconYuri\n";
 #      print OUT " unsetenv Calibrations_tpc\n";
 #      print OUT "cd $homedir; \n"; 
 #      print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
 #      print OUT "cd /gpfs01/star/subsys-tpc/fisyak/dEdx/jobs/New\n";
 #      print OUT "cd /gpfs01/star/subsys-tpc/fisyak/dEdx/jobs\n";
-      print OUT "test -d $scrr || mkdir -p $scrr;\n";
+      print OUT "/usr/bin/test -d $scrr || mkdir -p $scrr;\n";
 #      print OUT "cd $scrr; \n";
     }
 #    my $cmd = "Root.exe -q -b  '" . $macro;
 #    my $cmd = "root4star -q -b  '~/.dev/macros/" . $macro;
 #    my $cmd = "test ! -r " . $root . " && root4star -q -b  '" . $macro;
-    my $cmd = "test ! -r " . $root . " && root.exe -q -b  '" . $macro;
+    my $cmd = "/usr/bin/test ! -r " . $root . " && root.exe -q -b  '" . $macro;
 #    if ($Production =~ /P02gi2/ || $Production =~ /P02gi3/) {$cmd .= "N";}
 #    if ($Production =~ /^dAu/ or $Production =~ /^AuAu/) {$cmd .= "S";}
 #    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ",\"$Year\")\' >& $log";
