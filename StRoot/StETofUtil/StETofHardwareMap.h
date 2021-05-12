@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StETofHardwareMap.h,v 1.3 2019/02/19 20:15:14 fseck Exp $
+ * $Id: StETofHardwareMap.h,v 1.4 2021/05/12 16:04:42 weidenkaff Exp $
  *
  * Author: Pengfei Lyu, April 2018
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StETofHardwareMap.h,v $
+ * Revision 1.4  2021/05/12 16:04:42  weidenkaff
+ * adjusted mapping to fit with pattern mapping in digimaker
+ *
  * Revision 1.3  2019/02/19 20:15:14  fseck
  * update to allow initialization from database
  *
@@ -47,7 +50,9 @@ public:
     void          init( std::string fileName );
 
     void          mapToGeom( unsigned int rocId, unsigned int chipId, unsigned int chanId, std::vector< unsigned int >& geomVec );
+    void          mapToSector( unsigned int rocId, unsigned int& sector );
     unsigned int  module( unsigned int sector, unsigned int plane );
+
 
 protected:
     UInt_t mYear;
