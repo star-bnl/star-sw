@@ -18,23 +18,28 @@
 
 
 
+#ifndef FORCEDDEBUGMESSAGE
 #define FORCEDDEBUGMESSAGE(x)                       cout << "##### " << __PRETTYF__ << " ##### " << x << endl;
 #define DEBUGMESSAGE(x)  if (StMuDebug::level()> 0) cout << "##### " << __PRETTYF__ << " ##### " << x << endl;
 #define DEBUGMESSAGE1(x) if (StMuDebug::level()>=1) cout << "##### " << __PRETTYF__ << " ##### " << x << endl;
 #define DEBUGMESSAGE2(x) if (StMuDebug::level()>=2) cout << "##### " << __PRETTYF__ << " ##### " << x << endl;
 #define DEBUGMESSAGE3(x) if (StMuDebug::level()>=3) cout << "##### " << __PRETTYF__ << " ##### " << x << endl;
+#endif
 
+#ifndef FORCEDDEBUGVALUE
 #define FORCEDDEBUGVALUE(x)                         cout << "##### " << __PRETTYF__ << " ##### " << (#x) << "=" << x << endl;
 #define DEBUGVALUE(x)    if (StMuDebug::level()> 0) cout << "##### " << __PRETTYF__ << " ##### " << (#x) << "=" << x << endl;
 #define DEBUGVALUE1(x)   if (StMuDebug::level()>=1) cout << "##### " << __PRETTYF__ << " ##### " << (#x) << "=" << x << endl;
 #define DEBUGVALUE2(x)   if (StMuDebug::level()>=2) cout << "##### " << __PRETTYF__ << " ##### " << (#x) << "=" << x << endl;
 #define DEBUGVALUE3(x)   if (StMuDebug::level()>=3) cout << "##### " << __PRETTYF__ << " ##### " << (#x) << "=" << x << endl;
+#endif
 
+#ifndef IFDEBUG
 #define IFDEBUG(x)       if (StMuDebug::level()> 0) { DEBUGMESSAGE(""); (x);} 
 #define IFDEBUG1(x)      if (StMuDebug::level()>=1) { DEBUGMESSAGE(""); (x);} 
 #define IFDEBUG2(x)      if (StMuDebug::level()>=2) { DEBUGMESSAGE(""); (x);} 
 #define IFDEBUG3(x)      if (StMuDebug::level()>=3) { DEBUGMESSAGE(""); (x);} 
-
+#endif
 
 /** 
     \class StMuDebug 
@@ -84,6 +89,9 @@ class StMuDebug : public TObject{
 /***********************************************************************
  *
  * $Log: StMuDebug.h,v $
+ * Revision 1.8  2021/05/12 00:02:36  perev
+ * WarnOff
+ *
  * Revision 1.7  2004/05/02 04:10:13  perev
  * private => protected
  *
