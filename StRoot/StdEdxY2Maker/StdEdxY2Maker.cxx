@@ -1382,19 +1382,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidDeuteron]),
 	  FdEdx[k].F.dx
 	};
-	Double_t VarsV[9] = {
-	  FdEdx[k].C[StTpcdEdxCorrection::kTpcRowQ-1].dEdxN,
-	  Vars[1],
-	  Vars[2],
-	  Vars[3],
-	  Vars[4],
-	  Vars[5],
-	  Vars[6],
-	  Vars[7],
-	  Vars[8]
-	};
-	Double_t Pad2Edge = FdEdx[k].edge;
-	if (TMath::Abs(Pad2Edge) > 5) {
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcRowQ-1].dEdxN;
+	//	Double_t Pad2Edge = FdEdx[k].edge;
+	//?	if (TMath::Abs(Pad2Edge) > 5) {
 #if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
 	  SecRow3.Fill(sector,row,Vars);
 #else /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
@@ -1407,8 +1397,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    Double_t ADCL = TMath::Log(FdEdx[k].adc);
 	    ADC3.Fill(sector,row,&ADCL);
 	  }
-	}
+	  //?	}
 #ifdef __ZDC3__
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kzCorrection-1].dEdxN;
 	if (FdEdx[k].Zdc > 0) Zdc3.Fill(rowS,TMath::Log10(FdEdx[k].Zdc),Vars);
 #endif /* __ZDC3__ */
 	//Double_t xyz[3]  = {FdEdx[k].xyz[0],FdEdx[k].xyz[1],FdEdx[k].xyz[2]};
@@ -1416,6 +1407,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	//Double_t Phi  = 180./TMath::Pi()*TMath::ATan2(xyz[0],xyz[1]);
 	//	Double_t PhiD = 180./TMath::Pi()*TMath::ATan2(xyzD[0],xyzD[1]); 
 #if 0
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTanL-1].dEdxN;
 #ifdef __iTPCOnly__
 	if (! St_tpcPadConfigC::instance()->iTPC(sector)) 
 #endif
@@ -1429,16 +1421,21 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  Double_t p     = tpcGas->barometricPressure;
 	  //	  Double_t t     = tpcGas->inputGasTemperature/298.2;
 	  if (p > 0) {
+	    Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::ktpcPressure-1].dEdxN;
 	    Double_t press = TMath::Log(p);
 	    Pressure.Fill(rowS,press,Vars);
 	  }
 	  Int_t cs = NumberOfChannels*(sector-1)+FdEdx[k].channel;
 	  Double_t V = FdEdx[k].Voltage;
 	  Double_t VN = (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ? V - 1170 : V - 1390;
-	  Voltage.Fill(cs,VN,VarsV);
+	  Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcRowQ-1].dEdxN;
+	  Voltage.Fill(cs,VN,Vars);
 	  //	  Volt.Fill(cs,V,VarsV);
-	  Qcm.Fill(cs,FdEdx[k].Qcm,VarsV);
-	  AvCurrent.Fill(cs,FdEdx[k].Crow,VarsV);
+	  
+	  Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcAccumulatedQ-1].dEdxN;
+	  Qcm.Fill(cs,FdEdx[k].Qcm,Vars);
+	  Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcCurrentCorrection-1].dEdxN;
+	  AvCurrent.Fill(cs,FdEdx[k].Crow,Vars);
 // 	  if (p*t > 0) {
 // 	    Double_t temp = TMath::Log(p/t);
 // 	    PressureT.Fill(rowS,temp,Vars);
@@ -1448,6 +1445,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (Time)    Time->Fill(vars);
 	//	if (TimeP)  {vars[1] = FdEdx[k].C[StTpcdEdxCorrection::ktpcTime].dEdxN; TimeP->Fill(vars);}
 	if (TimeC)  {vars[1] = FdEdx[k].F.dEdxN; TimeC->Fill(vars);}
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kzCorrection-1].dEdxN;
 #ifdef __iTPCOnly__
 	if (! St_tpcPadConfigC::instance()->iTPC(sector)) {
 #endif
@@ -1474,6 +1472,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #if 0
 	Edge3.Fill(St_tpcPadConfigC::instance()->numberOfRows(20)*(sector-1)+row,FdEdx[k].edge, Vars);
 #endif
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcPadMDF-1].dEdxN;
 #if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
 	xyPad3.Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars);
 #else /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
