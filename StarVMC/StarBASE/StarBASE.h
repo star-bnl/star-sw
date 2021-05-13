@@ -1,4 +1,4 @@
-// $Id: StarBASE.h,v 1.2 2012/02/15 15:09:44 jwebb Exp $
+// $Id: StarBASE.h,v 1.2.2.1 2021/05/13 21:17:49 perev Exp $
 
 #ifndef STAR_StarBASE
 #define STAR_StarBASE
@@ -47,7 +47,8 @@ class StarBASE : public StMaker {
 
  public:
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StarBASE.h,v 1.2 2012/02/15 15:09:44 jwebb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]=
+    "Tag $Name:  $ $Id: StarBASE.h,v 1.2.2.1 2021/05/13 21:17:49 perev Exp $ built "__DATE__" "__TIME__"; 
     return cvs;
   }
 
