@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcModule.cxx,v 2.5 2011/09/06 21:33:02 ullrich Exp $
+ * $Id: StEmcModule.cxx,v 2.5.26.1 2021/05/13 19:58:05 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcModule.cxx,v $
+ * Revision 2.5.26.1  2021/05/13 19:58:05  perev
+ * StAutoBrowser obsolete Root6
+ *
  * Revision 2.5  2011/09/06 21:33:02  ullrich
  * Bug in getEnergy() corrected (Justin Stevens)
  *
@@ -29,9 +32,8 @@
 #include "StEmcModule.h"
 #include "StEmcRawHit.h"
 #include <TBrowser.h>
-//#include <StAutoBrowse.h>
 
-static const char rcsid[] = "$Id: StEmcModule.cxx,v 2.5 2011/09/06 21:33:02 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcModule.cxx,v 2.5.26.1 2021/05/13 19:58:05 perev Exp $";
 
 ClassImp(StEmcModule)
 

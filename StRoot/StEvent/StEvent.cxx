@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.61 2021/02/27 17:07:50 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.61.2.1 2021/05/13 19:58:05 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.61.2.1  2021/05/13 19:58:05  perev
+ * StAutoBrowser obsolete Root6
+ *
  * Revision 2.61  2021/02/27 17:07:50  ullrich
  * Added setFcsCollection method (Akio)
  *
@@ -245,7 +248,6 @@
 #include "StL3Trigger.h"
 #include "StPsd.h"
 #include "event_header.h"
-#include "StAutoBrowse.h"
 #include "StEventBranch.h"
 #include "StHltEvent.h"
 #include "StFgtCollection.h"
@@ -258,8 +260,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.61 2021/02/27 17:07:50 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.61 2021/02/27 17:07:50 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.61.2.1 2021/05/13 19:58:05 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.61.2.1 2021/05/13 19:58:05 perev Exp $";
 
 ClassImp(StEvent)
 
@@ -1481,7 +1483,6 @@ void StEvent::removePsd(StPsd* p)
 void StEvent::Browse(TBrowser* b)
 {
     if (!b) b = new TBrowser("StEvent",(TObject*)0);
-    StAutoBrowse::Browse(this,b);
     TDataSet::Browse(b);
 }
 

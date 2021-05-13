@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.cxx,v 2.12 2004/10/14 20:00:18 ullrich Exp $
+ * $Id: StEmcDetector.cxx,v 2.12.32.1 2021/05/13 19:58:05 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.cxx,v $
+ * Revision 2.12.32.1  2021/05/13 19:58:05  perev
+ * StAutoBrowser obsolete Root6
+ *
  * Revision 2.12  2004/10/14 20:00:18  ullrich
  * Added member and methods to deal with crate status flags.
  *
@@ -52,9 +55,8 @@
 #include "StEmcModule.h"
 #include "StEmcClusterCollection.h"
 #include <TBrowser.h>
-#include <StAutoBrowse.h>
 
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.12 2004/10/14 20:00:18 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.12.32.1 2021/05/13 19:58:05 perev Exp $";
 
 ClassImp(StEmcDetector)
 
@@ -211,5 +213,4 @@ StEmcDetector::Browse(TBrowser *b)
 	  b->Add(mModules[m],name); 
         }
     }
-    StAutoBrowse::Browse(mClusters, b);
 }
