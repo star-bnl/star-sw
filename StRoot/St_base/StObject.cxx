@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.28 2015/08/28 19:54:18 perev Exp $
+// $Id: StObject.cxx,v 1.28.10.1 2021/05/13 20:07:50 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.28.10.1  2021/05/13 20:07:50  perev
+// StAutoBrowser obsolete Root6
+//
 // Revision 1.28  2015/08/28 19:54:18  perev
 // Add specific copy constructor to StObject.
 // This ctr set zero to bit 1<<22. This boit means that object belongs
@@ -82,7 +85,6 @@
 #include "TBrowser.h"
 #include "TClass.h"
 #include "StArray.h"
-#include "StAutoBrowse.h"
 #include "TSystem.h"
 
 StXRefManager 	 *StXRefManager::fgManager=0;
@@ -107,16 +109,6 @@ StObject &StObject::operator=(const StObject &sto)
 //_____________________________________________________________________________
 StObject::~StObject()
 {
-}
-//_____________________________________________________________________________
-void StObject::Browse(TBrowser *tb)
-{
-  StAutoBrowse::Browse(this,tb);
-}
-//_____________________________________________________________________________
-Bool_t StObject::IsFolder() const
-{
-  return StAutoBrowse::Browse((TObject*)this,0);
 }
 //______________________________________________________________________________
 void StObject::Streamer(TBuffer &R__b)

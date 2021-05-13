@@ -1,5 +1,8 @@
-// $Id: StObject.h,v 1.21 2021/05/11 23:57:40 perev Exp $
+// $Id: StObject.h,v 1.21.2.1 2021/05/13 20:07:20 perev Exp $
 // $Log: StObject.h,v $
+// Revision 1.21.2.1  2021/05/13 20:07:20  perev
+// StAutoBrowser obsolete Root6
+//
 // Revision 1.21  2021/05/11 23:57:40  perev
 // TBuffer.h added fpr compatibility Star6
 //
@@ -58,9 +61,7 @@ public:
           StObject(const StObject &sto);
           StObject &operator=(const StObject &sto);
   virtual ~StObject();
-  virtual void Browse(TBrowser *b);
   
-  virtual Bool_t IsFolder() 	const;
   virtual TObject *clone() 	const {return ((TObject*)this)->Clone();}
   Int_t   isZombie() 		const {return IsZombie();}
   virtual void makeZombie(int flg=1)
