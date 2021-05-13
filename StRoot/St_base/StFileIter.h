@@ -1,4 +1,6 @@
-// @(#)root/table:$Name:  $:$Id: StFileIter.h,v 1.7 2012/06/11 15:08:41 fisyak Exp $
+#if 0 //Obsolete in Root6
+
+// @(#)root/table:$Name:  $:$Id: StFileIter.h,v 1.7.18.1 2021/05/13 17:45:35 perev Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 
 /*************************************************************************
@@ -258,3 +260,4 @@ inline void StFileIter::RestoreFileScope()
   gDirectory = fDirectoryBackUp; }
 
 #endif
+#endif //Root6

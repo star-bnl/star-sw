@@ -1,4 +1,6 @@
-// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.6 2009/03/27 17:40:16 fine Exp $
+#if 0 //Obsolete in Root6
+
+// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.6.18.1 2021/05/13 17:45:35 perev Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 
 /*************************************************************************
@@ -560,3 +562,4 @@ TString StFileIter::MapName(const char *name, const char *localSystemKey,const c
       newName.Replace(0,strlen(localName),foreignName);
    return newName;
 }
+#endif

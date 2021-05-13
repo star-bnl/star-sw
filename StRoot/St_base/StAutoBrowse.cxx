@@ -1,3 +1,4 @@
+#if 0 //Root6 ovsolete
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +9,6 @@
 #include "TMethod.h"
 #include "TMethodArg.h"
 #include "TDataType.h"
-#include "Api.h"
 #include "TBrowser.h"
 #include "TMemberInspector.h"
 #include "TError.h"
@@ -115,3 +115,4 @@ Int_t StAutoBrowse::Browse(TObject *obj,TBrowser *browser)
 #endif
   return insp.fCount;
 }
+#endif
