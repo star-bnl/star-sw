@@ -48,7 +48,7 @@ StETofHardwareMap::StETofHardwareMap( St_etofElectronicsMap* etofElectronicsMap,
     init( etofElectronicsMap );
 }
 
-StETofHardwareMap::StETofHardwareMap( string fileName, unsigned int year )
+StETofHardwareMap::StETofHardwareMap( std::string fileName, unsigned int year )
 {
     mYear = year;
 
@@ -130,10 +130,10 @@ StETofHardwareMap::init( std::string fileName )
 
     unsigned int nAfcks    = 0;
     unsigned int nChannels = 0;
-    vector< unsigned int > afckAddress;
-    vector< unsigned int > sector;
-    vector< unsigned int > channelNumber;
-    vector< unsigned int > geometryId;
+    std::vector< unsigned int > afckAddress;
+    std::vector< unsigned int > sector;
+    std::vector< unsigned int > channelNumber;
+    std::vector< unsigned int > geometryId;
 
 
 

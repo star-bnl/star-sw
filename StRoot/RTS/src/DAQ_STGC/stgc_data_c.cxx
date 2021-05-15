@@ -198,11 +198,11 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 		LOG(INFO,"S%d:%d: ECHO of cmd 0x%04X",sector1,rdo1,last_cmd) ;
 		break ;
 	case 0x4544 :	// event
-		LOG(INFO,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %u, delta %u",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts,adc_cou,
+		if(realtime) LOG(INFO,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %u, delta %u",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts,adc_cou,
 		    mhz_start_evt_marker,mhz_stop_evt_marker-mhz_start_evt_marker) ;
 		break ;
 	case 0x5445 :	// timer
-		LOG(TERR,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts) ;
+		if(realtime) LOG(TERR,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts) ;
 		break ;	
 	default :
 		LOG(ERR,"S%d:%d: %d: T %d, trg %d, daq %d, UNKNOWN type 0x%04X; shorts %d",sector1,rdo1,id,token,trg_cmd,daq_cmd,evt_type,shorts) ;
@@ -348,8 +348,12 @@ int stgc_data_c::event_0001()
 
 		bad_error |= evt_err ;
 
+
+
 		if(realtime) LOG(ERR,"S%d:%d evt_err 0x%X at adc_cou %d",sector1,rdo1,evt_err,adc_cou) ;	
-		return 0 ;
+
+		adc_cou-- ;
+		return 0 ;	// stop at the first occurence
 	}
 
 	vmm.feb_vmm = ((feb_id-1)<<2)|(vmm_id-4) ;
@@ -364,6 +368,15 @@ int stgc_data_c::event_0001()
 	else if(tb>32000) vmm.tb = 0x7FFF ;
 	else vmm.tb = tb ;
 
+
+	if(vmm.tb<-5 || vmm.tb>5) {
+		vmm.feb_vmm = 0 ;
+		vmm.ch = 0 ;
+		vmm.adc = 0 ;
+		vmm.bcid = 0 ;
+
+		// but leave tb as-is
+	}
 
 	adc_cou-- ;
 	return 1 ;
