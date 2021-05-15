@@ -1,4 +1,4 @@
-// $Id: StarBASE.h,v 1.2.2.1 2021/05/13 21:17:49 perev Exp $
+// $Id: StarBASE.h,v 1.2.2.2 2021/05/15 00:44:02 perev Exp $
 
 #ifndef STAR_StarBASE
 #define STAR_StarBASE
@@ -46,11 +46,8 @@ class StarBASE : public StMaker {
   TString fGeo;
 
  public:
-  virtual const char *GetCVS() const {
-    static const char cvs[]=
-    "Tag $Name:  $ $Id: StarBASE.h,v 1.2.2.1 2021/05/13 21:17:49 perev Exp $ built "__DATE__" "__TIME__"; 
-    return cvs;
-  }
+  virtual const char *GetCVS() const 
+  { static const char cvs[]="Tag $Name:  $ $Id: StarBASE.h,v 1.2.2.2 2021/05/15 00:44:02 perev Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   StMCStepping *mSteps;
 
