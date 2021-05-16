@@ -136,7 +136,7 @@ require  Exporter;
 
 
 use vars qw($VERSION);
-$VERSION   =   "V01.402";
+$VERSION   =   "V01.403";
 
 # The hashes that hold a current context
 my %optoperset;
@@ -2034,7 +2034,7 @@ sub disentangle_collision_type {
     my (@particles) = ("proton", "gas",
 		       "au", "ga", "si", "cu", "ca", "he3", "al",
 		       "zr", "ru",
-		       "p", "d", "s", "u");
+		       "p", "d", "s", "u" ,"o");
 
     $firstParticle = $secondParticle = "";
     $colstring     = lc($colstring);
