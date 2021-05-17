@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TH1Helper.cxx,v 1.4 2021/05/17 16:54:11 perev Exp $
+ * $Id: TH1Helper.cxx,v 1.5 2021/05/17 17:38:27 perev Exp $
  *
  ***************************************************************************
  *
@@ -18,12 +18,12 @@
 
 //ClassImp(TH1Helper)
 //______________________________________________________________________________
-void TH1Helper::SetCanRebin(TH1 *h, int axis))
+void TH1Helper::SetCanRebin(TH1 *h, int axis)
 {
 #if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
   h->SetBit(TH1::kCanRebin);
 #else
-  if (!axis) axis = TH1::kAllAxis;
+  if (!axis) axis = TH1::kAllAxes;
   h->SetCanExtend(axis);
 #endif
 }
