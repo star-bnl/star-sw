@@ -1,6 +1,9 @@
 //----------------------------------------------------------------------------------------------------
-// $Id: CentralityMaker.cxx,v 1.3 2020/01/16 23:51:55 tnonaka Exp $
+// $Id: CentralityMaker.cxx,v 1.4 2021/05/17 09:07:05 tnonaka Exp $
 // $Log: CentralityMaker.cxx,v $
+// Revision 1.4  2021/05/17 09:07:05  tnonaka
+// Refmult centrality definition for isobaric data
+//
 // Revision 1.3  2020/01/16 23:51:55  tnonaka
 // gRefmult for Run14 and Run16 added
 //
@@ -43,6 +46,7 @@ CentralityMaker::CentralityMaker()
   fRefMultCorr  = new StRefMultCorr("refmult") ;
   fRefMult2Corr = new StRefMultCorr("refmult2") ;
   fRefMult3Corr = new StRefMultCorr("refmult3") ;
+  fRefMultCorr_Isobar  = new StRefMultCorr("refmult","Isobar") ;
  // fTofTrayMultCorr = new StRefMultCorr("toftray") ;
   fgRefMultCorr  = new StRefMultCorr("grefmult") ;
   fgRefMultCorr_Run14_AuAu200_VpdMB5_P16id = new StRefMultCorr("grefmult","Run14_AuAu200_VpdMB5","P16id") ;
@@ -84,6 +88,12 @@ StRefMultCorr* CentralityMaker::getRefMult2Corr()
 StRefMultCorr* CentralityMaker::getRefMult3Corr()
 {
   return fRefMult3Corr ;
+}
+
+//____________________________________________________________________________________________________
+StRefMultCorr* CentralityMaker::getRefMultCorr_Isobar()
+{
+  return fRefMultCorr_Isobar ;
 }
 
 /*

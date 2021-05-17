@@ -1,6 +1,9 @@
 //----------------------------------------------------------------------------------------------------
-// $Id: CentralityMaker.h,v 1.3 2020/01/16 23:52:58 tnonaka Exp $
+// $Id: CentralityMaker.h,v 1.4 2021/05/17 09:07:05 tnonaka Exp $
 // $Log: CentralityMaker.h,v $
+// Revision 1.4  2021/05/17 09:07:05  tnonaka
+// Refmult centrality definition for isobaric data
+//
 // Revision 1.3  2020/01/16 23:52:58  tnonaka
 // gRefmult for Run14 and Run16 added
 //
@@ -53,6 +56,7 @@ class CentralityMaker {
     StRefMultCorr* getRefMultCorr()  ; // For refmult
     StRefMultCorr* getRefMult2Corr() ; // For refmult2
     StRefMultCorr* getRefMult3Corr() ; // For refmult3
+    StRefMultCorr* getRefMultCorr_Isobar()  ; // For refmult
    // StRefMultCorr* getTofTrayMultCorr() ; // For TOF tray multiplicity
     StRefMultCorr* getgRefMultCorr()  ; // For grefmult //Run14 AuAu200GeV
     StRefMultCorr* getgRefMultCorr_Run14_AuAu200_VpdMB5_P16id()  ; 
@@ -73,6 +77,7 @@ class CentralityMaker {
     StRefMultCorr* fRefMultCorr  ; // refmult based centrality
     StRefMultCorr* fRefMult2Corr ; // refmult2 based centrality
     StRefMultCorr* fRefMult3Corr ; // refmult3 based centrality
+    StRefMultCorr* fRefMultCorr_Isobar  ; // refmult based centrality
    // StRefMultCorr* fTofTrayMultCorr ; // tofTrayMult based centrality
     StRefMultCorr* fgRefMultCorr  ; // grefmult based centrality
     StRefMultCorr* fgRefMultCorr_Run14_AuAu200_VpdMB5_P16id  ;
