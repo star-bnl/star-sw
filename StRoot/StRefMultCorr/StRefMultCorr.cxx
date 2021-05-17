@@ -1,6 +1,9 @@
 //------------------------------------------------------------------------------
-// $Id: StRefMultCorr.cxx,v 1.5 2020/01/16 23:53:28 tnonaka Exp $
+// $Id: StRefMultCorr.cxx,v 1.6 2021/05/17 09:07:05 tnonaka Exp $
 // $Log: StRefMultCorr.cxx,v $
+// Revision 1.6  2021/05/17 09:07:05  tnonaka
+// Refmult centrality definition for isobaric data
+//
 // Revision 1.5  2020/01/16 23:53:28  tnonaka
 // gRefmult for Run14 and Run16 added
 //
@@ -254,6 +257,40 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
 
 		return true;
 	}
+	else if( mParameterIndex>=36 && mParameterIndex<=37 )//Run18 200 GeV isobar 
+	{
+		double b0, b1, b2, b3, b4;
+		double c0, c1, c2, c3, c4;
+		// Zr+Zr
+		if(mParameterIndex==36){
+			b0=13.5244327901538;
+			b1=1.4429201808933;
+			b2=-0.002873496957537;
+			b3=7.29172798142226e-06;
+			b4=-7.45759942317285e-09;
+			c0=-11.2781454979572;
+			c1=0.420728494449501;
+			c2=0.00184005031913895;
+			c3=-4.61008765754698e-06;
+			c4=4.28291905929182e-09;
+		}
+		// Ru+Ru
+		else if(mParameterIndex==37){
+			b0=13.5426221755897;
+			b1=1.44261201539344;
+			b2=-0.00288428931227279;
+			b3=7.35384541646783e-06;
+			b4=-7.53407759526067e-09;
+			c0=-11.2591376113937;
+			c1=0.419541462167548;
+			c2=0.00185578651291454;
+			c3=-4.68933832723005e-06;
+			c4=4.4151761900593e-09;
+		}
+		double refmultcutmax = ( b0 + b1*(ntofmatch) + b2*pow(ntofmatch,2) + b3*pow(ntofmatch,3) + b4*pow(ntofmatch,4) );
+		double refmultcutmin = ( c0 + c1*(ntofmatch) + c2*pow(ntofmatch,2) + c3*pow(ntofmatch,3) + c4*pow(ntofmatch,4) );
+		return ( refmult<refmultcutmax && refmult>refmultcutmin );
+	}
 	else
 	{
 		return true;
@@ -425,6 +462,32 @@ Int_t StRefMultCorr::setParameterIndex(const Int_t RunId)
 		}
 	}	
 
+	// Run numbers for isobar data are not successive
+	if ( mName.CompareTo("refmult", TString::kIgnoreCase) == 0 &&
+	     mSubName.CompareTo("Isobar", TString::kIgnoreCase) == 0 ){
+	//	cout <<"This is isobaric runs"<< endl;
+		IsZr = IsRu = kFALSE;
+		for(Int_t i=0; i<nRunId_Zr; i++){
+			if(RunId==IsobarRunId_Zr[i]){
+				IsZr = kTRUE; 
+				mParameterIndex = 36;
+			//	cout <<"--> Zr+Zr"<< endl;
+				break;
+			}
+		}
+		for(Int_t i=0; i<nRunId_Ru; i++){
+			if(RunId==IsobarRunId_Ru[i]){
+				IsRu = kTRUE; 
+				mParameterIndex = 37;
+			//	cout <<"--> Ru+Ru"<< endl;
+				break;
+			}
+		}
+		if(!IsZr&&!IsRu){
+			Error("StRefMultCorr::setParameterIndex", "RUN %d is not isobaric data", RunId);
+		}
+	}
+
 //	cout <<"mParameterIndex = "<< mParameterIndex << endl;
 
 	if(mParameterIndex == -1)
@@ -462,7 +525,19 @@ Double_t StRefMultCorr::getRefMultCorr(
 	// better to check the <Refmult> vs ZDCX to see whether they are flat or not, add by Zaochen
 	const Double_t par0_lum = mPar_luminosity[0][mParameterIndex] ;
 	const Double_t par1_lum = mPar_luminosity[1][mParameterIndex] ;
-	Double_t correction_luminosity = (par0_lum==0.000) ? 1.0 : 1.0/(1.0 + par1_lum/par0_lum*zdcCoincidenceRate/1000.);
+	Double_t correction_luminosity;
+	if( mParameterIndex>=36 && mParameterIndex<=37 )
+	{
+           // if(mYear[mParameterIndex] == 2018 && IsZr) zdcmean = 96.9914;
+           // if(mYear[mParameterIndex] == 2018 && IsRu) zdcmean = 97.9927;
+	   	Double_t b_prime = 1.;
+		if(mParameterIndex==36) b_prime = 96.9914; // Zr
+		if(mParameterIndex==37) b_prime = 97.9927; // Ru
+		correction_luminosity = (par0_lum==0.000) ? 1.0 : b_prime/(par0_lum+zdcCoincidenceRate*par1_lum);
+	}
+	else {
+		correction_luminosity = (par0_lum==0.000) ? 1.0 : 1.0/(1.0 + par1_lum/par0_lum*zdcCoincidenceRate/1000.);
+	}
 
 	// from Run14, P16id, for VpdMB5/VPDMB30/VPDMB-noVtx, use refMult at ZdcX=30, other is at ZdcX=0;  
 	// -->changed by xlchen@lbl.gov, Run16 ~ 50kHz
@@ -506,10 +581,15 @@ Double_t StRefMultCorr::getRefMultCorr(
 	{
 		RefMult_d = (Double_t)(RefMult)+gRandom->Rndm()-0.5;
 	}
+	else if( mParameterIndex>=36 && mParameterIndex<=37 )
+	{
+		RefMult_d = (Double_t)(RefMult)-0.5+gRandom->Rndm();
+	}
 	else
 	{
 		RefMult_d = (Double_t)(RefMult)+gRandom->Rndm();
 	}
+
 	
 	Double_t RefMult_corr  = -9999. ;
 	switch ( flag ) 
@@ -523,7 +603,6 @@ Double_t StRefMultCorr::getRefMultCorr(
 					return -9999.;
 				}
 	}
-	//  cout << "Input RefMult = " << RefMult << ", input z = " << z << ", RefMult_corr = " << RefMult_corr << endl;
 	return RefMult_corr ;
 }
 
@@ -682,6 +761,7 @@ Double_t StRefMultCorr::getScaleForWeight() const
 }
 
 //______________________________________________________________________________
+// For Run18 27 GeV
 Double_t StRefMultCorr::getShapeWeight_SubVz2Center()
 {
 	if( mParameterIndex>=30 && mParameterIndex<=35 )//Run18 27 GeV MB
@@ -728,15 +808,32 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center()
 		
 		return (1./ShapeReweight);
 	}
+	else if( mParameterIndex>=36 && mParameterIndex<=37 )//Run18 200GeV isobar 
+	{
+		if(mVz>=-9 && mVz<=9) return 1.;
+		Int_t mShapeIndex;
+		if(IsRu)      mShapeIndex=0;
+		else if(IsZr) mShapeIndex=1;
+		Int_t iVzBinIndex = getVzWindowForVzDepCentDef();
+		//retrive shape weight 
+		Double_t weight = 1.;
+		if(iVzBinIndex>=22) weight = ShapeWeightArray[mShapeIndex][iVzBinIndex-9][TMath::Nint(mRefMult_corr)];
+		else		    weight = ShapeWeightArray[mShapeIndex][iVzBinIndex][TMath::Nint(mRefMult_corr)];
+		//handle bad weight
+		if(weight == 0 || TMath::IsNaN(weight)) weight = 1.;
+		return weight;
+	}
 	else
 	{
 		return 1.0;
 	}
 }
 
+
 //______________________________________________________________________________
 Double_t StRefMultCorr::getWeight() //const
 {
+
 	Double_t Weight = 1.0;
 
 	// Invalid index
@@ -744,6 +841,11 @@ Double_t StRefMultCorr::getWeight() //const
 
 	// Invalid z-vertex
 	if( !isZvertexOk() ) return Weight ;
+
+	// 200 GeV Isobar
+	if(mParameterIndex==36||mParameterIndex==37){
+		return getShapeWeight_SubVz2Center();
+	}
 
 	const Double_t par0 =   mPar_weight[0][mParameterIndex];
 	const Double_t par1 =   mPar_weight[1][mParameterIndex];
@@ -897,6 +999,49 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const
 		else if(mVz>=60. &&mVz<=70 ) iBinVz = 13;
 		else iBinVz = -1;
 	}
+	else if(mParameterIndex>=36 &&mParameterIndex<=37)//Run18 200 GeV isobar 
+	{
+		Double_t VtxZBinDouble = mVz/2. + 17.;
+		iBinVz = 0;
+		if(mVz == 25.) iBinVz = 29;
+		else if(mVz == -35.) iBinVz = 0;
+		else iBinVz = TMath::Nint(VtxZBinDouble);
+	}
+	/*
+	else if(mParameterIndex>=36 &&mParameterIndex<=37)//Run18 200 GeV isobar 
+	{
+		if(     mVz>=-35.&&mVz<-33.) iBinVz = 0;
+		else if(mVz>=-33.&&mVz<-31.) iBinVz = 1;
+		else if(mVz>=-31.&&mVz<-29.) iBinVz = 2;
+		else if(mVz>=-29.&&mVz<-27.) iBinVz = 3;
+		else if(mVz>=-27.&&mVz<-25.) iBinVz = 4;
+		else if(mVz>=-25.&&mVz<-23.) iBinVz = 5;
+		else if(mVz>=-23.&&mVz<-21.) iBinVz = 6;
+		else if(mVz>=-21.&&mVz<-19.) iBinVz = 7;
+		else if(mVz>=-19.&&mVz<-17.) iBinVz = 8;
+		else if(mVz>=-17.&&mVz<-15.) iBinVz = 9;
+		else if(mVz>=-15.&&mVz<-13.) iBinVz = 10;
+		else if(mVz>=-13.&&mVz<-11.) iBinVz = 11;
+		else if(mVz>=-11.&&mVz<-9.) iBinVz = 12;
+		else if(mVz>=-9.&&mVz<-7.) iBinVz = 13;
+		else if(mVz>=-7.&&mVz<-5.) iBinVz = 14;
+		else if(mVz>=-5.&&mVz<-3.) iBinVz = 15;
+		else if(mVz>=-3.&&mVz<-1.) iBinVz = 16;
+		else if(mVz>=-1.&&mVz<1.) iBinVz = 17;
+		else if(mVz>=1.&&mVz<3.) iBinVz = 18;
+		else if(mVz>=3.&&mVz<5.) iBinVz = 19;
+		else if(mVz>=5.&&mVz<7.) iBinVz = 20;
+		else if(mVz>=7.&&mVz<9.) iBinVz = 21;
+		else if(mVz>=9.&&mVz<11.) iBinVz = 22;
+		else if(mVz>=11.&&mVz<13.) iBinVz = 23;
+		else if(mVz>=13.&&mVz<15.) iBinVz = 24;
+		else if(mVz>=15.&&mVz<17.) iBinVz = 25;
+		else if(mVz>=17.&&mVz<19.) iBinVz = 26;
+		else if(mVz>=19.&&mVz<21.) iBinVz = 27;
+		else if(mVz>=21.&&mVz<23.) iBinVz = 28;
+		else if(mVz>=23.&&mVz<=25.) iBinVz = 29;
+	}
+	*/
 	else iBinVz = -1;
 	
 	return iBinVz;
