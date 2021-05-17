@@ -1,6 +1,9 @@
 //------------------------------------------------------------------------------
-// $Id: StRefMultCorr.h,v 1.5 2020/01/16 23:53:31 tnonaka Exp $
+// $Id: StRefMultCorr.h,v 1.6 2021/05/17 09:07:05 tnonaka Exp $
 // $Log: StRefMultCorr.h,v $
+// Revision 1.6  2021/05/17 09:07:05  tnonaka
+// Refmult centrality definition for isobaric data
+//
 // Revision 1.5  2020/01/16 23:53:31  tnonaka
 // gRefmult for Run14 and Run16 added
 //
@@ -153,6 +156,9 @@ class StRefMultCorr
 		Bool_t isRefMultOk() const ; /// 0-80%, (corrected multiplicity) > mCentrality_bins[0]
 		Bool_t isCentralityOk(const Int_t icent) const ; /// centrality bin check
 		Int_t setParameterIndex(const Int_t RunId) ; /// Parameter index from run id (return mParameterIndex)
+		// For isobar
+		Bool_t IsZr;
+		Bool_t IsRu;
 
 		// Special scale factor for Run14 to take into account the weight
 		// between different triggers
