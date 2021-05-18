@@ -27,6 +27,7 @@ int    GetNonZeros() const;
 double GetIntegral() ; 
 double GetIntegErr() ;
 
+static void SetCanRebin(TH1 *h,int axis=0);
 
 private:
 void   Build();

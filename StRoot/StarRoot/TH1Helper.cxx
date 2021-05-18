@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TH1Helper.cxx,v 1.3 2016/01/22 17:45:19 smirnovd Exp $
+ * $Id: TH1Helper.cxx,v 1.5 2021/05/17 17:38:27 perev Exp $
  *
  ***************************************************************************
  *
@@ -17,6 +17,17 @@
 #include "TMath.h"
 
 //ClassImp(TH1Helper)
+//______________________________________________________________________________
+void TH1Helper::SetCanRebin(TH1 *h, int axis)
+{
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
+  h->SetBit(TH1::kCanRebin);
+#else
+  if (!axis) axis = TH1::kAllAxes;
+  h->SetCanExtend(axis);
+#endif
+}
+
 //______________________________________________________________________________
 TH1Helper::TH1Helper(const TH1 *h, int binMin, int binMax)
 {
