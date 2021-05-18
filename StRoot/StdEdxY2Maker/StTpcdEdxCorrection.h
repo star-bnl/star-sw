@@ -162,6 +162,9 @@ class dEdxY2_t {
   dE_t     F;     //! 
   Int_t    npads; // cluster size in pads
   Int_t    ntmbks;// clustre size in time buckets
+  Float_t  AdcI;  // integrated ADC over time for a given socket
+  Float_t  dZdY;  // cluster projection on on Z
+  Float_t  dXdY;  // cluster projection on Wire
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
 }; 

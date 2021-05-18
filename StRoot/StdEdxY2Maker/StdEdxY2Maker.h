@@ -26,6 +26,8 @@ class StTrack;
 class StTpcdEdxCorrection;
 class dEdxY2_t;
 class dst_dedx_st;
+class StTpcHit;
+class StTpcHitCollection;
 class StdEdxY2Maker : public StMaker {
  public: 
   enum  EMode {kOldClusterFinder     =  0,
@@ -70,6 +72,8 @@ class StdEdxY2Maker : public StMaker {
   static  void fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   static  Double_t gaus2(Double_t *x, Double_t *p);
   static  TF1 *Gaus2();
+  void     IntegrateAdc(const StTpcHitCollection* TpcHitCollection);
+  Double_t IntegratedAdc(const StTpcHit* tpcHit);
  private:
   void   AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx);
   static Int_t Propagate(const StThreeVectorD &middle,const StThreeVectorD &normal,
@@ -94,6 +98,7 @@ class StdEdxY2Maker : public StMaker {
   Char_t               end[1];
   static Double_t      bField;
   static Bool_t        fUsedNdx;
+  static TH2F         *fIntegratedAdc;
  public:
   virtual const char *GetCVS() const {
     static const char cvs[]=
