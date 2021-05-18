@@ -14,9 +14,6 @@
 #include "TMethod.h"
 #include "TMethodArg.h"
 #include "TDataType.h"
-#if ROOT_VERSION_CODE < ROOT_VERSION(5,34,29)
-#include "Api.h"
-#endif
 #include "TMemberInspector.h"
 #include "TExMap.h"
 #include "TCollection.h"
