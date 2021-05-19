@@ -50,6 +50,10 @@ public:
 	}
 
 	void help() const ;
+
+	int xing_min ;
+	int xing_max ;
+
 private:
 	int get_l2_vmm(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt=0) ;
 } ;

@@ -86,6 +86,9 @@ daq_stgc::daq_stgc(daqReader *rts_caller)
 
 	LOG(DBG,"%s: constructor: caller %p",name, caller) ;
 
+	xing_min = -10 ;
+	xing_max = 20 ;
+
 	return ;
 }
 
@@ -417,6 +420,9 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 	min_rdo = 1 ;
 	max_rdo = 4 ;
 
+
+	stgc.xing_min = xing_min ;
+	stgc.xing_max = xing_max ;
 
 	// calc total bytes
 	tot_bytes = 0 ;
