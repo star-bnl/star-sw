@@ -36,6 +36,7 @@ if ( defined($arg1) ){
 if ( defined($ENV{FO_DEBUG}) ){
     rdaq_toggle_debug();
 }
+#$| = 1;
 
 # We add an infinit loop around so the table will be filled
 # as we go.
@@ -60,6 +61,7 @@ do {
 		$crun = $prun= "0.0";
 	    } else {
 		$run = $mode*rdaq_last_run($dbObj);
+		#$run = 22133020;  # DEBUG
 		($prun,$crun)= &GetRun();
 	    }
 
