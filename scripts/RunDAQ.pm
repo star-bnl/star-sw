@@ -135,6 +135,7 @@
 #
 #
 #
+use POSIX;
 use Carp;
 use DBI;
 use Date::Manip ();
@@ -184,7 +185,7 @@ $DDBPASSWD = "";
 $DDBPORT   = 3501;
 $DDBNAME   = "RunLog";
 
-$RDBOBJ    = undef;
+#$RDBOBJ    = undef;
 $ODBOBJ    = undef;
 
 $dbhost    = "duvall.star.bnl.gov";
@@ -248,6 +249,9 @@ $THREAD0{"TrgSetup"} = "FOTriggerSetup";
 $THREAD0{"ftype"}    = "FOFileType";
 $THREAD1{"Chain"}    = "FOChains";
 $THREAD1{"runNumber"}= "FOruns";
+
+$HEADER  = "FastOffl".POSIX::strftime("%Y%m%d-%H%M%S",localtime())." ::";
+
 
 
 #
@@ -628,8 +632,24 @@ sub rdaq_raw_files
 		# since this may be used in a CGI.
 		print "<!-- Fetched $kk records -->\n" if ($DEBUG);
 	    }
+	    # add some info between a run that is not completely
+	    # defined and now fully defined
+	    if ( defined($MESSAGES{$res[1]}) ){
+		&info_message("raw_files",3,
+			      "$res[1] undefined on ".
+			      $MESSAGES{$res[1]}." now defined ".
+			      localtime()."\n"
+		    );
+		undef($MESSAGES{$res[1]});
+	    }
+
 	} else {
-	    &info_message("raw_files",3,"Incomplete information (will skip)\n");
+	    # note that in this case, we key with run number
+	    $msg = "Incomplete information for $res[1] (will skip)\n";
+	    if ( ! defined($MESSAGES{$res[1]}) ){
+		&info_message("raw_files",3,$msg);
+		$MESSAGES{$res[1]} = localtime()."";
+	    }
 	}
     }
     $sth->finish();
@@ -709,10 +729,18 @@ sub rdaq_fetcher
 	# Ideally, we should skip those ... but there are so many. So decided
 	# to give a warning for debugging but save "unknown" (val=0).
 	if ($mask == 0 ){
-	    &info_message("fetcher",1,
-			  "Reading $run table=detectorTypes,detectorSet was 0 [$mask] (daq/trg run only)\n");
-	    #return undef;
-	} # else {
+	    # less messages - dislay ince per run
+	    my($msg)= "Reading $run table=detectorTypes,detectorSet was 0 [$mask] (daq/trg run only)\n";
+	    if ( ! defined($MESSAGES{$msg}) ){
+		&info_message("fetcher",1,$msg);
+		$MESSAGES{$msg}=1;
+	    }
+	    # 2021/05/14 - also happening here, while reading the table, 
+	    # comes empty suggesting a delay between run appearing and
+	    # the info being available - best to leave (FO will trya again
+	    # later)
+	    return undef;
+	} 
 	$DETSETS{$run} = $mask;
 	#}
     } else {
@@ -729,7 +757,11 @@ sub rdaq_fetcher
 	$mask = 0;
 	$sths->execute($run);
 	if( ! $sths ){
-	    &info_message("fetcher",3,"$run cannot be evaluated. No TriggerSetup info.\n");
+	    my($msg)="$run cannot be evaluated. No TriggerSetup info.\n";
+	    if ( ! defined($MESSAGES{$msg}) ){
+		&info_message("fetcher",3,$msg);
+		$MESSAGES{$msg}=1;
+	    }
 	    return undef;
 	} else {
 	    $mask = "";
@@ -740,8 +772,11 @@ sub rdaq_fetcher
 	    $mask = &Record_n_Fetch("FOTriggerSetup",$mask);
 	}
 	if ($mask eq ""){
-	    &info_message("fetcher",1,
-			  "Reading $run TrgSet table=runDescriptor field=glbSetupName leaded to [$mask]");
+	    my($msg)="Reading $run TrgSet table=runDescriptor field=glbSetupName leaded to [$mask]";
+	    if ( ! defined($MESSAGES{$msg}) ){
+		&info_message("fetcher",1,$msg);
+		$MESSAGES{$msg}=1;
+	    }
 	    return undef;
 	} else {
 	    $TRGSET{$run} = $mask;
@@ -757,13 +792,22 @@ sub rdaq_fetcher
     #
     if( ! defined($TRGMASK{$run}) ){
 	#&info_message("fetcher",3,"Checking TrgMask for run $run -> ");
+	my(@tmsg)="";
 	$mask = "";
 	$sthl->execute($run);
 	if( ! $sthl ){
-	    &info_message("fetcher",3,"$run cannot be evaluated. No TriggerLabel info.\n");
+	    my($msg)="$run cannot be evaluated. No TriggerLabel info.\n";
+	    if ( ! defined($MESSAGES{$msg}) ){
+		&info_message("fetcher",1,$msg);
+		$MESSAGES{$msg}=1;
+	    }
 	    return undef;
+
 	} else {
 	    while( @items = $sthl->fetchrow_array() ){
+		#if ($run == 22133029){
+		#    print " DEBUG ".join(";",@items)."\n";
+		#}
 		if($items[1] != 0){
 		    #if (  $run == 12050037 ){
 		    #	print "  $items[0] found -> ".&GetBitValue("TrgMask",$items[0])."\n";
@@ -771,21 +815,33 @@ sub rdaq_fetcher
 		    # mask can only go to 64 bits in perl (bummer)
 		    #$mask += (1 << &GetBitValue("TrgMask",$items[0]));
 		    $mask .= "[".&GetBitValue("TrgMask",$items[0])."].";
+		} else {
+		    # accumulate messages and display only if we end with
+		    # an empty mask
+		    push(@tmsg,
+			 "noticed run=$run, got ".join(";",@items).
+			 " (0 count in this trigger)\n");
+		    #&info_message("fetcher",1,
+		    #		  "noticed run=$run, got ".join(";",@items).
+		    #		  " (0 count in this trigger)\n");
 		}
 	    }
+	    #print "DEBUG mask is now [$mask]\n";
 	    chop($mask);
 	}
 	if ($mask eq ""){
-	    &info_message("fetcher",1,
-			  "Reading $run TrgMask table=l0TriggerSet leaded to [$mask]\n");
-	    #return undef;
-	} #else {
-	    #if ( $run == 12050037 ){
-	    #	print "<!-- For $run TrgMask table=l0TriggerSet mask=$mask -->\n";
-	    #	die;
-	    #}
+	    my($msg)="Reading $run TrgMask table=l0TriggerSet leaded to [$mask]\n";
+	    if ( ! defined($MESSAGES{$msg}) ){
+		&info_message("fetcher",1,@tmsg);
+		&info_message("fetcher",1,$msg);
+		&info_message("fetcher",1,
+			      "Mask cleanup (remove 0 counts) for run=$run ".
+			      "ended empty\n");
+		$MESSAGES{$msg}=1;
+	    }
+	    return undef;
+	} 
 	$TRGMASK{$run} = $mask;
-	#}
 
     } else {
 	$mask = $TRGMASK{$run};
@@ -1753,17 +1809,17 @@ sub	info_message
 	    chomp($mess);
 	    if ($mess =~ /;/){
 		my(@items) = split(/;/,$mess);
-		printf "FastOffl :: <TT>%10.10s</TT> :<BR>\n<BLOCKQUOTE>\n",$routine;
+		printf "$HEADER <TT>%10.10s</TT> :<BR>\n<BLOCKQUOTE>\n",$routine;
 		foreach (@items){
 		    print "$_<BR>\n";
 		}
 		print "</BLOCKQUOTE>\n";
 	    } else {
-		printf "FastOffl :: <TT>%10.10s</TT> : %s<BR>\n",$routine,$mess;
+		printf "$HEADER <TT>%10.10s</TT> : %s<BR>\n",$routine,$mess;
 	    }
 	} else {
 	    # default mode
-	    printf "FastOffl :: %10.10s : %s",$routine,$mess;
+	    printf "$HEADER %10.10s : %s",$routine,$mess;
 	}
     }
 }
@@ -1821,7 +1877,7 @@ sub  rdaq_set_message
 	$sth1 = $obj->prepare("SELECT id FROM FOMessages WHERE Message='?' AND Variablemsg='?'");
 	$sth2 = $obj->prepare("INSERT INTO FOMessages VALUES(0,NOW(),?,?,?)");
 	if ( ! defined($fac) ){  $fac  = "-";}
-	if ( ! defined($mess) ){ $cat  = "";}
+	if ( ! defined($mess) ){ $mess = "";}
 	if ( ! defined($var)){   $var  = "";}
 	if ( $sth1 ){
 	    $sth1->execute($mess,$var);
