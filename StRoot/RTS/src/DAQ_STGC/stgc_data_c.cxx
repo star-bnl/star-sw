@@ -46,6 +46,9 @@ stgc_data_c::stgc_data_c()
 	sector1 = 1 ;
 	rdo1 = 1 ;
 
+	xing_min = -10 ;
+	xing_max = 20 ;
+
 	return ;
 }
 
@@ -88,6 +91,9 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 	}
 
 	version = d[2] ;
+	if(version != 0x6) {
+		LOG(ERR,"VERSION 0x%04X",d[2]) ;
+	}
 
 	evt_type = d[8] ;
 	c_type = type_c(evt_type) ;
@@ -140,10 +146,10 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 	adc_cou -= 2 ;	// remove the stop_mhz 2 shorts...
 	
 	if(realtime) {
-	if(adc_cou%4) {
+	if(adc_cou%4 || shorts>40000) {
 		LOG(ERR,"%d: len is %d!?",rdo1,adc_cou) ;
 		for(int i=0;i<32;i++) {
-			LOG(TERR,"%d: %d/%d = 0x%04X",i,shorts,d[i]) ;
+			LOG(TERR,"%d/%d = 0x%04X",i,shorts,d[i]) ;
 			LOG(TERR,"last %d = 0x%04X",i,d16_last[-i]) ;
 		}
 	
@@ -198,8 +204,11 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 		LOG(INFO,"S%d:%d: ECHO of cmd 0x%04X",sector1,rdo1,last_cmd) ;
 		break ;
 	case 0x4544 :	// event
-		if(realtime) LOG(INFO,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %u, delta %u",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts,adc_cou,
+//		if(realtime) LOG(INFO,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %u, delta %u",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts,adc_cou,
+//		    mhz_start_evt_marker,mhz_stop_evt_marker-mhz_start_evt_marker) ;
+		LOG(NOTE,"S%d:%d: %d: VERSION 0x%04X: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %u, delta %u",sector1,rdo1,id,version,token,trg_cmd,daq_cmd,shorts,adc_cou,
 		    mhz_start_evt_marker,mhz_stop_evt_marker-mhz_start_evt_marker) ;
+
 		break ;
 	case 0x5445 :	// timer
 		if(realtime) LOG(TERR,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts) ;
@@ -252,6 +261,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 // unpacks and sanity-checks 1 RDO event
 int stgc_data_c::start_0001(u_short *d, int shorts)
 {
+	trg_cou = 0 ;
 
 	// move to start of actual data...
 	return 0 ;
@@ -297,9 +307,13 @@ int stgc_data_c::event_0001()
 
 		if((t != token)||(t_cmd != trg_cmd)||(d_cmd != daq_cmd)) err = 1 ;
 			
+		if(trg_cou) err = 1 ;	// more than 1 trigger
 
 		if(err) {
-			if(realtime) LOG(ERR,"%d: trg_cou %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_counter,t,t_cmd,d_cmd,mhz_trg_marker) ;
+			if(realtime) {
+				LOG(ERR,"%d: trg_counter %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_counter,t,t_cmd,d_cmd,mhz_trg_marker) ;
+				LOG(ERR,"%d: trg_cou %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_cou,token,trg_cmd,daq_cmd,mhz_trg_marker) ;
+			}
 		}
 		else {
 			//LOG(INFO,"%d: trg_cou %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_counter,t,t_cmd,d_cmd,mhz_trg_marker) ;
@@ -313,6 +327,7 @@ int stgc_data_c::event_0001()
 		vmm.tb = 0 ;
 
 		adc_cou-- ;
+		trg_cou++ ;
 		return 1 ;
 	}
 
@@ -360,7 +375,6 @@ int stgc_data_c::event_0001()
 	vmm.ch = channel ;
 	vmm.adc = pdo ;
 	vmm.bcid = bcid ;
-//	vmm.tb = (int)mhz_adc_marker - (int)(mhz_trg_marker&0x1FFFFFFF) ;
 
 	int tb = (int)mhz_adc_marker - (int)(mhz_trg_marker&0x1FFFFFFF) ;
 
@@ -369,7 +383,7 @@ int stgc_data_c::event_0001()
 	else vmm.tb = tb ;
 
 
-	if(vmm.tb<-5 || vmm.tb>5) {
+	if(vmm.tb<xing_min || vmm.tb>xing_max) {
 		vmm.feb_vmm = 0 ;
 		vmm.ch = 0 ;
 		vmm.adc = 0 ;
@@ -377,6 +391,7 @@ int stgc_data_c::event_0001()
 
 		// but leave tb as-is
 	}
+
 
 	adc_cou-- ;
 	return 1 ;
@@ -418,6 +433,9 @@ int stgc_data_c::start(u_short *d, int shorts)
 	case 0x0001 :
 	case 0x0002 :
 	case 0x0003 :
+	case 0x0004 :
+	case 0x0005 :
+	case 0x0006 :
 		return start_0001(d,shorts) ;
 	default :
 		break ;
@@ -516,6 +534,9 @@ int stgc_data_c::event()
 	case 0x0001 :
 	case 0x0002 :
 	case 0x0003 :
+	case 0x0004 :
+	case 0x0005 :
+	case 0x0006 :
 		return event_0001() ;
 	default:
 		break ;

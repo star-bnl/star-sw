@@ -59,6 +59,10 @@ public:
 	} errs[STGC_RDO_COU] ;
 
 	int adc_cou ;
+	int trg_cou ;
+
+	int xing_min ;
+	int xing_max ;
 
 	int event_any ;
 	int event_data ;
