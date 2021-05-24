@@ -1292,6 +1292,7 @@
 		      },
 		  'SUFOBJ' => "." . $O,
 		  'ENV'    => {
+		      'CPATH'           => $CPATH,
 		      'PATH'            => $PATH,
 		      'LM_LICENSE_FILE' => $LM_LICENSE_FILE,
 		      'INCLUDE'         => $INCLUDE_PATH,
