@@ -134,14 +134,16 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20i/ or $pwd =~ /P21i/) {
 #    elsif ($pwd =~ /7p7GeV_2021\/TFG21c\.B/)   {
 #    else {die "Not set yet";}
     if ($pwd =~ /3p85GeV_fixedTarget_2021/)   {$glob = "/2021/FF/TFG21e/3p85GeV_fixedTarget_2021";}
-    elsif ($pwd =~ /7p7GeV_2021_FF/)          {$glob = "/2021/FF/TFG21c.B/7p7GeV_2021";}
+    elsif ($pwd =~ /7p7GeV_2021_FF/)          {$glob = "/2021/FF/TFG21c.B/FF_7p7GeV_2021_FF";}
     elsif ($pwd =~ /7p7GeV_2021/)             {$glob = "/2021/RF/TFG21c.B/7p7GeV_2021";}
   }
   elsif ($pwd =~ /2021\/3p85GeV_fixedTarget_2021/) {$glob = "/2021/RF/TFG21e/3p85GeV_fixedTarget_2021";}
-  elsif ($pwd =~ /2021\/100GeV_fixedTarget_2021/) {$glob = "/2021/RF/TFG21e/100GeV_fixedTarget_2021";}
+  elsif ($pwd =~ /2021\/100GeV_fixedTarget_2021/)  {$glob = "/2021/RF/TFG21e/100GeV_fixedTarget_2021";}
   elsif ($pwd =~ /2021\/44p5GeV_fixedTarget_2021/) {$glob = "/2021/RF/TFG21e/44p5GeV_fixedTarget_2021";}
-  elsif ($pwd =~ /2021\/70GeV_fixedTarget_2021/) {$glob = "/2021/RF/TFG21e/70GeV_fixedTarget_2021";}
-  elsif ($pwd =~ /2021\/OO_200GeV_2021/) {$glob = "/2021/RF/TFG21e/OO_200GeV_2021";}
+  elsif ($pwd =~ /2021\/70GeV_fixedTarget_2021/)   {$glob = "/2021/RF/TFG21e/70GeV_fixedTarget_2021";}
+  elsif ($pwd =~ /2021\/ps_OO_200GeV_2021/)        {$glob = "/2021/RF/TFG21e/ps_OO_200GeV_2021";}
+  elsif ($pwd =~ /2021\/OO_200GeV_2021/)           {$glob = "/2021/RF/TFG21e/OO_200GeV_2021";}
+  elsif ($pwd =~ /2021\/FF_OO_200GeV_2021/)        {$glob = "/2021/FF/TFG21e/FF_OO_200GeV_2021";}
 }
 print "PICOPATH = $PICOPATH; days = $dayMin  - $dayMax : glob = $glob\n" if ($debug);
 #if (! $glob) {die "glob = $glob";}
