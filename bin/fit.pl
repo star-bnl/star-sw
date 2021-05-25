@@ -37,8 +37,13 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 
   @histGF = qw(
 	       SecRow3  Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3
 	       SecRow3C PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C
+	       AdcI3 dZdY3 dXdY3  nPad3 nTbk3
+	       AdcI3C dZdY3C dXdY3C nPad3C nTbk3C
+	       
 	     );
 
+#	       AdcI3P dZdY3P dXdY3P
+#	       AdcI3+AdcI3P dZdY3+dZdY3P dXdY3+dXdY3P
 # SecRow3  PressureTC Volt VoltCC  xyPad3C Edge3C TanL3DC TanL3DiTPCC   dX3iTPCC dX3C   SecRow3PC Z3OC Zdc3 Pressure Time 
 #		flowRateExhaustP flowRateRecirculationP Z3iTPCC
 #		ppmOxygenInP  inputGasTemperatureP 

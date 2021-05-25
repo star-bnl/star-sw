@@ -40,7 +40,8 @@
 #include "TLegend.h"
 #include "TStyle.h"
 #endif
-#ifdef __RUNXIX__
+#define __RUNXXI__
+#if defined(__RUNXIX__)
 static  Int_t N = 8;
 static  const Char_t *Names[8] = {
   "AuAu200_production_FullFieldLL",
@@ -52,7 +53,7 @@ static  const Char_t *Names[8] = {
   "AuAu7_production_ReversedFullField",
   "AuAu11_production_ReversedFullField"
 };
-#else /* RunXX */
+#elif  defined(__RUNXX__)
 static Int_t N = 14;
 static const Char_t *Names[14] = {
   "COL", // "RunXX22B",
@@ -90,8 +91,21 @@ static const Char_t *Names[14] = {
 9p2GeVb              20200224.230740  20200224.230740:   9.3374e+06 : 9p2GeVb              1e+07       9.1887e+06   ?             run = 21055035, Freq = 9.1887e+06 9p2GeVb             
 
 */
+#elif  defined(__RUNXXI__)
+static Int_t N = 9;
+static const Char_t *Names[9] = {
+  "All",
+  "100GeV_fixedTarget_2021",  
+  "3p85GeV_fixedTarget_2021",  
+  "44p5GeV_fixedTarget_2021",  
+  "70GeV_fixedTarget_2021",  
+  "7p7GeV_2021",  
+  "Cosmic",  
+  "OO_200GeV_2021",
+  "ps_OO_200GeV_2021"};
+  //  "Cosmic"
 #endif
-TFile **F = 0;
+TFile *F[100]  = {0};
 //________________________________________________________________________________
 Double_t rowsigned(Int_t row, Int_t sector) {
   Double_t y = row;
@@ -100,14 +114,15 @@ Double_t rowsigned(Int_t row, Int_t sector) {
 }
 //________________________________________________________________________________
 Int_t SetFileList() {
-  Int_t NF = 0;
   TSeqCollection *fs = gROOT->GetListOfFiles();
+  Int_t NF = fs->GetEntries();
   if (! fs) {
     cout << "No root files " << endl; 
     return NF;
   }
-  if (F) delete F;
-  F = new TFile*[N]; memset(F, 0, N*sizeof(TFile*));
+  //  if (F) delete F;
+  //  F = new TFile*[NF]; 
+  memset(F, 0, NF*sizeof(TFile*));
   TFile *f = 0;  
 #if 0
   for (Int_t k = 0; k < N; k++) {
@@ -127,13 +142,15 @@ Int_t SetFileList() {
   }
 #else
   TIter  iter(fs);
+  Int_t k = 0;
   while ((f = (TFile *) iter())) {
     TNtuple *FitP = (TNtuple *) f->Get("FitP");
     if (! FitP) continue;
-    F[NF] = f;
-    cout << NF << "\tAdd " << F[NF]->GetName() << endl;
-    NF++;
+    F[k] = f;
+    cout << k << "\tAdd " << F[k]->GetName() << endl;
+    k++;
   }
+  if (NF != k) {cout << "NF = " << NF << " k = " << k << " mismatched" << endl;}
 #endif
   return NF;
 }
@@ -146,15 +163,24 @@ void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)",
 	      const Char_t *cut = "(i&&j&&abs(mu)<1)/(dmu**2)", 
 	      const Char_t *opt = "profg",
 	      Double_t ymin = -1,
-	      Double_t ymax =  1) {
+	      Double_t ymax =  1,
+	      const Char_t *side = "All",
+	      const Char_t *var  = "log_{10}(#Sigma Adc)"
+	      ) {
+#if 0
+  TCanvas *c1 = (TCanvas*)gROOT->GetListOfCanvases()->FindObject("c1");
+  if (! c1 && xMin < xMax) {
+    
+  }
+#endif
   Int_t NF = SetFileList();  
   if (! NF) return;
   TString Current(gDirectory->GetName());
   gStyle->SetOptStat(0);
   Int_t icol = 0;
-  TLegend *leg = new TLegend(0.6,0.6,0.9,0.9);
+  TLegend *leg = new TLegend(0.6,0.1,0.9,0.3);
   //  gStyle->SetMarkerSize(0.4);
-  for (Int_t k = 0; k < N; k++) {
+  for (Int_t k = 0; k < NF; k++) {
     if (! F[k]) continue;
     F[k]->cd();
     TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");
@@ -172,6 +198,14 @@ void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)",
     TString same(opt);
     if (k != 0) same += "same";
     TString Draw(draw);
+#if 1
+    if (Draw.Contains("muS")) {
+      TH1 *mu = (TH1 *) gDirectory->Get("mu");
+      if (mu) {
+	Draw.ReplaceAll("muS",Form("mu-%f",mu->GetBinContent(0)));
+      }
+    }
+#endif
     TString histN(ext); histN += k;
     Draw += " >> "; Draw += histN;
     TProfile *p = 0;
@@ -204,6 +238,8 @@ void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)",
       name.ReplaceAll("AvCurrentCGF","");
       name.ReplaceAll("Z3CGF","");
       leg->AddEntry(hist,name.Data());
+      hist->SetTitle(Form("%s : %s",hist->GetTitle(), side));
+      hist->SetXTitle(var);
     }
   }
   leg->Draw();

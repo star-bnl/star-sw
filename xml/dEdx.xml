@@ -29,7 +29,7 @@
 #    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",102,"y2018")' &gt;&amp; ${logFile}
 #   rm ${fileB}
 #   cp *.root ${SUBMITTINGDIRECTORY} 
-    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",2,"y2018")' &gt;&amp; ${logFile}
+    root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
    endif
 </command>
 <input URL="command:dEdxSample.pl" />

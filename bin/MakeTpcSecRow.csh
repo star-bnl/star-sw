@@ -443,8 +443,10 @@
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210506.000020.root SecRow3CGF70GeV.root 'MakeTpcSecRowB.C(20210507,23,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210507,23.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210506.000020.root SecRow3CGF100GeV.root 'MakeTpcSecRowB.C(20210508,23,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210508,23.log
 
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210501.160023.root SecRow3CGF3p85GeV.root 'MakeTpcSecRowB.C(20210501,160024,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210501,160024.log 
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210506.000023.root SecRow3CGF44p5GeV.root 'MakeTpcSecRowB.C(20210506,24,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210506,24.log
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210507.000023.root SecRow3CGF70GeV.root 'MakeTpcSecRowB.C(20210507,24,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210507,24.log
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210508.000023.root SecRow3CGF100GeV.root 'MakeTpcSecRowB.C(20210508,24,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210508,24.log
-root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210508.000023.root SecRow3CGFOO_200GeV_2021.root 'MakeTpcSecRowB.C(20210510,24,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210510,24.log
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210501.160023.root SecRow3CGF3p85GeV.root 'MakeTpcSecRowB.C(20210501,160024,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210501,160024.log 
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210506.000023.root SecRow3CGF44p5GeV.root 'MakeTpcSecRowB.C(20210506,24,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210506,24.log
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210507.000023.root SecRow3CGF70GeV.root 'MakeTpcSecRowB.C(20210507,24,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210507,24.log
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210508.000023.root SecRow3CGF100GeV.root 'MakeTpcSecRowB.C(20210508,24,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210508,24.log
+#root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20210508.000023.root SecRow3CGFOO_200GeV_2021.root 'MakeTpcSecRowB.C(20210510,24,"TpcSecRowB",0)' >& MakeTpcSecRowB.20210510,24.log
+
+root.exe -q -b 

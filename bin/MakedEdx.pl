@@ -2102,9 +2102,20 @@ my $NEvents = 100000;
 #$hist = "RunXXI24"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TFG21e"; $year = "/*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/11/21 TpcSecRowB.20210501.160023.root TpcSecRowB.20210506.000023.root TpcSecRowB.20210507.000023.root TpcSecRowB.20210508.000023.root TpcPadCorrectionMDF.20210501.160023.C
 #$hist = "RunXXI25"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TFG21e"; $year = "/*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/12/21 TpcSecRowB.202105??.????24.root
 #$hist = "RunXXI30"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";#  05/14/21 reset all contants for 2021
-$hist = "RunXXI32"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";#  05/15/21 TpcSecRowB.20210129.000031.root -> TpcSecRowB.20210129.000006.root
-
-
+#$hist = "RunXXI32"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";#  05/15/21 TpcSecRowB.20210129.000031.root -> TpcSecRowB.20210129.000006.root
+#$hist = "RunXXI33"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 10; $Mode = 2; $macro = "dEdx";#  05/18/21 add AdcI3, dZdY3, and dXdY3 histograms
+#$hist = "RunXXI34"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";#  05/18/21 split AdcI3, dZdY3, and dXdY3 histograms for positive and negative 
+#$hist = "RunXXI35"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";#  05/19/21 reshape AdcI versus signed row, add npad and ntimebuckets histograms
+#$hist = "RunXXI36"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 10; $Mode = 2; $macro = "dEdx";#  05/20/21 fix npad and ntimebuckets histograms :: buggy
+#$hist = "RunXXI37"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 10; $Mode = 2; $macro = "dEdx";#  05/20/21 fix npad and ntimebuckets histograms 
+#$hist = "RunXXI38"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";#  05/21/21 add Tpc AdcI, nPad, and nTbk corrections
+#$hist = "RunXXI39"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 2; $Mode = 2; $macro = "dEdx";#  05/23/21 fix mess with new corrections
+#$hist = "RunXXI40"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 2; $Mode = 2; $macro = "dEdx";#  05/24/21 reset all correction except TpcSecRowB.20210129.000006.root
+#$hist = "RunXXI40"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/ps_OO*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 20; $Mode = 2; $macro = "dEdx";#  05/24/21 reset all corrections
+#$hist = "RunXXI40"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/OO*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 10; $Mode = 2; $macro = "dEdx";#  05/24/21 reset all corrections
+#$hist = "RunXXI40"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/FF_OO*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 2; $Mode = 2; $macro = "dEdx";#  05/24/21 reset all corrections
+#$hist = "RunXXI40"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/7p7GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 2; $Mode = 2; $macro = "dEdx";#  05/24/21 reset all corrections
+$hist = "RunXXI40"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TF*"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/24/21 reset all corrections
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2186,6 +2197,7 @@ my $now = time();
 if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";}
 {
   foreach my $file (@Files) {
+#    if ($file !~ /3p85GeV_fixedTarget_2021/ && $file !~ /7p7GeV_2021/) {next;}
 #    print "file = $file\n";
 #    next if $Production !~ 'adc' and $file =~ /adc/; 
 #    next if $file !~ /TOF/ and $file !~ /dEdx/;
@@ -2244,6 +2256,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     my $logL = $ff . ".log";
     my $log = $scrr . $logL;
     my $SCRIPT = $script ."_" . $STAR_LEVEL ."_". $ff . ".csh";
+    next if   -r $SCRIPT;
     my $LOG    = $script ."_" . $STAR_LEVEL ."_". $ff . ".log";
     my $ERR    = $script ."_" . $STAR_LEVEL ."_". $ff . ".err";
     # switch between all and 1-st one

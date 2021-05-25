@@ -54,9 +54,11 @@ void dEdx(Int_t nevents=1000,
       if (run = TString(obj->At(k)->GetName()).Atoi()) break;
     }
     Int_t yy = run/1000000 - 1;
-    Year = Form("y20%02i",yy);
-    //    cout << "set from  " << MainFile << "\tyear == " << Year.Data() << endl;
+    if (yy > 0 && yy < 25) {
+      Year = Form("y20%02i",yy);
+    }
   }
+  cout << "set from  " << MainFile << "\tyear == " << Year.Data() << endl;
   if (gClassTable->GetID("TTable") < 0) {
     gSystem->Load("libTable");
   }
