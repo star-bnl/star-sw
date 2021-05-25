@@ -794,6 +794,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
     } elsif ( $pkg =~ m/^StFwdTrackMaker$/ ){ 
 		$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
+		$env1->{StFwdTrackMaker}->{ROOTCINT_INCLUDES} = $env1->{ENV}->{OPTSTAR}."/include"
     } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
 	$LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
 	$SO_PKG = "";
@@ -1129,6 +1130,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "LINKMODULECOM |", $env2->{LINKMODULECOM}, "|\n" if $param::debug;
     my $cscanner = find scan::cpp( $env2->{_cwd}, $env2->{CPPPATH} );
     my @cpps = split /$main::PATH_SEPARATOR/, $env2->{CPPPATH};
+    # Additional include paths can be specified for individual packages
+    my @cpps_pkg = split /$main::PATH_SEPARATOR/, $env1->{$pkg}->{ROOTCINT_INCLUDES};
+    push(@cpps, @cpps_pkg);
     #  print "cpps => @cpps\n";# if $param::debug;
     #print "cpps => @cpps\n";
     my $ROOTCINT_CPP = "";
