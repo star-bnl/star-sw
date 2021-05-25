@@ -89,9 +89,9 @@ StTpcDbElectronics::instance()
 #ifndef ST_NO_EXCEPTIONS
 	throw invalid_argument("StTpcDbElectronics::getInstance(): Argument Missing!");
 #else
-	cerr << "StTpcDbElectronics::getInstance(): Argument Missing!" << endl;
-	cerr << "No arguments for instantiantion" << endl;
-	cerr << "Exiting..." << endl;
+	std::cerr << "StTpcDbElectronics::getInstance(): Argument Missing!" << endl;
+	std::cerr << "No arguments for instantiantion" << endl;
+	std::cerr << "Exiting..." << endl;
 #endif
     }
     return mInstance;
@@ -104,11 +104,11 @@ StTpcDbElectronics::instance(StTpcDb* gTpcDbPtr)
 	mInstance = new StTpcDbElectronics(gTpcDbPtr);
     }
     else {
-	cerr << "StTpcDbElectronics::instance()"  << endl;
-	cerr << "\tWARNING:" << endl;
-	cerr << "\tSingleton class is already instantiated" << endl;
-	cerr << "\tArgument  ignored!!" << endl;
-	cerr << "\tContinuing..." << endl;
+	std::cerr << "StTpcDbElectronics::instance()"  << endl;
+	std::cerr << "\tWARNING:" << endl;
+	std::cerr << "\tSingleton class is already instantiated" << endl;
+	std::cerr << "\tArgument  ignored!!" << endl;
+	std::cerr << "\tContinuing..." << endl;
     }
     return mInstance;
 }
