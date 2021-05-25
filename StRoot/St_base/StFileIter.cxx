@@ -331,6 +331,11 @@ void StFileIter::PurgeKeys(TList *listOfKeys) {
    }
 }
 
+#include <memory>
+
+void AssignPointer(TObjLink* cursor, TObjLink* ptr) { cursor = ptr; }
+void AssignPointer(std::shared_ptr<TObjLink> cursor, TObjLink* ptr) { cursor.reset(ptr); }
+
 //__________________________________________________________________________
 void StFileIter::Reset()
 {
@@ -348,12 +353,12 @@ void StFileIter::Reset()
          fList = listOfKeys;
          if (fDirection == kIterForward) {
             fCursorPosition = 0;
-            fCurCursor = fList->FirstLink();
-            if (fCurCursor) fCursor = fCurCursor->Next();
+            AssignPointer(fCurCursor, fList->FirstLink());
+            if (fCurCursor) AssignPointer(fCursor, fCurCursor->Next());
          } else {
             fCursorPosition = fList->GetSize()-1;
-            fCurCursor = fList->LastLink();
-            if (fCurCursor) fCursor = fCurCursor->Prev();
+            AssignPointer(fCurCursor, fList->LastLink());
+            if (fCurCursor) AssignPointer(fCursor, fCurCursor->Prev());
          }
       }
    }
@@ -394,11 +399,11 @@ TKey *StFileIter::SkipObjects(Int_t  nSkip)
                if (fCursorPosition < newPos) {
                   fCursorPosition++;
                   fCurCursor = fCursor;
-                  fCursor    = fCursor->Next();
+                  AssignPointer(fCursor, fCursor->Next());
                } else if (fCursorPosition > newPos) {
                   fCursorPosition--;
                   fCurCursor = fCursor;
-                  fCursor    = fCursor->Prev();
+                  AssignPointer(fCursor, fCursor->Prev());
                }
             } while (fCursorPosition != newPos);
             if (fCurCursor) nextObject = dynamic_cast<TKey *>(fCurCursor->GetObject());
@@ -406,10 +411,10 @@ TKey *StFileIter::SkipObjects(Int_t  nSkip)
             fCurCursor = fCursor = 0;
             if (newPos < 0) {
                fCursorPosition = -1;
-               if (fList) fCursor = fList->FirstLink();
+               if (fList) AssignPointer(fCursor, fList->FirstLink());
             } else  {
                fCursorPosition = collectionSize;
-               if (fList) fCursor = fList->LastLink();
+               if (fList) AssignPointer(fCursor, fList->LastLink());
             }
          }
       }
