@@ -18,7 +18,7 @@ void fcsDetectorPosition_db(char* opt = "", char* input) {
     TString storeTime;
     TString flavor;
     if(data.Contains("run21sim")){ //nominal
-	storeTime = "2020-12-10 00:00:00"; flavor="simu"; 
+	storeTime = "2020-12-10 00:01:00"; flavor="sim"; 
 	detpos.xoff[0]=-6.570*2.54; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 16.69
 	detpos.xoff[1]= 6.570*2.54; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54; //z=710.16
 	detpos.xoff[2]=-7.430*2.54; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 18.87
@@ -44,6 +44,27 @@ void fcsDetectorPosition_db(char* opt = "", char* input) {
 	detpos.xoff[1]= 6.850*2.54+50; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54; 
 	detpos.xoff[2]=-8.380*2.54-50; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; 
 	detpos.xoff[3]= 8.380*2.54+50; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54; 
+    }
+    else if(data.Contains("run21May06")){ //closed
+	storeTime = "2021-05-06 20:00:00"; flavor="ofl";
+	detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
+	detpos.xoff[1]= 6.850*2.54; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
+	detpos.xoff[2]=-8.380*2.54; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
+	detpos.xoff[3]= 8.380*2.54; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
+    }
+    else if(data.Contains("run21May20")){ //ecal open (hcal stayed closed)
+	storeTime = "2021-05-20 18:00:00"; flavor="ofl";
+	detpos.xoff[0]=-6.850*2.54-50; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
+	detpos.xoff[1]= 6.850*2.54+50; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
+	detpos.xoff[2]=-8.380*2.54;    detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
+	detpos.xoff[3]= 8.380*2.54;    detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
+    }
+    else if(data.Contains("run21May24")){ //hcal open (ecal stayed open)
+	storeTime = "2021-05-24 15:00:00"; flavor="ofl";
+	detpos.xoff[0]=-6.850*2.54-50; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
+	detpos.xoff[1]= 6.850*2.54+50; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
+	detpos.xoff[2]=-8.380*2.54-50; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
+	detpos.xoff[3]= 8.380*2.54+50; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
     }
     else{ 
 	std::cout<<"Invalid year range"<<std::endl; 
