@@ -3090,6 +3090,37 @@ TF1 *FitNF(TH1 *proj, Option_t *opt, Int_t kTpc = 2) {// fit with no. of primary
   return g2;
 }
 //________________________________________________________________________________
+void ShiftMu(TH2 *mu, TH1 *muI=0, TH1 *muJ=0) {
+  if (!mu) return;
+  if (! muI) {muI = (TH1 *) mu->Clone(); muI->SetName("muI");}
+  if (! muJ) {muJ = (TH1 *) mu->Clone(); muJ->SetName("muJ");}
+  Int_t nx = mu->GetNbinsX();
+  Int_t ny = mu->GetNbinsY();
+  for (Int_t i = 1; i <= nx; i++) {
+    for (Int_t j = 1; j <= ny; j++) {
+      Double_t valI = mu->GetBinContent(i,j) - mu->GetBinContent(0,j);
+      Double_t errI = TMath::Sqrt(mu->GetBinContent(i,j)*mu->GetBinContent(i,j) + mu->GetBinContent(0,j)* mu->GetBinContent(0,j));
+      muI->SetBinContent(i,j,valI);
+      muI->SetBinError(i,j,errI);
+      Double_t valJ = mu->GetBinContent(i,j) - mu->GetBinContent(i,0);
+      Double_t errJ = TMath::Sqrt(mu->GetBinContent(i,j)*mu->GetBinContent(i,j) + mu->GetBinContent(i,0)* mu->GetBinContent(i,01));
+      muJ->SetBinContent(i,j,valJ);
+      muJ->SetBinError(i,j,errJ);
+    }
+  }
+}
+//________________________________________________________________________________
+void ShiftMu(TH1 *mu, TH1 *muI) {
+  if (!mu) return;
+  if (! muI) {muI = (TH1 *) mu->Clone(); muI->SetName("muI");}
+  Int_t nx = mu->GetNbinsX();
+  for (Int_t i = 1; i <= nx; i++) {
+    Double_t valI = mu->GetBinContent(i) - mu->GetBinContent(0);
+    Double_t errI = TMath::Sqrt(mu->GetBinContent(i)*mu->GetBinContent(i) + mu->GetBinContent(0)* mu->GetBinContent(0));
+    muI->SetBinContent(i,valI);
+    muI->SetBinError(i,errI);
+  }
+}
 //________________________________________________________________________________
 void dEdxFit() {}
 //________________________________________________________________________________
@@ -3113,12 +3144,18 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
   if (! fRootFile ) {printf("There is no opened file\n"); return;}
   TH1 *hist = 0;// = (TH1 *) fRootFile->Get(HistName);
   //  fRootFile->GetObject(HistName,hist);
-  TObject *obj = fRootFile->Get(HistName);
-  if (!obj) {printf("Cannot find %s\n", HistName); return;}
-  if (obj->IsA()->InheritsFrom( "TH1" )) {
-    hist = (TH1 *) obj;
-  } else if (obj->IsA()->InheritsFrom( "THnSparse" )) {
-    hist = ((THnSparse *) obj)->Projection(1,0);
+  TObjArray *objArray = TString(HistName).Tokenize("+");
+  for (Int_t l = 0; l < objArray->GetEntries(); l++) {
+    const Char_t *histName = ((TObjString *) objArray->At(l))->GetName();
+    TObject *obj = fRootFile->Get(histName);
+    if (!obj) {printf("Cannot find %s\n", histName); return;}
+    if (obj->IsA()->InheritsFrom( "TH1" )) {
+      if (! hist) {hist = (TH1 *) obj; hist->SetName(HistName);}
+      else        {hist->Add((TH1 *) obj);}
+    } else if (obj->IsA()->InheritsFrom( "THnSparse" )) {
+      if (! hist) hist = ((THnSparse *) obj)->Projection(1,0); 
+      else        hist->Add(((THnSparse *) obj)->Projection(1,0));
+    }
   }
   if (! hist) return;
   TAxis *xax = hist->GetXaxis();
@@ -3164,6 +3201,8 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
     Float_t da4;
     Float_t da5;
     Float_t da6;
+    Float_t muJ;
+    Float_t dmuJ;
   };
   Fit_t Fit;
   //  TString NewRootFile(gSystem->DirName(fRootFile->GetName()));
@@ -3187,7 +3226,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
   }
   if (! FitP) {
     FitP = new TNtuple("FitP","Fit results",
-		       "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:a0:a1:a2:a3:a4:a5:a6:Npar:dpeak:dmu:dsigma:da0:da1:da2:da3:da4:da5:da6");
+		       "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:a0:a1:a2:a3:a4:a5:a6:Npar:dpeak:dmu:dsigma:da0:da1:da2:da3:da4:da5:da6:muJ:dmuJ");
     FitP->SetMarkerStyle(20);
     FitP->SetLineWidth(2);
   }
@@ -3195,6 +3234,8 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
   TH1 *rms  = (TH1 *) fOut->Get("rms");    
   TH1 *entries = (TH1 *) fOut->Get("entries");
   TH1 *mu   = (TH1 *) fOut->Get("mu");
+  TH1 *muI  = 0;
+  TH1 *muJ  = 0;
   TH1 *sigma= (TH1 *) fOut->Get("sigma");
   TH1 *chisq= (TH1 *) fOut->Get("chisq");
   if (! mu) {
@@ -3203,6 +3244,8 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       rms     = new TH2D("rms",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
       entries = new TH2D("entries",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
       mu      = new TH2D("mu",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      muI     = new TH2D("muI",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
+      muJ     = new TH2D("muJ",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
       sigma   = new TH2D("sigma",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
       chisq   = new TH2D("chisq",hist->GetTitle(),nx,xmin,xmax,ny,ymin,ymax);
     }
@@ -3212,6 +3255,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	rms     = new TH1D("rms",hist->GetTitle(),nx,xmin,xmax);
 	entries = new TH1D("entries",hist->GetTitle(),nx,xmin,xmax);
 	mu      = new TH1D("mu",hist->GetTitle(),nx,xmin,xmax);
+	muI     = new TH1D("muI",hist->GetTitle(),nx,xmin,xmax);
 	sigma   = new TH1D("sigma",hist->GetTitle(),nx,xmin,xmax);
 	chisq   = new TH1D("chisq",hist->GetTitle(),nx,xmin,xmax);
       }
@@ -3360,27 +3404,30 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       }
       //      Fit.chisq = g3->GetChisquare();
       //      if (Fit.prob > 0) {
-	if (dim == 3) {
-	  mean->SetBinContent(i,j,Fit.mean);
-	  rms->SetBinContent(i,j,Fit.rms);
-	  entries->SetBinContent(i,j,Fit.entries);
-	  mu->SetBinContent(i,j,Fit.mu);
-	  mu->SetBinError(i,j,g->GetParError(1));
-	  sigma->SetBinContent(i,j,Fit.sigma);
-	  sigma->SetBinError(i,j,g->GetParError(2));
-	  chisq->SetBinContent(i,j,Fit.chisq);
+      if (dim == 3) {
+	mean->SetBinContent(i,j,Fit.mean);
+	rms->SetBinContent(i,j,Fit.rms);
+	entries->SetBinContent(i,j,Fit.entries);
+	mu->SetBinContent(i,j,Fit.mu);
+	mu->SetBinError(i,j,g->GetParError(1));
+	sigma->SetBinContent(i,j,Fit.sigma);
+	sigma->SetBinError(i,j,g->GetParError(2));
+	chisq->SetBinContent(i,j,Fit.chisq);
+	if (j) {
+	  Fit.muJ = mu->GetBinContent(i,0);
+	  Fit.dmuJ = mu->GetBinError(i,0);
 	}
-	else {
-	  mean->SetBinContent(i,Fit.mean);
-	  rms->SetBinContent(i,Fit.rms);
-	  entries->SetBinContent(i,Fit.entries);
-	  mu->SetBinContent(i,Fit.mu);
-	  mu->SetBinError(i,g->GetParError(1));
-	  sigma->SetBinContent(i,Fit.sigma);
-	  sigma->SetBinError(i,g->GetParError(2));
-	  chisq->SetBinContent(i,Fit.chisq);
+      } else {
+	mean->SetBinContent(i,Fit.mean);
+	rms->SetBinContent(i,Fit.rms);
+	entries->SetBinContent(i,Fit.entries);
+	mu->SetBinContent(i,Fit.mu);
+	mu->SetBinError(i,g->GetParError(1));
+	sigma->SetBinContent(i,Fit.sigma);
+	sigma->SetBinError(i,g->GetParError(2));
+	chisq->SetBinContent(i,Fit.chisq);
 	}
-	//      }
+      //      }
       printf("%i/%i %f/%f mean %f rms = %f entries = %f mu = %f sigma = %f chisq = %f prob = %f\n",
 	    i,j,Fit.x,Fit.y,Fit.mean,Fit.rms,Fit.entries,Fit.mu,Fit.sigma,Fit.chisq,Fit.prob);
       if (FitP)  FitP->Fill(&Fit.i);
@@ -3400,6 +3447,14 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
   mu->Write();
   sigma->Write();
   chisq->Write();
+  if (muI && muJ) {
+    ShiftMu((TH2 *) mu, muI, muJ);
+    muI->Write();
+    muJ->Write();
+  } else if (muI) {
+    ShiftMu(mu,muI);
+    muI->Write();
+  }
 } 
 //________________________________________________________________________________
 void FitH3D(TH1 *hist, TF1 *fun,
