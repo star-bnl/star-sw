@@ -14,9 +14,9 @@ using namespace ROOT::Math;
 #include "tables/St_tpcCorrection_Table.h"
 #include "tables/St_tpcSectorT0offset_Table.h"
 #include "tables/St_tofTrayConfig_Table.h"
-#define DEBUGTABLE(STRUCT) PrintTable(#STRUCT,table )
+#define DEBUGTABLED(STRUCT) PrintTable(#STRUCT,table )
 #define makeString(PATH) # PATH
-#define CHECKTABLE(C_STRUCT) \
+#define CHECKTABLED(C_STRUCT) \
   if (table->InheritsFrom("St_" makeSTRING(C_STRUCT))) {	  \
     St_ ## C_STRUCT  *t = (St_ ## C_STRUCT  *) table ;	      \
     ## C_STRUCT ## _st *s = t->GetTable(); Nrows = s->nrows;    \
@@ -33,14 +33,9 @@ using namespace ROOT::Math;
   }
 //___________________Debug Print out  _____________________________________________________________
 void PrintTable(const Char_t *str, TTable *table) {
-  TDatime t[2];
+  DEBUGTABLE(str);
   Bool_t iprt = kTRUE;
   if (St_db_Maker::GetValidity(table,t) > 0) {
-    Int_t Nrows = table->GetNRows();
-    LOG_WARN << "St_" << str << "C::instance found table " << table->GetName()
-     << " with NRows = " << Nrows << " in db" << endm;
-    LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
-     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     if (table->InheritsFrom("St_tpcCorrection")) {
       St_tpcCorrection *t = (St_tpcCorrection *) table;
       tpcCorrection_st *s = t->GetTable(); Nrows = s->nrows;}
@@ -276,6 +271,16 @@ MakeChairOptionalInstance2(tpcCorrection,St_TpcdChargeC,Calibrations/tpc/TpcdCha
 MakeChairOptionalInstance2(tpcCorrection,St_TpcrChargeC,Calibrations/tpc/TpcrCharge);
 #include "St_TpcTanLC.h"
 MakeChairInstance2(tpcCorrection,St_TpcTanLC,Calibrations/tpc/TpcTanL);
+#include "St_TpcAdcIC.h"
+MakeChairInstance2(tpcCorrection,St_TpcAdcIC,Calibrations/tpc/TpcAdcI);
+#include "St_TpcnPadC.h"
+MakeChairInstance2(tpcCorrection,St_TpcnPadC,Calibrations/tpc/TpcnPad);
+#include "St_TpcnTbkC.h"
+MakeChairInstance2(tpcCorrection,St_TpcnTbkC,Calibrations/tpc/TpcnTbk);
+#include "St_TpcdZdYC.h"
+MakeChairInstance2(tpcCorrection,St_TpcdZdYC,Calibrations/tpc/TpcdZdY);
+#include "St_TpcdXdYC.h"
+MakeChairInstance2(tpcCorrection,St_TpcdXdYC,Calibrations/tpc/TpcdXdY);
 #include "St_TpcCurrentCorrectionC.h"
 //MakeChairInstance2(tpcCorrection,St_TpcCurrentCorrectionC,Calibrations/tpc/TpcCurrentCorrection);
 ClassImp(St_TpcCurrentCorrectionC);
