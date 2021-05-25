@@ -12,9 +12,9 @@
       St_tpcCorrection *t = (St_tpcCorrection *) table;			\
       tpcCorrection_st *s = t->GetTable(); Nrows = s->nrows;}		\
     LOG_WARN << "St_" << # STRUCT << "C::instance found table " << table->GetName() \
-	     << " with NRows = " << Nrows << " in db" << endm;		\
-    LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	\
-	     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;	\
+	     << " with NRows = " << Nrows << " in db"			\
+	     << "\tValidity:" << t[0].GetDate() << "/" << t[0].GetTime()\
+	     << " - " << t[1].GetDate() << "/" << t[1].GetTime() << endm;	\
     if (Nrows > 10) Nrows = 10;						\
     if (table->GetRowSize() < 512) table->Print(0,Nrows);		\
   }
