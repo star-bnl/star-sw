@@ -230,7 +230,6 @@ public:
     StEvent();
     virtual ~StEvent();
 
-    void                                Browse(TBrowser*);
     static const TString&               cvsTag();
     
     TString                             type() const;
