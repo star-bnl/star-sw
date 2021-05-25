@@ -112,6 +112,14 @@ Int_t StMagFMaker::InitRun(Int_t RunNo)
     Float_t  fScale = St_starMagOnlC::instance()->ScaleFactor();
     if (! St_starMagAvgC::instance()->Table()->IsMarked()) {
       fScale = St_starMagAvgC::instance()->ScaleFactor();
+      gMessMgr->Info() << "StMagFMaker::InitRun use Scale Factor = " << fScale 
+		       << " average for run " << St_starMagAvgC::instance()->runNumber();
+      if (GetRunNumber() > 1000000) {// real data
+	if (GetRunNumber() != (Int_t) St_starMagAvgC::instance()->runNumber()) {
+	  gMessMgr->Error() << ", which does not matched with the current RunNo " << GetRunNumber();
+	}
+      }
+      gMessMgr->Info() << endm;
     }
 #if 0
     assert(TMath::Abs(fScale)>0.005);
