@@ -52,7 +52,6 @@
 #include "StEmcModule.h"
 #include "StEmcClusterCollection.h"
 #include <TBrowser.h>
-#include <StAutoBrowse.h>
 
 static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.12 2004/10/14 20:00:18 ullrich Exp $";
 
@@ -196,20 +195,4 @@ bool  StEmcDetector::IsFolder() const
 {
     if(numberOfHits()) return true;
     else               return false;
-}
-
-void
-StEmcDetector::Browse(TBrowser *b)
-{
-    char name[10];
-    for (unsigned int m=0;m<mNumberOfModules;m++) {
-        if(mModules[m]->IsFolder()) {
-	  // 1 var; module[01] -> mHits 
-	  // StAutoBrowse::Browse(mModules[m], b); 
-	  // 2 var; mHits StEmcModule
-	  sprintf(name,"Module%3.3i",m+1);
-	  b->Add(mModules[m],name); 
-        }
-    }
-    StAutoBrowse::Browse(mClusters, b);
 }
