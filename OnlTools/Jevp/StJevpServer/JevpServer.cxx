@@ -918,7 +918,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	//builders.Add(new itpcBuilder(this));
 	builders.Add(new etofBuilder(this));
 	builders.Add(new fcsBuilder(this));
-    builders.Add(new fttBuilder(this));
+	builders.Add(new fttBuilder(this));
     }
     else {
 	builders.Add(new trgBuilder(this));
