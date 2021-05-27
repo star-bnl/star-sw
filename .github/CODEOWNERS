@@ -1,0 +1,37 @@
+/.github/CODEOWNERS          @star-bnl-user
+/OnlTools                    @kehw
+/StDb                        @dmarkh
+/StRoot/RTS                  @kehw
+/StRoot/StAnalysisMaker      @ullrich-bnl
+/StRoot/StAssociationMaker   @ullrich-bnl
+/StRoot/StBTof*              @jdbrice     @fgeurts     @starsdong
+/StRoot/StChain              @ullrich-bnl @klendathu2k
+/StRoot/StDaqLib/TOF         @jdbrice     @fgeurts     @starsdong
+/StRoot/StDb*                @dmarkh
+/StRoot/StDbUtilities        @fisyak
+/StRoot/StDetectorDbMaker    @dmarkh      @fisyak
+/StRoot/StEvent*             @klendathu2k @ullrich-bnl
+/StRoot/StGenericVertexMaker @plexoos
+/StRoot/StHeavyPool          @starsdong   @ullrich-bnl @fgeurts
+/StRoot/StHighPtTagsMaker    @ullrich-bnl
+/StRoot/StMiniDstMaker       @ullrich-bnl
+/StRoot/StMtd*               @marrbnl
+/StRoot/StMuDSTMaker         @jdbrice
+/StRoot/StMuDSTMaker/EMC     @kkauder
+/StRoot/StMuDSTMaker/RICHTOF @fgeurts     @starsdong
+/StRoot/StPico*              @nigmatkulov @marrbnl
+/StRoot/StRefMultCorr        @nigmatkulov
+/StRoot/StSpectraTagsMaker   @ullrich-bnl
+/StRoot/StTof*               @jdbrice     @fgeurts     @starsdong
+/StRoot/StVpd*               @jdbrice     @fgeurts
+/StRoot/St_db_Maker          @dmarkh
+/StRoot/StarClassLibrary     @ullrich-bnl @klendathu2k
+/StRoot/Sti*                 @klendathu2k @plexoos     @starsdong
+/StRoot/StppSpin             @ullrich-bnl
+/StRoot/TPCCATracker         @fisyak      @kehw
+/StRoot/macros               @ullrich-bnl
+/StRoot/macros/mudst         @nigmatkulov
+/StarDb                      @dmarkh
+/StarDb/Calibrations/tof     @jdbrice     @fgeurts
+/pams                        @fgeurts     @klendathu2k
+/pams/tables                 @dmarkh
