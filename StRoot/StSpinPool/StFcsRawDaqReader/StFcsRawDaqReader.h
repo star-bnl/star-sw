@@ -41,6 +41,8 @@ class StFcsRawDaqReader : public StMaker {
    virtual Int_t prepareEnvironment();   
    unsigned long long trgMask(){return mTrgMask;}
    StTriggerData* trgdata(){return mTrg;}
+   int fcsTcuBit() {return mFcsTcuBit;}
+   int fcsDepOut() {return mFcsDepOut;}
 
  protected:
    Int_t mDate, mTime;
@@ -60,6 +62,8 @@ class StFcsRawDaqReader : public StMaker {
    unsigned int mReadMode=0;
    unsigned long long mTrgMask=0;
    int mDebug=0;
+   int mFcsTcuBit=0;
+   int mFcsDepOut=0;
 
    virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
    ClassDef(StFcsRawDaqReader,1)   
@@ -68,8 +72,11 @@ class StFcsRawDaqReader : public StMaker {
 #endif
 
 /*
- * $Id: StFcsRawDaqReader.h,v 1.3 2021/03/30 13:30:11 akio Exp $
+ * $Id: StFcsRawDaqReader.h,v 1.4 2021/05/27 13:10:39 akio Exp $
  * $Log: StFcsRawDaqReader.h,v $
+ * Revision 1.4  2021/05/27 13:10:39  akio
+ * Many updates for trigger bits and around Clear()
+ *
  * Revision 1.3  2021/03/30 13:30:11  akio
  * StFcsDbMAker->StFcsDB
  *
