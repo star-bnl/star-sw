@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDb.h,v 1.2 2021/04/09 15:11:18 akio Exp $
+ * $Id: StFcsDb.h,v 1.3 2021/05/27 14:02:23 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDb.h,v $
+ * Revision 1.3  2021/05/27 14:02:23  akio
+ * clean up Clear and fixGain/corr
+ *
  * Revision 1.2  2021/04/09 15:11:18  akio
  * Adding projection of Hcal local position to Ecal local position
  *
@@ -200,10 +203,20 @@ public:
   float getPresValley(StFcsHit* hit) const;            //! get the pres valley position for cut
 
   enum GAINMODE { FIXED, DB, FORCED }; //! Gain mode switch
-  void forceFixGain(float v)               {mGainMode=GAINMODE::FIXED;    }   //! fixed default gain
-  void forceFixGainCorrection(float v)     {mGainCorrMode=GAINMODE::FIXED;}   //! fixed default gaincorr
-  void forceUniformGain(float v)           {mGainMode=GAINMODE::FORCED;     mForceUniformGain=v;         }  //! force a specified value               
-  void forceUniformGainCorrection(float v) {mGainCorrMode=GAINMODE::FORCED; mForceUniformGainCorrection=v;} //! force a specified value
+  void forceFixGain()                      {mGainMode=GAINMODE::FIXED;}       //! fixed default gain
+  void forceFixGainCorrection()            {mGainCorrMode=GAINMODE::FIXED;}   //! fixed default gaincorr
+  void forceUniformGain(float ecal, float hcal=0.0053, float pres=0.01){
+    mGainMode=GAINMODE::FORCED;   //! force a specified value               
+    mForceUniformGainEcal=ecal; 
+    mForceUniformGainHcal=hcal; 
+    mForceUniformGainPres=pres; 
+  }  
+  void forceUniformGainCorrection(float ecal, float hcal=1.0, float pres=0.5){
+    mGainCorrMode=GAINMODE::FORCED; //! force a specified value
+    mForceUniformGainCorrectionEcal=ecal;
+    mForceUniformGainCorrectionHcal=hcal;
+    mForceUniformGainCorrectionPres=pres;
+  } 
   void readGainFromText(const char* file="fcsgain.txt");                      //! reading gain from text file
   void readGainCorrFromText(const char* file="fcsgaincorr.txt");              //! reading gaincorr from text file
 
@@ -247,13 +260,17 @@ public:
   int   mRun19=0;                        //! run19 flag
   int   mLeakyHcal=0;                    //! LeakyHcal has different center positions
 
-  GAINMODE mGainMode = GAINMODE::DB;        //! Gain mode selection 
-  float mForceUniformGain=-1.0;           //! forcing a value
+  GAINMODE mGainMode = GAINMODE::DB;      //! Gain mode selection 
+  float mForceUniformGainEcal=-1.0;       //! forcing a value
+  float mForceUniformGainHcal=-1.0;       //! forcing a value
+  float mForceUniformGainPres=-1.0;       //! forcing a value
   int   mReadGainFromText=0;              //! flag for reading gain from text
 
-  GAINMODE mGainCorrMode = GAINMODE::DB;    //! GainCorr mode selection 
-  float mForceUniformGainCorrection=-1.0; //! forcing a value
-  int   mReadGainCorrectionFromText=0;    //! flag for reading gaincorr from text 
+  GAINMODE mGainCorrMode = GAINMODE::DB;      //! GainCorr mode selection 
+  float mForceUniformGainCorrectionEcal=-1.0; //! forcing a value
+  float mForceUniformGainCorrectionHcal=-1.0; //! forcing a value
+  float mForceUniformGainCorrectionPres=-1.0; //! forcing a value
+  int   mReadGainCorrectionFromText=0;        //! flag for reading gaincorr from text 
  
   //DEP sorted ped/gain/corr
   float mPed[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! Pedestal   
