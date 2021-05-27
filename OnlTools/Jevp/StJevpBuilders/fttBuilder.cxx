@@ -51,6 +51,8 @@ public:
         sprintf(baseFile, "%s/ftt/",confdatadir.c_str() );
         baseConfPath = TString( baseFile );
         
+	LOG("JEFF", "baseConfPath = %s", baseFile);
+
         // initialize number of last strip of one strip group
         ifstream inFile;
         inFile.open( (baseConfPath + "LastStrip.dat").Data() );
