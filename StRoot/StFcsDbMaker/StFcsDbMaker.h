@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFcsDbMaker.h,v 1.1 2021/03/30 13:40:07 akio Exp $
+ * $Id: StFcsDbMaker.h,v 1.2 2021/05/27 14:02:25 akio Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.h,v $
+ * Revision 1.2  2021/05/27 14:02:25  akio
+ * clean up Clear and fixGain/corr
+ *
  * Revision 1.1  2021/03/30 13:40:07  akio
  * FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
  *
@@ -97,6 +100,7 @@ public:
   virtual ~StFcsDbMaker();
   virtual int  Init();
   int  InitRun(int runNumber);
+  void  Clear(Option_t *option);
   int  Make();
   void setDbAccess(int v){mDbAccess=v;}
  

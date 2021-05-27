@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDbMaker.cxx,v $
+ * Revision 1.2  2021/05/27 14:02:24  akio
+ * clean up Clear and fixGain/corr
+ *
  * Revision 1.1  2021/03/30 13:40:07  akio
  * FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
  *
@@ -145,8 +148,12 @@ int StFcsDbMaker::Init(){
   return StMaker::Init();
 }
 
+void StFcsDbMaker::Clear(Option_t *option){
+  StMaker::Clear(option);
+}
+
 int StFcsDbMaker::Make(){
-  return kStOK;
+  return StMaker::Make();
 }
 
 int StFcsDbMaker::InitRun(int runNumber) {

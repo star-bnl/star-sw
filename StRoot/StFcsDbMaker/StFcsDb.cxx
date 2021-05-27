@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFcsDb.cxx,v $
+ * Revision 1.3  2021/05/27 14:02:22  akio
+ * clean up Clear and fixGain/corr
+ *
  * Revision 1.2  2021/04/09 15:11:18  akio
  * Adding projection of Hcal local position to Ecal local position
  *
@@ -245,10 +248,10 @@ int StFcsDb::Init(){
     makeMap2019();
   }else{
     makeMap();
+    printEtGain();
   }
   if(mDebug>0) {
     printMap();
-    printEtGain();
   }
   return kStOK;
 }
@@ -743,9 +746,11 @@ float StFcsDb::getGain(int det, int id) const  {
     switch(mGainMode){
     case GAINMODE::FIXED :
       if(det<=kFcsHcalSouthDetId) return 0.0053; //default 5.3MeV/ch
-      return 100;                                //100ch for MIP for Pres
+      return 1.0/100.0;                          //100ch for MIP for Pres
     case GAINMODE::FORCED :
-      return mForceUniformGain;
+      if(det<=kFcsEcalSouthDetId) return mForceUniformGainEcal;
+      if(det<=kFcsHcalSouthDetId) return mForceUniformGainHcal;
+      if(det<=kFcsPresSouthDetId) return mForceUniformGainPres;
     case GAINMODE::DB :
     default:
       int ehp,ns,dep,ch,crt,slt;
@@ -767,7 +772,9 @@ float StFcsDb::getGainCorrection(int det, int id) const  {
       if(det<=kFcsHcalSouthDetId) return 1.0;   // default 1.0
       return 0.5;                               // 1/2 MIP for Pres
     case GAINMODE::FORCED :
-      return mForceUniformGainCorrection;
+      if(det<=kFcsEcalSouthDetId) return mForceUniformGainCorrectionEcal;
+      if(det<=kFcsHcalSouthDetId) return mForceUniformGainCorrectionHcal;
+      if(det<=kFcsPresSouthDetId) return mForceUniformGainCorrectionPres;
     case GAINMODE::DB :
     default:
       int ehp,ns,dep,ch,crt,slt;
