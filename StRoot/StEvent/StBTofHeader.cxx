@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHeader.cxx,v 2.5 2010/05/12 15:12:03 ullrich Exp $
+ * $Id: StBTofHeader.cxx,v 2.6 2021/05/28 19:00:21 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHeader.cxx,v $
+ * Revision 2.6  2021/05/28 19:00:21  ullrich
+ * Added 3 member plus access fct: mTCanFirst, mTCanLast, mNTzeroCan (Frank)
+ *
  * Revision 2.5  2010/05/12 15:12:03  ullrich
  * Added member mNTzero and access methods.
  *
@@ -28,6 +31,7 @@
  *
  **************************************************************************/
 #include "StBTofHeader.h"
+#include "PhysicalConstants.h"
 
 ClassImp(StBTofHeader)
 
@@ -47,6 +51,9 @@ StBTofHeader::StBTofHeader()
         for(int j=0; j<MAXVPD; j++)
             mVpdTime[i][j] = 0.;
     mNTzero = 0;
+    mNTzeroCan = 0;
+    mTCanFirst = 99999.;
+    mTCanLast = -99999.;
 }
 
 StBTofHeader::~StBTofHeader() {/* no op */}
@@ -107,6 +114,15 @@ StBTofHeader::triggerTime(int fiberId) const { return mTriggerTime[fiberId]; }
 int
 StBTofHeader::nTzero() const { return mNTzero; }
 
+int
+StBTofHeader::nTzeroCan() const { return mNTzeroCan; }
+
+double
+StBTofHeader::tCanFirst() const { return mTCanFirst; }
+
+double
+StBTofHeader::tCanLast() const { return mTCanLast; }
+
 void
 StBTofHeader::setFiberHeader(int fiberId, short val)
 {
@@ -163,3 +179,12 @@ StBTofHeader::setTriggerTime(unsigned int tdc, int fiberId) { mTriggerTime[fiber
 
 void
 StBTofHeader::setNTzero(short n) { mNTzero = n; }
+
+void
+StBTofHeader::setNTzeroCan(short nCan) { mNTzeroCan = nCan; }
+
+void
+StBTofHeader::setTCanFirst(double tFirst) { mTCanFirst = tFirst; }
+
+void
+StBTofHeader::setTCanLast(double tLast) { mTCanLast = tLast; }
