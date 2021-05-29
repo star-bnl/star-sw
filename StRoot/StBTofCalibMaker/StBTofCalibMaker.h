@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.14 2021/01/27 04:06:25 geurts Exp $
+ * $Id: StBTofCalibMaker.h,v 1.15 2021/05/29 23:57:08 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.15  2021/05/29 23:57:08  geurts
+ * Updates to improve pp and pA handling - by Bassam Aboona (TAMU)
+ *
  * Revision 1.14  2021/01/27 04:06:25  geurts
  * Introducing meaningful nTofSigma calculations in VPDstartless mode.
  *
@@ -80,6 +83,8 @@
 #include "TMath.h"
 #include "StMaker.h"
 
+//#include "TProfile.h"
+
 #include <string>
 #include <vector>
 
@@ -95,6 +100,8 @@ class StMuPrimaryVertex;
 class StMuBTofPidTraits;
 class StVpdSimConfig;
 class StBTofSimResParams;
+
+class TProfile;
 
 #include "StPhysicalHelixD.hh"
 #include "StBTofUtil/StVpdSimConfig.h"
@@ -129,10 +136,32 @@ public:
   /// switch to FXT mode to include protons in T0 calculation
   void setFXTMode(const bool val=kTRUE);
 
+  ///  switch to pp/pA mode
+  void setPPPAMode(const Bool_t val=kFALSE);
+  /// switch to pp/pA pion selection
+  void setPPPAPionSel(const Bool_t val=kFALSE);
+  /// switch outlier rejection in pp/pA
+  void setPPPAOutlierRej(const Bool_t val=kFALSE);
+  /// enable nSigmTof mode
+  void setNSigmaTofMode(const Bool_t val=kFALSE);
+  /// explicitly set Run15 slewing correction
+  void setRun15Slew(const Bool_t val=kFALSE);
+  /// enable pp/pA QA histograms
+  void setPPPAModeHist(const Bool_t val=kFALSE);
+  /// enable JP 2015 fudge factor
+  void setJP2015FF(const Bool_t val=kFALSE);
+  /// enable MB 2015 fudge factor
+  void setMB2015FF(const Bool_t val=kFALSE);
+  /// enable JP 2017 fudge factor
+  void setJP2017FF(const Bool_t val=kFALSE);
+
   /// enable QA histogram filling
   void setCreateHistoFlag(Bool_t histos=kTRUE);
   /// set histogram output file name
   void setHistoFileName(const Char_t*);
+
+  /// set file name for pp/pA QA histograms
+  void setPPPAModeHistoFileName(const Char_t* filename);
 
   /// read calibration parameters from file
   void setInitFromFile(const Bool_t val = kTRUE);
@@ -181,6 +210,14 @@ private:
   void tstart_NoVpd(const StBTofCollection *btofCollection, const StPrimaryVertex *pVtx, Double_t *tstart);
   void tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVertex *pVtx, Double_t *tstart);
 
+  /// calculate start time using the VPD to use it in the BTof outlier rejection in pp/pA mode
+  void   vpdTStartForBTofComparison(Double_t vz, Double_t *vpdStartTime);
+  double fudgeFactor(double eta, double zVtx);
+  void   fillDtiVsPtotProfiles(double eta, double zVtx, double ptot, double Dti);
+  
+  void   archiveVpdHitInfo();
+
+
   ///
   float tofCellResolution(const Int_t iTray, const Int_t iModuleChan);
 
@@ -188,6 +225,12 @@ private:
   void bookHistograms();
   /// write histograms
   void writeHistograms();
+
+  /// book pp/pA histograms
+  void bookPPPAHistograms();
+  /// write pp/pA histograms
+  void writePPPAHistograms();
+
 
 private:
   enum{
@@ -212,6 +255,11 @@ private:
   static const Double_t DCARCUT;   // dcaR cut
 
   static const Double_t mC_Light;  // = C_C_LIGHT/1.e9;
+
+  static const Float_t BTHBLCHCNST; // Bethe-Bloch constant used for dE/dx 
+                                    // correction in start-time calculations 
+                                    // in pppAMode
+  static const Float_t DEDXTCORR[2];
 
     Bool_t     mValidCalibPar = kFALSE;
     Bool_t     mValidStartTime = kFALSE;
@@ -242,6 +290,21 @@ private:
     Double_t   mTStart = 0.0;           //! start time
     Int_t      mNTzero = 0;           //! number of hits used in T0 (non-vpd-start)
 
+    Int_t    mNTzeroCan = 0;
+    Double_t mTCanFirst = 0.0;
+    Double_t mTCanLast = 0.0;
+
+    Double_t     mVpdEHits = 0;
+    Double_t     mVpdWHits = 0;
+    Double_t     mVpdEGoodHits = 0;
+    Double_t     mVpdWGoodHits = 0;
+    Double_t     mEarliestVpdEHit = 0.0;
+    Double_t     mEarliestVpdWHit = 0.0;
+    Double_t     mClosestVpdEHit = 0.0;
+    Double_t     mClosestVpdWHit = 0.0;
+    Double_t     mLatestVpdEHit = 0.0;
+    Double_t     mLatestVpdWHit = 0.0;
+
     StPhysicalHelixD* mBeamHelix;  //! beamline helix used for Run 8
     ///
     StEvent*          mEvent;
@@ -262,6 +325,12 @@ private:
     std::map<int, StVpdSimConfig::SingleTubeParams>     mVpdRes;
     StBTofSimResParams* mBTofRes; //! database access BTOF resolutions
 
+    Bool_t            mPPPAMode = kFALSE; //! pp and pA Mode
+    Bool_t            mPPPAPionSel = kFALSE; //! Only use the particle selection cuts from pppAMode
+    Bool_t            mPPPAOutlierRej = kFALSE; //! Only use the outlier rejection algorithm from pppAMode
+    Bool_t            mNSigmaTofMode = kFALSE; //! Only use the nSigmaTOF value from pppAMode
+    Bool_t            mRun15Slew = kFALSE; //! Trigger slewing corrections for Run 15
+
     string mCalibFilePvpd; //! filename for pvpd calibration parameters
     string mCalibFileTot;  //! filename for ToT calibration parameters
     string mCalibFileZhit; //! filename for Zhit calibration parameters
@@ -271,10 +340,17 @@ private:
     string   mHistoFileName;    //! histogram file name
     TH1D*    hEventCounter = nullptr;     //!
 
-    virtual const char *GetCVS() const
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.14 2021/01/27 04:06:25 geurts Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    Bool_t   mPPPAModeHist = kFALSE;
+    string   mPPPAModeHistoFileName;
+    Int_t    iYr; //! specifies which set of FF to use for dE/dx corretion
+    TH1D*    hDtiArray[10];
+    TH1D*    hGDcaArray[5];
+    TProfile* hDtiVsPtot[11][2];
 
-    ClassDef(StBTofCalibMaker,3)
+    virtual const char *GetCVS() const
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.15 2021/05/29 23:57:08 geurts Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+
+    ClassDef(StBTofCalibMaker,4)
 };
 
 inline void StBTofCalibMaker::forceTStartZero(  ) { mForceTStartZero = true; }
@@ -293,5 +369,13 @@ inline void StBTofCalibMaker::setCalibFileT0(const Char_t* filename)   {mCalibFi
 inline Int_t StBTofCalibMaker::getZCalibType() {return Int_t(mZCalibType);}
 inline Int_t StBTofCalibMaker::getTotCalibType() {return Int_t(mTotCalibType);}
 inline void StBTofCalibMaker::setFXTMode(const Bool_t val) {mFXTMode = val;}
+
+inline void StBTofCalibMaker::setPPPAMode(const Bool_t val) { mPPPAMode = val; if(val){LOG_INFO << "You are now using PPPAMode!" << endm;} if(!val){mPPPAModeHist = kFALSE;}; }
+inline void StBTofCalibMaker::setPPPAPionSel(const Bool_t val) { mPPPAPionSel = val; if(mPPPAPionSel) { LOG_INFO << "mPPPAPionSel is on!" << endm;}}
+inline void StBTofCalibMaker::setPPPAOutlierRej(const Bool_t val) { mPPPAOutlierRej = val; if(mPPPAOutlierRej) { LOG_INFO << "mPPPAOutlierRej is on!" << endm;}}
+inline void StBTofCalibMaker::setNSigmaTofMode(const Bool_t val) { mNSigmaTofMode = val; if(mNSigmaTofMode) { LOG_INFO << "mNSigmaTofMode is on!" << endm;}}
+inline void StBTofCalibMaker::setPPPAModeHist(const Bool_t val) { if(mPPPAMode){mPPPAModeHist = val; if(mPPPAModeHist){LOG_INFO << "mPPPAModeHist is on!" << endm;}} else if(val){LOG_INFO << "setPPPAModeHist() is only valid when pppAMode is on! " << endm;} else{mPPPAModeHist = val;}; }
+inline void StBTofCalibMaker::setPPPAModeHistoFileName(const Char_t* filename) { if(mPPPAMode && mPPPAModeHist){mPPPAModeHistoFileName = filename;} else {LOG_INFO << "setPPPAMode() and setPPPAModeHist() must be turned on first before calling setPPPAModeHistoFileName()!" << endm;}; }
+inline void StBTofCalibMaker::setRun15Slew(const Bool_t val) {if(val){mRun15Slew = val; LOG_INFO << "Using Run 15 slewing corrections" << endm;}; }
 
 #endif

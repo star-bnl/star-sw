@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.h,v 1.8 2017/03/02 18:26:50 jeromel Exp $
+ * $Id: StVpdCalibMaker.h,v 1.9 2021/05/29 23:57:19 geurts Exp $
  *
  *******************************************************************/
 /*!
@@ -14,6 +14,9 @@
 /*****************************************************************
  *
  * $Log: StVpdCalibMaker.h,v $
+ * Revision 1.9  2021/05/29 23:57:19  geurts
+ * Updates to improve pp and pA handling - by Bassam Aboona (TAMU)
+ *
  * Revision 1.8  2017/03/02 18:26:50  jeromel
  * Updates to StVpdCalibMaker after review - changes by jdb, nl
  *
@@ -89,6 +92,9 @@ public:
   
   /// function for tofCalibMaker to know whether to use VPD as the start or not
   Bool_t useVpdStart() const;
+
+  /// Enable/disable default outlier rejection of VPD hits
+  void setCutVpdOutliers(const Bool_t val=kTRUE);
 
 private:
   /// Reset the calibration parameters
@@ -174,10 +180,14 @@ private:
   Bool_t mUseVpdStart;   //! switch for using Vpd as the start time (true by default)
   Bool_t mForceTofStart;   //! flag indicating that a user overrides any dbase-based start timing default
 
+  // Start: bassam
+  Bool_t mCutVpdOutliers;
+  // End: bassam
+
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.8 2017/03/02 18:26:50 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.9 2021/05/29 23:57:19 geurts Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
-  ClassDef(StVpdCalibMaker,1)
+  ClassDef(StVpdCalibMaker,2)
 };
 
 inline void StVpdCalibMaker::setVPDHitsCut(const Int_t ieast, const Int_t iwest) { mVPDEastHitsCut=ieast ; mVPDWestHitsCut=iwest; }
@@ -188,4 +198,9 @@ inline void StVpdCalibMaker::setInitFromFile(const Bool_t val)  {mInitFromFile =
 inline void StVpdCalibMaker::setCalibFilePvpd(const Char_t* filename) {mCalibFilePvpd = filename;}
 inline void StVpdCalibMaker::setUseVpdStart(const Bool_t val) {mUseVpdStart = val; mForceTofStart = kTRUE;}
 inline Bool_t StVpdCalibMaker::useVpdStart() const { return mUseVpdStart; }
+
+// Start: bassam
+// Setting mCutVpdOutliers = kFALSE allows access to all hits from the VPD
+inline void StVpdCalibMaker::setCutVpdOutliers(const Bool_t val) {mCutVpdOutliers = val; if(!val) {LOG_INFO << "Default outlier rejection of VPD hits is disabled!" << endm;} ;}
+// End: bassam 
 #endif
