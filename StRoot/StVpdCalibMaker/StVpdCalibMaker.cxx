@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.15 2020/07/03 21:54:50 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.16 2021/05/29 23:57:19 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.16  2021/05/29 23:57:19  geurts
+ * Updates to improve pp and pA handling - by Bassam Aboona (TAMU)
+ *
  * Revision 1.15  2020/07/03 21:54:50  geurts
  * Removed an old typo in the log messages regarding the corralgo version that the VPD will be using.
  *
@@ -140,6 +143,8 @@ StVpdCalibMaker::StVpdCalibMaker(const Char_t *name) : StMaker(name)
   // use vpd as start by default;
   mUseVpdStart = kTRUE;
   mForceTofStart = kFALSE; // flag indicates user-override for TOF Start time calculation
+
+  mCutVpdOutliers = kTRUE;
 }
 
 //_____________________________________________________________________________
@@ -176,6 +181,12 @@ Int_t StVpdCalibMaker::Init()
 {
     resetPars();
     resetVpd();
+
+    if (IAttr("vpdPPPAMode")) {
+        mUseVpdStart = kFALSE;
+	mForceTofStart = kTRUE;
+	mCutVpdOutliers = kFALSE;
+    }
 
     // m_Mode can be set by SetMode() method
 //    if(m_Mode) {
@@ -654,7 +665,7 @@ void StVpdCalibMaker::vzVpdFinder()
     double vpdtime;
     if(i<NVPD&&mNWest>1) {  // west VPD
       vpdtime = (mVPDLeTime[i]*mNWest-mTSumWest)/(mNWest-1);    // Cuts on times with a significant deviation from the average.
-      if(fabs(vpdtime)>TDIFFCUT) {
+      if(fabs(vpdtime)>TDIFFCUT && mCutVpdOutliers) {
         mTSumWest -= mVPDLeTime[i];
         mVPDLeTime[i] = 0.;
         mNWest--;
@@ -664,7 +675,7 @@ void StVpdCalibMaker::vzVpdFinder()
     }
     if(i>=NVPD&&mNEast>1) {  // east VPD
       vpdtime = (mVPDLeTime[i]*mNEast-mTSumEast)/(mNEast-1);    // Cuts on times with a significant deviation from the average.
-      if(fabs(vpdtime)>TDIFFCUT) {
+      if(fabs(vpdtime)>TDIFFCUT && mCutVpdOutliers) {
         mTSumEast -= mVPDLeTime[i];
         mVPDLeTime[i] = 0.;
         mNEast--;
@@ -675,7 +686,7 @@ void StVpdCalibMaker::vzVpdFinder()
   }
 
   // remove slower hit in low energy runs.
-  if(mTruncation ) {
+  if(mTruncation && mCutVpdOutliers) {
     LOG_DEBUG << "Uh-oh, stepped into the truncation block!" << endm;
     Int_t hitIndex[2*NVPD];
     Int_t nTube = NVPD;

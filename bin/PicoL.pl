@@ -66,6 +66,8 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20i/ or $pwd =~ /P21i/) {
   elsif ($pwd =~ /2021\/100GeV_fixedTarget/)  {$glob = "/reco/production_100GeV_fixedTarget_2021/ReversedFullField/dev/2021/";}
   elsif ($pwd =~ /2021\/OO_200GeV/)           {$glob = "/reco/production_OO_200GeV_2021/ReversedFullField/dev/2021/";}
   elsif ($pwd =~ /2021\/ps_OO_200GeV/)        {$glob = "/reco/production_ps_OO_200GeV_2021/ReversedFullField/dev/2021/";}
+  elsif ($pwd =~ /2021\/17p3GeV/)             {$glob = "/reco/production_17p3GeV_2021/ReversedFullField/dev/2021/";}
+  print "pwd = $pwd => glob = $glob\n" if ($debug);
 } else {# TFG
   $PICOPATH = "/gpfs01/star/pwg_tasks/tfg02"; 
 #  if (! -r  $PICOPATH) {$PICOPATH = "/net/l401/data/scratch1/reco";}

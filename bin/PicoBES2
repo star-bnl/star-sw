@@ -541,3 +541,9 @@ end
 foreach d (`ls -1d  ???/*`)
   set b = `basename ${d}; mv *${b}*.root ${d}
 end
+================================================================================
+[rcas6001] ~/work/kfp/2021 $ 
+foreach d ( `ls -1d  *dev/` )
+ cd ${d}; pwd; dir *.root; dir -ltr dEdxND/*.root | tail -1; dir dEdxND/Title*;
+ cd -
+end

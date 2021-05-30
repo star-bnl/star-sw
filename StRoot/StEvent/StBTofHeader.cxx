@@ -28,6 +28,7 @@
  *
  **************************************************************************/
 #include "StBTofHeader.h"
+#include "PhysicalConstants.h"
 
 ClassImp(StBTofHeader)
 
@@ -40,13 +41,30 @@ StBTofHeader::StBTofHeader()
     }
     for(int i=0; i<2; i++) mVpdHitPattern[i] = 0;
     for(int i=0; i<MAXVPDVZ; i++) mVpdVz[i] = -999.;
-    mTStart = -9999.;
+    mTStart = 0.;
     mTStartErr = 0.;
     mTDiff = -999.;
     for(int i=0; i<2; i++)
         for(int j=0; j<MAXVPD; j++)
             mVpdTime[i][j] = 0.;
     mNTzero = 0;
+    mNTzeroCan = 0;
+    mTCanFirst = 99999.;
+    mTCanLast = -99999.;
+
+    // Start: bassam
+    mVpdEHits = 0;
+    mVpdWHits = 0;
+    mVpdEGoodHits = 0;
+    mVpdWGoodHits = 0;
+    mEarliestVpdEHit = 99999.;
+    mEarliestVpdWHit = 99999.;
+    mClosestVpdEHit = 99999.;
+    mClosestVpdWHit = 99999.;
+    mLatestVpdEHit = -99999.;
+    mLatestVpdWHit = -99999.;
+    // End: bassam
+
 }
 
 StBTofHeader::~StBTofHeader() {/* no op */}
@@ -107,6 +125,47 @@ StBTofHeader::triggerTime(int fiberId) const { return mTriggerTime[fiberId]; }
 int
 StBTofHeader::nTzero() const { return mNTzero; }
 
+int
+StBTofHeader::nTzeroCan() const { return mNTzeroCan; }
+
+double
+StBTofHeader::tCanFirst() const { return mTCanFirst; }
+
+double
+StBTofHeader::tCanLast() const { return mTCanLast; }
+
+// Start: bassam
+int
+StBTofHeader::vpdEHits() const { return mVpdEHits; }
+
+int
+StBTofHeader::vpdWHits() const { return mVpdWHits; }
+
+int
+StBTofHeader::vpdEGoodHits() const { return mVpdEGoodHits; }
+
+int
+StBTofHeader::vpdWGoodHits() const { return mVpdWGoodHits; }
+
+double 
+StBTofHeader::earliestVpdEHit() const { return mEarliestVpdEHit; }
+
+double
+StBTofHeader::earliestVpdWHit() const { return mEarliestVpdWHit; }
+
+double
+StBTofHeader::closestVpdEHit() const { return mClosestVpdEHit; }
+
+double
+StBTofHeader::closestVpdWHit() const { return mClosestVpdWHit; }
+
+double
+StBTofHeader::latestVpdEHit() const { return mLatestVpdEHit; }
+
+double
+StBTofHeader::latestVpdWHit() const { return mLatestVpdWHit; }
+// End: bassam
+
 void
 StBTofHeader::setFiberHeader(int fiberId, short val)
 {
@@ -163,3 +222,44 @@ StBTofHeader::setTriggerTime(unsigned int tdc, int fiberId) { mTriggerTime[fiber
 
 void
 StBTofHeader::setNTzero(short n) { mNTzero = n; }
+
+void
+StBTofHeader::setNTzeroCan(short nCan) { mNTzeroCan = nCan; }
+
+void
+StBTofHeader::setTCanFirst(double tFirst) { mTCanFirst = tFirst; }
+
+void
+StBTofHeader::setTCanLast(double tLast) { mTCanLast = tLast; }
+
+// Start: bassam
+void 
+StBTofHeader::setVpdEHits(short vpdEHits) { mVpdEHits = vpdEHits; }
+
+void
+StBTofHeader::setVpdWHits(short vpdWHits) { mVpdWHits = vpdWHits; }
+
+void
+StBTofHeader::setVpdEGoodHits(short vpdEGoodHits) { mVpdEGoodHits = vpdEGoodHits; }
+
+void
+StBTofHeader::setVpdWGoodHits(short vpdWGoodHits) { mVpdWGoodHits = vpdWGoodHits; }
+
+void
+StBTofHeader::setEarliestVpdEHit(double earliestVpdEHit) { mEarliestVpdEHit = earliestVpdEHit; }
+
+void
+StBTofHeader::setEarliestVpdWHit(double earliestVpdWHit) { mEarliestVpdWHit = earliestVpdWHit; }
+
+void
+StBTofHeader::setClosestVpdEHit(double closestVpdEHit) { mClosestVpdEHit = closestVpdEHit; }
+
+void
+StBTofHeader::setClosestVpdWHit(double closestVpdWHit) { mClosestVpdWHit = closestVpdWHit; }
+
+void
+StBTofHeader::setLatestVpdEHit(double latestVpdEHit) { mLatestVpdEHit = latestVpdEHit; }
+
+void
+StBTofHeader::setLatestVpdWHit(double latestVpdWHit) { mLatestVpdWHit = latestVpdWHit; }
+// End: bassam
