@@ -1,5 +1,9 @@
-// $Id: StFcsWaveformFitMaker.cxx,v 1.1 2021/03/30 13:40:13 akio Exp $
+// $Id: StFcsWaveformFitMaker.cxx,v 1.2 2021/05/30 21:26:52 akio Exp $
 // $Log: StFcsWaveformFitMaker.cxx,v $
+// Revision 1.2  2021/05/30 21:26:52  akio
+// Added mFitDrawOn=2 for resetting mHitIdx for end of page, instead of each event
+// Increased accepted tb range as hit, need further tuning
+//
 // Revision 1.1  2021/03/30 13:40:13  akio
 // FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
 //
@@ -131,8 +135,8 @@ StFcsWaveformFitMaker::~StFcsWaveformFitMaker() {
 }
 
 void StFcsWaveformFitMaker::Clear(Option_t* option) {
-    mHitIdx=0;
-    StMaker::Clear(option);
+  if(mFitDrawOn==1) mHitIdx=0;
+  StMaker::Clear(option);
 }
 
 int StFcsWaveformFitMaker::InitRun(int runNumber) {
@@ -352,9 +356,17 @@ float StFcsWaveformFitMaker::analyzeWaveform(int select, TGraphAsymmErrors* g, f
     default: 
       LOG_WARN << "Unknown fit/sum method select=" << select << endm;
     }
-    //printf("func=%d mFitDrawOn=%d mFilter=%s mFilename=%s mPage=%d mMaxPage=%d\n",
-    //        func,mFitDrawOn,mFilter,mFilename,mPage,mMaxPage);
-    if(func && (mFitDrawOn || mFilter) && mFilename && mPage<=mMaxPage) drawFit(g,func);
+    //if(func && (mFitDrawOn || mFilter ) && mFilename && mPage<=mMaxPage) drawFit(g,func);
+    int flag=0;
+    if(mFilter){
+      TString dname(mDetName);
+      if(integral>50 && dname.Contains(mFilter)) flag=1;
+    }
+    if(mFitDrawOn && flag && mFilename && mPage<=mMaxPage) {
+      printf("det=%s func=%d mFitDrawOn=%d mFilter=%s mFilename=%s mPage=%d mMaxPage=%d mHitIdx=%d integral=%f\n",
+	     mDetName,func,mFitDrawOn,mFilter,mFilename,mPage,mMaxPage,mHitIdx,integral);	
+      drawFit(g,func);
+    }
     return integral;
 }
 
@@ -509,8 +521,8 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
     if(GetDebug()>2) sprintf(Opt,"  ");
     if(GetDebug()>3) sprintf(Opt,"V ");
     //find peaks and set parameters
-    int trgmin = mCenterTB-3;
-    int trgmax = mCenterTB+4;
+    int trgmin = mCenterTB-4.5;
+    int trgmax = mCenterTB+5.5;
     int n = g->GetN();
     double *t = g->GetX();
     double *a = g->GetY();    
@@ -521,7 +533,7 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
     double tb0,tb1,tb2;
     double adc0,adc1,adc2;
 
-    if(mFilter){
+    if(mFilter && GetDebug()>0){
       TString dname(mDetName);
       if(! dname.Contains(mFilter)) return res[0];
       printf("%s mMinTB=%d mMaxTB=%d : ",
@@ -593,7 +605,7 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
 	}	
     }else if(npeak>=mMaxPeak){
         res[5] = npeak;
-        printf("Finding too many peaks npeak=%d. Skip fitting\n",npeak);	
+        printf("%s Finding too many peaks npeak=%d. Skip fitting\n",mDetName,npeak);	
     }
     //printf("func=%d res=%f\n",func,res[0]);
     return res[0];
@@ -625,7 +637,7 @@ void StFcsWaveformFitMaker::drawFit(TGraphAsymmErrors* g, TF1* func){
       char file[100];
       if(mMaxPage==0)          {sprintf(file,"%s.pdf",mFilename);}
       else if(mPage==0)        {sprintf(file,"%s.pdf(",mFilename);}
-      else if(mPage==mMaxPage) {sprintf(file,"%s.pdf)",mFilename); mPad=-1;}
+      else if(mPage==mMaxPage) {sprintf(file,"%s.pdf)",mFilename); mPad=-1; mFitDrawOn=0; mHitIdx=0;}
       else                     {sprintf(file,"%s.pdf",mFilename);}
       printf("Saving pdf with [%s] mPage=%d mPad=%d\n",file,mPage,mPad);
       mCanvas->Print(file,"pdf");	  
@@ -633,6 +645,7 @@ void StFcsWaveformFitMaker::drawFit(TGraphAsymmErrors* g, TF1* func){
       if(mPage==mMaxPage){ mPad=-9999; }
       else               { mPad=0; }
       mPage++;	
+      if(mFitDrawOn==2) mHitIdx=0;
     }
   }
 }
