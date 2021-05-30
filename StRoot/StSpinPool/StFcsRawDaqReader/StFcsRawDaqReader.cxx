@@ -59,16 +59,16 @@ Int_t StFcsRawDaqReader::prepareEnvironment(){
   } else {
     mEvent=new StEvent();
     AddData(mEvent);
-    LOG_DEBUG <<"::prepareEnvironment() has added StEvent"<<endm;
+    LOG_DEBUG <<"StFcsRawDaqReader::prepareEnvironment() has added StEvent"<<endm;
   }
   mFcsCollectionPtr=mEvent->fcsCollection();
   if(!mFcsCollectionPtr) {
     mFcsCollectionPtr=new StFcsCollection();
     mEvent->setFcsCollection(mFcsCollectionPtr);
-    LOG_DEBUG<<"::prepareEnvironment() has added StFcsCollection"<<endm;
+    LOG_DEBUG <<"StFcsRawDaqReader::prepareEnvironment() has added StFcsCollection"<<endm;
   } else {
     mFcsCollectionPtr=mEvent->fcsCollection();
-    LOG_DEBUG <<"::prepareEnvironment() found StFcsCollection"<<endm;
+    LOG_DEBUG <<"StFcsRawDaqReader::prepareEnvironment() found StFcsCollection"<<endm;
   };
   return kStOK;
 };
@@ -222,11 +222,14 @@ Int_t StFcsRawDaqReader::Make() {
       //printf("Trigger: raw bank has %d bytes: ver 0x%02X, desc %d, len %d\n",dd->ncontent,desc->ver,desc->evt_desc,desc->len);                 
       if(desc->ver==0x46){
         TriggerDataBlk2019* trgdata2019 = (TriggerDataBlk2019*)dd->Byte;  
-        if(mDebug) printf("Creating StTriggerData for ver=0x46 (2019) with run=%d\n",mRun);
-        AddData(new TObjectSet("StTriggerData",new StTriggerData2019(trgdata2019,mRun,1,mDebug),kTRUE));
-        LOG_DEBUG << "Adding Dataset StTriggerData"<<endm;
-	mTrg = (StTriggerData*) (GetData("StTriggerData")->GetObject());
-        LOG_DEBUG << "Got back Dataset StTriggerData addr="<<mTrg<<endm;
+        LOG_DEBUG << "Creating StTriggerData for ver=0x46 (2019) with run="<<mRun<<endm;
+	mEvent->setTriggerData((StTriggerData*)new StTriggerData2019(trgdata2019,mRun,1,mDebug));
+	LOG_DEBUG << "Added StTriggerData to StEvent"<<endm;
+        //AddData(new TObjectSet("StTriggerData",new StTriggerData2019(trgdata2019,mRun,1,mDebug),kTRUE));
+        //LOG_DEBUG << "Adding Dataset StTriggerData"<<endm;
+	//	mTrg = (StTriggerData*) (GetData("StTriggerData")->GetObject());
+	//mTrg = mEvent->triggerData();
+        //LOG_DEBUG << "Got back Dataset StTriggerData addr="<<mTrg<<endm;
 	
 	mFcsTcuBit = mTrg->lastDSM(5);
 	//unsigned short lastdsm4 = mTrg->lastDSM(4);
@@ -246,7 +249,7 @@ Int_t StFcsRawDaqReader::Make() {
 	unsigned long long l2sum=mTrg->l2sum();
 	startrg = (l2sum & 0xFF8000FFFFFFFFFF)?1:0;
 	fcstrg  = (l2sum & 0x007FFF0000000000)?1:0;
-	LOG_INFO << Form("L2SUM = 0x%016llx STAR=%1d FCS=%1d",l2sum,startrg,fcstrg) << endm;
+	LOG_DEBUG << Form("L2SUM = 0x%016llx STAR=%1d FCS=%1d",l2sum,startrg,fcstrg) << endm;
 
       }else{
         printf("Unknown StTriggerData version = %x\n",desc->ver);
@@ -377,8 +380,11 @@ void StFcsRawDaqReader::Clear( Option_t *opts ){
 ClassImp(StFcsRawDaqReader);
 
 /*
- * $Id: StFcsRawDaqReader.cxx,v 1.8 2021/05/27 13:10:38 akio Exp $
+ * $Id: StFcsRawDaqReader.cxx,v 1.9 2021/05/30 21:31:30 akio Exp $
  * $Log: StFcsRawDaqReader.cxx,v $
+ * Revision 1.9  2021/05/30 21:31:30  akio
+ * Adding StTriggerData to StEvent, not dataset
+ *
  * Revision 1.8  2021/05/27 13:10:38  akio
  * Many updates for trigger bits and around Clear()
  *
