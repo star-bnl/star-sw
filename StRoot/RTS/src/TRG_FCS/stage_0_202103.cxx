@@ -67,20 +67,21 @@ void fcs_trg_base::stage_0_202103(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_
 
 				if(sum>0 && fcs_trgDebug>=2){ 
 					if(geo.det<2){
-						printf("ns=%1d det=%1d dep=%2d ch=%2d sum=%6d gain=%6d s*g=%6d pT=%6.3f\n",
+						printf("ns=%1d det=%1d dep=%2d ch=%2d sum=%6d gain=%6d s*g=%6d pT=%8.5f\n",
 						       geo.ns,geo.det,geo.dep,geo.ch,
-						       sum,pg->gain,(sum*pg->gain)>>6,
-						       0.00024711*((sum*pg->gain)>>6) );
+						       sum,pg->gain,(sum*pg->gain)>>8,
+						       0.00024711*((sum*pg->gain)>>8) );
 					}else{
 						printf("ns=%1d det=%1d dep=%2d ch=%2d sum=%6d gain=%6d s*g=%6d MIP=%5.3f\n",
 						       geo.ns,geo.det,geo.dep,geo.ch,
-						       sum,pg->gain,(sum*pg->gain)>>6,
-						       float((sum*pg->gain)>>6)/100.0);
+						       sum,pg->gain,(sum*pg->gain)>>8,
+						       float((sum*pg->gain)>>8)/100.0);
 					}					
 				}
 
-				sum *= pg?pg->gain:0x100 ;	// note that in FY21+ gain==1.0 is 0x100
-				sum >>= 8 ;		// see note above
+				sum *= pg?pg->gain:0x100 ; // note that in FY21+ gain==1.0 is 0x100
+				sum >>= 8 ;		   // see note above
+			       
 			}
 
 			break ;

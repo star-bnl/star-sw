@@ -99,7 +99,8 @@ void fcs_trg_base::init(const char* fname)
 	for(int j=0;j<ADC_DET_COU;j++) {
 	for(int k=0;k<DEP_COU;k++) {
 	for(int c=0;c<32;c++) {
-		p_g[i][j][k][c].gain = (1<<6) ;	// set gains to 1: THIS IS FY19 -- need to override in code
+	  // p_g[i][j][k][c].gain = (1<<6) ;	// set gains to 1: THIS IS FY19 -- need to override in code
+	  p_g[i][j][k][c].gain = (1<<8) ; // Akio changing to 4.8 fixed
 	}}}}
 
 
@@ -700,8 +701,9 @@ int fcs_trg_base::dump_event_sim(int xing)
 		for(int t=0;t<8;t++) {
 			int d_sim = d_out.s1[i][j][k].s1_to_s2.d[t] ;
 
-			if(d_sim) printf("S1 sim: %d:%d:%d - xing %d:%d, dta %d\n",
-			       i,j,k,xing,t,d_sim) ;
+			if(d_sim & fcs_trgDebug>0) 
+			  printf("S1 sim: %d:%d:%d - xing %d:%d, dta %d\n",
+				 i,j,k,xing,t,d_sim) ;
 		}
 	}
 	}
@@ -716,13 +718,14 @@ int fcs_trg_base::dump_event_sim(int xing)
 		for(int t=0;t<8;t++) {
 			int d_sim = d_out.s2[i].s2_to_s3[j].d[t] ;
 
-			printf("S2 sim: %d:%d - xing %d:%d, dta 0x%03X\n",
-			       i,j,xing,t,d_sim) ;
+			if(fcs_trgDebug>0)
+			  printf("S2 sim: %d:%d - xing %d:%d, dta 0x%03X\n",
+				 i,j,xing,t,d_sim) ;
 		}
 	}
 	}
 
-	printf("S3 sim: to DSM 0x%04X\n",d_out.s3.dsm_out) ;
+	//printf("S3 sim: to DSM 0x%04X\n",d_out.s3.dsm_out) ;
 
 	return 0 ;
 }
