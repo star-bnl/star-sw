@@ -37,6 +37,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 
   @histGF = qw(
 	       SecRow3  Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3
 	       SecRow3C PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C
+	       SecRow3P SecRow3PC SecRow3+SecRow3P SecRow3C+SecRow3PC 
 	       AdcI3 dZdY3 dXdY3  nPad3 nTbk3
 	       AdcI3C dZdY3C dXdY3C nPad3C nTbk3C
 	       

@@ -15,7 +15,8 @@ git ci -m "Update" RunXXIDefs.pm
 #cd /hlt/cephfs/reco/2021/RF/TFG21e/44p5GeV_fixedTarget_2021
 #cd /hlt/cephfs/reco/2021/RF/TFG21e/100GeV_fixedTarget_2021
 #cd /hlt/cephfs/reco/2021/RF/TFG21e/OO_200GeV_2021
-cd /hlt/cephfs/reco/2021/FF/TFG21e/FF_OO_200GeV_2021
+#cd /hlt/cephfs/reco/2021/FF/TFG21e/FF_OO_200GeV_2021
+cd /hlt/cephfs/reco/2021/FF/TFG21f/FF_OO_200GeV_2021
 CreateRunDirs.pl
 #foreach d (`ls -1d 121/22121031`)
 foreach d (`ls -1d ???/2*`)
@@ -40,7 +41,8 @@ foreach d (`ls -1d ???/2*`)
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG21c.xml
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.DEV2.xml
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG21e.xml
-  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG21e.OO.xml
+#  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG21e.OO.xml
+  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG21f.OO.xml
   touch Submitted
   cd -
 end

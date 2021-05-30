@@ -12,10 +12,13 @@ my @DistortionSet = qw(CorrY OShortR OBmap  OPr40 OIFC OSectorAlign OSpaceZ2 OGr
 # 	       '14p5GeV'          => '20190406.043336');
 #              'pp500_2017'       => '20170423.040951'
 #	       '14p5GeV'          => '20190406.043336'
+#	       '7p7GeV_2021_RF'  => '20210303.052529',
+#	       '7p7GeV_2021_FF'  => '20210304.034026'
 #	      );
+#	       'OO_200GeV_20217'  => '20210510.134727',
+#	       'FF_OO_200GeV_2021' => '20210522.024326',
 my %dates   = ( 
-	       '7p7GeV_2021_RF'  => '20210303.052529',
-	       '7p7GeV_2021_FF'  => '20210304.034026'
+	       'FF_OO_200GeV_2021_Ideal' => '20210523.024326'
 	      );
 foreach $trig  (sort keys %dates) {
   my $datetime = $dates{$trig};  print "$trig => $datetime\n";
