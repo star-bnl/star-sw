@@ -1,8 +1,11 @@
 // \class StFmsTriggerSimMaker
 // \author Akio Ogawa
 //
-//  $Id: StFcsTriggerSimMaker.cxx,v 1.1 2021/03/30 13:33:53 akio Exp $
+//  $Id: StFcsTriggerSimMaker.cxx,v 1.2 2021/05/30 21:40:56 akio Exp $
 //  $Log: StFcsTriggerSimMaker.cxx,v $
+//  Revision 1.2  2021/05/30 21:40:56  akio
+//  Many updates from trigger commissioning on Run21 OO data
+//
 //  Revision 1.1  2021/03/30 13:33:53  akio
 //  Moved from $CVSROOT/offline/upgrade/akio/ to $CVSROOT/StRoot/StSpinPool/
 //
@@ -75,6 +78,8 @@ int StFcsTriggerSimMaker::Init(){
     mTrgSim->init(".");
     mTrgSim->run_start(0);
     mTrgSim->fcs_trgDebug=mDebug;
+    
+    //trigegr versions
     if(mTrgSelect==201900){
 	mTrgSim->stage_version[0]=0;
 	mTrgSim->stage_version[1]=0;
@@ -85,7 +90,87 @@ int StFcsTriggerSimMaker::Init(){
 	mTrgSim->stage_version[1]=1;
 	mTrgSim->stage_version[2]=1;
 	mTrgSim->stage_version[3]=1;
+    }else if(mTrgSelect==202203){
+	mTrgSim->stage_version[0]=2;
+	mTrgSim->stage_version[1]=1;
+	mTrgSim->stage_version[2]=3;
+	mTrgSim->stage_version[3]=3;
+	//Thresholds
+	mTrgSim->EM_HERATIO_THR = 32;
+	mTrgSim->HAD_HERATIO_THR = 32;
+	if(0){
+	  mTrgSim->EMTHR1 = 32;
+	  mTrgSim->EMTHR2 = 48;
+	  mTrgSim->EMTHR3 = 64;
+	  mTrgSim->HADTHR1 = 32;
+	  mTrgSim->HADTHR2 = 48;
+	  mTrgSim->HADTHR3 = 64;
+	  mTrgSim->JETTHR1 = 64;
+	  mTrgSim->JETTHR2 = 128;
+	  mTrgSim->ETOTTHR = 128;
+	  mTrgSim->HTOTTHR = 64;
+	  mTrgSim->EHTTHR = 16;
+	  mTrgSim->HHTTHR = 16;
+	}
+	if(0){
+	  mTrgSim->EMTHR1 = 64;
+	  mTrgSim->EMTHR2 = 128;
+	  mTrgSim->EMTHR3 = 192;
+	  mTrgSim->HADTHR1 = 64;
+	  mTrgSim->HADTHR2 = 128;
+	  mTrgSim->HADTHR3 = 192;
+	  mTrgSim->JETTHR1 = 128;
+	  mTrgSim->JETTHR2 = 192;
+	  mTrgSim->ETOTTHR = 192;
+	  mTrgSim->HTOTTHR = 64;
+	  mTrgSim->EHTTHR = 64;
+	  mTrgSim->HHTTHR = 16;
+	}
+	if(0){
+	  mTrgSim->EMTHR1 = 180;
+	  mTrgSim->EMTHR2 = 240;
+	  mTrgSim->EMTHR3 = 250;
+	  mTrgSim->HADTHR1 = 180;
+	  mTrgSim->HADTHR2 = 240;
+	  mTrgSim->HADTHR3 = 250;
+	  mTrgSim->JETTHR1 = 150;
+	  mTrgSim->JETTHR2 = 250;
+	  mTrgSim->ETOTTHR = 250;
+	  mTrgSim->HTOTTHR = 150;
+	  mTrgSim->EHTTHR = 200;
+	  mTrgSim->HHTTHR = 40;
+	}
+	if(0){
+	  mTrgSim->EMTHR1 = 70;
+	  mTrgSim->EMTHR2 = 120;
+	  mTrgSim->EMTHR3 = 160;
+	  mTrgSim->HADTHR1 = 85;
+	  mTrgSim->HADTHR2 = 130;
+	  mTrgSim->HADTHR3 = 160;
+	  mTrgSim->JETTHR1 = 240;
+	  mTrgSim->JETTHR2 = 250;
+	  mTrgSim->ETOTTHR = 250;
+	  mTrgSim->HTOTTHR = 230;
+	  mTrgSim->EHTTHR = 80;
+	  mTrgSim->HHTTHR = 70;
+	}
+	if(1){
+	  mTrgSim->EMTHR1 = 70;
+	  mTrgSim->EMTHR2 = 50;
+	  mTrgSim->EMTHR3 = 160;
+	  mTrgSim->HADTHR1 = 85;
+	  mTrgSim->HADTHR2 = 50;
+	  mTrgSim->HADTHR3 = 160;
+	  mTrgSim->JETTHR1 = 240;
+	  mTrgSim->JETTHR2 = 250;
+	  mTrgSim->ETOTTHR = 100;
+	  mTrgSim->HTOTTHR = 80;
+	  mTrgSim->EHTTHR = 80;
+	  mTrgSim->HHTTHR = 70;
+	}
+	mTrgSim->PHTTHR = 160;    
     }
+    //EPD mask
     if(mPresMask){
 	printf("Reading PresMask from %s\n",mPresMask);
 	FILE* F=fopen(mPresMask,"r");
@@ -143,12 +228,22 @@ int StFcsTriggerSimMaker::InitRun(int runNumber){
 	    fcs_trg_pt_correction[ns][ehp][dep][ch] = mFcsDb->getEtGain(det,id);
 	    fcs_trg_gain_correction[ns][ehp][dep][ch] = mFcsDb->getGainCorrection(det,id);
 	    fcs_trg_pedestal[ns][ehp][dep][ch] = 0;
+	    
+	    mTrgSim->p_g[ns][ehp][dep][ch].ped  = fcs_trg_pedestal[ns][ehp][dep][ch];
+
+	    float ggg = fcs_trg_pt_correction[ns][ehp][dep][ch];
+	    //float ggg = (fcs_trg_pt_correction[ns][ehp][dep][ch]-1.0)/2.0 + 1.0;
+	    float gg = ggg * fcs_trg_gain_correction[ns][ehp][dep][ch];
+	    int g = (u_int)(gg*256.0+0.5) ;
+	    mTrgSim->p_g[ns][ehp][dep][ch].gain = g;
+
 	    /*
-	      printf("%1d %1d %2d %2d pT=%6.3f corr=%6.3f ped=%4d\n",ns,ehp,dep,ch,
+	      printf("AAA %1d %1d %2d %2d pT=%6.3f corr=%6.3f ped=%4d\n",ns,ehp,dep,ch,
 	      fcs_trg_pt_correction[ns][ehp][dep][ch],
 	      fcs_trg_gain_correction[ns][ehp][dep][ch],
 	      fcs_trg_pedestal[ns][ehp][dep][ch]);
 	    */
+
 	    if(gainfile) 
 		fprintf(gainfile,"%2d %2d %2d %2d %8.3f\n",ns,ehp,dep,ch,
 			fcs_trg_pt_correction[ns][ehp][dep][ch]);
@@ -185,8 +280,8 @@ int StFcsTriggerSimMaker::Make(){
     mTrgSim->start_event();
 
     //Feed ADC
-    u_short dta[8]; 
-    memset(dta,0,sizeof(dta)) ;
+    static u_short data[8]; 
+    memset(data,0,sizeof(data)) ;
     memset(fcs_trg_sim_adc,0,sizeof(fcs_trg_sim_adc));
     int n=0;
     for(int det=0; det<=kFcsNDet; det++){
@@ -199,15 +294,28 @@ int StFcsTriggerSimMaker::Make(){
 	    unsigned short dep = hit->dep();
 	    unsigned short ch  = hit->channel();
 	    //printf("ns=%1d ehp=%1d dep=%2d ch=%2d adc=%4d\n",ns,ehp,dep,ch,hit->adc());
+	    if(ehp<0 || ch>=32) continue;
 	    fcs_trg_sim_adc[ns][ehp][dep][ch] = hit->adc(0);
-	    dta[3] = hit->adc(0);
-	    mTrgSim->fill_event(ehp,ns,dep,ch,dta,8) ;
+	    if(mSimMode==0){
+	      int ntb=hit->nTimeBin();
+	      for(int t=0; t<ntb; t++){
+		int tb = hit->timebin(t);
+		if(tb>=mTrgTimebin-3 && tb<=mTrgTimebin+4){
+		  data[tb-mTrgTimebin+3] = hit->adc(t);
+		  //printf("tb=%3d i=%2d adc=%4d\n",tb,tb-mTrgTimebin+3,hit->adc(t));
+		}
+	      }
+	      mTrgSim->fill_event(ehp,ns,dep,ch,data,8) ;
+	    }else{
+	      data[3] = hit->adc(0);
+	      mTrgSim->fill_event(ehp,ns,dep,ch,data,8) ;
+	    }
 	    if(mFile) fprintf(mFile,"%2d %2d %2d %2d %5d\n",ns,ehp,dep,ch,hit->adc(0));
 	    n++;
 	}
     }
     if(mFile) fprintf(mFile,"%2d %2d %2d %2d %5d\n",-1,0,0,0,0);
-    LOG_INFO << Form("Feeded %d hits",n) << endm;;
+    LOG_INFO << Form("StFcsTriggerSimMaker feeded %d hits",n) << endm;;
 
     //Run Trigger Simulation
     //   u_short dsm_out = fcs_trg_run(mTrgSelect, mDebug);
