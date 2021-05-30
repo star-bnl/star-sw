@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBTofHeader.h,v 2.5 2021/05/28 19:00:21 ullrich Exp $
+ * $Id: StBTofHeader.h,v 2.4 2010/05/17 17:47:16 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -16,9 +16,6 @@
  ***************************************************************************
  *
  * $Log: StBTofHeader.h,v $
- * Revision 2.5  2021/05/28 19:00:21  ullrich
- * Added 3 member plus access fct: mTCanFirst, mTCanLast, mNTzeroCan (Frank)
- *
  * Revision 2.4  2010/05/17 17:47:16  ullrich
  * Increase version number to 2.
  *
@@ -64,6 +61,19 @@ public:
     double         tCanFirst() const;
     double         tCanLast() const;
 
+    // Start: bassam
+    int            vpdEHits() const;
+    int            vpdWHits() const;
+    int            vpdEGoodHits() const;
+    int            vpdWGoodHits() const;
+    double         earliestVpdEHit() const;
+    double         earliestVpdWHit() const;
+    double         closestVpdEHit() const;
+    double         closestVpdWHit() const;
+    double         latestVpdEHit() const;
+    double         latestVpdWHit() const; 
+    // End: bassam
+
     void         setFiberHeader(int fiberId, short val);
     void         setFiberTriggerWord(int fiberId, unsigned int val);
     void         setVpdHit(StBeamDirection eastwest, int tubeId);
@@ -81,6 +91,19 @@ public:
     void         setTCanFirst(double tFirst);
     void         setTCanLast(double tLast);
 
+    // Start: bassam
+    void         setVpdEHits(short vpdEHits);
+    void         setVpdWHits(short vpdWHits);
+    void         setVpdEGoodHits(short vpdEGoodHits);
+    void         setVpdWGoodHits(short vpdWGoodHits);
+    void         setEarliestVpdEHit(double earliestVpdEHit);
+    void         setEarliestVpdWHit(double earliestVpdWHit);
+    void         setClosestVpdEHit(double closestVpdEHit);
+    void         setClosestVpdWHit(double closestVpdWHit);
+    void         setLatestVpdEHit(double latestVpdEHit);
+    void         setLatestVpdWHit(double latestVpdWHit);
+    // End: bassam
+
 protected:
     Short_t      mFiberHeader[MAXFIBER];
     UInt_t       mFiberTriggerWord[MAXFIBER];
@@ -95,6 +118,20 @@ protected:
     Short_t      mNTzeroCan;
     Double_t     mTCanFirst;
     Double_t     mTCanLast;
+
+    // Start: bassam
+    Double_t     mVpdEHits;
+    Double_t     mVpdWHits;
+    Double_t     mVpdEGoodHits;
+    Double_t     mVpdWGoodHits;
+    Double_t     mEarliestVpdEHit;
+    Double_t     mEarliestVpdWHit;
+    Double_t     mClosestVpdEHit;
+    Double_t     mClosestVpdWHit;
+    Double_t     mLatestVpdEHit;
+    Double_t     mLatestVpdWHit; 
+    // Start: bassam
+
     ClassDef(StBTofHeader,3)
 };
 
