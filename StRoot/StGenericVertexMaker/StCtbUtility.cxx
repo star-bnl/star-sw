@@ -11,9 +11,6 @@
 // This needs cleanup of the mapping code
 extern void cts_get_ctb_indexes(long, long &, long &);
 
-/*!
- * cts_get_ctb_indexes() is defined in $STAR/pams/ctf/cts/cts.cc
- */
 
 
 #include "StCtbUtility.h"
