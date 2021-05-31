@@ -12,7 +12,6 @@ CTBforSeed() -- require CTB match for tracks used to find vertex seed
 
 use_ITTF  --  use ITTF tracks (checks encoded method)
 
-
 Output:
 
 No output, but fit results can be accessed from StVertexFinder.result()
