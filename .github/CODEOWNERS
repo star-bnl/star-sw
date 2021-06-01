@@ -1,4 +1,4 @@
-/.github/CODEOWNERS          @star-bnl-user
+*                            @plexoos     @nigmatkulov
 /OnlTools                    @kehw
 /StDb                        @dmarkh
 /StRoot/RTS                  @kehw
