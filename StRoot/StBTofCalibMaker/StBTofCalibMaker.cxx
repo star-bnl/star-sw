@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.25 2021/05/31 03:35:08 genevb Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.24 2021/05/29 23:57:08 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -19,8 +19,8 @@
  *add a flag mFXTMode: 0 for Collider mode, 1 for FXT mode
  *
  * $Log: StBTofCalibMaker.cxx,v $
- * Revision 1.25  2021/05/31 03:35:08  genevb
- * Stepping back from 2021-05-29 commit while awaiting updates to StEvent/StBTofHeader
+ * Revision 1.24  2021/05/29 23:57:08  geurts
+ * Updates to improve pp and pA handling - by Bassam Aboona (TAMU)
  *
  * Revision 1.23  2021/01/27 04:06:25  geurts
  * Introducing meaningful nTofSigma calculations in VPDstartless mode.
@@ -113,17 +113,17 @@
  *
  *******************************************************************/
 #include <iostream>
-#include "StEvent.h"
-#include "StBTofCollection.h"
-#include "StBTofHit.h"
-#include "StBTofHeader.h"
-#include "StBTofPidTraits.h"
-#include "StEventTypes.h"
+#include "StEvent/StEvent.h"
+#include "StEvent/StBTofCollection.h"
+#include "StEvent/StBTofHit.h"
+#include "StEvent/StBTofHeader.h"
+#include "StEvent/StBTofPidTraits.h"
+#include "StEvent/StEventTypes.h"
 #include "Stypes.h"
 #include "StThreeVectorD.hh"
 #include "StHelix.hh"
-#include "StTrackGeometry.h"
-#include "StTrackPidTraits.h"
+#include "StEvent/StTrackGeometry.h"
+#include "StEvent/StTrackPidTraits.h"
 #include "StEventUtilities/StuRefMult.hh"
 #include "PhysicalConstants.h"
 #include "StPhysicalHelixD.hh"
@@ -148,6 +148,7 @@
 #include "StBTofUtil/StBTofSimResParams.h"
 #include "StBTofUtil/StVpdSimConfig.h"
 
+#include "TProfile.h"
 
 /// Very High resolution mode, pico-second per bin
 const Double_t StBTofCalibMaker::VHRBIN2PS =  24.4140625; // 1000*25/1024 (ps/chn)
@@ -161,6 +162,12 @@ const Double_t StBTofCalibMaker::VZDIFFCUT=6.;
 const Double_t StBTofCalibMaker::DCARCUT=1.;
 const Double_t StBTofCalibMaker::mC_Light = C_C_LIGHT/1.e9;
 
+const Float_t StBTofCalibMaker::BTHBLCHCNST = 8.; // Bethe-Bloch constant used for dE/dx 
+                                                  // correction in start-time calculations 
+                                                  // in pppAMode
+const Float_t StBTofCalibMaker::DEDXTCORR[2] = {0.033, 0.013}; // correction to the vpd hit times 
+							       // to match the corrected BTOF start time
+							       // as a function of run year	
 
 //_____________________________________________________________________________
 StBTofCalibMaker::StBTofCalibMaker(const char *name) : StMaker(name)
@@ -183,6 +190,13 @@ StBTofCalibMaker::StBTofCalibMaker(const char *name) : StMaker(name)
     mForceTStartZero = false;
     isMcFlag = kFALSE;
     mFXTMode = kFALSE;
+
+    mPPPAMode = kFALSE;
+    mPPPAPionSel = kFALSE;
+    mPPPAOutlierRej = kFALSE;
+    mNSigmaTofMode = kFALSE;
+    mRun15Slew = kFALSE;
+    mPPPAModeHist = kFALSE;
 
     setCreateHistoFlag(kFALSE);
     setHistoFileName("btofcalib.root");
@@ -231,6 +245,21 @@ void StBTofCalibMaker::resetVpd()
     mNWest = 0;
     mValidStartTime = kFALSE;
     mNTzero = 0;
+
+    mNTzeroCan = 0;
+    mTCanFirst = 99999.;
+    mTCanLast = -99999.;
+
+    mVpdEHits = 0;
+    mVpdWHits = 0;
+    mVpdEGoodHits = 0;
+    mVpdWGoodHits = 0;
+    mEarliestVpdEHit = 99999.;
+    mEarliestVpdWHit = 99999.;
+    mClosestVpdEHit = 99999.;
+    mClosestVpdWHit = 99999.;
+    mLatestVpdEHit = -99999.;
+    mLatestVpdWHit = -99999.;
 }
 
 //____________________________________________________________________________
@@ -241,29 +270,41 @@ Int_t StBTofCalibMaker::Init()
 
 	if (IAttr("btofFXT")) mFXTMode = kTRUE; //True for FXT mode calib, default as false for collider mode calib
 
-    mUseEventVertex = ! IAttr("UseProjectedVertex");
-    if (mUseEventVertex) {
-        LOG_INFO << "Use event vertex position." << endm;
-    } else {
-        LOG_INFO << "Use projected vertex position." << endm;
-    }
+  if (IAttr("pppAMode")) {
+	    mPPPAMode = kTRUE;
+      mRun15Slew = kTRUE;
+  }
+
+  if (IAttr("setPPPAOutlierRej")) mPPPAOutlierRej = kTRUE;
+
+  mUseEventVertex = ! IAttr("UseProjectedVertex");
+  if (mUseEventVertex) {
+      LOG_INFO << "Use event vertex position." << endm;
+  } else {
+      LOG_INFO << "Use projected vertex position." << endm;
+  }
 
     // m_Mode can be set by SetMode() method
-    if(m_Mode) {
-        //    setHistoFileName("btofcalib.root");
-    } else {
-        setHistoFileName("");
-    }
+  if(m_Mode) {
+      //    setHistoFileName("btofcalib.root");
+  } else {
+      setHistoFileName("");
+  }
 
-    if (mHisto){
-        bookHistograms();
-        LOG_INFO << "Histograms are booked" << endm;
-        if (mHistoFileName!="") {
-            LOG_INFO << "Histograms will be stored in " << mHistoFileName.c_str() << endm;
-        }
-    }
+  if (mHisto){
+      bookHistograms();
+      LOG_INFO << "Histograms are booked" << endm;
+      if (mHistoFileName!="") {
+          LOG_INFO << "Histograms will be stored in " << mHistoFileName.c_str() << endm;
+      }
+  }
 
-    return kStOK;
+  if (mPPPAModeHist){
+     bookPPPAHistograms();
+     LOG_INFO << "pppAMode Histograms are booked!" << endm;
+  }
+
+  return kStOK;
 }
 
 //____________________________________________________________________________
@@ -300,6 +341,14 @@ Int_t StBTofCalibMaker::InitRun(int runnumber)
     } else {
         mUseVpdStart = kFALSE;
         LOG_INFO << "NO VPD Calibration Maker found:  vpd **NOT** used for start timing" << endm;
+    }
+
+    // Apply fudge factor (FF) for dE/dx corrections (Runs 14 - 18)
+    if(runnumber>=14350003 && runnumber<=17315001) {
+        iYr = 0;
+    }
+    else {
+        iYr = 1;
     }
 
     /// If no VPD is used then one should have selected to use the EventVertex from the TPC, and warn if not.
@@ -931,6 +980,7 @@ Int_t StBTofCalibMaker::Make()
     if(!mMuDstIn) processStEvent();
     else          processMuDst();
 
+    archiveVpdHitInfo();
     writeStartTime();
 
     return kStOK;
@@ -1033,7 +1083,7 @@ void StBTofCalibMaker::processStEvent()
         mEvtVtxZ = pVtx->position().z();
 
         tstart_NoVpd(theTof, pVtx, &mTStart);
-
+        
     }  // end if(mUseVpdStart)
 
     LOG_INFO << "primVz = " << mEvtVtxZ << " projVz = " << mProjVtxZ << "  vpdVz = " << mVPDVtxZ << endm;
@@ -1201,11 +1251,13 @@ void StBTofCalibMaker::processStEvent()
         float sigmap = -9999.;
 //        float res = 0.013;  // 0.013 by default - 1/beta resolution
         float res = tofCellResolution(trayId, moduleChan);
+	float res_c = res * (C_C_LIGHT/1.e9);
+
         if(fabs(res)>1.e-5) {
-            sigmae = (Float_t)(L*(1./beta-1./b_e)/res);
-            sigmapi = (Float_t)(L*(1./beta-1./b_pi)/res);
-            sigmak = (Float_t)(L*(1./beta-1./b_k)/res);
-            sigmap = (Float_t)(L*(1./beta-1./b_p)/res);
+            sigmae = (Float_t)(L*(1./beta-1./b_e)/res_c);
+            sigmapi = (Float_t)(L*(1./beta-1./b_pi)/res_c);
+            sigmak = (Float_t)(L*(1./beta-1./b_k)/res_c);
+            sigmap = (Float_t)(L*(1./beta-1./b_p)/res_c);
         }
 
         pidTof->setPathLength((Float_t)L);
@@ -1453,11 +1505,13 @@ void StBTofCalibMaker::processMuDst()
             float sigmap = -9999.;
 //            float res = 0.013;  // 0.013 by default - 1/beta resolution
             float res = tofCellResolution(trayId, moduleChan);
+	    float res_c = res * (C_C_LIGHT/1.e9);
+
            if(fabs(res)>1.e-5) {
-                sigmae = (Float_t)(L*(1./beta-1./b_e)/res);
-                sigmapi = (Float_t)(L*(1./beta-1./b_pi)/res);
-                sigmak = (Float_t)(L*(1./beta-1./b_k)/res);
-                sigmap = (Float_t)(L*(1./beta-1./b_p)/res);
+                sigmae = (Float_t)(L*(1./beta-1./b_e)/res_c);
+                sigmapi = (Float_t)(L*(1./beta-1./b_pi)/res_c);
+                sigmak = (Float_t)(L*(1./beta-1./b_k)/res_c);
+                sigmap = (Float_t)(L*(1./beta-1./b_p)/res_c);
             }
 
             pidTof.setPathLength((Float_t)L);
@@ -1608,6 +1662,21 @@ void StBTofCalibMaker::writeStartTime()
         mBTofHeader->setTStart(mTStart);
         mBTofHeader->setTDiff(mTDiff);
         mBTofHeader->setNTzero(mNTzero);
+
+        mBTofHeader->setNTzeroCan(mNTzeroCan);
+        mBTofHeader->setTCanFirst(mTCanFirst);
+        mBTofHeader->setTCanLast(mTCanLast);
+
+        mBTofHeader->setVpdEHits(mVpdEHits);
+        mBTofHeader->setVpdWHits(mVpdWHits);
+        mBTofHeader->setVpdEGoodHits(mVpdEGoodHits);
+        mBTofHeader->setVpdWGoodHits(mVpdWGoodHits);
+        mBTofHeader->setEarliestVpdEHit(mEarliestVpdEHit);
+        mBTofHeader->setEarliestVpdWHit(mEarliestVpdWHit);
+        mBTofHeader->setClosestVpdEHit(mClosestVpdEHit);
+        mBTofHeader->setClosestVpdWHit(mClosestVpdWHit);
+        mBTofHeader->setLatestVpdEHit(mLatestVpdEHit);
+        mBTofHeader->setLatestVpdWHit(mLatestVpdWHit);
     }
 
     return;
@@ -1678,6 +1747,26 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
     }
 
     LOG_DEBUG << "  Corrected tof: tofcorr = " << tofcorr << endm;
+
+// Special handling of Run15 slewing correction (Bassam)
+    const double SLEWCORR = 0.19; // slewing correction constant for Run 15 in ns
+    if(mRun15Slew && tot<15.) {
+        if(tot<13.) {
+            tofcorr -= SLEWCORR;
+        }
+        else {
+            tofcorr -= (SLEWCORR/4.)*(15.-tot)*(15.-tot);
+        }
+    }
+
+    if(mRun15Slew && tot>19. && tot<26.) {
+        double delta = (22.5-tot)/3.5;
+        tofcorr += .110*(1.0-delta*delta);
+    }
+
+    if (mRun15Slew) LOG_DEBUG << "  Corrected tof (Run15Slew): tofcorr = " << tofcorr << endm;
+
+
     return tofcorr;
 }
 
@@ -1720,10 +1809,19 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
     Int_t nCan = 0;
     Double_t tSum = 0.;
     Double_t t0[5000];
+    Double_t tCanFirst = 99999.;
+    Double_t tCanLast = -99999.;
+
     memset(t0, 0., sizeof(t0));
     for(size_t i=0;i<tofHits.size();i++) {
         StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
         if(!aHit) continue;
+
+        isMcFlag = kFALSE;       // Check to see if the hit is simulated.
+        if ( aHit->qaTruth() == 1  ) {
+            isMcFlag = kTRUE;
+        }
+
         int trayId = aHit->tray();
         if(trayId>0&&trayId<=mNTray) {
             StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(aHit->associatedTrack());
@@ -1738,13 +1836,31 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
             static StTpcDedxPidAlgorithm PidAlgorithm;
             static StPionPlus* Pion = StPionPlus::instance();
             static StProton* Proton = StProton::instance();
+            static StKaonPlus* Kaon = StKaonPlus::instance();
+            static StElectron* Electron = StElectron::instance();
+
             const StParticleDefinition* pd = pTrack->pidTraits(PidAlgorithm);
             double nSigPi = -999.;
-            double nSigP = -999.;
+            double nSigP  = -999.;
+            double nSigKaon = -999.;
+            double nSigElectron = -999.;
+            float nHitsDedx = 0.;
+
             if(pd) {
                 nSigPi = PidAlgorithm.numberOfSigma(Pion);
                 nSigP = PidAlgorithm.numberOfSigma(Proton);
+                nSigKaon = PidAlgorithm.numberOfSigma(Kaon);
+                nSigElectron = PidAlgorithm.numberOfSigma(Electron);
+
+                nHitsDedx = PidAlgorithm.traits()->numberOfPoints();
             }
+
+            float nHitsFit = pTrack->fitTraits().numberOfFitPoints();
+            float nHitsPoss = pTrack->numberOfPossiblePoints();
+
+            double pT = mom.perp();
+            double eta = mom.pseudoRapidity();
+	          double zVtx = pVtx->position().z();
 
             const StPtrVecTrackPidTraits& theTofPidTraits = pTrack->pidTraits(kTofId);
             if(!theTofPidTraits.size()) continue;
@@ -1760,7 +1876,10 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
             double zhit = pidTof->zLocal();
 
             int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
-            Double_t tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
+            Double_t tofcorr = tof;
+            if (!isMcFlag) {
+              tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
+            }
             if(tofcorr<0.) continue;
 
             StThreeVectorF primPos = pVtx->position();
@@ -1785,6 +1904,46 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
 					nCan++;
 				}
 			}
+      else if(mPPPAMode || mPPPAPionSel)
+      {
+          // Obtaining gDCA
+          const StDcaGeometry *dcaGeometry = gTrack->dcaGeometry();
+          if(!dcaGeometry) continue;
+          Double_t vtx[3] = {primPos[0], primPos[1], primPos[2]};
+          THelixTrack thelix = dcaGeometry->thelix();
+          thelix.Move(thelix.Path(vtx)); // move along the helix to the point that is closest to the vertex
+          const Double_t *pos = thelix.Pos();
+          StThreeVectorF gDca = StThreeVectorF(pos[0],pos[1],pos[2]) - pVtx->position();
+          double gDcaMag = gDca.mag();
+          if(tot > 25.) {
+              continue;
+          }
+          if(ptot>0.2 && ptot<0.7 && fabs(nSigPi)< 2.0
+                      && nHitsFit>20
+                      && nHitsFit>0.51*nHitsPoss
+                      && nHitsDedx>0.5*nHitsFit
+                      && fabs(gDcaMag)<2.0
+                      && nSigKaon<-3.0
+                      && nSigElectron<-3.0
+                      && pT>0.18
+                    )
+          {
+          double FDGCNST = fudgeFactor(eta, zVtx);
+          double nvrsBeta = sqrt(1.+(M_PION_PLUS/ptot)*(M_PION_PLUS/ptot));
+          double bthBlchFrml = nvrsBeta*nvrsBeta*(BTHBLCHCNST+2.*log(ptot/M_PION_PLUS));
+          double dTofPi = FDGCNST*L*L*((M_PION_PLUS/ptot)*(M_PION_PLUS/ptot)*(1./ptot)*bthBlchFrml);
+          Double_t tofCorrPi = tofcorr - tofPi - dTofPi;
+          if(tofCorrPi < tCanFirst) {
+            tCanFirst = tofCorrPi;
+          }
+          if(tofCorrPi > tCanLast) {
+            tCanLast = tofCorrPi;
+          }
+          tSum     += tofCorrPi;
+          t0[nCan]  = tofCorrPi;
+          nCan++;
+        }
+      }
 			else//If not FXT, Only use Pion
 			{
 				if(ptot>0.2 && ptot<0.6 && fabs(nSigPi)< 2.0)
@@ -1804,6 +1963,66 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
     }
 
     Int_t nTzero = nCan;
+
+if(mPPPAMode || mPPPAOutlierRej)
+{
+    const float outlierCut = 2.5 * 0.086; // numberOfSigmas * time resolution (sigma) of a BTof pad
+    if(nCan>1) {
+        while(nTzero>2) {
+            int iMax = 0;
+            double DtiMax = 0.0;
+            for(int i=0;i<nTzero;i++) {
+                double tdiff = fabs(t0[i] - (tSum-t0[i])/(nTzero-1));
+                if(tdiff>DtiMax) {
+                    iMax = i;
+                    DtiMax = tdiff;
+                } // end of if(tdiff>DtiMax)
+            } // end of for(int i=0;i<nTzero;i++)
+            if(DtiMax>sqrt(1.0+1.0/(nTzero-1))*outlierCut) {
+                tSum -= t0[iMax];
+                t0[iMax] = t0[nTzero-1];
+                nTzero--;
+            } // end of if(DtiMax>1.0)
+            else {
+                break;
+            }
+        } // end of while(nTzero>2)
+        if(nTzero==2){
+            if(fabs(t0[0]-t0[1])>sqrt(2.0)*outlierCut) {
+                float vpdTDiffCut = 0.25; // Acceptance window between an individual t0 vlaue
+                                          // and VPD start time based on the VPD resolution
+                double vpdStartTime = 0.;
+                Double_t vz = pVtx->position().z();
+                vpdTStartForBTofComparison(vz, &vpdStartTime);
+                if(fabs(t0[0]-vpdStartTime)<vpdTDiffCut && fabs(t0[1]-vpdStartTime)<vpdTDiffCut) {
+                    if(fabs(t0[0]-vpdStartTime) < fabs(t0[1]-vpdStartTime)) {
+                        tSum -= t0[1];
+                        nTzero--;
+                    }
+                    else {
+                        tSum -= t0[0];
+                        t0[0] = t0[1];
+                        nTzero--;
+                    }
+                } // end of if(fabs(t0[0]-vpdTStartTime)<0.25 && fabs(t0[1]-vpdTStartTime)<0.25)
+                else if(fabs(t0[0]-vpdStartTime)<vpdTDiffCut) {
+                    tSum -= t0[1];
+                    nTzero--;
+                }
+                else if(fabs(fabs(t0[1]-vpdStartTime)<vpdTDiffCut)) {
+                    tSum -= t0[0];
+                    t0[0] = t0[1];
+                    nTzero--;
+                }
+                else {
+                    nTzero = 0;
+                }
+            }
+        } // end of if(nTzero==2)
+    } // end of if(nCan>1)
+}
+else
+{
     if(nCan>1) { // remove hits too far from others
         for(int i=0;i<nCan;i++) {
             double tdiff = t0[i] - (tSum-t0[i])/(nTzero-1);
@@ -1813,6 +2032,7 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
             }
         }
     }
+  }
 
     mNTzero = nTzero;
 
@@ -1835,6 +2055,13 @@ void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVerte
     Int_t nCan = 0;
     Double_t tSum = 0.;
     Double_t t0[5000];
+
+    Double_t tCanFirst = 99999.;
+    Double_t tCanLast = -99999.;
+    Double_t gDCA[5000];
+    Double_t ptotSave[5000];
+    Double_t etaSave[5000];
+
     memset(t0, 0., sizeof(t0));
     int calibfailed(0); // keep counter
     for(int i=0;i<nBTofHits;i++) {
@@ -1862,6 +2089,17 @@ void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVerte
 
             double nSigPi = pTrack->nSigmaPion();
             double nSigP = pTrack->nSigmaProton();
+
+            float  nHitsFit = pTrack->nHitsFit();
+            float  nHitsPoss = pTrack->nHitsPoss();
+            float  nHitsDedx = pTrack->nHitsDedx();
+
+            double pT = pTrack->pt();
+            double nSigKaon = pTrack->nSigmaKaon();
+            double nSigElectron = pTrack->nSigmaElectron();
+            double gDcaMag = pTrack->dcaGlobal().mag();
+	          double eta = pTrack->eta();
+            double zVtx = pVtx->position().z();
 
             StMuBTofPidTraits pidTof = pTrack->btofPidTraits();
 
@@ -1903,6 +2141,41 @@ void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVerte
 					nCan++;
 				}
 			}
+      // calculating the total time, individual time,
+      // and multiplicity of candidate particles for the pppA mode
+      else if(mPPPAMode || mPPPAPionSel)
+      {
+        if(tot>25.) {
+          continue;
+        }
+        if(ptot>0.2 && ptot<0.7 && fabs(nSigPi)< 2.0
+                    && nHitsFit>20
+                    && nHitsFit>0.51*nHitsPoss
+                    && nHitsDedx>0.5*nHitsFit
+                    && fabs(gDcaMag)<2.0
+                    && nSigKaon<-3.0
+                    && nSigElectron<-3.0
+                    && pT>0.18)
+        {
+          double FDGCNST = fudgeFactor(eta, zVtx);
+          double nvrsBeta = sqrt(1.+(M_PION_PLUS/ptot)*(M_PION_PLUS/ptot));
+          double bthBlchFrml = nvrsBeta*nvrsBeta*(BTHBLCHCNST+2.*log(ptot/M_PION_PLUS));
+          double dTofPi = FDGCNST*L*L*((M_PION_PLUS/ptot)*(M_PION_PLUS/ptot)*(1./ptot)*bthBlchFrml);
+          Double_t tofCorrPi = tofcorr - tofPi - dTofPi;
+          if(tofCorrPi < tCanFirst) {
+            tCanFirst = tofCorrPi;
+          }
+          if(tofCorrPi > tCanLast) {
+            tCanLast = tofCorrPi;
+          }
+          tSum     += tofCorrPi;
+          t0[nCan]  = tofCorrPi;
+          gDCA[nCan] = gDcaMag;
+          ptotSave[nCan] = ptot;
+          etaSave[nCan] = eta;
+          nCan++;
+        }
+      }
 			else//If not FXT, Only use Pion
 			{
 				if(ptot>0.2 && ptot<0.6 && fabs(nSigPi)< 2.0)
@@ -1918,13 +2191,103 @@ void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVerte
 
   if (calibfailed) LOG_WARN << "tstart_NoVpd calibrations failures: " << calibfailed << " (out of "<< nBTofHits << "BTOF hits)"<< endm;
 
+  mNTzeroCan = nCan;
+  mTCanFirst = tCanFirst;
+  mTCanLast  = tCanLast;
+
+
 	if(nCan<=0) {
         *tstart = -9999.;
         return;
-    }
+      }
 
     Int_t nTzero = nCan;
-    if(nCan>1) { // remove hits too far from others
+
+    // Adjusting the default outlier rejection to accomodate for PPPAMode
+    if(mPPPAMode || mPPPAOutlierRej)
+    {
+        if(mPPPAModeHist) {
+            if(nCan==1) { // filling global DCA histograms before outlier rejection
+                hGDcaArray[0]->Fill(fabs(gDCA[0]));
+            }
+            else if(nCan==2) {
+                for(int i=0;i<nCan;i++) {
+                    hGDcaArray[1]->Fill(fabs(gDCA[i]));
+                }
+            }
+            else if(nCan>2) {
+                for(int i=0;i<nCan;i++) {
+                    hGDcaArray[2]->Fill(fabs(gDCA[i]));
+                }
+            }
+        }
+        const float outlierCut = 2.5 * 0.086; // numberOfSigmas * time resolution (sigma) of a BTof pad
+        if(nCan>1) {
+            while(nTzero>2) {
+                int iMax = 0;
+                double DtiMax = 0.0;
+                for(int i=0;i<nTzero;i++) {
+                    double tdiff = fabs(t0[i] - (tSum-t0[i])/(nTzero-1));
+                    if(tdiff>DtiMax) {
+                        iMax = i;
+                        DtiMax = tdiff;
+                    } // end of if(tdiff>DtiMax)
+                } // end of for(int i=0;i<nTzero;i++)
+                if(DtiMax>sqrt(1.0+1.0/(nTzero-1))*outlierCut) {
+                    tSum -= t0[iMax];
+                    t0[iMax] = t0[nTzero-1];
+                    gDCA[iMax] = gDCA[nTzero-1];
+        ptotSave[iMax] = ptotSave[nTzero-1];
+        etaSave[iMax] = etaSave[nTzero-1];
+                    nTzero--;
+                } // end of if(DtiMax>1.0)
+                else {
+                    break;
+                }
+            } // end of while(nTzero>2)
+            if(nTzero==2){
+                if(fabs(t0[0]-t0[1])>sqrt(2.0)*outlierCut) {
+                    float vpdTDiffCut = 0.25; // Acceptance window between an individual t0 vlaue
+                                              //and VPD start time based on the VPD resolution
+                    double vpdStartTime = 0.;
+                    Double_t vz = pVtx->position().z();
+                    vpdTStartForBTofComparison(vz, &vpdStartTime);
+                    if(fabs(t0[0]-vpdStartTime)<vpdTDiffCut && fabs(t0[1]-vpdStartTime)<vpdTDiffCut) {
+                        if(fabs(t0[0]-vpdStartTime) < fabs(t0[1]-vpdStartTime)) {
+                            tSum -= t0[1];
+                            nTzero--;
+                        }
+                        else {
+                            tSum -= t0[0];
+                            t0[0] = t0[1];
+                            gDCA[0] = gDCA[1];
+          ptotSave[0] = ptotSave[1];
+          etaSave[0] = etaSave[1];
+                            nTzero--;
+                        }
+                    } // end of if(fabs(t0[0]-vpdTStartTime)<0.25 && fabs(t0[1]-vpdTStartTime)<0.25)
+                    else if(fabs(t0[0]-vpdStartTime)<vpdTDiffCut) {
+                        tSum -= t0[1];
+                        nTzero--;
+                    }
+                    else if(fabs(fabs(t0[1]-vpdStartTime)<vpdTDiffCut)) {
+                        tSum -= t0[0];
+                        t0[0] = t0[1];
+                        gDCA[0] = gDCA[1];
+            ptotSave[0] = ptotSave[1];
+            etaSave[0] = etaSave[1];
+                        nTzero--;
+                    }
+                    else {
+                        nTzero = 0;
+                    }
+                }
+            } // end of if(nTzero==2)
+        } // end of if(nCan>1)
+    }
+    else
+    {
+      if(nCan>1) { // remove hits too far from others
         for(int i=0;i<nCan;i++) {
             double tdiff = t0[i] - (tSum-t0[i])/(nTzero-1);
             if(fabs(tdiff)>5.0) {
@@ -1933,10 +2296,371 @@ void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVerte
             }
         }
     }
+  }
 
     mNTzero = nTzero;
 
     *tstart = nTzero>0 ? tSum / nTzero : -9999.;
+
+    if(mPPPAModeHist) {
+       if(nTzero>1) {
+           for(int i=0;i<nTzero; i++) {
+               double Dti = t0[i] - (tSum-t0[i])/(nTzero-1);
+               if(nTzero>10) {
+                   hDtiArray[9]->Fill(Dti);
+               }
+               else {
+                   hDtiArray[nTzero-2]->Fill(Dti);
+               }
+               //if(nTzero>4 && fabs(pVtx->position().perp())<1. && fabs(pVtx->position().z())<75.) {
+               //    hDtiVsPtot[0]->Fill(ptotSave[i], Dti);
+               //}
+	       //if(nTzero>4 && fabs(pVtx->position().perp())<1. && fabs(pVtx->position().z())>75.) {
+               //    hDtiVsPtot[1]->Fill(ptotSave[i], Dti);
+               //}
+	       double rVtx = pVtx->position().perp();
+               double zVtx = pVtx->position().z();
+               if(nTzero>4 && (fabs(rVtx)<1. || (fabs(zVtx-200.)<3. && fabs(rVtx)<3.))) {
+	           fillDtiVsPtotProfiles(etaSave[i], zVtx, ptotSave[i], Dti);
+               }
+           } // end of for(int i=0;i<mNTzero; i++)
+       } // end of if(mNTzero>1)
+       if(nCan==2) { // filling global DCA histograms after outlier rejection
+           for(int i=0;i<nTzero;i++) {
+               hGDcaArray[3]->Fill(fabs(gDCA[i]));
+           }
+       }
+       else if(nCan>2) {
+           for(int i=0;i<nTzero;i++) {
+               hGDcaArray[4]->Fill(fabs(gDCA[i]));
+           }
+       }
+    } // end of if(mPPPAModeHist)
+
+
+    return;
+}
+
+//_____________________________________________________________________________
+void StBTofCalibMaker::vpdTStartForBTofComparison(Double_t vz, Double_t *vpdStartTime)
+{
+    if(!mBTofHeader){
+        *vpdStartTime = -9999.0;
+        return;
+    }
+    double vzNs = vz/mC_Light;
+    //int nVpdWCandHits = 0;
+    //int nVpdECandHits = 0;
+    Double_t vpdHitTStart[38]; // Array will contain the start time of West + East VPD hit start time
+    //Bool_t isEastHit[38]; // true if the hit came from VPDE false if hit came from VPDW
+
+    int nVpdTotCandHits = 0; // Total number of West + East VPD candidate hits in a given event
+    double tSum = 0.;
+
+    for(int i=0; i<19; i++) {
+        double vpdTime = mBTofHeader->vpdTime(west,i+1); // Here, the index has to be between 1-19
+							 //since the btofHeader function defines tubeId as tubeId-1.
+        if(vpdTime<1.e-4) {
+           continue;
+        }
+        vpdHitTStart[nVpdTotCandHits] = vpdTime + vzNs - DEDXTCORR[iYr];
+        //isEastHit[nVpdTotCandHits] = kFALSE;
+        tSum += vpdHitTStart[nVpdTotCandHits];
+        //nVpdWCandHits++;
+        nVpdTotCandHits++;
+    }
+
+    for(int i=0; i<19; i++) {
+        double vpdTime = mBTofHeader->vpdTime(east,i+1); // Here, the index has to be between 1-19
+							 //since the btofHeader function defines tubeId as tubeId-1.
+        if(vpdTime<1.e-4) {
+           continue;
+        }
+        vpdHitTStart[nVpdTotCandHits] = vpdTime - vzNs - DEDXTCORR[iYr];
+        //isEastHit[nVpdTotCandHits] = kTRUE;
+        tSum += vpdHitTStart[nVpdTotCandHits];
+        //nVpdECandHits++;
+        nVpdTotCandHits++;
+    }
+
+    if(nVpdTotCandHits<1) {
+        //*mNVpdWHits = 0;
+        //*mNVpdEHits = 0;
+        //*mNVpdTzero = 0;
+        *vpdStartTime = -9999.0;
+        return;
+    }
+
+    Int_t nVpdTzero = nVpdTotCandHits;
+
+    const float vpdTStartOulierCut = 2.5*0.130; // numberOfSigmas * time resolution of a vpd phototube
+
+    if(nVpdTotCandHits>1) {
+        while(nVpdTzero>2) {
+            int iVpdMax = 0;
+            double vpdDtiMax = 0.;
+            for(int i=0; i<nVpdTzero; i++) {
+                double vpdTdiff = fabs(vpdHitTStart[i] - (tSum-vpdHitTStart[i])/(nVpdTzero-1));
+                if(vpdTdiff>vpdDtiMax) {
+                    iVpdMax = i;
+                    vpdDtiMax = vpdTdiff;
+                } // end of if(vpdTdiff>vpdDtiMax)
+            } // end of for(int i=0; i<nVpdTzero; i++)
+            if(vpdDtiMax > sqrt(1.0+1.0/(nVpdTzero-1))*vpdTStartOulierCut) {
+                tSum -= vpdHitTStart[iVpdMax];
+                vpdHitTStart[iVpdMax] = vpdHitTStart[nVpdTzero-1];
+                //isEastHit[iVpdMax] = isEastHit[nVpdTzero-1];
+                nVpdTzero--;
+            } // end of if(vpdDitMax>sqrt(1.0+1.0/(nVpdTzero-1))*vpdTStartOulierCut)
+            else{
+                break;
+            }
+        } // end of while(nVpdTzero)
+        if(nVpdTzero==2) {
+            if(fabs(vpdHitTStart[0]-vpdHitTStart[1]) > sqrt(2.0)*vpdTStartOulierCut) {
+                nVpdTzero = 0;
+            }
+        } // end of if(nTzero==2)
+    } // end of nVpdTzero
+
+    *vpdStartTime = nVpdTzero>0 ? tSum/nVpdTzero : -9999.;
+}
+
+//_____________________________________________________________________________
+double StBTofCalibMaker::fudgeFactor(double eta, double zVtx)
+{
+    double ffArr[2][22] = {
+			    {6.1e-8, 6.95e-8, 7.9e-8, 11.2e-8, 14.7e-8, 13.2e-8, 10.7e-8, 8.8e-8, 8.21e-8, 8.31e-8, 9.01e-8, 8.31e-8, 7.2e-8, 9.e-8, 8.8e-8, 12.e-8, 8.9e-8, 6.e-8, 5.1e-8, 4.7e-8, 5.9e-8, 3.3e-8},
+                            {4.0e-8, 3.25e-8, 4.45e-8, 4.75e-8, 4.1e-8, 3.6e-8, 3.8e-8, 3.7e-8, 3.6e-8, 3.5e-8, 3.8e-8, 3.7e-8, 3.5e-8, 3.8e-8, 3.3e-8, 4.0e-8, 4.4e-8, 4.5e-8, 2.7e-8, 3.5e-8, 4.83e-8, 3.3e-8}
+                          };
+    double FF = 0.;
+    if(eta<=0.) {
+        if(zVtx<-75.) {
+    	FF = ffArr[iYr][0];
+        }
+        else if(zVtx<-50.) {
+            FF = ffArr[iYr][2];
+        }
+        else if(zVtx<-30.) {
+            FF = ffArr[iYr][4];
+        }
+        else if(zVtx<-10.) {
+            FF = ffArr[iYr][6];
+        }
+        else if(zVtx<0.) {
+            FF = ffArr[iYr][8];
+        }
+        else if(zVtx<10.) {
+            FF = ffArr[iYr][10];
+        }
+        else if(zVtx<30.) {
+            FF = ffArr[iYr][12];
+        }
+        else if(zVtx<50.) {
+            FF = ffArr[iYr][14];
+        }
+        else if(zVtx<75.) {
+            FF = ffArr[iYr][16];
+        }
+        else if(zVtx<196.){
+            FF = ffArr[iYr][18];
+        }
+        else {
+            if (eta < -1.) {
+                FF = ffArr[iYr][20];
+            }
+            else {
+                FF = ffArr[iYr][21];
+            }
+        }
+    } // end of if(eta<=0.)
+    else {
+        if(zVtx<-75.) {
+    	FF = ffArr[iYr][1];
+        }
+        else if(zVtx<-50.) {
+            FF = ffArr[iYr][3];
+        }
+        else if(zVtx<-30.) {
+            FF = ffArr[iYr][5];
+        }
+        else if(zVtx<-10.) {
+            FF = ffArr[iYr][7];
+        }
+        else if(zVtx<0.) {
+            FF = ffArr[iYr][9];
+        }
+        else if(zVtx<10.) {
+            FF = ffArr[iYr][11];
+        }
+        else if(zVtx<30.) {
+            FF = ffArr[iYr][13];
+        }
+        else if(zVtx<50.) {
+            FF = ffArr[iYr][15];
+        }
+        else if(zVtx<75.) {
+            FF = ffArr[iYr][17];
+        }
+        else if(zVtx<196.){
+            FF = ffArr[iYr][19];
+        }
+        else {
+            FF = ffArr[iYr][21];
+        }
+    }
+    return FF;
+}
+
+//_____________________________________________________________________________
+void StBTofCalibMaker::fillDtiVsPtotProfiles(double eta, double zVtx, double ptot, double Dti)
+{
+    int etaIdx;
+    int zIdx;
+
+    if(zVtx<-75.) {
+	zIdx = 0;
+    }
+    else if(zVtx<-50.) {
+        zIdx = 1;
+    }
+    else if(zVtx<-30.) {
+        zIdx = 2;
+    }
+    else if(zVtx<-10.) {
+        zIdx = 3;
+    }
+    else if(zVtx<0.) {
+        zIdx = 4;
+    }
+    else if(zVtx<10.) {
+        zIdx = 5;
+    }
+    else if(zVtx<30.) {
+        zIdx = 6;
+    }
+    else if(zVtx<50.) {
+        zIdx = 7;
+    }
+    else if(zVtx<75.) {
+        zIdx = 8;
+    }
+    else if(fabs(zVtx-200.)<3.){
+        zIdx = 10;
+    }
+    else {
+        zIdx = 9;
+    }
+
+    if(eta<=0.) {
+        if(zIdx==10) {
+           if(eta<-1.) {
+               etaIdx = 0;
+           }
+           else {
+               etaIdx = 1;
+           }
+        }
+	else {
+           etaIdx = 0;
+        }
+    }
+    else {
+        etaIdx = 1;
+    }
+
+    hDtiVsPtot[zIdx][etaIdx]->Fill(ptot, Dti);
+}
+
+//_____________________________________________________________________________
+void StBTofCalibMaker::archiveVpdHitInfo()
+{
+    if(!mBTofHeader) return;
+    if(mEvtVtxZ<-999.) return;
+ 
+    const double SIGMA = 0.13; // ns
+    float dist = 2.5; 
+
+    double vzNs = mEvtVtxZ/mC_Light; // mC_Light is c in cm/ns
+
+    int wHitCan = 0;
+    int eHitCan = 0;
+    int goodWHits = 0;
+    int goodEHits = 0;
+
+    double wEarlHit = 99999.;
+    double eEarlHit = 99999.;
+
+    double wClosestHit = 99999.;
+    double wClosestDiff = 99999.;
+    double eClosestHit = 99999.;
+    double eClosestDiff = 99999.;
+
+    double wLateHit = -99999.;
+    double eLateHit = -99999.;
+
+    for(int i=0; i<mNVPD; i++) {
+        double wHitTime = mBTofHeader->vpdTime(west,i+1);
+        if(wHitTime<1.e-4) {
+           continue;
+        }
+        wHitCan++;
+        double wHitTimeCorr = wHitTime + vzNs - DEDXTCORR[iYr];
+        if(wHitTimeCorr<wEarlHit) {
+            wEarlHit = wHitTimeCorr;
+        }
+        if(wHitTimeCorr>wLateHit) {
+            wLateHit = wHitTimeCorr;
+        }
+        if(mTStart>-1000.) {
+            double wHitTDiff = wHitTimeCorr - mTStart;
+            if(fabs(wHitTDiff)<dist*SIGMA) {
+                goodWHits++;
+            }
+            if(fabs(wHitTDiff)<fabs(wClosestDiff)) {
+                wClosestDiff = wHitTDiff;
+                wClosestHit = wHitTimeCorr;
+            }
+        } // End of if(mTStart>-1000.)
+    } // end of for(int i=0; i<MAXVPD; i++)
+
+    for(int i=0; i<mNVPD; i++) {
+        double eHitTime = mBTofHeader->vpdTime(east,i+1);
+        if(eHitTime<1.e-4) {
+           continue;
+        }
+        eHitCan++;
+        double eHitTimeCorr = eHitTime - vzNs - DEDXTCORR[iYr];
+        if(eHitTimeCorr<eEarlHit) {
+            eEarlHit = eHitTimeCorr;
+        }
+        if(eHitTimeCorr>eLateHit) {
+            eLateHit = eHitTimeCorr;
+        }
+        if(mTStart>-1000.) {
+            double eHitTDiff = eHitTimeCorr - mTStart;
+            if(fabs(eHitTDiff)<dist*SIGMA) {
+                goodEHits++;
+            }
+            if(fabs(eHitTDiff)<fabs(eClosestDiff)) {
+                eClosestDiff = eHitTDiff;
+                eClosestHit = eHitTimeCorr;
+            }
+        } // End of if(mTStart>-1000.)
+    } // End of for(int i=0; i<MAXVPD; i++)
+
+    mEarliestVpdEHit = eEarlHit;
+    mClosestVpdEHit = eClosestHit;
+    mLatestVpdEHit = eLateHit;
+
+    mEarliestVpdWHit = wEarlHit;
+    mClosestVpdWHit = wClosestHit;
+    mLatestVpdWHit = wLateHit;
+
+    mVpdEGoodHits = goodEHits;
+    mVpdWGoodHits = goodWHits;
+    mVpdEHits = eHitCan;
+    mVpdWHits = wHitCan;
 
     return;
 }
@@ -1963,6 +2687,100 @@ void StBTofCalibMaker::writeHistograms()
     return;
 }
 
+//_____________________________________________________________________________
+void StBTofCalibMaker::bookPPPAHistograms()
+{
+    for(int i=0;i<10;i++) {
+            ostringstream histogramName;
+            ostringstream histogramTitle;
+
+            if(i == 9)
+            {
+                histogramName << "DtiDistFornTzeroGreater10";
+                histogramTitle << "Dti Dist. For nTzero > 10";
+            }
+            else
+            {
+                histogramName << "DtiDistFornTzero" << i+2;
+                histogramTitle << "Dti Dist. for nTzero " << i+2;
+            }
+            hDtiArray[i] = new TH1D(histogramName.str().c_str(), histogramTitle.str().c_str(), 200, -1.0, 1.0);
+    } // end of for(int i=0;i<5;i++)
+
+    for(int i=0;i<5;i++) {
+        ostringstream histogramName;
+        ostringstream histogramTitle;
+
+        if(i<2) {
+            histogramName << "gDCABeforeOutlierRejectionForNCan" << i+1;
+            histogramTitle << "|gDCA| Before Outlier Rejection For nCan = " << i+1;
+        }
+        else if(i==2) {
+            histogramName << "gDCABeforeOutlierRejectionForNCanGreater2";
+            histogramTitle << "|gDCA| Before Outlier Rejection For nCan > 2";
+        }
+        else if(i==3) {
+            histogramName << "gDCAAfterOutlierRejectionForNCan2";
+            histogramTitle << "|gDCA| After Outlier Rejection For nCan = 2";
+        }
+        else if(i==4) {
+            histogramName << "gDCAAfterOutlierRejectionForNCanGreater2";
+            histogramTitle << "|gDCA| After Outlier Rejection Ror nCan > 2";
+        }
+        hGDcaArray[i] = new TH1D(histogramName.str().c_str(), histogramTitle.str().c_str(), 200, 0., 2.5);
+    }
+
+    string zVertLocation[11] = {"z_{vtx}#LT-75", "-75#leqz_{vtx}#LT-50", "-50#leqz_{vtx}#LT-30", "-30#leqz_{vtx}#LT-10", "-10#leqz_{vtx}#LT0", "0#leqz_{vtx}#LT10", "10#leqz_{vtx}#LT30", "30#leqz_{vtx}#LT50", "50#leqz_{vtx}#LT75", "z_{vtx}#geq75 (excluding |z_{vtx}-200|<3)", "|z_{vtx}-200|<3"};
+    string trkEta[4] = {"#eta#leq0","#eta>0", "#eta#LT-1", "#eta#geq-1"};
+    for(int i=0; i<11; i++) {
+        for(int j=0; j<2; j++) {
+	    ostringstream histogramName;
+	    ostringstream histogramTitle;
+
+            if(i==10 && j==0) {
+                histogramName << "hDtiVsPtot_" << i << j;
+                histogramTitle << "Dti vs. pTot  " << zVertLocation[i] << "  " << trkEta[2];
+            }
+            else if(i==10 && j==1) {
+                histogramName << "hDtiVsPtot_" << i << j;
+                histogramTitle << "Dti vs. pTot  " << zVertLocation[i] << "  " << trkEta[3];
+            }
+            else {
+                histogramName << "hDtiVsPtot_" << i << j;
+                histogramTitle << "Dti vs. pTot  " << zVertLocation[i] << "  " << trkEta[j];
+            }
+
+            hDtiVsPtot[i][j] = new TProfile(histogramName.str().c_str(), histogramTitle.str().c_str(), 50, 0.2, 0.7, -1.0, 1.0);
+	}
+    }
+}
+
+//_____________________________________________________________________________
+void StBTofCalibMaker::writePPPAHistograms()
+{
+    // Output file
+    TFile *thePPPAHistoFile = new TFile(mPPPAModeHistoFileName.c_str(), "RECREATE");
+
+    thePPPAHistoFile->cd();
+
+    if(mPPPAModeHist) {
+        for(int i=0;i<10;i++) {
+            hDtiArray[i]->Write();
+        }
+	for(int i=0;i<5;i++) {
+            hGDcaArray[i]->Write();
+        }
+	for(int i=0; i<11; i++) {
+	    for(int j=0; j<2; j++) {
+	        hDtiVsPtot[i][j]->Write();
+	    }
+	}
+    }
+
+    return;
+}
+
+//_____________________________________________________________________________
 float StBTofCalibMaker::tofCellResolution(const Int_t itray, const Int_t iModuleChan)
 {
 
@@ -1971,7 +2789,8 @@ float StBTofCalibMaker::tofCellResolution(const Int_t itray, const Int_t iModule
 
  int module = iModuleChan/6 + 1;
  int cell   = iModuleChan%6 + 1;
- float stop_resolution  = mBTofRes->timeres_tof(itray, module, cell);
+ // mBTofRes::timeres_tof() reports in picoseconds
+ float stop_resolution  = mBTofRes->timeres_tof(itray, module, cell)/1000.;
 
 float start_resolution(0);
  if (mUseVpdStart){
@@ -1989,7 +2808,8 @@ float start_resolution(0);
    // combine an average BTOF resolution based on NT0
    // more sophisticated: figure out what BTOF cells actually went into the NT0 count.
 
-   start_resolution = mBTofRes->average_timeres_tof()/sqrt(mNTzero);
+   // mBTofRes::timeres_tof() reports in picoseconds
+   start_resolution = mBTofRes->average_timeres_tof()/sqrt(mNTzero)/1000.;
  }
 
  resolution = sqrt(stop_resolution*stop_resolution + start_resolution*start_resolution);
