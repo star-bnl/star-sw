@@ -23,6 +23,7 @@
 /StRoot/StRefMultCorr        @nigmatkulov
 /StRoot/StSpectraTagsMaker   @ullrich-bnl
 /StRoot/StTof*               @jdbrice     @fgeurts     @starsdong
+/StRoot/StTriggerUtilities   @zlchang
 /StRoot/StVpd*               @jdbrice     @fgeurts
 /StRoot/St_db_Maker          @dmarkh
 /StRoot/StarClassLibrary     @ullrich-bnl @klendathu2k
