@@ -28,6 +28,7 @@
 /StRoot/StVpd*               @ZaochenYe     @fgeurts
 /StRoot/St_db_Maker          @dmarkh
 /StRoot/StarClassLibrary     @ullrich-bnl @klendathu2k
+/StRoot/StarGenerator        @klendathu2k @perevbnlgov
 /StRoot/Sti*                 @klendathu2k @plexoos     @starsdong @perevbnlgov
 /StRoot/StppSpin             @ullrich-bnl
 /StRoot/TPCCATracker         @fisyak      @kehw
