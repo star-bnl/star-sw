@@ -4,9 +4,9 @@
 /StRoot/RTS                  @kehw
 /StRoot/StAnalysisMaker      @ullrich-bnl
 /StRoot/StAssociationMaker   @ullrich-bnl
-/StRoot/StBTof*              @jdbrice     @fgeurts     @starsdong
+/StRoot/StBTof*              @ZaochenYe     @fgeurts     @starsdong
 /StRoot/StChain              @ullrich-bnl @klendathu2k
-/StRoot/StDaqLib/TOF         @jdbrice     @fgeurts     @starsdong
+/StRoot/StDaqLib/TOF         @ZaochenYe     @fgeurts     @starsdong
 /StRoot/StDb*                @dmarkh
 /StRoot/StDbUtilities        @fisyak
 /StRoot/StDetectorDbMaker    @dmarkh      @fisyak
@@ -27,7 +27,7 @@
 /StRoot/StSpinPool           @akioogawa   @zlchang     @veprbl
 /StRoot/StTof*               @jdbrice     @fgeurts     @starsdong
 /StRoot/StTriggerUtilities   @zlchang
-/StRoot/StVpd*               @jdbrice     @fgeurts
+/StRoot/StVpd*               @ZaochenYe     @fgeurts
 /StRoot/St_db_Maker          @dmarkh
 /StRoot/StarClassLibrary     @ullrich-bnl @klendathu2k
 /StRoot/Sti*                 @klendathu2k @plexoos     @starsdong @perevbnlgov
@@ -36,6 +36,6 @@
 /StRoot/macros               @ullrich-bnl
 /StRoot/macros/mudst         @nigmatkulov
 /StarDb                      @dmarkh      @perevbnlgov
-/StarDb/Calibrations/tof     @jdbrice     @fgeurts
+/StarDb/Calibrations/tof     @ZaochenYe     @fgeurts
 /pams                        @fgeurts     @klendathu2k
 /pams/tables                 @dmarkh
