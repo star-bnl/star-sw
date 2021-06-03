@@ -1,0 +1,10 @@
+/*    dummy.idl
+*
+*  Table: dummy
+*
+*       description: //  dummy file
+*/
+
+struct dummy {.
+  unsigned long dummy; /* dummy parameter  */
+};
