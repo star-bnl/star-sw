@@ -4,6 +4,7 @@ stardev
 tokens
 (make sure you have token for afs, if not klog)
 <cd to your dir>
+cvs co StRoot/RTS
 cvs co StRoot/StSpinPool/StFcsEventDisplay
 cvs co StRoot/StSpinPool/StFcsTrgQaMaker
 cvs co StRoot/StSpinPool/StFcsTriggerSimMaker
