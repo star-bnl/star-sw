@@ -274,17 +274,18 @@ public:
 	static u_short HHTTHR ;
 	static u_short PHTTHR ;
 
-	// various stuff...
-
-
         // Ecal and Hcal 4x4 sums, Ecal+nearest Hcal sum, and Pres(EPD) hit pattern at stage2
+	u_int e2x2[2][16][10];
+	u_int h2x2[2][10][6];
         u_int esum[2][15][9];
         u_int epdcoin[2][15][9];
-        u_int hsum[2][9][5];
+	u_int hsum[2][9][5];
         u_int padc[2][6][32];
         u_int phit[2][6][32];
         u_int sum [2][15][9];
         float ratio[2][15][9];
+        u_int em[2][15][9];
+        u_int had[2][15][9];
         u_int jet[2][3];
         u_int etot[2];
         u_int htot[2];    

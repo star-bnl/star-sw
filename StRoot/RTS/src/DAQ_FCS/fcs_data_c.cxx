@@ -1537,8 +1537,8 @@ int fcs_data_c::gain_from_cache(const char *fname)
 
 
 			// pre FY20: 
-			ped[s][i].i_gain[c] = (u_int)(d*64.0+0.5) ;
-			//ped[s][i].i_gain[c] = (u_int)(d*256.0+0.5) ;
+			//ped[s][i].i_gain[c] = (u_int)(d*64.0+0.5) ;
+			ped[s][i].i_gain[c] = (u_int)(d*256.0+0.5) ; // Akio changing to 4.8 fixed
 
 			if(ped[s][i].i_gain[c]>4095) {	// 12 bit max!
 				LOG(ERR,"S%d:%d: ch %d -- gain correction too big",s+1,i+1,c,ped[s][i].i_gain[c]) ;

@@ -117,6 +117,19 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
 	    if(pres[i].d[j]) fpre_or |= 1 ;
 	}
     }
+    
+    //mapped Ecal 2x2
+    for(int r=0; r<16; r++){
+      for(int c=0; c<10; c++){
+	e2x2[ns][r][c]=ecal[ETbTdep[r][c]].d[ETbTadr[r][c]];
+      }
+    }
+    //mapped Hcal 2x2
+    for(int r=0; r<10; r++){
+      for(int c=0; c<6; c++){
+	h2x2[ns][r][c]=hcal[HTbTdep[r][c]].d[HTbTadr[r][c]];
+      }
+    }
 
     //compute overlapping Hcal 4x4 sum of [9][5]
     //u_int hsum[9][5];
@@ -169,7 +182,7 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     u_int HAD1=0, HAD2=0, HAD3=0;
     u_int ETOT=0, HTOT=0;
     for(int r=0; r<15; r++){
-        if(fcs_trgDebug>=2) printf("E4x4 ");
+        if(fcs_trgDebug>=2) printf("E4x4+H %2d  ",r);
         for(int c=0; c<9; c++){
             esum[ns][r][c]
                 = ecal[ETbTdep[r  ][c  ]].d[ETbTadr[r  ][c  ]]
@@ -183,12 +196,13 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
                                  
 	    // E+H sum
             sum[ns][r][c] = esum[ns][r][c] + h;
+	    if(sum[ns][r][c]>0xff) sum[ns][r][c]=0xff;
 
-            //in VHDL we will do esum>hsum*threshold. Ratio is for human only
+            //in VHDL we will do esum>hsum*threshold. Ratio = H/(E+H) is for human only
             if(sum[ns][r][c]==0) {
-                ratio[ns][r][c]=0.0;
+	      ratio[ns][r][c]=0.0;
             }else{
-                ratio[ns][r][c] = float(esum[ns][r][c]) / float(sum[ns][r][c]);
+	      ratio[ns][r][c] = float(esum[ns][r][c]) / float(esum[ns][r][c] + h);
             }
 
 	    //check EPD hits using the mask
@@ -211,9 +225,12 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
 
 	    // integer multiplication as in VHDL!
 	    // ratio thresholds are in fixed point integer where 1.0==128
+	    em[ns][r][c]=0;	
+	    had[ns][r][c]=0;
 	    u_int h128 = h*128 ;
 	    if(h128 < esum[ns][r][c] * EM_HERATIO_THR){
-		if(sum[ns][r][c] > EMTHR1){
+  	        em[ns][r][c]=1;
+	        if(sum[ns][r][c] > EMTHR1){
 		    EM1 = 1;
 		    if(epdcoin[ns][r][c]==0) {GAM1 = 1;} 
 		    else                     {ELE1 = 1;}
@@ -230,11 +247,12 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
 		}
 	    }
 	    if(h128 > esum[ns][r][c] * HAD_HERATIO_THR){
+  	        had[ns][r][c]=1;
 		if(sum[ns][r][c] > HADTHR1) HAD1 = 1;
 		if(sum[ns][r][c] > HADTHR2) HAD2 = 1;
 		if(sum[ns][r][c] > HADTHR3) HAD3 = 1;
 	    }
-	    if(fcs_trgDebug>=2) printf("%5d %1d %3.2f ",esum[ns][r][c],epdcoin[ns][r][c],ratio[ns][r][c]);
+	    if(fcs_trgDebug>=2) printf("%5d %1d %3.2f ",sum[ns][r][c],epdcoin[ns][r][c],ratio[ns][r][c]);
 	}
 	if(fcs_trgDebug>=2) printf("\n");
     }
@@ -266,7 +284,7 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     jet[ns][1] = esub[1] + esub[2] + hsub[1] + hsub[2];
     jet[ns][2] = esub[2] + esub[3] + hsub[2] + hsub[3];
     for(int i=0; i<3; i++){
-        if(jet[ns][i]>0xff) jet[ns][i]=0xff;
+      //if(jet[ns][i]>0xff) jet[ns][i]=0xff;
         if(jet[ns][i]>JETTHR1) JP1 = 1;
         if(jet[ns][i]>JETTHR2) JP2 = 1;
     }
@@ -275,6 +293,8 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     //total ET
     etot[ns] = esub[0] + esub[1] + esub[2] + esub[3];
     htot[ns] = hsub[0] + hsub[1] + hsub[2] + hsub[3];
+    //if(etot[ns]>0xff) etot[ns]=0xff;
+    //if(htot[ns]>0xff) htot[ns]=0xff;
     if(etot[ns]>ETOTTHR) ETOT=1;
     if(htot[ns]>HTOTTHR) HTOT=1;
     if(fcs_trgDebug>=2) printf("E/H Tot = %3d %3d\n",etot[ns],htot[ns]);
@@ -301,14 +321,12 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     output[1].d[7] = 0xAB ;
 
     if(fcs_trgDebug>=1){    
-        printf("FCS STG2 NS=%1d output0 = %02x %02x %02x %02x %02x %02x %02x %02x\n",
-	       ns,
-	       output[0].d[0],output[0].d[1],output[0].d[2],output[0].d[3],
-	       output[0].d[4],output[0].d[5],output[0].d[6],output[0].d[7]);
-        printf("FCS STG2 NS=%1d output1 = %02x %02x %02x %02x %02x %02x %02x %02x\n",
-	       ns,
-	       output[1].d[0],output[1].d[1],output[1].d[2],output[1].d[3],
-	       output[1].d[4],output[1].d[5],output[1].d[6],output[1].d[7]);
+      printf("STG2 NS%1d = %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n",
+	     ns,
+	     output[1].d[0],output[0].d[0],output[1].d[1],output[0].d[1],
+	     output[1].d[2],output[0].d[2],output[1].d[3],output[0].d[3],
+	     output[1].d[4],output[0].d[4],output[1].d[5],output[0].d[5],
+	     output[1].d[6],output[0].d[6],output[1].d[7],output[0].d[7]);
     }
 
     return ;
