@@ -547,3 +547,12 @@ foreach d ( `ls -1d  *dev/` )
  cd ${d}; pwd; dir *.root; dir -ltr dEdxND/*.root | tail -1; dir dEdxND/Title*;
  cd -
 end
+foreach d ( `ls -1d  *dev/dEdxND` )
+ cd ${d}
+ PicoL.pl
+ if (! $?) then
+    lsf ~/xml/kfpAnalysis.xml
+ endif
+ cd -
+end
+
