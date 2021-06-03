@@ -2,15 +2,19 @@
 /OnlTools                    @kehw
 /StDb                        @dmarkh
 /StRoot/RTS                  @kehw
+/StRoot/RTS/src/*_FCS        @akioogawa
 /StRoot/StAnalysisMaker      @ullrich-bnl
 /StRoot/StAssociationMaker   @ullrich-bnl
 /StRoot/StBTof*              @jdbrice     @fgeurts     @starsdong
 /StRoot/StChain              @ullrich-bnl @klendathu2k
 /StRoot/StDaqLib/TOF         @jdbrice     @fgeurts     @starsdong
+/StRoot/StDaqLib/TRG         @akioogawa
 /StRoot/StDb*                @dmarkh
 /StRoot/StDbUtilities        @fisyak
 /StRoot/StDetectorDbMaker    @dmarkh      @fisyak
 /StRoot/StEvent*             @klendathu2k @ullrich-bnl
+/StRoot/StFcs*               @akioogawa
+/StRoot/StFms*               @akioogawa
 /StRoot/StGenericVertexMaker @plexoos     @perevbnlgov
 /StRoot/StHeavyPool          @starsdong   @ullrich-bnl @fgeurts
 /StRoot/StHighPtTagsMaker    @ullrich-bnl
@@ -22,7 +26,13 @@
 /StRoot/StPico*              @nigmatkulov @marrbnl
 /StRoot/StRefMultCorr        @nigmatkulov
 /StRoot/StSpectraTagsMaker   @ullrich-bnl
+/StRoot/StSpinPool/StFcs*    @akioogawa
+/StRoot/StSpinPool/StFms*    @akioogawa
+/StRoot/StSpinPool/StFps*    @akioogawa
+/StRoot/StSpinPool/StFpost*  @akioogawa
+/StRoot/StSpinPool/StTriggerFilterMaker @akioogawa
 /StRoot/StTof*               @jdbrice     @fgeurts     @starsdong
+/StRoot/StTriggerDataMaker   @akioogawa
 /StRoot/StVpd*               @jdbrice     @fgeurts
 /StRoot/St_db_Maker          @dmarkh
 /StRoot/StarClassLibrary     @ullrich-bnl @klendathu2k
