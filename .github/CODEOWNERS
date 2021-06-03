@@ -10,6 +10,7 @@
 /StRoot/StDb*                @dmarkh
 /StRoot/StDbUtilities        @fisyak
 /StRoot/StDetectorDbMaker    @dmarkh      @fisyak
+/StRoot/StETof*              @PhilippWeidenkaff   @ideppner
 /StRoot/StEvent*             @klendathu2k @ullrich-bnl
 /StRoot/StGenericVertexMaker @plexoos     @perevbnlgov
 /StRoot/StHeavyPool          @starsdong   @ullrich-bnl @fgeurts
