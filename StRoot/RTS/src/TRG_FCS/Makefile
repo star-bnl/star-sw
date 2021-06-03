@@ -34,6 +34,8 @@ fcs_trg_lib.a : fcs_trg_base.o \
 	stage_1_202201.o \
 	stage_2_202201.o \
 	stage_3_202201.o \
+	stage_3_202203.o \
+	stage_2_202203.o \
 	stage_2_tonko_202101.o \
 	stage_2_tonko_202104.o \
 	stage_3_tonko_202101.o \
