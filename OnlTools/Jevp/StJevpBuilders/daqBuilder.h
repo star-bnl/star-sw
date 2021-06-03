@@ -8,6 +8,9 @@
 
 #include <math.h>
 
+// GIT update test from rts02
+//
+
 class daqBuilder : public JevpBuilder {
 public:
   int run;
