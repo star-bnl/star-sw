@@ -4,12 +4,13 @@
 /StRoot/RTS                  @kehw
 /StRoot/StAnalysisMaker      @ullrich-bnl
 /StRoot/StAssociationMaker   @ullrich-bnl
-/StRoot/StBTof*              @jdbrice     @fgeurts     @starsdong
+/StRoot/StBTof*              @ZaochenYe     @fgeurts     @starsdong
 /StRoot/StChain              @ullrich-bnl @klendathu2k
-/StRoot/StDaqLib/TOF         @jdbrice     @fgeurts     @starsdong
+/StRoot/StDaqLib/TOF         @ZaochenYe     @fgeurts     @starsdong
 /StRoot/StDb*                @dmarkh
 /StRoot/StDbUtilities        @fisyak
 /StRoot/StDetectorDbMaker    @dmarkh      @fisyak
+/StRoot/StETof*              @PhilippWeidenkaff   @ideppner
 /StRoot/StEvent*             @klendathu2k @ullrich-bnl
 /StRoot/StGenericVertexMaker @plexoos     @perevbnlgov
 /StRoot/StHeavyPool          @starsdong   @ullrich-bnl @fgeurts
@@ -26,15 +27,17 @@
 /StRoot/StSpectraTagsMaker   @ullrich-bnl
 /StRoot/StSpinPool           @akioogawa   @zlchang     @veprbl
 /StRoot/StTof*               @jdbrice     @fgeurts     @starsdong
-/StRoot/StVpd*               @jdbrice     @fgeurts
+/StRoot/StTriggerUtilities   @zlchang
+/StRoot/StVpd*               @ZaochenYe     @fgeurts
 /StRoot/St_db_Maker          @dmarkh
 /StRoot/StarClassLibrary     @ullrich-bnl @klendathu2k
+/StRoot/StarGenerator        @klendathu2k @perevbnlgov
 /StRoot/Sti*                 @klendathu2k @plexoos     @starsdong @perevbnlgov
 /StRoot/StppSpin             @ullrich-bnl
 /StRoot/TPCCATracker         @fisyak      @kehw
 /StRoot/macros               @ullrich-bnl
 /StRoot/macros/mudst         @nigmatkulov
 /StarDb                      @dmarkh      @perevbnlgov
-/StarDb/Calibrations/tof     @jdbrice     @fgeurts
+/StarDb/Calibrations/tof     @ZaochenYe     @fgeurts
 /pams                        @fgeurts     @klendathu2k
 /pams/tables                 @dmarkh
