@@ -80,6 +80,18 @@ bool gdpbv100::Message::operator<(const gdpbv100::Message& other) const
    return uThisTs < uOtherTs;
 }
 //----------------------------------------------------------------------------
+//! equality operator, assumes same epoch for both messages
+bool gdpbv100::Message::operator==(const gdpbv100::Message& other) const
+{
+   return this->data == other.data;
+}
+//----------------------------------------------------------------------------
+//! inequality operator, assumes same epoch for both messages
+bool gdpbv100::Message::operator!=(const gdpbv100::Message& other) const
+{
+   return this->data != other.data;
+}
+//----------------------------------------------------------------------------
 //! Returns expanded and adjusted time of message (in ns)
 uint64_t gdpbv100::Message::getMsgFullTime(uint64_t epoch) const
 {
