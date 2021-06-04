@@ -2090,10 +2090,13 @@ void StBFChain::SetDbOptions(StMaker *mk){
       gMessMgr->QAInfo() << "StBFChain::SetDbOptions SetFlavor(\"" << FieldOptions[k].name
 			 << "\",\"MagFactor\")" << endm;
       if ( gClassTable->GetID("StarMagField") >= 0) {
+	Int_t map = 2;
+	if (GetOption("ConstantField")) map = 1;
 	TString cmd =
-	  Form("if (!StarMagField::Instance()) new StarMagField( 2, %f, kTRUE);",
-	       FieldOptions[k].scale);
+	  Form("if (!StarMagField::Instance()) new StarMagField(%i, %f, kTRUE);",
+	       map, FieldOptions[k].scale);
 	ProcessLine(cmd);
+	if (GetOption("ConstBz")) {cmd = "StarMagField::Instance()->setConstBz(kTRUE);"; ProcessLine(cmd);}
       }
     }
   }

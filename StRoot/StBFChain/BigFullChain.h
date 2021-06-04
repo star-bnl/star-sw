@@ -1298,6 +1298,8 @@ Bfc_st BFC[] = { // standard chains
   {"FieldOff"    ,""  ,"","MagF"                                          ,"","" ,"No Field option",kFALSE},
   {"HalfField"   ,""  ,"","MagF"                                         ,"","","Half Field option",kFALSE},
   {"ReverseField",""  ,"","MagF"                                      ,"","","Reverse Field option",kFALSE},
+  {"ConstantField","" ,"","MagF"                                     ,"","","Constant Field option",kFALSE},
+  {"ConstBz",     ""  ,"","MagF"                                     ,"","","Constant Field option",kFALSE},
   {"NoCintDb"    ,""  ,"",""                                        ,"","","Switch off all Cint Db",kFALSE},
   {"NoStarCintDb",""  ,"",""                                   ,"","","Switch off standard Cint Db",kFALSE},
   {"NoLocalCintDb","" ,"",""                                      ,"","","Switch off local Cint Db",kFALSE},
