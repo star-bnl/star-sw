@@ -472,17 +472,11 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
   B[0] = B[1] = B[2] = 0;
   z  = x[2] ;
   r  = sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-
-
   if ( mConstBz ) 
     {
-      B[0] = B[1] = B[2] = 0.;
-      if ( abs(z) < 380.0 && r < 300.0 ) B[2] = +5.0;
+      if ( abs(z) < 380.0 && r < 300.0 ) B[2] = +5.0*fFactor;
       return;
     }
-
-
-
   Float_t za = fabs(z);
   if (za > fZminDip && za < fZmaxDip && r < fRmaxDip) {//     beam Dipole   
     B[1] = TMath::Sign(fBDipole, z);
@@ -573,6 +567,11 @@ void StarMagField::B3DField( const Float_t x[], Float_t B[] )
 #endif  
   z = x[2] ;
   r  = sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  if ( mConstBz ) 
+    {
+      if ( abs(z) < 380.0 && r < 300.0 ) B[2] = +5.0*fFactor;
+      return;
+    }
   
   if ( r != 0.0 )
     {
