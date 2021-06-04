@@ -133,6 +133,9 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
       if (x < 1e-7) X = -16.118;
       else          X = TMath::Log(x);
       break;
+    case 6:
+      X = TMath::Abs(x);
+      break;
     default:      X = x;    break;
     }
   }
@@ -141,8 +144,8 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     if (X < cor->min) X = cor->min;
     if (X > cor->max) X = cor->max;
   }
-  static TF1 *f1000 = 0, *f1100 = 0, *f1200 = 0, *f1300 = 0;
-  static TF1 *f2000 = 0, *f2100 = 0, *f2200 = 0, *f2300 = 0;
+  static TF1 *f1000 = 0, *f1100 = 0, *f1200 = 0, *f1300 = 0, *f1400 = 0, *f1500 = 0;
+  static TF1 *f2000 = 0, *f2100 = 0, *f2200 = 0, *f2300 = 0, *f2400 = 0, *f2500 = 0;
   TF1 *f = 0;
   switch (cor->type) {
   case 1: // Tchebyshev [-1,1]
@@ -190,6 +193,8 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   case 1100:
   case 1200:
   case 1300:
+  case 1400:
+  case 1500:
     if (cor->type == 1000) {
       if (! f1000) f1000 = new TF1("f1000","gaus+pol0(3)");
       f = f1000;
@@ -202,6 +207,12 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     } else if (cor->type == 1300) {
       if (! f1300) f1300 = new TF1("f1300","gaus+pol3(3)");
       f = f1300;
+    } else if (cor->type == 1400) {
+      if (! f1400) f1400 = new TF1("f1400","gaus+pol4(3)");
+      f = f1400;
+    } else if (cor->type == 1500) {
+      if (! f1500) f1500 = new TF1("f1500","gaus+pol5(3)");
+      f = f1500;
     }
     assert(f);
     f->SetParameters(cor->a);
@@ -211,6 +222,8 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   case 2100:
   case 2200:
   case 2300:
+  case 2400:
+  case 2500:
     if (cor->type == 2000) {
       if (! f2000) f2000 = new TF1("f2000","expo+pol0(2)");
       f = f2000;
@@ -223,6 +236,12 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     } else if (cor->type == 2300) {
       if (! f2300) f2300 = new TF1("f2300","expo+pol3(2)");
       f = f2300;
+    } else if (cor->type == 2400) {
+      if (! f2400) f2400 = new TF1("f2400","expo+pol4(2)");
+      f = f2400;
+    } else if (cor->type == 2500) {
+      if (! f2500) f2500 = new TF1("f2500","expo+pol5(2)");
+      f = f2500;
     }
     assert(f);
     f->SetParameters(cor->a);
