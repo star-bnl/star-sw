@@ -1,5 +1,5 @@
 /*
-  root.exe Z3CGF*.root lDb.C MakeTpcZCorrection.C+
+  root.exe Z3GF*.root lDb.C MakeTpcZCorrection.C+
 */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
@@ -84,10 +84,13 @@ void MakeRow(TH2 *mu, Int_t row = 1, Int_t p = 2, Double_t xmin = 20, Double_t x
 void MakeTpcZCorrection1() {
   const Char_t *tableName = "TpcZCorrectionB";
   TString fileIn(gDirectory->GetName());
-  if (! fileIn.BeginsWith("Z3CGF")) return;
+  if (! fileIn.BeginsWith("Z3")) return;
   TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");
   if (! FitP) return;
+  fileIn.ReplaceAll("Z3PCGF","");
+  fileIn.ReplaceAll("Z3PGF","");
   fileIn.ReplaceAll("Z3CGF","");
+  fileIn.ReplaceAll("Z3GF","");
   fileIn.ReplaceAll(".root","");
   TString fOut =  Form("%s.%s.C", tableName, fileIn.Data());
   Double_t min =  22.0;
@@ -147,7 +150,7 @@ void MakeTpcZCorrection() {
   TFile *f = 0;
   while ( (f = (TFile *) next()) ) { 
     TString F(f->GetName());
-    if (! F.Contains("Z3CGF")) continue;
+    if (! F.Contains("Z3")) continue;
     f->cd();
     TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");
     if (! FitP) continue;

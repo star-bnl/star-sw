@@ -6,8 +6,6 @@
   root.exe TPoints*UG*.root  MakeTpcLengthCorrectionMDF.C
 
   foreach d (`ls -1d [0-9]*GeV*.root`)
-  foreach d (COL.root FXT.root)
-  foreach d (14p5GeV.root 19GeV.root)
      set b = `basename ${d} .root`;
      root.exe -q -b TPoints*U*${d}  MakeTpcLengthCorrectionMDF.C | tee ${b}.log
   end 

@@ -1,5 +1,8 @@
+#define __3D__
 //________________________________________________________________________________
-void Agufld(const Char_t *sdt = "sdt20210303.052529", const Char_t *field="RF") {
+//void Agufld(const Char_t *sdt = "sdt20210303.052529", const Char_t *field="RF") {
+void Agufld(const Char_t *sdt = "sdt20210522.024326", const Char_t *field="FF") {
+//void Agufld(const Char_t *sdt = "sdt20210510.134727", const Char_t *field="RF") {
 //   if ( gClassTable->GetID("TGiant3") >= 0) { // root4star
 //     gROOT->LoadMacro("bfc.C");
 //     bfc(-1,"MagF,nodefault",0);
@@ -29,8 +32,8 @@ void Agufld(const Char_t *sdt = "sdt20210303.052529", const Char_t *field="RF") 
 #ifdef __3D__
   const Int_t       nrp      = 200;       //  number of R nodes in the map
   const Int_t       nzp      = 800;       //  number of Z nodes in the map
-  const Float_t     zm       = 800.0;     //  map max length
-  const Float_t     rm       = 400.0;     //  map max radius
+  const Float_t     zm       = 200; // 800.0;     //  map max length
+  const Float_t     rm       = 200; //400.0;     //  map max radius
   const Int_t       nphi     =  36;
   TH3D* fieldZ = new TH3D("fieldZ","B_{Z};#rho;#phi;z",nrp, 0, rm, nphi, 0., 360., nzp, -zm, zm);
   TH3D* fieldR = new TH3D("fieldR","B_{R};#rho;#phi;z",nrp, 0, rm, nphi, 0., 360., nzp, -zm, zm);

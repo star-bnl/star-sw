@@ -2,7 +2,8 @@
 use File::Basename;
 use Cwd;
 #my @DistortionSet = qw(Corr4 Corr3 OBmap2D OTwist OClock Opr13 OIFC OShortR OBmap OSectorAlign);
-my @DistortionSet = qw(CorrY OShortR OBmap  OPr40 OIFC OSectorAlign OSpaceZ2 OGridLeakFull);
+#my @DistortionSet = qw(CorrY OShortR OBmap  OPr40 OIFC OSectorAlign OSpaceZ2 OGridLeakFull);
+my @DistortionSet = qw(OBMap); print "DistortionSet = @DistortionSet\n";
 # my %dates   = (
 # 	       'pp500_2012'       => '20120324.042916',
 #  	       'pp500_2017'       => '20170423.040951',
@@ -17,9 +18,25 @@ my @DistortionSet = qw(CorrY OShortR OBmap  OPr40 OIFC OSectorAlign OSpaceZ2 OGr
 #	      );
 #	       'OO_200GeV_20217'  => '20210510.134727',
 #	       'FF_OO_200GeV_2021' => '20210522.024326',
-my %dates   = ( 
-	       'FF_OO_200GeV_2021_Ideal' => '20210523.024326'
-	      );
+#my %dates   = ( 
+#	       'FF_OO_200GeV_2021_Ideal' => '20210523.024326'
+#	      );
+# my %dates = (
+# 	     '2021_RF_ideal' => 'y2021,FieldOn,ReverseField',
+# 	     '2021_FF_ideal' => 'y2021,FieldOn'
+# 	    );
+# my %dates = (
+# 	     '2021_RF_real' => 'sdt20210510.134727,FieldOn,ReverseField',
+# 	     '2021_FF_real' => 'sdt20210510.134727,FieldOn'
+# 	    );
+# my %dates = (
+# 	     '2021_RF_realCF' => 'sdt20210510.134727,FieldOn,ReverseField,ConstantField',
+# 	     '2021_FF_realCF' => 'sdt20210510.134727,FieldOn,ConstantField'
+# 	    );
+my %dates = (
+	     '2021_RF_realConstBz' => 'sdt20210510.134727,FieldOn,ReverseField,ConstBz',
+	     '2021_FF_realConstBz' => 'sdt20210510.134727,FieldOn,ConstBz'
+	    );
 foreach $trig  (sort keys %dates) {
   my $datetime = $dates{$trig};  print "$trig => $datetime\n";
   if (! -d $trig) {mkdir $trig;}
@@ -30,7 +47,8 @@ foreach $trig  (sort keys %dates) {
     my $Corr = $corr;
 #    if ($Corr eq 'OPr40' and $datetime < 20181101) {$Corr = "Opr13";}
     if (-r $rootfile) {next;}
-    my $cmd = "root.exe -q 'CheckDistortion.C(\"" . $Corr . ",sdt" . $datetime . ",NewTpcAlignment\",\"" . $rootfile . "\",\"" . $trig . "\")' >& " . $log;
+#    my $cmd = "root.exe -q 'CheckDistortion.C(\"" . $Corr . ",sdt" . $datetime . ",NewTpcAlignment\",\"" . $rootfile . "\",\"" . $trig . "\")' >& " . $log;
+    my $cmd = "root.exe -q 'CheckDistortion.C(\"" . $Corr . "," . $datetime . ",NewTpcAlignment\",\"" . $rootfile . "\",\"" . $trig . "\")' >& " . $log;
     print "cmd $cmd\n";
     my $flag = system($cmd);
     if ($flag) {print "flag = $flag\n"; die;}

@@ -66,25 +66,38 @@ void CheckDistortion(const Char_t *opt="CorrY,OSpaceZ2,OGridLeakFull", const Cha
   Int_t nr = 153;
   Double_t Rmin =  47.5;
   Double_t Rmax = 200.5;
+  Double_t *ybins = new Double_t[2*nr+2];
+  Double_t dy = (Rmax - Rmin)/nr;
+  ybins[0] = - Rmax;
+  for (Int_t j = 0; j < 2*nr + 2; j++) {
+    if (j > 0 && j != nr+1) ybins[j] = ybins[j-1] + dy;
+    else if (j == nr+1)    ybins[j] = Rmin;
+    //    cout << j << "\t" << ybins[j] << endl;
+  }
   TString Name("dX");
   TString Opt(opt);
   Int_t index = TMath::Min(Opt.Index(",New"),Opt.Index(",sdt"));
   TString Title("dX (cm) at X = 0 for ");
   Title += Opt(0,index); Title += " and "; Title += magF;
-  TH2F *dX    = new TH2F(Name,  Title, nz, zmin, zmax, nr, Rmin, Rmax);
+  //  TH2F *dX    = new TH2F(Name,  Title, nz, zmin, zmax, nr, Rmin, Rmax);
+  TH2F *dX    = new TH2F(Name,  Title, nz, zmin, zmax, 2*nr+1, ybins);
   dX->SetXTitle("Z (cm)");
-  dX->SetYTitle("R (cm)");
+  //  dX->SetYTitle("R (cm)");
+  dX->SetYTitle("Y (cm)");
   TString Name("dY");
   TString Title("dY (cm) X = 0 for ");
   Title += Opt(0,index); Title += " and "; Title += magF;
-  TH2F *dY    = new TH2F(Name,  Title, nz, zmin, zmax, nr, Rmin, Rmax);
+  //  TH2F *dY    = new TH2F(Name,  Title, nz, zmin, zmax, nr, Rmin, Rmax);
+  TH2F *dY    = new TH2F(Name,  Title, nz, zmin, zmax, 2*nr+1, ybins);
   dY->SetXTitle("Z (cm)");
-  dY->SetYTitle("R (cm)");
+  //  dY->SetYTitle("R (cm)");
+  dY->SetYTitle("Y (cm)");
 #if 1
   Name = "dZ";
   Title = "dZ (cm) at X = 0 for ";
   Title += Opt(0,index); Title += " and "; Title += magF;
-  TH2F *DZ = new TH2F(Name,Title, nz, zmin, zmax, nr, Rmin, Rmax);
+  //  TH2F *DZ = new TH2F(Name,Title, nz, zmin, zmax, nr, Rmin, Rmax);
+  TH2F *DZ = new TH2F(Name,Title, nz, zmin, zmax, 2*nr+1, ybins);
   DZ->SetXTitle("Z (cm)");
   DZ->SetYTitle("Y (cm)");
   StTpcCoordinateTransform transform;
@@ -95,13 +108,15 @@ void CheckDistortion(const Char_t *opt="CorrY,OSpaceZ2,OGridLeakFull", const Cha
   StTpcLocalSectorCoordinate locSecMoved;
 #endif
   Float_t xIn[3], xOut[3];
-  for (Int_t ir = 1; ir <= nr; ir++) {
+  Int_t nx = dY->GetXaxis()->GetNbins();
+  Int_t ny = dY->GetYaxis()->GetNbins();
+  for (Int_t ir = 1; ir <= ny; ir++) {
     xIn[0] = 0;
     xIn[1] = dY->GetYaxis()->GetBinCenter(ir);
 #if 0
     gC = StGlobalCoordinate(xIn);
 #endif    
-    for (Int_t iz = 1; iz < nz; iz++) {
+    for (Int_t iz = 1; iz < nx; iz++) {
       xIn[2] = dY->GetXaxis()->GetBinCenter(iz);
       StMagUtilities::Instance()->UndoDistortion(xIn,xOut);
       Double_t dx = xOut[0] - xIn[0];
