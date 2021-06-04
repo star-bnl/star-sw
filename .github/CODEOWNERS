@@ -1,6 +1,6 @@
 *                            @plexoos     @nigmatkulov
-/OnlTools                    @kehw
-/StDb                        @dmarkh
+/OnlTools                    @kehw @plexoos
+/StDb                        @dmarkh @plexoos
 /StRoot/RTS                  @kehw @akioogawa
 /StRoot/StAnalysisMaker      @ullrich-bnl
 /StRoot/StAssociationMaker   @ullrich-bnl
@@ -8,9 +8,9 @@
 /StRoot/StChain              @ullrich-bnl @klendathu2k
 /StRoot/StDaqLib/TOF         @ZaochenYe     @fgeurts     @starsdong
 /StRoot/StDaqLib/TRG         @akioogawa
-/StRoot/StDb*                @dmarkh
-/StRoot/StDbUtilities        @fisyak
-/StRoot/StDetectorDbMaker    @dmarkh      @fisyak
+/StRoot/StDb*                @dmarkh @plexoos
+/StRoot/StDbUtilities        @fisyak @plexoos
+/StRoot/StDetectorDbMaker    @dmarkh      @fisyak @plexoos
 /StRoot/StETof*              @PhilippWeidenkaff   @ideppner
 /StRoot/StEvent*             @klendathu2k @ullrich-bnl
 /StRoot/StFcs*               @akioogawa
@@ -25,7 +25,7 @@
 /StRoot/StMuDSTMaker         @jdbrice
 /StRoot/StMuDSTMaker/EMC     @kkauder
 /StRoot/StMuDSTMaker/RICHTOF @fgeurts     @starsdong
-/StRoot/StPico*              @nigmatkulov @marrbnl
+/StRoot/StPico*              @nigmatkulov @marrbnl @plexoos
 /StRoot/StRefMultCorr        @nigmatkulov
 /StRoot/StSpectraTagsMaker   @ullrich-bnl
 /StRoot/StSpinPool           @akioogawa   @zlchang     @veprbl
@@ -33,7 +33,7 @@
 /StRoot/StTriggerDataMaker   @akioogawa
 /StRoot/StTriggerUtilities   @zlchang
 /StRoot/StVpd*               @ZaochenYe     @fgeurts
-/StRoot/St_db_Maker          @dmarkh
+/StRoot/St_db_Maker          @dmarkh @plexoos @perevbnlgov
 /StRoot/StarClassLibrary     @ullrich-bnl @klendathu2k
 /StRoot/StarGenerator        @klendathu2k @perevbnlgov
 /StRoot/Sti*                 @klendathu2k @plexoos     @starsdong @perevbnlgov
@@ -44,4 +44,4 @@
 /StarDb                      @dmarkh      @perevbnlgov
 /StarDb/Calibrations/tof     @ZaochenYe     @fgeurts
 /pams                        @fgeurts     @klendathu2k
-/pams/tables                 @dmarkh
+/pams/tables                 @dmarkh @plexoos
