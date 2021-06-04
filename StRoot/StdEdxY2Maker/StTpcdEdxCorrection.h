@@ -41,7 +41,7 @@ class StTpcdEdxCorrection : public TObject {
  public:
   enum ESector : int {kTpcOuter = 0, kTpcInner = 1, kiTpc = 2};
   enum EOptions : int {
-    kUncorrected           =  0,//U   				           
+      kUncorrected           =  0,//U   				           
       kAdcCorrection         =  1,//R  					     
       kEdge                  =  2,//E   correction near edge of chamber	     
       kAdcCorrectionMDF      =  3,//RMDF  					     
@@ -89,7 +89,7 @@ class StTpcdEdxCorrection : public TObject {
   void SettpcGas               (St_tpcGas          *m = 0) {m_tpcGas = m;}
   
   void SetDebug(Int_t m=0) {m_Debug = m;}
-  void SetMask (Int_t m=0) {m_Mask = m;}
+  void SetMask (Long_t m=0) {m_Mask = m;}
   void ReSetCorrections();
   St_tpcGas         *tpcGas()              {return m_tpcGas;}
   //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
@@ -107,13 +107,13 @@ class StTpcdEdxCorrection : public TObject {
   St_tpcCorrectionC *tpcGasTemperature()   {return Correction(ktpcGasTemperature);}
   St_tpcCorrectionC *tpcWaterOut()         {return Correction(ktpcWaterOut);}
   St_tpcCorrectionC *TpcPadTBins()         {return Correction(kTpcPadTBins);}
-  Int_t Debug()                            {return m_Debug;}
-  Int_t Mask()                             {return m_Mask;}
+  Int_t  Debug()                           {return m_Debug;}
+  Long_t Mask()                            {return m_Mask;}
   Float_t           Adc2GeV()              {return mAdc2GeV;}
   void Print(Option_t *opt = "") const;
   Bool_t            IsFixedTarget()        {return m_isFixedTarget;}
  private:
-  Int_t                m_Mask;                  //!
+  Long_t               m_Mask;                  //!
   St_tpcGas           *m_tpcGas;                //!
   dEdxY2_t            *mdEdx;
   Float_t              mAdc2GeV;                //! Outer/Inner conversion factors from ADC -> GeV

@@ -361,6 +361,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[knTbk]                 = CdEdx.Ntbks; 
   VarXs[kdZdY]                 = CdEdx.dZdY;
   VarXs[kdXdY]                 = CdEdx.dXdY;
+  Int_t NLoops = 0;
+  Int_t m = 0;
   for (Int_t k = kUncorrected; k <= kTpcLast; k++) {
     Int_t l = 0;
     tpcCorrection_st *cor = 0;
@@ -417,7 +419,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     }
     cor = ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable();
     if (! cor) goto ENDL;
-    nrows = cor->nrows;
+    NLoops = cor->type/100000 + 1;
+    nrows = cor->nrows/NLoops;
     if (nrows <= 3)
       l = TMath::Min(nrows-1, kTpcOutIn);
     else {
@@ -428,82 +431,92 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       else if (nrows ==   6) {l =            kTpcOutIn;     if (sector > 12) l+= 3;}
       else if (nrows ==   4) {l = TMath::Min(kTpcOutIn, 1); if (sector > 12) l+= 2;} 
     }
-    corl = cor + l;
-    iCut = 0;
-    if (k == kAdcCorrection) {
-      ADC = adcCF;
-      if (ADC <= 0) return 3; //HACK to avoid FPE (VP)
-      if (corl->type == 12) 
-	dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,ADC,VarXs[kTanL]);
-      else 
-	dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,ADC,TMath::Abs(CdEdx.zG));
-      if (dE <= 0) return 3;
-      goto ENDL;
-    } else if (k == kTpcdCharge) {
-      if (l > 2) l = 1;
-      slope = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,row+0.5);
-      dE *=  TMath::Exp(-slope*CdEdx.dCharge);
-      dE *=  TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2+l,CdEdx.dCharge));
-      goto ENDL;
-    } else if (k == kzCorrection) {iCut = 1; // Always cut
-    } else if (k == kdXCorrection) {
-      xL2 = TMath::Log2(dx);
-      dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xL2); 
-      if (TMath::Abs(dXCorr) > 10) return 3;
-      if (nrows == 7) {// old schema without iTPC
-	dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
-	dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);
+    if (NLoops == 1) {
+      corl = cor + l;
+      iCut = 0;
+      if (k == kAdcCorrection) {
+	ADC = adcCF;
+	if (ADC <= 0) return 3; //HACK to avoid FPE (VP)
+	if (corl->type == 12) 
+	  dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,ADC,VarXs[kTanL]);
+	else 
+	  dE = Adc2GeVReal*((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,ADC,TMath::Abs(CdEdx.zG));
+	if (dE <= 0) return 3;
+	goto ENDL;
+      } else if (k == kTpcdCharge) {
+	if (l > 2) l = 1;
+	slope = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,row+0.5);
+	dE *=  TMath::Exp(-slope*CdEdx.dCharge);
+	dE *=  TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2+l,CdEdx.dCharge));
+	goto ENDL;
+      } else if (k == kzCorrection) {iCut = 1; // Always cut
+      } else if (k == kdXCorrection) {
+	xL2 = TMath::Log2(dx);
+	dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xL2); 
+	if (TMath::Abs(dXCorr) > 10) return 3;
+	if (nrows == 7) {// old schema without iTPC
+	  dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2,xL2);
+	  dXCorr += ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(5+kTpcOutIn,xL2);
+	}
+	CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.F.dx;
+	dE *= TMath::Exp(-dXCorr);
+	goto ENDL;
+      } else if (k == kSpaceCharge) {
+	if (cor[2*l  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*l  ].max &&
+	    cor[2*l+1].min <= CdEdx.DeltaZ && CdEdx.DeltaZ <= cor[2*l+1].max) 
+	  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*l  ,CdEdx.QRatio)
+			   -((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*l+1,CdEdx.DeltaZ));
+	goto ENDL;
+      } else if (k == kEdge) {
+	if (corl->type == 200) VarXs[kEdge] = TMath::Abs(CdEdx.edge);
+	if (corl->min > 0 && corl->min > VarXs[kEdge]    ) return 2;
+      } else if (k == ktpcTime) { // use the correction if you have xmin < xmax && xmin <= x <= xmax
+	if (corl->min >= corl->max || corl->min > VarXs[ktpcTime] ||  VarXs[ktpcTime] > corl->max) goto ENDL;
+	Double_t xx = VarXs[ktpcTime];
+	dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xx));
+	goto ENDL;
       }
-      CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.F.dx;
-      dE *= TMath::Exp(-dXCorr);
-      goto ENDL;
-    } else if (k == kSpaceCharge) {
-      if (cor[2*l  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*l  ].max &&
-	  cor[2*l+1].min <= CdEdx.DeltaZ && CdEdx.DeltaZ <= cor[2*l+1].max) 
-	dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*l  ,CdEdx.QRatio)
-			 -((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*l+1,CdEdx.DeltaZ));
-      goto ENDL;
-    } else if (k == kEdge) {
-      if (corl->type == 200) VarXs[kEdge] = TMath::Abs(CdEdx.edge);
-      if (corl->min > 0 && corl->min > VarXs[kEdge]    ) return 2;
-    } else if (k == ktpcTime) { // use the correction if you have xmin < xmax && xmin <= x <= xmax
-      if (corl->min >= corl->max || corl->min > VarXs[ktpcTime] ||  VarXs[ktpcTime] > corl->max) goto ENDL;
-      Double_t xx = VarXs[ktpcTime];
-      dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xx));
-      goto ENDL;
-    }
-    if (corl->type == 300) {
-      if (corl->min > 0 && corl->min > VarXs[k]    ) VarXs[k] = corl->min;
-      if (corl->max > 0 && VarXs[k]     > corl->max) VarXs[k] = corl->max;
-    }
-    if (TMath::Abs(corl->npar) >= 100 || iCut) {
-      Int_t iok = 2;
-      if (corl->min >= corl->max) {
-	iok = 0;
-      } else {
-	if (corl->min <= VarXs[k] && VarXs[k] <= corl->max) {
+      if (corl->type == 300) {
+	if (corl->min > 0 && corl->min > VarXs[k]    ) VarXs[k] = corl->min;
+	if (corl->max > 0 && VarXs[k]     > corl->max) VarXs[k] = corl->max;
+      }
+      if (TMath::Abs(corl->npar) >= 100 || iCut) {
+	Int_t iok = 2;
+	if (corl->min >= corl->max) {
 	  iok = 0;
+	} else {
+	  if (corl->min <= VarXs[k] && VarXs[k] <= corl->max) {
+	    iok = 0;
+	  }
+	}
+	if (iok) {
+	  return iok;
 	}
       }
-      if (iok) {
-	return iok;
-      }
-    }
-    if (corl->npar%100) {
-      Double_t dECor = TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
+      if (corl->npar%100) {
+	Double_t dECor = TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
 #if 0
-      if (TMath::IsNaN(dECor)) {
-	static Int_t iBreak = 0;
-	iBreak++;
-      }
+	if (TMath::IsNaN(dECor)) {
+	  static Int_t iBreak = 0;
+	  iBreak++;
+	}
 #endif
-      dE *= dECor;
+	dE *= dECor;
 #if 0
-      if (TMath::IsNaN(dE)) {
-	static Int_t iBreak = 0;
-	iBreak++;
-      }
+	if (TMath::IsNaN(dE)) {
+	  static Int_t iBreak = 0;
+	  iBreak++;
+	}
 #endif
+      }
+    } else  { // repeatable 
+      for (m = 0; m < NLoops; m++, l += nrows) {
+	corl = cor + l;
+	if (corl->min <= VarXs[k] && VarXs[k] < corl->max) {
+	  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
+	  break;
+	}	
+      }
     }
   ENDL:
     CdEdx.C[k].dE = dE;

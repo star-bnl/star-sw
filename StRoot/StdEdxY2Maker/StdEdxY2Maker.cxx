@@ -4,6 +4,7 @@
 //#define __KEEP_DX__
 //#define __SpaceCharge__
 //#define __NEGATIVE_ONLY__
+//#define __AdcI3__
 #ifndef  __NEGATIVE_ONLY__
 #define __NEGATIVE_AND_POSITIVE__
 #endif
@@ -424,9 +425,13 @@ Int_t StdEdxY2Maker::Make(){
 	  } else {
 	    dZdY = dXdY = 0;
 	  }
+#ifdef __AdcI3__
 	  Double_t sumAdc = IntegratedAdc(tpcHit);
 	  if (sumAdc > 0) AdcI = TMath::Log10(sumAdc);
 	  else            AdcI = 0;
+#else
+	  AdcI = 0;
+#endif
 	  // Check for Membernane
 	  if (xyz[1].z() * xyz[2].z() < 0) {
 	    Double_t dZ = TMath::Abs(xyz[1].z()) + TMath::Abs(xyz[2].z());
@@ -869,64 +874,50 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static THnSparseF *Time = 0, *TimeC = 0; // , *TimeP = 0
   Hists3D::NtotHist = 2;
   Int_t NoRows = St_tpcPadConfigC::instance()->numberOfRows(20);
-  static Hists3D Pressure("Pressure","log(dE/dx)","row","Log(Pressure)",-NoRows,150, 6.84, 6.99); // ? mix of inner and outer
   //  static Hists3D PressureT("PressureT","log(dE/dx)","row","Log(Pressure*298.2/inputGasTemperature)",-NoRows,150, 6.84, 6.99);
   
-  static Hists3D Voltage("Voltage","log(dE/dx)","Sector*Channels","Voltage - Voltage_{nominal}", numberOfSectors*NumberOfChannels,22,-210,10);
   //  static Hists3D Volt("Volt","log(dE/dx)","Sector*Channels","Voltage", numberOfSectors*NumberOfChannels,410,990.,1400.);
 
   static Hists3D AvCurrent("AvCurrent","log(dEdx/Pion)","Sector*Channels","Average Current [#{mu}A]",numberOfSectors*NumberOfChannels,200,0.,1.0);
   static Hists3D Qcm("Qcm","log(dEdx/Pion)","Sector*Channels","Accumulated Charge [uC/cm]",numberOfSectors*NumberOfChannels,200,0.,1000);
-  if (fUsedNdx) {
-    Hists3D::NtotHist = 9;
-  }
-#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
-  static Hists3D SecRow3("SecRow3","<log(dEdx/Pion)>","sector","row",numberOfSectors,NoRows);
-#else
-  static Hists3D SecRow3("SecRow3","<log(dEdx/Pion)> for negative","sector","row",numberOfSectors,NoRows);
-#ifdef __NEGATIVE_AND_POSITIVE__
-  static Hists3D SecRow3P("SecRow3P","<log(dEdx/Pion)> for positive","sector","row",numberOfSectors,NoRows);
-#endif
-#endif
-  Hists3D::NtotHist = 2;
-#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
-  static Hists3D Z3("Z3","<log(dEdx/Pion)>","row","Drift Distance",-NoRows,220,-5,215);
-#else
-  static Hists3D Z3("Z3","<log(dEdx/Pion)> for negative","row","Drift Distance",-NoRows,220,-5,215);
-#ifdef __NEGATIVE_AND_POSITIVE__
-  static Hists3D Z3P("Z3P","<log(dEdx/Pion)> for positive","row","Drift Distance",-NoRows,220,-5,215);
-#endif
-#endif
   static Hists3D ADC3("ADC3","<logADC)>","sector","row",numberOfSectors,
 		      NoRows,0,-1, 
 		      100,0.,10.,
 		      0,-1,
 		      1); //   Hists3D::NtotHist = 1;
   Hists3D::NtotHist = 2;
-#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
-  static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
-#else
-  static Hists3D xyPad3("xyPad3","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1] for negative"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
-#ifdef __NEGATIVE_AND_POSITIVE__
-  static Hists3D xyPad3P("xyPad3P","log(dEdx/Pion)","sector+yrow[-0.5,0.5] and xpad [-1,1] for positive"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5);
-#endif
-#endif
-  Hists3D::NtotHist = 2;
 #ifndef MakeString
 #define MakeString(PATH) # PATH
 #endif
 #define __BOOK__VARS__(SIGN,NEGPOS) \
-  static Hists3D AdcI3 ## SIGN ("AdcI3","log(dEdx/Pion)","Sector*Channels","Log10(AdcI)" MakeString(NEGPOS) ,-NoRows,70,0,7);\
-  static Hists3D dZdY3 ## SIGN ("dZdY3","log(dEdx/Pion)","row","dZdY" MakeString(NEGPOS) ,-NoRows,200,-5,5); \
-  static Hists3D dXdY3 ## SIGN ("dXdY3","log(dEdx/Pion)","row","dXdY" MakeString(NEGPOS) ,-NoRows,200,-2.5,2.5); \
-  static Hists3D nPad3 ## SIGN ("nPad3","log(dEdx/Pion)","row","npad" MakeString(NEGPOS) ,-NoRows,31,0.5,32.5); \
-  static Hists3D nTbk3 ## SIGN ("nTbk3","log(dEdx/Pion)","row","ntimebuckets" MakeString(NEGPOS) ,-NoRows,64,0.5,64.5);
+  if (fUsedNdx) {		    \
+    Hists3D::NtotHist = 9;	    \
+  }									\
+  static Hists3D SecRow3 ## SIGN ("SecRow3" MakeString(SIGN) ,"<log(dEdx/Pion)>"  MakeString(NEGPOS) ,"sector","row",numberOfSectors,NoRows); \
+  Hists3D::NtotHist = 2;						\
+  static Hists3D Pressure ## SIGN ("Pressure" MakeString(SIGN) ,"log(dE/dx)" MakeString(NEGPOS) ,"row","Log(Pressure)",-NoRows,150, 6.84, 6.99); \
+  static Hists3D Voltage ## SIGN ("Voltage" MakeString(SIGN) ,"log(dE/dx)" MakeString(NEGPOS) ,"Sector*Channels","Voltage - Voltage_{nominal}", numberOfSectors*NumberOfChannels,22,-210,10); \
+  static Hists3D Z3 ## SIGN ("Z3" MakeString(SIGN) ,"<log(dEdx/Pion)>" MakeString(NEGPOS) ,"row","Drift Distance",-NoRows,220,-5,215); \
+  static Hists3D xyPad3 ## SIGN ("xyPad3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5); \
+  static Hists3D dZdY3 ## SIGN ("dZdY3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","dZdY",-NoRows,200,-5,5); \
+  static Hists3D dXdY3 ## SIGN ("dXdY3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","dXdY",-NoRows,200,-2.5,2.5); \
+  static Hists3D nPad3 ## SIGN ("nPad3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","npad",-NoRows,31,0.5,32.5); \
+  static Hists3D nTbk3 ## SIGN ("nTbk3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","ntimebuckets",-NoRows,64,0.5,64.5);
 #if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
   __BOOK__VARS__(,);
+#ifdef __AdcI3__
+  static Hists3D AdcI3 ## SIGN ("AdcI3","log(dEdx/Pion)","Sector*Channels","Log10(AdcI)",-NoRows,70,0,7);
+#endif /* __AdcI3__ */
 #else
   __BOOK__VARS__(, for negative);
+#ifdef __AdcI3__
+  static Hists3D AdcI3("AdcI3" MakeString(SIGN) ,"log(dEdx/Pion) for neagative","Sector*Channels","Log10(AdcI)",-NoRows,70,0,7);
+#endif /* __AdcI3__ */
 #ifdef __NEGATIVE_AND_POSITIVE__
   __BOOK__VARS__(P, for positive);
+#ifdef __AdcI3__
+  static Hists3D AdcI3P("AdcI3P","log(dEdx/Pion) for positive","Sector*Channels","Log10(AdcI)",-NoRows,70,0,7);
+#endif /* __AdcI3__ */
 #endif
 #endif
   static TH2F *ZdcCP = 0, *BBCP = 0;
@@ -1142,27 +1133,19 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	// SecRow3
 	Double_t V = FdEdx[k].Voltage;
 	Double_t VN = (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ? V - 1170 : V - 1390;
-#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
-	SecRow3.Fill(sector,row,Vars);
-	Voltage.Fill(cs,VN,Vars);
-#else /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
-	  if (sCharge == 1)  SecRow3.Fill(sector,row,Vars);
-	  Voltage.Fill(cs,VN,Vars);
-#ifdef __NEGATIVE_AND_POSITIVE__
-	  if (sCharge == 0)  SecRow3P.Fill(sector,row,Vars);
-	  Voltage.Fill(cs,VN,Vars);
-#endif /* __NEGATIVE_AND_POSITIVE__ */
-#endif /*  ! _NEGATIVE_ONLY__ && !  __NEGATIVE_AND_POSITIVE__ */
-	  // ADC3 
-	  if (FdEdx[k].adc > 0) {
-	    Double_t ADCL = TMath::Log(FdEdx[k].adc);
-	    ADC3.Fill(sector,row,&ADCL);
-	  }
-	  if (tpcGas) {
+	Double_t press = 0;
+	// ADC3 
+	if (FdEdx[k].adc > 0) {
+	  Double_t ADCL = TMath::Log(FdEdx[k].adc);
+	  ADC3.Fill(sector,row,&ADCL);
+	}
+	  
+	if (tpcGas) {
 	  Double_t p     = tpcGas->barometricPressure;
+	  
 	  if (p > 0) {
 	    Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::ktpcPressure].dEdxN;
-	    Double_t press = TMath::Log(p);
+	    press = TMath::Log(p);
 	    Pressure.Fill(rowS,press,Vars);
 	  }
 	  Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcAccumulatedQ].dEdxN;
@@ -1174,13 +1157,15 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (Time)    Time->Fill(vars);
 	//	if (TimeP)  {vars[1] = FdEdx[k].C[StTpcdEdxCorrection::ktpcTime].dEdxN; TimeP->Fill(vars);}
 	if (TimeC)  {vars[1] = FdEdx[k].F.dEdxN; TimeC->Fill(vars);}
+
 #define __FILL__VARS__(SIGN) \
+	Vars[0] = FdEdx[k].F.dEdxN - dEdxNCor;			   \
+	SecRow3 ## SIGN .Fill(sector,row,Vars);			       \
+	Voltage ## SIGN .Fill(cs,VN,Vars);			       \
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kzCorrection].dEdxN; \
 	Z3     ## SIGN .Fill(rowS,FdEdx[k].ZdriftDistance,Vars);     \
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcPadMDF].dEdxN;   \
 	xyPad3 ## SIGN .Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars); \
-	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kAdcI].dEdxN;   \
-	AdcI3  ## SIGN .Fill(rowS,FdEdx[k].AdcI,&Vars[1]);	       \
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::knPad].dEdxN;   \
 	nPad3  ## SIGN .Fill(rowS,FdEdx[k].Npads,&Vars[1]);       \
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::knTbk].dEdxN;   \
@@ -1191,13 +1176,25 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	dXdY3  ## SIGN .Fill(rowS,FdEdx[k].dXdY,&Vars[1]);		
 #if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
 	__FILL__VARS__();
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kAdcI].dEdxN;
+#ifdef __AdcI3__
+	AdcI3.Fill(rowS,FdEdx[k].AdcI,&Vars[1]);
+#endif /* __AdcI3__ */
 #else /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
 	if (sCharge == 1)  {
 	__FILL__VARS__();
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kAdcI].dEdxN;
+#ifdef __AdcI3__
+	AdcI3.Fill(rowS,FdEdx[k].AdcI,&Vars[1]);
+#endif /* __AdcI3__ */
 	}
 #ifdef __NEGATIVE_AND_POSITIVE__
 	if (sCharge == 0)  {
 	__FILL__VARS__(P);
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kAdcI].dEdxN;
+#ifdef __AdcI3__
+	AdcI3P.Fill(rowS,FdEdx[k].AdcI,&Vars[1]);
+#endif /* __AdcI3__ */
 	}
 #endif /* __NEGATIVE_AND_POSITIVE__ */
 #endif /* ! __NEGATIVE_ONLY__ && ! __NEGATIVE_AND_POSITIVE__ */

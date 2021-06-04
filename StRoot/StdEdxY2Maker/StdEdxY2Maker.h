@@ -55,7 +55,7 @@ class StdEdxY2Maker : public StMaker {
   virtual Int_t InitRun(Int_t RunNumber);
   virtual Int_t Finish();
   virtual Int_t Make();
-  virtual void  SetMask(Int_t mask) {m_Mask = mask;}
+  virtual void  SetMask(Long_t mask) {m_Mask = mask;}
   static  void  SortdEdx();
   Double_t LikeliHood(Double_t Xlog10bg, Int_t NdEdx, dEdxY2_t *dEdx, Double_t chargeSq = 1);
   void    Histogramming(StGlobalTrack* gTrack=0);
@@ -84,7 +84,7 @@ class StdEdxY2Maker : public StMaker {
   static dEdxY2_t *FdEdx; // fit
   static dEdxY2_t *dEdxS; // dEdx sorted
   static void      UsedNdx() {fUsedNdx = kTRUE;}
-  Int_t                m_Mask; //!
+  Long_t               m_Mask; //!
   Char_t               beg[1];
   TMinuit             *m_Minuit;        //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !

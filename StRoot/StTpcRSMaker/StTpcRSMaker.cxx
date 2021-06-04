@@ -216,7 +216,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
   // Distortions
   if (TESTBIT(m_Mode,kdEdxCorr)) {
     LOG_INFO << "StTpcRSMaker:: use Tpc dE/dx correction from calibaration" << endm;
-    Int_t Mask = -1; // 22 bits
+    Long_t Mask = -1; // 64 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrectionMDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection3MDF);
