@@ -814,3 +814,4 @@ void StVpdCalibMaker::writeHistograms() const
 
   return;
 }
+void StVpdCalibMaker::setCutVpdOutliers(const Bool_t val) {mCutVpdOutliers = val; if(!val) {LOG_INFO << "Default outlier rejection of VPD hits is disabled!" << endm;} ;}

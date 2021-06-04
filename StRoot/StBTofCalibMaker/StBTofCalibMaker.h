@@ -82,7 +82,6 @@
 #include "phys_constants.h"
 #include "TMath.h"
 #include "StMaker.h"
-#include "StMessMgr.h"
 
 //#include "TProfile.h"
 
@@ -383,12 +382,5 @@ inline Int_t StBTofCalibMaker::getZCalibType() {return Int_t(mZCalibType);}
 inline Int_t StBTofCalibMaker::getTotCalibType() {return Int_t(mTotCalibType);}
 inline void StBTofCalibMaker::setFXTMode(const Bool_t val) {mFXTMode = val;}
 
-inline void StBTofCalibMaker::setPPPAMode(const Bool_t val) { mPPPAMode = val; if(val){LOG_INFO << "You are now using PPPAMode!" << endm;} if(!val){mPPPAModeHist = kFALSE;}; }
-inline void StBTofCalibMaker::setPPPAPionSel(const Bool_t val) { mPPPAPionSel = val; if(mPPPAPionSel) { LOG_INFO << "mPPPAPionSel is on!" << endm;}}
-inline void StBTofCalibMaker::setPPPAOutlierRej(const Bool_t val) { mPPPAOutlierRej = val; if(mPPPAOutlierRej) { LOG_INFO << "mPPPAOutlierRej is on!" << endm;}}
-inline void StBTofCalibMaker::setNSigmaTofMode(const Bool_t val) { mNSigmaTofMode = val; if(mNSigmaTofMode) { LOG_INFO << "mNSigmaTofMode is on!" << endm;}}
-inline void StBTofCalibMaker::setPPPAModeHist(const Bool_t val) { if(mPPPAMode){mPPPAModeHist = val; if(mPPPAModeHist){LOG_INFO << "mPPPAModeHist is on!" << endm;}} else if(val){LOG_INFO << "setPPPAModeHist() is only valid when pppAMode is on! " << endm;} else{mPPPAModeHist = val;}; }
-inline void StBTofCalibMaker::setPPPAModeHistoFileName(const Char_t* filename) { if(mPPPAMode && mPPPAModeHist){mPPPAModeHistoFileName = filename;} else {LOG_INFO << "setPPPAMode() and setPPPAModeHist() must be turned on first before calling setPPPAModeHistoFileName()!" << endm;}; }
-inline void StBTofCalibMaker::setRun15Slew(const Bool_t val) {if(val){mRun15Slew = val; LOG_INFO << "Using Run 15 slewing corrections" << endm;}; }
 
 #endif

@@ -209,6 +209,5 @@ inline Bool_t StVpdCalibMaker::useVpdStart() const { return mUseVpdStart; }
 
 // Start: bassam
 // Setting mCutVpdOutliers = kFALSE allows access to all hits from the VPD
-inline void StVpdCalibMaker::setCutVpdOutliers(const Bool_t val) {mCutVpdOutliers = val; if(!val) {LOG_INFO << "Default outlier rejection of VPD hits is disabled!" << endm;} ;}
 // End: bassam 
 #endif

@@ -120,6 +120,7 @@
 #include "StEvent/StBTofPidTraits.h"
 #include "StEvent/StEventTypes.h"
 #include "Stypes.h"
+#include "StMessMgr.h"
 #include "StThreeVectorD.hh"
 #include "StHelix.hh"
 #include "StEvent/StTrackGeometry.h"
@@ -2941,3 +2942,10 @@ float start_resolution(0);
  }
  return resolution;
 }
+void StBTofCalibMaker::setPPPAMode(const Bool_t val) { mPPPAMode = val; if(val){LOG_INFO << "You are now using PPPAMode!" << endm;} if(!val){mPPPAModeHist = kFALSE;}; }
+void StBTofCalibMaker::setPPPAPionSel(const Bool_t val) { mPPPAPionSel = val; if(mPPPAPionSel) { LOG_INFO << "mPPPAPionSel is on!" << endm;}}
+void StBTofCalibMaker::setPPPAOutlierRej(const Bool_t val) { mPPPAOutlierRej = val; if(mPPPAOutlierRej) { LOG_INFO << "mPPPAOutlierRej is on!" << endm;}}
+void StBTofCalibMaker::setNSigmaTofMode(const Bool_t val) { mNSigmaTofMode = val; if(mNSigmaTofMode) { LOG_INFO << "mNSigmaTofMode is on!" << endm;}}
+void StBTofCalibMaker::setPPPAModeHist(const Bool_t val) { if(mPPPAMode){mPPPAModeHist = val; if(mPPPAModeHist){LOG_INFO << "mPPPAModeHist is on!" << endm;}} else if(val){LOG_INFO << "setPPPAModeHist() is only valid when pppAMode is on! " << endm;} else{mPPPAModeHist = val;}; }
+void StBTofCalibMaker::setPPPAModeHistoFileName(const Char_t* filename) { if(mPPPAMode && mPPPAModeHist){mPPPAModeHistoFileName = filename;} else {LOG_INFO << "setPPPAMode() and setPPPAModeHist() must be turned on first before calling setPPPAModeHistoFileName()!" << endm;}; }
+void StBTofCalibMaker::setRun15Slew(const Bool_t val) {if(val){mRun15Slew = val; LOG_INFO << "Using Run 15 slewing corrections" << endm;}; }
