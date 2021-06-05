@@ -51,6 +51,7 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
 	t = StMaker::AliasTime(tag);
 	cout << "n = " << n << " tag: " << tag << " d = " << d << " t = " 
 	     << t << "\tflavor = " << flavor.Data() << endl;
+	if (! d) return;
       }
     }
     TDatime Date(d,t); cout << " Date " << Date.GetDate() << "\tTime " << Date.GetTime() << endl;
