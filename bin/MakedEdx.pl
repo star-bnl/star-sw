@@ -2144,7 +2144,11 @@ my $NEvents = 100000;
 #$hist = "RunXXI53"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/7p7GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 4; $Mode = 2; $macro = "dEdx";#  06/04/31 Add update TpcSecRowB.*52.root
 #$hist = "RunXXI53"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 2; $Mode = 2; $macro = "dEdx";#  06/04/21 -"-
 #$hist = "RunXXI54"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/7p7GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/04/31 TpcPadCorrectionMDF.20210129.000053.C & TpcZCorrectionB.20210129.000053.C & TpcLengthCorrectionMDF.000053.C
-$hist = "RunXXI54"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/04/21 TpcdXdY TpcdZdY TpcLengthCorrectionMDF TpcPadCorrectionMDF TpcZCorrectionB 20210129.000053.C
+#$hist = "RunXXI54"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/04/21 TpcdXdY TpcdZdY TpcLengthCorrectionMDF TpcPadCorrectionMDF TpcZCorrectionB 20210129.000053.C
+#$hist = "RunXXI55"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/7p7GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/04/31 TpcSecRowB.*54.root TpcLengthCorrectionMDF.000054.C
+#$hist = "RunXXI55"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/04/21 TpcSecRowB.20210501.160054.root ?
+#$hist = "RunXXI56"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/05/21 step back to RunXXI53
+$hist = "RunXXI57"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/05/21 TpcSecRowB.20210501.160056.root
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2389,11 +2393,13 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 print XML '
 <stdout URL="file:./sched$JOBID.log" />
 <stderr URL="file:./sched$JOBID.err" />
+<!--
  <ResourceUsage>
     <Memory>
       <MinMemory>1500</MinMemory>
     </Memory>
   </ResourceUsage>
+-->
 </job>
 ';
 close (XML);

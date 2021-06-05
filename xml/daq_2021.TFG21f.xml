@@ -12,10 +12,10 @@
 #   setup 64b
 #   setup gcc
 #   setup 32b
-    starver TFG21e
+    starver TFG21f
      set evtsFile = $INPUTFILE0;
      set f        = 1
-     set l        = 5000
+     set l        = 50000
   echo "${evtsFile}"
   set evtsFileB = `basename ${evtsFile}`
   set filel    = `basename ${evtsFileB} .daq`
