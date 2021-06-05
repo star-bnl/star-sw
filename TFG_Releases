@@ -67,5 +67,5 @@
  TFG21d freeze VMC, CAVx,                                            2021-03-27 18:59:05 -0400  (HEAD -> master, tag: TFG21d)
  TFG21e Merge with Maksym,starMagAvg, 3p85GeV_fixedTarget_2021       2021-05-01 18:42:27 -0400  (HEAD -> master, tag: TFG21e)
  TFG21e Remove EMC from picoDst due to memory leak                   2021-05-02 15:12:09 -0400  (HEAD -> master, tag: TFG21e_2)
- TFG21f Reshape dE/dx calibration for 3p85GeV_fxt for 2B production  2021-06-05 15:12:09 -0400  (HEAD -> master, tag: TFG21f)
+ TFG21f Reshape dE/dx calibration for 3p85GeV_fxt for 2B production  2021-06-05 19:39:14 -0400  (HEAD -> master, tag: TFG21f)
 .DEV2  head of TFG git repository
