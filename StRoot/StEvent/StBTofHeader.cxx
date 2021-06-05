@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHeader.cxx,v 2.5 2010/05/12 15:12:03 ullrich Exp $
+ * $Id: StBTofHeader.cxx,v 2.6 2021/05/28 19:00:21 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHeader.cxx,v $
+ * Revision 2.6  2021/05/28 19:00:21  ullrich
+ * Added 3 member plus access fct: mTCanFirst, mTCanLast, mNTzeroCan (Frank)
+ *
  * Revision 2.5  2010/05/12 15:12:03  ullrich
  * Added member mNTzero and access methods.
  *
@@ -51,8 +54,6 @@ StBTofHeader::StBTofHeader()
     mNTzeroCan = 0;
     mTCanFirst = 99999.;
     mTCanLast = -99999.;
-
-    // Start: bassam
     mVpdEHits = 0;
     mVpdWHits = 0;
     mVpdEGoodHits = 0;
@@ -63,8 +64,6 @@ StBTofHeader::StBTofHeader()
     mClosestVpdWHit = 99999.;
     mLatestVpdEHit = -99999.;
     mLatestVpdWHit = -99999.;
-    // End: bassam
-
 }
 
 StBTofHeader::~StBTofHeader() {/* no op */}
@@ -134,7 +133,6 @@ StBTofHeader::tCanFirst() const { return mTCanFirst; }
 double
 StBTofHeader::tCanLast() const { return mTCanLast; }
 
-// Start: bassam
 int
 StBTofHeader::vpdEHits() const { return mVpdEHits; }
 
@@ -147,7 +145,7 @@ StBTofHeader::vpdEGoodHits() const { return mVpdEGoodHits; }
 int
 StBTofHeader::vpdWGoodHits() const { return mVpdWGoodHits; }
 
-double 
+double
 StBTofHeader::earliestVpdEHit() const { return mEarliestVpdEHit; }
 
 double
@@ -164,7 +162,6 @@ StBTofHeader::latestVpdEHit() const { return mLatestVpdEHit; }
 
 double
 StBTofHeader::latestVpdWHit() const { return mLatestVpdWHit; }
-// End: bassam
 
 void
 StBTofHeader::setFiberHeader(int fiberId, short val)
@@ -232,8 +229,7 @@ StBTofHeader::setTCanFirst(double tFirst) { mTCanFirst = tFirst; }
 void
 StBTofHeader::setTCanLast(double tLast) { mTCanLast = tLast; }
 
-// Start: bassam
-void 
+void
 StBTofHeader::setVpdEHits(short vpdEHits) { mVpdEHits = vpdEHits; }
 
 void
@@ -262,4 +258,3 @@ StBTofHeader::setLatestVpdEHit(double latestVpdEHit) { mLatestVpdEHit = latestVp
 
 void
 StBTofHeader::setLatestVpdWHit(double latestVpdWHit) { mLatestVpdWHit = latestVpdWHit; }
-// End: bassam
