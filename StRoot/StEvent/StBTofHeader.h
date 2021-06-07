@@ -63,6 +63,16 @@ public:
     int            nTzeroCan() const;
     double         tCanFirst() const;
     double         tCanLast() const;
+    int            vpdEHits() const;
+    int            vpdWHits() const;
+    int            vpdEGoodHits() const;
+    int            vpdWGoodHits() const;
+    double         earliestVpdEHit() const;
+    double         earliestVpdWHit() const;
+    double         closestVpdEHit() const;
+    double         closestVpdWHit() const;
+    double         latestVpdEHit() const;
+    double         latestVpdWHit() const;
 
     void         setFiberHeader(int fiberId, short val);
     void         setFiberTriggerWord(int fiberId, unsigned int val);
@@ -80,6 +90,16 @@ public:
     void         setNTzeroCan(short nCan);
     void         setTCanFirst(double tFirst);
     void         setTCanLast(double tLast);
+    void         setVpdEHits(short vpdEHits);
+    void         setVpdWHits(short vpdWHits);
+    void         setVpdEGoodHits(short vpdEGoodHits);
+    void         setVpdWGoodHits(short vpdWGoodHits);
+    void         setEarliestVpdEHit(double earliestVpdEHit);
+    void         setEarliestVpdWHit(double earliestVpdWHit);
+    void         setClosestVpdEHit(double closestVpdEHit);
+    void         setClosestVpdWHit(double closestVpdWHit);
+    void         setLatestVpdEHit(double latestVpdEHit);
+    void         setLatestVpdWHit(double latestVpdWHit);
 
 protected:
     Short_t      mFiberHeader[MAXFIBER];
@@ -95,6 +115,17 @@ protected:
     Short_t      mNTzeroCan;
     Double_t     mTCanFirst;
     Double_t     mTCanLast;
+    Double_t     mVpdEHits;
+    Double_t     mVpdWHits;
+    Double_t     mVpdEGoodHits;
+    Double_t     mVpdWGoodHits;
+    Double_t     mEarliestVpdEHit;
+    Double_t     mEarliestVpdWHit;
+    Double_t     mClosestVpdEHit;
+    Double_t     mClosestVpdWHit;
+    Double_t     mLatestVpdEHit;
+    Double_t     mLatestVpdWHit; 
+
     ClassDef(StBTofHeader,3)
 };
 
