@@ -54,6 +54,16 @@ StBTofHeader::StBTofHeader()
     mNTzeroCan = 0;
     mTCanFirst = 99999.;
     mTCanLast = -99999.;
+    mVpdEHits = 0;
+    mVpdWHits = 0;
+    mVpdEGoodHits = 0;
+    mVpdWGoodHits = 0;
+    mEarliestVpdEHit = 99999.;
+    mEarliestVpdWHit = 99999.;
+    mClosestVpdEHit = 99999.;
+    mClosestVpdWHit = 99999.;
+    mLatestVpdEHit = -99999.;
+    mLatestVpdWHit = -99999.;
 }
 
 StBTofHeader::~StBTofHeader() {/* no op */}
@@ -123,6 +133,36 @@ StBTofHeader::tCanFirst() const { return mTCanFirst; }
 double
 StBTofHeader::tCanLast() const { return mTCanLast; }
 
+int
+StBTofHeader::vpdEHits() const { return mVpdEHits; }
+
+int
+StBTofHeader::vpdWHits() const { return mVpdWHits; }
+
+int
+StBTofHeader::vpdEGoodHits() const { return mVpdEGoodHits; }
+
+int
+StBTofHeader::vpdWGoodHits() const { return mVpdWGoodHits; }
+
+double
+StBTofHeader::earliestVpdEHit() const { return mEarliestVpdEHit; }
+
+double
+StBTofHeader::earliestVpdWHit() const { return mEarliestVpdWHit; }
+
+double
+StBTofHeader::closestVpdEHit() const { return mClosestVpdEHit; }
+
+double
+StBTofHeader::closestVpdWHit() const { return mClosestVpdWHit; }
+
+double
+StBTofHeader::latestVpdEHit() const { return mLatestVpdEHit; }
+
+double
+StBTofHeader::latestVpdWHit() const { return mLatestVpdWHit; }
+
 void
 StBTofHeader::setFiberHeader(int fiberId, short val)
 {
@@ -188,3 +228,33 @@ StBTofHeader::setTCanFirst(double tFirst) { mTCanFirst = tFirst; }
 
 void
 StBTofHeader::setTCanLast(double tLast) { mTCanLast = tLast; }
+
+void
+StBTofHeader::setVpdEHits(short vpdEHits) { mVpdEHits = vpdEHits; }
+
+void
+StBTofHeader::setVpdWHits(short vpdWHits) { mVpdWHits = vpdWHits; }
+
+void
+StBTofHeader::setVpdEGoodHits(short vpdEGoodHits) { mVpdEGoodHits = vpdEGoodHits; }
+
+void
+StBTofHeader::setVpdWGoodHits(short vpdWGoodHits) { mVpdWGoodHits = vpdWGoodHits; }
+
+void
+StBTofHeader::setEarliestVpdEHit(double earliestVpdEHit) { mEarliestVpdEHit = earliestVpdEHit; }
+
+void
+StBTofHeader::setEarliestVpdWHit(double earliestVpdWHit) { mEarliestVpdWHit = earliestVpdWHit; }
+
+void
+StBTofHeader::setClosestVpdEHit(double closestVpdEHit) { mClosestVpdEHit = closestVpdEHit; }
+
+void
+StBTofHeader::setClosestVpdWHit(double closestVpdWHit) { mClosestVpdWHit = closestVpdWHit; }
+
+void
+StBTofHeader::setLatestVpdEHit(double latestVpdEHit) { mLatestVpdEHit = latestVpdEHit; }
+
+void
+StBTofHeader::setLatestVpdWHit(double latestVpdWHit) { mLatestVpdWHit = latestVpdWHit; }
