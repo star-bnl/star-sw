@@ -10,7 +10,7 @@ if ($#ARGV < 0) {
 } else {
   $reduction = $ARGV[0];
 }
-if ($reduction <= 1 || $reduction > 4) {die "Illegal reduction factor = $reduction";}
+if ($reduction <= 1 || $reduction > 10) {die "Illegal reduction factor = $reduction";}
 my @List = glob "*/hlt*.daq";
 if ($#List < 100) {die "Only $#List hlt*daq files found in #pwd"; exit;}
 print "# Reduce no. $#List files by a factor of $reduction\n";
