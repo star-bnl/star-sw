@@ -856,12 +856,6 @@ Int_t StPicoDstMaker::MakeWrite() {
 
   // Get Emc collection
   mEmcCollection = mMuDst->emcCollection();
-  StMuEmcUtil *emcUtil = new StMuEmcUtil();
-  if ( !mEmcCollection ) {
-    // Recover StEmcCollection in case of broken/deleted pointer
-    // This usually happens during daq->picoDst converstion
-    mEmcCollection = emcUtil->getEmc( mMuDst->muEmcCollection() );
-  }
 
   if (mEmcCollection) {
     // Build EmcIndex before ::fillTracks()
