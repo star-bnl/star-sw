@@ -1,0 +1,524 @@
+MACRO fcs show=1 pid=0 
+   DETP GEOM dev2022=1 field=-5.0         
+   DETP WCAL wver.active=1
+   Gexe $STAR_LIB/libStarAgmlUtil.so
+   GEXE $STAR_LIB/xgeometry.so
+*   GEXE .$STAR_HOST_SYS/lib/xgeometry.so
+   GCLO ALL
+
+if [show]=1 then
+  debug on
+  trace on
+  gdebug 3
+  switch 2 3
+endif 
+
+if [show]=1 then
+   exec topview2 y=0
+endif
+
+if [pid]>0 then
+  user/phasespace 1 [pid] 2 2 3 3 0.5 0.5
+  gvertex 0.0 0.0 0.0
+  gspread 0.0 0.0 0.0
+  trig 1
+endif
+  
+RETURN
+
+macro beamview z=720.0
+  file=plot/beamview_[z]
+  fort/file 60 [file].ps; metafile 60 -111; next
+  dcut CAVE z  [z] 10 10 0.065 0.065
+  daxis -100 -100 [z] 40;  
+  dscale 18.0 2
+  selnt 1
+  SET CHHE 1
+  itx 4 19 Z=[z]cm 
+  close 60
+  shell convert [file].ps [file].png
+return
+
+macro ecal z1=720 z3=720 scl=0.065 
+  z2=[z1]+0.6
+  exec bv z1=[z1] z2=[z2] z3=[z3] scl=[scl] name=ecal
+return
+
+macro hcal z1=867 z3=720 scl=0.065 
+  z2=[z1]+0.6
+  exec bv z1=[z1] z2=[z2] z3=[z3] scl=[scl] name=hcal
+return
+
+macro hcalc z1=867 z3=720 scl=0.3
+  z2=[z1]+0.6
+  exec bv z1=[z1] z2=[z2] z3=[z3] scl=[scl] name=hcalclose
+return
+
+macro epd z=374 scl=0.065
+  if [z]>0 then
+    file=epdw
+  else
+    file=epde
+  endif
+  fort/file 60 [file].ps
+  metafile 60 -111
+  exec beamview z=[z] 
+  close 60  
+  shell convert [file].ps [file].png
+  mess creating [file].ps and [file].png
+return
+
+macro pres1s z1=638.5 z3=720 scl=0.065
+  z2=[z1]+0.6
+  exec bv z1=[z1] z2=[z2] z3=[z3] scl=[scl] name=pres1s
+return
+macro pres1n z1=641 z3=720 scl=0.065
+  z2=[z1]+0.6
+  exec bv z1=[z1] z2=[z2] z3=[z3] scl=[scl] name=pres1n
+return
+macro pres2 z1=648.0 z3=720 scl=0.065
+  z2=[z1]+0.6
+  exec bv z1=[z1] z2=[z2] z3=[z3] scl=[scl] name=pres2
+return
+macro pres3 z1=657.5 z3=720 scl=0.065
+  z2=[z1]+0.6
+  exec bv z1=[z1] z2=[z2] z3=[z3] scl=[scl] name=pres3
+return
+macro pres4 z1=667.0 z3=720 scl=0.065
+  z2=[z1]+0.6
+  exec bv z1=[z1] z2=[z2] z3=[z3] scl=[scl] name=pres4
+return
+
+macro bvall scl=0.065
+  next
+  file=plot/bvall
+  fort/file 60 [file].ps
+  metafile 60 -111  
+  gr/del 1; dopen 1; dcut cave z 720   10 10 [scl] [scl]; dclose; dshow 1
+*  gr/del 2; dopen 2; dcut cave z 867   10 10 [scl] [scl]; dclose; dshow 2
+  gr/del 3; dopen 3; dcut cave z 638.5 10 10 [scl] [scl]; dclose; dshow 3
+  gr/del 4; dopen 4; dcut cave z 641   10 10 [scl] [scl]; dclose; dshow 4
+  gr/del 5; dopen 5; dcut cave z 648   10 10 [scl] [scl]; dclose; dshow 5
+  gr/del 6; dopen 6; dcut cave z 657.5 10 10 [scl] [scl]; dclose; dshow 6
+  gr/del 7; dopen 7; dcut cave z 667   10 10 [scl] [scl]; dclose; dshow 7
+  close 60
+  shell convert [file].ps [file].png
+  mess creating [file].ps and [file].png
+return
+
+macro bv z1=676.14 z2=679.02 z3=692.72 scl=0.08 name=ecal
+  file=plot/[name]
+  fort/file 60 [file].ps
+  metafile 60 -111
+
+  gr/del 1
+  gr/del 2
+  gr/del 3
+  next
+
+  dopen  3
+  dcut cave z 699 10 10 [scl] [scl]
+  dclose 
+  next
+  dshow 3
+
+  dopen  2
+  dcut cave z [z2] 10 10 [scl] [scl]
+  dclose 
+  dshow 2
+
+  dopen  1
+  dcut cave z [z1] 10 10 [scl] [scl]
+  dclose 
+  dshow 1  
+
+  daxis -110 -110 [z1] 10;
+
+  selnt 1
+  SET TXFP -20  
+  SET CHHE 1
+  SET TXAL 20 
+  itx 10 18 [name] Z=[z1]cm
+
+  if [name]=ecal then
+     SET CHHE 0.5
+     itx 5 17  Det=1(North)
+     itx 15 17 Det=2(South)
+     itx  8.8 16.3 id=0
+     itx 11.2 16.3 id=0
+     itx 1 16.3 id=21
+     itx 19 16.3 id=21
+     itx 1 2.8 id=747
+     itx 19 2.8 id=747
+  endif
+
+  if [name]=hcal then
+     SET CHHE 0.5
+     itx 5 17  Det=3(North)
+     itx 15 17 Det=4(South)
+     itx  8.5 16.6 id=0
+     itx 11.5 16.6 id=0
+     itx 1 16.6 id=12
+     itx 19 16.6 id=12
+     itx 1 2.8 id=259
+     itx 19 2.8 id=259
+  endif
+
+  close 60
+  shell convert [file].ps [file].png
+  mess creating [file].ps and [file].png
+return
+
+macro 3d u0=13.0 v0=5.0 s=0.035 file=3d
+        message ps=[ps] 
+        fort/file 60 plot/[file].eps
+        metafile 60 -113
+        NEXT
+        DOPT HIDE ON
+        DOPT SHAD ON
+        DOPT RAYT ON
+        DOPT EDGE ON
+        CALL GSATT('CAVE','SEEN',0)
+        CALL GDRAW('CAVE',330.,30.,0.,[u0],[v0],[s],[s])
+        text 8 14 STAR-FCS 0.5
+        gr/set TXCI 1
+        close 60
+        message Creating plot/[file].jpeg
+        shell convert plot/[file].eps plot/[file].jpeg
+return
+
+macro topview y=-13 xscl=0.02 yscl=0.02 xoff=350 yoff=0 ps=1
+  if [ps]=1 then
+    file=plot/topview_y=[y]
+    fort/file 66 [file].ps
+    metafile 66 -111
+    gr/del 1
+    dopen  1
+  else 
+    next
+  endif
+  xo = 10-[xoff]*[xscl]
+  yo = 10-[yoff]*[yscl]
+  mess y=[y] xoff=[xoff] yoff=[yoff] xscl=[xscl] yscl=[yscl] (x0=[xo] y0=[yo])
+  dcut cave y [y] [xo] [yo] [xscl] [yscl]
+  if [ps]=1 then
+    dclose
+    next
+    dshow 1
+    t= y = [y]cm
+    close 66
+    shell convert [file].ps [file].png
+  endif
+return
+
+macro sideview x=0 xscl=0.04 yscl=0.04 xoff=500 yoff=0 ps=1
+  if [ps]=1 then
+    file=plot/sideview_x=[y]
+    fort/file 66 [file].ps
+    metafile 66 -111
+    gr/del 1
+    dopen  1
+  else 
+    next
+  endif
+  xo = 10-[xoff]*[xscl]
+  yo = 10-[yoff]*[yscl]
+  mess x=[x] xoff=[xoff] yoff=[yoff] xscl=[xscl] yscl=[yscl] (x0=[xo] y0=[yo])
+  dcut cave x [x] [xo] [yo] [xscl] [yscl]
+  if [ps]=1 then
+    dclose
+    next
+    dshow 1
+    t= y = [y]cm
+    close 66
+    shell convert [file].ps [file].png
+  endif
+return
+
+macro dtreew
+  file=plot/dtree_e
+  fort/file 66 [file].ps
+  metafile 66 -111
+  next
+  dtree WMOD 4
+  close 66
+  shell convert [file].ps [file].png
+return 
+
+macro dtreeh
+  file=plot/dtree_h
+  fort/file 66 [file].ps
+  metafile 66 -111
+  next
+  dtree HMOD 4
+  close 66
+  shell convert [file].ps [file].png
+return 
+
+macro dtreep
+  file=plot/dtree_p
+  fort/file 66 [file].ps
+  metafile 66 -111
+  next
+  dtree PMOD 3
+  close 66
+  shell convert [file].ps [file].png
+return 
+
+macro topviewslice 
+  do i=0,20
+    gr/del [i]
+    y=100+[i]*0.5
+    dopen [i]; exec ps#topview y=[y] xoff=675 yoff=10 xscl=2 yscl=2 ps=0; dclose
+  enddo
+  next 
+  do i=0,10
+    dshow [i]
+  enddo
+return
+
+
+macro beamview2 z=710 scl=0.03
+  file=plot/beamview2_[z]
+  fort/file 60 [file].ps; metafile 60 -111; next
+  gr/del 1
+  gr/del 2
+  next
+  dcut CAVE z  [z] 10 10 [scl] [scl]
+  daxis -90 -90 [z] 10;
+  dscale 18.0 2
+  selnt 1
+  itx 10 18 Z=[z]cm
+  close 60
+  shell convert [file].ps [file].png
+return
+
+macro beamview3 scl=0.015
+  file=plot/beamview3
+  fort/file 60 [file].ps; metafile 60 -111;
+  gr/del 1
+  gr/del 2
+  gr/del 3
+  dopen  1
+  dcut CAVE z 695 10 10 [scl] [scl]
+  dclose
+  dopen  2
+  dcut CAVE z 710 10 10 [scl] [scl]
+  dclose
+  dopen  3
+  dcut CAVE z 730 10 10 [scl] [scl]
+  dclose
+  next
+  dshow 1
+  dshow 2
+  dshow 3
+*  selnt 1
+*  itx 2 18 Z=[z]cm
+  close 60
+  shell convert [file].ps [file].png
+return
+
+macro beamview4 scl=0.015 z0=730 n=30 stp=2
+  file=plot/beamview4
+  fort/file 60 [file].ps; metafile 60 -111;
+  next
+  do i=1,[n]
+    z=[z0]-[i]*[stp]
+    mess [i] [z]
+    gr/del [i]
+    dopen  [i]
+    dcut CAVE z [z] 10 10 [scl] [scl]
+    dclose
+    dshow [i]
+  enddo
+*  selnt 1
+*  itx 2 18 Z=[z]cm
+  close 60
+  shell convert [file].ps [file].png
+return
+
+macro lg z=692.5 scl=0.3 x0=0 y0=100 name=lgtop
+  file=plot/[name]
+  fort/file 60 [file].ps; metafile 60 -111;
+  xoff=-[x0]*[scl]+10 
+  yoff=-[y0]*[scl]+10 
+  gr/del 1
+  dopen  1
+  dcut CAVE z [z] [xoff] [yoff] [scl] [scl]
+  dclose
+  next
+  dshow 1
+*  selnt 1
+*  itx 2 18 Z=[z]cm
+  close 60
+  shell convert [file].ps [file].png
+return
+
+macro psx x=40 scl=0.3
+  exec xview x=[x] scl=[scl] z0=695 y0=0 name=psx
+return
+
+macro xview x=40 scl=0.3 z0=695 y0=0 name=xview
+  file=plot/[name]
+  fort/file 60 [file].ps; metafile 60 -111;
+  zoff=-[z0]*[scl]+10 
+  yoff=-[y0]*[scl]+10 
+  gr/del 1
+  dopen  1
+  dcut CAVE x [x] [zoff] [yoff] [scl] [scl]
+  dclose
+  next
+  dshow 1
+*  selnt 1
+*  itx 2 18 Z=[z]cm
+  close 60
+  shell convert [file].ps [file].png
+return
+
+macro lgt
+  exec lg z=684.5 scal=0.5 x0=0 y0=100 name=lgt
+return
+macro lgb
+  exec lg z=684.5 scal=0.5 x0=0 y0=-90 name=lgb
+return
+macro lgs
+  exec lg z=688.5 scal=0.5 x0=100 y0=0 name=lgs
+return
+macro lgn
+  exec lg z=688.5 scal=0.5 x0=-100 y0=50 name=lgn
+return
+
+macro topview2 y=0 xscl=0.05 yscl=0.05 xoff=-550.0
+  file=plot/topview2
+  fort/file 66 [file].ps
+  metafile 66 -111
+  xo = [xoff]*[xscl]
+  yo=10
+  mess xscl=[xscl] yscl=[yscl] xo=[xo]
+  gr/del 1; dopen  1; dcut cave y -120 [xo] [yo] [xscl] [yscl]; dclose
+  gr/del 2; dopen  2; dcut cave y -110 [xo] [yo] [xscl] [yscl]; dclose
+  gr/del 3; dopen  3; dcut cave y -150 [xo] [yo] [xscl] [yscl]; dclose
+  gr/del 4; dopen  4; dcut cave y [y] [xo] [yo] [xscl] [yscl]; dclose
+  gr/del 5; dopen  5; dcut cave y 80 [xo] [yo] [xscl] [yscl];   dclose
+  next
+*  dshow 1
+*  dshow 2
+*  dshow 3
+  dshow 4
+  dshow 5
+  SET PLCI 1
+  dline [xo] [xo]+900*[xscl] [yo] [yo]+160*[yscl]
+  dline [xo] [xo]+900*[xscl] [yo] [yo]+27*[yscl]
+  close 66
+  shell convert [file].ps [file].png
+return
+
+macro pipe y=0 xscl=0.015 yscl=0.06 xoff=5 yoff=4
+  file=plot/pipe_yscl[yscl]
+  fort/file 66 [file].ps
+  metafile 66 -111
+  gr/del 1
+  gr/del 2
+  gr/del 3
+  gr/del 4
+  xo = [xoff]/0.012*[xscl]
+  mess xscl=[xscl] yscl=[yscl]
+  dopen  1
+  dcut cave y [y] [xo] 10 [xscl] [yscl]
+  dclose
+  next
+  dshow 1
+  user/phasespace 1 5 2 2 4.2 4.2 0.0 0.0
+  gvertex 0.0 0.0 0.0
+  gspread 0.0 0.0 0.0
+  trig 1
+  user/phasespace 1 5 2 2 2.5 2.5 0.0 0.0
+  gvertex 0.0 0.0 0.0
+  gspread 0.0 0.0 0.0
+  trig 1
+  close 66
+  shell convert [file].ps [file].png
+return
+
+macro sideview_old x=1.5 x2=170 x3=270 x4=100 xscl=0.04 yscl=0.04 xoff=-5
+  file=plot/sideview
+  fort/file 66 [file].ps
+  metafile 66 -111
+  gr/del 1
+  gr/del 2
+  gr/del 3
+  gr/del 4
+  xo = [xoff]/0.012*[xscl]
+  mess xscl=[xscl] yscl=[yscl]
+  dopen  1
+  dcut cave x [x] [xo] 10 [xscl] [yscl]
+  dclose
+  dopen  2
+  dcut cave x [x2] [xo] 10 [xscl] [yscl]
+  dclose
+  dopen  3
+  dcut cave x [x3] [xo] 10 [xscl] [yscl]
+  dclose
+  dopen  4
+  dcut cave x [x4] [xo] 10 [xscl] [yscl]
+  dclose
+  next
+  dshow 1
+  dshow 2
+  dshow 3
+  dshow 4
+*  t= y = [y]cm
+  close 66
+  shell convert [file].ps [file].png
+return
+
+macro scell
+  next
+  file=plot/scell
+  fort/file 66 [file].ps
+  metafile 66 -111
+
+  DOPT HIDE OFF
+  DOPT SHAD ON
+  DOPT RAYT ON
+  DOPT EDGE ON
+  geant/graph/satt FUMT COLO 7
+  CALL GSATT('FTOW','SEEN',0)
+  CALL GDRAW('FTOW',330.0,30.0,0.0,10.0,10.0,0.5,0.5)
+*  text 8 14 STAR-FMS-Small-Cell 0.5
+
+*  dcut ftow y 0 10 10 0.4 0.4
+  close 66
+  shell convert [file].ps [file].png
+  gr/set TXCI 1
+return
+
+macro etowy
+  next 
+  file=plot/etowz	
+  fort/file 66 [file].ps
+  metafile 66 -111      
+  dcut wtow y 0 10 10 0.25 0.8
+  close 66 
+  shell convert [file].ps [file].png
+return
+
+macro htowz
+  next 
+  file=plot/htowz	
+  fort/file 66 [file].ps
+  metafile 66 -111      
+  dcut htow z 10 10 10 1.3 1.3
+  close 66 
+  shell convert [file].ps [file].png
+return
+
+macro htowy
+  next 
+  file=plot/htowy	
+  fort/file 66 [file].ps
+  metafile 66 -111      
+  dcut htow y 0 10 10 0.2 0.5
+  close 66 
+  shell convert [file].ps [file].png
+return
