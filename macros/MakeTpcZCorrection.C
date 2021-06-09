@@ -127,12 +127,12 @@ void MakeTpcZCorrection1() {
     if (idx <= 2) cut += "&&x>0";
     else          cut += "&&x<0";
     FitP->SetMarkerColor(idx+1);
-    cout << "FitP->Draw(\"" << Form("mu:y>>%s(105,0,210)\"",histN[idx-1]) << ",\"" << cut << "\",\"" << prof << "\");" << endl;
-    FitP->Draw(Form("mu:y>>%s(105,0,210)",histN[idx-1]),cut,prof);
+    cout << "FitP->Draw(\"" << Form("mu-muJ:y>>%s(105,0,210)\"",histN[idx-1]) << ",\"" << cut << "\",\"" << prof << "\");" << endl;
+    FitP->Draw(Form("mu-muJ:y>>%s(105,0,210)",histN[idx-1]),cut,prof);
     TH1 *hist = (TH1 *) gDirectory->Get(histN[idx-1]);
     hist->Fit(f[io],"er","",min,max);
     Int_t npar = f[io]->GetNpar();
-    out << "  row.npar = " << Form("%12i",npar) << ";//  FitP->SetMarkerColor(" << idx+1 << "); FitP->Draw(\"mu:y>> " << histN[idx-1] << "(105,0,210)\",\"" << cut.Data() << "\",\"" << prof.Data() << "\');" << endl;
+    out << "  row.npar = " << Form("%12i",npar) << ";//  FitP->SetMarkerColor(" << idx+1 << "); FitP->Draw(\"mu-muJ:y>> " << histN[idx-1] << "(105,0,210)\",\"" << cut.Data() << "\",\"" << prof.Data() << "\');" << endl;
     for (Int_t p = 0; p < npar; p++) { 
       out << "  row.a[" << p << "] = " << Form("%12.5g",f[io]->GetParameter(p)) << ";" << endl;
     }
