@@ -58,7 +58,7 @@
 /StRoot/StTriggerUtilities   @zlchang
 /StRoot/StVpd*               @ZaochenYe     @fgeurts
 /StRoot/St_db_Maker          @dmarkh @plexoos @perevbnlgov
-/StRoot/St_QA_Maker
+/StRoot/St_QA_Maker          @genevb
 /StRoot/StarClassLibrary     @ullrich-bnl @klendathu2k
 /StRoot/StarGenerator        @klendathu2k @perevbnlgov
 /StRoot/Sti*                 @klendathu2k @plexoos     @starsdong @perevbnlgov
