@@ -64,9 +64,11 @@ if ($ARG{all}) {
 # 'production_9p2GeV_AuAu_4'                           => { first=> '20196005',         second => '20196017',   list => '',  beginTime => '20190715.085004'}, #        2019-07-15      08:50:04        2019-07-15      11:43:38
 # 	     );
 # Run XXI before and after calibrations
+#	      '7p7GeV_2021_1',  => { first => '22033001',	 second => '22039999',	 list => '',  beginTime => '20210202.065915'},
+#	      '7p7GeV_2021_2',  => { first => '22040001',	 second => '99999999',	 list => '',  beginTime => '20210202.065915'},
   @periods = ( 
-	      '7p7GeV_2021_1',  => { first => '22033001',	 second => '22039999',	 list => '',  beginTime => '20210202.065915'},
-	      '7p7GeV_2021_2',  => { first => '22040001',	 second => '99999999',	 list => '',  beginTime => '20210202.065915'},
+	      '3p85GeV_fixedTarget_2021A'  => { first => '22121033',	 second => '222125011',	 list => '',  beginTime => '20210129.000000'},
+	      '3p85GeV_fixedTarget_2021B'  => { first => '22158032',	 second => '99999999',	 list => '',  beginTime => '20210608.000000'}
 	     );
 }
 my @tags = ();
@@ -136,7 +138,7 @@ foreach my $file (@Files) {
 #die;
 my %Taglist = ();
 foreach my $tag (@tags) {
-#  print "tag = $tag\n";
+  print "tag = $tag => $TagList{$tag}\n";
   foreach my $key (sort keys %$def) {
     my ($t,$r) = split ':', $key;
 #    print "key $key => $t  / $r \n";
