@@ -10,21 +10,21 @@ if ($#ARGV < 0) {
 } else {
   $reduction = $ARGV[0];
 }
-# if ($reduction <= 1 || $reduction > 10) {die "Illegal reduction factor = $reduction";}
-# my @List = glob "*/*/hlt*.event.root";
-# if ($#List < 100) {die "Only $#List hlt*event.root files found in #pwd"; exit;}
-# print "# Reduce no. $#List files by a factor of $reduction\n";
-# my $n = 0;
-# foreach my $file (@List) {
-#   $n++;
-#   $i = $n%$reduction;
-#   if ($i == 1) {
-#     print "#keep $file\n";
-#     next;
-#   }
-#   print "rm $file\n";
+ if ($reduction <= 1 || $reduction > 50) {die "Illegal reduction factor = $reduction";}
+ my @List = glob "*/*/hlt*.event.root";
+ if ($#List < 100) {die "Only $#List hlt*event.root files found in #pwd"; exit;}
+ print "# Reduce no. $#List files by a factor of $reduction\n";
+ my $n = 0;
+ foreach my $file (@List) {
+   $n++;
+   $i = $n%$reduction;
+   if ($i == 1) {
+     print "#keep $file\n";
+     next;
+   }
+   print "rm $file\n";
+ }
+# my @dirList = glob "*/*"; print "dirlist = @dirlist\n";
+# foreach my $dir (@dirlist) {
+#   my @list = glob $dir . "/*event.root"; print "list = @list\n";
 # }
-my @dirList = glob "*/*"; print "dirlist = @dirlist\n";
-foreach my $dir (@dirlist) {
-  my @list = glob $dir . "/*event.root"; print "list = @list\n";
-}

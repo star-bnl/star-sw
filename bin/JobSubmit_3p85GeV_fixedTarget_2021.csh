@@ -1,6 +1,6 @@
 #! /bin/tcsh -f
 cd ~/bin/; onl CURRENT | SortRun.pl | tee RunXXIDefs.pm
-git diff .
+git diff -w .
 git ci -m "Update" RunXXIDefs.pm
 #cd ~/reco/2020/TFG19m/RF/11p5GeV.B
 #cd CreateRunDirs.pl/net/l401/data/scratch2/reco/2020/TFG20a/RF/31p2GeV_fixedTarget
