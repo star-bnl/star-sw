@@ -882,10 +882,12 @@ Int_t StBFChain::Instantiate()
       if (mode)
 	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
-    if (maker == "StBTofCalibMaker" && GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
-    if (maker == "StBTofCalibMaker" && GetOption("setPPPAOutlierRej"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
-    if (maker == "StBTofCalibMaker" && GetOption("pppAMode")) mk->SetAttr("pppAMode", kTRUE);
-    if (maker == "StVpdCalibMaker"  && GetOption("pppAMode")) mk->SetAttr("pppAMode", kTRUE);
+    if (maker == "StBTofCalibMaker") {
+      if (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
+      if (GetOption("setPPPAOutlierRej"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
+      if (GetOption("pppAMode")) mk->SetAttr("pppAMode", kTRUE);
+    }
+    if (maker == "StVpdCalibMaker" && GetOption("pppAMode")) mk->SetAttr("pppAMode", kTRUE);
 
     if (maker == "StEventMaker" && fFiltTrg.Length()) {
       mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));
