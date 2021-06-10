@@ -271,8 +271,9 @@ Int_t StBTofCalibMaker::Init()
 	if (IAttr("btofFXT")) mFXTMode = kTRUE; //True for FXT mode calib, default as false for collider mode calib
 
   if (IAttr("pppAMode")) {
-	    mPPPAMode = kTRUE;
+      mPPPAMode = kTRUE;
       mRun15Slew = kTRUE;
+      LOG_INFO << "pppAMode is on." << endm;
   }
 
   if (IAttr("setPPPAOutlierRej")) mPPPAOutlierRej = kTRUE;
