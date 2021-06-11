@@ -12,9 +12,9 @@
 /StRoot/StDaqLib/TOF         @ZaochenYe     @fgeurts     @starsdong
 /StRoot/StDaqLib/TRG         @akioogawa
 /StRoot/StDb*                @dmarkh @plexoos
-/StRoot/StDbUtilities        @fisyak @plexoos
+/StRoot/StDbUtilities        @yfisyak @plexoos
 /StRoot/StDbUtilities/StMagUtilities*     @genevb
-/StRoot/StDetectorDbMaker    @dmarkh      @fisyak @plexoos
+/StRoot/StDetectorDbMaker    @dmarkh      @yfisyak @plexoos
 /StRoot/StDetectorDbMaker/StDetectorDbBeamInfo*       @genevb
 /StRoot/StDetectorDbMaker/StDetectorDbGridLeak*       @genevb
 /StRoot/StDetectorDbMaker/StDetectorDbRichScalers*    @genevb
@@ -63,7 +63,7 @@
 /StRoot/StarGenerator        @klendathu2k @perevbnlgov
 /StRoot/Sti*                 @klendathu2k @plexoos     @starsdong @perevbnlgov
 /StRoot/StppSpin             @ullrich-bnl
-/StRoot/TPCCATracker         @fisyak      @kehw
+/StRoot/TPCCATracker         @yfisyak      @kehw
 /StRoot/macros               @genevb      @ullrich-bnl
 /StRoot/macros/mudst         @nigmatkulov
 /StarDb                      @dmarkh      @perevbnlgov
