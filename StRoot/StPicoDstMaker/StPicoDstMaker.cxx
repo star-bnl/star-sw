@@ -1853,8 +1853,10 @@ void StPicoDstMaker::fillEvent() {
   StZdcTriggerDetector &ZDC = ev->zdcTriggerDetector();
   picoEvent->setZdcSumAdcEast( ZDC.adcSum(east) );
   picoEvent->setZdcSumAdcWest( ZDC.adcSum(west) );
-  picoEvent->setZdcUnAttenuatedEast( ev->triggerData()->zdcUnAttenuated(east) );
-  picoEvent->setZdcUnAttenuatedWest( ev->triggerData()->zdcUnAttenuated(west) );
+  if ( ev->triggerData() ) {
+  	picoEvent->setZdcUnAttenuatedEast( ev->triggerData()->zdcUnAttenuated(east) );
+  	picoEvent->setZdcUnAttenuatedWest( ev->triggerData()->zdcUnAttenuated(west) );
+  }
 
   // Loop over all ZDC strips
   for(int iStrip=1; iStrip<9; ++iStrip) {
