@@ -1854,8 +1854,8 @@ void StPicoDstMaker::fillEvent() {
   picoEvent->setZdcSumAdcEast( ZDC.adcSum(east) );
   picoEvent->setZdcSumAdcWest( ZDC.adcSum(west) );
   if ( ev->triggerData() ) {
-  	picoEvent->setZdcUnAttenuatedEast( ev->triggerData()->zdcUnAttenuated(east) );
-  	picoEvent->setZdcUnAttenuatedWest( ev->triggerData()->zdcUnAttenuated(west) );
+    picoEvent->setZdcUnAttenuatedEast( ev->triggerData()->zdcUnAttenuated(east) );
+    picoEvent->setZdcUnAttenuatedWest( ev->triggerData()->zdcUnAttenuated(west) );
   }
 
   // Loop over all ZDC strips
