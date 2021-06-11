@@ -1,74 +1,74 @@
-*                            @plexoos     @nigmatkulov
-/mgr                         @genevb
-/OnlTools                    @kehw @plexoos
-/StDb                        @dmarkh @plexoos
-/StRoot/RTS                  @kehw @akioogawa
-/StRoot/StAnalysisMaker      @ullrich-bnl
-/StRoot/StAnalysisUtilities/StHistUtil*   @genevb
-/StRoot/StAssociationMaker   @ullrich-bnl
-/StRoot/StBFChain            @genevb
-/StRoot/StBTof*              @ZaochenYe     @fgeurts     @starsdong
-/StRoot/StChain              @ullrich-bnl @klendathu2k
-/StRoot/StDaqLib/TOF         @ZaochenYe     @fgeurts     @starsdong
-/StRoot/StDaqLib/TRG         @akioogawa
-/StRoot/StDb*                @dmarkh @plexoos
-/StRoot/StDbUtilities        @yfisyak @plexoos
-/StRoot/StDbUtilities/StMagUtilities*     @genevb
-/StRoot/StDetectorDbMaker    @dmarkh      @yfisyak @plexoos
-/StRoot/StDetectorDbMaker/StDetectorDbBeamInfo*       @genevb
-/StRoot/StDetectorDbMaker/StDetectorDbGridLeak*       @genevb
-/StRoot/StDetectorDbMaker/StDetectorDbRichScalers*    @genevb
-/StRoot/StDetectorDbMaker/StDetectorDbSpaceCharge*    @genevb
-/StRoot/StDetectorDbMaker/StDetectorDbTpcOmegaTau*    @genevb
-/StRoot/StDetectorDbMaker/St_EbyET0*      @genevb
-/StRoot/StDetectorDbMaker/St_spaceChargeCor*          @genevb
-/StRoot/StDetectorDbMaker/St_tpcOmegaTau* @genevb
-/StRoot/StDetectorDbMaker/St_tpcSCGLC*    @genevb
-/StRoot/StDetectorDbMaker/St_TpcSpaceCharge*          @genevb
-/StRoot/StDetectorDbMaker/St_trigDetSums* @genevb
-/StRoot/StDetectorDbMaker/St_vertexSeed*  @genevb
-/StRoot/StETof*              @PhilippWeidenkaff   @ideppner
-/StRoot/StEvent*             @klendathu2k @ullrich-bnl
-/StRoot/StEventUtilities/StEbyET0*        @genevb
-/StRoot/StEventUtilities/StRedoTracks*    @genevb
-/StRoot/StEventUtilities/StuFixTopoMap*   @genevb
-/StRoot/StEventUtilities/TwistPatch*      @genevb
-/StRoot/StFcs*               @akioogawa
-/StRoot/StFms*               @akioogawa
-/StRoot/StGenericVertexMaker @plexoos     @perevbnlgov
-/StRoot/StHeavyPool          @starsdong   @ullrich-bnl @fgeurts
-/StRoot/StHighPtTagsMaker    @ullrich-bnl
-/StRoot/StJetFinder          @zlchang     @veprbl
-/StRoot/StJetMaker           @zlchang     @veprbl
-/StRoot/StMiniDstMaker       @ullrich-bnl
-/StRoot/StMtd*               @marrbnl
-/StRoot/StMuDSTMaker         @jdbrice
-/StRoot/StMuDSTMaker/EMC     @kkauder
-/StRoot/StMuDSTMaker/RICHTOF @fgeurts     @starsdong
-/StRoot/StPass0CalibMaker    @genevb
-/StRoot/StPico*              @nigmatkulov @marrbnl @plexoos
-/StRoot/StRefMultCorr        @nigmatkulov
-/StRoot/StShadowMaker        @genevb
-/StRoot/StSpectraTagsMaker   @ullrich-bnl
-/StRoot/StSpinPool           @akioogawa   @zlchang     @veprbl
-/StRoot/StTof*               @jdbrice     @fgeurts     @starsdong
-/StRoot/StTriggerDataMaker   @akioogawa
-/StRoot/StUtilities/StMess*  @genevb
-/StRoot/StUtilities/StMultiH*             @genevb
-/StRoot/StTriggerUtilities   @zlchang
-/StRoot/StVpd*               @ZaochenYe     @fgeurts
-/StRoot/St_db_Maker          @dmarkh @plexoos @perevbnlgov
-/StRoot/St_QA_Maker          @genevb
-/StRoot/StarClassLibrary     @ullrich-bnl @klendathu2k
-/StRoot/StarGenerator        @klendathu2k @perevbnlgov
-/StRoot/Sti*                 @klendathu2k @plexoos     @starsdong @perevbnlgov
-/StRoot/StppSpin             @ullrich-bnl
-/StRoot/TPCCATracker         @yfisyak      @kehw
-/StRoot/macros               @genevb      @ullrich-bnl
-/StRoot/macros/mudst         @nigmatkulov
-/StarDb                      @dmarkh      @perevbnlgov
-/StarDb/Calibrations         @genevb
-/StarDb/Calibrations/tof     @ZaochenYe     @fgeurts
-/StarDb/Geometry             @genevb
-/pams                        @fgeurts     @klendathu2k
-/pams/tables                 @dmarkh @plexoos
+*                                                  @plexoos           @nigmatkulov
+/OnlTools                                          @kehw              @plexoos
+/StDb                                              @dmarkh            @plexoos
+/StRoot/RTS                                        @kehw              @akioogawa
+/StRoot/StAnalysisMaker                            @ullrich-bnl
+/StRoot/StAnalysisUtilities/StHistUtil*            @genevb
+/StRoot/StAssociationMaker                         @ullrich-bnl
+/StRoot/StBFChain                                  @genevb
+/StRoot/StBTof*                                    @ZaochenYe         @fgeurts     @starsdong
+/StRoot/StChain                                    @ullrich-bnl       @klendathu2k
+/StRoot/StDaqLib/TOF                               @ZaochenYe         @fgeurts     @starsdong
+/StRoot/StDaqLib/TRG                               @akioogawa
+/StRoot/StDb*                                      @dmarkh            @plexoos
+/StRoot/StDbUtilities                              @yfisyak           @plexoos
+/StRoot/StDbUtilities/StMagUtilities*              @genevb
+/StRoot/StDetectorDbMaker                          @dmarkh            @yfisyak     @plexoos
+/StRoot/StDetectorDbMaker/StDetectorDbBeamInfo*    @genevb
+/StRoot/StDetectorDbMaker/StDetectorDbGridLeak*    @genevb
+/StRoot/StDetectorDbMaker/StDetectorDbRichScalers* @genevb
+/StRoot/StDetectorDbMaker/StDetectorDbSpaceCharge* @genevb
+/StRoot/StDetectorDbMaker/StDetectorDbTpcOmegaTau* @genevb
+/StRoot/StDetectorDbMaker/St_EbyET0*               @genevb
+/StRoot/StDetectorDbMaker/St_TpcSpaceCharge*       @genevb
+/StRoot/StDetectorDbMaker/St_spaceChargeCor*       @genevb
+/StRoot/StDetectorDbMaker/St_tpcOmegaTau*          @genevb
+/StRoot/StDetectorDbMaker/St_tpcSCGLC*             @genevb
+/StRoot/StDetectorDbMaker/St_trigDetSums*          @genevb
+/StRoot/StDetectorDbMaker/St_vertexSeed*           @genevb
+/StRoot/StETof*                                    @PhilippWeidenkaff @ideppner
+/StRoot/StEvent*                                   @klendathu2k       @ullrich-bnl
+/StRoot/StEventUtilities/StEbyET0*                 @genevb
+/StRoot/StEventUtilities/StRedoTracks*             @genevb
+/StRoot/StEventUtilities/StuFixTopoMap*            @genevb
+/StRoot/StEventUtilities/TwistPatch*               @genevb
+/StRoot/StFcs*                                     @akioogawa
+/StRoot/StFms*                                     @akioogawa
+/StRoot/StGenericVertexMaker                       @plexoos           @perevbnlgov
+/StRoot/StHeavyPool                                @starsdong         @ullrich-bnl @fgeurts
+/StRoot/StHighPtTagsMaker                          @ullrich-bnl
+/StRoot/StJetFinder                                @zlchang           @veprbl
+/StRoot/StJetMaker                                 @zlchang           @veprbl
+/StRoot/StMiniDstMaker                             @ullrich-bnl
+/StRoot/StMtd*                                     @marrbnl
+/StRoot/StMuDSTMaker                               @jdbrice
+/StRoot/StMuDSTMaker/EMC                           @kkauder
+/StRoot/StMuDSTMaker/RICHTOF                       @fgeurts           @starsdong
+/StRoot/StPass0CalibMaker                          @genevb
+/StRoot/StPico*                                    @nigmatkulov       @marrbnl     @plexoos
+/StRoot/StRefMultCorr                              @nigmatkulov
+/StRoot/StShadowMaker                              @genevb
+/StRoot/StSpectraTagsMaker                         @ullrich-bnl
+/StRoot/StSpinPool                                 @akioogawa         @zlchang     @veprbl
+/StRoot/StTof*                                     @jdbrice           @fgeurts     @starsdong
+/StRoot/StTriggerDataMaker                         @akioogawa
+/StRoot/StTriggerUtilities                         @zlchang
+/StRoot/StUtilities/StMess*                        @genevb
+/StRoot/StUtilities/StMultiH*                      @genevb
+/StRoot/StVpd*                                     @ZaochenYe         @fgeurts
+/StRoot/St_QA_Maker                                @genevb
+/StRoot/St_db_Maker                                @dmarkh            @plexoos     @perevbnlgov
+/StRoot/StarClassLibrary                           @ullrich-bnl       @klendathu2k
+/StRoot/StarGenerator                              @klendathu2k       @perevbnlgov
+/StRoot/Sti*                                       @klendathu2k       @plexoos     @starsdong   @perevbnlgov
+/StRoot/StppSpin                                   @ullrich-bnl
+/StRoot/TPCCATracker                               @yfisyak           @kehw
+/StRoot/macros                                     @genevb            @ullrich-bnl
+/StRoot/macros/mudst                               @nigmatkulov
+/StarDb                                            @dmarkh            @perevbnlgov
+/StarDb/Calibrations                               @genevb
+/StarDb/Calibrations/tof                           @ZaochenYe         @fgeurts
+/StarDb/Geometry                                   @genevb
+/mgr                                               @genevb
+/pams                                              @fgeurts           @klendathu2k
+/pams/tables                                       @dmarkh            @plexoos
