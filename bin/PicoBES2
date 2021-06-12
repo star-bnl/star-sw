@@ -556,3 +556,8 @@ foreach d ( `ls -1d  *dev/dEdxND` )
  cd -
 end
 
+============== scratch clean up ==================================================================
+cd  /scratch/fisyak
+foreach f (`find . -name "*.picoDst.root" -cmin +60`)
+  set d = `dirname ${f}; rm -rf ${d}
+end

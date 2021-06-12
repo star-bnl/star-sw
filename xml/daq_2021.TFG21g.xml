@@ -41,7 +41,8 @@
    if ($n == 4) set evout = "evout";
 # TFG21c
   root.exe -b -q 'bfc.C('${f}','${l}',"P2021a,StiCA,'${evout}',NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
-#  cp  ${filel}*.picoDst.root ${logFile} ${SUBMITTINGDIRECTORY}
+   gzip ${logFile}
+#  cp  ${filel}*.picoDst.root ${logFile}.gz ${SUBMITTINGDIRECTORY}
    cp  ${filel}* ${SUBMITTINGDIRECTORY}
   rm ${bla}
   rm -rf ${CURRENT_DIR}
