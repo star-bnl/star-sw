@@ -854,8 +854,15 @@ Int_t StPicoDstMaker::MakeWrite() {
 
   mBField = muEvent->magneticField();
 
+#if !defined (__TFG__VERSION__)
   // Get Emc collection
   mEmcCollection = mMuDst->emcCollection();
+  if ( !mEmcCollection ) {
+    static StMuEmcUtil *emcUtil = new StMuEmcUtil();
+    // Recover StEmcCollection in case of broken/deleted pointer
+    // This usually happens during daq->picoDst converstion
+    mEmcCollection = emcUtil->getEmc( mMuDst->muEmcCollection() );
+  }
 
   if (mEmcCollection) {
     // Build EmcIndex before ::fillTracks()
@@ -863,6 +870,7 @@ Int_t StPicoDstMaker::MakeWrite() {
     // Fill BTOW hits only if ::buildEmcIndex() has been called for this event
     fillBTowHits();
   }
+#endif /* !__TFG__VERSION__ */
   
 
   // Fill StPicoEvent members
