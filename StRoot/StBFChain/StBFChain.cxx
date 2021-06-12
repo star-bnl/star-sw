@@ -1013,10 +1013,15 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
     if (maker == "StBTofCalibMaker") {
-      if  (GetOption("UseMCTstart")) mk->SetAttr("UseMCTstart",kTRUE);
       if  (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
+      if (GetOption("setPPPAOutlierRej"))   mk->SetAttr("setPPPAOutlierRej", kTRUE);
+      if (GetOption("pppAMode"))            mk->SetAttr("pppAMode", kTRUE);
+#if 0
       if  (GetOption("UseMCTstart") || 
 	   ! GetOption("vpdCalib"))         mk->SetAttr("UseMCTstart",kTRUE);
+#else
+      if  (GetOption("UseMCTstart"))        mk->SetAttr("UseMCTstart",kTRUE);
+#endif
     }
     if (maker == "StEventMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT",kTRUE);
     if (maker == "StEventMaker" && fFiltTrg.Length()) {

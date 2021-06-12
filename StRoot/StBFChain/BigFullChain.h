@@ -1441,6 +1441,8 @@ Bfc_st BFC[] = { // standard chains
   {"geomNoField" ,"" ,"","-geometry,StarMagField"        ,"","geometryNoField","geometry-Mag.Field",kFALSE},
   {"xgeometry"   ,"" ,"","-geometry,-geomNoField"         ,"","xgeometry","AgML geometry-Mag.Field",kFALSE},
   {"UseProjectedVertex" ,"" ,"",""                ,"","","Run StBTofCalibMaker w/wo Primary Vertex",kFALSE},
+  {"pppAMode" ,"" ,"",""                  ,"","","pppAMode in StVpdCalibMaker and StBTofCalibMaker",kFALSE},
+  {"setPPPAOutlierRej" ,"" ,"",""             ,"","","setPPPAOutlierRej is set in StBTofCalibMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"vpd"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"tls"         ,""  ,"","",""                          "","","WARNING *** Option is OBSOLETE ***",kFALSE},

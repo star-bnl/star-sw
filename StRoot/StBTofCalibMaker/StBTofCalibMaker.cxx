@@ -296,6 +296,7 @@ Int_t StBTofCalibMaker::Init()
   if (IAttr("pppAMode")) {
 	    mPPPAMode = kTRUE;
       mRun15Slew = kTRUE;
+      LOG_INFO << "pppAMode is on." << endm;
   }
 
   if (IAttr("setPPPAOutlierRej")) mPPPAOutlierRej = kTRUE;
