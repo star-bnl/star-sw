@@ -247,8 +247,10 @@ void Fit() {
     if (! fit) continue;
     // Disable sector 16 for Run 20
     TAxis *xax = fit->GetXaxis();
-    Int_t bin16 = xax->FindBin(16.);
-    fit->SetBinError(bin16, 1.0);
+    Int_t sector16 = xax->FindBin(16.);
+    fit->SetBinError(sector16, 1.0);
+    Int_t sector8 = xax->FindBin(8.);
+    fit->SetBinError(sector8, 1.0);
     
     fit->SetMarkerStyle(20);
     Double_t xmin = fit->GetXaxis()->GetXmin();
