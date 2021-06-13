@@ -858,10 +858,10 @@ Int_t StPicoDstMaker::MakeWrite() {
   // Get Emc collection
   mEmcCollection = mMuDst->emcCollection();
   if ( !mEmcCollection ) {
-    static StMuEmcUtil *emcUtil = new StMuEmcUtil();
+    static StMuEmcUtil emcUtil;
     // Recover StEmcCollection in case of broken/deleted pointer
     // This usually happens during daq->picoDst converstion
-    mEmcCollection = emcUtil->getEmc( mMuDst->muEmcCollection() );
+    mEmcCollection = emcUtil.getEmc( mMuDst->muEmcCollection() );
   }
 
   if (mEmcCollection) {
