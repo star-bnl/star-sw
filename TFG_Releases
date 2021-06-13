@@ -68,5 +68,4 @@
  TFG21e Merge with Maksym,starMagAvg, 3p85GeV_fixedTarget_2021       2021-05-01 18:42:27 -0400  (HEAD -> master, tag: TFG21e)
  TFG21e Remove EMC from picoDst due to memory leak                   2021-05-02 15:12:09 -0400  (HEAD -> master, tag: TFG21e_2)
  TFG21f Reshape dE/dx calibration for 3p85GeV_fxt for 2B production  2021-06-05 19:39:14 -0400  (HEAD -> master, tag: TFG21f)
- TFG21g Updatee dE/dx calibration for 3p85GeV_fxt for 2B production  2021-06-08 21:52:26 -0400  (HEAD -> master, tag: TFG21g)
 .DEV2  head of TFG git repository

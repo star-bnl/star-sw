@@ -1,7 +1,11 @@
 #! /bin/sh 
 # Purpose: change the title in an vt or xterm - @G.Alves
 if [ $# -eq 0 ]; then
- r=`root-config --version`;
+ r=""
+ which root-config > /dev/null 2>& 1
+ if [ $? -eq 0 ]; then
+   r=`root-config --version`;
+ fi
  t=""
  d=""
  v=""
