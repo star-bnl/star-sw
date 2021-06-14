@@ -1,6 +1,6 @@
 <Document  file="StarVMC/Geometry/FstmGeo/FstmConfig.xml">
  
-  <Detector name="FSTM" comment="Beam Beam Counter configurations"> 
+  <Detector name="FSTM" comment="Forward Silicon Tracker"> 
  
 
     <Modules>FstmGeo</Modules>
