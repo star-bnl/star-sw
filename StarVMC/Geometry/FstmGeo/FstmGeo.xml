@@ -15,10 +15,15 @@ Januar 14, 2021 F.Videbaek
  There is a bit of missing material at the outer edge of the inner mech structure. I will adjust the outer radiues so the toal mateerial should be ok.(approximately
 The outer radius could be make slightly bigger to adjust this.
 
-To do: Reve the inner novec part of cooling tube and replace with average material
+To do: Reviw the inner novec part of cooling tube and replace with average material
 for stainless tube and coolant. Will remove lots of tiny volumes.
 
-The inner support ring (3D printed) should be added
+The inner support ring (3D printed) should be added (done)
+
+June 14, 2021
+During installation review it was decided to move the middle ring modules
+to avoid interference. This is equivalent to rotate the middle ring by 180 deg around the vertical axis.
+
 
 
 -->
@@ -810,7 +815,9 @@ The inner support ring (3D printed) should be added
 
             <Create    block="FSTD" />
             <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(1)-zcenter" ncopy="4" />
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(2)-zcenter" ncopy="5" />
+            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(2)-zcenter" ncopy="5" >
+	      <Rotation alphaz="30"/>
+	    </Placement>
             <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(3)-zcenter" ncopy="6" />
         </Volume>
 
