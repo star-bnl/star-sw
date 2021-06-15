@@ -556,3 +556,8 @@ foreach d ( `ls -1d  *dev/dEdxND` )
  cd -
 end
 
+~/work/kfp
+foreach d ( `ls -1d  */*/dEdx` )
+ cd ${d}; pwd; dir *.root; dir -ltr dEdxND/*.root | tail -1; dir dEdxND/Title*;
+ cd -
+end
