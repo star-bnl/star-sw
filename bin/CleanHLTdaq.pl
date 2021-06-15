@@ -10,9 +10,15 @@ if ($#ARGV >= 0) {
 foreach my $file (@List) {
   my $Dir = File::Basename::dirname($file);
   print "Dir = $Dir\n" if ($debug);
-#  my $glob = $Dir . "/*picoDst.root";
-  my $glob = $Dir . "/*B.log";
-  my @PicoList = glob $glob;  print "glob = $glob, PicoList = @PicoList\n" if ($debug);
+  my @PicoList = ();
+  foreach my $globP (qw(picoDst.root B.log B.log.gz)) {
+    my $glob = $Dir . "/*" . $globP;
+    @PicoList = glob $glob;  
+    if ($#PicoList >= 0) {
+      print "glob = $glob, PicoList = @PicoList\n" if ($debug);
+      last;
+    }
+  }
   my $nPicos = $#PicoList; print "nPicos = $nPicos\n" if ($debug);
   my $globEv = $Dir . "/*event.root"; 
   my @EventList = glob $globEv;
@@ -20,9 +26,10 @@ foreach my $file (@List) {
   my @daqs = ();
   my $kept = 0;
   foreach my $pico (@PicoList) {
-#    my $tag = File::Basename::basename($pico,".picoDst.root");
-    my $tag = File::Basename::basename($pico,"B.log");
-    my $daq = "/hlt/cephfs/daq/2021/" . $Dir . "/" . $tag . ".daq";
+    my $tag1 = File::Basename::basename($pico,".picoDst.root");
+    my $tag2 = File::Basename::basename($tag1,"B.log.gz");
+    my $tag  = File::Basename::basename($tag2,"B.log");
+    my $daq = "/hlt/cephfs/daq/2021/" . $Dir . "/" . $tag . ".daq"; 
 #     if (! -r $daq) {
 #       $daq = "/hlt/cephfs/daq/2020/" . $Dir . "/" . $tag . ".daq";
 #       if (! -r $daq) {next;}
@@ -38,7 +45,7 @@ foreach my $file (@List) {
   }
   my $Ndaqs = $#daqs; print "Ndaqs = $Ndaqs, @daqs\n" if ($debug);
 #  if ($Ndaqs <= 0.5*$nPicos) {next;}
-  if ($Ndaqs <= 1) {next;}
+  if ($Ndaqs <= 100) {next;}
   my $j = 0;
   foreach my $daq (@daqs) {
 #     $j++;

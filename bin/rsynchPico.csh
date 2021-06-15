@@ -29,5 +29,8 @@
 #rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/subsysg/TFG/Pico/2021/RF/TFG21e/ps_OO_200GeV_2021
 #rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/subsysg/TFG/Pico/2021/RF/TFG21f/3p85GeV_fixedTarget_2021
 #rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/subsysg/TFG/Pico/2021/RF/TFG21e/ps_OO_200GeV_2021
-rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/subsysg/TFG/Pico/2021/RF/TFG21g/3p85GeV_fixedTarget_2021
+#rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/subsysg/TFG/Pico/2021/RF/TFG21g/3p85GeV_fixedTarget_2021
+#rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/subsysg/TFG/Pico/2021/RF/TFG21g.B/3p85GeV_fixedTarget_2021
+#rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/pwg/fisyak/Pico/2021/RF/TFG21e/17p3GeV_2021 >& rsynch.log &
+ rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/subsysg/TFG/Pico/2021/RF/TFG21g.B/3p85GeV_fixedTarget_2021 >& rsynch.log &
 

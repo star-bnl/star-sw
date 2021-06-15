@@ -314,3 +314,24 @@ l401:/data/scratch1   17T  3.6T   14T  22% /net/l401/data/scratch1
 
 l401:/data/scratch1 daq files 
 l401:/data/scratch2 Pico dsts
+================================================================================
+06/13/21 Clean up : keep only *event.root per run, keep only 1 daq file per run, remove all *event.root files
+ReduceEvent.pl | tee ReduceEvent.csh 
+csh -x ReduceEvent.csh 
+CleanHLTdaq.pl | tee rmE.csh 
+csh -x rmE.csh
+rm */*/*event.root
+
+2.6G    FF/TFG21c.B/7p7GeV_2021_FF
+391G    FF/TFG21e/FF_OO_200GeV_2021         << remove event.root
+91M     FF/TFG21f/FF_OO_200GeV_2021         << remove because it was a test sample, keep only MuTpcG.root
+2.3T    RF/TFG21c.B/7p7GeV_2021             << remove event.root        >> 0.007T
+545G    RF/TFG21e/100GeV_fixedTarget_2021   << remove events            >> 0.178T
+7.3T    RF/TFG21e/17p3GeV_2021              << remove event.root        >> 2.4T
+1.2T    RF/TFG21e/44p5GeV_fixedTarget_2021                              >> 0.4T
+1.2T    RF/TFG21e/70GeV_fixedTarget_2021                                >> 0.380T
+162G    RF/TFG21e/OO_200GeV_2021                                        >> 0.076T
+394G    RF/TFG21e/ps_OO_200GeV_2021                                     >> 0.275T
+320G    RF/TFG21e/3p85GeV_fixedTarget_2021      
+2.4T    RF/TFG21g/3p85GeV_fixedTarget_2021
+1.2T    RF/TFG21g.B/3p85GeV_fixedTarget_2021
