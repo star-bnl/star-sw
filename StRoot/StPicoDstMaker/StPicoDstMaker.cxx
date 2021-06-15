@@ -857,7 +857,9 @@ Int_t StPicoDstMaker::MakeWrite() {
 #if !defined (__TFG__VERSION__)
   // Get Emc collection
   mEmcCollection = mMuDst->emcCollection();
+  Bool_t isFromDaq = kFALSE;
   if ( !mEmcCollection ) {
+    isFromDaq = kTRUE;
     static StMuEmcUtil emcUtil;
     // Recover StEmcCollection in case of broken/deleted pointer
     // This usually happens during daq->picoDst converstion
@@ -898,6 +900,10 @@ Int_t StPicoDstMaker::MakeWrite() {
   if (Debug()) mPicoDst->printTracks();
 
   mTTree->Fill();
+  if ( isFromDaq ) {
+    delete mEmcCollection;
+    mEmcCollection = nullptr;
+  }
 
   mMuDst->setVertexIndex(originalVertexId);
 
