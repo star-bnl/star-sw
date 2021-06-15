@@ -1836,6 +1836,18 @@ void StPicoDstMaker::fillEvent() {
     picoEvent->setNVpdHitsWest( header->numberOfVpdHits(west) );
     picoEvent->setNTofT0( header->nTzero() );
     picoEvent->setVzVpd( header->vpdVz() );
+    picoEvent->setNTofT0Can( header->nTzeroCan() );
+    picoEvent->setTStart( header->tStart() );
+    picoEvent->setTCanFirst( header->tCanFirst() ); 
+    picoEvent->setTCanLast( header->tCanLast() );
+    picoEvent->setNVpdEGoodHits( header->vpdEGoodHits() );
+    picoEvent->setNVpdWGoodHits( header->vpdWGoodHits() );
+    picoEvent->setEarliestVpdEHit( header->earliestVpdEHit() );
+    picoEvent->setEarliestVpdWHit( header->earliestVpdWHit() );
+    picoEvent->setClosestVpdEHit( header->closestVpdEHit() );
+    picoEvent->setClosestVpdWHit( header->closestVpdWHit() );
+    picoEvent->setLatestVpdEHit( header->latestVpdEHit() );
+    picoEvent->setLatestVpdWHit( header->latestVpdWHit() );
   }
 
   // ZDC and BBC background rates
@@ -1853,8 +1865,10 @@ void StPicoDstMaker::fillEvent() {
   StZdcTriggerDetector &ZDC = ev->zdcTriggerDetector();
   picoEvent->setZdcSumAdcEast( ZDC.adcSum(east) );
   picoEvent->setZdcSumAdcWest( ZDC.adcSum(west) );
-  picoEvent->setZdcUnAttenuatedEast( ev->triggerData()->zdcUnAttenuated(east) );
-  picoEvent->setZdcUnAttenuatedWest( ev->triggerData()->zdcUnAttenuated(west) );
+  if ( ev->triggerData() ) {
+    picoEvent->setZdcUnAttenuatedEast( ev->triggerData()->zdcUnAttenuated(east) );
+    picoEvent->setZdcUnAttenuatedWest( ev->triggerData()->zdcUnAttenuated(west) );
+  }
 
   // Loop over all ZDC strips
   for(int iStrip=1; iStrip<9; ++iStrip) {

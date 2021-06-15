@@ -1,0 +1,27 @@
+/* eg_track.idl - Event Generator track table */
+
+struct eg_track {               /*VENUS         Description                  */
+/* long   label;                                event generator label        */
+/* long   eg_pid;                               event generator id           */
+   long   ge_pid;               /*idtype        GEANT id                     */
+   float  p[3];                 /*pptl[3]       momentum                     */
+   long   itrack;	        /*it            Track Number  (not in gstar) */
+   long   ivertex;		/*iv            Vertex Number (not in gstar) */
+   long   iz;                   /*iz                          (not in gstar) */
+/* struct eg_vertex_t *p_start_vertex;          ptr to start vertex          */
+/* struct eg_vertex_t *p_stop_vertex;           ptr to stop vertex           */
+/* struct eg_track_t  *p_parent_track;          ptr to parent track          */
+/* struct eg_track_t  *p_next_fs_track;         ptr to next final state trk  */
+/* struct eg_track_t  *p_prev_fs_track;         ptr to prev final state trk  */
+/* struct eg_track_t  *p_next_not_fs_track;     ptr to next non-fs track     */
+/* struct eg_track_t  *p_prev_not_fs_track;     ptr to prev non-fs track     */
+};
+
+/* Latest revision - $Date: 1997/01/08 21:15:14 $ */
+/*
+
+05dec96 - cetull
+	This table is derived from VENUS and GSTAR internal structures and
+	variables.
+
+*/
