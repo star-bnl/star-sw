@@ -45,7 +45,11 @@ StPicoTrack::StPicoTrack() : TObject(),
 #if !defined (__TFG__VERSION__)
   , mTopoMap_iTpc(0),
 #endif
-  mIdTruth(0), mQATruth(0), mVertexIndex(-1) {
+  mIdTruth(0), mQATruth(0), mVertexIndex(-1)
+#if !defined (__TFG__VERSION__)
+  , mDnDx(0), mDnDxError(0)
+#endif
+  {
   // Default constructor
   /* empty */
 }
@@ -90,6 +94,11 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
   mIdTruth = track.mIdTruth;
   mQATruth = track.mQATruth;
   mVertexIndex = track.mVertexIndex;
+
+#if !defined (__TFG__VERSION__)
+  mDnDx = track.mDnDx;
+  mDnDxError = track.mDnDxError;
+#endif
 }
 
 //_________________

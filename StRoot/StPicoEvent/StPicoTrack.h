@@ -124,9 +124,11 @@ class StPicoTrack : public TObject {
   Float_t dEdxPullKaon()      const { return dEdxPull(0.493677,1); }
   Float_t dEdxPullProton()    const { return dEdxPull(0.93827231,1); }
   Float_t dEdxPullElectron()  const { return dEdxPull(0.51099907e-3,1); }
-  Float_t dNdx() const              { return mDnDx; }
-  Float_t dNdxError() const         { return mDnDxError; }
 #endif
+  /// Return dN/dx of a track
+  Float_t dNdx() const              { return mDnDx; }
+  /// Return dN/dx error a track
+  Float_t dNdxError() const         { return mDnDxError; }
 
   /// Return nSigma(pion)
   Float_t nSigmaPion() const             { return (Float_t)mNSigmaPion / 1000.f; }
@@ -243,12 +245,10 @@ class StPicoTrack : public TObject {
   /// Set dE/dx error of the track
   void setDedxError(Float_t dEdxError)     { mDedxError = dEdxError; }
 
-#if defined (__TFG__VERSION__)
   /// Set dN/dx of the track
   void setDndx(Float_t dNdx)               { mDnDx = dNdx;}
   /// Set dN/dx error of the track
   void setDndxError(Float_t dNdxError)     { mDnDxError = dNdxError; }
-#endif
   
   /// Set nHitsFit ( charge * nHitsFit )
   void setNHitsFit(Int_t nhits)            { mNHitsFit = (Char_t)nhits; }
@@ -368,7 +368,14 @@ class StPicoTrack : public TObject {
   /// Parent vertex index. -2 if no vertex.
   Char_t   mVertexIndex;
 
-  ClassDef(StPicoTrack, 8)
+#if !defined (__TFG__VERSION__)
+  /// Fitted dN/dx
+  Float_t  mDnDx;
+  /// Fitted dN/dx error
+  Float_t  mDnDxError;
+#endif
+
+  ClassDef(StPicoTrack, 9)
 };
 
 #endif
