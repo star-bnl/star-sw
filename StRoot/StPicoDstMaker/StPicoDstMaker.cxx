@@ -854,13 +854,16 @@ Int_t StPicoDstMaker::MakeWrite() {
 
   mBField = muEvent->magneticField();
 
+#if !defined (__TFG__VERSION__)
   // Get Emc collection
   mEmcCollection = mMuDst->emcCollection();
-  StMuEmcUtil *emcUtil = new StMuEmcUtil();
+  Bool_t isFromDaq = kFALSE;
   if ( !mEmcCollection ) {
+    isFromDaq = kTRUE;
+    static StMuEmcUtil emcUtil;
     // Recover StEmcCollection in case of broken/deleted pointer
     // This usually happens during daq->picoDst converstion
-    mEmcCollection = emcUtil->getEmc( mMuDst->muEmcCollection() );
+    mEmcCollection = emcUtil.getEmc( mMuDst->muEmcCollection() );
   }
 
   if (mEmcCollection) {
@@ -869,6 +872,7 @@ Int_t StPicoDstMaker::MakeWrite() {
     // Fill BTOW hits only if ::buildEmcIndex() has been called for this event
     fillBTowHits();
   }
+#endif /* !__TFG__VERSION__ */
   
 
   // Fill StPicoEvent members
@@ -896,6 +900,10 @@ Int_t StPicoDstMaker::MakeWrite() {
   if (Debug()) mPicoDst->printTracks();
 
   mTTree->Fill();
+  if ( isFromDaq ) {
+    delete mEmcCollection;
+    mEmcCollection = nullptr;
+  }
 
   mMuDst->setVertexIndex(originalVertexId);
 
