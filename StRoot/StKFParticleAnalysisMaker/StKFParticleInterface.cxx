@@ -1272,6 +1272,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     if (  gTrack->nHitsFit() < 15) continue;
     //PiDCUT    if (  gTrack->dEdxError() < 0.04 || gTrack->dEdxError() > 0.12 ) continue;
     if (  gTrack->dEdxError() < 0.01 || gTrack->dEdxError() > 0.25 ) continue;
+    if (  gTrack->status() && !gTrack->isPrimary()) continue;
     const UInt_t index = gTrack->id();
     
     if(index >= trakIdToI.size()) trakIdToI.resize(index+1);
@@ -1467,7 +1468,6 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
   //   if( fCleanLowPVTrackEvents && ( (nUsedTracks - nPrimary) > (50. + 0.75*nPrimary) ) ) return 0;
   if( fCleanLowPVTrackEvents && ( (nUsedTracks - nPrimary) > 150 ) ) return 0;
   //TODO collider
-  if( fCleanLowPVTrackEvents && primaryVertex.GetR() > 2.5 ) return 0;
 #endif
 #ifdef __TFG__VERSION__
   if (! IsFixedTarget()) {

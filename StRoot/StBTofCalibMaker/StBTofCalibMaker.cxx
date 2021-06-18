@@ -2078,6 +2078,10 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
         }
     }
 
+    mNTzeroCan = nCan;
+    mTCanFirst = tCanFirst;
+    mTCanLast  = tCanLast;
+
     if(nCan<=0) {
         *tstart = -9999.;
         return;

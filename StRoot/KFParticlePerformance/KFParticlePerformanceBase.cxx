@@ -397,8 +397,8 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
       int nBinsX2D[nHistosPVParam2D] = {1000};
       float xMin2D[nHistosPVParam2D] = {-1.};
       float xMax2D[nHistosPVParam2D] = { 1.};
-      int nBinsY2D[nHistosPVParam2D] = {1000};
-      float yMin2D[nHistosPVParam2D] = {-1.};
+      int nBinsY2D[nHistosPVParam2D] = {4000};
+      float yMin2D[nHistosPVParam2D] = {-3.};
       float yMax2D[nHistosPVParam2D] = { 1.};
       
       for(int iH=0; iH<nHistosPVParam; iH++)
