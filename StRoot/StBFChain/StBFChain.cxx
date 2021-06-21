@@ -785,13 +785,12 @@ Int_t StBFChain::Instantiate()
       }
       mk->PrintAttr();
     }
-    if (maker == "StTpcHitMover" && GetOption("EbyET0")) {
-      mk->SetAttr("EbyET0", kTRUE);
+    if (maker == "StTpcHitMover") {
+      if (GetOption("EbyET0"))            mk->SetAttr("EbyET0", kTRUE);
+      if (GetOption("EmbeddingShortCut")) mk->SetAttr("EmbeddingShortCut", kTRUE);
     }
-    if ((maker == "StdEdxY2Maker"  || maker == "StTpcHitMover") &&
-	GetOption("EmbeddingShortCut"))  {
-      mk->SetAttr("EmbeddingShortCut", kTRUE);
-      mk->PrintAttr();
+    if (maker == "StdEdxY2Maker") {
+      if (GetOption("EmbeddingShortCut")) mk->SetAttr("EmbeddingShortCut", kTRUE);
     }
     if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){
       mk->SetMode(0);
