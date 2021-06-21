@@ -3,8 +3,7 @@
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
  set CURRENT_DIR = `pwd`
-#C
-         cd ${SUBMITTINGDIRECTORY}
+#C       cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
 #  setup debug
 #  setenv NODEBUG yes
@@ -36,19 +35,18 @@
 #  if (-r ${bla}) continue;
 #  touch ${bla}
 
-#  rsync -c ${SUBMITTINGDIRECTORY}/${input}/*${dstype}.root .
-#C  rsync  ${input}/*.${dstype}.root .
+  rsync  ${input}/*.${dstype}.root .
   set idNdx = kFALSE;
   echo ${SUBMITTINGDIRECTORY} | grep dNdx 
   if (! $? )  set idNdx = kTRUE;
-#    root.exe -q -b -x  'kfpAnalysis.C(1000000,"./*.'${dstype}'.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
+    root.exe -q -b -x  'kfpAnalysis.C(1000000,"./*.'${dstype}'.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
 #   root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${input}'/*.'${dstype}'.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
-   root.exe -q -b -x  '$STAR/StRoot/StKFParticleAnalysisMaker/kfpAnalysis.C(1000000,"'${input}'/*.'${dstype}'.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
+#   root.exe -q -b -x  '$STAR/StRoot/StKFParticleAnalysisMaker/kfpAnalysis.C(1000000,"'${input}'/*.'${dstype}'.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
 #    mv ${outputb} ${output}
 #    mv ${logb} ${log}
 #    rm ${bla}
 #C end
-##  rm -rf ${CURRENT_DIR}
+  rm -rf ${CURRENT_DIR}
         </command>
     <ResourceUsage>
       <Priority>99</Priority>
