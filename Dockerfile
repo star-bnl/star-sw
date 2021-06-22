@@ -68,6 +68,24 @@ RUN mkdir $OPTSTAR/lib && mkdir $OPTSTAR/include
 
 COPY . /star-sw
 
+# XXX TEMP XXX: Don't force mysql static libraries to be linked into root4star
+RUN cd /star-sw \
+ && cat > root4star_cons.patch <<<$'\
+diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
+--- a/asps/rexe/Conscript \n\
++++ b/asps/rexe/Conscript \n\
+@@ -79,9 +79,7 @@ \n\
+ } \n\
+ $LIBS .= " -lgeant321 -lgcalor"; \n\
+ $LIBS  .= " " . $env->{CERNLIBS};\n\
+-$LIBS  .= $env->{LDALL};\n\
+ $LIBS  .= " " . $env->{Packages}->{MYSQL}->{LIBS};\n\
+-$LIBS  .= $env->{LDNONE};\n\
+ $LIBS  .= " " . $FLIBS . " " . $env->{CLIBS};#   " " . $env->{SYSLIBS} ;\n\
+ if ($STAR_SYS =~ /^sun4x_5.$/) {\n\
+     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }\n' \
+ && patch -p1 < root4star_cons.patch
+
 RUN source star-spack/setup.sh && spack env activate mydocker \
  && export MYSQL=`spack location --install-dir mysql` \
  && export LIBXML2_DIR=`spack location --install-dir libxml2` \
