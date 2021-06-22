@@ -156,7 +156,7 @@
     if ($STAR_HOST_SYS =~ /gcc3/) {  $G77FLAGS    = "-pipe " . $G77FLAGS;}
     $G77EXTEND     = "-ffixed-line-length-132";
 
-    $CXX           = "g++";
+    $CXX           = "g++44";
     $LDFLAGS       = "";
     $SOFLAGS       = "";
     # $XMACHOPT would switch to -m32 or -m64
@@ -166,7 +166,7 @@
     $EXTRA_CXXFLAGS= "";
     $CXXOPT        = "";
 
-    $CC            = "gcc";
+    $CC            = "gcc44";
 
     $CFLAGS       .= " -fPIC -w";
     $EXTRA_CFLAGS  = "";

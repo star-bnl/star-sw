@@ -203,8 +203,8 @@ foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
     Install $env $INCLUDE, @incT;
   }
 }
-foreach my $dir qw(StRoot/Vc/include/Vc StRoot/Vc/common  StRoot/Vc/scalar StRoot/Vc/sse StRoot/Vc/include/Vc/internal
-		   StRoot/TBB/include/tbb StRoot/TBB/include/tbb/machine) {
+foreach my $dir (qw(StRoot/Vc/include/Vc StRoot/Vc/common  StRoot/Vc/scalar StRoot/Vc/sse StRoot/Vc/include/Vc/internal
+		   StRoot/TBB/include/tbb StRoot/TBB/include/tbb/machine)) {
   next if ! -r $dir;
   my $installdir = $INCLUDE;
   if ($dir =~ /Vc/) {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.29 2012/03/16 19:36:18 dmitry Exp $
+ * $Id: StDbConfigNode.cc,v 1.30 2021/02/08 15:13:11 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.30  2021/02/08 15:13:11  dmitry
+ * bugfix: override unknown db domain
+ *
  * Revision 1.29  2012/03/16 19:36:18  dmitry
  * converted dangled char pointers to std::string objects + fixed typo
  *
@@ -216,6 +219,7 @@ StDbConfigNode::setProdTimeOverride(unsigned int ptime, char* dbType, char* dbDo
 
     // ***** get current name for a node ******
     std::string currentName;
+	if ( this->getDbDomain() <= dbDUser1 ) { // override only when domain is known to the library
     if (!isAllTypesAccepted) {
         // strict check, dbType is provided
         currentName  = StDbManager::Instance()->printDbName( this->getDbType(), this->getDbDomain() ) ;
@@ -224,6 +228,7 @@ StDbConfigNode::setProdTimeOverride(unsigned int ptime, char* dbType, char* dbDo
         currentName.append("_");
         currentName.append( StDbManager::Instance()->getDbDomainName( this->getDbDomain() ) ) ;
     }
+	}
 
     // ***** compare names, override if needed *****
     if (completeName == currentName) {
