@@ -9,7 +9,7 @@
 
 #ifndef ROOT_StG3Particle
 #define ROOT_StG3Particle
-#include "StGENParticle.h"
+#include "StGimParticle.h"
 
 /// class StG3ParticleMaster is a implementation of container of tracks 
 /// in HEPEVT style:
@@ -22,7 +22,7 @@
 typedef void (*GFKINE_t) (int &,float*,float*,int &, int   &,int *,int &);
 typedef void (*GFVERT_t) (int &,float*,int  &,int &, float &,int *,int &);
 
-/// Master class for StGENParticle filled from GEANT3 internal structures
+/// Master class for StGimParticle filled from GEANT3 internal structures
 class StG3ParticleMaster :public StGenParticleMaster {
 public:
          StG3ParticleMaster(GFKINE_t fk,GFVERT_t fv);
