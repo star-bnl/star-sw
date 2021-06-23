@@ -794,6 +794,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
     } elsif ( $pkg =~ m/^StFwdTrackMaker$/ ){ 
 		$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
+		$env1->{StFwdTrackMaker}->{ROOTCINT_INCLUDES} = $env1->{ENV}->{OPTSTAR}."/include"
     } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
 	$LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
 	$SO_PKG = "";
@@ -946,7 +947,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#    $CPPPATH =
 	#      "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include";
 	#    print "CPPPATH => $CPPPATH\n";
-	$CXXFLAGS .= " -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics";
+	$CXXFLAGS .= " -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics";
 	$CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
 #	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
 #	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE";}
@@ -983,9 +984,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #	my $extraCXXFLAGS = " -DDO_TPCCATRACKER_EFF_PERFORMANCE -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
 #	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
 	$extraCXXFLAGS .= " -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function";
-	$extraCXXFLAGS .= " -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1";
+	$extraCXXFLAGS .= " -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1";
 	if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
-#	$extraCXXFLAGS .= " -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -msse3 -mssse3 -msse4.1 -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1 -ltr";
+#	$extraCXXFLAGS .= " -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -msse3 -mssse3 -msse4.1 -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1 -ltr";
 	#    $extraCXXFLAGS .= " -DUSE_TBB "; # uncomment if you do want to use TBB
 	#	$extraCXXFLAGS .= " -DDRAW3"; # uncomment for use TPCCATracker event display
 	#	$extraCXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE"; # uncomment for CA Efficiencies output
@@ -996,7 +997,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #	if ($STAR_SYS =~ 'gcc432$' || $STAR_SYS =~ 'gcc445$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
 #	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
 #	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE"}
-	# c++ `root-config --ldflags` -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
+	# c++ `root-config --ldflags` -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
+	if ( defined($ENV{Vc_LIB_DIR}) ) { $LIBPATH = $ENV{Vc_LIB_DIR}; }
 	$LIBS = "-lVc";
 	if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
 	# stand - alone in .DEV2 only
@@ -1129,6 +1131,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "LINKMODULECOM |", $env2->{LINKMODULECOM}, "|\n" if $param::debug;
     my $cscanner = find scan::cpp( $env2->{_cwd}, $env2->{CPPPATH} );
     my @cpps = split /$main::PATH_SEPARATOR/, $env2->{CPPPATH};
+    # Additional include paths can be specified for individual packages
+    my @cpps_pkg = split /$main::PATH_SEPARATOR/, $env1->{$pkg}->{ROOTCINT_INCLUDES};
+    push(@cpps, @cpps_pkg);
     #  print "cpps => @cpps\n";# if $param::debug;
     #print "cpps => @cpps\n";
     my $ROOTCINT_CPP = "";
