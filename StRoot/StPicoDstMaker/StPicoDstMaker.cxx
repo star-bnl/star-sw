@@ -1139,6 +1139,13 @@ void StPicoDstMaker::fillTracks() {
 
     picoTrk->setDndx( gTrk->probPidTraits().dNdxFit() );
     picoTrk->setDndxError( gTrk->probPidTraits().dNdxErrorFit() );
+    if ( gTrk->primaryTrack() ) {
+      picoTrk->setStatus(1);
+    }
+    else {
+      picoTrk->setStatus(0);
+    }
+
 
     // Fill track's hit information
     picoTrk->setNHitsDedx( gTrk->nHitsDedx() );
