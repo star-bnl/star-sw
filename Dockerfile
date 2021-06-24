@@ -1,4 +1,4 @@
-FROM centos:7.4.1708 AS build-stage
+FROM scientificlinux/sl:7 AS build-stage
 
 WORKDIR /workdir
 
