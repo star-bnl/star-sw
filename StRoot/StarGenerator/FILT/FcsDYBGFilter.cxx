@@ -67,7 +67,7 @@ Int_t FcsDYBGFilter::Filter( StarGenEvent *mEvent){
     if(size<2) return StarGenEvent::kReject;
     UInt_t res = 0x10;
     int accept=0;
-    int swap[1000]{};
+    std::vector<int> swap(100);
     for(unsigned int i=0; i<size-1; i++){
 	StarGenParticle *p1=forwardParticles.at(i);
 	float x1 = p1->GetVx()/10.0 + p1->GetPx() / p1->GetPz() * (ZFCS - p1->GetVz()/10.0);
@@ -95,8 +95,8 @@ Int_t FcsDYBGFilter::Filter( StarGenEvent *mEvent){
 		cout << Form("FcsDYBGFilter : idx=%3d %3d Pid=%5d %5d E=%6.2f %6.2f M=%6.2f DR=%6.2f res=0x%03x, x1=%.3f, x2=%.3f, xx_ep=%.3f",
 			     idx1,idx2,pid1,pid2,
 			     p1->GetEnergy(),p2->GetEnergy(),m,dr,res,x1,x2,xx_ep) << endl;
-		if(pid1!=111 && pid1!=22 && abs(pid1)!=11) swap[idx1]=1;
-		if(pid1!=111 && pid1!=22 && abs(pid2)!=11) swap[idx2]=1;
+		if(pid1!=111 && pid1!=22 && abs(pid1)!=11) swap.push_back(idx1);
+		if(pid2!=111 && pid2!=22 && abs(pid2)!=11) swap.push_back(idx2);
 		accept++;
 	    }
 	}
@@ -105,20 +105,11 @@ Int_t FcsDYBGFilter::Filter( StarGenEvent *mEvent){
     if(accept>0) {
 	ngood++;
 	int nswap=0;
-	for(int i=0; i<np; i++){ 
-	    if(swap[i]>0){
-		if(mSwap){
-		    StarGenParticle pp = *(event[i]);
-		    *(event[i])=*(event[nswap+1]);
-		    *(event[nswap+1])=pp;
-		}
-		nswap++;		
-	    }
-	}
 	if(mSwap){
-	    cout << Form("FcsDYBGFilter : found %d accepted pairs, swapped %d particles",accept,nswap)<<endl;
+	  //this has to be implemented with middle of GEANT (particle by particle) filter
+	  cout << Form("FcsDYBGFilter : found %d accepted pairs, swapped %d particles when implemented",accept,swap.size())<<endl;
 	}else{
-	    cout << Form("FcsDYBGFilter : found %d accepted pairs, No swap but could swap %d particles",accept,nswap)<<endl;
+	  cout << Form("FcsDYBGFilter : found %d accepted pairs, No swap but could swap %d particles",accept,swap.size())<<endl;
 	}
 	cout << Form("FcsDYBGFilter : N_Genearted=%6d  N_Accepted=%6d  R=%6.4f",
 		     ntot,ngood,float(ngood)/float(ntot)) <<endl;
