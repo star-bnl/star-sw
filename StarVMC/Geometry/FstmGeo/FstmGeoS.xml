@@ -5,6 +5,15 @@
 This is the file meant to a simplified version of ideal geometry.
 It was copied from FstmGeo.xml on June 15.
 
+Gavin 06/25/2021
+  -Mass from PEEK inner and outer ribs added to respective PEEK bases.
+  -Replaced all cooling tubes with 4 straight tubes.
+  -Steel and NOVEC mixed into one material “SteelNOVECMix”.
+  -Removed cooling tube holder.
+  -There are commented portions of code for heatsinks, which combine each heatsink into one component. 
+  Jason informed me that there are some additional geant tags required for proper implementation 
+  (konly="ONLY" or konly="MANY"). This can be computationally expensive and can be investigated after other 
+  geometry changes are tested.
 
 -->
     <Replace match="GeV">*1.0E+0;</Replace>    
@@ -22,15 +31,15 @@ It was copied from FstmGeo.xml on June 15.
 
             FTUO,   <!-- Tube segment for FST half ring outside wedge container -->
             FTUR,   <!-- Tube segment for FST half ring inside wedge container -->
-	    FSIR,   <!-- Inner support Ring -->
+	        FSIR,   <!-- Inner support Ring -->
 
             FTRO,   <!-- Trapizoid for FST mechanical strucutre (wedge) -->
-            FSBW,   <!-- Box for the ribs in FST wedges -->
+            <!--FSBW,-->   <!-- Box for the ribs in FST wedges -->
             FSWT,   <!-- Tube for the FST support tubes between inner and outer -->
             FTUW,   <!-- Tube segment for FST mechanical structure (wedge) -->
             FTIA,   <!-- Trapizoid for FST mechanical strucutre (inner wedge A) -->
             FTIB,   <!-- Trapizoid for FST mechanical strucutre (inner wedge B) -->
-            FTRB,   <!-- Tube segment for the ribs in FST wedges -->
+            <!--FTRB,-->   <!-- Tube segment for the ribs in FST wedges -->
 
             FSHA,   <!-- Box for FST heat sinks (outside mechanical) -->
             FSHB,   <!-- Box for FST heat sinks (outside mechanical) -->
@@ -54,12 +63,12 @@ It was copied from FstmGeo.xml on June 15.
             FHBF,   <!-- Box for FST heat sinks (inside inner wedge tube) -->
             FHBG,   <!-- Box for FST heat sinks (inside inner wedge tube) -->
             FHBH,   <!-- Box for FST heat sinks (inside inner wedge tube) -->
-
+            
             FSCT,   <!-- Tube for the FST cooling tube -->
-            FSCL,   <!-- Tube for the FST coolant -->
-            FHTS,   <!-- Tube segment for the FST cooling tube holder -->
-            FCHT,   <!-- Tube for the FST cooling tube holder -->
-            FCHB,   <!-- Box Tube for the FST cooling tube holder -->
+            <!--FSCL,-->   <!-- Tube for the FST coolant -->
+            <!--FHTS,-->   <!-- Tube segment for the FST cooling tube holder -->
+            <!--FCHT,-->   <!-- Tube for the FST cooling tube holder -->
+            <!--FCHB,-->   <!-- Box Tube for the FST cooling tube holder -->
 
             FSAC,   <!-- Box for FST APV chips -->
 
@@ -114,8 +123,8 @@ It was copied from FstmGeo.xml on June 15.
 	<varlist type="float" comment="Connecting tubes length between inner and outer">
 	  ioTubeLength/0.835/ 	<!-- Has to keep spacing -->
 	</varlist>
-
-	<varlist type="float">codeversion/1.0/ </varlist>
+ 
+    <varlist type="float">codeversion/1.1/ </varlist>
 
 
 
@@ -240,12 +249,12 @@ It was copied from FstmGeo.xml on June 15.
             <var name="rmax"      type="float" />
             <var name="phi1"      type="float" />
             <var name="phi2"      type="float" />
-            <var name="dz(7)"     type="float" />
-            <var name="x(7)"      type="float" />
-            <var name="y(7)"      type="float" />
-            <var name="z(7)"      type="float" />
-            <var name="rotz(7)"   type="float" />
-            <var name="rotx(7)"   type="float" />
+            <var name="dz(4)"     type="float" />
+            <var name="x(4)"      type="float" />
+            <var name="y(4)"      type="float" />
+            <var name="z(4)"      type="float" />
+            <var name="rotz(4)"   type="float" />
+            <var name="rotx(4)"   type="float" />
         </Structure>
 
         <Structure name="coolingtubec" comment="cooling tube (curved part)">
@@ -401,7 +410,7 @@ It was copied from FstmGeo.xml on June 15.
 	zcool = obase2 + 0.418
 	dcool = oBaseThickness -0.15
 
-	<Info format="FSTM simplified code version = {6.1f}">codeversion</Info>
+    <Info format="FSTM simplified code version = {6.1f}">codeversion</Info>
 
 
         <Fill name="mothervol" comment=" TUBE for the mothervolume" >
@@ -517,16 +526,16 @@ It was copied from FstmGeo.xml on June 15.
 
         <Fill name="coolingtubes" comment="cooling tube (straight part)">
             <var name="version"   value="1.0" />
-            <var name="rmin"      value="0.277" />
+            <var name="rmin"      value="0.0001" />
             <var name="rmax"      value="0.318" />
             <var name="phi1"      value="0.0" />
             <var name="phi2"      value="360.0" />
-            <var name="dz"        value="{5.892, 3.852, 0.1, 4.4625, 2.602, 0.25, 0.25}" />
-            <var name="x"         value="{23.937, 21.958, 29.793, 28.18, 16.704, 31.83, 31.594}" />
-            <var name="y"         value="{5.9685, -5.475, 6.423, -0.004, 0, 6.931, 7.877}" />
-            <var name="z"         value="{zcool, zcool, zcool, zcool, zcool, 3.173+dcool , 3.173+dcool}" />
-            <var name="rotz"      value="{14, -14, 14, 90, 90, 90, 90}" />
-            <var name="rotx"      value="{0, 0, 0, 0, 0, 90, 90}" />
+            <var name="dz"        value="{7.37286,5.513626,6.5235,3.865}" />
+            <var name="x"         value="{24.1489,22.3449,28.18,16.704}" />
+            <var name="y"         value="{6.0212,-5.5714,-0.50277,0.0}" />
+            <var name="z"         value="{zcool, zcool, zcool, zcool}" />
+            <var name="rotz"      value="{14, -14, 90, 90}" />
+            <!--var name="rotx"      value="{0, 0, 0, 0, 0, 90, 90}" /-->
         </Fill>
 
         <Fill name="coolingtubec" comment="cooling tube (curved part)">
@@ -576,6 +585,18 @@ It was copied from FstmGeo.xml on June 15.
             <var name="rotz"      value="{-9.75034, 9.75034}" />
         </Fill>
 
+        <!--Fill name="heatsink" comment="Heat sink">
+            <var name="version"   value="1.0" />
+            <var name="dx"        value="{ 0.85, 0.4, 0.4, 0.4, 0.41, 0.41, 0.41, 0.41}" />
+            <var name="dy"        value="{0.15, 0.15, 0.15, 0.15, 0.4, 0.4, 0.4, 0.4}" />
+					 
+            <var name="dz"        value="{0.41, 0.61, 0.61, 0.61, 0.359/2.0, 0.359/2.0, 0.359/2.0, 0.359/2.0}" />
+            <var name="x"         value="{5.4455, 2.1605, -2.056, -5.742, 16.8205, 17.1135, 17.113, 16.8205}" />
+            <var name="y"         value="{0.05, 0.05, 0.05, 0.05, 3.3455, 1.1215, -1.122, -3.3455}" />
+            <var name="z"         value="{5.27866, 5.51516, 5.52316, 5.01216, ibaseAB+0.0805, ibaseAB+0.0805, ibaseAB+0.0805, ibaseAB+0.0805}" />
+            <var name="rotz"      value="{11.8851, 4.3699, -4.1358, -11.6783, 11.2415, 3.77688, -3.56327, -11.2415}" />
+        </Fill-->
+        
         <Fill name="heatsink" comment="Heat sink">
             <var name="version"   value="1.0" />
             <var name="dx"        value="{0.41, 0.61, 0.61, 0.61, 0.41, 0.41, 0.41, 0.41, 
@@ -597,7 +618,8 @@ It was copied from FstmGeo.xml on June 15.
 					 5.27866, 5.51516, 5.52316, 5.01216, 0.5055, 0.7985, 0.798, 0.5055, 0, 0, 0, 0}" />
             <var name="rotz"      value="{11.8851, 4.3699, -4.1358, -11.6783, 11.2415, 3.77688, -3.56327, -11.2415, 11.8851, 4.3699, -4.1358, -11.6783, 11.2415, 3.77688, -3.56327, -11.2415, 11.2415, 3.77688, -3.56327, -11.2415}" />
         </Fill>
-
+        
+       
 	oapvz = sRingThickness-HybridThickness-0.015
 	iapvz = ibase2 + HybridThickness  + 0.015
         <Fill name="apvchip" comment="APV chips">
@@ -709,6 +731,18 @@ It was copied from FstmGeo.xml on June 15.
             <Component name="C" a="12.0096"   z="6"  w="0.79155"  />
             <Component name="O" a="15.99903"  z="8"  w="0.1665"  />
         </Mixture>
+        
+        <Mixture name="PEEK_FTUW" dens="1.382107"  >
+            <Component name="H" a="1.00784"   z="1"  w="0.04195"  />
+            <Component name="C" a="12.0096"   z="6"  w="0.79155"  />
+            <Component name="O" a="15.99903"  z="8"  w="0.1665"  />
+        </Mixture>
+        
+        <Mixture name="PEEK_FTRO" dens="1.387078"  >
+            <Component name="H" a="1.00784"   z="1"  w="0.04195"  />
+            <Component name="C" a="12.0096"   z="6"  w="0.79155"  />
+            <Component name="O" a="15.99903"  z="8"  w="0.1665"  />
+        </Mixture>
 
         <!-- PEEK CF 30 (30% graphite and 70% PEEK H12 C19 O3) -->
         <!--
@@ -760,8 +794,22 @@ It was copied from FstmGeo.xml on June 15.
             <Component name="Ni" a="58.6934"        z="28"  w="0.14" />
             <Component name="N"  a="14.00643"       z="7"   w="0.0001" />
         </Mixture>
-
-
+            
+        <Mixture name="SteelNOVECMix" dens="3.02252">
+            <Component name="Fe" a="55.845"         z="26"  w="0.21197" />
+            <Component name="C"  a="12.0096"        z="6"   w="0.1794" />
+            <Component name="Mn" a="54.938043"      z="25"  w="0.00683" />
+            <Component name="Si" a="28.085"         z="14"  w="0.00256" />
+            <Component name="P"  a="30.973761998"   z="15"  w="0.000154" />
+            <Component name="S"  a="32.06"          z="16"  w="0.000102" /> 
+            <Component name="Cr" a="51.9961"        z="24"  w="0.0478" />
+            <Component name="Mo" a="95.95"          z="42"  w="0.00" />
+            <Component name="Ni" a="58.6934"        z="28"  w="0.14" />
+            <Component name="N"  a="14.00643"       z="7"   w="0.0000034" />
+            <Component name="O"  a="16"             z="8"   w="0.0402" />
+            <Component name="H"  a="1"              z="1"   w="0.0125" />
+            <Component name="F"  a="19"             z="9"   w="0.4268"  />
+        </Mixture>
 
 
         <!-- referred from IstdGeo1a.xml for T-board -->
@@ -798,9 +846,7 @@ It was copied from FstmGeo.xml on June 15.
 
             <Create    block="FSTD" />
             <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(1)-zcenter" ncopy="4" />
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(2)-zcenter" ncopy="5" >
-	      <Rotation alphaz="30"/>
-	    </Placement>
+            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(2)-zcenter" ncopy="5" />
             <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(3)-zcenter" ncopy="6" />
         </Volume>
 
@@ -890,12 +936,12 @@ It was copied from FstmGeo.xml on June 15.
             </Placement>
 
             <!-- outer ribs -->
-            <Create block="FSBW" />
+            <!--Create block="FSBW" />
             <For var="irib" from="1" to="21">
                 <Placement block="FSBW" in="FSTW" x="outerrib_x(irib)" y="outerrib_y(irib)" z="-wholewedge_dz+outerrib_z" dx="outerrib_dx(irib)" dy="outerrib_dy(irib)" dz="outerrib_dz" >
                     <Rotation alphaz="outerrib_rotz(irib)"/>
                 </Placement>
-            </For>
+            </For-->
 
             <!-- outer tubes -->
             <Create block="FSWT" />
@@ -920,14 +966,14 @@ It was copied from FstmGeo.xml on June 15.
             </Placement>
 
             <!-- inner ribs -->
-            <Create block="FSBW" />
+            <!--Create block="FSBW" />
             <For var="irib" from="1" to="7">
                 <Placement block="FSBW" in="FSTW" x="innerriba_x(irib)" y="innerriba_y(irib)" z="-wholewedge_dz+innerriba_z" dx="innerriba_dx(irib)" dy="innerriba_dy(irib)" dz="innerriba_dz" >
                     <Rotation alphaz="innerriba_rotz(irib)"/>
                 </Placement>
-            </For>
-            <Create block="FTRB" />
-            <Placement block="FTRB" in="FSTW" x="0" y="0" z="-wholewedge_dz+innerriba_z" rmin="innerribb_rmin" phi1="innerribb_phi1" rmax="innerribb_rmax" phi2="innerribb_phi2" dz="innerribb_dz" />
+            </For-->
+            <!--Create block="FTRB" />
+            <Placement block="FTRB" in="FSTW" x="0" y="0" z="-wholewedge_dz+innerriba_z" rmin="innerribb_rmin" phi1="innerribb_phi1" rmax="innerribb_rmax" phi2="innerribb_phi2" dz="innerribb_dz" /-->
 
             <!-- ///////////////////////////// -->
             <!--    Cooling tube -->
@@ -935,24 +981,23 @@ It was copied from FstmGeo.xml on June 15.
 
             <!-- straight part -->
             <Create block="FSCT" />
-            <For var="itube" from="1" to="7">
+            <For var="itube" from="1" to="4">
                 <Placement block="FSCT" in="FSTW" x="coolingtubes_x(itube)" y="coolingtubes_y(itube)" z="-wholewedge_dz+coolingtubes_z(itube)" rmin="coolingtubes_rmin" rmax="coolingtubes_rmax" dz="coolingtubes_dz(itube)" >
                     <Rotation alphay="90.0"/>
                     <Rotation alphaz="coolingtubes_rotz(itube)"/>
-                    <Rotation alphax="coolingtubes_rotx(itube)"/>
+                    <!--Rotation alphax="coolingtubes_rotx(itube)"/-->
                 </Placement>
             </For>
-            <Create block="FSCL" />
-            <For var="itube" from="1" to="7">
+            <!--Create block="FSCL" />
+            <For var="itube" from="1" to="4">
                 <Placement block="FSCL" in="FSTW" x="coolingtubes_x(itube)" y="coolingtubes_y(itube)" z="-wholewedge_dz+coolingtubes_z(itube)" rmin="0.0001" rmax="coolingtubes_rmin" dz="coolingtubes_dz(itube)" >
                     <Rotation alphay="90.0"/>
-                    <Rotation alphaz="coolingtubes_rotz(itube)"/>
-                    <Rotation alphax="coolingtubes_rotx(itube)"/>
+                    <Rotation alphaz="coolingtubes_rotz(itube)"/>  
                 </Placement>
-            </For>
+            </For-->
 
-            <!-- curved part -->
-            <For var="itube" from="1" to="90">
+            <!-- curved part --> <!-- remove curved part (too many small structures) -->
+            <!-- For var="itube" from="1" to="90">
                 <Placement block="FSCT" in="FSTW" x="coolingtubec_x(itube)" y="coolingtubec_y(itube)" z="-wholewedge_dz+coolingtubec_z(itube)" rmin="coolingtubes_rmin" rmax="coolingtubes_rmax" dz="coolingtubec_dz(itube)" >
                     <Rotation alphay="90.0+coolingtubec_roty(itube)"/>
                     <Rotation alphaz="coolingtubec_rotz(itube)"/>
@@ -963,13 +1008,13 @@ It was copied from FstmGeo.xml on June 15.
                     <Rotation alphay="90.0+coolingtubec_roty(itube)"/>
                     <Rotation alphaz="coolingtubec_rotz(itube)"/>
                 </Placement>
-            </For>
+            </For-->
             
             <!-- ///////////////////////////// -->
             <!--    Cooling tube holder -->
             <!-- ///////////////////////////// -->
 
-            <Create    block="FHTS" />
+            <!--Create    block="FHTS" />
             <Placement block="FHTS" in="FSTW" x="0" y="0" z="-wholewedge_dz+holder_z" rmin="holder_rmin" phi1="holder_phi1" rmax="holder_rmax" phi2="holder_phi2" dz="holder_dz" />
 
             <Create block="FCHT" />
@@ -983,12 +1028,32 @@ It was copied from FstmGeo.xml on June 15.
             </Placement>
             <Placement block="FCHB" in="FSTW" x="holderbox_x" y="holderbox_y(2)" z="-wholewedge_dz+holder_z" dx="holderbox_dx" dy="holderbox_dy" dz="holder_dz" >
                 <Rotation alphaz="holderbox_rotz(2)"/>
-            </Placement>
+            </Placement-->
 
             <!-- ///////////////////////////// -->
             <!--    Heat sinks -->
             <!-- ///////////////////////////// -->
-
+              
+            <!-- Simplified Heat Sinks -->
+            
+            <!--Create    block="FSHE" />
+            <Create    block="FSHF" />
+            <Create    block="FSHG" />
+            <Create    block="FSHH" /-->
+            <!-- outside mechanical structure -->
+            <!--Placement block="FSHE" in="FSTW" konly="MANY" x="heatsink_x(5)" y="heatsink_y(5)" z="-wholewedge_dz+heatsink_z(5)" dx="heatsink_dx(5)" dy="heatsink_dy(5)" dz="heatsink_dz(5)" >
+                <Rotation alphaz="heatsink_rotz(5)"/>
+            </Placement>
+            <Placement block="FSHF" in="FSTW" konly="MANY" x="heatsink_x(6)" y="heatsink_y(6)" z="-wholewedge_dz+heatsink_z(6)" dx="heatsink_dx(6)" dy="heatsink_dy(6)" dz="heatsink_dz(6)" >
+                <Rotation alphaz="heatsink_rotz(6)"/>
+            </Placement>
+            <Placement block="FSHG" in="FSTW" konly="MANY" x="heatsink_x(7)" y="heatsink_y(7)" z="-wholewedge_dz+heatsink_z(7)" dx="heatsink_dx(7)" dy="heatsink_dy(7)" dz="heatsink_dz(7)" >
+                <Rotation alphaz="heatsink_rotz(7)"/>
+            </Placement>
+            <Placement block="FSHH" in="FSTW" konly="MANY" x="heatsink_x(8)" y="heatsink_y(8)" z="-wholewedge_dz+heatsink_z(8)" dx="heatsink_dx(8)" dy="heatsink_dy(8)" dz="heatsink_dz(8)" >
+                <Rotation alphaz="heatsink_rotz(8)"/>
+            </Placement-->
+            
             <Create    block="FSHA" />
             <Create    block="FSHB" />
             <Create    block="FSHC" />
@@ -1098,10 +1163,28 @@ It was copied from FstmGeo.xml on June 15.
      
 	<Volume name="FTRO" comment="Trapizoid for FST outer wedge">
             <Attribute for="FTRO" seen="1" colo="14" />
-            <Material name="PEEK" />
+            <Material name="PEEK_FTRO" />
             <Shape type="TRD1" dx1="outerbase_dx1" dx2="outerbase_dx2" dy="outerbase_dy" dz="outerbase_dz" />
-
-            <!-- heat sink inside outer mechanical structure -->
+            
+            <!-- Simplified Heatsinks -->
+            
+            <!--Create    block="FSHA" />
+            <Create    block="FSHB" />
+            <Create    block="FSHC" />
+            <Create    block="FSHD" />
+            <Placement block="FSHA" in="FTRO" x="heatsink_x(1)" y="heatsink_y(1)" z="heatsink_z(1)" dx="heatsink_dx(1)" dy="heatsink_dy(1)" dz="heatsink_dz(1)" >
+                <Rotation alphay="heatsink_rotz(1)"/>
+            </Placement>
+            <Placement block="FSHB" in="FTRO" x="heatsink_x(2)" y="heatsink_y(2)" z="heatsink_z(2)" dx="heatsink_dx(2)" dy="heatsink_dy(2)" dz="heatsink_dz(2)" >
+                <Rotation alphay="heatsink_rotz(2)"/>
+            </Placement>
+            <Placement block="FSHC" in="FTRO" x="heatsink_x(3)" y="heatsink_y(3)" z="heatsink_z(3)" dx="heatsink_dx(3)" dy="heatsink_dy(3)" dz="heatsink_dz(3)" >
+                <Rotation alphay="heatsink_rotz(3)"/>
+            </Placement>
+            <Placement block="FSHD" in="FTRO" x="heatsink_x(4)" y="heatsink_y(4)" z="heatsink_z(4)" dx="heatsink_dx(4)" dy="heatsink_dy(4)" dz="heatsink_dz(4)" >
+                <Rotation alphay="heatsink_rotz(4)"/>
+            </Placement-->
+            
             <Create    block="FHOA" />
             <Create    block="FHOB" />
             <Create    block="FHOC" />
@@ -1119,13 +1202,31 @@ It was copied from FstmGeo.xml on June 15.
                 <Rotation alphay="heatsink_rotz(12)"/>
             </Placement>
 
+            <!-- heat sink inside outer mechanical structure -->
+            <!--Create    block="FHOA" />
+            <Create    block="FHOB" />
+            <Create    block="FHOC" />
+            <Create    block="FHOD" />
+            <Placement block="FHOA" in="FTRO" x="heatsink_x(9)" y="heatsink_y(9)" z="heatsink_z(9)" dx="heatsink_dx(9)" dy="heatsink_dy(9)" dz="heatsink_dz(9)" >
+                <Rotation alphay="heatsink_rotz(9)"/>
+            </Placement>
+            <Placement block="FHOB" in="FTRO" x="heatsink_x(10)" y="heatsink_y(10)" z="heatsink_z(10)" dx="heatsink_dx(10)" dy="heatsink_dy(10)" dz="heatsink_dz(10)" >
+                <Rotation alphay="heatsink_rotz(10)"/>
+            </Placement>
+            <Placement block="FHOC" in="FTRO" x="heatsink_x(11)" y="heatsink_y(11)" z="heatsink_z(11)" dx="heatsink_dx(11)" dy="heatsink_dy(11)" dz="heatsink_dz(11)" >
+                <Rotation alphay="heatsink_rotz(11)"/>
+            </Placement>
+            <Placement block="FHOD" in="FTRO" x="heatsink_x(12)" y="heatsink_y(12)" z="heatsink_z(12)" dx="heatsink_dx(12)" dy="heatsink_dy(12)" dz="heatsink_dz(12)" >
+                <Rotation alphay="heatsink_rotz(12)"/>
+            </Placement-->
+
         </Volume>
 
-        <Volume name="FSBW" comment="Box for the ribs in FST wedges">
+        <!--Volume name="FSBW" comment="Box for the ribs in FST wedges">
             <Attribute for="FSBW" seen="1" colo="14" />
             <Material name="PEEK" />
             <Shape type="BBOX" dx="0" dy="0" dz="0" />
-        </Volume>
+        </Volume-->
 
         <Volume name="FSWT" comment="Tube for FST outer wedges">
             <Attribute for="FSWT" seen="1" colo="14" />
@@ -1135,7 +1236,7 @@ It was copied from FstmGeo.xml on June 15.
 
         <Volume name="FTUW" comment="Tube segment for FST inner wedge">
             <Attribute for="FTUW" seen="1" colo="14" />
-            <Material name="PEEK" />
+            <Material name="PEEK_FTUW" />
             <Shape type="TUBS" rmin="innerbaseb_rmin" phi1="innerbaseb_phi1" rmax="innerbaseb_rmax" phi2="innerbaseb_phi2" dz="innerbaseb_dz" />
 
             <!-- inside inner mechanical structure tube -->
@@ -1190,12 +1291,12 @@ It was copied from FstmGeo.xml on June 15.
             <Shape type="TRD1" dx1="innerbasea_dx1(2)" dx2="innerbasea_dx2(2)" dy="innerbasea_dy" dz="innerbasea_dz(2)"  />
         </Volume>
 
-        <Volume name="FTRB" comment="Tube segment for the ribs in FST inner wedge">
+        <!--Volume name="FTRB" comment="Tube segment for the ribs in FST inner wedge">
             <Attribute for="FTRB" seen="1" colo="14" />
             <Material name="PEEK" />
             <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
-        </Volume>
-
+        </Volume-->
+        
         <Volume name="FSHA" comment="Box for the FST heat sink A">
             <Attribute for="FSHA" seen="1" colo="430" />
             <Material name="Aluminium" /> <!-- original density is 2.7 g/cm^3-->
@@ -1321,32 +1422,32 @@ It was copied from FstmGeo.xml on June 15.
 
         <Volume name="FSCT" comment="Tube for FST cooling tube">
             <Attribute for="FSCT" seen="1" colo="795" />
-            <Material name="StainlessSteel316" />
+            <Material name="SteelNOVECMix" />
             <Shape type="TUBE" rmin="0" rmax="0" dz="0" />
         </Volume>
-        <Volume name="FSCL" comment="Tube for FST coolant">
+        <!--Volume name="FSCL" comment="Tube for FST coolant">
             <Attribute for="FSCL" seen="1" colo="432" />
             <Material name="NOVEC7200" />
             <Shape type="TUBE" rmin="0" rmax="0" dz="0" />
-        </Volume>
+        </Volume-->
         
-        <Volume name="FHTS" comment="Tube segment for FST cooling tube holder">
+        <!--Volume name="FHTS" comment="Tube segment for FST cooling tube holder">
             <Attribute for="FHTS" seen="1" colo="428" />
             <Material name="ABS" />
             <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
-        </Volume>
+        </Volume-->
 
-        <Volume name="FCHT" comment="Tube for FST cooling tube holder">
+        <!--Volume name="FCHT" comment="Tube for FST cooling tube holder">
             <Attribute for="FCHT" seen="1" colo="428" />
             <Material name="ABS" />
             <Shape type="TUBE" rmin="0" rmax="0" dz="0" />
-        </Volume>
+        </Volume-->
 
-        <Volume name="FCHB" comment="box for FST cooling tube holder">
+        <!--Volume name="FCHB" comment="box for FST cooling tube holder">
             <Attribute for="FCHB" seen="1" colo="428" />
             <Material name="ABS" />
             <Shape type="BBOX" dx="0" dy="0" dz="0" />
-        </Volume>
+        </Volume-->
 
         <Volume name="FSAC" comment="Box for the FST APV chips">
             <Attribute for="FSAC" seen="1" colo="8" />
