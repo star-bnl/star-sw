@@ -48,6 +48,8 @@
 
 #include "RTS/include/rtsLog.h"
 
+#include "StRoot/RTS/src/TRG_FCS/fcs_trg_base.h"
+
 namespace {
   enum {kMaxNS=2, kMaxDet=3, kMaxDep=24, kMaxCh=32, kMaxEcalDep=24, kMaxHcalDep=8, kMaxPresDep=4, kMaxLink2=2};
   u_int   fcs_trg_sim_adc[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
@@ -337,6 +339,10 @@ int StFcsTriggerSimMaker::Make(){
     LOG_INFO << Form("Output to DSM = 0x%03x  Filter=0x%03x\n",mTrg,mFlt)<<endm;
     return kStOK;
 }    
+
+void StFcsTriggerSimMaker::runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t& geo, link_t output[]){
+  mTrgSim->stage_2(ecal,hcal,pres,geo,output);
+}
 
 void StFcsTriggerSimMaker::print4B4(){
     //printout ecal 4x4
