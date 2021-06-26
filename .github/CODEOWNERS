@@ -1,6 +1,6 @@
 *                                                  @plexoos           @nigmatkulov
-/OnlTools                                          @kehw              @plexoos          @genevb         @jml985
-/StDb                                              @dmarkh            @plexoos          @genevb
+/OnlTools                                          @kehw              @plexoos          @jml985
+/StDb                                              @dmarkh            @plexoos
 /StDb/idl                                          @akioogawa         @fgeurts          @iraklic        @yfisyak
 /StRoot/RTS                                        @kehw              @akioogawa	@jml985		@tonko-lj
 /StRoot/StAnalysisMaker                            @ullrich-bnl
@@ -23,7 +23,7 @@
 /StRoot/StDaqLib/TOF                               @ZaochenYe         @fgeurts     @starsdong	@jdbrice
 /StRoot/StDaqLib/TRG                               @akioogawa
 /StRoot/StDb*                                      @dmarkh            @plexoos
-/StRoot/StDbUtilities                              @yfisyak           @plexoos	   @genevb
+/StRoot/StDbUtilities                              @yfisyak           @plexoos
 /StRoot/StDbUtilities/StMagUtilities*              @genevb
 /StRoot/StDetectorDbMaker                          @dmarkh            @yfisyak     @plexoos
 /StRoot/StDetectorDbMaker/StDetectorDbBeamInfo*    @genevb
@@ -43,7 +43,7 @@
 /StRoot/StEEmcUtil				   @kkauder	      @rkunnawa		@klendathu2k
 /StRoot/StETof*                                    @PhilippWeidenkaff @ideppner
 /StRoot/StEmc*					   @kkauder           @rkunnawa
-/StRoot/StEvent*                                   @klendathu2k       @ullrich-bnl	@genevb
+/StRoot/StEvent*                                   @klendathu2k       @ullrich-bnl
 /StRoot/StEventUtilities/StEbyET0*                 @genevb
 /StRoot/StEventUtilities/StRedoTracks*             @genevb
 /StRoot/StEventUtilities/StuFixTopoMap*            @genevb
@@ -74,14 +74,11 @@
 /StRoot/StPxl*					   @starsdong	      @GuannanXie
 /StRoot/StRefMultCorr                              @nigmatkulov
 /StRoot/StRTSClient				   @jml985            @tonko-lj
-/StRoot/StSecondaryVertexMaker			   @genevb
-/StRoot/StSmdstMaker				   @genevb
 /StRoot/StShadowMaker                              @genevb
 /StRoot/StSpectraTagsMaker                         @ullrich-bnl
 /StRoot/StSpinPool                                 @akioogawa         @zlchang     @veprbl
 /StRoot/StSsd*					   @starsdong	      @plexoos
 /StRoot/StSst*					   @starsdong	      @plexoos
-/StRoot/StStrangeMuDstMaker			   @genevb
 /StRoot/StTof*                                     @jdbrice           @fgeurts     @starsdong
 /StRoot/StTpc*					   @yfisyak
 /StRoot/StTreeMaker				   @perevbnlgov
@@ -97,9 +94,8 @@
 /StRoot/St_geant_Maker				   @klendathu2k	      @perevbnlgov
 /StRoot/St_l3Clufi_Maker			   @jml985            @tonko-lj
 /StRoot/St_l3t_Maker				   @jml985            @tonko-lj
-/StRoot/St_smdst_Maker				   @genevb
-/StRoot/St_tcl_Maker				   @yfisyak           @iraklic     @genevb
-/StRoot/StarClassLibrary                           @ullrich-bnl       @klendathu2k @genevb
+/StRoot/St_tcl_Maker				   @yfisyak           @iraklic
+/StRoot/StarClassLibrary                           @ullrich-bnl       @klendathu2k
 /StRoot/StarGenerator                              @klendathu2k       @perevbnlgov
 /StRoot/StarRoot				   @klendathu2k
 /StRoot/StdEdx*					   @yfisyak
@@ -110,7 +106,7 @@
 /StRoot/TPCCATracker                               @yfisyak           @kehw
 /StRoot/macros                                     @genevb            @ullrich-bnl @dmarkh	@klendathu2k
 /StRoot/macros/mudst                               @nigmatkulov
-/StarDb                                            @dmarkh            @perevbnlgov @genevb
+/StarDb                                            @dmarkh            @perevbnlgov
 /StarDb/AgML*					   @klendathu2k
 /StarDb/AgiGeometry				   @klendathu2k
 /StarDb/Calibrations                               @genevb
@@ -118,7 +114,7 @@
 /StarDb/Calibrations/tof                           @ZaochenYe         @fgeurts
 /StarDb/Calibrations/tpc                           @yfisyak	      @iraklic
 /StarDb/Calibrations/tracker                       @klendathu2k
-/StarDb/Geometry                                   @klendathu2k
+/StarDb/Geometry                                   @genevb            @klendathu2k
 /StarDb/Geometry/tpc                               @yfisyak	      @iraklic
 /StarDb/VmcGeometry				   @klendathu2k
 /StarDb/emc					   @kkauder           @rkunnawa
@@ -126,6 +122,5 @@
 /StarVMC					   @klendathu2k
 /mgr                                               @genevb            @klendathu2k
 /pams                                              @klendathu2k
-/pams/global                                       @genevb
 /pams/sim					   @akioogawa         @klendathu2k
 /pams/tables                                       @dmarkh            @plexoos
