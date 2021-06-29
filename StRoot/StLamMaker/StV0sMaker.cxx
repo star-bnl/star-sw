@@ -9,7 +9,6 @@
 #include "TChain.h"
 #include "TSystem.h"
 #include "TFile.h"
-#include "TMemStat.h"
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>

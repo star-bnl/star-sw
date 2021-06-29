@@ -1271,7 +1271,8 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     if (! gTrack->charge())  continue;
     if (  gTrack->nHitsFit() < 15) continue;
     //PiDCUT    if (  gTrack->dEdxError() < 0.04 || gTrack->dEdxError() > 0.12 ) continue;
-    if (  gTrack->dEdxError() < 0.01 || gTrack->dEdxError() > 0.25 ) continue;
+    //    if (  gTrack->dEdxError() < 0.01 || gTrack->dEdxError() > 0.25 ) continue;
+    if (  gTrack->dEdxError() < 0.01 || gTrack->dEdxError() > 0.16 ) continue;
     if (  gTrack->status() && !gTrack->isPrimary()) continue;
     const UInt_t index = gTrack->id();
     
@@ -1577,7 +1578,8 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     if (  gTrack->flag() > 1000) continue;  // pile up track in TPC
     if (  gTrack->nHitsFit() < 15) continue;
     //PiDCUT    if (  gTrack->probPidTraits().dEdxErrorFit() < 0.04 || gTrack->probPidTraits().dEdxErrorFit() > 0.12 ) continue;
-    if (  gTrack->probPidTraits().dEdxErrorFit() < 0.01 || gTrack->probPidTraits().dEdxErrorFit() > 0.25 ) continue;
+    //    if (  gTrack->probPidTraits().dEdxErrorFit() < 0.01 || gTrack->probPidTraits().dEdxErrorFit() > 0.25 ) continue;
+    if (  gTrack->probPidTraits().dEdxErrorFit() < 0.01 || gTrack->probPidTraits().dEdxErrorFit() > 0.16 ) continue;
     int nHftHitsInTrack = gTrack->nHitsFit(kIstId) + gTrack->nHitsFit(kSsdId) + gTrack->nHitsFit(kPxlId);
 #ifdef __USE_HFT__
     if(fCollectTrackHistograms) fTrackHistograms[0]->Fill(nHftHitsInTrack);

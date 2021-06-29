@@ -1,57 +1,21 @@
 TDataSet *CreateTable() { 
-// -----------------------------------------------------------------
-// bfc/.make/db/.const/StarDb/Geometry/tpc/.TpcHalfPosition/TpcHalfPosition Allocated rows: 2  Used rows: 2  Row size: 180 bytes
-//  Table: Survey_st[0]--> Survey_st[1]
-// ====================================================================
-// ------  Test whether this table share library was loaded ------
-  if (!TClass::GetClass("St_Survey")) return 0;
-Survey_st row;
-St_Survey *tableSet = new St_Survey("TpcHalfPosition",2);
-//
-memset(&row,0,tableSet->GetRowSize());
-    row.Id	 =          0; // ;
-    row.r00	 =          1; // ;
-    row.r01	 =     -3e-05; // -gamma ;
-    row.r02	 =    -0.0002; // beta  ;
-    row.r10	 =      3e-05; // gamma ;
-    row.r11	 =          1; // ;
-    row.r12	 =          0; // -alpha ;
-    row.r20	 =     0.0002; // -beta  ;
-    row.r21	 =          0; // alpha ;
-    row.r22	 =          1; // ;
-    row.t0	 =          0; // ;
-    row.t1	 =          0; // ;
-    row.t2	 =          0; // ;
-    row.sigmaRotX	 =          0; // ;
-    row.sigmaRotY	 =          0; // ;
-    row.sigmaRotZ	 =          0; // ;
-    row.sigmaTrX	 =          0; // ;
-    row.sigmaTrY	 =          0; // ;
-    row.sigmaTrZ	 =          0; // ;
- memcpy(&row.comment,"2013\x20east\x20+\x20Membrane\x2014\x20+0.2mrad",32);// 
-tableSet->AddAt(&row);
-memset(&row,0,tableSet->GetRowSize());
-    row.Id	 =          1; // ;
-    row.r00	 =          1; // ;
-    row.r01	 =    0.00039; // -gamma ;
-    row.r02	 =    0.00011; // beta  ;
-    row.r10	 =   -0.00039; // gamma ;
-    row.r11	 =          1; // ;
-    row.r12	 =   -0.00016; // -alpha ;
-    row.r20	 =   -0.00011; // -beta  ;
-    row.r21	 =    0.00016; // alpha ;
-    row.r22	 =          1; // ;
-    row.t0	 =     0.0193; // ;
-    row.t1	 =    -0.0133; // ;
-    row.t2	 =    -0.0156; // ;
-    row.sigmaRotX	 =          0; // ;
-    row.sigmaRotY	 =          0; // ;
-    row.sigmaRotZ	 =          0; // ;
-    row.sigmaTrX	 =          0; // ;
-    row.sigmaTrY	 =          0; // ;
-    row.sigmaTrZ	 =          0; // ;
- memcpy(&row.comment,"2013\x20west",9);// 
-tableSet->AddAt(&row);
-// ----------------- end of code ---------------
- return (TDataSet *)tableSet;
+  if (!gROOT->GetClass("St_Survey")) return 0;
+  Survey_st row[2] = {
+    //            -gamma     beta    gamma            -alpha    -beta    alpha                 x0        y0        z0
+//  {0, 1.00000,-0.00004, 0.00000, 0.00004, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000,   0.0000,   0.0000,-231.4880,0,0,0,0,0,0,"2003 east"},
+//  {1, 1.00000, 0.00039, 0.00012,-0.00039, 1.00000,-0.00013,-0.00012, 0.00013, 1.00000,   0.0393,  -0.0305, 231.4759,0,0,0,0,0,0,"2003 west"}
+//  {0, 1.00000,-0.00005, 0.00000, 0.00005, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000,   0.0000,  -0.0001,-231.4829,0,0,0,0,0,0,"2004 east"},
+//  {1, 1.00000, 0.00037, 0.00010,-0.00037, 1.00000,-0.00008,-0.00010, 0.00008, 1.00000,   0.0330,  -0.0092, 231.4805,0,0,0,0,0,0,"2004 west"}
+//  {0, 1.00000,-0.00003, 0.00000, 0.00003, 1.00000, 0.00000, 0.00000, 0.00000, 1.00000,   0.0000,   0.0000,-231.4880,0,0,0,0,0,0,"2013 east"},
+    {0, 1.00000,-0.00003,-0.00020, 0.00003, 1.00000, 0.00000, 0.00020, 0.00000, 1.00000,   0.0000,   0.0000,-231.4880,0,0,0,0,0,0,"2013 east + Mem 14 +0.2mrad "},
+    {1, 1.00000, 0.00039, 0.00011,-0.00039, 1.00000,-0.00016,-0.00011, 0.00016, 1.00000,   0.0193,  -0.0133, 231.4724,0,0,0,0,0,0,"2013 west"}
+  };
+  Int_t n = 2;// east = 0, west = 1
+  St_Survey *tableSet = new St_Survey("TpcHalfPosition",n);
+  for (Int_t half = 0; half < 2; half++) {
+    if (row[half].t2 < 0) row[half].t2 += (229.71+1.7780);
+    else                  row[half].t2 -= (229.71+1.7780);
+    tableSet->AddAt(&row[half].Id);
+  }
+  return (TDataSet *)tableSet;
 }

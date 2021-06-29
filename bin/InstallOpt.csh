@@ -299,20 +299,20 @@ EOF
           if ( $?) break;
           touch ../${pkg}.Done
 	  breaks
-    case "simage":
+      case "simage":
 	  cmake -DCMAKE_INSTALL_PREFIX=$XOPTSTAR -DSIMAGE_BUILD_DOCUMENTATION=0 -DSIMAGE_BUILD_EXAMPLES=0 -DSIMAGE_LIBSNDFILE_SUPPORT=0 -DSIMAGE_MPEG2ENC_SUPPORT=0 -DSIMAGE_OGGVORBIS_SUPPORT=0 ../../simage
 	  breaksw
-    case "Coin3D-simage-2c958a61ea8b":
+      case "Coin3D-simage-2c958a61ea8b":
 	./configure --prefix=$XOPTSTAR
 	wget -O cc7.patch https://gitlab.cern.ch/atlas/atlasexternals/-/raw/master/External/Simage/patches/libpng_centos7.patch?inline=false 
 	patch -p1 < cc7.patch
 	make -j4
 	make install 
 	  breaksw
-    case "GeoModel*":
+      case "GeoModel*":
           cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${XOPTSTAR}  -DGEOMODEL_BUILD_TOOLS=1 -DGEOMODEL_BUILD_VISUALIZATION=1 ../../GeoModel
 	  breaksw
-     case "Coin3D-soqt*":
+      case "Coin3D-soqt*":
           cd src/Inventor/Qt
 	  ln -s  ../../../../soqt/src/Inventor/Qt/common .
           cd -

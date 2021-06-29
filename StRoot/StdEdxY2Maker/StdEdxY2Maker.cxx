@@ -13,6 +13,7 @@
 #define __BEST_VERTEX__
 //#define __DEBUG_dEdx__
 //#define __ADD_PROB__
+//#define __BENCHMARKS__DOFIT_ZN__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 #include "StTpcdEdxCorrection.h" 
@@ -36,6 +37,9 @@
 #include "TClonesArray.h"
 #include "TArrayI.h"
 #include "TArrayD.h"
+#ifdef __BENCHMARKS__DOFIT_ZN__
+#include "TBenchmark.h"
+#endif /* __BENCHMARKS__DOFIT_ZN__ */
 // StUtilities
 #include "StMagF.h"
 #include "StDbUtilities/StMagUtilities.h"
@@ -231,6 +235,9 @@ void StdEdxY2Maker::AddEdxTraits(StTrack *tracks[2], dst_dedx_st &dedx){
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Make(){ 
+#ifdef __BENCHMARKS__DOFIT_ZN__
+  TBenchmark myBenchmark;
+#endif /* __BENCHMARKS__DOFIT_ZN__ */
 #ifdef __KEEP_DX__
   static Bool_t ForcedX = IAttr("ForcedX");
 #endif /* __KEEP_DX__ */
@@ -704,6 +711,9 @@ Int_t StdEdxY2Maker::Make(){
 	}
 	// likelihood fit
 	Double_t chisq, fitZ, fitdZ;
+#ifdef __BENCHMARKS__DOFIT_ZN__
+	myBenchmark.Start("StdEdxY2Maker::DoFitZ");
+#endif /* __BENCHMARKS__DOFIT_ZN__ */
 	DoFitZ(chisq, fitZ, fitdZ);
 	if (chisq >0 && chisq < 10000.0) {
 	  dXavLog2 = 1;
@@ -730,6 +740,9 @@ Int_t StdEdxY2Maker::Make(){
 	    dedx.method    = kLikelihoodFitId;
 	    AddEdxTraits(tracks, dedx);
 	  }
+#ifdef __BENCHMARKS__DOFIT_ZN__
+	  myBenchmark.Stop("StdEdxY2Maker::DoFitZ");
+#endif /* __BENCHMARKS__DOFIT_ZN__ */
 #ifdef 	__DEBUG_dEdx__
 	  StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
 	  Double_t pMomentum = g3.mag();
@@ -750,6 +763,9 @@ Int_t StdEdxY2Maker::Make(){
 	if (fUsedNdx) {
 	  // likelihood fit of no. of primary cluster per cm
 	  Double_t chisqN, fitN, fitdN;
+#ifdef __BENCHMARKS__DOFIT_ZN__
+	  myBenchmark.Start("StdEdxY2Maker::DoFitN");
+#endif /* __BENCHMARKS__DOFIT_ZN__ */
 	  DoFitN(chisqN, fitN, fitdN);
 	  if (chisqN > -900.0 &&chisqN < 10000.0) {
 	    dedx.id_track  =  Id;
@@ -777,6 +793,9 @@ Int_t StdEdxY2Maker::Make(){
 	  }
 #endif
 	  }
+#ifdef __BENCHMARKS__DOFIT_ZN__
+	  myBenchmark.Stop("StdEdxY2Maker::DoFitN");
+#endif /* __BENCHMARKS__DOFIT_ZN__ */
 	}
 #ifdef __ADD_PROB__
 	if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
@@ -853,6 +872,10 @@ Int_t StdEdxY2Maker::Make(){
     }
   }
 #endif /* __SpaceCharge__ */
+#ifdef __BENCHMARKS__DOFIT_ZN__
+  Float_t rt, cp;
+  myBenchmark.Summary(rt,cp);
+#endif /* __BENCHMARKS__DOFIT_ZN__ */
   return kStOK;
 }
 //________________________________________________________________________________

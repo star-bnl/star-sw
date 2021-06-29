@@ -37,11 +37,12 @@ my $def = {@Runs};# print "Runs = @Runs\n";
 #my  @runs  = glob "/hlt/cephfs/daq/2020/2??/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2019/350/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2020/012/2101202?";  print "runs = @runs\n" if ($debug);
-my  @runs  = glob "/hlt/cephfs/daq/2021/???/*"; #  print "runs = @runs\n" if ($debug);
+my  @runs  = glob "/hlt/cephfs/daq/2021/???/22*"; #  print "runs = @runs\n" if ($debug);
 my %CosmicList = ();
 foreach my $run (@runs) {
   my $r = File::Basename::basename($run);
-#  print "$run => $r\n";
+  print "\# $run => $r\n";
+  if ($r < 22156015) {next;}
   foreach my $key (sort keys %$def ) {
     print "trig = $def->{$key}->{trig}, field = $def->{$key}->{field}; first = $def->{$key}->{first}, last = $def->{$key}->{last}" if ($debug);
     if ($r < $def->{$key}->{first})    {print ", rejected by first\n" if ($debug); next;}

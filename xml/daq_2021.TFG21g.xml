@@ -38,7 +38,7 @@
 #  @ n =  $JOBINDEX % 20
   @ n =  $JOBINDEX % 100
    set evout = "-evout";
-   if ($n == 4) set evout = "evout";
+# if ($n == 4) set evout = "evout";
 # TFG21c-g
 #  root.exe -b -q 'bfc.C('${f}','${l}',"P2021a,StiCA,'${evout}',NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 # TFG21g.B
@@ -48,7 +48,8 @@
   root.exe -b -q 'bfc.C('${f}','${l}',"P2021a,StiCA,'${evout}',NoHistos,noTags,noRunco,'${PicoMode}'","'${evtsFile}'")' &gt;&amp; ${logFile}
    gzip ${logFile}
 #  cp  ${filel}*.picoDst.root ${logFile}.gz ${SUBMITTINGDIRECTORY}
-   cp  ${filel}* ${SUBMITTINGDIRECTORY}
+#   cp  ${filel}* ${SUBMITTINGDIRECTORY}
+  cp *.gz *picoDst.root ${SUBMITTINGDIRECTORY}
   rm ${bla}
   rm -rf ${CURRENT_DIR}
         </command>

@@ -1,3 +1,7 @@
+/*
+  root.exe sqlstarMagOnl.C+
+  T->Draw("current:time>>C(640,0.99e9,1.63e9,100,-4540,-4490)","","colz")
+ */
 #ifndef __CINT__
 #include "Riostream.h"
 #include "TSQLServer.h"

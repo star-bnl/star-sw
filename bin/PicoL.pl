@@ -20,7 +20,7 @@ my $dayMin =  0;
 my $dayMax =  0;
 my $year = "y2020";
 my $Njobs = 0;
-my $DST = "picoDst";
+my $muDST = 0;
 if    ($pwd =~ /2021/) { $year = "y2021";}
 elsif ($pwd =~ /2020/) { $year = "y2020";}
 elsif ($pwd =~ /2019/) { $year = "y2019";} 
@@ -50,8 +50,8 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20i/ or $pwd =~ /P21i/) {
   elsif ($pwd =~ /2020\/9p2GeVb/)             {$glob = "/reco/production_9p2GeV_2020b/ReversedFullField/dev/2020";}
   elsif ($pwd =~ /2020\/9p2GeV/)              {$glob = "/reco/production_9p2GeV_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/9p8GeV_fixedTarget/)  {$glob = "/reco/production_9p8GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
-  elsif ($pwd =~ /2019\/19GeV_2019_P20ic/)    {$glob = "/reco/production_19GeV_2019/ReversedFullField/P20ic_calib/2019"; $DST = "MuDst";}
-  elsif ($pwd =~ /2019\/19GeV_2019_P21ia/)    {$glob = "/reco/production_19GeV_2019/ReversedFullField/P21ia_calib/2019"; $DST = "MuDst"}
+  elsif ($pwd =~ /2019\/19GeV_2019_P20ic/)    {$glob = "/reco/production_19GeV_2019/ReversedFullField/P20ic_calib/2019"; $muDST = 1;}
+  elsif ($pwd =~ /2019\/19GeV_2019_P21ia/)    {$glob = "/reco/production_19GeV_2019/ReversedFullField/P21ia_calib/2019"; $muDST = 1}
 #  elsif ($pwd =~ /2019\/19GeV_2019_P21ib2/)   {$PICOPATH = "/gpfs01/star/data101"; $glob = "/reco/production_19GeV_2019/ReversedFullField/P21ib_calib/2019"; }
   elsif ($pwd =~ /2019\/19GeV_2019_P21ib2/)   {$PICOPATH = "/gpfs01/star/data97"; $glob = "/reco/production_19GeV_2019/ReversedFullField/P21ib_calib/2019"; }
   elsif ($pwd =~ /2019\/19GeV_2019_P21ib/)    {$PICOPATH = "/gpfs01/star/data100"; $glob = "/reco/production_19GeV_2019/ReversedFullField/P21ib_calib/2019"; }
@@ -176,48 +176,46 @@ foreach my $run (@files) {
   $day -=  1000*$Y;           # print "day = $day\n";
   if ($dayMin > 0 && $day < $dayMin) {next;}
   if ($dayMax > 0 && $day > $dayMax) {next;}
-  my @files =  glob $run . "/*" . $DST . ".root";
-  my $NF = $#files + 1;
-  my $step = 20;
-  for (my $i = 0; $i < $NF; $i += $step) {
-    my @list = ();
-    my @listB = ();
-    for (my $k = 0; $k < $step; $k++) {
-      my $j = $k + $i;
-      if ($k < $NF && $files[$j]) {
-	push @list, $files[$j];
-	my $fileB =  File::Basename::basename( $files[$j] );
-	push @listB,$fileB;
-      } 
+  $Runs{$f}++;
+  my $ana = $f . "_" . $Runs{$f} . ".root"; print "ana = $ana\n" if ($debug);
+  if ( -r $ana) {
+    my $mtime = stat($ana)->mtime;
+    my $Mtime = ctime($mtime);
+#     my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, $mtime, $ctime, $blksize,$blocks) = stat($ana);
+    my @files = glob $run . "/*.root";
+    if ($#files < 0) {next;}
+    my $mtimeA = -1;
+    my $MtimeA;
+    foreach my $file (@files) {
+      my $mtimeR = stat($file)->mtime;
+      my $MtimeR = ctime($mtimeR);
+      #       my ($devR,$inoR,$modeR,$nlinkR,$uidR,$gidR,$devR, $sizeR, $atimeR, $mtimeR, $ctimeR, $blksizeR,$blocksR) = stat($run);
+      my $dt = $mtime - $mtimeR;
+      #       print "$ana: $mtime,$Mtime  $file: $mtimeR,$MtimeR dt = $dt\n";
+      #       my @list = `ls -l $ana $file`; print "@list\n";
+      if ( $mtimeR > $mtimeA) { $mtimeA =  $mtimeR; $MtimeA = $MtimeR;}
     }
-    $Runs{$f}++;
-    my $ana = $f . "_" . $Runs{$f} . ".root"; print "ana = $ana\n" if ($debug);
-    if ( -r $ana) {
-      my $mtime = stat($ana)->mtime;
-      my $Mtime = ctime($mtime);
-      #     my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, $mtime, $ctime, $blksize,$blocks) = stat($ana);
-      #    my @files = glob $run . "/*.root";
-      if ($#list < 0) {next;}
-      my $mtimeA = -1;
-      my $MtimeA;
-      foreach my $file (@list) {
-	my $mtimeR = stat($file)->mtime;
-	my $MtimeR = ctime($mtimeR);
-	#       my ($devR,$inoR,$modeR,$nlinkR,$uidR,$gidR,$devR, $sizeR, $atimeR, $mtimeR, $ctimeR, $blksizeR,$blocksR) = stat($run);
-	my $dt = $mtime - $mtimeR;
-	#       print "$ana: $mtime,$Mtime  $file: $mtimeR,$MtimeR dt = $dt\n";
-	#       my @list = `ls -l $ana $file`; print "@list\n";
-	if ( $mtimeR > $mtimeA) { $mtimeA =  $mtimeR; $MtimeA = $MtimeR;}
-      }
-      my $dt = $mtime - $mtimeA;
-      print "$day, $ana $mtime,$Mtime, $run $mtimeA,$MtimeA, dt = $dt\n" if ($debug);
-      if ($dt > 0) {next;}
-      my $cmd = "mv ". $ana ." ". $ana .".BAK";
-      print "$cmd \n" if ($debug);
-      my $flag = system($cmd);
-    }
-    print "string:$run:$ana:$year:$DST:@listB\n";
+    my $dt = $mtime - $mtimeA;
+    print "$day, $ana $mtime,$Mtime, $run $mtimeA,$MtimeA, dt = $dt\n" if ($debug);
+    if ($dt > 0) {next;}
+    my $cmd = "mv ". $ana ." ". $ana .".BAK";
+    print "$cmd \n" if ($debug);
+    my $flag = system($cmd);
+  };
+  my $picoGlob = $run . "/*picoDst.root";
+  my @picos = glob $picoGlob;
+  if ($#picos > -1 and ! $muDST) {
+    print "string:$run:$ana:$year:picoDst\n";
     $Njobs++;
-  }
+#   } else {
+#     my $MuGlob = $run . "/*MuDst.root";
+#     my @Mus = glob $MuGlob;
+#     if ($#Mus > -1) {
+#       print "string:$run:$ana:$year:MuDst\n";
+#       $Njobs++;
+#     }
+xs  }
+#  last;
+#  die;
 }
 if (! $Njobs) {die "Don't have input files\n";}
