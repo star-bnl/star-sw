@@ -97,5 +97,5 @@ RUN source star-spack/setup.sh && spack env activate mydocker \
  && cons %GeoTestMaker %Kinematics %OnlTools %StAngleCorrMaker %StDaqClfMaker \
     %StEEmcPool %StEbye2ptMaker %StEbyePool %StEbyeScaTagsMaker %StFgtPool \
     %StFtpcV0Maker %StHighptPool %StJetFinder %StRoot/Stv %StRoot/StvMaker \
-    %StRoot/StvSeed %StShadowMaker %StSpinMaker %StSpinPool %StStrangePool \
+    %StRoot/StvSeed %StShadowMaker %StSpinMaker %StStrangePool \
     %pams/sim/g2r %StRoot/StHbtMaker
