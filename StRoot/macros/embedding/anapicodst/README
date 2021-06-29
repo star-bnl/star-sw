@@ -1,0 +1,7 @@
+how to run:
+1) convert embedding MuDst.root to picoDst.root
+adjust the pico chain setting in genDst.csh, then
+./genDst.csh a.MuDst.root
+Note that only the pico code (StPicoDstMaker/StPicoEvent) in recent STAR library (>= SL21b) includes MC information. One should use the same library (or pico code) to convert real data MuDst and embedding MuDst.
+2) run the example analysis code (SL19b is used here for testing only, StRoot/StPicoDstMaker and StRoot/StPicoEvent should be checked out from git and cons-ed in SL19b for this test)
+./runmakeMuDstQA.csh test.pico.list 10 0 test.histo.root
