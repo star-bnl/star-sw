@@ -16,6 +16,7 @@ RUN yum update -q -y \
     lapack-static blas-static \
     libX11-devel libXext-devel libXpm-devel openmotif-devel \
     python python-pip \
+    environment-modules \
  && yum clean all
 
 # Install extra python modules used by the STAR software
