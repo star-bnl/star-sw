@@ -954,7 +954,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#    $CPPPATH =
 	#      "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include";
 	#    print "CPPPATH => $CPPPATH\n";
-	$CXXFLAGS .= " -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics";
+	$CXXFLAGS .= " -W -Wall -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics";
 	$CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
 #	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
 #	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE";}
@@ -991,11 +991,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
           $LIBPATH = $ENV{Vc_DIR}."/lib";
         }
 
-	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
-#	my $extraCXXFLAGS = " -DDO_TPCCATRACKER_EFF_PERFORMANCE -DDRAW -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
-#	my $extraCXXFLAGS = " -DDO_TPCCATRACKER_EFF_PERFORMANCE -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
-#	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
-	$extraCXXFLAGS .= " -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function";
+	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION -W -Wall -Wswitch -Wformat -Wchar-subscripts";
+#	my $extraCXXFLAGS = " -DDO_TPCCATRACKER_EFF_PERFORMANCE -DDRAW -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wswitch -Wformat -Wchar-subscripts";
+#	my $extraCXXFLAGS = " -DDO_TPCCATRACKER_EFF_PERFORMANCE -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wswitch -Wformat -Wchar-subscripts";
+#	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wswitch -Wformat -Wchar-subscripts";
+	$extraCXXFLAGS .= " -Wparentheses -Wmultichar -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function";
 	$extraCXXFLAGS .= " -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1";
 	if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
 #	$extraCXXFLAGS .= " -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -msse3 -mssse3 -msse4.1 -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1 -ltr";
@@ -1009,7 +1009,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #	if ($STAR_SYS =~ 'gcc432$' || $STAR_SYS =~ 'gcc445$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
 #	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
 #	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE"}
-	# c++ `root-config --ldflags` -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
+	# c++ `root-config --ldflags` -W -Wall -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
 	if ( defined($ENV{Vc_LIB_DIR}) ) { die("Vc_LIB_DIR is not supported anymore. Please use Vc_DIR."); }
 	$LIBS = "-lVc";
 	if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
