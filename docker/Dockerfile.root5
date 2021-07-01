@@ -16,17 +16,19 @@ RUN yum update -q -y \
     lapack-static blas-static \
     libX11-devel libXext-devel libXpm-devel openmotif-devel \
     python python-pip \
+    environment-modules \
  && yum clean all
 
 # Install extra python modules used by the STAR software
 RUN pip install pyparsing
 
-ADD https://api.github.com/repos/star-bnl/star-spack/commits/main star-spack-ref.json
-RUN git clone --recurse-submodules https://github.com/star-bnl/star-spack.git
+RUN mkdir -p star-spack \
+ && curl -sL https://github.com/star-bnl/star-spack/archive/9299449b078f4f0ad0d6fd1b0a220449d38b340d.tar.gz | tar -xz --strip-components 1 -C star-spack \
+ && curl -sL https://github.com/spack/spack/archive/010e5761d6631eae102d1eec87e5e74a0e16ed82.tar.gz | tar -xz --strip-components 1 -C star-spack/spack
 
 RUN source star-spack/setup.sh \
- && spack env create mydocker star-spack/environments/star-x86_64-root534-docker.yaml \
- && spack env activate mydocker \
+ && spack env create star-env-root5 star-spack/environments/star-x86_64-root-5.34.38-container.yaml \
+ && spack env activate star-env-root5 \
  && spack install -j 5 --fail-fast \
  && spack gc -y
 
@@ -86,7 +88,7 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
      if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }\n' \
  && patch -p1 < root4star_cons.patch
 
-RUN source star-spack/setup.sh && spack env activate mydocker \
+RUN source star-spack/setup.sh && spack env activate star-env-root5 \
  && export MYSQL=`spack location --install-dir mysql` \
  && export LIBXML2_DIR=`spack location --install-dir libxml2` \
  && cd /usr/include && ln -s $MYSQL/include mysql \
@@ -97,5 +99,5 @@ RUN source star-spack/setup.sh && spack env activate mydocker \
  && cons %GeoTestMaker %Kinematics %OnlTools %StAngleCorrMaker %StDaqClfMaker \
     %StEEmcPool %StEbye2ptMaker %StEbyePool %StEbyeScaTagsMaker %StFgtPool \
     %StFtpcV0Maker %StHighptPool %StJetFinder %StRoot/Stv %StRoot/StvMaker \
-    %StRoot/StvSeed %StShadowMaker %StSpinMaker %StSpinPool %StStrangePool \
+    %StRoot/StvSeed %StShadowMaker %StSpinMaker %StStrangePool \
     %pams/sim/g2r %StRoot/StHbtMaker
