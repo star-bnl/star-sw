@@ -1,10 +1,26 @@
-//-*- Mode: C++ -*-
-// ************************************************************************
-// This file is property of and copyright by the ALICE HLT Project        *
-// ALICE Experiment at CERN, All rights reserved.                         *
-// See cxx source for full Copyright notice                               *
-//                                                                        *
-//*************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #ifndef ALIHLTTPCCASLICEOUTPUT_H
@@ -14,6 +30,7 @@
 
 #include "AliHLTTPCCASliceTrack.h"
 #include "AliHLTTPCCADataCompressor.h"
+#include "AliHLTTPCCASliceTrackVector.h"
 
 /**
  * @class AliHLTTPCCASliceOutput
@@ -30,7 +47,7 @@ class AliHLTTPCCASliceOutput
 {
   public:
 
-    inline AliHLTTPCCASliceOutput(): fNTracks( 0 ), fNTrackClusters( 0 ), fTracks( 0 ), fClusterIDrc( 0 ), fClusterPackedYZ( 0 ), fClusterUnpackedYZ( 0 ), fClusterUnpackedX( 0 ), fClusterPackedAmp( 0 ) {}
+    inline AliHLTTPCCASliceOutput() {}
     int NTracks()                    const { return fNTracks;              }
     int NTrackClusters()             const { return fNTrackClusters;       }
 
@@ -59,6 +76,14 @@ class AliHLTTPCCASliceOutput
     static bool CompareTrackLength (const AliHLTTPCCASliceTrack &st1, const AliHLTTPCCASliceTrack &st2) {
       return (st1.NClusters() > st2.NClusters());
     }
+#if 0
+    void SetNTracksV       ( int v )  { fNTracksV = v;        }
+    void AddNTracksV       ()  { fNTracksV++;        }
+    int NTracksV()                    const { return fNTracksV;              }
+    AliHLTTPCCASliceTrackVector &TrackV( int i ) const { return fTracksV[i]; }
+    void SetTrackV( int i, const AliHLTTPCCASliceTrackVector &v ) {  fTracksV[i] = v; }
+#endif
+
   private:
 
     AliHLTTPCCASliceOutput( const AliHLTTPCCASliceOutput& )
@@ -69,6 +94,10 @@ class AliHLTTPCCASliceOutput
     int fNTracks;                 // number of reconstructed tracks
     int fNTrackClusters;          // total number of track clusters
     AliHLTTPCCASliceTrack *fTracks; // pointer to reconstructed tracks
+#if 0
+    int fNTracksV;                 // number of reconstructed tracks
+    AliHLTTPCCASliceTrackVector *fTracksV; // pointer to reconstructed tracks
+#endif
     DataCompressor::RowCluster *fClusterIDrc;  // pointer to cluster IDs ( packed IRow and ICluster)
     unsigned short *fClusterPackedYZ;     // pointer to packed cluster YZ coordinates
     float2   *fClusterUnpackedYZ;   // pointer to cluster coordinates (temporary data, for debug proposes)

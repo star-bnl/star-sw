@@ -1,24 +1,26 @@
-// @(#) $Id: AliHLTTPCCAStartHitsFinder.cxx,v 1.1 2016/02/05 23:27:29 fisyak Exp $
-// **************************************************************************
-// This file is property of and copyright by the ALICE HLT Project          *
-// ALICE Experiment at CERN, All rights reserved.                           *
-//                                                                          *
-// Primary Authors: Sergey Gorbunov <sergey.gorbunov@kip.uni-heidelberg.de> *
-//                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
-//                  for The ALICE HLT Project.                              *
-//                                                                          *
-// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
-//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
-//                                                                          *
-// Permission to use, copy, modify and distribute this software and its     *
-// documentation strictly for non-commercial purposes is hereby granted     *
-// without fee, provided that the above copyright notice appears in all     *
-// copies and that both the copyright notice and this permission notice     *
-// appear in the supporting documentation. The authors make no claims       *
-// about the suitability of this software for any purpose. It is            *
-// provided "as is" without express or implied warranty.                    *
-//                                                                          *
-//***************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include "AliHLTTPCCAStartHitsFinder.h"
 #include "AliHLTTPCCATracker.h"
@@ -42,45 +44,10 @@
 // only when all rows are done, is NTracklets known
 //////////////////////////////////////////////////////////////////////////////
 
-//X template<typename Int, typename Float>
-//X struct SeedRowData {
-//X   Int fRow;
-//X   Int fHitIndex;
-//X };
-//X 
-//X typedef std::vector<SeedRowData<ushort_v, sfloat_v> > SeedDataVector; // contains ushort_v::Size complete seeds
-//X typedef std::vector<SeedRowData<unsigned short, float> > SeedDataScalar; // contains one complete seed
-//X 
-//X void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, const SliceData &data )
-//X {
-//X   SeedDataVector seed;
-//X   const int lastRow = Parameters::NumberOfRows - 4;
-//X   for ( int rowIndex = 2; rowIndex <= lastRow; ++rowIndex ) {
-//X     // inside the row we're looking for hits that are linked upwards but not downwards, those start
-//X     // a seed
-//X     const int maxStorageSize = ( row.NHits() + short_v::Size - 1 ) / short_v::Size;
-//X     short_v linkUpCompressedStorage[maxStorageSize];
-//X     ushort_v hitIndexesCompressedStorage[maxStorageSize];
-//X     short *linkUpCompressed = &linkUpCompressedStorage[0];
-//X     unsigned short *hitIndexesCompressed = &hitIndexesCompressedStorage[0];
-//X     for ( int hitIndex = 0; hitIndex < row.NHits(); hitIndex += short_v::Size ) {
-//X       const short_v linkUp = data.HitLinkUpData( row, hitIndex );
-//X       foreach_bit( int i, linkUp != -1 ) {
-//X         *linkUpCompressed++ = linkUp[i];
-//X         *hitIndexesCompressed++ = hitIndex + i;
-//X       }
-//X     }
-//X   }
-//X }
-
 void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &data, int iter )
 {
-  // enum {
-  //   kArraySize = 10240,
-  //   kMaxStartHits = kArraySize - 1 - short_v::Size
-  // };
 
-  AliHLTTPCCAStartHitId *const startHits = tracker.TrackletStartHits();
+  Vc::vector<AliHLTTPCCAStartHitId>& startHits = tracker.TrackletStartHits();
 
   //TODO parallel_for
   const int rowStep = AliHLTTPCCAParameters::RowStep;
@@ -92,56 +59,66 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &da
 #else //USE_TBB
     const int hitsStartOffset = *tracker.NTracklets(); // number of start hits from other jobs
 #endif //USE_TBB
-    //X   short_m leftMask( Vc::Zero );
+    //X   int_m leftMask( Vc::Zero );
     const AliHLTTPCCARow &row = data.Row( rowIndex );
-//    const AliHLTTPCCARow &middleRow = data.Row( rowIndex + rowStep );
     int startHitsCount = 0;
 
 
     // look through all the hits and look for
     const int numberOfHits = row.NHits();
-    for ( int hitIndex = 0; hitIndex < numberOfHits; hitIndex += short_v::Size ) {
-      const short_v hitIndexes = short_v( Vc::IndexesFromZero ) + hitIndex;
-      short_m validHitsMask = hitIndexes < numberOfHits;
-      validHitsMask &= ( short_v(data.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes) ) == short_v( Vc::Zero ) ); // not-used hits can be connected only with not-used, so only one check is needed
+    for ( int hitIndex = 0; hitIndex < numberOfHits; hitIndex += int_v::Size ) {
+      const int_v hitIndexes = int_v( Vc::IndexesFromZero ) + hitIndex;
+      int_m validHitsMask = hitIndexes < numberOfHits;
+      int_v hitDataTemp;
+      for( unsigned int ii = 0; ii < float_v::Size; ii++ ) {
+      	hitDataTemp[ii] = data.HitDataIsUsed( row )[(unsigned int)hitIndexes[ii]];
+      }
+      validHitsMask &= ( hitDataTemp == int_v( Vc::Zero ) );
       
       // hits that have a link up but none down == the start of a Track
-      const short_v &middleHitIndexes = data.HitLinkUpData( row, hitIndex );
-      validHitsMask &= ( data.HitLinkDownData( row, hitIndex ) < short_v( Vc::Zero ) ) && ( middleHitIndexes >= short_v( Vc::Zero ) );
+      const int_v &middleHitIndexes = data.HitLinkUpData( row, hitIndex );
+      validHitsMask &= ( data.HitLinkDownData( row, hitIndex ) < int_v( Vc::Zero ) ) && ( middleHitIndexes >= int_v( Vc::Zero ) );
       if ( !validHitsMask.isEmpty() ) { // start hit has been found
 
           // find the length
         int iRow = rowIndex + 1*rowStep;
         int nRows = 2;
-        short_v upperHitIndexes = middleHitIndexes;
+        int_v upperHitIndexes = middleHitIndexes;
         for (;!validHitsMask.isEmpty() && nRows < AliHLTTPCCAParameters::NeighboursChainMinLength[iter];) {
-          upperHitIndexes = short_v( data.HitLinkUpData( data.Row( iRow ) ), static_cast<ushort_v>( upperHitIndexes ), validHitsMask );
-          validHitsMask &= upperHitIndexes >= short_v( Vc::Zero );
+          for( unsigned int i = 0; i < float_v::Size; i++ ) {
+            if( !validHitsMask[i] ) continue;
+            upperHitIndexes[i] = data.HitLinkUpData( data.Row( iRow ) )[(unsigned int)upperHitIndexes[i]];
+          }
+          validHitsMask &= upperHitIndexes >= int_v( Vc::Zero );
           nRows++;
           iRow += rowStep;
         }
           // check if the length is enough
-        short_m goodChains = validHitsMask;
+        int_m goodChains = validHitsMask;
         if ( !goodChains.isEmpty() ) { 
             // set all hits in the chain as used
-          data.SetHitAsUsed( row, static_cast<ushort_v>( hitIndexes ), goodChains );
+          data.SetHitAsUsed( row, static_cast<uint_v>( hitIndexes ), goodChains );
 
           int iRow2 = rowIndex + 1*rowStep;
-          ushort_v nHits(Vc::Zero);
+          uint_v nHits(Vc::Zero);
           nHits(goodChains) = 2;
           AliHLTTPCCARow curRow2;
-          short_v upperHitIndexes2 = middleHitIndexes;
+          int_v upperHitIndexes2 = middleHitIndexes;
           for (;!goodChains.isEmpty();) {
             curRow2 = data.Row( iRow2 );
 
-            data.SetHitAsUsed( curRow2, static_cast<ushort_v>( upperHitIndexes2 ), goodChains );
-            upperHitIndexes2 = short_v( data.HitLinkUpData( curRow2 ), static_cast<ushort_v>( upperHitIndexes2 ), goodChains );
-            goodChains &= upperHitIndexes2 >= short_v( Vc::Zero );
+            data.SetHitAsUsed( curRow2, static_cast<uint_v>( upperHitIndexes2 ), goodChains );
+            for( unsigned int i = 0; i < float_v::Size; i++ ) {
+              if( !goodChains[i] ) continue;
+              upperHitIndexes2[i] = data.HitLinkUpData( curRow2 )[(unsigned int)upperHitIndexes2[i]];
+            }
+            goodChains &= upperHitIndexes2 >= int_v( Vc::Zero );
             nHits(goodChains)++;
             iRow2 += rowStep;
           }
 
-          foreach_bit( int i, validHitsMask ) {
+          for( unsigned int i = 0; i < int_v::Size; i++ ) {
+            if(!validHitsMask[i]) continue;
             startHits[hitsStartOffset + startHitsCount++].Set( rowIndex, hitIndex + i, nHits[i] );
           }
 
@@ -161,10 +138,9 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &da
 #endif //USE_TBB
   } // for rowIndex
 
-//   std::cout << *tracker.NTracklets() << " start hits have been found." << std::endl;
 #ifdef USE_TBB
   tbb::parallel_sort( startHits, startHits + *tracker.NTracklets() );
 #else //USE_TBB
-  std::sort( startHits, startHits + *tracker.NTracklets() );
+  std::sort( &startHits[0], &startHits[0] + *tracker.NTracklets() );
 #endif //USE_TBB
 }

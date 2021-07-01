@@ -1,11 +1,26 @@
-//-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCATracker.h,v 1.2 2016/07/15 14:43:33 fisyak Exp $
-// ************************************************************************
-// This file is property of and copyright by the ALICE HLT Project        *
-// ALICE Experiment at CERN, All rights reserved.                         *
-// See cxx source for full Copyright notice                               *
-//                                                                        *
-//*************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef ALIHLTTPCCATRACKER_H
 #define ALIHLTTPCCATRACKER_H
@@ -25,15 +40,11 @@
 #include "AliHLTTPCCASliceDataVector.h"
 #include <vector>
 
+#include "AliHLTTPCCASliceOutput.h"
+
 class AliHLTTPCCATrack;
 class AliHLTTPCCATrackParam;
 class AliHLTTPCCAClusterData;
-class AliHLTTPCCASliceOutput;
-
-//X using Vc::int_v;
-//X using Vc::uint_v;
-//X using Vc::float_v;
-//X using Vc::Mask;
 
 /**
  * @class AliHLTTPCCATracker
@@ -70,8 +81,8 @@ class AliHLTTPCCATracker
     void WriteOutput();
 
     void GetErrors2( int iRow,  const AliHLTTPCCATrackParam &t, float *Err2Y, float *Err2Z ) const;
-    void GetErrors2( int iRow,  const AliHLTTPCCATrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const;
-    void GetErrors2( const ushort_v &rowIndexes, const AliHLTTPCCATrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const;
+    void GetErrors2( int iRow,  const AliHLTTPCCATrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const;
+    void GetErrors2( const uint_v &rowIndexes, const AliHLTTPCCATrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const;
 
     void RecalculateHitsSize( int MaxNHits );
     void SetPointersHits( int MaxNHits );
@@ -95,26 +106,32 @@ class AliHLTTPCCATracker
     void SetNTracklets(int nTrlets) { fNTracklets = nTrlets; }
 
     const AliHLTTPCCAStartHitId &TrackletStartHit( int i ) const { return fTrackletStartHits[i]; }
-    AliHLTTPCCAStartHitId *TrackletStartHits() const { return fTrackletStartHits; }
+    Vc::vector<AliHLTTPCCAStartHitId>& TrackletStartHits() { return fTrackletStartHits; }
+    const Vc::vector<AliHLTTPCCAStartHitId>& TrackletStartHits() const { return fTrackletStartHits; }
 
     size_t NTracks() const { return fTracks.size(); }
     const std::vector<AliHLTTPCCATrack *> &Tracks() const { return fTracks; }
 
     const AliHLTTPCCASliceOutput * Output() const { return fOutput; }
+    AliHLTTPCCASliceOutput * Output() { return fOutput; }
 
-#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+//#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
     int fNOutTracks1; // number of tracks in fOutTracks array
     AliHLTTPCCAOutTrack *fOutTracks1; // output array of the reconstructed tracks
 
     int NOutTracks1() const { return fNOutTracks1; }
     AliHLTTPCCAOutTrack *OutTracks1() const { return  fOutTracks1; }
     const AliHLTTPCCAOutTrack &OutTrack1( int index ) const { return fOutTracks1[index]; }
-#endif //DO_TPCCATRACKER_EFF_PERFORMANCE
+//#endif //DO_TPCCATRACKER_EFF_PERFORMANCE
     void StoreToFile( FILE *f ) const;
     void RestoreFromFile( FILE *f );
 
   private:
     void SetupCommonMemory();
+
+#ifdef TETA
+    void ConvertPTrackParamToVector( const AliHLTTPCCATrackParam *t0[uint_v::Size], AliHLTTPCCATrackParamVector &t, const int &nTracksV);
+#endif
 
     AliHLTTPCCAParam fParam; // parameters
     double fTimers[11]; // running CPU time for different parts of the algorithm
@@ -133,7 +150,7 @@ class AliHLTTPCCATracker
     int   fTrackMemorySize; // size of the event memory [bytes]
 
 
-    AliHLTTPCCAStartHitId *fTrackletStartHits;   // start hits for the tracklets
+    Vc::vector<AliHLTTPCCAStartHitId> fTrackletStartHits;   // start hits for the tracklets
 
     int fNTracklets;     // number of tracklets
     AliHLTResizableArray<TrackletVector> fTrackletVectors; // tracklet data
@@ -153,7 +170,41 @@ class AliHLTTPCCATracker
     AliHLTTPCCATracker &operator=( const AliHLTTPCCATracker& );
 };
 
-inline void AliHLTTPCCATracker::GetErrors2( int iRow, const AliHLTTPCCATrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const
+#ifdef TETA
+struct TrSort {
+  int nHits, trId;
+  bool operator() ( const TrSort& a, const TrSort& b ) { return (a.nHits > b.nHits);}
+  static bool trComp( const TrSort& a, const TrSort& b ) { return (a.nHits > b.nHits); }
+};
+
+inline void AliHLTTPCCATracker::ConvertPTrackParamToVector( const AliHLTTPCCATrackParam *t0[uint_v::Size], AliHLTTPCCATrackParamVector &t, const int &nTracksV)
+{
+  float_v tmpFloat;
+  int_v tmpShort;
+
+  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->X();
+  t.SetX(tmpFloat);
+  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->SignCosPhi();
+  t.SetSignCosPhi(tmpFloat);
+
+  for(int iP=0; iP<5; iP++)
+  {
+    for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->Par()[iP];
+    t.SetPar(iP,tmpFloat);
+  }
+  for(int iC=0; iC<15; iC++)
+  {
+    for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->Cov()[iC];
+    t.SetCov(iC,tmpFloat);
+  }
+  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpFloat[iV] = t0[iV]->Chi2();
+  t.SetChi2(tmpFloat);
+  for(int iV=0; iV < nTracksV; iV++) if(t0[iV]) tmpShort[iV] = t0[iV]->NDF();
+  t.SetNDF(tmpShort);
+}
+#endif
+
+inline void AliHLTTPCCATracker::GetErrors2( int iRow, const AliHLTTPCCATrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const
 {
   //
   // Use calibrated cluster error from OCDB
@@ -161,7 +212,7 @@ inline void AliHLTTPCCATracker::GetErrors2( int iRow, const AliHLTTPCCATrackPara
 
   fParam.GetClusterErrors2( iRow, t, Err2Y, Err2Z );
 }
-inline void AliHLTTPCCATracker::GetErrors2( const ushort_v &rowIndexes, const AliHLTTPCCATrackParamVector &t, sfloat_v *Err2Y, sfloat_v *Err2Z ) const
+inline void AliHLTTPCCATracker::GetErrors2( const uint_v &rowIndexes, const AliHLTTPCCATrackParamVector &t, float_v *Err2Y, float_v *Err2Z ) const
 {
   //
   // Use calibrated cluster error from OCDB
@@ -169,22 +220,6 @@ inline void AliHLTTPCCATracker::GetErrors2( const ushort_v &rowIndexes, const Al
 
   fParam.GetClusterErrors2( rowIndexes, t, Err2Y, Err2Z );
 }
-///mvz start 20.01.2010
-/*
-inline void AliHLTTPCCATracker::GetErrors2( int iRow, const sfloat_v &z, const sfloat_v &sinPhi,
-    const sfloat_v &DzDs, sfloat_v *Err2Y, sfloat_v *Err2Z ) const
-{
-  //
-  // Use calibrated cluster error from OCDB
-  //
-
-  fParam.GetClusterErrors2( iRow, z, sinPhi, DzDs, *Err2Y, *Err2Z );
-}
-inline void AliHLTTPCCATracker::GetErrors2( const ushort_v &iRow, const sfloat_v &z, const sfloat_v &sinPhi,
-    const sfloat_v &DzDs, sfloat_v *Err2Y, sfloat_v *Err2Z ) const {
-  fParam.GetClusterErrors2( iRow, z, sinPhi, DzDs, *Err2Y, *Err2Z );
-}*/
-///mvz end 20.01.2010
 typedef AliHLTTPCCATracker Tracker;
 
 #endif

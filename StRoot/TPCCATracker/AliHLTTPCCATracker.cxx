@@ -1,24 +1,26 @@
-// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.3 2016/07/15 14:43:33 fisyak Exp $
-// **************************************************************************
-// This file is property of and copyright by the ALICE HLT Project          *
-// ALICE Experiment at CERN, All rights reserved.                           *
-//                                                                          *
-// Primary Authors: Sergey Gorbunov <sergey.gorbunov@kip.uni-heidelberg.de> *
-//                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
-//                  for The ALICE HLT Project.                              *
-//                                                                          *
-// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
-//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
-//                                                                          *
-// Permission to use, copy, modify and distribute this software and its     *
-// documentation strictly for non-commercial purposes is hereby granted     *
-// without fee, provided that the above copyright notice appears in all     *
-// copies and that both the copyright notice and this permission notice     *
-// appear in the supporting documentation. The authors make no claims       *
-// about the suitability of this software for any purpose. It is            *
-// provided "as is" without express or implied warranty.                    *
-//                                                                          *
-//***************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include "AliHLTTPCCATracker.h"
 #include "AliHLTTPCCAOutTrack.h"
@@ -54,16 +56,12 @@ AliHLTTPCCATracker::AliHLTTPCCATracker()
 #endif //DO_TPCCATRACKER_EFF_PERFORMANCE
     fParam(),
     fClusterData( 0 ),
-    fData(),
     fHitMemory( 0 ),
     fHitMemorySize( 0 ),
     fTrackMemory( 0 ),
     fTrackMemorySize( 0 ),
     fTrackletStartHits( 0 ),
     fNTracklets( 0 ),
-    fTrackletVectors(),
-    fNumberOfTracks(0),
-    fTracks(0),
     fNTrackHits( 0 ),
     fOutput( 0 )
 {
@@ -103,12 +101,9 @@ void AliHLTTPCCATracker::StartEvent()
 
 void  AliHLTTPCCATracker::SetupCommonMemory()
 {
-//   std::cout << " SetupCommonMemory0 " << std::endl; //iklm debug
-  if (fHitMemory) delete[] fHitMemory;
-//   std::cout << " SetupCommonMemory1 " << std::endl; //iklm debug
-  fHitMemory = 0;
+//   if (fHitMemory) delete[] fHitMemory;
+//   fHitMemory = 0;
   if (fTrackMemory) delete[] fTrackMemory;
-//   std::cout << " SetupCommonMemory2 " << std::endl; //iklm debug
   fTrackMemory = 0;
 
   fData.Clear();
@@ -117,25 +112,21 @@ void  AliHLTTPCCATracker::SetupCommonMemory()
 
 void AliHLTTPCCATracker::RecalculateHitsSize( int MaxNHits )
 {
-  fHitMemorySize = 0;
-  fHitMemorySize += RequiredMemory( fTrackletStartHits, MaxNHits );
+//   fHitMemorySize = 0;
+//   fHitMemorySize += RequiredMemory( fTrackletStartHits, MaxNHits );
 }
 
 void  AliHLTTPCCATracker::SetPointersHits( int MaxNHits )
 {
-  assert( fHitMemory );
-  assert( fHitMemorySize > 0 );
-
+//   assert( fHitMemory );
+//   assert( fHitMemorySize > 0 );
   // set all pointers to the event memory
-
-  char *mem = fHitMemory;
-
+//   char *mem = fHitMemory;
   // extra arrays for tpc clusters
-
-  AssignMemory( fTrackletStartHits, mem, MaxNHits );
-
+  fTrackletStartHits.resize(MaxNHits);
+  //AssignMemory( fTrackletStartHits, mem, MaxNHits );
   // arrays for track hits
-  assert( fHitMemorySize >= mem - fHitMemory );
+//   assert( fHitMemorySize >= mem - fHitMemory );
 }
 
 void AliHLTTPCCATracker::RecalculateTrackMemorySize( int MaxNTracks, int MaxNHits )
@@ -172,15 +163,12 @@ void  AliHLTTPCCATracker::SetPointersTracks( int MaxNTracks, int MaxNHits )
 void AliHLTTPCCATracker::ReadEvent( AliHLTTPCCAClusterData *clusterData )
 {
   fClusterData = clusterData;
-//   std::cout << " cat0 " << std::endl; //iklm debug
   StartEvent();
-//   std::cout << " cat1 " << std::endl; //iklm debug
   //* Convert input hits, create grids, etc.
   fData.InitFromClusterData( *clusterData );
-//   std::cout << " cat2 " << std::endl; //iklm debug
   {
     RecalculateHitsSize( fData.NumberOfHits() ); // to calculate the size
-    fHitMemory = new char[fHitMemorySize + 1600];
+//     fHitMemory = new char[fHitMemorySize + 1600];
     SetPointersHits( fData.NumberOfHits() ); // set pointers for hits
     fNTracklets = 0;
   }
@@ -203,8 +191,6 @@ void AliHLTTPCCATracker::WriteOutput()
   Stopwatch timer;
   timer.Start();
 #endif // USE_TIMERS
-  
-  //cout<<"output: nTracks = "<< fTracks.size() <<", nHitsTotal="<<fData.NumberOfHits()<<std::endl;
 
   debugWO() << "numberOfTracks = " << fNumberOfTracks << std::endl;
   fOutput->SetNTracks( fNumberOfTracks );
@@ -221,43 +207,92 @@ void AliHLTTPCCATracker::WriteOutput()
   int nStoredHits = 0;
   int iTr = 0;
   const int tracksSize = fTracks.size();
+#ifdef TETA
+  float *sFirstClusterRef = (float*) _mm_malloc(sizeof(float_v), float_v::Size*4);
+  float *sNClusters = (float*) _mm_malloc(sizeof(float_v), float_v::Size*4);
+  float *sInnerRow = (float*) _mm_malloc(sizeof(float_v), float_v::Size*4);
+  float *sOuterRow = (float*) _mm_malloc(sizeof(float_v), float_v::Size*4);
+  const AliHLTTPCCATrackParam *sStartPoint[float_v::Size] = {0};
+  int nTrackV(0), iTrV(0);
+  fOutput->SetNTracksV( 0 );
+  TrSort* tr_sort_helper = new TrSort[fNumberOfTracks];
+  for ( int trackIndex = 0; trackIndex < tracksSize; ++trackIndex ) {
+    if( trackIndex >= fNumberOfTracks ) continue;
+    const Track &track = *fTracks[trackIndex];
+    tr_sort_helper[trackIndex].nHits = track.NumberOfHits();
+    tr_sort_helper[trackIndex].trId = trackIndex;
+  }
+  std::sort(&(tr_sort_helper[0]), &(tr_sort_helper[fNumberOfTracks]), TrSort::trComp);
+#endif
   for ( int trackIndex = 0; trackIndex < tracksSize; ++trackIndex ) {
     // if (!fTracks[trackIndex]) continue;
+#ifndef TETA
     const Track &track = *fTracks[trackIndex];
-    const short numberOfHits = track.NumberOfHits();
-    if ( numberOfHits <= 0 ) {
-      // might happen. See TrackletSelector.
-      if (fTracks[trackIndex]) delete fTracks[trackIndex];
-      continue;
-    }
+    const int numberOfHits = track.NumberOfHits();
 
     {
       AliHLTTPCCASliceTrack out;
       hitStoreIndex = nStoredHits;
       out.SetFirstClusterRef( nStoredHits );
-      nStoredHits += numberOfHits;
+//      nStoredHits += numberOfHits;
       out.SetNClusters( numberOfHits );
       out.SetParam( track.Param() );
       fOutput->SetTrack( iTr, out );
     }
+#else
+    const Track &track = *fTracks[tr_sort_helper[trackIndex].trId];
+    const int numberOfHits = track.NumberOfHits();
+    sFirstClusterRef[nTrackV] = nStoredHits;
+    sNClusters[nTrackV] = numberOfHits;
+    sInnerRow[nTrackV] = track.HitId( 0 ).RowIndex();
+    sOuterRow[nTrackV] = track.HitId( numberOfHits - 1 ).RowIndex();
+    sStartPoint[nTrackV] = &track.Param();
+    nTrackV++;
+    if( nTrackV == float_v::Size || trackIndex >= tracksSize - 1 ) {
+      float_v &tFirstClusterRef = reinterpret_cast<float_v&>(sFirstClusterRef[0]);
+      int_v vFirstClusterRef(tFirstClusterRef);
+      float_v &tNClusters = reinterpret_cast<float_v&>(sNClusters[0]);
+      int_v vNClusters(tNClusters);
+      float_v &tInnerRow = reinterpret_cast<float_v&>(sInnerRow[0]);
+      int_v vInnerRow(tInnerRow);
+      float_v &tOuterRow = reinterpret_cast<float_v&>(sOuterRow[0]);
+      int_v vOuterRow(tOuterRow);
+      AliHLTTPCCATrackParamVector vStartPoint;
+      ConvertPTrackParamToVector(sStartPoint,vStartPoint,nTrackV);
+      int_m vActive( int_v( Vc::IndexesFromZero ) < nTrackV );
+      AliHLTTPCCASliceTrackVector vOut( vFirstClusterRef, vNClusters, vInnerRow, vOuterRow, int_v(0), vActive, vStartPoint );
+      fOutput->SetTrackV( iTrV, vOut );
+      iTrV++;
+      nTrackV = 0;
+      fOutput->AddNTracksV();
+    }
+#endif
     ++iTr;
+    nStoredHits += numberOfHits;
 
     for ( int hitIdIndex = 0; hitIdIndex < numberOfHits; ++hitIdIndex ) {
       const HitId &hitId = track.HitId( hitIdIndex );
-      const short rowIndex = hitId.RowIndex();
-      const unsigned short hitIndex = hitId.HitIndex();
+      const int rowIndex = hitId.RowIndex();
+      const unsigned int hitIndex = hitId.HitIndex();
       const AliHLTTPCCARow &row = fData.Row( rowIndex );
 
       const int inpIdOffset = fClusterData->RowOffset( rowIndex );
       const int inpIdtot = fData.ClusterDataIndex( row, hitIndex );
       const int inpId = inpIdtot - inpIdOffset;
+#if 0
+      VALGRIND_CHECK_VALUE_IS_DEFINED( rowIndex );
+      VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
+      VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdOffset );
+      VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdtot );
+      VALGRIND_CHECK_VALUE_IS_DEFINED( inpId );
+#endif
 
       const float origX = fClusterData->X( inpIdtot );
       const float origY = fClusterData->Y( inpIdtot );
       const float origZ = fClusterData->Z( inpIdtot );
 
       const DataCompressor::RowCluster rc( rowIndex, inpId );
-      unsigned short hPackedYZ = 0;
+      unsigned int hPackedYZ = 0;
       UChar_t hPackedAmp = 0;
       float2 hUnpackedYZ;
       hUnpackedYZ.x = origY;
@@ -271,10 +306,19 @@ void AliHLTTPCCATracker::WriteOutput()
       fOutput->SetClusterUnpackedX( hitStoreIndex, hUnpackedX );
       ++hitStoreIndex;
     }
+#ifndef TETA
     if (fTracks[trackIndex]) delete fTracks[trackIndex];
+#endif
   }
-
+#ifdef TETA
+  _mm_free(sFirstClusterRef);
+  _mm_free(sNClusters);
+  _mm_free(sInnerRow);
+  _mm_free(sOuterRow);
+#else
   fOutput->SortTracks();
+#endif
+
 #ifdef USE_TIMERS
   timer.Stop();
   fTimers[5] += timer.RealTime();
@@ -338,19 +382,7 @@ void AliHLTTPCCATracker::StoreToFile( FILE *f ) const
 
   BinaryStoreWrite( fTimers, 10, f );
 
-  //BinaryStoreWrite( fLinkUpData  , startPointer, f );
-  //BinaryStoreWrite( fLinkDownData, startPointer, f );
-  //BinaryStoreWrite( fHitDataY    , startPointer, f );
-  //BinaryStoreWrite( fHitDataZ    , startPointer, f );
-
-  //BinaryStoreWrite( fHitWeights, startPointer, f );
-
   BinaryStoreWrite( fNTracklets, f );
-  //BinaryStoreWrite( fTrackletStartHits, startPointer, f );
-  // TODO BinaryStoreWrite( fTracklets, startPointer, f );
-
-  //BinaryStoreWrite( fTracks, startPointer, f );
-  //BinaryStoreWrite( fNTrackHits, startPointer, f );
 #if 0
   BinaryStoreWrite( fNOutTracks, f );
   //BinaryStoreWrite( fOutTracks, startPointer, f );
@@ -369,19 +401,7 @@ void AliHLTTPCCATracker::RestoreFromFile( FILE *f )
   Byte_t alignment;
   BinaryStoreRead( alignment, f );
 
-  //BinaryStoreRead( fLinkUpData   , startPointer, f );
-  //BinaryStoreRead( fLinkDownData , startPointer, f );
-  //BinaryStoreRead( fHitDataY     , startPointer, f );
-  //BinaryStoreRead( fHitDataZ     , startPointer, f );
-
-  //BinaryStoreRead( fHitWeights   , startPointer, f );
-
   BinaryStoreRead( fNTracklets, f );
-  //BinaryStoreRead( fTrackletStartHits, startPointer, f );
-  // TODO BinaryStoreRead( fTracklets    , startPointer, f );
-
-  //BinaryStoreRead( fTracks       , startPointer, f );
-  //BinaryStoreRead( fNTrackHits   , startPointer, f );
 #if 0
   BinaryStoreRead( fNOutTracks   , f );
   //BinaryStoreRead( fOutTracks    , startPointer, f );
