@@ -23,7 +23,7 @@ RUN yum update -q -y \
 RUN pip install pyparsing
 
 RUN mkdir -p star-spack \
- && curl -sL https://github.com/star-bnl/star-spack/archive/9299449b078f4f0ad0d6fd1b0a220449d38b340d.tar.gz | tar -xz --strip-components 1 -C star-spack \
+ && curl -sL https://github.com/star-bnl/star-spack/archive/588a489e3441c61a28f61f666e7f0aa3095f217a.tar.gz | tar -xz --strip-components 1 -C star-spack \
  && curl -sL https://github.com/spack/spack/archive/010e5761d6631eae102d1eec87e5e74a0e16ed82.tar.gz | tar -xz --strip-components 1 -C star-spack/spack
 
 RUN source star-spack/setup.sh \
