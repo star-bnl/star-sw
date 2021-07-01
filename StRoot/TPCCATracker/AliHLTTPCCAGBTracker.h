@@ -1,10 +1,26 @@
-//-*- Mode: C++ -*-
-// ************************************************************************
-// This file is property of and copyright by the ALICE HLT Project        *
-// ALICE Experiment at CERN, All rights reserved.                         *
-// See cxx source for full Copyright notice                               *
-//                                                                        *
-//*************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef ALIHLTTPCCAGBTRACKER_H
 #define ALIHLTTPCCAGBTRACKER_H
@@ -73,6 +89,10 @@ class AliHLTTPCCAGBTracker
     int *TrackHits() { return fTrackHits; }
     int TrackHit( int i ) const { return fTrackHits[i]; }
 
+    short *TrackHitsSegmentsId() const { return fTrackHitsSegmentsId; }
+    short *TrackHitsSegmentsId() { return fTrackHitsSegmentsId; }
+    short TrackHitSegmentId( short i ) const { return fTrackHitsSegmentsId[i]; }
+
     bool FitTrack( AliHLTTPCCATrackParam &T, AliHLTTPCCATrackParam t0,
                      float &Alpha, int hits[], int &NTrackHits,
                      bool dir );
@@ -102,6 +122,11 @@ class AliHLTTPCCAGBTracker
     void SetSettings( const std::vector<AliHLTTPCCAParam>& settings ); // need for StRoot
     int  GetHitsSize() const {return fHits.Size();}
 
+#ifdef CALC_DCA_ON
+  vector<point_3d>& GetLeftDCA() { return dca_left; }
+  vector<point_3d>& GetRightDCA() { return dca_right; }
+#endif
+
       /// Try to group close hits in row formed by one track. After sort hits.
 //     void GroupHits(); // iklm
   friend class AliHLTTPCCAPerformance; //dbg
@@ -113,9 +138,14 @@ class AliHLTTPCCAGBTracker
     int *fExt2IntHitID;        //* array of internal hit indices
     int fNHits;                //* N hits in event
     int *fTrackHits;           //* track->hits reference array
+    short *fTrackHitsSegmentsId;           //* track->hit's segment id reference array
     AliHLTTPCCAGBTrack *fTracks; //* array of tracks
     int fNTracks;              //* N tracks
     AliHLTTPCCAMerger *fMerger;  //* global merger
+#ifdef CALC_DCA_ON
+    vector<point_3d> dca_left;
+    vector<point_3d> dca_right;
+#endif
 
     AliHLTResizableArray<AliHLTTPCCAClusterData, 1, AliHLTFullyCacheLineAligned> fClusterData;
 

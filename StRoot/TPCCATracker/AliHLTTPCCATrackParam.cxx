@@ -1,24 +1,26 @@
-// $Id: AliHLTTPCCATrackParam.cxx,v 1.1 2016/02/05 23:27:29 fisyak Exp $
-// **************************************************************************
-// This file is property of and copyright by the ALICE HLT Project          *
-// ALICE Experiment at CERN, All rights reserved.                           *
-//                                                                          *
-// Primary Authors: Sergey Gorbunov <sergey.gorbunov@kip.uni-heidelberg.de> *
-//                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
-//                  for The ALICE HLT Project.                              *
-//                                                                          *
-// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
-//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
-//                                                                          *
-// Permission to use, copy, modify and distribute this software and its     *
-// documentation strictly for non-commercial purposes is hereby granted     *
-// without fee, provided that the above copyright notice appears in all     *
-// copies and that both the copyright notice and this permission notice     *
-// appear in the supporting documentation. The authors make no claims       *
-// about the suitability of this software for any purpose. It is            *
-// provided "as is" without express or implied warranty.                    *
-//                                                                          *
-//***************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #include "AliHLTTPCCATrackParam.h"
@@ -313,8 +315,6 @@ bool AliHLTTPCCATrackParam::Rotate( float alpha, float maxSinPhi )
   //                      {  0, 0, j2, 0,  0 }, // SinPhi
   //                    {  0, 0, 0,  1,  0 }, // DzDs
   //                    {  0, 0, 0,  0,  1 } }; // Kappa
-  //cout<<"alpha="<<alpha<<" "<<x<<" "<<y<<" "<<sP<<" "<<cP<<" "<<j0<<" "<<j2<<endl;
-  //cout<<"      "<<fC[0]<<" "<<fC[1]<<" "<<fC[6]<<" "<<fC[10]<<" "<<fC[4]<<" "<<fC[5]<<" "<<fC[8]<<" "<<fC[12]<<endl;
   fC[0] *= j0 * j0;
   fC[1] *= j0;
   fC[3] *= j0;
@@ -373,73 +373,6 @@ bool AliHLTTPCCATrackParam::Rotate( float alpha, AliHLTTPCCATrackLinearisation &
 
   return 1;
 }
-
-
-
-/*bool AliHLTTPCCATrackParam::Filter( float y, float z, float err2Y, float err2Z, float maxSinPhi )
-{
-  assert( maxSinPhi > 0.f );
-  /// Add the y,z measurement with the Kalman filter
-
-  float
-  c00 = fC[ 0],
-  c11 = fC[ 2],
-  c20 = fC[ 3],
-  c31 = fC[ 7],
-  c40 = fC[10];
-
-  err2Y += c00;
-  err2Z += c11;
-
-  float
-  z0 = y - fP[0],
-  z1 = z - fP[1];
-
-  if ( ISUNLIKELY( err2Y < 1.e-8f ) || ISUNLIKELY( err2Z < 1.e-8f ) ) return 0;
-
-  float mS0 = 1.f / err2Y;
-  float mS2 = 1.f / err2Z;
-
-  // K = CHtS
-
-  float k00, k11, k20, k31, k40;
-
-  k00 = c00 * mS0;
-  k20 = c20 * mS0;
-  k40 = c40 * mS0;
-
-  k11 = c11 * mS2;
-  k31 = c31 * mS2;
-
-  float sinPhi = fP[2] + k20 * z0  ;
-
-  if ( ISUNLIKELY( CAMath::Abs( sinPhi ) >= maxSinPhi ) ) return 0;
-
-  fNDF  += 2;
-  fChi2 += mS0 * z0 * z0 + mS2 * z1 * z1 ;
-
-  fP[ 0] += k00 * z0 ;
-  fP[ 1] += k11 * z1 ;
-  fP[ 2] = sinPhi ;
-  fP[ 3] += k31 * z1 ;
-  fP[ 4] += k40 * z0 ;
-
-  fC[ 0] -= k00 * c00 ;
-  fC[ 3] -= k20 * c00 ;
-  fC[ 5] -= k20 * c20 ;
-  fC[10] -= k40 * c00 ;
-  fC[12] -= k40 * c20 ;
-  fC[14] -= k40 * c40 ;
-
-  fC[ 2] -= k11 * c11 ;
-  fC[ 7] -= k31 * c11 ;
-  fC[ 9] -= k31 * c31 ;
-
-  return 1;
-}*/
-
-
-
 
 #if !defined(HLTCA_GPUCODE)
 #include <iostream>
