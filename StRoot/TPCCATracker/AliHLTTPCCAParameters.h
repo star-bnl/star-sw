@@ -1,18 +1,20 @@
-/**************************************************************************
- * This file is property of and copyright by the ALICE HLT Project        *
- * All rights reserved.                                                   *
- *                                                                        *
- * Primary Authors:                                                       *
- *     Copyright 2009       Matthias Kretz <kretz@kde.org>                *
- *                                                                        *
- * Permission to use, copy, modify and distribute this software and its   *
- * documentation strictly for non-commercial purposes is hereby granted   *
- * without fee, provided that the above copyright notice appears in all   *
- * copies and that both the copyright notice and this permission notice   *
- * appear in the supporting documentation. The authors make no claims     *
- * about the suitability of this software for any purpose. It is          *
- * provided "as is" without express or implied warranty.                  *
- **************************************************************************/
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2009 Matthias Kretz <kretz@kde.org>
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef ALIHLTTPCCAPARAMETERS_H
 #define ALIHLTTPCCAPARAMETERS_H
@@ -69,7 +71,7 @@ namespace AliHLTTPCCAParameters
      */
       //    NumberOfInnerRows = 13-1, // delete iRow = 12
     
-    MaxNumberOfRows8 = 112, // this should be divideable by sfloat_v::Size = 8, (16 for Xeon Phi)
+    MaxNumberOfRows8 = 112, // this should be divideable by float_v::Size = 8, (16 for Xeon Phi)
 
     /**
      * The number of slices in the TPC.
@@ -84,8 +86,21 @@ namespace AliHLTTPCCAParameters
       /**
        * Number of cells in grid will be GridCreationCoeff*NHitsOnRow
        */
-    GridCreationCoeff = 2    
+    GridCreationCoeff = 2,    
 
+    /**
+     * When non-overlaped tracks are merged allow gaps of
+     * this size
+     */
+//    MaximumRowGapBetweenClones = 11,
+    MaximumRowGapBetweenClones = 70,
+
+    /**
+     * When overlaped tracks are merged allow gaps of
+     * this size
+     */
+    MaximumRowGapBetweenOverlapingClones = 7
+    
   };
 
     /**
@@ -114,7 +129,9 @@ namespace AliHLTTPCCAParameters
 //  static const float NeighbourCurvCutY[3] = {0.03,  .1, 3.};//{0.03,  .1, 3.};
 //  static const float NeighbourCurvCutZ[3] = {0.03,  .1, 3.};//{0.03,  .1, 3.};
 #else
-  static const float NeighbourChiCut[3] = {0.2,  3., 3.};//{0.2,  3., 3.};
+
+  static const float NeighbourChiCut[3] = {0.2,  3., 3.};
+
 #endif // 1
 
    /**
@@ -130,8 +147,8 @@ namespace AliHLTTPCCAParameters
   /**
    * The minimum for q/Pt that TrackletConstructor ensures at the end.
    */
-#ifndef __CINT__
-  static const sfloat_v MinimumQPt = 1.e-8f;
+#if !defined(__CINT__) && !defined(__CLING__)
+  static const float_v MinimumQPt = 1.e-8f;
 #else
   static const float    MinimumQPt = 1.e-8f;
 #endif

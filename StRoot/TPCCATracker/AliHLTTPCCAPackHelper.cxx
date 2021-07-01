@@ -22,22 +22,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "AliHLTTPCCAGBHit.h"
+#include "AliHLTTPCCAPackHelper.h"
+#include "AliHLTTPCCARow.h"
+#include "AliHLTTPCCADef.h"
 
-ostream& operator<<(ostream& out, const AliHLTTPCCAGBHit &a)
-{
-  return out << a.fX << " " << a.fY << " " << a.fZ << std::endl
-   << a.fErrX << " " << a.fErrY << " " << a.fErrZ << std::endl
-   << a.fAmp << " " << a.fISlice << " " << a.fIRow << " " << a.fID << " " << a.fIsUsed << std::endl;
-
+// 1e2f is chousen because in this case multiplication of floats is very fast
+PackHelper::TPackedY PackHelper::PackY( const AliHLTTPCCARow& row, float y ) {
+  UNUSED_PARAM1(row);
+  return y*1e2f;
+}
+PackHelper::TPackedZ PackHelper::PackZ( const AliHLTTPCCARow& row, float z ) {
+  UNUSED_PARAM1(row);
+  return z*1e2f;
 }
 
-istream& operator>>(istream& in, AliHLTTPCCAGBHit &a)
-{
-  return in >> a.fX >> a.fY >> a.fZ
-   >> a.fErrX >> a.fErrY >> a.fErrZ
-   >> a.fAmp >> a.fISlice >> a.fIRow >> a.fID >> a.fIsUsed;
+float PackHelper::UnpackY( const AliHLTTPCCARow& row, PackHelper::TPackedY y ) {
+  UNUSED_PARAM1(row);
+  return static_cast<float>(y)*1e-2f;
+}
+float PackHelper::UnpackZ( const AliHLTTPCCARow& row, PackHelper::TPackedZ z ) {
+  UNUSED_PARAM1(row);
+  return static_cast<float>(z)*1e-2f;
 }
 
-
-//ClassImp(AliHLTTPCCAGBHit)

@@ -1,24 +1,26 @@
-// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.2 2016/06/21 03:39:45 smirnovd Exp $
-// **************************************************************************
-// This file is property of and copyright by the ALICE HLT Project          *
-// ALICE Experiment at CERN, All rights reserved.                           *
-//                                                                          *
-// Primary Authors: Sergey Gorbunov <sergey.gorbunov@kip.uni-heidelberg.de> *
-//                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
-//                  for The ALICE HLT Project.                              *
-//                                                                          *
-// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
-//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
-//                                                                          *
-// Permission to use, copy, modify and distribute this software and its     *
-// documentation strictly for non-commercial purposes is hereby granted     *
-// without fee, provided that the above copyright notice appears in all     *
-// copies and that both the copyright notice and this permission notice     *
-// appear in the supporting documentation. The authors make no claims       *
-// about the suitability of this software for any purpose. It is            *
-// provided "as is" without express or implied warranty.                    *
-//                                                                          *
-//***************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #include "AliHLTTPCCAParam.h"
@@ -28,12 +30,12 @@
 #include "debug.h"
 
 AliHLTTPCCAParam::AliHLTTPCCAParam()
-  : fISlice( 0 ), fNRows( 0 ), fNInnerRows(0), fAlpha( 0.174533 ), fDAlpha( 0.349066 ),
+  : fISlice( 0 ), fNRows( 0 ), fAlpha( 0.174533 ), fDAlpha( 0.349066 ),
     fCosAlpha( 0 ), fSinAlpha( 0 ), fAngleMin( 0 ), fAngleMax( 0 ), fRMin( 83.65 ), fRMax( 133.3 ),
     fZMin( 0.0529937 ), fZMax( 249.778 ), fErrX( 0 ), fErrY( 0 ), fErrZ( 0.228808 ), fPadPitch( 0.4 ), fBz( -5. ),
     fHitPickUpFactor( 1. ),
     fMaxTrackMatchDRow( 4 ), fTrackConnectionFactor( 3.5 ), fTrackChiCut( 3.5 ), fTrackChi2Cut( 10 ) // are rewrited from file. See operator>>()
-    ,fRowX(0), fRecoType(0) //Default is Sti
+  ,fRecoType(0) //Default is Sti
 {
   // constructor
 ///mvz start
@@ -79,7 +81,7 @@ AliHLTTPCCAParam::AliHLTTPCCAParam()
   fParamS0Par[1][2][4] = 0.0179946f;
   fParamS0Par[1][2][5] = 0.000425504f;
   fParamS0Par[1][2][6] = 20.9294f;*/
-
+  
   fParamS0Par[0][0][0] = 0.0004f;
   fParamS0Par[0][0][1] = 0.001720216f;
   fParamS0Par[0][0][2] = 0.0236289f;
@@ -203,22 +205,7 @@ float AliHLTTPCCAParam::GetClusterError2( int yz, int type, float z, float angle
 //std::cout << v << std::endl;
   return CAMath::Abs( v );
 }
-///mvz start 20.01.2010
-/*
-void AliHLTTPCCAParam::GetClusterErrors2( int iRow, float z, float sinPhi, float cosPhi, float DzDs, float &Err2Y, float &Err2Z ) const
-{
-  //
-  // Use calibrated cluster error from OCDB
-  //
 
-  z = CAMath::Abs( ( 250. - 0.275 ) - CAMath::Abs( z ) );
-  const int type = errorType( iRow );
-  float cosPhiInv = CAMath::Abs( cosPhi ) > 1.e-2 ? 1. / cosPhi : 0;
-  float angleY = sinPhi * cosPhiInv ;
-  float angleZ = DzDs * cosPhiInv ; // SG was bug???
-  Err2Y = GetClusterError2( 0, type, z, angleY );
-  Err2Z = GetClusterError2( 1, type, z, angleZ );
-}*/
 void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const AliHLTTPCCATrackParam &t, float &Err2Y, float &Err2Z ) const
 {
 enum {kYErr=0,kZErr=1,kWidTrk=2,kThkDet=3,kYDiff=4,kZDiff=5};
@@ -309,7 +296,12 @@ std::istream &operator>>( std::istream &in, AliHLTTPCCAParam &p )
 
   in >> p.fISlice;
   in >> p.fNRows;
-  p.SetNInnerRows( 13 ); // TODO move to input file
+  if( p.fNRows < 45 ) {
+    p.SetNInnerRows( 13 ); // TODO move to input file
+  } else {
+    p.SetNInnerRows( 40 ); // TODO move to input file
+  }
+  p.SetNTpcRows( p.fNRows );
   in >> p.fAlpha;
   in >> p.fDAlpha;
   in >> p.fCosAlpha;

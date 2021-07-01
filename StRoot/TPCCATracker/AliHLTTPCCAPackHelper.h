@@ -22,22 +22,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "AliHLTTPCCAGBHit.h"
+#ifndef ALIHLTTPCCAPACKHELPER_H
+#define ALIHLTTPCCAPACKHELPER_H
 
-ostream& operator<<(ostream& out, const AliHLTTPCCAGBHit &a)
+#include "AliHLTTPCCADef.h"
+class AliHLTTPCCARow;
+
+ // version w\o this transformation at revision 21937
+class PackHelper
 {
-  return out << a.fX << " " << a.fY << " " << a.fZ << std::endl
-   << a.fErrX << " " << a.fErrY << " " << a.fErrZ << std::endl
-   << a.fAmp << " " << a.fISlice << " " << a.fIRow << " " << a.fID << " " << a.fIsUsed << std::endl;
+ public:
+  typedef short int TPackedY;
+  typedef short int TPackedZ;
 
-}
+  static TPackedY PackY( const AliHLTTPCCARow& row, float y );
+  static TPackedZ PackZ( const AliHLTTPCCARow& row, float z );
+  static float UnpackY( const AliHLTTPCCARow& row, TPackedY y );
+  static float UnpackZ( const AliHLTTPCCARow& row, TPackedZ z );
+};
 
-istream& operator>>(istream& in, AliHLTTPCCAGBHit &a)
-{
-  return in >> a.fX >> a.fY >> a.fZ
-   >> a.fErrX >> a.fErrY >> a.fErrZ
-   >> a.fAmp >> a.fISlice >> a.fIRow >> a.fID >> a.fIsUsed;
-}
-
-
-//ClassImp(AliHLTTPCCAGBHit)
+#endif

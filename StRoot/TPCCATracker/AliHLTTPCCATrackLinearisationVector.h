@@ -1,9 +1,26 @@
-// ************************************************************************
-// This file is property of and copyright by the ALICE HLT Project        *
-// ALICE Experiment at CERN, All rights reserved.                         *
-// See cxx source for full Copyright notice                               *
-//                                                                        *
-//*************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #ifndef ALIHLTTPCCATRACKLINEARISATIONVECTOR_H
@@ -33,48 +50,48 @@ class AliHLTTPCCATrackLinearisationVector
     AliHLTTPCCATrackLinearisationVector()
         : fSinPhi( Vc::Zero ), fCosPhi( 1 ), fDzDs( Vc::Zero ), fQPt( Vc::Zero ) {}
 
-    AliHLTTPCCATrackLinearisationVector( sfloat_v SinPhi1, sfloat_v CosPhi1, sfloat_v DzDs1, sfloat_v QPt1 )
+    AliHLTTPCCATrackLinearisationVector( float_v SinPhi1, float_v CosPhi1, float_v DzDs1, float_v QPt1 )
         : fSinPhi( SinPhi1 ), fCosPhi( CosPhi1 ), fDzDs( DzDs1 ), fQPt( QPt1 ) {}
 
     AliHLTTPCCATrackLinearisationVector( const AliHLTTPCCATrackParamVector &t );
 
-    void Set( sfloat_v SinPhi1, sfloat_v CosPhi1, sfloat_v DzDs1, sfloat_v QPt1 );
+    void Set( float_v SinPhi1, float_v CosPhi1, float_v DzDs1, float_v QPt1 );
 
 
-    sfloat_v SinPhi()const { return fSinPhi; }
-    sfloat_v CosPhi()const { return fCosPhi; }
-    sfloat_v DzDs()  const { return fDzDs; }
-    sfloat_v QPt()   const { return fQPt; }
+    float_v SinPhi()const { return fSinPhi; }
+    float_v CosPhi()const { return fCosPhi; }
+    float_v DzDs()  const { return fDzDs; }
+    float_v QPt()   const { return fQPt; }
 
-    sfloat_v GetSinPhi()const { return fSinPhi; }
-    sfloat_v GetCosPhi()const { return fCosPhi; }
-    sfloat_v GetDzDs()  const { return fDzDs; }
-    sfloat_v GetQPt()   const { return fQPt; }
+    float_v GetSinPhi()const { return fSinPhi; }
+    float_v GetCosPhi()const { return fCosPhi; }
+    float_v GetDzDs()  const { return fDzDs; }
+    float_v GetQPt()   const { return fQPt; }
 
-    void SetSinPhi( sfloat_v v ) {  fSinPhi = v; }
-    void SetCosPhi( sfloat_v v ) {  fCosPhi = v; }
-    void SetDzDs( sfloat_v v )  {  fDzDs   = v; }
-    void SetQPt( sfloat_v v )   {  fQPt = v; }
+    void SetSinPhi( float_v v ) {  fSinPhi = v; }
+    void SetCosPhi( float_v v ) {  fCosPhi = v; }
+    void SetDzDs( float_v v )  {  fDzDs   = v; }
+    void SetQPt( float_v v )   {  fQPt = v; }
 
   private:
 
-    sfloat_v fSinPhi; // SinPhi
-    sfloat_v fCosPhi; // CosPhi
-    sfloat_v fDzDs;   // DzDs
-    sfloat_v fQPt;    // QPt
+    float_v fSinPhi; // SinPhi
+    float_v fCosPhi; // CosPhi
+    float_v fDzDs;   // DzDs
+    float_v fQPt;    // QPt
 };
 
 
 inline AliHLTTPCCATrackLinearisationVector::AliHLTTPCCATrackLinearisationVector( const AliHLTTPCCATrackParamVector &t )
     : fSinPhi( t.SinPhi() ), fCosPhi( Vc::Zero ), fDzDs( t.DzDs() ), fQPt( t.QPt() )
 {
-  fSinPhi = CAMath::Max( CAMath::Min( fSinPhi, sfloat_v( .999f ) ), sfloat_v( -.999f ) );
-  fCosPhi = t.SignCosPhi() * CAMath::Sqrt( sfloat_v( Vc::One ) - fSinPhi * fSinPhi );
+  fSinPhi = CAMath::Max( CAMath::Min( fSinPhi, float_v( .999f ) ), float_v( -.999f ) );
+  fCosPhi = t.SignCosPhi() * CAMath::Sqrt( float_v( Vc::One ) - fSinPhi * fSinPhi );
 }
 
 
-inline void AliHLTTPCCATrackLinearisationVector::Set( sfloat_v SinPhi1, sfloat_v CosPhi1,
-    sfloat_v DzDs1, sfloat_v QPt1 )
+inline void AliHLTTPCCATrackLinearisationVector::Set( float_v SinPhi1, float_v CosPhi1,
+    float_v DzDs1, float_v QPt1 )
 {
   SetSinPhi( SinPhi1 );
   SetCosPhi( CosPhi1 );

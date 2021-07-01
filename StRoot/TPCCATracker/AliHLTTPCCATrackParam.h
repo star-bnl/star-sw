@@ -1,11 +1,26 @@
-//-*- Mode: C++ -*-
-// $Id: AliHLTTPCCATrackParam.h,v 1.1 2016/02/05 23:27:29 fisyak Exp $
-// ************************************************************************
-// This file is property of and copyright by the ALICE HLT Project        *
-// ALICE Experiment at CERN, All rights reserved.                         *
-// See cxx source for full Copyright notice                               *
-//                                                                        *
-//*************************************************************************
+/*
+ * This file is part of TPCCATracker package
+ * Copyright (C) 2007-2020 FIAS Frankfurt Institute for Advanced Studies
+ *               2007-2020 Goethe University of Frankfurt
+ *               2007-2020 Ivan Kisel <I.Kisel@compeng.uni-frankfurt.de>
+ *               2007-2019 Sergey Gorbunov
+ *               2007-2019 Maksym Zyzak
+ *               2007-2014 Igor Kulakov
+ *               2014-2020 Grigory Kozlov
+ *
+ * TPCCATracker is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TPCCATracker is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 
 #ifndef ALIHLTTPCCATRACKPARAM_H
@@ -17,7 +32,7 @@
 #include "AliHLTTPCCADef.h"
 
 class AliHLTTPCCATrackLinearisation;
-#if 0
+
 namespace std
 {
   template<typename T> struct char_traits;
@@ -26,7 +41,7 @@ namespace std
   template<typename _CharT, typename _Traits> class basic_ostream;
   typedef basic_ostream<char, char_traits<char> > ostream;
 } // namespace std
-#endif
+
 /**
  * @class AliHLTTPCCATrackParam
  *
@@ -193,6 +208,12 @@ class AliHLTTPCCATrackParam
       fChi2 = 0; fNDF = 0;
     }
 
+    void ReversePar() {
+      fP[2] = -fP[2];
+      fP[4] = -fP[4];
+      fSignCosPhi = -fSignCosPhi;
+    }
+
   private:
     float fX;      // x position
     float fSignCosPhi; // sign of cosPhi   // phi = arctg (Dy/Dx)
@@ -205,9 +226,13 @@ class AliHLTTPCCATrackParam
 inline void AliHLTTPCCATrackParam::RotateXY( float alpha, float &x, float &y, float &sin ) const
 {
   //* Rotate the coordinate system in XY on the angle alpha
+  float cA = 1;
+  float sA = 0;
 
-  const float cA = CAMath::Cos( alpha );
-  const float sA = CAMath::Sin( alpha );
+  if ( fabs(alpha) > 1e-7 ) {
+    cA = CAMath::Cos( alpha );
+    sA = CAMath::Sin( alpha );
+  }
 
   x = ( X()*cA +  Y()*sA );
   y = ( -X()*sA +  Y()*cA );
@@ -473,8 +498,6 @@ inline bool  AliHLTTPCCATrackParam::TransportToX( float x, AliHLTTPCCATrackLinea
   fC[13] = fC[13];
   fC[14] = fC[14];
 #endif
-
-//std::cout << fC[0] << "  "<<fC1[0]<<"       "<<fC[2] << "  "<<fC1[2]<<"       "<<fC[5] << "  "<<fC1[5]<<"       "<<fC[9] << "  "<<fC1[9]<<"       "<<fC[14] << "  "<<fC1[14]<<std::endl;
   return 1;
 }
 
@@ -507,7 +530,6 @@ inline bool AliHLTTPCCATrackParam::CorrectForMeanMaterial( float xOverX0,  float
   fC[13] *= corr;
   fC[14] *= corr * corr;
   fC[14] += par.fSigmadE2 * CAMath::Abs( dE );
-//  std::cout << "dE "<<dE<<"    corr "<<corr<<"  fBethe  " <<par.fBethe<<"  XxRo  "<<xTimesRho<<std::endl;
 
   //Multiple scattering******************
 
