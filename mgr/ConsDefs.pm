@@ -1182,13 +1182,26 @@
     } else {
 	print "Could not find xml libs\n" if (! $param::quiet);
     }
- #Vc check SSE support
- my $cmd = "touch temp_gccflags.c; $CXX -E -dM -o - temp_gccflags.c | grep -q SSE";
- my $VcCPPFLAGS = " -DVC_IMPL=SSE";
- if ($STAR_HOST_SYS =~ 'gcc432$' || system($cmd)) {# No SSE
-   $VcCPPFLAGS = " -DVC_IMPL=Scalar";
-   if (-e "temp_gccflags.c") {`rm temp_gccflags.c`;}
- }
+
+    $TARGET = "";
+    if ($USE_64BITS){
+	$TARGET = "x86_64";
+    } else {
+	$TARGET = "x86";
+    }
+    my $VcDIR = `/cvmfs/star.sdcc.bnl.gov/star-spack/spack/bin/spack find --format '{prefix}' 'vc\@1.4.1' target=$TARGET`;
+    chomp($VcDIR);
+    my $VcCPPFLAGS = " -I" . $VcDIR . "/include" . " -Wabi -fabi-version=0";
+    my $VcLIB = $VcDIR . "/lib/libVc.a";
+    #Vc check SSE support
+    # my $cmd = "touch temp_gccflags.c; $CXX -E -dM -x c++ -o - temp_gccflags.c | grep -q SSE";
+    my $cmd = "$CXX -E -dM -x c++ - < /dev/null | grep -q SSE";
+    if ($STAR_HOST_SYS =~ 'gcc432$' || system($cmd)) {# No SSE
+        $VcCPPFLAGS .= " -DVC_IMPL=Scalar";
+        # if (-e "temp_gccflags.c") {`rm temp_gccflags.c`;}
+    } else {
+        $VcCPPFLAGS .= " -DVc_IMPL=SSE";
+    }
     my @params = (
 		  'Package'        => 'None',
 		  'CPP'            => $CPP,
@@ -1374,7 +1387,8 @@
 			     'LIBS'  => $LoggerLIBS
 			     },
 		       'Vc' => {
-			   'CPP'   => $VcCPPFLAGS
+			   'CPP'   => $VcCPPFLAGS,
+                           'LIBS'  => $VcLIB
 			   },
 		  }
 		  );
