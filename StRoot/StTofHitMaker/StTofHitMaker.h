@@ -31,6 +31,18 @@ class StTofDataCollection;
 
 class StTofHitMaker:public StRTSBaseMaker
 {
+ public:
+
+   /// TOF Raw hits info. struct
+   struct TofRawHit {
+     unsigned short fiberid;           /// 0 1 2,3
+     unsigned short trayID;            /// 1,2,......,120,for tray, 121, 122 for upvpd
+     unsigned short globaltdcchan;     /// 0,1,......,191
+     unsigned int   tdc;               /// tdc time (in bin) per hit.
+     unsigned int   timestamp;         /// data word before unpack
+     unsigned int   triggertimestamp;  /// trigger word before unpack
+   };
+
    private: 
       StEvent *mStEvent;
 #ifndef __CINT__
@@ -43,16 +55,6 @@ class StTofHitMaker:public StRTSBaseMaker
       Int_t UnpackTofRawData();
       void fillTofDataCollection();
       void fillStEvent();     //! ship collection to StEvent
-      /// TOF Raw hits info. struct
-      ///----------------------------------------------------
-      struct TofRawHit {
-        unsigned short fiberid;           /// 0 1 2,3
-        unsigned short trayID;            /// 1,2,......,120,for tray, 121, 122 for upvpd
-        unsigned short globaltdcchan;     /// 0,1,......,191   
-        unsigned int   tdc;               /// tdc time (in bin) per hit.
-        unsigned int   timestamp;         /// data word before unpack
-        unsigned int   triggertimestamp;  /// trigger word before unpack
-     };
      vector<TofRawHit> TofLeadingHits;
      vector<TofRawHit> TofTrailingHits;
 

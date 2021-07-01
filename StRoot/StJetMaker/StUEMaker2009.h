@@ -47,17 +47,6 @@ public:
 StJetMaker2009 *mJetMaker;
 StJetSkimEventMaker *mSkimMaker;
 
-
-private:
-  StJetCandidate* findLeadingJet(StJetVertex *vertex);
-  // void AddRegion(StJetCandidate *leadingjet, StjTrackList trackList, StUeEvent *event);
-  // void addJet(const StProtoJet& protojet, StJetEvent* event, StJetVertex* vertex);
-  void copyVertex(const StjPrimaryVertex& vertex, StJetVertex* jetvertex);
-
-  void copyTrack(const StjTrack&, StJetTrack*);
-  void copyTower(const StjTowerEnergy&, StJetTower*);
-  void copyParticle(const StjMCParticle&, StJetParticle*);
-
   struct StUeBranch {
     StUeBranch(const char* name,  StAnaPars* anapars, const char* jetname)//, StUEAnaPars* ueanapars, StUEPars* uepars)
       : name(name)
@@ -75,6 +64,16 @@ private:
     //  StJetFinder* jetfinder;
     StUeEvent* event;
   };
+
+private:
+  StJetCandidate* findLeadingJet(StJetVertex *vertex);
+  // void AddRegion(StJetCandidate *leadingjet, StjTrackList trackList, StUeEvent *event);
+  // void addJet(const StProtoJet& protojet, StJetEvent* event, StJetVertex* vertex);
+  void copyVertex(const StjPrimaryVertex& vertex, StJetVertex* jetvertex);
+
+  void copyTrack(const StjTrack&, StJetTrack*);
+  void copyTower(const StjTowerEnergy&, StJetTower*);
+  void copyParticle(const StjMCParticle&, StJetParticle*);
   void addTracks(const StjTrackList&, StUeEvent*);
   void addTowers(const StjTowerEnergyList&, StUeEvent*);
   void addParticles(const StjMCParticleList&, StUeEvent*);

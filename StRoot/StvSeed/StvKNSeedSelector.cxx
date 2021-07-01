@@ -40,7 +40,6 @@ static float kStpTheDiv = M_PI/kNumTheDiv;	//step in theta map
 TStopwatch SW;
 
 
-#define Sq(x) ((x)*(x))
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 static void Eigen2(const double err[3], float lam[2], float eig[2][2])
@@ -106,7 +105,7 @@ static inline void Zer( float A[3])
 //_____________________________________________________________________________
 static inline double Nor(float A[3]) 
 {
-   double sum = Sq(A[0])+Sq(A[1])+Sq(A[2]);
+   double sum = A[0]*A[0] + A[1]*A[1] + A[2]*A[2];
    sum = sqrt(sum);
    A[0]/=sum;A[1]/=sum;A[2]/=sum;
    return sum;
@@ -211,7 +210,7 @@ void StvKNSeedSelector::Reset(const float startPos[3],const Mtx33F_t *dir, void 
   for (int jk = kKNminber; jk<kKNumber;jk++) {
     mKNNDist[jk] = 1e11; mMinIdx[jk] = -1;
   }
-  mStartRad = sqrt(Sq(mStartPos[0])+Sq(mStartPos[1]));
+  mStartRad = sqrt(mStartPos[0]*mStartPos[0] + mStartPos[1]*mStartPos[1]);
   mErr = SEED_ERR(mStartRad)*kErrFact;
   Zer(mAveDir);  
 }

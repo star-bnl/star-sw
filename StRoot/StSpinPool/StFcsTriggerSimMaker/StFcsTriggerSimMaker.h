@@ -8,12 +8,13 @@
 #define STAR_StFcsTriggerSimMaker_HH
 
 #include "StMaker.h"
-#include "StRoot/RTS/src/DAQ_FCS/fcs_data_c.h"
-#include "StRoot/RTS/src/TRG_FCS/fcs_trg_base.h"
 
 class StFcsDb;
 class StFcsCollection;
 class TFile;
+class fcs_trg_base;
+class link_t;
+class geom_t;
 
 class StFcsTriggerSimMaker : public StMaker{
 public: 
@@ -33,9 +34,7 @@ public:
     void setTrgTimeBin(int v) {mTrgTimebin=v;} //8 timebin = v-3 to v+4. v=52 for 49~56
 
     fcs_trg_base* getTriggerEmu() {return mTrgSim;}
-    void runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]){
-      mTrgSim->stage_2(ecal,hcal,pres,geo,output);
-    }
+    void runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t& geo, link_t output[]);
 
 private:
     StFcsDb* mFcsDb=0;
@@ -48,7 +47,6 @@ private:
     int mSimMode=0;      //! 0 from data, 1 for MC
     int mTrgTimebin=52;  //! center timebin for data
 
-    fcs_data_c* mFcsDataC;
     fcs_trg_base* mTrgSim;
 
     char* mPresMask=0;

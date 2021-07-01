@@ -11,7 +11,7 @@
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
 #include "StThreeVectorF.hh"
-#include "StFcsDbMaker/StFcsDbMaker.h"
+#include "StFcsDbMaker/StFcsDb.h"
 #include "StRoot/StSpinPool/StFcsQaMaker/StFcsQaMaker.h"
 #include "StRoot/StSpinPool/StFcsRawDaqReader/StFcsRawDaqReader.h"
 #include "StRoot/StEvent/StTriggerData.h"
@@ -45,8 +45,8 @@ StFcsPi0ReconstructionMaker::~StFcsPi0ReconstructionMaker(){}
 //-----------------------
 Int_t StFcsPi0ReconstructionMaker::Init()
 {
-	mFcsDbMaker=static_cast<StFcsDbMaker*>(GetMaker("fcsDb"));
-        if(!mFcsDbMaker){
+	mFcsDb=static_cast<StFcsDb*>(GetDataSet("fcsDb"));
+        if(!mFcsDb){
         	LOG_ERROR  << "StFcsEventDisplay::InitRun Failed to get StFcsDbMaker" << endm;
         return kStFatal;
     	}	
@@ -260,7 +260,7 @@ Int_t StFcsPi0ReconstructionMaker::Init()
  
 		for(int det=0; det<kFcsNDet; det++)
 		{
-			int check_ecal= mFcsDbMaker->ecalHcalPres(det);
+			int check_ecal= mFcsDb->ecalHcalPres(det);
 			if (check_ecal!=0) continue;
 			
 			// get Ecal Mult,  Ecal Cluster Mult
@@ -365,7 +365,7 @@ Int_t StFcsPi0ReconstructionMaker::Init()
 
 		for(int det=0; det<kFcsNDet; det++)
                 {
-			int check_ecal= mFcsDbMaker->ecalHcalPres(det);
+			int check_ecal= mFcsDb->ecalHcalPres(det);
                         if (check_ecal!=0) continue;
                         StSPtrVecFcsCluster& clusters = mFcsColl->clusters(det);
                         int nc=mFcsColl->numberOfClusters(det);
@@ -414,8 +414,8 @@ Int_t StFcsPi0ReconstructionMaker::Init()
 				float clu_y=clu->y();
 				float clu_energy=clu->energy();
 				if (clu_energy<1) continue; //cluster energy cut	
-				StThreeVectorD xyz = mFcsDbMaker->getStarXYZfromColumnRow(det,clu_x,clu_y);
-				StLorentzVectorD p = mFcsDbMaker->getLorentzVector((xyz),clu_energy,0);
+				StThreeVectorD xyz = mFcsDb->getStarXYZfromColumnRow(det,clu_x,clu_y);
+				StLorentzVectorD p = mFcsDb->getLorentzVector((xyz),clu_energy,0);
 
 	
 				for (int j=i+1;j<nc;j++)
@@ -429,8 +429,8 @@ Int_t StFcsPi0ReconstructionMaker::Init()
 					if (zgg>=0.7) continue;//Zgg cut
 					if (((clu_energy+cluj_energy)<8)||((clu_energy+cluj_energy)>20)) continue;//E1 + E2 cut
 
-					StThreeVectorD xyzj = mFcsDbMaker->getStarXYZfromColumnRow(det,cluj->x(),cluj->y());
-                                        StLorentzVectorD pj = mFcsDbMaker->getLorentzVector((xyzj),cluj->energy(),0);
+					StThreeVectorD xyzj = mFcsDb->getStarXYZfromColumnRow(det,cluj->x(),cluj->y());
+                                        StLorentzVectorD pj = mFcsDb->getLorentzVector((xyzj),cluj->energy(),0);
 					
 					//choose the best pair of cluster	
 					if ((clu_energy+cluj_energy)>energy_largest_cluster)
@@ -483,8 +483,8 @@ Int_t StFcsPi0ReconstructionMaker::Init()
                                 float pnt_y=pnt->y();
                                 float pnt_energy=pnt->energy();
                                 if (pnt_energy<1) continue; //point energy cut        
-                                StThreeVectorD xyz = mFcsDbMaker->getStarXYZfromColumnRow(det,pnt_x,pnt_y);
-                                StLorentzVectorD p = mFcsDbMaker->getLorentzVector((xyz),pnt_energy,0);
+                                StThreeVectorD xyz = mFcsDb->getStarXYZfromColumnRow(det,pnt_x,pnt_y);
+                                StLorentzVectorD p = mFcsDb->getLorentzVector((xyz),pnt_energy,0);
 				
                                 for (int j=i+1;j<np;j++)
                                 {
@@ -497,8 +497,8 @@ Int_t StFcsPi0ReconstructionMaker::Init()
                                         if (zgg>=0.7) continue;
                                         if (((pnt_energy+pntj_energy)<8)||((pnt_energy+pntj_energy)>20)) continue;
 
-                                        StThreeVectorD xyzj = mFcsDbMaker->getStarXYZfromColumnRow(det,pntj->x(),pntj->y());
-                                        StLorentzVectorD pj = mFcsDbMaker->getLorentzVector((xyzj),pntj->energy(),0);
+                                        StThreeVectorD xyzj = mFcsDb->getStarXYZfromColumnRow(det,pntj->x(),pntj->y());
+                                        StLorentzVectorD pj = mFcsDb->getLorentzVector((xyzj),pntj->energy(),0);
 
 					//choose the best pair of point
                                         if ((pnt_energy+pntj_energy)>energy_largest_point)

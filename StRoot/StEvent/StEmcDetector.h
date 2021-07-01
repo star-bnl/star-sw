@@ -77,7 +77,6 @@ public:
     void setCrateStatus(int, StEmcCrateStatus);
 
     virtual bool  IsFolder() const;    
-    virtual void  Browse(TBrowser *b);
 
 protected:
     void clear();

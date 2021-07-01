@@ -245,7 +245,6 @@
 #include "StL3Trigger.h"
 #include "StPsd.h"
 #include "event_header.h"
-#include "StAutoBrowse.h"
 #include "StEventBranch.h"
 #include "StHltEvent.h"
 #include "StFgtCollection.h"
@@ -1476,13 +1475,6 @@ void StEvent::removePsd(StPsd* p)
 	    if (*iter == p)
 		mContent.erase(iter);
     }
-}
-
-void StEvent::Browse(TBrowser* b)
-{
-    if (!b) b = new TBrowser("StEvent",(TObject*)0);
-    StAutoBrowse::Browse(this,b);
-    TDataSet::Browse(b);
 }
 
 void StEvent::statistics()

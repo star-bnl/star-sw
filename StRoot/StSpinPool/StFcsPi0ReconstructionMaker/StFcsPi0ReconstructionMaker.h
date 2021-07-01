@@ -16,7 +16,7 @@
 
 class TApplication;
 class StFcsPi0ReconstructionMaker;
-class StFcsDbMaker;
+class StFcsDb;
 class StFcsCollection;
 
 class StFcsPi0ReconstructionMaker : public StMaker
@@ -32,7 +32,7 @@ public:
 
 private:
 
-	StFcsDbMaker* mFcsDbMaker=0;
+	StFcsDb* mFcsDb=0;
         StFcsCollection* mFcsColl=0;
 	TH1F* h0=0; //h0:# of entries
 	TH1F* h1_inv_mass_cluster=0; //h1_inv_mass_cluster:invariant mass for cluster finder analysis

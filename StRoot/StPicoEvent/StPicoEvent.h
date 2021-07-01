@@ -154,7 +154,31 @@ class StPicoEvent : public TObject {
   Int_t    nTofT0() const                { return (Int_t)mNTofT0; }
   /// Return z position of the primary vertex estimated by VPD
   Float_t  vzVpd() const                 { return mVzVpd; }
-
+  // In the following, the factors of 1000. serve to convert times back and forth between external nsec and internal psec
+  /// Return number of particles before T0 outlier rejection
+  Int_t    nTofT0Can() const		 { return (Int_t)mNTofT0Can; }
+  /// Return event start time in nano seconds
+  Double_t  tStart() const                { return ((Double_t)mTStart)/1000.; }
+  /// Return hit time in nano seconds for the earliest candidate particle in the T0 calculation
+  Double_t  tCanFirst() const             { return ((Double_t)mTCanFirst)/1000.; }
+  /// Return last candidate particle in T0 calculation
+  Double_t  tCanLast() const              { return ((Double_t)mTCanLast)/1000.; }
+  /// Return total number of in-time VPDE hits
+  Int_t    nVpdEGoodHits() const          { return (Int_t)mNVpdEGoodHits; }
+  /// Return total number of in-time VPDW hits
+  Int_t    nVpdWGoodHits() const          { return (Int_t)mNVpdWGoodHits; }
+  /// Return earliest VPDE hit compared to start time
+  Double_t  earliestVpdEHit() const       { return ((Double_t)mEarliestVpdEHit)/1000.; }
+  /// Return earliest VPDW hit compared to start time
+  Double_t  earliestVpdWHit() const       { return ((Double_t)mEarliestVpdWHit)/1000.; }
+  /// Return closest VPDE hit to start time
+  Double_t  closestVpdEHit() const        { return ((Double_t)mClosestVpdEHit)/1000.; }
+  /// Return closest VPDW hit to start time
+  Double_t  closestVpdWHit() const        { return ((Double_t)mClosestVpdWHit)/1000.; }
+  /// Return furthest VPDE hit compared to start time
+  Double_t  latestVpdEHit() const         { return ((Double_t)mLatestVpdEHit)/1000.; }
+  /// Return furthest VPDW hit compared to start time
+  Double_t  latestVpdWHit() const         { return ((Double_t)mLatestVpdWHit)/1000.; }
   /// Return ZDC coincidence rate
   Float_t  ZDCx() const                  { return (Float_t)mZDCx; }
   /// Return BBC coincidence rate
@@ -308,7 +332,31 @@ class StPicoEvent : public TObject {
   void setNTofT0(Int_t t0)                      { mNTofT0 = (UShort_t)t0; }
   /// Set Vz of the primary vertex reconstructed by VPD
   void setVzVpd(Float_t vpdVz)                  { mVzVpd = vpdVz; }
-
+  // In the following, the factors of 1000. serve to convert times back and forth between external nsec and internal psec
+  /// Set number of particles before T0 outlier rejection
+  void setNTofT0Can(Int_t t0Can)		       { mNTofT0Can = (UShort_t)t0Can; }
+  /// Set event start time
+  void setTStart(Double_t startTime)                   { mTStart = (Int_t)(startTime*1000.); }  
+  /// Set time of earliest candidate particle in T0 calculation
+  void setTCanFirst(Double_t tFirst)                   { mTCanFirst = (Int_t)(tFirst*1000.); } 
+  /// Set time of last candidate particle in T0 calculation
+  void setTCanLast(Double_t tLast)                     { mTCanLast = (Int_t)(tLast*1000.); }
+  /// Set total number of in-time VPDE hits
+  void setNVpdEGoodHits(Int_t vpdEGoodHits)            { mNVpdEGoodHits = (UChar_t)vpdEGoodHits; }
+  /// Set total number of in-time VPDW hits
+  void setNVpdWGoodHits(Int_t vpdWGoodHits)            { mNVpdWGoodHits = (UChar_t)vpdWGoodHits; }
+  /// Set earliest VPDE hit compared to start time
+  void setEarliestVpdEHit(Double_t earliestVpdEHit)    { mEarliestVpdEHit = (Int_t)(earliestVpdEHit*1000.); }
+  /// Set earliest VPDW hit compared to start time
+  void setEarliestVpdWHit(Double_t earliestVpdWHit)    { mEarliestVpdWHit = (Int_t)(earliestVpdWHit*1000.); }
+  /// Set closest VPDE hit to start time
+  void setClosestVpdEHit(Double_t closestVpdEHit)      { mClosestVpdEHit = (Int_t)(closestVpdEHit*1000.); }
+  /// Set closest VPDW hit to start time
+  void setClosestVpdWHit(Double_t closestVpdWHit)      { mClosestVpdWHit = (Int_t)(closestVpdWHit*1000.); }
+  /// Set furthest VPDE hit compared to start time
+  void setLatestVpdEHit(Double_t latestVpdEHit)        { mLatestVpdEHit = (Int_t)(latestVpdEHit*1000.); }
+  /// Set furthest VPDW hit compared to start time
+  void setLatestVpdWHit(Double_t latestVpdWHit)        { mLatestVpdWHit = (Int_t)(latestVpdWHit*1000.); }
   /// Set ZDC coincidence rate
   void setZDCx(Float_t zdcCoinRate)             { mZDCx = (UInt_t)zdcCoinRate; }
   /// Set BBC coincidence rate
@@ -460,7 +508,31 @@ protected:
   UShort_t mNTofT0;
   /// Vz estimated via VPD
   Float_t  mVzVpd;
-
+  /// Number of particles before T0 outlier rejection
+  UShort_t mNTofT0Can;
+  /// Event start time in ps
+  Int_t  mTStart; 
+  /// Earliest candidate particle in T0 calculation
+  Int_t  mTCanFirst;
+  /// Last candidate particle in T0 calculation
+  Int_t  mTCanLast;
+  /// Total number of in-time VPDE hits
+  UChar_t  mNVpdEGoodHits;
+  /// Total number of in-time VPDW hits
+  UChar_t  mNVpdWGoodHits;
+  /// Earliest VPDE hit compared to start time
+  Int_t  mEarliestVpdEHit;
+  /// Earliest VPDW hit compared to start time
+  Int_t  mEarliestVpdWHit;
+  /// Closest VPDE hit to start time
+  Int_t  mClosestVpdEHit;
+  /// Closest VPDW hit to start time
+  Int_t  mClosestVpdWHit;
+  /// Furthest VPDE hit compared to start time
+  Int_t  mLatestVpdEHit;
+  /// Furthest VPDW hit compared to start time
+  Int_t  mLatestVpdWHit;
+ 
   /// ZDC coincidence rate
   UInt_t   mZDCx;
   /// BBC coincidence rate
@@ -536,9 +608,9 @@ protected:
   UShort_t mZdcUnAttenuated[2];
 
 #if defined (__TFG__VERSION__)
-  ClassDef(StPicoEvent, 7)
+  ClassDef(StPicoEvent, 8)
 #else /* ! __TFG__VERSION__ */
-  ClassDef(StPicoEvent, 5)
+  ClassDef(StPicoEvent, 6)
 #endif
 };
 

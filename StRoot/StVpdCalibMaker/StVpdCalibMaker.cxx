@@ -174,10 +174,11 @@ Int_t StVpdCalibMaker::Init()
     resetPars();
     resetVpd();
 
-    if (IAttr("vpdPPPAMode")) {
+    if (IAttr("pppAMode")) {
         mUseVpdStart = kFALSE;
 	mForceTofStart = kTRUE;
 	mCutVpdOutliers = kFALSE;
+        LOG_INFO << "pppAMode is on." << endm;
     }
 
     // m_Mode can be set by SetMode() method

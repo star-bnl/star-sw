@@ -8,7 +8,7 @@
 #include "StRoot/StEvent/StFcsCollection.h"
 #include "StRoot/StEvent/StFcsHit.h"
 #include "StRoot/StEvent/StFcsCluster.h"
-#include "StRoot/StFcsDbMaker/StFcsDbMaker.h"
+#include "StRoot/StFcsDbMaker/StFcsDb.h"
 #include "StRoot/StSpinPool/StFcsRawDaqReader/StFcsRawDaqReader.h"
 
 #include "TH1F.h"
@@ -40,9 +40,9 @@ StFcsMIPMaker::~StFcsMIPMaker(){};
 Int_t StFcsMIPMaker::Init(){
  
   
-      mFcsDbMkr = static_cast< StFcsDbMaker*>(GetMaker("fcsDb"));
+      mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
       
-      if(mPedSub>0) mFcsDbMkr->readPedFromText();
+      if(mPedSub>0) mFcsDb->readPedFromText();
 
       sprintf(mFilename,"%d_%d.root",mRun,mSub);
       printf("StFcsMIPMaker::Init - Opening %s\n",mFilename);
@@ -57,9 +57,9 @@ Int_t StFcsMIPMaker::Init(){
       hitsperevent= new TH1F("hitsperevent","EventHits",100,0,200);
       
       for(int det=0; det<kFcsNDet; det++){
-	int ns  = mFcsDbMkr->northSouth(det);
-	int ehp = mFcsDbMkr->ecalHcalPres(det);
-      	int maxid = mFcsDbMkr->maxId(det);
+	int ns  = mFcsDb->northSouth(det);
+	int ehp = mFcsDb->ecalHcalPres(det);
+      	int maxid = mFcsDb->maxId(det);
 
 	if(maxid==0) continue; 
       
@@ -67,7 +67,7 @@ Int_t StFcsMIPMaker::Init(){
 	  
 	  int ehp2,ns2,crt,sub,dep,ch;
 	  
-	  mFcsDbMkr->getDepfromId(det,id,ehp2,ns2,crt,sub,dep,ch);
+	  mFcsDb->getDepfromId(det,id,ehp2,ns2,crt,sub,dep,ch);
 	  sprintf(f,"%4s_%1s_TbinAdc_id%03d",nameEHP[ehp],nameNS[ns],id);	
 	  sprintf(t,"%4s_%1s_TbinAdc_id%03d",nameEHP[ehp],nameNS[ns],id);
 	  
@@ -142,7 +142,7 @@ Int_t StFcsMIPMaker::Make(){
       //loop over Ecal clusters
       for(int i=0; i<nEclu;i++){
 	StFcsCluster* clusterE=clusters[i];
-	StThreeVectorF xyzE=mFcsDbMkr->getStarXYZfromColumnRow(1,clusterE->x(),clusterE->y());      
+	StThreeVectorF xyzE=mFcsDb->getStarXYZfromColumnRow(1,clusterE->x(),clusterE->y());      
 	int ntow=clusterE->nTowers();
 	int nnei=clusterE->nNeighbor();
 	
@@ -160,7 +160,7 @@ Int_t StFcsMIPMaker::Make(){
 	  //loop over Hcal clusters
 	  for(int j=0; j<nHclu; j++){
 	    StFcsCluster* clusterH=Hclusters[j];
-	    StThreeVectorF xyzH=mFcsDbMkr->getStarXYZfromColumnRow(3,clusterH->x(),clusterH->y());
+	    StThreeVectorF xyzH=mFcsDb->getStarXYZfromColumnRow(3,clusterH->x(),clusterH->y());
 	    deltax=xyzH.x()-xyzE.x();
 	    deltay=xyzH.y()-xyzE.y();
 	    deltar=pow(pow(deltax,2)+pow(deltay,2),0.5);

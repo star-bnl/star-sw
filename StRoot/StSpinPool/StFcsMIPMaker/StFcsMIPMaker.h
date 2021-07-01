@@ -9,7 +9,7 @@
 #include "StMaker.h"
 #include <map>
 
-class StFcsDbMaker;
+class StFcsDb;
 class StFcsCollection;
 class TH1F;
 class TH2F;
@@ -31,7 +31,7 @@ class StFcsMIPMaker : public StMaker {
  protected:
   
  private:
-  StFcsDbMaker *mFcsDbMkr=0; 
+  StFcsDb *mFcsDb=0; 
   StFcsCollection *mFcsCollection=0; 
   int mRun=0;
   int mSub=0; //need this to get file name from .cxx

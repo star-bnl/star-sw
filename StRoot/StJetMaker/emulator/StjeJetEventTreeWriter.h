@@ -45,18 +45,18 @@ public:
   void fillJetTreeHeader(int iAnalyzer);
   void fillJetTree(int iAnalyzer, int iVertex);
 
-private:
-
-  void fillJetTreeForOneVertex(StJetEvent* jetEvent, list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker, int iVertex);
-  StJetCandidate* fillJet(StJetEvent* jetEvent, StJetVertex* jetVertex, StProtoJet& protojet);
-  void copyVertex(const StMuPrimaryVertex* muVertex, StJetVertex* jetVertex);
-
   struct AnalyzerCtl {
     string            _branchName;
     StFourPMaker*     _fourPMaker;
     list<StProtoJet>* _protoJetList;
     StJetEvent*       _jetEvent;
   };
+
+private:
+
+  void fillJetTreeForOneVertex(StJetEvent* jetEvent, list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker, int iVertex);
+  StJetCandidate* fillJet(StJetEvent* jetEvent, StJetVertex* jetVertex, StProtoJet& protojet);
+  void copyVertex(const StMuPrimaryVertex* muVertex, StJetVertex* jetVertex);
 
   vector<AnalyzerCtl> _analyzerCtlList;
 

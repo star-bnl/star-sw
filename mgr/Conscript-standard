@@ -794,6 +794,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
     } elsif ( $pkg =~ m/^StFwdTrackMaker$/ ){ 
 		$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
+		$env1->{StFwdTrackMaker}->{ROOTCINT_INCLUDES} = $env1->{ENV}->{OPTSTAR}."/include"
     } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
 	$LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
 	$SO_PKG = "";
@@ -946,7 +947,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#    $CPPPATH =
 	#      "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include";
 	#    print "CPPPATH => $CPPPATH\n";
-	$CXXFLAGS .= " -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics";
+	$CXXFLAGS .= " -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics";
 	$CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
 #	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
 #	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE";}
@@ -976,11 +977,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
             . $main::PATH_SEPARATOR . "#" . $Dir . "/../TPCCATracker";
         $extraCXXFLAGS = " -DNODEBUG -DNVALGRIND ";
         $extraCXXFLAGS .= " -Wno-parentheses -Wno-unused-function -Wno-deprecated-declarations -Wno-unused-but-set-variable -Wno-unused-variable";
-	if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
-	$CXXFLAGS .= $extraCXXFLAGS;
-	$CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
+        if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
+        $CXXFLAGS .= $extraCXXFLAGS;
+        $CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
         $LIBS = $env->{Packages}->{Vc}->{LIBS};
-	if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
+        if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
         if ($pkg =~ m/^TPCCATracker$/ and $extraCXXFLAGS =~ /DO_TPCCATRACKER_EFF_PERFORMANCE/) {$LIBS .= " -lTPCCATrackerPerformance";}
     }
     if ( $pkg =~ m/^Sti$/) {
@@ -1094,6 +1095,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "LINKMODULECOM |", $env2->{LINKMODULECOM}, "|\n" if $param::debug;
     my $cscanner = find scan::cpp( $env2->{_cwd}, $env2->{CPPPATH} );
     my @cpps = split /$main::PATH_SEPARATOR/, $env2->{CPPPATH};
+    # Additional include paths can be specified for individual packages
+    my @cpps_pkg = split /$main::PATH_SEPARATOR/, $env1->{$pkg}->{ROOTCINT_INCLUDES};
+    push(@cpps, @cpps_pkg);
     #  print "cpps => @cpps\n";# if $param::debug;
     #print "cpps => @cpps\n";
     my $ROOTCINT_CPP = "";
