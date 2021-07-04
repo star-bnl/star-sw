@@ -86,8 +86,6 @@ RUN source star-spack/setup.sh && spack env activate star-env-root5 \
  && export LIBXML2_DIR=`spack location --install-dir libxml2` \
  && cd /usr/include && ln -s $MYSQL/include mysql \
  && cd /star-sw \
- && cons +asps/staf \
- && cons +asps/Simulation/agetof \
  && cons +StarVMC/Geometry \
  && cons %pams/sim/g2r %OnlTools \
          %StarVMC/GeoTestMaker \
