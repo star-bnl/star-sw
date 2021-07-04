@@ -87,8 +87,6 @@ RUN source star-spack/setup.sh && spack env activate star-env-root6 \
  && export Vc_LIB_DIR=`spack location --install-dir vc`/lib \
  && cd /usr/include && ln -s $MYSQL/include mysql \
  && cd /star-sw \
- && cons +asps/staf \
- && cons +asps/Simulation/agetof \
  && cons +StarVMC/Geometry \
  && cons %pams/sim/g2r %OnlTools \
          %StarVMC/GeoTestMaker \
