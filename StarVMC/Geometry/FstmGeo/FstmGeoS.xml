@@ -856,7 +856,7 @@ Gavin 07/06/2021
             <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(1)-zcenter" ncopy="4" />
             <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(2)-zcenter" ncopy="5" >
                 <Rotation alphaz="30"/>
-            <Placement/>
+            </Placement>
             <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(3)-zcenter" ncopy="6" />
         </Volume>
 
