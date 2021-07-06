@@ -1,26 +1,26 @@
 /*!
- * \class StGENParticle 
+ * \class StGimParticle 
  * \author V.Perev  Mar/2009
  *
  * Defines  equivalent of HEPEVT particle
  * 
  */
-// @(#)STAR/eg:$Id: StGENParticle.h,v 1.3 2009/06/23 19:52:05 jeromel Exp $
+// @(#)STAR/eg:$Id: StGimParticle.h,v 1.3 2009/06/23 19:52:05 jeromel Exp $
 
-#ifndef STAR_StGENParticle
-#define STAR_StGENParticle
+#ifndef STAR_StGimParticle
+#define STAR_StGimParticle
 #include <vector>
 #include "StGenParticle.h"
 
 /// Implementation of StGenParticle similar to ROOT TParticle 
-class StGENParticle : public StGenParticle {
+class StGimParticle : public StGenParticle {
 public:
 
 
                                 // ****** constructors and destructor
-   StGENParticle(int idx);
+   StGimParticle(int idx);
 
-   virtual ~StGENParticle();
+   virtual ~StGimParticle();
 
 virtual int          	     GetStatusCode()     const 	{return fStatusCode;}
 virtual int          	     GetPdgCode()        const 	{return fPdgCode   ;}
@@ -39,8 +39,8 @@ virtual       double         Time() 		 const 	{return fV[3];}
   void SetGea(int gea) 					{fGeaCode=gea;}
   void SetVert(float v[4]);	
   void SetMom (float p[5]);	
-  void SetMother(int i,const StGENParticle *m) {fMother[i]=m;} 
-  void AddDaughter(const StGENParticle *m); 
+  void SetMother(int i,const StGimParticle *m) {fMother[i]=m;} 
+  void AddDaughter(const StGimParticle *m); 
 
 
 protected:
@@ -49,12 +49,12 @@ protected:
   int          fPdgCode;              // PDG   code of the particle
   int          fGeaCode;              // Geant code of the particle
   int          fStatusCode;           // generation status code
-  const StGENParticle *fMother[2];    // mother particles
+  const StGimParticle *fMother[2];    // mother particles
   double       fWeight;               // particle weight
   double       fP[5];                 // 4vector  of momentum + mass
   double       fV[4];                 // 3vector of production vertex +time in cm
   char fEnd[1];
-  std::vector<const StGENParticle*>     fDaughter;        
+  std::vector<const StGimParticle*>     fDaughter;        
 
 };
 
