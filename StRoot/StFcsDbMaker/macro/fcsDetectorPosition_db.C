@@ -66,7 +66,7 @@ void fcsDetectorPosition_db(char* opt = "", char* input) {
 	detpos.xoff[2]=-8.380*2.54-50; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
 	detpos.xoff[3]= 8.380*2.54+50; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
     }
-    else if(data.Contains("run21Jub27")){ //closed
+    else if(data.Contains("run21Jun27")){ //closed
         storeTime = "2021-06-27 15:00:00"; flavor="ofl";
         detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
 	detpos.xoff[1]= 6.850*2.54; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
