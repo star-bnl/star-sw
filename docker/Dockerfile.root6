@@ -1,4 +1,5 @@
-FROM scientificlinux/sl:7 AS build-stage
+# Pull SL7 image by digest (immutable identifier)
+FROM scientificlinux/sl@sha256:437d3402c454319a5443bb5a99844c8d6f454828c59dcfb2730f1bdff8f2f48c AS build-stage
 
 WORKDIR /workdir
 
