@@ -67,7 +67,7 @@ Int_t FcsDYBGFilter::Filter( StarGenEvent *mEvent){
     if(size<2) return StarGenEvent::kReject;
     UInt_t res = 0x10;
     int accept=0;
-    std::vector<int> swap(100);
+    std::vector<int> swap;
     for(unsigned int i=0; i<size-1; i++){
 	StarGenParticle *p1=forwardParticles.at(i);
 	float x1 = p1->GetVx()/10.0 + p1->GetPx() / p1->GetPz() * (ZFCS - p1->GetVz()/10.0);

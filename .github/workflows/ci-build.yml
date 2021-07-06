@@ -1,0 +1,20 @@
+name: CI Build
+
+on:
+  pull_request:
+    branches: main
+
+jobs:
+  ROOT5:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build with Docker
+        uses: docker/build-push-action@v2
+        with:
+          cache-from: type=registry,ref=ghcr.io/star-bnl/star-sw-base-root5
+          push: false
+          tags: ghcr.io/star-bnl/star-sw-base-root5
+          file: docker/Dockerfile.root5
