@@ -36,7 +36,7 @@ double average_timeres_tof(){return mAverageTimeResTof;}
 		if ( itray > 120 || imodule > 32 || icell > 6 )
 			return result;
 
-		return params[ itray ][ imodule * 6 + icell ];
+		return params[ itray - 1 ][ imodule * 6 + icell - 7 ];
 
 	}
 
