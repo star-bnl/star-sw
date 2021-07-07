@@ -58,9 +58,7 @@ public:
           StObject(const StObject &sto);
           StObject &operator=(const StObject &sto);
   virtual ~StObject();
-  virtual void Browse(TBrowser *b);
   
-  virtual Bool_t IsFolder() 	const;
   virtual TObject *clone() 	const {return ((TObject*)this)->Clone();}
   Int_t   isZombie() 		const {return IsZombie();}
   virtual void makeZombie(int flg=1)
