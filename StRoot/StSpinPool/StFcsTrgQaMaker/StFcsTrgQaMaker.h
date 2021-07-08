@@ -43,25 +43,25 @@ private:
     float mEcalPtThr=1.5;
     int mS3off=96;
 
-    TH1F* mETot[4];
-    TH1F* mHTot[4];
-    TH1F* mEHT[4];
-    TH1F* mHHT[4];
-    TH1F* mJP[2][4];
+    TH1F* mETot[kFcsNorthSouth][4];
+    TH1F* mHTot[kFcsNorthSouth][4];
+    TH1F* mEHT[kFcsNorthSouth][4];
+    TH1F* mHHT[kFcsNorthSouth][4];
+    TH1F* mJP[kFcsNorthSouth][6][4];
 
-    TH1F* mE4b4[4];
-    TH1F* mH4b4[4];
-    TH1F* mPOR[4];
+    TH1F* mE4b4[kFcsNorthSouth][4];
+    TH1F* mH4b4[kFcsNorthSouth][4];
+    TH1F* mPOR[kFcsNorthSouth][4];
 
-    TH1F* mSum[5][4];
-    TH1F* mEHR[5][4];
-    TH2F* mSumTot[2];
+    TH1F* mSum[kFcsNorthSouth][5][4];
+    TH1F* mEHR[kFcsNorthSouth][5][4];
+    TH2F* mSumTot[kFcsNorthSouth][2];
 
-    TH2F* mDEm[4];
-    TH2F* mDHad[4];
-    TH2F* mDGam[4];
-    TH2F* mDEle[4];
-    TH2F* mDJP[4];
+    TH2F* mDEm[kFcsNorthSouth][4];
+    TH2F* mDHad[kFcsNorthSouth][4];
+    TH2F* mDGam[kFcsNorthSouth][4];
+    TH2F* mDEle[kFcsNorthSouth][4];
+    TH2F* mDJP[kFcsNorthSouth][4];
 
     TH2F* mEcal[kFcsNorthSouth];
     TH2F* mHcal[kFcsNorthSouth];

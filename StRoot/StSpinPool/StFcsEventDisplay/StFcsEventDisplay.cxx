@@ -168,7 +168,7 @@ int StFcsEventDisplay::Make(){
 	mCanvas->Clear();	
 	char cc[100]; 
 	sprintf(cc,"FCSEventDisplayEvt=%d",mNEvents);
-	mFcsColl->print(); 
+	if(mDebug>0) mFcsColl->print(); 
 
 	//frame	
 	float xmin=-160;

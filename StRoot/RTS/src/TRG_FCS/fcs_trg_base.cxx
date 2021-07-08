@@ -10,7 +10,6 @@
 // statics
 fcs_trg_base::marker_t fcs_trg_base::marker ;
 
-
 u_int fcs_trg_base::stage_version[4] ;
 
 u_short fcs_trg_base::stage_params[4][16] ;
@@ -1109,6 +1108,15 @@ void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t g
 		break ;
 	case 3 :
 		stage_2_202203(ecal,hcal,pres,geo,output) ;
+		break ;
+	case 4 :
+		stage_2_JP6_202204(ecal,hcal,pres,geo,output) ;
+		break ;
+	case 5 :
+	        stage_2_JP6Carl_202205(ecal,hcal,pres,geo,output) ;
+		break ;
+	case 6 :
+		stage_2_JP5_202206(ecal,hcal,pres,geo,output) ;
 		break ;
 
 	// debugging versions below

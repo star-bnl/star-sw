@@ -51,61 +51,67 @@ Int_t StFcsTrgQaMaker::Init(){
   printf("StFcsTrgQaMaker::Init - Opening %s\n",mFilename);
   mFile=new TFile(mFilename,"RECREATE");
 
-  const char* cname[4]={"All","SIM","DEP","TCU"};
-  for(int i=0; i<4; i++){
-    mETot[i]   = new TH1F(Form("ETot%s", cname[i]), Form("ETot%s",  cname[i]),256,0,1024);
-    mHTot[i]   = new TH1F(Form("HTot%s", cname[i]), Form("HTot%s",  cname[i]),256,0,512);
-    mEHT [i]   = new TH1F(Form("EHT%s",  cname[i]), Form("EHT%s",   cname[i]),256,0,256);
-    mHHT [i]   = new TH1F(Form("HHT%s",  cname[i]), Form("HHT%s",   cname[i]),256,0,256);
-    mJP[0][i]  = new TH1F(Form("JP2%s",  cname[i]), Form("JP2%s",   cname[i]),256,0,1024);
-    mJP[1][i]  = new TH1F(Form("JP1%s",  cname[i]), Form("DiJP1%s", cname[i]),256,0,1024);
-
-    mPOR [i]   = new TH1F(Form("POR%s", cname[i]), Form("POR%s",     cname[i]),256,0,512);
-    mE4b4[i]   = new TH1F(Form("E4b4%s",cname[i]), Form("E4b4%s",    cname[i]),256,0,256);
-    mH4b4[i]   = new TH1F(Form("H4b4%s",cname[i]), Form("H4b4%s",    cname[i]),256,0,256);
-    
-    mSum[0][i] = new TH1F(Form("Sum%s", cname[i]), Form("E+H%s",     cname[i]),256,0,256);
-    mEHR[0][i] = new TH1F(Form("EHR%s", cname[i]), Form("EHRatio%s", cname[i]), 64,0,1.05);
-    mSum[1][i] = new TH1F(Form("Had%s", cname[i]), Form("E+H%s",     cname[i]),256,0,256);
-    mEHR[1][i] = new TH1F(Form("RHad%s",cname[i]), Form("EHRatio%s", cname[i]), 64,0,1.05);
-    mSum[2][i] = new TH1F(Form("EM%s",  cname[i]), Form("E+H%s",     cname[i]),256,0,256);
-    mEHR[2][i] = new TH1F(Form("REM%s", cname[i]), Form("EHRatio%s", cname[i]), 64,0,1.05);
-    mSum[3][i] = new TH1F(Form("Gam%s", cname[i]), Form("E+H%s",     cname[i]),256,0,256);
-    mEHR[3][i] = new TH1F(Form("RGam%s",cname[i]), Form("EHRatio%s", cname[i]), 64,0,1.05);
-    mSum[4][i] = new TH1F(Form("Ele%s", cname[i]), Form("E+H%s",     cname[i]),256,0,256);
-    mEHR[4][i] = new TH1F(Form("REle%s",cname[i]), Form("EHRatio%s", cname[i]), 64,0,1.05);
-
-    mDEm [i] = new TH2F(Form("DEm%s", cname[i]),Form("DiEM%s",      cname[i]),256,0,256,256,0,256);
-    mDHad[i] = new TH2F(Form("DHad%s",cname[i]),Form("DiHadron%s",  cname[i]),256,0,256,256,0,256);
-    mDGam[i] = new TH2F(Form("DGam%s",cname[i]),Form("DiGamma%s",   cname[i]),256,0,256,256,0,256);
-    mDEle[i] = new TH2F(Form("DEle%s",cname[i]),Form("DiElectron%s",cname[i]),256,0,256,256,0,256);
-    mDJP [i] = new TH2F(Form("DJP%s", cname[i]),Form("DiJP%s",      cname[i]),256,0,256,256,0,256);
-  }
-  mSumTot[0] = new TH2F("SumEtot","SumEtot;E4x4+H4x4;Etot",256,0,256,256,0,1024);
-  mSumTot[1] = new TH2F("SumHtot","SumHtot;E4x4+H4x4;Htot",256,0,256,256,0,512);
-
-  const char* NS[2]={"N","S"};
+  const char* cNS[2]={"N","S"};
+  const char* cName[4]={"All","SIM","DEP","TCU"};
+  const char* cJet[6]={"A","B","C","D","E","F"};
   for(int ns=0; ns<kFcsNorthSouth; ns++){
-      mEcal[ns] = new TH2F(Form("Ecal4x4%s",NS[ns]),Form("Ecal4x4%s",NS[ns]),
-			   kFcsEcal4x4NCol*kFcsEcal4x4NRow,0.0,kFcsEcal4x4NCol*kFcsEcal4x4NRow,
-			   64,0.0,6.4);
-      mHcal[ns] = new TH2F(Form("Hcal4x4%s",NS[ns]),Form("Hcal4x4%s",NS[ns]),
-			   kFcsHcal4x4NCol*kFcsHcal4x4NRow,0.0,kFcsHcal4x4NCol*kFcsHcal4x4NRow,
-			   64,0.0,6.4);
-      mPres[ns] = new TH2F(Form("PresAdc%s",NS[ns]),Form("PresAdc%s",NS[ns]),
-			   kFcsPresNCol*kFcsPresNRow,0.0,kFcsPresNCol*kFcsPresNRow,
-			   64,0.0,6.4);      
-      mEPmap[ns]= new TH2F(Form("EPmap%s",NS[ns]),Form("EPmap%s",NS[ns]),
-			   kFcsEcal4x4NCol*kFcsEcal4x4NRow,0.0,kFcsEcal4x4NCol*kFcsEcal4x4NRow,
-			   kFcsPresNCol*kFcsPresNRow,0.0,kFcsPresNCol*kFcsPresNRow);
-      mEcalNorm[ns] = new TH1F(Form("NormEcal%s",NS[ns]),Form("NormEcal4x4%s",NS[ns]),
-			       kFcsEcal4x4NCol*kFcsEcal4x4NRow,0.0,kFcsEcal4x4NCol*kFcsEcal4x4NRow);
+    for(int i=0; i<4; i++){
+      mETot[ns][i] = new TH1F(Form("ETot%s%s",cNS[ns],cName[i]), Form("ETot%s%s",cNS[ns],cName[i]),256,0,512);
+      mHTot[ns][i] = new TH1F(Form("HTot%s%s",cNS[ns],cName[i]), Form("HTot%s%s",cNS[ns],cName[i]),256,0,512);
+
+      mEHT [ns][i] = new TH1F(Form("EHT%s%s",cNS[ns],cName[i]), Form("EHT%s%s",cNS[ns],cName[i]),256,0,256);
+      mHHT [ns][i] = new TH1F(Form("HHT%s%s",cNS[ns],cName[i]), Form("HHT%s%s",cNS[ns],cName[i]),256,0,256);
+
+      for(int j=0; j<6; j++){
+	mJP[ns][j][i] = new TH1F(Form("JP%s%s%s",cJet[j],cNS[ns],cName[i]), Form("JP%s%s%s",cJet[j],cNS[ns],cName[i]),256,0,256);
+      }
+   
+      mPOR [ns][i] = new TH1F(Form("POR%s%s", cNS[ns],cName[i]), Form("POR%s%s", cNS[ns],cName[i]),256,0,512);
+      mE4b4[ns][i] = new TH1F(Form("E4b4%s%s",cNS[ns],cName[i]), Form("E4b4%s%s",cNS[ns],cName[i]),256,0,256);
+      mH4b4[ns][i] = new TH1F(Form("H4b4%s%s",cNS[ns],cName[i]), Form("H4b4%s%s",cNS[ns],cName[i]),256,0,256);
+
+      mSum[ns][0][i] = new TH1F(Form("Sum%s%s", cNS[ns],cName[i]), Form("E+H%s%s",     cNS[ns],cName[i]),256,0,256);
+      mEHR[ns][0][i] = new TH1F(Form("EHR%s%s", cNS[ns],cName[i]), Form("EHRatio%s%s", cNS[ns],cName[i]), 64,0,1.05);
+      mSum[ns][1][i] = new TH1F(Form("Had%s%s", cNS[ns],cName[i]), Form("E+H%s%s",     cNS[ns],cName[i]),256,0,256);
+      mEHR[ns][1][i] = new TH1F(Form("RHad%s%s",cNS[ns],cName[i]), Form("EHRatio%s%s", cNS[ns],cName[i]), 64,0,1.05);
+      mSum[ns][2][i] = new TH1F(Form("EM%s%s",  cNS[ns],cName[i]), Form("E+H%s%s",     cNS[ns],cName[i]),256,0,256);
+      mEHR[ns][2][i] = new TH1F(Form("REM%s%s", cNS[ns],cName[i]), Form("EHRatio%s%s", cNS[ns],cName[i]), 64,0,1.05);
+      mSum[ns][3][i] = new TH1F(Form("Gam%s%s", cNS[ns],cName[i]), Form("E+H%s%s",     cNS[ns],cName[i]),256,0,256);
+      mEHR[ns][3][i] = new TH1F(Form("RGam%s%s",cNS[ns],cName[i]), Form("EHRatio%s%s", cNS[ns],cName[i]), 64,0,1.05);
+      mSum[ns][4][i] = new TH1F(Form("Ele%s%s", cNS[ns],cName[i]), Form("E+H%s%s",     cNS[ns],cName[i]),256,0,256);
+      mEHR[ns][4][i] = new TH1F(Form("REle%s%s",cNS[ns],cName[i]), Form("EHRatio%s%s", cNS[ns],cName[i]), 64,0,1.05);
+      
+      mDEm [ns][i] = new TH2F(Form("DEm%s%s", cNS[ns],cName[i]),Form("DiEM%s%s",      cNS[ns],cName[i]),256,0,256,256,0,256);
+      mDHad[ns][i] = new TH2F(Form("DHad%s%s",cNS[ns],cName[i]),Form("DiHadron%s%s",  cNS[ns],cName[i]),256,0,256,256,0,256);
+      mDGam[ns][i] = new TH2F(Form("DGam%s%s",cNS[ns],cName[i]),Form("DiGamma%s%s",   cNS[ns],cName[i]),256,0,256,256,0,256);
+      mDEle[ns][i] = new TH2F(Form("DEle%s%s",cNS[ns],cName[i]),Form("DiElectron%s%s",cNS[ns],cName[i]),256,0,256,256,0,256);
+      mDJP [ns][i] = new TH2F(Form("DJP%s%s", cNS[ns],cName[i]),Form("DiJP%s%s",      cNS[ns],cName[i]),256,0,256,256,0,256);
+    }
+    mSumTot[ns][0] = new TH2F(Form("SumEtot%s",cNS[ns]),Form("SumEtot%s;E4x4+H4x4;Etot",cNS[ns]),256,0,256,256,0,1024);
+    mSumTot[ns][1] = new TH2F(Form("SumHtot%s",cNS[ns]),Form("SumHtot%s;E4x4+H4x4;Htot",cNS[ns]),256,0,256,256,0,512);
+
+    mEcal[ns] = new TH2F(Form("Ecal4x4%s",cNS[ns]),Form("Ecal4x4%s",cNS[ns]),
+			 kFcsEcal4x4NCol*kFcsEcal4x4NRow,0.0,kFcsEcal4x4NCol*kFcsEcal4x4NRow,
+			 64,0.0,6.4);
+    mHcal[ns] = new TH2F(Form("Hcal4x4%s",cNS[ns]),Form("Hcal4x4%s",cNS[ns]),
+			 kFcsHcal4x4NCol*kFcsHcal4x4NRow,0.0,kFcsHcal4x4NCol*kFcsHcal4x4NRow,
+			 64,0.0,6.4);
+    mPres[ns] = new TH2F(Form("PresAdc%s",cNS[ns]),Form("PresAdc%s",cNS[ns]),
+			 kFcsPresNCol*kFcsPresNRow,0.0,kFcsPresNCol*kFcsPresNRow,
+			 64,0.0,6.4);      
+    mEPmap[ns]= new TH2F(Form("EPmap%s",cNS[ns]),Form("EPmap%s",cNS[ns]),
+			 kFcsEcal4x4NCol*kFcsEcal4x4NRow,0.0,kFcsEcal4x4NCol*kFcsEcal4x4NRow,
+			 kFcsPresNCol*kFcsPresNRow,0.0,kFcsPresNCol*kFcsPresNRow);
+    mEcalNorm[ns] = new TH1F(Form("NormEcal%s",cNS[ns]),Form("NormEcal4x4%s",cNS[ns]),
+			     kFcsEcal4x4NCol*kFcsEcal4x4NRow,0.0,kFcsEcal4x4NCol*kFcsEcal4x4NRow);
   }
+
   mDsmOut = new TH1F("DsmOut","DsmOut",16,0,16);
   mDepOut = new TH1F("DepOut","DepOut",16,0,16);
   mTcuBit = new TH1F("TcuBit","TcuBit",16,0,16);
   mTcuDep = new TH1F("TcuDep","TcuDepMismatch",16,0,16);
   mSimDep = new TH1F("SimDep","SimDepMismatch",16,0,16);
+
   return kStOK;
 };
 
@@ -125,13 +131,14 @@ Int_t StFcsTrgQaMaker::Make() {
 	//LOG_INFO << "got StTriggerData addr="<<trgd<<endm;
       }else{
 	LOG_ERROR << "could not get StTriggerData from DataSet."<<endm;
-	return kStErr;
+	//return kStErr;
       }
     }else{
       LOG_ERROR << "could not get StTriggerData DataSet."<<endm;
-      return kStErr;
+      //return kStErr;
     }    
-    unsigned short tcubit = trgd->lastDSM(5);
+    unsigned short tcubit = 0;
+    if(trgd) tcubit = trgd->lastDSM(5);
 
     //TCU bits
     for(int i=0; i<16; i++) if((tcubit >> i) & 0x1) mTcuBit->Fill(i);
@@ -195,10 +202,10 @@ Int_t StFcsTrgQaMaker::Make() {
     LOG_INFO << Form("FCS SIM/DEP/TCU Bits = %04x  %04x  %04x",dsmout,depout,tcubit)<<endm;
 
     unsigned int max;
-    int maxns,maxc,maxr;    
+    int maxns,maxc,maxr,maxj;    
 
     //Ecal HT 2x2 
-    max=0;
+    max=0; maxns=0;
     for(int ns=0; ns<kFcsNorthSouth; ns++){
       for(int c=0; c<kFcsEcal4x4NCol+1; c++){
 	for(int r=0; r<kFcsEcal4x4NRow+1; r++){
@@ -208,13 +215,15 @@ Int_t StFcsTrgQaMaker::Make() {
 	}
       }
     }	    
-    mEHT[0]->Fill(max);
-    if((dsmout>>0)&0x1) mEHT[1]->Fill(max);
-    if((depout>>0)&0x1) mEHT[2]->Fill(max);
-    if((tcubit>>0)&0x1) mEHT[3]->Fill(max);
+    if(max>0){
+      mEHT[maxns][0]->Fill(max);
+      if((dsmout>>0)&0x1) mEHT[maxns][1]->Fill(max);
+      if((depout>>0)&0x1) mEHT[maxns][2]->Fill(max);
+      if((tcubit>>0)&0x1) mEHT[maxns][3]->Fill(max);
+    }
 
     //Hcal HT 2x2 
-    max=0;
+    max=0; maxns=0;
     for(int ns=0; ns<kFcsNorthSouth; ns++){
       for(int c=0; c<kFcsHcal4x4NCol+1; c++){
 	for(int r=0; r<kFcsHcal4x4NRow+1; r++){
@@ -223,48 +232,61 @@ Int_t StFcsTrgQaMaker::Make() {
 	  }
 	}
       }
-    }	    
-    mHHT[0]->Fill(max);
-    if((dsmout>>1)&0x1) mHHT[1]->Fill(max);
-    if((depout>>1)&0x1) mHHT[2]->Fill(max);
-    if((tcubit>>1)&0x1) mHHT[3]->Fill(max);
-    
+    }
+    if(max>0){
+      mHHT[maxns][0]->Fill(max);
+      if((dsmout>>1)&0x1) mHHT[maxns][1]->Fill(max);
+      if((depout>>1)&0x1) mHHT[maxns][2]->Fill(max);
+      if((tcubit>>1)&0x1) mHHT[maxns][3]->Fill(max);
+    }
+
     //Ecal Tot
-    max=trg->etot[0];
-    if(trg->etot[1] > max) max=trg->etot[1];
-    mETot[0]->Fill(max);
-    if((dsmout>>2)&0x1) mETot[1]->Fill(max);
-    if((depout>>2)&0x1) mETot[2]->Fill(max);
-    if((tcubit>>2)&0x1) mETot[3]->Fill(max);
-    
+    max=trg->etot[0]; maxns=0;
+    if(trg->etot[1] > max) {max=trg->etot[1]; maxns=1;}
+    mETot[0][0]->Fill(trg->etot[0]);
+    mETot[1][0]->Fill(trg->etot[1]);
+    if(max>0){
+      if((dsmout>>2)&0x1) mETot[maxns][1]->Fill(max);
+      if((depout>>2)&0x1) mETot[maxns][2]->Fill(max);
+      if((tcubit>>2)&0x1) mETot[maxns][3]->Fill(max);
+    }
+
     //Hcal Tot
-    max=trg->htot[0];
-    if(trg->htot[1] > max) max=trg->htot[1];
-    mHTot[0]->Fill(max);
-    if((dsmout>>3)&0x1) mHTot[1]->Fill(max);
-    if((depout>>3)&0x1) mHTot[2]->Fill(max);
-    if((tcubit>>3)&0x1) mHTot[3]->Fill(max);
-    
+    max=trg->htot[0]; maxns=0;
+    if(trg->htot[1] > max) {max=trg->htot[1]; maxns=1;}
+    mHTot[0][0]->Fill(trg->htot[0]);
+    mHTot[1][0]->Fill(trg->htot[1]);
+    if(max>0){
+      if((dsmout>>3)&0x1) mHTot[maxns][1]->Fill(max);
+      if((depout>>3)&0x1) mHTot[maxns][2]->Fill(max);
+      if((tcubit>>3)&0x1) mHTot[maxns][3]->Fill(max);
+    }
+
     //JP
-    max=0;
+    max=0; maxns=0;
     for(int ns=0; ns<kFcsNorthSouth; ns++){
-      for(int r=0; r<3; r++){
-	  if(trg->jet[ns][r]>max){  //find max JP
-	    max=trg->jet[ns][r]; maxns=ns; maxr=r;		    
-	  }
+      printf("StFcsTrgQaMaker JP  ns=%d : ",ns);
+      for(int j=0; j<6; j++){
+	if(trg->jet[ns][j]>max){  //find max JP
+	  max=trg->jet[ns][j]; maxns=ns; maxj=j;		    
+	}
+	mJP[ns][j][0]->Fill(trg->jet[ns][j]);
+	printf("%3d ",trg->jet[ns][j]);
       }
+      printf("\n");
     }	    
-    mJP[0][0]->Fill(max);
-    if((dsmout>>4)&0x1) mJP[0][1]->Fill(max);
-    if((depout>>4)&0x1) mJP[0][2]->Fill(max);
-    if((tcubit>>4)&0x1) mJP[0][3]->Fill(max);
-    mJP[1][0]->Fill(max);
-    if((dsmout>>9)&0x1) mJP[1][1]->Fill(max);
-    if((depout>>9)&0x1) mJP[1][2]->Fill(max);
-    if((tcubit>>9)&0x1) mJP[1][3]->Fill(max);
+    if(max>0){
+      if((dsmout>>4)&0x1) mJP[maxns][maxj][1]->Fill(max);
+      if((depout>>4)&0x1) mJP[maxns][maxj][2]->Fill(max);
+      if((tcubit>>4)&0x1) mJP[maxns][maxj][3]->Fill(max);
+      //mJP[1][0]->Fill(max);
+      //if((dsmout>>9)&0x1) mJP[1][1]->Fill(max);
+      //if((depout>>9)&0x1) mJP[1][2]->Fill(max);
+      //if((tcubit>>9)&0x1) mJP[1][3]->Fill(max);
+    }
 
     //ecal 4x4
-    max=0;
+    max=0; maxns=0;
     for(int ns=0; ns<kFcsNorthSouth; ns++){
       for(int c=0; c<kFcsEcal4x4NCol; c++){
 	for(int r=0; r<kFcsEcal4x4NRow; r++){
@@ -274,8 +296,10 @@ Int_t StFcsTrgQaMaker::Make() {
 	}
       }
     }	    
-    mE4b4[0]->Fill(max);
-    
+    if(max>0){
+      mE4b4[maxns][0]->Fill(max);
+    }
+
     //Fill only for max ecal 4x4
     if(max>0){
       int id=maxr*kFcsEcal4x4NCol + maxc;
@@ -295,7 +319,7 @@ Int_t StFcsTrgQaMaker::Make() {
     }
     
     //hcal
-    max=0;
+    max=0; maxns=0;
     for(int ns=0; ns<kFcsNorthSouth; ns++){
       for(int c=0; c<kFcsHcal4x4NCol; c++){
 	for(int r=0; r<kFcsHcal4x4NRow; r++){
@@ -308,10 +332,12 @@ Int_t StFcsTrgQaMaker::Make() {
 	}
       }
     }
-    mH4b4[0]->Fill(max);
+    if(max>0){
+      mH4b4[maxns][0]->Fill(max);
+    }
 
-    //Pres ADC
-    max=0;
+    //Pres ADC 
+    max=0; maxns=0;
     for(int ns=0; ns<kFcsNorthSouth; ns++){
       for(int dep=0; dep<6; dep++){
 	for(int ch=0; ch<32; ch++){
@@ -325,10 +351,12 @@ Int_t StFcsTrgQaMaker::Make() {
 	}
       }	
     }
-    mPOR[0]->Fill(max);
-
+    if(max>0){
+      mPOR[maxns][0]->Fill(max);
+    }
+    
     //ecal+hcal 4x4
-    max=0; 
+    max=0; maxns=0;
     for(int ns=0; ns<kFcsNorthSouth; ns++){
       for(int c=0; c<kFcsEcal4x4NCol; c++){
 	for(int r=0; r<kFcsEcal4x4NRow; r++){
@@ -339,24 +367,24 @@ Int_t StFcsTrgQaMaker::Make() {
       }
     }	    
     if(max>0){
-      mSum[0][0]->Fill(max);
-      mSumTot[0]->Fill(max,trg->etot[maxns]);
-      mSumTot[1]->Fill(max,trg->htot[maxns]);
-      mEHR[0][0]->Fill(trg->ratio[maxns][maxr][maxc]);
+      mSum[maxns][0][0]->Fill(max);
+      mSumTot[maxns][0]->Fill(max,trg->etot[maxns]);
+      mSumTot[maxns][1]->Fill(max,trg->htot[maxns]);
+      mEHR[maxns][0][0]->Fill(trg->ratio[maxns][maxr][maxc]);
       if(trg->had[maxns][maxr][maxc]){
-	mSum[1][0]->Fill(max);
-	mEHR[1][0]->Fill(trg->ratio[maxns][maxr][maxc]);
+	mSum[maxns][1][0]->Fill(max);
+	mEHR[maxns][1][0]->Fill(trg->ratio[maxns][maxr][maxc]);
       }
       if(trg->em[maxns][maxr][maxc]){
-	mSum[2][0]->Fill(max);
-	mEHR[2][0]->Fill(trg->ratio[maxns][maxr][maxc]); 
+	mSum[maxns][2][0]->Fill(max);
+	mEHR[maxns][2][0]->Fill(trg->ratio[maxns][maxr][maxc]); 
 	if(trg->epdcoin[maxns][maxr][maxc]==0){
-	  mSum[3][0]->Fill(max);
-	  mEHR[3][0]->Fill(trg->ratio[maxns][maxr][maxc]);
+	  mSum[maxns][3][0]->Fill(max);
+	  mEHR[maxns][3][0]->Fill(trg->ratio[maxns][maxr][maxc]);
 	}
 	if(trg->epdcoin[maxns][maxr][maxc]==1){
-	  mSum[4][0]->Fill(max);
-	  mEHR[4][0]->Fill(trg->ratio[maxns][maxr][maxc]);
+	  mSum[maxns][4][0]->Fill(max);
+	  mEHR[maxns][4][0]->Fill(trg->ratio[maxns][maxr][maxc]);
 	}
       }
     }
