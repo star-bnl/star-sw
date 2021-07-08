@@ -14,7 +14,17 @@ Gavin 06/25/2021
   Jason informed me that there are some additional geant tags required for proper implementation 
   (konly="ONLY" or konly="MANY"). This can be computationally expensive and can be investigated after other 
   geometry changes are tested.
-
+  
+Gavin 07/06/2021
+  -Included 30 degree rotation of middle disk that was implemented by Flemming in FstmGeo.xml
+  -Made adjustments to commented portions for simplified heat sinks implementation
+    *Added commented konly flags to FSH(A-H), FTIA, FTUW, and FTRO.
+    *Heatsinks are all placed in FSTW (wedge container). This requires heatsinks to be tagged with konly="ONLY"
+     and the other overlapping volumes contained in FSTW to be tagged with konly="MANY". The konly="MANY" flag 
+     will intruct starsim to search for other volumes in that location and only process volumes with konly="ONLY"
+     if there is overlap.
+    *This method may be more computationally expensive than simply splitting each heatsink into multiple pieces.
+flemming 7/8 Updated the material definition for combined NOVEC and Stainless
 -->
     <Replace match="GeV">*1.0E+0;</Replace>    
     <Replace match="MeV">*1.0E-3;</Replace>    
@@ -535,7 +545,6 @@ Gavin 06/25/2021
             <var name="y"         value="{6.0212,-5.5714,-0.50277,0.0}" />
             <var name="z"         value="{zcool, zcool, zcool, zcool}" />
             <var name="rotz"      value="{14, -14, 90, 90}" />
-            <!--var name="rotx"      value="{0, 0, 0, 0, 0, 90, 90}" /-->
         </Fill>
 
         <Fill name="coolingtubec" comment="cooling tube (curved part)">
@@ -587,13 +596,13 @@ Gavin 06/25/2021
 
         <!--Fill name="heatsink" comment="Heat sink">
             <var name="version"   value="1.0" />
-            <var name="dx"        value="{ 0.85, 0.4, 0.4, 0.4, 0.41, 0.41, 0.41, 0.41}" />
-            <var name="dy"        value="{0.15, 0.15, 0.15, 0.15, 0.4, 0.4, 0.4, 0.4}" />
+            <var name="dx"        value="{0.41, 0.61, 0.61, 0.61, 0.41, 0.41, 0.41, 0.41}" />
+            <var name="dy"        value="{0.85, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4}" />
 					 
-            <var name="dz"        value="{0.41, 0.61, 0.61, 0.61, 0.359/2.0, 0.359/2.0, 0.359/2.0, 0.359/2.0}" />
-            <var name="x"         value="{5.4455, 2.1605, -2.056, -5.742, 16.8205, 17.1135, 17.113, 16.8205}" />
-            <var name="y"         value="{0.05, 0.05, 0.05, 0.05, 3.3455, 1.1215, -1.122, -3.3455}" />
-            <var name="z"         value="{5.27866, 5.51516, 5.52316, 5.01216, ibaseAB+0.0805, ibaseAB+0.0805, ibaseAB+0.0805, ibaseAB+0.0805}" />
+            <var name="dz"        value="{0.15, 0.15, 0.15, 0.15, 0.359/2.0, 0.359/2.0, 0.359/2.0, 0.359/2.0}" />
+            <var name="x"         value="{28.131, 28.3675, 28.3755, 27.8645, 16.8205, 17.1135, 17.113, 16.8205}" />
+            <var name="y"         value="{5.4455, 2.1605, -2.056, -5.742, 3.3455, 1.1215, -1.122, -3.3455}" />
+            <var name="z"         value="{obase2-0.05, obase2-0.05, obase2-0.05, obase2-0.05, ibaseAB+0.0805, ibaseAB+0.0805, ibaseAB+0.0805, ibaseAB+0.0805}" />
             <var name="rotz"      value="{11.8851, 4.3699, -4.1358, -11.6783, 11.2415, 3.77688, -3.56327, -11.2415}" />
         </Fill-->
         
@@ -849,7 +858,9 @@ The factors are the weights fraction for stainless and NOVEC
 
             <Create    block="FSTD" />
             <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(1)-zcenter" ncopy="4" />
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(2)-zcenter" ncopy="5" />
+            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(2)-zcenter" ncopy="5" >
+                <Rotation alphaz="30"/>
+            </Placement>
             <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(3)-zcenter" ncopy="6" />
         </Volume>
 
@@ -934,6 +945,8 @@ The factors are the weights fraction for stainless and NOVEC
             <!-- outer base -->
             <Create    block="FTRO" />
             <Placement block="FTRO" in="FSTW" x="outerbase_x" y="outerbase_y" z="-wholewedge_dz+outerbase_z" >
+            <!--simplified heatsinks-->
+            <!--Placement block="FTRO" in="FSTW" konly="MANY" x="outerbase_x" y="outerbase_y" z="-wholewedge_dz+outerbase_z" -->
                 <Rotation alphay="90"/>
                 <Rotation alphax="90"/>
             </Placement>
@@ -955,9 +968,13 @@ The factors are the weights fraction for stainless and NOVEC
             <!-- inner base -->
             <Create    block="FTUW" />
             <Placement block="FTUW" in="FSTW" x="0" y="0" z="-wholewedge_dz+innerbaseb_z" />
+            <!--simplified heatsinks-->
+            <!--Placement block="FTUW" in="FSTW" konly="MANY" x="0" y="0" z="-wholewedge_dz+innerbaseb_z" /-->
 
             <Create    block="FTIA" />
             <Placement block="FTIA" in="FSTW" x="innerbasea_x(1)" y="innerbasea_y" z="-wholewedge_dz+innerbasea_z" >
+            <!--simplified heatsinks-->
+            <!--Placement block="FTIA" in="FSTW" konly="MANY" x="innerbasea_x(1)" y="innerbasea_y" z="-wholewedge_dz+innerbasea_z" -->
                 <Rotation alphay="90"/>
                 <Rotation alphax="90"/>
             </Placement>
@@ -1039,21 +1056,37 @@ The factors are the weights fraction for stainless and NOVEC
               
             <!-- Simplified Heat Sinks -->
             
-            <!--Create    block="FSHE" />
+            <!--Create    block="FSHA" />
+            <Create    block="FSHB" />
+            <Create    block="FSHC" />
+            <Create    block="FSHD" />
+            <Create    block="FSHE" />
             <Create    block="FSHF" />
             <Create    block="FSHG" />
             <Create    block="FSHH" /-->
             <!-- outside mechanical structure -->
-            <!--Placement block="FSHE" in="FSTW" konly="MANY" x="heatsink_x(5)" y="heatsink_y(5)" z="-wholewedge_dz+heatsink_z(5)" dx="heatsink_dx(5)" dy="heatsink_dy(5)" dz="heatsink_dz(5)" >
+            <!--Placement block="FSHA" in="FSTW" konly="ONLY" x="heatsink_x(1)" y="heatsink_y(1)" z="-wholewedge_dz+heatsink_z(1)" dx="heatsink_dx(1)" dy="heatsink_dy(1)" dz="heatsink_dz(1)" >
+                <Rotation alphay="heatsink_rotz(1)"/>
+            </Placement>
+            <Placement block="FSHB" in="FSTW" konly="ONLY" x="heatsink_x(2)" y="heatsink_y(2)" z="-wholewedge_dz+heatsink_z(2)" dx="heatsink_dx(2)" dy="heatsink_dy(2)" dz="heatsink_dz(2)" >
+                <Rotation alphay="heatsink_rotz(2)"/>
+            </Placement>
+            <Placement block="FSHC" in="FSTW" konly="ONLY" x="heatsink_x(3)" y="heatsink_y(3)" z="-wholewedge_dz+heatsink_z(3)" dx="heatsink_dx(3)" dy="heatsink_dy(3)" dz="heatsink_dz(3)" >
+                <Rotation alphay="heatsink_rotz(3)"/>
+            </Placement>
+            <Placement block="FSHD" in="FSTW" konly="ONLY" x="heatsink_x(4)" y="heatsink_y(4)" z="-wholewedge_dz+heatsink_z(4)" dx="heatsink_dx(4)" dy="heatsink_dy(4)" dz="heatsink_dz(4)" >
+                <Rotation alphay="heatsink_rotz(4)"/>
+            </Placement>
+            <Placement block="FSHE" in="FSTW" konly="ONLY" x="heatsink_x(5)" y="heatsink_y(5)" z="-wholewedge_dz+heatsink_z(5)" dx="heatsink_dx(5)" dy="heatsink_dy(5)" dz="heatsink_dz(5)" >
                 <Rotation alphaz="heatsink_rotz(5)"/>
             </Placement>
-            <Placement block="FSHF" in="FSTW" konly="MANY" x="heatsink_x(6)" y="heatsink_y(6)" z="-wholewedge_dz+heatsink_z(6)" dx="heatsink_dx(6)" dy="heatsink_dy(6)" dz="heatsink_dz(6)" >
+            <Placement block="FSHF" in="FSTW" konly="ONLY" x="heatsink_x(6)" y="heatsink_y(6)" z="-wholewedge_dz+heatsink_z(6)" dx="heatsink_dx(6)" dy="heatsink_dy(6)" dz="heatsink_dz(6)" >
                 <Rotation alphaz="heatsink_rotz(6)"/>
             </Placement>
-            <Placement block="FSHG" in="FSTW" konly="MANY" x="heatsink_x(7)" y="heatsink_y(7)" z="-wholewedge_dz+heatsink_z(7)" dx="heatsink_dx(7)" dy="heatsink_dy(7)" dz="heatsink_dz(7)" >
+            <Placement block="FSHG" in="FSTW" konly="ONLY" x="heatsink_x(7)" y="heatsink_y(7)" z="-wholewedge_dz+heatsink_z(7)" dx="heatsink_dx(7)" dy="heatsink_dy(7)" dz="heatsink_dz(7)" >
                 <Rotation alphaz="heatsink_rotz(7)"/>
             </Placement>
-            <Placement block="FSHH" in="FSTW" konly="MANY" x="heatsink_x(8)" y="heatsink_y(8)" z="-wholewedge_dz+heatsink_z(8)" dx="heatsink_dx(8)" dy="heatsink_dy(8)" dz="heatsink_dz(8)" >
+            <Placement block="FSHH" in="FSTW" konly="ONLY" x="heatsink_x(8)" y="heatsink_y(8)" z="-wholewedge_dz+heatsink_z(8)" dx="heatsink_dx(8)" dy="heatsink_dy(8)" dz="heatsink_dz(8)" >
                 <Rotation alphaz="heatsink_rotz(8)"/>
             </Placement-->
            
@@ -1168,25 +1201,6 @@ The factors are the weights fraction for stainless and NOVEC
             <Attribute for="FTRO" seen="1" colo="14" />
             <Material name="PEEK_FTRO" />
             <Shape type="TRD1" dx1="outerbase_dx1" dx2="outerbase_dx2" dy="outerbase_dy" dz="outerbase_dz" />
-            
-            <!-- Simplified Heatsinks -->
-            
-            <Create    block="FSHA" />
-            <Create    block="FSHB" />
-            <Create    block="FSHC" />
-            <Create    block="FSHD" />
-            <Placement block="FSHA" in="FTRO" x="heatsink_x(1)" y="heatsink_y(1)" z="heatsink_z(1)" dx="heatsink_dx(1)" dy="heatsink_dy(1)" dz="heatsink_dz(1)" >
-                <Rotation alphay="heatsink_rotz(1)"/>
-            </Placement>
-            <Placement block="FSHB" in="FTRO" x="heatsink_x(2)" y="heatsink_y(2)" z="heatsink_z(2)" dx="heatsink_dx(2)" dy="heatsink_dy(2)" dz="heatsink_dz(2)" >
-                <Rotation alphay="heatsink_rotz(2)"/>
-            </Placement>
-            <Placement block="FSHC" in="FTRO" x="heatsink_x(3)" y="heatsink_y(3)" z="heatsink_z(3)" dx="heatsink_dx(3)" dy="heatsink_dy(3)" dz="heatsink_dz(3)" >
-                <Rotation alphay="heatsink_rotz(3)"/>
-            </Placement>
-            <Placement block="FSHD" in="FTRO" x="heatsink_x(4)" y="heatsink_y(4)" z="heatsink_z(4)" dx="heatsink_dx(4)" dy="heatsink_dy(4)" dz="heatsink_dz(4)" >
-                <Rotation alphay="heatsink_rotz(4)"/>
-            </Placement>
             
             <Create    block="FHOA" />
             <Create    block="FHOB" />
