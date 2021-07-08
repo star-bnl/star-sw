@@ -1,5 +1,5 @@
-#ifndef __StarLight_h__
-#define __StarLight_h__
+#ifndef __StarLightGen_h__
+#define __StarLightGen_h__
 
 #include "StarGenerator/BASE/StarGenerator.h"
 
@@ -11,17 +11,17 @@ class StarGenAAEvent;
 //class inputParameters;
 
 /**
-   \class StarLight
-   \brief Interface to the StarLight (c++ version) event generator
+   \class StarLightGen
+   \brief Interface to the StarLightGen (c++ version) event generator
    
  */
 
-class StarLight : public StarGenerator
+class StarLightGen : public StarGenerator
 {
 
  public:
-  StarLight( const Char_t *name="STARlight" );
-  ~StarLight(){ /* nada */ };
+  StarLightGen( const Char_t *name="STARlight" );
+  ~StarLightGen(){ /* nada */ };
 
   Int_t Init();
   Int_t Generate();
@@ -29,7 +29,7 @@ class StarLight : public StarGenerator
   //void Set( const Char_t *s ){ mSTARlight -> readString(s); }
 
   //void const char *GetCVS() const
-  //{static const char cvs[]="Tag $Name:  $ $Id: StarLight.h,v 1.4 2014/08/06 11:43:58 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  //{static const char cvs[]="Tag $Name:  $ $Id: StarLightGen.h,v 1.4 2014/08/06 11:43:58 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
  private:
  protected:
@@ -58,7 +58,7 @@ public:
   void SetInterferencePtValues( Double_t high, Int_t bins );
   void ProcessParameters();
 
-  ClassDef(StarLight,1);
+  ClassDef(StarLightGen,1);
 
 };
 

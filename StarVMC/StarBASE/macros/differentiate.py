@@ -41,14 +41,14 @@ def main():
       print ""
       print "Must specify a baseline geometry."
       print ""
-      os.system("./differential.py --help")
+      os.system("./differentiate.py --help")
       return
 
    if ( opts.geometry == "NONE" ):
       print ""
       print "Must specify a comparison geometry."
       print ""
-      os.system("./differential.py --help")
+      os.system("./differentiate.py --help")
       return   
       
 

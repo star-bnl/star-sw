@@ -31,13 +31,13 @@ Python (PyROOT) scripts are available under StarVMC/StarBASE/macros/ to process 
 resulting histogram files.  The two files which are needed are
 
 1) starbase.py
-2) differential.py
+2) differentiate.py
 
 Example usage:
 
 $ starbase.py --geom=y2006 
 $ starbase.py --geom=y2006h
-$ differential.py --base=y2006 --geom=y2006h
+$ differentiate.py --base=y2006 --geom=y2006h
 
 --------------------------
 """
