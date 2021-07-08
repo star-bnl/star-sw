@@ -62,6 +62,9 @@ public:
 	void stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_TAMU_202202(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_JP6_202204(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_JP6Carl_202205(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_JP5_202206(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_tonko_202101(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_tonko_202104(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
@@ -286,7 +289,7 @@ public:
         float ratio[2][15][9];
         u_int em[2][15][9];
         u_int had[2][15][9];
-        u_int jet[2][3];
+        u_int jet[2][6];
         u_int etot[2];
         u_int htot[2];    
         u_int dsmout;

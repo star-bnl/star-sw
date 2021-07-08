@@ -14,7 +14,7 @@ static const float XFCSMin =  16.69;
 static const float XFCSMax =  16.69 + 22.0*5.542;
 static const float YFCS    =  34.0/2.0 * 5.542;
 static const float FVCUT   =  20.0; //cm 
-static const float ETHR = 50.0;
+static const float ETHR = 50.0; //GeV
 
 static int NTOT=0;
 static int NGOOD=0;

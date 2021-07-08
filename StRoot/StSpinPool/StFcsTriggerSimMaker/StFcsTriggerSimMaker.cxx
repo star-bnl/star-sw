@@ -48,8 +48,6 @@
 
 #include "RTS/include/rtsLog.h"
 
-#include "StRoot/RTS/src/TRG_FCS/fcs_trg_base.h"
-
 namespace {
   enum {kMaxNS=2, kMaxDet=3, kMaxDep=24, kMaxCh=32, kMaxEcalDep=24, kMaxHcalDep=8, kMaxPresDep=4, kMaxLink2=2};
   u_int   fcs_trg_sim_adc[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
@@ -97,81 +95,98 @@ int StFcsTriggerSimMaker::Init(){
 	mTrgSim->stage_version[1]=1;
 	mTrgSim->stage_version[2]=3;
 	mTrgSim->stage_version[3]=3;
-	//Thresholds
-	mTrgSim->EM_HERATIO_THR = 32;
-	mTrgSim->HAD_HERATIO_THR = 32;
-	if(0){
-	  mTrgSim->EMTHR1 = 32;
-	  mTrgSim->EMTHR2 = 48;
-	  mTrgSim->EMTHR3 = 64;
-	  mTrgSim->HADTHR1 = 32;
-	  mTrgSim->HADTHR2 = 48;
-	  mTrgSim->HADTHR3 = 64;
-	  mTrgSim->JETTHR1 = 64;
-	  mTrgSim->JETTHR2 = 128;
-	  mTrgSim->ETOTTHR = 128;
-	  mTrgSim->HTOTTHR = 64;
-	  mTrgSim->EHTTHR = 16;
-	  mTrgSim->HHTTHR = 16;
-	}
-	if(0){
-	  mTrgSim->EMTHR1 = 64;
-	  mTrgSim->EMTHR2 = 128;
-	  mTrgSim->EMTHR3 = 192;
-	  mTrgSim->HADTHR1 = 64;
-	  mTrgSim->HADTHR2 = 128;
-	  mTrgSim->HADTHR3 = 192;
-	  mTrgSim->JETTHR1 = 128;
-	  mTrgSim->JETTHR2 = 192;
-	  mTrgSim->ETOTTHR = 192;
-	  mTrgSim->HTOTTHR = 64;
-	  mTrgSim->EHTTHR = 64;
-	  mTrgSim->HHTTHR = 16;
-	}
-	if(0){
-	  mTrgSim->EMTHR1 = 180;
-	  mTrgSim->EMTHR2 = 240;
-	  mTrgSim->EMTHR3 = 250;
-	  mTrgSim->HADTHR1 = 180;
-	  mTrgSim->HADTHR2 = 240;
-	  mTrgSim->HADTHR3 = 250;
-	  mTrgSim->JETTHR1 = 150;
-	  mTrgSim->JETTHR2 = 250;
-	  mTrgSim->ETOTTHR = 250;
-	  mTrgSim->HTOTTHR = 150;
-	  mTrgSim->EHTTHR = 200;
-	  mTrgSim->HHTTHR = 40;
-	}
-	if(0){
-	  mTrgSim->EMTHR1 = 70;
-	  mTrgSim->EMTHR2 = 120;
-	  mTrgSim->EMTHR3 = 160;
-	  mTrgSim->HADTHR1 = 85;
-	  mTrgSim->HADTHR2 = 130;
-	  mTrgSim->HADTHR3 = 160;
-	  mTrgSim->JETTHR1 = 240;
-	  mTrgSim->JETTHR2 = 250;
-	  mTrgSim->ETOTTHR = 250;
-	  mTrgSim->HTOTTHR = 230;
-	  mTrgSim->EHTTHR = 80;
-	  mTrgSim->HHTTHR = 70;
-	}
-	if(1){
-	  mTrgSim->EMTHR1 = 70;
-	  mTrgSim->EMTHR2 = 50;
-	  mTrgSim->EMTHR3 = 160;
-	  mTrgSim->HADTHR1 = 85;
-	  mTrgSim->HADTHR2 = 50;
-	  mTrgSim->HADTHR3 = 160;
-	  mTrgSim->JETTHR1 = 240;
-	  mTrgSim->JETTHR2 = 250;
-	  mTrgSim->ETOTTHR = 100;
-	  mTrgSim->HTOTTHR = 80;
-	  mTrgSim->EHTTHR = 80;
-	  mTrgSim->HHTTHR = 70;
-	}
-	mTrgSim->PHTTHR = 160;    
+    }else if(mTrgSelect==202204){
+	mTrgSim->stage_version[0]=2;
+	mTrgSim->stage_version[1]=1;
+	mTrgSim->stage_version[2]=4;
+	mTrgSim->stage_version[3]=3;
+    }else if(mTrgSelect==202205){
+	mTrgSim->stage_version[0]=2;
+	mTrgSim->stage_version[1]=1;
+	mTrgSim->stage_version[2]=5;
+	mTrgSim->stage_version[3]=3;
+    }else if(mTrgSelect==202206){
+	mTrgSim->stage_version[0]=2;
+	mTrgSim->stage_version[1]=1;
+	mTrgSim->stage_version[2]=6;
+	mTrgSim->stage_version[3]=3;
     }
+
+    //Thresholds
+    mTrgSim->EM_HERATIO_THR = 32;
+    mTrgSim->HAD_HERATIO_THR = 32;
+    if(0){
+      mTrgSim->EMTHR1 = 32;
+      mTrgSim->EMTHR2 = 48;
+      mTrgSim->EMTHR3 = 64;
+      mTrgSim->HADTHR1 = 32;
+      mTrgSim->HADTHR2 = 48;
+      mTrgSim->HADTHR3 = 64;
+      mTrgSim->JETTHR1 = 64;
+      mTrgSim->JETTHR2 = 128;
+      mTrgSim->ETOTTHR = 128;
+      mTrgSim->HTOTTHR = 64;
+      mTrgSim->EHTTHR = 16;
+      mTrgSim->HHTTHR = 16;
+    }
+    if(0){
+      mTrgSim->EMTHR1 = 64;
+      mTrgSim->EMTHR2 = 128;
+      mTrgSim->EMTHR3 = 192;
+      mTrgSim->HADTHR1 = 64;
+      mTrgSim->HADTHR2 = 128;
+      mTrgSim->HADTHR3 = 192;
+      mTrgSim->JETTHR1 = 128;
+      mTrgSim->JETTHR2 = 192;
+      mTrgSim->ETOTTHR = 192;
+      mTrgSim->HTOTTHR = 64;
+      mTrgSim->EHTTHR = 64;
+      mTrgSim->HHTTHR = 16;
+    }
+    if(0){
+      mTrgSim->EMTHR1 = 180;
+      mTrgSim->EMTHR2 = 240;
+      mTrgSim->EMTHR3 = 250;
+      mTrgSim->HADTHR1 = 180;
+      mTrgSim->HADTHR2 = 240;
+      mTrgSim->HADTHR3 = 250;
+      mTrgSim->JETTHR1 = 150;
+      mTrgSim->JETTHR2 = 250;
+      mTrgSim->ETOTTHR = 250;
+      mTrgSim->HTOTTHR = 150;
+      mTrgSim->EHTTHR = 200;
+      mTrgSim->HHTTHR = 40;
+    }
+    if(0){
+      mTrgSim->EMTHR1 = 70;
+      mTrgSim->EMTHR2 = 120;
+      mTrgSim->EMTHR3 = 160;
+      mTrgSim->HADTHR1 = 85;
+      mTrgSim->HADTHR2 = 130;
+      mTrgSim->HADTHR3 = 160;
+      mTrgSim->JETTHR1 = 240;
+      mTrgSim->JETTHR2 = 250;
+      mTrgSim->ETOTTHR = 250;
+      mTrgSim->HTOTTHR = 230;
+      mTrgSim->EHTTHR = 80;
+      mTrgSim->HHTTHR = 70;
+    }
+    if(1){
+      mTrgSim->EMTHR1 = 70;
+      mTrgSim->EMTHR2 = 50;
+      mTrgSim->EMTHR3 = 160;
+      mTrgSim->HADTHR1 = 85;
+      mTrgSim->HADTHR2 = 50;
+      mTrgSim->HADTHR3 = 160;
+      mTrgSim->JETTHR1 = 240;
+      mTrgSim->JETTHR2 = 250;
+      mTrgSim->ETOTTHR = 100;
+      mTrgSim->HTOTTHR = 80;
+      mTrgSim->EHTTHR = 80;
+      mTrgSim->HHTTHR = 70;
+    }
+    mTrgSim->PHTTHR = 160;    
+
     //EPD mask
     if(mPresMask){
 	printf("Reading PresMask from %s\n",mPresMask);
@@ -309,7 +324,7 @@ int StFcsTriggerSimMaker::Make(){
 	      }
 	      mTrgSim->fill_event(ehp,ns,dep,ch,data,8) ;
 	    }else{
-	      data[3] = hit->adc(0);
+	      data[1] = hit->adc(0);
 	      mTrgSim->fill_event(ehp,ns,dep,ch,data,8) ;
 	    }
 	    if(mFile) fprintf(mFile,"%2d %2d %2d %2d %5d\n",ns,ehp,dep,ch,hit->adc(0));
@@ -339,10 +354,6 @@ int StFcsTriggerSimMaker::Make(){
     LOG_INFO << Form("Output to DSM = 0x%03x  Filter=0x%03x\n",mTrg,mFlt)<<endm;
     return kStOK;
 }    
-
-void StFcsTriggerSimMaker::runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t& geo, link_t output[]){
-  mTrgSim->stage_2(ecal,hcal,pres,geo,output);
-}
 
 void StFcsTriggerSimMaker::print4B4(){
     //printout ecal 4x4
