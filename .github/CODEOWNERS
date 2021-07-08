@@ -63,8 +63,8 @@
 /StRoot/Sti*                                       @klendathu2k       @plexoos     @starsdong   @perevbnlgov
 /StRoot/StppSpin                                   @ullrich-bnl
 /StRoot/TPCCATracker                               @yfisyak           @kehw
-/StRoot/macros                                     @genevb            @ullrich-bnl
-/StRoot/macros/mudst                               @nigmatkulov
+/StRoot/macros                                     @genevb            @ullrich-bnl @plexoos
+/StRoot/macros/mudst                               @nigmatkulov       @plexoos
 /StarDb                                            @dmarkh            @perevbnlgov
 /StarDb/Calibrations                               @genevb
 /StarDb/Calibrations/tof                           @ZaochenYe         @fgeurts
