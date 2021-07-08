@@ -5,8 +5,8 @@ TString input_chain = "fzin,geant,FieldOn,logger,MakeEvent,fcsSim,fcsWFF,fcsClus
 
 class StFmsSimulatorMaker;
 
-void runSimBfc( int TrgVersion=202204, Int_t nEvents=1000, Int_t run=1, const char* pid="jet",
-		int debug, int e=0, float pt=1.5, float vz=0.0,
+void runSimBfc( Int_t nEvents=1000, Int_t run=1, const char* pid="jet", int TrgVersion=202204,
+		int debug=0, int e=0, float pt=1.5, float vz=0.0,
 		char* epdmask="0.0100",
 		int leakyHcal=0, 
 		int eventDisplay=20,
