@@ -95,6 +95,7 @@
 #include "TObjArray.h"
 
 #include "StMessMgr.h"
+#include "StarRoot/TH1Helper.h"
 #include "StMiniMcEvent/StMiniMcEvent.h"
 #include "StMiniMcEvent/StTinyMcTrack.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
@@ -368,7 +369,7 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   mhRunNumber->SetXTitle("Run number");
 
   // Set bit to automatic bin extention
-  mhEventId->SetBit(TH1::kCanRebin);
+  TH1Helper::SetCanRebin(mhEventId);
 
   utility->setStyle( mhEventId   ) ;
   utility->setStyle( mhRunNumber ) ;
