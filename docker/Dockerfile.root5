@@ -37,6 +37,13 @@ RUN source star-spack/setup.sh \
  # Create star-spack/spack/var/spack/environments/star-env-root/loads
  && spack -e star-env-root env loads
 
+# Strip all the binaries
+RUN find -L /opt/software/* -type f -exec readlink -f '{}' \; | \
+    xargs file -i | \
+    grep 'charset=binary' | \
+    grep 'x-executable\|x-archive\|x-sharedlib' | \
+    awk -F: '{print $1}' | xargs strip -S
+
 
 FROM scientificlinux/sl@sha256:437d3402c454319a5443bb5a99844c8d6f454828c59dcfb2730f1bdff8f2f48c AS base-stage
 
