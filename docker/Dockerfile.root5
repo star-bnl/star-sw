@@ -1,5 +1,5 @@
 # Pull SL7 image by digest (immutable identifier)
-FROM scientificlinux/sl@sha256:437d3402c454319a5443bb5a99844c8d6f454828c59dcfb2730f1bdff8f2f48c AS build-stage
+FROM scientificlinux/sl@sha256:437d3402c454319a5443bb5a99844c8d6f454828c59dcfb2730f1bdff8f2f48c AS prep-stage
 
 SHELL ["/bin/bash", "-c"]
 ENV LC_ALL=en_US.UTF-8
@@ -13,9 +13,6 @@ RUN yum update -q -y \
     lapack-static blas-static \
     libX11-devel libXext-devel libXpm-devel openmotif-devel \
  && yum clean all
-
-# Install extra python modules used by the STAR software
-RUN pip install pyparsing
 
 # Install cernlib
 RUN mkdir /cern && cd /cern \
@@ -31,14 +28,47 @@ RUN mkdir -p star-spack \
  && curl -sL https://github.com/spack/spack/archive/010e5761d6631eae102d1eec87e5e74a0e16ed82.tar.gz | tar -xz --strip-components 1 -C star-spack/spack
 
 RUN source star-spack/setup.sh \
- && spack env create star-env-root5 star-spack/environments/star-x86_64-root-5.34.38-container.yaml \
- && spack env activate star-env-root5 \
+ && spack env create star-env-root star-spack/environments/star-x86_64-root-5.34.38-container.yaml \
+ && spack env activate star-env-root \
  && spack install -j 5 --fail-fast \
  && spack gc -y \
  && spack clean --all \
  && spack uninstall --force -y llvm \
- # Create star-spack/spack/var/spack/environments/star-env-root5/loads
- && spack -e star-env-root5 env loads
+ # Create star-spack/spack/var/spack/environments/star-env-root/loads
+ && spack -e star-env-root env loads
+
+
+FROM scientificlinux/sl@sha256:437d3402c454319a5443bb5a99844c8d6f454828c59dcfb2730f1bdff8f2f48c AS base-stage
+
+SHELL ["/bin/bash", "-c"]
+ENV LC_ALL=en_US.UTF-8
+
+COPY --from=prep-stage /opt/software /opt/software
+COPY --from=prep-stage /cern /cern
+COPY --from=prep-stage /star-spack/spack/var/spack/environments/star-env-root/loads /opt/loads
+COPY --from=prep-stage /star-spack/spack/share/spack/modules/linux-scientific7-x86_64 /opt/linux-scientific7-x86_64
+
+# epel repo is for python-pip only
+RUN yum update -q -y \
+ && yum install -y epel-release \
+ && yum install -y \
+    binutils gcc gcc-c++ gcc-gfortran \
+    git bzip2 file which make patch \
+    bison byacc flex flex-devel libcurl-devel \
+    perl perl-Env perl-Digest-MD5 \
+    libX11-devel libXext-devel libXpm-devel libXt-devel \
+    python python-pip \
+    environment-modules \
+ && yum clean all
+
+# Install extra python modules used by the STAR software
+RUN pip install pyparsing
+
+
+FROM base-stage AS build-stage
+
+SHELL ["/bin/bash", "-c"]
+ENV LC_ALL=en_US.UTF-8
 
 ENV STAR=/star-sw
 ENV USE_64BITS=1
@@ -78,7 +108,7 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
      if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }\n' \
  && patch -p1 < root4star_cons.patch
 
-RUN source star-spack/setup.sh && spack env activate star-env-root5 \
+RUN source star-spack/setup.sh && spack env activate star-env-root \
  && export MYSQL=`spack location --install-dir mysql` \
  && export LIBXML2_DIR=`spack location --install-dir libxml2` \
  && ln -s $MYSQL/include /usr/include/mysql \
