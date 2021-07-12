@@ -23,6 +23,15 @@ RUN yum update -q -y \
 # Install extra python modules used by the STAR software
 RUN pip install pyparsing
 
+# Install cernlib
+RUN mkdir /cern && cd /cern \
+ && curl -sL https://github.com/psilib/cernlib/archive/centos7.tar.gz | tar -xz --strip-components 1 \
+ && ./build_cernlib.sh \
+ && mv /usr/lib64/libblas.a   /cern/2006/lib/libblas.a \
+ && mv /usr/lib64/liblapack.a /cern/2006/lib/liblapack3.a \
+ && ln -s 2006 /cern/pro \
+ && rm -fr /cern/2006/src /cern/2006/build
+
 RUN mkdir -p star-spack \
  && curl -sL https://github.com/star-bnl/star-spack/archive/588a489e3441c61a28f61f666e7f0aa3095f217a.tar.gz | tar -xz --strip-components 1 -C star-spack \
  && curl -sL https://github.com/spack/spack/archive/010e5761d6631eae102d1eec87e5e74a0e16ed82.tar.gz | tar -xz --strip-components 1 -C star-spack/spack
@@ -32,17 +41,6 @@ RUN source star-spack/setup.sh \
  && spack env activate star-env-root6 \
  && spack install -j 5 --fail-fast \
  && spack gc -y
-
-# Install CERNLIB
-RUN mkdir /cern && cd /cern \
- && curl -sL https://github.com/psilib/cernlib/archive/centos7.tar.gz | tar -xz --strip-components 1 \
- && ./build_cernlib.sh \
- && cd /cern/2006/lib \
- && ln -s /usr/lib64/libblas.a libblas.a \
- && ln -s /usr/lib64/liblapack.a liblapack3.a \
- && cd /cern \
- && ln -s 2006 pro \
- && rm -fr /cern/2006/src /cern/2006/build /tmp/*
 
 ENV STAR=/star-sw
 ENV USE_64BITS=1
