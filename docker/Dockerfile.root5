@@ -52,7 +52,7 @@ ENV LC_ALL=en_US.UTF-8
 
 COPY --from=prep-stage /opt/software /opt/software
 COPY --from=prep-stage /cern /cern
-COPY --from=prep-stage /star-spack/spack/var/spack/environments/star-env-root/loads /opt/loads
+COPY --from=prep-stage /star-spack/spack/var/spack/environments/star-env-root/loads /etc/profile.d/z10_load_spack_env_modules.sh
 COPY --from=prep-stage /star-spack/spack/share/spack/modules/linux-scientific7-x86_64 /opt/linux-scientific7-x86_64
 
 # epel repo is for python-pip only
@@ -82,7 +82,7 @@ ENV USE_64BITS=1
 ENV CERN=/cern
 ENV CERN_LEVEL=pro
 ENV CERN_ROOT=$CERN/$CERN_LEVEL
-ENV OPTSTAR=/opt/view
+ENV OPTSTAR=/opt/software
 ENV STAR_HOST_SYS=sl88_gcc789
 ENV NODEBUG=yes
 ENV STAR_LIB=$STAR/.${STAR_HOST_SYS}/LIB
@@ -91,6 +91,7 @@ ENV STAR_SYS=x8664_sl7
 ENV PATH=$CERN_ROOT/bin:$STAR_BIN:$STAR/mgr:$PATH
 ENV LD_LIBRARY_PATH=$STAR_LIB:$LD_LIBRARY_PATH
 ENV LIBPATH+=:/lib64:/lib
+ENV MODULEPATH=/opt/linux-scientific7-x86_64
 
 # Dummy directories checked by cons
 RUN mkdir $OPTSTAR/lib && mkdir $OPTSTAR/include
@@ -115,9 +116,9 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
      if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }\n' \
  && patch -p1 < root4star_cons.patch
 
-RUN source star-spack/setup.sh && spack env activate star-env-root \
- && export MYSQL=`spack location --install-dir mysql` \
- && export LIBXML2_DIR=`spack location --install-dir libxml2` \
+RUN source /etc/profile \
+ && export MYSQL=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/mysql-5.7.27-pfyt3fwtkubcc5eazmoqfick3lgp67mf \
+ && export LIBXML2_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/libxml2-2.9.10-4lxsmpa57bm3xs2cs3xapk3qccxflkfl \
  && ln -s $MYSQL/include /usr/include/mysql \
  && cd /star-sw \
  && cons +StarVMC/Geometry \
@@ -127,3 +128,14 @@ RUN source star-spack/setup.sh && spack env activate star-env-root \
          %StRoot/StJetFinder \
          %StRoot/StShadowMaker %StRoot/StHbtMaker \
  && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
+
+# One might expect the single ENTRYPOINT command below to work but for some
+# reason it chokes on a complex command such as
+#
+#     docker run image root4star -b 'bfc.C(10, "opt1", "infile.root")'
+#
+#ENTRYPOINT ["/bin/bash", "--rcfile", "/etc/profile", "-l", "-c"]
+
+RUN install -m 755 <(echo $'#!/bin/sh\n . /etc/profile; exec "$@"') entrypoint.sh
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["/bin/bash"]
