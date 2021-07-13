@@ -1,30 +1,26 @@
 <Document file="StarVMC/Geometry/FstmGeo/FstmGeoS.xml">
 
-
 <!--
 This is the file meant to a simplified version of ideal geometry.
 It was copied from FstmGeo.xml on June 15.
 
-Gavin 06/25/2021
+06/25/2021 - Gavin 
   -Mass from PEEK inner and outer ribs added to respective PEEK bases.
   -Replaced all cooling tubes with 4 straight tubes.
   -Steel and NOVEC mixed into one material “SteelNOVECMix”.
   -Removed cooling tube holder.
-  -There are commented portions of code for heatsinks, which combine each heatsink into one component. 
-  Jason informed me that there are some additional geant tags required for proper implementation 
-  (konly="ONLY" or konly="MANY"). This can be computationally expensive and can be investigated after other 
-  geometry changes are tested.
   
-Gavin 07/06/2021
+07/06/2021 - Gavin
   -Included 30 degree rotation of middle disk that was implemented by Flemming in FstmGeo.xml
-  -Made adjustments to commented portions for simplified heat sinks implementation
-    *Added commented konly flags to FSH(A-H), FTIA, FTUW, and FTRO.
-    *Heatsinks are all placed in FSTW (wedge container). This requires heatsinks to be tagged with konly="ONLY"
-     and the other overlapping volumes contained in FSTW to be tagged with konly="MANY". The konly="MANY" flag 
-     will intruct starsim to search for other volumes in that location and only process volumes with konly="ONLY"
-     if there is overlap.
-    *This method may be more computationally expensive than simply splitting each heatsink into multiple pieces.
-flemming 7/8 Updated the material definition for combined NOVEC and Stainless
+  
+07/08/2021 - Flemming
+  -Updated the material definition for combined NOVEC and Stainless
+  
+07/13/2021 - Gavin
+  -Included 3 more pieces of the cooling tube to create simplified cooling tube connectors.
+  -Compressed heatsinks into individual volumes located within the inner and outer PEEK bases.
+  -Removed significant amount of unnecessary commented code.  
+  
 -->
     <Replace match="GeV">*1.0E+0;</Replace>    
     <Replace match="MeV">*1.0E-3;</Replace>    
@@ -439,9 +435,9 @@ flemming 7/8 Updated the material definition for combined NOVEC and Stainless
             <var name="rmax"      value="0.318" />
             <var name="phi1"      value="0.0" />
             <var name="phi2"      value="360.0" />
-            <var name="dz"        value="{7.37286, 5.513626, 6.5235, 3.865, 1.721815, 1.07, 1.07}" />
-            <var name="x"         value="{24.1489, 22.3449, 28.18, 16.704, 30.15474, 31.83, 31.594}" />
-            <var name="y"         value="{6.0212, -5.5714, -0.50277, 0.0, 6.51308, 6.931, 7.877}" />
+            <var name="dz"        value="{7.37286, 5.513626, 6.5235, 3.865, 1.562765, 1.07, 1.07}" />
+            <var name="x"         value="{24.1489, 22.3449, 28.18, 16.704, 30.000415, 31.83, 31.594}" />
+            <var name="y"         value="{6.0212, -5.5714, -0.50277, 0.0, 6.474605, 6.931, 7.877}" />
             <var name="z"         value="{zcool, zcool, zcool, zcool, zcool, 2.403, 2.403}" />
             <var name="rotz"      value="{14, -14, 90, 90, 14, 90, 90}" />
             <var name="rotx"      value="{0, 0, 0, 0, 0, 90, 90}" /> 
@@ -706,7 +702,7 @@ The factors are the weights fraction for stainless and NOVEC
             <Attribute for="FSTD" seen="1" colo="1" />
 
             <!-- Shape will be dynamically sized to include all disks placed -->
-	    <!--  not so from the geant 3 version  -->
+	        <!--  not so from the geant 3 version  -->
             <Shape     type="TUBE" rmin="4.8" rmax="34" dz="5" />
 
             <!-- 12 wedges -->
@@ -730,7 +726,6 @@ The factors are the weights fraction for stainless and NOVEC
                 </Placement>
             </For>
             <For var="iwedge" from="0" to="5">  <!-- odd wedges -->
-                <!-- Support ring outside wedge -->
                 <!-- Support ring outside wedge -->
                 <Placement block="FTUO" in="FSTD" x="0" y="0" z="-ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="ring_dz" >
                     <Rotation alphaz="15+30*(2*iwedge+1)"/>
@@ -778,7 +773,6 @@ The factors are the weights fraction for stainless and NOVEC
             <Create    block="FTRO" />
             <Placement block="FTRO" in="FSTW" x="outerbase_x" y="outerbase_y" z="-wholewedge_dz+outerbase_z" >
             <!--simplified heatsinks-->
-            <!--Placement block="FTRO" in="FSTW" konly="MANY" x="outerbase_x" y="outerbase_y" z="-wholewedge_dz+outerbase_z" -->
                 <Rotation alphay="90"/>
                 <Rotation alphax="90"/>
             </Placement>
