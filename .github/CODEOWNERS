@@ -104,8 +104,8 @@
 /StRoot/StppSpin                                   @ullrich-bnl
 /StRoot/StvUtil  				   @klendathu2k
 /StRoot/TPCCATracker                               @yfisyak           @kehw
-/StRoot/macros                                     @genevb            @ullrich-bnl @dmarkh	@klendathu2k
-/StRoot/macros/mudst                               @nigmatkulov
+/StRoot/macros                                     @genevb            @ullrich-bnl @plexoos
+/StRoot/macros/mudst                               @nigmatkulov       @plexoos
 /StarDb                                            @dmarkh            @perevbnlgov
 /StarDb/AgML*					   @klendathu2k
 /StarDb/AgiGeometry				   @klendathu2k
