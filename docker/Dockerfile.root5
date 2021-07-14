@@ -27,7 +27,7 @@ RUN mkdir /cern && cd /cern \
  && rm -fr /cern/2006/src /cern/2006/build
 
 RUN mkdir -p star-spack \
- && curl -sL https://github.com/star-bnl/star-spack/archive/588a489e3441c61a28f61f666e7f0aa3095f217a.tar.gz | tar -xz --strip-components 1 -C star-spack \
+ && curl -sL https://github.com/star-bnl/star-spack/archive/166348c6f84c66ffdc044a14f00a14539558ba6e.tar.gz | tar -xz --strip-components 1 -C star-spack \
  && curl -sL https://github.com/spack/spack/archive/010e5761d6631eae102d1eec87e5e74a0e16ed82.tar.gz | tar -xz --strip-components 1 -C star-spack/spack
 
 RUN source star-spack/setup.sh \
