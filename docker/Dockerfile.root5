@@ -71,11 +71,7 @@ RUN yum update -q -y \
 # Install extra python modules used by the STAR software
 RUN pip install pyparsing
 
-
-FROM base-stage AS build-stage
-
-SHELL ["/bin/bash", "-c"]
-ENV LC_ALL=en_US.UTF-8
+ENV MODULEPATH=/opt/linux-scientific7-x86_64
 
 ENV STAR=/star-sw
 ENV USE_64BITS=1
@@ -91,10 +87,16 @@ ENV STAR_SYS=x8664_sl7
 ENV PATH=$CERN_ROOT/bin:$STAR_BIN:$STAR/mgr:$PATH
 ENV LD_LIBRARY_PATH=$STAR_LIB:$LD_LIBRARY_PATH
 ENV LIBPATH+=:/lib64:/lib
-ENV MODULEPATH=/opt/linux-scientific7-x86_64
+
+ENV MYSQL=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/mysql-5.7.27-pfyt3fwtkubcc5eazmoqfick3lgp67mf
+ENV LIBXML2_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/libxml2-2.9.10-4lxsmpa57bm3xs2cs3xapk3qccxflkfl
 
 # Dummy directories checked by cons
 RUN mkdir $OPTSTAR/lib && mkdir $OPTSTAR/include
+RUN ln -s $MYSQL/include /usr/include/mysql
+
+
+FROM base-stage AS build-stage
 
 COPY . /star-sw
 
@@ -117,9 +119,6 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
  && patch -p1 < root4star_cons.patch
 
 RUN source /etc/profile \
- && export MYSQL=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/mysql-5.7.27-pfyt3fwtkubcc5eazmoqfick3lgp67mf \
- && export LIBXML2_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/libxml2-2.9.10-4lxsmpa57bm3xs2cs3xapk3qccxflkfl \
- && ln -s $MYSQL/include /usr/include/mysql \
  && cd /star-sw \
  && cons +StarVMC/Geometry \
  && cons %pams/sim/g2r %OnlTools \
