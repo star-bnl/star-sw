@@ -201,11 +201,21 @@ int StFcsEventDisplay::Make(){
 	
 	frame->Draw();
 	scale(xmax,5,ymin,ymax);
-	TText* t1=new TText(xmax+5, ymax,          "100GeV"); t1->SetTextSize(0.02); t1->Draw();
-	TText* t2=new TText(xmax+5, ymin+dy*2/3.0, "10GeV" ); t2->SetTextSize(0.02); t2->Draw();
-	TText* t3=new TText(xmax+5, ymin+dy/3.0,   "1GeV"  ); t3->SetTextSize(0.02); t3->Draw();
-	TText* t4=new TText(xmax+5, ymin,          "0.1GeV"); t4->SetTextSize(0.02); t4->Draw();
-	
+	if(mMaxE==2 && mMinE==-1){
+	  TText* t1=new TText(xmax+5, ymax,          "100GeV"); t1->SetTextSize(0.02); t1->Draw();
+	  TText* t2=new TText(xmax+5, ymin+dy*2/3.0, "10GeV" ); t2->SetTextSize(0.02); t2->Draw();
+	  TText* t3=new TText(xmax+5, ymin+dy/3.0,   "1GeV"  ); t3->SetTextSize(0.02); t3->Draw();
+	  TText* t4=new TText(xmax+5, ymin,          "0.1GeV"); t4->SetTextSize(0.02); t4->Draw();
+	}else if(mMaxE==1 && mMinE==-3){
+	  TText* t1=new TText(xmax+5, ymax,          "1GeV");    t1->SetTextSize(0.02); t1->Draw();
+	  TText* t2=new TText(xmax+5, ymin+dy*2/3.0, "100MeV" ); t2->SetTextSize(0.02); t2->Draw();
+	  TText* t3=new TText(xmax+5, ymin+dy/3.0,   "10MeV"  ); t3->SetTextSize(0.02); t3->Draw();
+	  TText* t4=new TText(xmax+5, ymin,          "1MeV");    t4->SetTextSize(0.02); t4->Draw();
+	}else{
+	  TText* t1=new TText(xmax+5, ymax,          Form("1E%2.0f GeV",mMaxE)); t1->SetTextSize(0.02); t1->Draw();
+	  TText* t4=new TText(xmax+5, ymin,          Form("1E%2.0f GeV",mMinE)); t4->SetTextSize(0.02); t4->Draw();
+	}  
+
 	int color = 1000;
 	for(int det=0; det<kFcsNDet; det++){
 	    StSPtrVecFcsHit& hits = mFcsColl->hits(det);
@@ -243,9 +253,9 @@ int StFcsEventDisplay::Make(){
 		    float e=hit->energy();
 		    if(e<=0.0) continue;
 		    float logE=log10(e);
-		    if(logE>2.0) logE=2.0;
-		    if(logE<-1.0) logE=-1.0;
-		    setColor(color,(logE+1.0)/3.0);
+                    if(logE>mMaxE) logE=mMaxE;
+                    if(logE<mMinE) logE=mMinE;
+                    setColor(color,(logE - mMinE)/(mMaxE-mMinE));
 		    cell->SetFillColor(color);
 		    cell->Draw();
 		    color++;
@@ -304,6 +314,14 @@ int StFcsEventDisplay::Make(){
 		m->SetMarkerColor(kMagenta);
 		m->SetMarkerSize(2);
 		m->Draw();
+		TText* tx;
+		tx=new TText(cxyz.x()+xoff[det],cxyz.y()+yoff[det],
+			     Form("   %d/%3.1f/%3.1f/%3.0f",
+				  clu->nTowers(),clu->sigmaMax(),clu->sigmaMin(),
+				  clu->theta()*180/3.141592654));
+		tx->SetTextSize(cTxSize);
+		tx->SetTextColor(kBlue);
+		tx->Draw();
 		int nphoton=clu->nPoints();
 		for(int j=0; j<nphoton; j++){
 		    StFcsPoint* point = clu->points()[j];
