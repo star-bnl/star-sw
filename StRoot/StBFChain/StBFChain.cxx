@@ -793,7 +793,7 @@ Int_t StBFChain::Instantiate()
       mk->SetAttr("EmbeddingShortCut", kTRUE);
       mk->PrintAttr();
     }
-    if (maker == "StdEdxY2Maker" && (GetOption("SkipdNdx") || !(GetOption("CalcdNdx")))) {
+    if (maker == "StdEdxY2Maker" && !GetOption("CalcdNdx")) {
       mk->SetAttr("SkipdNdx", 1);
     } 
     if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){
