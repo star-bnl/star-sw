@@ -1793,9 +1793,8 @@ Bfc_st BFC[] = { // standard chains
 #else
   {"BeamBack" ,"","","StEvent"                                           ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
 #endif
-  {"dEdxY2"      ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker"
+  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker"
    ,                                                                 "Bichsel method used for dEdx",kFALSE},
-  {"SkipdNdx","","","dEdxY2",          "","","Option for StdEdxY2Maker to bypass calculation dN/dx",kFALSE},
   {"CalcdNdx", "", "", "dEdxY2", "", "",              "Option for StdEdxY2Maker to calculate dN/dx",kFALSE},
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti

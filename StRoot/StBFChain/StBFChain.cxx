@@ -794,8 +794,8 @@ Int_t StBFChain::Instantiate()
       mk->PrintAttr();
     }
     if (maker == "StdEdxY2Maker" && !GetOption("CalcdNdx")) {
-      mk->SetAttr("SkipdNdx", 1);
-    } 
+      mk->SetAttr("SkipdNdx", kTRUE);
+    }
     if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){
       mk->SetMode(0);
       // If simulation running make sure pick up simu stuff from db

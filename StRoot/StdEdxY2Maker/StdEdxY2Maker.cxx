@@ -171,7 +171,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
     DoOnce = 1;
     if (! IAttr("SkipdNdx")) {
       if ((GetDate() > 20171201 && m_TpcdEdxCorrection->IsFixedTarget()) ||
-	  (GetDate() > 20181201) 
+	  (GetDate() > 20181201)
 	  ) fUsedNdx = kTRUE; // use dN/dx for fixed target for Run XVIII and year >= XIX
     }
     if (TESTBIT(m_Mode, kCalibration)) {// calibration mode
