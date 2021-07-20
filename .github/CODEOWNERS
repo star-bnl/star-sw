@@ -2,8 +2,6 @@
 /OnlTools                                          @kehw              @plexoos          @jml985
 /StDb                                              @dmarkh            @plexoos
 /StDb/idl                                          @akioogawa 	      @dmarkh		@fgeurts	@iraklic	@plexoos	@yfisyak
-/StRoot/GenFit                                     @yfisyak
-/StRoot/KFParticle*                                @yfisyak
 /StRoot/RTS                                        @kehw              @akioogawa	@jml985		@tonko-lj
 /StRoot/StAnalysisMaker                            @ullrich-bnl	      @yfisyak
 /StRoot/StAnalysisUtilities/StHistUtil*            @genevb
