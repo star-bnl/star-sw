@@ -31,9 +31,7 @@ StPicoTrack::StPicoTrack() : TObject(),
   mGMomentumX(0), mGMomentumY(0), mGMomentumZ(0),
   mOriginX(0),mOriginY(0), mOriginZ(0),
   mDedx(0), mDedxError(0),
-#if defined (__TFG__VERSION__)
   mDnDx(0),mDnDxError(0),
-#endif
   mNHitsFit(0), mNHitsMax(0), mNHitsDedx(0),
   mNSigmaPion( std::numeric_limits<short>::min() ),
   mNSigmaKaon( std::numeric_limits<short>::min() ),
@@ -45,7 +43,9 @@ StPicoTrack::StPicoTrack() : TObject(),
 #if !defined (__TFG__VERSION__)
   , mTopoMap_iTpc(0),
 #endif
-  mIdTruth(0), mQATruth(0), mVertexIndex(-1) {
+  mStatus(0),
+  mIdTruth(0), mQATruth(0), mVertexIndex(-1)
+  {
   // Default constructor
   /* empty */
 }
@@ -66,10 +66,8 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
   mOriginZ = track.mOriginZ;
   mDedx = track.mDedx;
   mDedxError = track.mDedxError;
-#if defined (__TFG__VERSION__)
   mDnDx = track.mDnDx;
   mDnDxError = track.mDnDxError;
-#endif
   mNHitsFit = track.mNHitsFit;
   mNHitsMax = track.mNHitsMax;
   mNHitsDedx = track.mNHitsDedx;
@@ -87,6 +85,7 @@ StPicoTrack::StPicoTrack(const StPicoTrack &track) : TObject() {
 #if !defined (__TFG__VERSION__)
   mTopoMap_iTpc = track.mTopoMap_iTpc;
 #endif
+  mStatus = track.mStatus;
   mIdTruth = track.mIdTruth;
   mQATruth = track.mQATruth;
   mVertexIndex = track.mVertexIndex;

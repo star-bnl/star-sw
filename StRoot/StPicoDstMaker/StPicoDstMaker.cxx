@@ -1137,10 +1137,15 @@ void StPicoDstMaker::fillTracks() {
       picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
     }
 
-#if defined (__TFG__VERSION__)
     picoTrk->setDndx( gTrk->probPidTraits().dNdxFit() );
     picoTrk->setDndxError( gTrk->probPidTraits().dNdxErrorFit() );
-#endif /* __TFG__VERSION__ */
+    if ( gTrk->primaryTrack() ) {
+      picoTrk->setStatus(1);
+    }
+    else {
+      picoTrk->setStatus(0);
+    }
+
 
     // Fill track's hit information
     picoTrk->setNHitsDedx( gTrk->nHitsDedx() );
