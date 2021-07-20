@@ -75,7 +75,7 @@ double average_timeres_tof(){return mAverageTimeResTof;}
       mAverageTimeResTof=0;
 			for ( int i = 0; i < 120; i++ ){ //  nTrays
 				for ( int j = 0; j < 192; j++ ){
-					size_t index = i * 120 + j;
+					size_t index = i * 192 + j;
 					params[i][j] =  table[0].resolution[index];
           mAverageTimeResTof+=params[i][j];
 					LOG_DEBUG << "tray:" << i << ", mod cell:" << j << " = " << table[0].resolution[index]  << " == " << params[i][j] << endm;
