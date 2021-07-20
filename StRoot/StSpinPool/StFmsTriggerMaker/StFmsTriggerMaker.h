@@ -13,7 +13,7 @@
 class TH2F;
 
 #include <cstring>
-#if !defined(__CINT__) && !defined(__CLING__)
+#if !defined(__CINT__)
 #include "Board.hh"
 #include "Crate.hh"
 #include "bits.hh"
@@ -131,7 +131,7 @@ private:
 
   // Crates
   enum { NCRATES = 14 };
-#if !defined(__CINT__) && !defined(__CLING__)
+#if !defined(__CINT__)
 
   Crate crates[NCRATES];
 
