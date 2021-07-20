@@ -909,25 +909,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CPPPATH = "#StarVMC" . $main::PATH_SEPARATOR . $CPPPATH;
 	#    print "StarVMC change CPPPATH to $CPPPATH =========\n";
 
-    } elsif ( $pkg =~ m/^Vc$/){
-	#    $CPPPATH =
-	#      "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include";
-	#    print "CPPPATH => $CPPPATH\n";
-	$CXXFLAGS .= " -W -Wall -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics";
-	$CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
-#	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
-#	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE";}
-	my @srcC = ();
-	foreach my $s (@src) {
-	    #      print "$s\n";
-	    #      next if $s eq 'benchmarks/benchmark.cpp';
-	    my $dirL = File::Basename::dirname($s);
-	    my $sdir = File::Basename::basename($dirL);
-	    next if $sdir eq 'examples' or $sdir eq 'benchmarks';
-	    push @srcC, $s;
-	}
-	@src = @srcC;
-
     } elsif ($pkg eq "TPCCATracker" or $pkg eq "StiCA") {
         $CPPPATH .=
 	  $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/code";
