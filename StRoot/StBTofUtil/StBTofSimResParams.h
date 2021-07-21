@@ -69,7 +69,6 @@ class StBTofSimResParams : public StMaker {
 			St_tofSimResParams *dataset = 0;
 			dataset = (St_tofSimResParams*) DB->Find("tofSimResParams");
 
-
 			if(dataset) 
 			{
 				TDatime val[2];
@@ -80,23 +79,24 @@ class StBTofSimResParams : public StMaker {
 				
 				tofSimResParams_st* tofTable = static_cast<tofSimResParams_st*>(dataset->GetTable());
 				
+				const int mNTray         = 120;
+				const int mNCellsPerTray = 192;
+
 				mAverageTimeResTof = 0;
-				for ( int i = 0; i < 120; i++ )
+				for ( int i = 0; i < mNTray; i++ )
 				{
-					for ( int j = 0; j < 192; j++ )
+					for ( int j = 0; j < mNCellsPerTray; j++ )
 					{
-						size_t index = i * 192 + j;
+						size_t index = i * mNCellsPerTray + j;
 						params[i][j] = tofTable[0].resolution[index];
 
 						mAverageTimeResTof += params[i][j];
 
 						LOG_DEBUG << "tray:" << i << ", mod cell:" << j << " = " << tofTable[0].resolution[index]  << " == " << params[i][j] << endm;
-						cout<<"index: "<<index<<endl;
-						LOG_INFO <<  "tray:" << i << ", mod cell:" << j << " = " << tofTable[0].resolution[index]  << " == " << params[i][j] << endm;
 					}
 				}
 
-				mAverageTimeResTof=mAverageTimeResTof/(120*192);
+				mAverageTimeResTof=mAverageTimeResTof/(mNTray*mNCellsPerTray);
 
 				LOG_INFO << "Loaded tofSimResParams. Average = " << mAverageTimeResTof << endm;
 				return;
@@ -106,8 +106,6 @@ class StBTofSimResParams : public StMaker {
 				LOG_WARN << "ERROR: dataset does not contain requested table" << endm;
 				return;
 			}
-
-
 
 		} // loadParams
 
