@@ -331,7 +331,7 @@ Int_t StBTofCalibMaker::InitRun(int runnumber)
     mVpdResConfig->loadVpdSimParams(); // do i really need this?
     mVpdRes = mVpdResConfig->getParams();
     mBTofRes = new StBTofSimResParams;
-    mBTofRes->loadParams();
+    mBTofRes->loadParams(runnumber);
 
 
     if(vpdCalib) {
