@@ -93,4 +93,4 @@ RUN source star-spack/setup.sh && spack env activate star-env-root5 \
          %StRoot/StarGenerator/Kinematics \
          %StRoot/StEEmcPool %StRoot/StFgtPool %StRoot/StHighptPool \
          %StRoot/StJetFinder \
-         %StRoot/StShadowMaker %StRoot/StSpinMaker %StRoot/StHbtMaker
+         %StRoot/StShadowMaker
