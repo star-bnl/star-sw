@@ -28,8 +28,8 @@ RUN mkdir -p star-spack \
  && curl -sL https://github.com/spack/spack/archive/010e5761d6631eae102d1eec87e5e74a0e16ed82.tar.gz | tar -xz --strip-components 1 -C star-spack/spack
 
 RUN source star-spack/setup.sh \
- && spack env create star-env-root5 star-spack/environments/star-x86_64-root-5.34.38-container.yaml \
- && spack env activate star-env-root5 \
+ && spack env create star-env-root6 star-spack/environments/star-x86_64-root-6.16.00-container.yaml \
+ && spack env activate star-env-root6 \
  && spack install -j 5 --fail-fast \
  && spack gc -y
 
@@ -82,9 +82,10 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
      if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }\n' \
  && patch -p1 < root4star_cons.patch
 
-RUN source star-spack/setup.sh && spack env activate star-env-root5 \
+RUN source star-spack/setup.sh && spack env activate star-env-root6 \
  && export MYSQL=`spack location --install-dir mysql` \
  && export LIBXML2_DIR=`spack location --install-dir libxml2` \
+ && export Vc_LIB_DIR=`spack location --install-dir vc`/lib \
  && cd /usr/include && ln -s $MYSQL/include mysql \
  && cd /star-sw \
  && cons +StarVMC/Geometry \
