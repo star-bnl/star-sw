@@ -516,10 +516,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
     }
 
-
-
-
-
     $SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
     $SO_PKG_PLAIN = $SO_PKG;
     if ( $#idlM > -1 and $PKG !~ "^St" ) {
@@ -706,9 +702,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
     } elsif ( $pkg =~ m/^StHbtMaker$/ ) {
 	$CPPPATH = "#" . $Dir;
-	foreach
-	    my $subdir( "Base", "Infrastructure", "Reader", "Cut",
-			"CorrFctn", "Fit", "ThCorrFctn")
+	foreach my $subdir( "Base", "Infrastructure", "Reader", "Cut", "CorrFctn", "Fit", "ThCorrFctn")
 	{
 	    $CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/" . $subdir;
 	}
@@ -751,7 +745,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	      $pkg =~ m/^Stv$/                ||
 	      $pkg =~ m/^Sti/ && $pkg !~ m/StiVMC/) {
 
-      $CPPPATH .=  $main::PATH_SEPARATOR . "#" . $Dir;
+        $CPPPATH .=  $main::PATH_SEPARATOR . "#" . $Dir;
 
 	print "WARNING Package $pkg requires a glob() to be called\n" if $param::debug;
 
