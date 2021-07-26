@@ -790,7 +790,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#print "-=-=-=-=-=-= SO_PKG = $SO_PKG\n";
 
     } elsif ( $pkg =~ m/^StJetFinder$/ ){
-	$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
+
+        if ( defined($ENV{FASTJET_DIR}) ) {
+          $CPPPATH = $ENV{FASTJET_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
+        } else {
+          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
+        }
 
     } elsif ( $pkg =~ m/^StFwdTrackMaker$/ ){ 
 		$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
