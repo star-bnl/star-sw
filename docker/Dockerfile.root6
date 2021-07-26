@@ -90,7 +90,6 @@ RUN source star-spack/setup.sh && spack env activate star-env-root6 \
  && cd /star-sw \
  && cons +StarVMC/Geometry \
  && cons %pams/sim/g2r %OnlTools \
-         %StarVMC/GeoTestMaker \
          %StRoot/StarGenerator/Kinematics \
          %StRoot/StEEmcPool %StRoot/StFgtPool %StRoot/StHighptPool \
          %StRoot/StJetFinder \
