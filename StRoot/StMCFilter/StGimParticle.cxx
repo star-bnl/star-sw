@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StGENParticle.cxx,v 1.3 2016/06/21 20:28:51 jwebb Exp $
+// @(#)root/eg:$Id: StGimParticle.cxx,v 1.3 2016/06/21 20:28:51 jwebb Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -6,10 +6,10 @@
 #include "math.h"
 #include "string.h"
 
-#include "StGENParticle.h"
+#include "StGimParticle.h"
 
 //______________________________________________________________________________
-StGENParticle::StGENParticle(int idx) : 
+StGimParticle::StGimParticle(int idx) : 
   StGenParticle(idx),
   fBeg{0},
   fPdgCode{0},
@@ -24,43 +24,43 @@ StGENParticle::StGENParticle(int idx) :
   Clear();
 }
 //______________________________________________________________________________
-StGENParticle::~StGENParticle() 
+StGimParticle::~StGimParticle() 
 {}
 //______________________________________________________________________________
-const StGenParticle *StGENParticle::GetDaughter(int i)  const  
+const StGenParticle *StGimParticle::GetDaughter(int i)  const  
 {
   if (i>=(int)fDaughter.size()) return 0;
   return fDaughter[i];
 }
 //______________________________________________________________________________
-void  StGENParticle::Momentum(double p4[4])   const
+void  StGimParticle::Momentum(double p4[4])   const
 {
   memcpy(p4,fP,4*sizeof(*fP));
 }
 //______________________________________________________________________________
-void  StGENParticle::Vertex(double v3[3])   const
+void  StGimParticle::Vertex(double v3[3])   const
 {
   memcpy(v3,fV,3*sizeof(*fV));
 }
 //______________________________________________________________________________
-void StGENParticle::Clear()
+void StGimParticle::Clear()
 {
   memset(fBeg,0,fEnd-fBeg+1);
   fWeight = 1; fStatusCode=1;
   fDaughter.clear();
 }
 //______________________________________________________________________________
-void StGENParticle::SetVert(float v[4])
+void StGimParticle::SetVert(float v[4])
 {
   for (int i=0;i<4;i++) { fV[i]=v[i];}
 }
 //______________________________________________________________________________
-void StGENParticle::SetMom(float p[5])
+void StGimParticle::SetMom(float p[5])
 {
   for (int i=0;i<5;i++) { fP[i]=p[i];}
 }
 //______________________________________________________________________________
-void StGENParticle::AddDaughter(const StGENParticle *m)
+void StGimParticle::AddDaughter(const StGimParticle *m)
 {
    fDaughter.push_back(m);   
 }

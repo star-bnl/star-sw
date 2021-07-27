@@ -1,5 +1,5 @@
-#include "StarLight.h"
-ClassImp(StarLight);
+#include "StarLightGen.h"
+ClassImp(StarLightGen);
 
 #include "randomgenerator.h"
 #include "TDatabasePDG.h"
@@ -23,7 +23,7 @@ extern "C" {
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-StarLight::StarLight(const Char_t *name) : StarGenerator(name),
+StarLightGen::StarLightGen(const Char_t *name) : StarGenerator(name),
 					   ParametersDouble(),
 					   ParametersInt(),
 					   _parameters(0),
@@ -68,7 +68,7 @@ StarLight::StarLight(const Char_t *name) : StarGenerator(name),
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-Int_t StarLight::Init()
+Int_t StarLightGen::Init()
 {
   // Proton mass:
   Double_t ProtonMass  = 0.938272046;
@@ -147,7 +147,7 @@ Int_t StarLight::Init()
   //
 }
 // ----------------------------------------------------------------------------
-Int_t StarLight::Generate()
+Int_t StarLightGen::Generate()
 {
 
   //
@@ -204,7 +204,7 @@ Int_t StarLight::Generate()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void StarLight::FillAA( StarGenEvent *myevent )
+void StarLightGen::FillAA( StarGenEvent *myevent )
 {
   //
   // Fill event-wise information
@@ -242,7 +242,7 @@ void StarLight::FillAA( StarGenEvent *myevent )
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void StarLight::FillPP( StarGenEvent *myevent )
+void StarLightGen::FillPP( StarGenEvent *myevent )
 {
   //
   // Fill event-wise information
@@ -278,7 +278,7 @@ void StarLight::FillPP( StarGenEvent *myevent )
 
 }
 // ----------------------------------------------------------------------------
-void StarLight::ProcessParameters()
+void StarLightGen::ProcessParameters()
 {
   // First we print all of the parameters to a file
   std::ofstream params_out;
@@ -301,49 +301,49 @@ void StarLight::ProcessParameters()
   mSTARlight -> init();
 }
 // ----------------------------------------------------------------------------
-void StarLight::SetEtaCut( Double_t low, Double_t high )
+void StarLightGen::SetEtaCut( Double_t low, Double_t high )
 {
   ParametersDouble["ETA_MIN"] = low;
   ParametersDouble["ETA_MAX"] = high;
   ParametersInt["CUT_ETA"]    = 1;    // Turn the cut on
 }
 // ----------------------------------------------------------------------------
-void StarLight::SetPtCut( Double_t low, Double_t high )
+void StarLightGen::SetPtCut( Double_t low, Double_t high )
 {
   ParametersDouble["PT_MIN"] = low;
   ParametersDouble["PT_MAX"] = high;
   ParametersInt["CUT_PT"]    = 1;     // Turn the cut on
 }
 // ----------------------------------------------------------------------------
-void StarLight::SetRapidityValues( Double_t high, Int_t bins )
+void StarLightGen::SetRapidityValues( Double_t high, Int_t bins )
 {
   ParametersDouble["RAP_MAX"] = high;
   ParametersInt["RAP_N_BINS"] = bins;
 }
 // ----------------------------------------------------------------------------
-void StarLight::SetWValues( Double_t low, Double_t high, Int_t bins )
+void StarLightGen::SetWValues( Double_t low, Double_t high, Int_t bins )
 {
   ParametersDouble["W_MIN"] = low;
   ParametersDouble["W_MAX"] = high;
   ParametersInt["W_N_BINS"] = bins;
 }
 // ----------------------------------------------------------------------------
-void StarLight::SetProductionMode( Int_t mode )
+void StarLightGen::SetProductionMode( Int_t mode )
 {
   ParametersInt["PROD_MODE"] = mode;
 }
 // ----------------------------------------------------------------------------
-void StarLight::SetProductionPID( Int_t pid )
+void StarLightGen::SetProductionPID( Int_t pid )
 {
   ParametersInt["PROD_PID"] = pid;
 }
 // ----------------------------------------------------------------------------
-void StarLight::SetBreakupMode( Int_t mode )
+void StarLightGen::SetBreakupMode( Int_t mode )
 {
   ParametersInt["BREAKUP_MODE"] = mode;
 }
 // ----------------------------------------------------------------------------
-void StarLight::SetInterference( Double_t percent )
+void StarLightGen::SetInterference( Double_t percent )
 {
   if( (percent > 1) || (percent<0) )
   {
@@ -355,7 +355,7 @@ void StarLight::SetInterference( Double_t percent )
   ParametersInt["INTERFERENCE"]   = 1;
 }
 // ----------------------------------------------------------------------------
-void StarLight::SetIncoherence( Double_t percent )
+void StarLightGen::SetIncoherence( Double_t percent )
 {
   if( (percent > 1) || (percent<0) )
   {
@@ -367,12 +367,12 @@ void StarLight::SetIncoherence( Double_t percent )
   ParametersInt["COHERENT"]       = 0;
 }
 // ----------------------------------------------------------------------------
-void StarLight::SetBFORD( Double_t value )
+void StarLightGen::SetBFORD( Double_t value )
 {
   ParametersDouble["BFORD"] = value;
 }
 // ----------------------------------------------------------------------------
-void StarLight::SetInterferencePtValues( Double_t high, Int_t bins )
+void StarLightGen::SetInterferencePtValues( Double_t high, Int_t bins )
 {
   ParametersDouble["INT_PT_MAX"] = high;
   ParametersInt["INT_PT_N_BINS"] = bins;
