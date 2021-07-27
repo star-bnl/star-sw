@@ -90,6 +90,7 @@ ENV LIBPATH+=:/lib64:/lib
 
 ENV MYSQL=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/mysql-5.7.27-pfyt3fwtkubcc5eazmoqfick3lgp67mf
 ENV LIBXML2_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/libxml2-2.9.10-4lxsmpa57bm3xs2cs3xapk3qccxflkfl
+ENV FASTJET_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/fastjet-3.3.3-xj22tput5pd5atejy4igsrtgdtygi74u
 
 # Dummy directories checked by cons
 RUN mkdir $OPTSTAR/lib && mkdir $OPTSTAR/include
@@ -124,7 +125,6 @@ RUN source /etc/profile \
  && cons %pams/sim/g2r %OnlTools \
          %StRoot/StarGenerator/Kinematics \
          %StRoot/StEEmcPool %StRoot/StFgtPool %StRoot/StHighptPool \
-         %StRoot/StJetFinder \
          %StRoot/StShadowMaker %StRoot/StHbtMaker \
  && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 
