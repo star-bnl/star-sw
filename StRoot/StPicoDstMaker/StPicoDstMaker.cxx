@@ -854,13 +854,16 @@ Int_t StPicoDstMaker::MakeWrite() {
 
   mBField = muEvent->magneticField();
 
+#if !defined (__TFG__VERSION__)
   // Get Emc collection
   mEmcCollection = mMuDst->emcCollection();
-  StMuEmcUtil *emcUtil = new StMuEmcUtil();
+  Bool_t isFromDaq = kFALSE;
   if ( !mEmcCollection ) {
+    isFromDaq = kTRUE;
+    static StMuEmcUtil emcUtil;
     // Recover StEmcCollection in case of broken/deleted pointer
     // This usually happens during daq->picoDst converstion
-    mEmcCollection = emcUtil->getEmc( mMuDst->muEmcCollection() );
+    mEmcCollection = emcUtil.getEmc( mMuDst->muEmcCollection() );
   }
 
   if (mEmcCollection) {
@@ -869,6 +872,7 @@ Int_t StPicoDstMaker::MakeWrite() {
     // Fill BTOW hits only if ::buildEmcIndex() has been called for this event
     fillBTowHits();
   }
+#endif /* !__TFG__VERSION__ */
   
 
   // Fill StPicoEvent members
@@ -896,6 +900,10 @@ Int_t StPicoDstMaker::MakeWrite() {
   if (Debug()) mPicoDst->printTracks();
 
   mTTree->Fill();
+  if ( isFromDaq ) {
+    delete mEmcCollection;
+    mEmcCollection = nullptr;
+  }
 
   mMuDst->setVertexIndex(originalVertexId);
 
@@ -1129,10 +1137,15 @@ void StPicoDstMaker::fillTracks() {
       picoTrk->setDedxError( gTrk->probPidTraits().dEdxErrorFit() );
     }
 
-#if defined (__TFG__VERSION__)
     picoTrk->setDndx( gTrk->probPidTraits().dNdxFit() );
     picoTrk->setDndxError( gTrk->probPidTraits().dNdxErrorFit() );
-#endif /* __TFG__VERSION__ */
+    if ( gTrk->primaryTrack() ) {
+      picoTrk->setStatus(1);
+    }
+    else {
+      picoTrk->setStatus(0);
+    }
+
 
     // Fill track's hit information
     picoTrk->setNHitsDedx( gTrk->nHitsDedx() );
@@ -1836,6 +1849,18 @@ void StPicoDstMaker::fillEvent() {
     picoEvent->setNVpdHitsWest( header->numberOfVpdHits(west) );
     picoEvent->setNTofT0( header->nTzero() );
     picoEvent->setVzVpd( header->vpdVz() );
+    picoEvent->setNTofT0Can( header->nTzeroCan() );
+    picoEvent->setTStart( header->tStart() );
+    picoEvent->setTCanFirst( header->tCanFirst() ); 
+    picoEvent->setTCanLast( header->tCanLast() );
+    picoEvent->setNVpdEGoodHits( header->vpdEGoodHits() );
+    picoEvent->setNVpdWGoodHits( header->vpdWGoodHits() );
+    picoEvent->setEarliestVpdEHit( header->earliestVpdEHit() );
+    picoEvent->setEarliestVpdWHit( header->earliestVpdWHit() );
+    picoEvent->setClosestVpdEHit( header->closestVpdEHit() );
+    picoEvent->setClosestVpdWHit( header->closestVpdWHit() );
+    picoEvent->setLatestVpdEHit( header->latestVpdEHit() );
+    picoEvent->setLatestVpdWHit( header->latestVpdWHit() );
   }
 
   // ZDC and BBC background rates
@@ -1853,8 +1878,10 @@ void StPicoDstMaker::fillEvent() {
   StZdcTriggerDetector &ZDC = ev->zdcTriggerDetector();
   picoEvent->setZdcSumAdcEast( ZDC.adcSum(east) );
   picoEvent->setZdcSumAdcWest( ZDC.adcSum(west) );
-  picoEvent->setZdcUnAttenuatedEast( ev->triggerData()->zdcUnAttenuated(east) );
-  picoEvent->setZdcUnAttenuatedWest( ev->triggerData()->zdcUnAttenuated(west) );
+  if ( ev->triggerData() ) {
+    picoEvent->setZdcUnAttenuatedEast( ev->triggerData()->zdcUnAttenuated(east) );
+    picoEvent->setZdcUnAttenuatedWest( ev->triggerData()->zdcUnAttenuated(west) );
+  }
 
   // Loop over all ZDC strips
   for(int iStrip=1; iStrip<9; ++iStrip) {

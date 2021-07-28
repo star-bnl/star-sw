@@ -82,7 +82,6 @@
 #include "TBrowser.h"
 #include "TClass.h"
 #include "StArray.h"
-#include "StAutoBrowse.h"
 #include "TSystem.h"
 
 StXRefManager 	 *StXRefManager::fgManager=0;
@@ -107,16 +106,6 @@ StObject &StObject::operator=(const StObject &sto)
 //_____________________________________________________________________________
 StObject::~StObject()
 {
-}
-//_____________________________________________________________________________
-void StObject::Browse(TBrowser *tb)
-{
-  StAutoBrowse::Browse(this,tb);
-}
-//_____________________________________________________________________________
-Bool_t StObject::IsFolder() const
-{
-  return StAutoBrowse::Browse((TObject*)this,0);
 }
 //______________________________________________________________________________
 void StObject::Streamer(TBuffer &R__b)
