@@ -38,7 +38,7 @@ class StBTofSimResParams : public StMaker {
 			if ( itray > 120 || imodule > 32 || icell > 6 )
 				return result;
 
-			return params[ itray ][ imodule * 6 + icell ];
+			return params[ itray-1 ][ (imodule-1) * 6 + (icell-1) ];
 		}
 
 		//! Loads BTOF Sim Params from database
@@ -52,7 +52,7 @@ class StBTofSimResParams : public StMaker {
 			St_db_Maker *dbMk = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
 			dbMk->SetDebug();
 			dbMk->SetDateTime(date,1);
-			cout<<"cout for test, data: "<<date<<endl;
+			cout<<"cout for test, date for BTOF resolution table: "<<date<<endl;
 			dbMk->SetFlavor("ofl");
 			dbMk->Init();
 			dbMk->Make();
