@@ -10,6 +10,10 @@
 
 #include <TVector3.h>
 
+// Start: bassam
+#include "StMuDSTMaker/COMMON/StMuBTofHit.h"
+// End: bassam
+
 int StjTPCMuDst::currentVertexIndex() const
 {
   return StMuDst::currentVertexIndex();
@@ -84,6 +88,15 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
 
   TVector3 p(mutrack->momentum().x(), mutrack->momentum().y(), mutrack->momentum().z());
 
+  // Start: bassam
+  // Getting BTOF TrayID
+  int btofTrayId = -999;
+  int index2BTofHit = mutrack->index2BTofHit();
+  if(index2BTofHit>=0) { // to make sure that there is a BTOF hit
+      btofTrayId = mutrack->tofHit()->tray();
+  }
+  // End: bassam
+
   track.pt         = p.Pt();
   track.eta        = p.Eta();
   track.phi        = p.Phi();
@@ -105,6 +118,14 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
   track.chi2       = mutrack->chi2();
   track.chi2prob   = mutrack->chi2prob();
   track.BField     = magneticField;
+
+  // Start: bassam
+  track.btofTrayId = btofTrayId;
+  track.nSigmaTofPion = mutrack->btofPidTraits().sigmaPion();
+  track.nSigmaTofKaon = mutrack->btofPidTraits().sigmaKaon();
+  track.nSigmaTofProton = mutrack->btofPidTraits().sigmaProton();
+  track.nSigmaTofElectron = mutrack->btofPidTraits().sigmaElectron();
+  // End: bassam
 
   // The optimum BEMC radius to use in extrapolating the track was determined to be 238.6 cm
   // (slightly behind the shower max plane) in Murad Sarsour's electron jets analysis.

@@ -288,6 +288,21 @@ class StJetSkimEvent : public TObject {
 		void setL2Result(const int* rhs);
 		void setMcEvent(const StPythiaEvent *ptr) {mMcEvent = ptr;}
 
+                // Start: bassam
+                void setNTzero(short n) { mNTzero = n; }
+                void setNTzeroCan(short nCan) { mNTzeroCan = nCan; }
+                void setTCanFirst(double tFirst) { mTCanFirst = tFirst; }
+                void setTCanLast(double tLast) { mTCanLast = tLast; }
+                void setNVpdEGoodHits(int vpdEGoodHits) { mNVpdEGoodHits = vpdEGoodHits; }
+                void setNVpdWGoodHits(int vpdWGoodHits) { mNVpdWGoodHits = vpdWGoodHits; }
+                void setEarliestVpdEHit(int earliestVpdEHit) { mEarliestVpdEHit = earliestVpdEHit; }
+                void setEarliestVpdWHit(double earliestVpdWHit) { mEarliestVpdWHit = earliestVpdWHit; }
+                void setClosestVpdEHit(double closestVpdEHit) { mClosestVpdEHit = closestVpdEHit; }
+                void setClosestVpdWHit(double closestVpdWHit) { mClosestVpdWHit = closestVpdWHit; }
+                void setLatestVpdEHit(double latestVpdEHit) { mLatestVpdEHit = latestVpdEHit; }
+                void setLatestVpdWHit(double latestVpdWHit) { mLatestVpdWHit = latestVpdWHit; }
+                // End: bassam 
+
 		//gets
 		float fill() const {return mFill;}
 		int runId() const {return mRunId;}
@@ -335,6 +350,22 @@ class StJetSkimEvent : public TObject {
 		const int* L2Result() const { return mL2Result; }
 
 		const StPythiaEvent* mcEvent() const {return mMcEvent;}
+
+                // Start: bassam
+                short nTzero() const { return mNTzero; }
+                short nTzeroCan() const { return mNTzeroCan; }
+                float tStart() const {return mVpdTstart;}
+                double tCanFirst() const { return mTCanFirst; }
+                double tCanLast() const { return mTCanLast; }
+                int vpdEGoodHits() const { return mNVpdEGoodHits; }
+                int vpdWGoodHits() const { return mNVpdWGoodHits; }
+                double earliestVpdEHit() const { return mEarliestVpdEHit; }
+                double earliestVpdWHit() const { return mEarliestVpdWHit; }
+                double closestVpdEHit() const { return mClosestVpdEHit; }
+                double closestVpdWHit() const { return mClosestVpdWHit; }
+                double latestVpdEHit() const { return mLatestVpdEHit; }
+                double latestVpdWHit() const { return mLatestVpdWHit; }
+                // End: bassam
 
 		// Getters
 		int barrelJetPatchTh(int i) const;
@@ -460,6 +491,21 @@ class StJetSkimEvent : public TObject {
 		int mVpdEastHits;
 		int mVpdWestHits;
 
+                // Start: bassam
+                short mNTzero;
+                short mNTzeroCan;
+                double mTCanFirst;
+                double mTCanLast;
+                int mNVpdEGoodHits;
+                int mNVpdWGoodHits;
+                double mEarliestVpdEHit;
+                double mEarliestVpdWHit;
+                double mClosestVpdEHit;
+                double mClosestVpdWHit;
+                double mLatestVpdEHit;
+                double mLatestVpdWHit;
+                // End: bassam
+
 		//spin db
 		int mIsValid;
 		int mIsPolLong;
@@ -495,7 +541,7 @@ class StJetSkimEvent : public TObject {
 
 		TDatime mDatime;
 
-		ClassDef(StJetSkimEvent,7);
+		ClassDef(StJetSkimEvent,8); // bassam: this was changed from 7->8 after edits were done
 };
 
 // Getters

@@ -242,6 +242,22 @@ Int_t StJetSkimEventMaker::Make()
 		mEvent->setVpdZvertex(muDst->btofHeader()->vpdVz());
 		mEvent->setVpdEastHits(muDst->btofHeader()->numberOfVpdHits(east));
 		mEvent->setVpdWestHits(muDst->btofHeader()->numberOfVpdHits(west));
+
+                // Start: bassam
+                mEvent->setNTzero(muDst->btofHeader()->nTzero());
+                mEvent->setNTzeroCan(muDst->btofHeader()->nTzeroCan());
+                mEvent->setTCanFirst(muDst->btofHeader()->tCanFirst());
+                mEvent->setTCanLast(muDst->btofHeader()->tCanLast());
+                // filling in pile-up information from the VPD
+                mEvent->setNVpdEGoodHits(muDst->btofHeader()->vpdEGoodHits());
+                mEvent->setNVpdWGoodHits(muDst->btofHeader()->vpdWGoodHits());
+                mEvent->setEarliestVpdEHit(muDst->btofHeader()->earliestVpdEHit());
+                mEvent->setEarliestVpdWHit(muDst->btofHeader()->earliestVpdWHit());
+                mEvent->setClosestVpdEHit(muDst->btofHeader()->closestVpdEHit());
+                mEvent->setClosestVpdWHit(muDst->btofHeader()->closestVpdWHit());
+                mEvent->setLatestVpdEHit(muDst->btofHeader()->latestVpdEHit());
+                mEvent->setLatestVpdWHit(muDst->btofHeader()->latestVpdWHit());
+                // End: bassam 
 	}
 	else { // No StBTofHeader
 		cout << "BAD BTOFHEADER" << endl;
@@ -250,6 +266,21 @@ Int_t StJetSkimEventMaker::Make()
 		mEvent->setVpdZvertex(-999.);
 		mEvent->setVpdEastHits(-1);
 		mEvent->setVpdWestHits(-1);
+
+                // Start: bassam
+                mEvent->setNTzero(0);
+                mEvent->setNTzeroCan(0);
+                mEvent->setTCanFirst(99999.);
+                mEvent->setTCanLast(-99999.);
+                mEvent->setNVpdEGoodHits(0);
+                mEvent->setNVpdWGoodHits(0);
+                mEvent->setEarliestVpdEHit(99999.);
+                mEvent->setEarliestVpdWHit(99999.);
+                mEvent->setClosestVpdEHit(99999.);
+                mEvent->setClosestVpdWHit(99999.);
+                mEvent->setLatestVpdEHit(-99999.);
+                mEvent->setLatestVpdWHit(-99999.);
+                // End: bassam 
 	}
 
 	//spin specific info from Mudst:

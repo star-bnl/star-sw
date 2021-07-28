@@ -314,6 +314,21 @@ StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetS
     memset(mOverlapJetPatchAdc,0,sizeof(mOverlapJetPatchAdc));
 
     mEmcLayer2 = 0;
+
+    // Start: bassam
+    mNTzero = 0;
+    mNTzeroCan = 0;
+    mTCanFirst = 99999.;
+    mTCanLast = -99999.;
+    mNVpdEGoodHits = 0;
+    mNVpdWGoodHits = 0;
+    mEarliestVpdEHit = 99999.;
+    mEarliestVpdWHit = 99999.;
+    mClosestVpdEHit = 99999.;
+    mClosestVpdWHit = 99999.;
+    mLatestVpdEHit = -99999.;
+    mLatestVpdWHit = -99999.;
+    // End: bassam
 }
 
 StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
@@ -349,6 +364,21 @@ StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
     this->mVpdZvertex   = other.vpdZvertex();
     this->mVpdEastHits   = other.vpdEastHits();
     this->mVpdWestHits   = other.vpdWestHits();
+
+    // Start: bassam
+    this->mNTzero = other.nTzero();
+    this->mNTzeroCan = other.nTzeroCan();
+    this->mTCanFirst = other.tCanFirst();
+    this->mTCanLast = other.tCanLast();
+    this->mNVpdEGoodHits = other.vpdEGoodHits();
+    this->mNVpdWGoodHits = other.vpdWGoodHits();
+    this->mEarliestVpdEHit = other.earliestVpdEHit();
+    this->mEarliestVpdWHit = other.earliestVpdWHit();
+    this->mClosestVpdEHit = other.closestVpdEHit();
+    this->mClosestVpdWHit = other.closestVpdWHit();
+    this->mLatestVpdEHit = other.latestVpdEHit();
+    this->mLatestVpdWHit = other.latestVpdWHit();
+    // End: bassam
 
     mZdcWestRate = other.mZdcWestRate;
     mZdcEastRate = other.mZdcEastRate;
@@ -423,6 +453,21 @@ StJetSkimEvent& StJetSkimEvent::operator=(const StJetSkimEvent &rhs)
         this->mVpdEastHits   = rhs.vpdEastHits();
         this->mVpdWestHits   = rhs.vpdWestHits();
 
+        // Start: bassam
+        this->mNTzero = rhs.nTzero();
+        this->mNTzeroCan = rhs.nTzeroCan();
+        this->mTCanFirst = rhs.tCanFirst();
+        this->mTCanLast = rhs.tCanLast();
+        this->mNVpdEGoodHits = rhs.vpdEGoodHits();
+        this->mNVpdWGoodHits = rhs.vpdWGoodHits();
+        this->mEarliestVpdEHit = rhs.earliestVpdEHit();
+        this->mEarliestVpdWHit = rhs.earliestVpdWHit();
+        this->mClosestVpdEHit = rhs.closestVpdEHit();
+        this->mClosestVpdWHit = rhs.closestVpdWHit();
+        this->mLatestVpdEHit = rhs.latestVpdEHit();
+        this->mLatestVpdWHit = rhs.latestVpdWHit();
+        // End: bassam
+
 	mZdcWestRate = rhs.mZdcWestRate;
 	mZdcEastRate = rhs.mZdcEastRate;
 	mZdcCoincidenceRate = rhs.mZdcCoincidenceRate;
@@ -488,6 +533,21 @@ void StJetSkimEvent::clear()
     memset(mOverlapJetPatchAdc,0,sizeof(mOverlapJetPatchAdc));
 
     mEmcLayer2 = 0;
+
+    // Start: bassam
+    mNTzero = 0;
+    mNTzeroCan = 0;
+    mTCanFirst = 99999.;
+    mTCanLast = -99999.;
+    mNVpdEGoodHits = 0;
+    mNVpdWGoodHits = 0;
+    mEarliestVpdEHit = 99999.;
+    mEarliestVpdWHit = 99999.;
+    mClosestVpdEHit = 99999.;
+    mClosestVpdWHit = 99999.;
+    mLatestVpdEHit = -99999.;
+    mLatestVpdWHit = -99999.;
+    // End: bassam
 }
 
 void StJetSkimEvent::Clear(const char *option) {
