@@ -47,7 +47,7 @@ class StBTofSimResParams : public StMaker {
 		{
 			
 			const int yearNumber = runNumber/1000000 - 1 + 2000;
-			const int date       = yearNumber*1000*10 + 101; // year + 01-01(Date)
+			const int date       = (yearNumber-1)*1000*10 + 1001; // prior year + October 1st(Date)
 
 			St_db_Maker *dbMk = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
 			dbMk->SetDebug();
