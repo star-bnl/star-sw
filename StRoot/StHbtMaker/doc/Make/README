@@ -1,0 +1,23 @@
+CONTENTS:
+---------
+Makefile	makefile for an stand-alone executabe of the StHbtMaker
+SOURCE_THIS     script to set the correct path for shared libirary libstd++
+hbt.cc		main function to run the StHbtMaker as a stand-alone executable
+
+INSTRUCTIONS:
+-------------
+0.) go to a clean directory
+    cd <destination>
+1.) cvs co StRoot/StHbtMaker
+2.) cvs co StRoot/StarClassLibrary
+3.) copy the Make directory to where you want to create the program
+    cp StRoot/StHbtMaker/doc/Make <destination>
+    cd StRoot/StHbtMaker/doc/Make <destination>
+4.) source SOURCE_THIS
+5.) edit the Makefile so that the STROOT variable points to the StRoot directory
+5.) make hbt
+6.) hbt <eventNumber> asc/bin <inputFile>
+
+QUESTIONS:
+----------
+laue@mps.ohio-state.edu

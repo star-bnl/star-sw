@@ -1,0 +1,34 @@
+StHbtMaker - STAR HBT analysis framework
+
+for documentation see
+http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StHbtMaker/doc/
+
+26jul99 - MALisa - StHbtMaker works now in dev/
+	- do NOT have to do any fancy stuff with MakeDll
+
+
+-------
+From README of Randy Wells' CoulombCorrection:
+
+correctionpp.dat -and- correctionpm.dat have the following form:
+Presently, I have added one data line to the bottom.(see below)
+
+1st line:
+        A list of the radii that we have Coulomb corrections 
+        calculated for r1,r2,r3,r4,...
+
+Rest:
+        A table of eta's and the Coulomb corrections
+        First column is eta
+        Rest are the corrections of the respective radius from first line.
+
+        eta1  Coul(eta1,r1)  Coul(eta1,r2)  Coul(eta1,r3)  ...
+        eta2  Coul(eta2,r1)  Coul(eta2,r2)  Coul(eta2,r3)  ...
+        ...
+        ...
+        ...
+
+These files were created in ~rcwells/root/coulomb/  using various little
+programs to rewrite data files.  SEE the README.txt in that directory.
+
+-------
