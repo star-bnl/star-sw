@@ -52,7 +52,6 @@ class StBTofSimResParams : public StMaker {
 			St_db_Maker *dbMk = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
 			dbMk->SetDebug();
 			dbMk->SetDateTime(date,1);
-			cout<<"cout for test, date for BTOF resolution table: "<<date<<endl;
 			dbMk->SetFlavor("ofl");
 			dbMk->Init();
 			dbMk->Make();
@@ -73,9 +72,6 @@ class StBTofSimResParams : public StMaker {
 			{
 				TDatime val[2];
 				dbMk->GetValidity((TTable*)dataset,val);
-				
-				std::cout << "Dataset validity range: [ " << val[0].GetDate() << "." << val[0].GetTime() << " - "
-					<< val[1].GetDate() << "." << val[1].GetTime() << " ] " << std::endl;
 				
 				tofSimResParams_st* tofTable = static_cast<tofSimResParams_st*>(dataset->GetTable());
 				
