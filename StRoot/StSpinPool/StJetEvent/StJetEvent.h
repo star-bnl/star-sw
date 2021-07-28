@@ -82,7 +82,7 @@ private:
   TClonesArray* mTowers;
   TClonesArray* mParticles;
 
-  ClassDef(StJetEvent,6);
+  ClassDef(StJetEvent,7); //incremented to 7 for new updates with TOF information
 };
 
 #endif // ST_JET_EVENT_H
