@@ -960,6 +960,7 @@ Int_t StBTofCalibMaker::FinishRun(int runnumber)
 Int_t StBTofCalibMaker::Finish()
 {
     if (mHistoFileName!="") writeHistograms();
+    if (mPPPAModeHist)      writePPPAHistograms();
     return kStOK;
 }
 
