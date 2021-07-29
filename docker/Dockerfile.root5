@@ -85,6 +85,7 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
 RUN source star-spack/setup.sh && spack env activate star-env-root5 \
  && export MYSQL=`spack location --install-dir mysql` \
  && export LIBXML2_DIR=`spack location --install-dir libxml2` \
+ && unset Vc_LIB_DIR \
  && cd /usr/include && ln -s $MYSQL/include mysql \
  && cd /star-sw \
  && cons +StarVMC/Geometry \
