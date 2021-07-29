@@ -5,6 +5,7 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StTriggerData.h"
+#include <functional>
 
 ClassImp(StTriggerFilterMaker)
 
@@ -22,85 +23,56 @@ Int_t StTriggerFilterMaker::Init() {
 }
 
 Int_t StTriggerFilterMaker::Make() {
-  StEvent* event= (StEvent*)GetInputDS("StEvent");
-  if(event){
-    StTriggerIdCollection* trgIdColl = event->triggerIdCollection();
-    const StTriggerData* trgdata = event->triggerData();
-    if(trgIdColl){
-      if(mPrint){
-	vector<unsigned int> ids = trgIdColl->nominal()->triggerIds();
-	LOG_INFO << "Offline Trigger Id = ";
-	for(unsigned i=0; i<ids.size(); ++i) LOG_INFO << ids[i] << " ";
-      }
-      for(unsigned i=0; i<mVetoTriggers.size(); ++i) {
-	if(trgIdColl->nominal()->isTrigger(mVetoTriggers[i])) {
-	  if(mPrint)  LOG_INFO << " Vetoed" << endm;
-	  return kStSkip;
-	}
-      }
-      for(unsigned i=0; i<mGoodTriggers.size(); ++i) {
-	if(trgIdColl->nominal()->isTrigger(mGoodTriggers[i])) {
-	  
-	  if(trgdata && mTofUpperLimit>0){
-	    unsigned int tof = trgdata->tofMultiplicity();
-	    if(tof < mTofUpperLimit){
-	      if(mPrint) LOG_INFO << " Accepted with TOF upper limit" << endm;
-	      return kStOk;
-	    }else{
-	      if(mPrint) 
-		LOG_INFO 
-		  << Form(" TriggerId accepted but rejected with TOFmult uppter limit TOFM=%d < UpperLimit=%d",
-			  tof,mTofUpperLimit)
-		  << endm;
-	      return kStSkip;
-	    }
-	  }
-	  
-	  if(mPrint) LOG_INFO << " Accepted (no TOF condition)" << endm;
-	  return kStOk;
-	}
-      }
-    }
-  }else if(StMuDst::event()){    
-    StMuTriggerIdCollection& trgIdColl = StMuDst::event()->triggerIdCollection();
-    const StTriggerData* trgdata = StMuDst::event()->triggerData();
-    if(mPrint){
-      vector<unsigned int> ids = trgIdColl.nominal().triggerIds();
-      LOG_INFO << "Offline Trigger Id = ";
-      for(unsigned i=0; i<ids.size(); ++i) LOG_INFO << ids[i] << " ";
-    }
-    for(unsigned i=0; i<mVetoTriggers.size(); ++i) {
-      if(trgIdColl.nominal().isTrigger(mVetoTriggers[i])) {
-	if(mPrint)  LOG_INFO << " Vetoed" << endm;
-	return kStSkip;
-      }
-    }
-    for(unsigned i=0; i<mGoodTriggers.size(); ++i) {
-      if(trgIdColl.nominal().isTrigger(mGoodTriggers[i])) {
+    StEvent* event= (StEvent*)GetInputDS("StEvent");
+    vector<unsigned int> triggerIds;
+    std::function<bool(unsigned int)> isTrigger;
+    const StTriggerData* trgdata;
+    if(event){
+	StTriggerIdCollection* trgIdColl = event->triggerIdCollection();
+	triggerIds = trgIdColl->nominal()->triggerIds();
+	isTrigger = std::bind(&StTriggerId::isTrigger, trgIdColl->nominal(), std::placeholders::_1);
+	trgdata = event->triggerData();
 	
-	if(trgdata && mTofUpperLimit>0){
-	  unsigned int tof = trgdata->tofMultiplicity();
-	  if(tof < mTofUpperLimit){
-	    if(mPrint) LOG_INFO << " Accepted with TOF upper limit" << endm;
-	    return kStOk;
-	  }else{
-	    if(mPrint) 
-	      LOG_INFO 
-		<< Form(" TriggerId accepted but rejected with TOFmult uppter limit TOFM=%d < UpperLimit=%d",
-			tof,mTofUpperLimit)
-		<< endm;
-	    return kStSkip;
-	  }
-	}	  
-	if(mPrint) LOG_INFO << " Accepted (no TOF condition)" << endm;
-	return kStOk;
-      }
+    }else if(StMuDst::event()){
+	StMuTriggerIdCollection& trgIdColl = StMuDst::event()->triggerIdCollection();
+	triggerIds = trgIdColl.nominal().triggerIds();
+	isTrigger = std::bind(&StTriggerId::isTrigger, &trgIdColl.nominal(), std::placeholders::_1);
+	trgdata = StMuDst::event()->triggerData();
+    }else{
+	LOG_INFO << "No StEvent nor Mudst" << endm;
+	return kStSkip;
     }
-  }else{
-    LOG_INFO << "No StEvent nor Mudst" << endm;
-  }	
-  if(mPrint) LOG_INFO << "Skip" << endm;
-  return kStSkip;
+    if(mPrint){
+	LOG_INFO << "Offline Trigger Id = ";
+	for(unsigned int id : triggerIds) LOG_INFO << id << " ";
+	LOG_INFO << endm;
+    }    
+    if(mTofUpperLimit>0){
+	if(!trgdata){
+	    LOG_INFO << "No TriggerData found but needed for TOF cut" << endm;
+	    return kStSkip;
+	}
+	unsigned int tof = trgdata->tofMultiplicity();  
+	if(tof >= mTofUpperLimit){
+	    LOG_INFO << Form(" Rejected with TOFmult uppter limit TOFM=%d < UpperLimit=%d",
+			     tof,mTofUpperLimit) << endm;
+	    return kStSkip;
+	}
+    }
+    for(unsigned int id_veto : mVetoTriggers) {
+	if(isTrigger(id_veto)){
+	    if(mPrint) LOG_INFO << " Vetoed by id= " << id_veto << endm;
+	    return kStSkip;
+	}
+    }
+    for(unsigned int id_good : mGoodTriggers){
+	if(isTrigger(id_good)){      
+	    if (mPrint) LOG_INFO << " Accepted with id=" << id_good << endm;
+	    return kStOk;
+	}
+    }
+    if(mPrint) LOG_INFO << "Skip (no good triggerId)" << endm;
+    return kStSkip;
 }
 
 /*****************************************************************************
