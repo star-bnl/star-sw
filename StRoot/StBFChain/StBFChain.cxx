@@ -737,6 +737,7 @@ Int_t StBFChain::Instantiate()
     // TPC
     if (maker == "StTpcRTSHitMaker") {
       if ( GetOption("TpxClu2D")) mk->SetAttr("TpxClu2D", kTRUE);
+      if ( GetOption("EbyET0")) mk->SetAttr("EbyET0", kTRUE);
     }
     if (maker == "StTpcDbMaker"){
       if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",kTRUE);
