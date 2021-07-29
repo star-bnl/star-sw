@@ -1,7 +1,4 @@
-#!/opt/star/bin/perl
-##!/usr/bin/env perl
-##!/opt/star/rh64_gcc482/bin/perl
-#
+#!/usr/bin/env perl
 
 #
 # This is the command line utility, which allows access to the data in the
@@ -27,10 +24,12 @@
 #
 #use Env (OPTSTAR);
 #use lib "$OPTSTAR/lib";
+#use lib "/afs/rhic.bnl.gov/star/packages/scripts";
 use lib "/afs/rhic.bnl.gov/star/packages/.DEV2/scripts";
+#use lib "/star/u/jeromel/work/ddb";                 #
 use strict;
 use FileCatalog;
-#use XML::Simple qw(:strict);
+
 my @output;
 my $i;
 my $count;

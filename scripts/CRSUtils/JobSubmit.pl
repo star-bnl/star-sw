@@ -633,6 +633,7 @@ if ( $ThisYear == 2005 ){
    } elsif ($ThisYear == 2021) {
        $DCHAIN{"AuAu"} = "P2021a,StiCA,EbyET0,BEmcChkStat,-hitfilt";
        $DCHAIN{"OO"} = "P2021a,StiCA,EbyET0,BEmcChkStat,-hitfilt";
+       $DCHAIN{"DAu"} = "P2021a,StiCA,EbyET0,BEmcChkStat,-hitfilt";
 
    #} else {
    #     $DCHAIN{"PPPP"} =

@@ -786,7 +786,7 @@ sub _ReadConfig
 	    my($ref,$server) ;
 	    my($bref);
 	    # intent can be BNL::Admin
-	    &print_debug("_ReadConfig","Prasing intent $intent");
+	    &print_debug("_ReadConfig","Parsing intent [$intent]");
 	    if ($intent =~ /::/){
 		($site,$lintent) = split("::",$intent);
 	    } else {
@@ -1062,7 +1062,7 @@ sub _Connect
     if ($_[0] =~ m/FileCatalog/) {   shift(@_);}
 
     # my ($user,$passwd,$port,$host,$db) = @_;
-    my ($dbr)=@_;
+    my ($dbr)=@_;# print "dbr = $dbr\n";
     my ($user,$passwd,$host);
     my ($sth,$count);
     my ($tries,$rtries,$idx);
@@ -1072,12 +1072,12 @@ sub _Connect
     my(@Dbrr);
 
     # Now randomize order
-    #print "BEFORE $#Dbr [".join(" ",@Dbr)."]\n";
+#    print "BEFORE $#Dbr [".join(" ",@Dbr)."]\n";
     for($tries=$#Dbr ; $tries >= 0 ; $tries--){
 	$idx = splice(@Dbr,int(rand($#Dbr+1)),1);
 	push(@Dbrr,$idx);
     }
-    #print "AFTER  $#Dbrr [".join(" ",@Dbrr)."]\n";
+#    print "AFTER  $#Dbrr [".join(" ",@Dbrr)."]\n";
     @Dbr = @Dbrr;
 
 
@@ -1091,6 +1091,8 @@ sub _Connect
 
     &print_debug("_Connect","Trying connection $idx / $#Dbr");
     ($FC::DBRef,$user,$passwd)  =  split(",",$Dbr[$idx]);
+    $passwd = $dbpass;
+#    print "db = $FC::DBRef, user = $user, passwd = $passwd\n";
     if ( $FC::DBRef =~ m/\.$/){ chop($FC::DBRef);}
     $host  = (split(":",$FC::DBRef))[1];
     $FC::DBRef = "DBI:mysql:$FC::DBRef";

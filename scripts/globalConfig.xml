@@ -87,28 +87,35 @@ responsible for creating the scripts and the file lists. -->
         <void property="recursiveCopyCommand">
             <string>    
     ########### Copy Command Block ########### 
-    echo "Starting copy block"
-    foreach file ( (fromScratch) )
-         set i=0
          
-         if ( -d $file ) then
-            set cpCommand="/bin/cp -r $file (toURL)"
-         else
-            set cpCommand="/bin/cp -fp $file (toURL)"
-         endif
-         
-         RETRY_CP:
-         echo "Running copy command: " $cpCommand
-         $cpCommand
-         if ( $status &amp;&amp; $i &lt; 15 ) then
-             echo "The copy failed, waiting to try again."
-             @ i++
-             sleep 60
-             echo "Trying copy again at "`/bin/date`
-             goto RETRY_CP
-         endif
+    rm -f $SCRATCH/count.$JOBID.test            
+    (/bin/ls (fromScratch) &gt; $SCRATCH/count.$JOBID.test) &gt;&amp; /dev/null
+    if ( -z $SCRATCH/count.$JOBID.test ) then               
+        echo 'Error: Scheduler could not find any files in $SCRATCH matching your &lt;output&gt; tag fromScratch value: (fromScratchNoMode) '
+    else                      
+        echo "Starting copy block"
+        foreach file ( (fromScratch) )
+             set i=0
 
-    end
+             if ( -d $file ) then
+                set cpCommand="/bin/cp -r $file (toURL)"
+             else
+                set cpCommand="/bin/cp -fp $file (toURL)"
+             endif
+
+             RETRY_CP:
+             echo "Running copy command: " $cpCommand
+             $cpCommand
+             if ( $status &amp;&amp; $i &lt; 15 ) then
+                 echo "The copy failed, waiting to try again."
+                 @ i++
+                 sleep 60
+                 echo "Trying copy again at "`/bin/date`
+                 goto RETRY_CP
+             endif
+        end
+        
+    endif
     ##########################################
             </string>
         </void>
@@ -145,6 +152,89 @@ end
       </object>
     </void>
     
+    
+    
+    <!-- CSHApplication configuration. The CSHApplication components is the one 
+responsible for creating the scripts and the file lists. -->
+    <void method="put">
+      <string>CSHApplication_InternalCondorTransfer</string>
+      <object id="CSHApplication_InternalCondorTransfer" class="gov.bnl.star.offline.scheduler.Dispatchers.CSHApplication">
+        <void property="usesInternalIOCopy"> <boolean>true</boolean> </void>
+        <void property="customInputPath"> <string>../..</string> </void>
+        <void property="noSpawn">
+          <boolean>false</boolean>
+        </void>
+        <void property="recurseCopy">
+          <boolean>true</boolean>
+        </void>
+        <void property="copyScript">
+          <string>copyURIs.pl</string>
+        </void>
+        <void property="registerScript">
+          <string>register_file.pl</string>
+        </void>
+        <void property="storageScript">
+          <string>storageService.pl</string>
+        </void>
+        <void property="EnvVariableLimit">
+          <int>200</int>
+        </void>
+        <!-- Knowledge of location should be confined to programLocations -->
+        <!-- non-URI based syntax implies OS depencies                    -->
+        <!-- How can the config file be OS independent ??? Below, are a 
+            few example and syntax where it is NOT                        -->
+
+        <void property="copyCommand">
+            <!--<string>/bin/cp (fromScratch) (toURL)</string>-->
+            <string>    
+    ########### Copy Command Block ########### 
+    mv (fromScratch) $TMP/                  
+    ##########################################
+            </string>
+        </void>
+        
+        
+        <void property="recursiveCopyCommand">
+            <string>    
+    ########### Copy Command Block ########### 
+    mv (fromScratch) $TMP/                  
+    ##########################################
+            </string>
+        </void>
+        
+        <void property="gridCopyCommand">
+            <string>
+# This loop solves the problem of not being able to use wild cards in the globus-url-copy command.
+# However the (toURL) area will need to be different for each pass of the loop as a destination file name must be specified. 
+# In this syntax the user must put the last slash on the “toURL” or else it will concatenate the last dir to the file name.
+cd $SCRATCH
+foreach file ((fromScratch))
+  globus-url-copy -p 25 file:$SCRATCH/$file gsiftp://(copyBackGateKeeper)(toURL)$file
+end 
+            </string>
+        </void>
+       
+        <void property="makeExecutableCommand"> <!--<void property="makeEvnd">-->
+            <string>/bin/chmod +x </string>
+        </void>
+        <void property="helperScripts">  
+            <string>/star/data08/HRM/scripts/</string>
+        </void>
+
+        <void property="localCommands"></void>
+        <void property="gridCommands"></void>
+        <void property="gridInitializationScript"><string>setenv  JOB_START_LOCATION `pwd`</string></void>
+        <void property="initializationScript">
+            <string>setenv  JOB_START_LOCATION `pwd`
+if(! $?TMP)then
+   setenv TMP `pwd`
+   echo "TMP not set, setting TMP=$TMP"                          
+endif                
+            </string>
+        </void>
+        
+      </object>
+    </void>
     
     
     
@@ -330,7 +420,7 @@ initializer. -->
     
     
 
-    <!-- ************************************* The local objects thatr are common to all sites ************************************* -->
+    <!-- ************************************* The local objects that are common to all sites ************************************* -->
    
     <void method="put">
         <string>LocalDispatcher</string>
@@ -481,6 +571,7 @@ initializer. -->
 
 
  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BNL basic user queues ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <!--
           <void method="add">
                <object id="BNL_condor_short" class="gov.bnl.star.offline.scheduler.Queue">
                     <void method="setID">                     <string>bnl_condor_short</string></void>
@@ -489,27 +580,14 @@ initializer. -->
                     <void method="setSearchOrderPriority">    <int>10</int>                      </void>
                     <void method="setType">                   <string>CONDOR</string>           </void>
                     <void method="setSite">                   <string>STAR</string>             </void>
-                    <void method="setTimeLimit">              <int>180</int>                     </void>
-                    <void method="setMaxMemory">              <int>10000</int>                   </void> <!-- I made this value up L.B.H. -->
+                    <void method="setTimeLimit">              <int>300</int>                     </void> 
+                    <void method="setMaxMemory">              <int>3000</int>                   </void> 
                     <void method="setImplementation">         <string>local</string>            </void>
                     <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
                 </object>
           </void>
+          -->
 
-          <void method="add">
-               <object id="BNL_condor_medium" class="gov.bnl.star.offline.scheduler.Queue">
-                    <void method="setID">                     <string>BNL_condor_medium</string></void>
-                    <void method="setName">                   <string></string></void>
-                    <void method="setCluster">                <string>rcrs.rcf.bnl.gov</string> </void> 
-                    <void method="setSearchOrderPriority">    <int>50</int>                      </void>
-                    <void method="setType">                   <string>CONDOR</string>           </void> 
-                    <void method="setSite">                   <string>STAR</string>             </void> 
-                    <void method="setTimeLimit">              <int>10000</int>                     </void>
-                    <void method="setMaxMemory">              <int>400</int>                    </void> <!-- I made this value up L.B.H. -->
-                    <void method="setImplementation">         <string>local</string>            </void>
-                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
-                </object>
-          </void>
           
           <void method="add"> 
                <object id="BNL_condor_cas_long" class="gov.bnl.star.offline.scheduler.Queue">
@@ -530,84 +608,95 @@ initializer. -->
 
 
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Start of quick condor queues, for use with the CondorFastDispatcher ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!--
           <void method="add">
                <object id="BNL_condor_short_quick" class="gov.bnl.star.offline.scheduler.Queue">
-                    <void method="getValuesFrom">             <object idref="BNL_condor_short"/>       </void> <!-- Always call this one first, it over-writes other setting -->
+                    <void method="getValuesFrom">             <object idref="BNL_condor_short"/>       </void> 
                     <void method="setID">                     <string>bnl_condor_short_quick</string>  </void>
-            <!--    <void method="setName">                   <string></string></void>
-                    <void method="setCluster">                <string>rcrs.rcf.bnl.gov</string> </void>
-                    <void method="setSearchOrderPriority">    <int>1</int>                      </void>
-                    <void method="setType">                   <string>CONDOR</string>           </void>
-                    <void method="setSite">                   <string>STAR</string>             </void>
-                    <void method="setTimeLimit">              <int>180</int>                    </void>
-                    <void method="setMaxMemory">              <int>350</int>                    </void>
-                    <void method="setImplementation">         <string>local</string>            </void>
-                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void> -->
                 </object>
           </void>
-
-
+-->
           <void method="add">
                <object id="BNL_condor_medium_quick" class="gov.bnl.star.offline.scheduler.Queue">
-                    <void method="getValuesFrom">             <object idref="BNL_condor_medium"/>      </void> <!-- Always call this one first, it over-writes other setting -->
-                    <void method="setID">                     <string>BNL_condor_medium_quick</string> </void>
-<!--                <void method="setName">                   <string></string></void>
+                    <void method="setID">                     <string>bnl_condor_medium_quick</string>  </void>
+                    <void method="setName">                   <string></string>                  </void>
                     <void method="setCluster">                <string>rcrs.rcf.bnl.gov</string> </void>
-                    <void method="setSearchOrderPriority">    <int>50</int>                     </void>
+                    <void method="setSearchOrderPriority">    <int>50</int>                      </void>
                     <void method="setType">                   <string>CONDOR</string>           </void>
                     <void method="setSite">                   <string>STAR</string>             </void>
-                    <void method="setTimeLimit">              <int>300</int>                     </void>
-                    <void method="setMaxMemory">              <int>400</int>                    </void> 
+                    <void method="setTimeLimit">              <int>4320</int>                    </void> <!--3 days -->
+                    <void method="setMaxMemory">              <int>3000</int>                    </void>
                     <void method="setImplementation">         <string>local</string>            </void>
-                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void> -->
+                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void> 
                 </object>
           </void>
-
-
+          <!--
           <void method="add">
                <object id="BNL_condor_long_quick" class="gov.bnl.star.offline.scheduler.Queue">
-                    <void method="getValuesFrom">             <object idref="BNL_condor_cas_long"/>      </void> <!-- Always call this one first, it over-writes other setting -->
+                    <void method="getValuesFrom">             <object idref="BNL_condor_cas_long"/>      </void> 
                     <void method="setID">                     <string>bnl_condor_long_quick</string></void>
-<!--                <void method="setName">                   <string></string></void>
-                    <void method="setCluster">                <string>rcrs.rcf.bnl.gov</string> </void>
+                </object>
+          </void>
+          -->
+          <!--~~~~~~~~~~~~~~~~~~~~~~~~ Mirror of short med. and long for newer cpus based on Mips ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+            <!--
+            <void method="add">
+                <object id="BNL_condor_short_quick_newercpus" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_short"/>       </void> 
+                    <void method="setID">                     <string>bnl_condor_short_newcpus</string>  </void>
+                </object>
+            </void>
+            -->
+            <void method="add">
+                <object id="BNL_condor_medium_quick_newercpus" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_medium_quick"/>       </void> <!-- Always call this one first, it over-writes other settings -->
+                    <void method="setID">                     <string>bnl_condor_med_newcpus</string>  
+                    </void>
+                </object>
+            </void>
+          <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Mirror of short and medium for native condor trasfer  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+          <!--
+            <void method="add">
+                <object id="BNL_condor_short_quick_nativeTras" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_short"/>       </void> 
+                    <void method="setID">                     <string>bnl_condor_short_natTras</string>  </void>
+                </object>
+            </void>
+            
+            <void method="add">
+                <object id="BNL_condor_medium_quick_nativeTras" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_medium_quick"/>       </void> 
+                    <void method="setID">                     <string>bnl_condor_med_natTras</string>  
+                    </void>
+                </object>
+            </void> 
+          -->
+          <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+          <void method="add">
+               <object id="BNL_condor_embed_quick_queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">                     <string>bnl_condor_embed_quick</string></void>
+                    <void method="setName">                   <string></string></void>
+                    <void method="setCluster">                <string>sdcc.bnl.gov</string> </void>
                     <void method="setSearchOrderPriority">    <int>100</int>                    </void>
                     <void method="setType">                   <string>CONDOR</string>           </void>
                     <void method="setSite">                   <string>STAR</string>             </void>
-                    <void method="setTimeLimit">              <int>7200</int>                  </void>
+                    <void method="setTimeLimit">              <int>4320</int>                  </void>
                     <void method="setMaxMemory">              <int>440</int>                    </void>
                     <void method="setImplementation">         <string>local</string>            </void>
                     <void property="jobPriorityAdjust">       <byte>10</byte>                   </void> 
-                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>-->
+                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
                 </object>
           </void>
-
-
+<!--          
           <void method="add">
-               <object id="BNL_condor_long_quick" class="gov.bnl.star.offline.scheduler.Queue">
-                    <void method="getValuesFrom">             <object idref="BNL_condor_cas_long"/>      </void> <!-- Always call this one first, it over-writes other setting -->
-                    <void method="setID">                     <string>bnl_condor_long_quick</string></void>
-<!--                <void method="setName">                   <string></string></void>
-                    <void method="setCluster">                <string>rcrs.rcf.bnl.gov</string> </void>
-                    <void method="setSearchOrderPriority">    <int>100</int>                    </void>
-                    <void method="setType">                   <string>CONDOR</string>           </void>
-                    <void method="setSite">                   <string>STAR</string>             </void>
-                    <void method="setTimeLimit">              <int>7200</int>                  </void>
-                    <void method="setMaxMemory">              <int>440</int>                    </void>
-                    <void method="setImplementation">         <string>local</string>            </void>
-                    <void property="jobPriorityAdjust">       <byte>10</byte>                   </void> 
-                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>-->
+                <object id="BNL_condor_cme_quick_queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_embed_quick_queue"/>       </void> 
+                    <void method="setID">                     <string>bnl_condor_cme_quick</string>  
+                    </void>
                 </object>
           </void>
-          
-          
-          <!--~~~~~~~~~~Queue for the systems in the online farm~~~~~~~~~~-->
-          <void method="add">
-               <object id="BNL_condor_online_quick" class="gov.bnl.star.offline.scheduler.Queue">
-                    <void method="getValuesFrom">             <object idref="BNL_condor_cas_long"/>      </void> <!-- Always call this one first, it over-writes other setting -->
-                    <void method="setID">                     <string>bnl_condor_online_quick</string></void>
-                </object>
-          </void>
-
+-->
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HLT ONLINE queues ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
           <void method="add">
@@ -638,6 +727,57 @@ initializer. -->
                 </object>
           </void>
 
+          <!--~~~~~~~~~~ Queues for star and phenix nodes only ~~~~~~~~~~-->
+          <!--
+          <void method="add">
+               <object id="BNL_condor_short_SP-Only" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_short"/>       </void> 
+                    <void method="setID">                     <string>bnl_condor_short_SP-Only</string>  </void>
+            </object>
+          </void>
+          -->
+          
+          <void method="add">
+               <object id="BNL_condor_long_SP-Only_quick" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_cas_long"/>      </void> <!-- Always call this one first, it over-writes other setting -->
+                    <void method="setID">                     <string>bnl_condor_long_SP-Only</string></void>
+                </object>
+          </void>
+          <!--~~~~~~~~~~ End of queues for star and phenix nodes only ~~~~~~~~~~-->
+          
+          <!--~~~~~~~~~~Queue for the systems in the online farm~~~~~~~~~~-->
+          <void method="add">
+               <object id="BNL_condor_online_quick" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_cas_long"/>      </void> <!-- Always call this one first, it over-writes other setting -->
+                    <void method="setID">                     <string>bnl_condor_online_quick</string></void>
+                </object>
+          </void>
+          
+          
+          <!--~~~~~~~~~~Queue for EIC at the RCF~~~~~~~~~~-->
+          <void method="add">
+                <object id="BNL_condor_eic_queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">                     <string>bnl_condor_eic</string>  </void>
+                    <void method="setName">                   <string></string>                  </void>
+                    <void method="setCluster">                <string>eic.bnl.gov</string>      </void>
+                    <void method="setSearchOrderPriority">    <int>50</int>                      </void>
+                    <void method="setType">                   <string>CONDOR</string>           </void>
+                    <void method="setSite">                   <string>EIC</string>             </void>
+                    <void method="setTimeLimit">              <int>4320</int>                    </void> <!--3 days -->
+                    <void method="setMaxMemory">              <int>3000</int>                    </void>
+                    <void method="setImplementation">         <string>local</string>            </void>
+                    <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void> 
+                </object>
+          </void>  
+          
+          <void method="add">
+               <object id="BNL_condor_eic_grid_queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="getValuesFrom">             <object idref="BNL_condor_eic_queue"/>  </void> 
+                    <void method="setID">                     <string>BNL_eic_grid_queue</string>   </void>
+                </object>
+          </void> 
+                
+          
 
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of of quick condor queues, for use with the CondorFastDispatcher ~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
@@ -645,19 +785,15 @@ initializer. -->
 
 
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DAG Dispatcher Queues ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+          <!--
           <void method="add">
                <object id="BNL_condor_short_DAG_queue" class="gov.bnl.star.offline.scheduler.Queue">
-                    <void method="getValuesFrom">    <object idref="BNL_condor_short"/>         </void>   <!-- Always call this one first, it over-writes other setting -->
+                    <void method="getValuesFrom">    <object idref="BNL_condor_short"/>         </void>   
                    <void method="setID">             <string>bnlCondorDAG_shortQueue</string></void>
                </object>                                     
           </void>
-          
-          <void method="add">
-               <object id="BNL_condor_medium_DAG_queue" class="gov.bnl.star.offline.scheduler.Queue">
-                    <void method="getValuesFrom">    <object idref="BNL_condor_medium"/>         </void>  <!-- Always call this one first, it over-writes other setting -->
-                   <void method="setID">             <string>bnlCondorDAG_mediumQueue</string></void>
-               </object>
-          </void>
+          -->
+
           
           <void method="add">
                <object id="BNL_condor_long_DAG_queue" class="gov.bnl.star.offline.scheduler.Queue">
@@ -698,7 +834,7 @@ initializer. -->
           
           
 
-
+          <!--
           <void method="add">
                <object id="BNL_condor_cross_rcf_quick" class="gov.bnl.star.offline.scheduler.Queue">
                     <void method="setID">                     <string>bnl_condor_RCF_quick</string></void>  
@@ -712,6 +848,7 @@ initializer. -->
                     <void method="setRDLApplicationResolver"> <object idref="RCS_RDLApplicationResolver"/> </void>
                 </object>
            </void>
+           -->
            
            <void method="add">
                <object id="BNL_condor_cas_crs" class="gov.bnl.star.offline.scheduler.Queue">
@@ -750,6 +887,15 @@ initializer. -->
                     <void method="getValuesFrom">    <object idref="BNL_condor_high_queue"/>         </void> 
                 </object>
             </void>
+          
+            <void method="add"> <!-- Queue for RCF nighly test benchmarking -->
+               <object id="BNL_condor_nightlyTest_queue" class="gov.bnl.star.offline.scheduler.Queue">
+                    <void method="setID">            <string>BNL_condor_nightlyTest_queue</string>     </void>
+                    <void method="getValuesFrom">    <object idref="BNL_condor_high_queue"/>         </void> 
+                </object>
+            </void>          
+          
+          
           
           
             <void method="add">
@@ -1131,26 +1277,24 @@ initializer. -->
 <!-- ************************************End of LSF Policy ************************************ -->      
     
 <!-- ************************************ Condor Policy ************************************ -->  
+<!--
     <void method="put">
       <string>bnl_condor_rcf</string>
       <object id="bnl_condor_rcf" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
         <void method="addQueue"><object idref="BNL_condor_cross_rcf_quick"/></void>
         <void property="clusterName"> <string>string>rcf.bnl.gov</string> </void>
-        <!--<void property="bypassQueueTests"><boolean>false</boolean></void>-->
         <void property="clusterName"><string>rcf.bnl.gov</string></void>
 
       </object>
    </void>
+-->
 
 
-
-
-<!--Old defualt pol. for BNL no longer used becuase these are slow -->
+<!-- Old defualt pol. for BNL no longer used becuase these are slow -->
 <void method="put"> 
       <string>bnl_condor_cas</string> 
       <object id="BNL_condor_cas" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
-            <void method="addQueue"><object idref="BNL_condor_short"/></void>
-            <void method="addQueue"><object idref="BNL_condor_medium"/></void>
+            <!--<void method="addQueue"><object idref="BNL_condor_short"/></void>-->
             <void method="addQueue"><object idref="BNL_condor_cas_long"/></void>
             <void property="clusterName"><string>rcas.rcf.bnl.gov</string></void>
       </object>
@@ -1183,7 +1327,29 @@ initializer. -->
     </void>
     
     
-
+    <void method="put">
+        <string>bnl_condor_nightlyTest</string> 
+        <object id="bnl_condor_nightlyTest" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="BNL_condor_nightlyTest_queue"/></void>
+        </object>
+    </void>
+    
+    
+    <void method="put">
+        <string>bnl_condor_embed</string> 
+        <object id="BNL_condor_embed" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="BNL_condor_embed_quick_queue"/></void>
+        </object>
+    </void>
+    
+<!--    
+    <void method="put">
+        <string>bnl_condor_cme</string> 
+        <object id="BNL_condor_cme" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="BNL_condor_cme_quick_queue"/></void>
+        </object>
+    </void>
+-->
 
     <void method="put">
       <string>bnl_condor_crs</string>
@@ -1220,8 +1386,7 @@ initializer. -->
     <void method="put">
       <string>bnl_condor_dag</string>
       <object id="bnl_condor_DAG_Policy" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
-            <void method="addQueue"><object idref="BNL_condor_short_DAG_queue"/></void>
-            <void method="addQueue"><object idref="BNL_condor_medium_DAG_queue"/></void>
+            <!--<void method="addQueue"><object idref="BNL_condor_short_DAG_queue"/></void>-->
             <void method="addQueue"><object idref="BNL_condor_long_DAG_queue"/></void>            
             <void property="clusterName"><string>rcrs.rcf.bnl.gov</string></void>
       </object>
@@ -1237,41 +1402,6 @@ initializer. -->
       </object>
     </void>
 
-<!-- ********************************** Other HLT Online Policies ********************************* -->
-
-     <void method="put">
-      <string>bnl_condor_online_CpuModelNumber45</string>
-      <object id="bnl_condor_online_Policy_CpuModelNumber45" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
-            <void method="addQueue"><object idref="BNL_condor_online_quick_CpuModelNumber45"/></void>
-            <void property="clusterName"><string>star.bnl.gov</string></void>
-      </object>
-     </void>
-
-    <void method="put">
-      <string>bnl_condor_online_CpuModelNumber62</string>
-      <object id="bnl_condor_online_Policy_CpuModelNumber62" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
-            <void method="addQueue"><object idref="BNL_condor_online_quick_CpuModelNumber62"/></void>
-            <void property="clusterName"><string>star.bnl.gov</string></void>
-      </object>
-    </void>
-   
-    <void method="put">
-      <string>bnl_condor_online_CpuModelNumber63</string>
-      <object id="bnl_condor_online_Policy_CpuModelNumber63" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
-            <void method="addQueue"><object idref="BNL_condor_online_quick_CpuModelNumber63"/></void>
-            <void property="clusterName"><string>star.bnl.gov</string></void>
-      </object>
-    </void>
-   
-    <void method="put">
-      <string>bnl_condor_online_CpuModelNumber6X</string>
-      <object id="bnl_condor_online_Policy_CpuModelNumber6X" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
-            <void method="addQueue"><object idref="BNL_condor_online_quick_CpuModelNumber6X"/></void>
-            <void property="clusterName"><string>star.bnl.gov</string></void>
-      </object>
-    </void>
-
-
     
 <!-- ************************************ End of Condor Policy ************************************ -->
 
@@ -1281,16 +1411,61 @@ initializer. -->
     <void method="put">
       <string>bnl_condor_cas_quick</string>
       <object id="BNL_condor_cas_quick" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
-            <void method="addQueue"><object idref="BNL_condor_cross_rcf_quick"/></void>
-            <void method="addQueue"><object idref="BNL_condor_short_quick"/></void>
+            <!--<void method="addQueue"><object idref="BNL_condor_short_quick"/></void>-->
             <void method="addQueue"><object idref="BNL_condor_medium_quick"/></void>
-            <void method="addQueue"><object idref="BNL_condor_long_quick"/></void>
+            <!--<void method="addQueue"><object idref="BNL_condor_long_quick"/></void>-->
+            <void property="clusterName"><string>rcas.rcf.bnl.gov</string></void>
+      </object>
+    </void>
+    
+    <void method="put">
+      <string>bnl_condor_cas_newercpus</string>
+      <object id="bnl_condor_cas_newercpus" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <!--<void method="addQueue"><object idref="BNL_condor_short_quick_newercpus"/></void>-->
+            <void method="addQueue"><object idref="BNL_condor_medium_quick_newercpus"/></void>
+            <void property="clusterName"><string>rcas.rcf.bnl.gov</string></void>
+      </object>
+    </void>
+    
+    <!--
+    <void method="put">
+      <string>bnl_condor_natTrans</string>
+      <object id="bnl_condor_cas_newercpus" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="BNL_condor_short_quick_nativeTras"/></void>
+            <void method="addQueue"><object idref="BNL_condor_medium_quick_nativeTras"/></void>
+            <void property="clusterName"><string>rcas.rcf.bnl.gov</string></void>
+      </object>
+    </void>
+    -->
+    <!--~~~~~~~~~~ EIC Policy ~~~~~~~~~~-->
+    <void method="put">
+      <string>bnl_condor_eic</string>
+      <object id="bnl_condor_eic" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="BNL_condor_eic_queue"/></void>
+            <void property="clusterName"><string>eic.bnl.gov</string></void>
+      </object>
+    </void>
+    
+    <void method="put">
+      <string>bnl_eic_grid</string>
+      <object id="bnl_eic_grid" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <void method="addQueue"><object idref="BNL_condor_eic_grid_queue"/></void>
+            <void property="clusterName"><string>sdcc.bnl.gov</string></void>
+      </object>
+    </void>
+
+    
+    
+    <!-- For Star and Phenix nodes only -->
+    <void method="put">
+      <string>bnl_condor_cas_SP-Only_quick</string>
+      <object id="BNL_condor_cas_SP-Only_quick" class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
+            <!--<void method="addQueue"><object idref="BNL_condor_short_SP-Only"/></void>-->
+            <void method="addQueue"><object idref="BNL_condor_long_SP-Only_quick"/></void>
             <void property="clusterName"><string>rcas.rcf.bnl.gov</string></void>
       </object>
     </void>
 <!-- ********** End of of quick condor queues, for use with the CondorFastDispatcher ************* -->
-
-
 
 <!-- ************************************ start of BHAM ************************************ -->  
 <void method="put">
@@ -1469,8 +1644,6 @@ make use of queue information. -->
 <void method="put">
   <string>star_all</string>
   <object class="gov.bnl.star.offline.scheduler.policy.PassivePolicy">
-    <void method="addQueue"><object idref="BNL_condor_medium"/></void>
-    <void method="addQueue"><object idref="BNL_condor_medium"/></void>
  
     <void method="addQueue"><object idref="PDSF_SGE_Queue"/></void>
     <void method="addQueue"><object idref="PDSF_SGE_Queue"/></void>
@@ -1741,6 +1914,7 @@ make use of queue information. -->
 <!-- .........................................................These are the LOCAL short, medium, long local BNL dispachers .............................................................-->
 
             <!-- This dispacher lets user jobs into crs part of the batch, but they will be will be killed if they run for more then 3 hours-->
+            <!--
             <void method="add">
                 <object id="condorBNL_Short_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
                     <void property="submitCommand">      <string>condor_submit</string>   </void>
@@ -1754,33 +1928,13 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
                     <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
+                    <void property="maxAttempts">   <int>20</int>                     </void>
                     <void property="msBtwnFailure"> <int>10000</int>                 </void>
                     <void property="msBtwnSuccess"> <int>1000</int>                  </void>
                     <void property="application">   <object idref="CSHApplication"/> </void>
                 </object>
             </void>
-
-
-            <void method="add">
-                <object id="condorBNL_CAS_medium_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
-                    <void property="submitCommand">      <string>condor_submit</string>   </void>
-                    <void property="condorOptions"> 
-<string>+Experiment     = &quot;star&quot;
-+Job_Type       = &quot;cas&quot;
-kill_sig        = SIGINT
-PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (CPU_Experiment == "star")  </string>  </void>
-                    <void property="priorityUsed"><boolean>true</boolean>           </void>
-                    <void property="priorityMax"><double>20</double>                </void>
-                    <void property="priorityMin"><double>0</double>                 </void>
-                    <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
-                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
-                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
-                    <void property="application">   <object idref="CSHApplication"/> </void>
-                </object>
-            </void>
+            -->
 
 
 
@@ -1788,16 +1942,15 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                 <object id="condorBNL_CAS_long_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
                     <void property="submitCommand">      <string>condor_submit</string>   </void>
                     <void property="condorOptions"> 
-<string>+Experiment     = &quot;star&quot;
-+Job_Type       = &quot;long&quot;
+<string>accounting_group = group_star.cas
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (CPU_Experiment == "star") </string>  </void>
+                    <!--<void method="addRequirement"><string>(CPU_Experiment == "sdcc")</string>  </void>-->
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
                     <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
+                    <void property="maxAttempts">   <int>20</int>                     </void>
                     <void property="msBtwnFailure"> <int>10000</int>                 </void>
                     <void property="msBtwnSuccess"> <int>1000</int>                  </void>
                     <void property="application">   <object idref="CSHApplication"/> </void>
@@ -1810,16 +1963,15 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                 <object id="condorBNL_high_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
                     <void property="submitCommand">      <string>condor_submit</string>   </void>
                     <void property="condorOptions">
-<string>+Experiment     = &quot;star&quot;
-+Job_Type       = &quot;high&quot;
-kill_sig        = SIGINT
+<string>kill_sig        = SIGINT
+accounting_group = group_star.crs
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Experiment == "star") </string>  </void>
+                    <!--<void method="addRequirement"><string>(CPU_Experiment == "star") </string>  </void>-->
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
                     <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
+                    <void property="maxAttempts">   <int>20</int>                     </void>
                     <void property="msBtwnFailure"> <int>10000</int>                 </void>
                     <void property="msBtwnSuccess"> <int>1000</int>                  </void>
                     <void property="application">   <object idref="CSHApplication"/> </void>
@@ -1827,17 +1979,16 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
             </void>
             
             
-            
+<!--            
             <void method="add">
                 <object id="condorBNL_benchmark_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
                     <void property="submitCommand">      <string>condor_submit</string>   </void>
                     <void property="condorOptions">
-<string>+Experiment     = &quot;star&quot;
-<!--   +Job_Type       = &quot;high&quot; -->
-+Job_Type       = &quot;cas&quot;
+<string>+Job_Type       = &quot;cas&quot;
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Experiment == "star") &amp;&amp; ( \
+                     <void method="addRequirement">
+    <string>(CPU_Experiment == "star") &amp;&amp; ( \
 (machine == "rcas2901.rcf.bnl.gov") || (machine == "rcas2902.rcf.bnl.gov") || (machine == "rcas2903.rcf.bnl.gov") || (machine == "rcas2904.rcf.bnl.gov") || \ 
 (machine == "rcas2905.rcf.bnl.gov") || (machine == "rcas2906.rcf.bnl.gov") || (machine == "rcas2907.rcf.bnl.gov") || (machine == "rcas2908.rcf.bnl.gov") || \
 (machine == "rcas2909.rcf.bnl.gov") || (machine == "rcas2910.rcf.bnl.gov") || (machine == "rcas2911.rcf.bnl.gov") || (machine == "rcas2912.rcf.bnl.gov") || \
@@ -1877,18 +2028,41 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 (machine == "rcrs6062.rcf.bnl.gov") || (machine == "rcrs6063.rcf.bnl.gov") || (machine == "rcrs6064.rcf.bnl.gov") || (machine == "rcrs6065.rcf.bnl.gov") || \
 (machine == "rcrs6066.rcf.bnl.gov") || (machine == "rcrs6067.rcf.bnl.gov") || (machine == "rcrs6068.rcf.bnl.gov") || (machine == "rcrs6069.rcf.bnl.gov") || \
 (machine == "rcrs6070.rcf.bnl.gov") || (machine == "rcrs6071.rcf.bnl.gov") || (machine == "rcrs6072.rcf.bnl.gov") ) </string>  
-                    </void> <!-- TotalSlots == 40 is used to select nodes for the same type -->
+                    </void> 
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
                     <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
+                    <void property="maxAttempts">   <int>20</int>                     </void>
                     <void property="msBtwnFailure"> <int>10000</int>                 </void>
                     <void property="msBtwnSuccess"> <int>1000</int>                  </void>
                     <void property="application">   <object idref="CSHApplication"/> </void>
                 </object>
             </void>
-            
+-->
+
+
+            <void method="add">
+                <object id="condorBNL_nightlyTest_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand">      <string>condor_submit -verbose</string>   </void>
+                    <void property="condorOptions">
+<string>kill_sig        = SIGINT
+PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)
+accounting_group = group_star.crs</string>
+                    </void>
+                    <!--<void method="addRequirement"><string>( CPU_Experiment == "star" &amp;&amp; CPU_Type == "benchmark" ) </string></void>-->
+                    <void method="addRequirement"><string>(CpuFamily == 6 &amp;&amp; CpuModelNumber == 62) </string></void>
+                    <void property="priorityUsed"><boolean>true</boolean>          </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int></void>
+                    <void property="maxAttempts">   <int>20</int>                     </void>
+                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+                                 
 
 
 <!-- ..............................................................End of local short, medium, long local BNL dispachers ...............................................................-->
@@ -1898,92 +2072,341 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 
 
             <!-- ~~~ Dispacher for submitting all jobs in one go "CondorFastDispatcher" ~~~ -->
+            <!--
             <void method="add">
                 <object id="condorBNL_Short_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
-                    <void property="submitCommand">      <string>condor_submit</string>   </void>
+                    <void property="submitCommand"> <string>condor_submit -verbose</string> </void>
                     <void property="condorOptions"> 
-<string>+Experiment     = &quot;star&quot;
-+Job_Type       = &quot;cas&quot;
-kill_sig        = SIGINT
-PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Experiment == "star")  </string>  </void>
+<string>+Job_Type        = &quot;cas&quot; 
+kill_sig         = SIGINT
+accounting_group = group_star.cas</string></void>
+            <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+            <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = true</string></void>
+                    <void method="addRequirement"><string> ((CPU_Experiment == "sdcc") || (CPU_Experiment == "star")) </string>  </void> 
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
-                    <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
+                    <void property="defaultStorageSpace"><int>-1</int>            </void>
+                    <void property="maxAttempts">   <int>20</int>                     </void>
+                    <void property="msBtwnFailure"> <int>1000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+            -->
+            <!-- ~~~ End of Dispacher for submitting all jobs in one go "CondorFastDispatcher" ~~~ -->
+
+            <!-- ~~~ Dispacher for submitting all jobs in one go "CondorFastDispatcher" ~~~ -->
+            <void method="add">
+                <object id="condorBNL_medium_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand"> <string>condor_submit -verbose</string> </void>
+                    <!--Used for debuging despacher by simulating condor not returning  
+                    <void property="submitCommand"> <string>sleep 100516; echo </string>   </void> -->
+                    <void property="condorOptions"> 
+<string>kill_sig         = SIGINT
+accounting_group = group_star.cas</string></void>
+            <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+            <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = true</string></void>
+                    <!--<void method="addRequirement"><string> (CPU_Experiment == "sdcc") </string>  </void> -->
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int>            </void>
+                <!--<void property="defaultMinMemory"><int>2000</int>               </void>-->
+                    <void property="maxAttempts">   <int>20</int>                     </void>
+                <!--<void property="msBtwnFailure"> <int>10000</int>                 </void> -->
+                    <void property="msBtwnFailure"> <int>1000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+
+<!-- ...........................................................End of Quick dispatchers for short, medium ...................................................................................................... -->
+<!-- ...........................................................Start of STAR native trasfer dispatchers for short, medium ...................................................................................................... -->
+            <!-- ~~~ STAR short queue natvie trasfer dispatcher ~~~ -->
+            <!--
+            <void method="add">
+                <object id="condorBNL_Short_natTransDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorOSGDispatcher">
+                    <void property="submitCommand"> <string>condor_submit -verbose</string> </void>
+                    <void property="condorOptions"> 
+<string>+Job_Type        = &quot;cas&quot; 
+kill_sig         = SIGINT
+accounting_group = group_star.cas</string></void>
+            <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+            <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = true</string></void>
+                    <void method="addRequirement"><string> ((CPU_Experiment == "sdcc") || (CPU_Experiment == "star")) </string>  </void> 
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int>            </void>
+                     <void property="defaultMinMemory"><int>2000</int>               </void>
+                    <void property="maxAttempts">   <int>20</int>                     </void>
+                    <void property="msBtwnFailure"> <int>1000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication_InternalCondorTransfer"/> </void>
+                </object>
+            </void>
+
+
+            <void method="add">
+                <object id="condorBNL_medium_natTransDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorOSGDispatcher">
+                    <void property="submitCommand"> <string>condor_submit -verbose</string> </void>
+                    <void property="condorOptions"> 
+<string>+Job_Type        = &quot;cas&quot; 
+kill_sig         = SIGINT
+accounting_group = group_star.cas</string></void>
+            <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+            <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = true</string></void>
+                    <void method="addRequirement"><string> (CPU_Experiment == "sdcc") </string>  </void> 
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int>            </void>
+                     <void property="defaultMinMemory"><int>2000</int>               </void>
+                    <void property="maxAttempts">   <int>20</int>                     </void>
+                    <void property="msBtwnFailure"> <int>1000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication_InternalCondorTransfer"/> </void>
+                </object>
+            </void>
+-->
+<!-- ........................................................... Quick dispatchers for short_newcpu, long_newcpu ..................................................................................................... -->
+
+
+            <!-- ~~~ Dispacher for submitting all jobs in one go "CondorFastDispatcher" ~~~ -->
+            <!--
+            <void method="add">
+                <object id="condorBNL_short_QuickDispatcher_newcpu" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand"> <string>condor_submit -verbose</string> </void>
+                    <void property="condorOptions"> 
+<string>+Job_Type        = &quot;cas&quot; 
+kill_sig         = SIGINT
+accounting_group = group_star.cas</string></void>
+            <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+            <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = true</string></void>
+                    <void method="addRequirement"><string> ( (CPU_Experiment == "star") &amp;&amp; ( Mips>21000 ) ) </string>  </void> 
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int>            </void>
+                    <void property="maxAttempts">   <int>20</int>                     </void>
+                    <void property="msBtwnFailure"> <int>1000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+            -->
+            <!-- ~~~ End of Dispacher for submitting all jobs in one go "CondorFastDispatcher" ~~~ -->
+
+            <void method="add">
+                <object id="condorBNL_medium_QuickDispatcher_newcpu" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand"> <string>condor_submit -verbose</string> </void>
+                    <!--Used for debuging despacher by simulating condor not returning  
+                    <void property="submitCommand"> <string>sleep 100516; echo </string>   </void> -->
+                    <void property="condorOptions"> 
+<string>+Job_Type        = &quot;cas&quot; 
+kill_sig         = SIGINT
+accounting_group = group_star.cas</string></void>
+            <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+            <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = true</string></void>
+                    <void method="addRequirement"><string> (Mips>21000) </string>  </void> 
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int>            </void>
+                <!--<void property="defaultMinMemory"><int>2000</int>               </void>-->
+                    <void property="maxAttempts">   <int>20</int>                     </void>
+                <!--<void property="msBtwnFailure"> <int>10000</int>                 </void> -->
+                    <void property="msBtwnFailure"> <int>1000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+            
+<!--
+            <void method="add">
+                <object id="condorBNL_CAS_long_QuickDispatcher_newcpu" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand">      <string>condor_submit -verbose</string>   </void>
+                    <void property="condorOptions">
+<string>+Job_Type        = &quot;long&quot;
+kill_sig         = SIGINT
+accounting_group = group_star.cas</string></void>
+                    <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+                    <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = true</string></void>
+                    <void method="addRequirement">
+                        <string>(CPU_Type != "crs") &amp;&amp; (CPU_Experiment == "star" &amp;&amp; Mips>21000)</string>  
+                    </void>
+                    <void property="priorityUsed"><boolean>true</boolean>            </void>
+                    <void property="priorityMax"><double>20</double>                 </void>
+                    <void property="priorityMin"><double>0</double>                  </void>
+                    <void property="defaultStorageSpace"><int>-1</int>               </void>
+                     <void property="defaultMinMemory"><int>2000</int>                </void>
+                    <void property="maxAttempts">   <int>20</int>                    </void>
                     <void property="msBtwnFailure"> <int>10000</int>                 </void>
                     <void property="msBtwnSuccess"> <int>1000</int>                  </void>
                     <void property="application">   <object idref="CSHApplication"/> </void>
                 </object>
             </void>
+-->
+
+
+<!-- ...........................................................End of Quick dispatchers for short_newcpu, long_newcpu ...................................................................................................... -->         
+
+            <void method="add">
+                <object id="condorBNL_CAS_embed_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand">      <string>condor_submit -verbose</string>   </void>
+                    <void property="condorOptions">
+<string>+Job_Type        = &quot;long&quot;
+kill_sig         = SIGINT
+accounting_group = group_star.embed</string></void>
+                    <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+                    <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = flase</string></void>
+                    <!--<void method="addRequirement"><string> (CPU_Experiment == "sdcc") </string>  </void>-->
+                    <void property="priorityUsed"><boolean>true</boolean>            </void>
+                    <void property="priorityMax"><double>20</double>                 </void>
+                    <void property="priorityMin"><double>0</double>                  </void>
+                    <void property="defaultStorageSpace"><int>-1</int>               </void>
+                 <!--<void property="defaultMinMemory"><int>2000</int>                </void>-->
+                    <void property="maxAttempts">   <int>20</int>                    </void>
+                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+            
+<!--            
+            <void method="add">
+                <object id="condorBNL_CAS_cme_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand">      <string>condor_submit -verbose</string>   </void>
+                    <void property="condorOptions">
+<string>kill_sig         = SIGINT
+accounting_group = group_cme</string></void> 
+                    <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+                    <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = flase</string></void>
+                    <void property="priorityUsed"><boolean>true</boolean>            </void>
+                    <void property="priorityMax"><double>20</double>                 </void>
+                    <void property="priorityMin"><double>0</double>                  </void>
+                    <void property="defaultStorageSpace"><int>-1</int>               </void>
+                    <void property="maxAttempts">   <int>20</int>                    </void>
+                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+-->  
+            
+            <!-- ~~~ Dispacher for submitting all jobs in one go "CondorFastDispatcher" ~~~ -->
+            <!--
+            <void method="add">
+                <object id="condorBNL_Short_SP-Only_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand">      <string>condor_submit -verbose</string>   </void>
+                    <void property="condorOptions"> 
+<string>+Job_Type        = &quot;cas&quot; 
+kill_sig         = SIGINT
+accounting_group = group_star.cas
+PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+                    <void method="addRequirement"><string> ((CPU_Experiment == "star") || (CPU_Experiment == "phenix")) </string>  </void> 
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int>            </void>
+                    <void property="maxAttempts">   <int>20</int>                     </void>
+                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>
+            -->
             <!-- ~~~ End of Dispacher for submitting all jobs in one go "CondorFastDispatcher" ~~~ -->
 
 
-
             <void method="add">
-                <object id="condorBNL_CAS_medium_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
-                    <void property="submitCommand">      <string>condor_submit</string>   </void>
+                <object id="condorBNL_CAS_long_SP-Only_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand">      <string>condor_submit -verbose</string>   </void>
                     <void property="condorOptions">
-<string>+Experiment     = &quot;star&quot;
-+Job_Type       = &quot;cas&quot;
-kill_sig        = SIGINT
-PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (CPU_Experiment == "star")  </string>  </void>
-                    <void property="priorityUsed"><boolean>true</boolean>           </void>
-                    <void property="priorityMax"><double>20</double>                </void>
-                    <void property="priorityMin"><double>0</double>                 </void>
-                    <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
+<string>kill_sig         = SIGINT
+accounting_group = group_star.cas
+PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+                    <!--<void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (CPU_Experiment == "star") </string>  </void>-->
+                    <void property="priorityUsed"><boolean>true</boolean>            </void>
+                    <void property="priorityMax"><double>20</double>                 </void>
+                    <void property="priorityMin"><double>0</double>                  </void>
+                    <void property="defaultStorageSpace"><int>-1</int>               </void>
+              <!-- <void property="defaultMinMemory"><int>2000</int>                </void> -->
+                    <void property="maxAttempts">   <int>20</int>                    </void>
                     <void property="msBtwnFailure"> <int>10000</int>                 </void>
                     <void property="msBtwnSuccess"> <int>1000</int>                  </void>
                     <void property="application">   <object idref="CSHApplication"/> </void>
                 </object>
             </void>
-
-
-
-            <void method="add">
-                <object id="condorBNL_CAS_long_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
-                    <void property="submitCommand">      <string>condor_submit</string>   </void>
-                    <void property="condorOptions">
-<string>+Experiment     = &quot;star&quot;
-+Job_Type       = &quot;long&quot;
-kill_sig        = SIGINT
-PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (CPU_Experiment == "star") </string>  </void>
-                    <void property="priorityUsed"><boolean>true</boolean>           </void>
-                    <void property="priorityMax"><double>20</double>                </void>
-                    <void property="priorityMin"><double>0</double>                 </void>
-                    <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
-                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
-                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
-                    <void property="application">   <object idref="CSHApplication"/> </void>
-                </object>
-            </void>
-
-
-
-<!-- ...........................................................End of Quick dispatchers for short, medium, long ...................................................................................................... 
             
-     ...........................................................Start of DAG dispatchers for short, medium, long ...................................................................................................... -->            
+            
+            
+            
+            <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ EIC Dispacher ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+            <void method="add">
+                <object id="condorBNL_InternalCopy_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
+                    <void property="submitCommand"> <string>condor_submit -verbose</string> </void>
+                    <void property="condorOptions"> <string>kill_sig         = SIGINT</string></void>
+                    <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+                    <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = true</string></void>
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int>            </void>
+              <!--   <void property="defaultMinMemory"><int>2000</int>               </void> -->
+                    <void property="maxAttempts">   <int>20</int>                     </void>
+                <!--<void property="msBtwnFailure"> <int>10000</int>                 </void> -->
+                    <void property="msBtwnFailure"> <int>1000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication"/> </void>
+                </object>
+            </void>     
+            
+            <void method="add">
+                <object id="condorBNL_EIC_GRID_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorOSGDispatcher">
+                    <void property="submitCommand"> <string>condor_submit -verbose</string> </void>
+                    <void property="condorOptions"> <string>+ProjectName = "osg.EIC"
+request_cpus = 1
++SingularityImage = "/cvmfs/eic.opensciencegrid.org/singularity/rhic_sl7_ext"</string>
+                    </void>
+                    <void property="priorityUsed"><boolean>true</boolean>           </void>
+                    <void property="priorityMax"><double>20</double>                </void>
+                    <void property="priorityMin"><double>0</double>                 </void>
+                    <void property="defaultStorageSpace"><int>-1</int>            </void>
+              <!--   <void property="defaultMinMemory"><int>2000</int>               </void> -->
+                    <void property="maxAttempts">   <int>20</int>                     </void>
+                <!--<void property="msBtwnFailure"> <int>10000</int>                 </void> -->
+                    <void property="msBtwnFailure"> <int>1000</int>                 </void>
+                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
+                    <void property="application">   <object idref="CSHApplication_InternalCondorTransfer"/> </void>
+                    <void method="addRequirement"><string>(HAS_CVMFS_eic_opensciencegrid_org == true) &amp;&amp; (HAS_SINGULARITY == TRUE)</string></void>
+                </object>
+            </void>     
+            
+            
+<!-- ...........................................................Start of DAG dispatchers for short, medium, long ...................................................................................................... -->            
             
             
             <!-- This dispacher will alow the user to submit condor DAGs via the Action element -->
+            <!--
             <void method="add">
                 <object id="condorBNL_short_DAG_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDAGDispatcher">
                     <void method="getValuesFrom">    <object idref="condorBNL_Short_Dispatcher"/> </void>
                     <void property="submitCommand">  <string>condor_submit_dag</string>           </void>
                 </object> 
             </void>
-            
-            <void method="add">
-                <object id="condorBNL_medium_DAG_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDAGDispatcher">
-                    <void method="getValuesFrom">    <object idref="condorBNL_CAS_medium_Dispatcher"/> </void>
-                    <void property="submitCommand">  <string>condor_submit_dag</string>           </void>
-                </object> 
-            </void>
+            -->
             
             <void method="add">
                 <object id="condorBNL_long_DAG_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDAGDispatcher">
@@ -1995,20 +2418,19 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
 <!-- ...........................................................End of DAG dispatchers for short, medium, long ...................................................................................................... -->
 
 
-      <void method="add">
+            <void method="add">
                 <object id="condorBNL_production_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
-                    <void property="submitCommand">      <string>condor_submit</string>   </void>
-                    <void property="condorOptions">
-<string>+Experiment     = &quot;star&quot;
-+Job_Type       = &quot;crs&quot;
-kill_sig        = SIGINT
-PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Experiment == "star") </string>  </void>
+                    <void property="submitCommand">      <string>condor_submit -verbose</string>   </void>
+                    <void property="condorOptions"><string>kill_sig         = SIGINT</string></void>
+                    <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+                    <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = true</string></void>
+                    <!--<void method="addRequirement"><string>(CPU_Type != "crs") &amp;&amp; (CPU_Experiment == "star") </string></void>-->
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
                     <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
+                    <void property="maxAttempts">   <int>10</int>                    </void>
                     <void property="msBtwnFailure"> <int>10000</int>                 </void>
                     <void property="msBtwnSuccess"> <int>1000</int>                  </void>
                     <void property="application">   <object idref="CSHApplication"/> </void>
@@ -2023,11 +2445,12 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                 <object id="condorBNL_Eval_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
                     <void property="submitCommand">      <string>condor_submit</string>   </void>
                     <void property="condorOptions">
-<string>+Experiment     = &quot;star&quot;
-+Job_Type       = &quot;eval&quot;
-kill_sig        = SIGINT
-PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
-                    <void method="addRequirement"><string>(CPU_Type == "cas") &amp;&amp; (CPU_Experiment == "star")  </string>  </void>
+<string>+Job_Type       = &quot;eval&quot;
+kill_sig        = SIGINT</string></void>
+                    <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+                    <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = true</string></void>
+                    <!--<void method="addRequirement"><string>(CPU_Type == "cas") &amp;&amp; (CPU_Experiment == "star")  </string>  </void>-->
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -2041,29 +2464,8 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
             
             
 
-
+<!--
             <void method="add">
-                <object id="condorG_BNL_CAS_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
-                    <void property="submitCommand"><string>condor_submit</string></void>
-                    <void property="useRSL"><boolean>false</boolean></void>
-                    <void property="condorGOptions">
-<string>+Experiment     = &quot;star&quot;
-Priority        = +10                                 
-+Job_Type       = &quot;cas&quot; </string></void>  <!--This has not been tested -->
-                    <!--<void method="addRequirement"><string></string> </void>-->
-                    <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts"><int>1</int></void>
-                    <void property="msBtwnFailure"><int>10000</int></void>
-                    <void property="msBtwnSuccess"><int>1000</int></void>
-                    <void property="queueName"><string>medium</string></void>
-                    <void property="transferExecutable"><boolean>true</boolean></void>
-                    <void property="application"><object idref="CSHApplication"/></void>
-                </object>
-            </void>
-            
-
-            <void method="add">
-            <!--<object id="BNL_condor_crossEx_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">-->
                 <object id="BNL_condor_crossEx_QuickDispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">    
                     <void property="submitCommand">       <string>condor_submit</string>   </void>
                     <void property="condorOptions">
@@ -2071,17 +2473,7 @@ Priority        = +10
 +Job_Type       = &quot;cas&quot;
 kill_sig        = SIGINT
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10))  || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)</string></void>
-                    <!--
-                    Priority        = +10  
-                    <void property="defaultStorageSpace">
-                       <int>-1</int>
-                    </void>
-                    <void property="maxAttempts">    <int>1</int>                     </void>
-                    <void property="msBtwnFailure">  <int>10000</int>                 </void>
-                    <void property="msBtwnSuccess">  <int>1000</int>                  </void>
-                    <void property="application">    <object idref="CSHApplication"/> </void>
-                    -->
-                    <void method="addRequirement"><string> ((CPU_Experiment == "star") || ( CPU_Experiment == "phenix" )) </string>  </void>
+                    <void method="addRequirement"><string> ((CPU_Experiment == "sdcc" ) || (CPU_Experiment == "star") || (CPU_Experiment == "phenix")) </string>  </void>
                     <void property="priorityUsed"><boolean>true</boolean>           </void>
                     <void property="priorityMax"><double>20</double>                </void>
                     <void property="priorityMin"><double>0</double>                 </void>
@@ -2090,8 +2482,6 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                     <void property="msBtwnFailure"> <int>10000</int>                 </void>
                     <void property="msBtwnSuccess"> <int>1000</int>                  </void>
                     <void property="application">   <object idref="CSHApplication"/> </void>
-                    
-                    
                 </object>
             </void>
             
@@ -2103,7 +2493,24 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                     <void property="condorGOptions"> 
  <string>+Experiment    = &quot;general&quot;
 Priority       = +10
-+Job_Type      = &quot;cas&quot; </string></void>   <!-- This function will have to be added or else the jobs will go to the wrong cluster -->
++Job_Type      = &quot;cas&quot; </string></void>   
+                    <void property="defaultStorageSpace"><int>-1</int></void>
+                    <void property="maxAttempts"><int>1</int></void>
+                    <void property="msBtwnFailure"><int>10000</int></void>
+                    <void property="msBtwnSuccess"><int>1000</int></void>
+                    <void property="queueName"><string>medium</string></void>
+                    <void property="transferExecutable"><boolean>true</boolean></void>
+                    <void property="application"><object idref="CSHApplication"/></void>
+                </object>
+            </void>
+-->            
+
+            <void method="add">
+                <object id="condorG_BNL_CAS_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
+                    <void property="submitCommand"><string>condor_submit</string></void>
+                    <void property="useRSL"><boolean>false</boolean></void>
+                    <void property="condorGOptions">
+<string>Priority        = +10</string></void>  <!--This has not been tested -->
                     <!--<void method="addRequirement"><string></string> </void>-->
                     <void property="defaultStorageSpace"><int>-1</int></void>
                     <void property="maxAttempts"><int>1</int></void>
@@ -2114,17 +2521,17 @@ Priority       = +10
                     <void property="application"><object idref="CSHApplication"/></void>
                 </object>
             </void>
-            
+
+
             
              
             <void method="add">
                 <object id="BNL_condor_cas_crs_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
                     <void property="submitCommand">       <string>condor_submit</string>  </void>
                     <void property="condorOptions">
- <string>+Experiment     = &quot;star&quot;
-+Job_Type       = &quot;cas&quot;
+ <string>
 PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string> </void>
-                    <void method="addRequirement"><string>(CPU_Experiment == "star")</string>  </void>
+                    <!--<void method="addRequirement"><string>(CPU_Type != "crs")</string>  </void>-->
                     <void property="defaultStorageSpace"><int>-1</int></void>
                     <void property="maxAttempts">    <int>1</int>                    </void>
                     <void property="msBtwnFailure">  <int>10000</int>                </void>
@@ -2139,9 +2546,8 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                 <object id="BNL_condorG_cas_crs_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
                     <void property="submitCommand"><string>condor_submit</string></void>
                     <void property="useRSL"><boolean>false</boolean></void>
-                    <void property="condorGOptions"> 
-<string>+Experiment     = &quot;star&quot;
-+Job_Type       = &quot;cas&quot;</string></void>   <!-- This function will have to be added or else the jobs will go to the wrong cluster -->
+                    <!--<void property="condorGOptions"> 
+                    <string>+Job_Type       = &quot;cas&quot;</string></void> -->  <!-- This function will have to be added or else the jobs will go to the wrong cluster -->
                     <!--<void method="addRequirement"><string></string> </void>-->
                     <void property="defaultStorageSpace"><int>-1</int></void>
                     <void property="maxAttempts"><int>1</int></void>
@@ -2158,14 +2564,17 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                  <void method="add">
                       <object id="BNL_condor_CRS_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
                         <void property="submitCommand">      <string>condor_submit</string>   </void>
+                        <!--
                         <void property="condorOptions"> 
-<string>+Experiment     = &quot;star&quot;
-+Job_Type       = &quot;cas&quot;
-PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)  || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string> </void>
-                        <void method="addRequirement"><string>(CPU_Type == "crs") &amp;&amp; (CPU_Experiment == "star")  &amp;&amp; (Arch == "X86_64")  </string>  </void>
+                        <string>+Job_Type       = &quot;crs&quot;
++Experiment     = &quot;star&quot;</string>  </void> -->
+                        <void property="removeCondition"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5) || (JobRunCount >= 1 &amp;&amp; JobStatus == 1)</string></void>
+                        <void property="removeConditionWithRestart"><string>PeriodicRemove   = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus == 2 &amp;&amp; (CurrentTime - JobCurrentStartDate > (54000)) &amp;&amp; ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) &lt; 0.10)) || (((CurrentTime - EnteredCurrentStatus) &gt; (2*24*3600)) &amp;&amp; JobStatus == 5)
++IsRestartable   = true</string></void>
+                        <!--<void method="addRequirement"><string>(CPU_Type == "crs")</string>  </void>-->
                         <void property="defaultStorageSpace"><int>-1</int></void>
                         <void property="maxAttempts">    <int>1</int>                    </void>
-                        <void property="msBtwnFailure">  <int>10000</int>                 </void>
+                        <void property="msBtwnFailure">  <int>10000</int>                </void>
                         <void property="msBtwnSuccess">  <int>1000</int>                 </void>
                         <void property="application">    <object idref="CSHApplication"/></void>
                       </object>
@@ -2177,8 +2586,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                             <void property="submitCommand"><string>condor_submit</string></void>
                             <void property="useRSL"><boolean>false</boolean></void>
                             <void property="condorGOptions">
- <string>+Experiment    = &quot;star&quot;
-+Job_Type      = &quot;cas&quot;</string></void>   <!-- This function will have to be added or else the jobs will go to the wrong cluster -->
+                            <string>+Job_Type      = &quot;cas&quot;</string></void>   <!-- This function will have to be added or else the jobs will go to the wrong cluster -->
                             <!--<void method="addRequirement"><string></string> </void>-->
                             <void property="defaultStorageSpace"><int>-1</int></void>
                             <void property="maxAttempts"><int>1</int></void>
@@ -2198,7 +2606,7 @@ PeriodicRemove  = (NumJobStarts &gt;=1 &amp;&amp; JobStatus==1) || (JobStatus ==
                         <void property="universe"><string>grid</string></void>
                         <void property="grid_resource"><string>condor stargw3.starp.bnl.gov stargw3.starp.bnl.gov:9619</string></void>
                         <void property="useRSL"><boolean>false</boolean></void>
-                        <void property="condorGOptions"><string>use_x509userproxy = false</string></void> 
+                        <void property="condorGOptions"><string>use_x509userproxy = true</string></void> 
                         <void property="defaultStorageSpace"><int>-1</int></void>
                         <void property="maxAttempts"><int>1</int></void>
                         <void property="msBtwnFailure"><int>10000</int></void>
@@ -2242,6 +2650,13 @@ delegate_job_GSI_credentials_lifetime = 864000</string> <!--10 day proxy-->
                           <void property="maxElapseTime"> <int>30000</int></void>
                           <void property="application"><object idref="CSHApplication"/></void>
                           <void property="pool"><string>shared-chos</string></void>
+                          <void property="submitArgs"><string></string></void>
+                          <void property="slrInitializationCommands">
+                              <string>prjquota star
+echo Slurm job id SLURM_ARRAY_JOB_ID
+(sleep 300; date; top ibn1)&amp;                                           
+                              </string>
+                          </void>
                           <void property="defaultMemory"> <int>2500</int></void>
                       </object>
                   </void>
@@ -2255,6 +2670,13 @@ delegate_job_GSI_credentials_lifetime = 864000</string> <!--10 day proxy-->
                           <void property="maxElapseTime"> <int>30000</int></void>
                           <void property="application"><object idref="CSHApplication"/></void>
                           <void property="pool"><string>shared</string></void>
+                          <void property="submitArgs"><string></string></void>
+                          <void property="slrInitializationCommands">
+                              <string>prjquota star
+echo Slurm job id SLURM_ARRAY_JOB_ID
+(sleep 300; date; top ibn1)&amp;                                           
+                              </string>
+                          </void>
                           <void property="defaultMemory"> <int>2500</int></void>
                       </object>
                    </void>
@@ -2543,7 +2965,7 @@ stream_error = false </string></void>
                  
             <void method="add">
                 <object id="condor_UIC_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorDispatcher">
-                    <void property="submitCommand">      <string>condor_submit</string>   </void>
+                    <void property="submitCommand">      <string>condor_submit </string>   </void>
                     <void property="condorOptions"> <string/> </void>
                     <void method="addRequirement"><string/>  </void>
                     <void property="maxAttempts">   <int>1</int>                     </void>
@@ -2560,7 +2982,7 @@ stream_error = false </string></void>
             
              <void method="add">
                 <object id="Generic_Fast_condor_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
-                    <void property="submitCommand">      <string>condor_submit</string>   </void>
+                    <void property="submitCommand">      <string>condor_submit -verbose</string>   </void>
                     <void property="condorOptions">
 <string>should_transfer_files = YES
 when_to_transfer_output = ON_EXIT</string>
@@ -2577,99 +2999,6 @@ when_to_transfer_output = ON_EXIT</string>
                 </object>
             </void>
             
-
-
-<!-- *********************************************** HLT Dispatchers ***************************************************** -->
-
-
-
-             <void method="add">
-                <object id="Fast_condor_Dispatcher_CpuModelNumber45" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
-                    <void property="submitCommand">      <string>condor_submit</string>   </void>
-                    <void property="condorOptions">
-<string>should_transfer_files = YES
-when_to_transfer_output = ON_EXIT</string>
-                   </void>
-                    <void method="addRequirement"> <string> (CpuModelNumber == 45 ) </string> </void>
-                    <void property="priorityUsed"><boolean>true</boolean>           </void>
-                    <void property="priorityMax"><double>20</double>                </void>
-                    <void property="priorityMin"><double>0</double>                 </void>
-                    <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
-                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
-                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
-                    <void property="application">   <object idref="CSHApplication"/> </void>
-                </object>
-            </void>
-
-
-
-             <void method="add">
-                <object id="Fast_condor_Dispatcher_CpuModelNumber62" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
-                    <void property="submitCommand">      <string>condor_submit</string>   </void>
-                    <void property="condorOptions">
-<string>should_transfer_files = YES
-when_to_transfer_output = ON_EXIT</string>
-                   </void>
-                    <void method="addRequirement"><string> (CpuModelNumber == 62 ) </string> </void>
-                    <void property="priorityUsed"><boolean>true</boolean>           </void>
-                    <void property="priorityMax"><double>20</double>                </void>
-                    <void property="priorityMin"><double>0</double>                 </void>
-                    <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
-                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
-                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
-                    <void property="application">   <object idref="CSHApplication"/> </void>
-                </object>
-            </void>
-
-
-
-             <void method="add">
-                <object id="Fast_condor_Dispatcher_CpuModelNumber63" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
-                    <void property="submitCommand">      <string>condor_submit</string>   </void>
-                    <void property="condorOptions">
-<string>should_transfer_files = YES
-when_to_transfer_output = ON_EXIT</string>
-                   </void>
-                    <void method="addRequirement"><string> (CpuModelNumber == 63 )  </string> </void>
-                    <void property="priorityUsed"><boolean>true</boolean>           </void>
-                    <void property="priorityMax"><double>20</double>                </void>
-                    <void property="priorityMin"><double>0</double>                 </void>
-                    <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
-                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
-                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
-                    <void property="application">   <object idref="CSHApplication"/> </void>
-                </object>
-            </void>
-
-
-             <void method="add">
-                <object id="Fast_condor_Dispatcher_CpuModelNumber6X" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorFastDispatcher">
-                    <void property="submitCommand">      <string>condor_submit</string>   </void>
-                    <void property="condorOptions">
-<string>should_transfer_files = YES
-when_to_transfer_output = ON_EXIT</string>
-                   </void>
-                    <void method="addRequirement"><string> (CpuModelNumber == 63 ||  CpuModelNumber == 62)  </string> </void>
-                    <void property="priorityUsed"><boolean>true</boolean>           </void>
-                    <void property="priorityMax"><double>20</double>                </void>
-                    <void property="priorityMin"><double>0</double>                 </void>
-                    <void property="defaultStorageSpace"><int>-1</int></void>
-                    <void property="maxAttempts">   <int>1</int>                     </void>
-                    <void property="msBtwnFailure"> <int>10000</int>                 </void>
-                    <void property="msBtwnSuccess"> <int>1000</int>                  </void>
-                    <void property="application">   <object idref="CSHApplication"/> </void>
-                </object>
-            </void>
-
-
-
-
-<!-- ******************************************** End of HLT Dispatchers ***************************************************** -->
-
-
 
             <void method="add">
                 <object id="Generic_condorG_Dispatcher" class="gov.bnl.star.offline.scheduler.Dispatchers.condorg.CondorGRSLDispatcher">
@@ -2711,11 +3040,6 @@ when_to_transfer_output = ON_EXIT</string>
 </void>
     
 
-<!-- Test block -->  
-  <void method="put">    
-        <string>TestDispatcher</string>
-        <object idref="condorBNL_CAS_medium_Dispatcher"/>
-  </void>
     
     
 <!-- /////////////////////////////////////////////////////////////////////////////////////////////////////////// -->    
@@ -2782,25 +3106,24 @@ when_to_transfer_output = ON_EXIT</string>
                             </void>
                        
 
-                            <!-- ******** LSF BNL CAS batch queues (local) ******** -->
+                            <!-- ******** LSF BNL CAS batch queues (local) ******** --><!--
                             <void method="addAccessMethod"> 
                                     <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                          <void property="dispatcher"> <object idref="BNL_LSF_CAS_Dispatcher"/>    </void> 
-                                         <void method="addQueue"> <object idref="BNL_LSF_star_cas_short"/>  </void>
-                                         <void method="addQueue"> <object idref="BNL_LSF_star_cas_big"/>    </void>
-                                         <void method="addQueue"> <object idref="BNL_LSF_crs_queue"/>       </void>
-                                         <void method="addQueue"> <object idref="BNL_LSF_lowMemQueue"/>     </void>
-
-                                  </object>
-                             </void>  
+                                         <void method="addQueue"> <object idref="BNL_LSF_star_cas_short"/>        </void>
+                                         <void method="addQueue"> <object idref="BNL_LSF_star_cas_big"/>          </void>
+                                         <void method="addQueue"> <object idref="BNL_LSF_crs_queue"/>             </void>
+                                         <void method="addQueue"> <object idref="BNL_LSF_lowMemQueue"/>           </void>
+                                    </object>
+                             </void>  -->
                              
-                             <!-- ******** LSF BNL CRS batch queues (local) ******** -->
+                             <!-- ******** LSF BNL CRS batch queues (local) ******** --><!--
                              <void method="addAccessMethod">  
                                     <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                         <void method="addQueue"> <object idref="BNL_LSF_prod_Queue"/> </void>
                                         <void property="dispatcher"> <object idref="BNL_LSF_CRS_Dispatcher"/> </void> 
                                     </object>
-                             </void>
+                             </void>-->
                              
                              
                              
@@ -2815,24 +3138,14 @@ when_to_transfer_output = ON_EXIT</string>
 
                 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Basic user access methods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
                              <!-- ******** CONDOR BNL CAS and CRS batch queue (local) for all users hows jobs are under 3 hours ******** -->
+                             <!--
                              <void method="addAccessMethod">
                                     <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                         <void method="addQueue"> <object idref="BNL_condor_short"/> </void>
                                         <void property="dispatcher"> <object idref="condorBNL_Short_Dispatcher"/> </void>
                                     </object>
                              </void>
-
-
-
-                             <!-- ******** CONDOR BNL CAS batch queues (local) ******** --> 
-                             <void method="addAccessMethod">
-                                    <object class="gov.bnl.star.offline.scheduler.AccessMethod">
-                                        <void method="addQueue"> <object idref="BNL_condor_medium"/> </void>
-                                        <void property="dispatcher"> <object idref="condorBNL_CAS_medium_Dispatcher"/> </void>
-                                    </object>
-                             </void>
-                             
-                             
+                             -->
                              
                              <!-- ******** CONDOR BNL CAS LONG batch queues (local) ******** --> 
                              <void method="addAccessMethod">
@@ -2841,53 +3154,128 @@ when_to_transfer_output = ON_EXIT</string>
                                         <void property="dispatcher"> <object idref="condorBNL_CAS_long_Dispatcher"/> </void> 
                                     </object>
                              </void>
-
-
-
-                            <!-- ******** CONDOR BNL high batch queue (local) ******** -->
+                             
+                             
+                             <!-- ******** CONDOR BNL CAS and CRS batch queue (local) for all users hows jobs are under 3 hours ******** -->
+                             <!--
+                             <void method="addAccessMethod">
+                                    <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                        <void method="addQueue"> <object idref="BNL_condor_short"/> </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_Short_Dispatcher"/> </void>
+                                    </object>
+                             </void>
+                             -->
+                             
+                            <!-- ******** CONDOR BNL For Star and Phenix nodes only ******** --> 
+                            <!--
                             <void method="addAccessMethod">
                                     <object class="gov.bnl.star.offline.scheduler.AccessMethod">
-                                        <void method="addQueue"> <object idref="BNL_condor_high_queue"/> </void>
-                                        <void property="dispatcher"> <object idref="condorBNL_high_Dispatcher"/> </void>
+                                        <void method="addQueue"> <object idref="BNL_condor_short_SP-Only"/> </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_Short_SP-Only_QuickDispatcher"/> </void> 
                                     </object>
                             </void>
+                            -->
+                                                       
+                            <void method="addAccessMethod">
+                                    <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                        <void method="addQueue"> <object idref="BNL_condor_long_SP-Only_quick"/> </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_CAS_long_SP-Only_QuickDispatcher"/> </void>
+                                    </object>
+                            </void>
+                            <!-- ******** ENd of CONDOR BNL For Star and Phenix nodes only ******** --> 
                             
                             
                             <void method="addAccessMethod">
                                     <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                         <void method="addQueue"> <object idref="BNL_condor_benchmark_queue"/> </void>
-                                        <void property="dispatcher"> <object idref="condorBNL_benchmark_Dispatcher"/> </void>
+                                        <!--
+                                        We will use the same dispatcher as we use for nihjtly test
+                                        <void property="dispatcher"> <object idref="condorBNL_benchmark_Dispatcher"/> </void>-->
+                                        <void property="dispatcher"> <object idref="condorBNL_nightlyTest_Dispatcher"/> </void>
                                     </object>
                             </void>
                              
-                             
-
+                            <void method="addAccessMethod">
+                                    <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                        <void method="addQueue"> <object idref="BNL_condor_nightlyTest_queue"/> </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_nightlyTest_Dispatcher"/> </void>
+                                    </object>
+                            </void>
+                            
+                            <void method="addAccessMethod">
+                                    <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                        <void method="addQueue"> <object idref="BNL_condor_embed_quick_queue"/> </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_CAS_embed_QuickDispatcher"/> </void>
+                                    </object>
+                            </void>
+                            
+<!--
+                            <void method="addAccessMethod">
+                                    <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                        <void method="addQueue"> <object idref="BNL_condor_cme_quick_queue"/> </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_CAS_cme_QuickDispatcher"/> </void>
+                                    </object>
+                            </void>
+-->
                    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of basic user access mothods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
 
                    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~New quick dispatcher local access mothods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-
-                             <void method="addAccessMethod">
+                            <!--
+                            <void method="addAccessMethod">
                                     <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                         <void method="addQueue"> <object idref="BNL_condor_short_quick"/>    </void>
                                         <void property="dispatcher"> <object idref="condorBNL_Short_QuickDispatcher"/> </void>
                                     </object>
-                             </void>
-
-                             <void method="addAccessMethod">
+                            </void>
+                             -->
+                            <void method="addAccessMethod">
                                     <object class="gov.bnl.star.offline.scheduler.AccessMethod">
-                                        <void method="addQueue"> <object idref="BNL_condor_medium_quick"/>   </void>
-                                        <void property="dispatcher"> <object idref="condorBNL_CAS_medium_QuickDispatcher"/> </void>
+                                        <void method="addQueue"> <object idref="BNL_condor_medium_quick"/>    </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_medium_QuickDispatcher"/> </void>
                                     </object>
-                             </void>
-
+                            </void>
+                            <!--
                              <void method="addAccessMethod">
                                     <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                         <void method="addQueue"> <object idref="BNL_condor_long_quick"/> </void>
                                         <void property="dispatcher"> <object idref="condorBNL_CAS_long_QuickDispatcher"/> </void>
                                     </object>
                              </void>
+                             -->
+                   
+                   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Dispatcher local access mothods for newer cpus~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+                            <!--
+                            <void method="addAccessMethod">
+                                    <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                        <void method="addQueue"> <object idref="BNL_condor_short_quick_newercpus"/>    </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_short_QuickDispatcher_newcpu"/> </void>
+                                    </object>
+                            </void>
+                            -->
+                            <void method="addAccessMethod">
+                                    <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                        <void method="addQueue"> <object idref="BNL_condor_medium_quick_newercpus"/>    </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_medium_QuickDispatcher_newcpu"/> </void>
+                                    </object>
+                            </void>
                              
+                            <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Dispatcher for native trasfer ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->        
+                            <!--
+                            <void method="addAccessMethod">
+                                    <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                        <void method="addQueue"> <object idref="BNL_condor_short_quick_nativeTras"/>    </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_Short_natTransDispatcher"/> </void>
+                                    </object>
+                            </void>
+                            
+                            <void method="addAccessMethod">
+                                    <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                        <void method="addQueue"> <object idref="BNL_condor_medium_quick_nativeTras"/>    </void>
+                                        <void property="dispatcher"> <object idref="condorBNL_medium_natTransDispatcher"/> </void>
+                                    </object>
+                            </void> 
+                             -->
                              <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ for production jobs ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
                              <void method="addAccessMethod">
@@ -2898,20 +3286,14 @@ when_to_transfer_output = ON_EXIT</string>
                              </void>
                              
 
-                   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~End of new quick dispatcher local access mothods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-
 
                    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Start of DAG dispatcher local access mothods ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->          
-
+                             <!--
                              <void method="addAccessMethod">
                                     <object idref="BNL_condor_short_DAG_queue"/>
                                     <object idref="condorBNL_short_DAG_Dispatcher"/>
                              </void> 
-                             
-                             <void method="addAccessMethod">
-                                    <object idref="BNL_condor_medium_DAG_queue"/>
-                                    <object idref="condorBNL_medium_DAG_Dispatcher"/>
-                             </void> 
+                             -->
                              
                              <void method="addAccessMethod">
                                     <object idref="BNL_condor_long_DAG_queue"/>
@@ -2924,13 +3306,14 @@ when_to_transfer_output = ON_EXIT</string>
                              
                              
                              <!-- ******** BNL CONDOR cross exprement batch system  (local) ******** -->
+                             <!--
                              <void method="addAccessMethod">
                                     <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                         <void method="addQueue"> <object idref="BNL_condor_cross_rcf_quick"/> </void>
                                         <void property="dispatcher"> <object idref="BNL_condor_crossEx_QuickDispatcher"/> </void> 
                                     </object>
                              </void>
-                             
+                             -->
                              
                              <!-- ******** BNL CONDOR CAS + CRS (local) ******** -->
                              <void method="addAccessMethod">
@@ -2985,8 +3368,7 @@ when_to_transfer_output = ON_EXIT</string>
                                 <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                      <void property="dispatcher"><object idref="condorG_BNL_CAS_Dispatcher"/> </void>
                                      <void property="batchSystem">   <string>condor</string>                  </void>
-                                      <void method="addQueue"> <object idref="BNL_condor_short"/>             </void>  <!-- Note that the dispacher is worng for these queues but they need to be mapped somewhere -->
-                                      <void method="addQueue"> <object idref="BNL_condor_medium"/>            </void>
+                                      <!--<void method="addQueue"> <object idref="BNL_condor_short"/>             </void> --> <!-- Note that the dispacher is worng for these queues but they need to be mapped somewhere -->
                                       <void method="addQueue"> <object idref="BNL_condor_cas_long"/>          </void>
                                 </object>
                             </void>
@@ -2997,6 +3379,7 @@ when_to_transfer_output = ON_EXIT</string>
                             
                             
                             <!-- ******** BNL CONDOR cross exprement (GateKeeperAccessPoint) ******** -->
+                            <!--
                             <void method="addAccessMethod">
                                 <object class="gov.bnl.star.offline.scheduler.AccessMethod">
                                      <void property="dispatcher"><object idref="BNL_condorG_crossEx_Dispatcher"/> </void>
@@ -3004,6 +3387,7 @@ when_to_transfer_output = ON_EXIT</string>
                                      <void method="addQueue"> <object idref="BNL_condor_cross_rcf_quick"/>  </void>
                                 </object>
                             </void>
+                            -->
                             
                             <!-- ******** BNL CONDOR CAS + CRS (GateKeeperAccessPoint) ******** -->
                             <void method="addAccessMethod">
@@ -3071,7 +3455,7 @@ when_to_transfer_output = ON_EXIT</string>
                     in which directory the log is saved. A log file for each user will be created.
                     Log files can be deleted at any time without any problem. -->
                     <void property="logConf">
-                        <object class="java.util.Hashtable">
+                        <object id="BNL_STAR_log_config" class="java.util.Hashtable">
                             <void method="put">
                               <string>directory</string>
                               <string>/afs/rhic.bnl.gov/star/doc/www/html/tmp/pub/scheduler</string>
@@ -3086,19 +3470,20 @@ when_to_transfer_output = ON_EXIT</string>
                     <!-- Statistics configuation. This sections tells whether the scheduler 
                     should record the statistics and in which database. To change database, 
                     simply change the database URL and the username/password -->
+                    <!--
                     <void property="statisticsConf">
-                          <object class="java.util.Hashtable">
+                          <object id="BNL_STAR_stats_config" class="java.util.Hashtable">
                             <void method="put">
                               <string>URL</string>
-                              <string>jdbc:mysql://duvall.star.bnl.gov/Scheduler_bnl</string>
+                              <string></string>
                             </void>
                             <void method="put">
                               <string>password</string>
-                              <string>4stats!</string>
+                              <string></string>
                             </void>
                             <void method="put">
                               <string>username</string>
-                              <string>scheduler</string>
+                              <string></string>
                             </void>
                             <void method="put">
                               <string>makeTablesIfNeeded</string>
@@ -3106,7 +3491,7 @@ when_to_transfer_output = ON_EXIT</string>
                             </void>
                           </object>
                     </void>
-                    
+                    -->
     
                     <!-- Program location. Tells the scheduler where it can find the commands.
                     Some commands are not defined here, but in the component in which they are used.
@@ -3114,8 +3499,8 @@ when_to_transfer_output = ON_EXIT</string>
                     to a change in architecture, and this section was left as legacy. It will become
                     less and less important the more the scheduler moves to a  even moremodular
                     architecture. -->
-                    <void property="programLocations">
-                        <object class="java.util.Hashtable">
+                    <void  property="programLocations">
+                        <object id="BNL_STAR_programLocations_config" class="java.util.Hashtable">
                             <void method="put">
                               <string>ls</string>
                               <string>/bin/ls</string>
@@ -3187,7 +3572,186 @@ ls -al
                 </object>
             </void>
             <!--End of BNL site block-->
+<!--_______________________________________ This block defines the EIC _______________________________________-->
+            <void method="add">
+                <object class="gov.bnl.star.offline.scheduler.Site">
+                    
+                    <void property="siteName"><string>eic.bnl.gov</string></void>
+                    <void property="canonicalName"><string>EIC</string></void>
+                    
+                    <void method="addFileSyntax"> <!--This is assumed by default -->
+                       <string>paths</string> 
+                       <object class="gov.bnl.star.offline.scheduler.util.fileSyntax.PathsSyntax"/>
+                    </void>   
+                    <void method="addFileSyntax"> 
+                       <string>rootd</string> 
+                       <object class="gov.bnl.star.offline.scheduler.util.fileSyntax.RootdSyntax"/>
+                    </void>
+                    <void method="addFileSyntax"> 
+                       <string>xrootd</string> 
+                       <object class="gov.bnl.star.offline.scheduler.util.fileSyntax.XRootdSyntax">
+                             <void property="isDefaultSiteSyntax"><boolean>true</boolean>              </void> <!-- This line sets this as the default for this site -->
+                             <void property="xrootdRedirectorName"><string>xrdstar.rcf.bnl.gov</string></void>
+                             <void property="xrootdRedirectorPort"><int>1095</int>                     </void>
+                       </object>
+                    </void>
+
+
+                   <!-- ***** This should be added to all sites ***** -->
+                   <!--
+                   <void method="addAccessPoint">
+                        <object idref="DefaultLocalAccessPoint"/>
+                   </void>
+                    -->
+                   <!-- ********************************************* -->
+
+
+                    <void method="addAccessPoint">
+                        <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">
+                             <!--               
+                            <void method="addAccessMethod">
+                                <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                    <void property="dispatcher">    <object idref="LocalDispatcher"/>  </void>
+                                    <void property="batchSystem">   <string>local</string>             </void> 
+                                    <void method="addQueue">        <object idref="local_Queue"/>      </void> 
+                               </object>
+                            </void>
+                            -->
+
+                            <void method="addAccessMethod">
+                                <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                    <void property="dispatcher">    <object idref="condorBNL_InternalCopy_QuickDispatcher"/>  </void>
+                                    <void property="batchSystem">   <string>local</string>                           </void> 
+                                    <void method="addQueue">        <object idref="BNL_condor_eic_queue"/>           </void> 
+                               </object>
+                            </void>
+                       
+                         </object>    
+                   </void> 
+
+                    <void property="logConf">
+                         <object id="BNL_EIC_log_config" class="java.util.Hashtable">
+                            <void method="put">
+                              <string>directory</string>
+                              <string>$HOME/.sums</string>
+                            </void>
+                            <void method="put">
+                              <string>level</string>
+                              <string>INFO</string> <!-- DEBUG INFO WARN ERROR FATAL -->
+                            </void>
+                        </object>
+                    </void>
+                    
+                    <!--
+                    <void property="statisticsConf">
+                          <object idref="BNL_STAR_stats_config"/>
+                    </void>
+                    -->
+
+                    <void property="programLocations">
+                        <object idref="BNL_STAR_programLocations_config"/>
+                    </void>
+                    
+                    
+                    <!--The default policy a user submitting at this site will be given if they do not use the –policy option.-->
+                    <void property="defaultPolicy">
+                              <object idref="bnl_condor_eic"/>
+                   </void>
                         
+  
+                </object>
+            </void>
+            <!--End of EIC site block-->  
+<!--_______________________________________ This block defines the EIC-GRID  _______________________________________-->
+            <void method="add">
+                <object class="gov.bnl.star.offline.scheduler.Site">
+                    
+                    <void property="siteName"><string>eic.grid.sdcc.bnl.gov</string></void>
+                    <void property="canonicalName"><string>EIC</string></void>
+                    
+                    <void method="addFileSyntax"> <!--This is assumed by default -->
+                       <string>paths</string> 
+                       <object class="gov.bnl.star.offline.scheduler.util.fileSyntax.PathsSyntax"/>
+                    </void>   
+
+                    <void method="addAccessPoint">
+                        <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">
+
+                            <void method="addAccessMethod">
+                                <object class="gov.bnl.star.offline.scheduler.AccessMethod">
+                                    <void property="dispatcher">    <object idref="condorBNL_EIC_GRID_QuickDispatcher"/>  </void>
+                                    <void property="batchSystem">   <string>local</string>                           </void> 
+                                    <void method="addQueue">        <object idref="BNL_condor_eic_grid_queue"/>      </void> 
+                               </object>
+                            </void>
+                       
+                         </object>    
+                   </void> 
+
+                    <void property="logConf">
+                         <object id="BNL_EIC_log_config" class="java.util.Hashtable">
+                            <void method="put">
+                              <string>directory</string>
+                              <string>$HOME/.sums</string>
+                            </void>
+                            <void method="put">
+                              <string>level</string>
+                              <string>INFO</string> <!-- DEBUG INFO WARN ERROR FATAL -->
+                            </void>
+                        </object>
+                    </void>
+                    
+                    <!--
+                    <void property="statisticsConf">
+                          <object idref="BNL_STAR_stats_config"/>
+                    </void>
+                    -->
+
+                    <void property="programLocations">
+                        <object id="PDSFProgramLocations" class="java.util.Hashtable">
+                            <void method="put">
+                                <string>$SCRATCH</string>
+                                <string>$JOB_START_LOCATION</string>
+                            </void>
+                            <void method="put">
+                              <string>ls</string>
+                              <string>/bin/ls</string>
+                            </void>
+                            <void method="put">
+                              <string>csh</string>
+                              <string>/bin/csh</string>
+                            </void>
+                            <void method="put">
+                              <string>ln</string>
+                              <string>/bin/ln</string>
+                            </void>
+                            <void method="put">
+                              <string>unzip</string>
+                              <string>/usr/bin/unzip</string>
+                            </void> 
+                            <void method="put">
+                              <string>$APP</string>
+                              <string>no_value</string>
+                              <!--<object class="gov.bnl.star.offline.scheduler.GridCat" method="getAppDir"/>-->
+                            </void>
+                            <!-- This value is recovered from grid cat. If this code is xml is activeated it will replace the grid cat value.
+                            <void method="put">
+                              <string>$DATA</string>
+                              <string>/auto/pdsfdv32/OSG/data</string>
+                            </void>  -->
+                        </object>
+                    </void>
+                    
+                    
+                    <!--The default policy a user submitting at this site will be given if they do not use the –policy option.-->
+                    <void property="defaultPolicy">
+                              <object idref="bnl_eic_grid"/>
+                   </void>
+                        
+  
+                </object>
+            </void>
+  <!--End of EIC-GRID site block-->                                      
 <!--____________________________________________________start of PDSF Site block________________________________________________-->
             <void method="add">
                 <object class="gov.bnl.star.offline.scheduler.Site">
@@ -3332,21 +3896,20 @@ ls -al
                         </object>
                     </void>
                     
+                    <!--
                     <void property="statisticsConf">
                         <object id="PDSFStatisticsConf" class="java.util.Hashtable">
                             <void method="put">
                               <string>URL</string>
-                              <!--<string>jdbc:mysql://pdsfdv16.nersc.gov/Scheduler_PDSF</string>-->
-                              <string>jdbc:mysql://pstardb4.nersc.gov:3307/Scheduler_PDSF</string>
+                              <string></string>
                             </void>
                             <void method="put">
                               <string>password</string>
-                              <string>temp123!</string>
-                              <!--<string>stat4PDSF!</string>-->
+                              <string></string>
                             </void>
                             <void method="put">
                               <string>username</string>
-                              <string>scheduler</string>
+                              <string></string>
                             </void>
                             <void method="put">
                               <string>makeTablesIfNeeded</string>
@@ -3354,6 +3917,7 @@ ls -al
                             </void>
                         </object>
                     </void>
+                    -->
                     
                     <void property="programLocations">
                         <object id="PDSFProgramLocations" class="java.util.Hashtable">
@@ -3850,8 +4414,10 @@ ls -al
                         </object>
                     </void>
                     
+                    <!--
                     <void property="statisticsConf">
                     </void>
+                    -->
                     
                     <void property="programLocations">      <!--Mike these have to be set for MacOSX -->
                         <object class="java.util.Hashtable">
@@ -4433,8 +4999,7 @@ end
             <void method="add">
             <object class="gov.bnl.star.offline.scheduler.Site">
                <!--<void property="siteName"><string>star.bnl.gov</string></void> Moved to starp network-->
-              <!-- <void property="siteName"><string>starp.bnl.gov</string></void> -->
-              <void property="siteName"><string>l4.bnl.local</string></void>
+               <void property="siteName"><string>starp.bnl.gov</string></void>
                
                <void method="addAccessPoint">   
                    <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">                   
@@ -4447,69 +5012,6 @@ end
                         </void>
                     </object>
                 </void>
-
-
-<!-- ****************************************************** new *********************************************************************** -->
-               <void method="addAccessPoint">
-                   <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">
-                        <void method="addAccessMethod">
-                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">
-                                <void property="dispatcher">       <object idref="Fast_condor_Dispatcher_CpuModelNumber45"/>     </void>  <!--SHould chaneg to generic name-->
-                                <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
-                                <void method="addQueue">           <object idref="BNL_condor_online_quick_CpuModelNumber45"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
-                            </object>
-                        </void>
-                    </object>
-                </void>
-
-
-
-               <void method="addAccessPoint">
-                   <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">
-                        <void method="addAccessMethod">
-                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">
-                                <void property="dispatcher">       <object idref="Fast_condor_Dispatcher_CpuModelNumber62"/>     </void>  <!--SHould chaneg to generic name-->
-                                <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
-                                <void method="addQueue">           <object idref="BNL_condor_online_quick_CpuModelNumber62"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
-                            </object>
-                        </void>
-                    </object>
-                </void>
-
-
-               <void method="addAccessPoint">
-                   <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">
-                        <void method="addAccessMethod">
-                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">
-                                <void property="dispatcher">       <object idref="Fast_condor_Dispatcher_CpuModelNumber63"/>     </void>  <!--SHould chaneg to generic name-->
-                                <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
-                                <void method="addQueue">           <object idref="BNL_condor_online_quick_CpuModelNumber63"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
-                            </object>
-                        </void>
-                    </object>
-                </void>
-
-               <void method="addAccessPoint">
-                   <object class="gov.bnl.star.offline.scheduler.LocalAccessPoint">
-                        <void method="addAccessMethod">
-                            <object class="gov.bnl.star.offline.scheduler.AccessMethod">
-                                <void property="dispatcher">       <object idref="Fast_condor_Dispatcher_CpuModelNumber6X"/>     </void>  <!--SHould chaneg to generic name-->
-                                <void property="batchSystem">      <string>condor</string>                 </void>    <!-- This is used for logging -->
-                                <void method="addQueue">           <object idref="BNL_condor_online_quick_CpuModelNumber6X"/>    </void>    <!-- Even if batch system does not have a concept of queues a queue object must still be passed which states parameters such as runtime limit. -->
-                            </object>
-                        </void>
-                    </object>
-                </void>
-
-
-<!-- ************************************************************************************************************************************************ -->
-
-
-
-
-
-
-
                 
                 
                 <void method="addAccessPoint">

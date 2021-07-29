@@ -9,12 +9,13 @@
 # This one script may therefore handle multiple production.
 #
 # Written J.Lauret July 2001-2018.
+# Updated by Amol June 2021 for XRDCP  
 # Please, follow comments for more information ...
 #
 #  Some info :
 #  The job descriptor should be as follow
 #    executable=ThisProgram
-#    executableargs=STDOpt,LibraryVersion,Destination,NumEvt,options...
+#    executableargs=STDOpt,LibraryVersion,Destination,XRootD,NumEvt,options...
 #
 #  where
 #   ALLOpt         Bit-wise option setup.
@@ -24,9 +25,14 @@
 #                           1 optimized
 #                  Bit 4-5    enables/disables compressed STDOUT
 #                             enables/disables compressed STDERR
+#                  Bit 6-7  00 No copy of XRootD
+#                           01 copy picodst file to XRootD
+#                           10 copy mudst file to XRootD
+#                           11 copy picodst and mudst to XRootD
 #
 #   LibraryVersion can be one of new, dev, old, pro or a version
 #                  understood by 'starver'
+#
 #   Destination    is a disk-path used for file copy.
 #                  The syntax may now be either something like
 #                  /star/data32            or
@@ -149,6 +155,7 @@ shift @ARGV if (! $CONDOR_CRS );
 $ALLOPT       = shift @ARGV;
 $LIBRARY      = shift @ARGV;
 $DESTINATION  = shift @ARGV;
+#$XRDCP        = shift @ARGV;
 $NUMEVT       = shift @ARGV;
 
 
@@ -192,10 +199,11 @@ if( $CHAINOPT eq "~" ){
 
 
 # --- Option bitmask ----------------------------------------------
-$STDOPT = ($ALLOPT &  3) >> 0; # i.e.    011, on 2 bits for future extensions
+$STDOPT = ($ALLOPT &  1) >> 0; # i.e.     01
+$TAGSFL = ($ALLOPT &  2) >> 1; # i.e.     10
 $OPTOPT = ($ALLOPT &  4) >> 2; # i.e.    100
 $COMPRS = ($ALLOPT & 24) >> 3; # i.e.  11000
-
+$XRDCP  = ($ALLOPT & 96) >> 5; # i.e.1100000 
 
 
 # --- ENV variables we may use       ------------------------------
@@ -691,11 +699,12 @@ if ( ! open(FO,">$PWD/$JOB_ID.csh") ){
     &List("Our working directory contains","We will now start to run ...");
 
     $elaps  = time();
+    #--commented for debug--
     system("$PWD/$JOB_ID.csh");
     $status = $?;
     $elaps  = time() - $elaps;
 
-
+    $status = 0;
 
     # after this, we may have crashed or not
     if($status == 0){
@@ -788,6 +797,28 @@ if ( ! open(FO,">$PWD/$JOB_ID.csh") ){
 	    # OK to copy $cfile -> $ffile is defined
 	    if( $ffile ne $cfile){
 		&FileCopy($cfile,$ffile);
+                # xrootd copy (DD)
+                if (($XRDCP > 0) and (index($cfile,"Dst.root")>=0)){
+                   if (($XRDCP & 2) and (index($cfile,"MuDst.root")>=0)){
+                          print "$PRGM :: Info: Copy MuDst output file to DD\n";
+                          &Xcopy($cfile,$ffile);
+                   }
+                   if (($XRDCP & 1) and (index($cfile,"picoDst.root")>=0)){
+                          print "$PRGM :: Info: Copy picoDst output file to DD\n";
+                          &Xcopy($cfile,$ffile);
+                   } 
+                }
+                #else {
+                #  print "$PRGM :: Info: Choose not to copy any file to DD\n";
+                #}
+                #tag file copy
+                if (($TAGSFL > 0) and (index($cfile,"tags.root")>=0))
+                {
+                    if(index($cfile,"_adc_")>=0){
+			print "$PRGM :: Info: Copy tags.root output file to data20\n";
+                        &TagCopy($cfile,$ffile);
+                    }
+                }
 	    } else {
 		print "$PRGM :: Info: $file is at its final destination\n";
 	    }
@@ -827,6 +858,98 @@ if ( ! open(FO,">$PWD/$JOB_ID.csh") ){
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Subroutines
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+#
+# copy tag file 
+#
+
+sub TagCopy
+{
+   my($flnm,$target)=@_;
+   # Try to copy two times
+   my $tcp_flag = 0;
+   my $tcp = 0;
+   my @path = split("reco",$target);
+   my $dtst = "/star/data20/tags".@path[1]."";
+   print("Tags file destination=>$dtst\n");
+   my $dir = $dtst;
+   $dir =~ s/$flnm//;
+   my $cmd = "cp ".$flnm." ".$dir."";
+   #print("\n$cmd");
+   # creating directory if not present
+   my $mkdir = `mkdir -p $dir`;
+   for($tcp=0 ; $tcp <= 2 ; $tcp++)
+   {
+          my $tout = `$cmd 2>&1`;
+          my @stat = stat($flnm);
+          my @tstat = stat($dtst);
+          if ($#tstat == -1){
+              print "$PRGM :: Error: stat() failed for $dtst\n";
+          } else {
+             
+             if ( $stat[7] != 0){
+                $szd = abs(($tstat[7]-$stat[7])/$stat[7]);
+                if ( $szd != 0){
+                     #$k++;
+                     if ($tstat[7] == 0) {
+                             print "$PRGM :: Error: target size is null and should have been $stat[7]\n";
+                     } elsif ( $szd < $SOFFTOL ){
+                             print "$PRGM :: Info: target size missmatches $fstat[7] $stat[7]\n";
+                     }
+                }
+                else {
+                     print("\nSource size=>$stat[7]");
+                     print("\nDestination size=>$tstat[7]\n");
+		     $tcp_flag = 1;
+                     last;	
+                }
+             }
+             else {
+                  print "$PRGM :: Warning: source size is null for $flnm\n";
+             } 
+             #$tcp_flag = 1;
+             #last;
+          }
+    }
+    if ($tcp_flag == 0){
+           print("Unable to copy file to the destination..\n");
+    }
+}
+
+#
+# copy to DD xrootd
+#
+
+sub Xcopy
+{
+   my($flnm,$target)=@_;
+   my @path = split("reco", $target);
+   # Try to copy two times
+   my $xcp_flag = 0;
+   my $xcp = 0;
+   my $dtst = "root://xrdstar.rcf.bnl.gov:1096//home/starreco/reco".@path[1]."";
+   print("XRootD Destination=>$dtst\n");
+   my $cmd = "xrdcp ".$flnm." ".$dtst."";
+   #print("Command:$cmd\n");
+   for($xcp=0 ; $xcp <= 2 ; $xcp++)
+   {
+          my $xout = `$cmd 2>&1`;
+          #print("XRootD copy output:$xout\n");
+          if (index($xout,"100%")>=0){
+              print("Copied file to DD successfully....\n");
+              $xcp_flag = 1;
+              last;
+          }
+   }
+   if ($xcp_flag == 0){
+      print("Unable to copy file to DD..\n");
+   }
+}
+
+
+
+
+
 #
 # Compress or not file1. Change name and return
 # value of file1/file2 if succeded.

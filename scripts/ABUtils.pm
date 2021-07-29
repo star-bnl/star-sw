@@ -19,7 +19,7 @@ use Digest::MD5;
 	   IURTFormat JPRFFormat VLGFormat
 	   JPRExec
 	   IUCanonicalName
-	   IUTests IUTestDir IUListRoutine IUErrorURL IUCVSRef
+	   IUTests IUTestDir IUListRoutine IUErrorURL IUCVSRef IUGITRef
 	   IUQueue IUSubmit
 	   IUCheckFile IUMoveFile
 	   IUReleaseFile IUManagers IUCompDir
@@ -183,6 +183,8 @@ $INSU::WSERVR = "http://www.star.bnl.gov";                           # Web serve
 $INSU::HTMLREF="/public/comp/prod/Sanity";                           # URL
 $INSU::HTMLPUBD="/afs/rhic.bnl.gov/star/doc/www/html/tmp/pub/Sanity";# public dir (temp)
 $INSU::CVSWEB="/cgi-bin/protected/cvsweb.cgi";                       # CVS web utility
+$INSU::GITSERVR = "https://github.com/star-bnl";                     # git server root
+$INSU::GITHIST = "commits/main";                                     # git history
 
 
 # variables subject to export. So far, we will be using
@@ -473,6 +475,13 @@ sub IUCVSRef
 {
     my($file)=@_;
     "<A HREF=\"$INSU::CVSWEB/$file\">$file</A>";
+}
+
+# Returns a formatted reference / string relating to git web
+sub IUGITRef
+{
+    my($file,$repo)=@_;
+    "<A HREF=\"$INSU::GITSERVR/$repo/$INSU::GITHIST/$file\">$file</A>";
 }
 
 
