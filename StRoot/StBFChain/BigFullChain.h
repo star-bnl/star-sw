@@ -1454,7 +1454,7 @@ Bfc_st BFC[] = { // standard chains
   {"tpcI" ,"tpcChain","","db,tpcDB,TpcHitMover",                "StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
   {"Trs","Trs","tpcChain","scl,tpcDB,TrsToF,StEvent,EmbeddingShortCut","StTrsMaker","StTrsMaker","",kFALSE},
-  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut","StTpcRSMaker"
+  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut,Stu","StTpcRSMaker"
    ,"libMathMore,StdEdxY2Maker,StTpcRSMaker",                          "New Tpc Response Simulator",kFALSE},
   {"tfs"     ,"","","TpcFastSim" ,"","","WARNING *** Option is OBSOLETE *** use TpcFastSim instead",kFALSE},
   {"TpcFastSim"  ,"tpc_hits","tpcChain","MakeEvent,Simu,-trs,-TpcRS,-tcl,-tpxclu,-fcf,-tpc_daq,StEvent,"
