@@ -1,0 +1,125 @@
+*                                                  @plexoos           @nigmatkulov
+/OnlTools                                          @kehw              @plexoos          @jml985
+/StDb                                              @dmarkh            @plexoos
+/StDb/idl                                          @akioogawa @dmarkh         @fgeurts          @iraklic @plexoos        @yfisyak
+/StRoot/RTS                                        @kehw              @akioogawa	@jml985		@tonko-lj
+/StRoot/StAnalysisMaker                            @ullrich-bnl
+/StRoot/StAnalysisUtilities/StHistUtil*            @genevb
+/StRoot/StAssociationMaker                         @ullrich-bnl
+/StRoot/StAssociationMaker/EMC                     @ullrich-bnl	      @kkauder	   @rkunnawa
+/StRoot/StBFChain                                  @genevb            @plexoos     @klendathu2k
+/StRoot/StBTof*                                    @ZaochenYe         @fgeurts     @starsdong	@jdbrice
+/StRoot/StBbcSimulationMaker			   @akioogawa
+/StRoot/StBichsel				   @yfisyak
+/StRoot/StChain                                    @ullrich-bnl       @klendathu2k @perevbnlgov
+/StRoot/StDAQMaker				   @perevbnlgov	      @akioogawa
+/StRoot/StDaqLib				   @jml985
+/StRoot/StDaqLib/EEMC				   @kkauder           @rkunnawa
+/StRoot/StDaqLib/EMC				   @kkauder           @rkunnawa
+/StRoot/StDaqLib/FPD				   @akioogawa
+/StRoot/StDaqLib/L3				   @jml985	      @tonko-lj
+/StRoot/StDaqLib/SC				   @genevb
+/StRoot/StDaqLib/SSD				   @starsdong
+/StRoot/StDaqLib/TOF                               @ZaochenYe         @fgeurts     @starsdong	@jdbrice
+/StRoot/StDaqLib/TRG                               @akioogawa
+/StRoot/StDb*                                      @dmarkh            @plexoos
+/StRoot/StDbUtilities                              @yfisyak           @plexoos
+/StRoot/StDbUtilities/StMagUtilities*              @genevb
+/StRoot/StDetectorDbMaker                          @dmarkh            @yfisyak     @plexoos
+/StRoot/StDetectorDbMaker/StDetectorDbBeamInfo*    @genevb
+/StRoot/StDetectorDbMaker/StDetectorDbGridLeak*    @genevb
+/StRoot/StDetectorDbMaker/StDetectorDbRichScalers* @genevb
+/StRoot/StDetectorDbMaker/StDetectorDbSpaceCharge* @genevb
+/StRoot/StDetectorDbMaker/StDetectorDbTpcOmegaTau* @genevb
+/StRoot/StDetectorDbMaker/St_EbyET0*               @genevb
+/StRoot/StDetectorDbMaker/St_TpcSpaceCharge*       @genevb
+/StRoot/StDetectorDbMaker/St_spaceChargeCor*       @genevb
+/StRoot/StDetectorDbMaker/St_tpcOmegaTau*          @genevb
+/StRoot/StDetectorDbMaker/St_tpcSCGLC*             @genevb
+/StRoot/StDetectorDbMaker/St_trigDetSums*          @genevb
+/StRoot/StDetectorDbMaker/St_vertexSeed*           @genevb
+/StRoot/StEEmc*					   @kkauder           @rkunnawa
+/StRoot/StEEmcSimulatorMaker			   @kkauder	      @rkunnawa		@klendathu2k
+/StRoot/StEEmcUtil				   @kkauder	      @rkunnawa		@klendathu2k
+/StRoot/StETof*                                    @PhilippWeidenkaff @ideppner
+/StRoot/StEmc*					   @kkauder           @rkunnawa
+/StRoot/StEvent*                                   @klendathu2k       @ullrich-bnl
+/StRoot/StEventUtilities/StEbyET0*                 @genevb
+/StRoot/StEventUtilities/StRedoTracks*             @genevb
+/StRoot/StEventUtilities/StuFixTopoMap*            @genevb
+/StRoot/StEventUtilities/TwistPatch*               @genevb
+/StRoot/StFcs*                                     @akioogawa	      @jdbrice
+/StRoot/StFms*                                     @akioogawa
+/StRoot/StFpd*                                     @akioogawa
+/StRoot/StFstSimMaker				   @jdbrice
+/StRoot/StFttSimMaker				   @jdbrice
+/StRoot/StGenericVertexMaker                       @plexoos           @perevbnlgov	@akioogawa	@klendathu2k
+/StRoot/StHeavyPool                                @starsdong         @ullrich-bnl 	@fgeurts
+/StRoot/StHighPtTagsMaker                          @ullrich-bnl
+/StRoot/StHltMaker				   @kehw
+/StRoot/StIOMaker				   @plexoos           @perevbnlgov
+/StRoot/StIst*					   @plexoos	      @starsdong
+/StRoot/StJetFinder                                @zlchang           @veprbl
+/StRoot/StJetMaker                                 @zlchang           @veprbl
+/StRoot/StMCFilter				   @klendathu2k
+/StRoot/StMcAnalysisMaker			   @klendathu2k
+/StRoot/StMcEvent*				   @klendathu2k
+/StRoot/StMiniDstMaker                             @ullrich-bnl
+/StRoot/StMtd*                                     @marrbnl
+/StRoot/StMuDSTMaker                               @jdbrice
+/StRoot/StMuDSTMaker/EMC                           @kkauder           @rkunnawa
+/StRoot/StMuDSTMaker/RICHTOF                       @fgeurts           @starsdong
+/StRoot/StPass0CalibMaker                          @genevb	      @iraklic
+/StRoot/StPico*                                    @nigmatkulov       @marrbnl     @plexoos
+/StRoot/StPxl*					   @starsdong	      @GuannanXie
+/StRoot/StRefMultCorr                              @nigmatkulov
+/StRoot/StRTSClient				   @jml985            @tonko-lj
+/StRoot/StShadowMaker                              @genevb
+/StRoot/StSpectraTagsMaker                         @ullrich-bnl
+/StRoot/StSpinPool                                 @akioogawa         @zlchang     @veprbl
+/StRoot/StSsd*					   @starsdong	      @plexoos
+/StRoot/StSst*					   @starsdong	      @plexoos
+/StRoot/StTof*                                     @jdbrice           @fgeurts     @starsdong
+/StRoot/StTpc*					   @yfisyak
+/StRoot/StTreeMaker				   @perevbnlgov
+/StRoot/StTriggerDataMaker                         @akioogawa
+/StRoot/StTriggerUtilities                         @zlchang           @akioogawa   @jml985
+/StRoot/StTrsMaker				   @yfisyak	      @iraklic
+/StRoot/StUtilities/StMess*                        @genevb
+/StRoot/StUtilities/StMultiH*                      @genevb
+/StRoot/StVpd*                                     @ZaochenYe         @fgeurts
+/StRoot/St_QA_Maker                                @genevb
+/StRoot/St_TLA_Maker				   @perevbnlgov
+/StRoot/St_db_Maker                                @dmarkh            @plexoos     @perevbnlgov
+/StRoot/St_geant_Maker				   @klendathu2k	      @perevbnlgov
+/StRoot/St_l3Clufi_Maker			   @jml985            @tonko-lj
+/StRoot/St_l3t_Maker				   @jml985            @tonko-lj
+/StRoot/St_tcl_Maker				   @yfisyak           @iraklic
+/StRoot/StarClassLibrary                           @ullrich-bnl       @klendathu2k
+/StRoot/StarGenerator                              @klendathu2k       @perevbnlgov
+/StRoot/StarRoot				   @klendathu2k
+/StRoot/StdEdx*					   @yfisyak
+/StRoot/Sti*                                       @klendathu2k       @plexoos     @starsdong   @perevbnlgov
+/StRoot/Stl3*					   @jml985            @tonko-lj
+/StRoot/StppSpin                                   @ullrich-bnl
+/StRoot/StvUtil  				   @klendathu2k
+/StRoot/TPCCATracker                               @yfisyak           @kehw
+/StRoot/macros                                     @genevb            @ullrich-bnl @plexoos
+/StRoot/macros/mudst                               @nigmatkulov       @plexoos
+/StarDb                                            @dmarkh            @perevbnlgov
+/StarDb/AgML*					   @klendathu2k
+/StarDb/AgiGeometry				   @klendathu2k
+/StarDb/Calibrations                               @genevb
+/StarDb/Calibrations/emc                           @kkauder           @rkunnawa
+/StarDb/Calibrations/tof                           @ZaochenYe         @fgeurts
+/StarDb/Calibrations/tpc                           @yfisyak	      @iraklic
+/StarDb/Calibrations/tracker                       @klendathu2k
+/StarDb/Geometry                                   @genevb            @klendathu2k
+/StarDb/Geometry/tpc                               @yfisyak	      @iraklic
+/StarDb/VmcGeometry				   @klendathu2k
+/StarDb/emc					   @kkauder           @rkunnawa
+/StarVMC					   @klendathu2k
+/mgr                                               @genevb            @klendathu2k
+/pams                                              @klendathu2k
+/pams/sim					   @akioogawa         @klendathu2k
+/pams/tables                                       @dmarkh            @plexoos
