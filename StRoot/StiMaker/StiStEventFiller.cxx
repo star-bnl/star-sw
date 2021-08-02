@@ -989,7 +989,6 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
   StiHit *ihit = node->getHit();
   StThreeVectorF origin(node->x_g(),node->y_g(),node->z_g());
   StThreeVectorF hitpos(ihit->x_g(),ihit->y_g(),ihit->z_g());
-#if 0
   if (node->getDetector()) {
     double dif = (hitpos-origin).mag();
     
@@ -1006,7 +1005,6 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
       assert(fabs(dif)<50.);
     }
   }
-#endif
     // making some checks.  Seems the curvature is infinity sometimes and
   // the origin is sometimes filled with nan's...
   

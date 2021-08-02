@@ -73,10 +73,8 @@ void StMinuitVertexFinder::InitRun(int run_number, const St_db_Maker* db_maker)
   mDcaZMax                     = cuts->DcaZMax();     // Note: best to use integer numbers
   mMinTrack                    = (mMinTrack<0 ? cuts->MinTrack() : mMinTrack);
   mRImpactMax                  = cuts->RImpactMax();
-#if 0
   mZMin                        = cuts->ZMin();        // note: best to use integer numbers
   mZMax                        = cuts->ZMax();        // note: best to use integer numbers
-#endif
   if (mZMin == mZMax) {
     // historical defaults
     mZMin = -250.0;
