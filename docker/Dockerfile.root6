@@ -125,7 +125,7 @@ RUN source /etc/profile \
  && export Vc_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/vc_-0.7.4-gqbhzu2x5u2dbe5tafxnl36xj5qbwov4 \
  && cd /star-sw \
  && cons +StarVMC/Geometry \
- && cons %pams/sim/g2r %OnlTools \
+ && cons %OnlTools \
          %StRoot/StarGenerator/Kinematics \
          %StRoot/StEEmcPool %StRoot/StFgtPool \
          %StRoot/StShadowMaker %StRoot/StHbtMaker \
