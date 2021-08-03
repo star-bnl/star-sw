@@ -70,4 +70,6 @@
  TFG21f Reshape dE/dx calibration for 3p85GeV_fxt for 2B production  2021-06-05 19:39:14 -0400  (HEAD -> master, tag: TFG21f)
  TFG21g Updatee dE/dx calibration for 3p85GeV_fxt for 2B production  2021-06-08 21:52:26 -0400  (HEAD -> master, tag: TFG21g)
  TFG21g Remove zcut in StMinuitVertexFinder                          2021-06-29 14:36:12 -0400  (HEAD -> master, tag: TFG21g_2)
+ TFG21g Fix fixed Target definion mixed up for dAu200                2021-07-02 15:16:45 -0400  (HEAD -> master, tag: TFG21g_3)
+ TFG21h Switch to github, Run XXI calibration production             2021-08-03 15:16:45 -0400  (HEAD -> master, tag: TFG21h)
 .DEV2  head of TFG git repository
