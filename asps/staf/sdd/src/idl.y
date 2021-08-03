@@ -445,7 +445,7 @@ void Tbl(void) {
   DotIncFileTbl();
 }
 DumpGlobalsPam(void) {
-  int ii,jj; char buf[5];
+  int ii,jj; char buf[6];
   printf("The name of the PAM is %s, %d include files, %d prototypes.\n","xyz",
   gNIncFile,gNProto);
   for(ii=0;ii<gNIncFile;ii++) {
