@@ -449,9 +449,13 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
 
   while (strncmp(DATAP,"LRHD", 4) == 0) {
     // copy the logical record into local struct lr
+#if 0
     if (memcpy(&lr,DATAP,sizeof(lr))<0) {
        LOG_ERROR<< strerror(errno)<<": error in memcpy"<<endm;
     }
+#else
+    memcpy(&lr,DATAP,sizeof(lr));
+#endif
     // check the CRC
     if (!lr.test_CRC()) ERROR(ERR_CRC);
     // swap bytes
