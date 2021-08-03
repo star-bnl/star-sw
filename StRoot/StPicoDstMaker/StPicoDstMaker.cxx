@@ -876,23 +876,25 @@ Int_t StPicoDstMaker::MakeWrite() {
 #endif /* __TFG__VERSION__ */
 
   mBField = muEvent->magneticField();
-#if !defined(__TFG__VERSION__)
+
+  //#if !defined(__TFG__VERSION__)
   // Get Emc collection
   mEmcCollection = mMuDst->emcCollection();
+  Bool_t isFromDaq = kFALSE;
   if ( !mEmcCollection ) {
-    static StMuEmcUtil *emcUtil = new StMuEmcUtil();
+    isFromDaq = kTRUE;
+    static StMuEmcUtil emcUtil;
     // Recover StEmcCollection in case of broken/deleted pointer
     // This usually happens during daq->picoDst converstion
-    mEmcCollection = emcUtil->getEmc( mMuDst->muEmcCollection() );
+    mEmcCollection = emcUtil.getEmc( mMuDst->muEmcCollection() );
   }
-
   if (mEmcCollection) {
     // Build EmcIndex before ::fillTracks()
     buildEmcIndex(mEmcCollection);
     // Fill BTOW hits only if ::buildEmcIndex() has been called for this event
     fillBTowHits();
   }
-#endif /* ! __TFG__VERSION__ */
+  //#endif /* ! __TFG__VERSION__ */
 
   // Fill StPicoEvent members
   fillMcVertices();
@@ -919,6 +921,10 @@ Int_t StPicoDstMaker::MakeWrite() {
   if (Debug()) mPicoDst->printTracks();
 
   mTTree->Fill();
+  if ( isFromDaq ) {
+    delete mEmcCollection;
+    mEmcCollection = nullptr;
+  }
 
   mMuDst->setVertexIndex(originalVertexId);
 
@@ -1917,6 +1923,18 @@ void StPicoDstMaker::fillEvent() {
     picoEvent->setNVpdHitsWest( header->numberOfVpdHits(west) );
     picoEvent->setNTofT0( header->nTzero() );
     picoEvent->setVzVpd( header->vpdVz() );
+    picoEvent->setNTofT0Can( header->nTzeroCan() );
+    picoEvent->setTStart( header->tStart() );
+    picoEvent->setTCanFirst( header->tCanFirst() ); 
+    picoEvent->setTCanLast( header->tCanLast() );
+    picoEvent->setNVpdEGoodHits( header->vpdEGoodHits() );
+    picoEvent->setNVpdWGoodHits( header->vpdWGoodHits() );
+    picoEvent->setEarliestVpdEHit( header->earliestVpdEHit() );
+    picoEvent->setEarliestVpdWHit( header->earliestVpdWHit() );
+    picoEvent->setClosestVpdEHit( header->closestVpdEHit() );
+    picoEvent->setClosestVpdWHit( header->closestVpdWHit() );
+    picoEvent->setLatestVpdEHit( header->latestVpdEHit() );
+    picoEvent->setLatestVpdWHit( header->latestVpdWHit() );
   }
 
   // ZDC and BBC background rates
