@@ -1,4 +1,3 @@
-#if 0
 #include <stdlib.h>
 #include <math.h>
 #include "TError.h"
@@ -12,12 +11,13 @@
 #include "TVectorD.h"
 #include "TRandom.h"
 #include "TRandom2.h"
-#include "THelixTrack.h"
 #include "THelix3d.h"
 #include "TRandomVector.h"
 #include "StMatrixD.hh"
 #include "TH1.h"
 #include <cassert>
+
+
 static double EmxSign(int n,const double *a); 
 
 #if 0
@@ -166,7 +166,7 @@ static const int idx[]= {kU,kV   , kU,kFita
 //_____________________________________________________________________________
 THelix3d::THelix3d(int charge,const double *xyz,const double *mom,const double *Mag)
 {
-//	Generalization of THelixTrack for arbitrary direction of mag field
+//	Generalization of THelixTrack_ for arbitrary direction of mag field
 //      V.Perevoztchikov
 //
   memset(fBeg3d,0,fEnd3d-fBeg3d);
@@ -211,7 +211,7 @@ void THelix3d::Build()
   fPinv = -fCharge/fMom;
   double pt = sqrt(TCL::vdot(fP,fP,2))*fMom;
   fRho = -fCharge*fH3d[3]/pt;
-  THelixTrack::Build();
+  THelixTrack_::Build();
   if (!fEmx3d) return;
   TkDir_t tkDir;
   DoTkDir(tkDir);
@@ -221,13 +221,13 @@ void THelix3d::Build()
   fDer3d->SetTkDir(1,tkDir);
 }
 //_____________________________________________________________________________
-THelix3d::THelix3d(const THelix3d  *from): THelixTrack(from)
+THelix3d::THelix3d(const THelix3d  *from): THelixTrack_(from)
 {
   memcpy(fBeg3d,from->fBeg3d,fEnd3d-fBeg3d);
   fEmx3d=0; fEmx=0;
 }
 //_____________________________________________________________________________
-THelix3d::THelix3d(const THelix3d  &from): THelixTrack(&from)
+THelix3d::THelix3d(const THelix3d  &from): THelixTrack_(&from)
 {
   memcpy(fBeg3d,from.fBeg3d,fEnd3d-fBeg3d);
   if (fEmx3d) {fEmx3d = new THEmx3d_t; *fEmx3d = *from.fEmx3d;}
@@ -237,7 +237,7 @@ THelix3d::THelix3d(const THelix3d  &from): THelixTrack(&from)
 void THelix3d::ToGlobal(const double locX[3],const double locD[3]
                        ,      double gloX[3],      double gloD[3]
 		       ,      double gloP[3])const
-// Convert local variables(THelixTrack) into global (THelix3d)
+// Convert local variables(THelixTrack_) into global (THelix3d)
 
 {
   double myX[3];
@@ -272,7 +272,7 @@ void THelix3d::Backward()
   TCL::vscale(fD3d   ,-1.,fD3d   ,3);
   fCharge = - fCharge;
   fPinv   = - fPinv;
-  THelixTrack::Backward();
+  THelixTrack_::Backward();
   if (fEmx3d) fEmx3d->Backward();
   if (fDer3d) fDer3d->Backward();
   ToLocal();
@@ -286,11 +286,11 @@ double THelix3d::Move(double step,double F[5][5])
   memcpy(fD3dPre,fD3d,sizeof(fD3dPre));
   if (!IsDerOn() && !F) { //No derivatives needed
     ToLocal();
-    fLen = THelixTrack::Move(step);
+    fLen = THelixTrack_::Move(step);
     ToGlobal();
   } else {
     ToLocal();
-    fLen = THelixTrack::Move(step);
+    fLen = THelixTrack_::Move(step);
     ToGlobal();
     MakeMtx();
     if (F) memcpy(F[0],fDer3d[0],sizeof(double)*5*5);
@@ -310,7 +310,7 @@ double THelix3d::Eval(double step, double xyz[3], double mom[3])
   } else {
     ToLocal();
     double myXE[3],myDE[3],myX3dE[3],myD3dE[3],myP3dE[3];
-    THelixTrack::Eval(step,myXE,myDE);
+    THelixTrack_::Eval(step,myXE,myDE);
     ToGlobal(myXE,myDE,myX3dE,myD3dE,myP3dE);
     if (xyz) memcpy(xyz,myX3dE,sizeof(myX3dE));
     if (mom) memcpy(mom,myP3dE,sizeof(myP3dE));
@@ -324,7 +324,7 @@ double THelix3d::Path(const double point[3],double xyz[3], double mom[3])
   ToLocal();
   TCL::vsub(point,fX3d,myPoint+3,3);
   TCL::vmatl(fLoc[0],myPoint+3,myPoint,3,3);
-  double s = THelixTrack::Path(myPoint,myXyz,myMom);
+  double s = THelixTrack_::Path(myPoint,myXyz,myMom);
   if (xyz)  {
     TCL::vmatr(myXyz,fLoc[0],xyz,3,3);
     TCL::vadd(xyz,fX3d,xyz,3);
@@ -413,10 +413,10 @@ static const double Zero[3]= {0,0,1}; //Start of coordinate in local sys
 
   assert(fLen!=0);
   double Dhlx[5][5],to3d[5][5],to3di[5][5],tmp[5*5];
-  THelixTrack::MakeMtx(fLen,Dhlx);
-  THelixTrack preHlx(Zero,fPpre,fRho);
+  THelixTrack_::MakeMtx(fLen,Dhlx);
+  THelixTrack_ preHlx(Zero,fPpre,fRho);
   ConvertErrs(                  &preHlx, fH3d[3],0,   0,to3di);
-  ConvertErrs((const THelixTrack *)this, fH3d[3],0,to3d,    0);
+  ConvertErrs((const THelixTrack_ *)this, fH3d[3],0,to3d,    0);
 
   TCL::mxmpy(to3d[0],Dhlx[0],tmp,5,5,5);
   TCL::mxmpy(tmp,to3di[0],der[0],5,5,5);
@@ -486,13 +486,13 @@ void THelix3d::MakeTkDir( const double T[3],const double H[3],TkDir_t &tkDir)
  for (int k=0;k<=i;k++) {
    double dot = TCL::vdot(tkDir[i],tkDir[k],3);
    if (i==k) dot--;
-   assert(fabs(dot)<1e-3);
+   assert(fabs(dot)<1e-4);
  }}
 
  for (int i=0;i<3;i++) {
    int j=(i+1)%3;int k=(j+1)%3;
    double qwe =(TVector3(tkDir[i]).Cross(TVector3(tkDir[j]))).Dot(TVector3(tkDir[k]));
-   assert(fabs(qwe-1)<1e-3);
+   assert(fabs(qwe-1)<1e-4);
  }
 
 #endif
@@ -584,85 +584,46 @@ void THEmx3d_t::Backward()
 //_____________________________________________________________________________
 void THEmx3d_t::Update(const TkDir_t &tkDir)
 {
-//============================================================      
-//  U0*u0     +  V0*v0     +  T0*t0 = U1*u1 + V1*v1
-// (U0*T1)*u0 + (V0*T1)*v0 + (T0*T1)*t0 = 0
-// )/
-// t0 = -((U0*T1)*u0 + (V0*T1)*v0)/(T0*T1)
+// U1U0*fita0 + U1V0*lama0 = fita1
+// V1U0*fita0 + V1V0*lama0 = lama1
 // 
-// u1 = (U0*U1)*u0 + (V0*U1)*v0 - (T0*U1)/(T0*T1)*((U0*T1)*u0 + (V0*T1)*v0)
-// v1 = (U0*V1)*u0 + (V0*V1)*v0 - (T0*V1)/(T0*T1)*((U0*T1)*u0 + (V0*T1)*v0)
-// 
-// 
-// du1/du0 = (U0*U1) - (T0*U1)/(T0*T1) *(U0*T1)
-// du1/dv0 = (V0*U1) - (T0*U1)/(T0*T1) *(V0*T1)
-// dv1/du0 = (U0*V1) - (T0*V1)/(T0*T1) *(U0*T1)
-// dv1/dv0 = (V0*V1) - (T0*V1)/(T0*T1) *(V0*T1)
-// 
-// 
-// 
-// u0 = (U1*U0)*u1 + (V1*U0)*v1
-// v0 = (U1*V0)*u1 + (V1*V0)*v1
-// 
-// det = (U1*U0)*(V1*V0)-(V1*U0)*(U1*V0)
-// 
-//       ( (V1*V0)  -(V1*U0))
-// inv = (                 )/det
-//       (-(U1*V0)   (U1*U0))
-//       
-// ============================================================      
-// 
-// vector = U0*fita0 + V0*lama0 + T0 = U1*fita1 + V1*lama1 + T1
-// 
-// fita1  = (U1*U0)*fita0 + (U1*V0)*lama0 +(T0*U1)
-// lama1  = (V1*U0)*fita0 + (V1*V0)*lama0 +(T0*V1)
-// 
-// dFita1_dFita0 = (U1*U0);
-// dFita1_dLama0 = (U1*V0);
-// dLama1_dFita0 = (V1*U0);
-// dLama1_dLama0 = (V1*V0);
-// ============================================================      
+// U1U0*u0 +U1V0*v0 = u1
+// V1U0*u0 +V1V0*v0 = V1
 
-
-
-  double dots[2][2];
+  double dots[3][3];
   enum {kU,kV,kFita,kLama,kPinv};
 //   for (int i=0;i<3;i++) {  
 //   for (int j=0;j<3;j++) {
 //     dots[i][j] = dot(tkDir[i],mTkDir[j]);
 //   } }
-  for (int i=0;i<=1;i++) {  
-  for (int j=0;j<=1;j++) {
+  for (int i=kU;i<=kV;i++) {  
+  for (int j=kU;j<=kV;j++) {
     dots[i][j] = dot(tkDir[i+kKU],mTkDir[j+kKU]);
   } }
-  double det = dots[0][0]*dots[1][1]-dots[0][1]*dots[1][0];
 
-  double du1_du0 =  dots[1][1]/det;
-  double du1_dv0 = -dots[1][0]/det;
-  double dv1_du0 = -dots[0][1]/det;
-  double dv1_dv0 =  dots[0][0]/det;
+  double T1U0  = dot(tkDir[kKT],mTkDir[kKU]);
+  double T1V0  = dot(tkDir[kKT],mTkDir[kKV]);
+  double UdDdL = dot(tkDir[kKU],tkDir[kKdDdL]);
+  double VdDdL = dot(tkDir[kKV],tkDir[kKdDdL]);
 
-  double dFita1_dFita0 = dots[0][0];
-  double dFita1_dLama0 = dots[0][1];
-  double dLama1_dFita0 = dots[1][0];
-  double dLama1_dLama0 = dots[1][1];
 
   double T[5][5]={{0}};  
-  T[kU][kU] 	  = du1_du0;
-  T[kU][kV] 	  = du1_dv0;
-  T[kV][kU] 	  = dv1_du0;
-  T[kV][kV] 	  = dv1_dv0;
-  T[kFita][kFita] = dFita1_dFita0;
-  T[kFita][kLama] = dFita1_dLama0;
-  T[kLama][kFita] = dLama1_dFita0;
-  T[kLama][kLama] = dLama1_dLama0;
+  T[kU][kU] 	  = dots[kU][kU];
+  T[kU][kV] 	  = dots[kU][kV];
+  T[kV][kU] 	  = dots[kV][kU];
+  T[kV][kV] 	  = dots[kV][kV];
+  T[kFita][kFita] = dots[kU][kU];
+  T[kFita][kLama] = dots[kU][kV];
+  T[kLama][kFita] = dots[kV][kU];
+  T[kLama][kLama] = dots[kV][kV];
   T[kPinv][kPinv] = 1;
+  T[kFita][kU]    = -(UdDdL)*T1U0;
+  T[kFita][kV]    = -(UdDdL)*T1V0;
+  T[kLama][kU]    = -(VdDdL)*T1U0;
+  T[kLama][kV]    = -(VdDdL)*T1V0;
   
   double preRR[5*(5+1)/2];
   memcpy(preRR,&mUU,sizeof(preRR));
-  for (int i=0,li=0;i< 5;li+=++i) {
-    assert(preRR[li+i]>0);
-  }
   TCL::trasat(T[0],preRR,&mUU,5,5);
   assert(mPP>0);
   memcpy(mTkDir[0],tkDir[0],sizeof(mTkDir));
@@ -799,7 +760,7 @@ void THelix3d::Test()
 
   for (int charge=1;charge >=-1;charge-=2) {
 
-    THelixTrack TH(ZER,PZ,-Rho*charge);
+    THelixTrack_ TH(ZER,PZ,-Rho*charge);
     double s1 = TH.Path(XZ);
     THelix3d    T3(charge,ZER,PP,HH);
     double s2 = T3.Path(XX);
@@ -1702,10 +1663,10 @@ static const char *tit[]={"UV","UF","VF","UL","VL","FL","UP","VP","FP","LP"};
   while(!gSystem->ProcessEvents()){gSystem->Sleep(200);}; 
 }
 //______________________________________________________________________________
-void THelix3d::ConvertErrs(const THelixTrack *he, const double Bzp
+void THelix3d::ConvertErrs(const THelixTrack_ *he, const double Bzp
                           , double G[15],double D[5][5],double Di[5][5])
 {
-//		in THelixTrack:
+//		in THelixTrack_:
 //  Let Dx,Dy,Dz direction of track
 //  dH:  along  vector (-Dy,Dx,0)
 //  dZ:  along Zaxis
@@ -1717,7 +1678,7 @@ void THelix3d::ConvertErrs(const THelixTrack *he, const double Bzp
 //   H = (-sinPhi,cosPhi,0)
 //   Z = (      0,     0,1)
 //   C = curvature
-//   THelixTrack space point modification = H*h + Z*z
+//   THelixTrack_ space point modification = H*h + Z*z
 //   
 // //		in THelix3d:
 //   V: vector orthogonal T and in plane (T,B) in our case B==Z
@@ -1733,12 +1694,12 @@ void THelix3d::ConvertErrs(const THelixTrack *he, const double Bzp
 // 
 //    We see that H == U
 //
-//   THelixTrack: space point modification = H*h + Z*z 
+//   THelixTrack_: space point modification = H*h + Z*z 
 //   THelix3d:    space point modification = U*u + V*v 
 // 
 // 
 //       U*h + Z*z +T*t = U*u + V*v
-//       t is moving along track from crossing with THelixTrack plane
+//       t is moving along track from crossing with THelixTrack_ plane
 //       orthogonal (Tx,Ty,0) 
 //       to THelix3d plane orthogonal (Tx,Ty,Tz) 
 //       Mult by T
@@ -1921,7 +1882,7 @@ void THelix3d::TestConvertErrs()
       Gbeg[li+j] = EMX[i][j];
   } }
   
-  THelixTrack TH0(     Xbeg,Pbeg,Curv);
+  THelixTrack_ TH0(     Xbeg,Pbeg,Curv);
   THelix3d    TH1(icharge  ,Xbeg,Pbeg,Mag );
   assert (fabs(TH1.GetRho()-Curv)<1e-5);
   TH0.SetEmx(Gbeg); 
@@ -1989,14 +1950,14 @@ enum {kkH,kkPhi,kkCur,kkZ,kkLam};
   double Der2[5][5],NumDer2[5][5]; //dH3d/dHlx
   double NumDer3[5][5];  
 
-  THelixTrack THbeg((double*)&XbegV[0],(double*)&DbegV[0],Curv);
+  THelixTrack_ THbeg((double*)&XbegV[0],(double*)&DbegV[0],Curv);
   double CosBeg = THbeg.GetCos();
   printf(" ==================== CosBeg = %g  ==========================\n",CosBeg);
 
 //??  L = 0.5*CosBeg/Curv*M_PI; ////????
 
 
-  THelixTrack THend((double*)&XbegV[0],(double*)&DbegV[0],Curv);
+  THelixTrack_ THend((double*)&XbegV[0],(double*)&DbegV[0],Curv);
   THend.Move(L,Dhlx);
   double CosEnd = THend.GetCos();
   TVector3 XendV(THend.Pos());
@@ -2088,8 +2049,8 @@ enum {kkH,kkPhi,kkCur,kkZ,kkLam};
 
 
 
-//		By THelixTrack
-      THelixTrack TH1((double*)&X1begV[0],(double*)&D1begV[0],Curv1);
+//		By THelixTrack_
+      THelixTrack_ TH1((double*)&X1begV[0],(double*)&D1begV[0],Curv1);
       double CosBeg1 = TH1.GetCos();
       TH1.Move(L);
       TVector3 X1endV(TH1.Pos());
@@ -2138,11 +2099,11 @@ enum {kkH,kkPhi,kkCur,kkZ,kkLam};
       for (int i=0;i<5;i++) { NumDer2[i][J] = dif[i];}
 
 
-//		By THelixTrack but 3d derivative
+//		By THelixTrack_ but 3d derivative
       double CosBeg2 = sqrt((1.-D2begV.CosTheta())*(1.+D2begV.CosTheta()));
       double Curv2beg = -icharge*P2invBeg/CosBeg2*Hz;
 #if 1
-      THelixTrack TH2((double*)&X2begV[0],(double*)&D2begV[0],Curv2beg);
+      THelixTrack_ TH2((double*)&X2begV[0],(double*)&D2begV[0],Curv2beg);
 #endif
 #if 0
       P2begV = D2begV*(1/fabs(P2invBeg));
@@ -2258,4 +2219,3 @@ L42:
 RETN: if (B!=buf) delete B; 
    return ans;
 } /* trchlu_ */
-#endif //0

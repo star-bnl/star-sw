@@ -156,6 +156,7 @@ void   SetNdf(int ndf);
 double EvalChi2();
 void   Clear(const char *opt ="");
 void   Print(const char* chopt = "") const;
+Bool_t TestCov();
 const double *GetX(int i=0) const;
       double *GetX(int i=0);
 void   Show()  const;

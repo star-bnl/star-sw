@@ -2151,6 +2151,15 @@ SWIT: switch(fKase) {
     return fChi2;
 }
 //______________________________________________________________________________
+Bool_t TCircleFitter::TestCov() {
+  for (Int_t i = 0; i < 6; i++) {
+    if (TMath::IsNaN(fCov[i])) {
+      return kFALSE;
+    }
+  }
+  return kTRUE;
+} 
+//______________________________________________________________________________
 void TCircleFitter::MakeErrs() 
 {
    fEmx->Clear();
@@ -2208,6 +2217,7 @@ void TCircleFitter::MakeErrs()
    TCL::vscale(fCov,myFact/fWtot,fCov,6);
    TCL::trasat(F[0],fCov,fEmx->Arr(),3,3); 
    if (fBack) {fEmx->mHA*=-1;fEmx->mAC*=-1;}
+   assert(TestCov());
 }
 //______________________________________________________________________________
 double TCircleFitter::EvalChi2() 
