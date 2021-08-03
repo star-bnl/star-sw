@@ -1388,7 +1388,7 @@ Bool_t        St_beamInfoC::IsFixedTarget() {
   Bool_t isFixTag = kFALSE;
   Float_t MaxIntensity = TMath::Max(blueIntensity(), yellowIntensity());
   Float_t MinIntensity = TMath::Min(blueIntensity(), yellowIntensity());
-  if (MaxIntensity > 1.0 && MaxIntensity > 10*MinIntensity) isFixTag = kTRUE;
+  if (MaxIntensity > 1.0 && MaxIntensity > 1000*MinIntensity) isFixTag = kTRUE;
   return isFixTag;
 }
 //________________________________________________________________________________
