@@ -45,7 +45,7 @@
   set PicoMode = "PicoVtxVpdOrDefault"
   echo ${SUBMITTINGDIRECTORY} | grep fixed
   if ($? == 0) set PicoMode = "PicoVtxFXT"
-  root.exe -b -q 'bfc.C('${f}','${l}',"P2021a,StiCA,'${evout}',NoHistos,noTags,noRunco,'${PicoMode}'","'${evtsFile}'")' &gt;&amp; ${logFile}
+  root.exe -b -q 'bfc.C('${f}','${l}',"P2021a,-gmt,-gmtDat,-gmtClu,StiCA,'${evout}',NoHistos,noTags,noRunco,'${PicoMode}'","'${evtsFile}'")' &gt;&amp; ${logFile}
    gzip ${logFile}
 #  cp  ${filel}*.picoDst.root ${logFile}.gz ${SUBMITTINGDIRECTORY}
 #   cp  ${filel}* ${SUBMITTINGDIRECTORY}

@@ -25,11 +25,19 @@
 #  if (-r ${bla}) continue;
 #  touch ${bla}
   if ("${filelist}" != "") then
-   foreach f (${filelist}) 
-      rsync  ${inputDIR}/${f} .
-   end
+    foreach f (${filelist}) 
+      if (${SITE} == "HLT") then
+        ln -s  ${inputDIR}/${f} .
+      else 
+        rsync  ${inputDIR}/${f} .
+      endif
+    end
   else 
-    rsync  ${inputDIR} .
+      if (${SITE} == "HLT") then
+        ln -s  ${inputDIR}/*.root .
+      else 
+        rsync  ${inputDIR}  .
+      endif
   endif
   set idNdx = kFALSE;
   echo ${SUBMITTINGDIRECTORY} | grep dNdx 
@@ -37,14 +45,14 @@
     root.exe -q -b -x  'kfpAnalysis.C(1000000,"./*.'${dstype}'.root","'${output}'","'${year}'",'${idNdx}')' &gt;&amp; ${log}
   rm -rf ${CURRENT_DIR}
         </command>
-    <ResourceUsage>
-      <Priority>99</Priority>
 <!--
+    <ResourceUsage>
+      <Priority>1</Priority>
     <Memory>
       <MinMemory>3500</MinMemory>
     </Memory>
--->
     </ResourceUsage>
+-->
     <stdout URL="file:./sched$JOBID.log" />
     <stderr URL="file:./sched$JOBID.err" />
      <input URL="command:PicoL.pl" /> 

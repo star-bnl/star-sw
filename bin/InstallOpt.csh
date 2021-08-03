@@ -72,7 +72,10 @@ endsw
 #set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 veccore VecGeom node-v10.16.0 ";
 #set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8301  eigen3 mercurial-4.4-rc coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 veccore VecGeom node-v10.16.0 "; # pythia8301 cannot be done with cint
 #set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 veccore VecGeom node-v10.16.0 tbb cfitsio-3.49";
-set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49";
+#set list = "cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-cf953eacd849 Coin3D-soqt-483ecb26b30c boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49";
+#set list = "perl-5.34.0 cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49";
+#set list = "cmake-3.21.1 perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49";
+set list = "cmake-3.21.1 perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49";
 
 #set list = "gsl-2.1";
 #set list = "boost_1_66_0";
@@ -114,6 +117,10 @@ setenv CFLAGSd   "$cflags"
               if (-r ~/sources/${pkg}.tz) then
                 tar xfz ~/sources/${pkg}.tz
          	mv ${pkg} ../
+	      else 
+	        if (-r ~/sources/${pkg}.zip) then
+                  unzip ~/sources/${pkg}.zip
+                endif
               endif
             endif
           endif
@@ -125,6 +132,15 @@ setenv CFLAGSd   "$cflags"
 #    endif
     cd ${pkg}
     switch ($pkg)
+      case "perl*":
+        ./Configure -des -Dprefix=$XOPTSTAR
+	make test
+        make install
+        if ( $?) break;
+        touch ../${pkg}.Done
+	rehash
+        perldoc perl
+        breaksw
       case "libtools*":
       case "cfitsio*":
        ./bootstrap

@@ -17,7 +17,7 @@
 #end
 #
 ##    ./ sftp.sdcc.bnl.gov:/gpfs01/star/pwg/fisyak/Pico/2021/RF/TFG21c.B/{dir}/${d} >>& ../${log}
-#
+# 
 ##rsync -avrz -h                        \
 ##    --include='*picoDst.root'                  \
 #    --exclude='*.*'  --exclude='Sub*' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  \
@@ -34,5 +34,7 @@
 #rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/pwg/fisyak/Pico/2021/RF/TFG21e/17p3GeV_2021 >& rsynch.log &
 # rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/subsysg/TFG/Pico/2021/RF/TFG21g.B/3p85GeV_fixedTarget_2021 >& rsynch.log &
 # rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/pwg/fisyak/Pico/2021/RF/TFG21e/100GeV_fixedTarget_2021 >& rsynch.log &
- rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/pwg/fisyak/Pico/2021/RF/TFG21e/44p5GeV_fixedTarget_2021 >& rsynch.log &
+# rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/pwg/fisyak/Pico/2021/RF/TFG21e/44p5GeV_fixedTarget_2021 >& rsynch.log &
 
+# rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/pwg/fisyak/Pico/2021/RF/TFG21g.B/dAu200_2021 >& rsynch.log &
+rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='*GB' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/pwg_tasks/tfg02/2021/RF/TFG21g.B/3p85GeV_fixedTarget_2021  >& rsynch.log &
