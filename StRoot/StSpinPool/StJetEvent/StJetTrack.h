@@ -32,11 +32,11 @@ public:
     , mNSigmaKaon(0)
     , mNSigmaProton(0)
     , mNSigmaElectron(0)
-    , mBTofTrayId(0)           // bassam
-    , mNSigmaTofPion(0)        // bassam
-    , mNSigmaTofKaon(0)        // bassam
-    , mNSigmaTofProton(0)      // bassam
-    , mNSigmaTofElectron(0)    // bassam
+    , mBTofTrayId(0)
+    , mNSigmaTofPion(0)
+    , mNSigmaTofKaon(0)
+    , mNSigmaTofProton(0)
+    , mNSigmaTofElectron(0)
   {
   }
 
@@ -69,13 +69,11 @@ public:
   float nSigmaElectron()       const { return mNSigmaElectron; }
   float m()                    const { return (beta() > 0 && beta() < 1) ? momentum().Mag()*TMath::Sqrt(1/(beta()*beta())-1) : -999; }
 
-  // Start: bassam
   int btofTrayId()             const { return mBTofTrayId; }
   double nSigmaTofPion()       const { return mNSigmaTofPion; }
   double nSigmaTofKaon()       const { return mNSigmaTofKaon; }
   double nSigmaTofProton()     const { return mNSigmaTofProton; }
   double nSigmaTofElectron()   const { return mNSigmaTofElectron; }
-  // End: bassam
 
 private:
   short    mFlag;
@@ -100,15 +98,13 @@ private:
   float    mNSigmaProton;
   float    mNSigmaElectron;
 
-  // Start: bassam
   int      mBTofTrayId;
   double   mNSigmaTofPion;
   double   mNSigmaTofKaon;
   double   mNSigmaTofProton;
   double   mNSigmaTofElectron;
-  // End: bassam
 
-  ClassDef(StJetTrack,6); // bassam: this was changed from 5->6 after edits were done
+  ClassDef(StJetTrack,6); 
 };
 
 #endif // ST_JET_TRACK_H

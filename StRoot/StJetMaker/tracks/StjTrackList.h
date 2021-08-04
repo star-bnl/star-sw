@@ -49,15 +49,13 @@ public:
   TVector3       firstPoint;
   TVector3       lastPoint;
 
-  // Start: bassam
   int            btofTrayId;
   double         nSigmaTofPion;
   double         nSigmaTofKaon;
   double         nSigmaTofProton;
   double         nSigmaTofElectron;
-  // End: bassam
 
-  ClassDef(StjTrack,5) // bassam: this was changed from 4->5 after edits were done
+  ClassDef(StjTrack,5);
 };
 
 typedef std::vector<StjTrack> StjTrackList;
@@ -96,13 +94,13 @@ inline bool operator==(const StjTrack& v1, const StjTrack& v2)
   if(v1.id                != v2.id)                return false;   
   if(v1.firstPoint        != v2.firstPoint)        return false;
   if(v1.lastPoint         != v2.lastPoint)         return false;
-  if(v1.btofTrayId        != v2.btofTrayId)        return false; // bassam
-  if(v1.nSigmaTofPion     != v2.nSigmaTofPion)     return false; // bassam
-  if(v1.nSigmaTofKaon     != v2.nSigmaTofKaon)     return false; // bassam
-  if(v1.nSigmaTofProton   != v2.nSigmaTofProton)   return false; // bassam
-  if(v1.nSigmaTofElectron != v2.nSigmaTofElectron) return false; // bassam
+  if(v1.btofTrayId        != v2.btofTrayId)        return false;
+  if(v1.nSigmaTofPion     != v2.nSigmaTofPion)     return false;
+  if(v1.nSigmaTofKaon     != v2.nSigmaTofKaon)     return false;
+  if(v1.nSigmaTofProton   != v2.nSigmaTofProton)   return false;
+  if(v1.nSigmaTofElectron != v2.nSigmaTofElectron) return false;
   return true;
-  }
+}
 
 inline bool operator!=(const StjTrack& v1, const StjTrack& v2)
 {

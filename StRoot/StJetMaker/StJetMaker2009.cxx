@@ -91,7 +91,6 @@ int StJetMaker2009::Make()
       // Keep track of number of good vertices
       int nvertices = 0;
 
-      // Start: bassam
       int totNumVertices = 0; // store the total number of available vertices
       if(mStoreOnlyDefaultVertex && tpc.numberOfVertices()!=0) {
           totNumVertices = 1;
@@ -99,7 +98,6 @@ int StJetMaker2009::Make()
       else {
           totNumVertices = tpc.numberOfVertices();
       }   
-      // End: bassam
 
       // Vertex loop
       for (int iVertex = 0; iVertex < totNumVertices; ++iVertex) {
@@ -395,13 +393,11 @@ void StJetMaker2009::copyTrack(const StMuTrackEmu* t, StJetTrack* track)
   track->mNSigmaProton       = t->nSigmaProton();
   track->mNSigmaElectron     = t->nSigmaElectron();
 
-  // Start: bassam
   track->mBTofTrayId         = t->btofTrayId();
   track->mNSigmaTofPion      = t->nSigmaTofPion();
   track->mNSigmaTofKaon      = t->nSigmaTofKaon();
   track->mNSigmaTofProton    = t->nSigmaTofProton();
   track->mNSigmaTofElectron  = t->nSigmaTofElectron();
-  // End: bassam 
 }
 
 void StJetMaker2009::copyTower(const StMuTowerEmu* t, StJetTower* tower)

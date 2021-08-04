@@ -42,11 +42,11 @@ public:
     , _trackIndex(0)
     , _id(0)
     , _detectorId(0)
-    , _btofTrayId(0)        // bassam
-    , _nSigmaTofPion(0)     // bassam
-    , _nSigmaTofKaon(0)     // bassam
-    , _nSigmaTofProton(0)   // bassam
-    , _nSigmaTofElectron(0) // bassam
+    , _btofTrayId(0)
+    , _nSigmaTofPion(0)
+    , _nSigmaTofKaon(0)   
+    , _nSigmaTofProton(0) 
+    , _nSigmaTofElectron(0)
  { }
 
   virtual ~StMuTrackEmu() { }
@@ -85,13 +85,11 @@ public:
   short          id()          const { return _id; }
   short          detectorId()  const { return _detectorId; }
 
-  // Start: bassam
   int            btofTrayId()        const { return _btofTrayId; }
   double         nSigmaTofPion()     const { return _nSigmaTofPion; }
   double         nSigmaTofKaon()     const { return _nSigmaTofKaon; }
   double         nSigmaTofProton()   const { return _nSigmaTofProton; }
   double         nSigmaTofElectron() const { return _nSigmaTofElectron; }
-  // End: bassam
 
 private:
 
@@ -133,13 +131,11 @@ private:
   short          _id;
   short          _detectorId;
 
-  // Star: bassam
   int            _btofTrayId;
   double         _nSigmaTofPion;
   double         _nSigmaTofKaon;
   double         _nSigmaTofProton;
   double         _nSigmaTofElectron;
-  // End: bassam
 };
 
 #endif // STMUTRACKEMU_H

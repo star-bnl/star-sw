@@ -47,9 +47,7 @@ public:
   void addBranch(const char* name, StAnaPars* anapars, StJetPars* jetpars);
   void setJetFile(const char* filename);
 
-  // Start: bassam
   void setStoreOnlyDefaultVertex(const Bool_t val);
-  // End: bassam
 
   // Getters
   TTree* tree();
@@ -84,15 +82,11 @@ struct StJetBranch {
   TFile* mFile;
   TTree* mTree;
 
-  // Start: bassam
   Bool_t  mStoreOnlyDefaultVertex;
-  // End: bassam
 
-  ClassDef(StJetMaker2009,0); //zchang// bassam: this was changed from 0->1 after edits were done
+  ClassDef(StJetMaker2009,0);
 };
 
-// Start: bassam
 inline void StJetMaker2009::setStoreOnlyDefaultVertex(const Bool_t val) { mStoreOnlyDefaultVertex = val; }
-// End: bassam
 
 #endif

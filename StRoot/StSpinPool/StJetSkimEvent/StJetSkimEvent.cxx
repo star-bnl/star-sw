@@ -315,7 +315,6 @@ StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetS
 
     mEmcLayer2 = 0;
 
-    // Start: bassam
     mNTzero = 0;
     mNTzeroCan = 0;
     mTCanFirst = 99999.;
@@ -328,7 +327,6 @@ StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetS
     mClosestVpdWHit = 99999.;
     mLatestVpdEHit = -99999.;
     mLatestVpdWHit = -99999.;
-    // End: bassam
 }
 
 StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
@@ -365,7 +363,6 @@ StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
     this->mVpdEastHits   = other.vpdEastHits();
     this->mVpdWestHits   = other.vpdWestHits();
 
-    // Start: bassam
     this->mNTzero = other.nTzero();
     this->mNTzeroCan = other.nTzeroCan();
     this->mTCanFirst = other.tCanFirst();
@@ -378,7 +375,6 @@ StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
     this->mClosestVpdWHit = other.closestVpdWHit();
     this->mLatestVpdEHit = other.latestVpdEHit();
     this->mLatestVpdWHit = other.latestVpdWHit();
-    // End: bassam
 
     mZdcWestRate = other.mZdcWestRate;
     mZdcEastRate = other.mZdcEastRate;
@@ -453,7 +449,6 @@ StJetSkimEvent& StJetSkimEvent::operator=(const StJetSkimEvent &rhs)
         this->mVpdEastHits   = rhs.vpdEastHits();
         this->mVpdWestHits   = rhs.vpdWestHits();
 
-        // Start: bassam
         this->mNTzero = rhs.nTzero();
         this->mNTzeroCan = rhs.nTzeroCan();
         this->mTCanFirst = rhs.tCanFirst();
@@ -466,7 +461,6 @@ StJetSkimEvent& StJetSkimEvent::operator=(const StJetSkimEvent &rhs)
         this->mClosestVpdWHit = rhs.closestVpdWHit();
         this->mLatestVpdEHit = rhs.latestVpdEHit();
         this->mLatestVpdWHit = rhs.latestVpdWHit();
-        // End: bassam
 
 	mZdcWestRate = rhs.mZdcWestRate;
 	mZdcEastRate = rhs.mZdcEastRate;
@@ -534,7 +528,6 @@ void StJetSkimEvent::clear()
 
     mEmcLayer2 = 0;
 
-    // Start: bassam
     mNTzero = 0;
     mNTzeroCan = 0;
     mTCanFirst = 99999.;
@@ -547,7 +540,6 @@ void StJetSkimEvent::clear()
     mClosestVpdWHit = 99999.;
     mLatestVpdEHit = -99999.;
     mLatestVpdWHit = -99999.;
-    // End: bassam
 }
 
 void StJetSkimEvent::Clear(const char *option) {

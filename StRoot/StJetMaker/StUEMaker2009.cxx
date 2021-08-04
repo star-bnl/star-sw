@@ -230,13 +230,11 @@ void StUEMaker2009::copyTrack(const StjTrack& t, StJetTrack* track)
   track->mNSigmaProton      = t.nSigmaProton;
   track->mNSigmaElectron    = t.nSigmaElectron;
 
-  // Start: bassam
   track->mBTofTrayId        = t.btofTrayId;
   track->mNSigmaTofPion     = t.nSigmaTofPion;
   track->mNSigmaTofKaon     = t.nSigmaTofKaon;
   track->mNSigmaTofProton   = t.nSigmaTofProton;
   track->mNSigmaTofElectron = t.nSigmaTofElectron;
-  // End: bassam 
 }
 
 void StUEMaker2009::copyTower(const StjTowerEnergy& t, StJetTower* tower)

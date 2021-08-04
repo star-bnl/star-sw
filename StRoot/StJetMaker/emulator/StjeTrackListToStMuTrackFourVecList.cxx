@@ -67,11 +67,11 @@ StMuTrackEmu* StjeTrackListToStMuTrackFourVecList::createTrackEmu(const StjTrack
   ret->_trackIndex     =  track.trackIndex            ; 
   ret->_id             =  track.id                    ;
   ret->_detectorId     =  track.detectorId    	      ;
-  ret->_btofTrayId         =  track.btofTrayId        ; // bassam
-  ret->_nSigmaTofPion      =  track.nSigmaTofPion     ; // bassam
-  ret->_nSigmaTofKaon      =  track.nSigmaTofKaon     ; // bassam
-  ret->_nSigmaTofProton    =  track.nSigmaTofProton   ; // bassam
-  ret->_nSigmaTofElectron  =  track.nSigmaTofElectron ; // bassam 
+  ret->_btofTrayId         =  track.btofTrayId        ; 
+  ret->_nSigmaTofPion      =  track.nSigmaTofPion     ;
+  ret->_nSigmaTofKaon      =  track.nSigmaTofKaon     ;
+  ret->_nSigmaTofProton    =  track.nSigmaTofProton   ;
+  ret->_nSigmaTofElectron  =  track.nSigmaTofElectron ;
 
   return ret;
 }
