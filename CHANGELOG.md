@@ -1,6 +1,6 @@
 # Changelog
 
-## [SL21c] - 2021-07-16
+## [SL21c] - 2021-07-29
 
 First release after code transfer to Git
 
@@ -12,11 +12,15 @@ First release after code transfer to Git
 - Update centrality bins in StRoot/StRefMultCorr
 - Enhance cons scripts to allow more control over external dependencies location (#8)
 - Introduce .github/CODEOWNERS
+- Add new data member to mark all primary tracks in StPicoTrack (#34)
+- Event-by-event T0 correction applied in StTpcHitMoverMaker (reconstruction)
+  must by un-corrected in StTpcRSMaker (simulation) (#76)
 
 ### Bug fixes
 
 - Fix pre Run 13 BTOF geometry by properly accounting valid trays and GEM-trays
 - Fix memory leak introduced in SL21b (Issue #21)
+- Fix BTOF tray indexing issue; Select params based on run number (#65)
 
 ### API changes
 
