@@ -885,10 +885,10 @@ Int_t StBFChain::Instantiate()
     }
     if (maker == "StBTofCalibMaker") {
       if (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
-      if (GetOption("setPPPAOutlierRej"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
-      if (GetOption("pppAMode")) mk->SetAttr("pppAMode", kTRUE);
+      if (GetOption("setOutlierRej4BToft0"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
+      if (GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
     }
-    if (maker == "StVpdCalibMaker" && GetOption("pppAMode")) mk->SetAttr("pppAMode", kTRUE);
+    if (maker == "StVpdCalibMaker" && GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
 
     if (maker == "StEventMaker" && fFiltTrg.Length()) {
       mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));
