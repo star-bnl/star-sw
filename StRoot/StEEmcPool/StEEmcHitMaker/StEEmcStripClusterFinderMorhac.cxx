@@ -111,8 +111,17 @@ Int_t StEEmcStripClusterFinderMorhac_t::find( const ESmdLayer_t& stripArray, StS
       // std::copy( mStripEnergyArrayTemp, mStripEnergyArrayTemp+kEEmcNumStrips, mSmoothedEnergyArray );
    };
 
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
    Int_t nPeaks = peakFinderPtr->SearchHighRes( mSmoothedEnergyArray, mDeconvoluted, kEEmcNumStrips, sigma,
                                                 mThreshold, mRemoveBkg, mNumDeconIters, mDoMarkov, mAverWindow );
+#else
+   Double_t mSmoothedEnergyArrayD[kEEmcNumStrips];
+   Double_t mDeconvolutedD[kEEmcNumStrips];
+   std::copy(mSmoothedEnergyArray, mSmoothedEnergyArray + kEEmcNumStrips, mSmoothedEnergyArrayD);
+   std::copy(mDeconvoluted, mDeconvoluted + kEEmcNumStrips, mDeconvolutedD);
+   Int_t nPeaks = peakFinderPtr->SearchHighRes( mSmoothedEnergyArrayD, mDeconvolutedD, kEEmcNumStrips, sigma,
+                                                mThreshold, mRemoveBkg, mNumDeconIters, mDoMarkov, mAverWindow );
+#endif
 
 #ifdef DEBUG
    LOG_INFO << getEventNum() << " sector " << mSector << " layer " << mLayer << " found " << nPeaks << " peaks." << endm;
@@ -135,7 +144,11 @@ Int_t StEEmcStripClusterFinderMorhac_t::find( const ESmdLayer_t& stripArray, StS
 
    std::vector< Float_t > peakPos;
    if( nPeaks ){
+#if ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
       Float_t *peakPosRAW = peakFinderPtr->GetPositionX();
+#else
+      Double_t *peakPosRAW = peakFinderPtr->GetPositionX();
+#endif
       peakPos.reserve( nPeaks );
 
       // estimate energy of peak strip and its adjacent neighbors
