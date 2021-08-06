@@ -258,7 +258,6 @@ void StEEmcDataDrivenMcMaker::processTrack(StMcTrack* mcTrack)
 
     int sectors[2];
     int strips[2];
-    StMcCalorimeterHit* maxHits[2];
 
     for (int plane = 0; plane < 2; ++plane) {
       // Get U and V strips closest to the extrapolated position of the photon in
@@ -282,9 +281,6 @@ void StEEmcDataDrivenMcMaker::processTrack(StMcTrack* mcTrack)
 	  replaceInfo->addMcHitEsmdV(hit);
 	if (!maxHit || hit->dE() > maxHit->dE()) maxHit = hit;
       }	// End hit loop
-
-      // Save max hits for later
-      maxHits[plane] = maxHit;	// Can be 0
 
       if (maxHit) {
 	int maxId = maxHit->eta() - 1; // 0-287

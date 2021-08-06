@@ -59,7 +59,7 @@ void CtbMatching::ctb_get_slat_from_data(int slat, int tray, double & ctbphi, do
     // slat=0,...,119
     
     int iz ;	    
-    double phi,eta ;
+    double phi;
     
     if ( tray < 60 )  {
 	phi = phiZero1 - tray * deltaPhi ; 
@@ -73,7 +73,7 @@ void CtbMatching::ctb_get_slat_from_data(int slat, int tray, double & ctbphi, do
     if ( phi > 360. ) phi -= 360 ;
     
     ctbphi=phi;
-    eta = (1-2*iz)*(1+2*slat)*0.25;
+    //double eta = (1-2*iz)*(1+2*slat)*0.25;
     ctbeta =(1-2*iz)*(1+2*slat)*0.25;
     
     //printf("CTB hit: slat=%d, tray=%d,  phiDeg=%f/deg, eta=%f\n",slat,tray,ctbphi,ctbeta);
@@ -84,11 +84,6 @@ void CtbMatching::ctb_get_slat_from_data(int slat, int tray, double & ctbphi, do
 //________________________________________________
 //________________________________________________
 unsigned int CtbMatching::match(const StMuTrack* rTrack) {
-  
-  // not used output from Jon
-  bool  shouldHit;
-  double  trackEtaInCTBFrame;
-  double  trackPhiInCTBFrame;
   
   // the code
   const double Rctb=213.6; // (cm) radius of the CTB
@@ -111,17 +106,10 @@ unsigned int CtbMatching::match(const StMuTrack* rTrack) {
   double phi = atan2(pos.y(),pos.x())*180/TMath::Pi();
   if(phi < 0)  phi+= 360;
   
-  trackPhiInCTBFrame = phi;
-  
   double theta = atan2(pos.perp(),pos.z());
   double eta = -log(tan(theta/2.0));
-  trackEtaInCTBFrame = eta;
   
   // if |eta| < 1 then track should have hit the CTB.
-  if(fabs(eta) < 1.+etaToll)
-    shouldHit = true;
-  else
-    shouldHit = false;
   
   // Loop over CTB Hits To see if a match
   float deta,dphi;

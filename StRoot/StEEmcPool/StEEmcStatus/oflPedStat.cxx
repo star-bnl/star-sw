@@ -84,10 +84,10 @@ oflPedStat::procDetector(char *name,float maxPedPos, float minPedPos, float maxS
   }
   
   //sort by crate/chan
-  char title[100],crate[4],txt[3]; int chan=-1;
+  char title[100],crate[4],txt[3]; //int chan=-1;
   sprintf(title,"%s",h->GetTitle()); //sprintf(title2,"%s",h->GetTitle());
   if(strncmp(title+35,"tube=",5)==0 && name[3]!='T') {
-    sprintf(txt,"%c%c%c",title[29],title[30],title[31]); chan=atoi(txt); 
+    sprintf(txt,"%c%c%c",title[29],title[30],title[31]); //chan=atoi(txt);
     sprintf(crate,"%c%c%c%c",title[40],title[41],title[42],title[43]);
   }
   //printf("name=%s crate=%s chan=%d\n",name,crate,chan);
