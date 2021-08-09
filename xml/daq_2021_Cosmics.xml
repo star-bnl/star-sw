@@ -5,7 +5,8 @@
    setenv STARFPE NO
 #   setenv NODEBUG yes
 #   setup 64b
-   starver TFG21c
+#   starver TFG21c
+   starver TFG21h
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -35,6 +36,9 @@
     set bla = ${SUBMITTINGDIRECTORY}/${bf}.bla.root
     if (-r ${bla}) continue;
     touch ${bla}
+    if (-r ${SUBMITTINGDIRECTORY}/Submitted) then 
+      rm ${SUBMITTINGDIRECTORY}/Submitted
+    endif
     set input = ${evtsFile};
 root.exe -q -b 'bfc.C(100000,"P2021a,evout,NoHistos,noTags,noRunco,StiCA,-picoWrite,-picoDst,Cosmics","'${input}'")' &gt;&amp; ${logFile}
     cp -p ${logFile} ${SUBMITTINGDIRECTORY}/

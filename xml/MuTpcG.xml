@@ -5,20 +5,21 @@
   setenv STARFPE NO
   setup  debug
   set l        = 5000000
-  set evtsFile = $INPUTFILE0;
-  echo "${evtsFile}"
-  if (! -r ${evtsFile}) exit 1;
-  set filel    = `basename $evtsFile .MuDst.root`
-  set output  = Mu${filel}.root
+  set dir = $INPUTFILE0;
+  echo "${dir}"
+  if (! -r ${dir}) exit 1;
+  set day = `basename ${dir}`
+  cd ${day};
+  set output  = MuTpcG.root
   if ( -r $output) exit 0;
-  set logFile  = Mu${filel}B.log
+  set logFile  = MuTpcG.log
   if ( -r $logFile) exit 0;
   ln -s ~/macros/.sl* .
 #  root.exe -q -b lMuDst.C 'MuTpcG.C+('$l',"'${evtsFile}'","'$output'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'lMuDst.C(-1,"'${evtsFile}'/*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","'$output'")' MuTpcG.C+ &gt;&amp; ${logFile}
+  root.exe -q -b 'lMuDst.C(-1,"*/*MuDst.root","RMuDst,tpcDb,mysql,magF,nodefault","'$output'")' MuTpcG.C+ &gt;&amp; ${logFile}
         </command>
-        <stdout URL="file:./MuTpcG$JOBID.log" />
-        <stderr URL="file:./MuTpcG$JOBID.err" />
+        <stdout URL="file:./sched$JOBID.log" />
+        <stderr URL="file:./sched$JOBID.err" />
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/FF_adc/*.daq" /> -->
 <!-- <input URL="file:/star/data03/daq/2014/*/*/st_cosmic_adc_15*.daq" /> -->
 <!-- <input URL="command:Cosmics2014.pl" /> -->
@@ -30,5 +31,6 @@
 <!-- <input URL="file:/hlt/cephfs/reco/2021/RF/TFG21c.B/7p7GeV_2021/*/2*" /> -->
 <!-- <input URL="command:ListMuDstD.pl '/hlt/cephfs/reco/2021/RF/TFG21c.B/7p7GeV_2021/*/2*'" />  -->
 <!-- <input URL="command:ListMuDstD.pl '/hlt/cephfs/reco/2021/FF/TFG21c.B/7p7GeV_2021/*/2*'" />  -->
-<input URL="command:ListMuDstD.pl '/hlt/cephfs/reco/2021/FF/TFG21c.B/7p7GeV_2021.WorngField/*/2*'" /> 
+<!-- <input URL="command:ListMuDstD.pl '/hlt/cephfs/reco/2021/FF/TFG21c.B/7p7GeV_2021.WorngField/*/2*'" /> -->
+<input URL="command:MuTpcG.pl"/>
 </job>

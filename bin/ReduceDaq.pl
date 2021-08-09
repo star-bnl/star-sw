@@ -12,7 +12,7 @@ if ($#ARGV < 0) {
 }
 if ($reduction <= 1 || $reduction > 100) {die "Illegal reduction factor = $reduction";}
 #my @runlist = glob "22*"; #print "\# $#runlist = @runlist\n";
-my @runlist = glob "22178019 2217802*"; #print "\# $#runlist = @runlist\n";
+my @runlist = glob "22*"; #print "\# $#runlist = @runlist\n";
 foreach my $run (@runlist) {
   my @List = glob  $run . "/hlt*.daq";# print "\# $#List = @List\n";
   if ($#List < 20) {print "\# Only $#List hlt*daq files found for $run\n"; next;}

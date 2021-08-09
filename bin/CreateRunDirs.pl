@@ -36,6 +36,7 @@ sub GoodRun($$) {
   print "GoodRun:: run = $run" if $debug;
   foreach my $key (sort keys %$env ) {
     print "$pwd, trig = $env->{$key}->{trig}, field = $env->{$key}->{field}; first = $env->{$key}->{first}, last = $env->{$key}->{last}" if ($debug);
+    if ($pwd =~ /tune/ and $env->{$key}->{trig} !~ /tune/) {print ", rejected by trig\n"  if ($debug); next;}
     if ($pwd !~ /$env->{$key}->{trig}/)  {print ", rejected by trig\n"  if ($debug); next;}
     if ($pwd !~ /$env->{$key}->{field}/) {print ", rejected by field\n" if ($debug); next;}
     if ($run < $env->{$key}->{first})    {print ", rejected by first\n" if ($debug); next;}

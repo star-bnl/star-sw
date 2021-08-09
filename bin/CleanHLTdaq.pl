@@ -7,8 +7,9 @@ my $debug = 0;
 if ($#ARGV >= 0) {
   $debug = $ARGV[0];
 }
-foreach my $file (@List) {
-  my $Dir = File::Basename::dirname($file);
+#foreach my $file (@List) {
+#  my $Dir = File::Basename::dirname($file);
+foreach my $Dir (glob "1*/2*") {
   print "Dir = $Dir\n" if ($debug);
   my @PicoList = ();
   foreach my $globP ("picoDst.root") {# B.log B.log.gz)) {
