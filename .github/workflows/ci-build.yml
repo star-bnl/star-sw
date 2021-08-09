@@ -31,3 +31,11 @@ jobs:
           push: false
           tags: ghcr.io/star-bnl/star-sw-root6-build
           file: docker/Dockerfile.root6
+  runtest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        run: ['run1', 'run2']
+    steps:
+    - run: echo Run ${{ matrix.run }}
+    - run: date
