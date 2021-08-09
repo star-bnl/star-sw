@@ -238,16 +238,9 @@ Int_t StJetSkimEventMaker::Make()
 	// VPD Stuff:
 	if (muDst->btofHeader()){
 	  mEvent->setVpdTdiff(muDst->btofHeader()->tDiff());
-          //the start time doesn't have to be coming from VPD alone
-	  mEvent->setVpdTstart(muDst->btofHeader()->tStart());
 	  mEvent->setVpdZvertex(muDst->btofHeader()->vpdVz());
 	  mEvent->setVpdEastHits(muDst->btofHeader()->numberOfVpdHits(east));
 	  mEvent->setVpdWestHits(muDst->btofHeader()->numberOfVpdHits(west));
-
-	  mEvent->setNTzero(muDst->btofHeader()->nTzero());
-	  mEvent->setNTzeroCan(muDst->btofHeader()->nTzeroCan());
-	  mEvent->setTCanFirst(muDst->btofHeader()->tCanFirst());
-	  mEvent->setTCanLast(muDst->btofHeader()->tCanLast());
 	  // filling in pile-up information from the VPD
 	  mEvent->setNVpdEGoodHits(muDst->btofHeader()->vpdEGoodHits());
 	  mEvent->setNVpdWGoodHits(muDst->btofHeader()->vpdWGoodHits());
@@ -257,27 +250,34 @@ Int_t StJetSkimEventMaker::Make()
 	  mEvent->setClosestVpdWHit(muDst->btofHeader()->closestVpdWHit());
 	  mEvent->setLatestVpdEHit(muDst->btofHeader()->latestVpdEHit());
 	  mEvent->setLatestVpdWHit(muDst->btofHeader()->latestVpdWHit());
+          //the start time could be from either VPD or start-less TOF
+	  mEvent->setTstart(muDst->btofHeader()->tStart());
+	  mEvent->setNTzero(muDst->btofHeader()->nTzero());
+	  mEvent->setNTzeroCan(muDst->btofHeader()->nTzeroCan());
+	  mEvent->setTCanFirst(muDst->btofHeader()->tCanFirst());
+	  mEvent->setTCanLast(muDst->btofHeader()->tCanLast());
 	}
 	else { // No StBTofHeader
 	  LOG_INFO << "BAD BTOFHEADER" << endm;
 	  mEvent->setVpdTdiff(-999.);
-	  mEvent->setVpdTstart(-999.);
 	  mEvent->setVpdZvertex(-999.);
 	  mEvent->setVpdEastHits(-1);
-	  mEvent->setVpdWestHits(-1);
-	  
-	  mEvent->setNTzero(0);
-	  mEvent->setNTzeroCan(0);
-	  mEvent->setTCanFirst(99999.);
-	  mEvent->setTCanLast(-99999.);
+	  mEvent->setVpdWestHits(-1); 
 	  mEvent->setNVpdEGoodHits(0);
 	  mEvent->setNVpdWGoodHits(0);
+
 	  mEvent->setEarliestVpdEHit(99999.);
 	  mEvent->setEarliestVpdWHit(99999.);
 	  mEvent->setClosestVpdEHit(99999.);
 	  mEvent->setClosestVpdWHit(99999.);
 	  mEvent->setLatestVpdEHit(-99999.);
 	  mEvent->setLatestVpdWHit(-99999.);
+
+	  mEvent->setTstart(-999.);
+	  mEvent->setNTzero(0);
+	  mEvent->setNTzeroCan(0);
+	  mEvent->setTCanFirst(99999.);
+	  mEvent->setTCanLast(-99999.);
 	}
 
 	//spin specific info from Mudst:

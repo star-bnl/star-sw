@@ -292,7 +292,7 @@ StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetS
     mBestVertRef = NULL;
     mFill = mRunId = mEventId = mbx7 = mbx48 = mSpinBits = 0;
     mEbbc = mWbbc = mBbcTimeBin = 0;
-    mVpdTdiff = mVpdTstart = mVpdZvertex = -999.;
+    mVpdTdiff = mVpdZvertex = -999.;
     mVpdEastHits = mVpdWestHits = -1;
     mZdcWestRate = 0;
     mZdcEastRate = 0;
@@ -315,6 +315,7 @@ StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetS
 
     mEmcLayer2 = 0;
 
+    mTstart = -999;
     mNTzero = 0;
     mNTzeroCan = 0;
     mTCanFirst = 99999.;
@@ -358,15 +359,10 @@ StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
     this->mBbcTimeBin   = other.bbcTimeBin();
 
     this->mVpdTdiff   = other.vpdTdiff();
-    this->mVpdTstart   = other.vpdTstart();
     this->mVpdZvertex   = other.vpdZvertex();
     this->mVpdEastHits   = other.vpdEastHits();
     this->mVpdWestHits   = other.vpdWestHits();
 
-    this->mNTzero = other.nTzero();
-    this->mNTzeroCan = other.nTzeroCan();
-    this->mTCanFirst = other.tCanFirst();
-    this->mTCanLast = other.tCanLast();
     this->mNVpdEGoodHits = other.vpdEGoodHits();
     this->mNVpdWGoodHits = other.vpdWGoodHits();
     this->mEarliestVpdEHit = other.earliestVpdEHit();
@@ -375,6 +371,12 @@ StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
     this->mClosestVpdWHit = other.closestVpdWHit();
     this->mLatestVpdEHit = other.latestVpdEHit();
     this->mLatestVpdWHit = other.latestVpdWHit();
+
+    this->mTstart   = other.tStart();
+    this->mNTzero = other.nTzero();
+    this->mNTzeroCan = other.nTzeroCan();
+    this->mTCanFirst = other.tCanFirst();
+    this->mTCanLast = other.tCanLast();
 
     mZdcWestRate = other.mZdcWestRate;
     mZdcEastRate = other.mZdcEastRate;
@@ -444,15 +446,10 @@ StJetSkimEvent& StJetSkimEvent::operator=(const StJetSkimEvent &rhs)
         this->mBbcTimeBin   = rhs.bbcTimeBin();
 
         this->mVpdTdiff   = rhs.vpdTdiff();
-        this->mVpdTstart   = rhs.vpdTstart();
         this->mVpdZvertex   = rhs.vpdZvertex();
         this->mVpdEastHits   = rhs.vpdEastHits();
         this->mVpdWestHits   = rhs.vpdWestHits();
 
-        this->mNTzero = rhs.nTzero();
-        this->mNTzeroCan = rhs.nTzeroCan();
-        this->mTCanFirst = rhs.tCanFirst();
-        this->mTCanLast = rhs.tCanLast();
         this->mNVpdEGoodHits = rhs.vpdEGoodHits();
         this->mNVpdWGoodHits = rhs.vpdWGoodHits();
         this->mEarliestVpdEHit = rhs.earliestVpdEHit();
@@ -461,6 +458,12 @@ StJetSkimEvent& StJetSkimEvent::operator=(const StJetSkimEvent &rhs)
         this->mClosestVpdWHit = rhs.closestVpdWHit();
         this->mLatestVpdEHit = rhs.latestVpdEHit();
         this->mLatestVpdWHit = rhs.latestVpdWHit();
+
+        this->mTstart   = rhs.tStart();
+        this->mNTzero = rhs.nTzero();
+        this->mNTzeroCan = rhs.nTzeroCan();
+        this->mTCanFirst = rhs.tCanFirst();
+        this->mTCanLast = rhs.tCanLast();
 
 	mZdcWestRate = rhs.mZdcWestRate;
 	mZdcEastRate = rhs.mZdcEastRate;
@@ -500,7 +503,7 @@ void StJetSkimEvent::clear()
     mMudstFileName = "Undefined";
     mFill = mRunId = mEventId =  mbx7 = mbx48 = mSpinBits = 0;
     mEbbc = mWbbc = mBbcTimeBin = 0;
-    mVpdTdiff = mVpdTstart = mVpdZvertex = -999.;
+    mVpdTdiff = mVpdZvertex = -999.;
     mVpdEastHits = mVpdWestHits = -1;
     mZdcWestRate = 0;
     mZdcEastRate = 0;
@@ -528,10 +531,6 @@ void StJetSkimEvent::clear()
 
     mEmcLayer2 = 0;
 
-    mNTzero = 0;
-    mNTzeroCan = 0;
-    mTCanFirst = 99999.;
-    mTCanLast = -99999.;
     mNVpdEGoodHits = 0;
     mNVpdWGoodHits = 0;
     mEarliestVpdEHit = 99999.;
@@ -540,6 +539,12 @@ void StJetSkimEvent::clear()
     mClosestVpdWHit = 99999.;
     mLatestVpdEHit = -99999.;
     mLatestVpdWHit = -99999.;
+
+    mTstart = -999.;
+    mNTzero = 0;
+    mNTzeroCan = 0;
+    mTCanFirst = 99999.;
+    mTCanLast = -99999.;
 }
 
 void StJetSkimEvent::Clear(const char *option) {

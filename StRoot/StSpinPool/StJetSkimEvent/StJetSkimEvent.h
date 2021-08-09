@@ -266,10 +266,11 @@ public:
   void setBbcTimeBin(int i) {mBbcTimeBin = i;}
 
   void setVpdTdiff  (float x) {mVpdTdiff   = x;}
-  void setVpdTstart (float x) {mVpdTstart  = x;}
   void setVpdZvertex(float x) {mVpdZvertex = x;}
   void setVpdEastHits(int i) {mVpdEastHits = i;}
   void setVpdWestHits(int i) {mVpdWestHits = i;}
+
+  void setTstart (float x) {mTstart  = x;}
 
   void setZdcWestRate(float x) { mZdcWestRate = x; }
   void setZdcEastRate(float x) { mZdcEastRate = x; }
@@ -316,8 +317,6 @@ public:
   int bbcTimeBin() const {return mBbcTimeBin;}
 
   float vpdTdiff() const {return mVpdTdiff;}
-  //mVpdTstart was set by btofheader in StJetMaker/StJetSkimMaker. But as of Aug, 2021, the retured value from btofheader doesn't have to be coming from VPD 
-  float vpdTstart() const {return mVpdTstart;}
   float vpdZvertex() const {return mVpdZvertex;}
   int vpdEastHits() const {return mVpdEastHits;}
   int vpdWestHits() const {return mVpdWestHits;}
@@ -350,6 +349,7 @@ public:
   
   const StPythiaEvent* mcEvent() const {return mMcEvent;}
 
+  float tStart() const {return mTstart;}
   short nTzero() const { return mNTzero; }
   short nTzeroCan() const { return mNTzeroCan; }
   double tCanFirst() const { return mTCanFirst; }
@@ -482,15 +482,10 @@ private:
   
   //vpd info:
   float mVpdTdiff;
-  float mVpdTstart;
   float mVpdZvertex;
   int mVpdEastHits;
   int mVpdWestHits;
 
-  short mNTzero; //Number of particles used for start-time calculations
-  short mNTzeroCan; //Number of candidate particles available for start-time calculations before outlier rejection
-  double mTCanFirst; //Earlies candidate particle in start-time calculations
-  double mTCanLast; //Latest candidat particle in start-time calculations
   int mNVpdEGoodHits;
   int mNVpdWGoodHits;
   double mEarliestVpdEHit;
@@ -499,6 +494,12 @@ private:
   double mClosestVpdWHit;
   double mLatestVpdEHit;
   double mLatestVpdWHit;
+
+  float mTstart; //start time either from VPD or start-less tof
+  short mNTzero; //Number of particles used for start-time calculations
+  short mNTzeroCan; //Number of candidate particles available for start-time calculations before outlier rejection
+  double mTCanFirst; //Earlies candidate particle in start-time calculations
+  double mTCanLast; //Latest candidat particle in start-time calculations
 
   //spin db
   int mIsValid;
