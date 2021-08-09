@@ -34,7 +34,6 @@ public:
     : StMaker(name)
     , mFile(0)
     , mTree(0)
-    , mStoreOnlyDefaultVertex(kFALSE)
   {
   }
 
@@ -82,11 +81,6 @@ struct StJetBranch {
   TFile* mFile;
   TTree* mTree;
 
-  Bool_t  mStoreOnlyDefaultVertex;
-
   ClassDef(StJetMaker2009,0);
 };
-
-inline void StJetMaker2009::setStoreOnlyDefaultVertex(const Bool_t val) { mStoreOnlyDefaultVertex = val; }
-
 #endif

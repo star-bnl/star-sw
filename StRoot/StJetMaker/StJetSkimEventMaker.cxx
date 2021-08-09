@@ -238,6 +238,7 @@ Int_t StJetSkimEventMaker::Make()
 	// VPD Stuff:
 	if (muDst->btofHeader()){
 	  mEvent->setVpdTdiff(muDst->btofHeader()->tDiff());
+          //the start time doesn't have to be coming from VPD alone
 	  mEvent->setVpdTstart(muDst->btofHeader()->tStart());
 	  mEvent->setVpdZvertex(muDst->btofHeader()->vpdVz());
 	  mEvent->setVpdEastHits(muDst->btofHeader()->numberOfVpdHits(east));

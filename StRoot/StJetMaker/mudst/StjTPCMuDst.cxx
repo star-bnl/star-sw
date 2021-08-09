@@ -86,12 +86,6 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
 
   TVector3 p(mutrack->momentum().x(), mutrack->momentum().y(), mutrack->momentum().z());
 
-  // Getting BTOF TrayID
-  int btofTrayId = -999;
-  int index2BTofHit = mutrack->index2BTofHit();
-  if(index2BTofHit>=0) { // to make sure that there is a BTOF hit
-      btofTrayId = mutrack->tofHit()->tray();
-  }
 
   track.pt         = p.Pt();
   track.eta        = p.Eta();
@@ -115,7 +109,11 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
   track.chi2prob   = mutrack->chi2prob();
   track.BField     = magneticField;
 
-  track.btofTrayId = btofTrayId;
+  track.btofTrayId = -999;
+  // Getting BTOF TrayID
+  if(mutrack->index2BTofHit()>=0) { // to make sure that there is a BTOF hit
+      track.btofTrayId = mutrack->tofHit()->tray();
+  }
   track.nSigmaTofPion = mutrack->btofPidTraits().sigmaPion();
   track.nSigmaTofKaon = mutrack->btofPidTraits().sigmaKaon();
   track.nSigmaTofProton = mutrack->btofPidTraits().sigmaProton();

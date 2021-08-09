@@ -316,6 +316,7 @@ public:
   int bbcTimeBin() const {return mBbcTimeBin;}
 
   float vpdTdiff() const {return mVpdTdiff;}
+  //mVpdTstart was set by btofheader in StJetMaker/StJetSkimMaker. But as of Aug, 2021, the retured value from btofheader doesn't have to be coming from VPD 
   float vpdTstart() const {return mVpdTstart;}
   float vpdZvertex() const {return mVpdZvertex;}
   int vpdEastHits() const {return mVpdEastHits;}
@@ -351,7 +352,6 @@ public:
 
   short nTzero() const { return mNTzero; }
   short nTzeroCan() const { return mNTzeroCan; }
-  float tStart() const {return mVpdTstart;}
   double tCanFirst() const { return mTCanFirst; }
   double tCanLast() const { return mTCanLast; }
   int vpdEGoodHits() const { return mNVpdEGoodHits; }
@@ -487,10 +487,10 @@ private:
   int mVpdEastHits;
   int mVpdWestHits;
 
-  short mNTzero;
-  short mNTzeroCan;
-  double mTCanFirst;
-  double mTCanLast;
+  short mNTzero; //Number of particles used for start-time calculations
+  short mNTzeroCan; //Number of candidate particles available for start-time calculations before outlier rejection
+  double mTCanFirst; //Earlies candidate particle in start-time calculations
+  double mTCanLast; //Latest candidat particle in start-time calculations
   int mNVpdEGoodHits;
   int mNVpdWGoodHits;
   double mEarliestVpdEHit;
