@@ -199,9 +199,6 @@ if ( $pkg eq "Jevp") {
 	      .   $main::PATH_SEPARATOR .  $CPPPATH;
     $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
 }
-if ( $pkg eq "GeoTestMaker") {
-  $LIBS = "-lQtGui";
-}
 
 #$CPPFLAGS .= " -DNEW_DAQ_READER -D__NO_STRANGE_MUDST__  ";
 $CPPFLAGS .= " -DNEW_DAQ_READER ";
@@ -790,7 +787,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#print "-=-=-=-=-=-= SO_PKG = $SO_PKG\n";
 
     } elsif ( $pkg =~ m/^StJetFinder$/ ){
-	$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
+
+        if ( defined($ENV{FASTJET_DIR}) ) {
+          $CPPPATH = $ENV{FASTJET_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
+        } else {
+          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
+        }
 
     } elsif ( $pkg =~ m/^StFwdTrackMaker$/ ){ 
 		$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
@@ -971,13 +973,18 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #	$CXXFLAGS .= " -MMD -DTBB_DO_ASSERT -DDO_ITT_NOTIFY -DUSE_PTHREAD -D__TBB_BUILD=1 -Wall -Wno-parentheses";
 #
 #
-    }  elsif ( $pkg =~ m/^TPCCATracker$/) {
+    } elsif ($pkg eq "TPCCATracker" or $pkg eq "StiCA") {
         $CPPPATH .=
 	  $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/code";
 #	  $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/code" .
 #	    $main::PATH_SEPARATOR . "#" . $Dir . "/code/KFParticle" .  $main::PATH_SEPARATOR . "#" . $Dir . "/code/Performance";
 	#    $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/TBB/include";
 	#    print "CPPPATH => $CPPPATH\n";
+
+        if ( defined($ENV{Vc_DIR}) ) {
+          $CPPPATH = $ENV{Vc_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
+          $LIBPATH = $ENV{Vc_DIR}."/lib";
+        }
 
 	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
 #	my $extraCXXFLAGS = " -DDO_TPCCATRACKER_EFF_PERFORMANCE -DDRAW -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
@@ -998,7 +1005,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
 #	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE"}
 	# c++ `root-config --ldflags` -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
-	if ( defined($ENV{Vc_LIB_DIR}) ) { $LIBPATH = $ENV{Vc_LIB_DIR}; }
+	if ( defined($ENV{Vc_LIB_DIR}) ) { die("Vc_LIB_DIR is not supported anymore. Please use Vc_DIR."); }
 	$LIBS = "-lVc";
 	if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
 	# stand - alone in .DEV2 only
