@@ -46,8 +46,6 @@ public:
   void addBranch(const char* name, StAnaPars* anapars, StJetPars* jetpars);
   void setJetFile(const char* filename);
 
-  void setStoreOnlyDefaultVertex(const Bool_t val);
-
   // Getters
   TTree* tree();
   StJetEvent* event(const char* branchname);

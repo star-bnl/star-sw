@@ -315,11 +315,6 @@ StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetS
 
     mEmcLayer2 = 0;
 
-    mTstart = -999;
-    mNTzero = 0;
-    mNTzeroCan = 0;
-    mTCanFirst = 99999.;
-    mTCanLast = -99999.;
     mNVpdEGoodHits = 0;
     mNVpdWGoodHits = 0;
     mEarliestVpdEHit = 99999.;
@@ -328,6 +323,12 @@ StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetS
     mClosestVpdWHit = 99999.;
     mLatestVpdEHit = -99999.;
     mLatestVpdWHit = -99999.;
+
+    mTstart = -999;
+    mNTzero = 0;
+    mNTzeroCan = 0;
+    mTCanFirst = 99999.;
+    mTCanLast = -99999.;
 }
 
 StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
