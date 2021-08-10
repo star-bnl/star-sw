@@ -204,31 +204,37 @@ void StUEMaker2009::copyVertex(const StjPrimaryVertex& vertex, StJetVertex* jetv
 
 void StUEMaker2009::copyTrack(const StjTrack& t, StJetTrack* track)
 {
-  track->mId             = t.id;
-  track->mDetectorId     = t.detectorId;
-  track->mFlag           = t.flag;
-  track->mCharge         = t.charge;
-  track->mNHits          = t.nHits;
-  track->mNHitsFit       = t.nHitsFit;
-  track->mNHitsPoss      = t.nHitsPoss;
-  track->mNHitsDedx      = t.nHitsDedx;
-  track->mDedx           = t.dEdx;
-  track->mBeta           = t.beta;
-  track->mFirstPoint     = t.firstPoint;
-  track->mLastPoint      = t.lastPoint;
-  track->mExitTowerId    = t.exitTowerId;
-  track->mExitDetectorId = t.exitDetectorId;
+  track->mId                = t.id;
+  track->mDetectorId        = t.detectorId;
+  track->mFlag              = t.flag;
+  track->mCharge            = t.charge;
+  track->mNHits             = t.nHits;
+  track->mNHitsFit          = t.nHitsFit;
+  track->mNHitsPoss         = t.nHitsPoss;
+  track->mNHitsDedx         = t.nHitsDedx;
+  track->mDedx              = t.dEdx;
+  track->mBeta              = t.beta;
+  track->mFirstPoint        = t.firstPoint;
+  track->mLastPoint         = t.lastPoint;
+  track->mExitTowerId       = t.exitTowerId;
+  track->mExitDetectorId    = t.exitDetectorId;
   track->mDca.SetXYZ(t.dcaX,t.dcaY,t.dcaZ);
-  track->mDcaD           = t.dcaD;
-  track->mChi2           = t.chi2;
-  track->mChi2Prob       = t.chi2prob;
-  track->mPt             = t.pt;
-  track->mEta            = t.eta;
-  track->mPhi            = t.phi;
-  track->mNSigmaPion     = t.nSigmaPion;
-  track->mNSigmaKaon     = t.nSigmaKaon;
-  track->mNSigmaProton   = t.nSigmaProton;
-  track->mNSigmaElectron = t.nSigmaElectron;
+  track->mDcaD              = t.dcaD;
+  track->mChi2              = t.chi2;
+  track->mChi2Prob          = t.chi2prob;
+  track->mPt                = t.pt;
+  track->mEta               = t.eta;
+  track->mPhi               = t.phi;
+  track->mNSigmaPion        = t.nSigmaPion;
+  track->mNSigmaKaon        = t.nSigmaKaon;
+  track->mNSigmaProton      = t.nSigmaProton;
+  track->mNSigmaElectron    = t.nSigmaElectron;
+
+  track->mBTofTrayId        = t.btofTrayId;
+  track->mNSigmaTofPion     = t.nSigmaTofPion;
+  track->mNSigmaTofKaon     = t.nSigmaTofKaon;
+  track->mNSigmaTofProton   = t.nSigmaTofProton;
+  track->mNSigmaTofElectron = t.nSigmaTofElectron;
 }
 
 void StUEMaker2009::copyTower(const StjTowerEnergy& t, StJetTower* tower)
