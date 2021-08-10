@@ -1,5 +1,22 @@
 # Changelog
 
+## [SL21d] - future release
+
+### Enhancements
+
+- Various changes to make code compatible with ROOT6 API (#47)
+- Updates in CI (#75)
+  - Build against ROOT6 in addition to ROOT5
+  - Switch to multistage docker build; optimize base image
+- Fix compiler errors and include previously excluded packages into CI build (#63 #72 #86 #87)
+- StJetMaker: save additional TOF information to the jet trees (#79)
+- Introduce new StFcsCosmicMaker in StRoot/SpinPool (#58)
+
+### Miscellaneous
+
+- Fix file name conflicts on case insensitive systems (#48)
+
+
 ## [SL21c] - 2021-07-29
 
 First release after code transfer to Git
