@@ -82,7 +82,7 @@ private:
   TClonesArray* mTowers;
   TClonesArray* mParticles;
 
-  ClassDef(StJetEvent,6); 
+  ClassDef(StJetEvent,6);
 };
 
 #endif // ST_JET_EVENT_H
