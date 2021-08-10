@@ -121,7 +121,6 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
 
 RUN source /etc/profile \
  && cd /star-sw \
- && cons +StarVMC/Geometry \
  && cons %OnlTools \
          %StRoot/StarGenerator/Kinematics \
          %StRoot/StEEmcPool \

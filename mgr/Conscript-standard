@@ -383,7 +383,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			    Depends $env ["#".$agX, "#".$agH, "#".$agE], ("#$xml", "#$agml_cmd");
 			    # Depends $env --> some rule to build extra dict on the fly
 
-			    Command $env ["#".$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
+			    Command $env ["#".$agX, "#".$agH], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
 			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
 			    # Install local file (#) as global
