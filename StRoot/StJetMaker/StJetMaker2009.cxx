@@ -93,7 +93,7 @@ int StJetMaker2009::Make()
 
       int totNumVertices = tpc.numberOfVertices(); 
       // store the total number of available vertices if set by anapars
-      if(jetbranch->anapars->storeOnlyDefaultVertex && tpc.numberOfVertices() > 1) {
+      if(jetbranch->anapars->storeOnlyDefaultVertex && totNumVertices > 1) {
           totNumVertices = 1;
       }   
 
