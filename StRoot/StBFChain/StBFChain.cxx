@@ -695,6 +695,7 @@ Int_t StBFChain::Instantiate()
 	mode |= (1 << 10); // kNoToflight   //10 don't account for particle time of flight
 	mk->SetMode(mode);
       }
+      if (GetOption("EbyET0")) mk->SetAttr("EbyET0", kTRUE);
     }
     if (maker == "StTrsMaker") {
       Int_t mode = 0;
@@ -792,6 +793,9 @@ Int_t StBFChain::Instantiate()
 	GetOption("EmbeddingShortCut"))  {
       mk->SetAttr("EmbeddingShortCut", kTRUE);
       mk->PrintAttr();
+    }
+    if (maker == "StdEdxY2Maker" && !GetOption("CalcdNdx")) {
+      mk->SetAttr("SkipdNdx", kTRUE);
     }
     if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){
       mk->SetMode(0);
