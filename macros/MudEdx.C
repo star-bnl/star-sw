@@ -1,3 +1,5 @@
+//   root.exe -q -b 'lMuDst.C(-2,"","RMuDst")' 'MudEdx.C+("/direct/gpfs01/star/data100/reco/production_19GeV_2019/ReversedFullField/P21ib_calib/2019/057/*/*MuDst.root")'               > & MudEdx.log &
+//   root.exe -q -b 'lMuDst.C(-2,"","RMuDst")' 'MudEdx.C+("/direct/gpfs01/star/data*/reco/production_19GeV_2019/ReversedFullField/P21ic/2019/057/2005700*/st_physics_2*_2*MuDst.root")' > & MudEdx.log &
 /*
   root.exe 'lMuDst.C(-2,"*.MuDst.root","RMuDst","MuOut.root")' MudEdx.C+  >& MudEdx.log &
   root.exe 'lMuDst.C(-2,"/gpfs01/star/subsys-tpc/fisyak/reco/2014/50M/SL15StiCAKFV/130/15130037/*.MuDst.root","RMuDst","MuOut.root")' MudEdx.C+

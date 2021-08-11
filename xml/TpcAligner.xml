@@ -53,6 +53,8 @@
 <!--	<input URL="file:/star/data06/iraklic/Run2019/Cosmics/*.event.root" /> -->
 <!--	<input URL="file:/net/l404/data/fisyak/Tpc/Alignment/2019/RF/Cosmic/*.event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2021/062/*/*laser*.daq" /> -->
-<input URL="file:/hlt/cephfs/reco/2021/RF/TFG21c.B/Cosmic/*/*/*event.root" /> 
+<!-- <input URL="file:/hlt/cephfs/reco/2021/RF/TFG21c.B/Cosmic/*/*/*event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2021/FF/TFG21c.B/Cosmic/*/*/*event.root" /> -->
+<!-- <input URL="file:/hlt/cephfs/reco/2021/FF/TFG21h/Cosmic/*/*/*event.root" />   -->
+<input URL="file:/hlt/cephfs/reco/2021/RF/TFG21h/Cosmic/*/*/*event.root" />
 </job>

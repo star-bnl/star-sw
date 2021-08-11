@@ -32,7 +32,8 @@ my $myVolName = $mount; #File::Basename::basename($mount);
 # fusermount -u /direct/gpfs01
 #$cmd = "sshfs fisyak\@rftpexp02.rhic.bnl.gov:$DISK $disk";
 #$cmd = "sshfs fisyak\@rftpexp01.rhic.bnl.gov:$DISK $disk";
-$cmd = "sshfs fisyak\@sftp.sdcc.bnl.gov:$DISK $disk";
+#$cmd = "sshfs fisyak\@sftp.sdcc.bnl.gov:$DISK $disk";
+$cmd = "sshfs   fisyak\@sftp.sdcc.bnl.gov:$DISK $disk  -o allow_other ";
 print "$cmd";
 $flag = system($cmd);
 if ( $flag) {print " === failed";}
