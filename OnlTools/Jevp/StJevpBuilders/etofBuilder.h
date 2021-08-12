@@ -14,6 +14,9 @@ class daqReader;
 
 namespace gdpbv100 { class FullMessage; };
 
+#ifdef __CINT__
+typedef unsigned int uint64_t;
+#endif
 
 class etofBuilder : public JevpBuilder {
   public:
