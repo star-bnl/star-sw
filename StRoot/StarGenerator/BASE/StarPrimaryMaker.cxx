@@ -11,8 +11,6 @@ ClassImp(StarPrimaryMaker);
 #include "StarGenerator.h"
 #include "StarCallf77.h" 
 #include <iostream>
-#include "St_geant_Maker/St_geant_Maker.h"
-#include "TGiant3.h"
 #include <map>
 #include "TString.h"
 #include "TSystem.h"
