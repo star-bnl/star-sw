@@ -62,6 +62,9 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mStack = new StarParticleStack();
   AgStarReader::Instance().SetStack(mStack);
 
+  // Publish the stack
+  AddObj( mStack, ".data" );  
+
   // Register the particle database with this maker
   StarParticleData &pdb = StarParticleData::instance();
   //  Shunt( &pdb );
