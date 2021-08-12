@@ -12,7 +12,7 @@ jobs:
       - name: Build with Docker
         uses: docker/build-push-action@v2
         with:
-          cache-from: type=registry,ref=ghcr.io/star-bnl/star-sw-root5-base@sha256:bc73379c552ff02181d9c6778ff64bece4f11c5a2aaf75fd23cd62d9af6b8349
+          cache-from: type=registry,ref=ghcr.io/star-bnl/star-sw-root5-base@sha256:4bed8a8b729fa9e6c8e92b2bdecd6b73869e67a07bfbde969936f921123d4c3e
           push: false
           tags: ghcr.io/star-bnl/star-sw-root5-build
           file: docker/Dockerfile.root5
@@ -25,7 +25,7 @@ jobs:
       - name: Build with Docker
         uses: docker/build-push-action@v2
         with:
-          cache-from: type=registry,ref=ghcr.io/star-bnl/star-sw-root6-base@sha256:9b40544fa0af6ac911eddeaa396b04bab5e78da0ebef36170e779269c177e9f9
+          cache-from: type=registry,ref=ghcr.io/star-bnl/star-sw-root6-base@sha256:107736be0e111ef9eaac37281f9bcad95769ab3ce75a4c9624d8cea98b1eb966
           push: false
           tags: ghcr.io/star-bnl/star-sw-root6-build
           file: docker/Dockerfile.root6

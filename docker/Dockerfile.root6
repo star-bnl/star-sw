@@ -92,6 +92,7 @@ ENV MYSQL=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/mysql-5.7.27-pfyt3fwt
 ENV LIBXML2_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/libxml2-2.9.10-4lxsmpa57bm3xs2cs3xapk3qccxflkfl
 ENV Vc_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/vc-1.4.1-xdb5jhivtn2rejvvfs2whrf4nx4lxwbi
 ENV FASTJET_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/fastjet-3.3.3-xj22tput5pd5atejy4igsrtgdtygi74u
+ENV GSL_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/gsl-2.6-ao26bt7pm6xxywo2q7dcmhhg2lp2inx7
 
 # Dummy directories checked by cons
 RUN mkdir $OPTSTAR/lib && mkdir $OPTSTAR/include
