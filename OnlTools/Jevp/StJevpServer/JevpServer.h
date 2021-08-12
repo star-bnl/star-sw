@@ -10,7 +10,6 @@
 #include <TClass.h>
 
 class daqReader;
-#include <PDFUtil/PdfIndex.hh>
 #include "Jevp/StJevpPlot/EvpMessage.h"
 #include "Jevp/StJevpPlot/JevpPlot.h"
 #include "DisplayDefs.h"

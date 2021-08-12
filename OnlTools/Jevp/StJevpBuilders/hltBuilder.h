@@ -13,10 +13,8 @@
 
 #include "JevpBuilder.h"
 class daqReader;
-//#include <DAQ_READER/daq_dta.h>
 struct daq_dta;
 
-#include <DAQ_L3/daq_l3.h>
 #include <TStyle.h>
 #include "TVector3.h"
 #include <fstream>
@@ -29,10 +27,7 @@ struct daq_dta;
 #include <TFile.h> 
 #include <TProfile.h>
 #include <math.h>
-#include <DAQ_HLT/daq_hlt.h>
 #include "RTS/include/HLT/HLTFormats.h"
-//#include <time.h>
-//#include <sys/time.h>
 
 class hltBuilder : public JevpBuilder {
  public:
