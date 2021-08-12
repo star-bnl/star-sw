@@ -4,8 +4,6 @@
 #include "JevpBuilder.h"
 class daqReader;
 //#include <DAQ_READER/daq_dta.h>
-#include <DAQ_L3/daq_l3.h>
-#include <DAQ_L4/daq_l4.h>
 #include <TStyle.h>
 #include "TVector3.h"
 #include <fstream>
@@ -19,7 +17,6 @@ class daqReader;
 #include <TProfile.h>
 #include "TStopwatch.h"
 #include <math.h>
-#include <DAQ_HLT/daq_hlt.h>
 #include "RTS/include/HLT/HLTFormats.h"
 
 enum {

@@ -13,6 +13,7 @@ class daqReader;
 
 #include <math.h>
 
+#include "RTS/include/daqFormats.h"
 struct QtEventInfo {
     double usec;      // total readout time
     double sz;
