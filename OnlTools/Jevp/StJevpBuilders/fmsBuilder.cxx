@@ -1,7 +1,8 @@
 #include "fmsBuilder.h"
 
-
+#include "StEvent/StTriggerData.h"
 #include <RTS/include/rtsLog.h>
+#include "DAQ_READER/daqReader.h"
 
 #include "StarRoot/TH1Helper.h"
 

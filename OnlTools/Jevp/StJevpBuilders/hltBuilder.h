@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 #include "JevpBuilder.h"
-#include "DAQ_READER/daqReader.h"
+class daqReader;
 //#include <DAQ_READER/daq_dta.h>
 struct daq_dta;
 
