@@ -4,7 +4,6 @@
 * $Log: gfkine.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:40  potekhin
 *
-*
 * Revision 1.3  2003/11/21 17:25:13  nevski
 * make user buffer size controllable from outside
 *

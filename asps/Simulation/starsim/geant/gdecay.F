@@ -2,7 +2,6 @@
 * $Name:  $
 * $Log: gdecay.F,v $
 * Revision 1.6  2014/07/09 18:27:55  jwebb
-*
 * Previous version of gdecay.F limited the decay products of a particle to
 * particles with geant ID <= 99 or <= 999.
 *

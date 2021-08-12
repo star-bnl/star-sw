@@ -3,7 +3,6 @@
 * $Log: gtdraw.inc,v $
 * Revision 1.1.1.1  2004/01/15 00:12:25  potekhin
 *
-*
 * Revision 1.2  2001/11/20 10:17:31  nevski
 * gtdraw corrected following cernlib
 *

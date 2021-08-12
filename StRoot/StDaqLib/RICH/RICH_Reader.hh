@@ -13,7 +13,7 @@
  * 12-Mar-00  XZB GetNumOfChannels() returns total number of channels
  * 21-Apr-00 xzb Add in RichEventReader for standalone data file 
  ***************************************************************************
- * $Log: Opens Event From File, Fills Struct 
+ *  Opens Event From File, Fills Struct 
  *
  **************************************************************************/
 #ifndef RICH_READER_HH

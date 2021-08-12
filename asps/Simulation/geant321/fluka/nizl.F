@@ -4,7 +4,6 @@
 * $Log: nizl.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:02  potekhin
 *
-*
 * Revision 1.2  1998/02/10 13:04:40  atgeant3
 * *** empty log message ***
 *

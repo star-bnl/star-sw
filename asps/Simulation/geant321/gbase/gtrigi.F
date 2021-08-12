@@ -4,7 +4,6 @@
 * $Log: gtrigi.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:03  potekhin
 *
-*
 * Revision 1.2  1998/02/10 13:04:46  atgeant3
 * *** empty log message ***
 *

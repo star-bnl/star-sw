@@ -3,7 +3,6 @@
 * $Name:  $
 * $Log: axposition.age,v $
 * Revision 1.2  2018/09/07 19:32:34  jwebb
-*
 * Add exception rule for a specific geometry (KludGeo), disabling any attempt
 * to use it unless it is being run in a "dev" library (dev, .dev*, adev, etc...).
 * Users should watch out when using KludGeo.

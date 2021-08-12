@@ -118,7 +118,7 @@ SSD_Reader::SSD_Reader(EventReader *er) {
   datap=er->getDATAP(); 
   if (datap) {
 
-  ULong_t UTime = er->getEventInfo().UnixTime;
+  unsigned int UTime = er->getEventInfo().UnixTime;
   struct tm *time=gmtime((time_t*) &UTime);
 
   //LDate = (((1900+time->tm_year)*100 + 1 + time->tm_mon)*100 + time->tm_mday)*100;

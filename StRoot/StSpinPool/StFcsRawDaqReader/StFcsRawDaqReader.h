@@ -14,7 +14,7 @@ class daqReader;
 class StEvent;
 class StFcsCollection;
 class StTriggerData;
-class StFcsDbMaker;
+class StFcsDb;
 
 class StFcsRawDaqReader : public StMaker {
  public: 
@@ -41,6 +41,8 @@ class StFcsRawDaqReader : public StMaker {
    virtual Int_t prepareEnvironment();   
    unsigned long long trgMask(){return mTrgMask;}
    StTriggerData* trgdata(){return mTrg;}
+   int fcsTcuBit() {return mFcsTcuBit;}
+   int fcsDepOut() {return mFcsDepOut;}
 
  protected:
    Int_t mDate, mTime;
@@ -56,20 +58,28 @@ class StFcsRawDaqReader : public StMaker {
    unsigned int mMaxEvtPerSector=100;
    unsigned int mEvtInSector=0;
    StTriggerData* mTrg=0;
-   StFcsDbMaker* mFcsDbMkr=0;
+   StFcsDb* mFcsDb=0;
    unsigned int mReadMode=0;
    unsigned long long mTrgMask=0;
    int mDebug=0;
+   int mFcsTcuBit=0;
+   int mFcsDepOut=0;
 
-   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
+   virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
    ClassDef(StFcsRawDaqReader,1)   
 };
 
 #endif
 
 /*
- * $Id: StFcsRawDaqReader.h,v 1.2 2021/01/11 14:39:12 akio Exp $
+ * $Id: StFcsRawDaqReader.h,v 1.4 2021/05/27 13:10:39 akio Exp $
  * $Log: StFcsRawDaqReader.h,v $
+ * Revision 1.4  2021/05/27 13:10:39  akio
+ * Many updates for trigger bits and around Clear()
+ *
+ * Revision 1.3  2021/03/30 13:30:11  akio
+ * StFcsDbMAker->StFcsDB
+ *
  * Revision 1.2  2021/01/11 14:39:12  akio
  * Change logic to skip over none standard events at the begining of files.
  * Added function to get event# in a sector=file.

@@ -4,7 +4,6 @@
 * $Log: rebank.age,v $
 * Revision 1.1.1.1  2004/01/12 23:49:49  potekhin
 *
-*
 * Revision 1.7  2003/10/22 15:11:48  nevski
 * failure in table scan does not reset Link, but returns negative Ia instead
 *

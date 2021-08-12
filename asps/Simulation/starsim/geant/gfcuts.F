@@ -3,7 +3,6 @@
 * $Log: gfcuts.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:40  potekhin
 *
-*
 * Revision 1.1  2001/06/14 00:11:06  nevski
 * return cuts in a material
 *

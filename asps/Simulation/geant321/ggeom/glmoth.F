@@ -4,7 +4,6 @@
 * $Log: glmoth.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:07  potekhin
 *
-*
 * Revision 1.1.1.1  1997/11/03 15:30:01  atlascvs
 * Importing CERNLIB version 08.21.
 *

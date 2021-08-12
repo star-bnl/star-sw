@@ -4,7 +4,6 @@
 * $Log: cask0b.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:09  potekhin
 *
-*
 * Revision 1.2  2001/07/01 01:49:35  soneale
 * Re-order statements to avoid linux compiler bug
 *

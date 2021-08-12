@@ -1,7 +1,6 @@
 * $Id: gzebra.F,v 1.6 2019/10/04 16:08:44 jwebb Exp $
 * $Log: gzebra.F,v $
 * Revision 1.6  2019/10/04 16:08:44  jwebb
-*
 * Remove redundant initialization of ZEBRA.  Reduce logging level.
 *
 * Revision 1.5  2019/10/03 22:11:16  jwebb

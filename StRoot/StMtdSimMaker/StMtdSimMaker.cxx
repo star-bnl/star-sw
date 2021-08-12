@@ -44,7 +44,7 @@ static RanluxEngine engine;
 static RandGauss ranGauss(engine);
 
 Int_t geant2backlegIDMap[30]; 
-float StMtdSimMaker::kMtdPadWidth = 3.8 + 0.6; 
+const float StMtdSimMaker::kMtdPadWidth = 3.8 + 0.6; 
 ClassImp(StMtdSimMaker)
 
 //_____________________________________________________________________________

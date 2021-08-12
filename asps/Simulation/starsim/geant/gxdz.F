@@ -4,7 +4,6 @@
 * $Log: gxdz.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:41  potekhin
 *
-*
 * Revision 1.2  2003/09/29 16:19:36  nevski
 * auto open workstation
 *

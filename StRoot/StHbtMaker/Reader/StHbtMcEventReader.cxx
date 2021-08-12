@@ -9,6 +9,7 @@
 #include "StEventMaker/StEventMaker.h"
 // StMcEvent stuff
 #include "StMcEventTypes.hh"
+#include "StMcEventMaker/StMcEventMaker.h"
 
 // c++ stuff
 //#include <typeinfo>

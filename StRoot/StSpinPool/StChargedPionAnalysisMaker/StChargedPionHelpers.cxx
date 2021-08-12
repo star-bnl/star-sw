@@ -29,7 +29,8 @@ translateEvent(StJetSkimEvent *skimEvent, StChargedPionBaseEv *ev) {
     ev->setRunId(skimEvent->runId());
     ev->setEventId(skimEvent->eventId());
     ev->setBbcTimeBin(skimEvent->bbcTimeBin());
-    const char *baseName = strrchr(skimEvent->mudstFileName().GetString().Data(), '/') + 1;
+    const char *baseName = strrchr(skimEvent->mudstFileName().GetString().Data(), '/');
+    baseName = baseName + 1;
     ev->setMuDstName( baseName );
     
     StChargedPionEvent *data = dynamic_cast<StChargedPionEvent*>(ev);

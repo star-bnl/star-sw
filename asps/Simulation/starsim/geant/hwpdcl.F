@@ -4,7 +4,6 @@
 * $Log: hwpdcl.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:41  potekhin
 *
-*
 * Revision 1.1  2003/04/04 13:19:13  nevski
 * nlines in output common extended
 *

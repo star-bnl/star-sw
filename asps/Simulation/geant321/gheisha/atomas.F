@@ -4,7 +4,6 @@
 * $Log: atomas.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:09  potekhin
 *
-*
 * Revision 1.1.1.1  1997/11/03 15:30:10  atlascvs
 * Importing CERNLIB version 08.21.
 *

@@ -4,7 +4,6 @@
 * $Log: gsxyz.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:17  potekhin
 *
-*
 * Revision 1.2  2003/02/05 14:10:11  nevski
 * Pour les vrais connaisseurs (FCA): Do not rely on the memory being 0 in JX bank
 *

@@ -36,7 +36,8 @@
 #include "EEmcSmdGeom.h"
 #include "EEmcStripGeom.h"
 #include <assert.h>
-#include "TMath.h"
+#include <TMath.h>
+
 // decouple from StarClassLibrary
 //#include "PhysicalConstants.h"  
 #ifndef HEP_SYSTEM_OF_UNITS_H

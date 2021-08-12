@@ -190,7 +190,7 @@ inline bool StEStructEventCuts::hasZVertMatchCut() {
  *
  * $Log: StEStructEventCuts.h,v $
  * Revision 1.16  2011/08/02 20:31:25  prindle
- *   Change string handling
+ * Change string handling
  *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
  *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
  *   Added methods to check if cuts imposed

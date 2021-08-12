@@ -179,7 +179,7 @@ int StFmsTriggerMaker::Init()
   hqt3adc = new TH2F("hqt3adc","QT3 crate;QT channel;QT ADC",512,0,512,1024,0,1024);
   hqt4adc = new TH2F("hqt4adc","QT4 crate;QT channel;QT ADC",512,0,512,1024,0,1024);
   hfeqadc = new TH2F("hfeqadc","FEQ crate;QT channel;QT ADC",512,0,512,1024,0,1024);
-  return StMaker::Init();
+  return kStOk;
 }
 
 int StFmsTriggerMaker::InitRun(int runNumber){  
@@ -717,7 +717,7 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
   const char* user = "";
   const char* pass = "";
   // See http://drupal.star.bnl.gov/STAR/comp/db/onlinedb/online-sever-port-map
-  const char* host = host1;
+  char* host = host1;
   int year;
   if(mForceRun==0){ 
     mDBTime=GetDBTime(); 

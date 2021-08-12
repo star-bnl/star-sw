@@ -4,7 +4,6 @@
 * $Log: agpread.age,v $
 * Revision 1.1.1.1  2004/01/12 23:49:37  potekhin
 *
-*
 * Revision 1.10  2003/12/05 16:17:58  nevski
 * suppress header check in case of read error
 *

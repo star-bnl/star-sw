@@ -2,7 +2,6 @@
 * $Log: guinti.cdf,v $
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
 *
-*
 * Revision 1.1  2001/02/27 10:14:52  nevski
 *  first working release
 *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructAscii.cxx
+ *  StEStructAscii.cxx
  *
  * Author: msd
  *

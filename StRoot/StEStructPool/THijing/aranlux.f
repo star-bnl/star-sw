@@ -1,7 +1,7 @@
 * $Id: aranlux.f,v 1.1 2010/03/02 21:49:14 prindle Exp $
 * $Log: aranlux.f,v $
 * Revision 1.1  2010/03/02 21:49:14  prindle
-*   Save and restore random seeds for event
+* Save and restore random seeds for event
 *   (Used to sort events by multiplicity if desired)
 *
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin

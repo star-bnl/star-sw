@@ -17,7 +17,7 @@ class StRccCounterMonitor : public StMaker {
   virtual Int_t Finish();
    
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
   
   void setDebug(int v=1) {mDebug=v;}
   

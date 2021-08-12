@@ -38,7 +38,7 @@ Int_t StEmcEqualMaker::Init()
 
   mSpecName ="mSpecEqual";
   mAcceptName = "mAcceptEqual";
-  return StMaker::Init();
+  return StEmcCalibMaker::Init();
 }
 //_____________________________________________________________________________
 void StEmcEqualMaker::Clear(Option_t *option)              

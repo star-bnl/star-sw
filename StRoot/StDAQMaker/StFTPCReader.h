@@ -30,7 +30,7 @@
  **************************************************************************/
 #ifndef _StFTPCReader_
 #define _StFTPCReader_
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "StTPCReader.h"
 #endif
 

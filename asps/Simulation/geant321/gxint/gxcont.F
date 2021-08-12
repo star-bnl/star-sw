@@ -4,7 +4,6 @@
 * $Log: gxcont.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:18  potekhin
 *
-*
 * Revision 1.3  2001/11/20 21:37:02  nevski
 * gcdraw variables correctly described
 *

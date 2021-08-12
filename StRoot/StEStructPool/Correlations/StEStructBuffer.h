@@ -58,7 +58,7 @@ inline int StEStructBuffer::numEventsDeleted(){ return mnumDeleted; };
  *
  * $Log: StEStructBuffer.h,v $
  * Revision 1.5  2011/08/02 20:34:02  prindle
- *   More detailed histograms for event mixing.
+ * More detailed histograms for event mixing.
  *   Buffer: increased mixed events to 4 (from 2)
  *   CutBin: added mode 9 for exploration of p_t space, fixed place in mode 5 where
  *           histogram was written before checking it existed.

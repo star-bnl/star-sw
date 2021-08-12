@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.17
+ *  StHbtPair.hh,v 1.17
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa

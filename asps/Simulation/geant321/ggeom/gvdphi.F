@@ -4,7 +4,6 @@
 * $Log: gvdphi.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:09  potekhin
 *
-*
 * Revision 1.2  2002/03/19 14:36:23  nevski
 * phi-limits corrected for CTUB
 *

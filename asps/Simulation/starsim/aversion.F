@@ -4,7 +4,6 @@
 * $Log: aversion.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:36  potekhin
 *
-*
 * Revision 1.9  2002/02/22 15:20:19  nevski
 * move pointers to 3.0.0
 *

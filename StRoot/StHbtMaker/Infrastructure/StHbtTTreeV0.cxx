@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StHbtTTreeV0.h,v 1.0 1999/09/07
+ *  StHbtTTreeV0.h,v 1.0 1999/09/07
  *
  * Authors: Frank Laue, BNL, laue@bnl.gov
  *

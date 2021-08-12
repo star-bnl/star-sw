@@ -3,7 +3,6 @@
 * $Log: gvdphi.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:41  potekhin
 *
-*
 * Revision 1.1  2002/04/22 01:34:53  nevski
 * bugfix - define procedure for CTUBS
 *

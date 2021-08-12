@@ -2,8 +2,8 @@
  *
  * \class StSimpleHit_t
  * \author Stephen Gliske <sgliske@anl.gov>
- * $Id: 
- * $Log:
+ *  
+ * 
  *
  * Root stuff for the class.  See the header file.
  */

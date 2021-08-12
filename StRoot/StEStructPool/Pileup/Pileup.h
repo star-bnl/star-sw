@@ -167,7 +167,7 @@ class Pileup : public TObject {
  *
  * $Log: Pileup.h,v $
  * Revision 1.2  2011/02/12 00:07:04  prindle
- *   Just changed comments. Hopefully it is understandble how to use the package
+ * Just changed comments. Hopefully it is understandble how to use the package
  * just from the comments now.
  *
  * Revision 1.1  2008/12/02 23:47:44  prindle

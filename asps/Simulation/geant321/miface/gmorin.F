@@ -4,7 +4,6 @@
 * $Log: gmorin.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:19  potekhin
 *
-*
 * Revision 1.2  2002/05/29 17:30:50  soneale
 * change strategy for finding and opening data file
 *

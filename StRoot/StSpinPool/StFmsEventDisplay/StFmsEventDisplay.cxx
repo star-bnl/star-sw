@@ -67,7 +67,7 @@ Int_t StFmsEventDisplay::Init(){
     mApplication = new TApplication("EvtDsp",0,0);
     mCanvas=new TCanvas("FMSEventtDisplay","FMSEventtDisplay",10,10,900,900);
     gStyle->SetOptStat(0);
-    return StMaker::Init();
+    return kStOK;
 }
 
 Int_t StFmsEventDisplay::Finish(){

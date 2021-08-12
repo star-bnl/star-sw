@@ -2,7 +2,6 @@
 * $Log: gnzlgn.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:37  potekhin
 *
-*
 * Revision 1.2  2001/03/02 21:03:13  nevski
 * agmer splitted, gnz restored
 *

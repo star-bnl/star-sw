@@ -4,7 +4,6 @@
 * $Log: gxphys.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:18  potekhin
 *
-*
 * Revision 1.2  1998/02/10 13:05:19  atgeant3
 * *** empty log message ***
 *

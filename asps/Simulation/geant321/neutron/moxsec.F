@@ -4,7 +4,6 @@
 * $Log: moxsec.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:21  potekhin
 *
-*
 * Revision 1.2  2001/07/13 14:47:38  nevski
 * zero all banks at initialization
 *

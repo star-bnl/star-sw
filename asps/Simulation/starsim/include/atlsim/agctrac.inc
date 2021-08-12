@@ -3,7 +3,6 @@
 * $Log: agctrac.inc,v $
 * Revision 1.1.1.1  2004/01/12 23:49:41  potekhin
 *
-*
 * Revision 1.1  2001/12/15 00:27:29  nevski
 * upgrade atlsim commons
 *

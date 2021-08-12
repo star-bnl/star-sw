@@ -16,8 +16,8 @@ static unsigned int N3[16][4];
 static float MM[MAXDT][18];
 
 void printMismatch(int run){
-  printf("Run      Mismatch%% =  FM001  FM002  FM003  FM004  FM005  FM006  FM007  FM008  FM009  FM010  FM011  FM012 |  FM101  FM102  FM03   FM104 |  FP201 |  TCU   | Average\n");
-  printf("%8d mismatch%% = ",run);
+  printf("Run      Mismatch% =  FM001  FM002  FM003  FM004  FM005  FM006  FM007  FM008  FM009  FM010  FM011  FM012 |  FM101  FM102  FM03   FM104 |  FP201 |  TCU   | Average\n");
+  printf("%8d mismatch\% = ",run);
   float ave=0.0;
   for(int id=0; id<18; id++) {
     ave+=MM[MAXD][id];
@@ -64,7 +64,7 @@ void printCount(int id, const char* name, unsigned int n[MAXDT][4][32][4], int r
     }
     printf("\n");
   }
-  printf("%8d %15s MMdeltaT%% = ",run,name); 
+  printf("%8d %15s MMdeltaT\% = ",run,name); 
   for(int dt=0; dt<MAXDT; dt++){
     int d=dt-MAXD;
     if(d<dmin || d>dmax) continue;
@@ -73,9 +73,9 @@ void printCount(int id, const char* name, unsigned int n[MAXDT][4][32][4], int r
     MM[dt][id]=mm;
   }
   printf("\n");
-  printf("%8d %15s Mismatch%% = ",run,name); 
+  printf("%8d %15s Mismatch\% = ",run,name); 
   int dt=MAXD;
-  //  int d=dt-MAXD;
+  int d=dt-MAXD;
   float mm=float(nt[dt]-ng[dt])/float(nt[dt])*100.0;
   printf("%6.3f ",mm);
   MM[dt][id]=mm;
@@ -105,7 +105,7 @@ void printCount3(int id, const char* name, unsigned int n[32][4], int run){
   }
   printf("\n");
   float mm=float(nt-ng)/float(nt)*100.0;
-  printf("%8d %15s Mismatch%% = %6.3f\n",run,name,mm); 
+  printf("%8d %15s Mismatch\% = %6.3f\n",run,name,mm); 
   MM[MAXD][id]=mm;
 }
 
@@ -233,7 +233,7 @@ int StFmsBitCheckMaker::Init(){
   memset(N2,0,sizeof(N2));
   memset(N3,0,sizeof(N3));
   PRINTLEVEL=mPrint;
-  return StMaker::Init();
+  return kStOk;
 }
 
 int StFmsBitCheckMaker::InitRun(int runNumber){
@@ -241,7 +241,7 @@ int StFmsBitCheckMaker::InitRun(int runNumber){
 }
 
 int StFmsBitCheckMaker::Finish(){
-  printf("Run      Name            Mismatch%%   Data Xing - Previous layer&Emulation xing\n");
+  printf("Run      Name            Mismatch%   Data Xing - Previous layer&Emulation xing\n");
   printCount(0,"QT1/DCBA=>FM001",N0[0],mRun);
   printCount(1,"QT2/DCBA=>FM002",N0[1],mRun);
   printCount(2,"QT3/DCBA=>FM003",N0[2],mRun);
@@ -261,7 +261,6 @@ int StFmsBitCheckMaker::Finish(){
   printCount(16,"FM101/4 =>FP201", N2,mRun,1);    
   printCount3(17,"FP201   =>TCU  ",N3,mRun);
   printMismatch(mRun);
-  return 0;
 }
 
 int StFmsBitCheckMaker::Make(){
@@ -294,7 +293,7 @@ int StFmsBitCheckMaker::Make(){
   int bunchid7  = td->bunchId7Bit();
   int bunchid48 = td->bunchId48Bit();
   if(bx%120 != bunchid48)
-    printf("BC48 check :  (BX from BCdata)%%20=%d is not consistent with  bunchId48Bit=%d\n",bx%120,bunchid48);
+    printf("BC48 check :  (BX from BCdata)\%120=%d is not consistent with  bunchId48Bit=%d\n",bx%120,bunchid48);
   int dbc = bunchid7-bunchid48;
   if(dbc<0) dbc+=120;
   if(dbc0==-999) dbc0=dbc;

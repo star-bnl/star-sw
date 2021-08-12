@@ -4,7 +4,6 @@
 * $Log: ggclos.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:40  potekhin
 *
-*
 * Revision 1.5  2002/01/24 22:51:43  nevski
 * cosmetic changes
 *

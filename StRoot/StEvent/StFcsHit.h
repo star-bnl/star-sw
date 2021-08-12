@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFcsHit.h,v 1.10 2021/01/11 14:42:09 akio Exp $
+ * $Id: StFcsHit.h,v 2.1 2021/01/11 20:25:37 ullrich Exp $
  *
  * Author: Akio Ogawaa, Aug 2018
  ***************************************************************************
@@ -10,36 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFcsHit.h,v $
- * Revision 1.10  2021/01/11 14:42:09  akio
- * Adding nPeak
- *
- * Revision 1.9  2020/12/17 21:08:05  akio
- * Switching from F to D for LorentVector
- *
- * Revision 1.8  2020/09/03 19:30:57  akio
- * adding fit chi2
- *
- * Revision 1.7  2019/07/15 16:58:09  akio
- * Adding hit->cluster pointer
- *
- * Revision 1.6  2019/07/10 06:12:20  akio
- * adding pointer to cluster it belongs
- *
- * Revision 1.5  2019/06/26 17:59:39  akio
- * Added StFcsHit constructor for MC
- *
- * Revision 1.4  2019/06/07 18:20:47  akio
- * StFcsHit holds all timebins now
- *
- * Revision 1.3  2019/05/16 16:03:45  akio
- * add .includes_for_export.flg and also compress dep/ch
- *
- * Revision 1.2  2019/05/10 19:40:13  akio
- * Adding flag
- *
- * Revision 1.1  2018/11/14 16:49:00  akio
- * FCS codes in offline/upgrade/akio
- *
+ * Revision 2.1  2021/01/11 20:25:37  ullrich
+ * Initial Revision
  *
  **************************************************************************/
 #ifndef StFcsHit_hh

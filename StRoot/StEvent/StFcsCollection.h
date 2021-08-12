@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFcsCollection.h,v 1.2 2019/06/07 18:20:46 akio Exp $
+ * $Id: StFcsCollection.h,v 2.1 2021/01/11 20:25:37 ullrich Exp $
  *
  * Author: Akio Ogawa, 2018 Aug
  ***************************************************************************
@@ -16,12 +16,8 @@
  ***************************************************************************
  *
  * $Log: StFcsCollection.h,v $
- * Revision 1.2  2019/06/07 18:20:46  akio
- * StFcsHit holds all timebins now
- *
- * Revision 1.1  2018/11/14 16:48:59  akio
- * FCS codes in offline/upgrade/akio
- *
+ * Revision 2.1  2021/01/11 20:25:37  ullrich
+ * Initial Revision
  *
  **************************************************************************/
 #ifndef StFcsCollection_hh

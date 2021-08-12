@@ -4,7 +4,6 @@
 * $Log: csdefn.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
 *
-*
 * Revision 1.1  2003/11/08 16:47:01  nevski
 * update for infinit zebra size
 *

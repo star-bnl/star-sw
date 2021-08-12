@@ -21,6 +21,7 @@ EMC_BarrelReader::EMC_BarrelReader(EventReader *er,Bank_EMCP *pEMCP):pBankEMCP(p
     ts.GetTime(1,0,&hour1,&min,&sec);
     UInt_t date= day + 100*(month+100*year );  
     UInt_t hour= sec + 100*(min  +100*hour1);
+
     decoder=new StEmcDecoder(date,hour);
     cout<<"EMC_Barrelreader** Event time (Unix time) = "<<info.UnixTime<<endl;
     Initialize();

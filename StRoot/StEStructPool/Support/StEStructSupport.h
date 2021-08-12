@@ -142,7 +142,7 @@ inline bool StEStructSupport::silent() { return msilent; };
  *
  * $Log: StEStructSupport.h,v $
  * Revision 1.19  2011/08/02 20:42:24  prindle
- *   Added YtYtVolumeNormalization.
+ * Added YtYtVolumeNormalization.
  *   Fixed calculation of error for YtYt \Delta\rho/sqrt(\rho_{ref})
  *   Added error calculation for p_t histograms
  *   Added warning when either \rho_{sib} or \rho_{ref} has an empty bin. Set ratio

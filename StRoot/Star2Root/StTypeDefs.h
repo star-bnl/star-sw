@@ -54,7 +54,7 @@ typedef TTableDescriptor St_tableDescriptor;
 
 // $Log: StTypeDefs.h,v $
 // Revision 1.4  2000/04/27 17:41:48  fine
-//  wrong typedef for TCL class fixed
+// wrong typedef for TCL class fixed
 //
 // Revision 1.3  2000/04/27 17:16:16  fine
 //  wrong typedef for TCL class fixed

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StHbtTTreeXi.h,v 1.0 1999/09/07
+ *  StHbtTTreeXi.h,v 1.0 1999/09/07
  *
  * Authors: Frank Laue, BNL, laue@bnl.gov
  *

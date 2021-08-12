@@ -4,7 +4,6 @@
 * $Log: cshlopt.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
 *
-*
 * Revision 1.2  2001/06/15 23:00:20  nevski
 * if-endif corrected
 *

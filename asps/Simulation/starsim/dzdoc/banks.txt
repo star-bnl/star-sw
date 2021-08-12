@@ -2,7 +2,6 @@
 * $Log: banks.txt,v $
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
 *
-*
 * Revision 1.4  2001/07/26 16:07:40  nevski
 * *** empty log message ***
 *

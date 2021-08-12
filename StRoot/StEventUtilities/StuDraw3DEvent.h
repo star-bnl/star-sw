@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.21 2012/01/24 03:11:25 perev Exp $
+// $Id: StuDraw3DEvent.h,v 1.22 2018/06/29 17:21:24 perev Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"

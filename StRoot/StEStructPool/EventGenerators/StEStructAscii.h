@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructAscii.h 
+ *  StEStructAscii.h 
  *
  * Author: msd
  *
@@ -55,7 +55,7 @@ inline bool StEStructAscii::done(){ return mAmDone; };
 
 /**********************************************************************
  *
- * $Log: 
+ *  
  * Revision 1.1 
  * 
  *

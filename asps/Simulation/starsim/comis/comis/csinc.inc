@@ -1,7 +1,7 @@
 *
-* $Id:
+* 
 *
-* $Log:
+* 
 *
 #ifndef CERNLIB_COMIS_CSINC_INC
 #define CERNLIB_COMIS_CSINC_INC

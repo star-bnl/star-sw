@@ -19,12 +19,11 @@ StChargedPionEvent::StChargedPionEvent() : mSpinQA(0), mTriggerBits(0), mSimuTri
     
     memset(mL2Result, 0, 36);
     memset(mL2ResultEmulated, 0, 36);
-#if  1 /* bug in TStreamerInfo*, fixed 09/05/14, ROOT_VERSION_CODE < ROOT_VERSION(5,34,20) */        
+        
     StChargedPionEvent::Class()->IgnoreTObjectStreamer();
     StChargedPionVertex::Class()->IgnoreTObjectStreamer();
     StChargedPionTrack::Class()->IgnoreTObjectStreamer();
     StChargedPionJet::Class()->IgnoreTObjectStreamer();
-#endif
 }
 
 StChargedPionEvent::~StChargedPionEvent() { 

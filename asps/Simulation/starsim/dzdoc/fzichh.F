@@ -3,7 +3,6 @@
 * $Log: fzichh.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
 *
-*
 * Revision 1.2  2001/06/15 00:02:18  nevski
 * merging differences between private cmz and this version
 *

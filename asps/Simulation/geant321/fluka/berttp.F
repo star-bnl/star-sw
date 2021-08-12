@@ -4,7 +4,6 @@
 * $Log: berttp.F,v $
 * Revision 1.1.1.1  2004/01/15 00:11:59  potekhin
 *
-*
 * Revision 1.3  2003/12/01 18:52:01  nevski
 * input data files search can be done by user
 *

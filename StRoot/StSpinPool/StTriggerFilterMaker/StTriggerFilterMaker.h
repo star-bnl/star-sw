@@ -30,6 +30,8 @@ public:
     
     void addTrigger(unsigned int trigId) { mGoodTriggers.push_back(trigId); }
     void addVetoTrigger(unsigned int trigId) { mVetoTriggers.push_back(trigId); }
+    void addTofUpperLimit(unsigned int thr) {mTofUpperLimit=thr;}
+
     void printTriggerId(int v=1) {mPrint=v;}
 
     const vector<unsigned int> getTriggers() const {return mGoodTriggers;}
@@ -41,6 +43,7 @@ public:
 private:
     vector<unsigned int> mGoodTriggers; //!
     vector<unsigned int> mVetoTriggers; //!
+    unsigned int mTofUpperLimit=0; //!
     int mPrint; //!
 
     ClassDef(StTriggerFilterMaker,1)

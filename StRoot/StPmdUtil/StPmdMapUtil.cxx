@@ -12,7 +12,7 @@
  *********************************************************
  * $Log: StPmdMapUtil.cxx,v $
  * Revision 1.11  2010/05/02 13:13:46  rashmi
- *  removed some couts
+ * removed some couts
  *
  * Revision 1.10  2010/04/30 07:05:46  rashmi
  * Fixed an array for nSmChainBoards

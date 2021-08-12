@@ -98,7 +98,6 @@ inline void StEStructPhiWeight::logStats(ostream& os){
  *
  * $Log: StEStructPhiWeight.h,v $
  * Revision 1.1  2006/04/26 18:58:15  dkettler
- *
  * Simple version of weight calculation analysis
  *
  *

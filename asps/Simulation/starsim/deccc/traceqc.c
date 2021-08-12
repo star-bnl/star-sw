@@ -4,7 +4,6 @@
 * $Log: traceqc.c,v $
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
 *
-*
 * Revision 1.3  2003/09/29 16:18:46  nevski
 * linux tracing
 *

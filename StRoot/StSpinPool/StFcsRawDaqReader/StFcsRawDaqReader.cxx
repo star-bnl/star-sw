@@ -37,6 +37,7 @@
 #include "StRoot/StEvent/StFcsCollection.h"
 #include "StRoot/StEvent/StFcsHit.h"
 #include "StRoot/StFcsDbMaker/StFcsDbMaker.h"
+#include "StRoot/StFcsDbMaker/StFcsDb.h"
 #include "RTS/src/DAQ_READER/daqReader.h"
 
 #include <string.h>
@@ -58,16 +59,16 @@ Int_t StFcsRawDaqReader::prepareEnvironment(){
   } else {
     mEvent=new StEvent();
     AddData(mEvent);
-    LOG_DEBUG <<"::prepareEnvironment() has added StEvent"<<endm;
+    LOG_DEBUG <<"StFcsRawDaqReader::prepareEnvironment() has added StEvent"<<endm;
   }
   mFcsCollectionPtr=mEvent->fcsCollection();
   if(!mFcsCollectionPtr) {
     mFcsCollectionPtr=new StFcsCollection();
     mEvent->setFcsCollection(mFcsCollectionPtr);
-    LOG_DEBUG<<"::prepareEnvironment() has added StFcsCollection"<<endm;
+    LOG_DEBUG <<"StFcsRawDaqReader::prepareEnvironment() has added StFcsCollection"<<endm;
   } else {
     mFcsCollectionPtr=mEvent->fcsCollection();
-    LOG_DEBUG <<"::prepareEnvironment() found StFcsCollection"<<endm;
+    LOG_DEBUG <<"StFcsRawDaqReader::prepareEnvironment() found StFcsCollection"<<endm;
   };
   return kStOK;
 };
@@ -75,6 +76,7 @@ Int_t StFcsRawDaqReader::prepareEnvironment(){
 Int_t StFcsRawDaqReader::Init(){
    GetEvtHddr()->SetEventNumber(1);
    LOG_INFO << "Opening "<< mDaqFileName.data() <<endm;
+
    mRdr = new daqReader( const_cast< Char_t* >( mDaqFileName.data() ) ); 	
    if(!mRdr) {
      LOG_FATAL << "Error constructing daqReader" << endm;
@@ -86,18 +88,27 @@ Int_t StFcsRawDaqReader::Init(){
    int date=(local->tm_year+1900)*10000 + (local->tm_mon+1)*100 + local->tm_mday;
    int time=local->tm_hour*10000 + local->tm_min*100 + local->tm_sec;
    printf("Event Unix Time = %d %0d %06d\n",mRdr->evt_time,date,time);   
-   mFcsDbMkr = static_cast< StFcsDbMaker*>(GetMaker("fcsDb"));
+
+   StFcsDbMaker* mFcsDbMkr = static_cast<StFcsDbMaker*>(GetMaker("fcsDbMkr"));
    if(!mFcsDbMkr){
      LOG_FATAL << "Error finding StFcsDbMaker"<< endm;
      return kStFatal;
-   }
+   }   
    mFcsDbMkr->SetDateTime(date,time);
    LOG_INFO << "Using date and time " << mFcsDbMkr->GetDateTime().GetDate() << ", "
 	    << mFcsDbMkr->GetDateTime().GetTime() << endm;
+
+   mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
+   if(!mFcsDb){
+     LOG_FATAL << "Error finding StFcsDb"<< endm;
+     return kStFatal;
+   }   
    return kStOK;
 };
 
 Int_t StFcsRawDaqReader::Make() {
+  LOG_DEBUG << "Starting StFcsRawDaqReader::Make()"<<endm;
+
   static int nskip=0;
   static int nskiptot=0;
   mTrg=0;
@@ -172,6 +183,7 @@ Int_t StFcsRawDaqReader::Make() {
       GoodOrEOR=1;
     }
   }
+
   int trgcmd = mRdr->trgcmd;
   if(trgcmd != 4 && trgcmd !=10){  // 4=phys/ped 10=LED
     printf("This should not happen!!!  trgcmd=%d skipping nskip=%d nskiptot=%d\n",trgcmd,nskip,nskiptot);
@@ -195,6 +207,7 @@ Int_t StFcsRawDaqReader::Make() {
 
   daq_dta *dd = 0;
   dd = mRdr->det("trg")->get("raw");
+  int startrg=0,fcstrg=0;
   if(!dd){
     //printf("trg/raw not found\n");
   }else{
@@ -209,15 +222,65 @@ Int_t StFcsRawDaqReader::Make() {
       //printf("Trigger: raw bank has %d bytes: ver 0x%02X, desc %d, len %d\n",dd->ncontent,desc->ver,desc->evt_desc,desc->len);                 
       if(desc->ver==0x46){
         TriggerDataBlk2019* trgdata2019 = (TriggerDataBlk2019*)dd->Byte;  
-	mTrg = (StTriggerData*) new StTriggerData2019(trgdata2019,mRun,1,mDebug);
-        if(mDebug) printf("Creating StTriggerData for ver=0x46 (2019) with run=%d\n",mRun);
-        //AddData(new TObjectSet("StTriggerData",new StTriggerData2017(trgdata2017,mRun,1,mDebug),kTRUE));
-        //printf("Adding dataset StTriggerData for ver=0x44 (2017) with run=%d\n",mRun);
+        LOG_DEBUG << "Creating StTriggerData for ver=0x46 (2019) with run="<<mRun<<endm;
+	mEvent->setTriggerData((StTriggerData*)new StTriggerData2019(trgdata2019,mRun,1,mDebug));
+	LOG_DEBUG << "Added StTriggerData to StEvent"<<endm;
+        //AddData(new TObjectSet("StTriggerData",new StTriggerData2019(trgdata2019,mRun,1,mDebug),kTRUE));
+        //LOG_DEBUG << "Adding Dataset StTriggerData"<<endm;
+	//	mTrg = (StTriggerData*) (GetData("StTriggerData")->GetObject());
+	//mTrg = mEvent->triggerData();
+        //LOG_DEBUG << "Got back Dataset StTriggerData addr="<<mTrg<<endm;
+	
+	mFcsTcuBit = mTrg->lastDSM(5);
+	//unsigned short lastdsm4 = mTrg->lastDSM(4);
+	//unsigned short fcs0   = (lastdsm4 >> 10) & 0x1;
+	//unsigned short fcs1   = (lastdsm4 >>  5) & 0x1;
+	//unsigned short fcs2   = (lastdsm4 >>  7) & 0x1;
+	//unsigned short fcs3   = (lastdsm4 >>  8) & 0x1;
+	//unsigned short fcs4   = (lastdsm4 >>  9) & 0x1;
+	//unsigned short fcs5   = (lastdsm4 >> 12) & 0x1;
+	//unsigned short fcs6   = (lastdsm4 >> 13) & 0x1;
+	//unsigned short fcs7   = (lastdsm4 >> 14) & 0x1;
+	//unsigned short fcs8   = (lastdsm4 >> 15) & 0x1; 
+	//mFcsTcuBit = fcs0 + (fcs1<<1) + (fcs2<<2) + (fcs3<<3) 
+	//  + (fcs4<<4) + (fcs5<<5) + (fcs6<<6) + (fcs7<<7) + (fcs8<<8);
+	LOG_DEBUG << Form("FCS TCU Bits = 0x%04x",mFcsTcuBit)<<endm;
+
+	unsigned long long l2sum=mTrg->l2sum();
+	startrg = (l2sum & 0xFF8000FFFFFFFFFF)?1:0;
+	fcstrg  = (l2sum & 0x007FFF0000000000)?1:0;
+	LOG_DEBUG << Form("L2SUM = 0x%016llx STAR=%1d FCS=%1d",l2sum,startrg,fcstrg) << endm;
+
       }else{
         printf("Unknown StTriggerData version = %x\n",desc->ver);
       }
     }
   }
+
+  /*
+  //Get DEPIO board info from "adc"
+  mFcsDepOut=0;
+  dd = mRdr->det("fcs")->get("adc");
+  if(dd){
+    while(dd->iterate()) {
+      //int sec = ((dd->sec >> 11) & 0x1F) + 1;
+      //int rdo = ((dd->sec >> 8) & 0x7) + 1;
+      int ehp = (dd->sec >> 6) & 0x3;
+      int ns  = (dd->sec >> 5) & 1;
+      int dep = dd->row ;
+      int ch  = dd->pad ;
+      //printf("DEPIO EHP=%1d NS=%1d DEP=%02d CH=%02d N=%d\n",
+      //     ehp,ns,dep,ch,dd->ncontent);
+      if(ehp==3 && ns==0 && dep==0 && (ch==4 || ch==5)){	
+	u_int n=dd->ncontent;
+	u_short *d16 = (u_short *)dd->Void;
+	if(ch==4) mFcsDepOut += (d16[96] & 0xFF);
+	if(ch==5) mFcsDepOut += (d16[96] & 0xFF) << 8;
+	//for(int i=0; i<n; i++) printf("  tb=%3d  d16=0x%04x\n",i,d16[i]);
+      }
+    }
+  }
+  */
 
   int ndata=0, nvaliddata=0;
   //  char* mode[2]={"adc","zs"};
@@ -238,26 +301,29 @@ Int_t StFcsRawDaqReader::Make() {
       int ch = dd->pad ;
       u_int n=dd->ncontent;      
       int detid,id,crt,sub;
-      mFcsDbMkr->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
+      mFcsDb->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
+      //printf("EHP=%1d NS=%1d DEP=%02d CH=%02d DET=%1d id=%4d\n",ehp,ns,dep,ch,detid,id);
       //if(ch>=32) continue;
       u_short *d16 = (u_short *)dd->Void;
       StFcsHit* hit=0;
-      //unsigned short tmp[512];
+      unsigned short tmp[1024];
       if(mReadMode==0){
 	hit = new StFcsHit(0,detid,id,ns,ehp,dep,ch,n,d16);
       }else{
 	/*
-	for(u_int i=0; i<n; i++) {
-	  u_int tb   = dd->adc[i].tb;
-	  u_int data = dd->adc[i].adc;
-	  tmp[i*2  ]=data;
-	  tmp[i*2+1]=tb;
-
-	  printf("AAA %4d : %4d %4d : %4d %4d\n",i,data&0xfff,d16[i*2]&0xfff,tb,d16[i*2+1]);
-	}	
-	hit = new StFcsHit(1,detid,id,ns,ehp,dep,ch,2*n,tmp);
+	if(startrg==0 && fcstrg==1){
+	  for(u_int i=0; i<n; i++) {
+	    u_int tb   = dd->adc[i].tb;
+	    u_int data = dd->adc[i].adc;
+	    tmp[i*2  ]=data;
+	    tmp[i*2+1]=tb + 8;	    
+	    //printf("AAA %4d : %4d %4d : %4d %4d\n",i,data&0xfff,d16[i*2]&0xfff,tb,d16[i*2+1]);
+	  }	
+	  hit = new StFcsHit(1,detid,id,ns,ehp,dep,ch,2*n,tmp);	  
 	*/
-	hit = new StFcsHit(1,detid,id,ns,ehp,dep,ch,2*n,d16);
+	//}else{
+	  hit = new StFcsHit(1,detid,id,ns,ehp,dep,ch,2*n,d16);
+	//}
       }
       mFcsCollectionPtr->addHit(detid,hit);
       ndata++;      
@@ -300,18 +366,31 @@ Int_t StFcsRawDaqReader::Make() {
 };
 
 void StFcsRawDaqReader::Clear( Option_t *opts ){
-  StTriggerData2019* d=(StTriggerData2019*)mTrg;
-  if(d) delete d;
-  if(mFcsCollectionPtr){
-    for(int d=0; d<kFcsNDet+1; d++) { mFcsCollectionPtr->hits(d).clear(); }
-  }
+  //StTriggerData2019* d=(StTriggerData2019*)mTrg;
+  //if(d) delete d;
+  //mFcsCollectionPtr->print();
+  //StMaker::Clear(opts);
+  //mFcsCollectionPtr->print();
+  //if(mFcsCollectionPtr){
+  //  for(int d=0; d<kFcsNDet+1; d++) { mFcsCollectionPtr->hits(d).clear(); }
+  //}
+  //mFcsCollectionPtr->print();
 };
 
 ClassImp(StFcsRawDaqReader);
 
 /*
- * $Id: StFcsRawDaqReader.cxx,v 1.6 2021/02/13 21:39:17 akio Exp $
+ * $Id: StFcsRawDaqReader.cxx,v 1.9 2021/05/30 21:31:30 akio Exp $
  * $Log: StFcsRawDaqReader.cxx,v $
+ * Revision 1.9  2021/05/30 21:31:30  akio
+ * Adding StTriggerData to StEvent, not dataset
+ *
+ * Revision 1.8  2021/05/27 13:10:38  akio
+ * Many updates for trigger bits and around Clear()
+ *
+ * Revision 1.7  2021/03/30 13:30:11  akio
+ * StFcsDbMAker->StFcsDB
+ *
  * Revision 1.6  2021/02/13 21:39:17  akio
  * debug printouts
  *

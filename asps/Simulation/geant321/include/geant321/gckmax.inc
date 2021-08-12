@@ -4,7 +4,6 @@
 * $Log: gckmax.inc,v $
 * Revision 1.1.1.1  2004/01/15 00:12:23  potekhin
 *
-*
 * Revision 1.2  2003/11/16 17:41:04  nevski
 * follow cernlib 2002 release note
 *

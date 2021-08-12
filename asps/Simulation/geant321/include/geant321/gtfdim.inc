@@ -4,7 +4,6 @@
 * $Log: gtfdim.inc,v $
 * Revision 1.1.1.1  2004/01/15 00:12:25  potekhin
 *
-*
 * Revision 1.1.1.1  1997/11/03 15:29:50  atlascvs
 * Importing CERNLIB version 08.21.
 *

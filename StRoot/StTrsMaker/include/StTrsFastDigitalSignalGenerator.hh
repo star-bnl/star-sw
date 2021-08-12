@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.hh,v 1.1 1999/10/01 
+ *  StTrsFastDigitalSignalGenerator.hh,v 1.1 1999/10/01 
  *      17:15:00 HUi Long Exp $
  *
  * Author: Hui Long

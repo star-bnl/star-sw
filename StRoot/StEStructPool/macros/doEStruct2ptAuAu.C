@@ -138,7 +138,6 @@ void doEStruct2ptAuAu(const char* fileListFile, const char* outputDir, const cha
  *
  * $Log: doEStruct2ptAuAu.C,v $
  * Revision 1.2  2006/04/26 18:52:50  dkettler
- *
  * Added reaction plane determination for the analysis
  *
  * Added reaction plane angle calculation

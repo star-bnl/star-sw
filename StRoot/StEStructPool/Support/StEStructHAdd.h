@@ -46,7 +46,7 @@ class StEStructHAdd : public TObject {
  *
  * $Log: StEStructHAdd.h,v $
  * Revision 1.6  2010/06/23 22:33:45  prindle
- *   In HAdd we distinguish between the parent distributions of the
+ * In HAdd we distinguish between the parent distributions of the
  *    two particles.
  *   In Support I fixed a number of problems in the Pt correlation section.
  *

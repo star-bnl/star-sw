@@ -4,7 +4,6 @@
 * $Log: cs_dlfcn.c,v $
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
 *
-*
 * Revision 1.4  2001/11/25 15:30:19  nevski
 * dlfch is for hp only
 *

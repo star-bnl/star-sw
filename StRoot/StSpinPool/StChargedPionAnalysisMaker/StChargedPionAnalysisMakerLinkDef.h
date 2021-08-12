@@ -7,7 +7,7 @@
  * we can force it to include them using this file.
  *****************************************************************************/
 
-#if defined(__CINT__) || defined(__CLING__)
+#ifdef __CINT__
 #pragma link C++ class std::vector< StChargedPionJetParticle >;
 #pragma link C++ class std::vector< StChargedPionMcTrack >;
 #pragma link C++ class std::vector< StChargedPionJet >;

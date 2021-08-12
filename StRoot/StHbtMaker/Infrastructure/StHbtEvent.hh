@@ -140,7 +140,7 @@ public:
   double MagneticField() const;
   unsigned int TriggerWord() const;
   unsigned int TriggerActionWord() const;
-  unsigned int L3TriggerAlgorithm(const unsigned int& l) const;
+  unsigned int L3TriggerAlgorithm(const unsigned int& l=0) const;
 
   void SetEventNumber(const unsigned short&);
   void SetRunNumber(const int&);

@@ -3,7 +3,6 @@
 * $Log: gcalor.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:40  potekhin
 *
-*
 * Revision 1.7  2003/03/18 12:27:30  nevski
 * print corrected
 *

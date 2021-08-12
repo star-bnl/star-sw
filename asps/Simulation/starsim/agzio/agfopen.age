@@ -2,7 +2,6 @@
 * $Log: agfopen.age,v $
 * Revision 1.1.1.1  2004/01/12 23:49:36  potekhin
 *
-*
 * Revision 1.4  2002/06/12 00:33:48  nevski
 * Fopen can give only a warning
 *

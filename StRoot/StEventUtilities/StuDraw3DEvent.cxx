@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.34 2012/04/27 00:20:23 perev Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.35 2018/06/29 17:21:24 perev Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TSystem.h"

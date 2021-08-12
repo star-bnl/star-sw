@@ -37,7 +37,7 @@ ClassImp(St2011WMaker)
 
 //_____________________________________________________________________________
 //
-  St2011WMaker::St2011WMaker(const char *name):StMaker(name), spinDb(0) {
+St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   char muDstMakerName[]="MuDst"; 
   mMuDstMaker=(StMuDstMaker*)GetMaker(muDstMakerName);  
   coreTitle=name;

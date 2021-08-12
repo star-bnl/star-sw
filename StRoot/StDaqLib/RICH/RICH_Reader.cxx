@@ -13,7 +13,7 @@
  * 12-Mar-00 XZB Token check, EventNumber=Token, consistancy check, BankId
  * 21-Apr-00 xzb add in RichEventReader for standalone data file 
  ***************************************************************************
- * $Log: Opens Event From File, Fills Struct 
+ *  Opens Event From File, Fills Struct 
  *
  **************************************************************************/
 

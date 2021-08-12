@@ -1,7 +1,7 @@
 *
-* $Id:
+* 
 *
-* $Log:
+* 
 *
 #include "comis/pilot.h"
 *-- Author : O.Couet

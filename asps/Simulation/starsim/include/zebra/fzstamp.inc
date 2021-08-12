@@ -4,7 +4,6 @@
 * $Log: fzstamp.inc,v $
 * Revision 1.1.1.1  2004/01/12 23:49:41  potekhin
 *
-*
 * Revision 1.1  2001/06/15 00:02:18  nevski
 * merging differences between private cmz and this version
 *

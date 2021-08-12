@@ -4,7 +4,6 @@
 * $Log: fldist.F,v $
 * Revision 1.1.1.1  2004/01/15 00:11:59  potekhin
 *
-*
 * Revision 1.2  2001/07/13 14:30:41  nevski
 * Send K0Ls back to GHEISHA (as well as low energy neutrons)
 *

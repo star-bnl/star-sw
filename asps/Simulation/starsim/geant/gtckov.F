@@ -4,7 +4,6 @@
 * $Log: gtckov.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:40  potekhin
 *
-*
 * Revision 1.2  2003/11/16 20:15:55  nevski
 * switch on/off doubtful correction
 *

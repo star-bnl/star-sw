@@ -203,7 +203,7 @@ void StEmcCalibrationMaker::fillTrackArrays()
   {
 	  for(int t=0;t<mNTracks;t++)
 	  { 
-	    StTrack *track = (StTrack *) tracks[t]->track(0);
+		  StTrack *track = tracks[t]->track(0);
       if(track)
       {
         if(track->geometry())

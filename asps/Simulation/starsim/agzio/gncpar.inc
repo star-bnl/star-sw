@@ -2,7 +2,6 @@
 * $Log: gncpar.inc,v $
 * Revision 1.1.1.1  2004/01/12 23:49:37  potekhin
 *
-*
 * Revision 1.1  2001/03/05 11:40:07  nevski
 * pseudo-genz parameters
 *

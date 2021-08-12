@@ -214,7 +214,7 @@ Int_t StFmsDiPi0::Init(){
         mChain->SetBranchAddress("pz",tPz);
         mFile->cd();	
     }
-    return StMaker::Init();
+    return kStOK;
 }
 
 Int_t StFmsDiPi0::Finish(){

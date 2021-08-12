@@ -2,7 +2,6 @@
 * $Log: agmotif.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
 *
-*
 * Revision 1.1  2001/02/27 10:14:47  nevski
 *  first working release
 *

@@ -2,7 +2,6 @@
 * $Log: gnzpnam.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:37  potekhin
 *
-*
 * Revision 1.4  2002/10/12 21:57:55  nevski
 * decode more names
 *

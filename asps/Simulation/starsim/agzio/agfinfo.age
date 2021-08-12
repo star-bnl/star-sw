@@ -4,7 +4,6 @@
 * $Log: agfinfo.age,v $
 * Revision 1.1.1.1  2004/01/12 23:49:36  potekhin
 *
-*
 * Revision 1.3  2003/08/30 16:52:24  nevski
 * bugfix: HEAD bank lost on event skip
 *

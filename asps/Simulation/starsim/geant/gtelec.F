@@ -2,7 +2,6 @@
 * $Log: gtelec.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:40  potekhin
 *
-*
 * Revision 1.2  2001/06/14 00:03:34  nevski
 * vnext not used
 *

@@ -294,7 +294,7 @@ Int_t StBTofCalibMaker::Init()
 	if (IAttr("btofFXT")) mFXTMode = kTRUE; //True for FXT mode calib, default as false for collider mode calib
 
   if (IAttr("pppAMode")) {
-	    mPPPAMode = kTRUE;
+      mPPPAMode = kTRUE;
       mRun15Slew = kTRUE;
       LOG_INFO << "pppAMode is on." << endm;
   }
@@ -363,7 +363,7 @@ Int_t StBTofCalibMaker::InitRun(int runnumber)
     mVpdResConfig->loadVpdSimParams(); // do i really need this?
     mVpdRes = mVpdResConfig->getParams();
     mBTofRes = new StBTofSimResParams;
-    mBTofRes->loadParams();
+    mBTofRes->loadParams(runnumber); //zaochen
 
 
     if(vpdCalib) {
@@ -965,7 +965,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     //beam line not be calibrated yet
     //x0 shift by 0.5
     //x0 = 0.5;
-     //**********
+    //**********
     StThreeVectorD origin(x0,y0,0.0);
     double pt = 88889999;
     double nxy=::sqrt(dxdz*dxdz +  dydz*dydz);
@@ -980,8 +980,8 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
     if(mBeamHelix) delete mBeamHelix;
     mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
-    
-  
+
+
     return kStOK;
 }
 
@@ -1002,6 +1002,7 @@ Int_t StBTofCalibMaker::Finish()
 {
 #ifndef __TFG__VERSION__
     if (mHistoFileName!="") writeHistograms();
+    if (mPPPAModeHist)      writePPPAHistograms();
 #endif /* ! __TFG__VERSION__ */
     return kStOK;
 }

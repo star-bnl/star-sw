@@ -3,7 +3,6 @@
 * $Log: versqq.inc,v $
 * Revision 1.1.1.1  2004/01/12 23:49:41  potekhin
 *
-*
 * Revision 1.4  2002/02/22 15:20:20  nevski
 * move pointers to 3.0.0
 *

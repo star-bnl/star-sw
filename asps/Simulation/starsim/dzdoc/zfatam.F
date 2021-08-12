@@ -4,7 +4,6 @@
 * $Log: zfatam.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
 *
-*
 * Revision 1.2  2001/03/25 17:50:32  nevski
 * mzca splitted
 *

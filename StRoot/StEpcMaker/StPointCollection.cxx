@@ -858,7 +858,7 @@ Int_t StPointCollection::matchToTracks(StEvent* event)
         StThreeVectorD momentum,position;
         for(Int_t t=0;t<nTracks;t++)
         {
-	  StTrack *track = (StTrack *)tracks[t]->track(global);
+            StTrack *track = tracks[t]->track(0);
             if(track)
             {
                 if(track->geometry())

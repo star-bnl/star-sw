@@ -3,7 +3,6 @@
 * $Log: gxcont.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:41  potekhin
 *
-*
 * Revision 1.7  2003/11/08 17:47:28  nevski
 * event offset=0
 *

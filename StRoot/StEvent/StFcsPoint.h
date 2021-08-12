@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * $Id: StFcsPoint.h,v 1.2 2019/10/23 13:27:07 akio Exp $
+ * $Id: StFcsPoint.h,v 2.1 2021/01/11 20:25:37 ullrich Exp $
  *
  * Author: Akio Ogawa 2018
  **************************************************************************
@@ -11,19 +11,15 @@
  **************************************************************************
  *
  * $Log: StFcsPoint.h,v $
- * Revision 1.2  2019/10/23 13:27:07  akio
- * including StFcsPoint for StFcsPointMaker
- *
- * Revision 1.1  2018/11/14 16:49:00  akio
- * FCS codes in offline/upgrade/akio
- *
+ * Revision 2.1  2021/01/11 20:25:37  ullrich
+ * Initial Revision
  *
  **************************************************************************/
 #ifndef StFcsPoint_h
 #define StFcsPoint_h
 
-#include "StLorentzVectorF.hh"
-#include "StThreeVectorF.hh"
+#include "StLorentzVectorD.hh"
+#include "StThreeVectorD.hh"
 #include "StObject.h"
 #include "StFcsCluster.h"
 #include "StEnumerations.h"
@@ -40,8 +36,8 @@ public:
     unsigned int parentClusterId() const; //parent cluster Id
     StFcsCluster* cluster(); //  Parent cluster of the photon.
     int nParentClusterPhotons()   const; // Number of points in the parent cluster.
-    const StThreeVectorF& XYZ()   const; // XYZ position in global STAR coordinate
-    const StLorentzVectorF& fourMomentum() const;
+    const StThreeVectorD& xyz()   const; // XYZ position in global STAR coordinate
+    const StLorentzVectorD& fourMomentum() const;
 
     void setDetectorId(unsigned short detectorId);
     void setEnergy(float energy);
@@ -49,8 +45,8 @@ public:
     void setY(float y);
     void setCluster(StFcsCluster* cluster);
     void setNParentClusterPhotons(int nclph);
-    void setXYZ(const StThreeVectorF& p3);
-    void setFourMomentum(const StLorentzVectorF& p4);
+    void setXYZ(const StThreeVectorD& p3);
+    void setFourMomentum(const StLorentzVectorD& p4);
     
     void print(int option=0);
 
@@ -61,8 +57,8 @@ private:
     Float_t  mY=0.0;         ///  Fitted y-position in local coordinate
     Int_t    mNParentClusterPhotons=0;  ///< Number of photons in the parent cluster
     StFcsCluster* mCluster=0;
-    StLorentzVectorF mFourMomentum;  ///< Photon 4-momentum
-    StThreeVectorF   mXYZ;           //Photon position in STAR coordinate
+    StLorentzVectorD mFourMomentum;  ///< Photon 4-momentum
+    StThreeVectorD   mXYZ;           //Photon position in STAR coordinate
 
     ClassDef(StFcsPoint, 1)
 };
@@ -74,16 +70,16 @@ inline float StFcsPoint::y() const { return mY; } // y position in cm at which p
 inline unsigned int StFcsPoint::parentClusterId() const { return mCluster->id(); } //parent cluster Id
 inline StFcsCluster* StFcsPoint::cluster() { return mCluster; } //  Parent cluster of the photon.
 inline int StFcsPoint::nParentClusterPhotons() const { return mNParentClusterPhotons; } // Number of points in parent cluster
-inline const StThreeVectorF& StFcsPoint::XYZ() const { return mXYZ; }
-inline const StLorentzVectorF& StFcsPoint::fourMomentum() const { return mFourMomentum; }
+inline const StThreeVectorD& StFcsPoint::xyz() const { return mXYZ; }
+inline const StLorentzVectorD& StFcsPoint::fourMomentum() const { return mFourMomentum; }
 inline void StFcsPoint::setDetectorId(unsigned short det) { mDetectorId = det; }
 inline void StFcsPoint::setEnergy(float energy) { mEnergy = energy; }
 inline void StFcsPoint::setX(float xpos) { mX = xpos; }
 inline void StFcsPoint::setY(float ypos) { mY = ypos; }
 inline void StFcsPoint::setCluster(StFcsCluster* cluster) { mCluster = cluster; }
 inline void StFcsPoint::setNParentClusterPhotons(int nclph) { mNParentClusterPhotons = nclph; }
-inline void StFcsPoint::setXYZ(const StThreeVectorF& p3) { mXYZ = p3; }
-inline void StFcsPoint::setFourMomentum(const StLorentzVectorF& p4) { mFourMomentum = p4; }
+inline void StFcsPoint::setXYZ(const StThreeVectorD& p3) { mXYZ = p3; }
+inline void StFcsPoint::setFourMomentum(const StLorentzVectorD& p4) { mFourMomentum = p4; }
 
 #endif  // StFcsPoint_h
 

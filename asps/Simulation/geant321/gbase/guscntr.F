@@ -4,7 +4,6 @@
 * $Log: guscntr.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:03  potekhin
 *
-*
 * Revision 1.1  1998/02/10 13:04:47  atgeant3
 * *** empty log message ***
 *

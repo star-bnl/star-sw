@@ -4,7 +4,6 @@
 * $Log: csfile.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
 *
-*
 * Revision 1.2  2002/02/21 01:11:49  nevski
 * extend pathname in gexec command
 *

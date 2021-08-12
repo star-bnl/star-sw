@@ -4,7 +4,6 @@
 * $Log: gvtxout.F,v $
 * Revision 1.1.1.1  2004/01/12 23:49:41  potekhin
 *
-*
 * Revision 1.1  2002/11/26 00:44:19  nevski
 * new utility to access daughther list
 *

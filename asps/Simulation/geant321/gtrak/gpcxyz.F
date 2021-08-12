@@ -4,7 +4,6 @@
 * $Log: gpcxyz.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:17  potekhin
 *
-*
 * Revision 1.2  1999/01/13 13:39:37  soneale
 * See ChangeLog
 *

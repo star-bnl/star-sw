@@ -34,7 +34,7 @@ int StPythiaEventMaker::Init()
   mPythiaEvent = new StPythiaEvent;
   mTree = new TTree("PythiaTree","Pythia Record");
   mTree->Branch("PythiaBranch","StPythiaEvent",&mPythiaEvent);
-  return StMaker::Init();
+  return kStOk;
 }
 
 int StPythiaEventMaker::Make()

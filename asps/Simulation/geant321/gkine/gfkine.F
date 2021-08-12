@@ -3,7 +3,6 @@
 * $Log: gfkine.F,v $
 * Revision 1.1.1.1  2004/01/15 00:12:12  potekhin
 *
-*
 * Revision 1.4  2003/11/25 11:59:36  nevski
 * bugfix - min instead of max
 *

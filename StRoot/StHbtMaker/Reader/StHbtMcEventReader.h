@@ -13,6 +13,7 @@ class StHbtMcEventReader : public StHbtEventReader, public StHbtCheckPdgIdList {
   
  private:
   // pointers to other makers
+  StMaker* mTheMcEventMaker;      //! this is the chain where the StEventReaderMaker is
 
   long  mV0;        //! Number of v0s looked at to date
   time_t timeStamp; // to display the time/event
@@ -41,4 +42,8 @@ class StHbtMcEventReader : public StHbtEventReader, public StHbtCheckPdgIdList {
   ClassDef(StHbtMcEventReader, 1)
 #endif
 };
+    
+inline void StHbtMcEventReader::SetTheMcEventMaker(StMaker* mcMaker){mTheMcEventMaker=mcMaker;}
+inline StMaker* StHbtMcEventReader::TheMcEventMaker(){return mTheMcEventMaker;}
+
 #endif

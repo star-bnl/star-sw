@@ -94,7 +94,7 @@ inline StEStructCentType StEStructCentrality::getCentType(){ return mCentType;};
  *
  * $Log: StEStructCentrality.h,v $
  * Revision 1.8  2010/03/02 21:47:18  prindle
- *   Support to retrieve track radius when it crosses endplate
+ * Support to retrieve track radius when it crosses endplate
  *   Add way to retrieve centrality
  *
  * Revision 1.7  2007/01/26 17:19:50  msd

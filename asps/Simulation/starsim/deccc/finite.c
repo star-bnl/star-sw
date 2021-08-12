@@ -3,7 +3,6 @@
 * $Log: finite.c,v $
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
 *
-*
 * Revision 1.2  2001/03/05 11:55:21  nevski
 * headers clean-up
 *
