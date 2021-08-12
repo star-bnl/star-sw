@@ -480,22 +480,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    push @QtDefs, $out[1]; print "Qt3/QtDefs from $ui -> $out[1]\n"; # if $param::debug;
 	}
     }
-    if ($#xpmQT >= 0) {
-	my $out = $PKG . "_image_collection.cxx";
-	if (!$qt4) {
-	    my $dir     = File::Basename::dirname( $xpmQT[0] );
-	    my $dirbase = $dir;
-	    $dirbase =~ s/$Dir//;
-	    if ($dirbase) {
-		$dirbase =~ s|^/||;
-		$dirbase .= "/";
-	    }
-	    my @xpm = map ($dirbase . File::Basename::basename( $_), @xpmQT);
-	    print "Command $uic -embed ".join(" ",@xpm)." -o $out \n";
-	    Command $env [$out], @xpm, qq($uic -embed %< -o %> );
-	    push @src, $out
-	    }
-    }
     if ($qt4) {
 	foreach my $qrc (@qrcQT) {
 	    my $dir     = File::Basename::dirname( $qrc );
