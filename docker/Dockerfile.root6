@@ -127,7 +127,7 @@ RUN source /etc/profile \
  && cd /star-sw \
  && cons +StarVMC/Geometry \
  && cons %OnlTools \
-         %StRoot/StShadowMaker %StRoot/StHbtMaker \
+         %StRoot/StShadowMaker \
  && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 
 RUN install /star-sw/StRoot/macros/.rootrc .
