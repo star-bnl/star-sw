@@ -10,7 +10,7 @@
 #include "StChain/StRtsTable.h"
 #include "StRoot/StEvent/StFcsCollection.h"
 #include "StRoot/StEvent/StFcsHit.h"
-#include "StRoot/StFcsDbMaker/StFcsDbMaker.h"
+#include "StRoot/StFcsDbMaker/StFcsDb.h"
 
 StFcsRawHitMaker::StFcsRawHitMaker( const char* name) :
     StRTSBaseMaker("fcs",name){
@@ -18,31 +18,10 @@ StFcsRawHitMaker::StFcsRawHitMaker( const char* name) :
 
 StFcsRawHitMaker::~StFcsRawHitMaker(){};
 
-int StFcsRawHitMaker::prepareEnvironment(){
-  mEvent = (StEvent*)GetInputDS("StEvent");  
-  if(mEvent) {
-    LOG_INFO <<"::prepareEnvironment() found StEvent"<<endm;
-  } else {
-    mEvent=new StEvent();
-    AddData(mEvent);
-    LOG_INFO <<"::prepareEnvironment() has added StEvent"<<endm;
-  }
-  mFcsCollectionPtr=mEvent->fcsCollection();
-  if(!mFcsCollectionPtr) {
-    mFcsCollectionPtr=new StFcsCollection();
-    mEvent->setFcsCollection(mFcsCollectionPtr);
-    LOG_INFO <<"::prepareEnvironment() has added StFcsCollection"<<endm;
-  } else {
-    mFcsCollectionPtr=mEvent->fcsCollection();
-    LOG_INFO <<"::prepareEnvironment() found StFcsCollection"<<endm;
-  };
-  return kStOK;
-};
-
 int StFcsRawHitMaker::InitRun(int runNumber){
     mRun=runNumber;
-    mFcsDbMkr = static_cast< StFcsDbMaker*>(GetMaker("fcsDb"));
-    if(!mFcsDbMkr){
+    mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
+    if(!mFcsDb){
 	LOG_FATAL << "Error finding StFcsDbMaker"<< endm;
 	return kStFatal;
     }
@@ -50,8 +29,25 @@ int StFcsRawHitMaker::InitRun(int runNumber){
 };
 
 int StFcsRawHitMaker::Make() {
+    mEvent = (StEvent*)GetInputDS("StEvent");  
+    if(mEvent) {
+      LOG_DEBUG<<"Found StEvent"<<endm;
+    } else {
+      mEvent=new StEvent();
+      AddData(mEvent);
+      LOG_INFO <<"Added StEvent"<<endm;
+    }
+    mFcsCollectionPtr=mEvent->fcsCollection();
+    if(!mFcsCollectionPtr) {
+      mFcsCollectionPtr=new StFcsCollection();
+      mEvent->setFcsCollection(mFcsCollectionPtr);
+      LOG_INFO <<"Added StFcsCollection"<<endm;
+    } else {
+      mFcsCollectionPtr=mEvent->fcsCollection();
+      LOG_DEBUG <<"Found StFcsCollection"<<endm;
+    }
+
     StRtsTable* dd=0;
-    prepareEnvironment();    
     int nData=0, nValidData=0;
     const char* mode[2]={"adc","zs"};
     char node[20];
@@ -66,7 +62,7 @@ int StFcsRawHitMaker::Make() {
 	int ch = dd->Pad() ;               // Channel (0-31)
 	u_int n=dd->GetNRows();   
 	int detid,id,crt,sub;
-	mFcsDbMkr->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
+	mFcsDb->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
 	u_short *d16 = (u_short *)dd->GetTable();
 	StFcsHit* hit=0;
 	if(mReadMode==0){
@@ -100,8 +96,11 @@ void StFcsRawHitMaker::Clear( Option_t *opts ){};
 ClassImp(StFcsRawHitMaker);
 
 /*
- * $Id: StFcsRawHitMaker.cxx,v 1.6 2021/02/25 21:55:32 akio Exp $
+ * $Id: StFcsRawHitMaker.cxx,v 1.1 2021/03/30 13:40:12 akio Exp $
  * $Log: StFcsRawHitMaker.cxx,v $
+ * Revision 1.1  2021/03/30 13:40:12  akio
+ * FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
+ *
  * Revision 1.6  2021/02/25 21:55:32  akio
  * Int_t -> int
  *

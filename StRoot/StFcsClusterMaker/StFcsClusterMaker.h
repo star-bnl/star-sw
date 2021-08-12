@@ -1,5 +1,8 @@
-// $Id: StFcsClusterMaker.h,v 1.13 2021/02/25 21:52:57 akio Exp $
+// $Id: StFcsClusterMaker.h,v 1.1 2021/03/30 13:40:02 akio Exp $
 // $Log: StFcsClusterMaker.h,v $
+// Revision 1.1  2021/03/30 13:40:02  akio
+// FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
+//
 // Revision 1.13  2021/02/25 21:52:57  akio
 // Int_t -> int
 //
@@ -52,7 +55,7 @@ class StFcsCollection;
 class StFcsHit;
 class StFcsCluster;
 class StFcsPoint;
-class StFcsDbMaker;
+class StFcsDb;
 class StMuDst;
 
 class StFcsClusterMaker : public StMaker {
@@ -66,42 +69,50 @@ public:
     
     void setDebug(int v) {SetDebug(v);}
 
-    void set_NEIGHBOR_DISTANCE(float e, float h){m_NEIGHBOR_DISTANCE_Ecal=e; m_NEIGHBOR_DISTANCE_Hcal=h;}
-    void set_DISTANCE_ADVANTAGE(float v){m_DISTANCE_ADVANTAGE=v;}
-    void set_TOWER_E_THRESHOLD(float v){m_TOWER_E_THRESHOLD=v;}
-    void set_TOWER_E_THRE_MOMENT(float v){m_TOWER_E_THRE_MOMENT=v;}
-    void set_TOWER_E_RATIO2SPLIT(float e, float h){m_TOWER_E_RATIO2SPLIT_Ecal=e; m_TOWER_E_RATIO2SPLIT_Hcal=h;}
+    void setNeighborDistance(float e, float h){mNeighborDistance_Ecal=e; mNeighborDistance_Hcal=h;}
+    void setDistanceAdvantage(float e, float h){mDistanceAdvantage_Ecal=e; mDistanceAdvantage_Hcal=h;}
+    void setTowerEThreshold(float e, float h){mTowerEThreshold_Ecal=e; mTowerEThreshold_Hcal=h;}
+    void setTowerEThreMoment(float e, float h){mTowerEThreMoment_Ecal=e; mTowerEThreMoment_Hcal=h;}
+    void setTowerERatio2Split(float e, float h){mTowerERatio2Split_Ecal=e; mTowerERatio2Split_Hcal=h;}
+    void sortById(int v=1){mSortById=v;}
 
  private:
-    //move those to StFcsWaveformFitMaker   
-    //int makeSum(int det);
-    //int makeFit(int det);
-
     int makeCluster(int det);
 
-    float isNeighbor(StFcsHit* hit,  StFcsCluster* clu);
-    float distance(StFcsHit* hit1, StFcsHit* hit2);
-    float distance(StFcsHit* hit, StFcsCluster* clu);
-    void  updateCluster(StFcsCluster* clu);
-    void  clusterMomentAnalysis(StFcsCluster* clu, float ecut=-1.0);
-    float getSigma(StFcsCluster* clu, double thetam, float ecut);
-    void  categorization(StFcsCluster* clu);
+    float isNeighbor(StFcsHit* hit,  StFcsCluster* clu);   //! checks if a hit is touching a cluster
+    float distance(StFcsHit* hit1, StFcsHit* hit2);        //! distance between 2 hits [cell unit]
+    float distance(StFcsHit* hit, StFcsCluster* clu);      //! distance between a hit to cluster center [cell unit]
+    void  updateCluster(StFcsCluster* clu);                //! update cluster infos after hits added 
+    int   clusterMomentAnalysis(StFcsCluster* clu, float ecut);      //! cluster moment analysis with a threshold
+    float getSigma(StFcsCluster* clu, double thetam, float ecut);    //! calculate sigma 
+    void  categorization(StFcsCluster* clu);                         //! categorize cluster based on moment analysis
 	
-    StFcsDbMaker* mDb=0;               //!
-    StFcsCollection* mFcsCollection=0; //!
+    StFcsDb* mDb=0;                       //! pointer to StFcsDb
+    StFcsCollection* mFcsCollection=0;    //! pointer to StFcsCollection in StEvent
 
-    float m_NEIGHBOR_DISTANCE_Ecal=1.01; //! Distance to make it neignbor for Ecal and Hcal
-    float m_NEIGHBOR_DISTANCE_Hcal=2.01; //! 1.01 for 4 towers around
-                                           //! 1.42 for 8 surrounding)
+    float mNeighborDistance      = 1.01;  //! Distance to make it neignbor
+    float mNeighborDistance_Ecal = 1.01;  //! 1.01 for 4 towers around
+    float mNeighborDistance_Hcal = 2.01;  //! 1.42 for 8 surroundings
 
-    float m_DISTANCE_ADVANTAGE  = 1.2;   //! if similar distanced cluster found, higher E cluster takes it
-    float m_TOWER_E_THRESHOLD   = 0.01;  //! Tower E threshold for clustering [GeV]
-    float m_TOWER_E_THRE_MOMENT = 0.1;   //! Tower E threshold for moment analysis [GeV]
+    float mDistanceAdvantage      = 1.2;  //! if similar distanced cluster found, higher E cluster takes it
+    float mDistanceAdvantage_Ecal = 1.2;  //! for Ecal
+    float mDistanceAdvantage_Hcal = 1.2;  //! for Hcal
 
-    float m_TOWER_E_RATIO2SPLIT_Ecal = 1.5; //! Neighbor E * threshold > tower E to merge cluster, otherwise split
-    float m_TOWER_E_RATIO2SPLIT_Hcal = 2.0; //! Neighbor E * threshold > tower E to merge cluster, otherwise split
+    float mTowerEThreshold      = 0.01;   //! Tower E threshold for clustering [GeV] 
+    float mTowerEThreshold_Ecal = 0.01;   //! for Ecal
+    float mTowerEThreshold_Hcal = 0.01;   //! for Hcal
 
-    virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
+    float mTowerEThreMoment      = 0.1;   //! Tower E threshold for moment analysis [GeV]
+    float mTowerEThreMoment_Ecal = 0.1;   //! for Ecal
+    float mTowerEThreMoment_Hcal = 0.1;   //! for Hcal
+
+    float mTowerERatio2Split      = 1.5;  //! Neighbor E * threshold > tower E to merge cluster, otherwise split
+    float mTowerERatio2Split_Ecal = 1.5;  //! for Ecal
+    float mTowerERatio2Split_Hcal = 2.0;  //! for Hcal
+
+    int mSortById=0;  //! set this for cosmic tracking (default is sort by energy)
+
+    virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
     ClassDef(StFcsClusterMaker, 1)
 };
 #endif  // STROOT_STFCSCLUSTERMAKER_STFCSCLUSTERMAKER_H_

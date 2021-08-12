@@ -1,6 +1,9 @@
-// $Id: StFcsFastSimulatorMaker.cxx,v 1.10 2021/02/25 21:54:41 akio Exp $                                            
+// $Id: StFcsFastSimulatorMaker.cxx,v 1.2 2021/03/30 13:40:09 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFcsFastSimulatorMaker.cxx,v $
+// Revision 1.2  2021/03/30 13:40:09  akio
+// FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
+//
 // Revision 1.10  2021/02/25 21:54:41  akio
 // Int_t -> int
 //
@@ -44,9 +47,11 @@
 #include "tables/St_g2t_emc_hit_Table.h"
 #include "tables/St_g2t_hca_hit_Table.h"
 #include "tables/St_g2t_ctf_hit_Table.h"
-#include "StFcsDbMaker/StFcsDbMaker.h"
+#include "StFcsDbMaker/StFcsDb.h"
 
-static const char name[kFcsEHP][4]={"wca","hca","pre"};
+namespace{
+  static const char name[kFcsEHP][4]={"wca","hca","pre"};
+}
 
 StFcsFastSimulatorMaker::StFcsFastSimulatorMaker(const char* name) : StMaker(name) {
   setLeakyHcal(0);
@@ -54,6 +59,12 @@ StFcsFastSimulatorMaker::StFcsFastSimulatorMaker(const char* name) : StMaker(nam
 }
 
 int StFcsFastSimulatorMaker::Init() {
+  mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
+  if (!mFcsDb) {
+    LOG_ERROR << "StFcsFastSimulatorMaker initializing failed due to no StFcsDb" << endm;
+    return kStErr;
+  } 
+
   memset(mEcalMap,0,sizeof(mEcalMap));
   memset(mHcalMap,0,sizeof(mHcalMap));
   memset(mPresMap,0,sizeof(mPresMap));
@@ -71,11 +82,6 @@ void StFcsFastSimulatorMaker::Clear(Option_t *option){
 int StFcsFastSimulatorMaker::Make() {
   LOG_DEBUG << "StFcsFastSimulatorMaker::Make" << endm;
   
-  if (!GetMaker("fcsDb")) {
-    LOG_ERROR << "No StFcsDbMaker. StFcsDbMaker library not loaded?" << endm;
-    return kStErr;
-  } 
-  
   // Get the existing StEvent, or add one if it doesn't exist.
   StEvent* event = static_cast<StEvent*>(GetDataSet("StEvent"));
   if (!event) {        
@@ -83,6 +89,7 @@ int StFcsFastSimulatorMaker::Make() {
     AddData(event);
     LOG_DEBUG << "Creating StEvent" << endm;
   }  
+
   // Add an FCS collection to the event if one does not already exist.
   if (!event->fcsCollection()) {
     event->setFcsCollection(new StFcsCollection);
@@ -94,8 +101,7 @@ int StFcsFastSimulatorMaker::Make() {
 }
 
 /* Fill an event with StFcsHits. */
-void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
-  StFcsDbMaker* dbMaker = static_cast<StFcsDbMaker*>(GetMaker("fcsDb"));
+void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {  
   StFcsCollection * fcscollection = event->fcsCollection();
   int ehp;
   int ng2thit[kFcsEHP]={};
@@ -121,7 +127,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	  if (!hit) {hit++; continue;}
 	  const int ns  = hit->volume_id / 1000 - 1;
 	  const int id  = hit->volume_id % 1000 - 1;
-	  const int det = dbMaker->detectorId(ehp,ns);
+	  const int det = mFcsDb->detectorId(ehp,ns);
 	  if(det<0 || det>=kFcsNDet || id<0 || id>=kFcsEcalMaxId){
 	    LOG_WARN << Form("ECAL det=%1d id=%3d volid=%5d e=%f out of range (%d)",
 			     det,id,hit->volume_id,hit->de,kFcsMaxId) << endm;
@@ -135,7 +141,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	  StFcsHit* fcshit=0;
 	  if(mEcalMap[ns][id]==0){ // New hit
 	    int ehp=0, rns=0, crt=0, sub=0, dep=0, ch=0;
-	    dbMaker->getDepfromId(det, id, ehp, rns, crt, sub, dep, ch);
+	    mFcsDb->getDepfromId(det, id, ehp, rns, crt, sub, dep, ch);
 	    fcshit = new StFcsHit(1, det, id, rns, ehp, dep, ch, de);
 	    hits.push_back(fcshit);
 	    mEcalMap[ns][id]=fcshit;
@@ -167,7 +173,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	  if (!hit) {hit++; continue;}
 	  const int ns  = hit->volume_id / 1000 - 1;
 	  const int id  = hit->volume_id % 1000 - 1;
-	  const int det = dbMaker->detectorId(ehp,ns);
+	  const int det = mFcsDb->detectorId(ehp,ns);
 	  if(det<0 || det>=kFcsNDet || id<0 || id>=kFcsHcalMaxId){
 	    LOG_WARN << Form("HCAL det=%d id=%d volid=%5d e=%f out of range (%d)",
 			     det,id,hit->volume_id,hit->de,kFcsMaxId) << endm;
@@ -179,7 +185,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	  }
 	  StFcsHit* fcshit=0;
 	  int ehp=0, rns=0, crt=0, sub=0, dep=0, ch=0;
-	  dbMaker->getDepfromId(det, id, ehp, rns, crt, sub, dep, ch);
+	  mFcsDb->getDepfromId(det, id, ehp, rns, crt, sub, dep, ch);
 	  if(leakyHcal==0  || leakyHcal==2){
 	    float de;
 	    de = hit->de;
@@ -208,8 +214,8 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	      //de[2] = hit->de2C;
 	      //de[3] = hit->de2D;
 	    }
-	    int col = dbMaker->getColumnNumber(det,id);	// col goes 1 ~ ncol
-	    int ncol= dbMaker->nColumn(det);
+	    int col = mFcsDb->getColumnNumber(det,id);	// col goes 1 ~ ncol
+	    int ncol= mFcsDb->nColumn(det);
 	    for(int j=0; j<4; j++){
 	      int id2;
 	      int jj = j-2;; //jj goes from -2 ~ +1
@@ -217,10 +223,10 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	      else if(col==2 && jj==-2)   {id2=id-1;}  // if col=2, add leaked light back to col=1
 	      else if(col==ncol && jj==1) {id2=id;}    // if col=ncol, add leaked light back to col=ncol
 	      else                        {id2=id+jj;} // add leaked lights to its neighbors
-	      dbMaker-> getDepfromId(det, id2, ehp, rns, crt, sub, dep, ch);
+	      mFcsDb-> getDepfromId(det, id2, ehp, rns, crt, sub, dep, ch);
 	      if(mHcalMap[ns][id2]==0){ // New hit
 		int ehp=0, rns=0, crt=0, sub=0, dep=0, ch=0;
-		dbMaker-> getDepfromId(det, id2, ehp, rns, crt, sub, dep, ch);
+		mFcsDb-> getDepfromId(det, id2, ehp, rns, crt, sub, dep, ch);
 		fcshit = new StFcsHit(1, det, id2, rns, ehp, dep, ch, de[j]);
 		hits.push_back(fcshit);
 		mHcalMap[ns][id2]=fcshit;
@@ -236,7 +242,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
     }
   }
   
-  // Read the g2t table for FCS Pres == EPD now
+  // Read the g2t table for FCS Pres == CTF now
   ehp=2;
   St_g2t_ctf_hit* hitTable_p = static_cast<St_g2t_ctf_hit*>(GetDataSet("g2t_epd_hit"));
   if (!hitTable_p) {
@@ -264,8 +270,8 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	    else        {tt-=1;}
 	  }
 	  int det,id,ehp,ns,crt,slt,dep,ch;
-	  dbMaker->getIdfromEPD(pp,tt,det,id);
-	  dbMaker->getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+	  mFcsDb->getIdfromEPD(pp,tt,det,id);
+	  mFcsDb->getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
 	  if(det<0 || det>=kFcsNDet || id<0 || id>=kFcsPresMaxId){
 	    LOG_WARN << Form("Pres det=%1d id=%3d volid=%4d e=%f10.6  id out of range (%d)",
 			     det,id,hit->volume_id,1000*hit->de,kFcsPresId) << endm;
@@ -299,17 +305,17 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
     const int det = hits[i]->detectorId();
     const int id = hits[i]->id();
     float de  = hits[i]->energy();
-    float sf  = dbMaker->getSamplingFraction(det);
-    float gain= dbMaker->getGain(det, id);
-    float corr= dbMaker->getGainCorrection(det, id);
+    float sf  = mFcsDb->getSamplingFraction(det);
+    float gain= mFcsDb->getGain(det, id);
+    float corr= mFcsDb->getGainCorrection(det, id);
     int adc = static_cast<int>(de / (sf * gain * corr));
     adc = std::min(adc, 4095*8);  // Cap maximum ADC =12bit * 8 tim
-    zs  = dbMaker->getZeroSuppression(det);
+    zs  = mFcsDb->getZeroSuppression(det);
     if(GetDebug()) LOG_INFO << Form("Det=%1d id=%3d dE=%8.3f SF=%6.3f gain=%6.3f corr=%6.3f ADC=%4d ZS=%2d digiE=%8.3f",
 				    det,id,de,sf,gain,corr,adc,zs,adc*gain*corr) << endm;
     if(adc>zs){ // zero suppress low ADC
       float digi_energy = adc * gain * corr;
-      int ehp = dbMaker->ecalHcalPres(det);
+      int ehp = mFcsDb->ecalHcalPres(det);
       hits[i]->setAdc(0,adc);
       hits[i]->setEnergy(digi_energy);
       fcscollection->addHit(det,hits[i]); 

@@ -1,4 +1,4 @@
-// $Id: StFcsPointMaker.h,v 1.3 2021/02/25 21:55:06 akio Exp $
+// $Id: StFcsPointMaker.h,v 1.1 2021/03/30 13:40:10 akio Exp $
 
 #ifndef STROOT_STFCSPOINTMAKER_STFCSPOINTMAKER_H_
 #define STROOT_STFCSPOINTMAKER_STFCSPOINTMAKER_H_
@@ -10,7 +10,7 @@ class StFcsCollection;
 class StFcsHit;
 class StFcsCluster;
 class StFcsPoint;
-class StFcsDbMaker;
+class StFcsDb;
 class StMuDst;
 
 class StFcsPointMaker : public StMaker {
@@ -34,17 +34,17 @@ public:
 
     //1 photon fit switches and parameters
     void set_PH1_FixEnergy(int v)  {m_PH1_FixEnergy=v;}
-    void set_PH1_DELTA_X(double v) {m_PH1_DELTA_X=v;}
-    void set_PH1_DELTA_E(double v) {m_PH1_DELTA_E=v;}
+    void set_PH1_Delta_X(double v) {m_PH1_Delta_X=v;}
+    void set_PH1_Delta_E(double v) {m_PH1_Delta_E=v;}
     
     //2 photon fit switches and parameters
     void set_PH2_FixEnergy(int v)    {m_PH2_FixEnergy=v;}
     void set_PH2_FixTheta(int v)     {m_PH2_FixTheta=v;}
-    void set_PH2_DELTA_X(double v)   {m_PH2_DELTA_X=v;}
-    void set_PH2_DELTA_E(double v)   {m_PH2_DELTA_E=v;}
-    void set_PH2_LOW_DGG(double v)   {m_PH2_LOW_DGG=v;}
-    void set_PH2_HIGH_DGG(double v)  {m_PH2_HIGH_DGG=v;}
-    void set_PH2_MAXTHETA_F(double v){m_PH2_MAXTHETA_F=v;}
+    void set_PH2_Delta_X(double v)   {m_PH2_Delta_X=v;}
+    void set_PH2_Delta_E(double v)   {m_PH2_Delta_E=v;}
+    void set_PH2_Low_Dgg(double v)   {m_PH2_Low_Dgg=v;}
+    void set_PH2_High_Dgg(double v)  {m_PH2_High_Dgg=v;}
+    void set_PH2_MaxTheta_F(double v){m_PH2_MaxTheta_F=v;}
     void set_PH2_StartDggFactor(double v) {m_PH2_StartDggFactor=v;}
 
  private:
@@ -58,7 +58,7 @@ public:
     static void minimizationFunction2Photon(int& npar, double* grad, double& fval, double* par, int flag); 
     static double energyDepositionInTower(double x, double y,double xun, double yun);
     
-    StFcsDbMaker* mDb=0;               //!
+    StFcsDb* mDb=0;               //!
     StFcsCollection* mFcsCollection=0; //!
         
     int mShowerShape=0;              //! shower shape choice
@@ -68,20 +68,20 @@ public:
 
     //1 photon fit switch and parameters
     int    m_PH1_FixEnergy=1;
-    double m_PH1_DELTA_X=0.5; 
-    double m_PH1_DELTA_E=1.15; 
+    double m_PH1_Delta_X=0.5; 
+    double m_PH1_Delta_E=1.15; 
 
     //2 photon fit switch and parameters
     int    m_PH2_FixEnergy=1;
     int    m_PH2_FixTheta=1;
-    double m_PH2_DELTA_X=0.2; 
-    double m_PH2_DELTA_E=1.05; 
-    double m_PH2_LOW_DGG=0.8; 
-    double m_PH2_HIGH_DGG=3.0; 
-    double m_PH2_MAXTHETA_F=TMath::PiOver2(); 
+    double m_PH2_Delta_X=0.2; 
+    double m_PH2_Delta_E=1.05; 
+    double m_PH2_Low_Dgg=0.8; 
+    double m_PH2_High_Dgg=3.0; 
+    double m_PH2_MaxTheta_F=TMath::PiOver2(); 
     double m_PH2_StartDggFactor=1.1;
 
-    virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
+    virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
     ClassDef(StFcsPointMaker, 0)
 };
 

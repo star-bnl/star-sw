@@ -1,5 +1,9 @@
-// $Id: StFcsWaveformFitMaker.h,v 1.1 2021/03/30 13:40:13 akio Exp $
+// $Id: StFcsWaveformFitMaker.h,v 1.2 2021/05/30 21:26:53 akio Exp $
 // $Log: StFcsWaveformFitMaker.h,v $
+// Revision 1.2  2021/05/30 21:26:53  akio
+// Added mFitDrawOn=2 for resetting mHitIdx for end of page, instead of each event
+// Increased accepted tb range as hit, need further tuning
+//
 // Revision 1.1  2021/03/30 13:40:13  akio
 // FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
 //
@@ -85,6 +89,7 @@ public:
     // if idx<0 (default) it returns "current" which is idx=mHitIdx-1
     // makeTGraphAsymmErrors() makes all at idx=mHitIdx=0 except when 
     // mFitDrawOn=1, then keep incrementing mHitIdx to hold them for a event
+    // mFitDrawOn=2, then keep incrementing mHitIdx to hold them until new page
     TGraphAsymmErrors* getGraph(int idx=-1);
 
     //measuring fit time
@@ -144,8 +149,8 @@ public:
     void setMaxPage(int v){mMaxPage=v;}         
     void setSkip(int v){mSkip=v;}         
     void setFileName(char* file, int maxpage=25, int skip=5){mFilename=file; mMaxPage=maxpage; mSkip=skip;} 
-    void setFitDrawOn(int v=1) {mFitDrawOn=v;} 
-    void setFitFilter(char* filter) {mFilter=filter;}
+    void setFitDrawOn(int v=1) {mFitDrawOn=v;}  //=1 to keep for a event, =2 for a page
+    void setFitFilter(char* filter) {mFilter=filter; mFitDrawOn=2;}
 
     //Draw from David
     StFcsPulseFit* davidFitter(){return mPulseFit;}
@@ -197,9 +202,9 @@ public:
     char* mFilename=0;
     char* mFilter=0;
     char mDetName[100];
-    int mFitDrawOn;   //! If set, it will also create a new TGraphAsymmErrors for each hit
+    int mFitDrawOn=0;   //! If set, it will also create a new TGraphAsymmErrors for each hit
 
-    virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}
+    virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
 
     ClassDef(StFcsWaveformFitMaker, 3)
 };

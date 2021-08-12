@@ -12,7 +12,7 @@
 class StEvent;
 class StFcsCollection;
 class StTriggerData;
-class StFcsDbMaker;
+class StFcsDb;
 
 class StFcsRawHitMaker : public StRTSBaseMaker {
 public: 
@@ -30,27 +30,32 @@ public:
     virtual const char *GetCVS() const;
     
 private:
-    int prepareEnvironment();   
     StEvent *mEvent;
     StFcsCollection *mFcsCollectionPtr;
     unsigned int mRun=0;
-    StFcsDbMaker* mFcsDbMkr=0;
-    unsigned int mReadMode=0;
+    StFcsDb* mFcsDb=0;
+    unsigned int mReadMode=1;
 
     ClassDef(StFcsRawHitMaker,1);
 };
 
 // inline functions
 inline const char *StFcsRawHitMaker::GetCVS() const {
-    static const char cvs[] = "Tag $Name:  $ $Id: StFcsRawHitMaker.h,v 1.4 2021/02/25 21:55:32 akio Exp $ built " __DATE__ " " __TIME__ ;
+    static const char cvs[] = "Tag $Name:  $ $Id: StFcsRawHitMaker.h,v 1.2 2021/04/26 20:05:35 akio Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
 };
 
 #endif
 
 /*
- * $Id: StFcsRawHitMaker.h,v 1.4 2021/02/25 21:55:32 akio Exp $
+ * $Id: StFcsRawHitMaker.h,v 1.2 2021/04/26 20:05:35 akio Exp $
  * $Log: StFcsRawHitMaker.h,v $
+ * Revision 1.2  2021/04/26 20:05:35  akio
+ * change default readmode = 1 (ZS bank)
+ *
+ * Revision 1.1  2021/03/30 13:40:12  akio
+ * FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
+ *
  * Revision 1.4  2021/02/25 21:55:32  akio
  * Int_t -> int
  *

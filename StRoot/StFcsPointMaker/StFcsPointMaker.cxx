@@ -1,4 +1,4 @@
-// $Id: StFcsPointMaker.cxx,v 1.8 2021/02/25 21:55:05 akio Exp $
+// $Id: StFcsPointMaker.cxx,v 1.1 2021/03/30 13:40:10 akio Exp $
 
 #include "StFcsPointMaker.h"
 #include "StLorentzVectorF.hh"
@@ -8,7 +8,7 @@
 #include "StEvent/StFcsHit.h"
 #include "StEvent/StFcsCluster.h"
 #include "StEvent/StFcsPoint.h"
-#include "StFcsDbMaker/StFcsDbMaker.h"
+#include "StFcsDbMaker/StFcsDb.h"
 
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -48,9 +48,9 @@ void StFcsPointMaker::Clear(Option_t* option) {
 int StFcsPointMaker::InitRun(int runNumber) {
     // Ensure we can access database information
     LOG_DEBUG << "StFcsPointMaker initializing run" << endm;
-    mDb = static_cast<StFcsDbMaker*>(GetMaker("fcsDb"));
+    mDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
     if (!mDb) {
-	LOG_ERROR << "StFcsPointMaker initializing failed due to no StFcsDbMaker" << endm;
+	LOG_ERROR << "StFcsPointMaker initializing failed due to no StFcsDb" << endm;
 	return kStErr;
     }
     return StMaker::InitRun(runNumber);
@@ -192,6 +192,9 @@ void StFcsPointMaker::fitClusters(int det) {
     case 2:
       chi2 = fit2PhotonCluster(c,&point1,&point2);
       break;
+    default:
+      chi1 = chi2 = 0;
+      LOG_WARN << "Unknown cluster category=" << c->category() << endm;
     }	
     // sotre chi2 for both
     c->setChi2Ndf1Photon(chi1);
@@ -249,8 +252,8 @@ double StFcsPointMaker::fit1PhotonCluster(StFcsCluster* c, StFcsPoint* p){
     double x=c->x();
     double y=c->y();
     double e=c->energy();
-    double dx=m_PH1_DELTA_X;  //0.5
-    double de=m_PH1_DELTA_E;  //1.15
+    double dx=m_PH1_Delta_X;  //0.5
+    double de=m_PH1_Delta_E;  //1.15
     const std::vector<TString> names = {"np", "x", "y", "e"};    
     double one=1.0;
     double zero=0.0;
@@ -292,11 +295,11 @@ double StFcsPointMaker::fit2PhotonCluster(StFcsCluster* c, StFcsPoint* p1, StFcs
     double t=c->theta();
     double z=0.0; 
     double e=c->energy();    
-    double dx=m_PH2_DELTA_X;     //0.2
-    double ddl=d*m_PH2_LOW_DGG;  //0.8
-    double ddh=d*m_PH2_HIGH_DGG; //3.0
-    double dt=m_PH2_MAXTHETA_F;  //TMath::PiOver2()
-    double de=m_PH2_DELTA_E;     //1.05
+    double dx=m_PH2_Delta_X;     //0.2
+    double ddl=d*m_PH2_Low_Dgg;  //0.8
+    double ddh=d*m_PH2_High_Dgg; //3.0
+    double dt=m_PH2_MaxTheta_F;  //TMath::PiOver2()
+    double de=m_PH2_Delta_E;     //1.05
     mMinuit.mnparm(0, "np",    2.0, 0.0,        2.0,    2.0,   err);
     mMinuit.mnparm(1, "x",     x,   dx/5,       x-dx,   x+dx,  err);
     mMinuit.mnparm(2, "y",     y,   dx/5,       y-dx,   y+dx,  err);

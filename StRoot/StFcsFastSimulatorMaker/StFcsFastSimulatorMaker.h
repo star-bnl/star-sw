@@ -1,6 +1,9 @@
-// $Id: StFcsFastSimulatorMaker.h,v 1.8 2021/02/25 21:54:41 akio Exp $
+// $Id: StFcsFastSimulatorMaker.h,v 1.2 2021/03/30 13:40:09 akio Exp $
 //
 // $Log: StFcsFastSimulatorMaker.h,v $
+// Revision 1.2  2021/03/30 13:40:09  akio
+// FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
+//
 // Revision 1.8  2021/02/25 21:54:41  akio
 // Int_t -> int
 //
@@ -33,6 +36,7 @@
 
 class StEvent;
 class StFcsHit;
+class StFcsDb;
 
 #include "StChain/StMaker.h"
 #include "StEvent/StEnumerations.h"
@@ -69,12 +73,13 @@ public:
     void setHcalZDepEff(int v=1) {SetAttr("FcsHcalZDepEff",v);}
                                                                                                       
 private:    
-    void fillStEvent(StEvent* event);   // Filling StEvent with StFcsHits    
-    StFcsHit* mEcalMap[kFcsNorthSouth][kFcsEcalMaxId]; // table to keep pointers to Ecal hits
-    StFcsHit* mHcalMap[kFcsNorthSouth][kFcsHcalMaxId]; // table to keep pointers to Hcal hits
-    StFcsHit* mPresMap[kFcsNorthSouth][kFcsPresMaxId]; // table to keep pointers to Pres hits
+    StFcsDb* mFcsDb;  //! pointer to DB
+    void fillStEvent(StEvent* event);   //! Filling StEvent with StFcsHits    
+    StFcsHit* mEcalMap[kFcsNorthSouth][kFcsEcalMaxId]; //! table to keep pointers to Ecal hits
+    StFcsHit* mHcalMap[kFcsNorthSouth][kFcsHcalMaxId]; //! table to keep pointers to Hcal hits
+    StFcsHit* mPresMap[kFcsNorthSouth][kFcsPresMaxId]; //! table to keep pointers to Pres hits
 
-    virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag $Name:" __DATE__ " " __TIME__ ; return cvs;}  
+    virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}  
     ClassDef(StFcsFastSimulatorMaker, 1)
 };
 

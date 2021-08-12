@@ -1,6 +1,9 @@
-// $Id: StFcsClusterMaker.cxx,v 1.18 2021/02/25 21:52:57 akio Exp $
+// $Id: StFcsClusterMaker.cxx,v 1.1 2021/03/30 13:40:02 akio Exp $
 //
 // $Log: StFcsClusterMaker.cxx,v $
+// Revision 1.1  2021/03/30 13:40:02  akio
+// FCS code after peer review and moved from $CVSROOT/offline/upgrades/akio
+//
 // Revision 1.18  2021/02/25 21:52:57  akio
 // Int_t -> int
 //
@@ -64,7 +67,7 @@
 #include "StEventTypes.h"
 #include "StEvent/StFcsHit.h"
 #include "StEvent/StFcsCluster.h"
-#include "StFcsDbMaker/StFcsDbMaker.h"
+#include "StFcsDbMaker/StFcsDb.h"
 
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -86,10 +89,11 @@ void StFcsClusterMaker::Clear(Option_t* option) {
 
 int StFcsClusterMaker::InitRun(int runNumber) {
     // Ensure we can access database information
-    LOG_DEBUG << "StFcsClusterMaker initializing run" << endm;
-    mDb = static_cast<StFcsDbMaker*>(GetMaker("fcsDb"));
+    LOG_DEBUG << "StFcsClusterMaker initializing run" << endm;    
+    //mDb = static_cast<StFcsDbMaker*>(GetMaker("fcsDb"));    
+    mDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
     if (!mDb) {
-	LOG_ERROR << "StFcsClusterMaker initializing failed due to no StFcsDbMaker" << endm;
+	LOG_ERROR << "StFcsClusterMaker initializing failed due to no StFcsDb" << endm;
 	return kStErr;
     }
     return StMaker::InitRun(runNumber);
@@ -107,6 +111,20 @@ int StFcsClusterMaker::Make() {
     }
     
     for(int det=0; det<=kFcsHcalSouthDetId; det++) {
+      if(det==0){
+	mNeighborDistance = mNeighborDistance_Ecal;
+	mDistanceAdvantage = mDistanceAdvantage_Ecal;
+	mTowerEThreshold = mTowerEThreshold_Ecal;
+	mTowerEThreMoment = mTowerEThreMoment_Ecal;
+	mTowerERatio2Split = mTowerERatio2Split_Ecal;    
+      }
+      if(det==2){
+	mNeighborDistance = mNeighborDistance_Hcal;
+	mDistanceAdvantage = mDistanceAdvantage_Hcal;
+	mTowerEThreshold = mTowerEThreshold_Hcal;
+	mTowerEThreMoment = mTowerEThreMoment_Hcal;
+	mTowerERatio2Split = mTowerERatio2Split_Hcal;    
+      }
       makeCluster(det);	
     }
     if(GetDebug()>0) mFcsCollection->print(3);
@@ -120,19 +138,20 @@ int StFcsClusterMaker::makeCluster(int det) {
   int nhit=hits.size();
   for(int i=0; i<nhit; i++) hits[i]->setCluster(0); //reset cluster pointer from hit
 
-  //sort by energy
-  std::sort(hits.begin(), hits.end(), [](StFcsHit* a, StFcsHit* b) {
-      return b->energy() < a->energy();
-    });
+  if(mSortById==0){  //sort by energy
+    std::sort(hits.begin(), hits.end(), [](StFcsHit* a, StFcsHit* b) {
+	return b->energy() < a->energy();
+      });
+  }else{ //sort by Id
+    std::sort(hits.begin(), hits.end(), [](StFcsHit* a, StFcsHit* b) {
+	return b->id() > a->id();
+      });
+  }    
 
-  float r2split;
-  if(det<2) r2split=m_TOWER_E_RATIO2SPLIT_Ecal;
-  else      r2split=m_TOWER_E_RATIO2SPLIT_Hcal;
-  
   for(int i=0; i<nhit; i++){ //loop over all hits 
     StFcsHit* hit=hits[i];
     float e=hit->energy();
-    if(e < m_TOWER_E_THRESHOLD) break;
+    if(e < mTowerEThreshold && mSortById==0) break;
     float neighborClusterId=-1;
     float minDistance=999.0;
     int ncluster = clusters.size();
@@ -144,16 +163,14 @@ int StFcsClusterMaker::makeCluster(int det) {
       if(neighborTowerE>0.0) { //found neighbor cluster
 	neighbor.push_back(clu);
 	nNeighbor++;	      
-	if(neighborTowerE * r2split > e){ //merge to existing cluster
+	if(neighborTowerE * mTowerERatio2Split > e){ //merge to existing cluster
 	  float d = distance(hit,clu);
-	  if(d * m_DISTANCE_ADVANTAGE < minDistance){
+	  if(d * mDistanceAdvantage < minDistance){
 	    neighborClusterId=j;
 	    minDistance=d;
 	  }
 	}
       }
-      // printf("AAA hit=%3d cluster=%3d e=%4.2f neighbor=%4.2f cluid=%2d minDist=%4.2f\n",
-      //        i,j,e,neighborTowerE,neighborClusterId,minDistance);
     }
     StFcsCluster* cluster=0;
     if(neighborClusterId==-1){ 
@@ -196,7 +213,8 @@ int StFcsClusterMaker::makeCluster(int det) {
     clu->setFourMomentum(mDb->getLorentzVector(xyz,clu->energy(),0.0));
     const StLorentzVectorD& p = clu->fourMomentum();
     //LOG_DEBUG << Form("momentum= %lf %lf %lf %lf", p.px(), p.py(), p.pz(), p.e()) << endm;
-    clusterMomentAnalysis(clu);
+    int ret=clusterMomentAnalysis(clu,mTowerEThreMoment); //moment analysis with default threshold
+    if(ret==kStErr) ret=clusterMomentAnalysis(clu,0.0);   //Redo with 0 threshold
     categorization(clu);
   }
   return kStOk;
@@ -211,8 +229,8 @@ float StFcsClusterMaker::isNeighbor(StFcsHit* hit, StFcsCluster* clu){
 	StFcsHit* h=clu->hits()[i];
 	int ehp = mDb->ecalHcalPres(h->detectorId());
 	float thr=1.01;
-	if(ehp==0) thr=m_NEIGHBOR_DISTANCE_Ecal;
-	if(ehp==1) thr=m_NEIGHBOR_DISTANCE_Hcal;
+	if(ehp==0) thr=mNeighborDistance_Ecal;
+	if(ehp==1) thr=mNeighborDistance_Hcal;
 	float d = distance(hit,h);
 	float e = h->energy();
 	if(d < thr) ne=e;
@@ -220,6 +238,7 @@ float StFcsClusterMaker::isNeighbor(StFcsHit* hit, StFcsCluster* clu){
     return ne;
 }
 
+// distance between 2 hits in cell unit
 float StFcsClusterMaker::distance(StFcsHit* hit1, StFcsHit* hit2){
     int   det1=hit1->detectorId();
     int   det2=hit2->detectorId();
@@ -232,6 +251,7 @@ float StFcsClusterMaker::distance(StFcsHit* hit1, StFcsHit* hit2){
     return sqrt(dx*dx + dy*dy);
 }
 
+// distance between a hit and cluster center
 float StFcsClusterMaker::distance(StFcsHit* hit, StFcsCluster* clu){
     int   det1=hit->detectorId();
     int   det2=clu->detectorId();
@@ -253,7 +273,7 @@ void StFcsClusterMaker::updateCluster(StFcsCluster* clu){
 	float x,y;
 	mDb->getLocalXYinCell(hit,x,y);
 	double e= hit->energy();	
-	double w=log(e + 1.0 - m_TOWER_E_THRE_MOMENT);
+	double w=log(e + 1.0 - mTowerEThreMoment);
 	if(w<0.0) w=0.0;
 	etot+= e; xe += x*e; ye += y*e;
 	wtot+= w; xw += x*w; yw += y*w;
@@ -272,8 +292,8 @@ void StFcsClusterMaker::updateCluster(StFcsCluster* clu){
     }
 }
 
-void StFcsClusterMaker::clusterMomentAnalysis(StFcsCluster* clu, float ecut){
-    if(ecut<0.0) ecut=m_TOWER_E_THRE_MOMENT;
+// perform cluster moment analysis, return kStErr if no tower found above ecut
+int StFcsClusterMaker::clusterMomentAnalysis(StFcsCluster* clu, float ecut){
     int nhit=clu->hits().size();
     double wtot=0.0, xx=0.0, yy=0.0, sx=0.0, sy=0.0, sxy=0.0;
     for(int i=0; i<nhit; i++){
@@ -291,18 +311,16 @@ void StFcsClusterMaker::clusterMomentAnalysis(StFcsCluster* clu, float ecut){
 	    sxy+= xh*yh*w; 
 	}
     }
-    if(wtot<=0.0){
-	//if cluster has no tower above ecoff, do it again without cutoff
-	if(ecut>0.0){
-	    clusterMomentAnalysis(clu,0.0);
-	}else{ //even with ecut=0.0, no energy!?
-	    clu->setSigmaMin(0.0);
-	    clu->setSigmaMax(0.0);
-	    //clu->setTheta(0.0);
-	    return;
-	}
+    if(wtot<=0.0){ //cluster has no tower above ecoff
+      if(ecut>0.0){
+	return kStErr; // return error so one can re-try with lower threshold
+      }else{ //even with ecut=0.0, no energy!?
+	clu->setSigmaMin(0.0);
+	clu->setSigmaMax(0.0);
+	return kStOK;
+      }
     }else{
-	double x = xx/wtot;
+        double x = xx/wtot;
 	double y = yy/wtot;
 	double sigx  = sqrt(fabs(sx / wtot - std::pow(x, 2.0)));
 	double sigy  = sqrt(fabs(sy / wtot - std::pow(y, 2.0)));
@@ -321,10 +339,11 @@ void StFcsClusterMaker::clusterMomentAnalysis(StFcsCluster* clu, float ecut){
 	while (theta < -M_PI / 2.0) {
 	    theta += M_PI;
 	} 
-	//clu->setTheta(theta);
+	clu->setTheta(theta);
 	clu->setSigmaMin(getSigma(clu, theta, ecut));
 	clu->setSigmaMax(getSigma(clu, theta - M_PI/2.0, ecut));	
     }
+    return kStOK;
 }
 
 float StFcsClusterMaker::getSigma(StFcsCluster* clu, double theta, float ecut){
@@ -335,7 +354,7 @@ float StFcsClusterMaker::getSigma(StFcsCluster* clu, double theta, float ecut){
     int nhit=clu->hits().size();
     for (int i=0; i<nhit; i++){ // loop over all hits in cluster
 	StFcsHit* hit = clu->hits()[i];
-	//        int det=hit->detectorId();
+        int det=hit->detectorId();
 	float x,y;
 	mDb->getLocalXYinCell(hit,x,y);
 	// the 2-d vector from the "center" of cluster to tower
