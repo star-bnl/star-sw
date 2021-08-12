@@ -22,12 +22,12 @@ AgStarReader *AgStarReader::mInstance = 0;
 //
 // Setup the interface with starsim
 //
-#define agusread F77_NAME(agusread,AGUSREAD)
+#define ageventread F77_NAME(ageventread,AGEVENTREAD)
 #define agsvert  F77_NAME(agsvert, AGSVERT)
 #define agskine  F77_NAME(agskine, AGSKINE)
 
 extern "C" {
-  void type_of_call agusread() {    AgStarReader::Instance().ReadEvent();  }
+  void type_of_call ageventread() {    AgStarReader::Instance().ReadEvent();  }
   void type_of_call agsvert( float *vertex, int *nb, int *nt, float *ubuf, int *nu, int *nv );
   void type_of_call agskine( float *plab,   int *ip, int *nv, float *ubuf, int *nb, int *nt );
 };
