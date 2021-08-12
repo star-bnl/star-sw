@@ -1860,18 +1860,18 @@ void HltphiBuilder::TempPhiWgtCal()
 }
 
 //------------raw v2 fit function
-static double ratio[70];
+static double signalRatio[70];
 
 // Double_t HltDisplayHist::
 static Double_t fitfun_raw(Double_t *x, Double_t *para)
 {
   /*
     Int_t bin=(x[0]-2.0)/0.02;
-    Double_t fitval=para[0]*ratio[bin]+(para[1]+para[2]*x[0])*(1-ratio[bin]);
+    Double_t fitval=para[0]*signalRatio[bin]+(para[1]+para[2]*x[0])*(1-signalRatio[bin]);
     return fitval;
   */
   Int_t bin=(x[0]-0.99)/0.001;
-  Double_t fitval=para[0]*ratio[bin]+(para[1]+para[2]*x[0])*(1-ratio[bin]);
+  Double_t fitval=para[0]*signalRatio[bin]+(para[1]+para[2]*x[0])*(1-signalRatio[bin]);
   return fitval;
 }
 
@@ -2133,13 +2133,13 @@ void HltphiBuilder::Jpsiflow()
 	  x = 2.01+0.02*t;
 	  signal = getPlotByIndex(78 + i)->getHisto(0)->histo->GetBinContent(t+1) - (par[3]+par[4]*x);
 
-	  if(fabs(total[t])<1.0e-6) ratio[t]=1.0e-6;
-	  else ratio[t] = signal/total[t];
+	  if(fabs(total[t])<1.0e-6) signalRatio[t]=1.0e-6;
+	  else signalRatio[t] = signal/total[t];
 	*/
 	xx=0.9905+0.001*t;
 	signal = getPlotByIndex(78 + i)->getHisto(0)->histo->GetBinContent(t+11)- ( par[3]+ par[4]*xx);
-	if(fabs(total[t])<1.0e-6)ratio[t]=1.0e-6;
-	else  ratio[t] = signal/total[t];
+	if(fabs(total[t])<1.0e-6)signalRatio[t]=1.0e-6;
+	else  signalRatio[t] = signal/total[t];
       }
 	
     ////-----fit v2-----////
@@ -2195,7 +2195,7 @@ void HltphiBuilder::Jpsiflow()
       xxx = 0.9905 + 0.001*t ;
 
       int bin = getPlotByIndex(66 + i)->getHisto(1)->histo->GetXaxis()->FindBin(xxx);
-      double tempfun = ratio[t]*jpsipar[0] + (1-ratio[t])*(jpsipar[1] + jpsipar[2]*xxx) ;
+      double tempfun = signalRatio[t]*jpsipar[0] + (1-signalRatio[t])*(jpsipar[1] + jpsipar[2]*xxx) ;
 
       getPlotByIndex(66+i)->getHisto(1)->histo->Fill(xxx, tempfun);
 
