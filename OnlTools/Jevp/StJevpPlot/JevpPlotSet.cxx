@@ -17,6 +17,8 @@
 // #include "StEvent/StTriggerData2016.h"
 #include "PdfFileBuilder.h"
 
+#include "StarRoot/TH1Helper.h"
+
 //#include <DAQ_READER/daqReader.h>
 //#include <DAQ_READER/daq_dta.h>
 //#include <DAQ_READER/daq_det.h>
@@ -280,7 +282,7 @@ void JevpPlotSet::_initialize(int argc, char *argv[])
     plotTime = new JevpPlot();
     sprintf(tmp, "%s_Time", getPlotSetName());
     h = new TH1F(tmp,tmp,100,0,.000000001);
-    h->SetBit(TH1::kCanRebin);
+    TH1Helper::SetCanRebin(h);
     ph = new PlotHisto();
     ph->histo = h;
     plotTime->addHisto(ph);

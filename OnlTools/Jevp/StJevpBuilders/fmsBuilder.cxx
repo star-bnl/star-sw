@@ -3,6 +3,8 @@
 
 #include <RTS/include/rtsLog.h>
 
+#include "StarRoot/TH1Helper.h"
+
 
 /* TEST COMMANDS used for run17 implementation
  * tcsh
@@ -157,7 +159,7 @@ void fmsBuilder::initialize(int /* unused */, char** /* unused */) {
                          kNChannels, 0., kNChannels,  // Channel axis bins
                          200, 0., kNAdc);           // ADC axis bins
                          
-      h->SetBit(TH1::kCanRebin);
+      TH1Helper::SetCanRebin(h);
       h->SetXTitle("slot * 32 + channel");
       h->SetYTitle("ADC");
       h->GetXaxis()->SetNdivisions(kNLargeDivisions,
@@ -184,7 +186,7 @@ void fmsBuilder::initialize(int /* unused */, char** /* unused */) {
     TH1F* h = new TH1F(nameTitle.first.c_str(),
                        nameTitle.second.c_str(),
                        kNChannels, 0., kNChannels);
-    h->SetBit(TH1::kCanRebin);
+    TH1Helper::SetCanRebin(h);
     h->SetXTitle("slot * 32 + channel");
     h->SetLineWidth(5);
     h->SetLineColor(kRed);
@@ -221,7 +223,7 @@ void fmsBuilder::initialize(int /* unused */, char** /* unused */) {
   */
   for(int ee=0; ee<2; ee++) {
     for(int ls=0; ls<2; ls++) {
-      hitmap[ls][ee]->SetBit(TH1::kCanRebin);
+      TH1Helper::SetCanRebin(hitmap[ls][ee]);
       hitmap[ls][ee]->SetXTitle("column");
       hitmap[ls][ee]->SetYTitle("row");
       hitmap[ls][ee]->GetXaxis()->SetLabelSize(kAxisLabelSize);
