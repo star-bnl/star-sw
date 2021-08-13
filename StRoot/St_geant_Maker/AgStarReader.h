@@ -22,6 +22,10 @@ class AgStarReader : public TObject
   /// @param stack The particle stack
   void SetStack( StarParticleStack *stack ){ mStack = stack; }
 
+  /// Set the particle data
+  /// @param data Pointer to the particle data
+  void SetParticleData( StarParticleData* data ){ mParticleData = data; }
+
   /// Read events from the particle stack and push them out to starsim
   void ReadEvent();
 

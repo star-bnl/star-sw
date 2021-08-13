@@ -38,7 +38,7 @@ extern "C" {
 // ----------------------------------------------------------------------------------------------------
 AgStarReader::AgStarReader() : TObject(), mStack(0), mParticleData(0)
 { 
-  mParticleData = &StarParticleData::instance();
+
 }
 // ----------------------------------------------------------------------------------------------------
 //
@@ -109,7 +109,7 @@ void AgStarReader::ReadEvent()
       int   ipdg    = part->GetPdgCode();
       int   g3id    = 0;
       {
-	TParticlePDG *pdg = mParticleData -> GetParticle( ipdg );     assert(pdg);
+	TParticlePDG *pdg = StarParticleData::instance().GetParticle( ipdg );     assert(pdg);
 	g3id = pdg->TrackingCode();
 	if ( g3id < 1 )
 	  {
