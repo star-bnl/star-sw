@@ -25,7 +25,7 @@ class StarParticleStack : public TVirtualMCStack
 {
  public:
 
-  StarParticleStack( const Char_t *name = "stack" );
+  StarParticleStack( const Char_t *name = "PrimaryParticleStack" );
   ~StarParticleStack();
 
   ///
