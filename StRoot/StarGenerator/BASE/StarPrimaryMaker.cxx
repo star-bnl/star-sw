@@ -57,7 +57,7 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   assert(fgPrimary == 0); // cannot create more than one primary generator
   fgPrimary = this;
 
-  mStack = new StarParticleStack();
+  mStack = new StarParticleStack("PrimaryMakerStack");
   AgStarReader::Instance().SetStack(mStack);
 
   // Publish the stack
