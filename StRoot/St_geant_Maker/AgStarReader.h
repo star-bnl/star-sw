@@ -3,6 +3,7 @@
 
 #include "TObject.h"
 class StarParticleData;
+class StarParticleStack;
 
 /**
    \class AgStarReader
