@@ -354,8 +354,8 @@ TParticlePDG *StarParticleData::SetTrackingCode( const int pdgid, const int g3id
 StarParticleData& StarParticleData::instance()
 { return (sInstance)? *sInstance : *(sInstance = new StarParticleData()); }
 //_______________________________________________________________________________________________
-TParticlePDG* StarParticleData::operator(const char* name){ return instance().GetParticle(name); }
-TParticlePDG* StarParticleData::operator(const ind   id  ){ return instance().GetParticle(id  ); }
+TParticlePDG* StarParticleData::operator()(const char* name){ return instance().GetParticle(name); }
+TParticlePDG* StarParticleData::operator()(const ind   id  ){ return instance().GetParticle(id  ); }
 //_______________________________________________________________________________________________
 
 
