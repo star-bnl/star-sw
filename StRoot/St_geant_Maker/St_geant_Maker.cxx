@@ -1186,8 +1186,8 @@ int St_geant_Maker::Make() {
 
     auto* stack = GetDataSet("PrimaryMakerStack");
     auto* data  = GetDataSet("PDG_Database");
-    if ( stack != 0 )       AgStarReader::Instance().SetStack( (StarParticleStack*)stack->GetObject() );
-    if ( data  != 0 )       AgStarReader::Instance().SetParticleData( (StarParticleData*)data->GetObject() );
+    if ( stack )       AgStarReader::Instance().SetStack( (StarParticleStack*)stack->GetObject() );
+    if ( data  )       AgStarReader::Instance().SetParticleData( (StarParticleData*)data->GetObject() );
     
   }
 
