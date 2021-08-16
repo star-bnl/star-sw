@@ -989,6 +989,7 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
   
   double sc_min[12],sc_max[12],sc_offset[12],gapf_min[12],gapf_max[12],gapf_offset[12],Lmin,Lmax;
   SetMinMax(nMeasures,m_L,Lmin,Lmax,m_L[0]);
+  if (0<Lmin) Lmin = 0; // Draw plots to 0, or below 0 if necessary
   for (k=0; k<(BY_SECTOR?12:1); k++) {
     SetMinMax(nMeasures,(BY_SECTOR?m_sc2S[k]:m_sc2),sc_min[k],sc_max[k],0);
     // Offset is minimum of either 0.2*(max-min) or 5*MAX_DEV*VAR, 
