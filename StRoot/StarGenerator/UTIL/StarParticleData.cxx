@@ -51,7 +51,7 @@ public:
 };
 
 // Instance should exist from the start
-StarParticleData* StarParticleData::sInstance = 0;
+StarParticleData* StarParticleData::sInstance = nullptr;
 
 // ---------------------------------------------------------------------------------------------
 StarParticleData::~StarParticleData()
