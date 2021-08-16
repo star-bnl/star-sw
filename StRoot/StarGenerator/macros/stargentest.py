@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-import datetime, os
-import ROOT
+import os
 import subprocess, shlex
-import sys
 
 
 def run_test_macro( name, cmd_ = 'root4star' ):
