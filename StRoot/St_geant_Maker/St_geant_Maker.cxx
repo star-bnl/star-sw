@@ -695,7 +695,7 @@
 #include "g2t/St_g2t_stg_Module.h"
 #include "g2t/St_g2t_epd_Module.h"
 // Event Generator/starsim integration
-#include "AgStarReader.h"
+#include "St_geant_Maker/AgStarReader.h"
 class StarParticleStack;
 
 #include "St_db_Maker/St_db_Maker.h"
