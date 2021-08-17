@@ -129,11 +129,11 @@
 	$LLIB = "lib";
     }
 
-    if ( ( -x "/usr/bin/gfortran" or -x "/sw/bin/gfortran" ) && !defined($ENV{USE_G77}) ){
+    if ( ( -x "/usr/bin/gfortran44" or -x "/sw/bin/gfortran" ) && !defined($ENV{USE_G77}) ){
 	# JL 200908 - give preference to gfortran for now 
 	# JL 201004 - added possibility to revertto g77 by defining USE_G77 but 
 	#             this is at your own risk
-	$G77       = "gfortran";
+	$G77       = "gfortran44";
 	$FC        = $G77;
 	if ( defined( $ARG{NODEBUG} ) || $NODEBUG )  {
 	    $G77FLAGS  = "$XMACHOPT -fd-lines-as-comments ";
@@ -143,8 +143,8 @@
 
 	$G77FLAGS .= " -std=legacy -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
 	$FFLAGS    = $G77FLAGS;
-	$FLIBS     = "-lgfortran";
-#	$FLIBS      = `$FC $FFLAGS -print-file-name=libgfortran.$SOEXT`; chomp($FLIBS);
+	#$FLIBS     = "-lgfortran";
+	$FLIBS      = `$FC $FFLAGS -print-file-name=libgfortran.$SOEXT`; chomp($FLIBS);
 #	if ($FLIBS eq "libgfortran.$SOEXT") {
 #	  $FLIBS    = `$FC $FFLAGS -print-file-name=libgfortran.a`; chomp($FLIBS);
 #	}
