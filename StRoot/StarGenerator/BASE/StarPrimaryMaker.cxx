@@ -20,6 +20,7 @@ ClassImp(StarPrimaryMaker);
 #include "TTree.h"
 #include "TClass.h"
 
+#include "StarGenerator/BASE/AgStarReader.h"
 #include "StarGenerator/EVENT/StarGenEvent.h"
 #include "StarGenerator/EVENT/StarGenParticle.h"
 #include "StarGenerator/UTIL/StarRandom.h"
