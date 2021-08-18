@@ -317,8 +317,12 @@ Int_t StarPrimaryMaker::InitRun( Int_t runnumber )
 void StarPrimaryMaker::Clear( const Option_t *opts )
 {
   mNumParticles = 0;
-  mStack->Clear();
-  mPrimaryEvent->Clear();
+  if ( mStack ) {
+    mStack->Clear();
+  }
+  if ( mPrimaryEvent ) {
+    mPrimaryEvent->Clear();
+  }
   StMaker::Clear(opts);
   TIter Next( GetMakeList() );
   StarGenerator *generator = 0;
