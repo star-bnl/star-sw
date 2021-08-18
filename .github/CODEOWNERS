@@ -40,7 +40,8 @@
 /StRoot/StDetectorDbMaker/St_vertexSeed*           @genevb
 /StRoot/StEEmc*                                    @kkauder           @rkunnawa
 /StRoot/StEEmcSimulatorMaker                       @kkauder           @rkunnawa    @klendathu2k
-/StRoot/StEEmcUtil                                 @kkauder           @rkunnawa    @klendathu2k
+/StRoot/StEEmcUtil                                 @kkauder           @rkunnawa    @klendathu2k @tinglin-physics
+/StRoot/StEEmcPool                                 @tinglin-physics
 /StRoot/StETof*                                    @PhilippWeidenkaff @ideppner
 /StRoot/StEmc*                                     @kkauder           @rkunnawa
 /StRoot/StEmbeddingUtilities                       @zhux97
