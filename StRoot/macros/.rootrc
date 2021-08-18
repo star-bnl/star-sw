@@ -1,3 +1,4 @@
-Gui.Style:                  windows
-Gui.Backend:                qt
-Gui.Factory:                qtgui
+Rint.Logon:                $(STAR)/StRoot/macros/rootlogon.C
+Rint.Logoff:               $(STAR)/StRoot/macros/rootlogoff.C
+Unix.*.Root.MacroPath:     .:$(STAR)/StRoot/macros:$(ROOTSYS)/macros
+Unix.*.Root.DynamicPath:   .:$(STAR_LIB):$(ROOTSYS)/lib
