@@ -694,9 +694,6 @@
 #include "g2t/St_g2t_fts_Module.h"
 #include "g2t/St_g2t_stg_Module.h"
 #include "g2t/St_g2t_epd_Module.h"
-// Event Generator/starsim integration
-#include "St_geant_Maker/AgStarReader.h"
-class StarParticleStack;
 
 #include "St_db_Maker/St_db_Maker.h"
 #include "TUnixTime.h"
@@ -1180,16 +1177,6 @@ int St_geant_Maker::InitRun(int run){
 }
 //_____________________________________________________________________________
 int St_geant_Maker::Make() {
-
-  static bool first = true;
-  if ( first ) {    // Event generator may have been plugged into chain after Init()
-
-    auto* stack = GetDataSet("PrimaryMakerStack");
-    auto* data  = GetDataSet("PDG_Database");
-    if ( stack )       AgStarReader::Instance().SetStack( (StarParticleStack*)stack->GetObject() );
-    if ( data  )       AgStarReader::Instance().SetParticleData( (StarParticleData*)data->GetObject() );
-    
-  }
 
   int    /*nhits,nhit1,nhit2,nhit3,nhit4,*/link=1,ide=1,npart,irun,ievt,iwtfl;
   Float_t  vert[4],weigh;

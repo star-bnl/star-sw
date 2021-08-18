@@ -20,7 +20,6 @@ ClassImp(StarPrimaryMaker);
 #include "TTree.h"
 #include "TClass.h"
 
-#include "St_geant_Maker/AgStarReader.h"
 #include "StarGenerator/EVENT/StarGenEvent.h"
 #include "StarGenerator/EVENT/StarGenParticle.h"
 #include "StarGenerator/UTIL/StarRandom.h"
@@ -57,7 +56,7 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   fgPrimary = this;
 
   mStack = new StarParticleStack("PrimaryMakerStack");
-  AgStarReader::Instance().SetStack(mStack);
+  SetAttr("usestarsim", int(1) );
 
   // Publish the stack
   AddObj( mStack, ".data" );  
@@ -87,6 +86,12 @@ TParticlePDG *StarPrimaryMaker::pdg( Int_t id ){
 // --------------------------------------------------------------------------------------------------------------
 Int_t StarPrimaryMaker::Init()
 {
+
+  if ( 1 == IAttr("usestarsim") ) {
+    LOG_INFO << "Registered starsim callbacks" << endm;
+    AgStarReader::Instance().SetStack(mStack);
+  }
+
 
   //
   // Initialize runtime flags
