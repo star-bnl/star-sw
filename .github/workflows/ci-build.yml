@@ -38,9 +38,22 @@ jobs:
           tags: ghcr.io/star-bnl/star-sw-root6-build
           file: docker/Dockerfile.root6
 
-  ROOT5_test_job87:
+  ROOT5_test_setup:
     runs-on: ubuntu-latest
     needs: ROOT5
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo "::set-output name=matrix::" $(cat test/joblist_ci.json)
+        id: set-matrix
+
+  ROOT5_test:
+    runs-on: ubuntu-latest
+    needs: ROOT5_test_setup
+    strategy:
+      matrix:
+        test_id: ${{ fromJSON(needs.ROOT5_test_setup.outputs.matrix) }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v2
@@ -50,74 +63,6 @@ jobs:
 
       - run: docker load --input /tmp/star-sw-root5-build.tar
       - run: docker run --name star-test-data --volume /star-test-data ghcr.io/star-bnl/star-test-data
-      - run: docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root5-build root4star -b -l -q 'bfc.C(10, "pp2017,btof,mtd,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt", "/star-test-data/quick/st_physics_18069061_raw_2000021.daq")'
-
-  ROOT5_test_job88:
-    runs-on: ubuntu-latest
-    needs: ROOT5
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: star-sw-root5-build
-          path: /tmp
-
-      - run: docker load --input /tmp/star-sw-root5-build.tar
-      - run: docker run --name star-test-data --volume /star-test-data ghcr.io/star-bnl/star-test-data
-      - run: docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root5-build root4star -b -l -q 'bfc.C(10, "pp2017,StiCA,btof,mtd,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt", "/star-test-data/quick/st_physics_18069061_raw_2000021.daq")'
-
-  ROOT5_test_job89:
-    runs-on: ubuntu-latest
-    needs: ROOT5
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: star-sw-root5-build
-          path: /tmp
-
-      - run: docker load --input /tmp/star-sw-root5-build.tar
-      - run: docker run --name star-test-data --volume /star-test-data ghcr.io/star-bnl/star-test-data
-      - run: docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root5-build root4star -b -l -q 'bfc.C(10, "pp2017,Sti,hitreuseon,btof,mtd,pp2pp,fmsDat,fmsPoint,fpsDat,BEmcChkStat,QAalltrigs,CorrX,OSpaceZ2,OGridLeak3D,-hitfilt", "/star-test-data/quick/st_physics_18069061_raw_2000021.daq")'
-
-  ROOT5_test_job101:
-    runs-on: ubuntu-latest
-    needs: ROOT5
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: star-sw-root5-build
-          path: /tmp
-
-      - run: docker load --input /tmp/star-sw-root5-build.tar
-      - run: docker run --name star-test-data --volume /star-test-data ghcr.io/star-bnl/star-test-data
-      - run: docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root5-build root4star -b -l -q 'bfc.C(10, "P2018a,Sti,btof,mtd,PicoVtxDefault,BEmcChkStat,QAalltrigs,OSpaceZ2,OGridLeak3D,-hitfilt", "/star-test-data/quick/st_physics_19136012_raw_1000016.daq")'
-
-  ROOT5_test_job102:
-    runs-on: ubuntu-latest
-    needs: ROOT5
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: star-sw-root5-build
-          path: /tmp
-
-      - run: docker load --input /tmp/star-sw-root5-build.tar
-      - run: docker run --name star-test-data --volume /star-test-data ghcr.io/star-bnl/star-test-data
-      - run: docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root5-build root4star -b -l -q 'bfc.C(10, "P2018a,StiCA,btof,mtd,PicoVtxDefault,BEmcChkStat,QAalltrigs,OSpaceZ2,OGridLeak3D,-hitfilt", "/star-test-data/quick/st_physics_19136012_raw_1000016.daq")'
-
-  ROOT5_test_job103:
-    runs-on: ubuntu-latest
-    needs: ROOT5
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: star-sw-root5-build
-          path: /tmp
-
-      - run: docker load --input /tmp/star-sw-root5-build.tar
-      - run: docker run --name star-test-data --volume /star-test-data ghcr.io/star-bnl/star-test-data
-      - run: docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root5-build root4star -b -l -q 'bfc.C(10, "P2018a,Sti,hitreuseon,btof,mtd,PicoVtxDefault,BEmcChkStat,QAalltrigs,OSpaceZ2,OGridLeak3D,-hitfilt", "/star-test-data/quick/st_physics_19136012_raw_1000016.daq")'
+      - run: |
+             TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-root5-build star-sw/test/executest.py -c ${{ matrix.test_id }})
+             docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root5-build sh -c "$TEST_CMD"
