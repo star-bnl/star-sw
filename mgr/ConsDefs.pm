@@ -135,7 +135,7 @@
 	$LLIB = "lib";
     }
 
-    if ( ( -x "/usr/bin/gfortran" || -x "/sw/bin/gfortran" ) && !defined($ENV{USE_G77}) ){
+    if ( ( -x "/usr/bin/gfortran" ) && !defined($ENV{USE_G77}) ){
 	# JL 200908 - give preference to gfortran for now 
 	# JL 201004 - added possibility to revertto g77 by defining USE_G77 but 
 	#             this is at your own risk
@@ -837,7 +837,6 @@
 	    script::find_lib( $MYSTAR . "/include " .  $MYSTAR . "/include/mysql ".
 			      $MYSQL . " " .
 			      $MYSQL . "/include " .
-			      "/sw/include/mysql ".
 			      "/include /usr/include ".
 			      "/usr/include/mysql  ".
 			      "/usr/mysql/include  ".
@@ -847,7 +846,6 @@
 	($MYSQLINCDIR,$mysqlheader) =
 	    script::find_lib( $MYSQL . " " .
 			      $MYSQL . "/include " .
-			      "/sw/include/mysql ".
 			      "/include /usr/include ".
 			      "/usr/include/mysql  ".
 			      "/usr/mysql/include  ".
