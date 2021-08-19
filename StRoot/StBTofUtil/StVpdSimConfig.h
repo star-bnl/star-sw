@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <fstream>
+#include "StMessMgr.h"
 #include <vector>
 #include "St_db_Maker/St_db_Maker.h"
 #include "tables/St_vpdSimParams_Table.h"
