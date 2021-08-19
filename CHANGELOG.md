@@ -19,6 +19,7 @@
   - StRoot/StarGenerator/Kinematics (#96)
   - StRoot/StHbtMaker into CI build (#98)
 - Introduce new StFcsCosmicMaker in StRoot/SpinPool (#58)
+- Removed special support for x86_darwin/FINK platform
 
 
 ### Miscellaneous
