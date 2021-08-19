@@ -314,63 +314,61 @@
     # Above was a generic gcc support
     # ============================================================
 
-    # cernlib if not intel WNT
-    if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
-	my($packl,$cernl,$kernl,$strip);
+    my($packl,$cernl,$kernl,$strip);
 
-	$strip = "";
+    $strip = "";
 
-	# A small sanity check in case user redefines improperly CERN_ROOT
-	if ( $CERN_ROOT eq "") {
-	    print "WARNING: CERN_ROOT is not defined (you may define it as \$CERN/\$CERN_LEVEL)\n"
-		unless ($param::quiet);
-	} elsif ( ! -d "$CERN_ROOT/lib"){
-	    print "WARNING: $CERN_ROOT/lib does not exists (may have CERN_ROOT ill-defined)\n"
-		unless ($param::quiet);
-	}
-
-	# now check
-	if ( -e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
-	     -e "$CERN_ROOT/lib/libkernlib_noshift.a") {
-	    $packl = "packlib_noshift";
-	    $kernl = "kernlib_noshift";
-	    if (-e "$CERN_ROOT/bin/cernlib_noshift"){
-		$cernl = "$CERN_ROOT/bin/cernlib_noshift";
-	    } else {
-		$cernl = "cernlib";
-	    }
-	} elsif ( -e "$CERN_ROOT/lib/libpacklib-noshift.a" &&
-		  -e "$CERN_ROOT/lib/libkernlib-noshift.a") {
-	    $packl = "packlib-noshift";
-	    $kernl = "kernlib-noshift";
-	    if (-e "$CERN_ROOT/bin/cernlib-noshift"){
-		$cernl = "$CERN_ROOT/bin/cernlib-noshift";
-	    } else {
-		$cernl = "cernlib";
-	    }
-
-	} else {
-	    print "WARNING: using cernlib from the default path\n"
-		unless ($param::quiet);
-#	    $cernl = "cernlib -s";
-	    $cernl = "cernlib";
-	    $packl = "packlib";
-	    $kernl = "kernlib";
-	}
-
-	$CERNLIBS .= " " . `$cernl pawlib packlib graflib/X11 packlib mathlib kernlib`;
-	$CERNLIBS =~ s/packlib\./$packl\./g;
-	$CERNLIBS =~ s/kernlib\./$kernl\./g;
-	$CERNLIBS =~ s/$strip//g     if ($strip ne "");
-	$CERNLIBS =~ s/lib /lib64 /g if ($USE_64BITS);
-
-	chop($CERNLIBS);
-	
-	if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
-	  $CERNLIBS =~ s#lX11#L/usr/X11R6/lib -lX11#;
-	}
-	print "CERNLIB = $CERNLIBS\n" unless ($param::quiet);
+    # A small sanity check in case user redefines improperly CERN_ROOT
+    if ( $CERN_ROOT eq "") {
+        print "WARNING: CERN_ROOT is not defined (you may define it as \$CERN/\$CERN_LEVEL)\n"
+        unless ($param::quiet);
+    } elsif ( ! -d "$CERN_ROOT/lib"){
+        print "WARNING: $CERN_ROOT/lib does not exists (may have CERN_ROOT ill-defined)\n"
+        unless ($param::quiet);
     }
+
+    # now check
+    if ( -e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
+         -e "$CERN_ROOT/lib/libkernlib_noshift.a") {
+        $packl = "packlib_noshift";
+        $kernl = "kernlib_noshift";
+        if (-e "$CERN_ROOT/bin/cernlib_noshift"){
+        $cernl = "$CERN_ROOT/bin/cernlib_noshift";
+        } else {
+        $cernl = "cernlib";
+        }
+    } elsif ( -e "$CERN_ROOT/lib/libpacklib-noshift.a" &&
+          -e "$CERN_ROOT/lib/libkernlib-noshift.a") {
+        $packl = "packlib-noshift";
+        $kernl = "kernlib-noshift";
+        if (-e "$CERN_ROOT/bin/cernlib-noshift"){
+        $cernl = "$CERN_ROOT/bin/cernlib-noshift";
+        } else {
+        $cernl = "cernlib";
+        }
+
+    } else {
+        print "WARNING: using cernlib from the default path\n"
+        unless ($param::quiet);
+#        $cernl = "cernlib -s";
+        $cernl = "cernlib";
+        $packl = "packlib";
+        $kernl = "kernlib";
+    }
+
+    $CERNLIBS .= " " . `$cernl pawlib packlib graflib/X11 packlib mathlib kernlib`;
+    $CERNLIBS =~ s/packlib\./$packl\./g;
+    $CERNLIBS =~ s/kernlib\./$kernl\./g;
+    $CERNLIBS =~ s/$strip//g     if ($strip ne "");
+    $CERNLIBS =~ s/lib /lib64 /g if ($USE_64BITS);
+
+    chop($CERNLIBS);
+
+    if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
+      $CERNLIBS =~ s#lX11#L/usr/X11R6/lib -lX11#;
+    }
+    print "CERNLIB = $CERNLIBS\n" unless ($param::quiet);
+
     $PLATFORM      = `root-config --platform`; chomp($PLATFORM);
     $ARCH          = `root-config --arch`; chomp($ARCH);
     #  ============================================================
@@ -437,95 +435,6 @@
 	$EXTRA_LDFLAGS = "";
 	$EXTRA_SOFLAGS = "";
 
-    } elsif (/^alpha_dux/) {
-	#
-	# Trying True64
-	#
-        $ARCOM  = "%AR %ARFLAGS %>  -input %< ; %RANLIB %>";
-#	$PLATFORM      = "alpha";
-#	$ARCH          = "alphaxxx6";
-	$CC            = "cc";
-	$CXX           = "cxx";
-	$CPP           = $CC . " -EP";
-	$CXXFLAGS      = "tlocal";
-	$CFLAGS        = "";
-	$FC            = "f77";
-	$FLIBS       = "/usr/shlib/libFutil.so /usr/shlib/libUfor.so /usr/shlib/libfor.so /usr/shlib/libots.so";
-	$FFLAGS        = "-old_f77";
-	$FEXTEND       = "-extend_source -shared -warn argument_checking -warn nouninitialize";
-	$NOOPT         = "-O0";
-	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
-	$SYSLIBS       = "-lm";
-	$CLIBS         = "-lm -ltermcap";
-	$LD            = $CXX;
-	$LDFLAGS       = "";
-	$LDEXPORT      = " -Wl,-call_shared -Wl,-expect_unresolved -Wl,\"*\""; #-B symbolic
-        $LDALL         = " -Wl,-all";
-        $LDNONE        = " -Wl,-none";
-	$F77LD         = $LD;
-	$SO            = $CXX;
-	$SOFLAGS       = "-shared -nocxxstd -Wl,-expect_unresolved,*,-msym,-soname,";
-	$OSFID        .= " ST_NO_NAMESPACES";
-
-	$EXTRA_CXXFLAGS= "-Iinclude -long_double_size 64";
-	$EXTRA_CFLAGS  = "";
-	$EXTRA_CPPFLAGS= "";
-	$EXTRA_LDFLAGS = "";
-	$EXTRA_SOFLAGS = "";
-
-    } elsif (/^sun4x_/) {
-	#
-	# Solaris
-	#
-#        $PLATFORM = "solaris";
-#        $ARCH     = "solarisCC5";
-        if (/^sun4x_56/) {$OSFCFID    = "__SunOS_5_6";}
-	if (/^sun4x_58/) {$OSFCFID    = "__SunOS_5_8";}
-        $OSFCFID .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED SOLARIS";
-        if ($STAR) {
-            $OSFID .= " ST_NO_MEMBER_TEMPLATES";
-        }
-        $OSFCFID .= " SUN Solaris sun sun4os5 " . $STAR_SYS;
-        $EXTRA_CPPPATH = $main::PATH_SEPARATOR . "/usr/openwin/include";
-	$SUNWS = $ENV{'SUNWS'};
-	$SUNOPT= $ENV{'SUNOPT'};
-	if( ! defined($SUNWS) ){ $SUNWS = "WS5.0";}
-	if( ! defined($SUNOPT)){ $SUNOPT= "/opt";}
-        $CC     = "$SUNOPT/$SUNWS/bin/cc";
-        $CXX    = "$SUNOPT/$SUNWS/bin/CC";
-	$CPP           = $CC . " -EP";
-        $CXXCOM =
-"%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -ptr%ObjDir %_IFLAGS -c %CXXinp%< %Cout%>";
-        $FC             = "$SUNOPT/$SUNWS/bin/f77";
-        $CXXFLAGS       = "-KPIC";
-        $CLIBS        =
-          "-lm -ltermcap -ldl -lnsl -lsocket -lgen $SUNOPT/$SUNWS/lib/libCrun.so -L. -lCstd -lmalloc";
-          # Brute force required for CC WS6.0 (?). Links all others but that one
-	  # (libCrun however isa softlink unlike the others).
-          # -L" . $OPTSTAR  . "/lib -lCstd -liostream -lCrun";
-        $FLIBS = "-L$SUNOPT/$SUNWS/lib -lM77 -lF77 -lsunmath";
-        $XLIBS = "-L" . $ROOTSYS . "/lib -lXpm -L/usr/openwin/lib -lX11";
-
-        #   $XLIBS     = "-L/usr/local/lib -lXpm -L/usr/openwin/lib -lX11";
-        $SYSLIBS    = "-lmalloc -lm -ldl -lnsl -lsocket";
-        $FFLAGS     = "-KPIC -w";
-        $FEXTEND    = "-e";
-        $CFLAGS     = "-KPIC";
-        $LD         = $CXX;
-        $LDFLAGS    = " -Bdynamic";
-	$F77LD         = $LD;
-        $SO         = $CXX;
-        $SOFLAGS    = "-G -ptr%ObjDir";
-
-        $EXTRA_CXXFLAGS = " -D__CC5__";
-        $EXTRA_CFLAGS   = " -D__CC5__";
-	$EXTRA_CPPFLAGS = "";
-	$EXTRA_LDFLAGS  = "";
-	$EXTRA_SOFLAGS  = "";
-
-	# ATTENTION
-	# - Below is a generic gcc support tweaks
-	# - Any platform specific support needs to appear prior to this
     } elsif ($STAR_HOST_SYS =~ /^i386_/ ||
 	     $STAR_HOST_SYS =~ /^rh/    ||
 	     $STAR_HOST_SYS =~ /^sl/    ||
