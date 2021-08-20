@@ -16,7 +16,7 @@ if (! $?NODEBUG) then
 else
     set ROOTBUILD="opt"
 endif
-#setenv LDFLAGS -m32
+setenv LDFLAGS -m32
 setenv VC_ROOT ../../Vc/
 switch ( $STAR_HOST_SYS )  
 #    case *x8664_gcc7*:
@@ -41,14 +41,16 @@ cmake -L                                        \
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
     -DCMAKE_C_FLAGS=\'${cflags}\' \
+    -DCMAKE_C_FLAGS=${LDFLAGS} \
+    -DCMAKE_CXX_FLAGS=${LDFLAGS} \
     ${VC_ROOT}
 #    -DCMAKE_C_FLAGS=\'`root-config --cflags | sed -e 's/ -I.*//'`\' \
 #    -DCMAKE_CXX_FLAGS=\'`root-config --ldflags`\' \
 #    -DCMAKE_CXX_FLAGS=\"${cxxflags}\" \
+#    -DCMAKE_C_FLAGS=`root-config --auxcflags` \
+#    -DCMAKE_CXX_FLAGS=`root-config --auxcflags` \
 
 make -j 10 install
 touch ../Vc.Done
 # make -j test
 # make install
-#    -DCMAKE_C_FLAGS=`root-config --auxcflags` \
-#    -DCMAKE_CXX_FLAGS=`root-config --auxcflags` \

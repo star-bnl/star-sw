@@ -76,7 +76,7 @@ endsw
 #set list = "perl-5.34.0 cmake-3.14.5 apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49";
 #set list = "cmake-3.21.1 perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd-4.10.0-rc5  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49";
 set list = "cmake-3.21.1 perl-5.34.0  apr-1.5.2 apr-util-1.5.4 apache-log4cxx-0.10.0.CVS  fastjet-3.0.3 fftw-3.3.5  texinfo-6.3  gsl  Python-2.7.12 pyparsing-1.5.7 xrootd  Coin-3.1.3 qt-everywhere-opensource-src-4.8.7 pythia6 pythia8243  eigen3 mercurial-5.2 coin soqt Coin3D-simage-2c958a61ea8b Coin3D-soqt-483ecb26b30c  boost_1_66_0 veccore VecGeom node-v10.16.0 cfitsio-3.49";
-
+#set list = "qt-everywhere-opensource-src-4.8.7"
 #set list = "gsl-2.1";
 #set list = "boost_1_66_0";
 #set list = "Coin3D-simage-cf953eacd849";
@@ -267,7 +267,8 @@ setenv CFLAGSd   "$cflags"
       setenv CXXFLAGS "${CXXFLAGSD}"
       setenv CFLAGS   "${CFLAGSD}"
 #          if (! -d ${XOPTSTAR}/qt4) mkdir -p ${XOPTSTAR}/qt4
-          ./configure --prefix=$QTDIR -no-glib -no-qt3support -no-cups <<EOF
+#          ./configure --prefix=$QTDIR -no-glib -no-qt3support -no-cups <<EOF
+          ./configure --prefix=$QTDIR -no-glib -no-cups <<EOF
 o
 yes
 EOF
