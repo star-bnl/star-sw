@@ -1,4 +1,4 @@
-/*
+/* for TpcAccumulatedQ
   root.exe -q -b 'MakeRow.C+(mu)'
   TH1D *h = 0;
   Int_t ch  = 0, sec = 0;

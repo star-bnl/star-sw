@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#! /usr/bin/env perl
 use File::Basename;
 use Cwd;
 use Env;
@@ -2073,8 +2073,19 @@ my $NEvents = 100000;
 #$hist = "P21ib02_13"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/10/21 test with cleaned StarDb
 #$hist = "P21ib02_14"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "adev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/11/21 test adev
 #$hist = "P21ib02_15"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 05/14/21 check with dev 
+#$hist = "P21ib02_16"; $NEvents = 2000; $disk = "data97/"; $RECO = "reco/*19GeV*/ReversedFullField/";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "SL21c"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/11/21 check with SL21c
+#$hist = "P21ib02_17"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*19GeV*/ReversedFullField/";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/12/21 reset TpcAccumulatedQ.20190225.230020.C -> TpcAccumulatedQ.C, TpcSecRowB.20190225.230020.root -> TpcSecRowB.20190225.230010.root.HOLD.ofl, TpcSecRowB.20190404.000020.root -> TpcSecRowB.20190225.230010.root.HOLD.ofl
+#$hist = "P21ib02_17"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/12/21 reset TpcAccumulatedQ.20190225.230020.C -> TpcAccumulatedQ.C, TpcSecRowB.20190225.230020.root -> TpcSecRowB.20190225.230010.root.HOLD.ofl, TpcSecRowB.20190404.000020.root -> TpcSecRowB.20190225.230010.root.HOLD.ofl => "P21ib02_21
+#$hist = "P21ib02_22"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/13/21 TpcAccumulatedQ.20190225.230021.C & TpcAccumulatedQ.20190404.000021.C
+#$hist = "P21ib02_23"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/14/21 TpcSecRowB.20210*.*22.root bug with 2021
+#$hist = "P21ib02_24"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/14/21 TpcSecRowB.20190*.*22.root
+#$hist = "P21ib02_24"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/15/21 TpcSecRowB.20190*.*22.root : mv TpcSecRowB.20190129.000022.root TpcSecRowB.20190225.230022.root
+#$hist = "P21ib02_25"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/16/21  add tpcTimeCorrection
+#$hist = "P21ib02_26"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/17/21  TpcSecRowB.20190*.*025.root
+#$hist = "P21ib02_27"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/17/21  TpcLengthCorrectionMDF.2019*26.C
+$hist = "P21ib02_28"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "SL21c"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/18/21  check SL21c
 ######################################## Run XXI express calibration ########################################
-#$hist = "RunXXI01"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 start from 2020 express production: strong Z dependence, and SecRow3 ~4%, xypad ~ 10%
+#$hist = "RunXXI01"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year 22= "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 start from 2020 express production: strong Z dependence, and SecRow3 ~4%, xypad ~ 10%
 #$hist = "RunXXI02"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 reset date 20210129.000001: TpcLengthCorrectionMDF, TpcPadCorrectionMDF, TpcZCorrectionB
 #$hist = "RunXXI03"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/05/21 new TpcSecRowB.20210129.000002
 #$hist = "RunXXI04"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/05/21 new TpcZCorrectionB.20210129.000003.C
@@ -2149,10 +2160,6 @@ my $NEvents = 100000;
 #$hist = "RunXXI55"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/04/21 TpcSecRowB.20210501.160054.root ?
 #$hist = "RunXXI56"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/05/21 step back to RunXXI53
 #$hist = "RunXXI57"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/05/21 TpcSecRowB.20210501.160056.root
-# $hist = "RunXXI100"
-# $hist = "RunXXI101"
-# $hist = "RunXXI102"
-$hist = "RunXXI200"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG21h"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  08/07/21 - 08/09/21 Recheck 
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2244,7 +2251,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #    print " dev,  ino,  mode,  nlink,  uid,  gid,  rdev,  size,  atime,  mtime,  ctime,  blksize,  blocks\n";
 #    print "$dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks\n";
     my $dt = $now - $ctime;
-#    print "$file dt = $dt\n";
+    print "$file dt = $dt\n";
 #    my $da = $now - $mtime;
 #    print "da = $da\n";
 #    if ($dt < 3600) {print "$file is too young $dt --- skipped\n"; next};
@@ -2349,6 +2356,9 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 # 	print OUT "source $GROUP_DIR/setup gcc;\n";
 # 	print OUT "source $GROUP_DIR/setup 32b;\n";
 # 	print OUT "source $GROUP_DIR/setup nodebug;\n";
+	if ($STAR_LEVEL !~ "^\.DEV2" and $STAR_LEVEL !~ "^TFG") {
+	  print OUT "source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh;\n";
+	}
 	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
       }  else {
 # 	print OUT "setenv NODEBUG yes\n";
