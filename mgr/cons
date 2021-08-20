@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+use lib '.';
 #use strict;
 use Env;
 use English;
