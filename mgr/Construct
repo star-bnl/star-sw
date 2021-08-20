@@ -383,7 +383,7 @@ if (($STAR_HOST_SYS !~ /darwin/) && # and $STAR_HOST_SYS !~ /sl53_gcc471/ and $S
     $ROOT_LEVEL !~ /^6/ ||
     ($param::include and $qtRoot =~ /$param::include/)) {# no qt on mac
 #  print "check $qtRoot\n";
-  if ((-d $qtRoot or -l $qtRoot) and $env->{CXX_MAJOR} <= 6 ) {
+  if ((-d $qtRoot or -l $qtRoot)) {# and $env->{CXX_MAJOR} <= 6 ) {
 #    print "$qtRoot does exist\n";
     push @packages, $qtRoot;
   } else {
