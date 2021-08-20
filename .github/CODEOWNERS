@@ -11,7 +11,6 @@
 /StRoot/StBichsel                                  @yfisyak
 /StRoot/StBTof*                                    @ZaochenYe         @fgeurts     @starsdong   @jdbrice
 /StRoot/StBbcSimulationMaker                       @akioogawa
-/StRoot/StBichsel                                  @yfisyak
 /StRoot/StChain                                    @klendathu2k       @perevbnlgov @yfisyak
 /StRoot/StDAQMaker                                 @perevbnlgov       @akioogawa
 /StRoot/StDaqLib                                   @jml985
@@ -42,9 +41,11 @@
 /StRoot/StDetectorDbMaker/St_vertexSeed*           @genevb
 /StRoot/StEEmc*                                    @kkauder           @rkunnawa
 /StRoot/StEEmcSimulatorMaker                       @kkauder           @rkunnawa    @klendathu2k
-/StRoot/StEEmcUtil                                 @kkauder           @rkunnawa    @klendathu2k
+/StRoot/StEEmcUtil                                 @kkauder           @rkunnawa    @klendathu2k @tinglin-physics
+/StRoot/StEEmcPool                                 @tinglin-physics
 /StRoot/StETof*                                    @PhilippWeidenkaff @ideppner
 /StRoot/StEmc*                                     @kkauder           @rkunnawa
+/StRoot/StEmbeddingUtilities                       @zhux97
 /StRoot/StEvent*                                   @klendathu2k       @ullrich-bnl
 /StRoot/StEvent/StTpc*                             @yfisyak
 /StRoot/StEventUtilities/StEbyET0*                 @genevb
@@ -103,9 +104,10 @@
 /StRoot/St_base*                                   @perevbnlgov       @yfisyak
 /StRoot/St_db_Maker                                @dmarkh            @plexoos     @perevbnlgov
 /StRoot/St_geant_Maker                             @klendathu2k       @perevbnlgov @yfisyak
+/StRoot/St_geant_Maker/Embed                       @zhux97         
 /StRoot/St_l3Clufi_Maker                           @jml985            @tonko-lj
 /StRoot/St_l3t_Maker                               @jml985            @tonko-lj
-/StRoot/St_tcl_Maker                               @yfisyak
+/StRoot/St_tcl_Maker                               @yfisyak           @iraklic
 /StRoot/Star2Root                                  @perevbnlgov       @yfisyak
 /StRoot/StarClassLibrary                           @ullrich-bnl       @klendathu2k
 /StRoot/StarGenerator                              @klendathu2k       @perevbnlgov
@@ -119,6 +121,7 @@
 /StRoot/StvUtil                                    @klendathu2k       @perevbnlgov
 /StRoot/TPCCATracker                               @yfisyak           @kehw
 /StRoot/macros                                     @genevb            @ullrich-bnl @plexoos     @yfisyak
+/StRoot/macros/embedding                           @zhux97
 /StRoot/macros/mudst                               @nigmatkulov       @plexoos
 /StarDb                                            @dmarkh            @perevbnlgov @yfisyak
 /StarDb/AgML*                                      @klendathu2k

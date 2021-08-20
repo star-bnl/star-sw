@@ -74,6 +74,7 @@ public:
     void setTowerEThreshold(float e, float h){mTowerEThreshold_Ecal=e; mTowerEThreshold_Hcal=h;}
     void setTowerEThreMoment(float e, float h){mTowerEThreMoment_Ecal=e; mTowerEThreMoment_Hcal=h;}
     void setTowerERatio2Split(float e, float h){mTowerERatio2Split_Ecal=e; mTowerERatio2Split_Hcal=h;}
+    void sortById(int v=1){mSortById=v;}
 
  private:
     int makeCluster(int det);
@@ -108,6 +109,8 @@ public:
     float mTowerERatio2Split      = 1.5;  //! Neighbor E * threshold > tower E to merge cluster, otherwise split
     float mTowerERatio2Split_Ecal = 1.5;  //! for Ecal
     float mTowerERatio2Split_Hcal = 2.0;  //! for Hcal
+
+    int mSortById=0;  //! set this for cosmic tracking (default is sort by energy)
 
     virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
     ClassDef(StFcsClusterMaker, 1)

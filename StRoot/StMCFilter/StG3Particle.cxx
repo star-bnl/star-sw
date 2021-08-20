@@ -8,13 +8,13 @@
 #include <cassert>
 
 #include "StG3Particle.h"
-#include "StGENParticle.h"
+#include "StGimParticle.h"
 
 StG3ParticleMaster *StG3ParticleMaster::mgInst =0;
 GFKINE_t StG3ParticleMaster::mgFK=0; //pointer to Geant routine GFKINE
 GFVERT_t StG3ParticleMaster::mgFV=0; //pointer to Geant routine GFVERT
 
-static std::vector<StGENParticle*> myVec;
+static std::vector<StGimParticle*> myVec;
 
 //______________________________________________________________________________
 StG3ParticleMaster::StG3ParticleMaster(GFKINE_t fk,GFVERT_t fv)
@@ -61,9 +61,9 @@ void StG3ParticleMaster::Update()
     if (NVTX) {
       (mgFV)(NVTX,V,NTBEAM,NTTARG,TOFG,UBUF,NWBUF);
     }
-    if (ITRA > size0) {myVec.push_back(new StGENParticle(ITRA-1));}
+    if (ITRA > size0) {myVec.push_back(new StGimParticle(ITRA-1));}
     else              {myVec[ITRA-1]->Clear()			 ;}
-    StGENParticle *tk = myVec[ITRA-1];
+    StGimParticle *tk = myVec[ITRA-1];
     tk->Clear();
     VERT[3] = TOFG*kC;
     PVERT[4] = Gea2Mas(IPART);

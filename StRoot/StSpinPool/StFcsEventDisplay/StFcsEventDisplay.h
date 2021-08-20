@@ -59,6 +59,7 @@ public:
     void setFileName(char* file){mFilename=file;} 
     void setRun19(int v) {mRun19=v;}
     void setDebug(int v) {mDebug=1;}
+    void setMinMax(float min, float max) {mMinE=min; mMaxE=max;} // log10 min/max                   
 
 private:
     StFcsDb* mFcsDb=0;
@@ -68,6 +69,9 @@ private:
     StStgcCollection* mStgcColl=0;
 #endif
     StEpdGeom* mEpdgeo=0;
+
+    float mMinE=2.0;
+    float mMaxE=-1.0;
 
     TApplication* mApplication=0;
     TCanvas* mCanvas=0;    
