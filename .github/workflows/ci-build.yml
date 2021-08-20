@@ -37,6 +37,13 @@ jobs:
           push: false
           tags: ghcr.io/star-bnl/star-sw-root6-build
           file: docker/Dockerfile.root6
+          outputs: type=docker,dest=/tmp/star-sw-root6-build.tar
+
+      - name: Save built image for test jobs
+        uses: actions/upload-artifact@v2
+        with:
+          name: star-sw-root6-build
+          path: /tmp/star-sw-root6-build.tar
 
   ROOT5_test_setup:
     runs-on: ubuntu-latest
