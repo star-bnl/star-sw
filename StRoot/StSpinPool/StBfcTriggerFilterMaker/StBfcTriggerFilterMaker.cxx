@@ -48,7 +48,7 @@ int StBfcTriggerFilterMaker::Init()
   copy(mTriggers.begin(),mTriggers.end(),ostream_iterator<int>(os," "));
   LOG_INFO << "Triggers: " << os.str() << endm;
 
-  return kStOk;
+  return StMaker::Init();
 }
 
 // Print format: trigger ID (trigger decision)

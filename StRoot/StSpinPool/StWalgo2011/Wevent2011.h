@@ -152,7 +152,7 @@ class WeveVertex { // info about vertex
   }
   
   void print( int flag=0){
-    printf(" Vertex ID=%d Z=%.1f cm  nTrack=%d\n",id,z, eleTrack.size());
+    printf(" Vertex ID=%d Z=%.1f cm  nTrack=%zu\n",id,z, eleTrack.size());
     for(uint i=0;i< eleTrack.size();i++) 
       eleTrack[i].print();
   }
@@ -339,7 +339,7 @@ class Wevent2011 : public TObject {
   
   //...........................
   void print( int flag=0, int isMC=0) {
-    printf("\nmy W2011event runNo=%d ID=%d  L2Wbits: ET=%d rnd=%d;  muDst: bx7=%d bx48=%d nVert=%d star: Bx7m=%d, Bx48=%d, spin4=%d \n",runNo,id,l2bitET,l2bitRnd,bx7,bx48, vertex.size(),bxStar7, bxStar48, spin4);
+    printf("\nmy W2011event runNo=%d ID=%d  L2Wbits: ET=%d rnd=%d;  muDst: bx7=%d bx48=%d nVert=%zu star: Bx7m=%d, Bx48=%d, spin4=%d \n",runNo,id,l2bitET,l2bitRnd,bx7,bx48, vertex.size(),bxStar7, bxStar48, spin4);
     int  yyyymmdd,  hhmmss; getGmt_day_hour( yyyymmdd,  hhmmss);
     printf("  event time is: day=%d, hour=%d (GMT)\n",yyyymmdd,hhmmss);
 
