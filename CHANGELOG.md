@@ -9,12 +9,19 @@
   - Build against ROOT6 in addition to ROOT5
   - Switch to multistage docker build; optimize base image
 - Fix compiler errors and include previously excluded packages into CI build (#63 #72 #86 #87)
-- StJetMaker: save additional TOF information to the jet trees (#79)
 - Introduce new StFcsCosmicMaker in StRoot/SpinPool (#58)
 
 ### Miscellaneous
 
 - Fix file name conflicts on case insensitive systems (#48)
+
+
+## [SL21c_1] - 2021-08-20
+
+- Add local DB parameters for TpcRS 26p5GeV_fixedTarget_2018 (#107, #88)
+- Change BTOF and VPD chain option names to something more descriptively useful (#84)
+- StJetMaker: save additional TOF information to the jet trees (#79)
+- TpcRS will need StEventUtilities lib for EbyET0 (#78)
 
 
 ## [SL21c] - 2021-07-29
