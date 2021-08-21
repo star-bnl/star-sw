@@ -4,16 +4,31 @@
 
 ### Enhancements
 
+- Add test jobs to CI (#112XXX, #106, #71)
+- Change BTOF and VPD chain option names to something more descriptively useful (#84)
 - Various changes to make code compatible with ROOT6 API (#47)
 - Updates in CI (#75)
   - Build against ROOT6 in addition to ROOT5
   - Switch to multistage docker build; optimize base image
-- Fix compiler errors and include previously excluded packages into CI build (#63 #72 #86 #87)
+- Fix compiler errors and include previously excluded packages into CI build
+  - StRoot/StSpinPool (#63)
+  - StarVMC/GeoTestMaker (#72)
+  - StRoot/StEEmcPool (#83)
+  - StRoot/StFgtPool (#86, #93)
+  - StRoot/StHighptPool (#87)
+  - StRoot/StarGenerator/Kinematics (#96)
+  - StRoot/StHbtMaker into CI build (#98)
 - Introduce new StFcsCosmicMaker in StRoot/SpinPool (#58)
+
 
 ### Miscellaneous
 
 - Fix file name conflicts on case insensitive systems (#48)
+- Remove deprecated StRoot/StSpinMaker (#66)
+- Cons build scripts cleanup (#99 #62XXX)
+- Add local DB parameters for TpcRS 26p5GeV_fixedTarget_2018 (#107, #88)
+- Address compiler warning about set but not used variables in StRoot/StEEmcPool (#104)
+- Update SCGL macro (#105)
 
 
 ## [SL21c_1] - 2021-08-20
