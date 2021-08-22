@@ -39,7 +39,7 @@
 - TpcRS will need StEventUtilities lib for EbyET0 (#78)
 
 
-## [SL21c] - 2021-07-29
+## [SL21c_0] - 2021-07-29
 
 First release after code transfer to Git
 
@@ -73,6 +73,10 @@ First release after code transfer to Git
 ### Miscellaneous
 
 - Multiple changes in StRoot/StTpcHitMaker
+
+### star-mcgen
+
+- Move pams/gen/idl from star-mcgen repo to star-sw
 
 
 ## [SL21b_v2] - 2021-04-02
