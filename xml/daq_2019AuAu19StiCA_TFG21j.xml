@@ -36,7 +36,8 @@
 # SL21c
 #    root4star -b -q 'bfc.C(500000,"DbV20210726 P2019a StiCA -beamline3D btof mtd BEmcChkStat CorrY -OPr13 EbyET0 evout PicoVtxVpdOrDefault PicoCovMtxWrite -hitfilt","'${evtsFile}'")' &gt;&amp; ${logFile}
 # TFG21j
-    root.exe -b -q 'bfc.C(500000,"DbV20210726 P2019a StiCA -beamline3D btof mtd BEmcChkStat CorrY -OPr13 EbyET0 evout PicoVtxVpdOrDefault PicoCovMtxWrite -hitfilt","'${evtsFile}'")' &gt;&amp; ${logFile}
+#    root.exe -b -q 'bfc.C(500000,"DbV20210726 P2019a StiCA -beamline3D btof mtd BEmcChkStat CorrY -OPr13 EbyET0 evout PicoVtxVpdOrDefault PicoCovMtxWrite -hitfilt","'${evtsFile}'")' &gt;&amp; ${logFile}
+    root.exe -b -q 'bfc.C(500000,"P2019a StiCA -beamline3D btof mtd BEmcChkStat CorrY -OPr13 EbyET0 evout PicoVtxVpdOrDefault PicoCovMtxWrite -hitfilt","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   cp  ${filel}* ${SUBMITTINGDIRECTORY}
    rm ${bla}
         </command>
