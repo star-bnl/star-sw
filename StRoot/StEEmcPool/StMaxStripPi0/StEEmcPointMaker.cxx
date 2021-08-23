@@ -253,7 +253,7 @@ Bool_t StEEmcPointMaker::findPoints( Int_t sector,
   /// where we find such unique matches, we add the point to
   /// the list of found points, and remove the matching pair
   /// of smd clusters from the list of clusters.  
-  Bool_t go = false;
+  /// Bool_t go = false;
   StEEmcSmdClusterVec_t::iterator uiter=uclusters.begin();
   StEEmcSmdClusterVec_t::iterator viter=vclusters.begin();
 
@@ -303,7 +303,7 @@ Bool_t StEEmcPointMaker::findPoints( Int_t sector,
       /// uniquely matches an smd point.  Thus, we will not proceed
       /// to the second-stage logic which determines ambiguous
       /// matches using energies of clusters
-      go=true;
+      /// go=true;
       	
       /// push the point into the list of points and remove
       /// the associated pair of clusters
