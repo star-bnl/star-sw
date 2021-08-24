@@ -28,12 +28,12 @@ RUN mkdir -p star-spack \
  && curl -sL https://github.com/spack/spack/archive/010e5761d6631eae102d1eec87e5e74a0e16ed82.tar.gz | tar -xz --strip-components 1 -C star-spack/spack
 
 RUN source star-spack/setup.sh \
+ && sed -e '/mesa/a\    variants: ~llvm' -i star-spack/environments/packages_gcc-4.8.5.yaml \
  && spack env create star-env-root star-spack/environments/star-x86_64-root-6.16.00-container.yaml \
  && spack env activate star-env-root \
  && spack install -j 5 --fail-fast \
  && spack gc -y \
  && spack clean --all \
- && spack uninstall --force -y llvm \
  # Create star-spack/spack/var/spack/environments/star-env-root/loads
  && spack -e star-env-root env loads
 
