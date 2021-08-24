@@ -1,10 +1,17 @@
 # Changelog
 
-## [SL21d] - future release
+## [SL21d_0] - future release on SL21d branch
 
 ### Enhancements
 
-- Add test jobs to CI (#112XXX, #106, #71)
+- Geometry update for 2022 (#173)
+- StJetMaker: add idTruth to StJetTrack (#152)
+- Use std::ostringstream in place of STARs ostrstream (#150)
+  - Garbage in the output produced by StChain #165
+  - StRoot/StUtilities/StMessage: fix regression from using the proper std::ostringstream::str (#168)
+- Fix dependency of STAR geometry libraries on generated source files (#148)
+- Update to FST geometry to add a simplified version of the geometry for tracking  (#147)
+- Add test jobs to CI (#112, #106, #71)
 - Change BTOF and VPD chain option names to something more descriptively useful (#84)
 - Various changes to make code compatible with ROOT6 API (#47)
 - Updates in CI (#75)
@@ -20,15 +27,24 @@
   - StRoot/StHbtMaker into CI build (#98)
 - Introduce new StFcsCosmicMaker in StRoot/SpinPool (#58)
 
+### Bug fixes
+
+- fixed a logical error for the PicoVtxMod::Mtd in StPicoDstMaker.cxx (#163)
 
 ### Miscellaneous
 
 - Fix file name conflicts on case insensitive systems (#48)
 - Remove deprecated StRoot/StSpinMaker (#66)
-- Cons build scripts cleanup (#99 #62XXX)
+- Cons build scripts cleanup (#99 #62)
 - Add local DB parameters for TpcRS 26p5GeV_fixedTarget_2018 (#107, #88)
 - Address compiler warning about set but not used variables in StRoot/StEEmcPool (#104)
 - Update SCGL macro (#105)
+- cons: Skip uncompilable package StShadowMaker (#69)
+
+### Online
+
+- Initial Implement of FST Online Monitor (#169)
+- Update readers for stgc and fcs (#167)
 
 
 ## [SL21c_5] - 2021-10-08
