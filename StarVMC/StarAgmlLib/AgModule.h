@@ -5,6 +5,7 @@
 #include "Mortran.h"
 #include "AgDetp.h"
 #include <string>
+#include <StarVMC/StarAgmlLib/AgMLExtension.h>
 using namespace std;
 
 class TDataSet;
@@ -44,6 +45,9 @@ class AgModule : public AgBlock
   void SetTrackingFlag( int flag ){ mTrackingFlag = flag; }
   int  GetTrackingFlag(){ return mTrackingFlag; }
 
+  void AddHitScoring( TString name, AgMLScoring* sc ){ mHitScoring[name] = sc; }
+  std::map<TString,AgMLScoring*> GetHitScoring(){ return mHitScoring; }
+
  private:
  protected:
 
@@ -57,6 +61,8 @@ class AgModule : public AgBlock
   static TDataSet *mGeomSet;
 
   short mTrackingFlag;
+
+  std::map<TString,AgMLScoring*> mHitScoring;
 
  public:
   virtual const Char_t *GetCVS() const {
