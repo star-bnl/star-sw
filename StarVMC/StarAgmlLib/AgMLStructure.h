@@ -220,7 +220,12 @@ class AgMLStructure : public AgMLStructureBase
 public:
 
   AgMLStructure( const char *_name ) : AgMLStructureBase(), name(_name) { };
-
+ ~AgMLStructure() {   
+   for ( auto t : table ) { // cleanup the table
+     if (t) delete (t);
+   }
+ };
+  
   void fill() {
     table.push_back( new T( current ) );
     int index = table.size() - 1; // current FILL index
@@ -260,30 +265,6 @@ public:
     //    std::cout << "[WARNING]: USE "<< name << " " << typeid(p).name() << " == " << p.value() << " failed." << std::endl << std::flush;  assert(0);
     return false; 
   };
-
-
-  // //
-  // // Could simplify selextion by using c++11 lambdas...
-  // //
-  // //   HEXG.use( []( hexg_t h ){ return h.type == 1; } )
-  // //
-  // template<class Struct>
-  // bool use2( std::function<bool(Struct)> predicate ) {
-  //   auto x = std::find_if( table.begin(), table.end(), predicate );
-  //   if ( x == table.end() ) return false;
-
-  //   if ( *x ) { 
-  //     current = *(*x);
-  //     return true;
-  //   };
-
-  //   return false;
-  // };
-
-
-
-
-
 
   /// Cast to a refence to the current version
   operator T&(){ return current; }
