@@ -1441,6 +1441,8 @@ Bfc_st BFC[] = { // standard chains
   {"geomNoField" ,"" ,"","-geometry,StarMagField"        ,"","geometryNoField","geometry-Mag.Field",kFALSE},
   {"xgeometry"   ,"" ,"","-geometry,-geomNoField"         ,"","xgeometry","AgML geometry-Mag.Field",kFALSE},
   {"UseProjectedVertex" ,"" ,"",""                ,"","","Run StBTofCalibMaker w/wo Primary Vertex",kFALSE},
+  {"ImpBToFt0Mode" ,"" ,"",""             ,"","","pppAMode in StVpdCalibMaker and StBTofCalibMaker",kFALSE},
+  {"setOutlierRej4BToft0" ,"" ,"",""          ,"","","setPPPAOutlierRej is set in StBTofCalibMaker",kFALSE},
   {"pppAMode" ,"" ,"",""                  ,"","","pppAMode in StVpdCalibMaker and StBTofCalibMaker",kFALSE},
   {"setPPPAOutlierRej" ,"" ,"",""             ,"","","setPPPAOutlierRej is set in StBTofCalibMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1959,6 +1961,7 @@ Bfc_st BFC[] = { // standard chains
   {"dEdxY2"       ,"dEdxY2","","LdEdxY2","StdEdxY2Maker","",         "Bichsel method used for dEdx",kFALSE},
   {"dEdxCalib"    ,"","","dEdxY2","",                       "switch on dEdx calibration histograms",kFALSE},
   {"ForcedX"     ,"","","dEdxY2","",                      "Force recalculation of dX using Helices",kFALSE},
+  {"SkipdNdx", "", "", "dEdxY2", "", "",              "Option for StdEdxY2Maker to calculate dN/dx",kFALSE},
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti
   {"btofMatch" ,"","","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker","TPC-BTOF track matching",kFALSE},

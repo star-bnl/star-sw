@@ -37,7 +37,7 @@
 #include "StPhmdModule.h"
 
 #include "StTofUtil/tofPathLength.hh"
-#include "tables/St_tofTotbCorr_Table.h"
+#include "tables/St_tofTotCorr_Table.h"
 // btof
 #include "StBTofCollection.h"
 #include "StBTofHit.h"
@@ -137,12 +137,12 @@ Int_t StEventQAMaker::InitRun(int runnumber) {
   }
 
   // vpd calibration parameters
-  St_tofTotbCorr* tofTotbCorr = static_cast<St_tofTotbCorr*>(GetDataBase("Calibrations/tof/tofTotbCorr"));
-  if(!tofTotbCorr) {
+  St_tofTotCorr* tofTotCorr = static_cast<St_tofTotCorr*>(GetDataBase("Calibrations/tof/tofTotCorr"));
+  if(!tofTotCorr) {
     gMessMgr->Error("unable to get tof TotCorr table parameters","OS");
     return kStWarn;
   }
-  tofTotbCorr_st* totCorr = static_cast<tofTotbCorr_st*>(tofTotbCorr->GetArray());
+  tofTotCorr_st* totCorr = static_cast<tofTotCorr_st*>(tofTotCorr->GetArray());
   
   for(Int_t i=0;i<mNVPD;i++) {
     short trayId = totCorr[i].trayId;
@@ -1579,14 +1579,12 @@ void StEventQAMaker::MakeHistPID() {
 	    hists->m_p_dedx_rec->Fill((float)(p),(float)(dedx*1.e6));
 	  }
 	}
-#if 0
 	if (dedxPidTr->detector() == kTpcSvtId) {
 	  Float_t pionExpected = Bichsel::Instance()->GetI70M(
             TMath::Log10(theTrack->geometry()->momentum().mag()/pion_minus_mass_c2));
 	  pionExpected *= 1.e-6;
 	  hists->m_dedxTTS->Fill(dedx/(pionExpected+1.e-10));
 	}
-#endif
 	if (dedxPidTr->detector() == kFtpcWestId) {
 	  // east and west in same histogram
 	  hists->m_ndedxF->Fill(ndedx,1.);

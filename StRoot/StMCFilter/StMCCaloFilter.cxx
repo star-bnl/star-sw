@@ -29,8 +29,8 @@ StMCCaloFilter::StMCCaloFilter(): StMCFilter("MCCaloFilter")
     mConeRadius = 0.07;       
     mSeedThreshold = 8.0;
     mClusterThreshold = 14.;
-    mEtaLow =  1.5;
-    mEtaHigh = 2.5;
+    mEtaLow = -1.1;
+    mEtaHigh = 1.6;
     mMaxVertex = 100;
     mHadronEfract=0.5;
     gInpEvent=gKeepEvent=0;

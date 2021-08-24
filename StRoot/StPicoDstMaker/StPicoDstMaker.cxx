@@ -1199,11 +1199,6 @@ void StPicoDstMaker::fillTracks() {
     static StDedxMethod defaultdEdxMethod = (defY > 0 && defY < 14) ? kTruncatedMeanId : kLikelihoodFitId;
 #else /* __TFG__VERSION__ */
     static StDedxMethod defaultdEdxMethod = kLikelihoodFitId;
-    if ( gTrk->primaryTrack() ) {
-      picoTrk->setStatus(1);      
-    } else {
-      picoTrk->setStatus(0);
-    }
 #endif /* ! __TFG__VERSION__ */
     if (defaultdEdxMethod == kTruncatedMeanId) {
       picoTrk->setDedx( gTrk->probPidTraits().dEdxTruncated() );
@@ -1217,6 +1212,11 @@ void StPicoDstMaker::fillTracks() {
 #if defined(__TFG__VERSION__)
     picoTrk->setDndx( gTrk->probPidTraits().dNdxFit() );
     picoTrk->setDndxError( gTrk->probPidTraits().dNdxErrorFit() );
+    if ( gTrk->primaryTrack() ) {
+      picoTrk->setStatus(1);      
+    } else {
+      picoTrk->setStatus(0);
+    }
 #endif /* __TFG__VERSION__ */
 
     // Fill track's hit information

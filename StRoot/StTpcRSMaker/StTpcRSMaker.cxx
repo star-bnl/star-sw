@@ -47,6 +47,7 @@
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StDetectorDbMaker/St_tpcBXT0CorrEPDC.h"
+#include "StEventUtilities/StEbyET0.h"
 #include "StDetectorDbMaker/St_beamInfoC.h"
 #if 0
 #include "StParticleTable.hh"
@@ -667,6 +668,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
 	double driftVelocity = StTpcDb::instance()->DriftVelocity(1);
 	fgTriggerT0 = - StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth)*mTimeBinWidth*1e-6;
+      } else if (pEvent && IAttr("EbyET0")) {
+        // StEbyET0 returns microsec, will need it in seconds
+        fgTriggerT0 = - StEbyET0::Instance()->getT0(pEvent)*1e-6;
 #if 0
       } else if (g2t_ver->GetNRows() > 0) {
       Double_t beta  = St_beamInfoC::instance()->BetaYellow();

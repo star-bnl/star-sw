@@ -813,7 +813,8 @@ Int_t StBFChain::Instantiate()
 	mode |= (1 << 10); // kNoToflight   //10 don't account for particle time of flight
 	mk->SetMode(mode);
       }
-    }
+      if (GetOption("EbyET0")) mk->SetAttr("EbyET0", kTRUE);
+   }
     if (maker == "StTrsMaker") {
       Int_t mode = 0;
       if (GetOption("TrsPileUp")) mode += 1; // Pile-up correction
@@ -919,6 +920,7 @@ Int_t StBFChain::Instantiate()
       mk->PrintAttr();
     }
     if (maker == "StdEdxY2Maker") {
+      if (GetOption("SkipdNdx")) mk->SetAttr("SkipdNdx", kTRUE);
       if (GetOption("dEdxCalib")) {
 	Int_t Mode = 0;
 	SETBIT(Mode,StdEdxY2Maker::kCalibration);
@@ -1023,6 +1025,7 @@ Int_t StBFChain::Instantiate()
       if  (GetOption("UseMCTstart"))        mk->SetAttr("UseMCTstart",kTRUE);
 #endif
     }
+    if (maker == "StVpdCalibMaker" && GetOption("pppAMode")) mk->SetAttr("pppAMode", kTRUE);
     if (maker == "StEventMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT",kTRUE);
     if (maker == "StEventMaker" && fFiltTrg.Length()) {
       mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));

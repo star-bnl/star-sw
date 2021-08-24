@@ -7,8 +7,7 @@
 
 #include "StExampleFilter.h"
 #include "StGenParticle.h"
-#include "TMath.h"
-#include "StMessMgr.h" 
+
 /// 	IMPORTANT IMPORTANT IMPORTANT
 /// Defining the static instance of user filter provides creating this
 /// class during the loading of library. Afterward GEANT could select 
@@ -89,11 +88,9 @@ static StExampleFilter qwerty;
 //______________________________________________________________________________
 int StExampleFilter::RejectEG(const StGenParticleMaster &ptl) const
 {
-#if 0
   ptl.Print("************** In RejectEG ************** ");
 // Condition: number of tracks etaGate[0]<eta<= etaGate[1] must be bigger  etaGate[2]
-//const static double etaGate[3]={0.8,1.2, 3};
-  const static double etaGate[3]={1.5,2.5, 1};
+const static double etaGate[3]={0.8,1.2, 3};
   const StGenParticle *tk=0;
   int n = ptl.Size();
   int ntk=0;
@@ -106,48 +103,17 @@ int StExampleFilter::RejectEG(const StGenParticleMaster &ptl) const
   }
 
   if (ntk<etaGate[2]) return 1;
-#endif
   return 0;
 }
 //______________________________________________________________________________
 int StExampleFilter::RejectGT(const StGenParticleMaster &ptl) const
 {
+  ptl.Print("************** In RejectGT ************** ");
   return 0;
 }
 //______________________________________________________________________________
 int StExampleFilter::RejectGE(const StGenParticleMaster &ptl) const
 {
-#if 1
-  //  ptl.Print("************** In RejectGE ************** ");
-  // Condition: K0S->pi+ pi-, Gamma->e+e-,Lambda->p pi-; LambdaBar -> pbar pi+; with pT > 0.5 withing TPC fiducial volume
-  //  ptl.Print("************** In RejectGT ************** ");
-  const StGenParticle *tk=0;
-  Int_t n = ptl.Size();
-  Int_t ntk=0;
-  for (Int_t i=0;i<n;i++) {
-    tk = ptl(i); if (!tk) 	continue;
-    if (tk->R()  > 100) continue;
-    if (tk->Pt() < 0.5) continue;
-    Int_t gId = tk->GetPdgCode();
-    if (! tk->GetDaughter(0) ||
-	! tk->GetDaughter(1)) continue;
-    if (gId == 22) ntk++;
-    else if (gId == 310) {
-      if (TMath::Abs(tk->GetDaughter(0)->GetPdgCode()) == 211) {
-	LOG_INFO << "Accept " << gId << " R = " << tk->R() << " (cm), pT = " << tk->Pt() << " (GeV/c) , daughter = " << tk->GetDaughter(0)->GetPdgCode() <<endm;
-	tk++;
-      }
-    } else if (TMath::Abs(gId) == 3122) {
-      if (TMath::Abs(tk->GetDaughter(0)->GetPdgCode()) ==  211 || 
-	  TMath::Abs(tk->GetDaughter(0)->GetPdgCode()) == 2212) {
-	LOG_INFO << "Accept " << gId << " R = " << tk->R() << " (cm), pT = " << tk->Pt() << " (GeV/c)" 
-		 << ", daughter0 =" << tk->GetDaughter(0)->GetPdgCode() 
-		 << ", daughter1 =" << tk->GetDaughter(1)->GetPdgCode() <<endm;
-	ntk++;	
-      }
-    }
-  }
-  if (! ntk) return 1;
-#endif
+  ptl.Print("************** In RejectGE ************** ");
   return 0;
 }
