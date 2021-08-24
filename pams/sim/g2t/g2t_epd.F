@@ -44,6 +44,9 @@ c$$$  Local  = Idigi.ge.2
 *
       enddo    
 
+      g2t_track(trac).hit_epd_p    = i
+      g2t_track(trac).n_epd_hit    = g2t_track(trac).n_epd_hit + 1
+
       RETURN
       END
 
