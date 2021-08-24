@@ -49,7 +49,6 @@ ClassImp(StarTGeoStacker);
 #include <RVersion.h> 
 
 #include "StMessMgr.h"
-#define ENDL endm
 
 #undef min
 #undef max
@@ -305,14 +304,14 @@ TGeoMaterial *BuildMaterial( AgMaterial &ag_material )
     case( AgMaterial::kMixture ):
       if ( ag_material.sumWeights() - 1.0 < -1.0E-5 ) 
 	{	  
-	  LOG_WARN << "Warning: sum of all weights does not add up to 1.0" << ENDL;
+	  LOG_WARN << "Warning: sum of all weights does not add up to 1.0" << endm;
 	  ag_material.Print();
 	}
       mixture = new TGeoMixture( mat_name, nc, dd );
       for ( ic = 0; ic<nc; ic++ )
 	{
 	  if ( aa<=zz ) {
-	    LOG_INFO << mat_name.Data() << " invalid component: " << name << " A=" << aa << " Z=" << zz << " weight=" << ww << ENDL;
+	    LOG_INFO << mat_name.Data() << " invalid component: " << name << " A=" << aa << " Z=" << zz << " weight=" << ww << endm;
 	  }
 	  ag_material.Component(ic,name,aa,zz,ww); mixture->DefineElement(ic,aa,zz,ww); assert(aa>=zz);
 	}
