@@ -311,7 +311,7 @@ TGeoMaterial *BuildMaterial( AgMaterial &ag_material )
       mixture = new TGeoMixture( mat_name, nc, dd );
       for ( ic = 0; ic<nc; ic++ )
 	{
-	  if ( aa<zz ) {
+	  if ( aa<=zz ) {
 	    LOG_INFO << mat_name.Data() << " invalid component: " << name << " A=" << aa << " Z=" << zz << " weight=" << ww << ENDL;
 	  }
 	  ag_material.Component(ic,name,aa,zz,ww); mixture->DefineElement(ic,aa,zz,ww); assert(aa>=zz);
@@ -639,12 +639,25 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 
       // AgML extented volume information
       AgMLExtension* agmlExt = gAgMLExt[ block->GetName() ]; 
-      if ( 0==agmlExt ) { gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); }
+      if ( 0==agmlExt ) { 
+	// Create new agml extension
+	gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); 
+	// Add user hits to the extension
+	for ( auto kv : module->GetHitScoring() ) {
+	  TString key          = kv.first;
+	  AgMLScoring* scoring = kv.second;
+	  agmlExt -> AddHitScoring( scoring );
+	}
+      }
       agmlExt->SetVolumeName( nn );
       agmlExt->SetFamilyName( block->GetName() );
       agmlExt->SetModuleName( module->GetName() );
       agmlExt->SetSensitive( mMedium.par("isvol") );
       agmlExt->SetTracking( module->GetTrackingFlag() );
+      // Get tracking cuts from the block
+      for ( auto kv : block->GetCuts() ) {
+	agmlExt->AddCut( kv.first, kv.second );
+      }
 
       volume->SetUserExtension( agmlExt );
 
@@ -720,12 +733,25 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 	  // AgML extented volume information
 
 	  AgMLExtension* agmlExt = gAgMLExt[ block->GetName() ]; 
-	  if ( 0==agmlExt ) { gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); }
+	  if ( 0==agmlExt ) { 
+	    // Create new agml extension
+	    gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); 
+	    // Add user hits to the extension
+	    for ( auto kv : module->GetHitScoring() ) {
+	      TString key          = kv.first;
+	      AgMLScoring* scoring = kv.second;
+	      agmlExt -> AddHitScoring( scoring );
+	    }
+	  }
 	  agmlExt->SetVolumeName( nn );
 	  agmlExt->SetFamilyName( block->GetName() );
 	  agmlExt->SetModuleName( module->GetName() );
 	  agmlExt->SetSensitive( mMedium.par("isvol") );
 	  agmlExt->SetTracking( module->GetTrackingFlag() );
+	  // Get tracking cuts from the block
+	  for ( auto kv : block->GetCuts() ) {
+	    agmlExt->AddCut( kv.first, kv.second );
+	  }
 
 	  volume->SetUserExtension( agmlExt );
 
@@ -838,33 +864,22 @@ TGeoVolume *makeCopyVolume( TGeoVolume *org, AgShape shape, Bool_t copyDaughters
 //
 Bool_t sanityCheck( TGeoVolume *volume )
 {
-
-  bool result = false;
-
-  if ( volume->IsAssembly() ) {
-    result = true;
-  } 
-  else { 
-
-    TGeoShape *shape = volume->GetShape();
-    if ( 0==shape ) { 
-      result = false;
+  
+  TGeoShape *shape = volume->GetShape();
+  
+  // Shape with volume=0 is probably an error
+  if ( shape->Capacity() <= 0. )
+    { Int_t old=gErrorIgnoreLevel;    
+      gErrorIgnoreLevel=1; // Some warnings will not be supressed
+      AgBlock::module()->Warning(AgModule::module()->GetName(),Form("Volume %s shape parameters invalid.  NULL bounding box capacity.",volume->GetName()));
+      //      volume -> Print();
+      //      volume -> InspectShape();
+      gErrorIgnoreLevel=old;
+      return false;
     }
-    else { 
-      if ( shape->Capacity() > 0 ) {
-	result = true;
-      }
-      else {
-	result = false;
-      }
-    }
-  }
 
-  if ( result == false ) {
-    LOG_WARN << "Invalid shape for volume " << volume->GetName() << endm;
-  }
 
-  return result;
+  return true;
 }
 
 
@@ -885,12 +900,14 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //
   //////////////////////////////////////////////////////////////////////////////
   //
-  AgBlock    *mother_block = AgBlock::Find( position.mother() );
-  TString     mother_name  = mother_block -> nickname();
-  TString     group_name   = position.group();
-  TGeoVolume *mother       = mVolumeTable[ mother_name ];
-  TGeoVolume *group        = mVolumeTable[ group_name ];
-  TGeoVolume *daughter     = 0;
+  AgMLExtension* agmlext      = gAgMLExt[ block_name ]; 
+  AgBlock*       mother_block = AgBlock::Find( position.mother() );
+  TString        mother_name  = mother_block -> nickname();
+  TString        group_name   = position.group();
+  TGeoVolume*    mother       = mVolumeTable[ mother_name ];
+  TGeoVolume*    group        = mVolumeTable[ group_name ];
+  TGeoVolume*    daughter     = 0;
+
 
   //
   //////////////////////////////////////////////////////////////////////////////
@@ -903,8 +920,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //////////////////////////////////////////////////////////////////////////////
   //
   AgShape *shape = block->shape();
-  if ( shape->type() == AgShape::kDivision )
-    {
+  if ( shape->type() == AgShape::kDivision )    {
       Warning("Position(...)",Form("Attempt to position %s which is a division of %s",block->GetName(),mother->GetName()));
       return true;
     }
@@ -919,8 +935,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //
   AgAttribute *attribute  = block->attribute();
   Double_t     att_serial = -999.0;
-  if ( attribute -> isSet("serial") )
-    {
+  if ( attribute -> isSet("serial") )    {
       att_serial = attribute->par("serial");
     }
 
@@ -953,8 +968,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   AgShape pos_shape = *block->shape();
   AgShape sav_shape = *block->shape();
   Int_t   nshape = 0;
-  for ( UInt_t i=0;i<pos_shape.parList().size();i++ )
-    {
+  for ( UInt_t i=0;i<pos_shape.parList().size();i++ )    {
       TString key=pos_shape.parList()[i];
       if ( position.isSet(key) )
 	{
@@ -973,8 +987,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //////////////////////////////////////////////////////////////////////////////
   //
   Bool_t parameterized = false;
-  if ( nshape )
-    {
+  if ( nshape )    {
 
       if ( !block->shape()->parameterized() ) // [ERROR]: Block placed with position arguements but is not a parameterized block
 	{ gErrorIgnoreLevel=1; 
@@ -1038,14 +1051,12 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //
   //////////////////////////////////////////////////////////////////////////////
   //
-  if ( nshape )
-    {
+  if ( nshape )    {
       block->SetShape( pos_shape );
     }
 
   std::vector< TGeoVolume * > sisters; // list of similar volumes for error detection/debug purposes below
-  while ( (vol=(TGeoVolume*)next() ) )
-    {
+  while ( (vol=(TGeoVolume*)next() ) )    {
 
       TString volume_name = realname( vol->GetName() );
 
@@ -1089,8 +1100,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
 
   if ( !daughter )
 
-    while ( (vol=(TGeoVolume*)nextG() ) )
-      {
+    while ( (vol=(TGeoVolume*)nextG() ) )      {
 
 	TString volume_name = realname( vol->GetName() );
 
@@ -1163,8 +1173,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
   //////////////////////////////////////////////////////////////////////////////
   //
   Int_t copy = 1;
-  for ( Int_t i=0;i<mother->GetNdaughters();i++ )
-    {
+  for ( Int_t i=0;i<mother->GetNdaughters();i++ )    {
       TGeoNode *node   = mother->GetNode(i);
       TString   name   = node->GetVolume()->GetName();
       TString   myname = realname(name);
@@ -1266,21 +1275,14 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPosition position )
 
   // Increment the number of branches on the block
   block->branch();
+
+  // Record currnent number of branchings in the extension
+  agmlext->SetBranchings( block->numberBranches() );
   
-
-//   //
-//   // In the case of parameterized blocks, restore the previous state of the shape
-//   //
-//   if ( nshape )
-//     {
-//       block->SetShape( sav_shape );
-//     }
-
 
   // If the shape is a parameterized shape, reset all of the shape
   // paramters to zero
-  if ( parameterized )
-    {
+  if ( parameterized )    {
 
       std::vector<TString> pars = block->shape()->parList();
       for ( UInt_t i=0;i<pars.size();i++ )
@@ -1310,12 +1312,13 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
   //
   //////////////////////////////////////////////////////////////////////////////
   //
-  AgBlock    *mother_block = AgBlock::Find( position.mother() );
-  TString     mother_name  = mother_block -> nickname();
-  TString     group_name   = position.group();
-  TGeoVolume *mother       = mVolumeTable[ mother_name ];
-  TGeoVolume *group        = mVolumeTable[ group_name ];
-  TGeoVolume *daughter     = 0;
+  AgMLExtension* agmlext      = gAgMLExt[ block_name ]; 
+  AgBlock*       mother_block = AgBlock::Find( position.mother() );
+  TString        mother_name  = mother_block -> nickname();
+  TString        group_name   = position.group();
+  TGeoVolume*    mother       = mVolumeTable[ mother_name ];
+  TGeoVolume*    group        = mVolumeTable[ group_name ];
+  TGeoVolume*    daughter     = 0;
 
   //
   //////////////////////////////////////////////////////////////////////////////
@@ -1682,13 +1685,9 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
   // Increment the number of branches on the block
   block->branch();
 
-//   //
-//   // In the case of parameterized blocks, restore the previous state of the shape
-//   //
-//   if ( nshape )
-//     {
-//       block->SetShape( sav_shape );
-//     }
+  // Store number of branchings
+  //  LOG_INFO << "Number of brancghings: " << block->numberOfBranchings() << endm;
+  agmlext->SetBranchings( block->numberBranches() );
 
 
   // If the shape is a parameterized shape, reset all of the shape
