@@ -1,5 +1,8 @@
 #include "AgMath.h"
 #include "TMath.h"
+//using namespace AgMath;
+
+namespace AgMath { 
 
 Int_t iand(Int_t x, Int_t y){ return x&y; }
 Int_t ior (Int_t x, Int_t y){ return x|y; }
@@ -29,3 +32,5 @@ Float_t operator*( const Float_t &A, const AgPower<Float_t> &power )
 {
   return TMath::Power(A,power.value);
 }
+
+}; 
