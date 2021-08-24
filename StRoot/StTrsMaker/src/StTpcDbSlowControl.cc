@@ -102,10 +102,10 @@ StTpcSlowControl* StTpcDbSlowControl::instance()
 #ifndef ST_NO_EXCEPTIONS
 	throw invalid_argument("StTpcDbSlowControl::getInstance(): Argument Missing!");
 #else	
-	cerr << "StTpcDbSlowControl::instance() " << endl;	
-	cerr << "\tWARNING" << endl;
-	cerr << "\tNo arguments for instantiation of" << endl;
-	cerr << "Exiting..." << endl;
+	std::cerr << "StTpcDbSlowControl::instance() " << endl;	
+	std::cerr << "\tWARNING" << endl;
+	std::cerr << "\tNo arguments for instantiation of" << endl;
+	std::cerr << "Exiting..." << endl;
 #endif
     }
     return mInstance;	
@@ -118,10 +118,10 @@ StTpcSlowControl* StTpcDbSlowControl::instance(StTpcDb* globalDbPointer)
     if (!mInstance)
 	mInstance = new StTpcDbSlowControl(globalDbPointer);
     else {
-	cerr << "StTpcDbSlowControl::instance() " << endl;	
-	cerr << "\tWARNING" << endl;
-	cerr << "\tSingleton class is already instantiated." << endl;
-	cerr << "\tArgument (const char*) is ignored." << endl;
+	std::cerr << "StTpcDbSlowControl::instance() " << endl;	
+	std::cerr << "\tWARNING" << endl;
+	std::cerr << "\tSingleton class is already instantiated." << endl;
+	std::cerr << "\tArgument (const char*) is ignored." << endl;
     }
     return mInstance;
 }

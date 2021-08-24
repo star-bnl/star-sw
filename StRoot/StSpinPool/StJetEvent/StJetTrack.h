@@ -32,6 +32,11 @@ public:
     , mNSigmaKaon(0)
     , mNSigmaProton(0)
     , mNSigmaElectron(0)
+    , mBTofTrayId(0)
+    , mNSigmaTofPion(0)
+    , mNSigmaTofKaon(0)
+    , mNSigmaTofProton(0)
+    , mNSigmaTofElectron(0)
   {
   }
 
@@ -64,6 +69,12 @@ public:
   float nSigmaElectron()       const { return mNSigmaElectron; }
   float m()                    const { return (beta() > 0 && beta() < 1) ? momentum().Mag()*TMath::Sqrt(1/(beta()*beta())-1) : -999; }
 
+  int btofTrayId()             const { return mBTofTrayId; }
+  double nSigmaTofPion()       const { return mNSigmaTofPion; }
+  double nSigmaTofKaon()       const { return mNSigmaTofKaon; }
+  double nSigmaTofProton()     const { return mNSigmaTofProton; }
+  double nSigmaTofElectron()   const { return mNSigmaTofElectron; }
+
 private:
   short    mFlag;
   short    mCharge;
@@ -87,7 +98,13 @@ private:
   float    mNSigmaProton;
   float    mNSigmaElectron;
 
-  ClassDef(StJetTrack,5);
+  int      mBTofTrayId;
+  double   mNSigmaTofPion;
+  double   mNSigmaTofKaon;
+  double   mNSigmaTofProton;
+  double   mNSigmaTofElectron;
+
+  ClassDef(StJetTrack,6); 
 };
 
 #endif // ST_JET_TRACK_H

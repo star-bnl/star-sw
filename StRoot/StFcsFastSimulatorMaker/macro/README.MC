@@ -1,3 +1,5 @@
+This is obsolete. See https://www.star.bnl.gov/protected/spin/akio/fcs/howto_MC_github.html
+
 *** How to get codes, compile and run for MC
 
 stardev

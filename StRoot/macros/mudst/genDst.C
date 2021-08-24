@@ -227,6 +227,7 @@ void genDst(unsigned int First,
     muDstMaker.SetStatus("ETof*", 1);
     muDstMaker.SetStatus("Epd*", 1);
     muDstMaker.SetStatus("Fms*", 1);
+    muDstMaker.SetStatus("MCAll", 1);
 
     // EMCs
     StEEmcDbMaker* eemcDb = new StEEmcDbMaker;

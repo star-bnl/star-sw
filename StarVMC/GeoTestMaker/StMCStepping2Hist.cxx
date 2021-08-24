@@ -30,7 +30,6 @@
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "TSystem.h"
-//#include "TQtCanvas2Html.h"
 #include "StTProfile2D.h"
 #include "StiELossTrk.h"
 
@@ -384,15 +383,6 @@ void My2Hist::Save()
      PadClean(mC[0][i]);
      mC[0][i]->Print(".C");
      if (i>5) continue;
-#ifdef ROOT_TQtCanvas2Html
-     TString ts(mC[0][i]->GetName());ts.Replace(0,1,"HTM");
-     TQtCanvas2Html WebSite(mC[0][i],1.8,ts.Data());
-#endif 
-//        char cc[500];
-//        sprintf(cc,"TQtCanvas2Html WebSite((TCanvas*)%p,1.8,\"%s\");"
-//               ,(void*)mC[0][i],mC[0][i]->GetName());
-// 
-//        gROOT->ProcessLine(cc);
    }
 }
 //_____________________________________________________________________________

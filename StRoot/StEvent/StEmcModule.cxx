@@ -29,7 +29,6 @@
 #include "StEmcModule.h"
 #include "StEmcRawHit.h"
 #include <TBrowser.h>
-//#include <StAutoBrowse.h>
 
 static const char rcsid[] = "$Id: StEmcModule.cxx,v 2.5 2011/09/06 21:33:02 ullrich Exp $";
 
@@ -79,16 +78,6 @@ StEmcModule::hits() const { return mHits; }
 
 StSPtrVecEmcRawHit&
 StEmcModule::hits() {return mHits; }
-
-// 15-sep-2003 by PAI
-/*
- void  StEmcModule::Browse(TBrowser *b)
- {
- if(IsFolder()) StAutoBrowse::Browse(this, b);
- //  b->Add(&mHits); // no good
- //  TClass::AutoBrowse(&mHits, b); // no good
- }
- */
 
 bool  StEmcModule::IsFolder() const
 {
