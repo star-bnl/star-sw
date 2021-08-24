@@ -163,6 +163,7 @@ class SyntaxHandler ( ContentHandler ):
         self.addToken( 'Hits'      , Language.Hits          )
         self.addToken( 'Instrument', Language.Instrument    )
         self.addToken( 'Hit'       , Language.Hit           )
+        self.addToken( 'UserHit'   , Language.UserHit       )
         #
         self.addToken( 'Cut'       , Language.Cut           )
         self.addToken( 'Gsckov'    , Language.Gsckov        )

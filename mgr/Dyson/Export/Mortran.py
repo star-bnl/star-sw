@@ -2222,7 +2222,10 @@ class Instrument(Handler):
             declare += str(hit)
         form(declare,breakers=' ')
 
-
+class UserHit(Handler):
+    def __init__(self): Handler.__init__(self)
+    def setParent(self,p): self.parent = p
+    pass
         
     
 # ====================================================================================================       

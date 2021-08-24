@@ -679,20 +679,16 @@ class StarGeometry(Handler):
         header = """
 #ifndef __StarGeometry_h__
 #define __StarGeometry_h__
-#include "TDataSet.h"
-        #include <string>
-        #include <map>
+#include "TDataSet.h"        
         class StarGeometry {
         public:
         /// Construct geometry with the specified tag, and return wrapped in a TDataSet
-        static TDataSet* Construct( const char* name = "%s");
+        static TDataSet* Construct( const char* name = "%s" );
         static bool      List     ( const char* name = "%s");
-        static void      Whitelist( const char* name, int value=1 ){ whitelist[name]=value; }
         StarGeometry(){ /* nada */ };
         virtual ~StarGeometry(){ /* nada */ }
         private:
         protected:
-        static std::map<std::string,int> whitelist;                        
         ClassDef(StarGeometry,1);
         };
 
@@ -712,11 +708,7 @@ class StarGeometry(Handler):
 #include "StarVMC/StarGeometry/StarGeo.h"
 #include "TObjectSet.h"
 #include "TGeoManager.h"        
-#include <string>
-#include <map>
-
-        std::map<std::string,int> StarGeometry::whitelist= {{"all",1}};
-        
+#include <string>        
         TDataSet* StarGeometry::Construct( const char* name )
         {
         std::string tag = name;
@@ -724,7 +716,7 @@ class StarGeometry(Handler):
         document.impl( implement1, unit='global' )
         for geom in self.geoms:
             name    = geom.name;
-            output = '             if (tag=="%s") { %s::construct( whitelist ); }'  %(name,name)          
+            output = '             if (tag=="%s") { %s::construct(); }'  %(name,name)          
             document.impl( output, unit='global' )
         document.impl( 'if (0 == gGeoManager) return NULL;', unit='global')
         document.impl( 'TObjectSet* dataset = new TObjectSet( "Geometry", gGeoManager, false );', unit='global' )
@@ -803,11 +795,10 @@ class Geometry( Handler ):
         global document
         document.head( '#ifndef __construct_%s_geometry__'%self.name )
         document.head( '#define __construct_%s_geometry__'%self.name )
-        document.head( '#include <string>' )
-        document.head( '#include <map>' )
+           
 #       document.head( 'namespace Star { //$NMSPC' )
         document.head( 'struct %s {' % self.name )
-        document.head( 'static bool construct( std::map<std::string,int> whitelist = {{"all",1}} );' )
+        document.head( 'static bool construct();' )
         document.head( 'static bool list();' )
         #document.head( '#if 0\n  ClassDef(%s,1);\n#endif\n'%self.name )
         document.head( '};' )
@@ -819,18 +810,14 @@ class Geometry( Handler ):
             document.impl('#include "%s"'%i, unit='global' )
 
         # Setup the builder code
-        document.impl( 'bool %s::construct( std::map<std::string,int> whitelist ) {'%self.name, unit='global' )
+        document.impl( 'bool %s::construct() {'%self.name, unit='global' )
         document.impl( 'bool result = true;',                    unit='global' )
         # Loop over detector tags.  Create in order and construct
         for sub in self.sys:
             subup = sub.upper();
             cfg = self.config[sub]
-            if subup!="CAVE": # Always create the cave
-                document.impl( 'if (whitelist["%s"]||whitelist["all"])'%(subup), unit='global' )
-            document.impl( '{', unit='global' )
-            document.impl( '\t%s::%s::setup();'%(subup,cfg), unit='global' )
-            document.impl( '\t%s::%s::construct();'%(subup,cfg), unit='global' )
-            document.impl( '} //endif [%s] '%(subup), unit='global' )
+            document.impl( '%s::%s::setup();'%(subup,cfg), unit='global' )
+            document.impl( '%s::%s::construct();'%(subup,cfg), unit='global' )
         document.impl( 'return result;\n',                      unit='global' )
         document.impl( '};',                                      unit='global' )
 
@@ -1049,8 +1036,16 @@ class Setup( Handler ):
         document.impl( output, unit='global' )
 
         #output = "active=true;\n"
-        output  = "AgModule* _module = New();\n"
-        output += "if (_module) _module->ConstructGeometry();\n"
+        try:
+            simflg  = self.flags['simu']
+        except KeyError:
+            simflg  = int(1) # default to tracking
+            
+        output      = "AgModule* _module = New();\n"
+        output     += "if (_module) {\n"
+        output     += "     _module->SetTrackingFlag(%i);\n"   % simflg
+        output     += "     _module->ConstructGeometry();\n"
+        output     += "}\n";
 
         if self.topvolume:
             output += 'TGeoVolume* _top = gGeoManager->FindVolumeFast("%s");\n'%self.topvolume
@@ -1206,6 +1201,8 @@ class Module ( Handler ):
             document.impl( text='#include "StarVMC/StarAgmlLib/%s.h"'%h, unit='global' )
         for h in ["iostream", "vector", "map"]:
             document.impl( text='#include <%s>'%h, unit='global' )
+
+        document.impl( text="using namespace AgMath;", unit='global' )
 
         document.impl('const Int_t _printlevel = 0;', unit='global' )
         document.impl('#define LOG_PRINT if(_printlevel>0) std::cout << GetName() << " -Print- "', unit='global')
@@ -3631,7 +3628,9 @@ class Cut(Handler):
         value  = attr.get('value')
 
         #document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
-        document.impl( 'module()->AddCut(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )
+        #document.impl( 'module()->AddCut(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )
+        document.impl( 'active()->AddCut("%s",%s);'%(name.lower(),value.lower()), unit=current )
+
 class Hits(Handler):
 # TODO        
     def __init__(self):
@@ -3675,6 +3674,7 @@ class Hits(Handler):
         for i,hit in enumerate(self.hit_list):
             arg = self.arg_list[i]
             declare += "%s:%s "%( hit, arg )
+
 class Hit(Handler):
     def __init__(self):
         Handler.__init__(self)
@@ -3697,12 +3697,22 @@ class Instrument(Handler):
     def addHit(self,hit):
         self.hit_list.append(hit)
     def startElement(self,tag,attr):
-        self.block = attr.get('block', attr.get('volume', None))        
+        self.block = attr.get('block', attr.get('volume', None))
+        self.user  = attr.get('user',None) # user hits
+
+    def userHit(self,name):
+        mylist = [ 'xx', 'yy', 'zz','pz', 'py', 'pz','cx', 'cy', 'cz','x',  'y',  'z','eta','slen', 'tof', 'step','sleng', 'lptot','birk', 'eloss', 'elos','user', 'etsp', 'ptot', 'lgam' ]
+        if self.user == None: return False # do not export user hits
+        for tag in mylist:
+            if tag == name.lower(): return False
+        return True
+           
+        
     def endElement(self,tag):
         block = self.block
         for hit in self.hit_list:
             attr = hit.attr
-            meas = attr.get('meas',None)
+            meas = attr.get('meas',None)                
             nbits=attr.get('nbits', attr.get('bins', '0') )
             mn   = attr.get('min','0')
             mx   = attr.get('max','0')
@@ -3711,8 +3721,58 @@ class Instrument(Handler):
             nbits=replacements(nbits).lower()
             mn   =replacements(mn).lower()
             mx   =replacements(mx).lower()
+            # This could be deprecated...
             document.impl( 'module()->AddHit( "%s", "%s", %s, %s, %s, "%s");'%( block, meas, nbits, mn, mx, opts ), unit=current )
+            if self.userHit(meas):
+                toimpl = """
+                {  // Create and register new user-based hit scoring routine
+                   auto* userScoring = new %sScoring;
+                   TString bname = GetName();
+                
+                   module()->AddHitScoring(bname + ": %s" ,userScoring);
+                }
+                """%(meas,meas)
+                document.impl( toimpl, unit=current )
 
+
+class UserHit(Handler):
+    def __init__(self): Handler.__init__(self)
+    def setParent(self,p): self.parent = p
+    def startElement(self,tag,attr):
+        self.name = attr.get('name', None )
+        self.comment = attr.get('comment', "" )
+        # Open the user hit scoring block
+        toimpl = """
+        // execute user hit scoring
+        float %sScoring::hit() const {
+        """%self.name
+        document.impl( toimpl, unit=current )        
+        
+    def characters(self,content):
+        toimpl = replacements(content)
+        content = content.lower()        
+        document.impl(content,unit=current)
+        
+    def endElement(self,tag):
+        toheader = """
+        // Add user hit class to header file
+        class %sScoring : public AgMLScoring {
+        public:
+            virtual float hit() const;
+        };
+        """%(self.name)
+        document.head( toheader )
+
+        toimpl = """
+        // end hit scoring
+        std::cout << "Hit scoring for %s" << std::endl;
+        return 0.0; // but user should return before we get here...
+        }
+        """%(self.name)
+        document.impl( toimpl, unit=current )
+        
+        pass
+            
 
 class Gsckov(Handler):
 # TODO            
