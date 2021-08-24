@@ -199,17 +199,17 @@ void AgMaterial::Print( Option_t *opts ) const
 	  output += Form(" %s= <unset> ",key); 
 	}
     }
-  LOG_INFO << output.Data() << ENDL;
+  LOG_INFO << output.Data() << endm;
 
   if ( mType > kMaterial ) {
-    LOG_INFO << Form("\t\t\t\t\t\t\t\t\t\t           A           Z         W")<<ENDL;
+    LOG_INFO << Form("\t\t\t\t\t\t\t\t\t\t           A           Z         W")<<endm;
     for ( UInt_t i=0;i<mC.size();i++ )
       {
 	TString comp = mC[i];
 	Double_t a = mA[i];
 	Double_t z = mZ[i];
 	Double_t w = mW[i];
-	LOG_INFO << Form("\t\t\t\t\t\t\t\t\t\t %4s   %6.3f     %6.3f    %6.3f",comp.Data(),a,z,w)<<ENDL;
+	LOG_INFO << Form("\t\t\t\t\t\t\t\t\t\t %4s   %6.3f     %6.3f    %6.3f",comp.Data(),a,z,w)<<endm;
       }
   }
 
