@@ -1177,7 +1177,6 @@ int St_geant_Maker::InitRun(int run){
 }
 //_____________________________________________________________________________
 int St_geant_Maker::Make() {
-
   int    /*nhits,nhit1,nhit2,nhit3,nhit4,*/link=1,ide=1,npart,irun,ievt,iwtfl;
   Float_t  vert[4],weigh;
   if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
