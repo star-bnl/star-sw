@@ -31,6 +31,11 @@
 - Update SCGL macro (#105)
 
 
+## [SL21c_2] - 2021-08-24
+
+- Add new BFC option for StPicoDstMaker: PicoVtxMtd (#116)
+
+
 ## [SL21c_1] - 2021-08-20
 
 - Add local DB parameters for TpcRS 26p5GeV_fixedTarget_2018 (#107, #88)
