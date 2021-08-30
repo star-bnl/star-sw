@@ -44,7 +44,6 @@ void StiCATpcTrackerInterface::MakeHits()
         // get local coordinates. take into account distortion
       StiHit *hit = *cit;
       if (! hit->stHit()) 	continue;
-      //yf      if (  hit->timesUsed()) 	continue;//VP
       
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
       if ( ! tpcHit) continue;
@@ -82,7 +81,6 @@ void StiCATpcTrackerInterface::MakeHits()
       caHit.SetErrZ( 0.16 );
       caHit.SetISlice( tpcHit->sector() - 1 );
       caHit.SetIRow( hitc.padrow );
-      //      caHit.SetID( fCaHits.size() );
       caHit.SetID( Id );
       fIdTruth.push_back( hitc.track_key );
 
