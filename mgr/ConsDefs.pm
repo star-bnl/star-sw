@@ -927,6 +927,7 @@
 	($MYSQLINCDIR,$mysqlheader) =
 	    script::find_lib( $MYSTAR . "/include " .  $MYSTAR . "/include/mysql ".
 			      $MYSQL . " " .
+			      $MYSQL . "/include " .
 			      "/sw/include/mysql ".
 			      "/include /usr/include ".
 			      "/usr/include/mysql  ".
@@ -936,6 +937,7 @@
     } else { 
 	($MYSQLINCDIR,$mysqlheader) =
 	    script::find_lib( $MYSQL . " " .
+			      $MYSQL . "/include " .
 			      "/sw/include/mysql ".
 			      "/include /usr/include ".
 			      "/usr/include/mysql  ".
@@ -955,6 +957,7 @@
 	($MYSQLCONFIG,$mysqlconf) =
 	    script::find_lib($MYSTAR . "/bin " .  $MYSTAR . "/bin/mysql ".
 			     $MYSQL . " ".
+			     $MYSQL . "/bin ".
 			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ",
 			     "mysql_config");
     # } else {
@@ -1133,7 +1136,7 @@
     }
     # xml2
     my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
-    my ($xml) =  script::find_lib($MYSTAR . "/bin /usr/bin",
+    my ($xml) =  script::find_lib($MYSTAR . "/bin /usr/bin " . $LIBXML2_DIR . "/bin",
 				  "xml2-config");
     if ($xml) {
 	$xml .= "/xml2-config";
@@ -1292,6 +1295,7 @@
 		      },
 		  'SUFOBJ' => "." . $O,
 		  'ENV'    => {
+		      'CPATH'           => $CPATH,
 		      'PATH'            => $PATH,
 		      'LM_LICENSE_FILE' => $LM_LICENSE_FILE,
 		      'INCLUDE'         => $INCLUDE_PATH,

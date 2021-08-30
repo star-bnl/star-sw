@@ -23,7 +23,6 @@ SCL_OBJS = $(SCL_SRCS:.cc=.o)
 SCL_HDRS = $(SCL_SRCS:.cc=.hh) StThreeVectorF.hh
 
 BASE_SRCS = \
-	StAutoBrowse.cxx \
 	StObject.cxx
 
 BASE_OBJS = $(BASE_SRCS:.cxx=.o)

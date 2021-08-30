@@ -5,7 +5,7 @@
   \author Victor Perev 
   \date   17/03/2009
 
-  StGenParticle and derived StHepParticle,StGENParticle are based on HEPEVT 
+  StGenParticle and derived StHepParticle,StGimParticle are based on HEPEVT 
   standard (http://cepa.fnal.gov/psm/simulation/mcgen/lund/pythia_manual/pythia6.3/pythia6301/node39.html)
   Description of HEPEVT follows
 

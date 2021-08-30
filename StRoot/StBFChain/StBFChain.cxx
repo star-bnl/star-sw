@@ -183,7 +183,7 @@ Int_t StBFChain::Load()
 	    }
 	  } else {
 	    if ( ! index(fBFC[i].Libs,',') || Debug() > 1 ) {
-	      LOG_WARN << "No path for Key=" << fBFC[i].Key << "-> Searched for [" << libL 
+	      LOG_WARN << "No path for Key=" << fBFC[i].Key << "-> Searched for [" << libL
 		       << "] from Libs=" << fBFC[i].Libs << " (will proceed)" << endm;
 	    }
 	  }
@@ -264,7 +264,7 @@ Int_t StBFChain::Instantiate()
 	  if (GetOption("NoLocalCintDb")) {MyCintDb = "";}
 	  if (GetOption("NoStarCintDb") ) {MainCintDb = "";}
 	  if (GetOption("NoCintDb")     ) {MainCintDb = ""; MyCintDb = "";}
-	  
+
 	  TString Dirs[10];
 	  Int_t j;
 	  for (j = 0; j < 10; j++) Dirs[j] = "";
@@ -276,14 +276,14 @@ Int_t StBFChain::Instantiate()
 	  if (MyCintDbObj   != "") {Dirs[j] = MyCintDbObj;   j++;}
 	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2],Dirs[3],Dirs[4]);
 	  if (!dbMk) goto Error;
-	  
+
 	  TString namec = dbMk->GetName();
 	  int len       = sizeof(fBFC[i].Name);
 	  if ( namec.Length() <= len){
 	    strncpy (fBFC[i].Name, namec.Data(),len);
 	  } else {
 	    gMessMgr->Error() << "Maker name [" << namec
-			      << "] length is > " << len 
+			      << "] length is > " << len
 			      << " - increase BFC Name field length" << endm;
 	  }
 
@@ -302,7 +302,7 @@ Int_t StBFChain::Instantiate()
 	      if (fileStream.Length()>0) flavors.Prepend(fileStream += '+');
 	    }
 	  }
- 
+
 	  LOG_INFO << "Using DB flavors: " << flavors << endm;
 	  dbMk->SetFlavor(flavors.Data());
 	  mk = dbMk;
@@ -329,7 +329,7 @@ Int_t StBFChain::Instantiate()
 	  strncpy (fBFC[i].Name, namec.Data() , len);
 	} else {
 	  gMessMgr->Error() << "Maker name [" << namec
-			    << "] length is > " << len 
+			    << "] length is > " << len
 			    << " - increase BFC Name field length" << endm;
 	}
 
@@ -364,7 +364,7 @@ Int_t StBFChain::Instantiate()
 	  strncpy (fBFC[i].Name, namec.Data() , len);
 	} else {
 	  gMessMgr->Error() << "Maker name [" << namec
-			    << "] length is > " << len 
+			    << "] length is > " << len
 			    << " - increase BFC Name field length" << endm;
 	}
 	treeMk->SetIOMode("w");
@@ -390,7 +390,7 @@ Int_t StBFChain::Instantiate()
 	strncpy (fBFC[i].Name,namec.Data(),len);
       } else {
 	gMessMgr->Error() << "Maker name [" << namec
-			  << "] length is > " << len 
+			  << "] length is > " << len
 			  << " - increase BFC Name field length" << endm;
       }
     }
@@ -402,9 +402,9 @@ Int_t StBFChain::Instantiate()
 
     if (maker == "St_geant_Maker") { // takes only first request for geant, if it is active then it should be the first one
       Int_t NwGeant = 10; // default geant parameters
-      if (!GetOption("fzin")  && 
+      if (!GetOption("fzin")  &&
 	  !GetOption("ntin")  &&
-	  !GetOption("gstar") && 
+	  !GetOption("gstar") &&
 	  !GetOption("pythia"))                      NwGeant =  5;
       if (GetOption("big"))                          NwGeant = 20;
       if (GetOption("bigbig"))                       NwGeant = 40;
@@ -412,12 +412,12 @@ Int_t StBFChain::Instantiate()
       ProcessLine(Form("((St_geant_Maker *) %p)->SetNwGEANT(%i);",mk,NwGeant));
       if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
       if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
-      if (GetOption("fzin")      || 
-	  GetOption("ntin")      || 
-	  GetOption("gstar")     || 
-	  GetOption("pythia")    || 
-	  GetOption("hijing")    || 
-	  GetOption("PrepEmbed") || 
+      if (GetOption("fzin")      ||
+	  GetOption("ntin")      ||
+	  GetOption("gstar")     ||
+	  GetOption("pythia")    ||
+	  GetOption("hijing")    ||
+	  GetOption("PrepEmbed") ||
 	  GetOption("mtin")) {
 	mk->SetActive(kTRUE);
 	//	if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
@@ -439,7 +439,7 @@ Int_t StBFChain::Instantiate()
 
     // special maker options
     // m_Mode xyz
-    //        x = 1 phys_off                    
+    //        x = 1 phys_off
     //        y = 1 Passive mode (do not call RunMC()
     //        z = 1 Mixer Mode
     if (maker == "StVMCMaker") {
@@ -473,7 +473,7 @@ Int_t StBFChain::Instantiate()
 
       // Option to re-use hits in other tracks
       if ( GetOption("hitreuseon") ){
-	mk->SetAttr("SetMaxTimes", 100); 
+	mk->SetAttr("SetMaxTimes", 100);
       }
 
       // By default iTpc hits are used in tracking
@@ -540,7 +540,7 @@ Int_t StBFChain::Instantiate()
 	mk->SetAttr("activeBTof" ,kTRUE);
       }
 
-      if (GetOption("StiPulls") || 
+      if (GetOption("StiPulls") ||
 	  GetOption("StvPulls"))  mk->SetAttr("makePulls"  ,kTRUE);
       if (GetOption("skip1row"))  mk->SetAttr("skip1row"   ,kTRUE);
       if (GetOption("EastOff"))   mk->SetAttr("EastOff"    ,kTRUE);
@@ -584,8 +584,8 @@ Int_t StBFChain::Instantiate()
 
       // X-tended works only for VFPPV, VFPPVnoCTB, VFPPVev for now but could be re-used
       // However, we will change this to a more flexible arbitrarry setting later
-      if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100); 
-      //if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100); 
+      if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100);
+      //if (GetOption("VFStoreX")    ) mk->SetAttr("VFStore"      , 100);
       mk->PrintAttr();
     }
     if (maker=="StKFVertexMaker") {
@@ -668,6 +668,7 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("picoRead")  )  mk->SetMode(2);   // possibly more magic
       if ( GetOption("PicoVtxVpd"))           mk->SetAttr("PicoVtxMode", "PicoVtxVpd");
       else if ( GetOption("PicoVtxFXT"))      mk->SetAttr("PicoVtxMode", "PicoVtxFXT");
+      else if ( GetOption("PicoVtxMtd"))      mk->SetAttr("PicoVtxMode", "PicoVtxMtd");
       else if ( GetOption("PicoVtxVpdOrDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxVpdOrDefault");
       else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxDefault");
       if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("PicoCovMtxMode", "PicoCovMtxWrite");
@@ -675,7 +676,7 @@ Int_t StBFChain::Instantiate()
       //<<<<<<< StBFChain.cxx
       if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");
       else if ( GetOption("PicoBEmcSmdSkip"))  mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdSkip"); // Default mode
-      
+
       //=======
       if ( GetOption("PicoBEmcSmdWrite"))      mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdWrite");
       else if ( GetOption("PicoBEmcSmdSkip"))  mk->SetAttr("PicoBEmcSmdMode", "PicoBEmcSmdSkip"); // Default mode
@@ -695,6 +696,7 @@ Int_t StBFChain::Instantiate()
 	mode |= (1 << 10); // kNoToflight   //10 don't account for particle time of flight
 	mk->SetMode(mode);
       }
+      if (GetOption("EbyET0")) mk->SetAttr("EbyET0", kTRUE);
     }
     if (maker == "StTrsMaker") {
       Int_t mode = 0;
@@ -793,6 +795,9 @@ Int_t StBFChain::Instantiate()
       mk->SetAttr("EmbeddingShortCut", kTRUE);
       mk->PrintAttr();
     }
+    if (maker == "StdEdxY2Maker" && !GetOption("CalcdNdx")) {
+      mk->SetAttr("SkipdNdx", kTRUE);
+    }
     if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){
       mk->SetMode(0);
       // If simulation running make sure pick up simu stuff from db
@@ -882,7 +887,13 @@ Int_t StBFChain::Instantiate()
       if (mode)
 	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
-    if (maker == "StBTofCalibMaker" && GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
+    if (maker == "StBTofCalibMaker") {
+      if (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
+      if (GetOption("setOutlierRej4BToft0"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
+      if (GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
+    }
+    if (maker == "StVpdCalibMaker" && GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
+
     if (maker == "StEventMaker" && fFiltTrg.Length()) {
       mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));
       TString FiltTrgFlavor = fFiltTrg(1,128);
@@ -924,7 +935,7 @@ Int_t StBFChain::Instantiate()
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiVMC");
 
   for ( unsigned int n=0 ; n < Gproperty.size() ; n++ ){
-    gMessMgr->QAInfo() << "+++ Setting attribute " 
+    gMessMgr->QAInfo() << "+++ Setting attribute "
 		       << (Gproperty.at(n)).Data() << " = " << (Gvalue.at(n)).Data() << " for "
 		       << (Gpattern.at(n).Data())  << endm;
 
@@ -971,18 +982,18 @@ Int_t StBFChain::Init() {
 
 
     if (fNoChainOptions) {
-      if (GetOption("misalign") && TClass::GetClass("AgPosition") ) 
+      if (GetOption("misalign") && TClass::GetClass("AgPosition") )
 	gROOT->ProcessLine("AgPosition::SetReal();");
-      else if ( TClass::GetClass("AgPosition") )                        
+      else if ( TClass::GetClass("AgPosition") )
 	gROOT->ProcessLine("AgPosition::SetIdeal();");
     }
 
 
     // force load of geometry for VMC and Sti
-    
-    if (GetOption("Sti") || GetOption("StiCA") || 
-	GetOption("Stv") || 
-	GetOption("StiVMC") ||GetOption("VMC") || 
+
+    if (GetOption("Sti") || GetOption("StiCA") ||
+	GetOption("Stv") ||
+	GetOption("StiVMC") ||GetOption("VMC") ||
 	GetOption("VMCPassive")) {
       const DbAlias_t *DbAlias = GetDbAliases();
       for (Int_t i = 0; DbAlias[i].tag; i++) {
@@ -1141,7 +1152,7 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     if (Tag.Length() == 11  || Tag.Length() == 18) return 0;
 
     // Else we need to parse some more - assume a pattern {dbv|sdt}YYYYMMDD[.HHMMSS]_XXX_ZZZZZ
-    // First, detect it using quick counting 
+    // First, detect it using quick counting
     Tag.ToLower();
     if ( TPRegexp(BFC_DBREGEXP).Match(Tag)  == 7) return 0;
   }
@@ -1164,7 +1175,7 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     if ( TPRegexp("^FiltTrg(Inc|Exc)?(_.*)*$").Match(Tag,"i") > 0) return 0;
   }
   if ( Tag.BeginsWith("VFStore",TString::kIgnoreCase)         ||
-       Tag.BeginsWith("TpcVpdVzDiffCut",TString::kIgnoreCase) 
+       Tag.BeginsWith("TpcVpdVzDiffCut",TString::kIgnoreCase)
        ) {
     // need to match an ":" sign
     Check = kTRUE;
@@ -1199,7 +1210,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  strncpy (fBFC[kgo].Comment, Comment.Data(),sizeof(fBFC[kgo].Comment));
 	  gMessMgr->QAInfo() << Form(" Set        %s = %s", fBFC[kgo].Key,fBFC[kgo].Comment) << endm;
 	} else {
-	  gMessMgr->Error()  << Form(" Cpy problem [%s] is > %d - adjust BFC Comment field size", 
+	  gMessMgr->Error()  << Form(" Cpy problem [%s] is > %d - adjust BFC Comment field size",
 				     Comment.Data(),len) << endm;
 	}
       }
@@ -1212,7 +1223,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	if (kgo > 0) {
 	  TString Comment(fBFC[kgo].Comment);
 	  TString Opts(fBFC[kgo].Opts);
-	  if (Tag.BeginsWith("Test.",TString::kIgnoreCase) && ! Comment.BeginsWith("/star/") && 
+	  if (Tag.BeginsWith("Test.",TString::kIgnoreCase) && ! Comment.BeginsWith("/star/") &&
 	      Opts.BeginsWith("test_",TString::kIgnoreCase)) {
 	    SetOptions(Opts,Tag);
 	  } else {
@@ -1221,13 +1232,13 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 		 Tag.BeginsWith("eval_",TString::kIgnoreCase)) && Comment.BeginsWith("/star/") ) {
 	      fkChain = kgo;
 	      gMessMgr->QAInfo() << "Default Test chain set " << fBFC[fkChain].Key << " with input " << fBFC[fkChain].Comment << endm;
-	    } 
+	    }
 	  }
 	}
       } else {
-	// it is 0 i.e. was not recognized. 
+	// it is 0 i.e. was not recognized.
 	// Check if it is a (dbv|sdt)YYYYMMDD or (dbv|sdt)YYYYMMDD.HHMMSS and derivative
-	// We really set the options only once later in SetDbOptions() (removing the fBFC[i].Flag check) 
+	// We really set the options only once later in SetDbOptions() (removing the fBFC[i].Flag check)
 	// but the goal here is to avoid user's histeria by displaying extra messages NOW.
 	//
 	// Note that kOpt() has already validated the pattern (so it has to be right here).
@@ -1258,7 +1269,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 
 	    GTSOptions.push_back(TS);
 
-	    LOG_WARN << "Override timestamp for detector requested\n\t" 
+	    LOG_WARN << "Override timestamp for detector requested\n\t"
 	             << "Detector " << TS.Detector  << "\n\t"
 	             << "Realm    " << realm        << "\n\t"
 		     << "Date     " << TS.Date      << "\n\t"
@@ -1294,7 +1305,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  Gpattern.push_back("*");
 
 	  // JL - this is not finished, see comment in kOpt()
-	  
+
 	  // pattern is case sensitive, need more checks on this before
 	  // setting to something else than "*"
 	  //Gpattern  += GOptName;
@@ -1311,13 +1322,13 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	} else if (Tag.BeginsWith("rung")) {
 	  fRunG = 1;
 	  if (Tag.Length() > 4)  (void) sscanf(Tag.Data(),"rung.%d",&fRunG);
-	  gMessMgr->QAInfo() << Tag.Data() << " will be considered as Run number (& rndm seed set) " 
-			     << fRunG << " for simulation." << endm; 
+	  gMessMgr->QAInfo() << Tag.Data() << " will be considered as Run number (& rndm seed set) "
+			     << fRunG << " for simulation." << endm;
 
 
 	  // JL: super long options I could not accomomodate with gopt (also used ":")
 	} else if (Tag.BeginsWith("VFStore"        ,TString::kIgnoreCase) ||
-		   Tag.BeginsWith("TpcVpdVzDiffCut",TString::kIgnoreCase) 
+		   Tag.BeginsWith("TpcVpdVzDiffCut",TString::kIgnoreCase)
 		   ) {
 	  TString VFS   = Tag;
 	  Ssiz_t  idx   = Tag.Index(':');
@@ -1336,7 +1347,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	    // Attr() need to be set after the maker exist
 
 	  }
-	  
+
 
 	} else if (Tag.BeginsWith("FiltTrg",TString::kIgnoreCase)) {
           TString filtTrgTag = Tag;
@@ -1550,7 +1561,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       TString STAR_LEVEL(gSystem->Getenv("STAR_LEVEL"));
       if (STAR_LEVEL == ".DEV2")  SetOption("StiCA","Default,ITTF");
       else                        SetOption("Sti"  ,"Default,ITTF");
-    }  
+    }
     if (GetOption("Stv")) {
       SetOption("-TpcIT","Default,Stv");
       SetOption("-SvtIT","Default,Stv");
@@ -1559,8 +1570,8 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-BTofIT","Default,Stv");
       SetOption("-PxlIT","Default,Stv");
       SetOption("-IstIT","Default,Stv");
-    }  
-    
+    }
+
   }
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");
   // Print set values
@@ -1626,7 +1637,7 @@ void StBFChain::SetInputFile (const Char_t *infile){
 /// Takes care of output file name (extension)
 void StBFChain::SetOutputFile (const Char_t *outfile){
   if (!  GetOption("NoOutput")) {
-    if (outfile) { 
+    if (outfile) {
       fFileOut = outfile;
     } else {
       if (fInFile != "") {
@@ -1667,7 +1678,7 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
             delete fileOutTokens;
           }
 	}
-      } 
+      }
       if (fFileOut == "") {
 	if      (GetOption("pythia")) fFileOut = "pythia.root";
 	else if (GetOption("hijing")) fFileOut = "hijing.root";
@@ -1827,7 +1838,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
     db->SetMaxEntryTime(Idate,Itime);
     gMessMgr->Info() << "\tSet DataBase max entry time " << Idate << "/" << Itime
 		     << " for St_db_Maker(\"" << db->GetName() <<"\")" << endm;
-  } 
+  }
 #ifdef USE_BFCTIMESTAMP
   //
   // Now treat the detector specific options
@@ -1845,12 +1856,12 @@ void StBFChain::SetDbOptions(StMaker *mk){
 				  (char *) realm.Data(),
 				  (char *) GTSOptions[i].Detector.Data());
 
-      LOG_INFO << "Recovering override stamp " << i << " :: " 
-	       << GTSOptions[i].Detector << ", " << realm << ", "  
+      LOG_INFO << "Recovering override stamp " << i << " :: "
+	       << GTSOptions[i].Detector << ", " << realm << ", "
 	       << GTSOptions[i].Date     << ", " << GTSOptions[i].Time  << endm;
     } else {
-      LOG_WARN << "Found override type " << GTSOptions[i].Type << " no treated yet" 
-	       << GTSOptions[i].Detector << ", " << realm << ", "  
+      LOG_WARN << "Found override type " << GTSOptions[i].Type << " no treated yet"
+	       << GTSOptions[i].Detector << ", " << realm << ", "
 	       << GTSOptions[i].Date     << ", " << GTSOptions[i].Time  << endm;
     }
   }
@@ -1924,11 +1935,11 @@ void StBFChain::SetTreeOptions()
   }
   if (GetOption("GeantOut")) treeMk->IntoBranch("geantBranch","geant");
   if (GetOption("AllEvent")) {
-    if (GetOption("fzin")   || 
-	GetOption("ntin")   || 
-	GetOption("gstar")  || 
-	GetOption("pythia") || 
-	GetOption("VMC")    || 
+    if (GetOption("fzin")   ||
+	GetOption("ntin")   ||
+	GetOption("gstar")  ||
+	GetOption("pythia") ||
+	GetOption("VMC")    ||
 	GetOption("PrepEmbed")) {
       treeMk->IntoBranch("geantBranch","geant");
       treeMk->IntoBranch("geantBranch","geant/.data/particle");
@@ -1963,6 +1974,5 @@ TString StBFChain::GetGeometry() const
     if (k[4] <'0' || k[4]>'9') 	continue;
     return k;
   }
-  return TString(""); 
-}   
-   
+  return TString("");
+}

@@ -519,9 +519,6 @@ Bool_t StMyPointMaker::split( const StEEmcSmdCluster &in1,  // first resolved cl
   Int_t   id_second = -1;
   Float_t min_chi2 = 9.0E9;
 
-  Float_t weight1[288]; for ( Int_t ii=0;ii<288;ii++ ) weight1[ii]=0.;
-  Float_t weight2[288]; for ( Int_t ii=0;ii<288;ii++ ) weight2[ii]=0.;
-
   /// Scan location of second cluster
   for ( Int_t id_scan=id_min; id_scan<=id_max; id_scan++ )
     {

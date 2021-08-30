@@ -43,7 +43,7 @@ void STARlight( TString mode="pp" )
 
   gSystem->Load( "libStarLight.so" );
 
-  starlight = new StarLight( "STARlight" );
+  starlight = new StarLightGen( "STARlight" );
   if ( mode = "pp" )
   {
     starlight->SetFrame("CMS",510);

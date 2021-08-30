@@ -99,7 +99,7 @@ class StarPrimaryMaker : public StMaker
 {
  public:
   StarPrimaryMaker();
-  ~StarPrimaryMaker();
+  virtual ~StarPrimaryMaker();
   
   Int_t InitRun( Int_t runnumber );
   Int_t Init();

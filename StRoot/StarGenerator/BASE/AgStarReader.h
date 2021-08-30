@@ -2,8 +2,8 @@
 #define __AgStarReader_h__
 
 #include "TObject.h"
-#include "StarParticleStack.h"
 class StarParticleData;
+class StarParticleStack;
 
 /**
    \class AgStarReader

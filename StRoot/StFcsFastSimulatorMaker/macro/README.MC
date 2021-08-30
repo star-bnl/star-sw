@@ -1,9 +1,12 @@
+This is obsolete. See https://www.star.bnl.gov/protected/spin/akio/fcs/howto_MC_github.html
+
 *** How to get codes, compile and run for MC
 
 stardev
 tokens
 (make sure you have token for afs, if not klog)
 <cd to your dir>
+cvs co StRoot/RTS
 cvs co StRoot/StSpinPool/StFcsEventDisplay
 cvs co StRoot/StSpinPool/StFcsTrgQaMaker
 cvs co StRoot/StSpinPool/StFcsTriggerSimMaker
