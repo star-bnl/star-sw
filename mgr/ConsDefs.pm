@@ -1379,8 +1379,8 @@
 			     'LIBS'  => $LoggerLIBS
 			     },
 		       'Vc' => {
-			   'CPP'   => $VcCPPFLAGS,
-                           'LIBS'  => $VcLIB
+					'CPP'   => $VcCPPFLAGS,
+                    'LIBS'  => $VcLIB
 			   },
 		  }
 		  );
