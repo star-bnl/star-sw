@@ -21,12 +21,15 @@ class PlotHisto : public TObject {
     PlotHisto(TH1 *hist = NULL);
     PlotHisto(PlotHisto &x);
 
+#ifdef PLOTHISTO_COPY_CONSTRUCTURE
+asdf
     PlotHisto(const PlotHisto &x) {
 	//LOG("JEFF", "Copy Constructor");
 	histo = new TH1(*(x.histo));
 	if(x.legendText) setLegText(x.legendText);
 	if(x.legendArgs) setLegArgs(x.legendArgs);
     }
+#endif
 
     // PlotHisto(TH1 *hist, char *legText=NULL, char *legArgs=NULL);
     void setLegText(const char *text);
