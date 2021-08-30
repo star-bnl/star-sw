@@ -930,6 +930,7 @@ void l4Builder::event(daqReader *rdr)
 
     XX(0);
     unsigned int decision = hlt_eve->hltDecision;
+	const int upc = 0x0;  // DAQ trigger id
 
 #ifdef _OPENMP
     omp_set_nested(1);
