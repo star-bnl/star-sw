@@ -67,7 +67,7 @@
 //#endif
 
 #include "Cut/HitMergingPairCut.h"
-class ostrstream;
+class St_ostrstream;
 
 class fabricesPairCut : public HitMergingPairCut{
 public:
@@ -83,7 +83,7 @@ public:
   void setElPairMaxProbability(double aElPairMaxProb);
   void setPiPiPairMaxProbability(double aPiPiPairMaxProb);
   void setKKPairMaxProbability(double aKKPairMaxProb);
-  ostrstream* finalReport() const;
+  St_ostrstream* finalReport() const;
 
 private:
   double mPiKPairMinProb;

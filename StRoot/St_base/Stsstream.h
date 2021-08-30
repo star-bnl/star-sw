@@ -12,7 +12,7 @@
 #include "Rstrstream.h"
 #ifdef R__SSTREAM
 using std::streamsize;
-class ostrstream : public std::ostringstream {
+class St_ostrstream : public std::ostringstream {
 std::string myString;
 public:
 const char *str()         

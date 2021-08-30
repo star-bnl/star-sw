@@ -24,7 +24,7 @@
 //#endif
 
 #include "Cut/HitMergingPairCut.h"
-class ostrstream;
+class St_ostrstream;
 
 class adamsPairCut : public HitMergingPairCut{
 public:
@@ -42,7 +42,7 @@ public:
   void setPiPairPIDMax (double aPiPIDMax);
   void setKPairPIDMax  (double aKPIDMax);
   void SetPIDPThreshold(const float&);
-  ostrstream* finalReport() const;
+  St_ostrstream* finalReport() const;
 
 private:
   double mElSigma;

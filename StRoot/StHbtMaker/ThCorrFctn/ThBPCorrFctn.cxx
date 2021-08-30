@@ -140,7 +140,7 @@ ThBPCorrFctn::ThBPCorrFctn(const ThBPCorrFctn& ThCf)
 
 StHbtString ThBPCorrFctn::Report() 
 {
-  ostrstream *out = new ostrstream();
+  St_ostrstream *out = new St_ostrstream();
   (*out) << "Report form the ThBPLCMS Correlation function" << endl;
   return out->str();
 }

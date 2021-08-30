@@ -10,7 +10,7 @@ StMessage* endm     = 0;
 StMessage* gMessage = 0;
 
 //______________________________________________________________________________
-StMessMgr::StMessMgr() : ostrstream() {}
+StMessMgr::StMessMgr() : St_ostrstream() {}
 
 //  Manager factory
 //  The default version of the manager factory provide the singleton object

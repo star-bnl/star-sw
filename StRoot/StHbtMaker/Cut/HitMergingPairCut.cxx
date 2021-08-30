@@ -75,8 +75,8 @@ StHbtString HitMergingPairCut::Report(){
   return returnThis;
 }
 //__________________
-ostrstream* HitMergingPairCut::finalReport() const{
-  ostrstream* tFinalReport = new ostrstream;
+St_ostrstream* HitMergingPairCut::finalReport() const{
+  St_ostrstream* tFinalReport = new St_ostrstream;
   (*tFinalReport) <<  "_____ HitMerging pair Cut _____ " << endl
 		  << " N pairs passed : " << mNPairsPassed << endl 
 		  << " N pairs failed : " << mNPairsFailed << endl 
