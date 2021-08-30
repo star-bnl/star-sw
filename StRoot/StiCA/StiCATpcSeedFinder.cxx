@@ -19,8 +19,7 @@
 //#define KINK_REJECTION  
 #define OVERLAP_REJECTION
 //#define StiCATpcSeedFinderBLOG
-#include <unordered_map>
-#include <set>
+
 //________________________________________________________________________________
 Bool_t StiCATpcSeedFinder::SeedsCompareStatus(const Seed_t a, const Seed_t b)
 {
@@ -36,7 +35,6 @@ StiTrack *StiCATpcSeedFinder::findTrack(double rMin)
     // zero all banks before filling !!! 
     auto *map =  &StiToolkit::instance()->getHitContainer()->hits();
 
-
     // Run reconstruction by the CA Tracker
     caTrackerInt.SetHits(*map);
     caTrackerInt.Run();
@@ -49,24 +47,11 @@ StiTrack *StiCATpcSeedFinder::findTrack(double rMin)
     Seed_t aSeed = mSeeds->back();
     mSeeds->pop_back();
 
-    // std::unordered_map<const StiHit*, int> hitCount;
-    // for (auto h : aSeed.vhit) {
-    //   hitCount[h->hit]++;
-    // }
-    // for (auto h : hitCount) {
-    //   if (h.second > 1) {
-    //     cout << "seed: " << mSeeds->size() << " : duplicated hits: " << h.first << " : " << h.second << endl;
-    //   }
-    // }
-
     vector<StiHit*>        _seedHits;
-    // std::set<StiHit*> existingHits;
     int nHits = aSeed.vhit.size();
     Int_t nHitsUsed = 0;
     for (int iHit=0;iHit<nHits;iHit++)     {
       StiHit *hit = aSeed.vhit[iHit]->hit;if (!hit) continue;
-      // if (existingHits.count(hit)) continue;
-      // existingHits.insert(hit);
       if (hit->timesUsed()) nHitsUsed++;
       _seedHits.push_back(hit);
     }

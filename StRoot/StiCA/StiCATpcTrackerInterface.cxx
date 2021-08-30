@@ -17,7 +17,7 @@
 #include "StDetectorDbMaker/StiTPCHitErrorCalculator.h"
   //to get Magnetic Field
 #include "StarMagField/StarMagField.h"
-#include "TStopwatch.h"
+
 #include <vector>
 #include <algorithm>
 using std::vector;
