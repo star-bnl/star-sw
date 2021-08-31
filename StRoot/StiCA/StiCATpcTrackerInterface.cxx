@@ -7,10 +7,6 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
-  // for MCdata
-#include "tables/St_g2t_track_Table.h" 
-#include "tables/St_g2t_tpc_hit_Table.h"
-#include "TDatabasePDG.h"
   //to obtain error coefficients
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
