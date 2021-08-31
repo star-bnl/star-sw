@@ -952,6 +952,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 		if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
 		$CXXFLAGS .= $extraCXXFLAGS;
 		$CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
+        $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{Vc}->{LIBDIR};
         $LIBS .= $env->{Packages}->{Vc}->{LIBS};
 		if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
     	if ($pkg =~ m/^TPCCATracker$/ and $extraCXXFLAGS =~ /DO_TPCCATRACKER_EFF_PERFORMANCE/) {$LIBS .= " -lTPCCATrackerPerformance";}

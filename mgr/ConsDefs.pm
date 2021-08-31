@@ -1184,8 +1184,8 @@
     }
 
     my $VcCPPFLAGS = " -I" . $Vc_DIR . "/include" . " -Wabi -fabi-version=0";
-    my $VcLIBDIR = $Vc_DIR . "/lib"
-    my $VcLIB = "-lVc";
+    my $VcLIBDIR = $Vc_DIR . "/lib";
+    my $VcLIB = " -lVc";
     #Vc check SSE support
     my $cmd = "$CXX -E -dM -x c++ - < /dev/null | grep -q SSE";
     if ($STAR_HOST_SYS =~ 'gcc432$' || system($cmd)) {# No SSE
