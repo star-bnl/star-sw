@@ -1183,17 +1183,17 @@
 	print "Could not find xml libs\n" if (! $param::quiet);
     }
 
-    my $VcCPPFLAGS = " -I" . $VC_DIR . "/include" . " -Wabi -fabi-version=0";
-    my $VcLIB = $VC_DIR . "/lib/libVc.a";
+    my $VcCPPFLAGS = " -I" . $Vc_DIR . "/include" . " -Wabi -fabi-version=0";
+    my $VcLIBDIR = $Vc_DIR . "/lib"
+    my $VcLIB = "-lVc";
     #Vc check SSE support
-    # my $cmd = "touch temp_gccflags.c; $CXX -E -dM -x c++ -o - temp_gccflags.c | grep -q SSE";
     my $cmd = "$CXX -E -dM -x c++ - < /dev/null | grep -q SSE";
     if ($STAR_HOST_SYS =~ 'gcc432$' || system($cmd)) {# No SSE
         $VcCPPFLAGS .= " -DVC_IMPL=Scalar";
-        # if (-e "temp_gccflags.c") {`rm temp_gccflags.c`;}
     } else {
         $VcCPPFLAGS .= " -DVc_IMPL=SSE";
     }
+
     my @params = (
 		  'Package'        => 'None',
 		  'CPP'            => $CPP,
@@ -1379,8 +1379,9 @@
 			     'LIBS'  => $LoggerLIBS
 			     },
 		       'Vc' => {
-					'CPP'   => $VcCPPFLAGS,
-                    'LIBS'  => $VcLIB
+					'CPP'    => $VcCPPFLAGS,
+                    'LIBDIR' => $VcLIBDIR,
+                    'LIBS'   => $VcLIB
 			   },
 		  }
 		  );
