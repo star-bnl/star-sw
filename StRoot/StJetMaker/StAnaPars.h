@@ -34,6 +34,7 @@ public:
     , randomSelectorSeed(0)
     , changeTracks(0)
     , changeTowers(0)
+    , storeOnlyDefaultVertex(false)
   {
   }
 
@@ -112,6 +113,7 @@ public:
   unsigned int randomSelectorSeed;
   StjAbstractTrack* changeTracks;
   StjAbstractTower* changeTowers;
+  bool storeOnlyDefaultVertex; //add flag to tell jet maker to store only the highest positively ranked vertex
 
   ClassDef(StAnaPars,0);
 };

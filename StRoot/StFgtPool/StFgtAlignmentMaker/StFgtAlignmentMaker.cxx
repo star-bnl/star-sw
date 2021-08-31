@@ -10,7 +10,6 @@
 
 #include <stdio.h>
 #include <math.h>
-#include <curses.h>
 
 #include "StFgtAlignmentMaker.h"
 #include "StEventTypes.h"

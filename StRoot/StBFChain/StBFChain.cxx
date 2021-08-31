@@ -788,6 +788,8 @@ Int_t StBFChain::Instantiate()
       }
       if ( GetOption("picoRead")  )  mk->SetMode(2);   // possibly more magic
       if ( GetOption("PicoVtxVpd"))           mk->SetAttr("PicoVtxMode", "PicoVtxVpd");
+      else if ( GetOption("PicoVtxFXT"))      mk->SetAttr("PicoVtxMode", "PicoVtxFXT");
+      else if ( GetOption("PicoVtxMtd"))      mk->SetAttr("PicoVtxMode", "PicoVtxMtd");
       else if ( GetOption("PicoVtxVpdOrDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxVpdOrDefault");
       else if ( GetOption("PicoVtxFXT"))      mk->SetAttr("PicoVtxMode", "PicoVtxFXT");
       else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxDefault");
@@ -1017,7 +1019,9 @@ Int_t StBFChain::Instantiate()
     if (maker == "StBTofCalibMaker") {
       if  (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
       if (GetOption("setPPPAOutlierRej"))   mk->SetAttr("setPPPAOutlierRej", kTRUE);
+      if (GetOption("setOutlierRej4BToft0"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
       if (GetOption("pppAMode"))            mk->SetAttr("pppAMode", kTRUE);
+      if (GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
 #if 0
       if  (GetOption("UseMCTstart") || 
 	   ! GetOption("vpdCalib"))         mk->SetAttr("UseMCTstart",kTRUE);
@@ -1026,6 +1030,7 @@ Int_t StBFChain::Instantiate()
 #endif
     }
     if (maker == "StVpdCalibMaker" && GetOption("pppAMode")) mk->SetAttr("pppAMode", kTRUE);
+    if (maker == "StVpdCalibMaker" && GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
     if (maker == "StEventMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT",kTRUE);
     if (maker == "StEventMaker" && fFiltTrg.Length()) {
       mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));

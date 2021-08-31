@@ -23,6 +23,7 @@ class StarParticleData : public TObjectSet
 {
  public:
 
+  StarParticleData( const Char_t *name="PDG_Database",       TDataSet *parent = 0 );
   ~StarParticleData();
 
   /// Get a particle by name
@@ -77,16 +78,15 @@ class StarParticleData : public TObjectSet
   */
 
   /// Returns a reference to the single instance of this class
-    static StarParticleData &instance();
+  static StarParticleData &instance();
 
-  TParticlePDG *operator()( const Char_t *name ){ return instance().GetParticle(name); }
-  TParticlePDG *operator()( const Int_t  id    ){ return instance().GetParticle(id)  ; }
+  TParticlePDG *operator()( const Char_t *name );
+  TParticlePDG *operator()( const Int_t  id    );
 
   /// Returns a reference to the list of particles.
   const TObjArray &GetParticles() const { return mParticleList; }
 
  private:
-  StarParticleData( const Char_t *name="PDG_Database",       TDataSet *parent = 0 );
  protected:
 
   // Singleton instance of this class

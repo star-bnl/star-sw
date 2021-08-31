@@ -82,7 +82,16 @@ class StFgtStatusMaker : public StMaker {
    // Get CVS
    virtual const char *GetCVS() const;
 
-// protected:
+   typedef UChar_t status_t;
+
+   struct apvData_t {
+      Int_t numDead;
+      std::vector< status_t* > stripStatusVec;
+
+      apvData_t() : numDead( kFgtNumChannels ) { /* */ };   // Default to 128, i.e. all dead
+   };
+
+ protected:
    // for the ped maker
    std::string mPedMkrName;
    StFgtPedMaker *mPedMkr;
@@ -101,13 +110,6 @@ class StFgtStatusMaker : public StMaker {
    Int_t saveToFile();
 
    // internal data
-   typedef UChar_t status_t;
-   struct apvData_t {
-      Int_t numDead;
-      std::vector< status_t* > stripStatusVec;
-
-      apvData_t() : numDead( kFgtNumChannels ) { /* */ };   // Default to 128, i.e. all dead
-   };
    typedef std::vector< apvData_t > apvDataVec_t;
 
    status_t* mStatus;

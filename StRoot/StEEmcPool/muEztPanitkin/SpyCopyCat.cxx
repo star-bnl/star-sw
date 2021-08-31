@@ -38,10 +38,10 @@ SpyCopyCat::accumulate(EztEmcRawData *e, EztEmcRawData *m){
   nEve++;
 
   EztEmcRawData *eRaw=0; 
-  int crateID=0;
+  //int crateID=0;
   switch (type) {
-  case 'T': eRaw=e; crateID=1+icr; break;
-  case 'M': eRaw=m; crateID=64+icr; break;
+  case 'T': eRaw=e; /*crateID=1+icr; */ break;
+  case 'M': eRaw=m; /*crateID=64+icr;*/ break;
   default: ;
   }
   assert(eRaw);  

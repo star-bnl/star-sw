@@ -259,7 +259,7 @@ StFgtSlowSimuMaker::sort_g2t_hits( St_g2t_fgt_hit *fgt_hitT){
 
     // decode volume_id WMZ
     Int_t numbv1 = ivid/1000000;  
-    Int_t numbv2 = (ivid/10000)%100;
+    //Int_t numbv2 = (ivid/10000)%100;
     int diskID, iQuad;  // diskID and quadID, both start from 0
 
 //No Quad ID for now, it assigned to 0 for now

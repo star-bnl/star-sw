@@ -79,7 +79,7 @@ ENV CERN=/cern
 ENV CERN_LEVEL=pro
 ENV CERN_ROOT=$CERN/$CERN_LEVEL
 ENV OPTSTAR=/opt/software
-ENV STAR_HOST_SYS=sl88_gcc789
+ENV STAR_HOST_SYS=sl79_gcc485
 ENV NODEBUG=yes
 ENV STAR_LIB=$STAR/.${STAR_HOST_SYS}/LIB
 ENV STAR_BIN=$STAR/.${STAR_HOST_SYS}/BIN
@@ -92,6 +92,7 @@ ENV MYSQL=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/mysql-5.7.27-pfyt3fwt
 ENV LIBXML2_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/libxml2-2.9.10-4lxsmpa57bm3xs2cs3xapk3qccxflkfl
 ENV Vc_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/vc-1.4.1-xdb5jhivtn2rejvvfs2whrf4nx4lxwbi
 ENV FASTJET_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/fastjet-3.3.3-xj22tput5pd5atejy4igsrtgdtygi74u
+ENV GSL_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/gsl-2.6-ao26bt7pm6xxywo2q7dcmhhg2lp2inx7
 
 # Dummy directories checked by cons
 RUN mkdir $OPTSTAR/lib && mkdir $OPTSTAR/include
@@ -125,11 +126,11 @@ RUN source /etc/profile \
  && export Vc_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/vc_-0.7.4-gqbhzu2x5u2dbe5tafxnl36xj5qbwov4 \
  && cd /star-sw \
  && cons +StarVMC/Geometry \
- && cons %pams/sim/g2r %OnlTools \
-         %StRoot/StarGenerator/Kinematics \
-         %StRoot/StEEmcPool %StRoot/StFgtPool \
-         %StRoot/StShadowMaker %StRoot/StHbtMaker \
+ && cons %OnlTools \
+         %StRoot/StShadowMaker \
  && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
+
+RUN install /star-sw/StRoot/macros/.rootrc .
 
 # One might expect the single ENTRYPOINT command below to work but for some
 # reason it chokes on a complex command such as

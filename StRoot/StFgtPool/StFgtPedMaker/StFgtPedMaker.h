@@ -78,10 +78,6 @@ class StFgtPedMaker : public StMaker {
    // Get CVS
    virtual const char *GetCVS() const;
 
-// protected:
-   // mask for which time bins to save
-   Short_t mTimeBinMask;
-
    // to hold sums
    struct pedData_t {
       Int_t n;
@@ -97,6 +93,11 @@ class StFgtPedMaker : public StMaker {
 
       pedData_t( Int_t nIn=0, Float_t s=0, Float_t ssq=0, Float_t f=0 ) : n(nIn), sum(s), sumsq(ssq), fracClose(f) { /* */ };
    };
+
+ protected:
+   // mask for which time bins to save
+   Short_t mTimeBinMask;
+
    typedef std::vector< pedData_t > pedDataVec_t;
 
    pedDataVec_t mDataVec;

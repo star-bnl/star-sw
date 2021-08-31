@@ -9,6 +9,7 @@
 #include "StEvent/StTriggerId.h"
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+#include "StarRoot/TH1Helper.h"
 
 #include "TRandom.h"
 #include "TH1F.h"
@@ -110,7 +111,6 @@ void StEEmcMixMaker::mixReal()
   if ( !mPoints.size() ) return; 
 
   Float_t emax=0.;
-  Int_t   imax=0;
   Int_t   count=0;
 
 
@@ -156,7 +156,6 @@ void StEEmcMixMaker::mixReal()
 	mCandidates.push_back ( StEEmcPair( point1, point2, vertex, vertex ) );
 	if ( mCandidates.back().energy() > emax ) { 
 	  emax = mCandidates.back().energy();
-	  imax=count;
 	}
 
       }
@@ -265,13 +264,10 @@ void StEEmcMixMaker::book()
   
     // 1D QA histograms
   mH1.push_back(new TH1F("triggers","Number of triggers fired",1,0.,1.));
-#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-  mH1[0]->SetBit(TH1::kCanRebin);
-#endif
+  TH1Helper::SetCanRebin(mH1[0]);
   mH1.push_back(new TH1F("status","Events processed up to...",1,0.,1.));
-#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-  mH1[1]->SetBit(TH1::kCanRebin);
-#endif
+  TH1Helper::SetCanRebin(mH1[1]);
+
   // 2D QA histograms
   mH2.push_back(new TH2F("uvha","<u> vs <v> for higher-energy gamma",288,0.,288.,288,0.,288.)); 
   mH2.push_back(new TH2F("uvla","<u> vs <v> for lower-energy gamma",288,0.,288.,288,0.,288.)); 

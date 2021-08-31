@@ -71,7 +71,18 @@ class StFgtPedReader {
    // pedistal.
    void setTimeBinMask( Short_t mask = 0xFF );
 
-// protected:
+   // ped structure
+   struct ped_t {
+      Float_t ped;
+      Float_t err;
+
+      ped_t( Float_t p=0, Float_t err=1e10 );
+      operator float() const;
+      Float_t getPed();
+      Float_t getErr();
+   };
+
+ protected:
    // mask for which time bins to read
    Short_t mTimeBinMask;
 
@@ -85,17 +96,6 @@ class StFgtPedReader {
       key_t( Int_t elecId = 0, Int_t timeBin = 0);
       //Bool_t operator<( const key_t& rhs ) const;
       operator int() const;
-   };
-
-   // ped structure
-   struct ped_t {
-      Float_t ped;
-      Float_t err;
-
-      ped_t( Float_t p=0, Float_t err=1e10 );
-      operator float() const;
-      Float_t getPed();
-      Float_t getErr();
    };
 
    typedef std::vector< ped_t > PedVec_t;
