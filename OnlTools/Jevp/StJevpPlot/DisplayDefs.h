@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <rtsLog.h>
 
+//
 // The Pallete file is just a separate DisplayDef containing:
 // <doc>
 //    <pallete>
