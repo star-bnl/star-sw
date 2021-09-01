@@ -123,7 +123,7 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
 RUN source /etc/profile \
  && cd /star-sw \
  && cons +StarVMC/Geometry \
- && cons %StRoot/StShadowMaker \
+ && cons \
  && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 
 RUN install /star-sw/StRoot/macros/.rootrc .

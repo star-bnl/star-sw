@@ -256,7 +256,13 @@ if ($STAR_SYS =~ /x86_darwin/) {
 #$items .= "StBTofPool|StFgtPool|StPeCMaker";
 # closing exclusion list
 my $items = "";# print "items $#items  = @items\n";
-if ( defined($SKIP_DIRS) ){ $items = join("|",split(" ",$SKIP_DIRS));}
+
+if ( defined($SKIP_DIRS) ) {
+  $items = join("|", split(" ", $SKIP_DIRS));
+} else {
+  $items = "StShadowMaker";
+}
+
 if ( $#items > -1){
   if (! $item) {$items  =       join("|",@items);}
   else         {$items .= "|" . join("|",@items);}
