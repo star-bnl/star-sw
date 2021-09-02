@@ -52,6 +52,7 @@ CVS
 Entries
 Root
 Repository
+.cvsignore
 .svn
 .sl*
 .rh*
