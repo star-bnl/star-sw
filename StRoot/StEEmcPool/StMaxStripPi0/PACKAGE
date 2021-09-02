@@ -1,0 +1,5 @@
+# $Id $
+# package StMaxStripPi0
+# author: 
+Library:libStMaxStripPi0.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -lStEEmcSimulatorMaker  -l_StEEmcUtil  -l_StEvent  -l_StMuDSTMaker  -lPhysics
+#Library:libStMaxStripPi0.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -lStEEmcSimulatorMaker  -lStEEmcUtil  -lStEvent  -lStMuDSTMaker  -lPhysics
