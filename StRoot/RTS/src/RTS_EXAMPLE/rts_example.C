@@ -1936,9 +1936,15 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    fcs2019 |= ((lastdsm[4] >> 15) & 1) << 8 ;	// bit 8: FCSIN-7 -- never fires?
 
 	    u_int fcs2021 = lastdsm[5] ;
-
 	    printf("fcs2021 0x%04X\n",fcs2021) ;
 
+	    u_int fcs_main_2022 = lastdsm[2] ;
+	    u_int fcs_north_2022 = lastdsm[5] & 0xFF ;
+	    u_int fcs_south_2022 = lastdsm[5] >> 8 ;
+
+	    printf("fcs_2022: main 0x%04X, north 0x%02X, south 0x%02X\n",fcs_main_2022,fcs_north_2022,fcs_south_2022) ;
+
+	    
             printf("bc7bit %3d, fcs2019 0x%04X : 0x%04X 0x%04X 0x%04X 0x%04X\n",bc7bit,fcs2019,
 		   lastdsm[0],lastdsm[1],lastdsm[2],lastdsm[3]) ;
 
@@ -1948,7 +1954,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		    printf("{%d=%d}",i,rdr->getOfflineId(i));
 		}
 	    }
-
+	    printf("\n") ;
 	    
 	    printf("   l1=0x%llx   trgDetMask=0%x   trgCrateMask=0x%x\n",rdr->daqbits64_l1,trgDetMask,trgCrateMask);
 

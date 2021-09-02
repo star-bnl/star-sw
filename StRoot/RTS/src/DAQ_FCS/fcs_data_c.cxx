@@ -1819,7 +1819,7 @@ int fcs_data_c::load_sc_map(const char *fname)
 		rdo_map[s][r].ch[c].sc_sipm = 0xFF ;
 	}}}
 
-	for(u_int dd=0;dd<2;dd++) {
+	for(u_int dd=0;dd<3;dd++) {
 
 
 	switch(dd) {
@@ -1830,15 +1830,60 @@ int fcs_data_c::load_sc_map(const char *fname)
 		fn = "/RTS/conf/fcs/fcs_hcal_sc_map.csv" ;
 		break ;
 	case 2 :
-		fn = "/RTS/conf/fcs/fcs_fpre_sc_map.csv" ;
+		fn = "/RTS/conf/fcs/fcs_pres_sc_map.csv" ;
 		break ;
 	case 3 :
 		fn = "/RTS/conf/fcs/fcs_main_sc_map.csv" ;
 		break ;
 	}
 		
+#if 0
+	if(dd==2) {	// SPECIAL HACKS FOR EPD Splitter!
+		LOG(INFO,"load_sc_map: constructing FPRE map") ;
 
-	
+		for(int s=0;s<10;s++) {
+		for(int r=0;r<8;r++) {
+			if(rdo_map[s][r].det != 2) continue ;	// skip non preshower
+
+			int dep = rdo_map[s][r].dep ;
+
+			for(int c=0;c<32;c++) {
+				rdo_map[s][r].ch[c].sc_sipm = 0 ;	// make them ALL active
+				rdo_map[s][r].ch[c].sc_dep = dep ;
+				rdo_map[s][r].ch[c].sc_add = 0 ;
+				rdo_map[s][r].ch[c].sc_bra = 0 ;
+			}
+
+			int ns = rdo_map[s][r].ns ;
+
+
+			// and now kill some of them according to Akio's Aug-2021 recipe
+
+			if(ns==0) {	// North
+				rdo_map[s][r].ch[16].sc_sipm= 0xFF ;
+			}
+			else {
+				rdo_map[s][r].ch[0].sc_sipm = 0xFF ;
+			}
+
+			if(dep==0) {
+				for(int c=0;c<16;c++) {
+					rdo_map[s][r].ch[c].sc_sipm = 0xFF ;
+				}
+			}
+			else if(dep==5) {
+				for(int c=16;c<32;c++) {
+					rdo_map[s][r].ch[c].sc_sipm = 0xFF ;
+				}
+
+			}
+
+		}}
+
+		return 0 ;
+	}
+
+#endif	
 
 	FILE *f = fopen(fn,"r") ;
 
@@ -1901,6 +1946,16 @@ int fcs_data_c::load_sc_map(const char *fname)
 				rdo_map[s][r].ch[c].sc_dep = dep ;
 				rdo_map[s][r].ch[c].sc_bra = bra ;
 				rdo_map[s][r].ch[c].sc_add = add ;
+
+
+				// FPRE is special: Akio marked unused channels with non-0
+				if(dd==2) {
+					if(sipm!=0) {
+						//LOG(TERR,"%d %d %d = %d",s,r,c,sipm) ;
+						sipm = 0xFF ;
+					}
+				}
+
 				rdo_map[s][r].ch[c].sc_sipm = sipm ;
 
 				found_it = 1 ;
