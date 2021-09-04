@@ -1,4 +1,4 @@
-#ifndef MAPS_DIGPRESULT_H
+#ifndef MAPS_DIGRESULT_H
 #define MAPS_DIGRESULT_H
 
 #include <TNamed.h>

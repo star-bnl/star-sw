@@ -1,0 +1,36 @@
+StarEtc directory contains different auxiliary files for STAT+ROOT
+
+1. 601600.rootrc rootrc file for ROOT.60.16.00. To run ROOT must do copy:
+   cp 601600.rootrc ~/.rootrc 
+
+2. rootlogon.C ROOT logon which is called on init
+
+3. STAR.h include file with the set of popular STAR includes  used in macros.
+   for instance in bfc.C
+
+4 source skip_dirs.csh
+  An example how to skip compilation of non desirable directories
+
+5.updRDict.csh This mmacro is a temmporary  solution. It ust be the part of "cons"
+  All the *pcm fules creared by Cling must be linked to $STARSYS/lib
+  When this will be done this file will be remmoved.
+
+6 source rootnodeb.csh 
+  Initialisation of Root 6.16.00
+
+7. agmlupd.csh acro to compile & update AGML stuff.
+
+How to copile everything.
+Unfortunatelly in cons still existing soe bugs. As a result some dependency
+are not correct. But compilation still possible
+===========================================================================
+stardev
+cd $STAR
+source StarEtc/skip_dirs.csh   # if you need only subset of libbraries
+cons
+cons +sim
+StarEtc/agmlupd.csh
+cons
+StarEtc/updRDict.csh
+
+
