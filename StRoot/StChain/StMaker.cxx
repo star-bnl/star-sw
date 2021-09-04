@@ -17,7 +17,7 @@
  * The method will be described.
  *                                                                     
  */
-#define STAR_LOGGER 1
+#define STAR_LOGGER 1 
 #include "StMaker.h"
 #include "Stiostream.h"
 #include <stdio.h>

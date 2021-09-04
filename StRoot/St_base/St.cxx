@@ -76,7 +76,7 @@ ULong64_t St::Call(const char* fun,int I0,const char* C0,const char* C1,const ch
 //_______________________________________________________________________________
 ULong64_t St::MyCall()
 {
-  TString ts("return "); ts += mC[kIN]; ts+="(";
+  TString ts(".x "); ts += mC[kIN]; ts+="(";
   for (int ii = 0; ii<mIn; ii++)
   {
     ts += mI[ii]; ts +=",";
@@ -84,7 +84,7 @@ ULong64_t St::MyCall()
   
   for (int ic = 0; ic<mIn; ic++)
   {
-    ts += "(const char*)";
+    ts += "(const char*)0x";
     ts += TString::ULLtoa((ULong64_t)mC[ic],16); ts +=",";
   }
   ts[ts.Length()-1] = ')';
