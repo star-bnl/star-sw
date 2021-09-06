@@ -300,6 +300,8 @@ MakeChairInstance2(tpcCorrection,St_TpcnTbkC,Calibrations/tpc/TpcnTbk);
 MakeChairInstance2(tpcCorrection,St_TpcdZdYC,Calibrations/tpc/TpcdZdY);
 #include "St_TpcdXdYC.h"
 MakeChairInstance2(tpcCorrection,St_TpcdXdYC,Calibrations/tpc/TpcdXdY);
+#include "St_GatingGridC.h"
+MakeChairInstance2(GatingGrid,St_GatingGridC,Calibrations/tpc/GatingGrid);
 #include "St_TpcCurrentCorrectionC.h"
 //MakeChairInstance2(tpcCorrection,St_TpcCurrentCorrectionC,Calibrations/tpc/TpcCurrentCorrection);
 ClassImp(St_TpcCurrentCorrectionC);

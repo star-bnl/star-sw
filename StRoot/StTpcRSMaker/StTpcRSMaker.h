@@ -78,6 +78,7 @@ class StTpcRSMaker : public StMaker {
   void SetCutEle(Double_t p = 1e-4)                  {mCutEle = p;}
   static Double_t Ec(Double_t *x, Double_t *p); // minimal energy to create an ion pair
   static TF1 *fEc(Double_t w = 26.2);           // HEED function to generate Ec
+  TF1F       *GaitingGridTransperency() {return mGG;}
  private:
   static Double_t ShaperFunc(Double_t *x, Double_t *p);
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
