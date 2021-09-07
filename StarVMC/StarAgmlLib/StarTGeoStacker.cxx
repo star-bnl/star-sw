@@ -863,22 +863,31 @@ TGeoVolume *makeCopyVolume( TGeoVolume *org, AgShape shape, Bool_t copyDaughters
 //
 Bool_t sanityCheck( TGeoVolume *volume )
 {
-  
-  TGeoShape *shape = volume->GetShape();
-  
-  // Shape with volume=0 is probably an error
-  if ( shape->Capacity() <= 0. )
-    { Int_t old=gErrorIgnoreLevel;    
-      gErrorIgnoreLevel=1; // Some warnings will not be supressed
-      AgBlock::module()->Warning(AgModule::module()->GetName(),Form("Volume %s shape parameters invalid.  NULL bounding box capacity.",volume->GetName()));
-      //      volume -> Print();
-      //      volume -> InspectShape();
-      gErrorIgnoreLevel=old;
-      return false;
+
+  bool result = false;
+
+  if ( volume->IsAssembly() ) {
+    result = true;
+  } 
+  else { 
+    
+    TGeoShape *shape = volume->GetShape();
+    if ( 0==shape ) { 
+      result = false;
+    }
+    else { 
+      if ( shape->Capacity() > 0 ) {
+	result = true;
+      }
+      else {
+	result = false;
+      }
+
     }
 
+  }
 
-  return true;
+  return result;
 }
 
 
