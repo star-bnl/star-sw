@@ -217,7 +217,7 @@ inline Double_t StPicoHelix::pathLength(Double_t X, Double_t Y) const { return f
 
 inline Int_t StPicoHelix::bad(Double_t WorldSize) const {
 
-  Int_t ierr;
+  Int_t ierr = 0;
   if ( !std::isfinite(mDipAngle) ) {
     return 11;
   }
