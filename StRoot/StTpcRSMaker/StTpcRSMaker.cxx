@@ -77,7 +77,6 @@ struct HitPoint_t {
 //#define __LASERINO__
 //#define Old_dNdx_Table
 //#define __ELECTRONS_TUPLE__
-//#define __GaitingGrid__
 #define __SECROW_PLOTS__
 #define __STOPPED_ELECTRONS__
 #define __DEBUG__
@@ -484,9 +483,6 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
     }
   }
   // tss
-#ifdef  __GaitingGrid__
-  mGG = new TF1F("GaitingGridTransperency","TMath::Max(0.,1-6.27594134307865925e+00*TMath::Exp(-2.87987e-01*(x-1.46222e+01)))",10,56);
-#endif
   if (Debug()) Print();
   memset (hist, 0, sizeof(hist));
   memset (checkList, 0, sizeof(checkList));
@@ -642,6 +638,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   g2t_vertex_st     *gver = 0;
   Int_t NV = 0;
   fgTriggerT0 = 0;
+  Double_t mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
+  Double_t driftVelocity = StTpcDb::instance()->DriftVelocity(1);
   if (g2t_ver) {
     gver = g2t_ver->GetTable();
     NV = g2t_ver->GetNRows();
@@ -665,8 +663,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    if (TAC > maxTAC) maxTAC = TAC;
 	  }
 	}
-	double mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
-	double driftVelocity = StTpcDb::instance()->DriftVelocity(1);
 	fgTriggerT0 = - StTpcBXT0CorrEPDC::instance()->getCorrection(maxTAC, driftVelocity, mTimeBinWidth)*mTimeBinWidth*1e-6;
       } else if (pEvent && IAttr("EbyET0")) {
         // StEbyET0 returns microsec, will need it in seconds
@@ -875,13 +871,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  SecRow[4]->Fill(sector,row,dEdxCor);
 #endif /* __LASERINO__ */
 	}
-#ifdef __GaitingGrid__
-	// Apply Gating Grid
-	if (TrackSegmentHits[iSegHits].Pad.timeBucket() > mGG->GetXmin() && 
-	    TrackSegmentHits[iSegHits].Pad.timeBucket() < mGG->GetXmax()) {
-	  dEdxCor *= mGG->Eval(TrackSegmentHits[iSegHits].Pad.timeBucket());
-	}
-#endif
 	if (dEdxCor < minSignal) continue;
 	// Initialize propagation
 	Float_t BField[3] = {(Float_t ) TrackSegmentHits[iSegHits].BLS.position().x(), 
@@ -1981,11 +1970,13 @@ Bool_t StTpcRSMaker::TrackSegment2Propagate(g2t_tpc_hit_st *tpc_hitC, g2t_vertex
   //	if (! TESTBIT(m_Mode, kNoToflight)) 
   tof += tpc_hitC->tof;
   Double_t driftLength = TrackSegmentHits.coorLS.position().z() + tof*gStTpcDb->DriftVelocity(sector); // ,row); 
+#if 0 /* don't use sign swap for hits behind zGG */
   if (driftLength > -1.0 && driftLength <= 0) {
     if ((row >  St_tpcPadConfigC::instance()->numberOfInnerRows(sector) && driftLength > -gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation()) ||
 	(row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector) && driftLength > -gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation())) 
       driftLength = TMath::Abs(driftLength);
   }
+#endif
   TrackSegmentHits.coorLS.position().setZ(driftLength); PrPP(Make,TrackSegmentHits.coorLS);
   // useT0, don't useTau
   transform(TrackSegmentHits.coorLS,TrackSegmentHits.Pad,kFALSE,kFALSE); // don't use T0, don't use Tau
@@ -1997,10 +1988,10 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
   static StTpcCoordinateTransform transform(gStTpcDb);
   SignalSum_t *SignalSum = GetSignalSum(sector);
   for(Int_t row = rowMin; row <= rowMax; row++) {              
-    if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45) { // ! iTpx
-      if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row)) continue;
-      if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
-    }
+    //    if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45) { // ! iTpx
+    if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row)) continue;
+    if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
+      //    }
     Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
     StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, row);
     static StTpcPadCoordinate Pad;
@@ -2047,8 +2038,9 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
       Double_t dt = dT;
       //		if (St_tpcPadConfigC::instance()->numberOfRows(sector) ==45 && ! TESTBIT(m_Mode, kGAINOAtALL)) { 
       if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
-	gain   *= St_tpcPadGainT0BC::instance()->Gain(sector,row,pad);
-	if (gain <= 0.0) continue;
+	Double_t GC = St_tpcPadGainT0BC::instance()->Gain(sector,row,pad);
+	if (GC <= 0.0) continue;
+	gain  /= GC;
 	dt -= St_tpcPadGainT0BC::instance()->T0(sector,row,pad);
       }
       if (ClusterProfile) {
@@ -2167,6 +2159,7 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
     St_tpcGas *tpcGas = m_TpcdEdxCorrection->tpcGas();
     if (tpcGas)
       CdEdx.ZdriftDistanceO2 = CdEdx.ZdriftDistance*(*tpcGas)[0].ppmOxygenIn;
+    dEdxCor = 0; // reject hits if they out of acceptance
     if (! m_TpcdEdxCorrection->dEdxCorrection(CdEdx)) {
       dEdxCor = CdEdx.F.dE;
     }

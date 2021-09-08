@@ -13,7 +13,7 @@ void Load() {
 #if 1
   if (gClassTable->GetID("StDbManager") < 0) {
     gROOT->LoadMacro("bfc.C");
-    TString Chain("db,tpcDb,mysql,NoDefault");
+    TString Chain("r2021,db,tpcDb,mysql,NoDefault");
     bfc(-1,Chain.Data(),0,0,0);
     dbMk = (St_db_Maker *)chain->GetMaker("db");
     dbMk->SetDebug(1);
@@ -36,6 +36,7 @@ void Load() {
 void Print(Int_t sector = 1, Int_t row = 24, Int_t pad = 1, Int_t time = 1, 
 	   Double_t rx=0, Double_t ry=1, Double_t rz=0) {
   cout << endl; cout << endl;
+#if 0
   cout << "Directions =============================" << endl;
   StTpcLocalSectorDirection   dirLS(rx,ry,rz,sector,row);      cout << dirLS << endl;
   StTpcLocalSectorAlignedDirection     dirLSA;//cout << dirLSA << endl;
@@ -48,6 +49,7 @@ void Print(Int_t sector = 1, Int_t row = 24, Int_t pad = 1, Int_t time = 1,
   transform->operator()(dirG,dirL,sector,row);             cout << dirL << endl;
   transform->operator()(dirL,dirLSA);                      cout << dirLSA << endl;
   transform->operator()(dirLSA,dirLS);                     cout << dirLS << endl;
+#endif
   cout << "Coordinates ============================" << endl;
   StTpcPadCoordinate coorP(sector, row, pad, time);             cout << coorP << endl; 
   StTpcLocalSectorCoordinate  coorLS;
@@ -65,6 +67,18 @@ void Print(Int_t sector = 1, Int_t row = 24, Int_t pad = 1, Int_t time = 1,
   transform->operator()(coorLS,coorP);                     cout << coorP << endl; 
 }
 //________________________________________________________________________________
+void PrintPad(Int_t sector = 3, Int_t row = 24, Int_t pad = 1, Int_t time = 0) {
+  cout << endl; cout << endl;
+  cout << "Coordinates ============================" << endl;
+  StTpcPadCoordinate coorP(sector, row, pad, time);             cout << coorP << endl; 
+  StTpcLocalSectorCoordinate  coorLS;
+  StTpcLocalSectorCoordinate  coorLST;
+  StTpcLocalSectorCoordinate  coorLSF;
+  transform->operator()(coorP,coorLS ,kFALSE, kTRUE);  cout << "Cluster without T0, with    tau\t" << coorLS << endl;
+  transform->operator()(coorP,coorLST,kFALSE,kFALSE);  cout << "Pixel   with    T0, without tau\t" << coorLST << endl;
+  transform->operator()(coorP,coorLST, kTRUE,kFALSE);  cout << "Pixel   withot  T0, without tau\t" << coorLST << endl;
+}
+//________________________________________________________________________________
 void testTpcCoordinateTransform(Int_t date = 20040125, Int_t time = 0) {
   if (dbMk == 0) Load();
   dbMk->SetDateTime(date,time); 
@@ -74,5 +88,6 @@ void testTpcCoordinateTransform(Int_t date = 20040125, Int_t time = 0) {
   transform = new StTpcCoordinateTransform(gStTpcDb);
   Int_t sector = 12;
   Int_t row    = 45;
-  Print(sector,row);
+  //  Print(sector,row);
+  PrintPad(3,24);
 }

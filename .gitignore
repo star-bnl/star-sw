@@ -62,3 +62,6 @@ Repository
 *.log
 update.*
 bin/f77split
+.DS_Store
+.vscode/
+

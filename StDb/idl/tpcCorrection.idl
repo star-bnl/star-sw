@@ -19,6 +19,7 @@ struct tpcCorrection {
                 // type = 11 (== log(1. + OffSet/x) + poly(x,npar) for log(ADC) and |Z|
                 // type = 200 cut on range [min,max]
                 // type = 300 don't correct out of range [min,max]
+                // type = 400 special for TpcZCorrectionB, to enable Gating Grid correction
                 // type = 1000      ; gaus(0)+pol0(3);
                 // type = 1000 + 100; gaus(0)+pol1(3)
                 // type = 1000 + 200; gaus(0)+pol2(3)

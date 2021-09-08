@@ -262,6 +262,8 @@ MakeChairInstance2(tpcCorrection,St_TpcDriftDistOxygenC,Calibrations/tpc/TpcDrif
 MakeChairInstance2(tpcCorrection,St_TpcMultiplicityC,Calibrations/tpc/TpcMultiplicity);
 #include "St_TpcZCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcZCorrectionBC,Calibrations/tpc/TpcZCorrectionB);
+#include "St_TpcZCorrectionCC.h"
+MakeChairInstance2(tpcCorrection,St_TpcZCorrectionCC,Calibrations/tpc/TpcZCorrectionC);
 #include "St_TpcdXCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorrectionB);
 #include "St_tpcPressureBC.h"
@@ -300,6 +302,19 @@ MakeChairInstance2(tpcCorrection,St_TpcnTbkC,Calibrations/tpc/TpcnTbk);
 MakeChairInstance2(tpcCorrection,St_TpcdZdYC,Calibrations/tpc/TpcdZdY);
 #include "St_TpcdXdYC.h"
 MakeChairInstance2(tpcCorrection,St_TpcdXdYC,Calibrations/tpc/TpcdXdY);
+#include "St_GatingGridC.h"
+MakeChairInstance2(GatingGrid,St_GatingGridC,Calibrations/tpc/GatingGrid);
+//________________________________________________________________________________
+Double_t St_GatingGridC::CalcCorrection(Int_t i, Double_t x) {// drift time in microseconds
+  if (x < 0) return 0;
+  GatingGrid_st *cor =  ((St_GatingGrid *) Table())->GetTable() + i;
+  Double_t value = -10;
+  if (x <= cor->t0) return value;
+  Double_t corD = 1. - TMath::Exp(-(x-cor->t0)/(cor->settingTime/4.6));
+  if (corD < 1e-4) return value;
+  return TMath::Log(corD);
+}
+
 #include "St_TpcCurrentCorrectionC.h"
 //MakeChairInstance2(tpcCorrection,St_TpcCurrentCorrectionC,Calibrations/tpc/TpcCurrentCorrection);
 ClassImp(St_TpcCurrentCorrectionC);

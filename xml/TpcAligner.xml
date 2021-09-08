@@ -56,5 +56,6 @@
 <!-- <input URL="file:/hlt/cephfs/reco/2021/RF/TFG21c.B/Cosmic/*/*/*event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2021/FF/TFG21c.B/Cosmic/*/*/*event.root" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2021/FF/TFG21h/Cosmic/*/*/*event.root" />   -->
-<input URL="file:/hlt/cephfs/reco/2021/RF/TFG21h/Cosmic/*/*/*event.root" />
+<!-- <input URL="file:/hlt/cephfs/reco/2021/RF/TFG21h/Cosmic/*/*/*event.root" /> -->
+<input URL="command:CosmicsA2021.pl" /> 
 </job>

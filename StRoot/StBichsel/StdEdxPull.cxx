@@ -5,10 +5,12 @@
 Double_t StdEdxPull::Eval(Double_t dEdx, Double_t dEdxError, Double_t betagamma, UChar_t fit, Int_t charge) {
   Double_t z = -999.;
   Double_t dedx_expected;
+  Double_t dx2 = 1;
+  if (TMath::Abs(charge) > 1) dx2 = TMath::Log2(5.);
   if (! fit) { // I70
-    dedx_expected = 1.e-6*charge*charge*Bichsel::Instance()->GetI70M(TMath::Log10(betagamma)); 
+    dedx_expected = 1.e-6*charge*charge*Bichsel::Instance()->GetI70M(TMath::Log10(betagamma),dx2); 
   } else if ( fit == 1) {     // Ifit
-    dedx_expected = 1.e-6*charge*charge*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(betagamma)));
+    dedx_expected = 1.e-6*charge*charge*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(betagamma),dx2));
   } else {     // dNdx
     dedx_expected = StdEdxModel::instance()->dNdx(betagamma,charge);
   }
