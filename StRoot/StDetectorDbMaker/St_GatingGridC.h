@@ -11,9 +11,11 @@ class St_GatingGridC : public TChair {
   UInt_t     	getNumRows()                	const {return GetNRows();}
   Float_t 	t0(Int_t i = 0) 	const {return Struct(i)->t0;}
   Float_t 	settingTime(Int_t i = 0) 	const {return Struct(i)->settingTime;}
+  Double_t      CalcCorrection(Int_t i, Double_t x);
  protected:
   St_GatingGridC(St_GatingGrid *table=0) : TChair(table) {}
   virtual ~St_GatingGridC() {fgInstance = 0;}
+  
  private:
   static St_GatingGridC* fgInstance;
   ClassDefChair(St_GatingGrid, GatingGrid_st )

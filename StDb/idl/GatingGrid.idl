@@ -5,7 +5,7 @@
  Old Gating Grid for Runs 19 - 21
  New Gating Grid for Run > 21: t0 = 240 ns, setting time = 2.0  us, tau = 2.0  / 4.6  = 435 ns.
  setting time = time of reaching transperency 99%
- tau = setting time / 4.6 => 1%
+ tau = setting time/4.6 => exp(-4.6) = 1%
  description: Gating Grid transperancy = 0, for t < t0, and 1 - exp(-(t-t0)/tau), for t > t0
 */ 
 

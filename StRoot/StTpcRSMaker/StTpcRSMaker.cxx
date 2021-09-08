@@ -77,10 +77,6 @@ struct HitPoint_t {
 //#define __LASERINO__
 //#define Old_dNdx_Table
 //#define __ELECTRONS_TUPLE__
-#define __GatingGrid__
-#ifdef __GatingGrid__
-#include "StDetectorDbMaker/St_GatingGridC.h"
-#endif /* __GatingGrid__ */
 #define __SECROW_PLOTS__
 #define __STOPPED_ELECTRONS__
 #define __DEBUG__
@@ -226,9 +222,6 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection3MDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
-#ifdef __GatingGrid__
-    CLRBIT(Mask,StTpcdEdxCorrection::kzCorrection);
-#endif __GatingGrid__
     //    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
   }
@@ -490,14 +483,6 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
     }
   }
   // tss
-#ifdef  __GatingGrid__
-  //  mGG = new TF1F("GatingGridTransperency","TMath::Max(0.,1-6.27594134307865925e+00*TMath::Exp(-2.87987e-01*(x-1.46222e+01)))",10,56);
-  Double_t parGG[2];
-  parGG[0] = St_GatingGridC::instance()->t0();
-  parGG[1] = St_GatingGridC::instance()->settingTime()/4.6;
-  mGG = new TF1F("GatingGridTransperency","TMath::Max(0.,1.0-TMath::Exp(-(x-[0]/[1])))",0,10*parGG[1]);
-  mGG->SetParameters(parGG);
-#endif
   if (Debug()) Print();
   memset (hist, 0, sizeof(hist));
   memset (checkList, 0, sizeof(checkList));
@@ -2007,16 +1992,6 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
     if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row)) continue;
     if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
       //    }
-    Double_t mGainLocalGG = mGainLocal;
-#ifdef __GatingGrid__
-    // Apply Gating Grid
-    Double_t driftLength = TrackSegmentHits.coorLS.position().z();
-    Double_t tDrift = driftLength/gStTpcDb->DriftVelocity(sector)*1e6; // musec
-    if (tDrift > mGG->GetXmin() && tDrift < mGG->GetXmax()) {
-      mGainLocalGG*= mGG->Eval(tDrift);
-      if (mGainLocalGG < minSignal) return;
-    }
-#endif /*  __GatingGrid__ */
     Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
     StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, row);
     static StTpcPadCoordinate Pad;
@@ -2059,7 +2034,7 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
     mPadResponseFunction[io][sector-1]->GetSaveL(Npads,xPadMin,XDirectionCouplings);
     //	      Double_t xPad = padMin - padX;
     for(Int_t pad = padMin; pad <= padMax; pad++) {
-      Double_t gain = QAv*mGainLocalGG;
+      Double_t gain = QAv*mGainLocal;
       Double_t dt = dT;
       //		if (St_tpcPadConfigC::instance()->numberOfRows(sector) ==45 && ! TESTBIT(m_Mode, kGAINOAtALL)) { 
       if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
@@ -2184,6 +2159,7 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
     St_tpcGas *tpcGas = m_TpcdEdxCorrection->tpcGas();
     if (tpcGas)
       CdEdx.ZdriftDistanceO2 = CdEdx.ZdriftDistance*(*tpcGas)[0].ppmOxygenIn;
+    dEdxCor = 0; // reject hits if they out of acceptance
     if (! m_TpcdEdxCorrection->dEdxCorrection(CdEdx)) {
       dEdxCor = CdEdx.F.dE;
     }
