@@ -77,7 +77,7 @@ class StBTofSimResParams : public StMaker {
 
 			if(dataset) 
 			{
-				TDatime val[2];
+				//TDatime val[2];
 				//dbMk->GetValidity((TTable*)dataset,val);
 				
 				tofSimResParams_st* tofTable = static_cast<tofSimResParams_st*>(dataset->GetTable());
