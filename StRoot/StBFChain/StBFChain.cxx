@@ -668,6 +668,7 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("picoRead")  )  mk->SetMode(2);   // possibly more magic
       if ( GetOption("PicoVtxVpd"))           mk->SetAttr("PicoVtxMode", "PicoVtxVpd");
       else if ( GetOption("PicoVtxFXT"))      mk->SetAttr("PicoVtxMode", "PicoVtxFXT");
+      else if ( GetOption("PicoVtxMtd"))      mk->SetAttr("PicoVtxMode", "PicoVtxMtd");
       else if ( GetOption("PicoVtxVpdOrDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxVpdOrDefault");
       else if ( GetOption("PicoVtxDefault"))  mk->SetAttr("PicoVtxMode", "PicoVtxDefault");
       if ( GetOption("PicoCovMtxWrite"))      mk->SetAttr("PicoCovMtxMode", "PicoCovMtxWrite");
@@ -695,6 +696,7 @@ Int_t StBFChain::Instantiate()
 	mode |= (1 << 10); // kNoToflight   //10 don't account for particle time of flight
 	mk->SetMode(mode);
       }
+      if (GetOption("EbyET0")) mk->SetAttr("EbyET0", kTRUE);
     }
     if (maker == "StTrsMaker") {
       Int_t mode = 0;
@@ -887,10 +889,10 @@ Int_t StBFChain::Instantiate()
     }
     if (maker == "StBTofCalibMaker") {
       if (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
-      if (GetOption("setPPPAOutlierRej"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
-      if (GetOption("pppAMode")) mk->SetAttr("pppAMode", kTRUE);
+      if (GetOption("setOutlierRej4BToft0"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
+      if (GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
     }
-    if (maker == "StVpdCalibMaker" && GetOption("pppAMode")) mk->SetAttr("pppAMode", kTRUE);
+    if (maker == "StVpdCalibMaker" && GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
 
     if (maker == "StEventMaker" && fFiltTrg.Length()) {
       mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));

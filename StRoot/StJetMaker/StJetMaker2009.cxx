@@ -91,8 +91,14 @@ int StJetMaker2009::Make()
       // Keep track of number of good vertices
       int nvertices = 0;
 
+      int totNumVertices = tpc.numberOfVertices(); 
+      // store the total number of available vertices if set by anapars
+      if(jetbranch->anapars->storeOnlyDefaultVertex && totNumVertices > 1) {
+          totNumVertices = 1;
+      }   
+
       // Vertex loop
-      for (int iVertex = 0; iVertex < tpc.numberOfVertices(); ++iVertex) {
+      for (int iVertex = 0; iVertex < totNumVertices; ++iVertex) {
 	tpc.setVertexIndex(iVertex);
 
 	// Get TPC vertex and tracks
@@ -357,33 +363,39 @@ void StJetMaker2009::copyVertex(const StjPrimaryVertex& vertex, StJetVertex* jet
 
 void StJetMaker2009::copyTrack(const StMuTrackEmu* t, StJetTrack* track)
 {
-  track->mId             = t->id();
-  track->mDetectorId     = t->detectorId();
-  track->mFlag           = t->flag();
-  track->mCharge         = t->charge();
-  track->mNHits          = t->nHits();
-  track->mNHitsFit       = t->nHitsFit();
-  track->mNHitsPoss      = t->nHitsPoss();
-  track->mNHitsDedx      = t->nHitsDedx();
-  track->mDedx           = t->dEdx();
-  track->mBeta           = t->beta();
-  track->mFirstPoint     = t->firstPoint();
-  track->mLastPoint      = t->lastPoint();
-  track->mExitTowerId    = t->exitTowerId();
-  track->mExitDetectorId = t->exitDetectorId();
+  track->mId                 = t->id();
+  track->mDetectorId         = t->detectorId();
+  track->mFlag               = t->flag();
+  track->mCharge             = t->charge();
+  track->mNHits              = t->nHits();
+  track->mNHitsFit           = t->nHitsFit();
+  track->mNHitsPoss          = t->nHitsPoss();
+  track->mNHitsDedx          = t->nHitsDedx();
+  track->mDedx               = t->dEdx();
+  track->mBeta               = t->beta();
+  track->mFirstPoint         = t->firstPoint();
+  track->mLastPoint          = t->lastPoint();
+  track->mExitTowerId        = t->exitTowerId();
+  track->mExitDetectorId     = t->exitDetectorId();
   track->mExitPoint.SetPtEtaPhi(t->bemcRadius(),t->etaext(),t->phiext());
   track->mDca.SetXYZ(t->dcaX(),t->dcaY(),t->dcaZ());
-  track->mDcaD           = t->dcaD();
-  track->mChi2           = t->chi2();
-  track->mChi2Prob       = t->chi2prob();
+  track->mDcaD               = t->dcaD();
+  track->mChi2               = t->chi2();
+  track->mChi2Prob           = t->chi2prob();
   TVector3 mom(t->px(),t->py(),t->pz());
-  track->mPt             = mom.Pt();
-  track->mEta            = mom.Eta();
-  track->mPhi            = mom.Phi();
-  track->mNSigmaPion     = t->nSigmaPion();
-  track->mNSigmaKaon     = t->nSigmaKaon();
-  track->mNSigmaProton   = t->nSigmaProton();
-  track->mNSigmaElectron = t->nSigmaElectron();
+  track->mPt                 = mom.Pt();
+  track->mEta                = mom.Eta();
+  track->mPhi                = mom.Phi();
+  track->mNSigmaPion         = t->nSigmaPion();
+  track->mNSigmaKaon         = t->nSigmaKaon();
+  track->mNSigmaProton       = t->nSigmaProton();
+  track->mNSigmaElectron     = t->nSigmaElectron();
+
+  track->mBTofTrayId         = t->btofTrayId();
+  track->mNSigmaTofPion      = t->nSigmaTofPion();
+  track->mNSigmaTofKaon      = t->nSigmaTofKaon();
+  track->mNSigmaTofProton    = t->nSigmaTofProton();
+  track->mNSigmaTofElectron  = t->nSigmaTofElectron();
 }
 
 void StJetMaker2009::copyTower(const StMuTowerEmu* t, StJetTower* tower)

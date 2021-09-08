@@ -9,8 +9,7 @@
 #include "JTMonitor.h"
 #include <TClass.h>
 
-#include "DAQ_READER/daqReader.h"
-#include <PDFUtil/PdfIndex.hh>
+class daqReader;
 #include "Jevp/StJevpPlot/EvpMessage.h"
 #include "Jevp/StJevpPlot/JevpPlot.h"
 #include "DisplayDefs.h"

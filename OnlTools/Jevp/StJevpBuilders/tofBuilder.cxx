@@ -15,6 +15,7 @@
 #include <math.h>
 #include "tofBuilder.h"
 #include <RTS/include/rtsLog.h>
+#include "StEvent/StTriggerData.h"
 #include <assert.h>
 
 ClassImp(tofBuilder);

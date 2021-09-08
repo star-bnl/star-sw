@@ -293,9 +293,6 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
         /// Try to cut down on noice around identified gammas
         Float_t floor[288]; for ( Int_t i=0; i<288; i++ ) floor[i]=0.;
 
-	/// Energy of all strips in plane
-	Float_t energy[288]; for ( Int_t i=0; i<288; i++ ) energy[i]=0.;
-
   	/// Get list of strips
     	StEEmcStripVec_t strips=mEEanalysis->strips(sector,plane);
 	StEEmcStripVec_t seeds;
@@ -304,26 +301,13 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
   	/// Order in descending energy
     	std::reverse(strips.begin(),strips.end());
 
-
-	/// Copy energy of all hit strips into an array
-	StEEmcStripVec_t::iterator istrip=strips.begin();
-	while ( istrip != strips.end() ) {
-	  if ( (*istrip).stat()||(*istrip).fail() ) {
-	    istrip++;
-	    continue;
-	  }
-
-	  energy[ (*istrip).index() ] = (*istrip).energy();
-	  istrip++;
-	}
-	
 	/// We'll flag each seed strip
 	std::vector<Bool_t> seed_flags( strips.size(), false );
 
 	/// Iterate over strips and find seeds
 	Int_t nstrip=0;
 	Int_t nseeds=0;
-	istrip=strips.begin();
+	StEEmcStripVec_t::iterator istrip=strips.begin();
 	while ( istrip!=strips.end() ) {
 
 	  Int_t index=(*istrip).index();
