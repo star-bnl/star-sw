@@ -46,8 +46,9 @@ class StBTofSimResParams : public StMaker {
 		void loadParams(const int runNumber = 20076002)
 		{
 			//--------------------------------------------------------------------------------------------------
-			//the following lines may be needed if not run with bfc.C, instead run btof simulation individually,
-			//it will require you to set up a timestampe to pickup the table in DB
+			//the following lines may be needed if not run with bfc.C, but run btof simulation individually,
+			//it will require you to set up a timestamp to pickup the table in DB, here below show an example to use
+			//runnumber to set the timestamp, you can also modify the function to pickup the timestamp you want
 			//const int yearNumber = runNumber/1000000 - 1 + 2000;
 			//const int date       = (yearNumber-1)*1000*10 + 1001; // prior year + October 1st(Date)
 
