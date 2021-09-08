@@ -41,4 +41,5 @@
 
 #rsync -avrz -h --include='*picoDst.root' --exclude='*.*' --exclude='Sub*' --exclude='*T' --exclude='Done' --exclude='cpu*' --exclude='.sl*'  ./??? /direct/gpfs01/star/subsysg/TFG/Pico/2021/RF/TFG21g.B/26p5GeV_fixedTarget_2021 >& rsynch.log &
 cd /net/l401/data/scratch2/fisyak/Pico/2021/RF/TFG21e/17p3GeV_2021
-rsync -avrz -h --include='*picoDst.root'  /direct//gpfs01/star/pwg/fisyak/Pico/2021/RF/TFG21e/17p3GeV_2021/1??  . >& rsynch.log &
+#rsync -avrz -h --include='*picoDst.root'  /direct/gpfs01/star/pwg/fisyak/Pico/2021/RF/TFG21e/17p3GeV_2021/1??  . >& rsynch.log &
+rsync -avrz -h --include='*picoDst.root'  /direct/gpfs01/star/subsysg/TFG/Pico/2021/RF/TFG21c.B/7p7GeV_2021/???  . >& rsynch.log &

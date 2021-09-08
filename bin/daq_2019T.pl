@@ -17,7 +17,7 @@ print "Day = $Day\n" if ($debug);
 my $glob;
 if (-r "/hlt/cephfs/daq/2019B/") {
 #  @globs = ("/hlt/cephfs/daq/2019B/" . $Day . "/*/*.daq", );  print "globs = @globs\n" if ($debug);
-  @globs = ("/hlt/cephfs/daq/2019B/" . $Day . "/*/hlt*.daq", );  print "globs = @globs\n" if ($debug);
+  @globs = ("/hlt/cephfs/daq/2019B/" . $Day . "/*/*.daq", );  print "globs = @globs\n" if ($debug);
 }
 if (-r "/gpfs01/star/daq/2019/") {
 #  @globs = ("/gpfs01/star/daq/2019/*/*/st_physics_adc*.daq");  print "globs = @globs\n" if ($debug);
