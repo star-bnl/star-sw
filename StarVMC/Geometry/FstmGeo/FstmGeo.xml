@@ -24,15 +24,16 @@ June 14, 2021
 During installation review it was decided to move the middle ring modules
 to avoid interference. This is equivalent to rotate the middle ring by 180 deg around the vertical axis.
 
-
-
+July 2021
+It is nesc to move FSTmodules out by 2inch.
+Remove the inner support tubes as it could not be attached to detector.
 -->
     <Replace match="GeV">*1.0E+0;</Replace>    
     <Replace match="MeV">*1.0E-3;</Replace>    
     <Replace match="keV">*1.0E-6;</Replace>
 
     <Module name="FstmGeo" comment="Forward Silicon Tracker (Full geometry)">
-        <Author name="Te-Chuan Huang"/>
+        <Author name="Te-Chuan Huang, Flemming Videbaek"/>
         <Created date="09 March, 2020"/>
         <CDE>AGECOM,GCONST,GCUNIT</CDE>
         <Content>
@@ -42,7 +43,6 @@ to avoid interference. This is equivalent to rotate the middle ring by 180 deg a
 
             FTUO,   <!-- Tube segment for FST half ring outside wedge container -->
             FTUR,   <!-- Tube segment for FST half ring inside wedge container -->
-	    FSIR,   <!-- Inner support Ring -->
 
             FTRO,   <!-- Trapizoid for FST mechanical strucutre (wedge) -->
             FSBW,   <!-- Box for the ribs in FST wedges -->
@@ -429,7 +429,8 @@ to avoid interference. This is equivalent to rotate the middle ring by 180 deg a
             <var name="rmin"     value="4.1" />
             <var name="rmax"     value="34.00" />
             <var name="dz"       value="30.0" />
-	    <var name="zdisk"    value="{144.633,158.204,171.271}" />
+	<!--    <var name="zdisk"    value="{144.633,158.204,171.271}" /> -->
+	 <var name="zdisk"    value="{149.713, 163.284, 176.35}" />
         </Fill>
 
         <Fill name="wholewedge" comment="whole wedge shape" >
@@ -814,6 +815,7 @@ to avoid interference. This is equivalent to rotate the middle ring by 180 deg a
             <Shape     type="TUBE" rmin="4.8" rmax="mothervol_rmax" dz="mothervol_dz" />
 
             <Create    block="FSTD" />
+	    <Info format="Position FSTD 1 at {6.2f}">mothervol_zdisk(1)</Info>
             <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(1)-zcenter" ncopy="4" />
             <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(2)-zcenter" ncopy="5" >
 	      <Rotation alphaz="30"/>
@@ -870,9 +872,6 @@ to avoid interference. This is equivalent to rotate the middle ring by 180 deg a
                     <Rotation alphaz="15+30*(2*iwedge+1)"/>
                 </Placement>
             </For>
-            <Create    block="FSIR" />
-	    <Placement block="FSIR" in="FSTD" x="0" y="0" z="0" >
-	    </Placement>
  
 	</Volume>
 
@@ -1107,11 +1106,6 @@ to avoid interference. This is equivalent to rotate the middle ring by 180 deg a
             <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
         </Volume>
 
-	<Volume name="FSIR" comment="inner support tube">
-            <Attribute for="FSIR" seen="1" colo="1" />
-            <Material name="PEEK" />
-           <Shape type="TUBE" rmin="iring_rmin" rmax="iring_rmax" dz="iring_dz" />
-	</Volume>
      
 	<Volume name="FTRO" comment="Trapizoid for FST outer wedge">
             <Attribute for="FTRO" seen="1" colo="14" />
