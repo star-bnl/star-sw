@@ -2083,7 +2083,7 @@ my $NEvents = 100000;
 #$hist = "P21ib02_25"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/16/21  add tpcTimeCorrection
 #$hist = "P21ib02_26"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/17/21  TpcSecRowB.20190*.*025.root
 #$hist = "P21ib02_27"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/17/21  TpcLengthCorrectionMDF.2019*26.C
-$hist = "P21ib02_28"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "SL21c"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/18/21  check SL21c
+#$hist = "P21ib02_28"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "SL21c"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/18/21  check SL21c
 ######################################## Run XXI express calibration ########################################
 #$hist = "RunXXI01"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year 22= "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 start from 2020 express production: strong Z dependence, and SecRow3 ~4%, xypad ~ 10%
 #$hist = "RunXXI02"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 reset date 20210129.000001: TpcLengthCorrectionMDF, TpcPadCorrectionMDF, TpcZCorrectionB
@@ -2160,6 +2160,11 @@ $hist = "P21ib02_28"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/Re
 #$hist = "RunXXI55"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/04/21 TpcSecRowB.20210501.160054.root ?
 #$hist = "RunXXI56"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/05/21 step back to RunXXI53
 #$hist = "RunXXI57"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/RF"; $Production = "/TF*"; $year = "/3p85GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/05/21 TpcSecRowB.20210501.160056.root
+# $hist = "RunXXI100"
+# $hist = "RunXXI101"
+# $hist = "RunXXI102"
+# $hist = "RunXXI200"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG21h"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  08/07/21 - 08/09/21 Recheck 
+ $hist = "RunXXI201"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG21h"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  09/10/21 TpcZCorrectionC.y2021.C
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2421,3 +2426,4 @@ close (XML);
 my $GB = $Total_Size/1024/1024/1024;
 print "Total size = $GB GB\n"; 
 }
+
