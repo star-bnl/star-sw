@@ -1,0 +1,5 @@
+#!/bin/csh -f 
+
+root.exe -l ./StRoot/StGeant4Maker/macros/initStar.C ./StRoot/StGeant4Maker/macros/geant4star.C $argv 
+
+
