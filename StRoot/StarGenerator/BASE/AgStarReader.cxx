@@ -78,7 +78,7 @@ typedef struct {
   int    istory; 
 } Gctrak_t; 
 
-Gctrak_t* fGctrak;
+Gctrak_t* fGctrak = 0;
 
 
 // ----------------------------------------------------------------------------------------------------
@@ -149,6 +149,7 @@ void AgStarReader::ReadEvent()
 	  }
 
 	  // Set time of flight
+	  assert(fGctrak);
 	  fGctrak->tofg = part->T();
 
 	}
