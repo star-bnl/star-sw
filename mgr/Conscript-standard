@@ -376,11 +376,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			$env->{ENV}->{AGML_WARNINGS} = 1==1; # $param::debug;
 
 			if ( $xml =~ m/Compat/ ){
-			    Depends $env ["#".$agE], ("#$xml", "#$agml_cmd");
+			    Depends $env ["#".$agE], "#$xml";
 			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
 			} else {
-			    Depends $env ["#".$agX, "#".$agH, "#".$agE], ("#$xml", "#$agml_cmd");
+			    Depends $env ["#".$agX, "#".$agH, "#".$agE], "#$xml";
 			    # Depends $env --> some rule to build extra dict on the fly
 
 			    Command $env ["#".$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
