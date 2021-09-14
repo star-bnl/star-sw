@@ -1192,7 +1192,7 @@ class Module ( Handler ):
         # ---------------------------------------------------------------    
         # Global scope of implementation file
         # ---------------------------------------------------------------        
-        document.impl('#include "%s.h"' % document.agmodule, unit='global')
+        document.impl('#include "StarVMC/StarGeometry/%s.h"' % document.agmodule, unit='global')
         document.impl( banner, unit='global' )
 ##        document.impl('ClassImp(%s);'   % document.agmodule, unit='global')
         document.impl(seperator, unit='global')
