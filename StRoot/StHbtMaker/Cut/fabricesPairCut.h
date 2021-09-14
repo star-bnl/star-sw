@@ -67,7 +67,7 @@
 //#endif
 
 #include "Cut/HitMergingPairCut.h"
-class ostrstream;
+//class ostrstream;
 
 class fabricesPairCut : public HitMergingPairCut{
 public:

@@ -24,7 +24,7 @@
 //#endif
 
 #include "Cut/HitMergingPairCut.h"
-class ostrstream;
+//class ostrstream;
 
 class adamsPairCut : public HitMergingPairCut{
 public:

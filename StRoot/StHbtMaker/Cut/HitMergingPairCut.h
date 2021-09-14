@@ -29,7 +29,7 @@
 //#endif
 
 #include "StHbtMaker/Base/StHbtPairCut.h"
-class ostrstream;
+//class ostrstream;
 
 class HitMergingPairCut : public StHbtPairCut{
 public:
