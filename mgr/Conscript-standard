@@ -480,22 +480,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    push @QtDefs, $out[1]; print "Qt3/QtDefs from $ui -> $out[1]\n"; # if $param::debug;
 	}
     }
-    if ($#xpmQT >= 0) {
-	my $out = $PKG . "_image_collection.cxx";
-	if (!$qt4) {
-	    my $dir     = File::Basename::dirname( $xpmQT[0] );
-	    my $dirbase = $dir;
-	    $dirbase =~ s/$Dir//;
-	    if ($dirbase) {
-		$dirbase =~ s|^/||;
-		$dirbase .= "/";
-	    }
-	    my @xpm = map ($dirbase . File::Basename::basename( $_), @xpmQT);
-	    print "Command $uic -embed ".join(" ",@xpm)." -o $out \n";
-	    Command $env [$out], @xpm, qq($uic -embed %< -o %> );
-	    push @src, $out
-	    }
-    }
     if ($qt4) {
 	foreach my $qrc (@qrcQT) {
 	    my $dir     = File::Basename::dirname( $qrc );
@@ -816,7 +800,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    my $sdir = File::Basename::basename($dirL);
 	    #      print "s = $s dir = $dirL sdir = $sdir\n";
 	    #      next if $sdir ne $dirL;
-	    next if $s eq 'uset.F' and $STAR_SYS =~ /sun4x_/;
 	    next if $sdir eq 'hpxgs'; # hpux macos
 	    next if $sdir eq 'sungs'; # sun
 	    next if $sdir eq 'allgs';
@@ -851,7 +834,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    my $sdir = File::Basename::basename($dirL);
 	    #      print "s = $s dir = $dirL sdir = $sdir\n";
 	    next if $dirL !~ /$dirs/;
-	    next if $s eq 'uset.F' and $STAR_SYS =~ /sun4x_/;
 	    next if $sdir eq 'hpxgs'; # hpux macos
 	    next if $sdir eq 'sungs'; # sun
 	    next if $sdir eq 'allgs';
@@ -955,13 +937,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CPPPATH .= $main::PATH_SEPARATOR . $INCLUDE . "/tables" . $main::PATH_SEPARATOR . "#";;
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
     }
-    if ( $LIBPKG && $Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/ ) {
+    if ( $LIBPKG && $Dir =~ /pams\// ) {
 	$LIBS .= " -l" . $pkg;    #"lib" . $pkg . "." . $env1->{SUFLIB};
-    }
-    if ($pkg =~ /^St_base$/) {
-	if ( $STAR_SYS =~ /^hp_ux102$/) {
-	    $CPPPATH .= $main::PATH_SEPARATOR . "/usr/local/include";
-	}
     }
 
     if (($pkg eq 'StHbtMaker' or $pkg eq 'StMuDSTMaker') and $CC ne 'gcc' and $CC ne 'icc') {
@@ -988,7 +965,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$LIBS    .= " " . $env1->{Packages}->{Logger}->{LIBS};
     }
 
-    if ( $STAR_SYS =~ /^sun4x_5.$/ ) { $CXXFLAGS .= " -ptr" . $obj_dir; }
     if ( $STAR_SYS =~ /kcc$/ ) { $LIBPATH = ""; $LIBS = ""; }
 #    print "pkg = $pkg FPPFLAGS = $FPPFLAGS\n";
     my $libpath = $LIBPATH;
@@ -1090,18 +1066,17 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    my $modC = "St_" . $stem . "_Module.cxx";
 	    print "modC = $modC\n" if $param::debug;
 
-	    if ( $STAR_SYS !~ /^intel_wnt$/ ) {
-		$env2->{ENV}->{STICTMP} = "/tmp/$<$$";
-		my $stic_cmd =
-		    "test -d \$STICTMP && /bin/rm -rf \$STICTMP ; ".
-		    "/bin/mkdir -m 777 \$STICTMP && cd \$STICTMP && ".
-		    "/bin/cp %<:a . && $STIC -s -r $STIC_CPPPATH -q %<:f && ".
-		    "(/bin/mv %>:f %>:a ; cd /tmp  &&  /bin/rm -rf \$STICTMP)";
-		Command $env2 [$modh], @idlS, qq($stic_cmd);
-		Command $env2 [$modi], @idlS, qq($stic_cmd);
-		Command $env2 [$modH], @idlS, qq($stic_cmd);
-		Command $env2 [$modC], @idlS, qq($stic_cmd);
-	    }
+	    $env2->{ENV}->{STICTMP} = "/tmp/$<$$";
+	    my $stic_cmd =
+	        "test -d \$STICTMP && /bin/rm -rf \$STICTMP ; ".
+	        "/bin/mkdir -m 777 \$STICTMP && cd \$STICTMP && ".
+	        "/bin/cp %<:a . && $STIC -s -r $STIC_CPPPATH -q %<:f && ".
+	        "(/bin/mv %>:f %>:a ; cd /tmp  &&  /bin/rm -rf \$STICTMP)";
+	    Command $env2 [$modh], @idlS, qq($stic_cmd);
+	    Command $env2 [$modi], @idlS, qq($stic_cmd);
+	    Command $env2 [$modH], @idlS, qq($stic_cmd);
+	    Command $env2 [$modC], @idlS, qq($stic_cmd);
+
 	    my @objmod = ($modC);
 	    print "Install @objmod in $ObjDir\n" if $param::debug;
 	    push @src, $modC;
@@ -1160,6 +1135,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
     if ( $#Defs > -1 ){  # && ! $OnlinePackage ) {
 	my @CintFiles = ( $PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h" );
+
+        if ($env->{ENV}->{ROOT_VERSION_MAJOR} >= 6) {
+            push @CintFiles, $PKG."_Cint_rdict.pcm";
+            Install $env $LIB, File::Basename::basename($CintFiles[3]);
+        }
+
 	@Defs = script::sortu(@Defs);
 	my @defs = ();
 	foreach my $def(@Defs) {    #print "def = $def OBJ = $OBJ\n";
@@ -1301,23 +1282,23 @@ if ( $#idlL > -1 ) {
       if ( -r $IDL ) {
 	my @Deps = ($idll);
 	print "Deps: $Deps[0]\n" if $param::debug;
-	if ( $STAR_SYS !~ /^intel_wnt$/ ) {
-	  $env3->{ENV}->{STICTMP} = "/tmp/$<$$";
-	  my $stic_cmd  =
-	    "test -d \$STICTMP && /bin/rm -rf \$STICTMP ; ".
-	    "/bin/mkdir -p -m 777 \$STICTMP && cd \$STICTMP && ".
-	    "/bin/cp %<:a . && $STIC -q %<:f && ".
-	    "(/bin/mv %>:f %>:a ; cd /tmp ; /bin/rm -rf \$STICTMP)";
 
-	  Command $env3 [$idlh], @Deps, qq ($stic_cmd);
-	  Command $env3 [$idli], @Deps, qq ($stic_cmd);
-	  push @Deps, $idlh;
-	  Command $env3 [$idlH], @Deps, qq (ConstructTable.pl %1 %>);
-	  push @Deps, $idlH;
-	  Command $env3 [$idlC], @Deps, qq (ConstructTable.pl %1 %>);
-	  Command $env3 [$LinkDef], @Deps,
-	    qq (ConstructTable.pl %1 %>);
-	}
+	$env3->{ENV}->{STICTMP} = "/tmp/$<$$";
+	my $stic_cmd  =
+	  "test -d \$STICTMP && /bin/rm -rf \$STICTMP ; ".
+	  "/bin/mkdir -p -m 777 \$STICTMP && cd \$STICTMP && ".
+	  "/bin/cp %<:a . && $STIC -q %<:f && ".
+	  "(/bin/mv %>:f %>:a ; cd /tmp ; /bin/rm -rf \$STICTMP)";
+
+	Command $env3 [$idlh], @Deps, qq ($stic_cmd);
+	Command $env3 [$idli], @Deps, qq ($stic_cmd);
+	push @Deps, $idlh;
+	Command $env3 [$idlH], @Deps, qq (ConstructTable.pl %1 %>);
+	push @Deps, $idlH;
+	Command $env3 [$idlC], @Deps, qq (ConstructTable.pl %1 %>);
+	Command $env3 [$LinkDef], @Deps,
+	  qq (ConstructTable.pl %1 %>);
+
 	@Deps = ();
 	push @Deps, $idlH;
 	push @Deps, $LinkDef;
@@ -1325,10 +1306,9 @@ if ( $#idlL > -1 ) {
 	push @Deps, $idlh;
 	push @Deps, $idli;
 
-	if ( $STAR_SYS !~ /^intel_wnt$/ ) {
-	  Command $env3 [ ($idlCintC , $idlCintH) ], @Deps,
-	    qq (rootcint -f %> -c $ROOTCINT_CPPPATH -D__ROOT__ %1 %2);
-	}
+	Command $env3 [ ($idlCintC , $idlCintH) ], @Deps,
+	  qq (rootcint -f %> -c $ROOTCINT_CPPPATH -D__ROOT__ %1 %2);
+
 	push @Deps, $idlCintC;
 	push @Deps, $idlCintH;
 	push @Deps, $idlC;
