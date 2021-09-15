@@ -3,3 +3,13 @@
 .consign
 .DS_Store
 .vscode/
+StarVMC/StarGeometry 
+StarVMC/xgeometry/[A-Z]*.age
+StarVMC/xgeometry/*geo.age 
+StarVMC/xgeometry/*geo[0-9].age 
+StarVMC/xgeometry/*par.age 
+StarVMC/xgeometry/*ego.age 
+StarVMC/xgeometry/*hit.age 
+StarVMC/xgeometry/*step.age 
+StRoot/StBFChain/doc 
+temp_gccflags.c
