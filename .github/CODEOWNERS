@@ -144,8 +144,9 @@
 /StarVMC/StarBASE                                  @klendathu2k
 /StarVMC/StarGeometry                              @klendathu2k
 /StarVMC/StarVMCApplication                        @fisyak
-/StarVMC/xgeometry                                 @klendathu2k       @fisyak
+/StarVMC/xgeometry                                 @klendathu2k
 /mgr                                               @genevb            @klendathu2k @fisyak     @plexoos
 /pams                                              @klendathu2k       @fisyak
 /pams/sim                                          @akioogawa         @klendathu2k
 /pams/tables                                       @dmarkh            @plexoos
+/asps                                              @klendathu2k       @perevbnlgov
