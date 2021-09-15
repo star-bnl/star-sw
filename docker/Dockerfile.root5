@@ -122,7 +122,6 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
 
 RUN source /etc/profile \
  && cd /star-sw \
- && cons +StarVMC/Geometry \
  && cons %StRoot/StShadowMaker \
  && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 
