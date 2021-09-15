@@ -108,19 +108,19 @@ int StMessage::Print(int nChars) {
   }
   const char* addedMessage=0;
   if (nChars == 0) {
-    addedMessage = messCounter->str();                   // Any limit message
+    addedMessage = messCounter->str().c_str();                   // Any limit message
   } else {
     if (nChars>0) {
       if (messBuffer.tellp() >= nChars)
         messBuffer.seekp(nChars-1);   // set end-of-string at nChars
-      int noReturns = strcspn(messBuffer.str(),endofline);
+      int noReturns = strcspn(messBuffer.str().c_str(),endofline);
       if (noReturns < messBuffer.tellp()) messBuffer.seekp(noReturns);
     } else
       nChars = 0;
   }
   messBuffer << ends;
   if (!repeats) {
-    if (!strcmp(messBuffer.str(),lastMessBuffer.str())) {
+    if (!strcmp(messBuffer.str().c_str(),lastMessBuffer.str().c_str())) {
       return messBuffer.tellp();
     } else {
       lastMessBuffer.seekp(0);
