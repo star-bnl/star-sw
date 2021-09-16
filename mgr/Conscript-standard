@@ -288,17 +288,13 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    $trgt = "";
 	    $hfl  = "";
 	    if ( $Dir =~ m/xgeometry/ ){
-		$fcheck = $trgt  = $OBJ."/".$Dir."/".$agM.".age";
-		$fcheck =~ s/\#//; $trgt = "" if ( -e $fcheck);
+		$trgt = "$OBJ/$Dir/$agM.age";
 	    } else {
 		# Compat contains redundant defs only needed for the age
 		# .h also needed for Dictionary building
 		if ( $xml !~ m/Compat/ ){
-		    $fcheck = $trgt  = $OBJ."/".$Dir."/".$agM.".cxx";
-		    $fcheck =~ s/\#//; $trgt = "" if ( -e $fcheck);
-
-		    $fcheck = $hfl   = $OBJ."/".$Dir."/".$agM.".h";
-		    $fcheck =~ s/\#//; $hfl = "" if ( -e $fcheck);
+		    $trgt = "$OBJ/$Dir/$agM.cxx";
+		    $hfl  = "$OBJ/$Dir/$agM.h";
 		}
 	    }
 	    # push but only if not present - if present, cons will find
