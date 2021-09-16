@@ -463,7 +463,9 @@ int StGeant4Maker::Init() {
   mVmcApplication = new StarVMCApplication("g4star","STAR G4/VMC",DAttr("Application:Zmax"),DAttr("Application:Rmax"));
 
   LOG_INFO << "Create VMC run configuration" << endm;
-  mRunConfig = new TG4RunConfiguration( SAttr("G4VmcOpt:Nav"), SAttr("G4VmcOpt:Phys" ), SAttr("G4VmcOpt:Process") );
+  const bool specialStacking = false;
+  const bool multiThreaded   = false;
+  mRunConfig = new TG4RunConfiguration( SAttr("G4VmcOpt:Nav"), SAttr("G4VmcOpt:Phys" ), SAttr("G4VmcOpt:Process"), specialStacking, multiThreaded );
 
   AddObj( mVmcApplication, ".const", 0 ); // Register VMC application  
 
