@@ -376,33 +376,22 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			$env->{ENV}->{AGML_WARNINGS} = 1==1; # $param::debug;
 
 			if ( $xml =~ m/Compat/ ){
-			    Depends $env ["#".$agE], ("#$xml", "#$agml_cmd");
-			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+			    Depends $env ["$OBJ/$agE"], ("#$xml", "#$agml_cmd");
+			    Command $env ["$OBJ/$agE"], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
 			} else {
-			    Depends $env ["#".$agX, "#".$agH, "#".$agE], ("#$xml", "#$agml_cmd");
+			    Depends $env ["$OBJ/$agX", "$OBJ/$agH", "$OBJ/$agE"], ("#$xml", "#$agml_cmd");
 			    # Depends $env --> some rule to build extra dict on the fly
 
-			    Command $env ["#".$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
-			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+			    Command $env ["$OBJ/$agX", "$OBJ/$agH"], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
+			    Command $env ["$OBJ/$agE"], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
-			    # Install local file (#) as global
-			    # The .h file can be installed as-is
-			    $trgt = $OBJ."/".$agH;
-			    InstallAs  $env $trgt, "#".$agH;
-
-			    # The recently generated .cxx will create an extra source dependency
-			    $trgt = $OBJ."/".$agX;
-			    InstallAs  $env $trgt, "#".$agX;
+			    $trgt = $INCLUDE."/".$agH;
+			    InstallAs  $env $trgt, "$OBJ/$agH";
 
 			    # Add source dependency but only cxx
 			    #>>push(@srcL, $trgt);
 			}
-
-			# Install the "#" i.e. local file as global file - ageF created in both cases
-			# BEWARE that the agE (.age) file is created in xgeometry
-			$trgt = $OBJ."/".$agE;
-			InstallAs  $env $trgt, "#".$agE;
 
 			# Create source dependencies based on installed age, not the original
 			#>>push(@srcL, $trgt );
