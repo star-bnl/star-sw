@@ -88,7 +88,7 @@ std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
   os << Form(" pdg:%5i Q:%2i  chi2/NDF :%8.2f/%2i",particle.GetPDG(),particle.GetQ(),particle.GetChi2(),particle.GetNDF());
   if (particle.IdTruth()) os << Form(" IdT:%4i/%3i",particle.IdTruth(),particle.QaTruth());
   int nd = particle.NDaughters();
-  if (nd > 1) {
+  if (nd > 0) {
     os << " ND: " << nd << ":";
     if (nd > 3) nd = 3;
     for (int d = 0; d < nd; d++) {

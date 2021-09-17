@@ -1,5 +1,5 @@
 #include "StKFParticleInterface.h"
-
+#include <map>
 #include "KFParticleTopoReconstructor.h"
 #include "KFMCTrack.h"
 
@@ -7,7 +7,7 @@
 #include "TArrayD.h"
 #include "TH1F.h"
 #include "TH2F.h"
-
+#include "TDirectory.h"
 #include "StPicoDstMaker/StPicoDstMaker.h"
 #include "StPicoEvent/StPicoHelix.h"
 #include "StPicoEvent/StPicoPhysicalHelix.h"
@@ -18,8 +18,9 @@
 #include "StPicoEvent/StPicoBTofPidTraits.h"
 #ifdef __TFG__VERSION__
 #include "StPicoEvent/StPicoETofPidTraits.h"
+#include "StdEdxY2Maker/StPidStatus.h"
 #endif /* __TFG__VERSION__ */
-
+#include "StMaker.h"
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
 #include "StProbPidTraits.h"
@@ -31,6 +32,7 @@
 #else /* __TFG__VERSION__ */
 #define USETOF
 //#define __USE_HFT__
+//#define __ETAPN_TOF_PLOTS__
 #define dEdxL10min 0.0
 #define dNdxL10min 1.25
 #define __BOOK_hdEdx__(dir,hist,Name,Title)				\
@@ -56,6 +58,10 @@ StKFParticleInterface::StKFParticleInterface():
   fCollectTrackHistograms(false), fCollectPIDHistograms(false),
   fStrictTofPID(true), fCleanKaonsWitTof(true), fdEdXMode(1), fTriggerMode(false),
   fChiPrimaryCut(18.6f), fChiPrimaryCutFragments(0.f), fChiPrimaryMaxCut(2e4f), fCleanLowPVTrackEvents(false), fUseHFTTracksOnly(false)
+#ifdef __TFG__VERSION__
+  , fPidQA(kTRUE)
+#endif /* _TFG__VERSION__ */
+
 {
   fKFParticleTopoReconstructor = new KFParticleTopoReconstructor();
   fgStKFParticleInterface = this;
@@ -295,10 +301,12 @@ void StKFParticleInterface::CollectTrackHistograms()
   if (! fTrackHistograms2D[4]) {
     fTrackHistograms2D[4] = new TH2F("hTofPID", "hTofPID", 200, -1, 1, 1100, -1, 10);
     fTrackHistograms2D[4]->SetXTitle("log_{10}P");
+#ifdef __ETAPN_TOF_PLOTS__ 
     fTrackHistograms2D[15] = new TH2F("hTofPIDP", "hTofPIDP eta >  0", 200, -1, 1, 1100, -1, 10);
     fTrackHistograms2D[15]->SetXTitle("log_{10}P");
     fTrackHistograms2D[16] = new TH2F("hTofPIDN", "hTofPIDN eta <= 0", 200, -1, 1, 1100, -1, 10);
     fTrackHistograms2D[16]->SetXTitle("log_{10}P");
+#endif /* __ETAPN_TOF_PLOTS__ */
   }
   fTrackHistograms2D[14] = (TH2F *)   dirs[1]->Get("hETofPID");
   if (! fTrackHistograms2D[14]) {
@@ -404,10 +412,12 @@ void StKFParticleInterface::CollectPIDHistograms()
     if (! fHistoTofPIDTracks[iTrackHisto][0]) {
       fHistoTofPIDTracks[iTrackHisto][0] = new TH2F("hTofPID", "hTofPID", 200, -1, 1, 1100, -1, 10);
       fHistoTofPIDTracks[iTrackHisto][0]->SetXTitle("log_{10}P");
+#ifdef __ETAPN_TOF_PLOTS__ 
       fHistoTofPIDTracks[iTrackHisto][1] = new TH2F("hTofPIDP", "hTofPID eta >  0", 200, -1, 1, 1100, -1, 10);
       fHistoTofPIDTracks[iTrackHisto][1]->SetXTitle("log_{10}P");
       fHistoTofPIDTracks[iTrackHisto][2] = new TH2F("hTofPIDN", "hTofPID eta <= 0", 200, -1, 1, 1100, -1, 10);
       fHistoTofPIDTracks[iTrackHisto][2]->SetXTitle("log_{10}P");
+#endif /* __ETAPN_TOF_PLOTS__ */
     }
     fHistoETofPIDTracks[iTrackHisto] = (TH2F *)   dirs[2]->Get("hETofPID");
     if (! fHistoETofPIDTracks[iTrackHisto]) {
@@ -433,7 +443,7 @@ void StKFParticleInterface::CollectPIDHistograms()
 #endif /* __TFG__VERSION__ */
     
     fHistodEdXZ[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXZ");
-    if (! fHistodEdXZ[iTrackHisto]) fHistodEdXZ[iTrackHisto] = new TH2F("hdEdXZ", "hdEdXZ", 2000, -5, 5, 280, -1, 6);
+    if (! fHistodEdXZ[iTrackHisto]) fHistodEdXZ[iTrackHisto] = new TH2F("hdEdXZ", "hdEdXZ", 2000, -2, 2, 280, -1, 6);
 #ifdef __TFG__VERSION__
     fHistodEdXPull[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXPull");
     if (! fHistodEdXPull[iTrackHisto]) fHistodEdXPull[iTrackHisto] = new TH2F("hdEdXPull", "hdEdXPull", 2000, -2, 2, 120, -6, 6);
@@ -796,14 +806,15 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
   return totalPDG;
 }
 
+
 void StKFParticleInterface::AddTrackToParticleList(const KFPTrack& track, int nHftHitsInTrack, int index, const std::vector<int>& totalPDG, KFVertex& pv, 
-#ifndef __TFG__VERSION__
-  std::vector<int>& primaryTrackList, std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved,
-  const KFPTrack* trackAtLastHit, std::vector<KFParticle>* particlesAtLastHit)
-#else /* __TFG__VERSION__ */
-						   std::vector<int>& primaryTrackList, std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved,
-						   Float_t chi2, Int_t NDF)
+						   std::vector<int>& primaryTrackList,
+						   std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved,
+						   const KFPTrack* trackAtLastHit, std::vector<KFParticle>* particlesAtLastHit
+#ifdef __TFG__VERSION__
+						   , Float_t chi2, Int_t NDF
 #endif /* __TFG__VERSION__ */
+						   )
 {
   for(unsigned int iPDG=0; iPDG<totalPDG.size(); iPDG++)
   {
@@ -990,7 +1001,9 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
       Double_t pL10 = TMath::Log10(momentum);
       Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()) : dEdxL10min;
       Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
+#ifdef __ETAPN_TOF_PLOTS__
       Double_t eta  = gTrack->gMom().Eta();
+#endif /* __ETAPN_TOF_PLOTS__ */
       fHistodEdXTracks[iTrackHisto] -> Fill(pL10, dEdxL10);
       fHistodNdXTracks[iTrackHisto] -> Fill(pL10, dNdxL10);
       if(isTofm2 || isETofm2)
@@ -1003,8 +1016,10 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
         fHistodEdXwithToFTracks[iTrackHisto] -> Fill(pL10, dEdxL10);
         if (isTofm2) {
 	  fHistoTofPIDTracks[iTrackHisto][0] -> Fill(pL10, m2tof);
+#ifdef __ETAPN_TOF_PLOTS__
 	  if (eta > 0) fHistoTofPIDTracks[iTrackHisto][1] -> Fill(pL10, m2tof);
 	  else         fHistoTofPIDTracks[iTrackHisto][2] -> Fill(pL10, m2tof);
+#endif /* __ETAPN_TOF_PLOTS__ */
 	}
         if (isETofm2) fHistoETofPIDTracks[iTrackHisto] -> Fill(pL10, m2Etof);
 #endif /* __TFG__VERSION__ */
@@ -1301,7 +1316,9 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     Double_t pL10 = (track.GetP() > 0) ? TMath::Log10(track.GetP()) : -2;
     Double_t dEdxL10 = (gTrack->dEdx() > 0) ? TMath::Log10(gTrack->dEdx()) : dEdxL10min;
     Double_t dNdxL10 = (gTrack->dNdx() > 0) ? TMath::Log10(gTrack->dNdx()) : dNdxL10min;
+#ifdef __ETAPN_TOF_PLOTS__
     Double_t eta = gTrack->gMom().Eta();
+#endif /* __ETAPN_TOF_PLOTS__ */
 #endif /* __TFG__VERSION__ */    
     if(fCollectTrackHistograms)
     {
@@ -1356,8 +1373,10 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
         fTrackHistograms2D[3]->Fill(pL10, dEdxL10);
         fTrackHistograms2D[12]->Fill(pL10, dNdxL10);
 	fTrackHistograms2D[4]->Fill(pL10, m2tof);
+#ifdef __ETAPN_TOF_PLOTS__
 	if (eta > 0) fTrackHistograms2D[15]->Fill(pL10, m2tof);
 	else         fTrackHistograms2D[16]->Fill(pL10, m2tof);
+#endif /* __ETAPN_TOF_PLOTS__ */
       }
     }
     if(gTrack->eTofPidTraitsIndex() >= 0)
@@ -1399,8 +1418,10 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
         fTrackHistograms2D[12]->Fill(pL10, dNdxL10);
         if (isTofm2)  {
 	  fTrackHistograms2D[4]->Fill(pL10, m2tof);
+#ifdef __ETAPN_TOF_PLOTS__
 	  if (eta > 0) fTrackHistograms2D[15]->Fill(pL10, m2tof);
 	  else         fTrackHistograms2D[16]->Fill(pL10, m2tof);
+#endif /* __ETAPN_TOF_PLOTS__ */
 	}
         if (isETofm2) fTrackHistograms2D[14]->Fill(pL10, m2Etof);
     }
@@ -1416,7 +1437,7 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
 #else /* __TFG__VERSION__ */
     Int_t NDF = 2*gTrack->nHitsFit() - 5;
     Float_t Chi2 = gTrack->chi2()*NDF;
-    AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved, Chi2, NDF); 
+    AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved, 0, 0, Chi2, NDF); 
 #endif /* __TFG__VERSION__ */
     
     if(nPartSaved > nPartSaved0) 
@@ -1509,7 +1530,11 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     }  
   //reconstruct short-lived particles
   ReconstructParticles();
-  
+#ifdef __TFG__VERSION__
+  if (fPidQA) {
+    PidQA(picoDst, trakIdToI);
+  }
+#endif /* __TFG__VERSION__ */
   return 1;
 }
 
@@ -1667,7 +1692,9 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
 #ifdef __TFG__VERSION__
     double m2Etof = -1.e6;
     bool isETofm2 = false;
+#ifdef __ETAPN_TOF_PLOTS__
     Double_t eta  = gTrack->eta();
+#endif /* __ETAPN_TOF_PLOTS__ */
     const StMuETofPidTraits &etofPid = gTrack->etofPidTraits();
     double timeETof = etofPid.timeOfFlight();
     if (timeETof > 0) {
@@ -1697,8 +1724,10 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
         fTrackHistograms2D[12]->Fill(pL10, dNdxL10);
         if (isTofm2)  {
 	  fTrackHistograms2D[4]->Fill(pL10, m2tof);
+#ifdef __ETAPN_TOF_PLOTS__
 	  if (eta > 0) fTrackHistograms2D[15]->Fill(pL10, m2tof);
 	  else         fTrackHistograms2D[16]->Fill(pL10, m2tof);
+#endif /* __ETAPN_TOF_PLOTS__ */
 	}
         if (isETofm2) fTrackHistograms2D[14]->Fill(pL10, m2Etof);
       }
@@ -1731,7 +1760,7 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
 #else /* __TFG__VERSION__ */
     Int_t NDF = 2*gTrack->nHitsFit() - 5;
     Float_t Chi2 = gTrack->chi2()*NDF;
-    AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved, Chi2, NDF);         
+    AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved, 0, 0, Chi2, NDF);         
 #endif /* __TFG__VERSION__ */
     
     if(nPartSaved > nPartSaved0)
@@ -1881,6 +1910,317 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     
   }
 #endif /* __TFG__VERSION__ */
-  
-  return 1;
+#ifdef __TFG__VERSION__
+  if (fPidQA) {
+    PidQA(muDst, trakIdToI);
   }
+#endif /* __TFG__VERSION__ */
+  return 1;
+}
+#ifdef __TFG__VERSION__
+//________________________________________________________________________________
+Bool_t StKFParticleInterface::PidQA(StPicoDst* picoDst, std::vector<int> trakIdToI) {
+  static Int_t _debug = 0;
+  StPicoEvent* picoEvent = picoDst->event();
+  if(!picoEvent) return 0;
+  Int_t nGlobalTracks = picoDst->numberOfTracks( );
+  if (! nGlobalTracks) return kFALSE;
+  const int nCandidates = GetParticles().size();
+  if (! nCandidates) return kFALSE;
+  for (Int_t iParticle = 0; iParticle < nCandidates; iParticle++) {
+    const KFParticle &particle = GetParticles()[iParticle];
+    if (_debug) particle.Print("");
+    if (particle.NDaughters() != 1) continue;
+    Int_t index = trakIdToI[particle.DaughterIds()[0]];
+    //      cout << "trakIdToI[" << iParticle << "] = " << index << endl;
+    if (index > 0 && index <= nGlobalTracks) {
+      StPicoTrack *gTrack = picoDst->track(index);
+      if (! gTrack) continue;
+      if (_debug) gTrack->Print();
+      StPidStatus PiD(gTrack); 
+      if (PiD.PiDStatus < 0) continue;
+      FillPidQA(&PiD, particle.GetPDG(), 0);
+    }
+  }
+#if 0  
+  for(int iSet=0; iSet<KFParticleFinder::GetNSecondarySets(); iSet++)    {// 0 => Ks0, 1 -> Lambda, 2 => Lambda_bar, 3 => gamma, 4 => pi0
+    const std::vector<KFParticle>& SecondaryCandidates = GetTopoReconstructor()->GetKFParticleFinder()->GetSecondaryCandidates()[iSet];
+    for(unsigned int iP=0; iP<SecondaryCandidates.size(); iP++)	{
+      KFParticle particle = SecondaryCandidates[iP];
+      //      FillParticleParameters(particle, iParticle, id, 0, hPartParamSecondaryMass, hPartParam2DSecondaryMass, 0, 0);
+      particle = GetTopoReconstructor()->GetParticles()[id];
+      //        FillParticleParameters(particle, iParticle, id, 0, hPartParamSecondary, hPartParam2DSecondary, 0, 0);
+    }
+  }
+#endif      
+    
+  for(int iSet=0; iSet<KFParticleFinder::GetNPrimarySets(); iSet++)    {
+    for(int iPV=0; iPV<GetTopoReconstructor()->NPrimaryVertices(); iPV++)      {
+      if (_debug) cout << "Set = " << iSet << "\tPV = " << iPV << "\tGetTopoReconstructor()->NPrimaryVertices() = " << GetTopoReconstructor()->NPrimaryVertices() << endl;
+#if 0
+      const std::vector<KFParticle>& PrimaryCandidates = GetTopoReconstructor()->GetKFParticleFinder()->GetPrimaryCandidates()[iSet][iPV];
+      if (_debug) cout << "PrimaryCandidates.size() = " << PrimaryCandidates.size() << endl;
+      for(unsigned int iP=0; iP<PrimaryCandidates.size(); iP++)        {
+	KFParticle particle =  PrimaryCandidates[iP];
+	if (_debug) particle.Print("");
+// 	int iParticle = fParteff.GetParticleIndex(particle.GetPDG());
+// 	if(iParticle < 0) continue;
+	
+	const int id = particle.Id();
+	//	FillParticleParameters(particle,iParticle, id, iPV, hPartParamPrimaryMass, hPartParam2DPrimaryMass, 0, hFitQAMassConstraint);
+          
+	particle = GetTopoReconstructor()->GetParticles()[id];
+	if (_debug) particle.Print("");
+	//	FillParticleParameters(particle,iParticle, id, iPV, hPartParamPrimary, hPartParam2DPrimary, 0, hFitQANoConstraint);
+      }
+      const std::vector<KFParticle>& PrimaryCandidatesTopo = GetTopoReconstructor()->GetKFParticleFinder()->GetPrimaryTopoCandidates()[iSet][iPV];
+      if (_debug) cout << "PrimaryCandidatesTopo.size() = " << PrimaryCandidatesTopo.size() << endl;
+      for(unsigned int iP=0; iP<PrimaryCandidatesTopo.size(); iP++)        {
+	KFParticle particle =  PrimaryCandidatesTopo[iP];
+	if (_debug) particle.Print("");
+// 	int iParticle = fParteff.GetParticleIndex(particle.GetPDG());
+// 	if(iParticle < 0) continue;
+	const int id = particle.Id();
+	//	FillParticleParameters(particle,iParticle, particle.Id(), iPV, hPartParamPrimaryTopo, hPartParam2DPrimaryTopo, 0, hFitQATopoConstraint);
+      }
+#endif
+      const std::vector<KFParticle>& PrimaryCandidatesTopoMass = GetTopoReconstructor()->GetKFParticleFinder()->GetPrimaryTopoMassCandidates()[iSet][iPV];
+      if (_debug) cout << "PrimaryCandidatesTopoMass.size() = " << PrimaryCandidatesTopoMass.size() << endl;
+      for(unsigned int iP=0; iP<PrimaryCandidatesTopoMass.size(); iP++)        {
+	KFParticle particle =  PrimaryCandidatesTopoMass[iP];
+	if (_debug) particle.Print("");
+	KFParticle p1 = GetParticles()[particle.DaughterIds()[0]]; if (_debug) p1.Print();
+	Int_t index1 = trakIdToI[p1.DaughterIds()[0]];
+	StPicoTrack *gTrack1 = picoDst->track(index1); if (_debug) gTrack1->Print();
+	StPidStatus PiD1(gTrack1); 
+	if (PiD1.PiDStatus < 0) continue;
+	FillPidQA(&PiD1, p1.GetPDG(), particle.GetPDG());
+	KFParticle p2 = GetParticles()[particle.DaughterIds()[1]]; if (_debug) p2.Print();
+	Int_t index2 = trakIdToI[p2.DaughterIds()[0]];
+	StPicoTrack *gTrack2 = picoDst->track(index2); if (_debug) gTrack2->Print();
+	StPidStatus PiD2(gTrack2); 
+	if (PiD2.PiDStatus < 0) continue;
+	FillPidQA(&PiD2, p2.GetPDG(), particle.GetPDG());
+      }
+    }
+  }
+  return kTRUE;
+}
+//________________________________________________________________________________
+Bool_t StKFParticleInterface::PidQA(StMuDst* muDst, std::vector<int> trakIdToI) {
+  static Int_t _debug = 0;
+  StMuEvent* muEvent = muDst->event();
+  if(!muEvent) return 0;
+  Int_t nGlobalTracks = muDst->numberOfGlobalTracks( );
+  if (! nGlobalTracks) return kFALSE;
+  const int nCandidates = GetParticles().size();
+  if (! nCandidates) return kFALSE;
+  for (Int_t iParticle = 0; iParticle < nCandidates; iParticle++) {
+    const KFParticle &particle = GetParticles()[iParticle];
+    if (_debug) particle.Print("");
+    if (particle.NDaughters() != 1) continue;
+    Int_t index = trakIdToI[particle.DaughterIds()[0]];
+    //      cout << "trakIdToI[" << iParticle << "] = " << index << endl;
+    if (index > 0 && index <= nGlobalTracks) {
+      StMuTrack *gTrack = muDst->globalTracks(index);
+      if (! gTrack) continue;
+      if (_debug) gTrack->Print();
+      StPidStatus PiD(gTrack); 
+      if (PiD.PiDStatus < 0) continue;
+      FillPidQA(&PiD, particle.GetPDG(), 0);
+    }
+  }
+#if 0  
+  for(int iSet=0; iSet<KFParticleFinder::GetNSecondarySets(); iSet++)    {// 0 => Ks0, 1 -> Lambda, 2 => Lambda_bar, 3 => gamma, 4 => pi0
+    const std::vector<KFParticle>& SecondaryCandidates = GetTopoReconstructor()->GetKFParticleFinder()->GetSecondaryCandidates()[iSet];
+    for(unsigned int iP=0; iP<SecondaryCandidates.size(); iP++)	{
+      KFParticle particle = SecondaryCandidates[iP];
+      //      FillParticleParameters(particle, iParticle, id, 0, hPartParamSecondaryMass, hPartParam2DSecondaryMass, 0, 0);
+      particle = GetTopoReconstructor()->GetParticles()[id];
+      //        FillParticleParameters(particle, iParticle, id, 0, hPartParamSecondary, hPartParam2DSecondary, 0, 0);
+    }
+  }
+#endif      
+    
+  for(int iSet=0; iSet<KFParticleFinder::GetNPrimarySets(); iSet++)    {
+    for(int iPV=0; iPV<GetTopoReconstructor()->NPrimaryVertices(); iPV++)      {
+      if (_debug) cout << "Set = " << iSet << "\tPV = " << iPV << "\tGetTopoReconstructor()->NPrimaryVertices() = " << GetTopoReconstructor()->NPrimaryVertices() << endl;
+#if 0
+      const std::vector<KFParticle>& PrimaryCandidates = GetTopoReconstructor()->GetKFParticleFinder()->GetPrimaryCandidates()[iSet][iPV];
+      if (_debug) cout << "PrimaryCandidates.size() = " << PrimaryCandidates.size() << endl;
+      for(unsigned int iP=0; iP<PrimaryCandidates.size(); iP++)        {
+	KFParticle particle =  PrimaryCandidates[iP];
+	if (_debug) particle.Print("");
+// 	int iParticle = fParteff.GetParticleIndex(particle.GetPDG());
+// 	if(iParticle < 0) continue;
+	
+	const int id = particle.Id();
+	//	FillParticleParameters(particle,iParticle, id, iPV, hPartParamPrimaryMass, hPartParam2DPrimaryMass, 0, hFitQAMassConstraint);
+          
+	particle = GetTopoReconstructor()->GetParticles()[id];
+	if (_debug) particle.Print("");
+	//	FillParticleParameters(particle,iParticle, id, iPV, hPartParamPrimary, hPartParam2DPrimary, 0, hFitQANoConstraint);
+      }
+      const std::vector<KFParticle>& PrimaryCandidatesTopo = GetTopoReconstructor()->GetKFParticleFinder()->GetPrimaryTopoCandidates()[iSet][iPV];
+      if (_debug) cout << "PrimaryCandidatesTopo.size() = " << PrimaryCandidatesTopo.size() << endl;
+      for(unsigned int iP=0; iP<PrimaryCandidatesTopo.size(); iP++)        {
+	KFParticle particle =  PrimaryCandidatesTopo[iP];
+	if (_debug) particle.Print("");
+// 	int iParticle = fParteff.GetParticleIndex(particle.GetPDG());
+// 	if(iParticle < 0) continue;
+	const int id = particle.Id();
+	//	FillParticleParameters(particle,iParticle, particle.Id(), iPV, hPartParamPrimaryTopo, hPartParam2DPrimaryTopo, 0, hFitQATopoConstraint);
+      }
+#endif
+      const std::vector<KFParticle>& PrimaryCandidatesTopoMass = GetTopoReconstructor()->GetKFParticleFinder()->GetPrimaryTopoMassCandidates()[iSet][iPV];
+      if (_debug) cout << "PrimaryCandidatesTopoMass.size() = " << PrimaryCandidatesTopoMass.size() << endl;
+      for(unsigned int iP=0; iP<PrimaryCandidatesTopoMass.size(); iP++)        {
+	KFParticle particle =  PrimaryCandidatesTopoMass[iP];
+	if (_debug) particle.Print("");
+	KFParticle p1 = GetParticles()[particle.DaughterIds()[0]]; if (_debug) p1.Print();
+	Int_t index1 = trakIdToI[p1.DaughterIds()[0]];
+	StMuTrack *gTrack1 = muDst->globalTracks(index1); if (_debug) gTrack1->Print();
+	StPidStatus PiD1(gTrack1); 
+	if (PiD1.PiDStatus < 0) continue;
+	FillPidQA(&PiD1, p1.GetPDG(), particle.GetPDG());
+	KFParticle p2 = GetParticles()[particle.DaughterIds()[1]]; if (_debug) p2.Print();
+	Int_t index2 = trakIdToI[p2.DaughterIds()[0]];
+	StMuTrack *gTrack2 = muDst->globalTracks(index2); if (_debug) gTrack2->Print();
+	StPidStatus PiD2(gTrack2); 
+	if (PiD2.PiDStatus < 0) continue;
+	FillPidQA(&PiD2, p2.GetPDG(), particle.GetPDG());
+      }
+    }
+  }
+  return kTRUE;
+}
+//________________________________________________________________________________
+Bool_t StKFParticleInterface::FillPidQA(StPidStatus* PiD, Int_t pdg, Int_t pdgParent) {
+  static Int_t _debug = 0;
+  struct Particle_t {
+    Int_t pdg;
+    const Char_t *name;
+    Int_t code;
+  };
+  enum {Nparticles = 18, Ndecays = 4};
+  static Particle_t particles[26] = {
+    {         11,  "e-",   kPidElectron},
+    { 	     -11,  "e+",   kPidElectron},	 
+    { 	      13,  "mu-",  kPidMuon}, 	 
+    { 	     -13,  "mu+",  kPidMuon},	 
+    {        211,  "pi+",  kPidPion},	 
+    { 	    -211,  "pi-",  kPidPion},	 
+    { 	     321,  "K+",   kPidKaon},	 
+    { 	    -321,  "K-",   kPidKaon},	 
+    {       2212,  "p",    kPidProton},	 
+    {      -2212,  "p-",   kPidProton},	 
+    { 1000010020,  "d",    kPidDeuteron},        
+    {-1000010020,  "d-",   kPidDeuteron}, 
+    { 1000010030,  "t",    kPidTriton},	 
+    {-1000010030,  "t-",   kPidTriton},	 
+    { 1000020030,  "He3",  kPidHe3},      
+    {-1000020030,  "He3-", kPidHe3},
+    { 1000020040,  "He4",  kPidAlpha},	 
+    {-1000020040,  "He4-", kPidAlpha},
+    { 1000020060,  "He6",  -1},	 
+    {-1000020060,  "He6-", -1},
+    { 1000030060,  "Li6",  -1},	 
+    {-1000030060,  "Li6-", -1},
+    { 1000030070,  "Li7",  -1},	 
+    {-1000030070,  "Li7-", -1}, 
+    { 1000040070,  "Be7",  -1},	 
+    {-1000040070,  "Be7-", -1}
+  };
+  struct Decay_t {
+    Int_t pdgParent;
+    const Char_t *name;
+    Int_t pdg1;
+    Int_t pdg2;
+  };
+  Decay_t parents[4] = {
+    {   310, "Ks",           211, -211},
+    {  3122, "Lambda",      2212, -211},
+    { -3122, "Lambdab",    -2212,  211},
+    {    22, "gamma",         11,  -11}
+  }; 
+  static TH2F *hist[Ndecays+1][Nparticles][6] = {0};
+  if (! hist[0][0][0]) {
+    TDirectory *top = StMaker::GetTopChain()->GetTFile();
+    top->mkdir("PiDQA");
+    TDirectory *PiDQA = top->GetDirectory("PiDQA");
+    for (Int_t d = 0; d <= Ndecays; d++) {
+      for (Int_t p = 0; p < Nparticles; p++) {
+	PiDQA->cd();
+	if (_debug) cout << "d = " << d << "\tp = " << p << "\t" <<  TDirectory::CurrentDirectory()->GetPath() << endl;
+	TDirectory *dir1 = PiDQA;
+	if (d > 0 && (particles[p].pdg != parents[d-1].pdg1 && particles[p].pdg != parents[d-1].pdg2)) continue;
+	if (d) {
+	  TDirectory *dir2 = dir1->GetDirectory(parents[d-1].name);
+	  if (! dir2) {
+	    dir1->mkdir(parents[d-1].name); 
+	    dir2 = dir1->GetDirectory(parents[d-1].name); 
+	  }
+	  dir2->cd(); dir1 = dir2;
+	  if (_debug) cout << "d = " << d << "\tp = " << p << "\t" <<  TDirectory::CurrentDirectory()->GetPath() << endl;
+	}
+	dir1->mkdir(particles[p].name);
+	TDirectory *dir3 = dir1->GetDirectory(particles[p].name);
+	dir3->cd();
+	if (_debug) cout << "d = " << d << "\tp = " << p << "\t" <<  TDirectory::CurrentDirectory()->GetPath() << endl;
+	hist[d][p][0] = new TH2F("dEdx","dE/dx_{fit} / Bichsel prediction for I_{fit} versus log_{10}(#beta #gamma)",280,-1,4,200,-0.5,0.5);
+	hist[d][p][1] = new TH2F("dNdx","dN/dx_{fit} / dN/dx_{predicted} for N/dx versus log_{10}(#beta #gamma)",280,-1,4,200,-0.5,0.5);
+	hist[d][p][2] = new TH2F("dM2BTof","dM^{2} fro BTof versus log_{10}(#beta #gamma)",280,-1,4,200,-0.2,0.2);
+	hist[d][p][3] = new TH2F("dM2ETof","dM^{2} fro ETof versus log_{10}(#beta #gamma)",280,-1,4,200,-0.2,0.2);
+	hist[d][p][4] = new TH2F("dEdxBTof","dE/dx_{fit} / Bichsel prediction for I_{fit} versus log_{10}(#beta #gamma with |sigmaBTOF| < 3)",280,-1,4,200,-0.5,0.5);
+	hist[d][p][5] = new TH2F("dNdxBTof","dN/dx_{fit} / dN/dx_{predicted} for N/dx versus log_{10}(#beta #gamma) with |sigmaBTOF| < 3)",280,-1,4,200,-0.5,0.5);
+      }
+    }
+  }
+  Int_t d = 0;
+  if (pdgParent) {
+    d = -1;
+    for (Int_t dau = 0; dau < Ndecays; dau++) {
+      if (pdgParent != parents[dau].pdgParent) continue;
+      if (pdg != parents[dau].pdg1 && pdg != parents[dau].pdg2) continue;
+      d = dau + 1;
+      break;
+    }
+  } 
+  if (d >= 0) {
+    for (Int_t p = 0; p < Nparticles; p++) {
+      if (pdg != particles[p].pdg) continue;
+      if (! PiD->fFit) continue;
+      Int_t l = particles[p].code;
+      Double_t p2 = PiD->g3.mag2()/TMath::Power(StProbPidTraits::mPidParticleDefinitions[l]->charge(),2);
+      Double_t M2 = TMath::Power(StProbPidTraits::mPidParticleDefinitions[l]->mass(),2);
+      Double_t bgL10 = PiD->bghyp[l];
+      Double_t sigmaToF = 999;
+      if (PiD->fBTof) {
+	sigmaToF = PiD->fBTof->Sigma(l);
+      }
+      hist[d][p][0]->Fill(bgL10, PiD->fFit->dev[l]);
+      if (sigmaToF < 3) hist[d][p][4]->Fill(bgL10, PiD->fFit->dev[l]);
+      if (PiD->fdNdx) {
+	hist[d][p][1]->Fill(bgL10, PiD->fdNdx->dev[l]);
+	if (sigmaToF < 3) hist[d][p][5]->Fill(bgL10, PiD->fdNdx->dev[l]);
+      }
+
+      if (PiD->fBTof) {
+	Float_t beta = PiD->fBTof->beta();
+	if (beta > 0 && beta < 2) {
+	  Double_t dM2 = p2*(1./(beta*beta) - 1.) - M2;
+	  hist[d][p][2]->Fill(bgL10, dM2);
+	}
+      }
+      if (PiD->fETof) {
+	Float_t beta = PiD->fETof->beta();
+	if (beta > 0 && beta < 2) {
+	  Double_t dM2 = p2*(1./(beta*beta) - 1.) - M2;
+	  hist[d][p][3]->Fill(bgL10, dM2);
+	}
+      }
+    }
+  } 
+  return kTRUE;
+}
+#endif /* __TFG__VERSION__ */
