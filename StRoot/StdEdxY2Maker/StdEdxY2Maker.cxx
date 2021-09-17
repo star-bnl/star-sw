@@ -1044,45 +1044,45 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   Int_t l;
   for (l = kPidElectron; l < KPidParticles; l++) {
     Int_t k = PiD.PiDkeyU3;
-    if (PiD.fI70.fPiD) {
-      I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
-      I70.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
+    if (PiD.fI70->fPiD) {
+      I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
+      I70.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
       if (k >= 0) {
-	I70.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
-	I70.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
+	I70.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
+	I70.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
       }
     }
-    if (PiD.fFit.fPiD) {
-      fitZ.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
-      fitZ.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
+    if (PiD.fFit->fPiD) {
+      fitZ.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
+      fitZ.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
       if (k >= 0) {
-	fitZ.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
-	fitZ.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
+	fitZ.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
+	fitZ.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
       }
     }
     if (fitN) {
-      if (PiD.fdNdx.fPiD) {
-	fitN->dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
-	fitN->dev[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
+      if (PiD.fdNdx->fPiD) {
+	fitN->dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
+	fitN->dev[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
 	if (k >= 0) {
-	  fitN->devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
-	  fitN->devT[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
+	  fitN->devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
+	  fitN->devT[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
 	}
       }
     }
   }
-  if (PiD.fFit.Pred[kPidPion] <= 0) {
+  if (PiD.fFit->Pred[kPidPion] <= 0) {
     LOG_WARN << "StdEdxY2Maker:: Prediction for p = " 
-			<< pMomentum << " and TrackLength = " << PiD.fFit.TrackLength()
-			<< " is wrong = " << PiD.fFit.Pred[kPidPion] << " <<<<<<<<<<<<<" << endl;
+			<< pMomentum << " and TrackLength = " << PiD.fFit->TrackLength()
+			<< " is wrong = " << PiD.fFit->Pred[kPidPion] << " <<<<<<<<<<<<<" << endl;
     return;
   };
   for (Int_t j = 0; j < kTotalMethods; j++) {
     if (PiD.Status(kTPoints[j])) {
-	TPoints[sCharge][j]->Fill(PiD.fFit.TrackLength(),PiD.fFit.log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
-	Pulls[sCharge][j]->Fill(PiD.fFit.TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
+	TPoints[sCharge][j]->Fill(PiD.fFit->TrackLength(),PiD.fFit->log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
+	Pulls[sCharge][j]->Fill(PiD.fFit->TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
 #ifdef __ETA_PLOTS__
-      if (j < 2 && PiD.fFit.TrackLength() > 40) {
+      if (j < 2 && PiD.fFit->TrackLength() > 40) {
 	StTrackNode *node = gTrack->node();
 	StPrimaryTrack *pTrack = static_cast<StPrimaryTrack*>(node->track(primary));
 	if (pTrack) {
@@ -1099,7 +1099,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #endif /*  __ETA_PLOTS__ */
     }
   }
-  if (PiD.fFit.TrackLength() > 20) { 
+  if (PiD.fFit->TrackLength() > 20) { 
     //  if (NoFitPoints >= 20) { 
     Int_t k;
     Double_t bgL10 = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
@@ -1118,7 +1118,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - FdEdx[k].C[l].ddEdxL;
       }
       Int_t cs = NumberOfChannels*(sector-1)+FdEdx[k].channel;
-      if (pMomentum > pMomin && pMomentum < pMomax &&PiD.fFit.TrackLength() > 40 ) continue; // { // Momentum cut
+      if (pMomentum > pMomin && pMomentum < pMomax &&PiD.fFit->TrackLength() > 40 ) continue; // { // Momentum cut
 	if (St_trigDetSumsC::instance()) {
 	  if (FdEdx[k].Zdc > 0 && ZdcCP) ZdcCP->Fill(TMath::Log10(FdEdx[k].Zdc), FdEdx[k].F.dEdxN);
 	  if (St_trigDetSumsC::instance()->bbcX() > 0)  {
@@ -1128,7 +1128,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	Double_t dEN = 0;
 	Double_t zdEMPV = 0;
 	if (fUsedNdx) {
-	  Double_t n_P = FdEdx[k].dxC*PiD.fdNdx.Pred[kPidPion];
+	  Double_t n_P = FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion];
 	  dEN = TMath::Log(1e6*FdEdx[k].F.dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
 	  StdEdxModel::ETpcType kTpc = StdEdxModel::kTpcOuter;
 	  if (St_tpcPadConfigC::instance()->IsRowInner(sector,row)) kTpc = StdEdxModel::kTpcInner;
@@ -1146,11 +1146,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  FdEdx[k].F.dEdxN - dEdxNCor,
 	  FdEdx[k].F.dEdxN,
 	  dEN - zdEMPV,
-	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidElectron]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidPion]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidKaon]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidProton]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx.Pred[kPidDeuteron]),
+	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidElectron]),
+	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion]),
+	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidKaon]),
+	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidProton]),
+	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidDeuteron]),
 	  FdEdx[k].F.dx
 	};
 	// SecRow3
@@ -1719,14 +1719,14 @@ void StdEdxY2Maker::V0CrossCheck() {
     for (Int_t sCharge = negative; sCharge <= positive; sCharge++) {
       Int_t m = h[sCharge];
       Double_t bg10 = PiDs[sCharge]->bghyp[m];
-      if (PiDs[sCharge]->fI70.fPiD) {
-	Double_t z = TMath::Log(PiDs[sCharge]->fI70.I()/PiDs[sCharge]->fI70.Pred[m]);
+      if (PiDs[sCharge]->fI70->fPiD) {
+	Double_t z = TMath::Log(PiDs[sCharge]->fI70->I()/PiDs[sCharge]->fI70->Pred[m]);
 	hist70B[l[sCharge]][sCharge]->Fill(bg10,z);
 	if (PiDkeyU3 > 0) 
 	  hist70BT[l[sCharge]][sCharge]->Fill(bg10,z);
       }
-      if (PiDs[sCharge]->fFit.fPiD) {
-	Double_t z = TMath::Log(PiDs[sCharge]->fFit.I()/PiDs[sCharge]->fFit.Pred[m]);
+      if (PiDs[sCharge]->fFit->fPiD) {
+	Double_t z = TMath::Log(PiDs[sCharge]->fFit->I()/PiDs[sCharge]->fFit->Pred[m]);
 	histzB[l[sCharge]][sCharge]->Fill(bg10,z);
 	if (PiDkeyU3 > 0) 
 	  histzBT[l[sCharge]][sCharge]->Fill(bg10,z);

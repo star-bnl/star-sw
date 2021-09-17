@@ -156,9 +156,10 @@ Double_t bichselZM(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  scale *= charge*charge;
-  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->GetMostProbableZM(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
+  //  scale *= charge*charge;
+  //  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->GetMostProbableZM(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
   //return charge*charge*TMath::Log10(m_Bichsel->GetI70(TMath::Log10(poverm),1.));
+  return TMath::Log10(scale*StdEdxPull::EvalPred(poverm, 1, charge));
 }
 //________________________________________________________________________________
 Double_t bichsel70(Double_t *x,Double_t *par) {
@@ -174,9 +175,9 @@ Double_t bichsel70(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  scale *= charge*charge;
+  //  scale *= charge*charge;
   // return  TMath::Log10(scale*charge*charge*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
-  return TMath::Log10(scale*m_Bichsel->GetI70(TMath::Log10(poverm),1.));
+  return TMath::Log10(scale*StdEdxPull::EvalPred(poverm, 0, charge));
 }
 //________________________________________________________________________________
 Double_t bichsel70M(Double_t *x,Double_t *par) {
@@ -192,8 +193,8 @@ Double_t bichsel70M(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  scale *= charge*charge;
-  return  TMath::Log10(scale*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
+  //  scale *= charge*charge;
+  //  return  TMath::Log10(scale*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
 }
 #if 0
 //________________________________________________________________________________
@@ -244,7 +245,8 @@ Double_t dNdx(Double_t *x,Double_t *par) {
   if (par[1] > 1.0) charge = par[1];
   poverm *= charge;
   //  scale *= charge*charge;
-  return  TMath::Log10(scale*StdEdxModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
+  //  return  TMath::Log10(scale*StdEdxModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
+  return TMath::Log10(scale*StdEdxPull::EvalPred(poverm, 2, charge));
 }
 #if !defined(__CINT__) && !defined(__CLING__)
 //________________________________________________________________________________

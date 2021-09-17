@@ -25,7 +25,7 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   //  if (! isPico) Chain += ",RMuDst";
   if (! isPico) {Chain += ",RMuDst,PicoWrite";}//  isPico = kTRUE;}
   else          Chain += ",RpicoDst";
-  Chain += ",kfpAna,mysql,detDb,nodefault,quiet";
+  Chain += ",kfpAna,mysql,detDb,nodefault,LdEdxY2,quiet";
   //  lMuDst(0,input,"ry2016,RpicoDst,mysql,PicoAnalysis,quiet,nodefault",output);
   lMuDst(-1,input,Chain,output);
 //________________________________________________________________________________

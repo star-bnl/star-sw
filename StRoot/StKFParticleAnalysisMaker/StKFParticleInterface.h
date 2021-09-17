@@ -20,7 +20,9 @@ class StDcaGeometry;
 class KFPTrack;
 class TH1F;
 class TH2F;
-
+#ifdef __TFG__VERSION__
+class StPidStatus;
+#endif
 class StKFParticleInterface: public TObject
 {
  public:
@@ -73,6 +75,12 @@ class StKFParticleInterface: public TObject
   
   bool ProcessEvent(StPicoDst* picoDst, std::vector<int>& goodTracks);
   bool ProcessEvent(StMuDst* muDst, std::vector<KFMCTrack>& mcTracks, std::vector<int>& mcIndices, bool processSignal);
+#ifdef __TFG__VERSION__
+  void   SetPidQA(Bool_t k = kTRUE) {fPidQA = k;}
+  Bool_t PidQA(StPicoDst* picoDst, std::vector<int> trakIdToI);
+  Bool_t PidQA(StMuDst* muDst, std::vector<int> trakIdToI);
+  Bool_t FillPidQA(StPidStatus* PiD = 0, Int_t pdg = 0, Int_t pdgParent = 0); 
+#endif /* _TFG__VERSION__ */
   bool OpenCharmTrigger();
   void OpenCharmTriggerCompression(int nTracksTriggered, int nTracksInEvent, bool triggerDMesons);
   
@@ -146,19 +154,23 @@ class StKFParticleInterface: public TObject
   bool GetTrack(const StDcaGeometry& dcaG, KFPTrack& track, int q, int index);
   std::vector<int> GetTofPID(double m2, double p, int q, const int trackId);
   std::vector<int> GetPID(double m2, double p, int q, double dEdX, double dEdXPull[8], bool isTofm2, const int trackId);
-#ifndef __TFG__VERSION__
   void AddTrackToParticleList(const KFPTrack& track, int nHftHitsInTrack, int index, const std::vector<int>& totalPDG, KFVertex& pv, std::vector<int>& primaryTrackList,
                               std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved,
-                              const KFPTrack* trackAtLastHit=nullptr, std::vector<KFParticle>* particlesAtLastHit=nullptr);
-  void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof);
-  void FillPIDHistograms(StMuTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof);
-#else /* __TFG__VERSION__ */
-  void AddTrackToParticleList(const KFPTrack& track, int nHftHitsInTrack, int index, const std::vector<int>& totalPDG, KFVertex& pv, std::vector<int>& primaryTrackList,
-                              std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved, Float_t chi2 = 0, Int_t NDF = -1);
-  void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2 = kFALSE, float m2tof = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1);
-  void FillPIDHistograms(StMuTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2 = kFALSE, float m2tof = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1);
+                              const KFPTrack* trackAtLastHit=nullptr, std::vector<KFParticle>* particlesAtLastHit=nullptr
+#ifdef __TFG__VERSION__
+			      , Float_t chi2 = 0, Int_t NDF = -1
 #endif /* __TFG__VERSION__ */
-  
+			      );
+  void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof
+#ifdef __TFG__VERSION__
+			 = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1
+#endif /* __TFG__VERSION__ */
+			 );
+  void FillPIDHistograms(StMuTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof
+#ifdef __TFG__VERSION__
+			 = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1
+#endif /* __TFG__VERSION__ */
+			 );
   KFParticleTopoReconstructor* fKFParticleTopoReconstructor;
   std::vector<KFParticle> fParticles;
 #ifdef __kfpAtFirstHit__
@@ -225,6 +237,7 @@ class StKFParticleInterface: public TObject
   bool fUseHFTTracksOnly;
 #ifdef __TFG__VERSION__
   Bool_t            fIsFixedTarget;
+  Bool_t            fPidQA;
 #endif /* __TFG__VERSION__ */
   ClassDef(StKFParticleInterface,1)
 };
