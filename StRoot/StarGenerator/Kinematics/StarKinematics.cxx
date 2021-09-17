@@ -32,7 +32,6 @@ vector<string> split(const string &s, const string &sep_chars)
 
 // ----------------------------------------------------------------------------
 
-StarParticleData &data = StarParticleData::instance();
 StarRandom       &random = StarRandom::Instance();
 
 static std::random_device _stl_rd;
@@ -82,7 +81,13 @@ StarGenParticle *StarKinematics::AddParticle()
 // ----------------------------------------------------------------------------
 StarGenParticle *StarKinematics::AddParticle( const Char_t *type )
 {
-  TParticlePDG *pdg = data(type); assert(pdg);
+
+  StarParticleData &data = StarParticleData::instance();
+  TParticlePDG *pdg = data(type); 
+  
+  if (0==pdg) {LOG_INFO << "Unknown particle added : " << type << endm;}
+      assert(pdg);
+
   Int_t id = pdg->PdgCode();
   StarGenParticle *p = AddParticle();
   p->SetStatus( StarGenParticle::kFinal );
