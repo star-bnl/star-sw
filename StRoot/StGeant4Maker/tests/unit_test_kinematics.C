@@ -108,6 +108,7 @@ void unit_test_kinematics() {
     return result;
   };
 
+#if 0
   auto add_alpha = [=]() {
     std::string result = "alpha";
     const double ptmn =  0.099999;
@@ -117,13 +118,14 @@ void unit_test_kinematics() {
     auto* _kine = dynamic_cast<StarKinematics*>( chain->GetMaker("StarKine") );
     pm->Clear();
     _kine->SetAttr("rapidity",1);
-    _kine->Kine(1,"alpha",ptmn,ptmx,etamn,etamx);   
+    _kine->Kine(1,"He4",ptmn,ptmx,etamn,etamx);   
     pm->Make();
     pm->event()->Print();
     return result;
   };
+#endif
 
-  check_kine( "After adding an alpha to the generator, a single particle appears in the event", add_alpha, [=](){
+  check_kine( "After adding He3 to the generator, a single particle appears in the event", add_helium3, [=](){
       std::string result = FAIL;
       int np = _kine->GetNumberOfParticles();
       if ( 1 == np ) {
