@@ -77,6 +77,7 @@ class StKFParticleInterface: public TObject
   bool ProcessEvent(StMuDst* muDst, std::vector<KFMCTrack>& mcTracks, std::vector<int>& mcIndices, bool processSignal);
 #ifdef __TFG__VERSION__
   void   SetPidQA(Bool_t k = kTRUE) {fPidQA = k;}
+  vector<const KFParticle *> Vec4Cfits();
   Bool_t PidQA(StPicoDst* picoDst, std::vector<int> trakIdToI);
   Bool_t PidQA(StMuDst* muDst, std::vector<int> trakIdToI);
   Bool_t FillPidQA(StPidStatus* PiD = 0, Int_t pdg = 0, Int_t pdgParent = 0); 
