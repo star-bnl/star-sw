@@ -1919,41 +1919,9 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
 }
 #ifdef __TFG__VERSION__
 //________________________________________________________________________________
-Bool_t StKFParticleInterface::PidQA(StPicoDst* picoDst, std::vector<int> trakIdToI) {
+vector<const KFParticle *> StKFParticleInterface::Vec4Cfits() {
   static Int_t _debug = 0;
-  StPicoEvent* picoEvent = picoDst->event();
-  if(!picoEvent) return 0;
-  Int_t nGlobalTracks = picoDst->numberOfTracks( );
-  if (! nGlobalTracks) return kFALSE;
-  const int nCandidates = GetParticles().size();
-  if (! nCandidates) return kFALSE;
-  for (Int_t iParticle = 0; iParticle < nCandidates; iParticle++) {
-    const KFParticle &particle = GetParticles()[iParticle];
-    if (_debug) particle.Print("");
-    if (particle.NDaughters() != 1) continue;
-    Int_t index = trakIdToI[particle.DaughterIds()[0]];
-    //      cout << "trakIdToI[" << iParticle << "] = " << index << endl;
-    if (index > 0 && index <= nGlobalTracks) {
-      StPicoTrack *gTrack = picoDst->track(index);
-      if (! gTrack) continue;
-      if (_debug) gTrack->Print();
-      StPidStatus PiD(gTrack); 
-      if (PiD.PiDStatus < 0) continue;
-      FillPidQA(&PiD, particle.GetPDG(), 0);
-    }
-  }
-#if 0  
-  for(int iSet=0; iSet<KFParticleFinder::GetNSecondarySets(); iSet++)    {// 0 => Ks0, 1 -> Lambda, 2 => Lambda_bar, 3 => gamma, 4 => pi0
-    const std::vector<KFParticle>& SecondaryCandidates = GetTopoReconstructor()->GetKFParticleFinder()->GetSecondaryCandidates()[iSet];
-    for(unsigned int iP=0; iP<SecondaryCandidates.size(); iP++)	{
-      KFParticle particle = SecondaryCandidates[iP];
-      //      FillParticleParameters(particle, iParticle, id, 0, hPartParamSecondaryMass, hPartParam2DSecondaryMass, 0, 0);
-      particle = GetTopoReconstructor()->GetParticles()[id];
-      //        FillParticleParameters(particle, iParticle, id, 0, hPartParamSecondary, hPartParam2DSecondary, 0, 0);
-    }
-  }
-#endif      
-    
+  vector<const KFParticle *> Vec4Cfit;
   for(int iSet=0; iSet<KFParticleFinder::GetNPrimarySets(); iSet++)    {
     for(int iPV=0; iPV<GetTopoReconstructor()->NPrimaryVertices(); iPV++)      {
       if (_debug) cout << "Set = " << iSet << "\tPV = " << iPV << "\tGetTopoReconstructor()->NPrimaryVertices() = " << GetTopoReconstructor()->NPrimaryVertices() << endl;
@@ -1987,22 +1955,67 @@ Bool_t StKFParticleInterface::PidQA(StPicoDst* picoDst, std::vector<int> trakIdT
       const std::vector<KFParticle>& PrimaryCandidatesTopoMass = GetTopoReconstructor()->GetKFParticleFinder()->GetPrimaryTopoMassCandidates()[iSet][iPV];
       if (_debug) cout << "PrimaryCandidatesTopoMass.size() = " << PrimaryCandidatesTopoMass.size() << endl;
       for(unsigned int iP=0; iP<PrimaryCandidatesTopoMass.size(); iP++)        {
-	KFParticle particle =  PrimaryCandidatesTopoMass[iP];
-	if (_debug) particle.Print("");
-	KFParticle p1 = GetParticles()[particle.DaughterIds()[0]]; if (_debug) p1.Print();
-	Int_t index1 = trakIdToI[p1.DaughterIds()[0]];
-	StPicoTrack *gTrack1 = picoDst->track(index1); if (_debug) gTrack1->Print();
-	StPidStatus PiD1(gTrack1); 
-	if (PiD1.PiDStatus < 0) continue;
-	FillPidQA(&PiD1, p1.GetPDG(), particle.GetPDG());
-	KFParticle p2 = GetParticles()[particle.DaughterIds()[1]]; if (_debug) p2.Print();
-	Int_t index2 = trakIdToI[p2.DaughterIds()[0]];
-	StPicoTrack *gTrack2 = picoDst->track(index2); if (_debug) gTrack2->Print();
-	StPidStatus PiD2(gTrack2); 
-	if (PiD2.PiDStatus < 0) continue;
-	FillPidQA(&PiD2, p2.GetPDG(), particle.GetPDG());
+	const KFParticle *particle =  &PrimaryCandidatesTopoMass[iP];
+	if (_debug) particle->Print("");
+	Vec4Cfit.push_back(particle);
       }
     }
+  }
+  return Vec4Cfit;
+}
+//________________________________________________________________________________
+Bool_t StKFParticleInterface::PidQA(StPicoDst* picoDst, std::vector<int> trakIdToI) {
+  static Int_t _debug = 0;
+  StPicoEvent* picoEvent = picoDst->event();
+  if(!picoEvent) return 0;
+  Int_t nGlobalTracks = picoDst->numberOfTracks( );
+  if (! nGlobalTracks) return kFALSE;
+  const int nCandidates = GetParticles().size();
+  if (! nCandidates) return kFALSE;
+  for (Int_t iParticle = 0; iParticle < nCandidates; iParticle++) {
+    const KFParticle &particle = GetParticles()[iParticle];
+    if (_debug) particle.Print("");
+    if (particle.NDaughters() != 1) continue;
+    Int_t index = trakIdToI[particle.DaughterIds()[0]];
+    //      cout << "trakIdToI[" << iParticle << "] = " << index << endl;
+    if (index > 0 && index <= nGlobalTracks) {
+      StPicoTrack *gTrack = picoDst->track(index);
+      if (! gTrack) continue;
+      if (_debug) gTrack->Print();
+      StPidStatus PiD(gTrack); 
+      if (PiD.PiDStatus < 0) continue;
+      FillPidQA(&PiD, particle.GetPDG(), 0);
+    }
+  }
+  // list on unique fits
+  vector<const KFParticle *> Vec4Cfit = Vec4Cfits();
+  for (auto particle : Vec4Cfit) {
+    KFParticle p1 = GetParticles()[particle->DaughterIds()[0]]; if (_debug) p1.Print();
+    Int_t index1 = trakIdToI[p1.DaughterIds()[0]];
+    KFParticle p2 = GetParticles()[particle->DaughterIds()[1]]; if (_debug) p2.Print();
+    Int_t index2 = trakIdToI[p2.DaughterIds()[0]];
+    Bool_t foundUniq = kTRUE;
+    for (auto particle2 : Vec4Cfit) {
+      if (particle == particle2) continue;
+      KFParticle p21 = GetParticles()[particle2->DaughterIds()[0]]; if (_debug) p21.Print();
+      Int_t index21 = trakIdToI[p21.DaughterIds()[0]];
+      KFParticle p22 = GetParticles()[particle2->DaughterIds()[1]]; if (_debug) p22.Print();
+      Int_t index22 = trakIdToI[p22.DaughterIds()[0]];
+      if ((index1 == index21 && index2 == index22) ||
+	  (index2 == index21 && index1 == index22)) {
+	foundUniq = kFALSE;
+	break;
+      }
+    }
+    if (! foundUniq) continue;
+    StPicoTrack *gTrack1 = picoDst->track(index1); if (_debug) gTrack1->Print();
+    StPidStatus PiD1(gTrack1); 
+    if (PiD1.PiDStatus < 0) continue;
+    FillPidQA(&PiD1, p1.GetPDG(), particle->GetPDG());
+    StPicoTrack *gTrack2 = picoDst->track(index2); if (_debug) gTrack2->Print();
+    StPidStatus PiD2(gTrack2); 
+    if (PiD2.PiDStatus < 0) continue;
+    FillPidQA(&PiD2, p2.GetPDG(), particle->GetPDG());
   }
   return kTRUE;
 }
@@ -2030,67 +2043,34 @@ Bool_t StKFParticleInterface::PidQA(StMuDst* muDst, std::vector<int> trakIdToI) 
       FillPidQA(&PiD, particle.GetPDG(), 0);
     }
   }
-#if 0  
-  for(int iSet=0; iSet<KFParticleFinder::GetNSecondarySets(); iSet++)    {// 0 => Ks0, 1 -> Lambda, 2 => Lambda_bar, 3 => gamma, 4 => pi0
-    const std::vector<KFParticle>& SecondaryCandidates = GetTopoReconstructor()->GetKFParticleFinder()->GetSecondaryCandidates()[iSet];
-    for(unsigned int iP=0; iP<SecondaryCandidates.size(); iP++)	{
-      KFParticle particle = SecondaryCandidates[iP];
-      //      FillParticleParameters(particle, iParticle, id, 0, hPartParamSecondaryMass, hPartParam2DSecondaryMass, 0, 0);
-      particle = GetTopoReconstructor()->GetParticles()[id];
-      //        FillParticleParameters(particle, iParticle, id, 0, hPartParamSecondary, hPartParam2DSecondary, 0, 0);
-    }
-  }
-#endif      
-    
-  for(int iSet=0; iSet<KFParticleFinder::GetNPrimarySets(); iSet++)    {
-    for(int iPV=0; iPV<GetTopoReconstructor()->NPrimaryVertices(); iPV++)      {
-      if (_debug) cout << "Set = " << iSet << "\tPV = " << iPV << "\tGetTopoReconstructor()->NPrimaryVertices() = " << GetTopoReconstructor()->NPrimaryVertices() << endl;
-#if 0
-      const std::vector<KFParticle>& PrimaryCandidates = GetTopoReconstructor()->GetKFParticleFinder()->GetPrimaryCandidates()[iSet][iPV];
-      if (_debug) cout << "PrimaryCandidates.size() = " << PrimaryCandidates.size() << endl;
-      for(unsigned int iP=0; iP<PrimaryCandidates.size(); iP++)        {
-	KFParticle particle =  PrimaryCandidates[iP];
-	if (_debug) particle.Print("");
-// 	int iParticle = fParteff.GetParticleIndex(particle.GetPDG());
-// 	if(iParticle < 0) continue;
-	
-	const int id = particle.Id();
-	//	FillParticleParameters(particle,iParticle, id, iPV, hPartParamPrimaryMass, hPartParam2DPrimaryMass, 0, hFitQAMassConstraint);
-          
-	particle = GetTopoReconstructor()->GetParticles()[id];
-	if (_debug) particle.Print("");
-	//	FillParticleParameters(particle,iParticle, id, iPV, hPartParamPrimary, hPartParam2DPrimary, 0, hFitQANoConstraint);
-      }
-      const std::vector<KFParticle>& PrimaryCandidatesTopo = GetTopoReconstructor()->GetKFParticleFinder()->GetPrimaryTopoCandidates()[iSet][iPV];
-      if (_debug) cout << "PrimaryCandidatesTopo.size() = " << PrimaryCandidatesTopo.size() << endl;
-      for(unsigned int iP=0; iP<PrimaryCandidatesTopo.size(); iP++)        {
-	KFParticle particle =  PrimaryCandidatesTopo[iP];
-	if (_debug) particle.Print("");
-// 	int iParticle = fParteff.GetParticleIndex(particle.GetPDG());
-// 	if(iParticle < 0) continue;
-	const int id = particle.Id();
-	//	FillParticleParameters(particle,iParticle, particle.Id(), iPV, hPartParamPrimaryTopo, hPartParam2DPrimaryTopo, 0, hFitQATopoConstraint);
-      }
-#endif
-      const std::vector<KFParticle>& PrimaryCandidatesTopoMass = GetTopoReconstructor()->GetKFParticleFinder()->GetPrimaryTopoMassCandidates()[iSet][iPV];
-      if (_debug) cout << "PrimaryCandidatesTopoMass.size() = " << PrimaryCandidatesTopoMass.size() << endl;
-      for(unsigned int iP=0; iP<PrimaryCandidatesTopoMass.size(); iP++)        {
-	KFParticle particle =  PrimaryCandidatesTopoMass[iP];
-	if (_debug) particle.Print("");
-	KFParticle p1 = GetParticles()[particle.DaughterIds()[0]]; if (_debug) p1.Print();
-	Int_t index1 = trakIdToI[p1.DaughterIds()[0]];
-	StMuTrack *gTrack1 = muDst->globalTracks(index1); if (_debug) gTrack1->Print();
-	StPidStatus PiD1(gTrack1); 
-	if (PiD1.PiDStatus < 0) continue;
-	FillPidQA(&PiD1, p1.GetPDG(), particle.GetPDG());
-	KFParticle p2 = GetParticles()[particle.DaughterIds()[1]]; if (_debug) p2.Print();
-	Int_t index2 = trakIdToI[p2.DaughterIds()[0]];
-	StMuTrack *gTrack2 = muDst->globalTracks(index2); if (_debug) gTrack2->Print();
-	StPidStatus PiD2(gTrack2); 
-	if (PiD2.PiDStatus < 0) continue;
-	FillPidQA(&PiD2, p2.GetPDG(), particle.GetPDG());
+  vector<const KFParticle *> Vec4Cfit = Vec4Cfits(); 
+  for (auto particle : Vec4Cfit) {
+    KFParticle p1 = GetParticles()[particle->DaughterIds()[0]]; if (_debug) p1.Print();
+    Int_t index1 = trakIdToI[p1.DaughterIds()[0]];
+    KFParticle p2 = GetParticles()[particle->DaughterIds()[1]]; if (_debug) p2.Print();
+    Int_t index2 = trakIdToI[p2.DaughterIds()[0]];
+    Bool_t foundUniq = kTRUE;
+    for (auto particle2 : Vec4Cfit) {
+      if (particle == particle2) continue;
+      KFParticle p21 = GetParticles()[particle2->DaughterIds()[0]]; if (_debug) p21.Print();
+      Int_t index21 = trakIdToI[p21.DaughterIds()[0]];
+      KFParticle p22 = GetParticles()[particle2->DaughterIds()[1]]; if (_debug) p22.Print();
+      Int_t index22 = trakIdToI[p22.DaughterIds()[0]];
+      if ((index1 == index21 && index2 == index22) ||
+	  (index2 == index21 && index1 == index22)) {
+	foundUniq = kFALSE;
+	break;
       }
     }
+    if (! foundUniq) continue;
+    StMuTrack *gTrack1 = muDst->globalTracks(index1); if (_debug) gTrack1->Print();
+    StPidStatus PiD1(gTrack1); 
+    if (PiD1.PiDStatus < 0) continue;
+    FillPidQA(&PiD1, p1.GetPDG(), particle->GetPDG());
+    StMuTrack *gTrack2 = muDst->globalTracks(index2); if (_debug) gTrack2->Print();
+    StPidStatus PiD2(gTrack2); 
+    if (PiD2.PiDStatus < 0) continue;
+    FillPidQA(&PiD2, p2.GetPDG(), particle->GetPDG());
   }
   return kTRUE;
 }
