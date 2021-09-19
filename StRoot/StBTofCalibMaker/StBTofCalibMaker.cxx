@@ -1304,11 +1304,7 @@ void StBTofCalibMaker::processStEvent()
         }
 
         if(!doPID) continue;
-#ifndef  __TFG__VERSION__
         doPID++;
-#else /*  __TFG__VERSION__ */
-	doPID++;
-#endif /*  __TFG__VERSION__ */
 
         Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
 
