@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "JevpBuilder.h"
-#include "DAQ_READER/daqReader.h"
+class daqReader;
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TH2D.h>

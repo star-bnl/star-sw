@@ -4,6 +4,7 @@
 #include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
 #include "Jevp/StJevpPlot/RunStatus.h"
+#include "StEvent/StTriggerData2016.h"
 
 #include <TH1I.h>
 #include <TH2F.h>

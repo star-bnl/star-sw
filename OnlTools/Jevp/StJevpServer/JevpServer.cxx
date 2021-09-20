@@ -64,6 +64,9 @@
 #include "Jevp/StJevpBuilders/fttBuilder.h"
 
 #include <RTS/include/SUNRT/clockClass.h>
+#include "DAQ_READER/daqReader.h"
+
+#include "StRoot/St_base/StMessMgr.h"
 
 RtsTimer_root eventHandlingClock;
 RtsTimer_root waitingClock;

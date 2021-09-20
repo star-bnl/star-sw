@@ -59,7 +59,7 @@ public:
 
    virtual void Layout();
    virtual TGDimension GetDefaultSize() const;
-   virtual void SavePrimitive(ostream &out, Option_t *option = "");
+   virtual void SavePrimitive(std::ostream &out, Option_t *option = "");
 
    int isLayedOut;
 
@@ -134,7 +134,7 @@ public:
    virtual void      SetText(const char *text = "tab");              //*MENU*icon=bld_rename.png*
    Bool_t            IsEnabled(Int_t tabIndex) const;
 
-   virtual void      SavePrimitive(ostream &out, Option_t *option = "");
+   virtual void      SavePrimitive(std::ostream &out, Option_t *option = "");
 
    virtual void CloseTab(Int_t id) { Emit("CloseTab(Int_t)", id); }  //*SIGNAL*
    virtual void Removed(Int_t id) { Emit("Removed(Int_t)", id); }    //*SIGNAL*

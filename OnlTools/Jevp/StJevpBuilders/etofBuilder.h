@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "JevpBuilder.h"
-#include "DAQ_READER/daqReader.h"
+class daqReader;
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TProfile.h>
@@ -14,6 +14,9 @@
 
 namespace gdpbv100 { class FullMessage; };
 
+#ifdef __CINT__
+typedef unsigned int uint64_t;
+#endif
 
 class etofBuilder : public JevpBuilder {
   public:

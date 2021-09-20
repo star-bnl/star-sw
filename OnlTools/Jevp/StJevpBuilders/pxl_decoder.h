@@ -33,7 +33,7 @@ public:
   unsigned long to_ulong() const {return m_bits.to_ulong();}
   template <class charT, class traits, class Allocator>
   std::basic_string<charT,traits,Allocator> to_string() const {
-    m_bits.to_string<charT, traits, Allocator>(); return *this;}
+    m_bits.template to_string<charT, traits, Allocator>(); return *this;}
   unsigned long count() const {return m_bits.count();}
   unsigned long size() const {return m_bits.size();}
   bool test(size_t m, size_t n) const {return m_bits.test(m*N + n);}
