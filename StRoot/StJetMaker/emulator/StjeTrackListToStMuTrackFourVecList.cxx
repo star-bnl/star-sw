@@ -66,6 +66,8 @@ StMuTrackEmu* StjeTrackListToStMuTrackFourVecList::createTrackEmu(const StjTrack
   ret->_lastPoint      =  track.lastPoint             ;
   ret->_trackIndex     =  track.trackIndex            ; 
   ret->_id             =  track.id                    ;
+  ret->_idTruth        =  track.idTruth               ;
+  ret->_qaTruth        =  track.qaTruth               ;
   ret->_detectorId     =  track.detectorId    	      ;
   ret->_btofTrayId         =  track.btofTrayId        ; 
   ret->_nSigmaTofPion      =  track.nSigmaTofPion     ;
