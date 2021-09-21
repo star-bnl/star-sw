@@ -2084,6 +2084,25 @@ my $NEvents = 100000;
 #$hist = "P21ib02_26"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/17/21  TpcSecRowB.20190*.*025.root
 #$hist = "P21ib02_27"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/17/21  TpcLengthCorrectionMDF.2019*26.C
 #$hist = "P21ib02_28"; $NEvents = 1000; $disk = "data97/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P21ib_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "SL21c"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 08/18/21  check SL21c
+# Lidia 09/21/2021 
+#  Run 2019:
+#
+#/star/data100/reco/production_31GeV_fixedTarget_2019/ReversedFullField/P21ic_calib/2019/*/*
+#/star/data100/reco/production_7.3GeV_fixedTarget_2019/ReversedFullField/P21ic_calib/2019/*/*
+#/star/data100/reco/production_4p59GeV_fixedTarget_2019/ReversedFullField/P21ic_calib/2019/*/*
+#
+#  Run 2020 :
+#
+#/star/data100/reco/production_31p2GeV_fixedTarget_2020/ReversedFullField/P21ic_calib/2020/*/*
+#/star/data100/reco/production_26p5GeV_fixedTarget_2020/ReversedFullField/P21ic_calib/2020/*/*
+#/star/data100/reco/production_19p5GeV_fixedTarget_2020/ReversedFullField/P21ic_calib/2020/*/*
+#/star/data100/reco/production_13p5GeV_fixedTarget_2020/ReversedFullField/P21ic_calib/2020/*/*
+#/star/data100/reco/production_9p8GeV_fixedTarget_2020/ReversedFullField/P21ic_calib/2020/*/*
+#/star/data100/reco/production_7p3GeV_fixedTarget_2020/ReversedFullField/P21ic_calib/2020/*/*
+#/star/data100/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/P21ic_calib/2020/*/*
+#$hist = "P21ic_calib_30"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/21/2021 check Run XIX and Run XX fixedTarget
+$hist = "P21ic_calib_31"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/21/2021 check Run XIX and Run XX fixedTarget
+
 ######################################## Run XXI express calibration ########################################
 #$hist = "RunXXI01"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year 22= "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 start from 2020 express production: strong Z dependence, and SecRow3 ~4%, xypad ~ 10%
 #$hist = "RunXXI02"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 reset date 20210129.000001: TpcLengthCorrectionMDF, TpcPadCorrectionMDF, TpcZCorrectionB
@@ -2164,7 +2183,7 @@ my $NEvents = 100000;
 # $hist = "RunXXI101"
 # $hist = "RunXXI102"
 # $hist = "RunXXI200"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG21h"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  08/07/21 - 08/09/21 Recheck 
- $hist = "RunXXI201"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG21h"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  09/10/21 TpcZCorrectionC.y2021.C
+# $hist = "RunXXI201"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG21h"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  09/10/21 TpcZCorrectionC.y2021.C
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
