@@ -14,7 +14,6 @@
 #include "StTreeMaker/StTreeMaker.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StMessMgr.h"
-#include "StShadowMaker/StShadowMaker.h"
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
@@ -739,7 +738,6 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",kTRUE) ;// uses laserDV database
       if ( GetOption("useCDV")    ) mk->SetAttr("useCDV",kTRUE) ;// uses ofl database
       if ( GetOption("useNewLDV") ) mk->SetAttr("useNewLDV",kTRUE);// uses new laserDV
-      if ( GetOption("shadow")    ) mk->SetAttr("NoReset",kTRUE);// no resetting ExB
       if ( GetOption("ExB")){
 	mk->SetAttr("ExB", kTRUE);	// bit 0 is ExB ON or OFF
 	if      ( GetOption("EB1") ) mk->SetAttr("EB1", kTRUE);
@@ -893,9 +891,6 @@ Int_t StBFChain::Instantiate()
       TString FiltTrgFlavor = fFiltTrg(1,128);
       if (FiltTrgFlavor.Length())
         SetFlavor((FiltTrgFlavor += "+ofl").Data(),"trgOfflineFilter");
-    }
-    if (maker == "StTagsMaker"){
-      if ( GetOption("shadow")    ) mk->SetAttr("shadow",kTRUE);
     }
 
   Add2Chain:
@@ -1647,30 +1642,6 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
 	      break;
 	    }
 	  }
-	} else {
-	  fFileOut = gSystem->BaseName(fInFile.Data());
-          if (GetOption("shadow")) {
-            TObjArray* fileOutTokens = fFileOut.Tokenize("_.");
-            TString& runToken = ((TObjString*) (fileOutTokens->At(2)))->String();
-            TString& seqToken = ((TObjString*) (fileOutTokens->At(4)))->String();
-            if (!(runToken.CompareTo("adc"))) {
-              runToken = ((TObjString*) (fileOutTokens->At(3)))->String();
-              seqToken = ((TObjString*) (fileOutTokens->At(5)))->String();
-            }
-            if (!(runToken.IsDigit())) {
-              LOG_ERROR << "Unable to locate run number in filename for shadowing." << endm;
-            } else {
-              fFileOut.ReplaceAll(runToken,Form("%d",
-                StShadowMaker::getRunNumber(runToken.Atoi())));
-            }
-            if (!(seqToken.IsDigit())) {
-              LOG_ERROR << "Unable to locate file sequence number in filename for shadowing." << endm;
-            } else {
-              fFileOut.ReplaceAll(seqToken,Form("%07d",
-                StShadowMaker::getFileSeq(seqToken.Atoi())));
-            }
-            delete fileOutTokens;
-          }
 	}
       }
       if (fFileOut == "") {

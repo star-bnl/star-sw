@@ -88,7 +88,6 @@
 #include "StTriggerData.h"
 #include "StEventUtilities/StuRefMult.hh"
 #include "StEventUtilities/StuFtpcRefMult.hh"
-#include "StShadowMaker/StShadowMaker.h"
 static TClass *tabClass = 0;
 static TTree  *fTree = 0; //!
 static TDataSet *fTagsList =  new TDataSet("TagList");
@@ -183,12 +182,6 @@ Int_t StTagsMaker::Make(){
 	  StEvtHddr *lEvtHddr = (StEvtHddr *) ds;
 	  lEvtHddr->FillTag(&fEvtHddr);
 	  address = &fEvtHddr;
-          if (IAttr("shadow")) {
-            fEvtHddr.mRunNumber = StShadowMaker::getRunNumber();
-            if (fEvtHddr.mOldRunNumber>0)
-              fEvtHddr.mOldRunNumber = fEvtHddr.mRunNumber;
-            fEvtHddr.mEventNumber = StShadowMaker::getEventNumber(fEvtHddr.mEventNumber);
-          }
 	  cl = gROOT->GetClass("EvtHddr_st");
 	}
 	if (cl) {
