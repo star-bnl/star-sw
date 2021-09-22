@@ -57,7 +57,7 @@ public:
   double         nSigmaTofProton;
   double         nSigmaTofElectron;
 
-  ClassDef(StjTrack,5);
+  ClassDef(StjTrack,6);
 };
 
 typedef std::vector<StjTrack> StjTrackList;
