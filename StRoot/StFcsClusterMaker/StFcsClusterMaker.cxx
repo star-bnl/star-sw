@@ -138,15 +138,20 @@ int StFcsClusterMaker::makeCluster(int det) {
   int nhit=hits.size();
   for(int i=0; i<nhit; i++) hits[i]->setCluster(0); //reset cluster pointer from hit
 
-  //sort by energy
-  std::sort(hits.begin(), hits.end(), [](StFcsHit* a, StFcsHit* b) {
-      return b->energy() < a->energy();
-    });
+  if(mSortById==0){  //sort by energy
+    std::sort(hits.begin(), hits.end(), [](StFcsHit* a, StFcsHit* b) {
+	return b->energy() < a->energy();
+      });
+  }else{ //sort by Id
+    std::sort(hits.begin(), hits.end(), [](StFcsHit* a, StFcsHit* b) {
+	return b->id() > a->id();
+      });
+  }    
 
   for(int i=0; i<nhit; i++){ //loop over all hits 
     StFcsHit* hit=hits[i];
     float e=hit->energy();
-    if(e < mTowerEThreshold) break;
+    if(e < mTowerEThreshold && mSortById==0) break;
     float neighborClusterId=-1;
     float minDistance=999.0;
     int ncluster = clusters.size();
@@ -334,7 +339,7 @@ int StFcsClusterMaker::clusterMomentAnalysis(StFcsCluster* clu, float ecut){
 	while (theta < -M_PI / 2.0) {
 	    theta += M_PI;
 	} 
-	//clu->setTheta(theta);
+	clu->setTheta(theta);
 	clu->setSigmaMin(getSigma(clu, theta, ecut));
 	clu->setSigmaMax(getSigma(clu, theta - M_PI/2.0, ecut));	
     }

@@ -4,7 +4,6 @@
 #include "StarGenerator/UTIL/StarParticleData.h"
 #include "StarGenerator/UTIL/StarRandom.h"
 
-#include <boost/algorithm/string.hpp>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -12,7 +11,24 @@
 
 #define random myrandom
 
+// Tokenizes a string similar to boost::split() from boost/algorithm/string.hpp
+// For motivation see https://github.com/star-bnl/star-sw/issues/81
+namespace {
+vector<string> split(const string &s, const string &sep_chars)
+{
+  string::size_type prev_pos = 0, pos = 0;
+  vector<string> result;
 
+  while ((pos = s.find_first_of(sep_chars, pos)) != string::npos) {
+    result.push_back(s.substr(prev_pos, pos - prev_pos));
+    pos += 1;
+    prev_pos = pos;
+  }
+  result.push_back(s.substr(prev_pos));
+
+  return result;
+}
+}
 
 // ----------------------------------------------------------------------------
 
@@ -81,8 +97,7 @@ void StarKinematics::Kine(Int_t ntrack, const Char_t *_type, Double_t ptlow, Dou
 {
 
   std::string type = _type;
-  std::vector<std::string> types;
-  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+  std::vector<std::string> types = split(_type, ", ");
 
   for ( Int_t i=0;i<ntrack;i++ )
     {
@@ -162,8 +177,7 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TF1 *ptFunc, TF1 *
 {
 
   std::string type = _type;
-  std::vector<std::string> types;
-  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+  std::vector<std::string> types = split(_type, ", ");
 
   for ( Int_t i=0; i<ntrack; i++ )
     {
@@ -205,8 +219,7 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TF1 *ptFunc, TF1 *
 void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TH1 *ptFunc, TH1 *etaFunc, TH1 *phiFunc )
 {
   std::string type = _type;
-  std::vector<std::string> types;
-  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+  std::vector<std::string> types = split(_type, ", ");
 
   for ( Int_t i=0; i<ntrack; i++ )
     {
@@ -250,8 +263,7 @@ const double deg2rad = TMath::DegToRad();
 void StarKinematics::Cosmic( int ntrack, const char* _type, double plow, double phigh, double radius, double zmin, double zmax, double dphi )
 {
   std::string type = _type;
-  std::vector<std::string> types;
-  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
+  std::vector<std::string> types = split(_type, ", ");
 
   for ( Int_t i=0; i<ntrack; i++ )
     {

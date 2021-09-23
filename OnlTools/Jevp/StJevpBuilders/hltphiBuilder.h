@@ -2,10 +2,9 @@
 #include <stdlib.h>
 
 #include "JevpBuilder.h"
-#include "DAQ_READER/daqReader.h"
+class daqReader;
 //#include <DAQ_READER/daq_dta.h> //xue
 struct daq_dta;
-#include <DAQ_L3/daq_l3.h> //xue
 #include <TStyle.h> //xue
 #include "TVector3.h"//xue
 #include "TFile.h"//xue
@@ -28,7 +27,6 @@ struct daq_dta;
 #include <math.h>
 #include <TF1.h>
 //-----Run10 AuAu new Format
-#include <DAQ_HLT/daq_hlt.h>
 #include "RTS/include/HLT/HLTFormats.h"
 //-----added by xueliang
 

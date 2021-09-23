@@ -20,7 +20,7 @@ y2011:              bbc	    tof btow fms ftpc pmd     etow       bsmd esmd tpx m
 y2012:              bbc	    tof btow fms              etow       bsmd esmd tpx mtd fgt vpd | pp500,200,UU193
 y2013:              bbc     tof btow fms              etow       nsmd esmd tpx mtd fgt vpd gmt  | - fpd, pp500
 y2014:              bbc     tof btow                  etow       nsmd esmd tpx mtd     vpd gmt  | no fgt and fms
-y2015:              bbc     tof btow fms              etow       nsmd esmd tpx mtd     vpd gmt fps | +fms and fps                                        
+y2015:              bbc     tof btow fms              etow       nsmd esmd tpx mtd     vpd gmt fps | +fms and fps
 ______________________________________________________________________________________________________________
  */
 #endif
@@ -1078,8 +1078,8 @@ Bfc_st BFC[] = { // standard chains
   {"P2016a","" ,"",
    "B2016a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis"
    ,                      "","","Production chain for 2016 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
-  
-  // 
+
+  //
   // Year 17, p+p and BES - first chains are FastOffline related as usual
   //
   {"B2017"  ,"","","ry2017,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
@@ -1311,6 +1311,8 @@ Bfc_st BFC[] = { // standard chains
   {"geomNoField" ,"" ,"","-geometry,StarMagField"        ,"","geometryNoField","geometry-Mag.Field",kFALSE},
   {"xgeometry"   ,"" ,"","-geometry,-geomNoField"         ,"","xgeometry","AgML geometry-Mag.Field",kFALSE},
   {"UseProjectedVertex" ,"" ,"",""                ,"","","Run StBTofCalibMaker w/wo Primary Vertex",kFALSE},
+  {"ImpBToFt0Mode" ,"" ,"",""             ,"","","pppAMode in StVpdCalibMaker and StBTofCalibMaker",kFALSE},
+  {"setOutlierRej4BToft0" ,"" ,"",""          ,"","","setPPPAOutlierRej is set in StBTofCalibMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"vpd"         ,""  ,"",""                                             ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
   {"tls"         ,""  ,"",""                                             ,"","",STAR_CHAIN_OBSOLETE,kFALSE},
@@ -1345,7 +1347,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                     "StStrangeMuDstMaker,Tree","Load MuDST misc. dependencies",kFALSE},
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
    ,                                                            "StMuDSTMaker","Load MuDST library",kFALSE},
-#else /* __NoStrangeMuDst__  
+#else /* __NoStrangeMuDst__
   // If NoStrangeMuDst, StMuDSTMaker has to be c with -D__NO_STRANGE_MUDST__*/
   {"MuDSTDeps"   ,"" ,"","StEvent,Stu,StBichsel",   "","Tree","Load MuDST misc. dependencies (all)",kFALSE},
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
@@ -1360,6 +1362,15 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                               "Load GeantLibs",kFALSE},
   {"gstarLib","","",""                                                 ,"","gstar","Load gstar lib",kFALSE},
   {"flux"        ,"","","simu"                                           ,"","flux","Load flux lib",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"Generators  ","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
+  {"pythia8.1.86","","","stargen", "", "Pythia8_1_86.so",       "Load Pythia 8.1.86 generator", false },
+  {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so",       "Load Pythia 8.1.86 generator", false },
+  {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",        "Load Hijing  1.383 generator", false },
+  {"kinematics"  ,"","","stargen", "", "Kinematics.so",         "Load STAR Particle Gun", false },
+  {"genreader"   ,"","","stargen", "", "StarGenEventReader.so", "Load STAR Gen Event Reader", false },
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1443,7 +1454,7 @@ Bfc_st BFC[] = { // standard chains
   {"mtd"      ,"MtdChain","","mtdDat,mtdMatch","StMaker",                     "StChain","MTD Chain",kFALSE},
   {"mtdDat"   ,"mtd_raw","MtdChain","db,MuDst","StMtdHitMaker","StEvent,StMtdHitMaker"
    ,                                                                                "MTD hit maker",kFALSE},
-  {"mtdTrkMask","","","db","StMtdTrackingMaskMaker"      ,"StMtdEvtFilterMaker","MTD track masking",kFALSE},  
+  {"mtdTrkMask","","","db","StMtdTrackingMaskMaker"      ,"StMtdEvtFilterMaker","MTD track masking",kFALSE},
 
   // EPD
   {"epdHit",    "", "", "epdDb,event",            "StEpdHitMaker", "StEpdHitMaker","EPD hit maker", kFALSE},
@@ -1452,7 +1463,7 @@ Bfc_st BFC[] = { // standard chains
   {"tpcI" ,"tpcChain","","db,tpcDB,TpcHitMover",                "StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
   {"Trs","Trs","tpcChain","scl,tpcDB,TrsToF,StEvent,EmbeddingShortCut","StTrsMaker","StTrsMaker","",kFALSE},
-  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut","StTpcRSMaker"
+  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut,Stu","StTpcRSMaker"
    ,"libMathMore,StdEdxY2Maker,StTpcRSMaker",                          "New Tpc Response Simulator",kFALSE},
   {"tfs"     ,"","","TpcFastSim" ,"","","WARNING *** Option is OBSOLETE *** use TpcFastSim instead",kFALSE},
   {"TpcFastSim"  ,"tpc_hits","tpcChain","MakeEvent,Simu,-trs,-TpcRS,-tcl,-tpxclu,-fcf,-tpc_daq,StEvent,"
@@ -1541,12 +1552,12 @@ Bfc_st BFC[] = { // standard chains
    ,                                           "StPxlSimMaker","StPxlSimMaker","PXL Fast Simulator",kFALSE},
   {"pxlSlowSim"  ,"","","pxlRaw,StMcEvent,StEvent"
    ,                                           "StPxlSimMaker","StPxlSimMaker","PXL Slow Simulator",kFALSE},
-   
+
   {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker",     "PXL cluster maker",kFALSE},
   {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker",     "PXL hit maker",kFALSE},
   //{"pxlMon"    ,"","","StEvent"              ,"StPxlMonMaker","StPxlMonMaker","Example of Pxl QA",kFALSE},
 
-  {"istSlowSim", "", "","StMcEvent,StEvent,IstUtil", "StIstSlowSimMaker", 
+  {"istSlowSim", "", "","StMcEvent,StEvent,IstUtil", "StIstSlowSimMaker",
                                                              "StIstSimMaker", "IST Slow simulator", kFALSE},
   {"istFastSim","","","StMcEvent,StEvent","StIstFastSimMaker","StIstSimMaker","IST Fast simulator", kFALSE},
   {"istRawHit",  "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
@@ -1675,7 +1686,7 @@ Bfc_st BFC[] = { // standard chains
    "StFmsPointMaker","StFmsPointMaker","Fill FMS clusters and points",                              kFALSE},
   {"fmsfps"   ,"","", "event,fmsDb",
    "StFmsFpsMaker","StFmsFpsMaker","Fill FPS association in FMS points",                            kFALSE},
-  // FCS                              
+  // FCS
   {"fcsSim",""    ,"","StEvent,fcsDb",
    "StFcsFastSimulatorMaker","StFcsFastSimulatorMaker","FCS Fast Simulator",                        kFALSE},
   {"fcsDat",""    ,"","StEvent,fcsDb",
@@ -1793,14 +1804,14 @@ Bfc_st BFC[] = { // standard chains
 #endif
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker"
    ,                                                                 "Bichsel method used for dEdx",kFALSE},
-
+  {"CalcdNdx", "", "", "dEdxY2", "", "",              "Option for StdEdxY2Maker to calculate dN/dx",kFALSE},
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti
   {"btofMatch" ,"","","db,BTofUtil,vpdCalib,btofCalib","StBTofMatchMaker","StBTofMatchMaker"
    ,                                                                      "TPC-BTOF track matching",kFALSE},
   {"btofCalib","","","db,BTofUtil",        "StBTofCalibMaker","StBTofCalibMaker","BTOF calibration",kFALSE},
 
-  // ETOF hit building and track matching after bTofCalib - needs to be after btof	
+  // ETOF hit building and track matching after bTofCalib - needs to be after btof
   {"ETofHit",   "",      "ETofChain", "db, ETofUtil, muDst", "StETofHitMaker",   "StETofHitMaker",
                                                                                    "ETOF hit maker",kFALSE},
   {"ETofMatch",  "",     "ETofChain", "db, ETofUtil, muDst", "StETofMatchMaker", "StETofMatchMaker",
@@ -1809,7 +1820,7 @@ Bfc_st BFC[] = { // standard chains
                                                                                     "ETOF QA maker",kFALSE},
 
   {"ETofA",  "",    "","etofdat,ETofCalib,etofhit,ETofMatch","","... ETOF chain options for data",  kFALSE},
- 
+
 
   // the below needs to be done earlier to save time - leaving here for documentation purposes as two
   // makers are part of the same library (let's not forget this)
@@ -1917,6 +1928,7 @@ Bfc_st BFC[] = { // standard chains
   {"PicoVtxVpd"     ,"","","-PicoVtxDefault"             ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
   {"PicoVtxVpdOrDefault","","","-PicoVtxDefault"    ,"","","pico Vtx cut on Tof and VPD or default",kFALSE},
   {"PicoVtxFXT"     ,"","","-PicoVtxDefault"    ,"" ,"","pico Vtx constraint on FXT [198,202] mode",kFALSE},
+  {"PicoVtxMtd"     ,"","","-PicoVtxDefault"             ,"" ,"","pico Vtx using MTD matching mode",kFALSE},
   {"PicoCovMtxSkip" ,"","",""       ,"" ,"","Do not write covariance matrices to picoDst (default)",kFALSE},
   {"PicoCovMtxWrite","","","-PicoCovMtxSkip"   ,"" ,"","Write track covariance matrices to picoDst",kFALSE},
   {"PicoBEmcSmdSkip" ,"","",""                     ,"" ,"","Do not write BSMD to picoDst (default)",kFALSE},

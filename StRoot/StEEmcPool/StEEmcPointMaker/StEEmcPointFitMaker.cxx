@@ -157,8 +157,6 @@ Int_t StEEmcPointFitMaker::FitSector(Int_t sector)
     /// scan smd planes for maximum 5-strip residual
     Double_t res5umax=0.;
     Double_t res5vmax=0.;
-    Double_t resu=0.;
-    Double_t resv=0.;
     Double_t res5u=0.;
     Double_t res5v=0.;
     Int_t maxu=-1;
@@ -167,8 +165,8 @@ Int_t StEEmcPointFitMaker::FitSector(Int_t sector)
       {
 	res5u=fitter->Residual(i,0,2);
 	res5v=fitter->Residual(i,1,2);
-	resu=fitter->Residual(i,0);
-	resv=fitter->Residual(i,1);
+	// resu=fitter->Residual(i,0);
+	// resv=fitter->Residual(i,1);
 	if ( res5u > res5umax ) {
 	  res5umax=res5u;
 	  maxu=i;

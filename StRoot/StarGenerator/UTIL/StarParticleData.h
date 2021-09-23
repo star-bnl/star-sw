@@ -78,10 +78,10 @@ class StarParticleData : public TObjectSet
   */
 
   /// Returns a reference to the single instance of this class
-  static StarParticleData &instance(){ return sInstance; }
+  static StarParticleData &instance();
 
-  TParticlePDG *operator()( const Char_t *name ){ return sInstance.GetParticle(name); }
-  TParticlePDG *operator()( const Int_t  id    ){ return sInstance.GetParticle(id)  ; }
+  TParticlePDG *operator()( const Char_t *name );
+  TParticlePDG *operator()( const Int_t  id    );
 
   /// Returns a reference to the list of particles.
   const TObjArray &GetParticles() const { return mParticleList; }
@@ -90,7 +90,7 @@ class StarParticleData : public TObjectSet
  protected:
 
   // Singleton instance of this class
-  static StarParticleData sInstance; 
+  static StarParticleData *sInstance; 
 
   TObjArray                           mParticleList;      // my particles
   std::map< TString, TParticlePDG* >  mParticleNameMap;   // particle aliases

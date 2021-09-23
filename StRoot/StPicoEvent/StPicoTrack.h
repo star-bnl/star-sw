@@ -124,9 +124,13 @@ class StPicoTrack : public TObject {
   Float_t dEdxPullKaon()      const { return dEdxPull(0.493677,1); }
   Float_t dEdxPullProton()    const { return dEdxPull(0.93827231,1); }
   Float_t dEdxPullElectron()  const { return dEdxPull(0.51099907e-3,1); }
-  Float_t dNdx() const              { return mDnDx; }
-  Float_t dNdxError() const         { return mDnDxError; }
 #endif
+  /// Return dN/dx of the track
+  Float_t dNdx() const              { return mDnDx; }
+  /// Return dN/dx error of the track
+  Float_t dNdxError() const         { return mDnDxError; }
+  /// Return if the track was fitted to any vertex (0 - not fitted, 1 - fitted)
+  Char_t  status() const            { return mStatus; }
 
   /// Return nSigma(pion)
   Float_t nSigmaPion() const             { return (Float_t)mNSigmaPion / 1000.f; }
@@ -243,12 +247,12 @@ class StPicoTrack : public TObject {
   /// Set dE/dx error of the track
   void setDedxError(Float_t dEdxError)     { mDedxError = dEdxError; }
 
-#if defined (__TFG__VERSION__)
   /// Set dN/dx of the track
   void setDndx(Float_t dNdx)               { mDnDx = dNdx;}
   /// Set dN/dx error of the track
   void setDndxError(Float_t dNdxError)     { mDnDxError = dNdxError; }
-#endif
+  /// Set status of the track (0 - not fitted to any vertex, 1 - fitted to a vertex)
+  void setStatus(Char_t k = 0)             { mStatus = k; }
   
   /// Set nHitsFit ( charge * nHitsFit )
   void setNHitsFit(Int_t nhits)            { mNHitsFit = (Char_t)nhits; }
@@ -317,13 +321,10 @@ class StPicoTrack : public TObject {
   Float16_t  mDedx;
   /// dE/dx error (in GeV/cm)
   Float16_t  mDedxError;
-
-#if defined (__TFG__VERSION__)
   /// Fitted dN/dx
   Float_t  mDnDx;
   /// Fitted dN/dx error
   Float_t  mDnDxError;
-#endif
   
   /// Charge * nHitsFit
   Char_t   mNHitsFit;
@@ -361,6 +362,11 @@ class StPicoTrack : public TObject {
   ULong64_t mTopoMap_iTpc;
 #endif
 
+  /// Checks if the track was fitted to any vertex
+  /// \par 0 not fitted
+  /// \par 1 fitted
+  Char_t mStatus;
+
   /// MC track id
   UShort_t mIdTruth;
   /// MC track quality (percentage of hits coming from corresponding MC track)
@@ -368,7 +374,11 @@ class StPicoTrack : public TObject {
   /// Parent vertex index. -2 if no vertex.
   Char_t   mVertexIndex;
 
-  ClassDef(StPicoTrack, 8)
+#if !defined (__TFG__VERSION__)
+  ClassDef(StPicoTrack, 9)
+#else
+  ClassDef(StPicoTrack, 10)
+#endif
 };
 
 #endif

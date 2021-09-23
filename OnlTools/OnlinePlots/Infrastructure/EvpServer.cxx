@@ -46,7 +46,6 @@
 
 ClassImp(EvpServer) ;
 
-extern TGClient* gClient;
 #ifndef PR
 #  define PR(x) {if (mDebugLevel)  cout << __PRETTY_FUNCTION__ << " ::: " << (#x) << " = " << x << endl;}
 #endif
