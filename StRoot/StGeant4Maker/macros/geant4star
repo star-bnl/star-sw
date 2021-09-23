@@ -1,5 +1,9 @@
 #!/bin/csh -f 
 
-root.exe -l ./StRoot/StGeant4Maker/macros/initStar.C ./StRoot/StGeant4Maker/macros/geant4star.C $argv 
+if ( -e ./StRoot/StGeant4Maker/macros/geant4star.C ) then
+   root.exe -l ./StRoot/StGeant4Maker/macros/initStar.C ./StRoot/StGeant4Maker/macros/geant4star.C $argv 
+else
+   root.exe -l $STAR/StRoot/StGeant4Maker/macros/initStar.C $STAR/StRoot/StGeant4Maker/macros/geant4star.C $argv 
+endif
 
 
