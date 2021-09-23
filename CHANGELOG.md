@@ -31,6 +31,11 @@
 - Update SCGL macro (#105)
 
 
+## [SL21c_3] - 2021-09-16
+
+- let StBTofSimResParams.h to use existed timestamp in bfc chain, instead of re-define a new timestamp (#145)
+
+
 ## [SL21c_2] - 2021-08-24
 
 - Add new BFC option for StPicoDstMaker: PicoVtxMtd (#116)
