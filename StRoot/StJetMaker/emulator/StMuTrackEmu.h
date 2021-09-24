@@ -40,6 +40,8 @@ public:
     , _dEdx(0)
     , _beta(0)
     , _trackIndex(0)
+    , _idTruth(0)
+    , _qaTruth(0)
     , _id(0)
     , _detectorId(0)
     , _btofTrayId(0)
@@ -82,6 +84,8 @@ public:
   const TVector3& firstPoint() const { return _firstPoint; }
   const TVector3&  lastPoint() const { return _lastPoint;  }
   int            trackIndex()  const { return _trackIndex; }
+  int            idTruth()     const { return _idTruth; }
+  int            qaTruth()     const { return _qaTruth; }
   short          id()          const { return _id; }
   short          detectorId()  const { return _detectorId; }
 
@@ -127,6 +131,9 @@ private:
   TVector3       _lastPoint;
 
   int            _trackIndex;
+
+  int            _idTruth;
+  int            _qaTruth;
 
   short          _id;
   short          _detectorId;
