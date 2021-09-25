@@ -2,6 +2,8 @@
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
+namespace eemcgeom {
+
 const int kEEmcNumDepths     =  5;
 const int kEEmcNumSectors    = 12; 
 const int kEEmcNumSubSectors =  5; 
@@ -31,6 +33,9 @@ const double etabounds[] = {  2.0000 ,
 			      1.9008 , 1.8065 , 1.7168 , 1.6317 , 1.5507 , 1.4738 ,
 			      1.4007 , 1.3312 , 1.2651 , 1.2023 , 1.1427 , 1.086                             
 };
+
+}
+
 //___________________________________________________________________
 double _eta  = 0; 
 double _phid = 0;
@@ -45,6 +50,9 @@ void throw_muon_in_eemc_tower( double eta, double phid, int charge = 1 ) {
   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_eem_hit") );
+  chain->ls(10);
+  assert(track_table);
+  track_table->Print(0,10);
 
 }
 //___________________________________________________________________
@@ -59,12 +67,12 @@ struct EEmcVolumeId {
 //___________________________________________________________________
 EEmcVolumeId decode_eemc_volume_id( const int _volumeId ) {
   EEmcVolumeId result = {0};
-  int halfId   = _volumeId / kEEmcTowerHalfId;
-  int volumeId = _volumeId % kEEmcTowerHalfId;
+  int halfId   = _volumeId / eemcgeom::kEEmcTowerHalfId;
+  int volumeId = _volumeId % eemcgeom::kEEmcTowerHalfId;
   result.half   = halfId;
-  result.phibin = volumeId / kEEmcTowerPhiId;   volumeId%=kEEmcTowerPhiId;
-  result.etabin = volumeId / kEEmcTowerEtaId;   volumeId%=kEEmcTowerEtaId;
-  result.depth  = volumeId / kEEmcTowerDepId;   volumeId%=kEEmcTowerDepId;
+  result.phibin = volumeId / eemcgeom::kEEmcTowerPhiId;   volumeId%=eemcgeom::kEEmcTowerPhiId;
+  result.etabin = volumeId / eemcgeom::kEEmcTowerEtaId;   volumeId%=eemcgeom::kEEmcTowerEtaId;
+  result.depth  = volumeId / eemcgeom::kEEmcTowerDepId;   volumeId%=eemcgeom::kEEmcTowerDepId;
   result.subsector = ( result.phibin - 1 )%5 + 1;
   result.sector    = ( result.phibin - 1 )/5 + 1;
   return result;  
@@ -99,7 +107,7 @@ void unit_test_eem_hits() {
   for ( int i=0;i<12;i++ ) {  // loop on eta bin
     for ( int j=0;j<60;j++ ) {  // loop on phi bin
 
-      double eta=0.5*(etabounds[i]+etabounds[i+1]);
+      double eta=0.5*(eemcgeom::etabounds[i]+eemcgeom::etabounds[i+1]);
       double phid = 6.0*j;
 
       int etabin    = i + 1;
@@ -117,6 +125,7 @@ void unit_test_eem_hits() {
       throw_muon_in_eemc_tower( direction.Eta(), direction.Phi()*180.0/TMath::Pi() );
   
       check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){
+	  assert(t);
 	  return PASS; 
 	});
       check_track( "The track should have a start vertex",           [=](const g2t_track_st* t){
