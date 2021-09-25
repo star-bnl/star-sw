@@ -24,8 +24,6 @@ void initStar() {
   // Preload a few libraries
   Load("libGeom.so");
 
-  
-
   Load("libPhysics.so");
   Load("libTable.so");
 
@@ -38,5 +36,9 @@ void initStar() {
   Load("StChain.so"); 
   Load("StBFChain.so"); 
 
+  // And preload the system's mysql library
+  TString mysqldir = gSystem->Getenv("__G4STAR_MYSQL_DIR__");
+  Load( mysqldir + "/libmysqlclient.so" );
+  
 
 };

@@ -1,5 +1,7 @@
 #!/bin/csh -f 
 
+setenv __G4STAR_MYSQL_DIR__ `mysql_config --variable=pkglibdir`
+
 root.exe -l ./StRoot/StGeant4Maker/macros/initStar.C ./StRoot/StGeant4Maker/macros/geant4star.C $argv 
 
 
