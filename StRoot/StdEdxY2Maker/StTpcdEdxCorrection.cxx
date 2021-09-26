@@ -129,6 +129,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   const St_tpcCorrectionC *chair = 0;
   const St_MDFCorrectionC *chairMDF = 0;
   const St_MDFCorrection3C *chair3MDF = 0;
+  const St_TpcSecRowCorC  *chairSecRow = 0;
   const TTable *table = 0;
   const St_tpcCorrection  *tableC = 0;
   const St_MDFCorrection  *tableMDF = 0;
@@ -155,8 +156,9 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     chair    = dynamic_cast<St_tpcCorrectionC *>(m_Corrections[k].Chair);
     chairMDF = dynamic_cast<St_MDFCorrectionC *>(m_Corrections[k].Chair);
     chair3MDF = dynamic_cast<St_MDFCorrection3C *>(m_Corrections[k].Chair);
-    if (! chair && ! chairMDF && ! chair3MDF) {
-      LOG_WARN << "\tis not tpcCorrection or MDFCorrection types" << endm;
+    chairSecRow = dynamic_cast<St_TpcSecRowCorC *>(m_Corrections[k].Chair);
+    if (! chair && ! chairMDF && ! chair3MDF && !chairSecRow) {
+      LOG_WARN << "\tis not tpcCorrection, MDFCorrection or TpcSecRowCor types" << endm;
       m_Corrections[k].nrows = m_Corrections[k].Chair->Table()->GetNRows();
       continue; // not St_tpcCorrectionC
     }

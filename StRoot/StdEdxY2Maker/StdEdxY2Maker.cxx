@@ -14,6 +14,7 @@
 //#define __DEBUG_dEdx__
 //#define __ADD_PROB__
 //#define __BENCHMARKS__DOFIT_ZN__
+//#define __FIT_PULLS__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 #include "StTpcdEdxCorrection.h" 
@@ -947,7 +948,6 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   //  static TH2F *ctbWest = 0, *ctbEast = 0, *ctbTOFp = 0, *zdcWest = 0, *zdcEast = 0;
   enum  {kTotalMethods = 6};
   static TH3F *TPoints[2][kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"}; 0 => "+", 1 => "-";
-  static TH2F *Pulls[2][kTotalMethods] = {0};
   static StDedxMethod kTPoints[kTotalMethods] = {// {"F","70","FU","70U","N", "NU"};
     kLikelihoodFitId,         // F
     kTruncatedMeanId,         // 70
@@ -956,10 +956,24 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     ,kOtherMethodId           // N
     ,kOtherMethodId2          // NU
   };
-  static Hists2D I70("I70");
-  static Hists2D fitZ("fitZ");
-  static Hists2D *fitN = 0;
-  if (fUsedNdx && ! fitN) fitN = new Hists2D("fitN");
+#ifdef  __FIT_PULLS__
+  static TH2F *Pulls[2][kTotalMethods] = {0};
+  enum {kNPulls = 3};
+  struct PullH_t {
+    StPidStatus::PiDStatusIDs kPid;
+    Hists2D* histograms;
+  };
+  static PullH_t PullH[kNPulls] = {
+    { StPidStatus::kI70,  new Hists2D("I70")},
+    { StPidStatus::kFit,  new Hists2D("fitZ")},
+    { StPidStatus::kdNdx, 0}
+  };
+  static Bool_t NotYetDone = kTRUE;
+  if (NotYetDone) {
+    NotYetDone = kFALSE;
+    if (fUsedNdx) PullH[2].histograms = new Hists2D("fitN");
+  }
+#endif /*  __FIT_PULLS__ */
   const static Int_t Nlog2dx = 80;
   const static Double_t log2dxLow = 0.0, log2dxHigh = 4.0;
   // ProbabilityPlot
@@ -1001,9 +1015,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	TPoints[s][t]   = new TH3F(Form("TPoints%s%s",N[t],NS[s]),
 				   Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s",T[t],TS[s]),
 				   190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
+#ifdef  __FIT_PULLS__
 	Pulls[s][t] = new TH2F(Form("Pull%s%s",N[t],NS[s]),
 			       Form("Pull %s versus Length in TPC - iTPC %s",T[t],TS[s]),
 			       190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
+#endif /*  __FIT_PULLS__ */
 #ifdef __ETA_PLOTS__
 	if (s == 0 && t < 2) {
 	  Eta[t] = new TH2F(Form("Eta%s",N[t]),
@@ -1041,48 +1057,35 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   //  Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
   Int_t sCharge = 0;
   if (gTrack->geometry()->charge() < 0) sCharge = 1;
+  StDedxMethod kMethod;
+#ifdef  __FIT_PULLS__
+  // Pulls
+  Int_t k = PiD.PiDkeyU3;
   Int_t l;
-  for (l = kPidElectron; l < KPidParticles; l++) {
-    Int_t k = PiD.PiDkeyU3;
-    if (PiD.fI70->fPiD) {
-      I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
-      I70.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
-      if (k >= 0) {
-	I70.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
-	I70.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
-      }
-    }
-    if (PiD.fFit->fPiD) {
-      fitZ.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
-      fitZ.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
-      if (k >= 0) {
-	fitZ.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
-	fitZ.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
-      }
-    }
-    if (fitN) {
-      if (PiD.fdNdx->fPiD) {
-	fitN->dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
-	fitN->dev[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
+  for (Int_t m = 0; m < kNPulls; m++) {// I70, Ifit, dNdx
+    if (! PullH[m].histograms) continue;
+    if (! PiD.fStatus[PullH[m].kPid]) continue;
+    for (l = kPidElectron; l < KPidParticles; l++) {
+      if (PiD.fI70 && PiD.fI70->fPiD) {
+	PullH[m].histograms->dev[l][sCharge]->Fill(PiD.bghyp[l], PiD.fStatus[PullH[m].kPid]->dev[l]);
+	PullH[m].histograms->dev[l][      2]->Fill(PiD.bghyp[l], PiD.fStatus[PullH[m].kPid]->dev[l]);
 	if (k >= 0) {
-	  fitN->devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
-	  fitN->devT[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
+	  PullH[m].histograms->devT[l][sCharge]->Fill(PiD.bghyp[l], PiD.fStatus[PullH[m].kPid]->dev[l]);
+	  PullH[m].histograms->devT[l][      2]->Fill(PiD.bghyp[l], PiD.fStatus[PullH[m].kPid]->dev[l]);
 	}
       }
     }
   }
-  if (PiD.fFit->Pred[kPidPion] <= 0) {
-    LOG_WARN << "StdEdxY2Maker:: Prediction for p = " 
-			<< pMomentum << " and TrackLength = " << PiD.fFit->TrackLength()
-			<< " is wrong = " << PiD.fFit->Pred[kPidPion] << " <<<<<<<<<<<<<" << endl;
-    return;
-  };
+#endif /*  __FIT_PULLS__ */
   for (Int_t j = 0; j < kTotalMethods; j++) {
-    if (PiD.Status(kTPoints[j])) {
-	TPoints[sCharge][j]->Fill(PiD.fFit->TrackLength(),PiD.fFit->log2dX(),PiD.Status(kTPoints[j])->dev[kPidPion]);
-	Pulls[sCharge][j]->Fill(PiD.fFit->TrackLength(),PiD.Status(kTPoints[j])->devS[kPidPion]);
+    kMethod = kTPoints[j];
+    if (PiD.dEdxStatus(kMethod)) {
+      TPoints[sCharge][j]->Fill(PiD.dEdxStatus(kMethod)->TrackLength(),PiD.dEdxStatus(kMethod)->log2dX(),PiD.dEdxStatus(kMethod)->dev[kPidPion]);
+#ifdef  __FIT_PULLS__
+      Pulls[sCharge][j]->Fill(PiD.dEdxStatus(kMethod)->TrackLength(),PiD.dEdxStatus(kMethod)->devS[kPidPion]);
+#endif /*  __FIT_PULLS__ */
 #ifdef __ETA_PLOTS__
-      if (j < 2 && PiD.fFit->TrackLength() > 40) {
+      if (j < 2 && PiD.dEdxStatus(kMethod)->TrackLength() > 40) {
 	StTrackNode *node = gTrack->node();
 	StPrimaryTrack *pTrack = static_cast<StPrimaryTrack*>(node->track(primary));
 	if (pTrack) {
@@ -1091,7 +1094,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    if (TMath::Abs(primVx->position().z()) < 10) {
 	      StThreeVectorD P = pTrack->geometry()->helix().momentum(bField);
 	      Double_t eta = P.pseudoRapidity();
-		Eta[j]->Fill(eta,PiD.Status(kTPoints[j])->dev[kPidPion]);
+	      Eta[j]->Fill(eta,PiD.dEdxStatus(kMethod)->dev[kPidPion]);
 	    }
 	  }
 	}
@@ -1099,7 +1102,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #endif /*  __ETA_PLOTS__ */
     }
   }
-  if (PiD.fFit->TrackLength() > 20) { 
+  kMethod = kLikelihoodFitId;
+  if (PiD.dEdxStatus(kMethod) && PiD.dEdxStatus(kMethod)->TrackLength() > 20) { 
     //  if (NoFitPoints >= 20) { 
     Int_t k;
     Double_t bgL10 = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
@@ -1118,7 +1122,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - FdEdx[k].C[l].ddEdxL;
       }
       Int_t cs = NumberOfChannels*(sector-1)+FdEdx[k].channel;
-      if (pMomentum > pMomin && pMomentum < pMomax &&PiD.fFit->TrackLength() > 40 ) continue; // { // Momentum cut
+      if (pMomentum > pMomin && pMomentum < pMomax &&PiD.dEdxStatus(kMethod)->TrackLength() > 40 ) continue; // { // Momentum cut
 	if (St_trigDetSumsC::instance()) {
 	  if (FdEdx[k].Zdc > 0 && ZdcCP) ZdcCP->Fill(TMath::Log10(FdEdx[k].Zdc), FdEdx[k].F.dEdxN);
 	  if (St_trigDetSumsC::instance()->bbcX() > 0)  {

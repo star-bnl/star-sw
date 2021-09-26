@@ -92,7 +92,7 @@ class StPidStatus {
   }
   void Clear() {memset(mBeg,0,mEnd-mBeg+1);}
   Int_t Status() {return PiDStatus;}
-  StdEdxStatus   *Status(StDedxMethod k) {return fStatus[k];}
+  StdEdxStatus   *dEdxStatus(StDedxMethod k) {return fStatus[k];}
   StBTofPidTraits SetBTofPidTraits(const StMuBTofPidTraits &pid);
   StBTofPidTraits SetBTofPidTraits(const StPicoBTofPidTraits &pid);
   StETofPidTraits SetETofPidTraits(const StMuETofPidTraits &pid);
