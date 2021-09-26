@@ -8,4 +8,8 @@
 #pragma link C++ function StdEdxPull::EvalPred(Double_t, UChar_t, Int_t);
 #pragma link C++ function StdEdxPull::EvalDeV(Double_t, Double_t, UChar_t, Int_t);
 #pragma link C++ function StdEdxPull::Eval(Double_t, Double_t, UChar_t, Int_t);
+
+#pragma link C++ function StdEdxPull::EvalPred2(Double_t, Double_t, UChar_t, Int_t);
+#pragma link C++ function StdEdxPull::EvalDeV2(Double_t, Double_t, Double_t, UChar_t, Int_t);
+#pragma link C++ function StdEdxPull::Eval2(Double_t, Double_t, Double_t, UChar_t, Int_t);
 #endif
