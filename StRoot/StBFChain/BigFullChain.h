@@ -1370,6 +1370,7 @@ Bfc_st BFC[] = { // standard chains
   {"stargen.event","","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libStarGeneratorEvent.so,libMathMore.so","STAR Generator BASE",false},
   {"stargen.base", "","", "gen_T,sim_T"/*+++*/,                     "", "libVMC.so,libStarGeneratorBase.so,libMathMore.so","STAR Generator BASE",false},
   {"stargen",     "","",  "stargen.util,stargen.event,stargen.base"/*+++*/,                     "", "","STAR Generator BASE",false},
+  {"pythia6.4.28","","","stargen", "", "Pythia6_4_28.so",       "Load Pythia 6.4.28 generator", false },
   {"pythia8.1.86","","","stargen", "", "Pythia8_1_86.so",       "Load Pythia 8.1.86 generator", false },
   {"pythia8.2.35","","","stargen", "", "Pythia8_2_35.so",       "Load Pythia 8.1.86 generator", false },
   {"hijing1.383" ,"","","stargen", "", "Hijing1_383.so",        "Load Hijing  1.383 generator", false },
