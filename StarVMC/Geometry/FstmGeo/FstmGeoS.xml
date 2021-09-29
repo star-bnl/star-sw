@@ -4,26 +4,26 @@
 This is the file meant to a simplified version of ideal geometry.
 It was copied from FstmGeo.xml on June 15. 2021
 
-06/25/2021 - Gavin 
+06/25/2021 - Gavin
   -Mass from PEEK inner and outer ribs added to respective PEEK bases.
   -Replaced all cooling tubes with 4 straight tubes.
   -Steel and NOVEC mixed into one material “SteelNOVECMix”.
   -Removed cooling tube holder.
-  
+
 07/06/2021 - Gavin
   -Included 30 degree rotation of middle disk that was implemented by Flemming in FstmGeo.xml
-  
+
 07/08/2021 - Flemming
   -Updated the material definition for combined NOVEC and Stainless
-  
+
 07/13/2021 - Gavin
   -Included 3 more pieces of the cooling tube to create simplified cooling tube connectors.
   -Compressed heatsinks into individual volumes located within the inner and outer PEEK bases.
-  -Removed significant amount of unnecessary commented code.  
-  
+  -Removed significant amount of unnecessary commented code.
+
 -->
-    <Replace match="GeV">*1.0E+0;</Replace>    
-    <Replace match="MeV">*1.0E-3;</Replace>    
+    <Replace match="GeV">*1.0E+0;</Replace>
+    <Replace match="MeV">*1.0E-3;</Replace>
     <Replace match="keV">*1.0E-6;</Replace>
 
     <Module name="FstmGeoS" comment="Forward Silicon Tracker (Simplified geometry)">
@@ -37,7 +37,7 @@ It was copied from FstmGeo.xml on June 15. 2021
 
             FTUO,   <!-- Tube segment for FST half ring outside wedge container -->
             FTUR,   <!-- Tube segment for FST half ring inside wedge container -->
-	    FSIR,   <!-- Inner support Ring -->
+            FSIR,   <!-- Inner support Ring -->
 
             FTRO,   <!-- Trapizoid for FST mechanical strucutre (wedge) -->
             FSWT,   <!-- Tube for the FST support tubes between inner and outer -->
@@ -52,7 +52,7 @@ It was copied from FstmGeo.xml on June 15. 2021
             FHBF,   <!-- Box for FST heat sinks (inside inner wedge tube) -->
             FHBG,   <!-- Box for FST heat sinks (inside inner wedge tube) -->
             FHBH,   <!-- Box for FST heat sinks (inside inner wedge tube) -->
-            
+
             FSCT,   <!-- Tube for the FST cooling tube -->
             FSCL,   <!-- Tube for the FST coolant -->
 
@@ -64,7 +64,7 @@ It was copied from FstmGeo.xml on June 15. 2021
             FTIH,   <!-- Tube segment for FST outer hybrid -->
             FTOH,   <!-- Tube segment for FST inner hybrid -->
             FSBH,   <!-- Box for FST hybrid -->
-                         
+
             FTUS    <!-- Tube segment for FST silicon -->
         </Content>
 
@@ -74,42 +74,42 @@ It was copied from FstmGeo.xml on June 15. 2021
         <varlist type="int">
             iwedge/0/, irib/0/, itube/0/, ichip/0/
         </varlist>
-	
-	<varlist type="float" comment="position of mothervolume and other general offsets">
-	  zcenter/0/ , oapvz, obase2, ibase1, ibase2, iapvz, ibaseAB, zcool
-	</varlist>
 
-	<varlist type="float" comment="offset for cooling tubes ">
-	  dcool /0/
-	</varlist>
+        <varlist type="float" comment="position of mothervolume and other general offsets">
+          zcenter/0/ , oapvz, obase2, ibase1, ibase2, iapvz, ibaseAB, zcool
+        </varlist>
+
+        <varlist type="float" comment="offset for cooling tubes ">
+          dcool /0/
+        </varlist>
 
 
-	<varlist type="float" comment="supportRing Half thickness">
-	sRingThickness/0.3969/ </varlist>  	<!-- Was 0.4  this is 5/16" /2 -->
+        <varlist type="float" comment="supportRing Half thickness">
+        sRingThickness/0.3969/ </varlist>       <!-- Was 0.4  this is 5/16" /2 -->
 
-	<varlist type="float" comment="outer base thickness">
-	oBaseThickness/0.20/ </varlist>  	<!-- Was 0.15 -->
-	<varlist type="float" comment="inner base thickness">
-	iBaseThickness/0.20/ </varlist> 	<!-- Was 0.16 -->
-	<varlist type="float" comment="inner base AB thickness">
-	iBaseThicknessAB/0.06/ </varlist> 	<!-- Was 0.1 -->
- 	<varlist type="float" comment="peek rib height"> 	<!-- Was 0.25 -->
-	  RibHeight/0.20/
-	</varlist>  
+        <varlist type="float" comment="outer base thickness">
+        oBaseThickness/0.20/ </varlist>         <!-- Was 0.15 -->
+        <varlist type="float" comment="inner base thickness">
+        iBaseThickness/0.20/ </varlist>         <!-- Was 0.16 -->
+        <varlist type="float" comment="inner base AB thickness">
+        iBaseThicknessAB/0.06/ </varlist>       <!-- Was 0.1 -->
+        <varlist type="float" comment="peek rib height">        <!-- Was 0.25 -->
+          RibHeight/0.20/
+        </varlist>
 
-	<!-- these number correspond to drawings as 11-1-2021 -->
-	<varlist type="float" comment="outer base z1">
-	oBaseZ1/14.9442/ </varlist>
-	<varlist type="float" comment="outer base z2">
-	oBaseZ2/30.7605/ </varlist>
+        <!-- these number correspond to drawings as 11-1-2021 -->
+        <varlist type="float" comment="outer base z1">
+        oBaseZ1/14.9442/ </varlist>
+        <varlist type="float" comment="outer base z2">
+        oBaseZ2/30.7605/ </varlist>
 
-	<varlist type="float" comment="HybridThickness"> 
-	HybridThickness/0.035/ </varlist> 	<!-- Was 0.1 -->
+        <varlist type="float" comment="HybridThickness">
+        HybridThickness/0.035/ </varlist>       <!-- Was 0.1 -->
 
-	<varlist type="float" comment="Connecting tubes length between inner and outer">
-	  ioTubeLength/0.835/ 	<!-- Has to keep spacing -->
-	</varlist>
- 
+        <varlist type="float" comment="Connecting tubes length between inner and outer">
+          ioTubeLength/0.835/   <!-- Has to keep spacing -->
+        </varlist>
+
     <varlist type="float">codeversion/1.1/ </varlist>
 
 
@@ -127,7 +127,7 @@ It was copied from FstmGeo.xml on June 15. 2021
             <var name="rmin"      type="float" />
             <var name="rmax"      type="float" />
             <var name="dz"        type="float" />
-	    <var name="zdisk(3)"  type="float" />
+            <var name="zdisk(3)"  type="float" />
         </Structure>
 
         <Structure name="wholewedge" comment="whole wedge shape">
@@ -253,7 +253,7 @@ It was copied from FstmGeo.xml on June 15. 2021
             <var name="y(2)"      type="float" />
             <var name="z(2)"      type="float" />
         </Structure>
-        
+
         <Structure name="outerhybrida" comment="outer hybrid a">
             <var name="version"   type="float" />
             <var name="z"         type="float" />
@@ -316,15 +316,15 @@ It was copied from FstmGeo.xml on June 15. 2021
 
         <!-- ////////////////////////////////////////////////////////////////////////////
                 Fill some variables with actual offsets
-		Fill the structures
+                Fill the structures
         -->
 
-	obase2 = sRingThickness + oBaseThickness
-	ibase1 = obase2 + ioTubeLength+iBaseThicknessAB
-	ibase2 = ibase1 + iBaseThickness
-	ibaseAB = ibase1 - iBaseThicknessAB
-	zcool = obase2 + 0.418
-	dcool = oBaseThickness -0.15
+        obase2 = sRingThickness + oBaseThickness
+        ibase1 = obase2 + ioTubeLength+iBaseThicknessAB
+        ibase2 = ibase1 + iBaseThickness
+        ibaseAB = ibase1 - iBaseThicknessAB
+        zcool = obase2 + 0.418
+        dcool = oBaseThickness -0.15
 
     <Info format="FSTM simplified code version = {6.1f}">codeversion</Info>
 
@@ -420,27 +420,27 @@ It was copied from FstmGeo.xml on June 15. 2021
             <var name="y"         value="{6.0212, -5.5714, -0.50277, 0.0, 6.474605, 6.931, 7.877}" />
             <var name="z"         value="{zcool, zcool, zcool, zcool, zcool, 2.403, 2.403}" />
             <var name="rotz"      value="{14, -14, 90, 90, 14, 90, 90}" />
-            <var name="rotx"      value="{0, 0, 0, 0, 0, 90, 90}" /> 
+            <var name="rotx"      value="{0, 0, 0, 0, 0, 90, 90}" />
         </Fill>
-        
+
         <Fill name="heatsink" comment="Heat sink">
             <var name="version"   value="1.0" />
             <var name="dx"        value="{0.85, 0.4, 0.4, 0.4, 0.41, 0.41, 0.41, 0.41}" />
-            <var name="dy"        value="{oBaseThickness/2, oBaseThickness/2, oBaseThickness/2, oBaseThickness/2, 
+            <var name="dy"        value="{oBaseThickness/2, oBaseThickness/2, oBaseThickness/2, oBaseThickness/2,
                                           0.4, 0.4, 0.4, 0.4}" />
-                                          
-            <var name="dz"        value="{0.41, 0.61, 0.61, 0.61, 
-					                      iBaseThickness/2,iBaseThickness/2,iBaseThickness/2,iBaseThickness/2}" />
+
+            <var name="dz"        value="{0.41, 0.61, 0.61, 0.61,
+                                                              iBaseThickness/2,iBaseThickness/2,iBaseThickness/2,iBaseThickness/2}" />
 
             <var name="x"         value="{5.4455, 2.1605, -2.056, -5.742, 16.8205, 17.1135, 17.113, 16.8205}" />
             <var name="y"         value="{0, 0, 0, 0, 3.3455, 1.1215, -1.122, -3.3455}" />
             <var name="z"         value="{5.27866, 5.51516, 5.52316, 5.01216, 0, 0, 0, 0}" />
             <var name="rotz"      value="{11.8851, 4.3699, -4.1358, -11.6783, 11.2415, 3.77688, -3.56327, -11.2415}" />
         </Fill>
-        
-       
-	oapvz = sRingThickness-HybridThickness-0.015
-	iapvz = ibase2 + HybridThickness  + 0.015
+
+
+        oapvz = sRingThickness-HybridThickness-0.015
+        iapvz = ibase2 + HybridThickness  + 0.015
         <Fill name="apvchip" comment="APV chips">
             <var name="version"   value="1.0" />
             <var name="dx"        value="{0.41, 0.41, 0.41, 0.41, 0.41, 0.41, 0.41, 0.41}" />
@@ -471,7 +471,7 @@ It was copied from FstmGeo.xml on June 15. 2021
             <var name="y"         value="{0, -0.001}" />
             <var name="z"         value="{ibase2-0.2626, sRingThickness+0.305}" />
         </Fill>
-        
+
         <Fill name="outerhybrida" comment="outer hybrid a" >
             <var name="version"  value="1.0" />
             <var name="z"        value="sRingThickness-HybridThickness/2" />
@@ -550,13 +550,13 @@ It was copied from FstmGeo.xml on June 15. 2021
             <Component name="C" a="12.0096"   z="6"  w="0.79155"  />
             <Component name="O" a="15.99903"  z="8"  w="0.1665"  />
         </Mixture>
-        
+
         <Mixture name="PEEK_FTUW" dens="1.382107"  >
             <Component name="H" a="1.00784"   z="1"  w="0.04195"  />
             <Component name="C" a="12.0096"   z="6"  w="0.79155"  />
             <Component name="O" a="15.99903"  z="8"  w="0.1665"  />
         </Mixture>
-        
+
         <Mixture name="PEEK_FTRO" dens="1.387078"  >
             <Component name="H" a="1.00784"   z="1"  w="0.04195"  />
             <Component name="C" a="12.0096"   z="6"  w="0.79155"  />
@@ -565,7 +565,7 @@ It was copied from FstmGeo.xml on June 15. 2021
 
         <!-- PEEK CF 30 (30% graphite and 70% PEEK H12 C19 O3) -->
         <!--
-        <Mixture name="PEEKCF30" dens="1.41" radl="25.0" >  
+        <Mixture name="PEEKCF30" dens="1.41" radl="25.0" >
             <Component name="O"  a="16"   z="8"  w="0.117"  />
             <Component name="C"  a="12"   z="6"  w="0.854"  />
             <Component name="H"  a="1"    z="1"  w="0.029"  />
@@ -592,7 +592,7 @@ It was copied from FstmGeo.xml on June 15. 2021
         </Mixture>
 
         <!-- 3M Novec 7200 (C4F9OC2H5) for cooling liquid -->
-        <Mixture name="NOVEC7200" dens="1.44">  
+        <Mixture name="NOVEC7200" dens="1.44">
             <Component name="O" a="16" z="8"  w="0.061" />
             <Component name="H" a="1"  z="1"  w="0.019" />
             <Component name="C" a="12" z="6"  w="0.272"  />
@@ -600,9 +600,9 @@ It was copied from FstmGeo.xml on June 15. 2021
         </Mixture>
 
         <!-- Stainless steel 316 for the cooling tube (choose maximum of each element except Fe)
-	compared to web spreadsheet C 0008->0003-->
+        compared to web spreadsheet C 0008->0003-->
 
-        <Mixture name="StainlessSteel316" dens="8">  
+        <Mixture name="StainlessSteel316" dens="8">
             <Component name="Fe" a="55.845"         z="26"  w="0.62085" />
             <Component name="C"  a="12.0096"        z="6"   w="0.0003" />
             <Component name="Mn" a="54.938043"      z="25"  w="0.02" />
@@ -614,7 +614,7 @@ It was copied from FstmGeo.xml on June 15. 2021
             <Component name="Ni" a="58.6934"        z="28"  w="0.14" />
             <Component name="N"  a="14.00643"       z="7"   w="0.0001" />
         </Mixture>
-            
+
 <!--
 Apperantly geant3 does not allow more that 10 meterial in GSMIXT
 Comment out the 3 lowest weight fraction N,P, MO (we==0)
@@ -652,7 +652,7 @@ The factors are the weights fraction for stainless and NOVEC
         <!-- ///////////////////////////////////////////////////////////////////////////
                 Place the volumes
         -->
-	zcenter = mothervol_z+mothervol_dz
+        zcenter = mothervol_z+mothervol_dz
         <Create    block="FSTM" />
         <Placement block="FSTM" in="CAVE" x="0.0" y="0.0" z="zcenter" />
 
@@ -682,11 +682,11 @@ The factors are the weights fraction for stainless and NOVEC
             <Attribute for="FSTD" seen="1" colo="1" />
 
             <!-- Shape will be dynamically sized to include all disks placed -->
-	        <!--  not so from the geant 3 version  -->
+                <!--  not so from the geant 3 version  -->
             <Shape     type="TUBE" rmin="4.8" rmax="34" dz="5" />
 
             <!-- 12 wedges -->
-            <Create block="FTUO" /> 
+            <Create block="FTUO" />
             <Create block="FSTW" />
             <For var="iwedge" from="0" to="5">  <!-- even wedges -->
                 <!-- Wedge -->
@@ -723,10 +723,10 @@ The factors are the weights fraction for stainless and NOVEC
                 </Placement>
             </For>
             <Create    block="FSIR" />
-	    <Placement block="FSIR" in="FSTD" x="0" y="0" z="0" >
-	    </Placement>
- 
-	</Volume>
+            <Placement block="FSIR" in="FSTD" x="0" y="0" z="0" >
+            </Placement>
+
+        </Volume>
 
         <!-- Whole wedge container -->
         <Volume name="FSTW" comment="Whole wedge container" assembly="true" >
@@ -792,7 +792,7 @@ The factors are the weights fraction for stainless and NOVEC
                     <Rotation alphax="coolingtubes_rotx(itube)"/>
                 </Placement>
             </For-->
-         
+
             <Create block="FSCT" />
             <For var="itube" from="1" to="7">
                 <Placement block="FSCT" in="FSTW" x="coolingtubes_x(itube)" y="coolingtubes_y(itube)" z="-wholewedge_dz+coolingtubes_z(itube)" rmin="0.277" rmax="0.318" dz="coolingtubes_dz(itube)" >
@@ -809,8 +809,8 @@ The factors are the weights fraction for stainless and NOVEC
                     <Rotation alphax="coolingtubes_rotx(itube)"/>
                 </Placement>
             </For>
-            
-            
+
+
 
             <!-- ///////////////////////////// -->
             <!--    APV chips -->
@@ -879,17 +879,17 @@ The factors are the weights fraction for stainless and NOVEC
             <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
         </Volume>
 
-	<Volume name="FSIR" comment="inner support tube">
+        <Volume name="FSIR" comment="inner support tube">
             <Attribute for="FSIR" seen="1" colo="1" />
             <Material name="PEEK" />
            <Shape type="TUBE" rmin="iring_rmin" rmax="iring_rmax" dz="iring_dz" />
-	</Volume>
-     
-	<Volume name="FTRO" comment="Trapizoid for FST outer wedge">
+        </Volume>
+
+        <Volume name="FTRO" comment="Trapizoid for FST outer wedge">
             <Attribute for="FTRO" seen="1" colo="14" />
             <Material name="PEEK_FTRO" />
             <Shape type="TRD1" dx1="outerbase_dx1" dx2="outerbase_dx2" dy="outerbase_dy" dz="outerbase_dz" />
-            
+
             <Create    block="FHOA" />
             <Create    block="FHOB" />
             <Create    block="FHOC" />
@@ -906,7 +906,7 @@ The factors are the weights fraction for stainless and NOVEC
             <Placement block="FHOD" in="FTRO" x="heatsink_x(4)" y="heatsink_y(4)" z="heatsink_z(4)" dx="heatsink_dx(4)" dy="heatsink_dy(4)" dz="heatsink_dz(4)" >
                 <Rotation alphay="heatsink_rotz(4)"/>
             </Placement>
-            
+
         </Volume>
 
         <Volume name="FSWT" comment="Tube for FST outer wedges">
@@ -1082,7 +1082,7 @@ The factors are the weights fraction for stainless and NOVEC
                 <Hit meas="tof" nbits="0"  />
                 <Hit meas="step" bins=".0001"  />
                 <Hit meas="eloss" nbits="16"  />
-            </Instrument>   
+            </Instrument>
         </Volume>
 
     </Module>
