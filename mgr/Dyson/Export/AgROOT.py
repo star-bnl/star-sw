@@ -1281,7 +1281,7 @@ class Module ( Handler ):
 
         document.head('// endElement in class Module')
         if namespace:
-            document.head('}; // namespace %s'%document.agmodule)
+            document.head('} // namespace %s'%document.agmodule)
         
 
         document.head('#endif // __%s__' % document.agmodule)
@@ -1289,7 +1289,7 @@ class Module ( Handler ):
         document.impl('}; // %s'%document.agmodule, unit= 'geoctr' )
         # and close namespace
         if namespace:
-            document.impl('}; // namespace %s'%document.agmodule, unit='geoctr')
+            document.impl('} // namespace %s'%document.agmodule, unit='geoctr')
             
     def addVar(self,name,type,dim,value,comment):
         if ( comment != None ):
