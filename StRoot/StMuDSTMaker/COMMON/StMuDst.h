@@ -31,6 +31,7 @@ class TCut;
 #endif
 class StMuEmcCollection;
 class StMuFmsCollection;
+class StMuFcsCollection;
 class StMuPmdCollection;
 
 class StEvent;
@@ -112,10 +113,11 @@ public:
 		    TClonesArray** mc_ptca=0, 
 		    TClonesArray** emc_ptca=0, 
 		    TClonesArray** fms_ptca=0, 
+            TClonesArray** fcs_ptca=0, 
 		    TClonesArray** pmd_ptca=0, 
 		    TClonesArray** tof_ptca=0, 
 		    TClonesArray** btof_ptca=0,
-        TClonesArray** etof_col=0,  // jdb
+            TClonesArray** etof_col=0,  // jdb
 		    TClonesArray**  epd_col=0,  // MALisa
 		    TClonesArray** mtd_ptca=0,
 		    TClonesArray** fgt_ptca=0,
@@ -123,6 +125,7 @@ public:
 		    TClonesArray *emc_tca=0, 
 		    StMuEmcCollection *emc_col=0, 
 		    StMuFmsCollection *fms_col=0, 
+            StMuFcsCollection *fcs_col=0, 
 		    TClonesArray *pmd_tca=0, 
 		    StMuPmdCollection *pmd_col=0
 );
@@ -174,6 +177,8 @@ public:
   static TClonesArray** emcArrays;
   /// array of TClonesArrays for the stuff inherited from the Fms
   static TClonesArray** fmsArrays;
+  /// array of TClonesArrays for the stuff inherited from the Fcs
+  static TClonesArray** fcsArrays;
   /// array of TClonesArrays for the stuff inherited from the Pmd 
   static TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
@@ -195,7 +200,9 @@ public:
   // pointer to array with MuPmdCollection (for backward compatible mode)
   static TClonesArray *mMuPmdCollectionArray;
   /// pointer to FmsCollection (manages the FmsArrays)
-  static StMuFmsCollection *mMuFmsCollection; 
+  static StMuFmsCollection *mMuFmsCollection;
+  /// pointer to FcsCollection (manages the FcsArrays)
+  static StMuFcsCollection *mMuFcsCollection; 
   /// pointer to PmdCollection (manages the PmdArrays)
   static StMuPmdCollection *mMuPmdCollection;
   /// pointer to EmcCollecion (for Emc clusterfinding etc)
@@ -339,6 +346,8 @@ public:
   static StMuEmcCollection* muEmcCollection() { if (mMuEmcCollectionArray) return (StMuEmcCollection*) mMuEmcCollectionArray->UncheckedAt(0); else return mMuEmcCollection; }
    /// returns pointer to current StMuFmsCollection
   static StMuFmsCollection* muFmsCollection() { return mMuFmsCollection; }
+   /// returns pointer to current StMuFcsCollection
+  static StMuFcsCollection* muFcsCollection() { return mMuFcsCollection; }
   /// returns pointer to current StMuPmdCollection
   static StMuPmdCollection* pmdCollection() { if (mMuPmdCollectionArray)  return (StMuPmdCollection*) mMuPmdCollectionArray->UncheckedAt(0); else return mMuPmdCollection; }
   /// returns pointer to current StEmcCollection

@@ -37,3 +37,6 @@
 #include "StMuETofCollection.h"
 #include "StMuETofDigi.h"
 #include "StMuETofHit.h"
+#include "StMuFcsCollection.h"
+#include "StMuFcsHit.h"
+#include "StMuFcsUtil.h"
