@@ -12,6 +12,7 @@
 #include <math.h>
 #include "upcBuilder.h"
 #include <RTS/include/rtsLog.h>
+#include "StEvent/StTriggerData.h"
 
 // This is the one PlotSet that is guarenteed to always exist
 // It's main purpose is to provide the run information 

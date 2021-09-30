@@ -382,7 +382,7 @@ Bool_t StEEmcIUClusterMaker::buildSmdClusters()
         Float_t floor[288]; for ( Int_t i=0; i<288; i++ ) floor[i]=0.;
 
 	/// Energy of all strips in plane
-	Float_t energy[288]; for ( Int_t i=0; i<288; i++ ) energy[i]=0.;
+	//Float_t energy[288]; for ( Int_t i=0; i<288; i++ ) energy[i]=0.;
 	//averaging energies
 	//Float_t newenergy[288]; for ( Int_t i=0; i<288; i++ ) newenergy[i]=0.;
   	/// Get list of strips
@@ -402,7 +402,7 @@ Bool_t StEEmcIUClusterMaker::buildSmdClusters()
 	    continue;
 	  }
 	  ampe=(*(strips.begin())).energy();
-	  energy[ (*istrip).index() ] = (*istrip).energy();
+	  //energy[ (*istrip).index() ] = (*istrip).energy();
 	  //cout<<"energy="<<(*istrip).energy()<<endl;
 	  
 	  if((*istrip).energy()>=0)

@@ -40,8 +40,15 @@ public:
     , _dEdx(0)
     , _beta(0)
     , _trackIndex(0)
+    , _idTruth(0)
+    , _qaTruth(0)
     , _id(0)
     , _detectorId(0)
+    , _btofTrayId(0)
+    , _nSigmaTofPion(0)
+    , _nSigmaTofKaon(0)   
+    , _nSigmaTofProton(0) 
+    , _nSigmaTofElectron(0)
  { }
 
   virtual ~StMuTrackEmu() { }
@@ -77,8 +84,16 @@ public:
   const TVector3& firstPoint() const { return _firstPoint; }
   const TVector3&  lastPoint() const { return _lastPoint;  }
   int            trackIndex()  const { return _trackIndex; }
+  int            idTruth()     const { return _idTruth; }
+  int            qaTruth()     const { return _qaTruth; }
   short          id()          const { return _id; }
   short          detectorId()  const { return _detectorId; }
+
+  int            btofTrayId()        const { return _btofTrayId; }
+  double         nSigmaTofPion()     const { return _nSigmaTofPion; }
+  double         nSigmaTofKaon()     const { return _nSigmaTofKaon; }
+  double         nSigmaTofProton()   const { return _nSigmaTofProton; }
+  double         nSigmaTofElectron() const { return _nSigmaTofElectron; }
 
 private:
 
@@ -117,8 +132,17 @@ private:
 
   int            _trackIndex;
 
+  int            _idTruth;
+  int            _qaTruth;
+
   short          _id;
   short          _detectorId;
+
+  int            _btofTrayId;
+  double         _nSigmaTofPion;
+  double         _nSigmaTofKaon;
+  double         _nSigmaTofProton;
+  double         _nSigmaTofElectron;
 };
 
 #endif // STMUTRACKEMU_H

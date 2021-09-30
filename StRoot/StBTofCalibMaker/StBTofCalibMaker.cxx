@@ -331,7 +331,7 @@ Int_t StBTofCalibMaker::InitRun(int runnumber)
     mVpdResConfig->loadVpdSimParams(); // do i really need this?
     mVpdRes = mVpdResConfig->getParams();
     mBTofRes = new StBTofSimResParams;
-    mBTofRes->loadParams();
+    mBTofRes->loadParams(runnumber); //zaochen
 
 
     if(vpdCalib) {
@@ -960,6 +960,7 @@ Int_t StBTofCalibMaker::FinishRun(int runnumber)
 Int_t StBTofCalibMaker::Finish()
 {
     if (mHistoFileName!="") writeHistograms();
+    if (mPPPAModeHist)      writePPPAHistograms();
     return kStOK;
 }
 
@@ -1957,6 +1958,10 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
 
         }
     }
+
+    mNTzeroCan = nCan;
+    mTCanFirst = tCanFirst;
+    mTCanLast  = tCanLast;
 
     if(nCan<=0) {
         *tstart = -9999.;

@@ -245,9 +245,9 @@ StTpcDbGeometry::instance()
 #ifndef ST_NO_EXCEPTIONS
 	throw invalid_argument("StTpcDbGeometry::getInstance(): Argument Missing!");
 #else
-	cerr << "StTpcDbGeometry::getInstance(): Argument Missing!" << endl;
-	cerr << "No arguments for instantiantion" << endl;
-	cerr << "Aborting..." << endl;
+	std::cerr << "StTpcDbGeometry::getInstance(): Argument Missing!" << endl;
+	std::cerr << "No arguments for instantiantion" << endl;
+	std::cerr << "Aborting..." << endl;
 	abort();
 #endif
     }
@@ -261,11 +261,11 @@ StTpcDbGeometry::instance(StTpcDb* gDbPtr)
 	mInstance = new StTpcDbGeometry(gDbPtr);
     }
     else {
-	cerr << "StTpcDbGeometry::instance()"  << endl;
-	cerr << "\tWARNING:" << endl;
-	cerr << "\tSingleton class is already instantiated" << endl;
-	cerr << "\tDataSet Argument ignored!!" << endl;
-	cerr << "\tContinuing..." << endl;
+	std::cerr << "StTpcDbGeometry::instance()"  << endl;
+	std::cerr << "\tWARNING:" << endl;
+	std::cerr << "\tSingleton class is already instantiated" << endl;
+	std::cerr << "\tDataSet Argument ignored!!" << endl;
+	std::cerr << "\tContinuing..." << endl;
     }
     return mInstance;
 }
@@ -276,7 +276,7 @@ int StTpcDbGeometry::numberOfPadsAtRow(int r) const
 #ifndef ST_NO_EXCEPTIONS
 	throw invalid_argument("Row limits are from 1--45");
 #else
-	cerr << "Error in StTpcDbGeometry::numberOfPadsAtRow() "
+	std::cerr << "Error in StTpcDbGeometry::numberOfPadsAtRow() "
 	     << "Row limits [1--" << mPadRows << "]"
 	     << " (r=" << r << ")" << endl;
 	abort();
@@ -291,7 +291,7 @@ double StTpcDbGeometry::radialDistanceAtRow(int r) const
 #ifndef ST_NO_EXCEPTIONS
 	throw invalid_argument("Row limits are from 1--45");
 #else
-	cerr << "Error in StTpcDbGeometry::numberOfPadsAtRow() "
+	std::cerr << "Error in StTpcDbGeometry::numberOfPadsAtRow() "
 	     << "Row limits [1--" << mPadRows << "]"
 	     << " (r=" << r << ")" << endl;
 	abort();
@@ -306,8 +306,8 @@ double StTpcDbGeometry::outerSectorAnodeWire(int n) const
 #ifndef ST_NO_EXCEPTIONS
 	throw range_error("Invalid wire number");
 #else
-	cerr << "Wire Range must be 0 < n < " << numberOfOuterSectorAnodeWires() << endl;
-	cerr << "Aborting..." << endl;
+	std::cerr << "Wire Range must be 0 < n < " << numberOfOuterSectorAnodeWires() << endl;
+	std::cerr << "Aborting..." << endl;
 	abort();
 #endif	
     }
@@ -320,8 +320,8 @@ double StTpcDbGeometry::innerSectorAnodeWire(int n) const
 #ifndef ST_NO_EXCEPTIONS
 	throw range_error("Invalid wire number");
 #else
-	cerr << "Wire Range must be 0 < n < " << numberOfInnerSectorAnodeWires() << endl;
-	cerr << "Aborting..." << endl;
+	std::cerr << "Wire Range must be 0 < n < " << numberOfInnerSectorAnodeWires() << endl;
+	std::cerr << "Aborting..." << endl;
 	abort();
 #endif
     }
@@ -406,7 +406,7 @@ void StTpcDbGeometry::print(ostream& os) const
     os << "==========================================" << endl;
     for(int i=0; i<mPadRows; i++) {
 	os.width(3);
-	os.setf(ios::right,ios::adjustfield);
+	os.setf(std::ios::right,std::ios::adjustfield);
 	os << i+1;
 	os.width(9);
 	os << mPadsInRow[i];

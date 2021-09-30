@@ -317,7 +317,7 @@ Bool_t StEEmcIUPointMaker::findPoints( Int_t sector,
     }
 
   ////     stage zero
-  Bool_t go = false;
+  // Bool_t go = false;
   StEEmcIUSmdClusterVec_t::iterator uiter=uclusters.begin();
   StEEmcIUSmdClusterVec_t::iterator viter=vclusters.begin();
 
@@ -372,7 +372,7 @@ Bool_t StEEmcIUPointMaker::findPoints( Int_t sector,
       /// uniquely matches an smd point.  Thus, we will not proceed
       /// to the second-stage logic which determines ambiguous
       /// matches using energies of clusters
-      go=true;
+      /// go=true;
       	
       /// push the point into the list of points and remove
       /// the associated pair of clusters
@@ -647,7 +647,7 @@ Bool_t StEEmcIUPointMaker::findPoints( Int_t sector,
       }
     }
   float chisq2=9.0E9;
-  int imin2=-1,inn=-1;
+  int inn=-1;
   
   for ( UInt_t i=0; i<mypoints.size(); i++ )
     {
@@ -659,7 +659,6 @@ Bool_t StEEmcIUPointMaker::findPoints( Int_t sector,
 	  Float_t ev=mypoints[i].cluster(1).energy();
 	  Float_t x22=(eu-ev)*(eu-ev);
 	  if ( x22 < chisq2 ) {
-	    imin2=i;
 	    chisq2=x22;
 	  }
 	}

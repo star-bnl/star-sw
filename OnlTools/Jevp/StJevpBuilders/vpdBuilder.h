@@ -2,10 +2,10 @@
 #include <stdlib.h>
 
 #include "JevpBuilder.h"
-#include "DAQ_READER/daqReader.h"
+class daqReader;
 //#include "RunStatus.h"
 
-#include "StEvent/StTriggerData2016.h"
+class StTriggerData2016;
 
 #include <TH1I.h>
 #include <TH2F.h>

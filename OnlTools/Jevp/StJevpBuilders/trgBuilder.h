@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "JevpBuilder.h"
-#include "DAQ_READER/daqReader.h"
+class daqReader;
 //#include "RTS/trg/include/trgDataDefs.h"
 
 //#include "RunStatus.h"
@@ -13,6 +13,7 @@
 
 #include <math.h>
 
+#include "RTS/include/daqFormats.h"
 struct QtEventInfo {
     double usec;      // total readout time
     double sz;

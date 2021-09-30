@@ -24,6 +24,7 @@
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcA2EMaker.h"
 
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StarRoot/TH1Helper.h"
 
 ClassImp(StEEmcTimingMaker);
 
@@ -175,7 +176,7 @@ Int_t StEEmcTimingMaker::Init()
 {
 
   hCounter=new TH1F("hCounter","Event counter;status",1,0.,1.);
-  hCounter->SetBit(TH1::kCanRebin);
+  TH1Helper::SetCanRebin(hCounter);
 
 #if 1
 
