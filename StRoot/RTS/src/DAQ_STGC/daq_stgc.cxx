@@ -86,8 +86,11 @@ daq_stgc::daq_stgc(daqReader *rts_caller)
 
 	LOG(DBG,"%s: constructor: caller %p",name, caller) ;
 
-	xing_min = -10 ;
-	xing_max = 20 ;
+//	xing_min = -10 ;
+//	xing_max = 20 ;
+
+	xing_min = -32000 ;
+	xing_max = 32000 ;
 
 	return ;
 }

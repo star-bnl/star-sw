@@ -69,10 +69,17 @@ public:
 
 	u_short version ;	// 0x0001 is the version in May 2021
 	u_short evt_type ;
+	u_short status ;	// from d[3]
+	u_short echo ;		// if echo command
+	unsigned long response ;	// from FEE response packet
+	u_int fee_status ;
 
 	u_short *d16_start ;
 	u_short *d16_data ;
 	u_short *d16_last ;
+	
+
+	
 
 	u_int mhz_start_evt_marker ;
 	u_int mhz_stop_evt_marker ;

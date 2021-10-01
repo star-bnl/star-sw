@@ -99,8 +99,8 @@ void fcs_trg_base::init(const char* fname)
 	for(int j=0;j<ADC_DET_COU;j++) {
 	for(int k=0;k<DEP_COU;k++) {
 	for(int c=0;c<32;c++) {
-	  // p_g[i][j][k][c].gain = (1<<6) ;	// set gains to 1: THIS IS FY19 -- need to override in code
-	  p_g[i][j][k][c].gain = (1<<8) ; // Akio changing to 4.8 fixed
+		p_g[i][j][k][c].gain = (1<<8) ;		// new for FY22
+
 	}}}}
 
 
@@ -431,6 +431,8 @@ void fcs_trg_base::fill_event(int det, int ns, int dep, int c, u_short *d16, int
 					d_in[xing].s2[ns].s2_to_s3[c-34].d[xou] = dta & 0xFF ;
 				}
 				break ;
+			case 36 :	// new in FY22
+				break ;	// for now
 			default :
 				tix = t - marker.s2_in_start ;	
 				
@@ -550,7 +552,13 @@ int fcs_trg_base::verify_event_io()
 				int s2_from_s1[34] ;
 				int s1_to_s2[34] ;
 				int ix = 0 ;
+
 				long mask = 0 ;
+				
+				int cns ;
+
+				if(ns==0) cns='N' ;
+				else cns = 'S' ;
 
 				if(tb_cou[ns][3][1]==0) continue ;	// no stage_2
 
@@ -595,8 +603,8 @@ int fcs_trg_base::verify_event_io()
 					if(s2_from_s1[i] != s1_to_s2[i]) {
 						event_bad |= 0x10 ;
 
-						if(log_level>1) LOG(ERR,"evt %d: S1_to_S2 IO: NS %d: ch %d: xing %d:%d: out 0x%02X, in 0x%02X",
-						    evts,ns,i,x,t,s1_to_s2[i],s2_from_s1[i]) ;
+						if(log_level>0) LOG(ERR,"evt %d: S1_to_S2 IO: NS %c: ch %d: xing %d:%d: out 0x%02X, in 0x%02X",
+						    evts,cns,i,x,t,s1_to_s2[i],s2_from_s1[i]) ;
 
 						if(ns==0 && i<17) errs.io_s1_to_s2[0]++ ;
 						else if(ns==0) errs.io_s1_to_s2[1]++ ;
@@ -659,7 +667,7 @@ int fcs_trg_base::verify_event_io()
 				}
 			}
 
-			if(err==1 && log_level>1) {
+			if(err==1 && log_level>0) {
 				for(int t=0;t<8;t++) {
 					char ctmp ;
 
@@ -701,7 +709,7 @@ int fcs_trg_base::dump_event_sim(int xing)
 		for(int t=0;t<8;t++) {
 			int d_sim = d_out.s1[i][j][k].s1_to_s2.d[t] ;
 
-			if(d_sim & fcs_trgDebug>0) 
+			if(d_sim && fcs_trgDebug>0) 
 			  printf("S1 sim: %d:%d:%d - xing %d:%d, dta %d\n",
 				 i,j,k,xing,t,d_sim) ;
 		}
@@ -744,7 +752,26 @@ int fcs_trg_base::verify_event_sim(int xing)
 	int s3_failed = 0 ;
 
 	for(int i=0;i<NS_COU;i++) {
+	int cns ;
+
+	if(i==0) cns='N' ;
+	else cns='S' ;
+
 	for(int j=0;j<ADC_DET_COU;j++) {
+	int cdet ;
+
+	switch(j) {
+	case 0 :
+		cdet='E' ;
+		break ;
+	case 1 :
+		cdet='H' ;
+		break ;
+	case 2 :
+		cdet='F' ;
+		break ;
+	}
+
 	for(int k=0;k<DEP_COU;k++) {
 		int want_print = 0 ;
 		int want_log = 0 ;
@@ -779,7 +806,7 @@ int fcs_trg_base::verify_event_sim(int xing)
 			int d_i = d_in[xing].s1[i][j][k].s1_to_s2.d[t] ;
 
 			if(want_log && log_level>0) {
-				LOG(ERR,"evt %d: S1 sim: %d:%d:%d - xing %d:%d: sim 0x%02X, dta 0x%02X %c",evts,i,j,k,
+				LOG(ERR,"evt %d: S1 sim: %c:%c:%d - xing %d:%d: sim 0x%02X, dta 0x%02X %c",evts,cns,cdet,k,
 				    xing,t,
 				    d_sim,
 				    d_i,d_sim!=d_i?'*':' ') ;
@@ -793,7 +820,7 @@ int fcs_trg_base::verify_event_sim(int xing)
 			}
 		}
 
-		if(want_log && log_level>0) {
+		if(want_log && log_level>4) {
 			u_int s1_bits = 0 ;
 			for(int c=0;c<32;c++) {
 				int sum = 0 ;
@@ -802,7 +829,7 @@ int fcs_trg_base::verify_event_sim(int xing)
 					LOG(ERR,"ch %2d: t %d: dta %d",c,t,d_in[xing].s1[i][j][k].adc[c].d[t]) ;
 				}
 
-				LOG(ERR,"  sum %d, ped %d, sum-ped %d, ht thresh %d",sum,p_g[i][j][k][c].ped,sum-p_g[i][j][k][c].ped,ht_threshold[j]) ;
+				//LOG(ERR,"  sum %d, ped %d, sum-ped %d, ht thresh %d",sum,p_g[i][j][k][c].ped,sum-p_g[i][j][k][c].ped,ht_threshold[j]) ;
 				sum -= p_g[i][j][k][c].ped ;
 				if(sum > ht_threshold[j]) s1_bits |= (1<<c) ;
 			}
@@ -817,13 +844,19 @@ int fcs_trg_base::verify_event_sim(int xing)
 
 	// verify stage_2 data locally to stage_2 DEP
 	for(int i=0;i<NS_COU;i++) {
+
+	int cns ;
+
+	if(i==0) cns = 'N' ;
+	else cns = 'S' ;
+
 	for(int j=0;j<2;j++) {
 		int want_print = 0 ;
 		int want_log = 0 ;
 
 		if(tb_cou[i][3][1]==0) continue ;	// no stage_2 in data
 
-		for(int t=0;t<8;t++) {
+		for(int t=0;t<7;t++) {	// skip 0xABCD
 			int d_sim = d_out.s2[i].s2_to_s3[j].d[t] ;
 			int d_i = d_in[xing].s2[i].s2_to_s3[j].d[t] ;
 
@@ -851,14 +884,14 @@ int fcs_trg_base::verify_event_sim(int xing)
 			if(d_sim != d_i) ctmp = '*' ;
 
 			if(want_log && log_level>0) {
-				LOG(ERR,"evt %d: S2 sim: %d:%d - xing %d:%d: sim 0x%02X, dta 0x%02X%c",evts,i,j,
+				LOG(ERR,"evt %d: S2 sim: %c:%d - xing %d:%d: sim 0x%02X, dta 0x%02X%c",evts,cns,j,
 				    xing,t,
 				    d_sim,
 				    d_i,ctmp) ;
 			}
 
 			if(want_print && log_level>3) {
-				printf("evt %d: S2 sim: %d:%d: - xing %d:%d: sim %d, dta %d %s\n",evts,i,j,
+				printf("evt %d: S2 sim: %c:%d: - xing %d:%d: sim %d, dta %d %s\n",evts,cns,j,
 				       xing,t,
 				       d_sim,
 				       d_i,want_log?"ERROR":"") ;
@@ -950,12 +983,9 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 			geo.det = j ;
 
 			for(int k=0;k<DEP_COU;k++) {	// DEP/ADC
-
-				//if(type==0) {	// only for non-GEANT
-			            if(tb_cou[i][j][k]==0) continue ;	// this DEP/ADC wasn't filled
-				//}
-
 				u_int s0_to_s1[32] ;
+
+				if(tb_cou[i][j][k]==0) continue ;	// this DEP/ADC wasn't filled
 
 				geo.dep = k ;
 
@@ -1067,6 +1097,9 @@ void fcs_trg_base::stage_0(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *dt
 		break ;
 	case 2 :
 		stage_0_202103(adc, geo, pg, dta_out) ;
+		break ;
+	case 3 :
+		stage_0_202109(adc, geo, pg, dta_out) ;
 		break ;
 	default :
 		*dta_out = 0 ;

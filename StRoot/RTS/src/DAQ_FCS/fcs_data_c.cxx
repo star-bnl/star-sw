@@ -31,6 +31,8 @@ struct fcs_data_c::rdo_map_t fcs_data_c::rdo_map[FCS_SECTOR_COU][8] ;	// FCS_SEC
 struct fcs_data_c::det_map_t fcs_data_c::det_map[4][2][24] ;	// det,ns,dep --> sector RDO
 u_char fcs_data_c::rdo_map_loaded ;
 
+u_char fcs_data_c::fcs_bad_ch[8][34] ;
+u_char fcs_data_c::fcs_bad_ch_all[FCS_SECTOR_COU][8][34] ;
 
 u_int fcs_data_c::run_number ;
 u_int fcs_data_c::run_type ;
@@ -985,7 +987,7 @@ int fcs_data_c::event()
 		//complain = 1 ;
 		if(board_id_xpect != board) complain = 1 ;
 
-		if(ch>35) complain = 1 ;
+		if(ch>36) complain = 1 ;	// Sep21: stage2 can have 37 chs
 		else {
 			if(ch_mask_seen & (1LL<<ch)) {
 				if(realtime) LOG(ERR,"event %d: ch duplicate %d",events,ch) ;
@@ -1074,7 +1076,7 @@ int fcs_data_c::event()
 
 int fcs_data_c::ana_ch()
 {
-	if(ch>=32) return 0 ;
+
 
 	switch(run_type) {
 	case 1 :
@@ -1084,6 +1086,67 @@ int fcs_data_c::ana_ch()
 	default:
 		return 0 ;
 	}
+
+	if(run_type==2 && sector==11 && trg_cmd==4) {
+		static int first ;
+
+		
+		static u_char expect[3][37] ;
+		
+		if(first==0) {
+		expect[0][0]=0xC1 ;
+		expect[0][1]=0xC1 ;
+		expect[0][2]=0xE1 ;
+		expect[0][3]=0xE1 ;
+
+		expect[1][34]=0xC1 ;
+		expect[1][35]=0xC1 ;
+		expect[1][36]=0x66 ;
+
+		expect[2][34]=0xE1 ;
+		expect[2][35]=0xE1 ;
+		expect[2][36]=0x77 ;
+
+		for(int i=0;i<20;i++) {
+			expect[1][i]= i ;
+			expect[2][i]=(1<<5)|i ;
+		}
+
+		for(int i=20;i<28;i++) {
+			expect[1][i] = (1<<6)|(i-20) ;
+			expect[2][i] = (1<<6)|(1<<5)|(i-20) ;
+		}
+
+		for(int i=28;i<34;i++) {
+			expect[1][i] = (2<<6)|(i-28) ;
+			expect[2][i] = (2<<6)|(1<<5)|(i-28) ;
+		}
+
+		first = 1 ;
+		}
+
+		int errs = 0 ;
+		for(int tb=0;tb<tb_cou;tb++) {
+			int r=rdo-5 ;
+
+			if(expect[r][ch] != (adc[tb]&0xFF)) {
+				errs++ ;
+			}
+		}
+		
+
+//		if(errs) {
+			ped_lock() ;
+			ped[sector-1][rdo-1].cou[ch]++ ;
+			ped[sector-1][rdo-1].bad_4[ch] += errs ;
+			ped_unlock() ;
+//		}
+
+		return 0 ;
+
+	}
+
+	if(ch>=32 || sector==11) return 0 ;
 
 	ped_lock() ;
 
@@ -1257,10 +1320,10 @@ void fcs_data_c::ped_stop(int bad_ped)
 	u_int max_c = 0 ;
 
 
-	if(rdo_map[s][r].det >= 3) {	// trigger DEPs
-		LOG(WARN,"S%d:%d is a DEP/IO -- skipping ped_stop",sector,rdo) ;
-		return ;
-	}
+//	if(rdo_map[s][r].det >= 3) {	// trigger DEPs
+//		LOG(WARN,"S%d:%d is a DEP/IO -- skipping ped_stop",sector,rdo) ;
+//		return ;
+//	}
 
 
 	// check for bad pedestals... since we can have masked channels just find the max
@@ -1362,7 +1425,15 @@ void fcs_data_c::ped_stop(int bad_ped)
 
 	fprintf(pedf,"\n") ;
 
-	for(int c=0;c<32;c++) {
+	int c_max ;
+
+	if((s+1)==11) {
+		if((r+1)==5) c_max = 4 ;
+		else c_max = 37 ;
+	}
+	else c_max = 32 ;
+	
+	for(int c=0;c<c_max;c++) {
 		int err = 0 ;
 		double m = ped[s][r].mean[c] ;
 		double rms = ped[s][r].rms[c] ;
@@ -1380,7 +1451,7 @@ void fcs_data_c::ped_stop(int bad_ped)
 		}
 		
 		if(err) {
-			LOG(WARN,"S%02d:%d ch %02d: ped %.1f, rms %.1f: bad cou %u",sector,rdo,c,m,rms,ped[s][r].bad_4[c]) ;
+			LOG(ERR,"S%02d:%d ch %02d: ped %.1f, rms %.1f: bad cou %u",sector,rdo,c,m,rms,ped[s][r].bad_4[c]) ;
 		}
 
 		//LOG(TERR,"PEDs: S%02d:%d: %d: %.1f [0x%03X] %.2f - %.1f %.1f [cou %d]",sector,rdo,c,
@@ -1541,7 +1612,7 @@ int fcs_data_c::gain_from_cache(const char *fname)
 			ped[s][i].i_gain[c] = (u_int)(d*256.0+0.5) ; // Akio changing to 4.8 fixed
 
 			if(ped[s][i].i_gain[c]>4095) {	// 12 bit max!
-				LOG(ERR,"S%d:%d: ch %d -- gain correction too big",s+1,i+1,c,ped[s][i].i_gain[c]) ;
+				LOG(NOTE,"S%d:%d: ch %d -- gain correction too big",s+1,i+1,c,ped[s][i].i_gain[c]) ;
 			}
 			else {
 
@@ -2159,4 +2230,63 @@ u_short fcs_data_c::set_board_id()
 //	LOG(TERR,"set_board_id: %d %d --> %d %d %d --> 0x%X",sector,rdo,det,ns,dep,board_id) ;
 
 	return board_id ;
+}
+
+int fcs_data_c::load_bad_ch(const char *fname, int sector)
+{
+	memset(fcs_bad_ch,0,sizeof(fcs_bad_ch)) ;
+	memset(fcs_bad_ch_all,0,sizeof(fcs_bad_ch_all)) ;
+
+	if(fname==0) {
+		fname = "/RTS/conf/fcs/bad_channels.txt" ;
+	}
+
+	FILE *f = fopen(fname,"r") ;
+	if(f==0) {
+		LOG(ERR,"fcs_load_bad_ch: %s [%s]",fname,strerror(errno)) ;
+		return -1 ;
+	}
+
+	LOG(INFO,"fcs_load_bad_ch: %s",fname) ;
+
+	while(!feof(f)) {
+		char buff[1024] ;
+
+//		LOG(ERR,"asd") ;
+
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+//		LOG(ERR,"--- %s",buff) ;
+
+		if(buff[0]=='#') continue ;
+		if(buff[0]=='\n') continue ;
+
+		int s,r,det,ns,dep,ch,flag ;
+		float ped, rms ;
+
+		int ret = sscanf(buff,"%d %d %d %d %d %d %f %f 0x%X",&s,&r,&det,&ns,&dep,&ch,&ped,&rms,&flag) ;
+
+//		LOG(WARN,"ret [%s]",buff) ;
+
+		if(ret != 9) continue ;
+
+		if(sector==0) LOG(WARN,"Bad ch: S%02d:%d:%02d",s,r,ch) ;
+
+		if((r<1)||(r>8)) continue ;
+		if((ch<0)||(ch>33)) continue ;
+		if((s<1)||(s>10)) continue ;
+
+		fcs_bad_ch_all[s-1][r-1][ch] = 1 ;
+
+		if(s != sector) continue ;
+
+		LOG(WARN,"Bad ch: S%02d:%d:%02d",s,r,ch) ;
+
+		fcs_bad_ch[r-1][ch] = 1 ;
+	}
+
+	fclose(f) ;
+
+	return 0 ;
+
 }
