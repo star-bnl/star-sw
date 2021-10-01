@@ -42,7 +42,8 @@ fcs_trg_lib.a : fcs_trg_base.o \
 	stage_2_TAMU_202202.o \
 	stage_0_202103.o \
 	stage_3_202203.o \
-	stage_2_202203.o 
+	stage_2_202203.o \
+	stage_0_202109.o
 	$(RTS_AR)
 
 # DO NOT DELETE
@@ -53,6 +54,7 @@ fcs_trg_base.o: fcs_trg_base.h
 stage_0_201900.o: fcs_trg_base.h
 stage_0_202101.o: fcs_trg_base.h
 stage_0_202103.o: fcs_trg_base.h
+stage_0_202109.o: fcs_trg_base.h
 stage_1_201900.o: fcs_trg_base.h
 stage_1_202201.o: fcs_trg_base.h
 stage_2_201900.o: fcs_trg_base.h

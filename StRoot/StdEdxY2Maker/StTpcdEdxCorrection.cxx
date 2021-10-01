@@ -43,6 +43,7 @@
 #include "StDetectorDbMaker/St_TpcZDCC.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionBC.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionMDF.h"
+#include "StDetectorDbMaker/St_TpcLengthCorrectionMD2.h"
 #include "StDetectorDbMaker/St_TpcPadCorrectionMDF.h"
 #include "StDetectorDbMaker/St_TpcdEdxCorC.h" 
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
@@ -60,16 +61,50 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 {
   assert(gStTpcDb);
   if (!m_Mask) m_Mask = -1;
-  static const Char_t *FXTtables[] = {"TpcdXCorrectionB",
-				      "tpcGainCorrection",
-				      "TpcLengthCorrectionMDF",
-				      "TpcPadCorrectionMDF",
-				      "TpcSecRowB",
-				      "TpcZCorrectionB"};
+  static const Char_t *FXTtables[] = {"TpcAdcCorrectionB",         
+				      "TpcEdge",            
+				      "TpcAdcCorrectionMDF",       
+				      "TpcAdcCorrection3MDF",
+				      "TpcdCharge",         
+				      "TpcrCharge",                
+				      "TpcCurrentCorrection",     
+				      "TpcRowQ",            
+				      "TpcAccumulatedQ",    
+				      "TpcSecRowB",                
+				      "TpcSecRowC",         
+				      "tpcPressureB",       
+				      "tpcTime",            
+				      "TpcDriftDistOxygen", 
+				      "TpcMultiplicity",    
+				      "TpcZCorrectionC",           
+				      "TpcZCorrectionB",    
+				      "tpcMethaneIn",       
+				      "tpcGasTemperature",     
+				      "tpcWaterOut",        
+				      "TpcSpaceCharge",            
+				      "TpcPhiDirection",           
+				      "TpcTanL",            
+				      "TpcdXCorrectionB",   
+				      "TpcEffectivedX",     
+				      "TpcPadTBins",               
+				      "TpcZDC",                    
+				      "TpcPadCorrectionMDF",     
+				      "TpcAdcI",            
+				      "TpcnPad",                   
+				      "TpcnTbk",            
+				      "TpcdZdY",            
+				      "TpcdXdY",            
+				      "TpcLengthCorrectionB",
+				      "TpcLengthCorrectionMDF",        
+				      "TpcLengthCorrectionMD2",              
+				      "TpcdEdxCor"};
   static Int_t NT = sizeof(FXTtables)/sizeof(const Char_t *);
   m_isFixedTarget = St_beamInfoC::instance()->IsFixedTarget();
   TString flavor("sim+ofl");
-  if (m_isFixedTarget) flavor = "sim+ofl+FXT";
+#ifdef __TFG__VERSION__
+  flavor += "+TFG";
+#endif
+  if (m_isFixedTarget) flavor += "+FXT";
   St_db_Maker *dbMk = (St_db_Maker *) StMaker::GetTopChain()->Maker("db");
   for (Int_t i = 0; i < NT; i++) {
     dbMk->SetFlavor(flavor, FXTtables[i]);
@@ -124,6 +159,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kTpcLast               ] = dEdxCorrection_t("Final"        	  ,""								        ,0);					     
   m_Corrections[kTpcLengthCorrection   ] = dEdxCorrection_t("TpcLengthCorrectionB"  ,"Variation vs Track length and relative error in Ionization"	,St_TpcLengthCorrectionBC::instance());     
   m_Corrections[kTpcLengthCorrectionMDF] = dEdxCorrection_t("TpcLengthCorrectionMDF","Variation vs Track length and <log2(dX)> and rel. error in dE/dx" ,St_TpcLengthCorrectionMDF::instance());         
+  m_Corrections[kTpcLengthCorrectionMD2] = dEdxCorrection_t("TpcLengthCorrectionMD2","Variation vs Track length and <log2(dX)> for pred. with fixed dx2",St_TpcLengthCorrectionMD2::instance());         
   m_Corrections[kTpcNoAnodeVGainC      ] = dEdxCorrection_t("TpcNoAnodeVGainC"      ,"Remove tpc Anode Voltage gain correction"				,0);					         
   m_Corrections[kTpcdEdxCor            ] = dEdxCorrection_t("TpcdEdxCor"            ,"dEdx correction wrt Bichsel parameterization"			,St_TpcdEdxCorC::instance());               
   const St_tpcCorrectionC *chair = 0;
@@ -157,8 +193,10 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     chairMDF = dynamic_cast<St_MDFCorrectionC *>(m_Corrections[k].Chair);
     chair3MDF = dynamic_cast<St_MDFCorrection3C *>(m_Corrections[k].Chair);
     chairSecRow = dynamic_cast<St_TpcSecRowCorC *>(m_Corrections[k].Chair);
-    if (! chair && ! chairMDF && ! chair3MDF && !chairSecRow) {
-      LOG_WARN << "\tis not tpcCorrection, MDFCorrection or TpcSecRowCor types" << endm;
+    if (! chair && ! chairMDF && ! chair3MDF) {
+      if (! chairSecRow) {
+	LOG_WARN << "\tis not tpcCorrection, MDFCorrection or TpcSecRowCor types" << endm;
+      }
       m_Corrections[k].nrows = m_Corrections[k].Chair->Table()->GetNRows();
       continue; // not St_tpcCorrectionC
     }
@@ -264,6 +302,23 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     if (m_Corrections[kAdcCorrection         ].Chair) {
       LOG_ERROR << " \tAt least two ADC corrections activated. Deactivate kAdcCorrection" << endm;
       m_Corrections[kAdcCorrection         ].Chair = 0;
+    }
+  }
+  // Use only TpcLengthCorrection
+  if (m_Corrections[kTpcLengthCorrectionMD2].Chair) {
+    if (m_Corrections[kTpcLengthCorrectionMDF].Chair) {
+      LOG_ERROR << " \tkTpcLengthCorrectionMD2 has activated. Deactivate kTpcLengthCorrectionMDF" << endm;
+      m_Corrections[kTpcLengthCorrectionMDF].Chair = 0;
+    }
+    if (m_Corrections[kTpcLengthCorrection   ].Chair) {
+      LOG_ERROR << " \tkTpcLengthCorrectionMD2 has activated. Deactivate kTpcLengthCorrection" << endm;
+      m_Corrections[kTpcLengthCorrection   ].Chair = 0;
+    }
+  }
+  if (m_Corrections[kTpcLengthCorrectionMDF].Chair) {
+    if (m_Corrections[kTpcLengthCorrection   ].Chair) {
+      LOG_ERROR << " \tkTpcLengthCorrectionMDF has activated. Deactivate kTpcLengthCorrection" << endm;
+      m_Corrections[kTpcLengthCorrection   ].Chair = 0;
     }
   }
 }
@@ -571,8 +626,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 //________________________________________________________________________________
 Int_t StTpcdEdxCorrection::dEdxTrackCorrection(Int_t type, dst_dedx_st &dedx) {
   Int_t ok = 0;
-  if      (m_Corrections[kTpcLengthCorrection   ].Chair) ok = dEdxTrackCorrection(kTpcLengthCorrection   ,type,dedx);
+  if      (m_Corrections[kTpcLengthCorrectionMD2].Chair) ok = dEdxTrackCorrection(kTpcLengthCorrectionMD2,type,dedx);
   else if (m_Corrections[kTpcLengthCorrectionMDF].Chair) ok = dEdxTrackCorrection(kTpcLengthCorrectionMDF,type,dedx);
+  else if (m_Corrections[kTpcLengthCorrection   ].Chair) ok = dEdxTrackCorrection(kTpcLengthCorrection   ,type,dedx);
   if      (m_Corrections[kTpcdEdxCor].Chair)             ok = dEdxTrackCorrection(kTpcdEdxCor            ,type,dedx);
   return ok;
 }

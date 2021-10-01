@@ -54,6 +54,7 @@ stgc_data_c::stgc_data_c()
 
 const char *stgc_data_c::type_c(u_short type)
 {
+
 	switch(type) {
 	case 0x5244:
 		return "RESPONSE" ;
@@ -91,9 +92,9 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 	}
 
 	version = d[2] ;
-	if(version != 0x6) {
-		LOG(ERR,"VERSION 0x%04X",d[2]) ;
-	}
+//	if(version != 0x8) {
+//		LOG(ERR,"%d: VERSION 0x%04X",rdo1,d[2]) ;
+//	}
 
 	evt_type = d[8] ;
 	c_type = type_c(evt_type) ;
@@ -118,10 +119,10 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 
 	mhz_start_evt_marker = (d[6]<<16)|d[7] ;
 
-	u_short last_cmd = d[12] ;
+	echo = d[12] ;
 
 
-	unsigned long response = 0 ;
+	response = 0 ;
 
 	d16_last = d + shorts - 2 ;	// should be at the last 0xFEED
 
@@ -145,7 +146,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
  	adc_cou = d16_last - d16_data + 1 ;	// effective ADC length
 	adc_cou -= 2 ;	// remove the stop_mhz 2 shorts...
 	
-	if(realtime) {
+	if(realtime>1) {
 	if(adc_cou%4 || shorts>40000) {
 		LOG(ERR,"%d: len is %d!?",rdo1,adc_cou) ;
 		for(int i=0;i<32;i++) {
@@ -184,7 +185,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 			sh |= 2 ;
 		}
 
-		if(last_cmd==0) {	// VMM config
+		if(echo==0) {	// VMM config
 			if((response & 0xFFFFFFFFFFFFFl) != 0x1150000000000l) sh |= 4;
 		}
 		else {
@@ -192,16 +193,17 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 		}
 
 		if(sh) {
-			LOG(ERR,"S%d:%d: RESPONSE of cmd 0x%04X; sh 0x%X",sector1,rdo1,last_cmd,sh) ;
+			LOG(ERR,"S%d:%d: RESPONSE of cmd 0x%04X = 0x%lX: sh 0x%X",sector1,rdo1,echo,response,sh) ;
 		}
 		else {
-			LOG(INFO,"S%d:%d: RESPONSE of cmd 0x%04X",sector1,rdo1,last_cmd) ;
+			if(realtime>1) LOG(TERR,"S%d:%d: RESPONSE of cmd 0x%04X",sector1,rdo1,echo) ;
 		}
 		}
 
 		break ;
 	case 0x414B :	//echo 
-		LOG(INFO,"S%d:%d: ECHO of cmd 0x%04X",sector1,rdo1,last_cmd) ;
+		if(realtime>1) LOG(TERR,"S%d:%d: ECHO of cmd 0x%04X",sector1,rdo1,echo) ;
+		
 		break ;
 	case 0x4544 :	// event
 //		if(realtime) LOG(INFO,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %u, delta %u",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts,adc_cou,
@@ -211,7 +213,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 
 		break ;
 	case 0x5445 :	// timer
-		if(realtime) LOG(TERR,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts) ;
+		if(realtime>1) LOG(TERR,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts) ;
 		break ;	
 	default :
 		LOG(ERR,"S%d:%d: %d: T %d, trg %d, daq %d, UNKNOWN type 0x%04X; shorts %d",sector1,rdo1,id,token,trg_cmd,daq_cmd,evt_type,shorts) ;
@@ -224,12 +226,19 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 			LOG(ERR,"%d: %s: RESPONSE FIFO",rdo1,c_type) ;
 		}
 	}
-
+	
+	status = d[3] ;
+	
 	if((d[3] & (1<<13))==0) {
 		LOG(ERR,"%d: %s: GTP not ready",rdo1,c_type) ;
 	}
 	if((d[3] & (1<<12))==0) {
-		LOG(ERR,"%d: %s: RHICx5 PLL not locked",rdo1,c_type) ;
+		switch(evt_type) {
+		case 0x414B :	// echo
+		//case 0x5244 :	// response
+			LOG(ERR,"%d: %s of echo 0x%04X: RHICx5 PLL not locked",rdo1,c_type,echo) ;
+			break ;
+		}
 	}
 	if((d[3] & (1<<8))) {
 		if(realtime && errs[rdo1-1].fifo==0) {
@@ -242,15 +251,20 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 	}
 
 
-	for(int i=0;i>6;i++) {
+	fee_status = 0 ;
+	for(int i=0;i<6;i++) {
+		fee_status |= ((st[i]&0xF)<<(i*4)) ;
+
 		switch(st[i]) {
 		case 3 :	//present & OK
 		case 0 :	//not present
 			break ;
 		default :
-			if(realtime) LOG(ERR,"%d: %s: FEB %d status: 0x%X",rdo1,c_type,i,st[i]) ;
+			if(realtime>1) LOG(ERR,"%d: %s: FEB %d status: 0x%X",rdo1,c_type,i,st[i]) ;
 			break ;
 		}
+
+		//LOG(TERR,"%d: FEE %d: 0x%X (0x%X)",rdo1,i,st[i],fee_status) ;
 	}
 
 	if(evt_err) bad_error |= 1 ;
@@ -271,6 +285,9 @@ int stgc_data_c::start_0001(u_short *d, int shorts)
 int stgc_data_c::event_0001()
 {
 	int evt_err = 0 ;
+	u_int feb_id = 255 ;
+
+//	LOG(TERR,"ADC cou %d, feb %d",adc_cou,feb_id) ;
 
 	if(adc_cou<=0) return 0 ;
 
@@ -282,7 +299,10 @@ int stgc_data_c::event_0001()
 
 	u_int dd = (d[0]<<16)|d[1] ;
 
-	int feb_id = dd>>29 ;
+	feb_id = dd>>29 ;
+
+
+
 
 	if(feb_id==7) {	// trigger	
 		u_short t_hi, t_mid, t_lo ;
@@ -294,7 +314,7 @@ int stgc_data_c::event_0001()
 		t_cmd = d[1] & 0xF ;
 		d_cmd = (d[1]>>4) & 0xF ;
 		t_hi = (d[1]>>8)& 0xF ;
-		t_mid = (d[1]>>12)&0xF ;
+ 		t_mid = (d[1]>>12)&0xF ;
 		t_lo = (d[0]>>0) & 0xF ;
 
 		t = (t_hi<<8)|(t_mid<<4)|t_lo ;
@@ -303,11 +323,11 @@ int stgc_data_c::event_0001()
 		mhz_trg_marker = (d[2]<<16)|d[3] ;	// or RHIC clock
 
 //		if((mhz_trg_marker+1) < mhz_start_evt_marker) err = 1 ;
-//		if(mhz_trg_marker > (mhz_start_evt_marker+1)) err = 1 ;
+//		if(mhz_trg_marker > (mhz_start_evt_marker+1)) err |= 1 ;
 
-		if((t != token)||(t_cmd != trg_cmd)||(d_cmd != daq_cmd)) err = 1 ;
+		if((t != token)||(t_cmd != trg_cmd)||(d_cmd != daq_cmd)) err |= 2 ;
 			
-		if(trg_cou) err = 1 ;	// more than 1 trigger
+		if(trg_cou) err |= 4 ;	// more than 1 trigger
 
 		if(err) {
 			if(realtime) {
@@ -339,7 +359,7 @@ int stgc_data_c::event_0001()
 
 	u_int mhz_adc_marker = dd & 0x1FFFFFFF ;	// 29 bits of trigger
 
-	int vmm_id = (d[2]>>13)&0x7 ;
+	u_int vmm_id = (d[2]>>13)&0x7 ;
 	int crc_ok = (d[2]>>12)&1 ;
 	int channel = (d[2]>>6)&0x3F ;
 
@@ -371,17 +391,23 @@ int stgc_data_c::event_0001()
 		return 0 ;	// stop at the first occurence
 	}
 
-	vmm.feb_vmm = ((feb_id-1)<<2)|(vmm_id-4) ;
+//	vmm.feb_vmm = ((feb_id-1)<<2)|(vmm_id-4) ;
+	vmm.feb_vmm = ((feb_id)<<2)|(vmm_id-4) ;
 	vmm.ch = channel ;
 	vmm.adc = pdo ;
 	vmm.bcid = bcid ;
 
+
+//	LOG(TERR,"feb_id %d, vmm_id %d, 0x%X",feb_id,vmm_id,vmm.feb_vmm) ;
+
 	int tb = (int)mhz_adc_marker - (int)(mhz_trg_marker&0x1FFFFFFF) ;
 
+	// since vmm.tb is only 16 bits
 	if(tb<-32000) vmm.tb = 0x8000 ;
 	else if(tb>32000) vmm.tb = 0x7FFF ;
 	else vmm.tb = tb ;
 
+//	LOG(ERR,"Hack %d",tb) ;
 
 	if(vmm.tb<xing_min || vmm.tb>xing_max) {
 		vmm.feb_vmm = 0 ;
@@ -436,6 +462,10 @@ int stgc_data_c::start(u_short *d, int shorts)
 	case 0x0004 :
 	case 0x0005 :
 	case 0x0006 :
+	case 0x0007 :
+	case 0x0008 :
+	case 0x0009 :
+	case 0x000A :
 		return start_0001(d,shorts) ;
 	default :
 		break ;
@@ -537,6 +567,10 @@ int stgc_data_c::event()
 	case 0x0004 :
 	case 0x0005 :
 	case 0x0006 :
+	case 0x0007 :
+	case 0x0008 :
+	case 0x0009 :
+	case 0x000A :
 		return event_0001() ;
 	default:
 		break ;

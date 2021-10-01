@@ -53,6 +53,7 @@ public:
 	void stage_0_201900(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
 	void stage_0_202101(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
 	void stage_0_202103(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
+	void stage_0_202109(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
 
 	void stage_1(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
 	void stage_1_201900(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
@@ -162,6 +163,8 @@ public:
 
 			// stage_2 data sent by DEP/ADC in stage_2 (ns,ch)
 			link_t s2_to_s3[2] ;			// stage_2 data _sent_ to stage_3; ns,ch
+
+			link_t s2_to_dsm ;			// new for FY22 -- direct link to Trigger
 		} s2[NS_COU] ;
 
 
@@ -187,6 +190,9 @@ public:
 		//output from stage_2 emulation ;
 		struct {
 			link_t s2_to_s3[2] ;
+
+			u_short s2_to_dsm ;	// new in FY22
+
 		} s2[NS_COU] ;
 
 		// output from stage_3 emulation

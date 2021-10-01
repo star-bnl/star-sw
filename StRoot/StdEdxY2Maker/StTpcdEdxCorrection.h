@@ -80,8 +80,9 @@ class StTpcdEdxCorrection : public TObject {
       kTpcNoAnodeVGainC      = 36,//   					     
       kTpcLengthCorrection   = 37,//                                             
       kTpcLengthCorrectionMDF= 38,//   					   
-      kTpcdEdxCor            = 39,//   					   
-      kTpcAllCorrections     = 40 //                                             
+      kTpcLengthCorrectionMD2= 39,//   					   
+      kTpcdEdxCor            = 40,//   					   
+      kTpcAllCorrections     = 41 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
@@ -95,7 +96,7 @@ class StTpcdEdxCorrection : public TObject {
   void ReSetCorrections();
   St_tpcGas         *tpcGas()              {return m_tpcGas;}
   //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
-
+  const dEdxCorrection_t &CorrectionStatus(Int_t k = 0) {return  *&m_Corrections[k];}
   St_tpcCorrectionC *Correction(Int_t k = 0) { return dynamic_cast<St_tpcCorrectionC *>(m_Corrections[k].Chair);}
   St_tpcCorrectionC *drift()               {return Correction(kDrift);}
   St_tpcCorrectionC *Multiplicity()        {return Correction(kMultiplicity);}

@@ -2101,50 +2101,53 @@ my $NEvents = 100000;
 #/star/data100/reco/production_7p3GeV_fixedTarget_2020/ReversedFullField/P21ic_calib/2020/*/*
 #/star/data100/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/P21ic_calib/2020/*/*
 
-7.3GeV_fixedTarget_2019   2019-04-17      13:34:01
-7.3GeV_fixedTarget_2019   2019-04-23      15:54:1
-31GeV_fixedTarget_2019    
-3p85GeV_fixedTarget_2019
-4p59GeV_fixedTarget_2019
-
-5p75GeV_fixedTarget_2020
-31p2GeV_fixedTarget_2020
-9p8GeV_fixedTarget_2020
-19p5GeV_fixedTarget_2020
-13p5GeV_fixedTarget_2020
-7p3GeV_fixedTarget_2020
-26p5GeV_fixedTarget_2020
-
-
-'0832'=> {trig=>'7.3GeV_fixedTarget',   field => 'RF',  first=> '20107029',      last => '20107029',     list => '',  beginTime => '20190417.133401'}, #        2019-04-17      13:34:01        2019-04-17      14:12:46
-'0865'=> {trig=>'7.3GeV_fixedTarget',   field => 'RF',  first=> '20113042',      last => '20113048',     list => '',  beginTime => '20190423.155418'}, #        2019-04-23      15:54:18        2019-04-23      18:11:58
-'1102'=> {trig=>'3p85GeV_fixedTarget',  field => 'RF',  first=> '20158041',      last => '20158042',     list => '',  beginTime => '20190607.174702'}, #        2019-06-07      17:47:02        2019-06-07      18:24:43
-'1113'=> {trig=>'3p85GeV_fixedTarget',  field => 'RF',  first=> '20160023',      last => '20160027',     list => '',  beginTime => '20190609.124528'}, #        2019-06-09      12:45:28        2019-06-10      02:41:09
-'1164'=> {trig=>'7.3GeV_fixedTarget',   field => 'RF',  first=> '20169028',      last => '20169045',     list => '',  beginTime => '20190618.143658'}, #        2019-06-18      14:36:58        2019-06-18      22:20:09
-'1206'=> {trig=>'4p59GeV_fixedTarget',  field => 'RF',  first=> '20179039',      last => '20179041',     list => '',  beginTime => '20190629.032834'}, #        2019-06-29      03:28:34        2019-06-29      04:38:17
-'1217'=> {trig=>'4p59GeV_fixedTarget',  field => 'RF',  first=> '20182006',      last => '20182018',     list => '',  beginTime => '20190701.081137'}, #        2019-07-01      08:11:37        2019-07-02      03:36:50
-'1261'=> {trig=>'31GeV_fixedTarget',    field => 'RF',  first=> '20189035',      last => '20189035',     list => '',  beginTime => '20190709.032312'}, #        2019-07-09      03:23:12        2019-07-09      03:36:39
-
-'161' => {trig=>'5p75GeV_fixedTarget',  field => 'RF',  first=> '20355020',      last => '20355021',     list => '',  beginTime => '20191221.154021'}, #        2019-12-21      15:40:21        2019-12-21      19:00:32
-'363' => {trig=>'31p2GeV_fixedTarget',  field => 'RF',  first=> '21028011',      last => '21028014',     list => '',  beginTime => '20200128.182912'}, #        2020-01-28      18:29:12        2020-01-28      20:30:12
-'374' => {trig=>'9p8GeV_fixedTarget',   field => 'RF',  first=> '21029051',      last => '21029057',     list => '',  beginTime => '20200130.005840'}, #        2020-01-30      00:58:40        2020-01-30      05:57:48
-'379' => {trig=>'9p8GeV_fixedTarget',   field => 'RF',  first=> '21031001',      last => '21031016',     list => '',  beginTime => '20200131.050328'}, #        2020-01-31      05:03:28        2020-02-01      03:03:39
-'387' => {trig=>'19p5GeV_fixedTarget',  field => 'RF',  first=> '21032046',      last => '21032057',     list => '',  beginTime => '20200201.191904'}, #        2020-02-01      19:19:04        2020-02-02      04:45:46
-'392' => {trig=>'13p5GeV_fixedTarget',  field => 'RF',  first=> '21033026',      last => '21033027',     list => '',  beginTime => '20200202.160409'}, #        2020-02-02      16:04:09        2020-02-02      18:15:15
-'399' => {trig=>'7p3GeV_fixedTarget',   field => 'RF',  first=> '21035003',      last => '21035007',     list => '',  beginTime => '20200204.053518'}, #        2020-02-04      05:35:18        2020-02-04      10:26:17
-'461' => {trig=>'5p75GeV_fixedTarget',  field => 'RF',  first=> '21044023',      last => '21044025',     list => '',  beginTime => '20200213.152339'}, #        2020-02-13      15:23:39        2020-02-13      15:50:47
-'889' => {trig=>'26p5GeV_fixedTarget',  field => 'RF',  first=> '21211028',      last => '21211028',     list => '',  beginTime => '20200730.015354'}, #        2020-07-30      01:53:54        2020-07-30      04:28:36
-'966' => {trig=>'26p5GeV_fixedTarget',  field => 'RF',  first=> '21226023',      last => '21226036',     list => '',  beginTime => '20200813.213251'}, #        2020-08-13      21:32:51        2020-08-14      05:43:57
-'1000' => {trig=>'26p5GeV_fixedTarget', field => 'RF',  first=> '21232025',      last => '21232025',     list => '',  beginTime => '20200819.192253'}, #        2020-08-19      19:22:53        2020-08-20      05:54:02
-'1045' => {trig=>'26p5GeV_fixedTarget', field => 'RF',  first=> '21240017',      last => '21240019',     list => '',  beginTime => '20200827.143507'}, #        2020-08-27      14:35:07        2020-08-27      17:13:37
-'1104' => {trig=>'26p5GeV_fixedTarget', field => 'RF',  first=> '21251020',      last => '21251023',     list => '',  beginTime => '20200907.221141'}, #        2020-09-07      22:11:41        2020-09-08      02:38:05
-'1122' => {trig=>'26p5GeV_fixedTarget', field => 'RF',  first=> '21256006',      last => '21256010',     list => '',  beginTime => '20200912.102033'}, #        2020-09-12      10:20:33        2020-09-12      14:28:50
-'1131' => {trig=>'26p5GeV_fixedTarget', field => 'RF',  first=> '21257029',      last => '21257031',     list => '',  beginTime => '20200913.171430'}, #        2020-09-13      17:14:30        2020-09-13      20:26:47
-
+#7.3GeV_fixedTarget_2019   2019-04-17      13:34:01
+#7.3GeV_fixedTarget_2019   2019-04-23      15:54:1
+#31GeV_fixedTarget_2019    
+#3p85GeV_fixedTarget_2019
+#4p59GeV_fixedTarget_2019
+#
+#5p75GeV_fixedTarget_2020
+#31p2GeV_fixedTarget_2020
+#9p8GeV_fixedTarget_2020
+#19p5GeV_fixedTarget_2020
+#13p5GeV_fixedTarget_2020
+#7p3GeV_fixedTarget_2020
+#26p5GeV_fixedTarget_2020
+#
+#
+#'0832'=> {trig=>'7.3GeV_fixedTarget',   field => 'RF',  first=> '20107029',      last => '20107029',     list => '',  beginTime => '20190417.133401'}, #        2019-04-17      13:34:01        2019-04-17      14:12:46
+#'0865'=> {trig=>'7.3GeV_fixedTarget',   field => 'RF',  first=> '20113042',      last => '20113048',     list => '',  beginTime => '20190423.155418'}, #        2019-04-23      15:54:18        2019-04-23      18:11:58
+#'1102'=> {trig=>'3p85GeV_fixedTarget',  field => 'RF',  first=> '20158041',      last => '20158042',     list => '',  beginTime => '20190607.174702'}, #        2019-06-07      17:47:02        2019-06-07      18:24:43
+#'1113'=> {trig=>'3p85GeV_fixedTarget',  field => 'RF',  first=> '20160023',      last => '20160027',     list => '',  beginTime => '20190609.124528'}, #        2019-06-09      12:45:28        2019-06-10      02:41:09
+#'1164'=> {trig=>'7.3GeV_fixedTarget',   field => 'RF',  first=> '20169028',      last => '20169045',     list => '',  beginTime => '20190618.143658'}, #        2019-06-18      14:36:58        2019-06-18      22:20:09
+#'1206'=> {trig=>'4p59GeV_fixedTarget',  field => 'RF',  first=> '20179039',      last => '20179041',     list => '',  beginTime => '20190629.032834'}, #        2019-06-29      03:28:34        2019-06-29      04:38:17
+#'1217'=> {trig=>'4p59GeV_fixedTarget',  field => 'RF',  first=> '20182006',      last => '20182018',     list => '',  beginTime => '20190701.081137'}, #        2019-07-01      08:11:37        2019-07-02      03:36:50
+#'1261'=> {trig=>'31GeV_fixedTarget',    field => 'RF',  first=> '20189035',      last => '20189035',     list => '',  beginTime => '20190709.032312'}, #        2019-07-09      03:23:12        2019-07-09      03:36:39
+#
+#'161' => {trig=>'5p75GeV_fixedTarget',  field => 'RF',  first=> '20355020',      last => '20355021',     list => '',  beginTime => '20191221.154021'}, #        2019-12-21      15:40:21        2019-12-21      19:00:32
+#'363' => {trig=>'31p2GeV_fixedTarget',  field => 'RF',  first=> '21028011',      last => '21028014',     list => '',  beginTime => '20200128.182912'}, #        2020-01-28      18:29:12        2020-01-28      20:30:12
+#'374' => {trig=>'9p8GeV_fixedTarget',   field => 'RF',  first=> '21029051',      last => '21029057',     list => '',  beginTime => '20200130.005840'}, #        2020-01-30      00:58:40        2020-01-30      05:57:48
+#'379' => {trig=>'9p8GeV_fixedTarget',   field => 'RF',  first=> '21031001',      last => '21031016',     list => '',  beginTime => '20200131.050328'}, #        2020-01-31      05:03:28        2020-02-01      03:03:39
+#'387' => {trig=>'19p5GeV_fixedTarget',  field => 'RF',  first=> '21032046',      last => '21032057',     list => '',  beginTime => '20200201.191904'}, #        2020-02-01      19:19:04        2020-02-02      04:45:46
+#'392' => {trig=>'13p5GeV_fixedTarget',  field => 'RF',  first=> '21033026',      last => '21033027',     list => '',  beginTime => '20200202.160409'}, #        2020-02-02      16:04:09        2020-02-02      18:15:15
+#'399' => {trig=>'7p3GeV_fixedTarget',   field => 'RF',  first=> '21035003',      last => '21035007',     list => '',  beginTime => '20200204.053518'}, #        2020-02-04      05:35:18        2020-02-04      10:26:17
+#'461' => {trig=>'5p75GeV_fixedTarget',  field => 'RF',  first=> '21044023',      last => '21044025',     list => '',  beginTime => '20200213.152339'}, #        2020-02-13      15:23:39        2020-02-13      15:50:47
+#'889' => {trig=>'26p5GeV_fixedTarget',  field => 'RF',  first=> '21211028',      last => '21211028',     list => '',  beginTime => '20200730.015354'}, #        2020-07-30      01:53:54        2020-07-30      04:28:36
+#'966' => {trig=>'26p5GeV_fixedTarget',  field => 'RF',  first=> '21226023',      last => '21226036',     list => '',  beginTime => '20200813.213251'}, #        2020-08-13      21:32:51        2020-08-14      05:43:57
+#'1000' => {trig=>'26p5GeV_fixedTarget', field => 'RF',  first=> '21232025',      last => '21232025',     list => '',  beginTime => '20200819.192253'}, #        2020-08-19      19:22:53        2020-08-20      05:54:02
+#'1045' => {trig=>'26p5GeV_fixedTarget', field => 'RF',  first=> '21240017',      last => '21240019',     list => '',  beginTime => '20200827.143507'}, #        2020-08-27      14:35:07        2020-08-27      17:13:37
+#'1104' => {trig=>'26p5GeV_fixedTarget', field => 'RF',  first=> '21251020',      last => '21251023',     list => '',  beginTime => '20200907.221141'}, #        2020-09-07      22:11:41        2020-09-08      02:38:05
+#'1122' => {trig=>'26p5GeV_fixedTarget', field => 'RF',  first=> '21256006',      last => '21256010',     list => '',  beginTime => '20200912.102033'}, #        2020-09-12      10:20:33        2020-09-12      14:28:50
+#'1131' => {trig=>'26p5GeV_fixedTarget', field => 'RF',  first=> '21257029',      last => '21257031',     list => '',  beginTime => '20200913.171430'}, #        2020-09-13      17:14:30        2020-09-13      20:26:47
+#
 #$hist = "P21ic_calib_30"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/21/2021 check Run XIX and Run XX fixedTarget
 #$hist = "P21ic_calib_31"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/21/2021 check Run XIX and Run XX fixedTarget
 #$hist = "P21ic_calib_32"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG21l"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/21/2021 check Run XIX and Run XX fixedTarget
-$hist = "P21ic_calib_33"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/21/2021 check Run XIX and Run XX fixedTarget
+#$hist = "P21ic_calib_33"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/21/2021 check Run XIX and Run XX fixedTarget
+#$hist = "P21ic_calib_34"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*2019/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/21/2021 check Run XIX and Run XX fixedTarget
+#$hist = "P21ic_calib_35"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*2019/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/21/2021 check Run XIX and Run XX fixedTarget
+$hist = "P21ic_calib_36"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 09/27/2021 use scheme with usedx2 TRUE
 
 ######################################## Run XXI express calibration ########################################
 #$hist = "RunXXI01"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year 22= "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 start from 2020 express production: strong Z dependence, and SecRow3 ~4%, xypad ~ 10%
@@ -2362,6 +2365,8 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     if ($dd !~ /GeV/) {
       $dd = $words[7];
     }
+    $dd =~ s/production_//;
+    $dd =~ s/_ReversedFullField//;
     my $scrr = $scr . $dd . "/"; #print "scrr = $scrr\n";
     my $root = $scrr . $ff . ".root"; print "root = $root\n";
     my $logL = $ff . ".log";

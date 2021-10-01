@@ -46,8 +46,7 @@ class StdEdxY2Maker : public StMaker {
 	       kZBGX                 = 13,
 	       kEmbedding            = 15,
 	       kNoUsedHits           = 16,
-	       kEmbeddingShortCut    = 17, 
-	       kV0CrossCheck         = 18
+	       kEmbeddingShortCut    = 17
   };
   StdEdxY2Maker(const char *name="dEdxY2");
   virtual       ~StdEdxY2Maker() {}
@@ -85,6 +84,7 @@ class StdEdxY2Maker : public StMaker {
   static dEdxY2_t *dEdxS; // dEdx sorted
   static void      UsedNdx() {fUsedNdx = kTRUE;}
   Long_t               m_Mask; //!
+  Bool_t               fUsedx2; //! flag for StPiDStatus to absord log2(dx) dependence into TpcLengthCorrectionMD2
   Char_t               beg[1];
   TMinuit             *m_Minuit;        //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
