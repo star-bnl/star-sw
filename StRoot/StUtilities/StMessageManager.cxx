@@ -115,7 +115,7 @@ StMessMgr* StMessageManager::Instance() {
   return mInstance;
 }
 //_____________________________________________________________________________
-ostrstream& StMessageManager::Message(const char* mess, const char* type,
+std::ostringstream& StMessageManager::Message(const char* mess, const char* type,
   const char* opt,const char *,int) {
 //
 // Message declarator - creates a new message if mess is not empty,
@@ -221,7 +221,7 @@ void StMessageManager::Print() {
       *this << std::ends;
     }
 
-    BuildMessage(str(), curType, curOpt);
+    BuildMessage(str().c_str(), curType, curOpt);
     building = 0;
 
   } else {

@@ -58,7 +58,7 @@ class StLoggerManager : public StMessMgr {
 #ifndef __CINT__
    std::vector<std::string>  fSourceFileNames;
    std::string fLastMessage;
-   ostrstream fStreams[7];
+   std::ostringstream fStreams[7];
 #endif
    int   fLineNumbers[10];
    int   fAllowRepeat;        // the total number one and the same message can be printed out
@@ -85,7 +85,7 @@ class StLoggerManager : public StMessMgr {
   void SetStarOptionFilter(const log4cxx::varia::StarOptionFilterPtr& filter);
   const log4cxx::varia::StarOptionFilterPtr& GetStarOptionFilter() const;
   log4cxx::varia::StarOptionFilterPtr& GetStarOptionFilter();
-  ostrstream &Stream();
+  std::ostringstream &Stream();
 #endif
 
 protected:
@@ -118,7 +118,7 @@ protected:
    static  void setColorEnabled(bool t = true) {mColorEnabled = t;}
 
 // Generic Messages:
-   virtual ostrstream& Message(const char* mess="", const char* type="",
+   virtual std::ostringstream& Message(const char* mess="", const char* type="",
          const char* opt=0,const char *sourceFileName=0, int lineNumber=-1);
    virtual       void Print();
 //    virtual        int PrintList(messVec* list);
@@ -152,7 +152,7 @@ protected:
 //   virtual const char *GetName();
 
 // Info Messages:
-   virtual ostrstream& Info(const char* mess="", const char* opt="O"
+   virtual std::ostringstream& Info(const char* mess="", const char* opt="O"
                           ,const char *sourceFileName=0, int lineNumber=-1);
    virtual        int PrintInfos();
    virtual const messVec* GetInfos();
@@ -162,7 +162,7 @@ protected:
          const char* s3="", const char* s4="");
 
 // Warning Messages:
-   virtual ostrstream& Warning(const char* mess="", const char* opt="E"
+   virtual std::ostringstream& Warning(const char* mess="", const char* opt="E"
                              ,const char *sourceFileName=0, int lineNumber=-1);
    virtual        int PrintWarnings();
    virtual const messVec* GetWarnings();
@@ -172,7 +172,7 @@ protected:
          const char* s3="", const char* s4="");
 
 // Error Messages:
-   virtual ostrstream& Error(const char* mess="", const char* opt="E"
+   virtual std::ostringstream& Error(const char* mess="", const char* opt="E"
                            ,const char *sourceFileName=0, int lineNumber=-1);
    virtual        int PrintErrors();
    virtual const messVec* GetErrors();
@@ -182,7 +182,7 @@ protected:
          const char* s3="", const char* s4="");
 
 // Debug Messages:
-   virtual ostrstream& Debug(const char* mess="", const char* opt="OT"
+   virtual std::ostringstream& Debug(const char* mess="", const char* opt="OT"
                            ,const char *sourceFileName=0, int lineNumber=-1);
    virtual        int PrintDebug();
    virtual const messVec* GetDebugs();
@@ -192,7 +192,7 @@ protected:
          const char* s3="", const char* s4="");
 
 // QAInfo Messages:
-   virtual ostrstream& QAInfo(const char* mess="", const char* opt="OS"
+   virtual std::ostringstream& QAInfo(const char* mess="", const char* opt="OS"
                             ,const char *sourceFileName=0, int lineNumber=-1);
    virtual        int PrintQAInfo();
    virtual const messVec* GetQAInfos();
@@ -202,7 +202,7 @@ protected:
          const char* s3="", const char* s4="");
 
 // UCMInfo Messages:
-   virtual ostrstream& UCMInfo(const char* mess="", const char* opt="OS"
+   virtual std::ostringstream& UCMInfo(const char* mess="", const char* opt="OS"
                             ,const char *sourceFileName=0, int lineNumber=-1);
    virtual        int PrintUCMInfo();
    virtual const messVec* GetUCMInfos();
@@ -212,13 +212,13 @@ protected:
          const char* s3="", const char* s4="");
    
 // "As is" Messages:
-   virtual ostrstream& out(const char* mess="");
-   virtual ostrstream& err(const char* mess="");
+   virtual std::ostringstream& out(const char* mess="");
+   virtual std::ostringstream& err(const char* mess="");
 
    virtual       void PrintInfo();
 
    // Fatal Messages:
-   virtual ostrstream& Fatal(const char* mess="", const char* opt="F",const char *sourceFileName=0, int lineNumber=-1);
+   virtual std::ostringstream& Fatal(const char* mess="", const char* opt="F",const char *sourceFileName=0, int lineNumber=-1);
 
    //  "Extra Logger" methods
    void PrintLogger(const char* mess, unsigned char type, const char* opt, const char *sourceFileName=0, int lineNumber=-1);
