@@ -1,14 +1,16 @@
-#include <StRoot/StGeant4Maker/StHitCollection.h>
+#include <StHitCollection.h>
 
 #include <TVirtualMC.h>
 #include <TGeoManager.h>
 #include <TGeoNavigator.h>
 
-#include <StRoot/StGeant4Maker/StSensitiveDetector.h>
-#include <StRoot/StGeant4Maker/StMCParticleStack.h>
+#include <StSensitiveDetector.h>
+#include <StMCParticleStack.h>
 #include <StMessMgr.h>
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
+
+#include <cassert>
 
 //____________________________________________________________________________________________
 ostream&  operator<<(ostream& os,  const TrackerHit& hit) {

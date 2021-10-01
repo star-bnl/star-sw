@@ -14,7 +14,8 @@ using namespace std;
 #include <TGeoMedium.h>
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
-#include <StRoot/StGeant4Maker/GeometryUtils.h>
+#include <GeometryUtils.h>
+#include <StMaker.h>
 
 const int kDefaultStackSize = 400;
 const int kDefaultArraySize = 4000;
@@ -80,7 +81,10 @@ StMCParticleStack::StMCParticleStack( const Char_t *name ) :
   mParticleTable(),
   mVertexTable(),
   mStackToTable(),
-  mIdTruthFromParticle()
+  mIdTruthFromParticle(),
+  mScoringRmax(450.0),
+  mScoringZmax(2000.0),
+  mScoringEmin(0.01)
 {
 
   mArray     = new TClonesArray("TParticle", kDefaultArraySize );
@@ -106,8 +110,14 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
 
   // Determine whether we are in a tracking region or calorimeter region
   static auto* navigator    = gGeoManager->GetCurrentNavigator();
-         auto* node         = navigator->FindNode( vx, vy, vz );   assert(node);
-         auto* volume       = node->GetVolume();                   assert(volume);
+         auto* node         = navigator->FindNode( vx, vy, vz );   
+         auto* volume       = (node) ? node->GetVolume() : 0;
+
+	 if ( 0 == volume ) {
+	   LOG_INFO << "Attempt to push a track @ v="<< vx << "," << vy << "," << vz << " ... no node found (FindNode)" << endm;
+	   LOG_INFO << "... current path = " << navigator->GetPath() << endm;
+	   return; // drop track on the ground
+	 }
 
   // AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( node->GetUserExtension() );
   // if ( 0==agmlext ) {
@@ -134,10 +144,8 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   particle->SetWeight(weight);
   particle->SetUniqueID(mech);
 
-  // Increment primary track count
-  if ( parent<0 )    {
-      mNumPrimary++;
-    }
+  bool isPrimary = parent<0;
+  mNumPrimary += isPrimary;
 
   // Add to the stack of particles
   if ( toDo )    {
@@ -151,10 +159,17 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   // Increment mArraySize
   mArraySize++;
 
+
+  double Rmax2=mScoringRmax*mScoringRmax;
+  double vr2 = vx*vx+vy*vy;
+
+  bool tracing = (vr2<Rmax2) && (TMath::Abs(vz)<mScoringZmax) && energy > mScoringEmin;
+  
+
   //
   // And handle region-based track persistence
   //
-  if ( agmlreg == 2 ) {
+  if ( agmlreg == 2 && tracing || isPrimary ) {
 
     StarMCVertex* vertex = GetVertex( vx, vy, vz, vt, mech );
 
@@ -183,6 +198,12 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   }
 
 
+}
+//___________________________________________________________________________________________________________________
+StarMCParticle* StMCParticleStack::GetPersistentTrack( int stackIndex ) {    
+  auto track = mStackToTable[ stackIndex ];
+  assert(track);
+  return track;
 }
 //___________________________________________________________________________________________________________________
 StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, double vt, int proc ) {
@@ -346,6 +367,10 @@ StarMCParticle::StarMCParticle( TParticle* part, StarMCVertex* vert ) :
   mHits()
 {
   
+}
+//___________________________________________________________________________________________________________________						
+void StarMCParticle::addHit( DetectorHit* hit ) {
+  mHits.push_back( hit );
 }
 //___________________________________________________________________________________________________________________						
 StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},

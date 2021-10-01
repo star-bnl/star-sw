@@ -60,6 +60,7 @@ public:
   void AddCut( TString cut, double value ){ mGstpar[cut] = value; }
   std::map<TString,double>& GetCuts() { return mGstpar; }
   
+  void Print( const char* opts="" );
  
 private:
 protected:
