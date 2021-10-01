@@ -123,7 +123,7 @@ StMtdPidTraits StPidStatus::SetMtdPidTraits(const StMuMtdPidTraits &pid) {
   return mtdPidTraits;
 }
 //________________________________________________________________________________
-StPidStatus::StPidStatus(StGlobalTrack *gTrack) : PiDStatus(-1) {// , gTrack(Track) {
+StPidStatus::StPidStatus(StGlobalTrack *gTrack, Bool_t Usedx2) : PiDStatus(-1), fUsedx2(Usedx2) {// , gTrack(Track) {
   Clear();
   if (! gTrack) return;
   g3 = gTrack->geometry()->momentum(); // p of global track
@@ -167,7 +167,7 @@ StPidStatus::StPidStatus(StGlobalTrack *gTrack) : PiDStatus(-1) {// , gTrack(Tra
   Set();
 }
 //________________________________________________________________________________
-StPidStatus::StPidStatus(StMuTrack *muTrack) : PiDStatus(-1) {
+StPidStatus::StPidStatus(StMuTrack *muTrack, Bool_t Usedx2) : PiDStatus(-1), fUsedx2(Usedx2) {
   Clear();
   if (! muTrack) return;
   const StMuProbPidTraits &probPidTraits = muTrack->probPidTraits();
@@ -186,17 +186,17 @@ StPidStatus::StPidStatus(StMuTrack *muTrack) : PiDStatus(-1) {
   static StMtdPidTraits  pidMtd; //!
   if (probPidTraits.dEdxTruncated() > 0) {
     pidI70 = StDedxPidTraits(kTpcId, kTruncatedMeanId, 100*((UShort_t)probPidTraits.dEdxTrackLength()) + muTrack->nHitsDedx(), 
-			     probPidTraits.dEdxTruncated(), probPidTraits.dEdxErrorTruncated());
+			     probPidTraits.dEdxTruncated(), probPidTraits.dEdxErrorTruncated(),probPidTraits.log2dX());
     fI70 = new StdEdxStatus(&pidI70);
   } 
   if (probPidTraits.dEdxFit() > 0) {
     pidFit = StDedxPidTraits(kTpcId, kLikelihoodFitId, 100*((UShort_t)probPidTraits.dEdxTrackLength()) + muTrack->nHitsDedx(), 
-			     probPidTraits.dEdxFit(), probPidTraits.dEdxErrorFit());
+			     probPidTraits.dEdxFit(), probPidTraits.dEdxErrorFit(),probPidTraits.log2dX());
     fFit = new StdEdxStatus(&pidFit);
   }
   if (probPidTraits.dNdxFit() > 0) {
     pidNdx = StDedxPidTraits(kTpcId, kOtherMethodId, 100*((UShort_t)probPidTraits.dEdxTrackLength()) + muTrack->nHitsDedx(), 
-			     probPidTraits.dNdxFit(), probPidTraits.dNdxErrorFit());
+			     probPidTraits.dNdxFit(), probPidTraits.dNdxErrorFit(),probPidTraits.log2dX());
     fdNdx = new StdEdxStatus(&pidNdx);
   }
   if (btofPidTraits.matchFlag()) {
@@ -218,7 +218,7 @@ StPidStatus::StPidStatus(StMuTrack *muTrack) : PiDStatus(-1) {
   Set();
 }
 //________________________________________________________________________________
-StPidStatus::StPidStatus(StPicoTrack *picoTrack) : PiDStatus(-1) {
+StPidStatus::StPidStatus(StPicoTrack *picoTrack, Bool_t Usedx2) : PiDStatus(-1), fUsedx2(Usedx2) {
   Clear();
   if (! picoTrack) return;
   TVector3 gMom = picoTrack->gMom();
@@ -296,7 +296,10 @@ void StPidStatus::Set() {
       UChar_t fit = 0;
       if (k == kLikelihoodFitId || k == kWeightedTruncatedMeanId) fit = 1;
       else if (k == kOtherMethodId || k == kOtherMethodId2) fit = 2;
-      fStatus[k]->Pred[l] = StdEdxPull::EvalPred(betagamma, fit, charge);
+      if (fUsedx2) 
+	fStatus[k]->Pred[l] = StdEdxPull::EvalPred2(betagamma, fStatus[k]->log2dX(), fit, charge);
+      else 
+	fStatus[k]->Pred[l] = StdEdxPull::EvalPred(betagamma, fit, charge);
       if (fStatus[k]->I() > 0) {
 	fStatus[k]->dev[l] = TMath::Log(fStatus[k]->I()/fStatus[k]->Pred[l]);
 	fStatus[k]->devS[l] = -999;

@@ -75,9 +75,9 @@ class StPidStatus {
   enum PiDStatusIDs {
     kI70,   kFit,   kI70U,   kFitU,   kdNdx,   kdNdxU,  kBTof,   kETof,   kMtd, kTotal
   };
-  StPidStatus(StGlobalTrack *gTrack = 0);
-  StPidStatus(StMuTrack *muTrack = 0);
-  StPidStatus(StPicoTrack *picoTrack = 0);
+  StPidStatus(StGlobalTrack *gTrack = 0, Bool_t Usedx2 = kTRUE);
+  StPidStatus(StMuTrack *muTrack = 0, Bool_t Usedx2 = kTRUE);
+  StPidStatus(StPicoTrack *picoTrack = 0, Bool_t Usedx2 = kFALSE);
   virtual ~StPidStatus() {
     SafeDelete(fProb); 
     SafeDelete(fI70); 
@@ -105,6 +105,7 @@ class StPidStatus {
   StdEdxStatus* fStatus[kOtherMethodId2+1];
   //  StGlobalTrack *gTrack; //!
   StThreeVectorD g3; //!
+  Bool_t fUsedx2;
   Char_t                mBeg[1];                   //!
   StProbPidTraits *fProb; //!
   StdEdxStatus *fI70; //!
