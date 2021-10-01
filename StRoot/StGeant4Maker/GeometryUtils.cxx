@@ -1,4 +1,4 @@
-#include <StGeant4Maker/GeometryUtils.h>
+#include <GeometryUtils.h>
 
 AgMLExtension* getExtension( TGeoNode* n ) {
 

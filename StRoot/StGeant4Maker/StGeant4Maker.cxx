@@ -25,8 +25,11 @@
 #include "GeometryUtils.h"
 #include "TString.h"
 
+#include "StChain/StEvtHddr.h"
+#include "TH2F.h"
+
 //_______________________________________________________________________________________________
-#include <StRoot/StGeant4Maker/AgMLVolumeIdFactory.h>
+#include <AgMLVolumeIdFactory.h>
 //_______________________________________________________________________________________________
 
 
@@ -57,6 +60,7 @@
 //________________________________________________________________________________________________
 //#include "StMcHitFiller.h"
 //________________________________________________________________________________________________
+#include "tables/St_g2t_event_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
 //________________________________________________________________________________________________
@@ -71,7 +75,7 @@
 #include "g2t/St_g2t_mtd_Module.h"
 #include "g2t/St_g2t_vpd_Module.h"
 //________________________________________________________________________________________________
-#include <StRoot/StGeant4Maker/StHitCollection.h> 
+#include <StHitCollection.h> 
 //________________________________________________________________________________________________
 
 // Functors used to copy the hits from the sensitive detector hit collections into the g2t tables.
@@ -211,6 +215,7 @@ struct SD2Table_FST {
     }
   } 
 } sd2table_fst; 
+
 // Generic EMC copy (no increment on track hits)
 struct SD2Table_EMC {
   void operator()( StSensitiveDetector* sd, St_g2t_emc_hit* table, St_g2t_track* track ) {
@@ -251,6 +256,44 @@ struct SD2Table_EMC {
     }
   } 
 } sd2table_emc; 
+
+struct SD2Table_HCA {
+  void operator()( StSensitiveDetector* sd, St_g2t_hca_hit* table, St_g2t_track* track ) {
+    
+    TString sdname = sd->GetName();
+
+    // Retrieve the hit collection 
+    StCalorimeterHitCollection* collection = (StCalorimeterHitCollection *)sd->hits();
+    // Iterate over all hits
+    for ( auto hit : collection->hits() ) {
+
+      g2t_hca_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_hca_hit_st)); 
+      
+      g2t_hit.id        = hit->id;
+      // TODO: add pointer to next hit on the track 
+      g2t_hit.track_p   = hit->idtruth;
+      g2t_hit.volume_id = hit->volId;
+      g2t_hit.de        = hit->de;
+      if ( hit->user.size()>=1 ) g2t_hit.deA       = hit->user[0];   else g2t_hit.deA = -1;
+      if ( hit->user.size()>=2 ) g2t_hit.deB       = hit->user[1];   else g2t_hit.deB = -2;
+      if ( hit->user.size()>=3 ) g2t_hit.deC       = hit->user[2];   else g2t_hit.deC = -3;
+      if ( hit->user.size()>=4 ) g2t_hit.deD       = hit->user[3];   else g2t_hit.deD = -4;
+      g2t_hit.x         = hit->position_in[0];
+      g2t_hit.y         = hit->position_in[1];
+      g2t_hit.z         = hit->position_in[2];
+      
+      table -> AddAt( &g2t_hit );     
+
+      int idtruth = hit->idtruth;
+      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
+
+      trk->n_hca_hit++;
+
+    }
+  } 
+} sd2table_hca; 
+
+
 struct SD2Table_CTF {
   void operator()( StSensitiveDetector* sd, St_g2t_ctf_hit* table, St_g2t_track* track ) {
     
@@ -322,7 +365,7 @@ struct SD2Table_VPD {
       int idtruth = hit->idtruth;
       g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
 
-      trk->n_tof_hit++;
+      trk->n_vpd_hit++;
       
     }
   } 
@@ -393,7 +436,8 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   mPreviousVolume (0),
   mCurrentTrackingRegion(2),
   mPreviousTrackingRegion(2),
-  acurr(0),aprev(0)
+  acurr(0),aprev(0),
+  mEventHeader(0)
 { 
 
   // Setup default attributes
@@ -408,11 +452,28 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   //  SetAttr( "G4VmcOpt:Process", "stepLimiter+stackPopper" ); // special process
   SetAttr( "AgMLOpt:TopVolume", "HALL" );
   SetAttr( "Stepping:Punchout:Stop", 1 ); // 0=no action, 1=track stopped, 2=track stopped and re-injected            
+  SetAttr( "Stepping:Punchout:Rmin", 223.49 ); // min radius applied to punchout logic
+  SetAttr( "Stepping:Punchout:Zmin", 268.75 ); // min radius applied to punchout logic
   SetAttr( "Random:G4", 12345); 
   SetAttr( "field", -5.0 );
 
   SetAttr( "Application:Zmax", DBL_MAX );
   SetAttr( "Application:Rmax", DBL_MAX );
+
+  SetAttr("Scoring:Transit",0);
+  SetAttr("Scoring:Rmax",450.0);
+  SetAttr("Scoring:Zmax",2000.0);
+  SetAttr("Scoring:Emin",0.01);
+
+  SetAttr("vertex:x",0.0);
+  SetAttr("vertex:y",0.0);
+  SetAttr("vertex:z",0.0);
+  SetAttr("vertex:sigmax",0.0);
+  SetAttr("vertex:sigmay",0.0);
+  SetAttr("vertex:sigmaz",0.0);
+
+
+  SetAttr( "runnumber", 1 );
 
 
   // Setup default cuts
@@ -538,27 +599,54 @@ int StGeant4Maker::Init() {
 
   for ( auto cmd : g4cmd )   gG4->ProcessGeantCommand( cmd );
 
-
   LOG_INFO << "Initialize GEANT4 Physics" << endm;
   gG4 -> BuildPhysics();
+
+  // Create histograms
+  TH1* h;
+  AddHist( h = new TH2F("MC:vertex:RvsZ","MC vertex;z [cm];R [cm]",1801,-900.5,900.5,501,-0.5,500.5) );
 
   return StMaker::Init();
 }
 //________________________________________________________________________________________________
 int StGeant4Maker::InitRun( int /* run */ ){
 
+  auto result = kStOK;
+
   // Get magnetic field scale
   double field = DAttr("field"); /* kG */ 
 
   if ( 0 == StarMagField::Instance() ) new StarMagField( StarMagField::kMapped, field / 5.0 );
 
-  if ( 0.0 == field ) { 
+  if ( 0.0 == field ) { // TODO: Not sure about the logic here... 
     // field = St_MagFactorC::instance()->ScaleFactor();
     // if ( TMath::Abs(field)<1E-3 ) field = 1E-3;  
     StarMagField::Instance()->SetFactor(field);
   }
 
-  return kStOK;
+  // Obtain a pointer to the event header
+  mEventHeader = (StEvtHddr*) ( GetTopChain()->GetDataSet("EvtHddr") );
+
+  // If it does not exist, create and register
+  if ( 0 == mEventHeader ) {
+    mEventHeader = new StEvtHddr(GetConst());                                                                                                                                                                
+    mEventHeader->SetRunNumber(0);                
+    SetOutput(mEventHeader);                      // Declare this event header for output
+  }
+
+  // Obtain pointer to the primary maker
+  StarPrimaryMaker* primarymk   = dynamic_cast<StarPrimaryMaker*> (GetMaker("PrimaryMaker"));
+  if (primarymk) { 
+    primarymk->SetVertex( DAttr("vertex:x"), DAttr("vertex:y"), DAttr("vertex:z") );
+    primarymk->SetSigma ( DAttr("vertex:sigmax"), DAttr("vertex:sigmay"), DAttr("vertex:sigmaz") );
+  }
+  else {
+    LOG_FATAL << "Primary event generator not registered" << endm;
+    result = kStFatal;
+  }
+  
+
+  return result;
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::ConstructGeometry(){ 
@@ -573,7 +661,7 @@ int  StGeant4Maker::InitGeom() {
   if ( 0==gGeoManager ) {
   for (int i = 0; DbAlias[i].tag; i++) // iterate over DB aliases
     {
-      StBFChain *bfc = dynamic_cast<StBFChain *>(GetTopChain());
+      StBFChain *bfc = (StBFChain *)(GetTopChain());
       if ( 0==bfc ) break; // nothing to do in this case...
 
       //
@@ -616,6 +704,13 @@ int  StGeant4Maker::InitGeom() {
   return kStOK;
 }
 //________________________________________________________________________________________________
+double StarVMCApplication::TrackingRmax() const {
+  return mRmax;
+}
+double StarVMCApplication::TrackingZmax() const {
+  return mZmax;
+}
+//________________________________________________________________________________________________
 int StGeant4Maker::InitHits() {
   return kStOK;
 }
@@ -624,8 +719,29 @@ struct A { };
 struct B { };
 int StGeant4Maker::Make() {
 
+  static int eventNumber  = 1;
+  const  int runnumber   = IAttr("runnumber");
+  
+  // One time initialization
+  if ( 1 == eventNumber ) {
+
+    mMCStack->SetScoring( DAttr("Scoring:Rmax"), DAttr("Scoring:Zmax"), DAttr("Scoring:Emin") );
+
+  }
+
   // Process one single event.  Control handed off to VMC application.
   gG4 -> ProcessRun( 1 );
+
+  // Update event header.  Note that event header's SetRunNumber method sets the run number AND updates the previous run number.
+
+  if ( runnumber != mEventHeader->GetRunNumber() ) mEventHeader -> SetRunNumber( runnumber );
+  mEventHeader -> SetEventNumber( eventNumber );
+  mEventHeader -> SetProdDateTime();
+
+  // SetDateTime();
+ 
+  // Increment event number
+  eventNumber++;
 
   return kStOK; 
 }
@@ -720,7 +836,7 @@ int  StGeant4Maker::ConfigureGeometry() {
     TGeoMedium* medium = volume->GetMedium();
     int id = medium->GetId();
     if ( media[id]>0 ) continue; // skip if medium already encountered
-    AgMLExtension* agmlExt = dynamic_cast<AgMLExtension*>( volume->GetUserExtension() );
+    AgMLExtension* agmlExt = (AgMLExtension*)( volume->GetUserExtension() );
     if ( 0==agmlExt ) continue;
     for ( auto kv : agmlExt->GetCuts() ) {
       gG4->Gstpar( media[id]=id, kv.first, kv.second );
@@ -743,6 +859,11 @@ void StGeant4Maker::FinishEvent(){
 
   LOG_INFO << "End of Event" << endm;
 
+  // Event information is (for the time being) zeroed out
+  St_g2t_event*  g2t_event  = new St_g2t_event("g2t_event",1);          AddData(g2t_event);
+  g2t_event_st event = {0};
+  g2t_event->AddAt( &event );
+
   StMCParticleStack* stack    = (StMCParticleStack *)TVirtualMC::GetMC()->GetStack();
   auto&              vertex   = stack->GetVertexTable();
   auto&              particle = stack->GetParticleTable();
@@ -754,6 +875,9 @@ void StGeant4Maker::FinishEvent(){
 
   St_g2t_vertex* g2t_vertex = new St_g2t_vertex("g2t_vertex",nvertex);  AddData(g2t_vertex);
   St_g2t_track*  g2t_track  = new St_g2t_track ("g2t_track", ntrack);   AddData(g2t_track);
+
+
+  
 
   // Add tracks and vertices to the data structures...
 
@@ -798,6 +922,16 @@ void StGeant4Maker::FinishEvent(){
     myvertex.ge_proc   = v->process();
     myvertex.is_itrmd  = v->intermediate();
 
+    // Fill histograms
+    {
+      float& x = myvertex.ge_x[0];
+      float& y = myvertex.ge_x[1];
+      float& z = myvertex.ge_x[2];
+      float  r2 = x*x + y*y;
+      float  r = sqrt(r2);
+      GetHist("MC:vertex:RvsZ")->Fill(z,r);
+    }
+
     // TODO: map ROOT mechanism to G3 names
 
     // An intermediate vertex with no daughters makes no
@@ -815,10 +949,19 @@ void StGeant4Maker::FinishEvent(){
   itrack = 1; // track numbering starts from 1
   for ( auto t : particle ) {
 
+    auto* pdgdata = particleData.GetParticle( t->GetPdg() );
+    
     // partial fill of track table _______________________
     g2t_track_st mytrack;   memset(&mytrack, 0, sizeof(g2t_track_st));    
     mytrack.id       = itrack;
     mytrack.eg_pid   = t->GetPdg();
+    if ( pdgdata ) {
+      mytrack.ge_pid = pdgdata->TrackingCode();
+      mytrack.charge = pdgdata->Charge()/3.0;
+    }
+    else {
+      LOG_WARN << Form("Particle w/ pdgid = %i has no G3 ID (assign 0 to g2t_track::ge_pid)",t->GetPdg()) << endm;
+    }
     mytrack.p[0]     = t->px();
     mytrack.p[1]     = t->py();
     mytrack.p[2]     = t->pz();
@@ -845,7 +988,7 @@ void StGeant4Maker::FinishEvent(){
   AddHits<St_g2t_fts_hit>( "STGH", {"TGCG"}, "g2t_stg_hit", sd2table_stgc );
   AddHits<St_g2t_emc_hit>( "PREH", {"PSCI"}, "g2t_pre_hit", sd2table_emc  );
   AddHits<St_g2t_emc_hit>( "WCAH", {"WSCI"}, "g2t_wca_hit", sd2table_emc  );
-  AddHits<St_g2t_emc_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_emc  ); 
+  AddHits<St_g2t_hca_hit>( "HCAH", {"HSCI"}, "g2t_hca_hit", sd2table_hca  ); // HCA should have its own copier
 
   AddHits<St_g2t_ctf_hit>( "BTOH", {"BRSG"}, "g2t_tfr_hit", sd2table_ctf  );
   AddHits<St_g2t_vpd_hit>( "VPDH", {"VRAD"}, "g2t_vpd_hit", sd2table_vpd  );
@@ -892,6 +1035,8 @@ void StGeant4Maker::PostTrack()
 void StGeant4Maker::UpdateHistory() {
 
   static auto* navigator    = gGeoManager->GetCurrentNavigator();
+  static auto* mc           = TVirtualMC::GetMC();
+
 
   mPreviousNode   = mCurrentNode;
   mPreviousVolume = mCurrentVolume;
@@ -923,13 +1068,13 @@ void StGeant4Maker::UpdateHistory() {
 
   if ( aprev ) {     
     mPreviousTrackingRegion = aprev->GetTracking(); 
-    // HACK override for CAVE
-    if ( aprev->GetVolumeName() == "CAVE") mPreviousTrackingRegion = 2;
+    // HACK override for CAVE, SCON
+    if ( aprev->GetVolumeName() == "CAVE" ) mPreviousTrackingRegion = 2;
   }
   if ( acurr ) { 
     mCurrentTrackingRegion  = acurr->GetTracking(); 
     // HACK override for CAVE
-    if ( acurr->GetVolumeName() == "CAVE") mCurrentTrackingRegion = 2;
+    if ( acurr->GetVolumeName() == "CAVE" ) mCurrentTrackingRegion = 2;
   }
 
 }
@@ -938,12 +1083,19 @@ int StGeant4Maker::regionTransition( int curr, int prev ) {
   TString previous = (mPreviousNode) ? mPreviousNode->GetName() : "";
   int result = 0;
 
+  static auto mc = TVirtualMC::GetMC();
+  static double Rmin = DAttr("Stepping:Punchout:Rmin");
+  static double Zmin = DAttr("Stepping:Punchout:Zmin");
+
+
+
   // TODO:  This is a hack.  We need to update the geometry and group these three
   //        detectors underneath a single integration volume / region.
   if ( previous == "PMOD" || 
        previous == "WMOD" || 
-       previous == "HMOD" )
+       previous == "HMOD" ) {
     result = 0;
+  }
   else
     result = curr - prev;
 
@@ -951,6 +1103,16 @@ int StGeant4Maker::regionTransition( int curr, int prev ) {
   //     2      1       1     into tracking from calorimeter
   //     1      2      -1     into calorimeter from tracking
   //     1      1       0     no transition
+
+
+ 
+ 
+ 
+    
+
+ 
+
+  return result;
 
 }
 //________________________________________________________________________________________________
@@ -978,8 +1140,33 @@ void StGeant4Maker::Stepping(){
   mc->TrackPosition( vx,vy,vz );
   tof = mc->TrackTime(); // because consistent interface ala TrackMomentum is hard...
 
+  bool stopped = false;
+
+  static double Rmin = DAttr("Stepping:Punchout:Rmin");
+  static double Zmin = DAttr("Stepping:Punchout:Zmin");
+
+  // Defines a tracking region which overrides the geometry module region assignment
+  auto trackingRegion = [=]()->bool {
+       
+    bool result = false;
+    
+    double x,y,z,r;
+    mc->TrackPosition( x, y, z );
+    r = TMath::Sqrt( x*x + y*y );
+    z = TMath::Abs(z);
+
+    bool tpcFiducial = r < Rmin && z < Zmin;
+    bool fwdFiducial = r < 90.0;             // 90cm is poletip donut hole
+
+    bool fcsFiducial = z > 700 && z < 1000 && TMath::Abs(x) < 150 && TMath::Abs(y) < 101.0;
+
+
+    return tpcFiducial || fwdFiducial || fcsFiducial;
+
+  };
+
   // Check if option to stop punchout tracks is enabled
-  if ( IAttr("Stepping:Punchout:Stop") && 1==transit) {
+  if ( IAttr("Stepping:Punchout:Stop") && 1==transit && !trackingRegion() ) {
     
     if ( 2==IAttr("Stepping:Punchout:Stop") ) {
 
@@ -1006,15 +1193,17 @@ void StGeant4Maker::Stepping(){
 
     } 
 
-    LOG_INFO << "Stopping track at z=" << vz << endm;
-    mPreviousVolume->Print();
-    mCurrentVolume->Print();
+    //    LOG_INFO << "Stopping track at z=" << vz << endm;
+    //    mPreviousVolume->Print();
+    //    mCurrentVolume->Print();
     mc->StopTrack();
+    stopped = true;
     
   }
 
   // Score interaction vertices on entrance / exit of a tracking region
-  if ( 2==mCurrentTrackingRegion || 0!=transit ) {
+  bool transitCheck = (0!=transit)&&IAttr("Scoring:Transit");
+  if ( 2==mCurrentTrackingRegion || transitCheck ) {
 
     int nsec  = mc->NSecondaries();
 
@@ -1066,6 +1255,11 @@ void StGeant4Maker::Stepping(){
       
     }
 
+  }
+
+  if ( stopped ) {
+    LOG_INFO << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
+		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
   }
 
 

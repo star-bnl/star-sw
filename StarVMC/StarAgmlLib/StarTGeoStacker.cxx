@@ -641,12 +641,7 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
       if ( 0==agmlExt ) { 
 	// Create new agml extension
 	gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); 
-	// Add user hits to the extension
-	for ( auto kv : module->GetHitScoring() ) {
-	  TString key          = kv.first;
-	  AgMLScoring* scoring = kv.second;
-	  agmlExt -> AddHitScoring( scoring );
-	}
+        // NOTE: user hits have not been defined at this point, add to extension at point of definition
       }
       agmlExt->SetVolumeName( nn );
       agmlExt->SetFamilyName( block->GetName() );

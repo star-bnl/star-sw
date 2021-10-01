@@ -68,7 +68,7 @@ public:
   //void  addHit(){ mNumHits++; } 
 
   const long long numberOfHits(){ return mHits.size(); } 
-  void  addHit( DetectorHit* hit ){ mHits.push_back(hit); } 
+  void  addHit( DetectorHit* hit );//{ mHits.push_back(hit); } 
 
   std::vector<DetectorHit*>& hits(){ return mHits; }
   
@@ -224,9 +224,15 @@ class StMCParticleStack : public TVirtualMCStack
 
   StarMCVertex* GetVertex( double vx, double vy, double vz, double vt, int proc=-1 );
 
-  StarMCParticle* GetPersistentTrack( int stackIndex ) {    return mStackToTable[ stackIndex ];  }
+  StarMCParticle* GetPersistentTrack( int stackIndex );
 
   int GetIdTruth( StarMCParticle* part ){ return mIdTruthFromParticle[part]; }
+
+  void SetScoring( const float rmax, const float zmax, const float emin ){
+    mScoringRmax=rmax;
+    mScoringZmax=zmax;
+    mScoringEmin=emin;
+  };
 
  private:
  protected:
@@ -250,7 +256,10 @@ class StMCParticleStack : public TVirtualMCStack
 
   std::map<StarMCParticle*, int> mIdTruthFromParticle;
 
-
+  float mScoringRmax;
+  float mScoringZmax;
+  float mScoringEmin;
+  
   //  ClassDef(StMCParticleStack,0);
     
 };

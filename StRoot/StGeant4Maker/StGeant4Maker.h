@@ -8,7 +8,7 @@
 #include "TVirtualMCApplication.h"
 #include "TVirtualMagField.h"
 #include "StarMagField.h"
-#include <StGeant4Maker/StSensitiveDetector.h> 
+#include <StSensitiveDetector.h> 
 
 
 
@@ -24,10 +24,12 @@ class TG4RunConfiguration;
 
 class St_g2t_track; 
 
+class StEvtHddr;
+
 //______________________________________________________________________________________
 class StarMagFieldAdaptor : public TVirtualMagField {
 public:
-  void Field( const Double_t *x, Double_t *B )
+  void Field( const double *x, double *B )
   { 
     StarMagField::Instance()->BField(x,B); 
   }
@@ -35,7 +37,7 @@ public:
 //______________________________________________________________________________________
 class StarVMCApplication : public TVirtualMCApplication {
 public:
-  StarVMCApplication( const Char_t *name = "starsim", const Char_t *title="STAR VMC simulation", double zmax=DBL_MAX, double rmax=DBL_MAX );
+  StarVMCApplication( const char *name = "starsim", const char *title="STAR VMC simulation", double zmax=DBL_MAX, double rmax=DBL_MAX );
  ~StarVMCApplication(){ /* nada */ };
 
   /// Geometry construction is the responsability of the STAR chain
@@ -43,7 +45,7 @@ public:
   virtual void ConstructSensitiveDetectors();
 
   /// Misalignment of geometry.  Default false.
-  virtual Bool_t MisalignGeometry(){ return false; }
+  virtual bool MisalignGeometry(){ return false; }
 
   /// Define parameters for optical processes (optional)
   virtual void ConstructOpGeometry() { LOG_INFO << "VMC APP ConstructOpGeometry()" << endm; }
@@ -82,13 +84,13 @@ public:
   virtual void FinishEvent();
 
   /// Define maximum radius for tracking (optional)
-  virtual Double_t TrackingRmax() const { return mRmax; }
+  virtual double TrackingRmax() const;
 
   /// Define maximum z for tracking (optional)
-  virtual Double_t TrackingZmax() const { return mZmax; }
+  virtual double TrackingZmax() const;
 
   /// Calculate user field \a b at point \a x
-  virtual void Field(const Double_t* x, Double_t* b) const { StarMagField::Instance()->BField(x,b); }
+  virtual void Field(const double* x, double* b) const { StarMagField::Instance()->BField(x,b); }
 
   /// Define action at each step for Geane
   virtual void GeaneStepping() {;}    
@@ -104,7 +106,9 @@ protected:
 };
 //______________________________________________________________________________________
 class StGeant4Maker : public StMaker {
+
 public:
+
   StGeant4Maker( const char* nm="geant4star" );
   ~StGeant4Maker(){ /* nada */ };
 
@@ -160,6 +164,8 @@ protected:
   AgMLExtension* acurr;
   AgMLExtension* aprev;
 
+  StEvtHddr* mEventHeader;
+
   int regionTransition( int, int );
 
   /// @param T specifies the type of the table   
@@ -190,9 +196,17 @@ protected:
     sd->Clear();
 
     return nhits;
-  }
+  };
 
-  ClassDef(StGeant4Maker,0);
+  ClassDef(StGeant4Maker,1);
+
+public:
+
+  virtual const char *GetCVS() const
+  {
+    static const char cvs[]="Tag $Name:$ $Id:$ built __DATE__ __TIME__ "; 
+    return cvs;
+  }
 
 };
 //______________________________________________________________________________________

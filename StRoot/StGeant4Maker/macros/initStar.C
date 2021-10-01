@@ -13,6 +13,7 @@ void initStar() {
   for (int sig = 0; sig < kMAXSIGNALS; sig++) gSystem->ResetSignal((ESignals)sig);
 
   // Add a few things to the include path
+  gSystem->AddIncludePath(" -I$STAR/StRoot -I$STAR/StarVMC ");
   gSystem->AddIncludePath(" -IStRoot -Igeom -IStarVMC -IStarVMC/Geometry/macros -I.${STAR_HOST_SYS}/include ");
   gEnv->SetValue("Logger.Colors","YES");   
 

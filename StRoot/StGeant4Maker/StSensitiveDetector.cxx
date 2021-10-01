@@ -1,12 +1,12 @@
-#include <StRoot/StGeant4Maker/StSensitiveDetector.h>
+#include <StSensitiveDetector.h>
 
 #include <TGeoManager.h>
 #include <TGeoNavigator.h>
 #include <TVirtualMC.h>
 
-#include <StRoot/StGeant4Maker/StMCParticleStack.h>
-#include <StRoot/StGeant4Maker/StHitCollection.h>
+#include <StMCParticleStack.h>
 #include <StMessMgr.h>
+#include <StHitCollection.h>
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 
