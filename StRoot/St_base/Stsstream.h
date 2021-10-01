@@ -9,32 +9,17 @@
 #ifndef STSSTREAM_H
 #define STSSTREAM_H
 #include <ctype.h>
-//#include "Rstrstream.h"
-#include <sstream>
-#define ostrstream St_ostrstream
+#include "Rstrstream.h"
+#ifdef R__SSTREAM
 using std::streamsize;
-namespace std {
-class St_ostrstream : public std::ostringstream {
-std::string myString;
-public:
-const char *str()         
-{
-  std::string tmp = std::ostringstream::str();
-  if (myString != tmp) myString=tmp;
-  return myString.c_str();
-}	
-int        pcount()       {return int(tellp()) ;}
-void       seekp(int pos) {if (int(tellp())>=0) std::ostringstream::seekp(pos);}
-void freeze(bool) const{;}
-};	
-}; //end of namespace
-using std::St_ostrstream;
 
 class istrstream : public std::istringstream {
 public:
 istrstream(): std::istringstream(){}
 istrstream(const char *init):std::istringstream(std::string(init)){}
 };
+#else
+#endif 
 
 // Hide the function from `rootcint` as it cannot process variadic template parameters
 #ifndef __CINT__
