@@ -7,6 +7,9 @@ StBFChain* chain = 0;
 
 // Random number generator seed
 int __rngSeed = 12345;
+bool __export = false;
+TString __rngName = ""; 
+TString __geometry_tag="dev2021"; 
 
 // Add a new maker to the chain
 void addMaker( const char* name, const char* maker ) {
@@ -46,7 +49,7 @@ bool hasRuntimeArg( const char* arg_ ) {
   return result;
 }
 
-void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
+void loadStar(TString mytag="dev2021", Bool_t agml = true  )
 {
 
   gROOT->ProcessLine("chain = new StBFChain();");
