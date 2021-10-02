@@ -7,6 +7,9 @@ StBFChain* chain = 0;
 
 // Random number generator seed
 int __rngSeed = 12345;
+bool __export = false;
+TString __rngName = ""; 
+TString __geometry_tag="dev2021"; 
 
 // Add a new maker to the chain
 void addMaker( const char* name, const char* maker ) {
@@ -46,14 +49,13 @@ bool hasRuntimeArg( const char* arg_ ) {
   return result;
 }
 
-void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
+void loadStar(TString mytag="dev2021", Bool_t agml = true  )
 {
 
   gROOT->ProcessLine("chain = new StBFChain();");
   gROOT->ProcessLine("chain->cd();");
   gROOT->ProcessLine("chain->SetDebug(1);");  
 
-  //  TString chainOpts = "agml geant4 geant4vmc stargen geant4mk pythia8.1.86 kinematics -emc_t -ftpcT nodefault ";
   TString chainOpts = "agml geant4 geant4vmc stargen geant4mk kinematics -emc_t -ftpcT nodefault ";
 
   // pickup command line options ala "--" and add them as a chain option
@@ -61,13 +63,17 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   for ( int i=0; i<gApplication->Argc();i++ ) {
     TString arg = gApplication->Argv(i);
     if ( arg.Contains("--web") || arg.Contains("notebook") ) continue;
+    if ( arg=="--export" ) { __export = true; continue; } // exports geometry
     // Parse "--" style options for ourselves
     if ( arg.Contains("--") ) {
       arg.ReplaceAll("--"," "); // n.b. the space pads out the chain options
       // If the option matches key=value, treat this as an attribute to be
       // set on the G4 maker...
       if ( arg.Contains("=") ) {
-	// Skip for now
+	// Generally skip, but output triggers geant4out chain option
+	if ( arg.Contains("output") ) {
+	  chainOpts += " geant4out ";
+	}
       }
       else {
 	chainOpts += arg;
@@ -78,7 +84,6 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   // Set the chain options
   gROOT->ProcessLine(Form("chain->SetFlags(\"%s\");",chainOpts.Data()));
 
-  // Find the output filename, if given, and set as the output
   TString output = "";
   for ( int i=0; i<gApplication->Argc();i++ ) {
     TString arg = gApplication->Argv(i);  
@@ -90,11 +95,15 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
       if ( arg.Contains("=") ) {
 	TString key = arg.Tokenize("=")->At(0)->GetName();
 	TString val = arg.Tokenize("=")->At(1)->GetName();
-	std::cout << " key = [" << key.Data() << "] value = " << val.Data() << std::endl;
+	//     std::cout << " key = [" << key.Data() << "] value = " << val.Data() << std::endl;
+	// Find the output filename, if given, and set as the output
 	if ( key=="output" ){
 	  output = val;
 	  gROOT->ProcessLine(Form("chain->Set_IO_Files(\"\",\"%s\");",output.Data()));
-	  break;
+         //break;
+	}
+        if ( key=="geometry" ) {
+	    mytag = val;
 	}
       }
     }
@@ -127,7 +136,6 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
     if ( _generatorMap[s] != "" ) {
       addGenerator( s, _generatorMap[s] );
     }
-    
   }
   
 
@@ -154,27 +162,33 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
 
     TString arg = gApplication->Argv(i);
     if ( arg.Contains("--web") || arg.Contains("notebook") ) continue;
+
     // Parse "--" style options for ourselves
     if ( arg.Contains("--") ) {
-      arg.ReplaceAll("--"," ");
+      arg.ReplaceAll("--","");
 
       // If the option matches key=value, treat this as an attribute to be
       // set on the G4 maker...                                        
       if ( arg.Contains("=") ) {
 
 	TString key = arg.Tokenize("=")->At(0)->GetName();
-	TString val = arg.Tokenize("=")->At(0)->GetName();
+	TString val = arg.Tokenize("=")->At(1)->GetName();
+
+	if ( key=="geometry" ) continue; // action already taken
+	if ( key=="output"   ) continue; // ... ditto
+
+	//	std::cout << "geant4star commandline option " << key.Data() << " = " << val.Data() << std::endl;
 
 	// Process RNG seed
 	if ( key=="seed" ) {
 	  __rngSeed = val.Atoi();
-	  gMessMgr->Info() << "--seed=" << __rngSeed << " detected" << endm;
+	  gMessMgr->Info() << "Setting RNG seed --seed=" << __rngSeed << endm;	  
 	  continue;
 	}
 
-	// Process output file
-	if ( arg.Contains("output") ) {
-	  /* nada */ 
+	if ( key=="rng" ) {
+	  __rngName = val;
+	  gMessMgr->Info() << "Setting RNG --rng=" << __rngName.Data() << endm;	  
 	  continue;
 	}
 
@@ -194,29 +208,42 @@ void loadStar(const Char_t *mytag="dev2021", Bool_t agml = true  )
   const char* cmds[] = { 
 
     // Geometry instantiation
-    "TString __geometry_tag = \"dev2021\";"
+    //"TString __geometry_tag = \"dev2021\";"
     "AgModule::SetStacker( new StarTGeoStacker() );"
     "StarGeometry::Construct(__geometry_tag);"
-    "gGeoManager->Export(\"y2014x.root\");"
-    "gGeoManager->Export(\"y2014x.C\");"
+    // "gGeoManager->Export(\"y2014x.root\");"
+    // "gGeoManager->Export(\"y2014x.C\");"
 
   };
 
+  //gROOT->ProcessLine( Form("TString __geometry_tag = \"%s\";", mytag.Data() ) );
   for ( auto cmd : cmds ) {
     gROOT->ProcessLine( cmd );
   }
+
+  if ( __export ) {
+    gROOT->ProcessLine(Form( "gGeoManager->Export(\"%s.root\");", mytag.Data() ));
+  }
+
+  
+
 
 }
 
 bool __initialized = false;
 
 bool initChain( std::vector<std::string> _cmds={ "std::cout << \"Chain has been initialized.\" << std::endl;" } ) {
+  std::cout << "initChain is called seed = " << __rngSeed << std::endl;
   if ( !__initialized ) { 
-    //    gROOT->ProcessLine(Form("chain->SetAttr(\"Random:G4\",%i)",__rngSeed));
-    // Setup RNG seed and map all ROOT TRandom here
-    // gROOT->ProcessLine(Form("StarRandom::seed( %i );",__rngSeed));
-    // gROOT->ProcessLine("StarRandom::capture();"); 
-    // gMessMgr->Info() << "RNG seed set to " << __rngSeed << endm;
+
+    if ( __rngSeed > -1 ) {
+      gROOT->ProcessLine(Form("chain->SetAttr(\"Random:G4\",%i)",__rngSeed));
+      // Setup RNG seed and map all ROOT TRandom here
+      gROOT->ProcessLine(Form("StarRandom::seed( %i );",__rngSeed));
+      gROOT->ProcessLine("StarRandom::capture();"); 
+      gMessMgr->Info() << "RNG seed set to " << __rngSeed << endm;
+    }
+
     gROOT->ProcessLine("chain->Init();"); 
     for ( auto cmd : _cmds ) {
       gROOT->ProcessLine( cmd.c_str() );
@@ -280,5 +307,11 @@ void particleGun( const char* particle="mu+", double px=1.0/sqrt(2), double py=1
 
 
 void geant4star(){ 
+  TString cmdline="geant4star:";
+  for ( int i=0;i<gApplication->Argc();i++ ) {
+    cmdline+=" ";
+    cmdline+=gApplication->Argv(i); 
+  }
+  std::cout << cmdline.Data() << std::endl;
   loadStar(); 
 }

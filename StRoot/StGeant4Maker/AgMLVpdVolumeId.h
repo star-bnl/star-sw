@@ -9,7 +9,7 @@ public:
   
   AgMLVpdVolumeId(){}
 
-  static const int version = 2;
+  static const int version = 2; // version is hard coded to the dev2021 geometry
   
   virtual int id( int* numbv ) const { 
 

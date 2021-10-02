@@ -15,7 +15,7 @@ using namespace std;
 StMessageCounter* StMessageCounter::mInstance = 0;
 
 //_____________________________________________________________________________
-StMessageCounter::StMessageCounter() : ostrstream(),
+StMessageCounter::StMessageCounter() : std::ostringstream(),
 limitMessage(" - COUNT LIMIT REACHED!\n") {
   messTypeList = StMessTypeList::Instance();
   yesLimits = 0;

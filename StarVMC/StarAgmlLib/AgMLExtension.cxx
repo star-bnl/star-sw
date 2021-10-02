@@ -1,4 +1,5 @@
 #include "AgMLExtension.h"
+#include <StMessMgr.h>
 
 AgMLExtension::AgMLExtension() : TGeoRCExtension(), 
 				 mModuleName("none"), 
@@ -12,4 +13,18 @@ AgMLExtension::AgMLExtension() : TGeoRCExtension(),
 				 mGstpar()
 {
   Grab();
+}
+
+void AgMLExtension::Print( const char* opts ) {
+
+  LOG_INFO << mModuleName.Data() << ":"
+	   << mFamilyName.Data() << ":"
+	   << mVolumeName.Data() << " this="
+	   << this << " sens="
+	   << mSensitive << " tracking="
+	   << mTracking << " nbranch="
+	   << mBranchings << " nuser="
+	   << mHitScoring.size() << " "
+	   << endm;
+
 }

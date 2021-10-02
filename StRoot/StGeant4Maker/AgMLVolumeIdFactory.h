@@ -5,22 +5,23 @@
 #include <map>
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
-#include <StRoot/StGeant4Maker/AgMLTpcVolumeId.h>
-#include <StRoot/StGeant4Maker/AgMLFstVolumeId.h>
-#include <StRoot/StGeant4Maker/AgMLStgVolumeId.h>
-#include <StRoot/StGeant4Maker/AgMLWcaVolumeId.h>
-#include <StRoot/StGeant4Maker/AgMLHcaVolumeId.h>
-#include <StRoot/StGeant4Maker/AgMLPreVolumeId.h>
-#include <StRoot/StGeant4Maker/AgMLEpdVolumeId.h>
-#include <StRoot/StGeant4Maker/AgMLEmcVolumeId.h>
-#include <StRoot/StGeant4Maker/AgMLEEmcVolumeId.h>
-#include <StRoot/StGeant4Maker/AgMLBTofVolumeId.h>
-#include <StRoot/StGeant4Maker/AgMLMtdVolumeId.h>
-#include <StRoot/StGeant4Maker/AgMLVpdVolumeId.h>
+#include <AgMLTpcVolumeId.h>
+#include <AgMLFstVolumeId.h>
+#include <AgMLStgVolumeId.h>
+#include <AgMLWcaVolumeId.h>
+#include <AgMLHcaVolumeId.h>
+#include <AgMLPreVolumeId.h>
+#include <AgMLEpdVolumeId.h>
+#include <AgMLEmcVolumeId.h>
+#include <AgMLEEmcVolumeId.h>
+#include <AgMLBTofVolumeId.h>
+#include <AgMLMtdVolumeId.h>
+#include <AgMLVpdVolumeId.h>
 
 class AgMLVolumeIdFactory {
 public:
 
+  // TODO: Identify what the test flag is for and (probably) remove it 
   static AgMLVolumeId* Create( TString name, bool test=false ) { 
 
     static std::map<TString,AgMLVolumeId*> VolumeId;
