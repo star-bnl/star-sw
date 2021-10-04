@@ -114,6 +114,8 @@
 #include "StMuMcTrack.h"
 #include "StG2TrackVertexMap.h"
 
+#include <strstream> //added/needed to compile successfully after 01.Oct.21. Remove in merger if problem is solved in a different way. No further changes in file. Weidenkaff
+
 class StEpdHit;  // MALisa
 
 ClassImp(StMuDstMaker)
