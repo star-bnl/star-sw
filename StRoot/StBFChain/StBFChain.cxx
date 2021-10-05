@@ -1928,6 +1928,7 @@ void StBFChain::SetTreeOptions()
     treeMk->IntoBranch("McEventBranch","StMcEvent");
   }
   if (GetOption("GeantOut")) treeMk->IntoBranch("geantBranch","geant");
+  if (GetOption("Geant4Out")) treeMk->IntoBranch("geantBranch","geant4star");
   if (GetOption("AllEvent")) {
     if (GetOption("fzin")   ||
 	GetOption("ntin")   ||
