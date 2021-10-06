@@ -89,6 +89,17 @@ public:
     void setDebug( const bool debug );
     void setStrictPulserHandling( const bool debug );
     void setReferencePulserIndex( const int index );
+    
+    //moved to public to avoid problem with root6
+    struct StructStuckFwDigi{
+		  Int_t     geomId;
+		  Double_t  time;
+		  Double_t  tot;
+
+		  bool operator==( const StructStuckFwDigi& r ) const {
+		      return geomId == r.geomId && fabs( time - r.time ) < 1.e-5 && fabs( tot - r.tot ) < 1.e-5;
+		  }
+    };
 
 
 private:
@@ -138,7 +149,7 @@ private:
     std::string   mFileNameTimingWindow;        // name of parameter file for timing window
     std::string   mFileNameSignalVelocity;      // name of parameter file for signal velocity
     std::string   mFileNameCalibHistograms;     // name of parameter file for calibration histograms (output of QA maker)
-	 std::string   mFileNameOffsetHistograms;    // name of parameter file for run by run offsets histograms (output of QA maker)
+    std::string   mFileNameOffsetHistograms;    // name of parameter file for run by run offsets histograms (output of QA maker)
     std::string   mFileNameResetTimeCorr;       // name of parameter file for reset time correction
     std::string   mFileNamePulserTotPeak;       // name of parameter file for pulser peak tot
     std::string   mFileNamePulserTimeDiffGbtx;  // name of parameter file for pulser time diff
@@ -175,17 +186,6 @@ private:
 
     std::map< UInt_t, Int_t >     mUnlockPulserState;   // map that counts pulser offsets to avoid locking into the wrong pulser offset state
 
-
-    struct StructStuckFwDigi{
-        Int_t     geomId;
-        Double_t  time;
-        Double_t  tot;
-
-        bool operator==( const StructStuckFwDigi& r ) const {
-            return geomId == r.geomId && fabs( time - r.time ) < 1.e-5 && fabs( tot - r.tot ) < 1.e-5;
-        }
-    };
-
     std::vector< StructStuckFwDigi > mStuckFwDigi; // list of digis to ignore for the rest of the run due to stuck firmware
 
 	 Bool_t 			mStrictPulserHandling;
@@ -201,7 +201,7 @@ private:
 
     virtual const Char_t *GetCVS() const { static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs; }
 
-    ClassDef( StETofCalibMaker, 1 )
+    ClassDef( StETofCalibMaker, 0 )
 };
 
 inline void StETofCalibMaker::setFileNameCalibParam(         const char* fileName )     { mFileNameCalibParam         = fileName; }
