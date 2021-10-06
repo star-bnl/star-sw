@@ -53,6 +53,7 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 
   @histRL5 = @histGF;
   @histGP = qw (
 		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
+		 TPoints270 TPoints2F TPoints270U TPoints2FU  TPoints2N TPoints2NU
 	      );
 # 		 I70eP I70eN I70protonP I70protonN I70kaonP I70kaonN I70piP I70piN I70muP I70muN I70deuteronP I70deuteronN I70tritonP I70tritonN I70He3P I70He3N I70alphaP I70alphaN 
 # 		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 

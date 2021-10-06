@@ -5,9 +5,9 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   echo $INPUTFILE0 | grep ':'
-#  setenv NODEBUG yes
-#  setenv STARFPE NO
-#  starver .DEV2
+  if $?NODEBUG)  unsetenv NODEBUG 
+  setenv STARFPE NO
+  starver .DEV2
   if (! $?) then
     set rung  = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
     set f     = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
