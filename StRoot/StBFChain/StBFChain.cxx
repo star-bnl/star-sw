@@ -509,10 +509,12 @@ Int_t StBFChain::Instantiate()
 	  GetOption("PrepEmbed")   || 
 	  GetOption("mtin")        ||
 	  GetOption("mickey")      ||
+	  GetOption("pythia")      ||
 	  CintF != "") {
 	mk->SetActive(kTRUE);
 	//	if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
 	if (GetOption("Embedding") || GetOption("PrepEmbed") || GetOption("pythiaEmbed") || GetOption("fzinSDT")) mk->SetAttr("Don'tTouchTimeStamp",kTRUE);
+	if (GetOption("pythia"))    mk->SetAttr("pythia",kTRUE);
 	if (GetOption("flux"))      mk->SetAttr("flux",kTRUE);
 	if (GetOption("fzout"))     mk->SetAttr("fzout",kTRUE);
 	if (GetOption("beamLine"))  mk->SetAttr("beamLine",kTRUE);
@@ -545,6 +547,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VMCPassive")) {// don't use mk->SetActive(kFALSE) because we want to have InitRun
 	mk->SetAttr("VMCPassive",kTRUE);
       }  else {
+	if (GetOption("fluxVMC"))  mk->SetAttr("fluxVMC",kTRUE);
 	if (GetOption("beamLine")) mk->SetAttr("beamLine",kTRUE);
 	if (GetOption("phys_off")) mk->SetAttr("phys_off",kTRUE);
 	if (GetOption("hadr_off")) mk->SetAttr("hadr_off",kTRUE);
