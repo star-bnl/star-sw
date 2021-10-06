@@ -209,7 +209,9 @@ class StarGenEvent : public TObject
   void AddUserWeight( double w ){ mWeights.push_back(w); }
 
   /// Retrieve the user weights vector
-  const std::vector<double>& GetUserWeights(){ return mWeights; }
+  const std::vector<double>& GetUserWeights()       { return mWeights; }
+  /// Retrieve the user weights vector
+  const std::vector<double>& GetUserWeights() const { return mWeights; }
 
  private:
   /// Copy ctor is private.  
