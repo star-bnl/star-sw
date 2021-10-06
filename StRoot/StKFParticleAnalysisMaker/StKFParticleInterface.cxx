@@ -1981,7 +1981,13 @@ Bool_t StKFParticleInterface::PidQA(StPicoDst* picoDst, std::vector<int> trakIdT
     if (index > 0 && index <= nGlobalTracks) {
       StPicoTrack *gTrack = picoDst->track(index);
       if (! gTrack) continue;
-      if (_debug) gTrack->Print();
+      if (_debug) {
+	StPicoTrackCovMatrix *cov = picoDst->trackCovMatrix(index);
+	const StDcaGeometry dca = cov->dcaGeometry();
+	KFParticle p = dca.Particle(index,particle.GetPDG());
+	p.Print();
+	gTrack->Print();
+      }
       StPidStatus PiD(gTrack); 
       if (PiD.PiDStatus < 0) continue;
       FillPidQA(&PiD, particle.GetPDG(), 0);
@@ -2008,11 +2014,25 @@ Bool_t StKFParticleInterface::PidQA(StPicoDst* picoDst, std::vector<int> trakIdT
       }
     }
     if (! foundUniq) continue;
-    StPicoTrack *gTrack1 = picoDst->track(index1); if (_debug) gTrack1->Print();
+    StPicoTrack *gTrack1 = picoDst->track(index1); 
+    if (_debug) {
+      StPicoTrackCovMatrix *cov = picoDst->trackCovMatrix(index1);
+      const StDcaGeometry dca = cov->dcaGeometry();
+      KFParticle p = dca.Particle(index1,p1.GetPDG());
+      p.Print();
+      gTrack1->Print();
+    }
     StPidStatus PiD1(gTrack1); 
     if (PiD1.PiDStatus < 0) continue;
     FillPidQA(&PiD1, p1.GetPDG(), particle->GetPDG());
-    StPicoTrack *gTrack2 = picoDst->track(index2); if (_debug) gTrack2->Print();
+    StPicoTrack *gTrack2 = picoDst->track(index2); 
+    if (_debug) {
+      StPicoTrackCovMatrix *cov = picoDst->trackCovMatrix(index2);
+      const StDcaGeometry dca = cov->dcaGeometry();
+      KFParticle p = dca.Particle(index2,p2.GetPDG());
+      p.Print();
+      gTrack2->Print();
+    }
     StPidStatus PiD2(gTrack2); 
     if (PiD2.PiDStatus < 0) continue;
     FillPidQA(&PiD2, p2.GetPDG(), particle->GetPDG());
@@ -2037,7 +2057,12 @@ Bool_t StKFParticleInterface::PidQA(StMuDst* muDst, std::vector<int> trakIdToI) 
     if (index > 0 && index <= nGlobalTracks) {
       StMuTrack *gTrack = muDst->globalTracks(index);
       if (! gTrack) continue;
-      if (_debug) gTrack->Print();
+      if (_debug) {
+	const StDcaGeometry* dca = gTrack->dcaGeom();
+	KFParticle p = dca->Particle(index,particle.GetPDG());
+	p.Print();
+	gTrack->Print();
+      }
       StPidStatus PiD(gTrack); 
       if (PiD.PiDStatus < 0) continue;
       FillPidQA(&PiD, particle.GetPDG(), 0);
@@ -2063,11 +2088,25 @@ Bool_t StKFParticleInterface::PidQA(StMuDst* muDst, std::vector<int> trakIdToI) 
       }
     }
     if (! foundUniq) continue;
-    StMuTrack *gTrack1 = muDst->globalTracks(index1); if (_debug) gTrack1->Print();
+    StMuTrack *gTrack1 = muDst->globalTracks(index1); 
+    if (_debug) {
+      p1.Print();
+      const StDcaGeometry* dca = gTrack1->dcaGeom();
+      KFParticle p = dca->Particle(index1,p1.GetPDG());
+      p.Print();
+      gTrack1->Print();
+    }
     StPidStatus PiD1(gTrack1); 
     if (PiD1.PiDStatus < 0) continue;
     FillPidQA(&PiD1, p1.GetPDG(), particle->GetPDG());
-    StMuTrack *gTrack2 = muDst->globalTracks(index2); if (_debug) gTrack2->Print();
+    StMuTrack *gTrack2 = muDst->globalTracks(index2); 
+    if (_debug) {
+      p2.Print();
+      const StDcaGeometry* dca = gTrack2->dcaGeom();
+      KFParticle p = dca->Particle(index2,p2.GetPDG());
+      p.Print();
+      gTrack2->Print();
+    }
     StPidStatus PiD2(gTrack2); 
     if (PiD2.PiDStatus < 0) continue;
     FillPidQA(&PiD2, p2.GetPDG(), particle->GetPDG());
