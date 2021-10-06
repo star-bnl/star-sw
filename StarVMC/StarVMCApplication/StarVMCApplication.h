@@ -18,6 +18,7 @@
 class TGeoPhysicalNode;
 class TGeoHMatrix;
 class TGeoRotation;
+class TGeant3TGeo;
 struct VMCPath2Detector_st  {   /* path to the detector element  */
   Char_t     VName[32];         /* Volume of branching           */
   Int_t      Ncopy;             /* number of branchings          */
@@ -73,6 +74,10 @@ class StarVMCApplication : public TVirtualMCApplication {
 		   const Char_t *mode1A = 0, const Char_t *mode1B = 0, const Char_t *mode1C = 0, Float_t branch1 = 0,
 		   const Char_t *mode2A = 0, const Char_t *mode2B = 0, const Char_t *mode2C = 0, Float_t branch2 = 0,
 		   const Char_t *mode3A = 0, const Char_t *mode3B = 0, const Char_t *mode3C = 0, Float_t branch3 = 0);
+  static void usflux();
+  static Int_t ipartx(Int_t id);
+  static Float_t dose(Float_t Z);
+  static void SetFlux(Bool_t k = kTRUE) {flux = k;}
  private:
   // methods
   
@@ -80,10 +85,12 @@ class StarVMCApplication : public TVirtualMCApplication {
   StarStack               *fStarStack;
   StarMCPrimaryGenerator  *fPrimaryGenerator;
   StarMCHits              *fMcHits;
+  static TGeant3TGeo      *fgGeant3; //!
   Int_t                    fDebug;
   Bool_t                   fAlignment;
   Bool_t                   fAlignmentDone;
   Int_t                    fStatus;
+  static Bool_t            flux;
   ClassDef(StarVMCApplication,1)  //Interface to MonteCarlo application
 };
 

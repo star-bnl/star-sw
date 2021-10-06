@@ -53,10 +53,17 @@
 #include "StSstUtil/StSstBarrel.hh"
 #include "StarGenerator/BASE/StarPrimaryMaker.h"
 #include "Stypes.h"
+#include "TGraph.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TH3.h"
+#include "StMaker.h"
 TableClassImpl(St_VMCPath2Detector,VMCPath2Detector_st);
 ClassImp(StarVMCApplication);
 #define PrPV(B)      if (Debug())                {std::cout << (#B) << " = \t"; (B).Print();} 
 static const TString separator("/_"); 
+Bool_t StarVMCApplication::flux = kFALSE;
+TGeant3TGeo *StarVMCApplication::fgGeant3 = 0;
 //_____________________________________________________________________________
 StarVMCApplication::StarVMCApplication(const char *name, const char *title) : 
   TVirtualMCApplication(name,title),
@@ -108,10 +115,10 @@ void StarVMCApplication::InitGeometry() {
     TVirtualMC::GetMC()->SetRootGeometry();
   }  
   if (TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3TGeo")) {
-    TGeant3TGeo *geant3 = (TGeant3TGeo *)TVirtualMC::GetMC();
+    fgGeant3 = (TGeant3TGeo *)TVirtualMC::GetMC();
     if (Debug()) {
-      geant3->Gprint("mate");
-      geant3->Gprint("tmed");
+      fgGeant3->Gprint("mate");
+      fgGeant3->Gprint("tmed");
     }
   }
   if (fMcHits) fMcHits->Init();
@@ -148,7 +155,8 @@ void StarVMCApplication::PreTrack() {    // User actions at beginning of each tr
 }
 //_____________________________________________________________________________
 void StarVMCApplication::Stepping() {    // User actions at each step
-  if (fMcHits) fMcHits->Step();
+  if (flux) usflux();
+  else if (fMcHits) fMcHits->Step();
 }
 //_____________________________________________________________________________
 void StarVMCApplication::PostTrack() {    // User actions after finishing of each track
@@ -721,8 +729,7 @@ Ist: SensorGlobal = TpcOnGlobal * IdsOnTpc * PstOnIds * IstOnPst * LadderOnIst[l
 void StarVMCApplication::SetDebug(Int_t m) {
   fDebug = m;
   if (fDebug > 1) {
-    TGeant3TGeo *geant3 = (TGeant3TGeo *)gMC;
-    Gcflag_t* cflag = geant3->Gcflag();
+    Gcflag_t* cflag = fgGeant3->Gcflag();
     cflag->idebug = fDebug;
     cflag->idemin =     1;
     cflag->idemax = 10000;
@@ -740,12 +747,11 @@ void StarVMCApplication::ForceDecay(const Char_t *nameP,
     LOG_ERROR << "StarVMCApplication::ForceDecay does not work without TGeant3TGeo" << endm;
     return;
   }
-  TGeant3TGeo *g3 = (TGeant3TGeo *)TVirtualMC::GetMC();
   TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(nameP);
   assert(p);
   Int_t pdg = p->PdgCode();
   if (! pdg) return;
-  Int_t iD  = g3->IdFromPDG(pdg);
+  Int_t iD  = fgGeant3->IdFromPDG(pdg);
   const Char_t *modes[3][3] = {
     {mode1A, mode1B, mode1C},
     {mode2A, mode2B, mode2C},
@@ -795,13 +801,278 @@ void StarVMCApplication::ForceDecay(const Char_t *nameP,
       pdg = p->PdgCode();
       Line += modes[m][j];
       Line += " ";
-      Int_t Id = g3->IdFromPDG(pdg);
+      Int_t Id = fgGeant3->IdFromPDG(pdg);
       mode[m] = 100*mode[m] + Id;
     }
     bratio[m] = 100*branches[m]/total;
     LOG_INFO << "Force decay of " << nameP << " => " << Line.Data() << endm;
   }
-  g3->Gsdk(iD, bratio, mode);
+  fgGeant3->Gsdk(iD, bratio, mode);
+}
+//________________________________________________________________________________
+Int_t StarVMCApplication::ipartx(Int_t id) {
+  Int_t                            ipartxf = -1;
+  if      (id == 1)                ipartxf = 1;  // gamma
+  else if (id == 2 || id == 3)     ipartxf = 2;  // e+/-
+  else if (id == 5 || id == 6)     ipartxf = 3;  // mu+/-
+  else if (id == 13)               ipartxf = 4;  // neutron
+#if 0
+  else if ((id >=  8 && id <=  9) ||
+	   (id >= 11 && id <= 15)) ipartxf = 0;  // all other charged particles
+#endif
+  else                             ipartxf = 0;  // all other particles
+  return ipartxf;
+}
+//________________________________________________________________________________
+Float_t StarVMCApplication::dose(Float_t Z) {
+  /*                                                                      *
+   *  Function    : Interpolation of gamma dose rate                      *
+   *                                                                      *
+   *  Arguments   : Z   Atom number                                       */
+  static TGraph *graph = 0;
+  if (! graph) {
+    Int_t n = 43;
+    Double_t x[] = {11., 12., 13., 14., 15., 17., 18., 19., 20., 22.,
+		    23., 24., 25., 26., 27., 28., 29., 30., 32., 33.,
+		    34., 35., 38., 40., 41., 42., 43., 46., 47., 48.,
+		    49., 50., 51., 53., 57., 66., 73., 74., 78., 79.,
+		    80., 82., 83.}; // Z
+    Double_t y[] = {8.8033795E-02, 0.1175197    , 0.1043398    , 8.3658338E-02,
+		    7.6843806E-02, 5.7563554E-02, 4.0977564E-02, 4.6153713E-02,
+		    4.0977564E-02, 0.1257856    , 0.1797267    , 0.1679161    ,
+		    0.1650867    , 0.1828069    , 0.1828069    , 0.1956649    ,
+		    0.2094273    , 0.1923680    , 0.1923680    , 0.2612006    ,
+		    0.2795725    , 0.3095814    , 0.4499212    , 0.6880791    ,
+		    0.7240669    , 0.6213810    , 0.5          , 0.5          ,
+		    0.5          , 0.3546627    , 0.3796084    , 0.3428115    ,
+		    0.2941946    , 0.3370352    , 0.3          , 0.2702305    ,
+		    0.2941946    , 0.2567994    , 0.3607410    , 0.3607410    ,
+		    0.3428115    , 0.3          , 0.4}; // Dose
+    graph = new TGraph(n,x,y);
+  }
+  return 13.1286072899874E-6*TMath::Max(0., TMath::Min(0.5, graph->Eval(Z)));
+}
+//________________________________________________________________________________
+void StarVMCApplication::usflux() {
+  Int_t        id;
+  Float_t      OmegaN;
+  Int_t        i;
+  Float_t      ZZ, RR;
+  Int_t        NstepB;
+  Float_t      stepF, destepF, XYZ[3];
+  Float_t      RADIUS;
+  Int_t        p;
+  enum {Nregions = 1, Nparts = 5, NH1T = 3, NH1TE = NH1T + 1, NH2T = 9};
+  const Char_t *NameV[Nregions] = {""}; 
+  static TH1F *histV1[Nregions][NH1TE][Nparts];
+  //#define __3DPLOTS__
+#ifdef __3DPLOTS__
+  static TH3F *histV2[NH2T][Nparts];
+#else
+  static TH2F *histV2[NH2T][Nparts];
+#endif
+  static TH2F *tofg = 0;
+  static Bool_t first = kTRUE;
+  if (first) {
+    assert(StMaker::GetChain()->GetTFile());
+    StMaker::GetChain()->GetTFile()->cd();
+    first = kFALSE;
+    memset(histV1, 0, sizeof(histV1));
+    memset(histV2, 0, sizeof(histV2));
+    Double_t xstep =  5;
+    Double_t ystep =  2;
+    Double_t xmax  = 2000, xmin = - xmax;
+    Double_t ymax  = 1500, ymin =      0;
+    Int_t nx = (xmax - xmin)/xstep;
+    Int_t ny = (ymax - ymin)/ystep;
+    struct Name_t {
+      const Char_t *Name;
+      const Char_t *Title;
+    };
+    struct NameX_t {
+      Name_t name;
+      Int_t nX;
+      Double_t xMin, xMax;
+      Int_t nY;
+      Double_t yMin, yMax;
+    };
+    tofg = new TH2F("tofg","log_{10} (tof [nsec]) @ step versus particle type",140,-1,13,51,0.5,51.5);
+    Name_t Particles[Nparts] = {
+      {"", "#pi/K/p and others"}, // 0
+      {"g","#gamma"},             // 1
+      {"e","e^{#pm}"},            // 2
+      {"m","#mu^{#pm}"},          // 3
+      {"n","neutron"}             // 4
+    };
+    NameX_t Types1[NH1TE] = {
+      {{"Ekin10"    ,"Log_{10}(GEKIN) for %s for %s"                 }, 340, -14., 3.0, 0, 0, 0},  //5 -> 0 300
+      {{"Ekin10s"   ,"Log_{10}(GEKIN) for %s at step for %s weighted with L"   }, 340, -14., 3.0, 0, 0, 0},  //6 -> 1 320
+      {{"Ekin10V"   ,"Log_{10}(GEKIN) for %s at production Vx for %s"}, 340, -14., 3.0, 0, 0, 0},   //7 -> 2 400
+      {{"Ekin10overV","Log_{10}(GEKIN) for %s at step weight with L/v for %s"}, 340, -14., 3.0, 0, 0, 0} 
+    };
+    NameX_t Types2[NH2T] = {
+      {{"flux"      ,"flux from %s * step "                    }, nx, xmin, xmax, ny, ymin, ymax},  //0 100
+      {{"flux100keV","flux from %s * step E_{kin} > 100 keV "  }, nx, xmin, xmax, ny, ymin, ymax},  //1 800
+      {{"flux250meV","flux from %s * step E_{kin} < 250 meV "  }, nx, xmin, xmax, ny, ymin, ymax},  //2 500
+      {{"entries"   ,"entries from %s "                        }, nx, xmin, xmax, ny, ymin, ymax},  //3 900
+      {{"VxProd"    ,"Vertex Production of %s "                }, nx, xmin, xmax, ny, ymin, ymax},  //4 200
+      {{"dose"      ,"dose from %s "                           }, nx, xmin, xmax, ny, ymin, ymax},  //8 ->5  600
+      {{"star"      ,"star density  from %s "                  }, nx, xmin, xmax, ny, ymin, ymax},  //9 ->6 700
+      {{"RD"        ,"Residual Dose  from %s "                 }, nx, xmin, xmax, ny, ymin, ymax},  //0 ->7 701
+      {{"DepEnergy" ,"Deposited energy at step (keV)  from %s "}, nx, xmin, xmax, ny, ymin, ymax}
+    };
+    for (p = 0; p < Nparts; p++) {
+      TH1::SetDefaultSumw2(kTRUE);
+      for (Int_t r = 0; r < Nregions; r++) {
+	for (Int_t t = 0; t < NH1TE; t++) {
+	  //	  if (p != Nparts - 1 && t > NH1T) continue;
+	  TString Name(Types1[t].name.Name); Name += Particles[p].Name; Name += NameV[r];
+	  TString Title(Form(Types1[t].name.Title,Particles[p].Title,NameV[r]));
+	  histV1[r][t][p] = 
+	    new TH1F(Name,Title,Types1[t].nX,Types1[t].xMin,Types1[t].xMax);
+	}
+      }
+      TH1::SetDefaultSumw2(kFALSE);
+      for (Int_t t = 0; t < NH2T; t++) {
+	if (p == 3 && t > 1) continue;
+	TString Name(Types2[t].name.Name); Name += Particles[p].Name; 
+	TString Title(Form(Types2[t].name.Title,Particles[p].Title));
+	histV2[t][p] = 
+#ifdef __3DPLOTS__
+	  new TH3F(Name,Title,Types2[t].nX,Types2[t].xMin,Types2[t].xMax,Types2[t].nY,Types2[t].yMin,Types2[t].yMax,24,-180,180);
+#else
+	new TH2F(Name,Title,Types2[t].nX,Types2[t].xMin,Types2[t].xMax,Types2[t].nY,Types2[t].yMin,Types2[t].yMax);//24,-180,180);
+#endif
+      }
+    }
+    return;
+  }
+  // Fill histograms
+  Gckine_t *ckine = fgGeant3->Gckine();
+  Gctrak_t *ctrak = fgGeant3->Gctrak();
+  Gcking_t *cking = fgGeant3->Gcking();
+  Gcmate_t *cmate = fgGeant3->Gcmate();
+  Int_t Ipart = ckine->ipart%100;
+  p = ipartx (Ipart);
+  Double_t tofg10 = - 1;
+  if (ctrak->tofg > 0) tofg10 = TMath::Log10(1e9*ctrak->tofg);
+  tofg->Fill(tofg10,Ipart);
+  if (Ipart == 13 && ctrak->gekin <= 0.25E-9) tofg->Fill(tofg10,51);
+  if (p < 0) return;
+  Double_t Log10gekin = -20;
+#if 0
+  if (ctrak->gekin <= 0.0)       {
+    ctrak->istop = 2;
+    return;
+  }
+#else
+  if (ctrak->gekin > 0) Log10gekin = TMath::Log10(ctrak->gekin);
+#endif
+  if (ctrak->upwght < 1) ctrak->upwght = 1;
+  Int_t r = 0;
+  RR = TMath::Sqrt(ctrak->vect[0]*ctrak->vect[0] + ctrak->vect[1]*ctrak->vect[1]);
+  ZZ = ctrak->vect[2];
+  Double_t Phi = TMath::RadToDeg()*TMath::ATan2(ctrak->vect[1],ctrak->vect[0]);
+  if (Phi < -180) Phi += 360;
+  if (Phi >  180) Phi -= 360;
+  // calculate particle flux in sensitive volumes
+  if (! (ckine->charge == 0 && p < 0)) {
+    /*
+     * *** step cannot be bigger then 10 cm => suppose stright line in R/Z
+     */
+    if (ctrak->step > 0.0)        {
+      NstepB = ctrak->step + 0.5;
+      NstepB = TMath::Max (1, NstepB);
+      stepF  = ctrak->step/NstepB;
+      destepF  = 1e6*ctrak->destep/NstepB;
+      for (i = 1; i <= NstepB; i++) {
+	XYZ[0] = ctrak->vect[0] + ctrak->vect[3]*stepF*(0.5 - i);
+	XYZ[1] = ctrak->vect[1] + ctrak->vect[4]*stepF*(0.5 - i);
+	XYZ[2] = ctrak->vect[2] + ctrak->vect[5]*stepF*(0.5 - i);
+	RADIUS = TMath::Sqrt(XYZ[0]*XYZ[0] + XYZ[1]*XYZ[1]);
+	Double_t phi = TMath::RadToDeg()*TMath::ATan2(XYZ[1],XYZ[0]);
+	if (phi < -180) phi += 360;
+	if (phi >  180) phi -= 360;
+#ifdef __3DPLOTS__
+	if (histV2[0][p])                             histV2[0][p]->Fill(XYZ[2], RADIUS, Phi, stepF);
+	if (ctrak->gekin >= 1.E-4 && histV2[1][p])    histV2[1][p]->Fill(XYZ[2], RADIUS, Phi, stepF);
+	if (ctrak->gekin <= 0.25E-9 && histV2[2][p])  histV2[2][p]->Fill(XYZ[2], RADIUS, Phi, stepF);
+	if (cmate->dens > 2e-5 && ctrak->destep > 0.0 && histV2[5][p]) 
+ 	  histV2[5][p]->Fill(XYZ[2], RADIUS, Phi, destepF/cmate->dens);
+	if (histV2[8][p])                             histV2[8][p]->Fill(XYZ[2], RADIUS, Phi, destepF);
+#else
+	if (histV2[0][p])                             histV2[0][p]->Fill(XYZ[2], RADIUS, stepF);
+	if (ctrak->gekin >= 1.E-4 && histV2[1][p])    histV2[1][p]->Fill(XYZ[2], RADIUS, stepF);
+	if (ctrak->gekin <= 0.25E-9 && histV2[2][p])  histV2[2][p]->Fill(XYZ[2], RADIUS, stepF);
+	if (cmate->dens > 2e-5 && ctrak->destep > 0.0 && histV2[5][p]) 
+	  histV2[5][p]->Fill(XYZ[2], RADIUS, destepF/cmate->dens);
+	if (histV2[8][p])                             histV2[8][p]->Fill(XYZ[2], RADIUS, destepF);
+#endif
+      }
+      histV1[0][0][p]->Fill(Log10gekin);
+      histV1[0][1][p]->Fill(Log10gekin,ctrak->step);
+      if (r > 0) {
+	histV1[r][0][p]->Fill(Log10gekin);
+	histV1[r][1][p]->Fill(Log10gekin,ctrak->step);
+      }
+      if (p == 4 && ctrak->gekin < 1e-3) { // neutrons < 1 MeV
+	static Double_t EkinThermal = 25.8e-12; // meV
+	static Double_t MassNeutron = 0.9396;
+	static Double_t velTherm = TMath::Sqrt(2*EkinThermal/MassNeutron);
+	Double_t vel = TMath::Sqrt(2*ctrak->gekin/MassNeutron);
+	histV1[0][3][p]->Fill(Log10gekin,velTherm/vel*ctrak->step);
+	if (r > 0) histV1[r][3][p]->Fill(Log10gekin,velTherm/vel*ctrak->step);
+      }
+      if (ctrak->inwvol == 1) {
+#ifdef __3DPLOTS__
+	if(histV2[3][p]) histV2[3][p]->Fill(ZZ, RR, Phi);
+#else
+	if(histV2[3][p]) histV2[3][p]->Fill(ZZ, RR);
+#endif
+      }
+      for (Int_t i = 0; i < cking->ngkine; i++) {
+	id = ((Int_t)cking->gkin[i][4])%100;
+	p = ipartx (id);
+	if (p >= 0) {
+	  Char_t name[12];
+	  Int_t itrtyp;
+	  Float_t mass, charge, tlife;
+	  fgGeant3->Gfpart(id,name,itrtyp,mass,charge,tlife);
+#ifdef __3DPLOTS__
+	  if (histV2[4][p]) histV2[4][p]->Fill(ZZ, RR, Phi);
+#else
+	  if (histV2[4][p]) histV2[4][p]->Fill(ZZ, RR);
+#endif
+	  Double_t ekin = 
+	    TMath::Sqrt(cking->gkin[i][0]*cking->gkin[i][0] +
+			cking->gkin[i][1]*cking->gkin[i][1] +
+			cking->gkin[i][2]*cking->gkin[i][2] + mass*mass) - mass;
+	  ekin = TMath::Max (1e-14, ekin);
+	  histV1[0][2][p]->Fill(TMath::Log10(ekin));
+	  if (r > 0)  histV1[r][2][p]->Fill(TMath::Log10(ekin));
+	}
+      }
+    }
+    // Star density
+    if (cking->ngkine > 0)        {
+      if (ctrak->vect[6] > 0.300 && p <= 0) {
+	for (Int_t i = 0; i < ctrak->nmec; i++) {
+	  if (ctrak->lmec[i] >= 12 && ctrak->lmec[i] <= 20 && p >= 0) {
+	    OmegaN = dose(cmate->z);
+#ifdef __3DPLOTS__
+	    if (histV2[6][p]) histV2[6][p]->Fill(ZZ, RR, Phi); 
+	    if (histV2[7][p]) histV2[7][p]->Fill(ZZ, RR, Phi, OmegaN ); 
+#else
+	    if (histV2[6][p]) histV2[6][p]->Fill(ZZ, RR); 
+	    if (histV2[7][p]) histV2[7][p]->Fill(ZZ, RR, OmegaN ); 
+#endif
+	    break;
+	  }
+	}
+      }
+    }
+  }
+#undef __3DPLOTS__
 }
 #undef PrPV
 // $Log: StarVMCApplication.cxx,v $
