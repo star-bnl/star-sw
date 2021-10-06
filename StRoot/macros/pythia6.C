@@ -1,6 +1,6 @@
 Int_t pythia6(TString mode="pp:W:510", Int_t tune=320) {
   
-  if (!gROOT->GetClass("St_geant_Maker")) return 0;
+  //  if (!gROOT->GetClass("St_geant_Maker")) return 0;
   gSystem->Load( "libVMC");
   gSystem->Load( "libgen_Tables");
   gSystem->Load( "StarGeneratorUtil" );
@@ -24,8 +24,8 @@ Int_t pythia6(TString mode="pp:W:510", Int_t tune=320) {
   if (! StMaker::GetTopChain() ) return kStErr;
   Int_t ok = ((StBFChain *)StMaker::GetTopChain()) -> AddBefore( "geant", primary );
   if (ok != kStOk) return ok;
-  if (gSystem->Load( "libPythia6_4_23") < 0) return kStErr;
-  gSystem->Load( "StarPythia6"   );
+  if (gSystem->Load( "libPythia6_4_28") < 0) return kStErr;
+  //  gSystem->Load( "StarPythia6"   );
 
   StarPythia6 *pythia6 = new StarPythia6("pythia6");
   if (mode.Contains("pp",TString::kIgnoreCase)) {
