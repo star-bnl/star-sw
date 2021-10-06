@@ -629,16 +629,24 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
         TFile* histFile = new TFile( mFileNameCalibHistograms.c_str(), "READ" );
 
-        if( !histFile || histFile->IsZombie() ) {
-            LOG_ERROR << "unable to open file: " << mFileNameCalibHistograms.c_str() << endm;
+        if( !histFile ) {
+            LOG_ERROR << "No calibration file found: " << mFileNameCalibHistograms.c_str() << endm;
             LOG_INFO  << "setting all parameters to default" << endm;
+        }else if( histFile->IsZombie() ){
+            LOG_ERROR << "Zombie calibration file: " << mFileNameCalibHistograms.c_str() << endm;
+            LOG_INFO  << "stopping execution" << endm;
+            return kStFatal;        
         }
 
         TFile* histOffsetFile = new TFile( mFileNameOffsetHistograms.c_str(), "READ" ); //create setter!
 
-        if( !histOffsetFile || histOffsetFile->IsZombie() ) {
-            LOG_ERROR << "unable to open file: " << mFileNameOffsetHistograms.c_str() << endm;
+        if( !histOffsetFile ) {
+            LOG_INFO << "No offset file found: " << mFileNameOffsetHistograms.c_str() << endm;
             LOG_INFO  << "setting all parameters to default" << endm;
+        }else if( histOffsetFile->IsZombie() ) {
+            LOG_ERROR << "Zombie offset file: " << mFileNameOffsetHistograms.c_str() << endm;
+            LOG_INFO  << "stopping execution" << endm;
+            return kStFatal;        
         }else{
             LOG_INFO  << "Successfully opened RunOffset file  "<< mFileNameOffsetHistograms.c_str() << endm;
 			}
