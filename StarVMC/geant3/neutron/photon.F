@@ -1,29 +1,6 @@
-*
-* $Id: photon.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
-*
-* $Log: photon.F,v $
-* Revision 1.2  2018/06/28 19:29:23  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:32:00  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/07/24 15:56:27  rdm
-* initial import into CVS
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:58  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: photon.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE PHOTON(D,LD,IDICTS,LDICT,NTX,NTS,IGCBS,LGCB,
      +      AWR,IGCBS2,LGCB2,LR,IGAMS,LGAM,QI,ID,IIN,LRI,SIGN)
 C       THIS ROUTINE CONTROLS THE GENERATION AND STORAGE OF ALL
@@ -40,9 +17,7 @@ C       NEUTRON REACTION OCCURING.
       DIMENSION IDICTS(NNR,NNUC),LDICT(NNR,NNUC),NTX(*),NTS(*),
      +  IGCBS(NGR,NNUC),LGCB(NGR,NNUC),AWR(*),IGCBS2(NGR,NNUC),
      +  LGCB2(NGR,NNUC),LR(NQ,NNUC),IGAMS(*),LGAM(*),D(*),LD(*)
-#if __GNUC__ < 7
       SAVE
-#endif
 C flag to mark call to SECEGY = 1 or PARTXS = 2 for EP   CZ 13/8/92
       IEP = 0
 C       INITIALIZE THE PHOTON ENERGY TO ZERO IN CASE NO PHOTON IS
@@ -339,15 +314,30 @@ C       MULTIPLICITY (PHOTON WEIGHT) IS DISTRIBUTED TO SEVERAL
 C       PHOTONS (SPLITTING OF SORTS) WITH BOTH WEIGHT AND ENERGY
 C       BEING CONSERVED.  THIS RARELY OCCURS BUT IS NECESSARY.
   330 CONTINUE
-C poisson distributed photon multiplicity CZ 13.8.92
-      IGTRY=0
-      MGPAR=INT(FLOAT(MAXPAR)*0.7)
-  340 CALL G3POISS(YP,NUMBG,1)
-      IGTRY=IGTRY+1
-      IF(NUMBG.GT.INT(4.*YP).OR.
-     +   NUMBG.GT.MGPAR.AND.IGTRY.LT.5) GOTO 340
+      MGPAR = INT(FLOAT(MAXPAR)*0.7)
+C
+C for a photon multiplicity > 1.01 a poisson distribution is sampled
+C for the actually generated multiplicity (with mean YP)
+C
+      IF(YP.GT.1.01) THEN
+C
+C use poisson distribution
+C
+        IGTRY=0
+  340   CALL G3POISS(YP,NUMBG,1)
+        IGTRY=IGTRY+1
+        IF((NUMBG.GT.INT(4.*YP).OR.NUMBG.GT.MGPAR)
+     +                             .AND.IGTRY.LT.5) GOTO 340
+      ELSE
+C  YP <= 1.01
+C number of photons generated = INT(YP)
+C plus an additional photon if YP-INT(YP) > random number
+C CZ 21.8.95
+        NUMBG = INT(YP)
+        IF((YP-FLOAT(NUMBG)).GT.FLTRNF(0)) NUMBG = NUMBG + 1
+      ENDIF
       NUMBG=MIN(NUMBG,MGPAR)
-C Allow 0 Photond to be generated
+C Allow 0 Photons to be generated
       IF(NUMBG.EQ.0) RETURN
       EPTOT = YP*EP
       EPSUM = 0.0
@@ -386,5 +376,5 @@ C end photon production when energy is used up  CZ 13.8.92
 10100 FORMAT(' PHOTON: NO SECONDARY ENERGY ',
      +   'DISTRIBUTION WAS FOUND FOR THE CONTINUUM REACTION CHOSEN')
   390 WRITE(6,*) ' CALOR: ERROR in PHOTON ===> STOP '
-      CALL ABEND
+      STOP
       END

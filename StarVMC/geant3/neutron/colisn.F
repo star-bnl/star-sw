@@ -1,26 +1,6 @@
-*
-* $Id: colisn.F,v 1.1.1.3 2009/02/18 20:32:06 fisyak Exp $
-*
-* $Log: colisn.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:06  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/07/24 15:56:27  rdm
-* initial import into CVS
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:56  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: colisn.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE COLISN(D,LD,IGAMS,LGAM,INABS,LNAB,ITHRMS,LTHRM,
      + IDICTS,LDICT,NTX,NTS,IGCBS,LGCB,AWR,Q,NSEI,NAEI,NMT2,NMT4,
      + NMT16,NMT17,NMT18,NMT22,NMT23,NMT24,NMT28,NMT51,NMT91,
@@ -51,9 +31,7 @@ C
       CHARACTER*80 COMM
 C
       DATA QBE8/-7.3686E+06/
-#if __GNUC__ < 7
       SAVE
-#endif
       CALL GTMED(NMED,MED)
 C       INITIALIZE THE COUNTERS AND FLAGS
 C       ITRY ALLOWS FOR MULTIPLE ATTEMPTS IF THE ENDF/B PARTIAL
@@ -86,7 +64,7 @@ C       CROSS SECTIONS DO NOT EXACTLY SUM TO THE TOTAL
       LIFLAG=0
       AWRI=AWR(IIN)
       KZI=KZ(IIM)
-#if defined(CERNLIB_MDEBUG)
+#if defined(ATLAS_MDEBUG)
       PRINT *,' COLISN: A=',AWRI,' K=',KZI
 #endif
 C       INITIALIZE THE CROSS SECTION VARIABLES

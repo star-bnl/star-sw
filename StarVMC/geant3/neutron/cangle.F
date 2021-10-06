@@ -1,29 +1,10 @@
-*
-* $Id: cangle.F,v 1.1.1.3 2009/02/18 20:32:06 fisyak Exp $
-*
-* $Log: cangle.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:06  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:55  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: cangle.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE CANGLE(D,LD,E,FM,LEN)
 C       THIS ROUTINE SELECTS THE SCATTERING ANGLE AT A COLLISION
       DIMENSION D(*),LD(*)
-#if __GNUC__ < 7
       SAVE
-#endif
       I=0
       IPP=1
       NR=LD(IPP)

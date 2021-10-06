@@ -1,26 +1,6 @@
-*
-* $Id: isotpe.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
-*
-* $Log: isotpe.F,v $
-* Revision 1.2  2018/06/28 19:29:23  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:32:00  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:57  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: isotpe.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE ISOTPE(D,LD,KM,RHO,IN,IDICTS,LDICT,E,TSIG,NMED,
      +                  IIN,IIM)
 C       THIS ROUTINE DETERMINES WHICH ISOTOPE HAS BEEN STRUCK
@@ -31,14 +11,12 @@ C       IN MEDIA NMED
 C
       DIMENSION D(*),LD(*),KM(*),RHO(*),IN(*),IDICTS(NNR,NNUC),
      +          LDICT(NNR,NNUC)
-#if __GNUC__ < 7
       SAVE
-#endif
 C
       R=FLTRNF(0)
       NOA=0
       SUM=0.
-#if defined(CERNLIB_MDEBUG)
+#if defined(ATLAS_MDEBUG)
       DO 10 K=1,NMIX
          IF(KM(K).NE.NMED)GO TO 10
 C       DETERMINE ISOTOPE NUMBER
@@ -77,7 +55,7 @@ C       AN ISOTOPE WAS NOT CHOSEN, TRY AGAIN
       GO TO 20
    40 IIN=K1
       IIM=K2
-#if defined(CERNLIB_MDEBUG)
+#if defined(ATLAS_MDEBUG)
       PRINT *,' Isotope chosen : K=',K
 #endif
       RETURN
@@ -88,5 +66,5 @@ C       AN ISOTOPE WAS NOT CHOSEN, TRY AGAIN
       WRITE(IOUT,10100)R,SUM,TSIG,X,E,RHO(K2),NMED,K1,K2
 10100 FORMAT('0',1X,1P6E12.4,3I10)
       WRITE(6,*) ' CALOR: ERROR in ISOTPE =====> STOP '
-      CALL ABEND
+      STOP
       END

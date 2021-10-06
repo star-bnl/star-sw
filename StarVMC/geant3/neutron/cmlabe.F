@@ -1,23 +1,6 @@
-*
-* $Id: cmlabe.F,v 1.1.1.3 2009/02/18 20:32:06 fisyak Exp $
-*
-* $Log: cmlabe.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:06  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:55  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.48  by  S.Giani
-*-- Author :
+* $Id: cmlabe.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE CMLABE(D,LD,AWR,KZ,ID,FM,Q,IFLG)
 C       THIS ROUTINE CONVERTS THE EXIT NEUTRON SCATTERING ANGLE
 C       FROM THE CENTER OF MASS COORDINATE SYSTEM TO THE LABORATORY
@@ -33,10 +16,8 @@ C       EXIT PARAMETERS FOR THE RECOIL NUCLEUS.
 #include "geant321/mmass.inc"
 #include "geant321/mupsca.inc"
 #include "geant321/mpstor.inc"
-#if __GNUC__ < 7
       DIMENSION D(*),LD(*)
       SAVE
-#endif
       MT=0
       IF(ID.EQ.2)MT=2
 C       IFLG EQUAL TO ONE IMPLIES LABORATORY COORDINATE SYSTEM

@@ -1,23 +1,6 @@
-*
-* $Id: n2nn3n.F,v 1.1.1.3 2009/02/18 20:32:05 fisyak Exp $
-*
-* $Log: n2nn3n.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:05  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:58  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.48  by  S.Giani
-*-- Author :
+* $Id: n2nn3n.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE N2NN3N(D,LD,AWR,KZ,ID,FM,Q,IFLG)
 C       THIS ROUTINE CALCULATES THE DIRECTIONAL COSINES FOR THE
 C       NEUTRON AND RECOIL NUCLEUS FOR AN N2N OR N3N REACTION
@@ -31,9 +14,7 @@ C       EXIT PARAMETRS FOR THE RECOIL NUCLEUS.
 #include "geant321/mmass.inc"
 #include "geant321/mpstor.inc"
       DIMENSION D(*),LD(*),FM(*)
-#if __GNUC__ < 7
       SAVE
-#endif
       MT=0
       IF(ID.EQ.8)MT=16
       IF(ID.EQ.9)MT=17

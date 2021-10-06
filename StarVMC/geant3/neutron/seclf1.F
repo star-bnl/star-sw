@@ -1,34 +1,12 @@
-*
-* $Id: seclf1.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
-*
-* $Log: seclf1.F,v $
-* Revision 1.2  2018/06/28 19:29:23  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:32:06  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:59  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: seclf1.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE SECLF1(FSE,IFSE,EX,U,E)
 C        THIS ROUTINE SAMPLES AN EXIT ENERGY FROM
 C        A TABULATED DISTRIBUTION
 #include "geant321/minput.inc"
       DIMENSION FSE(*),IFSE(*)
-#if __GNUC__ < 7
       SAVE
-#endif
       C=0.
       IP=1
       NRE=IFSE(IP)
@@ -120,5 +98,5 @@ C       SELECT THE EXIT ENERGY FROM THE TABULATED DISTRIBUTION
   120 WRITE(IOUT,10100)R,PROB
 10100 FORMAT(' MICAP: EXIT ENERGY NOT SELECTED IN SECLF1',1P2E13.5)
   130 WRITE(6,*) ' CALOR: ERROR in SECLF1 =====> STOP '
-      CALL ABEND
+      STOP
       END

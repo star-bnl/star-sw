@@ -1,31 +1,12 @@
-*
-* $Id: tbsplt.F,v 1.1.1.3 2009/02/18 20:32:05 fisyak Exp $
-*
-* $Log: tbsplt.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:05  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:59  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.48  by  S.Giani
-*-- Author :
+* $Id: tbsplt.F,v 1.1.1.1 2004/01/15 00:08:49 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE TBSPLT(A,E,NP,Y)
 C       THIS ROUTINE DETERMINES A CROSS SECTION AT A GIVEN
 C       ENERGY FROM A CROSS SECTION VERSUS ENERGY TABLE USING
 C       A TABLE SPLITTING METHOD
       DIMENSION A(1)
-#if __GNUC__ < 7
       SAVE
-#endif
       IPP=1
       IF(E.LE.A(1))GO TO 40
       IF(E.GE.A(2*NP-1))GO TO 50

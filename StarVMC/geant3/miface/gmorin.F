@@ -103,21 +103,20 @@ C xsection file unit
 C open MICAP I/O units
       INQUIRE(UNIT=MICROS,OPENED=OPENED)
       IF(OPENED) THEN
-         REWIND MICROS
-      ELSE
+         REWIND MICROS ELSE
 #if defined(CERNLIB_VAX)
-         XSFILE='xsneut95.dat'
+         XSFILE='xsneut96.dat'
          INQUIRE(FILE=XSFILE,EXIST=EXISTS)
          IF(.NOT.EXISTS) THEN
             ISTAT = LIB$SYS_TRNLOG('CERN_ROOT',NALL,CHROOT,,,%VAL(0))
-            IF(ISTAT.EQ.1) XSFILE = 'CERN_ROOT:[LIB]xsneut95.dat'
+            IF(ISTAT.EQ.1) XSFILE = 'CERN_ROOT:[LIB]xsneut96.dat'
          ENDIF
          INQUIRE(FILE=XSFILE,EXIST=EXISTS)
          IF(.NOT.EXISTS) THEN
            PRINT*,'**********************************'
            PRINT*,'*        G C A L O R             *'
            PRINT*,'*        -----------             *'
-           PRINT*,'*  File XSNEUT95.DAT not found   *'
+           PRINT*,'*  File XSNEUT96.DAT not found   *'
            PRINT*,'*         Program STOP           *'
            PRINT*,'*   Check CERN_ROOT environment  *'
            PRINT*,'*           variable             *'
@@ -127,21 +126,21 @@ C open MICAP I/O units
          OPEN(UNIT=MICROS,FILE=XSFILE, STATUS='OLD',READONLY)
 #endif
 #if defined(CERNLIB_UNIX)||defined(CERNLIB_CRAY)
-         XSFILE = 'xsneut95.dat'
+         XSFILE = 'xsneut96.dat'
          INQUIRE(FILE=XSFILE,EXIST=EXISTS)
          IF(.NOT.EXISTS) THEN
             CHROOT=' '
             CALL GETENV('CERN_ROOT',CHROOT)
             LNROOT = LNBLNK(CHROOT)
             IF(LNROOT.GT.0)
-     +      XSFILE = CHROOT(1:LNROOT)//'/lib/xsneut95.dat'
+     +      XSFILE = CHROOT(1:LNROOT)//'/lib/xsneut96.dat'
          ENDIF
          INQUIRE(FILE=XSFILE,EXIST=EXISTS)
          IF(.NOT.EXISTS) THEN
            PRINT*,'**********************************'
            PRINT*,'*        G C A L O R             *'
            PRINT*,'*        -----------             *'
-           PRINT*,'*  File XSNEUT95.DAT not found   *'
+           PRINT*,'*  File XSNEUT96.DAT not found   *'
            PRINT*,'*         Program STOP           *'
            PRINT*,'*   Check CERN_ROOT environment  *'
            PRINT*,'*           variable             *'
@@ -155,16 +154,16 @@ C open MICAP I/O units
          CALL GETENVF('CERN_ROOT',CHROOT)
          LNROOT = LNBLNK(CHROOT)
          IF(LNROOT.LE.0) THEN
-            XSFILE = 'xsneut95.dat'
+            XSFILE = 'xsneut96.dat'
          ELSE
-            XSFILE = CHROOT(1:LNROOT)//'\\lib\\xsneut95.dat'
+            XSFILE = CHROOT(1:LNROOT)//'\\lib\\xsneut96.dat'
             INQUIRE(FILE=XSFILE,EXIST=EXISTS)
-            IF(.NOT.EXISTS) XSFILE='xsneut95.dat'
+            IF(.NOT.EXISTS) XSFILE='xsneut96.dat'
          ENDIF
          OPEN(UNIT=MICROS,FILE=XSFILE)
 #endif
 #if defined(CERNLIB_IBMVM)
-         XSFILE = '\XSNEUT95 DAT *'
+         XSFILE = '\XSNEUT96 DAT *'
          OPEN(UNIT=MICROS,FILE=XSFILE,STATUS='OLD')
 #endif
       ENDIF

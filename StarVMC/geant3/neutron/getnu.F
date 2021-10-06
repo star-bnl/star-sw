@@ -1,34 +1,12 @@
-*
-* $Id: getnu.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
-*
-* $Log: getnu.F,v $
-* Revision 1.2  2018/06/28 19:29:23  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:32:06  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:56  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.48  by  S.Giani
-*-- Author :
+* $Id: getnu.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE GETNU(D,LD,E,LEN,XNU)
 C       THIS ROUTINE SELECTS THE AVERAGE NUMBER OF NEUTRONS
 C       BORN FROM A FISSION REACTION (I.E. NU-BAR)
 #include "geant321/minput.inc"
       DIMENSION D(*),LD(*),C(4)
-#if __GNUC__ < 7
       SAVE
-#endif
       IP=1
       XNU=0.0
       LNU=LD(IP)
@@ -61,5 +39,5 @@ C       LINEAR-LINEAR INTERPOLATION IS ASSUMED AT THIS POINT
    40 WRITE(IOUT,10000)LNU
 10000 FORMAT(' MICAP: ERROR IN ROUTINE GETNU; LNU=',I3)
       WRITE(6,*) ' CALOR: ERROR in GETNU ====> STOP'
-      CALL ABEND
+      STOP
       END

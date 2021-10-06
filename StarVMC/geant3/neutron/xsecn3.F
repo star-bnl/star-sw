@@ -1,26 +1,6 @@
-*
-* $Id: xsecn3.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
-*
-* $Log: xsecn3.F,v $
-* Revision 1.2  2018/06/28 19:29:23  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:32:01  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:22:00  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.48  by  S.Giani
-*-- Author :
+* $Id: xsecn3.F,v 1.1.1.1 2004/01/15 00:08:49 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE XSECN3(KM,KE,RHO,IN,IDICTS,LDICT,ISIGTS,LSIGT,BUF,
      +IBUF,TCS,LIM,LAST)
 C       THIS ROUTINE CREATES MACROSCOPIC TOTAL CROSS SECTIONS
@@ -195,6 +175,6 @@ C       FINISHED MIXING AND THINING
 10100 FORMAT(' MICAP: NOT ENOUGH ROOM TO MIX CROSS SECTIONS',/,5X,
      +'SPACE AVAILABLE=',I10,/,5X,'SPACE NEEDED=',I10)
   190 PRINT '('' CALOR: ERROR in XSECN3 ====> STOP'')'
-      CALL ABEND
+      STOP
   200 RETURN
       END

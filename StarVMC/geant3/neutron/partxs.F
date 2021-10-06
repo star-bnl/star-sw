@@ -1,32 +1,13 @@
-*
-* $Id: partxs.F,v 1.1.1.3 2009/02/18 20:32:00 fisyak Exp $
-*
-* $Log: partxs.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:00  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:58  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.48  by  S.Giani
-*-- Author :
+* $Id: partxs.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE PARTXS(D,LD,E,SIGTOT,EP)
 C       THIS ROUTINE SAMPLES FROM THE FILE 12 OR 13 PHOTON
 C       PRODUCTION PARTIAL DISTRIBUTIONS TO OBTAIN THE EXIT
 C       PHOTON ENERGY FROM A NEUTRON REACTION
 #include "geant321/minput.inc"
       DIMENSION D(*),LD(*)
-#if __GNUC__ < 7
       SAVE
-#endif
 C       INITIALIZE THE VALUES USED IN THE SELECTION PROCESS
 C       THE VALUE (II) IS A POINTER
       ITRY1=0

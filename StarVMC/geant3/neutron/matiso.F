@@ -1,26 +1,6 @@
-*
-* $Id: matiso.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
-*
-* $Log: matiso.F,v $
-* Revision 1.2  2018/06/28 19:29:23  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:32:00  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:22:00  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: matiso.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE MATISO(IZ,IA,NI,IDISO,FSINGL,NUNIT)
 C
 C Search array MATIDS for the isotopes which have to be taken
@@ -66,11 +46,11 @@ C matching isotope found
           IDISO(1,2) = 100
         ENDIF
       ELSE
-         WRITE(IOUT,'('' MATISO: Error in neutron x-section '',
-     +                ''file detected - Z = '',I4)') IZ
-         WRITE(6,'('' MICAP : Error in x-section file '',
-     +             '' detected -> STOP '')')
-         CALL ABEND
+         WRITE(IOUT,'('' MATISO: Error in neutron x-section '',   '
+     +         //'    ''file detected - Z = '',I4)') IZ
+         WRITE(6,'('' MICAP : Error in x-section file '',       '
+     +         //'    '' detected -> STOP '')')
+         STOP
       ENDIF
       RETURN
       END

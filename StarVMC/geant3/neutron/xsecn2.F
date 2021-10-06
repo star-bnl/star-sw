@@ -1,26 +1,6 @@
-*
-* $Id: xsecn2.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
-*
-* $Log: xsecn2.F,v $
-* Revision 1.2  2018/06/28 19:29:23  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:32:01  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:22:00  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: xsecn2.F,v 1.1.1.1 2004/01/15 00:08:49 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE XSECN2(ICOM,IREC,IUNIT,IGAMS,LGAM,ELTOL,INABS,LNAB,
      + ITHRMS,LTHRM,IDICTS,LDICT,NTX,NTS,IGCBS,LGCB,AWR,Q,LR,QLR,
      + BUF,IBUF,LIM,LAST,INEL)
@@ -253,11 +233,13 @@ CZ changed in order to read ASCII xsection file
             READ(NUNIT,'((6G13.7))') (BUF(LST+J+2),J=1,IBUF(LST+2))
             ID = IBUF(LST+2) + 2 + LST
             DO 280 K = 1, IBUF(LST+1)
+               ID1=ID+1
                READ(NUNIT,'(2(G13.7,I10))') BUF(ID+1),IBUF(ID+2),
      +         BUF(ID+3),IBUF(ID+4)
                ID = ID + 4
                READ(NUNIT,'((6G13.7))') (BUF(ID + J),J=1,IBUF(LST+2))
                ID = ID + IBUF(LST+2)
+               CALL XSTEST(BUF(ID1),IBUF(LST+2))
   280       CONTINUE
 CZ end of change
   290       CONTINUE
@@ -333,6 +315,6 @@ C       READ IN THE THERMAL CROSS SECTION DATA ARRAY
 10100 FORMAT('0','NOT ENOUGH SPACE TO READ IN RECORD',/,5X,
      +'LENGTH OF RECORD=',I10,/,5X,'SPACE AVAILABLE=',I10)
   390 PRINT '('' CALOR: ERROR in XSECN2 ====> STOP '')'
-      CALL ABEND
+      STOP
   400 RETURN
       END

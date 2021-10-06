@@ -1,31 +1,12 @@
-*
-* $Id: secl11.F,v 1.1.1.3 2009/02/18 20:32:00 fisyak Exp $
-*
-* $Log: secl11.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:00  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:58  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: secl11.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE SECL11(FSE,IFSE,EX,U,E)
 C       THIS ROUTINE SAMPLES AN EXIT ENERGY FROM
 C       AN ENERGY DEPENDENT WATT SPECTRUM
 #include "geant321/minput.inc"
       DIMENSION FSE(*),IFSE(*)
-#if __GNUC__ < 7
       SAVE
-#endif
       IP=1
       NR=IFSE(IP)
       NE=IFSE(IP+1)
@@ -79,7 +60,7 @@ C       DETERMINE B
 C       SELECT THE EXIT ENERGY FROM THE WATT SPECTRUM
   100 EX=FISRNF(A,B)
       IF(EX.LE.EMAX)RETURN
-#if defined(CERNLIB_MDEBUG)
+#if defined(ATLAS_MDEBUG)
       WRITE(IOUT,10000)EX,EMAX
 10000 FORMAT(' MICAP: WARNING-EX,EMAX=',1P2E13.5,' IN SECL11')
 #endif

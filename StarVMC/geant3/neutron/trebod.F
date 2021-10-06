@@ -1,23 +1,6 @@
-*
-* $Id: trebod.F,v 1.1.1.3 2009/02/18 20:32:06 fisyak Exp $
-*
-* $Log: trebod.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:06  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:59  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.48  by  S.Giani
-*-- Author :
+* $Id: trebod.F,v 1.1.1.1 2004/01/15 00:08:49 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE TREBOD(D,LD,KZ1,KZ2,KZ3,A1,A2,A3,Z1,Z2,Z3,
      +                  ATAR,Q,MT)
 C CZ July 30,1992 Simple aproach to get (N,PA), (N,T2A),(N,D2A)
@@ -35,9 +18,7 @@ C       THE COLLISION PRODUCTS AND STORES THEM IN THE RECOIL BANK.
 #include "geant321/mmass.inc"
 #include "geant321/mpstor.inc"
       DIMENSION D(*),LD(*),ER1(3)
-#if __GNUC__ < 7
       SAVE
-#endif
 C loop over no. of emmitted particles CZ July 30,1992
       NPN = 1
       IF(MT.EQ.112) NPN = 2

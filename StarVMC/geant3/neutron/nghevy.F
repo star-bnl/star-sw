@@ -1,23 +1,6 @@
-*
-* $Id: nghevy.F,v 1.1.1.3 2009/02/18 20:32:00 fisyak Exp $
-*
-* $Log: nghevy.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:00  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:58  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.48  by  S.Giani
-*-- Author :
+* $Id: nghevy.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE NGHEVY(D,LD,KZ,AWR,Q,MT)
 C       THIS ROUTINE CALCULATES THE EXIT ENERGY AND DIRECTIONAL
 C       COSINES FOR THE RECOIL NUCLEUS RESULTING FROM THE (N,G)
@@ -34,9 +17,7 @@ C       WITH THE PHOTONS MOMENTUM EQUAL TO ITS ENERGY.
 #include "geant321/mpstor.inc"
 #include "geant321/mgamma.inc"
       DIMENSION D(*),LD(*)
-#if __GNUC__ < 7
       SAVE
-#endif
       AR=AWR*AN+AN
 C       CALCULATE THE TOTAL MOMENTUM BEFORE THE COLLISION
 C       NEUTRON MOMENTUM BEFORE COLLISION (PI) EQUALS TOTAL MOMENTUM
