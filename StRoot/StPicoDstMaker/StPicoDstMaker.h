@@ -349,7 +349,7 @@ class StPicoDstMaker : public StMaker {
     return cvs;
   }
 
-  ClassDef(StPicoDstMaker, 1)
+  ClassDef(StPicoDstMaker, 0)
 };
 
 inline void StPicoDstMaker::setSplit(int split) { mSplit = split; }
