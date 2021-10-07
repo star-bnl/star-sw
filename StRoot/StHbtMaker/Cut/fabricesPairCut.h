@@ -66,9 +66,8 @@
 //#include "StMaker.h"
 //#endif
 
-#include <sstream>
-
 #include "Cut/HitMergingPairCut.h"
+class std::ostringstream;
 
 class fabricesPairCut : public HitMergingPairCut{
 public:

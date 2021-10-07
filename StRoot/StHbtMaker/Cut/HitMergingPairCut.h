@@ -28,9 +28,8 @@
 //#include "StMaker.h"
 //#endif
 
-#include <sstream>
-
 #include "StHbtMaker/Base/StHbtPairCut.h"
+class std::ostringstream;
 
 class HitMergingPairCut : public StHbtPairCut{
 public:
