@@ -14,6 +14,7 @@ using namespace std;
 #include "TGiant3.h"
 
 #include "StarGenerator/UTIL/StarParticleData.h"
+#include "StarGenerator/BASE/StarParticleStack.h"
 
 AgStarReader *AgStarReader::mInstance = 0;
 
@@ -22,12 +23,12 @@ AgStarReader *AgStarReader::mInstance = 0;
 //
 // Setup the interface with starsim
 //
-#define agusread F77_NAME(agusread,AGUSREAD)
+#define ageventread F77_NAME(ageventread,AGEVENTREAD)
 #define agsvert  F77_NAME(agsvert, AGSVERT)
 #define agskine  F77_NAME(agskine, AGSKINE)
 
 extern "C" {
-  void type_of_call agusread() {    AgStarReader::Instance().ReadEvent();  }
+  void type_of_call ageventread() {    AgStarReader::Instance().ReadEvent();  }
   void type_of_call agsvert( float *vertex, int *nb, int *nt, float *ubuf, int *nu, int *nv );
   void type_of_call agskine( float *plab,   int *ip, int *nv, float *ubuf, int *nb, int *nt );
 };
@@ -35,9 +36,9 @@ extern "C" {
 // ----------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------------------
-AgStarReader::AgStarReader() : TObject(), mStack(0), mParticleData(0)
+AgStarReader::AgStarReader() : TObject(), mStack(0), mParticleData(&StarParticleData::instance())
 { 
-  mParticleData = &StarParticleData::instance();
+
 }
 // ----------------------------------------------------------------------------------------------------
 //
@@ -108,7 +109,7 @@ void AgStarReader::ReadEvent()
       int   ipdg    = part->GetPdgCode();
       int   g3id    = 0;
       {
-	TParticlePDG *pdg = mParticleData -> GetParticle( ipdg );     assert(pdg);
+	TParticlePDG *pdg = mParticleData->GetParticle( ipdg );     assert(pdg);
 	g3id = pdg->TrackingCode();
 	if ( g3id < 1 )
 	  {

@@ -11,8 +11,6 @@ ClassImp(StarPrimaryMaker);
 #include "StarGenerator.h"
 #include "StarCallf77.h" 
 #include <iostream>
-#include "St_geant_Maker/St_geant_Maker.h"
-#include "TGiant3.h"
 #include <map>
 #include "TString.h"
 #include "TSystem.h"
@@ -22,11 +20,10 @@ ClassImp(StarPrimaryMaker);
 #include "TTree.h"
 #include "TClass.h"
 
+#include "StarGenerator/BASE/AgStarReader.h"
 #include "StarGenerator/EVENT/StarGenEvent.h"
 #include "StarGenerator/EVENT/StarGenParticle.h"
-#include "AgStarReader.h"
 #include "StarGenerator/UTIL/StarRandom.h"
-
 #include "StarGenerator/FILT/StarFilterMaker.h"
 
 #include "TMCProcess.h"
@@ -59,13 +56,16 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   assert(fgPrimary == 0); // cannot create more than one primary generator
   fgPrimary = this;
 
-  mStack = new StarParticleStack();
-  AgStarReader::Instance().SetStack(mStack);
+  mStack = new StarParticleStack("PrimaryMakerStack");
+  SetAttr("usestarsim", int(1) );
+
+  // Publish the stack
+  AddObj( mStack, ".const" );  
 
   // Register the particle database with this maker
   StarParticleData &pdb = StarParticleData::instance();
   //  Shunt( &pdb );
-  AddData( &pdb, ".data" );
+  AddData( &pdb, ".const" );
 
   SetAttr("FilterKeepHeader", int(1) );
 
@@ -87,6 +87,12 @@ TParticlePDG *StarPrimaryMaker::pdg( Int_t id ){
 // --------------------------------------------------------------------------------------------------------------
 Int_t StarPrimaryMaker::Init()
 {
+
+  if ( 1 == IAttr("usestarsim") ) {
+    LOG_INFO << "Registered starsim callbacks" << endm;
+    AgStarReader::Instance().SetStack(mStack);
+  }
+
 
   //
   // Initialize runtime flags
@@ -312,8 +318,12 @@ Int_t StarPrimaryMaker::InitRun( Int_t runnumber )
 void StarPrimaryMaker::Clear( const Option_t *opts )
 {
   mNumParticles = 0;
-  mStack->Clear();
-  mPrimaryEvent->Clear();
+  if ( mStack ) {
+    mStack->Clear();
+  }
+  if ( mPrimaryEvent ) {
+    mPrimaryEvent->Clear();
+  }
   StMaker::Clear(opts);
   TIter Next( GetMakeList() );
   StarGenerator *generator = 0;

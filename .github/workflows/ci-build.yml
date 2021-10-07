@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+        with:
+          driver-opts: env.BUILDKIT_STEP_LOG_MAX_SIZE=10000000
 
       - name: Build with Docker
         uses: docker/build-push-action@v2
@@ -29,6 +31,8 @@ jobs:
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+        with:
+          driver-opts: env.BUILDKIT_STEP_LOG_MAX_SIZE=10000000
 
       - name: Build with Docker
         uses: docker/build-push-action@v2
@@ -69,7 +73,7 @@ jobs:
           path: /tmp
 
       - run: docker load --input /tmp/star-sw-root5-build.tar
-      - run: docker run --name star-test-data --volume /star-test-data ghcr.io/star-bnl/star-test-data
+      - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:v2
       - run: |
              TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-root5-build star-sw/tests/executest.py -c ${{ matrix.test_id }})
              docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root5-build sh -c "$TEST_CMD"
