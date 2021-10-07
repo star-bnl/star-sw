@@ -1829,7 +1829,7 @@ string StMuDstMaker::dirname(string s){
 }
 
 void StMuDstMaker::setProbabilityPidFile(const char* file) {
-  std::ostringstream flnm;
+  ostrstream flnm;
 
   if ( ! file ){
     const char *PIDtable="PIDTableP01gl.root";

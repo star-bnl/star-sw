@@ -86,7 +86,7 @@ void StHbtThPair::UpdateWeight() {
     mWeightNum=(mWeightNum-1.)*mPairPurity+1.;
     mWeightDen=mWeight->GetWeightDen();
     if(mWeightNum<=0. || mWeightNum>1000.){
-      std::ostringstream tCom;
+      ostrstream tCom;
       tCom << "echo ---> " << mWeightNum << " " 
 	   << mEmPoint1 << " " << mEmPoint2 << " " 
 	   << mMomentum1 << " " << mMomentum2 << " >> Err.txt" << ends;
@@ -101,7 +101,7 @@ void StHbtThPair::UpdateWeight() {
 }
 
 StHbtString StHbtThPair::Report() {
-  std::ostringstream tStr; 
+  ostrstream tStr; 
   tStr << "Default StHbtThPair Report" << endl;
   if (mWeight) {
     tStr << mWeight->Report() << endl;

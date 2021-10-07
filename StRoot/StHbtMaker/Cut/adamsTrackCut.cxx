@@ -149,7 +149,7 @@ StHbtString adamsTrackCut::Report()  {
 }
 
 
-std::ostringstream* adamsTrackCut::finalReport() const{
+ostrstream* adamsTrackCut::finalReport() const{
   return franksTrackCut::finalReport();
 }
 

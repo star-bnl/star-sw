@@ -68,7 +68,7 @@ class franksTrackCut : public StHbtTrackCut
 
   franksTrackCut* Clone();
 
-  std::ostringstream* finalReport() const;
+  ostrstream* finalReport() const;
 
   //private:   // here are the quantities I want to cut on...
  protected:

@@ -97,8 +97,8 @@ StHbtString adamsPairCut::Report(){
   return returnThis;
 }
 //__________________
-std::ostringstream* adamsPairCut::finalReport() const{
-  std::ostringstream* tFinalReport = new std::ostringstream;
+ostrstream* adamsPairCut::finalReport() const{
+  ostrstream* tFinalReport = new ostrstream;
   (*tFinalReport) <<  "_____ Adams pair Cut _____ " << endl
 		  << " N pairs passed : " << mNPairsPassed << endl 
 		  << " N pairs failed : " << mNPairsFailed << endl 

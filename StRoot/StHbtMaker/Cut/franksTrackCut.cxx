@@ -244,8 +244,8 @@ StHbtString franksTrackCut::Report(){
 }
 
 
-std::ostringstream* franksTrackCut::finalReport() const{
-  std::ostringstream* tFinalReport = new std::ostringstream;
+ostrstream* franksTrackCut::finalReport() const{
+  ostrstream* tFinalReport = new ostrstream;
   (*tFinalReport) <<  "_____ Track Cut _____ " << endl
 		  << "Charge = " << mCharge << endl
 		  << mNSigmaPion[0] << " < Sigma pion < " 

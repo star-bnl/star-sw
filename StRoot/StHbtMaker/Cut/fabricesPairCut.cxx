@@ -89,8 +89,8 @@ StHbtString fabricesPairCut::Report(){
   return returnThis;
 }
 //__________________
-std::ostringstream* fabricesPairCut::finalReport() const{
-  std::ostringstream* tFinalReport = new std::ostringstream;
+ostrstream* fabricesPairCut::finalReport() const{
+  ostrstream* tFinalReport = new ostrstream;
   (*tFinalReport) <<  "_____ Fabrices pair Cut _____ " << endl
 		  << " N pairs passed : " << mNPairsPassed << endl 
 		  << " N pairs failed : " << mNPairsFailed << endl 

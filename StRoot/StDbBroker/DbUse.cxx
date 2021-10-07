@@ -100,7 +100,7 @@ unsigned int num_rows;
 //unsigned int num_struct;
 
 //const int MAXBUF=1024;
-std::ostringstream Query;
+ostrstream Query;
 char temps[128];
 
 char validFrom[20];

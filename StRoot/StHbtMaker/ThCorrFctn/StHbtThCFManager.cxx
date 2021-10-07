@@ -55,7 +55,7 @@ void StHbtThCFManager::Finish() {
 
 
 StHbtString StHbtThCFManager::Report() {
-  std::ostringstream tStr; 
+  ostrstream tStr; 
   tStr << "Theoretical Correlation Function Manager Report" << endl;
   if (!(mThPair)) {
     tStr << "ERROR : No Theoretical Pair Plugged " << endl;

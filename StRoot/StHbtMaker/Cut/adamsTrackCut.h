@@ -44,7 +44,7 @@ class adamsTrackCut : public franksTrackCut
 
   adamsTrackCut* Clone();
 
-  std::ostringstream* finalReport() const;
+  ostrstream* finalReport() const;
 
  private:   // here are the quantities I want to cut on...
   float             mPIDPThreshold;

@@ -29,7 +29,7 @@
 //#endif
 
 #include "StHbtMaker/Base/StHbtPairCut.h"
-class std::ostringstream;
+class ostrstream;
 
 class HitMergingPairCut : public StHbtPairCut{
 public:
@@ -47,7 +47,7 @@ public:
   void setDefaultHalfFieldMergingPar();
   void setDefaultFullFieldMergingPar();
 
-  virtual std::ostringstream* finalReport() const;
+  virtual ostrstream* finalReport() const;
 
 protected:
   long mNPairsPassed;

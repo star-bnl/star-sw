@@ -21,12 +21,12 @@
 using namespace std;
 static StMessageCounter* messCounter = StMessageCounter::Instance();
 
-static std::ostringstream messBuffer;
+static ostrstream messBuffer;
 static char space = ' ';
 static char tab = '\t';
 
 int StMessage::repeats=1;
-static std::ostringstream lastMessBuffer;
+static ostrstream lastMessBuffer;
 
 #ifdef __ROOT__
 ClassImp(StMessage)
