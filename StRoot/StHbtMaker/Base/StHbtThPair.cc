@@ -90,7 +90,7 @@ void StHbtThPair::UpdateWeight() {
       tCom << "echo ---> " << mWeightNum << " " 
 	   << mEmPoint1 << " " << mEmPoint2 << " " 
 	   << mMomentum1 << " " << mMomentum2 << " >> Err.txt" << ends;
-      system(tCom.str().c_str());
+      system(tCom.str());
       mWeightNum=1;
     }
   } else {

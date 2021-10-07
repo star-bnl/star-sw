@@ -221,7 +221,7 @@ void StMessageManager::Print() {
       *this << std::ends;
     }
 
-    BuildMessage(str().c_str(), curType, curOpt);
+    BuildMessage(str(), curType, curOpt);
     building = 0;
 
   } else {
