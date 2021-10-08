@@ -187,7 +187,6 @@ int StMessageCounter::CheckLimit(char* mess, const char* type) {
       }
       index++;
     }
-    *this << ends;
   }
   return printIt;
 }
