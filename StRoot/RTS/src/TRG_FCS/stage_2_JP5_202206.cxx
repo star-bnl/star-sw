@@ -5,14 +5,9 @@
 #include "fcs_trg_base.h"
 #include "fcs_ecal_epd_mask.h"
 
-// Processing on the North or South DEP/IO flavoured board. 
-// Inputs are up to 32 links but I already organized them according to strawman.
-// output is 1 link over the external OUT connector.
-// There are 20 inputs from ECAL, 8 from HCAL and 6 from PRE.
-// This version combines HT trigger and physics triggers as Christian did in VHDL.
+// Modifed from stage_2_202201.cxx -- Ting 
 
-namespace{
-
+namespace {
   //version2 with top2 & bottom2 rows in trigger, missing far side column
   static const int EtoHmap[15][9][2] = {
     { { 0, 0},{ 0, 1},{ 0, 1},{ 0, 2},{ 0, 2},{ 0, 3},{ 0, 4},{ 0, 4},{ 0, 4}},
@@ -31,24 +26,36 @@ namespace{
     { { 8, 0},{ 8, 1},{ 8, 1},{ 8, 2},{ 8, 2},{ 8, 3},{ 8, 4},{ 8, 4},{ 8, 4}},
     { { 8, 0},{ 8, 1},{ 8, 1},{ 8, 2},{ 8, 2},{ 8, 3},{ 8, 4},{ 8, 4},{ 8, 4}}
   } ;
+  
+  static const int EtoH3map[15][9][4] = {
+    {{-1,-1,-1, 0},{-1,-1, 0, 1},{-1,-1, 1, 2},{-1,-1, 1, 2},{-1,-1, 2, 3},{-1,-1, 2, 3},{-1,-1, 3, 4},{-1,-1, 4,-1},{-1,-1, 4,-1}},
+    {{-1, 0,-1, 5},{ 0, 1, 5, 6},{ 1, 2, 6, 7},{ 1, 2, 6, 7},{ 2, 3, 7, 8},{ 2, 3, 7, 8},{ 3, 4, 8, 9},{ 4,-1, 9,-1},{ 4,-1, 9,-1}},
+    {{-1, 0,-1, 5},{ 0, 1, 5, 6},{ 1, 2, 6, 7},{ 1, 2, 6, 7},{ 2, 3, 7, 8},{ 2, 3, 7, 8},{ 3, 4, 8, 9},{ 4,-1, 9,-1},{ 4,-1, 9,-1}},
+    {{-1, 5,-1,10},{ 5, 6,10,11},{ 6, 7,11,12},{ 6, 7,11,12},{ 7, 8,12,13},{ 7, 8,12,13},{ 8, 9,13,14},{ 9,-1,14,-1},{ 9,-1,14,-1}},
+    {{-1,10,-1,15},{10,11,15,16},{11,12,16,17},{11,12,16,17},{12,13,17,18},{12,13,17,18},{13,14,18,19},{14,-1,19,-1},{14,-1,19,-1}},
+    {{-1,10,-1,15},{10,11,15,16},{11,12,16,17},{11,12,16,17},{12,13,17,18},{12,13,17,18},{13,14,18,19},{14,-1,19,-1},{14,-1,19,-1}},
+    {{-1,15,-1,20},{15,16,20,21},{16,17,21,22},{16,17,21,22},{17,18,22,23},{17,18,22,23},{18,19,23,24},{19,-1,24,-1},{19,-1,24,-1}},
+    {{-1,20,-1,25},{20,21,25,26},{21,22,26,27},{21,22,26,27},{22,23,27,28},{22,23,27,28},{23,24,28,29},{24,-1,29,-1},{24,-1,29,-1}},
+    {{-1,20,-1,25},{20,21,25,26},{21,22,26,27},{21,22,26,27},{22,23,27,28},{22,23,27,28},{23,24,28,29},{24,-1,29,-1},{24,-1,29,-1}},
+    {{-1,25,-1,30},{25,26,30,31},{26,27,31,32},{26,27,31,32},{27,28,32,33},{27,28,32,33},{28,29,33,34},{29,-1,34,-1},{29,-1,34,-1}},
+    {{-1,25,-1,30},{25,26,30,31},{26,27,31,32},{26,27,31,32},{27,28,32,33},{27,28,32,33},{28,29,33,34},{29,-1,34,-1},{29,-1,34,-1}},
+    {{-1,30,-1,35},{30,31,35,36},{31,32,36,37},{31,32,36,37},{32,33,37,38},{32,33,37,38},{33,34,38,39},{34,-1,39,-1},{34,-1,39,-1}},
+    {{-1,35,-1,40},{35,36,40,41},{36,37,41,42},{36,37,41,42},{37,38,42,43},{37,38,42,43},{38,39,43,44},{39,-1,44,-1},{39,-1,44,-1}},
+    {{-1,35,-1,40},{35,36,40,41},{36,37,41,42},{36,37,41,42},{37,38,42,43},{37,38,42,43},{38,39,43,44},{39,-1,44,-1},{39,-1,44,-1}},
+    {{-1,40,-1,-1},{40,41,-1,-1},{41,42,-1,-1},{41,42,-1,-1},{42,43,-1,-1},{42,43,-1,-1},{43,44,-1,-1},{44,-1,-1,-1},{44,-1,-1,-1}}
+  };
 }
 
-void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[])
+void  fcs_trg_base::stage_2_JP5_202206(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[])
 {    
     int ns=geo.ns;
-    if(fcs_trgDebug>=2) printf("Stage2v3 ns=%d\n",ns);
-
-    // NS Marker
-//    u_short params ;
-//  if(ns==0) params = 0xBBAA ;
-//    else params = 0xDDCC ;
-
-    // Creating 2x2 row/column address map when called first time
+    if(fcs_trgDebug>=2) printf("Stage2v1 ns=%d\n",ns);
+    static int first=0;
+    // creating 2x2 row/column address map when called first time
     static u_int ETbTdep[16][10]; //DEP#
     static u_int ETbTadr[16][10]; //Input Link data address
     static u_int HTbTdep[10][6];  //DEP#
     static u_int HTbTadr[10][6];  //Input Link data address          
-    static int first=0;
     if(first==0){
 	first=1;
 	//making map of 2x2 Ecal Sums of [4][4]
@@ -81,53 +88,52 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
 	}
     }
     
-    // Ecal 2x2 "HT" trigger
+    // Ecal 2x2 "HT" trigger                                                                            
     int ecal_ht = 0 ;
-    for(int i=0;i<DEP_ECAL_TRG_COU;i++) {// 0..19
-	for(int j=0;j<8;j++) {
-	    if(s2_ch_mask[geo.ns] & (1ll<<i)) {
-		ecal[i].d[j] = 0 ;
-		continue ;
-	    }
-	    if(ecal[i].d[j] > EHTTHR) ecal_ht |= 1 ;
+    for(int i=0;i<DEP_ECAL_TRG_COU;i++) {// 0..19                                                       
+      for(int j=0;j<8;j++) {
+	if(s2_ch_mask[geo.ns] & (1ll<<i)) {
+	  ecal[i].d[j] = 0 ;
+	  continue ;
 	}
-    }
-    
-    // Hcal 2x2 "HT" trigger
-    int hcal_ht = 0 ;
-    for(int i=0;i<DEP_HCAL_TRG_COU;i++) {// 20..27
-	for(int j=0;j<8;j++) {
-	    if(s2_ch_mask[geo.ns] & (1ll<<(20+i))) {
-		hcal[i].d[j] = 0 ;
-		continue ;
-	    }
-	    if(hcal[i].d[j] > HHTTHR) hcal_ht |= 1 ;
-	}
-    }
-    
-    // Pres OR trigger
-    int fpre_or = 0 ;
-    for(int i=0;i<DEP_PRE_TRG_COU;i++) {// 28..32
-	for(int j=0;j<8;j++) {
-	    if(s2_ch_mask[geo.ns] & (1ll<<(28+i))) {
-		pres[i].d[j] = 0 ;
-		continue ;
-	    }
-//	    if(pres[i].d[j] > PHTTHR) fpre_or |= 1 ;	// Tonko: the FPRE S2 inputs are bitmasks so we _do_not_ apply PHTTHR here
-	    if(pres[i].d[j]) fpre_or |= 1 ;
-	}
-    }
-    
-    //mapped Ecal 2x2
-    for(int r=0; r<16; r++){
-      for(int c=0; c<10; c++){
-	e2x2[ns][r][c]=ecal[ETbTdep[r][c]].d[ETbTadr[r][c]];
+	if(ecal[i].d[j] > EHTTHR) ecal_ht |= 1 ;
       }
     }
-    //mapped Hcal 2x2
+
+    // Hcal 2x2 "HT" trigger                                                                            
+    int hcal_ht = 0 ;
+    for(int i=0;i<DEP_HCAL_TRG_COU;i++) {// 20..27                                                      
+      for(int j=0;j<8;j++) {
+	if(s2_ch_mask[geo.ns] & (1ll<<(20+i))) {
+	  hcal[i].d[j] = 0 ;
+	  continue ;
+	}
+	if(hcal[i].d[j] > HHTTHR) hcal_ht |= 1 ;
+      }
+    }
+
+    // Pres OR trigger                                                                                  
+    int fpre_or = 0 ;
+    for(int i=0;i<DEP_PRE_TRG_COU;i++) {// 28..32                                                       
+      for(int j=0;j<8;j++) {
+	if(s2_ch_mask[geo.ns] & (1ll<<(28+i))) {
+	  pres[i].d[j] = 0 ;
+	  continue ;
+	}
+	if(pres[i].d[j]) fpre_or |= 1 ;
+      }
+    }
+
+    //mapped Ecal 2x2                                                                                   
+    for(int r=0; r<16; r++){
+      for(int c=0; c<10; c++){
+        e2x2[ns][r][c]=ecal[ETbTdep[r][c]].d[ETbTadr[r][c]];
+      }
+    }
+    //mapped Hcal 2x2                                                                                   
     for(int r=0; r<10; r++){
       for(int c=0; c<6; c++){
-	h2x2[ns][r][c]=hcal[HTbTdep[r][c]].d[HTbTadr[r][c]];
+        h2x2[ns][r][c]=hcal[HTbTdep[r][c]].d[HTbTadr[r][c]];
       }
     }
 
@@ -182,7 +188,7 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     u_int HAD1=0, HAD2=0, HAD3=0;
     u_int ETOT=0, HTOT=0;
     for(int r=0; r<15; r++){
-        if(fcs_trgDebug>=2) printf("E4x4+H %2d  ",r);
+        if(fcs_trgDebug>=2) printf("E4x4 ");
         for(int c=0; c<9; c++){
             esum[ns][r][c]
                 = ecal[ETbTdep[r  ][c  ]].d[ETbTadr[r  ][c  ]]
@@ -193,16 +199,27 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
 
 	    // locate the closest hcal
             u_int h=hsum[ns][EtoHmap[r][c][0]][EtoHmap[r][c][1]];
-                                 
+
+            // locate the max 2x2 hcal
+            u_int hmax=0;
+            for(int iz=0; iz<4; iz++){
+              int iHCalID = EtoH3map[r][c][iz];
+              if(iHCalID < 0) continue;
+              int irow = iHCalID/5;
+              int icol = iHCalID%5;
+              if(hmax < hsum[ns][irow][icol]) hmax = hsum[ns][irow][icol];
+            }
+
+            //if(h > 0 || hmax > 0) printf("Checking: %d, %d\n", h, hmax);
+ 
 	    // E+H sum
             sum[ns][r][c] = esum[ns][r][c] + h;
-	    if(sum[ns][r][c]>0xff) sum[ns][r][c]=0xff;
 
-            //in VHDL we will do esum>hsum*threshold. Ratio = H/(E+H) is for human only
+            //in VHDL we will do esum>hsum*threshold. Ratio is for human only
             if(sum[ns][r][c]==0) {
-	      ratio[ns][r][c]=0.0;
+                ratio[ns][r][c]=0.0;
             }else{
-	      ratio[ns][r][c] = float(esum[ns][r][c]) / float(esum[ns][r][c] + h);
+                ratio[ns][r][c] = float(esum[ns][r][c]) / float(sum[ns][r][c]);
             }
 
 	    //check EPD hits using the mask
@@ -225,40 +242,67 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
 
 	    // integer multiplication as in VHDL!
 	    // ratio thresholds are in fixed point integer where 1.0==128
-	    em[ns][r][c]=0;	
-	    had[ns][r][c]=0;
 	    u_int h128 = h*128 ;
+            u_int hmax128 = hmax*128 ;
 
-// Tonko: matches newest Christian code
-//	    if(h128 < esum[ns][r][c] * EM_HERATIO_THR){
-	    if(h128 <= esum[ns][r][c] * EM_HERATIO_THR){
-  	        em[ns][r][c]=1;
-		if(sum[ns][r][c] > EMTHR1){
+          if(hmax128 < esum[ns][r][c] * EM_HERATIO_THR){
+		if(esum[ns][r][c] > EMTHR1){
 		    EM1 = 1;
 		    if(epdcoin[ns][r][c]==0) {GAM1 = 1;} 
 		    else                     {ELE1 = 1;}
 		}
-		if(sum[ns][r][c] > EMTHR2){
+		if(esum[ns][r][c] > EMTHR2){
 		    EM2 = 1;		
 		    if(epdcoin[ns][r][c]==0) {GAM2 = 1;} 
 		    else                     {ELE2 = 1;}
 		}
-		if(sum[ns][r][c] > EMTHR3){
+		if(esum[ns][r][c] > EMTHR3){
 		    EM3 = 1;		
 		    if(epdcoin[ns][r][c]==0) {GAM3 = 1;} 
 		    else                     {ELE3 = 1;}
 		}
 	    }
+
 	    if(h128 > esum[ns][r][c] * HAD_HERATIO_THR){
-  	        had[ns][r][c]=1;
 		if(sum[ns][r][c] > HADTHR1) HAD1 = 1;
 		if(sum[ns][r][c] > HADTHR2) HAD2 = 1;
 		if(sum[ns][r][c] > HADTHR3) HAD3 = 1;
 	    }
-	    if(fcs_trgDebug>=2) printf("%5d %1d %3.2f ",sum[ns][r][c],epdcoin[ns][r][c],ratio[ns][r][c]);
+	    if(fcs_trgDebug>=2) printf("%5d %1d %3.2f ",esum[ns][r][c],epdcoin[ns][r][c],ratio[ns][r][c]);
 	}
 	if(fcs_trgDebug>=2) printf("\n");
     }
+    
+    //5 square JP
+    int e_col_start[5] = { 0, 0, 0, 3, 3};  //these are 2x2 row/col
+    int e_col_stop[5]  = { 3, 6, 6, 9, 9};
+    int e_row_start[5] = { 3, 0, 5, 0, 5};
+    int e_row_stop[5]  = {12,10,15,10,15};
+    int h_col_start[5] = { 0, 0, 0, 2, 2};
+    int h_col_stop[5]  = { 2, 3, 3, 5, 5};
+    int h_row_start[5] = { 2, 0, 3, 0, 3};
+    int h_row_stop[5]  = { 7, 6, 9, 6, 9};			  
+    int JP1[5] = {0,0,0,0,0};
+    int JP2[5] = {0,0,0,0,0};    
+    for(int i=0; i<5; i++){
+      jet[ns][i]=0;
+      for(int c=e_col_start[i]; c<=e_col_stop[i]; c++){ 
+	for(int r=e_row_start[i]; r<=e_row_stop[i]; r++){ 
+	  if((i==1 || i==2) && (c==0 || c==1) && (r>=5 && r<=10)) continue; //cutout
+	  jet[ns][i] += ecal[ETbTdep[r][c]].d[ETbTadr[r][c]]; 
+	}
+      }
+      for(int c=h_col_start[i]; c<=h_col_stop[i]; c++){ 
+	for(int r=h_row_start[i]; r<=h_row_stop[i]; r++){ 
+	  if((i==1 || i==2) && (c==0) && (r>=3 && r<=6)) continue; //cutout
+	  jet[ns][i] += hcal[HTbTdep[r][c]].d[HTbTadr[r][c]]; 
+	}
+      }
+      if(jet[ns][i]>0xff) jet[ns][i]=0xff;
+      if(jet[ns][i]>JETTHR1) JP1[i] = 1;
+      if(jet[ns][i]>JETTHR2) JP2[i] = 1;
+    }
+    if(fcs_trgDebug>=2) printf("JP5 = %3d %3d %3d %3d %3d\n",jet[ns][0],jet[ns][1],jet[ns][2],jet[ns][3],jet[ns][4]);
     
     //Ecal sub-crate sum
     u_int esub[4];
@@ -280,60 +324,39 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     hsub[3] = hsum[ns][ 7][0]+hsum[ns][ 7][2]+hsum[ns][ 7][4];
     for(int i=0; i<4; i++) if(hsub[i]>0xff) hsub[i]=0xff;
 
-    //Jet sum
-    //u_int jet[3];
-    u_int JP1=0,JP2=0;
-    jet[ns][0] = esub[0] + esub[1] + hsub[0] + hsub[1];
-    jet[ns][1] = esub[1] + esub[2] + hsub[1] + hsub[2];
-    jet[ns][2] = esub[2] + esub[3] + hsub[2] + hsub[3];
-    for(int i=0; i<3; i++){
-      //if(jet[ns][i]>0xff) jet[ns][i]=0xff;
-        if(jet[ns][i]>JETTHR1) JP1 = 1;
-        if(jet[ns][i]>JETTHR2) JP2 = 1;
-    }
-    if(fcs_trgDebug>=2) printf("Jet = %3d %3d %3d\n",jet[ns][0],jet[ns][1],jet[ns][2]);
-
     //total ET
     etot[ns] = esub[0] + esub[1] + esub[2] + esub[3];
     htot[ns] = hsub[0] + hsub[1] + hsub[2] + hsub[3];
-    //if(etot[ns]>0xff) etot[ns]=0xff;
-    //if(htot[ns]>0xff) htot[ns]=0xff;
     if(etot[ns]>ETOTTHR) ETOT=1;
     if(htot[ns]>HTOTTHR) HTOT=1;
     if(fcs_trgDebug>=2) printf("E/H Tot = %3d %3d\n",etot[ns],htot[ns]);
 
-    //sending output bits lower 8 bits
-    //output[0].d[0] = EM1  + (EM2 <<1) + (EM3 <<2) + 0x80; // Tonko: added last bit
+    //sending output bits
     output[0].d[0] = EM1  + (EM2 <<1) + (EM3 <<2);
     output[0].d[1] = ELE1 + (ELE2<<1) + (ELE3<<2);
     output[0].d[2] = GAM1 + (GAM2<<1) + (GAM3<<2);
     output[0].d[3] = HAD1 + (HAD2<<1) + (HAD3<<2);
-    output[0].d[4] = JP1  + (JP2 <<1);
+    output[0].d[4] = (JP1[0] << 0) + (JP1[1]<<1) + (JP1[2]<<2) + (JP1[3]<<3) + (JP1[4]<<4);
     output[0].d[5] = ETOT + (HTOT<<1);
-    output[0].d[6] = (fpre_or<<2) | (hcal_ht<<1) | (ecal_ht); //HT
-//    output[0].d[7] = 0xCD ;   
-    output[0].d[7] = 0 ;   
+    output[0].d[6] = (fpre_or<<2) | (hcal_ht<<1) | (ecal_ht); //HT                                  
+    output[0].d[7] = 0xCD ;
 
-    // upper 8 bits
+    // upper 8 bits                                                                                 
     output[1].d[0] = 0 ;
     output[1].d[1] = 0 ;
     output[1].d[2] = 0 ;
     output[1].d[3] = 0 ;
-    output[1].d[4] = 0 ;
+    output[0].d[4] = (JP2[0] << 0) + (JP2[1]<<1) + (JP2[2]<<2) + (JP2[3]<<3) + (JP2[4]<<4);
     output[1].d[5] = 0 ;
     output[1].d[6] = 0 ;
-//    output[1].d[7] = 0xAB ;
-    output[1].d[7] = 0 ;
+    output[1].d[7] = 0xAB ;
 
     if(fcs_trgDebug>=1){    
-      printf("STG2 NS%1d = %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x\n",
-	     ns,
-	     output[1].d[0],output[0].d[0],output[1].d[1],output[0].d[1],
-	     output[1].d[2],output[0].d[2],output[1].d[3],output[0].d[3],
-	     output[1].d[4],output[0].d[4],output[1].d[5],output[0].d[5],
-	     output[1].d[6],output[0].d[6],output[1].d[7],output[0].d[7]);
+        printf("FCS STG2 NS=%1d output = %02x %02x %02x %02x %02x %02x %02x %02x\n",
+	       ns,
+	       output[0].d[0],output[0].d[1],output[0].d[2],output[0].d[3],
+	       output[0].d[4],output[0].d[5],output[0].d[6],output[0].d[7]);
     }
 
     return ;
 }
-
