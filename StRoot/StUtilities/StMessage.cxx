@@ -21,7 +21,6 @@
 using namespace std;
 static StMessageCounter* messCounter = StMessageCounter::Instance();
 
-static std::ostringstream messBuffer;
 static char space = ' ';
 static char tab = '\t';
 
@@ -73,7 +72,7 @@ int StMessage::Print(int nChars) {
   if (!nChars) {
     printIt = messCounter->CheckLimit(message,type);
   }
-  messBuffer.seekp(0);
+  std::ostringstream messBuffer;
   if (printIt) {
     const char* insert;
     if (!(option & kMessOptP)) {
@@ -118,7 +117,6 @@ int StMessage::Print(int nChars) {
     } else
       nChars = 0;
   }
-  messBuffer << ends;
   if (!repeats) {
     if (!strcmp(messBuffer.str().c_str(),lastMessBuffer.str().c_str())) {
       return messBuffer.tellp();
