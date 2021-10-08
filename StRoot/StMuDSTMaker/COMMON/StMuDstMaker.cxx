@@ -173,7 +173,7 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mBTofUtil = new StMuBTofUtil();   /// dongx
   mEpdUtil = new StMuEpdUtil();     /// MALisa
   mEzTree  = new StMuEzTree();
-  if ( ! mStMuDst || ! mEmcUtil || ! mFmsUtil || ! mPmdUtil  || ! mTofUtil || ! mBTofUtil || ! mEpdUtil || ! mEzTree ) /// dongx
+  if ( ! mStMuDst || ! mEmcUtil || ! mFmsUtil || ! mFcsUtil || ! mPmdUtil  || ! mTofUtil || ! mBTofUtil || ! mEpdUtil || ! mEzTree ) /// dongx
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
 
@@ -810,6 +810,12 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
   if (!mFmsCollection) {
     mFmsCollection=new StMuFmsCollection();
     connectFmsCollection();
+    mStMuDst->set(this);
+  }
+
+  if (!mFcsCollection) {
+    mFcsCollection=new StMuFcsCollection();
+    connectFcsCollection();
     mStMuDst->set(this);
   }
 
@@ -1859,7 +1865,7 @@ string StMuDstMaker::dirname(string s){
 }
 
 void StMuDstMaker::setProbabilityPidFile(const char* file) {
-  ostrstream flnm;
+  std::ostringstream flnm;
 
   if ( ! file ){
     const char *PIDtable="PIDTableP01gl.root";
@@ -1947,6 +1953,7 @@ void StMuDstMaker::connectFcsCollection() {
   mFcsCollection->setFcsHitArray(mFcsArrays[muFcsHit]);
   mFcsCollection->setFcsClusterArray(mFcsArrays[muFcsCluster]);
   mFcsCollection->setFcsPointArray(mFcsArrays[muFcsPoint]);
+  mFcsCollection->setFcsInfoArray(mFcsArrays[muFcsInfo]);
 }
 //-----------------------------------------------------------------------
 void StMuDstMaker::connectPmdCollection() {

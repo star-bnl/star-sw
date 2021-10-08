@@ -39,4 +39,5 @@
 #include "StMuETofHit.h"
 #include "StMuFcsCollection.h"
 #include "StMuFcsHit.h"
+#include "StMuFcsInfo.h"
 #include "StMuFcsUtil.h"

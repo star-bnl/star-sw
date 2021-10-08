@@ -33,6 +33,8 @@ private:
   void fillMuFcsClusters(StMuFcsCollection*, StFcsCollection*);
   /** Create StMuFcsPoints from StFcsPoints and fill StMuFcsCollection */
   void fillMuFcsPoints(StMuFcsCollection*, StFcsCollection*);
+  /** Create StMuFcsInfo from reconstruction flag and det indices */
+  void fillMuFcsInfo(StMuFcsCollection*, StFcsCollection*);
   /** Set the relationships in StMu */
   void rebuildRelationships(StFcsCollection*, StMuFcsCollection*);
   /** fill the StFcsHits from MuDst */

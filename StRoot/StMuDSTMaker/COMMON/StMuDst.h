@@ -236,6 +236,8 @@ public:
   static TClonesArray* emcArray(int type) { return emcArrays[type]; }
    /// returns pointer to the n-th TClonesArray from the fms arrays
   static TClonesArray* fmsArray(int type) { return fmsArrays[type]; }
+  /// returns pointer to the n-th TClonesArray from the fms arrays
+  static TClonesArray* fcsArray(int type) { return fcsArrays[type]; }
     /// returns pointer to the n-th TClonesArray from the pmd arrays
   static TClonesArray* pmdArray(int type) { return pmdArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the tof arrays

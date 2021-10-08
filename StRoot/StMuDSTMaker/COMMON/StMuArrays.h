@@ -22,7 +22,7 @@ enum fgtTypes {muFgtStrips=0, muFgtClusters, muFgtStripAssociations, muFgtAdcs }
 
 enum fmsTypes {muFmsHit=0, muFmsCluster, muFmsPoint, muFmsInfo};
 
-enum fcsTypes {muFcsHit=0, muFcsCluster, muFcsPoint}; 
+enum fcsTypes {muFcsHit=0, muFcsCluster, muFcsPoint, muFcsInfo}; 
 #ifndef __NO_STRANGE_MUDST__
 /// @enum strangeTypes enumeration to to index the strangeArrays
 enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0Mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc, smuCut};
@@ -61,7 +61,7 @@ __NMCARRAYS__      =2,	///< size of the MCness arrays, i.e. number of TClonesArr
 __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
 __NFMSARRAYS__     =4 ,	///< size of the fms arrays, i.e. number of TClonesArrays  
-__NFCSARRAYS__     =3 ,  ///< size of the fcs arrays, i.e. number of TClonesArrays  
+__NFCSARRAYS__     =4 ,  ///< size of the fcs arrays, i.e. number of TClonesArrays  
 // run 5 - dongx
 __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NBTOFARRAYS__    =3 ,  /// dongx

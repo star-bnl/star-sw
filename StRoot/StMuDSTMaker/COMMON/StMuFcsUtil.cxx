@@ -3,6 +3,7 @@
 #include "StMuDSTMaker/COMMON/StMuFcsHit.h"
 #include "StMuDSTMaker/COMMON/StMuFcsPoint.h"
 #include "StMuDSTMaker/COMMON/StMuFcsUtil.h"
+#include "StMuDSTMaker/COMMON/StMuFcsInfo.h"
 #include "StMuDSTMaker/COMMON/StMuFcsCollection.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -54,6 +55,7 @@ void StMuFcsUtil::fillMuFcs(StMuFcsCollection *muFcs,StFcsCollection *fcscol)
   fillMuFcsHits(muFcs, fcscol);
   fillMuFcsPoints(muFcs, fcscol);
   fillMuFcsClusters(muFcs, fcscol);
+  fillMuFcsInfo(muFcs, fcscol);
 
   // rebuild the pointers that give cluster <-> hit, cluster <-> cluster,
   // and cluster <-> point relationships
@@ -223,6 +225,39 @@ void StMuFcsUtil::fillMuFcsPoints(StMuFcsCollection* muFcs,
         }  // for i
     } // for idet
 } // fillMuFcsPoints
+
+void StMuFcsUtil::fillMuFcsInfo(StMuFcsCollection* muFcs,
+                                  StFcsCollection* fcscol) {
+    muFcs->addInfo();
+    muFcs->setFcsReconstructionFlag(fcscol->fcsReconstructionFlag());
+
+    // Now store the index for the first and last hit/cluster/point
+    // for each detector
+    size_t hitCount = 0;
+    size_t clusterCount = 0;
+    size_t pointCount = 0;
+    for ( unsigned int idet = 0; idet < kFcsNDet + 1; idet++ ){
+        
+
+        muFcs->getInfo()->setHitIndex( idet, hitCount );
+        hitCount     += fcscol->numberOfHits(idet);
+
+        if ( idet == kFcsNDet )
+            break;
+        muFcs->getInfo()->setClusterIndex( idet, clusterCount );
+        clusterCount += fcscol->numberOfClusters(idet);
+
+        muFcs->getInfo()->setPointIndex( idet, pointCount );
+        pointCount   += fcscol->numberOfPoints(idet);
+    }
+
+    // fill the final index with the total number
+    // so that it is easy to compute the # for the final detector
+    muFcs->getInfo()->setHitIndex( kFcsNDet + 1, hitCount );
+    muFcs->getInfo()->setClusterIndex( kFcsNDet, clusterCount );
+    muFcs->getInfo()->setPointIndex( kFcsNDet, pointCount );
+
+}
 
 void StMuFcsUtil::fillFcsHits(StFcsCollection* fcscol,
                               StMuFcsCollection* muFcs) {

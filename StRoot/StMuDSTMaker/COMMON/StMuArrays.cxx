@@ -28,7 +28,7 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVer
                                                            "EEmcPrs","EEmcSmdu","EEmcSmdv",
 /*pmdArrayNames    [__NPMDARRAYS__    ]*/                  "PmdHit","CpvHit", "PmdCluster", "CpvCluster",
 /*fmsArrayNames    [__NFMSARRAYS__    ]*/                  "FmsHit","FmsCluster","FmsPoint","FmsInfo",
-/*fcsArrayNames    [__NFCSARRAYS__    ]*/                  "FcsHit","FcsCluster","FcsPoint",
+/*fcsArrayNames    [__NFCSARRAYS__    ]*/                  "FcsHit","FcsCluster","FcsPoint", "FcsInfo",
 /*tofArrayNames    [__NTOFARRAYS__    ]*/                  "TofHit","TofData", "TofRawData",
 /*btofArrayNames   [__NBTOFARRAYS__   ]*/                  "BTofHit","BTofRawHit","BTofHeader", // dongx
 /*etofArrayNames   [__NETOFARRAYS__   ]*/                  "ETofDigi","ETofHit","ETofHeader",   // jdb
@@ -46,7 +46,8 @@ const char** StMuArrays::mcArrayNames = StMuArrays::arrayNames        +__NARRAYS
 const char** StMuArrays::emcArrayNames = StMuArrays::mcArrayNames     +__NMCARRAYS__;
 const char** StMuArrays::pmdArrayNames = StMuArrays::emcArrayNames    +__NEMCARRAYS__;
 const char** StMuArrays::fmsArrayNames = StMuArrays::pmdArrayNames    +__NPMDARRAYS__;
-const char** StMuArrays::tofArrayNames = StMuArrays::fmsArrayNames    +__NFMSARRAYS__;
+const char** StMuArrays::fcsArrayNames = StMuArrays::fmsArrayNames    +__NFMSARRAYS__;
+const char** StMuArrays::tofArrayNames = StMuArrays::fcsArrayNames    +__NFCSARRAYS__;
 const char** StMuArrays::btofArrayNames = StMuArrays::tofArrayNames   +__NTOFARRAYS__;  // dongx
 const char** StMuArrays::etofArrayNames = StMuArrays::btofArrayNames  +__NBTOFARRAYS__; // jdb
 const char** StMuArrays::epdArrayNames  = StMuArrays::etofArrayNames  +__NETOFARRAYS__; // MALisa
@@ -73,7 +74,7 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrim
 							                               "StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit",
 /*pmdArrayTypes   [__NPMDARRAYS__     ]*/                  "StMuPmdHit","StMuPmdHit","StMuPmdCluster","StMuPmdCluster",
 /*fmsArrayTypes   [__NFMSARRAYS__     ]*/                  "StMuFmsHit","StMuFmsCluster","StMuFmsPoint","StMuFmsInfo",
-/*fcsArrayTypes   [__NFCSARRAYS__     ]*/                  "StMuFcsHit","StMuFcsCluster","StMuFcsPoint",
+/*fcsArrayTypes   [__NFCSARRAYS__     ]*/                  "StMuFcsHit","StMuFcsCluster","StMuFcsPoint","StMuFcsInfo",
 /*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData","StTofRawData",
 /*btofArrayTypes  [__NBTOFARRAYS__    ]*/                  "StMuBTofHit","StBTofRawHit","StBTofHeader",  // dongx
 /*etofArrayTypes  [__NETOFARRAYS__    ]*/                  "StMuETofDigi","StMuETofHit","StMuETofHeader",  // jdb+fseck
@@ -112,7 +113,7 @@ int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,10,1000,1000,1000,1
 /*emcArraySizes    [__NEMCARRAYS__    ]*/                  1,1000,1000,1000,1000,1000,1000,
 /*pmdArraySizes    [__NPMDARRAYS__    ]*/                  1000,1000,1000,1000,
 /*fmsArraySizes    [__NFMSARRAYS__    ]*/                  1,1,1,1,
-/*fcsArraySizes    [__NFCSARRAYS__    ]*/                  1,1,1,
+/*fcsArraySizes    [__NFCSARRAYS__    ]*/                  1,1,1,1,
 /*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200, 1000,
 /*btofArraySizes   [__NBTOFARRAYS__   ]*/                  1000,1000,1,   // dongx
 /*etofArraySizes   [__NETOFARRAYS__   ]*/                  1000,1000,1,   // jdb
@@ -148,7 +149,7 @@ int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,0,0
 /*emcArrayCounters    [__NEMCARRAYS__    ]*/               0,0,0,0,0,0,0,
 /*pmdArrayCounters    [__NPMDARRAYS__    ]*/               0,0,0,0,
 /*fmsArrayCounters    [__NFMSARRAYS__    ]*/               0,0,0,0,
-/*fcsArrayCounters    [__NFCSARRAYS__    ]*/               0,0,0,
+/*fcsArrayCounters    [__NFCSARRAYS__    ]*/               0,0,0,0,
 /*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0, 0,
 /*btofArrayCounters   [__NBTOFARRAYS__   ]*/               0, 0, 0,      // dongx
 /*etofArrayCounters   [__NETOFARRAYS__   ]*/               0, 0, 0,      // jdb
