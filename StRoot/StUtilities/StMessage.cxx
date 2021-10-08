@@ -182,15 +182,6 @@ void StMessage::PrintInfo() {
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
-//_____________________________________________________________________________
-int StMessage::InitBuffer() {
-  // Initialize buffer with 1088 bytes.
-  messBuffer << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64
-     << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64;
-  return messBuffer.tellp();
-}
-
-int tmpp = StMessage::InitBuffer();
 
 //_____________________________________________________________________________
 // $Id: StMessage.cxx,v 1.29 2016/06/14 06:24:54 genevb Exp $
