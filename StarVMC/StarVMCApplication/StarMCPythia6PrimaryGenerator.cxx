@@ -26,6 +26,7 @@ void StarMCPythia6PrimaryGenerator::PreSet() {
   fOrigin = TVector3(0,0,0);
   fPVX = fPVY = fPVZ = fPVxyError = 0;
   fPythia6 = 0;
+  SetSpread(0.15, 0.15, 42.0);
 }
 //_____________________________________________________________________________
 void StarMCPythia6PrimaryGenerator::SetGenerator(TString mode, Int_t tune) {
@@ -91,12 +92,15 @@ void StarMCPythia6PrimaryGenerator::GeneratePrimary() {
   Double_t poly = 0.; 
   Double_t polz = 0.; 
   Int_t ntr = 0;
+  fNofPrimaries = 0;
   for (Int_t i = 0; i <= N; i++) {
     TParticle *p = (TParticle *) particles.UncheckedAt(i);
     if (! p) continue;
     // Add particle to stack 
     fStarStack->PushTrack(toBeDone, -1, p->GetPdgCode(), p->Px(), p->Py(), p->Pz(), p->Energy(), 
-			  p->Vx(), p->Vy(), p->Vz(), p->T(),  polx, poly, polz, kPPrimary, ntr, 1., 2);
+			  p->Vx() + fOrigin.X(), p->Vy() + fOrigin.Y(), p->Vz() + fOrigin.Z(), p->T(),  
+			  polx, poly, polz, kPPrimary, ntr, 1., 2);
+    fNofPrimaries++;
   }
 }
 //_____________________________________________________________________________
@@ -137,9 +141,11 @@ void StarMCPythia6PrimaryGenerator::GeneratePrimaries() {
       } else {
 	LOG_WARN << "Warning : Requested Beam Line, but there is no beam line" << endm;
       }
-    } else {
-      fOrigin.SetZ(fZ_min + (fZ_max-fZ_min)*gRandom->Rndm());
 #endif
+    } else {
+      fOrigin.SetX(gRandom->Gaus(0,gSpreadX));
+      fOrigin.SetY(gRandom->Gaus(0,gSpreadY));
+      fOrigin.SetZ(gRandom->Gaus(0,gSpreadZ));
     }
   }
   GeneratePrimaries(fOrigin);
