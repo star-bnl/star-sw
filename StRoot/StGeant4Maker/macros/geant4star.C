@@ -25,6 +25,16 @@ void addGenerator( const char* name, const char* maker ) {
   gROOT->ProcessLine( Form( "_primary->AddGenerator( _%s );", name ) );
 }
 
+// Add a filter to the primary event generator
+void addFilter( const char* name ) {
+
+  TString myname = name; myname.ToLower();
+  LOG_INFO << "auto* _" << myname.Data() << " = new " << name << endm;
+  gROOT->ProcessLine( Form( "auto* _%s = new %s;", myname.Data(), name ) );
+  gROOT->ProcessLine( Form( "_primary->AddFilter( _%s );", myname.Data() ) );
+
+}
+
 std::map<TString,TString> _generatorMap = {
   { "genreader", "StarGenEventReader" }
 };
@@ -74,6 +84,10 @@ void loadStar(TString mytag="dev2021", Bool_t agml = true  )
 	if ( arg.Contains("output") ) {
 	  chainOpts += " geantout ";
 	}
+	// By specifying a filter, load the stargeneratorfilt package
+	if ( arg.Contains("filter") ) {
+	  chainOpts += " stargen.filt";	  
+	}
       }
       else {
 	chainOpts += arg;
@@ -85,6 +99,7 @@ void loadStar(TString mytag="dev2021", Bool_t agml = true  )
   gROOT->ProcessLine(Form("chain->SetFlags(\"%s\");",chainOpts.Data()));
 
   TString output = "";
+  std::vector< std::string > filters;
   for ( int i=0; i<gApplication->Argc();i++ ) {
     TString arg = gApplication->Argv(i);  
     if ( arg.Contains("--") ) {
@@ -105,6 +120,9 @@ void loadStar(TString mytag="dev2021", Bool_t agml = true  )
         if ( key=="geometry" ) {
 	    mytag = val;
 	}
+	if ( key=="filter" ) {
+	  filters.push_back( val.Data() );
+	}
       }
     }
   }
@@ -122,6 +140,12 @@ void loadStar(TString mytag="dev2021", Bool_t agml = true  )
   addMaker( "primary", "StarPrimaryMaker()" );
   addMaker( "geant4",  "StGeant4Maker()" );
 
+  // Attach filters to the primary maker...
+  for ( auto s : filters ) {
+    addFilter( s.c_str() );
+  }
+
+
   //  addMaker( "pythia8", "StarPythia8()" );
   //  gROOT->ProcessLine("_primary->AddGenerator( _pythia8 );");
 
@@ -137,6 +161,7 @@ void loadStar(TString mytag="dev2021", Bool_t agml = true  )
       addGenerator( s, _generatorMap[s] );
     }
   }
+
   
 
 
@@ -176,6 +201,7 @@ void loadStar(TString mytag="dev2021", Bool_t agml = true  )
 
 	if ( key=="geometry" ) continue; // action already taken
 	if ( key=="output"   ) continue; // ... ditto
+	if ( key=="filter"   ) continue; // ... ditto
 
 	//	std::cout << "geant4star commandline option " << key.Data() << " = " << val.Data() << std::endl;
 
@@ -193,10 +219,10 @@ void loadStar(TString mytag="dev2021", Bool_t agml = true  )
 	}
 
 	// All other variables pass through to G4 maker
-	
-	gROOT->ProcessLine(Form("_geant4->SetAttr(\"%s\",%s);",
-				arg.Tokenize("=")->At(0)->GetName(),
-				arg.Tokenize("=")->At(1)->GetName()));
+	if ( val.IsFloat() ) 	  gROOT->ProcessLine(Form("_geant4->SetAttr(\"%s\",%s);",     key.Data(), val.Data() ));
+	else                   	  gROOT->ProcessLine(Form("_geant4->SetAttr(\"%s\",\"%s\");", key.Data(), val.Data() ));
+						     
+
       }                                                               
     } 
   } 
