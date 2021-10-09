@@ -73,3 +73,9 @@ sftp -r  fisyak@sftp.sdcc.bnl.gov:/gpfs01/star/data100/reco/production_31GeV_fix
 
 
 rsync -avrz -h --include='*event.root'  --exclude='*.*' --exclude="*dev*" /direct/gpfs01/star/data100/reco/production_*fixedTarget*  . >& rsync6.log &
+
+
+sftp -r  fisyak@sftp.sdcc.bnl.gov:/gpfs02/eic/DATA/PYTHIA/ep/YellowReport/TREES/pythia.ep.18x275.1Mevents.RadCor=0.Q2=0.00001-1.0.kT=1.0*root . >& sftp.log
+
+
+rsync -avrz -h  --include='*.root'  --exclude='*.*' /direct/gpfs02/eic/DATA/PYTHIA/ep/YellowReport/TREES/pythia.ep.18x275.1Mevents.RadCor=0.Q2=0.00001-1.0.kT=1.0*root .

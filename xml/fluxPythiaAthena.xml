@@ -21,7 +21,7 @@
   echo "${file}"
   if ( ! -r ${file}) then
 # root4star -q -b 'bfc.C('$l',"y2017a,useXgeom,StEvent,noRunco,noHistos,pythia,flux,rung.'${rung}',nodefault","","","'${file}'")' &gt;&amp; ${logFile}
-  root.exe -q -b 'bfc.C('$l',"y2017a,StEvent,noRunco,noHistos,pythia,flux,rung.'${rung}',pythia6pp510VMC,VMC,fluxVMC","","","'${file}'")' &gt;&amp; ${logFile}
+  root.exe -q -b 'bfc.C('$l',"athena,StEvent,noRunco,noHistos,rung.'${rung}',pythia6pp510VMC,VMC,fluxVMC","","","'${file}'")' &gt;&amp; ${logFile}
   endif
 </command>
 <input URL="command:fluxPythia.pl" />

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job  name="Flux" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
-<stdout URL="file:./Flux$JOBID.log" />
-<stderr URL="file:./Flux$JOBID.err" />
+<stdout URL="file:./$JOBID.log" />
+<stderr URL="file:./$JOBID.err" />
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   setup debug
