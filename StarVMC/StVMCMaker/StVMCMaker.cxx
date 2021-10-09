@@ -62,6 +62,7 @@
 #include "StChain.h"
 #include "Stiostream.h"
 #include "StarMagField.h"
+#include "AthenaMagField.h"
 #include "StarMCHits.h"
 #include "StarMCSimplePrimaryGenerator.h"
 #include "StarMCHBPrimaryGenerator.h"
@@ -118,10 +119,6 @@ Int_t StVMCMaker::Init() {
 #endif
       } 
     }
-    StarMCHits *hits = StarMCHits::instance();
-    hits->SetHitHolder(m_DataSet);
-    fgStarVMCApplication->GetStack()->SetHitHolder(m_DataSet);
-    fgStarVMCApplication->SetStepping(hits);
   }
   SafeDelete(gRandom);
   fRunNo = IAttr("RunG");
@@ -145,8 +142,10 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
     }
     assert(geom);
     TObjectSet *o = (TObjectSet *) geom->Find("configGeom");
-    TEnv *env = (TEnv *) (o->GetObject());
-    StarVMCDetector::SetConfigEnv(env);
+    if (o) {
+      TEnv *env = (TEnv *) (o->GetObject());
+      StarVMCDetector::SetConfigEnv(env);
+    }
   }
   if (!fVolume) {
     fVolume = (TDataSet *) GetDataBase("StarDb/AgiGeometry/HALL");
@@ -156,11 +155,15 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
      ((StVMCMaker *)this)->AddConst(fVolume);
      if (Debug() > 1) fVolume->ls(3);
   }
-  LOG_INFO << "StVMCMaker::InitRun SetMagField set as StarMagField" 
-		   << " with Map: " << StarMagField::Instance()->GetMap()
-		   << ",Factor: " << StarMagField::Instance()->GetFactor() 
-		   << ",Rescale: " << StarMagField::Instance()->GetRescale() <<endm;
-  fgGeant3->SetMagField(StarMagField::Instance());
+  if (TString(gGeoManager->GetName()) != "default") {
+    LOG_INFO << "StVMCMaker::InitRun SetMagField set as StarMagField" 
+	     << " with Map: " << StarMagField::Instance()->GetMap()
+	     << ",Factor: " << StarMagField::Instance()->GetFactor() 
+	     << ",Rescale: " << StarMagField::Instance()->GetRescale() <<endm;
+    fgGeant3->SetMagField(StarMagField::Instance());
+  } else {
+    fgGeant3->SetMagField(AthenaMagField::Instance());
+  }
   if (IAttr("VMCPassive"))  {LOG_INFO << "StVMCMaker::InitRun Passive   mode" << endm;} 
   else                      {LOG_INFO << "StVMCMaker::InitRun Active    mode" << endm;
     if (IAttr("Embedding")) {LOG_INFO << "StVMCMaker::InitRun Embedding mode" << endm;}
@@ -252,6 +255,11 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   if (! gGeoManager->IsClosed()) {
     gGeoManager->CloseGeometry();
   }
+  StarMCHits *hits = 0;
+  if (TString(gGeoManager->GetName()) != "default") hits = StarMCHits::instance();
+  if (hits) hits->SetHitHolder(m_DataSet);
+  fgStarVMCApplication->GetStack()->SetHitHolder(m_DataSet);
+  fgStarVMCApplication->SetStepping(hits);
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -298,6 +306,7 @@ Int_t StVMCMaker::Make(){
     }
     Double_t BbcW = 0, BbcE = 0;
     St_g2t_ctf_hit *g2t_bbc_hit = (St_g2t_ctf_hit *) GetDataSet("g2t_bbc_hit");
+    if (! g2t_bbc_hit) return kStOK;
     Int_t N = g2t_bbc_hit->GetNRows();
     g2t_ctf_hit_st *bbc = g2t_bbc_hit->GetTable();
     for (Int_t i = 0; i < N; i++, bbc++) {
