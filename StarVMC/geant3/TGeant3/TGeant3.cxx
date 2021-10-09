@@ -1661,6 +1661,7 @@ Int_t TGeant3::IdFromPDG(Int_t pdg) const
    for (Int_t i = 0; i < fNPDGCodes; ++i)
       if (pdg == fPDGCode[i])
          return i;
+   //   Warning("IdFromPDG", "Unknown to GEANT3 pdg value = %i",pdg);
    return -1;
 }
 
