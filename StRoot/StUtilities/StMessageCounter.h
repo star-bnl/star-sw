@@ -19,7 +19,7 @@ typedef StVector(char*) messCharVec;
 typedef StVector(char*)::iterator messCharVecIter;
 
 
-class StMessageCounter : public ostrstream {
+class StMessageCounter : public std::ostringstream {
  private:
    static StMessageCounter* mInstance;
    StMessTypeList* messTypeList;

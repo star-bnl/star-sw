@@ -39,4 +39,4 @@ if __name__ == "__main__":
     for job in joblist:
         if job.jobid != args.jobid: continue
         if args.description: print("{descr}".format(**job._asdict())) 
-        if args.command:     print("root4star -b -q -l \'bfc.C(10, \"{chopts}\", \"/star-test-data/quick/{inpfile}\")\'".format(**job._asdict()))
+        if args.command:     print("root4star -b -q -l \'bfc.C({nevents}, \"{chopts}\", \"{inppath}/{inpfile}\")\'".format(**job._asdict()))

@@ -328,8 +328,8 @@ void StPicoEvent::setBunchId(Int_t id) {
     LOG_INFO << "StPicoEvent::setBunchID() - negative bunch ID = " << id << endm;
   }
   else {
-    mBunchCrossId = ( ( id > std::numeric_limits<unsigned short>::max() ) ?
-		      std::numeric_limits<unsigned short>::max() :
+    mBunchCrossId = ( ( id > std::numeric_limits<decltype(mBunchCrossId)>::max() ) ?
+		      std::numeric_limits<decltype(mBunchCrossId)>::max() :
 		      (UChar_t)id );
   }
 }

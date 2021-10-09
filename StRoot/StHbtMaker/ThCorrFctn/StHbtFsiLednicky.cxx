@@ -150,7 +150,7 @@ double StHbtFsiLednicky::GetWeight(const StHbtThPair* aThPair){
 };
 
 StHbtString StHbtFsiLednicky::Report() {
-  ostrstream tStr; 
+  std::ostringstream tStr; 
   tStr << "Lednicky afterburner calculation for  Correlation -  Report" << endl;
   tStr << "    Setting : Quantum : " << ((mIqs) ? "On" : "Off"); 
   tStr << " - Coulbomb : " << ((mIch) ? "On" : "Off") ;

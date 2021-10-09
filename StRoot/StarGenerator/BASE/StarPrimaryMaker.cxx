@@ -60,12 +60,12 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   SetAttr("usestarsim", int(1) );
 
   // Publish the stack
-  AddObj( mStack, ".data" );  
+  AddObj( mStack, ".const" );  
 
   // Register the particle database with this maker
   StarParticleData &pdb = StarParticleData::instance();
   //  Shunt( &pdb );
-  AddData( &pdb, ".data" );
+  AddData( &pdb, ".const" );
 
   SetAttr("FilterKeepHeader", int(1) );
 
