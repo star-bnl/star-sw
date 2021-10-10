@@ -31,6 +31,11 @@
 - Update SCGL macro (#105)
 
 
+## [SL21c_4] - 2021-10-08
+
+- fixed a logical error for the PicoVtxMod::Mtd in StPicoDstMaker.cxx (#163)
+
+
 ## [SL21c_3] - 2021-09-16
 
 - let StBTofSimResParams.h to use existed timestamp in bfc chain, instead of re-define a new timestamp (#145)
