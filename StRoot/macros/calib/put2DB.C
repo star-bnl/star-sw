@@ -123,9 +123,8 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
     if (N == 1) offset = 0;
     if (TName.Contains("tpcDriftVelocity") ||TName.Contains("ssdConfiguration") || TName.Contains("trgTimeOffset")) offset = 0;
     if (TName.Contains("svtWafersPosition")) {cout << "Un comment SvtIndexMap include" << endl; return;}
-#if 0 /* Take care about this in Cint files */
     Bool_t ok = myTable->IsA()->InheritsFrom( "St_tpcCorrection" );
-    if ( ok ) {
+    if ( ok && N < 50) {
       cout << "==================== St_tpcCorrection ====================" << endl;
       // enlarge table up to 50 rows
       //      const Int_t Nmax = 192; 
@@ -137,21 +136,21 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
       tpcCorrection_st row;
       memset(&row, 0, sizeof(tpcCorrection_st));
       for (Int_t i = N; i < Nmax; i++) myTable->AddAt(&row);
+#if 0
       tpcCorrection_st *r = (tpcCorrection_st *) myTable->GetTable();
       for (Int_t i = 0; i < N; i++, r++) {
 	r->idx = 0;
 	r->nrows = 0;
       }
+#endif
       myTable->Print(0,N+1);
       N = Nmax;
       offset = 1;
     }
-#endif
     Int_t *rowIDs = new Int_t[N];
     for(Int_t ti=0;ti<N;ti++) rowIDs[ti]=ti + offset;
     Char_t* gstr = (Char_t*) myTable->GetTable();
     dbTable->SetTable(gstr,N,rowIDs);
-#if 1
     Int_t status = 0;
     Int_t maxIter = 1; // 5
     for (Int_t i = 0; i < maxIter; i++) {
@@ -171,7 +170,6 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
     cout << file << " ------> Done" << endl;
     TString cmd(Form("mv %s %s.HOLD.%s",file, file, flavor.Data())); 
     if (gSystem->Exec(cmd)) return;
-#endif
   }
 }
 /*
