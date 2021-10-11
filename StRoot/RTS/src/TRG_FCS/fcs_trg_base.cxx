@@ -10,7 +10,6 @@
 // statics
 fcs_trg_base::marker_t fcs_trg_base::marker ;
 
-
 u_int fcs_trg_base::stage_version[4] ;
 
 u_short fcs_trg_base::stage_params[4][16] ;
@@ -32,14 +31,30 @@ u_int fcs_trg_base::PRES_MASK[15][9][6];
 
 u_short        fcs_trg_base::EM_HERATIO_THR ;
 u_short        fcs_trg_base::HAD_HERATIO_THR ;
+u_short        fcs_trg_base::EMTHR0 ;
 u_short        fcs_trg_base::EMTHR1 ;
 u_short        fcs_trg_base::EMTHR2 ;
-u_short        fcs_trg_base::EMTHR3 ;
+u_short        fcs_trg_base::EMTHR3 ;  //obsolete for 202207 
+u_short        fcs_trg_base::ELETHR0 ;
+u_short        fcs_trg_base::ELETHR1 ;
+u_short        fcs_trg_base::ELETHR2 ;
+u_short        fcs_trg_base::HADTHR0 ;
 u_short        fcs_trg_base::HADTHR1 ;
 u_short        fcs_trg_base::HADTHR2 ;
-u_short        fcs_trg_base::HADTHR3 ;
-u_short        fcs_trg_base::JETTHR1 ;
-u_short        fcs_trg_base::JETTHR2 ;
+u_short        fcs_trg_base::HADTHR3 ; //obsolete for 202207 
+u_short        fcs_trg_base::JETTHR1 ; //obsolete for 202207 
+u_short        fcs_trg_base::JETTHR2 ; //obsolete for 202207 
+u_short        fcs_trg_base::JPATHR2 ;      
+u_short        fcs_trg_base::JPATHR1 ;      
+u_short        fcs_trg_base::JPATHR0 ;      
+u_short        fcs_trg_base::JPBCTHR2 ;      
+u_short        fcs_trg_base::JPBCTHR1 ;      
+u_short        fcs_trg_base::JPBCTHR0 ;      
+u_short        fcs_trg_base::JPBCTHRD ;      
+u_short        fcs_trg_base::JPDETHR2 ;      
+u_short        fcs_trg_base::JPDETHR1 ;      
+u_short        fcs_trg_base::JPDETHR0 ;      
+u_short        fcs_trg_base::JPDETHRD ;      
 u_short        fcs_trg_base::ETOTTHR ;
 u_short        fcs_trg_base::HTOTTHR ;
 u_short        fcs_trg_base::EHTTHR ;
@@ -203,19 +218,41 @@ void fcs_trg_base::init(const char* fname)
 	// stage2 params (defaults are from Akio's code)
 	EM_HERATIO_THR = 32 ;  // or 128*(1/4)
 	HAD_HERATIO_THR = 32 ;
-	EMTHR1 = 32 ;
-	EMTHR2 = 48 ;
-	EMTHR3 = 64 ;
-	HADTHR1 = 32 ;
-	HADTHR2 = 48 ;
-	HADTHR3 = 64 ;
-	JETTHR1 = 64 ;
-	JETTHR2 = 128;
+
+	EMTHR3 = 128 ; //obsolete for 202207 
+	EMTHR2 = 128 ;
+	EMTHR1 = 96 ;
+	EMTHR0 = 64 ; 
+
+	ELETHR2 = 64 ;
+	ELETHR1 = 32 ;
+	ELETHR0 = 22 ; 
+
+	HADTHR3 = 160 ; //obsolete for 202207   
+	HADTHR2 = 160 ;
+	HADTHR1 = 128 ;
+	HADTHR0 =  96 ; 
+
+	JETTHR2  = 128 ; //obsolete for 202207   
+	JETTHR1  =  64 ; //obsolete for 202207   
+	JPATHR2  = 190 ;      
+        JPATHR1  = 127 ;      
+        JPATHR0  = 111 ;      
+        JPBCTHR2 = 190 ;      
+        JPBCTHR1 = 127 ;      
+        JPBCTHR0 = 111 ;      
+        JPBCTHRD = 127 ;       
+        JPDETHR2 = 190 ;      
+        JPDETHR1 = 127 ;      
+        JPDETHR0 = 111 ;      
+        JPDETHRD = 127 ;      
+
 	ETOTTHR = 10 ;
 	HTOTTHR = 10 ;
 	EHTTHR = 32 ;
 	HHTTHR = 32 ;
-	PHTTHR = 0 ;
+
+	PHTTHR = 100 ; //stage1
 
 	// IMPORTANT: Requested Stage_x versions defaults
 	// Either set by the user to her/his wishes or picked up from the DAQ file
@@ -1031,7 +1068,7 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 				fpre_in[j] = d_in[xing].s2[i].s2_from_s1[28+j] ;
 			}
 
-			stage_2(ecal_in, hcal_in, fpre_in, geo, d_out.s2[i].s2_to_s3) ;
+			stage_2(ecal_in, hcal_in, fpre_in, geo, d_out.s2[i].s2_to_s3, &d_out.s2[i].s2_to_dsm) ;
 		}
 		else {	// GEANT-like simulation
 
@@ -1045,7 +1082,7 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 				fpre_in[c] = d_out.s1[i][2][c].s1_to_s2 ;	// FY19 fPRE
 			}
 			
-			stage_2(ecal_in, hcal_in, fpre_in, geo, d_out.s2[i].s2_to_s3) ;
+			stage_2(ecal_in, hcal_in, fpre_in, geo, d_out.s2[i].s2_to_s3, &d_out.s2[i].s2_to_dsm) ;
 		}
 	}
 
@@ -1128,7 +1165,7 @@ void fcs_trg_base::stage_1(u_int s0[], geom_t geo, link_t *output)
 
 
 // 2 links are output: lo & hi
-void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[2]) 
+void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[2], u_short* s2_to_dsm) 
 {
 	switch(stage_version[2]) {
 	case 0 :
@@ -1142,6 +1179,18 @@ void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t g
 		break ;
 	case 3 :
 		stage_2_202203(ecal,hcal,pres,geo,output) ;
+		break ;
+	case 4 :
+		stage_2_JP6_202204(ecal,hcal,pres,geo,output) ;
+		break ;
+	case 5 :
+	        stage_2_JP6Carl_202205(ecal,hcal,pres,geo,output) ;
+		break ;
+	case 6 :
+		stage_2_JP5_202206(ecal,hcal,pres,geo,output) ;
+		break ;
+	case 7 :
+	        stage_2_202207(ecal,hcal,pres,geo,output,s2_to_dsm) ;
 		break ;
 
 	// debugging versions below
@@ -1172,6 +1221,9 @@ void fcs_trg_base::stage_3(link_t link[4], u_short *dsm_out)
 		break ;
 	case 3 :
 		stage_3_202203(link,dsm_out) ;
+		break ;
+	case 7 :
+		stage_3_202207(link,dsm_out) ;
 		break ;
 	// debugging versions below
 	case 0xFF210201 :

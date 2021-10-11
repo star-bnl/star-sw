@@ -1491,7 +1491,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 
 			if(do_print) {
-				printf("%s RAW: RDO %d: %d bytes, %d words\n",d_name,dd->rdo,dd->ncontent,dd->ncontent/4) ;
+				printf("%s RAW: RDO %d:%d: %d bytes, %d words\n",d_name,dd->sec,dd->rdo,dd->ncontent,dd->ncontent/4) ;
 				// dump a few ints
 				for(int i=0;i<10;i++) {
 					printf(" %3d: 0x%08X\n",i,d[i]) ;
@@ -2823,6 +2823,9 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 
 	dd = rdr->det("stgc")->get("altro") ;	
 
+	((daq_stgc *)rdr->det("stgc"))->xing_min = -65000 ;
+	((daq_stgc *)rdr->det("stgc"))->xing_max = 65000 ;
+
 	while(dd && dd->iterate()) {	
 		altro_found = 1 ;
 
@@ -2839,9 +2842,12 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 
 	dd = rdr->det("stgc")->get("vmm") ;
 
+//	LOG(TERR,"min %d, max %d",((daq_stgc *)rdr->det("stgc"))->xing_min,((daq_stgc *)rdr->det("stgc"))->xing_max) ;
+
 	while(dd && dd->iterate()) {	
 		vmm_found = 1 ;
 
+		
 		if(do_print) {
 			// there is NO RDO in the bank
 			printf("STGC VMM: evt %d: sec %d, RDO %d: hits %d\n",good,dd->sec,dd->rdo,dd->ncontent) ;
@@ -2851,7 +2857,7 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 				u_char feb = vmm[i].feb_vmm >> 2 ;	// feb [0..5]
 				u_char vm = vmm[i].feb_vmm & 3 ;	// VMM [0..3]
 
-				printf("  FEB %d:%d, ch %02d: ADC %3d, BCID %4d, tb %4d\n",feb,vm,vmm[i].ch,
+				printf("  FEB %d:%d [0x%X], ch %02d: ADC %3d, BCID %4d, tb %4d\n",feb,vm,vmm[i].feb_vmm,vmm[i].ch,
 				       vmm[i].adc,vmm[i].bcid,vmm[i].tb) ;
 			}
 		}
