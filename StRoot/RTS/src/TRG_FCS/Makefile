@@ -43,7 +43,12 @@ fcs_trg_lib.a : fcs_trg_base.o \
 	stage_0_202103.o \
 	stage_3_202203.o \
 	stage_2_202203.o \
-	stage_0_202109.o
+	stage_0_202109.o \
+	stage_2_JP6Carl_202205.o \
+	stage_2_JP5_202206.o \
+	stage_2_JP6_202204.o \
+	stage_2_202207.o \
+	stage_3_202207.o
 	$(RTS_AR)
 
 # DO NOT DELETE

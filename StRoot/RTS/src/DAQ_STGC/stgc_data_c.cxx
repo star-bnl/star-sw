@@ -49,8 +49,19 @@ stgc_data_c::stgc_data_c()
 	xing_min = -10 ;
 	xing_max = 20 ;
 
+	event_any = event_data = 0 ;
+
 	return ;
 }
+
+int stgc_data_c::run_start()
+{
+	bad_error = 0 ;
+	event_any = 0 ;
+	event_data = 0 ;
+
+	return 0 ;
+} ;
 
 const char *stgc_data_c::type_c(u_short type)
 {
@@ -75,20 +86,23 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 	const char *c_type ;
 
 
-//	for(int i=0;i<32;i++) {
-//		LOG(TERR,"... %d/%d = 0x%04X",i,shorts,d[i]) ;
-//	}
-
-
 	d16_start = d ;	// points to start-comma
 
 	d += 8 ;	// skip TEF header
 	shorts -= 8 ;
 
-	u_int evt_err = 0 ;
+	trg_cou = 0 ;
+	evt_type = 0 ;
+	token = 4096 ;
+	trg_cmd = daq_cmd = 0 ;
+	echo = 0 ;
+	adc_cou = 0 ;
+	version = 0 ;
 
 	if(d[1] != 0xCCCC) {
-		evt_err |= 1 ;
+		bad_error |= 1 ;
+		LOG(ERR,"%d: evt %d: corrupt header 0x%04X, shorts %d",rdo1,event_any,d[1],shorts) ;
+		return bad_error ;
 	}
 
 	version = d[2] ;
@@ -108,19 +122,25 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 
 	token = (t_hi<<8)|(t_mid<<4)|t_lo ;
 
+//	if(realtime && (token==0)) {
+//		LOG(ERR,"%d: evt %d: token0: 0x%X 0x%X 0x%X 0x%X 0x%X",rdo1,event_any,
+//			d[0],d[1],d[2],d[3],d[4]) ;
+//	}
+	
+	trg_counter = d[5]>>6 ;
 
+	// FEE status
 	st[5] = d[9]>>8 ;
-	st[4] = d[9]&0xF ;
+	st[4] = d[9]&0xFF ;
 	st[3] = d[10]>>8 ;
-	st[2] = d[10]&0xF ;
+	st[2] = d[10]&0xFF ;
 	st[1] = d[11]>>8 ;
-	st[0] = d[11]&0xF ;
+	st[0] = d[11]&0xFF ;
 
 
-	mhz_start_evt_marker = (d[6]<<16)|d[7] ;
+	mhz_start_evt_marker = (((unsigned long)d[5]&0x3F)<<32)|((unsigned long)d[6]<<16)|(unsigned long)d[7] ;
 
 	echo = d[12] ;
-
 
 	response = 0 ;
 
@@ -136,6 +156,11 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 
 	}
 
+	// d16_last[0] should be 0xFEEC
+	if(d16_last[0] != 0xFEEC) {
+		if(realtime) LOG(ERR,"%d: evt %d: last is 0x%04X",rdo1,event_any,d16_last[0]) ;
+	}
+
 //	LOG(TERR,"d_last is 0x%04X",*d16_last) ;	// at the datum just before the first 0xFEED
 
 	mhz_stop_evt_marker = (d16_last[-1]<<16)|d16_last[0] ;
@@ -143,18 +168,18 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 
 	d16_data = d + 13 ;	// first datum is at d[13]
 
- 	adc_cou = d16_last - d16_data + 1 ;	// effective ADC length
+ //	adc_cou = d16_last - d16_data + 1 ;	// effective ADC length
+	adc_cou = d16_last - d16_data  ;	// effective ADC length
 	adc_cou -= 2 ;	// remove the stop_mhz 2 shorts...
 	
-	if(realtime>1) {
 	if(adc_cou%4 || shorts>40000) {
-		LOG(ERR,"%d: len is %d!?",rdo1,adc_cou) ;
-		for(int i=0;i<32;i++) {
-			LOG(TERR,"%d/%d = 0x%04X",i,shorts,d[i]) ;
-			LOG(TERR,"last %d = 0x%04X",i,d16_last[-i]) ;
-		}
-	
-	}
+		if(realtime) LOG(ERR,"%d: evt %d: %s: adc_cou is %d (%d), shorts %d!?",rdo1,event_any,c_type,adc_cou,adc_cou/4,shorts) ;
+		if(realtime>100) {
+			for(int i=0;i<16;i++) {
+				LOG(TERR,"%d/%d = 0x%04X",i,shorts,d[i]) ;
+				LOG(TERR,"last %d = 0x%04X",i,d16_last[-i]) ;
+			}
+		}	
 	}
 
 	adc_cou /= 4 ;	// number of ADCs....
@@ -163,7 +188,6 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 	// response has adc_cou 4 
 	// physics has 
 //	LOG(TERR,"d_last is 0x%04X; effective length %d",*d16_last,adc_cou) ;	// at the datum just before the first 0xFEED
-
 //	for(int i=0;i<32;i++) {
 //		LOG(TERR,"... %d/%d = 0x%04X",i,shorts,d[i]) ;
 //	}
@@ -200,24 +224,37 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 		}
 		}
 
+		token = 4096 ;
+		trg_cmd = daq_cmd = 0 ;
 		break ;
 	case 0x414B :	//echo 
 		if(realtime>1) LOG(TERR,"S%d:%d: ECHO of cmd 0x%04X",sector1,rdo1,echo) ;
+
+		token = 4096 ;
+		trg_cmd = daq_cmd = 0 ;
 		
 		break ;
 	case 0x4544 :	// event
-//		if(realtime) LOG(INFO,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %u, delta %u",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts,adc_cou,
-//		    mhz_start_evt_marker,mhz_stop_evt_marker-mhz_start_evt_marker) ;
-		LOG(NOTE,"S%d:%d: %d: VERSION 0x%04X: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %u, delta %u",sector1,rdo1,id,version,token,trg_cmd,daq_cmd,shorts,adc_cou,
-		    mhz_start_evt_marker,mhz_stop_evt_marker-mhz_start_evt_marker) ;
+		LOG(NOTE,"S%d:%d: %d: VERSION 0x%04X: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %ul, delta %d",sector1,rdo1,id,version,token,trg_cmd,daq_cmd,
+			shorts,adc_cou,
+		    	mhz_start_evt_marker,mhz_stop_evt_marker-mhz_start_evt_marker) ;
+		LOG(NOTE,"%d: evts %d: T %d: trg_counter %d",rdo1,event_any,token,trg_counter) ;
 
 		break ;
 	case 0x5445 :	// timer
 		if(realtime>1) LOG(TERR,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts) ;
+
+		token = 4096 ;
+		trg_cmd = daq_cmd = 0 ;
+
 		break ;	
 	default :
-		LOG(ERR,"S%d:%d: %d: T %d, trg %d, daq %d, UNKNOWN type 0x%04X; shorts %d",sector1,rdo1,id,token,trg_cmd,daq_cmd,evt_type,shorts) ;
-		evt_err |= 2 ;
+		LOG(ERR,"S%d:%d: evt %d: T %d, trg %d, daq %d, UNKNOWN type 0x%04X; shorts %d",sector1,rdo1,event_any,token,trg_cmd,daq_cmd,evt_type,shorts) ;
+		bad_error |= 2 ;
+
+		token = 4096 ;
+		trg_cmd = daq_cmd = 0 ;
+
 	}
 
 
@@ -236,7 +273,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 		switch(evt_type) {
 		case 0x414B :	// echo
 		//case 0x5244 :	// response
-			LOG(ERR,"%d: %s of echo 0x%04X: RHICx5 PLL not locked",rdo1,c_type,echo) ;
+			if(echo != 0xF010) LOG(ERR,"%d: %s of echo 0x%04X: RHICx5 PLL not locked",rdo1,c_type,echo) ;
 			break ;
 		}
 	}
@@ -253,31 +290,29 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 
 	fee_status = 0 ;
 	for(int i=0;i<6;i++) {
-		fee_status |= ((st[i]&0xF)<<(i*4)) ;
+		fee_status |= (((unsigned long)st[i]&0xFF)<<(i*8)) ;
+
+		//LOG(TERR,"%d: evt %d: FEB %d: 0x%X",rdo1,event_any,i,st[i]) ;
 
 		switch(st[i]) {
 		case 3 :	//present & OK
 		case 0 :	//not present
 			break ;
 		default :
-			if(realtime>1) LOG(ERR,"%d: %s: FEB %d status: 0x%X",rdo1,c_type,i,st[i]) ;
+			if(realtime>10) LOG(ERR,"%d: evt %d: %s: FEB %d status: 0x%X",rdo1,event_any,c_type,i,st[i]) ;
 			break ;
 		}
 
 		//LOG(TERR,"%d: FEE %d: 0x%X (0x%X)",rdo1,i,st[i],fee_status) ;
 	}
 
-	if(evt_err) bad_error |= 1 ;
 
-	return 0 ;
+	return bad_error ;
 }
 
-// unpacks and sanity-checks 1 RDO event
+// unused...
 int stgc_data_c::start_0001(u_short *d, int shorts)
 {
-	trg_cou = 0 ;
-
-	// move to start of actual data...
 	return 0 ;
 
 }
@@ -289,6 +324,7 @@ int stgc_data_c::event_0001()
 
 //	LOG(TERR,"ADC cou %d, feb %d",adc_cou,feb_id) ;
 
+//	if(bad_error) return 0 ;
 	if(adc_cou<=0) return 0 ;
 
 	u_short d[4] ;
@@ -302,12 +338,10 @@ int stgc_data_c::event_0001()
 	feb_id = dd>>29 ;
 
 
-
-
 	if(feb_id==7) {	// trigger	
 		u_short t_hi, t_mid, t_lo ;
 		u_short t ;
-		u_short trg_counter ;
+		u_short mhz_hi ;
 		u_char t_cmd, d_cmd ;
 		u_char err = 0 ;
 
@@ -319,24 +353,41 @@ int stgc_data_c::event_0001()
 
 		t = (t_hi<<8)|(t_mid<<4)|t_lo ;
 
-		trg_counter = (d[0]>>4)&0x1FF ;
-		mhz_trg_marker = (d[2]<<16)|d[3] ;	// or RHIC clock
+		mhz_hi = (d[0]>>4)&0x1FF ;
+		mhz_trg_marker = ((unsigned long)mhz_hi<<32)|((unsigned long)d[2]<<16)|(unsigned long)d[3] ;	// or RHIC clock
 
 //		if((mhz_trg_marker+1) < mhz_start_evt_marker) err = 1 ;
 //		if(mhz_trg_marker > (mhz_start_evt_marker+1)) err |= 1 ;
 
-		if((t != token)||(t_cmd != trg_cmd)||(d_cmd != daq_cmd)) err |= 2 ;
+//		if((t != token)||(t_cmd != trg_cmd)||(d_cmd != daq_cmd)) err |= 2 ;
 			
 		if(trg_cou) err |= 4 ;	// more than 1 trigger
 
-		if(err) {
+
+		if(t==0) err |= 8 ;
+		if(t_cmd==0) err |= 8 ;
+		
+		
+		if(err) {	// typically corrupt data -- should STOP!
+			bad_error |= 0x10 ;
+
 			if(realtime) {
-				LOG(ERR,"%d: trg_counter %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_counter,t,t_cmd,d_cmd,mhz_trg_marker) ;
-				LOG(ERR,"%d: trg_cou %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_cou,token,trg_cmd,daq_cmd,mhz_trg_marker) ;
+				
+				LOG(ERR,"%d: evt %d: err 0x%X: 0x%04X 0x%04X 0x%04X 0x%04X at adc_cou %d",rdo1,event_any,err,d[0],d[1],d[2],d[3],adc_cou) ;
+				LOG(ERR,"%d: evt %d: data: trg_cou %d: T %d, trg %d, daq %d; trg_mhz %ul",rdo1,event_any,trg_cou,t,
+					t_cmd,d_cmd,mhz_trg_marker) ;
+				LOG(ERR,"%d: evt %d: hdr : trg_counter %d: T %d, trg %d, daq %d; evt_mhz %ul",rdo1,event_any,trg_counter,token,
+					trg_cmd,daq_cmd,mhz_start_evt_marker) ;
 			}
 		}
 		else {
 			//LOG(INFO,"%d: trg_cou %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_counter,t,t_cmd,d_cmd,mhz_trg_marker) ;
+		}
+
+		if(trg_cou==0) {	// only use the first!
+			token = t ;	
+			trg_cmd = t_cmd ;
+			daq_cmd = d_cmd ;
 		}
 
 		// to indicate no data!
@@ -348,12 +399,14 @@ int stgc_data_c::event_0001()
 
 		adc_cou-- ;
 		trg_cou++ ;
+
+		if(err) return 0 ;	// HALT on error
 		return 1 ;
 	}
 
 	
 	if(feb_id>5) {
-		evt_err |= 2 ;
+		evt_err |= 0x20 ;	// hard error; corrupt data
 	}
 
 
@@ -369,9 +422,9 @@ int stgc_data_c::event_0001()
 	int bcid = d[3]&0xFFF ;
 	bcid = gray2dec(bcid) ;
 
-	if(crc_ok==0) evt_err |= 8 ;
-
-	if(vmm_id<4) evt_err |= 4 ;
+	if(crc_ok==0) evt_err |= 0x80 ;	// soft error
+	
+	if(vmm_id<4) evt_err |= 0x40 ;	// hard error; corrupt data
 
 
 	if(evt_err) {
@@ -383,19 +436,21 @@ int stgc_data_c::event_0001()
 
 		bad_error |= evt_err ;
 
+		if(realtime) {
+			LOG(ERR,"S%d:%d: evt %d: FEB %d, VMM %d, ch %d: evt_err 0x%X at adc_cou %d",sector1,rdo1,event_any,feb_id,vmm_id,channel,evt_err,adc_cou) ;	
+			LOG(ERR,"  0x%04X 0x%04X 0x%04X 0x%04X",d[0],d[1],d[2],d[3]) ;
+		}
 
-
-		if(realtime) LOG(ERR,"S%d:%d evt_err 0x%X at adc_cou %d",sector1,rdo1,evt_err,adc_cou) ;	
-
-		adc_cou-- ;
-		return 0 ;	// stop at the first occurence
+//		adc_cou-- ;
+//		return 0 ;	// stop at the first occurence
 	}
-
-//	vmm.feb_vmm = ((feb_id-1)<<2)|(vmm_id-4) ;
-	vmm.feb_vmm = ((feb_id)<<2)|(vmm_id-4) ;
-	vmm.ch = channel ;
-	vmm.adc = pdo ;
-	vmm.bcid = bcid ;
+	else {
+//		vmm.feb_vmm = ((feb_id-1)<<2)|(vmm_id-4) ;
+		vmm.feb_vmm = ((feb_id)<<2)|(vmm_id-4) ;
+		vmm.ch = channel ;
+		vmm.adc = pdo ;
+		vmm.bcid = bcid ;
+	}
 
 
 //	LOG(TERR,"feb_id %d, vmm_id %d, 0x%X",feb_id,vmm_id,vmm.feb_vmm) ;
@@ -426,34 +481,12 @@ int stgc_data_c::event_0001()
 // unpacks and sanity-checks 1 RDO event
 int stgc_data_c::start(u_short *d, int shorts)
 {
-#if 0
-	int t_hi, t_mid, t_lo ;
-
-	d16_start = d ;
-
-	
-	d += 8 ;	// skip TEF header
-	shorts -= 8 ;
-
-//	for(int i=0;i<shorts;i++) {
-//		LOG(TERR,"%d/%d = 0x%04X",i,shorts,d[i]) ;
-//	}
-
-	trg_cmd = d[3]&0xF ;
-	daq_cmd = d[4]&0xF ;
-
-	t_hi = (d[4]>>4)&0xF ;
-	t_mid = (d[4]>>8)&0xF ;
-	t_lo = (d[4]>>12)&0xF ;
-
-	token = (t_hi<<8)|(t_mid<<4)|t_lo ;
-
-
-#endif
 	bad_error = 0 ;
 	want_saved = 0 ;
 
-	hdr_check(d,shorts) ;
+	event_any++ ;
+
+	if(hdr_check(d,shorts)) return -1 ;
 
 	switch(version) {
 	case 0x0001 :
@@ -471,6 +504,9 @@ int stgc_data_c::start(u_short *d, int shorts)
 		break ;
 	}
 
+	// OLD CODE BELOW
+	LOG(ERR,"OLD CODE") ;
+	return -1 ;
 
 	u_short *d16_last = d + shorts - 2 ;	// should be at the last 0xFEED
 	
