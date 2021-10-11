@@ -66,8 +66,9 @@
 //#include "StMaker.h"
 //#endif
 
+#include <sstream>
+
 #include "Cut/HitMergingPairCut.h"
-class ostrstream;
 
 class fabricesPairCut : public HitMergingPairCut{
 public:
@@ -83,7 +84,7 @@ public:
   void setElPairMaxProbability(double aElPairMaxProb);
   void setPiPiPairMaxProbability(double aPiPiPairMaxProb);
   void setKKPairMaxProbability(double aKKPairMaxProb);
-  ostrstream* finalReport() const;
+  std::ostringstream* finalReport() const;
 
 private:
   double mPiKPairMinProb;

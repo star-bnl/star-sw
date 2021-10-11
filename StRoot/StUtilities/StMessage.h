@@ -56,8 +56,6 @@ class StMessage {
          char* GetOptions() const;
           void SetOptions(const char* opt);
         size_t GetMemoryUsage();
-
-    static int InitBuffer();
 #ifdef __ROOT__
    ClassDef(StMessage,0)
 #endif
