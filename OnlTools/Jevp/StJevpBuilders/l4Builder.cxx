@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include "JevpBuilder.h"
+#include "DAQ_HLT/daq_hlt.h"
 #include "DAQ_READER/daqReader.h"
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_L3/daq_l3.h>
@@ -763,6 +764,7 @@ void l4Builder::writeHistogram()
 	file.Close();
 }
 
+#include <sys/stat.h>
 void l4Builder::main(int argc, char *argv[])
 {
 	l4Builder me;
@@ -930,6 +932,7 @@ void l4Builder::event(daqReader *rdr)
 
     XX(0);
     unsigned int decision = hlt_eve->hltDecision;
+    const int upc = 0x0;  // DAQ trigger id
 
 #ifdef _OPENMP
     omp_set_nested(1);

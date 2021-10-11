@@ -396,6 +396,9 @@ void StJetMaker2009::copyTrack(const StMuTrackEmu* t, StJetTrack* track)
   track->mNSigmaTofKaon      = t->nSigmaTofKaon();
   track->mNSigmaTofProton    = t->nSigmaTofProton();
   track->mNSigmaTofElectron  = t->nSigmaTofElectron();
+
+  track->mIdTruth            = t->idTruth();
+  track->mQaTruth            = t->qaTruth();
 }
 
 void StJetMaker2009::copyTower(const StMuTowerEmu* t, StJetTower* tower)

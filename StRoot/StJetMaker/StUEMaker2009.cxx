@@ -235,6 +235,9 @@ void StUEMaker2009::copyTrack(const StjTrack& t, StJetTrack* track)
   track->mNSigmaTofKaon     = t.nSigmaTofKaon;
   track->mNSigmaTofProton   = t.nSigmaTofProton;
   track->mNSigmaTofElectron = t.nSigmaTofElectron;
+	
+  track->mIdTruth           = t.idTruth;
+  track->mQaTruth           = t.qaTruth;
 }
 
 void StUEMaker2009::copyTower(const StjTowerEnergy& t, StJetTower* tower)

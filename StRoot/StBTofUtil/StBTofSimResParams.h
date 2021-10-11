@@ -45,19 +45,26 @@ class StBTofSimResParams : public StMaker {
 		//void loadParams(const int date = 20160913, const int time = 175725, const char* Default_time = "2016-09-13 17:57:25")
 		void loadParams(const int runNumber = 20076002)
 		{
+			//--------------------------------------------------------------------------------------------------
+			//the following lines may be needed if not run with bfc.C, but run btof simulation individually,
+			//it will require you to set up a timestamp to pickup the table in DB, here below show an example to use
+			//runnumber to set the timestamp, you can also modify the function to pickup the timestamp you want
+			//const int yearNumber = runNumber/1000000 - 1 + 2000;
+			//const int date       = (yearNumber-1)*1000*10 + 1001; // prior year + October 1st(Date)
+
+			//St_db_Maker *dbMk = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
+			//dbMk->SetDebug();
+			//dbMk->SetDateTime(date,1);
+			//dbMk->SetFlavor("ofl");
+			//dbMk->Init();
+			//dbMk->Make();
+
+			//TDataSet *DB = 0;
+			//DB = dbMk->GetDataBase("Calibrations/tof/tofSimResParams");
+			//--------------------------------------------------------------------------------------------------
 			
-			const int yearNumber = runNumber/1000000 - 1 + 2000;
-			const int date       = (yearNumber-1)*1000*10 + 1001; // prior year + October 1st(Date)
-
-			St_db_Maker *dbMk = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
-			dbMk->SetDebug();
-			dbMk->SetDateTime(date,1);
-			dbMk->SetFlavor("ofl");
-			dbMk->Init();
-			dbMk->Make();
-
 			TDataSet *DB = 0;
-			DB = dbMk->GetDataBase("Calibrations/tof/tofSimResParams");
+			DB = GetDataBase("Calibrations/tof/tofSimResParams");
 
 			if(!DB)
 			{
@@ -70,8 +77,8 @@ class StBTofSimResParams : public StMaker {
 
 			if(dataset) 
 			{
-				TDatime val[2];
-				dbMk->GetValidity((TTable*)dataset,val);
+				//TDatime val[2];
+				//dbMk->GetValidity((TTable*)dataset,val);
 				
 				tofSimResParams_st* tofTable = static_cast<tofSimResParams_st*>(dataset->GetTable());
 				

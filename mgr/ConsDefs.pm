@@ -74,8 +74,14 @@
     $AFSLIBS  = "-L" . $AFSDIR . "/lib -L" . $AFSDIR . "/lib/afs";
     $AFSLIBS .= " -lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp";
     $AFSLIBS .= " -lcmd -lcom_err -laudit " . $AFSDIR . "/lib/afs/util.a";
+
+    $ROOT_VERSION = `root-config --version`;
+    $ROOT_VERSION =~ s/^\s+|\s+$//; # trim
+    $ROOT_VERSION =~ s/\//./;       # dot notation
+    ($ROOT_VERSION_MAJOR, $ROOT_VERSION_MINOR, $ROOT_VERSION_PATCH) = split('\.', $ROOT_VERSION);
+
     if ( !$ROOT )       { $ROOT       = $AFS_RHIC."/star/ROOT"; }
-    if ( !$ROOT_LEVEL ) { $ROOT_LEVEL = "2.25.01"; }
+    if ( !$ROOT_LEVEL ) { $ROOT_LEVEL = $ROOT_VERSION; }
     if ( !$ROOTSYS )    { $ROOTSYS    = $ROOT . "/" . $ROOT_LEVEL; }
     my $rootlibs = `root-config --nonew --libs`; chomp($rootlibs);
     my @List = ();
@@ -1210,6 +1216,7 @@
 		      'INCLUDE'         => $INCLUDE_PATH,
 		      'ROOT'            => $ROOT,
 		      'ROOT_LEVEL'      => $ROOT_LEVEL,
+		      'ROOT_VERSION_MAJOR' => $ROOT_VERSION_MAJOR,
 		      'ROOTSRC'         => $ROOTSRC,
 		      'ROOTSYS'         => $ROOTSYS,
 		      'CINTSYSDIR'      => $CINTSYSDIR,
