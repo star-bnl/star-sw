@@ -20,8 +20,6 @@ limitMessage(" - COUNT LIMIT REACHED!\n") {
   messTypeList = StMessTypeList::Instance();
   yesLimits = 0;
   noLimits = 0;
-  // Initialize buffer with 256 bytes
-  *this << ch64 << ch64 << ch64 << ch64;
 }
 //_____________________________________________________________________________
 StMessageCounter::~StMessageCounter() {
@@ -189,7 +187,6 @@ int StMessageCounter::CheckLimit(char* mess, const char* type) {
       }
       index++;
     }
-    *this << ends;
   }
   return printIt;
 }
