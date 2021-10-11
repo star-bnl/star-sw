@@ -5,16 +5,8 @@
 class daqReader;
 #include <TH1F.h>
 #include <TH2F.h>
-
-// Git update test from daqman
-// and add to that too
-// again...
 #include <math.h>
 
-// GIT update test from rts02
-//
-// asdf
-//
 class daqBuilder : public JevpBuilder {
 public:
   int run;
