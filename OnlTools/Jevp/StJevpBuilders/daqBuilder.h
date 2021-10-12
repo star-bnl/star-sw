@@ -5,7 +5,6 @@
 class daqReader;
 #include <TH1F.h>
 #include <TH2F.h>
-
 #include <math.h>
 
 class daqBuilder : public JevpBuilder {

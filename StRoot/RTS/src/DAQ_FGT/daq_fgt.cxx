@@ -197,7 +197,7 @@ daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 	char *st ;
 	int r_start, r_stop ;
 	int bytes ;
-	int s = 1 ;
+	int s_start, s_stop ;
 
 	assert(caller) ;	// sanity...
 
@@ -220,9 +220,22 @@ daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 		r_start = r_stop = rdo ;
 	}
 
+	if(sec<=0) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else if(sec>3) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else {
+		s_start = s_stop = sec ;
+	}
+
+
 	raw->create(8*1024,"fgt_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
-
-
+	
+	for(int s=s_start;s<=s_stop;s++) {
 	for(int r=r_start;r<=r_stop;r++) {
 		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, s, r) ;
 		full_name = caller->get_sfs_name(str) ;
@@ -240,6 +253,7 @@ daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 
 	
 		raw->finalize(bytes,s,r,0) ;	// sector 0;
+	}
 	}
 
 	raw->rewind() ;
@@ -455,7 +469,7 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 {
 	int r_start, r_stop ;
-	int s = 1 ;	// for now...
+	int s_start, s_stop ;
 	
 	adc->create(1000,"fgt_adc",rts_id,DAQ_DTA_STRUCT(fgt_adc_t)) ;
 
@@ -471,9 +485,21 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 		r_start = r_stop = rdo ;
 	}
 
+	if(sec<=0) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else if(sec>3) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else {
+		s_start = s_stop = sec ;
+	}
 
 	int found_some = 0 ;
 
+	for(int s=s_start;s<=s_stop;s++) {	
 	for(int r=r_start;r<=r_stop;r++) {
 		u_int *d ;
 
@@ -727,6 +753,7 @@ unrecoverable_error:
 		LOG(WARN,"[evt %d]: RDO %d: Cannot reliably recover pointer to next item, dropping the rest of this event on this rdo",
 		    get_global_event_num(),r);
 	}
+	}
 
 	adc->rewind() ;
 
@@ -898,7 +925,7 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	
-	LOG(DBG,"RDO %d: expect %d, in data %d",rdo,rdo_id[rdo],rdo_in_dta) ;
+	LOG(NOTE,"RDO %d: expect %d, in data %d",rdo,rdo_id[rdo],rdo_in_dta) ;
 
 
 	int format_code = (d32[2] >> 8) & 0xFF ;
