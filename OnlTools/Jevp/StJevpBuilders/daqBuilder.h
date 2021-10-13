@@ -5,7 +5,6 @@
 class daqReader;
 #include <TH1F.h>
 #include <TH2F.h>
-
 #include <math.h>
 
 // 6/3/21 12:34
