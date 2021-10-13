@@ -62,6 +62,7 @@
 #include "Jevp/StJevpBuilders/etofBuilder.h"
 #include "Jevp/StJevpBuilders/fcsBuilder.h"
 #include "Jevp/StJevpBuilders/fttBuilder.h"
+#include "Jevp/StJevpBuilders/fstBuilder.h"
 
 #include <RTS/include/SUNRT/clockClass.h>
 #include "DAQ_READER/daqReader.h"
@@ -922,6 +923,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	builders.Add(new etofBuilder(this));
 	builders.Add(new fcsBuilder(this));
 	builders.Add(new fttBuilder(this));
+	builders.Add(new fstBuilder(this));
     }
     else {
 	builders.Add(new trgBuilder(this));
