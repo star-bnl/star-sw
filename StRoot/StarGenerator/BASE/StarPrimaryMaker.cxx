@@ -181,8 +181,6 @@ Int_t StarPrimaryMaker::Finish()
     // Call finish on the generator
     mFilter->Finish();
     
-    mAccepted->Print("all");
-    mTree->SetEventList( mAccepted );
   }
 
   if (mFile) 
@@ -275,10 +273,6 @@ Int_t StarPrimaryMaker::Make()
 	//
 	mTree->Fill();
 
-	//
-	// Add the event to the accepted event list
-	//
-	if ( mAccepted ) mAccepted->Enter( mTree->GetEntries() );
 
 	// Break out of loop and accept event.  
 	break;
