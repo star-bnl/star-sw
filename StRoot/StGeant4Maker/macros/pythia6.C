@@ -89,7 +89,7 @@ void init() {
       }
       else if ( tit.IsFloat() ) { // floating point
 	// keep to five decimal places
-	cmd += Form( "%.5f", tit.Data() );
+	cmd += Form( "%.5f", tit.Atof() );
       }
       else {
 	cmd += tit;
@@ -122,7 +122,7 @@ void init() {
   for ( auto iter=mylist.rbegin(); iter!=mylist.rend(); iter++ ) {
     //    TString cmd=*iter;
     std::string cmd = (*iter).Data();
-    LOG_INFO << cmd.c_str() << endm;
+    LOG_INFO << "execute pythia6 command " << cmd.c_str() << endm;
     //    pythia6mk->PyGive(cmd.Data());
     PyGive(cmd);
     setcount++;
