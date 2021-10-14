@@ -83,17 +83,27 @@ void init() {
     TString tit = obj->GetTitle();
     if ( str.Contains("pythia6:set:") ) {
       str.ReplaceAll("pythia6:set:","");
-      TString cmd = str + "=" + tit;
+      TString cmd = str + "=";
+      if ( tit.IsDigit() ) { // integer digits
+	cmd += tit;
+      }
+      else if ( tit.IsFloat() ) { // floating point
+	// keep to five decimal places
+	cmd += Form( "%.5f", tit.Data() );
+      }
+      else {
+	cmd += tit;
+      }
       mylist.push_back(cmd);
     }
     if ( str.Contains("pythia6:tune") ) {
       int tune = pythia6mk->IAttr("pythia6:tune");
       pythia6mk->PyTune(tune); // set tune
     }
-    if ( str.Contains("pythia6:drellyan:ee") ) {
-      // initialize DY --> ee
-      drellyan();
-    }
+    // if ( str.Contains("pythia6:drellyan:ee") ) {
+    //   // initialize DY --> ee
+    //   drellyan();
+    // }
     if ( str.Contains("pythia6:closedecay") ) {
       TString ex = Form("pythia6mk->CloseDecays(%s);", tit.Data());
       //LOG_INFO<< ex.Data() << endm;
