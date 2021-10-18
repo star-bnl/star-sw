@@ -1,4 +1,6 @@
+#ifdef __TFG__VERSION__
 #include "StPicoEvent/StPicoDst.h"
+#endif /*  __TFG__VERSION__ */
 #include "StPidStatus.h"
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
@@ -31,6 +33,7 @@ StBTofPidTraits StPidStatus::SetBTofPidTraits(const StMuBTofPidTraits &pid) {
   btofPidTraits.setProbProton   (pid.probProton());  
   return btofPidTraits;
 }
+#ifdef __TFG__VERSION_
 //________________________________________________________________________________
 StBTofPidTraits StPidStatus::SetBTofPidTraits(const StPicoBTofPidTraits &pid) {
   StBTofPidTraits btofPidTraits;
@@ -41,7 +44,6 @@ StBTofPidTraits StPidStatus::SetBTofPidTraits(const StPicoBTofPidTraits &pid) {
   //  btofPidTraits.setTimeOfFlight (pid.btofTimeOfFlight());
   //  btofPidTraits.setPathLength   (pid.btofPathLength());
   btofPidTraits.setBeta         (pid.btofBeta());
-				      
   btofPidTraits.setPosition     (StThreeVectorF(pid.btofHitPosX(),pid.btofHitPosY(),pid.btofHitPosZ()));
 				      
   btofPidTraits.setSigmaElectron(pid.nSigmaElectron()); 
@@ -54,6 +56,7 @@ StBTofPidTraits StPidStatus::SetBTofPidTraits(const StPicoBTofPidTraits &pid) {
   //  btofPidTraits.setProbProton   (pid.btofProbProton());  
   return btofPidTraits;
 }
+#endif /*  __TFG__VERSION__ */				      
 //________________________________________________________________________________
 StETofPidTraits StPidStatus::SetETofPidTraits(const StMuETofPidTraits &pid) {
   StETofPidTraits etofPidTraits;
@@ -69,6 +72,7 @@ StETofPidTraits StPidStatus::SetETofPidTraits(const StMuETofPidTraits &pid) {
   etofPidTraits.setBeta(        pid.beta        ());
   return etofPidTraits;
 }
+#ifdef __TFG__VERSION__
 //________________________________________________________________________________
 StETofPidTraits StPidStatus::SetETofPidTraits(const StPicoETofPidTraits &pid) {
   StETofPidTraits etofPidTraits;
@@ -103,6 +107,7 @@ StMtdPidTraits StPidStatus::SetMtdPidTraits(const StPicoMtdPidTraits &pid) {
   //  mtdPidTraits.setProbMuon       (pid.probMuon()); 
   return mtdPidTraits;
 }
+#endif /*  __TFG__VERSION__ */
 //________________________________________________________________________________
 StMtdPidTraits StPidStatus::SetMtdPidTraits(const StMuMtdPidTraits &pid) {
   StMtdPidTraits mtdPidTraits;
@@ -217,6 +222,7 @@ StPidStatus::StPidStatus(StMuTrack *muTrack, Bool_t Usedx2) : PiDStatus(-1), fUs
 
   Set();
 }
+#ifdef __TFG__VERSION__
 //________________________________________________________________________________
 StPidStatus::StPidStatus(StPicoTrack *picoTrack, Bool_t Usedx2) : PiDStatus(-1), fUsedx2(Usedx2) {
   Clear();
@@ -240,13 +246,11 @@ StPidStatus::StPidStatus(StPicoTrack *picoTrack, Bool_t Usedx2) : PiDStatus(-1),
 			     1e-6*picoTrack->dEdx(), picoTrack->dEdxError());
     fFit = new StdEdxStatus(&pidFit);
   }
-#ifdef __TFG__VERSION__
   if (picoTrack->dNdx() > 0) {
     pidNdx = StDedxPidTraits(kTpcId, kOtherMethodId, picoTrack->nHitsDedx(),
 			     picoTrack->dNdx(), picoTrack->dNdxError());
     fdNdx = new StdEdxStatus(&pidNdx);
   }
-#endif /* __TFG__VERSION__ */
   Int_t ibtof = picoTrack->bTofPidTraitsIndex();
   if (ibtof >= 0) {
     static StBTofPidTraits pidBTof;
@@ -268,6 +272,7 @@ StPidStatus::StPidStatus(StPicoTrack *picoTrack, Bool_t Usedx2) : PiDStatus(-1),
 
   Set();
 }
+#endif /* __TFG__VERSION__ */
 //________________________________________________________________________________
 void StPidStatus::Set() {
   if (! fI70 && ! fFit && ! fdNdx) return;
