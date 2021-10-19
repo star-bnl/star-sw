@@ -118,6 +118,10 @@ It was copied from FstmGeo.xml on June 15. 2021
                 Declare structures
         -->
 
+	<Structure name="FSTG" comment="FstmGeo geometry configuration">
+	  <var name="version" comment="Geometry version" />
+	</Structure>
+
 
         <Structure name="mothervol" comment="tubes for the mother volume">
             <var name="version"   type="float" />
@@ -328,6 +332,7 @@ It was copied from FstmGeo.xml on June 15. 2021
 
     <Info format="FSTM simplified code version = {6.1f}">codeversion</Info>
 
+	<Fill name="FSTG"><var name="version" value="1.1" /></Fill>
 
         <Fill name="mothervol" comment=" TUBE for the mothervolume" >
             <var name="version"  value="1.0" />
