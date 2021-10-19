@@ -1,0 +1,4 @@
+run this first ./genTargetList.sh
+then run: rbq findBestChi2.C
+ you will find the corresponding root file name
+ /direct/star+u/zye20/allScripts/analysis/GlauberSimu/auau27gev/glauberSim/LOG_Scan/doScanX_my_1_27_1_8_0_16_0_11.log

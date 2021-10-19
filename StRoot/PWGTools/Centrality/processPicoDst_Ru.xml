@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Task description -->
+<job minFilesPerProcess="15" maxFilesPerProcess="15" filesPerHour="3" fileListSyntax="xrootd" simulateSubmission="false">
+
+  <!-- Decription of the task -->
+  <command>
+
+    stardev
+    setenv NODEBUG yes
+    set softDir = /star/data03/pwg/sweger/IsobarCentrality/centrality_definition/Centrality
+    ln -s ${softDir}/StRoot .
+    pwd
+    ls -al
+
+
+    set newlist="$PWD"/"$JOBID".list
+    awk '{print $1}' ${FILELIST} > $newlist
+    eval set outfilename = o${JOBID}.root
+    root4star -b -l runCentralityAnalyzer_Ru.C\(\"$newlist\",\"$outfilename\"\)
+
+
+  </command>
+
+  <!-- Get input files from get_file_lis.pl -->
+
+  <input URL="catalog:star.bnl.gov?collision=RuRu200,stream=st_physics,filetype=daq_reco_picoDst,sname2=st_physics,available=1,sanity=1,storage!=HPSS" preferStorage="local" nFiles="all" />
+
+  <stdout URL="file:/star/data03/pwg/sweger/IsobarCentrality/centrality_definition/Centrality/log/$JOBID.out" />
+  <stderr URL="file:/star/data03/pwg/sweger/IsobarCentrality/centrality_definition/Centrality/log/$JOBID.err" />
+  <output fromScratch="*.root" toURL="file:/star/data03/pwg/sweger/IsobarCentrality/centrality_definition/Centrality/data/"/>
+  <!--<output fromScratch="*.root" toURL="file:/star/u/sweger/data/"/> -->
+  <output fromScratch="*.log"  toURL="file:/star/data03/pwg/sweger/IsobarCentrality/centrality_definition/Centrality/log/"/>
+
+  <Generator>
+    <Location>/star/data03/pwg/sweger/IsobarCentrality/centrality_definition/Centrality/log/</Location>
+  </Generator>
+
+  <SandBox installer="ZIP">
+    <Package name="centArchive_RuAllTrigs">
+      <File>file:./.sl73_gcc485/</File>
+      <File>file:./runCentralityAnalyzer_Ru.C</File>
+    </Package>
+  </SandBox>
+
+</job>
