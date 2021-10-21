@@ -1321,3 +1321,17 @@ void StGeant4Maker::PushPrimaries() {
 
 }
 //________________________________________________________________________________________________
+int StGeant4Maker::Finish() {
+
+  LOG_INFO << "Energy sums per sensitive volume" << endm;
+  for ( auto kv : mHitSum ) {
+
+    std::string name = kv.first;
+    double      esum = kv.second;
+
+    LOG_INFO << name.c_str() << " dE sum = " << esum << endm;
+
+  }
+
+  return kStOK;
+}

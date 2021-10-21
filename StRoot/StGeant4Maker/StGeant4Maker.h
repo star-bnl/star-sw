@@ -9,7 +9,7 @@
 #include "TVirtualMagField.h"
 #include "StarMagField.h"
 #include <StSensitiveDetector.h> 
-
+#include <map>
 
 
 class StGeant4Maker;
@@ -140,6 +140,9 @@ public:
   /// Clear for the next event
   void Clear( const Option_t* opts="" );
 
+  /// Final end of run actions
+  int  Finish();
+
 private:
 protected:
 
@@ -168,6 +171,8 @@ protected:
 
   int regionTransition( int, int );
 
+  std::map<std::string, double> mHitSum;
+
   /// @param T specifies the type of the table   
   /// @param F specifies the functor class which retrieves the hits from geant  
   template<typename T, typename F>
@@ -191,6 +196,11 @@ protected:
     sd2table( sd, table, g2t_track ); 
                                     
     AddData( table ); 
+    double sum = 0.0;
+    for ( auto hit : (*table) ) {
+      sum += hit.de;
+    }
+    mHitSum[ name ] += sum;
 
     // Clear the sensitive detector
     sd->Clear();
