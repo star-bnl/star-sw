@@ -66,8 +66,6 @@ void fcsDetectorPosition_db(char* opt = "", char* input) {
 	detpos.xoff[2]=-8.380*2.54-50; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
 	detpos.xoff[3]= 8.380*2.54+50; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
     }
-<<<<<<< HEAD
-=======
     else if(data.Contains("run21Jun27")){ //closed
         storeTime = "2021-06-27 15:00:00"; flavor="ofl";
         detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
@@ -89,7 +87,6 @@ void fcsDetectorPosition_db(char* opt = "", char* input) {
 	detpos.xoff[2]=-8.380*2.54; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
 	detpos.xoff[3]= 8.380*2.54; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
     }
->>>>>>> 1bb48ab955... Changing FCS Wcal and Hcal x positions in Geometry file beased on run21 survey
     else{ 
 	std::cout<<"Invalid year range"<<std::endl; 
 	exit;
