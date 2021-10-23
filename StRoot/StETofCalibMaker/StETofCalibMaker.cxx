@@ -58,7 +58,7 @@
 #include "StEvent.h"
 
 #include "StETofCollection.h"
-#include "StETofHeader.h" //collection includes header. Make sure to include header first to get correct version!
+//#include "StETofHeader.h" //collection includes header. Make sure to include header first to get correct version!
 #include "StETofDigi.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
