@@ -34,7 +34,6 @@ StMuETofHeader::StMuETofHeader()
 {
   mRocGdpbTs.clear();
   mRocStarTs.clear();
-  mRocStarTs.clear();
   const size_t kNbGet4sInSystem = 1728;
   mMissMatchFlagVec = std::vector<bool>( kNbGet4sInSystem, false );
   const size_t kNbCountersInSystem = 108;
