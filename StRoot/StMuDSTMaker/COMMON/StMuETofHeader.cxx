@@ -22,6 +22,7 @@
  ***************************************************************************/
 #include "StMuETofHeader.h"
 #include "StETofHeader.h"
+#include "StETofUtil/StETofConstants.h"
 
 
 StMuETofHeader::StMuETofHeader()
@@ -34,10 +35,8 @@ StMuETofHeader::StMuETofHeader()
 {
   mRocGdpbTs.clear();
   mRocStarTs.clear();
-  const size_t kNbGet4sInSystem = 1728;
-  mMissMatchFlagVec = std::vector<bool>( kNbGet4sInSystem, false );
-  const size_t kNbCountersInSystem = 108;
-  mGoodEventFlagVec = std::vector<bool>( kNbCountersInSystem, false );  
+  mMissMatchFlagVec = std::vector<bool>( eTofConst::nGet4sInSystem, false );
+  mGoodEventFlagVec = std::vector<bool>( eTofConst::nCountersInSystem, false );   
 }
 
 
@@ -54,10 +53,8 @@ StMuETofHeader::StMuETofHeader( const double& trgGdpbTime, const double& trgStar
 {
     setRocGdpbTs( gdpbTs );
     setRocStarTs( starTs );
-	 const size_t kNbGet4sInSystem = 1728;
-    mMissMatchFlagVec = std::vector< Bool_t >( kNbGet4sInSystem, false );
-    const size_t kNbCountersInSystem = 108;
-    mGoodEventFlagVec = std::vector<bool>( kNbCountersInSystem, false );   
+    mMissMatchFlagVec = std::vector<bool>( eTofConst::nGet4sInSystem, false );
+    mGoodEventFlagVec = std::vector<bool>( eTofConst::nCountersInSystem, false );   
 }
 
 StMuETofHeader::StMuETofHeader( const double& trgGdpbTime, const double& trgStarTime,
