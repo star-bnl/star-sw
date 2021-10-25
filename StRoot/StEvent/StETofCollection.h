@@ -59,7 +59,7 @@ private:
     StSPtrVecETofHit    mETofHits;
 
 
-    ClassDef( StETofCollection, 1 )
+    ClassDef( StETofCollection, 2 )
 };
 
 #endif // STETOFCOLLECTION_H
