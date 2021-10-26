@@ -224,7 +224,6 @@ Int_t StdEdxY2Maker::Finish() {
   SafeDelete(m_Minuit);
   if (m_TpcdEdxCorrection && m_TpcdEdxCorrection->TestBit(kCanDelete)) delete m_TpcdEdxCorrection;
   m_TpcdEdxCorrection = 0;
-  SafeDelete(fIntegratedAdc);
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
@@ -309,7 +308,9 @@ Int_t StdEdxY2Maker::Make(){
     return kStOK;        // if no event, we're done
   }
   TotalNoOfTpcHits = TpcHitCollection->numberOfHits();
+#ifdef __AdcI3__
   IntegrateAdc(TpcHitCollection);
+#endif
   StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
   UInt_t nTracks = trackNode.size();
   for (UInt_t i=0; i < nTracks; i++) { 
