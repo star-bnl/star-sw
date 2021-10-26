@@ -1,5 +1,5 @@
 #!/bin/csh
-#       $Id: group_env.csh,v 1.262 2018/06/22 13:38:38 jeromel Exp $
+#       $Id: group_env.csh,v 1.264 2021/10/13 15:39:51 jeromel Exp $
 #	Purpose:	STAR group csh setup
 #
 # Revisions & notes
@@ -835,6 +835,15 @@ endif
 #if ( $?GRAXML_HOME ) then
 #    set path=($path $GRAXML_HOME/bin)
 #endif
+
+if ( $STAR_LEVEL  == "dev" || $STAR_LEVEL  == ".dev" || $STAR_LEVEL  == "adev" ) then
+    # not a very intuitive path ..
+    setenv Vc_DIR /cvmfs/star.sdcc.bnl.gov/star-spack/spack/opt/spack/linux-rhel7-x86_64/gcc-4.8.5/vc_-1.4.1-7m2zajp3rqt6usw3zlgtmfrlxbbw5yvn
+else
+    #if ( $?Vc_DIR ) then
+    #	unsetenv Vc_DIR
+    #endif
+endif 
 
 
 # Support for subversion if installed in a sub-directory
