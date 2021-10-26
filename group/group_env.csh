@@ -341,7 +341,7 @@ setenv HEED_DATABASE ${GARFIELD_HOME}/Heed/heed++/database
                                                   if ($ECHO) echo   "Setting up STAR_LIB  = ${STAR_LIB}"
 setenv MINE_LIB        .${STAR_HOST_SYS}/lib${ROOT_VERSION}
 setenv MY_BIN          .${STAR_HOST_SYS}/bin${ROOT_VERSION}
-
+setenv G3SYS           ${STAR}/StarVMC/geant3
 
 
 # YP fix

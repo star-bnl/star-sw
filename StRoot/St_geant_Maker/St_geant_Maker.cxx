@@ -940,12 +940,46 @@ Int_t St_geant_Maker::Init(){
 	gInterpreter->ProcessLine(command,&ee);
 	assert(!ee);
 #endif
-      } else {
-	if (IAttr("Mickey")) {
-	  TString kuip("user/input please mickey.mouse");	
-	  if (Debug()) LOG_INFO << "St_geant_Maker::Init kuip " << kuip.Data() << endm;
-	  Do(kuip.Data()); 
+      } else if (IAttr("Mickey")) {
+	TString kuip("user/input please mickey.mouse");	
+	if (Debug()) LOG_INFO << "St_geant_Maker::Init kuip " << kuip.Data() << endm;
+	Do(kuip.Data()); 
+      }  else if (IAttr("Pythia")) { 
+	Do("call bpythia");
+	//   ** These particles will be decayed by geant instead of pythia **
+	Do("MDCY (102,1)=0");//  ! PI0 111
+	Do("MDCY (106,1)=0");//  ! PI+ 211
+	Do("MDCY (109,1)=0");//  ! ETA 221
+	Do("MDCY (116,1)=0");//  ! K+ 321
+	Do("MDCY (112,1)=0");//  ! K_SHORT 310
+	Do("MDCY (105,1)=0");//  ! K_LONG 130
+	Do("MDCY (164,1)=0");//  ! LAMBDA0 3122
+	Do("MDCY (167,1)=0");//  ! SIGMA0 3212
+	Do("MDCY (162,1)=0");//  ! SIGMA- 3112
+	Do("MDCY (169,1)=0");//  ! SIGMA+ 3222
+	Do("MDCY (172,1)=0");//  ! Xi- 3312
+	Do("MDCY (174,1)=0");//  ! Xi0 3322
+	Do("MDCY (176,1)=0");//  ! OMEGA- 3334
+	Do("frame CMS");
+	Do("beam  p p");
+	Double_t sqrtS = 510;
+	Do(Form("ener  %f",sqrtS));
+	Do("CALL PyTUNE(329)"); // set the pythia tune
+	Do("gspread   0.015 0.015 42.00");
+	if (IAttr("Wenu")) {
+	  //  select W --> e nu production
+	  Do("ckin 3=10.0");
+	  Do("ckin 4=-1.0");
+	  Do("msel  12");
 	}
+	if (IAttr("Wenu")) {
+	  //  close all decay channels
+	  Do("call closeDecays(24)"); // real call
+	  //   ** enable W+/- --> e+/- nu
+	  Do("call openDecay(24,206,1)");
+	}
+	//?   GKINE -4 0 0. 510. -3.0 +3.0
+	Do("call pystat(1)");
       }
       
       Do("mode g2tm prin 1;");

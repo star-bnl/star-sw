@@ -1,4 +1,4 @@
-#! /usr/bin/env perl
+x1#! /usr/bin/env perl
 use File::Basename;
 use Cwd;
 #my @list = glob "/gpfs01/star/scratch/fisyak/daq/2017/*/*/st_laser*.daq";

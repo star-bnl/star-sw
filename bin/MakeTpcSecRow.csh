@@ -472,8 +472,22 @@
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190404.000020.root SecRow3CGF14p5GeV_2019.root  'MakeTpcSecRowB.C(20190404,22,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190404,22.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190225.230022.root SecRow3CGF19GeV.root     'MakeTpcSecRowB.C(20190225,230025,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225,230025.log
 #root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190404.000022.root SecRow3CGF14p5GeV.root  'MakeTpcSecRowB.C(20190404,25,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190404,25.log
-foreach f (`ls -1d  SecRow3CGF*2019.root`)
-    set b = `echo ${f} | sed -e 's/SecRow3CGF//' -e 's/\.root//'`; echo "${f} => ${b}"
-    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190404.000025.root ${f}  'MakeTpcSecRowB.C(20190404,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
-    mv TpcSecRowB.20190404.000001.root  TpcSecRowB.${b}.root
-end
+#foreach f (`ls -1d  SecRow3CGF*2019.root`)
+#    set b = `echo ${f} | sed -e 's/SecRow3CGF//' -e 's/\.root//'`; echo "${f} => ${b}"
+#    root.exe -q -b  $STAR/StarDb/Calibrations/tpc/TpcSecRowB.20190404.000025.root ${f}  'MakeTpcSecRowB.C(20190404,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
+#    mv TpcSecRowB.20190404.000001.root  TpcSecRowB.${b}.root
+#end
+# P21ic_calib_40
+#foreach f (`ls -1d SecRow3GF20*.root`) 
+#    set b = `echo ${f} | sed -e 's/SecRow3GF//' -e 's/\.root//'`
+#    root.exe -q -b  ${f} 'MakeTpcSecRowB.C(20350101,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.log
+#    mv TpcSecRowB.20350101.000001.root TpcSecRowB.${b}fixedTarget.root
+#    mv MakeTpcSecRowB.log MakeTpcSecRowB.${b}fixedTarget.log
+#end
+# P21ic_calib_55
+#foreach f (SecRow3GF4p59GeV_fixedTarget_2019.root SecRow3GF26p5GeV_fixedTarget_2020.root)
+#    set b = `echo ${f} | sed -e 's/SecRow3GF//' -e 's/\.root//'`
+#    root.exe -q -b  ${f} 'MakeTpcSecRowB.C(-1,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
+#end
+# P21ic_calib_56
+  root.exe -q -b ../P21ic_calib_55/TpcSecRowB.4p59GeV_fixedTarget_2019.root SecRow3CGF4p59GeV_fixedTarget_2019.root   'MakeTpcSecRowB.C(-1,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.log

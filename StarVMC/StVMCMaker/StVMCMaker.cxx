@@ -62,6 +62,7 @@
 #include "StChain.h"
 #include "Stiostream.h"
 #include "StarMagField.h"
+#include "AthenaMagField.h"
 #include "StarMCHits.h"
 #include "StarMCSimplePrimaryGenerator.h"
 #include "StarMCHBPrimaryGenerator.h"
@@ -71,6 +72,8 @@
 #include "StarVMCDetectorSet.h"
 #include "TTreeIter.h"
 #include "StarGenerator/BASE/StarPrimaryMaker.h"
+#include "St_g2t_Chair.h"
+#include "tables/St_g2t_vertex_Table.h"
 ClassImp(StVMCMaker);
 
 StarVMCApplication* StVMCMaker::fgStarVMCApplication = 0;
@@ -85,6 +88,7 @@ Int_t StVMCMaker::Init() {
   }
   LOG_INFO << "Init Geant3 has been created." << endm;
   fgGeant3->SetExternalDecayer(TPythia6Decayer::Instance());
+  if (IAttr("fluxVMC")) fgStarVMCApplication->SetFlux(kTRUE);
   if (IAttr("VMCAlignment")) fgStarVMCApplication->DoMisAlignment(kTRUE);
   if (IAttr("NoVMCAlignment")) fgStarVMCApplication->DoMisAlignment(kFALSE);
   if (! IAttr("VMCPassive")) {
@@ -115,10 +119,6 @@ Int_t StVMCMaker::Init() {
 #endif
       } 
     }
-    StarMCHits *hits = StarMCHits::instance();
-    hits->SetHitHolder(m_DataSet);
-    fgStarVMCApplication->GetStack()->SetHitHolder(m_DataSet);
-    fgStarVMCApplication->SetStepping(hits);
   }
   SafeDelete(gRandom);
   fRunNo = IAttr("RunG");
@@ -142,8 +142,10 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
     }
     assert(geom);
     TObjectSet *o = (TObjectSet *) geom->Find("configGeom");
-    TEnv *env = (TEnv *) (o->GetObject());
-    StarVMCDetector::SetConfigEnv(env);
+    if (o) {
+      TEnv *env = (TEnv *) (o->GetObject());
+      StarVMCDetector::SetConfigEnv(env);
+    }
   }
   if (!fVolume) {
     fVolume = (TDataSet *) GetDataBase("StarDb/AgiGeometry/HALL");
@@ -153,11 +155,15 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
      ((StVMCMaker *)this)->AddConst(fVolume);
      if (Debug() > 1) fVolume->ls(3);
   }
-  LOG_INFO << "StVMCMaker::InitRun SetMagField set as StarMagField" 
-		   << " with Map: " << StarMagField::Instance()->GetMap()
-		   << ",Factor: " << StarMagField::Instance()->GetFactor() 
-		   << ",Rescale: " << StarMagField::Instance()->GetRescale() <<endm;
-  fgGeant3->SetMagField(StarMagField::Instance());
+  if (TString(gGeoManager->GetName()) != "default") {
+    LOG_INFO << "StVMCMaker::InitRun SetMagField set as StarMagField" 
+	     << " with Map: " << StarMagField::Instance()->GetMap()
+	     << ",Factor: " << StarMagField::Instance()->GetFactor() 
+	     << ",Rescale: " << StarMagField::Instance()->GetRescale() <<endm;
+    fgGeant3->SetMagField(StarMagField::Instance());
+  } else {
+    fgGeant3->SetMagField(AthenaMagField::Instance());
+  }
   if (IAttr("VMCPassive"))  {LOG_INFO << "StVMCMaker::InitRun Passive   mode" << endm;} 
   else                      {LOG_INFO << "StVMCMaker::InitRun Active    mode" << endm;
     if (IAttr("Embedding")) {LOG_INFO << "StVMCMaker::InitRun Embedding mode" << endm;}
@@ -214,6 +220,20 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
     TVirtualMC::GetMC()->SetProcess("DRAY", 1);
     TVirtualMC::GetMC()->SetProcess("MULS", 1);
     TVirtualMC::GetMC()->SetProcess("STRA", 0);
+  } else if (IAttr("fluxVMC")) {
+    TVirtualMC::GetMC()->SetCut("CUTGAM", 1e-5  );
+    TVirtualMC::GetMC()->SetCut("CUTELE", 1e-5  );
+    TVirtualMC::GetMC()->SetCut("CUTHAD", 1e-3  );
+    TVirtualMC::GetMC()->SetCut("CUTNEU", 1e-14 );
+    TVirtualMC::GetMC()->SetCut("CUTMUO", 1e-3  );
+    TVirtualMC::GetMC()->SetCut("BCUTE",  1e-3  );
+    TVirtualMC::GetMC()->SetCut("BCUTM",  1e-3  );
+    TVirtualMC::GetMC()->SetCut("DCUTE",  1e-3  );
+    TVirtualMC::GetMC()->SetCut("DCUTM",  1e-3  );
+    TVirtualMC::GetMC()->SetCut("PPCUTM", 1e-3  );
+    TVirtualMC::GetMC()->SetCut("TOFMAX", 1e3);
+    //    TVirtualMC::GetMC()->SetProcess("HARD", 6.); // fluka+Mikap"
+    TVirtualMC::GetMC()->SetProcess("HADR", 5.); // gcalor
   }
   fgStarVMCApplication->InitMC(SAttr("VMCConfig"));
   Double_t scaleX0 = DAttr("ScaleX04TpcGas");
@@ -235,6 +255,11 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   if (! gGeoManager->IsClosed()) {
     gGeoManager->CloseGeometry();
   }
+  StarMCHits *hits = 0;
+  if (TString(gGeoManager->GetName()) != "default") hits = StarMCHits::instance();
+  if (hits) hits->SetHitHolder(m_DataSet);
+  fgStarVMCApplication->GetStack()->SetHitHolder(m_DataSet);
+  fgStarVMCApplication->SetStepping(hits);
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -261,6 +286,37 @@ Int_t StVMCMaker::Make(){
     Bool_t runOk = fgStarVMCApplication->RunMC(1);
     if (! runOk) return kStEOF;
     //    if (Debug())   sw.Print();
+  }
+  if (IAttr("fluxVMC")) {
+    static TH1D *Vx = 0, *Vy = 0, *Vz = 0;
+    static TH2D *BbcC = 0;
+    if (! Vx) {
+      if (GetChain()->GetTFile()) GetChain()->GetTFile()->cd();
+      Vx = new TH1D("Vx","Geant primary vertex X",50,-5.0,5.0);
+      Vy = new TH1D("Vy","Geant primary vertex Y",50,-5.0,5.0);
+      Vz = new TH1D("Vz","Geant primary vertex Z",50,-100,100);
+    }
+    St_g2t_vertex *geantVertex=(St_g2t_vertex *) GetDataSet("g2t_vertex"); 
+    g2t_vertex_st *gvt=geantVertex->GetTable();
+    Vx->Fill(gvt->ge_x[0]);
+    Vy->Fill(gvt->ge_x[1]);
+    Vz->Fill(gvt->ge_x[2]);
+    if (! BbcC) {
+      BbcC = new TH2D("BbcC","BBC East versus BBC West",100,-1,9,100,-1,9);
+    }
+    Double_t BbcW = 0, BbcE = 0;
+    St_g2t_ctf_hit *g2t_bbc_hit = (St_g2t_ctf_hit *) GetDataSet("g2t_bbc_hit");
+    if (! g2t_bbc_hit) return kStOK;
+    Int_t N = g2t_bbc_hit->GetNRows();
+    g2t_ctf_hit_st *bbc = g2t_bbc_hit->GetTable();
+    for (Int_t i = 0; i < N; i++, bbc++) {
+      if (bbc->tof > 100e-9) continue;
+      if (bbc->volume_id < 2000) BbcW++;
+      else                       BbcE++;
+    }
+    if (BbcW  <= 0) BbcW = 0.1;
+    if (BbcE  <= 0) BbcE = 0.1;
+    BbcC->Fill(TMath::Log10(BbcW),TMath::Log10(BbcE));
   }
   return kStOK;
 }
@@ -467,4 +523,3 @@ Int_t StVMCMaker::SetVertex() {
   } while(1);
   return kStFatal;
 }
-//________________________________________________________________________________

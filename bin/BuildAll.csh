@@ -24,11 +24,12 @@ foreach root (root5 root6)
       if ($gcc == "gcc" && $root == "root5") set bits = "32b 64b";
       foreach bit (${bits})
         unsetenv NODEBUG
-        if ($opt == "opt")  setenv NODEBUG YES 
-        if ($opt == "opt3") setenv NODEBUG -O3 
+#        if ($opt == "opt")  setenv NODEBUG YES 
+#        if ($opt == "opt3") setenv NODEBUG -O3 
         setup ${gcc}
         setup ${bit}
         setup ${root}
+	setup ${opt}
         starver ${STAR_LEVEL}
 	which rootcint
 	if ($?) continue;

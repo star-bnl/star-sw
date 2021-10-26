@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job  name="Flux" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
-<stdout URL="file:./Flux$JOBID.log" />
-<stderr URL="file:./Flux$JOBID.err" />
+<stdout URL="file:./$JOBID.log" />
+<stderr URL="file:./$JOBID.err" />
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
+  setup debug
+  starver .DEV2
 #if pp500 pp200
   set f        = 1
   echo $INPUTFILE0 | grep ':'
@@ -21,7 +23,9 @@
 #if pp500
 #   root4star -q -b 'bfc.C('$l',"y2013_1x,useXgeom,StEvent,noRunco,noHistos,pythia,flux,rung.'${rung}',nodefault","","","'${file}'")' &gt;&amp; ${logFile}
 #else pp200 y2014
- root4star -q -b 'bfc.C('$l',"y2014a,useXgeom,StEvent,noRunco,noHistos,pythia,flux,rung.'${rung}',nodefault","","","'${file}'")' &gt;&amp; ${logFile}
+# root4star -q -b 'bfc.C('$l',"y2014a,useXgeom,StEvent,noRunco,noHistos,pythia,flux,rung.'${rung}',nodefault","","","'${file}'")' &gt;&amp; ${logFile}
+#else pp510 y2017a
+ root4star -q -b 'bfc.C('$l',"y2017a,useXgeom,StEvent,noRunco,noHistos,pythia,flux,rung.'${rung}',nodefault","","","'${file}'")' &gt;&amp; ${logFile}
 #endif
   endif
 </command>

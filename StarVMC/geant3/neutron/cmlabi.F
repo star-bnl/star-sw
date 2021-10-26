@@ -1,23 +1,6 @@
-*
-* $Id: cmlabi.F,v 1.1.1.3 2009/02/18 20:32:06 fisyak Exp $
-*
-* $Log: cmlabi.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:06  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:55  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.48  by  S.Giani
-*-- Author :
+* $Id: cmlabi.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE CMLABI(D,LD,AWR,KZ,ID,FM,Q,IFLG,LIFLAG,LRI)
 C       THIS ROUTINE CONVERTS THE EXIT NEUTRON SCATTERING ANGLE
 C       FROM THE CENTER OF MASS COORDINATE SYSTEM TO THE LABORATORY
@@ -33,9 +16,7 @@ C       EXIT PARAMETERS FOR THE RECOIL NUCLEUS.
 #include "geant321/mmass.inc"
 #include "geant321/mpstor.inc"
       DIMENSION D(*),LD(*)
-#if __GNUC__ < 7
       SAVE
-#endif
       MT=0
       IF((ID.GE.14).AND.(ID.LE.54))MT=51
       IF(MT.NE.51)GO TO 10

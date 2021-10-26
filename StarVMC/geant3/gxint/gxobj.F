@@ -102,7 +102,7 @@
             IDPOIN=0
             OBNAME=' '
          ELSE
-            CALL GFPART(IDPOIN,NAPART,ITRTYP,AMASS,CHARGE,TLIFE,
+            CALL G3FPART(IDPOIN,NAPART,ITRTYP,AMASS,CHARGE,TLIFE,
      +      VBUF,NWBUF)
             IF(ITRTYP.NE.0)THEN
                OBNAME=NAPART

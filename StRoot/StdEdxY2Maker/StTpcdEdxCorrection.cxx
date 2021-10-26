@@ -63,17 +63,17 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   if (!m_Mask) m_Mask = -1;
   static const Char_t *FXTtables[] = {"TpcAdcCorrectionB",         
 				      "TpcEdge",            
-				      "TpcAdcCorrectionMDF",       
+				      //				      "TpcAdcCorrectionMDF",       
 				      "TpcAdcCorrection3MDF",
 				      "TpcdCharge",         
-				      "TpcrCharge",                
+				      //				      "TpcrCharge",                
 				      "TpcCurrentCorrection",     
 				      "TpcRowQ",            
 				      "TpcAccumulatedQ",    
 				      "TpcSecRowB",                
-				      "TpcSecRowC",         
+				      //				      "TpcSecRowC",         
 				      "tpcPressureB",       
-				      "tpcTime",            
+				      //				      "tpcTime",            
 				      "TpcDriftDistOxygen", 
 				      "TpcMultiplicity",    
 				      "TpcZCorrectionC",           
@@ -81,19 +81,19 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 				      "tpcMethaneIn",       
 				      "tpcGasTemperature",     
 				      "tpcWaterOut",        
-				      "TpcSpaceCharge",            
+				      //				      "TpcSpaceCharge",            
 				      "TpcPhiDirection",           
 				      "TpcTanL",            
 				      "TpcdXCorrectionB",   
 				      "TpcEffectivedX",     
-				      "TpcPadTBins",               
+				      //				      "TpcPadTBins",               
 				      "TpcZDC",                    
 				      "TpcPadCorrectionMDF",     
-				      "TpcAdcI",            
-				      "TpcnPad",                   
-				      "TpcnTbk",            
-				      "TpcdZdY",            
-				      "TpcdXdY",            
+				      //				      "TpcAdcI",            
+				      //				      "TpcnPad",                   
+				      //				      "TpcnTbk",            
+				      //				      "TpcdZdY",            
+				      //				      "TpcdXdY",            
 				      "TpcLengthCorrectionB",
 				      "TpcLengthCorrectionMDF",        
 				      "TpcLengthCorrectionMD2",              
@@ -174,7 +174,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   const MDFCorrection_st *corMDF = 0;
   const MDFCorrection3_st *cor3MDF = 0;
   TDatime t[2];
-  Int_t N = 0;  
+  Int_t N = 0; 
   Int_t npar = 0;
   Int_t nrows = 0;
   for (Int_t k = kUncorrected+1; k < kTpcAllCorrections; k++) {
@@ -182,7 +182,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     LOG_WARN << "StTpcdEdxCorrection: " << m_Corrections[k].Name << "/" << m_Corrections[k].Title;
     table = m_Corrections[k].Chair->Table();
     if (! TESTBIT(m_Mask,k) || m_Corrections[k].Chair->Table()->IsMarked()) {
-      LOG_WARN << " \tis missing" << endm; 
+      LOG_WARN << " \tis missing"; 
       goto CLEAR;
     }
     if (St_db_Maker::GetValidity(table,t) > 0) {
@@ -195,10 +195,10 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     chairSecRow = dynamic_cast<St_TpcSecRowCorC *>(m_Corrections[k].Chair);
     if (! chair && ! chairMDF && ! chair3MDF) {
       if (! chairSecRow) {
-	LOG_WARN << "\tis not tpcCorrection, MDFCorrection or TpcSecRowCor types" << endm;
+	LOG_WARN << "\tis not tpcCorrection, MDFCorrection or TpcSecRowCor types";
       }
       m_Corrections[k].nrows = m_Corrections[k].Chair->Table()->GetNRows();
-      continue; // not St_tpcCorrectionC
+      goto ENDM;
     }
     npar = 0;
     if (chair) {
@@ -221,12 +221,12 @@ void StTpcdEdxCorrection::ReSetCorrections() {
 	}
       }
       if (! npar ) {
-	LOG_WARN << " \thas no significant corrections => switch it off" << endm;
+	LOG_WARN << " \thas no significant corrections => switch it off";
 	goto CLEAR;
       }
       if (k == kzCorrection) {
 	if ( m_Corrections[kzCorrectionC].Chair) { // if kzCorrectionC is already active
-	  LOG_WARN << "\tTpcZCorrectionC is already active => disbale TpcZCorrectionB" << endm;
+	  LOG_WARN << "\tTpcZCorrectionC is already active => disbale TpcZCorrectionB";
 	  goto CLEAR;
 	} else {	 // disabled GatingGrid
 	  CLRBIT(m_Mask,kGatingGrid); 
@@ -235,8 +235,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
 	}
       }
       m_Corrections[k].nrows = nrows;
-      LOG_WARN << endm;
-      continue;
+      goto ENDM;
     }
     if (chairMDF) {
       tableMDF = (const St_MDFCorrection *) chairMDF->Table();
@@ -253,12 +252,11 @@ void StTpcdEdxCorrection::ReSetCorrections() {
 	nrows++;
       }
       if (! npar ) {
-	LOG_WARN << " \thas no significant corrections => switch it off" << endm;
+	LOG_WARN << " \thas no significant corrections => switch it off";
 	goto CLEAR;
       }
       m_Corrections[k].nrows = nrows;
-      LOG_WARN << endm;
-      continue;
+      goto ENDM;
     }
     if (chair3MDF) {
       table3MDF = (const St_MDFCorrection3 *) chair3MDF->Table();
@@ -275,49 +273,52 @@ void StTpcdEdxCorrection::ReSetCorrections() {
 	nrows++;
       }
       if (! npar ) {
-	LOG_WARN << " \thas no significant corrections => switch it off" << endm;
+	LOG_WARN << " \thas no significant corrections => switch it off.";
 	goto CLEAR;
       }
       m_Corrections[k].nrows = nrows;
-      LOG_WARN << endm;
-      continue;
     }
+  ENDM:
+    LOG_WARN << endm;
+    continue;
   EMPTY:
     LOG_WARN << " \tis empty" << endm;
+    continue;
   CLEAR:
+    LOG_WARN << " \tIt is cleaned" << endm;
     CLRBIT(m_Mask,k); 
     SafeDelete(m_Corrections[k].Chair);
   }	
   // Use only one ADC correction
   if        (m_Corrections[kAdcCorrection3MDF     ].Chair) {
     if      (m_Corrections[kAdcCorrection         ].Chair) {
-      LOG_ERROR << " \tAt least two ADC corrections activated. Deactivate kAdcCorrection" << endm;
+      LOG_WARN << " \tAt least two ADC corrections activated. Deactivate kAdcCorrection" << endm;
       m_Corrections[kAdcCorrection         ].Chair = 0;
     }
     if      (m_Corrections[kAdcCorrectionMDF      ].Chair) {
-      LOG_ERROR << " \tAt least two ADC corrections activated. Deactivate kAdcCorrectionMDF" << endm;
+      LOG_WARN << " \tAt least two ADC corrections activated. Deactivate kAdcCorrectionMDF" << endm;
       m_Corrections[kAdcCorrectionMDF      ].Chair = 0;
     }
   } else if (m_Corrections[kAdcCorrectionMDF      ].Chair) {
     if (m_Corrections[kAdcCorrection         ].Chair) {
-      LOG_ERROR << " \tAt least two ADC corrections activated. Deactivate kAdcCorrection" << endm;
+      LOG_WARN << " \tAt least two ADC corrections activated. Deactivate kAdcCorrection" << endm;
       m_Corrections[kAdcCorrection         ].Chair = 0;
     }
   }
   // Use only TpcLengthCorrection
   if (m_Corrections[kTpcLengthCorrectionMD2].Chair) {
     if (m_Corrections[kTpcLengthCorrectionMDF].Chair) {
-      LOG_ERROR << " \tkTpcLengthCorrectionMD2 has activated. Deactivate kTpcLengthCorrectionMDF" << endm;
+      LOG_WARN << " \tkTpcLengthCorrectionMD2 has activated. Deactivate kTpcLengthCorrectionMDF" << endm;
       m_Corrections[kTpcLengthCorrectionMDF].Chair = 0;
     }
     if (m_Corrections[kTpcLengthCorrection   ].Chair) {
-      LOG_ERROR << " \tkTpcLengthCorrectionMD2 has activated. Deactivate kTpcLengthCorrection" << endm;
+      LOG_WARN << " \tkTpcLengthCorrectionMD2 has activated. Deactivate kTpcLengthCorrection" << endm;
       m_Corrections[kTpcLengthCorrection   ].Chair = 0;
     }
   }
   if (m_Corrections[kTpcLengthCorrectionMDF].Chair) {
     if (m_Corrections[kTpcLengthCorrection   ].Chair) {
-      LOG_ERROR << " \tkTpcLengthCorrectionMDF has activated. Deactivate kTpcLengthCorrection" << endm;
+      LOG_WARN << " \tkTpcLengthCorrectionMDF has activated. Deactivate kTpcLengthCorrection" << endm;
       m_Corrections[kTpcLengthCorrection   ].Chair = 0;
     }
   }
@@ -662,6 +663,7 @@ Int_t StTpcdEdxCorrection::dEdxTrackCorrection(EOptions opt, Int_t type, dst_ded
     }
     break;
   case kTpcLengthCorrectionMDF:
+  case kTpcLengthCorrectionMD2:
     nrows = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->nrows(l);
     if (dedx.det_id > 100 && nrows > l+6) l += 6;
     switch (type) {

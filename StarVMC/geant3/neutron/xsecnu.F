@@ -1,30 +1,11 @@
-*
-* $Id: xsecnu.F,v 1.1.1.3 2009/02/18 20:32:01 fisyak Exp $
-*
-* $Log: xsecnu.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:01  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:22:00  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.48  by  S.Giani
-*-- Author :
+* $Id: xsecnu.F,v 1.1.1.1 2004/01/15 00:08:49 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE XSECNU(BUF,LEN,E,XSC,L1,L2)
 C       THIS ROUTINE DETERMINES A CROSS SECTION AT A GIVEN ENERGY
 C       FROM A CROSS SECTION VERSUS ENERGY TABLE
       DIMENSION BUF(*)
-#if __GNUC__ < 7
       SAVE
-#endif
       IF(E.LT.BUF(L1))GO TO 40
       DO 10 J=1,LEN
          N=L1+2*(J-1)

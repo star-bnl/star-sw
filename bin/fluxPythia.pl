@@ -16,7 +16,7 @@ use Cwd;
 #if pp500
 #my $vers = "Z"; # modified Magp geometry
 #elseif pp200
-my $vers = "pp200";
+my $vers = "pp510";
 #my $pwd = cwd();
 #my $dir = File::Basename::basename($pwd);# print "dir = $dir\n";
 #$dir =~ s/^[a-zA-Z]*//;# print "dir = $dir\n";

@@ -6,13 +6,15 @@
 #include "StMtdPidTraits.h"
 #include "StDedxPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
-#include "StPicoEvent/StPicoTrack.h"
 #include "StMuDSTMaker/COMMON/StMuBTofPidTraits.h"
-#include "StPicoEvent/StPicoBTofPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuETofPidTraits.h"
-#include "StPicoEvent/StPicoETofPidTraits.h"
 #include "StMuDSTMaker/COMMON/StMuMtdPidTraits.h"
+#ifdef __TFG__VERSION__
+#include "StPicoEvent/StPicoTrack.h"
+#include "StPicoEvent/StPicoBTofPidTraits.h"
+#include "StPicoEvent/StPicoETofPidTraits.h"
 #include "StPicoEvent/StPicoMtdPidTraits.h"
+#endif /* __TFG__VERSION__ */
 class StGlobalTrack;
 class StdEdxStatus {
  public:
@@ -77,7 +79,9 @@ class StPidStatus {
   };
   StPidStatus(StGlobalTrack *gTrack = 0, Bool_t Usedx2 = kTRUE);
   StPidStatus(StMuTrack *muTrack = 0, Bool_t Usedx2 = kTRUE);
+#ifdef __TFG__VERSION__
   StPidStatus(StPicoTrack *picoTrack = 0, Bool_t Usedx2 = kFALSE);
+#endif /* __TFG__VERSION__ */
   virtual ~StPidStatus() {
     SafeDelete(fProb); 
     SafeDelete(fI70); 
@@ -94,11 +98,13 @@ class StPidStatus {
   Int_t Status() {return PiDStatus;}
   StdEdxStatus   *dEdxStatus(StDedxMethod k) {return fStatus[k];}
   StBTofPidTraits SetBTofPidTraits(const StMuBTofPidTraits &pid);
-  StBTofPidTraits SetBTofPidTraits(const StPicoBTofPidTraits &pid);
   StETofPidTraits SetETofPidTraits(const StMuETofPidTraits &pid);
-  StETofPidTraits SetETofPidTraits(const StPicoETofPidTraits &pid);
   StMtdPidTraits  SetMtdPidTraits(const StMuMtdPidTraits &pid);
+#ifdef __TFG__VERSION__
+  StBTofPidTraits SetBTofPidTraits(const StPicoBTofPidTraits &pid);
+  StETofPidTraits SetETofPidTraits(const StPicoETofPidTraits &pid);
   StMtdPidTraits  SetMtdPidTraits(const StPicoMtdPidTraits &pid);
+#endif /* __TFG__VERSION__ */
   void Set();
   
   Int_t        PiDStatus; //!

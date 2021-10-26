@@ -42,7 +42,7 @@ StBFChain *bfc(Int_t First, const Char_t *Chain = "MC2016,20Muons,vmc,Rung.1",
 //________________________________________________________________________________
 void dEdx(Int_t nevents=1000,
 	  const char *MainFile=	"/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
-	  const char* rootFile="", Int_t mode = 2, const Char_t *year = "") {
+	  const char* rootFile="", Int_t mode = 2, const Char_t *year = "", const Char_t *opt = "") {
   TString Year(year);
   if (Year == "") {
     Year = "y2021";
@@ -77,8 +77,9 @@ void dEdx(Int_t nevents=1000,
   if (STAR_VERSION.BeginsWith("TFG") || STAR_VERSION.Contains("DEV2")) {
     tfgV = kTRUE;
     Chain += ",quiet,ForcedX";
-    if (mode == 2) Chain += ",dEdxCalib";
+    if (mode == 2) Chain += ",dEdxCalib"; //,DbV20211017"; // !!!!!!!!!!!!   check DbV
   } 
+  Chain += opt;
   //  Chain += ",CMuDst,picoWrite,noHistos,noRunco,-evout"; // For PicoDst
   TString RootFile(rootFile);
   if (RootFile == "") {

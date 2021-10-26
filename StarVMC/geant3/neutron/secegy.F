@@ -1,31 +1,12 @@
-*
-* $Id: secegy.F,v 1.1.1.3 2009/02/18 20:32:00 fisyak Exp $
-*
-* $Log: secegy.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:00  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:58  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: secegy.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE SECEGY(EX,FSE,E,IFSE)
 C       THIS ROUTINE SELECTS A PARTIAL ENERGY DISTRIBUTION
 C       TO SAMPLE THE EXIT ENERGY FROM
 #include "geant321/minput.inc"
       DIMENSION FSE(*),IFSE(*)
-#if __GNUC__ < 7
       SAVE
-#endif
       EX = 0.0
       IPP=1
       N=1
@@ -132,8 +113,8 @@ C       NOW SELECT THE SECONDARY ENERGY FROM THE CHOSEN DISTRIBUTION
       IF(LF.EQ.11)CALL SECL11(FSE(IP+1),IFSE(IP+1),EX,U,E)
       RETURN
   170 CONTINUE
-#if defined(CERNLIB_MDEBUG)
-      WRITE(IOUT,10000)R,PROB,E
+#if defined(ATLAS_MDEBUG)
+      WRITE(IOUT,100)R,PROB,E
 10000 FORMAT(' MICAP: WARNING-SECONDARY ENERGY DISTRIBUTION NOT ',
      +       'CHOSEN IN SECEGY',1P3E11.4)
 #endif

@@ -1,39 +1,18 @@
-*
-* $Id: thrmsc.F,v 1.1.1.3 2009/02/18 20:32:01 fisyak Exp $
-*
-* $Log: thrmsc.F,v $
-* Revision 1.1.1.3  2009/02/18 20:32:01  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:59  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 28/02/95  17.12.29  by  S.Giani
-*-- Author :
+* $Id: thrmsc.F,v 1.1.1.1 2004/01/15 00:08:49 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE THRMSC(D,LD,ITHRMS,LTHRM,E,U,V,W,TEMP,FM,AWR,IIN,
      +                  IFLG,IOUT)
 C      THIS ROUTINE CONTROLS SELECTION OF THE NEUTRON EXIT ENERGY
 C      IN THE THERMAL DATA RANGE
 #include "geant321/mupsca.inc"
       DIMENSION D(*),LD(*),ITHRMS(*),LTHRM(*),AWR(*)
-      REAL HMASSN, SPI
-      DATA HMASSN, SPI/0.5044905, 1.1283792/
- 
+      REAL HMASSN/0.5044905/,SPI/1.1283792/
 C       HMASSN EQUALS ONE-HALF THE NEUTRON MASS
 C       SPI EQUALS TWO DIVIDED BY THE SQUARE ROOT OF PI
 C       CONVERT TEMPERATURE FROM DEGREES KELVIN TO EV
       DATA BK/8.6167E-5/
-#if __GNUC__ < 7
       SAVE
-#endif
 C
       TDK=BK*TEMP
       AAWR=AWR(IIN)

@@ -224,7 +224,6 @@ Int_t StdEdxY2Maker::Finish() {
   SafeDelete(m_Minuit);
   if (m_TpcdEdxCorrection && m_TpcdEdxCorrection->TestBit(kCanDelete)) delete m_TpcdEdxCorrection;
   m_TpcdEdxCorrection = 0;
-  SafeDelete(fIntegratedAdc);
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
@@ -309,7 +308,9 @@ Int_t StdEdxY2Maker::Make(){
     return kStOK;        // if no event, we're done
   }
   TotalNoOfTpcHits = TpcHitCollection->numberOfHits();
+#ifdef __AdcI3__
   IntegrateAdc(TpcHitCollection);
+#endif
   StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
   UInt_t nTracks = trackNode.size();
   for (UInt_t i=0; i < nTracks; i++) { 
@@ -1015,7 +1016,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	TPoints[0][s][t]   = new TH3F(Form("TPoints%s%s",N[t],NS[s]),
 				      Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s",T[t],TS[s]),
 				      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
-	TPoints[1][s][t]   = new TH3F(Form("TPoints%s%s2",N[t],NS[s]),
+	TPoints[1][s][t]   = new TH3F(Form("TPoints2%s%s",N[t],NS[s]),
 				      Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s no dx2 in prediciton",T[t],TS[s]),
 				      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
 #ifdef  __FIT_PULLS__
@@ -1083,8 +1084,12 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #endif /*  __FIT_PULLS__ */
   for (Int_t j = 0; j < kTotalMethods; j++) {
     kMethod = kTPoints[j];
+    for (Int_t l = 0; l <2; l++) {// with and without dx2 in prediction
+      if (PiDs[l].dEdxStatus(kMethod)) {
+	TPoints[l][sCharge][j]->Fill(PiDs[l].dEdxStatus(kMethod)->TrackLength(),PiDs[l].dEdxStatus(kMethod)->log2dX(),PiDs[l].dEdxStatus(kMethod)->dev[kPidPion]);
+      }
+    }
     if (PiD.dEdxStatus(kMethod)) {
-      TPoints[1][sCharge][j]->Fill(PiDs[1].dEdxStatus(kMethod)->TrackLength(),PiDs[1].dEdxStatus(kMethod)->log2dX(),PiDs[1].dEdxStatus(kMethod)->dev[kPidPion]);
 #ifdef  __FIT_PULLS__
       Pulls[sCharge][j]->Fill(PiD.dEdxStatus(kMethod)->TrackLength(),PiD.dEdxStatus(kMethod)->devS[kPidPion]);
 #endif /*  __FIT_PULLS__ */
@@ -1173,11 +1178,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  
 	if (tpcGas) {
 	  Double_t p     = tpcGas->barometricPressure;
-	  
 	  if (p > 0) {
-	    Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::ktpcPressure].dEdxN;
 	    press = TMath::Log(p);
-	    Pressure.Fill(rowS,press,Vars);
 	  }
 	  Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcAccumulatedQ].dEdxN;
 	  Qcm.Fill(cs,FdEdx[k].Qcm,Vars);
@@ -1204,7 +1206,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kdZdY].dEdxN;   \
 	dZdY3  ## SIGN .Fill(rowS,FdEdx[k].dZdY,&Vars[1]);       \
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kdXdY].dEdxN;   \
-	dXdY3  ## SIGN .Fill(rowS,FdEdx[k].dXdY,&Vars[1]);		
+	dXdY3  ## SIGN .Fill(rowS,FdEdx[k].dXdY,&Vars[1]);	\
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::ktpcPressure].dEdxN; \
+	Pressure ## SIGN.Fill(rowS,press,Vars);
 #if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
 	__FILL__VARS__();
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kAdcI].dEdxN;

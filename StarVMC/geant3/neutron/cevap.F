@@ -1,33 +1,13 @@
-*
-* $Id: cevap.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
-*
-* $Log: cevap.F,v $
-* Revision 1.2  2018/06/28 19:29:23  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:32:00  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:55  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: cevap.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE CEVAP(E,Q,ATAR,CB,EX)
 C       THIS ROUTINE SAMPLES AN EXIT ENERGY FROM AN
 C       EVAPORATION SPECTRUM
 #include "geant321/minput.inc"
-#if __GNUC__ < 7
       SAVE
-#endif
+
+      Ex = 0
 C       CONVERT THE COULOMB BARRIER (CB) TO UNITS OF EV
       CB=CB*1.00E+06
 C       CALCULATE THE MAXIMUM ENERGY AVAILABLE
@@ -44,8 +24,11 @@ C       CALCULATE THE MAXIMUM ENERGY AVAILABLE
 10000 FORMAT(' MICAP: NEGATIVE MAXIMUM ENERGY CALCULATED IN ROUTINE ',
      1'EVAP --- INDICATING PROBABLE CROSS SECTION ERROR ALLOWING ',
      2'THE REACTION TO OCCUR',/,10X,'E,EMAX,Q,CB=',4E13.5)
-      WRITE(6,*) ' CALOR: Fatal ERROR in EVAP ====> STOP '
-      CALL ABEND
+
+*      WRITE(6,*) ' CALOR: Fatal ERROR in EVAP ====> STOP '
+*      STOP
+      return
+
 C       CALCULATE THE NUCLEAR TEMPERATURE (THETA)
    10 THETA=4.0161E+03*(SQRT(E+Q-CB)/(ATAR**0.8333333))
 C       SELECT THE EXIT ENERGY FROM AN EVAPORATION SPECTRUM
@@ -58,7 +41,7 @@ C       SELECT THE EXIT ENERGY FROM AN EVAPORATION SPECTRUM
 C       RESAMPLE 75% OF THE TIME IF EX IS GREATER THAN EMAX
       R=FLTRNF(0)
       IF(R.LE.0.75)GO TO 20
-#if defined(CERNLIB_MDEBUG)
+#if defined(ATLAS_MDEBUG)
       IF(EX.GT.20.*EMAX) WRITE(IOUT,10100)EX,EMAX
 10100 FORMAT(' MICAP: WARNING EX > EMAX=',2E13.5,' IN ROUTINE EVAP')
 #endif

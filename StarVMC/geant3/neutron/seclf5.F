@@ -1,34 +1,12 @@
-*
-* $Id: seclf5.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
-*
-* $Log: seclf5.F,v $
-* Revision 1.2  2018/06/28 19:29:23  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:32:06  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:59  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: seclf5.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE SECLF5(FSE,IFSE,EX,U,E)
 C       THIS ROUTINE SAMPLES AN EXIT ENERGY FROM
 C       A GENERAL EVAPORATION SPECTRUM
 #include "geant321/minput.inc"
       DIMENSION FSE(*),IFSE(*)
-#if __GNUC__ < 7
       SAVE
-#endif
 C       DETERMINE THETA
       IP=1
       NR=IFSE(IP)
@@ -71,7 +49,7 @@ C       DETERMINE X
 C       SELECT THE EXIT ENERGY FROM THE GENERAL EVAPORATION SPECTRUM
       EX=THETA*X
       IF(EX.LE.EMAX)RETURN
-#if defined(CERNLIB_MDEBUG)
+#if defined(ATLAS_MDEBUG)
       WRITE(IOUT,10000)EX,EMAX
 10000 FORMAT(' MICAP: WARNING-EX,EMAX=',1P2E13.5,' IN SECLF5')
 #endif
@@ -90,5 +68,5 @@ C       USE THE FIRST DISTRIBUTION
   100 WRITE(IOUT,10100)IS
 10100 FORMAT(' MICAP: INTERPOLATION SCHEME=',I3,' IN SECLF5')
       WRITE(6,*) ' CALOR: ERROR in SECLF5 =====> STOP '
-      CALL ABEND
+      STOP
       END

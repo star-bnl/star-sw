@@ -49,3 +49,22 @@ or
      StKFParticleInterface::PerformanceAnalysis
        KFTopoPerformance::FillHistos
          KFTopoPerformance::FillParticleParameters
+================================================================================
+Indeces: 
+StRoot/KFParticle/KFParticleDef.h:36:#define NInputSets 8
+
+StKFParticleInterface::fParticles    [nGlobalTracks*10]
+                       fParticlesPdg [nGlobalTracks*10]
+ProcessEvent
+                       m2TofArray(nGlobalTracks*2, -1.0e6f);
+                       trakIdToI(nGlobalTracks*2);
+                       trakIdToI[gTrack->id()] = iTrack; iTrack < nGlobalTracks; index = gTrack->id()
+
+                       vector<int> totalPDG = GetPID(m2tof, track.GetP(), q, gTrack->dEdx(), dEdXPull, isTofm2, index);
+                       AddTrackToParticleList(track, nHftHitsInTrack, index, totalPDG, primaryVertex, primaryTrackList, fNHftHits, fParticlesPdg, fParticles, nPartSaved, 0, 0, Chi2, NDF); 
+                              particle.SetId(index);
+                              particles[nPartSaved] = particle;
+  InitParticles();
+        KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int>* pdg, vector<int>* nPixelHits)
+        fKFParticleTopoReconstructor->Init( fParticles, &fParticlesPdg, &fNHftHits );
+KFParticleTopoReconstructor::fParticles

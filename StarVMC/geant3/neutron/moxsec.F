@@ -1,29 +1,8 @@
-*
-* $Id: moxsec.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
-*
-* $Log: moxsec.F,v $
-* Revision 1.2  2018/06/28 19:29:23  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:32:00  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/07/24 15:56:27  rdm
-* initial import into CVS
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:57  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/04 23/02/95  14.46.01  by  S.Giani
-*-- Author :
+* $Id: moxsec.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
+*CMZ :  1.04/09 27/09/96  10.51.12  by  Christian Zeitnitz
+*-- Author :    Christian Zeitnitz   22/07/92
       SUBROUTINE MOXSEC
 C************************************************************
 C
@@ -38,6 +17,8 @@ C  Author : C.Zeitnitz
 C
 C  See USER's GUIDE TO MICAP ORNL/TM-10340
 C  for details and pointer description (MPOINT)
+C 30-Jun-01 Implement sugestion of Pavel Nevski to zero bank
+C           content when booking memory in constants division.
 C
 C************************************************************
 #include "geant321/mmicap.inc"
@@ -84,10 +65,12 @@ C get number of isoptopes from xsection file(s)
       IF(LT.GT.0) GOTO 40
 C allocate needed memory for x-section
       NW = 2*NII+13*NNUC+2*NNR*NNUC+4*NGR*NNUC+3*NQ*NNUC+26*MEDIA + 2
+C pn, 01.06.2003:
+      NW = NW+NMIX
       NI = NII
       NWTOT = NWTOT + NW
       CALL CHKZEB(NW,IXCONS)
-      CALL MZBOOK(IXCONS,LMOX1,0,2,'MOX1',0,0,NW,0,-1)
+      CALL MZBOOK(IXCONS,LMOX1,0,2,'MOX1',0,0,NW,0,0)
 C       SET UP THE B CONTROL BLOCK LOCATION NUMBER ARRAY ICOM(NNUC)
 C LFP170 points to length of x-section data
       LFP170 = LMOX1 + 2
@@ -103,14 +86,14 @@ C check if all isotopes have been found in the x-section file(s)
       XSTOP = .FALSE.
       DO 50  I=1,NMIX
         IF(LD(LFP19+I-1).EQ.0) THEN
-         WRITE(IOUT,10100)LD(LFP19+I-1)
+         WRITE(IOUT,10000)LD(LFP19+I-1)
 10000    FORMAT(' MICAP: Could not find x-section of element ',I8)
          XSTOP = .TRUE.
         ENDIF
    50 CONTINUE
       IF(XSTOP) THEN
         PRINT '('' CALOR : Neutron x-section not found ===> STOP '')'
-        CALL ABEND
+        STOP
       ENDIF
       LFP21=LFP20+NNUC
 C store xs accuracy at LFP210 (used for thinning  in XSECN3)
@@ -144,7 +127,7 @@ C       ESTABLISH THE RANDOM WALK STORAGE LOCATIONS
       NW = NW + 2
       NWTOT = NWTOT + NW
       CALL CHKZEB(NW,IXCONS)
-      CALL MZBOOK(IXCONS,LMOX2,0,2,'MOX2',0,0,NW,0,-1)
+      CALL MZBOOK(IXCONS,LMOX2,0,2,'MOX2',0,0,NW,0,0)
       LFP43 = LMOX2 + 2
       LAST = LFP43 - 1
       MAXD = LMOX2 + NW
@@ -164,20 +147,17 @@ C determine length needed for macroscopic xs and mixing
             IF(LD(LFP10+IN-1).NE.IM) GOTO 70
             NM = NM+1
             II = LD(LFP16+IN-1)
-            LZ = MAX0(LD(LFP27+NNR*(II-1)),LZ)
+            LZ = LD(LFP27+NNR*(II-1))+LZ
+C            LZ = MAX0(LD(LFP27+NNR*(II-1)),LZ)
 C           LZ = MAX0(LDICT(1,II),LZ)
    70    CONTINUE
-         IF(NM.GT.1) LZ = 4*LZ
-         DO 80 J=1,NMIX
-            IF(LD(LFP10+J-1).NE.IM) GOTO 80
-            II = LD(LFP16+J-1)
-   80    CONTINUE
-         NW = NW + LZ
+C         IF(NM.GT.1) LZ = 6*LZ
+         NW = NW + 2*LZ
    90 CONTINUE
       NW = NW + 2
       NWTOT = NWTOT + NW
       CALL CHKZEB(NW,IXCONS)
-      CALL MZBOOK(IXCONS,LMOX3,0,2,'MOX3',0,0,NW,0,-1)
+      CALL MZBOOK(IXCONS,LMOX3,0,2,'MOX3',0,0,NW,0,0)
       LAST = LMOX3 + 1
       LFP44=LAST+1
       MAXD = LMOX3+NW
@@ -200,7 +180,7 @@ C           LZ = LGCB(2*J,I)
       NW = NW + 2*NGR*NNUC+2
       NWTOT = NWTOT + NW + 1
       CALL CHKZEB(NW,IXCONS)
-      CALL MZBOOK(IXCONS,LMOX4,0,2,'MOX4',0,0,NW,0,-1)
+      CALL MZBOOK(IXCONS,LMOX4,0,2,'MOX4',0,0,NW,0,0)
       LMAG2 = LMOX4 + 1
       LD(LMAG2) = NMAGIC
       LFP45 = LMAG2 + 1
@@ -235,7 +215,10 @@ C      WRITE(IOUT,10000)
       DO 130 I=0,NMIX-1
 C get GEANT name of material
          MARK = '/   '
-         IF(LD(LFP11+I)/1000.NE.LD(LFP13+I)) THEN
+         IF(LD(LFP11+I)/1000.NE.LD(LFP13+I).OR.
+     +      (I.LT.NMIX-1.AND.D(LFP140+I).NE.0..AND.D(LFP140+I+1).NE.0.
+     +       .AND.NINT(D(LFP34+LD(LFP16+I)-1)*1.008665)
+     +       .NE.NINT(D(LFP140+I)))) THEN
             MARK = '/  *'
             MFLAG=1
          ENDIF
@@ -245,7 +228,7 @@ C get GEANT name of material
          EN = 1.E6
          CALL TBSPLT(D(LS1),EN,LEN,XSEC)
          XSEC = 1./XSEC/D(LFP12+I)
-         IF(LD(LFP140+I).NE.0.) THEN
+         IF(D(LFP140+I).NE.0.) THEN
             WRITE(CGEANT,'(F6.1,I5)')  D(LFP140+I),LD(LFP13+I)
          ELSE
             WRITE(CGEANT,'(A11)')  '    -     -'
@@ -276,16 +259,16 @@ C get GEANT name of material
          NISO = NISO + 1
   130 CONTINUE
       WRITE(IOUT,'(78(''-''),/,48X,''Density in (Atoms/barn/cm)'')')
-      WRITE(IOUT,'(36X,
-     +    ''Collision Length for 1 MeV neutron in (cm)'',/)')
-      IF(MFLAG.EQ.1) WRITE(IOUT,'(/,
-     + 15X,''*******************************************'',/,
-     + 15X,''*               W A R N I N G             *'',/,
-     + 15X,''*   Marked isotopes (*) not found in the  *'',/,
-     + 15X,''*        cross-section file(s)            *'',/,
-     + 15X,''*    Cross-sections of the isotope with   *'',/,
-     + 15X,''*    the closest Z will be used instead   *'',/,
-     + 15X,''*******************************************'',/)')
+      WRITE(IOUT,'(36X, '
+     +    //' ''Collision Length for 1 MeV neutron in (cm)'',/)')
+      IF(MFLAG.EQ.1) WRITE(IOUT,'(/, '
+     + //'15X,''*******************************************'',/,  '
+     + //'15X,''*               W A R N I N G             *'',/,  '
+     + //'15X,''*   Marked isotopes (*) not found in the  *'',/,  '
+     + //'15X,''*        cross-section file(s)            *'',/,  '
+     + //'15X,''*    Cross-sections of the isotope with   *'',/,  '
+     + //'15X,''*    the closest Z will be used instead   *'',/,  '
+     + //'15X,''*******************************************'',/)')
 C which x-section files have been used?
       LT = LTEMP
       LCI = LCISO
@@ -356,11 +339,12 @@ C get file name of x-section file
         CALL UHTOC(IQ(LT+NTCOMM+1),4,COMMEN,IQ(LT+NTCOMM))
         CALL UHTOC(IQ(LT+NTDATS+1),4,DATSTR,IQ(LT+NTDATS))
         WRITE(IOUT,'('' File      : '',A66)') XSFILE
-        WRITE(IOUT,'('' Generated : '',A24,/,
-     +               '' Comment   : '',A66,/)') DATSTR,COMMEN
+        WRITE(IOUT,'('' Generated : '',A24,/,    '
+     +        //'    '' Comment   : '',A66,/)') DATSTR,COMMEN
   230   LT = LQ(LT)
       IF(LT.GT.0) GOTO 200
-      WRITE(IOUT,'(/,'' MICAP :'',I10,
-     + '' words used in GCBANK for neutron x-section tables''/)') NWTOT
+      WRITE(IOUT,'(/,'' MICAP :'',I10, '
+     + //' '' words used in GCBANK for neutron x-section tables''/)')
+     +   NWTOT
       RETURN
       END

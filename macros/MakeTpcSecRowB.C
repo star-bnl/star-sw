@@ -86,10 +86,26 @@ void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,
   }
   secrow->Print(0,24);
   //  TDatime  time(20010701,120000);
-  TDatime  time(d,t);
-  TString filename(Form("%s.%08d.%06d",TableName,time.GetDate(),time.GetTime()));
+  TString filename;
+  if (d > 0) {
+    TDatime  time(d,t);
+    filename = Form("%s.%08d.%06d",TableName,time.GetDate(),time.GetTime());
   //  sprintf(filename,"./StarDb/Calibrations/tpc/TpcSecRowTest.%08d.%06d.C",time.GetDate(),time.GetTime());
   //  sprintf(filename,"TpcSecRow.%08d.%06d.root",time.GetDate(),time.GetTime());
+  } else {
+    TDirectory *dir = hist->GetDirectory();
+    TString fileIn(dir->GetName());
+    fileIn.ReplaceAll("SecRow3CPCGF","");
+    fileIn.ReplaceAll("SecRow3CPGF","");
+    fileIn.ReplaceAll("SecRow3CCGF","");
+    fileIn.ReplaceAll("SecRow3CGF","");
+    fileIn.ReplaceAll("SecRow3PCGF","");
+    fileIn.ReplaceAll("SecRow3PGF","");
+    fileIn.ReplaceAll("SecRow3CGF","");
+    fileIn.ReplaceAll("SecRow3GF","");
+    fileIn.ReplaceAll(".root","");
+    filename = Form("%s.%s",TableName,fileIn.Data());
+  }
   printf("Create %s\n",filename.Data());
 #if 0
   TString dirname = gSystem->DirName(filename);

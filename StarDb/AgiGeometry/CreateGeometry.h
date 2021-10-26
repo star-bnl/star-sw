@@ -83,7 +83,7 @@ TDataSet *CreateGeometry(const Char_t *name, TEnv *configGeom) {
   if (gGeoManager) {
     cout << "VMC geometry " << gGeoManager->GetName() << " has beed created. Ignore request for " 
 	 << name << " ! " << endl;
-    return geom;
+    return geometry;
   }
   gSystem->Load("libRotations");
   TString path(".:");

@@ -1,35 +1,13 @@
-*
-* $Id: thrsel.F,v 1.2 2018/06/28 19:29:23 fisyak Exp $
-*
-* $Log: thrsel.F,v $
-* Revision 1.2  2018/06/28 19:29:23  fisyak
-* Merge with geant3
-*
-* Revision 1.1.1.3  2009/02/18 20:32:01  fisyak
-* *** empty log message ***
-*
-* Revision 1.1.1.1  2002/06/16 15:18:43  hristov
-* Separate distribution  of Geant3
-*
-* Revision 1.1.1.1  1999/05/18 15:55:21  fca
-* AliRoot sources
-*
-* Revision 1.1.1.1  1995/10/24 10:21:59  cernlib
-* Geant
-*
-*
-#include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.48  by  S.Giani
-*-- Author :
+* $Id: thrsel.F,v 1.1.1.1 2004/01/15 00:08:49 potekhin Exp $
+* $Name:  $
+#include <commons/config.h>
       SUBROUTINE THRSEL(NE,NP7,NB7,E,EOUT,FM,TDK,ETH,ALPHA,BETA,W,
      +                  PMUPS,PMDS,F,AWR,IIN,IPTMD,IPMDS,IOUT)
 C      THIS ROUTINE SELECTS THE EXIT ENERGY AND SCATTERING ANGLE
 C      FROM S(ALPHA,BETA) DATA TABLES
       DIMENSION ETH(*),ALPHA(*),BETA(*),ABETA2(2),PMDS(*),
      +   IPTMD(NE),W(NE),IPMDS(*),PMUPS(NB7,NE),F(NP7,NB7),AWR(*)
-#if __GNUC__ < 7
       SAVE
-#endif
 C
       AAWR=AWR(IIN)
       DO 10 IE=1,NE
@@ -59,7 +37,7 @@ C       NEUTRON DOWNSCATTERS
 10000 FORMAT(' MICAP: CUMULATIVE DOWNSCATTER DIST. DOES NOT END ',
      +       'IN 1.0 IN THRSEL',E12.4)
          PRINT *,' CALOR: ERROR in MICAP ====> STOP '
-         CALL ABEND
+         STOP
    60    IF(IB.EQ.1)GO TO 70
          DELE=(PMDS(IP+NB+IB)-R)/(PMDS(IP+NB+IB)-PMDS(IP+NB+IB-1))
          ABETA=DELE*(PMDS(IP+IB-1)-PMDS(IP+IB))+PMDS(IP+IB)
@@ -87,7 +65,7 @@ C       NEUTRON UPSCATTERS
 10100 FORMAT(' MICAP: CUMULATIVE UPSCATTER DIST. DOES NOT END ',
      +       'IN 1.0 IN THRSEL',E12.4)
          PRINT *,' CALOR: ERROR in MICAP ====> STOP '
-         CALL ABEND
+         STOP
   140    IF(IB.EQ.1)GO TO 150
          DELE=(PMUPS(IB,INDX)-R)/(PMUPS(IB,INDX)-PMUPS(IB-1,INDX))
          ABETA=DELE*(BETA(IB-1)-BETA(IB))+BETA(IB)
@@ -96,7 +74,7 @@ C       NEUTRON UPSCATTERS
 10200 FORMAT(' MICAP: CUMULATIVE UPSCATTER DIST. DOES NOT BEGIN ',
      +       'AT 0.0 IN THRSEL',E12.4)
          PRINT *,' CALOR: ERROR in MICAP ====> STOP '
-         CALL ABEND
+         STOP
   160    ABETA2(I)=ABETA
          INDX=INDX-1
   170 CONTINUE

@@ -50,8 +50,10 @@ foreach my $sub_dir (@subdirS) {
     foreach my $file (@flist) {
       if ($keep > 0) {
 	print "rm $file\# $keep from $#flist\n";
+      } else {
+	print "# keep $file\n";
+	$keep++;
       }
-      $keep++;
     }
   }
 }

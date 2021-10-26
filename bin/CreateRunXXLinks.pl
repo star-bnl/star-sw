@@ -29,12 +29,14 @@ sub PrintHash($$) {
   my $prefix = shift;
   my $oldTrig = "";
   foreach my $key (sort keys %$env ) {
-    if ($env->{$key}->{trig} !~ /GeV/) {next;}
+#    if ($env->{$key}->{trig} !~ /GeV/) {next;}
+#    if ($env->{$key}->{trig} =~ /fixed/) {next;}
+    if ($env->{$key}->{trig} =~ /Cosmic/) {next;}
     if ($env->{$key}->{trig} eq $oldTrig) {next;}
     $oldTrig = $env->{$key}->{trig};
 #    print "{ $key }\t=> {'$env->{$key}->{trig}', \tfield=>`$env->{$key}->{field}',\tfirst=>'$env->{$key}->{first}', \tlast=>'$env->{$key}->{last}', \tbeginTime=>'$env->{$key}->{beginTime}'\n";
 #    printf("%-20s %s\n",$env->{$key}->{trig},$env->{$key}->{beginTime});
-    printf("ln -sf tpcT0BX.2020_%s.C                     \ttpcT0BX.%s.C\n",$env->{$key}->{trig},$env->{$key}->{beginTime});
+    printf("ln -sf TpcSecRowB.%-40s  TpcSecRowB.%s\n",$env->{$key}->{trig} . "_2020.C",$env->{$key}->{beginTime} . ".C");
 #      my $fileN = $TableName . "." . $env->{$key}->{trig} . ".C";
 #      if (-r $fileN) {
 #        my $fileT = $TableName . "." .  $env->{$key}->{beginTime} . ".C";
