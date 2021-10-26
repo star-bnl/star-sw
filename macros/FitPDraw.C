@@ -165,7 +165,7 @@ void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)",
 	      Double_t ymin = -1,
 	      Double_t ymax =  1,
 	      const Char_t *side = "All",
-	      const Char_t *var  = "log_{10}(#Sigma Adc)"
+	      const Char_t *var  = "sector*side" // log_{10}(#Sigma Adc)"
 	      ) {
 #if 0
   TCanvas *c1 = (TCanvas*)gROOT->GetListOfCanvases()->FindObject("c1");

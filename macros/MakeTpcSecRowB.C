@@ -93,7 +93,8 @@ void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,
   //  sprintf(filename,"./StarDb/Calibrations/tpc/TpcSecRowTest.%08d.%06d.C",time.GetDate(),time.GetTime());
   //  sprintf(filename,"TpcSecRow.%08d.%06d.root",time.GetDate(),time.GetTime());
   } else {
-    TString fileIn(gDirectory->GetName());
+    TDirectory *dir = hist->GetDirectory();
+    TString fileIn(dir->GetName());
     fileIn.ReplaceAll("SecRow3CPCGF","");
     fileIn.ReplaceAll("SecRow3CPGF","");
     fileIn.ReplaceAll("SecRow3CCGF","");
