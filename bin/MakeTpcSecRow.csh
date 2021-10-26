@@ -484,8 +484,10 @@
 #    mv TpcSecRowB.20350101.000001.root TpcSecRowB.${b}fixedTarget.root
 #    mv MakeTpcSecRowB.log MakeTpcSecRowB.${b}fixedTarget.log
 #end
-# P21ic_calib_42
-foreach f (`ls -1d SecRow3GF*.root`) 
-    set b = `echo ${f} | sed -e 's/SecRow3GF//' -e 's/\.root//'`
-    root.exe -q -b  ${f} 'MakeTpcSecRowB.C(-1,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
-end
+# P21ic_calib_55
+#foreach f (SecRow3GF4p59GeV_fixedTarget_2019.root SecRow3GF26p5GeV_fixedTarget_2020.root)
+#    set b = `echo ${f} | sed -e 's/SecRow3GF//' -e 's/\.root//'`
+#    root.exe -q -b  ${f} 'MakeTpcSecRowB.C(-1,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
+#end
+# P21ic_calib_56
+  root.exe -q -b ../P21ic_calib_55/TpcSecRowB.4p59GeV_fixedTarget_2019.root SecRow3CGF4p59GeV_fixedTarget_2019.root   'MakeTpcSecRowB.C(-1,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.log
