@@ -91,7 +91,7 @@ public:
 
 	int verify_event_io() ;
 
-	u_short run_event_sim(int xing, int type) ;	// returns DSM bits
+	u_int run_event_sim(int xing, int type) ;	// returns DSM bits
 
 	int verify_event_sim(int xing) ;
 

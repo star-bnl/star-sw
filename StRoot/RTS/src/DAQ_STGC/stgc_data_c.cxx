@@ -75,6 +75,8 @@ const char *stgc_data_c::type_c(u_short type)
 		return "TIMER" ;
 	case 0x4544 :
 		return "EVENT" ;
+	case 0x1F00 :
+		return "PROM" ;
 	default :
 		return "UNKNOWN" ;
 	}
@@ -171,8 +173,9 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
  //	adc_cou = d16_last - d16_data + 1 ;	// effective ADC length
 	adc_cou = d16_last - d16_data  ;	// effective ADC length
 	adc_cou -= 2 ;	// remove the stop_mhz 2 shorts...
-	
-	if(adc_cou%4 || shorts>40000) {
+
+	// MOVE this only for EVENTS	
+	if((evt_type==0x4544 && (adc_cou%4)) || shorts>40000) {
 		if(realtime) LOG(ERR,"%d: evt %d: %s: adc_cou is %d (%d), shorts %d!?",rdo1,event_any,c_type,adc_cou,adc_cou/4,shorts) ;
 		if(realtime>100) {
 			for(int i=0;i<16;i++) {
@@ -248,6 +251,10 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 		trg_cmd = daq_cmd = 0 ;
 
 		break ;	
+	case 0x1F00 :	// PROM response
+		token = 4096 ;
+		trg_cmd = daq_cmd = 0 ;
+		break ;
 	default :
 		LOG(ERR,"S%d:%d: evt %d: T %d, trg %d, daq %d, UNKNOWN type 0x%04X; shorts %d",sector1,rdo1,event_any,token,trg_cmd,daq_cmd,evt_type,shorts) ;
 		bad_error |= 2 ;
@@ -488,6 +495,8 @@ int stgc_data_c::start(u_short *d, int shorts)
 
 	if(hdr_check(d,shorts)) return -1 ;
 
+	return 0 ;	// stop checking the version
+
 	switch(version) {
 	case 0x0001 :
 	case 0x0002 :
@@ -596,6 +605,9 @@ int stgc_data_c::event()
 	int trigger_id ;
 	int err = 0 ;
 
+	if(version!=0) return event_0001() ;
+
+	
 	switch(version) {
 	case 0x0001 :
 	case 0x0002 :

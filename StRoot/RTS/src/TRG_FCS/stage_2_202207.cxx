@@ -182,7 +182,7 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
     //u_int esum[15][9];
     //u_int sum[15][9];
     //float ratio[15][9];
-    u_int EM2 =0, EM1 =0, EM0=0;
+    u_int EM2 =0, EM1 =0, EM0=0, EM3=0;
     u_int ELE2=0, ELE1=0, ELE0=0;
     u_int HAD2=0, HAD1=0, HAD0=0;
     u_int ETOT=0, HTOT=0;
@@ -245,9 +245,10 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
             u_int hmax128 = hmax*128 ;
 
 	    if(hmax128 < esum[ns][r][c] * EM_HERATIO_THR){
-		if(esum[ns][r][c] > EMTHR2) EM2 = 1;
-		if(esum[ns][r][c] > EMTHR1) EM1 = 1;
-		if(esum[ns][r][c] > EMTHR0) EM0 = 1;
+		if(esum[ns][r][c] > EMTHR2)  EM2 = 1;
+		if(esum[ns][r][c] > EMTHR1)  EM1 = 1;
+		if(esum[ns][r][c] > EMTHR0)  EM0 = 1;
+		if(esum[ns][r][c] > ELETHR2) EM3 = 1; //Using ELE Thr2 
 		if(epdcoin[ns][r][c]==1){
 		    if(esum[ns][r][c] > ELETHR2) ELE2 = 1;
 		    if(esum[ns][r][c] > ELETHR1) ELE1 = 1;
@@ -339,8 +340,8 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
     if(fcs_trgDebug>=2) printf("E/H Tot = %3d %3d\n",etot[ns],htot[ns]);
 
     //sending output bits
-    output[0].d[0] = (EM0<<0)  + (EM1<<1)  + (EM2<<2)  + (0<<3) + (ELE0<<4) + (ELE1<<5) + (ELE2<<6) + (fpre_or<<7);
-    output[1].d[0] = (HAD0<<0) + (HAD1<<1) + (HAD2<<2) + (0<<3) + (ecal_ht<<4) + (hcal_ht<<5) + (ETOT<<6) + (HTOT<<7);
+    output[0].d[0] = (EM0<<0)  + (EM1<<1)  + (EM2<<2)  + (EM3<<3) + (ELE0<<4) + (ELE1<<5) + (ELE2<<6) + (fpre_or<<7);
+    output[1].d[0] = (HAD0<<0) + (HAD1<<1) + (HAD2<<2) + (0<<3)   + (ecal_ht<<4) + (hcal_ht<<5) + (ETOT<<6) + (HTOT<<7);
     output[0].d[1] = (JP2[0]<<0) + (JP2[1]<<1) + (JP2[2]<<2) + (JP2[3]<<3) + (JP2[4]<<4);
     output[1].d[1] = (JP1[0]<<0) + (JP1[1]<<1) + (JP1[2]<<2) + (JP1[3]<<3) + (JP1[4]<<4);
     output[0].d[2] = (JP0[0]<<0) + (JP0[1]<<1) + (JP0[2]<<2) + (JP0[3]<<3) + (JP0[4]<<4);
@@ -356,7 +357,7 @@ void  fcs_trg_base::stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], 
     output[0].d[7] = 0;
     output[1].d[7] = 0;
 
-    *s2_to_dsm = (ELE0<<0) + (ELE1<<1) + (ELE2<<2) + (EM2<<3)
+    *s2_to_dsm = (ELE0<<0) + (ELE1<<1) + (ELE2<<2) + (EM3<<3)
    	       + (ecal_ht<<4) + (hcal_ht<<5) + (ETOT<<6) + (HTOT<<7);
 
     if(fcs_trgDebug>=1){    
