@@ -373,7 +373,8 @@ int StFcsTriggerSimMaker::Make(){
 }    
 
 void StFcsTriggerSimMaker::runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t& geo, link_t output[]){
-  mTrgSim->stage_2(ecal,hcal,pres,geo,output);
+  u_short s2_to_dsm;
+  mTrgSim->stage_2(ecal,hcal,pres,geo,output,&s2_to_dsm);
 }
 
 void StFcsTriggerSimMaker::print4B4(){

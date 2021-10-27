@@ -459,18 +459,25 @@ int StFcsDb::getDepCh(int dep, int ch) const{
   return dep*kFcsMaxDepCh + ch;
 }                                                                                        
 
-void StFcsDb::getName(int det, int id, char name[]) const{
+void StFcsDb::getName(int det, int id, char name[]) {
   int ehp,ns,crt,slt,dep,ch;
   int c=getColumnNumber(det,id);
   int r=getRowNumber(det,id);
   getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);  
-  int scehp,scns,scdep,br,i2c,sipm,pp,j;
-  getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
-  sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
-	  DET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+  if(ehp<2){
+    int scehp,scns,scdep,br,i2c,sipm,pp,j;
+    getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
+    sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
+            DET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+  }else{
+    int pp,tt;
+    getEPDfromId(det,id,pp,tt);
+    sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_PP%02d%1sTT%02d",
+            DET[det],id,r,c,dep,ch,pp,tt%2==0?"E":"O",tt);
+  }
 }
 
-void StFcsDb::getName(int ehp, int ns, int dep, int ch, char name[]) const{
+void StFcsDb::getName(int ehp, int ns, int dep, int ch, char name[]) {
   int det,id,crt,slt;
   getIdfromDep(ehp,ns,dep,ch,det,id,crt,slt);
   if(id==-1){
@@ -480,10 +487,17 @@ void StFcsDb::getName(int ehp, int ns, int dep, int ch, char name[]) const{
   }else{
     int c=getColumnNumber(det,id);
     int r=getRowNumber(det,id);
-    int scehp,scns,scdep,br,i2c,sipm,pp,j;
-    getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
-    sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
-	    DET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+    if(ehp<2){
+      int scehp,scns,scdep,br,i2c,sipm,pp,j;
+      getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
+      sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
+              DET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+    }else{
+      int pp,tt;
+      getEPDfromId(det,id,pp,tt);
+      sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_PP%02d%1s/TT%02d",
+              DET[det],id,r,c,dep,ch,pp,tt%2==0?"E":"O",tt);
+    }
   }
 }
 

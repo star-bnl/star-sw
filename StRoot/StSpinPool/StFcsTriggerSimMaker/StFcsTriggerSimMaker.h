@@ -43,9 +43,8 @@ public:
 
     fcs_trg_base* getTriggerEmu() {return mTrgSim;}
 
-    void runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[], u_short* dsm){
-	mTrgSim->stage_2(ecal,hcal,pres,geo,output,dsm);
-    }
+    //this is for just running stage2 from macro
+    void runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t &geo, link_t output[]);
 
 private:
     StFcsDb* mFcsDb=0;

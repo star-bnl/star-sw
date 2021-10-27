@@ -145,8 +145,8 @@ public:
   int getColumnNumber(int det, int id) const ;   //! get the column number for the channel
   int getId(int det, int row, int col) const ; //! get the id from row/col
   int getDepCh(int dep, int ch) const ; //! get the DEP/ch id
-  void getName(int det, int id, char name[]) const; //! Get Name of a channel
-  void getName(int ehp, int ns, int dep, int ch, char name[]) const; //! Get Name of a channel 
+  void getName(int det, int id, char name[]); //! Get Name of a channel
+  void getName(int ehp, int ns, int dep, int ch, char name[]); //! Get Name of a channel 
   static void getFromName(const char name[], int& det, int& id); //! Get det/id from name
   static int getDetFromName(const std::string& detname);  //! Get det from name
 
