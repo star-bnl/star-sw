@@ -116,7 +116,7 @@ void Db(const Char_t *tabNam  =
 	"Geometry/tpc/itpcPadPlanes",
 	Int_t date = -1, Int_t time = 0,
 	Int_t debugL = 1,
-	const Char_t *flavor="sim+ofl+laserDV+TFG"
+	const Char_t *flavor="sim+ofl+laserDV+TFG+FXT"
 	){ 
   if (dbMk == 0) DbLoad();
   dbMk->SetDebug(debugL);
