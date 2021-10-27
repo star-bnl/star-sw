@@ -8,8 +8,7 @@
 #include <cstdlib>
 #include <pwd.h>
 #include <sys/time.h>
-#include <unistd.h>
-#include <sys/types.h>
+
 #include <sstream>
 
 namespace {

@@ -27,6 +27,7 @@
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
+
 #ifndef __TFG__VERSION__
 // #define USETOF
 #else /* __TFG__VERSION__ */
@@ -2170,7 +2171,7 @@ Bool_t StKFParticleInterface::FillPidQA(StPidStatus* PiD, Int_t pdg, Int_t pdgPa
     for (Int_t d = 0; d <= Ndecays; d++) {
       for (Int_t p = 0; p < Nparticles; p++) {
 	PiDQA->cd();
-	if (_debug) cout << "d = " << d << "\tp = " << p << "\t" <<  TDirectory::CurrentDirectory()->GetPath() << endl;
+	if (_debug) cout << "d = " << d << "\tp = " << p << "\t" <<  gDirectory->GetPath() << endl;
 	TDirectory *dir1 = PiDQA;
 	if (d > 0 && (particles[p].pdg != parents[d-1].pdg1 && particles[p].pdg != parents[d-1].pdg2)) continue;
 	if (d) {
@@ -2180,12 +2181,12 @@ Bool_t StKFParticleInterface::FillPidQA(StPidStatus* PiD, Int_t pdg, Int_t pdgPa
 	    dir2 = dir1->GetDirectory(parents[d-1].name); 
 	  }
 	  dir2->cd(); dir1 = dir2;
-	  if (_debug) cout << "d = " << d << "\tp = " << p << "\t" <<  TDirectory::CurrentDirectory()->GetPath() << endl;
+	  if (_debug) cout << "d = " << d << "\tp = " << p << "\t" <<  gDirectory->GetPath() << endl;
 	}
 	dir1->mkdir(particles[p].name);
 	TDirectory *dir3 = dir1->GetDirectory(particles[p].name);
 	dir3->cd();
-	if (_debug) cout << "d = " << d << "\tp = " << p << "\t" <<  TDirectory::CurrentDirectory()->GetPath() << endl;
+	if (_debug) cout << "d = " << d << "\tp = " << p << "\t" <<  gDirectory->GetPath() << endl;
 	hist[d][p][0] = new TH2F("dEdx","dE/dx_{fit} / Bichsel prediction for I_{fit} versus log_{10}(#beta #gamma)",280,-1,4,200,-0.5,0.5);
 	hist[d][p][1] = new TH2F("dNdx","dN/dx_{fit} / dN/dx_{predicted} for N/dx versus log_{10}(#beta #gamma)",280,-1,4,200,-0.5,0.5);
 	hist[d][p][2] = new TH2F("dM2BTof","dM^{2} fro BTof versus log_{10}(#beta #gamma)",280,-1,4,200,-0.2,0.2);

@@ -77,9 +77,10 @@ struct HitPoint_t {
 //#define __LASERINO__
 //#define Old_dNdx_Table
 //#define __ELECTRONS_TUPLE__
-#define __SECROW_PLOTS__
 #define __STOPPED_ELECTRONS__
+#ifdef __TFG__VERSION__
 #define __DEBUG__
+#endif /* __TFG__VERSION__ */
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else

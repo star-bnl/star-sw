@@ -112,7 +112,7 @@ class messVec;
 #endif
 class StMessMgr 
 #ifndef __CLING__
-: public ostrstream 
+: public std::ostringstream 
 #endif
 {
 
@@ -137,7 +137,7 @@ class StMessMgr
        kAll=-5, kFatal, kError, kWarning, kInfo, kDefault, kDebug, kDebug2 
     }; 
    StMessMgr();
-   //   StMessMgr(const StMessMgr&) : ostrstream() {;}
+   //   StMessMgr(const StMessMgr&) : std::ostringstream() {;}
    virtual ~StMessMgr(){;}
 // operator <<
 
@@ -145,7 +145,7 @@ class StMessMgr
 
 // Generic Messages:
 #if !defined(__CLING__)
-   virtual ostrstream& Message(const char* mess="", const char* type="",
+   virtual std::ostringstream& Message(const char* mess="", const char* type="",
          const char* opt=0,const char *sourceFileName=0, int lineNumber=-1)= 0;
 #endif
    virtual       void Print() =0;
@@ -223,7 +223,7 @@ protected:
 public:
 // Info Messages:
 #if  !defined(__CLING__)
-   virtual ostrstream& Info(const char* mess="", const char* opt="O",const char *sourceFileName=0, int lineNumber=-1)=0;
+   virtual std::ostringstream& Info(const char* mess="", const char* opt="O",const char *sourceFileName=0, int lineNumber=-1)=0;
 #endif
    virtual        int PrintInfos() =0;
    virtual const messVec* GetInfos() =0;
@@ -234,7 +234,7 @@ public:
 
 // Warning Messages:
 #if  !defined(__CLING__)
-   virtual ostrstream& Warning(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)= 0;
+   virtual std::ostringstream& Warning(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)= 0;
 #endif
    virtual        int PrintWarnings() =0;
    virtual const messVec* GetWarnings() =0;
@@ -245,7 +245,7 @@ public:
 
 // Error Messages:
 #if  !defined(__CLING__)
-   virtual ostrstream& Error(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1) = 0;
+   virtual std::ostringstream& Error(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1) = 0;
 #endif
    virtual        int PrintErrors() =0;
    virtual const messVec* GetErrors() =0;
@@ -256,7 +256,7 @@ public:
 
 // Debug Messages:
 #if  !defined(__CLING__)
-   virtual ostrstream& Debug(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)= 0;
+   virtual std::ostringstream& Debug(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)= 0;
 #endif
    virtual        int PrintDebug() =0;
    virtual const messVec* GetDebugs() =0;
@@ -267,7 +267,7 @@ public:
 
 // QAInfo Messages:
 #if  !defined(__CLING__)
-   virtual ostrstream& QAInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1) = 0;
+   virtual std::ostringstream& QAInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1) = 0;
 #endif
    virtual        int PrintQAInfo() =0;
    virtual const messVec* GetQAInfos() =0;
@@ -278,7 +278,7 @@ public:
 
 // UCMInfo Messages:
 #if  !defined(__CLING__)
-   virtual ostrstream& UCMInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1) = 0;
+   virtual std::ostringstream& UCMInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1) = 0;
 #endif
    virtual        int PrintUCMInfo() =0;
    virtual const messVec* GetUCMInfos() =0;
@@ -289,13 +289,13 @@ public:
 
 // "As is" Messages:
 #if  !defined(__CLING__)
-   virtual ostrstream& out(const char* mess="") = 0;
-   virtual ostrstream& err(const char* mess="") = 0;
+   virtual std::ostringstream& out(const char* mess="") = 0;
+   virtual std::ostringstream& err(const char* mess="") = 0;
 #endif
    virtual       void PrintInfo() =0;
    // Fatal Messages:
 #if  !defined(__CLING__)
-   virtual ostrstream& Fatal(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)= 0;
+   virtual std::ostringstream& Fatal(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)= 0;
 #endif
 #ifdef __ROOT__
    ClassDef(StMessMgr,0)

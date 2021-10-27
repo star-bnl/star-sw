@@ -11,7 +11,6 @@
 
 #include <stdlib.h>
 #include <vector>
-#include <cstring>
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
 #endif

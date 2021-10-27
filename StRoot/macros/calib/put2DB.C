@@ -123,7 +123,7 @@ void put2DB(const Char_t* files="$STAR/StarDb/Geometry/svt/svtWafersPosition.200
     if (N == 1) offset = 0;
     if (TName.Contains("tpcDriftVelocity") ||TName.Contains("ssdConfiguration") || TName.Contains("trgTimeOffset")) offset = 0;
     if (TName.Contains("svtWafersPosition")) {cout << "Un comment SvtIndexMap include" << endl; return;}
-    Bool_t ok = myTable->IsA()->InheritsFrom( "St_tpcCorrection" );
+    Bool_t ok = myTable->IsA()->InheritsFrom( "St_tpcCorrection" ) || myTable->IsA()->InheritsFrom( "St_MDFCorrection" );
     if ( ok && N < 50) {
       cout << "==================== St_tpcCorrection ====================" << endl;
       // enlarge table up to 50 rows
