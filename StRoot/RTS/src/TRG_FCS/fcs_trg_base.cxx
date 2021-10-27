@@ -156,7 +156,6 @@ void fcs_trg_base::init(const char* fname)
 		}
 	}
 
-
 	for(int i=0;i<NS_COU;i++) {
 	for(int j=0;j<ADC_DET_COU;j++) {
 	for(int k=0;k<DEP_COU;k++) {
@@ -220,46 +219,53 @@ void fcs_trg_base::init(const char* fname)
 	HAD_HERATIO_THR = 32 ;
 
 	EMTHR3 = 128 ; //obsolete for 202207 
-	EMTHR2 = 128 ;
-	EMTHR1 = 96 ;
-	EMTHR0 = 64 ; 
-
-	ELETHR2 = 64 ;
-	ELETHR1 = 32 ;
-	ELETHR0 = 22 ; 
-
-	HADTHR3 = 160 ; //obsolete for 202207   
-	HADTHR2 = 160 ;
-	HADTHR1 = 128 ;
-	HADTHR0 =  96 ; 
-
+	HADTHR3 = 169 ; //obsolete for 202207   
 	JETTHR2  = 128 ; //obsolete for 202207   
 	JETTHR1  =  64 ; //obsolete for 202207   
-	JPATHR2  = 190 ;      
-        JPATHR1  = 127 ;      
-        JPATHR0  = 111 ;      
-        JPBCTHR2 = 190 ;      
-        JPBCTHR1 = 127 ;      
-        JPBCTHR0 = 111 ;      
-        JPBCTHRD = 127 ;       
-        JPDETHR2 = 190 ;      
-        JPDETHR1 = 127 ;      
-        JPDETHR0 = 111 ;      
-        JPDETHRD = 127 ;      
 
-	ETOTTHR = 10 ;
-	HTOTTHR = 10 ;
-	EHTTHR = 32 ;
-	HHTTHR = 32 ;
+	//original default
+	EMTHR2 = 192 ;
+	EMTHR1 = 128 ;
+	EMTHR0 = 64 ; 
+	
+	ELETHR2 = 32 ;
+	ELETHR1 = 22 ;
+	ELETHR0 = 25 ; 
+	
+	HADTHR2 = 192 ;
+	HADTHR1 = 128 ;
+	HADTHR0 =  64 ; 
+	
+	JPATHR2  = 254 ;      
+	JPATHR1  = 192 ;      
+	JPATHR0  = 128 ;      
+	JPBCTHR2 = 254 ;      
+	JPBCTHR1 = 192 ;      
+	JPBCTHR0 = 128 ;      
+	JPBCTHRD = 160 ;       
+	JPDETHR2 = 254 ;      
+	JPDETHR1 = 192 ;      
+	JPDETHR0 = 128 ;      
+	JPDETHRD = 160 ;      
 
+	ETOTTHR = 32 ;
+	HTOTTHR = 32 ;
+	EHTTHR = 50 ;
+	HHTTHR = 50 ;
 	PHTTHR = 100 ; //stage1
+
+	if(sim_mode){
+	    ht_threshold[0]=EHTTHR;
+	    ht_threshold[1]=HHTTHR;
+	    ht_threshold[2]=PHTTHR;
+	}	 
 
 	// IMPORTANT: Requested Stage_x versions defaults
 	// Either set by the user to her/his wishes or picked up from the DAQ file
-	stage_version[0] = 0 ;
-	stage_version[1] = 0 ;
-	stage_version[2] = 0 ;
-	stage_version[3] = 0 ;
+	stage_version[0] = 2 ;
+	stage_version[1] = 1 ;
+	stage_version[2] = 7 ;
+	stage_version[3] = 7 ;
 
 	// DEP/Trigger masks
 	//s3_ch_mask = (1<<2) ;	        // South 0 
@@ -515,7 +521,7 @@ int fcs_trg_base::end_event()
 			LOG(NOTE,"run_event_sim: xing %d",xing) ;
 		}
 
-		dsmout = run_event_sim(xing,sim_mode) ;
+		dsmout = run_event_sim(xing,sim_mode) ;		
 
 		if(dsmout) {
 			dsm_any = dsmout ;
@@ -1000,7 +1006,8 @@ int fcs_trg_base::verify_event_sim(int xing)
 // type==0 if we only want to compare data from actual DAQ files
 // type==1 if this is a GEANT simulation and there are no actual DEP boards
 
-u_short fcs_trg_base::run_event_sim(int xing, int type) 
+//u_short fcs_trg_base::run_event_sim(int xing, int type) 
+u_int fcs_trg_base::run_event_sim(int xing, int type) 
 {
 	geom_t geo ;
 
@@ -1117,7 +1124,11 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 		stage_3(l_in,&d_out.s3.dsm_out) ;
 	}
 
-	return d_out.s3.dsm_out ;	// not that the return is the _simulated_ DSM
+	//	return d_out.s3.dsm_out ;	// not that the return is the _simulated_ DSM
+	return d_out.s3.dsm_out
+	    + ((int)(d_out.s2[0].s2_to_dsm & 0xFF) << 16)
+	    + ((int)(d_out.s2[1].s2_to_dsm & 0xFF) << 24);
+	
 }
 
 

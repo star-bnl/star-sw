@@ -41,8 +41,8 @@ void fcs_trg_base::stage_3_202207(link_t link[], u_short *dsm_out)
     if( (link[0].d[2] & 0x04) && (link[3].d[2] & 0x1A) ) *dsm_out |= 0x4000; //DiJPAsy
     if( (link[0].d[2] & 0x18) && (link[3].d[2] & 0x1E) ) *dsm_out |= 0x4000; //DiJPAsy
 
-    if( (link[0].d[0] & 0x40) && (link[2].d[0] & 0x20) ) *dsm_out |= 0x4000; //DiELEA
-    if( (link[0].d[0] & 0x20) && (link[2].d[0] & 0x40) ) *dsm_out |= 0x4000; //DiELEA
+    if( (link[0].d[0] & 0x40) && (link[2].d[0] & 0x20) ) *dsm_out |= 0x8000; //DiELEA
+    if( (link[0].d[0] & 0x20) && (link[2].d[0] & 0x40) ) *dsm_out |= 0x8000; //DiELEA
 
     dsmout = *dsm_out;
 

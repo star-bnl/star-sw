@@ -24,6 +24,7 @@
 struct fgt_adc_t {
 	unsigned short ch ;
 	unsigned char tb ;
+	unsigned char flags ;	// FST specific
 	short adc ;
 } ;
 
@@ -33,6 +34,8 @@ struct fgt_pedrms_t {
 	unsigned char tb ;
 	float ped ;
 	float rms ;
+	
+	float cmn_rms ;	// FST specific
 } ;
 
 struct apv_meta_t {
