@@ -1,3 +1,4 @@
+#! /bin/tcsh -f
 set D = `basename ${PWD}`
 set dist = ~/work/Histograms/${D}
 if (! -d ${dist}) mkdir ${dist}
