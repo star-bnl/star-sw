@@ -31,12 +31,12 @@ StMuETofHeader::StMuETofHeader()
   mStarToken( 0 ),
   mStarDaqCmdIn( 0 ),
   mStarTrgCmdIn( 0 ),
-  mEventStatusFlag( 0 )
+  mEventStatusFlag( 0 ),
+  mMissMatchFlagVec( eTofConst::nGet4sInSystem, false ),
+  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
 {
   mRocGdpbTs.clear();
   mRocStarTs.clear();
-  mMissMatchFlagVec = std::vector<bool>( eTofConst::nGet4sInSystem, false );
-  mGoodEventFlagVec = std::vector<bool>( eTofConst::nCountersInSystem, false );   
 }
 
 
@@ -49,12 +49,12 @@ StMuETofHeader::StMuETofHeader( const double& trgGdpbTime, const double& trgStar
   mStarToken( starToken ),
   mStarDaqCmdIn( starDaqCmdIn ),
   mStarTrgCmdIn( starTrgCmdIn ),
-  mEventStatusFlag( eventStatusFlag )
+  mEventStatusFlag( eventStatusFlag ),
+  mMissMatchFlagVec( eTofConst::nGet4sInSystem, false ),
+  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
 {
     setRocGdpbTs( gdpbTs );
     setRocStarTs( starTs );
-    mMissMatchFlagVec = std::vector<bool>( eTofConst::nGet4sInSystem, false );
-    mGoodEventFlagVec = std::vector<bool>( eTofConst::nCountersInSystem, false );   
 }
 
 StMuETofHeader::StMuETofHeader( const double& trgGdpbTime, const double& trgStarTime,
@@ -67,7 +67,8 @@ StMuETofHeader::StMuETofHeader( const double& trgGdpbTime, const double& trgStar
   mStarDaqCmdIn( starDaqCmdIn ),
   mStarTrgCmdIn( starTrgCmdIn ),
   mEventStatusFlag( eventStatusFlag ),
-  mMissMatchFlagVec( MissMatchFlagVec )
+  mMissMatchFlagVec( MissMatchFlagVec ),
+  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
 {
     setRocGdpbTs( gdpbTs );
     setRocStarTs( starTs );
