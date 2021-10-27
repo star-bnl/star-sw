@@ -32,13 +32,11 @@ class StMultiH1F : public TH2F {
                               { return (ybin<StMultiH1FMaxBins ? names[ybin].Data() : 0); }
   virtual const char* GetNames(Float_t ybin) const
                               { return GetNames((Int_t) ybin); }
-#if ROOT_VERSION_CODE < 393216 /* ROOT_VERSION(6,15,1) */
   // Overload the Rebin() function to allow naming of y bins with TH2F pointer
-  virtual        TH1* Rebin(Int_t ngroup, const char* newname)
+  virtual        TH2* Rebin(Int_t ngroup, const char* newname)
                               { SetNames(ngroup, newname); return 0; }
-  virtual        TH1* Rebin(Int_t ngroup, const char* newname, const Double_t* xbins)
+  virtual        TH2* Rebin(Int_t ngroup, const char* newname, const Double_t* xbins)
                               { SetNames(ngroup, newname); return 0; }
-#endif
   // Overload the SetBarOffset() function to allow offsetting of y bins vertically
   virtual        void SetBarOffset(Float_t offset);
   virtual    Double_t GetNonZeroMinimum() const;

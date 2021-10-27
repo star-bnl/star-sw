@@ -58,7 +58,7 @@ class StLoggerManager : public StMessMgr {
 #if !defined(__CINT__) && !defined(__CLING__)
    std::vector<std::string>  fSourceFileNames;
    std::string fLastMessage;
-   ostrstream fStreams[7];
+   std::ostringstream fStreams[7];
 #endif
    int   fLineNumbers[10];
    int   fAllowRepeat;        // the total number one and the same message can be printed out
@@ -85,7 +85,7 @@ class StLoggerManager : public StMessMgr {
   void SetStarOptionFilter(const log4cxx::varia::StarOptionFilterPtr& filter);
   const log4cxx::varia::StarOptionFilterPtr& GetStarOptionFilter() const;
   log4cxx::varia::StarOptionFilterPtr& GetStarOptionFilter();
-  ostrstream &Stream();
+  std::ostringstream &Stream();
 #endif
 
 protected:
@@ -119,7 +119,7 @@ protected:
 
 // Generic Messages:
 #if !defined(__CINT__) && !defined(__CLING__)
-   virtual ostrstream& Message(const char* mess="", const char* type="",
+   virtual std::ostringstream& Message(const char* mess="", const char* type="",
          const char* opt=0,const char *sourceFileName=0, int lineNumber=-1);
 #endif
    virtual       void Print();
@@ -155,7 +155,7 @@ protected:
 
 // Info Messages:
 #if !defined(__CINT__) && !defined(__CLING__)
-   virtual ostrstream& Info(const char* mess="", const char* opt="O"
+   virtual std::ostringstream& Info(const char* mess="", const char* opt="O"
                           ,const char *sourceFileName=0, int lineNumber=-1);
 #endif
    virtual        int PrintInfos();
@@ -167,7 +167,7 @@ protected:
 
 // Warning Messages:
 #if !defined(__CINT__) && !defined(__CLING__)
-   virtual ostrstream& Warning(const char* mess="", const char* opt="E"
+   virtual std::ostringstream& Warning(const char* mess="", const char* opt="E"
                              ,const char *sourceFileName=0, int lineNumber=-1);
 #endif
    virtual        int PrintWarnings();
@@ -179,7 +179,7 @@ protected:
 
 // Error Messages:
 #if !defined(__CINT__) && !defined(__CLING__)
-   virtual ostrstream& Error(const char* mess="", const char* opt="E"
+   virtual std::ostringstream& Error(const char* mess="", const char* opt="E"
                            ,const char *sourceFileName=0, int lineNumber=-1);
 #endif
    virtual        int PrintErrors();
@@ -191,7 +191,7 @@ protected:
 
 // Debug Messages:
 #if !defined(__CINT__) && !defined(__CLING__)
-   virtual ostrstream& Debug(const char* mess="", const char* opt="OT"
+   virtual std::ostringstream& Debug(const char* mess="", const char* opt="OT"
                            ,const char *sourceFileName=0, int lineNumber=-1);
 #endif
    virtual        int PrintDebug();
@@ -203,7 +203,7 @@ protected:
 
 // QAInfo Messages:
 #if !defined(__CINT__) && !defined(__CLING__)
-   virtual ostrstream& QAInfo(const char* mess="", const char* opt="OS"
+   virtual std::ostringstream& QAInfo(const char* mess="", const char* opt="OS"
                             ,const char *sourceFileName=0, int lineNumber=-1);
 #endif
    virtual        int PrintQAInfo();
@@ -215,7 +215,7 @@ protected:
 
 // UCMInfo Messages:
 #if !defined(__CINT__) && !defined(__CLING__)
-   virtual ostrstream& UCMInfo(const char* mess="", const char* opt="OS"
+   virtual std::ostringstream& UCMInfo(const char* mess="", const char* opt="OS"
                             ,const char *sourceFileName=0, int lineNumber=-1);
 #endif
    virtual        int PrintUCMInfo();
@@ -227,14 +227,14 @@ protected:
    
 // "As is" Messages:
 #if !defined(__CINT__) && !defined(__CLING__)
-   virtual ostrstream& out(const char* mess="");
-   virtual ostrstream& err(const char* mess="");
+   virtual std::ostringstream& out(const char* mess="");
+   virtual std::ostringstream& err(const char* mess="");
 #endif
    virtual       void PrintInfo();
 
    // Fatal Messages:
 #if !defined(__CINT__) && !defined(__CLING__)
-   virtual ostrstream& Fatal(const char* mess="", const char* opt="F",const char *sourceFileName=0, int lineNumber=-1);
+   virtual std::ostringstream& Fatal(const char* mess="", const char* opt="F",const char *sourceFileName=0, int lineNumber=-1);
 #endif
    //  "Extra Logger" methods
    void PrintLogger(const char* mess, unsigned char type, const char* opt, const char *sourceFileName=0, int lineNumber=-1);

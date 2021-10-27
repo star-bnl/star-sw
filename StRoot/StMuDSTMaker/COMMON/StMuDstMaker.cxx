@@ -35,7 +35,7 @@
 #include "StStrangeMuDstMaker/StKinkMc.hh"
 #include "StStrangeMuDstMaker/StStrangeCuts.hh"
 #endif
-
+#include "StMessMgr.h"
 #include "StMuException.hh"
 #include "StMuEvent.h"
 #include "StMuPrimaryVertex.h"
@@ -1873,8 +1873,7 @@ string StMuDstMaker::dirname(string s){
 }
 
 void StMuDstMaker::setProbabilityPidFile(const char* file) {
-  ostrstream flnm;
-
+  std::ostringstream flnm;
   if ( ! file ){
     const char *PIDtable="PIDTableP01gl.root";
 

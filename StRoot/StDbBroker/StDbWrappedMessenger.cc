@@ -47,12 +47,12 @@
 #include "StDbWrappedMessenger.hh"
 #include <string.h>
 #include <assert.h>
-//#include "StUtilities/StMessageManager.h"
-#include "StMessMgr.h" 
+#include "StUtilities/StMessageManager.h"
+
 //////////////////////////////////////////////////////////////////////////
 
 StDbWrappedMessenger::StDbWrappedMessenger() {
-  //  mMessenger=StMessageManager::Instance();
+  mMessenger=StMessageManager::Instance();
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -126,8 +126,7 @@ StDbWrappedMessenger::printMessage(const char* message, const char* levelString,
   char * str = new char[n];
 
   sprintf(str,"%s::%s line=%d %s",className,methodName,lineNumber,message);
-  //  mMessenger->Message(str,levelString);
-  LOG_WARN << str << endm;
+  mMessenger->Message(str,levelString);
   delete [] str;
 }
 
