@@ -369,9 +369,8 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         mMinDigisPerSlewBin   = calibParamTable->minDigisInSlewBin;
 
         // only set the reference pulser index if it is not alredy set from outside by a steering macro
-        if( mReferencePulserIndex == 0 ) { //REMOVED TO COMPILE AGAINST NEW. PW
-            //mReferencePulserIndex = calibParamTable->referencePulserIndex;
-				mReferencePulserIndex = 1;
+        if( mReferencePulserIndex == 0 ) {
+            mReferencePulserIndex = calibParamTable->referencePulserIndex;
         }
         else {
             LOG_INFO << "--- reference pulser index is set manually ---" << endm;
