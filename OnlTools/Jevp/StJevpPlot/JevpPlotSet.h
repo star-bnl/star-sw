@@ -10,7 +10,6 @@
 #include <THashList.h>
 
 #include "JevpPlot.h"
-//#include "DAQ_READER/daqReader.h"
 #include "Jevp/StJevpPlot/BuilderStatus.h"
 #include "Jevp/StJevpPlot/JLatex.h"
 #include "Jevp/StJevpPlot/JLine.h"

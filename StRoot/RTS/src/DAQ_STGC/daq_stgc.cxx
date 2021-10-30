@@ -430,8 +430,6 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 	stgc_d->xing_min = xing_min ;
 	stgc_d->xing_max = xing_max ;
 
-//	LOG(WARN,"xing_min %d, xing_max %d",stgc_d->xing_min,stgc_d->xing_max) ;
-
 	// calc total bytes
 	tot_bytes = 0 ;
 	int o_cou = 0 ;

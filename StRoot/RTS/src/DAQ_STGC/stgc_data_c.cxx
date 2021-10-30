@@ -75,8 +75,6 @@ const char *stgc_data_c::type_c(u_short type)
 		return "TIMER" ;
 	case 0x4544 :
 		return "EVENT" ;
-	case 0x1F00 :
-		return "PROM" ;
 	default :
 		return "UNKNOWN" ;
 	}
@@ -87,23 +85,37 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 	u_short st[6] ;
 	const char *c_type ;
 
+#if 0
+//	if(event_any==1) {
+	if(1) {
+		printf("Event %d, shorts %d\n",event_any,shorts) ;
+		for(int i=0;i<shorts;i++) {
+			printf("%d = 0x%04X\n",i,d[i]) ;
+		}
+		fflush(stdout) ;
+	}
+#endif
+
+//	for(int i=0;i<32;i++) {
+//		LOG(TERR,"... %d/%d = 0x%04X",i,shorts,d[i]) ;
+//	}
+
 
 	d16_start = d ;	// points to start-comma
 
 	d += 8 ;	// skip TEF header
 	shorts -= 8 ;
 
-	trg_cou = 0 ;
+
 	evt_type = 0 ;
-	token = 4096 ;
-	trg_cmd = daq_cmd = 0 ;
+	token = 0 ;
 	echo = 0 ;
 	adc_cou = 0 ;
 	version = 0 ;
 
 	if(d[1] != 0xCCCC) {
 		bad_error |= 1 ;
-		LOG(ERR,"%d: evt %d: corrupt header 0x%04X, shorts %d",rdo1,event_any,d[1],shorts) ;
+		if(realtime) LOG(ERR,"%d: evt %d: corrupt header 0x%04X, shorts %d",rdo1,event_any,d[1],shorts) ;
 		return bad_error ;
 	}
 
@@ -124,13 +136,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 
 	token = (t_hi<<8)|(t_mid<<4)|t_lo ;
 
-//	if(realtime && (token==0)) {
-//		LOG(ERR,"%d: evt %d: token0: 0x%X 0x%X 0x%X 0x%X 0x%X",rdo1,event_any,
-//			d[0],d[1],d[2],d[3],d[4]) ;
-//	}
 	
-	trg_counter = d[5]>>6 ;
-
 	// FEE status
 	st[5] = d[9]>>8 ;
 	st[4] = d[9]&0xFF ;
@@ -140,7 +146,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 	st[0] = d[11]&0xFF ;
 
 
-	mhz_start_evt_marker = (((unsigned long)d[5]&0x3F)<<32)|((unsigned long)d[6]<<16)|(unsigned long)d[7] ;
+	mhz_start_evt_marker = (d[6]<<16)|d[7] ;
 
 	echo = d[12] ;
 
@@ -173,9 +179,8 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
  //	adc_cou = d16_last - d16_data + 1 ;	// effective ADC length
 	adc_cou = d16_last - d16_data  ;	// effective ADC length
 	adc_cou -= 2 ;	// remove the stop_mhz 2 shorts...
-
-	// MOVE this only for EVENTS	
-	if((evt_type==0x4544 && (adc_cou%4)) || shorts>40000) {
+	
+	if(adc_cou%4 || shorts>40000) {
 		if(realtime) LOG(ERR,"%d: evt %d: %s: adc_cou is %d (%d), shorts %d!?",rdo1,event_any,c_type,adc_cou,adc_cou/4,shorts) ;
 		if(realtime>100) {
 			for(int i=0;i<16;i++) {
@@ -227,41 +232,24 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 		}
 		}
 
-		token = 4096 ;
-		trg_cmd = daq_cmd = 0 ;
 		break ;
 	case 0x414B :	//echo 
 		if(realtime>1) LOG(TERR,"S%d:%d: ECHO of cmd 0x%04X",sector1,rdo1,echo) ;
-
-		token = 4096 ;
-		trg_cmd = daq_cmd = 0 ;
 		
 		break ;
 	case 0x4544 :	// event
-		LOG(NOTE,"S%d:%d: %d: VERSION 0x%04X: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %ul, delta %d",sector1,rdo1,id,version,token,trg_cmd,daq_cmd,
-			shorts,adc_cou,
-		    	mhz_start_evt_marker,mhz_stop_evt_marker-mhz_start_evt_marker) ;
-		LOG(NOTE,"%d: evts %d: T %d: trg_counter %d",rdo1,event_any,token,trg_counter) ;
+//		if(realtime) LOG(INFO,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %u, delta %u",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts,adc_cou,
+//		    mhz_start_evt_marker,mhz_stop_evt_marker-mhz_start_evt_marker) ;
+		LOG(NOTE,"S%d:%d: %d: VERSION 0x%04X: T %d, trg %d, daq %d; shorts %d, ADCs %d; start_mhz %u, delta %u",sector1,rdo1,id,version,token,trg_cmd,daq_cmd,shorts,adc_cou,
+		    mhz_start_evt_marker,mhz_stop_evt_marker-mhz_start_evt_marker) ;
 
 		break ;
 	case 0x5445 :	// timer
 		if(realtime>1) LOG(TERR,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts) ;
-
-		token = 4096 ;
-		trg_cmd = daq_cmd = 0 ;
-
 		break ;	
-	case 0x1F00 :	// PROM response
-		token = 4096 ;
-		trg_cmd = daq_cmd = 0 ;
-		break ;
 	default :
 		LOG(ERR,"S%d:%d: evt %d: T %d, trg %d, daq %d, UNKNOWN type 0x%04X; shorts %d",sector1,rdo1,event_any,token,trg_cmd,daq_cmd,evt_type,shorts) ;
 		bad_error |= 2 ;
-
-		token = 4096 ;
-		trg_cmd = daq_cmd = 0 ;
-
 	}
 
 
@@ -317,9 +305,12 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 	return bad_error ;
 }
 
-// unused...
+// unpacks and sanity-checks 1 RDO event
 int stgc_data_c::start_0001(u_short *d, int shorts)
 {
+	trg_cou = 0 ;
+
+	// move to start of actual data...
 	return 0 ;
 
 }
@@ -348,7 +339,7 @@ int stgc_data_c::event_0001()
 	if(feb_id==7) {	// trigger	
 		u_short t_hi, t_mid, t_lo ;
 		u_short t ;
-		u_short mhz_hi ;
+		u_short trg_counter ;
 		u_char t_cmd, d_cmd ;
 		u_char err = 0 ;
 
@@ -360,41 +351,28 @@ int stgc_data_c::event_0001()
 
 		t = (t_hi<<8)|(t_mid<<4)|t_lo ;
 
-		mhz_hi = (d[0]>>4)&0x1FF ;
-		mhz_trg_marker = ((unsigned long)mhz_hi<<32)|((unsigned long)d[2]<<16)|(unsigned long)d[3] ;	// or RHIC clock
+		trg_counter = (d[0]>>4)&0x1FF ;
+		mhz_trg_marker = (d[2]<<16)|d[3] ;	// or RHIC clock
 
 //		if((mhz_trg_marker+1) < mhz_start_evt_marker) err = 1 ;
 //		if(mhz_trg_marker > (mhz_start_evt_marker+1)) err |= 1 ;
 
-//		if((t != token)||(t_cmd != trg_cmd)||(d_cmd != daq_cmd)) err |= 2 ;
+		if((t != token)||(t_cmd != trg_cmd)||(d_cmd != daq_cmd)) err |= 2 ;
 			
 		if(trg_cou) err |= 4 ;	// more than 1 trigger
 
-
-		if(t==0) err |= 8 ;
-		if(t_cmd==0) err |= 8 ;
-		
-		
 		if(err) {	// typically corrupt data -- should STOP!
 			bad_error |= 0x10 ;
 
 			if(realtime) {
 				
 				LOG(ERR,"%d: evt %d: err 0x%X: 0x%04X 0x%04X 0x%04X 0x%04X at adc_cou %d",rdo1,event_any,err,d[0],d[1],d[2],d[3],adc_cou) ;
-				LOG(ERR,"%d: evt %d: data: trg_cou %d: T %d, trg %d, daq %d; trg_mhz %ul",rdo1,event_any,trg_cou,t,
-					t_cmd,d_cmd,mhz_trg_marker) ;
-				LOG(ERR,"%d: evt %d: hdr : trg_counter %d: T %d, trg %d, daq %d; evt_mhz %ul",rdo1,event_any,trg_counter,token,
-					trg_cmd,daq_cmd,mhz_start_evt_marker) ;
+				LOG(ERR,"%d: evt %d: trg_counter %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,event_any,trg_counter,t,t_cmd,d_cmd,mhz_trg_marker) ;
+				LOG(ERR,"%d: trg_cou %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_cou,token,trg_cmd,daq_cmd,mhz_trg_marker) ;
 			}
 		}
 		else {
 			//LOG(INFO,"%d: trg_cou %d: T %d, trg %d, daq %d; mhz_counter %u",rdo1,trg_counter,t,t_cmd,d_cmd,mhz_trg_marker) ;
-		}
-
-		if(trg_cou==0) {	// only use the first!
-			token = t ;	
-			trg_cmd = t_cmd ;
-			daq_cmd = d_cmd ;
 		}
 
 		// to indicate no data!
@@ -494,8 +472,6 @@ int stgc_data_c::start(u_short *d, int shorts)
 	event_any++ ;
 
 	if(hdr_check(d,shorts)) return -1 ;
-
-	return 0 ;	// stop checking the version
 
 	switch(version) {
 	case 0x0001 :
@@ -605,9 +581,6 @@ int stgc_data_c::event()
 	int trigger_id ;
 	int err = 0 ;
 
-	if(version!=0) return event_0001() ;
-
-	
 	switch(version) {
 	case 0x0001 :
 	case 0x0002 :

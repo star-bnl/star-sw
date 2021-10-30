@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include "JevpBuilder.h"
+#include "DAQ_HLT/daq_hlt.h"
 #include "DAQ_READER/daqReader.h"
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_L3/daq_l3.h>
@@ -763,6 +764,7 @@ void l4Builder::writeHistogram()
 	file.Close();
 }
 
+#include <sys/stat.h>
 void l4Builder::main(int argc, char *argv[])
 {
 	l4Builder me;

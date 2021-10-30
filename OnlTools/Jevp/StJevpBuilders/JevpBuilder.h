@@ -15,8 +15,8 @@ typedef unsigned char u_char;
 // interfaces...
 //
 
-#include "DAQ_READER/daqReader.h"
-#include "StEvent/StTriggerData.h"
+class daqReader;
+class StTriggerData;
 
 class JevpBuilder : public JevpPlotSet {
  public:

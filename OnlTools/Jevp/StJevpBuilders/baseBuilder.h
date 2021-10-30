@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "JevpBuilder.h"
-#include "DAQ_READER/daqReader.h"
+class daqReader;
 //#include "RunStatus.h"
 
 #include <TH1I.h>

@@ -115,9 +115,6 @@ class StMessMgr
 : public std::ostringstream 
 #endif
 {
-
-
-
    friend ostream& operator<<(ostream& ,StMessage*);
    friend ostream& operator++(StMessMgr&);
    friend ostream& operator-(StMessMgr&);

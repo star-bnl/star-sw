@@ -7,6 +7,7 @@
 #include "DAQ_READER/daqReader.h"
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_READER/daq_det.h>
+#include "StEvent/StTriggerData.h"
 #include "StEvent/StTriggerData2009.h"
 #include "StEvent/StTriggerData2012.h"
 #include "StEvent/StTriggerData2013.h"

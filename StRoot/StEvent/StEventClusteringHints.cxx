@@ -179,6 +179,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StTriggerData2017",           "evt_trigger",  3);
     setBranch("StTriggerData2018",           "evt_trigger",  3);
     setBranch("StTriggerData2019",           "evt_trigger",  3);
+    setBranch("StTriggerData2022",           "evt_trigger",  3);
     setBranch("StSPtrVecTrackDetectorInfo",  "evt_tracks",   4);
     setBranch("StSPtrVecPrimaryVertex",      "evt_tracks",   4);
     setBranch("StSPtrVecTrackNode",          "evt_tracks",   4);
@@ -261,6 +262,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StTriggerData2017",           "event", 1);
     setBranch("StTriggerData2018",           "event", 1);
     setBranch("StTriggerData2019",           "event", 1);
+    setBranch("StTriggerData2022",           "event", 1);
     setBranch("StSPtrVecKinkVertex",         "event", 1);
     setBranch("StSPtrVecV0Vertex",           "event", 1);
     setBranch("StSPtrVecXiVertex",           "event", 1);

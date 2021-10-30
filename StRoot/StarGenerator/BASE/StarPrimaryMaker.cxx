@@ -62,14 +62,16 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   assert(fgPrimary == 0); // cannot create more than one primary generator
   fgPrimary = this;
 
-  mStack = new StarParticleStack();
-#if 0
-  AgStarReader::Instance().SetStack(mStack);
-#endif
+  mStack = new StarParticleStack("PrimaryMakerStack");
+  SetAttr("usestarsim", int(1) );
+
+  // Publish the stack
+  AddObj( mStack, ".const" );  
+
   // Register the particle database with this maker
   StarParticleData &pdb = StarParticleData::instance();
   //  Shunt( &pdb );
-  //  AddData( &pdb, ".data" );
+  AddData( &pdb, ".const" );
 
   SetAttr("FilterKeepHeader", int(1) );
 

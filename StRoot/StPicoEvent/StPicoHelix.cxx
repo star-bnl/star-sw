@@ -14,6 +14,7 @@
 
 // C++ headers
 #include <float.h>
+#include <ostream>
 
 #include "Riostream.h"
 // PicoDst headers

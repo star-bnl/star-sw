@@ -18,6 +18,7 @@
 
 #include <algorithm>    // std::find
 #include <vector>       // std::vector
+#include <fstream>
 
 
 // This is the one PlotSet that is guarenteed to always exist
