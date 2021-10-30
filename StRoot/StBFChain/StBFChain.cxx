@@ -338,6 +338,9 @@ Int_t StBFChain::Instantiate()
 	  
 	  // Determine flavors
 	  TString flavors = "ofl"; // default flavor for offline
+	  // fixed target flavor
+ 	  if (GetOption("FXT")) flavors.Prepend("FXT+");
+
 	  // TFG specific Db tag
 	  if (! GetOption("NoTFGLDbTag")) flavors += "+TFG";
 	  // simulation flavors

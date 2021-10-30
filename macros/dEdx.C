@@ -91,6 +91,7 @@ void dEdx(Int_t nevents=1000,
   chain = bfc(-1,Chain.Data(),MainFile,0,RootFile.Data());
   StdEdxY2Maker *dEdxY2 = (StdEdxY2Maker *) chain->Maker("dEdxY2"); 
   if (dEdxY2) {
+    //    dEdxY2->SetDebug(3);
     Int_t tMin = 20000101;
     Int_t tMax = 20220101;
     for (Int_t y = 2000; y < 2026; y++) {
