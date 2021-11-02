@@ -1405,7 +1405,17 @@ Bool_t        St_beamInfoC::IsFixedTarget() {
   Bool_t isFixTag = kFALSE;
   Float_t MaxIntensity = TMath::Max(blueIntensity(), yellowIntensity());
   Float_t MinIntensity = TMath::Min(blueIntensity(), yellowIntensity());
-  if (MaxIntensity > 1.0 && MaxIntensity > 1000*MinIntensity) isFixTag = kTRUE;
+  if (MaxIntensity > 0.5) {
+    if (MaxIntensity > 1000*MinIntensity) isFixTag = kTRUE;
+  } else if (yellowIntensity() < 0.5) {
+  //Fix for beamInfo for fixedTarget with yellowIntensity < 1
+    if ((runNumber() >= 20181040 && runNumber() <= 20181045) || // 4p59GeV_fixedTarget_2019
+	(runNumber() >= 20182006 && runNumber() <= 20182018) || 
+	 runNumber() == 22121022 ||                             // tune_3p85GeV_fixedTarget_2021
+	 runNumber() == 22158035 ||
+	 runNumber() == 22166031                                // 3p85GeV_fixedTarget_2021
+	)	isFixTag = kTRUE;
+  }
   return isFixTag;
 }
 //________________________________________________________________________________
