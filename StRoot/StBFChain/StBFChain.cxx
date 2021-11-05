@@ -290,6 +290,9 @@ Int_t StBFChain::Instantiate()
 	  // Determine flavors
 	  TString flavors = "ofl"; // default flavor for offline
 
+	  // fixed target flavor
+	  if (GetOption("FXT")) flavors.Prepend("FXT+");
+
 	  // simulation flavors
 	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) flavors.Prepend("sim+");
 
