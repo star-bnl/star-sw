@@ -23,6 +23,7 @@
 #ifndef STMUETOFHEADER_H
 #define STMUETOFHEADER_H
 
+#include <stdint.h>
 #include <map>
 #include <vector>
 
