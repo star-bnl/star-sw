@@ -259,6 +259,7 @@ void StPicoDstMaker::createArrays() {
   for (Int_t i = 0; i < (StPicoArrays::NAllPicoArrays); ++i) {
     mPicoArrays[i] = new TClonesArray(StPicoArrays::picoArrayTypes[i],
 				      StPicoArrays::picoArraySizes[i]);
+    mPicoArrays[i]->SetOwner(kTRUE);
   }
   mPicoDst->set(mPicoArrays);
 }
