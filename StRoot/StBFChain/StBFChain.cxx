@@ -484,6 +484,9 @@ Int_t StBFChain::Instantiate()
       if (GetOption("adcOnly")) mk->SetAttr("adcOnly",kTRUE);
       NoMakersWithInput++;
     }
+    if (maker == "StarMuEventReader") {
+      NoMakersWithInput++;
+    }
     if (maker == "StarPrimaryMaker") {
       if (GetOption("genIn") || GetOption("mtIn")) mk->SetAttr("FreezePV", kTRUE);
     }
@@ -2019,7 +2022,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
 
     db->SetDateTime(FDateS,FTimeS);
   } else {
-    if (GetOption("simu") || ! NoMakersWithInput) {
+    if (GetOption("simu") && ! NoMakersWithInput) {
       const DbAlias_t *DbAlias = GetDbAliases();
       Int_t found = 0;
       for (Int_t i = 0; DbAlias[i].tag; i++) {
