@@ -6,19 +6,30 @@
 <command> 
   cd ${SUBMITTINGDIRECTORY}  
   setenv STARFPE NO
+#  setenv WithoutStCloseFileOnTerminate yes
 #  unsetenv NODEBUG 
 #  setup debug
 #  setup gcc
 #  setup 32b
 #  starver .DEV2 
 #  starver TFG17j 
-  set evtsFile = $INPUTFILE0;
-  set file = `basename ${evtsFile} .MuDst.root`;
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+    set file     = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+  else
+    set evtsFile = $INPUTFILE0;
+    set f        = 1
+    set l        = 50000
+    set file     = `basename ${evtsFile} .MuDst.root`;
+  endif
   echo "${file}"
   set logFile  = ${file}B.log
 #  set KFVertex = ",KFVertex";
-  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
-  if ("$f" == "") then
+  set e = `find . -maxdepth 1 -type f -name "*${file}*.root"`
+  if (${e} == "") then
 #    root4star -q -b 'TpcRS.C(4000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
 #    root.exe -x  -q -b 'TpcRS.C(1000,"MC.2016,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
 #    root4star -q -b 'TpcRS.C(1000,"MC.2016,sdt20160419.051230,TpcRS,StiCA,KFVertex,rung.'${rung}'",0,"heed,PhysicsOff,'${file}'")' &gt;&amp; ${logFile}
@@ -26,11 +37,16 @@
 #     root4star -q -b 'bfc.C(1000,"mtin,TpcRS,P2018a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,KFVertex,CorrX,McTpcAna,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #      root4star -q -b 'TpcRS.C(4000,"y2019a,TpcRS,StiCA,StiKFVertex","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
 #      root4star -q -b 'TpcRS.C(4000,"mc.y2019a,TpcRS,StiCA","'${evtsFile}'","Bichsel,PhysicsOff")' &gt;&amp; ${logFile}
-     root.exe -q -b 'bfc.C(2000,"mtin,TpcRS,P2019a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,CorrY,McTpcAna,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#     root.exe -q -b 'bfc.C(2000,"mtin,TpcRS,P2019a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,CorrY,McTpcAna,PicoVtxDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
+#     root.exe -q -b 'bfc.C(2000,"mtin,TpcRS,P2019a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,CorrY,McTpcAna,PicoVtxDefault,TObjTable","'${evtsFile}'")' &gt;&amp; ${logFile}
+#     root.exe -q -b 'bfc.C(2000,"mtin,TpcRS,P2019a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,CorrY,McTpcAna,PicoVtxDefault,-in","'${evtsFile}'")' &gt;&amp; ${logFile}
+#     root.exe -q -b 'bfc.C(100,"mtin,TpcRS,P2019a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,CorrY,McTpcAna,PicoVtxDefault,-in,TObjTable","'${evtsFile}'")' &gt;&amp; ${logFile}
+     root.exe -q -b 'bfc.C('${f}','${l}',"mtin,TpcRS,P2019a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,CorrY,McTpcAna,PicoVtxDefault,-in","'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
   endif
 </command>
 <!-- <input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq2019AuAu19/*MuDst.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2019AuAu19/*MuDst.root" /> -->
-<input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/2019/daq_19GeV/*MuDst.root" />
+<!-- <input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/2019/daq_19GeV/*MuDst.root" /> -->
+<input URL="command:SplitJobs.pl files='/net/l404/data/fisyak/Tpc/TpcRS/2019/daq_19GeV/*MuDst.root' first=1 last=1000 step=20 debug=0" />
 </job>
 

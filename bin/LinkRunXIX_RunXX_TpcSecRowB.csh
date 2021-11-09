@@ -52,3 +52,8 @@ ln -sf TpcSecRowB.26p5GeV_fixedTarget_2020.root                TpcSecRowB.202008
 ln -sf TpcSecRowB.26p5GeV_fixedTarget_2020.root                TpcSecRowB.20200827.143507.root
 ln -sf TpcSecRowB.26p5GeV_fixedTarget_2020.root                TpcSecRowB.20200907.221141.root
 ln -sf TpcSecRowB.26p5GeV_fixedTarget_2020.root                TpcSecRowB.20200912.102033.root
+
+
+ln -sf TpcSecRowB.7.3GeV_fixedTarget_2019.root                 TpcSecRowB.20190417.133401.root
+ln -sf TpcSecRowB.7.3GeV_fixedTarget_2019.root                 TpcSecRowB.20190423.155418.root
+ln -sf TpcSecRowB.7.3GeV_fixedTarget_2019.root                 TpcSecRowB.20190618.143658.root
