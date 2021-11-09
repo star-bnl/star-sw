@@ -106,7 +106,7 @@
  
   <Fill name="WOFF" comment="FCS ECAL position Offsets " >
     <var name="NS" value="1" comment=" North or South " />    
-    <var name="XOffset" value="16.69" comment=" tower x offset from beam to nearlest tower @ front face"  />
+    <var name="XOffset" value="17.399" comment=" tower x offset from beam to nearlest tower @ front face"  />
     <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
     <var name="ZOffset" value="710.16" comment=" tower z offset from IR to tower front face @ near beam "  />
     <var name="Angle"   value="1.73" comment=" Angle aroud y axis [degree] "  />
@@ -114,7 +114,7 @@
 
   <Fill name="WOFF" comment="FCS ECAL position Offsets " >
     <var name="NS" value="2" comment=" North or South " />    
-    <var name="XOffset" value="16.69" comment=" tower x offset from beam to nearlest tower @ front face"  />
+    <var name="XOffset" value="17.399" comment=" tower x offset from beam to nearlest tower @ front face"  />
     <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
     <var name="ZOffset" value="710.16" comment=" tower z offset from IR to tower front face @ near beam "  />
     <var name="Angle"   value="1.73" comment=" Angle aroud y axis [degree] "  />

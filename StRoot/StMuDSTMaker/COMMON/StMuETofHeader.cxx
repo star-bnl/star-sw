@@ -22,6 +22,7 @@
  ***************************************************************************/
 #include "StMuETofHeader.h"
 #include "StETofHeader.h"
+#include "StETofUtil/StETofConstants.h"
 
 
 StMuETofHeader::StMuETofHeader()
@@ -30,7 +31,9 @@ StMuETofHeader::StMuETofHeader()
   mStarToken( 0 ),
   mStarDaqCmdIn( 0 ),
   mStarTrgCmdIn( 0 ),
-  mEventStatusFlag( 0 )
+  mEventStatusFlag( 0 ),
+  mMissMatchFlagVec( eTofConst::nGet4sInSystem, false ),
+  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
 {
   mRocGdpbTs.clear();
   mRocStarTs.clear();
@@ -38,36 +41,54 @@ StMuETofHeader::StMuETofHeader()
 
 
 StMuETofHeader::StMuETofHeader( const double& trgGdpbTime, const double& trgStarTime,
-                            const std::map< UInt_t, ULong64_t >& gdpbTs, const std::map< UInt_t, ULong64_t >& starTs,
-                            const UInt_t& starToken, const UInt_t& starDaqCmdIn, const UInt_t& starTrgCmdIn,
-                            const ULong64_t& eventStatusFlag )
-: mTrgGdpbFullTime( trgGdpbTime ),
-  mTrgStarFullTime( trgStarTime ),
-  mStarToken( starToken ),
-  mStarDaqCmdIn( starDaqCmdIn ),
-  mStarTrgCmdIn( starTrgCmdIn ),
-  mEventStatusFlag( eventStatusFlag )
-{
-    setRocGdpbTs( gdpbTs );
-    setRocStarTs( starTs );
-	 const size_t kNbGet4sInSystem = 1728;
-    mMissMatchFlagVec = std::vector< Bool_t >( kNbGet4sInSystem, false ); 
-}
-
-StMuETofHeader::StMuETofHeader( const double& trgGdpbTime, const double& trgStarTime,
-                            const map< UInt_t, ULong64_t >& gdpbTs, const map< UInt_t, ULong64_t >& starTs,
-                            const UInt_t& starToken, const UInt_t& starDaqCmdIn, const UInt_t& starTrgCmdIn,
-                            const ULong64_t& eventStatusFlag, const vector< Bool_t >& MissMatchFlagVec  )
+                            const std::map< unsigned int, uint64_t >& gdpbTs, const std::map< unsigned int, uint64_t >& starTs,
+                            const unsigned int& starToken, const unsigned int& starDaqCmdIn, const unsigned int& starTrgCmdIn,
+                            const uint64_t& eventStatusFlag )
 : mTrgGdpbFullTime( trgGdpbTime ),
   mTrgStarFullTime( trgStarTime ),
   mStarToken( starToken ),
   mStarDaqCmdIn( starDaqCmdIn ),
   mStarTrgCmdIn( starTrgCmdIn ),
   mEventStatusFlag( eventStatusFlag ),
-  mMissMatchFlagVec( MissMatchFlagVec )
+  mMissMatchFlagVec( eTofConst::nGet4sInSystem, false ),
+  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
 {
     setRocGdpbTs( gdpbTs );
     setRocStarTs( starTs );
+}
+
+StMuETofHeader::StMuETofHeader( const double& trgGdpbTime, const double& trgStarTime,
+                            const map< unsigned int, uint64_t >& gdpbTs, const map< unsigned int, uint64_t >& starTs,
+                            const unsigned int& starToken, const unsigned int& starDaqCmdIn, const unsigned int& starTrgCmdIn,
+                            const uint64_t& eventStatusFlag, const std::vector< Bool_t >& MissMatchFlagVec  )
+: mTrgGdpbFullTime( trgGdpbTime ),
+  mTrgStarFullTime( trgStarTime ),
+  mStarToken( starToken ),
+  mStarDaqCmdIn( starDaqCmdIn ),
+  mStarTrgCmdIn( starTrgCmdIn ),
+  mEventStatusFlag( eventStatusFlag ),
+  mMissMatchFlagVec( MissMatchFlagVec ),
+  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
+{
+    setRocGdpbTs( gdpbTs );
+    setRocStarTs( starTs );
+}
+
+StMuETofHeader::StMuETofHeader( const double& trgGdpbTime, const double& trgStarTime,
+                            const map< unsigned int, uint64_t >& gdpbTs, const map< unsigned int, uint64_t >& starTs,
+                            const unsigned int& starToken, const unsigned int& starDaqCmdIn, const unsigned int& starTrgCmdIn,
+                            const uint64_t& eventStatusFlag, const std::vector<bool>& MissMatchFlagVec, const std::vector<bool>& GoodEventFlagVec  )
+: mTrgGdpbFullTime( trgGdpbTime ),
+  mTrgStarFullTime( trgStarTime ),
+  mStarToken( starToken ),
+  mStarDaqCmdIn( starDaqCmdIn ),
+  mStarTrgCmdIn( starTrgCmdIn ),
+  mEventStatusFlag( eventStatusFlag ),
+  mMissMatchFlagVec( MissMatchFlagVec ),
+  mGoodEventFlagVec( GoodEventFlagVec )
+{
+    setRocGdpbTs( gdpbTs );
+    setRocStarTs( starTs ); 
 }
 
 StMuETofHeader::StMuETofHeader( const StETofHeader* header )
@@ -77,7 +98,8 @@ StMuETofHeader::StMuETofHeader( const StETofHeader* header )
   mStarDaqCmdIn(    header->starDaqCmdIn()    ),
   mStarTrgCmdIn(    header->starTrgCmdIn()    ),
   mEventStatusFlag( header->eventStatusFlag() ),
-  mMissMatchFlagVec(header->missMatchFlagVec())
+  mMissMatchFlagVec(header->missMatchFlagVec()),
+  mGoodEventFlagVec(header->goodEventFlagVec())
 {
     setRocGdpbTs( header->rocGdpbTs() );
     setRocStarTs( header->rocStarTs() );
@@ -99,46 +121,46 @@ StMuETofHeader::trgStarFullTime() const
 }
 
 
-std::map< UInt_t, ULong64_t >
+std::map< unsigned int, uint64_t >
 StMuETofHeader::rocGdpbTs() const
 {
-    std::map< UInt_t, ULong64_t > map_root_type( mRocGdpbTs.begin(), mRocGdpbTs.end() );
+    std::map< unsigned int, uint64_t > map_root_type( mRocGdpbTs.begin(), mRocGdpbTs.end() );
 
     return map_root_type;
 }
 
 
-std::map< UInt_t, ULong64_t >
+std::map< unsigned int, uint64_t >
 StMuETofHeader::rocStarTs() const
 {
-    std::map< UInt_t, ULong64_t > map_root_type( mRocStarTs.begin(), mRocStarTs.end() );
+    std::map< unsigned int, uint64_t > map_root_type( mRocStarTs.begin(), mRocStarTs.end() );
 
     return map_root_type;
 }
 
 
-UInt_t
+unsigned int
 StMuETofHeader::starToken() const
 {
     return mStarToken;
 }
 
 
-UInt_t
+unsigned int
 StMuETofHeader::starDaqCmdIn() const
 {
     return mStarDaqCmdIn;
 }
 
 
-UInt_t
+unsigned int
 StMuETofHeader::starTrgCmdIn() const
 {
     return mStarTrgCmdIn;
 }
 
 
-ULong64_t
+uint64_t
 StMuETofHeader::eventStatusFlag() const
 {
     return mEventStatusFlag;
@@ -149,6 +171,12 @@ std::vector < Bool_t >
 StMuETofHeader::missMatchFlagVec() const
 {
     return mMissMatchFlagVec;
+}
+
+std::vector <bool>
+StMuETofHeader::goodEventFlagVec() const
+{
+    return mGoodEventFlagVec;
 }
 
 
@@ -167,42 +195,48 @@ StMuETofHeader::setTrgStarFullTime( const double& starFullTime )
 
 
 void
-StMuETofHeader::setRocGdpbTs( const std::map< UInt_t, ULong64_t >& gdpbTs )
+StMuETofHeader::setRocGdpbTs( const std::map< unsigned int, uint64_t >& gdpbTs )
 {
     mRocGdpbTs.insert( gdpbTs.begin(), gdpbTs.end() );
 }
 
 
 void
-StMuETofHeader::setRocStarTs( const std::map< UInt_t, ULong64_t >& starTs )
+StMuETofHeader::setRocStarTs( const std::map< unsigned int, uint64_t >& starTs )
 {
     mRocStarTs.insert( starTs.begin(), starTs.end() );
 }
 
 
 void
-StMuETofHeader::setStarToken( const UInt_t& token )
+StMuETofHeader::setStarToken( const unsigned int& token )
 {
     mStarToken = token;
 }
 
 
 void
-StMuETofHeader::setStarDaqCmdIn( const UInt_t& daqCmdIn )
+StMuETofHeader::setStarDaqCmdIn( const unsigned int& daqCmdIn )
 {
     mStarDaqCmdIn = daqCmdIn;
 }
 
 
 void
-StMuETofHeader::setStarTrgCmdIn( const UInt_t& trgCmdIn )
+StMuETofHeader::setStarTrgCmdIn( const unsigned int& trgCmdIn )
 {
     mStarTrgCmdIn = trgCmdIn;
 }
 
 
 void
-StMuETofHeader::setEventStatusFlag( const ULong64_t& statusFlag )
+StMuETofHeader::setEventStatusFlag( const uint64_t& statusFlag )
 {
     mEventStatusFlag = statusFlag;
+}
+
+void    
+StMuETofHeader::setGoodEventFlagVec( const std::vector<bool>& FlagVec )
+{
+    mGoodEventFlagVec = FlagVec;
 }
