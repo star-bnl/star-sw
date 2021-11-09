@@ -145,6 +145,7 @@ void StPicoDstReader::createArrays() {
   for(Int_t iArr=0; iArr<StPicoArrays::NAllPicoArrays; iArr++) {
     mPicoArrays[iArr] = new TClonesArray(StPicoArrays::picoArrayTypes[iArr],
 					 StPicoArrays::picoArraySizes[iArr]);
+    mPicoArrays[iArr]->SetOwner(kTRUE);
   }
   mPicoDst->set(mPicoArrays);
 }
