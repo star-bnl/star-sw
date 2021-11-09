@@ -33,7 +33,7 @@ StarParticleStack::StarParticleStack( const Char_t *name ) :
 {
 
   mArray     = new TClonesArray("TParticle", kDefaultArraySize );
-
+  mArray->SetOwner(kTRUE);
 }
 // ----------------------------------------------------------------------------------------------------
 //
