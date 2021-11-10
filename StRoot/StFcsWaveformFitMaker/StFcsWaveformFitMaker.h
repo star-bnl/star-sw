@@ -60,6 +60,8 @@ class StFcsDb;
 class TGraphAsymmErrors;
 class TGraph;
 class TCanvas;
+class TH1F;
+class TH2F;
 
 class StFcsWaveformFitMaker : public StMaker {
 public:
@@ -95,6 +97,9 @@ public:
     //measuring fit time
     void setMeasureTime(char* file) {mMeasureTime=file;}
     TH1F* mTime;
+
+    //stage0 peak algo study
+    TH2F* mTimeIntg[4];
 
     //create makeTGraphAsymmErrors from given timebin and adc data
     //with asymmetroc errors when adc is saturated
