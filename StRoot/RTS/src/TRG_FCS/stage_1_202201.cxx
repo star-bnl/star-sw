@@ -27,7 +27,9 @@ void fcs_trg_base::stage_1_202201(u_int s0[], geom_t geo, link_t *output)
 
 	// Tonko: new 16-Feb-21
 	// stage_params[0][2] overrides the algo
-	if((stage_params[0][2]&0x3)==1) geo.det = 2 ;	// force FPRE "high tower lookalike"
+
+	// nah, not yet since stage_params doesn't know about DEPs
+	//if((stage_params[0][2]&0x3)==1) geo.det = 2 ;	// force FPRE "high tower lookalike"
 
 	// debugging marker in the stream, only for FPRE algo
 	if(stage_params[0][2]&4) {
