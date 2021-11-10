@@ -2531,6 +2531,7 @@ StETofCalibMaker::bookHistograms()
     mHistograms[ "pulserDigiTimeDiff_GbtxCorrProf"    ] = new TProfile( "pulserDigiTimeDiff_GbtxCorrProf",    "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, "s" );
     mHistograms[ "pulserDigiTimeDiff_GbtxCorrProfMod" ] = new TProfile( "pulserDigiTimeDiff_GbtxCorrProfMod", "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, "s" );
     mHistograms[ "pulserDigiTimeDiff_fullCorr"  ] = new TH2F( "pulserDigiTimeDiff_fullCorr",  "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
+    mHistograms[ "pulserDigiTimeDiff_RefCorr"  ] = new TH1F("pulserDigiTimeDiff_RefCorr",  "time difference of pulsers to reference; #Delta T (ns)", 45, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ));
 
     if( mDoQA ) {
         mHistograms[ "pulserDigiTimeDiff"           ] = new TH2F( "pulserDigiTimeDiff",           "time difference of pulsers to reference;pulser channel;#Delta T (ns)", 216, 0, 216, 360, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ) );
@@ -2548,10 +2549,7 @@ StETofCalibMaker::bookHistograms()
 
 		  mHistograms[ "pulserDigiTimeDiff_CorrAgreement"  ] = new TH1F("pulserDigiTimeDiff_CorrAgreement",  "Number of pulsers agreeing on a common shift between events; #pulsers", 218, -0.5, 217.5);
 		  mHistograms[ "pulserDigiTimeDiff_CorrCommonJump"  ] = new TH1F("pulserDigiTimeDiff_CorrCommonJump",  "Number of pulsers jumping at the same time between events; #pulsers", 218, -0.5, 217.5);
-
         mHistograms[ "pulserDigiPresence" ] = new TH1F( "pulserDigiPresence",           "pulser presence (number of events at ( -1 );pulser channel", 218, -1.5, 216.5);
-
-	     mHistograms[ "pulserDigiTimeDiff_RefCorr"  ] = new TH1F("pulserDigiTimeDiff_RefCorr",  "time difference of pulsers to reference; #Delta T (ns)", 45, -179.5 * ( 6.25 / 112 ), 180.5 * ( 6.25 / 112 ));
 
         for( int i=0; i<12; i++ ) {
             std::string histName = "resetTimeDifferenceToSector" + to_string( i + 13 );
