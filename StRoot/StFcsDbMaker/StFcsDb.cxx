@@ -301,29 +301,56 @@ int StFcsDb::InitRun(int runNumber) {
     mRun=runNumber;
 
     //storing in DEP sorted table
-    int ie=0, ih=0, ip=0, ehp, ns, crt, slt, dep, ch;
-    for(int ins=0; ins<kFcsNorthSouth; ins++){
-      int det=kFcsEcalNorthDetId+ins; 
-      for(int id=0; id<maxId(det); id++){ 
-	getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
-	mGain[ehp][ns][dep][ch]=mFcsEcalGain.gain[ie]; 
-	mGainCorr[ehp][ns][dep][ch]=mFcsEcalGainCorr.gaincorr[ie]; 
-	ie++;
+    if(mGainMode==GAINMODE::DB){
+      int ie=0, ih=0, ip=0, ehp, ns, crt, slt, dep, ch;
+      for(int ins=0; ins<kFcsNorthSouth; ins++){
+	int det=kFcsEcalNorthDetId+ins; 
+	for(int id=0; id<maxId(det); id++){ 
+	  getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+	  mGain[ehp][ns][dep][ch]=mFcsEcalGain.gain[ie]; 
+	  ie++;
+	}
+	det=kFcsHcalNorthDetId+ins; 
+	for(int id=0; id<maxId(det); id++){ 
+	  getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+	  mGain[ehp][ns][dep][ch]=mFcsHcalGain.gain[ih]; 
+	  ih++;
+	}
+	det=kFcsPresNorthDetId+ins; 
+	for(int id=0; id<maxId(det); id++){ 
+	  getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+	  mGain[ehp][ns][dep][ch]=mFcsPresGain.gain[ip]; 
+	  ip++;
+	}
       }
-      det=kFcsHcalNorthDetId+ins; 
-      for(int id=0; id<maxId(det); id++){ 
-	getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
-	mGain[ehp][ns][dep][ch]=mFcsHcalGain.gain[ih]; 
-	mGainCorr[ehp][ns][dep][ch]=mFcsHcalGainCorr.gaincorr[ie]; 
-	ih++;
+    }else if(mGainMode==GAINMODE::TXT){
+      readGainFromText();
+    }
+
+    if(mGainCorrMode==GAINMODE::DB){
+      int ie=0, ih=0, ip=0, ehp, ns, crt, slt, dep, ch;
+      for(int ins=0; ins<kFcsNorthSouth; ins++){
+        int det=kFcsEcalNorthDetId+ins;
+        for(int id=0; id<maxId(det); id++){
+          getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+          mGainCorr[ehp][ns][dep][ch]=mFcsEcalGainCorr.gaincorr[ie];
+          ie++;
+        }
+        det=kFcsHcalNorthDetId+ins;
+        for(int id=0; id<maxId(det); id++){
+          getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+          mGainCorr[ehp][ns][dep][ch]=mFcsHcalGainCorr.gaincorr[ih];
+          ih++;
+        }
+        det=kFcsPresNorthDetId+ins;
+        for(int id=0; id<maxId(det); id++){
+          getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
+          mGainCorr[ehp][ns][dep][ch]=mFcsPresValley.valley[ip];
+          ip++;
+        }
       }
-      det=kFcsPresNorthDetId+ins; 
-      for(int id=0; id<maxId(det); id++){ 
-	getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);
-	mGain[ehp][ns][dep][ch]=mFcsPresGain.gain[ip]; 
-	mGainCorr[ehp][ns][dep][ch]=mFcsPresValley.valley[ip]; 
-	ip++;
-      }
+    }else if(mGainCorrMode==GAINMODE::TXT){
+      readGainCorrFromText();
     }
 
     // Get beamline 
@@ -432,18 +459,25 @@ int StFcsDb::getDepCh(int dep, int ch) const{
   return dep*kFcsMaxDepCh + ch;
 }                                                                                        
 
-void StFcsDb::getName(int det, int id, char name[]) const{
+void StFcsDb::getName(int det, int id, char name[]) {
   int ehp,ns,crt,slt,dep,ch;
   int c=getColumnNumber(det,id);
   int r=getRowNumber(det,id);
   getDepfromId(det,id,ehp,ns,crt,slt,dep,ch);  
-  int scehp,scns,scdep,br,i2c,sipm,pp,j;
-  getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
-  sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
-	  DET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+  if(ehp<2){
+    int scehp,scns,scdep,br,i2c,sipm,pp,j;
+    getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
+    sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
+            DET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+  }else{
+    int pp,tt;
+    getEPDfromId(det,id,pp,tt);
+    sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_PP%02d%1sTT%02d",
+            DET[det],id,r,c,dep,ch,pp,tt%2==0?"E":"O",tt);
+  }
 }
 
-void StFcsDb::getName(int ehp, int ns, int dep, int ch, char name[]) const{
+void StFcsDb::getName(int ehp, int ns, int dep, int ch, char name[]) {
   int det,id,crt,slt;
   getIdfromDep(ehp,ns,dep,ch,det,id,crt,slt);
   if(id==-1){
@@ -453,10 +487,17 @@ void StFcsDb::getName(int ehp, int ns, int dep, int ch, char name[]) const{
   }else{
     int c=getColumnNumber(det,id);
     int r=getRowNumber(det,id);
-    int scehp,scns,scdep,br,i2c,sipm,pp,j;
-    getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
-    sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
-	    DET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+    if(ehp<2){
+      int scehp,scns,scdep,br,i2c,sipm,pp,j;
+      getSCmap(det,id,scehp,scns,scdep,br,i2c,sipm,pp,j);
+      sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_F%02d/%1d/%02d/%1d",
+              DET[det],id,r,c,dep,ch,scdep,br,i2c,sipm);
+    }else{
+      int pp,tt;
+      getEPDfromId(det,id,pp,tt);
+      sprintf(name,"%2s%03d_r%02dc%02d_Dep%02dCh%02d_PP%02d%1s/TT%02d",
+              DET[det],id,r,c,dep,ch,pp,tt%2==0?"E":"O",tt);
+    }
   }
 }
 
@@ -1792,10 +1833,11 @@ void StFcsDb::printMap(){
     fclose(fpp);
 }
 
-float StFcsDb::getEtGain(int det, int id) const{
+// factor= 1(ET Match), 0(E Match), 0.5(halfway)
+float StFcsDb::getEtGain(int det, int id, float factor) const{
   if(det<0 || det>=kFcsNDet) return 0.0;
-  if(id<0 || id>=kFcsMaxId) return 0.0;
-  return  mEtGain[det][id];
+  if(id<0 || id>=kFcsMaxId) return 0.0;  
+  return (mEtGain[det][id]-1.0)*factor+1.0;
 }
 
 void  StFcsDb::printEtGain(){
@@ -1826,7 +1868,8 @@ void  StFcsDb::printEtGain(){
 		double z=xyz.z();
 		double l=xyz.mag();
 		double ptch=gain/l*r;	    
-		double ratio=ptch/norm[eh]*1000;
+		double ratio=1.0;
+		if(eh<2) ratio=ptch/norm[eh]*1000; //PRES stays 1.0
 		mEtGain[det][id]=ratio;
 		fprintf(f1,"D=%1d Id=%3d Row=%2d Column=%2d xyz=%7.2f %7.2f %7.2f Gain=%7.5f ET/ch=%6.4f [MeV/count] norm=%6.4f\n",
 			det,id,row,col,x,y,z,gain,ptch*1000,ratio);
@@ -1891,15 +1934,14 @@ void StFcsDb::readPedFromText(const char* file){
   fclose(F);
 }
 
-void StFcsDb::readGainFromText(const char* file){
+void StFcsDb::readGainFromText(){
   memset(mGain,0,sizeof(mGain));
-  LOG_INFO << Form("Reading Gain from %s",file)<<endm;
-  FILE* F=fopen(file,"r");
+  LOG_INFO << Form("Reading Gain from %s",mGainFilename)<<endm;
+  FILE* F=fopen(mGainFilename,"r");
   if(F == NULL){
-    LOG_ERROR << Form("Could not open %s",file)<<endm;
+    LOG_ERROR << Form("Could not open %s",mGainFilename)<<endm;
     return;
   }
-  mReadGainFromText=1;
   int ehp,ns,dep,ch;
   float gain;
   while(fscanf(F,"%d %d %d %d %f",&ehp,&ns,&dep,&ch,&gain) != EOF){
@@ -1909,15 +1951,14 @@ void StFcsDb::readGainFromText(const char* file){
   fclose(F);
 }
 
-void StFcsDb::readGainCorrFromText(const char* file){
+void StFcsDb::readGainCorrFromText(){
   memset(mGainCorr,0,sizeof(mGainCorr));
-  LOG_INFO << Form("Reading GainCorr from %s",file)<<endm;
-  FILE* F=fopen(file,"r");
+  LOG_INFO << Form("Reading GainCorr from %s",mGainCorrFilename)<<endm;
+  FILE* F=fopen(mGainCorrFilename,"r");
   if(F == NULL){
-    LOG_ERROR << Form("Could not open %s",file)<<endm;
+    LOG_ERROR << Form("Could not open %s",mGainCorrFilename)<<endm;
     return;
   }
-  mReadGainCorrectionFromText=1;
   int ehp,ns,dep,ch;
   float gain;
   while(fscanf(F,"%d %d %d %d %f",&ehp,&ns,&dep,&ch,&gain) != EOF){
