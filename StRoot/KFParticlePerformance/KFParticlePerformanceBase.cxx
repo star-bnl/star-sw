@@ -264,8 +264,8 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
           }
           gDirectory->cd(".."); //particle directory
 	  //          CreateFitHistograms(hFitQAPull[iPart], iPart);
-#endif /* __TFG__VERSION__ */
         }
+#endif /* __TFG__VERSION__ */
         gDirectory->mkdir("Parameters");
         gDirectory->cd("Parameters");
         {

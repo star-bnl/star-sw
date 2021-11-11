@@ -1702,9 +1702,9 @@ void KFTopoPerformance::FillParticleParameters(KFParticle& TempPart,
 	static Int_t iBreak = 0;
 	iBreak++;
       }
-#endif /* __TFG__VERSION__ */
     }
   }
+#endif /* __TFG__VERSION__ */
   //________________________________________________________________________________
     
   //Fill 3D histograms for multi differential analysis
