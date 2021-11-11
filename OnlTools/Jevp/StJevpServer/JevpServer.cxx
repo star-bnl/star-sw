@@ -641,17 +641,19 @@ void JevpServer::parseArgs(int argc, char *argv[])
 	    throttle_time = .05;
 	}
 	else if (strcmp(argv[i], "-test")==0) {
+	    log_output = RTS_LOG_STDERR;
 	    nodb = 1;
-	    log_dest = (char *)"172.16.0.1";
+	    myport = JEVP_PORT + 10;
+	    maxevts = 10000001;
+	    die = 1; 
+	    runCanvasImageBuilder = 0;
+	    //log_dest = (char *)"172.16.0.1";
 	    //log_output = RTS_LOG_STDERR;
-	    basedir = (char *)"/RTScache/conf/jevp";
+	    //basedir = (char *)"/RTScache/conf/jevp";
 	    //pdfdir = (char *)"/a/jevp_test/pdf";
 	    //refplotdir = (char *)"/a/jevp_test/refplots";
 	    //rootfiledir = (char *)"/a/jevp_test/rootfiles";
-	    myport = JEVP_PORT + 10;
-	    maxevts = 10000001;
-	    die = 1;
-	    runCanvasImageBuilder = 0;
+	    //runCanvasImageBuilder = 0;
 	}
 	else if (strcmp(argv[i], "-pallete") == 0) {
 	    log_output = RTS_LOG_STDERR;
