@@ -114,6 +114,7 @@
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TSystem.h"
+#include "TLine.h"
 
 #include "StEmbeddingQADraw.h"
 #include "StEmbeddingQAUtilities.h"
@@ -438,7 +439,7 @@ void StEmbeddingQADraw::setOutputDirectory(const TString name)
 
   /// Make sure that the directory exists or not
   if( gSystem->AccessPathName(name) == kTRUE ){ // 0 is true, i.e. directory exists
-    Error("setOutputDirectory", "Directory %s does not exist. Set current directory as the output location");
+    Error("setOutputDirectory", "Directory %s does not exist. Set current directory as the output location",name.Data());
     mOutputFigureDirectory = "./";
   }
 
