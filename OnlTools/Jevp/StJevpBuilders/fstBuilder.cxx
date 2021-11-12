@@ -731,7 +731,7 @@ void fstBuilder::initialize(int argc, char *argv[])
   plots[nPlots+34] = new JevpPlot(hSumContents.hCommonModeNoise[1]);
   plots[nPlots+35] = new JevpPlot(hSumContents.hCommonModeNoise[2]);
 
-  for(int iPlots = nPlots; iPlots < nPlots+33; ++iPlots)
+  for(int iPlots = nPlots; iPlots < nPlots+36; ++iPlots)
   {
     LOG(DBG, "Adding plot %d",iPlots);
     addPlot(plots[iPlots]);
