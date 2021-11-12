@@ -54,7 +54,7 @@ i=1
 pause=0
 
 # default port is 8499....
-port=8499
+#JJ port=8499
 
 
 
@@ -63,25 +63,16 @@ while [ $# -gt 0 ]; do
 	pause=1
     fi
 
-    if [ $1 = "-port" ]; then
-	#echo "launch found port $2"
-	port=$2
-    fi
-
     argstring="$argstring  args[$i] = \"$1\";"
     let i=$i+1;
     shift;
 done
 
+mypid=$$
+
 # need a shell script to execute...
 myaccount=`whoami`;
-shellname="/tmp/${mainfunction}_${myaccount}_${port}_root.C"
-
-#echo "launch with port = $port:  shellname = $shellname"
-
-#echo "-----"
-#echo -e "ARGSTRING:  $argstring"
-#echo "-----"
+shellname="/tmp/${mainfunction}_${myaccount}_${mypid}_root.C"
 
 serv=`echo "$mainfunction" | grep -i -c server`
 pres=`echo "$mainfunction" | grep -i -c EvpMain`
@@ -111,26 +102,19 @@ evplibs="   gSystem->Load("\""PDFUtil"\""); "
 #fi
 
 evplibs="$evplibs   gSystem->Load("\""Jevp"\"");  "
-#evplibs="$evplibs   gSystem->Load("\""libQtRootGui.so"\"");  "
 
 cat >${shellname}<<ROOTMACRO
 {
-
-//printf("a\n");
   gROOT->Macro("Load.C");
-//printf("b\n");
+
   gSystem->Load("RTS");
-//printf("c\n");
   if (gROOT->IsBatch()) {
        gSystem->Load("libGui.so");
    }
   gSystem->Load("StDaqLib");
   gSystem->Load("StDbLib");
-//printf("e\n");
   gSystem->Load("StEEmcUtil");
-//printf("f\n");
   gSystem->Load("StEmcUtil");
-//printf("g\n");
   gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");
   gSystem->Load("St_db_Maker");
@@ -157,11 +141,10 @@ else
     else
 	echo "Shell is: $shellname \n"
         root4star -q -b -l $shellname &
-	#echo "boo\n"
         wait
     fi
 fi
 
-#echo "I am process $$, but root ended"
+`rm $shellname`
 
 exit

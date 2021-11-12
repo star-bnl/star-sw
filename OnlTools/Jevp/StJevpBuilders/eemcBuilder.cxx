@@ -446,6 +446,8 @@ void eemcBuilder::event(daqReader *rdr)
   TH2F *h = (TH2F *)oh->Clone("MAPMHits2");
   PCP;
   PlotHisto *ph = plots[MAPMHitsCopy]->getHisto(0);
+
+
   PCP;
   delete(ph->histo);
   PCP;

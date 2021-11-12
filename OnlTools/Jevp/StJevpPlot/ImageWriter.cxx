@@ -123,8 +123,10 @@ void ImageWriter::writeImage(char *fn, JevpPlot *plot, double ymax) {
     //}
 
     XX(nHisto);
+    //pthread_mutex_lock(&mux);
     //canvas->Print(fn);
     canvas->SaveAs(fn);
+    //pthread_mutex_unlock(&mux);
     XX(nHisto);
 
     t4 = ic2.record_time()*1000;
@@ -169,9 +171,11 @@ void ImageWriter::loop() {
 		sprintf(o, "/tmp/%s_build_%08d", slot.name, slot.writeIdx);
 		sprintf(d, "/tmp/%s_done_%08d", slot.name, slot.writeIdx);
 
-		LOG("JEFF", "Saved %d plots in %lf seconds: %s", nHisto, imageClock.record_time(), d);
+		LOG("JEFF", "Saved %d plots in %lf seconds: %s. Now copy to %s", nHisto, imageClock.record_time(), o, d);
 
 		rename(o, d);
+
+		LOG("JEFF", "renamed plots in %lf seconds: %s to %s", imageClock.record_time(), o, d);
 	    }
 	}
 	else {

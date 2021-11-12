@@ -962,7 +962,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     }
     eventHandlingClock.record_time();
 
-  // LOG("JEFF", "Maxevts = %d evtsInRun = %d", maxevts, evtsInRun);
+    //LOG("JEFF", "Maxevts = %d evtsInRun = %d", maxevts, evtsInRun);
 
     if(((maxevts > 0) && (evtsInRun > maxevts)) ||
        strcmp(m->cmd,"stoprun") == 0) {
@@ -971,6 +971,8 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 	if(runStatus.running() || daqfilename) {
 	    CP;
 	    performStopRun();
+
+	    evtsInRun = 0;
 
 	    if(ndaqfilenames) {
 		cdaqfilename++;
