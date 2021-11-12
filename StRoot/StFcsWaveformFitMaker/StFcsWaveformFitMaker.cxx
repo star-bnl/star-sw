@@ -76,6 +76,8 @@ ClassImp(StFcsWaveformFitMaker)
 #include <chrono>
 #include "TMath.h"
 #include "TF1.h"
+#include "TH1F.h"
+#include "TH2F.h"
 #include "TGraph.h"
 #include "TGraphAsymmErrors.h"
 #include "TGraphAsymmErrorsWithReset.h"
@@ -154,7 +156,13 @@ int StFcsWaveformFitMaker::InitRun(int runNumber) {
     if(mMeasureTime){
       mTime=new TH1F("FitTime","FitTime; msec",200,0,6);
     }
-
+    if(mFilter && mFilter[0]=='0'){
+      mTimeIntg[0]=new TH2F("Noboth",  "No both;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
+      mTimeIntg[1]=new TH2F("NoFall",  "No Fall;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
+      mTimeIntg[2]=new TH2F("NoRise",  "No Rise;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
+      mTimeIntg[3]=new TH2F("Accepted","Accepted; PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
+    }
+    
     if(mTail==1){
       GSigma = GSigma_1;
       A1     = A1_1;        
@@ -194,6 +202,17 @@ int StFcsWaveformFitMaker::Finish(){
     c->cd(1)->SetLogy();
     mTime->Draw();
     c->SaveAs(mMeasureTime);
+  }
+  if(mFilter && mFilter[0]=='0'){
+    TCanvas *c= new TCanvas("Stage0","Stage0",10,10,800,800);
+    gStyle->SetOptStat(111110);
+    gStyle->SetLabelSize(0.02,"xy");
+    c->Divide(2,2);
+    c->cd(1)->SetLogy(); mTimeIntg[0]->Draw("colz");
+    c->cd(2)->SetLogy(); mTimeIntg[1]->Draw("colz");
+    c->cd(3)->SetLogy(); mTimeIntg[2]->Draw("colz");
+    c->cd(4)->SetLogy(); mTimeIntg[3]->Draw("colz");
+    c->SaveAs("stage0.png");
   }
   return kStOK;
 }
@@ -319,7 +338,7 @@ TGraphAsymmErrors* StFcsWaveformFitMaker::makeTGraphAsymmErrors(TH1* hist){
 }
 
 TGraphAsymmErrors* StFcsWaveformFitMaker::makeTGraphAsymmErrors(StFcsHit* hit){  
-    int N = mMaxTB - mMinTB +1;
+    //int N = mMaxTB - mMinTB +1;
     int n = hit->nTimeBin();
     TGraphAsymmErrors* gae = resetGraph();
     mDb->getName(hit->detectorId(),hit->id(),mDetName);
@@ -357,8 +376,43 @@ float StFcsWaveformFitMaker::analyzeWaveform(int select, TGraphAsymmErrors* g, f
       LOG_WARN << "Unknown fit/sum method select=" << select << endm;
     }
     //if(func && (mFitDrawOn || mFilter ) && mFilename && mPage<=mMaxPage) drawFit(g,func);
-    int flag=0;
-    if(mFilter){
+    int flag=1;
+    if(mFilter && mFilter[0]=='0'){
+      flag=0;
+      if(integral>0 && res[2]>47.0 && res[2]<54.0){	
+	int peak=0;
+	double* t=g->GetX();
+	double* a=g->GetY();
+	for(int i=0; i<g->GetN()-1; i++){
+	  int t0=t[i];
+	  int t1=t[i+1];
+	  int a0=a[i];
+	  int a1=a[i+1];
+	  int dt=t1-t0;
+	  int da=a1-a0;
+	  if(GetDebug()) printf("AAA t0=%4d t1=%4d a0=%4d a1=%4d dt=%4d da=%5d ",t0,t1,a0,a1,dt,da);
+	  if(t0==mCenterTB-3 && dt==1){
+	    if(da>0) {
+	      peak+=1;	
+	      if(GetDebug()) printf("R"); 
+	    } 
+	    else {if(GetDebug()) printf("X");}
+	  }
+	  if(t0==mCenterTB+3 && dt==1){
+	    if(da<0) {
+	      peak+=2; 
+	      if(GetDebug()) printf("F"); 
+	    }
+	    else {if(GetDebug()) printf("X");}
+	  }
+	  if(GetDebug()) printf("\n");
+	}
+	printf("BBB Intg=%8.2f peak=%6.2f Raise/Fall=%1d\n",integral,res[2],peak); 
+	if(peak<3 && integral>50 && res[2]>49) flag=1;
+	mTimeIntg[peak]->Fill(res[2],integral);
+      }
+    }else if(mFilter){
+      flag=0;
       TString dname(mDetName);
       if(integral>50 && dname.Contains(mFilter)) flag=1;
     }
