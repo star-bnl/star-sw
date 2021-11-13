@@ -116,6 +116,7 @@ void fstBuilder::initialize(int argc, char *argv[])
     isChannelBad[i]    = false;
     runningAvg[i]      = 0;
     runningStdDevSq[i] = 0;
+    fstRanNoise[i]      = 0;
   }
   for ( int i=0; i<totCh; i++ )
   {
@@ -820,6 +821,7 @@ void fstBuilder::startrun(daqReader *rdr)
   FILE *file;
   char paraDir[256];
   sprintf(paraDir, "%s/fst_s1_pedestals.txt", clientdatadir);
+  // sprintf(paraDir, "/star/data01/pwg/sunxuhit/ForwardSiliconTracker/Data/FstInstallation/daqtest/fst_s1_pedestals.txt");
 
   file = fopen(paraDir, "r");
   if (file==0) {
@@ -849,7 +851,9 @@ void fstBuilder::startrun(daqReader *rdr)
 	if(ret!=8) continue;
 
 	if(tbIdxTemp==2) { //only take time bin 2 as sample
-	  int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + apvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+	  int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+	  int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+	  int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
 	  fstPedestal[glbElecChanIdxTemp] = pp; // pedestal
 	  fstRmsNoise[glbElecChanIdxTemp] = rr; // total noise
 	  fstRanNoise[glbElecChanIdxTemp] = nn; // random noise
@@ -879,10 +883,13 @@ void fstBuilder::startrun(daqReader *rdr)
       if(ret!=8) continue;
 
       if(tbIdxTemp==2) { //only take time bin 2 as sample
-	int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + apvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+	int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+	int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+	int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
 	fstPedestal[glbElecChanIdxTemp] = pp; // pedestal
 	fstRmsNoise[glbElecChanIdxTemp] = rr; // total noise
 	fstRanNoise[glbElecChanIdxTemp] = nn; // random noise
+	// cout << "glbElecChanIdxTemp = " << glbElecChanIdxTemp << ", rdoIdxTemp = " << rdoIdxTemp << ", armIdxTemp = " << armIdxTemp << ", apvIdxTemp = " << apvIdxTemp << "chanIdxTemp = " << chanIdxTemp << ", nn = " << nn << endl;
       }
     }
     tableFound = true;
@@ -890,6 +897,8 @@ void fstBuilder::startrun(daqReader *rdr)
   }
 
   sprintf(paraDir, "%s/fst_s2_pedestals.txt", clientdatadir);
+  // sprintf(paraDir, "/star/data01/pwg/sunxuhit/ForwardSiliconTracker/Data/FstInstallation/daqtest/fst_s2_pedestals.txt");
+
   FILE *file0;
 
   file0 = fopen(paraDir, "r");
@@ -920,7 +929,9 @@ void fstBuilder::startrun(daqReader *rdr)
 	if(ret!=8) continue;
 
 	if(tbIdxTemp==2) { //only take time bin 2 as sample
-	  int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + apvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+	  int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+	  int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+	  int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
 	  fstPedestal[glbElecChanIdxTemp] = pp; // pedestal
 	  fstRmsNoise[glbElecChanIdxTemp] = rr; // total noise
 	  fstRanNoise[glbElecChanIdxTemp] = nn; // random noise
@@ -950,10 +961,13 @@ void fstBuilder::startrun(daqReader *rdr)
       if(ret!=8) continue;
 
       if(tbIdxTemp==2) { //only take time bin 2 as sample
-	int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + apvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+	int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+	int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+	int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
 	fstPedestal[glbElecChanIdxTemp] = pp; // pedestal
 	fstRmsNoise[glbElecChanIdxTemp] = rr; // total noise
 	fstRanNoise[glbElecChanIdxTemp] = nn; // random noise
+	// cout << "glbElecChanIdxTemp = " << glbElecChanIdxTemp << ", rdoIdxTemp = " << rdoIdxTemp << ", armIdxTemp = " << armIdxTemp << ", apvIdxTemp = " << apvIdxTemp << "chanIdxTemp = " << "pp = " << pp << ", rr = " << rr << ", nn = " << nn << endl;
       }
     }
     tableFound = true;
@@ -1378,6 +1392,7 @@ void fstBuilder::event(daqReader *rdr)
 	runningAvg[glbGeomChanId]      += (f[i].adc-runningAvg[glbGeomChanId]) / numVals[glbGeomChanId];
 	runningStdDevSq[glbGeomChanId] += ((float)numVals[glbGeomChanId]-1)/(numVals[glbGeomChanId]) * (f[i].adc-runningAvg[glbGeomChanId]) * (f[i].adc-runningAvg[glbGeomChanId]);
 	oldStdDevs[glbGeomChanId]       = sqrt(runningStdDevSq[glbGeomChanId] / numVals[glbGeomChanId]);
+	fstRanNoise[glbElecChanId]      = fstRmsNoise[glbElecChanId];
       }
       else {
 	numVals[glbGeomChanId]++;
@@ -1634,7 +1649,7 @@ void fstBuilder::fillSumHistos()
 
     float pedestal = runningAvg[geoIdx];
     float rmsPed   = oldStdDevs[geoIdx];
-    float ranPed   = fstRanNoise[glbElecApvIdx];
+    float ranPed   = fstRanNoise[glbElecChanId];
     bool  isBad    = false;
 
     if ( rmsPed > 0 ) {

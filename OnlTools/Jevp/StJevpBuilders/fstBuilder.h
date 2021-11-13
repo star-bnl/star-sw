@@ -92,7 +92,7 @@ class fstBuilder : public JevpBuilder {
   static const int numTimeBin   = 9;     // to be decided
   static const int goodChCut    = 64;    // to be decided
   static const int minPedVal    = 200;   // to be decided
-  static const int maxPedVal    = 2000;  // to be decided
+  static const int maxPedVal    = 3000;  // to be decided
   static const int minRMSVal    = 10;    // to be decided
   static const int maxRMSVal    = 60;    // to be decided
   //alarm threshold
