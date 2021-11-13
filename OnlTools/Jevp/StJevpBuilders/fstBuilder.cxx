@@ -37,7 +37,7 @@ const float fstBuilder::maxTbFracOK       = 0.9;
 const float fstBuilder::landauFit_dn      = 400.0;
 const float fstBuilder::landauFit_up      = 2000.0;
 const float fstBuilder::cmnCut            = 3.0;
-const float fstBuilder::hitCut            = 4.0;
+const float fstBuilder::hitCut            = 3.0;
 const float fstBuilder::noiseChipCut      = 10.0;
 const int   fstBuilder::hitOccupancyCut  = 25;
 
