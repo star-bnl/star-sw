@@ -527,8 +527,8 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "P", const Char_t *O
     if (TMath::Abs(fzV) > 60) continue;
     if (TMath::Abs(fxV) > 1 || TMath::Abs(fyV) > 1) continue;
 #endif
-    if (mom.Pt()  < 0.4 || mom.Pt()  > 0.6) continue;
 #if 0
+    if (mom.Pt()  < 0.4 || mom.Pt()  > 0.6) continue;
     if (mom.Eta() <-1.0 || mom.Eta() > 0.0) continue;
     if (fRcTrack_fTrackLength70[0] < 40) continue;
     if (fRcTrack_fdEdx[0] < 2e-6 || fRcTrack_fdEdx[0] > 3e-6) continue;
