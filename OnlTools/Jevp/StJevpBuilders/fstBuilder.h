@@ -2,10 +2,8 @@
 #include <stdlib.h>
 
 #include "JevpBuilder.h"
-
+// #include "DAQ_READER/daqReader.h"
 class daqReader;
-
-
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TH1S.h>
@@ -94,7 +92,7 @@ class fstBuilder : public JevpBuilder {
   static const int numTimeBin   = 9;     // to be decided
   static const int goodChCut    = 64;    // to be decided
   static const int minPedVal    = 200;   // to be decided
-  static const int maxPedVal    = 2000;  // to be decided
+  static const int maxPedVal    = 3000;  // to be decided
   static const int minRMSVal    = 10;    // to be decided
   static const int maxRMSVal    = 60;    // to be decided
   //alarm threshold
@@ -132,6 +130,7 @@ class fstBuilder : public JevpBuilder {
   bool  tableFound;
   float fstPedestal[totCh];
   float fstRmsNoise[totCh];
+  float fstRanNoise[totCh];
 
   //*** Histogram Declarations...
   union {
@@ -342,7 +341,8 @@ class fstBuilder : public JevpBuilder {
     TH1 *eventSumArray[];
     struct {
       TH1* hMeanPed;//mean pedestal of all channels
-      TH1* hMeanRMS;//mean rms of all channels
+      TH1* hMeanRMS;//mean total rms of all channels
+      TH1* hMeanRan;//mean random rms of all channels
       TH1* hSumTB;  //number of time bin per event
       TH1* hMaxTimeBin;  //max ADC time bin index
       TH1* hMaxTimeBin_ZS;  //max ADC time bin index
@@ -600,6 +600,7 @@ class fstBuilder : public JevpBuilder {
       TH2* hMultVsModule[totDisk];       //total number of hits per event vs. module for each disk
       TH2* hSumPed[totDisk];  	         //pedestal per channel for each disk (ADC vs. channel index)
       TH2* hSumSig[totDisk];	         //pedestal RMS per channel for each disk (RMS vs. channel index)
+      TH2* hSumRan[totDisk];	         //random RMS per channel for each disk (RMS vs. channel index)
       TH2* hCommonModeNoise[totDisk];    //common mode noise per chip for each disk (CM noise vs.chip index)
     };
   } hSumContents;

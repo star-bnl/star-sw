@@ -37,7 +37,7 @@ const float fstBuilder::maxTbFracOK       = 0.9;
 const float fstBuilder::landauFit_dn      = 400.0;
 const float fstBuilder::landauFit_up      = 2000.0;
 const float fstBuilder::cmnCut            = 3.0;
-const float fstBuilder::hitCut            = 3.0;
+const float fstBuilder::hitCut            = 4.0;
 const float fstBuilder::noiseChipCut      = 10.0;
 const int   fstBuilder::hitOccupancyCut  = 25;
 
@@ -116,6 +116,7 @@ void fstBuilder::initialize(int argc, char *argv[])
     isChannelBad[i]    = false;
     runningAvg[i]      = 0;
     runningStdDevSq[i] = 0;
+    fstRanNoise[i]      = 0;
   }
   for ( int i=0; i<totCh; i++ )
   {
@@ -304,6 +305,11 @@ void fstBuilder::initialize(int argc, char *argv[])
   hEventSumContents.hMeanRMS->GetXaxis()->SetTitle("RMS pedestal [ADC counts]");
   hEventSumContents.hMeanRMS->SetFillColor(kYellow-9);
   hEventSumContents.hMeanRMS->SetStats(true);
+
+  hEventSumContents.hMeanRan = new TH1S("MeanRandomRMS", "FST - <Random RMS>", nBins*2, SigMin, SigMax); //100 bins
+  hEventSumContents.hMeanRan->GetXaxis()->SetTitle("Random RMS [ADC counts]");
+  hEventSumContents.hMeanRan->SetFillColor(kYellow-9);
+  hEventSumContents.hMeanRan->SetStats(true);
 
   hEventSumContents.hSumTB = new TH1I("NumberOfTB", "FST - Number of Time Bins", nBinsTB, 0, TBMax); //15 bins
   hEventSumContents.hSumTB->SetFillColor(kYellow-9);
@@ -543,12 +549,21 @@ void fstBuilder::initialize(int argc, char *argv[])
     hSumContents.hSumSig[iDisk]->GetXaxis()->SetTitle("Channel Geometry ID");
     hSumContents.hSumSig[iDisk]->GetYaxis()->SetTitle("Pedestal RMS [ADC counts]");
 
+    sprintf(buffer,"RandomRmsPerChannelDisk%d", iDisk+1);
+    sprintf(buffer2,"FST - Random RMS vs Channel for Disk%d", iDisk+1);
+    hSumContents.hSumRan[iDisk] = new TH2S(buffer, buffer2, ApvPerDisk, 0, ChPerDisk, nBins*2, SigMin, SigMax); //96*100 bins
+    hSumContents.hSumRan[iDisk]->GetXaxis()->SetNdivisions(-ModPerDisk,false);
+    hSumContents.hSumRan[iDisk]->SetStats(false);
+    hSumContents.hSumRan[iDisk]->GetXaxis()->SetTitle("Channel Geometry ID");
+    hSumContents.hSumRan[iDisk]->GetYaxis()->SetTitle("Random RMS [ADC counts]");
+
     for(int index=0; index<ModPerDisk; index++ )
     {
       char label[100];
       sprintf(label, "M%d", index+1);
       hSumContents.hSumPed[iDisk]->GetXaxis()->SetBinLabel(index*ApvPerMod+ApvPerMod/2, label);  
       hSumContents.hSumSig[iDisk]->GetXaxis()->SetBinLabel(index*ApvPerMod+ApvPerMod/2, label);
+      hSumContents.hSumRan[iDisk]->GetXaxis()->SetBinLabel(index*ApvPerMod+ApvPerMod/2, label);
     }
 
     sprintf(buffer,"CommonModeNoisePerAPVDisk%d", iDisk+1);
@@ -603,17 +618,18 @@ void fstBuilder::initialize(int argc, char *argv[])
 
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist]   = new JevpPlot(hEventSumContents.hMeanPed);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+1] = new JevpPlot(hEventSumContents.hMeanRMS);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+2] = new JevpPlot(hEventSumContents.hSumTB);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+3] = new JevpPlot(hEventSumContents.hMaxTimeBin);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+4] = new JevpPlot(hEventSumContents.hMaxTimeBin_ZS);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+5] = new JevpPlot(hEventSumContents.hSumBad);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+6] = new JevpPlot(hEventSumContents.hApvCorpt);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+7] = new JevpPlot(hEventSumContents.hEventSize);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+8] = new JevpPlot(hEventSumContents.hMipMPVvsSection);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+9] = new JevpPlot(hEventSumContents.hMipMPVvsSection_ZS);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+10] = new JevpPlot(hEventSumContents.hMipSIGMAvsSection);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+11] = new JevpPlot(hEventSumContents.hMipSIGMAvsSection_ZS);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+12] = new JevpPlot(hEventSumContents.hMaxTBfractionVsSection_ZS);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+2] = new JevpPlot(hEventSumContents.hMeanRan);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+3] = new JevpPlot(hEventSumContents.hSumTB);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+4] = new JevpPlot(hEventSumContents.hMaxTimeBin);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+5] = new JevpPlot(hEventSumContents.hMaxTimeBin_ZS);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+6] = new JevpPlot(hEventSumContents.hSumBad);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+7] = new JevpPlot(hEventSumContents.hApvCorpt);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+8] = new JevpPlot(hEventSumContents.hEventSize);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+9] = new JevpPlot(hEventSumContents.hMipMPVvsSection);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+10] = new JevpPlot(hEventSumContents.hMipMPVvsSection_ZS);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+11] = new JevpPlot(hEventSumContents.hMipSIGMAvsSection);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+12] = new JevpPlot(hEventSumContents.hMipSIGMAvsSection_ZS);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+13] = new JevpPlot(hEventSumContents.hMaxTBfractionVsSection_ZS);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+6]->logy=true;
   // plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+6]->setOptStat(10);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+7]->logy=true;
@@ -709,11 +725,14 @@ void fstBuilder::initialize(int argc, char *argv[])
   plots[nPlots+27] = new JevpPlot(hSumContents.hSumSig[0]);
   plots[nPlots+28] = new JevpPlot(hSumContents.hSumSig[1]);
   plots[nPlots+29] = new JevpPlot(hSumContents.hSumSig[2]);
-  plots[nPlots+30] = new JevpPlot(hSumContents.hCommonModeNoise[0]);
-  plots[nPlots+31] = new JevpPlot(hSumContents.hCommonModeNoise[1]);
-  plots[nPlots+32] = new JevpPlot(hSumContents.hCommonModeNoise[2]);
+  plots[nPlots+30] = new JevpPlot(hSumContents.hSumRan[0]);
+  plots[nPlots+31] = new JevpPlot(hSumContents.hSumRan[1]);
+  plots[nPlots+32] = new JevpPlot(hSumContents.hSumRan[2]);
+  plots[nPlots+33] = new JevpPlot(hSumContents.hCommonModeNoise[0]);
+  plots[nPlots+34] = new JevpPlot(hSumContents.hCommonModeNoise[1]);
+  plots[nPlots+35] = new JevpPlot(hSumContents.hCommonModeNoise[2]);
 
-  for(int iPlots = nPlots; iPlots < nPlots+33; ++iPlots)
+  for(int iPlots = nPlots; iPlots < nPlots+36; ++iPlots)
   {
     LOG(DBG, "Adding plot %d",iPlots);
     addPlot(plots[iPlots]);
@@ -801,13 +820,14 @@ void fstBuilder::startrun(daqReader *rdr)
   //load external pedstal/RMS value for all channels
   FILE *file;
   char paraDir[256];
-  sprintf(paraDir, "%s/fst/pedestals.txt", clientdatadir);
+  sprintf(paraDir, "%s/fst_s1_pedestals.txt", clientdatadir);
+  // sprintf(paraDir, "/star/data01/pwg/sunxuhit/ForwardSiliconTracker/Data/FstInstallation/daqtest/fst_s1_pedestals.txt");
 
   file = fopen(paraDir, "r");
   if (file==0) {
     LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
     tableFound = false;
-    sprintf(paraDir, "%s/fst/pedestals_local.txt", clientdatadir);
+    sprintf(paraDir, "%s/fst_s1_pedestals_local.txt", clientdatadir);
     file = fopen(paraDir, "r");
     if(file==0){
       LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
@@ -815,7 +835,7 @@ void fstBuilder::startrun(daqReader *rdr)
       //LOG(U_FST,"loading pedestals from %s ", paraDir);
       while(!feof(file)) {
 	int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
-	float pp=0., rr=0.;
+	float pp=0., rr=0., nn=0.;
 	char buff[256];
 
 	if(fgets(buff,sizeof(buff),file) == 0) continue ;
@@ -827,13 +847,16 @@ void fstBuilder::startrun(daqReader *rdr)
 	  case '.' :
 	    continue ;
 	}
-	int ret = sscanf(buff,"%d %d %d %d %d %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr);
-	if(ret!=7) continue;
+	int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
+	if(ret!=8) continue;
 
 	if(tbIdxTemp==2) { //only take time bin 2 as sample
-	  int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + apvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
-	  fstPedestal[glbElecChanIdxTemp] = pp;
-	  fstRmsNoise[glbElecChanIdxTemp] = rr;
+	  int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+	  int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+	  int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+	  fstPedestal[glbElecChanIdxTemp] = pp; // pedestal
+	  fstRmsNoise[glbElecChanIdxTemp] = rr; // total noise
+	  fstRanNoise[glbElecChanIdxTemp] = nn; // random noise
 	}
       }
       tableFound = true;
@@ -844,7 +867,7 @@ void fstBuilder::startrun(daqReader *rdr)
     //LOG(U_FST,"loading pedestals from %s ", paraDir);
     while(!feof(file)) {
       int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
-      float pp=0., rr=0.;
+      float pp=0., rr=0., nn=0.;
       char buff[256];
 
       if(fgets(buff,sizeof(buff),file) == 0) continue ;
@@ -856,19 +879,103 @@ void fstBuilder::startrun(daqReader *rdr)
 	case '.' :
 	  continue ;
       }
-      int ret = sscanf(buff,"%d %d %d %d %d %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr);
-      if(ret!=7) continue;
+      int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
+      if(ret!=8) continue;
 
       if(tbIdxTemp==2) { //only take time bin 2 as sample
-	int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + apvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
-	fstPedestal[glbElecChanIdxTemp] = pp;
-	fstRmsNoise[glbElecChanIdxTemp] = rr;
+	int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+	int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+	int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+	fstPedestal[glbElecChanIdxTemp] = pp; // pedestal
+	fstRmsNoise[glbElecChanIdxTemp] = rr; // total noise
+	fstRanNoise[glbElecChanIdxTemp] = nn; // random noise
+	// cout << "glbElecChanIdxTemp = " << glbElecChanIdxTemp << ", rdoIdxTemp = " << rdoIdxTemp << ", armIdxTemp = " << armIdxTemp << ", apvIdxTemp = " << apvIdxTemp << "chanIdxTemp = " << chanIdxTemp << ", nn = " << nn << endl;
       }
     }
     tableFound = true;
     fclose(file);
   }
 
+  sprintf(paraDir, "%s/fst_s2_pedestals.txt", clientdatadir);
+  // sprintf(paraDir, "/star/data01/pwg/sunxuhit/ForwardSiliconTracker/Data/FstInstallation/daqtest/fst_s2_pedestals.txt");
+
+  FILE *file0;
+
+  file0 = fopen(paraDir, "r");
+  if (file0==0) {
+    LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+    tableFound = false;
+    sprintf(paraDir, "%s/fst_s2_pedestals_local.txt", clientdatadir);
+    file0 = fopen(paraDir, "r");
+    if(file0==0){
+      LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+    }else{
+      //LOG(U_FST,"loading pedestals from %s ", paraDir);
+      while(!feof(file0)) {
+	int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
+	float pp=0., rr=0., nn=0.;
+	char buff[256];
+
+	if(fgets(buff,sizeof(buff),file0) == 0) continue ;
+	switch(buff[0]) {
+	  case '#' :
+	  case '!' :
+	  case '*' :
+	  case '/' :
+	  case '.' :
+	    continue ;
+	}
+	int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
+	if(ret!=8) continue;
+
+	if(tbIdxTemp==2) { //only take time bin 2 as sample
+	  int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+	  int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+	  int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+	  fstPedestal[glbElecChanIdxTemp] = pp; // pedestal
+	  fstRmsNoise[glbElecChanIdxTemp] = rr; // total noise
+	  fstRanNoise[glbElecChanIdxTemp] = nn; // random noise
+	}
+      }
+      tableFound = true;
+      fclose(file0);
+    }
+  }
+  else {
+    //LOG(U_FST,"loading pedestals from %s ", paraDir);
+    while(!feof(file0)) {
+      int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
+      float pp=0., rr=0., nn=0.;
+      char buff[256];
+
+      if(fgets(buff,sizeof(buff),file0) == 0) continue ;
+      switch(buff[0]) {
+	case '#' :
+	case '!' :
+	case '*' :
+	case '/' :
+	case '.' :
+	  continue ;
+      }
+      int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
+      if(ret!=8) continue;
+
+      if(tbIdxTemp==2) { //only take time bin 2 as sample
+	int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+	int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+	int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+	fstPedestal[glbElecChanIdxTemp] = pp; // pedestal
+	fstRmsNoise[glbElecChanIdxTemp] = rr; // total noise
+	fstRanNoise[glbElecChanIdxTemp] = nn; // random noise
+	// cout << "glbElecChanIdxTemp = " << glbElecChanIdxTemp << ", rdoIdxTemp = " << rdoIdxTemp << ", armIdxTemp = " << armIdxTemp << ", apvIdxTemp = " << apvIdxTemp << "chanIdxTemp = " << "pp = " << pp << ", rr = " << rr << ", nn = " << nn << endl;
+      }
+    }
+    tableFound = true;
+    fclose(file0);
+  }
+
+  /*
+  // will active once needed
   sprintf(paraDir, "%s/fst/fst_apv_bad.txt", clientdatadir);
   //LOG(U_FST,"Loading file %s",paraDir);
   FILE *file1;
@@ -1040,6 +1147,7 @@ void fstBuilder::startrun(daqReader *rdr)
     }
     fclose(file3);
   }
+  */
 
   errorMsg->SetText("No Error Message");    
   sumHistogramsFilled  = 0;  
@@ -1181,14 +1289,20 @@ void fstBuilder::event(daqReader *rdr)
 	maxAdc_zs[glbGeomChanId_zs]     = f_zs[i].adc;
 	maxTimeBin_zs[glbGeomChanId_zs] = f_zs[i].tb;
       }
-      if ( f_zs[i].adc > hitCut * oldStdDevs[glbGeomChanId_zs]) {
+      // if ( f_zs[i].adc > hitCut * ranStdDevs[glbGeomChanId_zs]) {
+      if ( f_zs[i].adc > hitCut * fstRanNoise[glbElecChanId_zs]) {
 	cou_zs[f_zs[i].ch]++;
       }
     }//end current APV loop
 
-    // zero out hits less than 3 TBs
+    // zero out hits less than 2 TBs
     for(int i=0;i<ChPerApv;i++){
-      if(cou_zs[i]>=3){
+      if(cou_zs[i]<2){
+	int glbElecChanId         = (rdoIdx-1)*ChPerRdo + armIdx*ChPerArm + refApvIdx*ChPerApv + i; // 0-36863
+	int glbGeomChanId         = fstGeomMapping[glbElecChanId];                                  // 0-36863
+	maxAdc_zs[glbGeomChanId]     = 0;
+	maxTimeBin_zs[glbGeomChanId] = -1;
+      }else{
 	counterGoodHitPerEvent_zs[glbElecApvIdx]++;
       }
     }
@@ -1278,6 +1392,7 @@ void fstBuilder::event(daqReader *rdr)
 	runningAvg[glbGeomChanId]      += (f[i].adc-runningAvg[glbGeomChanId]) / numVals[glbGeomChanId];
 	runningStdDevSq[glbGeomChanId] += ((float)numVals[glbGeomChanId]-1)/(numVals[glbGeomChanId]) * (f[i].adc-runningAvg[glbGeomChanId]) * (f[i].adc-runningAvg[glbGeomChanId]);
 	oldStdDevs[glbGeomChanId]       = sqrt(runningStdDevSq[glbGeomChanId] / numVals[glbGeomChanId]);
+	fstRanNoise[glbElecChanId]      = fstRmsNoise[glbElecChanId];
       }
       else {
 	numVals[glbGeomChanId]++;
@@ -1390,6 +1505,7 @@ void fstBuilder::event(daqReader *rdr)
 
     //float pedestal   = runningAvg[geoIdx-1];
     float rms   = oldStdDevs[geoIdx];
+    float ran   = fstRanNoise[glbElecChanId];
     int adc_max = maxAdc[geoIdx];
     int tb_max  = maxTimeBin[geoIdx];
 
@@ -1438,8 +1554,8 @@ void fstBuilder::event(daqReader *rdr)
     }
 
     //ZS data
-    if( maxAdc_zs[geoIdx] > hitCut*rms && rms > minRMSVal && rms < maxRMSVal ) {//roughly cut
-      if( !isNoisyApv[glbElecApvIdx] || (isNoisyApv[glbElecApvIdx] && maxAdc_zs[geoIdx] > noiseChipCut*rms)){
+    if( maxAdc_zs[geoIdx] > hitCut*ran && ran > minRMSVal && ran < maxRMSVal ) {//roughly cut
+      if( !isNoisyApv[glbElecApvIdx] || (isNoisyApv[glbElecApvIdx] && maxAdc_zs[geoIdx] > noiseChipCut*ran)){
 	if(counterGoodHitPerEvent_zs[glbElecApvIdx]<=hitOccupancyCut){
 	  hMipContents.mipArray[glbSecIdx+totSec]->Fill(short(maxAdc_zs[geoIdx]+0.5));
 	  if(maxTimeBin_zs[geoIdx]>=0){
@@ -1513,6 +1629,7 @@ void fstBuilder::fillSumHistos()
   char buffer[200];
   hEventSumContents.hMeanPed->Reset();  // mean ped
   hEventSumContents.hMeanRMS->Reset();  // sigma
+  hEventSumContents.hMeanRan->Reset();  // sigma
   hEventSumContents.hSumBad->Reset();   // #goodapv
 
   int numGood[totAPV];
@@ -1532,11 +1649,17 @@ void fstBuilder::fillSumHistos()
 
     float pedestal = runningAvg[geoIdx];
     float rmsPed   = oldStdDevs[geoIdx];
+    float ranPed   = fstRanNoise[glbElecChanId];
     bool  isBad    = false;
 
     if ( rmsPed > 0 ) {
       hEventSumContents.hMeanRMS->Fill(short(rmsPed+0.5));
       hSumContents.hSumSig[diskIdx-1]->Fill(geoIdx-(diskIdx-1)*ChPerDisk, short(rmsPed+0.5));
+    }
+
+    if ( ranPed > 0 ) {
+      hEventSumContents.hMeanRan->Fill(short(ranPed+0.5));
+      hSumContents.hSumRan[diskIdx-1]->Fill(geoIdx-(diskIdx-1)*ChPerDisk, short(ranPed+0.5));
     }
 
     if ( pedestal > 0 ) {
