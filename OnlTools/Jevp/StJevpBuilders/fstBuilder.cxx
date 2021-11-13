@@ -1638,7 +1638,7 @@ void fstBuilder::fillSumHistos()
   int numBadAll =0;
   sumHistogramsFilled++;
 
-  for ( int geoIdx=1; geoIdx<=totCh; geoIdx++ ) {
+  for ( int geoIdx=0; geoIdx<totCh; geoIdx++ ) {
     int diskIdx       = geoIdx/ChPerDisk + 1;                                   // 1-3
     int glbElecChanId = fstElecMapping[geoIdx];                                 // 0-36863
     int rdoIdx        = glbElecChanId/ChPerRdo + 1;                             // 1-6
