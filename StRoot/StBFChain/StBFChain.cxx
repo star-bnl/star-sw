@@ -495,6 +495,11 @@ Int_t StBFChain::Instantiate()
       mk->SetAttr("InputFile",fInFile.Data());
       NoMakersWithInput++;
     }
+    if ((maker == "StVMCMaker" && GetOption("mtin")) &&  fInFile != "") {
+      mk->SetAttr("InputFile",fInFile.Data());
+      mk->SetAttr("mtin", kTRUE);
+      NoMakersWithInput++;
+    }
     if (maker == "St_geant_Maker") { // takes only first request for geant, if it is active then it should be the first one
       Int_t NwGeant = 10; // default geant parameters
       if (!GetOption("fzin")  && !GetOption("fzinSDT") &&

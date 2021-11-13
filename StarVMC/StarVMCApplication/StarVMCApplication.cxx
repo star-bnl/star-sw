@@ -125,7 +125,7 @@ void StarVMCApplication::InitGeometry() {
 }
 //_____________________________________________________________________________
 void StarVMCApplication::GeneratePrimaries() {    
-  if (! StarMCPrimaryGenerator::Instance()) new StarMCPrimaryGenerator(fStarStack);
+  if (! StarMCPrimaryGenerator::Instance()) new StarMCPrimaryGenerator();
   fStatus = kStOK;
   if (StarPrimaryMaker::instance()) {
     // put TParticle from StarParticleStack from StarPrimaryMaker to StarStack

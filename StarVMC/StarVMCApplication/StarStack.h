@@ -78,7 +78,7 @@ class StarStack : public TVirtualMCStack
     Int_t          fCurrentID;          //! Index of track in fParticles
     Bool_t         fFromStack;          //! true is particle is taken from fStack
     static Int_t   fgDebug;             //!
-    TDataSet          *fHitHolder;
+    TDataSet      *fHitHolder;          //!
     std::stack<TParticle>   fStack;//!
     ClassDef(StarStack,1) //Particles stack
 };

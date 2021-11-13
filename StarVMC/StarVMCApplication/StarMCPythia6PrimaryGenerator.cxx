@@ -14,13 +14,12 @@
 #include "StMessMgr.h" 
 ClassImp(StarMCPythia6PrimaryGenerator);
 //_____________________________________________________________________________
-StarMCPythia6PrimaryGenerator::StarMCPythia6PrimaryGenerator(TString mode, Int_t tune) {
+StarMCPythia6PrimaryGenerator::StarMCPythia6PrimaryGenerator(TString mode, Int_t tune) : StarMCPrimaryGenerator() {
   PreSet(); 
   SetGenerator(mode,tune);
 }
 //_____________________________________________________________________________
 void StarMCPythia6PrimaryGenerator::PreSet() {
-  fStarStack = 0;
   fNofPrimaries = 0; fId = 0;
   fOption = "";
   fOrigin = TVector3(0,0,0);
@@ -104,18 +103,6 @@ void StarMCPythia6PrimaryGenerator::GeneratePrimary() {
   }
 }
 //_____________________________________________________________________________
-void StarMCPythia6PrimaryGenerator::GeneratePrimaries(const TVector3& origin) {    
-  // Fill the user stack (derived from TVirtualMCStack) with primary particles.
-  // ---
-  Double_t sigmaX = gEnv->GetValue("FixedSigmaX", 0.00176);
-  Double_t sigmaY = gEnv->GetValue("FixedSigmaY", 0.00176);
-  Double_t sigmaZ = gEnv->GetValue("FixedSigmaZ", 0.00176);
-  TVector3 dR(gRandom->Gaus(0, sigmaX), gRandom->Gaus(0, sigmaY), gRandom->Gaus(0, sigmaZ));
-  fOrigin = origin + dR;
-  GeneratePrimary();  
-  fStarStack->SetNprimaries(fNofPrimaries);
-}
-//_____________________________________________________________________________
 void StarMCPythia6PrimaryGenerator::GeneratePrimaries() {
   if (! fSetVertex) {
     if (fPVX && fPVY && fPVZ) {
@@ -143,10 +130,17 @@ void StarMCPythia6PrimaryGenerator::GeneratePrimaries() {
       }
 #endif
     } else {
+#if 0
+      Double_t sigmaX = gEnv->GetValue("FixedSigmaX", 0.00176);
+      Double_t sigmaY = gEnv->GetValue("FixedSigmaY", 0.00176);
+      Double_t sigmaZ = gEnv->GetValue("FixedSigmaZ", 0.00176);
+      TVector3 dR(gRandom->Gaus(0, sigmaX), gRandom->Gaus(0, sigmaY), gRandom->Gaus(0, sigmaZ));
+      fOrigin = origin + dR;
+#endif
       fOrigin.SetX(gRandom->Gaus(0,gSpreadX));
       fOrigin.SetY(gRandom->Gaus(0,gSpreadY));
       fOrigin.SetZ(gRandom->Gaus(0,gSpreadZ));
     }
   }
-  GeneratePrimaries(fOrigin);
+  GeneratePrimary();
 }

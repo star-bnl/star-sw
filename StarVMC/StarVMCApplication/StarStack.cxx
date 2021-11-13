@@ -54,7 +54,8 @@ using namespace std;
     fNprimary(0),
     fTrackNo(0),
     fCurrentID(-1),
-    fFromStack(kFALSE)
+    fFromStack(kFALSE),
+    fHitHolder(0)
 {
   //
   // Default constructor
@@ -69,7 +70,8 @@ StarStack::StarStack(Int_t size, const char* /*evfoldname*/):
   fNprimary(0),
   fTrackNo(0),
   fCurrentID(-1),
-  fFromStack(kFALSE)
+  fFromStack(kFALSE),
+  fHitHolder(0)
 {
   //
   //  Constructor
@@ -85,7 +87,8 @@ StarStack::StarStack(const StarStack& st):
   fNprimary(st.GetNprimary()),
   fTrackNo(0),
   fCurrentID(-1),
-  fFromStack(kFALSE)
+  fFromStack(kFALSE),
+  fHitHolder(0)
 {
   // Copy constructor
 }

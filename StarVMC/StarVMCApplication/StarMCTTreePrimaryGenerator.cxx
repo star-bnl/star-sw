@@ -16,13 +16,12 @@
 #include "StChainOpt.h"
 ClassImp(StarMCTTreePrimaryGenerator);
 //_____________________________________________________________________________
-StarMCTTreePrimaryGenerator::StarMCTTreePrimaryGenerator(TString mode, Int_t tune) {
+StarMCTTreePrimaryGenerator::StarMCTTreePrimaryGenerator(TString mode, Int_t tune) : StarMCPrimaryGenerator() {
   PreSet(); 
   SetGenerator(mode,tune);
 }
 //_____________________________________________________________________________
 void StarMCTTreePrimaryGenerator::PreSet() {
-  fStarStack = 0;
   fNofPrimaries = 0; fId = 0;
   fOption = "";
   fOrigin = TVector3(0,0,0);

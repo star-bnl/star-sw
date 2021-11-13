@@ -1546,8 +1546,7 @@ Bfc_st BFC[] = { // standard chains
   {"Generators", "Generators", "","sim_T,gen_T", ""
    ,"VMC,MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase",  "Basic STAR Generators",kFALSE},
   {"StarPrimary0", "StarPrimary", "","Generators", "StarPrimaryMaker", "",  "Basic STAR Generators",kFALSE},
-  {"mtin", "MuTreeReader","StarPrimary","StarPrimary0","StarMuEventReader"
-   ,"StarMuEventReader"                                             ,"Read event from MuDst TTree", kFALSE},
+  {"mtin", "","","",""                                              ,"Read event from MuDst TTree", kFALSE},
   //________________________________________________________________________________
   {"picoWrite" ,"","","picoDst,PicoVtxDefault",""                       ,"","Writes picoDST format",kFALSE},
   {"NoPiCovMtx","","","",""                                      ,"","Don't write Pico Cov. Matrix",kFALSE},
