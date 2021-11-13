@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# need a shell script to execute...
+mypid=$$
+myaccount=`whoami`;
+shellname="/tmp/${mainfunction}_${myaccount}_${mypid}_root.C"
+
 #
 # The signal handler kills the child processes
 #
@@ -14,6 +19,8 @@ function handle_interrupt {
 	    kill $child
 	fi
     done 
+
+    `rm $shellname`
 
     #echo "Now process $$ is dead..."
     exit
@@ -68,11 +75,7 @@ while [ $# -gt 0 ]; do
     shift;
 done
 
-mypid=$$
 
-# need a shell script to execute...
-myaccount=`whoami`;
-shellname="/tmp/${mainfunction}_${myaccount}_${mypid}_root.C"
 
 serv=`echo "$mainfunction" | grep -i -c server`
 pres=`echo "$mainfunction" | grep -i -c EvpMain`
