@@ -37,7 +37,7 @@ const float fstBuilder::maxTbFracOK       = 0.9;
 const float fstBuilder::landauFit_dn      = 400.0;
 const float fstBuilder::landauFit_up      = 2000.0;
 const float fstBuilder::cmnCut            = 3.0;
-const float fstBuilder::hitCut            = 4.0;
+const float fstBuilder::hitCut            = 3.0;
 const float fstBuilder::noiseChipCut      = 10.0;
 const int   fstBuilder::hitOccupancyCut  = 25;
 
@@ -1638,7 +1638,7 @@ void fstBuilder::fillSumHistos()
   int numBadAll =0;
   sumHistogramsFilled++;
 
-  for ( int geoIdx=1; geoIdx<=totCh; geoIdx++ ) {
+  for ( int geoIdx=0; geoIdx<totCh; geoIdx++ ) {
     int diskIdx       = geoIdx/ChPerDisk + 1;                                   // 1-3
     int glbElecChanId = fstElecMapping[geoIdx];                                 // 0-36863
     int rdoIdx        = glbElecChanId/ChPerRdo + 1;                             // 1-6
