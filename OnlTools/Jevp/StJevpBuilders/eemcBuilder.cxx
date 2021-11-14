@@ -439,7 +439,7 @@ void eemcBuilder::event(daqReader *rdr)
   // LOG("JEFF", "Done with fillHisto");
   // Hack to double up MAPMHits histo 2!  
   // Delete and recreate each time...
-
+  /*
   // can this possibly work?
   TH2F *oh = (TH2F *)plots[MAPMHits]->getHisto(0)->histo;
   PCP;
@@ -454,14 +454,14 @@ void eemcBuilder::event(daqReader *rdr)
   ph->histo = h;
   h->SetAxisRange(88,120);
   h->SetXTitle("Crate ID     6S1=88,  7S1=92,  8S1=96,  9S1=100, 10S1=104,  11S1=108");
-
+  */
   PCP;
 
   if(trgd) {
     delete trgd;
     trgd = NULL;
   }
- 
+  PCP;
   //LOG("JEFF", "Done with event");
 }
 
