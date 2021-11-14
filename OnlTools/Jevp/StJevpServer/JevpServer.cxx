@@ -83,12 +83,14 @@ static char tmpServerTags[MSTL];
 
 
 static int line_number=0;
-static char *line_builder = NULL;
+//static char *line_builder = NULL;
 static int readerTid;
 
+JevpPlotSet *loggingBuilder = NULL;
+
 #define CP line_number=__LINE__
-#define CP_ENTER_BUILDER(x) line_builder = x
-#define CP_LEAVE_BUILDER line_builder = NULL;
+#define CP_ENTER_BUILDER(x) loggingBuilder = x
+#define CP_LEAVE_BUILDER loggingBuilder = NULL;
 static sigjmp_buf env;
 
 int JEVPSERVERport;
@@ -139,13 +141,23 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
 	l4sourceline = l4BuilderSourceLine;
     }
     
-    
-    LOG(WARN, "signal %d TID, me: %d,  reader: %d, (server: %d)(builder: %s)(imageWriter: %d)(canvasBuilder: %d)(l4: %d)", arg, mythread, readerTid, line_number, line_builder ? line_builder: "", ImageWriterDrawingPlot, canvasBuilderLine, l4sourceline);
+    char *line_builder = "";
+    int plotSetLine = 0;
+    int plotSetCallParam = 0;
+    int builderLine = 0;
+    if(loggingBuilder) {
+	line_builder = loggingBuilder->getPlotSetName();
+	plotSetLine = loggingBuilder->dbgCallSourceLine;
+	plotSetCallParam = loggingBuilder->dbgCallParam;
+	builderLine = loggingBuilder->dbgBuilderLine;
+    }
+	
+    LOG(WARN, "signal %d TID, me: %d,  reader: %d, (server: %d)(builder: %s:%d(%d):%d)(imageWriter: %d)(canvasBuilder: %d)(l4: %d)", arg, mythread, readerTid, line_number, line_builder,plotSetLine, plotSetCallParam, builderLine, ImageWriterDrawingPlot, canvasBuilderLine, l4sourceline);
 
     // If we are trying to cleam up after a builder!
     //
     //   Must both be in right thread, and be inside a builder!
-    if((mythread != readerTid) && line_builder) {
+    if((mythread != readerTid) && loggingBuilder) {
 	LOG(ERR, "signal in builder: %d", arg);
 	sleep(10);
 	siglongjmp(env,1);
@@ -1073,7 +1085,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
 		CP_LEAVE_BUILDER;
 	    }
 	    else {
-		CP_ENTER_BUILDER(curr->getPlotSetName());
+		CP_ENTER_BUILDER(curr);
 		curr->_event(rdr);
 		CP_LEAVE_BUILDER;
 	    }
