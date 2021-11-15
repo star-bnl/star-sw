@@ -81,5 +81,4 @@ struct StJetBranch {
 
   ClassDef(StJetMaker2009,0);
 };
-
 #endif

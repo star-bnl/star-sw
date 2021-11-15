@@ -108,8 +108,14 @@ int StJetMaker2012::Make()
       // Keep track of number of good vertices
       int nvertices = 0;
 
+      int totNumVertices = tpc.numberOfVertices();
+      // store the total number of available vertices if set by anapars
+      if(jetbranch->anapars->storeOnlyDefaultVertex && totNumVertices > 1) {
+	totNumVertices = 1;
+      }
+
       // Vertex loop
-      for (int iVertex = 0; iVertex < tpc.numberOfVertices(); ++iVertex) {
+      for (int iVertex = 0; iVertex < totNumVertices; ++iVertex) {
 	tpc.setVertexIndex(iVertex);
 
 	// Get TPC vertex and tracks

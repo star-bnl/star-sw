@@ -110,8 +110,13 @@
       If (IKINEold==-2) call AgNTread(ier)
       If (IKINEold<=-3) call AgFread (ier)
       If (IKINEold<=-4)
-      { J=CsADDR('AGUSREAD'); If (J>0) Call CSjCAL(J,1,Ier,0,0,0,0,0,0,0,0,0) }
+      { 
 
+        J             =   CsADDR('AGUSREAD')
+        IF (J <= 0) J =   CsADDR('AGEVENTREAD')
+        If (J>0) Call CSjCAL(J,1,Ier,0,0,0,0,0,0,0,0,0)
+      }
+          
       If (LkEvnt<=0 & IKINE>0)    Call HEPEFILL
       If (LkEvnt<=0 & IKINE<=-1)  Call HEPEREAD
       Ieotri=0

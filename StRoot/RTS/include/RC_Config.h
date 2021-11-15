@@ -157,6 +157,8 @@ class UINT128 {
 #define L3_OBJECT 37            // Reserved for L3 use...
 #define EQ1_QT_OBJECT 38        // Changed FQ1 > EQ1.  JMN 8/15/17
 #define EQ2_QT_OBJECT 39        // Changed FQ2 > EQ2.  JMN 8/15/17
+#define FCS_OBJECT 40
+#define DSM2_OBJECT 41
 
 #define BIT_OBJECT 100          // Reserved for TCU bit labels
 

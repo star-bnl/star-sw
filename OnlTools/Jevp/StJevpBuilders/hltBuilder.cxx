@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
+#include "DAQ_HLT/daq_hlt.h"
 #include "DAQ_READER/daqReader.h"
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_L3/daq_l3.h>

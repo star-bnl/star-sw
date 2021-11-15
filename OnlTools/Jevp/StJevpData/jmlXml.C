@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <libxml2/libxml/xmlreader.h>
+#include <libxml/xmlreader.h>
 #include <unistd.h>
 #include <stdlib.h>
 

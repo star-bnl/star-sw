@@ -165,8 +165,10 @@ int  Init(const char* input);
 int  Waiting();
 void SetMinMax(int n, Double_t* ar, double& min, double& max, double inclusion, double margin=0.075);
 int  SetMinuitPars(const int n, TString* names, Double_t* starts, Double_t* steps, int debug, Bool_t* fixing=0);
+void GetMinuitPar(const int n);
+void GetMinuitPars(const int n, Bool_t* fixing=0, Double_t* fixedValues=0);
 void Log2Lin(int i);
-int  FitWithOutlierRemoval(int debug);
+int  FitWithOutlierRemoval(int npar, int debug);
 void DrawErrorContours(int npar, Bool_t* fix=0);
 TString PCA(int Nmax=32, int debug=0);
 void PrintResult(double scp, double escp, double sop, double esop,
@@ -232,6 +234,7 @@ char* parNameGL[3];
 char* parNameSCGL[9];
 char* parNameSCGLsec[19];
 Bool_t unfittableSec[12];
+bool atLimit[32];
 
 // Global fit data and parameters
 Double_t m_sc[nMeasuresMax];
@@ -355,31 +358,32 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
   if (DO_PCA) { // Doing a PCA analysis
     if (!ITER0) {
       Bool_t no_plots = NO_PLOTS;
-      NO_PLOTS = kTRUE;
+      NO_PLOTS = kTRUE; // Don't do plots for iteration 0
       ITER0 = kTRUE;
       printf("\n*** Running PCA iteration 0 ***\n\n");
-      // First iteration uses a single input dataset to define PCA
+      // Iteration 0 uses a single input dataset to define PCA
       status = Calib_SC_GL(input,cuts,scaler,debug,gcuts);
       if (status) return status;
-      // Second pass uses all input datasets to define PCA
+      // Iteration 1 uses all input datasets to define PCA
       NO_PLOTS = no_plots;
       ITER0 = kFALSE;
       printf("\n*** Running PCA iteration 1 ***\n\n");
-      delete minuit;
+      delete minuit; // Need to delete the minuit instance that was used in iteration 0
     } else {
+      // This line is for iteration 0 only
       fitPars = fitParsSCGL;
     }
-    dets[nsca-1] = PCA(1-scaler,debug);
+    dets[nsca-1] = PCA(1-scaler,debug); // dets[nsca-1] reserved for such use
     scaler = nsca-1;
   } else {
     if (scastr.Length()) {
-      dets[nsca-1] = scastr;
+      dets[nsca-1] = scastr; // dets[nsca-1] reserved for such use
       scaler = nsca - 1;
     }
   }
 
   int i,j,k;
-  double temp1,temp2,temp3,vsc_min = 1e10;
+  double temp1,vsc_min = 1e10;
   int jmin=-1;
 
   // Asymmetrical calibration mode variables
@@ -524,9 +528,24 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
     // Set starting values and step sizes for parameters
     double sce_init = GUESS_g5 + GUESS_GL; // approximate guess on (g5 + GL)
     if (DO_PCA) {
-      if (!ITER0) sce_init = fitParsSCGL[1]+fitParsSCGL[4];
+      if (!ITER0) {
+        // Do a sanity check on g5 from iteration 0 before using it
+        if (TMath::Abs(TMath::Log(fitParsSCGL[1]/GUESS_g5)) > 0.9) {
+          if (debug>0) printf("\nWARNING: g5 from iteration 0 at or near limit - not sane\n");
+          sce_init = GUESS_g5 + fitParsSCGL[4];
+        } else {
+          sce_init = fitParsSCGL[1] + fitParsSCGL[4];
+        }
+      }
     } else {
-      SCall->Draw(Form("%s/(%s)",scvar,dt),cut,"goff");
+      // Small denominators can cause large values that throw off the mean
+      // where small is in the context of the RMS of the distribution instead
+      // of the range, which is even more sensitive to outliers than the RMS
+      SCall->Draw(Form("%s",dt),cut,"goff");
+      histo = SCall->GetHistogram();
+      double dtrms = histo->GetRMS();
+      TCut avoidSmallDenominators = Form("abs(%s)>%g",dt,dtrms * 0.4); // 0.4 found by trial & error
+      SCall->Draw(Form("%s/(%s)",scvar,dt),avoidSmallDenominators&&cut,"goff");
       histo = SCall->GetHistogram();
       sce_init *= (histo->GetMean());
     }
@@ -541,20 +560,20 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
 
     // Perform the fit
     printf("\nSpaceCharge fit results {scaler: %s}:\n",dt);
-    status = FitWithOutlierRemoval(debug);
+    status = FitWithOutlierRemoval(3,debug);
     if (status==4) {
       if (debug) printf("Fit failed with initial g5=15. Trying 12...\n");
       GUESS_g5 = 12.0;
       sstart[2] = TMath::Log(GUESS_g5);
       SetMinuitPars(3,sname,sstart,sstep,debug);
-      status = FitWithOutlierRemoval(debug);
+      status = FitWithOutlierRemoval(3,debug);
     }
     if (status==4) {
       if (debug) printf("Fit failed with initial g5=12. Trying 20...\n");
       GUESS_g5 = 20.0;
       sstart[2] = TMath::Log(GUESS_g5);
       SetMinuitPars(3,sname,sstart,sstep,debug);
-      status = FitWithOutlierRemoval(debug);
+      status = FitWithOutlierRemoval(3,debug);
     }
     if (status) {
       printf("Fit failed for sc, err = %d\nTrying next scaler (if any)...\n\n",status);
@@ -576,11 +595,11 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
     sofE[j] = fitParErrs[0];
     sceE[j] = fitParErrs[1];
     gglE[j] = fitParErrs[2];
-    vsc[j] = VAR;
+    vsc[j] = VAR; // Excludes outliers
     ssc[j] = STDDEV;
 
     if (debug>0) printf("VAR_all = %6.4g for %s\n",VAR_all,dt);
-    if (VAR_all < vsc_min) { // Select best scaler
+    if (VAR_all < vsc_min) { // Select best scaler based on variance without excluding outliers
       vsc_min = VAR_all;
       jmin = j;
       memcpy(outliersSC,outliers0,nMeasures*sizeof(Double_t));
@@ -608,6 +627,8 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
   //////////////////////////////////////////
   // 3D fit for GridLeak
 
+  // Do this fit even if fixing GL to get an estimate for g2
+
   // Prepare for GL fit
   devs = devsGL;
   outliers = outliersGL;
@@ -626,10 +647,14 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
   }
 
   // Set starting values and step sizes for parameters
-  double scale_init = GUESS_GL / (GUESS_g5 + GUESS_GL); // SC*GL = SC*(g5+GL) * GL/(g5+GL)
+  double scale_init = GUESS_GL / (ggl[jmin] + GUESS_GL); // SC*GL = SC*(g5+GL) * GL/(g5+GL)
+  double scXgl = sce[jmin]*scale_init;
+  double escXgl = sceE[jmin]*scale_init;
+  double GLO = sof[jmin];
+  double eGLO = sofE[jmin];
   TString gname[3] = {"g2","g1/g2 = SCxGL","GLO"};
-  Double_t gstart[3] = {1.0, sce[jmin]*scale_init, fitParsSC[0]};
-  Double_t gstep[3]  = {0.01, sceE[jmin]*scale_init, fitParErrsSC[0]};
+  Double_t gstart[3] = {1.0, scXgl, GLO};
+  Double_t gstep[3]  = {0.01, escXgl, eGLO};
   if (DO_PCA) {
     gstart[1] = GUESS_GL;
     gstep[1] = 0.1*GUESS_GL;
@@ -639,15 +664,12 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
 
   // Perform the fit
   printf("\nGridLeak fit results {scaler: %s}:\n",detbest);
-  status = FitWithOutlierRemoval(debug);
+  status = FitWithOutlierRemoval(3,debug);
   if (status) {
     printf("Fit failed for gapf, err = %d\n",status);
     if (!FIX_GL) return 1;
     printf("Continuing with a fixed GL.");
-    fitPars[1] = gstart[1];
-    fitParErrs[1] = gstep[1];
-    fitPars[2] = gstart[2];
-    fitParErrs[2] = gstep[2];
+    for (k=0;k<3;k++) { fitPars[k] = gstart[k]; fitParErrs[k] = gstep[k]; }
   }
   if (!NO_PLOTS && debug>0) {
     if (conGL ==0) {
@@ -657,13 +679,18 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
     DrawErrorContours(3);
   }
 
-  
-  double scXgl = fitPars[1];
-  double escXgl = fitParErrs[1];
-  double GLO = fitPars[2];
-  double eGLO = fitParErrs[2];
   vgl = VAR;
   STDDEV_GL = STDDEV;
+
+  if (FIX_GL) {
+    // use scXgl and GLO estimates from before the 3D fit for GridLeak
+    escXgl = 0;
+  } else {
+    scXgl = fitPars[1];
+    escXgl = fitParErrs[1];
+    GLO = fitPars[2];
+    eGLO = fitParErrs[2];
+  }
 
 
   //////////////////////////////////////////
@@ -680,13 +707,15 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
   double ewp = 1.0;
   double eewp = 0.0;
 
-  double glp1 = ((sce[jmin]/scXgl) - 1.0);
-  double glp = ggl[jmin]/glp1;
-  double glp2 = glp/glp1;
-  double eglp = TMath::Sqrt(TMath::Power(glp*gglE[jmin]/ggl[jmin],2) +
-                            TMath::Power(glp2*escXgl*sce[jmin]/(scXgl*scXgl),2) +
-                            TMath::Power(glp2*sceE[jmin]*scXgl,2));
-
+  double scale_final = scXgl/(sce[jmin] - scXgl);
+  double glp = ggl[jmin]*scale_final;
+  double eglp = 0;
+  if (!FIX_GL) {
+    scale_final *= glp;
+    eglp = TMath::Sqrt(TMath::Power(glp*gglE[jmin]/ggl[jmin],2) +
+                            TMath::Power(scale_final*escXgl*sce[jmin]/(scXgl*scXgl),2) +
+                            TMath::Power(scale_final*sceE[jmin]*scXgl,2));
+  }
   if (debug>0) {
     printf("\n*** FIRST PASS CALIBRATION VALUES: ***\n");
     PrintResult(scp, escp, sop, esop, glp, eglp, ewp, eewp, detbest);
@@ -728,6 +757,7 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
     covarAdjust += (minuit->GetCovarianceMatrixElement(2,4) /
                     (minuit->GetCovarianceMatrixElement(2,2) +
                      minuit->GetCovarianceMatrixElement(4,4)));
+  GetMinuitPars(npar,ffix,fstart);
   status = minuit->ExecuteCommand("SET LIM", 0, 0); // Remove limits before MINOS
   if (status) {
     printf("SetLimit failed for sc+gl, err = %d\n",status);
@@ -736,10 +766,10 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
   double eplus,eminus,eparab,gcc;
   for (k=0;k<npar;k++) {
     if (ffix[k]) { fitPars[k] = fstart[k]; fitParErrs[k] = 0; continue; }
-    minuit->GetParameter(k,parName[k],fitPars[k],fitParErrs[k],temp1,temp2);
-  }
-  for (k=0;k<npar;k++) {
-    if (ffix[k]) { fitPars[k] = fstart[k]; fitParErrs[k] = 0; continue; }
+    if (atLimit[k]) {
+      printf("%s\t:\t%g\t+/- %g\t(AT LIMIT!)\n",parName[k],fitPars[k],fitParErrs[k]);
+      continue;
+    }
     for (i=0;i<npar;i++) if (i!=k && !ffix[i]) minuit->FixParameter(i);
     status = minuit->ExecuteCommand("MINIMIZE", arglist, 1);
     if (status) {
@@ -752,7 +782,7 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
       printf("Fit errors failed for sc+gl, err = %d\n",status);
       return 1;
     }
-    minuit->GetParameter(k,parName[k],fitPars[k],temp1,temp2,temp3);
+    GetMinuitPar(k);
     minuit2->mnerrs(k,eplus,eminus,eparab,gcc);
     if (eplus!=0.0 && eminus!=0.0) fitParErrs[k] = 0.5*(eplus-eminus);
     else if (eplus!=0.0 || eminus!=0.0) fitParErrs[k] = eparab;
@@ -862,6 +892,7 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
       printf("Fit failed for sc+gl by sector, err = %d\n",status);
       return 1;
     }
+    GetMinuitPars(npar,bfix,bstart);
     status = minuit->ExecuteCommand("SET LIM", 0, 0); // Remove limits before MINOS
     if (status) {
       printf("SetLimit failed for sc+gl by sector, err = %d\n",status);
@@ -869,10 +900,10 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
     }
     for (k=0;k<npar;k++) {
       if (bfix[k]) { fitPars[k] = bstart[k]; fitParErrs[k] = 0; continue; }
-      minuit->GetParameter(k,parName[k],fitPars[k],fitParErrs[k],temp1,temp2);
-    }
-    for (k=0;k<npar;k++) {
-      if (bfix[k]) { fitPars[k] = bstart[k]; fitParErrs[k] = 0; continue; }
+      if (atLimit[k]) {
+        printf("%s\t:\t%g\t+/- %g\t(AT LIMIT!)\n",parName[k],fitPars[k],fitParErrs[k]);
+        continue;
+      }
       for (i=0;i<npar;i++) if (i!=k && !bfix[i]) minuit->FixParameter(i);
       status = minuit->ExecuteCommand("MINIMIZE", arglist, 1);
       if (status) {
@@ -885,7 +916,7 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
         printf("Fit errors failed for sc+gl by sector, err = %d\n",status);
         return 1;
       }
-      minuit->GetParameter(k,parName[k],fitPars[k],temp1,temp2,temp3);
+      GetMinuitPar(k);
       minuit2->mnerrs(k,eplus,eminus,eparab,gcc);
       if (eplus!=0.0 && eminus!=0.0) fitParErrs[k] = 0.5*(eplus-eminus);
       else if (eplus!=0.0 || eminus!=0.0) fitParErrs[k] = eparab;
@@ -1007,20 +1038,20 @@ int Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, cons
   TF1* fnGapf = 0;
   TF1* fnSC = 0;
   if (BY_SECTOR) {
-    fnGapf = new TF1("fnGapf","[0] * ( ([2]*[4]) * (x - [16]) ) + [10]",0,Lmax);
-    fnSC = new TF1("fnSC","([2]*([1] + [4])) * (x - [3]) / ([18]*([17]*[1] + [8])) + [10]",0,Lmax);
+    fnGapf = new TF1("fnGapf","[0] * ( ([2]*[4]) * (x - [16]) ) + [10]",Lmin,Lmax);
+    fnSC = new TF1("fnSC","([2]*([1] + [4])) * (x - [3]) / ([18]*([17]*[1] + [8])) + [10]",Lmin,Lmax);
     fnGapf->SetParameters(fitParsSCGLsec);
     fnSC->SetParameters(fitParsSCGLsec);
   } else {
-    fnGapf = new TF1("fnGapf","[0] * ( ([2]*[4]) * (x - [5]) ) + [10]",0,Lmax);
-    fnSC = new TF1("fnSC","([2]*([1] + [4])) * (x - [3]) / ([7]*([6]*[1] + [8])) + [10]",0,Lmax);
+    fnGapf = new TF1("fnGapf","[0] * ( ([2]*[4]) * (x - [5]) ) + [10]",Lmin,Lmax);
+    fnSC = new TF1("fnSC","([2]*([1] + [4])) * (x - [3]) / ([7]*([6]*[1] + [8])) + [10]",Lmin,Lmax);
     fnGapf->SetParameters(fitParsSCGL);
     fnSC->SetParameters(fitParsSCGL);
   }
   fnGapf->SetLineWidth(1);
   fnSC->SetLineWidth(1);
-  TF1* fiGapf = new TF1("fiGapf","[0] * ( ([1]) * (x - [2]) ) + [10]",0,Lmax);
-  TF1* fiSC = new TF1("fiSC","[1] * (x - [0]) / ([2] + [8]) + [10]",0,Lmax);
+  TF1* fiGapf = new TF1("fiGapf","[0] * ( ([1]) * (x - [2]) ) + [10]",Lmin,Lmax);
+  TF1* fiSC = new TF1("fiSC","[1] * (x - [0]) / ([2] + [8]) + [10]",Lmin,Lmax);
   fiGapf->SetParameters(fitParsGL);
   fiSC->SetParameters(fitParsSC);
   fiGapf->SetLineWidth(1);
@@ -1924,17 +1955,42 @@ int SetMinuitPars(const int n, TString* names, Double_t* starts, Double_t* steps
   return maxlen;
 }
 
+void GetMinuitPar(const int n) {
+  // Get a single parameter values from Minuit and ignore the errors and limits
+  double temp1,temp2,temp3;
+  minuit->GetParameter(n,parName[n],fitPars[n],temp1,temp2,temp3);
+}
+
+void GetMinuitPars(const int n, Bool_t* fixing, Double_t* fixedValues) {
+  // Get all parameter values and errors from Minuit, unless they are a fixed value,
+  //  and record if parameters are at or near their limits in atLimit array
+  double lowerLimit,upperLimit;
+  int i;
+  for (i=0; i<n; i++) {
+    if (fixing && fixing[i]) {
+      fitPars[i] = fixedValues[i];
+      fitParErrs[i] = 0;
+      atLimit[i] = false;
+    } else {
+      minuit->GetParameter(i,parName[i],fitPars[i],fitParErrs[i],lowerLimit,upperLimit);
+      if (lowerLimit==0 && upperLimit==0) { atLimit[i] = false; continue; }
+      double limitsCenter = 0.5*(lowerLimit+upperLimit);
+      double limitsWindow = 0.49 * (upperLimit-lowerLimit);
+      atLimit[i] = (TMath::Abs(fitPars[i]-limitsCenter) > limitsWindow);
+    }
+  }
+}
 
 void Log2Lin(int i) {
   fitPars[i] = TMath::Exp(fitPars[i]);
   fitParErrs[i] *= fitPars[i];
 }
 
-int FitWithOutlierRemoval(int debug) {
+int FitWithOutlierRemoval(int npar, int debug) {
   // Iterates the fit, until a stable set of
   //  outliers at > MAX_DEV*VAR are removed
   int i,k,status,nOutliers;
-  double temp1,temp2,temp3;
+  double temp1,temp2;
   Double_t VAR_sets,VAR_single;
   Double_t nSet[nfip];
   Double_t VAR_singles[nfip];
@@ -1953,8 +2009,7 @@ int FitWithOutlierRemoval(int debug) {
     if (status) return status;
 
     // One more call to the fnch to get the deviations correct
-    for (k=0;k<3;k++)
-      minuit->GetParameter(k,parName[k],fitPars[k],fitParErrs[k],temp1,temp2);
+    GetMinuitPars(npar);
     (*(minuit->GetFCN()))(k,&temp1,temp2,fitPars,status);
 
     // Calculate apprpriate errors
@@ -2019,35 +2074,44 @@ int FitWithOutlierRemoval(int debug) {
                       nOutliers,nMeasures,iter+1);
 
   // Constrain errors by fixing other parameters
-  double eplus,eminus,eparab,gcc;
+  GetMinuitPars(npar);
   status = minuit->ExecuteCommand("SET LIM", 0, 0);
   if (status) return status;
-  for (k=0;k<3;k++) minuit->GetParameter(k,parName[k],fitPars[k],fitParErrs[k],temp1,temp2);
-  for (k=0;k<3;k++) {
-    for (i=0;i<3;i++) if (i!=k) minuit->FixParameter(i);
+  double eplus,eminus,eparab,gcc;
+  for (k=0;k<npar;k++) {
+    if (atLimit[k]) {
+      printf("%s\t:\t%g\t+/- %g\t(AT LIMIT!)\n",parName[k],fitPars[k],fitParErrs[k]);
+      continue;
+    }
+    for (i=0;i<npar;i++) if (i!=k) minuit->FixParameter(i);
     status = minuit->ExecuteCommand("MINIMIZE", arglist, 1);
     if (status) return status;
     arglist[1] = (double) k+1;
     status = minuit->ExecuteCommand("MINOS", arglist, 2);
     if (status) return status;
-    minuit->GetParameter(k,parName[k],fitPars[k],temp1,temp2,temp3);
+    GetMinuitPar(k);
     minuit2->mnerrs(k,eplus,eminus,eparab,gcc);
     if (debug>0) printf("%s\t:\t%g\t+%g/%g or +/- %g\n",parName[k],fitPars[k],eplus,eminus,eparab);
     if (eplus!=0.0 && eminus!=0.0) fitParErrs[k] = 0.5*(eplus-eminus);
     else if (eplus!=0.0 || eminus!=0.0) fitParErrs[k] = eparab;
     printf("%s\t:\t%g\t+/- %g\n",parName[k],fitPars[k],fitParErrs[k]);
-    for (i=0;i<3;i++) if (i!=k) minuit->ReleaseParameter(i);
+    for (i=0;i<npar;i++) if (i!=k) minuit->ReleaseParameter(i);
   }
 
   // One more determination of variance using final fit,
-  //   without outlier removal
+  //   with and without outlier removal
   memcpy(outliers1,outliers,nBytes);
   memset(outliers,0,nBytes);
   (*(minuit->GetFCN()))(k,&temp1,temp2,fitPars,status);
-  VAR_all = 0;
-  for (i=0; i<nMeasures; i++) VAR_all += devs[i]*devs[i];
-  VAR_all = TMath::Sqrt(VAR_all/((Double_t) nMeasures));
   memcpy(outliers,outliers1,nBytes);
+  VAR = 0;
+  VAR_all = 0;
+  for (i=0; i<nMeasures; i++) {
+    if (!outliers[i]) VAR += devs[i]*devs[i];
+    VAR_all += devs[i]*devs[i];
+  }
+  VAR = TMath::Sqrt(VAR/((Double_t) nMeasuresI-1));
+  VAR_all = TMath::Sqrt(VAR_all/((Double_t) nMeasures-1));
 
   return status;
 }
@@ -2314,6 +2378,25 @@ void PrintResult(double scp, double escp, double sop, double esop,
 }
 
 /////////////////////////////////////////////////////////////////
+// Revision 2.14 2021/09/23 genevb
+// A few improvements:
+// - Do not execute MINOS error calculation for parameters who are
+//   at their limits from the standard fit as this was allowing the
+//   limits to be exceeded
+// - PCA : check on sanity of g5 from iteration 0 before using in iteration 1
+// - FIX_GL : 3D fit for GridLeak now used only to provide g2 in this case
+//
+// Revision 2.13 2021/08/13 genevb
+// First git version, which doesn't autoincrement revision numbering
+// Several small improvements:
+// - sce_init calculation more robust by avoiding small denominators
+// - apply all initial guesses for gapf params if fit fails for FIX_GL
+// - VAR must be re-calculated at the end of FitWithOutlierRemoval()
+//   because the individual parameter fits can change the results
+//   (apparently for the better from what I can tell)
+// - function lines on plots vs. luminosity need to go to negative
+//   luminosities in PCA fits for data with observed negative SpaceCharge
+//
 // $Id: Calib_SC_GL.C,v 2.12 2021/04/21 21:51:52 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
 // Revision 2.12  2021/04/21 21:51:52  genevb

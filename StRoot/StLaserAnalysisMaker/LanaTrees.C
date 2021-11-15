@@ -61,7 +61,6 @@
 //#define __REFIT__
 //#define INTEGRATE_OVER_HOURS
 //#define SeparateWestandEast
-//#define ADJUSTABLE_BINNING
 //#define __Memberane__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 //#include <ostream>
@@ -73,6 +72,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TAxis.h"
 #include "TStyle.h"
 #include "TF1.h"
 #include "TFitResult.h"
@@ -114,6 +114,28 @@ struct Run_t {
 const Char_t *vRun = "run:date:time:events:day:dvAll:ddvAll:dvWest:ddvWest:dvEast:ddvEast:slAll:dslAll:slWest:dslWest:slEast:dslEast:vWest:vEast:zWI:dzWI:zEI:dzEI:zWO:dzWO:zEO:dzEO:utime:ok:dvSet:XWI:dXWI:XEI:dXEI:XWO:dXWO:XEO:dXEO:YWI:dYWI:YEI:dYEI:YWO:dYWO:YEO:dYEO";
 Run_t Run;
 //________________________________________________________________________________
+Double_t memDelay(Double_t *x, Double_t *p) {
+  static Double_t MembraneDelay[2][24] = {// delay in cm 
+//     {397.377,366.758,341.826,332.002,341.826,366.758,397.377,425.086,443.949,450.599,443.949,425.086,448.749,455.399,448.749,429.886,402.177,371.558,346.626,336.802,346.626,371.558,402.177,429.886}, //Inner
+//     {423.378,372.639,328.529,310.094,328.529,372.639,423.378,467.23 ,496.294,506.418,496.294,467.23 ,501.094,511.218,501.094,461.02 ,416.682,377.439,333.329,314.894,333.329,377.439,428.178,472.03 }};//Outer
+    {398.122,367.481,342.294,332.015,341.383,366.056,396.65,424.512,443.64 ,450.607,444.276,425.678,448.44 ,455.407,449.076,430.478,402.922,372.281,347.094,336.815,346.183,370.856,401.45,429.312},  //Inner
+    {424.573,373.866,329.379,310.108,327.703,371.43 ,422.198,466.33,495.816,506.426,496.787,468.144,500.616,511.226,501.587,472.944,429.373,378.666,334.179,314.908,332.503,376.23,426.998,471.13}};  //Outer
+  Int_t sector = TMath::Nint(x[0]);
+  Double_t value = 0;
+  if (sector < 1 || sector > 24) return value;
+  Int_t inout = TMath::Nint(p[0]); // in = 0, out = 1
+  if (inout < 0 || inout > 1) return value;
+  return p[1] + p[2]*MembraneDelay[inout][sector-1];
+}
+//________________________________________________________________________________
+TF1 *MemDelay(Int_t inout = 0) {
+  TF1 *f = new TF1("MemDelay",memDelay,-0.5,24.5,3);
+  f->SetParameters(inout,0,1);
+  f->SetParNames("InOut","Shift","Scale");
+  f->FixParameter(0,inout);
+  return f;
+}
+//________________________________________________________________________________
 Double_t ScaleE2W(Double_t day) {// scale East to West drift velocity
   //  RunNT->Draw("1e3*(dvEast/dvWest-1):day>>diffE(30,90,180)","(ddvWest>0&&ddvWest<4e-5&&ddvEast>0&&ddvEast<4e-5)/((ddvWest/dvWest)**2+(ddvEast/dvEast)**2)","profw")
   static Double_t par[2] = {1.57361e-01,-4.59752e-03};
@@ -146,7 +168,7 @@ void MakeTable() {
     cout << "v = " << dv << " +/- " << ddv << endl;
     Run.ok = 2;
   }
-  if (Run.ok == 2 && (Run.date < 130101 ||  Run.date >  140000)) return;
+  if (Run.ok == 2 && (Run.date < 130101 ||  Run.date >  140000 && Run.date < 150000)) return;
   if (Run.ok == 2) { // try to drift length for Run XIII
     if (Run.dzWO > 2e-3 || Run.dzEO > 2e-3 ||
 	Run.zWO + Run.zEO < 409.9 ||
@@ -208,6 +230,7 @@ void Fit() {
   run  = (Int_t) (1000000*((Int_t) (Run.date/1000000)) + Run.run);
   memset(&DVAll[0][0], 0, 6*sizeof(Double_t));
   memset(&dDVAll[0][0], 0, 6*sizeof(Double_t));
+  if (! slope) return;
   Run.events = slope->GetEntries();
   cout << "Run " << run << " has " << Run.events << " entries" <<  endl;
   TH2D *hist[2] = {dv, slope};
@@ -216,12 +239,19 @@ void Fit() {
 #ifdef ADJUSTABLE_BINNING
     hist[l]->BufferEmpty();
 #endif
-    hist[l]->Write();
+    //    hist[l]->Write();
     hist[l]->FitSlicesY(0,1,0,10,"QNRI");
     TString fitN(hist[l]->GetName());
     fitN += "_1";
     TH1D *fit = (TH1D *) gDirectory->Get(fitN);
     if (! fit) continue;
+    // Disable sector 16 for Run 20
+    TAxis *xax = fit->GetXaxis();
+    Int_t sector16 = xax->FindBin(16.);
+    fit->SetBinError(sector16, 1.0);
+    Int_t sector8 = xax->FindBin(8.);
+    fit->SetBinError(sector8, 1.0);
+    
     fit->SetMarkerStyle(20);
     Double_t xmin = fit->GetXaxis()->GetXmin();
     Double_t xmax = fit->GetXaxis()->GetXmax();
@@ -236,7 +266,8 @@ void Fit() {
 	  x2 = 12.5;
 	} else if (k == 2) {
 	  opt += "+";
-	  x1 = 12.5;
+	  //	  x1 = 12.5;
+	  x1 = 17.0;
 	}
 	DVAll[l][k]  = -999;
 	dDVAll[l][k] =  999;
@@ -251,7 +282,6 @@ void Fit() {
     }
     fit->Write();
   }
-#ifdef __Memberane__
   // Memberane
   for (Int_t io = 0; io < 2; io++) {
     zMembrane[io]->FitSlicesY(0,1,0,10,"QNRI");
@@ -280,10 +310,10 @@ void Fit() {
 	fitN += "_1";
 	TH1D *fit = (TH1D *) gDirectory->Get(fitN);
 	if (! fit) continue;
-	Int_t status = fit->SetMarkerStyle(20);
+	fit->SetMarkerStyle(20);
+	TF1 *pol1 = (TF1*) gROOT->GetFunction("pol1");
+	Int_t status =  fit->Fit(pol1);
 	if (! status) {
-	  TF1 *pol1 = (TF1*) gROOT->GetFunction("pol1");
-	  fit->Fit(pol1);
 	  par[8*xy+4*io+2*we  ] = pol1->GetParameter(1)/210;
 	  par[8*xy+4*io+2*we+1] = pol1->GetParError(1)/210;
 	} else {
@@ -294,7 +324,6 @@ void Fit() {
       }
     }
   }
-#endif /* __Memberane__ */
   MakeTable();
   runNT->Fill(&Run.run);
 }
@@ -374,7 +403,7 @@ void LanaTrees(const Char_t *files="./st_laser_*.laser.root", const Char_t *Out 
 	  name += Form("%i",event->GetHeader()->GetRun()%1000000);
 	  title += Form(" for run %i",event->GetHeader()->GetRun()%1000000); 
 	  //	  dMembraneY[io] = new TH2D(name,title,24,0.5,24.5,2000,-10.,10.);
-	  zMembrane[io] = new TH2D(name,title,24,0.5,24.5,2000,200,210);
+	  zMembrane[io] = new TH2D(name,title,24,0.5,24.5,200,200,210);
 	  for (Int_t we = 0; we < 2; we++) {
 	    for (Int_t xy = 0; xy < 2; xy++) {
 	      name  = "R"; name += Form("%i",event->GetHeader()->GetRun()%1000000); 
@@ -395,6 +424,7 @@ void LanaTrees(const Char_t *files="./st_laser_*.laser.root", const Char_t *Out 
       }
 #endif
     }
+#if 1
     for (Int_t i = 0; i <  event->GetNhit(); i++) {
       Hit *hit = (Hit *) event->Hits()->UncheckedAt(i);
       Int_t io = 0; if (hit->row    > 13) io = 1;
@@ -402,8 +432,9 @@ void LanaTrees(const Char_t *files="./st_laser_*.laser.root", const Char_t *Out 
       Int_t we = 0; if (hit->sector > 12) we = 1;
       dMembraneY[io][we][0]->Fill(hit->xyz.x(),hit->xyzTpcL.z());
       dMembraneY[io][we][1]->Fill(hit->xyz.y(),hit->xyzTpcL.z());
-      if (TMath::Abs(TMath::Abs(hit->xyzTpcL.z())-205) < 25 && hit->hit.adc() > 0) memAdc->Fill(2.*we + io + 1., TMath::Log(hit->hit.adc()));
+      if (TMath::Abs(TMath::Abs(hit->xyzTpcL.z())-205) < 25 && hit->adc > 0) memAdc->Fill(2.*we + io + 1., TMath::Log(hit->adc));
     }
+#endif
     Double_t dt =  event->GetHeader()->fDate%1000000 + ((Double_t) event->GetHeader()->fTime)*1e-6;
     Double_t DT =  Run.date + Run.time*1e-6;
     if (dt < DT) {
@@ -527,7 +558,8 @@ Double_t OffSets(Double_t *x/*, Double_t *par = 0 */) {
 
 
 c1 = new TCanvas()
-TH1* frame = c1->DrawFrame(575e6,5.4,581.e6,5.6)
+//TH1* frame = c1->DrawFrame(575e6,5.4,581.e6,5.6)
+TH1* frame = c1->DrawFrame(632e6,5.4,642.e6,5.6)
 frame->SetTitle("Drift velocitry")
 frame->GetXaxis()->SetTimeDisplay(1)
 c1->Update()
@@ -546,8 +578,32 @@ RunNT->Draw("dvSet:utime-788936400>>memb","ok==2","same")
 l->AddEntry(memb,"Membrane")
 
 
+TH1F *frame = c1->DrawFrame(632e6,5.46,644e6,5.57)
+.x DrawTime.C(frame)
+RunNT->Draw("dvAll:utime-788936400>>h2","ok<2","same")
 
+RunXIX
+TH1* frame = c1->DrawFrame(758e6,5.4,767.e6,5.6)
+frame->SetTitle("Drift velocitry")
+frame->GetXaxis()->SetTimeDisplay(1)
+c1->Update()
 
+ TH1* frame = c1->DrawFrame(786e6,5.4,794.e6,5.8)
 
+Run XX
+ root.exe 2020F.root 2020P.root
+TCanvas *c1 = new TCanvas("c1","c1");
+TH1* frame = c1->DrawFrame(786e6,5.4,795e6,5.8);
+frame->SetTitle("Tpc drift verlocity versus date");
+.x DrawTime.C(frame)
 
+_file0->cd();
+RunNT->SetMarkerColor(2);
+RunNT->Draw("dvAll:utime-788936400>>W16","ok==1","same");
+TLegend *l = new TLegend(0.7,0.3,0.8,0.4)
+l->AddEntry(W16,"With Sector 16");
+_file1->cd();
+RunNT->Draw("dvAll:utime-788936400>>WO16","ok==1","same");
+l->AddEntry(WO16,"Withot Sector 16");
+l->Draw();
  */

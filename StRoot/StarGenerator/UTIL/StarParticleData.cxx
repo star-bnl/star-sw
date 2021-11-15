@@ -51,7 +51,7 @@ public:
 };
 
 // Instance should exist from the start
-StarParticleData StarParticleData::sInstance;
+StarParticleData* StarParticleData::sInstance = nullptr;
 
 // ---------------------------------------------------------------------------------------------
 StarParticleData::~StarParticleData()
@@ -350,3 +350,12 @@ TParticlePDG *StarParticleData::SetTrackingCode( const int pdgid, const int g3id
   return myparticle;
 
 }
+//_______________________________________________________________________________________________
+StarParticleData& StarParticleData::instance()
+{ return (sInstance)? *sInstance : *(sInstance = new StarParticleData()); }
+//_______________________________________________________________________________________________
+TParticlePDG* StarParticleData::operator()(const char* name){ return instance().GetParticle(name); }
+TParticlePDG* StarParticleData::operator()(const int   id  ){ return instance().GetParticle(id  ); }
+//_______________________________________________________________________________________________
+
+
