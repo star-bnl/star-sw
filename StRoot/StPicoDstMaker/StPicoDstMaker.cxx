@@ -55,6 +55,7 @@
 #include "StMuDSTMaker/COMMON/StMuEpdHit.h"
 #include "StMuDSTMaker/COMMON/StMuETofHit.h"
 #include "StMuDSTMaker/COMMON/StMuETofDigi.h"
+#include "StMuDSTMaker/COMMON/StMuETofHeader.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 
@@ -1825,6 +1826,10 @@ void StPicoDstMaker::fillEvent() {
   picoEvent->setNumberOfPrimaryTracks( mMuDst->numberOfPrimaryTracks() );
   picoEvent->setbTofTrayMultiplicity( ev->btofTrayMultiplicity() );
   picoEvent->setETofHitMultiplicity( ev->etofHitMultiplicity() );
+  StMuETofHeader *header = mMuDst->etofHeader();
+  if( header ) {
+      picoEvent->setETofGoodEventFlag( header->goodEventFlagVec() );
+  }
 
   // Save the number of etof digis that were useable in the hit building process
   unsigned short nUseableETofDigis = 0;
@@ -2574,11 +2579,9 @@ bool StPicoDstMaker::selectVertex() {
     } //if (mBTofHeader && fabs(mBTofHeader->vpdVz()) < 200)
   } //else if (mVtxMode == PicoVtxMode::Vpd || mVtxMode == PicoVtxMode::VpdOrDefault)
   else if ( mVtxMode == PicoVtxMode::Mtd ) {
-    
+
     // Set the first primary vertex as a default vertex
-    mMuDst->setVertexIndex(0);
-    // Set pointer to the first primary vertex
-    selectedVertex = mMuDst->primaryVertex();
+    int VtxIndex = 0;
 
     // Loop over primary vertices
     for(unsigned int iVtx=0; iVtx<mMuDst->numberOfPrimaryVertices(); iVtx++) {
@@ -2592,30 +2595,33 @@ bool StPicoDstMaker::selectVertex() {
       // Loop over primary tracks
       for(unsigned int iTrk=0; iTrk<mMuDst->numberOfPrimaryTracks(); iTrk++) {
 
-	// Retrieve i-th primary track from that belongs
-	// to the current primary vertex
-	StMuTrack* pTrack = mMuDst->primaryTracks( iTrk );
-	// Track must exist
-	if( !pTrack ) continue;
+        // Retrieve i-th primary track from that belongs
+        // to the current primary vertex
+        StMuTrack* pTrack = mMuDst->primaryTracks( iTrk );
+        // Track must exist
+        if( !pTrack ) continue;
 
-	// Check if track matches MTD
-	if( pTrack->index2MtdHit()<0 ) continue;
-	// Increment number of tracks that matched MTD
-	nMtdMatched++;
-       
+        // Check if track matches MTD
+        if( pTrack->index2MtdHit()<0 ) continue;
+        // Increment number of tracks that matched MTD
+        nMtdMatched++;
+
       } // for(unsigned int iTrk=0; iTrk<mMuDst->numberOfPrimaryTracks(); iTrk++)
 
-	// Take the first primary vertex that has at least 2 tracks
-	// that matched MTD
+      // Take the first primary vertex that has at least 2 tracks
+      // that matched MTD
       if( nMtdMatched >= 2 ) {
-	// Reset vertex index
-	mMuDst->setVertexIndex( iVtx );
-	// Reset pointer to the primary vertex
-	selectedVertex = mMuDst->primaryVertex();
-	// Quit vertex loop
-	break;
+        // Change vertex index
+        VtxIndex = iVtx;
+        // Quit vertex loop
+        break;
       } // if( nMtdMatched >= 2 )
     } // for(unsigned int iVtx=0; iVtx<mMuDst->numberOfPrimaryVertices(); iVtx++)
+
+    // Set the vertex index
+    mMuDst->setVertexIndex(VtxIndex);
+    // Set pointer to the primary vertex
+    selectedVertex = mMuDst->primaryVertex();
   } //  else if ( mVtxMode == PicoVtxMode::Mtd )
   else { // default case
     LOG_ERROR << "Pico Vtx Mode not set!" << endm;

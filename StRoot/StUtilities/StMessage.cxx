@@ -21,7 +21,6 @@
 using namespace std;
 static StMessageCounter* messCounter = StMessageCounter::Instance();
 
-static std::ostringstream messBuffer;
 static char space = ' ';
 static char tab = '\t';
 
@@ -73,7 +72,7 @@ int StMessage::Print(int nChars) {
   if (!nChars) {
     printIt = messCounter->CheckLimit(message,type);
   }
-  messBuffer.seekp(0);
+  std::ostringstream messBuffer;
   if (printIt) {
     const char* insert;
     if (!(option & kMessOptP)) {
@@ -106,9 +105,11 @@ int StMessage::Print(int nChars) {
       messBuffer << endofline;                           // "\n" end-line
     }
   }
-  const char* addedMessage=0;
+  bool addedMessageFlag = false;
+  std::string addedMessage;
   if (nChars == 0) {
-    addedMessage = messCounter->str().c_str();                   // Any limit message
+    addedMessageFlag = true;
+    addedMessage = messCounter->str();                   // Any limit message
   } else {
     if (nChars>0) {
       if (messBuffer.tellp() >= nChars)
@@ -118,7 +119,6 @@ int StMessage::Print(int nChars) {
     } else
       nChars = 0;
   }
-  messBuffer << ends;
   if (!repeats) {
     if (!strcmp(messBuffer.str().c_str(),lastMessBuffer.str().c_str())) {
       return messBuffer.tellp();
@@ -129,12 +129,12 @@ int StMessage::Print(int nChars) {
   }
   if ((option & kMessOptO) || (nChars != 0)) {
     myout << messBuffer.str();
-    if (addedMessage) myout << addedMessage;
+    if (addedMessageFlag) myout << addedMessage;
     myout.flush();
   }
   if ((option & kMessOptE) && (nChars == 0)) {
     myerr << messBuffer.str();
-    if (addedMessage) myerr << addedMessage;
+    if (addedMessageFlag) myerr << addedMessage;
     myerr.flush();
   }
   return messBuffer.tellp();
@@ -182,15 +182,6 @@ void StMessage::PrintInfo() {
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
-//_____________________________________________________________________________
-int StMessage::InitBuffer() {
-  // Initialize buffer with 1088 bytes.
-  messBuffer << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64
-     << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64 << ch64;
-  return messBuffer.tellp();
-}
-
-int tmpp = StMessage::InitBuffer();
 
 //_____________________________________________________________________________
 // $Id: StMessage.cxx,v 1.29 2016/06/14 06:24:54 genevb Exp $

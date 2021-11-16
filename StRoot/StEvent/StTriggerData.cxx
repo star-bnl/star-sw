@@ -239,6 +239,9 @@ unsigned int StTriggerData::bunchCounterHigh() const {return 0;}
 unsigned int StTriggerData::bunchCounterLow() const {return 0;}
 unsigned int StTriggerData::bunchId48Bit() const {return 0;}
 unsigned int StTriggerData::bunchId7Bit() const {return 0;}
+unsigned int StTriggerData::revTick1() const {return 0;}
+unsigned int StTriggerData::revTick2() const {return 0;}
+unsigned int StTriggerData::revTick3() const {return 0;}
 unsigned int StTriggerData::spinBit() const {return 0;}
 unsigned int StTriggerData::spinBitYellowFilled() const {return 0;}
 unsigned int StTriggerData::spinBitYellowUp() const {return 0;}

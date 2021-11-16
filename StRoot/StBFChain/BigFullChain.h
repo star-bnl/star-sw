@@ -1208,6 +1208,7 @@ Bfc_st BFC[] = { // standard chains
   {"paw"         ,""  ,"",""                                      ,"","","Allocate memory for pawc",kFALSE},
   {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
+  {"FXT"         ,""  ,"","",""                                  ,"","enable anything FXT-specific",kFALSE},
   {"Corr1"       ,""  ,"","AlignSectors,ExB,OBmap,OClock,OPr13","",""
    ,                                                  "... AlignSectors,ExB,OBmap,OClock,OPr13 ...",kFALSE},
   {"Corr2"       ,""  ,"","Corr1,OTwist,OIFC"                     ,"","","...Corr1+OTwist,OIFC ...",kFALSE},
