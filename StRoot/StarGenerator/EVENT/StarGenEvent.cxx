@@ -30,6 +30,7 @@ StarGenEvent::StarGenEvent(const Char_t *name, const Char_t *title ) : TObject()
 {
   for ( Int_t i=0;i<3;i++ ) mNumRejected[i]=0; 
   mParticles = new TClonesArray( "StarGenParticle", 1000 );
+  mParticles->SetOwner(kTRUE);
 }
 // ----------------------------------------------------------------------------
 StarGenEvent::~StarGenEvent()

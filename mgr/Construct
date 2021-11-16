@@ -212,6 +212,7 @@ push @items, "Stv";
 push @items, "StvMaker";
 push @items, "StvSeed";
 push @items, "StvUtil";
+push @items, "StTrsMaker";
 
 push @items, "StVecBosAna"; # missing boost/program_options/options_description.hpp
 if ($STAR_HOST_SYS =~ /darwin/ or $STAR_HOST_SYS =~ /icc/) {

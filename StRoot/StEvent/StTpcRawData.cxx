@@ -81,6 +81,8 @@
 #include "TMath.h"
 #include "StDaqLib/TPC/trans_table.hh"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
+StMemoryPool StDigitalPixel::mPool(sizeof(StDigitalPixel));
+
 //________________________________________________________________________________
 StTpcDigitalSector::StTpcDigitalSector(Int_t sector) : mSector(sector) {
 #if 0
@@ -137,6 +139,7 @@ Int_t StTpcDigitalSector::cleanup() {
   if (numberOfEmptyRows==mData.size()) return 1;
   else return 0;
 }
+#if 0
 //________________________________________________________________________________
 Int_t StTpcDigitalSector::getSequences(Int_t row, Int_t pad, Int_t *nSeq, StSequence** Seq, Int_t ***Ids) {
   *Seq=0;
@@ -150,10 +153,7 @@ Int_t StTpcDigitalSector::getSequences(Int_t row, Int_t pad, Int_t *nSeq, StSequ
   if (!nTimeBins) return 2;
   // Construct the sequences:
   StSequence aSequence;
-  static UChar_t ADCs[__MaxNumberOfTimeBins__];
-  static Int_t IDTs[__MaxNumberOfTimeBins__];
-  getTimeAdc(row,pad,ADCs, IDTs);
-  
+#if 0
   for (Int_t ibin=0;ibin<nTimeBins;ibin++)  {
     aSequence.length       = trsPadData[ibin].size();
     if (aSequence.length > 31) aSequence.length = 31;
@@ -162,6 +162,16 @@ Int_t StTpcDigitalSector::getSequences(Int_t row, Int_t pad, Int_t *nSeq, StSequ
     mSequence.push_back(aSequence);
     mIds.push_back(&IDTs[aSequence.startTimeBin]);
   }
+#else
+  Int_t tbC = -999;
+  for (auto it =  trsPadData.cbegin(); it != trsPadData.cend(); ++it) {
+    Int_t tb = (*it).first;
+    Short_t adc = (*it).second.adc();
+    Int_t   idt = (*it).second.idt();
+    if (tbC > 0 
+  }
+ 
+#endif
   *nSeq = mSequence.size();
   *Seq = &mSequence[0];
   if (Ids) *Ids = &mIds[0];
@@ -180,10 +190,12 @@ Int_t StTpcDigitalSector::getPadList(Int_t row, UChar_t **padList) {
   *padList = &mPadList[0];
   return mPadList.size();
 }
+#endif
 //________________________________________________________________________________
 Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, UShort_t *IDTs) {// 10 -> 8 conversion
   Int_t ntimebins = 0;
   StDigitalTimeBins  digPadData;
+#if 0
   Int_t tbC = -999;
   for (Int_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
     if (! ADCs[tb]) continue;
@@ -193,6 +205,15 @@ Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, UShort
     else      digPadData.back().add(ADCs[tb]);
     ntimebins++;
   }
+#else
+  for (Int_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
+    if (! ADCs[tb]) continue;
+    Int_t Idt = 0;
+    if (IDTs) Idt = IDTs[tb]; 
+    digPadData[tb] = StDigitalPixel(ADCs[tb], Idt);
+    ntimebins++;
+  }
+#endif
   if (ntimebins) assignTimeBins(row,pad,&digPadData);
   return ntimebins;
 }
@@ -200,6 +221,7 @@ Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, UShort
 Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, UChar_t *ADCs, UShort_t *IDTs) {// no conversion
   Int_t ntimebins = 0;
   StDigitalTimeBins  digPadData;
+#if 0
   Int_t tbC = -999;
   for (Int_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
     if (! ADCs[tb]) continue;
@@ -210,6 +232,16 @@ Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, UChar_t *ADCs, UShort
     else      digPadData.back().add(adc);
     ntimebins++;
   }
+#else
+  for (UShort_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
+    if (! ADCs[tb]) continue;
+    Int_t Idt = 0;
+    if (IDTs) Idt = IDTs[tb]; 
+    UShort_t adc = log8to10_table[ADCs[tb]];
+    digPadData[tb] = StDigitalPixel(adc, Idt);
+    ntimebins++;
+  }
+#endif
   assignTimeBins(row,pad,&digPadData);
   return ntimebins;
 }
@@ -217,6 +249,7 @@ Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, UChar_t *ADCs, UShort
 Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, Int_t *IDTs) {// 10 -> 8 conversion
   Int_t ntimebins = 0;
   StDigitalTimeBins  digPadData;
+#if 0
   Int_t tbC = -999;
   for (Int_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
     if (! ADCs[tb]) continue;
@@ -226,6 +259,15 @@ Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, Int_t 
     else      digPadData.back().add(ADCs[tb]);
     ntimebins++;
   }
+#else
+  for (UShort_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
+    if (! ADCs[tb]) continue;
+    Int_t Idt = 0;
+    if (IDTs) Idt = IDTs[tb]; 
+    digPadData[tb] = StDigitalPixel(ADCs[tb], Idt);
+    ntimebins++;
+  }
+#endif
   if (ntimebins) assignTimeBins(row,pad,&digPadData);
   return ntimebins;
 }
@@ -233,6 +275,7 @@ Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, Short_t *ADCs, Int_t 
 Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, UChar_t *ADCs, Int_t *IDTs) {// no conversion
   Int_t ntimebins = 0;
   StDigitalTimeBins  digPadData;
+#if 0
   Int_t tbC = -999;
   for (Int_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
     if (! ADCs[tb]) continue;
@@ -243,6 +286,15 @@ Int_t StTpcDigitalSector::putTimeAdc(Int_t row, Int_t pad, UChar_t *ADCs, Int_t 
     else      digPadData.back().add(adc);
     ntimebins++;
   }
+#else
+  for (UShort_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
+    if (! ADCs[tb]) continue;
+    Int_t Idt = 0;
+    if (IDTs) Idt = IDTs[tb]; 
+    digPadData[tb] = StDigitalPixel(ADCs[tb], Idt);
+    ntimebins++;
+  }
+#endif
   assignTimeBins(row,pad,&digPadData);
   return ntimebins;
 }
@@ -259,6 +311,7 @@ Int_t StTpcDigitalSector::getTimeAdc(Int_t row, Int_t pad,
   StDigitalTimeBins &trsPadData = *TrsPadData;
   nTimeSeqs = trsPadData.size();
   if (! nTimeSeqs) return nTimeSeqs;
+#if 0
   for (UInt_t i = 0; i < nTimeSeqs; i++) {
     StDigitalPair &digPair = trsPadData[i];
     UInt_t ntbk = digPair.size();
@@ -269,6 +322,12 @@ Int_t StTpcDigitalSector::getTimeAdc(Int_t row, Int_t pad,
       if (isIdt) IDTs[tb] = digPair.idt()[j];
     }
   }
+#else
+  for (auto it =  trsPadData.cbegin(); it != trsPadData.cend(); ++it) {
+    ADCs[(*it).first] = (*it).second.adc();
+    IDTs[(*it).first] = (*it).second.idt();
+  }
+#endif
   return nTimeSeqs;
 }
 //________________________________________________________________________________
@@ -285,6 +344,7 @@ Int_t StTpcDigitalSector::getTimeAdc(Int_t row, Int_t pad,
   StDigitalTimeBins &trsPadData = *TrsPadData;
   nTimeSeqs = trsPadData.size();
   if (! nTimeSeqs) return nTimeSeqs;
+#if 0
   for (UInt_t i = 0; i < nTimeSeqs; i++) {
     StDigitalPair &digPair = trsPadData[i];
     UInt_t ntbk = digPair.size();
@@ -296,6 +356,12 @@ Int_t StTpcDigitalSector::getTimeAdc(Int_t row, Int_t pad,
       if (isIdt) IDTs[tb] = digPair.idt()[j];
     }
   }
+#else
+  for (auto it =  trsPadData.cbegin(); it != trsPadData.cend(); ++it) {
+    ADCs[(*it).first] = (*it).second.adc();
+    IDTs[(*it).first] = (*it).second.idt();
+  }
+#endif
   return nTimeSeqs;
  }
 //________________________________________________________________________________
@@ -307,6 +373,7 @@ Int_t StTpcDigitalSector::PrintTimeAdc(Int_t row, Int_t pad) const {
   nTimeSeqs = trsPadData.size();
   if (! nTimeSeqs) return nTimeSeqs;
   cout << "Time/Adc/IdTruth for row " << row << "\tpad " << pad << endl;
+#if 0
   for (UInt_t i = 0; i < nTimeSeqs; i++) {
     StDigitalPair digPair = trsPadData[i];
     UInt_t ntbk = digPair.size();
@@ -316,6 +383,11 @@ Int_t StTpcDigitalSector::PrintTimeAdc(Int_t row, Int_t pad) const {
       cout << "\t" << tb << "\t" << digPair.adc()[j] << "\t" << digPair.idt()[j] << endl;
     }
   }
+#else
+  for (auto it =  trsPadData.cbegin(); it != trsPadData.cend(); ++it) {
+    cout << "\t" << (*it).first << "\t" << (*it).second.adc() << "\t" << (*it).second.idt() << endl;
+  }
+#endif
   return nTimeSeqs;
  }
 //________________________________________________________________________________

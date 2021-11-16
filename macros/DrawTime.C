@@ -4,7 +4,7 @@
 #include "TStyle.h"
 #include "TDatime.h"
 #include "TPolyMarker.h"
-void DrawTime(TH1 *h, const Char_t *opt="%m\/%d\/%y\%F1995-01-01 00:00:00") {// "%y\/%m\/%d\/%H%F1995-01-01 00:00:00") {
+void DrawTime(TH1 *h, const Char_t *opt="%m/%d/%y%F1995-01-01 00:00:00") {// "%y/%m/%d/%H%F1995-01-01 00:00:00") {
   //  FitP->Draw("sum_curr_1:utime-788936400","sum_curr_1>=-8&&sum_curr_1<=8&&utime>=1146339600&&utime<1146347789")
   //                               time of set
   if (! h) return;
@@ -14,9 +14,9 @@ void DrawTime(TH1 *h, const Char_t *opt="%m\/%d\/%y\%F1995-01-01 00:00:00") {// 
   //  gStyle->SetTimeOffset(-788936400); // - TDatime(19950101,0).Convert();  UNIX_TIMESTAMP("1995-01-01 00:00:00") = 788918400; for dEdx plots
   //  gStyle->SetTimeOffset(0);
   h->GetXaxis()->SetTimeDisplay(1);
-  //  h->GetXaxis()->SetTimeFormat("%m\/%d\/%y%F2000-01-01 00:00:00");
+  //  h->GetXaxis()->SetTimeFormat("%m/%d/%y%F2000-01-01 00:00:00");
   //  h->GetXaxis()->SetTimeFormat("%y%F1995-01-01 00:00:00");
-  //  h->GetXaxis()->SetTimeFormat("%m\/%y");
+  //  h->GetXaxis()->SetTimeFormat("%m/%y");
   h->GetXaxis()->SetTimeFormat(opt);
   //  h->GetXaxis()->SetTimeOffset(da.Convert());   
   //  h->Draw();
@@ -24,7 +24,7 @@ void DrawTime(TH1 *h, const Char_t *opt="%m\/%d\/%y\%F1995-01-01 00:00:00") {// 
   gPad->Update();
 }
 //________________________________________________________________________________
-void DrawTimeU(TH1 *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:00") {// "%y\/%m\/%d\/%H%F1995-01-01 00:00:00") {
+void DrawTimeU(TH1 *h, const Char_t *opt="%m/%d/%y"){//%F2001-01-01 00:00:00") {// "%y/%m/%d/%H%F1995-01-01 00:00:00") {
   // from unix time
   //  FitP->Draw("sum_curr_1:utime-788936400","sum_curr_1>=-8&&sum_curr_1<=8&&utime>=1146339600&&utime<1146347789")
   //                               time of set
@@ -35,16 +35,16 @@ void DrawTimeU(TH1 *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:00"
   //  gStyle->SetTimeOffset(-788936400); // - TDatime(19950101,0).Convert();  UNIX_TIMESTAMP("1995-01-01 00:00:00") = 788918400; for dEdx plots
   //  gStyle->SetTimeOffset(0);
   h->GetXaxis()->SetTimeDisplay(1);
-  //  h->GetXaxis()->SetTimeFormat("%m\/%d\/%y%F2000-01-01 00:00:00");
+  //  h->GetXaxis()->SetTimeFormat("%m/%d/%y%F2000-01-01 00:00:00");
   //  h->GetXaxis()->SetTimeFormat("%y%F1995-01-01 00:00:00");
-  //  h->GetXaxis()->SetTimeFormat("%m\/%y");
+  //  h->GetXaxis()->SetTimeFormat("%m/%y");
   h->GetXaxis()->SetTimeFormat(opt);
   //  h->GetXaxis()->SetTimeOffset(da.Convert());   
   //  h->Draw();
   gPad->Modified();
   gPad->Update();
 }
-void DrawTime(TGraph *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:00") {// "%y\/%m\/%d\/%H%F1995-01-01 00:00:00") {
+void DrawTime(TGraph *h, const Char_t *opt="%m/%d/%y"){//%F2001-01-01 00:00:00") {// "%y/%m/%d/%H%F1995-01-01 00:00:00") {
   //  FitP->Draw("sum_curr_1:utime-788936400","sum_curr_1>=-8&&sum_curr_1<=8&&utime>=1146339600&&utime<1146347789")
   //                               time of set
   if (! h) return;
@@ -54,9 +54,9 @@ void DrawTime(TGraph *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:0
   //  gStyle->SetTimeOffset(-788936400); // - TDatime(19950101,0).Convert();  UNIX_TIMESTAMP("1995-01-01 00:00:00") = 788918400; for dEdx plots
   //  gStyle->SetTimeOffset(0);
   h->GetXaxis()->SetTimeDisplay(1);
-  //  h->GetXaxis()->SetTimeFormat("%m\/%d\/%y%F2000-01-01 00:00:00");
+  //  h->GetXaxis()->SetTimeFormat("%m/%d/%y%F2000-01-01 00:00:00");
   //  h->GetXaxis()->SetTimeFormat("%y%F1995-01-01 00:00:00");
-  //  h->GetXaxis()->SetTimeFormat("%m\/%y");
+  //  h->GetXaxis()->SetTimeFormat("%m/%y");
   h->GetXaxis()->SetTimeFormat(opt);
   //  h->GetXaxis()->SetTimeOffset(da.Convert());   
   //  h->Draw();
@@ -64,7 +64,7 @@ void DrawTime(TGraph *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:0
   gPad->Update();
 }
 //________________________________________________________________________________
-void DrawTimeU(TGraph *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:00") {// "%y\/%m\/%d\/%H%F1995-01-01 00:00:00") {
+void DrawTimeU(TGraph *h, const Char_t *opt="%m/%d/%y"){//%F2001-01-01 00:00:00") {// "%y/%m/%d/%H%F1995-01-01 00:00:00") {
   // from unix time
   //  FitP->Draw("sum_curr_1:utime-788936400","sum_curr_1>=-8&&sum_curr_1<=8&&utime>=1146339600&&utime<1146347789")
   //                               time of set
@@ -75,9 +75,9 @@ void DrawTimeU(TGraph *h, const Char_t *opt="%m\/%d\/%y"){//\%F2001-01-01 00:00:
   //  gStyle->SetTimeOffset(-788936400); // - TDatime(19950101,0).Convert();  UNIX_TIMESTAMP("1995-01-01 00:00:00") = 788918400; for dEdx plots
   //  gStyle->SetTimeOffset(0);
   h->GetXaxis()->SetTimeDisplay(1);
-  //  h->GetXaxis()->SetTimeFormat("%m\/%d\/%y%F2000-01-01 00:00:00");
+  //  h->GetXaxis()->SetTimeFormat("%m/%d/%y%F2000-01-01 00:00:00");
   //  h->GetXaxis()->SetTimeFormat("%y%F1995-01-01 00:00:00");
-  //  h->GetXaxis()->SetTimeFormat("%m\/%y");
+  //  h->GetXaxis()->SetTimeFormat("%m/%y");
   h->GetXaxis()->SetTimeFormat(opt);
   //  h->GetXaxis()->SetTimeOffset(da.Convert());   
   //  h->Draw();

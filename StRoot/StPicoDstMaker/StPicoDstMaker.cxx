@@ -57,6 +57,7 @@
 #include "StMuDSTMaker/COMMON/StMuEpdHit.h"
 #include "StMuDSTMaker/COMMON/StMuETofHit.h"
 #include "StMuDSTMaker/COMMON/StMuETofDigi.h"
+#include "StMuDSTMaker/COMMON/StMuETofHeader.h"
 #include "StMuDSTMaker/COMMON/StMuMcTrack.h"
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 
@@ -259,6 +260,7 @@ void StPicoDstMaker::createArrays() {
   for (Int_t i = 0; i < (StPicoArrays::NAllPicoArrays); ++i) {
     mPicoArrays[i] = new TClonesArray(StPicoArrays::picoArrayTypes[i],
 				      StPicoArrays::picoArraySizes[i]);
+    mPicoArrays[i]->SetOwner(kTRUE);
   }
   mPicoDst->set(mPicoArrays);
 }
@@ -1899,6 +1901,10 @@ void StPicoDstMaker::fillEvent() {
   picoEvent->setNumberOfPrimaryTracks( mMuDst->numberOfPrimaryTracks() );
   picoEvent->setbTofTrayMultiplicity( ev->btofTrayMultiplicity() );
   picoEvent->setETofHitMultiplicity( ev->etofHitMultiplicity() );
+  StMuETofHeader *header = mMuDst->etofHeader();
+  if( header ) {
+      picoEvent->setETofGoodEventFlag( header->goodEventFlagVec() );
+  }
 
   // Save the number of etof digis that were useable in the hit building process
   unsigned short nUseableETofDigis = 0;

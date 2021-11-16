@@ -338,11 +338,12 @@ Int_t StBFChain::Instantiate()
 	  
 	  // Determine flavors
 	  TString flavors = "ofl"; // default flavor for offline
-	  // fixed target flavor
- 	  if (GetOption("FXT")) flavors.Prepend("FXT+");
 
 	  // TFG specific Db tag
 	  if (! GetOption("NoTFGLDbTag")) flavors += "+TFG";
+	  // fixed target flavor
+	  if (GetOption("FXT")) flavors.Prepend("FXT+");
+
 	  // simulation flavors
 	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) flavors.Prepend("sim+");
 	  
@@ -482,6 +483,9 @@ Int_t StBFChain::Instantiate()
     if (maker == "StTpcDbMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
     if (maker == "StDAQMaker") {
       if (GetOption("adcOnly")) mk->SetAttr("adcOnly",kTRUE);
+      NoMakersWithInput++;
+    }
+    if (maker == "StarMuEventReader") {
       NoMakersWithInput++;
     }
     if (maker == "StarPrimaryMaker") {
@@ -2019,7 +2023,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
 
     db->SetDateTime(FDateS,FTimeS);
   } else {
-    if (GetOption("simu") || ! NoMakersWithInput) {
+    if (GetOption("simu") && ! NoMakersWithInput) {
       const DbAlias_t *DbAlias = GetDbAliases();
       Int_t found = 0;
       for (Int_t i = 0; DbAlias[i].tag; i++) {

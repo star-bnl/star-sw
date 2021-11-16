@@ -79,3 +79,6 @@ sftp -r  fisyak@sftp.sdcc.bnl.gov:/gpfs02/eic/DATA/PYTHIA/ep/YellowReport/TREES/
 
 
 rsync -avrz -h  --include='*.root'  --exclude='*.*' /direct/gpfs02/eic/DATA/PYTHIA/ep/YellowReport/TREES/pythia.ep.18x275.1Mevents.RadCor=0.Q2=0.00001-1.0.kT=1.0*root .
+foreach r (`ls -1d st*.root | awk -F_ '{print $3}' | sort -u`)
+  mkdir -p P21ic_calib/2019/169/${r}; mv st*${r}*event.root P21ic_calib/2019/169//${r}/
+end

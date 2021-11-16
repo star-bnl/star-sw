@@ -39,44 +39,60 @@
 
 class StETofHeader : public StObject {
 public:
- 
+
     StETofHeader();
-    StETofHeader( const Double_t& trgGdpbTime, const Double_t& trgStarTime,
-		  const map< UInt_t, ULong64_t >& gdpbTs, const map< UInt_t, ULong64_t >& starTs,
-		  const UInt_t& starToken, const UInt_t& starDaqCmdIn, const UInt_t& starTrgCmdIn,
-		  const ULong64_t& eventStatusFlag );
-    StETofHeader( const Double_t& trgGdpbTime, const Double_t& trgStarTime,
-		  const map< UInt_t, ULong64_t >& gdpbTs, const map< UInt_t, ULong64_t >& starTs,
-		  const UInt_t& starToken, const UInt_t& starDaqCmdIn, const UInt_t& starTrgCmdIn,
-		  const ULong64_t& eventStatusFlag, const vector<Bool_t>& MissMatchFlagVec );
+    /** 
+     ** @brief default constructor for pre-2020 data. No missmatch information available. Used in StEtofDigiMaker to initialise the header.
+     **/
+    StETofHeader( const double&, const double&, const map< unsigned int, uint64_t >&, const map< unsigned int, uint64_t >& ,
+                  const unsigned int&, const unsigned int&, const unsigned int&, const uint64_t& );
+    /** 
+     ** @brief default constructor for post-2020 data. Include missmatch information from FEE. Used in StEtofDigiMaker to initialise the header.
+     **/              
+    StETofHeader( const double&, const double&, const map< unsigned int, uint64_t >&, const map< unsigned int, uint64_t >& ,
+                  const unsigned int&, const unsigned int&, const unsigned int&, const uint64_t&, const std::vector<bool>&  );
+    /** 
+     ** @brief Full constructor including goodEventFlag, which is normally set in calibrations only.
+     **/                
+    StETofHeader( const double&, const double&, const map< unsigned int, uint64_t >&, const map< unsigned int, uint64_t >& ,
+                  const unsigned int&, const unsigned int&, const unsigned int&, const uint64_t&, const std::vector<bool>&, const std::vector<bool>&  );              
 
     ~StETofHeader();
 
-    Double_t    trgGdpbFullTime()   const;
-    Double_t    trgStarFullTime()   const;
+    double    trgGdpbFullTime()   const;
+    double    trgStarFullTime()   const;
 
-    map< UInt_t, ULong64_t > rocGdpbTs()  const;
-    map< UInt_t, ULong64_t > rocStarTs()  const;
+    map< unsigned int, uint64_t > rocGdpbTs()  const;
+    map< unsigned int, uint64_t > rocStarTs()  const;
 
-    UInt_t      starToken()         const;
-    UInt_t      starDaqCmdIn()      const;
-    UInt_t      starTrgCmdIn()      const;
-    ULong64_t   eventStatusFlag()   const;
-    
-    vector<Bool_t>       missMatchFlagVec()  const;
+    unsigned int      starToken()         const;
+    unsigned int      starDaqCmdIn()      const;
+    unsigned int      starTrgCmdIn()      const;
+    uint64_t          eventStatusFlag()   const;    
+    /** 
+     ** @brief Flag for each Get4 TDC to mark if it is available in this event.
+     **/     
+    std::vector<bool>       missMatchFlagVec()  const;
+    /** 
+     ** @brief Flag to mark if the event is good for physics analysis for each counter. A counter is considered good in each event when there are zero missmatch flags set and pulser digis on both sides are found. In this case, the counter should perform at its best. Counter efficiency should be constant between good events. 
+     **/      
+    std::vector<bool>       goodEventFlagVec()  const;
 
 
-    void    setTrgGdpbFullTime( const Double_t& gdpbFullTime );
-    void    setTrgStarFullTime( const Double_t& starFullTime );
+    void    setTrgGdpbFullTime( const double& gdpbFullTime );
+    void    setTrgStarFullTime( const double& starFullTime );
 
-    void    setRocGdpbTs( const map< UInt_t, ULong64_t >& gdpbTs );
-    void    setRocStarTs( const map< UInt_t, ULong64_t >& starTs );
+    void    setRocGdpbTs( const map< unsigned int, uint64_t >& gdpbTs );
+    void    setRocStarTs( const map< unsigned int, uint64_t >& starTs );
 
-    void    setStarToken(    const UInt_t& token    );
-    void    setStarDaqCmdIn( const UInt_t& daqCmdIn );
+    void    setStarToken(    const unsigned int& token    );
+    void    setStarDaqCmdIn( const unsigned int& daqCmdIn );
     void    setStarTrgCmdIn( const unsigned int& trgCmdIn );
 
-    void    setEventStatusFlag( const ULong64_t& statusFlag );
+    void    setEventStatusFlag( const uint64_t& statusFlag );
+    void    setGoodEventFlagVec( const std::vector<bool>& FlagVec );
+    void    setGoodEventFlagVec( int blubb ) {return;}
+    //    void    setGoodEventFlagVec( const std::vector<bool>& FlagVec );
 
 private:
     Double_t    mTrgGdpbFullTime;
@@ -91,9 +107,10 @@ private:
     
     ULong64_t   mEventStatusFlag;
 
-    vector< Bool_t > mMissMatchFlagVec; 
+    std::vector< Bool_t > mMissMatchFlagVec;
+    std::vector< Bool_t > mGoodEventFlagVec; 
 
-    ClassDef( StETofHeader, 2 )
+    ClassDef( StETofHeader, 3 )
 };
 
 #endif // STETOFHEADER_H

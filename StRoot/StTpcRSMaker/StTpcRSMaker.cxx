@@ -613,6 +613,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   static Int_t maxSector = IAttr("maxSector");
   static Int_t minRow    = IAttr("minRow");
   static Int_t maxRow    = IAttr("maxRow");
+  TArrayF rs(1000); 
   // constants
   static Int_t iBreak = 0;
 #ifdef __DEBUG__
@@ -968,9 +969,15 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t driftLength = TMath::Abs(TrackSegmentHits[iSegHits].coorLS.position().z());
 	Double_t D = 1. + OmegaTau*OmegaTau;
 	Double_t SigmaT = St_TpcResponseSimulatorC::instance()->transverseDiffusion()*  TMath::Sqrt(   driftLength/D);
+	Double_t SigmaL = St_TpcResponseSimulatorC::instance()->longitudinalDiffusion()*TMath::Sqrt(   driftLength  );
+	if (St_tpcPadConfigC::instance()->IsRowInner(sector,row)) {
+	  if ( St_TpcResponseSimulatorC::instance()->transverseDiffusionI() > 0.0) 
+	    SigmaT = St_TpcResponseSimulatorC::instance()->transverseDiffusionI()*  TMath::Sqrt(   driftLength/D);
+	  if (St_TpcResponseSimulatorC::instance()->longitudinalDiffusionI() > 0.0) 
+	    SigmaL = St_TpcResponseSimulatorC::instance()->longitudinalDiffusionI()*TMath::Sqrt(   driftLength  );
+	}
 	//	Double_t SigmaL = St_TpcResponseSimulatorC::instance()->longitudinalDiffusion()*TMath::Sqrt(2*driftLength  );
 	if (sigmaJitterX > 0) {SigmaT = TMath::Sqrt(SigmaT*SigmaT + sigmaJitterX*sigmaJitterX);}
-	Double_t SigmaL = St_TpcResponseSimulatorC::instance()->longitudinalDiffusion()*TMath::Sqrt(   driftLength  );
 	Double_t NoElPerAdc = St_TpcResponseSimulatorC::instance()->NoElPerAdc();
 	if (NoElPerAdc <= 0) {
 	  if (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row)) {
@@ -1009,7 +1016,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	memset (padsdE, 0, sizeof(padsdE));
 	memset (tbksdE,  0, sizeof(tbksdE));
 	Float_t dEr = 0;
-	TArrayF rs(10); 
 	
 	do {// Clusters
 	  Float_t dS = 0;
@@ -1346,7 +1352,7 @@ Double_t StTpcRSMaker::PadResponseFunc(Double_t *x, Double_t *par) {
 }
 //________________________________________________________________________________
 Double_t StTpcRSMaker::Gatti(Double_t *x, Double_t *par) {
-  /************************************************************************
+  /***********************************************x[*************************
    *  Function    : generates the cathode signal using                    *
    *                the single-parameter Gatti formula:                   *
    *                              1 - tanh(K2 * lambda)**2                *
@@ -1391,7 +1397,9 @@ void  StTpcRSMaker::Print(Option_t */* option */) const {
   PrPP(Print, St_TpcResponseSimulatorC::instance()->W());// = 26.2);//*eV
   PrPP(Print, St_TpcResponseSimulatorC::instance()->Cluster());
   PrPP(Print, St_TpcResponseSimulatorC::instance()->longitudinalDiffusion());
+  PrPP(Print, St_TpcResponseSimulatorC::instance()->longitudinalDiffusionI());
   PrPP(Print, St_TpcResponseSimulatorC::instance()->transverseDiffusion());
+  PrPP(Print, St_TpcResponseSimulatorC::instance()->transverseDiffusionI());
   //  PrPP(Print, Gain);
   PrPP(Print, NoOfTimeBins);
   PrPP(Print, numberOfInnerSectorAnodeWires); 

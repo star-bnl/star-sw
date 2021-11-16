@@ -55,11 +55,14 @@
 
 #include "StObject.h"
 #include <vector>
+#include <map>
 #include <utility>
 #include "StSequence.hh"
 #include "StTpcPixel.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
+#include "StMemoryPool.hh"
 #define __MaxNumberOfTimeBins__ 512
+#if 0
 typedef std::vector<Short_t>  StVectorADC;
 typedef std::vector<Int_t> StVectorIDT;
 
@@ -85,18 +88,35 @@ private:
 typedef std::vector<StDigitalPair>           StDigitalTimeBins;
 typedef std::vector<StDigitalTimeBins>       StDigitalPadRow;
 typedef std::vector<StDigitalPadRow>         StDigitalSector;
-
 typedef std::vector<StDigitalPair>::iterator StDigitalTimeBinIterator;
 typedef StDigitalTimeBins::iterator          StDigitalTimeBinsIterator;
 typedef StDigitalPadRow::iterator            StDigitalPadRowIterator;
 typedef StDigitalSector::iterator            StDigitalRowIterator;
 
+#else
+class StDigitalPixel {
+ public:
+  StDigitalPixel(Short_t adc=0, Int_t Idt=0): mAdc(adc), mIdt(Idt) {}
+  virtual ~StDigitalPixel() {}
+  Short_t  adc()   const {return mAdc;}
+  Int_t    idt()   const {return mIdt;}
+  void* operator new(size_t) { return mPool.alloc(); }
+  void  operator delete(void* p)  { mPool.free(p); }
+ private:
+  Short_t  mAdc;
+  Int_t    mIdt; 
+  static StMemoryPool mPool;
+};
+typedef std::map<UShort_t,StDigitalPixel>           StDigitalTimeBins;
+typedef std::vector<StDigitalTimeBins>       StDigitalPadRow;
+typedef std::vector<StDigitalPadRow>         StDigitalSector;
+#endif
+typedef std::vector<StTpcPixel>              StVectPixel;
 typedef std::vector<StSequence>              StVecSequence;
 typedef std::vector<Int_t*>                  StVecIds;
 typedef std::vector<UChar_t>                 StVecPads;
 typedef std::vector<UChar_t> 	             StVecUChar;
 typedef std::vector<Int_t> 	             StVecInt;
-typedef std::vector<StTpcPixel>              StVectPixel;
 
 class StTpcDigitalSector : public StObject {
 public:
@@ -114,8 +134,10 @@ public:
     
     // Adding
     void   assignTimeBins(Int_t row , Int_t pad, StDigitalTimeBins*);
+#if 0
     Int_t  getSequences(Int_t row, Int_t pad, Int_t *nSeq, StSequence** seq, Int_t ***Ids);
     Int_t  getPadList(Int_t row, UChar_t **padList);
+#endif
     Int_t  getTimeAdc(Int_t row, Int_t pad, Short_t ADCs[__MaxNumberOfTimeBins__], 
 		      Int_t IDTs[__MaxNumberOfTimeBins__]); // with  8 => 10 conversion
     Int_t  getTimeAdc(Int_t row, Int_t pad, UChar_t  ADCs[__MaxNumberOfTimeBins__], 
@@ -146,7 +168,6 @@ private:
     Int_t                 mNoRows;
     ClassDef(StTpcDigitalSector,2)
 };
-
 class StTpcRawData : public StObject {
 public:
     StTpcRawData(Int_t noSectors = 24) {setNoSectors(noSectors);}

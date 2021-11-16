@@ -109,10 +109,11 @@
   //#ifndef __CLING__
   if (gSystem->DynamicPathName("StarRoot",kTRUE)) {    
     gSystem->Load("StarRoot");
-    gROOT->ProcessLine("StCloseFileOnTerminate::Instantiate();",&rootlogon_error);
   } else if (gSystem->DynamicPathName("libStarRoot",kTRUE)) { 
     gSystem->Load("libStarRoot");
-    gROOT->ProcessLine("StCloseFileOnTerminate::Instantiate();",&rootlogon_error);
+  }
+  if (! gSystem->Getenv("WithoutStCloseFileOnTerminate")) {
+      gROOT->ProcessLine("StCloseFileOnTerminate::Instantiate();",&rootlogon_error);
   }
   //#endif
 #if 1

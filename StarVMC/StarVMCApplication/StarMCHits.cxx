@@ -246,11 +246,13 @@ void StarMCHits::FillG2Table() {
     Int_t ieta = TMath::Abs(eta)/deta;// + 1
     Int_t phi_sub = 0;
     if (fHit.Middle.Local.xyzT.Y() > 0) phi_sub = 1;
-    TObjArray *objs = gGeoManager->GetListOfPhysicalNodes();
-    TGeoPhysicalNode *nodeP = 0;
     TString path(gGeoManager->GetPath());
+#if 0
+    TGeoPhysicalNode *nodeP = 0;
+    TObjArray *objs = gGeoManager->GetListOfPhysicalNodes();
     if (objs) nodeP = (TGeoPhysicalNode *) objs->FindObject(path);
     if (! nodeP) 	nodeP = gGeoManager->MakePhysicalNode(path);
+#endif
     Agcdigi()->idigi[0] = ieta;
     Agcdigi()->idigi[1] = phi_sub;
     Agcdigi()->idigi[2] = strip;

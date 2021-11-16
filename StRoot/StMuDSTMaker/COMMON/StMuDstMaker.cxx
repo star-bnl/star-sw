@@ -476,6 +476,7 @@ TClonesArray* StMuDstMaker::clonesArray(TClonesArray*& p, const char* type, int 
   if (p) return p;
   DEBUGVALUE2(type);
   p = new TClonesArray(type, size);
+  p->SetOwner(kTRUE);
   counter=0;
   return p;
 }
