@@ -30,7 +30,9 @@ jobs:
       - name: Rebuild up to base-stage
         uses: docker/build-push-action@v2
         with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:cache
+          cache-from:
+            - type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:cache
+            - type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:latest
           file: docker/Dockerfile.root5
           target: base-stage
           push: true
@@ -68,7 +70,9 @@ jobs:
       - name: Rebuild up to base-stage
         uses: docker/build-push-action@v2
         with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:cache
+          cache-from:
+            - type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:cache
+            - type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:latest
           file: docker/Dockerfile.root6
           target: base-stage
           push: true
