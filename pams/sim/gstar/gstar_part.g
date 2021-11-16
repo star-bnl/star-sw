@@ -854,6 +854,18 @@ Particle H4Lambda_He4_pi_minus    code = 61055       ,
                                   bratio = {1,}      , 
                                   mode = {004709,}
 
+Particle H4LambdaBar_He4Bar_pi_plus    code = 61056  , 
+                                  mass = 3.92727     , 
+                                  tlife = 2.6329e-10 , 
+                                  charge = -1        , 
+                                  pdg  = UNDEFINED   , 
+                                  trktyp = kGtHadr   ,  
+                                  bratio = {1,}      
+
+     uw = { 0, 8, 50047 }
+     Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
+
+
 Particle He4Lambda_He3_p_pi_minus code = 61057       , 
                                   mass = 3.92168     , 
                                   tlife = 2.6320e-10 , 
