@@ -65,14 +65,6 @@ void AnalyzePedAsPhysRun(char* inputDirectory, char* inputFileName)
 void DrawWheel(StSPtrVecEpdHit hits, TString outputFileName){
 
 
-  /* I cannot believe that in November 2021 I am fixing a bug with these limits.... !
-     - MAL 11nov2021
-     int lowLimitB[4] = {-1,10,149,3001};
-     int hiLimitB[4]  = {9,150,3000,5000};
-     int lowLimitC[4] = {-1,10,149,3001};
-     int hiLimitC[4]  = {9,150,3000,5000};
-  */
-
   int lowLimitB[4] = {-1,10,150,3001};
   int hiLimitB[4]  = {9,149,3000,5000};
   int lowLimitC[4] = {-1,10,150,3001};
@@ -105,7 +97,6 @@ void DrawWheel(StSPtrVecEpdHit hits, TString outputFileName){
     for (Level=0; Level<4; Level++){
       if (tt<10){lowCutoff=lowLimitC[Level];  hiCutoff=hiLimitC[Level];}
       else {lowCutoff=lowLimitB[Level];  hiCutoff=hiLimitB[Level];}
-      //      if ((adc>lowCutoff)&&(adc<hiCutoff)) break;   fixed (below) - MAL 11nov2021
       if ((adc>=lowCutoff)&&(adc<=hiCutoff)) break; 
     }
     if (Level>3) cout << "ERROR!!\n\n";
