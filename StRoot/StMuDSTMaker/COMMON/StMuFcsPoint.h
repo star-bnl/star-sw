@@ -1,8 +1,8 @@
 /*****************************************************************************
  * 
- * $Id: StMuFcsPoint.h,v 1.3 2015/10/16 18:13:28 jdb Exp $
+ * $Id: StMuFcsPoint.h,v 1.0 2021/11/17 18:13:28 jdb Exp $
  *
- * Author: Thomas Burton, 2014
+ * Author: Daniel Brandenburg, 2021
  *****************************************************************************
  *
  * Description: Declaration of StMuFcsPoint, the MuDST FCS "point" class

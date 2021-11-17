@@ -11,7 +11,6 @@
 #include "St_base/StMessMgr.h"
 #include "StEvent/StEventTypes.h"
 #include "StEvent/StTriggerData.h"
-// #include "StFcsDbMaker/StFcsDbMaker.h"
 
 #include <algorithm>  // For std::find
 #include <iterator>  // For std::distance

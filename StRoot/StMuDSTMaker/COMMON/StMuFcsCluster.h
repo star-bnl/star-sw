@@ -1,20 +1,14 @@
 /*************************************************************************
  *
- * $Id: StMuFmsCluster.h,v 1.2 2015/09/02 22:09:58 jdb Exp $
+ * $Id: StMuFcsCluster.h,v 1.2 2021/11/17 22:09:58 jdb Exp $
  *
- * Author: Thomas Burton, 2014
+ * Author: Daniel Brandenburg, 2021
  *************************************************************************
  *
- * Description: Declaration of StMuFmsCluster, the MuDST FMS cluster class
+ * Description: Declaration of StMuFcsCluster, the MuDST FCS cluster class
  *
- *************************************************************************
- *
- * $Log: StMuFmsCluster.h,v $
- * Revision 1.2  2015/09/02 22:09:58  jdb
- * Added Akios changes to Fms
- *
- *
- *************************************************************************/  
+ *************************************************************************/
+
 #ifndef StMuFcsCluster_hh
 #define StMuFcsCluster_hh
 

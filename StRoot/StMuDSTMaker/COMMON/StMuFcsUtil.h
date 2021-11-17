@@ -6,7 +6,6 @@
 
 class StMuFcsCollection;
 class StFcsCollection;
-// class StFcsDbMaker;
 class StTriggerData;
 class StMuDst;
 class StFcsHit;

@@ -1,11 +1,11 @@
 /*****************************************************************************
  * 
- * $Id: StMuFcsPoint.cxx,v 1.2 2015/09/02 22:09:58 jdb Exp $
+ * $Id: StMuFcsPoint.cxx,v 1.0 2021/11/17 22:09:58 jdb Exp $
  *
- * Author: Thomas Burton, 2014
+ * Author: Daniel Brandenburg, 2021
  *****************************************************************************
  *
- * Description: Implementation of StMuFcsPoint, the MuDST FMS "point" class
+ * Description: Implementation of StMuFcsPoint, the MuDST FCS "point" class
  *
  *****************************************************************************
  *

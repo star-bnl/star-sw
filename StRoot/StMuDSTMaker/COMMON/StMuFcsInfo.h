@@ -1,3 +1,14 @@
+/***************************************************************************
+ *
+ * $Id: StMuFcsInfo.h,v 1.0 2021/11/17 16:07:31 jdb Exp $
+ *
+ * Author: Daniel Brandenburg, 2021
+ ***************************************************************************
+ *
+ * Description: StMuFcsInfo is event level data for Fcs. 
+ *  Stores hit indices for each detector
+ *
+ ***************************************************************************/
 #ifndef STROOT_STMUDSTMAKER_STMUFCSINFO_H
 #define STROOT_STMUDSTMAKER_STMUFCSINFO_H
 

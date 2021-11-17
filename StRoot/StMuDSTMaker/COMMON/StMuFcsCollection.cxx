@@ -1,16 +1,14 @@
 /***************************************************************************
  *
- * $Id: StMuFcsCollection.cxx,v 1.6 2017/08/14 16:22:36 smirnovd Exp $
+ * $Id: StMuFcsCollection.cxx,v 1.0 2021/11/17 16:22:36 jdb Exp $
  *
- * Author: Jingguo Ma, Dec 2009
+ * Author: Daniel Brandenburg, 2021
  ***************************************************************************
  *
- * Description: Fcs data interface to StMuFcsHit, StMuFcsCluster and StMuFcsPoint
+ * Description: Fcs data interface to StMuFcsHit, StMuFcsCluster, StMuFcsPoint, and StMuFcsInfo
  *
- ***************************************************************************
- *
- *
- **************************************************************************/
+ ***************************************************************************/
+
 #include "StMuDSTMaker/COMMON/StMuFcsCollection.h"
 #include "StMuDSTMaker/COMMON/StMuFcsCluster.h"
 #include "StMuDSTMaker/COMMON/StMuFcsHit.h"

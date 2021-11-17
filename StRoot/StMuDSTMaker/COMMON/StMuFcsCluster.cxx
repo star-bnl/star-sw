@@ -1,25 +1,14 @@
 /*****************************************************************************
  *
- * $Id: StMuFmsCluster.cxx,v 1.3 2016/06/14 17:11:34 jdb Exp $
+ * $Id: StMuFcsCluster.cxx,v 1.0 2021/11/17 17:11:34 jdb Exp $
  *
- * Author: Thomas Burton , 2014
+ * Author: Daniel Brandneburg , 2021
  *****************************************************************************
  *
- * Description: Implementation of StMuFmsCluster, the MuDST FMS cluster class
+ * Description: Implementation of StMuFcsCluster, the MuDST FCS cluster class
  *
- *****************************************************************************
- *
- * $Log: StMuFmsCluster.cxx,v $
- * Revision 1.3  2016/06/14 17:11:34  jdb
- * Fixing Coverity Errors:
- * StMuFmsCluster.cxx : UNINIT_CTOR on member mEnergy
- * StMuFmsUtile.cxx : DEADCODE on check for null pointer
- *
- * Revision 1.2  2015/09/02 22:09:58  jdb
- * Added Akios changes to Fms
- *
- *
- *****************************************************************************/ 
+ *****************************************************************************/
+
 #include "StFcsCluster.h"
 #include "StMuFcsCluster.h"
 
