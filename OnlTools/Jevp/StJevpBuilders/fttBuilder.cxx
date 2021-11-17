@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
 
 #include "JevpBuilder.h"
 #include "DAQ_READER/daqReader.h"
