@@ -45,56 +45,13 @@ Bool_t AgModule::AddHit( string _for, string meas, Float_t bitns, Float_t mn, Fl
 
 Bool_t AgModule::AddCut( string block, string cut, Float_t value )
 {
-
-  TDataSet      *BLOCKS   = mDataSet -> Find("blocks");
-  TDataSet      *THEBLOCK = BLOCKS   -> Find(block.c_str());
-  TGenericTable *G3cuts   = dynamic_cast<TGenericTable *>( THEBLOCK -> Find("G3cuts") );
-
-
-  if ( 0==G3cuts )
-    {
-      //      cout << "Register new cut table for block " << block.c_str() << endl;
-      // Create the table and add default set of cuts
-      THEBLOCK -> Add( G3cuts = new TGenericTable( "Gccuts_t", "G3cuts" ) );
-      Gccuts_t cuts; /* new default cuts */ 
-      G3cuts -> AddAt( &cuts );
-    }
-
-  // Set new cut value for this cut
-  ((Gccuts_t *)G3cuts->At(0))->set( cut, value );
   return true;
 };
 
 Bool_t AgModule::AddPar( string block, string cut, Float_t value )
 {
-
-  TDataSet      *BLOCKS   = mDataSet -> Find("blocks");
-  TDataSet      *THEBLOCK = BLOCKS   -> Find(block.c_str());
-  TGenericTable *G3birk   = dynamic_cast<TGenericTable *>( THEBLOCK -> Find("G3birk") );
-  TGenericTable *G3phlt   = dynamic_cast<TGenericTable *>( THEBLOCK -> Find("G3phlt") );
-
-
-  if ( 0==G3birk || 0==G3phlt )
-    {
-      //      cout << "Register new par tables for block " << block.c_str() << endl;
-      // Create the table and add default set of cuts
-      THEBLOCK -> Add( G3birk = new TGenericTable( "Gcbirk_t", "G3birk" ) );
-      THEBLOCK -> Add( G3phlt = new TGenericTable( "Gcphlt_t", "G3phlt" ) );
-      Gcbirk_t birk;       G3birk -> AddAt( &birk );
-      Gcphlt_t phlt;       G3phlt -> AddAt( &phlt );
-    }
-
-  // Set new cut value for this cut
-  ((Gcbirk_t *)G3birk->At(0))->set( cut, value );
-  ((Gcphlt_t *)G3phlt->At(0))->set( cut, value );
   return true;
 };
-
-
-
-// Bool_t AgModule::AddHit( const Char_t *for, const Char_t *meas, Float_t bins, Float_t mn=0, Float_t mx=0, const Char_t *opts="" ) {
-//   return true;
-// };
 
 // ---------------------------------------------------------------------------------------------
 AgBlock *AgModule::AddBlock( const Char_t *name, AgBlock *_block )
