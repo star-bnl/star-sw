@@ -430,7 +430,8 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 			for(int i=0;i<tb_cou;i++) {
 				fgt_d[cou].ch = ch ;
 				fgt_d[cou].tb = i ;
-				fgt_d[cou].adc = d[ix] ;
+				fgt_d[cou].adc = d[ix] & 0xFFF ;	// new: 13 bits
+				fgt_d[cou].flags = d[ix]>>12 ;		// new: upper 3 are flags
 				cou++ ;
 
 				//printf("ZS: %d %d %d %d %d = %d\n",arc,arm,apv,ch,i,d[ix]) ;
@@ -736,6 +737,7 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 						fgt_d[cou].ch = rch ;
 						fgt_d[cou].tb = tb ;
 						fgt_d[cou].adc = adc ;
+						fgt_d[cou].flags = 0 ;
 						cou++ ;
 					}
 				}
@@ -805,8 +807,17 @@ daq_dta *daq_fgt::handle_ped(int sec, int rdo)
 		LOG(ERR,"Bad pedestal version") ;
 	}
 
-	if(d[1] != 1 ) {
-		LOG(ERR,"Bad pedestal version") ;
+	int is_fst = 0 ;
+
+	switch(d[1]) {
+	case 1 :	// old, non FST
+		break ;
+	case 2 :
+		is_fst = 1 ;
+		break ;
+	default :
+		LOG(ERR,"Bad pedestal version 0x%X",d[1]) ;
+		break ;
 	}
 
 //	int arm_cou = d[2] ;
@@ -834,11 +845,18 @@ daq_dta *daq_fgt::handle_ped(int sec, int rdo)
 				for(int t=0;t<tb_cou;t++) {
 					u_short ped = d[ix++] ;
 					u_short rms = d[ix++] ;
+					u_short cmn_rms ;
+
+					if(is_fst) {	// SPECIAL
+						cmn_rms = d[ix++] ;
+					}
+					else cmn_rms = 0 ;
 
 					f_ped[cou].ch = ch ;
 					f_ped[cou].tb = t ;
 					f_ped[cou].ped = ((float)ped) / 16.0 ;
 					f_ped[cou].rms = ((float)rms) / 16.0 ;
+					f_ped[cou].cmn_rms = ((float)cmn_rms) / 16.0 ;
 					cou++ ;
 				}
 			}
