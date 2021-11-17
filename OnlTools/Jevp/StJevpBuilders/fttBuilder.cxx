@@ -18,8 +18,7 @@
 
 #include <algorithm>    // std::find
 #include <vector>       // std::vector
-#include <fstream>
-
+#include <assert.h>
 
 // This is the one PlotSet that is guarenteed to always exist
 // It's main purpose is to provide the run information 
@@ -34,156 +33,81 @@
 #include <map>
 #include <string>
 
-
-
-class Strip2CH
-{
-private:
-    std :: map< int , int > StripGroupLast; 
-    std :: map< int , int > FEEs2Slot;
-    std :: map< int , int > ALTRO1_2_Strip;
-    std :: map< int , int > ALTRO2_2_Strip;
-public:
-    Strip2CH(){}
-    
-    void init( string confdatadir, string filename, int n_FEEs){
-        TString baseConfPath;
-        char baseFile[256];
-        sprintf(baseFile, "%s/ftt/",confdatadir.c_str() );
-        baseConfPath = TString( baseFile );
-        
-	LOG("JEFF", "baseConfPath = %s", baseFile);
-
-        // initialize number of last strip of one strip group
-        ifstream inFile;
-        inFile.open( (baseConfPath + "LastStrip.dat").Data() );
-        int LastStrip = 0;
-        int nGroup = 1;
-        while ( inFile >> LastStrip)
-        {
-            // cout << LastStrip << endl;
-            StripGroupLast[nGroup] = LastStrip;
-            nGroup++;
-        }
-        inFile.close();
-
-        // initialize FEEs to Slots
-        inFile.open( (baseConfPath + filename.c_str()).Data() );
-        nGroup = 1;
-        int FEEnumber = 0;
-        while (inFile >> FEEnumber)
-        {
-            // cout << FEEnumber << endl;
-            FEEs2Slot[ FEEnumber ] = nGroup;
-            nGroup++;
-            if (nGroup > n_FEEs) break;
-        }
-        inFile.close();
-
-        // initialize FEE channel to Strip channel
-        inFile.open( (baseConfPath + "ALTRO1_2_Strip.dat").Data() );
-        int FEE_Channel;
-        int Strip_Channel;
-        while (inFile >> FEE_Channel >> Strip_Channel ) {
-            // cout << "FEE channel is " << FEE_Channel << " Strip Channel is " << Strip_Channel << endl;
-            ALTRO1_2_Strip[FEE_Channel] = Strip_Channel;
-        }
-        inFile.close();
-
-        // initialize FEE channel to Strip channel
-        inFile.open( (baseConfPath + "ALTRO2_2_Strip.dat").Data() );
-        while (inFile >> FEE_Channel >> Strip_Channel ) {
-            // cout << "FEE channel is " << FEE_Channel << " Strip Channel is " << Strip_Channel << endl;
-            ALTRO2_2_Strip[FEE_Channel] = Strip_Channel;
-        }
-        inFile.close();
-
-    }
-    void initFEEs( int* FEEs, int n_FEEs ) {}
-
-    // get the strip number from the FEE ALTRO and channel number from electronics
-    // must follow this RULE : ALTRO number = FEE*2 or FEE*2+1
-    int GetStripNumber( int FEE, int ALTRO, int Channel )
-    {
-        int GroupLastStrip = StripGroupLast[ FEEs2Slot[ FEE ] ];
-        map < int , int > Maps;
-        if ( ALTRO == FEE*2 ) Maps = ALTRO1_2_Strip;
-        if ( ALTRO == FEE*2+1 ) Maps = ALTRO2_2_Strip;
-
-        int Strip_number = GroupLastStrip-Maps[Channel]+1;
-        return Strip_number;
-    }
-
-    // 60*60 prototype layer1, there is a mirror flip between the layer 1 and layer 2,
-    // the map needs to be modified.
-    // this function is used to correct the difference between the layer 1 and layer 2
-    int GetStripNumber_MirrorFlip( int FEE, int ALTRO, int Channel )
-    {
-        int GroupLastStrip = StripGroupLast[ FEEs2Slot[ FEE ] ];
-        map < int , int > Maps;
-        if ( ALTRO == FEE*2 ) Maps = ALTRO2_2_Strip;
-        if ( ALTRO == FEE*2+1 ) Maps = ALTRO1_2_Strip;
-
-        int Strip_number;
-        if ( Channel <= 7 ) Strip_number = GroupLastStrip-Maps[Channel+8]+1;
-        if ( Channel >= 8 ) Strip_number = GroupLastStrip-Maps[Channel-8]+1;
-        return Strip_number;
-    }
-
-
-    ~Strip2CH() {}
-};
-
-
-/*********************************************************/
-// class for mapping the TPX electronics
-
+// helper macro for string formatting
+#define TSF( ... ) TString::Format(__VA_ARGS__)
 
 
 ClassImp(fttBuilder);
-	
+
+const std::string fttBuilder::quadLabels[4] = {"A", "B", "C", "D"};
+const std::string fttBuilder::dirLabels[4]  = {"Horizontal", "Vertical", "Diagonal", "Unknown"};
+
 void fttBuilder::initialize(int argc, char *argv[]) {
 	
 
+    // Control draw/visiblity options
+    std::vector<std::string> setLogy   = { "hitsPerPlane", "hitsPerQuad", "hitsPerFob", "hitsPerVMM", "hitsVMMPerPlane0", "hitsVMMPerPlane1", "hitsVMMPerPlane2", "hitsVMMPerPlane3", "nStripsFired" };
+    std::vector<std::string> setLogz   = { "hitsPerPlaneQuad", "hitsFobQuadPerPlane0", "hitsFobQuadPerPlane1", "hitsFobQuadPerPlane2", "hitsFobQuadPerPlane3" };
+    std::vector<std::string> showStats = {  };
+
+    //////////////////////////////////////////////////////////////////////// 
+    // General
+    ////////////////////////////////////////////////////////////////////////
+        contents.nStripsFired            = new TH1D( "nStripsFired", "sTGC; nStripsFired; counts", 6144, 0, 6144 );
+
+    //////////////////////////////////////////////////////////////////////// 
+    // hits and adc
+    ////////////////////////////////////////////////////////////////////////
+        contents.hitsPerPlane             = new TH1D( "hitsPerPlane", "sTGC (hits / Plane); Plane; counts (hits)", nPlane,0.5, nPlane + 0.5 );
+        contents.hitsPerQuad              = new TH1D( "hitsPerQuad", "sTGC (hits / Quadrant); Plane & Quadrant; counts (hits)", nQuad,0.5, nQuad + 0.5 );
+        contents.hitsPerFob               = new TH1D( "hitsPerFob", "sTGC (hits / Fob); Fob; counts (hits)", nFob,0.5, nFob + 0.5 );
+        contents.hitsPerVMM               = new TH1D( "hitsPerVMM", "sTGC (hits / VMM); VMM Index (96VMM / Plane); counts (hits)", nVMM,0.5, nVMM + 0.5 );
+        contents.hitsPerPlaneQuad         = new TH2D( "hitsPerPlaneQuad", "sTGC (hits / Quadrant); Plane; Quadrant", nPlane,0.5, nPlane + 0.5, nQuadPerPlane, 0.5, nQuadPerPlane + 0.5);
+        contents.hitsPerVMMPlane          = new TH2D( "hitsPerVMMPlane", "sTGC (hits / VMM / Plane); VMM index; Plane", nVMMPerPlane, 0.5, nVMMPerPlane+0.5, nPlane,0.5, nPlane + 0.5);
+        contents.adcVMM                   = new TH2D( "adcVMM", "sTGC; VMM; ADC", nVMM,0.5, nVMM + 0.5, maxADC/10.0, 0, maxADC);
+        contents.bcidVMM                  = new TH2D( "bcidVMM", "sTGC; VMM; BCID", nVMM,0.5, nVMM + 0.5, maxBCID/10.0, 0, maxBCID);
     
-    // TPX
-    contents.tpxADC              = new TH1D( "tpxADC", "sTGC TPX; ADC; counts", 400,-0.5,1023.5);
-    contents.tpxADCZoom          = new TH1D( "tpxADCZoom", "sTGC TPX; ADC; counts", 200,-0.5,199.5);
-    contents.tpxFEE              = new TH1D( "tpxFEE", "sTGC TPX; FEE; counts", 31,-0.5,30.5);
-    contents.tpxALTRO            = new TH1D( "tpxALTRO", "sTGC TPX; ALTRO; counts", 61,-0.5,60.5);
-    contents.tpxCHANNEL          = new TH1D( "tpxCHANNEL", "sTGC TPX; CHANNEL; counts", 16,-0.5,15.5);
-    // contents.tpxFEEALTRO         = new TH2D( "tpxFEEALTRO", "sTGC TPX; ALTRO; FEE", 61, -0.5, 99.5, 31,-0.5,30.5);
-    contents.tpxALTROCHANNEL     = new TH2D( "tpxALTROCHANNEL", "sTGC TPX; ALTRO; Channel; counts", 61,-0.5,60.5,16,-0.5,15.5);
-    contents.tpxLayerRowStrip[0] = new TH2D( "tpxLayer1RowStrip", "sTGC TPX Layer1; Strip; Row; counts", 200,-0.5,199.5,4,-0.5,3.5);
-    contents.tpxLayerRowStrip[1] = new TH2D( "tpxLayer2RowStrip", "sTGC TPX Layer2; Strip; Row; counts", 200,-0.5,199.5,4,-0.5,3.5);
+        contents.hitsPerPlane->GetXaxis()->SetNdivisions( 5, 1, 0 );
+        contents.hitsPerPlaneQuad->GetXaxis()->SetNdivisions( 5, 1, 0 );
+        contents.hitsPerVMMPlane->GetYaxis()->SetNdivisions( 5, 1, 0 );
 
-    contents.tpxLayerRowStripADC[0] = new TH2D( "tpxLayer1RowStripADC", "sTGC TPX Layer1; Strip; Row; ADC", 200,-0.5,199.5,4,-0.5,3.5);
-    contents.tpxLayerRowStripADC[1] = new TH2D( "tpxLayer2RowStripADC", "sTGC TPX Layer2; Strip; Row; ADC", 200,-0.5,199.5,4,-0.5,3.5);
+    //////////////////////////////////////////////////////////////////////// 
+    // hits Per Plane
+    ////////////////////////////////////////////////////////////////////////
+        for ( u_char iPlane = 0; iPlane < fttBuilder::nPlane; iPlane ++ ){
+            contents.hitsFobQuadPerPlane[iPlane]    = new TH2D( TSF("hitsFobQuadPerPlane%d", iPlane), TSF("sTGC Plane %d (hits / Fob); Fob index; Quadrant", iPlane+1), nFobPerQuad, 0.5, nFobPerQuad+0.5, nQuadPerPlane, 0.5, nQuadPerPlane+0.5 );
+            setQuadLabels( contents.hitsFobQuadPerPlane[iPlane]->GetYaxis() );
 
-    contents.tpxLayerRowTimebinStripADC[0] = new TH2D( "tpxLayer1Row1TimebinStripADC", "sTGC TPX Layer1 Row 1; Strip; Timebin; ADC", 200,-0.5,199.5,60,-0.5,59.5);
-    contents.tpxLayerRowTimebinStripADC[1] = new TH2D( "tpxLayer1Row2TimebinStripADC", "sTGC TPX Layer1 Row 2; Strip; Timebin; ADC", 200,-0.5,199.5,60,-0.5,59.5);
-    contents.tpxLayerRowTimebinStripADC[2] = new TH2D( "tpxLayer1Row3TimebinStripADC", "sTGC TPX Layer1 Row 3; Strip; Timebin; ADC", 200,-0.5,199.5,60,-0.5,59.5);
-    contents.tpxLayerRowTimebinStripADC[3] = new TH2D( "tpxLayer2Row1TimebinStripADC", "sTGC TPX Layer2 Row 1; Strip; Timebin; ADC", 200,-0.5,199.5,60,-0.5,59.5);
-    contents.tpxLayerRowTimebinStripADC[4] = new TH2D( "tpxLayer2Row2TimebinStripADC", "sTGC TPX Layer2 Row 2; Strip; Timebin; ADC", 200,-0.5,199.5,60,-0.5,59.5);
-    contents.tpxLayerRowTimebinStripADC[5] = new TH2D( "tpxLayer2Row3TimebinStripADC", "sTGC TPX Layer2 Row 3; Strip; Timebin; ADC", 200,-0.5,199.5,60,-0.5,59.5);
 
-    contents.tpxTimebinStrip = new TH2D( "tpxTimebinStrip", "sTGC TPX; Strip; Timebin; counts", 200,-0.5,199.5,100,-0.5,99.5);
-    contents.tpxTimebinADC   = new TH2D( "tpxTimebinADC", "sTGC TPX;Timebin; ADC; counts", 60,-0.5,59.5,1024,-0.5,1023.5);
-    contents.tpxNStripsFired = new TH1D( "tpxNStripsFired", "sTGC TPX; nStripsFired; nEvents", 200, -0.5, 199.5 );
+            contents.hitsVMMPerPlane[iPlane]        = new TH1D( TSF("hitsVMMPerPlane%d", iPlane), TSF("sTGC Plane %d (hits / VMM); VMM; counts (hits)", iPlane+1), nVMMPerPlane, 0.5, nVMMPerPlane + 0.5 );
 
-    std::vector<std::string> setLogy   = {"tpxADC", "tpxADCZoom", "tpxFEE", "tpxALTRO", "tpxCHANNEL"};
-    std::vector<std::string> setLogz   = {"tpxTimebinADC"};
-    std::vector<std::string> hideStats = {  "tpxALTROCHANNEL", "tpxLayer1RowStrip", "tpxLayer2RowStrip", 
-                                            "tpxLayer1Row1TimebinStripADC", "tpxLayer1Row2TimebinStripADC", 
-                                            "tpxLayer1Row3TimebinStripADC", "tpxLayer2Row1TimebinStripADC", 
-                                            "tpxLayer2Row2TimebinStripADC", "tpxLayer2Row3TimebinStripADC", 
-                                            "tpxLayer1RowStripADC", "tpxLayer2RowStripADC"
-                                         };
 
-    // VMM
-    contents.ADC              = new TH1D( "ADC", "sTGC; ADC; counts", 400,-0.5,1023.5);
-    contents.ADCZoom          = new TH1D( "ADCZoom", "sTGC; ADC; counts", 200,-0.5,199.5);
+            contents.hStripPerPlane[iPlane]    = new TH2D( TSF("hStripPerPlane%d", iPlane), TSF("sTGC Horizontal Strips, Plane %d (hits / Strip); x; y", iPlane+1), 140, -700, 700, 438, -700, 700 );
+            contents.vStripPerPlane[iPlane]    = new TH2D( TSF("vStripPerPlane%d", iPlane), TSF("sTGC Vertical Strips, Plane %d (hits / Strip); x; y", iPlane+1), 438, -700, 700, 140, -700, 700 );
 
+
+            for ( u_char iQuad = 0; iQuad < nQuadPerPlane; iQuad ++ ){
+                u_char iQuadPerFtt = iQuad + (iPlane * nQuadPerPlane);
+                contents.hitsVMMChPerPlaneQuad[ iQuadPerFtt ] = new TH2D( TSF("hitsVMMChPerPlaneQuad%d", iQuadPerFtt), TSF("sTGC (Plane %d, Quadrant %s); VMM; Channel", iPlane + 1, quadLabels[iQuad].c_str()), nVMMPerQuad,0.5, nVMMPerQuad + 0.5, nChPerVMM, 0.5, nChPerVMM + 0.5);
+                contents.adcVMMChPerPlaneQuad[ iQuadPerFtt ]  = new TH2D( TSF("adcVMMChPerPlaneQuad%d", iQuadPerFtt), TSF("sTGC (Plane %d, Quadrant %s) ADC weighted; VMM; Channel", iPlane + 1, quadLabels[iQuad].c_str()), nVMMPerQuad,0.5, nVMMPerQuad + 0.5, nChPerVMM, 0.5, nChPerVMM + 0.5);
+
+                contents.hitsPerQuad->GetXaxis()->SetBinLabel( iQuadPerFtt+1, TSF( "%d%s", iPlane+1, quadLabels[iQuad].c_str() ) );
+
+
+
+                if ( iPlane == 0 ){
+                    contents.hitsPerPlaneQuad->GetYaxis()->SetBinLabel( iQuadPerFtt+1, TSF( "%s", quadLabels[iQuad].c_str() ) );
+                }
+                // for ( u_char iFob = 0; iFob < nFobPerQuad; iFob ++ ){
+                //     int iFobPerFtt = iFob + ( iQuad * nFobPerQuad ) + ( iPlane * nFobPerPlane );
+                //     contents.adcChPerFob[ iFobPerFtt ] = new TH2D( TSF( "adcChPerFob%d",iFobPerFtt ), TSF("sTGC (Plane %d, Quadule %d, Fob %d); Channel; ADC;", iPlane+1, iQuad+1, iFob+1), nChPerFob, 0.5, nChPerFob + 0.5, maxADC, 0, maxADC );
+                // }
+
+            }
+        }
+
+
+    ////////////////////////////////////////////////////////////////////////
 	// Add root histograms to Plots
 	int np = sizeof(contents) / sizeof(TH1 *);
 	JevpPlot *plots[np];
@@ -199,8 +123,12 @@ void fttBuilder::initialize(int argc, char *argv[]) {
         if ( std::find( setLogy.begin(), setLogy.end(), name ) != setLogy.end() ) {
             plots[i]->logy=1;
         }
-        if ( std::find( hideStats.begin(), hideStats.end(), name ) != hideStats.end() ) {
-            plots[i]->optstat=0;
+        if ( std::find( setLogz.begin(), setLogz.end(), name ) != setLogz.end() ) {
+            plots[i]->optlogz=1;
+        }
+        plots[i]->optstat=0;
+        if ( std::find( showStats.begin(), showStats.end(), name ) != showStats.end() ) {
+            plots[i]->optstat=111;
         }
         if ( contents.array[i]->GetZaxis())
             contents.array[i]->GetZaxis()->SetLabelSize(10.0 / 360.0);
@@ -208,125 +136,193 @@ void fttBuilder::initialize(int argc, char *argv[]) {
         addPlot(plots[i]);
     }
 
-    // Set up the mapping for the TPX electronics
-    tpxMapLayer1 = std::make_shared<Strip2CH>();
-    tpxMapLayer2 = std::make_shared<Strip2CH>();
-}
+    ////////////////////////////////////////////////////////////////////////
+    // Set up the mapping for the VMM electronics
+    ////////////////////////////////////////////////////////////////////////
+    mHardwareMap = std::make_shared<VMMHardwareMap>();
+    mHardwareMap->loadMap( string(confdatadir)+"/ftt/vmm_map.dat" );
+} // initialize
 	
 void fttBuilder::startrun(daqReader *rdr) {
 	resetAllPlots();
-
-    // Read the mapping parameters
-    if ( tpxMapLayer1 ){
-        tpxMapLayer1->init( string(confdatadir), "FEE2Slot_Layer1.dat", /*nFEEs=*/15 );
-    }
-    if ( tpxMapLayer2 ){
-        tpxMapLayer2->init( string(confdatadir), "FEE2Slot_Layer2.dat", /*nFEEs=*/15 );
-    }
-
+    // Set the "time" window for accepting data
+    ((daq_stgc *)rdr->det("stgc"))->xing_min = -65000 ;
+    ((daq_stgc *)rdr->det("stgc"))->xing_max = 65000 ;
 }
 
 void fttBuilder::stoprun(daqReader *rdr) {
 }
 
-void fttBuilder::processTPX(daqReader *rdr) {
 
-    bool do_print = true;
-    daq_dta *dd ;
-    dd = rdr->det("stgc")->get("altro") ;   
+void fttBuilder::drawStrip( TH2 * h2, int row, int strip, VMMHardwareMap::Quadrant q, VMMHardwareMap::StripOrientation so ){
 
-    int nStripsFired = 0;
+    double x0 = 0;
+    double y0 = 0;
 
-    bool altro_found = false;
-    while(dd && dd->iterate()) {    
-        altro_found = 1 ;
-
-        if(do_print) {
-            // there is NO RDO in the bank
-            int ALTRO = dd->row;
-            int FEE = dd->row/2;
-            int CHANNEL = dd->pad;
-            // printf("STGC ALTRO: sec %d, ALTRO %2d(FEE%02d):%02d\n",dd->sec,dd->row,dd->row/2,dd->pad) ;
-
-            contents.tpxFEE->Fill( FEE );
-            
-            contents.tpxALTRO->Fill( ALTRO );
-            contents.tpxCHANNEL->Fill( CHANNEL );
-            contents.tpxALTROCHANNEL->Fill( ALTRO, CHANNEL );
-
-            int Layer = -1;
-            int strip = -1;
-            if ( FEE <= 15 ){
-                Layer = 1;
-                strip = tpxMapLayer1->GetStripNumber_MirrorFlip( FEE, ALTRO, CHANNEL );
-            }
-            else{
-                Layer = 2;
-                strip = tpxMapLayer2->GetStripNumber( FEE, ALTRO, CHANNEL );
-            }
-            int row = strip / 1000;
-            int rstrip = strip - row*1000;
-            nStripsFired++;
-
-            // printf( "STGC Strip: %d, Row: %d, strip: %d\n\n", strip, row, rstrip );
-
-
-            contents.tpxLayerRowStrip[Layer-1]->Fill( rstrip, row );
-
-            for(u_int i=0;i<dd->ncontent;i++) {
-                int TB = dd->adc[i].tb;
-                int ADC = dd->adc[i].adc;
-                // printf("    %3d %3d\n",dd->adc[i].tb,dd->adc[i].adc) ;
-                contents.tpxADC->Fill( dd->adc[i].adc );
-                contents.tpxADCZoom->Fill( dd->adc[i].adc );
-
-                contents.tpxTimebinStrip->Fill( rstrip, TB );
-                contents.tpxTimebinADC->Fill( TB, ADC );
-
-                contents.tpxLayerRowStripADC[Layer-1]->Fill( rstrip, row, ADC );
-                contents.tpxLayerRowTimebinStripADC[((Layer-1)*3 + row)-1]->Fill( rstrip, TB, ADC );
-            }
-        }
+    if ( VMMHardwareMap::Quadrant::B == q ){
+        x0 = 60;
+        y0 = 0;
+    } else if ( VMMHardwareMap::Quadrant::C == q ){
+        x0 = -60;
+        y0 = 0;
+    } else if ( VMMHardwareMap::Quadrant::D == q ){
+        x0 = 0;
+        y0 = 0;
     }
 
-    contents.tpxNStripsFired->Fill( nStripsFired );
-} // processTPX
+    TAxis *ax = h2->GetXaxis();
+    TAxis *ay = h2->GetYaxis();
+
+    const double rLength = VMMHardwareMap::rowLength; 
+    const double sPitch = VMMHardwareMap::stripPitch;
+
+    if ( VMMHardwareMap::StripOrientation::Horizontal == so ){
+        if ( VMMHardwareMap::Quadrant::B == q ){
+            strip = -strip-1;
+        } else if ( VMMHardwareMap::Quadrant::C == q ){
+            row = -row -1;
+            strip = -strip-1;
+        } else if ( VMMHardwareMap::Quadrant::D == q ){
+            row = -row-1;
+        }
+
+        int ix0 = ax->FindBin( x0 + row * rLength );
+        int ix1 = ax->FindBin( x0 + (row + 1) * rLength - 1 );
+        if ( VMMHardwareMap::Quadrant::C == q || VMMHardwareMap::Quadrant::D == q ){
+            int ix0 = ax->FindBin( x0 + (row - 1) * rLength );
+            int ix1 = ax->FindBin( x0 + (row) * rLength - 1 );
+        }
+        const int iy0 = ay->FindBin( y0 + strip * sPitch );
+        const int iy1 = ay->FindBin( y0 + (strip) * sPitch );
+        floodFill( h2, ix0, iy0, ix1, iy1 );
+    } else if ( VMMHardwareMap::StripOrientation::Vertical == so ){
+        
+        if ( VMMHardwareMap::Quadrant::B == q ){
+            row = -row-1;
+        } else if ( VMMHardwareMap::Quadrant::C == q ){
+            strip = -strip -1;
+            row = -row-1;
+        } else if ( VMMHardwareMap::Quadrant::D == q ){
+            strip = -strip-1;
+        }
+
+        int iy0 = ay->FindBin( y0 + row * rLength );
+        int iy1 = ay->FindBin( y0 + (row + 1) * rLength - 1 );
+        if ( VMMHardwareMap::Quadrant::C == q || VMMHardwareMap::Quadrant::D == q ){
+            int iy0 = ay->FindBin( y0 + (row - 1) * rLength );
+            int iy1 = ay->FindBin( y0 + (row) * rLength - 1 );
+        }
+        const int ix0 = ax->FindBin( x0 + strip * sPitch );
+        const int ix1 = ax->FindBin( x0 + (strip) * sPitch );
+        floodFill( h2, ix0, iy0, ix1, iy1 );
+    }
+
+
+}
+
+void fttBuilder::processVMMHit( int iPlane, VMMHardwareMap::Quadrant quad, stgc_vmm_t rawVMM ){
+
+    int iQuad = (int)quad;
+    int thePlane = iPlane + 1;
+    int theQuad = iQuad + 1;
+    int iQuadPerFtt = iQuad + ( iPlane * nQuadPerPlane );
+    
+
+    int iFob = rawVMM.feb_vmm >> 2 ;   // feb [0..5]
+    int theFob = iFob + 1;
+    int iVMM = rawVMM.feb_vmm & 3 ;    // VMM [0..3]
+    int theVMM = iVMM + 1;
+    int iCh = rawVMM.ch;
+    int theCh = iCh + 1;
+
+
+    // This is the "FOB" according to Prashanth's map
+    size_t iFobPerFtt = iFob + ( iQuad * nFobPerQuad ) + ( iPlane * nFobPerPlane );
+
+    size_t iVMMPerQuad  = iVMM + ( iFob * nVMMPerFob);
+    size_t iVMMPerPlane = iVMMPerQuad + ( iQuad * nVMMPerQuad );
+    size_t iVMMPerFtt  = iVMMPerPlane + ( iPlane * nVMMPerPlane ); // global VMM index
+
+    size_t iChPerFob   = iCh + ( iVMM * nChPerVMM );
+
+    // global counter on strips fired
+    nStripsFired++;
+
+    // count hits per
+    contents.hitsPerPlane->Fill( thePlane ); // disk
+    contents.hitsPerQuad->Fill( iQuadPerFtt+1 ); // quad index
+    contents.hitsPerFob->Fill( iFobPerFtt+1 ); // Fob index
+    contents.hitsPerVMM->Fill( iVMMPerFtt+1 ); // VMM index
+    contents.hitsPerPlaneQuad->Fill( thePlane, theQuad ); // 2D Quadule vs. Plane
+    contents.hitsPerVMMPlane->Fill( iVMMPerPlane+1, iPlane + 1 );
+
+    contents.hitsVMMPerPlane[ iPlane ]->Fill( iVMMPerPlane + 1 );
+    contents.hitsFobQuadPerPlane[ iPlane ]->Fill( theFob, theQuad );
+
+
+    contents.hitsVMMChPerPlaneQuad[ iQuadPerFtt % nQuad ]->Fill( iVMMPerQuad + 1, theCh );
+    contents.adcVMMChPerPlaneQuad[ iQuadPerFtt % nQuad ]->Fill( iVMMPerQuad + 1, theCh, rawVMM.adc );
+    if ( iQuadPerFtt >= 16 ){
+        printf( "iQuadPerFtt = %d, iQuad=%d, iPlane=%d", (int) iQuadPerFtt, (int)iQuad, (int)iPlane );
+    }
+
+    // contents.adcChPerFob[ iFobPerFtt ]->Fill( iChPerFob+1, rawVMM.adc );
+    contents.adcVMM->Fill( iVMMPerFtt+1, rawVMM.adc );
+    contents.bcidVMM->Fill( iVMMPerFtt+1, rawVMM.bcid );
+
+
+
+    int iRow = -1;
+    int iStrip = -1;
+    VMMHardwareMap::StripOrientation stripDir;
+    mHardwareMap->get( /*rob=*/iQuadPerFtt+1, iFob+1, iVMM+1, iCh, iRow, iStrip, stripDir );
+
+    if ( false && (iRow == -1 || iStrip == -1) ){
+        printf( "\n\n------>START\n" );
+        printf( "ROB=%d, FOB=%d, VMM=%d, CH=%d", iQuadPerFtt+1, iFob+1, iVMM+1, iCh ); puts("");
+        printf( "Row=%d, Strip=%d, dir=%s\n", iRow, iStrip, dirLabels[(int)stripDir].c_str() );
+        printf( "<------STOP\n\n" );
+    }
+
+    if ( VMMHardwareMap::StripOrientation::Horizontal == stripDir ){
+        drawStrip(contents.hStripPerPlane[ iPlane ], iRow, iStrip, quad, stripDir );
+    }
+    if ( VMMHardwareMap::StripOrientation::Vertical == stripDir ){
+        drawStrip(contents.vStripPerPlane[ iPlane ], iRow, iStrip, quad, stripDir );
+    }
+
+}
 
 void fttBuilder::processVMM(daqReader *rdr) {
+    daq_dta *dd = nullptr;
+    dd = rdr->det("stgc")->get("vmm");
 
-    bool do_print = true;
-    daq_dta *dd ;
-    dd = rdr->det("stgc")->get("vmm") ;
+    nStripsFired = 0;
+
+    int vmm0bcid = -1;
+    int vmm3bcid = -1;
 
     bool vmm_found = false;
     while(dd && dd->iterate()) {    
-        vmm_found = 1 ;
+        vmm_found = true ;
 
-        if(do_print) {
-            // there is NO RDO in the bank
-            printf("STGC VMM: sec %d, RDO %d\n",dd->sec,dd->rdo) ;
+        struct stgc_vmm_t *vmm = (stgc_vmm_t *)dd->Void ;
+        // Zero index to disk, module
+        u_char iPlane = dd->sec - 1;
+        u_char iQuad = dd->rdo - 1;
 
-            struct stgc_vmm_t *vmm = (stgc_vmm_t *)dd->Void ;
-            for(u_int i=0;i<dd->ncontent;i++) {
-                u_char feb = vmm[i].feb_vmm >> 2 ;  // feb [0..5]
-                u_char vm = vmm[i].feb_vmm & 3 ;    // VMM [0..3]
+        // loop over the hits
+        for(u_int iHit=0; iHit<dd->ncontent; iHit++) {
+            processVMMHit( iPlane, (VMMHardwareMap::Quadrant)iQuad, vmm[iHit] );
+        } // Loop over iHit
+    } // iterate dd
 
-                printf("  FEB %d:%d, ch %02d: ADC %d, BCID %d\n",feb,vm,vmm[i].ch,
-                       vmm[i].adc,vmm[i].bcid) ;
-
-                contents.ADC->Fill( vmm[i].adc );
-                contents.ADCZoom->Fill( vmm[i].adc );
-            }
-        }
-    }
+    contents.nStripsFired->Fill( nStripsFired );
 } // processVMM
 
 void fttBuilder::event(daqReader *rdr) {
-	LOG(DBG, "event #%d",rdr->seq);
-
-    processTPX(rdr);
-    // processVMM(rdr);
-
+	LOG(DBG, "-------> START EVENT, #%d",rdr->seq);
+    processVMM(rdr);
 }
 
 void fttBuilder::main(int argc, char *argv[])
