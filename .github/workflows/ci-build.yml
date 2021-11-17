@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base
-          tags: ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:${{ github.base_ref }}_latest
+          tags: ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:${{ github.base_ref }}_latest
           file: docker/Dockerfile.root6
           outputs: type=docker,dest=/tmp/star-sw-root6-build.tar
 
