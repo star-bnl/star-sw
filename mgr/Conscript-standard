@@ -314,8 +314,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#print "\tAfter  ".($#src)." ".($#inc)."\n";
 
         if ($Dir =~ m#StarVMC/StarGeometry#) {
+
+	    my $CINT_INCLUDE = ".${STAR_SYS}/include";
+	    print $CINT_INCLUDE, "\n";
+
             Command $env ["$OBJ/StarVMC/StarGeometry/StarGeo_Cint.cxx", "$OBJ/StarVMC/StarGeometry/StarGeo_Cint.h"],
-                         ("$OBJ/StarVMC/StarGeometry/StarGeo.h", "#StarVMC/Geometry/StarGeoLinkDef.h"), qq(rootcint -f %> -c %1 %2);
+                         ("$OBJ/StarVMC/StarGeometry/StarGeo.h", "#StarVMC/Geometry/StarGeoLinkDef.h"), qq(rootcint -I $CINT_INCLUDE -f %> -c %1 %2);
             push(@srcL, "$OBJ/StarVMC/StarGeometry/StarGeo_Cint.cxx");
         }
 
