@@ -11,7 +11,10 @@ my $STAR_SYS     = $env->{ENV}->{STAR_SYS};
 my $STAR_VERSION = $env->{ENV}->{STAR_VERSION};         # print "#####  $STAR_VER\n";
 my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};
 
+my $ROOT_FEATURES = `root-config --features`;
+
 @Repo   = Repository_List unless $param::noRepository;#   print "Repositories = |@Repo|\n";
+
 
 
 print "+-+-+- STAR=".$env->{ENV}->{STAR}."\n"  if $param::debug;
@@ -252,6 +255,14 @@ if ($FC =~ m/g77/ || $FC =~ m/gfortran/ ){
 if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "\t--- Regular case treatment (not gen not sim) ---\n" if $param::debug;
 
+
+
+    if ( $Dir =~ m/Table$/ ) { 
+	if ( $ROOT_FEATURES =~ m/table/ ){ print "[ROOT has table support]\n";@srcL=();@h_filesL = (); }
+	else                             { print "[ROOT has no table support, compile Table] \n"; }
+    }
+
+
     # if user requested debug, print some info on what was found
     if ($param::debug) {
 	$i = 0;
@@ -261,8 +272,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$i = 0;
 	foreach my $s(@h_filesL) { print "i=", $i++, " h_files = ", $s, "\n"; }
     }
-
-
 
     #+
     # Generate geometries first - this will be hit on any $Dir
@@ -288,17 +297,13 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    $trgt = "";
 	    $hfl  = "";
 	    if ( $Dir =~ m/xgeometry/ ){
-		$fcheck = $trgt  = $OBJ."/".$Dir."/".$agM.".age";
-		$fcheck =~ s/\#//; $trgt = "" if ( -e $fcheck);
+		$trgt = "$OBJ/$Dir/$agM.age";
 	    } else {
 		# Compat contains redundant defs only needed for the age
 		# .h also needed for Dictionary building
 		if ( $xml !~ m/Compat/ ){
-		    $fcheck = $trgt  = $OBJ."/".$Dir."/".$agM.".cxx";
-		    $fcheck =~ s/\#//; $trgt = "" if ( -e $fcheck);
-
-		    $fcheck = $hfl   = $OBJ."/".$Dir."/".$agM.".h";
-		    $fcheck =~ s/\#//; $hfl = "" if ( -e $fcheck);
+		    $trgt = "$OBJ/$Dir/$agM.cxx";
+		    $hfl  = "$OBJ/$Dir/$agM.h";
 		}
 	    }
 	    # push but only if not present - if present, cons will find
@@ -307,6 +312,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    push(@inc, $hfl)   if ($hfl  ne "" );
 	}
 	#print "\tAfter  ".($#src)." ".($#inc)."\n";
+
+        if ($Dir =~ m#StarVMC/StarGeometry#) {
+            Command $env ["$OBJ/StarVMC/StarGeometry/StarGeo_Cint.cxx", "$OBJ/StarVMC/StarGeometry/StarGeo_Cint.h"],
+                         ("$OBJ/StarVMC/StarGeometry/StarGeo.h", "#StarVMC/Geometry/StarGeoLinkDef.h"), qq(rootcint -f %> -c %1 %2);
+            push(@srcL, "$OBJ/StarVMC/StarGeometry/StarGeo_Cint.cxx");
+        }
 
 	#print "-=-=-=-=- LALALA -=-=-=-\n";
 	# 2018/01 issue after updating to AgML 2.0
@@ -376,33 +387,22 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			$env->{ENV}->{AGML_WARNINGS} = 1==1; # $param::debug;
 
 			if ( $xml =~ m/Compat/ ){
-			    Depends $env ["#".$agE], ("#$xml", "#$agml_cmd");
-			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+			    Depends $env ["$OBJ/$agE"], ("#$xml", "#$agml_cmd");
+			    Command $env ["$OBJ/$agE"], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
 			} else {
-			    Depends $env ["#".$agX, "#".$agH, "#".$agE], ("#$xml", "#$agml_cmd");
+			    Depends $env ["$OBJ/$agX", "$OBJ/$agH", "$OBJ/$agE"], ("#$xml", "#$agml_cmd");
 			    # Depends $env --> some rule to build extra dict on the fly
 
-			    Command $env ["#".$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
-			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+			    Command $env ["$OBJ/$agX", "$OBJ/$agH"], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
+			    Command $env ["$OBJ/$agE"], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
-			    # Install local file (#) as global
-			    # The .h file can be installed as-is
-			    $trgt = $OBJ."/".$agH;
-			    InstallAs  $env $trgt, "#".$agH;
-
-			    # The recently generated .cxx will create an extra source dependency
-			    $trgt = $OBJ."/".$agX;
-			    InstallAs  $env $trgt, "#".$agX;
+			    $trgt = $INCLUDE."/".$agH;
+			    InstallAs  $env $trgt, "$OBJ/$agH";
 
 			    # Add source dependency but only cxx
 			    #>>push(@srcL, $trgt);
 			}
-
-			# Install the "#" i.e. local file as global file - ageF created in both cases
-			# BEWARE that the agE (.age) file is created in xgeometry
-			$trgt = $OBJ."/".$agE;
-			InstallAs  $env $trgt, "#".$agE;
 
 			# Create source dependencies based on installed age, not the original
 			#>>push(@srcL, $trgt );
@@ -1133,7 +1133,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
     }
 
-    if ( $#Defs > -1 ){  # && ! $OnlinePackage ) {
+    if ( $#Defs > -1 && $pkg !~ m/Geometry/ ) {
 	my @CintFiles = ( $PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h" );
 
         if ($env->{ENV}->{ROOT_VERSION_MAJOR} >= 6) {

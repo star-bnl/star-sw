@@ -80,13 +80,26 @@ public:
     void setFileNameTimingWindow(       const char* fileName );
     void setFileNameSignalVelocity(     const char* fileName );
     void setFileNameCalibHistograms(    const char* fileName );
+    void setFileNameOffsetHistograms(   const char* fileName );
     void setFileNameResetTimeCorr(      const char* fileName );
     void setFileNamePulserTotPeak(      const char* fileName );
     void setFileNamePulserTimeDiffGbtx( const char* fileName );
 
     void setDoQA(  const bool doQA  );
     void setDebug( const bool debug );
+    void setStrictPulserHandling( const bool debug );
     void setReferencePulserIndex( const int index );
+    
+    //moved to public to avoid problem with root6
+    struct StructStuckFwDigi{
+		  Int_t     geomId;
+		  Double_t  time;
+		  Double_t  tot;
+
+		  bool operator==( const StructStuckFwDigi& r ) const {
+		      return geomId == r.geomId && fabs( time - r.time ) < 1.e-5 && fabs( tot - r.tot ) < 1.e-5;
+		  }
+    };
 
 
 private:
@@ -136,6 +149,7 @@ private:
     std::string   mFileNameTimingWindow;        // name of parameter file for timing window
     std::string   mFileNameSignalVelocity;      // name of parameter file for signal velocity
     std::string   mFileNameCalibHistograms;     // name of parameter file for calibration histograms (output of QA maker)
+    std::string   mFileNameOffsetHistograms;    // name of parameter file for run by run offsets histograms (output of QA maker)
     std::string   mFileNameResetTimeCorr;       // name of parameter file for reset time correction
     std::string   mFileNamePulserTotPeak;       // name of parameter file for pulser peak tot
     std::string   mFileNamePulserTimeDiffGbtx;  // name of parameter file for pulser time diff
@@ -146,7 +160,8 @@ private:
     Float_t       mResetTimeCorr;           // additional offset for the whole system in case reset time was not saved correctly
 
     Double_t      mTriggerTime;             // trigger time in ns
-    Double_t      mResetTime;               // reset time in ns 
+    Double_t      mResetTime;               // reset time in ns
+    Long64_t      mResetTs;                 // reset time stamp in clock ticks
 
     Float_t       mPulserPeakTime;          // pulser peak time relative to the trigger time in ns
     Int_t         mReferencePulserIndex;    // index of reference pulser used in the pulser correction to correct time offset between different Gbtx
@@ -162,15 +177,26 @@ private:
 
     std::map< UInt_t, Float_t >   mPulserPeakTot;       // TOT of pulsers on each side of the RPC counters (as key)
     std::map< UInt_t, Double_t >  mPulserTimeDiff;      // pulser time difference with respect to the reference pulser for each detector side as key
-    std::map< UInt_t, Double_t >  mPulserTimeDiffGbtx;  // pulser time difference with inside a Gbtx with respect to counter 1
+    std::map< UInt_t, Double_t >  mPulserTimeDiffGbtx;  // pulser time difference with inside a Gbtx with respect to counter 1    
+    std::map< UInt_t, UInt_t >   	 mNPulsersCounter;     // number of found pulsers on each counter. Has to be 2 for good the counter to be considered good in this event. 
+    std::map< UInt_t, UInt_t >   	 mNStatusBitsCounter;  // number of Get4 status bits on each counter. Has to be 0 for good the counter to be considered good in this event.     
+    std::map< UInt_t, Bool_t >    mPulserPresent;       // map of present pulsers for each event (by counter side)
 
-    std::map< UInt_t, UInt_t >    mJumpingPulsers;      // flag jumping pulsers
+    std::map< UInt_t, Int_t >     mJumpingPulsers;      // flag jumping pulsers
 
+    std::map< UInt_t, Int_t >     mUnlockPulserState;   // map that counts pulser offsets to avoid locking into the wrong pulser offset state
+
+    std::vector< StructStuckFwDigi > mStuckFwDigi; // list of digis to ignore for the rest of the run due to stuck firmware
+
+	 Bool_t 			mStrictPulserHandling;
     Bool_t        mUsePulserGbtxDiff;
     Bool_t        mDoQA;
     Bool_t        mDebug;
     std::string                    mHistFileName;
     std::map< std::string, TH1* >  mHistograms;
+
+
+
 
 
     virtual const Char_t *GetCVS() const { static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs; }
@@ -184,6 +210,7 @@ inline void StETofCalibMaker::setFileNameStatusMap(          const char* fileNam
 inline void StETofCalibMaker::setFileNameTimingWindow(       const char* fileName )     { mFileNameTimingWindow       = fileName; }
 inline void StETofCalibMaker::setFileNameSignalVelocity(     const char* fileName )     { mFileNameSignalVelocity     = fileName; }
 inline void StETofCalibMaker::setFileNameCalibHistograms(    const char* fileName )     { mFileNameCalibHistograms    = fileName; }
+inline void StETofCalibMaker::setFileNameOffsetHistograms(   const char* fileName )     { mFileNameOffsetHistograms   = fileName; } 
 inline void StETofCalibMaker::setFileNameResetTimeCorr(      const char* fileName )     { mFileNameResetTimeCorr      = fileName; }
 inline void StETofCalibMaker::setFileNamePulserTotPeak(      const char* fileName )     { mFileNamePulserTotPeak      = fileName; }
 inline void StETofCalibMaker::setFileNamePulserTimeDiffGbtx( const char* fileName )     { mFileNamePulserTimeDiffGbtx = fileName; }
@@ -191,6 +218,7 @@ inline void StETofCalibMaker::setFileNamePulserTimeDiffGbtx( const char* fileNam
 
 inline double StETofCalibMaker::resetTimeCorr() const { return mResetTimeCorr; }
 
+inline void StETofCalibMaker::setStrictPulserHandling(  const bool StrictPulserHandling  ) { mStrictPulserHandling  = StrictPulserHandling;  }
 inline void StETofCalibMaker::setDoQA(  const bool doQA  ) { mDoQA  = doQA;  }
 inline void StETofCalibMaker::setDebug( const bool debug ) { mDebug = debug; }
 inline void StETofCalibMaker::setReferencePulserIndex( const int index ) { mReferencePulserIndex = index; }
