@@ -30,18 +30,18 @@ jobs:
       - name: Rebuild up to base-stage
         uses: docker/build-push-action@v2
         with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:cache
           file: docker/Dockerfile.root5
           target: base-stage
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:${{ steps.branch-name.outputs.current_branch }}_latest
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base,mode=max
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:cache,mode=max
 
       - name: Build release container
         if: steps.branch-name.outputs.is_tag == 'true'
         uses: docker/build-push-action@v2
         with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root5-base:cache
           file: docker/Dockerfile.root5
           target: build-stage
           push: true
@@ -68,18 +68,18 @@ jobs:
       - name: Rebuild up to base-stage
         uses: docker/build-push-action@v2
         with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:cache
           file: docker/Dockerfile.root6
           target: base-stage
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:${{ steps.branch-name.outputs.current_branch }}_latest
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base,mode=max
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:cache,mode=max
 
       - name: Build release container
         if: steps.branch-name.outputs.is_tag == 'true'
         uses: docker/build-push-action@v2
         with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-root6-base:cache
           file: docker/Dockerfile.root6
           target: build-stage
           push: true
