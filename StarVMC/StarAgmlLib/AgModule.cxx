@@ -25,34 +25,6 @@ TDataSet *AgModule::Geom()
   else           return mGeomSet;
 };
 
-Bool_t AgModule::AddHit( string _for, string meas, Float_t bitns, Float_t mn, Float_t mx, string opts )
-{
-  TGenericTable *hits = dynamic_cast<TGenericTable *>(mDataSet->Find(Form("hits/%s",_for.c_str())));
-  if ( !hits ) {
-    mDataSet -> Find("hits") -> Add( hits = new TGenericTable("HitSet_t",_for.c_str()) );
-  };
-  HitSet_t myhit;// = { meas.c_str(), bitns, mn, mx, opts.c_str() };
-  {
-    {size_t len = meas.copy( myhit.meas, TMath::Min( sizeof(myhit.meas)-1, meas.size() ) ); myhit.meas[len]='\0';}
-    {size_t len = opts.copy( myhit.opts, TMath::Min( sizeof(myhit.opts)-1, opts.size() ) ); myhit.opts[len]='\0';}
-    myhit.nb = bitns;
-    myhit.min = mn;
-    myhit.max = mx;
-    hits->AddAt(&myhit);
-  }
-  return true;
-};
-
-Bool_t AgModule::AddCut( string block, string cut, Float_t value )
-{
-  return true;
-};
-
-Bool_t AgModule::AddPar( string block, string cut, Float_t value )
-{
-  return true;
-};
-
 // ---------------------------------------------------------------------------------------------
 AgBlock *AgModule::AddBlock( const Char_t *name, AgBlock *_block )
 {
