@@ -16,6 +16,7 @@
 
 #ifndef __CINT__
 #include <assert.h>
+#include <fstream>
 /*********************************************************/
 // class for mapping the VMM electronics
 // 
@@ -61,11 +62,13 @@ public:
     }
 
     void loadMap( std::string fn ){
-        ifstream inf;
+        std::ifstream inf;
         inf.open( fn.c_str() );
 
+        mMap.clear();
         if ( !inf ) return;
 
+        mMap.clear();
         string hs0, hs1, hs2, hs3, hs4;
         // HEADER:
         // Row_num    FEB_num    VMM_num    VMM_ch         strip_ch
@@ -184,17 +187,9 @@ class VMMHardwareMap;
 #endif
 
 
+// DAQ RTS format for sTGC data
 class stgc_vmm_t;
 
-// This is the one PlotSet that is guarenteed to always exist
-// It's main purpose is to provide the run information 
-// To the server...
-//
-// It has no plots (currently)
-//
-
-// class VMMHardwareMap;
-// enum class Quadrant: int;
 
 class fttBuilder : public JevpBuilder {
  public:
@@ -233,7 +228,10 @@ class fttBuilder : public JevpBuilder {
   static const size_t nCh          = nChPerPlane * nPlane; // 6144 * 4 = 24576 Ch per Plane
   
   static const size_t maxADC       = 1024 + 1; // 10 bits;
-  static const size_t maxBCID      = 65536 + 1; // 16 bits;
+  static const size_t maxBCID      = 4096 + 1; // 12 bits;
+  static const int minTb        = -32768 - 1000; // get the under and overflow
+  static const int maxTb        = 32768 + 1000;
+
   static const std::string quadLabels[4];
   static const std::string dirLabels[4];
 
@@ -246,14 +244,17 @@ class fttBuilder : public JevpBuilder {
         TH1 *hitsPerQuad; // all disks
         TH1 *hitsPerFob; // all disks
         TH1 *hitsPerVMM; // all Quadrants, all Planes
+        TH1 *hitsPerTb;
+        TH1 *hitsPerTb400;
         // TH1 *SEC0;
         TH2 *hitsPerPlaneQuad; 
         TH2 *hitsPerVMMPlane; 
         // TH2 *SECRDO0; 
         TH2 *hitsFobQuadPerPlane[nPlane];
         TH1 *hitsVMMPerPlane[nPlane];
+        TH1 *hitsTbPerPlane[nPlane];
+        TH1 *chargePerPlane[nPlane];
         TH2 *hitsVMMChPerPlaneQuad[nQuad];
-
         TH2 *adcVMMChPerPlaneQuad[nQuad];
         TH2 *adcVMM;
         TH2 *bcidVMM;
@@ -261,6 +262,8 @@ class fttBuilder : public JevpBuilder {
         TH2 *hStripPerPlane[nPlane];
         TH2 *vStripPerPlane[nPlane];
         TH2 *dStripPerPlane[nPlane];
+
+        TH1 *chargePerFob[nFob];
         
         TH1 *nStripsFired;
     };
@@ -290,15 +293,13 @@ class fttBuilder : public JevpBuilder {
         }
     }
   }
-  
-
-  
-
 
   static void main(int argc, char *argv[]);
 
 #ifndef __CINT__
-  void drawStrip( TH2 * h2, int row, int strip, VMMHardwareMap::Quadrant q, VMMHardwareMap::StripOrientation so );
+    void drawLine( TH2 * h2, int dx, int dy );
+    void drawOutline( TH2 * h2, VMMHardwareMap::StripOrientation so );
+    void drawStrip( TH2 * h2, int row, int strip, VMMHardwareMap::Quadrant q, VMMHardwareMap::StripOrientation so );
     void processVMMHit( int iPlane, VMMHardwareMap::Quadrant iQuad, stgc_vmm_t rawVMM);
     shared_ptr<VMMHardwareMap> mHardwareMap;
 #endif
