@@ -547,7 +547,7 @@ int tpxPed::from_cache(char *fname, u_int rb_msk)
 {
 	FILE *f ;
 	char fn[64]  ;
-	char *pn ;
+	const char *pn ;
 
 	// trivial load from disk...
 	if(fname) {
@@ -629,7 +629,7 @@ int tpxPed::to_cache(char *fname, u_int run)
 	int r, p, t ;
 	char fn[64] ;
 //	char f_sum_name[128] ;
-	char *pn ;
+	const char *pn ;
 	char *asc_date ;
 
 	static float old_sum[46][183] ;
