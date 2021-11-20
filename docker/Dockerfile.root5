@@ -100,6 +100,8 @@ RUN ln -s $MYSQL/include /usr/include/mysql
 
 FROM base-stage AS build-stage
 
+ARG BUILD_CMD="cons"
+
 COPY . /star-sw
 
 # XXX TEMP XXX: Don't force mysql static libraries to be linked into root4star
@@ -122,7 +124,8 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
 
 RUN source /etc/profile \
  && cd /star-sw \
- && cons \
+ && install -m 755 <(echo "${BUILD_CMD}") build_cmd.sh \
+ && ./build_cmd.sh \
  && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 
 RUN install /star-sw/StRoot/macros/.rootrc .
