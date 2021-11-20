@@ -7,7 +7,6 @@
 
 #ifndef StMuDst_h
 #define StMuDst_h
-#define __TFG_MUDST__FORMAT_EXT__
 #include "TObject.h"
 #include "TClonesArray.h"
 #include <map>
