@@ -89,9 +89,9 @@ struct g2t_track {
        long      hit_hca_p;  /* Id of first hca hit on track linked list */
        long      hit_fts_p;  /* Id of first fts hit on track linked list */
        long      hit_eto_p;  /* Id of first etof hit on track linked list */ 
-       long      hit_epd_p;  /* Id of first epdf hit on track linked list */ 
        long      hit_wca_p;  /* Id of first wca hit on track linked list */
        long      hit_pre_p;  /* Id of first pre hit on track linked list */
+       long      hit_epd_p; /* Id of first epd hit on track linked list */
        long      id;         /* primary key */
        long      is_shower;  /* 1 if shower track, 0 if not */
        long      itrmd_vertex_p; /* First intermediate vertex */
@@ -123,10 +123,10 @@ struct g2t_track {
        long      n_hca_hit;  /* Nhits on hca [hadronic calorimeter]*/
        long      n_fts_hit;  /* Nhits on fts */
        long      n_eto_hit;  /* Nhits on etof */
-       long      n_epd_hit;  /* Nhits on epdf */
        long      n_stg_hit; /* Nhits on sTGC [new Forward small thin gap chambers]*/  
        long      n_wca_hit;  /* Nhits on wca [West EM calorimeter]*/
        long      n_pre_hit;  /* Nhits on prs [West EM calorimeter preshower]*/
+       long      n_epd_hit;  /* Nhits on epd */
        long      next_parent_p; /* Id of next parent track */
        long      next_vtx_trk_p; /* Next daughter track of start vertex */
        long      start_vertex_p; /* Id of start vertex of track */
