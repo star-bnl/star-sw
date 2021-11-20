@@ -78,10 +78,12 @@ StarVMCApplication::StarVMCApplication(const char *name, const char *title) :
   assert (! program.BeginsWith("root4star"));
   // Create a user stack
   fStarStack = new StarStack(100); 
+  fgGeant3 = new TGeant3TGeo("TGeant3TGeo");
 }
 //_____________________________________________________________________________
 StarVMCApplication::~StarVMCApplication() {  // Destructor  
   delete fStarStack;
+  delete fgGeant3;
   //  SafeDelete(TVirtualMC::GetMC());
 }
 //_____________________________________________________________________________
@@ -90,14 +92,14 @@ void StarVMCApplication::InitMC(const Char_t *setup) {  // Initialize MC.
     gROOT->LoadMacro(setup);
     gInterpreter->ProcessLine("Config()");
   }
-  TVirtualMC::GetMC()->SetStack(fStarStack);
-  TVirtualMC::GetMC()->Init();
-  TVirtualMC::GetMC()->BuildPhysics(); 
+  fgGeant3->SetStack(fStarStack);
+  fgGeant3->Init();
+  fgGeant3->BuildPhysics(); 
   //  MisalignGeometry(); // Called from TGeant3TGeo::FinishGeometry
 }
 //_____________________________________________________________________________
 Bool_t StarVMCApplication::RunMC(Int_t nofEvents) {    // MC run.
-  Bool_t ok = TVirtualMC::GetMC()->ProcessRun(nofEvents);
+  Bool_t ok = fgGeant3->ProcessRun(nofEvents);
   if (! ok) FinishRun();
   return ok;
 }
@@ -110,16 +112,11 @@ void StarVMCApplication::ConstructGeometry() {    // Initialize geometry
 }
 //_____________________________________________________________________________
 void StarVMCApplication::InitGeometry() {    
-  if (TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3")) {
-    assert(gGeoManager); 
-    TVirtualMC::GetMC()->SetRootGeometry();
-  }  
-  if (TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3TGeo")) {
-    fgGeant3 = (TGeant3TGeo *)TVirtualMC::GetMC();
-    if (Debug()) {
-      fgGeant3->Gprint("mate");
-      fgGeant3->Gprint("tmed");
-    }
+  assert(gGeoManager); 
+  fgGeant3->SetRootGeometry();
+  if (Debug()) {
+    fgGeant3->Gprint("mate");
+    fgGeant3->Gprint("tmed");
   }
   if (fMcHits) fMcHits->Init();
 }
@@ -135,7 +132,7 @@ void StarVMCApplication::GeneratePrimaries() {
     StarMCPrimaryGenerator::Instance()->GeneratePrimaries();
     fStatus = StarMCPrimaryGenerator::Instance()->Status();
   } 
-  if (fStatus == kStEOF) {TVirtualMC::GetMC()->StopRun();}
+  if (fStatus == kStEOF) {fgGeant3->StopRun();}
   if (fMcHits) {
     fMcHits->BeginEvent();
   }
@@ -176,7 +173,7 @@ void StarVMCApplication::FinishPrimary() {    // User actions after finishing of
 }
 //_____________________________________________________________________________
 void StarVMCApplication::FinishEvent() {    // User actions after finishing of an event
-  if (TString(TVirtualMC::GetMC()->GetName()) == "TGeant3") {
+  if (TString(fgGeant3->GetName()) == "TGeant3") {
     // add scale (1.4)
   }  
   if (Debug()) {
@@ -743,10 +740,6 @@ void StarVMCApplication::ForceDecay(const Char_t *nameP,
 				    const Char_t *mode1A, const Char_t *mode1B, const Char_t *mode1C, Float_t branch1,
 				    const Char_t *mode2A, const Char_t *mode2B, const Char_t *mode2C, Float_t branch2,
 				    const Char_t *mode3A, const Char_t *mode3B, const Char_t *mode3C, Float_t branch3) {
-  if (! TVirtualMC::GetMC()->IsA()->InheritsFrom("TGeant3TGeo")) {
-    LOG_ERROR << "StarVMCApplication::ForceDecay does not work without TGeant3TGeo" << endm;
-    return;
-  }
   TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(nameP);
   assert(p);
   Int_t pdg = p->PdgCode();
