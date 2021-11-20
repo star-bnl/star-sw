@@ -32,11 +32,7 @@
 
 KFParticlePerformanceBase::KFParticlePerformanceBase():
   fParteff(), fPVeff(), fPVeffMCReconstructable(), outfileName(), histodir(0), fNEvents(0), fStoreMCHistograms(1), 
-#ifndef __TFG__VERSION__
   fStorePrimSecHistograms(1), fStoreZRHistograms(1), fStore3DEfficiency(0), fHistoDir(0)
-#else /* __TFG__VERSION__ */
-  fStorePrimSecHistograms(1), fStoreZRHistograms(1), fStore3DEfficiency(0), fStoreFitPullHistograms(0),fHistoDir(0)
-#endif /* __TFG__VERSION__ */
 {
   /** The default constructor. Initialises all pointers to nullptr.  **/
   for(int iParticle=0; iParticle<KFPartEfficiencies::nParticles; iParticle++)
@@ -184,11 +180,8 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
           {
             TString parName[nFitQA/2] = {"X","Y","Z","Px","Py","Pz","E","M"};
             int nBins = 100;
-#ifndef __TFG__VERSION__
+//             float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
             float xMax[nFitQA/2] = {4.,4.,10.,0.3,0.3,0.3,0.3,0.01};
-#else /* __TFG__VERSION__ */
-            float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
-#endif /* __TFG__VERSION__ */
 
             for( int iH=0; iH<nFitQA/2; iH++ ){
               hFitDaughtersQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
@@ -206,11 +199,8 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
           {
             TString parName[3] = {"X","Y","Z"};
             int nBins = 100;
-#ifndef __TFG__VERSION__
+//             float xMax[3] = {0.5, 0.5, 2.};
             float xMax[3] = {4.f, 4.f, 10.f};
-#else /* __TFG__VERSION__ */
-            float xMax[3] = {0.5, 0.5, 2.};
-#endif /* __TFG__VERSION__ */
 
             for( int iH=0; iH<3; iH++ ){
               hDSToParticleQA[iPart][iH]   = new TH1F((res+parName[iH]).Data(),
@@ -228,44 +218,6 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
           CreateFitHistograms(hFitQA[iPart], iPart);
           CreateEfficiencyHistograms(hPartEfficiency[iPart], hPartEfficiency2D[iPart], hPartEfficiencyMulti[iPart]);
         }
-#ifdef __TFG__VERSION__
-        if(fStoreFitPullHistograms)
-        {
-          TString res = "res";
-          TString pull = "pull";
-
-          gDirectory->mkdir("FitQAPull");
-          gDirectory->cd("FitQAPull");
-          {
-            TString parName[nFitQA/2] = {"X","Y","Z","Px","Py","Pz","E","M"};
-            int nBins = 100;
-	    //            float xMax[nFitQA/2] = {0.15,0.15,0.03,0.01,0.01,0.06,0.06,0.01};
-	    float xMax[nFitQA/2] = {  2.,  2.,  5.,0.01,0.01,0.06,0.06,0.01};
-#if 1
-	    Int_t NS = 3;
-#else
-	    Int_t NS = 1;
-#endif
-	    for (Int_t s = 0; s < NS; s++) {// mother, + and - daughters
-	      TString charge;
-	      if (s == 1) charge = "+";
-	      else if (s == 2) charge = "-";
-	      Int_t HMax = nFitQA/2;
-	      if (s) HMax -= 2;
-	      for( int iH=0; iH < HMax; iH++ ){
-		hFitQAPull[iPart][iH][s]   = new TH1F((res+parName[iH]+charge).Data(),
-						      (GetDirectoryPath()+res+parName[iH]+charge).Data(), 
-                                                      nBins, -xMax[iH],xMax[iH]);
-		hFitQAPull[iPart][iH+8][s] = new TH1F((pull+parName[iH]+charge).Data(),
-						      (GetDirectoryPath()+pull+parName[iH]+charge).Data(), 
-						      nBins, -6,6);
-	      }
-	    }
-          }
-          gDirectory->cd(".."); //particle directory
-	  //          CreateFitHistograms(hFitQAPull[iPart], iPart);
-        }
-#endif /* __TFG__VERSION__ */
         gDirectory->mkdir("Parameters");
         gDirectory->cd("Parameters");
         {
@@ -390,17 +342,24 @@ void KFParticlePerformanceBase::CreateHistos(std::string histoDir, TDirectory* o
       float xMin[nHistosPVParam] = {-2.5, -2.5, -200.,  0,   -0.5,    0.,   -0.5,    0., 0., -0.01, -0.01, -0.01, -0.01, -0.01,   0.};
       float xMax[nHistosPVParam] = { 2.5,  2.5,  220., 10, 1000.5, 1000., 1000.5, 1000., 1.,  1.01,  1.01,  1.01,  1.01,  1.01, 100.};
 #endif /* __TFG__VERSION__ */
-      
+    
       TString parName2D[nHistosPVParam2D] = {"xy"};
       TString parXAxisName2D[nHistosPVParam2D] = {"x [cm]"};
       TString parYAxisName2D[nHistosPVParam2D] = {"y [cm]"};
       int nBinsX2D[nHistosPVParam2D] = {1000};
+#ifndef __TFG__VERSION__
+      float xMin2D[nHistosPVParam2D] = {-10.};
+      float xMax2D[nHistosPVParam2D] = { 10.};
+      int nBinsY2D[nHistosPVParam2D] = {1000};
+      float yMin2D[nHistosPVParam2D] = {-10.};
+      float yMax2D[nHistosPVParam2D] = { 10.};
+#else /* __TFG__VERSION__ */
       float xMin2D[nHistosPVParam2D] = {-1.};
       float xMax2D[nHistosPVParam2D] = { 1.};
       int nBinsY2D[nHistosPVParam2D] = {4000};
       float yMin2D[nHistosPVParam2D] = {-3.};
       float yMax2D[nHistosPVParam2D] = { 1.};
-      
+#endif /* __TFG__VERSION__ */    
       for(int iH=0; iH<nHistosPVParam; iH++)
       {
         hPVParam[iH]       = new TH1F(parName[iH].Data(),(GetDirectoryPath()+parName[iH]).Data(),
@@ -660,6 +619,7 @@ void KFParticlePerformanceBase::CreateFitHistograms(TH1F* histo[nFitQA], int iPa
     TString parName[nFitQA/2] = {"X","Y","Z","Px","Py","Pz","E","M"};
     int nBins = 50;
 #ifndef __TFG__VERSION__
+//     float xMax[nFitQA/2] = {0.15,0.15,1.2,0.02,0.02,0.15,0.15,0.006};
     float xMax[nFitQA/2] = {5.f,5.f,10.f,0.1,0.1,0.5,0.5,0.006};
 #else /* __TFG__VERSION__ */
     float xMax[nFitQA/2] = {0.15,0.15,1.2,0.02,0.02,0.15,0.15,0.006};
@@ -721,7 +681,6 @@ void KFParticlePerformanceBase::CreateEfficiencyHistograms(TProfile* histo[3][nP
     TString partAxisNameEff[nPartEfficiency] = {"p [GeV/c]","p_{t} [GeV/c]",
                                                 "y", "z [cm]", "Life time c#tau [cm]", "Decay length [cm]", 
                                                 "L [cm]", "Rxy [cm]", "m_{t} [GeV/c^{2}]"};
-#ifndef __TFG__VERSION__
 #ifdef CBM
     int nBinsEff[nPartEfficiency]  = { 100 , 100 , 40 ,  360 ,  60 ,  60 ,  140 ,  60 , 100 };
     float xMinEff[nPartEfficiency] = {   0.,   0.,  0.,  -10., -10., -10.,    0.,   0. ,  0.};
@@ -731,12 +690,6 @@ void KFParticlePerformanceBase::CreateEfficiencyHistograms(TProfile* histo[3][nP
     float xMinEff[nPartEfficiency] = {   0.,   0.,  -3.,  -230.,  -10.,  -10.,    0.,    0.,   0. };
     float xMaxEff[nPartEfficiency] = {  10.,  10.,   0.,   230.,   50.,   50.,   50.,   50.,  10. };
 #endif
-#else /* __TFG__VERSION__ */
-    int nBinsEff[nPartEfficiency]  = { 100 , 100 ,  50  ,   100 ,  100 ,  100 ,  100 ,  100 , 100  };
-    float xMinEff[nPartEfficiency] = {   0.,   0.,  -3.0,   -10.,    0.,    0.,    0.,    0.,   0. };
-    float xMaxEff[nPartEfficiency] = {  10.,  10.,   2.0,    10.,   30.,    5.,    1.,    1.,  10. };
-
-#endif /* __TFG__VERSION__ */
     TString effTypeName[3] = {"All particles",
                               "Reconstructable daughters",
                               "Reconstructed daughters"};
@@ -904,7 +857,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   TString parName3D[nHistoPartParam3D] = {"y-p_{t}-M", "y-m_{t}-M", "centrality-pt-M", "centrality-y-M", "centrality-mt-M", "ct-pt-M", "dalitz", "dalitz2","dalitz3","dalitzM2", "dalitz2M2", "dalitz3M2"};
 #else /* __TFG__VERSION__ */
   TString parName3D[nHistoPartParam3D] = {"y-p_{t}-M", "y-m_{t}-M", "centrality-pt-M", "centrality-y-M", "centrality-mt-M", "ct-pt-M", "dalitz", "dalitz2","dalitz3","dalitzM2", "dalitz2M2", "dalitz3M2",
-					  "y-#phi-M", "y-p_{t}-dM" };
+                                         "y-#phi-M", "y-p_{t}-dM" };
 #endif /* __TFG__VERSION__ */
   TString parTitle3D[nHistoPartParam3D];
   for(int iParam=0; iParam<nHistoPartParam; iParam++)
@@ -924,7 +877,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                           "#sigma_{X}, [cm]", "#sigma_{Y}, [cm]", "#sigma_{Z}, [cm]",
                                           "#sigma_{p_{x}}/|p_{x}|", "#sigma_{p_{y}}/|p_{y}|", "#sigma_{p_{z}}/|p_{z}|",
                                           "#sigma_{E}/E", "#sigma_{M}, [GeV/c^{2}]"};
-#ifdef CBM 
+#ifdef CBM
   int nBins[nHistoPartParam] =  {1000, // M
                                   100, // p
                                   100, // pt
@@ -979,8 +932,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   35.f, // L/dL
                                   4.f, // Mt
                                   float(fParteff.partMaxMult[iPart])+0.5f};
-#else /* ! CBM */ 
-
+#else
   int nBins[nHistoPartParam] = {1000, // M
                                  100, // p
                                  100, // pt
@@ -997,7 +949,11 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                  100, // phi
                                  100, // X
                                  100, // Y
+#ifndef __TFG__VERSION__
+                                 100, // Z
+#else /* __TFG__VERSION__ */
                                  230, // Z
+#endif /* __TFG__VERSION__ */
                                  500, // R
                                  500, // L
                                 1000, // L/dL
@@ -1021,7 +977,11 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   0.f, // chi2/ndf
                                   0.f, // prob
                                   0.f, // theta
+#ifndef __TFG__VERSION__
+                         -TMath::Pi(), // phi
+#else /* __TFG__VERSION__ */
                   -(float)TMath::Pi(), // phi
+#endif /* __TFG__VERSION__ */
                                 -10.f, // X
                                 -10.f, // Y
                                -230.f, // Z
@@ -1043,7 +1003,7 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   10.f, // p
                                   10.f, // pt
 #ifndef __TFG__VERSION__
-                                  0.f, // y
+                                   0.f, // y
 #else /* __TFG__VERSION__ */
                                   2.0f, // y
 #endif /* __TFG__VERSION__ */
@@ -1051,8 +1011,13 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
                                   50.f, // ctau
                                   20.f, // chi2/ndf
                                    1.f, // prob
-                    (float)TMath::Pi(), // theta
-                    (float)TMath::Pi(), // phi
+#ifndef __TFG__VERSION__
+                           TMath::Pi(), // theta
+                           TMath::Pi(), // phi
+#else /* __TFG__VERSION__ */
+		   (float) TMath::Pi(), // theta
+		   (float) TMath::Pi(), // phi
+#endif /* __TFG__VERSION__ */
                                   10.f, // X
                                   10.f, // Y
                                  230.f, // Z
@@ -1072,11 +1037,10 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
   };
   if(iPart < 9)
   {
-    xMin[10] =-50; xMin[11] =-50;// xMin[12] =-100;
-    xMax[10] = 50; xMax[11] = 50;// xMax[12] = 100; 
-    xMax[13] = 50; xMax[14] = 50; 
+    xMin[10] =-50; xMin[11] =-50; xMin[12] =-100;
+    xMax[10] = 50; xMax[11] = 50; xMax[12] = 100; xMax[13] = 50; xMax[14] = 50; 
   }
-#endif /* ! CBM */
+#endif
   for(int iH=0; iH<nHistoPartParam; iH++)
   {
     histoParameters[iPart][iH] = new TH1F(parName[iH].Data(),parTitle[iH].Data(),
@@ -1165,23 +1129,23 @@ void KFParticlePerformanceBase::CreateParameterHistograms(TH1F* histoParameters[
     histoParameters3D[iPart][5]->GetYaxis()->SetTitle("p_{t} [GeV/c]");
     histoParameters3D[iPart][5]->GetYaxis()->SetTitleOffset(1.0);
     histoParameters3D[iPart][5]->GetZaxis()->SetTitle("M");
-    
 #ifdef __TFG__VERSION__
     histoParameters3D[iPart][12] = new TH3F(parName3D[12].Data(),parTitle3D[12] + " pT > 1 GeV", // and track with NDF > 45",
-					    nBins[3],xMin[3],xMax[3],
-					    nBins[9],xMin[9],xMax[9],
-					    nBins[0],xMin[0],xMax[0]);
+                                           nBins[3],xMin[3],xMax[3],
+                                           nBins[9],xMin[9],xMax[9],
+                                           nBins[0],xMin[0],xMax[0]);
     histoParameters3D[iPart][12]->GetXaxis()->SetTitle("y");
     histoParameters3D[iPart][12]->GetYaxis()->SetTitle("#phi (rad)");
     histoParameters3D[iPart][12]->GetZaxis()->SetTitle("dM");
     histoParameters3D[iPart][13] = new TH3F(parName3D[13].Data(),parTitle3D[13] + " pT > 1 GeV", // and track with NDF > 45",
-					    nBins[3],xMin[3],xMax[3],
-					    nBins[9],xMin[9],xMax[9],
-					    nBins[0],xMin[0],xMax[0]);
+                                           nBins[3],xMin[3],xMax[3],
+                                           nBins[9],xMin[9],xMax[9],
+                                           nBins[0],xMin[0],xMax[0]);
     histoParameters3D[iPart][13]->GetXaxis()->SetTitle("y");
     histoParameters3D[iPart][13]->GetYaxis()->SetTitle("#phi (rad)");
 
 #endif /* __TFG__VERSION__ */
+   
     if(IsCollectDalitz(iPart))
     {
       int nBinsM12  = 100;
@@ -1331,32 +1295,8 @@ bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
   /** Checks if 3D histograms for decay "iParticle" should be created. */
 #ifndef __TFG__VERSION__
   return 0; //TODO
-//   return (!fStore3DEfficiency) && (abs(fParteff.partPDG[iParticle]) == 310 ||
-//          abs(fParteff.partPDG[iParticle]) == 3122 ||
-//          abs(fParteff.partPDG[iParticle]) == 3312 ||
-//          abs(fParteff.partPDG[iParticle]) == 3334 ||
-//          (abs(fParteff.partPDG[iParticle]) >= 3000 && 
-//           abs(fParteff.partPDG[iParticle]) <= 3029) ||
-//          abs(fParteff.partPDG[iParticle]) == 3103 ||
-//          abs(fParteff.partPDG[iParticle]) == 3203 ||
-// #ifdef CBM
-//          abs(fParteff.partPDG[iParticle]) == 7003112 ||
-//          abs(fParteff.partPDG[iParticle]) == 7003222 ||
-//          abs(fParteff.partPDG[iParticle]) == 7003312 ||
-//          abs(fParteff.partPDG[iParticle]) == 8003222 ||
-//          abs(fParteff.partPDG[iParticle]) == 9000321);
-// #else
-//          abs(fParteff.partPDG[iParticle]) == 421 ||
-//          abs(fParteff.partPDG[iParticle]) == 429 ||
-//          abs(fParteff.partPDG[iParticle]) == 426 ||
-//          abs(fParteff.partPDG[iParticle]) == 411 ||
-//          abs(fParteff.partPDG[iParticle]) == 431 ||
-//          abs(fParteff.partPDG[iParticle]) == 4122 ||
-//          abs(fParteff.partPDG[iParticle]) == 521 ||
-//          abs(fParteff.partPDG[iParticle]) == 511);
-// #endif
 #else /* __TFG__VERSION__ */
-  return abs(fParteff.partPDG[iParticle]) == 310 ||
+  return (!fStore3DEfficiency) && (abs(fParteff.partPDG[iParticle]) == 310 ||
          abs(fParteff.partPDG[iParticle]) == 3122 ||
          abs(fParteff.partPDG[iParticle]) == 3312 ||
          abs(fParteff.partPDG[iParticle]) == 3334 ||
@@ -1369,7 +1309,7 @@ bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
          abs(fParteff.partPDG[iParticle]) == 7003222 ||
          abs(fParteff.partPDG[iParticle]) == 7003312 ||
          abs(fParteff.partPDG[iParticle]) == 8003222 ||
-         abs(fParteff.partPDG[iParticle]) == 9000321;
+         abs(fParteff.partPDG[iParticle]) == 9000321);
 #else
          abs(fParteff.partPDG[iParticle]) == 421 ||
          abs(fParteff.partPDG[iParticle]) == 429 ||
@@ -1378,7 +1318,7 @@ bool KFParticlePerformanceBase::IsCollect3DHistogram(int iParticle) const
          abs(fParteff.partPDG[iParticle]) == 431 ||
          abs(fParteff.partPDG[iParticle]) == 4122 ||
          abs(fParteff.partPDG[iParticle]) == 521 ||
-         abs(fParteff.partPDG[iParticle]) == 511;
+         abs(fParteff.partPDG[iParticle]) == 511);
 #endif
 #endif /* __TFG__VERSION__ */
 }
@@ -1388,35 +1328,8 @@ bool KFParticlePerformanceBase::IsCollectArmenteros(int iParticle) const
   /** Checks if Armenteros-Podoliansky plot for decay "iParticle" should be created. */
 #ifndef __TFG__VERSION__
   return 0; //TODO
-//   return (!fStore3DEfficiency) && (abs(fParteff.partPDG[iParticle]) == 310 ||
-//          abs(fParteff.partPDG[iParticle]) == 3122 ||
-//          abs(fParteff.partPDG[iParticle]) == 3312 ||
-//          abs(fParteff.partPDG[iParticle]) == 3334 ||
-//          abs(fParteff.partPDG[iParticle]) == 22 ||
-//          abs(fParteff.partPDG[iParticle]) == 111 ||
-//          abs(fParteff.partPDG[iParticle]) == 3003 ||
-//          abs(fParteff.partPDG[iParticle]) == 3103 ||
-//          abs(fParteff.partPDG[iParticle]) == 3004 ||
-//          abs(fParteff.partPDG[iParticle]) == 3005 ||
-//          abs(fParteff.partPDG[iParticle]) == 3203 ||
-//          abs(fParteff.partPDG[iParticle]) == 3008 ||
-//          abs(fParteff.partPDG[iParticle]) == 3000 ||
-//          abs(fParteff.partPDG[iParticle]) == 333 ||
-// #ifdef CBM
-//          abs(fParteff.partPDG[iParticle]) == 7003112 ||
-//          abs(fParteff.partPDG[iParticle]) == 7003222 ||
-//          abs(fParteff.partPDG[iParticle]) == 7003312 ||
-//          abs(fParteff.partPDG[iParticle]) == 8003222 ||
-//          abs(fParteff.partPDG[iParticle]) == 9000321);
-// #else
-//          abs(fParteff.partPDG[iParticle]) == 421 ||
-//          abs(fParteff.partPDG[iParticle]) == 420 ||
-//          abs(fParteff.partPDG[iParticle]) == 426 ||
-//          abs(fParteff.partPDG[iParticle]) == 521 ||
-//          abs(fParteff.partPDG[iParticle]) == 511);        
-// #endif
 #else /* __TFG__VERSION__ */
-  return abs(fParteff.partPDG[iParticle]) == 310 ||
+  return (!fStore3DEfficiency) && (abs(fParteff.partPDG[iParticle]) == 310 ||
          abs(fParteff.partPDG[iParticle]) == 3122 ||
          abs(fParteff.partPDG[iParticle]) == 3312 ||
          abs(fParteff.partPDG[iParticle]) == 3334 ||
@@ -1435,13 +1348,13 @@ bool KFParticlePerformanceBase::IsCollectArmenteros(int iParticle) const
          abs(fParteff.partPDG[iParticle]) == 7003222 ||
          abs(fParteff.partPDG[iParticle]) == 7003312 ||
          abs(fParteff.partPDG[iParticle]) == 8003222 ||
-         abs(fParteff.partPDG[iParticle]) == 9000321;
+         abs(fParteff.partPDG[iParticle]) == 9000321);
 #else
          abs(fParteff.partPDG[iParticle]) == 421 ||
          abs(fParteff.partPDG[iParticle]) == 420 ||
          abs(fParteff.partPDG[iParticle]) == 426 ||
          abs(fParteff.partPDG[iParticle]) == 521 ||
-         abs(fParteff.partPDG[iParticle]) == 511;        
+         abs(fParteff.partPDG[iParticle]) == 511);        
 #endif
 #endif /* __TFG__VERSION__ */
 }
@@ -1451,29 +1364,23 @@ bool KFParticlePerformanceBase::IsCollectDalitz(int iParticle) const
   /** Checks if Armenteros-Podoliansky plot for decay "iParticle" should be created. */
 #ifndef __TFG__VERSION__
   return 0; // TODO
-//   return fParteff.partPDG[iParticle] == 3006 ||
-//          fParteff.partPDG[iParticle] == 3007 ||
-//          fParteff.partPDG[iParticle] == 3012 ||
-//          fParteff.partPDG[iParticle] == 3013 ||
-//          
-//          fParteff.partPDG[iParticle] == 3014 ||
-//          fParteff.partPDG[iParticle] == 3015 ||
-//          fParteff.partPDG[iParticle] == 3017 ||
-//          fParteff.partPDG[iParticle] == 3018 ||
-//          fParteff.partPDG[iParticle] == 3020 ||
-//          fParteff.partPDG[iParticle] == 3021 ||
-//          fParteff.partPDG[iParticle] == 3023 ||
-//          fParteff.partPDG[iParticle] == 3024 ||
-//          fParteff.partPDG[iParticle] == 3026 ||
-//          fParteff.partPDG[iParticle] == 3027 ||
-//          
-//          fParteff.partPDG[iParticle] == 3028 || 
-//          fParteff.partPDG[iParticle] == 3029 ;
 #else /* __TFG__VERSION__ */
   return fParteff.partPDG[iParticle] == 3006 ||
          fParteff.partPDG[iParticle] == 3007 ||
          fParteff.partPDG[iParticle] == 3012 ||
-         fParteff.partPDG[iParticle] == 3013 || 
+         fParteff.partPDG[iParticle] == 3013 ||
+         
+         fParteff.partPDG[iParticle] == 3014 ||
+         fParteff.partPDG[iParticle] == 3015 ||
+         fParteff.partPDG[iParticle] == 3017 ||
+         fParteff.partPDG[iParticle] == 3018 ||
+         fParteff.partPDG[iParticle] == 3020 ||
+         fParteff.partPDG[iParticle] == 3021 ||
+         fParteff.partPDG[iParticle] == 3023 ||
+         fParteff.partPDG[iParticle] == 3024 ||
+         fParteff.partPDG[iParticle] == 3026 ||
+         fParteff.partPDG[iParticle] == 3027 ||
+         
          fParteff.partPDG[iParticle] == 3028 || 
          fParteff.partPDG[iParticle] == 3029 ;
 #endif /* __TFG__VERSION__ */

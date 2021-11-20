@@ -23,12 +23,7 @@
 
 #include "KFParticleSIMD.h"
 #include "KFParticle.h"
-#include "KFParticleDatabase.h"
-#ifdef __ROOT__
-#include "TClass.h"
-//#include "TRSymMatrix.h"
-//#include "TRVector.h"
-#endif
+#include "KFParticleMath.h"
 
 #ifdef HomogeneousField
 float_v KFParticleSIMD::fgBz = -5.f;  //* Bz compoment of the magnetic field
@@ -254,31 +249,6 @@ void KFParticleSIMD::Create(KFPTrackVector &track, uint_v& index, const int_v& p
   
   //   fPDG.gather(&(track.PDG()[0]), index);
   fQ.gather(&(track.Q()[0]), index);
-
-  float_v mass = KFParticleDatabase::Instance()->GetMass(pdg);
-  Create(fP,fC,fQ,mass);
-}
-
-void KFParticleSIMD::Load(KFPTrackVector &track, int index, const int_v& pdg)
-{
-  /** Create a particle from a set of consequetive tracks stored in the KFPTrackVector format
-   ** starting from the index "index".
-   ** \param[in] track - an array with tracks in the KFPTrackVector format
-   ** \param[in] index - index of the first track
-   ** \param[in] pdg - a SIMD vector with an individual pdg hypothesis for each element
-   **/
-  
-  for(int i=0; i<6; i++)
-    fP[i] = reinterpret_cast<const float_v&>(track.Parameter(i)[index]);
-  for(int i=0; i<21; i++)
-    fC[i] = reinterpret_cast<const float_v&>(track.Covariance(i)[index]);
-#ifdef NonhomogeneousField
-  for(int i=0; i<10; i++)
-    fField.fField[i] = reinterpret_cast<const float_v&>(track.FieldCoefficient(i)[index]);
-#endif
-  
-  //   fPDG.gather(&(track.PDG()[0]), index);
-  fQ = reinterpret_cast<const int_v&>(track.Q()[index]);
 
   float_v mass = KFParticleDatabase::Instance()->GetMass(pdg);
   Create(fP,fC,fQ,mass);
@@ -1049,23 +1019,3 @@ void KFParticleSIMD::GetKFParticle(KFParticle* Part, int nPart)
   for(int i=0; i<nPart; i++)
     GetKFParticle(Part[i],i);
 }
-#ifdef __ROOT__
-//________________________________________________________________________________
-void KFParticleSIMD::Print(Option_t *opt) const {
-  std::cout << *this << std::endl;
-//   if (opt && (opt[0] == 'a' || opt[0] == 'A')) {
-//     TRVector P(8,fP); std::cout << "par. " << P << std::endl;
-//     TRSymMatrix C(8,fC); std::cout << "cov. " << C << std::endl;
-    
-//   }
-}
-//________________________________________________________________________________
-std::ostream&  operator<<(std::ostream& os, const KFParticleSIMD& particle) {
-  KFParticle Part;
-  for (int iv = 0; iv < float_vLen; iv++) {
-    particle.GetKFParticle(Part,iv);
-    os << iv << "\t" << Part << std::endl;
-  }
-  return os;
-}
-#endif

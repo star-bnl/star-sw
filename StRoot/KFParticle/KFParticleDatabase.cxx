@@ -75,9 +75,9 @@ KFParticleDatabase::KFParticleDatabase():
   fMassSecPDG[2] = 1.32171; //Xi  
   fMassSecPDG[3] = 0; //gamma
   fMassSecPDG[4] = 1.67245; //Omega
-  fMassSecPDG[5] = 2.9915; //H3L
-  fMassSecPDG[6] = 3.9216; //He4L
-  fMassSecPDG[7] = 4.8340; //He5L
+  fMassSecPDG[5] = 2.9914; //H3L
+  fMassSecPDG[6] = 3.9217; //He4L
+  fMassSecPDG[7] = 4.8397; //He5L
   
 #ifdef PANDA_STT
   fMassSecPDGSigma[0]=12.0e-3; //K0 TODO tune
@@ -102,9 +102,9 @@ KFParticleDatabase::KFParticleDatabase():
 #endif
   fMassSecPDGSigma[3]=6.0e-3; //TODO tune //Gamma
   fMassSecPDGSigma[4]=2.1e-3; //Omega
-  fMassSecPDGSigma[5]=3.0e-3; //H3L
-  fMassSecPDGSigma[6]=3.0e-3; //He4L
-  fMassSecPDGSigma[7]=3.0e-3; //He5L
+  fMassSecPDGSigma[5]=2.0e-3; //H3L
+  fMassSecPDGSigma[6]=1.5e-3; //He4L
+  fMassSecPDGSigma[7]=1.5e-3; //He5L
   
   fDatabase = this;
 }

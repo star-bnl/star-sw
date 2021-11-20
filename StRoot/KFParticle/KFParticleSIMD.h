@@ -32,6 +32,7 @@
 #include "KFPTrackVector.h"
 #include "KFPEmcCluster.h"
 #include "KFPVertex.h"
+#include "KFParticleDatabase.h"
 
 #ifdef NonhomogeneousField
 #include "KFParticleField.h"
@@ -116,6 +117,7 @@ class KFParticleSIMD :public KFParticleBaseSIMD
   void Create(KFPTrack* Track[], int NTracks, const Int_t *pdg=0);
   void Create(KFPTrackVector &track, uint_v& index, const int_v& pdg);
   void Load(KFPTrackVector &track, int index, const int_v& pdg);
+  void Load(const KFPTrackVector &track, int index);
   void Rotate();
 
   KFParticleSIMD(KFPTrack &Track, const Int_t *pdg=0);
@@ -334,11 +336,8 @@ class KFParticleSIMD :public KFParticleBaseSIMD
 
   void GetFieldValue( const float_v xyz[], float_v B[] ) const ;
   
-  void Transport( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0  ) const ;
+  void Transport( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0, const bool fullC=true ) const ;
   void TransportFast( float_v dS, float_v P[] ) const ;
-#ifdef __ROOT__ //for the STAR experiment
-  virtual void Print(Option_t *opt="") const;
-#endif
   
  protected: 
   
@@ -1058,7 +1057,7 @@ inline void KFParticleSIMD::GetDStoParticleFast( const KFParticleBaseSIMD &p, fl
 #endif
 }
 
-inline void KFParticleSIMD::Transport( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1, float_v* F, float_v* F1 ) const 
+inline void KFParticleSIMD::Transport( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1, float_v* F, float_v* F1, const bool fullC ) const 
 {
   /** Transports the parameters and their covariance matrix of the current particle
    ** on a length defined by the transport parameter dS = l/p, where l is the signed distance and p is 
@@ -1083,7 +1082,7 @@ inline void KFParticleSIMD::Transport( float_v dS, const float_v* dsdr, float_v 
    ** with the state vector r1, to which the current particle is being transported, F1 = d(fP new)/d(r1)
    **/ 
 #ifdef HomogeneousField
-  KFParticleBaseSIMD::TransportBz( GetFieldAlice(), dS, dsdr, P, C, dsdr1, F, F1 );
+  KFParticleBaseSIMD::TransportBz( GetFieldAlice(), dS, dsdr, P, C, dsdr1, F, F1, fullC );
 #endif
 #ifdef NonhomogeneousField
   KFParticleBaseSIMD::TransportCBM( dS, dsdr, P, C, dsdr1, F, F1 );
@@ -1110,7 +1109,126 @@ inline void KFParticleSIMD::TransportFast( float_v dS, float_v P[] ) const
 #endif
 }
 
-#ifdef __ROOT__ //for the STAR experiment
-std::ostream&  operator<<(std::ostream& os, KFParticleSIMD const & particle);
+inline void KFParticleSIMD::Load(KFPTrackVector &track, int index, const int_v& pdg)
+{
+  /** Create a particle from a set of consequetive tracks stored in the KFPTrackVector format
+   ** starting from the index "index".
+   ** \param[in] track - an array with tracks in the KFPTrackVector format
+   ** \param[in] index - index of the first track
+   ** \param[in] pdg - a SIMD vector with an individual pdg hypothesis for each element
+   **/
+  
+  fP[0] = reinterpret_cast<const float_v&>(track.Parameter(0)[index]);
+  fP[1] = reinterpret_cast<const float_v&>(track.Parameter(1)[index]);
+  fP[2] = reinterpret_cast<const float_v&>(track.Parameter(2)[index]);
+  fP[3] = reinterpret_cast<const float_v&>(track.Parameter(3)[index]);
+  fP[4] = reinterpret_cast<const float_v&>(track.Parameter(4)[index]);
+  fP[5] = reinterpret_cast<const float_v&>(track.Parameter(5)[index]);
+   
+  fC[ 0] = reinterpret_cast<const float_v&>(track.Covariance( 0)[index]);
+  fC[ 1] = reinterpret_cast<const float_v&>(track.Covariance( 1)[index]);
+  fC[ 2] = reinterpret_cast<const float_v&>(track.Covariance( 2)[index]);
+  fC[ 3] = reinterpret_cast<const float_v&>(track.Covariance( 3)[index]);
+  fC[ 4] = reinterpret_cast<const float_v&>(track.Covariance( 4)[index]);
+  fC[ 5] = reinterpret_cast<const float_v&>(track.Covariance( 5)[index]);
+  fC[ 6] = reinterpret_cast<const float_v&>(track.Covariance( 6)[index]);
+  fC[ 7] = reinterpret_cast<const float_v&>(track.Covariance( 7)[index]);
+  fC[ 8] = reinterpret_cast<const float_v&>(track.Covariance( 8)[index]);
+  fC[ 9] = reinterpret_cast<const float_v&>(track.Covariance( 9)[index]);
+  fC[10] = reinterpret_cast<const float_v&>(track.Covariance(10)[index]);
+  fC[11] = reinterpret_cast<const float_v&>(track.Covariance(11)[index]);
+  fC[12] = reinterpret_cast<const float_v&>(track.Covariance(12)[index]);
+  fC[13] = reinterpret_cast<const float_v&>(track.Covariance(13)[index]);
+  fC[14] = reinterpret_cast<const float_v&>(track.Covariance(14)[index]);
+  fC[15] = reinterpret_cast<const float_v&>(track.Covariance(15)[index]);
+  fC[16] = reinterpret_cast<const float_v&>(track.Covariance(16)[index]);
+  fC[17] = reinterpret_cast<const float_v&>(track.Covariance(17)[index]);
+  fC[18] = reinterpret_cast<const float_v&>(track.Covariance(18)[index]);
+  fC[19] = reinterpret_cast<const float_v&>(track.Covariance(19)[index]);
+  fC[20] = reinterpret_cast<const float_v&>(track.Covariance(20)[index]);
+  
+#ifdef NonhomogeneousField
+  for(int i=0; i<10; i++)
+    fField.fField[i] = reinterpret_cast<const float_v&>(track.FieldCoefficient(i)[index]);
 #endif
+  
+  //   fPDG.gather(&(track.PDG()[0]), index);
+  fQ = reinterpret_cast<const int_v&>(track.Q()[index]);
+
+  float_v mass = KFParticleDatabase::Instance()->GetMass(pdg);
+  
+  float_v energy = sqrt( mass*mass + fP[3]*fP[3] + fP[4]*fP[4] + fP[5]*fP[5]);
+  fP[6] = energy;
+  fP[7] = 0;
+  fNDF = 0;
+  fChi2 = 0;
+  fAtProductionVertex = 0;
+  fSFromDecay = 0;
+
+  float_v energyInv = 1.f/energy;
+  float_v 
+    h0 = fP[3]*energyInv,
+    h1 = fP[4]*energyInv,
+    h2 = fP[5]*energyInv;
+
+  fC[21] = h0*fC[ 6] + h1*fC[10] + h2*fC[15];
+  fC[22] = h0*fC[ 7] + h1*fC[11] + h2*fC[16];
+  fC[23] = h0*fC[ 8] + h1*fC[12] + h2*fC[17];
+  fC[24] = h0*fC[ 9] + h1*fC[13] + h2*fC[18];
+  fC[25] = h0*fC[13] + h1*fC[14] + h2*fC[19];
+  fC[26] = h0*fC[18] + h1*fC[19] + h2*fC[20];
+  fC[27] = ( h0*h0*fC[ 9] + h1*h1*fC[14] + h2*h2*fC[20] 
+           + 2*(h0*h1*fC[13] + h0*h2*fC[18] + h1*h2*fC[19] ) );
+  for( Int_t i=28; i<36; i++ ) fC[i] = 0.f;
+  fC[35] = 1.f;
+
+  SumDaughterMass = mass;
+  fMassHypo = mass;
+}
+
+inline void KFParticleSIMD::Load(const KFPTrackVector &track, int index)
+{
+  /** Create a particle from a set of consequetive tracks stored in the KFPTrackVector format
+   ** starting from the index "index".
+   ** \param[in] track - an array with tracks in the KFPTrackVector format
+   ** \param[in] index - index of the first track
+   **/
+  
+  fP[0] = reinterpret_cast<const float_v&>(track.Parameter(0)[index]);
+  fP[1] = reinterpret_cast<const float_v&>(track.Parameter(1)[index]);
+  fP[2] = reinterpret_cast<const float_v&>(track.Parameter(2)[index]);
+  fP[3] = reinterpret_cast<const float_v&>(track.Parameter(3)[index]);
+  fP[4] = reinterpret_cast<const float_v&>(track.Parameter(4)[index]);
+  fP[5] = reinterpret_cast<const float_v&>(track.Parameter(5)[index]);
+   
+  fC[ 0] = reinterpret_cast<const float_v&>(track.Covariance( 0)[index]);
+  fC[ 1] = reinterpret_cast<const float_v&>(track.Covariance( 1)[index]);
+  fC[ 2] = reinterpret_cast<const float_v&>(track.Covariance( 2)[index]);
+  fC[ 3] = reinterpret_cast<const float_v&>(track.Covariance( 3)[index]);
+  fC[ 4] = reinterpret_cast<const float_v&>(track.Covariance( 4)[index]);
+  fC[ 5] = reinterpret_cast<const float_v&>(track.Covariance( 5)[index]);
+  fC[ 6] = reinterpret_cast<const float_v&>(track.Covariance( 6)[index]);
+  fC[ 7] = reinterpret_cast<const float_v&>(track.Covariance( 7)[index]);
+  fC[ 8] = reinterpret_cast<const float_v&>(track.Covariance( 8)[index]);
+  fC[ 9] = reinterpret_cast<const float_v&>(track.Covariance( 9)[index]);
+  fC[10] = reinterpret_cast<const float_v&>(track.Covariance(10)[index]);
+  fC[11] = reinterpret_cast<const float_v&>(track.Covariance(11)[index]);
+  fC[12] = reinterpret_cast<const float_v&>(track.Covariance(12)[index]);
+  fC[13] = reinterpret_cast<const float_v&>(track.Covariance(13)[index]);
+  fC[14] = reinterpret_cast<const float_v&>(track.Covariance(14)[index]);
+  fC[15] = reinterpret_cast<const float_v&>(track.Covariance(15)[index]);
+  fC[16] = reinterpret_cast<const float_v&>(track.Covariance(16)[index]);
+  fC[17] = reinterpret_cast<const float_v&>(track.Covariance(17)[index]);
+  fC[18] = reinterpret_cast<const float_v&>(track.Covariance(18)[index]);
+  fC[19] = reinterpret_cast<const float_v&>(track.Covariance(19)[index]);
+  fC[20] = reinterpret_cast<const float_v&>(track.Covariance(20)[index]);
+  
+#ifdef NonhomogeneousField
+  for(int i=0; i<10; i++)
+    fField.fField[i] = reinterpret_cast<const float_v&>(track.FieldCoefficient(i)[index]);
+#endif
+  
+  fQ = reinterpret_cast<const int_v&>(track.Q()[index]);
+}
+
 #endif 

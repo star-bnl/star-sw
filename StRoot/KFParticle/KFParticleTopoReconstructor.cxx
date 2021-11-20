@@ -249,7 +249,7 @@ void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker, vector<int
 } // void KFParticleTopoReconstructor::Init(AliHLTTPCCAGBTracker* tracker)
 #endif
 
-void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int>* pdg, vector<int>* nPixelHits)
+void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int>* pdg, vector<int>* nPixelHits, bool initPVTracks)
 {
 #ifdef USE_TIMERS
   timer.Start();
@@ -293,7 +293,8 @@ void KFParticleTopoReconstructor::Init(vector<KFParticle> &particles, vector<int
     fTracks[0].SetNPixelHits(npixelhits,iTr);
   }
 
-  fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
+  if(initPVTracks)
+    fKFParticlePVReconstructor->Init( &fTracks[0], nTracks );
   
 #ifdef USE_TIMERS
   timer.Stop();

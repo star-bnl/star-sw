@@ -18,8 +18,10 @@ class KFMCTrack;
 class StMuDst;
 class StDcaGeometry;
 class KFPTrack;
+class KFPTrackVector;
 class TH1F;
 class TH2F;
+
 #ifdef __TFG__VERSION__
 class StPidStatus;
 #endif
@@ -88,7 +90,8 @@ class StKFParticleInterface: public TObject
   //Histograms
   void CollectTrackHistograms();
   void CollectPIDHistograms();
-  
+  void CollectPVHistograms();
+
   //PID hypothesis, should be resized from outside
   void ResizeTrackPidVectors(const int nTracks);
   const float GetdEdXNSigmaPion(const int trackId)   const { return fTrackPidTpc[0][trackId]; }
@@ -147,6 +150,8 @@ class StKFParticleInterface: public TObject
 #ifdef __TFG__VERSION__
   void              SetFixedTarget(Bool_t k=kTRUE) {fIsFixedTarget = k;}
   Bool_t            IsFixedTarget()        {return fIsFixedTarget;}
+  void              SetFixedTarget2018(Bool_t k=kTRUE) {fIsFixedTarget2018 = k;}
+  Bool_t            IsFixedTarget2018()        {return fIsFixedTarget2018;}
 #endif /* __TFG__VERSION__ */
  private:
   
@@ -155,23 +160,25 @@ class StKFParticleInterface: public TObject
   bool GetTrack(const StDcaGeometry& dcaG, KFPTrack& track, int q, int index);
   std::vector<int> GetTofPID(double m2, double p, int q, const int trackId);
   std::vector<int> GetPID(double m2, double p, int q, double dEdX, double dEdXPull[8], bool isTofm2, const int trackId);
+#ifndef __TFG__VERSION__
   void AddTrackToParticleList(const KFPTrack& track, int nHftHitsInTrack, int index, const std::vector<int>& totalPDG, KFVertex& pv, std::vector<int>& primaryTrackList,
                               std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved,
-                              const KFPTrack* trackAtLastHit=nullptr, std::vector<KFParticle>* particlesAtLastHit=nullptr
-#ifdef __TFG__VERSION__
-			      , Float_t chi2 = 0, Int_t NDF = -1
-#endif /* __TFG__VERSION__ */
-			      );
-  void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof
-#ifdef __TFG__VERSION__
-			 = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1
-#endif /* __TFG__VERSION__ */
-			 );
-  void FillPIDHistograms(StMuTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof
-#ifdef __TFG__VERSION__
-			 = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1
-#endif /* __TFG__VERSION__ */
-			 );
+                              const KFPTrack* trackAtLastHit=nullptr, std::vector<KFParticle>* particlesAtLastHit=nullptr);
+  void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof);
+  void FillPIDHistograms(StMuTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof);
+#else /* __TFG__VERSION__ */
+  void AddTrackToParticleList(const KFPTrack& track, int nHftHitsInTrack, int index, const std::vector<int>& totalPDG, KFVertex& pv, std::vector<int>& primaryTrackList,
+                              std::vector<int>& nHftHits, std::vector<int>& particlesPdg, std::vector<KFParticle>& particles, int& nPartSaved,
+                              const KFPTrack* trackAtLastHit=nullptr, std::vector<KFParticle>* particlesAtLastHit=nullptr,
+			      Float_t chi2 = 0, Int_t NDF = -1);
+  void FillPIDHistograms(StPicoTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1);
+  void FillPIDHistograms(StMuTrack *gTrack, const std::vector<int>& pdgVector, const bool isTofm2, float m2tof = -1,  const bool isETofm2 = kFALSE, float m2Etof = -1);
+#endif /* ! __TFG__VERSION__ */
+  
+  bool FitPV(KFVertex& pv, bool isFirstSeed, const KFPTrackVector& tracks,   
+             std::vector<int>& pvTrackIndices, std::vector<int>& leftTrackIndices);
+  bool FindFixedTargetPV(StPicoDst* picoDst, KFVertex& pv, std::vector<bool>& isPileup);
+ 
   KFParticleTopoReconstructor* fKFParticleTopoReconstructor;
   std::vector<KFParticle> fParticles;
 #ifdef __kfpAtFirstHit__
@@ -183,11 +190,14 @@ class StKFParticleInterface: public TObject
   //histograms
   bool fCollectTrackHistograms;
   bool fCollectPIDHistograms;
-  //0 - N HFT hits in track, 1 - PV error distribution, 2 - pv tracks ratio
+  bool fCollectPVHistograms;
+  //0 - N HFT hits in track, 1 - PV error distribution, 2 - NPrimTracks/NAllTracks
   TH1F* fTrackHistograms[3];
 #ifndef __TFG__VERSION__
-  // 0 - dEdX, 1 - dEdX positive tracks, 2 - dEdX negative tracks, 3 - dEdX tracks with ToF, 4 - ToF PID, 5 - PV errors vs N tracks, 6 - PV errors vs N PV tracks, 7 - N secondary vs N prim
-  TH2F* fTrackHistograms2D[8];
+  // 0 - dEdX, 1 - dEdX positive tracks, 2 - dEdX negative tracks, 3 - dEdX tracks with ToF, 4 - ToF PID, 5 - PV errors vs N tracks, 6 - PV errors vs N PV tracks, 7 - N secondary vs N prim, 8 - M2 vs dEdx, 9 - dEdX with EToF, 10 - EToF PID
+  TH2F* fTrackHistograms2D[11];
+
+
 #else /* __TFG__VERSION__ */
   // 0 - dEdX, 1 - dEdX positive tracks, 2 - dEdX negative tracks, 3 - dEdX tracks with ToF or ETof,
   // 4 - ToF PID, 5 - PV errors vs N tracks, 6 - PV errors vs N PV tracks, 7 - N Global vs N Primary
@@ -199,14 +209,19 @@ class StKFParticleInterface: public TObject
   // 16 - ToF PID, eta < 0
   TH2F* fTrackHistograms2D[17];
 #endif /* __TFG__VERSION__ */
+  TH1F* fPVHistograms[11];
+  TH2F* fPVHistograms2D[4];
+  
   //PID histograms
   static const int NTrackHistoFolders = 26;
   TH2F* fHistodEdXTracks[NTrackHistoFolders];
   TH2F* fHistodEdXwithToFTracks[NTrackHistoFolders];
+#ifndef __TFG__VERSION__
+  TH2F* fHistoTofPIDTracks[NTrackHistoFolders];
+#else /* __TFG__VERSION__ */
   TH2F* fHistoTofPIDTracks[NTrackHistoFolders][3];
-#ifdef __TFG__VERSION__
   TH2F* fHistoETofPIDTracks[NTrackHistoFolders];
-#endif /* __TFG__VERSION__ */
+#endif /* ! __TFG__VERSION__ */
   TH1F* fHistoMomentumTracks[NTrackHistoFolders];
   TH2F* fHistodEdXPull[NTrackHistoFolders];
   TH2F* fHistodEdXZ[NTrackHistoFolders];
@@ -238,6 +253,7 @@ class StKFParticleInterface: public TObject
   bool fUseHFTTracksOnly;
 #ifdef __TFG__VERSION__
   Bool_t            fIsFixedTarget;
+  Bool_t            fIsFixedTarget2018;
   Bool_t            fPidQA;
 #endif /* __TFG__VERSION__ */
   ClassDef(StKFParticleInterface,1)

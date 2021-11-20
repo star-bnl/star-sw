@@ -17,7 +17,7 @@
 
 class StKFParticleInterface;
 class StKFParticlePerformanceInterface;
-class KFParticle;
+//class KFParticle;
 class StPicoDst;
 class StMuDst;
 class TNtuple;
@@ -54,6 +54,7 @@ class StKFParticleAnalysisMaker : public StMaker {
   Bool_t fProcessSignal;
   Bool_t fCollectTrackHistograms;
   Bool_t fCollectPIDHistograms;
+  Bool_t fCollectPVHistograms;
   Bool_t fTMVAselection;
   
   //Centrality and flow
@@ -113,6 +114,7 @@ class StKFParticleAnalysisMaker : public StMaker {
   void StoreTMVANtuples() { fStoreTmvaNTuples = true; }
   void CollectTrackHistograms() { fCollectTrackHistograms = true; }
   void CollectPIDHistograms() { fCollectPIDHistograms = true; }
+  void CollectPVHistograms() { fCollectPVHistograms = true; }
   void UseTMVA() { fTMVAselection = true; }
   void SetTMVABinsD0   (TString centralityBins, TString ptBins) { SetTMVABins(0, centralityBins, ptBins); }
   void SetTMVABinsDPlus(TString centralityBins, TString ptBins) { SetTMVABins(1, centralityBins, ptBins); }

@@ -74,7 +74,7 @@ class KFParticleBase :public TObject {
   void GetDStoParticleCBM( const KFParticleBase &p, float dS[2], float dsdr[4][6] ) const ;
   
   /** Virtual method to transport a particle on a certain distance along the trajectory. Is defined in KFParticle.**/
-  virtual void Transport( float dS, const float dsdr[6], float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const = 0;
+  virtual void Transport( float dS, const float dsdr[6], float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0, const bool fullC=true ) const = 0;
 
 
   KFParticleBase();
@@ -196,7 +196,7 @@ class KFParticleBase :public TObject {
   void TransportToDecayVertex();
   void TransportToProductionVertex();
   void TransportToDS( float dS, const float* dsdr );
-  void TransportBz( float Bz, float dS, const float* dsdr, float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const;
+  void TransportBz( float Bz, float dS, const float* dsdr, float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0, const bool fullC=true ) const;
   void TransportCBM( float dS, const float* dsdr, float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const;  
 
   //* 
@@ -251,6 +251,7 @@ class KFParticleBase :public TObject {
   static void MultQSQt( const float Q[], const float S[], float SOut[], const int kN );
 
   void GetDistanceToVertexLine( const KFParticleBase &Vertex, float &l, float &dl) const;
+  void GetDistanceToVertexLineWithDirection( const KFParticleBase &Vertex, float &l, float &dl) const;
 
  protected:
   /** Converts a pair of indices {i,j} of the covariance matrix to one index corresponding to the triangular form. */
@@ -301,5 +302,33 @@ class KFParticleBase :public TObject {
 #ifdef __ROOT__ //for the STAR experiment
 std::ostream&  operator<<(std::ostream& os, KFParticleBase const & particle);
 #endif
+
+inline void KFParticleBase::InvertCholetsky3(float a[6])
+{
+  /** Inverts symmetric 3x3 matrix a using modified Choletsky decomposition. The result is stored to the same matrix a.
+   ** \param[in,out] a - 3x3 symmetric matrix
+   **/
+
+  const float d0 = 1.f/a[0];
+  const float u01 = a[1]*d0;
+  const float u02 = a[3]*d0;
+  
+  const float d1 = 1.f/(a[2] - u01*a[1]);
+  const float u12_d = a[4] - u01*a[3];
+  const float u12 = d1*u12_d;  
+  const float d2 = 1.f/(a[5] - u02*a[3] - u12*u12_d);
+  
+  //find V = -U^-1
+  const float v02 = u02 - u01*u12;
+  
+  //find A^-1 = U^-1 D^-1 Ut^-1
+  a[5] =  d2;
+  a[4] = -d2*u12;
+  a[3] = -d2*v02;
+  const float d1u01 = -d1*u01;
+  a[2] = d1    - a[4]*u12;
+  a[1] = d1u01 - a[3]*u12;
+  a[0] = d0 - d1u01*u01 - a[3]*v02;
+}
 
 #endif 

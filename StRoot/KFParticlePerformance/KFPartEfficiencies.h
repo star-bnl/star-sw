@@ -348,44 +348,52 @@ class KFPartEfficiencies :public TObject
       KFEfficiencyParticleInfo("pi0_{Sigma-b}",    "pi0_{Sigma-_b}",   -8000111, 0.0f, 1.0f, 0.1349766  , 8.52e-17,   0, 0.0030), //216
       KFEfficiencyParticleInfo("Sigma+_{p pi0}",   "Sigma+_{ppi0} ",    8003222, 0.0f, 2.0f, 1.18937    , 0.8018e-10, 1, 0.0250), //217
       KFEfficiencyParticleInfo("pi0_{Sigma+}",     "pi0_{Sigma+}  ",    8000111, 0.0f, 1.0f, 0.1349766  , 8.52e-17,   0, 0.0030), //218
+      KFEfficiencyParticleInfo("He3L_{He3pi0}",    "He3L_{He3pi0} ",    7003029, 2.9f, 3.9f, 2.991      , 2.632e-10,  2, 0.0020), //219
+      KFEfficiencyParticleInfo("pi0_{He3L+}",      "pi0_{He3L+}   ",    7700111, 0.0f, 1.0f, 0.1349766  , 8.52e-17,   0, 0.0030), //220
+      KFEfficiencyParticleInfo("He3L_{He3pi0} b",  "He3L_{He3pi0}b",   -7003029, 2.9f, 3.9f, 2.991      , 2.632e-10,  2, 0.0020), //221
+      KFEfficiencyParticleInfo("pi0_{He3L-}",      "pi0_{He3L-}   ",   -7700111, 0.0f, 1.0f, 0.1349766  , 8.52e-17,   0, 0.0030), //222
+      KFEfficiencyParticleInfo("He4L_{He4pi0}",    "He4L_{He4pi0} ",    7003006, 3.8f, 4.8f, 3.921      , 2.632e-10,  2, 0.0020), //223
+      KFEfficiencyParticleInfo("pi0_{He4L+}",      "pi0_{He4L+}   ",    7800111, 0.0f, 1.0f, 0.1349766  , 8.52e-17,   0, 0.0030), //224
+      KFEfficiencyParticleInfo("He4L_{He4pi0} b",  "He4L_{He4pi0}b",   -7003006, 3.8f, 4.8f, 3.921      , 2.632e-10,  2, 0.0020), //225
+      KFEfficiencyParticleInfo("pi0_{He4L-}",      "pi0_{He4L-}   ",   -7800111, 0.0f, 1.0f, 0.1349766  , 8.52e-17,   0, 0.0030), //226
 //tracks                                                                                                                             
-      KFEfficiencyParticleInfo("e-",               "e-            ",         11, 0.0f,0.01f, 5.109989461E-04, 1.0e20,-1, 0.0030), //219
-      KFEfficiencyParticleInfo("e+",               "e+            ",        -11, 0.0f,0.01f, 5.109989461E-04, 1.0e20, 1, 0.0030), //220
-      KFEfficiencyParticleInfo("mu-",              "mu-           ",         13, 0.0f, 1.0f, 0.1056583745, 2.2e-6,   -1, 0.0030), //221
-      KFEfficiencyParticleInfo("mu+",              "mu+           ",        -13, 0.0f, 1.0f, 0.1056583745, 2.2e-6,    1, 0.0030), //222
-      KFEfficiencyParticleInfo("pi+",              "pi+           ",        211, 0.0f, 1.0f, 0.13957039 , 2.6e-8,     1, 0.0030), //223
-      KFEfficiencyParticleInfo("pi-",              "pi-           ",       -211, 0.0f, 1.0f, 0.13957039 , 2.6e-8,    -1, 0.0030), //224
-      KFEfficiencyParticleInfo("K+",               "K+            ",        321, 0.0f, 1.0f, 0.493677   , 1.238e-8,   1, 0.0030), //225
-      KFEfficiencyParticleInfo("K-",               "K-            ",       -321, 0.0f, 1.0f, 0.493677   , 1.238e-8,  -1, 0.0030), //226
-      KFEfficiencyParticleInfo("p+",               "p+            ",       2212, 0.0f, 1.5f, 0.9382720813, 1.0e20,    1, 0.0030), //227
-      KFEfficiencyParticleInfo("p-",               "p-            ",      -2212, 0.0f, 1.5f, 0.9382720813, 1.0e20,   -1, 0.0030), //228
-      KFEfficiencyParticleInfo("d+",               "d+            ", 1000010020, 0.0f, 2.5f, 1.87561294257, 1.0e20,   1, 0.0030), //229
-      KFEfficiencyParticleInfo("d-",               "d-            ",-1000010020, 0.0f, 2.5f, 1.87561294257, 1.0e20,  -1, 0.0030), //230
-      KFEfficiencyParticleInfo("t+",               "t+            ", 1000010030, 0.0f, 3.5f, 2.80892113298, 1.0e20,   1, 0.0030), //231
-      KFEfficiencyParticleInfo("t-",               "t-            ",-1000010030, 0.0f, 3.5f, 2.80892113298, 1.0e20,  -1, 0.0030), //232
-      KFEfficiencyParticleInfo("He3+",             "He3+          ", 1000020030, 0.0f, 3.5f, 2.80839160743, 1.0e20,   2, 0.0030), //233
-      KFEfficiencyParticleInfo("He3-",             "He3-          ",-1000020030, 0.0f, 3.5f, 2.80839160743, 1.0e20,  -2, 0.0030), //234
-      KFEfficiencyParticleInfo("He4+",             "He4+          ", 1000020040, 0.0f, 4.5f, 3.7273794066, 1.0e20,    2, 0.0030), //235
-      KFEfficiencyParticleInfo("He4-",             "He4-          ",-1000020040, 0.0f, 4.5f, 3.7273794066, 1.0e20,   -2, 0.0030), //236
-      KFEfficiencyParticleInfo("He6+",             "He6+          ", 1000020060, 0.0f, 6.5f, 5.6055375  , 1.0e20,     2, 0.0030), //237
-      KFEfficiencyParticleInfo("He6-",             "He6-          ",-1000020060, 0.0f, 6.5f, 5.6055375  , 1.0e20,    -2, 0.0030), //238
-      KFEfficiencyParticleInfo("Li6+",             "Li6+          ", 1000030060, 0.0f, 6.5f, 5.6015181  , 1.0e20,     3, 0.0030), //239
-      KFEfficiencyParticleInfo("Li6-",             "Li6-          ",-1000030060, 0.0f, 6.5f, 5.6015181  , 1.0e20,    -3, 0.0030), //240
-      KFEfficiencyParticleInfo("Li7+",             "Li7+          ", 1000030070, 0.0f, 7.5f, 6.5338336  , 1.0e20,     3, 0.0030), //241
-      KFEfficiencyParticleInfo("Li7-",             "Li7-          ",-1000030070, 0.0f, 7.5f, 6.5338336  , 1.0e20,    -3, 0.0030), //242
-      KFEfficiencyParticleInfo("Be7+",             "Be7+          ", 1000040070, 0.0f, 7.5f, 6.5341844  , 1.0e20,     4, 0.0030), //243
-      KFEfficiencyParticleInfo("Be7-",             "Be7-          ",-1000040070, 0.0f, 7.5f, 6.5341844  , 1.0e20,    -4, 0.0030), //244
+      KFEfficiencyParticleInfo("e-",               "e-            ",         11, 0.0f,0.01f, 5.109989461E-04, 1.0e20,-1, 0.0030), //227
+      KFEfficiencyParticleInfo("e+",               "e+            ",        -11, 0.0f,0.01f, 5.109989461E-04, 1.0e20, 1, 0.0030), //228
+      KFEfficiencyParticleInfo("mu-",              "mu-           ",         13, 0.0f, 1.0f, 0.1056583745, 2.2e-6,   -1, 0.0030), //229
+      KFEfficiencyParticleInfo("mu+",              "mu+           ",        -13, 0.0f, 1.0f, 0.1056583745, 2.2e-6,    1, 0.0030), //230
+      KFEfficiencyParticleInfo("pi+",              "pi+           ",        211, 0.0f, 1.0f, 0.13957039 , 2.6e-8,     1, 0.0030), //231
+      KFEfficiencyParticleInfo("pi-",              "pi-           ",       -211, 0.0f, 1.0f, 0.13957039 , 2.6e-8,    -1, 0.0030), //232
+      KFEfficiencyParticleInfo("K+",               "K+            ",        321, 0.0f, 1.0f, 0.493677   , 1.238e-8,   1, 0.0030), //233
+      KFEfficiencyParticleInfo("K-",               "K-            ",       -321, 0.0f, 1.0f, 0.493677   , 1.238e-8,  -1, 0.0030), //234
+      KFEfficiencyParticleInfo("p+",               "p+            ",       2212, 0.0f, 1.5f, 0.9382720813, 1.0e20,    1, 0.0030), //235
+      KFEfficiencyParticleInfo("p-",               "p-            ",      -2212, 0.0f, 1.5f, 0.9382720813, 1.0e20,   -1, 0.0030), //236
+      KFEfficiencyParticleInfo("d+",               "d+            ", 1000010020, 0.0f, 2.5f, 1.87561294257, 1.0e20,   1, 0.0030), //237
+      KFEfficiencyParticleInfo("d-",               "d-            ",-1000010020, 0.0f, 2.5f, 1.87561294257, 1.0e20,  -1, 0.0030), //238
+      KFEfficiencyParticleInfo("t+",               "t+            ", 1000010030, 0.0f, 3.5f, 2.80892113298, 1.0e20,   1, 0.0030), //239
+      KFEfficiencyParticleInfo("t-",               "t-            ",-1000010030, 0.0f, 3.5f, 2.80892113298, 1.0e20,  -1, 0.0030), //240
+      KFEfficiencyParticleInfo("He3+",             "He3+          ", 1000020030, 0.0f, 3.5f, 2.80839160743, 1.0e20,   2, 0.0030), //241
+      KFEfficiencyParticleInfo("He3-",             "He3-          ",-1000020030, 0.0f, 3.5f, 2.80839160743, 1.0e20,  -2, 0.0030), //242
+      KFEfficiencyParticleInfo("He4+",             "He4+          ", 1000020040, 0.0f, 4.5f, 3.7273794066, 1.0e20,    2, 0.0030), //243
+      KFEfficiencyParticleInfo("He4-",             "He4-          ",-1000020040, 0.0f, 4.5f, 3.7273794066, 1.0e20,   -2, 0.0030), //244
+      KFEfficiencyParticleInfo("He6+",             "He6+          ", 1000020060, 0.0f, 6.5f, 5.6055375  , 1.0e20,     2, 0.0030), //245
+      KFEfficiencyParticleInfo("He6-",             "He6-          ",-1000020060, 0.0f, 6.5f, 5.6055375  , 1.0e20,    -2, 0.0030), //246
+      KFEfficiencyParticleInfo("Li6+",             "Li6+          ", 1000030060, 0.0f, 6.5f, 5.6015181  , 1.0e20,     3, 0.0030), //247
+      KFEfficiencyParticleInfo("Li6-",             "Li6-          ",-1000030060, 0.0f, 6.5f, 5.6015181  , 1.0e20,    -3, 0.0030), //248
+      KFEfficiencyParticleInfo("Li7+",             "Li7+          ", 1000030070, 0.0f, 7.5f, 6.5338336  , 1.0e20,     3, 0.0030), //249
+      KFEfficiencyParticleInfo("Li7-",             "Li7-          ",-1000030070, 0.0f, 7.5f, 6.5338336  , 1.0e20,    -3, 0.0030), //250
+      KFEfficiencyParticleInfo("Be7+",             "Be7+          ", 1000040070, 0.0f, 7.5f, 6.5341844  , 1.0e20,     4, 0.0030), //251
+      KFEfficiencyParticleInfo("Be7-",             "Be7-          ",-1000040070, 0.0f, 7.5f, 6.5341844  , 1.0e20,    -4, 0.0030), //252
 //background for subtraction
-      KFEfficiencyParticleInfo("pi+pi+",           "pi+pi+        ",       9001, 0.0f, 2.0f, 0          , 1.0e20,     0, 0.0030), //245
-      KFEfficiencyParticleInfo("pi+K+",            "pi+K+         ",       9002, 0.6f, 5.6f, 0          , 1.0e20,     0, 0.0030), //246
-      KFEfficiencyParticleInfo("K+K+",             "K+K+          ",       9003, 0.8f, 3.8f, 0          , 1.0e20,     0, 0.0030), //247
-      KFEfficiencyParticleInfo("K+p+",             "K+p+          ",       9004, 1.4f, 5.4f, 0          , 1.0e20,     0, 0.0030), //248
-      KFEfficiencyParticleInfo("pi-pi-",           "pi-pi-        ",      -9001, 0.0f, 2.0f, 0          , 1.0e20,     0, 0.0030), //249
-      KFEfficiencyParticleInfo("pi-K-",            "pi-K-         ",      -9002, 0.6f, 5.6f, 0          , 1.0e20,     0, 0.0030), //250
-      KFEfficiencyParticleInfo("K-K-",             "K-K-          ",      -9003, 0.8f, 3.8f, 0          , 1.0e20,     0, 0.0030), //251
-      KFEfficiencyParticleInfo("K-p-",             "K-p-          ",      -9004, 1.4f, 5.4f, 0          , 1.0e20,     0, 0.0030), //252
+      KFEfficiencyParticleInfo("pi+pi+",           "pi+pi+        ",       9001, 0.0f, 2.0f, 0          , 1.0e20,     0, 0.0030), //253
+      KFEfficiencyParticleInfo("pi+K+",            "pi+K+         ",       9002, 0.6f, 5.6f, 0          , 1.0e20,     0, 0.0030), //254
+      KFEfficiencyParticleInfo("K+K+",             "K+K+          ",       9003, 0.8f, 3.8f, 0          , 1.0e20,     0, 0.0030), //255
+      KFEfficiencyParticleInfo("K+p+",             "K+p+          ",       9004, 1.4f, 5.4f, 0          , 1.0e20,     0, 0.0030), //256
+      KFEfficiencyParticleInfo("pi-pi-",           "pi-pi-        ",      -9001, 0.0f, 2.0f, 0          , 1.0e20,     0, 0.0030), //257
+      KFEfficiencyParticleInfo("pi-K-",            "pi-K-         ",      -9002, 0.6f, 5.6f, 0          , 1.0e20,     0, 0.0030), //258
+      KFEfficiencyParticleInfo("K-K-",             "K-K-          ",      -9003, 0.8f, 3.8f, 0          , 1.0e20,     0, 0.0030), //259
+      KFEfficiencyParticleInfo("K-p-",             "K-p-          ",      -9004, 1.4f, 5.4f, 0          , 1.0e20,     0, 0.0030), //260
 //V0
-      KFEfficiencyParticleInfo("V0",               "V0            ",  123456789, 0.3f, 1.3f, 0          , 0,          0, 0.0030)  //253
+      KFEfficiencyParticleInfo("V0",               "V0            ",  123456789, 0.3f, 1.3f, 0          , 0,          0, 0.0030)  //261
     };
                                         
     int mPartMaxMult[nParticles];
@@ -1370,6 +1378,38 @@ class KFPartEfficiencies :public TObject
     partDaughterPdg[curPart].push_back(      2212); //
     curPart++;
     
+    partDaughterPdg[curPart].push_back( 1000020030); // He3L+ -> He3 + Pi0
+    partDaughterPdg[curPart].push_back(    7700111); //
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(    7003029); // Pi0 <- He3L+ - He3 
+    partDaughterPdg[curPart].push_back( 1000020030); //
+    curPart++;
+
+    partDaughterPdg[curPart].push_back(-1000020030); // He3L- -> He3- + Pi0
+    partDaughterPdg[curPart].push_back(   -7700111); //
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(   -7003029); // Pi0 <- He3L- - He3- 
+    partDaughterPdg[curPart].push_back(-1000020030); //
+    curPart++;
+
+    partDaughterPdg[curPart].push_back( 1000020040); // He4L+ -> He4 + Pi0
+    partDaughterPdg[curPart].push_back(    7800111); //
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(    7003006); // Pi0 <- He4L+ - He4
+    partDaughterPdg[curPart].push_back( 1000020040); //
+    curPart++;
+
+    partDaughterPdg[curPart].push_back(-1000020040); // He4L- -> He4- + Pi0
+    partDaughterPdg[curPart].push_back(   -7800111); //
+    curPart++;
+    
+    partDaughterPdg[curPart].push_back(   -7003006); // Pi0 <- He4L- - He4- 
+    partDaughterPdg[curPart].push_back(-1000020040); //
+    curPart++;
+    
     for(int iP=0; iP<nParticles; iP++)
     {
       partPDG[iP] = particleInfo[iP].PDG();
@@ -1590,13 +1630,13 @@ class KFPartEfficiencies :public TObject
   float GetMass(int iParticle) const { return partMass[iParticle]; } ///< Returns the table mass of the decay with index "iParticle".
   float GetMassSigma(int iParticle) const { return partMassSigma[iParticle]; } ///< Returns expected width of the mass peak of the decay with index "iParticle".
   
-  static const int nParticles = 254;                     ///< Number of particles.
+  static const int nParticles = 262;                     ///< Number of particles.
   static const int fFirstHypernucleusIndex = 118;        ///< Index of the first hypernuclei in the list.
   static const int fLastHypernucleusIndex = 182;         ///< Index of the last hypernuclei in the list.
   static const int fFirstMissingMassParticleIndex = 183; ///< Index of the first decay reconstructed by the missing mass method.
-  static const int fLastMissingMassParticleIndex = 218;  ///< Index of the last decay reconstructed by the missing mass method.
-  static const int fFirstStableParticleIndex = 219;      ///< Index of the first stable particle in the list.
-  static const int fLastStableParticleIndex = 244;       ///< Index of the last stable particle in the list.
+  static const int fLastMissingMassParticleIndex = 226;  ///< Index of the last decay reconstructed by the missing mass method.
+  static const int fFirstStableParticleIndex = 227;      ///< Index of the first stable particle in the list.
+  static const int fLastStableParticleIndex = 252;       ///< Index of the last stable particle in the list.
   
   int partPDG[nParticles];                        ///< Array of PDG codes assigned to the decays.
   std::string partName[nParticles];               ///< Array of names of the decay in the file with histograms.

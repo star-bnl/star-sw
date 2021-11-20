@@ -21,6 +21,7 @@
 
 
 #include "KFParticleBaseSIMD.h"
+#include "KFParticleMath.h"
 #include <iostream>
 
 static const float_v small = 1.e-20f;
@@ -511,7 +512,7 @@ void KFParticleBaseSIMD::GetMeasurement( const KFParticleBaseSIMD& daughter, flo
   }
 }
 
-void KFParticleBaseSIMD::AddDaughter( const KFParticleBaseSIMD &Daughter )
+inline void KFParticleBaseSIMD::AddDaughter( const KFParticleBaseSIMD &Daughter )
 {
   /** Adds daughter to the current particle. Depending on the selected construction method uses: \n
    ** 1) Either simplifyed fast mathematics which consideres momentum and energy as
@@ -1879,7 +1880,8 @@ float_v KFParticleBaseSIMD::GetDStoPointBz( float_v B, const float_v xyz[3], flo
 
   float_v bs= bq*dS;
 
-  float_v s = sin(bs), c = cos(bs);
+  float_v s, c;
+  KFPMath::sincos(bs, s, c);
 
   bq(abs(bq) < LocalSmall) = LocalSmall;
   float_v bbq = bq*(dx*py - dy*px) - pt2;
@@ -1911,8 +1913,7 @@ float_v KFParticleBaseSIMD::GetDStoPointBz( float_v B, const float_v xyz[3], flo
   dS(!mask) += sz;
   
   bs= bq*dS;
-  s = sin(bs);
-  c = cos(bs);
+  KFPMath::sincos(bs, s, c);
   
   float_v sB, cB;
   const float_v kOvSqr6 = 1.f/sqrt(float_v(6.f));
@@ -2264,7 +2265,8 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
   {
     const float_v& bs1 = bq1*dS1[iP];
     const float_v& bs2 = bq2*dS2[iP];
-    float_v sss = sin(bs1), ccc = cos(bs1);
+    float_v sss, ccc;
+    KFPMath::sincos(bs1, sss, ccc);
     
     const float_m& bs1Big = abs(bs1) > 1.e-8f;
     const float_m& bs2Big = abs(bs2) > 1.e-8f;
@@ -2279,7 +2281,7 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     const float_v& y1 = param1[1] - cB*px1 + sB*py1;
     const float_v& z1 = param1[2] + dS1[iP]*param1[5];
 
-    sss = sin(bs2); ccc = cos(bs2);
+    KFPMath::sincos(bs2, sss, ccc);
 
     sB(bs2Big) = sss/bq2;
     sB(!bs2Big) = ((1.f-bs2*kOvSqr6)*(1.f+bs2*kOvSqr6)*dS2[iP]);
@@ -2569,7 +2571,8 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
   {
     const float_v& bs1 = bq1*dS[0];
     const float_v& bs2 = bq2*dS[1];
-    float_v sss = sin(bs1), ccc = cos(bs1);
+    float_v sss, ccc;
+    KFPMath::sincos(bs1, sss, ccc);
     
     const float_m& bs1Big = abs(bs1) > 1.e-8f;
     const float_m& bs2Big = abs(bs2) > 1.e-8f;
@@ -2587,7 +2590,8 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     const float_v& ppy1 = -sss*px1 + ccc*py1;
     const float_v& ppz1 = pz1;
     
-    float_v sss1 = sin(bs2), ccc1 = cos(bs2);
+    float_v sss1, ccc1;
+    KFPMath::sincos(bs2, sss1, ccc1);
 
     float_v sB1(0.f), cB1(0.f);
     sB1(bs2Big) = sss1/bq2;
@@ -2798,7 +2802,8 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
   {
     const float_v& bs1 = bq1*dS1[iP];
     const float_v& bs2 = bq2*dS2[iP];
-    float_v sss = KFPMath::Sin(bs1), ccc = KFPMath::Cos(bs1);
+    float_v sss, ccc;
+    KFPMath::sincos(bs1, sss, ccc);
     
     const float_m& bs1Big = abs(bs1) > 1.e-8f;
     const float_m& bs2Big = abs(bs2) > 1.e-8f;
@@ -2813,7 +2818,7 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     const float_v& y1 = param1[1] - cB*px1 + sB*py1;
     const float_v& z1 = param1[2] + dS1[iP]*param1[5];
 
-    sss = KFPMath::Sin(bs2); ccc = KFPMath::Cos(bs2);
+    KFPMath::sincos(bs2, sss, ccc);
 
     sB(bs2Big) = sss/bq2;
     sB(!bs2Big) = ((1.f-bs2*kOvSqr6)*(1.f+bs2*kOvSqr6)*dS2[iP]);
@@ -2881,7 +2886,8 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
   {
     const float_v& bs1 = bq1*dS[0];
     const float_v& bs2 = bq2*dS[1];
-    float_v sss = KFPMath::Sin(bs1), ccc = KFPMath::Cos(bs1);
+    float_v sss, ccc;
+    KFPMath::sincos(bs1, sss, ccc);
     
     const float_m& bs1Big = abs(bs1) > 1.e-8f;
     const float_m& bs2Big = abs(bs2) > 1.e-8f;
@@ -2899,7 +2905,8 @@ void KFParticleBaseSIMD::GetDStoParticleBz( float_v B, const KFParticleBaseSIMD 
     const float_v& ppy1 = -sss*px1 + ccc*py1;
     const float_v& ppz1 = pz1;
     
-    float_v sss1 = KFPMath::Sin(bs2), ccc1 = KFPMath::Cos(bs2);
+    float_v sss1, ccc1;
+    KFPMath::sincos(bs2, sss1, ccc1);
 
     float_v sB1(0.f), cB1(0.f);
     sB1(bs2Big) = sss1/bq2;
@@ -3622,7 +3629,7 @@ void KFParticleBaseSIMD::TransportCBM( float_v dS, float_v P[] ) const
   P[7] = fP[7];
 }
 
-void KFParticleBaseSIMD::TransportBz( float_v Bz, float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1, float_v* F, float_v* F1 ) const 
+void KFParticleBaseSIMD::TransportBz( float_v Bz, float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1, float_v* F, float_v* F1, const bool fullC  ) const 
 { 
   /** Transports the parameters and their covariance matrix of the current particle assuming constant homogeneous 
    ** magnetic field Bz on the length defined by the transport parameter dS = l/p, where l is the signed distance and p is 
@@ -3649,7 +3656,8 @@ void KFParticleBaseSIMD::TransportBz( float_v Bz, float_v dS, const float_v* dsd
   const float_v kCLight = 0.000299792458f;
   Bz = Bz*simd_cast<float_v>(fQ)*kCLight;
   float_v bs= Bz*dS;
-  float_v s = sin(bs), c = cos(bs);
+  float_v s, c;
+  KFPMath::sincos(bs, s, c);
 
   float_v sB(Vc::Zero), cB(Vc::Zero);
 
@@ -3675,40 +3683,213 @@ void KFParticleBaseSIMD::TransportBz( float_v Bz, float_v dS, const float_v* dsd
   P[6] = fP[6];
   P[7] = fP[7];
 
-  float_v mJ[8][8];
-  for( Int_t i=0; i<8; i++ ) for( Int_t j=0; j<8; j++) mJ[i][j]=0;
+  float_v mJ[6][6];
+  
+  const float_v cPx = c * px;
+  const float_v sPy = s * py;
+  mJ[0][0] = (cPx * dsdr[0] + sPy * dsdr[0]) + 1.f;
+  mJ[0][1] = cPx * dsdr[1] + sPy * dsdr[1];
+  mJ[0][2] = cPx * dsdr[2] + sPy * dsdr[2];
+  mJ[0][3] = (cPx * dsdr[3] + sPy * dsdr[3]) + sB;
+  mJ[0][4] = (cPx * dsdr[4] + sPy * dsdr[4]) + cB;
+  mJ[0][5] = cPx * dsdr[5] + sPy * dsdr[5];
+  
+  const float_v sPx = s * px;
+  const float_v cPy = c * py;
+  mJ[1][0] = (cPy * dsdr[0] - sPx * dsdr[0]);
+  mJ[1][1] = (cPy * dsdr[1] - sPx * dsdr[1]) + 1.f;
+  mJ[1][2] = (cPy * dsdr[2] - sPx * dsdr[2]);
+  mJ[1][3] = (cPy * dsdr[3] - sPx * dsdr[3]) - cB;
+  mJ[1][4] = (cPy * dsdr[4] - sPx * dsdr[4]) + sB;
+  mJ[1][5] = (cPy * dsdr[5] - sPx * dsdr[5]);
 
-  for(int i=0; i<8; i++) mJ[i][i]=1;
-  mJ[0][3] =  sB; mJ[0][4] = cB;
-  mJ[1][3] = -cB; mJ[1][4] = sB;
-  mJ[2][5] = dS;
-  mJ[3][3] =  c; mJ[3][4] = s;
-  mJ[4][3] = -s; mJ[4][4] = c;
+  mJ[2][0] = pz*dsdr[0];
+  mJ[2][1] = pz*dsdr[1];
+  mJ[2][2] = pz*dsdr[2] + 1.f;
+  mJ[2][3] = pz*dsdr[3];
+  mJ[2][4] = pz*dsdr[4];
+  mJ[2][5] = pz*dsdr[5] + dS;
   
+  float_v CJt[6][5];
   
-  float_v mJds[6][6];
-  for( Int_t i=0; i<6; i++ ) for( Int_t j=0; j<6; j++) mJds[i][j]=0;
-  mJds[0][3] =  c; mJds[0][4] = s;
-  mJds[1][3] = -s; mJds[1][4] = c;
-  mJds[2][5] = 1;
-  mJds[3][3] = -Bz*s; mJds[3][4] =  Bz*c;
-  mJds[4][3] = -Bz*c; mJds[4][4] = -Bz*s;
+  CJt[0][0] = fC[ 0]*mJ[0][0] + fC[ 1]*mJ[0][1] + fC[ 3]*mJ[0][2] + fC[ 6]*mJ[0][3] + fC[10]*mJ[0][4] + fC[15]*mJ[0][5];
+  CJt[0][1] = fC[ 0]*mJ[1][0] + fC[ 1]*mJ[1][1] + fC[ 3]*mJ[1][2] + fC[ 6]*mJ[1][3] + fC[10]*mJ[1][4] + fC[15]*mJ[1][5];
+  CJt[0][2] = fC[ 0]*mJ[2][0] + fC[ 1]*mJ[2][1] + fC[ 3]*mJ[2][2] + fC[ 6]*mJ[2][3] + fC[10]*mJ[2][4] + fC[15]*mJ[2][5];
+
+  CJt[1][0] = fC[ 1]*mJ[0][0] + fC[ 2]*mJ[0][1] + fC[ 4]*mJ[0][2] + fC[ 7]*mJ[0][3] + fC[11]*mJ[0][4] + fC[16]*mJ[0][5];
+  CJt[1][1] = fC[ 1]*mJ[1][0] + fC[ 2]*mJ[1][1] + fC[ 4]*mJ[1][2] + fC[ 7]*mJ[1][3] + fC[11]*mJ[1][4] + fC[16]*mJ[1][5];
+  CJt[1][2] = fC[ 1]*mJ[2][0] + fC[ 2]*mJ[2][1] + fC[ 4]*mJ[2][2] + fC[ 7]*mJ[2][3] + fC[11]*mJ[2][4] + fC[16]*mJ[2][5];
+
+  CJt[2][0] = fC[ 3]*mJ[0][0] + fC[ 4]*mJ[0][1] + fC[ 5]*mJ[0][2] + fC[ 8]*mJ[0][3] + fC[12]*mJ[0][4] + fC[17]*mJ[0][5];
+  CJt[2][1] = fC[ 3]*mJ[1][0] + fC[ 4]*mJ[1][1] + fC[ 5]*mJ[1][2] + fC[ 8]*mJ[1][3] + fC[12]*mJ[1][4] + fC[17]*mJ[1][5];
+  CJt[2][2] = fC[ 3]*mJ[2][0] + fC[ 4]*mJ[2][1] + fC[ 5]*mJ[2][2] + fC[ 8]*mJ[2][3] + fC[12]*mJ[2][4] + fC[17]*mJ[2][5];
+
+  CJt[3][0] = fC[ 6]*mJ[0][0] + fC[ 7]*mJ[0][1] + fC[ 8]*mJ[0][2] + fC[ 9]*mJ[0][3] + fC[13]*mJ[0][4] + fC[18]*mJ[0][5];
+  CJt[3][1] = fC[ 6]*mJ[1][0] + fC[ 7]*mJ[1][1] + fC[ 8]*mJ[1][2] + fC[ 9]*mJ[1][3] + fC[13]*mJ[1][4] + fC[18]*mJ[1][5];
+  CJt[3][2] = fC[ 6]*mJ[2][0] + fC[ 7]*mJ[2][1] + fC[ 8]*mJ[2][2] + fC[ 9]*mJ[2][3] + fC[13]*mJ[2][4] + fC[18]*mJ[2][5];
+
+  CJt[4][0] = fC[10]*mJ[0][0] + fC[11]*mJ[0][1] + fC[12]*mJ[0][2] + fC[13]*mJ[0][3] + fC[14]*mJ[0][4] + fC[19]*mJ[0][5];
+  CJt[4][1] = fC[10]*mJ[1][0] + fC[11]*mJ[1][1] + fC[12]*mJ[1][2] + fC[13]*mJ[1][3] + fC[14]*mJ[1][4] + fC[19]*mJ[1][5];
+  CJt[4][2] = fC[10]*mJ[2][0] + fC[11]*mJ[2][1] + fC[12]*mJ[2][2] + fC[13]*mJ[2][3] + fC[14]*mJ[2][4] + fC[19]*mJ[2][5];
+
+  CJt[5][0] = fC[15]*mJ[0][0] + fC[16]*mJ[0][1] + fC[17]*mJ[0][2] + fC[18]*mJ[0][3] + fC[19]*mJ[0][4] + fC[20]*mJ[0][5];
+  CJt[5][1] = fC[15]*mJ[1][0] + fC[16]*mJ[1][1] + fC[17]*mJ[1][2] + fC[18]*mJ[1][3] + fC[19]*mJ[1][4] + fC[20]*mJ[1][5];
+  CJt[5][2] = fC[15]*mJ[2][0] + fC[16]*mJ[2][1] + fC[17]*mJ[2][2] + fC[18]*mJ[2][3] + fC[19]*mJ[2][4] + fC[20]*mJ[2][5];
+
   
-  for(int i1=0; i1<6; i1++)
-    for(int i2=0; i2<6; i2++)
-      mJ[i1][i2] += mJds[i1][3]*px*dsdr[i2] + mJds[i1][4]*py*dsdr[i2] + mJds[i1][5]*pz*dsdr[i2];
+  C[ 0] = mJ[0][0]*CJt[0][0] + mJ[0][1]*CJt[1][0] + mJ[0][2]*CJt[2][0] + mJ[0][3]*CJt[3][0] + mJ[0][4]*CJt[4][0] + mJ[0][5]*CJt[5][0];
   
-  MultQSQt( mJ[0], fC, C, 8);
+  C[ 1] = mJ[1][0]*CJt[0][0] + mJ[1][1]*CJt[1][0] + mJ[1][2]*CJt[2][0] + mJ[1][3]*CJt[3][0] + mJ[1][4]*CJt[4][0] + mJ[1][5]*CJt[5][0];
+  C[ 2] = mJ[1][0]*CJt[0][1] + mJ[1][1]*CJt[1][1] + mJ[1][2]*CJt[2][1] + mJ[1][3]*CJt[3][1] + mJ[1][4]*CJt[4][1] + mJ[1][5]*CJt[5][1];
+
+  C[ 3] = mJ[2][0]*CJt[0][0] + mJ[2][1]*CJt[1][0] + mJ[2][2]*CJt[2][0] + mJ[2][3]*CJt[3][0] + mJ[2][4]*CJt[4][0] + mJ[2][5]*CJt[5][0];
+  C[ 4] = mJ[2][0]*CJt[0][1] + mJ[2][1]*CJt[1][1] + mJ[2][2]*CJt[2][1] + mJ[2][3]*CJt[3][1] + mJ[2][4]*CJt[4][1] + mJ[2][5]*CJt[5][1];
+  C[ 5] = mJ[2][0]*CJt[0][2] + mJ[2][1]*CJt[1][2] + mJ[2][2]*CJt[2][2] + mJ[2][3]*CJt[3][2] + mJ[2][4]*CJt[4][2] + mJ[2][5]*CJt[5][2];
+
+  const float_v sBzPx = Bz * sPx;
+  const float_v cBzPy = Bz * cPy;
+  const float_v cBzPx = Bz * cPx;
+  const float_v sBzPy = Bz * sPy;
   
-  if(F)
-  {
+  if(fullC){
+    mJ[3][0] = (cBzPy * dsdr[0] - sBzPx * dsdr[0]);
+    mJ[3][1] = (cBzPy * dsdr[1] - sBzPx * dsdr[1]);
+    mJ[3][2] = (cBzPy * dsdr[2] - sBzPx * dsdr[2]);
+    mJ[3][3] = (cBzPy * dsdr[3] - sBzPx * dsdr[3]) + c;
+    mJ[3][4] = (cBzPy * dsdr[4] - sBzPx * dsdr[4]) + s;
+    mJ[3][5] = (cBzPy * dsdr[5] - sBzPx * dsdr[5]);
+    
+    mJ[4][0] = -(cBzPx * dsdr[0] + sBzPy * dsdr[0]);
+    mJ[4][1] = -(cBzPx * dsdr[1] + sBzPy * dsdr[1]);
+    mJ[4][2] = -(cBzPx * dsdr[2] + sBzPy * dsdr[2]);
+    mJ[4][3] = -s - (cBzPx * dsdr[3] + sBzPy * dsdr[3]);
+    mJ[4][4] = c - (cBzPx * dsdr[4] + sBzPy * dsdr[4]);
+    mJ[4][5] = -(cBzPx * dsdr[5] + sBzPy * dsdr[5]);
+    
+    mJ[5][0] = 0.f;
+    mJ[5][1] = 0.f;
+    mJ[5][2] = 0.f;
+    mJ[5][3] = 0.f;
+    mJ[5][4] = 0.f;
+    mJ[5][5] = 1.f;
+  
+    CJt[0][3] = fC[ 0]*mJ[3][0] + fC[ 1]*mJ[3][1] + fC[ 3]*mJ[3][2] + fC[ 6]*mJ[3][3] + fC[10]*mJ[3][4] + fC[15]*mJ[3][5];
+    CJt[0][4] = fC[ 0]*mJ[4][0] + fC[ 1]*mJ[4][1] + fC[ 3]*mJ[4][2] + fC[ 6]*mJ[4][3] + fC[10]*mJ[4][4] + fC[15]*mJ[4][5];
+
+    CJt[1][3] = fC[ 1]*mJ[3][0] + fC[ 2]*mJ[3][1] + fC[ 4]*mJ[3][2] + fC[ 7]*mJ[3][3] + fC[11]*mJ[3][4] + fC[16]*mJ[3][5];
+    CJt[1][4] = fC[ 1]*mJ[4][0] + fC[ 2]*mJ[4][1] + fC[ 4]*mJ[4][2] + fC[ 7]*mJ[4][3] + fC[11]*mJ[4][4] + fC[16]*mJ[4][5];
+
+    CJt[2][3] = fC[ 3]*mJ[3][0] + fC[ 4]*mJ[3][1] + fC[ 5]*mJ[3][2] + fC[ 8]*mJ[3][3] + fC[12]*mJ[3][4] + fC[17]*mJ[3][5];
+    CJt[2][4] = fC[ 3]*mJ[4][0] + fC[ 4]*mJ[4][1] + fC[ 5]*mJ[4][2] + fC[ 8]*mJ[4][3] + fC[12]*mJ[4][4] + fC[17]*mJ[4][5];
+
+    CJt[3][3] = fC[ 6]*mJ[3][0] + fC[ 7]*mJ[3][1] + fC[ 8]*mJ[3][2] + fC[ 9]*mJ[3][3] + fC[13]*mJ[3][4] + fC[18]*mJ[3][5];
+    CJt[3][4] = fC[ 6]*mJ[4][0] + fC[ 7]*mJ[4][1] + fC[ 8]*mJ[4][2] + fC[ 9]*mJ[4][3] + fC[13]*mJ[4][4] + fC[18]*mJ[4][5];
+
+    CJt[4][3] = fC[10]*mJ[3][0] + fC[11]*mJ[3][1] + fC[12]*mJ[3][2] + fC[13]*mJ[3][3] + fC[14]*mJ[3][4] + fC[19]*mJ[3][5];
+    CJt[4][4] = fC[10]*mJ[4][0] + fC[11]*mJ[4][1] + fC[12]*mJ[4][2] + fC[13]*mJ[4][3] + fC[14]*mJ[4][4] + fC[19]*mJ[4][5];
+
+    CJt[5][3] = fC[15]*mJ[3][0] + fC[16]*mJ[3][1] + fC[17]*mJ[3][2] + fC[18]*mJ[3][3] + fC[19]*mJ[3][4] + fC[20]*mJ[3][5];
+    CJt[5][4] = fC[15]*mJ[4][0] + fC[16]*mJ[4][1] + fC[17]*mJ[4][2] + fC[18]*mJ[4][3] + fC[19]*mJ[4][4] + fC[20]*mJ[4][5];
+  
+    C[ 6] = mJ[3][0]*CJt[0][0] + mJ[3][1]*CJt[1][0] + mJ[3][2]*CJt[2][0] + mJ[3][3]*CJt[3][0] + mJ[3][4]*CJt[4][0] + mJ[3][5]*CJt[5][0];
+    C[ 7] = mJ[3][0]*CJt[0][1] + mJ[3][1]*CJt[1][1] + mJ[3][2]*CJt[2][1] + mJ[3][3]*CJt[3][1] + mJ[3][4]*CJt[4][1] + mJ[3][5]*CJt[5][1];
+    C[ 8] = mJ[3][0]*CJt[0][2] + mJ[3][1]*CJt[1][2] + mJ[3][2]*CJt[2][2] + mJ[3][3]*CJt[3][2] + mJ[3][4]*CJt[4][2] + mJ[3][5]*CJt[5][2];
+    C[ 9] = mJ[3][0]*CJt[0][3] + mJ[3][1]*CJt[1][3] + mJ[3][2]*CJt[2][3] + mJ[3][3]*CJt[3][3] + mJ[3][4]*CJt[4][3] + mJ[3][5]*CJt[5][3];
+    
+    C[10] = mJ[4][0]*CJt[0][0] + mJ[4][1]*CJt[1][0] + mJ[4][2]*CJt[2][0] + mJ[4][3]*CJt[3][0] + mJ[4][4]*CJt[4][0] + mJ[4][5]*CJt[5][0];
+    C[11] = mJ[4][0]*CJt[0][1] + mJ[4][1]*CJt[1][1] + mJ[4][2]*CJt[2][1] + mJ[4][3]*CJt[3][1] + mJ[4][4]*CJt[4][1] + mJ[4][5]*CJt[5][1];
+    C[12] = mJ[4][0]*CJt[0][2] + mJ[4][1]*CJt[1][2] + mJ[4][2]*CJt[2][2] + mJ[4][3]*CJt[3][2] + mJ[4][4]*CJt[4][2] + mJ[4][5]*CJt[5][2];
+    C[13] = mJ[4][0]*CJt[0][3] + mJ[4][1]*CJt[1][3] + mJ[4][2]*CJt[2][3] + mJ[4][3]*CJt[3][3] + mJ[4][4]*CJt[4][3] + mJ[4][5]*CJt[5][3];
+    C[14] = mJ[4][0]*CJt[0][4] + mJ[4][1]*CJt[1][4] + mJ[4][2]*CJt[2][4] + mJ[4][3]*CJt[3][4] + mJ[4][4]*CJt[4][4] + mJ[4][5]*CJt[5][4];
+    
+    C[15] = CJt[5][0];
+    C[16] = CJt[5][1];
+    C[17] = CJt[5][2];
+    C[18] = CJt[5][3];
+    C[19] = CJt[5][4];
+    C[20] = fC[20];
+
+    const float_v C21 = fC[21]*mJ[0][0] + fC[22]*mJ[0][1] + fC[23]*mJ[0][2] + fC[24]*mJ[0][3] + fC[25]*mJ[0][4] + fC[26]*mJ[0][5];
+    const float_v C22 = fC[21]*mJ[1][0] + fC[22]*mJ[1][1] + fC[23]*mJ[1][2] + fC[24]*mJ[1][3] + fC[25]*mJ[1][4] + fC[26]*mJ[1][5];
+    const float_v C23 = fC[21]*mJ[2][0] + fC[22]*mJ[2][1] + fC[23]*mJ[2][2] + fC[24]*mJ[2][3] + fC[25]*mJ[2][4] + fC[26]*mJ[2][5];
+    const float_v C24 = fC[21]*mJ[3][0] + fC[22]*mJ[3][1] + fC[23]*mJ[3][2] + fC[24]*mJ[3][3] + fC[25]*mJ[3][4] + fC[26]*mJ[3][5];
+    const float_v C25 = fC[21]*mJ[4][0] + fC[22]*mJ[4][1] + fC[23]*mJ[4][2] + fC[24]*mJ[4][3] + fC[25]*mJ[4][4] + fC[26]*mJ[4][5];
+    C[21] = C21;
+    C[22] = C22;
+    C[23] = C23;
+    C[24] = C24;
+    C[25] = C25;
+    C[26] = fC[26];
+    C[27] = fC[27];
+    
+    const float_v C28 = fC[28]*mJ[0][0] + fC[29]*mJ[0][1] + fC[30]*mJ[0][2] + fC[31]*mJ[0][3] + fC[32]*mJ[0][4] + fC[33]*mJ[0][5];
+    const float_v C29 = fC[28]*mJ[1][0] + fC[29]*mJ[1][1] + fC[30]*mJ[1][2] + fC[31]*mJ[1][3] + fC[32]*mJ[1][4] + fC[33]*mJ[1][5];
+    const float_v C30 = fC[28]*mJ[2][0] + fC[29]*mJ[2][1] + fC[30]*mJ[2][2] + fC[31]*mJ[2][3] + fC[32]*mJ[2][4] + fC[33]*mJ[2][5];
+    const float_v C31 = fC[28]*mJ[3][0] + fC[29]*mJ[3][1] + fC[30]*mJ[3][2] + fC[31]*mJ[3][3] + fC[32]*mJ[3][4] + fC[33]*mJ[3][5];
+    const float_v C32 = fC[28]*mJ[4][0] + fC[29]*mJ[4][1] + fC[30]*mJ[4][2] + fC[31]*mJ[4][3] + fC[32]*mJ[4][4] + fC[33]*mJ[4][5];
+    C[28] = C28;
+    C[29] = C29;
+    C[30] = C30;
+    C[31] = C31;
+    C[32] = C32;
+    C[33] = fC[33];
+    C[34] = fC[34];
+    C[35] = fC[35];
+  }
+
+  if(F) {
     for(int i=0; i<6; i++)
       for(int j=0; j<6; j++)
         F[i*6+j] = mJ[i][j];
+  }  
 
-    for(int i1=0; i1<6; i1++)
-      for(int i2=0; i2<6; i2++)
-        F1[i1*6 + i2] = mJds[i1][3]*px*dsdr1[i2] + mJds[i1][4]*py*dsdr1[i2] + mJds[i1][5]*pz*dsdr1[i2];
+  if(F1) {
+    F1[ 0] = cPx * dsdr1[0] + sPy * dsdr1[0];
+    F1[ 1] = cPx * dsdr1[1] + sPy * dsdr1[1];
+    F1[ 2] = cPx * dsdr1[2] + sPy * dsdr1[2];
+    
+    F1[ 6] = cPy * dsdr1[0] - sPx * dsdr1[0];
+    F1[ 7] = cPy * dsdr1[1] - sPx * dsdr1[1];
+    F1[ 8] = cPy * dsdr1[2] - sPx * dsdr1[2];
+
+    F1[12] = pz*dsdr1[0];
+    F1[13] = pz*dsdr1[1];
+    F1[14] = pz*dsdr1[2];
+        
+    if(fullC){
+      F1[ 3] = cPx * dsdr1[3] + sPy * dsdr1[3];
+      F1[ 4] = cPx * dsdr1[4] + sPy * dsdr1[4];
+      F1[ 5] = cPx * dsdr1[5] + sPy * dsdr1[5];
+
+      F1[ 9] = cPy * dsdr1[3] - sPx * dsdr1[3];
+      F1[10] = cPy * dsdr1[4] - sPx * dsdr1[4];
+      F1[11] = cPy * dsdr1[5] - sPx * dsdr1[5];
+
+      F1[15] = pz*dsdr1[3];
+      F1[16] = pz*dsdr1[4];
+      F1[17] = pz*dsdr1[5];
+      
+      F1[18] = cBzPy * dsdr1[0] - sBzPx * dsdr1[0];
+      F1[19] = cBzPy * dsdr1[1] - sBzPx * dsdr1[1];
+      F1[20] = cBzPy * dsdr1[2] - sBzPx * dsdr1[2];
+      F1[21] = cBzPy * dsdr1[3] - sBzPx * dsdr1[3];
+      F1[22] = cBzPy * dsdr1[4] - sBzPx * dsdr1[4];
+      F1[23] = cBzPy * dsdr1[5] - sBzPx * dsdr1[5];
+
+      F1[24] = -(cBzPx * dsdr1[0] + sBzPy * dsdr1[0]);
+      F1[25] = -(cBzPx * dsdr1[1] + sBzPy * dsdr1[1]);
+      F1[26] = -(cBzPx * dsdr1[2] + sBzPy * dsdr1[2]);
+      F1[27] = -(cBzPx * dsdr1[3] + sBzPy * dsdr1[3]);
+      F1[28] = -(cBzPx * dsdr1[4] + sBzPy * dsdr1[4]);
+      F1[29] = -(cBzPx * dsdr1[5] + sBzPy * dsdr1[5]);
+
+      F1[30] = 0.f;
+      F1[31] = 0.f;
+      F1[32] = 0.f;
+      F1[33] = 0.f;
+      F1[34] = 0.f;
+      F1[35] = 0.f;    
+    }
   }
 }
 
@@ -3727,7 +3908,8 @@ void KFParticleBaseSIMD::TransportBz( float_v Bz, float_v dS, float_v P[] ) cons
   const float_v kCLight = 0.000299792458f;
   Bz = Bz*simd_cast<float_v>(fQ)*kCLight;
   float_v bs= Bz*dS;
-  float_v s = KFPMath::Sin(bs), c = KFPMath::Cos(bs);
+  float_v s, c;
+  KFPMath::sincos(bs, s, c);
 
   float_v sB(Vc::Zero), cB(Vc::Zero);
 
@@ -3818,43 +4000,38 @@ float_v KFParticleBaseSIMD::GetDeviationFromVertex( const float_v v[], const flo
   float_v dsdr[6] = {0.f,0.f,0.f,0.f,0.f,0.f};
   const float_v dS = GetDStoPoint(v, dsdr);
   float_v dsdp[6] = {-dsdr[0], -dsdr[1], -dsdr[2], 0.f, 0.f, 0.f};
-  float_v F[36], F1[36];
-  for(int i2=0; i2<36; i2++)
-  {
-    F[i2]  = 0.f;
-    F1[i2] = 0.f;
-  }
-  Transport( dS, dsdr, mP, mC, dsdp, F, F1 );  
+  float_v F1[36];
+  Transport( dS, dsdr, mP, mC, dsdp, nullptr, F1, false );  
 
   if(Cv)
   {
-    float_v VFT[3][6];
-    for(int i=0; i<3; i++)
-      for(int j=0; j<6; j++)
-      {
-        VFT[i][j] = 0;
-        for(int k=0; k<3; k++)
-        {
-          VFT[i][j] +=  Cv[IJ(i,k)] * F1[j*6+k];
-        }
-      }
-  
-    float_v FVFT[6][6];
-    for(int i=0; i<6; i++)
-      for(int j=0; j<6; j++)
-      {
-        FVFT[i][j] = 0;
-        for(int k=0; k<3; k++)
-        {
-          FVFT[i][j] += F1[i*6+k] * VFT[k][j];
-        }
-      }
-    mC[0] += FVFT[0][0] + Cv[0];
-    mC[1] += FVFT[1][0] + Cv[1];
-    mC[2] += FVFT[1][1] + Cv[2];
-    mC[3] += FVFT[2][0] + Cv[3];
-    mC[4] += FVFT[2][1] + Cv[4];
-    mC[5] += FVFT[2][2] + Cv[5];
+    float_v VFT[3][3];
+    VFT[0][0] = Cv[0]*F1[ 0] + Cv[1]*F1[ 1] + Cv[3]*F1[ 2];
+    VFT[0][1] = Cv[0]*F1[ 6] + Cv[1]*F1[ 7] + Cv[3]*F1[ 8];
+    VFT[0][2] = Cv[0]*F1[12] + Cv[1]*F1[13] + Cv[3]*F1[14];
+
+    VFT[1][0] = Cv[1]*F1[ 0] + Cv[2]*F1[ 1] + Cv[4]*F1[ 2];
+    VFT[1][1] = Cv[1]*F1[ 6] + Cv[2]*F1[ 7] + Cv[4]*F1[ 8];
+    VFT[1][2] = Cv[1]*F1[12] + Cv[2]*F1[13] + Cv[4]*F1[14];
+
+    VFT[2][0] = Cv[3]*F1[ 0] + Cv[4]*F1[ 1] + Cv[5]*F1[ 2];
+    VFT[2][1] = Cv[3]*F1[ 6] + Cv[4]*F1[ 7] + Cv[5]*F1[ 8];
+    VFT[2][2] = Cv[3]*F1[12] + Cv[4]*F1[13] + Cv[5]*F1[14];
+
+    float_v FVFT[6];
+    FVFT[0] = F1[ 0]*VFT[0][0] + F1[ 1]*VFT[1][0] + F1[ 2]*VFT[2][0];
+    FVFT[1] = F1[ 6]*VFT[0][0] + F1[ 7]*VFT[1][0] + F1[ 8]*VFT[2][0];
+    FVFT[2] = F1[ 6]*VFT[0][1] + F1[ 7]*VFT[1][1] + F1[ 8]*VFT[2][1];
+    FVFT[3] = F1[12]*VFT[0][0] + F1[13]*VFT[1][0] + F1[14]*VFT[2][0];
+    FVFT[4] = F1[12]*VFT[0][1] + F1[13]*VFT[1][1] + F1[14]*VFT[2][1];
+    FVFT[5] = F1[12]*VFT[0][2] + F1[13]*VFT[1][2] + F1[14]*VFT[2][2];
+    
+    mC[0] += FVFT[0] + Cv[0];
+    mC[1] += FVFT[1] + Cv[1];
+    mC[2] += FVFT[2] + Cv[2];
+    mC[3] += FVFT[3] + Cv[3];
+    mC[4] += FVFT[4] + Cv[4];
+    mC[5] += FVFT[5] + Cv[5];
   }
   
   InvertCholetsky3(mC);
@@ -4207,8 +4384,8 @@ void KFParticleBaseSIMD::RotateXY(float_v angle, float_v Vtx[3])
   Z() = Z() - Vtx[2];
 
   // Rotate the kf particle
-  float_v s = sin(angle);
-  float_v c = cos(angle);
+  float_v s, c;
+  KFPMath::sincos(angle, s, c);
   
   float_v mA[8][ 8];
   for( Int_t i=0; i<8; i++ ){
@@ -4260,64 +4437,6 @@ void KFParticleBaseSIMD::RotateXY(float_v angle, float_v Vtx[3])
   X() = GetX() + Vtx[0];
   Y() = GetY() + Vtx[1];
   Z() = GetZ() + Vtx[2];
-}
-
-void KFParticleBaseSIMD::InvertCholetsky3(float_v a[6])
-{
-  /** Inverts symmetric 3x3 matrix a using modified Choletsky decomposition. The result is stored to the same matrix a.
-   ** \param[in,out] a - 3x3 symmetric matrix
-   **/
-
-  float_v d[3], uud, u[3][3];
-  for(int i=0; i<3; i++) 
-  {
-    d[i]=0.f;
-    for(int j=0; j<3; j++) 
-      u[i][j]=0.f;
-  }
-
-  for(int i=0; i<3 ; i++)
-  {
-    uud=0.f;
-    for(int j=0; j<i; j++) 
-      uud += u[j][i]*u[j][i]*d[j];
-    uud = a[i*(i+3)/2] - uud;
-
-    uud(abs(uud)<1.e-8f) = 1.e-8f;
-    d[i] = uud/abs(uud);
-    u[i][i] = sqrt(abs(uud));
-
-    for(int j=i+1; j<3; j++) 
-    {
-      uud = 0.f;
-      for(int k=0; k<i; k++)
-        uud += u[k][i]*u[k][j]*d[k];
-      uud = a[j*(j+1)/2+i] - uud;
-      u[i][j] = d[i]/u[i][i]*uud;
-    }
-  }
-
-  float_v u1[3];
-
-  for(int i=0; i<3; i++)
-  {
-    u1[i] = u[i][i];
-    u[i][i] = 1.f/u[i][i];
-  }
-  for(int i=0; i<2; i++)
-  {
-    u[i][i+1] = - u[i][i+1]*u[i][i]*u[i+1][i+1];
-  }
-  for(int i=0; i<1; i++)
-  {
-    u[i][i+2] = u[i][i+1]*u1[i+1]*u[i+1][i+2]-u[i][i+2]*u[i][i]*u[i+2][i+2];
-  }
-
-  for(int i=0; i<3; i++)
-    a[i+3] = u[i][2]*u[2][2]*d[2];
-  for(int i=0; i<2; i++)
-    a[i+1] = u[i][1]*u[1][1]*d[1] + u[i][2]*u[1][2]*d[2];
-  a[0] = u[0][0]*u[0][0]*d[0] + u[0][1]*u[0][1]*d[1] + u[0][2]*u[0][2]*d[2];
 }
 
 void KFParticleBaseSIMD::MultQSQt( const float_v Q[], const float_v S[], float_v SOut[], const int kN )

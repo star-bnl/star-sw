@@ -24,6 +24,7 @@
 using std::map;
 using std::vector;
 
+#include "KFParticleMath.h"
 #include "KFParticleDatabase.h"
 #include "KFPEmcCluster.h"
 
@@ -165,20 +166,20 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
    ** \param[in] nPV - number of the input primary vertices.
    **/
   Init(nPV);
-  const int nPartPrim = vRTracks[2].NPions() * vRTracks[3].NKaons() + 
-                        vRTracks[3].NPions() * vRTracks[2].NKaons() + 
-                        vRTracks[2].NKaons() * vRTracks[3].NKaons() + 
-                        vRTracks[2].NKaons() * vRTracks[3].NProtons() + 
-                        vRTracks[3].NKaons() * vRTracks[2].NProtons() + 
-                        vRTracks[2].NElectrons() * vRTracks[3].NElectrons() + 
-                        vRTracks[2].NMuons() * vRTracks[3].NMuons();
+//   const int nPartPrim = vRTracks[2].NPions() * vRTracks[3].NKaons() + 
+//                         vRTracks[3].NPions() * vRTracks[2].NKaons() + 
+//                         vRTracks[2].NKaons() * vRTracks[3].NKaons() + 
+//                         vRTracks[2].NKaons() * vRTracks[3].NProtons() + 
+//                         vRTracks[3].NKaons() * vRTracks[2].NProtons() + 
+//                         vRTracks[2].NElectrons() * vRTracks[3].NElectrons() + 
+//                         vRTracks[2].NMuons() * vRTracks[3].NMuons();
 
-  const int nPart = vRTracks[0].NPions() * vRTracks[1].NPions() +
-                    vRTracks[0].NPions() * vRTracks[1].NProtons() +
-                    vRTracks[1].NPions() * vRTracks[0].NProtons() + nPartPrim;
-  int nEmcClusters = 0;
-  if(fEmcClusters)
-    nEmcClusters = fEmcClusters->Size();
+//   const int nPart = vRTracks[0].NPions() * vRTracks[1].NPions() +
+//                     vRTracks[0].NPions() * vRTracks[1].NProtons() +
+//                     vRTracks[1].NPions() * vRTracks[0].NProtons() + nPartPrim;
+//   int nEmcClusters = 0;
+//   if(fEmcClusters)
+//     nEmcClusters = fEmcClusters->Size();
   vector<KFParticle> vGammaPrimEmc;
 
 //   int nPartEstimation = nPart+vRTracks[0].Size()+vRTracks[1].Size()+vRTracks[2].Size()+vRTracks[3].Size() + nEmcClusters;
@@ -342,7 +343,18 @@ void KFParticleFinder::FindParticles(KFPTrackVector* vRTracks, kfvector_float* C
     //He5L_bar -> He4- p- pi+, He6L_bar -> He4- d- pi+, He7L_bar -> He4- t- pi+, Li8L_bar -> He4- He4- pi+
     FindTrackV0Decay(fHe4PiBar,-3005, vRTracks[1], -1, vRTracks[1].FirstProton(), vRTracks[1].LastBe7(), Particles, PrimVtx, -1, 0);
     //LLn -> H3L pi-
-    FindTrackV0Decay(fHe3Pi   , 3004, vRTracks[1], -1, vRTracks[1].FirstPion(),   vRTracks[1].LastPion(),   Particles, PrimVtx, -1, 0 );
+    std::vector<KFParticle> h3L;
+    float massH3L, massH3LSigma;
+    KFParticleDatabase::Instance()->GetMotherMass(3004, massH3L, massH3LSigma);
+    for(unsigned int iHe3Pi=0; iHe3Pi<fHe3Pi.size(); iHe3Pi++) {
+      KFParticle& he3pi = fHe3Pi[iHe3Pi];
+      float m, dm;
+      he3pi.GetMass(m,dm);
+      if( (fabs(m - massH3L)/massH3LSigma) > 3.f ) continue;
+      he3pi.SetNonlinearMassConstraint(massH3L);
+      h3L.push_back(he3pi);
+    }
+    FindTrackV0Decay(h3L      , 3004, vRTracks[1], -1, vRTracks[1].FirstPion(),   vRTracks[1].LastPion(),   Particles, PrimVtx, -1, 0 );
     //H4LL -> He4L pi-
     FindTrackV0Decay(fHe4L    , 3006, vRTracks[1], -1, vRTracks[1].FirstPion(),   vRTracks[1].LastPion(),   Particles, PrimVtx, -1, 0 );
     //H5LL -> He5L pi-
@@ -1950,7 +1962,7 @@ void KFParticleFinder::ConstructTrackV0Cand(KFPTrackVector& vTracks,
     
     mother_temp.SetId(Particles.size());
 
-    if(!(isPrimaryPart[iv]))
+    if( !(isPrimaryPart[iv]) || (mother.PDG()[iv] == 3006) || (mother.PDG()[iv] == 3007) )
     {
       if( vMotherSec )
       {
@@ -2996,13 +3008,6 @@ void KFParticleFinder::MatchKaons(KFPTrackVector* vTracks,
           float_v distance = sqrt(dx*dx + dy*dy + dz*dz);
           active &= (distance <= float_v(20.0f));
           if( active.isEmpty() ) continue;
-          
-          float_v lTrack, dlTrack;
-          kaonTrack.GetDistanceToVertexLine(PrimVtx[iPV], lTrack, dlTrack);
-          float_v lCandidate, dlCandidate;
-          candidate.GetDistanceToVertexLine(PrimVtx[iPV], lCandidate, dlCandidate);
-          active &= (lCandidate >= (lTrack - float_v(0.5f)));
-          if( active.isEmpty() ) continue;
 
           //Chi2 should be correct, momentum should be 0 within errors
           KFParticleSIMD check = candidate;
@@ -3364,8 +3369,8 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks, vector<KFPa
     
   int_v pvIndexMother(-1); 
   
-  int outNeutralDaughterPDG[4][5]; //[iTC][iHypothesis]
-  int outMotherPDG[4][5];
+  int outNeutralDaughterPDG[6][5]; //[iTC][iHypothesis]
+  int outMotherPDG[6][5];
   
   int trTypeIndexMother[2] = {6,7};
   int trTypeIndexDaughter[2] = {0,1};
@@ -3379,13 +3384,12 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks, vector<KFPa
     int MotherTracksSize = MotherTracks.Size();
 
     //track categories
-    int nTC = 4;
-    int startTCMother[4] = {0,0,0,0};
-    int endTCMother[4] = {0,0,0,0};
-    int startTCDaughter[4] = {0,0,0,0};
-    int endTCDaughter[4] = {0,0,0,0};
+    int nTC = 6;
+    int startTCMother[6] = {0,0,0,0,0,0};
+    int endTCMother[6] = {0,0,0,0,0,0};
+    int startTCDaughter[6] = {0,0,0,0,0,0};
+    int endTCDaughter[6] = {0,0,0,0,0,0};
 
-    nTC = 4;
     vector<int> nMotherHypothesis(nTC,0);
     vector< vector<int> > motherPDGHypothesis(nTC);
     vector< vector<float> > neutralDaughterMassHypothesis(nTC);
@@ -3396,7 +3400,6 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks, vector<KFPa
     startTCDaughter[0] = DaughterTracks.FirstMuon(); endTCDaughter[0] = DaughterTracks.LastMuon(); 
 
     nMotherHypothesis[0] = 2;
-
 
     motherPDGHypothesis[0].push_back(211);
     motherPDGHypothesis[0].push_back(321);
@@ -3468,6 +3471,33 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks, vector<KFPa
     
     outMotherPDG[3][0]=-8003222;
     
+    //He3
+    startTCMother[4] = 0; endTCMother[4] = MotherTracksSize;
+    startTCDaughter[4] = DaughterTracks.FirstHe3(); endTCDaughter[4] = DaughterTracks.LastHe3();
+
+    nMotherHypothesis[4] = 1;
+
+    motherPDGHypothesis[4].push_back(7003029);
+
+    neutralDaughterMassHypothesis[4].push_back(0.1349766);
+    
+    outNeutralDaughterPDG[4][0]= 7700111;
+    
+    outMotherPDG[4][0]= 7003029;
+
+    //He4
+    startTCMother[5] = 0; endTCMother[5] = MotherTracksSize;
+    startTCDaughter[5] = DaughterTracks.FirstHe4(); endTCDaughter[5] = DaughterTracks.LastHe4();
+
+    nMotherHypothesis[5] = 1;
+
+    motherPDGHypothesis[5].push_back(7003006);
+
+    neutralDaughterMassHypothesis[5].push_back(0.1349766);
+    
+    outNeutralDaughterPDG[5][0]= 7800111;
+    
+    outMotherPDG[5][0]= 7003006;
 
     for(int iTC=0; iTC<nTC; iTC++)
     {
@@ -3518,6 +3548,10 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks, vector<KFPa
               activeDaughter &= abs(DaughterPDG)==321;
             if(iTC==3)
               activeDaughter &= abs(DaughterPDG)==2212;
+            if(iTC==4)
+              activeDaughter &= abs(DaughterPDG)==1000020030;
+            if(iTC==5)
+              activeDaughter &= abs(DaughterPDG)==1000020040;
             if (activeDaughter.isEmpty()) continue;
             
             
@@ -3531,8 +3565,10 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks, vector<KFPa
                              
               if(abs(motherPDGHypothesis[iTC][iHypothesis]) < 1000)
                 active &= (abs(MotherPDG)==abs(motherPDGHypothesis[iTC][iHypothesis]));
-              else
+              else if(abs(motherPDGHypothesis[iTC][iHypothesis]) < 10000)
                 active &= (abs(MotherPDG)==2000003112);
+              else
+                active &= (abs(MotherPDG)>=1000020030);
               
               MotherTrack.Load(MotherTracks, iTrM, motherPDGHypothesis[iTC][iHypothesis]);
               
@@ -3575,6 +3611,7 @@ void KFParticleFinder::NeutralDaughterDecay(KFPTrackVector* vTracks, vector<KFPa
 
               active &= simd_cast<int_m>(lNeutral >= (lMotherTrak - float_v(10.0f)));
               active &= simd_cast<int_m>(lNeutral <= (lChargedTrak + float_v(10.0f)));
+
               //set cut on chi2 of the fit of the neutral daughter
               active &= simd_cast<int_m>(neutralDaughter.NDF() >= int_v(Vc::Zero));
               active &= simd_cast<int_m>(neutralDaughter.Chi2()/simd_cast<float_v>(neutralDaughter.NDF()) <= fCuts2D[1]);

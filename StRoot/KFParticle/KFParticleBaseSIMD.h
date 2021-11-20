@@ -97,7 +97,7 @@ class KFParticleBaseSIMD {
   void GetDStoParticleCBM( const KFParticleBaseSIMD &p, float_v dS[2] ) const ;
   
   /** Virtual method to transport a particle parameters and covariance matrix on a certain distance along the trajectory. Is defined in KFParticleSIMD.**/
-  virtual void Transport( float_v dS, const float_v dsdr[6], float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0 ) const = 0;
+  virtual void Transport( float_v dS, const float_v dsdr[6], float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0, const bool fullC=true ) const = 0;
   /** Virtual method to transport a particle parameters on a certain distance along the trajectory. Is defined in KFParticleSIMD.**/
   virtual void TransportFast( float_v dS, float_v P[] ) const = 0;
 
@@ -251,7 +251,7 @@ class KFParticleBaseSIMD {
   void TransportToDS( float_v dS, const float_v* dsdr );
   void TransportToDSLine( float_v dS, const float_v* dsdr );
   //* Particular extrapolators one can use 
-  void TransportBz( float_v Bz, float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0 ) const;
+  void TransportBz( float_v Bz, float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0, const bool fullC=true ) const;
   void TransportBz( float_v Bz, float_v dS, float_v P[] ) const;
   void TransportCBM( float_v dS, const float_v* dsdr, float_v P[], float_v C[], float_v* dsdr1=0, float_v* F=0, float_v* F1=0 ) const;
   void TransportCBM( float_v dS, float_v P[] ) const;    
@@ -342,5 +342,33 @@ class KFParticleBaseSIMD {
   std::vector<int_v> fDaughterIds; // id of particles it created from. if size == 1 then this is id of track.
 
 } __attribute__((aligned(sizeof(float_v))));
+
+inline void KFParticleBaseSIMD::InvertCholetsky3(float_v a[6])
+{
+  /** Inverts symmetric 3x3 matrix a using modified Choletsky decomposition. The result is stored to the same matrix a.
+   ** \param[in,out] a - 3x3 symmetric matrix
+   **/
+
+  const float_v d0 = 1.f/a[0];
+  const float_v u01 = a[1]*d0;
+  const float_v u02 = a[3]*d0;
+  
+  const float_v d1 = 1.f/(a[2] - u01*a[1]);
+  const float_v u12_d = a[4] - u01*a[3];
+  const float_v u12 = d1*u12_d;  
+  const float_v d2 = 1.f/(a[5] - u02*a[3] - u12*u12_d);
+  
+  //find V = -U^-1
+  const float_v v02 = u02 - u01*u12;
+  
+  //find A^-1 = U^-1 D^-1 Ut^-1
+  a[5] =  d2;
+  a[4] = -d2*u12;
+  a[3] = -d2*v02;
+  const float_v d1u01 = -d1*u01;
+  a[2] = d1    - a[4]*u12;
+  a[1] = d1u01 - a[3]*u12;
+  a[0] = d0 - d1u01*u01 - a[3]*v02;
+}
 
 #endif 
