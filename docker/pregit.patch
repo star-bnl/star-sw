@@ -1,0 +1,554 @@
+From 6b938f03712d68f9a9ae8739c8c8fbf10f8b1343 Mon Sep 17 00:00:00 2001
+From: Dmitri Smirnov <dmixsmi@gmail.com>
+Date: Fri, 19 Nov 2021 22:42:17 -0500
+Subject: [PATCH] Patch pre-Git pre-Spack releases
+
+Patch "mgr/Cons*" scripts for Spack environment
+
+Patch selected packages for docker build
+
+Cherry-picked commit 18a361e32a2f6e78caa4769c4c8d213087b56782
+Move pams/gen/idl from star-mcgen repo to star-sw
+
+Cherry-picked commit 54a65fd4039db89f83917cac9e5d658bfce8466f
+Eliminate dependency on C++ boost
+
+Cherry-picked commit 9ad7997fb018edfc12bef277261fe8dfae93bcb2
+Do not include unused header file in StFgtAlignmentMaker
+---
+ .../StFgtAlignmentMaker.cxx                   |  1 -
+ .../Kinematics/StarKinematics.cxx             | 30 ++++--
+ mgr/ConsDefs.pm                               | 15 ++-
+ mgr/Conscript-standard                        | 38 +++++++-
+ mgr/Construct                                 | 13 ++-
+ pams/gen/idl/eg_event.idl                     | 30 ++++++
+ pams/gen/idl/eg_gener.idl                     | 27 ++++++
+ pams/gen/idl/eg_track.idl                     | 27 ++++++
+ pams/gen/idl/eg_vertex.idl                    | 29 ++++++
+ pams/gen/idl/particle.idl                     | 93 +++++++++++++++++++
+ 10 files changed, 287 insertions(+), 16 deletions(-)
+ create mode 100644 pams/gen/idl/eg_event.idl
+ create mode 100644 pams/gen/idl/eg_gener.idl
+ create mode 100644 pams/gen/idl/eg_track.idl
+ create mode 100644 pams/gen/idl/eg_vertex.idl
+ create mode 100644 pams/gen/idl/particle.idl
+
+diff --git a/StRoot/StFgtPool/StFgtAlignmentMaker/StFgtAlignmentMaker.cxx b/StRoot/StFgtPool/StFgtAlignmentMaker/StFgtAlignmentMaker.cxx
+index 10c8dbcc99..7d8d355227 100644
+--- a/StRoot/StFgtPool/StFgtAlignmentMaker/StFgtAlignmentMaker.cxx
++++ b/StRoot/StFgtPool/StFgtAlignmentMaker/StFgtAlignmentMaker.cxx
+@@ -10,7 +10,6 @@
+ 
+ #include <stdio.h>
+ #include <math.h>
+-#include <curses.h>
+ 
+ #include "StFgtAlignmentMaker.h"
+ #include "StEventTypes.h"
+diff --git a/StRoot/StarGenerator/Kinematics/StarKinematics.cxx b/StRoot/StarGenerator/Kinematics/StarKinematics.cxx
+index 15a41b3243..d32acceb60 100644
+--- a/StRoot/StarGenerator/Kinematics/StarKinematics.cxx
++++ b/StRoot/StarGenerator/Kinematics/StarKinematics.cxx
+@@ -4,7 +4,6 @@
+ #include "StarGenerator/UTIL/StarParticleData.h"
+ #include "StarGenerator/UTIL/StarRandom.h"
+ 
+-#include <boost/algorithm/string.hpp>
+ #include <vector>
+ #include <string>
+ #include <algorithm>
+@@ -12,7 +11,24 @@
+ 
+ #define random myrandom
+ 
++// Tokenizes a string similar to boost::split() from boost/algorithm/string.hpp
++// For motivation see https://github.com/star-bnl/star-sw/issues/81
++namespace {
++vector<string> split(const string &s, const string &sep_chars)
++{
++  string::size_type prev_pos = 0, pos = 0;
++  vector<string> result;
++
++  while ((pos = s.find_first_of(sep_chars, pos)) != string::npos) {
++    result.push_back(s.substr(prev_pos, pos - prev_pos));
++    pos += 1;
++    prev_pos = pos;
++  }
++  result.push_back(s.substr(prev_pos));
+ 
++  return result;
++}
++}
+ 
+ // ----------------------------------------------------------------------------
+ 
+@@ -81,8 +97,7 @@ void StarKinematics::Kine(Int_t ntrack, const Char_t *_type, Double_t ptlow, Dou
+ {
+ 
+   std::string type = _type;
+-  std::vector<std::string> types;
+-  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
++  std::vector<std::string> types = split(_type, ", ");
+ 
+   for ( Int_t i=0;i<ntrack;i++ )
+     {
+@@ -162,8 +177,7 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TF1 *ptFunc, TF1 *
+ {
+ 
+   std::string type = _type;
+-  std::vector<std::string> types;
+-  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
++  std::vector<std::string> types = split(_type, ", ");
+ 
+   for ( Int_t i=0; i<ntrack; i++ )
+     {
+@@ -205,8 +219,7 @@ void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TF1 *ptFunc, TF1 *
+ void StarKinematics::Dist( Int_t ntrack, const Char_t *_type, TH1 *ptFunc, TH1 *etaFunc, TH1 *phiFunc )
+ {
+   std::string type = _type;
+-  std::vector<std::string> types;
+-  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
++  std::vector<std::string> types = split(_type, ", ");
+ 
+   for ( Int_t i=0; i<ntrack; i++ )
+     {
+@@ -250,8 +263,7 @@ const double deg2rad = TMath::DegToRad();
+ void StarKinematics::Cosmic( int ntrack, const char* _type, double plow, double phigh, double radius, double zmin, double zmax, double dphi )
+ {
+   std::string type = _type;
+-  std::vector<std::string> types;
+-  boost::split( types, type,  [](char c){ return (c==' ' || c== ',');} );
++  std::vector<std::string> types = split(_type, ", ");
+ 
+   for ( Int_t i=0; i<ntrack; i++ )
+     {
+diff --git a/mgr/ConsDefs.pm b/mgr/ConsDefs.pm
+index b1c7b976c3..de2477dc3b 100644
+--- a/mgr/ConsDefs.pm
++++ b/mgr/ConsDefs.pm
+@@ -74,8 +74,14 @@
+     $AFSLIBS  = "-L" . $AFSDIR . "/lib -L" . $AFSDIR . "/lib/afs";
+     $AFSLIBS .= " -lkauth -lprot -lubik -lauth -lrxkad -lsys -ldes -lrx -llwp";
+     $AFSLIBS .= " -lcmd -lcom_err -laudit " . $AFSDIR . "/lib/afs/util.a";
++
++    $ROOT_VERSION = `root-config --version`;
++    $ROOT_VERSION =~ s/^\s+|\s+$//; # trim
++    $ROOT_VERSION =~ s/\//./;       # dot notation
++    ($ROOT_VERSION_MAJOR, $ROOT_VERSION_MINOR, $ROOT_VERSION_PATCH) = split('\.', $ROOT_VERSION);
++
+     if ( !$ROOT )       { $ROOT       = $AFS_RHIC."/star/ROOT"; }
+-    if ( !$ROOT_LEVEL ) { $ROOT_LEVEL = "2.25.01"; }
++    if ( !$ROOT_LEVEL ) { $ROOT_LEVEL = $ROOT_VERSION; }
+     if ( !$ROOTSYS )    { $ROOTSYS    = $ROOT . "/" . $ROOT_LEVEL; }
+     my $rootlibs = `root-config --nonew --libs`; chomp($rootlibs);
+     my @List = ();
+@@ -928,6 +934,7 @@
+ 	($MYSQLINCDIR,$mysqlheader) =
+ 	    script::find_lib( $MYSTAR . "/include " .  $MYSTAR . "/include/mysql ".
+ 			      $MYSQL . " " .
++			      $MYSQL . "/include " .
+ 			      "/sw/include/mysql ".
+ 			      "/include /usr/include ".
+ 			      "/usr/include/mysql  ".
+@@ -937,6 +944,7 @@
+     } else { 
+ 	($MYSQLINCDIR,$mysqlheader) =
+ 	    script::find_lib( $MYSQL . " " .
++			      $MYSQL . "/include " .
+ 			      "/sw/include/mysql ".
+ 			      "/include /usr/include ".
+ 			      "/usr/include/mysql  ".
+@@ -956,6 +964,7 @@
+ 	($MYSQLCONFIG,$mysqlconf) =
+ 	    script::find_lib($MYSTAR . "/bin " .  $MYSTAR . "/bin/mysql ".
+ 			     $MYSQL . " ".
++			     $MYSQL . "/bin ".
+ 			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ",
+ 			     "mysql_config");
+     # } else {
+@@ -1134,7 +1143,7 @@
+     }
+     # xml2
+     my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
+-    my ($xml) =  script::find_lib($MYSTAR . "/bin /usr/bin",
++    my ($xml) =  script::find_lib($MYSTAR . "/bin /usr/bin " . $LIBXML2_DIR . "/bin",
+ 				  "xml2-config");
+     if ($xml) {
+ 	$xml .= "/xml2-config";
+@@ -1293,11 +1302,13 @@
+ 		      },
+ 		  'SUFOBJ' => "." . $O,
+ 		  'ENV'    => {
++		      'CPATH'           => $CPATH,
+ 		      'PATH'            => $PATH,
+ 		      'LM_LICENSE_FILE' => $LM_LICENSE_FILE,
+ 		      'INCLUDE'         => $INCLUDE_PATH,
+ 		      'ROOT'            => $ROOT,
+ 		      'ROOT_LEVEL'      => $ROOT_LEVEL,
++		      'ROOT_VERSION_MAJOR' => $ROOT_VERSION_MAJOR,
+ 		      'ROOTSRC'         => $ROOTSRC,
+ 		      'ROOTSYS'         => $ROOTSYS,
+ 		      'CINTSYSDIR'      => $CINTSYSDIR,
+diff --git a/mgr/Conscript-standard b/mgr/Conscript-standard
+index b67ac4ff53..115383b13b 100644
+--- a/mgr/Conscript-standard
++++ b/mgr/Conscript-standard
+@@ -11,6 +11,8 @@ my $STAR_SYS     = $env->{ENV}->{STAR_SYS};
+ my $STAR_VERSION = $env->{ENV}->{STAR_VERSION};         # print "#####  $STAR_VER\n";
+ my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};
+ 
++my $ROOT_FEATURES = `root-config --features`;
++
+ @Repo   = Repository_List unless $param::noRepository;#   print "Repositories = |@Repo|\n";
+ 
+ 
+@@ -255,6 +257,14 @@ if ($FC =~ m/g77/ || $FC =~ m/gfortran/ ){
+ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
+     print "\t--- Regular case treatment (not gen not sim) ---\n" if $param::debug;
+ 
++
++
++    if ( $Dir =~ m/Table$/ ) { 
++	if ( $ROOT_FEATURES =~ m/table/ ){ print "[ROOT has table support]\n";@srcL=();@h_filesL = (); }
++	else                             { print "[ROOT has no table support, compile Table] \n"; }
++    }
++
++
+     # if user requested debug, print some info on what was found
+     if ($param::debug) {
+ 	$i = 0;
+@@ -733,8 +743,13 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
+ 	    $CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/" . $subdir;
+ 	}
+ 	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+-	# $CPPPATH .= $main::PATH_SEPARATOR . "/opt/star/include";
+-	$CPPPATH .= $main::PATH_SEPARATOR . $env1->{ENV}->{OPTSTAR}."/include";
++
++        if ( defined($ENV{GSL_DIR}) ) {
++          $CPPPATH = $ENV{GSL_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
++        } else {
++          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
++        }
++
+ 	print "CPPPATH = $CPPPATH\n" if $param::debug;
+ 	# According to description, all client requirering this
+ 	# should be added here.
+@@ -789,8 +804,16 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
+ 	#print "-=-=-=-=-=-= SO_PKG = $SO_PKG\n";
+ 
+     } elsif ( $pkg =~ m/^StJetFinder$/ ){
+-	$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
+ 
++        if ( defined($ENV{FASTJET_DIR}) ) {
++          $CPPPATH = $ENV{FASTJET_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
++        } else {
++          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
++        }
++
++    } elsif ( $pkg =~ m/^StFwdTrackMaker$/ ){ 
++		$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
++		$env1->{StFwdTrackMaker}->{ROOTCINT_INCLUDES} = $env1->{ENV}->{OPTSTAR}."/include"
+     } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
+ 	$LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
+ 	$SO_PKG = "";
+@@ -1126,6 +1149,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
+     print "LINKMODULECOM |", $env2->{LINKMODULECOM}, "|\n" if $param::debug;
+     my $cscanner = find scan::cpp( $env2->{_cwd}, $env2->{CPPPATH} );
+     my @cpps = split /$main::PATH_SEPARATOR/, $env2->{CPPPATH};
++    # Additional include paths can be specified for individual packages
++    my @cpps_pkg = split /$main::PATH_SEPARATOR/, $env1->{$pkg}->{ROOTCINT_INCLUDES};
++    push(@cpps, @cpps_pkg);
+     #  print "cpps => @cpps\n";# if $param::debug;
+     #print "cpps => @cpps\n";
+     my $ROOTCINT_CPP = "";
+@@ -1249,6 +1275,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
+ 
+     if ( $#Defs > -1 ){  # && ! $OnlinePackage ) {
+ 	my @CintFiles = ( $PKG . "_Cint.cxx", $PKG . "_Cint.h", "LinkDef.h" );
++
++        if ($env->{ENV}->{ROOT_VERSION_MAJOR} >= 6) {
++            push @CintFiles, $PKG."_Cint_rdict.pcm";
++            Install $env $LIB, File::Basename::basename($CintFiles[3]);
++        }
++
+ 	@Defs = script::sortu(@Defs);
+ 	my @defs = ();
+ 	foreach my $def(@Defs) {    #print "def = $def OBJ = $OBJ\n";
+diff --git a/mgr/Construct b/mgr/Construct
+index bee1955fc8..fe9906c865 100644
+--- a/mgr/Construct
++++ b/mgr/Construct
+@@ -4,6 +4,8 @@ use Env;
+ use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
+ use ConsDefs;
+ 
++my $ROOT_FEATURES = `root-config --features`;
++
+ #my $xx=$ENV{ConstructLocation};
+ #print "Path used for ConsDefs is $xx\n" unless ($param::quiet);
+ 
+@@ -186,6 +188,9 @@ print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
+ foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
+   print "---> looking for include in $dir\n" if ($param::debug);
+   next if ! -r $dir;
++
++  next if ( ($ROOT_FEATURES=~/table/) && ($dir =~ /Table$/) );   # Do not export Table headers if ROOT provides table support
++
+   opendir( DIR, $dir ) or die "Can't open $dir\n";
+   my @incs = readdir DIR; print "incs = @incs\n" if ($param::debug);
+   closedir DIR;
+@@ -278,7 +283,13 @@ if ($STAR_SYS =~ /x86_darwin/) {
+ #$items .= "StBTofPool|StFgtPool|StPeCMaker";
+ # closing exclusion list
+ my $items = "";# print "items $#items  = @items\n";
+-if ( defined($SKIP_DIRS) ){ $items = join("|",split(" ",$SKIP_DIRS));}
++
++if ( defined($SKIP_DIRS) ) {
++  $items = join("|", split(" ", $SKIP_DIRS));
++} else {
++  $items = "StShadowMaker";
++}
++
+ if ( $#items > -1){
+   if (! $item) {$items  =       join("|",@items);}
+   else         {$items .= "|" . join("|",@items);}
+diff --git a/pams/gen/idl/eg_event.idl b/pams/gen/idl/eg_event.idl
+new file mode 100644
+index 0000000000..e7b4d9b177
+--- /dev/null
++++ b/pams/gen/idl/eg_event.idl
+@@ -0,0 +1,30 @@
++/* eg_event.idl - Event Generator event table */
++
++struct eg_event {	   /*VENUS     Description                           */
++   long   n_event;         /*nrevt     eg event number                       */
++   float  b_impact;        /*bimevt    actual impact parameter               */
++   float  phi_impact;      /*phievt    reaction plane                        */
++/* long   event_type;                  trigger, minbias bkgd, cosmic, etc.   */
++/* long   polarization_evt[10];        to be defined                         */
++/* long   n_part_prot_east;            number of participant protons         */
++/* long   n_part_neut_east;            number of participant neutrons        */
++/* long   n_part_prot_west;            number of participant protons         */
++/* long   n_part_neut_west;            number of participant neutrons        */
++   long   n_track;         /*nptls     # tracks                              */
++   long   n_vertex;        /*ivtxs     # vertices                            */
++/* long   n_fs_track;                  # final state tracks                  */
++/* long   n_not_fs_track;              # non-final state tracks              */
++/* long   n_primary_vertex;            # primary vertices                    */
++/* long   n_fs_vertex;                 # non-final state vertices            */
++/* struct eg_vertex_t   *p_first_primary_vertex; ptr to ll of primary verts  */
++/* struct eg_vertex_t   *p_first_fs_vertex;      ptr to ll of fin. state vert*/
++};
++
++/* Latest revision - $Date: 1997/01/08 21:15:08 $ */
++/*
++
++05dec96 - cetull
++	This table is derived from VENUS and GSTAR internal structures and
++	variables.
++
++*/
+diff --git a/pams/gen/idl/eg_gener.idl b/pams/gen/idl/eg_gener.idl
+new file mode 100644
+index 0000000000..d49efc9a70
+--- /dev/null
++++ b/pams/gen/idl/eg_gener.idl
+@@ -0,0 +1,27 @@
++/* eg_gener.idl - Event Generator generator table */
++
++struct eg_gener {        /*VENUS       Description                           */
++/* long     generator;                 event generator identification        */
++   char     eg_name[32]; /*            event generator name                  */
++   float    eg_version;  /*            version of event generator            */
++/* long     eg_run;                    generator run number                  */
++/* long     eg_rndm[2];                generator random numbers              */
++   float    sqrts;       /*engy        center of mass energy                 */
++/* long     is_minbias;                minimum bias flag                     */
++/* float    b_min;                     minimum impact parameter              */
++   float    b_max;       /*bmaxim      maximum impact parameter              */
++   long     east_a;      /*maproj      projectile 1 mass number              */
++   long     east_z;      /*laproj      projectile 1 charge                   */
++   long     west_a;      /*matarg      projectile 2 mass number              */
++   long     west_z;      /*latarg      projectile 2 charge                   */
++/* long     polarization_run[10];      to be defined                         */
++};
++
++/* Latest revision - $Date: 1997/01/08 21:15:11 $ */
++/*
++
++05dec96 - cetull
++	This table is derived from VENUS and GSTAR internal structures and
++	variables.
++
++*/
+diff --git a/pams/gen/idl/eg_track.idl b/pams/gen/idl/eg_track.idl
+new file mode 100644
+index 0000000000..c678b7cfd3
+--- /dev/null
++++ b/pams/gen/idl/eg_track.idl
+@@ -0,0 +1,27 @@
++/* eg_track.idl - Event Generator track table */
++
++struct eg_track {               /*VENUS         Description                  */
++/* long   label;                                event generator label        */
++/* long   eg_pid;                               event generator id           */
++   long   ge_pid;               /*idtype        GEANT id                     */
++   float  p[3];                 /*pptl[3]       momentum                     */
++   long   itrack;	        /*it            Track Number  (not in gstar) */
++   long   ivertex;		/*iv            Vertex Number (not in gstar) */
++   long   iz;                   /*iz                          (not in gstar) */
++/* struct eg_vertex_t *p_start_vertex;          ptr to start vertex          */
++/* struct eg_vertex_t *p_stop_vertex;           ptr to stop vertex           */
++/* struct eg_track_t  *p_parent_track;          ptr to parent track          */
++/* struct eg_track_t  *p_next_fs_track;         ptr to next final state trk  */
++/* struct eg_track_t  *p_prev_fs_track;         ptr to prev final state trk  */
++/* struct eg_track_t  *p_next_not_fs_track;     ptr to next non-fs track     */
++/* struct eg_track_t  *p_prev_not_fs_track;     ptr to prev non-fs track     */
++};
++
++/* Latest revision - $Date: 1997/01/08 21:15:14 $ */
++/*
++
++05dec96 - cetull
++	This table is derived from VENUS and GSTAR internal structures and
++	variables.
++
++*/
+diff --git a/pams/gen/idl/eg_vertex.idl b/pams/gen/idl/eg_vertex.idl
+new file mode 100644
+index 0000000000..e614e2e22c
+--- /dev/null
++++ b/pams/gen/idl/eg_vertex.idl
+@@ -0,0 +1,29 @@
++/* eg_vertex.idl - Event Generator vertex table */
++
++struct eg_vertex {      /*VENUS      Description                             */
++/* long   label;                     event generator label                   */
++/* long   i_eg_process;              event generator production process      */
++   float  x[3];         /*xstrx,y,z  space point                             */
++   float  t;            /*xstrt      time coordinate                         */
++   long   ivstor;       /*ivstor     ?                        (not in gstar) */
++   long   iz;           /*iz         ?                        (not in gstar) */
++   long   npstor;       /*npstor     ?                        (not in gstar) */
++/* long   n_fs_track;                # final state daughter tracks           */
++/* long   n_not_fs_track;            # non-final state daughter tracks       */
++/* struct eg_track_t  *p_parent_track;        ptr to parent track            */
++/* struct eg_track_t  *p_first_fs_track;      ptr to ll of final state trks  */
++/* struct eg_track_t  *p_first_not_fs_track;  ptr to ll of non-fs tracks     */
++/* struct eg_vertex_t *p_next_primary_vertex; ptr to next primary vertex     */
++/* struct eg_vertex_t *p_prev_primary_vertex; ptr to prev primary vertex     */
++/* struct eg_vertex_t *p_next_fs_vertex;      ptr to next final state vertex */
++/* struct eg_vertex_t *p_prev_fs_vertex;      ptr to prev final state vertex */
++};
++
++/* Latest revision - $Date: 1997/01/08 21:15:17 $ */
++/*
++
++05dec96 - cetull
++	This table is derived from VENUS and GSTAR internal structures and
++	variables.
++
++*/
+diff --git a/pams/gen/idl/particle.idl b/pams/gen/idl/particle.idl
+new file mode 100644
+index 0000000000..a4f59f5ad9
+--- /dev/null
++++ b/pams/gen/idl/particle.idl
+@@ -0,0 +1,93 @@
++/* Generated particle table
++*
++* $Id: particle.idl,v 1.3 1999/02/18 20:51:07 longacre Exp $
++*
++* $Log: particle.idl,v $
++* Revision 1.3  1999/02/18 20:51:07  longacre
++* add two new starlight
++*
++* Revision 1.2  1999/02/18 15:52:20  longacre
++*  added listing headpss.inc
++*
++* Revision 1.1  1998/04/16 17:26:34  longacre
++* first row of particle table in most generators
++*
++* PSSHEP(1) = B impact parameter
++* PSSHEP(2) = PHI angle of impact
++* PSSHEP(3) = GENERATOR NUMBER
++*  1 FRITIOF : MINBIAS
++*  2 FRITIOF : CENTRAL
++* 10 HBT     : MINBIAS
++* 11 HBT     : CENTRAL
++* 20 HIJET   : RHICEVT : MINBIAS 
++* 21 HIJET   : RHICEVT : CENTRAL
++* 22 HIJET   : PLASMA
++* 23 HIJET   : LANDAU
++* 24 HIJET   : SMOKE
++* 25 HIJET   : VOLCANO
++* 26 HIJET   : CHIRAL
++* 27 HIJET   : PTSIM
++* 28 HIJET   : STRANGSIM
++* 29 HIJET   : HIFLOW
++* 30 HIJING  : REGULAR : MINBIAS 
++* 31 HIJING  : REGULAR : CENTRAL 
++* 32 HIJING  : JET     : MINBIAS  
++* 33 HIJING  : JET     : CENTRAL 
++* 40 PYTHIA  : MINBIAS
++* 41 PYTHIA  : JET
++* 42 PYTHIA  : PHOTON
++* 43 PYTHIA  : W
++* 50 STARLIGHT
++* 51 STARLIGHT gamma gamma
++* 52 STARLIGHT photnuc : coherent
++* 60 VENUS   : MINBIAS 
++* 61 VENUS   : CENTRAL  
++* 62 VENUS   : CENTRAL : MEV
++* 70 VNI     : NOAFTER : MINBIAS 
++* 71 VNI     : AFTER   : MINBIAS 
++* 72 VNI     : NOAFTER : CENTRAL 
++* 73 VNI     : AFTER   : CENTRAL 
++* 74 VNI     : NOAFTER : JET
++* 75 VNI     : AFTER   : JET
++* 76 VNI     : NOAFTER : PHOTON
++* 77 VNI     : AFTER   : PHOTON
++* 78 VNI     : NOAFTER : CHIRAL
++* 79 VNI     : AFTER   : CHIRAL
++* 80 VNI     : CENTRAL : MEV
++* 90 RQMD    : MINBIAS
++* 91 RQMD    : CENTRAL
++* 100 BEAMGAS: VENUS   : MINBIAS
++* PSSHEP(4) = ENERGY OF N N CMS
++* PSSHEP(5) = Awest.Aeast  p p  =  1.1 or Au Au = 197.197
++* VSSHEP(1) = run number
++* VSSHEP(2) = event number
++* VSSHEP(3) = DATE
++* VSSHEP(4) = TIME
++*
++* headpss.inc
++* Here is the headpss common block that are in each generator
++*
++*      COMMON/HEADPSS/IFIRST,PSSHEP(5),VSSHEP(4)
++*      INTEGER IFIRST
++*      DOUBLE PRECISION PSSHEP,VSSHEP
++*      SAVE /HEADPSS/
++   $Id: particle.idl,v 1.3 1999/02/18 20:51:07 longacre Exp $ 
++   $Log: particle.idl,v $
++   Revision 1.3  1999/02/18 20:51:07  longacre
++   add two new starlight
++
++   Revision 1.2  1999/02/18 15:52:20  longacre
++    added listing headpss.inc
++
++   Revision 1.1  1998/02/10 15:12:41  fisyak
++   Particle table
++ 
++*/
++struct particle {
++  long  isthep;      /* status code of the entry */
++  long  idhep;       /* particle identity, accordingly to the PDG standard */
++  long  jmohep[2];   /* pointer(s) to position where the mother(s) stored */
++  long  jdahep[2];   /* pointers to position of the first/last daughter */
++  float phep[5];     /* p4 and mass (GeV) */
++  float vhep[4];     /* production vertex (mm) and time (mm/c) */ 
++};
+\ No newline at end of file
+-- 
+2.30.1
+
