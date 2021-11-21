@@ -8,10 +8,6 @@
 #include "StEvent/StDcaGeometry.h"
 #endif /* __TFG__VERSION__ */
 
-#if defined (__TFG__VERSION__)
-#include "StEvent/StDcaGeometry.h"
-#endif /* __TFG__VERSION__ */
-
 //_________________
 class StPicoTrackCovMatrix : public TObject {
   
