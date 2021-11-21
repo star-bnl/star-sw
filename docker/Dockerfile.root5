@@ -101,8 +101,9 @@ RUN ln -s $MYSQL/include /usr/include/mysql
 FROM base-stage AS build-stage
 
 ARG BUILD_CMD="cons"
+ARG PATCH_FILE=""
 
-COPY . /star-sw
+ADD . $PATCH_FILE /star-sw/
 
 # XXX TEMP XXX: Don't force mysql static libraries to be linked into root4star
 RUN cd /star-sw \
@@ -120,7 +121,7 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
  $LIBS  .= " " . $FLIBS . " " . $env->{CLIBS};#   " " . $env->{SYSLIBS} ;\n\
  if ($STAR_SYS =~ /^sun4x_5.$/) {\n\
      if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }\n' \
- && patch -p1 < root4star_cons.patch
+ && for patch in ./*.patch; do patch -p1 < $patch; done
 
 RUN source /etc/profile \
  && cd /star-sw \
