@@ -61,6 +61,10 @@ class StMuEmcUtil;
 #include "StMuFmsCollection.h"
 class StMuFmsUtil;
 
+/// fcs stuff
+#include "StMuFcsCollection.h"
+class StMuFcsUtil;
+
 #include "StMuEpdHitCollection.h" // MALisa
 class StMuEpdUtil;
 /// PMD by Supriya Das
@@ -176,6 +180,7 @@ class StMuDstMaker : public StIOInterFace {
 
   StMuEmcUtil* muEmcUtil() { return mEmcUtil; } ///< return pointer to StMuEmcUtil;
   StMuFmsUtil* muFmsUtil() { return mFmsUtil; } ///< return pointer to StMuFmsUtil;
+  StMuFcsUtil* muFcsUtil() { return mFcsUtil; } ///< return pointer to StMuFcsUtil;
   StMuPmdUtil* muPmdUtil() { return mPmdUtil; } ///< return pointer to StMuPmdUtil;
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
@@ -190,6 +195,7 @@ protected:
   /// routine to set up connection between mEmcCollection and Emc arrays
   void connectEmcCollection();
   void connectFmsCollection();
+  void connectFcsCollection();
   void connectPmdCollection();
  public:
   enum ioMode {ioRead, ioWrite};
@@ -212,6 +218,7 @@ protected:
   StTreeMaker* mTreeMaker;
   StMuEmcUtil* mEmcUtil;
   StMuFmsUtil* mFmsUtil;
+  StMuFcsUtil* mFcsUtil;
   StMuPmdUtil* mPmdUtil;
   StMuTofUtil* mTofUtil;
   /// dongx
@@ -288,6 +295,7 @@ virtual   void closeRead();
   void fillEpd(StEvent* ev);    // MALisa
   void fillEmc(StEvent* ev);
   void fillFms(StEvent* ev);
+  void fillFcs(StEvent* ev);
 #ifndef __NO_STRANGE_MUDST__
   void fillStrange(StStrangeMuDstMaker*);
 #endif
@@ -356,6 +364,7 @@ virtual   void closeRead();
   TClonesArray** mMCArrays;//[__NMCARRAYS__];
   TClonesArray** mEmcArrays;    //[__NEMCARRAYS__    ];
   TClonesArray** mFmsArrays;    //[__NFMSARRAYS__    ];
+  TClonesArray** mFcsArrays;    //[__NFMSARRAYS__    ];
   TClonesArray** mPmdArrays;    //[__NPMDARRAYS__    ];
   TClonesArray** mTofArrays;    //[__NTOFARRAYS__    ];
   /// dongx
@@ -370,13 +379,14 @@ virtual   void closeRead();
   TClonesArray*  mEmcCollectionArray; // Needed to hold old format
   StMuEmcCollection *mEmcCollection;
   StMuFmsCollection *mFmsCollection;
+  StMuFcsCollection *mFcsCollection;
   TClonesArray*  mPmdCollectionArray; // Needed to hold old format
   StMuPmdCollection *mPmdCollection;
   static StMuDstMaker *gStMuDstMaker;
   //  StMuEpdHitCollection *mMuEpdHitCollection;   // MALisa
 
   // Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDstMaker, 6)
+  ClassDef(StMuDstMaker, 7)
 };
 
 inline StMuDst* StMuDstMaker::muDst() { return mStMuDst;}

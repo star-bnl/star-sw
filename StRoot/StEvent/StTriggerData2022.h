@@ -70,6 +70,9 @@ public:
     unsigned int bunchCounterLow() const;
     unsigned int bunchId48Bit() const;
     unsigned int bunchId7Bit() const;
+    unsigned int revTick1() const;
+    unsigned int revTick2() const;
+    unsigned int revTick3() const;
     unsigned int spinBit() const;
     unsigned int spinBitYellowFilled() const;
     unsigned int spinBitYellowUp() const;
@@ -129,10 +132,10 @@ public:
     bool           epdHitLayer2(StBeamDirection eastwest) const;
     unsigned short epdLayer1(int ch, int prepost=0) const;
     unsigned short epdLayer1a(int ch, int prepost=0) const;
-    unsigned short epdLayer1b(int ch, int prepost=0) const;
+    //unsigned short epdLayer1b(int ch, int prepost=0) const;
     unsigned short epdLayer0t(int ch, int prepost=0) const;
-    unsigned short epdLayer0a(int ch, int prepost=0) const;
-    unsigned char  epdLayer0h(int ch, int prepost=0) const;
+    //unsigned short epdLayer0a(int ch, int prepost=0) const;
+    // unsigned char  epdLayer0h(int ch, int prepost=0) const;
     unsigned short epdADC(int crt, int adr, int ch, int prepost=0) const;
     unsigned short epdTDC(int crt, int adr, int ch, int prepost=0) const;
     unsigned short epdNHits(StBeamDirection eastwest, int prepost=0) const;

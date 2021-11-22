@@ -35,9 +35,11 @@ class TCut;
 #endif
 class StMuEmcCollection;
 class StMuFmsCollection;
+class StMuFcsCollection;
 class StMuPmdCollection;
 
 class StEvent;
+class StTriggerData;
 class StTrack;
 class StTrackGeometry;
 class StEmcCollection;
@@ -106,12 +108,12 @@ enum PicoVtxMode {NotSet=0, Default=1, Vpd=2, VpdOrDefault=3, Mtd=4, FXT=5};
 
 class StMuDst : public TObject {
 public:
-  // constructor
+  /// constructor
   StMuDst(); 
-  // set the pointers to the TClonesArrays
+  /// set the pointers to the TClonesArrays
   void set(StMuDstMaker* maker);
-  // set the pointers to the TClonesArrays
-  // dongx
+  /// set the pointers to the TClonesArrays
+  /// dongx
     void set(TClonesArray** /* Arrays */, 
 #ifndef __NO_STRANGE_MUDST__
 		    TClonesArray** /* StrangeArrays */, 
@@ -119,10 +121,11 @@ public:
 		    TClonesArray** mc_ptca=0, 
 		    TClonesArray** emc_ptca=0, 
 		    TClonesArray** fms_ptca=0, 
+	     TClonesArray** fcs_ptca=0,
 		    TClonesArray** pmd_ptca=0, 
 		    TClonesArray** tof_ptca=0, 
 		    TClonesArray** btof_ptca=0,
-                    TClonesArray** etof_col=0,  // jdb
+            TClonesArray** etof_col=0,  // jdb
 		    TClonesArray**  epd_col=0,  // MALisa
 		    TClonesArray** mtd_ptca=0,
 		    TClonesArray** fgt_ptca=0,
@@ -130,33 +133,34 @@ public:
 		    TClonesArray *emc_tca=0, 
 		    StMuEmcCollection *emc_col=0, 
 		    StMuFmsCollection *fms_col=0, 
+            StMuFcsCollection *fcs_col=0,
 		    TClonesArray *pmd_tca=0, 
 		    StMuPmdCollection *pmd_col=0
 );
-  // set pointer to current StEmcCollection
+  /// set pointer to current StEmcCollection
   static void setEmcCollection(StEmcCollection *emc_coll) { instance()->mEmcCollection=emc_coll; }
   
   static void setFmsCollection(StFmsCollection *fms_coll) { instance()->mFmsCollection=fms_coll; }
   void  ResetMaps();
-  // resets the pointers to the TClonesArrays to 0
+  /// resets the pointers to the TClonesArrays to 0
   void unset();
-  // checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
+  /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
   static void fixTrackIndices(TClonesArray* primary, TClonesArray* global);
-  // checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
+  /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
   static void fixTrackIndices();
   //fills gloabl track's mIndex2Global with the index to the respective primary track
   static void fixTrackIndicesG(Int_t mult=1);
-  // creates a StEvent from the StMuDst (this) and returns a pointer to it. (This function is not yet finished)  
+  /// creates a StEvent from the StMuDst (this) and returns a pointer to it. (This function is not yet finished)  
   StEvent* createStEvent();
-  // helper function to create a StTrackGeometry
+  /// helper function to create a StTrackGeometry
   static StTrackGeometry* trackGeometry(int q, StPhysicalHelixD* h);
-  // creates a StTrack from an StMuTrack and return pointer to it
+  /// creates a StTrack from an StMuTrack and return pointer to it
   static StTrack* createStTrack(const StMuTrack*);
-  // dongx
+  /// dongx
   static void fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, TClonesArray* global);
   static void fixETofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, TClonesArray* global);
   static void fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TClonesArray* global);
-  //
+  ///
   void fixTofTrackIndices();
   void fixETofTrackIndices();
   void fixMtdTrackIndices();
@@ -197,136 +201,140 @@ public:
   static Float_t   mTpcVpdVzDiffCut;
 
   static StMuDst *fgMuDst; //!
-  // array of TClonesArrays
+  /// array of TClonesArrays
   TClonesArray** arrays;
 #ifndef __NO_STRANGE_MUDST__
-  // array of TClonesArrays for the stuff inherited from the StStrangeMuDst
+  /// array of TClonesArrays for the stuff inherited from the StStrangeMuDst
   TClonesArray** strangeArrays;
 #endif
   TClonesArray** mcArrays;
-  // array of TClonesArrays for the stuff inherited from the Emc
+  /// array of TClonesArrays for the stuff inherited from the Emc
   TClonesArray** emcArrays;
-  // array of TClonesArrays for the stuff inherited from the Fms
+  /// array of TClonesArrays for the stuff inherited from the Fms
   TClonesArray** fmsArrays;
-  // array of TClonesArrays for the stuff inherited from the Pmd 
+  /// array of TClonesArrays for the stuff inherited from the Fcs
+  TClonesArray** fcsArrays;
+  /// array of TClonesArrays for the stuff inherited from the Pmd 
   TClonesArray** pmdArrays;
-  // array of TClonesArrays for the stuff inherited from the TOF
+  /// array of TClonesArrays for the stuff inherited from the TOF
   TClonesArray** tofArrays;
-  // array of TClonesArrays for the stuff inherited from the BTOF // dongx
+  /// array of TClonesArrays for the stuff inherited from the BTOF // dongx
   TClonesArray** btofArrays;  
-  /// array of TClonesArrays for ETof
+  //// array of TClonesArrays for ETof
   TClonesArray** etofArrays;
-  // array of TClonesArrays for Epd
+  /// array of TClonesArrays for Epd
   TClonesArray** epdArrays;
-  // array of TClonesArrays for the stuff inherited from the Mtd
+  /// array of TClonesArrays for the stuff inherited from the Mtd
   TClonesArray** mtdArrays;  
-  // array of TClonesArrays for the stuff inherited from the Fgt
+  /// array of TClonesArrays for the stuff inherited from the Fgt
   TClonesArray** fgtArrays;
   // pointer to array with MuEmcCollection (for backward compatible mode)
   TClonesArray *mMuEmcCollectionArray;
   // pointer to EmcCollection (manages the EmcArrays)
   StMuEmcCollection *mMuEmcCollection;
-  // pointer to array with MuPmdCollection (for backward compatible mode)
+  /// pointer to array with MuPmdCollection (for backward compatible mode)
   TClonesArray *mMuPmdCollectionArray;
-  // pointer to FmsCollection (manages the FmsArrays)
+  /// pointer to FmsCollection (manages the FmsArrays)
   StMuFmsCollection *mMuFmsCollection; 
-  // pointer to PmdCollection (manages the PmdArrays)
+  /// pointer to FcsCollection (manages the FcsArrays)
+  StMuFcsCollection *mMuFcsCollection; 
+  /// pointer to PmdCollection (manages the PmdArrays)
   StMuPmdCollection *mMuPmdCollection;
-  // pointer to EmcCollecion (for Emc clusterfinding etc)
+  /// pointer to EmcCollecion (for Emc clusterfinding etc)
   StEmcCollection *mEmcCollection;
-  // pointer to FmsCollecion (for Fms clusterfinding etc)
+  /// pointer to FmsCollecion (for Fms clusterfinding etc)
   StFmsCollection *mFmsCollection;
 
-  // array of TClonesArrays for the stuff inherited from the EZT (ezTree)
+  /// array of TClonesArrays for the stuff inherited from the EZT (ezTree)
   TClonesArray** eztArrays;
 
-  // Index number of current primary vertex
+  /// Index number of current primary vertex
   Int_t     mCurrVertexId;
-  // Temporary array to collect tracks from currect primary vertex
+  /// Temporary array to collect tracks from currect primary vertex
   TObjArray *mCurrPrimaryTracks;
-  // Helper function to collect tracks for the current prim vertex
+  /// Helper function to collect tracks for the current prim vertex
   void collectVertexTracks();
   
 public:
-  // Set the index number of the current primary vertex (used by both primaryTracks() functions and for StMuEvent::refMult())
+  /// Set the index number of the current primary vertex (used by both primaryTracks() functions and for StMuEvent::refMult())
   static void setVertexIndex(Int_t vtx_id);
-  // Get the index number of the current primary vertex 
+  /// Get the index number of the current primary vertex 
   static Int_t currentVertexIndex() ;
-  // returns pointer to the n-th TClonesArray 
+  /// returns pointer to the n-th TClonesArray 
   static TClonesArray* array(Int_t type) ;
 #ifndef __NO_STRANGE_MUDST__
-  // returns pointer to the n-th TClonesArray from the strangeness arrays
+  /// returns pointer to the n-th TClonesArray from the strangeness arrays
   static TClonesArray* strangeArray(Int_t type) ;
 #endif
   static TClonesArray* mcArray(Int_t type) ;
   static TClonesArray* mcVertices()      ;
   static TClonesArray* mcTracks()        ;
-  // returns pointer to the n-th TClonesArray from the emc arrays
+  /// returns pointer to the n-th TClonesArray from the emc arrays
   static TClonesArray* emcArray(Int_t type) ;
-  // returns pointer to the n-th TClonesArray from the fms arrays
+  /// returns pointer to the n-th TClonesArray from the fms arrays
   static TClonesArray* fmsArray(Int_t type) ;
-  // returns pointer to the n-th TClonesArray from the pmd arrays
+  /// returns pointer to the n-th TClonesArray from the pmd arrays
   static TClonesArray* pmdArray(Int_t type) ;
-  // returns pointer to the n-th TClonesArray from the tof arrays
+  /// returns pointer to the n-th TClonesArray from the tof arrays
   static TClonesArray* tofArray(Int_t type) ;
-  // returns pointer to the n-th TClonesArray from the btof arrays // dongx
+  /// returns pointer to the n-th TClonesArray from the btof arrays /// dongx
   static TClonesArray* btofArray(Int_t type) ;
-  /// returns pointer to the n-th TClonesArray from the etof arrays // FS
+  //// returns pointer to the n-th TClonesArray from the etof arrays /// FS
     static TClonesArray* etofArray(int type) ;
-  // returns pointer to the n-th TClonesArray from the mtd arrays
+  /// returns pointer to the n-th TClonesArray from the mtd arrays
   static TClonesArray* mtdArray(Int_t type) ;
-  // returns pointer to the n-th TClonesArray from the fgt arrays
+  /// returns pointer to the n-th TClonesArray from the fgt arrays
   static TClonesArray* fgtArray(Int_t type) ;
-  // returns pointer to the n-th TClonesArray from the ezt arrays
+  /// returns pointer to the n-th TClonesArray from the ezt arrays
   static TClonesArray* eztArray(int type) ;
-  // returns pointer to the EpdHitCollection
+  /// returns pointer to the EpdHitCollection
   static TClonesArray* epdHits() ;
-  // returns pointer to the primary vertex list
+  /// returns pointer to the primary vertex list
   static TClonesArray* primaryVertices() ;
   static TClonesArray* allPrimaryTracks() ;
-  // returns pointer to a list of tracks belonging to the selected primary vertex
+  /// returns pointer to a list of tracks belonging to the selected primary vertex
   static TObjArray* primaryTracks() ;
-  // returns pointer to the global tracks list
+  /// returns pointer to the global tracks list
   static TObjArray* globalTracks() ;
-  // returns pointer to the other tracks list (all tracks that are not flagged as primary of global)
+  /// returns pointer to the other tracks list (all tracks that are not flagged as primary of global)
   static TClonesArray* otherTracks() ;
-  // returns pointer to the l3Tracks list
+  /// returns pointer to the l3Tracks list
   static TClonesArray* l3Tracks() ;
-  // returns pointer to the list of rich spectra
+  /// returns pointer to the list of rich spectra
   static TClonesArray* richSpectra() ;
-  // returns pointer to the list of detector states
+  /// returns pointer to the list of detector states
   static TClonesArray* detectorStates() ;
-  // returns pointer to list of accepted l3 algorithms 
+  /// returns pointer to list of accepted l3 algorithms 
   static TClonesArray* l3AlgoAccept() ;
-  // returns pointer to list rejected l3 algorithms 
+  /// returns pointer to list rejected l3 algorithms 
   static TClonesArray* l3AlgoReject() ;
   static TClonesArray* covGlobTrack() ;
   static TClonesArray* covPrimTrack() ;
   static TClonesArray* KFTracks() ;
   static TClonesArray* KFVertices() ;
 
-  // returns pointer to current StMuEvent (class holding the event wise information, e.g. event number, run number)
+  /// returns pointer to current StMuEvent (class holding the event wise information, e.g. event number, run number)
   static StMuEvent* event() ;
   static Int_t      eventId();
-  // return pointer to current primary vertex
+  /// return pointer to current primary vertex
   static StMuPrimaryVertex* primaryVertex() ;
-  // return pointer to i-th primary vertex
+  /// return pointer to i-th primary vertex
   static StMuPrimaryVertex* primaryVertex(Int_t i) ;
-  // return pointer to i-th primary track 
+  /// return pointer to i-th primary track 
   static StMuTrack* primaryTracks(Int_t i) ;
-  // return pointer to i-th global track 
+  /// return pointer to i-th global track 
   static StMuTrack* globalTracks(Int_t i) ;
-  // return pointer to i-th other track  (track that is not flagged as primary of global)
+  /// return pointer to i-th other track  (track that is not flagged as primary of global)
   static StMuTrack* otherTracks(Int_t i) ;
-  // return pointer to i-th l3 track
+  /// return pointer to i-th l3 track
   static StMuTrack* l3Tracks(Int_t i) ;
-  // returns pointer to i-th StRichSpectra
+  /// returns pointer to i-th StRichSpectra
   static StRichSpectra* richSpectra(Int_t i) ;
-  // returns pointer to i-th StDetectorState
+  /// returns pointer to i-th StDetectorState
   static StDetectorState* detectorStates(Int_t i) ;
-  // returns pointer to i-th accepted StL3AlgorithmInfo
+  /// returns pointer to i-th accepted StL3AlgorithmInfo
   static StL3AlgorithmInfo* l3AlgoAccept(Int_t i) ;
-  // returns pointer to i-th rejected StL3AlgorithmInfo
+  /// returns pointer to i-th rejected StL3AlgorithmInfo
   static StL3AlgorithmInfo* l3AlgoReject(Int_t i) ;
   //returns pp2pp infomation
   static StMuRpsCollection* RpsCollection() ;
@@ -340,103 +348,106 @@ public:
   static StMuMcVertex*               MCvertex(Int_t i) ;
  
 #ifndef __NO_STRANGE_MUDST__
-  // returns pointer to current StStrangeEvMuDst (class holding the event wise information, e.g. event number, run number)
+  /// returns pointer to current StStrangeEvMuDst (class holding the event wise information, e.g. event number, run number)
   static StStrangeEvMuDst* strangeEvent() ;
-  // returns pointer to MC version of current StStrangeEvMuDst
+  /// returns pointer to MC version of current StStrangeEvMuDst
   static StStrangeEvMuDst* strangeEventMc() ;
-  // returns pointer to the v0 list
+  /// returns pointer to the v0 list
   static TClonesArray* v0s() ;
-  // returns pointer to the mc v0 list
+  /// returns pointer to the mc v0 list
   static TClonesArray* v0sMc() ;
-  // returns pointer to the v0 association list
+  /// returns pointer to the v0 association list
   static TClonesArray* v0Assoc() ;
-  // returns pointer to the xi list
+  /// returns pointer to the xi list
   static TClonesArray* xis() ;
-  // returns pointer to the mc xi list
+  /// returns pointer to the mc xi list
   static TClonesArray* xisMc() ;
-  // returns pointer to the xi association list
+  /// returns pointer to the xi association list
   static TClonesArray* xiAssoc() ;
-  // returns pointer to the kink list
+  /// returns pointer to the kink list
   static TClonesArray* kinks() ;
-  // returns pointer to the mc kink list
+  /// returns pointer to the mc kink list
   static TClonesArray* kinksMc() ;
-  // returns pointer to the kink association list
+  /// returns pointer to the kink association list
   static TClonesArray* kinkAssoc() ;
-  // returns pointer to the list of strangeCuts
+  /// returns pointer to the list of strangeCuts
   static TClonesArray* strangeCuts() ;
-  // returns pointer to the i-th v0
+  /// returns pointer to the i-th v0
   static StV0MuDst* v0s(Int_t i) ;
   static StV0Mc* v0sMc(Int_t i) ;
   static StStrangeAssoc* v0Assoc(Int_t i) ;
-  // returns pointer to the i-th xi
+  /// returns pointer to the i-th xi
   static StXiMuDst* xis(Int_t i) ;
   static StXiMc* xisMc(Int_t i) ;
   static StStrangeAssoc* xiAssoc(Int_t i) ;
-  // returns pointer to the i-th kink
+  /// returns pointer to the i-th kink
   static StKinkMuDst* kinks(Int_t i) ;
   static StKinkMc* kinksMc(Int_t i) ;
   static StStrangeAssoc* kinkAssoc(Int_t i) ;
-  // returns pointer to the i-th stranneCut (of type TCut)
+  /// returns pointer to the i-th stranneCut (of type TCut)
   static TCut* strangeCuts(Int_t i) ;
 #endif
-  // returns pointer to current StMuEmcCollection
+  /// returns pointer to current StMuEmcCollection
   static StMuEmcCollection* muEmcCollection() ;
-   // returns pointer to current StMuFmsCollection
+   /// returns pointer to current StMuFmsCollection
   static StMuFmsCollection* muFmsCollection() ;
-  // returns pointer to current StMuPmdCollection
+   /// returns pointer to current StMuFcsCollection
+    static StMuFcsCollection* muFcsCollection() { return instance()->mMuFcsCollection; }
+  /// returns pointer to current StMuPmdCollection
   static StMuPmdCollection* pmdCollection() ;
-  // returns pointer to current StEmcCollection
+  /// returns pointer to current StEmcCollection
   static StEmcCollection* emcCollection() ;
-  // returns pointer to current StFmsCollection
+  /// returns pointer to current StFmsCollection
   static StFmsCollection* fmsCollection() ;
 
-  // returns pointer to the i-th muTofHit
+  /// returns pointer to the i-th muTofHit
   static StMuTofHit* tofHit(Int_t i) ;
-  // returns pointer to the i-th tofData
+  /// returns pointer to the i-th tofData
   static StTofData* tofData(Int_t i) ;
   // run 5 - dongx
-  // returns pointer to the i-th tofRawData
+  /// returns pointer to the i-th tofRawData
   static StTofRawData* tofRawData(Int_t i) ;
-  // returns pointer to the i-th muBTofHit
+  /// returns pointer to the i-th muBTofHit
   static StMuBTofHit* btofHit(Int_t i) ;
-  // returns pointer to the i-th btofRawHit - dongx
+  /// returns pointer to the i-th btofRawHit - dongx
   static StBTofRawHit* btofRawHit(Int_t i) ;
-  // returns pointer to the btofHeader - dongx
+  /// returns pointer to the btofHeader - dongx
   static StBTofHeader* btofHeader() ;
 
   // fseck ---
   /// returns pointer to the i-th StMuEtofDigi
-    static StMuETofDigi* etofDigi(Int_t  i);
+  static StMuETofDigi* etofDigi(Int_t  i);
   /// returns pointer to the i-th StMuETofHit
-      static StMuETofHit* etofHit(Int_t  i);
+  static StMuETofHit* etofHit(Int_t  i);
   /// returns pointer to the StMuETofHeader
-	static StMuETofHeader* etofHeader();
+  static StMuETofHeader* etofHeader();
+  // -- ---
 
   static StMuEpdHit* epdHit(Int_t  i) ;
 
   static StMuMtdHit* mtdHit(Int_t  i) ;
-  static StMuMtdRawHit* mtdRawHit(Int_t  i) ;
-  static StMuMtdHeader* mtdHeader() ;
+    static StMuMtdRawHit* mtdRawHit(Int_t  i) ;
+    static StMuMtdHeader* mtdHeader() ;
     
     
-  // returns pointer to eztHeader 
+  /// returns pointer to eztHeader 
   static  EztEventHeader* eztHeader() ;
 
-//    static StMuBTofHit* btofHit(Int_t i) ;
+///    static StMuBTofHit* btofHit(Int_t i) ;
 
     
-  // returns pointer to eztTrig 
+  /// returns pointer to eztTrig 
   static  EztTrigBlob* eztTrig() 
     ;
 
-  // returns pointer to eztFpd 
+  /// returns pointer to eztFpd 
   static  EztFpdBlob* eztFpd() 
     ;
 
-  // returns pointer to ETOW 
+  /// returns pointer to ETOW 
   static  EztEmcRawData* eztETow() 
     ;
-  // returns pointer to eztESmd +pre/post
+  /// returns pointer to eztESmd +pre/post
   static  EztEmcRawData* eztESmd() 
     ;
 
@@ -522,7 +533,7 @@ public:
   static unsigned int GetNMTDHit()         ;
   static unsigned int GetNMTDRawHit()      ;
     
-  virtual void Print(Option_t *option = "") const; //< Print basic event info
+  virtual void Print(Option_t *option = "") const; ///< Print basic event info
   static void printPrimaryTracks();
   static void printAllPrimaryTracks();
   static void printGlobalTracks() ;
@@ -625,8 +636,8 @@ public:
   static void SetVxRmax(Double_t rmax = 2);
   static void SetTpcVpdVzDiffCut(Float_t cut = 3) { instance()->mTpcVpdVzDiffCut = cut;}
   
-  // Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDst,5)
+  /// Increment this by 1 every time the class structure is changed
+  ClassDef(StMuDst,6)
 };
 
 #endif

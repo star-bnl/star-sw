@@ -354,6 +354,22 @@ unsigned int StTriggerData2022::bunchId7Bit() const
     return b7;
 }
 
+unsigned int StTriggerData2022::revTick1() const
+{
+  return L1_DSM->BCdata[1] & 0x1;
+}
+
+unsigned int StTriggerData2022::revTick2() const
+{
+  return L1_DSM->BCdata[12] & 0x1;
+}
+
+unsigned int StTriggerData2022::revTick3() const
+{
+  return (L1_DSM->lastDSM[4] >> 3) & 0x1;
+}
+
+
 unsigned int StTriggerData2022::spinBit() const
 {
     return (L1_DSM->lastDSM[4]/16)%256;
@@ -556,33 +572,6 @@ unsigned short StTriggerData2022::epdLayer0t(int ch, int prepost) const
     return 0;
 }
 
-unsigned short StTriggerData2022::epdLayer0a(int ch, int prepost) const
-{
-    int dsmmap[16] = {3,2,1,0,7,6,5,4, 11,10,9,8,15,14,13,12};
-    int buffer = prepostAddress(prepost);
-    if (buffer>=0){
-        if (mBBC[buffer]){
-            if(ch>=0 && ch<16) return mBBC[buffer]->EPDlayer0a[dsmmap[ch]];
-        }
-    }
-    return 0;
-}
-
-unsigned char StTriggerData2022::epdLayer0h(int ch, int prepost) const
-{
-    int dsmmap[32] = { 7, 6, 5, 4, 3, 2, 1, 0,
-		      15,14,13,12,11,10, 9, 8,
-		      23,22,21,20,19,18,17,16,
-		      31,30,29,28,27,26,25,24};
-    int buffer = prepostAddress(prepost);
-    if (buffer>=0){
-        if (mBBC[buffer]){
-            if(ch>=0 && ch<32) return mBBC[buffer]->EPDlayer0h[dsmmap[ch]];
-        }
-    }
-    return 0;
-}
-
 unsigned short StTriggerData2022::epdLayer1(int ch, int prepost) const
 {
     return epdLayer1a(ch,prepost);
@@ -595,18 +584,6 @@ unsigned short StTriggerData2022::epdLayer1a(int ch, int prepost) const
     if (buffer>=0){
         if (mBBC[buffer]){
             if(ch>=0 && ch<8) return mBBC[buffer]->EPDlayer1a[dsmmap[ch]];
-        }
-    }
-    return 0;
-}
-
-unsigned short StTriggerData2022::epdLayer1b(int ch, int prepost) const
-{
-    int dsmmap[8] = {3,2,1,0,7,6,5,4};
-    int buffer = prepostAddress(prepost);
-    if (buffer>=0){
-        if (mBBC[buffer]){
-            if(ch>=0 && ch<8) return mBBC[buffer]->EPDlayer1b[dsmmap[ch]];
         }
     }
     return 0;
@@ -1833,8 +1810,9 @@ void StTriggerData2022::swapRawDet(DataBlock2022* data, int name, int hlength,in
                 break;
             case y22BBC_CONF_NUM :
                 bbc = (BBCBlock2022*) data;
-                swapSSn((unsigned int*)bbc->BBClayer1,8+8+8+8+16+8+16);
-		//char EPDlayer0h doesn't need swap
+		//use actual length in case DSM2 fake data insert fails and data is short by 8.
+                swapSSn((unsigned int*)bbc->BBClayer1,(data->length)/2);
+		//swapSSn((unsigned int*)bbc->BBClayer1,8+8+8+8+16
                break;
             case y22FMS_CONF_NUM :
                 //only char
