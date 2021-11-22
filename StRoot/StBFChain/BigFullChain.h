@@ -1698,7 +1698,8 @@ Bfc_st BFC[] = { // standard chains
    "StFcsClusterMaker","StFcsClusterMaker","Fill FCS clusters",                                     kFALSE},
   {"fcsPoint"   ,"","", "StEvent,fcsDb",
    "StFcsPointMaker","StFcsPointMaker,libMinuit","Fill FCS points",                                 kFALSE},
-
+   {"FttDat","","","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent", 
+                                                            "sTGC Raw hit maker",                   kFALSE},
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 #else
