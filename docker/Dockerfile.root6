@@ -101,6 +101,8 @@ RUN ln -s $MYSQL/include /usr/include/mysql
 
 FROM base-stage AS build-stage
 
+ARG BUILD_CMD="cons"
+
 COPY . /star-sw
 
 # XXX TEMP XXX: Don't force mysql static libraries to be linked into root4star
@@ -125,7 +127,8 @@ RUN source /etc/profile \
  # Override default Vc version
  && export Vc_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/vc_-0.7.4-gqbhzu2x5u2dbe5tafxnl36xj5qbwov4 \
  && cd /star-sw \
- && cons \
+ && install -m 755 <(echo "${BUILD_CMD}") build_cmd.sh \
+ && ./build_cmd.sh \
  && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 
 RUN install /star-sw/StRoot/macros/.rootrc .
