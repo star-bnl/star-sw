@@ -3,7 +3,8 @@ use File::Basename;
 use Cwd;
 use Env;
 use lib "/net/l402/data/fisyak/STAR/packages/.DEV2/bin";#$ENV{ConstructLocation}; 
-use RunXXIDefs;
+#use RunXXIDefs;
+use RunXXIIDefs;
 my $debug = 0;
 my $pwd = cwd();
 my $Day = File::Basename::basename(File::Basename::dirname($pwd));
@@ -33,28 +34,31 @@ sub PrintHash($$) {
 sub GoodRun($$) {
   my $env = shift;
   my $run = shift;
-  print "GoodRun:: run = $run" if $debug;
+  print "GoodRun:: run = $run" if ($debug > 1);
   foreach my $key (sort keys %$env ) {
-    print "$pwd, trig = $env->{$key}->{trig}, field = $env->{$key}->{field}; first = $env->{$key}->{first}, last = $env->{$key}->{last}" if ($debug);
-    if ($pwd !~ /$env->{$key}->{trig}/)  {print ", rejected by trig\n"  if ($debug); next;}
-    if ($pwd !~ /$env->{$key}->{field}/) {print ", rejected by field\n" if ($debug); next;}
-    if ($run < $env->{$key}->{first})     {print ", rejected by first\n" if ($debug); next;}
-    if ($run > $env->{$key}->{last})      {print ", rejected by last\n"  if ($debug); next;}
+    my $trig = $env->{$key}->{trig};
+    if ($trig =~ /Cosmic_/) {$trig = "Cosmic";}
+    print "$pwd, trig = $trig, field = $env->{$key}->{field}; first = $env->{$key}->{first}, last = $env->{$key}->{last}\n" if ($debug>1);
+    if ($pwd !~ /$trig/)  {print ", rejected by trig\n"  if ($debug); next;}
+    if ($pwd !~ /$env->{$key}->{field}/) {print ", rejected by field\n" if ($debug > 1); next;}
+    if ($run < $env->{$key}->{first})     {print ", rejected by first\n" if ($debug > 1); next;}
+    if ($run > $env->{$key}->{last})      {print ", rejected by last\n"  if ($debug > 1); next;}
     print " accepted\n" if ($debug);
     return $run;
   }
-  print " rejected\n" if ($debug);
+  print " rejected\n" if ($debug > 1);
   return -1;
 }
 my $def = {@Runs};# print "Runs = @Runs\n";
-PrintHash($def,"Runs") if ($debug);
+PrintHash($def,"Runs") if ($debug > 1);
 #die;
 #my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /hlt/cephfs/daq/2020/???/*";  print "runs = @runs\n" if ($debug);
 #my @runs = ("/hlt/cephfs/daq/2019/" . $Day . "/" .  $Run,
 #	    "/hlt/cephfs/daq/2020/" . $Day . "/" .  $Run);
-#my @runs = ("/hlt/cephfs/daq/2022/" . $Day . "/" .  $Run);
-my  @runs  = glob "/hlt/cephfs/daq/2021/???/* /hlt/cephfs/daq/2022/???/*";  
-print "runs = @runs\n" if ($debug);
+my @runs = ("/hlt/cephfs/daq/*/" . $Day . "/" .  $Run);
+#my  @runs  = glob "/hlt/cephfs/daq/2021/???/* /hlt/cephfs/daq/2022/???/*";  
+#my  @runs  = glob "/hlt/cephfs/daq/2021/???/* /hlt/cephfs/daq/2022/???/*";  
+#print "runs = @runs\n" if ($debug);
 foreach my $run (@runs) {
   my $r = File::Basename::basename($run);
   if (GoodRun($def,$r) < 0) {next;}
@@ -81,6 +85,8 @@ foreach my $run (@runs) {
       if (-r $mufile) {next;}
       my $pifile = $b . ".picoDst.root";
       if (-r $pifile) {next;}
+      my $evfile = $b . ".event.root";
+      if (-r $evfile) {next;}
       my $blafile = $b . ".bla.root";
       if (-r $blafile) {next;}
       print "string:$file\n";

@@ -13,6 +13,7 @@
 #  setup 32b
 #  starver .DEV2 
 #  starver TFG17j 
+  limit stacksize 16m
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
     set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -47,6 +48,6 @@
 <!-- <input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/daq2019AuAu19/*MuDst.root" /> -->
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/daq_2019AuAu19/*MuDst.root" /> -->
 <!-- <input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/2019/daq_19GeV/*MuDst.root" /> -->
-<input URL="command:SplitJobs.pl files='/net/l404/data/fisyak/Tpc/TpcRS/2019/daq_19GeV/*MuDst.root' first=1 last=1000 step=20 debug=0" />
+<input URL="command:SplitJobs.pl files='/net/l404/data/fisyak/Tpc/TpcRS/2019/daq_19GeV/*MuDst.root' first=1 last=1000 step=50 debug=0" />
 </job>
 
