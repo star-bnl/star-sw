@@ -81,13 +81,13 @@ StFttRawHitMaker::Make()
     } else {
         mEvent = new StEvent();
         AddData(mEvent);
-        LOG_INFO <<"Added StEvent"<<endm;
+        LOG_DEBUG <<"Added StEvent"<<endm;
     }
     mFttCollection=mEvent->fttCollection();
     if(!mFttCollection) {
         mFttCollection = new StFttCollection();
         mEvent->setFttCollection(mFttCollection);
-        LOG_INFO <<"Added StFttCollection"<<endm;
+        LOG_DEBUG <<"Added StFttCollection"<<endm;
     } else {
         mFttCollection = mEvent->fttCollection();
         LOG_DEBUG <<"Found StFttCollection"<<endm;
