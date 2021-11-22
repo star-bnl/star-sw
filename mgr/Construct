@@ -288,7 +288,8 @@ foreach my $dir( "pams", "StRoot", "StPiD", "StarVMC" ) {
   foreach my $sub_dir (@subdirS) { 
     next if ($sub_dir eq '.' || $sub_dir eq '..');
     next if ($sub_dir =~ $excludeDirList);
-    next if ($sub_dir eq 'Table' and $ROOT_LEVEL =~ /^5/ );
+#    next if ($sub_dir eq 'Table' and $ROOT_LEVEL =~ /^5/ );
+    next if ($sub_dir eq 'Table');
     my $sub_Dir = $dir . "/" . $sub_dir; 
     next if !-d $sub_Dir and !-l $sub_Dir;
     print "dir = $dir \t sub_dir = $sub_dir sub_Dir = $sub_Dir\n" if ($param::debug);
