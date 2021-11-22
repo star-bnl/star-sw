@@ -69,29 +69,6 @@ static TH2F *pVxy = 0;
 StMuDst *StMuDst::fgMuDst = 0;
 ClassImp(StMuDst);
 //________________________________________________________________________________
-TClonesArray** StMuDst::mcArrays             = 0;
-TClonesArray** StMuDst::emcArrays            = 0;
-TClonesArray** StMuDst::fmsArrays            = 0;
-TClonesArray** StMuDst::fcsArrays            = 0;
-TClonesArray** StMuDst::pmdArrays            = 0;
-TClonesArray** StMuDst::tofArrays            = 0;
-TClonesArray** StMuDst::btofArrays           = 0;   /// dongx
-TClonesArray** StMuDst::etofArrays           = 0;   /// jdb
-TClonesArray** StMuDst::epdArrays            = 0;   /// MALisa
-TClonesArray** StMuDst::mtdArrays            = 0;
-TClonesArray** StMuDst::fgtArrays            = 0;
-TClonesArray *StMuDst::mMuEmcCollectionArray = 0;
-StMuEmcCollection *StMuDst::mMuEmcCollection = 0;
-StMuFmsCollection *StMuDst::mMuFmsCollection = 0;
-StMuFcsCollection *StMuDst::mMuFcsCollection = 0;
-TClonesArray *StMuDst::mMuPmdCollectionArray = 0;
-StMuPmdCollection *StMuDst::mMuPmdCollection = 0;
-StEmcCollection *StMuDst::mEmcCollection     = 0;
-StFmsCollection *StMuDst::mFmsCollection     = 0;
-TClonesArray** StMuDst::eztArrays            = 0;
-
-Int_t StMuDst::mCurrVertexId                 = -2;
-TObjArray* StMuDst::mCurrPrimaryTracks       = 0;
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
@@ -117,23 +94,26 @@ void StMuDst::unset() {
     mcArrays = 0;
     emcArrays     = 0;
     fmsArrays     = 0;
+    fcsArrays     = 0;
     pmdArrays     = 0;
     tofArrays     = 0;
     btofArrays    = 0;   // dongx
     mtdArrays     = 0;   // dongx
-    etofArrays    = 0;   // jdb
     epdArrays     = 0;   // MALisa
+    etofArrays    = 0;   // jdb
     fgtArrays     = 0;
     mMuEmcCollectionArray = 0;
-    mMuEmcCollection = 0; 
-	mMuFmsCollection = 0;
+    mMuEmcCollection = 0;
+    mMuFmsCollection = 0;
     mMuFcsCollection = 0;
     mMuPmdCollectionArray = 0;
     mMuPmdCollection = 0;
-    mEmcCollection = 0;
-	mFmsCollection = 0;
-    eztArrays      = 0;
-    mtdArrays = 0;
+    mEmcCollection     = 0;
+    mFmsCollection     = 0;
+    eztArrays          = 0;
+    mCurrVertexId      = -2;
+    mCurrPrimaryTracks = 0;
+    mtdArrays          = 0;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------

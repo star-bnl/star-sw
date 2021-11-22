@@ -143,8 +143,7 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mTrackFilter(0), mL3TrackFilter(0),
   mCurrentFile(0),
   mChain (0), mTTree(0),
-  mSplit(99), 
-  mCompression(9), mBufferSize(65536*4), mVtxList(100),
+  mSplit(99), mCompression(9), mBufferSize(65536*4), mVtxList(100),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
   mFmsCollection(0),mFcsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
 
@@ -352,6 +351,7 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
   if (mIoMode==ioRead)
     setBranchAddresses(mChain);
 }
+#ifndef __TFG__VERSION__
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -404,8 +404,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mTrackType(256), mReadTracks(1),
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
-  mSplit(99), 
-  mCompression(9), mBufferSize(65536*4),mStTriggerYear(year),
+  mSplit(99), mCompression(9), mBufferSize(65536*4),mStTriggerYear(year),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
 mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
 {
@@ -428,6 +427,7 @@ mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
   mEzTree  = new StMuEzTree();
   gStMuDstMaker = this;
 }*/
+#endif /* ! __TFG__VERSION__ */
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------

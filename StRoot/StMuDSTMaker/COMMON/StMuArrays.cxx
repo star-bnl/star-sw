@@ -14,6 +14,7 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVer
 					                   "PrimaryTracks","GlobalTracks","OtherTracks","L3Tracks",
 					                   "RichSpectra","DetectorStates","L3AlgoAccept","L3AlgoReject",
 							   "CovGlobTrack","CovPrimTrack","pp2pp","mtd",
+							   "KFTracks","KFVertices",
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArrayNames[__NSTRANGEARRAYS__]*/                  "Event","McEvent",
 							   "V0","McV0","V0Assoc",
@@ -61,7 +62,8 @@ const char** StMuArrays::eztArrayNames = StMuArrays::fgtArrayNames    +__NFGTARR
 const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrimaryVertex",
 					                   "StMuTrack","StMuTrack","StMuTrack","StMuTrack",
 					                   "StRichSpectra","StDetectorState","StL3AlgorithmInfo","StL3AlgorithmInfo",
-							   "StDcaGeometry","StMuPrimaryTrackCovariance","StMuRpsCollection","StMuMtdCollection",
+							   "StDcaGeometry","StMuPrimaryTrackCovariance","StMuRpsCollection","StMuMtdCollection", 
+							   "KFParticle","KFVertex",
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArrayTypes[__NSTRANGEARRAYS__]*/                  "StStrangeEvMuDst","StStrangeEvMuDst",
 							   "StV0MuDst","StV0Mc","StStrangeAssoc",
