@@ -13,6 +13,9 @@
 #define FGT_CH_COU		128	// from 0..127
 #define FGT_TB_COU		31	// from 0..30
 
+#define FST_ARM_COU		3
+#define FST_TB_COU		9
+
 /*
 #define FGT_CH_STAT_SHOULD		0x01	// exists in hardware
 #define FGT_CH_STAT_NO_CONFIG		0x02	// killed in RC or config file

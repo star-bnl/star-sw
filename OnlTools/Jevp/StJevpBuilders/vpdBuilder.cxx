@@ -14,6 +14,8 @@
 #include <RTS/include/rtsLog.h>
 #include <rtsSystems.h>
 
+#include "TObjString.h"
+
 // This is the one PlotSet that is guarenteed to always exist
 // It's main purpose is to provide the run information 
 // To the server...

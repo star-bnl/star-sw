@@ -55,6 +55,9 @@ pthread_mutex_t fcs_data_c::ped_mutex ;
 	
 fcs_data_c::statistics_t fcs_data_c::statistics[8] ;
 
+int fcs_data_c::stage_params_txt[32] ;
+
+
 long fcs_data_c::dep_to_char(int det, int ns, int dep)
 {
         long ret ;
@@ -89,6 +92,95 @@ long fcs_data_c::dep_to_char(int det, int ns, int dep)
 
 }
 
+const char *fcs_data_c::stage_labels[] = {
+	"FCS_HAD-HERATIO-THR", //
+        "FCS_EM-HERATIO-THR", //
+        "FCS_HADTHR1", //
+        "FCS_HADTHR2", //
+        "FCS_HADTHR3",
+        "FCS_EMTHR1", //
+        "FCS_EMTHR2", //
+        "FCS_EMTHR3",
+        "FCS_JETTHR1",
+        "FCS_JETTHR2",
+        "FCS_ETOTTHR", //
+        "FCS_HTOTTHR",	// 11 //
+
+        "FCS_EHTTHR",	// 12 //
+        "FCS_HHTTHR",	// 13 //
+        "FCS_PHTTHR"	// 14 //
+} ;
+
+int fcs_data_c::load_stage_params(int sec1, const char *fname)
+{
+	if(fname==0) {
+		fname="/RTS/conf/fcs/stage_params.txt" ;
+	}
+
+	FILE *f = fopen(fname,"r") ;
+	if(f==0) {
+		LOG(ERR,"sector %2d: %s: [%s]",sec1,fname,strerror(errno)) ;
+		return -1 ;
+	}
+
+	LOG(INFO,"sector %2d: stage_params %s opened",sec1,fname) ;
+
+	int max_i = 0 ;
+
+	while(!feof(f)) {
+		char buff[128] ;
+		char name[64] ;
+		int val ;
+		int ix ;
+		int dummy ;
+
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+		if(buff[0]=='#') continue ;
+		if(buff[0]=='\n') continue ;
+
+		name[0] = '?' ;
+		name[1] = 0 ;
+		val = -1 ;
+
+		int ret = sscanf(buff,"%d %d %d %s %d",&dummy,&dummy,&ix,name,&val) ;
+		if(ret != 5) continue ;
+
+//		LOG(TERR,"ret %d: [%s]=%d",ret,name,val) ;
+
+		char got_it = -1 ;
+		for(u_int i=0;i<sizeof(stage_labels)/sizeof(stage_labels[0]);i++) {
+			if(stage_labels[i]==0) continue ;
+
+			if(strcasecmp(stage_labels[i],name)==0) {
+				stage_params_txt[i] = val ;
+				got_it = i ;
+				max_i = i ;
+				break ;
+			}
+		}
+
+		if(sec1==11) {	// LOG only from this one
+			if(got_it<0) {
+				LOG(ERR,"stage_param_txt [%s]=%d NOT coded locally",name,val) ;
+			}
+			else {
+				LOG(INFO,"stage_param_txt [%s]=%d, index %d, ix %d",name,val,got_it,ix) ;
+			}
+		}
+	}
+
+	if(sec1==11) {	// LOG from this one only
+		for(int i=0;i<max_i;i++) {
+			LOG(TERR,"stage_params_txt: %d/%d = %d",i,max_i,stage_params_txt[i]) ;
+		}
+	}
+
+	fclose(f) ;
+	return 0 ;
+}
+
+	
 
 int fcs_data_c::zs_start(u_short *buff)
 {
@@ -1128,8 +1220,14 @@ int fcs_data_c::ana_ch()
 		int errs = 0 ;
 		for(int tb=0;tb<tb_cou;tb++) {
 			int r=rdo-5 ;
+			int d = adc[tb] & 0xFF ;
 
-			if(expect[r][ch] != (adc[tb]&0xFF)) {
+			if(ch==36) {
+				if(d && (expect[r][ch] != d)) {
+					errs++ ;
+				}
+			}
+			else if(expect[r][ch] != d) {
 				errs++ ;
 			}
 		}
@@ -1549,7 +1647,7 @@ int fcs_data_c::gain_from_cache(const char *fname)
 
 		FILE *f = fopen(ff,"r") ;
 		if(f==0) {
-			LOG(WARN,"gain_from_cache: %s [%s]",ff,strerror(errno)) ;
+			LOG(ERR,"gain_from_cache: %s [%s] (perhaps not an error)",ff,strerror(errno)) ;
 			if(!is_dir) goto read_done ;
 			continue ;
 		}

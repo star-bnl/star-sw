@@ -14,7 +14,6 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVer
 					                   "PrimaryTracks","GlobalTracks","OtherTracks","L3Tracks",
 					                   "RichSpectra","DetectorStates","L3AlgoAccept","L3AlgoReject",
 							   "CovGlobTrack","CovPrimTrack","pp2pp","mtd",
-							   "KFTracks","KFVertices",
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArrayNames[__NSTRANGEARRAYS__]*/                  "Event","McEvent",
 							   "V0","McV0","V0Assoc",
@@ -29,6 +28,7 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVer
                                                            "EEmcPrs","EEmcSmdu","EEmcSmdv",
 /*pmdArrayNames    [__NPMDARRAYS__    ]*/                  "PmdHit","CpvHit", "PmdCluster", "CpvCluster",
 /*fmsArrayNames    [__NFMSARRAYS__    ]*/                  "FmsHit","FmsCluster","FmsPoint","FmsInfo",
+/*fcsArrayNames    [__NFCSARRAYS__    ]*/                  "FcsHit","FcsCluster","FcsPoint", "FcsInfo",
 /*tofArrayNames    [__NTOFARRAYS__    ]*/                  "TofHit","TofData", "TofRawData",
 /*btofArrayNames   [__NBTOFARRAYS__   ]*/                  "BTofHit","BTofRawHit","BTofHeader", // dongx
 /*etofArrayNames   [__NETOFARRAYS__   ]*/                  "ETofDigi","ETofHit","ETofHeader",   // jdb
@@ -46,7 +46,8 @@ const char** StMuArrays::mcArrayNames = StMuArrays::arrayNames        +__NARRAYS
 const char** StMuArrays::emcArrayNames = StMuArrays::mcArrayNames     +__NMCARRAYS__;
 const char** StMuArrays::pmdArrayNames = StMuArrays::emcArrayNames    +__NEMCARRAYS__;
 const char** StMuArrays::fmsArrayNames = StMuArrays::pmdArrayNames    +__NPMDARRAYS__;
-const char** StMuArrays::tofArrayNames = StMuArrays::fmsArrayNames    +__NFMSARRAYS__;
+const char** StMuArrays::fcsArrayNames = StMuArrays::fmsArrayNames    +__NFMSARRAYS__;
+const char** StMuArrays::tofArrayNames = StMuArrays::fcsArrayNames    +__NFCSARRAYS__;
 const char** StMuArrays::btofArrayNames = StMuArrays::tofArrayNames   +__NTOFARRAYS__;  // dongx
 const char** StMuArrays::etofArrayNames = StMuArrays::btofArrayNames  +__NBTOFARRAYS__; // jdb
 const char** StMuArrays::epdArrayNames  = StMuArrays::etofArrayNames  +__NETOFARRAYS__; // MALisa
@@ -61,7 +62,6 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrim
 					                   "StMuTrack","StMuTrack","StMuTrack","StMuTrack",
 					                   "StRichSpectra","StDetectorState","StL3AlgorithmInfo","StL3AlgorithmInfo",
 							   "StDcaGeometry","StMuPrimaryTrackCovariance","StMuRpsCollection","StMuMtdCollection",
-							   "KFParticle","KFVertex",
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArrayTypes[__NSTRANGEARRAYS__]*/                  "StStrangeEvMuDst","StStrangeEvMuDst",
 							   "StV0MuDst","StV0Mc","StStrangeAssoc",
@@ -71,9 +71,10 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrim
 #endif
 /*mcArrayTypes[__NMCARRAYS__]*/                            "StMuMcVertex","StMuMcTrack",
 /*emcArrayTypes   [__NEMCARRAYS__     ]*/                  "StMuEmcTowerData","StMuEmcHit",
-							   "StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit",
+							                               "StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit",
 /*pmdArrayTypes   [__NPMDARRAYS__     ]*/                  "StMuPmdHit","StMuPmdHit","StMuPmdCluster","StMuPmdCluster",
 /*fmsArrayTypes   [__NFMSARRAYS__     ]*/                  "StMuFmsHit","StMuFmsCluster","StMuFmsPoint","StMuFmsInfo",
+/*fcsArrayTypes   [__NFCSARRAYS__     ]*/                  "StMuFcsHit","StMuFcsCluster","StMuFcsPoint","StMuFcsInfo",
 /*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData","StTofRawData",
 /*btofArrayTypes  [__NBTOFARRAYS__    ]*/                  "StMuBTofHit","StBTofRawHit","StBTofHeader",  // dongx
 /*etofArrayTypes  [__NETOFARRAYS__    ]*/                  "StMuETofDigi","StMuETofHit","StMuETofHeader",  // jdb+fseck
@@ -87,16 +88,17 @@ const char** StMuArrays::mcArrayTypes = StMuArrays::strangeArrayTypes  +__NSTRAN
 #else
 const char** StMuArrays::mcArrayTypes = StMuArrays::arrayTypes         +__NARRAYS__;
 #endif
-const char** StMuArrays::emcArrayTypes = StMuArrays::mcArrayTypes      +__NMCARRAYS__;
-const char** StMuArrays::pmdArrayTypes =  StMuArrays::emcArrayTypes    +__NEMCARRAYS__;
-const char** StMuArrays::fmsArrayTypes =  StMuArrays::pmdArrayTypes    +__NPMDARRAYS__;
-const char** StMuArrays::tofArrayTypes = StMuArrays::fmsArrayTypes     +__NFMSARRAYS__;
+const char** StMuArrays::emcArrayTypes  = StMuArrays::mcArrayTypes     +__NMCARRAYS__;
+const char** StMuArrays::pmdArrayTypes  = StMuArrays::emcArrayTypes    +__NEMCARRAYS__;
+const char** StMuArrays::fmsArrayTypes  = StMuArrays::pmdArrayTypes    +__NPMDARRAYS__;
+const char** StMuArrays::fcsArrayTypes  = StMuArrays::fmsArrayTypes    +__NFMSARRAYS__;
+const char** StMuArrays::tofArrayTypes  = StMuArrays::fcsArrayTypes    +__NFCSARRAYS__;
 const char** StMuArrays::btofArrayTypes = StMuArrays::tofArrayTypes    +__NTOFARRAYS__;  // dongx
 const char** StMuArrays::etofArrayTypes = StMuArrays::btofArrayTypes   +__NBTOFARRAYS__;  // jdb
-const char** StMuArrays::epdArrayTypes = StMuArrays::etofArrayTypes    +__NETOFARRAYS__; // MALisa
-const char** StMuArrays::mtdArrayTypes = StMuArrays::epdArrayTypes     +__NEPDARRAYS__;  // dongx
-const char** StMuArrays::fgtArrayTypes = StMuArrays::mtdArrayTypes     +__NMTDARRAYS__;
-const char** StMuArrays::eztArrayTypes = StMuArrays::fgtArrayTypes     +__NFGTARRAYS__;
+const char** StMuArrays::epdArrayTypes  = StMuArrays::etofArrayTypes   +__NETOFARRAYS__; // MALisa
+const char** StMuArrays::mtdArrayTypes  = StMuArrays::epdArrayTypes    +__NEPDARRAYS__;  // dongx
+const char** StMuArrays::fgtArrayTypes  = StMuArrays::mtdArrayTypes    +__NMTDARRAYS__;
+const char** StMuArrays::eztArrayTypes  = StMuArrays::fgtArrayTypes    +__NFGTARRAYS__;
 
 //		ARRAY SIZES
 //============================================================================================
@@ -111,6 +113,7 @@ int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,10,1000,1000,1000,1
 /*emcArraySizes    [__NEMCARRAYS__    ]*/                  1,1000,1000,1000,1000,1000,1000,
 /*pmdArraySizes    [__NPMDARRAYS__    ]*/                  1000,1000,1000,1000,
 /*fmsArraySizes    [__NFMSARRAYS__    ]*/                  1,1,1,1,
+/*fcsArraySizes    [__NFCSARRAYS__    ]*/                  1,1,1,1,
 /*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200, 1000,
 /*btofArraySizes   [__NBTOFARRAYS__   ]*/                  1000,1000,1,   // dongx
 /*etofArraySizes   [__NETOFARRAYS__   ]*/                  1000,1000,1,   // jdb
@@ -127,7 +130,8 @@ int* StMuArrays::mcArraySizes = StMuArrays::arraySizes         +__NARRAYS__;
 int* StMuArrays::emcArraySizes = StMuArrays::mcArraySizes      +__NMCARRAYS__;
 int* StMuArrays::pmdArraySizes = StMuArrays::emcArraySizes     +__NEMCARRAYS__;
 int* StMuArrays::fmsArraySizes = StMuArrays::pmdArraySizes     +__NPMDARRAYS__;
-int* StMuArrays::tofArraySizes = StMuArrays::fmsArraySizes     +__NFMSARRAYS__;
+int* StMuArrays::fcsArraySizes = StMuArrays::fmsArraySizes     +__NFMSARRAYS__;
+int* StMuArrays::tofArraySizes = StMuArrays::fcsArraySizes     +__NFCSARRAYS__;
 int* StMuArrays::btofArraySizes = StMuArrays::tofArraySizes    +__NTOFARRAYS__;  // dongx
 int* StMuArrays::etofArraySizes = StMuArrays::btofArraySizes   +__NBTOFARRAYS__;  // jdb
 int* StMuArrays::epdArraySizes  = StMuArrays::etofArraySizes   +__NETOFARRAYS__;  // MALisa
@@ -145,6 +149,7 @@ int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,0,0
 /*emcArrayCounters    [__NEMCARRAYS__    ]*/               0,0,0,0,0,0,0,
 /*pmdArrayCounters    [__NPMDARRAYS__    ]*/               0,0,0,0,
 /*fmsArrayCounters    [__NFMSARRAYS__    ]*/               0,0,0,0,
+/*fcsArrayCounters    [__NFCSARRAYS__    ]*/               0,0,0,0,
 /*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0, 0,
 /*btofArrayCounters   [__NBTOFARRAYS__   ]*/               0, 0, 0,      // dongx
 /*etofArrayCounters   [__NETOFARRAYS__   ]*/               0, 0, 0,      // jdb
@@ -163,7 +168,8 @@ int* StMuArrays::mcArrayCounters  = StMuArrays::arrayCounters            +__NARR
 int* StMuArrays::emcArrayCounters = StMuArrays::mcArrayCounters      +__NMCARRAYS__;
 int* StMuArrays::pmdArrayCounters = StMuArrays::emcArrayCounters     +__NEMCARRAYS__;
 int* StMuArrays::fmsArrayCounters = StMuArrays::pmdArrayCounters     +__NPMDARRAYS__;
-int* StMuArrays::tofArrayCounters = StMuArrays::fmsArrayCounters     +__NFMSARRAYS__;
+int* StMuArrays::fcsArrayCounters = StMuArrays::fmsArrayCounters     +__NFMSARRAYS__;
+int* StMuArrays::tofArrayCounters = StMuArrays::fcsArrayCounters     +__NFCSARRAYS__;
 int* StMuArrays::btofArrayCounters = StMuArrays::tofArrayCounters    +__NTOFARRAYS__;  // dongx
 int* StMuArrays::etofArrayCounters = StMuArrays::btofArrayCounters   +__NBTOFARRAYS__;  // jdb
 int* StMuArrays::epdArrayCounters = StMuArrays::etofArrayCounters    +__NETOFARRAYS__;  // MALisa
@@ -176,10 +182,10 @@ StMuArrays::StMuArrays()
 {
 #ifndef __NO_STRANGE_MUDST__
   int i = strangeArrayNames-arrayNames-__NARRAYS__;
-  //  printf("strangeArrayNames-arrayNames-__NARRAYS__ = %d\n",i);
+  printf("strangeArrayNames-arrayNames-__NARRAYS__ = %d\n",i);
 #else
   int i = mcArrayNames-arrayNames-__NARRAYS__;
-  //  printf("mcArrayNames-arrayNames-__NARRAYS__ = %d\n",i);
+  printf("mcArrayNames-arrayNames-__NARRAYS__ = %d\n",i);
 #endif
   assert(i==0);
 }
@@ -212,8 +218,8 @@ StMuArrays::StMuArrays()
  * Revision 1.31  2013/07/23 11:02:59  jeromel
  * Undo changes (KF and other)
  *
- * Revision 1.28  2013/04/08 18:07:54  fisyak
- * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks
+ * Revision 1.29  2013/04/10 19:28:35  jeromel
+ * Step back to 04/04 version (van aware) - previous changes may be recoverred
  *
  * Revision 1.27  2013/01/08 22:57:33  sangalin
  * Merged in FGT changes allowing for a variable number of timebins to be read out for each strip.
