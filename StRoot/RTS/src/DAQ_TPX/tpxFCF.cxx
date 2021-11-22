@@ -656,7 +656,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 	if(tpx_padplane) gain = 0 ;	// force it!
 
-	LOG(WARN,"apply_gains???") ;
+	LOG(WARN,"apply_gains, sec %d",sec) ;
 
 	if(gain == 0) {
 		LOG(WARN,"Sector %2d, gains NULL",sector) ;

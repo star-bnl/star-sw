@@ -83,9 +83,10 @@ public:
 
 	
 
-	u_int mhz_start_evt_marker ;
+	unsigned long mhz_start_evt_marker ;
 	u_int mhz_stop_evt_marker ;
-	u_int mhz_trg_marker ;
+	unsigned long mhz_trg_marker ;
+	u_short trg_counter ;
 
 	struct stgc_vmm_t vmm ;
 

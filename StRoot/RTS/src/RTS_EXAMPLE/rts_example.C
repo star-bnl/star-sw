@@ -265,7 +265,8 @@ int main(int argc, char *argv[])
 		
 		if(print_det[0]) {
 		    if(strcmp(print_det, "tinfo") == 0) {		    
-			tinfo_doer(evp, "tinfo");
+			int ret = tinfo_doer(evp, "tinfo");
+			if(ret) LOG(INFO,"Trigger Info FOUND") ;
 		    }
 		}
 
@@ -1555,7 +1556,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 
 		if(do_print) {
-			printf("%s ADC: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
+			printf("EVT %d: %s ADC: RDO %d, ARM %d, APV %d: %d values\n",good,d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
 				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
@@ -1632,7 +1633,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 			printf("%s ZS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
-				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
+				printf(" %5d: ch %3d, tb %d = %3d (flags %d)\n",i,f[i].ch,f[i].tb,f[i].adc,f[i].flags) ;
 			}
 		}
 	}
@@ -2727,7 +2728,12 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 					u_int flags = d16[i] >> 12 ;
 					u_int data = d16[i] & 0xFFF ;
 
-					printf(" %5d = 0x%X = %4u\n",i,flags,data) ;
+					if(det!=3) {	// main
+						printf(" %5d = 0x%X = %4u\n",i,flags,data) ;
+					}
+					else {
+						printf(" %5d = 0x%X = 0x%04X\n",i,flags,data) ;
+					}
 				}
 			}
 
@@ -2778,7 +2784,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
 
 	if(raw_found || zs_found || ped_found) {
-		LOG(INFO,"FCS found [%s]",fstr) ;
+		LOG(INFO,"FCS found: %s",fstr) ;
 	}
 
 	return raw_found ;
