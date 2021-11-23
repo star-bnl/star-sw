@@ -7,11 +7,9 @@
 #include <stdio.h> 
 #include <string.h> 
 
-typedef unsigned char uchar;
-
 class EEdsm0  {
   enum {nw=16,nc=10,mxTh=3,mxOu=2};
-  uchar data[nw];
+  unsigned char data[nw];
   short value[nc]; // unpacked 12bit input values
   int type;
   int mYear;// HTTP algo added in 2006
@@ -34,7 +32,7 @@ class EEdsm0  {
   void  unpack(); // 16 inputs --> 10 values
 
   //.... input
-  void  setBite(int b, uchar val); // from trigger data block
+  void  setBite(int b, unsigned char val); // from trigger data block
   void  setInp12bit(int ch, short val); // HT+TPsum from one FEE TP  
   int   getInp12bit(int ch) const; // HT+TPsum from one FEE TP  
   int   getInpHT6bit(int ch) const { return  getInp12bit(ch) & 0x3f;} 
