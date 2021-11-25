@@ -6,9 +6,9 @@ The list of stable releases can be found TFG_Releases.md
 
 <h2>How to use  TFG release </h2>
 <ul>
-<li> starver .DEV2
-<li> source $STAR/setupDEV2.csh
-<li> starver _desired_TFG_version__, from TFG16a  to TFG21n, .DEV2 == TFG is check out HEAD from TFG repository, it could be unstable.
+<li>  <b>starver .DEV2</b>
+<li>  <b>source $STAR/setupDEV2.csh</b>
+<li>  <b>starver _desired_TFG_version__</b>, from TFG16a  to TFG21n, .DEV2 == TFG is check out HEAD from TFG repository, it could be unstable.
 </ul>
 <p>
 In order to swithc back to the "official" STAR software do: <b>source unsetupDEV2.csh</b>
@@ -23,7 +23,7 @@ Unix.*.Root.MacroPath:      :$HOME/macros:$STAR/macros:$(ROOTSYS)/macros:./StRoo
 /macros/html:$(STAR)/StRoot/macros/qa:$(STAR)/StRoot/macros/mudst:$(STAR)/StRoot/macros/calib:./StRoot/macros/embedding:$(STAR)/StRoot/macros/embedding:$(ROOTSYS)/macros:$ROOTSYS/tutorials:$(ROOTROOT)/root/tmva/test
 
 or just copy 
-cp ~fisyak/.rootrc_noqt ~/.rootrc
+<b>cp ~fisyak/.rootrc_noqt ~/.rootrc</b>
 
 <h2>
 A tutorial : How to use  KFParticle for analysis can be found at 
