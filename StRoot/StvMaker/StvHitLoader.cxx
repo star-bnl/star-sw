@@ -226,7 +226,7 @@ static int knt=0;knt++;
        if (tk->GetHA(x)<1./1000) seed = 0;
    } }
 //VP   if (mStvHit->IsCombo()) seed = 0;
-   hard *= (uint)kMaxDetectorId; hard+=(uint)did;
+   hard *= (unsigned int)kMaxDetectorId; hard+=(unsigned int)did;
    
    const StHitPlane *hp = tgh->AddHit(mStvHit,mDetId,xyz,hard,seed);
    sure =  tgh->IsGoodHit();

@@ -35,6 +35,5 @@ rtsLog: rtsLog.o rtsLogUnix.o
 # DO NOT DELETE
 
 logTest.o: ../../../../StRoot/RTS/include/rtsLog.h
-rtsLog2.o: ../../../../StRoot/RTS/include/rtsLog.h
 rtsLog.o: ../../../../StRoot/RTS/include/rtsLog.h
 rtsLogUnix.o: ../../../../StRoot/RTS/include/rtsLog.h

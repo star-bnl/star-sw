@@ -354,6 +354,21 @@ unsigned int StTriggerData2019::bunchId7Bit() const
     return b7;
 }
 
+unsigned int StTriggerData2019::revTick1() const
+{
+  return L1_DSM->BCdata[1] & 0x1;
+}
+
+unsigned int StTriggerData2019::revTick2() const
+{
+  return L1_DSM->BCdata[12] & 0x1;
+}
+
+unsigned int StTriggerData2019::revTick3() const
+{
+  return (L1_DSM->lastDSM[4] >> 3) & 0x1;
+}
+
 unsigned int StTriggerData2019::spinBit() const
 {
     return (L1_DSM->lastDSM[4]/16)%256;
