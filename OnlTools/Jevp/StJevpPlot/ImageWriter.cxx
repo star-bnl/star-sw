@@ -164,7 +164,6 @@ void ImageWriter::loop() {
 	    }
 
 	    if(nHisto > 0) {
-		nHisto = 0;
 		char o[256];
 		char d[256];
 		strcpy(o, slot.name);
@@ -172,7 +171,7 @@ void ImageWriter::loop() {
 		sprintf(d, "/tmp/%s_done_%08d", slot.name, slot.writeIdx);
 
 		LOG("JEFF", "Saved %d plots in %lf seconds: %s. Now copy to %s", nHisto, imageClock.record_time(), o, d);
-
+		nHisto = 0;
 		rename(o, d);
 
 		LOG("JEFF", "renamed plots in %lf seconds: %s to %s", imageClock.record_time(), o, d);
