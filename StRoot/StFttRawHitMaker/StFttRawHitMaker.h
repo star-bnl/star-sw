@@ -15,18 +15,10 @@
 
 #include <vector>
 
-#ifndef __CINT__
-// copied from RTS ... trying to include directly fails
-struct stgc_vmm_t {
-    u_char feb_vmm ;    
-    u_char ch ;
-    u_short adc ;
-    u_short bcid ;
-    short tb ;  // from the trigger
-} ;
-#endif
 #ifdef __CINT__
 struct stgc_vmm_t;
+#else
+#include <RTS/src/DAQ_STGC/daq_stgc.h>
 #endif
 
 class StEvent;
@@ -36,7 +28,6 @@ class StFttRawHitMaker: public StRTSBaseMaker {
 
 public:
     StFttRawHitMaker( const char* name = "stgc" );
-    ~StFttRawHitMaker();
 
     Int_t  Init();
     Int_t  InitRun( Int_t );

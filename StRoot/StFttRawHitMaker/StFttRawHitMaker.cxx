@@ -36,8 +36,6 @@ StFttRawHitMaker::StFttRawHitMaker( const char* name )
   mDebug( false )       /// print out of all full messages for debugging
 { /* no op */ }
 
-//_____________________________________________________________
-StFttRawHitMaker::~StFttRawHitMaker() {  /* no op */ }
 
 //_____________________________________________________________
 Int_t
