@@ -117,27 +117,10 @@ Bfc_st BFC[] = { // standard chains
   {"Test.default.y2005i.ITTF","","","Test.default.ITTF,sdt20050130,noSimuDb"              ,"","","",kFALSE},
   {"Test.default.y2007g.ITTF","","","Test.default.ITTF,sdt20070322,noSimuDb"              ,"","","",kFALSE},
   {"Test.fast.y2005i.ITTF","","","Test.fast.ITTF,sdt20050130,noSimuDb"                    ,"","","",kFALSE},
-  {"Test.reco.StiVMC","","","MakeEvent,tpcI,tcl,ftpc,SvtCL,Test.StiVMC"                   ,"","","",kFALSE},
-  {"Test.default.StiVMC","","","TpcRS,Simu,sss,svt,ssd,fss,bbcSim,IdTruth,MakeEvent,"
-   "miniMcMk,McAna,Test.reco.StiVMC,CMuDst"                                               ,"","","",kFALSE},
-  {"Test.StiVMC","","","TpcRS,StiVMC,event,analysis,tags,EvOut,StarMagField,FieldOn,Idst,CMuDst"
-   ,                                                                                       "","","",kFALSE},
-  {"Test.VeryFast.StiVMC","","","TpcFastSim,Simu,sfs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,"
-   "SvtCL,tpc_T,globT,tls,db,tpcDB,svtDb,svtIT,ssdIT,StiVMC,Idst,event,analysis,EventQA,tags,"
-   "EvOut,StarMagField,FieldOn,IAna,CMuDst"                                               ,"","","",kFALSE},
-  {"Test.fast.StiVMC","","","tfs,Simu,sfs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,SvtCL,"
-   "tpc_T,globT,tls,db,tpcDB,svtDb,StiVMC,Idst,event,analysis,EventQA,tags,EvOut,"
-   "StarMagField,FieldOn,IAna,CMuDst"                                                     ,"","","",kFALSE},
   {"Test.fast.y2007g.ITTF","","","Test.fast.ITTF,sdt20070322,noSimuDb"                    ,"","","",kFALSE},
   {"Test.VeryFast.y2005i.ITTF","","","Test.VeryFast.ITTF,sdt20050130,noSimuDb"            ,"","","",kFALSE},
   {"Test.VeryFast.y2007g.ITTF","","","Test.VeryFast.ITTF,sdt20070322,noSimuDb"            ,"","","",kFALSE},
-  {"Test.default.StiVMC","","","TpcRS,Simu,sss,svt,ssd,fss,bbcSim,IdTruth,MakeEvent,"
-   "miniMcMk,McAna,Test.reco.ITTF,CMuDst"                                                 ,"","","",kFALSE},
   {"Test.y2009.ITTF","","","Test.default.ITTF,y2009,TpcRS,sdt20090428.141700"             ,"","","",kFALSE},
-  {"Test.y2009.StiVMC","","","Test.default.StiVMC,y2009,TpcRS,sdt20090428.141700,noSimuDb","","","",kFALSE},
-  {"Test.fast.y2005i.StiVMC","","","Test.fast.StiVMC,sdt20050130,noSimuDb"                ,"","","",kFALSE},
-  {"Test.VeryFast.y2005i.StiVMC","","","Test.VeryFast.StiVMC,sdt20050130,noSimuDb"        ,"","","",kFALSE},
-  {"Test.VeryFast.y2007g.StiVMC","","","Test.VeryFast.StiVMC,sdt20070322,noSimuDb"        ,"","","",kFALSE},
   {"Test.default.Fast.ITTF","","","tfs,sfs,ssdFast,IdTruth,MakeEvent,miniMcMk,Test.ITTF",  "","","",kFALSE},
   {"Test.srs.ITTF","","",   "TpcRS,Simu,spcrs,svt,ssd,fss,bbcSim,emcY2,McEvOut,GeantOut,IdTruth,"
    "miniMcMk,McAna,Test.reco.ITTF,CMuDst"                                                 ,"","","",kFALSE},
@@ -1961,9 +1944,6 @@ Bfc_st BFC[] = { // standard chains
    ,"StvMaker","libHist,libHistPainter,libVMC,geant3,GeoTestMaker,StvUtil,Stv,StvSeed,StvMaker,StEventUtilities,"
    ,"Stv"                                                                                          ,kFALSE},
   {"StvCA"    ,"StvCA","","Stv","",""                                                      ,"StvCA",kFALSE},
-  {"StiVMC"   ,"StiVMC","","-Sti,SCL,stu,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
-   ,                                                       "StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
-  {"StiVMCLibs","","","detDb,StarMagField","",                      "","ITTF:load StiVMC libraries",kFALSE},
   {"laserIT"  ,"","","","",                              "TpcIT","use Sti for laser reconstruction",kFALSE},
   {"TpcIT"    ,"","","ITTF"                                              ,"","","Sti tracking: TPC",kFALSE},
   {"SvtIT"    ,"","","ITTF"                                              ,"","","Sti tracking: SVT",kFALSE},
