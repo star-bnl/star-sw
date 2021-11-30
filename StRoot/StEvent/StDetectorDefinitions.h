@@ -159,6 +159,10 @@
 ** Epd
 */
 #define kEpdIdentifier                44
+ ** Add the sTGC (Ftt)
+ */
+
+#define kFttIdentifier                45
 
 /*
 **  The following are more or less virtual detectors.

@@ -154,6 +154,9 @@ class StFcsCluster;
 class StFcsHit;
 class StFcsPoint;
 class StFtsStgcHit;
+class StFttRawHit;
+class StFttCluster;
+class StFttPoint;
 class StFgtHit;
 class StFgtPoint;
 class StFgtStrip;
@@ -225,6 +228,12 @@ StCollectionDef(EmcPoint)
 StCollectionDef(EmcRawHit)
 StCollectionDef(EpdHit)    // MAL
 StCollectionDef(EtrHit)
+StCollectionDef(FcsCluster)
+StCollectionDef(FcsHit)
+StCollectionDef(FcsPoint)
+StCollectionDef(FttRawHit)
+StCollectionDef(FttCluster)
+StCollectionDef(FttPoint)
 StCollectionDef(FgtHit)
 StCollectionDef(FgtPoint)
 StCollectionDef(FgtStrip)
