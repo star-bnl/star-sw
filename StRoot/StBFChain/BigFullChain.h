@@ -1284,7 +1284,7 @@ Bfc_st BFC[] = { // standard chains
    "","",                                                      "Base chain for run 2022 data (tpc)",kFALSE},
 
   {"P2022","" ,"",
-   "B2022,ITTF,VFMinuit,etofa,btof,gmt,mtd,emcDY2,epdHit,trgd,ZDCvtx,BAna",
+   "B2022,ITTF,VFMinuit,etofa,btof,gmt,mtd,emcDY2,epdHit,trgd,ZDCvtx,BAna"
    ,            "","", "Base chain for year 2022 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
   {"B2022a" ,"","",
    "ry2022a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
@@ -1884,14 +1884,9 @@ Bfc_st BFC[] = { // standard chains
    "StFmsPointMaker","StFmsPointMaker","Fill FMS clusters and points",                              kFALSE},
   {"fmsfps"   ,"","", "event,fmsDb",
    "StFmsFpsMaker","StFmsFpsMaker","Fill FPS association in FMS points",                            kFALSE},
-<<<<<<< HEAD
-  // FCS                              
-  {"fcsSim",""    ,"","StEvent,fcsDb",
-=======
   // FCS
   {"fcs","fcsChain","","fcsDat,fcsWFF,fcsCluster,fcsPoint",         "StMaker","StChain","FCS chain",kFALSE},
   {"fcsSim",""    ,"fcsChain","StEvent,fcsDb",
->>>>>>> upstream/main
    "StFcsFastSimulatorMaker","StFcsFastSimulatorMaker","FCS Fast Simulator",                        kFALSE},
   {"fcsDat",""    ,"fcsChain","StEvent,fcsDb",
    "StFcsRawHitMaker","StFcsRawHitMaker","FCS daq file reader/hit maker",                           kFALSE},
@@ -1901,13 +1896,9 @@ Bfc_st BFC[] = { // standard chains
    "StFcsClusterMaker","StFcsClusterMaker","Fill FCS clusters",                                     kFALSE},
   {"fcsPoint"   ,"","fcsChain", "StEvent,fcsDb",
    "StFcsPointMaker","StFcsPointMaker,libMinuit","Fill FCS points",                                 kFALSE},
-<<<<<<< HEAD
-=======
   // FTT
   {"FttDat","","","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent",
                                                             "sTGC Raw hit maker",                   kFALSE},
-#if 0
->>>>>>> upstream/main
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
   // FGT
   {"fgt"        ,"FgtChain","","fgtDat,fgtClu,fgtAtoC"        ,"StMaker","StChain","Fgt data Chain",kFALSE},

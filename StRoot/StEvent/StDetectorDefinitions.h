@@ -159,8 +159,9 @@
 ** Epd
 */
 #define kEpdIdentifier                44
- ** Add the sTGC (Ftt)
- */
+/*
+** Add the sTGC (Ftt)
+*/
 
 #define kFttIdentifier                45
 
