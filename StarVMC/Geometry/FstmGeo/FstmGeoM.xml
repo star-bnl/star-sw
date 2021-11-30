@@ -147,8 +147,8 @@ to avoid interference. This is equivalent to rotate the middle ring by 180 deg a
 	  ioTubeLength/0.835/ 	<!-- Has to keep spacing -->
 	</varlist>
 
-
-
+        <varlist type="float">codeversion/1.1/ </varlist>
+   
         <!-- ////////////////////////////////////////////////////////////////////////////
                 Declare structures
         -->
@@ -819,7 +819,9 @@ to avoid interference. This is equivalent to rotate the middle ring by 180 deg a
         -->
 	zcenter = mothervol_z+mothervol_dz
         <Create    block="FSTM" />
-        <Placement block="FSTM" in="CAVE" x="0.0" y="0.0" z="zcenter" />
+        <Placement block="FSTM" in="CAVE" x="0.0" y="0.0" z="zcenter" >
+            <Misalign table="Geometry/fst/fstOnTpc" row="0"/>
+        </Placement>
 
         <!-- FST mother container -->
         <Volume name="FSTM" comment="FST mother">
@@ -831,85 +833,76 @@ to avoid interference. This is equivalent to rotate the middle ring by 180 deg a
             <!-- Shape should be sized to include all disks placed -->
             <Shape     type="TUBE" rmin="4.8" rmax="mothervol_rmax" dz="mothervol_dz" />
 
-            <!--<Create    block="FSTD" />
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(1)-zcenter" ncopy="4" />
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(2)-zcenter" ncopy="5" >
-	            <Rotation alphaz="30"/>
-	        </Placement>
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(3)-zcenter" ncopy="6" />
-            -->
-            <!-- Placing wedges in the mother volume --> 
-        <Create block="FSTW" />
-        <Create block="FTUS" />
-        <Create block="FTUO" />
+            <Create block="FSTW" />
+            <Create block="FTUS" />
+            <Create block="FTUO" />
             <For var="idisk" from="0" to="2">
                 <For var="iwedgem" from="0" to="11">
                    
-                   wedge_motherz = mothervol_zdisk(idisk+1)-zcenter+wholewedge_dz
-                   inner_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter+innersilicon_z
-                   outer_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter+outersilicon_z
-                   wedge_xrot = 0.0
-                   ringmotherz = mothervol_zdisk(idisk+1)-zcenter-ring_dz
+                    wedge_motherz = mothervol_zdisk(idisk+1)-zcenter+wholewedge_dz
+                    inner_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter+innersilicon_z
+                    outer_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter+outersilicon_z
+                    wedge_xrot = 0.0
+                    ringmotherz = mothervol_zdisk(idisk+1)-zcenter-ring_dz
 
-                   <If expr="idisk.ne.1">
-                   <If expr="wholewedge_modulus2(iwedgem+1).eq.0">
-                        wedge_motherz = mothervol_zdisk(idisk+1)-zcenter-wholewedge_dz
-                        inner_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-innersilicon_z
-                        outer_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-outersilicon_z
-                        wedge_xrot = 180.0
-                        ringmotherz = mothervol_zdisk(idisk+1)-zcenter+ring_dz
-                    </If>
+                    <If expr="idisk.ne.1">
+                        <If expr="wholewedge_modulus2(iwedgem+1).eq.0">
+                            wedge_motherz = mothervol_zdisk(idisk+1)-zcenter-wholewedge_dz
+                            inner_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-innersilicon_z
+                            outer_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-outersilicon_z
+                            wedge_xrot = 180.0
+                            ringmotherz = mothervol_zdisk(idisk+1)-zcenter+ring_dz
+                        </If>
                     </If>
                     <If expr="idisk.eq.1">
-                    <If expr="wholewedge_modulus2(iwedgem+1).eq.1">
-                        wedge_motherz = mothervol_zdisk(idisk+1)-zcenter-wholewedge_dz
-                        inner_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-innersilicon_z
-                        outer_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-outersilicon_z
-                        wedge_xrot = 180.0
-                        ringmotherz = mothervol_zdisk(idisk+1)-zcenter+ring_dz
-                    </If>
+                        <If expr="wholewedge_modulus2(iwedgem+1).eq.1">
+                            wedge_motherz = mothervol_zdisk(idisk+1)-zcenter-wholewedge_dz
+                            inner_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-innersilicon_z
+                            outer_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-outersilicon_z
+                            wedge_xrot = 180.0
+                            ringmotherz = mothervol_zdisk(idisk+1)-zcenter+ring_dz
+                        </If>
                     </If>
                  
                     wedge_zrot = 75.0-30.0*iwedgem
-                    <If expr="wedge_zrot.le.0">
+                    <!--If expr="wedge_zrot.le.0">
                         wedge_zrot = 360.0+wedge_zrot
-                    </If>
+                    </If-->
 
                     halfid = 0
-                    <If expr="iwedge.ge.5">
+                    <If expr="iwedgem.ge.5">
                         halfid = 1
                     </If>
-                    
-
                                        
                     <Placement block="FSTW" in="FSTM" x="0" y="0" z="wedge_motherz" konly="MANY" ncopy="1+iwedgem+12*idisk" >
                         <Rotation alphax="wedge_xrot"/>
                         <Rotation alphaz="wedge_zrot"/>
-                        <Misalign table="Geometry/fst/wedgeInFstHalf"    row="iwedgem+12*idisk" />
-                        <Misalign table="Geometry/fst/fstHalfInMother"   row="halfid" />
+                        <Misalign table="Geometry/fst/fstWedgeOnHss"  row="iwedgem+12*idisk" />
+                        <Misalign table="Geometry/fst/hssOnFst"       row="halfid" />
                     </Placement>
 
                     <Placement block="FTUS" in="FSTM" x="0" y="0" z="inner_silicon_motherz" rmin="innersilicon_rmin" phi1="innersilicon_phi1" rmax="innersilicon_rmax" phi2="innersilicon_phi2"    dz="innersilicon_dz" konly="ONLY" ncopy="1+3*iwedgem+36*idisk" >
                         <Rotation alphax="wedge_xrot"/>
                         <Rotation alphaz="wedge_zrot"/>
-                        <Misalign table="Geometry/fst/siliconInWedge"    row="3*iwedgem+36*idisk" />
-                        <Misalign table="Geometry/fst/wedgeInFstHalf"    row="iwedgem+12*idisk" />
-                        <Misalign table="Geometry/fst/fstHalfInMother"   row="halfid" />
+                        <Misalign table="Geometry/fst/fstSensorOnWedge"  row="3*iwedgem+36*idisk" />
+                        <Misalign table="Geometry/fst/fstWedgeOnHss"     row="iwedgem+12*idisk" />
+                        <Misalign table="Geometry/fst/hssOnFst"          row="halfid" />
                     </Placement>
    
                     <Placement block="FTUS" in="FSTM" x="0" y="0" z="outer_silicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" konly="ONLY" ncopy="2+3*iwedgem+36*idisk" >
                         <Rotation alphax="wedge_xrot"/>
                         <Rotation alphaz="wedge_zrot"/>
-                        <Misalign table="Geometry/fst/siliconInWedge"    row="1+3*iwedgem+36*idisk" />
-                        <Misalign table="Geometry/fst/wedgeInFstHalf"    row="iwedgem+12*idisk" />
-                        <Misalign table="Geometry/fst/fstHalfInMother"   row="halfid" />
+                        <Misalign table="Geometry/fst/fstSensorOnWedge"  row="1+3*iwedgem+36*idisk" />
+                        <Misalign table="Geometry/fst/fstWedgeOnHss"     row="iwedgem+12*idisk" />
+                        <Misalign table="Geometry/fst/hssOnFst"          row="halfid" />
+ 
                     </Placement>
                     <Placement block="FTUS" in="FSTM" x="0" y="0" z="outer_silicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" konly="ONLY" ncopy="3+3*iwedgem+36*idisk" >
                         <Rotation alphax="wedge_xrot"/>
                         <Rotation alphaz="wedge_zrot"/>
-                        <Misalign table="Geometry/fst/siliconInWedge"    row="2+3*iwedgem+36*idisk" /> 
-                        <Misalign table="Geometry/fst/wedgeInFstHalf"    row="iwedgem+12*idisk" />
-                        <Misalign table="Geometry/fst/fstHalfInMother"   row="halfid" />
+                        <Misalign table="Geometry/fst/fstSensorOnWedge"  row="2+3*iwedgem+36*idisk" />
+                        <Misalign table="Geometry/fst/fstWedgeOnHss"     row="iwedgem+12*idisk" />
+                        <Misalign table="Geometry/fst/hssOnFst"          row="halfid" />
                     </Placement>
 
                     <Placement block="FTUO" in="FSTM" x="0" y="0" z="ringmotherz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="ring_dz" >
@@ -924,93 +917,7 @@ to avoid interference. This is equivalent to rotate the middle ring by 180 deg a
 
                 </For>
             </For>
-
-            
- 
-        </Volume>
-
-        <!-- Placing wedges in the mother volume (first draft)--> 
-        <!--Create block="FSTW" />
-        <Create block="FTUS" />
-            <For var="idisk" from="0" to="2">
-                <For var="iwedgem" from="0" to="5">
-                    normal_wedge_motherz = mothervol_zdisk(idisk+1)-zcenter-wholewedge_dz
-                    normal_innersilicon_motherz = mothervol_zdisk(idisk+1)-zcenter-wholewedge_dz-wholewedge_dz+innersilicon_z
-                    normal_outersilicon_motherz = mothervol_zdisk(idisk+1)-zcenter-wholewedge_dz-wholewedge_dz+outersilicon_z
-                 
-                    xflipped_wedge_motherz = mothervol_zdisk(idisk+1)-zcenter+wholewedge_dz
-                    xflipped_innersilicon_motherz = mothervol_zdisk(idisk+1)-zcenter+wholewedge_dz+wholewedge_dz+innersilicon_z
-                    xflipped_outersilicon_motherz = mothervol_zdisk(idisk+1)-zcenter+wholewedge_dz+wholewedge_dz+outersilicon_z
-                     
-                    <If expr="idisk.ne.1"> 
-                        <Placement block="FSTW" in="FSTM" x="0" y="0" z="xflipped_wedge_motherz" ncopy="2*iwedgem+12*idisk" >
-                            <Rotation alphax="180"/>
-                            <Rotation alphaz="15+30*2*iwedgem"/>
-                        </Placement>
-                        <Placement block="FSTW" in="FSTM" x="0" y="0" z="normal_wedge_motherz" ncopy="2*iwedgem+1+12*idisk" >
-                            <Rotation alphaz="15+30*(2*iwedgem+1)"/>
-                        </Placement>
-
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="xflipped_outersilicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" ncopy="2*iwedgem+12*idisk" >
-                            <Rotation alphax="180"/>
-                            <Rotation alphaz="15+30*2*iwedgem"/>
-                        </Placement>
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="xflipped_outersilicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" ncopy="2*iwedgem+12*idisk" >
-                            <Rotation alphax="180"/>
-                            <Rotation alphaz="15+30*2*iwedgem"/>
-                        </Placement>
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="xflipped_innersilicon_motherz" rmin="innersilicon_rmin" phi1="innersilicon_phi1"    rmax="innersilicon_rmax" phi2="innersilicon_phi2"    dz="innersilicon_dz" ncopy="2*iwedgem+12*idisk" >
-                            <Rotation alphax="180"/>
-                            <Rotation alphaz="15+30*2*iwedgem"/>
-                        </Placement>
-                  
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="normal_outersilicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" ncopy="2*iwedgem+1+12*idisk" >
-                            <Rotation alphaz="15+30*(2*iwedgem+1)"/>
-                        </Placement>
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="normal_outersilicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" ncopy="2*iwedgem+1+12*idisk" >
-                            <Rotation alphaz="15+30*(2*iwedgem+1)"/>
-                        </Placement>
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="normal_innersilicon_motherz" rmin="innersilicon_rmin" phi1="innersilicon_phi1"    rmax="innersilicon_rmax" phi2="innersilicon_phi2"    dz="innersilicon_dz" ncopy="2*iwedgem+1+12*idisk" >
-                            <Rotation alphaz="15+30*(2*iwedgem+1)"/>
-                        </Placement>
-                    </If>
-                   
-                    <If expr="idisk.eq.1">
-                        <Placement block="FSTW" in="FSTM" x="0" y="0" z="normal_wedge_motherz" ncopy="2*iwedgem+12*idisk" >
-                            <Rotation alphaz="15+30*2*iwedgem"/>
-                        </Placement>
-                        <Placement block="FSTW" in="FSTM" x="0" y="0" z="xflipped_wedge_motherz" ncopy="2*iwedgem+1+12*idisk" >
-                            <Rotation alphax="180"/>
-                            <Rotation alphaz="15+30*(2*iwedgem+1)"/>
-                        </Placement>
-
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="normal_outersilicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" ncopy="2*iwedgem+12*idisk" >
-                            <Rotation alphaz="15+30*2*iwedgem"/>
-                        </Placement>
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="normal_outersilicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" ncopy="2*iwedgem+12*idisk" >
-                            <Rotation alphaz="15+30*2*iwedgem"/>
-                        </Placement>
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="normal_innersilicon_motherz" rmin="innersilicon_rmin" phi1="innersilicon_phi1"    rmax="innersilicon_rmax" phi2="innersilicon_phi2"    dz="innersilicon_dz" ncopy="2*iwedgem+12*idisk" >
-                            <Rotation alphaz="15+30*2*iwedgem"/>
-                        </Placement>
-
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="xflipped_outersilicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" ncopy="2*iwedgem+12*idisk" >
-                            <Rotation alphax="180"/>
-                            <Rotation alphaz="15+30*(2*iwedgem+1)"/>
-                        </Placement>
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="xflipped_outersilicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" ncopy="2*iwedgem+12*idisk" >
-                            <Rotation alphax="180"/>
-                            <Rotation alphaz="15+30*(2*iwedgem+1)"/>
-                        </Placement>
-                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="xflipped_innersilicon_motherz" rmin="innersilicon_rmin" phi1="innersilicon_phi1"    rmax="innersilicon_rmax" phi2="innersilicon_phi2"    dz="innersilicon_dz" ncopy="2*iwedgem+12*idisk" >
-                            <Rotation alphax="180"/>
-                            <Rotation alphaz="15+30*(2*iwedgem+1)"/>
-                        </Placement>      
-                    </If>
-                </For>
-            </For>
--->
-        
+        </Volume>        
 
         <!-- Whole wedge container -->
         <Volume name="FSTW" comment="Whole wedge container" assembly="true" >

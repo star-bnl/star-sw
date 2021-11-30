@@ -3,7 +3,7 @@
   <Detector name="FSTM" comment="Forward Silicon Tracker"> 
  
 
-    <Modules>FstmGeo, FstmGeoS, FstmGeoM</Modules>
+    <Modules>FstmGeo, FstmGeoS, FstmGeoM, FstmGeoSM</Modules>
     
     <Setup  name  = "FSTMof" comment="No FSTM" module="FstmGeo" onoff="off" />
 
@@ -38,6 +38,15 @@
     <Setup  name   = "FSTMv1m"
             comment= "Misaligned configuration for the Forward Silicon Tracker"
             module = "FstmGeoM" 
+            onoff  = "on"
+            simu   = "2"
+            >
+
+    </Setup>
+
+    <Setup  name   = "FSTMv1sm"
+            comment= "Misaligned Simplified configuration for the Forward Silicon Tracker"
+            module = "FstmGeoSM" 
             onoff  = "on"
             simu   = "2"
             >

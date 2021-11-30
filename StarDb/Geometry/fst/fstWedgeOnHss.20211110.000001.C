@@ -1,7 +1,7 @@
 TDataSet *CreateTable() {
     if (!TClass::GetClass("St_Survey")) return 0;
 Survey_st row;
-St_Survey *tableSet = new St_Survey("wedgeInFstHalf",36);
+St_Survey *tableSet = new St_Survey("fstWedgeOnHss",36);
 //
 for(int i = 0; i < 36; i++){
     memset(&row,0,tableSet->GetRowSize());

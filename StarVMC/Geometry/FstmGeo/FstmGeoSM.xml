@@ -1,4 +1,4 @@
-<Document file="StarVMC/Geometry/FstmGeo/FstmGeoS.xml">
+<Document file="StarVMC/Geometry/FstmGeo/FstmGeoSM.xml">
 
 <!--
 This is the file meant to a simplified version of ideal geometry.
@@ -26,18 +26,17 @@ It was copied from FstmGeo.xml on June 15. 2021
     <Replace match="MeV">*1.0E-3;</Replace>
     <Replace match="keV">*1.0E-6;</Replace>
 
-    <Module name="FstmGeoS" comment="Forward Silicon Tracker (Simplified geometry)">
+    <Module name="FstmGeoSM" comment="Forward Silicon Tracker (Simplified Misaligned geometry)">
         <Author name="Te-Chuan Huang, Flemming Videbaek, Gavin Wilks "/>
         <Created date="09 March, 2020"/>
         <CDE>AGECOM,GCONST,GCUNIT</CDE>
         <Content>
             FSTM,   <!-- mother volume of FST, a disk -->
-            FSTD,   <!-- FST disk container -->
+            <!--FSTD,-->   <!-- FST disk container -->
             FSTW,   <!-- Whole wedge container -->
 
             FTUO,   <!-- Tube segment for FST half ring outside wedge container -->
-            FTUR,   <!-- Tube segment for FST half ring inside wedge container -->
-            <!--FSIR,-->   <!-- Inner support Ring -->
+            FTUR,   <!-- Tube segment for FST half ring inside wedge container --> 
 
             FTRO,   <!-- Trapizoid for FST mechanical strucutre (wedge) -->
             FSWT,   <!-- Tube for the FST support tubes between inner and outer -->
@@ -72,18 +71,30 @@ It was copied from FstmGeo.xml on June 15. 2021
    Declare varlists
         -->
         <varlist type="int">
-            iwedge/0/, irib/0/, itube/0/, ichip/0/
+          iwedge/0/, irib/0/, itube/0/, ichip/0/, idisk/0/, iwedgem/0/
+        </varlist>
+             
+        <varlist type="float" comment="position of mothervolume and other general offsets">
+          zcenter/0/, oapvz, obase2, ibase1, ibase2, iapvz, ibaseAB, zcool
         </varlist>
 
-        <varlist type="float" comment="position of mothervolume and other general offsets">
-          zcenter/0/ , oapvz, obase2, ibase1, ibase2, iapvz, ibaseAB, zcool
+        <varlist type="float" comment="position of silicon in mother volume">
+          inner_silicon_motherz/0/, outer_silicon_motherz/0/
+        </varlist>
+
+        <varlist type="float" comment="position of wedges in mother volume">
+          wedge_motherz/0/, wedge_xrot/0/, wedge_zrot/0/, ringmotherz/0/
         </varlist>
 
         <varlist type="float" comment="offset for cooling tubes ">
           dcool /0/
         </varlist>
 
+        <varlist type="int" comment="FST Half Identification for Misalignment">
+          halfid/0/
+        </varlist>
 
+ 
         <varlist type="float" comment="supportRing Half thickness">
         sRingThickness/0.3969/ </varlist>       <!-- Was 0.4  this is 5/16" /2 -->
 
@@ -141,6 +152,7 @@ It was copied from FstmGeo.xml on June 15. 2021
             <var name="phi1"      type="float" />
             <var name="phi2"      type="float" />
             <var name="dz"        type="float" />
+            <var name="modulus2(12)" type="int" />
         </Structure>
 
         <Structure name="ring" comment="support ring">
@@ -332,7 +344,7 @@ It was copied from FstmGeo.xml on June 15. 2021
 
     <Info format="FSTM simplified code version = {6.1f}">codeversion</Info>
 
-	<Fill name="FSTG"><var name="version" value="1.1" /></Fill>
+	<Fill name="FSTG"><var name="version" value="1.3" /></Fill>
 
         <Fill name="mothervol" comment=" TUBE for the mothervolume" >
             <var name="version"  value="1.0" />
@@ -352,6 +364,7 @@ It was copied from FstmGeo.xml on June 15. 2021
             <var name="phi1"     value="-17" />
             <var name="phi2"     value="17" />
             <var name="dz"       value="4.0/2" />  <!-- cooling tube connect at z=3.018 -->
+            <var name="modulus2" value="{0,1,0,1,0,1,0,1,0,1,0,1}" />
         </Fill>
 
         <Fill name="ring" comment=" supporting half ring" >
@@ -659,7 +672,9 @@ The factors are the weights fraction for stainless and NOVEC
         -->
         zcenter = mothervol_z+mothervol_dz
         <Create    block="FSTM" />
-        <Placement block="FSTM" in="CAVE" x="0.0" y="0.0" z="zcenter" />
+        <Placement block="FSTM" in="CAVE" x="0.0" y="0.0" z="zcenter" >
+            <Misalign table="Geometry/fst/fstOnTpc" row="0"/>
+        </Placement>
 
         <!-- FST mother container -->
         <Volume name="FSTM" comment="FST mother">
@@ -671,67 +686,95 @@ The factors are the weights fraction for stainless and NOVEC
             <!-- Shape should be sized to include all disks placed -->
             <Shape     type="TUBE" rmin="4.8" rmax="mothervol_rmax" dz="mothervol_dz" />
 
-            <Create    block="FSTD" />
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(1)-zcenter" ncopy="4" />
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(2)-zcenter" ncopy="5" >
-                <Rotation alphaz="30"/>
-            </Placement>
-            <Placement block="FSTD" in="FSTM" x="0.0" y="0.0" z="mothervol_zdisk(3)-zcenter" ncopy="6" />
-        </Volume>
-
-        <!-- FST disk container -->
-        <Volume name="FSTD" comment="FST disk">
-            <Material  name="air" />               <!-- access material   -->
-            <Material  name="air" isvol="0" />     <!-- hack to create local copy -->
-            <Medium    name="standard"      />     <!-- can change medium paramters here -->
-            <Attribute for="FSTD" seen="1" colo="1" />
-
-            <!-- Shape will be dynamically sized to include all disks placed -->
-                <!--  not so from the geant 3 version  -->
-            <Shape     type="TUBE" rmin="4.8" rmax="34" dz="5" />
-
-            <!-- 12 wedges -->
-            <Create block="FTUO" />
+       
             <Create block="FSTW" />
-            <For var="iwedge" from="0" to="5">  <!-- even wedges -->
-                <!-- Wedge -->
-                <Placement block="FSTW" in="FSTD" x="0" y="0" z="-wholewedge_dz" >
-                    <Rotation alphax="180"/>
-                    <Rotation alphaz="15+30*2*iwedge"/>
-                </Placement>
-                <!-- Support ring outside wedge -->
-                <Placement block="FTUO" in="FSTD" x="0" y="0" z="ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="ring_dz" >
-                    <Rotation alphaz="15+30*2*iwedge"/>
-                </Placement>
-                <Placement block="FTUO" in="FSTD" x="0" y="0" z="ring_dz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="ring_dz" >
-                    <Rotation alphaz="15+30*2*iwedge"/>
-                </Placement>
-                  <Placement block="FTUO" in="FSTD" x="0" y="0" z="ring_dz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="ring_dz" >
-                    <Rotation alphaz="15+30*2*iwedge"/>
-                </Placement>
-            </For>
-            <For var="iwedge" from="0" to="5">  <!-- odd wedges -->
-                <!-- Support ring outside wedge -->
-                <Placement block="FTUO" in="FSTD" x="0" y="0" z="-ring_dz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="ring_dz" >
-                    <Rotation alphaz="15+30*(2*iwedge+1)"/>
-                </Placement>
-                <Placement block="FTUO" in="FSTD" x="0" y="0" z="-ring_dz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="ring_dz" >
-                    <Rotation alphaz="15+30*(2*iwedge+1)"/>
-                </Placement>
-                  <Placement block="FTUO" in="FSTD" x="0" y="0" z="-ring_dz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="ring_dz" >
-                    <Rotation alphaz="15+30*(2*iwedge+1)"/>
-                </Placement>
+            <Create block="FTUS" />
+            <Create block="FTUO" />
+                <For var="idisk" from="0" to="2">
+                    <For var="iwedgem" from="0" to="11">
+                       
+                        wedge_motherz = mothervol_zdisk(idisk+1)-zcenter+wholewedge_dz
+                        inner_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter+innersilicon_z
+                        outer_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter+outersilicon_z
+                        wedge_xrot = 0.0
+                        ringmotherz = mothervol_zdisk(idisk+1)-zcenter-ring_dz
 
-                <!-- Wedge -->
-                <Placement block="FSTW" in="FSTD" x="0" y="0" z="wholewedge_dz" >
-                    <Rotation alphaz="15+30*(2*iwedge+1)"/>
-                </Placement>
-            </For>
-            <!--Create    block="FSIR" />
-            <Placement block="FSIR" in="FSTD" x="0" y="0" z="0" >
-            </Placement-->
+                        <If expr="idisk.ne.1">
+                            <If expr="wholewedge_modulus2(iwedgem+1).eq.0">
+                                wedge_motherz = mothervol_zdisk(idisk+1)-zcenter-wholewedge_dz
+                                inner_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-innersilicon_z
+                                outer_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-outersilicon_z
+                                wedge_xrot = 180.0
+                                ringmotherz = mothervol_zdisk(idisk+1)-zcenter+ring_dz
+                            </If>
+                        </If>
+                        <If expr="idisk.eq.1">
+                            <If expr="wholewedge_modulus2(iwedgem+1).eq.1">
+                                wedge_motherz = mothervol_zdisk(idisk+1)-zcenter-wholewedge_dz
+                                inner_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-innersilicon_z
+                                outer_silicon_motherz = mothervol_zdisk(idisk+1)-zcenter-outersilicon_z
+                                wedge_xrot = 180.0
+                                ringmotherz = mothervol_zdisk(idisk+1)-zcenter+ring_dz
+                            </If>
+                        </If>
+                     
+                        wedge_zrot = 75.0-30.0*iwedgem
+                        <!--If expr="wedge_zrot.le.0">
+                            wedge_zrot = 360.0+wedge_zrot
+                        </If-->
 
-        </Volume>
+                        halfid = 0
+                        <If expr="iwedgem.ge.5">
+                            halfid = 1
+                        </If>
+                                           
+                        <Placement block="FSTW" in="FSTM" x="0" y="0" z="wedge_motherz" konly="MANY" ncopy="1+iwedgem+12*idisk" >
+                            <Rotation alphax="wedge_xrot"/>
+                            <Rotation alphaz="wedge_zrot"/>
+                            <Misalign table="Geometry/fst/fstWedgeOnHss"  row="iwedgem+12*idisk" />
+                            <Misalign table="Geometry/fst/hssOnFst"       row="halfid" />
+                        </Placement>
+
+                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="inner_silicon_motherz" rmin="innersilicon_rmin" phi1="innersilicon_phi1" rmax="innersilicon_rmax" phi2="innersilicon_phi2"    dz="innersilicon_dz" konly="ONLY" ncopy="1+3*iwedgem+36*idisk" >
+                            <Rotation alphax="wedge_xrot"/>
+                            <Rotation alphaz="wedge_zrot"/>
+                            <Misalign table="Geometry/fst/fstSensorOnWedge"  row="3*iwedgem+36*idisk" />
+                            <Misalign table="Geometry/fst/fstWedgeOnHss"     row="iwedgem+12*idisk" />
+                            <Misalign table="Geometry/fst/hssOnFst"          row="halfid" />
+                        </Placement>
+   
+                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="outer_silicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" konly="ONLY" ncopy="2+3*iwedgem+36*idisk" >
+                            <Rotation alphax="wedge_xrot"/>
+                            <Rotation alphaz="wedge_zrot"/>
+                            <Misalign table="Geometry/fst/fstSensorOnWedge"  row="1+3*iwedgem+36*idisk" />
+                            <Misalign table="Geometry/fst/fstWedgeOnHss"     row="iwedgem+12*idisk" />
+                            <Misalign table="Geometry/fst/hssOnFst"          row="halfid" />
+ 
+                        </Placement>
+                        <Placement block="FTUS" in="FSTM" x="0" y="0" z="outer_silicon_motherz" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" konly="ONLY" ncopy="3+3*iwedgem+36*idisk" >
+                            <Rotation alphax="wedge_xrot"/>
+                            <Rotation alphaz="wedge_zrot"/>
+                            <Misalign table="Geometry/fst/fstSensorOnWedge"  row="2+3*iwedgem+36*idisk" />
+                            <Misalign table="Geometry/fst/fstWedgeOnHss"     row="iwedgem+12*idisk" />
+                            <Misalign table="Geometry/fst/hssOnFst"          row="halfid" />
+                        </Placement>
+
+
+                        <Placement block="FTUO" in="FSTM" x="0" y="0" z="ringmotherz" rmin="ring_rmid" phi1="-ring_phi1" rmax="ring_rmax" phi2="ring_phi1" dz="ring_dz" >
+                            <Rotation alphaz="wedge_zrot"/>
+                        </Placement>
+                        <Placement block="FTUO" in="FSTM" x="0" y="0" z="ringmotherz" rmin="ring_rmin" phi1="-ring_phi1" rmax="ring_rmid" phi2="-ring_phi2" dz="ring_dz" >
+                            <Rotation alphaz="wedge_zrot"/>
+                        </Placement>
+                        <Placement block="FTUO" in="FSTM" x="0" y="0" z="ringmotherz" rmin="ring_rmin" phi1="ring_phi2" rmax="ring_rmid" phi2="ring_phi1" dz="ring_dz" >
+                            <Rotation alphaz="wedge_zrot"/>
+                        </Placement>
+
+                    </For>
+                </For>
+
+        </Volume> 
+
 
         <!-- Whole wedge container -->
         <Volume name="FSTW" comment="Whole wedge container" assembly="true" >
@@ -798,8 +841,8 @@ The factors are the weights fraction for stainless and NOVEC
                 </Placement>
             </For>
 
-            <!--Create block="FSCT" /-->
-            <!--For var="itube" from="1" to="7">
+            <!--Create block="FSCT" />
+            <For var="itube" from="1" to="7">
                 <Placement block="FSCT" in="FSTW" x="coolingtubes_x(itube)" y="coolingtubes_y(itube)" z="-wholewedge_dz+coolingtubes_z(itube)" rmin="0.277" rmax="0.318" dz="coolingtubes_dz(itube)" >
                     <Rotation alphay="90.0"/>
                     <Rotation alphaz="coolingtubes_rotz(itube)"/>
@@ -858,11 +901,11 @@ The factors are the weights fraction for stainless and NOVEC
             <!--    silicon -->
             <!-- ///////////////////////////// -->
 
-            <Create    block="FTUS" />
+            <!--Create    block="FTUS" />
             <Placement block="FTUS" in="FSTW" x="0" y="0" z="-wholewedge_dz+outersilicon_z" rmin="outersilicon_rmin" phi1="outersilicon_phi1(1)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(1)" dz="outersilicon_dz" />
             <Placement block="FTUS" in="FSTW" x="0" y="0" z="-wholewedge_dz+outersilicon_z" rmin="outersilicon_rmin" phi1="outersilicon_phi1(2)" rmax="outersilicon_rmax" phi2="outersilicon_phi2(2)" dz="outersilicon_dz" />
             <Placement block="FTUS" in="FSTW" x="0" y="0" z="-wholewedge_dz+innersilicon_z" rmin="innersilicon_rmin" phi1="innersilicon_phi1"    rmax="innersilicon_rmax" phi2="innersilicon_phi2"    dz="innersilicon_dz" />
-
+-->
         </Volume>
 
 
@@ -883,13 +926,7 @@ The factors are the weights fraction for stainless and NOVEC
             <Material name="aluminium" isvol="0" />
             <Shape type="TUBS" rmin="0" phi1="0" rmax="0" phi2="0" dz="0" />
         </Volume>
-
-        <!--Volume name="FSIR" comment="inner support tube">
-            <Attribute for="FSIR" seen="1" colo="1" />
-            <Material name="PEEK" />
-           <Shape type="TUBE" rmin="iring_rmin" rmax="iring_rmax" dz="iring_dz" />
-        </Volume-->
-
+ 
         <Volume name="FTRO" comment="Trapizoid for FST outer wedge">
             <Attribute for="FTRO" seen="1" colo="14" />
             <Material name="PEEK_FTRO" />
