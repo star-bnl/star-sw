@@ -62,7 +62,7 @@ public:
     void setDetectorId(unsigned short val);
     void setId(unsigned short val);
 
-    void setData(int n, const unsigned short* d);
+    void setData(int ndata, const unsigned short* d);
     void setDataAt(int tb, unsigned short val);
     void setAdcFlag(int tb, unsigned short adc, unsigned short flag);
     void setAdc(int tb, unsigned short val);
