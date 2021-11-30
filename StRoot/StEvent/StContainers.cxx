@@ -142,6 +142,9 @@
 #include "StFcsCluster.h"
 #include "StFcsHit.h"
 #include "StFcsPoint.h"
+#include "StFttRawHit.h"
+#include "StFttCluster.h"
+#include "StFttPoint.h"
 #include "StFgtHit.h"
 #include "StFgtPoint.h"
 #include "StFgtStrip.h"
@@ -216,6 +219,9 @@ StCollectionImp(EtrHit)
 StCollectionImp(FcsCluster)
 StCollectionImp(FcsHit)
 StCollectionImp(FcsPoint)
+StCollectionImp(FttRawHit)
+StCollectionImp(FttCluster)
+StCollectionImp(FttPoint)
 StCollectionImp(FgtHit)
 StCollectionImp(FgtPoint)
 StCollectionImp(FgtStrip)
