@@ -354,7 +354,7 @@ It was copied from FstmGeo.xml on June 15. 2021
             <var name="rmin"     value="4.1" />
             <var name="rmax"     value="34.00" />
             <var name="dz"       value="30.0" />
-            <var name="zdisk"    value="{149.713,163.284,176.351}" />
+            <var name="zdisk"    value="{151.750, 165.248, 178.781}" />
         </Fill>
 
         <Fill name="wholewedge" comment="whole wedge shape" >
