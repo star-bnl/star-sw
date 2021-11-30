@@ -3,4 +3,5 @@
 # mysql -h robinson.star.bnl.gov --port=3306 -u "" -p"" StarDb
 #aHost=0xa637e98 "dbx.star.bnl.gov", aUser=0x0, aPasswd=0x0, aDb=0xa637458 "StarDb", aPort=3316
 # mysql -h robinson.star.bnl.gov --port=3306 -u "" Calibrations_tpc 
-mysql -h robinson.star.bnl.gov --port=3306 -u "" --password=""  Calibrations_tpc
+#mysql -h robinson.star.bnl.gov --port=3306 -u "" --password=""  Calibrations_tpc
+mysql -h robinson.star.bnl.gov --port=3306 -u "fisyak" Calibrations_tpc
