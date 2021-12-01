@@ -22,7 +22,7 @@
 - Online
   - Fix for pulser histogram in online plots ([#187](https://github.com/star-bnl/star-sw/pull/187))
 - TPC
-  - Move back to MagFactor instead of starMagOnl for pre 2012 data (issue #185) (#216)
+  - Move back to MagFactor instead of starMagOnl for pre 2012 data (issue [#185](https://github.com/star-bnl/star-sw/issues/185)) ([#216](https://github.com/star-bnl/star-sw/pull/216))
 
 - Minor fix: 2017 -> 2022 ([#219](https://github.com/star-bnl/star-sw/pull/219))
 
