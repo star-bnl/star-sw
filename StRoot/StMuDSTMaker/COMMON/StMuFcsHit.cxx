@@ -84,13 +84,12 @@ void StMuFcsHit::setZS(unsigned short val)                       { setDetId(val,
 void StMuFcsHit::setDetectorId(unsigned short val)               { setDetId(zs(),val,id()); }
 void StMuFcsHit::setId(unsigned short val)                       { setDetId(zs(),detectorId(),val); }
 
-void StMuFcsHit::setData(int ntimebin, const unsigned short* data) {
+void StMuFcsHit::setData(int ndata, const unsigned short* data) {
     if(!mData) {
-        mData = new TArrayS(ntimebin,(const short*)data);
+        mData = new TArrayS(ndata,(const short*)data);
+    } else {
+        mData->Set(ndata,(const short*)data);
     }
-    else {
-        mData->Set(ntimebin,(const short*)data);
-  }
 }
 void StMuFcsHit::setDataAt(int i, unsigned short val)                       { mData->AddAt(val,i); }
 void StMuFcsHit::setAdcFlag(int i, unsigned short adc, unsigned short flag) { mData->AddAt(((flag&0xf)<<12) + adc, i); }
