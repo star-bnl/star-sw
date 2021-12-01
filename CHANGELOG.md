@@ -24,7 +24,7 @@
 - TPC
   - Move back to MagFactor instead of starMagOnl for pre 2012 data (issue #185) (#216)
 
-- Minor fix: 2017 -> 2022 (#219)
+- Minor fix: 2017 -> 2022 ([#219](https://github.com/star-bnl/star-sw/pull/219))
 
 ### Miscellaneous
 
