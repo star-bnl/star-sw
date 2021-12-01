@@ -1183,9 +1183,11 @@
 	print "Could not find xml libs\n" if (! $param::quiet);
     }
 
+    print "Vc dir is set to $Vc_DIR\n" unless ($param::quiet);
     my $VcCPPFLAGS = " -I" . $Vc_DIR . "/include" . " -Wabi -fabi-version=0";
     my $VcLIBDIR = $Vc_DIR . "/lib";
-    my $VcLIB = " -lVc";
+    my $VcLIB = $VcLIBDIR . "/libVc.a";
+
     #Vc check SSE support
     my $cmd = "$CXX -E -dM -x c++ - < /dev/null | grep -q SSE";
     if ($STAR_HOST_SYS =~ 'gcc432$' || system($cmd)) {# No SSE
