@@ -1,5 +1,107 @@
 # Changelog
 
+## SL22a_0 - 2022-03-13
+
+### Enhancements
+
+- FCS
+  - Adding option to read from MuDst in StFcsRawHitMaker ([#226](https://github.com/star-bnl/star-sw/pull/226))
+  - Bug: Fix min/max default value mixup ([#221](https://github.com/star-bnl/star-sw/pull/221))
+  - StMuDstMaker, init mFcsCollection to zero ([#222](https://github.com/star-bnl/star-sw/pull/222))
+  - Fcs mudst ([#200](https://github.com/star-bnl/star-sw/pull/200))
+- FST
+  - added FST subsystem ([#242](https://github.com/star-bnl/star-sw/pull/242))
+- sTGC
+  - HOTFIX: Missing FttCollection in StEventClusteringHints.cxx ([#227](https://github.com/star-bnl/star-sw/pull/227))
+  - StEvent to StMuDst for sTGC data ([#229](https://github.com/star-bnl/star-sw/pull/229))
+  - StEvent additions for sTGC (Ftt) detector ([#209](https://github.com/star-bnl/star-sw/pull/209))
+- TOF
+  - Modifications to StBTofCalibMaker for FXT ([#241](https://github.com/star-bnl/star-sw/pull/241))
+- Online
+  - Trigger group removed 5DSM from BBC crate, thus changing structure. ([#207](https://github.com/star-bnl/star-sw/pull/207))
+  - StEvent StTriggerData2022 update associate with  ([#203](https://github.com/star-bnl/star-sw/pull/203))
+  - updates to daq readers in prep for run 22 ([#186](https://github.com/star-bnl/star-sw/pull/186))
+
+### Bug fixes
+
+- EPD
+  - Fix cut limits in EPD macro ([#188](https://github.com/star-bnl/star-sw/pull/188))
+- FCS
+  - StFcsDB makes no file unless debug is on ([#218](https://github.com/star-bnl/star-sw/pull/218))
+- Online
+  - Fix for pulser histogram in online plots ([#187](https://github.com/star-bnl/star-sw/pull/187))
+- TPC
+  - Move back to MagFactor instead of starMagOnl for pre 2012 data (issue [#185](https://github.com/star-bnl/star-sw/issues/185)) ([#216](https://github.com/star-bnl/star-sw/pull/216))
+
+- Fix the charge of He5Lambda ([#239](https://github.com/star-bnl/star-sw/pull/239))
+- Minor fix: 2017 -> 2022 ([#219](https://github.com/star-bnl/star-sw/pull/219))
+
+### Miscellaneous
+
+- starsim: make seed overflow into a fatal error ([#215](https://github.com/star-bnl/star-sw/pull/215))
+- Update `gstar_part.g` ([#228](https://github.com/star-bnl/star-sw/pull/228))
+- Initial Run 22 chains, including FTT and FCS ([#217](https://github.com/star-bnl/star-sw/pull/217))
+- StRoot/StSpinPool: replace sys/types.h with stdint.h ([#224](https://github.com/star-bnl/star-sw/pull/224))
+- StRoot/StTriggerUtilities: replace sys/types.h with stdint.h ([#212](https://github.com/star-bnl/star-sw/pull/212))
+- StRoot/Stv: replace sys/types.h with stdint.h ([#211](https://github.com/star-bnl/star-sw/pull/211))
+- Remove StRoot/RTS/include/FTP/FTPC_PADKEY.h ([#195](https://github.com/star-bnl/star-sw/pull/195))
+- ci: Avoid conflict with latest tag when using cache to/from ([#198](https://github.com/star-bnl/star-sw/pull/198))
+- Star tablelib ([#189](https://github.com/star-bnl/star-sw/pull/189))
+
+
+* StEvent StFcsHit adding forgotten protection against bad inputs by @akioogawa in ([#252](https://github.com/star-bnl/star-sw/pull/252))
+* Remove unused dependence on GEANT3 common blocks by @klendathu2k in ([#202](https://github.com/star-bnl/star-sw/pull/202))
+* mgr/Conscript-standard: take into account agmlParser dependencies by @veprbl in ([#261](https://github.com/star-bnl/star-sw/pull/261))
+* misc: replace sys/types.h with stdint.h by @veprbl in ([#234](https://github.com/star-bnl/star-sw/pull/234))
+* FCS pi0 finder for Ecal by Xilin by @akioogawa in ([#250](https://github.com/star-bnl/star-sw/pull/250))
+* mgr/Conscript-standard: fix build of StarVMC/StarGeometry with ROOT6 that doesn't ship ttables by @veprbl in ([#259](https://github.com/star-bnl/star-sw/pull/259))
+* QA run22 + fcs by @genevb in ([#260](https://github.com/star-bnl/star-sw/pull/260))
+* Reintroduce run time switch for dN/dx calculation by @fisyak in ([#268](https://github.com/star-bnl/star-sw/pull/268))
+* StFmsBsQaMaker: fix invaild ClassDef by @veprbl in ([#256](https://github.com/star-bnl/star-sw/pull/256))
+* Hot fix for FastOffline by @akioogawa in ([#271](https://github.com/star-bnl/star-sw/pull/271))
+* Fst stevent by @jdbrice in ([#265](https://github.com/star-bnl/star-sw/pull/265))
+* StRoot/StTof\*: fix inconsistent validAdc/validTdc declarations by @veprbl in ([#272](https://github.com/star-bnl/star-sw/pull/272))
+* StBTofCalibMaker: fix variable shadowing by @veprbl in ([#273](https://github.com/star-bnl/star-sw/pull/273))
+* StMiniMcMaker: use const reference to TString in setters by @veprbl in ([#257](https://github.com/star-bnl/star-sw/pull/257))
+* Drawing rules for FCS histograms by @genevb in ([#276](https://github.com/star-bnl/star-sw/pull/276))
+* StEEmcClusterMaker: avoid using operator++(bool&) by @veprbl in ([#274](https://github.com/star-bnl/star-sw/pull/274))
+* StEvent StTriggerData2022 patch by @akioogawa in ([#284](https://github.com/star-bnl/star-sw/pull/284))
+* Add makers and utilities for FST hit processing by @jdbrice in ([#266](https://github.com/star-bnl/star-sw/pull/266))
+* Fix problems with Gating Grid simulation, add fix from Xianglei for i… by @fisyak in ([#281](https://github.com/star-bnl/star-sw/pull/281))
+* Stabilize calculation of uncertainties for vertices extremely close to beam line by @kehw in ([#279](https://github.com/star-bnl/star-sw/pull/279))
+* Rdo clean up by @fisyak in ([#293](https://github.com/star-bnl/star-sw/pull/293))
+* Tuned T0offsets and iTPC cluster sizes for Run19 Au+Au 19.6 GeV embeding by @zhux97 in ([#290](https://github.com/star-bnl/star-sw/pull/290))
+* Sync with RTS code by @jml985 in ([#288](https://github.com/star-bnl/star-sw/pull/288))
+* Add K\*(892)+ and K\*(892)- to gstar_part.g by @klendathu2k in ([#286](https://github.com/star-bnl/star-sw/pull/286))
+* Jevp Histogram Sync to reflect production code by @jml985 in ([#292](https://github.com/star-bnl/star-sw/pull/292))
+* FCS Y position change based on measurements by @akioogawa in ([#291](https://github.com/star-bnl/star-sw/pull/291))
+* fix for offline flag in itpc reader by @jml985 in ([#296](https://github.com/star-bnl/star-sw/pull/296))
+* QA switch for FCS by @genevb in ([#298](https://github.com/star-bnl/star-sw/pull/298))
+* Fix crash in StFcsPi0FinderForEcal with MuDst VPD vertex in FastOffli… by @akioogawa in ([#299](https://github.com/star-bnl/star-sw/pull/299))
+* ci: Add tests for ROOT6 build  by @plexoos in ([#154](https://github.com/star-bnl/star-sw/pull/154))
+* ci: grep output log to ensure there was no segfault by @veprbl in ([#300](https://github.com/star-bnl/star-sw/pull/300))
+* Fst QA and Calibration Makers by @jdbrice in ([#282](https://github.com/star-bnl/star-sw/pull/282))
+* Add Toshihiro Nonaka to the StRefMultCorr codeowner list by @nigmatkulov in ([#302](https://github.com/star-bnl/star-sw/pull/302))
+* Fix EMC data in picoDst data in DAQ production by @starsdong in ([#295](https://github.com/star-bnl/star-sw/pull/295))
+* Revert "Fix EMC data in picoDst data in DAQ production" by @veprbl in ([#304](https://github.com/star-bnl/star-sw/pull/304))
+* Adding Flemming's TPC QA to fast-offline by @imooney in ([#307](https://github.com/star-bnl/star-sw/pull/307))
+* Star geant4maker starvmc geometry macros by @klendathu2k in ([#306](https://github.com/star-bnl/star-sw/pull/306))
+* [g4star] Add linked hit list to STGC by @klendathu2k in ([#305](https://github.com/star-bnl/star-sw/pull/305))
+* new FTT detector and tables (Daniel) by @dmarkh in ([#310](https://github.com/star-bnl/star-sw/pull/310))
+* Mu fcs hit clear by @jdbrice in ([#301](https://github.com/star-bnl/star-sw/pull/301))
+* Misalignment updates FST and Simplified FST Geometry by @klendathu2k in ([#285](https://github.com/star-bnl/star-sw/pull/285))
+* ci: run tests with MALLOC_CHECK_=3 by @veprbl in ([#312](https://github.com/star-bnl/star-sw/pull/312))
+* CODEOWNERS update by @starsdong in ([#316](https://github.com/star-bnl/star-sw/pull/316))
+* TriggerSimu + picoDst for BEMC data in daq->picoDst production by @starsdong in ([#314](https://github.com/star-bnl/star-sw/pull/314))
+* Keep short tracks pointing to ETOF by @genevb in ([#320](https://github.com/star-bnl/star-sw/pull/320))
+* Ignore StRoot/StBFChain/doc in Git by @plexoos in ([#321](https://github.com/star-bnl/star-sw/pull/321))
+* Restore GetCVS() function in StTriggerSimuMaker by @genevb in ([#322](https://github.com/star-bnl/star-sw/pull/322))
+* Tpc rdo mask fix by @fisyak in ([#319](https://github.com/star-bnl/star-sw/pull/319))
+* Resolve compiler warnings in StFcsDb by @genevb in ([#323](https://github.com/star-bnl/star-sw/pull/323))
+* Simu pp200 run14 pythia8 hfjets by @klendathu2k in ([#315](https://github.com/star-bnl/star-sw/pull/315))
+* Resolved #324 by @klendathu2k in ([#325](https://github.com/star-bnl/star-sw/pull/325))
+
+
 ## SL21d_0 - 2021-11-14
 
 ### Enhancements
