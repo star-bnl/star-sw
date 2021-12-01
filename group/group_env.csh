@@ -1,5 +1,5 @@
 #!/bin/csh
-#       $Id: group_env.csh,v 1.264 2021/10/13 15:39:51 jeromel Exp $
+#       $Id: group_env.csh,v 1.265 2021/11/16 15:34:27 jeromel Exp $
 #	Purpose:	STAR group csh setup
 #
 # Revisions & notes
@@ -836,14 +836,53 @@ endif
 #    set path=($path $GRAXML_HOME/bin)
 #endif
 
-if ( $STAR_LEVEL  == "dev" || $STAR_LEVEL  == ".dev" || $STAR_LEVEL  == "adev" ) then
-    # not a very intuitive path ..
-    setenv Vc_DIR /cvmfs/star.sdcc.bnl.gov/star-spack/spack/opt/spack/linux-rhel7-x86_64/gcc-4.8.5/vc_-1.4.1-7m2zajp3rqt6usw3zlgtmfrlxbbw5yvn
-else
-    #if ( $?Vc_DIR ) then
-    #	unsetenv Vc_DIR
-    #endif
-endif 
+
+#
+# This is forced to work if the file exists.
+# Just add the package name with non-obvious paths.
+# The name of teh file should be LEVELS.$envVarToSet
+# The content should have 32bits= and 64bits= tags
+#
+set PKGS="Vc_DIR"
+foreach pkg ( $PKGS )
+    set FF=""
+    if ( -f $STAR/mgr/LEVELS.$pkg ) then
+	set FF=$STAR/mgr/LEVELS.$pkg
+    endif
+    if ( -f mgr/LEVELS.$pkg ) then
+	set FF=mgr/LEVELS.$pkg
+    endif
+    if ( "$FF" != "") then
+	if ( $USE_64BITS == 1 ) then
+	    set prefix=64bits
+	else
+	    set prefix=32bits
+	endif
+        # verification need to be non-empty and match
+	set test=`cat $FF | sed 's/#.*//' | grep $prefix`
+	if ( "$test" != "" ) then
+	    # we have validated the file
+	    if ( $?DECHO ) echo "$self :: Loading $pkg $prefix"
+	    set test=`echo $test | sed 's/.*=//'`
+	    setenv $pkg $test
+	endif
+    else
+	# If we switch library and the file is NOT there, we 
+	# need to undefine
+	unsetenv $pkg
+    endif
+end
+
+
+#
+#if ( $STAR_LEVEL  == "dev" || $STAR_LEVEL  == ".dev" || $STAR_LEVEL  == "adev" ) then
+#    # not a very intuitive path ..
+#    setenv Vc_DIR /cvmfs/star.sdcc.bnl.gov/star-spack/spack/opt/spack/linux-rhel7-x86_64/gcc-4.8.5/vc_-1.4.1-7m2zajp3rqt6usw3zlgtmfrlxbbw5yvn
+#else
+#    #if ( $?Vc_DIR ) then
+#    #	unsetenv Vc_DIR
+#    #endif
+#endif 
 
 
 # Support for subversion if installed in a sub-directory
