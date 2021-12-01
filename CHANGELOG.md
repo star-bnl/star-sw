@@ -1,5 +1,40 @@
 # Changelog
 
+## SL21d_1 - 2021-12-01
+
+### Enhancements
+
+- FCS
+  - Fcs mudst ([#200](https://github.com/star-bnl/star-sw/pull/200))
+- sTGC
+  - StEvent additions for sTGC (Ftt) detector ([#209](https://github.com/star-bnl/star-sw/pull/209))
+- Online
+  - Trigger group removed 5DSM from BBC crate, thus changing structure. ([#207](https://github.com/star-bnl/star-sw/pull/207))
+  - StEvent StTriggerData2022 update associate with  ([#203](https://github.com/star-bnl/star-sw/pull/203))
+  - updates to daq readers in prep for run 22 ([#186](https://github.com/star-bnl/star-sw/pull/186))
+
+### Bug fixes
+
+- EPD
+  - Fix cut limits in EPD macro ([#188](https://github.com/star-bnl/star-sw/pull/188))
+- FCS
+  - StFcsDB makes no file unless debug is on ([#218](https://github.com/star-bnl/star-sw/pull/218))
+- Online
+  - Fix for pulser histogram in online plots ([#187](https://github.com/star-bnl/star-sw/pull/187))
+- TPC
+  - Move back to MagFactor instead of starMagOnl for pre 2012 data (issue #185) (#216)
+
+- Minor fix: 2017 -> 2022 (#219)
+
+### Miscellaneous
+
+- Initial Run 22 chains, including FTT and FCS ([#217](https://github.com/star-bnl/star-sw/pull/217))
+- StRoot/Stv*: replace sys/types.h with stdint.h ([#211](https://github.com/star-bnl/star-sw/pull/211))
+- Remove StRoot/RTS/include/FTP/FTPC_PADKEY.h ([#195](https://github.com/star-bnl/star-sw/pull/195))
+- ci: Avoid conflict with latest tag when using cache to/from ([#198](https://github.com/star-bnl/star-sw/pull/198))
+- Star tablelib ([#189](https://github.com/star-bnl/star-sw/pull/189))
+
+
 ## SL21d_0 - 2021-11-14
 
 ### Enhancements
