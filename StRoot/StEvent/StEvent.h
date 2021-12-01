@@ -199,6 +199,7 @@ class StEtrHitCollection;
 class StEmcCollection;
 class StEpdCollection;
 class StFcsCollection;
+class StFttCollection;
 class StFmsCollection;
 class StFcsCollection;
 class StStgcCollection;
@@ -267,6 +268,8 @@ public:
     const StFcsCollection*              fcsCollection() const;
     StStgcCollection*                   stgcCollection();
     const StStgcCollection*             stgcCollection() const;
+    StFttCollection*                    fttCollection();
+    const StFttCollection*              fttCollection() const;
     StFmsCollection*                    fmsCollection();
     const StFmsCollection*              fmsCollection() const;
     StRHICfCollection*                  rhicfCollection();
@@ -381,6 +384,7 @@ public:
     void setEpdCollection(StEpdCollection*);
     void setFcsCollection(StFcsCollection*);
     void setStgcCollection(StStgcCollection*);
+    void setFttCollection(StFttCollection*);
     void setFmsCollection(StFmsCollection*);
     void setRHICfCollection(StRHICfCollection*);
     void setRichCollection(StRichCollection*);

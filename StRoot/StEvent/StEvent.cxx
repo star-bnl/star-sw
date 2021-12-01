@@ -232,6 +232,7 @@
 #include "StEmcCollection.h"
 #include "StEpdCollection.h"
 #include "StFcsCollection.h"
+#include "StFttCollection.h"
 #include "StFmsCollection.h"
 #include "StFcsCollection.h"
 #include "StStgcCollection.h"
@@ -593,6 +594,22 @@ StEvent::fcsCollection() const
     StFcsCollection *fcs = 0;
     _lookup(fcs, mContent);
     return fcs;
+}
+
+StFttCollection*
+StEvent::fttCollection()
+{
+    StFttCollection *ftt = 0;
+    _lookup(ftt, mContent);
+    return ftt;
+}
+
+const StFttCollection*
+StEvent::fttCollection() const
+{
+    StFttCollection *ftt = 0;
+    _lookup(ftt, mContent);
+    return ftt;
 }
 
 StFmsCollection*
@@ -1306,6 +1323,12 @@ StEvent::setFmsCollection(StFmsCollection* val)
 
 void
 StEvent::setFcsCollection(StFcsCollection* val)
+{
+  _lookupAndSet(val, mContent);
+}
+
+void
+StEvent::setFttCollection(StFttCollection* val)
 {
   _lookupAndSet(val, mContent);
 }

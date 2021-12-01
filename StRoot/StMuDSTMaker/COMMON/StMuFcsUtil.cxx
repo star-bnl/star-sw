@@ -82,7 +82,7 @@ void StMuFcsUtil::fillMuFcsHits(StMuFcsCollection* muFcs,
             if ( vecHit[i]->zs() ) l *= 2; // size of data, x2 if zero suppressed
             unsigned short data[ l ];
             for (unsigned int j = 0; j < l; j++ ){
-                data[ i ] = vecHit[i]->data( j );
+                data[ j ] = vecHit[i]->data( j );
             }
 
             muFcsHit->setFcsHit( 
