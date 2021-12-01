@@ -28,6 +28,7 @@ foreach my $file (@Files) {
 #  my $now = time(); #print "now = $now\n";
 #  my $dt = $now - $ctime;# print "now = $now, ctime = $ctime, dt = $dt\n";
 #  if ($dt < 3600) {next;}
+  
   my $string = "string:" .  $file;
   print "$string\n";
   $n++;
