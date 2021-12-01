@@ -106,44 +106,7 @@ namespace KFPMath
   {     
     return Sin( phi + 1.570796326795f ); //x + pi/2
   }
-  static inline __attribute__((always_inline)) float_v ATan2( const float_v &y, const float_v &x )
-  { 
-    const float_v pi(3.1415926535897932f);
-    const float_v zero(Vc::Zero);
 
-    const float_m &xZero = (x == zero);
-    const float_m &yZero = (y == zero);
-    const float_m &xNeg  = (x < zero);
-    const float_m &yNeg  = (y < zero);
-
-    const float_v &absX = Vc::abs(x);
-    const float_v &absY = Vc::abs(y);
-
-    float_v a = absY / absX;
-    const float_m &gt_tan_3pi_8 = (a > float_v(2.414213562373095f));
-    const float_m &gt_tan_pi_8  = (a > float_v(0.4142135623730950f)) && (!gt_tan_3pi_8);
-    float_v b(Vc::Zero);
-    b(gt_tan_3pi_8) = pi/2.f;
-    b(gt_tan_pi_8) = pi/4.f;
-    a(gt_tan_3pi_8) =  (-1.f / a);
-    a(gt_tan_pi_8) =  ((absY - absX) / (absY + absX)) ;
-    const float_v &a2 = a * a;
-    b += (((8.05374449538e-2f * a2
-          - 1.38776856032E-1f) * a2
-          + 1.99777106478E-1f) * a2
-          - 3.33329491539E-1f) * a2 * a
-          + a;
-    b(xNeg ^ yNeg) = -b;
-    b(xNeg && !yNeg) = (b+pi);
-    b(xNeg &&  yNeg)  = (b-pi);
-    b(xZero && yZero) = zero;
-    b(xZero &&  yNeg) = (-pi/2.f);
-    return b;
-  }
-  template<typename T> static inline __attribute__((always_inline)) 
-    typename Vc::Vector<T>::Mask Finite(const Vc::Vector<T> &x) { return Vc::isfinite( x ); }
-  template<typename T> static inline __attribute__((always_inline)) T Log ( const T &x ) { return std::log( x ); }
-  template<typename T> static inline __attribute__((always_inline)) T ACos( const T &x ) { return (3.1415926535897f/2.f - asin( x )); }
 }
 
 #endif 

@@ -1224,7 +1224,6 @@ void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t g
 	case 7 :
 	        stage_2_202207(ecal,hcal,pres,geo,output,s2_to_dsm) ;
 		break ;
-
 	// debugging versions below
 	case 0xFF210201 :
 		stage_2_tonko_202101(ecal,hcal,pres,geo,output) ;

@@ -1262,6 +1262,38 @@ Bfc_st BFC[] = { // standard chains
    "B2021a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    ,    "","",        "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
+  // 2021 initial chains
+  {"B2021" ,"","",
+   "ry2021,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree",
+   "","",                                                      "Base chain for run 2021 data (tpc)",kFALSE},
+
+  {"P2021","" ,"",
+   "B2021,ITTF,VFMinuit,etofa,btof,gmt,mtd,emcDY2,epdHit,trgd,ZDCvtx,BAna,picoWrite,picoVtxDefault,picoCovMtxWrite"
+   ,            "","", "Base chain for year 2021 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+  {"B2021a" ,"","",
+   "ry2021a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree",
+   "","",                                                      "Base chain for run 2021 data (tpc)",kFALSE},
+
+  {"P2021a","" ,"",
+   "B2021a,ITTF,VFMinuit,etofa,btof,gmt,mtd,emcDY2,epdHit,trgd,ZDCvtx,BAna,picoWrite,picoVtxDefault,picoCovMtxWrite"
+   ,            "","", "Base chain for year 2021 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+
+  // 2022 initial chains
+  {"B2022" ,"","",
+   "ry2022,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree",
+   "","",                                                      "Base chain for run 2022 data (tpc)",kFALSE},
+
+  {"P2022","" ,"",
+   "B2022,ITTF,VFMinuit,etofa,btof,gmt,mtd,emcDY2,epdHit,trgd,ZDCvtx,BAna,picoWrite,picoVtxDefault,picoCovMtxWrite"
+   ,            "","", "Base chain for year 2022 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+  {"B2022a" ,"","",
+   "ry2022a,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+   "","",                                                      "Base chain for run 2020 data (tpc)",kFALSE},
+
+  {"P2022a","" ,"",
+   "B2022a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,gmt,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   ,    "","",        "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
+
 
   // Other chains/Calibration
 #if 0
@@ -1514,8 +1546,7 @@ Bfc_st BFC[] = { // standard chains
   {"Generators", "Generators", "","sim_T,gen_T", ""
    ,"VMC,MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase",  "Basic STAR Generators",kFALSE},
   {"StarPrimary0", "StarPrimary", "","Generators", "StarPrimaryMaker", "",  "Basic STAR Generators",kFALSE},
-  {"mtin", "MuTreeReader","StarPrimary","StarPrimary0","StarMuEventReader"
-   ,"StarMuEventReader"                                             ,"Read event from MuDst TTree", kFALSE},
+  {"mtin", "","","",""                                              ,"Read event from MuDst TTree", kFALSE},
   //________________________________________________________________________________
   {"picoWrite" ,"","","picoDst,PicoVtxDefault",""                       ,"","Writes picoDST format",kFALSE},
   {"NoPiCovMtx","","","",""                                      ,"","Don't write Pico Cov. Matrix",kFALSE},

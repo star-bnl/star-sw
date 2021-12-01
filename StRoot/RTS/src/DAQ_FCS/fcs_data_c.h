@@ -260,6 +260,10 @@ public:
 
 	static int load_bad_ch(const char *fname=0, int sector=0) ;
 
+	static const char *stage_labels[32] ;
+	static int stage_params_txt[32] ;	// from the params_xx file below
+	static int load_stage_params(int sec1, const char *fname=0) ;
+
 	// mutex for pedestals but also for statistics
 	static struct statistics_t {
 		float temperature ;

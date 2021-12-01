@@ -36,7 +36,7 @@ class StKFParticleCandidateAnalysis: public TObject  {
   
   TFile* fOutputHistoFile;
   TDirectory* fOutputHistoDir;
-  static const int NParticles = 6;
+  static const int NParticles = 21;
   static const int NSignalSets = 3; // total, signal and BG
   static const int NSets = 8;
   static const int NHistos = 30;

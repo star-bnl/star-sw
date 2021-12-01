@@ -20,61 +20,8 @@
  */
 
 #include "KFPTrackVector.h"
+#include "KFParticleMath.h"
 #include <iostream>
-
-void KFPTrackVector::SetParameter(const float_v& value, int iP, int iTr)
-{ 
-  /** Copies the SIMD vector "value" to the parameter vector KFPTrackVector::fP[iP]
-   ** starting at the position "iTr".
-   ** \param[in] value - SIMD vector with the values to be stored
-   ** \param[in] iP - number of the parameter vector
-   ** \param[in] iTr - starting position in the parameter vector where the values should be stored
-   **/
-// gather caused errors at XeonPhi, temporarly replaced with the simple copying
-//   if( (iTr+float_vLen) < Size())
-//     reinterpret_cast<float_v&>(fP[iP][iTr]) = value;
-//   else
-//   {
-//     const uint_v index(uint_v::IndexesFromZero());
-//     (reinterpret_cast<float_v&>(fP[iP][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
-//   }
-  
-  if( (iTr+float_vLen) < Size())
-    reinterpret_cast<float_v&>(fP[iP][iTr]) = value;
-  else
-    for(int i=0; i<float_v::Size; i++)
-    {
-      if(iTr + i >= Size()) continue;
-      fP[iP][iTr+i] = value[i];
-    } 
-}
-void KFPTrackVector::SetCovariance(const float_v& value, int iC, int iTr) 
-{ 
-  /** Copies the SIMD vector "value" to the element of the covariance matrix vector KFPTrackVector::fC[iC]
-   ** starting at the position "iTr".
-   ** \param[in] value - SIMD vector with the values to be stored
-   ** \param[in] iC - number of the element of the covariance matrix
-   ** \param[in] iTr - starting position in the parameter vector where the values should be stored
-   **/
-// gather caused errors at XeonPhi, temporarly replaced with the simple copying
-//   if( (iTr+float_vLen) < Size())
-//     reinterpret_cast<float_v&>(fC[iC][iTr]) = value;
-//   else
-//   {
-//     const uint_v index(uint_v::IndexesFromZero());
-//     (reinterpret_cast<float_v&>(fC[iC][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
-//   }
-  
-  if( (iTr+float_vLen) < Size())
-    reinterpret_cast<float_v&>(fC[iC][iTr]) = value;
-  else
-    for(int i=0; i<float_v::Size; i++)
-    {
-      if(iTr + i >= Size()) continue;
-      fC[iC][iTr+i] = value[i];
-    } 
-}
-  
 
 void KFPTrackVector::Resize(const int n)
 {
@@ -241,26 +188,6 @@ void KFPTrackVector::SetTracks(const KFPTrackVector& track, const kfvector_uint&
   }
 }
 
-void KFPTrackVector::GetTrack(KFPTrack& track, const int n)
-{ 
-  /** Copies track with index "n" for the current object to the KFPTrack object "track".
-   ** \param[out] track - KFPTrack object, where track with index "n" is copied
-   ** \param[in] n - index of the track to be copied
-   **/
-  track.SetParameters(fP[0][n],fP[1][n],fP[2][n],fP[3][n],fP[4][n],fP[5][n]);
-  for(int i=0; i<21; i++)
-    track.SetCovariance(i,fC[i][n]);
-//     track.SetChi2(fChi2[n]);
-//     track.SetNDF(fNDF[n]);
-  track.SetId(fId[n]);
-  track.SetCharge(fQ[n]);
-  
-#ifdef NonhomogeneousField
-    for(int i=0; i<10; i++)
-      track.SetFieldCoeff( fField[i][n], i);
-#endif
-}
-
 void KFPTrackVector::RotateXY( float_v alpha, int firstElement )
 {
   /** Rotates SIMD vector of tracks starting from the position "firstElement" onto the angles "alpha" in the XY plane.
@@ -277,8 +204,8 @@ void KFPTrackVector::RotateXY( float_v alpha, int firstElement )
    ** \param[in] firstElement - track index, starting from which SIMD vector of tracks will be rotated
    **/
   
-  const float_v cA = KFPMath::Cos( alpha );
-  const float_v sA = KFPMath::Sin( alpha );
+  float_v cA, sA;
+  KFPMath::sincos(alpha, sA, cA);
 
   const float_v xInit = reinterpret_cast<const float_v&>(fP[0][firstElement]);
   const float_v yInit = reinterpret_cast<const float_v&>(fP[1][firstElement]);

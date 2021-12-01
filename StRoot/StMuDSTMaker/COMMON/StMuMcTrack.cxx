@@ -146,6 +146,11 @@ void StMuMcTrack::FillKFMCTrack(KFMCTrack &mcTrackKF) {
     pdgRoot = TDatabasePDG::Instance()->ConvertGeant3ToPdg(GePid());
     if(pdgRoot == 0 && q>0) pdgRoot = 211;
     if(pdgRoot == 0 && q<0) pdgRoot = -211;
+    if(GePid() == 61053) pdgRoot = 3004;
+    if(GePid() == 61055) pdgRoot = 3005;
+    if(GePid() == 49) pdgRoot = 1000020030;
+    if(GePid() == 46) pdgRoot = 1000010030;
+    if(GePid() == 47) pdgRoot = 1000020040;
     mcTrackKF.SetPDG(pdgRoot);
   }
   mcTrackKF.SetPDG( pdgRoot );

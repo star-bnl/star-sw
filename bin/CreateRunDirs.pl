@@ -4,7 +4,8 @@ use Cwd;
 use Env;
 use lib "/net/l402/data/fisyak/STAR/packages/.DEV2/bin";#$ENV{ConstructLocation}; 
 #use RunXXDefs;
-use RunXXIDefs;
+#use RunXXIDefs;
+use RunXXIIDefs;
 my $pwd = cwd();
 #my $day = File::Basename::basename(File::Basename::dirname($pwd));
 #my $run =  File::Basename::basename($pwd);
@@ -35,9 +36,11 @@ sub GoodRun($$) {
   my $run = shift;
   print "GoodRun:: run = $run" if $debug;
   foreach my $key (sort keys %$env ) {
-    print "$pwd, trig = $env->{$key}->{trig}, field = $env->{$key}->{field}; first = $env->{$key}->{first}, last = $env->{$key}->{last}" if ($debug);
-    if ($pwd =~ /tune/ and $env->{$key}->{trig} !~ /tune/) {print ", rejected by trig\n"  if ($debug); next;}
-    if ($pwd !~ /$env->{$key}->{trig}/)  {print ", rejected by trig\n"  if ($debug); next;}
+    my $trig = $env->{$key}->{trig};
+    if ($trig =~ /Cosmic_/) {$trig = "Cosmic";}
+    print "$pwd, trig = $trig, field = $env->{$key}->{field}; first = $env->{$key}->{first}, last = $env->{$key}->{last}" if ($debug);
+    if ($pwd =~ /tune/ and $trig !~ /tune/) {print ", rejected by trig\n"  if ($debug); next;}
+    if ($pwd !~ /$trig/)  {print ", rejected by trig\n"  if ($debug); next;}
     if ($pwd !~ /$env->{$key}->{field}/) {print ", rejected by field\n" if ($debug); next;}
     if ($run < $env->{$key}->{first})    {print ", rejected by first\n" if ($debug); next;}
     if ($run > $env->{$key}->{last})     {print ", rejected by last\n"  if ($debug); next;}

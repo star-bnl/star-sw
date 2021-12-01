@@ -67,13 +67,17 @@ void Load(const Char_t *options="");
 //TString defChain("MC.2015,gstar,20Muons,TpcRS,StiCA,VFMinuit,-hitfilt,useXgeom");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb");//eemcA2E,,sdt20100107.110000");
 //TString defChain("MC.2015,HijingAuAuFixedTarget19,StiCA,KFVertex,-SstIt,-SstDb,-MiniMcMk,tfs");//eemcA2E,,sdt20100107.110000");
-//TString defChain("test.RC.AuAu200.y2016,StiCA,KFVertex")
+//TString defChain("test.RC.AuAu200.y2016,StiCA,KFVertex");
+//TString defChain("gstar,20Muons,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna");
+//TString defChain("gstar,K_S01,y2020a,tpcDb,TpcRS,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna");
+TString defChain("MC2016,StiCA,20Muons,vmc,Rung.1");
+//TString defChain("MC2020,StiCA,K_S01,vmc,Rung.1");
 //StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
 //	 const Char_t *infile=0, const Char_t *outfile="HijingAuAuFixedTarget19.event.root", const Char_t *TreeFile="HijingAuAuFixedTarget19.root");
 //	 const Char_t *Chain="gstar,20Muons,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
-StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display",
-	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName=0);
-StBFChain *bfc(Int_t First, const Char_t *Chain = "MC2016,StiCA,20Muons,vmc,Rung.1",
+//StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display",
+//	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName=0);
+StBFChain *bfc(Int_t First, const Char_t *Chain = defChain,
  	       const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName = "");
 //	 const Char_t *Chain="gstar,20Muons,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
 //_____________________________________________________________________

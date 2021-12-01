@@ -80,9 +80,9 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20/ or $pwd =~ /P21/) {
   if    ($pwd =~ /2010\/11GeV/)               {$glob = "/2010/11GeV";}
   elsif ($pwd =~ /2010\/19GeV/)               {$glob = "/2010/19GeV";}
   elsif ($pwd =~ /2010\/7GeV/)                {$glob = "/2010/7GeV";}
-
-
   elsif ($pwd =~ /2011\/27GeV/)               {$glob = "/2011/27GeV";}
+  elsif ($pwd =~ /2014\/TFG21l/)              {$glob = "/2014/TFG21l";}
+  elsif ($pwd =~ /2014\/SL21c/)               {$glob = "/2014/SL21c";}
   elsif ($pwd =~ /2018\/27GeV/)               {$PICOPATH = "/gpfs01/star/data*"; $glob = "/reco/production_27GeV_fixedTarget_2018/ReversedFullField/P19ie/2018";}
 #  elsif ($pwd =~ /2018\/3p85GeV_fixedTarget/) {$glob = "/2018/3p85GeV_fixedTarget";}
   elsif ($pwd =~ /2018\/3p85GeV_fixedTarget/) {$PICOPATH = "/gpfs01/star/data*";$glob = "/reco/production_3p85GeV_fixedTarget_2018/ReversedFullField/P19ie.SL20d/2018";}

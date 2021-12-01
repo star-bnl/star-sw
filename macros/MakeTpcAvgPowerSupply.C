@@ -327,8 +327,8 @@ Int_t LastProcessedRun(TpcAvgPowerSupply_st *avgI, Double_t AcCharge[2]) {
 //________________________________________________________________________________
 void MakeTpcAvgPowerSupply(Int_t year = 2020) {
   TDatime d(10000*(year-1) + 1201,0);
-  if (year == 2020) {
-    d = TDatime(10000*(year-1) + 1101,0);
+  if (year == 2020 || year == 2022) {
+    d = TDatime(10000*(year-1) + 1001,0);
   }
   cout << "Run MakeTpcAvgPowerSupply for "; d.Print();
   Int_t u95 = d.Convert();
@@ -358,7 +358,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2020) {
   //  TString sql("SELECT runNumber,from_unixtime(startRunRTS),from_unixtime(endRunRTS) from runUpdateStatus order by beginTime;");
   //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime) from daqSummary  order by beginTime;");
   //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  where beginTime > \"2019-11-01\"  order by beginTime;");
-  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  where beginTime > \"2020-06-01\"  order by beginTime;");
+  TString sql(Form("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary  where beginTime > \"%s\"  order by beginTime;",d.AsSQLString()));
   //  TString sql("SELECT runNumber,from_unixtime(firstEventTime),from_unixtime(lastEventTime),firstEventTime,lastEventTime from daqSummary where beginTime > \"2018-03-15 13:44:00\"  order by beginTime;");
   TSQLResult *res = RunLog->Query(sql.Data());
   Int_t Nruns = res->GetRowCount(); cout << "Got " << Nruns << " rows in result" << endl;

@@ -327,6 +327,26 @@ MySQL [Conditions_rts]> select entryTime,elementID,beginTime,deactive,run from  
        if ($1 == "Version") printf("itpc_gains.txt.%08i.%06i\n",$4,$5);\
        }' itpc.log
 
+MySQL [Calibrations_tpc]> select entryTime,elementID,beginTime,flavor,deactive,run from  itpcPadGainT0 where beginTime > "2019" order by beginTime desc;
++---------------------+-----------+---------------------+--------+----------+------+
+| entryTime           | elementID | beginTime           | flavor | deactive | run  |
++---------------------+-----------+---------------------+--------+----------+------+
+| 2021-11-08 19:06:47 |         0 | 2021-11-05 09:14:38 | ofl    |        0 |  123 |20211105.051401
+| 2021-04-23 12:30:16 |         0 | 2021-04-23 12:25:22 | ofl    |        0 |  123 |20210423.082447
+| 2021-03-15 14:50:14 |         0 | 2021-03-15 14:44:25 | ofl    |        0 |  123 |
+| 2021-02-28 14:50:13 |         0 | 2021-02-28 14:48:45 | ofl    |        0 |  123 |
+| 2021-02-25 09:50:14 |         0 | 2021-02-25 09:45:40 | ofl    |        0 |  123 |
+| 2021-02-20 18:00:15 |         0 | 2021-02-20 17:55:06 | ofl    |        0 |  123 |
+| 2021-02-02 10:10:12 |         0 | 2021-02-02 10:02:14 | ofl    |        0 |  123 |
+
+cvs co -r 1.39 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20211105.051401
+cvs co -r 1.38 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20211105.051325
+cvs co -r 1.37 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210630.082758
+cvs co -r 1.36 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210611.110412
+cvs co -r 1.35 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210517.033610
+cvs co -r 1.34 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210514.010417
+
+
 cvs co -r 1.33 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210423.082447
 cvs co -r 1.32 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210407.073736
 cvs co -r 1.31 -p online/RTS/src/ITPC_SUPPORT/itpc_gains.txt >itpc_gains.txt.20210319.064311
@@ -367,6 +387,17 @@ cvs log $STAR/online/RTS/src/TPX_SUPPORT/tpx_gains.txt > tpx.log
        if ($1 == "revision") printf("cvs co -r %s -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >",$2);\
        if ($1 == "Version") printf("tpc_gains.txt.%08i.%06i\n",$4,$5);\
        }' tpx.log
+MySQL [Calibrations_tpc]> select entryTime,elementID,beginTime,flavor,deactive,run from  tpcPadGainT0 where beginTime > "2019" order by beginTime desc;
++---------------------+-----------+---------------------+--------+----------+---------+
+| entryTime           | elementID | beginTime           | flavor | deactive | run     |
++---------------------+-----------+---------------------+--------+----------+---------+
+| 2021-11-08 19:06:02 |         0 | 2021-10-29 08:19:05 | ofl    |        0 | 1107731 |20211029.041901
+| 2021-01-29 20:40:53 |         0 | 2021-01-14 16:23:04 | ofl    |        0 |       0 |20210114.112304
+| 2021-01-29 20:40:50 |         0 | 2020-08-07 14:44:03 | ofl    |        0 |       0 |
+| 2021-01-29 20:40:48 |         0 | 2020-08-07 14:16:59 | ofl    |        0 |       0 |
+cvs co -r 1.101 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20211029.041901
+cvs co -r 1.100 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20211029.040810
+
 cvs co -r 1.99 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20210503.085129
 cvs co -r 1.98 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20210401.085802
 cvs co -r 1.97 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20210226.061422
@@ -467,4 +498,14 @@ cvs co -r 1.4 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.2009082
 cvs co -r 1.3 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20093526.133548
 cvs co -r 1.2 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20093426.133454
 cvs co -r 1.1 -p online/RTS/src/TPX_SUPPORT/tpx_gains.txt >tpc_gains.txt.20090826.172602
+
+
+
+
+
+
+
+
+
+
 */

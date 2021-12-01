@@ -19,9 +19,8 @@
 #include "TF1.h"
 class StarCosmicRaysGenerator : public StarMCPrimaryGenerator  {
  public:
-  StarCosmicRaysGenerator(StarStack* stack) : StarMCPrimaryGenerator() {fStarStack = stack; }
-    StarCosmicRaysGenerator() {}
-    virtual ~StarCosmicRaysGenerator() {}
+  StarCosmicRaysGenerator() : StarMCPrimaryGenerator() {}
+  virtual ~StarCosmicRaysGenerator() {}
   
   static StarCosmicRaysGenerator* Instance() {return (StarCosmicRaysGenerator*) StarMCPrimaryGenerator::Instance();}
   virtual void GeneratePrimaries();

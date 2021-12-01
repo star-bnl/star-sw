@@ -3,6 +3,7 @@
         <command>
   cd ${SUBMITTINGDIRECTORY}
 #  starver TFG20b
+  starver TFG21m
 #  setenv NODEBUG yes
   FPE_OFF
   setenv MALLOC_CHECK_ 2

@@ -22,6 +22,7 @@
 #include "StMuDebug.h"
 #include "StMuEmcUtil.h"
 #include "StMuFmsUtil.h"
+#include "StMuFcsUtil.h"
 #include "StMuPmdUtil.h"
 #include "StMuMcVertex.h"
 #include "StMuMcTrack.h"
@@ -93,22 +94,26 @@ void StMuDst::unset() {
     mcArrays = 0;
     emcArrays     = 0;
     fmsArrays     = 0;
+    fcsArrays     = 0;
     pmdArrays     = 0;
     tofArrays     = 0;
     btofArrays    = 0;   // dongx
     mtdArrays     = 0;   // dongx
-    etofArrays    = 0;   // jdb
     epdArrays     = 0;   // MALisa
+    etofArrays    = 0;   // jdb
     fgtArrays     = 0;
     mMuEmcCollectionArray = 0;
-    mMuEmcCollection = 0; 
-	mMuFmsCollection = 0;
+    mMuEmcCollection = 0;
+    mMuFmsCollection = 0;
+    mMuFcsCollection = 0;
     mMuPmdCollectionArray = 0;
     mMuPmdCollection = 0;
-    mEmcCollection = 0;
-	mFmsCollection = 0;
-    eztArrays      = 0;
-    mtdArrays = 0;
+    mEmcCollection     = 0;
+    mFmsCollection     = 0;
+    eztArrays          = 0;
+    mCurrVertexId      = -2;
+    mCurrPrimaryTracks = 0;
+    mtdArrays          = 0;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -123,6 +128,7 @@ void StMuDst::set(StMuDstMaker* maker) {
   mcArrays = maker->mMCArrays;
   emcArrays     = maker->mEmcArrays;
   fmsArrays     = maker->mFmsArrays;
+  fcsArrays     = maker->mFcsArrays;
   pmdArrays     = maker->mPmdArrays;
   tofArrays     = maker->mTofArrays;
   btofArrays    = maker->mBTofArrays;    // dongx
@@ -135,6 +141,7 @@ void StMuDst::set(StMuDstMaker* maker) {
     mMuEmcCollectionArray = maker->mEmcCollectionArray;
   mMuEmcCollection      = maker->mEmcCollection;
   mMuFmsCollection      = maker->mFmsCollection;
+  mMuFcsCollection      = maker->mFcsCollection;
    mMuPmdCollectionArray = maker->mPmdCollectionArray;
   mMuPmdCollection = maker->mPmdCollection;
   eztArrays     = maker->mEztArrays;
@@ -193,18 +200,20 @@ void StMuDst::set(TClonesArray** theArrays,
 		  TClonesArray** theMCArrays, 
 		  TClonesArray** theEmcArrays,
 		  TClonesArray** theFmsArrays,
+          TClonesArray** theFcsArrays,
 		  TClonesArray** thePmdArrays,
 		  TClonesArray** theTofArrays,
 		  TClonesArray** theBTofArrays,    // dongx
 		  TClonesArray** theETofArrays,    // jdb
-                  TClonesArray** theEpdArrays,     // MALisa
+          TClonesArray** theEpdArrays,     // MALisa
 		  TClonesArray** theMTDArrays,
 		  TClonesArray** theFgtArrays,
 		  TClonesArray** theEztArrays,
-                  TClonesArray* emc_arr,
+          TClonesArray* emc_arr,
 		  StMuEmcCollection *emc,
- 		  StMuFmsCollection *fms,		  
-                  TClonesArray* pmd_arr,
+ 		  StMuFmsCollection *fms,
+          StMuFcsCollection *fcs,		  
+          TClonesArray* pmd_arr,
 		  StMuPmdCollection *pmd)
 {
   // I don't understand why this method is still needed,
@@ -217,6 +226,7 @@ void StMuDst::set(TClonesArray** theArrays,
   mcArrays = theMCArrays;
   emcArrays     = theEmcArrays;   
   fmsArrays     = theFmsArrays;
+  fcsArrays     = theFcsArrays;
   fgtArrays     = theFgtArrays;
   pmdArrays     = thePmdArrays;
   tofArrays     = theTofArrays;
@@ -226,6 +236,7 @@ void StMuDst::set(TClonesArray** theArrays,
   mMuEmcCollectionArray = emc_arr;  
   mMuEmcCollection = emc; 
   mMuFmsCollection = fms;  
+  mMuFcsCollection = fcs;
   mMuPmdCollectionArray = pmd_arr;
   mMuPmdCollection = pmd;
   eztArrays     = theEztArrays;
@@ -782,6 +793,13 @@ StEvent* StMuDst::createStEvent() {
   if(fms) { // transform to StEvent format and fill it
      StFmsCollection *FMS = mFmsUtil->getFms(fms);
      if(FMS) ev->setFmsCollection(FMS);
+  }
+  // now get the FMS stuff and put it in the StEvent
+  static StMuFcsUtil* mFcsUtil = new StMuFcsUtil();
+  StMuFcsCollection *fcs = muFcsCollection();
+  if(fcs) { // transform to StEvent format and fill it
+     StFcsCollection *FCS = mFcsUtil->getFcs(fcs);
+     if(FCS) ev->setFcsCollection(FCS);
   }
   // now get the PMD stuff and put it in the StEvent
   static StMuPmdUtil* mPmdUtil = new StMuPmdUtil();

@@ -22,13 +22,11 @@
 #include <vector>
 class StarMCPythia6PrimaryGenerator : public StarMCPrimaryGenerator  {
  public:
-  StarMCPythia6PrimaryGenerator(StarStack* stack) : StarMCPrimaryGenerator() { PreSet(); fStarStack = stack; }
   StarMCPythia6PrimaryGenerator(TString mode="pp:W:510", Int_t tune=320);
   virtual ~StarMCPythia6PrimaryGenerator() {}
   
   static StarMCPythia6PrimaryGenerator* Instance() {return (StarMCPythia6PrimaryGenerator*) StarMCPrimaryGenerator::Instance();}
   virtual void GeneratePrimaries();
-  virtual void GeneratePrimaries(const TVector3& v);
   virtual void SetGenerator(TString mode="pp:W:510", Int_t tune=320);
   void SetSpread(Double_t xs = 0.15, Double_t ys = 0.15, Double_t zs = 42.0) { gSpreadX = xs; gSpreadY = ys; gSpreadZ = zs;}
  private:

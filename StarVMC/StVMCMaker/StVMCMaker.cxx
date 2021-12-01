@@ -66,6 +66,7 @@
 #include "StarMCHits.h"
 #include "StarMCSimplePrimaryGenerator.h"
 #include "StarMCHBPrimaryGenerator.h"
+#include "StarMuEventReader.h"
 #include "StarVMCApplication.h"
 #include "StMessMgr.h"
 #include "StarVMCDetector.h"
@@ -93,30 +94,38 @@ Int_t StVMCMaker::Init() {
   if (IAttr("NoVMCAlignment")) fgStarVMCApplication->DoMisAlignment(kFALSE);
   if (! IAttr("VMCPassive")) {
     LOG_INFO << "StVMCMaker::Init => Active mode" << endm; 
-    if (! StarPrimaryMaker::instance()) {
-      TString CintF(SAttr("GeneratorFile"));
-      if (CintF == "" && fInputFile == "" ) {
-	CintF = "20Muons.C"; // default
+    if (! StarPrimaryMaker::instance()) {// Jason's Makers ?
+      if (! StarMCPrimaryGenerator::Instance()) {
+	if (IAttr("mtin") && SAttr("InputFile")) {
+	  StarMuEventReader *mureader = new StarMuEventReader();
+	  mureader->SetMuDstFile(SAttr("InputFile"));
+	}
       }
-      if (CintF != "") {
-	static const Char_t *path  = ".:./StarDb/Generators:$STAR/StarDb/Generators";
-	Char_t *file = gSystem->Which(path,CintF,kReadPermission);
-	if (! file) Fatal("StVMCMaker::Init","File %s has not been found in path %s",CintF.Data(),path);
-	else        Warning("StVMCMaker::Init","File %s has been found as %s",CintF.Data(),file);
-	TString command(Form(".L %s",file));
-	TInterpreter::EErrorCode ee;
-	gInterpreter->ProcessLine(command,&ee);
-	assert(!ee);
-	TDataSet *d = (TDataSet *) gInterpreter->Calc("CreateTable()",&ee);
-	assert(!ee);
-	assert(d);
-	AddConst(d);
+      if (! StarMCPrimaryGenerator::Instance()) {
+	TString CintF(SAttr("GeneratorFile"));
+	if (CintF == "" && fInputFile == "" ) {
+	  CintF = "20Muons.C"; // default
+	}
+	if (CintF != "") {
+	  static const Char_t *path  = ".:./StarDb/Generators:$STAR/StarDb/Generators";
+	  Char_t *file = gSystem->Which(path,CintF,kReadPermission);
+	  if (! file) Fatal("StVMCMaker::Init","File %s has not been found in path %s",CintF.Data(),path);
+	  else        Warning("StVMCMaker::Init","File %s has been found as %s",CintF.Data(),file);
+	  TString command(Form(".L %s",file));
+	  TInterpreter::EErrorCode ee;
+	  gInterpreter->ProcessLine(command,&ee);
+	  assert(!ee);
+	  TDataSet *d = (TDataSet *) gInterpreter->Calc("CreateTable()",&ee);
+	  assert(!ee);
+	  assert(d);
+	  AddConst(d);
 #if  ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0)
-	/* Don' do this beacuse root will try to unload shared libraries in the macro */
-	command.ReplaceAll(".L ",".U ");
-	gInterpreter->ProcessLine(command,&ee);
-	assert(!ee);
+	  /* Don' do this beacuse root will try to unload shared libraries in the macro */
+	  command.ReplaceAll(".L ",".U ");
+	  gInterpreter->ProcessLine(command,&ee);
+	  assert(!ee);
 #endif
+	}
       } 
     }
   }
@@ -257,9 +266,11 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   }
   StarMCHits *hits = 0;
   if (TString(gGeoManager->GetName()) != "default") hits = StarMCHits::instance();
-  if (hits) hits->SetHitHolder(m_DataSet);
-  fgStarVMCApplication->GetStack()->SetHitHolder(m_DataSet);
-  fgStarVMCApplication->SetStepping(hits);
+  if (hits) {
+    hits->SetHitHolder(m_DataSet);
+    fgStarVMCApplication->GetStack()->SetHitHolder(m_DataSet);
+    fgStarVMCApplication->SetStepping(hits);
+  }
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -276,13 +287,14 @@ Int_t StVMCMaker::Make(){
   }  
   if (! IAttr("VMCPassive")) {// Active  mode 
     //    TStopwatch sw;
-    if (fMuDstIter && ! IAttr("mtin"))  {
+    if (fMuDstIter) {
       Int_t ok = SetVertex();
       if (ok) return ok;
     }
-    // Run Generators if any
-    Int_t ok = StMaker::Make();
-    if (ok) return ok;
+    if (! IAttr("mtin"))  {    // Run Generators if any
+      Int_t ok = StMaker::Make();
+      if (ok) return ok;
+    }
     Bool_t runOk = fgStarVMCApplication->RunMC(1);
     if (! runOk) return kStEOF;
     //    if (Debug())   sw.Print();

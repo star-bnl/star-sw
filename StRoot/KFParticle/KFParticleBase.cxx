@@ -22,6 +22,7 @@
 
 
 #include "KFParticleBase.h"
+#include "KFParticleMath.h"
 #include <cmath>
 
 #ifndef KFParticleStandalone
@@ -540,41 +541,29 @@ bool KFParticleBase::GetMeasurement( const KFParticleBase& daughter, float m[], 
     
     float dsdp[6] = {-dsdr[0], -dsdr[1], -dsdr[2], 0, 0, 0};
     
-    float F[36], F1[36];
-    for(int i2=0; i2<36; i2++)
-    {
-      F[i2]  = 0;
-      F1[i2] = 0;
-    }
-    daughter.Transport(dS, dsdr, m, V, dsdp, F, F1);
+    float F1[36];
+    daughter.Transport(dS, dsdr, m, V, dsdp, nullptr, F1);
     
-//     float V1Tmp[36] = {0.};
-//     MultQSQt(F1, fC, V1Tmp, 6);
-    
-//     for(int iC=0; iC<21; iC++)
-//       V[iC] += V1Tmp[iC];
-    
-    float VFT[3][6];
-    for(int i=0; i<3; i++)
-      for(int j=0; j<6; j++)
-      {
-        VFT[i][j] = 0;
-        for(int k=0; k<3; k++)
-        {
-          VFT[i][j] +=  fC[IJ(i,k)] * F1[j*6+k];
-        }
-      }
-    
-    float FVFT[6][6];
-    for(int i=0; i<6; i++)
-      for(int j=0; j<6; j++)
-      {
-        FVFT[i][j] = 0;
-        for(int k=0; k<3; k++)
-        {
-          FVFT[i][j] += F1[i*6+k] * VFT[k][j];
-        }
-      }
+    float VFT[3][3];
+    VFT[0][0] = fC[0]*F1[ 0] + fC[1]*F1[ 1] + fC[3]*F1[ 2];
+    VFT[0][1] = fC[0]*F1[ 6] + fC[1]*F1[ 7] + fC[3]*F1[ 8];
+    VFT[0][2] = fC[0]*F1[12] + fC[1]*F1[13] + fC[3]*F1[14];
+
+    VFT[1][0] = fC[1]*F1[ 0] + fC[2]*F1[ 1] + fC[4]*F1[ 2];
+    VFT[1][1] = fC[1]*F1[ 6] + fC[2]*F1[ 7] + fC[4]*F1[ 8];
+    VFT[1][2] = fC[1]*F1[12] + fC[2]*F1[13] + fC[4]*F1[14];
+
+    VFT[2][0] = fC[3]*F1[ 0] + fC[4]*F1[ 1] + fC[5]*F1[ 2];
+    VFT[2][1] = fC[3]*F1[ 6] + fC[4]*F1[ 7] + fC[5]*F1[ 8];
+    VFT[2][2] = fC[3]*F1[12] + fC[4]*F1[13] + fC[5]*F1[14];
+
+    float FVFT[6];
+    FVFT[0] = F1[ 0]*VFT[0][0] + F1[ 1]*VFT[1][0] + F1[ 2]*VFT[2][0];
+    FVFT[1] = F1[ 6]*VFT[0][0] + F1[ 7]*VFT[1][0] + F1[ 8]*VFT[2][0];
+    FVFT[2] = F1[ 6]*VFT[0][1] + F1[ 7]*VFT[1][1] + F1[ 8]*VFT[2][1];
+    FVFT[3] = F1[12]*VFT[0][0] + F1[13]*VFT[1][0] + F1[14]*VFT[2][0];
+    FVFT[4] = F1[12]*VFT[0][1] + F1[13]*VFT[1][1] + F1[14]*VFT[2][1];
+    FVFT[5] = F1[12]*VFT[0][2] + F1[13]*VFT[1][2] + F1[14]*VFT[2][2];
       
     for(int i=0; i<3; i++)
       for(int j=0; j<3; j++)
@@ -586,28 +575,12 @@ bool KFParticleBase::GetMeasurement( const KFParticleBase& daughter, float m[], 
         }
       }
       
-    V[0] += FVFT[0][0];
-    V[1] += FVFT[1][0];
-    V[2] += FVFT[1][1];
-    V[3] += FVFT[2][0];
-    V[4] += FVFT[2][1];
-    V[5] += FVFT[2][2];
-    
-//     if(fNDF > 100)
-//     {
-//       float dx = fP[0] - m[0];
-//       float dy = fP[1] - m[1];
-//       float dz = fP[2] - m[2];
-//       float sigmaS = 3.f*sqrt( (dx*dx + dy*dy + dz*dz) / (m[3]*m[3] + m[4]*m[4] + m[5]*m[5]) );
-//     
-//       float h[3] = { m[3]*sigmaS, m[4]*sigmaS, m[5]*sigmaS };
-//       V[0]+= h[0]*h[0];
-//       V[1]+= h[1]*h[0];
-//       V[2]+= h[1]*h[1];
-//       V[3]+= h[2]*h[0];
-//       V[4]+= h[2]*h[1];
-//       V[5]+= h[2]*h[2];
-//     }
+    V[0] += FVFT[0];
+    V[1] += FVFT[1];
+    V[2] += FVFT[2];
+    V[3] += FVFT[3];
+    V[4] += FVFT[4];
+    V[5] += FVFT[5];
   }
   
   return 1;
@@ -627,7 +600,7 @@ void KFParticleBase::AddDaughter( const KFParticleBase &Daughter )
    ** AddDaughterWithEnergyFitMC() function.
    ** \param[in] Daughter - the daughter particle
    **/
-    
+  
   AddDaughterId( Daughter.Id() );
   
   if( fNDF<-1 ){ // first daughter -> just copy
@@ -803,7 +776,7 @@ void KFParticleBase::SubtractDaughter( const KFParticleBase &Daughter )
    **/
 
   AddDaughterId( Daughter.Id() );
-
+  
   float m[8], mV[36];
 
   float D[3][3];
@@ -1644,6 +1617,41 @@ void KFParticleBase::GetDistanceToVertexLine( const KFParticleBase &Vertex, floa
 
   l = (l < 1.e-8f) ? 1.e-8f : l;
   dl = (dl > 0.f) ? sqrt(dl)/l : 1e8f;
+  
+
+//   float cosV = dx*fP[3] + dy*fP[4] + dz*fP[5];
+//   if((l > 3.f*dl) && (cosV>0.f))
+//     dl = 1e8f;
+}
+
+void KFParticleBase::GetDistanceToVertexLineWithDirection( const KFParticleBase &Vertex, float &l, float &dl) const 
+{
+  /** Calculates the distance between the particle position and the vertex together with the error.
+   ** Errors of both particle and vertex are taken into account. Also optionally checks if partcile
+   ** is pointing flying from the vertex, not in the direction to the vertex if the pointer to the
+   ** mask isParticleFromVertex is provided.
+   ** \param[in] Vertex - vertex to which the distance should be calculated
+   ** \param[out] l - distance between the current position of the particle and a vertex
+   ** \param[out] dl - the error of the calculated distance
+   **/
+
+  float c[6] = {Vertex.fC[0]+fC[0], Vertex.fC[1]+fC[1], Vertex.fC[2]+fC[2],
+                Vertex.fC[3]+fC[3], Vertex.fC[4]+fC[4], Vertex.fC[5]+fC[5]};
+
+  float dx = (Vertex.fP[0]-fP[0]);
+  float dy = (Vertex.fP[1]-fP[1]);
+  float dz = (Vertex.fP[2]-fP[2]);
+
+  l = sqrt( dx*dx + dy*dy + dz*dz );
+  dl = c[0]*dx*dx + c[2]*dy*dy + c[5]*dz*dz + 2*(c[1]*dx*dy + c[3]*dx*dz + c[4]*dy*dz);
+
+  l = (l < 1.e-8f) ? 1.e-8f : l;
+  dl = (dl > 0.f) ? sqrt(dl)/l : 1e8f;
+  
+
+  float cosV = dx*fP[3] + dy*fP[4] + dz*fP[5];
+  if((l > 3.f*dl) && (cosV>0.f))
+    dl = 1e8f;
 }
 
 float KFParticleBase::GetDStoPointLine( const float xyz[3], float dsdr[6] ) const 
@@ -1730,8 +1738,8 @@ float KFParticleBase::GetDStoPointBz( float B, const float xyz[3], float dsdr[6]
   dS = atan2( abq, pt2 + bq*(dy*px -dx*py) )/bq;
 
   float bs= bq*dS;
-
-  float s = sin(bs), c = cos(bs);
+  float s = sin(bs);
+  float c = cos(bs);
 
   if(fabs(bq) < LocalSmall)
     bq = LocalSmall;
@@ -1764,7 +1772,8 @@ float KFParticleBase::GetDStoPointBz( float B, const float xyz[3], float dsdr[6]
   dS += sz;
   
   bs= bq*dS;
-  s = sin(bs), c = cos(bs);
+  s = sin(bs);
+  c = cos(bs);
   
   float sB, cB;
   const float kOvSqr6 = 1.f/sqrt(float(6.f));
@@ -2814,7 +2823,7 @@ void KFParticleBase::TransportCBM( float dS, const float* dsdr, float P[], float
 }
 
 
-void KFParticleBase::TransportBz( float Bz, float dS, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1 ) const 
+void KFParticleBase::TransportBz( float Bz, float dS, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1, const bool fullC ) const 
 { 
   /** Transports the parameters and their covariance matrix of the current particle assuming constant homogeneous 
    ** magnetic field Bz on the length defined by the transport parameter dS = l/p, where l is the signed distance and p is 
@@ -2838,14 +2847,15 @@ void KFParticleBase::TransportBz( float Bz, float dS, const float* dsdr, float P
    ** with the state vector r1, to which the current particle is being transported, F1 = d(fP new)/d(r1)
    **/  
   
-  const float kCLight = 0.000299792458;
+  const float kCLight = 0.000299792458f;
   Bz = Bz*fQ*kCLight;
   float bs= Bz*dS;
   float s = sin(bs), c = cos(bs);
+
   float sB, cB;
-  if( fabs(bs)>1.e-10){
+  if( fabs(bs)>1.e-10f){
     sB= s/Bz;
-    cB= (1-c)/Bz;
+    cB= (1.f-c)/Bz;
   }else{
     const float kOvSqr6 = 1./sqrt(6.);
     sB = (1.-bs*kOvSqr6)*(1.+bs*kOvSqr6)*dS;
@@ -2865,40 +2875,212 @@ void KFParticleBase::TransportBz( float Bz, float dS, const float* dsdr, float P
   P[6] = fP[6];
   P[7] = fP[7];
 
-  float mJ[8][8];
-  for( Int_t i=0; i<8; i++ ) for( Int_t j=0; j<8; j++) mJ[i][j]=0;
+  float mJ[6][6];
+  for( Int_t i=0; i<6; i++ ) 
+    for( Int_t j=0; j<6; j++)
+      mJ[i][j]=0;
 
-  for(int i=0; i<8; i++) mJ[i][i]=1;
+  for(int i=0; i<6; i++)
+    mJ[i][i]=1;
+  
   mJ[0][3] =  sB; mJ[0][4] = cB;
   mJ[1][3] = -cB; mJ[1][4] = sB;
   mJ[2][5] = dS;
   mJ[3][3] =  c; mJ[3][4] = s;
   mJ[4][3] = -s; mJ[4][4] = c;
+
+  const float cPx = c * px;
+  const float sPy = s * py;
+  mJ[0][0] += cPx * dsdr[0] + sPy * dsdr[0];
+  mJ[0][1] += cPx * dsdr[1] + sPy * dsdr[1];
+  mJ[0][2] += cPx * dsdr[2] + sPy * dsdr[2];
+  mJ[0][3] += cPx * dsdr[3] + sPy * dsdr[3];
+  mJ[0][4] += cPx * dsdr[4] + sPy * dsdr[4];
+  mJ[0][5] += cPx * dsdr[5] + sPy * dsdr[5];
   
+  const float sPx = s * px;
+  const float cPy = c * py;
+  mJ[1][0] -= sPx * dsdr[0] - cPy * dsdr[0];
+  mJ[1][1] -= sPx * dsdr[1] - cPy * dsdr[1];
+  mJ[1][2] -= sPx * dsdr[2] - cPy * dsdr[2];
+  mJ[1][3] -= sPx * dsdr[3] - cPy * dsdr[3];
+  mJ[1][4] -= sPx * dsdr[4] - cPy * dsdr[4];
+  mJ[1][5] -= sPx * dsdr[5] - cPy * dsdr[5];
+
+  mJ[2][0] += pz*dsdr[0];
+  mJ[2][1] += pz*dsdr[1];
+  mJ[2][2] += pz*dsdr[2];
+  mJ[2][3] += pz*dsdr[3];
+  mJ[2][4] += pz*dsdr[4];
+  mJ[2][5] += pz*dsdr[5];
+
+  const float sBzPx = Bz * sPx;
+  const float cBzPy = Bz * cPy;
+  mJ[3][0] -= sBzPx * dsdr[0] - cBzPy * dsdr[0];
+  mJ[3][1] -= sBzPx * dsdr[1] - cBzPy * dsdr[1];
+  mJ[3][2] -= sBzPx * dsdr[2] - cBzPy * dsdr[2];
+  mJ[3][3] -= sBzPx * dsdr[3] - cBzPy * dsdr[3];
+  mJ[3][4] -= sBzPx * dsdr[4] - cBzPy * dsdr[4];
+  mJ[3][5] -= sBzPx * dsdr[5] - cBzPy * dsdr[5];
   
-  float mJds[6][6];
-  for( Int_t i=0; i<6; i++ ) for( Int_t j=0; j<6; j++) mJds[i][j]=0;
-  mJds[0][3] =  c; mJds[0][4] = s;
-  mJds[1][3] = -s; mJds[1][4] = c;
-  mJds[2][5] = 1;
-  mJds[3][3] = -Bz*s; mJds[3][4] =  Bz*c;
-  mJds[4][3] = -Bz*c; mJds[4][4] = -Bz*s;
-  
-  for(int i1=0; i1<6; i1++)
-    for(int i2=0; i2<6; i2++)
-      mJ[i1][i2] += mJds[i1][3]*px*dsdr[i2] + mJds[i1][4]*py*dsdr[i2] + mJds[i1][5]*pz*dsdr[i2];
-  
-  MultQSQt( mJ[0], fC, C, 8);
-  
-  if(F)
-  {
+  const float cBzPx = Bz * cPx;
+  const float sBzPy = Bz * sPy;
+  mJ[4][0] -= cBzPx * dsdr[0] + sBzPy * dsdr[0];
+  mJ[4][1] -= cBzPx * dsdr[1] + sBzPy * dsdr[1];
+  mJ[4][2] -= cBzPx * dsdr[2] + sBzPy * dsdr[2];
+  mJ[4][3] -= cBzPx * dsdr[3] + sBzPy * dsdr[3];
+  mJ[4][4] -= cBzPx * dsdr[4] + sBzPy * dsdr[4];
+  mJ[4][5] -= cBzPx * dsdr[5] + sBzPy * dsdr[5];
+
+  if(F) {
     for(int i=0; i<6; i++)
       for(int j=0; j<6; j++)
         F[i*6+j] = mJ[i][j];
+  }  
+  
+  float CJt[6][5];
+  
+  CJt[0][0] = fC[ 0]*mJ[0][0] + fC[ 1]*mJ[0][1] + fC[ 3]*mJ[0][2] + fC[ 6]*mJ[0][3] + fC[10]*mJ[0][4] + fC[15]*mJ[0][5];
+  CJt[0][1] = fC[ 0]*mJ[1][0] + fC[ 1]*mJ[1][1] + fC[ 3]*mJ[1][2] + fC[ 6]*mJ[1][3] + fC[10]*mJ[1][4] + fC[15]*mJ[1][5];
+  CJt[0][2] = fC[ 0]*mJ[2][0] + fC[ 1]*mJ[2][1] + fC[ 3]*mJ[2][2] + fC[ 6]*mJ[2][3] + fC[10]*mJ[2][4] + fC[15]*mJ[2][5];
+  CJt[0][3] = fC[ 0]*mJ[3][0] + fC[ 1]*mJ[3][1] + fC[ 3]*mJ[3][2] + fC[ 6]*mJ[3][3] + fC[10]*mJ[3][4] + fC[15]*mJ[3][5];
+  CJt[0][4] = fC[ 0]*mJ[4][0] + fC[ 1]*mJ[4][1] + fC[ 3]*mJ[4][2] + fC[ 6]*mJ[4][3] + fC[10]*mJ[4][4] + fC[15]*mJ[4][5];
 
-    for(int i1=0; i1<6; i1++)
-      for(int i2=0; i2<6; i2++)
-        F1[i1*6 + i2] = mJds[i1][3]*px*dsdr1[i2] + mJds[i1][4]*py*dsdr1[i2] + mJds[i1][5]*pz*dsdr1[i2];
+  CJt[1][0] = fC[ 1]*mJ[0][0] + fC[ 2]*mJ[0][1] + fC[ 4]*mJ[0][2] + fC[ 7]*mJ[0][3] + fC[11]*mJ[0][4] + fC[16]*mJ[0][5];
+  CJt[1][1] = fC[ 1]*mJ[1][0] + fC[ 2]*mJ[1][1] + fC[ 4]*mJ[1][2] + fC[ 7]*mJ[1][3] + fC[11]*mJ[1][4] + fC[16]*mJ[1][5];
+  CJt[1][2] = fC[ 1]*mJ[2][0] + fC[ 2]*mJ[2][1] + fC[ 4]*mJ[2][2] + fC[ 7]*mJ[2][3] + fC[11]*mJ[2][4] + fC[16]*mJ[2][5];
+  CJt[1][3] = fC[ 1]*mJ[3][0] + fC[ 2]*mJ[3][1] + fC[ 4]*mJ[3][2] + fC[ 7]*mJ[3][3] + fC[11]*mJ[3][4] + fC[16]*mJ[3][5];
+  CJt[1][4] = fC[ 1]*mJ[4][0] + fC[ 2]*mJ[4][1] + fC[ 4]*mJ[4][2] + fC[ 7]*mJ[4][3] + fC[11]*mJ[4][4] + fC[16]*mJ[4][5];
+
+  CJt[2][0] = fC[ 3]*mJ[0][0] + fC[ 4]*mJ[0][1] + fC[ 5]*mJ[0][2] + fC[ 8]*mJ[0][3] + fC[12]*mJ[0][4] + fC[17]*mJ[0][5];
+  CJt[2][1] = fC[ 3]*mJ[1][0] + fC[ 4]*mJ[1][1] + fC[ 5]*mJ[1][2] + fC[ 8]*mJ[1][3] + fC[12]*mJ[1][4] + fC[17]*mJ[1][5];
+  CJt[2][2] = fC[ 3]*mJ[2][0] + fC[ 4]*mJ[2][1] + fC[ 5]*mJ[2][2] + fC[ 8]*mJ[2][3] + fC[12]*mJ[2][4] + fC[17]*mJ[2][5];
+  CJt[2][3] = fC[ 3]*mJ[3][0] + fC[ 4]*mJ[3][1] + fC[ 5]*mJ[3][2] + fC[ 8]*mJ[3][3] + fC[12]*mJ[3][4] + fC[17]*mJ[3][5];
+  CJt[2][4] = fC[ 3]*mJ[4][0] + fC[ 4]*mJ[4][1] + fC[ 5]*mJ[4][2] + fC[ 8]*mJ[4][3] + fC[12]*mJ[4][4] + fC[17]*mJ[4][5];
+
+  CJt[3][0] = fC[ 6]*mJ[0][0] + fC[ 7]*mJ[0][1] + fC[ 8]*mJ[0][2] + fC[ 9]*mJ[0][3] + fC[13]*mJ[0][4] + fC[18]*mJ[0][5];
+  CJt[3][1] = fC[ 6]*mJ[1][0] + fC[ 7]*mJ[1][1] + fC[ 8]*mJ[1][2] + fC[ 9]*mJ[1][3] + fC[13]*mJ[1][4] + fC[18]*mJ[1][5];
+  CJt[3][2] = fC[ 6]*mJ[2][0] + fC[ 7]*mJ[2][1] + fC[ 8]*mJ[2][2] + fC[ 9]*mJ[2][3] + fC[13]*mJ[2][4] + fC[18]*mJ[2][5];
+  CJt[3][3] = fC[ 6]*mJ[3][0] + fC[ 7]*mJ[3][1] + fC[ 8]*mJ[3][2] + fC[ 9]*mJ[3][3] + fC[13]*mJ[3][4] + fC[18]*mJ[3][5];
+  CJt[3][4] = fC[ 6]*mJ[4][0] + fC[ 7]*mJ[4][1] + fC[ 8]*mJ[4][2] + fC[ 9]*mJ[4][3] + fC[13]*mJ[4][4] + fC[18]*mJ[4][5];
+
+  CJt[4][0] = fC[10]*mJ[0][0] + fC[11]*mJ[0][1] + fC[12]*mJ[0][2] + fC[13]*mJ[0][3] + fC[14]*mJ[0][4] + fC[19]*mJ[0][5];
+  CJt[4][1] = fC[10]*mJ[1][0] + fC[11]*mJ[1][1] + fC[12]*mJ[1][2] + fC[13]*mJ[1][3] + fC[14]*mJ[1][4] + fC[19]*mJ[1][5];
+  CJt[4][2] = fC[10]*mJ[2][0] + fC[11]*mJ[2][1] + fC[12]*mJ[2][2] + fC[13]*mJ[2][3] + fC[14]*mJ[2][4] + fC[19]*mJ[2][5];
+  CJt[4][3] = fC[10]*mJ[3][0] + fC[11]*mJ[3][1] + fC[12]*mJ[3][2] + fC[13]*mJ[3][3] + fC[14]*mJ[3][4] + fC[19]*mJ[3][5];
+  CJt[4][4] = fC[10]*mJ[4][0] + fC[11]*mJ[4][1] + fC[12]*mJ[4][2] + fC[13]*mJ[4][3] + fC[14]*mJ[4][4] + fC[19]*mJ[4][5];
+
+  CJt[5][0] = fC[15]*mJ[0][0] + fC[16]*mJ[0][1] + fC[17]*mJ[0][2] + fC[18]*mJ[0][3] + fC[19]*mJ[0][4] + fC[20]*mJ[0][5];
+  CJt[5][1] = fC[15]*mJ[1][0] + fC[16]*mJ[1][1] + fC[17]*mJ[1][2] + fC[18]*mJ[1][3] + fC[19]*mJ[1][4] + fC[20]*mJ[1][5];
+  CJt[5][2] = fC[15]*mJ[2][0] + fC[16]*mJ[2][1] + fC[17]*mJ[2][2] + fC[18]*mJ[2][3] + fC[19]*mJ[2][4] + fC[20]*mJ[2][5];
+  CJt[5][3] = fC[15]*mJ[3][0] + fC[16]*mJ[3][1] + fC[17]*mJ[3][2] + fC[18]*mJ[3][3] + fC[19]*mJ[3][4] + fC[20]*mJ[3][5];
+  CJt[5][4] = fC[15]*mJ[4][0] + fC[16]*mJ[4][1] + fC[17]*mJ[4][2] + fC[18]*mJ[4][3] + fC[19]*mJ[4][4] + fC[20]*mJ[4][5];
+  
+  
+  
+  C[ 0] = mJ[0][0]*CJt[0][0] + mJ[0][1]*CJt[1][0] + mJ[0][2]*CJt[2][0] + mJ[0][3]*CJt[3][0] + mJ[0][4]*CJt[4][0] + mJ[0][5]*CJt[5][0];
+  
+  C[ 1] = mJ[1][0]*CJt[0][0] + mJ[1][1]*CJt[1][0] + mJ[1][2]*CJt[2][0] + mJ[1][3]*CJt[3][0] + mJ[1][4]*CJt[4][0] + mJ[1][5]*CJt[5][0];
+  C[ 2] = mJ[1][0]*CJt[0][1] + mJ[1][1]*CJt[1][1] + mJ[1][2]*CJt[2][1] + mJ[1][3]*CJt[3][1] + mJ[1][4]*CJt[4][1] + mJ[1][5]*CJt[5][1];
+
+  C[ 3] = mJ[2][0]*CJt[0][0] + mJ[2][1]*CJt[1][0] + mJ[2][2]*CJt[2][0] + mJ[2][3]*CJt[3][0] + mJ[2][4]*CJt[4][0] + mJ[2][5]*CJt[5][0];
+  C[ 4] = mJ[2][0]*CJt[0][1] + mJ[2][1]*CJt[1][1] + mJ[2][2]*CJt[2][1] + mJ[2][3]*CJt[3][1] + mJ[2][4]*CJt[4][1] + mJ[2][5]*CJt[5][1];
+  C[ 5] = mJ[2][0]*CJt[0][2] + mJ[2][1]*CJt[1][2] + mJ[2][2]*CJt[2][2] + mJ[2][3]*CJt[3][2] + mJ[2][4]*CJt[4][2] + mJ[2][5]*CJt[5][2];
+  
+  if(fullC){
+    C[ 6] = mJ[3][0]*CJt[0][0] + mJ[3][1]*CJt[1][0] + mJ[3][2]*CJt[2][0] + mJ[3][3]*CJt[3][0] + mJ[3][4]*CJt[4][0] + mJ[3][5]*CJt[5][0];
+    C[ 7] = mJ[3][0]*CJt[0][1] + mJ[3][1]*CJt[1][1] + mJ[3][2]*CJt[2][1] + mJ[3][3]*CJt[3][1] + mJ[3][4]*CJt[4][1] + mJ[3][5]*CJt[5][1];
+    C[ 8] = mJ[3][0]*CJt[0][2] + mJ[3][1]*CJt[1][2] + mJ[3][2]*CJt[2][2] + mJ[3][3]*CJt[3][2] + mJ[3][4]*CJt[4][2] + mJ[3][5]*CJt[5][2];
+    C[ 9] = mJ[3][0]*CJt[0][3] + mJ[3][1]*CJt[1][3] + mJ[3][2]*CJt[2][3] + mJ[3][3]*CJt[3][3] + mJ[3][4]*CJt[4][3] + mJ[3][5]*CJt[5][3];
+    
+    C[10] = mJ[4][0]*CJt[0][0] + mJ[4][1]*CJt[1][0] + mJ[4][2]*CJt[2][0] + mJ[4][3]*CJt[3][0] + mJ[4][4]*CJt[4][0] + mJ[4][5]*CJt[5][0];
+    C[11] = mJ[4][0]*CJt[0][1] + mJ[4][1]*CJt[1][1] + mJ[4][2]*CJt[2][1] + mJ[4][3]*CJt[3][1] + mJ[4][4]*CJt[4][1] + mJ[4][5]*CJt[5][1];
+    C[12] = mJ[4][0]*CJt[0][2] + mJ[4][1]*CJt[1][2] + mJ[4][2]*CJt[2][2] + mJ[4][3]*CJt[3][2] + mJ[4][4]*CJt[4][2] + mJ[4][5]*CJt[5][2];
+    C[13] = mJ[4][0]*CJt[0][3] + mJ[4][1]*CJt[1][3] + mJ[4][2]*CJt[2][3] + mJ[4][3]*CJt[3][3] + mJ[4][4]*CJt[4][3] + mJ[4][5]*CJt[5][3];
+    C[14] = mJ[4][0]*CJt[0][4] + mJ[4][1]*CJt[1][4] + mJ[4][2]*CJt[2][4] + mJ[4][3]*CJt[3][4] + mJ[4][4]*CJt[4][4] + mJ[4][5]*CJt[5][4];
+    
+    C[15] = CJt[5][0];
+    C[16] = CJt[5][1];
+    C[17] = CJt[5][2];
+    C[18] = CJt[5][3];
+    C[19] = CJt[5][4];
+    C[20] = fC[20];
+
+    const float C21 = fC[21]*mJ[0][0] + fC[22]*mJ[0][1] + fC[23]*mJ[0][2] + fC[24]*mJ[0][3] + fC[25]*mJ[0][4] + fC[26]*mJ[0][5];
+    const float C22 = fC[21]*mJ[1][0] + fC[22]*mJ[1][1] + fC[23]*mJ[1][2] + fC[24]*mJ[1][3] + fC[25]*mJ[1][4] + fC[26]*mJ[1][5];
+    const float C23 = fC[21]*mJ[2][0] + fC[22]*mJ[2][1] + fC[23]*mJ[2][2] + fC[24]*mJ[2][3] + fC[25]*mJ[2][4] + fC[26]*mJ[2][5];
+    const float C24 = fC[21]*mJ[3][0] + fC[22]*mJ[3][1] + fC[23]*mJ[3][2] + fC[24]*mJ[3][3] + fC[25]*mJ[3][4] + fC[26]*mJ[3][5];
+    const float C25 = fC[21]*mJ[4][0] + fC[22]*mJ[4][1] + fC[23]*mJ[4][2] + fC[24]*mJ[4][3] + fC[25]*mJ[4][4] + fC[26]*mJ[4][5];
+    C[21] = C21;
+    C[22] = C22;
+    C[23] = C23;
+    C[24] = C24;
+    C[25] = C25;
+    C[26] = fC[26];
+    C[27] = fC[27];
+    
+    const float C28 = fC[28]*mJ[0][0] + fC[29]*mJ[0][1] + fC[30]*mJ[0][2] + fC[31]*mJ[0][3] + fC[32]*mJ[0][4] + fC[33]*mJ[0][5];
+    const float C29 = fC[28]*mJ[1][0] + fC[29]*mJ[1][1] + fC[30]*mJ[1][2] + fC[31]*mJ[1][3] + fC[32]*mJ[1][4] + fC[33]*mJ[1][5];
+    const float C30 = fC[28]*mJ[2][0] + fC[29]*mJ[2][1] + fC[30]*mJ[2][2] + fC[31]*mJ[2][3] + fC[32]*mJ[2][4] + fC[33]*mJ[2][5];
+    const float C31 = fC[28]*mJ[3][0] + fC[29]*mJ[3][1] + fC[30]*mJ[3][2] + fC[31]*mJ[3][3] + fC[32]*mJ[3][4] + fC[33]*mJ[3][5];
+    const float C32 = fC[28]*mJ[4][0] + fC[29]*mJ[4][1] + fC[30]*mJ[4][2] + fC[31]*mJ[4][3] + fC[32]*mJ[4][4] + fC[33]*mJ[4][5];
+    C[28] = C28;
+    C[29] = C29;
+    C[30] = C30;
+    C[31] = C31;
+    C[32] = C32;
+    C[33] = fC[33];
+    C[34] = fC[34];
+    C[35] = fC[35];
+  }
+
+  if(F1) {
+    F1[ 0] = cPx * dsdr1[0] + sPy * dsdr1[0];
+    F1[ 1] = cPx * dsdr1[1] + sPy * dsdr1[1];
+    F1[ 2] = cPx * dsdr1[2] + sPy * dsdr1[2];
+    
+    F1[ 6] = cPy * dsdr1[0] - sPx * dsdr1[0];
+    F1[ 7] = cPy * dsdr1[1] - sPx * dsdr1[1];
+    F1[ 8] = cPy * dsdr1[2] - sPx * dsdr1[2];
+
+    F1[12] = pz*dsdr1[0];
+    F1[13] = pz*dsdr1[1];
+    F1[14] = pz*dsdr1[2];    
+    
+    if(fullC){
+      F1[ 3] = cPx * dsdr1[3] + sPy * dsdr1[3];
+      F1[ 4] = cPx * dsdr1[4] + sPy * dsdr1[4];
+      F1[ 5] = cPx * dsdr1[5] + sPy * dsdr1[5];
+
+      F1[ 9] = cPy * dsdr1[3] - sPx * dsdr1[3];
+      F1[10] = cPy * dsdr1[4] - sPx * dsdr1[4];
+      F1[11] = cPy * dsdr1[5] - sPx * dsdr1[5];
+
+      F1[15] = pz*dsdr1[3];
+      F1[16] = pz*dsdr1[4];
+      F1[17] = pz*dsdr1[5];
+
+      F1[18] = cBzPy * dsdr1[0] - sBzPx * dsdr1[0];
+      F1[19] = cBzPy * dsdr1[1] - sBzPx * dsdr1[1];
+      F1[20] = cBzPy * dsdr1[2] - sBzPx * dsdr1[2];
+      F1[21] = cBzPy * dsdr1[3] - sBzPx * dsdr1[3];
+      F1[22] = cBzPy * dsdr1[4] - sBzPx * dsdr1[4];
+      F1[23] = cBzPy * dsdr1[5] - sBzPx * dsdr1[5];
+
+      F1[24] = -(cBzPx * dsdr1[0] + sBzPy * dsdr1[0]);
+      F1[25] = -(cBzPx * dsdr1[1] + sBzPy * dsdr1[1]);
+      F1[26] = -(cBzPx * dsdr1[2] + sBzPy * dsdr1[2]);
+      F1[27] = -(cBzPx * dsdr1[3] + sBzPy * dsdr1[3]);
+      F1[28] = -(cBzPx * dsdr1[4] + sBzPy * dsdr1[4]);
+      F1[29] = -(cBzPx * dsdr1[5] + sBzPy * dsdr1[5]);
+
+      F1[30] = 0.f;
+      F1[31] = 0.f;
+      F1[32] = 0.f;
+      F1[33] = 0.f;
+      F1[34] = 0.f;
+      F1[35] = 0.f;    
+    }
   }
 }
 
@@ -2969,43 +3151,60 @@ float KFParticleBase::GetDeviationFromVertex( const float v[], const float Cv[] 
   float dsdr[6] = {0.f,0.f,0.f,0.f,0.f,0.f};
   const float dS = GetDStoPoint(v, dsdr);
   float dsdp[6] = {-dsdr[0], -dsdr[1], -dsdr[2], 0, 0, 0};
-  float F[36], F1[36];
-  for(int i2=0; i2<36; i2++)
-  {
-    F[i2]  = 0;
-    F1[i2] = 0;
-  }
-  Transport( dS, dsdr, mP, mC, dsdp, F, F1 );  
+  float F1[36];
+  Transport( dS, dsdr, mP, mC, dsdp, nullptr, F1, false );
 
   if(Cv)
   {
-    float VFT[3][6];
-    for(int i=0; i<3; i++)
-      for(int j=0; j<6; j++)
-      {
-        VFT[i][j] = 0;
-        for(int k=0; k<3; k++)
-        {
-          VFT[i][j] +=  Cv[IJ(i,k)] * F1[j*6+k];
-        }
-      }
-  
-    float FVFT[6][6];
-    for(int i=0; i<6; i++)
-      for(int j=0; j<6; j++)
-      {
-        FVFT[i][j] = 0;
-        for(int k=0; k<3; k++)
-        {
-          FVFT[i][j] += F1[i*6+k] * VFT[k][j];
-        }
-      }
-    mC[0] += FVFT[0][0] + Cv[0];
-    mC[1] += FVFT[1][0] + Cv[1];
-    mC[2] += FVFT[1][1] + Cv[2];
-    mC[3] += FVFT[2][0] + Cv[3];
-    mC[4] += FVFT[2][1] + Cv[4];
-    mC[5] += FVFT[2][2] + Cv[5];
+//     float VFT[3][6];
+//     for(int i=0; i<3; i++)
+//       for(int j=0; j<6; j++)
+//       {
+//         VFT[i][j] = 0;
+//         for(int k=0; k<3; k++)
+//         {
+//           VFT[i][j] +=  Cv[IJ(i,k)] * F1[j*6+k];
+//         }
+//       }
+//   
+//     float FVFT[6][6];
+//     for(int i=0; i<6; i++)
+//       for(int j=0; j<6; j++)
+//       {
+//         FVFT[i][j] = 0;
+//         for(int k=0; k<3; k++)
+//         {
+//           FVFT[i][j] += F1[i*6+k] * VFT[k][j];
+//         }
+//       }
+    
+    float VFT[3][3];
+    VFT[0][0] = Cv[0]*F1[ 0] + Cv[1]*F1[ 1] + Cv[3]*F1[ 2];
+    VFT[0][1] = Cv[0]*F1[ 6] + Cv[1]*F1[ 7] + Cv[3]*F1[ 8];
+    VFT[0][2] = Cv[0]*F1[12] + Cv[1]*F1[13] + Cv[3]*F1[14];
+
+    VFT[1][0] = Cv[1]*F1[ 0] + Cv[2]*F1[ 1] + Cv[4]*F1[ 2];
+    VFT[1][1] = Cv[1]*F1[ 6] + Cv[2]*F1[ 7] + Cv[4]*F1[ 8];
+    VFT[1][2] = Cv[1]*F1[12] + Cv[2]*F1[13] + Cv[4]*F1[14];
+
+    VFT[2][0] = Cv[3]*F1[ 0] + Cv[4]*F1[ 1] + Cv[5]*F1[ 2];
+    VFT[2][1] = Cv[3]*F1[ 6] + Cv[4]*F1[ 7] + Cv[5]*F1[ 8];
+    VFT[2][2] = Cv[3]*F1[12] + Cv[4]*F1[13] + Cv[5]*F1[14];
+
+    float FVFT[6];
+    FVFT[0] = F1[ 0]*VFT[0][0] + F1[ 1]*VFT[1][0] + F1[ 2]*VFT[2][0];
+    FVFT[1] = F1[ 6]*VFT[0][0] + F1[ 7]*VFT[1][0] + F1[ 8]*VFT[2][0];
+    FVFT[2] = F1[ 6]*VFT[0][1] + F1[ 7]*VFT[1][1] + F1[ 8]*VFT[2][1];
+    FVFT[3] = F1[12]*VFT[0][0] + F1[13]*VFT[1][0] + F1[14]*VFT[2][0];
+    FVFT[4] = F1[12]*VFT[0][1] + F1[13]*VFT[1][1] + F1[14]*VFT[2][1];
+    FVFT[5] = F1[12]*VFT[0][2] + F1[13]*VFT[1][2] + F1[14]*VFT[2][2];
+    
+    mC[0] += FVFT[0] + Cv[0];
+    mC[1] += FVFT[1] + Cv[1];
+    mC[2] += FVFT[2] + Cv[2];
+    mC[3] += FVFT[3] + Cv[3];
+    mC[4] += FVFT[4] + Cv[4];
+    mC[5] += FVFT[5] + Cv[5];
   }
   
   InvertCholetsky3(mC);
@@ -3473,65 +3672,6 @@ void KFParticleBase::Rotate(float angle, const KFParticleBase& axis)
   X() = GetX() + axis.GetX();
   Y() = GetY() + axis.GetY();
   Z() = GetZ() + axis.GetZ();
-}
-
-void KFParticleBase::InvertCholetsky3(float a[6])
-{
-  /** Inverts symmetric 3x3 matrix a using modified Choletsky decomposition. The result is stored to the same matrix a.
-   ** \param[in,out] a - 3x3 symmetric matrix
-   **/
-  
-  float d[3], uud, u[3][3];
-  for(int i=0; i<3; i++) 
-  {
-    d[i]=0;
-    for(int j=0; j<3; j++) 
-      u[i][j]=0;
-  }
-
-  for(int i=0; i<3 ; i++)
-  {
-    uud=0;
-    for(int j=0; j<i; j++) 
-      uud += u[j][i]*u[j][i]*d[j];
-    uud = a[i*(i+3)/2] - uud;
-
-    if(fabs(uud)<1.e-12f) uud = 1.e-12f;
-
-    d[i] = uud/fabs(uud);
-    u[i][i] = sqrt(fabs(uud));
-
-    for(int j=i+1; j<3; j++) 
-    {
-      uud = 0;
-      for(int k=0; k<i; k++)
-        uud += u[k][i]*u[k][j]*d[k];
-      uud = a[j*(j+1)/2+i] - uud;
-      u[i][j] = d[i]/u[i][i]*uud;
-    }
-  }
-
-  float u1[3];
-
-  for(int i=0; i<3; i++)
-  {
-    u1[i] = u[i][i];
-    u[i][i] = 1/u[i][i];
-  }
-  for(int i=0; i<2; i++)
-  {
-    u[i][i+1] = - u[i][i+1]*u[i][i]*u[i+1][i+1];
-  }
-  for(int i=0; i<1; i++)
-  {
-    u[i][i+2] = u[i][i+1]*u1[i+1]*u[i+1][i+2]-u[i][i+2]*u[i][i]*u[i+2][i+2];
-  }
-
-  for(int i=0; i<3; i++)
-    a[i+3] = u[i][2]*u[2][2]*d[2];
-  for(int i=0; i<2; i++)
-    a[i+1] = u[i][1]*u[1][1]*d[1] + u[i][2]*u[1][2]*d[2];
-  a[0] = u[0][0]*u[0][0]*d[0] + u[0][1]*u[0][1]*d[1] + u[0][2]*u[0][2]*d[2];
 }
 
 void KFParticleBase::MultQSQt( const float Q[], const float S[], float SOut[], const int kN )

@@ -15,6 +15,7 @@
 #include "StarVMCDetectorSet.h"
 #include "TTable.h"
 #include "Ttypes.h"
+class StarMCPrimaryGenerator;
 class TGeoPhysicalNode;
 class TGeoHMatrix;
 class TGeoRotation;
@@ -57,7 +58,6 @@ class StarVMCApplication : public TVirtualMCApplication {
   virtual void AddParticles() {}
   virtual void SetPrimaryGenerator(StarMCPrimaryGenerator *m = 0) {
     fPrimaryGenerator = m; 
-    if (fPrimaryGenerator) fPrimaryGenerator->SetStack(fStarStack);
   }
   virtual void SetStepping(StarMCHits *m = 0) {fMcHits = m;}
   virtual StarMCPrimaryGenerator  *GetPrimaryGenerator() const {return fPrimaryGenerator;}

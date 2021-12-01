@@ -455,7 +455,7 @@ int fstPed::do_zs(char *src, int in_bytes, char *dst, int rdo1, int id)
 
 	//LOG(TERR,"ARC %d: dumped %d/%d, %d bytes",rdo1,dumped_cou,all_cou,out_bytes) ;
 
-	printf("RDO: %d us\n",t_delta(mark)) ;
+//	printf("RDO: %d us\n",t_delta(mark)) ;
 
 	return out_bytes ;
 }

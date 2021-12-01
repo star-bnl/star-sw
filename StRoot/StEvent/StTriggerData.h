@@ -235,6 +235,9 @@ public:
     virtual unsigned int bunchCounterLow() const;
     virtual unsigned int bunchId48Bit() const;
     virtual unsigned int bunchId7Bit() const;
+    virtual unsigned int revTick1() const;
+    virtual unsigned int revTick2() const;
+    virtual unsigned int revTick3() const;
     virtual unsigned int spinBit() const;
     virtual unsigned int spinBitYellowFilled() const;
     virtual unsigned int spinBitYellowUp() const;

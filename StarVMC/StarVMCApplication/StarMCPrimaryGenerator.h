@@ -31,12 +31,12 @@
 #include "TRandom.h"
 #include "TPDGCode.h"
 #include "TDatabasePDG.h"
+#include "StarVMCApplication.h"
 #include "StarGenerator/BASE/StarParticleStack.h"
 #include "Stypes.h"
 class StarMCPrimaryGenerator : public TObject {
  public:
-  StarMCPrimaryGenerator(StarStack* stack = 0) : TObject(), fStarStack(stack), fIsRandom(false), fNofPrimaries(0), 
-    fOption(""), fDebug(0), fId(0), fOrigin(), fSigmasOrigin(), fSetVertex(kFALSE), fUseBeamLine(kFALSE), fStatus(kStOK)  {fgInstance = this;}
+ StarMCPrimaryGenerator();
   virtual ~StarMCPrimaryGenerator() {fgInstance = 0;}
   static StarMCPrimaryGenerator* Instance()   { return fgInstance;}
   void  SetIsRandom(Bool_t isRandomGenerator) { fIsRandom = isRandomGenerator; }
@@ -55,7 +55,7 @@ class StarMCPrimaryGenerator : public TObject {
   void  SetBeamLine(Bool_t k = kTRUE)         {fUseBeamLine = k;}
   void  SetStatus(Int_t status = 0)           {fStatus = status;}
   Int_t GetNofPrimaries()                     { return fNofPrimaries;}
-  Int_t Skip(Int_t nskip);
+  virtual Int_t Skip(Int_t nskip);
   const Option_t* GetOption() const           { return fOption.Data();}
   StarStack *GetStack()                       { return fStarStack;}
   Int_t Debug()                               { return fDebug;}
@@ -63,7 +63,6 @@ class StarMCPrimaryGenerator : public TObject {
   TVector3 &GetOrigin()                       { return fOrigin;}
   TVector3 &GetSigmasOrigin()                 { return fSigmasOrigin;}
   virtual void GeneratePrimaries() {}
-  virtual void GeneratePrimaries(const TVector3& /* origin */) {}
   virtual void Print(Option_t *option="") const;
  protected:
   static StarMCPrimaryGenerator *fgInstance;

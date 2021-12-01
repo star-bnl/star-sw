@@ -68,6 +68,10 @@ public:
 	void stage_2_JP5_202206(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
         void stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[], u_short* s2_to_dsm) ;
 	void stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_JP6_202204(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_JP6Carl_202205(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_JP5_202206(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+        void stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[], u_short* s2_to_dsm) ;
 	void stage_2_tonko_202101(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_tonko_202104(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 

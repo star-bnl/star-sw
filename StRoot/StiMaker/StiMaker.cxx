@@ -108,6 +108,8 @@ More detailed: 				<br>
 #include "TObjString.h"
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
+#include "TString.h"
+#include "TObjString.h"
 
 #include "StiTpc/StiTpcDetectorBuilder.h"
 #include "StiSvt/StiSvtDetectorBuilder.h"

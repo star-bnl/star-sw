@@ -101,7 +101,7 @@ class KFParticleTopoReconstructor{
    ** "-1" is set as the pdg hypothesis for all tracks
    ** \param[in] nPixelHits - pointer to the vector with number of precise measurement in each track
    **/  
-  void Init(std::vector<KFParticle> &particles, std::vector<int>* pdg=0, std::vector<int>* nPixelHits=0);
+  void Init(std::vector<KFParticle> &particles, std::vector<int>* pdg=0, std::vector<int>* nPixelHits=0, bool initPVTracks = false);
   /** Initialises the pointer KFParticleTopoReconstructor::fTracks with the external pointer "particles".
    ** Primary vertices are assumed to be found and are also provided externally. Only reconstruction
    ** of short-lived particles should be run if this initialisation method is used.

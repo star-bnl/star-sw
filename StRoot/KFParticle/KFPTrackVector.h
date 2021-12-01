@@ -457,4 +457,99 @@ class KFPTrackVector
   int fNSigma; ///< Index of the last Sigma.
 } __attribute__((aligned(sizeof(float_v))));
 
+
+inline void KFPTrackVector::SetParameter(const float_v& value, int iP, int iTr)
+{ 
+  /** Copies the SIMD vector "value" to the parameter vector KFPTrackVector::fP[iP]
+   ** starting at the position "iTr".
+   ** \param[in] value - SIMD vector with the values to be stored
+   ** \param[in] iP - number of the parameter vector
+   ** \param[in] iTr - starting position in the parameter vector where the values should be stored
+   **/
+// gather caused errors at XeonPhi, temporarly replaced with the simple copying
+//   if( (iTr+float_vLen) < Size())
+//     reinterpret_cast<float_v&>(fP[iP][iTr]) = value;
+//   else
+//   {
+//     const uint_v index(uint_v::IndexesFromZero());
+//     (reinterpret_cast<float_v&>(fP[iP][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
+//   }
+  
+  if( (iTr+float_vLen) < Size())
+    reinterpret_cast<float_v&>(fP[iP][iTr]) = value;
+  else
+    for(int i=0; i<int(float_v::Size); i++)
+    {
+      if(iTr + i >= Size()) continue;
+      fP[iP][iTr+i] = value[i];
+    } 
+}
+
+inline void KFPTrackVector::SetCovariance(const float_v& value, int iC, int iTr) 
+{ 
+  /** Copies the SIMD vector "value" to the element of the covariance matrix vector KFPTrackVector::fC[iC]
+   ** starting at the position "iTr".
+   ** \param[in] value - SIMD vector with the values to be stored
+   ** \param[in] iC - number of the element of the covariance matrix
+   ** \param[in] iTr - starting position in the parameter vector where the values should be stored
+   **/
+// gather caused errors at XeonPhi, temporarly replaced with the simple copying
+//   if( (iTr+float_vLen) < Size())
+//     reinterpret_cast<float_v&>(fC[iC][iTr]) = value;
+//   else
+//   {
+//     const uint_v index(uint_v::IndexesFromZero());
+//     (reinterpret_cast<float_v&>(fC[iC][iTr])).gather(reinterpret_cast<const float*>(&value), index, float_m(index<(Size() - iTr)));
+//   }
+  
+  if( (iTr+float_vLen) < Size())
+    reinterpret_cast<float_v&>(fC[iC][iTr]) = value;
+  else
+    for(int i=0; i<int(float_v::Size); i++)
+    {
+      if(iTr + i >= Size()) continue;
+      fC[iC][iTr+i] = value[i];
+    } 
+}
+
+inline void KFPTrackVector::GetTrack(KFPTrack& track, const int n)
+{ 
+  /** Copies track with index "n" for the current object to the KFPTrack object "track".
+   ** \param[out] track - KFPTrack object, where track with index "n" is copied
+   ** \param[in] n - index of the track to be copied
+   **/
+  track.SetParameters(fP[0][n],fP[1][n],fP[2][n],fP[3][n],fP[4][n],fP[5][n]);
+    
+  track.SetCovariance( 0,fC[ 0][n]);
+  track.SetCovariance( 1,fC[ 1][n]);
+  track.SetCovariance( 2,fC[ 2][n]);
+  track.SetCovariance( 3,fC[ 3][n]);
+  track.SetCovariance( 4,fC[ 4][n]);
+  track.SetCovariance( 5,fC[ 5][n]);
+  track.SetCovariance( 6,fC[ 6][n]);
+  track.SetCovariance( 7,fC[ 7][n]);
+  track.SetCovariance( 8,fC[ 8][n]);
+  track.SetCovariance( 9,fC[ 9][n]);
+  track.SetCovariance(10,fC[10][n]);
+  track.SetCovariance(11,fC[11][n]);
+  track.SetCovariance(12,fC[12][n]);
+  track.SetCovariance(13,fC[13][n]);
+  track.SetCovariance(14,fC[14][n]);
+  track.SetCovariance(15,fC[15][n]);
+  track.SetCovariance(16,fC[16][n]);
+  track.SetCovariance(17,fC[17][n]);
+  track.SetCovariance(18,fC[18][n]);
+  track.SetCovariance(19,fC[19][n]);
+  track.SetCovariance(20,fC[20][n]);
+
+//     track.SetChi2(fChi2[n]);
+//     track.SetNDF(fNDF[n]);
+  track.SetId(fId[n]);
+  track.SetCharge(fQ[n]);
+  
+#ifdef NonhomogeneousField
+    for(int i=0; i<10; i++)
+      track.SetFieldCoeff( fField[i][n], i);
+#endif
+}
 #endif

@@ -83,4 +83,5 @@ source ${GROUP_DIR}/.starver .DEV2
 #setenv  CXXFLAGS " -m32"
 #setenv  CFLAGS  " -m32"
 #setenv  LDFLAGS " -m32"
-cat $AFS_RHIC/packages/.DEV2/TFG_Releases
+cat $AFS_RHIC/packages/.DEV2/TFG_Releases.md
+

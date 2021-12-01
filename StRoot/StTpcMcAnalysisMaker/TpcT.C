@@ -277,7 +277,7 @@ public:
 ClassImp(TH1FSet);
 #endif
 //--------------------------------------------------------------------------------
-void TpcT(const Char_t *files="*.root", const Char_t *opt = "P", const Char_t *Out = ""){//, const Char_t *Time = "20090415.000000") {
+void TpcT(const Char_t *files="*.root", const Char_t *opt = "S", const Char_t *Out = ""){//, const Char_t *Time = "20090415.000000") {
   //	   Int_t ev, Double_t tanCut, Int_t NpadCut, Double_t pMomin, Double_t pMomax) {
 #ifdef __useGainT0__
   gSystem->Load("libStDb_Tables.so");
@@ -527,8 +527,8 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "P", const Char_t *O
     if (TMath::Abs(fzV) > 60) continue;
     if (TMath::Abs(fxV) > 1 || TMath::Abs(fyV) > 1) continue;
 #endif
-    if (mom.Pt()  < 0.4 || mom.Pt()  > 0.6) continue;
 #if 0
+    if (mom.Pt()  < 0.4 || mom.Pt()  > 0.6) continue;
     if (mom.Eta() <-1.0 || mom.Eta() > 0.0) continue;
     if (fRcTrack_fTrackLength70[0] < 40) continue;
     if (fRcTrack_fdEdx[0] < 2e-6 || fRcTrack_fdEdx[0] > 3e-6) continue;
@@ -2412,7 +2412,7 @@ void MakeFunctions() {
   mConvolution->SetParName(17,"outerSectorPadWidth"); mConvolution->FixParameter(17,6.2e-01); 
   mConvolution->SetParName(18,"outerSectorPadPitch"); mConvolution->FixParameter(18,outerSectorPadPitch);
 }
-//________________________________________________________________________________
+//_______________________________________________________________________________
 void FitSlices(const Char_t *name="OuterPadRc", const Char_t *opt="K3", Int_t iy=0) {
   TDirectory *fIn = gDirectory;
   if (! fIn) return;
@@ -2462,6 +2462,7 @@ void FitSlices(const Char_t *name="OuterPadRc", const Char_t *opt="K3", Int_t iy
     ga->FixParameter(4,-1);
     ga->FixParameter(5,0);
     ga->SetParameter(6,0);
+    if (Opt.Contains("Noise",TString::kIgnoreCase)) ga->ReleaseParameter(6);
     ga->FixParameter(7,0);
     ga->FixParameter(8,0);
     ga->FixParameter(9,0);
@@ -2641,7 +2642,7 @@ void FitSlices(const Char_t *name="OuterPadRc", const Char_t *opt="K3", Int_t iy
   fIn->cd();
 }
 //________________________________________________________________________________
-void FitSlicesT(const Char_t *name="OuterTimeRc", Int_t iy=0, const Char_t *opt="SigmaSqSpread") {
+void FitSlicesT(const Char_t *name="OuterTimeRc", const Char_t *opt="SigmaSqSpread", Int_t iy=0) {
   TDirectory *fIn = gDirectory;
   if (! fIn) return;
   TProfile2D *h = (TProfile2D *) fIn->Get(name);
@@ -2712,7 +2713,7 @@ void FitSlicesT(const Char_t *name="OuterTimeRc", Int_t iy=0, const Char_t *opt=
     Double_t tanL   = TMath::Sqrt(cosL2I-1);
     Double_t spread = 0; // lH*tanL/timeBin;
     ga->SetParameters(0,1,1,0,1);
-    ga->FixParameter(3, 0);
+    if (! TString(opt).Contains("Noise"))     ga->FixParameter(3, 0);
     ga->FixParameter(4,spread);
 
     TH1D *proj = h->ProjectionX(Form("%s_%i_%s",Name.Data(),i,opt),i,i);
@@ -3187,7 +3188,8 @@ void CrossTalk(const Char_t *fN = "PadResponseFunctionInner") {
 void Fits(const Char_t *opt="Rc", Int_t tp = -1) {
   const Char_t *InOut[2] = {"Inner","Outer"};
   const Char_t *PadTime[2] =           {"Time"         ,"Pad"};
-  const Char_t *PadTimeFitOptions[2] = {"SigmaSqSpread","SigmaSQ"};
+  //  const Char_t *PadTimeFitOptions[2] = {"SigmaSqSpread","SigmaSQ"};
+  const Char_t *PadTimeFitOptions[2] = {"SigmaSqSpreadNoise","SigmaSQNoise"};
   //  const Char_t *PadTimeFitOptions[2] = {"FWHMNoise","SigmaSQ"};
   //  const Char_t *PadTimeFitOptions[2] = {"FWHMNoise","NoiseConv"};
   //  const Char_t *PadTimeFitOptions[2] = {"ConvNoise","NoiseConv"};
@@ -3202,8 +3204,8 @@ void Fits(const Char_t *opt="Rc", Int_t tp = -1) {
       for (Int_t io = 0; io < 2; io++) {
 	TString Fit(PadTimeFitOptions[ip]);
 	TString Name(Form("%s%s%s%s",InOut[io],X[ix],PadTime[ip],opt));
-	if (Fit == "SigmaSqSpread") {FitSlicesT(Name);}
-	else                        {FitSlices (Name,PadTimeFitOptions[ip]);}
+	if (Fit.BeginsWith("SigmaSqSpread")) {FitSlicesT(Name, Fit);}
+	else                                 {FitSlices (Name, Fit);}
 	
 	//  FitSlices(Form("InnerTime%s",opt),"FWHMNoiseConv");
 	//  FitSlices(Form("OuterTime%s",opt),"FWHMNoiseConv");

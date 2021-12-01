@@ -301,7 +301,7 @@ class KFParticle :public KFParticleBase
 
   void GetFieldValue( const float xyz[], float B[] ) const ;
 
-  void Transport( float dS, const float* dsdr, float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0 ) const ;
+  void Transport( float dS, const float* dsdr, float P[], float C[], float* dsdr1=0, float* F=0, float* F1=0, const bool fullC=true ) const ;
 
  protected: 
   
@@ -989,7 +989,7 @@ inline void KFParticle::GetDStoParticle( const KFParticleBase &p, float dS[2], f
 #endif
 }
 
-inline void KFParticle::Transport( float dS, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1 ) const 
+inline void KFParticle::Transport( float dS, const float* dsdr, float P[], float C[], float* dsdr1, float* F, float* F1, const bool fullC ) const 
 {
   /** Transports the parameters and their covariance matrix of the current particle
    ** on a length defined by the transport parameter dS = l/p, where l is the signed distance and p is 
@@ -1014,7 +1014,7 @@ inline void KFParticle::Transport( float dS, const float* dsdr, float P[], float
    ** with the state vector r1, to which the current particle is being transported, F1 = d(fP new)/d(r1)
    **/ 
 #ifdef HomogeneousField
-  KFParticleBase::TransportBz( GetFieldAlice(), dS, dsdr, P, C, dsdr1, F, F1 );
+  KFParticleBase::TransportBz( GetFieldAlice(), dS, dsdr, P, C, dsdr1, F, F1, fullC );
 #endif
 #ifdef NonhomogeneousField
   KFParticleBase::TransportCBM( dS, dsdr, P, C, dsdr1, F, F1 );

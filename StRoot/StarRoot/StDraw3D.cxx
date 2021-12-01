@@ -2,6 +2,7 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
+#include "TCanvasImp.h"
 #include "TTRAP.h"
 #include "TGeometry.h"
 #include "TVolume.h"

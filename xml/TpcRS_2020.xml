@@ -14,22 +14,34 @@ setenv STARFPE NO
 #   starver TFG19e
 #  starver .DEV2
   limit stacksize 16m
-  set file = $INPUTFILE0;
+  echo $INPUTFILE0 | grep ':'
+  if (! $?) then
+    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+    set file     = `echo $INPUTFILE0 | awk -F\: '{print $4}'`
+  else
+    set evtsFile = $INPUTFILE0;
+    set f        = 1
+    set l        = 200
+    set file     = `basename ${evtsFile} .MuDst.root`;
+  endif
 #  set rung = `echo $file | awk -F\_ '{print $2}'`
   echo "${file}"
   set fileB = `basename ${file} .MuDst.root`;
   set logFile  = ${fileB}B.log
   set sdt = "";
   set Name = `basename $PWD`
-  set sdt = ",sdt20201224"
+#  set sdt = ",sdt20201224"
   set KFVertex = "";
-  echo $Name | grep -i KFV
-  if (! $?) set KFVertex = ",StiKFVertex";
+#  echo $Name | grep -i KFV
+#  if (! $?) set KFVertex = ",StiKFVertex";
 #  set f=`find . -maxdepth 1 -type f -name "*${fileB}*.root"`
 #  if ("$f" == "") then
   ls -l *${fileB}*.root
   if (! $?) exit 0;
- root.exe -q -b 'bfc.C(200,"mtin,MC.2020,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'",0,"'${fileB}'.root")' &gt;&amp; ${logFile}
+# root.exe -q -b 'bfc.C(200,"mtin,MC.2020,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'",0,"'${fileB}'.root")' &gt;&amp; ${logFile}
+     root.exe -q -b 'bfc.C('${f}','${l}',"mtin,TpcRS,P2020a,TpxRaw,TpxClu,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,CorrY,McTpcAna,PicoVtxDefault,-in","'${evtsFile}'","'${fileB}'.root")' &gt;&amp; ${logFile}
 </command>
 <!-- <input URL="command:TpcRS_Part.pl" /> -->
 <input URL="command:daq2020TpcRS.pl" />

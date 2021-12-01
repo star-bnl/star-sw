@@ -57,7 +57,7 @@ extern "C"
 //________________________________________________________________________________
 StarMCHits::StarMCHits(const Char_t *name,const Char_t *title) : 
   TDataSet(name,title), fCurrentDetector(0), fDebug(0), fSeed(0), fEventNumber(0) { 
-  fgInstance = this; fHitHolder = this; 
+  fgInstance = this; fHitHolder = 0;
   gcohit(PASSCHARD("AGCDIGI"),(int*&) fAgcdigi  PASSCHARL("AGCDIGI"));
   gcohit(PASSCHARD("AGCHITV"),(int*&) fAgchitv  PASSCHARL("AGCHITV"));
 }

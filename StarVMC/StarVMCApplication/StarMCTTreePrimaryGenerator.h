@@ -22,7 +22,6 @@
 #include "TTreeIter.h"
 class StarMCTTreePrimaryGenerator : public StarMCPrimaryGenerator  {
  public:
- StarMCTTreePrimaryGenerator(StarStack* stack) : StarMCPrimaryGenerator(), fTreeIter(0), fTree(0) { PreSet(); fStarStack = stack; }
   StarMCTTreePrimaryGenerator(TString mode="pp:W:510", Int_t tune=320);
   virtual ~StarMCTTreePrimaryGenerator() {}
   
