@@ -63,10 +63,6 @@ public:
 	void stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_TAMU_202202(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
-	void stage_2_JP6_202204(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
-	void stage_2_JP6Carl_202205(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
-	void stage_2_JP5_202206(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
-        void stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[], u_short* s2_to_dsm) ;
 	void stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_JP6_202204(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_JP6Carl_202205(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
@@ -108,7 +104,6 @@ public:
 
 	u_char want_stage_2_io ;	// only if I have full events
 	u_char want_stage_3_io ;	// only for eother full events or in sector 11
-	u_char want_stage_1_sim ;
 
 	// cleared at run start; logged at run stop
 	struct errors_t {
@@ -129,9 +124,6 @@ public:
 		int tcd_marker ;
 		int self_trg_marker ;
 	} statistics ;
-
-	u_char self_trigger ;	// for debugging
-	u_int dbg_xing ;	// for debugging
 
 	u_int run_number ;	// for logging
 	u_int evts ;		// for logging
@@ -321,7 +313,7 @@ public:
         float ratio[2][15][9];
         u_int em[2][15][9];
         u_int had[2][15][9];
-        u_int jet[2][6];
+        u_int jet[2][3];
         u_int etot[2];
         u_int htot[2];    
         u_int dsmout;

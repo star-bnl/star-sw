@@ -10,6 +10,7 @@
 // statics
 fcs_trg_base::marker_t fcs_trg_base::marker ;
 
+
 u_int fcs_trg_base::stage_version[4] ;
 
 u_short fcs_trg_base::stage_params[4][16] ;
@@ -78,7 +79,6 @@ fcs_trg_base::fcs_trg_base()
 
 	want_stage_2_io = 0 ;
 	want_stage_3_io = 0 ;
-	want_stage_1_sim = 1 ;
 }
 
 
@@ -517,8 +517,6 @@ int fcs_trg_base::end_event()
 	dsm_any = 0 ;
 	dsm_xing = 0 ;
 
-	self_trigger = 0 ;
-
 	for(int xing=0;xing<marker.last_xing;xing++) {
     		if(log_level>1) {
 			LOG(NOTE,"run_event_sim: xing %d",xing) ;
@@ -797,8 +795,6 @@ int fcs_trg_base::verify_event_sim(int xing)
 	int s2_failed = 0 ;
 	int s3_failed = 0 ;
 
-	if(!want_stage_1_sim) goto skip_stage1 ;
-	
 	for(int i=0;i<NS_COU;i++) {
 	int cns ;
 
@@ -886,8 +882,6 @@ int fcs_trg_base::verify_event_sim(int xing)
 
 	}}}
 	
-	skip_stage1: ;
-
 	if(s1_failed) {
 		event_bad |= 1 ;
 	}
@@ -1022,8 +1016,6 @@ u_int fcs_trg_base::run_event_sim(int xing, int type)
 		memset(&d_out,0,sizeof(d_out)) ;
 	}
 
-	dbg_xing = xing ;
-
 	for(int i=0;i<NS_COU;i++) {			// NS
 		geo.ns = i ;
 
@@ -1053,20 +1045,8 @@ u_int fcs_trg_base::run_event_sim(int xing, int type)
 
 					s0_to_s1[c] = res ;
 
-					if(log_level>100) printf("... S0: xing %d: %d:%d:%d: ch %d = %d (ADC %d) (ped %d, gain %d) %s\n",xing,i,j,k,c,res,
-								 d_in[xing].s1[i][j][k].adc[c].d[0],
-								p_g[i][j][k][c].ped,p_g[i][j][k][c].gain,
-								 res?"S1_HIT":"") ;
-
-					if(log_level>101) {
-						int sum = 0 ;
-						for(int t=0;t<8;t++) {
-							sum += d_in[xing].s1[i][j][k].adc[c].d[t] ;
-							printf("       ADC %d = %d [sum %d, delta %d]\n",t,d_in[xing].s1[i][j][k].adc[c].d[t],sum,sum-p_g[i][j][k][c].ped) ;
-						}
-
-						printf("SSS0: %d %d %d %d %d\n",j,i,k,c,sum-p_g[i][j][k][c].ped) ;
-					}
+					if(log_level>100) printf("... S0: xing %d: %d:%d:%d: ch %d = %d (ped %d, gain %d)\n",xing,i,j,k,c,res,
+								p_g[i][j][k][c].ped,p_g[i][j][k][c].gain) ;
 				}
 
 				// so that we compare d_out.s1_to_s2 and d_in.s1_to_s2
