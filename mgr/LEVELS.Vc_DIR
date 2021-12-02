@@ -1,0 +1,9 @@
+#
+# Simple aprpoach could be replicated for other
+# packages hence the logic in the login
+#   32bits or 64bits = are the flags. They should be full path.
+#   Login will undefine them.
+#
+EnvVar=Vc_DIR
+32bits=/cvmfs/star.sdcc.bnl.gov/star-spack/spack/opt/spack/linux-rhel7-x86/gcc-4.8.5/vc_-1.4.1-s377vadzdgfalknjtjlwe3alzra46ycl
+64bits=/cvmfs/star.sdcc.bnl.gov/star-spack/spack/opt/spack/linux-rhel7-x86_64/gcc-4.8.5/vc_-1.4.1-7m2zajp3rqt6usw3zlgtmfrlxbbw5yvn
