@@ -400,9 +400,9 @@ int FtfFinder::setConformalCoordinates ( )
 -------------------------------------------------------------------------*/
      thisHit = &(hit[ihit]) ;
 
-     uint *v1 = (uint *)volumeC;
-     uint *v2 = (uint *)&volumeC[20746];
-     uint *h = (uint *)thisHit;
+     unsigned int *v1 = (unsigned int *)volumeC;
+     unsigned int *v2 = (unsigned int *)&volumeC[20746];
+     unsigned int *h = (unsigned int *)thisHit;
      
      if((h>v1) && (h<v2)) {
        printf("hit: 0x%p v1=0x%p v2=0x%p ihit=%d nHits=%d hit=0x%p\n",

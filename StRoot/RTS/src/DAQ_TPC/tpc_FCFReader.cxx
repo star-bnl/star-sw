@@ -265,7 +265,7 @@ int daq_tpc::fcfReader(int sector, int *t0c, u_int *gainc, tpc_t *tpc)          
     // Can burn this row...
     
 //     for(int ii=0;ii<3;ii++) {
-//       uint *x = fcf_ptrs[ii];
+//       unsigned int *x = fcf_ptrs[ii];
 //       if(!x) continue;
 //       int row = *x;
 //       x++;

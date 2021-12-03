@@ -20,18 +20,6 @@
 
 /* several shortcut definitions */
 
-#ifndef uint
-#define uint unsigned int
-#endif
-
-#ifndef ushort
-#define ushort unsigned short
-#endif
-
-#ifndef ulong
-#define ulong unsigned long
-#endif
-
 typedef unsigned char BYTE;
 typedef unsigned int  WORD;
 
@@ -151,13 +139,13 @@ typedef struct {
   unsigned short TCUdataBytes;
   char           TCUEvtDesc;
   BYTE           TrgDataFmtVer;
-  uint           bunchXing_hi;
-  uint           bunchXing_lo;   /* Two parts of RHIC bunch crossing number */
+  unsigned int           bunchXing_hi;
+  unsigned int           bunchXing_lo;   /* Two parts of RHIC bunch crossing number */
   Info1          TCU1;           /* TCU Info Fifo's */  
   Info2          TCU2;
   Info5          TCU5;
-  ushort         npre;
-  ushort         npost;          /* Dummy to bring total size of struct to modulo 8 bytes */
+  unsigned short         npre;
+  unsigned short         npost;          /* Dummy to bring total size of struct to modulo 8 bytes */
 } EvtDescData;          /* 28 bytes total */ 
 
 /* Trigger Summary  Data Structures */
@@ -165,11 +153,11 @@ typedef struct {
 /* L0 DSM data structures */
 
 typedef struct {
-  ushort             CPA[32];        /* Contents of 4 CTB+MWC DSM Input Buffers (IB's) - coarse pixel array*/
-  ushort             quadDSM[8];     /* Contents of 1 CTB+MWC DSM IB - outputs of previous 4 */
-  ushort             lastDSM[8];     /* Contents of last DSM IB - results of all DSM trees */
+  unsigned short             CPA[32];        /* Contents of 4 CTB+MWC DSM Input Buffers (IB's) - coarse pixel array*/
+  unsigned short             quadDSM[8];     /* Contents of 1 CTB+MWC DSM IB - outputs of previous 4 */
+  unsigned short             lastDSM[8];     /* Contents of last DSM IB - results of all DSM trees */
   BYTE               ZDC[16];        /* Contents of ZDC DSM IB - raw data from ZDC */
-  ushort             BCdata[16];     /* Contents of 2 Bunch Crossing DSMs IB's */
+  unsigned short             BCdata[16];     /* Contents of 2 Bunch Crossing DSMs IB's */
 } L0_DSM_Data;          /* 144 bytes total */
 
 
@@ -178,17 +166,17 @@ typedef struct {
 typedef struct {
   unsigned short TrgSumBytes;
   char           TrgSumHeader[2];
-  uint           L1Sum[2];        /* L1 Summary */
-  uint           L2Sum[2];        /* L2 Summary */
+  unsigned int           L1Sum[2];        /* L1 Summary */
+  unsigned int           L2Sum[2];        /* L2 Summary */
   unsigned short L0SumBytes;
   char           L0SumHeader[2];
   L0_DSM_Data    DSM;             /* L0 DSM Data from DSM Tree */
   unsigned short L1SumBytes;
   char           L1SumHeader[2];
-  uint           L1Result[32];       /* Result from L1 CPU */
+  unsigned int           L1Result[32];       /* Result from L1 CPU */
   unsigned short L2SumBytes;
   char           L2SumHeader[2];
-  uint           L2Result[28];       /* Result from L2 CPU */
+  unsigned int           L2Result[28];       /* Result from L2 CPU */
   unsigned short L0RegBytes;
   char           L0RegHeader[2];
   unsigned short Mult_Reg[3];        /* The 3 multiplcity thresholds */

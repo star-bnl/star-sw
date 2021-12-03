@@ -31,9 +31,9 @@ public:
   {
     // Generic types
     char data[RCDATASIZE];   
-    uchar byte[RCDATASIZE];
-    uint dword[RCDATASIZE/4];
-    ushort word[RCDATASIZE/2];
+    unsigned char byte[RCDATASIZE];
+    unsigned int dword[RCDATASIZE/4];
+    unsigned short word[RCDATASIZE/2];
 
     // Message types
     // Internal Handler commands

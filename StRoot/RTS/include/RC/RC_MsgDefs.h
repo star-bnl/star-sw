@@ -66,9 +66,9 @@ struct rc_drc_connect
   int pid;                         // connectors pid
   connect_direction direction;
 };
-struct rc_cmd_nop             { uint dummy; };       //
-struct rc_drc_ping            { uint dummy; };       //
-struct rc_drc_stophandler     { uint dummy; };       //
+struct rc_cmd_nop             { unsigned int dummy; };       //
+struct rc_drc_ping            { unsigned int dummy; };       //
+struct rc_drc_stophandler     { unsigned int dummy; };       //
 struct rc_drc_clear_handler                          //
 { 
   int state; 
@@ -83,8 +83,8 @@ struct rc_drc_querysystem                            //
   bool client_threads;
   bool ping;
 };
-struct rc_cmd_timeout         { uint dummy; };       //
-struct rc_drc_reconfig        { uint dummy; };       //
+struct rc_cmd_timeout         { unsigned int dummy; };       //
+struct rc_drc_reconfig        { unsigned int dummy; };       //
 struct rc_drc_add_component
 {
   char daqpath[8];
@@ -92,7 +92,7 @@ struct rc_drc_add_component
   int rb_mask;
   mask_types rb_mask_type;
 };
-struct rc_cmd_reboot         { uint all; };
+struct rc_cmd_reboot         { unsigned int all; };
 struct rc_drc_run_start
 {
   int run_number;
@@ -187,10 +187,10 @@ struct rc_rts_reconnect
 };
 
 // system --> Handler
-struct rc_cmd_ack             { uint dummy; };
-struct rc_cmd_ping            { uint dummy; };
+struct rc_cmd_ack             { unsigned int dummy; };
+struct rc_cmd_ping            { unsigned int dummy; };
 struct rc_daq_run_start { 
-  uint run_number; 
+  unsigned int run_number; 
   int num_triggers;
 };
 
@@ -202,10 +202,10 @@ struct rc_daq_run_stop
   int junk;
 };
 
-struct rc_daq_run_pause       { uint run_number; };
+struct rc_daq_run_pause       { unsigned int run_number; };
 struct rc_daq_run_resume      
 { 
-  uint run_number; 
+  unsigned int run_number; 
   int num_triggers;
 };
 struct rc_daq_send_config     
@@ -213,18 +213,18 @@ struct rc_daq_send_config
   u_int port; 
   u_int handler_id; 
 };
-struct rc_daq_set_busy        { uint run_number; };
-struct rc_daq_release_busy    { uint run_number; };
-struct rc_daq_flush_tokens    { uint run_number; };
+struct rc_daq_set_busy        { unsigned int run_number; };
+struct rc_daq_release_busy    { unsigned int run_number; };
+struct rc_daq_flush_tokens    { unsigned int run_number; };
 struct rc_daq_query_tokens   
 { 
-  uint num_tokens; 
-  uint state;
-  uint rb[12];
+  unsigned int num_tokens; 
+  unsigned int state;
+  unsigned int rb[12];
 };
 struct rc_mz_emul_fiber
 {
-  uint ntriggers;
+  unsigned int ntriggers;
 };
 
 struct rc_drc_monitor_send

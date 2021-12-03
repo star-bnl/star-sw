@@ -445,7 +445,7 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 
 							LOG(DBG,"BSMD ZS data present, %d hits",datums) ;
 
-							data = (u_short *) ((uint) emcadcd + 40) ;	// skip header
+							data = (u_short *) ((unsigned int) emcadcd + 40) ;	// skip header
 							LOG(DBG,"local fiber %d, channels %d [== %d]",b2h16(data[0]),b2h16(data[1]),datums) ;
 							data += 2 ;
 

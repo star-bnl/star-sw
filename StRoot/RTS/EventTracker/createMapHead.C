@@ -21,7 +21,7 @@ int main(int, char *[])
   }
   
   int sz = statbuff.st_size;
-  uint *buff = (uint *)malloc(sz);
+  unsigned int *buff = (unsigned int *)malloc(sz);
   float *fbuff = (float *)buff;
   char *cbuff = (char *)buff;
 

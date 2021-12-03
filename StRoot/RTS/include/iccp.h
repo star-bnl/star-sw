@@ -38,9 +38,6 @@
 // but only in linux...
 #include "iccp2k.h"     
 
-typedef unsigned int   uint ;
-typedef unsigned short ushort ;
-typedef unsigned char  uchar ;
 typedef char           byte ;
 
 typedef unsigned char UINT8;
@@ -144,35 +141,35 @@ typedef unsigned int UINTPTR;
 #pragma pack(1)
 
 // the CMD struct
-struct ic_cmd_ping {  uint dummy;};
-struct ic_cmd_response {  uint transaction ;};
-struct ic_cmd_ack      {  uint transaction ;};  
-struct ic_cmd_cancel   {  uint transaction ;}; 
-struct ic_cmd_req_stat       {  uint dummy   ;};
-struct ic_cmd_release_token  {  uint dummy ; };
-struct ic_cmd_confirm_release{  uint dummy   ;};
-struct ic_cmd_confirm_formatted_data{ uint dummy   ;}; 
-struct ic_confirm_send { uint dummy ; };
+struct ic_cmd_ping {  unsigned int dummy;};
+struct ic_cmd_response {  unsigned int transaction ;};
+struct ic_cmd_ack      {  unsigned int transaction ;};  
+struct ic_cmd_cancel   {  unsigned int transaction ;}; 
+struct ic_cmd_req_stat       {  unsigned int dummy   ;};
+struct ic_cmd_release_token  {  unsigned int dummy ; };
+struct ic_cmd_confirm_release{  unsigned int dummy   ;};
+struct ic_cmd_confirm_formatted_data{ unsigned int dummy   ;}; 
+struct ic_confirm_send { unsigned int dummy ; };
 // EVB 
-struct ic_evb_stat           {  uint dummy   ;};
-struct ic_evb_format_data{ uchar cs ; uchar res ; ushort format ;} ;
+struct ic_evb_stat           {  unsigned int dummy   ;};
+struct ic_evb_format_data{ unsigned char cs ; unsigned char res ; unsigned short format ;} ;
 struct ic_evb_send_data
 { 
-  uint haddr;
-  uint laddr;
-  uint det_evt_id;
-  uint evb_evt_id;
+  unsigned int haddr;
+  unsigned int laddr;
+  unsigned int det_evt_id;
+  unsigned int evb_evt_id;
 } ;
 struct ic_det_announce_data {
-  uint words;
-  uint evt_id;
-  uint task;
+  unsigned int words;
+  unsigned int evt_id;
+  unsigned int task;
 };
 struct ic_eth_announce {
-  uint words;
-  uint ptr;   // actually a pointer! eth->evb same address space
+  unsigned int words;
+  unsigned int ptr;   // actually a pointer! eth->evb same address space
 }; 
-// struct ic_evb_tape_request{ uint* addr;} ;
+// struct ic_evb_tape_request{ unsigned int* addr;} ;
 struct ic_rts_write_counters {
   int readoutPeriod;
 };
@@ -215,9 +212,9 @@ struct ic_spool_event_written {
 };
 
 struct ic_evb_announce_memcpy2 {
-  uint buff;
-  uint words;
-  uint node;
+  unsigned int buff;
+  unsigned int words;
+  unsigned int node;
 };
 
 
@@ -241,7 +238,7 @@ struct ic_evbx_spool_event_written {
 };
 
 // taper
-//struct ic_taper_done{ uint dummy; }  ;
+//struct ic_taper_done{ unsigned int dummy; }  ;
 struct ic_taper_done {
   int run;
   int size;
@@ -254,7 +251,7 @@ struct ic_spool_write_list { int listIdx; };
 struct ic_spool_list_written { int listIdx; };
 
 //  daq
-struct ic_daq_run_start{ uint dummy ;} ;
+struct ic_daq_run_start{ unsigned int dummy ;} ;
 struct ic_daq_run_stop
 {
   int run_number;
@@ -262,99 +259,99 @@ struct ic_daq_run_stop
   int num_events;
   int junk;
 } ;
-struct ic_daq_run_pause{ uint run_number ;} ;
+struct ic_daq_run_pause{ unsigned int run_number ;} ;
 struct ic_daq_run_resume
 { 
-  uint run_number;
-  uint num_triggers;
+  unsigned int run_number;
+  unsigned int num_triggers;
 } ;
-struct ic_daq_send_config { uint port; uint handler_id; };
-struct ic_daq_flush_tokens { uint run_number; };
-struct ic_reboot { uint system; };
+struct ic_daq_send_config { unsigned int port; unsigned int handler_id; };
+struct ic_daq_flush_tokens { unsigned int run_number; };
+struct ic_reboot { unsigned int system; };
 struct ic_drc_run_start 
 { 
-  uint run_number; 
-  uint num_triggers; 
+  unsigned int run_number; 
+  unsigned int num_triggers; 
 };
 struct ic_drc_run_stop 
 { 
-  uint run_number;
-  uint junk;
+  unsigned int run_number;
+  unsigned int junk;
 };
 struct ic_drc_run_pause 
 {
-  uint run_number;
+  unsigned int run_number;
 };
 struct ic_drc_run_resume               
 {
-  uint run_number;
-  uint num_triggers;
+  unsigned int run_number;
+  unsigned int num_triggers;
 };
 struct ic_drc_get_config               
 {
-  uint dummy;
+  unsigned int dummy;
 };
 struct ic_drc_set_config              
 {
-  uint dummy;
+  unsigned int dummy;
 };
 struct ic_drc_send_config             
 {
-  uint dummy;
+  unsigned int dummy;
 };
 struct ic_drc_flush_tokens            
 {
-  uint run_number;
-  uint type;
+  unsigned int run_number;
+  unsigned int type;
 };
 struct ic_mz_emul_fiber               
 {
-  uint ntriggers;
+  unsigned int ntriggers;
 };
 struct ic_drc_query_tokens
 {
-  uint num_tokens;
-  uint state;
-  uint rb[12];
+  unsigned int num_tokens;
+  unsigned int state;
+  unsigned int rb[12];
 };
 
 
 // GL3
 struct ic_gl3_build  
 { 
-  uint bxm ; uint bxl ;
-  ushort trg_cmd ; ushort trg_word ;
-  ushort res ; unsigned trg_type :4 ; unsigned  trg_token :12 ;
+  unsigned int bxm ; unsigned int bxl ;
+  unsigned short trg_cmd ; unsigned short trg_word ;
+  unsigned short res ; unsigned trg_type :4 ; unsigned  trg_token :12 ;
 } ; 
 // GB
 struct ic_gb_build  
 { 
-  ushort gl3Node ;
-  uchar accept;
-  uchar build ;
-  uint   eventDesc[10] ;   // take from data!
-  uint   L3summ[4] ;
-  uint   L2summary[2];
-  uint   L1summary[2];
-  uint   rtsDetMask ;
-  uint eventNumber;
-  uint sec;
-  uint usec;
-  uint flags;       // bit 0 set, tpc raw data inside
+  unsigned short gl3Node ;
+  unsigned char accept;
+  unsigned char build ;
+  unsigned int   eventDesc[10] ;   // take from data!
+  unsigned int   L3summ[4] ;
+  unsigned int   L2summary[2];
+  unsigned int   L1summary[2];
+  unsigned int   rtsDetMask ;
+  unsigned int eventNumber;
+  unsigned int sec;
+  unsigned int usec;
+  unsigned int flags;       // bit 0 set, tpc raw data inside
 } ; 
 
-//struct ic_gl3_send_sl3 { uint* dest_header ; uint*  dest_clusters ; uint* dest_tracks ; uint* dest_debug; };
-struct ic_gl3_stat     { uint dummy   ;};       
+//struct ic_gl3_send_sl3 { unsigned int* dest_header ; unsigned int*  dest_clusters ; unsigned int* dest_tracks ; unsigned int* dest_debug; };
+struct ic_gl3_stat     { unsigned int dummy   ;};       
 struct ic_gl3_announce_data
 {
-  uint size_L3_header ;  // this can be GL3 or GL3+SL3s
-  uint size_TRG_data ;
-  uint size_L3_data[11] ;
+  unsigned int size_L3_header ;  // this can be GL3 or GL3+SL3s
+  unsigned int size_TRG_data ;
+  unsigned int size_L3_data[11] ;
 };
 
 struct ic_l4_startevent {
-    uint sz;   // event size
-    uint buff_id;   // event buffer id
+    unsigned int sz;   // event size
+    unsigned int buff_id;   // event buffer id
     int local_id;
     int tmtoken;
     int evbidx;
@@ -368,13 +365,13 @@ struct ic_l4_internal {
 
 /*
 struct ic_l4_event {
-    uint l2trg_lo;
-    uint l2trg_hi;
-    uint l4trg_lo;   // lo 32 bits of the trigger mask
-    uint l4trg_hi;   // hi 32 bits of the trigger mask
-    uint buff_id;  // event buffer id for the hlt data
-    uint evt_sz;   // sz of the original event
-    uint l4_sz;    // sz of the l4 output buffer
+    unsigned int l2trg_lo;
+    unsigned int l2trg_hi;
+    unsigned int l4trg_lo;   // lo 32 bits of the trigger mask
+    unsigned int l4trg_hi;   // hi 32 bits of the trigger mask
+    unsigned int buff_id;  // event buffer id for the hlt data
+    unsigned int evt_sz;   // sz of the original event
+    unsigned int l4_sz;    // sz of the l4 output buffer
     int local_id;
     int tmtoken;
     int evbidx;
@@ -384,77 +381,77 @@ struct ic_l4_event {
 
 // Payloads for the l4 taping commands
 struct ic_l4_evt_descriptor {
-    uint buff_id;
-    uint sz;
-    uint disk;
-    uint fd;
+    unsigned int buff_id;
+    unsigned int sz;
+    unsigned int disk;
+    unsigned int fd;
 };
 
 
-//struct ic_announce_trg_sum {uint* addr ;};
+//struct ic_announce_trg_sum {unsigned int* addr ;};
 // SB
-struct ic_sb_announce_sl3{ uint size_of_header ; uint size_of_clusters ; uint size_of_tracks ; uint size_of_debug ; } ;
+struct ic_sb_announce_sl3{ unsigned int size_of_header ; unsigned int size_of_clusters ; unsigned int size_of_tracks ; unsigned int size_of_debug ; } ;
 struct ic_sb_announce_formatted_data
 {
-  uint size_header ;
-  uint size_data[12] ; // size is in long words 
+  unsigned int size_header ;
+  unsigned int size_data[12] ; // size is in long words 
 } ;
-struct ic_rcv_stat{ uchar res ; uchar mz_A ;uchar mz_B ;uchar mz_C ;};
+struct ic_rcv_stat{ unsigned char res ; unsigned char mz_A ;unsigned char mz_B ;unsigned char mz_C ;};
 struct ic_sb_stat { ic_rcv_stat rcv[12] ; } ; 
 
-struct ic_sb_confirm_sl3 { uint dummy   ;};
+struct ic_sb_confirm_sl3 { unsigned int dummy   ;};
 
 //struct ic_bb_announce_event {
-//  uint size;
-//  uint token;
+//  unsigned int size;
+//  unsigned int token;
 //};
 //struct ic_bb_announce_data { 
-//  uint buffer;
-//  uint offset;               // Offset of this buffer in the event
-//  uint size;                 // Must be <= BB_STAGE_BUFF_SZ
+//  unsigned int buffer;
+//  unsigned int offset;               // Offset of this buffer in the event
+//  unsigned int size;                 // Must be <= BB_STAGE_BUFF_SZ
 //};
 struct ic_bb_send_data {
-  uint buffer;
-  uint addr_hi;
-  uint addr_lo;
+  unsigned int buffer;
+  unsigned int addr_hi;
+  unsigned int addr_lo;
 };
 //struct ic_bb_confirm_send {  // use with CONFIRM_SEND command
-//  uint buffer;
-//  uint last;
+//  unsigned int buffer;
+//  unsigned int last;
 //};
 //struct ic_bbm_announce_data {
-//  uint size;
+//  unsigned int size;
 //};
 //struct ic_bbm_send_data {
-//  uint offset;
-//  uint shm;
+//  unsigned int offset;
+//  unsigned int shm;
 //  int size;
 //};
 //struct ic_qdsend_announce_chunk {
-//  uint chunkwords;      // For next chunk, 0 if no more
-//  uint last_chunkwords; // was there a previous send/?
-//  uint source_hi;      // just gets passed back to sender
-//  uint source_lo;
-//  uint final_dest_hi;  // rcv saves this 
-//  uint final_dest_lo;
+//  unsigned int chunkwords;      // For next chunk, 0 if no more
+//  unsigned int last_chunkwords; // was there a previous send/?
+//  unsigned int source_hi;      // just gets passed back to sender
+//  unsigned int source_lo;
+//  unsigned int final_dest_hi;  // rcv saves this 
+//  unsigned int final_dest_lo;
 //};
 //struct ic_qdsend_send_chunk {
-//  uint addr_hi;                  // Source address's (actual)
-//  uint addr_lo;
-//  uint dest_hi;                  // Destination address's (actual)
-//  uint dest_lo;                  //
-//  uint chunkwords;
+//  unsigned int addr_hi;                  // Source address's (actual)
+//  unsigned int addr_lo;
+//  unsigned int dest_hi;                  // Destination address's (actual)
+//  unsigned int dest_lo;                  //
+//  unsigned int chunkwords;
 //};
 //struct ic_qmyri_memcpy_start {
-//  uint pTargetBuff_hi;
-//  uint pTargetBuff_lo;
-//  uint localBuffSegment;
-//  uint localBuffOffset;
-//  uint len;
-//  uint targetId;
+//  unsigned int pTargetBuff_hi;
+//  unsigned int pTargetBuff_lo;
+//  unsigned int localBuffSegment;
+//  unsigned int localBuffOffset;
+//  unsigned int len;
+//  unsigned int targetId;
 //};
 //struct ic_qmyri_memcpy_done {
-//  uint dummy;
+//  unsigned int dummy;
 //};
 //struct ic_qmyri_ctl {
 //  int ctl_cmd;
@@ -498,16 +495,16 @@ struct ic_evp_event_done {
 //   int token;
 // };
 struct ic_rcf_writer_flush {
-  uint dummy;
+  unsigned int dummy;
 };
 //struct ic_rcf_list_written {
 // struct rcfEventList *el;
 //};
 struct ic_vx_request_file {
-  uint direction;
-  uint addr_hi;
-  uint addr_lo;
-  uint size;
+  unsigned int direction;
+  unsigned int addr_hi;
+  unsigned int addr_lo;
+  unsigned int size;
   char filename[92];    // 120 - (4 * 4) - (4 * 3)
 };
 // struct ic_rcf_confirm_event {
@@ -566,9 +563,9 @@ struct TokenManagerResults {
 //-----======------||||||------~~~~~~-----======------||||||------~~~~~~
 union ic_load
 {
-  uint  dword[27] ;
-  ushort word[54] ;
-  uchar byte[108]  ;                                      // this is the max you have
+  unsigned int  dword[27] ;
+  unsigned short word[54] ;
+  unsigned char byte[108]  ;                                      // this is the max you have
 #if !(defined(NOT_DAQ) || defined(alpha))
   ic_cmd_ping                      cmd_ping ;
   ic_cmd_response                  cmd_rsp ;

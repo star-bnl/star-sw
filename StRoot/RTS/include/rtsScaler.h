@@ -2,7 +2,6 @@
 #define _RTS_SCA_H_
 
 /* LINUX issues */
-typedef unsigned int uint ;
 #ifndef SHM_SHARE_MMU
 #define SHM_SHARE_MMU  0
 #endif

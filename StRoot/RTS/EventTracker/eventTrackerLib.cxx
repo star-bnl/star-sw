@@ -118,7 +118,7 @@ int EventTracker::gl3Event_to_GTD(L3_GTD *gtd,  u_int max_size)
   gtd->zVert = gl3->getVertex().Getz();
   gtd->nTracks = gl3->getNTracks();
 
-  for(uint i=0;i<gtd->nTracks;i++) {
+  for(unsigned int i=0;i<gtd->nTracks;i++) {
 
     global_track gtrack;
     gl3Track *gl3track = gl3->getTrack(i);
