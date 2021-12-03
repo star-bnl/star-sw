@@ -27,7 +27,7 @@ inline float fswap(float swapped)
 #endif
 
 
-int l3_reader(char *m, struct l3_t *l3, u_int driver)
+int l3_reader(char *m, struct l3_t *l3, uint32_t driver)
 {
 	struct DATAP *datap = (struct DATAP *)m ;
 	struct L3_P *l3p ;
@@ -65,7 +65,7 @@ int l3_reader(char *m, struct l3_t *l3, u_int driver)
 		off = ntohl(datap->det[L3_ID].off) ;
 		if(off == 0) return 0 ;
 
-		l3p = (struct L3_P *)((u_int *)m+off) ;
+		l3p = (struct L3_P *)((uint32_t *)m+off) ;
 
 
 		len = l3p->bh.length;

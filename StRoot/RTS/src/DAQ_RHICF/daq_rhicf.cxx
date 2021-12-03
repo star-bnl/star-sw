@@ -1,5 +1,5 @@
 #include <assert.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 
 #include <rtsLog.h>
@@ -14,7 +14,7 @@
 
 #include "daq_rhicf.h"
 
-extern int rhicf_reader(char *mem, struct rhicf_t *rhicf, u_int driver) ;
+extern int rhicf_reader(char *mem, struct rhicf_t *rhicf, uint32_t driver) ;
 
 
 
@@ -132,7 +132,7 @@ daq_dta *daq_rhicf::handle_raw(int sec, int rdo)
 	}
 	size -= 40 ;	//bank header
 
-	raw->create(size,"rhicf_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	raw->create(size,"rhicf_raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 
 	char *st = (char *) raw->request(size) ;
 

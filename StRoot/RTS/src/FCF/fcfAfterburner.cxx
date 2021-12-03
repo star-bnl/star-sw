@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <math.h>
 #include <string.h>
 #include <assert.h>
@@ -98,13 +98,13 @@ int fcfAfterburner::output(struct fcfHit *hit)
 	exists) and adds it to "hit". "sim" defaults to "NULL" in
 	the function declaration.
 */
-void fcfAfterburner::decode(u_int *ptr, struct fcfHit *hit, u_int *sim)
+void fcfAfterburner::decode(uint32_t *ptr, struct fcfHit *hit, uint32_t *sim)
 {
-	u_int pt, cf ;
-	u_short flags, fl ;
-	u_short tm, pad ;
-	u_short p1,p2,t1,t2 ;
-	u_short charge ;
+	uint32_t pt, cf ;
+	uint16_t flags, fl ;
+	uint16_t tm, pad ;
+	uint16_t p1,p2,t1,t2 ;
+	uint16_t charge ;
 
 
 
@@ -178,7 +178,7 @@ void fcfAfterburner::decode(u_int *ptr, struct fcfHit *hit, u_int *sim)
 */
 int fcfAfterburner::check_merge(struct fcfHit *hit_l, struct fcfHit *hit_r) 
 {
-	u_int charge ;
+	uint32_t charge ;
 	double tm[2] ;
 
 	tm[0] = (double)hit_l->tm  ;
@@ -242,9 +242,9 @@ int fcfAfterburner::check_merge(struct fcfHit *hit_l, struct fcfHit *hit_r)
 }
 
 
-int fcfAfterburner::burn(u_int *ptr_res[3], u_int *ptr_simu_res[3])
+int fcfAfterburner::burn(uint32_t *ptr_res[3], uint32_t *ptr_simu_res[3])
 {
-	u_int i ;
+	uint32_t i ;
 
 	last_i = last_n = last_count = last_stage = 0 ;	// wrap to the beginning!
 	
@@ -298,8 +298,8 @@ int fcfAfterburner::next(fcfHit *h)
 	// move through (up to) 3 components
 	// and find and tag broken clusters
 	// and output the others at the same time...
-	u_int *res ;
-	u_int *res_sim ;
+	uint32_t *res ;
+	uint32_t *res_sim ;
 
 	if(row == 0) {	// no data to begin with in "burn"
 		return 0 ;
@@ -341,7 +341,7 @@ int fcfAfterburner::next(fcfHit *h)
 	}
 
 	if(last_i == 0) {	// need new counters
-		u_int irow = *res++ ;
+		uint32_t irow = *res++ ;
 		last_count = *res++ ;
 
 		// need to advance the sim guy as well...
@@ -414,7 +414,7 @@ int fcfAfterburner::next(fcfHit *h)
 	// so let's merge lists 0-1 and 2-3
 	int right ;
 	for(right=0;right<4;right+=2) {
-		u_int i, j ;
+		uint32_t i, j ;
 		for(i=0;i<cou_broken[right];i++) {
 			int merged = 0 ;
 			for(j=0;j<cou_broken[right+1];j++) {
@@ -458,13 +458,13 @@ int fcfAfterburner::next(fcfHit *h)
 	returns # of mismatches
 	0 means match....
 */
-int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
+int fcfAfterburner::compare(uint32_t *p1[3], uint32_t *p2[3])
 {
-	u_int matched1, count1, count2 ;
-	u_int match ;
+	uint32_t matched1, count1, count2 ;
+	uint32_t match ;
 	fcfAfterburner after ;
 	fcfHit h1, h2 ;
-	static u_char marray[2][10000] ;	// the size could be a problem!
+	static uint8_t marray[2][10000] ;	// the size could be a problem!
 	int i ;
 	int ret = 0 ;	// return number of mismatches
 	int save_merge, save_cuts ;

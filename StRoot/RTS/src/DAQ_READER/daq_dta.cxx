@@ -61,9 +61,9 @@ void daq_dta::release()
 /*
 	objects is a first guess as to what we'll need, it is best that it is good!
 */
-daq_store *daq_dta::create(u_int bytes, const char *name, int rts_id, const char *o_name, u_int obj_size) 
+daq_store *daq_dta::create(uint32_t bytes, const char *name, int rts_id, const char *o_name, uint32_t obj_size) 
 {
-	u_int requested ;
+	uint32_t requested ;
 
 	// size of the store's header
 	requested = sizeof(daq_store) + sizeof(daq_store_hdr) ;	// first "object" is the header
@@ -76,7 +76,7 @@ daq_store *daq_dta::create(u_int bytes, const char *name, int rts_id, const char
 
 
 	if(bytes_alloced < requested) {
-		u_int b_all_cache = bytes_alloced ;
+		uint32_t b_all_cache = bytes_alloced ;
 
 		release() ;	// free current store...
 
@@ -145,7 +145,7 @@ void daq_dta::clear()
 }
 
 
-void *daq_dta::request(u_int obj_cou)
+void *daq_dta::request(uint32_t obj_cou)
 {
 	daq_store *tmp_store ;
 
@@ -161,7 +161,7 @@ void *daq_dta::request(u_int obj_cou)
 
 }
 
-void daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
+void daq_dta::finalize(uint32_t obj_cou, int sec, int row, int pad)
 {
 //	if(obj_cou==0) {
 //		daq_store_hdr *hdr = (daq_store_hdr *)(store + 1 ) ;
@@ -189,12 +189,12 @@ void daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
 }
 
 	
-//daq_store *daq_dta::get(u_int *ret_avail)
-daq_store *daq_dta::get(u_int obj_cou)
+//daq_store *daq_dta::get(uint32_t *ret_avail)
+daq_store *daq_dta::get(uint32_t obj_cou)
 {
 	int do_realloc = 0 ;
-	u_int avail ;
-	u_int need ;
+	uint32_t avail ;
+	uint32_t need ;
 
 	// how much to we need
 	if(obj_cou==0) obj_cou = 16 ;	// is not specified, as for 16...
@@ -220,16 +220,16 @@ daq_store *daq_dta::get(u_int obj_cou)
 		cou16++ ;
 		need = cou16 * chunk ;
 
-		u_int old_alloced = bytes_alloced ;
+		uint32_t old_alloced = bytes_alloced ;
 
 		bytes_alloced = hdr->bytes_used + need ;
 
 		LOG(DBG,"Reallocing from %d to %d",old_alloced,bytes_alloced) ;
 
 		// remember pointers!
-		u_int hdr_off = (char *)hdr-(char *)store ;
-		u_int Byte_off = (char *)Byte - (char *)store ;
-		u_int store_cur_off = (char *)store_cur - (char *)store ;
+		uint32_t hdr_off = (char *)hdr-(char *)store ;
+		uint32_t Byte_off = (char *)Byte - (char *)store ;
+		uint32_t store_cur_off = (char *)store_cur - (char *)store ;
 
 #define USE_REALLOC
 #ifdef USE_REALLOC
@@ -254,7 +254,7 @@ daq_store *daq_dta::get(u_int obj_cou)
 
 		// apply ptrs
 		hdr = (daq_store_hdr *) ((char *)new_store + hdr_off) ;
-		Byte = (u_char *)new_store + Byte_off ;
+		Byte = (uint8_t *)new_store + Byte_off ;
 		store_cur = (daq_store *) ((char *)new_store + store_cur_off) ;
 
 		store = (daq_store *) new_store ;
@@ -271,7 +271,7 @@ daq_store *daq_dta::get(u_int obj_cou)
 	return store_cur ;
 }
 
-void daq_dta::commit(u_int bytes) 
+void daq_dta::commit(uint32_t bytes) 
 {
 	char *mem = (char *)store_cur ;
 	if(bytes == 0) {

@@ -5,23 +5,23 @@
 
 
 #include <rts.h>	// for swaps
-#include <sys/types.h>	// for u_int
+#include <stdint.h>	// for uint32_t
 
 #include "daq_dta_structs.h"
 
 
 struct daq_store {
-//	u_char sec ;
-//	u_char row ;
-//	u_char pad ;
+//	uint8_t sec ;
+//	uint8_t row ;
+//	uint8_t pad ;
 //	char type ;		// 'r' raw; 'a' adc; 'c' clusters; 'p' pedestals; 'g' gains
 
-	u_int sec ;
-	u_int row ;
-	u_int pad ;
+	uint32_t sec ;
+	uint32_t row ;
+	uint32_t pad ;
 	char type ;		// 'r' raw; 'a' adc; 'c' clusters; 'p' pedestals; 'g' gains
 
-	u_int nitems ;		// usually 1 for raw; <512 for adc; <32 for clusters; 512 for pedestals; 1 for gains
+	uint32_t nitems ;		// usually 1 for raw; <512 for adc; <32 for clusters; 512 for pedestals; 1 for gains
 } ;
 
 
@@ -29,10 +29,10 @@ struct daq_store_hdr {
 // this MUST NOT change!
 	int hdr_bytes ;
 	int hdr_version ;
-	u_int endianess ;
+	uint32_t endianess ;
 	int obj_bytes ;
 	char obj_name[32] ;
-	u_int bytes_used ;
+	uint32_t bytes_used ;
 	char describe[128] ;	// string for humans...
 //extend after this line
 } ;
@@ -52,19 +52,19 @@ private:
 	daq_store *store_cur ;
 	daq_store_hdr *hdr ;
 
-	u_int bytes_alloced ;	// in store!
-	u_int nitems ;
+	uint32_t bytes_alloced ;	// in store!
+	uint32_t nitems ;
 
 	int do_swap ;	// for endianess conversion
 	char type ;	// type of structure stored; used for endianess conversion only!
 
-	inline void sw(u_int &x) {
+	inline void sw(uint32_t &x) {
 		x = swap32(x) ;
 	}
 	inline void sw(int &x) {
 		x = swap32(x) ;
 	}
-	inline void sw(u_short &x) {
+	inline void sw(uint16_t &x) {
 		x = swap16(x) ;
 	}
 	inline void sw(short &x) {
@@ -73,13 +73,13 @@ private:
 
 
 
-	inline void psw(u_int &x) {
+	inline void psw(uint32_t &x) {
 		if(do_swap) x = swap32(x) ;
 	}
 	inline void psw(int &x) {
 		if(do_swap) x = swap32(x) ;
 	}
-	inline void psw(u_short &x) {
+	inline void psw(uint16_t &x) {
 		if(do_swap) x = swap16(x) ;
 	}
 	inline void psw(short &x) {
@@ -88,7 +88,7 @@ private:
 
 
 
-	inline u_int tsw(u_int x) {
+	inline uint32_t tsw(uint32_t x) {
 		if(do_swap) return swap32(x) ;
 		return x ;
 	}
@@ -96,7 +96,7 @@ private:
 		if(do_swap) return swap32(x) ;
 		return x ;
 	}
-	inline u_short tsw(u_short x) {
+	inline uint16_t tsw(uint16_t x) {
 		if(do_swap) return swap16(x) ;
 		return x ;
 	}
@@ -107,16 +107,16 @@ private:
 
 
 	inline short l2h(short x) { return l2h16(x) ; } ;
-	inline u_short l2h(u_short x) { return l2h16(x) ; } ;
+	inline uint16_t l2h(uint16_t x) { return l2h16(x) ; } ;
 	inline int l2h(int x) { return l2h32(x) ; } ;
-	inline u_int l2h(u_int x) { return l2h32(x) ; } ;
+	inline uint32_t l2h(uint32_t x) { return l2h32(x) ; } ;
 
 	inline short b2h(short x) { return b2h16(x) ; } ;
-	inline u_short b2h(u_short x) { return b2h16(x) ; } ;
+	inline uint16_t b2h(uint16_t x) { return b2h16(x) ; } ;
 	inline int b2h(int x) { return b2h32(x) ; } ;
-	inline u_int b2h(u_int x) { return b2h32(x) ; } ;
+	inline uint32_t b2h(uint32_t x) { return b2h32(x) ; } ;
 
-	daq_store *get(u_int obj_cou=0) ;
+	daq_store *get(uint32_t obj_cou=0) ;
 
 	void clear() ;	// clears counters so it can be reused...
 
@@ -124,7 +124,7 @@ private:
 
 
 
-	void commit(u_int bytes=0) ;
+	void commit(uint32_t bytes=0) ;
 
 	daq_store *store ;
 public:
@@ -134,10 +134,10 @@ public:
 	virtual ~daq_dta() ;
 
 	// used for writing!
-	daq_store *create(u_int bytes, const char *name, int rts_id, const char *o_name, u_int obj_size) ;
+	daq_store *create(uint32_t bytes, const char *name, int rts_id, const char *o_name, uint32_t obj_size) ;
 
-	void *request(u_int obj_cou) ;
-	void finalize(u_int obj_cou, int s=0, int row=0, int pad=0) ;
+	void *request(uint32_t obj_cou) ;
+	void finalize(uint32_t obj_cou, int s=0, int row=0, int pad=0) ;
 	void rewind() ;	// rewinds at the beggining
 
 
@@ -223,9 +223,9 @@ public:
 
 	void *meta ;	// detector specific info bank...
 
-	u_int ncontent ;
+	uint32_t ncontent ;
 
-	u_int mode ;	// bank/detector specific; can be error, can be something else...
+	uint32_t mode ;	// bank/detector specific; can be error, can be something else...
 } ;
 
 

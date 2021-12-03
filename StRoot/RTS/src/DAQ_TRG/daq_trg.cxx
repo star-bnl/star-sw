@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <rtsLog.h>
@@ -29,7 +29,7 @@ public:
 static daq_det_trg_factory trg_factory ;
 
 
-extern int trg_reader(char *m, struct trg_t *trg, u_int driver, u_int daqbits) ;
+extern int trg_reader(char *m, struct trg_t *trg, uint32_t driver, uint32_t daqbits) ;
 extern char *trg_find_raw(char *m, int *bytes); 
 
 daq_trg::daq_trg(daqReader *rts_caller) : daq_det(rts_caller)

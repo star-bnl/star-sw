@@ -2,7 +2,7 @@
 #define _STGC_PED_HH_
 
 
-#include <sys/types.h>
+#include <stdint.h>
 
 #include <DAQ_TPX/tpxCore.h>
 
@@ -30,8 +30,8 @@ public:
 
 	int to_evb(char *buff) ;			// to EVB format from ped_store
 
-	int from_cache(char *fname = 0, u_int r_mask = 0x3F) ;		// from cached file to ped_store
-	int to_cache(char *fname = 0, u_int run = 0) ;			// to cached file from ped_store
+	int from_cache(char *fname = 0, uint32_t r_mask = 0x3F) ;		// from cached file to ped_store
+	int to_cache(char *fname = 0, uint32_t run = 0) ;			// to cached file from ped_store
 
 
 
@@ -54,7 +54,7 @@ private:
 	struct peds {
 		double ped[512] ;
 		double rms[512] ;
-		u_short cou[512] ;
+		uint16_t cou[512] ;
 	} peds[256][16] ;	// ALTRO:ch
 
 

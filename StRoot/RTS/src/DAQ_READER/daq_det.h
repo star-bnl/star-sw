@@ -7,7 +7,7 @@
 // ADC data for most
 // CLD data for TPX/TPC
 
-#include <sys/types.h> // for u_int
+#include <stdint.h> // for uint32_t
 
 #define m_Mode_DAQ_PED          (1<<0)          // calculate pedestals in Make
 #define m_Mode_DAQ_GAIN         (1<<1)          // calculate gains in Make
@@ -54,18 +54,18 @@ protected:
 class daq_det {
 protected:
 
-	u_char present ;	// in this event: bitmask: 1 in DATAP; 2 in SFS
+	uint8_t present ;	// in this event: bitmask: 1 in DATAP; 2 in SFS
 
 
 	int run_num ;	// of this run
-	u_int evt_num ;	// in the run!
+	uint32_t evt_num ;	// in the run!
 
 	int def_sector ;	
 	int def_rdo ;
 
-	u_int m_Mode ;	// processing mod bitmask: see m_Mode_DAQ_xxx above
+	uint32_t m_Mode ;	// processing mod bitmask: see m_Mode_DAQ_xxx above
 
-	u_int m_Debug ; // prints, header checks etc.
+	uint32_t m_Debug ; // prints, header checks etc.
 
 	// statics
 	static const int MAX_SEC = 0 ;
@@ -113,10 +113,10 @@ public:
 	virtual int get_token(char *buff, int buff_bytes) ;
 
 
-	virtual void SetMode(u_int mode=0) { 
+	virtual void SetMode(uint32_t mode=0) { 
 		m_Mode=mode ;
 	} ;
-	virtual u_int GetMode() { 
+	virtual uint32_t GetMode() { 
 		return m_Mode ; 
 	} ;
 
@@ -140,7 +140,7 @@ public:
 
 	const char *name ;	// detector's name i.e. "SVT"
 
-	u_int event_mode ;
+	uint32_t event_mode ;
 
 	char *in_buffer ;
 	int in_bytes ;

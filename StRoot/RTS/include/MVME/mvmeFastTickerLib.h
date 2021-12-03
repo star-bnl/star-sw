@@ -23,7 +23,7 @@ extern inline volatile unsigned int mvmeFastTickerMark(void)
 extern inline volatile unsigned int mvmeFastTickerDelta(unsigned int old)
 {
         volatile unsigned int cur = rs32(MVME_FAST_TICKER_READ) & 0x7FFFFFFF ;
-	u_int ret ;
+	uint32_t ret ;
 
         if(old >= cur) ret = (old-cur) ;
         else ret = (((unsigned int)0x7FFFFFFF-cur)+old) ;

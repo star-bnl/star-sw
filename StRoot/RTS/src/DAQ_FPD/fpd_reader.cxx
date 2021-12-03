@@ -9,7 +9,7 @@
 
 #include "daq_fpd.h"
 
-int fpd_reader(char *m, struct fpd_t *fpd, u_int driver)
+int fpd_reader(char *m, struct fpd_t *fpd, uint32_t driver)
 {
 	struct DATAP *datap = (struct DATAP *)m ;
 	struct FPDP *fpdp ;
@@ -39,7 +39,7 @@ int fpd_reader(char *m, struct fpd_t *fpd, u_int driver)
 	if(off == 0) return 0 ;
 
 
-	fpdp = (struct FPDP *)((u_int *)m + off) ;
+	fpdp = (struct FPDP *)((uint32_t *)m + off) ;
 
 	if(checkBank(fpdp->bh.bank_type,"FPDP") < 0) {
 		return -1 ;
@@ -66,8 +66,8 @@ int fpd_reader(char *m, struct fpd_t *fpd, u_int driver)
 		switch(type) {
 		case FPDP_ADCD :
 
-			adcd = (struct FPDADCD *)((u_int *)fpdp + l2h32(fpdp->type[type].off)) ;
-//			adcd = (struct FPDADCD *)((u_int *)fpdp + (fpdp->type[type].off)) ;
+			adcd = (struct FPDADCD *)((uint32_t *)fpdp + l2h32(fpdp->type[type].off)) ;
+//			adcd = (struct FPDADCD *)((uint32_t *)fpdp + (fpdp->type[type].off)) ;
 			if(checkBank(adcd->bh.bank_type,CHAR_FPDADCD) < 0) {
 				return -1 ;
 			}
@@ -88,7 +88,7 @@ int fpd_reader(char *m, struct fpd_t *fpd, u_int driver)
 			break ;
 		case FPDP_TDCD :
 
-			tdcd = (struct FPDTDCD *)((u_int *)fpdp + l2h32(fpdp->type[type].off)) ;
+			tdcd = (struct FPDTDCD *)((uint32_t *)fpdp + l2h32(fpdp->type[type].off)) ;
 			if(checkBank(tdcd->bh.bank_type,CHAR_FPDTDCD) < 0) {
 				return -1 ;
 			}
@@ -101,7 +101,7 @@ int fpd_reader(char *m, struct fpd_t *fpd, u_int driver)
 			break ;
 
 		case FPDP_REGD :
-			regd = (struct FPDREGD *)((u_int *)fpdp + l2h32(fpdp->type[type].off)) ;
+			regd = (struct FPDREGD *)((uint32_t *)fpdp + l2h32(fpdp->type[type].off)) ;
 			if(checkBank(regd->bh.bank_type,CHAR_FPDREGD) < 0) {
 				return -1 ;
 			}
@@ -114,7 +114,7 @@ int fpd_reader(char *m, struct fpd_t *fpd, u_int driver)
 			break ;
 
 		case FPDP_PEDR :
-			pedr = (struct FPDPEDR *)((u_int *)fpdp + l2h32(fpdp->type[type].off)) ;
+			pedr = (struct FPDPEDR *)((uint32_t *)fpdp + l2h32(fpdp->type[type].off)) ;
 			if(checkBank(pedr->bh.bank_type,CHAR_FPDPEDR) < 0) {
 				return -1 ;
 			}
@@ -129,14 +129,14 @@ int fpd_reader(char *m, struct fpd_t *fpd, u_int driver)
 
 			break ;
 		case FPDP_SCL :
-			scl = (struct FPDSCL *)((u_int *)fpdp + l2h32(fpdp->type[type].off)) ;
+			scl = (struct FPDSCL *)((uint32_t *)fpdp + l2h32(fpdp->type[type].off)) ;
 			if(checkBank(scl->bh.bank_type,CHAR_FPDSCL) < 0) {
 				return -1 ;
 			}
 			
 			break ;
 		case FPDP_BBCDAT :
-			bbcdat = (struct BBCDAT *)((u_int *)fpdp + l2h32(fpdp->type[type].off)) ;
+			bbcdat = (struct BBCDAT *)((uint32_t *)fpdp + l2h32(fpdp->type[type].off)) ;
 			if(checkBank(bbcdat->bh.bank_type,CHAR_BBCDAT) < 0) {
 				return -1 ;
 			}
@@ -158,7 +158,7 @@ int fpd_reader(char *m, struct fpd_t *fpd, u_int driver)
 
 			break ;
 		case FPDP_BBCPED :
-			bbcped = (struct BBCPED *)((u_int *)fpdp + l2h32(fpdp->type[type].off)) ;
+			bbcped = (struct BBCPED *)((uint32_t *)fpdp + l2h32(fpdp->type[type].off)) ;
 			if(checkBank(bbcped->bh.bank_type,CHAR_BBCPED) < 0) {
 				return -1 ;
 			}
@@ -175,7 +175,7 @@ int fpd_reader(char *m, struct fpd_t *fpd, u_int driver)
 
 			break ;
 		case FPDP_BBCSCL :
-			bbcscl = (struct BBCSCL *)((u_int *)fpdp + l2h32(fpdp->type[type].off)) ;
+			bbcscl = (struct BBCSCL *)((uint32_t *)fpdp + l2h32(fpdp->type[type].off)) ;
 			if(checkBank(bbcscl->bh.bank_type,CHAR_BBCSCL) < 0) {
 				return -1 ;
 			}

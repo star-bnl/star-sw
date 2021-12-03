@@ -25,25 +25,25 @@ public:
 
 	//per FEE
 	struct fee_ch_t {
-		u_char port ;	//0..15
-		u_char fee ;	//0..63; padplane id
-		u_char ch ;	//0..63
-		u_char err ;
+		uint8_t port ;	//0..15
+		uint8_t fee ;	//0..63; padplane id
+		uint8_t ch ;	//0..63
+		uint8_t err ;
 
-		u_short words ;
+		uint16_t words ;
 	} ;
 
 	//per RDO, per event
 	struct rdo_t {
-		u_char sector ;
-		u_char rdo ;
-		u_char rb ;
-		u_char reserved ;
+		uint8_t sector ;
+		uint8_t rdo ;
+		uint8_t rb ;
+		uint8_t reserved ;
 
-		u_short token ;
+		uint16_t token ;
 
-		u_char trg_cmd ;
-		u_char daq_cmd ;
+		uint8_t trg_cmd ;
+		uint8_t daq_cmd ;
 
 
 
@@ -78,7 +78,7 @@ public:
 
 	void data_accum(fee_ch_t *fee_p, int tb, int adc) ;
 
-	int fee_scan(u_short *d16, int shorts) ;
+	int fee_scan(uint16_t *d16, int shorts) ;
 
 
 	static itpc_ped_t *ped_p ;
@@ -86,7 +86,7 @@ public:
 	static void ped_start() ;
 	static void ped_stop() ;
 
-	u_int format_version ;
+	uint32_t format_version ;
 
 	int sector ;
 
@@ -110,7 +110,7 @@ private:
 	int next_word ;
 	int hdr_cou[8] ;
 
-	int start(u_short *d16) ;	
+	int start(uint16_t *d16) ;	
 };
 
 

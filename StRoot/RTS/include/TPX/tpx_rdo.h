@@ -2,31 +2,31 @@
 #define _TPX_RDO_H_
 
 struct tpx_rdo {
-	u_char sector ;
-	u_char rdo ;
+	uint8_t sector ;
+	uint8_t rdo ;
 
-	u_char remote ;
+	uint8_t remote ;
 
-	u_char temp_rdo ;
-	u_char temp_stratix ;
+	uint8_t temp_rdo ;
+	uint8_t temp_stratix ;
 
-	u_int fpga_usercode[5] ;
+	uint32_t fpga_usercode[5] ;
 
-	u_char compilation_date[24] ;
+	uint8_t compilation_date[24] ;
 
-	u_short status_cpld ;
-	u_short status_xilinx ;
+	uint16_t status_cpld ;
+	uint16_t status_xilinx ;
 
 
-	u_int three[3] ;
+	uint32_t three[3] ;
 
 	struct {
-		u_int base ;
-		u_char x_s ;
-		u_char id ;
-		u_char fee_status ;
-		u_char pad_id ;
-		u_char jumpers ;
+		uint32_t base ;
+		uint8_t x_s ;
+		uint8_t id ;
+		uint8_t fee_status ;
+		uint8_t pad_id ;
+		uint8_t jumpers ;
 	} fee[3][12] ;
 
 } ;

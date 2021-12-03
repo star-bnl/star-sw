@@ -1,7 +1,7 @@
 #ifndef RC_CONFIG_HH
 #define RC_CONFIG_HH
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <rtsSystems.h>
 #include <netinet/in.h>
 

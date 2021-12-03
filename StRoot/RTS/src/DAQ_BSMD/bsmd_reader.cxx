@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 
 #include <rtsLog.h>
 #include <rtsSystems.h>
@@ -18,7 +18,7 @@ const char *hdrs[3] = {
 char *bsmd_reader(char *e, struct bsmd_desc *bsmd_d)
 {
 	struct EMCP *emcp = (struct EMCP *)e ;
-	u_int off, len ;
+	uint32_t off, len ;
 	int found_some ;
 
 	found_some =  0 ;	// assume we haven't found anything
@@ -37,7 +37,7 @@ char *bsmd_reader(char *e, struct bsmd_desc *bsmd_d)
 
 	if((len==0) || (off==0)) return 0 ;
 
-	struct EMCSECP *emcsecp = (struct EMCSECP *)((u_int *)emcp + off) ;
+	struct EMCSECP *emcsecp = (struct EMCSECP *)((uint32_t *)emcp + off) ;
 
 	if(checkBank(emcsecp->bh.bank_type, CHAR_EMCSECP)<0) return 0 ;
 
@@ -52,7 +52,7 @@ char *bsmd_reader(char *e, struct bsmd_desc *bsmd_d)
 
 		if((len==0) || (off==0)) continue ;
 
-		struct EMCRBP *emcrbp = (struct EMCRBP *)((u_int *)emcsecp + off) ;
+		struct EMCRBP *emcrbp = (struct EMCRBP *)((uint32_t *)emcsecp + off) ;
 
 		if(checkBank(emcrbp->bh.bank_type, CHAR_EMCRBP)< 0) return 0 ;
 
@@ -67,7 +67,7 @@ char *bsmd_reader(char *e, struct bsmd_desc *bsmd_d)
 
 			if((len==0) || (off==0)) continue ;
 
-			struct DUMMYDATA *emcadc = (DUMMYDATA *) ((u_int *)emcrbp + off) ;
+			struct DUMMYDATA *emcadc = (DUMMYDATA *) ((uint32_t *)emcrbp + off) ;
 
 			if(checkBank(emcadc->bh.bank_type, (char *)hdrs[b])<0) return 0 ;
 

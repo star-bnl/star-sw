@@ -5,7 +5,7 @@
 #include <time.h>
 #include "sfs_index.h"
 #include <sys/uio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>

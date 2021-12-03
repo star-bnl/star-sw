@@ -10,7 +10,7 @@ struct ric_t {
 	int channels ;
 	int max_channels ;	// 16*960
 
-	u_short adc[16][960] ;
+	uint16_t adc[16][960] ;
 } ;
 
 

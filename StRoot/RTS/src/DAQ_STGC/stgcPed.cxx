@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -141,7 +141,7 @@ void stgcPed::smooth()
 void stgcPed::accum(char *evbuff, int bytes)
 {
 	int t ;
-	u_int *data_end ;
+	uint32_t *data_end ;
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
 
@@ -288,11 +288,11 @@ int stgcPed::to_altro(char *buff, int rb, int timebins)
 	for(ch=0;ch<16;ch++) {
 
 
-		u_int *addr = (u_int *) rbuff ;	// remember where to store the address
+		uint32_t *addr = (uint32_t *) rbuff ;	// remember where to store the address
 	
 		rbuff += 4 ;	// skip 4 bytes
 
-		u_short *ptr = (u_short *) rbuff ;	// start
+		uint16_t *ptr = (uint16_t *) rbuff ;	// start
 
 		int tcou = 0 ;	// zero counter...
 
@@ -306,12 +306,12 @@ int stgcPed::to_altro(char *buff, int rb, int timebins)
 		// first should be the pedestals from the start
 		// of trigger...
 		for(t=15;t<timebins+15;t++) {
-			*ptr++ = (u_short) ped->ped[t] ;
+			*ptr++ = (uint16_t) ped->ped[t] ;
 
-			//if(ch==0 && t<40) LOG(TERR,"A%d:%d: %d: tb %d = %d",a,ch,tcou,t,(u_short)ped->ped[t]) ;
+			//if(ch==0 && t<40) LOG(TERR,"A%d:%d: %d: tb %d = %d",a,ch,tcou,t,(uint16_t)ped->ped[t]) ;
 
 			if((row==42)&&(pad==140)) {
-				//LOG(TERR,"%d,%d = %d",t,tcou,(u_short)ped->ped[t]) ;
+				//LOG(TERR,"%d,%d = %d",t,tcou,(uint16_t)ped->ped[t]) ;
 			}
 			tcou++ ;
 		}
@@ -320,7 +320,7 @@ int stgcPed::to_altro(char *buff, int rb, int timebins)
 
 		// follow with a "wall" of 1023
 		for(;t<(TPX_MAX_TB+15);t++) {
-			u_short val = (u_short) 1023 ;
+			uint16_t val = (uint16_t) 1023 ;
 
 			*ptr++ = val ;
 			if((row==42)&&(pad==140)) {
@@ -336,7 +336,7 @@ int stgcPed::to_altro(char *buff, int rb, int timebins)
 		// actually, I'm totally confused... this count of 15 must
 		// exist but the value seems irrelevant...
 		for(t=0;t<15;t++) {
-			u_short val = (u_short) ped->ped[t] ;
+			uint16_t val = (uint16_t) ped->ped[t] ;
 			*ptr++ = val ;
 			if((row==42)&&(pad==140)) {
 				//LOG(TERR,"%d,%d = %d",t,tcou,val) ;
@@ -346,7 +346,7 @@ int stgcPed::to_altro(char *buff, int rb, int timebins)
 		}
 
 		// this, last value is the one that gets used for the pre- pedestals
-		u_short val = (u_short) ped->ped[0] ;
+		uint16_t val = (uint16_t) ped->ped[0] ;
 		*ptr++ = val ;
 		if((row==42)&&(pad==140)) {
 			//LOG(TERR,"%d,%d = %d",t,tcou,val) ;
@@ -360,7 +360,7 @@ int stgcPed::to_altro(char *buff, int rb, int timebins)
 		// need to be even
 		if(tcou & 1) {
 			LOG(WARN,"tcou %d is odd, adding ped of tb %d?",tcou,t) ;
-			*ptr++ = (u_short) ped->ped[0]; // was ped[t]; then ped[0]
+			*ptr++ = (uint16_t) ped->ped[0]; // was ped[t]; then ped[0]
 			tcou++ ;
 		}
 
@@ -383,7 +383,7 @@ int stgcPed::to_evb(char *buff)
 	return 0 ;
 }
 
-int stgcPed::from_cache(char *fname, u_int rb_msk) 
+int stgcPed::from_cache(char *fname, uint32_t rb_msk) 
 {
 	FILE *f ;
 	char fn[64]  ;
@@ -421,7 +421,7 @@ int stgcPed::from_cache(char *fname, u_int rb_msk)
 
 
 		while(!feof(f)) {
-			u_int r, p , t ;
+			uint32_t r, p , t ;
 			float pp, rr ;
 			char buff[64] ;
 			int bad = 0 ;
@@ -475,7 +475,7 @@ int stgcPed::from_cache(char *fname, u_int rb_msk)
 	return valid ;
 }
 
-int stgcPed::to_cache(char *fname, u_int run)
+int stgcPed::to_cache(char *fname, uint32_t run)
 {
 	FILE *f ;
 	char fn[64] ;

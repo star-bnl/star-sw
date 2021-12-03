@@ -5,10 +5,10 @@
 #include <DAQ_READER/daq_det.h>
 
 struct stgc_vmm_t {
-	u_char feb_vmm ;	
-	u_char ch ;
-	u_short adc ;
-	u_short bcid ;
+	uint8_t feb_vmm ;	
+	uint8_t ch ;
+	uint16_t adc ;
+	uint16_t bcid ;
 	short tb ;	// from the trigger
 } ;
 

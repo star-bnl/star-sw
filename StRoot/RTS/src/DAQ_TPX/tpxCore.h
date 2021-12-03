@@ -1,7 +1,7 @@
 #ifndef _TPX_CORE_H_
 #define _TPX_CORE_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <rtsLog.h>
 
 #define TPX_GAIN_MASTER_FILE        "/RTS/conf/tpx/tpx_gains.txt"   // global -- read only AFAIK this code is concerned!
@@ -32,73 +32,73 @@
 #include <TPX/tpx_rdo.h>
 
 struct tpx_odd_fee_t {
-	u_char tpc_fee_padplane ;	// fee id from padplane
-	u_char status ;	// 1=overriden; 2=marked bad
-	u_char sector ;	// from 1
-	u_char rdo ;	// from 1
+	uint8_t tpc_fee_padplane ;	// fee id from padplane
+	uint8_t status ;	// 1=overriden; 2=marked bad
+	uint8_t sector ;	// from 1
+	uint8_t rdo ;	// from 1
 
-	u_char altro_id_padplane ;
+	uint8_t altro_id_padplane ;
 } ;
 
 struct tpx_rdo_event {
-	u_int *data_start ;
-	u_int *data_end ;
-	u_int trg_cou ;
+	uint32_t *data_start ;
+	uint32_t *data_end ;
+	uint32_t trg_cou ;
 	struct trg_data *trg ;
 
 	short token ;	// can be negative!
 	short sector ;	// can be negative, if uknown...
 	short rdo ;	// can be negative, if unknown; starts from 1!
 
-	u_char l2_cmd ;	// abort,accept,unknown yet...
-	u_char type ;
-	u_char subtype ;
-	u_char data_err ;
+	uint8_t l2_cmd ;	// abort,accept,unknown yet...
+	uint8_t type ;
+	uint8_t subtype ;
+	uint8_t data_err ;
 } ;
 
 
 struct tpx_altro_struct {
-	u_char id ;		// original altro id; even if overriden
-	u_char ch ;	// original altro channel
-	u_char rdo ;	// from 0; this is an _incoming_ datum to the scanner!
-	u_char what ;	// bitfield: do what, see defines above...
+	uint8_t id ;		// original altro id; even if overriden
+	uint8_t ch ;	// original altro channel
+	uint8_t rdo ;	// from 0; this is an _incoming_ datum to the scanner!
+	uint8_t what ;	// bitfield: do what, see defines above...
 
-	u_char sector ;	// input: from 1
-	u_char fee ;	// TPC physical absolute FEE; will be correct even for overriden ALTROs!
-	u_char row ;
-	u_char pad ;
+	uint8_t sector ;	// input: from 1
+	uint8_t fee ;	// TPC physical absolute FEE; will be correct even for overriden ALTROs!
+	uint8_t row ;
+	uint8_t pad ;
 
-	u_short wc_dummy ;	// full altro word count, used in FCF
-	u_char log_err ;	// input!
-	u_char err ;	// output
+	uint16_t wc_dummy ;	// full altro word count, used in FCF
+	uint8_t log_err ;	// input!
+	uint8_t err ;	// output
 
-//	u_int *where ;	// pointer to this altro's data...
+//	uint32_t *where ;	// pointer to this altro's data...
 
-	u_short t ;	// token; incoming, for debugging
-	u_short count ;		// length of data
+	uint16_t t ;	// token; incoming, for debugging
+	uint16_t count ;		// length of data
 
-	u_short adc[512] ;
-	u_short tb[512] ;
+	uint16_t adc[512] ;
+	uint16_t tb[512] ;
 
 } ;
 
 
 struct tpx_rdo_dbg
 {
-	u_int delta ;
-	u_int old_rhic ;
+	uint32_t delta ;
+	uint32_t old_rhic ;
 } ;
 
 struct tpx_rdo_heartbeat_t {
-			u_char pll ;
-			u_char status ;
-			u_short retries ;
+			uint8_t pll ;
+			uint8_t status ;
+			uint16_t retries ;
 			
-			u_int trgs ;
-			u_int trg_csr ;	// shows i.e. BUSY
-			u_int a_ticks ;
-			u_int sta_reg ;	// status
-			u_int rhic_ticks ; // rhic clocks..
+			uint32_t trgs ;
+			uint32_t trg_csr ;	// shows i.e. BUSY
+			uint32_t a_ticks ;
+			uint32_t sta_reg ;	// status
+			uint32_t rhic_ticks ; // rhic clocks..
 } ;
 
 inline int tpx36_from_real(int s36, int s_real, int r_real)
@@ -168,14 +168,14 @@ inline void tpx36_to_real(int s36, int r1, int &s_real, int &r_real)
 
 
 
-extern int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log)  ;
-extern u_int *tpx_scan_to_next(u_int *now, u_int *data_start, struct tpx_altro_struct *a) ;
+extern int tpx_get_start(char *buff, uint32_t words, struct tpx_rdo_event *rdo, int do_log)  ;
+extern uint32_t *tpx_scan_to_next(uint32_t *now, uint32_t *data_start, struct tpx_altro_struct *a) ;
 
 extern void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad) ;
 extern void tpx_to_altro(int row, int pad, int &rdo, int &a, int &ch) ;
 extern int tpx_altro_to_fee(int rdo, int a) ;
-extern u_char tpx_rdo_fees(int rdo, int cou) ;
-//extern u_char tpx_altro_ch_to_fee(int a, int ch) ;
+extern uint8_t tpx_rdo_fees(int rdo, int cou) ;
+//extern uint8_t tpx_altro_ch_to_fee(int a, int ch) ;
 
 extern void tpx_analyze_log(int sector, int rdo, char *buff) ;
 extern int  tpx_analyze_msc(int sector, int rdo, char *buff, int *altro_list=0) ;

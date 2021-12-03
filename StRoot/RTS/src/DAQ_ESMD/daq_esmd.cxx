@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <assert.h>
 
@@ -159,14 +159,14 @@ daq_dta *daq_esmd::handle_raw()
 
 daq_dta *daq_esmd::handle_adc()
 {
-	u_short *raw_dta ;
+	uint16_t *raw_dta ;
 
 	daq_dta *dd = handle_raw() ;
 
 	LOG(DBG,"%s: got raw %p",name,dd) ;
 
 	if(dd && dd->iterate()) {
-		raw_dta = (u_short *) dd->Byte ;
+		raw_dta = (uint16_t *) dd->Byte ;
 	}
 	else {
 		return 0 ;
@@ -178,7 +178,7 @@ daq_dta *daq_esmd::handle_adc()
 
 
 		
-	u_short *data = (u_short *)((char *)raw_dta + 128) ;	
+	uint16_t *data = (uint16_t *)((char *)raw_dta + 128) ;	
 
 	if(present & DET_PRESENT_DATAP) {
 		data += 2 ;	// for old, VME based RBs we need to also skip 4 bytes of junk
@@ -227,10 +227,10 @@ int daq_esmd::get_l2(char *buff, int buff_words, struct daq_trg_word *trg, int r
 	const int ESMD_DDL_BYTES = 18948 ;
 	int buff_bytes = buff_words * 4 ;
 
-	u_short *us = (u_short *)buff ;
+	uint16_t *us = (uint16_t *)buff ;
 
-	u_short t_hi = l2h16(us[2]) ;
-	u_short t_lo = l2h16(us[3]) ;
+	uint16_t t_hi = l2h16(us[2]) ;
+	uint16_t t_lo = l2h16(us[3]) ;
 
 	int err = 0 ;
 

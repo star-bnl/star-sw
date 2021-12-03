@@ -1,14 +1,14 @@
 #ifndef _DAQ_SC_H_
 #define _DAQ_SC_H_
 
-#include <sys/types.h>  // for u_int
+#include <stdint.h>  // for uint32_t
 
 struct sc_t {
-  u_int valid;       
-  u_int time;
+  uint32_t valid;       
+  uint32_t time;
   int timelag;  // lag between read time and event time (to 1 sec)
   float mag_field;
-  u_int rich_scalers[16];
+  uint32_t rich_scalers[16];
 };
 
 #ifndef DAQ_SC_DATA_STRUCTURE

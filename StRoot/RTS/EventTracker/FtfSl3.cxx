@@ -971,7 +971,7 @@ int FtfSl3::readSectorFromEvpReader(int sector) {
 		int padrow = dd->row;
 		int sec = dd->sec;
 		
-		for(u_int i=0;i<dd->ncontent;i++) {
+		for(uint32_t i=0;i<dd->ncontent;i++) {
 		    float pad = dd->cld[i].pad;
 		    float tb = dd->cld[i].tb;
 		    int charge = dd->cld[i].charge;
@@ -1118,7 +1118,7 @@ int FtfSl3::readSector (DATAP *datap, int sector) {
   if(len == 0) return -1;
   if(off == 0) return -1;
 
-  TPCP *tpcp = (TPCP *)((u_int *)datap + off) ;
+  TPCP *tpcp = (TPCP *)((uint32_t *)datap + off) ;
   int swaptpcp = 0;
   if(checkBank((char *)tpcp,"TPCP") < 0) return -1;
   if(tpcp->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swaptpcp = 1;
@@ -1127,14 +1127,14 @@ int FtfSl3::readSector (DATAP *datap, int sector) {
   if(len == 0) return -1;
   if(off == 0) return -1;
 
-  TPCSECP *secp = (TPCSECP *)((u_int *)tpcp + off);
+  TPCSECP *secp = (TPCSECP *)((uint32_t *)tpcp + off);
   int swapsecp = 0;
   if(checkBank((char *)secp,"TPCSECP") < 0) return -1;
   if(secp->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapsecp = 1;
   off = qswap32(swapsecp, secp->bh.w9);
   if(off == 0) return -1;
   
-  TPCSECLP *seclp = (TPCSECLP *)((u_int *)secp + off);
+  TPCSECLP *seclp = (TPCSECLP *)((uint32_t *)secp + off);
   if(checkBank((char *)seclp,"TPCSECLP") < 0) return -1;
   readSector((bankHeader *)seclp);
 

@@ -24,27 +24,27 @@ struct ssd_t {
 	int max_channels ;
 
 	// how many valid strips in this hybrid
-	u_char counts[40][64] ;
+	uint8_t counts[40][64] ;
 
 	// Up to 192 valid strips (count is in counts)
 	// strip is overloaded with RMS data if mode==1
-	u_char strip[40][64][192];
+	uint8_t strip[40][64][192];
 
 	// Up to 192 valid adcs (same count as above...)
 	// overloaded with PED data if mode==1
-	u_char adc[40][64][192];
+	uint8_t adc[40][64][192];
 
 	// To facilitate decoding in raw events
 	// this points to raw data of ONE mezzanine
 	// this raw data is 6*64*512 bytes long
 	// There are only 2 mezzanines/RB
-	u_char *raw[4][2] ;
+	uint8_t *raw[4][2] ;
 
 } ;
 
 
 
-extern int ssd_reader(char *mem, struct ssd_t *ssd, u_int driver) ;
+extern int ssd_reader(char *mem, struct ssd_t *ssd, uint32_t driver) ;
 
 
 class daq_ssd : public daq_det {

@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <rtsLog.h>
@@ -9,7 +9,7 @@
 
 #include "daq_svt.h"
 
-extern int svt_reader(char *m, struct svt_t *svt, u_int driver) ;
+extern int svt_reader(char *m, struct svt_t *svt, uint32_t driver) ;
 
 const char *daq_svt::help_string = "SVT tst\n" ;
 

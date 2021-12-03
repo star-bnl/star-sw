@@ -2,7 +2,7 @@
 #define _STGC_DATA_C_H_
 
 
-#include <sys/types.h>
+#include <stdint.h>
 
 #define STGC_SECTOR_COU	4
 #define STGC_RDO_COU	4
@@ -15,49 +15,49 @@ public:
 	stgc_data_c() ;
 	~stgc_data_c() {;} ;
 
-	static u_int run_number ;
-	static u_int run_type ;
+	static uint32_t run_number ;
+	static uint32_t run_type ;
 
-	u_char id ;	// 0 is special
+	uint8_t id ;	// 0 is special
 
-	u_char sector1 ;
-	u_char rdo1 ;
+	uint8_t sector1 ;
+	uint8_t rdo1 ;
 
-	u_int bad_error ;	// flags
-	u_char want_saved ;
-	u_char realtime ;
+	uint32_t bad_error ;	// flags
+	uint8_t want_saved ;
+	uint8_t realtime ;
 
 	//per event; per RDO
-	int hdr_check(u_short *d16, int shorts) ;
+	int hdr_check(uint16_t *d16, int shorts) ;
 
-	int start_0001(u_short *d16, int shorts) ;
+	int start_0001(uint16_t *d16, int shorts) ;
 	int event_0001() ;
 
 	int run_start() ;
 
-	int start(u_short *d16, int shorts) ;
+	int start(uint16_t *d16, int shorts) ;
 	int event() ;
 	int event_end(int flag) ;
 
-	static const char *type_c(u_short type) ;
+	static const char *type_c(uint16_t type) ;
 
 //	void set_rdo(int r1) { rdo1 = r1 ; } ;
 
 
 	static struct feb_t {
-		u_char present ;
+		uint8_t present ;
 		struct {
-			u_short threshold ;
+			uint16_t threshold ;
 			struct {
-				u_char threshold ;
-				u_char mask ;
+				uint8_t threshold ;
+				uint8_t mask ;
 			} ch[64] ;
 		} vmm[STGC_VMM_COU] ;
 	} feb[STGC_SECTOR_COU][STGC_RDO_COU][STGC_FEE_COU] ;
 
 
 	static struct errs_t {
-		u_int fifo ;
+		uint32_t fifo ;
 	} errs[STGC_RDO_COU] ;
 
 	int adc_cou ;
@@ -66,35 +66,35 @@ public:
 	int xing_min ;
 	int xing_max ;
 
-	u_int event_any ;
-	u_int event_data ;
+	uint32_t event_any ;
+	uint32_t event_data ;
 
-	u_short version ;	// 0x0001 is the version in May 2021
-	u_short evt_type ;
-	u_short status ;	// from d[3]
-	u_short echo ;		// if echo command
+	uint16_t version ;	// 0x0001 is the version in May 2021
+	uint16_t evt_type ;
+	uint16_t status ;	// from d[3]
+	uint16_t echo ;		// if echo command
 	unsigned long response ;	// from FEE response packet
 	unsigned long fee_status ;
 
-	u_short *d16_start ;
-	u_short *d16_data ;
-	u_short *d16_last ;
+	uint16_t *d16_start ;
+	uint16_t *d16_data ;
+	uint16_t *d16_last ;
 	
 
 	
 
-	u_int mhz_start_evt_marker ;
-	u_int mhz_stop_evt_marker ;
-	u_int mhz_trg_marker ;
+	uint32_t mhz_start_evt_marker ;
+	uint32_t mhz_stop_evt_marker ;
+	uint32_t mhz_trg_marker ;
 
 	struct stgc_vmm_t vmm ;
 
-	u_short event_type ;
+	uint16_t event_type ;
 	int ch_count ;
 
-	u_short token ;
-	u_char daq_cmd ;
-	u_char trg_cmd ;
+	uint16_t token ;
+	uint8_t daq_cmd ;
+	uint8_t trg_cmd ;
 
 private:
 

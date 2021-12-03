@@ -112,7 +112,7 @@ public:
 private:
 
   //int init();              // load the config files...automatic on first trackEvent() call
-  int gl3Event_to_GTD(L3_GTD *gtd, u_int max_size);
+  int gl3Event_to_GTD(L3_GTD *gtd, uint32_t max_size);
 
   //int initialized;
 

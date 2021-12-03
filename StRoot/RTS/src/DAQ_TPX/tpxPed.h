@@ -2,7 +2,7 @@
 #define _TPX_PED_HH_
 
 
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "tpxCore.h"
 
@@ -31,8 +31,8 @@ public:
 
 	int to_evb(char *buff) ;			// to EVB format from ped_store
 
-	int from_cache(char *fname = 0, u_int r_mask = 0x3F) ;		// from cached file to ped_store
-	int to_cache(char *fname = 0, u_int run = 0) ;			// to cached file from ped_store
+	int from_cache(char *fname = 0, uint32_t r_mask = 0x3F) ;		// from cached file to ped_store
+	int to_cache(char *fname = 0, uint32_t run = 0) ;			// to cached file from ped_store
 
 	int special_setup(int run_type, int sub_type) ;
 	int hlt_debug_setup(int param) ;
@@ -53,12 +53,12 @@ private:
 
 
 	struct peds {
-		u_short row ;
-		u_short pad ;
+		uint16_t row ;
+		uint16_t pad ;
 
 		double ped[512] ;
 		double rms[512] ;
-		u_short cou[512] ;
+		uint16_t cou[512] ;
 	} ; // *ped_store ;
 
 	struct peds_rdo_t {
@@ -70,8 +70,8 @@ private:
 	} ped_rdo_store[6] ;	// indexed by logical r0
 
 
-	u_int evts[6] ;		// logical r0: RDOs count from 0 here!
-	u_int valid_evts[6] ;	// logical r0
+	uint32_t evts[6] ;		// logical r0: RDOs count from 0 here!
+	uint32_t valid_evts[6] ;	// logical r0
 
 
 	void accum(tpx_altro_struct *a) ;	// adds values into ped_store

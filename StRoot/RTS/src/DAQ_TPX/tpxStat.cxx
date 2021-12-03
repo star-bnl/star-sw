@@ -46,7 +46,7 @@ static const int fee_check_count = sizeof(fee_check)/sizeof(fee_check[0]) ;
 
 static FILE *stripes_f ;
 
-void tpxStat::run_start(u_int rb_mask, int r_type)
+void tpxStat::run_start(uint32_t rb_mask, int r_type)
 {
 
 	run_type = r_type ;
@@ -122,7 +122,7 @@ void tpxStat::run_start(u_int rb_mask, int r_type)
 	return ;
 }
 
-int tpxStat::run_stop(FILE *ofile, u_int rb_mask, int run_type, char *fname)
+int tpxStat::run_stop(FILE *ofile, uint32_t rb_mask, int run_type, char *fname)
 {
 
 	int should ;
@@ -216,7 +216,7 @@ int tpxStat::run_stop(FILE *ofile, u_int rb_mask, int run_type, char *fname)
 	for(a=0;a<256;a++) {
 		int a_err = 0 ;
 		for(c=0;c<16;c++) {
-			u_int have, expect ;
+			uint32_t have, expect ;
 			
 			int warn = 0 ;
 			int p_err = 0 ;
@@ -322,7 +322,7 @@ int tpxStat::run_stop(FILE *ofile, u_int rb_mask, int run_type, char *fname)
 			int aid = fee_check_data[ix][ch].aid ;
 			int row, pad ;
 
-			u_char j1 ;
+			uint8_t j1 ;
 
 			tpx_from_altro(2,aid,ch,row,pad) ;
 
@@ -400,11 +400,11 @@ int tpxStat::run_stop(FILE *ofile, u_int rb_mask, int run_type, char *fname)
 void tpxStat::accum(char *rdobuff, int bytes)
 {
 	int t ;
-	u_int *data_end ;
+	uint32_t *data_end ;
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
 	int errors = 0 ;
-	const u_int MAX_ERRORS = 10 ;
+	const uint32_t MAX_ERRORS = 10 ;
 	int r0_logical ;
 
 	TLOG() ;

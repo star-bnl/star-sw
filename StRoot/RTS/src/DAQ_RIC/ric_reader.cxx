@@ -10,7 +10,7 @@
 #include "daq_ric.h"
 
 
-int ric_reader(char *m, struct ric_t *ric, u_int driver) 
+int ric_reader(char *m, struct ric_t *ric, uint32_t driver) 
 {
 	struct DATAP *datap = (struct DATAP *)m ;
 	struct RICP *ricp ;
@@ -34,7 +34,7 @@ int ric_reader(char *m, struct ric_t *ric, u_int driver)
 
 	LOG(DBG,"RIC len %d, off %d",len,off,0,0,0) ;
 
-	ricp = (struct RICP *)((u_int *)m + off) ;
+	ricp = (struct RICP *)((uint32_t *)m + off) ;
 
 	if(checkBank(ricp->bh.bank_type,CHAR_RICP) < 0) {
 		return -1 ;
@@ -53,15 +53,15 @@ int ric_reader(char *m, struct ric_t *ric, u_int driver)
 
 		if(ricp->crams[cram].len <= 0) continue ;
 
-		riccramp = (struct RICCRAMP *)((u_int *)ricp + b2h32(ricp->crams[cram].off)) ;
+		riccramp = (struct RICCRAMP *)((uint32_t *)ricp + b2h32(ricp->crams[cram].off)) ;
 
 		if(checkBank(riccramp->bh.bank_type,CHAR_RICCRAMP) < 0) {
 			return -1 ;
 		}
 
 		for(banks=0;banks<8;banks++) {
-			u_int cou ;
-			u_int i ;
+			uint32_t cou ;
+			uint32_t i ;
 
 			if(riccramp->banks[banks].len <= 0) continue ;
 
@@ -72,7 +72,7 @@ int ric_reader(char *m, struct ric_t *ric, u_int driver)
 
 
 
-			ricdatad = (struct RICDATAD *)((u_int *)riccramp + b2h32(riccramp->banks[banks].off)) ;
+			ricdatad = (struct RICDATAD *)((uint32_t *)riccramp + b2h32(riccramp->banks[banks].off)) ;
 
 			
 			LOG(DBG,"Bank id is %d...",banks,0,0,0,0) ;
@@ -90,7 +90,7 @@ int ric_reader(char *m, struct ric_t *ric, u_int driver)
 
 
 			for(i=0;i<cou*2;i+=2) {
-				u_short adc, ch ;
+				uint16_t adc, ch ;
 
 				ch = b2h16(ricdatad->data[i]) ;
 				adc = b2h16(ricdatad->data[i+1]) ;

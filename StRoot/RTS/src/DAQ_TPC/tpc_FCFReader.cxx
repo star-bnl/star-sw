@@ -28,24 +28,24 @@
 // Assume that tpc raw structure is alread filled
 //
 //  t0corr   --> int   t0[46][242], for this sector
-//  gainCorr --> u_int gain[46][242], for this sector
+//  gainCorr --> uint32_t gain[46][242], for this sector
 // 
-int daq_tpc::fcfReader(int sector, int *t0c, u_int *gainc, tpc_t *tpc)          // from zero
+int daq_tpc::fcfReader(int sector, int *t0c, uint32_t *gainc, tpc_t *tpc)          // from zero
 {
   fcfClass *fcf = NULL;
   fcfAfterburner *fcf_after = NULL;
 
   int row, p, t;
-  u_short tb;
+  uint16_t tb;
 
-  u_int adcOff[183] ;
-  u_short cppOff[183] ;
-  u_short startFlags[183];
-  u_int output[2*FCF_MAX_CLUSTERS];
-  u_int hits = 0;
-  u_int *fcf_ptrs[3];
+  uint32_t adcOff[183] ;
+  uint16_t cppOff[183] ;
+  uint16_t startFlags[183];
+  uint32_t output[2*FCF_MAX_CLUSTERS];
+  uint32_t hits = 0;
+  uint32_t *fcf_ptrs[3];
   int t0[242];
-  u_int gain[242];
+  uint32_t gain[242];
   
   memset(tpc->cl_counts, 0, sizeof(tpc->cl_counts));
   memset(tpc->cl, 0, sizeof(tpc->cl));
@@ -61,13 +61,13 @@ int daq_tpc::fcfReader(int sector, int *t0c, u_int *gainc, tpc_t *tpc)          
     row = r+1;
 
     // Padrow adc data stored in "adc"
-    u_char adc[182][512];
+    uint8_t adc[182][512];
 
     memset(adc, 0, sizeof(adc));
     int adcs=0;
     for(p=0;p<182;p++) {
       for(t=0;t<tpc->counts[r][p];t++) {
-	u_char val;
+	uint8_t val;
 	tb = tpc->timebin[r][p][t];
 	val = tpc->adc[r][p][t];
 
@@ -85,7 +85,7 @@ int daq_tpc::fcfReader(int sector, int *t0c, u_int *gainc, tpc_t *tpc)          
     }
 
     // Padrow cpp stored in "cpp"
-    u_short cpp[182][32*2];
+    uint16_t cpp[182][32*2];
 
     int seqs = 0;
 
@@ -153,7 +153,7 @@ int daq_tpc::fcfReader(int sector, int *t0c, u_int *gainc, tpc_t *tpc)          
     }
 
 //     for(int i=0;i<182;i++) {
-//       u_short *pp = (u_short *)(((u_char *)cpp) + cppOff[i+1]);
+//       uint16_t *pp = (uint16_t *)(((uint8_t *)cpp) + cppOff[i+1]);
 //       if((sector == 1)) {
 // 	while(*pp != 0xffff) {
 // 	  printf("cpp  %d %d %d %d %d\n",sector,r+1,i+1,*pp,1) ;
@@ -168,7 +168,7 @@ int daq_tpc::fcfReader(int sector, int *t0c, u_int *gainc, tpc_t *tpc)          
     /*    
     if(r == 0) {
       for(p=0;p<182;p++) {
-	u_char *x = ((u_char *)cpp) + cppOff[p+1];
+	uint8_t *x = ((uint8_t *)cpp) + cppOff[p+1];
 	
 	for(tb=0;tb<512;tb++) {
 	  
@@ -220,7 +220,7 @@ int daq_tpc::fcfReader(int sector, int *t0c, u_int *gainc, tpc_t *tpc)          
     memset(startFlags, 0, sizeof(startFlags));
 
     memset(output, 0, sizeof(output));
-    u_int *out = output;
+    uint32_t *out = output;
  
     memset(fcf_ptrs, 0, sizeof(fcf_ptrs));
 
@@ -244,9 +244,9 @@ int daq_tpc::fcfReader(int sector, int *t0c, u_int *gainc, tpc_t *tpc)          
 
    
       
-      u_int words = fcf->finder((u_char *)adc, 
-				(u_short *)cpp,
-				(u_int *)out);
+      uint32_t words = fcf->finder((uint8_t *)adc, 
+				(uint16_t *)cpp,
+				(uint32_t *)out);
 
       //      LOG(NOTE, "c(%d)%d-%d padrow %d words=%d", mz, fcf->padStart, fcf->padStop, r,words);
  

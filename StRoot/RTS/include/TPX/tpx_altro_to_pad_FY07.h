@@ -1,14 +1,14 @@
 #ifndef _TPX_ALTRO_TO_PAD_H_
 #define _TPX_ALTRO_TO_PAD_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 
 /*
 	Map from the ALTRO channels to the old FEE channels (0..32).
 	ALTRO channels 0..15 correspond to the even ALTRO and
 	16..31 to the old altro
 */
-const u_char tpx_old_to_new_ch[32] = {
+const uint8_t tpx_old_to_new_ch[32] = {
     9, 11, 13, 15,  6,  4,  2,  0,      24, 26, 28, 30, 23, 21, 19, 17,
     8, 10, 12, 14,  7,  5,  3,  1,      25, 27, 29, 31, 22, 20, 18, 16
 } ;
@@ -16,8 +16,8 @@ const u_char tpx_old_to_new_ch[32] = {
 
 
 struct tpx_padrow {
-	u_char row ;
-	u_char pad ;
+	uint8_t row ;
+	uint8_t pad ;
 } ;
 
     

@@ -2,7 +2,7 @@
 #define _DDL_STRUCT_H_
 
 
-#include <sys/types.h>
+#include <stdint.h>
 
 /*
 	DDL events are little endian.
@@ -67,19 +67,19 @@
 #define DDL_HEADER(t,s)	((DDL_STRUCT_VERSION<<28)|(t<<0)|(s<<4))
 
 struct ddl_header {
-	u_int type ;	// 0xvRRVVSST
-	u_int ev_cou ;	// event counter
+	uint32_t type ;	// 0xvRRVVSST
+	uint32_t ev_cou ;	// event counter
 } ;
 
 struct ddl_trailer {
-	u_int fl_wc ;	// 0xFLLLLLLL:	F: 8 event in error; LLLLLL wc, can be 0 if not know...
-	u_int type ;	// 0xvRRVVSST	same as in the ddl_header
+	uint32_t fl_wc ;	// 0xFLLLLLLL:	F: 8 event in error; LLLLLL wc, can be 0 if not know...
+	uint32_t type ;	// 0xvRRVVSST	same as in the ddl_header
 } ;
 
 struct ddl_file_header {
 	char ctype[4] ;	// LOG,DTA,RuC,MSC
-	u_int wc ;		// word count of all data, including this header
-	u_int res[4] ;
+	uint32_t wc ;		// word count of all data, including this header
+	uint32_t res[4] ;
 } ;
 
 
@@ -95,8 +95,8 @@ struct ddl_file_header {
 
 /*
 struct altro_ch_v0 {
-	u_int d[] ;	// of the form 0x000ddddd 
-	u_int last[2] ;	// 
+	uint32_t d[] ;	// of the form 0x000ddddd 
+	uint32_t last[2] ;	// 
 }
 
 struct altro_data {
@@ -106,24 +106,24 @@ struct altro_data {
 
 // TRG subdata
 struct trg_data {
-	u_int rhic_counter ;
-	u_int csr ;		// if 0xFFFF0000 it is the prompt trigger
-	u_int data ;	// 0xFFFTDttt
+	uint32_t rhic_counter ;
+	uint32_t csr ;		// if 0xFFFF0000 it is the prompt trigger
+	uint32_t data ;	// 0xFFFTDttt
 } ;
 
 // structures used in the configuration event
 struct fee_cfg {
-	u_int fl_id ;	// 0xF0ii00II:	F flags, ii old TPC ID, II new FEE ID
-	u_int b_x_s ;	// 0x00000BXS:	B bus [0..2], X RDO Xilinx [0..2], Side [0..1]
+	uint32_t fl_id ;	// 0xF0ii00II:	F flags, ii old TPC ID, II new FEE ID
+	uint32_t b_x_s ;	// 0x00000BXS:	B bus [0..2], X RDO Xilinx [0..2], Side [0..1]
 
 } ;
 
 /*
 struct cfg_data {
-	u_int sec_rdo ;	// 0x0000SSRR ;
-	u_int time_code ;	
+	uint32_t sec_rdo ;	// 0x0000SSRR ;
+	uint32_t time_code ;	
 	fee_cfg fee[] ;
-	u_int fee_cou ;
+	uint32_t fee_cou ;
 } ;
 
 struct data_event {
@@ -132,9 +132,9 @@ struct data_event {
 		cfg_data c ;
 		altro_data a;
 	} d ;
-	u_int fee_mask[2] ;
+	uint32_t fee_mask[2] ;
 	trg_data trg[] ;
-	u_int trg_cou ;
+	uint32_t trg_cou ;
 	ddl_trailer t ;
 } ;
 

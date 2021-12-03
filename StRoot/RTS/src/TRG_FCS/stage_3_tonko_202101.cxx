@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "fcs_trg_base.h"
@@ -22,13 +22,13 @@ static int or_reduce(int d8)
 	return 0 ;
 }
 
-void  fcs_trg_base::stage_3_tonko_202101(link_t s2[], u_short *dsm)
+void  fcs_trg_base::stage_3_tonko_202101(link_t s2[], uint16_t *dsm)
 {    
- 	u_short out_s ;
-	u_short out_n ;
-	u_short n_or = 0 ;
-	u_short s_or = 0 ;
-	u_short big_or = 0 ;
+ 	uint16_t out_s ;
+	uint16_t out_n ;
+	uint16_t n_or = 0 ;
+	uint16_t s_or = 0 ;
+	uint16_t big_or = 0 ;
 
 	out_s = 0 ;
 	out_n = 0 ;

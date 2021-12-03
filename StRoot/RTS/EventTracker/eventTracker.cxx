@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <daqFormats.h>
 #include <rts.h>
@@ -32,7 +32,7 @@ void printL3Info(l3_t& l3)
   printf("%d tracks, %d clusters: Vertex = (%f, %f %f)\n",l3.tracks_num, l3.cluster_num, l3.xVertex,l3.yVertex,l3.zVertex);
 
   if(g_ptracks) {
-    for(u_int i=0;i<l3.tracks_num;i++) {
+    for(uint32_t i=0;i<l3.tracks_num;i++) {
       global_track *track = &l3.track[i];
 
       printf("%5d: pt=%5.3f z0=%7.2f q=%2d nHits=%2d ndedx=%2d ",

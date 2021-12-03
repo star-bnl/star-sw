@@ -1,5 +1,5 @@
 #include <assert.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 
 #include <rtsLog.h>
@@ -197,7 +197,7 @@ daq_dta *daq_itpc::get(const char *bank, int sec, int row, int pad, void *p1, vo
 daq_dta *daq_itpc::handle_cld_sim(int sec)
 {
 	int min_sec, max_sec ;
-	u_char evt_started[25] ;
+	uint8_t evt_started[25] ;
 
 	memset(evt_started,0,sizeof(evt_started)) ;
 
@@ -217,8 +217,8 @@ daq_dta *daq_itpc::handle_cld_sim(int sec)
 
 	while(sim && sim->iterate()) {
 		int s = sim->sec ;	//shorthand
-		u_short sim_array[512] ;
-		u_short track_array[512] ;
+		uint16_t sim_array[512] ;
+		uint16_t track_array[512] ;
 
 		//LOG(TERR,"Here %d",s) ;
 
@@ -257,7 +257,7 @@ daq_dta *daq_itpc::handle_cld_sim(int sec)
 		memset(sim_array,0,sizeof(sim_array)) ;
 		memset(track_array,0,sizeof(track_array)) ;
 
-		for(u_int i=0;i<sim->ncontent;i++) {
+		for(uint32_t i=0;i<sim->ncontent;i++) {
 			sim_array[sim_dta[i].tb] = sim_dta[i].adc ;
 			track_array[sim_dta[i].tb] = sim_dta[i].track_id ;
 
@@ -284,13 +284,13 @@ daq_dta *daq_itpc::handle_cld_sim(int sec)
 		bytes *= 4 ;	// and now it's bytes
 
 
-		u_int *end_buff = (u_int *)(buff + bytes) ;
-		u_int *p_buff = (u_int *)buff ;
+		uint32_t *end_buff = (uint32_t *)(buff + bytes) ;
+		uint32_t *p_buff = (uint32_t *)buff ;
 
 		while(p_buff < end_buff) {
-			u_int row = *p_buff++ ;
-			u_int version = *p_buff++ ;
-			u_int int_cou = *p_buff++ ;
+			uint32_t row = *p_buff++ ;
+			uint32_t version = *p_buff++ ;
+			uint32_t int_cou = *p_buff++ ;
 
 			int ints_per_cluster = (row>>16) ;
 			row &= 0xFFF ;
@@ -346,7 +346,7 @@ daq_dta *daq_itpc::handle_raw(int sec, int rdo)
 	}
 
 
-	raw->create(16*1024,(char *)"raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	raw->create(16*1024,(char *)"raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 
 
 
@@ -476,8 +476,8 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 	for(int s=min_sec;s<=max_sec;s++) {
 	for(int r=min_rdo;r<=max_rdo;r++) {
 		daq_dta *rdo_dta ;
-		u_int *dta ;
-		u_int words ;
+		uint32_t *dta ;
+		uint32_t words ;
 		int ret ;
 
 		rdo_dta = handle_raw(s,r) ;
@@ -487,7 +487,7 @@ daq_dta *daq_itpc::handle_sampa(int sec, int rdo, int in_adc)
 		ret = rdo_dta->iterate() ;
 		if(ret==0) continue ;
 
-		dta = (u_int *)rdo_dta->Byte ;
+		dta = (uint32_t *)rdo_dta->Byte ;
 		words = rdo_dta->ncontent/4 ;
 
 		if(words==0) continue ;
@@ -563,17 +563,17 @@ daq_dta *daq_itpc::handle_cld(int sec)
 
 		caller->sfs->read(full_name,mem,size) ;
 
-		u_int *end_buff = (u_int *)(mem+size) ;
-		u_int *p_buff = (u_int *)mem ;
+		uint32_t *end_buff = (uint32_t *)(mem+size) ;
+		uint32_t *p_buff = (uint32_t *)mem ;
 
 		while(p_buff < end_buff) {
 			// ints-per-cluster | row
 			// version
 			// count of clusters
 
-			u_int row = *p_buff++ ;
-			u_int version = *p_buff++ ;
-			u_int int_cou = *p_buff++ ;
+			uint32_t row = *p_buff++ ;
+			uint32_t version = *p_buff++ ;
+			uint32_t int_cou = *p_buff++ ;
 
 			int ints_per_cluster = (row>>16) ;
 			row &= 0xFFFF ;
@@ -635,7 +635,7 @@ daq_dta *daq_itpc::handle_ifee_fy17_raw()
 		return 0 ;
 	}
 
-	ifee_fy17_raw->create(size,"itpc_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	ifee_fy17_raw->create(size,"itpc_raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 	char *st = (char *) ifee_fy17_raw->request(size) ;
 
 	caller->sfs->read(full_name, st, size) ;
@@ -689,7 +689,7 @@ daq_dta *daq_itpc::handle_ifee_fy17_sampa()
 	dta_c.rdo_start(0,0,0) ;
 
 	//raw data at "ptr"
-	while(dta_c.fee_scan((u_short *)ptr,size/2)) {
+	while(dta_c.fee_scan((uint16_t *)ptr,size/2)) {
 		daq_adc_tb *at = (daq_adc_tb *) ifee_fy17_sampa->request(dta_c.tb_cou) ;
 		for(int i=0;i<dta_c.tb_cou;i++) {
 			at[i].adc = dta_c.at[i].adc ;	
@@ -723,7 +723,7 @@ int daq_itpc::get_token(char *addr, int words)
 	return trg[0].t ;
 }
 
-static inline u_int sw16(u_int d)
+static inline uint32_t sw16(uint32_t d)
 {
 	daq_itpc *p ;
 	if(p->no_sw16) return d ;
@@ -731,7 +731,7 @@ static inline u_int sw16(u_int d)
 	d = ((d>>16)&0xFFFF)|(d<<16) ;
 
 /*
-        u_int tmp = d ;
+        uint32_t tmp = d ;
 
         d >>= 16 ;
 
@@ -743,9 +743,9 @@ static inline u_int sw16(u_int d)
 
 // HACK for Dec 2019 Trigger Cable problem of TPC Sector 12
 // 3rd and 4th bit were reversed on the TCD cable.
-static u_int swap_s12(u_int dta)
+static uint32_t swap_s12(uint32_t dta)
 {
-	u_int n_dta = (dta & 0xFFF00000) ;
+	uint32_t n_dta = (dta & 0xFFF00000) ;
 	for(int n=0;n<5;n++) {
 		int dd = (dta>>(n*4)) & 0xF ;
 				
@@ -782,22 +782,22 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	return t_cou ;
 #else
-	u_int err = 0 ;
-	u_int trg_fired ;
-//	u_int v_fired ;
-	u_int trg_cou ;
+	uint32_t err = 0 ;
+	uint32_t trg_fired ;
+//	uint32_t v_fired ;
+	uint32_t trg_cou ;
 	int t_cou = 0 ;
-	u_int evt_status ;
+	uint32_t evt_status ;
 	int trl_ix ;
 	int trl_stop_ix ;
-	u_int ds ;
+	uint32_t ds ;
 	int rdo_version ;
 	char buff[128] ;
 	int buff_cou ;
-	u_int want_dump = 0 ;
+	uint32_t want_dump = 0 ;
 	int sector ;
 
-	u_int *d = (u_int *)addr + 4 ;	// skip header
+	uint32_t *d = (uint32_t *)addr + 4 ;	// skip header
 	words -= 4 ;
 
 
@@ -877,12 +877,12 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		if(rdo_version==1) {
 			if(sw16(d[3])==0x980000FC) {
 				//LOG(TERR,"RDO_mon") ;
-				u_int *dd = d+4 ;
-				u_int *dd_end = d+words ;
+				uint32_t *dd = d+4 ;
+				uint32_t *dd_end = d+words ;
 				buff_cou = 0 ;
 				while(dd < dd_end) {
-					u_int sd = sw16(*dd) ;
-					u_int dd_r = sd & 0xFFFFFF00 ;
+					uint32_t sd = sw16(*dd) ;
+					uint32_t dd_r = sd & 0xFFFFFF00 ;
 
 					if(sd==0x580000FD) {
 						//LOG(TERR,"RDO_mon end") ;
@@ -951,10 +951,10 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	if(evt_status) {
 		int b_cou = 0 ;
-		u_int fee_status = 0xABCDEF12 ;
+		uint32_t fee_status = 0xABCDEF12 ;
 
 		if(trl_stop_ix>0) {
-			u_int s ;
+			uint32_t s ;
 
 			trl_stop_ix++ ;
 
@@ -1000,7 +1000,7 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	}
 
-	for(u_int i=0;i<trg_cou;i++) {
+	for(uint32_t i=0;i<trg_cou;i++) {
 		if(trl_ix >= words) {
 			LOG(WARN,"%d: %d/%d = 0x%08X",rdo,trl_ix,words,sw16(d[trl_ix])) ;
 			trg[i+1].reserved[0] = 0 ;
@@ -1015,10 +1015,10 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		LOG(WARN,"%d: Lots of triggers %d",rdo,trg_cou) ;
 
 		for(int i=0;i<5;i++) {
-			u_int v = trg[i].reserved[0];
-			u_int t ;
-			u_int trg_cmd ;
-			u_int daq_cmd ;
+			uint32_t v = trg[i].reserved[0];
+			uint32_t t ;
+			uint32_t trg_cmd ;
+			uint32_t daq_cmd ;
 
 			t = ((v>>8)&0xF)<<8 ;
 			t |= ((v>>12)&0xF)<<4 ;
@@ -1036,10 +1036,10 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 #if 0
 	if(1) {
 		for(int i=0;i<=trg_cou;i++) {
-			u_int v = trg[i].reserved[0];
-			u_int t ;
-			u_int trg_cmd ;
-			u_int daq_cmd ;
+			uint32_t v = trg[i].reserved[0];
+			uint32_t t ;
+			uint32_t trg_cmd ;
+			uint32_t daq_cmd ;
 
 			t = ((v>>8)&0xF)<<8 ;
 			t |= ((v>>12)&0xF)<<4 ;
@@ -1072,10 +1072,10 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		t_cou++ ;
 	}
 	else {
-		u_int v = trg[0].reserved[0] ;
-		u_int t ;
-		u_int trg_cmd ;
-		u_int daq_cmd ;
+		uint32_t v = trg[0].reserved[0] ;
+		uint32_t t ;
+		uint32_t trg_cmd ;
+		uint32_t daq_cmd ;
 
 //		if(sector==12) {		// HACK for bad TCD nibble in FY20
 //			v = swap_s12(v) ;
@@ -1135,9 +1135,9 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 
 
-	for(u_int i=1;i<(trg_cou+1);i++) {
-		u_int v = trg[i].reserved[0] ;
-		u_int t ;
+	for(uint32_t i=1;i<(trg_cou+1);i++) {
+		uint32_t v = trg[i].reserved[0] ;
+		uint32_t t ;
 
 		if(v==0) {	// eh?
 			want_dump |= 1 ;
@@ -1216,9 +1216,9 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 #if 0
 	if(want_dump) {
-		for(u_int i=1;i<(trg_cou+1);i++) {
-			u_int v = trg[i].reserved[0] ;
-			u_int t ;
+		for(uint32_t i=1;i<(trg_cou+1);i++) {
+			uint32_t v = trg[i].reserved[0] ;
+			uint32_t t ;
 			int trg, daq ;
 
 			t = ((v>>8)&0xF)<<8 ;

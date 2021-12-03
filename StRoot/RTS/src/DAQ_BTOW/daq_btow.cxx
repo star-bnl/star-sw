@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
 
@@ -188,7 +188,7 @@ daq_dta *daq_btow::handle_raw()
 
 daq_dta *daq_btow::handle_adc()
 {
-	u_short *raw_dta ;
+	uint16_t *raw_dta ;
 
 	LOG(DBG,"Entering adc") ;
 
@@ -197,7 +197,7 @@ daq_dta *daq_btow::handle_adc()
 	LOG(DBG,"raw bank %p",dd) ;
 
 	if(dd && dd->iterate()) {
-		raw_dta = (u_short *) dd->Byte ;
+		raw_dta = (uint16_t *) dd->Byte ;
 	}
 	else {
 		return 0 ;
@@ -216,12 +216,12 @@ daq_dta *daq_btow::handle_adc()
 	// This is really a bad hack where DDL DAQ and DDL Trigger moved the
 	// whole event by 4 bytes to stay compatible with the VME BTOW Receiver
 
-	u_short *data = (u_short *)((char *)raw_dta + 4 + 128) ;	// 4 byte dummy, 128 byte header
+	uint16_t *data = (uint16_t *)((char *)raw_dta + 4 + 128) ;	// 4 byte dummy, 128 byte header
 
 
 
 #if 0
-	u_short *ppp = (u_short *) raw_dta ;
+	uint16_t *ppp = (uint16_t *) raw_dta ;
 	for(int i=0;i<10;i++) {
 		LOG(TERR,"%d: 0x%04X",i,ppp[i]) ;
 	}
@@ -254,10 +254,10 @@ int daq_btow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	int rdo1 = rdo  ;
 	int tcou = 0 ;
 
-	u_short *us = (u_short *)addr ;
+	uint16_t *us = (uint16_t *)addr ;
 
-	u_short t_hi = l2h16(us[2]) ;
-	u_short t_lo = l2h16(us[3]) ;
+	uint16_t t_hi = l2h16(us[2]) ;
+	uint16_t t_lo = l2h16(us[3]) ;
 
 	int err = 0 ;
 

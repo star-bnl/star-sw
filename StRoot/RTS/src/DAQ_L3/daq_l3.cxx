@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <rtsLog.h>
@@ -10,7 +10,7 @@
 
 #include "daq_l3.h"
 
-extern int l3_reader(char *m, struct l3_t *l3, u_int driver) ;
+extern int l3_reader(char *m, struct l3_t *l3, uint32_t driver) ;
 
 const char *daq_l3::help_string = "L3 tst\n" ;
 

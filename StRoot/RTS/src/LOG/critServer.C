@@ -2,7 +2,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <time.h>
 
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	int ret ;
 	int i ;
 	int data_in ;
-	u_int last_flush ;
+	uint32_t last_flush ;
 
 #ifdef OLD_TEST
 	for(i=0;i<MAX_LOGFILES;i++) {	
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
 	for(;;) {
 
-	u_int last_delta = time(NULL) - last_flush ;
+	uint32_t last_delta = time(NULL) - last_flush ;
 
 	data_in = 0 ;
 	for(i=0;i<MAX_LOGFILES;i++) {

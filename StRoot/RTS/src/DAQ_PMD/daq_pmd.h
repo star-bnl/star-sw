@@ -1,7 +1,7 @@
 #ifndef _DAQ_PMD_H_
 #define _DAQ_PMD_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <daqFormats.h>
 
 struct pmd_t {
@@ -9,14 +9,14 @@ struct pmd_t {
 	int channels ;
 	int max_channels ;	// 2*10*2*2016
 
-	u_int status[2] ;
+	uint32_t status[2] ;
 
 	// 2 sectors, 10 CRAMS, 2 CRAM channels, 2016 values max
-	u_short adc[2][PMD_CRAMS_MAX][2][PMD_CRAMS_CH_MAX] ;
+	uint16_t adc[2][PMD_CRAMS_MAX][2][PMD_CRAMS_CH_MAX] ;
 
-	u_short ped[2][PMD_CRAMS_MAX][2][PMD_CRAMS_CH_MAX] ;
-	u_short rms[2][PMD_CRAMS_MAX][2][PMD_CRAMS_CH_MAX] ;
-	u_short thr[2][PMD_CRAMS_MAX][2][PMD_CRAMS_CH_MAX] ;
+	uint16_t ped[2][PMD_CRAMS_MAX][2][PMD_CRAMS_CH_MAX] ;
+	uint16_t rms[2][PMD_CRAMS_MAX][2][PMD_CRAMS_CH_MAX] ;
+	uint16_t thr[2][PMD_CRAMS_MAX][2][PMD_CRAMS_CH_MAX] ;
 
 } ;
 

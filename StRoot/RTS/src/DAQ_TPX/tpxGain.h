@@ -2,6 +2,8 @@
 #define _TPX_GAIN_HH_
 
 #include <stdio.h>
+#include <stdint.h>
+#include <time.h>
 
 #include "tpxCore.h"
 
@@ -143,10 +145,10 @@ public:
 
 
 	// [sector 1-24][RDO 1-6][fee-index 0-35]
-	u_int bad_fee[25][7][37] ;	// [x][y][36] contains the count!
+	uint32_t bad_fee[25][7][37] ;	// [x][y][36] contains the count!
 
 	// sector 1..24
-	u_int bad_rdo_mask[25] ;	// bad if set to 1
+	uint32_t bad_rdo_mask[25] ;	// bad if set to 1
 
 	void if_file() ;
 
@@ -160,7 +162,7 @@ public:
 		//short wrong_peak ;	// hm?
 		short cou ;		// count of good events
 		short need ;		// count of expected events!
-		u_int adc_store[20] ;
+		uint32_t adc_store[20] ;
 	} *aux	;	// [24][46][TPX_MAX_PAD]
 
 
@@ -182,7 +184,7 @@ public:
 	
 
 	struct fee_found_t {
-		u_int got_one ;
+		uint32_t got_one ;
 		int ch_count[256][16] ;
 	} *fee_found ;
 
@@ -206,9 +208,9 @@ public:
 
 	void free_store() ;
 
-	u_int c_date ;	// date of file as YYYYMMDD
-	u_int c_time ;	// time of file as HHMMSS
-	u_int c_run ;	// run of file
+	uint32_t c_date ;	// date of file as YYYYMMDD
+	uint32_t c_time ;	// time of file as HHMMSS
+	uint32_t c_run ;	// run of file
 
 	int pulser_ped ;	// first timebin with ped=0
 	int pulser_ped_stop ;	// last timebin for ped calc

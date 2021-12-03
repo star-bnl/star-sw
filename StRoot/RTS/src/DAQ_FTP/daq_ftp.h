@@ -7,12 +7,12 @@ struct ftp_t {
 	int max_channels ;
 
 	// how many valid timebins in this pad
-	u_char counts[2][10][960] ;
+	uint8_t counts[2][10][960] ;
 	// up to 256 valid timebins (count is in counts)
-	u_char timebin[2][10][960][256] ;
+	uint8_t timebin[2][10][960][256] ;
 
 	// up to 256 valid adcs (same count as above...)
-	u_char adc[2][10][960][256] ;
+	uint8_t adc[2][10][960][256] ;
 
 } ;
 

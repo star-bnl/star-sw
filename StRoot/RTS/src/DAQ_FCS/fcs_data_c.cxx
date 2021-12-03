@@ -1,5 +1,5 @@
 #include <assert.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <math.h>
@@ -12,9 +12,9 @@
 
 #include "fcs_data_c.h"
 
-static inline u_int sw16(u_int d)
+static inline uint32_t sw16(uint32_t d)
 {
-        u_int tmp = d ;
+        uint32_t tmp = d ;
 
         d >>= 16 ;
 
@@ -29,13 +29,13 @@ struct fcs_data_c::fcs_ped_t fcs_data_c::ped[FCS_SECTOR_COU][8] ;	// 8 RDO
 
 struct fcs_data_c::rdo_map_t fcs_data_c::rdo_map[FCS_SECTOR_COU][8] ;	// FCS_SECTOR_COU sectors, 8 RDOs each --> det,ns,dep
 struct fcs_data_c::det_map_t fcs_data_c::det_map[4][2][24] ;	// det,ns,dep --> sector RDO
-u_char fcs_data_c::rdo_map_loaded ;
+uint8_t fcs_data_c::rdo_map_loaded ;
 
-u_char fcs_data_c::fcs_bad_ch[8][34] ;
-u_char fcs_data_c::fcs_bad_ch_all[FCS_SECTOR_COU][8][34] ;
+uint8_t fcs_data_c::fcs_bad_ch[8][34] ;
+uint8_t fcs_data_c::fcs_bad_ch_all[FCS_SECTOR_COU][8][34] ;
 
-u_int fcs_data_c::run_number ;
-u_int fcs_data_c::run_type ;
+uint32_t fcs_data_c::run_number ;
+uint32_t fcs_data_c::run_type ;
 
 // for ZS
 float fcs_data_c::n_sigma ;
@@ -45,11 +45,11 @@ short fcs_data_c::n_cou ;
 char fcs_data_c::n_mode ;
 
 // set in send_config, for shared access during data-checking
-u_short fcs_data_c::ht_threshold ;
-u_short fcs_data_c::tb_pre ;
-u_short fcs_data_c::tb_all ;
+uint16_t fcs_data_c::ht_threshold ;
+uint16_t fcs_data_c::tb_pre ;
+uint16_t fcs_data_c::tb_all ;
 
-u_char fcs_data_c::ascii_no ;
+uint8_t fcs_data_c::ascii_no ;
 
 pthread_mutex_t fcs_data_c::ped_mutex ;
 	
@@ -90,7 +90,7 @@ long fcs_data_c::dep_to_char(int det, int ns, int dep)
 }
 
 
-int fcs_data_c::zs_start(u_short *buff)
+int fcs_data_c::zs_start(uint16_t *buff)
 {
 	int thr ;
 	int l_cou ;
@@ -219,22 +219,22 @@ int fcs_data_c::zs_start(u_short *buff)
 
 	if(got_one==0) return 0 ;	// nothing found
 
-	u_short *dp ;
+	uint16_t *dp ;
 
-	dp = (u_short *)buff ;
+	dp = (uint16_t *)buff ;
 
 
 	int seq_cou = 0 ;
 
 	// and now go through the "mark"
-	u_short *dstart = dp ;
+	uint16_t *dstart = dp ;
 
 	dstart[0] = ch ;
 	dstart[1] = 0 ;	// count of sequences
 
 	dp += 2 ;	// skip the header
 
-	u_short *t_cou_p = dp + 1 ;
+	uint16_t *t_cou_p = dp + 1 ;
 	t_cou = 0 ;
 
 	for(int i=0;i<tb_cou;i++) {
@@ -295,9 +295,9 @@ int fcs_data_c::zs_start(u_short *buff)
 
 
 /*******************************/
-int fcs_data_c::start(u_short *d16, int shorts)
+int fcs_data_c::start(uint16_t *d16, int shorts)
 {
-	u_int *d ;
+	uint32_t *d ;
 
 	//class members
 	events++ ;
@@ -308,7 +308,7 @@ int fcs_data_c::start(u_short *d16, int shorts)
 	dta_stop = d16 + shorts ;
 	dta_shorts = shorts ;
 
-	d = (u_int *)d16 ;
+	d = (uint32_t *)d16 ;
 
 	rhic_start = 0;
 	ch_count = 0 ;
@@ -346,7 +346,7 @@ int fcs_data_c::start(u_short *d16, int shorts)
 			case 0x9801 :
 				version = 0x18050000 ;	// 15-May-2018
 
-				dta_p = ((u_short *)d)+6 ;	// this is for May18-Dec18
+				dta_p = ((uint16_t *)d)+6 ;	// this is for May18-Dec18
 
 
 				for(int i=0;i<16;i++) {
@@ -380,7 +380,7 @@ int fcs_data_c::start(u_short *d16, int shorts)
 		}
 
 		// pre-May-15-2018
-		dta_p = (u_short *) d ;
+		dta_p = (uint16_t *) d ;
 
 
 		for(int i=0;i<8;i++) {
@@ -417,7 +417,7 @@ int fcs_data_c::start(u_short *d16, int shorts)
 //	<0 is not all OK
 int fcs_data_c::hdr_event()
 {
-	u_short *start_p = dta_p ;
+	uint16_t *start_p = dta_p ;
 
 
 //	for(int i=0;i<32;i++) {
@@ -488,7 +488,7 @@ int fcs_data_c::hdr_event()
 		char ctmp[1024] ;
 
 		dta_p += 2 ;	// adjust
-		u_int *d32 = (u_int *)dta_p ;
+		uint32_t *d32 = (uint32_t *)dta_p ;
 
 		int words = (dta_shorts - 8 - 2)/2 ;	// adjust
 
@@ -499,9 +499,9 @@ int fcs_data_c::hdr_event()
 		if(ascii_no==0) LOG(TERR,"ASCII contribution - words %d[%d]: sector %d, rdo %d, hdr_trg_word 0x%X, hdr_board 0x%X",words,dta_shorts,sector,rdo,hdr_trg_word,hdr_board_id) ;
 
 		int end_marker = 0 ;
-		u_int cou = 0 ;
+		uint32_t cou = 0 ;
 		for(int i=0;i<words;i++) {
-			u_int asc = d32[i] ;
+			uint32_t asc = d32[i] ;
 
 			if((asc&0xFF00FFFF)==0xF5009800) {
 				char c = (asc>>16)&0xFF ;
@@ -510,7 +510,7 @@ int fcs_data_c::hdr_event()
 				else {
 					if(c=='\n') {
 						float f_val = 0.0 ;
-						u_int i_val = 0 ;
+						uint32_t i_val = 0 ;
 						char *c ;
 						//int ret ;
 
@@ -621,9 +621,9 @@ int fcs_data_c::hdr_event()
 	else if(dta_p[0]==0xFFFF) {
 		bad_error |= 8 ;
 
-		LOG(ERR,"BAD 0xFFFF bug -- 0x%08X",*((u_int *)dta_p)) ;
+		LOG(ERR,"BAD 0xFFFF bug -- 0x%08X",*((uint32_t *)dta_p)) ;
 
-		u_int *d32 = (u_int *)start_p ;
+		uint32_t *d32 = (uint32_t *)start_p ;
 
 		for(int i=0;i<32;i++) {
 			LOG(ERR,"... %d = 0x%04X",i,d32[i]) ;
@@ -666,13 +666,13 @@ int fcs_data_c::event_end(int how)
 
 int fcs_data_c::event_stream()
 {
-	u_int *d = (u_int *)dta_p ;
-	u_int *d_stop = (u_int *)dta_stop ;
-	u_int xings = 0 ;
-	u_int deadtime = 0 ;
-	u_int trgs = 0 ;
-	u_char want_log = 0 ;
-	u_char end_seen = 0 ;
+	uint32_t *d = (uint32_t *)dta_p ;
+	uint32_t *d_stop = (uint32_t *)dta_stop ;
+	uint32_t xings = 0 ;
+	uint32_t deadtime = 0 ;
+	uint32_t trgs = 0 ;
+	uint8_t want_log = 0 ;
+	uint8_t end_seen = 0 ;
 	
 	ch = -1 ;
 	tb_cou = 0 ;
@@ -691,24 +691,24 @@ int fcs_data_c::event_stream()
 	}
 
 
-	u_int slice = d[1] ;
-	u_int old_slice = d[2] ;
-	u_int pkt_counter = d[5] ;
+	uint32_t slice = d[1] ;
+	uint32_t old_slice = d[2] ;
+	uint32_t pkt_counter = d[5] ;
 
-	u_int end_slice = 0xdeadbeef ;
-	u_int pkt_status = 0xdeadbeef ;
+	uint32_t end_slice = 0xdeadbeef ;
+	uint32_t pkt_status = 0xdeadbeef ;
 
 
 	double mean[32] ;
 	double rms[32] ;
-	u_int cou[32] ;
+	uint32_t cou[32] ;
 
 	memset(mean,0,sizeof(mean)) ;
 	memset(rms,0,sizeof(rms)) ;
 	memset(cou,0,sizeof(cou)) ;
 
 
-	u_int ch_dead[32] ;
+	uint32_t ch_dead[32] ;
 	memset(ch_dead,0,sizeof(ch_dead)) ;
 
 	// skip header
@@ -720,20 +720,20 @@ int fcs_data_c::event_stream()
 //	}
 
 
-	u_int *adc32 = (u_int *)adc ;	// re-use instance storage 
+	uint32_t *adc32 = (uint32_t *)adc ;	// re-use instance storage 
 	int adc_cou = 0 ;
 	int adc_ch = 0 ;
 
 
-	u_char sync = 0xFF ;
+	uint8_t sync = 0xFF ;
 
-	u_int got_adc_end = 0 ;
+	uint32_t got_adc_end = 0 ;
 
-	u_int bad_sync = 0 ;
+	uint32_t bad_sync = 0 ;
 
 	while(d < d_stop) {
-		u_int dta = *d ;
-		u_int t = dta>>28 ;	// type
+		uint32_t dta = *d ;
+		uint32_t t = dta>>28 ;	// type
 
 
 		switch(t) {
@@ -783,8 +783,8 @@ int fcs_data_c::event_stream()
 			xings += adc_cou / 4 ;	// 2adcs per entry, 
 
 			for(int i=0;i<adc_cou;i++) {
-				u_int d_lo = adc32[i] & 0xFFF ;
-				u_int d_hi = (adc32[i]>>16) & 0xFFF ;
+				uint32_t d_lo = adc32[i] & 0xFFF ;
+				uint32_t d_hi = (adc32[i]>>16) & 0xFFF ;
 
 				mean[adc_ch] += d_lo ;
 				rms[adc_ch] += d_lo * d_lo ;
@@ -822,9 +822,9 @@ int fcs_data_c::event_stream()
 
 			{
 				want_log |= 2 ;
-				//u_int d_start = (d[-1]>>8)&0xFFFF ;
-				u_int d_end = (dta>>8) & 0xFFFF ;
-				u_int ch = dta & 0x1F ;
+				//uint32_t d_start = (d[-1]>>8)&0xFFFF ;
+				uint32_t d_end = (dta>>8) & 0xFFFF ;
+				uint32_t ch = dta & 0x1F ;
 
 				//LOG(ERR,"DEAD 0x%08X 0x%08X - %u %u",dta,d[-1],d_end,d_start) ;
 
@@ -936,7 +936,7 @@ int fcs_data_c::event()
 		LOG(ERR,"S%d:%d: events %d: BUG 0xFFFF: ch %d, bytes left %d",sector,rdo,events,ch_count,dta_stop-dta_p) ;
 		LOG(ERR,"   0x%X 0x%X 0x%X",dta_p[1],dta_p[2],dta_p[3]) ;
 
-//		u_short *dta_use = dta_p - 1000 ;
+//		uint16_t *dta_use = dta_p - 1000 ;
 //		while(dta_use<dta_stop) {
 //			printf("%d = 0x%04X\n",dta_stop-dta_use,*dta_use++) ;
 //		}
@@ -953,8 +953,8 @@ int fcs_data_c::event()
 
 	ch_count++ ;
 
-	u_int rhic_cou_xpect = hdr_rhic_counter & 0x7F ;
-	u_int board_id_xpect = board_id & 0xFF ;
+	uint32_t rhic_cou_xpect = hdr_rhic_counter & 0x7F ;
+	uint32_t board_id_xpect = board_id & 0xFF ;
 
 //	for(int i=-16;i<16;i++) {
 //		LOG(TERR,"in event %d = 0x%04X",i,dta_p[i]) ;
@@ -964,12 +964,12 @@ int fcs_data_c::event()
 
 
 	while(dta_p<dta_stop) {
-		u_short h[0] ;
-		u_int trg_word ;
-		u_int rhic_cou ;
-		u_int board ;
-		u_char complain =  0 ;
-		u_short *dbg_h = dta_p ;
+		uint16_t h[0] ;
+		uint32_t trg_word ;
+		uint32_t rhic_cou ;
+		uint32_t board ;
+		uint8_t complain =  0 ;
+		uint16_t *dbg_h = dta_p ;
 
 		h[0] = *dta_p++ ;	// board,channel
 		h[1] = *dta_p++ ;	// trigger cmd
@@ -1017,7 +1017,7 @@ int fcs_data_c::event()
 	
 
 		while(dta_p<dta_stop) {
-			u_short d = *dta_p++ ;
+			uint16_t d = *dta_p++ ;
 
 			//if(ch==32 && tb_cou==2) LOG(TERR,".... ch %d = %d = 0x%X",ch,tb_cou,d) ;
 
@@ -1031,7 +1031,7 @@ int fcs_data_c::event()
 			}
 
 			//protect structures
-			if((u_int)tb_cou>=(sizeof(adc)/sizeof(adc[0]))) {
+			if((uint32_t)tb_cou>=(sizeof(adc)/sizeof(adc[0]))) {
 				bad_error |= 0x80 ;
 				LOG(ERR,"Event too big, ch %d, tb %d",ch,tb_cou) ;
 				event_end(1) ;
@@ -1064,7 +1064,7 @@ int fcs_data_c::event()
 		return 1 ;
 	}
 
-//	u_int rhic_end = (dta_p[1]<<16)|dta_p[2] ;
+//	uint32_t rhic_end = (dta_p[1]<<16)|dta_p[2] ;
 //	LOG(TERR,"RHIC ticks %u",rhic_end-rhic_start) ;
 
 	//LOG(TERR,"0x%08X 0x%08X 0x%08X: 0x%08X",dta_p[0],dta_p[1],dta_p[2],rhic_end) ;	
@@ -1091,7 +1091,7 @@ int fcs_data_c::ana_ch()
 		static int first ;
 
 		
-		static u_char expect[3][37] ;
+		static uint8_t expect[3][37] ;
 		
 		if(first==0) {
 		expect[0][0]=0xC1 ;
@@ -1150,7 +1150,7 @@ int fcs_data_c::ana_ch()
 
 	ped_lock() ;
 
-	u_int aaa[2] ;
+	uint32_t aaa[2] ;
 
 	aaa[0] = 0xAAA ;
 	aaa[1] = 0x555 ;
@@ -1161,7 +1161,7 @@ int fcs_data_c::ana_ch()
 	}
 
 	for(int tb=0;tb<tb_cou;tb++) {
-		u_int iadc = adc[tb] & 0xFFF ;
+		uint32_t iadc = adc[tb] & 0xFFF ;
 
 		if(run_type==2) {	
 			if(aaa[tb%2] != iadc) {
@@ -1199,7 +1199,7 @@ int fcs_data_c::ana_ch()
 
 
 
-int fcs_data_c::accum_pre_fy19(u_int ch, u_int tb, u_short sadc)
+int fcs_data_c::accum_pre_fy19(uint32_t ch, uint32_t tb, uint16_t sadc)
 {
 //	int fla ;
 
@@ -1252,7 +1252,7 @@ int fcs_data_c::accum_pre_fy19(u_int ch, u_int tb, u_short sadc)
 
 
 
-void fcs_data_c::run_start(u_int run, int type)
+void fcs_data_c::run_start(uint32_t run, int type)
 {
 
 	events = 0 ;
@@ -1317,7 +1317,7 @@ void fcs_data_c::ped_stop(int bad_ped)
 
 	int s = sector - 1 ;
 	int r = rdo - 1 ;
-	u_int max_c = 0 ;
+	uint32_t max_c = 0 ;
 
 
 //	if(rdo_map[s][r].det >= 3) {	// trigger DEPs
@@ -1608,8 +1608,8 @@ int fcs_data_c::gain_from_cache(const char *fname)
 
 
 			// pre FY20: 
-			//ped[s][i].i_gain[c] = (u_int)(d*64.0+0.5) ;
-			ped[s][i].i_gain[c] = (u_int)(d*256.0+0.5) ; // Akio changing to 4.8 fixed
+			//ped[s][i].i_gain[c] = (uint32_t)(d*64.0+0.5) ;
+			ped[s][i].i_gain[c] = (uint32_t)(d*256.0+0.5) ; // Akio changing to 4.8 fixed
 
 			if(ped[s][i].i_gain[c]>4095) {	// 12 bit max!
 				LOG(NOTE,"S%d:%d: ch %d -- gain correction too big",s+1,i+1,c,ped[s][i].i_gain[c]) ;
@@ -1666,7 +1666,7 @@ int fcs_data_c::ped_from_cache(const char *ff)
 		ped[ss-1][rrd-1].rms_8[c] = rr ;
 		ped[ss-1][rrd-1].cou_8[c] = 0 ;	// irrelevant when loading from file
 
-		u_short pppp = (u_short)(pp+0.5) ;
+		uint16_t pppp = (uint16_t)(pp+0.5) ;
 
 		//if(pppp) {
 		//	LOG(TERR,"S%d:%d: %d",ss,rrd,pppp) ;
@@ -1696,7 +1696,7 @@ int fcs_data_c::event_pre_fy19()
 	while(dta_p<dta_stop) {
 
 #if 0
-		u_short h[3] ;
+		uint16_t h[3] ;
 
 
 		for(int i=0;i<128;i++) printf("%d 0x%04X\n",i,dta_p[i]) ;
@@ -1730,7 +1730,7 @@ int fcs_data_c::event_pre_fy19()
 		//LOG(TERR,"H 0x%X 0x%X 0x%X (ch %2d)",h[0],h[1],h[2],ch) ;
 
 		while(dta_p<dta_stop) {
-			u_short d = *dta_p++ ;
+			uint16_t d = *dta_p++ ;
 
 			//printf("... %d = 0x%04X [%u]\n",tb_cou,d,d) ;
 
@@ -1770,7 +1770,7 @@ int fcs_data_c::event_pre_fy19()
 		return 1 ;
 	}
 
-//	u_int rhic_end = (dta_p[1]<<16)|dta_p[2] ;
+//	uint32_t rhic_end = (dta_p[1]<<16)|dta_p[2] ;
 //	LOG(TERR,"RHIC ticks %u",rhic_end-rhic_start) ;
 
 	//LOG(TERR,"0x%08X 0x%08X 0x%08X: 0x%08X",dta_p[0],dta_p[1],dta_p[2],rhic_end) ;	
@@ -1788,7 +1788,7 @@ int fcs_data_c::load_readout_map(const char *fname)
 		return -1 ;
 	}
 
-	for(u_int dd=0;dd<4;dd++) {
+	for(uint32_t dd=0;dd<4;dd++) {
 
 
 	switch(dd) {
@@ -1818,10 +1818,10 @@ int fcs_data_c::load_readout_map(const char *fname)
 	}
 
 	while(!feof(f)) {
-		u_int adet, id ;
-		u_int row, col ;
-		u_int det, ns, dep, ch ;
-		u_int crt, slt ;
+		uint32_t adet, id ;
+		uint32_t row, col ;
+		uint32_t det, ns, dep, ch ;
+		uint32_t crt, slt ;
 
 		if(fgets(buff,sizeof(buff),f)==0) continue ;
 
@@ -1890,7 +1890,7 @@ int fcs_data_c::load_sc_map(const char *fname)
 		rdo_map[s][r].ch[c].sc_sipm = 0xFF ;
 	}}}
 
-	for(u_int dd=0;dd<3;dd++) {
+	for(uint32_t dd=0;dd<3;dd++) {
 
 
 	switch(dd) {
@@ -1965,10 +1965,10 @@ int fcs_data_c::load_sc_map(const char *fname)
 	}
 
 	while(!feof(f)) {
-		u_int adet, id ;
-		u_int row, col ;
-		u_int det, ns, dep ;	//NOTE: this is the DEP where the FEE is connected!
-		u_int bra, add, sipm ;
+		uint32_t adet, id ;
+		uint32_t row, col ;
+		uint32_t det, ns, dep ;	//NOTE: this is the DEP where the FEE is connected!
+		uint32_t bra, add, sipm ;
 
 
 		if(fgets(buff,sizeof(buff),f)==0) continue ;
@@ -2202,7 +2202,7 @@ int fcs_data_c::load_rdo_map(const char *fname)
 	return 0 ;
 }
 
-u_short fcs_data_c::set_rdo(int rdo1)
+uint16_t fcs_data_c::set_rdo(int rdo1)
 {
 	rdo = rdo1 ;
 
@@ -2210,7 +2210,7 @@ u_short fcs_data_c::set_rdo(int rdo1)
 } ;
 
 
-u_short fcs_data_c::set_board_id()
+uint16_t fcs_data_c::set_board_id()
 {
 	int sec = sector - 1 ;
 	int r = rdo - 1 ;

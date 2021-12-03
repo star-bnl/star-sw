@@ -9,7 +9,7 @@
 
 struct bsmd_t {
 	short adc[BSMD_DATSIZE] ;
-	u_char  cap ;	// capacitor
+	uint8_t  cap ;	// capacitor
 } ;
 
 
@@ -48,8 +48,8 @@ public:
                 static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
 	}
 
-	u_char rdo_id[7] ;	// for RDO checks in get_l2
-	u_int rdo_warns[7] ;	// number of warning issued...
+	uint8_t rdo_id[7] ;	// for RDO checks in get_l2
+	uint32_t rdo_warns[7] ;	// number of warning issued...
 
 	unsigned int t_data ;	// for trg_cmd pattern tests!
 

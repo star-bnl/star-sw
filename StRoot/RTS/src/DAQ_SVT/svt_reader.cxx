@@ -29,12 +29,12 @@ static int unpackRaw(int sec, int what, struct SVTANODK *padk, struct TPCCPPR_l 
  
 
 // m is DATAP
-int svt_reader(char *m, struct svt_t *svt, u_int driver)
+int svt_reader(char *m, struct svt_t *svt, uint32_t driver)
 {
 	int sec, i ;
 	int rb, mz ;
 	int len ;
-	u_int off ;
+	uint32_t off ;
 	static int first = 1 ;
 
 	struct DATAP *datap ;
@@ -68,7 +68,7 @@ int svt_reader(char *m, struct svt_t *svt, u_int driver)
 	off = ntohl(datap->det[SVT_ID].off) ;
 	if(off == 0) return 0 ;
 
-	svtp = (struct TPCP *)((u_int *)m+off) ;
+	svtp = (struct TPCP *)((uint32_t *)m+off) ;
 	if(checkBank((char *)svtp,"SVTP") < 0) return -1 ;	// wrong bank!
 
 
@@ -187,8 +187,8 @@ int svt_reader(char *m, struct svt_t *svt, u_int driver)
 
 					for(jj=0;jj<len;jj++) {
 						int start, last, length, stop ;
-						u_short ss, f8 ;
-						u_int rr, pp, hy ;
+						uint16_t ss, f8 ;
+						uint32_t rr, pp, hy ;
 						int tbin ;
 						int k ;
 
@@ -244,7 +244,7 @@ int svt_reader(char *m, struct svt_t *svt, u_int driver)
 							}
 
 							for(tbin=start;tbin<stop;tbin++) {
-								u_char val ;
+								uint8_t val ;
 								val = adcd->adc[adccou++] ;
 			
 								int counter = svt->counts[rrb][mz][rr-1][pp-1] ;
@@ -338,13 +338,13 @@ int svt_reader(char *m, struct svt_t *svt, u_int driver)
 static int unpackRaw(int sec, int what, struct SVTANODK *padk, struct TPCCPPR_l *cppr, char *mem, svt_t *svt)
 {
 	int i, j, t ;
-	u_char pad ;
-	u_short *cppseq ;
-	u_char *adcseq ;
-	u_char *adcdata ;
-	u_short *cppdata ;
+	uint8_t pad ;
+	uint16_t *cppseq ;
+	uint8_t *adcseq ;
+	uint8_t *adcdata ;
+	uint16_t *cppdata ;
 	int rb, mz ;
-	static u_char svtindex[128] ;
+	static uint8_t svtindex[128] ;
 	int timebins, cpps ;
 
 	timebins = 128 ;
@@ -384,14 +384,14 @@ static int unpackRaw(int sec, int what, struct SVTANODK *padk, struct TPCCPPR_l 
 
 	switch(what) {
 	case 0 :	// ADCR
-		adcdata = (u_char *) mem + sizeof(struct TPCADCR_l);
+		adcdata = (uint8_t *) mem + sizeof(struct TPCADCR_l);
 
 		if(cppr == NULL) {
 			LOG(WARN,"No CPPR? - skipping...",0,0,0,0,0) ;
 			return -1 ;
 		}
 
-		cppdata = (u_short *)((char *)cppr + sizeof(struct TPCCPPR_l)) ;
+		cppdata = (uint16_t *)((char *)cppr + sizeof(struct TPCCPPR_l)) ;
 		break ;
 	case 1 :	// PEDR
 		adcdata = ((struct TPCPEDR *)mem)->ped ;
@@ -412,19 +412,19 @@ static int unpackRaw(int sec, int what, struct SVTANODK *padk, struct TPCCPPR_l 
 
 
 		// arghh... one has to be careful with the SVT due to the new packing
-		u_int anode_offset = (pad % 0x40) * 128 * 4 + (pad/64) ;
+		uint32_t anode_offset = (pad % 0x40) * 128 * 4 + (pad/64) ;
 
-		adcseq = (u_char *) adcdata + i*0x8000 + anode_offset ;
+		adcseq = (uint8_t *) adcdata + i*0x8000 + anode_offset ;
 
 		switch(what) {
 		case 0 :
-			cppseq = (u_short *)((char *) cppdata + 2*2*8*(i*256+pad)) ;	
+			cppseq = (uint16_t *)((char *) cppdata + 2*2*8*(i*256+pad)) ;	
 
 			// let's make life easier
 			memset(svtindex,0,sizeof(svtindex)) ;
 
 			for(j=0;j<cpps;j++) {
-				u_short start, stop ;
+				uint16_t start, stop ;
 				int pre, post ;
 
 
@@ -457,7 +457,7 @@ static int unpackRaw(int sec, int what, struct SVTANODK *padk, struct TPCCPPR_l 
 			}
 
 			for(t=0;t<128;t++) {
-				u_char val ;
+				uint8_t val ;
 				int counter ;
 
 				if(svtindex[t]) {	// use it

@@ -25,7 +25,7 @@
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
 
-char *tpxFCF::fcf_flags(u_char flags)
+char *tpxFCF::fcf_flags(uint8_t flags)
 {
 	static char c_flags[32] ;
 
@@ -152,11 +152,11 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 
 				ch /= 1024 ;	// do what FCF does...
 
-				l->charge = (u_short) ch * 1024 ;	// do what decoder does...
+				l->charge = (uint16_t) ch * 1024 ;	// do what decoder does...
 				l->flags |= FCF_BIG_CHARGE ;
 			}
 			else {
-				l->charge = (u_short) charge ;
+				l->charge = (uint16_t) charge ;
 			}
 
 			l->flags &= ~FCF_BROKEN_EDGE ;
@@ -189,11 +189,11 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 	return merged ;
 }
 
-int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
+int tpxFCF::fcf_decode(uint32_t *p_buff, daq_cld *dc, uint16_t version)
 {
 	double p, t ;
 	int p1,p2,t1,t2,cha,fla ;
-	u_int p_tmp, t_tmp ;
+	uint32_t p_tmp, t_tmp ;
 
 	// pad
 	p_tmp = *p_buff & 0xFFFF ;
@@ -264,11 +264,11 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 	dc->tb = t ;
 
 
-	return 2 ;	// 2 u_ints used
+	return 2 ;	// 2 uint32_ts used
 
 }
 
-int tpxFCF::fcf_decode(u_int *p_buff, daq_sim_cld *sdc, u_short version)
+int tpxFCF::fcf_decode(uint32_t *p_buff, daq_sim_cld *sdc, uint16_t version)
 {
 	int skip = fcf_decode(p_buff,&(sdc->cld), version) ;
 
@@ -417,7 +417,7 @@ void tpxFCF::config2(int sec1, int rdo1, int mode, int rows, unsigned char *rowl
 }
 
 
-void tpxFCF::config(u_int mask, int mode, int rows, unsigned char *rowlen)
+void tpxFCF::config(uint32_t mask, int mode, int rows, unsigned char *rowlen)
 {
 	rbs = mask ;
 	modes = mode ;
@@ -692,7 +692,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 				s->t0 = 0.0 ;
 			}
 
-			u_int fl = 0 ;
+			uint32_t fl = 0 ;
 
 			if(!(s->f & FCF_NEED_PAD)) {	// not really here; missing in the RDO...
 				//LOG(WARN,"Applying broken edge to row:pad %d:%d",row,pad) ;
@@ -829,8 +829,8 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 		return 0 ;
 	}
 
-	u_int flags ;
-	u_int orig_flags ;
+	uint32_t flags ;
+	uint32_t orig_flags ;
 
 	if(fcf_style) {
 		struct s_static_storage *ss ;
@@ -859,11 +859,11 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 //		LOG(TERR,"Doing %d:%d %d",a->row,a->pad,a->count) ;
 //	}
 
-	u_int t_ave, charge ;
-	u_int tb_start ;
-	u_int last_falling, last_adc ;
+	uint32_t t_ave, charge ;
+	uint32_t tb_start ;
+	uint32_t last_falling, last_adc ;
 
-	u_int tb_prev ;
+	uint32_t tb_prev ;
 	int new_cluster ;
 
 	struct tpxFCF_cl *cl, *cl_max ;
@@ -873,7 +873,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 	cl_max = &(s->cl[FCF_MAX_CL]) ;	// end of cl sentinel...
 	
 
-	u_int max_adc = 0 ;
+	uint32_t max_adc = 0 ;
 
 	last_falling = last_adc = 0 ;
 	t_ave = charge = 0 ;
@@ -885,7 +885,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 
 	// start the loop over raw pixels in this pad...
 	for(int i=0;likely( i < a->count );i++) {
-		u_int adc, tb ;
+		uint32_t adc, tb ;
 
 
 		adc = a->adc[i] ;
@@ -1019,8 +1019,8 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 			cl->track_id = 0 ;
 			cl->quality = 0 ;
 
-			u_int adc_sum = 0 ;
-			u_int t_sum = 0 ;
+			uint32_t adc_sum = 0 ;
+			uint32_t t_sum = 0 ;
 
 			// position this clusters sim data...
 			int i_min = 0xFFFFFF ;
@@ -1086,7 +1086,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 }
 
 
-int tpxFCF::stage2(u_int *outbuff, int max_bytes)
+int tpxFCF::stage2(uint32_t *outbuff, int max_bytes)
 {
 	int r, p, c ;
 	struct stage1 *old1, *cur1 ;
@@ -1117,8 +1117,8 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 		}
 
 
-		u_int *row_cache = loc_buff++ ;	// remember where the row goes...
-		u_int *clust_count_cache = loc_buff++ ;	// remember where the cluster count goes...
+		uint32_t *row_cache = loc_buff++ ;	// remember where the row goes...
+		uint32_t *clust_count_cache = loc_buff++ ;	// remember where the cluster count goes...
 
 		
 		cur_row_clusters = 0 ;
@@ -1354,7 +1354,7 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 							if (cur->f_charge + old->f_charge > 0)
 							qua /= (cur->f_charge + old->f_charge) ;
 							else qua = 0;
-							cur->quality = (u_int )qua ;
+							cur->quality = (uint32_t )qua ;
 
 							// need to know what to do here when we 
 							if(modes & 2) {	// local annotation back to track id!
@@ -1468,20 +1468,20 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 
 	}	// loop over rows...
 
-//	LOG(TERR,"[%d] returning %d",loc_buff-(u_int *)outbuff) ;
+//	LOG(TERR,"[%d] returning %d",loc_buff-(uint32_t *)outbuff) ;
 
-	return loc_buff - (u_int *)outbuff ;	// return number of ints stored!
+	return loc_buff - (uint32_t *)outbuff ;	// return number of ints stored!
 }
 
 
 void tpxFCF::dump(tpxFCF_cl *cl, int row)
 {
-	u_int fla = cl->flags ;
-	u_int tmp_p, tmp_fl ;
-	u_int pad_c ;
+	uint32_t fla = cl->flags ;
+	uint32_t tmp_p, tmp_fl ;
+	uint32_t pad_c ;
 	int time_c ;	// time_c can go negative due to T0 corrections!
 	double dp, dt ;
-	u_int p1, p2 ;
+	uint32_t p1, p2 ;
 	int div_fact ;
 
 
@@ -1639,8 +1639,8 @@ void tpxFCF::dump(tpxFCF_cl *cl, int row)
 	}
 
 	// we dump an integerized version ("fixed point")
-	time_c = (u_int) (dt * div_fact + 0.5) ;	// 0.5 for correct roundoff
-	pad_c = (u_int) (dp * div_fact + 0.5) ;
+	time_c = (uint32_t) (dt * div_fact + 0.5) ;	// 0.5 for correct roundoff
+	pad_c = (uint32_t) (dp * div_fact + 0.5) ;
 
 	// get pad extents
 	tmp_p  = pad_c / div_fact   ;

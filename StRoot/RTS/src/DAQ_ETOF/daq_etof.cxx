@@ -1,5 +1,5 @@
 #include <assert.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 
 #include <rtsLog.h>
@@ -14,7 +14,7 @@
 
 #include "daq_etof.h"
 
-extern int etof_reader(char *mem, struct etof_t *etof, u_int driver) ;
+extern int etof_reader(char *mem, struct etof_t *etof, uint32_t driver) ;
 
 
 
@@ -132,7 +132,7 @@ daq_dta *daq_etof::handle_raw(int sec, int rdo)
 	}
 
 	LOG(TERR,"ETOF size %d",size) ;
-	u_int *d32 = (u_int *)ptr ;
+	uint32_t *d32 = (uint32_t *)ptr ;
 	for(int i=0;i<size/4;i++) {
 		LOG(TERR,"%d = 0x%08X",i,d32[i]) ;
 	}
@@ -142,7 +142,7 @@ daq_dta *daq_etof::handle_raw(int sec, int rdo)
 
 	size -= 40 ;	//bank header
 
-	raw->create(size,"etof_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	raw->create(size,"etof_raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 
 	char *st = (char *) raw->request(size) ;
 

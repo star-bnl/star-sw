@@ -26,10 +26,10 @@
 
 
 struct rdoHeader {
-  u_int bytes ;         // bytes including header and trailer, minus 4 bytes.
-  u_int w[2] ;          // (each has same format as trailer? but fifo status 0xa?
+  uint32_t bytes ;         // bytes including header and trailer, minus 4 bytes.
+  uint32_t w[2] ;          // (each has same format as trailer? but fifo status 0xa?
   union {
-    u_int deadface;     // currently 0xdeadface
+    uint32_t deadface;     // currently 0xdeadface
     char specifier[4];  // future could be "DTA\0" / "LOG\0" etc... for easy browsing
   };
 };
@@ -42,7 +42,7 @@ struct altroData {
 
 struct rdoTrailer {
   union {
-    u_int status;
+    uint32_t status;
     struct {
       unsigned evt:20;
       unsigned err:8;              // 0x08 good event

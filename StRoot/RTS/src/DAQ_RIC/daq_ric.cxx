@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <rtsLog.h>
@@ -9,7 +9,7 @@
 
 #include "daq_ric.h"
 
-extern int ric_reader(char *m, struct ric_t *ric, u_int driver) ;
+extern int ric_reader(char *m, struct ric_t *ric, uint32_t driver) ;
 
 const char *daq_ric::help_string = "RIC tst\n" ;
 

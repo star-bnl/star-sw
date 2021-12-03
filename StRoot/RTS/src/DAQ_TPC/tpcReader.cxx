@@ -1,5 +1,5 @@
 #include <string.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <assert.h>
 #include "DAQ_READER/daqReader.h"
 #include <DAQ_READER/daq_dta.h>

@@ -1,7 +1,7 @@
 #ifndef SIMPLEQ_HH
 #define SIMPLEQ_HH
 
-#include <sys/types.h>
+#include <stdint.h>
 
 template <class T, int S> class simpleQ
 {

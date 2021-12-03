@@ -3,13 +3,13 @@
 #include "fcs_trg_base.h"
 
 // VERSION 0x0  (Apr 2, 2019)
-void fcs_trg_base::stage_1_201900(u_int s0[], geom_t geo, link_t *output) 
+void fcs_trg_base::stage_1_201900(uint32_t s0[], geom_t geo, link_t *output) 
 {
 
 	// Tonko: I will run this basic "high-towerish" trigger always
-	u_char t[32] ;
-	u_int mask = 0 ;
-	u_int thr = ht_threshold[geo.det] ;	// depends on detector
+	uint8_t t[32] ;
+	uint32_t mask = 0 ;
+	uint32_t thr = ht_threshold[geo.det] ;	// depends on detector
 	
 	for(int i=0;i<32;i++) {
 		if(s0[i] > thr) {
@@ -24,7 +24,7 @@ void fcs_trg_base::stage_1_201900(u_int s0[], geom_t geo, link_t *output)
 
 	// algorithm depends on detector
 	if(geo.det == 2) {	// BASIC algo for fPRE in FY19
-		u_char bit[3] ;
+		uint8_t bit[3] ;
 
 		bit[0] = t[0] | t[1] | t[2] | t[3] | t[4] ;
 		bit[1] = t[2] | t[3] | t[4] | t[5] | t[6] ;
@@ -43,7 +43,7 @@ void fcs_trg_base::stage_1_201900(u_int s0[], geom_t geo, link_t *output)
 		output->d[7] = mask?0x80:0 ;
 	}
 	else {	// BASIC algo for ECAL/HCAL
-		u_int sum[8] ;
+		uint32_t sum[8] ;
 
 		// Akio
 		sum[0] = s0[0] + s0[1] + s0[4] + s0[5] ;

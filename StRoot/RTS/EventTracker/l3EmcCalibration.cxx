@@ -2,7 +2,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <errno.h>

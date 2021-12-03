@@ -10,25 +10,25 @@
 
 //raw data header
 struct fps_evt_hdr_t {
-	u_int ver ;	// version<<8 | (header words)
-	u_int words ; // of the event, including this header
+	uint32_t ver ;	// version<<8 | (header words)
+	uint32_t words ; // of the event, including this header
 
-	u_int ev ;	// event counter
-	u_int token ;	// trg/daq/token, 20bits
+	uint32_t ev ;	// event counter
+	uint32_t token ;	// trg/daq/token, 20bits
 
 
-	u_int xing ;
+	uint32_t xing ;
 
-	u_char qt_cou ;
-	u_char pre_post_cou ;
+	uint8_t qt_cou ;
+	uint8_t pre_post_cou ;
 	char status ;		// 1 OK; something else otherwise
-	u_char trg_type ;
+	uint8_t trg_type ;
 
-	u_int tick ;		//at event start, in us
+	uint32_t tick ;		//at event start, in us
 	int delta ;		//in us
 
-	u_int stp_data[3] ;
-	u_int reserved[2] ;
+	uint32_t stp_data[3] ;
+	uint32_t reserved[2] ;
 } ;
 
 #if 0
@@ -42,9 +42,9 @@ struct fps_dta_t {
 	struct {
 		char ix ;
 		char ch_cou ;
-		u_short adc[32] ;
-		u_char  tdc[32] ;
-		u_char  ch[32] ;
+		uint16_t adc[32] ;
+		uint8_t  tdc[32] ;
+		uint8_t  ch[32] ;
 	} qt[FPS_QT_COU] ;
 } ;
 
@@ -58,40 +58,40 @@ struct fps_evt_t {
 
 // transformed to ADC data
 struct fps_adc_t {
-	u_char ch ;
-	u_char tdc ;
-	u_short adc ;
+	uint8_t ch ;
+	uint8_t tdc ;
+	uint16_t adc ;
 } ;
 
 struct fps_config_t {
-	u_int run_type ;	//3:physics, 1:pedestal
-	u_int ped_mode ;	//1:do zs, 0:no zs
-	u_int qt_mask ;
-	u_int pre ;
-	u_int post ;
-	u_int log_level ;	// tonkoLogLevel thing
-	u_int run_number ;
+	uint32_t run_type ;	//3:physics, 1:pedestal
+	uint32_t ped_mode ;	//1:do zs, 0:no zs
+	uint32_t qt_mask ;
+	uint32_t pre ;
+	uint32_t post ;
+	uint32_t log_level ;	// tonkoLogLevel thing
+	uint32_t run_number ;
 
-	u_int trg_type ;	//2:pulser, 4:coinc, 0x1000:STP
-	u_int rcc_required ;
-	u_int events_required ;	
-	u_int qt_cou ;
+	uint32_t trg_type ;	//2:pulser, 4:coinc, 0x1000:STP
+	uint32_t rcc_required ;
+	uint32_t events_required ;	
+	uint32_t qt_cou ;
 
-	u_int reserved[27] ;
+	uint32_t reserved[27] ;
 
 };
 
 #define FPS_PED_VERSION	0x0
 
 struct fps_pedrms_t {	
-	u_char version ;
-	u_char qt_ix ;		//0..7
-	u_char ch_cou ;	//32
+	uint8_t version ;
+	uint8_t qt_ix ;		//0..7
+	uint8_t ch_cou ;	//32
 	
 	struct {
 		float ped ;
 		float rms ;
-		u_char flag ;	//1=error
+		uint8_t flag ;	//1=error
 	} ped[32] ;
 } ;
 

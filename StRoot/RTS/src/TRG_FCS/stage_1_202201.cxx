@@ -3,16 +3,16 @@
 #include "fcs_trg_base.h"
 
 // VERSION 0x1  (May 2020)
-void fcs_trg_base::stage_1_202201(u_int s0[], geom_t geo, link_t *output) 
+void fcs_trg_base::stage_1_202201(uint32_t s0[], geom_t geo, link_t *output) 
 {
-	u_char mrkr ;	// marker
+	uint8_t mrkr ;	// marker
 
          if(fcs_trgDebug>=2) printf("Stage1v1 ns=%1d det=%1d dep=%2d\n",geo.ns,geo.det,geo.dep);
 
 	// Tonko: I will run this basic "high-towerish" trigger always
-	u_char t[32] ;
-	u_int mask = 0 ;
-	u_int thr = ht_threshold[geo.det] ;	// depends on detector
+	uint8_t t[32] ;
+	uint32_t mask = 0 ;
+	uint32_t thr = ht_threshold[geo.det] ;	// depends on detector
 	
 	for(int i=0;i<32;i++) {
 		if(s0[i] > thr) {
@@ -52,7 +52,7 @@ void fcs_trg_base::stage_1_202201(u_int s0[], geom_t geo, link_t *output)
 	    output->d[7] = mask?0x80:0 ;
 	}
 	else {	// BASIC algo for ECAL/HCAL
-		u_int sum[8] ;
+		uint32_t sum[8] ;
 
 		// Akio
 		sum[0] = s0[0] + s0[1] + s0[4] + s0[5] ;

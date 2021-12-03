@@ -5,9 +5,9 @@
 
 struct SysTaskState
 {
-  u_short node;
-  u_char task;
-  u_char inrun;
+  uint16_t node;
+  uint8_t task;
+  uint8_t inrun;
   char name[MAX_STR_LEN];
   int state;
 };
@@ -21,9 +21,9 @@ struct SysState
 
 struct RtsErrorMsg
 {
-  u_short node;
-  u_char task;
-  u_char dummy;
+  uint16_t node;
+  uint8_t task;
+  uint8_t dummy;
   char msg[256];
 };
 

@@ -2,7 +2,7 @@
 #define _DAQ_READERCLASS_HH_
 
 #include <ctype.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include "daqConfig.h"
 // Define the old EVP_READER-based interface:
 
@@ -57,31 +57,31 @@ enum Input_Type { none, live, file, pointer, dir };
 #define EVP_STAT_CRIT   (-3)
 #define EVP_STAT_LOG  (-4)
 
-typedef unsigned int u_int;
+typedef unsigned int uint32_t;
 typedef unsigned long long int u_longlong;
 typedef unsigned long long int UINT64;
 
 struct SummaryInfo {
-  u_int token ;		// current token
-  u_int evt_time ;	// time in UNIX seconds
-  u_int detectors ;	// detectors present bit mask according to DAQ!
+  uint32_t token ;		// current token
+  uint32_t evt_time ;	// time in UNIX seconds
+  uint32_t detectors ;	// detectors present bit mask according to DAQ!
   UINT64 detectors64;
-  u_int daqbits;
-  u_int daqbits_l1;
-  u_int daqbits_l2;
-  u_int evpgroups;
-  u_int evp_daqbits;
-  u_int flags;
+  uint32_t daqbits;
+  uint32_t daqbits_l1;
+  uint32_t daqbits_l2;
+  uint32_t evpgroups;
+  uint32_t evp_daqbits;
+  uint32_t flags;
 
-  u_int trgword;
-  u_int trgcmd;	// current trigger command
-  u_int daqcmd;	// current DAQ command
+  uint32_t trgword;
+  uint32_t trgcmd;	// current trigger command
+  uint32_t daqcmd;	// current DAQ command
   
-  u_int L1summary[2];
-  u_int L2summary[2];
-  u_int L3summary[4];
+  uint32_t L1summary[2];
+  uint32_t L2summary[2];
+  uint32_t L3summary[4];
 
-  u_int seq ;		// event sequence from EVB    ????
+  uint32_t seq ;		// event sequence from EVB    ????
 };
 
 class daqReader {
@@ -146,7 +146,7 @@ class daqReader {
   //    whatever it might be...  
   char *event_memory;
   int event_size;   // size of the current event measured from beginning of memmap
-  u_int bytes ;	    // size of the current event measured from beginning of datap
+  uint32_t bytes ;	    // size of the current event measured from beginning of datap
 
   int getDetectorSize(const char *str);   // actually gets the size of any arbitrary file/directory...
 
@@ -185,65 +185,65 @@ class daqReader {
 
   //  These parameters are used for the evp reads with event number non-zero
   //  readall_lastevt --
-  u_int readall_rundone;
-  u_int readall_lastevt;
-  u_int readall_run;
+  uint32_t readall_rundone;
+  uint32_t readall_lastevt;
+  uint32_t readall_run;
   void readall_reset() { readall_rundone = 0; readall_lastevt = 0; readall_run=0; };
 
 
-  u_int event_number ;	// current event in the evp or file 
-  u_int total_events ;	// total number of events seen by this object so far
+  uint32_t event_number ;	// current event in the evp or file 
+  uint32_t total_events ;	// total number of events seen by this object so far
 
 
 	
 
 
-  u_int run ;		// current run number
+  uint32_t run ;		// current run number
 
-  u_int evb_type ;	// event type	(only from ACTIVE run)
-  u_int evb_cou ;		// total events in this run (only from ACTIVE run)
-  u_int evb_type_cou ;	// total events of the above type in this run (only from ACTIVE run)
+  uint32_t evb_type ;	// event type	(only from ACTIVE run)
+  uint32_t evb_cou ;		// total events in this run (only from ACTIVE run)
+  uint32_t evb_type_cou ;	// total events of the above type in this run (only from ACTIVE run)
 
-  u_int token ;		// current token
-  u_int trgcmd ;		// current trigger command
-  u_int daqcmd ;		// current DAQ command
-  u_int trgword ;		// the Trigger Word
-  u_int phyword ;		// the Physics Word
-  u_int daqbits ;		// "offline" bits aka L3 summary...
-  u_int daqbits_l1;       // triggers satisfying l1 
-  u_int daqbits_l2;       // triggers satisfying l2
+  uint32_t token ;		// current token
+  uint32_t trgcmd ;		// current trigger command
+  uint32_t daqcmd ;		// current DAQ command
+  uint32_t trgword ;		// the Trigger Word
+  uint32_t phyword ;		// the Physics Word
+  uint32_t daqbits ;		// "offline" bits aka L3 summary...
+  uint32_t daqbits_l1;       // triggers satisfying l1 
+  uint32_t daqbits_l2;       // triggers satisfying l2
 
   u_longlong daqbits64;
   u_longlong daqbits64_l1;
   u_longlong daqbits64_l2;
 
-  u_int evpgroups ;       // evp groups aka L3 summary[2]     
-  u_int flags ;
+  uint32_t evpgroups ;       // evp groups aka L3 summary[2]     
+  uint32_t flags ;
 
-  u_int evt_time ;	// time in UNIX seconds
-  u_int seq ;		// event sequence from EVB
-  u_int detectors ;	// detectors present bit mask according to DAQ!
+  uint32_t evt_time ;	// time in UNIX seconds
+  uint32_t seq ;		// event sequence from EVB
+  uint32_t detectors ;	// detectors present bit mask according to DAQ!
   UINT64 detectors64;
 
   float triggerFrequency;   // rhic frequency
-  u_int triggerFrequency_valid;
+  uint32_t triggerFrequency_valid;
 
   int streaming_seq;        // -1 if not streaming
   int streaming_evb;        // evb + seq is the key here, there are multiple seq per run
   char streaming_node[12];
   
-  u_int detector_bugs ;	// for per-detector bug tracing i.e. FY12 UU future protection TPX bug
+  uint32_t detector_bugs ;	// for per-detector bug tracing i.e. FY12 UU future protection TPX bug
   UINT64 detector_bugs64;
 
-  u_int detsinrun ;
+  uint32_t detsinrun ;
   UINT64 detsinrun64;
-  u_int evpgroupsinrun;
+  uint32_t evpgroupsinrun;
 
   // copies from the trigger data format...
   // the meanings potentially change year to year...
-  u_int L1summary[2];
-  u_int L2summary[2];
-  u_int L3summary[4];
+  uint32_t L1summary[2];
+  uint32_t L2summary[2];
+  uint32_t L3summary[4];
 
   int fixDatapSummary(DATAP *datap);
   char *getInputType();

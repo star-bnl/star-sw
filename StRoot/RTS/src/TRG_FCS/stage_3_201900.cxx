@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "fcs_trg_base.h"
@@ -12,7 +12,7 @@
 
 // Tonko: it goes first into the RAT and then to the LastDSM
 
-void fcs_trg_base::stage_3_201900(link_t link[], u_short *dsm_out)
+void fcs_trg_base::stage_3_201900(link_t link[], uint16_t *dsm_out)
 {
     *dsm_out = 0;
 

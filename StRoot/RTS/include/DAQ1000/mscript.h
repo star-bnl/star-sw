@@ -28,8 +28,8 @@ struct ParsedScript
   char *fn;                      // null if no file, or points to _fn[]
   int num;                     // numeric arg  0xffffffff by default
 
-  u_int data[MAX_MSCRIPT_LEN];   // compiled script
-  u_int n;                       // compiled script length
+  uint32_t data[MAX_MSCRIPT_LEN];   // compiled script
+  uint32_t n;                       // compiled script length
 };
 
 int parse(ParsedScript *script, char *str, int batch=0);
@@ -37,7 +37,7 @@ int parse(ParsedScript *script, char *str, int batch=0);
 #else
 
 /* Nios */
-int runList(u_int *prog, char *outputbuff, u_int sz);
+int runList(uint32_t *prog, char *outputbuff, uint32_t sz);
 #endif
 
 

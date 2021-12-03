@@ -14,8 +14,8 @@ static int unpackRaw(int rb, int mz, int what, char *mem, ssd_t *ssd) ;
 
 /* UNUSED 
 static struct ssdMap {
-	u_char start_ladder ;
-	u_char side ;
+	uint8_t start_ladder ;
+	uint8_t side ;
 } ssdMap[4][2] = {
 	{ {0,0}, {5,0} },
 	{ {10,0}, {15,0} },
@@ -24,12 +24,12 @@ static struct ssdMap {
 } ;
 */
 
-int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
+int ssd_reader(char *m, struct ssd_t *ssd, uint32_t driver)
 {
 	int sec ;
 	int rb, mz ;
 	int len ;
-	u_int off ;
+	uint32_t off ;
 	static int init ;
 
 	struct TPCP *ssdp ;
@@ -67,7 +67,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 	off = qswap32(swapdatap, datap->det[EXT_ID].off) ;
 	if(off == 0) return 0 ;	// not even a xtended det
 
-	datapx = (struct DATAPX *)((u_int *)m + off) ;
+	datapx = (struct DATAPX *)((uint32_t *)m + off) ;
 
 	int swapdatapx = 0;
 	if(datapx->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapdatapx = 1;
@@ -85,7 +85,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 	off = qswap32(swapdatapx, datapx->det[SSD_ID-10].off) ;
 	if(off == 0) return 0 ;
 
-	ssdp = (struct TPCP *)((u_int *)datapx + off) ;
+	ssdp = (struct TPCP *)((uint32_t *)datapx + off) ;
 	if(checkBank((char *)ssdp,"SSDP") < 0) return 0 ;	// wrong bank!
 
 
@@ -106,7 +106,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 	// clear mode before
 	ssd->mode = 0 ;
 
-	u_int occup[4][3] ;
+	uint32_t occup[4][3] ;
 	memset(occup,0,sizeof(occup)) ;
 
 	for(sec=0;sec<1;sec++) {	// just one sector! I kept the for loop for compatibility
@@ -115,7 +115,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 
 		if(ssdp->sb[sec].len == 0) continue ;
 
-		secp = (struct TPCSECP *) ((u_int *)ssdp + b2h32(ssdp->sb[sec].off)) ;
+		secp = (struct TPCSECP *) ((uint32_t *)ssdp + b2h32(ssdp->sb[sec].off)) ;
 		if(checkBank((char *)secp,"SSDSECP") < 0) return 0 ;
 
 		last = 4 ;	// 4 RBs max!
@@ -125,7 +125,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 
 			if(secp->rb[rb].len == 0) continue ;
 
-			rbp = (struct TPCRBP *) ((u_int *)secp + b2h32(secp->rb[rb].off)) ;
+			rbp = (struct TPCRBP *) ((uint32_t *)secp + b2h32(secp->rb[rb].off)) ;
 			if(checkBank((char *)rbp,"SSDRBP") < 0) {
 				continue ;
 			}
@@ -135,7 +135,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 			for(mz=0;mz<2;mz++) {	// 3rd mezzanine will be always empty...
 				if(rbp->mz[mz].len == 0) continue ;
 
-				mzp = (struct TPCMZP *)((u_int *)rbp + l2h32(rbp->mz[mz].off)) ;
+				mzp = (struct TPCMZP *)((uint32_t *)rbp + l2h32(rbp->mz[mz].off)) ;
 				if(checkBank((char *)mzp,"SSDMZP") < 0) {
 					continue ;
 				}
@@ -144,8 +144,8 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 				if((mzp->banks[TPC_ADCD].len != 0) && (ssd->mode==0)) {	// zero-suppressed
 
 
-					seqd = (struct TPCSEQD *)((u_int *)mzp + l2h32(mzp->banks[TPC_SEQD].off)) ;
-					adcd = (struct TPCADCD *)((u_int *)mzp + l2h32(mzp->banks[TPC_ADCD].off)) ;
+					seqd = (struct TPCSEQD *)((uint32_t *)mzp + l2h32(mzp->banks[TPC_SEQD].off)) ;
+					adcd = (struct TPCADCD *)((uint32_t *)mzp + l2h32(mzp->banks[TPC_ADCD].off)) ;
 
 					if(checkBank((char *)seqd,"SSDSEQD") < 0) continue ;
 					if(checkBank((char *)adcd,"SSDADCD") < 0) continue ;
@@ -162,7 +162,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 
 					for(jj=0;jj<len;jj++) {
 						int start, last, length, stop ;
-						u_short ss, f8 ;
+						uint16_t ss, f8 ;
 						int tbin ;
 
 						ss = l2h16(seqd->seq[jj]) ;
@@ -185,7 +185,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 							//LOG(DBG,"last %d, start %d, stop %d, pp %d, rr %d",last,start,stop,pp,rr) ;
 
 							for(tbin=start;tbin<stop;tbin++) {
-								u_char val ;
+								uint8_t val ;
 								int counter ;
 
 								val = adcd->adc[adccou++] ;
@@ -220,7 +220,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 
 				padk = NULL ;
 				if(mzp->banks[TPC_PADK].len != 0) {	
-					padk = (struct TPCPADK *)((u_int *)mzp + l2h32(mzp->banks[TPC_PADK].off)) ;
+					padk = (struct TPCPADK *)((uint32_t *)mzp + l2h32(mzp->banks[TPC_PADK].off)) ;
 
 					if(checkBank((char *)padk,"SSDPADK") < 0) return 0 ;
 
@@ -229,12 +229,12 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 				cppr = NULL ;
 				if(mzp->banks[TPC_CPPR].len != 0) {
 
-					cppr = (struct TPCCPPR_l *)((u_int *)mzp + l2h32(mzp->banks[TPC_CPPR].off)) ;
+					cppr = (struct TPCCPPR_l *)((uint32_t *)mzp + l2h32(mzp->banks[TPC_CPPR].off)) ;
 					if(checkBank((char *)cppr,"SSDCPPR") < 0) return 0 ;
 				}
 
 				if((mzp->banks[TPC_ADCR].len != 0) && (ssd->mode==0)) {	// raw ...
-					adcr = (struct TPCADCR_l *)((u_int *)mzp + l2h32(mzp->banks[TPC_ADCR].off)) ;
+					adcr = (struct TPCADCR_l *)((uint32_t *)mzp + l2h32(mzp->banks[TPC_ADCR].off)) ;
 
 					if(checkBank((char *)adcr,"SSDADCR") < 0) return 0 ;
 
@@ -249,7 +249,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 				}
 
 				if(mzp->banks[TPC_PEDR].len != 0) {	// pedestal data!
-					pedr = (struct TPCPEDR *)((u_int *)mzp + l2h32(mzp->banks[TPC_PEDR].off)) ;
+					pedr = (struct TPCPEDR *)((uint32_t *)mzp + l2h32(mzp->banks[TPC_PEDR].off)) ;
 
 					if(checkBank((char *)pedr,"SSDPEDR") < 0) return 0 ;
 
@@ -259,7 +259,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 				}
 
 				if(mzp->banks[TPC_RMSR].len != 0) {	// RMS too 
-					rmsr = (struct TPCRMSR *)((u_int *)mzp + l2h32(mzp->banks[TPC_RMSR].off)) ;
+					rmsr = (struct TPCRMSR *)((uint32_t *)mzp + l2h32(mzp->banks[TPC_RMSR].off)) ;
 
 					if(checkBank((char *)rmsr,"SSDRMSR") < 0) return 0 ;
 
@@ -290,9 +290,9 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 static int unpackRaw(int rb, int mz, int what, char *mem, ssd_t *ssd)
 {
 
-	u_char *adcdata ;
+	uint8_t *adcdata ;
 	int as, ch, strip, cou ;
-	u_char *dta ;
+	uint8_t *dta ;
 	int row ;
 
 	if(mem == NULL) {
@@ -308,7 +308,7 @@ static int unpackRaw(int rb, int mz, int what, char *mem, ssd_t *ssd)
 
 	switch(what) {
 	case 0 :	// ADCR 
-		adcdata = (u_char *) mem + sizeof(struct TPCADCR_l);
+		adcdata = (uint8_t *) mem + sizeof(struct TPCADCR_l);
 		ssd->raw[rb][mz] = adcdata ;
 		LOG(NOTE,"SSD rb %d, mz %d: raw...",rb,mz) ;
 		break ;

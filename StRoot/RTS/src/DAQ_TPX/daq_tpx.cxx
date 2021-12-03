@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <assert.h>
 
@@ -328,7 +328,7 @@ int daq_tpx::Make()
 
 int daq_tpx::InitRun(int run)
 {
-	u_int mode = GetMode() ;
+	uint32_t mode = GetMode() ;
 
 	LOG(NOTE,"%s: InitRun(%d), m_Mode 0x%08X",name, run, mode) ;
 
@@ -405,7 +405,7 @@ int daq_tpx::InitRun(int run)
 
 int daq_tpx::FinishRun(int old)
 {
-	u_int mode = GetMode() ;
+	uint32_t mode = GetMode() ;
 
 	LOG(NOTE,"%s: Run %d finished with %d events, m_Mode 0x%08X",name,run_num,evt_num,mode) ;
 
@@ -541,7 +541,7 @@ daq_dta *daq_tpx::put(const char *in_bank, int sec, int row, int pad, void *p1, 
 		}	
 		else {	// iTPC!
 			sim_row_count = row ;
-			sim_tpx_rowlen = (u_char *)p1 ;
+			sim_tpx_rowlen = (uint8_t *)p1 ;
 		}
 
 		LOG(NOTE,"adc_sim: row count %d, rowlen %p",sim_row_count,sim_tpx_rowlen) ;
@@ -614,7 +614,7 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 
 					int c = tpc_p->counts[r][p] ;	// shorthand
 					tpc_p->adc[r][p][c] = tpc_adc ;
-					tpc_p->timebin[r][p][c] = (u_char)(ped[i].rms*16.0) ;
+					tpc_p->timebin[r][p][c] = (uint8_t)(ped[i].rms*16.0) ;
 			
 					(tpc_p->counts[r][p])++ ;
 					tpc_p->channels_sector++ ;
@@ -655,7 +655,7 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 
 				//LOG(NOTE,"rp %d:%d, ncontent %d",r,p,dd->ncontent) ;
 
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 					int tpc_tb, tpc_adc ;
 
 					// adjust timebin
@@ -696,7 +696,7 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 				tpc_p->has_clusters = 1 ;
 				found_something = 1 ;
 
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 					int c = tpc_p->cl_counts[r] ;
 					if(c >= TPC_READER_MAX_CLUSTERS) break ;
 
@@ -817,12 +817,12 @@ daq_dta *daq_tpx::handle_ped(int sec)
 
 
 		// do the actual decoding...
-		u_short *d16 = (u_short *) tmp_cache ;
+		uint16_t *d16 = (uint16_t *) tmp_cache ;
 
 		// data format must be the same as in tpxPed::to_evb()!
 		while(size > 0) {
 /* old, wrong!
-			u_int r_id = l2h32(*(u_int *)d16) ;
+			uint32_t r_id = l2h32(*(uint32_t *)d16) ;
 
 			size -= 4 ;	// 1 int == 4 bytes
 			d16 += 2 ;	// 1 int == 2 shorts
@@ -846,7 +846,7 @@ daq_dta *daq_tpx::handle_ped(int sec)
 			daq_det_pedrms *d = (daq_det_pedrms *) ped->request(cou*10) ;	// force more allocation
 			
 			for(int i=0;i<cou;i++) {
-				u_short tmp = l2h16(*d16++) ;
+				uint16_t tmp = l2h16(*d16++) ;
 
 				int i_rms = (tmp & 0xFC00) >> 10 ;
 				int i_ped = tmp & 0x3FF ;
@@ -958,7 +958,7 @@ daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 			LOG(ERR,"RDO mismatch: in data %d, expect %d",rdo.rdo,r) ;
 		}
 
-		u_int *data_end = rdo.data_end ;
+		uint32_t *data_end = rdo.data_end ;
 
 		a.rdo = rdo.rdo -1 ;
 		a.t = token ;
@@ -980,7 +980,7 @@ daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 	
 			//LOG(DBG,"%d: %d:%d %d",adc->obj_cou,a.row,a.pad,a.count) ;
 
-			for(u_int i=0 ; i < a.count ; i++) {
+			for(uint32_t i=0 ; i < a.count ; i++) {
 				at[i].adc = a.adc[i] ;
 				at[i].tb = a.tb[i] ;
 
@@ -1087,7 +1087,7 @@ daq_dta *daq_tpx::handle_altro(int sec, int rdo)
 			LOG(ERR,"RDO mismatch: in data %d, expect %d",rdo.rdo,r) ;
 		}
 
-		u_int *data_end = rdo.data_end ;
+		uint32_t *data_end = rdo.data_end ;
 
 		a.rdo = rdo.rdo -1 ;
 		a.t = token ;
@@ -1109,7 +1109,7 @@ daq_dta *daq_tpx::handle_altro(int sec, int rdo)
 	
 			//LOG(DBG,"%d: %d:%d %d",altro->obj_cou,a.row,a.pad,a.count) ;
 
-			for(u_int i=0 ; i < a.count ; i++) {
+			for(uint32_t i=0 ; i < a.count ; i++) {
 				at[i].adc = a.adc[i] ;
 				at[i].tb = a.tb[i] ;
 
@@ -1144,7 +1144,7 @@ daq_dta *daq_tpx::handle_raw(int sec, int rdo)
 	struct {
 		int sec ;
 		int rb ;
-		u_int bytes ;
+		uint32_t bytes ;
 	} obj[24*6] ;
 
 	// sanity
@@ -1209,7 +1209,7 @@ daq_dta *daq_tpx::handle_raw(int sec, int rdo)
 	}
 	}
 
-	raw->create(tot_bytes,(char *)"raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	raw->create(tot_bytes,(char *)"raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 
 	// bring in the bacon from the SFS file....
 	for(int i=0;i<o_cou;i++) {
@@ -1250,7 +1250,7 @@ daq_dta *daq_tpx::handle_cld_raw(int sec, int rdo)
 	struct {
 		int sec ;
 		int rb ;
-		u_int bytes ;
+		uint32_t bytes ;
 	} obj[24*6] ;
 
 	// sanity
@@ -1314,7 +1314,7 @@ daq_dta *daq_tpx::handle_cld_raw(int sec, int rdo)
 	}
 	}
 
-	cld_raw->create(tot_bytes,(char *)"cld_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	cld_raw->create(tot_bytes,(char *)"cld_raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 
 	// bring in the bacon from the SFS file....
 	for(int i=0;i<o_cou;i++) {
@@ -1413,14 +1413,14 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 		int bytes = dd->ncontent ;
 		if(bytes <= 0) continue ;
 
-		u_int *buff = dd->Int32 ;
+		uint32_t *buff = dd->Int32 ;
 		
-		u_int *end_buff = buff + bytes/4 ;
-		u_int *p_buff = buff ;
+		uint32_t *end_buff = buff + bytes/4 ;
+		uint32_t *p_buff = buff ;
 
 		while(p_buff < end_buff) {
-			u_int row = *p_buff++ ;
-			u_int cou = *p_buff++ ;
+			uint32_t row = *p_buff++ ;
+			uint32_t cou = *p_buff++ ;
 			
 			if(cou > 1000000) {
 				LOG(WARN,"Bad data in S%02d-%d, row %d -- count is %d -- skipping",
@@ -1428,13 +1428,13 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 				break ;
 			}
 
-			u_int version = (row >> 16) ;	// decoder needs the version
+			uint32_t version = (row >> 16) ;	// decoder needs the version
 			row &= 0xFFFF ;			// finalize the row...
 
 			daq_cld *dc = (daq_cld *) cld->request(cou) ;	// ask for storage; we know exactly how much...
 			
 
-			for(u_int i=0;i<cou;i++) {
+			for(uint32_t i=0;i<cou;i++) {
 				p_buff += fcf_algo[0]->fcf_decode(p_buff, dc, version) ;
 				if((row==8) && (dc->flags & FCF_BROKEN_EDGE)) {
 					found_broken_edges = 1 ;	// mark for later use...
@@ -1470,7 +1470,7 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 		
 			int s = cld->sec ;	// shorthand
 			
-			for(u_int i=0;i<cld->ncontent;i++) {
+			for(uint32_t i=0;i<cld->ncontent;i++) {
 				if((cld->cld[i].flags & FCF_BROKEN_EDGE) && (merged_cou[s] < FCF_MAX_MERGED_COU)) {
 					merged_store[s][merged_cou[s]] = &cld->cld[i] ;	// remember the ptr...
 					merged_cou[s]++ ;	// count 'em
@@ -1593,13 +1593,13 @@ daq_dta *daq_tpx::handle_cld_2d_sim(int sec, int row)
 			//LOG(TERR,"Done with apply gains") ;
 
 			if(fcf_tmp_storage==0) {	// for the results!!!
-				fcf_tmp_storage = (u_int *)valloc(FCF_TMP_BYTES) ;
+				fcf_tmp_storage = (uint32_t *)valloc(FCF_TMP_BYTES) ;
 			}
 
 			fcf_2d_algo[sim->sec]->start_evt_2d(sim->sec,0) ;
 		}
 
-		//u_short track_id[512] ;
+		//uint16_t track_id[512] ;
 		tpx_altro_struct a ;
 
 		a.row = sim->row ;
@@ -1611,7 +1611,7 @@ daq_dta *daq_tpx::handle_cld_2d_sim(int sec, int row)
 
 		
 	
-		for(u_int i=0;i<sim->ncontent;i++) {
+		for(uint32_t i=0;i<sim->ncontent;i++) {
 			a.adc[i] = sim->sim_adc[i].adc ;
 			a.tb[i] = sim->sim_adc[i].tb ;
 			//track_id[i] = sim->sim_adc[i].track_id ;
@@ -1634,16 +1634,16 @@ daq_dta *daq_tpx::handle_cld_2d_sim(int sec, int row)
 
 			LOG(NOTE,"Sector %d: %d words",s,words) ;			
 
-			u_int *p_buff = fcf_tmp_storage ;
-			u_int *end_buff = p_buff + words ;
+			uint32_t *p_buff = fcf_tmp_storage ;
+			uint32_t *end_buff = p_buff + words ;
 
 			while(p_buff < end_buff) {
-				u_int row = *p_buff++ ;
-				u_int cou = *p_buff++ ;
+				uint32_t row = *p_buff++ ;
+				uint32_t cou = *p_buff++ ;
 				int g_cou = 0 ;
 			
 
-				u_int version = (row >> 16) ;
+				uint32_t version = (row >> 16) ;
 				row &= 0xFFFF ;
 
 			
@@ -1752,11 +1752,11 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 			fcf_algo[sim->sec]->start_evt() ;
 
 			if(fcf_tmp_storage==0) {
-				fcf_tmp_storage = (u_int *)valloc(FCF_TMP_BYTES) ;
+				fcf_tmp_storage = (uint32_t *)valloc(FCF_TMP_BYTES) ;
 			}
 		}
 
-		//u_short track_id[512] ;
+		//uint16_t track_id[512] ;
 		tpx_altro_struct a ;
 
 		a.row = sim->row ;
@@ -1768,7 +1768,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 
 		
 	
-		for(u_int i=0;i<sim->ncontent;i++) {
+		for(uint32_t i=0;i<sim->ncontent;i++) {
 			a.adc[i] = sim->sim_adc[i].adc ;
 			a.tb[i] = sim->sim_adc[i].tb ;
 			//track_id[i] = sim->sim_adc[i].track_id ;
@@ -1789,16 +1789,16 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 			if(words<=0) continue ;
 
 			LOG(DBG,"Sector %d: %d words",s,words) ;			
-			u_int *p_buff = fcf_tmp_storage ;
-			u_int *end_buff = p_buff + words ;
+			uint32_t *p_buff = fcf_tmp_storage ;
+			uint32_t *end_buff = p_buff + words ;
 
 			while(p_buff < end_buff) {
-				u_int row = *p_buff++ ;
-				u_int cou = *p_buff++ ;
+				uint32_t row = *p_buff++ ;
+				uint32_t cou = *p_buff++ ;
 				int g_cou = 0 ;
 			
 
-				u_int version = (row >> 16) ;
+				uint32_t version = (row >> 16) ;
 				row &= 0xFFFF ;
 
 				
@@ -1852,7 +1852,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 {
 	struct tpx_rdo_event rdo ;
 	int cou = 0 ;
-	u_int collision = 0 ;
+	uint32_t collision = 0 ;
 	int err = 0 ;
 
 	int ret = tpx_get_start(addr, words, &rdo, do_log) ;
@@ -1864,10 +1864,10 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 	LOG(DBG,"rdo %d, rdo token %d, trg cou %d",rdo.rdo,rdo.token,rdo.trg_cou) ;
 
 	// grab only the prompt contribution...
-	for(u_int i=0;i<rdo.trg_cou;i++) {
-		u_int dta = rdo.trg[i].data ;
-		u_int marker = rdo.trg[i].csr >> 24 ;
-		u_int rhic = rdo.trg[i].rhic_counter ;
+	for(uint32_t i=0;i<rdo.trg_cou;i++) {
+		uint32_t dta = rdo.trg[i].data ;
+		uint32_t marker = rdo.trg[i].csr >> 24 ;
+		uint32_t rhic = rdo.trg[i].rhic_counter ;
 
 
 //#define WANT_LOGGING
@@ -1963,10 +1963,10 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 		trgs[0].t = 4097 ;
 	}
 
-	for(u_int i=0;i<rdo.trg_cou;i++) {
-		u_int dta = rdo.trg[i].data ;
-		u_int marker = rdo.trg[i].csr >> 24 ;
-		u_int rhic = rdo.trg[i].rhic_counter ;
+	for(uint32_t i=0;i<rdo.trg_cou;i++) {
+		uint32_t dta = rdo.trg[i].data ;
+		uint32_t marker = rdo.trg[i].csr >> 24 ;
+		uint32_t rhic = rdo.trg[i].rhic_counter ;
 
 		if(marker==0xFF) {	// FIFO
 			int daq10k = 0 ;
@@ -2070,14 +2070,14 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 
 	if(err) {	// dump out everyhign
 		LOG(ERR," RDO %d: words %d",rdo.rdo,words) ;
-		for(u_int i=0;i<rdo.trg_cou;i++) {
+		for(uint32_t i=0;i<rdo.trg_cou;i++) {
 			LOG(ERR,"  RDO %d: T %4d: %d/%d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg_cou, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
 		}
 	}
 /*
 	else if((rdo.rdo>=6) && ((rdo.sector==24))) {
 		LOG(TERR," RDO %d: words %d",rdo.rdo,words) ;
-		for(u_int i=0;i<rdo.trg_cou;i++) {
+		for(uint32_t i=0;i<rdo.trg_cou;i++) {
 			LOG(TERR," dbg: RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, res 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, trgs[i].reserved[0],rdo.trg[i].rhic_counter) ;
 		}
 	}

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include <rtsLog.h>	// for my LOG() call
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
 					tof_t *tof = (tof_t *)dd->Void ;
 					for(int r=0;r<4;r++) {
 						printf("TOF RDO %d: words %d:\n",r+1,tof->ddl_words[r]) ;
-						for(u_int i=0;i<tof->ddl_words[r];i++) {
+						for(uint32_t i=0;i<tof->ddl_words[r];i++) {
 							printf("\t%d: 0x%08X [%u dec]\n",i,tof->ddl[r][i],tof->ddl[r][i]) ;
 						}
 					}
@@ -347,7 +347,7 @@ static int trg_doer(daqReader *rdr, const char  *do_print)
 			found = 1 ;
 
 
-			u_char *trg_raw = dd->Byte;
+			uint8_t *trg_raw = dd->Byte;
 			
 			if(do_print) {	// I have no clue but let me print first few words...
 
@@ -365,7 +365,7 @@ static int trg_doer(daqReader *rdr, const char  *do_print)
 				printf("Trigger: raw bank has %d bytes: ver 0x%02X, desc %d, len %d\n",dd->ncontent,desc->ver, desc->evt_desc, desc->len) ;
 
 				// dump first 10 ints...
-				u_int *i32 = (u_int *) trg_raw ;
+				uint32_t *i32 = (uint32_t *) trg_raw ;
 				for(int i=0;i<10;i++) {
 					printf("Trigger: word %d: 0x%08X\n",i,i32[i]) ;
 				}
@@ -533,7 +533,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 				pixel_count[dd->row] += dd->ncontent ;
 
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 					if(do_print) {
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
 					}
@@ -562,7 +562,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				printf("TPX: sec %02d, row %2d: %3d clusters (evt %d)\n",dd->sec,dd->row,dd->ncontent,good) ;
 			}
 			
-			for(u_int i=0;i<dd->ncontent;i++) {
+			for(uint32_t i=0;i<dd->ncontent;i++) {
 				if(do_print) {
 					int p1,p2,t1,t2 ;
 					int bad = 0 ;
@@ -603,7 +603,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 			if(do_print) {
 				printf("TPX: sec %02d, row %2d, pad %3d (%d pix)\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				daq_det_pedrms *ped = (daq_det_pedrms *)dd->Void ;
-				for(u_int tb=0;tb<dd->ncontent;tb++) {
+				for(uint32_t tb=0;tb<dd->ncontent;tb++) {
 					printf("  tb %3d: ped %3d, rms %.2f\n",tb,ped[tb].ped,ped[tb].rms) ;
 				}
 			}
@@ -977,13 +977,13 @@ static int btow_doer(daqReader *rdr, const char *do_print)
 	dd = rdr->det("btow")->get("raw") ;
 	if(dd) {
 		while(dd->iterate()) {
-			u_short *s16 = (u_short *) dd->Void ;
+			uint16_t *s16 = (uint16_t *) dd->Void ;
 
 			if(do_print) {
 				printf("BTOW: bytes %d\n",dd->ncontent) ;
 			}
 
-			for(u_int i=0;i<dd->ncontent/2;i++) {
+			for(uint32_t i=0;i<dd->ncontent/2;i++) {
 				if(do_print) {
 					printf("%d: 0x%04X [%d dec]\n",i,s16[i],s16[i]) ;	
 				}
@@ -1095,7 +1095,7 @@ static int l3_doer(daqReader *rdr, const char *do_print)
 				       l3_p->xVertex, l3_p->yVertex, l3_p->xVertex) ;
 
 
-				for(u_int i=0;i<l3_p->tracks_num;i++) {
+				for(uint32_t i=0;i<l3_p->tracks_num;i++) {
 					// just an example of what one would print out...
 					printf("  track %d: Pt %f, charge %d, nHits %d\n",i+1, 
 					       l3_p->track[i].pt, l3_p->track[i].q, l3_p->track[i].nHits) ;
@@ -1147,7 +1147,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 			found |= 1 ;
 
 			// point to the start of the DDL raw data
-			u_int *d = (u_int *) dd->Void ;	
+			uint32_t *d = (uint32_t *) dd->Void ;	
 
 
 			if(do_print) {
@@ -1215,7 +1215,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 		if(do_print) {
 			printf("%s ADC: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
-			for(u_int i=0;i<dd->ncontent;i++) {
+			for(uint32_t i=0;i<dd->ncontent;i++) {
 				adc_data[dd->rdo-1][dd->sec][dd->pad][f[i].ch][f[i].tb] = f[i].adc ;
 				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
 			}
@@ -1281,7 +1281,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 		if(do_print) {
 			printf("%s ZS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
-			for(u_int i=0;i<dd->ncontent;i++) {
+			for(uint32_t i=0;i<dd->ncontent;i++) {
 				zs_data[dd->rdo-1][dd->sec][dd->pad][f[i].ch][f[i].tb] = f[i].adc ;
 				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
 			}
@@ -1320,7 +1320,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 			//printf("%s PEDRMS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
-			for(u_int i=0;i<dd->ncontent;i++) {
+			for(uint32_t i=0;i<dd->ncontent;i++) {
 				printf("%d %d %2d %3d %2d: %.3f +- %.3f\n",arc,arm,apv,f[i].ch,f[i].tb,f[i].ped,f[i].rms) ;
 				//printf(" %5d: ch %3d, tb %d = %.3f +- %.3f\n",i,f[i].ch,f[i].tb,f[i].ped,f[i].rms) ;
 			}
@@ -1364,13 +1364,13 @@ static int mtd_doer(daqReader *rdr, const char *do_print)
 			found = 1 ;
 
 			// point to the start of the DDL raw data
-			u_int *d = (u_int *) dd->Void ;	
+			uint32_t *d = (uint32_t *) dd->Void ;	
 
 
 			if(do_print) {
 				printf("MTD: RDO %d: %d bytes\n",dd->rdo,dd->ncontent) ;
 				
-				for(u_int i=0;i<dd->ncontent/4;i++) {
+				for(uint32_t i=0;i<dd->ncontent/4;i++) {
 					printf(" %2d: 0x%08X\n",i,d[i]) ;
 				}
 			}
@@ -1398,7 +1398,7 @@ static int gmt_doer(daqReader *rdr, const char *do_print)
 			found = 1 ;
 
 			// point to the start of the DDL raw data
-			u_int *d = (u_int *) dd->Void ;	
+			uint32_t *d = (uint32_t *) dd->Void ;	
 
 
 			if(do_print) {
@@ -1468,7 +1468,7 @@ static int gmt_doer(daqReader *rdr, const char *do_print)
 		if(do_print) {
 			printf("GMT ADC: ARC %d, ARM %d, APV %d: %d values\n",dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
-			for(u_int i=0;i<dd->ncontent;i++) {
+			for(uint32_t i=0;i<dd->ncontent;i++) {
 				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
 			}
 		}
@@ -1549,7 +1549,7 @@ static int pxl_doer(daqReader *rdr, const char *do_print)
 			found = 1 ;
 
 			// point to the start of the DDL raw data
-			u_int *d = (u_int *) dd->Void ;	
+			uint32_t *d = (uint32_t *) dd->Void ;	
 
 
 			if(do_print) {

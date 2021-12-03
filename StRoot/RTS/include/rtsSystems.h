@@ -3,7 +3,7 @@
 #define _RTS_SYSTEMS_H_
 
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 /*
@@ -1105,7 +1105,7 @@ extern inline int GET_SYSTEM(unsigned short node)
   if(id == EXT_SYSTEM) return (node & 0x03f0) >> 4;
   if(id == EXT2_SYSTEM) return (node & 0x0f80) >> 7;
   if(id == FPD_SYSTEM) {	// new FY19 extension
-	u_int sys = node & 0x0FC0 ;
+	uint32_t sys = node & 0x0FC0 ;
 	sys >>= 6 ;
 	if(sys) return sys ;	// non-zero "system"
 	else return FPD_SYSTEM ;	// if 0, must be our old FPD

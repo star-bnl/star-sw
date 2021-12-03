@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +17,7 @@
 #include "tpxPed.h"
 #include "tpxGain.h"
 
-static	const u_int MIN_EVENTS = 500 ;
+static	const uint32_t MIN_EVENTS = 500 ;
 #define TPX_PED_FILENAME	"/RTScache/pedestals"
 
 tpxPed::tpxPed()
@@ -123,7 +123,7 @@ void tpxPed::init(int sec, int active_rbs)
 void tpxPed::accum(char *evbuff, int bytes)
 {
 	int t ;
-	u_int *data_end ;
+	uint32_t *data_end ;
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
 	int r0_logical ;
@@ -323,11 +323,11 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 
 
 
-		u_int *addr = (u_int *) rbuff ;	// remember where to store the address
+		uint32_t *addr = (uint32_t *) rbuff ;	// remember where to store the address
 	
 		rbuff += 4 ;	// skip 4 bytes
 
-		u_short *ptr = (u_short *) rbuff ;	// start
+		uint16_t *ptr = (uint16_t *) rbuff ;	// start
 
 		int tcou = 0 ;	// zero counter...
 
@@ -340,18 +340,18 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		}
 
 		for(t=0;t<timebins+15;t++) {
-			if(fff) fprintf(fff,"%d %d %d %d %d %d\n",row,pad,a,ch,t,(u_short)ped->ped[t]) ;
+			if(fff) fprintf(fff,"%d %d %d %d %d %d\n",row,pad,a,ch,t,(uint16_t)ped->ped[t]) ;
 		}
 #if 0
 		// copy as shorts BUT:
 		//	needs to go from 15 _AND_ needs to be even!
 		for(t=15;t<509;t++) {
-			*ptr++ = (u_short) ped->ped[t] ;
+			*ptr++ = (uint16_t) ped->ped[t] ;
 			tcou++ ;
 		}
 
 		if(tcou & 1) {
-			*ptr++ = (u_short) ped->ped[t] ;
+			*ptr++ = (uint16_t) ped->ped[t] ;
 			tcou++ ;
 		}
 #endif
@@ -361,9 +361,9 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		// first should be the pedestals from the start
 		// of trigger...
 		for(t=15;t<timebins+15;t++) {
-			*ptr++ = (u_short) ped->ped[t] ;
+			*ptr++ = (uint16_t) ped->ped[t] ;
 			if((row==42)&&(pad==140)) {
-				//LOG(TERR,"%d,%d = %d",t,tcou,(u_short)ped->ped[t]) ;
+				//LOG(TERR,"%d,%d = %d",t,tcou,(uint16_t)ped->ped[t]) ;
 			}
 			tcou++ ;
 		}
@@ -372,7 +372,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 
 		// follow with a "wall" of 1023
 		for(;t<(TPX_MAX_TB+15);t++) {
-			u_short val = (u_short) 1023 ;
+			uint16_t val = (uint16_t) 1023 ;
 
 			*ptr++ = val ;
 			if((row==42)&&(pad==140)) {
@@ -388,7 +388,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		// actually, I'm totally confused... this count of 15 must
 		// exist but the value seems irrelevant...
 		for(t=0;t<15;t++) {
-			u_short val = (u_short) ped->ped[t] ;
+			uint16_t val = (uint16_t) ped->ped[t] ;
 			*ptr++ = val ;
 			if((row==42)&&(pad==140)) {
 				//LOG(TERR,"%d,%d = %d",t,tcou,val) ;
@@ -398,7 +398,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		}
 
 		// this, last value is the one that gets used for the pre- pedestals
-		u_short val = (u_short) ped->ped[0] ;
+		uint16_t val = (uint16_t) ped->ped[0] ;
 		*ptr++ = val ;
 		if((row==42)&&(pad==140)) {
 			//LOG(TERR,"%d,%d = %d",t,tcou,val) ;
@@ -412,7 +412,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		// THIS is how it was done pre-FY11
 		// follow with pre-trigger pedestals
 		for(t=0;t<15;t++) {
-			*ptr++ = (u_short) ped->ped[t] ;
+			*ptr++ = (uint16_t) ped->ped[t] ;
 			tcou++ ;
 		}
 #endif
@@ -438,7 +438,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		// need to be even
 		if(tcou & 1) {
 			LOG(WARN,"tcou %d is odd, adding ped of tb %d?",tcou,t) ;
-			*ptr++ = (u_short) ped->ped[0]; // was ped[t]; then ped[0]
+			*ptr++ = (uint16_t) ped->ped[0]; // was ped[t]; then ped[0]
 			tcou++ ;
 		}
 
@@ -501,31 +501,31 @@ int tpxPed::to_evb(char *buff)
 
 	rbuff += h_bytes ;
 
-	u_short *addr = (u_short *) rbuff ;
+	uint16_t *addr = (uint16_t *) rbuff ;
 
 	for(r=0;r<=45;r++) {
 		for(p=1;p<=tpc_rowlen[r];p++) {
 			struct peds *ped = get(rl0,r, p) ;
 			if(ped==0) continue ;
 
-			addr = (u_short *) rbuff ;	// remember address
+			addr = (uint16_t *) rbuff ;	// remember address
 			*(addr+1) = (r<<8) | p ;	// row/pad
 			
-			u_short *ptr = addr + 2;	// read to store
+			uint16_t *ptr = addr + 2;	// read to store
 
 			for(t=0;t<512;t++) {
 				double rms = (ped->rms[t] * 16.0) ;
-				u_short val ;
+				uint16_t val ;
 
-				if((u_short)rms > 0x3F) val = 0x3F ;
-				else val = (u_short) rms ;
+				if((uint16_t)rms > 0x3F) val = 0x3F ;
+				else val = (uint16_t) rms ;
 				
 				// sanity check!
 				if(ped->ped[t] == 0) {
 					LOG(WARN,"WTF? ped 0 in rp %d:%d, tb %d",r,p,t) ;
 				}
 
-				*ptr++ = (val << 10) | (u_short)ped->ped[t] ;
+				*ptr++ = (val << 10) | (uint16_t)ped->ped[t] ;
 			}
 
 			*addr = t ;	// unsert count at the first short
@@ -543,7 +543,7 @@ int tpxPed::to_evb(char *buff)
 	return (rbuff-buff) ;
 }
 
-int tpxPed::from_cache(char *fname, u_int rb_msk) 
+int tpxPed::from_cache(char *fname, uint32_t rb_msk) 
 {
 	FILE *f ;
 	char fn[64]  ;
@@ -623,7 +623,7 @@ int tpxPed::from_cache(char *fname, u_int rb_msk)
 	return valid ;
 }
 
-int tpxPed::to_cache(char *fname, u_int run)
+int tpxPed::to_cache(char *fname, uint32_t run)
 {
 	FILE *f, *f_sum ;
 	int r, p, t ;
@@ -719,7 +719,7 @@ int tpxPed::to_cache(char *fname, u_int run)
 		f_sum = 0 ;
 #if 0
 		if(run==0) {
-			sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_r%d_%u_%d.txt",s_real,r_real,(u_int)time(NULL),clock_source) ;
+			sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_r%d_%u_%d.txt",s_real,r_real,(uint32_t)time(NULL),clock_source) ;
 		}
 		else {
 			sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_r%d_%08u_%d.txt",s_real,r_real,run,clock_source) ;
@@ -1043,7 +1043,7 @@ void tpxPed::smooth()
 		
 		// finally, we need to round off correctly!
 		for(t=0;t<512;t++) {
-			ped->ped[t] = (double) ((u_short) (smoother[t]+0.5)) ;	
+			ped->ped[t] = (double) ((uint16_t) (smoother[t]+0.5)) ;	
 		}
 
 

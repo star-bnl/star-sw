@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "fcs_trg_base.h"
@@ -16,8 +16,8 @@
 void  fcs_trg_base::stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[])
 {    
     static int first=0;
-    static u_int ETbTdep[4][4]; //DEP#
-    static u_int ETbTadr[4][4]; //Input Link data address
+    static uint32_t ETbTdep[4][4]; //DEP#
+    static uint32_t ETbTadr[4][4]; //Input Link data address
     if(first==0){
 	first=1;
 	//making map of 2x2 Ecal Sums of [4][4]
@@ -33,17 +33,17 @@ void  fcs_trg_base::stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], 
     }
     
     //compute hcal 4x4 sum -- note d[1,3,5,7] are not used at the stage-1 DEP
-    u_int hsum=hcal[0].d[0]+hcal[0].d[2]+hcal[0].d[4]+hcal[0].d[6];
+    uint32_t hsum=hcal[0].d[0]+hcal[0].d[2]+hcal[0].d[4]+hcal[0].d[6];
     if(fcs_trgDebug>=2) printf("Hcal sum=%5d\n",hsum);
     
     //compute ecal 4x4 sums of [3][3]
-    u_int esum[3][3];
+    uint32_t esum[3][3];
     float ratio[3][3];
-    u_int EM1 =0, EM2 =0;
-    u_int GAM1=0, GAM2=0;
-    u_int ELE1=0, ELE2=0;
-    u_int HAD1=0, HAD2=0;
-    u_int JP1 =0, JP2 =0;
+    uint32_t EM1 =0, EM2 =0;
+    uint32_t GAM1=0, GAM2=0;
+    uint32_t ELE1=0, ELE2=0;
+    uint32_t HAD1=0, HAD2=0;
+    uint32_t JP1 =0, JP2 =0;
     for(int r=0; r<3; r++){
 	if(fcs_trgDebug>=2) printf("E4x4 ");
 	for(int c=0; c<3; c++){
@@ -57,8 +57,8 @@ void  fcs_trg_base::stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], 
 //	    if(esum[r][c] > 0xff) esum[r][c]=0xff;
 	    
 	    //in VHDL we will do hsum > esum * threshold. Ratio is for human only
-	    u_int h=hsum; //find closest hcal but 4x4... but we have only 1 in run19
-	    u_int sum = esum[r][c] + h;
+	    uint32_t h=hsum; //find closest hcal but 4x4... but we have only 1 in run19
+	    uint32_t sum = esum[r][c] + h;
 	    if(sum==0) {
 		ratio[r][c]=0.0;
 	    }else{
@@ -68,7 +68,7 @@ void  fcs_trg_base::stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], 
 
 	    // integer multiplication as in VHDL!
 	    // ratio thresholds are in fixed point integer where 1.0==128
-	    u_int h128 = h*128 ;
+	    uint32_t h128 = h*128 ;
 
 	    if(h128 < esum[r][c] * EM_HERATIO_THR){
 
@@ -96,12 +96,12 @@ void  fcs_trg_base::stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], 
     }
     
     //Ecal total sum    
-    u_int etot;
+    uint32_t etot;
     etot= esum[ 0][0]+esum[ 0][2]
 	+ esum[ 2][0]+esum[ 2][2];
     
     //Jet sum
-    u_int jet = hsum + etot;
+    uint32_t jet = hsum + etot;
     if(etot > JETTHR1) JP1 = 1; //ecal only (pi0 trigger)
     if(jet  > JETTHR2) JP2 = 1; //ecal+hcal
     

@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 #include <arpa/inet.h>
@@ -110,7 +110,7 @@ static int run_number ;
 static int print_mode ;
 
 //trigger related globals
-u_int rcc_timestamp ;
+uint32_t rcc_timestamp ;
 
 
 
@@ -120,7 +120,7 @@ extern int *tpx_altro_to_row_override ;
 
 
 //static double det_raw_bytes[6] ;
-//static u_int det_events ;
+//static uint32_t det_events ;
 
 
 static class daqReader *evp = 0 ;			// tha main guy
@@ -338,7 +338,7 @@ int main(int argc, char *argv[])
 					tof_t *tof = (tof_t *)dd->Void ;
 					for(int r=0;r<4;r++) {
 						printf("TOF RDO %d: words %d:\n",r+1,tof->ddl_words[r]) ;
-						for(u_int i=0;i<tof->ddl_words[r];i++) {
+						for(uint32_t i=0;i<tof->ddl_words[r];i++) {
 							printf("\t%d: 0x%08X [%u dec]\n",i,tof->ddl[r][i],tof->ddl[r][i]) ;
 						}
 					}
@@ -474,7 +474,7 @@ static int trg_doer(daqReader *rdr, const char  *do_print)
 			found = 1 ;
 
 
-			u_char *trg_raw = dd->Byte;
+			uint8_t *trg_raw = dd->Byte;
 		
 			TriggerDataBlk *trg = (TriggerDataBlk *)dd->Byte;
 
@@ -503,7 +503,7 @@ static int trg_doer(daqReader *rdr, const char  *do_print)
 				printf("Trigger: raw bank has %d bytes: ver 0x%02X, desc %d, len %d\n",dd->ncontent,desc->ver, desc->evt_desc, desc->len) ;
 
 				// dump first 10 ints...
-				u_int *i32 = (u_int *) trg_raw ;
+				uint32_t *i32 = (uint32_t *) trg_raw ;
 				for(int i=0;i<10;i++) {
 					printf("Trigger: word %d: 0x%08X\n",i,i32[i]) ;
 				}
@@ -620,9 +620,9 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 	int cld_found = 0 ;
 	int ped_found = 0 ;
 	char s_mask[24] ;
-	u_int tot_pixels = 0 ;
+	uint32_t tot_pixels = 0 ;
 	daq_dta *dd ;
-	u_int sec_cou[24] ;
+	uint32_t sec_cou[24] ;
 
 	memset(sec_cou,0,sizeof(sec_cou)) ;
 
@@ -684,7 +684,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				int last_tb = -1 ;
 				int first_i = 0 ;
 
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 					int tb = dd->adc[i].tb ;
 					int adc = dd->adc[i].adc ;
 
@@ -704,7 +704,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 						}
 						else {
 							if(seq>=5 && (dd->adc[first_i].tb<30)) {
-								for(u_int j=first_i;j<i;j++) {
+								for(uint32_t j=first_i;j<i;j++) {
 									//printf("%d %d %d %d %d\n",good,dd->row,dd->pad,dd->adc[j].tb,dd->adc[j].adc) ;
 								}
 							}
@@ -713,7 +713,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 					}
 					else {
 						if(seq>=5 && (dd->adc[first_i].tb<30)) {
-							for(u_int j=first_i;j<i;j++) {
+							for(uint32_t j=first_i;j<i;j++) {
 								//printf("%d %d %d %d %d\n",good,dd->row,dd->pad,dd->adc[j].tb,dd->adc[j].adc) ;
 							}
 						}
@@ -725,7 +725,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				}
 
 #if 1			
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 					if(do_print) {
 						printf("%d %d %d %d %d\n",dd->sec,dd->row,dd->pad,dd->adc[i].tb,dd->adc[i].adc) ;
 						//printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
@@ -784,7 +784,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 			
 			tot_pixels += dd->ncontent ;
 
-			for(u_int i=0;i<dd->ncontent;i++) {
+			for(uint32_t i=0;i<dd->ncontent;i++) {
 				if(do_print) {
 					int p1,p2,t1,t2 ;
 					int bad = 0 ;
@@ -838,7 +838,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 			if(do_print) {
 				printf("TPX: sec %02d, row %2d, pad %3d (%d pix)\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				daq_det_pedrms *ped = (daq_det_pedrms *)dd->Void ;
-				for(u_int tb=0;tb<dd->ncontent;tb++) {
+				for(uint32_t tb=0;tb<dd->ncontent;tb++) {
 					printf("  tb %3d: ped %3d, rms %.2f\n",tb,ped[tb].ped,ped[tb].rms) ;
 				}
 			}
@@ -1233,13 +1233,13 @@ static int btow_doer(daqReader *rdr, const char *do_print)
 	dd = rdr->det("btow")->get("raw") ;
 	if(dd) {
 		while(dd->iterate()) {
-			u_short *s16 = (u_short *) dd->Void ;
+			uint16_t *s16 = (uint16_t *) dd->Void ;
 
 			if(do_print) {
 				printf("BTOW: bytes %d\n",dd->ncontent) ;
 			}
 
-			for(u_int i=0;i<dd->ncontent/2;i++) {
+			for(uint32_t i=0;i<dd->ncontent/2;i++) {
 				if(do_print) {
 					printf("%d: 0x%04X [%d dec]\n",i,s16[i],s16[i]) ;	
 				}
@@ -1318,7 +1318,7 @@ static int pp2pp_doer(daqReader *rdr, const char *do_print)
 			if(do_print) {
 				printf("PP2PP: RAW: sector %d, RDO %d, bytes %d\n",dd->sec,dd->rdo,dd->ncontent) ;
 
-				u_int *d32 = (u_int *)dd->Void ;
+				uint32_t *d32 = (uint32_t *)dd->Void ;
 				for(int i=0;i<16;i++) {
 					printf("   %2d: 0x%08X\n",i,d32[i]) ;
 
@@ -1437,7 +1437,7 @@ static int l3_doer(daqReader *rdr, const char *do_print)
 				       l3_p->xVertex, l3_p->yVertex, l3_p->xVertex) ;
 
 
-				for(u_int i=0;i<l3_p->tracks_num;i++) {
+				for(uint32_t i=0;i<l3_p->tracks_num;i++) {
 					// just an example of what one would print out...
 					printf("  track %d: Pt %f, charge %d, nHits %d\n",i+1, 
 					       l3_p->track[i].pt, l3_p->track[i].q, l3_p->track[i].nHits) ;
@@ -1487,7 +1487,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 			found |= 1 ;
 
 			// point to the start of the DDL raw data
-			u_int *d = (u_int *) dd->Void ;	
+			uint32_t *d = (uint32_t *) dd->Void ;	
 
 
 			if(do_print) {
@@ -1557,7 +1557,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 		if(do_print) {
 			printf("%s ADC: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
-			for(u_int i=0;i<dd->ncontent;i++) {
+			for(uint32_t i=0;i<dd->ncontent;i++) {
 				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
 			}
 		}
@@ -1621,7 +1621,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
 
-		for(u_int i=0;i<dd->ncontent;i++) {
+		for(uint32_t i=0;i<dd->ncontent;i++) {
 			if(f[i].adc > 0) {
 				charge_sum += f[i].adc ;
 			}
@@ -1631,7 +1631,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 		if(do_print) {
 			printf("%s ZS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
-			for(u_int i=0;i<dd->ncontent;i++) {
+			for(uint32_t i=0;i<dd->ncontent;i++) {
 				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
 			}
 		}
@@ -1655,7 +1655,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 			printf("%s PEDRMS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
-			for(u_int i=0;i<dd->ncontent;i++) {
+			for(uint32_t i=0;i<dd->ncontent;i++) {
 				printf("%d %d %2d %3d %2d: %.3f +- %.3f\n",arc,arm,apv,f[i].ch,f[i].tb,f[i].ped,f[i].rms) ;
 			}
 		}
@@ -1698,13 +1698,13 @@ static int mtd_doer(daqReader *rdr, const char *do_print)
 			found = 1 ;
 
 			// point to the start of the DDL raw data
-			u_int *d = (u_int *) dd->Void ;	
+			uint32_t *d = (uint32_t *) dd->Void ;	
 
 
 			if(do_print) {
 				printf("MTD: RDO %d: %d bytes\n",dd->rdo,dd->ncontent) ;
 				
-				for(u_int i=0;i<dd->ncontent/4;i++) {
+				for(uint32_t i=0;i<dd->ncontent/4;i++) {
 					printf(" %2d: 0x%08X\n",i,d[i]) ;
 				}
 			}
@@ -1908,10 +1908,10 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 
 	    printf("l1Dsm offset %d\n",swap32(trg->L1_DSM_ofl.offset)) ;	// should NOT be 0!
 
-	    u_int bc2 = swap16(l1Dsm->BCdata[2]) ;
-            u_int bc7bit = bc2  & 0x7F ;
+	    uint32_t bc2 = swap16(l1Dsm->BCdata[2]) ;
+            uint32_t bc7bit = bc2  & 0x7F ;
 
-	    u_int lastdsm[8] ;
+	    uint32_t lastdsm[8] ;
 
 	    for(int i=0;i<8;i++) {
 
@@ -1925,7 +1925,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    // "Hank's bits". And note the mess...
 	    // On the right, in comments is Hank's name of the bit...
 
-            u_int fcs2019 = (lastdsm[4] >> 10) & 1 ;	// bit 0: REVTICKIN-4
+            uint32_t fcs2019 = (lastdsm[4] >> 10) & 1 ;	// bit 0: REVTICKIN-4
 	    fcs2019 |= ((lastdsm[4] >> 5) & 1) << 1 ;	// bit 1: FCSIN-0
 	    fcs2019 |= ((lastdsm[4] >> 7) & 1) << 2 ;	// bit 2: FCSIN-1	
 	    fcs2019 |= ((lastdsm[4] >> 8) & 1) << 3 ;	// bit 3: FCSIN-2
@@ -1935,12 +1935,12 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    fcs2019 |= ((lastdsm[4] >> 14) & 1) << 7 ;	// bit 7: FCSIN-6
 	    fcs2019 |= ((lastdsm[4] >> 15) & 1) << 8 ;	// bit 8: FCSIN-7 -- never fires?
 
-	    u_int fcs2021 = lastdsm[5] ;
+	    uint32_t fcs2021 = lastdsm[5] ;
 	    printf("fcs2021 0x%04X\n",fcs2021) ;
 
-	    u_int fcs_main_2022 = lastdsm[2] ;
-	    u_int fcs_north_2022 = lastdsm[5] & 0xFF ;
-	    u_int fcs_south_2022 = lastdsm[5] >> 8 ;
+	    uint32_t fcs_main_2022 = lastdsm[2] ;
+	    uint32_t fcs_north_2022 = lastdsm[5] & 0xFF ;
+	    uint32_t fcs_south_2022 = lastdsm[5] >> 8 ;
 
 	    printf("fcs_2022: main 0x%04X, north 0x%02X, south 0x%02X\n",fcs_main_2022,fcs_north_2022,fcs_south_2022) ;
 
@@ -2000,7 +2000,7 @@ static int pxl_doer(daqReader *rdr, const char *do_print)
 			found = 1 ;
 
 			// point to the start of the DDL raw data
-			u_int *d = (u_int *) dd->Void ;	
+			uint32_t *d = (uint32_t *) dd->Void ;	
 
 
 			if(do_print) {
@@ -2039,7 +2039,7 @@ static int sst_doer(daqReader *rdr, const char *do_print)
 			found |= 1 ;
 
 			// point to the start of the DDL raw data
-			u_int *d = (u_int *) dd->Void ;	
+			uint32_t *d = (uint32_t *) dd->Void ;	
 
 
 			if(do_print) {
@@ -2070,7 +2070,7 @@ static int sst_doer(daqReader *rdr, const char *do_print)
 
 				printf("SST ADC: Sector %d, RDO %d, fiber %d: %d ADCs\n",dd->sec,dd->rdo,dd->pad,dd->ncontent) ;
 			
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 					printf("   Strip %3d, hybrid %2d: %4d\n",sst[i].strip,sst[i].hybrid,sst[i].adc) ;
 				}
 			}
@@ -2090,7 +2090,7 @@ static int sst_doer(daqReader *rdr, const char *do_print)
 
 				printf("SST PEDRMS: Sector %d, RDO %d, fiber %d: %d vals\n",dd->sec,dd->rdo,dd->pad,dd->ncontent) ;
 			
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 					for(int h=0;h<SST_HYBRID_COU;h++) {
 					for(int s=0;s<SST_STRIP_COU;s++) {
 						printf("     ped %d, rms %.3f\n",sst->ped[h][s],(float)sst->rms[h][s]/16.0) ;
@@ -2222,7 +2222,7 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 
 				int sum = 0 ;
 
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 					sum += a[i].adc ;
 				}
 				
@@ -2240,21 +2240,21 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 				stp *= 1000000.0 ;
 
 				//time at the end of the full event readout
-				double readout = ((double) (u_int) hdr->delta) * 1024.0 ;
+				double readout = ((double) (uint32_t) hdr->delta) * 1024.0 ;
 
 				readout /= cpu_clock ;
 				readout *= 1000000.0 ;
 			
-				double just_readout = ((double)(u_int) hdr->reserved[0]) * 1024.0 ;
+				double just_readout = ((double)(uint32_t) hdr->reserved[0]) * 1024.0 ;
 				just_readout /= cpu_clock ;
 				just_readout *= 1000000.0 ;
 
-				u_int rcc_tick = hdr->reserved[1] ;
+				uint32_t rcc_tick = hdr->reserved[1] ;
 
 				printf("FPS Sector %d META: time of STP-arrival %.1f us, time of End-of-Readout %.1f us (delta %.1f us, just readout %.1f us), RCC tick %u, RCC delta %d\n",
 				       dd->sec,stp, readout, readout-stp, readout-just_readout, rcc_tick, rcc_tick-rcc_timestamp) ;
 
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 					printf("    ch %2d: ADC %4d, TDC %2d\n",a[i].ch, a[i].adc, a[i].tdc) ;
 				}				
 		
@@ -2358,10 +2358,10 @@ static int etof_doer(daqReader *rdr, const char *do_print)
 			if(do_print) {
 				printf("ETOF: %d bytes\n",dd->ncontent) ;
 
-				u_int words = dd->ncontent/4 ;
+				uint32_t words = dd->ncontent/4 ;
 				if(words > 16) words = 16 ;
 
-				for(u_int i=0;i<words;i++) {
+				for(uint32_t i=0;i<words;i++) {
 					printf("    %d/%d: 0x%08X\n",i,dd->ncontent/4,dd->Int32[i]) ;
 				}
 			}
@@ -2392,7 +2392,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 	daq_dta *dd ;
 
-	u_char rdos[4] ;
+	uint8_t rdos[4] ;
 
 	memset(rdos,0,sizeof(rdos)) ;
 
@@ -2418,9 +2418,9 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 				if(do_print) {
 					printf("ITPC RAW: sector %2d, RDO %d: %d rawbytes\n",dd->sec,dd->row,dd->ncontent) ;
 
-					//u_int *d32 = (u_int *)dd->Void ;
+					//uint32_t *d32 = (uint32_t *)dd->Void ;
 
-					//for(u_int i=0;i<dd->ncontent/4;i++) {
+					//for(uint32_t i=0;i<dd->ncontent/4;i++) {
 					//	printf("%4d = 0x%08X\n",i,d32[i]) ;
 					//}
 				}
@@ -2451,7 +2451,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 					if(dd->ncontent) printf("ITPC SAMPA: sector %2d, RDO %d, FEE #%02d (padplane %02d), CH %2d: %3d timebins\n",dd->sec,rdo,port,fee_id,ch,dd->ncontent) ;
 
-					for(u_int i=0;i<dd->ncontent;i++) {
+					for(uint32_t i=0;i<dd->ncontent;i++) {
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb,dd->adc[i].adc) ;
 					}
 				}
@@ -2474,14 +2474,14 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 
 
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 				    adctb[dd->adc[i].tb] += dd->adc[i].adc;
 				}
 
 				if(do_print) {
 					if(dd->ncontent) printf("ITPC ADC %d: sector %2d, row %2d, pad %3d: %3d timebins\n",rdr->seq,dd->sec,dd->row,dd->pad,dd->ncontent) ;
 
-					for(u_int i=0;i<dd->ncontent;i++) {
+					for(uint32_t i=0;i<dd->ncontent;i++) {
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb,dd->adc[i].adc) ;
 					
 					}
@@ -2521,7 +2521,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 				if(do_print) {
 					printf("ITPC CLD: sector %2d, row %2d: %3d clusters\n",dd->sec,dd->row,dd->ncontent) ;
 
-					for(u_int i=0;i<dd->ncontent;i++) {
+					for(uint32_t i=0;i<dd->ncontent;i++) {
 						printf("\t%f %d %d %f %d %d %d 0x%X\n", dd->cld[i].pad,dd->cld[i].p1,dd->cld[i].p2,
 						       dd->cld[i].tb,dd->cld[i].t1,dd->cld[i].t2,
 						       dd->cld[i].charge,dd->cld[i].flags) ;
@@ -2561,7 +2561,7 @@ static int itpc_doer(daqReader *rdr, const char *do_print)
 
 			if(do_print) {
 				printf("ITPC: sector %2d, FEE %2d, ch %2d: pixels %3d\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
 				}
 			}
@@ -2694,8 +2694,8 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 			raw_found = 1 ;
 
 			if(do_print) {
-				u_short *d = (u_short *)dd->Void ;
-				for(u_int i=0;i<dd->ncontent/2;i++) {
+				uint16_t *d = (uint16_t *)dd->Void ;
+				for(uint32_t i=0;i<dd->ncontent/2;i++) {
 					printf("%d = 0x%04X\n",i,d[i]) ;
 				}
 			}
@@ -2721,11 +2721,11 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
 				// prints out Sector, RDO, channel
 				printf("FCS ADC %d: S%d:%d [det %d, ns %d, dep %d] ch %d, %d words\n",good,sector,rdo,det,ns,dep,ch,dd->ncontent) ;
-				u_short *d16 = (u_short *)dd->Void ;
+				uint16_t *d16 = (uint16_t *)dd->Void ;
 
-				for(u_int i=0;i<dd->ncontent;i++) {
-					u_int flags = d16[i] >> 12 ;
-					u_int data = d16[i] & 0xFFF ;
+				for(uint32_t i=0;i<dd->ncontent;i++) {
+					uint32_t flags = d16[i] >> 12 ;
+					uint32_t data = d16[i] & 0xFFF ;
 
 					printf(" %5d = 0x%X = %4u\n",i,flags,data) ;
 				}
@@ -2751,7 +2751,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
 				printf("FCS ZS %d: S%d:%d [det %d, ns %d, dep %d] ch %d, %d ADCs\n",good,sector,rdo,det,ns,dep,ch,dd->ncontent) ;
 
-				for(u_int i=0;i<dd->ncontent;i++) {
+				for(uint32_t i=0;i<dd->ncontent;i++) {
 					printf(" TB %5d, flags %d, ADC %4u\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
 				}
 			}
@@ -2808,8 +2808,8 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 			if(do_print) {
 				printf("STGC RAW: sec %02d, RDO %d: bytes %d\n",dd->sec,dd->rdo,dd->ncontent) ;
 				
-				//u_int *d = (u_int *)dd->Void ;
-				//for(u_int i=0;i<dd->ncontent/4;i++) {
+				//uint32_t *d = (uint32_t *)dd->Void ;
+				//for(uint32_t i=0;i<dd->ncontent/4;i++) {
 				//	printf("  %d/%d = 0x%04X\n",i,dd->ncontent/4,d[i]) ;
 				//}
 			}
@@ -2833,7 +2833,7 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 			// there is NO RDO in the bank
 			printf("STGC ALTRO: evt %d: sec %d, ALTRO %2d(FEE%02d):%02d\n",good,dd->sec,dd->row,dd->row/2,dd->pad) ;
 
-			for(u_int i=0;i<dd->ncontent;i++) {
+			for(uint32_t i=0;i<dd->ncontent;i++) {
 				printf("    %3d %3d\n",dd->adc[i].tb,dd->adc[i].adc) ;
 			}
 		}
@@ -2853,9 +2853,9 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 			printf("STGC VMM: evt %d: sec %d, RDO %d: hits %d\n",good,dd->sec,dd->rdo,dd->ncontent) ;
 
 			struct stgc_vmm_t *vmm = (stgc_vmm_t *)dd->Void ;
-			for(u_int i=0;i<dd->ncontent;i++) {
-				u_char feb = vmm[i].feb_vmm >> 2 ;	// feb [0..5]
-				u_char vm = vmm[i].feb_vmm & 3 ;	// VMM [0..3]
+			for(uint32_t i=0;i<dd->ncontent;i++) {
+				uint8_t feb = vmm[i].feb_vmm >> 2 ;	// feb [0..5]
+				uint8_t vm = vmm[i].feb_vmm & 3 ;	// VMM [0..3]
 
 				printf("  FEB %d:%d [0x%X], ch %02d: ADC %3d, BCID %4d, tb %4d\n",feb,vm,vmm[i].feb_vmm,vmm[i].ch,
 				       vmm[i].adc,vmm[i].bcid,vmm[i].tb) ;

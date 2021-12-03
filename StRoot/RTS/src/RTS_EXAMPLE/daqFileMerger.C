@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 #include <errno.h>

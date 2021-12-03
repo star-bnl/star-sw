@@ -72,7 +72,7 @@ int itpcPed::kill_non_phys()
 
 // sector: 1 to 24
 // rdo: 1 to 4
-void itpcPed::init(int sector, int rdo, u_int mask)
+void itpcPed::init(int sector, int rdo, uint32_t mask)
 {
 	LOG(NOTE,"%s: sector %d, RDO %d, mask 0x%04X",__PRETTY_FUNCTION__,sector,rdo,mask) ;
 
@@ -273,8 +273,8 @@ int itpcPed::from_cache(const char *fname, int sec1, int rdo1)
 
 int itpcPed::sanity(int mode)
 {
-	u_int bad_cou =0 ;
-	u_int good_cou =0 ;
+	uint32_t bad_cou =0 ;
+	uint32_t good_cou =0 ;
 
 	char fname[128] ;
 	sprintf(fname,"/log/itpc/itpc_log_%02d.txt",sector_id) ;
@@ -327,7 +327,7 @@ int itpcPed::sanity(int mode)
 	
 				double m_ped = 0.0 ;
 				double m_rms = 0.0 ;
-				u_int m_cou = 0 ;
+				uint32_t m_cou = 0 ;
 
 				for(int t=0;t<=20;t++) {
 					m_ped += pt->ped[t] ;
@@ -475,7 +475,7 @@ int itpcPed::to_cache(const char *fname, int sec1, int rdo1)
 	
 				double m_ped = 0.0 ;
 				double m_rms = 0.0 ;
-				u_int m_cou = 0 ;
+				uint32_t m_cou = 0 ;
 
 				for(int t=0;t<=20;t++) {
 					m_ped += pt->ped[t] ;

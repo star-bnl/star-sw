@@ -16,7 +16,7 @@
 typedef int bool;
 #endif
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <iccp.h>
 
 #define RCMSGSIZE 120
@@ -35,8 +35,8 @@ enum mask_types {literal=1, bits_on=2, bits_off=3};
 struct rc_daq_connect             // Used to be ConnectorParam
 {                                 // I will separate to DAQ_CONNECT / DAQ_CHASER_CONNECT
   // In all connections
-  u_int fd;
-  u_int addr;            
+  uint32_t fd;
+  uint32_t addr;            
   int connection_seq;             // sequence number for the connection
   int port;                       // The port connect
 };
@@ -210,8 +210,8 @@ struct rc_daq_run_resume
 };
 struct rc_daq_send_config     
 { 
-  u_int port; 
-  u_int handler_id; 
+  uint32_t port; 
+  uint32_t handler_id; 
 };
 struct rc_daq_set_busy        { unsigned int run_number; };
 struct rc_daq_release_busy    { unsigned int run_number; };

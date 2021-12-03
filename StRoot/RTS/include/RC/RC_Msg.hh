@@ -2,7 +2,7 @@
 #define RC_MSG_HEADER
  
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include "iccp.h"
 #include "RC_MsgDefs.h"
@@ -16,7 +16,7 @@ class RcComInfo;
 struct MsgEnvHeader
 {
   RcComInfo *origin;
-  u_int Seq;            // a sequence number - connection_seq
+  uint32_t Seq;            // a sequence number - connection_seq
                         // seq by value! starts out same as from origin
 };
 
@@ -100,9 +100,9 @@ public:
   void Clear(const MsgEnvHeader& env, unsigned char st, 
 	     unsigned char dt, unsigned char cmd=0);
   void Write(FILE* fd);
-  int Rcv(u_int fd, bool handshake=false) ;
-  int Snd(u_int fd, bool handshake=true) ;
-  int SockPeekHeader(u_int fd, u_int timeout);   // Peek at a socket (timeout uSec)
+  int Rcv(uint32_t fd, bool handshake=false) ;
+  int Snd(uint32_t fd, bool handshake=true) ;
+  int SockPeekHeader(uint32_t fd, uint32_t timeout);   // Peek at a socket (timeout uSec)
   void Dump(FILE* fd);
 };
 

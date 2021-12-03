@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -284,7 +284,7 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 	int found_some = 0 ;
 
 	for(int r=r_start;r<=r_stop;r++) {
-		u_short *d ;
+		uint16_t *d ;
 		int bytes ;
 
 		if(rdobuff == 0) {
@@ -297,7 +297,7 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 			if(!full_name) continue ;
 			bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
 
-			d = (u_short *) malloc(bytes) ;
+			d = (uint16_t *) malloc(bytes) ;
 			
 			int ret = caller->sfs->read(str, (char *)d, bytes) ;
 			if(ret != bytes) {
@@ -306,7 +306,7 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 
 		}
 		else {
-			d = (u_short *) rdobuff ;
+			d = (uint16_t *) rdobuff ;
 			bytes = inbytes ;
 		}
 
@@ -501,7 +501,7 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 
 	for(int s=s_start;s<=s_stop;s++) {	
 	for(int r=r_start;r<=r_stop;r++) {
-		u_int *d ;
+		uint32_t *d ;
 
 		if(rdobuff == 0) {
 			daq_dta *dd = handle_raw(s,r) ;
@@ -509,14 +509,14 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 
 			if(dd->iterate() == 0) continue ;
 
-			d = (u_int *) dd->Void ;
+			d = (uint32_t *) dd->Void ;
 			int words = dd->ncontent/4 ;
 
 			if(words <= 0) continue ;
 
 		}
 		else {
-			d = (u_int *) rdobuff ;
+			d = (uint32_t *) rdobuff ;
 		}
 
 
@@ -535,7 +535,7 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 		apv_meta.arc[r].arm_mask = arm_mask ;
 
 
-		u_int *dta = d + 6 ;	// start at the 6th word
+		uint32_t *dta = d + 6 ;	// start at the 6th word
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 			if(arm_mask & (1<<arm)) ;
@@ -549,7 +549,7 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 			int arm_err = (*dta >>16) & 0xf;
 			dta++ ;
 			// word 1
-			u_int apv_mask = *dta & 0x00FFFFFF ;
+			uint32_t apv_mask = *dta & 0x00FFFFFF ;
 			dta++ ;
 			// word 2, would get monitor register values from this word (not implemented yet, still need to skip over of course)
 			dta++ ;
@@ -692,14 +692,14 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 
 				// extract data here...
 
-				u_short *d16 = (u_short *) dta ;
+				uint16_t *d16 = (uint16_t *) dta ;
 
-				u_short wfm[((2047-2)/3)*8] ;       // worst case wfm length (from header max length value 2047)
+				uint16_t wfm[((2047-2)/3)*8] ;       // worst case wfm length (from header max length value 2047)
 				int i = 0 ;
 				
 				// it is important to note, this is specifically for the non-ZS formats, and the length will always be of form 2+3*n
 				for(int j=0;j<((length-2)/3)*2;j++) {
-					u_short wtmp ;
+					uint16_t wtmp ;
 
 					wfm[4*j]	= 0x0fff & d16[i] ;
 
@@ -716,8 +716,8 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 				dta += (length - 2) ;	// skip "length" words - 2 for the header
 
 				/*
-				u_int *o_dta = dta ;
-				dta = (u_int *)(d16 + i) ;
+				uint32_t *o_dta = dta ;
+				dta = (uint32_t *)(d16 + i) ;
 
 				LOG(TERR,"Diff %d",dta-o_dta) ;
 				*/
@@ -779,7 +779,7 @@ daq_dta *daq_fgt::handle_ped(int sec, int rdo)
 	char str[128] ;
 	char *full_name ;
 	int bytes ;
-	u_short *d ;
+	uint16_t *d ;
 
 	sprintf(str,"%s/sec%02d/pedrms",sfs_name, 1) ;
 	full_name = caller->get_sfs_name(str) ;
@@ -793,7 +793,7 @@ daq_dta *daq_fgt::handle_ped(int sec, int rdo)
 
 	LOG(TERR,"bytes %d",bytes) ;
 
-	d = (u_short *) malloc(bytes) ;
+	d = (uint16_t *) malloc(bytes) ;
 			
 	int ret = caller->sfs->read(str, (char *)d, bytes) ;
 	if(ret != bytes) {
@@ -832,8 +832,8 @@ daq_dta *daq_fgt::handle_ped(int sec, int rdo)
 			int cou = 0 ;
 			for(int ch=0;ch<ch_cou;ch++) {
 				for(int t=0;t<tb_cou;t++) {
-					u_short ped = d[ix++] ;
-					u_short rms = d[ix++] ;
+					uint16_t ped = d[ix++] ;
+					uint16_t rms = d[ix++] ;
 
 					f_ped[cou].ch = ch ;
 					f_ped[cou].tb = t ;
@@ -868,12 +868,12 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
 	const int FGT_BYTES_MIN = ((6)*4) ;	// this is the minimum
 	const int FGT_BYTES_MAX = (512*1024) ;
-//	const u_int FGT_VERSION = 0x0034 ;		 
-	const u_int FGT_SIGNATURE = 0x46475420 ;	// "FGT"
+//	const uint32_t FGT_VERSION = 0x0034 ;		 
+	const uint32_t FGT_SIGNATURE = 0x46475420 ;	// "FGT"
 
 	int t_cou = 0 ;
 	int bad = 0 ;
-	u_int *d32 = (u_int *)buff ;
+	uint32_t *d32 = (uint32_t *)buff ;
 	int id_check_failed = 0 ;
 	int last_ix = words - 1 ;
 
@@ -944,15 +944,15 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 #if 0
 #define	 G_CONST  0x04C11DB7 
 
-	u_int crc_in_data = d32[last_ix] ;
-	register u_int crc = 0xFFFFFFFF ;
+	uint32_t crc_in_data = d32[last_ix] ;
+	register uint32_t crc = 0xFFFFFFFF ;
 	if(crc_in_data) {	
 		for(int i=0;i<last_ix;i++) {
-			u_int datum ;
+			uint32_t datum ;
 
 			datum = d32[i] ;
-			register u_int data_j ;
-			register u_int crc_31 ;
+			register uint32_t data_j ;
+			register uint32_t crc_31 ;
 
 			for(register int j=31;j>=0;j--) {
 				data_j = (datum >> j) & 1 ;
@@ -1021,7 +1021,7 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	for(int i=0;i<mesg_length;i++) {
-		u_int trg_data = d32[last_ix - 2 - i] ;
+		uint32_t trg_data = d32[last_ix - 2 - i] ;
 
 		
 		
@@ -1076,8 +1076,8 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		int bad_cou = 0;
 		int shutup = 0 ;
 		for(int i=10;i<2410;i++) {
-			u_int should ;
-			u_int b31, b21, b1, b0 ;
+			uint32_t should ;
+			uint32_t b31, b21, b1, b0 ;
 
 			b31 = (t_data >> 31) & 1 ;
 			b21 = (t_data >> 21) & 1 ;

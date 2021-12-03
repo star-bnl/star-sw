@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,7 +53,7 @@ fgtPed::fgtPed(int rts)
 		break ;
 	case GMT_ID :
 		for(int ar=0;ar<2;ar++) {
-			u_int ap_mask = 0x00F00F ;
+			uint32_t ap_mask = 0x00F00F ;
 			for(int ap=0;ap<24;ap++) {
 				if(ap_mask & (1<<ap)) ;
 				else continue ;
@@ -71,7 +71,7 @@ fgtPed::fgtPed(int rts)
 		for(int r=0;r<2;r++) {
 		for(int ar=0;ar<6;ar++) {
 
-		u_int ap_mask = 0x3FF3FF ;
+		uint32_t ap_mask = 0x3FF3FF ;
 		for(int ap=0;ap<24;ap++) {
 			if(ap_mask & (1<ap)) ;
 			else continue ;
@@ -158,7 +158,7 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 	int all_cou = 0 ;
 
 	short *d16 = (short *) dst ;
-	u_int *d32 = (u_int *)dst ;
+	uint32_t *d32 = (uint32_t *)dst ;
 
 	fgt_stat[rdo1-1].evts++ ;
 	
@@ -264,7 +264,7 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 		break ;
 	}
 
-	u_int *dta_bytes = d32++ ;	// reserve space
+	uint32_t *dta_bytes = d32++ ;	// reserve space
 	*d32++ = meta_bytes ;
 
 	memcpy(d32,&meta_zs,meta_bytes) ;
@@ -295,7 +295,7 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 		*d16++ = (arm << 8) | apv ;
 
 
-		for(u_int i=0;i<dd->ncontent;i++) {
+		for(uint32_t i=0;i<dd->ncontent;i++) {
 			int tb = f[i].tb ;
 			int adc = f[i].adc ;
 
@@ -468,7 +468,7 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 
 		need[arm][apv] |= 4 ;
 
-		for(u_int i=0;i<dd->ncontent;i++) {
+		for(uint32_t i=0;i<dd->ncontent;i++) {
 			int adc ;
 			int ch ;
 			int tb ;
@@ -555,7 +555,7 @@ double fgtPed::do_thresh(double ns, int k, int do_log)
 		ped /= cou ;
 		rms /= cou ;
 
-		p->thr[arm][apv][c] = (u_short) (ped + rms * n_sigma + 0.5) ;
+		p->thr[arm][apv][c] = (uint16_t) (ped + rms * n_sigma + 0.5) ;
 
 		}
 		}
@@ -721,7 +721,7 @@ void fgtPed::calc()
 int fgtPed::to_evb(char *buff)
 {
 	int r, arm, apv, c, t ;
-	u_short *dta = (u_short *) buff ;	
+	uint16_t *dta = (uint16_t *) buff ;	
 
 
 	if(!valid) {
@@ -746,7 +746,7 @@ int fgtPed::to_evb(char *buff)
 		struct peds_t *ped = peds + r ;
 
 		*dta++ = r+1 ;			// ARC, from 1
-		u_short *apv_cou = dta++ ;
+		uint16_t *apv_cou = dta++ ;
 		*apv_cou = 0 ;
 
 		// need to dump the apv_meta_zs_t bank!!!
@@ -763,12 +763,12 @@ int fgtPed::to_evb(char *buff)
 		for(c=0;c<FGT_CH_COU;c++) {
 		for(t=0;t<tb_cou_ped;t++) {
 
-				u_short pp ;
+				uint16_t pp ;
 
-				pp = (u_short)(ped->ped[arm][apv][c][t]*16.0 + 0.5)  ;
+				pp = (uint16_t)(ped->ped[arm][apv][c][t]*16.0 + 0.5)  ;
 				*dta++ = pp;
 
-				pp = (u_short)(ped->rms[arm][apv][c][t]*16.0  + 0.5) ;
+				pp = (uint16_t)(ped->rms[arm][apv][c][t]*16.0  + 0.5) ;
 
 				*dta++ = pp ;
 		}
@@ -902,7 +902,7 @@ int fgtPed::from_cache(char *fname)
 	return valid ;
 }
 
-int fgtPed::to_cache(char *fname, u_int run, int dont_cache)
+int fgtPed::to_cache(char *fname, uint32_t run, int dont_cache)
 {
 	FILE *f ;
 	char f_fname[128] ;

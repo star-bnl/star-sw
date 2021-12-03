@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <assert.h>
 
@@ -188,7 +188,7 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 
 	adc->create(bytes,"adc",rts_id,DAQ_DTA_STRUCT(bsmd_t)) ;
 
-	u_short *data_alloc ;
+	uint16_t *data_alloc ;
 	int malloced_bytes ;
 
 	if(present & DET_PRESENT_DATAP) {
@@ -198,7 +198,7 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 	else {
 		// ZS _could_ be larger than raw by factors of 2!
 		malloced_bytes = (2400+10+3+100)*4   *2 ;
-		data_alloc = (u_short *)malloc(malloced_bytes) ;
+		data_alloc = (uint16_t *)malloc(malloced_bytes) ;
 		assert(data_alloc) ;
 	}
 
@@ -206,13 +206,13 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 	for(int r=start_r;r<=stop_r;r++) {
 		int count ;
 		int version, fiber ;
-		u_short *data ;
+		uint16_t *data ;
 
 		if(bsmd_d.bytes[r-1][1] == 0) continue ;
 
 		if(present & DET_PRESENT_DATAP) {
 
-			data = (u_short *)(bsmd_d.dta[r-1][1]) ;	// move to data start
+			data = (uint16_t *)(bsmd_d.dta[r-1][1]) ;	// move to data start
 		}
 		else {
 			int s_new, r_new ;
@@ -313,7 +313,7 @@ daq_dta *daq_bsmd::handle_ped_rms(int rdo, int is_ped)
 
 	// for SFS based
 	int want_sec[3] = { 0, 0, 0 } ;
-	u_short *pedrms[3] = { 0, 0, 0 } ;
+	uint16_t *pedrms[3] = { 0, 0, 0 } ;
 
 	for(int r=start_r;r<=stop_r;r++) {	
 
@@ -358,7 +358,7 @@ daq_dta *daq_bsmd::handle_ped_rms(int rdo, int is_ped)
 			bytes += l_bytes ;
 
 
-			pedrms[s] = (u_short *) malloc(l_bytes) ;
+			pedrms[s] = (uint16_t *) malloc(l_bytes) ;
 
 			caller->sfs->read(str, (char *)(pedrms[s]), l_bytes) ;
 
@@ -399,12 +399,12 @@ daq_dta *daq_bsmd::handle_ped_rms(int rdo, int is_ped)
 	LOG(DBG,"doing rdos: %d-%d",start_r,stop_r) ;
 
 	for(int r=start_r;r<=stop_r;r++) {
-		u_short *data ;
+		uint16_t *data ;
 
 		if(present & DET_PRESENT_DATAP) {
 			if(bsmd_d.bytes[r-1][2] == 0) continue ;
 
-			data = (u_short *)(bsmd_d.dta[r-1][2]) ;	// move to data start
+			data = (uint16_t *)(bsmd_d.dta[r-1][2]) ;	// move to data start
 		}
 		else {	// SFS
 			int s_new, r_new ;
@@ -509,7 +509,7 @@ daq_dta *daq_bsmd::handle_adc_non_zs(int rdo)
 			
 			LOG(DBG,"Found cap %d",bsmd->cap) ;
 
-			u_short *data = (u_short *)((char *)bsmd_d.dta[r-1][0] + 4 + 256) ;	// move to data start
+			uint16_t *data = (uint16_t *)((char *)bsmd_d.dta[r-1][0] + 4 + 256) ;	// move to data start
 		
 			for(int c=0;c<BSMD_DATSIZE;c++) {
 				bsmd->adc[c] = l2h16(*data++) ;
@@ -537,8 +537,8 @@ daq_dta *daq_bsmd::handle_adc_non_zs(int rdo)
 			if(dd->iterate() == 0) continue ;
 
 
-			u_int *d = (u_int *)dd->Void ;
-			u_int rdo_words = dd->ncontent ;
+			uint32_t *d = (uint32_t *)dd->Void ;
+			uint32_t rdo_words = dd->ncontent ;
 
 			if(rdo_words == 0) continue ;
 
@@ -552,7 +552,7 @@ daq_dta *daq_bsmd::handle_adc_non_zs(int rdo)
 			
 			LOG(DBG,"Found cap %d",bsmd->cap) ;
 
-			u_short *data = (u_short *)(d+10) ;	// move to data start which is 10 words after
+			uint16_t *data = (uint16_t *)(d+10) ;	// move to data start which is 10 words after
 		
 			for(int c=0;c<BSMD_DATSIZE;c++) {
 				bsmd->adc[c] = l2h16(*data++) ;
@@ -695,13 +695,13 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
 	const int BSMD_BYTES_MIN = ((2400+10+3)*4) ;	// this is the minimum
 	const int BSMD_BYTES_MAX = ((2400+10+3+30)*4) ;
-//	const u_int BSMD_VERSION = 0x8035 ;		// Nov 09
-	const u_int BSMD_SIGNATURE = 0x42534D44 ;	// "BSMD"
-	const u_int BSMD_HDR_ID = 5 ;	// by some definiton somewhere...
+//	const uint32_t BSMD_VERSION = 0x8035 ;		// Nov 09
+	const uint32_t BSMD_SIGNATURE = 0x42534D44 ;	// "BSMD"
+	const uint32_t BSMD_HDR_ID = 5 ;	// by some definiton somewhere...
 
 	int t_cou = 0 ;
 	int bad = 0 ;
-	u_int *d32 = (u_int *)buff ;
+	uint32_t *d32 = (uint32_t *)buff ;
 	int id_check_failed = 0 ;
 
 	//HACKINTOSH!
@@ -775,15 +775,15 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 #if 1
 #define	 G_CONST  0x04C11DB7 
 
-	u_int crc_in_data = d32[last_ix] ;
-	register u_int crc = 0xFFFFFFFF ;
+	uint32_t crc_in_data = d32[last_ix] ;
+	register uint32_t crc = 0xFFFFFFFF ;
 	if(crc_in_data) {	
 		for(int i=0;i<last_ix;i++) {
-			u_int datum ;
+			uint32_t datum ;
 
 			datum = d32[i] ;
-			register u_int data_j ;
-			register u_int crc_31 ;
+			register uint32_t data_j ;
+			register uint32_t crc_31 ;
 
 			for(register int j=31;j>=0;j--) {
 				data_j = (datum >> j) & 1 ;
@@ -842,7 +842,7 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	for(int i=0;i<mesg_length;i++) {
-		u_int trg_data = d32[last_ix - 2 - i] ;
+		uint32_t trg_data = d32[last_ix - 2 - i] ;
 
 		
 		
@@ -918,8 +918,8 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		int bad_cou = 0;
 		int shutup = 0 ;
 		for(int i=10;i<2410;i++) {
-			u_int should ;
-			u_int b31, b21, b1, b0 ;
+			uint32_t should ;
+			uint32_t b31, b21, b1, b0 ;
 
 			b31 = (t_data >> 31) & 1 ;
 			b21 = (t_data >> 21) & 1 ;

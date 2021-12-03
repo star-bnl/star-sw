@@ -1,5 +1,5 @@
 #include <assert.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <math.h>
 #include <time.h>
@@ -125,7 +125,7 @@ daq_dta *daq_fcs::handle_ped()
 	// bring in the bacon from the SFS file....
 	assert(caller) ;
 
-	ped->create(1024,"fcs_ped",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	ped->create(1024,"fcs_ped",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 
 
 	for(int s=1;s<=12;s++) {
@@ -189,7 +189,7 @@ daq_dta *daq_fcs::handle_raw()
 		version = 2017 ;
 	}
 
-	raw->create(1024,"fcs_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	raw->create(1024,"fcs_raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 
 
 	for(int s=1;s<=12;s++) {
@@ -239,8 +239,8 @@ daq_dta *daq_fcs::handle_raw()
 daq_dta *daq_fcs::handle_zs()
 {
 	char str[128] ;
-	u_int min_rdo = 1 ;
-	u_int max_rdo = 8 ;
+	uint32_t min_rdo = 1 ;
+	uint32_t max_rdo = 8 ;
 	char *full_name ;
 	int got_any = 0 ;
 //	int bytes = 0 ;
@@ -264,7 +264,7 @@ daq_dta *daq_fcs::handle_zs()
 
 	if(full_name) {
 		char *st, *m_st ;
-		u_short *zs_start ;
+		uint16_t *zs_start ;
 
 		int sec, rdo ;
 		int bytes ;
@@ -276,13 +276,13 @@ daq_dta *daq_fcs::handle_zs()
 		m_st = st = (char *)malloc(bytes) ;
 		caller->sfs->read(full_name,st,bytes) ;
 
-		u_int *zs_int = (u_int *)st ;
+		uint32_t *zs_int = (uint32_t *)st ;
 
 		int bytes_data = zs_int[0] & 0x0FFFFFFF ;
 
 		LOG(NOTE,"zs first 0x%X, bytes data %d",zs_int[0],bytes_data) ;
 
-		zs_start = (u_short *)st ;
+		zs_start = (uint16_t *)st ;
 		for(int j=0;j<16;j++) LOG(DBG,"%d = 0x%04X",j,zs_start[j]) ;
 
 
@@ -295,9 +295,9 @@ daq_dta *daq_fcs::handle_zs()
 		while(bytes_data) {
 
 
-		zs_start = (u_short *)st ;
-		u_short *zs_dta = zs_start ;
-		u_int *zs_int = (u_int *)st ;
+		zs_start = (uint16_t *)st ;
+		uint16_t *zs_dta = zs_start ;
+		uint32_t *zs_int = (uint32_t *)st ;
 
 		LOG(NOTE,"... board_id 0x%08X, shorts %d, bytes_data %d",zs_int[0],zs_int[1],bytes_data) ;
 
@@ -337,7 +337,7 @@ daq_dta *daq_fcs::handle_zs()
 
 //		LOG(TERR,"... 0x%X : 0x%X %d",zs_int[0],sec,rdo) ;
 
-		u_short *zs_end = zs_dta + zs_int[1] ;
+		uint16_t *zs_end = zs_dta + zs_int[1] ;
 
 		zs_dta += 2*2 ;	// to skip the 2 ints
 
@@ -365,7 +365,7 @@ daq_dta *daq_fcs::handle_zs()
 				LOG(DBG,"..... t_start %d, t_cou %d",t_start,t_cou) ;
 
 				for(int t=t_start;t<t_end;t++) {
-					u_short d = *zs_dta++ ;
+					uint16_t d = *zs_dta++ ;
 
 					a_t[a_cou].adc = d ;
 					a_t[a_cou].tb = t ;
@@ -399,7 +399,7 @@ daq_dta *daq_fcs::handle_zs()
 	else return 0 ;
 
 	// OLD stuff, pre FY19
-	for(u_int r=min_rdo;r<=max_rdo;r++) {
+	for(uint32_t r=min_rdo;r<=max_rdo;r++) {
 		int sec, rdo ;
 
 		sprintf(str,"%s/sec01/rdo%d/zs",sfs_name,r) ;
@@ -425,9 +425,9 @@ daq_dta *daq_fcs::handle_zs()
 
 		LOG(DBG,"sfs read succeeded") ;
 
-		u_short *zs_start = (u_short *)st ;
-		u_short *zs_dta = zs_start ;
-		u_int *zs_int = (u_int *)st ;
+		uint16_t *zs_start = (uint16_t *)st ;
+		uint16_t *zs_dta = zs_start ;
+		uint32_t *zs_int = (uint32_t *)st ;
 
 		LOG(NOTE,"... board_id 0x%08X, shorts %d",zs_int[0],zs_int[1]) ;
 
@@ -463,7 +463,7 @@ daq_dta *daq_fcs::handle_zs()
 
 //		LOG(TERR,"... 0x%X : 0x%X %d",zs_int[0],sec,rdo) ;
 
-		u_short *zs_end = zs_dta + zs_int[1] ;
+		uint16_t *zs_end = zs_dta + zs_int[1] ;
 
 		zs_dta += 2*2 ;
 
@@ -488,7 +488,7 @@ daq_dta *daq_fcs::handle_zs()
 				LOG(DBG,"..... t_start %d, t_cou %d",t_start,t_cou) ;
 
 				for(int t=t_start;t<t_end;t++) {
-					u_short d = *zs_dta++ ;
+					uint16_t d = *zs_dta++ ;
 
 					a_t[a_cou].adc = d ;
 					a_t[a_cou].tb = t ;
@@ -523,11 +523,11 @@ daq_dta *daq_fcs::handle_adc()
 
 	if(dta==0) return 0 ;
 
-	adc->create(1000,"adc",rts_id,DAQ_DTA_STRUCT(u_short)) ;
+	adc->create(1000,"adc",rts_id,DAQ_DTA_STRUCT(uint16_t)) ;
 
 	
 	while(dta && dta->iterate()) {
-		u_short *ptr = (u_short *) dta->Void ;
+		uint16_t *ptr = (uint16_t *) dta->Void ;
 		
 		//LOG(TERR,"Hello %d",dta->ncontent) ;
 
@@ -545,7 +545,7 @@ daq_dta *daq_fcs::handle_adc()
 
 			//LOG(TERR,"Request %d",fcs_c.tb_cou) ;
 
-			u_short *at = (u_short *)adc->request(fcs_c.tb_cou) ;
+			uint16_t *at = (uint16_t *)adc->request(fcs_c.tb_cou) ;
 
 			for(int i=0;i<fcs_c.tb_cou;i++) {
 				at[i] = fcs_c.adc[i] ;
@@ -585,9 +585,9 @@ int daq_fcs::get_token(char *addr, int words)
 	return trg[0].t ;
 }
 
-static inline u_int sw16(u_int d)
+static inline uint32_t sw16(uint32_t d)
 {
-        u_int tmp = d ;
+        uint32_t tmp = d ;
 
         d >>= 16 ;
 
@@ -602,10 +602,10 @@ static inline u_int sw16(u_int d)
 int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 {
 	int t_cou = 0 ;
-	u_int *d = (u_int *)addr ;
-	u_short *d16  ;
-	u_int trg_word ;
-	u_int hdr ;
+	uint32_t *d = (uint32_t *)addr ;
+	uint16_t *d16  ;
+	uint32_t trg_word ;
+	uint32_t hdr ;
 
 	int trg_cmd, daq_cmd ;
 	int t_hi, t_mid, t_lo ;
@@ -620,7 +620,7 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	d += 4 ;	// skip GTP header
 
-	d16 = (u_short *)d ;
+	d16 = (uint16_t *)d ;
 
 	if(d[0] != 0xCCCC001C) {
 		LOG(ERR,"%d: comma word 0x%08X bad, words %d",rdo,d[0],words) ;
@@ -681,7 +681,7 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 			else {
 				//LOG(ERR,"%d: token-0 in event HDR 0x%04X: trg_cmd 0x%05X: trg %d, daq %d",rdo,hdr,trg_word,trg_cmd,daq_cmd) ;
 
-				u_short *d16 = (u_short *)d ;
+				uint16_t *d16 = (uint16_t *)d ;
 				for(int i=0;i<16;i++) {
 					LOG(TERR,"... %d = 0x%04X",i,d16[i]) ;
 				}
@@ -706,7 +706,7 @@ int daq_fcs::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 #if 0
-	u_short *d16 = (u_short *)d ;
+	uint16_t *d16 = (uint16_t *)d ;
 	for(int i=0;i<16;i++) {
 		LOG(TERR,"... %d = 0x%04X",i,d16[i]) ;
 	}

@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -152,8 +152,8 @@ daq_dta *daq_pxl::handle_raw(int sec, int rdo)
 int daq_pxl::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
 	int t_cou = 0 ;
-	u_int *d32 = (u_int *)buff ;
-	u_int err = 0 ;
+	uint32_t *d32 = (uint32_t *)buff ;
+	uint32_t err = 0 ;
 	int last_ix = words - 1 ;
 	int token, daq_cmd, trg_cmd ;
 
@@ -197,7 +197,7 @@ int daq_pxl::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	// get other trigger commands...
 	int last_p = last_ix - 1 ;	// at CRC
 
-	//u_int crc = d32[last_p] ;
+	//uint32_t crc = d32[last_p] ;
 
 
 	last_p-- ;	// at end of TCD info

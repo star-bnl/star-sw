@@ -13,7 +13,7 @@
 
 // Modified JML 3/11/99
 // Removed size from template, added to constructor  
-#include <sys/types.h>
+#include <stdint.h>
 template <class T> class sdqueue
 {
 public:
@@ -24,9 +24,9 @@ public:
   int prepend(T* a) ; // beginning of list 
   int first(T* a) ;       // returns (but doesn't remove) first element 
   int get(T* a) ;    // like first, but removes element 
-  u_int entries();   // number of entries in List
+  uint32_t entries();   // number of entries in List
   
-  u_int free()        // returns number of free entries
+  uint32_t free()        // returns number of free entries
   {
     return(max - in) ;
   };  
@@ -39,10 +39,10 @@ public:
 
 private:
   T *store ;     // array of allocated buffers 
-  u_int f ;  // index to first 
-  u_int l  ;
-  u_int in  ;
-  u_int max ; 
+  uint32_t f ;  // index to first 
+  uint32_t l  ;
+  uint32_t in  ;
+  uint32_t max ; 
   int s;
 };
 
@@ -68,7 +68,7 @@ template <class T> void sdqueue<T>::clear()
   l = f = 0 ;
 };
 
-template <class T> u_int sdqueue<T>::entries()
+template <class T> uint32_t sdqueue<T>::entries()
 {
   return(in) ;
 };

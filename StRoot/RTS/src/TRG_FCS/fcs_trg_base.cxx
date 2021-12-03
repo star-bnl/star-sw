@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <rtsLog.h>
@@ -11,42 +11,42 @@
 fcs_trg_base::marker_t fcs_trg_base::marker ;
 
 
-u_int fcs_trg_base::stage_version[4] ;
+uint32_t fcs_trg_base::stage_version[4] ;
 
-u_short fcs_trg_base::stage_params[4][16] ;
+uint16_t fcs_trg_base::stage_params[4][16] ;
 
 ped_gain_t fcs_trg_base::p_g[NS_COU][ADC_DET_COU][DEP_COU][32] ;
-u_short fcs_trg_base::ht_threshold[ADC_DET_COU] ;
+uint16_t fcs_trg_base::ht_threshold[ADC_DET_COU] ;
 
 
 unsigned long long fcs_trg_base::s2_ch_mask[NS_COU] ;
-u_char fcs_trg_base::s2_ch_phase[NS_COU][34] ;
+uint8_t fcs_trg_base::s2_ch_phase[NS_COU][34] ;
 
-u_char fcs_trg_base::s3_ch_mask ;
-u_char fcs_trg_base::s3_ch_phase[4] ;
-u_char fcs_trg_base::s3_out_phase ;
+uint8_t fcs_trg_base::s3_ch_mask ;
+uint8_t fcs_trg_base::s3_ch_phase[4] ;
+uint8_t fcs_trg_base::s3_out_phase ;
 
 int fcs_trg_base::fcs_trgDebug ;
 int fcs_trg_base::fcs_readPresMaskFromText;
-u_int fcs_trg_base::PRES_MASK[15][9][6];
+uint32_t fcs_trg_base::PRES_MASK[15][9][6];
 
-u_short        fcs_trg_base::EM_HERATIO_THR ;
-u_short        fcs_trg_base::HAD_HERATIO_THR ;
-u_short        fcs_trg_base::EMTHR1 ;
-u_short        fcs_trg_base::EMTHR2 ;
-u_short        fcs_trg_base::EMTHR3 ;
-u_short        fcs_trg_base::HADTHR1 ;
-u_short        fcs_trg_base::HADTHR2 ;
-u_short        fcs_trg_base::HADTHR3 ;
-u_short        fcs_trg_base::JETTHR1 ;
-u_short        fcs_trg_base::JETTHR2 ;
-u_short        fcs_trg_base::ETOTTHR ;
-u_short        fcs_trg_base::HTOTTHR ;
-u_short        fcs_trg_base::EHTTHR ;
-u_short        fcs_trg_base::HHTTHR ;
-u_short        fcs_trg_base::PHTTHR ;
+uint16_t        fcs_trg_base::EM_HERATIO_THR ;
+uint16_t        fcs_trg_base::HAD_HERATIO_THR ;
+uint16_t        fcs_trg_base::EMTHR1 ;
+uint16_t        fcs_trg_base::EMTHR2 ;
+uint16_t        fcs_trg_base::EMTHR3 ;
+uint16_t        fcs_trg_base::HADTHR1 ;
+uint16_t        fcs_trg_base::HADTHR2 ;
+uint16_t        fcs_trg_base::HADTHR3 ;
+uint16_t        fcs_trg_base::JETTHR1 ;
+uint16_t        fcs_trg_base::JETTHR2 ;
+uint16_t        fcs_trg_base::ETOTTHR ;
+uint16_t        fcs_trg_base::HTOTTHR ;
+uint16_t        fcs_trg_base::EHTTHR ;
+uint16_t        fcs_trg_base::HHTTHR ;
+uint16_t        fcs_trg_base::PHTTHR ;
 
-u_int fcs_trg_base::data_format ;
+uint32_t fcs_trg_base::data_format ;
 
 
 
@@ -71,7 +71,7 @@ fcs_trg_base::~fcs_trg_base()
 //	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
 }
 
-u_int fcs_trg_base::get_version()
+uint32_t fcs_trg_base::get_version()
 {
 	return 0x21000000 ;	//YY,MM,DD,HH in BCD;	0 for base class
 } ;
@@ -152,14 +152,14 @@ void fcs_trg_base::init(const char* fname)
 		if(sec<0 || rdo<0) continue ;	// protection against bad load
 
 		for(int c=0;c<32;c++) {
-			u_short p = fcs_data_c::ped[sec][rdo].i_ped[c] ;
-			u_short g = fcs_data_c::ped[sec][rdo].i_gain[c] ;
+			uint16_t p = fcs_data_c::ped[sec][rdo].i_ped[c] ;
+			uint16_t g = fcs_data_c::ped[sec][rdo].i_gain[c] ;
 
 			if(p && log_level>5 && c==0) {	// just a sample, to check sanity
 				LOG(TERR,"S%d:%d: %d:%d:%d: ch %d = i_ped %d, i_gain %d",sec+1,rdo+1,j,i,k,c,p,g) ;
 			}
 			
-			//u_int mask = fcs_data_c::rdo_map[sec][rdo].ch_mask & 0xFFFFFFFFll ;
+			//uint32_t mask = fcs_data_c::rdo_map[sec][rdo].ch_mask & 0xFFFFFFFFll ;
 		
 		
 			p_g[i][j][k][c].gain = fcs_data_c::ped[sec][rdo].i_gain[c] ;
@@ -231,7 +231,7 @@ void fcs_trg_base::init(const char* fname)
 }
 
 
-void fcs_trg_base::run_start(u_int run)
+void fcs_trg_base::run_start(uint32_t run)
 {
 	run_number = run ;
 	evts = 0 ;
@@ -269,7 +269,7 @@ void fcs_trg_base::start_event()
 } ;
 
 
-void fcs_trg_base::fill_event(int det, int ns, int dep, int c, u_short *d16, int t_cou) 
+void fcs_trg_base::fill_event(int det, int ns, int dep, int c, uint16_t *d16, int t_cou) 
 {
 
 	if(t_cou) {
@@ -794,7 +794,7 @@ int fcs_trg_base::verify_event_sim(int xing)
 		}
 
 		if(want_log && log_level>0) {
-			u_int s1_bits = 0 ;
+			uint32_t s1_bits = 0 ;
 			for(int c=0;c<32;c++) {
 				int sum = 0 ;
 				for(int t=0;t<8;t++) {
@@ -930,7 +930,7 @@ int fcs_trg_base::verify_event_sim(int xing)
 // type==0 if we only want to compare data from actual DAQ files
 // type==1 if this is a GEANT simulation and there are no actual DEP boards
 
-u_short fcs_trg_base::run_event_sim(int xing, int type) 
+uint16_t fcs_trg_base::run_event_sim(int xing, int type) 
 {
 	geom_t geo ;
 
@@ -955,7 +955,7 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 			            if(tb_cou[i][j][k]==0) continue ;	// this DEP/ADC wasn't filled
 				//}
 
-				u_int s0_to_s1[32] ;
+				uint32_t s0_to_s1[32] ;
 
 				geo.dep = k ;
 
@@ -964,7 +964,7 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 				for(int c=0;c<32;c++) {	// channel
 					geo.ch = c ;
 
-					u_int res ;
+					uint32_t res ;
 
 					stage_0(d_in[xing].s1[i][j][k].adc[c],geo,&(p_g[i][j][k][c]),&res) ;
 
@@ -1056,7 +1056,7 @@ u_short fcs_trg_base::run_event_sim(int xing, int type)
 
 
 
-void fcs_trg_base::stage_0(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *dta_out)
+void fcs_trg_base::stage_0(adc_tick_t adc, geom_t geo, ped_gain_t *pg, uint32_t *dta_out)
 {
 	switch(stage_version[0]) {
 	case 0 :
@@ -1077,7 +1077,7 @@ void fcs_trg_base::stage_0(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *dt
 
 
 
-void fcs_trg_base::stage_1(u_int s0[], geom_t geo, link_t *output) 
+void fcs_trg_base::stage_1(uint32_t s0[], geom_t geo, link_t *output) 
 {
 
 	switch(stage_version[1]) {
@@ -1127,7 +1127,7 @@ void fcs_trg_base::stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t g
 
 
 // VERSION 0x0
-void fcs_trg_base::stage_3(link_t link[4], u_short *dsm_out) 
+void fcs_trg_base::stage_3(link_t link[4], uint16_t *dsm_out) 
 {
 
 	switch(stage_version[3]) {

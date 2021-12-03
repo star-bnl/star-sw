@@ -1,5 +1,5 @@
 #include <assert.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 
 #include <rtsLog.h>
@@ -12,7 +12,7 @@
 
 #include "daq_tof.h"
 
-extern int tof_reader(char *mem, struct tof_t *tof, u_int driver) ;
+extern int tof_reader(char *mem, struct tof_t *tof, uint32_t driver) ;
 
 
 
@@ -124,9 +124,9 @@ daq_dta *daq_tof::handle_legacy()
 		for(int r=1;r<=4;r++) {
 			daq_dta *dd = handle_raw(0,r) ;
 			if(dd && dd->iterate()) {
-				u_int *tmp = (u_int *)dd->Void ;
+				uint32_t *tmp = (uint32_t *)dd->Void ;
 
-				u_int words = dd->ncontent/4 ;	// tof wants words...
+				uint32_t words = dd->ncontent/4 ;	// tof wants words...
 
 				LOG(DBG,"TOF: RDO %d: bytes %d (max %d)",r,dd->ncontent,sizeof(tof_p->ddl[0])) ;
 
@@ -141,7 +141,7 @@ daq_dta *daq_tof::handle_legacy()
 				tof_p->ddl_words[r-1] = words ;
 
 				
-				for(u_int i=0;i<words;i++) {	//words!
+				for(uint32_t i=0;i<words;i++) {	//words!
 					tof_p->ddl[r-1][i] = l2h32(*tmp) ;
 					tmp++ ;
 				}
@@ -167,7 +167,7 @@ daq_dta *daq_tof::handle_raw(int sec, int rdo)
 	struct {
 		int sec ;
 		int rb ;
-		u_int bytes ;
+		uint32_t bytes ;
 	} obj[MAX_SEC*MAX_RDO] ;
 
 	// sanity
@@ -219,7 +219,7 @@ daq_dta *daq_tof::handle_raw(int sec, int rdo)
 	}
 	}
 
-	raw->create(tot_bytes,"tof_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	raw->create(tot_bytes,"tof_raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 
 	for(int i=0;i<o_cou;i++) {
 
@@ -267,7 +267,7 @@ int daq_tof::get_token(char *addr, int words)
 // knows how to get a/the L2 command out of the event...
 int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 {
-	u_int *w ;
+	uint32_t *w ;
 	int cou = 0 ;
 	int t_cou = 0 ;
 	int in_words = words ;
@@ -275,7 +275,7 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	int err = 0 ;
 	int trg_start = -1 ;
 
-	w = (u_int *)addr ;
+	w = (uint32_t *)addr ;
 	words-- ;	// point to last datum now...
 
 	// this will be DBG...

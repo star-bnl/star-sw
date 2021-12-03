@@ -88,7 +88,7 @@ int EventTracker::trackTPC(daqReader *rdr, char *mem, L3_GTD *gtd, int max_size)
 }
 
 
-int EventTracker::gl3Event_to_GTD(L3_GTD *gtd,  u_int max_size)
+int EventTracker::gl3Event_to_GTD(L3_GTD *gtd,  uint32_t max_size)
 {
   // Build GTD...
   memcpy(gtd->bh.bank_type, CHAR_L3_GTD, 8);
@@ -166,7 +166,7 @@ void EventTracker::dumpGTD(L3_GTD *gtd)
   printf("Computed:   Tracks: %5d:    Vertex: (%6.2f/%6.2f/%6.2f)\n",
 	 gtd->nTracks,gtd->xVert, gtd->yVert, gtd->zVert);
   
-  for(u_int i=0;i<gtd->nTracks;i++) {
+  for(uint32_t i=0;i<gtd->nTracks;i++) {
     global_track *track = &(gtd->track[i]);
     
     

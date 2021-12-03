@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <rtsLog.h>
@@ -9,7 +9,7 @@
 
 #include "daq_ftp.h"
 
-extern int ftp_reader(char *m, struct ftp_t *ftp, u_int driver) ;
+extern int ftp_reader(char *m, struct ftp_t *ftp, uint32_t driver) ;
 
 const char *daq_ftp::help_string = "FTP tst\n" ;
 

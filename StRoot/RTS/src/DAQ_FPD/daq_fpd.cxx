@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <rtsLog.h>
@@ -10,7 +10,7 @@
 #include "daq_fpd.h"
 
 
-extern int fpd_reader(char *m, struct fpd_t *fpd, u_int driver) ;
+extern int fpd_reader(char *m, struct fpd_t *fpd, uint32_t driver) ;
 
 const char *daq_fpd::help_string = "FPD tst\n" ;
 

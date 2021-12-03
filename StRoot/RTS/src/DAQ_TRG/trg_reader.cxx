@@ -50,7 +50,7 @@ char *trg_find_raw(char *m, int *bytes)
 
 	LOG(DBG,"Trg raw len %d (0x%x), off %d(0x%x)",len,len,off,off,0) ;
 
-	trgp = (struct TRGP *)((u_int *) m + off) ;
+	trgp = (struct TRGP *)((uint32_t *) m + off) ;
 	if(checkBank(trgp->bh.bank_type,"TRGP") < 0) {	// wrong bank!
 		return 0 ;				
 	}
@@ -64,7 +64,7 @@ char *trg_find_raw(char *m, int *bytes)
 
 	off = qswap32(swapit, trgp->trgData.off);
 	
-	trgd = (struct TRGD *) ((u_int *)trgp + off) ;
+	trgd = (struct TRGD *) ((uint32_t *)trgp + off) ;
 
 
 	swapit = 0 ;
@@ -88,7 +88,7 @@ char *trg_find_raw(char *m, int *bytes)
 }	
 
 // read the Trigger RAW data
-int trg_reader(char *m, struct trg_t *trg, u_int driver, u_int evp_daqbits)
+int trg_reader(char *m, struct trg_t *trg, uint32_t driver, uint32_t evp_daqbits)
 {
 	struct TRGP *trgp  ;
 	struct TRGD *trgd ;
@@ -128,7 +128,7 @@ int trg_reader(char *m, struct trg_t *trg, u_int driver, u_int evp_daqbits)
 
 	LOG(DBG,"Trg raw len %d (0x%x), off %d(0x%x)",len,len,off,off,0) ;
 
-	trgp = (struct TRGP *)((u_int *)m+off) ;
+	trgp = (struct TRGP *)((uint32_t *)m+off) ;
 	if(checkBank(trgp->bh.bank_type,"TRGP") < 0) {	// wrong bank!
 		return 0 ;				
 	}
@@ -196,9 +196,9 @@ int trg_reader(char *m, struct trg_t *trg, u_int driver, u_int evp_daqbits)
 	if(qswap32(swaptrgd, trgd->bh.length) == 10) return 0 ;	// no trigger data - just bh
 
 	
-	trg->trgc = (u_char *) trgd ;
+	trg->trgc = (uint8_t *) trgd ;
 
-	u_char trg_version = trgd->desc.TrgDataFmtVer ;
+	uint8_t trg_version = trgd->desc.TrgDataFmtVer ;
 
 
 	switch(trg_version) {

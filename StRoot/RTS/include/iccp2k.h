@@ -1,13 +1,10 @@
 #ifndef _ICCP2K_H_
 #define _ICCP2K_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <daqFormats.h>
 // Event Flag Definition
 
-typedef unsigned int u_int;
-typedef unsigned short u_short;
-typedef unsigned char u_char;
 typedef unsigned long long int UINT64;
 
 #define CMD2_PING     0x01
@@ -44,31 +41,31 @@ typedef unsigned long long int UINT64;
 
 //#ifdef RTS_LITTLE_ENDIAN
 struct iccp2k {   
-  u_int words;        // words of the bank to follow (not including this header)
-  u_short srcNode;      // source node
-  u_short dstNode;      // destination node
-  u_char srcTask;
-  u_char dstTask;
-  u_short token;
-  u_char cmd;
-  u_char pad1;
-  u_short payload_words;   // normally 0.  Number of words of payload.
+  uint32_t words;        // words of the bank to follow (not including this header)
+  uint16_t srcNode;      // source node
+  uint16_t dstNode;      // destination node
+  uint8_t srcTask;
+  uint8_t dstTask;
+  uint16_t token;
+  uint8_t cmd;
+  uint8_t pad1;
+  uint16_t payload_words;   // normally 0.  Number of words of payload.
 };
 /* #else */
 /* struct iccp2k {    */
-/*   u_int words;        // words of the bank to follow (not including this header) */
+/*   uint32_t words;        // words of the bank to follow (not including this header) */
 /*   //----- */
-/*   u_short dstNode; */
-/*   u_short srcNode;       */
+/*   uint16_t dstNode; */
+/*   uint16_t srcNode;       */
 /*   //---- */
-/*   u_short token; */
-/*   u_char dstTask; */
-/*   u_char srcTask; */
+/*   uint16_t token; */
+/*   uint8_t dstTask; */
+/*   uint8_t srcTask; */
 /*   //---- */
-/*   u_char pad3; */
-/*   u_char pad2; */
-/*   u_char pad1; */
-/*   u_char cmd; */
+/*   uint8_t pad3; */
+/*   uint8_t pad2; */
+/*   uint8_t pad1; */
+/*   uint8_t cmd; */
 /* }; */
 /* #endif */
 
@@ -84,69 +81,69 @@ struct iccp2k {
 #define GB_PAYLOAD_VERSION 0xDA000003
 // 2019 run,  expand the rtsDetMask
 struct gbPayload {
-    u_int gbPayloadVersion;
+    uint32_t gbPayloadVersion;
     
     union {
 	EvtDescData EventDescriptor ;   // take from data!  // big endian
-	u_int eventDesc[sizeof(EvtDescData)/4];
+	uint32_t eventDesc[sizeof(EvtDescData)/4];
     };
     
     // The rest is all little endian...
-    u_int L3summary[4] ;
-    u_int L2summary[2];
-    u_int L1summary[2];
+    uint32_t L3summary[4] ;
+    uint32_t L2summary[2];
+    uint32_t L1summary[2];
     UINT64 rtsDetMask;
-    u_int eventNumber;
-    u_int sec;
-    u_int usec;
-    u_int flags;            // bit 0 set, tpc raw data inside
-    u_int evp;
-    u_int token;
+    uint32_t eventNumber;
+    uint32_t sec;
+    uint32_t usec;
+    uint32_t flags;            // bit 0 set, tpc raw data inside
+    uint32_t evp;
+    uint32_t token;
 };
 
 // #define GB_PAYLOAD_VERSION 0xDA000002
 // 2008 run, pre-new TCU:   gbPayloadVersion=0xDA000002, TrgDataFmtVer=0x40
 struct gbPayload_0x02 {
-  u_int gbPayloadVersion;
+  uint32_t gbPayloadVersion;
 
   union {
     EvtDescData EventDescriptor ;   // take from data!  // big endian
-    u_int eventDesc[sizeof(EvtDescData)/4];
+    uint32_t eventDesc[sizeof(EvtDescData)/4];
   };
 
   // The rest is all little endian...
-  u_int L3summary[4] ;
-  u_int L2summary[2];
-  u_int L1summary[2];
-  u_int rtsDetMask;
-  u_int eventNumber;
-  u_int sec;
-  u_int usec;
-  u_int flags;            // bit 0 set, tpc raw data inside
-  u_int evp;
-  u_int token;
+  uint32_t L3summary[4] ;
+  uint32_t L2summary[2];
+  uint32_t L1summary[2];
+  uint32_t rtsDetMask;
+  uint32_t eventNumber;
+  uint32_t sec;
+  uint32_t usec;
+  uint32_t flags;            // bit 0 set, tpc raw data inside
+  uint32_t evp;
+  uint32_t token;
 };
 
 // 2008 run, pre-new TCU:   gbPayloadVersion=0xDA000002, TrgDataFmtVer=0x40
 struct gbPayload_pre2016 {
-  u_int gbPayloadVersion;
+  uint32_t gbPayloadVersion;
 
   union {
     EventDescriptor2008a EventDescriptor ;   // take from data!  // big endian
-    u_int eventDesc[sizeof(EventDescriptor2008a)/4];
+    uint32_t eventDesc[sizeof(EventDescriptor2008a)/4];
   };
 
   // The rest is all little endian...
-  u_int L3summary[4] ;
-  u_int L2summary[2];
-  u_int L1summary[2];
-  u_int rtsDetMask;
-  u_int eventNumber;
-  u_int sec;
-  u_int usec;
-  u_int flags;            // bit 0 set, tpc raw data inside
-  u_int evp;
-  u_int token;
+  uint32_t L3summary[4] ;
+  uint32_t L2summary[2];
+  uint32_t L1summary[2];
+  uint32_t rtsDetMask;
+  uint32_t eventNumber;
+  uint32_t sec;
+  uint32_t usec;
+  uint32_t flags;            // bit 0 set, tpc raw data inside
+  uint32_t evp;
+  uint32_t token;
 };
 
 
@@ -157,20 +154,20 @@ struct gbPayload_0x01a {
   // big endian
   union {
     EventDescriptor2008a EventDescriptor ;   // take from data! 
-    u_int eventDesc[sizeof(EventDescriptor2008a)/4];
+    uint32_t eventDesc[sizeof(EventDescriptor2008a)/4];
   };
 
   // The rest is all little endian...
-  u_int L3summary[4] ;
-  u_int L2summary[2];
-  u_int L1summary[2];
-  u_int rtsDetMask;
-  u_int eventNumber;
-  u_int sec;
-  u_int usec;
-  u_int flags;            // bit 0 set, tpc raw data inside
-  u_int evp;
-  u_int token;
+  uint32_t L3summary[4] ;
+  uint32_t L2summary[2];
+  uint32_t L1summary[2];
+  uint32_t rtsDetMask;
+  uint32_t eventNumber;
+  uint32_t sec;
+  uint32_t usec;
+  uint32_t flags;            // bit 0 set, tpc raw data inside
+  uint32_t evp;
+  uint32_t token;
 };
 
 // TrgDataFmtVer<0x40
@@ -178,20 +175,20 @@ struct gbPayload_0x01 {         // for 2007 run
   // big endian
   union {
     EventDescriptor2007 EventDescriptor ;   // take from data! 
-    u_int eventDesc[sizeof(EventDescriptor2007)/4];
+    uint32_t eventDesc[sizeof(EventDescriptor2007)/4];
   };
 
   // The rest is all little endian...
-  u_int L3summary[4] ;
-  u_int L2summary[2];
-  u_int L1summary[2];
-  u_int rtsDetMask;
-  u_int eventNumber;
-  u_int sec;
-  u_int usec;
-  u_int flags;            // bit 0 set, tpc raw data inside
-  u_int evp;
-  u_int token;
+  uint32_t L3summary[4] ;
+  uint32_t L2summary[2];
+  uint32_t L1summary[2];
+  uint32_t rtsDetMask;
+  uint32_t eventNumber;
+  uint32_t sec;
+  uint32_t usec;
+  uint32_t flags;            // bit 0 set, tpc raw data inside
+  uint32_t evp;
+  uint32_t token;
 };
 
 
@@ -202,9 +199,9 @@ struct gbPayload_0x01 {         // for 2007 run
 
 
 struct evpPayload {
-  u_int run;
-  u_int type;
-  u_int seq;
+  uint32_t run;
+  uint32_t type;
+  uint32_t seq;
 };
 
 struct tapeMsg {
@@ -215,30 +212,30 @@ struct tapeMsg {
 
 // network byte order...
 struct evtDoneMsg {
-  u_short token;
-  u_short status;
+  uint16_t token;
+  uint16_t status;
 };
 
 #define EVB_SUMMARY_VERSION 3
 
 struct EvbSummary_v3 {
-    u_int version;
-    u_int sz;
+    uint32_t version;
+    uint32_t sz;
     UINT64 detectorsInRun;
     float triggerFrequency;
-    u_int runNumber;
+    uint32_t runNumber;
 };
 
 struct EvbSummary_v2 {
-    u_int version;
-    u_int sz;
+    uint32_t version;
+    uint32_t sz;
     UINT64 detectorsInRun;
 };
 
 struct EvbSummary_v1 {
-  u_int version;  // version
-  u_int sz;       // size of structure
-  u_int detectorsInRun;
+  uint32_t version;  // version
+  uint32_t sz;       // size of structure
+  uint32_t detectorsInRun;
 };
 
 typedef EvbSummary_v3 EvbSummary;

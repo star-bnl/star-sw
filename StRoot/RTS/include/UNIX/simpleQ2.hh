@@ -3,7 +3,7 @@
 // Same as simpleQ, except the size of the queue is not part of the template
 // but rather set in the constructor!
 #include <stdlib.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 template <class T> class simpleQ2
 {

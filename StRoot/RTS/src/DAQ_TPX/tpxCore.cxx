@@ -2,7 +2,7 @@
 #include <math.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
@@ -22,7 +22,7 @@ struct tpx_rdo_dbg tpx_rdo_dbg[24][6] ;
 int tpx_fee_check ;
 
 // statics...
-u_int expected_usercode[5] = {
+uint32_t expected_usercode[5] = {
 //	0x1a830000,	// used in FY09
 	0x0c500000,	// with the Xilinx disabled on powerup
 	0x0283c6b3,	// FEE, 30Jan08
@@ -36,15 +36,15 @@ u_int expected_usercode[5] = {
 	0x00AD9D1D	//09Oct11, DAQ10k: maybe 1 clock delayed...
 } ;
 
-static inline u_int get10(u_int *l, u_int p) ;
-static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *first)  ;
+static inline uint32_t get10(uint32_t *l, uint32_t p) ;
+static uint32_t *data_test(uint32_t *h, struct tpx_altro_struct *a, int log, uint32_t *first)  ;
 
-//static int check_emul(u_int *a) ;
+//static int check_emul(uint32_t *a) ;
 
 static struct {
-	u_char altro ;
-	u_char ch ;
-	u_char rdo ;	// from 1 !!!
+	uint8_t altro ;
+	uint8_t ch ;
+	uint8_t rdo ;	// from 1 !!!
 } tpx_pad_to_altro[46][183] ;
 
 
@@ -244,7 +244,7 @@ int tpx_altro_to_fee(int rdo, int a)
 }
 
 //used in tpxGain solely
-u_char tpx_rdo_fees(int rdo, int cou)
+uint8_t tpx_rdo_fees(int rdo, int cou)
 {
 //	LOG(WARN,"tpx_rdo_fees: %d %d (map %d)",rdo,cou,tpx_fy16_map) ;
 
@@ -256,7 +256,7 @@ u_char tpx_rdo_fees(int rdo, int cou)
 
 
 #ifdef WHO_USUES_THIS
-u_char tpx_altro_ch_to_fee(int a, int ch)
+uint8_t tpx_altro_ch_to_fee(int a, int ch)
 {
 	if(a & 1) ch += 16 ;	// for odd altros, add 16
 
@@ -276,13 +276,13 @@ u_char tpx_altro_ch_to_fee(int a, int ch)
 	If we are called with do_log=1  _JUST_ do some
 	checks and return the token with logging. Made to work as "get_token"
 */
-int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log) 
+int tpx_get_start(char *buff, uint32_t words, struct tpx_rdo_event *rdo, int do_log) 
 {
 	struct ddl_header *hdr ;
 	struct ddl_trailer *trl ;
 
 
-	u_int *l ;	// temporary pointer...
+	uint32_t *l ;	// temporary pointer...
 
 
 	
@@ -312,7 +312,7 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 
 
 	rdo->data_end = 0 ;
-	rdo->data_start = (u_int *)(buff + sizeof(struct ddl_header)) ;	// skip the header...
+	rdo->data_start = (uint32_t *)(buff + sizeof(struct ddl_header)) ;	// skip the header...
 
 	rdo->l2_cmd = 0 ;
 
@@ -332,8 +332,8 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 //	    hdr->type,hdr->ev_cou,
 //	    rdo->type,rdo->subtype,rdo->sector,rdo->rdo) ;
 
-//	for(u_int i=0;i<words+8;i++) {
-//		LOG(DBG,"%2d: 0x%08X",i,*((u_int *)buff + i)) ;
+//	for(uint32_t i=0;i<words+8;i++) {
+//		LOG(DBG,"%2d: 0x%08X",i,*((uint32_t *)buff + i)) ;
 //	}
 
 
@@ -341,14 +341,14 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	if(trl->type != hdr->type) {
 		if(hdr->type == 0xFEED0301) {	// HACK! Old factory type!
 			if(do_log) LOG(WARN,"RDO %d: Old factory log?",rdo->rdo) ;
-			rdo->data_start = (u_int *)(buff + 12) ;
+			rdo->data_start = (uint32_t *)(buff + 12) ;
 			rdo->type = DDL_TYPE_LOG ;
 		}
 		else {
 			if(do_log) {
 				LOG(ERR,"RDO %d:%d: Header type 0x%08X and trailer type 0x%08X mismatch",rdo->sector,rdo->rdo,hdr->type,trl->type) ;
 
-				u_int *d32 = (u_int *)(buff + 4*words) ;
+				uint32_t *d32 = (uint32_t *)(buff + 4*words) ;
 				d32 -= 5 ;
 
 				for(int i=0;i<10;i++) {
@@ -383,7 +383,7 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	default :
 		if(do_log) {
 			LOG(WARN,"Hm,I haven't coded this type %d", rdo->type) ;
-			u_int *val = rdo->data_start ;
+			uint32_t *val = rdo->data_start ;
 			for(int i=0;i<10;i++) {
 				LOG(WARN,"\t%2d: 0x%08X [%u dec]",i,val[i],val[i]) ;
 			}
@@ -396,7 +396,7 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 
 
 
-	l = (u_int *) trl - 1 ;		// move before the trailer...
+	l = (uint32_t *) trl - 1 ;		// move before the trailer...
 
 	rdo->trg_cou = *l ;		// get the trigger count
 
@@ -420,11 +420,11 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	rdo->trg = (struct trg_data *) l ;
 
 
-	u_int rh  ;
-	u_int rh_prompt = 0 ;
+	uint32_t rh  ;
+	uint32_t rh_prompt = 0 ;
 	rdo->token = 4097 ;	// in case I don't find a real token!
 
-	for(u_int i=0;i<rdo->trg_cou;i++) {
+	for(uint32_t i=0;i<rdo->trg_cou;i++) {
 		int rh_delta ;
 
 		// fish out the token...
@@ -530,10 +530,10 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	returns NULL.
 
 */
-u_int *tpx_scan_to_next(u_int *now, u_int *first, struct tpx_altro_struct *a_struct)
+uint32_t *tpx_scan_to_next(uint32_t *now, uint32_t *first, struct tpx_altro_struct *a_struct)
 {
-	u_int *next_altro ;
-	u_int *store = now ;
+	uint32_t *next_altro ;
+	uint32_t *store = now ;
 	int log_yes ;
 	int was_log_yes ;
 	int iter = 0 ;
@@ -595,7 +595,7 @@ u_int *tpx_scan_to_next(u_int *now, u_int *first, struct tpx_altro_struct *a_str
 int tpx_use_rdo(char *rdobuff, int bytes, int (userfunc)(struct tpx_altro_struct *a, void *arg), void *arg)
 {
 	int t ;
-	u_int *data_end ;
+	uint32_t *data_end ;
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
 	int ret ;
@@ -640,13 +640,13 @@ int tpx_use_rdo(char *rdobuff, int bytes, int (userfunc)(struct tpx_altro_struct
 	a->rb points to the input RB!
 
 */
-static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *first) 
+static uint32_t *data_test(uint32_t *h, struct tpx_altro_struct *a, int log, uint32_t *first) 
 {
-  u_int hi, lo ;
+  uint32_t hi, lo ;
   int wc ;
   int ret ;
   int delta ;
-//  u_int *h_start = h ;
+//  uint32_t *h_start = h ;
 
   ret = 0 ;
 
@@ -863,8 +863,8 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
   // data check; we are in the data mode now...
   int tb_prev = 512 ;
 
-  u_short *p_adc = a->adc ;
-  u_short *p_tb = a->tb ;
+  uint16_t *p_adc = a->adc ;
+  uint16_t *p_tb = a->tb ;
   int tb_all = 0 ;
 
   while(p10 < l10) {
@@ -875,7 +875,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 	tb_cou -= 2 ;	// tb_cou & tb_last are included in the count, get rid of them...
 
 	/*
-	u_int tb_last 
+	uint32_t tb_last 
 		can't be greater than 511
 		can't be less than 0
 		can't be greater or equal to the end of the previous sequence
@@ -962,11 +962,11 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 
 
 #if 0
-static int check_emul(u_int *a)
+static int check_emul(uint32_t *a)
 {
   int i ;
-  u_int dta, should ;
-  u_int errors ;
+  uint32_t dta, should ;
+  uint32_t errors ;
 
   errors = 0 ;
   for(i=0;i<200000;i++) {
@@ -991,9 +991,9 @@ static int check_emul(u_int *a)
 }
 #endif
 
-static inline u_int get10(u_int *l, u_int p)
+static inline uint32_t get10(uint32_t *l, uint32_t p)
 {
-  u_int ret ;
+  uint32_t ret ;
 
   l -= 2*(p/4) ;
 
@@ -1054,7 +1054,7 @@ void tpx_analyze_log(int sector,int rdo, char *buff)
 int tpx_show_status(int sector, int rb_mask, int *altro_list)
 {
 	struct tpx_rdo *rdo ;
-	u_char altro[256] ;
+	uint8_t altro[256] ;
 	int err ;
 	int rb ;
 
@@ -1087,7 +1087,7 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 	    ) ;
 
 	for(int i=0;i<5;i++) {
-		if((expected_usercode[i] != rdo->fpga_usercode[i]) && (rdo->fpga_usercode[i] != (u_int)(i+1))) {
+		if((expected_usercode[i] != rdo->fpga_usercode[i]) && (rdo->fpga_usercode[i] != (uint32_t)(i+1))) {
 			LOG(WARN,"msc: RDO %d: FPGA %d usercode is 0x%08X, expect 0x%08X!?",rdo->rdo,i,rdo->fpga_usercode[i],expected_usercode[i]) ;
 		}
 	}
@@ -1180,7 +1180,7 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 
 
 		//is the altro overriden?
-		for(u_int i=0;i<sizeof(tpx_fee_override)/sizeof(tpx_fee_override[0]);i++) {
+		for(uint32_t i=0;i<sizeof(tpx_fee_override)/sizeof(tpx_fee_override[0]);i++) {
 			int r = tpx_fee_override[i].rdo ;
 			int s = tpx_fee_override[i].sector ;
 

@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <assert.h>
 
@@ -244,7 +244,7 @@ daq_dta *daq_stgc::handle_altro(int sec, int rdo)
 
 		//LOG(TERR,"S%d:%d = RDO %d, token %d, words %d %d",s,r,rdo.rdo,token,rdo_words,rdo.data_end-rdo.data_start) ;
 
-		u_int *data_end = rdo.data_end ;
+		uint32_t *data_end = rdo.data_end ;
 
 		a.rdo = rdo.rdo -1 ;
 		a.t = token ;
@@ -269,7 +269,7 @@ daq_dta *daq_stgc::handle_altro(int sec, int rdo)
 	
 			//LOG(DBG,"%d: %d:%d %d",altro->obj_cou,a.row,a.pad,a.count) ;
 
-			for(u_int i=0 ; i < a.count ; i++) {
+			for(uint32_t i=0 ; i < a.count ; i++) {
 				at[i].adc = a.adc[i] ;
 				at[i].tb = a.tb[i] ;
 
@@ -302,7 +302,7 @@ daq_dta *daq_stgc::handle_raw(int sec, int rdo)
 	struct {
 		int sec ;
 		int rb ;
-		u_int bytes ;
+		uint32_t bytes ;
 	} obj[MAX_SEC*6] ;
 
 	// sanity
@@ -365,7 +365,7 @@ daq_dta *daq_stgc::handle_raw(int sec, int rdo)
 	}
 	}
 
-	raw->create(tot_bytes,(char *)"raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	raw->create(tot_bytes,(char *)"raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 
 	// bring in the bacon from the SFS file....
 	for(int i=0;i<o_cou;i++) {
@@ -404,9 +404,9 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 	int tot_bytes ;
 	int min_sec, max_sec, min_rdo, max_rdo ;
 	struct {
-		u_int bytes ;
-		u_char rb ;
-		u_char sec ;
+		uint32_t bytes ;
+		uint8_t rb ;
+		uint8_t sec ;
 	} obj[8*4] ;
 
 
@@ -495,7 +495,7 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 		int hits = 0 ;			
 		stgc_d->sector1 = obj[i].sec ;
 		stgc_d->rdo1 = obj[i].rb ;
-		stgc_d->start((u_short *)mem,obj[i].bytes/2) ;
+		stgc_d->start((uint16_t *)mem,obj[i].bytes/2) ;
 		while(stgc_d->event()) {
 			if(stgc_d->vmm.feb_vmm==0 && stgc_d->vmm.adc==0 && stgc_d->vmm.bcid==0 && stgc_d->vmm.ch==0) {
 				//printf("... ODD: S%d:%d\n",obj[i].sec,obj[i].rb) ;
@@ -555,19 +555,19 @@ int daq_stgc::get_l2_vmm(char *addr, int words, struct daq_trg_word *trgs, int d
 	int t_hi, t_mid, t_lo ;
 
 
-	u_short *d = (u_short *)addr ;
+	uint16_t *d = (uint16_t *)addr ;
 
 	if(d[10]==0x0001) {	// new version
 		int shorts = words*2 ;
 		shorts -= 8 ;	// remove the TEF header
 		d += 8 ;	// skip the TEF header
 
-		u_short type = d[8] ;		
+		uint16_t type = d[8] ;		
 
 		if(type==0x4544) {	// triggered!
-			u_char trg_cmd ;
-			u_char daq_cmd ;
-			u_short t, t_lo, t_mid, t_hi ;
+			uint8_t trg_cmd ;
+			uint8_t daq_cmd ;
+			uint16_t t, t_lo, t_mid, t_hi ;
 
 			trg_cmd = d[3]&0xF ;
 			daq_cmd = d[4]&0xF ;
@@ -654,7 +654,7 @@ int daq_stgc::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_lo
 
 	struct tpx_rdo_event rdo ;
 	int cou = 0 ;
-	u_int collision = 0 ;
+	uint32_t collision = 0 ;
 	int err = 0 ;
 
 	int ret = tpx_get_start(addr, words, &rdo, do_log) ;
@@ -666,10 +666,10 @@ int daq_stgc::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_lo
 	LOG(DBG,"rdo %d, rdo token %d, trg cou %d",rdo.rdo,rdo.token,rdo.trg_cou) ;
 
 	// grab only the prompt contribution...
-	for(u_int i=0;i<rdo.trg_cou;i++) {
-		u_int dta = rdo.trg[i].data ;
-		u_int marker = rdo.trg[i].csr >> 24 ;
-		u_int rhic = rdo.trg[i].rhic_counter ;
+	for(uint32_t i=0;i<rdo.trg_cou;i++) {
+		uint32_t dta = rdo.trg[i].data ;
+		uint32_t marker = rdo.trg[i].csr >> 24 ;
+		uint32_t rhic = rdo.trg[i].rhic_counter ;
 
 
 //#define WANT_LOGGING
@@ -765,10 +765,10 @@ int daq_stgc::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_lo
 		trgs[0].t = 4097 ;
 	}
 
-	for(u_int i=0;i<rdo.trg_cou;i++) {
-		u_int dta = rdo.trg[i].data ;
-		u_int marker = rdo.trg[i].csr >> 24 ;
-		u_int rhic = rdo.trg[i].rhic_counter ;
+	for(uint32_t i=0;i<rdo.trg_cou;i++) {
+		uint32_t dta = rdo.trg[i].data ;
+		uint32_t marker = rdo.trg[i].csr >> 24 ;
+		uint32_t rhic = rdo.trg[i].rhic_counter ;
 
 		if(marker==0xFF) {	// FIFO
 			int daq10k = 0 ;
@@ -872,7 +872,7 @@ int daq_stgc::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_lo
 
 	if(err) {	// dump out everyhign
 		LOG(ERR," RDO %d: words %d",rdo.rdo,words) ;
-		for(u_int i=0;i<rdo.trg_cou;i++) {
+		for(uint32_t i=0;i<rdo.trg_cou;i++) {
 			LOG(ERR,"  RDO %d: T %4d: %d/%d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg_cou, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
 		}
 	}

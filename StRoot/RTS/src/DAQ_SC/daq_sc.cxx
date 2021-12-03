@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <rtsLog.h>
@@ -11,7 +11,7 @@
 
 #include "daq_sc.h"
 
-extern int sc_reader(char *m, struct sc_t *sc, u_int driver) ;
+extern int sc_reader(char *m, struct sc_t *sc, uint32_t driver) ;
 
 
 class daq_det_sc_factory : public daq_det_factory
@@ -176,14 +176,14 @@ daq_dta *daq_sc::handle_legacy()
 
 		sc_p->time = qswap32(swapit,scd->time) ;
 
-		u_int tmp_f = qswap32(swapit,scd->mag_field) ;
+		uint32_t tmp_f = qswap32(swapit,scd->mag_field) ;
 		memcpy(&(sc_p->mag_field),&tmp_f,4) ;
 		
 
 		sc_p->timelag = 0 ;	// I don't have DATAP! I can't tell the time difference!
 		sc_p->valid = 1 ;	// what else can I say????
 
-		for(u_int i=0;i<(sizeof(sc_p->rich_scalers)/4);i++) {
+		for(uint32_t i=0;i<(sizeof(sc_p->rich_scalers)/4);i++) {
 			sc_p->rich_scalers[i] = qswap32(swapit, scd->rich_scalers[i]) ;
 		}
 

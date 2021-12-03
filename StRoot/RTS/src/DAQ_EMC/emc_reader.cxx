@@ -22,8 +22,8 @@
 
 //static char *getEmcTrgData(char *input, int idx, int *bytes) ;
 
-static int readBTOW(u_short *_data, int token);
-static int readETOW(u_short *_data, int token);
+static int readBTOW(uint16_t *_data, int token);
+static int readETOW(uint16_t *_data, int token);
 
 static emc_t *emc_p ;
 
@@ -78,7 +78,7 @@ static struct emc_describe_t {
 } ;
 
 
-int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[12], int f_bytes[12]) 
+int emc_reader(char *m, struct emc_t *emc, uint32_t driver, int rts_id, char *ptrs[12], int f_bytes[12]) 
 {
 #if 1
 	return 0 ;
@@ -101,7 +101,7 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 	if(f_bytes) memset(f_bytes,0,sizeof(f_bytes)) ;
 	
 	emc_p = emc ;
-	u_char emc_wanted[4] ;
+	uint8_t emc_wanted[4] ;
 
 	if(emc_p == 0) {	// just the concrete rts_id!
 		for(int i=0;i<4;i++) {
@@ -194,7 +194,7 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 	}
 
 	       
-	emcp = (struct EMCP *)((u_int *)m + off) ;
+	emcp = (struct EMCP *)((uint32_t *)m + off) ;
 		
 	if(checkBank(emcp->bh.bank_type,emc_describe[i].p) < 0) {
 	  err = 1 ;
@@ -216,7 +216,7 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 
 	if(!len || !off) continue ;	// not found...
 	
-	emcsecp = (struct EMCSECP *)((u_int *)emcp + off) ;
+	emcsecp = (struct EMCSECP *)((uint32_t *)emcp + off) ;
 
 	if(checkBank(emcsecp->bh.bank_type,emc_describe[i].secp) <= 0) {
 	  err = 1 ;
@@ -239,7 +239,7 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 
 		if(!len || !off) continue ;
 
-		emcrbp = (struct EMCRBP *)((u_int *)emcsecp + off) ;
+		emcrbp = (struct EMCRBP *)((uint32_t *)emcsecp + off) ;
 
 		if(checkBank(emcrbp->bh.bank_type,emc_describe[i].rbp) <= 0) {
 			err = 1 ;
@@ -278,7 +278,7 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 			bytes = len *4 ;
 			dta_ptr = 40 + (char *)emcrbp + off*4 ;	// points to raw data, skipping 40 bytes bankHeader!
 			
-			dummy = (DUMMYDATA *) ((u_int *)emcrbp + off) ;
+			dummy = (DUMMYDATA *) ((uint32_t *)emcrbp + off) ;
 
 			b_bytes[k] = bytes ;
 			b_ptrs[k] = dta_ptr ;
@@ -363,14 +363,14 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 
 					switch(k) {
 					case 0 :	// Raw, ADCR
-						emcadcr = (struct DUMMYDATA *)((u_int *)emcrbp + off) ;
+						emcadcr = (struct DUMMYDATA *)((uint32_t *)emcrbp + off) ;
 						if(checkBank(emcadcr->bh.bank_type,adcr) < 0) {
 							continue ;
 						}
 
 						break ;
 					case 1 :	// zero-suppressed...
-						emcadcd = (struct DUMMYDATA *)((u_int *)emcrbp + off) ;
+						emcadcd = (struct DUMMYDATA *)((uint32_t *)emcrbp + off) ;
 						if(checkBank(emcadcd->bh.bank_type,adcd) < 0) {
 							continue ;
 						}
@@ -403,11 +403,11 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 					  	  return 1 ;
 					  }
 
-					  readBTOW((u_short *)((u_int)emcadcr + 40), token);
+					  readBTOW((uint16_t *)((uint32_t)emcadcr + 40), token);
 
 					}
 					else if((type==0) && (i == EMC_B_SMD)) {	// barrel SMD
-						u_short *data ;
+						uint16_t *data ;
 						int l ;
 
 						emc_p->bsmd_in = 1;
@@ -418,10 +418,10 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 
 							// get to the data: 40 bytes bank header, 4 bytes dummy,
 							// 256 bytes fiber header...
-							data = (u_short *) ((u_int) emcadcr + 40 + 4 + 256) ; 
+							data = (uint16_t *) ((uint32_t) emcadcr + 40 + 4 + 256) ; 
 					
 
-							emc_p->bsmd_cap[j] = *(u_char *)((u_int)emcadcr + 40 + 4 + 4*16) ;
+							emc_p->bsmd_cap[j] = *(uint8_t *)((uint32_t)emcadcr + 40 + 4 + 4*16) ;
 							if(adcd_found) {	// ALSO the ZS present!!!
 								emc_p->bsmd_raw_in = 1 ;
 								for(l=0;l<4800;l++) {
@@ -445,7 +445,7 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 
 							LOG(DBG,"BSMD ZS data present, %d hits",datums) ;
 
-							data = (u_short *) ((unsigned int) emcadcd + 40) ;	// skip header
+							data = (uint16_t *) ((unsigned int) emcadcd + 40) ;	// skip header
 							LOG(DBG,"local fiber %d, channels %d [== %d]",b2h16(data[0]),b2h16(data[1]),datums) ;
 							data += 2 ;
 
@@ -479,13 +479,13 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 					  	return 1 ;					  
 					  }
 
-					  readETOW((u_short *)((u_int)emcadcr + 40), token);
+					  readETOW((uint16_t *)((uint32_t)emcadcr + 40), token);
 
 					}
 					else if((type==1) && (i == EMC_B_SMD)) {	// endcap SMD
 						
-						u_short *data ;
-						u_int tlo, thi ;
+						uint16_t *data ;
+						uint32_t tlo, thi ;
 						int l, m ;
 
 						emc_p->esmd_in = 1;
@@ -493,9 +493,9 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 						// get to the data: 40 bytes bank header, 4 bytes dummy,
 						// 128 bytes fiber header...
 						// ...but first grab the token from the header...
-						data = (u_short *) ((u_int) emcadcr + 40 + 4 + 4) ;
+						data = (uint16_t *) ((uint32_t) emcadcr + 40 + 4 + 4) ;
 						thi = l2h16(*data) ;
-						data = (u_short *) ((u_int) emcadcr + 40 + 4 + 6) ;
+						data = (uint16_t *) ((uint32_t) emcadcr + 40 + 4 + 6) ;
 						tlo = l2h16(*data) ;
 
 						local_token = thi * 256 + tlo ;
@@ -509,7 +509,7 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 						  if((rts_id == ESMD_ID) && (emc == 0)) return 1 ;
 
 
-						data = (u_short *) ((u_int) emcadcr + 40 + 4 + 128) ; 
+						data = (uint16_t *) ((uint32_t) emcadcr + 40 + 4 + 128) ; 
 					
 						emc_p->esmd_raw = data ;
 
@@ -553,21 +553,21 @@ int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[
 // Starts from after the EMCADCR bankHeader...
 //
 //    ie...   data = (u_`int)emcadcr + 40
-//                 = (u_int)trg_btow_data
+//                 = (uint32_t)trg_btow_data
 //
-int readBTOW(u_short *_data, int token)
+int readBTOW(uint16_t *_data, int token)
 {
-  u_short *data ;
+  uint16_t *data ;
   int l, m ;
   int thi, tlo, local_token;
 
   emc_p->btow_in = 1;
 
-  data = (u_short *)((char *)_data + 4 + 4);
+  data = (uint16_t *)((char *)_data + 4 + 4);
   thi = l2h16(*data);
-  data = (u_short *)((char *)_data + 4 + 6);
+  data = (uint16_t *)((char *)_data + 4 + 6);
   tlo = l2h16(*data);
-  data = (u_short *)((char *)_data + 4 + 128);
+  data = (uint16_t *)((char *)_data + 4 + 128);
 
   local_token = thi * 256 + tlo ;
 
@@ -576,7 +576,7 @@ int readBTOW(u_short *_data, int token)
   }		
 
   // 4 bytes dummy, 128 bytes fiber header...
-  data = (u_short *)((char *)_data + 4 + 128);
+  data = (uint16_t *)((char *)_data + 4 + 128);
   emc_p->btow_raw = data ;
 						
   // get the preamble
@@ -608,12 +608,12 @@ int readBTOW(u_short *_data, int token)
 
 // Starts from after the bankHeader...
 //
-//    ie...   data = (u_int)emcadcr + 40
-//                 = (u_int)trg_btow_data + 136
+//    ie...   data = (uint32_t)emcadcr + 40
+//                 = (uint32_t)trg_btow_data + 136
 //
-int readETOW(u_short *_data, int token) {
-  u_short *data ;
-  u_int tlo, thi ;
+int readETOW(uint16_t *_data, int token) {
+  uint16_t *data ;
+  uint32_t tlo, thi ;
   int local_token;
 
   int l,m ;
@@ -624,11 +624,11 @@ int readETOW(u_short *_data, int token) {
   // ...but first grab the token from the header...
 
   
-  data = (u_short *)((char *)_data + 4 + 4);
+  data = (uint16_t *)((char *)_data + 4 + 4);
   thi = l2h16(*data);
-  data = (u_short *)((char *)_data + 4 + 6);
+  data = (uint16_t *)((char *)_data + 4 + 6);
   tlo = l2h16(*data);
-  data = (u_short *)((char *)_data + 4 + 128);
+  data = (uint16_t *)((char *)_data + 4 + 128);
 
   local_token = thi * 256 + tlo ;
 
@@ -708,7 +708,7 @@ char *getEmcTrgData(char *input, int idx, int *bytes)
   if(trgp->trgData.off == 0) return NULL;
 
   off = qswap32(swaptrgp, trgp->trgData.off);
-  ptr = (u_int *)trgp;
+  ptr = (uint32_t *)trgp;
   trgd = (struct TRGD *)(ptr + off) ;
 
   if(trgd->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swaptrgd = 1;
@@ -724,7 +724,7 @@ char *getEmcTrgData(char *input, int idx, int *bytes)
   if(qswap32(swaptrgd, trgd->bh.length) == 10) return NULL;	// no trigger data - just bh
 
 
-  u_char trg_version = trgd->desc.TrgDataFmtVer ;
+  uint8_t trg_version = trgd->desc.TrgDataFmtVer ;
   char *cptr;
   TrgTowerTrnfer *trgtowertrnfer;
 

@@ -5,7 +5,7 @@
 
 
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 
 #include <rtsLog.h>
 #include <DAQ_READER/daqReader.h>
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	// if you care, you can dump the in-file clusters here
 	dd = dr->det("tpx")->get("cld") ;
 	while(dd && dd->iterate()) {
-		for(u_int i=0;i<dd->ncontent;i++) {
+		for(uint32_t i=0;i<dd->ncontent;i++) {
 
 // Here we can blow off clusters we don't care about
 //			switch(dd->cld[i].flags) {
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 		daq_sim_adc_tb *sim_d = (daq_sim_adc_tb *) sim_dta->request(512) ;	// ask for space
 		
 		// copy over
-		for(u_int i=0;i<dd->ncontent;i++) {
+		for(uint32_t i=0;i<dd->ncontent;i++) {
 			sim_d[i].adc = dd->adc[i].adc ;
 			sim_d[i].tb = dd->adc[i].tb ;
 			sim_d[i].track_id = 0xFFFF ;	// should be 0xFFFF if you don;t have tracking...
@@ -120,9 +120,9 @@ int main(int argc, char *argv[])
 	while(dd->iterate()) {
 		//printf("sec %2d, row %3d: %d clusters\n",dd->sec,dd->row,dd->ncontent) ;
 
-		for(u_int i=0;i<dd->ncontent;i++) {
+		for(uint32_t i=0;i<dd->ncontent;i++) {
 #if 0
-			u_short tid = dd->sim_cld[i].track_id ;
+			uint16_t tid = dd->sim_cld[i].track_id ;
 
 			daq_dta *dta = dr->det("tpx")->get("adc_sim") ;
 			while(dta && dta->iterate()) {

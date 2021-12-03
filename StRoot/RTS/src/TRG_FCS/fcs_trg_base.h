@@ -1,31 +1,28 @@
 #ifndef _FCS_TRG_BASE_H_
 #define _FCS_TRG_BASE_H_
 
-#include <sys/types.h>
-typedef unsigned int u_int;
-typedef unsigned short u_short;
-typedef unsigned char u_char;
+#include <stdint.h>
 
 // serial links stage_1 --> stage_2 --> stage_3
 struct link_t {
-	u_short d[8] ;	// make them 16 bits because we might have 12 bits eventually
+	uint16_t d[8] ;	// make them 16 bits because we might have 12 bits eventually
 } ;
 
 // data links from ADC --> stage_0
 struct adc_tick_t {
-	u_short d[8] ;
+	uint16_t d[8] ;
 } ;
 	
 struct geom_t {
-	u_char ns ;
-	u_char det ;
-	u_char dep ;
-	u_char ch ;
+	uint8_t ns ;
+	uint8_t det ;
+	uint8_t dep ;
+	uint8_t ch ;
 } ;
 
 struct ped_gain_t {
-	u_short ped ;
-	u_short gain ;
+	uint16_t ped ;
+	uint16_t gain ;
 } ;
 
 
@@ -49,14 +46,14 @@ public:
 	virtual ~fcs_trg_base() ;
 
 	// stage_0 and stage_1 are running in DEP/ADC
-	void stage_0(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
-	void stage_0_201900(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
-	void stage_0_202101(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
-	void stage_0_202103(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
+	void stage_0(adc_tick_t adc, geom_t geo, ped_gain_t *pg, uint32_t *to_s1) ;
+	void stage_0_201900(adc_tick_t adc, geom_t geo, ped_gain_t *pg, uint32_t *to_s1) ;
+	void stage_0_202101(adc_tick_t adc, geom_t geo, ped_gain_t *pg, uint32_t *to_s1) ;
+	void stage_0_202103(adc_tick_t adc, geom_t geo, ped_gain_t *pg, uint32_t *to_s1) ;
 
-	void stage_1(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
-	void stage_1_201900(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
-	void stage_1_202201(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
+	void stage_1(uint32_t from_s0[], geom_t geo, link_t to_s2[]) ;
+	void stage_1_201900(uint32_t from_s0[], geom_t geo, link_t to_s2[]) ;
+	void stage_1_202201(uint32_t from_s0[], geom_t geo, link_t to_s2[]) ;
 
 	void stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
@@ -67,25 +64,25 @@ public:
 	void stage_2_tonko_202104(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 
 	// stage_3 is running in DEP/IO (1 Main) connected to STAR Trigger RAT/DSM
-	void stage_3(link_t from_s2[], u_short *to_dsm) ;
-	void stage_3_201900(link_t from_s2[], u_short *to_dsm) ;
-	void stage_3_202201(link_t from_s2[], u_short *to_dsm) ;
-	void stage_3_202203(link_t from_s2[], u_short *to_dsm) ;
-	void stage_3_tonko_202101(link_t from_s2[], u_short *to_dsm) ;
+	void stage_3(link_t from_s2[], uint16_t *to_dsm) ;
+	void stage_3_201900(link_t from_s2[], uint16_t *to_dsm) ;
+	void stage_3_202201(link_t from_s2[], uint16_t *to_dsm) ;
+	void stage_3_202203(link_t from_s2[], uint16_t *to_dsm) ;
+	void stage_3_tonko_202101(link_t from_s2[], uint16_t *to_dsm) ;
 
-	virtual u_int get_version() ;
+	virtual uint32_t get_version() ;
 
 	void init(const char* fname) ;
 
-	void run_start(u_int run) ;
+	void run_start(uint32_t run) ;
 
 	void start_event() ;
 
-	void fill_event(int det, int ns, int dep, int ch, u_short *adc, int t_cou) ;
+	void fill_event(int det, int ns, int dep, int ch, uint16_t *adc, int t_cou) ;
 
 	int verify_event_io() ;
 
-	u_short run_event_sim(int xing, int type) ;	// returns DSM bits
+	uint16_t run_event_sim(int xing, int type) ;	// returns DSM bits
 
 	int verify_event_sim(int xing) ;
 
@@ -96,51 +93,51 @@ public:
 	int run_stop() ;	// for statistics dumps et...
 
 
-	u_char want_stage_2_io ;	// only if I have full events
-	u_char want_stage_3_io ;	// only for eother full events or in sector 11
+	uint8_t want_stage_2_io ;	// only if I have full events
+	uint8_t want_stage_3_io ;	// only for eother full events or in sector 11
 
 	// cleared at run start; logged at run stop
 	struct errors_t {
-		u_int sim_s1 ;	
-		u_int sim_s2 ;
-		u_int sim_s3 ;
+		uint32_t sim_s1 ;	
+		uint32_t sim_s2 ;
+		uint32_t sim_s3 ;
 
 		// I/O errors
-		u_int io_s1_to_s2[4] ;
-		u_int io_s2_to_s3 ;
+		uint32_t io_s1_to_s2[4] ;
+		uint32_t io_s2_to_s3 ;
 		
 	} errs, good ;
 
 	// only for S3
 	struct statistics_t {
-		u_int self_trgs ;
+		uint32_t self_trgs ;
 
 		int tcd_marker ;
 		int self_trg_marker ;
 	} statistics ;
 
-	u_int run_number ;	// for logging
-	u_int evts ;		// for logging
+	uint32_t run_number ;	// for logging
+	uint32_t evts ;		// for logging
 
-	u_char got_one ;	// helper
+	uint8_t got_one ;	// helper
 
 	// log_level for various printfs
 	int log_level ;
 
 	// will change invocation to invocation when running in real-time!
-	u_char realtime ;	// 1 when in STAR DAQ, 0 when running from DAQ file (default)
-	u_char sim_mode ;	// 1 when running simulated data (e.g. for Akio et al)
+	uint8_t realtime ;	// 1 when in STAR DAQ, 0 when running from DAQ file (default)
+	uint8_t sim_mode ;	// 1 when running simulated data (e.g. for Akio et al)
 
 	
 
-//	u_char det ;
-//	u_char ns ;
-//	u_char dep ;
+//	uint8_t det ;
+//	uint8_t ns ;
+//	uint8_t dep ;
 
-	u_char id ;	// used in realtime to identify the thread
+	uint8_t id ;	// used in realtime to identify the thread
 
 
-	u_short tb_cou[NS_COU][DET_COU][DEP_COU] ;		// filled event by event; used as a "presence" marker too; det,ns,dep
+	uint16_t tb_cou[NS_COU][DET_COU][DEP_COU] ;		// filled event by event; used as a "presence" marker too; det,ns,dep
 
 
 	// data from DAQ file; used for replay/bitchecking or full simulation
@@ -191,21 +188,21 @@ public:
 
 		// output from stage_3 emulation
 		struct {
-			u_short dsm_out ;
+			uint16_t dsm_out ;
 		} s3 ;
 
 	} d_out ;
 
 	// if there's any output to DSM
-	u_int dsm_any ;
+	uint32_t dsm_any ;
 	int dsm_xing ;
 
 	// statics below
-	static u_int data_format ;	// 0:pre FY21, 1=FY21
+	static uint32_t data_format ;	// 0:pre FY21, 1=FY21
 
 
 	// Stage versions for this invocation
-	static u_int stage_version[4] ;
+	static uint32_t stage_version[4] ;
 
 
 
@@ -234,7 +231,7 @@ public:
 	int event_bad ;
 
 	// stage_x algo params (same as in firmware)
-	static u_short stage_params[4][16] ;	// [stage][param_ix] ;
+	static uint16_t stage_params[4][16] ;	// [stage][param_ix] ;
 
 	// for use by stage_0; loaded in init()
 	static ped_gain_t p_g[NS_COU][ADC_DET_COU][DEP_COU][32] ;		
@@ -242,54 +239,54 @@ public:
 
 	// for use by stage_1:
 	// various thresholds indexed by det
-	static u_short ht_threshold[ADC_DET_COU] ;
+	static uint16_t ht_threshold[ADC_DET_COU] ;
 
 
 	// for use by stage_2:
 	static unsigned long long s2_ch_mask[NS_COU] ;	// up to 34 bits
-	static u_char s2_ch_phase[NS_COU][34] ;			// phase used to align data
+	static uint8_t s2_ch_phase[NS_COU][34] ;			// phase used to align data
 
         static int fcs_readPresMaskFromText;
-        static u_int PRES_MASK[15][9][6];
+        static uint32_t PRES_MASK[15][9][6];
 
 	// for use by stage_3
-	static u_char s3_ch_mask ;			// if '1' corresponding input masked
-	static u_char s3_ch_phase[4] ;			// phasing of the 4 inputs
-	static u_char s3_out_phase ;			// phasing of the 1 output to Trigger
+	static uint8_t s3_ch_mask ;			// if '1' corresponding input masked
+	static uint8_t s3_ch_phase[4] ;			// phasing of the 4 inputs
+	static uint8_t s3_out_phase ;			// phasing of the 1 output to Trigger
 
 	// various thresholds
-	static u_short EM_HERATIO_THR ;
-	static u_short HAD_HERATIO_THR ;
-	static u_short EMTHR1 ;
-	static u_short EMTHR2 ;
-	static u_short EMTHR3 ;
-	static u_short HADTHR1 ;
-	static u_short HADTHR2 ;
-	static u_short HADTHR3 ;
-	static u_short JETTHR1 ;
-	static u_short JETTHR2 ;       
-	static u_short ETOTTHR ;       
-	static u_short HTOTTHR ;       
-	static u_short EHTTHR ;
-	static u_short HHTTHR ;
-	static u_short PHTTHR ;
+	static uint16_t EM_HERATIO_THR ;
+	static uint16_t HAD_HERATIO_THR ;
+	static uint16_t EMTHR1 ;
+	static uint16_t EMTHR2 ;
+	static uint16_t EMTHR3 ;
+	static uint16_t HADTHR1 ;
+	static uint16_t HADTHR2 ;
+	static uint16_t HADTHR3 ;
+	static uint16_t JETTHR1 ;
+	static uint16_t JETTHR2 ;       
+	static uint16_t ETOTTHR ;       
+	static uint16_t HTOTTHR ;       
+	static uint16_t EHTTHR ;
+	static uint16_t HHTTHR ;
+	static uint16_t PHTTHR ;
 
         // Ecal and Hcal 4x4 sums, Ecal+nearest Hcal sum, and Pres(EPD) hit pattern at stage2
-	u_int e2x2[2][16][10];
-	u_int h2x2[2][10][6];
-        u_int esum[2][15][9];
-        u_int epdcoin[2][15][9];
-	u_int hsum[2][9][5];
-        u_int padc[2][6][32];
-        u_int phit[2][6][32];
-        u_int sum [2][15][9];
+	uint32_t e2x2[2][16][10];
+	uint32_t h2x2[2][10][6];
+        uint32_t esum[2][15][9];
+        uint32_t epdcoin[2][15][9];
+	uint32_t hsum[2][9][5];
+        uint32_t padc[2][6][32];
+        uint32_t phit[2][6][32];
+        uint32_t sum [2][15][9];
         float ratio[2][15][9];
-        u_int em[2][15][9];
-        u_int had[2][15][9];
-        u_int jet[2][3];
-        u_int etot[2];
-        u_int htot[2];    
-        u_int dsmout;
+        uint32_t em[2][15][9];
+        uint32_t had[2][15][9];
+        uint32_t jet[2][3];
+        uint32_t etot[2];
+        uint32_t htot[2];    
+        uint32_t dsmout;
 };
 
 #endif

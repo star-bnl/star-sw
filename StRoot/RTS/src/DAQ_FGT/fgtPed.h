@@ -2,7 +2,7 @@
 #define _FGT_PED_HH_
 
 
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "daq_fgt.h"
 
@@ -36,7 +36,7 @@ public:
 	int run_stop() ;	// prints errors etc.
 
 	int from_cache(char *fname = 0) ;		// from cached file to ped_store
-	int to_cache(char *fname, u_int run, int dont_cache) ;			// to cached file from ped_store
+	int to_cache(char *fname, uint32_t run, int dont_cache) ;			// to cached file from ped_store
 	int bad_from_cache(char *fname = 0) ;
 
 
@@ -45,9 +45,9 @@ public:
 	int tb_cou_xpect ;	// as set in the conf file "ntimebins"!
 	int tb_cou_ped ;	// as in the pedestals/load file!
 
-	u_int total_charge ;	// summed up in the do_zs
+	uint32_t total_charge ;	// summed up in the do_zs
 
-	u_char ch_status[FGT_RDO_COU][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
+	uint8_t ch_status[FGT_RDO_COU][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
 
 //private:
 	// allocated per RDO
@@ -56,8 +56,8 @@ public:
 	struct peds_t {
 		float ped[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][FGT_TB_COU] ;
 		float rms[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][FGT_TB_COU] ;
-		u_short thr[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
-		u_short cou[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;	// no need for TB cou!
+		uint16_t thr[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
+		uint16_t cou[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;	// no need for TB cou!
 	} peds[FGT_RDO_COU], peds_from_cache[FGT_RDO_COU] ;
 
 

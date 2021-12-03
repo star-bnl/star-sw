@@ -13,19 +13,19 @@ struct svt_t {
 	int pre, post, pedoffset ;
 
 	// how many valid timebins in this hybrid
-	u_char counts[24][3][6][240] ;
+	uint8_t counts[24][3][6][240] ;
 	// up to 128 valid timebins (count is in counts)
 	// timebin is overloaded for pedestal RMS data!
-	u_char timebin[24][3][6][240][128] ;
+	uint8_t timebin[24][3][6][240][128] ;
 
 	// up to 128 valid adcs (same count as above...)
-	u_char adc[24][3][6][240][128] ;
+	uint8_t adc[24][3][6][240][128] ;
 
 	// helpers for the remap
-	u_char B[24][3][6] ;	// from RB,MZ,ASIC (all start from 1!) to Barrel
-	u_char L[24][3][6] ;	// ... to Ladder
-	u_char W[24][3][6] ;	// ... to Wafer
-	u_char H[24][3][6] ;	// ... to Hybrid
+	uint8_t B[24][3][6] ;	// from RB,MZ,ASIC (all start from 1!) to Barrel
+	uint8_t L[24][3][6] ;	// ... to Ladder
+	uint8_t W[24][3][6] ;	// ... to Wafer
+	uint8_t H[24][3][6] ;	// ... to Hybrid
 } ;
 
 

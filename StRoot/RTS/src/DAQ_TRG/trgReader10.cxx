@@ -51,7 +51,7 @@ int trgReader10(char *buff, struct trg_t *trg_t)
   }
 
   EvtDescData *evtdesc = (EvtDescData *)(buff + evtdesc_off); 
-//  u_int *x = (u_int *)evtdesc;
+//  uint32_t *x = (uint32_t *)evtdesc;
 
   int version2 = evtdesc->TrgDataFmtVer;
   

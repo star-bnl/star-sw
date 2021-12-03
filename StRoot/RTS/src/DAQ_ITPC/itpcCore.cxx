@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -16,20 +16,20 @@
 #include "itpcCore.h"
 
 // Copied over from tpx_altro_to_pad.h 
-static const u_char tpx_altro_to_j1[2][16] = {
+static const uint8_t tpx_altro_to_j1[2][16] = {
     {21,22,19,20,17,18,15,16,     8, 7,10, 9,12,11,14,13 },
     {38,37,36,35,34,33,32,31,    23,24,25,26,27,28,29,30 }
 } ;
 
 
 static struct itpc_to_ifee_table_t {
-	u_char fee_id ;
-	u_char fee_ch ;
+	uint8_t fee_id ;
+	uint8_t fee_ch ;
 } itpc_to_ifee_table[72+1][182+1] ;
 
 static struct itpc_rowpad_to_id_t {
-	u_char id ;
-	u_char pin ;
+	uint8_t id ;
+	uint8_t pin ;
 } itpc_rowpad_to_id_s[41][121] ;
 
 
@@ -311,7 +311,7 @@ void itpc_data_c::ped_stop()
 }
 
 //start of channel data!
-int itpc_data_c::start(u_short *d16)
+int itpc_data_c::start(uint16_t *d16)
 {
 	fee_ch_t *fee_p = rdo_p->fee_ch[rdo_p->fee_ch_cou] = (fee_ch_t *)malloc(sizeof(fee_ch_t)) ;
 	rdo_p->fee_ch_cou++ ;
@@ -324,7 +324,7 @@ int itpc_data_c::start(u_short *d16)
 	fee_p->words = words ;
 
 
-	u_short *d16_stop = d16 + words ;
+	uint16_t *d16_stop = d16 + words ;
 		
 	int tb_stop_last = -1 ;
 
@@ -392,7 +392,7 @@ void itpc_data_c::rdo_zap(void *rdo_p)
 }
 
 
-int itpc_data_c::fee_scan(u_short *d16, int shorts)
+int itpc_data_c::fee_scan(uint16_t *d16, int shorts)
 {
 
 //	for(int i=0;i<10;i++) {

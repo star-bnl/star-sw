@@ -36,7 +36,7 @@ struct fgt_pedrms_t {
 } ;
 
 struct apv_meta_t {
-	u_int version ;	
+	uint32_t version ;	
 
 	struct {
 		char present ;
@@ -80,9 +80,9 @@ const short META_ZS_VERSION = 0x0001 ;
 const short META_PED_ZS_VERSION = 0x0101 ;
 
 struct apv_meta_zs_t {	// used in the header of the ZS bank
-	u_char tb_cou ;
+	uint8_t tb_cou ;
 
-	u_char status[FGT_ARM_COU][FGT_APV_COU] ;	// bits: 1 present; 2 error
+	uint8_t status[FGT_ARM_COU][FGT_APV_COU] ;	// bits: 1 present; 2 error
 } ;
 
 	
@@ -121,9 +121,9 @@ public:
 	class daq_dta *handle_adc(int sec, int rdo, char *rdobuff = 0 ) ;
 	class daq_dta *handle_zs(int sec, int rdo, char *rdobuff = 0, int inbytes = 0 ) ;
 
-	u_int rdo_warns[7] ;	// number of warnings issued, per rdo; count from 1
-	u_char rdo_id[7] ;	// for RDO checks in get_l2; count from 1
-	u_int t_data ;		// for trg_cmd==1 pattern tests...
+	uint32_t rdo_warns[7] ;	// number of warnings issued, per rdo; count from 1
+	uint8_t rdo_id[7] ;	// for RDO checks in get_l2; count from 1
+	uint32_t t_data ;		// for trg_cmd==1 pattern tests...
 
 
 } ;

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <getopt.h>
 #include <stdlib.h>
@@ -25,9 +25,9 @@ static int sim_mode = 0 ;	//0 DAQ file rerun, 1 ASCII emulation
 static fcs_trg_base *f_t ;
 
 
-static u_int trg(daqReader *rdr)
+static uint32_t trg(daqReader *rdr)
 {
-	u_int fcs2019 = 0 ;
+	uint32_t fcs2019 = 0 ;
 	int ok = 0 ;
 	int fcs = 0 ;
 
@@ -65,7 +65,7 @@ static u_int trg(daqReader *rdr)
 
         L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
 
-	u_int lastdsm[8] ;
+	uint32_t lastdsm[8] ;
 
         for(int i=0;i<8;i++) {
               lastdsm[i] = swap16(l1Dsm->lastDSM[i]) ;
@@ -99,7 +99,7 @@ int from_ascii_evt()
 int from_ascii_open(const char *fn)
 {
 	int evts = 0 ;
-	u_short dta[8] ;
+	uint16_t dta[8] ;
 
 	LOG(INFO,"Opening %s",fn) ;
 
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
 			if(got_one == 0) {
 				fcs_evt++ ;
 				printf("=== fcs_evt %d\n",fcs_evt) ;
-				u_int fcs_trg = trg(rdr) ;
+				uint32_t fcs_trg = trg(rdr) ;
 				printf("--- fcs_trg %d\n",fcs_trg) ;
 				f_t->start_event() ;
 				got_one = 1 ;
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 
 			LOG(NOTE,"evt %d: %d %d %d %d : %d",evt,det,ns,dep,c,dd->ncontent) ;
 
-			f_t->fill_event(det,ns,dep,c,(u_short *)dd->Void,dd->ncontent) ;
+			f_t->fill_event(det,ns,dep,c,(uint16_t *)dd->Void,dd->ncontent) ;
 
 		}
 

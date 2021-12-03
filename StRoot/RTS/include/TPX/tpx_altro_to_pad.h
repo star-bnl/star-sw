@@ -1,33 +1,33 @@
 #ifndef _TPX_ALTRO_TO_PAD_H_
 #define _TPX_ALTRO_TO_PAD_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 
 /*
 	Map from the ALTRO channels to the old FEE channels (0..32).
 	ALTRO channels 0..15 correspond to the even ALTRO and
 	16..31 to the old altro
 */
-const u_char tpx_old_to_new_ch[32] = {
+const uint8_t tpx_old_to_new_ch[32] = {
     9, 11, 13, 15,  6,  4,  2,  0,      24, 26, 28, 30, 23, 21, 19, 17,
     8, 10, 12, 14,  7,  5,  3,  1,      25, 27, 29, 31, 22, 20, 18, 16
 } ;
 
-const u_char tpx_altro_to_j1[2][16] = {
+const uint8_t tpx_altro_to_j1[2][16] = {
     {21,22,19,20,17,18,15,16,     8, 7,10, 9,12,11,14,13 },
     {38,37,36,35,34,33,32,31,    23,24,25,26,27,28,29,30 }
 } ;
 
 struct tpx_padrow {
-	u_char row ;
-	u_char pad ;
+	uint8_t row ;
+	uint8_t pad ;
 } ;
 
 const struct tpx_fee_override_struct {
-	u_char sector ;	// 1..24
-	u_char rdo ;	// 1..6
-	u_char curr_altro ;	// what the backplanes reads
-	u_char orig_altro ;	// what is _should_ read!
+	uint8_t sector ;	// 1..24
+	uint8_t rdo ;	// 1..6
+	uint8_t curr_altro ;	// what the backplanes reads
+	uint8_t orig_altro ;	// what is _should_ read!
 } tpx_fee_override[] = {
 #ifdef TEST_RDO_ZG
 	{ 24, 1,   0,  90 },

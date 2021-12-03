@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "fcs_trg_base.h"
@@ -18,7 +18,7 @@
 // 2 output links
 void  fcs_trg_base::stage_2_tonko_202101(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[])
 {    
-	u_short params ;
+	uint16_t params ;
 
 
 	if(geo.ns==0) params = 0xBBAA ;

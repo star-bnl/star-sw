@@ -7,14 +7,14 @@
 
 
 struct bbc_t {
-	u_short pulse[32] ;
-	u_short time[32] ;
-	u_short proof[2] ;
-	u_short spare[6] ;
-	u_short ped[32] ;
-	u_short rms[32] ;
-	u_short peaks[64] ;
-	u_int scl[32] ;
+	uint16_t pulse[32] ;
+	uint16_t time[32] ;
+	uint16_t proof[2] ;
+	uint16_t spare[6] ;
+	uint16_t ped[32] ;
+	uint16_t rms[32] ;
+	uint16_t peaks[64] ;
+	uint32_t scl[32] ;
 } ;
 
 struct fpd_t {
@@ -22,11 +22,11 @@ struct fpd_t {
 	int channels ;
 	int max_channels ;
 
-	u_short adc[256] ;
-	u_short tdc[8] ;
-	u_short reg[3] ;
-	u_short ped[256] ;
-	u_short rms[256] ;
+	uint16_t adc[256] ;
+	uint16_t tdc[8] ;
+	uint16_t reg[3] ;
+	uint16_t ped[256] ;
+	uint16_t rms[256] ;
 
 	struct bbc_t bbc ;
 		

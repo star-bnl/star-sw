@@ -23,22 +23,22 @@ static int unpackCld(int sec, struct TPCMZCLD_local *mzcld) ;
 static int dumpGainr(int sec, int rb, struct TPCGAINR *g) ;
 
 /*
-static u_int max_ticks ;
-static u_int max_clust ;
-static u_int max_row ;
+static uint32_t max_ticks ;
+static uint32_t max_clust ;
+static uint32_t max_row ;
 */
 
 int tpc_reader(char *m, struct tpc_t *tpc, int sector, int flags)
 {
-	u_int rb, mz ;
-	u_int len  ;
-	u_int off ;
-	u_int t ;
-	u_int first, last ;
-	u_int hsec ;
+	uint32_t rb, mz ;
+	uint32_t len  ;
+	uint32_t off ;
+	uint32_t t ;
+	uint32_t first, last ;
+	uint32_t hsec ;
 	int ret ;
-	u_int tot_bytes ;
-//	static u_int evt ;
+	uint32_t tot_bytes ;
+//	static uint32_t evt ;
 
 	int retval = 0;
 
@@ -110,7 +110,7 @@ int tpc_reader(char *m, struct tpc_t *tpc, int sector, int flags)
 
 	LOG(DBG,"TPCP len %d, off %d",len,off) ;
 
-	tpcp = (struct TPCP *)((u_int *)m + off) ;
+	tpcp = (struct TPCP *)((uint32_t *)m + off) ;
 	if(checkBank((char *)tpcp,"TPCP") < 0) return 0 ;	// wrong bank!
 	if(tpcp->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swaptpcp = 1;
 
@@ -182,7 +182,7 @@ int tpc_reader(char *m, struct tpc_t *tpc, int sector, int flags)
 	seclp = NULL ;
 	if(b2h32(secp->bh.format_number)==2) {
 		if(secp->bh.w9) {
-			seclp = (struct TPCSECLP *)((u_int *)secp + b2h32(secp->bh.w9)) ;
+			seclp = (struct TPCSECLP *)((uint32_t *)secp + b2h32(secp->bh.w9)) ;
 			if(checkBank((char *)seclp,CHAR_TPCSECLP) < 0) {
 				seclp = NULL ;
 			}
@@ -389,7 +389,7 @@ int tpc_reader(char *m, struct tpc_t *tpc, int sector, int flags)
 
 				for(jj=0;jj<len;jj++) {
 					int start, last, length, stop ;
-					u_short ss, f8 ;
+					uint16_t ss, f8 ;
 					int tbin ;
 
 					ss = l2h16(seqd->seq[jj]) ;
@@ -409,7 +409,7 @@ int tpc_reader(char *m, struct tpc_t *tpc, int sector, int flags)
 						stop = start + length ;
 							
 						for(tbin=start;tbin<stop;tbin++) {
-							u_char val ;
+							uint8_t val ;
 							int counter ;
 
 							val = adcd->adc[adccou++] ;
@@ -564,11 +564,11 @@ int tpc_reader(char *m, struct tpc_t *tpc, int sector, int flags)
 static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *cppr, char *mem)
 {
 	int i, j, t ;
-	u_char row, pad ;
-	u_short *cppseq ;
-	u_char *adcseq ;
-	u_char *adcdata ;
-	u_short *cppdata ;
+	uint8_t row, pad ;
+	uint16_t *cppseq ;
+	uint8_t *adcseq ;
+	uint8_t *adcdata ;
+	uint16_t *cppdata ;
 
 	int timebins, cpps ;
 
@@ -591,13 +591,13 @@ static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *
 
 	switch(what) {
 	case 0 :	// ADCR 
-		adcdata = (u_char *) mem + sizeof(struct TPCADCR_l);
+		adcdata = (uint8_t *) mem + sizeof(struct TPCADCR_l);
 		if(cppr == NULL) {
 			LOG(WARN,"No CPPR? - skipping...",0,0,0,0,0) ;
 			return -1 ;
 		}
 
-		cppdata = (u_short *)((char *)cppr + sizeof(struct TPCCPPR_l)) ;
+		cppdata = (uint16_t *)((char *)cppr + sizeof(struct TPCCPPR_l)) ;
 		break ;
 	case 1 :	// PEDR
 		adcdata = ((struct TPCPEDR *)mem)->ped ;
@@ -622,16 +622,16 @@ static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *
 		row-- ;
 		pad-- ;
 
-		adcseq = (u_char *) adcdata + timebins*i ;
+		adcseq = (uint8_t *) adcdata + timebins*i ;
 
 
 		switch(what) {
 		case 0 :
-			cppseq = (u_short *)((char *) cppdata + 2*2*32*i) ;	
+			cppseq = (uint16_t *)((char *) cppdata + 2*2*32*i) ;	
 
 			for(j=0;j<cpps;j++) {
-				u_short start, stop ;
-				u_char val ;
+				uint16_t start, stop ;
+				uint8_t val ;
 				int counter ;
 
 
@@ -711,10 +711,10 @@ static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *
 
 static int unpackCld(int sec, struct TPCMZCLD_local *mzcld)
 {
-	u_int i, j ;
-	u_int nrows, nclust, row ;
-	u_int *rdata ;
-	u_int tot_hits ;
+	uint32_t i, j ;
+	uint32_t nrows, nclust, row ;
+	uint32_t *rdata ;
+	uint32_t tot_hits ;
 
 	tot_hits = 0 ;
 
@@ -731,12 +731,12 @@ static int unpackCld(int sec, struct TPCMZCLD_local *mzcld)
 		return tot_hits ;
 	}
 
-	u_int ticks = l2h32(mzcld->bh.w9) ;
+	uint32_t ticks = l2h32(mzcld->bh.w9) ;
 
 
-	rdata = (u_int *) mzcld->padrowFiller ;
+	rdata = (uint32_t *) mzcld->padrowFiller ;
 
-	LOG(DBG,"unpackCld: 0x%08X 0x%08X %d: 0x%08X 0x%08X",mzcld,rdata,rdata-(u_int*)mzcld,*rdata,*(rdata+1),0) ;
+	LOG(DBG,"unpackCld: 0x%08X 0x%08X %d: 0x%08X 0x%08X",mzcld,rdata,rdata-(uint32_t*)mzcld,*rdata,*(rdata+1),0) ;
 
 	row = 0 ;
 
@@ -767,9 +767,9 @@ static int unpackCld(int sec, struct TPCMZCLD_local *mzcld)
 
 
 		for(j=0;j<nclust;j++) {
-			u_short pad, tm, flags, charge, fl ;
-			u_int t1, t2, p1, p2 ;
-			u_int pt, cf ;
+			uint16_t pad, tm, flags, charge, fl ;
+			uint32_t t1, t2, p1, p2 ;
+			uint32_t pt, cf ;
 
 			pt = l2h32(*rdata++) ;
 			cf = l2h32(*rdata++) ;
@@ -812,7 +812,7 @@ static int unpackCld(int sec, struct TPCMZCLD_local *mzcld)
 
 			LOG(DBG,"   pad %d, timebin %d, charge %d, flags 0x%04X, t1 %d, t2 %d, p1 %d, p2 %d",(int)dpad,(int)dtimebin,charge,flags,t1,t2,p1,p2) ;
 
-			u_int ix = tpc_cached->cl_counts[row-1] ;	
+			uint32_t ix = tpc_cached->cl_counts[row-1] ;	
 			if(ix < TPC_READER_MAX_CLUSTERS) {
 				tpc_cached->cl[row-1][ix].p = (float) dpad ;
 				tpc_cached->cl[row-1][ix].t = (float) dtimebin ;
@@ -851,7 +851,7 @@ static int dumpGainr(int sec, int rrb, struct TPCGAINR *g)
 {
 	static int inited ;
 	static struct blah {
-		u_short row, pad ;
+		uint16_t row, pad ;
 	} seq[6][3][6*256] ;
 
 	int i ;
@@ -864,7 +864,7 @@ static int dumpGainr(int sec, int rrb, struct TPCGAINR *g)
 	rmz -= 1 ;	// start from 0 - God knows why anymore...
 
 	if(!inited) {
-	u_int vram, row, pad ;
+	uint32_t vram, row, pad ;
 
 	inited = 1 ;
 

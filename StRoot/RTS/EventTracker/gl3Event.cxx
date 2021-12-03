@@ -218,7 +218,7 @@ void gl3Event::readClustersFromEvpReader(daqReader *rdr, int sector)
        int padrow = dd->row;
        int sec = dd->sec;
        
-       for(u_int i=0;i<dd->ncontent;i++) {
+       for(uint32_t i=0;i<dd->ncontent;i++) {
 	 float pad = dd->cld[i].pad;
 	 float tb = dd->cld[i].tb;
 	 int charge = dd->cld[i].charge;

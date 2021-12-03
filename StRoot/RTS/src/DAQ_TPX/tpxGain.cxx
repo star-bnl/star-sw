@@ -24,7 +24,7 @@ struct tpx_odd_fee_t tpx_odd_fee[256] ;
 int tpx_odd_fee_count = 0 ;
 
 
-static u_int histo_data[2000] ;
+static uint32_t histo_data[2000] ;
 static void histo_init()
 {
 	memset(histo_data,0,sizeof(histo_data)) ;
@@ -252,7 +252,7 @@ void tpxGain::accum(char *evbuff, int bytes)
 {
 	int t ;
 	int i ;
-	u_int *data_end ;
+	uint32_t *data_end ;
 	int sec ;
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
@@ -870,7 +870,7 @@ int tpxGain::from_file(char *fname, int sec)
 	c_date = 0 ;
 	c_time = 0 ;
 
-	u_int f_date, f_time ;
+	uint32_t f_date, f_time ;
 	
 	struct tm tm ;
 	localtime_r(&buff.st_mtime, &tm) ;
@@ -965,7 +965,7 @@ int tpxGain::from_file(char *fname, int sec)
 
 		for(r=1;r<=6;r++) {
 			
-			for(u_int c=0;c<bad_fee[s][r][0];c++) {
+			for(uint32_t c=0;c<bad_fee[s][r][0];c++) {
 				int fee ;
 
 				fee = bad_fee[s][r][c+1] ;
@@ -1230,7 +1230,7 @@ int tpxGain::summarize(char *fname, FILE *log, int gain_mode)
 {
 	int s, r, a ;
 	char reason[1024] ;
-	u_int good, bad ;
+	uint32_t good, bad ;
 	FILE *ofile ;
 	int notes = 0 ;
 
@@ -1400,7 +1400,7 @@ int tpxGain::summarize(char *fname, FILE *log, int gain_mode)
 
 				// new as of Jun 11, 08:
 				// override fch to be J1 pin number as given to Tonko by Bob!
-				u_char j1 = tpx_altro_to_j1[a&1][ch] ;
+				uint8_t j1 = tpx_altro_to_j1[a&1][ch] ;
 
 				if(err > 1) {
 					if(row && bad_gain) sprintf(reason+strlen(reason),"[Bad gain %.1f]",g) ;					
@@ -1467,7 +1467,7 @@ int tpxGain::summarize(char *fname, FILE *log, int gain_mode)
 
 		for(a=0;a<256;a++) {
 			for(int ch=0;ch<16;ch++) {
-				u_char j1 = tpx_altro_to_j1[a&1][ch] ;
+				uint8_t j1 = tpx_altro_to_j1[a&1][ch] ;
 				if(fee_f->ch_count[a][ch] > 0) {
 					int fee = tpx_altro_to_fee(r,a) ;
 					notes++ ;

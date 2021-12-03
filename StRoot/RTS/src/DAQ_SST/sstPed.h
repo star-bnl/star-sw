@@ -2,7 +2,7 @@
 #define _SST_PED_HH_
 
 
-#include <sys/types.h>
+#include <stdint.h>
 
 #include "daq_sst.h"
 
@@ -27,7 +27,7 @@ public:
 	int to_evb(char *buff) ;			// to EVB format from ped_store
 
 
-	int to_cache(char *fname = 0, u_int run = 0) ;			// to cached file from ped_store
+	int to_cache(char *fname = 0, uint32_t run = 0) ;			// to cached file from ped_store
 
 
 	// allocated per RDO

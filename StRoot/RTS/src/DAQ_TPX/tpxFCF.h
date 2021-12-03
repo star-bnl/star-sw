@@ -27,7 +27,7 @@
 
 //#define FCF_DEBUG
 
-#define FCF_DO_DOUBLE	// timebins, pads, averages are double instead of u_int
+#define FCF_DO_DOUBLE	// timebins, pads, averages are double instead of uint32_t
 //#define FCF_DO_INT 	// p1, t1 etc. are ints instead of shorts
 
 
@@ -109,7 +109,7 @@ public:
 	static int fcf_decode(unsigned int *p_buff, daq_cld *dc, unsigned short version=0) ;
 	static int fcf_decode(unsigned int *p_buff, daq_sim_cld *sdc, unsigned short version=0) ;
 	static int afterburner(int cou, daq_cld *store[]) ;
-	static char *fcf_flags(u_char flags) ;
+	static char *fcf_flags(uint8_t flags) ;
 
 	// new functions for FY13 which assist in running FCF on any sector and rdo
 	void config2(int sec, int rdo, int modes=0, int rows=0, unsigned char *rowlen=0) ;

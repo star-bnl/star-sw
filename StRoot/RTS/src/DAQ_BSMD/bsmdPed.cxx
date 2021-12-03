@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,35 +59,35 @@ void bsmdPed::init(int active_rbs)
 }
 
 
-int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1, u_int *adc_sum)
+int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1, uint32_t *adc_sum)
 {
-	u_short *d_out = (u_short *) dst ;
+	uint16_t *d_out = (uint16_t *) dst ;
 	int fiber ;
-	u_short cap ;
-	u_short *d ;
-	u_int *d32 = (u_int *) src ;
+	uint16_t cap ;
+	uint16_t *d ;
+	uint32_t *d32 = (uint32_t *) src ;
 	double sum_adc = 0.0 ;	// for phase scanning
 
 	LOG(NOTE,"BSMD ZS: rdo %d: in bytes %d",rdo1,in_bytes) ;
 
-	d = (u_short *)(src + 10*4) ;	// data start at 10th word
+	d = (uint16_t *)(src + 10*4) ;	// data start at 10th word
 
-	cap = (u_short) (d32[8] & 0x7F) ;	// cap is now 16 bits!
+	cap = (uint16_t) (d32[8] & 0x7F) ;	// cap is now 16 bits!
 
 	fiber = (sector-1)*2 + (rdo1 - 1) ;
 
 	*d_out++ = 0x0002 ;	// version 2!
-	u_short *count = d_out++ ;	// save counter spot
+	uint16_t *count = d_out++ ;	// save counter spot
 	*d_out++ = d32[8] & 0xFFFF ;	// save 16 bits of the cap!
 	*d_out++ = fiber ;
 
-	u_short *tmp = d_out ;
+	uint16_t *tmp = d_out ;
 
 	double *ped = (ped_store + rdo1 - 1)->ped[cap] ;
-	u_short *thr = (ped_store + rdo1 - 1)->thr[cap] ;
+	uint16_t *thr = (ped_store + rdo1 - 1)->thr[cap] ;
 	
 	for(int ii=0;ii<4800;ii++) {
-		u_short dta = *d ;
+		uint16_t dta = *d ;
 		if(dta > *thr) {
 
 			sum_adc += (double)dta - (*ped) ;
@@ -114,7 +114,7 @@ int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1, u_int *adc_sum)
 	evts[rdo1-1]++ ;
 
 	if(adc_sum) {
-		*adc_sum = (u_int) (sum_adc + 0.5) ;
+		*adc_sum = (uint32_t) (sum_adc + 0.5) ;
 	}
 
 	return out_bytes ;
@@ -128,12 +128,12 @@ int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1, u_int *adc_sum)
 void bsmdPed::accum(char *evbuff, int bytes, int rdo1)
 {
 	int cap ;
-	u_short *d_in ;
-	u_int *d32 ;
+	uint16_t *d_in ;
+	uint32_t *d32 ;
 	int rdo = rdo1 - 1 ;	// since rdo1 is from 1
 
-	d_in = (u_short *) evbuff ;
-	d32 = (u_int *) evbuff ;
+	d_in = (uint16_t *) evbuff ;
+	d32 = (uint32_t *) evbuff ;
 
 	// this is where the cap should be...
 	cap = d32[8] & 0x7F ;	// mask off, in case of problems...
@@ -160,7 +160,7 @@ void bsmdPed::accum(char *evbuff, int bytes, int rdo1)
 	p->cou[cap]++ ;
 	
 	// move to start of data
-	d_in = (u_short *)(evbuff + 10*4) ;	// start at the 10th
+	d_in = (uint16_t *)(evbuff + 10*4) ;	// start at the 10th
 
 	for(int j=0;j<4800;j++) {
 
@@ -194,7 +194,7 @@ void bsmdPed::do_thresh(double thr_sm, double thr_pre)
 		struct peds *p = ped_store + r ;
 		for(int c=0;c<128;c++) {
 			for(int t=0;t<4800;t++) {
-				p->thr[c][t] = (u_short) (p->ped[c][t] + p->rms[c][t] * n_sigma + 0.5) ;
+				p->thr[c][t] = (uint16_t) (p->ped[c][t] + p->rms[c][t] * n_sigma + 0.5) ;
 			}
 		}
 	}
@@ -207,7 +207,7 @@ void bsmdPed::calc()
 {
 	int r, cap, ch ;
 	int bad ;
-	const u_int MIN_EVENTS = 20 ;
+	const uint32_t MIN_EVENTS = 20 ;
 
 
 	LOG(NOTE,"Calculating pedestals for sector %2d",sector) ;
@@ -294,7 +294,7 @@ int bsmdPed::to_evb(char *buff)
 	int r, p, t ;
 	int fiber ;
 
-	u_short *dta = (u_short *) buff ;	
+	uint16_t *dta = (uint16_t *) buff ;	
 
 
 
@@ -318,13 +318,13 @@ int bsmdPed::to_evb(char *buff)
 		for(p=0;p<128;p++) {
 			for(t=0;t<4800;t++) {
 
-				u_int rr, pp ;
+				uint32_t rr, pp ;
 
-				rr = (u_int)(ped->rms[p][t] * 8.0 + 0.5) ;
+				rr = (uint32_t)(ped->rms[p][t] * 8.0 + 0.5) ;
 				if(rr > 0x3F) rr = 0x3F ;	// maximum I can have!
 
 				
-				pp = (u_int)(ped->ped[p][t] + 0.5)  ;
+				pp = (uint32_t)(ped->ped[p][t] + 0.5)  ;
 				if(pp > 0x3FF) pp = 0x3FF ;	// maximum I can have!
 
 				*dta++ = (rr<<10)|pp ;
@@ -391,7 +391,7 @@ int bsmdPed::from_cache(char *fname)
 	return valid ;
 }
 
-int bsmdPed::to_cache(char *fname, u_int run)
+int bsmdPed::to_cache(char *fname, uint32_t run)
 {
 	FILE *f ;
 	int r, p, t ;

@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
 
@@ -163,7 +163,7 @@ daq_dta *daq_etow::handle_raw()
 
 		LOG(DBG,"ETOW sfs bytes %d",bytes) ;
 
-		raw->create(bytes,"raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+		raw->create(bytes,"raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 
 		st = (char *) raw->request(bytes) ;
 
@@ -174,7 +174,7 @@ daq_dta *daq_etow::handle_raw()
 		goto done ;
 	}
 
-	raw->create(bytes,"raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	raw->create(bytes,"raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 	st = (char *)raw->request(bytes) ;
 	memcpy(st, from, bytes) ;
 
@@ -190,7 +190,7 @@ daq_dta *daq_etow::handle_raw()
 
 daq_dta *daq_etow::handle_adc()
 {
-	u_short *raw_dta ;
+	uint16_t *raw_dta ;
 
 	LOG(DBG,"Entering adc") ;
 
@@ -199,7 +199,7 @@ daq_dta *daq_etow::handle_adc()
 	LOG(DBG,"raw bank %p",dd) ;
 
 	if(dd && dd->iterate()) {
-		raw_dta = (u_short *) dd->Byte ;
+		raw_dta = (uint16_t *) dd->Byte ;
 	}
 	else {
 		return 0 ;
@@ -214,7 +214,7 @@ daq_dta *daq_etow::handle_adc()
 
 
 	// unpack 
-	u_short *data = (u_short *)((char *)raw_dta + 4 + 128) ;	// 4 byte dummy, 128 byte header
+	uint16_t *data = (uint16_t *)((char *)raw_dta + 4 + 128) ;	// 4 byte dummy, 128 byte header
 	
 	for(int j=0;j<ETOW_PRESIZE;j++) {
 		for(int i=0;i<ETOW_MAXFEE;i++) {
@@ -240,10 +240,10 @@ int daq_etow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo1)
 	const int ETOW_DDL_BYTES = 2100 ;
 	int buff_bytes = words * 4 ;
 
-	u_short *us = (u_short *)addr ;
+	uint16_t *us = (uint16_t *)addr ;
 
-	u_short t_hi = l2h16(us[2]) ;
-	u_short t_lo = l2h16(us[3]) ;
+	uint16_t t_hi = l2h16(us[2]) ;
+	uint16_t t_lo = l2h16(us[3]) ;
 
 	int err = 0 ;
 

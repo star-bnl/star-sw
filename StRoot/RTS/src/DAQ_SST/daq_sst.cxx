@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -96,11 +96,11 @@ daq_dta *daq_sst::get(const char *bank, int sec, int rdo, int pad, void *p1, voi
 */
 int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_ped_t *peds, int mode)
 {
-	u_int *dta = (u_int *)rdobuff ;
+	uint32_t *dta = (uint32_t *)rdobuff ;
 
-	u_int *d32 = dta ;
-	u_int *d32_end = dta + words ;
-	u_int *d32_start = dta ;
+	uint32_t *d32 = dta ;
+	uint32_t *d32_end = dta + words ;
+	uint32_t *d32_start = dta ;
 
 	int adc_count = 0 ;
 
@@ -119,7 +119,7 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 	//immediatelly
 	int found = 0 ;
 	while(d32<d32_end) {
-		u_int d = *d32++ ;
+		uint32_t d = *d32++ ;
 
 		if(d == 0xDDDDDDDD) {
 			d32-- ;	// move back ;
@@ -136,10 +136,10 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 
 	int fib = 0 ;
 	while(d32<d32_end) {
-		u_int d = *d32++ ;
+		uint32_t d = *d32++ ;
 
 		if(d != 0xDDDDDDDD) {
-			u_int *d_here = d32 - 1 ;	// go back one
+			uint32_t *d_here = d32 - 1 ;	// go back one
 			LOG(ERR,"S%d-%d: %u: fiber %d: can't find 0xDDDDDDDD at offset %d [0x%08X] -- data corrupt, skipping!",s,r,e,fib,
 			    d_here-d32_start,*d_here) ;
 
@@ -151,7 +151,7 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 			goto err_ret ;
 		}
 
-		u_int fiber_id = d32[0] ;
+		uint32_t fiber_id = d32[0] ;
 		// fiber id: 0xfffwwwwm
 		// fff-> flags 000 OK, 001 empty, 002 overflow
 		// wwww -> word length
@@ -489,14 +489,14 @@ daq_dta *daq_sst::handle_adc(int sec, int rdo, char *rdobuff, int words)
 	for(int s=s_start;s<=s_stop;s++) {
 
 	for(int r=r_start;r<=r_stop;r++) {
-		u_int *dta ;
+		uint32_t *dta ;
 
 		if(rdobuff == 0) {
 			daq_dta *raw_d = handle_raw(s,r) ;
 			if(raw_d == 0) continue ;
 			if(raw_d->iterate() == 0) continue ;
 
-			dta = (u_int *) raw_d->Void ;
+			dta = (uint32_t *) raw_d->Void ;
 			words = raw_d->ncontent/4 ;
 
 			//for ERRORs printounts
@@ -505,7 +505,7 @@ daq_dta *daq_sst::handle_adc(int sec, int rdo, char *rdobuff, int words)
 
 		}
 		else {
-			dta = (u_int *) rdobuff ;
+			dta = (uint32_t *) rdobuff ;
 
 //			LOG(WARN,"Running from buffer: words %d, RDO %d",words,r) ;
 		} ;
@@ -601,11 +601,11 @@ int daq_sst::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
 	// will look the same as PXL!
 	int t_cou = 0 ;
-	u_int *d32 = (u_int *)buff ;
-	u_int err = 0 ;
+	uint32_t *d32 = (uint32_t *)buff ;
+	uint32_t err = 0 ;
 	int last_ix = words - 1 ;
 	int token, daq_cmd, trg_cmd ;
-	u_int token_word ;
+	uint32_t token_word ;
 
 	// quick sanity checks...
 	// errors in the lower 16 bits are critical in the sense that
@@ -688,7 +688,7 @@ int daq_sst::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	// get other trigger commands...
 	int last_p = last_ix - 1 ;	// at CRC
 
-	//u_int crc = d32[last_p] ;
+	//uint32_t crc = d32[last_p] ;
 
 
 	last_p-- ;	// at end of TCD info
@@ -778,7 +778,7 @@ daq_dta *daq_sst::handle_ped(int sec)
 	char str[128] ;
 	char *full_name ;
 	int bytes ;
-	u_short *d, *d_in ;
+	uint16_t *d, *d_in ;
 	int s_start, s_stop ;
 
 
@@ -811,7 +811,7 @@ daq_dta *daq_sst::handle_ped(int sec)
 
 	LOG(NOTE,"bytes %d",bytes) ;
 
-	d = (u_short *) malloc(bytes) ;
+	d = (uint16_t *) malloc(bytes) ;
 	d_in = d ;
 			
 	int ret = caller->sfs->read(str, (char *)d, bytes) ;

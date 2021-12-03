@@ -1,7 +1,7 @@
 #ifndef _DAQ_PP2PP_H_
 #define _DAQ_PP2PP_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 
 #define PP2PP_SVX_CH	128
 
@@ -11,46 +11,46 @@
 //   zero-suppressed data
 //   zero-suppressed data and pedestal subtracted too
 struct pp2pp_t {
-	u_char seq_id ;		// 1..whatever is coded with sequencer jumpers
-	u_char chain_id ;	// 0..3 ;
-	u_char svx_id ;		// 0..7 ;
-	u_char error ;		// error occured!
+	uint8_t seq_id ;		// 1..whatever is coded with sequencer jumpers
+	uint8_t chain_id ;	// 0..3 ;
+	uint8_t svx_id ;		// 0..7 ;
+	uint8_t error ;		// error occured!
 	
-	u_char bunch_xing ;
-	u_char not_sparse ;	
-	u_char res2 ;
-	u_char res3 ;
+	uint8_t bunch_xing ;
+	uint8_t not_sparse ;	
+	uint8_t res2 ;
+	uint8_t res3 ;
 
-	u_char adc[PP2PP_SVX_CH] ;	
-	u_char trace[PP2PP_SVX_CH] ;	// 0-ch not found;1 - ch found OK; 2 - duplicate ch
+	uint8_t adc[PP2PP_SVX_CH] ;	
+	uint8_t trace[PP2PP_SVX_CH] ;	// 0-ch not found;1 - ch found OK; 2 - duplicate ch
 } ;
 
 
 #define PP2PP_PED_SUB_VERSION	0x01
 struct pp2pp_ped_sub_t {
-	u_char seq_id ;		// 1..whatever is coded with sequencer jumpers
-	u_char chain_id ;	// 0..3 ;
-	u_char svx_id ;		// 0..7 ;
-	u_char error ;		// error occured!
+	uint8_t seq_id ;		// 1..whatever is coded with sequencer jumpers
+	uint8_t chain_id ;	// 0..3 ;
+	uint8_t svx_id ;		// 0..7 ;
+	uint8_t error ;		// error occured!
 	
-	u_char bunch_xing ;
-	u_char not_sparse ;	
-	u_char ch_cou ;
-	u_char version ;
+	uint8_t bunch_xing ;
+	uint8_t not_sparse ;	
+	uint8_t ch_cou ;
+	uint8_t version ;
 
 	struct {
-		u_char adc ;	
-		u_char ch ;
+		uint8_t adc ;	
+		uint8_t ch ;
 	} dta[0] ;
 } ;
 
 
 #define PP2PP_PED_VERSION 0 
 struct pp2pp_pedrms_t {
-	u_char version ;
-	u_char seq_id ;		// 1..whatever is coded with sequencer jumpers
-	u_char chain_id ;	// 0..3 ;
-	u_char svx_id ;		// 0..7 ;
+	uint8_t version ;
+	uint8_t seq_id ;		// 1..whatever is coded with sequencer jumpers
+	uint8_t chain_id ;	// 0..3 ;
+	uint8_t svx_id ;		// 0..7 ;
 
 	float svx_ped ;
 	float svx_rms ;

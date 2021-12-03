@@ -2,14 +2,14 @@
 #include <stdio.h>
 #include "fcs_trg_base.h"
 
-void fcs_trg_base::stage_0_201900(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *dta_out)
+void fcs_trg_base::stage_0_201900(adc_tick_t adc, geom_t geo, ped_gain_t *pg, uint32_t *dta_out)
 {
 	int sum = 0 ;
 //	int peak = 0 ;
 //	int last = 0 ;
 
 	for(int tb=0;tb<8;tb++) {
-		u_short radc = adc.d[tb] ;
+		uint16_t radc = adc.d[tb] ;
 
 		switch(tb) {
 		case 0 :

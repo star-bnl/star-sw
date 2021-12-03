@@ -11,7 +11,7 @@
 	Bit0	Do raw ADC
 */
 
-extern inline int daq100Decision(int t, u_int daq_cmd, u_int run_type, u_int cl_run, u_int zero_wr)
+extern inline int daq100Decision(int t, uint32_t daq_cmd, uint32_t run_type, uint32_t cl_run, uint32_t zero_wr)
 {
 	int fmt, proc, hlt ;
 

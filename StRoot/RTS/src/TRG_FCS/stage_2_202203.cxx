@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "fcs_trg_base.h"
@@ -39,15 +39,15 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     if(fcs_trgDebug>=2) printf("Stage2v3 ns=%d\n",ns);
 
     // NS Marker
-//    u_short params ;
+//    uint16_t params ;
 //  if(ns==0) params = 0xBBAA ;
 //    else params = 0xDDCC ;
 
     // Creating 2x2 row/column address map when called first time
-    static u_int ETbTdep[16][10]; //DEP#
-    static u_int ETbTadr[16][10]; //Input Link data address
-    static u_int HTbTdep[10][6];  //DEP#
-    static u_int HTbTadr[10][6];  //Input Link data address          
+    static uint32_t ETbTdep[16][10]; //DEP#
+    static uint32_t ETbTadr[16][10]; //Input Link data address
+    static uint32_t HTbTdep[10][6];  //DEP#
+    static uint32_t HTbTadr[10][6];  //Input Link data address          
     static int first=0;
     if(first==0){
 	first=1;
@@ -132,7 +132,7 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     }
 
     //compute overlapping Hcal 4x4 sum of [9][5]
-    //u_int hsum[9][5];
+    //uint32_t hsum[9][5];
     for(int r=0; r<9; r++){
         if(fcs_trgDebug>=2) printf("H4x4 ");
         for(int c=0; c<5; c++){
@@ -173,14 +173,14 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     
     //compute overlapping Ecal 4x4 sums of [15][9]
     //take ratio with the closest hcal 4x4
-    //u_int esum[15][9];
-    //u_int sum[15][9];
+    //uint32_t esum[15][9];
+    //uint32_t sum[15][9];
     //float ratio[15][9];
-    u_int EM1 =0, EM2 =0, EM3=0;
-    u_int GAM1=0, GAM2=0, GAM3=0;
-    u_int ELE1=0, ELE2=0, ELE3=0;
-    u_int HAD1=0, HAD2=0, HAD3=0;
-    u_int ETOT=0, HTOT=0;
+    uint32_t EM1 =0, EM2 =0, EM3=0;
+    uint32_t GAM1=0, GAM2=0, GAM3=0;
+    uint32_t ELE1=0, ELE2=0, ELE3=0;
+    uint32_t HAD1=0, HAD2=0, HAD3=0;
+    uint32_t ETOT=0, HTOT=0;
     for(int r=0; r<15; r++){
         if(fcs_trgDebug>=2) printf("E4x4+H %2d  ",r);
         for(int c=0; c<9; c++){
@@ -192,7 +192,7 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
             //if(esum[r][c] > 0xff) esum[r][c]=0xff; //Tonko says no point to saturate at 8bit here
 
 	    // locate the closest hcal
-            u_int h=hsum[ns][EtoHmap[r][c][0]][EtoHmap[r][c][1]];
+            uint32_t h=hsum[ns][EtoHmap[r][c][0]][EtoHmap[r][c][1]];
                                  
 	    // E+H sum
             sum[ns][r][c] = esum[ns][r][c] + h;
@@ -227,7 +227,7 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
 	    // ratio thresholds are in fixed point integer where 1.0==128
 	    em[ns][r][c]=0;	
 	    had[ns][r][c]=0;
-	    u_int h128 = h*128 ;
+	    uint32_t h128 = h*128 ;
 	    if(h128 < esum[ns][r][c] * EM_HERATIO_THR){
   	        em[ns][r][c]=1;
 	        if(sum[ns][r][c] > EMTHR1){
@@ -258,7 +258,7 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     }
     
     //Ecal sub-crate sum
-    u_int esub[4];
+    uint32_t esub[4];
     esub[0] = esum[ns][ 0][0]+esum[ns][ 0][2]+esum[ns][ 0][4]+esum[ns][ 0][6]+esum[ns][ 0][8]
 	    + esum[ns][ 2][0]+esum[ns][ 2][2]+esum[ns][ 2][4]+esum[ns][ 2][6]+esum[ns][ 2][8];
     esub[1] = esum[ns][ 4][0]+esum[ns][ 4][2]+esum[ns][ 4][4]+esum[ns][ 4][6]+esum[ns][ 4][8]
@@ -270,7 +270,7 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     for(int i=0; i<4; i++) if(esub[i]>0xff) esub[i]=0xff;
     
     //Hcal sub-crate sum
-    u_int hsub[4];
+    uint32_t hsub[4];
     hsub[0] = hsum[ns][ 1][0]+hsum[ns][ 1][2]+hsum[ns][ 1][4];
     hsub[1] = hsum[ns][ 3][0]+hsum[ns][ 3][2]+hsum[ns][ 3][4];
     hsub[2] = hsum[ns][ 5][0]+hsum[ns][ 5][2]+hsum[ns][ 5][4];
@@ -278,8 +278,8 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
     for(int i=0; i<4; i++) if(hsub[i]>0xff) hsub[i]=0xff;
 
     //Jet sum
-    //u_int jet[3];
-    u_int JP1=0,JP2=0;
+    //uint32_t jet[3];
+    uint32_t JP1=0,JP2=0;
     jet[ns][0] = esub[0] + esub[1] + hsub[0] + hsub[1];
     jet[ns][1] = esub[1] + esub[2] + hsub[1] + hsub[2];
     jet[ns][2] = esub[2] + esub[3] + hsub[2] + hsub[3];

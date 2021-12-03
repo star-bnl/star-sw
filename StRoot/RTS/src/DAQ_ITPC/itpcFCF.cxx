@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 #include <arpa/inet.h>
@@ -229,7 +229,7 @@ void itpc_fcf_c::set_gain(int sec1, int row1, int pad1, float gain)
 	gain_p[row1][pad1].gain = gain ;
 }
 
-u_char itpc_fcf_c::get_flags(int sec1, int row1, int pad1)
+uint8_t itpc_fcf_c::get_flags(int sec1, int row1, int pad1)
 {
 	if(row1==0 || pad1==0) return 255 ;
 
@@ -243,7 +243,7 @@ u_char itpc_fcf_c::get_flags(int sec1, int row1, int pad1)
 
 }
 
-void itpc_fcf_c::set_flags(int sec1, int row1, int pad1, u_char flags)
+void itpc_fcf_c::set_flags(int sec1, int row1, int pad1, uint8_t flags)
 {
 
 	gain_rp_t (*gain_p)[MAX_PHYS_PAD+1] ;
@@ -262,7 +262,7 @@ void itpc_fcf_c::zap_fee(int sec1, int rdo1, int port1)
 	int padplane_id = itpc->itpc_fee_map[sec1-1][rdo1-1][port1-1] ;
 	
 	for(int c=0;c<64;c++) {
-		u_char flags ;
+		uint8_t flags ;
 		int row, pad ;
 
 		itpc_ifee_to_rowpad(padplane_id,c,row,pad) ;
@@ -300,12 +300,12 @@ struct itpc_fcf_c::rp_t *itpc_fcf_c::get_row_pad(int row, int pad)
 		int max_row_all = max_slice + 1 ;
 		int chunks = max_row_all * max_pad_all ;
 
-		row_pad_store = (u_short *) valloc(chunks *s1_data_length * sizeof(u_short)) ;
+		row_pad_store = (uint16_t *) valloc(chunks *s1_data_length * sizeof(uint16_t)) ;
 		assert(row_pad_store) ;
-		memset(row_pad_store,0,chunks *s1_data_length * sizeof(u_short)) ;	// superstition...
+		memset(row_pad_store,0,chunks *s1_data_length * sizeof(uint16_t)) ;	// superstition...
 	}
 
-	u_short *p = row_pad_store + ((row*max_pad_all) + pad)*s1_data_length ;
+	uint16_t *p = row_pad_store + ((row*max_pad_all) + pad)*s1_data_length ;
 
 	return (rp_t *)p ;
 }
@@ -330,10 +330,10 @@ int itpc_fcf_c::init(daq_dta *gain)
 
 		daq_det_gain *gp = (daq_det_gain *) gain->Void ;
 
-		for(u_int p=0;p<gain->ncontent;p++) {
+		for(uint32_t p=0;p<gain->ncontent;p++) {
 			if(p==0) continue ;
-//			if(p>(u_int)rowlen[row]) continue ;
-			if(p>(u_int)x_max(row,0)) continue ;
+//			if(p>(uint32_t)rowlen[row]) continue ;
+			if(p>(uint32_t)x_max(row,0)) continue ;
 
 			tot_ch++ ;
 
@@ -568,7 +568,7 @@ void itpc_fcf_c::event_start()
 }
 
 
-int itpc_fcf_c::fcf_decode(u_int *p_buff, daq_sim_cld_x *dc, u_int version)
+int itpc_fcf_c::fcf_decode(uint32_t *p_buff, daq_sim_cld_x *dc, uint32_t version)
 {
 	daq_cld cld ;
 	int words_used ;
@@ -591,11 +591,11 @@ int itpc_fcf_c::fcf_decode(u_int *p_buff, daq_sim_cld_x *dc, u_int version)
 	
 }
 
-int itpc_fcf_c::fcf_decode(u_int *p_buff, daq_cld *dc, u_int version)
+int itpc_fcf_c::fcf_decode(uint32_t *p_buff, daq_cld *dc, uint32_t version)
 {
 	double p, t ;
 	int p1,p2,t1,t2,cha,fla ;
-	u_int p_tmp, t_tmp ;
+	uint32_t p_tmp, t_tmp ;
 
 	// pad
 	p_tmp = *p_buff & 0xFFFF ;
@@ -660,7 +660,7 @@ int itpc_fcf_c::fcf_decode(u_int *p_buff, daq_cld *dc, u_int version)
 	dc->tb = t ;
 
 
-	return 2 ;	// 2 u_ints used
+	return 2 ;	// 2 uint32_ts used
 
 }
 
@@ -674,13 +674,13 @@ int itpc_fcf_c::fcf_decode(u_int *p_buff, daq_cld *dc, u_int version)
 //	adc...
 //	adc...
 
-int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words) 
+int itpc_fcf_c::do_ch(int fee_id, int fee_ch, uint32_t *data, int words) 
 {
 	int row, pad ;
 	int seq_cou ;
 	int s_count ;
 	int t_stop_last ;
-	u_short *s1_data ;
+	uint16_t *s1_data ;
 	int t_cou ;
 	int err = 0 ;
 
@@ -711,7 +711,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 
 	t_cou = 0 ;
 	for(int i=0;i<word32;i++) {
-		u_int d = *data++ ;
+		uint32_t d = *data++ ;
 
 		if(d & 0xC0000000) {
 			seq_cou = 0 ;
@@ -820,21 +820,21 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 //	adc...
 //	adc...
 
-int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id) 
+int itpc_fcf_c::do_ch_sim(int row, int pad, uint16_t *tb_buff, uint16_t *track_id) 
 {
 	int seq_cou ;
 	int s_count ;
 
-	u_short *s1_data ;
+	uint16_t *s1_data ;
 
 	int t_start ;
 	int t_cou ;
-	u_short *p_start = 0 ;
+	uint16_t *p_start = 0 ;
 
 	offline = 1 ;	// juuuuust in case!
  	words_per_cluster = 4 ;	// added stuff
 	if(track_dta==0) {
-		track_dta = (u_short *)malloc(MAX_BLOB_SIZE*2) ;
+		track_dta = (uint16_t *)malloc(MAX_BLOB_SIZE*2) ;
 	}
 
 	seq_cou = 0;
@@ -933,10 +933,10 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id)
 // Returns words(ints) of storage.
 int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 {
-	out_store = (u_int *) v_store ;
+	out_store = (uint32_t *) v_store ;
 	max_out_bytes = bytes ;
 
-	u_int *store_start = out_store ;
+	uint32_t *store_start = out_store ;
 		
 	f_stat.evt_cou++ ;
 	
@@ -946,7 +946,7 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 		double tmx ;
 		int found_ints ;
 
-		u_int *row_store = out_store++ ;	// leave space for row number
+		uint32_t *row_store = out_store++ ;	// leave space for row number
 		out_store++ ;	// leave space for version
 		out_store++ ;	// leave space for cluster count
 
@@ -1052,8 +1052,8 @@ int itpc_fcf_c::do_blobs_stage1(int row)
 	for(int p=1;p<=rl;p++) {	// < is on purpose!!!
 		int t1_cou, t1_lo, t1_hi ;
 		int t2_cou, t2_lo, t2_hi ;
-		u_short *ix1_p ;
-		u_short *ix2_p ;
+		uint16_t *ix1_p ;
+		uint16_t *ix2_p ;
 
 		rp_t *rp1 = get_row_pad(row,p) ;
 
@@ -1061,10 +1061,10 @@ int itpc_fcf_c::do_blobs_stage1(int row)
 
 		//LOG(TERR,"Row %d: s1_len %d",row,rp[p].s1_len) ;
 
-		u_short *d1 = rp1->s1_data ;
+		uint16_t *d1 = rp1->s1_data ;
 
 		for(int i=0;i<rp1->s1_len;i++) {
-			u_short *d2 ;
+			uint16_t *d2 ;
 
 			rp_t *rp2 = get_row_pad(row,p+1) ;
 
@@ -1203,7 +1203,7 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 
 		if(rp->s1_len==0) continue ;
 
-		u_short *d = rp->s1_data ;
+		uint16_t *d = rp->s1_data ;
 
 		for(int i=0;i<rp->s1_len;i++) {	// loop over sequnces
 			int t_cou, t_start, t_stop ;
@@ -1284,10 +1284,10 @@ int itpc_fcf_c::do_blobs_stage2(int row)
 			continue ;
 		}
 
-		u_int bytes_for_blob = (dp+2)*(dt+2)*2*2 ;
+		uint32_t bytes_for_blob = (dp+2)*(dt+2)*2*2 ;
 
 		if(bytes_for_blob > sizeof(smooth_dta)) {
-//		if((u_int)(dt*dp) >  sizeof(smooth_dta)/sizeof(smooth_dta[0])) {	// too big!
+//		if((uint32_t)(dt*dp) >  sizeof(smooth_dta)/sizeof(smooth_dta[0])) {	// too big!
 			f_stat.toobigs++ ;
 
 //			LOG(ERR,"row %d: %d: toobig %d X %d",row,i,dp,dt) ;
@@ -1325,7 +1325,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 //	rp_t *rp = get_row_pad(row,0) ;
 	double tm ;
 	
-	u_int *obuff = (u_int *)out_store ;
+	uint32_t *obuff = (uint32_t *)out_store ;
 
 	//LOG(TERR,"stage3: row %d",row) ;
 
@@ -1380,12 +1380,12 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 			if(rp->s1_len==0) continue ;
 
-			u_short *d = rp->s1_data ;
+			uint16_t *d = rp->s1_data ;
 
 			int pp = p - p1 + 1 ;
 
 			short *adc_p = smooth_dta + dt_2 * pp ;
-			u_short *track_p = track_dta + dt_2 * pp ;
+			uint16_t *track_p = track_dta + dt_2 * pp ;
 
 			for(int j=0;j<rp->s1_len;j++) {	// loop over sequnces
 				int t_cou, t_start ;
@@ -1411,9 +1411,9 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				// asign ptr
 				// d now points to ADC
 				for(int t=0;t<t_cou;t++) {
-					u_short adc = *d++ ;
+					uint16_t adc = *d++ ;
 
-					u_short tb = t_start++ ;
+					uint16_t tb = t_start++ ;
 
 					int ttb = tb - bl->t1 + 1 ;
 					adc_p[ttb] = adc ;
@@ -1548,23 +1548,23 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 			int adc_max = 0 ;
 			int pixels = 0 ;
-			u_short track_id = 0xFFFF ;
-			u_short quality = 0 ;
+			uint16_t track_id = 0xFFFF ;
+			uint16_t quality = 0 ;
 
 			if(offline) {	// various track id things
-				u_int i_charge = 0 ;
-				u_int t_charge = 0 ;
+				uint32_t i_charge = 0 ;
+				uint32_t t_charge = 0 ;
 
 				for(int i=1;i<=dp;i++) {
 
 					short *adc_p = smooth_dta + dt_2 * i + 1;
-					u_short *track_p = track_dta + dt_2 * i + 1 ;
+					uint16_t *track_p = track_dta + dt_2 * i + 1 ;
 
 
 					for(int j=1;j<=dt;j++) {
 					
 						int adc = *adc_p++ ;
-						u_short t_id = *track_p++ ;
+						uint16_t t_id = *track_p++ ;
 
 						// count pixels
 						if(adc) pixels++ ;
@@ -1587,13 +1587,13 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				for(int i=1;i<=dp;i++) {
 
 					short *adc_p = smooth_dta + dt_2 * i + 1;
-					u_short *track_p = track_dta + dt_2 * i + 1 ;
+					uint16_t *track_p = track_dta + dt_2 * i + 1 ;
 
 
 					for(int j=1;j<=dt;j++) {
 					
 						int adc = *adc_p++ ;
-						u_short t_id = *track_p++ ;
+						uint16_t t_id = *track_p++ ;
 
 						if(t_id == track_id) t_charge += adc ;
 						
@@ -1601,7 +1601,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				}
 				
 				if(i_charge) {
-					quality = (u_short)(100.0*(double)t_charge/(double)i_charge+0.5) ;
+					quality = (uint16_t)(100.0*(double)t_charge/(double)i_charge+0.5) ;
 				}
 
 				
@@ -1617,8 +1617,8 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 				short *adc_p = smooth_dta + dt_2 * i + 1;
 
-				u_int i_charge = 0 ;
-				u_int i_t_ave = 0 ;
+				uint32_t i_charge = 0 ;
+				uint32_t i_t_ave = 0 ;
 
 				for(int j=1;j<=dt;j++) {
 					
@@ -1661,15 +1661,15 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 			// and dump out to storage!
 
 			// integerized values
-			u_int time_c = (u_int)(f_t_ave * 64.0 + 0.5) ;
-			u_int pad_c = (u_int)(f_p_ave * 64.0 + 0.5) ;
-			u_int cha = (u_int)(f_charge + 0.5) ;
+			uint32_t time_c = (uint32_t)(f_t_ave * 64.0 + 0.5) ;
+			uint32_t pad_c = (uint32_t)(f_p_ave * 64.0 + 0.5) ;
+			uint32_t cha = (uint32_t)(f_charge + 0.5) ;
 
 			// cant happen
 			//if(cha==0) printf("WTF cha %f\n",f_charge*1000.0) ;
 
 			//extents 
-			u_int tmp_fl ;
+			uint32_t tmp_fl ;
 
 			int p_lo = (pad_c/64) - blob[ix].p1 ;
 			int p_hi = blob[ix].p2 - (pad_c/64) ;
@@ -1725,8 +1725,8 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 				int adc_max = 0 ;
 				int pixels = 0 ;
-				u_short track_id = 0xFFFF ;
-				u_short quality = 0 ;
+				uint16_t track_id = 0xFFFF ;
+				uint16_t quality = 0 ;
 
 				ip1 = peaks[pk].i - 1 ;
 				if(ip1 < 1) ip1 = 1 ;
@@ -1751,8 +1751,8 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 
 					short *adc_p = smooth_dta + dt_2 * i + it1 ;
 
-					u_int i_charge = 0 ;
-					u_int i_t_ave = 0 ;
+					uint32_t i_charge = 0 ;
+					uint32_t i_t_ave = 0 ;
 
 
 					
@@ -1801,16 +1801,16 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				// and dump out to storage!
 
 				// integerized values
-				u_int time_c = (u_int)(f_t_ave * 64.0 + 0.5) ;
-				u_int pad_c = (u_int)(f_p_ave * 64.0 + 0.5) ;
-				u_int cha = (u_int)(f_charge + 0.5) ;
+				uint32_t time_c = (uint32_t)(f_t_ave * 64.0 + 0.5) ;
+				uint32_t pad_c = (uint32_t)(f_p_ave * 64.0 + 0.5) ;
+				uint32_t cha = (uint32_t)(f_charge + 0.5) ;
 
 				//if(cha==0) {
 				//	printf("WTF Multi peak %f\n",f_charge) ;
 				//}
 
 				//extents 
-				u_int tmp_fl ;
+				uint32_t tmp_fl ;
 
 				int p_lo = 1 ;
 				int p_hi = 1 ;
@@ -1876,7 +1876,7 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 #endif
 	}
 
-//	LOG(TERR,"row %d: clusters %d, bytes %d",row,clusters_cou,(obuff-(u_int *)out_store)*4) ;
+//	LOG(TERR,"row %d: clusters %d, bytes %d",row,clusters_cou,(obuff-(uint32_t *)out_store)*4) ;
 
 	return (obuff - out_store) ;	// in ints!!!
 }
@@ -1891,12 +1891,12 @@ int itpc_fcf_c::do_row_check(int row)
 
 	for(int p=1;p<=rl;p++) {	// < is on purpose!!!
 		int t1_cou, t1_lo ;
-		u_short *ix1_p ;
+		uint16_t *ix1_p ;
 		rp_t *rp = get_row_pad(row,p) ;
 
 		if(rp->s1_len==0) continue ;
 		
-		u_short *d1 = rp->s1_data ;
+		uint16_t *d1 = rp->s1_data ;
 
 		for(int i=0;i<rp->s1_len;i++) {
 			ix1_p = d1++ ;	

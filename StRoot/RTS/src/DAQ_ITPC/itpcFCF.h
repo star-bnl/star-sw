@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 #include <arpa/inet.h>
@@ -45,8 +45,8 @@ public:
 	void run_stop() ;
 	void event_start() ;	// mostly to zap some debugging counters
 
-        int do_ch(int fee_id, int fee_ch, u_int *data, int words) ;
-        int do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id) ;
+        int do_ch(int fee_id, int fee_ch, uint32_t *data, int words) ;
+        int do_ch_sim(int row, int pad, uint16_t *tb_buff, uint16_t *track_id) ;
 
 	int do_fcf(void *storage, int bytes) ;
 
@@ -58,8 +58,8 @@ public:
 	static float get_gain(int sec1, int row1, int pad1) ;
 	static void set_gain(int sec1, int row1, int pad1, float gain) ;
 
-	static u_char get_flags(int sec1, int row1, int pad1) ;
-	static void set_flags(int sec1, int row1, int pad1, u_char flags) ;
+	static uint8_t get_flags(int sec1, int row1, int pad1) ;
+	static void set_flags(int sec1, int row1, int pad1, uint8_t flags) ;
 
 	void zap_fee(int sec1, int rdo1, int port1) ;
 	
@@ -77,15 +77,15 @@ public:
 
 	struct f_stat_t {
 		double tm[10] ;
-		u_int evt_cou ;
+		uint32_t evt_cou ;
 
-		u_int toobigs ;
+		uint32_t toobigs ;
 		
-		u_int s1_found ;	// storage during 1 event
+		uint32_t s1_found ;	// storage during 1 event
 
-		u_int max_s1_found ;
-		u_int max_s1_len ;
-		u_int max_blob_cou ;
+		uint32_t max_s1_found ;
+		uint32_t max_s1_len ;
+		uint32_t max_blob_cou ;
 	} f_stat ;
 
 	int det_type ;		// TPC=0, ITPC=1, OTHER=2
@@ -133,7 +133,7 @@ private:
 	struct gain_rp_t {
 		float gain ;
 		float t0 ;
-		u_char flags ;
+		uint8_t flags ;
 	} ;
 
 	// I keep and allocate statically for ALL sectors
@@ -145,38 +145,38 @@ private:
 
 	// ********* input stage (do_ch)
 	// for do_ch and itpc unpacking
-	u_short tb_buff[MAX_TB_EVER] ;	// where I stohre the y data -- just max it out
+	uint16_t tb_buff[MAX_TB_EVER] ;	// where I stohre the y data -- just max it out
 
 	// this is where we store unpacked data from the detector or user input
 	int s1_data_length ;
 	struct rp_t {
-		u_short s1_len ;
-		u_short s1_data[] ;
+		uint16_t s1_len ;
+		uint16_t s1_data[] ;
 	} ;
 
-	u_short *row_pad_store ;
+	uint16_t *row_pad_store ;
 
 	inline struct rp_t *get_row_pad(int row, int pad) ;
 
 	// ********** stage 1
-	u_short blob_ix[MAX_BLOB] ;
+	uint16_t blob_ix[MAX_BLOB] ;
 
 	struct blob_t {
 		int cou ;
 		int merges ;
 
-		u_short seq_cou ;
-		u_short p1, p2 ;
-		u_short t1, t2 ;
+		uint16_t seq_cou ;
+		uint16_t p1, p2 ;
+		uint16_t t1, t2 ;
 
-		u_short flags ;
+		uint16_t flags ;
 
 		float tot_charge ;
-		u_short pixels ;
+		uint16_t pixels ;
 
 	} blob[MAX_BLOB] ;
 
-	u_short blob_cou ;	
+	uint16_t blob_cou ;	
 
 	// *********** stage 2 -- various extents
 
@@ -184,19 +184,19 @@ private:
 	// *********** stage 3 
 
 	short smooth_dta[MAX_BLOB_SIZE] ;	// for smoothing
-	u_short *track_dta ;	// for Offline simulation
+	uint16_t *track_dta ;	// for Offline simulation
 
 	struct {
-		u_short i ;
-		u_short j ;
-		u_short adc ;
+		uint16_t i ;
+		uint16_t j ;
+		uint16_t adc ;
 	} peaks[MAX_PEAKS+1] ;
 
 	// misc
-	u_int blob_id ;		// for debugging
+	uint32_t blob_id ;		// for debugging
 
 	// final output 
-	u_int *out_store ;
+	uint32_t *out_store ;
 	int max_out_bytes ;
 
 	

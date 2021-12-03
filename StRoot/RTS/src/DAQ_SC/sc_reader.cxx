@@ -11,7 +11,7 @@
 
 #include "daq_sc.h"
 
-int sc_reader(char *m, struct sc_t *sc, u_int driver)
+int sc_reader(char *m, struct sc_t *sc, uint32_t driver)
 {
   int swapdatap = 0;
   int swapscd = 0;
@@ -36,7 +36,7 @@ int sc_reader(char *m, struct sc_t *sc, u_int driver)
   if(off == 0) return 0;
 
   // printf("Have datapx\n");
-  DATAPX *datapx = (struct DATAPX *)(((u_int *)m)+off);
+  DATAPX *datapx = (struct DATAPX *)(((uint32_t *)m)+off);
   if(checkBank(datapx->bh.bank_type,"DATAPX") < 0) {
     return 0;
   }
@@ -55,7 +55,7 @@ int sc_reader(char *m, struct sc_t *sc, u_int driver)
 
   LOG(DBG,"SC raw len %d (0x%x), off %d(0x%x)",len,len,off,off,0) ;
 
-  SCD *scd = (struct SCD *)(((u_int *)datapx)+off) ;
+  SCD *scd = (struct SCD *)(((uint32_t *)datapx)+off) ;
   if(checkBank(scd->bh.bank_type,"SCD") < 0) {	// wrong bank!
     return 0 ;				
   }
@@ -68,7 +68,7 @@ int sc_reader(char *m, struct sc_t *sc, u_int driver)
   sz*=4;
   
   if((len != sz) ||
-     ((u_int)len > sizeof(SCD))) {
+     ((uint32_t)len > sizeof(SCD))) {
     LOG(ERR, "SCD Sizes not consistent: datap=%d, bh=%d SCD=%d",
 	len, sz, sizeof(scd),0,0);
     

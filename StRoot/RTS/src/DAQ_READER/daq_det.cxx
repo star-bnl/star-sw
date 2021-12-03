@@ -51,7 +51,7 @@ daq_det *daq_det_factory::make_det(int wh)
 	}
 
 	// dets are in uppercase, turn all to lowercase...
-	for(u_int i=0;i<strlen(libname);i++) {
+	for(uint32_t i=0;i<strlen(libname);i++) {
 		libname[i] = tolower(libname[i]) ;
 	}
 

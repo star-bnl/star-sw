@@ -15,7 +15,7 @@ static int adcReader(int sec, struct PMDADCD *adcd) ;
 static int pedReader(int sec, int type, struct PMDPEDR *pedr) ;
 
 
-int pmd_reader(char *m, struct pmd_t *pmd, u_int driver)
+int pmd_reader(char *m, struct pmd_t *pmd, uint32_t driver)
 {
 	struct DATAP *datap = (struct DATAP *)m ;
 	struct DATAPX *datapx  ;
@@ -175,11 +175,11 @@ int pmd_reader(char *m, struct pmd_t *pmd, u_int driver)
 static int adcReader(int sec, struct PMDADCD *adcd)
 {
 	int items = b2h32(adcd->bh.length) - sizeof(adcd->bh)/4 ;
-	u_int *datum ;
-	u_int j ;
-	u_int rb, mz ;
-	u_int ch_num ;
-	u_int ch ;
+	uint32_t *datum ;
+	uint32_t j ;
+	uint32_t rb, mz ;
+	uint32_t ch_num ;
+	uint32_t ch ;
 
 	if(items <= 0) return 0 ;
 
@@ -190,10 +190,10 @@ static int adcReader(int sec, struct PMDADCD *adcd)
 
 	LOG(DBG,"ADC: PMD sec %d: items %d",sec,items,0,0,0) ;
 
-	u_int *end_datum = datum + items ;
+	uint32_t *end_datum = datum + items ;
 
 	for(end_datum=datum+items;datum<end_datum;) {
-		u_int tmp = b2h32(*datum) ;
+		uint32_t tmp = b2h32(*datum) ;
 		datum++ ;
 
 		// DAQ pseudo-header
@@ -222,14 +222,14 @@ static int adcReader(int sec, struct PMDADCD *adcd)
 		LOG(DBG,"PMD ADCD: sec %d, rb %d, mz %d, channels %d",sec,rb,mz,ch,0) ;
 
 		for(j=0;j<ch;j++) {
-			u_int val ;
+			uint32_t val ;
 
 			val = b2h32(*datum) ;
 			datum++ ;
 
 
 			if(val & 0x40000000) {	// zero suppressed...
-				u_int channel = (val & 0x007ff000) >> 12 ;
+				uint32_t channel = (val & 0x007ff000) >> 12 ;
 				val &= 0xFFF ;
 
 				//printf("        %4d: %4d == %4d\n",j,channel,val) ;
@@ -260,7 +260,7 @@ static int adcReader(int sec, struct PMDADCD *adcd)
 static int pedReader(int sec, int type, struct PMDPEDR *pedr)
 {
 	int items ;
-	u_short *datum ;
+	uint16_t *datum ;
 	int rb, mz, ch ;
 	int ch_num ;
 	int valid ;
@@ -277,11 +277,11 @@ static int pedReader(int sec, int type, struct PMDPEDR *pedr)
 
 	//printf("PMD sec %d: items %d\n",sec,items) ;
 
-	u_short *end_datum = datum + items ;
+	uint16_t *end_datum = datum + items ;
 
 	for(end_datum=datum+items;datum<end_datum;) {
 		int channel ;
-		u_int tmp = b2h16(*datum) ;
+		uint32_t tmp = b2h16(*datum) ;
 		datum++ ;
 
 		rb = (tmp & 0x7F00) >> 8 ;
@@ -293,7 +293,7 @@ static int pedReader(int sec, int type, struct PMDPEDR *pedr)
 		ch = PMD_CRAMS_CH_MAX ;
 
 		if(!valid) {
-			LOG(WARN,"Type %d: datum not valid at %u == 0x%04X",type,datum-pedr->data, (u_int)tmp,0,0) ;
+			LOG(WARN,"Type %d: datum not valid at %u == 0x%04X",type,datum-pedr->data, (uint32_t)tmp,0,0) ;
 
 			datum += ch ;
 			continue ;
@@ -316,8 +316,8 @@ static int pedReader(int sec, int type, struct PMDPEDR *pedr)
 
 		
 		for(channel=0;channel<ch;channel++) {
-			u_int val ;
-			u_short blah ;
+			uint32_t val ;
+			uint16_t blah ;
 
 			blah = *datum ;
 			val = b2h16(blah) ;

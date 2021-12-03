@@ -12,9 +12,9 @@ struct mtd_t {
 	int max_channels ;
 
 
-	u_int ddl[2][12000] ;	// content of up to 4 fibers; was 10000 before FY09 but
+	uint32_t ddl[2][12000] ;	// content of up to 4 fibers; was 10000 before FY09 but
 				// Jo Schambach claims the maximum can be 11745
-	u_int ddl_words[2] ;	// the count of words (32bit) for above
+	uint32_t ddl_words[2] ;	// the count of words (32bit) for above
 } ;
 
 

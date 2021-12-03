@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <sys/time.h>
@@ -17,7 +17,7 @@
 #define TOUCH	"/online/tonko/log_touch.html"
 //#define DAQ_TOUCH	"/online/tonko/daq_touch.html"
 
-int parseLog(char *b, u_int file, u_int line) ;
+int parseLog(char *b, uint32_t file, uint32_t line) ;
 int dumpLines(void) ;
 
 static char buff[1024] ;
@@ -62,14 +62,14 @@ static char data_preamble[] = { " \
 
 
 static struct logline {
-	u_int sec ;
+	uint32_t sec ;
 	char tm[24] ;
-	u_int day ;	// day of the year...
+	uint32_t day ;	// day of the year...
 
-	u_int repeat ;
+	uint32_t repeat ;
 
-	u_int file ;
-	u_int seq ;
+	uint32_t file ;
+	uint32_t seq ;
 
 	char node[10] ;
 	char rb[10] ;
@@ -78,7 +78,7 @@ static struct logline {
 
 	char task[16] ;
 	char src[128] ;
-	u_int line ;
+	uint32_t line ;
 
 	char msg[256] ;
 } loglines[LOGLINES] ;
@@ -92,8 +92,8 @@ int main(int argc, char *argv[])
 	int ret ;
 	int i ;
 	int data_in, new_lines ;
-	u_int last_flush ;
-	u_int lines[MAX_LOGFILES] ;
+	uint32_t last_flush ;
+	uint32_t lines[MAX_LOGFILES] ;
 
 //#define OLD_TEST
 #ifdef OLD_TEST
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 
 
 	FILE *ff = fopen(TOUCH,"w") ;
-	fprintf(ff,"%u\n",(u_int)time(NULL)) ;
+	fprintf(ff,"%u\n",(uint32_t)time(NULL)) ;
 	fclose(ff) ;
 
 	while(logfiles[i][0] != 0) {
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 
 	for(;;) {
 
-	u_int last_delta = time(NULL) - last_flush ;
+	uint32_t last_delta = time(NULL) - last_flush ;
 
 	data_in = 0 ;
 
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
 		sleep(1) ;
 	}
 	else {
-		static u_int tot_data ;
+		static uint32_t tot_data ;
 		tot_data += data_in ;
 
 		if((tot_data % 10000)==0) {
@@ -218,9 +218,9 @@ int main(int argc, char *argv[])
 	return -1 ;	// UNREACHABLE
 }
 
-int parseLog(char *b, u_int file, u_int seq)
+int parseLog(char *b, uint32_t file, uint32_t seq)
 {
-	u_int cou ;
+	uint32_t cou ;
 	int i ;
 	static char tm[16] ;
 	static char task[128] ;
@@ -228,7 +228,7 @@ int parseLog(char *b, u_int file, u_int seq)
 	static char day[8] ;
 
 	int use = 0 ;
-	u_int min_sec = 0xffffffff ;
+	uint32_t min_sec = 0xffffffff ;
 
 	for(i=0;i<LOGLINES;i++) {
 		if(loglines[i].sec == 0) {	// unassigned - use immediately

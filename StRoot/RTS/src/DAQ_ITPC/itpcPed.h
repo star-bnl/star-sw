@@ -1,7 +1,7 @@
 #ifndef _ITPC_PED_H_
 #define _ITPC_PED_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 
 class itpcData
 {
@@ -12,14 +12,14 @@ public:
 	virtual void ch_start(int c) { ch = c ; tb_cou = 0 ;} ;
 	virtual void accum(int sec0, int rdo0, int port0, int fee_id, int ch, int tb, int adc) { tb_cou++ ;} ;
 	virtual void ch_done(int err) {;} ;
-	virtual int do_ch(int fee_id, int fee_ch, u_int *data, int words) { return 0 ; } ;
+	virtual int do_ch(int fee_id, int fee_ch, uint32_t *data, int words) { return 0 ; } ;
 
 	int run_type ;
-	u_int run_number ;
+	uint32_t run_number ;
 	int sector_id ;	// actual PC
 
 	int want_data ;
-	u_int data ;
+	uint32_t data ;
 	int words ;
 
 	int sector ;
@@ -38,9 +38,9 @@ public:
 	itpcPed() ;
 	~itpcPed() ;
 
-	void init(int sector, int rdo, u_int fee_mask) ;
+	void init(int sector, int rdo, uint32_t fee_mask) ;
 
-	void set_fee_mask(int sector, int rdo, u_int f_mask) {
+	void set_fee_mask(int sector, int rdo, uint32_t f_mask) {
 		fee_mask[sector-1][rdo-1] = f_mask ;
 	}
 
@@ -61,26 +61,26 @@ public:
 	struct ped_t {
 		double ped[512] ;
 		double rms[512] ;
-		u_short cou[512] ;
+		uint16_t cou[512] ;
 
 		double c_ped ;
 		double c_rms ;
-		u_int c_cou ;
+		uint32_t c_cou ;
 	} *ped_p[24][4][16][64] ;
 
 
-	u_char evts[24][4] ;
+	uint8_t evts[24][4] ;
 
-	u_char padplane_id[24][4][16] ;
+	uint8_t padplane_id[24][4][16] ;
 
-	u_char fee_err[24][4][16][64] ;
+	uint8_t fee_err[24][4][16][64] ;
 
-	u_short pulser_peak_timebin ;	// because of differences in lab vs STAR
-	u_char pulser_in_star ;	// because it is noisy
+	uint16_t pulser_peak_timebin ;	// because of differences in lab vs STAR
+	uint8_t pulser_in_star ;	// because it is noisy
 
 private:
 
-	u_short fee_mask[24][4] ;
+	uint16_t fee_mask[24][4] ;
 
 
 

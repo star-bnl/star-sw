@@ -44,7 +44,7 @@ public:
 	void output(void *data, int count) ;
 
 
-	int stage_2d(u_int  *outbuff, int max_bytes) ;
+	int stage_2d(uint32_t  *outbuff, int max_bytes) ;
 	int do_pad_2d(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc=0) ;
 
 	void start_evt_2d(int sec1, int rdo1) {
@@ -64,7 +64,7 @@ public:
 	int event ;	// for debugging too
 	int cluster_id ;	// for track id Offline stuff
 
-	int do_dump(int ix, u_int *obuff) ;
+	int do_dump(int ix, uint32_t *obuff) ;
 
 	int do_print(int row) ;
 
@@ -115,9 +115,9 @@ public:
 
 		short aux_flags ;
 #ifdef DO_SIMULATION
-		u_short cluster_id ;
+		uint16_t cluster_id ;
 		short quality ;
-		u_short track_id ;
+		uint16_t track_id ;
 #endif
 		
 	} peaks[MAX_PEAKS_PER_BLOB] ;
@@ -129,12 +129,12 @@ public:
 	short *dta_s ;	// for the filtered data...
 
 #ifdef DO_SIMULATION
-	u_short dta_t[32*1024] ;	// for the track ids
-	u_short dta_id[32*1024] ;	// for the cluster ids
+	uint16_t dta_t[32*1024] ;	// for the track ids
+	uint16_t dta_id[32*1024] ;	// for the cluster ids
 #endif
 } ;
 
-extern u_int *tpxFCF_2D_scan_to_next(tpxFCF_2D *fcf, u_int *end, u_int *start,tpx_altro_struct *a) ;
+extern uint32_t *tpxFCF_2D_scan_to_next(tpxFCF_2D *fcf, uint32_t *end, uint32_t *start,tpx_altro_struct *a) ;
 
 
 

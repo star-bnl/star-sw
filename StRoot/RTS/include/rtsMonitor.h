@@ -162,16 +162,16 @@ struct rtsMonStruct {
 struct rtsMonGB {
 	struct {
 	  char name[32] ;	// if strlen() == NULL, unused..
-	  u_int off_id ;		// offline id number i.e. 5001
-	  u_int fired ;		// received from trigger
-	  u_int rate ;		// rate of above
-	  u_int l3_sent ;		// sent to L3
-	  u_int aborted_gb ;	// released by GB
-	  u_int aborted_l3 ;	// released by L3
-	  u_int aborted_l25 ;	// released as L2.5
-	  u_int err ;		// events with error
-	  u_int built ;		// events built _successfully_
-	  u_int xpress ;		// events sent to xpress stream
+	  uint32_t off_id ;		// offline id number i.e. 5001
+	  uint32_t fired ;		// received from trigger
+	  uint32_t rate ;		// rate of above
+	  uint32_t l3_sent ;		// sent to L3
+	  uint32_t aborted_gb ;	// released by GB
+	  uint32_t aborted_l3 ;	// released by L3
+	  uint32_t aborted_l25 ;	// released as L2.5
+	  uint32_t err ;		// events with error
+	  uint32_t built ;		// events built _successfully_
+	  uint32_t xpress ;		// events sent to xpress stream
 	} trgs[TRIGGERS_MAX+1] ;	// TRIGGERS_MAX are the usual, last is the sum
 } ;
 
@@ -220,7 +220,7 @@ struct rtsMonTCD {
 struct rtsMonSCA {
 	struct {
 		char name[32] ;
-		u_int rate ;
+		uint32_t rate ;
 	} trgs[TRIGGERS_MAX] ;	// 0-32 are normal, the rest is reserved
 
 } ;
@@ -228,47 +228,47 @@ struct rtsMonSCA {
 struct rtsMonL1Counters {
   struct {
     //  char name[32];
-    u_int enabled;
-    u_int rate;
-    u_int deadtime;
+    uint32_t enabled;
+    uint32_t rate;
+    uint32_t deadtime;
   } trgs[TRIGGERS_MAX+1];
-  u_int detector_deadtime[16];
+  uint32_t detector_deadtime[16];
 };
 
 struct rtsMonEVB {
-	u_int mb_run ;	// MB stored in this run 
-	u_int gb_free ;	// still free on all disks
-	u_int gb_all ;	// total capacity on all discs (for %-free calc...)
+	uint32_t mb_run ;	// MB stored in this run 
+	uint32_t gb_free ;	// still free on all disks
+	uint32_t gb_all ;	// total capacity on all discs (for %-free calc...)
 	// stuff pertaining to RCF goes here..
 
-	u_int run_number ;	// hm, this is old, why do I have this here? *shrug*
+	uint32_t run_number ;	// hm, this is old, why do I have this here? *shrug*
 	struct rtsMonGB gb ;	// new in FY09 -- EVB sends GB stuff as well!
 } ;
 
 struct rtsMonEVB_supertask {
-  u_int mon[RTS_MON_SYS_WORDS];
+  uint32_t mon[RTS_MON_SYS_WORDS];
   // General
-  u_int mb_run;     // total data size for this run
-  u_int gb_free;    // free disk space
-  u_int gb_all;     // total disk space
+  uint32_t mb_run;     // total data size for this run
+  uint32_t gb_free;    // free disk space
+  uint32_t gb_all;     // total disk space
 
   // RCF
-  u_int files_sent;     // sent within last resets on the hour
-  u_int files_waiting;  // waiting to be sent
+  uint32_t files_sent;     // sent within last resets on the hour
+  uint32_t files_waiting;  // waiting to be sent
 
   // By trigger Information
   struct {
-    u_int off_id ;	   // offline id number i.e. 5001
+    uint32_t off_id ;	   // offline id number i.e. 5001
   
-    u_int fired ;	   // received from trigger
-    u_int rate ;	   // rate of above
-    u_int built ;	   // events built _successfully_
+    uint32_t fired ;	   // received from trigger
+    uint32_t rate ;	   // rate of above
+    uint32_t built ;	   // events built _successfully_
 
-    u_int aborted_l25 ;	   // released as L2.5
-    u_int err ;		   // events with error (det timeout, evb resources)
-    u_int spurious;        // events with spurious (trg timeout, evt overrun)
+    uint32_t aborted_l25 ;	   // released as L2.5
+    uint32_t err ;		   // events with error (det timeout, evb resources)
+    uint32_t spurious;        // events with spurious (trg timeout, evt overrun)
 
-    u_int stream;	   // which stream evts sent to
+    uint32_t stream;	   // which stream evts sent to
 
   } trgs[TRIGGERS_MAX+1] ;	           // 0-31 are the usual, 32 is the sum
 };
@@ -288,11 +288,11 @@ struct rtsMonRCF {
         int curr_run;
         int curr_idx;
 	struct {
-		u_int run ;		// run number ; 0 means invalid/empty
-		u_int mb_done ;		// MB already stored for this run
-		u_int mb_all ;		// ...of MB total for this run
-		u_int seq_done ;	// part number already stored
-		u_int seq_all ;		//... of parts remaining
+		uint32_t run ;		// run number ; 0 means invalid/empty
+		uint32_t mb_done ;		// MB already stored for this run
+		uint32_t mb_all ;		// ...of MB total for this run
+		uint32_t seq_done ;	// part number already stored
+		uint32_t seq_all ;		//... of parts remaining
 	} runs[11] ;
 
 	// runs[0] is the _current_ run _if_ the state is either RC_RUNNING or RC_ERROR
@@ -310,46 +310,46 @@ struct rtsMonRCF {
 // If not running the data should reflect the state of the last known
 // run...
 struct rtsMonRC {
-	u_int run ;		// run number
-	u_int type ;		// PEDESTAL etc.
+	uint32_t run ;		// run number
+	uint32_t type ;		// PEDESTAL etc.
 	char config[128] ;	// Configuration name
 	char dest[64] ;		// EVB destination name
-	u_int t_start ;		// Start run time
-	u_int t_end ;		// Stop run time (0 if not yet finished)
-	u_int accepted ;	// bits: 1 operator rejected, 2 force stop by sombody, 4 unsuccessfull end
-	u_int node_count ;	// the count of nodes following (all of which are in the run...)
-        u_short err_node ;        // jml... the node that caused the last stop run
-        u_short n_err_node;
+	uint32_t t_start ;		// Start run time
+	uint32_t t_end ;		// Stop run time (0 if not yet finished)
+	uint32_t accepted ;	// bits: 1 operator rejected, 2 force stop by sombody, 4 unsuccessfull end
+	uint32_t node_count ;	// the count of nodes following (all of which are in the run...)
+        uint16_t err_node ;        // jml... the node that caused the last stop run
+        uint16_t n_err_node;
 	struct {
-		u_short node ;
-		u_short task ;
-		u_int state ;
+		uint16_t node ;
+		uint16_t task ;
+		uint32_t state ;
 	} nodes[256] ;
 	struct {
 		char name[32] ;	// if strlen() == NULL, unused..
-		u_int off_id ;		// offline id number i.e. 5001
+		uint32_t off_id ;		// offline id number i.e. 5001
 	} trgs[TRIGGERS_MAX] ;
 } ;
 
 
 struct rtsMonL1 {		// used by GL3 as well!
-	u_int late_events ;	// number of events above the time cutoff (i.e. 7 ms)
-	u_int max_us ;		// the current maximum turaround time (in us)
+	uint32_t late_events ;	// number of events above the time cutoff (i.e. 7 ms)
+	uint32_t max_us ;		// the current maximum turaround time (in us)
 	struct {
-		u_int off_id ;		// offline id number
-		u_int accepted ;	// fired in the run so far
-		u_int rate ;		// rate/sec of "accepted"
-		u_int aborted ;		// number of evebts aborted in this run
+		uint32_t off_id ;		// offline id number
+		uint32_t accepted ;	// fired in the run so far
+		uint32_t rate ;		// rate/sec of "accepted"
+		uint32_t aborted ;		// number of evebts aborted in this run
 	} trgs[TRIGGERS_MAX+1] ;			// 0-31 are per trigger, 32 is the total sum...
 } ;
 
 struct rtsMonDET {
-	u_int val_rbs ;	// valid RBs
-	u_int cfg_rbs ;	// configured
-	u_int buffs ;	// EVB/SL3 buffers free
-	u_int evtsSpur ;	// spurious events; evtsBad are only the bad ones _with_ the Trigger
-	u_char rb_status[12] ;	// USED in DDL dets!
-	u_int dbg_ctrs[10] ;	// 10 debug counters
+	uint32_t val_rbs ;	// valid RBs
+	uint32_t cfg_rbs ;	// configured
+	uint32_t buffs ;	// EVB/SL3 buffers free
+	uint32_t evtsSpur ;	// spurious events; evtsBad are only the bad ones _with_ the Trigger
+	uint8_t rb_status[12] ;	// USED in DDL dets!
+	uint32_t dbg_ctrs[10] ;	// 10 debug counters
 } ;
 
 
@@ -366,9 +366,9 @@ struct rts2011MonL0 {
   rtsMonHeader head;
 
   struct {
-    u_int off_id;
-    u_int fired;
-    u_int rate;
+    uint32_t off_id;
+    uint32_t fired;
+    uint32_t rate;
   } trg[TRIGGERS_MAX + 1];
 };
 
@@ -380,11 +380,11 @@ struct rts2011MonL1 {
   rtsMonHeader head;
 
   struct {
-    u_int rate;
-    u_int deadtime;
+    uint32_t rate;
+    uint32_t deadtime;
   } scaler[TRIGGERS_MAX + 1];
   
-  u_int detector_dead[16];
+  uint32_t detector_dead[16];
 };
 
 
@@ -394,40 +394,40 @@ struct rts2011EvbxSuperMon {
   rtsMonHeader head;
 
   // General
-  u_int mb_run;     // total data size for this run
-  u_int gb_free;    // free disk space
-  u_int gb_all;     // total disk space
+  uint32_t mb_run;     // total data size for this run
+  uint32_t gb_free;    // free disk space
+  uint32_t gb_all;     // total disk space
 
   // RCF
-  u_int files_sent;     // sent within last resets on the hour
-  u_int files_waiting;  // waiting to be sent
+  uint32_t files_sent;     // sent within last resets on the hour
+  uint32_t files_waiting;  // waiting to be sent
 
   // By trigger Information
   struct {
-    u_int off_id ;	   // offline id number i.e. 5001
+    uint32_t off_id ;	   // offline id number i.e. 5001
   
-    u_int fired ;	   // received from trigger
-    u_int fired_rate;
+    uint32_t fired ;	   // received from trigger
+    uint32_t fired_rate;
 
-    u_int built ;	   // events built _successfully_
-    u_int built_rate;
+    uint32_t built ;	   // events built _successfully_
+    uint32_t built_rate;
 
-    u_int l1_abort;
-    u_int l1_abort_rate;
+    uint32_t l1_abort;
+    uint32_t l1_abort_rate;
 
-    u_int l2_abort;
-    u_int l2_abort_rate;
+    uint32_t l2_abort;
+    uint32_t l2_abort_rate;
 
-    u_int l3_abort;
-    u_int l3_abort_rate;
+    uint32_t l3_abort;
+    uint32_t l3_abort_rate;
 
-    u_int err;
-    u_int err_rate;
+    uint32_t err;
+    uint32_t err_rate;
 
-    u_int stream;	   // which stream evts sent to
+    uint32_t stream;	   // which stream evts sent to
   } trgs[TRIGGERS_MAX+1] ;
 
-  u_int detectorErrors[32];
+  uint32_t detectorErrors[32];
 };
 
 // new, FY13, slow controls monitoring (via scDeamon)
@@ -447,12 +447,12 @@ struct rtsMonSC {
 
 	char mcr_vote[32] ;
 
-	u_int phys_on ;
-	u_int phys_off ;
+	uint32_t phys_on ;
+	uint32_t phys_off ;
 
-	u_int tcu_clock ;
-	u_int zdc_corrected ;
-	u_int reserved[9] ;
+	uint32_t tcu_clock ;
+	uint32_t zdc_corrected ;
+	uint32_t reserved[9] ;
 };
 
 struct rts2013_L4Mon {
@@ -460,13 +460,13 @@ struct rts2013_L4Mon {
 
     // By trigger Information
     struct {
-	u_int off_id ;	   // offline id number i.e. 5001
+	uint32_t off_id ;	   // offline id number i.e. 5001
 	
-	u_int daq_cnt ;	   // received from EVB
-	u_int daq_rate;
+	uint32_t daq_cnt ;	   // received from EVB
+	uint32_t daq_rate;
 	
-	u_int l4_accept;
-	u_int l4_accept_rate;
+	uint32_t l4_accept;
+	uint32_t l4_accept_rate;
     } trgs[TRIGGERS_MAX+1] ;
 };
 
@@ -478,19 +478,19 @@ struct rts2013_L4RcfMon {
     rtsMonHeader head;
 
     // General
-    u_int gb_free;    // free disk space
-    u_int gb_all;     // total disk space
+    uint32_t gb_free;    // free disk space
+    uint32_t gb_all;     // total disk space
 
     // RCF
-    u_int files_sent;     // sent within last resets on the hour
-    u_int files_waiting;  // waiting to be sent
+    uint32_t files_sent;     // sent within last resets on the hour
+    uint32_t files_waiting;  // waiting to be sent
 };
 
 struct rts2013_TmMon {
     rtsMonHeader head; // all values according to token...
     
-    u_int evtsManaged;   // eventsIn by tmtoken rather than token
-    u_int evtsEvb[10];   // eventsIn by tmtoken by evb
+    uint32_t evtsManaged;   // eventsIn by tmtoken rather than token
+    uint32_t evtsEvb[10];   // eventsIn by tmtoken by evb
 };
 
 
@@ -498,12 +498,12 @@ struct rts2013_TmMon {
 struct ggMonStruct {
         struct rtsMonHeader m ;
 
-	u_short mode ;
-	u_short hv ;
+	uint16_t mode ;
+	uint16_t hv ;
 
-        u_int status[12] ;
-        u_short adc[12][4][3] ;
-        u_short dac[12][4][3] ;
+        uint32_t status[12] ;
+        uint16_t adc[12][4][3] ;
+        uint16_t dac[12][4][3] ;
 } ;
 
 

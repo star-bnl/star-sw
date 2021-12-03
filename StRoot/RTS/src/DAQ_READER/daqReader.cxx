@@ -43,7 +43,7 @@
 #endif
 
 
-u_int evp_daqbits ;
+uint32_t evp_daqbits ;
 
 //Tonko:
 static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.72 2021/01/25 03:47:52 jml Exp $" ;
@@ -1288,7 +1288,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
 
     LOG(DBG, "pay=0x%x",pay);
 
-    u_int version = pay->gbPayloadVersion;
+    uint32_t version = pay->gbPayloadVersion;
 
     LOG(DBG, "version = 0x%x", version);
 
@@ -1684,9 +1684,9 @@ int daqReader::fillSummaryInfo_v02(SummaryInfo *info, gbPayload_0x02 *pay) {
     parse the string of the form i.e. "tpc ssd tpx" and
     return a bitlist of RTS detectors
   */
-  static u_int parse_det_string(const char *list)
+  static uint32_t parse_det_string(const char *list)
     {
-      u_int mask = 0 ;
+      uint32_t mask = 0 ;
 
       //LOG(DBG,"Parsing \"%s\"",list) ;
 

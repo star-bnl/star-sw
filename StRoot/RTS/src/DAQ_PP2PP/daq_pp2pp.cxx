@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <assert.h>
 #include <arpa/inet.h>
@@ -113,7 +113,7 @@ daq_dta *daq_pp2pp::handle_pedrms(int sec)
 	int min_sec, max_sec ;
 	struct {
 		int sec ;
-		u_int bytes ;
+		uint32_t bytes ;
 	} obj[MAX_SEC*(MAX_RDO+1)] ;	// pp2pp has a special rdo#0 case!
 
 	// sanity
@@ -370,7 +370,7 @@ daq_dta *daq_pp2pp::handle_raw(int sec, int rdo)
 	struct {
 		int sec ;
 		int rb ;
-		u_int bytes ;
+		uint32_t bytes ;
 	} obj[MAX_SEC*(MAX_RDO+1)] ;	// pp2pp has a special rdo#0 case!
 
 	// sanity
@@ -434,7 +434,7 @@ daq_dta *daq_pp2pp::handle_raw(int sec, int rdo)
 
 	if(o_cou == 0) return 0 ;
 
-	raw->create(tot_bytes,"pp2pp_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	raw->create(tot_bytes,"pp2pp_raw",rts_id,DAQ_DTA_STRUCT(uint8_t)) ;
 
 	for(int i=0;i<o_cou;i++) {
 
@@ -483,11 +483,11 @@ int daq_pp2pp::get_token(char *addr, int words)
 
 int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prompt)
 {
-	u_int *d = (u_int *)addr ;
+	uint32_t *d = (uint32_t *)addr ;
 	int t_cou = 0 ;
-	u_int datum ;
-	u_int trg_cou ;
-	u_int *trg_dta ;
+	uint32_t datum ;
+	uint32_t trg_cou ;
+	uint32_t *trg_dta ;
 
 
 	if(prompt) {
@@ -506,7 +506,7 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 	trg_dta = &(d[words-1-trg_cou]) ;
 
 
-	for(u_int i=0;i<trg_cou;i++) {
+	for(uint32_t i=0;i<trg_cou;i++) {
 		datum = trg_dta[i] ;
 		
 		if((datum & 0xFF000000) == 0xEE000000) {	// prompt
@@ -546,7 +546,7 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 
 	}
 
-	for(u_int i=0;i<trg_cou;i++) {
+	for(uint32_t i=0;i<trg_cou;i++) {
 		datum = trg_dta[i] ;
 		
 		if((datum & 0xFF000000) != 0xEE000000) {	// FIFO!
@@ -591,10 +591,10 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 
 int daq_pp2pp::decode(int sec_id, char *raw, int bytes) 
 {
-	u_int *d32 ;
-	u_short *d16 ;
-	u_short seq[2], trg[2] ;
-	u_char *d8 ;
+	uint32_t *d32 ;
+	uint16_t *d16 ;
+	uint16_t seq[2], trg[2] ;
+	uint8_t *d8 ;
 	int ret = 0  ;
 
 	LOG(DBG,"adc %p",adc) ;
@@ -604,8 +604,8 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 	int words = bytes/4 ;
 
 	// we are still debugging!
-	d32 = (u_int *) raw ;	// data is BIG ENDIAN!
-	d16 = (u_short *) raw ;
+	d32 = (uint32_t *) raw ;	// data is BIG ENDIAN!
+	d16 = (uint16_t *) raw ;
 
 	for(int i=0;i<bytes/4;i++) {
 		LOG(DBG,"pp2pp data: %2d: 0x%08X",i,b2h32(d32[i])) ;
@@ -632,7 +632,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 	int next_good_ix = 0 ;
 
 	int bunch_xing = -1 ;
-	u_int trigger = 0xFFFFFFFF ;
+	uint32_t trigger = 0xFFFFFFFF ;
 
 	svx_id = 0 ;
 	int not_sparse = 0 ;
@@ -663,7 +663,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 			trigger = (trg[1] << 16) | trg[0] ;
 		}
 		else {
-			u_int tmp = (trg[1] << 16) | trg[0] ;
+			uint32_t tmp = (trg[1] << 16) | trg[0] ;
 
 			if(tmp != trigger) {
 				ret |= 1 ;
@@ -720,7 +720,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 		// subtract 2 because of the trigger word
 		fifo_w16 -= 2 ;
 
-		d8 = (u_char *) &(d16[cur_ix]) ;
+		d8 = (uint8_t *) &(d16[cur_ix]) ;
 		
 		next_good_ix = cur_ix + fifo_w16 ;
 		if(fifo_w16 & 1) {	// padding

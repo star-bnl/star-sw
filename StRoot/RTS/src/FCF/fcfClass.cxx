@@ -29,7 +29,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <ctype.h>
@@ -61,7 +61,7 @@ static char *fcf_cvs_revision = "$Revision: 1.5 $" ;
 
 
 
-//static u_int delta[20] ;
+//static uint32_t delta[20] ;
 
 
 
@@ -74,23 +74,23 @@ static char *fcf_cvs_revision = "$Revision: 1.5 $" ;
 
 struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 	int t ;	// this may occasionally be negative!
-	u_int charge ;
-	u_int scharge ;
+	uint32_t charge ;
+	uint32_t scharge ;
 
-	u_short flags ;		// short
+	uint16_t flags ;		// short
 	short mean ;		// short
 
-	u_int pad ;
+	uint32_t pad ;
 
-	u_short	 t1, t2, p1, p2 ;	// extents
+	uint16_t	 t1, t2, p1, p2 ;	// extents
 
 #if defined(FCF_SIM_ON) || defined(FCF_ANNOTATE_CLUSTERS)
 	// new - test only...
-	u_int pix ;		// pixel count
-	u_int adc_max ;		// maximum adc
+	uint32_t pix ;		// pixel count
+	uint32_t adc_max ;		// maximum adc
 
 	short id ;		// sim. id
-	u_short cl_id ;		// global cluster id!
+	uint16_t cl_id ;		// global cluster id!
 #endif
 
 } ;
@@ -119,7 +119,7 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 
 // simulation global
 #ifdef FCF_SIM_ON
-static u_int *simout ;
+static uint32_t *simout ;
 static fcfPixAnnotate pixStruct[183][512];
 #endif
 
@@ -156,7 +156,7 @@ struct fcfPixAnnotate fcfPixA[45][182][512] ;
 #endif	// UNIX
 
 
-extern __inline volatile void mstore(struct fcfResx *rr, int av, int ch, u_int mean, u_int flags)
+extern __inline volatile void mstore(struct fcfResx *rr, int av, int ch, uint32_t mean, uint32_t flags)
 {
 
 	rr->t = av ;
@@ -175,18 +175,18 @@ extern __inline volatile void mstore(struct fcfResx *rr, int av, int ch, u_int m
 // Since the row and cluster count makes 2 words the routine returns 
 // 2 in case of no clusters found!
 
-int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
+int fcfClass::finder(uint8_t *adcin, uint16_t *cppin, uint32_t *outres)
 {
 	int i, j, pad ;
 	int next_pad ;
-	u_int start_flags ;
+	uint32_t start_flags ;
 
 	chargeMinCorrect = chargeMin * FCF_GAIN_FACTOR ;
 
 	int new_res_ix, new_res_cou, old_res_cou ;
 
 
-	u_int *cl_found_pointer, *row_pointer ;
+	uint32_t *cl_found_pointer, *row_pointer ;
 
 
 	struct fcfResx **new_res, **old_res ;
@@ -200,7 +200,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 
 #ifdef FCF_SIM_ON
-	u_int *sim_found_ptr, *sim_row_ptr ;
+	uint32_t *sim_found_ptr, *sim_row_ptr ;
 	short *simin ;
 
 	simin = simIn ;	// copy the originals
@@ -220,7 +220,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 		sim_row_ptr = simout ;
 	}
 
-	u_short cl_id = 1 ;	// start global cluster id with 1
+	uint16_t cl_id = 1 ;	// start global cluster id with 1
 	memset(pixStruct,0,sizeof(pixStruct)) ;
 
 #endif
@@ -239,7 +239,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 
 	for(pad=padStart;pad<=padStop;pad++) {
-		u_int GC ;	// gain correction
+		uint32_t GC ;	// gain correction
 		int  T0C ;	// T0 correction
 
 		// gain and t0 corrections!
@@ -260,20 +260,20 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 		//LOG(WARN,"row %d, pad %d, GC %d, T0C %d",row,pad,GC,T0C,0) ;
 
-//		u_int mark = mzFastTimerMark() ;
+//		uint32_t mark = mzFastTimerMark() ;
 
 
 #if defined(__unix) || defined(__APPLE__)
-		static u_int cppStore[32] ;
-		u_int *ptrs = cppStore ;
+		static uint32_t cppStore[32] ;
+		uint32_t *ptrs = cppStore ;
 #else
-		u_int *ptrs = fastMem->cppStore ;
+		uint32_t *ptrs = fastMem->cppStore ;
 #endif
-		register u_int *ptrs_r = ptrs ;
-		register u_int *cpp_r = (u_int *)((char *)cppin + cppOff[pad]) ;
-		register u_int fe00  = 0xFE00FE00 ;
+		register uint32_t *ptrs_r = ptrs ;
+		register uint32_t *cpp_r = (uint32_t *)((char *)cppin + cppOff[pad]) ;
+		register uint32_t fe00  = 0xFE00FE00 ;
 
-		u_int *ptrs_end = ptrs_r + 31 ;
+		uint32_t *ptrs_end = ptrs_r + 31 ;
 
 
 		//LOG(DBG,"cppin 0x%X, cpp_off[] 0x%X, cpp_r 0x%X, cpp_off 0x%X",cppin,cpp_off[pad],cpp_r,cpp_off,0) ;
@@ -313,7 +313,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 		// NOTICE! go-to label!
 		go_out : ;
 
-		u_int cou_ptrs = (ptrs_r - ptrs) ;
+		uint32_t cou_ptrs = (ptrs_r - ptrs) ;
 
 		//LOG(DBG,"Running pad %d with %d clusters, pad %d had %d protoclusters...",pad,cou_ptrs,next_pad-1,new_res_cou,0) ;
 
@@ -324,15 +324,15 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 
 #ifdef FCF_10BIT_ADC
-		u_short *val = (u_short *)((char *)adcin + adcOff[pad]) ;
+		uint16_t *val = (uint16_t *)((char *)adcin + adcOff[pad]) ;
 #else
-		u_char *val = (u_char *)((char *)adcin + adcOff[pad]) ;
+		uint8_t *val = (uint8_t *)((char *)adcin + adcOff[pad]) ;
 #endif
 
 #ifdef FCF_SIM_ON
-		u_short *simval ;
+		uint16_t *simval ;
 		if(simout) {
-			simval = (u_short *)((char *)simin + adcOff[pad]) ;
+			simval = (uint16_t *)((char *)simin + adcOff[pad]) ;
 		}
 		else {
 			simval = 0 ;
@@ -390,14 +390,14 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 //		delta[0] = mzFastTimerDelta(mark) ;
 
 
-		u_short *ptrs_16 = (u_short *)ptrs ;
-		u_int cl_counter ;
+		uint16_t *ptrs_16 = (uint16_t *)ptrs ;
+		uint32_t cl_counter ;
 
 		for(cl_counter=0;cl_counter<cou_ptrs;cl_counter++) {
-			register u_int start, stop ;
+			register uint32_t start, stop ;
 
-			start = (u_int)*ptrs_16++ ;
-			stop = (u_int) *ptrs_16++ ;
+			start = (uint32_t)*ptrs_16++ ;
+			stop = (uint32_t) *ptrs_16++ ;
 
 			// paranoia
 			// don;t need this anymore
@@ -421,16 +421,16 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 			//asm("#first") ;
 #ifdef FCF_10BIT_ADC
-			register u_short *adc_p = val + start ;
-			register u_short *adc_end = val + stop + 1;
+			register uint16_t *adc_p = val + start ;
+			register uint16_t *adc_end = val + stop + 1;
 #else
-			register u_char *adc_p = val + start ;
-			register u_char *adc_end = val + stop + 1;
+			register uint8_t *adc_p = val + start ;
+			register uint8_t *adc_end = val + stop + 1;
 #endif
 
 #ifdef FCF_SIM_ON
-			u_short *sim_p  ;
-			u_short sim_id  ;
+			uint16_t *sim_p  ;
+			uint16_t sim_id  ;
 
 			if(simout) {
 				sim_p = simval + start ;
@@ -448,7 +448,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 			// move these to registers....
 			register int min_adc = minAdcT ;
 #ifndef FCF_10BIT_ADC
-			register u_short *adc8to10 FCF_960_R13 = a8to10 ;
+			register uint16_t *adc8to10 FCF_960_R13 = a8to10 ;
 #endif
 
 			//LOG(WARN,"Pad %d, cl %d, len %d",pad,cl_counter,stop-start+1,0,0) ;
@@ -458,7 +458,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				register int last_falling = 0 ;
 				register int max_a = 0 ;
 				register int mean FCF_960_R11  = 0 ;
-				register u_int charge FCF_960_R9  = 0 ;
+				register uint32_t charge FCF_960_R9  = 0 ;
 				register int av FCF_960_R8 = 0 ;
 
 				register int last_a = 0 ;
@@ -590,7 +590,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				rn->cl_id = cl_id++ ;		// global cluster id...
 #endif				
 
-				//if(((u_int)adc_p & 0xF)==0) preburst4(adc_p) ;
+				//if(((uint32_t)adc_p & 0xF)==0) preburst4(adc_p) ;
 
 			} while(likely(adc_p <= adc_end)) ;
 
@@ -629,8 +629,8 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 			register int min_adc = minAdcPad ;
 
-			register u_int old_scharge = rr->scharge ;
-			register u_int old_flags = rr->flags ;
+			register uint32_t old_scharge = rr->scharge ;
+			register uint32_t old_flags = rr->flags ;
 
 			start = new_start ;
 
@@ -648,7 +648,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 					continue ;
 				}
 				else if(mean <= old_mean_p) {	
-					register u_int charge ;
+					register uint32_t charge ;
 
 					charge = nresx->charge ;
 
@@ -656,7 +656,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 					if(old_flags & FCF_FALLING) {
 
 						if(charge > (old_scharge + min_adc)) {
-							register u_int sc_tmp, sc_p_tmp ;
+							register uint32_t sc_tmp, sc_p_tmp ;
 
 
 
@@ -825,7 +825,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 } 
 
 
-fcfClass::fcfClass(int det, u_short *table) 
+fcfClass::fcfClass(int det, uint16_t *table) 
 {
 	detector = det ;
 
@@ -946,7 +946,7 @@ fcfClass::fcfClass(int det, u_short *table)
 #endif
 
 
-	u_int i, j ;
+	uint32_t i, j ;
 	for(i=0;i<2;i++) {
 		for(j=0;j<FCF_MAX_RES_COU_FAST;j++) {
 			resx[i][j] = res_fast[i] + j ;
@@ -964,7 +964,7 @@ fcfClass::fcfClass(int det, u_short *table)
 
 
 // copy over the ADC conversion table...
-void fcfClass::set8to10(u_short *table)
+void fcfClass::set8to10(uint16_t *table)
 {
 	int i ;
 
@@ -981,17 +981,17 @@ void fcfClass::set8to10(u_short *table)
 }
 
 // returns the number of clusters saved
-inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
+inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, uint32_t *output)
 {
 	//asm("#saved") ;
 	int i ;
 	int saved = 0 ;
-	register u_int ch_min = chargeMinCorrect ;
+	register uint32_t ch_min = chargeMinCorrect ;
 	register int do_cuts = doCuts ;
-	u_int fla, cha ;
-	u_int pad_c ;
-	u_int time_c ;
-	u_int t_cha ;
+	uint32_t fla, cha ;
+	uint32_t pad_c ;
+	uint32_t time_c ;
+	uint32_t t_cha ;
 
 	for(i=0;i<cou;i++) {
 		struct fcfResx *rr ;
@@ -1087,11 +1087,11 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 		}
 
 
-		u_int p = (pad_c >> 6)  ;
-		u_int fl ;
+		uint32_t p = (pad_c >> 6)  ;
+		uint32_t fl ;
 		
-		u_int p1 = p - rr->p1 ;
-		u_int p2 = rr->p2 - p ;
+		uint32_t p1 = p - rr->p1 ;
+		uint32_t p2 = rr->p2 - p ;
 
 		if(p1 > 7) p1 = 7 ;
 		if(p2 > 7) p2 = 7 ;
@@ -1153,7 +1153,7 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 
 		if(simout) {
 
-			u_int sim_cha, all_cha ;
+			uint32_t sim_cha, all_cha ;
 
 			sim_cha = all_cha = 0 ;
 

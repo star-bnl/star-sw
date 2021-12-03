@@ -12,8 +12,8 @@ struct l3_t {
     int channels;	// for FY09 HLT this contains the unique event sequence!
     int max_channels;
     
-    u_int tracks_num;
-    u_int cluster_num;
+    uint32_t tracks_num;
+    uint32_t cluster_num;
     float xVertex;
     float yVertex;
     float zVertex;

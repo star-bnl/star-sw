@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -101,12 +101,12 @@ void sstPed::accum(char *evbuff, int bytes, int rdo1)
 void sstPed::calc()
 {
 
-	const u_int MIN_EVENTS = 90 ;
+	const uint32_t MIN_EVENTS = 90 ;
 
 
 	LOG(NOTE,"Calculating pedestals") ;
 
-	u_int bad[SST_RDO_COU][SST_FIBER_COU] ;
+	uint32_t bad[SST_RDO_COU][SST_FIBER_COU] ;
 
 	memset(bad,0,sizeof(bad)) ;
 
@@ -179,7 +179,7 @@ void sstPed::calc()
 int sstPed::to_evb(char *buff)
 {
 	int r,f,h,s ;
-	u_short *dta = (u_short *) buff ;	
+	uint16_t *dta = (uint16_t *) buff ;	
 
 
 	if(!valid) {
@@ -227,7 +227,7 @@ int sstPed::to_evb(char *buff)
 				pp = (short)(ped->ped[f][h][s] + 0.5)  ;
 				*dta++ = pp;
 
-				pp = (u_short)(ped->rms[f][h][s]*16.0  + 0.5) ;
+				pp = (uint16_t)(ped->rms[f][h][s]*16.0  + 0.5) ;
 				*dta++ = pp ;
 			}
 		}
@@ -242,7 +242,7 @@ int sstPed::to_evb(char *buff)
 }
 
 
-int sstPed::to_cache(char *fname, u_int run)
+int sstPed::to_cache(char *fname, uint32_t run)
 {
 	FILE *f ;
 	char f_fname[128] ;

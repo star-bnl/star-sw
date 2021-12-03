@@ -7,7 +7,7 @@
 #ifndef _FCF_CLASS_HH_
 #define _FCF_CLASS_HH_
 
-#include <sys/types.h>
+#include <stdint.h>
 
 
 // steering - watch it!
@@ -40,9 +40,9 @@
 
 #if defined(__unix) || defined(__ROOT__) || defined(__CINT__)
 
-typedef unsigned int u_int;
-typedef unsigned short u_short;
-typedef unsigned char u_char;  
+typedef unsigned int uint32_t;
+typedef unsigned short uint16_t;
+typedef unsigned char uint8_t;  
 
 #define FCF_SIM_ON
 
@@ -65,10 +65,10 @@ typedef unsigned char u_char;
 
 // used if the FCF_ANNOTATE_CLUSTERS is set...
 struct fcfPixAnnotate {
-	u_short adc ;	// the 10 bit ADC value of the charge
-	u_short cl_id ;	// the FCF cluster ID (local to the row)
-	u_short id_simtrk ;	// the Simulated track ID (local to the event)
-	u_short res ;		// reserved...
+	uint16_t adc ;	// the 10 bit ADC value of the charge
+	uint16_t cl_id ;	// the FCF cluster ID (local to the row)
+	uint16_t id_simtrk ;	// the Simulated track ID (local to the event)
+	uint16_t res ;		// reserved...
 } ;
 
 
@@ -101,29 +101,29 @@ extern struct fcfPixAnnotate pixStruct[183][512] ;
 class fcfClass {
 public:
 
-	fcfClass(int det, u_short *table = NULL) ;	// constructor
+	fcfClass(int det, uint16_t *table = NULL) ;	// constructor
 
 	// the following are set by the constructor depending on the detector parameter
 	// They may be changed explicitly for tests & debug thus they are "public"
 
 	// Tonko added this for TPCMZCLD tracking
-	u_int cvs_revision ;
+	uint32_t cvs_revision ;
 
 	int detector ;		// i.e. TPC_ID, SVT_ID; set in constructor
-	u_int maxTimebin ;	// 511 TPC, 127 SVT
-	u_int maxCPP ;		// 8 SVT, 31 TPC
+	uint32_t maxTimebin ;	// 511 TPC, 127 SVT
+	uint32_t maxCPP ;		// 8 SVT, 31 TPC
 
 	// the following MUST BE SET once!
-	u_int svtPedestal ;	// when using SVT pedestal offet...
-	u_int timebinLo ;
-	u_int timebinHi ;
-	u_int chargeMin ;
+	uint32_t svtPedestal ;	// when using SVT pedestal offet...
+	uint32_t timebinLo ;
+	uint32_t timebinHi ;
+	uint32_t chargeMin ;
 
 
-	u_int deconTime  ;	// unused...
-	u_int deconPad  ;	// unused...
+	uint32_t deconTime  ;	// unused...
+	uint32_t deconPad  ;	// unused...
 
-	u_int doCuts  ;
+	uint32_t doCuts  ;
 
 	int param1  ;
 	int minAdcT  ;
@@ -135,20 +135,20 @@ public:
 	int padStop ;	// Absolute last pad 
 	int padMax ;	// maximum pad for this row
 
-	u_int *adcOff ;	// offsets for the current row only!
-	u_short *cppOff ;	
-	u_int maxClusters ;	// maximum allowed # clusters in this row
+	uint32_t *adcOff ;	// offsets for the current row only!
+	uint16_t *cppOff ;	
+	uint32_t maxClusters ;	// maximum allowed # clusters in this row
 
         short *simIn;           // simulation track id
-        u_int *simOut;
+        uint32_t *simOut;
 
 	// offset to the pad-to-pad t0 correction (multipled by gain and 64!), V4.10
 	int *t0Corr ;
 
 	// offset to the pad gain table (multipled by 64!), 
-	u_int *gainCorr ;
+	uint32_t *gainCorr ;
 
-	u_short *startFlags ;
+	uint16_t *startFlags ;
 
 	// used perhaps...
 	int sb ;	// i.e. sector number, 1..24
@@ -157,33 +157,33 @@ public:
 
 
 	// THA function!
-	int finder(u_char *adcin, u_short *cppin, u_int *outres) ;
+	int finder(uint8_t *adcin, uint16_t *cppin, uint32_t *outres) ;
 
 	// support
-	inline int saveRes(struct fcfResx *res_p[], int cou, u_int *output) ;
-	void set8to10(u_short *extTable) ;
+	inline int saveRes(struct fcfResx *res_p[], int cou, uint32_t *output) ;
+	void set8to10(uint16_t *extTable) ;
 
 private:
 	struct fcfResx *resx[2][512] ;
 	
-	u_short *a8to10 ;	// internal copy
+	uint16_t *a8to10 ;	// internal copy
 	int noADCconversion ;
 
 	// used in UNIX versions only...
-	u_short adc8to10_storage[256] ;
+	uint16_t adc8to10_storage[256] ;
 
-	u_int chargeMinCorrect ;
+	uint32_t chargeMinCorrect ;
 } ;
 
 
 // Tonko: merged fcfAfterburner.hh into here
 
 struct fcfHit {
-	u_short pad ;
-	u_short tm ;
-	u_short f ;
-	u_short c ;
-	u_short p1,p2,t1,t2 ;
+	uint16_t pad ;
+	uint16_t tm ;
+	uint16_t f ;
+	uint16_t c ;
+	uint16_t p1,p2,t1,t2 ;
         short id_simtrk;
         short id_quality;
 	short cl_id ;
@@ -196,29 +196,29 @@ public:
         fcfAfterburner();
 	~fcfAfterburner() { ; } ;
 
-        int burn(u_int *ptr_res[3], u_int *ptr_simu_res[3] = NULL) ;
+        int burn(uint32_t *ptr_res[3], uint32_t *ptr_simu_res[3] = NULL) ;
 	int next(fcfHit *out) ;
-	int compare(u_int *p1[3], u_int *p2[3]) ;
+	int compare(uint32_t *p1[3], uint32_t *p2[3]) ;
 
-	void decode(u_int *data, fcfHit *h, u_int *sim = 0) ;	// utility: from FCF to local
+	void decode(uint32_t *data, fcfHit *h, uint32_t *sim = 0) ;	// utility: from FCF to local
 	void print_hit(char *, fcfHit *hit) ;	// utility
 
-	u_int do_swap ;		// 0=no, 1=yes => set by "burn"
-	u_int do_merge ;	// merge broken rows
-	u_int do_cuts ;		// apply additional cuts
-	u_int row ;		// picked up from the data...
+	uint32_t do_swap ;		// 0=no, 1=yes => set by "burn"
+	uint32_t do_merge ;	// merge broken rows
+	uint32_t do_cuts ;		// apply additional cuts
+	uint32_t row ;		// picked up from the data...
 	
         void setVerbose(bool v) { verbose = v; };
 private :
         bool verbose;
 
-	u_int last_n, last_i, last_count, last_stage ;
-	u_int **ptr ;	// storage for the burn arg...
-	u_int **ptr_simu ;	// storage for the simulation ptr. 2nd burn argument
+	uint32_t last_n, last_i, last_count, last_stage ;
+	uint32_t **ptr ;	// storage for the burn arg...
+	uint32_t **ptr_simu ;	// storage for the simulation ptr. 2nd burn argument
 
-	u_int edge[4] ;
+	uint32_t edge[4] ;
 	struct fcfHit broken[4][kMax_fcfHit] ;
-	u_int cou_broken[4] ;
+	uint32_t cou_broken[4] ;
 
 	int output(fcfHit *l) ;	// the cut function; return TRUE if accepted
 	int check_merge(fcfHit *l, fcfHit *r) ;	// merges r into l and returns TRUE 

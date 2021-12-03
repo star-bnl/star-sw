@@ -10,10 +10,10 @@
 
 
 struct daq_sst_data_t {
-	u_short strip ;
-	u_short adc ;
+	uint16_t strip ;
+	uint16_t adc ;
 
-	u_char hybrid ;
+	uint8_t hybrid ;
 } ;
 
 struct daq_sst_pedrms_t {
@@ -42,7 +42,7 @@ struct daq_sst_pedrms_t {
 struct daq_sst_ped_t {
 	double ped[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
 	double rms[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
-	u_int cou[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
+	uint32_t cou[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
 } ;
 
 
@@ -76,8 +76,8 @@ public:
 	}
 
 
-	u_int events[SST_RDO_COU] ;
-	u_int fiber_events[SST_RDO_COU][SST_FIBER_COU] ;
+	uint32_t events[SST_RDO_COU] ;
+	uint32_t fiber_events[SST_RDO_COU][SST_FIBER_COU] ;
 
 } ;
 

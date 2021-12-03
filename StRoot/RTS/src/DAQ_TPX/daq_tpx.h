@@ -62,7 +62,7 @@ private:
 
 
 
-	u_int *fcf_tmp_storage ;
+	uint32_t *fcf_tmp_storage ;
 	
 	static const int FCF_TMP_BYTES = (1024*1024) ;	// for local FCF
 

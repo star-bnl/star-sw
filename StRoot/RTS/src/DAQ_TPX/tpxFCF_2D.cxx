@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -30,9 +30,9 @@
 #define DTA_S(i,j) (dta_s + (dt_2)*(i) + (j))
 #define DTA_ID(i,j) (dta_id + (dt_2)*(i) + (j))
 
-static inline u_int get10(u_int *l, u_int p)
+static inline uint32_t get10(uint32_t *l, uint32_t p)
 {
-  u_int ret ;
+  uint32_t ret ;
 
   l -= 2*(p/4) ;
 
@@ -57,9 +57,9 @@ static inline u_int get10(u_int *l, u_int p)
   return ret ;
 }
 
-u_int *tpxFCF_2D_scan_to_next(tpxFCF_2D *fcf, u_int *end, u_int *start, tpx_altro_struct *a)
+uint32_t *tpxFCF_2D_scan_to_next(tpxFCF_2D *fcf, uint32_t *end, uint32_t *start, tpx_altro_struct *a)
 {
-	u_int *h = end ;
+	uint32_t *h = end ;
 	int wc, lo, hi ;
 	
 	a->count = 0 ;
@@ -173,7 +173,7 @@ u_int *tpxFCF_2D_scan_to_next(tpxFCF_2D *fcf, u_int *end, u_int *start, tpx_altr
 
 		for(;tb_last>tb_prev;tb_last--) {
 
-			u_short adc = get10(h,p10++) ;
+			uint16_t adc = get10(h,p10++) ;
 			*fcf->data_raw_p++ = adc ;
 		}
 		
@@ -240,10 +240,10 @@ int tpxFCF_2D::do_print(int row)
 }
 
 	
-int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
+int tpxFCF_2D::stage_2d(uint32_t *buff, int max_bytes)
 {
-	u_int *locbuff = buff ;
-	u_int *startbuff = buff ;
+	uint32_t *locbuff = buff ;
+	uint32_t *startbuff = buff ;
 	
 
 	int gprof0 = PROFILER(0) ;
@@ -263,14 +263,14 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 
 	struct {
-		u_short hi, lo ;
+		uint16_t hi, lo ;
 	} late_merge[MAX_LATE_MERGE] ;
 
 	int late_merge_cou = 0 ;
 	
-	u_int *row_cache = locbuff++ ;	// reserve space
-	u_int *clust_count_cache = locbuff++ ;
-	u_int *outbuff = locbuff ;
+	uint32_t *row_cache = locbuff++ ;	// reserve space
+	uint32_t *clust_count_cache = locbuff++ ;
+	uint32_t *outbuff = locbuff ;
 	
 	short blob_ix = 0 ;
 
@@ -814,7 +814,7 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 		// ************** copy over to local storage in a NxM matrix form
 		
 		// check total bytes
-		u_int tot_size = (dp+2)*dt_2*sizeof(short)*2 ;
+		uint32_t tot_size = (dp+2)*dt_2*sizeof(short)*2 ;
 		if(tot_size > sizeof(dta)) {
 			LOG(WARN,"Cluster too big: sec %d:%d, row %d, dp %d, dt %d: %d/%d-- skipping",sector,rdo,row,dp,dt,tot_size,sizeof(dta)) ;
 			continue ;
@@ -854,12 +854,12 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 // this is the critical timing part and should not be present in real-time code!
 #ifdef DO_SIMULATION	
-			u_short *tdd = DTA_T(p0,0) ;
+			uint16_t *tdd = DTA_T(p0,0) ;
 #endif
 			for(;tb_hi>=tb_lo;tb_hi--) {
 				short adc = *s++ ;
 #ifdef DO_SIMULATION
-				u_short track_id = *s++ ;
+				uint16_t track_id = *s++ ;
 
 				*(tdd + tb) = track_id ;
 #endif
@@ -984,7 +984,7 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 #ifdef DO_DBG
 
 if(peaks_cou <= 1) {
-	static u_int ccc ;
+	static uint32_t ccc ;
 
 	int max_adc = 0 ;
 
@@ -1086,7 +1086,7 @@ if(1) {
 		peaks[0].t2 = t2 ;
 		peaks[0].flags = flags ;
 
-		static u_int peak_counter ;
+		static uint32_t peak_counter ;
 	
 		if(peaks_cou <= 1 ) {	// single peak, full mean!
 
@@ -1196,7 +1196,7 @@ if(1) {
 
 
 
-	u_int cl_cou  ;
+	uint32_t cl_cou  ;
 	if(modes) {
 		cl_cou = (outbuff - locbuff)/3 ;
 	}
@@ -1229,7 +1229,7 @@ if(1) {
 
 	PROFILER(gprof0) ;	// start of RDO
 
-	return (u_int *)locbuff - (u_int *)startbuff ;	// return number of intes stored
+	return (uint32_t *)locbuff - (uint32_t *)startbuff ;	// return number of intes stored
 }
 
 
@@ -1346,7 +1346,7 @@ tpxFCF_2D::tpxFCF_2D()
 	data_raw = (short *) valloc(2*data_raw_shorts) ;	// pad_num X 512tb X 2bytes (short)
 }
 
-int tpxFCF_2D::do_dump(int ix, u_int *obuff)
+int tpxFCF_2D::do_dump(int ix, uint32_t *obuff)
 {
 	int ret = 0 ;	// how many ints did we use...
 
@@ -1379,9 +1379,9 @@ int tpxFCF_2D::do_dump(int ix, u_int *obuff)
 		return 0 ;
 	}
 
-	u_int time_c = (u_int)(f_t_ave * 64.0 + 0.5) ;
-	u_int pad_c = (u_int)(f_p_ave * 64.0 + 0.5) ;
-	u_int cha = (u_int) (peaks[ix].f_charge + 0.5) ;
+	uint32_t time_c = (uint32_t)(f_t_ave * 64.0 + 0.5) ;
+	uint32_t pad_c = (uint32_t)(f_p_ave * 64.0 + 0.5) ;
+	uint32_t cha = (uint32_t) (peaks[ix].f_charge + 0.5) ;
 
 
 	if(flags & FCF_BROKEN_EDGE) goto keep ;
@@ -1406,10 +1406,10 @@ else {
 		}
 }
 #endif
-	u_int tmp_fl ;
+	uint32_t tmp_fl ;
 
 	// get extents
-	u_int tmp_p = pad_c / 64 ;
+	uint32_t tmp_p = pad_c / 64 ;
 
 	p1 = tmp_p - p1 ;
 	p2 = p2 - tmp_p ;
@@ -1608,14 +1608,14 @@ void tpxFCF_2D::do_track_id(int peaks_cou)
 
 		struct {
 			int cou ;
-			u_int track_id ;
+			uint32_t track_id ;
 		} t_id[MAX_TRACK_IDS] ;
 
 		memset(t_id,0,sizeof(t_id)) ;
 
 
-		u_short track_id = 123;
-		u_int blob_adc = 0 ;
+		uint16_t track_id = 123;
+		uint32_t blob_adc = 0 ;
 
 		for(int i=1;i<=dp;i++) {
 		for(int j=1;j<=dt;j++) {

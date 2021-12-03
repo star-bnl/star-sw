@@ -1,7 +1,7 @@
 #ifndef _DAQ_DTA_STRUCTS_H_
 #define _DAQ_DTA_STRUCTS_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 
 // Trigger basics
 struct daq_trg_word {
@@ -78,7 +78,7 @@ struct daq_det_gain {
 
 struct daq_det_pedrms {
 	float rms ;
-	u_short ped ;
+	uint16_t ped ;
 } ;
 
 //size_t daq_dta_dict(const char *det, const char *bank) ;

@@ -185,7 +185,7 @@ int itpcInterpreter::fee_map_check()
 	LOG(TERR,"fee_map_check") ;
 
 	for(int s=0;s<24;s++) {
-		u_int padplane[64] ;
+		uint32_t padplane[64] ;
 
 		memset(padplane,0xFF,sizeof(padplane)) ;
 
@@ -207,7 +207,7 @@ int itpcInterpreter::fee_map_check()
 		}
 
 		for(int p=0;p<64;p++) {
-			u_int pd = padplane[p]  ;
+			uint32_t pd = padplane[p]  ;
 
 			if((p==0)||(p>55)) {
 				if(pd != 0xFFFFFFFF) {
@@ -226,9 +226,9 @@ int itpcInterpreter::fee_map_check()
 	return 0 ;
 }
 
-u_int itpcInterpreter::ifee_mask(int sec1, int rdo1)
+uint32_t itpcInterpreter::ifee_mask(int sec1, int rdo1)
 {
-	u_int mask = 0 ;
+	uint32_t mask = 0 ;
 
 	for(int i=0;i<16;i++) {
 		if(itpc_fee_map[sec1-1][rdo1-1][i]) mask |= (1<<i) ;
@@ -264,7 +264,7 @@ int itpcInterpreter::parse_default()
 
 	for(int sec=1;sec<=24;sec++) {	
 	for(int rb=0;rb<4;rb++) {
-		u_int mask = ifee_mask(sec,rb+1) ;
+		uint32_t mask = ifee_mask(sec,rb+1) ;
 
 		itpc_config[sec].rdo[rb].rdo_id = rb+1 ;
 		itpc_config[sec].rdo[rb].wire1 = 0 ;
@@ -307,7 +307,7 @@ int itpcInterpreter::parse_config(const char *fname)
 	while(!feof(f)) {
 		char line[128] ;
 		int sec,rdo,rb,phase,port,padplane ;
-		u_int wire1, mask ;
+		uint32_t wire1, mask ;
 		int ret ;
 
 		if(fgets(line,sizeof(line),f)==0) continue ;
@@ -395,7 +395,7 @@ itpcInterpreter::itpcInterpreter()
 
 atomic_t itpcInterpreter::run_errors[4][16] ;
 
-void itpcInterpreter::run_start(u_int run)
+void itpcInterpreter::run_start(uint32_t run)
 {
 	run_number = run ;
 	evt_ix = 0 ;
@@ -440,7 +440,7 @@ void itpcInterpreter::run_stop()
 }
 
 
-void itpcInterpreter::start_event(u_int bytes)
+void itpcInterpreter::start_event(uint32_t bytes)
 {
 	evt_ix++ ;	//events will start from 1
 
@@ -474,9 +474,9 @@ void itpcInterpreter::stop_event()
 
 
 
-static inline u_int sw16(u_int d)
+static inline uint32_t sw16(uint32_t d)
 {
-	u_int tmp = d ;
+	uint32_t tmp = d ;
 
 	d >>= 16 ;
 
@@ -491,10 +491,10 @@ static inline u_int sw16(u_int d)
 	This is the pre-April 2018 version for rdo_version = fee_version = 0 ;
 */
 /* We start with 0x980000008 */
-u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
+uint32_t *itpcInterpreter::fee_scan(uint32_t *start, uint32_t *end)
 {
-	u_int *d = start ;
-	u_int dd ;
+	uint32_t *d = start ;
+	uint32_t dd ;
 	int hdr ;
 	int trg ;
 	int cfg ;
@@ -514,7 +514,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 	ascii_cou = 0 ;
 
 	// We are at the start of FEE data:
-	u_int dd_x = d[0] & 0xFFC000FF ;	// command
+	uint32_t dd_x = d[0] & 0xFFC000FF ;	// command
 
 	// I should now point at 0x80xx0001
 	if(dd_x != 0x80000001) {
@@ -534,7 +534,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 	while(d<end) {
 		dd = *d++ ;
 		dd_x = dd & 0xFFC000FF ;	// just commands
-		u_int dd_a ;
+		uint32_t dd_a ;
 
 		LOG(NOTE,"FEE #%d: %u 0x%08X",fee_port,d-start,dd) ;
 		
@@ -580,7 +580,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 
 
 		
-		u_int t_fee_id = (dd >> 16) & 0x3F ;
+		uint32_t t_fee_id = (dd >> 16) & 0x3F ;
 		if(fee_id<0) {
 			if((dd_x & 0xFF000000)==0x80000000) fee_id = t_fee_id ;
 		}
@@ -605,8 +605,8 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 		case 0x80000001 :	// START EVENT (also hdr)
 			// this can be missing! and can also show up at the very end!
 			{
-				u_int bx_lo = d[4] & 0xFFFF ;
-				u_int bx_hi = d[5] & 0xFFFF ;
+				uint32_t bx_lo = d[4] & 0xFFFF ;
+				uint32_t bx_hi = d[5] & 0xFFFF ;
 
 				bx_lo |= (bx_hi<<16) ;
 
@@ -628,8 +628,8 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 				//LOG(TERR,"FEE #%d(%d) start SAMPA: FEE BX %u (0x%08X)",fee_port,fee_id,fee_bx&0xFFFFF,fee_bx) ;
 
 				for(int i=0;i<4;i++) {
-					u_int expect_mask ;
-					//u_int *cur_d = d ;
+					uint32_t expect_mask ;
+					//uint32_t *cur_d = d ;
 
 					switch(i) {
 					case 0 :
@@ -705,7 +705,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 		case 0x80000003 :	// START of pedestal confirm
 			//LOG(TERR,"Start Ped, fee %d",fee_port) ;
 			{
-				u_int delta = ((d[3]&0xFFFF)<<16)|(d[2]&0xFFFF) ;
+				uint32_t delta = ((d[3]&0xFFFF)<<16)|(d[2]&0xFFFF) ;
 				int for_me = (d[0] & 0x8000)?1:0 ;
 				int timebins = d[0] & 0x3FF ;
 				int ch = (d[0]>>10)&0x3F ;
@@ -730,7 +730,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 
 			dd_a = dd & 0xFFC0FF00 ;	// for ASCII
 			if(dd_a == 0x0000F500 || dd_a==0x00800000) {	// ASCII char
-				u_char c = dd & 0xFF ;
+				uint8_t c = dd & 0xFF ;
 				//LOG(TERR,"... [0x%08X]",dd) ;
 
 				if(isprint(c) || isspace(c)) ;
@@ -754,7 +754,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 					}
 
 					if(fee_port > 0) {	// this must be!
-						u_int id1 = 0 ;
+						uint32_t id1 = 0 ;
 						if(strncmp(ascii_dta,"1Wire:",6)==0) {
 							char *id = strstr(ascii_dta,"ID") ;
 							if(id) {
@@ -797,7 +797,7 @@ u_int *itpcInterpreter::fee_scan(u_int *start, u_int *end)
 
 
 	if(fee_id < 0) {	// Hm, never seen any FEE data really...
-//		LOG(ERR,"%d: fee_id %d, FEE #%d [0x%08X]: format error [%u 0x%08X]",rdo_id,fee_id,fee_port,(u_int)fee_port,d-start,*d) ;
+//		LOG(ERR,"%d: fee_id %d, FEE #%d [0x%08X]: format error [%u 0x%08X]",rdo_id,fee_id,fee_port,(uint32_t)fee_port,d-start,*d) ;
 		return d ;
 	}
 
@@ -857,7 +857,7 @@ int itpcInterpreter::sampa_ch_scan()
 
 		if(ped_c) {
 			for(int t=t_start;t<=t_stop;t++) {
-				u_short adc = tb_buff[i++] ;
+				uint16_t adc = tb_buff[i++] ;
 
 				ped_c->accum(s,r,p,fee_id,fee_ch,t,adc) ;
 				//ped_c->accum(t,adc) ;
@@ -882,25 +882,25 @@ int itpcInterpreter::sampa_ch_scan()
 	return err ;
 }
 
-u_int *itpcInterpreter::sampa_ch_hunt(u_int *start, u_int *end) 
+uint32_t *itpcInterpreter::sampa_ch_hunt(uint32_t *start, uint32_t *end) 
 {
 	// I expect to be pointed to the SAMPA channel header!
-	u_int *data = start ;
-	u_int *data_start ;
+	uint32_t *data = start ;
+	uint32_t *data_start ;
 
-	u_int d ;
-	u_int err  ;
-	u_int h[6] ;
+	uint32_t d ;
+	uint32_t err  ;
+	uint32_t h[6] ;
 	bool hamming_err ;
-	u_int l_sampa_bx ;
-	u_int type, words ;
+	uint32_t l_sampa_bx ;
+	uint32_t type, words ;
 	unsigned long long hc ;
-	u_int hh[2] ;
+	uint32_t hh[2] ;
 	bool uncorrectable ;
 	int p_cou ;
-	u_int hdr[2] ;
+	uint32_t hdr[2] ;
 
-	u_int sampa_id, sampa_ch ;	// shadow class variables on purpose!
+	uint32_t sampa_id, sampa_ch ;	// shadow class variables on purpose!
 
 
 	retry:;
@@ -1023,26 +1023,26 @@ u_int *itpcInterpreter::sampa_ch_hunt(u_int *start, u_int *end)
 	return 0 ;
 }
 
-u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
+uint32_t *itpcInterpreter::sampa_lane_scan(uint32_t *start, uint32_t *end)
 {
-	u_int d ;
-	u_int h[6] ;
-	u_int type, words ;
-	u_int word32 ;
-	u_char lane ;
-	u_int err = 0 ;
-	u_int *data ;
+	uint32_t d ;
+	uint32_t h[6] ;
+	uint32_t type, words ;
+	uint32_t word32 ;
+	uint8_t lane ;
+	uint32_t err = 0 ;
+	uint32_t *data ;
 	int ch_loop_cou = 0 ;
 	int l_sampa_bx ;
-	u_int lane_hdr ;
+	uint32_t lane_hdr ;
 	bool parity_err ;
 	bool hamming_err ;
 	unsigned long long hc ;
-	u_int hh[2] ;
+	uint32_t hh[2] ;
 	bool uncorrectable ;
 	int p_cou ;
-	u_int hdr[2] ;
-	u_int first_b ;
+	uint32_t hdr[2] ;
+	uint32_t first_b ;
 
 	data = start ;
 
@@ -1254,7 +1254,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	else {				// done in pedestal runs
 
 		int t_cou = 0 ;	// local
-		for(u_int i=0;i<word32;i++) {
+		for(uint32_t i=0;i<word32;i++) {
 			d = *data++ ;
 
 			if((d&0xC0000000)) {
@@ -1331,7 +1331,7 @@ u_int *itpcInterpreter::sampa_lane_scan(u_int *start, u_int *end)
 	LOG(ERR,"   0x%08X 0x%08X",hdr[0],hdr[1]) ;
 
 #if 0
-	u_int *n_data = sampa_ch_hunt(data,end) ;
+	uint32_t *n_data = sampa_ch_hunt(data,end) ;
 	if(n_data) {
 		err = 0 ;
 		data = n_data ;
@@ -1467,9 +1467,9 @@ void itpcInterpreter::fee_dbase(const char *fname)
 
 }
 
-int itpcInterpreter::ana_send_config(u_int *data, u_int *data_end)
+int itpcInterpreter::ana_send_config(uint32_t *data, uint32_t *data_end)
 {
-	u_int d ;
+	uint32_t d ;
 
 	data++ ;	// skip FD71
 
@@ -1584,8 +1584,8 @@ int itpcInterpreter::ana_send_config(u_int *data, u_int *data_end)
 	ascii_cou = 0 ;
 	
 	while(data<data_end) {
-		u_int dd_a, dd_b, dd_c ;
-		//u_int fee_id ;
+		uint32_t dd_a, dd_b, dd_c ;
+		//uint32_t fee_id ;
 
 		d = *data++ ;
 
@@ -1605,7 +1605,7 @@ int itpcInterpreter::ana_send_config(u_int *data, u_int *data_end)
 				ascii_dta[ascii_cou++] = 0 ;
 
 
-				u_int id1 = 0 ;
+				uint32_t id1 = 0 ;
 				if(strncmp(ascii_dta,"1Wire:",6)==0) {
 					char *id = strstr(ascii_dta,"ID") ;
 					if(id) {
@@ -1659,11 +1659,11 @@ int itpcInterpreter::ana_send_config(u_int *data, u_int *data_end)
 }
 
 
-int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
+int itpcInterpreter::ana_triggered(uint32_t *data, uint32_t *data_end)
 {
-	u_int trg ;
-	u_int err = 0 ;
-	u_int soft_err = 0 ;
+	uint32_t trg ;
+	uint32_t err = 0 ;
+	uint32_t soft_err = 0 ;
 	int fee_cou = 0 ;
 
 	int expect_fee_cou = itpc_config[sector_id].rdo[rdo_id-1].fee_count ;
@@ -1722,8 +1722,8 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		fee_id = (data[0]>>16) & 0xFF ;
 	}
 	else {	
-		u_int f_id[3], d_x[3] ;
-		u_int f_ok = 0 ;
+		uint32_t f_id[3], d_x[3] ;
+		uint32_t f_ok = 0 ;
 
 		// gotta be fee_version 1
 		fee_version = 1 ;
@@ -1753,7 +1753,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 			if(f_id[0]==f_id[2]) f_ok |= 0x20 ;
 		}
 
-		u_int w = data[0]>>28 ;
+		uint32_t w = data[0]>>28 ;
 
 		switch(w) {
 		case 0 :
@@ -1797,7 +1797,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		if(data[0] != ((fee_id<<16)|0x4321)) err |= 0x10000 ;
 		if(data[1] != ((fee_id<<16)|0x8765)) err |= 0x20000 ;
 
-		if((u_int)fee_version != (data[2] & 0xFFFF)) err |= 0x40000 ;
+		if((uint32_t)fee_version != (data[2] & 0xFFFF)) err |= 0x40000 ;
 
 		if(data[3]&0xFFF0) err |= 0x40000 ; 
 		fee_port = (data[3] & 0xF) + 1 ;
@@ -1831,7 +1831,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	
 	for(int i=0;i<4;i++) {
-		u_int expect_mask ;
+		uint32_t expect_mask ;
 
 		if((*data & 0xFC000000) != 0xB0000000) {
 			// bits 0x1011abxx e.g. 0xB4
@@ -1929,7 +1929,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 					break ;
 				}
 					
-				u_int dd_a = data[0] & 0xFFC0FF00 ;
+				uint32_t dd_a = data[0] & 0xFFC0FF00 ;
 
 				if(dd_a==0x0000F500 || dd_a==0x00800000) {	//ASCII				
 					int c = data[0] & 0xFF ;
@@ -2099,7 +2099,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 		data++ ;
 		ascii_cou = 0 ;
 		while(data<data_end) {
-			u_int d = *data++ ;
+			uint32_t d = *data++ ;
 
 			if((d&0xFFFFFF00)==0x9800F500) {
 				int c = d & 0xFF ;
@@ -2133,15 +2133,15 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	return 0 ;
 }
 
-int itpcInterpreter::ana_pedestal(u_int *data, u_int *data_end)
+int itpcInterpreter::ana_pedestal(uint32_t *data, uint32_t *data_end)
 {
 	int fee_port = 0 ;
 
 	data++ ;	// skip 9800FD60
 	
 	while(data<data_end) {
-		u_int dd_f = data[0] & 0xFF00FFFF ;
-		u_int dd_r = data[0] & 0xFF00000F ;
+		uint32_t dd_f = data[0] & 0xFF00FFFF ;
+		uint32_t dd_r = data[0] & 0xFF00000F ;
 
 		if(data[0]==0x5800FD61) {
 			LOG(INFO,"pedestal packet done") ;
@@ -2161,7 +2161,7 @@ int itpcInterpreter::ana_pedestal(u_int *data, u_int *data_end)
 
 		}
 		else if(dd_f==0x80000003) {
-			u_int s[7] ;
+			uint32_t s[7] ;
 			
 			int fee_id = (data[0] >> 16) & 0xFF ;
 			
@@ -2175,8 +2175,8 @@ int itpcInterpreter::ana_pedestal(u_int *data, u_int *data_end)
 			int len = s[1] & 0x3FF ;
 			int ch = (s[1]>>10)&0x3F ;
 
-			u_int ticks1 = (s[4]<<16)|s[3] ;
-			u_int ticks2 = (s[6]<<16)|s[5] ;
+			uint32_t ticks1 = (s[4]<<16)|s[3] ;
+			uint32_t ticks2 = (s[6]<<16)|s[5] ;
 			LOG(TERR,"#%02d(%02d): fee_id %02d: for_me %d: ch %2d, len %3d",fee_port,my_port,fee_id,for_me,ch,len) ;
 			LOG(TERR,"       chsum 0x%04X, ticks %u %u",s[2],ticks1,ticks2) ;
 			
@@ -2194,11 +2194,11 @@ int itpcInterpreter::ana_pedestal(u_int *data, u_int *data_end)
 	return 0 ;
 }
 
-int itpcInterpreter::rdo_scan_top(u_int *data, int words)
+int itpcInterpreter::rdo_scan_top(uint32_t *data, int words)
 {
-	u_int *data_end = data + words ;
-	u_int *data_start = data ;
-	u_int d ;
+	uint32_t *data_end = data + words ;
+	uint32_t *data_start = data ;
+	uint32_t d ;
 	int ret = 0 ;
 
 	//some preliminaries which used to be in start_event
@@ -2324,17 +2324,17 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 /*
 	This is the frozen, pre-April 2018 unpacker for rdo_version=0
 */
-int itpcInterpreter::rdo_scan(u_int *data, int words)
+int itpcInterpreter::rdo_scan(uint32_t *data, int words)
 {
 //	int status = 0 ;
 	int log_start = 0 ;
 
-	u_int *data_end = data + words ;
-	u_int *data_start = data ;
-	u_int rh_xing_start = 0 ;
-	u_int flags = 0 ;
+	uint32_t *data_end = data + words ;
+	uint32_t *data_start = data ;
+	uint32_t rh_xing_start = 0 ;
+	uint32_t flags = 0 ;
 
-	u_int d  ;
+	uint32_t d  ;
 
 	char mon_string[512] ;
 	int mon_cou = 0 ;
@@ -2392,7 +2392,7 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 //	LOG(TERR,"RDO scan") ;
 
 	while(data<data_end) {
-		u_int hdr ;
+		uint32_t hdr ;
 
 		word_ix = data - data_start ;
 
@@ -2421,7 +2421,7 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 		switch(state) {
 		case S_FEE_ASCII :
 			if((d&0xFFFF0000)==0x00AA0000) {
-				u_char c = d & 0xFF ;
+				uint8_t c = d & 0xFF ;
 
 				if(isprint(c) || isspace(c)) ;
 				else c = '?' ;
@@ -2433,7 +2433,7 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 					printf("HERE #%02d: %s",fee_port,ascii_dta) ;
 
 					if(strncmp(ascii_dta,"1Wire ",6)) {
-						u_int id1 ;
+						uint32_t id1 ;
 						char *id = strstr(ascii_dta,"ID") ;
 						sscanf(id,"ID 0x%X",&id1) ;
 						printf("=====> 0x%08X",id1) ;
@@ -2524,7 +2524,7 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			{
 			LOG(TERR,"Left fee_port %d: %d",fee_port,data_end-data) ;
 			if(fee_port==16) {
-				u_int *d = data ;
+				uint32_t *d = data ;
 
 				while(d<=data_end) {
 					LOG(TERR,"%d = 0x%08X",data_end-d,*d) ;
@@ -2551,7 +2551,7 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			flags |= 2 ;
 			LOG(NOTE,"RDO Event Header: START") ;
 			{
-				u_int *d_now = data ;
+				uint32_t *d_now = data ;
 
 				for(int i=0;i<10;i++) {
 					
@@ -2668,8 +2668,8 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			flags |= 8 ;
 			LOG(NOTE,"RDO: Event Trailer Start") ;
 			{
-				u_int trg_cou ;
-				u_int *d_now = data ;
+				uint32_t trg_cou ;
+				uint32_t *d_now = data ;
 				int suspect = 0 ;
 
 				if(data[0] != 0xABCD0000) {
@@ -2781,8 +2781,8 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 		case 0x80000010 :
 			{
 				
-				u_int h, l ;
-				u_int glo_status ;
+				uint32_t h, l ;
+				uint32_t glo_status ;
 				
 				l = (*data++) & 0xFFFF ;
 				h = (*data++) & 0xFFFF ;
@@ -2824,8 +2824,8 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 		case 0xA0000020 :
 			{
 				
-				u_int h, l ;
-				u_int glo_status ;
+				uint32_t h, l ;
+				uint32_t glo_status ;
 				
 				l = (*data++) & 0xFFFF ;
 				h = (*data++) & 0xFFFF ;
@@ -2849,11 +2849,11 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 		case 0x80000200 :
 			LOG(NOTE,"FEE Trigger: START: TRIGGERED") ;
 			{
-			u_int h, l ;
-			u_int bx_xing ;
-			u_int glo_status ;
-			u_int fee_evt ;
-			u_int type ;
+			uint32_t h, l ;
+			uint32_t bx_xing ;
+			uint32_t glo_status ;
+			uint32_t fee_evt ;
+			uint32_t type ;
 
 			l = (*data++) & 0xFFFF ;
 			h = (*data++) & 0xFFFF ;
@@ -2902,11 +2902,11 @@ int itpcInterpreter::rdo_scan(u_int *data, int words)
 			break ;
 		case 0xA0000300:
 			{
-				u_int a, b ;
-				u_int status ;
-				u_int xing ;
-				u_int glo_status ;
-				u_int fee_evt ;
+				uint32_t a, b ;
+				uint32_t status ;
+				uint32_t xing ;
+				uint32_t glo_status ;
+				uint32_t fee_evt ;
 
 				a = (*data++) & 0xFFFF ;	//lo
 				b = (*data++) & 0xFFFF ;	//ji

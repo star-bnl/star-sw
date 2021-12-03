@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <rtsLog.h>
@@ -11,7 +11,7 @@
 
 #include "daq_pmd.h"
 
-extern int pmd_reader(char *m, struct pmd_t *pmd, u_int driver) ;
+extern int pmd_reader(char *m, struct pmd_t *pmd, uint32_t driver) ;
 
 const char *daq_pmd::help_string = "PMD tst\n" ;
 

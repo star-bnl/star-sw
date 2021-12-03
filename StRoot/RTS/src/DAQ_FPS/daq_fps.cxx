@@ -1,4 +1,4 @@
-#include <sys/types.h>
+#include <stdint.h>
 #include <errno.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -113,7 +113,7 @@ daq_dta *daq_fps::handle_adc(int sec)
 
 
 		fps_evt_hdr_t *hdr = (fps_evt_hdr_t *) raw_d->Void ;
-		u_int *d32 = (u_int *) raw_d->Void ;
+		uint32_t *d32 = (uint32_t *) raw_d->Void ;
 
 
 
@@ -150,7 +150,7 @@ daq_dta *daq_fps::handle_adc(int sec)
 				//LOG(TERR,"TB %d, QT %d, chs %d",tb,qt,chs) ;
 			
 				for(int c=0;c<chs;c++) {
-					u_int datum = *d32++ ;
+					uint32_t datum = *d32++ ;
 
 					int ch = datum >> 27 ;
 					int aadc = datum & 0x0FFF ;

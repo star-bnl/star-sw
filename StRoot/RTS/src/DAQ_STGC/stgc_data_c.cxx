@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -12,12 +12,12 @@
 stgc_data_c::feb_t stgc_data_c::feb[STGC_SECTOR_COU][4][6] ;
 stgc_data_c::errs_t stgc_data_c::errs[4] ;
 
-u_int stgc_data_c::run_type ;
-u_int stgc_data_c::run_number ;
+uint32_t stgc_data_c::run_type ;
+uint32_t stgc_data_c::run_number ;
 
-static u_int gray2dec(u_int gray)
+static uint32_t gray2dec(uint32_t gray)
 {
-	u_int dec ;
+	uint32_t dec ;
 
 	dec = gray ;
 
@@ -63,7 +63,7 @@ int stgc_data_c::run_start()
 	return 0 ;
 } ;
 
-const char *stgc_data_c::type_c(u_short type)
+const char *stgc_data_c::type_c(uint16_t type)
 {
 
 	switch(type) {
@@ -80,9 +80,9 @@ const char *stgc_data_c::type_c(u_short type)
 	}
 }
 
-int stgc_data_c::hdr_check(u_short *d, int shorts)
+int stgc_data_c::hdr_check(uint16_t *d, int shorts)
 {
-	u_short st[6] ;
+	uint16_t st[6] ;
 	const char *c_type ;
 
 #if 0
@@ -211,7 +211,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 			sh-- ;
 		}
 		sh = 0 ;	// reuse
-		u_int feb = (response>>56)&0xF ;
+		uint32_t feb = (response>>56)&0xF ;
 		if((feb<1)||(feb>6)) sh |= 1 ;
 		if(((response>>48)&0xF0F0)!=0x1000) {
 			sh |= 2 ;
@@ -306,7 +306,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 }
 
 // unpacks and sanity-checks 1 RDO event
-int stgc_data_c::start_0001(u_short *d, int shorts)
+int stgc_data_c::start_0001(uint16_t *d, int shorts)
 {
 	trg_cou = 0 ;
 
@@ -318,30 +318,30 @@ int stgc_data_c::start_0001(u_short *d, int shorts)
 int stgc_data_c::event_0001()
 {
 	int evt_err = 0 ;
-	u_int feb_id = 255 ;
+	uint32_t feb_id = 255 ;
 
 //	LOG(TERR,"ADC cou %d, feb %d",adc_cou,feb_id) ;
 
 //	if(bad_error) return 0 ;
 	if(adc_cou<=0) return 0 ;
 
-	u_short d[4] ;
+	uint16_t d[4] ;
 
 	for(int i=0;i<4;i++) {
 		d[i] = *d16_data++ ;
 	}
 
-	u_int dd = (d[0]<<16)|d[1] ;
+	uint32_t dd = (d[0]<<16)|d[1] ;
 
 	feb_id = dd>>29 ;
 
 
 	if(feb_id==7) {	// trigger	
-		u_short t_hi, t_mid, t_lo ;
-		u_short t ;
-		u_short trg_counter ;
-		u_char t_cmd, d_cmd ;
-		u_char err = 0 ;
+		uint16_t t_hi, t_mid, t_lo ;
+		uint16_t t ;
+		uint16_t trg_counter ;
+		uint8_t t_cmd, d_cmd ;
+		uint8_t err = 0 ;
 
 		t_cmd = d[1] & 0xF ;
 		d_cmd = (d[1]>>4) & 0xF ;
@@ -395,9 +395,9 @@ int stgc_data_c::event_0001()
 	}
 
 
-	u_int mhz_adc_marker = dd & 0x1FFFFFFF ;	// 29 bits of trigger
+	uint32_t mhz_adc_marker = dd & 0x1FFFFFFF ;	// 29 bits of trigger
 
-	u_int vmm_id = (d[2]>>13)&0x7 ;
+	uint32_t vmm_id = (d[2]>>13)&0x7 ;
 	int crc_ok = (d[2]>>12)&1 ;
 	int channel = (d[2]>>6)&0x3F ;
 
@@ -464,7 +464,7 @@ int stgc_data_c::event_0001()
 }
 
 // unpacks and sanity-checks 1 RDO event
-int stgc_data_c::start(u_short *d, int shorts)
+int stgc_data_c::start(uint16_t *d, int shorts)
 {
 	bad_error = 0 ;
 	want_saved = 0 ;
@@ -493,7 +493,7 @@ int stgc_data_c::start(u_short *d, int shorts)
 	LOG(ERR,"OLD CODE") ;
 	return -1 ;
 
-	u_short *d16_last = d + shorts - 2 ;	// should be at the last 0xFEED
+	uint16_t *d16_last = d + shorts - 2 ;	// should be at the last 0xFEED
 	
 	for(int i=0;i<shorts;i++) {
 //		LOG(TERR,"last %d: 0x%04X",i,d16_last[-i]) ;
@@ -570,7 +570,7 @@ int stgc_data_c::start(u_short *d, int shorts)
 
 int stgc_data_c::event()
 {
-	u_short d[4] ;
+	uint16_t d[4] ;
 	int rod_id ;
 	int feb_id ;
 	int vmm_id ;

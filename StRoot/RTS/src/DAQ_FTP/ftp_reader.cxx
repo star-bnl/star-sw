@@ -11,12 +11,12 @@
 
 static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *cppr, char *mem, ftp_t *ftp) ;
 
-int ftp_reader(char *m, struct ftp_t *ftp, u_int driver)
+int ftp_reader(char *m, struct ftp_t *ftp, uint32_t driver)
 {
 	int sec ;
 	int rb, mz ;
 	int len ;
-	u_int off ;
+	uint32_t off ;
 
 	struct TPCP *ftpp ;
 	struct TPCSECP *secp ;
@@ -51,7 +51,7 @@ int ftp_reader(char *m, struct ftp_t *ftp, u_int driver)
 	off = ntohl(datap->det[FTP_ID].off) ;
 	if(off == 0) return 0 ;
 
-	ftpp = (struct TPCP *)((u_int *)m + off) ;
+	ftpp = (struct TPCP *)((uint32_t *)m + off) ;
 	if(checkBank((char *)ftpp,"FTPP") < 0) return -1 ;	// wrong bank!
 
 	// clear the data part
@@ -91,7 +91,7 @@ int ftp_reader(char *m, struct ftp_t *ftp, u_int driver)
 					return -1 ;
 				}
 
-				u_int mz_pix = 0 ;
+				uint32_t mz_pix = 0 ;
 
 				// what do we have here...
 				if((mzp->banks[TPC_ADCD].len != 0) && (ftp->mode==0)) {	// zero-suppressed
@@ -113,7 +113,7 @@ int ftp_reader(char *m, struct ftp_t *ftp, u_int driver)
 
 					for(jj=0;jj<len;jj++) {
 						int start, last, length, stop ;
-						u_short ss, f8 ;
+						uint16_t ss, f8 ;
 						static int rr, pp ;
 						int tbin ;
 						int frow, fpad ;	// FTPC row, pad
@@ -154,7 +154,7 @@ int ftp_reader(char *m, struct ftp_t *ftp, u_int driver)
 
 
 							for(tbin=start;tbin<stop;tbin++) {
-								u_char val ;
+								uint8_t val ;
 
 								val = adcd->adc[adccou++] ;
 								mz_pix++ ;
@@ -255,11 +255,11 @@ int ftp_reader(char *m, struct ftp_t *ftp, u_int driver)
 static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *cppr, char *mem, ftp_t *ftp)
 {
 	int i, j, t ;
-	u_char row, pad ;
-	u_short *cppseq ;
-	u_char *adcseq ;
-	u_char *adcdata ;
-	u_short *cppdata ;
+	uint8_t row, pad ;
+	uint16_t *cppseq ;
+	uint8_t *adcseq ;
+	uint8_t *adcdata ;
+	uint16_t *cppdata ;
 	int frow, fpad ;
 	int timebins, cpps ;
 
@@ -282,14 +282,14 @@ static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *
 
 	switch(what) {
 	case 0 :	// ADCR 
-		adcdata = (u_char *) mem + sizeof(struct TPCADCR_l);
+		adcdata = (uint8_t *) mem + sizeof(struct TPCADCR_l);
 
 		if(cppr == NULL) {
 			LOG(WARN,"No CPPR? - skipping...",0,0,0,0,0) ;
 			return -1 ;
 		}
 
-		cppdata = (u_short *)((char *)cppr + sizeof(struct TPCCPPR_l)) ;
+		cppdata = (uint16_t *)((char *)cppr + sizeof(struct TPCCPPR_l)) ;
 		break ;
 	case 1 :	// PEDR
 		adcdata = ((struct TPCPEDR *)mem)->ped ;
@@ -315,14 +315,14 @@ static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *
 		frow = row/6 ;
 		fpad = (row%6)*160 + pad ;
 
-		adcseq = (u_char *) adcdata + timebins*i ;
+		adcseq = (uint8_t *) adcdata + timebins*i ;
 
 		switch(what) {
 		case 0 :
-			cppseq = (u_short *)((char *) cppdata + 2*2*32*i) ;	
+			cppseq = (uint16_t *)((char *) cppdata + 2*2*32*i) ;	
 			for(j=0;j<cpps;j++) {
-				u_short start, stop ;
-				u_char val ;
+				uint16_t start, stop ;
+				uint8_t val ;
 				int counter ;
 
 
@@ -368,7 +368,7 @@ static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *
 			break ;
 		case 1 :	// PEDR is in ftp->adc!
 			for(j=0;j<256;j++) {
-				u_char val ;
+				uint8_t val ;
 				val = *adcseq++ ;
 
 				ftp->adc[sec][frow][fpad][j] = val ;
@@ -378,7 +378,7 @@ static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *
 			break ;
 		case 2 :	// RMSR is in ftp->timebin!
 			for(j=0;j<256;j++) {
-				u_char val ;
+				uint8_t val ;
 				val = *adcseq++ ;
 
 				ftp->timebin[sec][frow][fpad][j] = val ;
