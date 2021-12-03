@@ -35,8 +35,8 @@ private:
     StFcsCollection *mFcsCollectionPtr;
     unsigned int mRun=0;
     StFcsDb* mFcsDb=0;
-    unsigned int mReadMode=1;
-    unsigned int mReadMuDst=0; 
+    int mReadMode=1;
+    int mReadMuDst=0; 
 
     int readMuDst();
 
