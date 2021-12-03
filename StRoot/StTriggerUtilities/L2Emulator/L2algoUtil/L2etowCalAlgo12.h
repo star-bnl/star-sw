@@ -44,7 +44,7 @@ class L2etowCalAlgo12 : public  L2VirtualAlgo2012 {
   L2etowCalAlgo12(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom2012 *geo, char* outDir,int resOff);
   int   initRunUser( int runNo, int *rc_ints, float *rc_floats);
   void  finishRunUser();// at the end of each run
-  void  calibrateEtow(int token, int eemcIn, ushort *eemcData);
+  void  calibrateEtow(int token, int eemcIn, unsigned short *eemcData);
   void clear(int token);
   void  computeUser(int token); // booby trap
   void print0();

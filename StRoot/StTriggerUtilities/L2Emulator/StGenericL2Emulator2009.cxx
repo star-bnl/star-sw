@@ -296,7 +296,7 @@ void StGenericL2Emulator2009::printBEtowers(){
     printf(" StGenericL2Emulator2009:: B_EMC Tower HITS ...\n");
     for ( i = 1; i <= (int)twB->numberOfModules(); i++) { // The B-EMC modules
       StSPtrVecEmcRawHit& emcTowerHits = twB->module(i)->hits();
-      uint j;
+      unsigned int j;
       for ( j = 0; j < emcTowerHits.size(); j++) { 
 	int adc= emcTowerHits[j]->adc();
 	int mod= emcTowerHits[j]->module();
@@ -317,7 +317,7 @@ void StGenericL2Emulator2009::printBEtowers(){
       StEmcModule* stmod =   twE->module(i);
       if(stmod==0)	continue;
       StSPtrVecEmcRawHit& emcTowerHits = stmod->hits();
-      uint j;
+      unsigned int j;
       for ( j = 0; j < emcTowerHits.size(); j++) { 
 	int adc= emcTowerHits[j]->adc();
 	int sec= emcTowerHits[j]->module()+1;

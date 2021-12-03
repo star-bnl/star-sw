@@ -44,7 +44,7 @@ class L2etowCalAlgo09 : public  L2VirtualAlgo2009 {
   L2etowCalAlgo09(const char* name, L2EmcDb* db, L2EmcGeom *geo, char* outDir,int resOff);
   int   initRunUser( int runNo, int *rc_ints, float *rc_floats);
   void  finishRunUser();// at the end of each run
-  void  calibrateEtow(int token, int eemcIn, ushort *eemcData);
+  void  calibrateEtow(int token, int eemcIn, unsigned short *eemcData);
   void clear(int token);
   void  computeUser(int token); // booby trap
   void print0();
