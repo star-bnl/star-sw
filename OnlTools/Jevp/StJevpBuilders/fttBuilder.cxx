@@ -11,6 +11,8 @@
 #include <TH1D.h>
 #include <TH2F.h>
 #include <TString.h>
+#include <TF1.h>
+#include <TColor.h>
 
 #include <math.h>
 #include "fttBuilder.h"
@@ -42,6 +44,9 @@ ClassImp(fttBuilder);
 
 const std::string fttBuilder::quadLabels[4] = {"A", "B", "C", "D"};
 const std::string fttBuilder::dirLabels[4]  = {"Horizontal", "Vertical", "Diagonal", "Unknown"};
+const double fttBuilder::PENT_LS = 60.2361 * 10; // mm
+const double fttBuilder::PENT_SS = 0.308571429 * 60.2361 * 10; // mm
+
 
 void fttBuilder::initialize(int argc, char *argv[]) {
     
@@ -49,12 +54,15 @@ void fttBuilder::initialize(int argc, char *argv[]) {
     // Control draw/visiblity options
     std::vector<std::string> setLogy   = { "hitsPerTb", "chargePerPlane0", "chargePerPlane1", "chargePerPlane2", "chargePerPlane3", "hitsTbPerPlane0", "hitsTbPerPlane1", "hitsTbPerPlane2", "hitsTbPerPlane3", "hitsPerPlane", "hitsPerQuad", "hitsPerFob", "hitsPerVMM", "hitsVMMPerPlane0", "hitsVMMPerPlane1", "hitsVMMPerPlane2", "hitsVMMPerPlane3", "nStripsFired" };
     std::vector<std::string> setLogz   = { "hitsPerPlaneQuad", "hitsFobQuadPerPlane0", "hitsFobQuadPerPlane1", "hitsFobQuadPerPlane2", "hitsFobQuadPerPlane3" };
-    std::vector<std::string> showStats = {  };
+    std::vector<std::string> showStats = { "hitsPerTb400" };
+    std::vector<std::string> drawOutline = {};
+    std::vector<std::string> drawOutlineDH = {};
+    std::vector<std::string> drawOutlineDV = {};
 
     //////////////////////////////////////////////////////////////////////// 
     // General
     ////////////////////////////////////////////////////////////////////////
-        contents.nStripsFired            = new TH1D( "nStripsFired", "sTGC; nStripsFired; counts", 6144, 0, 6144 );
+        contents.nStripsFired            = new TH1D( "nStripsFired", "sTGC; nStripsFired; counts", 614, 0, 614 );
 
     //////////////////////////////////////////////////////////////////////// 
     // hits and adc
@@ -83,7 +91,20 @@ void fttBuilder::initialize(int argc, char *argv[]) {
             contents.hitsVMMPerPlane[iPlane]        = new TH1D( TSF("hitsVMMPerPlane%d", iPlane), TSF("sTGC Plane %d (hits / VMM); VMM; counts (hits)", iPlane+1), nVMMPerPlane, 0.5, nVMMPerPlane + 0.5 );
             contents.hStripPerPlane[iPlane]         = new TH2D( TSF("hStripPerPlane%d", iPlane), TSF("sTGC Horizontal Strips, Plane %d (hits / Strip); x; y", iPlane+1), 140, -700, 700, 438, -700, 700 );
             contents.vStripPerPlane[iPlane]         = new TH2D( TSF("vStripPerPlane%d", iPlane), TSF("sTGC Vertical Strips, Plane %d (hits / Strip); x; y", iPlane+1), 438, -700, 700, 140, -700, 700 );
-            contents.dStripPerPlane[iPlane]         = new TH2D( TSF("dStripPerPlane%d", iPlane), TSF("sTGC Diagonal Strips, Plane %d (hits / Strip); x; y", iPlane+1), 438, -700, 700, 438, -700, 700 );
+            contents.dhStripPerPlane[iPlane]        = new TH2D( TSF("dhStripPerPlane%d", iPlane), TSF("sTGC Diagonal Strips, Plane %d (hits / Strip); x; y", iPlane+1), 350, -700, 700, 350, -700, 700 );
+            contents.dvStripPerPlane[iPlane]        = new TH2D( TSF("dvStripPerPlane%d", iPlane), TSF("sTGC Diagonal Strips, Plane %d (hits / Strip); x; y", iPlane+1), 350, -700, 700, 350, -700, 700 );
+
+            setLogz.push_back( TSF("hStripPerPlane%d", iPlane).Data() );
+            setLogz.push_back( TSF("vStripPerPlane%d", iPlane).Data() );
+            setLogz.push_back( TSF("dhStripPerPlane%d", iPlane).Data() );
+            setLogz.push_back( TSF("dvStripPerPlane%d", iPlane).Data() );
+
+            drawOutline.push_back( TSF("hStripPerPlane%d", iPlane).Data() );
+            drawOutline.push_back( TSF("vStripPerPlane%d", iPlane).Data() );
+            // drawOutline.push_back( TSF("dhStripPerPlane%d", iPlane).Data() );
+            // drawOutline.push_back( TSF("dvStripPerPlane%d", iPlane).Data() );
+            drawOutlineDH.push_back( TSF("dhStripPerPlane%d", iPlane).Data() );
+            drawOutlineDV.push_back( TSF("dvStripPerPlane%d", iPlane).Data() );
 
             contents.hitsTbPerPlane[iPlane]        = new TH1D( TSF("hitsTbPerPlane%d", iPlane), TSF("sTGC Plane %d (Timing); Tb; counts (hits)", iPlane+1), 400, -400, 400 );
             contents.chargePerPlane[iPlane]        = new TH1D( TSF("chargePerPlane%d", iPlane), TSF("sTGC Plane %d (Charge); ADC; counts (hits)", iPlane+1), maxADC/10.0, 0, maxADC );
@@ -117,6 +138,8 @@ void fttBuilder::initialize(int argc, char *argv[]) {
     int np = sizeof(contents) / sizeof(TH1 *);
     JevpPlot *plots[np];
 
+    std::vector< JLine* > lines;
+
 
     // Add all of the plots
     for ( int i = 0; i < np; i++ ){
@@ -133,10 +156,114 @@ void fttBuilder::initialize(int argc, char *argv[]) {
         }
         plots[i]->optstat=0;
         if ( std::find( showStats.begin(), showStats.end(), name ) != showStats.end() ) {
-            plots[i]->optstat=111;
+            plots[i]->optstat=1111;
         }
         if ( contents.array[i]->GetZaxis())
             contents.array[i]->GetZaxis()->SetLabelSize(10.0 / 360.0);
+
+        contents.array[i]->SetFillColor( TColor::GetColor("#ffd600") );
+
+        lines.clear();
+        // Draw the detector outline
+        if ( std::find( drawOutline.begin(), drawOutline.end(), name ) != drawOutline.end() ){
+            
+            JLine* 
+            l = jLine(0.0, PENT_LS, PENT_SS, PENT_LS); lines.push_back( l );
+            l = jLine(PENT_SS, PENT_LS, PENT_LS, PENT_SS); lines.push_back( l );
+            l = jLine(PENT_LS, PENT_SS, PENT_LS, 0); lines.push_back( l );
+
+            l = jLine(0.0, PENT_LS, -PENT_SS, PENT_LS); lines.push_back( l );
+            l = jLine(-PENT_SS, PENT_LS, -PENT_LS, PENT_SS); lines.push_back( l );
+            l = jLine(-PENT_LS, PENT_SS, -PENT_LS, 0); lines.push_back( l );
+
+            l = jLine(-60.0, 0, 60.0, 0); lines.push_back( l );
+            l = jLine(-60.0, 0, -60, -PENT_LS); lines.push_back( l );
+            l = jLine(60.0, -PENT_LS, 60.0, 0); lines.push_back( l );
+
+            l = jLine(60.0, -PENT_LS, PENT_SS + 60.0, -PENT_LS); lines.push_back( l );
+            l = jLine(60.0 + PENT_SS, -PENT_LS, 60.0 + PENT_LS, -PENT_SS); lines.push_back( l );
+            l = jLine(60.0 + PENT_LS, -PENT_SS, 60.0 + PENT_LS, 0); lines.push_back( l );
+
+            l = jLine(-60.0, -PENT_LS, -PENT_SS - 60.0, -PENT_LS); lines.push_back( l );
+            l = jLine(-60.0 - PENT_SS, -PENT_LS, -60.0 - PENT_LS, -PENT_SS); lines.push_back( l );
+            l = jLine(-60.0 - PENT_LS, -PENT_SS, -60.0 - PENT_LS, 0); lines.push_back( l );
+
+            l = jLine(PENT_LS, 0, 60.0 + PENT_LS, 0); lines.push_back( l );
+            l = jLine(-PENT_LS, 0, -60.0 - PENT_LS, 0); lines.push_back( l );
+
+            l = jLine(0, 0, 0, PENT_LS); lines.push_back( l );
+            l = jLine(0, 0, PENT_LS, 0); lines.push_back( l );
+            l = jLine(0, 0, -PENT_LS, 0); lines.push_back( l );
+        }
+        if ( std::find( drawOutlineDH.begin(), drawOutlineDH.end(), name ) != drawOutlineDH.end() ){
+            JLine* 
+            l = jLine(0, PENT_LS, -PENT_SS, PENT_LS); lines.push_back( l );
+            l = jLine( -PENT_SS, PENT_LS, -399.177, 388.718); lines.push_back( l );
+            l = jLine(-399.177, 388.718, -162.14, 150.769); lines.push_back( l );
+            l = jLine(-162.14, 150.769, -306.996, 0); lines.push_back( l );
+            l = jLine(-306.996, 0, -384.362, 0); lines.push_back( l );
+            l = jLine(-384.362, 0, -219.753, -161.026); lines.push_back( l );
+            l = jLine(-219.753, -161.026, -456.79, -386.667); lines.push_back( l );
+
+            l = jLine(-456.79, -386.667, -60 - PENT_SS, -PENT_LS); lines.push_back( l );
+            l = jLine(-60 - PENT_SS, -PENT_LS, -60.0, -PENT_LS); lines.push_back( l );
+            
+
+            l = jLine(0, PENT_LS, PENT_SS, PENT_LS); lines.push_back( l );
+            l = jLine(PENT_SS, PENT_LS, 399.177,  388.718); lines.push_back( l );
+            l = jLine(399.177,  388.718,  162.14, 150.769); lines.push_back( l );
+            l = jLine(162.14 ,  150.769, 306.996, 0); lines.push_back( l );
+            l = jLine(306.996,        0, 384.362, 0); lines.push_back( l );
+            l = jLine(384.362,        0, 219.753, -161.026); lines.push_back( l );
+            l = jLine(219.753, -161.026,  456.79, -386.667); lines.push_back( l );
+            l = jLine(456.79, -386.667, 60 + PENT_SS, -PENT_LS); lines.push_back( l );
+            l = jLine(60 + PENT_SS, -PENT_LS, 60.0, -PENT_LS); lines.push_back( l );
+
+            l = jLine(-60.0, 0, 60.0, 0); lines.push_back( l );
+            l = jLine(-60.0, 0, -60, -PENT_LS); lines.push_back( l );
+            l = jLine(60.0, -PENT_LS, 60.0, 0); lines.push_back( l );
+
+            l = jLine(0.0, 0.0, 0.0, PENT_LS); lines.push_back( l );
+            l = jLine(-386.448, 0.0, 386.448, 0.0 ); lines.push_back( l );
+        }
+
+        if ( std::find( drawOutlineDV.begin(), drawOutlineDV.end(), name ) != drawOutlineDV.end() ){
+            JLine* 
+            l = jLine(-PENT_LS, 0, -PENT_LS, PENT_SS); lines.push_back( l );
+            l = jLine(-PENT_LS, PENT_SS, -388.09, 401.882); lines.push_back( l );
+            l = jLine(-388.09, 401.882, -154.004, 160.65); lines.push_back( l );
+            l = jLine(-154.004, 160.65, 0.0, 317.707); lines.push_back( l );
+            l = jLine(0.0, 317.707, 154.004, 160.65); lines.push_back( l );
+            l = jLine(154.004, 160.65, 386.448, 401.882); lines.push_back( l );
+            l = jLine(386.448, 401.882, PENT_LS, PENT_SS); lines.push_back( l );
+            l = jLine(PENT_LS, PENT_SS, PENT_LS, 0); lines.push_back( l );
+
+            l = jLine(-60 - PENT_LS, 0, -60 - PENT_LS, -PENT_SS); lines.push_back( l );
+            l = jLine(-60 - PENT_LS, -PENT_SS, -448.871, -397.776); lines.push_back( l );
+            l = jLine(-448.871, -397.776, -214.784, -160.65); lines.push_back( l );
+            l = jLine(-214.784, -160.65, -60, -312.575); lines.push_back( l );
+            
+            l = jLine(PENT_LS + 60, 0, PENT_LS + 60, -PENT_SS); lines.push_back( l );
+            l = jLine(PENT_LS + 60, -PENT_SS, 448.871, -397.776); lines.push_back( l );
+            l = jLine(448.871, -397.776, 214.784, -160.65); lines.push_back( l );
+            l = jLine(214.784, -160.65, 60, -312.575); lines.push_back( l );
+
+            l = jLine(PENT_LS, 0, PENT_LS + 60, 0); lines.push_back( l );
+            l = jLine(-PENT_LS, 0, -PENT_LS - 60, 0); lines.push_back( l );
+
+
+            l = jLine(-60.0, 0, 60.0, 0); lines.push_back( l );
+            l = jLine(-60.0, 0, -60, -312.575); lines.push_back( l );
+            l = jLine(60.0, -312.575, 60.0, 0); lines.push_back( l );
+
+            l = jLine(-PENT_LS, 0, PENT_LS, 0); lines.push_back( l );
+            l = jLine(0, 0, 0, 317.707); lines.push_back( l );
+            
+        }
+
+        for ( auto l : lines ){
+            plots[i]->addElement(l);
+        }
 
         addPlot(plots[i]);
     }
@@ -151,13 +278,16 @@ void fttBuilder::initialize(int argc, char *argv[]) {
 void fttBuilder::startrun(daqReader *rdr) {
     resetAllPlots();
     // Set the "time" window for accepting data
-    ((daq_stgc *)rdr->det("stgc"))->xing_min = -65000 ;
-    ((daq_stgc *)rdr->det("stgc"))->xing_max = 65000 ;
+    int tCut = 65000;
+    ((daq_stgc *)rdr->det("stgc"))->xing_min = -tCut ;
+    ((daq_stgc *)rdr->det("stgc"))->xing_max = tCut ;
 
     // Draw plane outlines
     for ( int iPlane = 0; iPlane < nPlane; iPlane++ ){
-        drawOutline( contents.hStripPerPlane[ iPlane ], VMMHardwareMap::StripOrientation::Horizontal );
-        drawOutline( contents.vStripPerPlane[ iPlane ], VMMHardwareMap::StripOrientation::Vertical );
+        // drawOutline( contents.hStripPerPlane[ iPlane ], VMMHardwareMap::StripOrientation::Horizontal );
+        // drawOutline( contents.vStripPerPlane[ iPlane ], VMMHardwareMap::StripOrientation::Vertical );
+        // drawOutline( contents.dhStripPerPlane[ iPlane ], VMMHardwareMap::StripOrientation::DiagonalH );
+        // drawOutline( contents.dvStripPerPlane[ iPlane ], VMMHardwareMap::StripOrientation::DiagonalV );
     }
 
     // reload the map every run for fast updates
@@ -165,8 +295,136 @@ void fttBuilder::startrun(daqReader *rdr) {
 }
 
 void fttBuilder::stoprun(daqReader *rdr) {
+    
+    fitTriggerTime();
+
+
+    // for ( int iPlane = 0; iPlane < 4; iPlane ++){
+    //         for ( int iRow = 3; iRow < 5; iRow ++ ){
+    //             for ( int iStrip = 0; iStrip < 152; iStrip+=1 ){
+                    
+    //                 if ( iRow == 4 && iStrip < 59 || iRow == 3 )
+    //                 {
+    //                     drawStrip(contents.dhStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::DiagonalH );
+    //                     drawStrip(contents.dhStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::B, VMMHardwareMap::StripOrientation::DiagonalH );
+    //                     drawStrip(contents.dhStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::C, VMMHardwareMap::StripOrientation::DiagonalH );
+    //                     drawStrip(contents.dhStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::D, VMMHardwareMap::StripOrientation::DiagonalH );
+    //                 }
+
+
+    //                 // if ( iRow == 3 && iStrip < 54 || iRow == 4 )
+    //                 if ( iRow == 4 && iStrip < 59 || iRow == 3 )
+    //                 {
+    //                     drawStrip(contents.dvStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::DiagonalV );
+    //                     drawStrip(contents.dvStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::B, VMMHardwareMap::StripOrientation::DiagonalV );
+    //                     drawStrip(contents.dvStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::C, VMMHardwareMap::StripOrientation::DiagonalV );
+    //                     drawStrip(contents.dvStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::D, VMMHardwareMap::StripOrientation::DiagonalV );
+    //                 }
+    //             }
+    //         }
+    //     }
 }
 
+
+JLine * fttBuilder::jLine( double x0, double y0, double x1, double y1 ){
+    JLine *l = new JLine( x0, y0, x1, y1 );
+    l->SetLineColor(kGreen);
+    l->SetLineWidth(2.0);
+    l->SetNDC_y( 0 );
+    return l;
+}
+
+void fttBuilder::fillPoint( TH2 * h2, float x, float y, float w ){
+    TAxis *ax = h2->GetXaxis();
+    TAxis *ay = h2->GetYaxis();
+    int ix0 = ax->FindBin( x );
+    int iy0 = ay->FindBin( y );
+    h2->SetBinContent( ix0, iy0, h2->GetBinContent( ix0, iy0 ) + w );
+}
+void fttBuilder::fillLineLow( TH2 * h2, float x0, float y0, float x1, float y1 ) {// plotLineLow(x0, y0, x1, y1)
+    float dx0 = 1.598173516*2;
+    float dy0 = 1.598173516*2;
+
+    float dx = x1 - x0;
+    float dy = y1 - y0;
+    float yi = 1;
+    yi = dy0;
+    if (dy < 0){
+        yi = -1;
+        yi = -dy0;
+        dy = -dy;
+    }
+    float D = (2 * dy) - dx;
+    float y = y0;
+
+    // for x from x0 to x1
+    for ( float x = x0; x < x1; x+=dx0 ){
+        if ( ((fabs( x ) < 660.0 && y < 0 ) || ( fabs( x ) < 600.0 && y > 0 )) && fabs( y ) < 600.0 )
+            fillPoint( h2, x, y );
+        if (D > 0){
+            y = y + yi;
+            D = D + (2 * (dy - dx));
+        } else {
+            D = D + 2*dy;
+        }
+    }
+}
+void fttBuilder::fillLineHigh( TH2 * h2, float x0, float y0, float x1, float y1 ) {
+    float dx0 = 1.598173516*2;
+    float dy0 = 1.598173516*2;
+
+    float dx = x1 - x0;
+    float dy = y1 - y0;
+    float xi = 1;
+    xi = dx0;
+    if (dx < 0){
+        xi = -1;
+        xi = -dx0;
+        dx = -dx;
+    }
+    float D = (2 * dx) - dy;
+    float x = x0;
+
+    // for y from y0 to y1
+    for ( float y = y0; y < y1; y+=dy0 ){
+        if ( ((fabs( x ) < 660.0 && y < 0 ) || ( fabs( x ) < 600.0 && y > 0 )) && fabs( y ) < 600.0 )
+            fillPoint( h2, x, y );
+        if (D > 0){
+            x = x + xi;
+            D = D + (2 * (dx - dy));
+        } else {
+            D = D + 2*dx;
+        }
+    }
+}
+void fttBuilder::fillLine( TH2 * h2, float x0, float y0, float x1, float y1 ) {
+    
+    const float d = 1.598173516;
+    const float nudge = 0;
+    int nx0 = (x0 / d);
+    x0 = nx0 * d;
+    int nx1 = (x1 / d);
+    x1 = nx1 * d;
+
+    int ny0 = (y0 / d);
+    y0 = ny0 * d;
+    int ny1 = (y1 / d);
+    y1 = ny1 * d;
+
+    if (abs(y1 - y0) < abs(x1 - x0)) {
+        if (x0 > x1) {
+            fillLineLow(h2, x1+nudge, y1+nudge, x0-nudge, y0-nudge);
+        } else {
+            fillLineLow(h2, x0+nudge, y0+nudge, x1-nudge, y1-nudge);
+        } 
+    } else {
+        if (y0 > y1){
+            fillLineHigh(h2, x1+nudge, y1+nudge, x0-nudge, y0-nudge);
+        } else {
+            fillLineHigh(h2, x0+nudge, y0+nudge, x1-nudge, y1-nudge);
+        }
+    }
+}
 
 void fttBuilder::drawStrip( TH2 * h2, int row, int strip, VMMHardwareMap::Quadrant q, VMMHardwareMap::StripOrientation so ){
 
@@ -229,76 +487,108 @@ void fttBuilder::drawStrip( TH2 * h2, int row, int strip, VMMHardwareMap::Quadra
         const int ix0 = ax->FindBin( x0 + strip * sPitch );
         const int ix1 = ax->FindBin( x0 + (strip) * sPitch );
         floodFill( h2, ix0, iy0, ix1, iy1 );
-    } else if ( VMMHardwareMap::StripOrientation::Diagonal == so ){
+    } else if ( VMMHardwareMap::StripOrientation::DiagonalH == so || VMMHardwareMap::StripOrientation::DiagonalV == so ){
+        // printf( "Diagonal @ row=%d, strip=%d\n", row, strip );
         double l0 = VMMHardwareMap::stripPitch * 5;
-        double l = l0 + VMMHardwareMap::stripPitch * strip;
-        double x0 = l0 / sqrt(2);
-        double y0 = x0;
+        double l = l0 + VMMHardwareMap::stripPitch * (strip) * (1.10);
+        double x1, y1;
+
+        if ( VMMHardwareMap::Quadrant::A == q ){
+            x0 = l / sqrt(2);
+            y0 = x0;
+            x1 = x0*2;
+            y1 = 0;
+            if ( row == 3 && so == VMMHardwareMap::StripOrientation::DiagonalH){
+                x1 = 0;
+                y1 = y0*2;
+            } else if ( row == 4 && so == VMMHardwareMap::StripOrientation::DiagonalV){
+                x1 = 0;
+                y1 = y0*2;
+            }
+
+            fillLine( h2, x0, y0, x1, y1 );
+        } 
+        else if ( VMMHardwareMap::Quadrant::B == q )
+        {
+            x0 = l / sqrt(2);
+            y0 = -x0;
+
+            x1 = x0*2;
+            y1 = 0;
+            if ( row == 3 && so == VMMHardwareMap::StripOrientation::DiagonalH){
+                x1 = 0;
+                y1 = y0*2;
+            } else if ( row == 4 && so == VMMHardwareMap::StripOrientation::DiagonalV){
+                x1 = 0;
+                y1 = y0*2;
+            }
+
+            x0 += 60;
+            x1 += 60;
+
+            fillLine( h2, x0, y0, x1, y1 );
+        } 
+        else if ( VMMHardwareMap::Quadrant::C == q ){
+            x0 = -l / sqrt(2);
+            y0 = x0;
+
+            x1 = x0*2;
+            y1 = 0;
+            if ( row == 3 && so == VMMHardwareMap::StripOrientation::DiagonalH ){
+                x1 = 0;
+                y1 = y0*2;
+            } else if ( row == 4 && so == VMMHardwareMap::StripOrientation::DiagonalV ){
+                x1 = 0;
+                y1 = y0*2;
+            }
+
+            x0 -= 60;
+            x1 -= 60;
+
+            fillLine( h2, x0, y0, x1, y1 );
+        } else if ( VMMHardwareMap::Quadrant::D == q ){
+            x0 = -l / sqrt(2);
+            y0 = fabs(x0);
+
+            x1 = x0*2;
+            y1 = 0;
+            if ( row == 3 && so == VMMHardwareMap::StripOrientation::DiagonalH ){
+                x1 = 0;
+                y1 = y0*2;
+            } else if ( row == 4 && so == VMMHardwareMap::StripOrientation::DiagonalV ){
+                x1 = 0;
+                y1 = y0*2;
+            }
+
+            fillLine( h2, x0, y0, x1, y1 );
+        }
+
+        
     }
 } // drawStrip
 
 
-void fttBuilder::drawOutline( TH2 * h2, VMMHardwareMap::StripOrientation so ) {
-    
-    double val = 1e-6;
-    for ( int ix = 1; ix < h2->GetNbinsX() + 1; ix++ ){
-        for ( int iy = 1; iy < h2->GetNbinsY() + 1; iy++ ){
-            float x = h2->GetXaxis()->GetBinCenter( ix );
-            float y = h2->GetYaxis()->GetBinCenter( iy );
 
+void fttBuilder::fitTriggerTime(){
 
-            if ( so == VMMHardwareMap::StripOrientation::Horizontal ){
-                int hStrip = 1000;
-                int hRow = 100;
-                
-                hStrip = y / VMMHardwareMap::stripPitch;
-                if ( y > 0 )
-                    hRow = x / VMMHardwareMap::rowLength;
-                else if ( x > 0 )
-                    hRow = ( x - 60 ) / VMMHardwareMap::rowLength;
-                else if ( x < 0 )
-                    hRow = ( x + 60 ) / VMMHardwareMap::rowLength;
-                
-                if ( hRow == 0 && abs(hStrip) > 166 )
-                    h2->SetBinContent( ix, iy, val );
-                if ( abs(hRow) == 1 && abs(hStrip) > 152 )
-                    h2->SetBinContent( ix, iy, val );
-                if ( abs(hRow) == 2 && abs(hStrip) > 93 )
-                    h2->SetBinContent( ix, iy, val );
-                if ( abs(hRow) > 2 || abs(hStrip) > 166 )
-                    h2->SetBinContent( ix, iy, val );
-                if ( y < 0 && x > -60 && x < 60 )
-                    h2->SetBinContent( ix, iy, val );
-            }
+    if ( nullptr == f1TriggerTime )
+        f1TriggerTime = new TF1( "fg", "gaus" );
 
-            if ( so == VMMHardwareMap::StripOrientation::Vertical ){
-                int vStrip = 1000;
-                int vRow = 100;
-                
-                if ( y > 0 )
-                    vStrip = x / VMMHardwareMap::stripPitch;
-                else if( x > 0 )
-                    vStrip = (x-60) / VMMHardwareMap::stripPitch;
-                else if( x < 0 )
-                    vStrip = (x+60) / VMMHardwareMap::stripPitch;
+    f1TriggerTime->SetLineColor( kRed );
 
-                vRow = y / VMMHardwareMap::rowLength;
-                
-                if ( vRow == 0 && abs(vStrip) > 166 )
-                    h2->SetBinContent( ix, iy, val );
-                if ( abs(vRow) == 1 && abs(vStrip) > 152 )
-                    h2->SetBinContent( ix, iy, val );
-                if ( abs(vRow) == 2 && abs(vStrip) > 93 )
-                    h2->SetBinContent( ix, iy, val );
-                if ( abs(vRow) > 2 || abs(vStrip) > 166 )
-                    h2->SetBinContent( ix, iy, val );
-                if ( y < 0 && x > -60 && x < 60 )
-                    h2->SetBinContent( ix, iy, val );
-            }
+    int ix = contents.hitsPerTb400->GetMaximumBin();
+    float x = contents.hitsPerTb400->GetXaxis()->GetBinCenter( ix );
 
-        }
-    }
-} // drawOutline
+    contents.hitsPerTb400->Fit( f1TriggerTime, "RQ", "", x - 30, x + 30 );
+    float m = f1TriggerTime->GetParameter(1);
+    float s = f1TriggerTime->GetParameter(2);
+    contents.hitsPerTb400->Fit( f1TriggerTime, "RQ", "", m - s*2, m + s*2 );
+    m = f1TriggerTime->GetParameter(1);
+    s = f1TriggerTime->GetParameter(2);
+    contents.hitsPerTb400->Fit( f1TriggerTime, "RQ", "", m - s*1.5, m + s*1.5 );
+    updateTimeFit = 0;
+
+}
 
 void fttBuilder::processVMMHit( int iPlane, VMMHardwareMap::Quadrant quad, stgc_vmm_t rawVMM ){
 
@@ -356,6 +646,9 @@ void fttBuilder::processVMMHit( int iPlane, VMMHardwareMap::Quadrant quad, stgc_
     contents.bcidVMM->Fill( iVMMPerFtt+1, rawVMM.bcid );
 
 
+    
+
+
 
     int iRow = -1;
     int iStrip = -1;
@@ -374,10 +667,19 @@ void fttBuilder::processVMMHit( int iPlane, VMMHardwareMap::Quadrant quad, stgc_
         else if ( VMMHardwareMap::StripOrientation::Vertical == stripDir ){
             drawStrip(contents.vStripPerPlane[ iPlane ], iRow, iStrip, quad, stripDir );
         }
-        else if ( VMMHardwareMap::StripOrientation::Diagonal == stripDir ){
-            drawStrip(contents.dStripPerPlane[ iPlane ], iRow, iStrip, quad, stripDir );
+        else if ( VMMHardwareMap::StripOrientation::DiagonalH == stripDir ){
+            drawStrip(contents.dhStripPerPlane[ iPlane ], iRow, iStrip, quad, stripDir );
+        }
+        else if ( VMMHardwareMap::StripOrientation::DiagonalV == stripDir ){
+            drawStrip(contents.dvStripPerPlane[ iPlane ], iRow, iStrip, quad, stripDir );
         }
     }
+
+    if ( updateTimeFit > fitUpdateInterval ) {
+        fitTriggerTime();
+    }
+
+    updateTimeFit++;
 
     // outline detector
     // drawStrip(contents.hStripPerPlane[ 0 ], 0, 167, VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::Horizontal );
@@ -405,9 +707,6 @@ void fttBuilder::processVMM(daqReader *rdr) {
     dd = rdr->det("stgc")->get("vmm");
 
     nStripsFired = 0;
-
-    int vmm0bcid = -1;
-    int vmm3bcid = -1;
 
     bool vmm_found = false;
     while(dd && dd->iterate()) {    

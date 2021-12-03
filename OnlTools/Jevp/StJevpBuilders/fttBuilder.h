@@ -103,8 +103,9 @@ public:
     enum class StripOrientation: int {
         Horizontal = 0,
         Vertical = 1,
-        Diagonal = 2,
-        Unknown = 3
+        DiagonalH = 2,
+        DiagonalV = 3,
+        Unknown = 4
     };
 
     // need non-class enum to get CINT to work
@@ -116,7 +117,7 @@ public:
     };
 
     static constexpr double stripPitch = 3.2; // mm
-    static constexpr double rowLength = 180; // mm
+    static constexpr double rowLength = 199; // mm
 
     // same for all planes
     // we have quadrants like:
@@ -131,20 +132,32 @@ public:
         if ( DEBUG ) {
             printf( "getOrientation( %d, %d, %d, %d )", rob, feb, vmm, row ); puts("");
         }
-        if ( 3 == row || 4 == row ){
-            return StripOrientation::Diagonal;
-        }
+        
+        
         if ( rob % 2 == 0 ){ // even rob
+            // row 3 and 4 are always diagonal
+            
+
             if ( feb % 2 != 0 ) { // odd
+                if ( 3 == row || 4 == row )
+                    return StripOrientation::DiagonalH;
                 return StripOrientation::Horizontal;
             }
             // even
+            if ( 3 == row || 4 == row )
+                return StripOrientation::DiagonalV;
             return StripOrientation::Vertical;
         } else { // odd rob
+            // row 3 and 4 are always diagonal
+            
             if ( feb % 2 != 0 ) { // odd
+                if ( 3 == row || 4 == row )
+                    return StripOrientation::DiagonalV;
                 return StripOrientation::Vertical;
             }
             // even
+            if ( 3 == row || 4 == row )
+                return StripOrientation::DiagonalH;
             return StripOrientation::Horizontal;
         }
         // should never get here!
@@ -189,7 +202,8 @@ class VMMHardwareMap;
 
 // DAQ RTS format for sTGC data
 class stgc_vmm_t;
-
+class TF1;
+class JLine;
 
 class fttBuilder : public JevpBuilder {
  public:
@@ -235,6 +249,13 @@ class fttBuilder : public JevpBuilder {
   static const std::string quadLabels[4];
   static const std::string dirLabels[4];
 
+  size_t updateTimeFit = 0;
+  static const size_t fitUpdateInterval = 10000;
+  TF1 * f1TriggerTime = nullptr;
+
+  static const double PENT_LS; //60.2361
+  static const double PENT_SS; //60.2361
+
   // Histo declarations!
   union {
     TH1 *array[];
@@ -261,7 +282,8 @@ class fttBuilder : public JevpBuilder {
 
         TH2 *hStripPerPlane[nPlane];
         TH2 *vStripPerPlane[nPlane];
-        TH2 *dStripPerPlane[nPlane];
+        TH2 *dhStripPerPlane[nPlane];
+        TH2 *dvStripPerPlane[nPlane];
 
         TH1 *chargePerFob[nFob];
         
@@ -275,7 +297,14 @@ class fttBuilder : public JevpBuilder {
   void event(daqReader *rdr);
 
   void processVMM(daqReader *rdr);
+  void fitTriggerTime();
 
+  void fillPoint( TH2 * h2, float x, float y, float w = 1.0 );
+  void fillLine( TH2 * h2, float x0, float y0, float x1, float y1 );
+  void fillLineLow( TH2 * h2, float x0, float y0, float x1, float y1 );
+  void fillLineHigh( TH2 * h2, float x0, float y0, float x1, float y1 );
+
+  // void fillLine( TH2 * h2, int x0, int y0, int x1, int y1);
   
   void processTPX(daqReader *rdr);
 
@@ -298,7 +327,8 @@ class fttBuilder : public JevpBuilder {
 
 #ifndef __CINT__
     void drawLine( TH2 * h2, int dx, int dy );
-    void drawOutline( TH2 * h2, VMMHardwareMap::StripOrientation so );
+    JLine * jLine( double x0, double y0, double x1, double y1 );
+    // void drawOutline( TH2 * h2, VMMHardwareMap::StripOrientation so );
     void drawStrip( TH2 * h2, int row, int strip, VMMHardwareMap::Quadrant q, VMMHardwareMap::StripOrientation so );
     void processVMMHit( int iPlane, VMMHardwareMap::Quadrant iQuad, stgc_vmm_t rawVMM);
     shared_ptr<VMMHardwareMap> mHardwareMap;
