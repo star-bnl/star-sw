@@ -403,7 +403,7 @@ void tpxBuilder::event(daqReader *rdr)
 	  channel_counts[dd->pad][dd->row] = 1;
 	}
 
-	for(u_int i=0;i<dd->ncontent;i++) {
+	for(uint32_t i=0;i<dd->ncontent;i++) {
 	  int tb = dd->adc[i].tb;
 	  int adc = dd->adc[i].adc;
 
@@ -453,7 +453,7 @@ void tpxBuilder::event(daqReader *rdr)
 
       while(dd->iterate()) {
 
-	for(u_int i=0;i<dd->ncontent;i++) {
+	for(uint32_t i=0;i<dd->ncontent;i++) {
 	  pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);
 	  charge_counts_cl[(int)dd->cld[i].pad][dd->row] += dd->cld[i].charge;
 	  tb_charge_counts_cl[(int)dd->cld[i].tb] += dd->cld[i].charge;
@@ -489,7 +489,7 @@ void tpxBuilder::event(daqReader *rdr)
     //       if(do_print) {
     // 	printf("TPX: sec %02d, row %2d, pad %3d (%d pix)\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
     // 	daq_det_pedrms *ped = (daq_det_pedrms *)dd->Void ;
-    // 	for(u_int tb=0;tb<dd->ncontent;tb++) {
+    // 	for(uint32_t tb=0;tb<dd->ncontent;tb++) {
     // 	  printf("  tb %3d: ped %3d, rms %.2f\n",tb,ped[tb].ped,ped[tb].rms) ;
     // 	}
     //       }

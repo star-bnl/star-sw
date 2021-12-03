@@ -32,7 +32,7 @@
   //             SEQ  |    1      2      3      4      5      6      7      8
   TString RP_name[8]  = { "EHI", "EHO", "EVU", "EVD", "WHI", "WHO", "WVD", "WVU" };
   TString PMT_name[8] = { "PMT0", "PMT1" };
-  //  u_short PMT_RP_MAP[8] = { 2, 3, 7, 6, 0, 1, 4, 5 };
+  //  uint16_t PMT_RP_MAP[8] = { 2, 3, 7, 6, 0, 1, 4, 5 };
   int PMT_RP_MAP[8] = { 2, 3, 7, 6, 1, 0, 5, 4 }; // changed by KY (2015-1-30)
 #else
   //              SEQ  |    1      2      3      4      5      6      7      8
@@ -220,19 +220,19 @@ void ppBuilder::initialize(int argc, char *argv[]) {
   plots[iNext] -> setDrawOpts("COLTEXT");
   iNext++;
 
-  for(u_int i=0; i<sizeof(contPMT_ADC) / sizeof(TH1 *);i++) {
+  for(uint32_t i=0; i<sizeof(contPMT_ADC) / sizeof(TH1 *);i++) {
     plots[iNext] = new JevpPlot(contPMT_ADC.array[i]); 
     plots[iNext]->logy = 1;  
     iNext++;                                      
   }
 
-  for(u_int i=0;i<sizeof(contPMT_TAC) / sizeof(TH2 *);i++) {
+  for(uint32_t i=0;i<sizeof(contPMT_TAC) / sizeof(TH2 *);i++) {
     plots[iNext] = new JevpPlot(contPMT_TAC.array[i]);
     plots[iNext] -> optlogz=1; 
     iNext++;                           
   }
 
-  for(u_int i=0;i<sizeof(contentsSVX) / sizeof(TProfile *);i++) {
+  for(uint32_t i=0;i<sizeof(contentsSVX) / sizeof(TProfile *);i++) {
     plots[iNext] = new JevpPlot(contentsSVX.array[i]);
     plots[iNext]->getHisto(0)->histo->SetMinimum(  0.);
     plots[iNext]->getHisto(0)->histo->SetMaximum(250.);
@@ -340,9 +340,9 @@ void ppBuilder::event(daqReader *rdr)
   if ( dd ){
     while ( dd->iterate() ){
       pp2pp_t *ds = (pp2pp_t *) dd->Void;  
-      u_char rp_id  = ds->seq_id - 1;                // NOTE!  range 1-8
-      u_char plane_id = ds->chain_id;
-      u_char svx = ds->svx_id;
+      uint8_t rp_id  = ds->seq_id - 1;                // NOTE!  range 1-8
+      uint8_t plane_id = ds->chain_id;
+      uint8_t svx = ds->svx_id;
       // Added by KY (2015-1-30) : Correcting wrong svx_id
       if ( svx == 7 ) svx = 3 ; 
 

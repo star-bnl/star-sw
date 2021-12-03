@@ -824,7 +824,7 @@ void tpcBuilder::event(daqReader *rdr)
 	  channel_counts[dd->pad][dd->row] = 1;
 	}
       
-	for(u_int i=0;i<dd->ncontent;i++) {
+	for(uint32_t i=0;i<dd->ncontent;i++) {
 	  int tb = dd->adc[i].tb;
 	  int adc = dd->adc[i].adc;
 	  if((dd->pad >= Npads1) ||
@@ -926,7 +926,7 @@ void tpcBuilder::event(daqReader *rdr)
 	}
 	
 	
-	for(u_int i=0;i<dd->ncontent;i++) {
+	for(uint32_t i=0;i<dd->ncontent;i++) {
 	  int tb = dd->adc[i].tb;
 	  int adc = dd->adc[i].adc;
 	  if((dd->pad >= Npads1) ||
@@ -1014,7 +1014,7 @@ void tpcBuilder::event(daqReader *rdr)
       itpc_cl_max_channels += tpc_max_channels_inner_sector;
 
       while(dd->iterate()) {
-	for(u_int i=0;i<dd->ncontent;i++) {
+	for(uint32_t i=0;i<dd->ncontent;i++) {
 	  noClustiTPC++;
 	  if((dd->cld[i].flags==0) || (dd->cld[i].flags==2)) {
 	    pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);
@@ -1064,7 +1064,7 @@ void tpcBuilder::event(daqReader *rdr)
 
       while(dd->iterate()) {
 	if(dd->row<14) continue; // fix for reading pre run 19 files
-	for(u_int i=0;i<dd->ncontent;i++) {
+	for(uint32_t i=0;i<dd->ncontent;i++) {
 	  noClustTPX++;
 	  if((dd->cld[i].flags==0)) {
 	    pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);

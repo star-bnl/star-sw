@@ -925,7 +925,7 @@ void istBuilder::event(daqReader *rdr) {
       int cou_zs[ChPerApv];
 		memset(cou_zs,0,sizeof(cou_zs));
 		//loop current APV chip
-		for ( u_int i=0; i<ddZS->ncontent; i++ ) {
+		for ( uint32_t i=0; i<ddZS->ncontent; i++ ) {
 			if ( f_zs[i].ch  < 0 || f_zs[i].ch  > 127 )    continue;//valid Channel numbering: 0, 1, ..., 127
 			if ( f_zs[i].tb  < 0 || f_zs[i].tb  > numTb )  continue;//valid Time bin numbering: 0, 1, ..., numTb
 			if ( f_zs[i].adc > 4095 )   continue;//valid ADC counts from 0 to 4095
@@ -981,7 +981,7 @@ void istBuilder::event(daqReader *rdr) {
 		bool isFilled = false;
 		int cou[ChPerApv];
 		memset(cou,0,sizeof(cou));
-		for ( u_int i=0; i<dd->ncontent; i++ ) { //loop current APV chip
+		for ( uint32_t i=0; i<dd->ncontent; i++ ) { //loop current APV chip
 			//non-ZS data
 			if ( f[i].ch  < 0 || f[i].ch  > 127 )       continue;      //valid Channel numbering: 0, 1, ..., 127 
 			if ( f[i].tb  < 0 || f[i].tb  > numTb )     continue;      //valid Time bin numbering: 0, 1, ..., numTb-1 (default 9 time bins, or 4, 5)

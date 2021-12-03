@@ -19,7 +19,7 @@
 #include <time.h>
 #include <assert.h>
 #include <sys/time.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <sys/syscall.h>
 #include "JevpBuilder.h"
@@ -802,7 +802,7 @@ void l4Builder::event(daqReader *rdr)
 
     //   //************************************** SET THE TRIGGER BIT HERE to min bias value *************
     //   //We want all events right now (not just min-bias), min-bias is our main trigger.
-    //   u_int trg = rdr->daqbits;
+    //   uint32_t trg = rdr->daqbits;
     //   //int minbias = 0x20;
     //   int vpdtag = 0x200;
     //   FILL_VPD_HISTOS = kFALSE;
@@ -1216,7 +1216,7 @@ void l4Builder::event(daqReader *rdr)
 	    // fill ToF hits
 	    THREADCP(2,0);
 
-	    for(u_int i = 0; i < hlt_tof->nTofHits; i++) {
+	    for(uint32_t i = 0; i < hlt_tof->nTofHits; i++) {
 		THREADCP(2,i);
 		short trayId   = hlt_tof->tofHit[i].trayId;
 		short channel  = hlt_tof->tofHit[i].channel;
@@ -1231,7 +1231,7 @@ void l4Builder::event(daqReader *rdr)
 
 	    // fill pVPD hit
 	    
-	    for(u_int i = 0; i < hlt_pvpd->nPvpdHits; i++) {
+	    for(uint32_t i = 0; i < hlt_pvpd->nPvpdHits; i++) {
 		THREADCP(2,i);
 		short trayId      = hlt_pvpd->pvpdHit[i].trayId;
 		float tdc         = hlt_pvpd->pvpdHit[i].tdc;
@@ -1255,7 +1255,7 @@ void l4Builder::event(daqReader *rdr)
 
             pEtofNhitsPerEvent->Fill(evt_time - first_evt_time, hlt_etof->nETofHits);
               
-            for(u_int i = 0; i < hlt_node->nNodes; i++) {
+            for(uint32_t i = 0; i < hlt_node->nNodes; i++) {
                 if (hlt_node->node[i].etofBeta <= 0) continue;
                 int globalTrackSN = hlt_node->node[i].globalTrackSN;
                 int primaryTrackSN = hlt_node->node[i].primaryTrackSN;
@@ -1289,7 +1289,7 @@ void l4Builder::event(daqReader *rdr)
 	    THREADCP(4,0);
 	    // fill EMC
 	    
-	    for(u_int i = 0; i < hlt_emc->nEmcTowers; i++) {
+	    for(uint32_t i = 0; i < hlt_emc->nEmcTowers; i++) {
 		float energy     = hlt_emc->emcTower[i].energy;
 		float phi   = hlt_emc->emcTower[i].phi;
 		float  eta   = hlt_emc->emcTower[i].eta;
@@ -1315,7 +1315,7 @@ void l4Builder::event(daqReader *rdr)
 	{    // section eee
 	    // global track
 	    THREADCP(5,0);
-            for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
+            for(uint32_t i = 0; i < (uint32_t)hlt_gt->nGlobalTracks; i++) {
 		int nHits = hlt_gt->globalTrack[i].nHits;
 	     	      
 		if(hlt_gt->globalTrack[i].flag < 0.) continue;
@@ -1351,7 +1351,7 @@ void l4Builder::event(daqReader *rdr)
 	    THREADCP(6,0);
 
 	    // global track
-	    for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
+	    for(uint32_t i = 0; i < (uint32_t)hlt_gt->nGlobalTracks; i++) {
 		int nHits = hlt_gt->globalTrack[i].nHits;
 	     	      
 		if(hlt_gt->globalTrack[i].flag < 0.) continue;
@@ -1386,7 +1386,7 @@ void l4Builder::event(daqReader *rdr)
 #pragma omp section
 	{  // section gg
 	    THREADCP(7,0);
-	    for(u_int i = 0; i < (u_int)hlt_gt->nGlobalTracks; i++) {
+	    for(uint32_t i = 0; i < (uint32_t)hlt_gt->nGlobalTracks; i++) {
 		int nHits = hlt_gt->globalTrack[i].nHits;
 		int ndedx = hlt_gt->globalTrack[i].ndedx;
 
@@ -1431,7 +1431,7 @@ void l4Builder::event(daqReader *rdr)
 
 #pragma omp parallel for num_threads(4)
 	    //#pragma omp parallel for num_threads(1)
-	    for(u_int i = 0; i < (u_int)hlt_node->nNodes; i++) {
+	    for(uint32_t i = 0; i < (uint32_t)hlt_node->nNodes; i++) {
 		int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
 		int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
 		hlt_track   GTrack     = hlt_gt->globalTrack[globalTrackSN];
@@ -1461,7 +1461,7 @@ void l4Builder::event(daqReader *rdr)
 #pragma omp section
 	{   // section ii
 	    THREADCP(9,0);
-	    for(u_int i = 0; i < (u_int)hlt_node->nNodes; i++) {
+	    for(uint32_t i = 0; i < (uint32_t)hlt_node->nNodes; i++) {
 		int     tofHitSN       = hlt_node->node[i].tofHitSN;
 		if(tofHitSN >= 0) 
 		    {
@@ -1486,7 +1486,7 @@ void l4Builder::event(daqReader *rdr)
 #pragma omp section
 	{   // section jj
 	    THREADCP(10,0);
-	    for(u_int i = 0; i < (u_int)hlt_node->nNodes; i++) {
+	    for(uint32_t i = 0; i < (uint32_t)hlt_node->nNodes; i++) {
 		int     emcTowerSN     = hlt_node->node[i].emcTowerSN;
 		if(emcTowerSN >= 0)
 		    {
@@ -1514,7 +1514,7 @@ void l4Builder::event(daqReader *rdr)
 	    int count = 0;
 	    int count_UPC = 0;
 	    THREADCP(11,0);
-	    for(u_int i = 0; i < hlt_node->nNodes; i++) {
+	    for(uint32_t i = 0; i < hlt_node->nNodes; i++) {
 		THREADCP(11,i);
 		//int     globalTrackSN  = hlt_node->node[i].globalTrackSN;
 		int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
@@ -1597,7 +1597,7 @@ void l4Builder::event(daqReader *rdr)
 	    // fill nodes
 	    THREADCP(12,0);
 	    
-	    for(u_int i = 0; i < u_int (hlt_node->nNodes*(1.0/3.0)); i++) {
+	    for(uint32_t i = 0; i < uint32_t (hlt_node->nNodes*(1.0/3.0)); i++) {
 		int  tofHitSN       = hlt_node->node[i].tofHitSN;
 	      
 		if(tofHitSN >= 0) {
@@ -1607,7 +1607,7 @@ void l4Builder::event(daqReader *rdr)
 			int  projChannel = hlt_node->node[i].projChannel;
 			int  Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
 	
-			for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
+			for(uint32_t j = 0; j < hlt_tof->nTofHits; j++) {
 			    int fire_trayId = hlt_tof->tofHit[j].trayId;
 	
 			    if(Proj_trayId == fire_trayId) {
@@ -1625,7 +1625,7 @@ void l4Builder::event(daqReader *rdr)
 	{   // section mm
 	    THREADCP(13,0);
 
-	    for(u_int i = u_int (hlt_node->nNodes*(1.0/3.0)); i < u_int (hlt_node->nNodes*(2.0/3.0)); i++) {
+	    for(uint32_t i = uint32_t (hlt_node->nNodes*(1.0/3.0)); i < uint32_t (hlt_node->nNodes*(2.0/3.0)); i++) {
 		int  tofHitSN       = hlt_node->node[i].tofHitSN;
 	      	      
 		if(tofHitSN >= 0) {
@@ -1635,7 +1635,7 @@ void l4Builder::event(daqReader *rdr)
 			int  projChannel = hlt_node->node[i].projChannel;
 			int Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
 		  
-			for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
+			for(uint32_t j = 0; j < hlt_tof->nTofHits; j++) {
 			    int fire_trayId = hlt_tof->tofHit[j].trayId;
 			    if(Proj_trayId == fire_trayId) {
 				hMatchId_fiberId_copy->Fill(projChannel, hlt_tof->tofHit[j].channel);
@@ -1651,7 +1651,7 @@ void l4Builder::event(daqReader *rdr)
 #pragma omp section
 	{   // section nn
 	    THREADCP(14,0);
-	    for(u_int i = u_int (hlt_node->nNodes*(2.0/3.0)); i < hlt_node->nNodes; i++) {
+	    for(uint32_t i = uint32_t (hlt_node->nNodes*(2.0/3.0)); i < hlt_node->nNodes; i++) {
 		int  tofHitSN       = hlt_node->node[i].tofHitSN;
 	      
 		if(tofHitSN >= 0) {
@@ -1661,7 +1661,7 @@ void l4Builder::event(daqReader *rdr)
 			int  projChannel = hlt_node->node[i].projChannel;
 			int Proj_trayId = hlt_tof->tofHit[tofHitSN].trayId;
 		  
-			for(u_int j = 0; j < hlt_tof->nTofHits; j++) {
+			for(uint32_t j = 0; j < hlt_tof->nTofHits; j++) {
 			    int fire_trayId = hlt_tof->tofHit[j].trayId;
 			    if(Proj_trayId == fire_trayId) {
 				hMatchId_fiberId_copy2->Fill(projChannel, hlt_tof->tofHit[j].channel);
@@ -1678,7 +1678,7 @@ void l4Builder::event(daqReader *rdr)
 	{   // section oo
 	    THREADCP(15,0);
 
-	    for(u_int i = 0; i < hlt_node->nNodes; i++) {
+	    for(uint32_t i = 0; i < hlt_node->nNodes; i++) {
 		int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
 		if (primaryTrackSN < 0) continue;
 		int     tofHitSN       = hlt_node->node[i].tofHitSN;
@@ -1721,7 +1721,7 @@ void l4Builder::event(daqReader *rdr)
 
 	    // heavy fragment
 	   
-	    for(u_int i = 0; i < hlt_hf->nHeavyFragments; i++) {
+	    for(uint32_t i = 0; i < hlt_hf->nHeavyFragments; i++) {
 	      
 		int heavyFrag_NodeSN = hlt_hf->heavyFragmentSN[i];
 		int heavyFragmentglobSN  = hlt_node->node[heavyFrag_NodeSN].globalTrackSN;
@@ -1751,7 +1751,7 @@ void l4Builder::event(daqReader *rdr)
 
 	    if(decision & triggerBitUPC) {
 	      
-		for(u_int i = 0; i < hlt_dipi->nRhos; i++) {
+		for(uint32_t i = 0; i < hlt_dipi->nRhos; i++) {
 		    int Daughter1NodeSN = hlt_dipi->PionPair[i].dau1NodeSN;
 		    int Daughter2NodeSN = hlt_dipi->PionPair[i].dau2NodeSN;
 		    int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
@@ -2034,7 +2034,7 @@ void l4Builder::event(daqReader *rdr)
 	    THREADCP(20,0);
 	    if(decision & triggerBitUPCDiElectron) {
 	      
-		for(u_int i = 0; i < hlt_upcdiep->nEPairs; i++) {
+		for(uint32_t i = 0; i < hlt_upcdiep->nEPairs; i++) {
 		    int Daughter1NodeSN = hlt_upcdiep->ePair[i].dau1NodeSN;
 		    int Daughter2NodeSN = hlt_upcdiep->ePair[i].dau2NodeSN;
 		    int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
@@ -2117,7 +2117,7 @@ void l4Builder::event(daqReader *rdr)
 	    //di-e2Twr
 	    THREADCP(21,0);
 	    if(decision & triggerBitDiElectron2Twr) {
-		for(u_int i = 0; i < hlt_Twrdiep->nEPairs; i++) {
+		for(uint32_t i = 0; i < hlt_Twrdiep->nEPairs; i++) {
 		    int Daughter1NodeSN = hlt_Twrdiep->ePair[i].dau1NodeSN;
 		    int Daughter2NodeSN = hlt_Twrdiep->ePair[i].dau2NodeSN;
 		    int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;
@@ -2257,7 +2257,7 @@ void l4Builder::event(daqReader *rdr)
 	    if(decision & triggerBitDiElectron) {
 	     
 
-		for(u_int i = 0; i < hlt_diep->nEPairs; i++) {
+		for(uint32_t i = 0; i < hlt_diep->nEPairs; i++) {
 		    int Daughter1NodeSN = hlt_diep->ePair[i].dau1NodeSN;
 		    int Daughter2NodeSN = hlt_diep->ePair[i].dau2NodeSN;
 		    int Daughter1TrackSN = hlt_node->node[Daughter1NodeSN].primaryTrackSN;

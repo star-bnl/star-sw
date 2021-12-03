@@ -131,7 +131,7 @@ class JevpPlotSet : public TObject {
 
   JevpServer *parent;
 
-  u_int lastevttm;
+  uint32_t lastevttm;
 
   int disabled;
   int run;

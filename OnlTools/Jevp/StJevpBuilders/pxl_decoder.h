@@ -76,7 +76,7 @@ struct _pxlHeaderInfo {
   unsigned short temperature[4][2];
 };
 
-int pxl_decoder(const u_int *d, 
+int pxl_decoder(const uint32_t *d, 
 		const int wordLength, 
 		bitset2D<NROW,NCOL> *bs, 
 		int *OVF,

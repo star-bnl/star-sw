@@ -742,15 +742,15 @@ char *DisplayFile::getDisplay(int idx)
 
 #define TAB_BASE 100
 
-u_int DisplayFile::getTabBase()
+uint32_t DisplayFile::getTabBase()
 {
   return TAB_BASE;
 }
 
 // Gets the multiplier to access the final
-u_int DisplayFile::getTabDepthMult(u_int idx)
+uint32_t DisplayFile::getTabDepthMult(uint32_t idx)
 {
-  u_int depth = 1;
+  uint32_t depth = 1;
   idx /= TAB_BASE;
   while(idx) {
     idx = idx / TAB_BASE;
@@ -759,22 +759,22 @@ u_int DisplayFile::getTabDepthMult(u_int idx)
   return depth;
 }
 
-u_int DisplayFile::getTabNextIdx(u_int idx)
+uint32_t DisplayFile::getTabNextIdx(uint32_t idx)
 {
-  u_int m = getTabDepthMult(idx);
+  uint32_t m = getTabDepthMult(idx);
   idx += m;
   return idx;
 }
 
-u_int DisplayFile::getTabChildIdx(u_int idx)
+uint32_t DisplayFile::getTabChildIdx(uint32_t idx)
 {
-  u_int m = getTabDepthMult(idx);
+  uint32_t m = getTabDepthMult(idx);
   m *= TAB_BASE;
   idx += m;
   return idx;
 }
 
-u_int DisplayFile::getTabIdxAtDepth(u_int idx, u_int depth)
+uint32_t DisplayFile::getTabIdxAtDepth(uint32_t idx, uint32_t depth)
 {
   while(depth) {
     idx /= TAB_BASE;
@@ -784,7 +784,7 @@ u_int DisplayFile::getTabIdxAtDepth(u_int idx, u_int depth)
   return idx % TAB_BASE;
 }
 
-u_int DisplayFile::getFinalTabIdx(u_int idx) {
+uint32_t DisplayFile::getFinalTabIdx(uint32_t idx) {
     int fi=0;
     int depth=0;
     while((fi = getTabIdxAtDepth(idx, depth)) > 0) {
@@ -793,7 +793,7 @@ u_int DisplayFile::getFinalTabIdx(u_int idx) {
     return fi;
 }
 
-u_int DisplayFile::getPenultimateTabIdx(u_int idx) {
+uint32_t DisplayFile::getPenultimateTabIdx(uint32_t idx) {
     int pi=0;
     int fi=0;
     int depth=1;
@@ -817,7 +817,7 @@ u_int DisplayFile::getPenultimateTabIdx(u_int idx) {
 
 
 
-DisplayNode *DisplayFile::getTab(u_int combo_index)
+DisplayNode *DisplayFile::getTab(uint32_t combo_index)
 {
     //LOG(DBG, "get: %d", combo_index);
 

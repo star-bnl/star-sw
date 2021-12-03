@@ -233,7 +233,7 @@ void gmtBuilder::event(daqReader *rdr)
       
       fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
       
-      for(u_int ii=0;ii<dd->ncontent;ii++)
+      for(uint32_t ii=0;ii<dd->ncontent;ii++)
 	{
 	  adc = f[ii].adc;
 	  timebin = f[ii].tb;
@@ -275,7 +275,7 @@ void gmtBuilder::event(daqReader *rdr)
       
       
       fgt_adc_t *f = (fgt_adc_t *) dd1->Void ;
-      for(u_int ii=0; ii<dd1->ncontent;ii++)
+      for(uint32_t ii=0; ii<dd1->ncontent;ii++)
 	{
 	  
 	  timebin = f[ii].tb;

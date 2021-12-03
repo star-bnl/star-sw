@@ -320,7 +320,7 @@ void fgtBuilder::event(daqReader *rdr)
     fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
     evtSize+=dd->ncontent*sizeof(fgt_adc_t);
     //    cout<<" adding " << dd->ncontent  <<" * " << sizeof(fgt_adc_t) <<" to evt size : " << dd->ncontent*sizeof(fgt_adc_t) <<" now: " << evtSize <<endl;
-    for(u_int i=0;i<dd->ncontent;i++)
+    for(uint32_t i=0;i<dd->ncontent;i++)
       {
 	//not zs data
 

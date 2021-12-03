@@ -435,7 +435,7 @@ void ssdBuilder::event(daqReader *rdr) {
     { 
       Int_t AdcLength = 0;
       Int_t index = 0;
-      u_int *d = (u_int *)dd->Void;
+      uint32_t *d = (uint32_t *)dd->Void;
       int FiberError[8] = {0}; //000--Fiber Token Error,001--No Data,002--OverFlow,003--Early Abort,004--Not Supported Format
       int RdoError; //0-Header Token Error, 1-TCD Token Error,2-TCD end Token Error, 3-End Token Error 
       int maxI = (int)dd->ncontent/4;    
@@ -528,7 +528,7 @@ void ssdBuilder::event(daqReader *rdr) {
       if ( mRDO < 1 || mRDO > 5 )        continue;  //RDO 1-5
       
       LOG(DBG,"SST ADC: Sector %d , RDO %d , Fiber %d",mSector,mRDO,mFiber);
-      u_int maxI = dd->ncontent;    
+      uint32_t maxI = dd->ncontent;    
       FindLadderSide(mRDO,mFiber,mLadder,mSide);   
 
       LOG(DBG,"SST ADC: Ladder %d , side %d",mLadder,mSide);
@@ -536,7 +536,7 @@ void ssdBuilder::event(daqReader *rdr) {
       int ChipFlag     = 0;		// Chip Status 0-good, 1-bad
       int OldChip      = 0;      	// Chip index buffer
       int nFiredInChip = -200;		// Number of fired channels in a give chip., -200 means eventhough all channel are fired, the nFiredInChip still negative, will never to equal to 1. 
-      for ( u_int i=0; i<maxI; i++ ) {
+      for ( uint32_t i=0; i<maxI; i++ ) {
 	mWafer = sst[i].hybrid;
 	mStrip = sst[i].strip;
 	mAdc   = sst[i].adc;
@@ -610,7 +610,7 @@ void ssdBuilder::event(daqReader *rdr) {
 	mRDO = 3 + dd->rdo;
       
       mFiber = dd->pad;
-      u_int maxI = dd->ncontent;
+      uint32_t maxI = dd->ncontent;
       
       if ( mFiber < 0 || mFiber > 7 )   continue;  //fiber 0-7
       if ( mSector < 1 || mSector > 2 ) continue;  //sector 1-2
@@ -620,7 +620,7 @@ void ssdBuilder::event(daqReader *rdr) {
       FindLadderSide(mRDO,mFiber,mLadder,mSide);   
       LOG(DBG,"##SST ADC: Ladder %d , side %d",mLadder,mSide);
            
-      for ( u_int i=0; i<maxI; i++ )
+      for ( uint32_t i=0; i<maxI; i++ )
 	{
 	  for(int h=0;h<nWaferPerLadder;h++)
 	    {

@@ -111,12 +111,12 @@ RunStatus *EthClient::getRunStatus() {
 }
 
 // NULL if not a page
-DisplayNode *EthClient::getTabDisplayBranchOrLeaf(u_int combo_idx) {
+DisplayNode *EthClient::getTabDisplayBranchOrLeaf(uint32_t combo_idx) {
   if(!displayFile) return NULL;
   return displayFile->getTab(combo_idx);
 }
 
-DisplayNode *EthClient::getTabDisplayBranch(u_int combo_idx) {
+DisplayNode *EthClient::getTabDisplayBranch(uint32_t combo_idx) {
   if(!displayFile) return NULL;
   DisplayNode *node = displayFile->getTab(combo_idx);
   if(!node) return NULL;
@@ -124,7 +124,7 @@ DisplayNode *EthClient::getTabDisplayBranch(u_int combo_idx) {
   return node;
 }
 
-DisplayNode *EthClient::getTabDisplayLeaf(u_int combo_idx) {
+DisplayNode *EthClient::getTabDisplayLeaf(uint32_t combo_idx) {
   if(!connected()) {
     if(combo_idx != 1) return NULL;
     
@@ -141,7 +141,7 @@ DisplayNode *EthClient::getTabDisplayLeaf(u_int combo_idx) {
   return node;
 }
 
-char *EthClient::getTabName(u_int combo_idx) {
+char *EthClient::getTabName(uint32_t combo_idx) {
   if(!displayFile) return NULL;
   DisplayNode *node = displayFile->getTab(combo_idx);
   if(!node) {

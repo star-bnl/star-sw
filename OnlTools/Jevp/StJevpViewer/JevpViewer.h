@@ -67,7 +67,7 @@ class TabHelper : public TObject {
     void deleteTab(TGTab2 *tab, int doDelete=1);
 
     // Add all below combo_index to tab
-    void fillTab(TGTab2 *tab, EthClient *client, u_int combo_index);
+    void fillTab(TGTab2 *tab, EthClient *client, uint32_t combo_index);
 
     // Slots...  
     void tabSelected(Int_t id);

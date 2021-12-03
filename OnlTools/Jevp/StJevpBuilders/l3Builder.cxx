@@ -140,7 +140,7 @@ void l3Builder::event(daqReader *rdr)
       contents.h101_l3_x_y->Fill(l3t.xVertex, l3t.yVertex);
       contents.h112_l3_vertex_zdctimediff->Fill(l3t.zVertex, zdcTimeDiff);
 
-      for(u_int i = 0; i < l3t.tracks_num ; i++) {
+      for(uint32_t i = 0; i < l3t.tracks_num ; i++) {
 	contents.h62_l3_pt->Fill(l3t.track[i].pt);
 	contents.h63_l3_phi0->Fill(l3t.track[i].phi0);
 	contents.h64_l3_psi->Fill(l3t.track[i].psi);

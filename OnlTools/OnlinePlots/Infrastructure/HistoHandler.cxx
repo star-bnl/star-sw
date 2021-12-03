@@ -651,20 +651,20 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   svt_fract  = ssd_fract = tof_fract = 0.;
   bemc_fract = l3_fract  = 0.;
   
-  u_int ctbch, zdcch;
-  // u_int pre_ctbch;
+  uint32_t ctbch, zdcch;
+  // uint32_t pre_ctbch;
   
   ctbch  = zdcch   = 0;
-  u_int zdcch_east, zdcch_west;
+  uint32_t zdcch_east, zdcch_west;
   zdcch_east = zdcch_west = 0;
-  u_int zdcTime_east, zdcTime_west;
+  uint32_t zdcTime_east, zdcTime_west;
   zdcTime_east = zdcTime_west = 0;
   //int bbctdiff = -999; // strange number from Akio
   
   //time stamp of the first recieved event in unix seconds
-  static u_int t_00;
-  static u_int t_01;
-  static u_int t_02 ;
+  static uint32_t t_00;
+  static uint32_t t_01;
+  static uint32_t t_02 ;
   //t_00 = t_01 = t_02 = 0;
   
   unsigned int d_t_00, d_t_01=0,d_t_02;
@@ -729,7 +729,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   daqReader* daqr = (daqReader*)datap;
 
   //Get event's time stamp
-  u_int event_time = daqr->evt_time;
+  uint32_t event_time = daqr->evt_time;
   
   d_t_00 = event_time - t_00;
   // 2 hour histograms
@@ -926,7 +926,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     // print occupancy
     int r,p,t ;
     float adc_sector ;
-    //uchar_t val ;
+    //unsigned char val ;
     float tpc_sector_size = 0;
     
     // Watch out here! The position depends on the
@@ -1455,7 +1455,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
       // print occupancy
       int s,r,p,t ;
       int adc ;
-      u_char val ;
+      uint8_t val ;
 
       adc = 0 ;
 

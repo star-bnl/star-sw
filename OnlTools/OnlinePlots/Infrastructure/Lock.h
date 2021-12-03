@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <fcntl.h> 
 
 using namespace std;

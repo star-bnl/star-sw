@@ -1,10 +1,6 @@
 #ifndef __JEVPBUILDER_H__
 #define __JEVPBUILDER_H__
 
-#ifdef __CINT__
-typedef unsigned char u_char;
-#endif
-
 #include "Jevp/StJevpPlot/JevpPlotSet.h"
 
 

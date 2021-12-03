@@ -229,7 +229,7 @@ void fpsBuilder::event(daqReader *rdr)
   dd = rdr->det("trg")->get("raw");
   unsigned int tcu=0;
   if(dd && dd->iterate() ){
-    u_char *trg_raw = dd->Byte;
+    uint8_t *trg_raw = dd->Byte;
     struct simple_desc {
       short len ;
       char evt_desc ;
@@ -275,14 +275,14 @@ void fpsBuilder::event(daqReader *rdr)
     while(dd && dd->iterate()) {
       int xing=(char)dd->pad;
       int qt=dd->row;
-      u_int n=dd->ncontent;
+      uint32_t n=dd->ncontent;
       if(xing>=128) xing-=256;
       
       //printf("Fpsfpost=%d xing=%d n=%d\n",fpsfpost,xing,n);
     
       if(xing!=0) continue;
       fps_adc_t *a = (fps_adc_t *) dd->Void;
-      for(u_int i=0;i<n;i++) {
+      for(uint32_t i=0;i<n;i++) {
 	ndata++;
 	int ch=a[i].ch;
 	int adc=a[i].adc;
@@ -387,9 +387,9 @@ void fpsBuilder::event(daqReader *rdr)
   // get cross points from layers 1 & 2
   for(int q=0; q<4; q++) {
     if( slats[0][q].size()>0 && slats[1][q].size()>0) {
-      for(u_int i=0; i<slats[0][q].size(); i++) {
+      for(uint32_t i=0; i<slats[0][q].size(); i++) {
   	if( slats[0][q][i] < 1 || slats[0][q][i] > 21 ) continue;
-  	for(u_int j=0; j<slats[1][q].size(); j++) {
+  	for(uint32_t j=0; j<slats[1][q].size(); j++) {
   	  if( slats[1][q][j] < 1 || slats[1][q][j] > 21 ) continue;
   	  xpos = xypos[slats[0][q][i]] - 1.0;
   	  if( q==1 || q==3) xpos = xypos[slats[0][q][i]+2] - 1.0; // bottom, beam pipe support shadow

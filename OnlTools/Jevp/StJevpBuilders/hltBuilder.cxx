@@ -1607,7 +1607,7 @@ void hltBuilder::event(daqReader *rdr) {
   
 //************************************** SET THE TRIGGER BIT HERE to min bias value *************  
 //We want all events right now (not just min-bias), min-bias is our main trigger.
-  u_int trg = rdr->daqbits;
+  uint32_t trg = rdr->daqbits;
   //int minbias = 0x20;
   int vpdtag = 0x200;
   FILL_VPD_HISTOS = kFALSE;
@@ -1704,7 +1704,7 @@ void hltBuilder::event(daqReader *rdr) {
     //MULTIPLICITY (only pi+, pi-, k+, k-, p, pbar from PID function)
     MULTIPLICITY = 0;
     UPDATE_SWITCH = 0; //for hbt buffer
-    for(u_int i=0; i < hlt_pt->nPrimaryTracks; i++) {
+    for(uint32_t i=0; i < hlt_pt->nPrimaryTracks; i++) {
       hlt_track ptrack = hlt_pt->primaryTrack[i];
       if( NO_CUTS_VERTEX ) Eta1->Fill(getEta(&ptrack));
       if( VzLT200_VxLT2_VyLT2_VERTEX ) Eta2->Fill(getEta(&ptrack));
@@ -1848,7 +1848,7 @@ if ( ! VrLT2_VERTEX ) {
     //FILL BEMC PLOT HISTOS
     int BEMCeastEnergy = 0;
     int  BEMCwestEnergy = 0;
-    for(u_int i=0 ; i < hlt_emc->nEmcTowers ; i++){
+    for(uint32_t i=0 ; i < hlt_emc->nEmcTowers ; i++){
       //		  int adc = hlt_emc->emcTower[i].adc;
       if(hlt_emc->emcTower[i].eta > 0) BEMCeastEnergy += hlt_emc->emcTower[i].energy;
       if(hlt_emc->emcTower[i].eta <=0) BEMCwestEnergy += hlt_emc->emcTower[i].energy;
@@ -1978,7 +1978,7 @@ if ( ! VrLT2_VERTEX ) {
     float Qbx = 0.;	float Qby = 0.;
     float weight = 0.;	
     if( V2CALC ) {
-      for(u_int i=0; i < hlt_pt->nPrimaryTracks; i++) {
+      for(uint32_t i=0; i < hlt_pt->nPrimaryTracks; i++) {
 	hlt_track ptrack = hlt_pt->primaryTrack[i];
 	if ( trackCut(&ptrack, hlt_eve, &v2ptTrackCuts) ) {
 	  int species = getPID(&ptrack); //ptrack.pt, ptrack.dedx, ptrack.q, ptrack.tanl);
@@ -2004,7 +2004,7 @@ if ( ! VrLT2_VERTEX ) {
 	
     //V2(pt) NUMERATOR, PT SPECTRA, HBT NUMERATOR, HBT DENOMINATOR
     float Ux = 0.;	float Uy = 0.;
-    for(u_int i=0; i < hlt_pt->nPrimaryTracks; i++) {
+    for(uint32_t i=0; i < hlt_pt->nPrimaryTracks; i++) {
       hlt_track ptrack = hlt_pt->primaryTrack[i];
       int species = getPID(&ptrack); //ptrack.pt, ptrack.dedx, ptrack.q, ptrack.tanl);
       //V2(pt) numerator
@@ -2048,7 +2048,7 @@ if ( ! VrLT2_VERTEX ) {
       //HBT numerator
       if ( trackCut(&ptrack, hlt_eve, &hbtTrackCuts) && ((species == 1) || (species == 2)) && HBTCALC ) { //track cut on first particle
 	//Loop over tracks again to make pairs
-	for(u_int j=i+1; j < hlt_pt->nPrimaryTracks ; j++) {
+	for(uint32_t j=i+1; j < hlt_pt->nPrimaryTracks ; j++) {
 	  hlt_track ptrackB = hlt_pt->primaryTrack[j];
 	  if ( trackCut(&ptrackB, hlt_eve, &hbtTrackCuts)  && ((getPID(&ptrackB) == 1) || (getPID(&ptrackB) == 2)) ) { //track cut on second particle
 	    //if( dipAngleCut(&ptrack, &ptrackB ) ) {  //optional dip angle cut

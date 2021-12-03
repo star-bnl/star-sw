@@ -46,13 +46,13 @@ class EthClient {
   // Display functions...
   void readDisplayFromServer(const char *displayName="shift");
   // These are all the same
-  //void getCanvasDescriptor(u_int combo_idx);
-  //void getTab(u_int combo_idx);
-  DisplayNode *getTabDisplayLeaf(u_int combo_idx);
-  DisplayNode *getTabDisplayBranch(u_int combo_idx);
-  DisplayNode *getTabDisplayBranchOrLeaf(u_int combo_idx);
+  //void getCanvasDescriptor(uint32_t combo_idx);
+  //void getTab(uint32_t combo_idx);
+  DisplayNode *getTabDisplayLeaf(uint32_t combo_idx);
+  DisplayNode *getTabDisplayBranch(uint32_t combo_idx);
+  DisplayNode *getTabDisplayBranchOrLeaf(uint32_t combo_idx);
 
-  char *getTabName(u_int combo_idx);
+  char *getTabName(uint32_t combo_idx);
   DisplayFile *display() { return displayFile; }
 
   int getRun();

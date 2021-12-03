@@ -31,7 +31,7 @@
 struct _xmlTextReader;
 typedef _xmlTextReader xmlTextReader;
 typedef xmlTextReader *xmlTextReaderPtr;
-typedef unsigned int u_int;
+typedef unsigned int uint32_t;
 
 
 class DisplayProperty {
@@ -174,19 +174,19 @@ class DisplayFile {
 
   // Interface for usage...
   static unsigned int getTabBase();
-  static unsigned int getTabDepthMult(u_int idx);
-  static unsigned int getTabNextIdx(u_int idx);
-  static unsigned int getTabChildIdx(u_int idx);
-  static unsigned int getTabIdxAtDepth(u_int idx, u_int depth);
-  static unsigned int getFinalTabIdx(u_int idx);
-  static unsigned int getPenultimateTabIdx(u_int idx);
+  static unsigned int getTabDepthMult(uint32_t idx);
+  static unsigned int getTabNextIdx(uint32_t idx);
+  static unsigned int getTabChildIdx(uint32_t idx);
+  static unsigned int getTabIdxAtDepth(uint32_t idx, uint32_t depth);
+  static unsigned int getFinalTabIdx(uint32_t idx);
+  static unsigned int getPenultimateTabIdx(uint32_t idx);
 
-  //DisplayNode *getTab(u_int combo_index, int *isCanvas);
+  //DisplayNode *getTab(uint32_t combo_index, int *isCanvas);
   //
   // isCanvas is equilvalent to node->leaf
   // (get properties from node->parent...)
   //
-  DisplayNode *getTab(u_int combo_index);
+  DisplayNode *getTab(uint32_t combo_index);
   //TabDescriptor *GetTab(int i, int j=-1);
   //HistogramDescriptor *GetHist(int i, int j, int k);
 

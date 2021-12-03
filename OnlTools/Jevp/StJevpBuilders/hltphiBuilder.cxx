@@ -1240,7 +1240,7 @@ void HltphiBuilder::event(daqReader *rdr) {
 
   //------------------fill tof hits--------------//
 
-  for(u_int i=0 ; i < hlt_tof->nTofHits ; i++){
+  for(uint32_t i=0 ; i < hlt_tof->nTofHits ; i++){
 
     short trayId     = hlt_tof->tofHit[i].trayId;
     short channel    = hlt_tof->tofHit[i].channel;
@@ -1255,7 +1255,7 @@ void HltphiBuilder::event(daqReader *rdr) {
 
   //-----------------fill pvpd hit------------//
 
-  for(u_int i=0 ; i < hlt_pvpd->nPvpdHits ; i++){
+  for(uint32_t i=0 ; i < hlt_pvpd->nPvpdHits ; i++){
 
     short trayId     = hlt_pvpd->pvpdHit[i].trayId;
     short channel    = hlt_pvpd->pvpdHit[i].channel;
@@ -1267,7 +1267,7 @@ void HltphiBuilder::event(daqReader *rdr) {
 
   //--------------fill Emc--------------//
 
-  for(u_int i=0 ; i < hlt_emc->nEmcTowers ; i++){
+  for(uint32_t i=0 ; i < hlt_emc->nEmcTowers ; i++){
 
     int adc = hlt_emc->emcTower[i].adc;
     short energy     = hlt_emc->emcTower[i].energy;
@@ -1287,7 +1287,7 @@ void HltphiBuilder::event(daqReader *rdr) {
 
   //---------------global track-------------//
   //	  cout<<"nGlobalTracks ="<<hlt_gt->nGlobalTracks <<endl;
-  for(u_int i=0 ; i < hlt_gt->nGlobalTracks ; i++)
+  for(uint32_t i=0 ; i < hlt_gt->nGlobalTracks ; i++)
     {
       int nHits = hlt_gt->globalTrack[i].nHits;
       int nDedx = hlt_gt->globalTrack[i].ndedx;
@@ -1334,7 +1334,7 @@ void HltphiBuilder::event(daqReader *rdr) {
 
   int refMult = 0;
 
-  for(u_int i=0 ; i < hlt_pt->nPrimaryTracks ; i++)
+  for(uint32_t i=0 ; i < hlt_pt->nPrimaryTracks ; i++)
     {
       int nHits = hlt_pt->primaryTrack[i].nHits;
       int nDedx = hlt_pt->primaryTrack[i].ndedx;
@@ -1528,14 +1528,14 @@ void HltphiBuilder::event(daqReader *rdr) {
 
   //-------------------High Pt---------------------//
 
-  for(u_int i=0 ; i < hlt_hipt->nHighPt ; i++){
+  for(uint32_t i=0 ; i < hlt_hipt->nHighPt ; i++){
 
   }
 
 
   //-------------------Heavy Fragment-----------------//
 
-  for(u_int i=0 ; i < hlt_hf->nHeavyFragments ; i++){
+  for(uint32_t i=0 ; i < hlt_hf->nHeavyFragments ; i++){
 
 
     int heavyFragmentSN = hlt_node->node[hlt_hf->heavyFragmentSN[i]].globalTrackSN ;
@@ -1571,7 +1571,7 @@ void HltphiBuilder::event(daqReader *rdr) {
 
   //---------------  Di electrons ------------------// 
 
-  for(u_int i=0 ; i < hlt_diep->nEPairs ; i++) {
+  for(uint32_t i=0 ; i < hlt_diep->nEPairs ; i++) {
 
     TVector2 Qall(Qx,Qy);
 

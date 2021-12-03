@@ -11,7 +11,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TPaveText.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <stdlib.h>
 

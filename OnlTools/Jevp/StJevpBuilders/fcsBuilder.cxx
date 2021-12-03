@@ -191,7 +191,7 @@ void fcsBuilder::event(daqReader *rdr){
 	//printf("trg/raw not found\n");
       }else{
 	while(dd->iterate()) {
-	  u_char *trg_raw = dd->Byte;
+	  uint8_t *trg_raw = dd->Byte;
 	  int mRun=22921001;
 	  TriggerDataBlk2019* trgdata2019 = (TriggerDataBlk2019*)dd->Byte;  
 	  StTriggerData* trg = (StTriggerData*) new StTriggerData2019(trgdata2019,mRun,1,0);
@@ -272,7 +272,7 @@ void fcsBuilder::event(daqReader *rdr){
 	int ns  = (dd->sec >> 5) & 1;
 	int dep = dd->row ;
 	int ch = dd->pad ;
-	u_int n=dd->ncontent;
+	uint32_t n=dd->ncontent;
 	
 	//getting ids from DEP info
 	int detid,id,crt,slt;
@@ -284,10 +284,10 @@ void fcsBuilder::event(daqReader *rdr){
 	if(ch>=32) continue; //skip trigger data
 	if(ehp>=3) continue; //skip main crates for now
 	
-	u_short *d16 = (u_short *)dd->Void;
-	u_short tb, adc;
-	u_int sum=0;
-	for(u_int i=0; i<n; i++) {		
+	uint16_t *d16 = (uint16_t *)dd->Void;
+	uint16_t tb, adc;
+	uint32_t sum=0;
+	for(uint32_t i=0; i<n; i++) {		
 	  if(mReadMode==0){ //none ZS data
 	    tb  = i;
 	    adc = d16[i] & 0xFFF;		    
@@ -317,9 +317,9 @@ void fcsBuilder::event(daqReader *rdr){
 	    int detid,id,crt,slt;
 	    getIdfromDep(ehp,ns,dep,ch,detid,id,crt,slt);
 	    if(detid==6) continue;
-	    u_int sum=0;	    
-	    for(u_short tb=TBTRG[0]-3; tb<TBTRG[0]+3; tb++){
-	      u_short adc=1000 - 333 * abs(tb-TBTRG[0]);
+	    uint32_t sum=0;	    
+	    for(uint16_t tb=TBTRG[0]-3; tb<TBTRG[0]+3; tb++){
+	      uint16_t adc=1000 - 333 * abs(tb-TBTRG[0]);
 	      contents.h_fcs_crt_depch_tbin[crt]->Fill(slt+float(ch+0.5)/32.0,float(tb),float(adc));
 	      int c = getColumnNumber(detid,id);
 	      int r = getRowNumber(detid,id);

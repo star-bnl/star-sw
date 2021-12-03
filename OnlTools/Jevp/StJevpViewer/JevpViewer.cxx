@@ -204,7 +204,7 @@ void TabHelper::fillTab(TGTab2 *tab, EthClient *ethclient, UInt_t idx)
   if(!mynode) return;
         
   // First get my child and my tabname
-  u_int child_idx = ethclient->display()->getTabChildIdx(idx);
+  uint32_t child_idx = ethclient->display()->getTabChildIdx(idx);
   DisplayNode *childnode = ethclient->display()->getTab(child_idx);
   if(!childnode) {
     LOG("JEFF", "NULL in filltab?");
@@ -224,7 +224,7 @@ void TabHelper::fillTab(TGTab2 *tab, EthClient *ethclient, UInt_t idx)
     tab->AddTab(mynode->name, frame);
   }
 
-  u_int next_idx = ethclient->display()->getTabNextIdx(idx);
+  uint32_t next_idx = ethclient->display()->getTabNextIdx(idx);
   fillTab(tab, ethclient, next_idx);
 }
 

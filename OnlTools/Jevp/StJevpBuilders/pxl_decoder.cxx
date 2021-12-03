@@ -6,7 +6,7 @@ static const char __attribute__ ((used )) *Get_vcid(){return vcid;}
 #include <stdio.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 // C++ header file
@@ -114,7 +114,7 @@ static int decode16bit(unsigned short val, bool MS16,
 }
 
 //**************************************************
-int pxl_decoder(const u_int *d, const int wordLength,
+int pxl_decoder(const uint32_t *d, const int wordLength,
 		bitset2D<NROW,NCOL> *bs,
 		int *OVF, struct _pxlHeaderInfo *pxlHeaderInfo,
 		float *ave_runlength,
@@ -156,11 +156,11 @@ int pxl_decoder(const u_int *d, const int wordLength,
 #ifdef CRC_CALC
 #define	 G_CONST  0x04C11DB7 
   for(int i=0; i<(wordLength-2); i++) {
-    u_int datum ;
+    uint32_t datum ;
     
     datum = d[i] ;
-    register u_int data_j ;
-    register u_int crc_31 ;
+    register uint32_t data_j ;
+    register uint32_t crc_31 ;
     
     for(register int j=31;j>=0;j--) {
       data_j = (datum >> j) & 1 ;

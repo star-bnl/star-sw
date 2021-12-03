@@ -55,8 +55,8 @@ float StReadLaserEvent::Make(int runNumber, int eventNumber, char* datap)
     { printf("resetAll called\n"); resetAll(); }
 
     int s,r,p,t ;
-    u_int timebin;
-    u_char val ;
+    uint32_t timebin;
+    uint8_t val ;
     // loop over sectors, rows, pads
     for(s=0; s<24 ;s++)                 // sector
     {

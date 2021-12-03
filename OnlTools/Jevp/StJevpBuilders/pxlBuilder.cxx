@@ -659,7 +659,7 @@ void pxlBuilder::event(daqReader *rdr)
 	 continue;
       }
      
-      u_int *d = (u_int *)dd->Void ; // point to the start of the DDL raw data	
+      uint32_t *d = (uint32_t *)dd->Void ; // point to the start of the DDL raw data	
       int wordLength = dd->ncontent/4; // number of 32bit words
 
       // decode the sector
@@ -689,14 +689,14 @@ void pxlBuilder::event(daqReader *rdr)
   
       int k = pxl_sector-1;
 
-      u_int serdesErr1 = d[8]; // sensors 1 - 32
-      u_int serdesErr2 = d[9]; // sensors 33 - 40
+      uint32_t serdesErr1 = d[8]; // sensors 1 - 32
+      uint32_t serdesErr2 = d[9]; // sensors 33 - 40
       for (int i=0; i<32; i++)
-	if(((0x1<<i) & serdesErr1) == (u_int)(0x1<<i)) {
+	if(((0x1<<i) & serdesErr1) == (uint32_t)(0x1<<i)) {
 	  contents.SerdesErrors->Fill(k*4+(int)(i/10)+1, i%10+1);
 	}
       for (int i=0; i<8; i++)
-	if(((0x1<<i) & serdesErr2) == (u_int)(0x1<<i)) {
+	if(((0x1<<i) & serdesErr2) == (uint32_t)(0x1<<i)) {
 	  contents.SerdesErrors->Fill(k*4+4, i+3);
 	}
 

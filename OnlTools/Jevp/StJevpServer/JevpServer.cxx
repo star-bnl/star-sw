@@ -23,7 +23,7 @@
 #include "EvpConstants.h"
 #include "JevpServer.h"
 #include <StRoot/RTS/include/rtsLog.h>
-#include <sys/types.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/wait.h>

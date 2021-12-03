@@ -419,7 +419,7 @@ void fttBuilder::processVMM(daqReader *rdr) {
         u_char iQuad = dd->rdo - 1;
 
         // loop over the hits
-        for(u_int iHit=0; iHit<dd->ncontent; iHit++) {
+        for(uint32_t iHit=0; iHit<dd->ncontent; iHit++) {
             processVMMHit( iPlane, (VMMHardwareMap::Quadrant)iQuad, vmm[iHit] );
         } // Loop over iHit
     } // iterate dd
