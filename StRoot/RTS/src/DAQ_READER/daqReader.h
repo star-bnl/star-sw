@@ -2,7 +2,9 @@
 #define _DAQ_READERCLASS_HH_
 
 #include <ctype.h>
-#include <stdint.h>
+#ifndef __CINT__
+#include <stdint.h> // for an unknown reason cint bugs out because of this in the docker build
+#endif
 #include "daqConfig.h"
 // Define the old EVP_READER-based interface:
 
