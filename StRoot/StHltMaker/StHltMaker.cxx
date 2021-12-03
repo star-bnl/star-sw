@@ -19,11 +19,6 @@
  *
  **************************************************************************/
 
-#ifdef __APPLE__
-#include <sys/types.h>
-#endif
-
-
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
@@ -101,7 +96,7 @@ StHltMaker::StHltMaker(const char *name) : StRTSBaseMaker("hlt",name)
 
 	SetAttr("hltMode",1);   // 1 is default value for full model production
 
-	for(u_int i=0; i<NMax; i++){
+	for(uint32_t i=0; i<NMax; i++){
 		mHighPtNodeSN[i] = -1;
 		mHeavyFragmentNodeSN[i] = -1;
 		mDaughter1NodeSN[i] = -1;
@@ -195,7 +190,7 @@ Int_t StHltMaker::Make()
 	mNumHeavyFragment = 0;
 	mNumDielectron = 0;
 	///< Initialize the series number of triggered particles
-	for(u_int i=0; i<NMax; i++){
+	for(uint32_t i=0; i<NMax; i++){
 		mHighPtNodeSN[i] = -1;
 		mHeavyFragmentNodeSN[i] = -1;
 		mDaughter1NodeSN[i] = -1;
@@ -314,7 +309,7 @@ void StHltMaker::processBank(const HLT_TOF  *hlt_tof)
 
 	LOG_DEBUG << "Begin to fill HLT_TOF bank " << endm;
 
-	for(u_int i=0 ; i < hlt_tof->nTofHits ; i++){
+	for(uint32_t i=0 ; i < hlt_tof->nTofHits ; i++){
 
 		// create StHltBTofHit 
 		StHltBTofHit *aHit = new StHltBTofHit();
@@ -342,7 +337,7 @@ void StHltMaker::processBank(const HLT_PVPD *hlt_pvpd)
 
 	LOG_DEBUG << "Begin to fill HLT_PVPD bank " << endm;
 
-	for(u_int i=0 ; i < hlt_pvpd->nPvpdHits ; i++){
+	for(uint32_t i=0 ; i < hlt_pvpd->nPvpdHits ; i++){
 
 		// create StHltVpdHit
 		StHltVpdHit *aHit = new StHltVpdHit();
@@ -372,7 +367,7 @@ void StHltMaker::processBank(const HLT_EMC  *hlt_emc)
 
 	LOG_DEBUG << "Begin to fill HLT_EMC bank " << endm;
 
-	for(u_int i=0 ; i< hlt_emc->nEmcTowers ; i++){
+	for(uint32_t i=0 ; i< hlt_emc->nEmcTowers ; i++){
 
 		// create StHltBEmcTowerHit
 		StHltBEmcTowerHit *aHit = new StHltBEmcTowerHit();
@@ -401,7 +396,7 @@ void StHltMaker::processBank(const HLT_GT   *hlt_gt)
 
 	LOG_DEBUG << "Begin to fill HLT_GT bank " << endm;
 
-	for(u_int i=0 ; i < hlt_gt->nGlobalTracks; i++){
+	for(uint32_t i=0 ; i < hlt_gt->nGlobalTracks; i++){
 
 		// create StHltTrack
 		StHltTrack *aTrack = new StHltTrack();
@@ -446,7 +441,7 @@ void StHltMaker::processBank(const HLT_PT   *hlt_pt)
 
 	LOG_DEBUG << "Begin to fill HLT_PT bank " << endm;
 
-	for(u_int i=0;i<hlt_pt->nPrimaryTracks;i++){
+	for(uint32_t i=0;i<hlt_pt->nPrimaryTracks;i++){
 
 		// create StHltTrack
 		StHltTrack *aTrack = new StHltTrack();
@@ -489,7 +484,7 @@ void StHltMaker::processBank(const HLT_NODE *hlt_node)
 {
 	LOG_DEBUG << "Begin to fill HLT_NODE bank " << endm;
 
-	for(u_int i=0 ; i< hlt_node->nNodes ; i++){
+	for(uint32_t i=0 ; i< hlt_node->nNodes ; i++){
 
 		// create StHltTrackNode
 		StHltTrackNode *aNode = new StHltTrackNode();
@@ -525,7 +520,7 @@ void StHltMaker::processBank(const HLT_HIPT *hlt_hipt)
 	LOG_DEBUG << "Begin to fill HLT_HTPT bank " << endm;
 
 	mNumHighPt = hlt_hipt->nHighPt;
-	for(u_int i=0; i<hlt_hipt->nHighPt; i++){
+	for(uint32_t i=0; i<hlt_hipt->nHighPt; i++){
 		mHighPtNodeSN[i] = hlt_hipt->highPtNodeSN[i];
 	}
 
@@ -541,7 +536,7 @@ void StHltMaker::processBank(const HLT_DIEP *hlt_diep)
 	LOG_DEBUG << "Begin to fill HLT_DIEP bank " << endm;
 
 	mNumDielectron = hlt_diep->nEPairs;
-	for(u_int i=0; i<hlt_diep->nEPairs; i++){
+	for(uint32_t i=0; i<hlt_diep->nEPairs; i++){
 
 		// create StHltDiElectron
 		StHltDiElectron *aDielectron = new StHltDiElectron();
@@ -573,7 +568,7 @@ void StHltMaker::processBank(const HLT_HF   *hlt_hf)
 	LOG_DEBUG << "Begin to fill HLT_HF bank " << endm;
 
 	mNumHeavyFragment = hlt_hf->nHeavyFragments;
-	for(u_int i=0 ; i < hlt_hf->nHeavyFragments ; i++){
+	for(uint32_t i=0 ; i < hlt_hf->nHeavyFragments ; i++){
 		mHeavyFragmentNodeSN[i] = hlt_hf->heavyFragmentSN[i];
 	}
 
@@ -595,7 +590,7 @@ void StHltMaker::fillNodePointer(StHltEvent* event)
 	StSPtrVecHltBEmcTowerHit& VecbEmcHit = event->bEmcTowerHits();
 
 	// create pointer in StHltTrackNode 
-	for(u_int i=0 ; i<VecTrackNode.size() ; i++){
+	for(uint32_t i=0 ; i<VecTrackNode.size() ; i++){
 
 		StHltTrackNode *trackNode = (StHltTrackNode*)VecTrackNode.at(i);
 		int globalTrackSN = trackNode->globalTrackSN();
@@ -637,7 +632,7 @@ void StHltMaker::fillHighPt(StHltEvent* event)
 
 	StSPtrVecHltTrackNode& VecTrackNode = event->trackNode();
 
-	for(u_int i=0 ; i<mNumHighPt ; i++){
+	for(uint32_t i=0 ; i<mNumHighPt ; i++){
 
 		// create StHltHighPt
 		StHltHighPt *highPt = new StHltHighPt();
@@ -688,7 +683,7 @@ void StHltMaker::fillHeavyFragment(StHltEvent* event)
 
 	StSPtrVecHltTrackNode& VecTrackNode = event->trackNode();
 
-	for(u_int i=0 ; i<mNumHeavyFragment ; i++){
+	for(uint32_t i=0 ; i<mNumHeavyFragment ; i++){
 
 		// create StHltHeavyFragment
 		StHltHeavyFragment *heavyFragment = new StHltHeavyFragment();
@@ -738,7 +733,7 @@ void StHltMaker::fillDielectron(StHltEvent* event)
 	StSPtrVecHltTrackNode& VecTrackNode = event->trackNode();
 	StSPtrVecHltDiElectron& VecDiElectron = event->diElectron();
 
-	for(u_int i=0 ; i<mNumDielectron ; i++){
+	for(uint32_t i=0 ; i<mNumDielectron ; i++){
 
 		StHltDiElectron *diElectron = (StHltDiElectron*)VecDiElectron.at(i);
 		StHltTrackNode* daughter1node = (StHltTrackNode*)VecTrackNode.at(mDaughter1NodeSN[i]);
@@ -811,7 +806,7 @@ void StHltMaker::fillTriggerReason(StHltEvent* event)
 
 	// create StHltTriggerReason
 	StSPtrVecHltDiElectron& VecDiElectron = event->diElectron();
-	for(u_int i=0 ; i<VecDiElectron.size() ; i++){
+	for(uint32_t i=0 ; i<VecDiElectron.size() ; i++){
 
 		StHltDiElectron *diElectron = (StHltDiElectron*)VecDiElectron.at(i);
 		StHltTriggerReason *aTriggerReason = new  StHltTriggerReason();
@@ -822,7 +817,7 @@ void StHltMaker::fillTriggerReason(StHltEvent* event)
 	}
 
 	StSPtrVecHltHighPt& VecHighPt = event->highPt();
-	for(u_int i=0 ; i<VecHighPt.size() ; i++){
+	for(uint32_t i=0 ; i<VecHighPt.size() ; i++){
 
 		StHltHighPt *highPt = (StHltHighPt*)VecHighPt.at(i);
 		StHltTriggerReason *aTriggerReason = new  StHltTriggerReason();
@@ -833,7 +828,7 @@ void StHltMaker::fillTriggerReason(StHltEvent* event)
 	}
 
 	StSPtrVecHltHeavyFragment& VecHeavyFragment = event->heavyFragment();
-	for(u_int i=0 ; i<VecHeavyFragment.size() ; i++){
+	for(uint32_t i=0 ; i<VecHeavyFragment.size() ; i++){
 
 		StHltHeavyFragment *heavyFragment = (StHltHeavyFragment*)VecHeavyFragment.at(i);
 		StHltTriggerReason *aTriggerReason = new  StHltTriggerReason();

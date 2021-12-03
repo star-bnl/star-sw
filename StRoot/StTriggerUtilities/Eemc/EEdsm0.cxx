@@ -49,7 +49,7 @@ EEdsm0::clear() {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEdsm0::setBite(int b, uchar val){
+EEdsm0::setBite(int b, unsigned char val){
   assert(b>=0 && b<nw);
   data[b]=val;
 }
@@ -78,7 +78,7 @@ EEdsm0::unpack() {
   int ch;
   for(ch=0;ch<nc;ch++) {
 
-  uint val=99999;
+  unsigned int val=99999;
   switch( ch%2 ) {
   case 0: // even: take 4 lower bytes form higher bite + lower bite   
     {// hi daddy! how are you? no! it's not red! uh!?
@@ -205,9 +205,9 @@ probably wrong, do not account for type 1 & 2
 int EEdsm0 :: maxHT() {
   int i;
   int k=0;
-  uint max=getHT(k); 
+  unsigned int max=getHT(k); 
   for(i=1;i<nc;i++) {
-    uint val=getHT(i); 
+    unsigned int val=getHT(i); 
     if(val<=max) continue;
     max=val;
     k=i;
@@ -222,9 +222,9 @@ int EEdsm0 :: maxHT() {
 int EEdsm0 :: maxTP() {
   int i;
   int k=0;
-  uint max=getTP(k); 
+  unsigned int max=getTP(k); 
   for(i=1;i<nc;i++) {
-    uint val=getTP(i);
+    unsigned int val=getTP(i);
     if(val<=max) continue;
     max=val;
     k=i;

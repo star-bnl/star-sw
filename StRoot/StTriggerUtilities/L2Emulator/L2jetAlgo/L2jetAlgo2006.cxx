@@ -326,8 +326,8 @@ L2jetAlgo2006::initRun( int runNo, int *rc_ints, float *rc_floats) {
   ======================================== */
 bool
 L2jetAlgo2006::doEvent(int L0trg, int inpEveId, TrgDataType* trgData, 
-		   int bemcIn, ushort *bemcData,
-		   int eemcIn, ushort *eemcData){
+		   int bemcIn, unsigned short *bemcData,
+		   int eemcIn, unsigned short *eemcData){
   /* STRICT TIME BUDGET  START ....*/
   rdtscl_macro(mEveTimeStart);
 
@@ -517,7 +517,7 @@ L2jetAlgo2006::doEvent(int L0trg, int inpEveId, TrgDataType* trgData,
   // unsigned char  cSum=L2jetResults2006_doCheckSum(&out); printf("cSum2=%d\n",cSum);
 
   //===== step 7: write L2Result
-  uint *outPlace=eve_TrigData->TrgSum.L2Result+mResultOffset;
+  unsigned int *outPlace=eve_TrigData->TrgSum.L2Result+mResultOffset;
   memcpy(outPlace,&out,sizeof( L2jetResults2006));
 
   // dirty tests, clean it up before real use
@@ -690,9 +690,9 @@ L2jetAlgo2006::clearEvent(){
 //=======================================
 //=======================================
 int 
-L2jetAlgo2006::projectAdc( ushort *rawAdc, int nRdo,
-	     ushort *thr, ushort *pedS, ushort *gainCorr,
-	     ushort *phiBin, ushort *patchBin,
+L2jetAlgo2006::projectAdc( unsigned short *rawAdc, int nRdo,
+	     unsigned short *thr, unsigned short *pedS, unsigned short *gainCorr,
+	     unsigned short *phiBin, unsigned short *patchBin,
 	     L2Histo *hHot	 ){
   
   int tmpNused=0; /* counts mapped & used ADC channels */
