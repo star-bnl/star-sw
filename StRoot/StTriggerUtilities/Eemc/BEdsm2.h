@@ -3,12 +3,11 @@
 /**************************************************************
  * $Id: BEdsm2.h,v 1.1 2009/10/12 18:04:25 pibero Exp $
  **************************************************************/
-typedef unsigned short ushort;
 
 class BEdsm2  {
   static const int nc=2; // # of used channels to DSM
   static const int njp=6; // # of EEMC JP
-  ushort data[nc];
+  unsigned short data[nc];
   int mYear;// unpacking changed in 2006
   
 
@@ -19,10 +18,10 @@ class BEdsm2  {
   virtual ~BEdsm2();
   void  print(int k=0) const;
   void  clear();
-  void  setWord(int ch, ushort val); 
+  void  setWord(int ch, unsigned short val); 
   void  setYear(int y){mYear=y;}
   int   getNc() const {return nc;} 
-  ushort getJPthr(int jp) const; // JP # Falk[0-5], out in 2006+
+  unsigned short getJPthr(int jp) const; // JP # Falk[0-5], out in 2006+
   //..... input
   int getInpHT2bit(int i3p) const; // i3p #[0,1]
   int getInpHT2bit_2(int i3p) const; // i3p #[0,1]
