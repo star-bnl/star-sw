@@ -199,6 +199,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StFpdCollection",             "evt_aux",      7);
     setBranch("StPhmdCollection",            "evt_aux",      7);
     setBranch("StRpsCollection",             "evt_aux",      7);
+    setBranch("StFttCollection",             "evt_aux",      7);
     setBranch("StSsdHitCollection",          "evt_hits",     8);
     setBranch("StSstHitCollection",          "evt_hits",     8);
     setBranch("StSvtHitCollection",          "evt_hits",     8);
@@ -219,6 +220,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StEmcCollection",             "event", 1);
     setBranch("StFmsCollection",             "event", 1);
     setBranch("StFcsCollection",             "event", 1);
+    setBranch("StFttCollection",             "event", 1);
     setBranch("StRHICfCollection",           "event", 1);
     setBranch("StRichCollection",            "event", 1);
     setBranch("StTofCollection",             "event", 1);
