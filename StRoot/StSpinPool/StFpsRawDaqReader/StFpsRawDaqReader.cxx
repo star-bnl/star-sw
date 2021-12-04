@@ -102,7 +102,7 @@ Int_t StFpsRawDaqReader::Make() {
     printf("trg/raw not found\n");
   }else{
     while(dd->iterate()) {
-      u_char *trg_raw = dd->Byte;
+      uint8_t *trg_raw = dd->Byte;
       struct simple_desc {
         short len ;
         char evt_desc ;
@@ -147,11 +147,11 @@ Int_t StFpsRawDaqReader::Make() {
       int xing=(char)dd->pad;
       if(xing>=128) xing-=256;
       int qt=dd->row;
-      u_int n=dd->ncontent;
+      uint32_t n=dd->ncontent;
       
       if(Debug()) printf("FPS: fpsfpost %1d xing %2d, QT %d, chs %d\n",fpsfpost,xing,qt,n) ;     
       fps_adc_t *a = (fps_adc_t *) dd->Void ;     
-      for(u_int i=0;i<n;i++) {
+      for(uint32_t i=0;i<n;i++) {
 	ndata++;
 	int ch=a[i].ch;
 	int adc=a[i].adc;
