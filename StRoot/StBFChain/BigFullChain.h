@@ -1259,7 +1259,7 @@ Bfc_st BFC[] = { // standard chains
    "","",                                                      "Base chain for run 2020 data (tpc)",kFALSE},
 
   {"P2021a","" ,"",
-   "B2021a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
+   "B2021a,ITTF,BAna,iTpcIT,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    ,    "","",        "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
   // 2021 initial chains
