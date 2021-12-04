@@ -896,18 +896,24 @@ void THelixTrack::Rot(double cosa,double sina)
 //_____________________________________________________________________________
 void THelixTrack::Streamer(TBuffer &){}
 //_____________________________________________________________________________
-void THelixTrack::Print(Option_t *) const
+void THelixTrack::Print(Option_t *opt) const
 {
-  printf("\n THelixTrack::this = %p\n",(void*)this);
-  printf(" THelixTrack::fX[3] = { %f , %f ,%f }\n",fX[0],fX[1],fX[2]);
-  printf(" THelixTrack::fP[3] = { %f , %f ,%f }\n",fP[0],fP[1],fP[2]);
-  printf(" THelixTrack::fRho  =   %f \n\n",fRho);
+  TString Opt(opt);
+  if (Opt == "") {
+    printf("\n THelixTrack::this = %p\n",(void*)this);
+    printf(" THelixTrack::fX[3] = { %f , %f ,%f }\n",fX[0],fX[1],fX[2]);
+    printf(" THelixTrack::fP[3] = { %f , %f ,%f }\n",fP[0],fP[1],fP[2]);
+    printf(" THelixTrack::fRho  =   %f \n\n",fRho);
 
-  printf("double xyz[3] = {%g,%g,%g};\n" ,fX[0],fX[1],fX[2]); 
-  printf("double dir[3] = {%g,%g,%g};\n" ,fP[0],fP[1],fP[2]); 
-  printf("double Rho = %g;\n" ,fRho); 
-  printf("THelixTrack *ht = new THelixTrack(xyz,dir,Rho);\n");
-  
+    printf("double xyz[3] = {%g,%g,%g};\n" ,fX[0],fX[1],fX[2]); 
+    printf("double dir[3] = {%g,%g,%g};\n" ,fP[0],fP[1],fP[2]); 
+    printf("double Rho = %g;\n" ,fRho); 
+    printf("THelixTrack *ht = new THelixTrack(xyz,dir,Rho);\n");
+  } else {
+    printf(" THelixTrack::fX[3] = { %f , %f ,%f }\t",fX[0],fX[1],fX[2]);
+    printf(" fP[3] = { %f , %f ,%f }\n",fP[0],fP[1],fP[2]);
+    if (fEmx) fEmx->Print();
+  }
 }
 //______________________________________________________________________________
 void THelixTrack::TestMtx() 

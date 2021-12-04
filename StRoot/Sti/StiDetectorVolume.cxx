@@ -111,7 +111,7 @@ void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder, unsigned i
 {
   // Construct the TVolume from the StDetectorBuilder
   unsigned int nRows = builder.getNRows();
-  LOG_INFO << "Builder: " << builder.getName().c_str() << " has " << nRows << " rows" << endm;
+//   LOG_INFO << "Builder: " << builder.getName().c_str() << " has " << nRows << " rows" << endm;
   for (unsigned int i=0; i < nRows; i++) {
      unsigned int nSectors = builder.getNSectors(i);
      Int_t iColor  = 3 + i%6;
@@ -119,7 +119,7 @@ void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder, unsigned i
      {
         StiDetector *next = builder.getDetector(i,j) ;
         if (!next) {
-           LOG_ERROR << "The is no detector for row " << i <<" sector " << j << endm;
+ //           LOG_ERROR << "The is no detector for row " << i <<" sector " << j << endm;
            continue;
         }
         if (select  &&  (    ( select == kActive   && !next->isActive()) 
@@ -127,7 +127,7 @@ void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder, unsigned i
                              ( select == kPassivie && next->isActive() )
                         ) ) continue;
         const StiShape *stiShape = next->getShape();
-        TShape     *shape = MakeShape(stiShape
+	TShape     *shape = MakeShape(stiShape
                         ,(const char*)next->getMaterial()->getName().c_str() ); 
         StiPlacement *place = next->getPlacement();
         TString canonicName = (const char*)next->getName().c_str();
@@ -161,30 +161,49 @@ void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder, unsigned i
         position->SetNode(nextVolume);
         Add(nextVolume,position);
 #if 1
-	nextVolume->Print(); 
+// 	nextVolume->Print(); 
 	TShape *sh = nextVolume->GetShape();
-	sh->Print();
+// 	sh->Print();
 	//	cout << "Material: " << sh->GetMaterial()->GetName() << " RadL. = " << sh->GetMaterial()->GetRadLength() << endl;
 	if (sh->InheritsFrom("TBRIK")) {
-	  TBRIK *brik = (TBRIK *) sh;
-	  cout << " dx " << brik->GetDx()
-	       << " dy " << brik->GetDy()
-	       << " dz " << brik->GetDz() << endl;
+// 	  TBRIK *brik = (TBRIK *) sh;
+// 	  cout << " dx " << brik->GetDx()
+// 	       << " dy " << brik->GetDy()
+// 	       << " dz " << brik->GetDz() << endl;
 	} else {
 	  if (sh->InheritsFrom("TTUBE")) {
+	    const StiMaterial *stiGas = next->getGas();
+	    const StiMaterial *stiMat = next->getMaterial();
+// 	    cout << "StiDetectorVolume::MakeVolume\t" <<*next << endl;
+// 	    if (stiShape) cout << *stiShape << endl;
+// 	    if (stiGas) cout << *stiGas << endl;
+// 	    if (stiMat) cout << *stiGas << endl;
 	    TTUBE *tube = (TTUBE *) sh;
-	    cout << " Rmin " << tube->GetRmin()
-		 << " Rmax " << tube->GetRmax()
-		 << " dz " << tube->GetDz();
+// 	    cout << " Rmin " << tube->GetRmin()
+// 		 << " Rmax " << tube->GetRmax()
+// 		 << " dz " << tube->GetDz();
+// 	    if (sh->InheritsFrom("TTUBS")) {
+// 	      TTUBS *tubs = (TTUBS *) sh;
+// 	      cout << " Phi1 " << tubs->GetPhi1()
+// 		   << " Phi2 " << tubs->GetPhi2();
+// 	    }
+// 	    cout << endl;
+// 	    position->Print();
+	    if (tube->GetDz() < 5.0) continue;
+	    static Int_t No = 0;
+	    static TString Line;
+	    Line = Form("  {%f,\"%s\",\t%3i,%8.3f,%8.3f,%8.3f,%8.3f",tube->GetRmin(),
+				stiMat->getName().c_str(), No, stiMat->getA(), stiMat->getZ(),stiMat->getDensity(),stiMat->getX0());
+	    Line += Form(",%8.3f,%8.3f, 0},", position->GetZ() - tube->GetDz(), position->GetZ() + tube->GetDz());
+	    cout << Line.Data() << "//" << next->getName() << endl;
+	    No++;
+	    Line = Form("  {%f,\"%s\",\t%3i,%8.3f,%8.3f,%8.3f,%8.3f",tube->GetRmax(),
+				stiGas->getName().c_str(), No, stiGas->getA(), stiGas->getZ(),stiGas->getDensity(),stiGas->getX0());
+	    Line += Form(",%8.3f,%8.3f, 0},", position->GetZ() - tube->GetDz(), position->GetZ() + tube->GetDz());
+	    cout << Line.Data() << "//" << next->getName() << endl;
+	    No++;
 	  }
-	  if (sh->InheritsFrom("TTUBS")) {
-	    TTUBS *tubs = (TTUBS *) sh;
-	    cout << " Phi1 " << tubs->GetPhi1()
-		 << " Phi2 " << tubs->GetPhi2();
-	  }
-	  cout << endl;
 	}
-	position->Print();
 #endif
      }
   }

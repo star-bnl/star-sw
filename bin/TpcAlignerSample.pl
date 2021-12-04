@@ -4,15 +4,19 @@ use Cwd;
 my $pwd = cwd(); #print "pwd = $pwd\n";
 my $FIELD = "";
 my $year  = "";
-if ($pwd =~ /2019/)    {$year = "2019";}
-elsif ($pwd =~ /2020/) {$year = "2020"};
-if ($pwd =~ /FF/)    {$FIELD = "FF";}
-elsif ($pwd =~ /RF/) {$FIELD = "RF"};
+if    ($pwd =~ /2019/) {$year = "2019";}
+elsif ($pwd =~ /2020/) {$year = "2020";}
+elsif ($pwd =~ /2021/) {$year = "2021";}
+elsif ($pwd =~ /2022/) {$year = "2022";}
+if    ($pwd =~ /FF/) {$FIELD = "FF";}
+elsif ($pwd =~ /RF/) {$FIELD = "RF";}
+elsif ($pwd =~ /ZF/) {$FIELD = "ZF";}
 #print "FIELD = $FIELD\n";
 if (! $FIELD) {die "Field is not defined";}
 #my $glob = "/hlt/cephfs/reco/2019/" . $FIELD . "/*.event.root"; #print "glob = $glob\n";
 #my $glob = "/net/l401/data/scratch1/reco/2019/" . $FIELD . "/*.event.root"; #print "glob = $glob\n";
-my $glob = "/hlt/cephfs/reco/" . $year . "/.DEV2/" . $FIELD . "/Cosmic/*.event.root"; #print "glob = $glob\n";
+#my $glob = "/hlt/cephfs/reco/" . $year . "/.DEV2/" . $FIELD . "/Cosmic/*.event.root"; #print "glob = $glob\n";
+my $glob = "/hlt/cephfs/reco/" . $year . "/" . $FIELD . "/Cosmic/*/*/*.event.root"; #print "glob = $glob\n";
 my @Files = glob $glob; #print "Files = @Files\n";
 my $n = 0;
 foreach my $file (@Files) {
@@ -24,6 +28,7 @@ foreach my $file (@Files) {
 #  my $now = time(); #print "now = $now\n";
 #  my $dt = $now - $ctime;# print "now = $now, ctime = $ctime, dt = $dt\n";
 #  if ($dt < 3600) {next;}
+  
   my $string = "string:" .  $file;
   print "$string\n";
   $n++;

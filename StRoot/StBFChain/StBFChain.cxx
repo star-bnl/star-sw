@@ -554,7 +554,7 @@ Int_t StBFChain::Instantiate()
     // m_Mode xyz
     //        x = 1 phys_off                    
     //        y = 1 Passive mode (do not call RunMC()
-    //        z = 1 Mixer Modex1
+    //        z = 1 Mixer Mode
     if (maker == "StVMCMaker") {
       if (GetOption("VMCPassive")) {// don't use mk->SetActive(kFALSE) because we want to have InitRun
 	mk->SetAttr("VMCPassive",kTRUE);
@@ -580,7 +580,7 @@ Int_t StBFChain::Instantiate()
     if (maker == "StxMaker" && GetOption("StxCA")) {
       mk->SetAttr("Undefined", kTRUE); // switch off Fit
     }
-    if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "StvMaker" || maker == "StxMaker") {
+    if (maker == "StiMaker" || maker == "StvMaker" || maker == "StxMaker") {
       if ( maker == "StvMaker" &&  GetOption("StvCA")) {
 	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder
 	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
@@ -681,9 +681,8 @@ Int_t StBFChain::Instantiate()
     //		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {
       // VertexFinder methods
-      if (GetOption("Sti") || GetOption("StiCA") ||
-	  GetOption("Stv") || GetOption("Stx") ||
-	  GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , kTRUE);
+      if (GetOption("Sti") || GetOption("StiCA") || GetOption("Stv") || 
+	  GetOption("Stx")         ) mk->SetAttr("ITTF"         , kTRUE);
       if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, kTRUE);
       if (GetOption("VFMinuitX"  ) ) mk->SetAttr("VFMinuitX"  	, kTRUE);
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
@@ -727,7 +726,7 @@ Int_t StBFChain::Instantiate()
       LOG_QA << "StBFChain::Instantiate Setting the Parameters for the Association Maker" << endm;
       
       TString cmd("");
-      if (GetOption("ITTF") || GetOption("StiVMC") || GetOption("useInTracker"))
+      if (GetOption("ITTF") || GetOption("useInTracker"))
 	cmd = Form ("((StAssociationMaker *) %p)->useInTracker();",mk);
       cmd += "StMcParameterDB* parameterDB = StMcParameterDB::instance();";
       // TPC
@@ -1091,7 +1090,6 @@ Int_t StBFChain::Instantiate()
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiCA");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stv");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stx");
-  if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiVMC");
   
   gMessMgr->QAInfo() << "+++ Setting attribute " << Gproperty.Data() << " = " << Gvalue.Data() << endm;
   SetAttr(Gproperty.Data(),Gvalue.Data(),Gpattern.Data());
@@ -1145,7 +1143,7 @@ Int_t StBFChain::Init() {
     if (GetOption("Sti") || GetOption("StiCA") || 
 	GetOption("Stv") || 
 	GetOption("Stx") || 
-	GetOption("StiVMC") ||GetOption("VMC") || 
+	GetOption("VMC") || 
 	GetOption("VMCPassive")) {
       const DbAlias_t *DbAlias = GetDbAliases();
       for (Int_t i = 0; DbAlias[i].tag; i++) {
@@ -1727,7 +1725,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       //      if (GetOption("Stx") && ! GetOption("simu")) SetOption("VmcPassive","Stx,-simu");
     }
     if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || GetOption("Stv") || 
-				GetOption("Stx") || GetOption("StiVMC"))) {
+				GetOption("Stx"))) {
       TString STAR_LEVEL(gSystem->Getenv("STAR_LEVEL"));
       if (STAR_LEVEL == ".DEV2")  SetOption("StiCA","Default,ITTF");
       else                        SetOption("Sti"  ,"Default,ITTF");

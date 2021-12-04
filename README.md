@@ -11,9 +11,9 @@ The list of stable releases can be found TFG_Releases.md
 <li>  <b>starver _desired_TFG_version__</b>, from TFG16a  to TFG21n, .DEV2 == TFG is check out HEAD from TFG repository, it could be unstable.
 </ul>
 <p>
-In order to swithc back to the "official" STAR software do: <b>source unsetupDEV2.csh</b>
+In order to switch back to the "official" STAR software do: 
 <ul>
-<li>
+<li><b>source unsetupDEV2.csh</b>
 </ul>
 <p>
 To use macros available in TFG releases w advice you to add in ~/.rootrc files the next two lines: 
