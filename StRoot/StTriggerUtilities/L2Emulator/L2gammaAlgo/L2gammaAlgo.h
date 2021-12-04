@@ -18,8 +18,6 @@
 /* CHANGE THIS WITH EVERY COMPILATION ON L2 MACHINE DURING RUN */
 #define LEVEL2_GAMMA_ALGORITHM_VERSION 0x1 
 
-//#define unsigned short unsigned short
-
 #define MAX_TOWERS 4800
 
 

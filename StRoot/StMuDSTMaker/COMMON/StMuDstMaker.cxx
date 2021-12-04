@@ -370,7 +370,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
-  mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
+  mFmsCollection(0), mFcsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
 {
   assignArrays();
   streamerOff();

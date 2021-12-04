@@ -665,7 +665,7 @@ StEemcTriggerSimu::getDsm0123inputs(){
   StL0Trigger &L0trg=StMuDst::event()->l0Trigger();
   //int L0Num;
   //L0Num=L0trg.lastDsmArraySize();
-  ushort L0word=L0trg.lastDsmArray(0);
+  unsigned short L0word=L0trg.lastDsmArray(0);
   dsm3TRG->setWord(0, L0word);
   //printf("L0word=%d\n", L0word);
 

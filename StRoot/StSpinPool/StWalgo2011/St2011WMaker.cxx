@@ -424,7 +424,7 @@ St2011WMaker::Make(){
 
     //fill tpc bins
     int nVerR=0; int nTrOK=0;
-    for(uint iv=0;iv<wEve->vertex.size();iv++) {
+    for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
       if(wEve->vertex[iv].rank > 0) nVerR++;
       if(wEve->vertex[iv].eleTrack.size() > 0) nTrOK++;
     }

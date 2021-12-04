@@ -49,7 +49,7 @@ EEdsm0::clear() {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEdsm0::setBite(int b, uchar val){
+EEdsm0::setBite(int b, unsigned char val){
   assert(b>=0 && b<nw);
   data[b]=val;
 }
