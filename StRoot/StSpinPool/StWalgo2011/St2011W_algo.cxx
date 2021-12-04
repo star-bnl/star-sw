@@ -31,9 +31,9 @@ St2011WMaker::find_W_boson(){
   if(wEve->zTag) return;
 
   // search for  Ws ............
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
 	WeveVertex &V=wEve->vertex[iv];
-	for(uint it=0;it<V.eleTrack.size();it++) {
+	for(unsigned int it=0;it<V.eleTrack.size();it++) {
 	  WeveEleTrack &T=V.eleTrack[it];
 
 	  getJetEvent();
@@ -263,9 +263,9 @@ St2011WMaker::tag_Z_boson(){
   float lowMass=70.; float highMass=140.;
 
   //form invariant mass from lepton candidate and jet
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {//vertex loop
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {//vertex loop
 	WeveVertex &V=wEve->vertex[iv];
-	for(uint it=0;it<V.eleTrack.size();it++) {// select track
+	for(unsigned int it=0;it<V.eleTrack.size();it++) {// select track
 	  WeveEleTrack &T1=V.eleTrack[it];
 	  if(T1.isMatch2Cl==false) continue;
 	  assert(T1.cluster.nTower>0); // internal logical error
@@ -327,9 +327,9 @@ St2011WMaker::tag_Z_boson(){
 void
 St2011WMaker::findPtBalance(){
 
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
 	WeveVertex &V=wEve->vertex[iv];
-	for(uint it=0;it<V.eleTrack.size();it++) {
+	for(unsigned int it=0;it<V.eleTrack.size();it++) {
 	  WeveEleTrack &T=V.eleTrack[it];
 
 	  getJetEvent(); //check that jet and W event match
@@ -392,9 +392,9 @@ void
 St2011WMaker::findAwayJet(){
   // printf("\n******* find AwayJet() nVert=%d\n",wEve->vertex.size());
   //wEve->print();
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
 	WeveVertex &V=wEve->vertex[iv];
-	for(uint it=0;it<V.eleTrack.size();it++) {
+	for(unsigned int it=0;it<V.eleTrack.size();it++) {
 	  WeveEleTrack &T=V.eleTrack[it];
 
 	  // .... sum opposite in phi EMC components
@@ -420,9 +420,9 @@ void
 St2011WMaker::findNearJet(){
   //printf("\n******* findNearJet() nVert=%d\n",wEve->vertex.size());
 
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
 	WeveVertex &V=wEve->vertex[iv];
-	for(uint it=0;it<V.eleTrack.size();it++) {
+	for(unsigned int it=0;it<V.eleTrack.size();it++) {
 	  WeveEleTrack &T=V.eleTrack[it];
 
 	  // .... sum EMC-jet component
@@ -532,7 +532,7 @@ St2011WMaker::sumTpcConeFromTree(int vertID, TVector3 refAxis, int flag,int poin
 
   double ptSum=0;
   WeveVertex &V=wEve->vertex[vertID];
-  for(uint it=0;it<V.prTrList.size();it++){
+  for(unsigned int it=0;it<V.prTrList.size();it++){
 	StMuTrack *prTr=V.prTrList[it];
 	if(prTr->flag()<=0) continue;
 	if(prTr->flag()!=301 && pointTowId>0) continue;// TPC-only regular tracks for barrel candidate
@@ -574,10 +574,10 @@ St2011WMaker::extendTrack2Barrel(){// return # of extended tracks
   if(!wEve->l2bitET) return 0; //fire barrel trigger
 
   int nTrB=0;
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
 	WeveVertex &V=wEve->vertex[iv];
 	if(V.rank<0) continue; //remove vertex for endcap algo only
-	for(uint it=0;it<V.eleTrack.size();it++) {
+	for(unsigned int it=0;it<V.eleTrack.size();it++) {
 	  WeveEleTrack &T=V.eleTrack[it];
 	  if(T.prMuTrack->flag()!=301) continue; //remove track for endcap algo only
 
@@ -634,10 +634,10 @@ St2011WMaker::matchTrack2BtowCluster(){
   // printf("******* matchCluster() nVert=%d\n",wEve->vertex.size());
   int nTr=0;
   float Rcylinder= mBtowGeom->Radius();
-  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wEve->vertex.size();iv++) {
 	WeveVertex &V=wEve->vertex[iv];
 	float zVert=V.z;
-	for(uint it=0;it<V.eleTrack.size();it++) {
+	for(unsigned int it=0;it<V.eleTrack.size();it++) {
 	  WeveEleTrack &T=V.eleTrack[it];
 	  if(T.pointTower.id<=0) continue; //skip endcap towers
 

@@ -60,10 +60,10 @@ int StFcsRawHitMaker::Make() {
 	int ns  = (s >> 5) & 1;            // 0=north/1=south  
 	int dep = dd->Row() ;              // DEP Board# (0-23)
 	int ch = dd->Pad() ;               // Channel (0-31)
-	u_int n=dd->GetNRows();   
+	uint32_t n=dd->GetNRows();   
 	int detid,id,crt,sub;
 	mFcsDb->getIdfromDep(ehp,ns,dep,ch,detid,id,crt,sub);
-	u_short *d16 = (u_short *)dd->GetTable();
+	uint16_t *d16 = (uint16_t *)dd->GetTable();
 	StFcsHit* hit=0;
 	if(mReadMode==0){
 	    hit = new StFcsHit(0,detid,id,ns,ehp,dep,ch,n,d16);

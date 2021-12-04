@@ -61,7 +61,7 @@ St2011WlumiMaker::bXingSort(){
   if(wMK->wEve->vertex.size()<=0) return; 
   hA[0]->Fill("ver",1.);
 
-  uint iv=0;
+  unsigned int iv=0;
   WeveVertex &V=wMK->wEve->vertex[iv];
   
   if(V.eleTrack.size()<=0)  return;
@@ -80,7 +80,7 @@ St2011WlumiMaker::bXingSort(){
 
   // find max ET of the cluster  matched to track
   float ET=-1;
-  for( uint it=0;  it<V.eleTrack.size(); it++) {
+  for( unsigned int it=0;  it<V.eleTrack.size(); it++) {
     WeveEleTrack &T=V.eleTrack[it];
     if(T.pointTower.id<=0) continue; //skip endcap towers
     if(ET>T.cluster.ET) continue;

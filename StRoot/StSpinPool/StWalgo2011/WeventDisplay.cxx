@@ -508,7 +508,7 @@ WeventDisplay::getPrimTracksFromTree(int vertID,int pointTowId) {
   assert(vertID<(int)wMK->wEve->vertex.size());
 
   WeveVertex &V=wMK->wEve->vertex[vertID];
-  for(uint it=0;it<V.prTrList.size();it++){
+  for(unsigned int it=0;it<V.prTrList.size();it++){
     StMuTrack *prTr=V.prTrList[it];
     if(prTr->flag()<=0) continue;
     if(prTr->flag()!=301 && pointTowId>0) continue;// TPC-only regular tracks for barrel candidate
