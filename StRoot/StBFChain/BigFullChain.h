@@ -1519,7 +1519,7 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"tdaq"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
   {"miniDAQ"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
-  {"fzin"        ,"geant","","Simu,-gstar,-ntin,-geant,geantL","St_geant_Maker",""
+  {"fzin"        ,"geant","","Simu,-gstar,-ntin,-geant,-in,geantL","St_geant_Maker",""
    ,                                                                           "read gstar fz-file",kFALSE},
   {"fzout" ,"","","","","","geant output should go to fz-file with name taken from TTree file name",kFALSE},
   {"UseXgeom","","","-geometry,-geomNoField,xgeometry","","StarAgmlUtil"
@@ -1566,17 +1566,17 @@ Bfc_st BFC[] = { // standard chains
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   // for simulation on fly Event time stamp is set outside of the simulation makers
-  {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker"
+  {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,-in,Simu,geantL","St_geant_Maker"
    ,                                        "","gstar for 20 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
-  {"mickey"      ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
+  {"mickey"      ,"geant"  ,"","-fzin,-geant,-gstar,-in,geantL,gstarLib,-magF","St_geant_Maker"
    ,                                                                    "","Mickey Mouse generator",kFALSE},
-  {"pythia"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL","St_geant_Maker"
+  {"pythia"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,-in,geantL","St_geant_Maker"
    ,                                "pythia_6410t,bpythia","Load Pythia in starsim, set pp 510 GeV",kFALSE},
   {"Wenu"        ,"" ,"","pythia","", ""                 ,"set pp 510 GeV -> W+/- -> e+/- nu/nubar",kFALSE},
   {"hijing"      ,"" ,"","AuAu200","", ""                                     ,"set Hijing AuAu200",kFALSE},
-  {"fzinSDT"       ,"geant","","Simu,-gstar,-ntin,-fzin,geantL","St_geant_Maker",""
+  {"fzinSDT"       ,"geant","","Simu,-gstar,-ntin,-fzin,-in,geantL","St_geant_Maker",""
    ,                                                                           "read gstar fz-file",kFALSE},
-  {"ntin"   ,"geant","","paw,-fzin,-geant,-gstar,Simu,geantL,gstarLib","St_geant_Maker"
+  {"ntin"   ,"geant","","paw,-fzin,-geant,-gstar,-in,Simu,geantL,gstarLib","St_geant_Maker"
    ,                                                        "","read event generated Hbook nt-file",kFALSE},
   {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker"
    ,                                                             "Prepare kinematics for embedding",kFALSE},
@@ -1600,7 +1600,7 @@ Bfc_st BFC[] = { // standard chains
   {"GenFILT", "GenFILT","StarPrimary","StarPrimary"
    ,                                 "StarFilterMaker","StarGeneratorFilt","Filt generated events", kFALSE},
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
-  {"AgStar","","","Generators,geant,-gstar,-gstarLib","","AgStar","Utility to feed St_geant_Maker", kFALSE},
+  {"AgStar","","","Generators,geant,-gstar,-in,-gstarLib","","AgStar","Utility to feed St_geant_Maker", kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
   {"VMCAppl"     ,"","","geomT,gen_t,sim_T,tpcDB,RootVMC","","MathMore,StarGeneratorUtil"
