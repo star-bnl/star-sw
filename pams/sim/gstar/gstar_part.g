@@ -523,9 +523,9 @@ MODULE gstar_part Is the STAR Particle Database
 *
 * K0*(892) --> K+ pi-
 *
-   PARTICLE K0STAR_892 code=10013 pdg=313 mass=0.89166 tlife=khbar/0.5050 ,
+   PARTICLE K0STAR_892 code=10013 pdg=313 mass=0.89555 tlife=khbar/0.0473 ,
                        trktyp=4, bratio={1.0,} mode={1109,} charge=0
-   PARTICLE K0STAR_892bar code=10113 pdg=-313 mass=0.89166 tlife=khbar/0.5050 ,
+   PARTICLE K0STAR_892bar code=10113 pdg=-313 mass=0.89555 tlife=khbar/0.0473 ,
                        trktyp=4, bratio={1.0,} mode={1208,} charge=0
 
 
