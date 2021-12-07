@@ -11,6 +11,7 @@
 #ifndef STMUFTTRAWHIT_H
 #define STMUFTTRAWHIT_H
 
+#include <iostream>
 #include <TObject.h>
 #include "StEnumerations.h"
 class StFttRawHit;
