@@ -25,7 +25,8 @@ public:
 
     void setReadMode(int v) {mReadMode=v;}
     void setDebug(int v=1) {SetDebug(v);}  //!backward compatubility     
-    
+    void setReadMuDst(int v=1) {mReadMuDst=v;} //!reading Mudst/StMuFcsHit into StEvent/StFcsHit
+
     // Get CVS
     virtual const char *GetCVS() const;
     
@@ -34,7 +35,10 @@ private:
     StFcsCollection *mFcsCollectionPtr;
     unsigned int mRun=0;
     StFcsDb* mFcsDb=0;
-    unsigned int mReadMode=1;
+    int mReadMode=1;
+    int mReadMuDst=0; 
+
+    int readMuDst();
 
     ClassDef(StFcsRawHitMaker,1);
 };
