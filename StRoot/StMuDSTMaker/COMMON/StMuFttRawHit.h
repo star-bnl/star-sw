@@ -78,7 +78,7 @@ protected:
     ClassDef( StMuFttRawHit, 1 );
 };
 
-ostream& operator << ( ostream&, const StMuFttRawHit& hit ); // Printing operator
+std::ostream& operator << ( std::ostream&, const StMuFttRawHit& hit ); // Printing operator
 
 inline UChar_t  StMuFttRawHit::sector()      const { return mSector;      };
 inline UChar_t  StMuFttRawHit::rdo()         const { return mRDO;         };
