@@ -38,8 +38,8 @@ const float fstBuilder::maxTbFracOK       = 0.9;
 const float fstBuilder::landauFit_dn      = 10.0;
 const float fstBuilder::landauFit_up      = 2000.0;
 const float fstBuilder::cmnCut            = 3.0;
-const float fstBuilder::hitCut            = 8.0;
-const float fstBuilder::zsCut             = 8.0;
+const float fstBuilder::hitCut            = 4.0;
+const float fstBuilder::zsCut             = 4.0;
 const float fstBuilder::noiseChipCut      = 10.0;
 const int   fstBuilder::hitOccupancyCut   = 100;
 const int   fstBuilder::defTb             = 5;
@@ -608,7 +608,7 @@ void fstBuilder::initialize(int argc, char *argv[])
     hSumContents.hRanNoise[iDisk]->GetXaxis()->SetNdivisions(-ModPerDisk,false);
     hSumContents.hRanNoise[iDisk]->SetStats(false);
     hSumContents.hRanNoise[iDisk]->GetXaxis()->SetTitle("Channel Geometry ID");
-    hSumContents.hRanNoise[iDisk]->GetYaxis()->SetTitle("ADC - Pedestal [ADC counts]");
+    hSumContents.hRanNoise[iDisk]->GetYaxis()->SetTitle("Random Noise [ADC counts]");
     hSumContents.hRanNoise[iDisk]->GetYaxis()->SetTitleOffset(1.1);
 
     sprintf(buffer,"CommonModeNoisePerAPVDisk%d", iDisk+1);
@@ -886,7 +886,7 @@ void fstBuilder::initialize(int argc, char *argv[])
   for(int i=0; i<totAPV; i++) {
     for(int iRstrip = 0; iRstrip < 4; ++iRstrip) {
       sprintf( buffer, "APV%d Group%d", i, iRstrip);
-      hCmnTemp.hCmnPerChip[i][iRstrip] = new TH1S(buffer, "Common mode noise per APV chip per Rstrip", 256, 0, 4096);
+      hCmnTemp.hCmnPerChip[i][iRstrip] = new TH1S(buffer, "Common mode noise per APV chip per Rstrip", 512, -4096, 4096);
     }
   }
 }
@@ -1357,7 +1357,8 @@ void fstBuilder::event(daqReader *rdr)
 	maxTimeBin_zs[glbGeomChanId_zs] = f_zs[i].tb;
       }
       // if ( flag < 8) { // select seed hits & recovery hits
-      if ( flag == 1 || flag == 3 || flag == 5 || flag == 7) { // select seed hits only
+      // if ( flag == 1 || flag == 3 || flag == 5 || flag == 7) { // select seed hits only
+      if ( flag == 7) { // select seed hits only
 	cou_zs[f_zs[i].ch]++;
       }
     }//end current APV loop
@@ -1824,7 +1825,7 @@ void fstBuilder::event(daqReader *rdr)
       couAdc[geoIdx]  = 0;
     }
 
-    cout << "evtCt = " << evtCt << ", evtCt_ZS = " << evtCt_ZS << ", evtCt_nonZS = " << evtCt_nonZS << endl;
+    // cout << "evtCt = " << evtCt << ", evtCt_ZS = " << evtCt_ZS << ", evtCt_nonZS = " << evtCt_nonZS << endl;
   }
 
   // Reset rolling histos if necessary..
@@ -2088,6 +2089,10 @@ void fstBuilder::stoprun(daqReader *rdr)
       cmNoise[i][iRstrip] = 0;   
     }
   }
+
+  // cout << "evtCt = " << evtCt << ", evtCt_ZS = " << evtCt_ZS << ", evtCt_nonZS = " << evtCt_nonZS << endl;
+  // cout << "ZS Hit Counts: Disk1: " << hSumContents.hPolyHitMap_ZS[0]->GetEntries() << ", Disk2: " << hSumContents.hPolyHitMap_ZS[1]->GetEntries() << ", Disk3: " << hSumContents.hPolyHitMap_ZS[2]->GetEntries() << endl;
+  // cout << "non-ZS Hit Counts: Disk1: " << hSumContents.hPolyHitMap[0]->GetEntries() << ", Disk2: " << hSumContents.hPolyHitMap[1]->GetEntries() << ", Disk3: " << hSumContents.hPolyHitMap[2]->GetEntries() << endl;
 }
 
 void fstBuilder::main(int argc, char *argv[])
