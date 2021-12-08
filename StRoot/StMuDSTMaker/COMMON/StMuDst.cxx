@@ -23,6 +23,7 @@
 #include "StMuEmcUtil.h"
 #include "StMuFmsUtil.h"
 #include "StMuFcsUtil.h"
+#include "StMuFttUtil.h"
 #include "StMuPmdUtil.h"
 #include "StMuMcVertex.h"
 #include "StMuMcTrack.h"
@@ -95,6 +96,7 @@ void StMuDst::unset() {
     emcArrays     = 0;
     fmsArrays     = 0;
     fcsArrays     = 0;
+    fttArrays     = 0;
     pmdArrays     = 0;
     tofArrays     = 0;
     btofArrays    = 0;   // dongx
@@ -106,6 +108,7 @@ void StMuDst::unset() {
     mMuEmcCollection = 0;
     mMuFmsCollection = 0;
     mMuFcsCollection = 0;
+    mMuFttCollection = 0;
     mMuPmdCollectionArray = 0;
     mMuPmdCollection = 0;
     mEmcCollection     = 0;
@@ -129,6 +132,7 @@ void StMuDst::set(StMuDstMaker* maker) {
   emcArrays     = maker->mEmcArrays;
   fmsArrays     = maker->mFmsArrays;
   fcsArrays     = maker->mFcsArrays;
+  fttArrays     = maker->mFttArrays;
   pmdArrays     = maker->mPmdArrays;
   tofArrays     = maker->mTofArrays;
   btofArrays    = maker->mBTofArrays;    // dongx
@@ -142,6 +146,7 @@ void StMuDst::set(StMuDstMaker* maker) {
   mMuEmcCollection      = maker->mEmcCollection;
   mMuFmsCollection      = maker->mFmsCollection;
   mMuFcsCollection      = maker->mFcsCollection;
+  mMuFttCollection      = maker->mFttCollection;
    mMuPmdCollectionArray = maker->mPmdCollectionArray;
   mMuPmdCollection = maker->mPmdCollection;
   eztArrays     = maker->mEztArrays;
@@ -201,6 +206,7 @@ void StMuDst::set(TClonesArray** theArrays,
 		  TClonesArray** theEmcArrays,
 		  TClonesArray** theFmsArrays,
           TClonesArray** theFcsArrays,
+          TClonesArray** theFttArrays,
 		  TClonesArray** thePmdArrays,
 		  TClonesArray** theTofArrays,
 		  TClonesArray** theBTofArrays,    // dongx
@@ -213,6 +219,7 @@ void StMuDst::set(TClonesArray** theArrays,
 		  StMuEmcCollection *emc,
  		  StMuFmsCollection *fms,
           StMuFcsCollection *fcs,		  
+          StMuFttCollection *ftt,
           TClonesArray* pmd_arr,
 		  StMuPmdCollection *pmd)
 {
@@ -227,6 +234,7 @@ void StMuDst::set(TClonesArray** theArrays,
   emcArrays     = theEmcArrays;   
   fmsArrays     = theFmsArrays;
   fcsArrays     = theFcsArrays;
+  fttArrays     = theFttArrays;
   fgtArrays     = theFgtArrays;
   pmdArrays     = thePmdArrays;
   tofArrays     = theTofArrays;
@@ -237,6 +245,7 @@ void StMuDst::set(TClonesArray** theArrays,
   mMuEmcCollection = emc; 
   mMuFmsCollection = fms;  
   mMuFcsCollection = fcs;
+  mMuFttCollection = ftt;
   mMuPmdCollectionArray = pmd_arr;
   mMuPmdCollection = pmd;
   eztArrays     = theEztArrays;
@@ -800,6 +809,13 @@ StEvent* StMuDst::createStEvent() {
   if(fcs) { // transform to StEvent format and fill it
      StFcsCollection *FCS = mFcsUtil->getFcs(fcs);
      if(FCS) ev->setFcsCollection(FCS);
+  }
+  // now get the FTT stuff and put it in the StEvent
+  static StMuFttUtil* mFttUtil = new StMuFttUtil();
+  StMuFttCollection *ftt = muFttCollection();
+  if(ftt) { // transform to StEvent format and fill it
+     StFttCollection *FTT = mFttUtil->getFtt(ftt);
+     if(FTT) ev->setFttCollection(FTT);
   }
   // now get the PMD stuff and put it in the StEvent
   static StMuPmdUtil* mPmdUtil = new StMuPmdUtil();

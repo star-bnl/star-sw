@@ -36,6 +36,7 @@ class TCut;
 class StMuEmcCollection;
 class StMuFmsCollection;
 class StMuFcsCollection;
+class StMuFttCollection;
 class StMuPmdCollection;
 
 class StEvent;
@@ -121,7 +122,8 @@ public:
 		    TClonesArray** mc_ptca=0, 
 		    TClonesArray** emc_ptca=0, 
 		    TClonesArray** fms_ptca=0, 
-	     TClonesArray** fcs_ptca=0,
+            TClonesArray** fcs_ptca=0, 
+            TClonesArray** ftt_ptca=0, 
 		    TClonesArray** pmd_ptca=0, 
 		    TClonesArray** tof_ptca=0, 
 		    TClonesArray** btof_ptca=0,
@@ -214,6 +216,8 @@ public:
   TClonesArray** fmsArrays;
   /// array of TClonesArrays for the stuff inherited from the Fcs
   TClonesArray** fcsArrays;
+  /// array of TClonesArrays for the stuff inherited from the Ftt
+  TClonesArray** fttArrays;
   /// array of TClonesArrays for the stuff inherited from the Pmd 
   TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
@@ -238,6 +242,8 @@ public:
   StMuFmsCollection *mMuFmsCollection; 
   /// pointer to FcsCollection (manages the FcsArrays)
   StMuFcsCollection *mMuFcsCollection; 
+  /// pointer to FttCollection (manages the FttArrays)
+  StMuFttCollection *mMuFttCollection; 
   /// pointer to PmdCollection (manages the PmdArrays)
   StMuPmdCollection *mMuPmdCollection;
   /// pointer to EmcCollecion (for Emc clusterfinding etc)
@@ -270,11 +276,15 @@ public:
   static TClonesArray* mcVertices()      ;
   static TClonesArray* mcTracks()        ;
   /// returns pointer to the n-th TClonesArray from the emc arrays
-  static TClonesArray* emcArray(Int_t type) ;
-  /// returns pointer to the n-th TClonesArray from the fms arrays
-  static TClonesArray* fmsArray(Int_t type) ;
-  /// returns pointer to the n-th TClonesArray from the pmd arrays
-  static TClonesArray* pmdArray(Int_t type) ;
+  static TClonesArray* emcArray(int type) { return emcArrays[type]; }
+   /// returns pointer to the n-th TClonesArray from the fms arrays
+  static TClonesArray* fmsArray(int type) { return fmsArrays[type]; }
+  /// returns pointer to the n-th TClonesArray from the fcs arrays
+  static TClonesArray* fcsArray(int type) { return fcsArrays[type]; }
+  /// returns pointer to the n-th TClonesArray from the ftt arrays
+  static TClonesArray* fttArray(int type) { return fttArrays[type]; }
+    /// returns pointer to the n-th TClonesArray from the pmd arrays
+  static TClonesArray* pmdArray(int type) { return pmdArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the tof arrays
   static TClonesArray* tofArray(Int_t type) ;
   /// returns pointer to the n-th TClonesArray from the btof arrays /// dongx
@@ -390,9 +400,11 @@ public:
   /// returns pointer to current StMuEmcCollection
   static StMuEmcCollection* muEmcCollection() ;
    /// returns pointer to current StMuFmsCollection
-  static StMuFmsCollection* muFmsCollection() ;
-   /// returns pointer to current StMuFcsCollection
-    static StMuFcsCollection* muFcsCollection() { return instance()->mMuFcsCollection; }
+  static StMuFmsCollection* muFmsCollection() { return mMuFmsCollection; }
+  /// returns pointer to current StMuFcsCollection
+  static StMuFcsCollection* muFcsCollection() { return mMuFcsCollection; }
+  /// returns pointer to current StMuFttCollection
+  static StMuFttCollection* muFttCollection() { return mMuFttCollection; }
   /// returns pointer to current StMuPmdCollection
   static StMuPmdCollection* pmdCollection() ;
   /// returns pointer to current StEmcCollection
