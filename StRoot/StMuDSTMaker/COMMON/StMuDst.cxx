@@ -23,6 +23,7 @@
 #include "StMuEmcUtil.h"
 #include "StMuFmsUtil.h"
 #include "StMuFcsUtil.h"
+#include "StMuFttUtil.h"
 #include "StMuPmdUtil.h"
 #include "StMuMcVertex.h"
 #include "StMuMcTrack.h"
@@ -95,6 +96,7 @@ void StMuDst::unset() {
     emcArrays     = 0;
     fmsArrays     = 0;
     fcsArrays     = 0;
+    fttArrays     = 0;
     pmdArrays     = 0;
     tofArrays     = 0;
     btofArrays    = 0;   // dongx
@@ -106,6 +108,7 @@ void StMuDst::unset() {
     mMuEmcCollection = 0;
     mMuFmsCollection = 0;
     mMuFcsCollection = 0;
+    mMuFttCollection = 0;
     mMuPmdCollectionArray = 0;
     mMuPmdCollection = 0;
     mEmcCollection     = 0;
@@ -129,6 +132,7 @@ void StMuDst::set(StMuDstMaker* maker) {
   emcArrays     = maker->mEmcArrays;
   fmsArrays     = maker->mFmsArrays;
   fcsArrays     = maker->mFcsArrays;
+  fttArrays     = maker->mFttArrays;
   pmdArrays     = maker->mPmdArrays;
   tofArrays     = maker->mTofArrays;
   btofArrays    = maker->mBTofArrays;    // dongx
@@ -142,6 +146,7 @@ void StMuDst::set(StMuDstMaker* maker) {
   mMuEmcCollection      = maker->mEmcCollection;
   mMuFmsCollection      = maker->mFmsCollection;
   mMuFcsCollection      = maker->mFcsCollection;
+  mMuFttCollection      = maker->mFttCollection;
    mMuPmdCollectionArray = maker->mPmdCollectionArray;
   mMuPmdCollection = maker->mPmdCollection;
   eztArrays     = maker->mEztArrays;
@@ -201,6 +206,7 @@ void StMuDst::set(TClonesArray** theArrays,
 		  TClonesArray** theEmcArrays,
 		  TClonesArray** theFmsArrays,
           TClonesArray** theFcsArrays,
+          TClonesArray** theFttArrays,
 		  TClonesArray** thePmdArrays,
 		  TClonesArray** theTofArrays,
 		  TClonesArray** theBTofArrays,    // dongx
@@ -213,6 +219,7 @@ void StMuDst::set(TClonesArray** theArrays,
 		  StMuEmcCollection *emc,
  		  StMuFmsCollection *fms,
           StMuFcsCollection *fcs,		  
+          StMuFttCollection *ftt,
           TClonesArray* pmd_arr,
 		  StMuPmdCollection *pmd)
 {
@@ -227,6 +234,7 @@ void StMuDst::set(TClonesArray** theArrays,
   emcArrays     = theEmcArrays;   
   fmsArrays     = theFmsArrays;
   fcsArrays     = theFcsArrays;
+  fttArrays     = theFttArrays;
   fgtArrays     = theFgtArrays;
   pmdArrays     = thePmdArrays;
   tofArrays     = theTofArrays;
@@ -237,6 +245,7 @@ void StMuDst::set(TClonesArray** theArrays,
   mMuEmcCollection = emc; 
   mMuFmsCollection = fms;  
   mMuFcsCollection = fcs;
+  mMuFttCollection = ftt;
   mMuPmdCollectionArray = pmd_arr;
   mMuPmdCollection = pmd;
   eztArrays     = theEztArrays;
@@ -800,6 +809,13 @@ StEvent* StMuDst::createStEvent() {
   if(fcs) { // transform to StEvent format and fill it
      StFcsCollection *FCS = mFcsUtil->getFcs(fcs);
      if(FCS) ev->setFcsCollection(FCS);
+  }
+  // now get the FTT stuff and put it in the StEvent
+  static StMuFttUtil* mFttUtil = new StMuFttUtil();
+  StMuFttCollection *ftt = muFttCollection();
+  if(ftt) { // transform to StEvent format and fill it
+     StFttCollection *FTT = mFttUtil->getFtt(ftt);
+     if(FTT) ev->setFttCollection(FTT);
   }
   // now get the PMD stuff and put it in the StEvent
   static StMuPmdUtil* mPmdUtil = new StMuPmdUtil();
@@ -1847,17 +1863,21 @@ TClonesArray* StMuDst::strangeArray(Int_t type) { return instance()->strangeArra
 TClonesArray* StMuDst::mcArray(Int_t type) { return instance()->mcArrays[type]; }
 TClonesArray* StMuDst::mcVertices()      { return instance()->mcArray(0);}
 TClonesArray* StMuDst::mcTracks()        { return instance()->mcArray(1);}
-  // returns pointer to the n-th TClonesArray from the emc arrays
+// returns pointer to the n-th TClonesArray from the emc arrays
 TClonesArray* StMuDst::emcArray(Int_t type) { return instance()->emcArrays[type]; }
-   // returns pointer to the n-th TClonesArray from the fms arrays
+// returns pointer to the n-th TClonesArray from the fms arrays
 TClonesArray* StMuDst::fmsArray(Int_t type) { return instance()->fmsArrays[type]; }
-    // returns pointer to the n-th TClonesArray from the pmd arrays
+// returns pointer to the n-th TClonesArray from the fcs arrays
+TClonesArray* StMuDst::fcsArray(int type) { return instance()->fcsArrays[type]; }
+// returns pointer to the n-th TClonesArray from the ftt arrays
+TClonesArray* StMuDst::fttArray(int type) { return instance()->fttArrays[type]; }
+// returns pointer to the n-th TClonesArray from the pmd arrays
 TClonesArray* StMuDst::pmdArray(Int_t type) { return instance()->pmdArrays[type]; }
   // returns pointer to the n-th TClonesArray from the tof arrays
 TClonesArray* StMuDst::tofArray(Int_t type) { return instance()->tofArrays[type]; }
   // returns pointer to the n-th TClonesArray from the btof arrays // dongx
 TClonesArray* StMuDst::btofArray(Int_t type) { return instance()->btofArrays[type]; }
-  /// returns pointer to the n-th TClonesArray from the etof arrays // FS
+  // returns pointer to the n-th TClonesArray from the etof arrays // FS
 TClonesArray* StMuDst::etofArray(int type) { return instance()->etofArrays[type]; }
   // returns pointer to the n-th TClonesArray from the mtd arrays
 TClonesArray* StMuDst::mtdArray(Int_t type) { return instance()->mtdArrays[type]; }
@@ -1968,6 +1988,10 @@ TCut* StMuDst::strangeCuts(Int_t i) { return (TCut*)instance()->strangeArrays[sm
 StMuEmcCollection* StMuDst::muEmcCollection() { if (instance()->mMuEmcCollectionArray) return (StMuEmcCollection*) instance()->mMuEmcCollectionArray->UncheckedAt(0); else return instance()->mMuEmcCollection; }
    // returns pointer to current StMuFmsCollection
 StMuFmsCollection* StMuDst::muFmsCollection() { return instance()->mMuFmsCollection; }
+   // returns pointer to current StMuFcsCollection
+StMuFcsCollection* StMuDst::muFcsCollection() { return instance()->mMuFcsCollection; }
+   // returns pointer to current StMuFttCollection
+StMuFttCollection* StMuDst::muFttCollection() { return instance()->mMuFttCollection; }
   // returns pointer to current StMuPmdCollection
 StMuPmdCollection* StMuDst::pmdCollection() { if (instance()->mMuPmdCollectionArray)  return (StMuPmdCollection*) instance()->mMuPmdCollectionArray->UncheckedAt(0); else return instance()->mMuPmdCollection; }
   // returns pointer to current StEmcCollection
