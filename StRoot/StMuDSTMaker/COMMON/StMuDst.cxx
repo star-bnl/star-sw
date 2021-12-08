@@ -1863,17 +1863,21 @@ TClonesArray* StMuDst::strangeArray(Int_t type) { return instance()->strangeArra
 TClonesArray* StMuDst::mcArray(Int_t type) { return instance()->mcArrays[type]; }
 TClonesArray* StMuDst::mcVertices()      { return instance()->mcArray(0);}
 TClonesArray* StMuDst::mcTracks()        { return instance()->mcArray(1);}
-  // returns pointer to the n-th TClonesArray from the emc arrays
+// returns pointer to the n-th TClonesArray from the emc arrays
 TClonesArray* StMuDst::emcArray(Int_t type) { return instance()->emcArrays[type]; }
-   // returns pointer to the n-th TClonesArray from the fms arrays
+// returns pointer to the n-th TClonesArray from the fms arrays
 TClonesArray* StMuDst::fmsArray(Int_t type) { return instance()->fmsArrays[type]; }
-    // returns pointer to the n-th TClonesArray from the pmd arrays
+// returns pointer to the n-th TClonesArray from the fcs arrays
+TClonesArray* StMuDst::fcsArray(int type) { return instance()->fcsArrays[type]; }
+// returns pointer to the n-th TClonesArray from the ftt arrays
+TClonesArray* StMuDst::fttArray(int type) { return instance()->fttArrays[type]; }
+// returns pointer to the n-th TClonesArray from the pmd arrays
 TClonesArray* StMuDst::pmdArray(Int_t type) { return instance()->pmdArrays[type]; }
   // returns pointer to the n-th TClonesArray from the tof arrays
 TClonesArray* StMuDst::tofArray(Int_t type) { return instance()->tofArrays[type]; }
   // returns pointer to the n-th TClonesArray from the btof arrays // dongx
 TClonesArray* StMuDst::btofArray(Int_t type) { return instance()->btofArrays[type]; }
-  /// returns pointer to the n-th TClonesArray from the etof arrays // FS
+  // returns pointer to the n-th TClonesArray from the etof arrays // FS
 TClonesArray* StMuDst::etofArray(int type) { return instance()->etofArrays[type]; }
   // returns pointer to the n-th TClonesArray from the mtd arrays
 TClonesArray* StMuDst::mtdArray(Int_t type) { return instance()->mtdArrays[type]; }
@@ -1984,6 +1988,10 @@ TCut* StMuDst::strangeCuts(Int_t i) { return (TCut*)instance()->strangeArrays[sm
 StMuEmcCollection* StMuDst::muEmcCollection() { if (instance()->mMuEmcCollectionArray) return (StMuEmcCollection*) instance()->mMuEmcCollectionArray->UncheckedAt(0); else return instance()->mMuEmcCollection; }
    // returns pointer to current StMuFmsCollection
 StMuFmsCollection* StMuDst::muFmsCollection() { return instance()->mMuFmsCollection; }
+   // returns pointer to current StMuFcsCollection
+StMuFcsCollection* StMuDst::muFcsCollection() { return instance()->mMuFcsCollection; }
+   // returns pointer to current StMuFttCollection
+StMuFttCollection* StMuDst::muFttCollection() { return instance()->mMuFttCollection; }
   // returns pointer to current StMuPmdCollection
 StMuPmdCollection* StMuDst::pmdCollection() { if (instance()->mMuPmdCollectionArray)  return (StMuPmdCollection*) instance()->mMuPmdCollectionArray->UncheckedAt(0); else return instance()->mMuPmdCollection; }
   // returns pointer to current StEmcCollection

@@ -136,6 +136,7 @@ public:
 		    StMuEmcCollection *emc_col=0, 
 		    StMuFmsCollection *fms_col=0, 
             StMuFcsCollection *fcs_col=0,
+            StMuFttCollection *ftt_col=0,
 		    TClonesArray *pmd_tca=0, 
 		    StMuPmdCollection *pmd_col=0
 );
@@ -276,15 +277,15 @@ public:
   static TClonesArray* mcVertices()      ;
   static TClonesArray* mcTracks()        ;
   /// returns pointer to the n-th TClonesArray from the emc arrays
-  static TClonesArray* emcArray(int type) { return emcArrays[type]; }
+  static TClonesArray* emcArray(int type) ;
    /// returns pointer to the n-th TClonesArray from the fms arrays
-  static TClonesArray* fmsArray(int type) { return fmsArrays[type]; }
+    static TClonesArray* fmsArray(int type) ;
   /// returns pointer to the n-th TClonesArray from the fcs arrays
-  static TClonesArray* fcsArray(int type) { return fcsArrays[type]; }
+    static TClonesArray* fcsArray(int type) ;
   /// returns pointer to the n-th TClonesArray from the ftt arrays
-  static TClonesArray* fttArray(int type) { return fttArrays[type]; }
+      static TClonesArray* fttArray(int type) ;
     /// returns pointer to the n-th TClonesArray from the pmd arrays
-  static TClonesArray* pmdArray(int type) { return pmdArrays[type]; }
+	static TClonesArray* pmdArray(int type) ;
   /// returns pointer to the n-th TClonesArray from the tof arrays
   static TClonesArray* tofArray(Int_t type) ;
   /// returns pointer to the n-th TClonesArray from the btof arrays /// dongx
@@ -400,11 +401,11 @@ public:
   /// returns pointer to current StMuEmcCollection
   static StMuEmcCollection* muEmcCollection() ;
    /// returns pointer to current StMuFmsCollection
-  static StMuFmsCollection* muFmsCollection() { return mMuFmsCollection; }
+    static StMuFmsCollection* muFmsCollection() ;
   /// returns pointer to current StMuFcsCollection
-  static StMuFcsCollection* muFcsCollection() { return mMuFcsCollection; }
+      static StMuFcsCollection* muFcsCollection();
   /// returns pointer to current StMuFttCollection
-  static StMuFttCollection* muFttCollection() { return mMuFttCollection; }
+	static StMuFttCollection* muFttCollection();
   /// returns pointer to current StMuPmdCollection
   static StMuPmdCollection* pmdCollection() ;
   /// returns pointer to current StEmcCollection
