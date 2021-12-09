@@ -10,6 +10,7 @@
 #include "StarMagField.h"
 #include <StSensitiveDetector.h> 
 #include <map>
+#include <string>
 
 
 class StGeant4Maker;
@@ -37,7 +38,7 @@ public:
 //______________________________________________________________________________________
 class StarVMCApplication : public TVirtualMCApplication {
 public:
-  StarVMCApplication( const char *name = "starsim", const char *title="STAR VMC simulation", double zmax=DBL_MAX, double rmax=DBL_MAX );
+  StarVMCApplication( const char *name = "starsim", const char *title="STAR VMC simulation", double zmax=DBL_MAX, double rmax=DBL_MAX, std::string engine="geant4", StMCParticleStack* stack = 0 );
  ~StarVMCApplication(){ /* nada */ };
 
   /// Geometry construction is the responsability of the STAR chain
@@ -101,7 +102,9 @@ protected:
   double mZmax;
   double mRmax;
 
-  ClassDef(StarVMCApplication, 1);
+  bool   mMulti;
+
+  ClassDef(StarVMCApplication, 0);
 
 };
 //______________________________________________________________________________________

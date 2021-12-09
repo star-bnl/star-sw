@@ -28,6 +28,8 @@
 #include "StChain/StEvtHddr.h"
 #include "TH2F.h"
 
+#include <functional>
+
 //_______________________________________________________________________________________________
 #include <AgMLVolumeIdFactory.h>
 //_______________________________________________________________________________________________
@@ -43,10 +45,12 @@
 //#include <SystemOfUnits.h>
 //#include <StGeant4Maker/SCORING/GenTrackerSensitiveDetector.h>
 //#include <StGeant4Maker/StSensitiveDetectorFactory.h>
+#include "TMCManager.h"
 //________________________________________________________________________________________________
 #include "TGeant4.h"
 #include "TG4RunManager.h"
 #include "TG4RunConfiguration.h"
+#include "TGeant3TGeo.h"
 //#include "TG4TrackManager.h"
 //#include "TG4SDManager.h"
 //#include "TG4SDConstruction.h"
@@ -76,6 +80,7 @@
 #include "g2t/St_g2t_vpd_Module.h"
 //________________________________________________________________________________________________
 #include <StHitCollection.h> 
+#include <cstring>
 //________________________________________________________________________________________________
 
 // Functors used to copy the hits from the sensitive detector hit collections into the g2t tables.
@@ -412,14 +417,29 @@ struct SD2Table_MTD {
 
 //________________________________________________________________________________________________
 TGeant4* gG4 = 0;
+TGeant3TGeo* gG3 = 0;
+
+// Function to process one event
+std::function<void(void)> trigger;
+
 //________________________________________________________________________________________________
 // Pointer to the maker so we can forward VMC calls there
 static StGeant4Maker* _g4maker = 0;
 //________________________________________________________________________________________________
 StarParticleData &particleData = StarParticleData::instance();
 //________________________________________________________________________________________________
-StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title, double zmax, double rmax ) : 
-  TVirtualMCApplication(name,title),mZmax(zmax),mRmax(rmax)  {
+StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title, double zmax, double rmax, std::string multi, StMCParticleStack* stack ) : 
+  TVirtualMCApplication(name,title),mZmax(zmax),mRmax(rmax),mMulti( multi=="multi" )
+{
+
+  if ( mMulti && stack ) {
+
+    LOG_INFO << "VMC Application Initialized for Multi-engine Run" << endm;
+
+    RequestMCManager();
+    fMCManager->SetUserStack(stack);
+
+  }
 }
 //________________________________________________________________________________________________
 StGeant4Maker::StGeant4Maker( const char* nm ) : 
@@ -450,6 +470,10 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   //  SetAttr( "G4VmcOpt:Process", "stepLimiter+specialCuts" ); // special process
   SetAttr( "G4VmcOpt:Process", "stepLimiter+specialControls+specialCuts+stackPopper" ); // special process
   //  SetAttr( "G4VmcOpt:Process", "stepLimiter+stackPopper" ); // special process
+
+  SetAttr("G3VmcOpt:Name", "GEANT3" );
+  SetAttr("G3VmcOpt:nwgeant", 0 );
+
   SetAttr( "AgMLOpt:TopVolume", "HALL" );
   SetAttr( "Stepping:Punchout:Stop", 1 ); // 0=no action, 1=track stopped, 2=track stopped and re-injected            
   SetAttr( "Stepping:Punchout:Rmin", 223.49 ); // min radius applied to punchout logic
@@ -506,6 +530,13 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr("RAYL", 1);
   SetAttr("LABS", 1);
   SetAttr("SYNC", 1);
+
+  SetAttr("all:physics",  "G4" );
+  SetAttr("ecal:physics", "G3" );
+  SetAttr("calb:physics", "G3" );
+  SetAttr("tpce:physics", "G3" );
+ 
+  SetAttr("application:engine","G4"); // multi engine physics
     
   // TODO-- 
   //  SetAttr( "AgMLOpt:Hits:Deactivate", "ECAL:*,TPCE:*,*" );
@@ -521,7 +552,7 @@ int StGeant4Maker::Init() {
   InitGeom();
 
   LOG_INFO << "Create VMC application" << endm;
-  mVmcApplication = new StarVMCApplication("g4star","STAR G4/VMC",DAttr("Application:Zmax"),DAttr("Application:Rmax"));
+  mVmcApplication = new StarVMCApplication("g4star","STAR G4/VMC",DAttr("Application:Zmax"),DAttr("Application:Rmax"), SAttr("application:engine"), mMCStack );
 
   LOG_INFO << "Create VMC run configuration" << endm;
   const bool specialStacking = false;
@@ -531,76 +562,109 @@ int StGeant4Maker::Init() {
   AddObj( mVmcApplication, ".const", 0 ); // Register VMC application  
 
   LOG_INFO << "Create GEANT4 instance" << endm;
-  AddObj( gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig) , ".const", 0 );
-  //gMC = gG4;
-  
-  // Set default track propation cuts
-  gG4->SetCut( "CUTGAM", DAttr("cutgam") );
-  gG4->SetCut( "CUTELE", DAttr("cutele") );
-  gG4->SetCut( "CUTHAD", DAttr("cuthad") );
-  gG4->SetCut( "CUTNEU", DAttr("cutneu") );
-  gG4->SetCut( "CUTMUO", DAttr("cutmuo") );
-  gG4->SetCut( "BCUTE" , DAttr("bcute") );
-  gG4->SetCut( "DCUTE" , DAttr("dcute") );
-  gG4->SetCut( "BCUTM" , DAttr("bcutm") );
-  gG4->SetCut( "DCUTM" , DAttr("dcutm") );
-  
-  // Set default physics flags
-  gG4->SetProcess("PAIR",   IAttr("PAIR"));
-  gG4->SetProcess("COMP",   IAttr("COMP"));
-  gG4->SetProcess("PHOT",   IAttr("PHOT"));
-  gG4->SetProcess("PFIS",   IAttr("PFIS"));
-  gG4->SetProcess("DRAY",   IAttr("DRAY"));
-  gG4->SetProcess("ANNI",   IAttr("ANNI"));
-  gG4->SetProcess("BREM",   IAttr("BREM"));
-  gG4->SetProcess("HADR",   IAttr("HADR"));
-  gG4->SetProcess("MUNU",   IAttr("MUNU"));
-  gG4->SetProcess("DCAY",   IAttr("DCAY"));
-  gG4->SetProcess("LOSS",   IAttr("LOSS"));
-  gG4->SetProcess("MULS",   IAttr("MULS"));
-  gG4->SetProcess("CKOV",   IAttr("CKOV"));
-  gG4->SetProcess("RAYL",   IAttr("RAYL"));
-  gG4->SetProcess("LABS",   IAttr("LABS"));
-  gG4->SetProcess("SYNC",   IAttr("SYNC"));
+  if ( 0==std::strcmp( SAttr("application:engine"), "G4") || 0==std::strcmp( SAttr("application:engine"), "multi") )  gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig);
+  if ( 0==std::strcmp( SAttr("application:engine"), "G3") || 0==std::strcmp( SAttr("application:engine"), "multi") )  gG3 = new TGeant3TGeo(SAttr("G3VmcOpt:Name"), IAttr("G3VmcOpt:nwgeant" ) );
 
-
-  LOG_INFO << "Create StarMagFieldAdaprtor" << endm;
-  mMagfield = new StarMagFieldAdaptor(/*nada*/);
-
-  LOG_INFO << "Pass stack and magnetic field to G4, flag ROOT geometry" << endm;
-  if ( gG4 ) {
-    gG4->SetStack( mMCStack );  
-    gG4->SetMagField( mMagfield );
-    gG4 -> SetRootGeometry();
-    //    gG4->ProcessGeantCommand( "/mcControl/g3Defaults" );
-  } else {
-    LOG_FATAL << "Could not instantiate concrete MC.  WTF?" << endm;
-    return kStFATAL;
-  };
-
-  // Obtain the G4 run manager
-  TG4RunManager* runManager = TG4RunManager::Instance();
-  runManager->UseRootRandom(false);
-
-
-  LOG_INFO << "Initialize GEANT4" << endm;
-  gG4 -> Init(); // FinishGeometry is called here...
-
-  // VMC SD manager appears to be the last thing initialized when gMC->Init()
-  // is called... so we should initialize our hits here...
+  if ( gG4 ) AddObj( gG4, ".const", 0 );
+  if ( gG3 ) AddObj( gG3, ".const", 0 );
 
   //
-  // Some geant4 configurations
+  // Create the function which processes a single event
   //
-  const char* g4cmd[] = {
-    "/mcPhysics/printGlobalCuts",
-    "/mcPhysics/printGlobalControls",
+
+  trigger = [](){ std::cout << "Trigger warning... no trigger function has been defined.  No events produced." << std::endl; } ;
+  { 
+    if ( 0==std::strcmp( SAttr("application:engine"), "G4" ) ) {
+      trigger = []() { gG4->ProcessRun(1); }   ;
+    }
+
+    else if ( 0==std::strcmp( SAttr("application:engine"), "G3" ) ) {
+      trigger = []() { gG3->ProcessRun(1); }   ;
+    }
+
+    else if ( 0==std::strcmp( SAttr("application:engine"), "multi" ) ) {
+      trigger = [](){ TMCManager::Instance()->Run(1); }   ;
+    }
+  }
+
+  mMagfield = new StarMagFieldAdaptor(/*nada*/);  
+
+  auto SetDefaultCuts      = [this](TVirtualMC* mc) {
+    mc->SetCut( "CUTGAM", DAttr("cutgam") );
+    mc->SetCut( "CUTELE", DAttr("cutele") );
+    mc->SetCut( "CUTHAD", DAttr("cuthad") );
+    mc->SetCut( "CUTNEU", DAttr("cutneu") );
+    mc->SetCut( "CUTMUO", DAttr("cutmuo") );
+    mc->SetCut( "BCUTE" , DAttr("bcute") );
+    mc->SetCut( "DCUTE" , DAttr("dcute") );
+    mc->SetCut( "BCUTM" , DAttr("bcutm") );
+    mc->SetCut( "DCUTM" , DAttr("dcutm") );
+  };  
+  auto SetDefaultProcesses = [this](TVirtualMC* mc) {
+    mc->SetProcess("PAIR",   IAttr("PAIR"));
+    mc->SetProcess("COMP",   IAttr("COMP"));
+    mc->SetProcess("PHOT",   IAttr("PHOT"));
+    mc->SetProcess("PFIS",   IAttr("PFIS"));
+    mc->SetProcess("DRAY",   IAttr("DRAY"));
+    mc->SetProcess("ANNI",   IAttr("ANNI"));
+    mc->SetProcess("BREM",   IAttr("BREM"));
+    mc->SetProcess("HADR",   IAttr("HADR"));
+    mc->SetProcess("MUNU",   IAttr("MUNU"));
+    mc->SetProcess("DCAY",   IAttr("DCAY"));
+    mc->SetProcess("LOSS",   IAttr("LOSS"));
+    mc->SetProcess("MULS",   IAttr("MULS"));
+    mc->SetProcess("CKOV",   IAttr("CKOV"));
+    mc->SetProcess("RAYL",   IAttr("RAYL"));
+    mc->SetProcess("LABS",   IAttr("LABS"));
+    mc->SetProcess("SYNC",   IAttr("SYNC"));
+  };
+  auto SetFieldAndGeometry = [this](TVirtualMC* mc) {
+    mc->SetMagField( mMagfield );
+    mc->SetRootGeometry();
+  };
+  auto SetStack            = [this](TVirtualMC* mc){ mc->SetStack(mMCStack); };
+  auto InitializeMC        = [SetDefaultCuts,SetDefaultProcesses,SetFieldAndGeometry](TVirtualMC* mc) {
+    SetDefaultCuts(mc);
+    SetDefaultProcesses(mc);
+    SetFieldAndGeometry(mc);
+    mc->Init();
+    mc->BuildPhysics();
   };
 
-  for ( auto cmd : g4cmd )   gG4->ProcessGeantCommand( cmd );
+  // Multi-engine initialization
+  if ( 0==std::strcmp( SAttr("application:engine"), "multi") ) {
 
-  LOG_INFO << "Initialize GEANT4 Physics" << endm;
-  gG4 -> BuildPhysics();
+    LOG_INFO << "Initialize Geant 4 + GEANT3 multiengine run" << endm;    
+    TMCManager::Instance()->Init( InitializeMC );
+
+
+  }
+  
+  // Geant4 standalone initialization
+  if ( 0==std::strcmp( SAttr("application:engine"), "G4") ) {  
+  
+    LOG_INFO << "Initialize Geant 4 standalone" << endm;
+
+    InitializeMC( gG4 );
+    SetStack( gG4 );
+    
+    TG4RunManager* runManager = TG4RunManager::Instance();
+    runManager->UseRootRandom(false);
+
+  }
+
+  // GEANT3 standalone initialization
+  if ( 0==std::strcmp( SAttr("application:engine"), "G3") ) {  
+
+    LOG_INFO << "Initialize GEANT3 standalone" << endm;
+    
+    InitializeMC( gG3 );
+    SetStack( gG3 );
+ 
+    gG3 -> Init();
+    gG3 -> BuildPhysics();
+ 
+  }
 
   // Create histograms
   TH1* h;
@@ -650,7 +714,10 @@ int StGeant4Maker::InitRun( int /* run */ ){
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::ConstructGeometry(){ 
-  //  assert(gGeoManager);
+  if ( 0==gGeoManager ) {
+    LOG_FATAL << "Geometry manager is not available at StarVMCApplication::ConstructGeometry... this will not go well" << endm;
+  }
+  gGeoManager->CloseGeometry(); 
 }
 int  StGeant4Maker::InitGeom() {
   // if ( gGeoManager ) {
@@ -729,8 +796,7 @@ int StGeant4Maker::Make() {
 
   }
 
-  // Process one single event.  Control handed off to VMC application.
-  gG4 -> ProcessRun( 1 );
+  trigger();
 
   // Update event header.  Note that event header's SetRunNumber method sets the run number AND updates the previous run number.
 
@@ -839,7 +905,7 @@ int  StGeant4Maker::ConfigureGeometry() {
     AgMLExtension* agmlExt = getExtension(volume);
     if ( 0==agmlExt ) continue;
     for ( auto kv : agmlExt->GetCuts() ) {
-      gG4->Gstpar( media[id]=id, kv.first, kv.second );
+      TVirtualMC::GetMC()->Gstpar( media[id]=id, kv.first, kv.second );
     }
   }
 

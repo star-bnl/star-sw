@@ -1423,6 +1423,7 @@ Bfc_st BFC[] = { // standard chains
   {"ag4ml",       "","", "g4geometry, agml"            ,"","", "AgML + g4",false},
   {"stargen",     "","", "gen_T,sim_T"/*+++*/,                     "", "libStarGeneratorUtil.so,libStarGeneratorEvent.so,libStarGeneratorBase.so,libStarGeneratorFilt.so,libMathMore.so","STAR Generator BASE",false},
   {"geant4mk",    "","", "stargen,geant4vmc", "", "StGeant4Maker.so,StarMagField.so", "Load G4 VMC libs", false},
+  {"geant321", "", "", "",                 "", "/star/simu/simu/jwebb/GEANT3/lib64/libgeant321.so", "Load G3 VMC library", false},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
