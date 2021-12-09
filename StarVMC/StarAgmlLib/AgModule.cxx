@@ -118,7 +118,7 @@ void AgModule::AddHitScoring( TString name, AgMLScoring* sc ) {
     LOG_WARN << "Volume " << key.Data() << " has not been created yet, no user hits defined " << name.Data() << endm;
   }
   else {
-    auto* ext = dynamic_cast<AgMLExtension*>(volume->GetUserExtension());
+    auto* ext = AgMLExtension::get( volume );
     ext->AddHitScoring(sc);
   }
 }

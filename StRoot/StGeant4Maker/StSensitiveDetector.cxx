@@ -9,6 +9,7 @@
 #include <StHitCollection.h>
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
+#include <GeometryUtils.h>
 
 TVirtualMC*    mc        = 0;
 TGeoNavigator* navigator = 0;
@@ -43,7 +44,7 @@ void StSensitiveDetector::Initialize(){
 //____________________________________________________________________________________________
 void StSensitiveDetector::addVolume( TGeoVolume* volume ) {
   if ( 0 == mVolumes.size() ) {
-    mAgMLInfo = dynamic_cast<AgMLExtension*>( volume->GetUserExtension() );   
+    mAgMLInfo = getExtension(volume);
 
     TString cname  = mAgMLInfo->GetFamilyName(); cname += "_hits";
     TString ctitle = mAgMLInfo->GetModuleName(); ctitle += " "; ctitle += cname;

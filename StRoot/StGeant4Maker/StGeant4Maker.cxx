@@ -778,7 +778,7 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
   for ( int i=0; i<volumes->GetEntries(); i++ ) {
 
     TGeoVolume* volume = (TGeoVolume *)volumes->At(i);
-    AgMLExtension* ae = (AgMLExtension *)volume->GetUserExtension();
+    AgMLExtension* ae = getExtension(volume);
     if ( 0==ae ) {
       LOG_DEBUG << "No agml extension on volume = " << volume->GetName() << endm;
       continue; // shouldn't happen
@@ -836,7 +836,7 @@ int  StGeant4Maker::ConfigureGeometry() {
     TGeoMedium* medium = volume->GetMedium();
     int id = medium->GetId();
     if ( media[id]>0 ) continue; // skip if medium already encountered
-    AgMLExtension* agmlExt = (AgMLExtension*)( volume->GetUserExtension() );
+    AgMLExtension* agmlExt = getExtension(volume);
     if ( 0==agmlExt ) continue;
     for ( auto kv : agmlExt->GetCuts() ) {
       gG4->Gstpar( media[id]=id, kv.first, kv.second );
@@ -1050,18 +1050,18 @@ void StGeant4Maker::UpdateHistory() {
   acurr = (mCurrentNode  ) ? dynamic_cast<AgMLExtension*>( mCurrentNode->GetUserExtension() )  : 0;
 
   if ( 0==aprev ) {
-    aprev = (mPreviousVolume) ? dynamic_cast<AgMLExtension*>( mPreviousVolume->GetUserExtension() ) : 0;
+    aprev = (mPreviousVolume) ? getExtension(mPreviousVolume)  : 0;
   }
   if ( 0==acurr ) {
-    acurr = (mCurrentVolume) ? dynamic_cast<AgMLExtension*>( mCurrentVolume->GetUserExtension() ) : 0;
+    acurr = (mCurrentVolume) ? getExtension(mCurrentVolume) : 0;
   }
 
   // Possibly inherit from parent volume
   if ( 0==aprev && mPreviousNode ) {
-    aprev = dynamic_cast<AgMLExtension*>( mPreviousNode->GetMotherVolume()->GetUserExtension() );
+    aprev = getExtension( mPreviousNode->GetMotherVolume() );
   }
   if ( 0==acurr && mCurrentNode ) {
-    acurr = dynamic_cast<AgMLExtension*>( mCurrentNode->GetMotherVolume()->GetUserExtension() );
+    acurr = getExtension( mCurrentNode->GetMotherVolume() );
   }
 
   // If the previous or current extension is null, there is no change in the tracking state.

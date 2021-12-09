@@ -7,6 +7,8 @@
 #include <vector>
 #include <map>
 
+class TGeoVolume;
+
 // Volume ID functor (for sensitive volumes)
 class AgMLVolumeId {
 public:
@@ -62,6 +64,9 @@ public:
   
   void Print( const char* opts="" );
  
+  void extends( TGeoVolume* volume ){ mExtensionMap[volume] = this; }
+  static AgMLExtension* get( TGeoVolume* volume ){ return mExtensionMap[volume]; }
+ 
 private:
 protected:
 
@@ -78,8 +83,13 @@ protected:
   std::vector<AgMLScoring*> mHitScoring; // Vector of functors for hit scoring
   std::map<TString, double> mGstpar;     // GSTPAR tracking cuts for this volume
 
+  static std::map< TGeoVolume*, AgMLExtension* > mExtensionMap;
+
   ClassDef(AgMLExtension,0);
 
 };
+
+// Global map to agml extensions
+
 
 #endif

@@ -654,7 +654,7 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
       }
 
       volume->SetUserExtension( agmlExt );
-
+      agmlExt->extends(volume);
 
       if ( mDebugOptions[block_name].Contains("shape") )
 	{
@@ -748,6 +748,7 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 	  }
 
 	  volume->SetUserExtension( agmlExt );
+	  agmlExt->extends(volume);
 
 
 	}

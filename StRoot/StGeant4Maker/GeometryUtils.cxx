@@ -13,6 +13,7 @@ AgMLExtension* getExtension( TGeoNode* n ) {
   //
   if ( 0==agmlext ) agmlext = getExtension( n->GetMotherVolume() );
 
+
   //
   // If it is still missing, its the user's problem now
   //
@@ -21,8 +22,5 @@ AgMLExtension* getExtension( TGeoNode* n ) {
 }
 
 AgMLExtension* getExtension( TGeoVolume* v ) {
-
-  AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( v->GetUserExtension() );
-  return agmlext;
-
+  return AgMLExtension::get(v);
 }

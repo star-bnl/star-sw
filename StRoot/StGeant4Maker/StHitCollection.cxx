@@ -9,6 +9,7 @@
 #include <StMessMgr.h>
 
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
+#include <GeometryUtils.h>
 
 #include <cassert>
 
@@ -172,7 +173,7 @@ void StTrackerHitCollection::ProcessHits() {
     AgMLExtension* agmlext = 0;
     for ( int ilvl=0; ilvl<navigator->GetLevel()+1;ilvl++ ) {
       TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
-      agmlext = dynamic_cast<AgMLExtension*> ( volume->GetUserExtension() );
+      agmlext = getExtension( volume ); 
       if ( 0 == agmlext )                  continue; // but probably an error
       if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
       hit->numbv[ inumbv++ ] = hit->copy[ilvl];
@@ -231,7 +232,7 @@ void StTrackerHitCollection::ProcessHits() {
   
 
   // Grab the agml extension and evaluate user hits
-  AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( current->GetUserExtension() );
+  AgMLExtension* agmlext = getExtension( current ); 
   if ( 0==agmlext ) return;
 
   // Score user defined hit quantities
@@ -324,7 +325,7 @@ void StCalorimeterHitCollection::ProcessHits() {
     AgMLExtension* agmlext = 0;
     for ( int ilvl=0; ilvl<navigator->GetLevel()+1;ilvl++ ) {
       TGeoVolume* volume = gGeoManager->GetVolume( hit->volu[ilvl] );
-      agmlext = dynamic_cast<AgMLExtension*> ( volume->GetUserExtension() );
+      agmlext = getExtension(volume);
       if ( 0 == agmlext )                  continue; // but probably an error
       if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
       hit->numbv[ inumbv++ ] = hit->copy[ilvl];
@@ -365,7 +366,7 @@ void StCalorimeterHitCollection::ProcessHits() {
   hit -> de =   mEsum * mBirk[0] / ( 1.0 + mBirk[1]*mEsum + mBirk[2]*mEsum*mEsum );
 
   // Grab the agml extension and evaluate user hits
-  AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( current->GetUserExtension() );
+  AgMLExtension* agmlext = getExtension( current ); 
   if ( 0==agmlext ) return;
 
   // Score user defined hit quantities
