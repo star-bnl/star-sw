@@ -22,9 +22,9 @@ class StKFParticleXPropagator : public KFParticleXPropagator {
   Bool_t  Propagete2Radius(const KFParticle &p, Float_t Radius);
   Float_t GetDStoSurface(const KFParticle &p, const double *surf, int nsurf, float dsdr[6] );
   static void Test(const Option_t *opt = "");
-  Double_t GetDStoR(Float_t BZ, Double_t R);
+  Double_t GetDStoR(Float_t BZ, Double_t R, double stmin,double stmax);
  private:
-  Double_t GetDStoSurfaceBz(Float_t B, double stmin,double stmax, const double *s, int nsurf, Int_t nearest, Float_t dsdr[6], KFParticle *particle = 0);
+  Double_t GetDStoSurfaceBz(Float_t B, double stmin,double stmax, const double *s, int nsurf, Int_t nearest); //, Float_t dsdr[6], KFParticle *particle = 0);
   static vector<MyMat_t> fgMaterials;
   static Int_t  SqEqu(double *, double *);
   ClassDef(StKFParticleXPropagator,1)

@@ -1,3 +1,9 @@
+/* 
+   root.exe 'kfpAnalysis.C(1)' 
+   gSystem->Load("StKFPX")
+   StKFParticleXPropagator::Test()
+*/
+
 #include "StKFParticleXPropagator.h"
 #include "TGeoManager.h"
 #include "TMath.h"
@@ -92,19 +98,21 @@ int StKFParticleXPropagator::SqEqu(double *cba, double *sol)
 }
 //_____________________________________________________________________________
 // from THelixTrack::Step(double stmin,double stmax, const double *s, int nsurf, double *xyz, double *dir, int nearest) const
-double StKFParticleXPropagator::GetDStoSurfaceBz(Float_t B,double stmin,double stmax, const double *s, int nsurf, Int_t nearest, Float_t dsdr[6], KFParticle *particle) 
+double StKFParticleXPropagator::GetDStoSurfaceBz(Float_t B,double stmin,double stmax, const double *s, int nsurf, Int_t nearest) //, Float_t dsdr[6], KFParticle *particle) 
 {
   static Float_t kClight = 1e-12*TMath::C(); // EC=2.99792458E-4 = 0.000299792458f; [CM/S] [kG] [GeV/c]
   int ix,jx,nx,ip,jp;
   double poly[4][3],tri[3],sol[2],cos1t,f1,f2,step,ss;
   const double *sp[4][4] = {{s+0,s+1,s+2,s+3}, {s+1,s+4,s+7,s+9}, 
                             {s+2,s+7,s+5,s+8}, {s+3,s+9,s+8,s+6}}; 
-  if (particle) fgmParticle = *particle;
-  else          fgmParticle = fgParticle;
-  fgmParticle.Print();
-  Double_t pMom = fgmParticle.GetP();
-  Double_t fRho = - fgmParticle.GetQ()*B*kClight/pMom;
-  TVector3 fP(fgmParticle.GetPx(), fgmParticle.GetPy(), fgmParticle.GetPz());
+  //  if (particle) fgmParticle = *particle;
+  //  else          
+  fgmParticle = fgParticle;
+  KFParticle tempParticle = fgmParticle;
+  tempParticle.Print();
+  Double_t pMom = tempParticle.GetP();
+  Double_t fRho = - tempParticle.GetQ()*B*kClight/pMom;
+  TVector3 fP(tempParticle.GetPx(), tempParticle.GetPy(), tempParticle.GetPz());
   TVector3 fDir = fP.Unit();
   Double_t fCosL = fDir.Perp();
   double myMax = 1./(fabs(fRho*fCosL)+1.e-10);
@@ -119,7 +127,7 @@ double StKFParticleXPropagator::GetDStoSurfaceBz(Float_t B,double stmin,double s
     for(ix=1;ix<4;ix++) {
 //       poly[ix][0] =th.fX  [ix-1]; 
 //       poly[ix][1] =th.fP  [ix-1]; 
-      poly[ix][0] =fgmParticle.GetParameter(ix-1);
+      poly[ix][0] =tempParticle.GetParameter(ix-1);
       poly[ix][1] =fDir  [ix-1]; 
       poly[ix][2] =hXp[ix-1]*cos1t;
     }
@@ -139,11 +147,20 @@ double StKFParticleXPropagator::GetDStoSurfaceBz(Float_t B,double stmin,double s
     int nsol = SqEqu(tri,sol);
     step = 1.e+12;
     if (nsol<0) 	return step;
-
+    if (nsol == 2) {
+      if (sol[1] < stmin || sol[1] > stmax) nsol = 1;
+    }
+    if (nsol == 2) {
+      if (sol[0] < stmin || sol[0] > stmax) {nsol = 1; sol[0] = sol[1];}
+    }
+    if (nsol == 1) {
+      if (sol[0] < stmin || sol[0] > stmax) nsol = 0; 
+    }
     if (nearest && nsol>1) {
       if(fabs(sol[0])>fabs(sol[1])) sol[0]=sol[1];
       nsol = 1;
     }
+    if (nsol <= 0) return step;
     if (nsol) step = sol[0];
     if (step < stmin && nsol > 1) step = sol[1];
     if (step < stmin || step > stmax) 	{
@@ -156,12 +173,12 @@ double StKFParticleXPropagator::GetDStoSurfaceBz(Float_t B,double stmin,double s
 
     //    th.Step(step,x,d);
     //    Float_t  P[8], C[36], dsdr1[6], F[36], F1[36];
-    //    fgmParticle.TransportBz(B,step/pMom, dsdr, P, C); //, dsdr1, F, F1, kFALSE);
+    //    tempParticle.TransportBz(B,step/pMom, dsdr, P, C); //, dsdr1, F, F1, kFALSE);
     Float_t dsdr[6] = {0};
-    cout << "before\t"; fgmParticle.Print();
-    fgmParticle.TransportToDS(step/pMom, dsdr);
-    cout << "after \t"; fgmParticle.Print();
-    const Float_t *x = &fgmParticle.X();
+    //    cout << "before\t"; tempParticle.Print();
+    tempParticle.TransportToDS(step/pMom, dsdr);
+    //    cout << "after \t"; tempParticle.Print();
+    const Float_t *x = &tempParticle.X();
     if (nsol) {//test it
       ss = s[0]+s[1]*x[0]+s[2]*x[1]+s[3]*x[2];
       if (nsurf > 4) ss += s[4]*x[0]*x[0]+s[5]*x[1]*x[1]+s[6]*x[2]*x[2];
@@ -169,6 +186,7 @@ double StKFParticleXPropagator::GetDStoSurfaceBz(Float_t B,double stmin,double s
       if (fabs(ss)<1.e-3 || TMath::Abs(step) < 1e-3) {
 // 	if (xyz) memcpy(xyz,x,sizeof(*xyz)*3);
 // 	if (dir) memcpy(dir,d,sizeof(*dir)*3);
+	fgmParticle = tempParticle;
 	return (totStep+step)/pMom;
     } }
 
@@ -183,10 +201,10 @@ double StKFParticleXPropagator::GetDStoSurfaceBz(Float_t B,double stmin,double s
   }
 }
 //________________________________________________________________________________
-Double_t StKFParticleXPropagator::GetDStoR(Float_t BZ, Double_t R) {
+Double_t StKFParticleXPropagator::GetDStoR(Float_t BZ, Double_t R, Double_t stmin, Double_t stmax) {
   Double_t cyl[6] = { -R*R , 0, 0, 0, 1, 1};
-  Float_t dsdr[6] = {0};
-  return GetDStoSurfaceBz(BZ, -222., 222., cyl, 6, 1, dsdr);
+  //  Float_t dsdr[6] = {0};
+  return GetDStoSurfaceBz(BZ, stmin, stmax, cyl, 6, 1); //, dsdr);
 }
 //________________________________________________________________________________
 Bool_t StKFParticleXPropagator::Propagete2Radius(const KFParticle &p, Float_t Radius) {
@@ -195,7 +213,6 @@ Bool_t StKFParticleXPropagator::Propagete2Radius(const KFParticle &p, Float_t Ra
   Float_t CurrentZ = fgParticle.GetZ();
   Float_t B[3];
   Double_t R;
-  Float_t dsdr[6] = {0};
   fgParticle.GetFieldValue(&fgParticle.X(), B);
   //  float P[8], C[36];
   if (CurrentR < Radius) {
@@ -205,18 +222,18 @@ Bool_t StKFParticleXPropagator::Propagete2Radius(const KFParticle &p, Float_t Ra
       if (it->Rmin > Radius)   break;
       if (! (it->Zmin < CurrentZ && CurrentZ < it->Zmax)) continue;
       R = TMath::Min(it->Rmax, Radius);
-      cout << "Target R = " << R << "\t"; fgParticle.Print();
-      Double_t dS = GetDStoR(B[2], R);
+      //      cout << "Target R = " << R << "\t"; fgParticle.Print();
+      Double_t dS = GetDStoR(B[2], R, 0., 222.);
       if (TMath::Abs(dS) > 2e4) return kFALSE;
       //      fgParticle.TransportBz(B[2], dS, dsdr, P, C);
       fgParticle = fgmParticle;
       //      fgParticle.TransportToDS(dS, dsdr);
       cout << "dS = " << dS << endl;
-      cout << "M\t"; fgmParticle.Print();
-      cout << "P\t"; fgParticle.Print();
+      //      cout << "M\t"; fgmParticle.Print();
+      //      cout << "P\t"; fgParticle.Print();
       CurrentR = TMath::Sqrt(fgParticle.GetX()*fgParticle.GetX() + fgParticle.GetY()*fgParticle.GetY());
       CurrentZ = fgParticle.GetZ();
-      cout << "Target R " << R << "\tCurrent R = " << CurrentR << "\tCurrent Z = " << CurrentZ << endl;
+      //      cout << "Target R " << R << "\tCurrent R = " << CurrentR << "\tCurrent Z = " << CurrentZ << endl;
     }
   } else {
     // go down
@@ -225,17 +242,17 @@ Bool_t StKFParticleXPropagator::Propagete2Radius(const KFParticle &p, Float_t Ra
       if (it->Rmax < Radius)  break;
       if (! (it->Zmin < CurrentZ && CurrentZ < it->Zmax)) continue;
       R = TMath::Max(it->Rmin, Radius);
-      cout << "Target R = " << R << "\t"; fgParticle.Print();
-      float dsdr[6];
+      //      cout << "Target R = " << R << "\t"; fgParticle.Print();
+      //      float dsdr[6];
       if (R > 1e-3) {
-	//	Float_t dS = GetDStoSurfaceBz(B[2], -222., 222., cyl, 6, 1, dsdr);
-	Double_t dS = GetDStoR(B[2], R);
+	//	Float_t dS = GetDStoSurfaceBz(B[2], -222., 222., cyl, 6, 1);// , dsdr);
+	Double_t dS = GetDStoR(B[2], R, -222, 0);
 	if (TMath::Abs(dS) > 2e4) return kFALSE;
 	fgParticle = fgmParticle;
 	//	fgParticle.TransportToDS(dS, dsdr);
-      cout << "dS = " << dS << endl;
-      cout << "M\t"; fgmParticle.Print();
-      cout << "P\t"; fgParticle.Print();
+	cout << "dS = " << dS << endl;
+	//      cout << "M\t"; fgmParticle.Print();
+	//      cout << "P\t"; fgParticle.Print();
 	//      fgParticle.TransportBz(B[2], dS, dsdr, P, C);
 	CurrentR = TMath::Sqrt(fgParticle.GetX()*fgParticle.GetX() + fgParticle.GetY()*fgParticle.GetY());
 	CurrentZ = fgParticle.GetZ();
@@ -261,14 +278,17 @@ Bool_t StKFParticleXPropagator::Propagete2Radius(const KFParticle &p, Float_t Ra
 	  s = (CXP*(1.-CXPRho*(0.5-CXPRho*(1/3.-CXPRho*0.25)))).Im();
 	}
 	Float_t dS = s/P.Perp();
-	fgParticle.TransportToDS(dS, dsdr);
-      cout << "dS = " << dS << endl;
-      cout << "M\t"; fgmParticle.Print();
-      cout << "P\t"; fgParticle.Print();
-	cout << "Final\t"; fgParticle.Print();
+	Float_t dsdr[6] = {0};
+	KFParticle tempParticle = fgParticle;
+	tempParticle.TransportToDS(dS, dsdr);
+	cout << "dS = " << dS << "\t"; tempParticle.Print();
+	fgParticle = tempParticle;
+	//	cout << "M\t"; fgmParticle.Print();
+	//	cout << "P\t"; fgParticle.Print();
       }
     }
   }
+  //  cout << "P2R::Final\t"; fgParticle.Print();
   return kTRUE;
 }
 //________________________________________________________________________________
@@ -299,7 +319,10 @@ void StKFParticleXPropagator::Test(const Option_t *opt) {
   };
   new StKFParticleXPropagator();
   StKFParticleXPropagator *instance = (StKFParticleXPropagator*) KFParticleXPropagator::instance();
+  KFParticle particleF;
+  Double_t R = 0;
   for (Int_t t = 0; t < 2; t++) {
+    cout << "t = " << t << "--------------------------------------------------------------------------------" << endl;
     Int_t pdg = 211*(1 - 2*t);
     StDcaGeometry dca;
     dca.set(pars[t], errs[t]); cout << pdg << "\t"; dca.Print();
@@ -308,9 +331,29 @@ void StKFParticleXPropagator::Test(const Option_t *opt) {
     track.SetCharge(1 - 2*t);
     track.SetID(t+1);
     KFParticle particle1(track, pdg); cout << "particle1" << endl; particle1.Print();
+    KFParticle particle2 = particle1;
+    cout << "t = " << t << "--------------------------------------------------------------------------------" << endl;
     cout << "Transport particle1 to 0" << endl;
+    R = 0;
     instance->Propagete2Radius(particle1, 0); // pars[t][0]);
-    cout << "Transport particle to K_S01xyz" << endl;
-    instance->Propagete2Radius(particle, TMath::Sqrt(K_S01xyz[0]*K_S01xyz[0]+K_S01xyz[1]*K_S01xyz[1]));
+                                            cout << "Start at \t"; particle1.Print();
+					    cout << "Target   \t"; particle.Print();
+    particleF = instance->GetFParticle(); cout << "Final at R = " << R << "\t"; particleF.Print();
+                  
+    R = TMath::Sqrt(K_S01xyz[0]*K_S01xyz[0]+K_S01xyz[1]*K_S01xyz[1]);
+    cout << "Transport particle to K_S01xyz R = " << R << endl;
+    instance->Propagete2Radius(particle, R);
+                                            cout << "Start at \t"; particle.Print();
+					    cout << "Target   \txyz = "; 
+					    for (Int_t i  = 0; i < 3; i++) cout << "\t" <<   K_S01xyz[i]; cout << "\tpxyz = "; 
+					    for (Int_t i = 0; i < 3; i++) cout << "\t" << piMC[t][i]; cout << endl;
+    particleF = instance->GetFParticle(); cout << "Final at R = " << R << "\t"; particleF.Print();
+    cout << "t = " << t << "--------------------------------------------------------------------------------" << endl;
+    R = TMath::Sqrt(kfPAt1stp[t][0]*kfPAt1stp[t][0] + kfPAt1stp[t][1]*kfPAt1stp[t][1]);
+    cout << "Transport particle1 to R = " << R << endl;
+    instance->Propagete2Radius(particle, R); 
+                                            cout << "Start at \t"; particle.Print();
+					    cout << "Target   \t"; particle1.Print();
+    particleF = instance->GetFParticle(); cout << "Final at R = " << R << "\t"; particleF.Print();
   }
 }

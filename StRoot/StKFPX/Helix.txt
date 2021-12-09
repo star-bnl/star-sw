@@ -1,0 +1,120 @@
+KFParticleBase::TransportBz
+KFParticleBase::GetDStoPointBz
+q - charge ==>  B*fQ*kCLight;
+B_z - z component of Magnic field (B_x = B_y = 0)
+x,y,z - coordinates
+px,py,pz - momentum
+_0 - initial values
+s = l/p - length divided by momentum
+b_z = q*B_z
+s_z = b_z * s
+
+x = (x_0 + py_0/b_z + px_0/b_z * sin(s_z) ~ py_0/b_z * cos(s_z),
+y = (y_0 ~ px_0/b_z + px_0/b_z * cos(s_z) + py_0/b_z * sin(s_z),
+z = z_0 + s*pz_0,
+px = px_0/b_z ~ px_0/b_z * cos(s_z) + py_0/b_z * sin(s_z),
+py = px_0/b_z ~ px_0/b_z * sin(s_z) ~ py_0/b_z * cos(s_z),
+pz = pz_0,
+
+
+StHelix:
+C - Curvature
+h = -sign(q*B), helicity
+
+x(s) = mOrigin.x() + (cos(mPhase + s*mH*mCurvature*mCosDipAngle)-mCosPhase)/mCurvature;
+y(s) = mOrigin.y() + (sin(mPhase + s*mH*mCurvature*mCosDipAngle)-mSinPhase)/mCurvature;
+z(s) = mOrigin.z() + s*mSinDipAngle;
+
+hz() = mCurvature/(1/pT)
+s_z = s*mH*mCurvature*mCosDipAngle = s * q*B_z / abs(q*B_z) p
+
+================================================================================
+Lorenz Force: https://en.wikipedia.org/wiki/Lorentz_force#cite_note-36
+
+
+p = (p_0, p_1, p_2, p_3) = (g*m*c, P_x, P_y, P_z);, g = sqrt((p/m)**2 + 1), m - mass, c - spped of light, p - sqrt(P_x**2 + P_y**2 + P_z**2)
+U = g * (c, -v_x, -v_y, -v_z) = g/m * (E, -p_x, 
+
+p = gamma * m * v
+                                                                  
+                                                                 
+                    (     0,  -E_x/c, -E_y/c, -E_z/c)            
+dp/dt = q * F * U = ( E_x/c,       0,   -B_z,    B_y) * q * U 
+                    ( E_y/c,     B_z,      0,   -B_x)		 
+                    ( E_z/c,    -B_y,    B_x,      0)		 
+
+dp/dt = q * (E + v x B);
+
+v = c * p/E = c *  p/(g*m)
+
+dp/dt = q * (E + c/(g*m) * p x B) 
+
+(dp_x/dt) =  q * g * v_y * B_z =   q/m * p_y * B_z;
+(dp_y/dt) = -q * g * v_x * B_z = - q/m * p_x * B_z;
+
+
+
+p_x = P * cos(omega*t + phi0);  dp_x/dt = - omega * P * sin(omega*t + phi0) = - omega * p_y;
+p_y = P * sin(omega*t + phi0);  dp_y/dt =   omega * P * cos(omega*t + phi0) =   omega * p_x;
+
+omega = q/m * B_z;
+  
+t = sT/vT; vT = c * pT / m = c * p / m; t = s / v = s * m / p
+
+t = sT / ( c * pT / m ) = sT * m / (c * pT) = s / p * m / c
+
+omega * t = q/m * B_z *  sT * m  / (c * pT) = q * B_z / ( c * pT) * sT = e * Z * B_z * s/p / c = Z * s / p * B_z * e_SI / c
+
+
+R = c * pT /(q * B_z) = c * pT /(z * e  * B_z) 
+q = z * e, e - positron charge [C]
+[C] - Coulomb
+[M] - meter
+[S] - secod
+
+e_SI    = 1.60217733e-19;	// positron charge in coulomb
+
+pT [GeV/c] = 1e9 * e_SI / c [C * V * S / M]
+
+B_z [T] =  [V * S / M^2]  
+
+R [m] = c * pT [1e9 * e_SI / c [C * V * S / M]] /( z * e_SI * B_z [V * S / M^2]) = 
+      = c * pT [1e9                           ] /( z        * B_z [      / M  ]) = 
+    
+
+
+-----------------------
+p [GeV] = 0.3 B[T] R[m] = 1e-9 c [M/S] 0.1 B [kG] 0.01 R [cm] = 1e-12 c [M/S] * B [kG] * R [cm]
+
+pT [GeV/c]  = 0.3 z B[T] R[m]
+
+----------------------
+================================================================================
+m dv/dt = q * (E + v x B);
+
+
+dv/dt = e_SI * Z / m * (E + v x B)
+
+B_x = B_y = 0; B_z = B
+
+         |   i   j   k |    (   v_y * B) 
+v x  B = | v_x v_y v_z | =  ( - v_x * B)
+         |   0   0   B |    (         0)
+
+
+
+v_x = vT_0 * cos(omega*t + phi0); dv_x/dt = - omega * v_y;  omega = e_SI * Z / m * B; omega*t = e_SI * Z /m * B * s / v = e_SI * Z * B * s / p = s / R
+v_y = vT_0 * sin(omega*t + phi0)  dv_y/dt =   omega * v_x; 
+v_z = vZ
+
+s = v * t; ds/dt = v; 
+dv_x/ds = dv_x/dt * dt/ds == 1/v * dv_x/dt;
+dv_x/d 
+
+R = p / (e_SI * Z * B) = [kG*M/S] / [C] / [T]
+
+p [GeV/c] = 1e9 e_SI /c [kG * M /S] => [kG * M /S] = c / (1e9 * e_SI) [GeV/c]
+https://en.wikipedia.org/wiki/Electronvolt
+Tesla = kg~s~2~A~1
+
+R[m] = c / (1e9 * e_SI) p* [GeV/c] e_SI * Z * B [T] = 1e-9 * c [M/S] * Z * B [T] * p [GeV/c] = 
