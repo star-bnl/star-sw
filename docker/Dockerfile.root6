@@ -28,7 +28,7 @@ RUN mkdir -p star-spack \
  && curl -sL https://github.com/spack/spack/archive/010e5761d6631eae102d1eec87e5e74a0e16ed82.tar.gz | tar -xz --strip-components 1 -C star-spack/spack
 
 RUN source star-spack/setup.sh \
- && spack env create star-env-root star-spack/environments/star-x86_64-root-5.34.38-container.yaml \
+ && spack env create star-env-root star-spack/environments/star-x86_64-root-6.16.00-container.yaml \
  && spack env activate star-env-root \
  && spack install -j 5 --fail-fast \
  && spack gc -y \
@@ -90,6 +90,7 @@ ENV LIBPATH+=:/lib64:/lib
 
 ENV MYSQL=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/mysql-5.7.27-pfyt3fwtkubcc5eazmoqfick3lgp67mf
 ENV LIBXML2_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/libxml2-2.9.10-4lxsmpa57bm3xs2cs3xapk3qccxflkfl
+ENV Vc_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/vc-1.4.1-xdb5jhivtn2rejvvfs2whrf4nx4lxwbi
 ENV FASTJET_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/fastjet-3.3.3-xj22tput5pd5atejy4igsrtgdtygi74u
 ENV GSL_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/gsl-2.6-ao26bt7pm6xxywo2q7dcmhhg2lp2inx7
 
@@ -121,6 +122,8 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
  && patch -p1 < root4star_cons.patch
 
 RUN source /etc/profile \
+ # Override default Vc version
+ && export Vc_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/vc_-0.7.4-gqbhzu2x5u2dbe5tafxnl36xj5qbwov4 \
  && cd /star-sw \
  && cons \
  && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
