@@ -2,12 +2,12 @@
 #define __AgmlExtension_h__
 
 #include <TGeoExtension.h>
+#include <TGeoVolume.h>
+
 #include <TString.h>
 #include <TMath.h>
 #include <vector>
 #include <map>
-
-class TGeoVolume;
 
 // Volume ID functor (for sensitive volumes)
 class AgMLVolumeId {
@@ -64,8 +64,11 @@ public:
   
   void Print( const char* opts="" );
  
-  void extends( TGeoVolume* volume ){ mExtensionMap[volume] = this; }
-  static AgMLExtension* get( TGeoVolume* volume ){ return mExtensionMap[volume]; }
+  void extends( TGeoVolume* volume ){ mExtensionMap[volume->GetName()] = this; }
+  static AgMLExtension* get( TGeoVolume* volume ){ return mExtensionMap[volume->GetName()]; }
+  static AgMLExtension* get( TString     volume ){ return mExtensionMap[volume]; }
+
+  static const std::map< TString, AgMLExtension* >& GetMap() { return mExtensionMap; }
  
 private:
 protected:
@@ -83,7 +86,7 @@ protected:
   std::vector<AgMLScoring*> mHitScoring; // Vector of functors for hit scoring
   std::map<TString, double> mGstpar;     // GSTPAR tracking cuts for this volume
 
-  static std::map< TGeoVolume*, AgMLExtension* > mExtensionMap;
+  static std::map< TString, AgMLExtension* > mExtensionMap;
 
   ClassDef(AgMLExtension,0);
 

@@ -29,4 +29,4 @@ void AgMLExtension::Print( const char* opts ) {
 
 }
 
-std::map<TGeoVolume*, AgMLExtension*> AgMLExtension::mExtensionMap;
+std::map<TString, AgMLExtension*> AgMLExtension::mExtensionMap;
