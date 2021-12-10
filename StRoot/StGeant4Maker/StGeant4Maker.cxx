@@ -862,7 +862,7 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     
     AgMLVolumeId* identifier = AgMLVolumeIdFactory::Create( fname );
     if ( identifier ) {
-      LOG_INFO << "Setting volume identifier for " << fname.Data() << " " << vname.Data() << endm;
+      LOG_DEBUG << "Setting volume identifier for " << fname.Data() << " " << vname.Data() << endm;
       ae -> SetVolumeIdentifier( identifier );
     }
 
@@ -878,8 +878,10 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     }
 
     // Register this volume to the sensitive detector
-    LOG_INFO << vname.Data() << "/" << fname.Data() << " --> " << sd->GetName() << endm;
-    TVirtualMC::GetMC()->SetSensitiveDetector( vname, sd );
+    LOG_DEBUG << vname.Data() << "/" << fname.Data() << " --> " << sd->GetName() << endm;
+    if ( nullptr == TVirtualMC::GetMC()->GetSensitiveDetector( vname ) ) {
+      TVirtualMC::GetMC()->SetSensitiveDetector( vname, sd );
+    }
     
     // Register this volume with the sensitive detector
     sd->addVolume( volume );
@@ -1325,6 +1327,10 @@ void StGeant4Maker::Stepping(){
 
   if ( stopped ) {
     LOG_INFO << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
+		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
+  }
+  else {
+    LOG_INFO << Form("track continues x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
 		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
   }
 

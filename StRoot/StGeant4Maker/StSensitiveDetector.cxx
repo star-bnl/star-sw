@@ -34,7 +34,7 @@ CalorimeterHit::CalorimeterHit() : DetectorHit(), position_in{0,0,0,0}, de(0) { 
 
 //____________________________________________________________________________________________
 StSensitiveDetector::StSensitiveDetector( const char* name, const char* title ) : TVirtualMCSensitiveDetector(name,title), mVolumes(), mAgMLInfo(0), mCollection(0) {
-  LOG_INFO << "SD created for " << name << " " << title << endm;
+  LOG_DEBUG << "SD created for " << name << " " << title << endm;
 } 
 //____________________________________________________________________________________________
 void StSensitiveDetector::Initialize(){ 
@@ -51,11 +51,11 @@ void StSensitiveDetector::addVolume( TGeoVolume* volume ) {
 
     if ( DetectorType::kTracker == detectorType() ) {
       mCollection = new StTrackerHitCollection(cname.Data(),ctitle.Data());
-      LOG_INFO << "Setting tracker collection" << endm;
+      LOG_DEBUG << "Setting tracker collection" << endm;
     }
     if ( DetectorType::kCalorimeter == detectorType() ) {
       mCollection = new StCalorimeterHitCollection(cname.Data(),ctitle.Data());
-      LOG_INFO << "Setting calorimeter collection" << endm;
+      LOG_DEBUG << "Setting calorimeter collection" << endm;
     }
 
   }
