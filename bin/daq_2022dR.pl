@@ -95,4 +95,4 @@ foreach my $run (@runs) {
   }
 }
 if (! $fNo) {die "Don't have input files\n";}
-
+exit(0);
