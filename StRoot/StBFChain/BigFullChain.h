@@ -1421,6 +1421,7 @@ Bfc_st BFC[] = { // standard chains
   {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
   {"fcsDb"       ,"fcsDbMkr","","",                 "StFcsDbMaker","StFcsDbMaker","Load FcsDbMaker",kFALSE},
+  {"fttDb"       ,"fttDbMkr","","",                 "StFttDbMaker","StFttDbMaker","Load FttDbMaker",kFALSE},
   {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb"       ,"pxlDb","","tpcDb PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
@@ -1711,6 +1712,11 @@ Bfc_st BFC[] = { // standard chains
   // FTT
   {"FttDat","","","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent",
                                                             "sTGC Raw hit maker",                   kFALSE},
+  {"FttClu","","","StEvent,fttDb","StFttClusterMaker","StFttClusterMaker,StEvent,StFttDbMaker", 
+                                                                           "sTGC Cluster maker",    kFALSE},
+  {"FttPoint","","","StEvent,fttDb","StFttPointMaker","StFttPointMaker,StEvent,StFttDbMaker", 
+                                                                             "sTGC Point maker",    kFALSE},
+  {"FttQA","","","","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker",                         kFALSE},
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 #else
