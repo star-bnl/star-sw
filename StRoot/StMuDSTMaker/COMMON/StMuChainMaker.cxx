@@ -251,7 +251,8 @@ void StMuChainMaker::fromDir(string dir) {
     if ( good && pass(name,mSubFilters) ) {
       char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
       // add it to the list of files
-      mFileList.push_back( StMuStringIntPair( fullFile, TChain::kBigNumber ) );
+      const auto TChain_kBigNumber = TChain::kBigNumber; // https://github.com/root-project/root/issues/9422
+      mFileList.push_back( StMuStringIntPair( fullFile, TChain_kBigNumber ) );
       delete []fullFile;
     }
   }   
@@ -358,7 +359,8 @@ void StMuChainMaker::fromList(string list) {
 void StMuChainMaker::fromFile(string file) {
   DEBUGMESSAGE2("");
   DEBUGMESSAGE2(mTreeName.c_str());
-  mFileList.push_back( StMuStringIntPair( file, TChain::kBigNumber ) );
+  const auto TChain_kBigNumber = TChain::kBigNumber; // https://github.com/root-project/root/issues/9422
+  mFileList.push_back( StMuStringIntPair( file, TChain_kBigNumber ) );
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
