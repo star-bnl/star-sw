@@ -1696,7 +1696,7 @@ assert(mFE._cEE>0);
 assert(mFE._cPP>0);
 assert(mFE._cTT>0);
 
-assert(mFE.zign()>0); ///??? 
+assert(mFE.zign()>=0); ///??? 
 
   double dE = sign*dxEloss;
 //		save detLoss and gasLoss for investigation only

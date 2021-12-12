@@ -192,13 +192,36 @@ void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder, unsigned i
 	    if (tube->GetDz() < 5.0) continue;
 	    static Int_t No = 0;
 	    static TString Line;
-	    Line = Form("  {%f,\"%s\",\t%3i,%8.3f,%8.3f,%8.3f,%8.3f",tube->GetRmin(),
-				stiMat->getName().c_str(), No, stiMat->getA(), stiMat->getZ(),stiMat->getDensity(),stiMat->getX0());
+	    static TString material;
+	    material = "\"";
+            material += stiGas->getName().c_str();
+	    material += "\"";
+	    if (No == 0) {
+	      Line = "//           Media name, type, No,   R_min,   R_max,       A,       Z,    density.       X_0,   Z_min,   Z_max, *Media";
+	      cout << Line.Data() << endl;
+	      /*
+  {"Vacuum"            ,"gas",  0,   3.900,   4.000,   1.000,   0.000,   0.000, 1.000e+11, -76.200,  76.200, 0},//PIPE_1/PIPC_1
+  {"BERILLIUM"         ,"mat",  1,   3.900,   4.000,   9.010,   4.000,   1.848, 3.446e+01, -76.200,  76.200, 0},//PIPE_1/PIPC_1
+  {"Vacuum"            ,"gas",  2,   3.875,   4.000,   1.000,   0.000,   0.000, 1.000e+11,  76.200, 383.000, 0},//PIPE_1/PIPO_1/PVAO_1
+  {"PIPE"              ,"mat",  3,   3.875,   4.000,  26.980,  13.000,   2.700, 8.875e+00,  76.200, 383.000, 0},//PIPE_1/PIPO_1/PVAO_1
+  {"Vacuum"            ,"gas",  4,   3.875,   4.000,   1.000,   0.000,   0.000, 1.000e+11,-383.000, -76.200, 0},//PIPE_2/PIPO_1/PVAO_1
+  {"PIPE"              ,"mat",  5,   3.875,   4.000,  26.980,  13.000,   2.700, 8.875e+00,-383.000, -76.200, 0},//PIPE_2/PIPO_1/PVAO_1
+  {"TPCE_SENSITIVE_GAS","gas",  6,  46.600,  51.700,  38.691,  17.436,   0.002, 1.302e+04,-230.876, 230.484, 0},///TIFC_1
+  {"ALUMINIUM_TIFC"    ,"mat",  7,  46.600,  51.700,  21.181,  10.311,   0.089, 3.220e+02,-230.876, 230.484, 0},///TIFC_1
+  {"TPCE_SENSITIVE_GAS","gas",  8, 200.000, 207.731,  38.691,  17.436,   0.002, 1.302e+04,-224.186, 223.794, 0},///TOFC_1
+  {"ALUMINIUM_TOFC"    ,"mat",  9, 200.000, 207.731,  26.827,  12.886,   0.324, 7.480e+01,-224.186, 223.794, 0},///TOFC_1
+	       */
+	    }
+	    Line = Form("  {%-20s,\"gas\",%3i,%8.3f,%8.3f,%8.3f,%8.3f,%10.3e,%10.3e",material.Data(), No,tube->GetRmin(),tube->GetRmax(),
+				stiGas->getA(), stiGas->getZ(),stiGas->getDensity(),stiGas->getX0());
 	    Line += Form(",%8.3f,%8.3f, 0},", position->GetZ() - tube->GetDz(), position->GetZ() + tube->GetDz());
 	    cout << Line.Data() << "//" << next->getName() << endl;
 	    No++;
-	    Line = Form("  {%f,\"%s\",\t%3i,%8.3f,%8.3f,%8.3f,%8.3f",tube->GetRmax(),
-				stiGas->getName().c_str(), No, stiGas->getA(), stiGas->getZ(),stiGas->getDensity(),stiGas->getX0());
+	    material = "\"";
+            material += stiMat->getName().c_str();
+	    material += "\"";
+	    Line = Form("  {%-20s,\"mat\",%3i,%8.3f,%8.3f,%8.3f,%8.3f,%8.3f,%10.3e",material.Data(), No,tube->GetRmin(),tube->GetRmax(),
+				stiMat->getA(), stiMat->getZ(),stiMat->getDensity(),stiMat->getX0());
 	    Line += Form(",%8.3f,%8.3f, 0},", position->GetZ() - tube->GetDz(), position->GetZ() + tube->GetDz());
 	    cout << Line.Data() << "//" << next->getName() << endl;
 	    No++;
