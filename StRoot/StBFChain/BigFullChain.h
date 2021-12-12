@@ -1603,7 +1603,7 @@ Bfc_st BFC[] = { // standard chains
   {"AgStar","","","Generators,geant,-gstar,-in,-gstarLib","","AgStar","Utility to feed St_geant_Maker", kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
-  {"VMCAppl"     ,"","","geomT,gen_t,sim_T,tpcDB,RootVMC","","MathMore,StarGeneratorUtil"
+  {"VMCAppl"     ,"","","geomT,gen_t,sim_T,tpcDB,RootVMC","",
    ",MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase,StSsdDbMaker,StIstDbMaker,StPxlDbMaker"
    ",StarVMCApplication"                                                                  ,"VMC G3",kFALSE},
   {"VMCAlignment","","","","","",                                                   "VMC Alignment",kFALSE},
@@ -2130,8 +2130,8 @@ Bfc_st BFC[] = { // standard chains
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb,TpcHitMover","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"MuD0Anal"    ,"","","","StMuD0AnalysisMaker",         "StMuD0AnalysisMaker","MuDst D0 Analysis",kFALSE},
-  {"KFPInter"    ,"","","KFParticle,picoDeps", ""
-   ,"StRefMultCorr,KFParticlePerformance,StKFParticleAnalysisMaker",    "STAR KFParticle interface",kFALSE},
+  {"KFPInter"    ,"","","KFParticle,picoDeps", "" ,"StRefMultCorr,KFParticle,KFParticlePerformance,"
+   "StKFParticleAnalysisMaker",                                         "STAR KFParticle interface",kFALSE},
   {"KFPAna"      ,"","","KFPInter","StKFParticleAnalysisMaker",      "", "STAR KFParticle analysis",kFALSE},
   {"MuMc"        ,"","","","StMuMcAnalysisMaker",             "StMuMcAnalysisMaker","MuMc Analysis",kFALSE},
   {"PicoAnalysis","","","KFPInter","StPicoAnalysisMaker"
