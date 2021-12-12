@@ -10,10 +10,12 @@ ostream&              operator<<(ostream& os,  const StMuMcVertex& v) {
   os << Form(" xyz:%8.3f %8.3f %8.3f",v.XyzV().x(),v.XyzV().y(),v.XyzV().z());
   return os;
 }
+#ifdef __TFG__VERSION__
 //________________________________________________________________________________
 StMuMcVertex::StMuMcVertex() {
   memset(mBeg,0,mEnd-mBeg+1);
 }
+#endif /* __TFG__VERSION__ */
 //________________________________________________________________________________
 void StMuMcVertex::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________

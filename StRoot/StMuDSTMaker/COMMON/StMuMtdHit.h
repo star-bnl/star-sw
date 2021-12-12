@@ -41,14 +41,22 @@ public:
   pair<Double_t,Double_t>  mLeadingEdgeTime;
   pair<Double_t,Double_t>  mTrailingEdgeTime;
 	
+#ifndef __TFG__VERSION__
+  UShort_t  mIdTruth;  // simulation associated track id
+#else /* __TFG__VERSION__ */
   Int_t     mIdTruth;  // simulation associated track id
+#endif /* __TFG__VERSION__ */
   UShort_t  mQuality;  // quality of this information (percentage of charge produced by mIdTruth)
   UShort_t  mTrackKey;
   Int_t     mIndex2Primary;
   Int_t     mIndex2Global;
 
 
+#ifndef __TFG__VERSION__
+ClassDef(StMuMtdHit,2)
+#else /* __TFG__VERSION__ */
 ClassDef(StMuMtdHit,3)
+#endif /* __TFG__VERSION__ */
 
 };
 

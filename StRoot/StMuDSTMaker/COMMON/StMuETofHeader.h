@@ -23,7 +23,9 @@
 #ifndef STMUETOFHEADER_H
 #define STMUETOFHEADER_H
 
+#ifdef __TFG__VERSION__
 #include <stdint.h>
+#endif /* __TFG__VERSION__ */
 #include <map>
 #include <vector>
 

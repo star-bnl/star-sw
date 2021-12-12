@@ -10,14 +10,22 @@
 #include "TObject.h"
 #include "StThreeVectorF.hh"
 #include "StEnumerations.h"
+
+#ifdef __TFG__VERSION__
 #include "TMath.h"
 #include "TArrayF.h"
+#endif /* __TFG__VERSION__ */
 class StPrimaryVertex;
 
 class StMuPrimaryVertex : public TObject {
 
  public:
+#ifndef __TFG__VERSION__
+
+  StMuPrimaryVertex(): mFlag(0), mPosition(-999,-999,-999), mPosError(-999,-999,-999), mVertexFinderId(undefinedVertexFinder), 
+#else /* __TFG__VERSION__ */
   StMuPrimaryVertex(): mType(kUndefinedVtxId), mId(0), mFlag(0), mPosition(-999,-999,-999), mPosError(-999,-999,-999), mVertexFinderId(undefinedVertexFinder), 
+#endif /* __TFG__VERSION__ */
     mRanking(999),mNTracksUsed(0), mNCTBMatch(0), mNBEMCMatch(0), mNEEMCMatch(0), mNCrossCentralMembrane(0),
     mSumTrackPt(-999),mMeanDip(-999), mChiSquared(9999), mNTracks(0), mNTpcWestOnly(0), mNTpcEastOnly(0), mRefMultNeg(0), mRefMultPos(0), mRefMultFtpcWest(0), 
     mRefMultFtpcEast(0), mIdTruth(0), mQuality(0), mIdParent(0) {}
@@ -25,6 +33,27 @@ class StMuPrimaryVertex : public TObject {
   StMuPrimaryVertex(const StPrimaryVertex* vertex);
 
   ~StMuPrimaryVertex() {;}
+#ifndef __TFG__VERSION__
+   Int_t            flag() const {return mFlag; }
+   StThreeVectorF   position() const        { return mPosition; }
+   StThreeVectorF   posError() const        { return mPosError; }
+   StVertexFinderId vertexFinderId()  const { return mVertexFinderId; } 
+   Float_t          ranking()  const        { return mRanking; }
+   UShort_t         nTracksUsed() const     { return mNTracksUsed; }
+   UShort_t         nBTOFMatch()  const     { return mNBTOFMatch; }
+   UShort_t         nCTBMatch()   const     { return mNCTBMatch; }
+   UShort_t         nBEMCMatch()  const     { return mNBEMCMatch; }
+   UShort_t         nEEMCMatch()  const     { return mNEEMCMatch; }
+   UShort_t         nPostXtracks() const { return mNPostXTracks;}
+   UShort_t         nPromptTracks() const { return mNTracksWithPromptHit;}
+   UShort_t         nBTOFNotMatch() const      { return mNBTOFNotMatch; }
+   UShort_t         nCTBNotMatch()  const      { return mNCTBNotMatch; }
+   UShort_t         nBEMCNotMatch() const      { return mNBEMCNotMatch; }
+   UShort_t         nEEMCNotMatch() const      { return mNEEMCNotMatch; }
+   UShort_t         nCrossCentralMembrane() const  { return mNCrossCentralMembrane; }
+   UShort_t         nTpcWestOnly() const  { return mNTpcWestOnly; }
+   UShort_t         nTpcEastOnly() const  { return mNTpcEastOnly; }
+#else /* __TFG__VERSION__ */
    StVertexId       type()                             const { return mType; }
    Int_t            id()                               const { return mId; }
    Int_t            flag()                             const { return mFlag; }
@@ -61,7 +90,29 @@ class StMuPrimaryVertex : public TObject {
    UShort_t         numTracksTpcWestOnly()             const { return nTpcWestOnly(); }
    UShort_t         nTpcEastOnly()                     const { return mNTpcEastOnly; }
    UShort_t         numTracksTpcEastOnly()             const { return nTpcEastOnly(); }
+#endif /* __TFG__VERSION__ */
    
+#ifndef __TFG__VERSION__
+   Float_t          sumTrackPt() const      { return mSumTrackPt; }
+   Float_t          meanDip() const         { return mMeanDip; }
+   Float_t          chiSquared() const      { return mChiSquared; }
+   UShort_t         noTracks() const {return mNTracks;}
+   UShort_t         refMultPos() const      { return mRefMultPos; }
+   UShort_t         refMultNeg() const      { return mRefMultNeg; }
+   UShort_t         refMult()    const      { return refMultPos() + refMultNeg(); }
+   UShort_t         refMultFtpcEast() const { return mRefMultFtpcEast; }
+   UShort_t         refMultFtpcWest() const { return mRefMultFtpcWest; }
+   UShort_t         refMultFtpc()     const { return refMultFtpcEast() + refMultFtpcWest(); }
+   void setPosition(const StThreeVectorF &pos)     { mPosition = pos; }
+   void setPosError(const StThreeVectorF &pos_err) { mPosError = pos_err; }
+   Int_t            idTruth() const { return mIdTruth;}
+   Int_t            qaTruth() const { return mQuality; }
+   Int_t            idParent() const { return mIdParent;}
+   void          setFlag(Int_t val) { mFlag = val; }
+   void          setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+   void          setIdParent(Int_t id) {mIdParent = id;}
+   Bool_t        isBeamConstrained() const {return TESTBIT(mFlag,kBEAMConstrVtxId);}
+#else /* __TFG__VERSION__ */
    Float_t          sumTrackPt()                       const { return mSumTrackPt; }
    Float_t          meanDip()                          const { return mMeanDip; }
    Float_t          chiSquared()                       const { return mChiSquared; }
@@ -85,17 +136,26 @@ class StMuPrimaryVertex : public TObject {
    void             setFlag(Int_t val) { mFlag = val; }								  
    void             setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = idtru; mQuality = (UShort_t) qatru;}
    void             setIdParent(Int_t id) {mIdParent = id;}                                                          
+#endif /* __TFG__VERSION__ */
    virtual void     Print(Option_t *option="") const; ///< Print essential vertex info
 
+#ifndef __TFG__VERSION__
+  ClassDef(StMuPrimaryVertex,8)
+#else /* __TFG__VERSION__ */
   ClassDef(StMuPrimaryVertex,10)
+#endif /* __TFG__VERSION__ */
     
     private:
+#ifdef __TFG__VERSION__
   StVertexId       mType;
   Int_t            mId;
+#endif /* __TFG__VERSION__ */
   Int_t            mFlag;
   StThreeVectorF   mPosition;
   StThreeVectorF   mPosError;
+#ifdef __TFG__VERSION__
   TArrayF          mError;
+#endif /* __TFG__VERSION__ */
   StVertexFinderId mVertexFinderId;
   Float_t          mRanking;
   UShort_t         mNTracksUsed;
@@ -122,7 +182,11 @@ class StMuPrimaryVertex : public TObject {
   UShort_t         mRefMultFtpcWest;
   UShort_t         mRefMultFtpcEast;
   // IdTruth
+#ifndef __TFG__VERSION__
+  UShort_t         mIdTruth; // MC vertex id if any 
+#else /* __TFG__VERSION__ */
   Int_t            mIdTruth; // MC vertex id if any 
+#endif /* __TFG__VERSION__ */
   UShort_t         mQuality; // quality of this information (percentage of tracks coming the above MC Vertex)
   Int_t            mIdParent;
 };

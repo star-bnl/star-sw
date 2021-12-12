@@ -59,7 +59,11 @@ SchedulerExample::~SchedulerExample(){
 Int_t  SchedulerExample::Init() {
   mMuDstMaker = (StMuDstMaker*)GetMaker("MuDstMaker");
   if (!mMuDstMaker) return 1;
+#ifndef __TFG__VERSION__
+  return 0;
+#else /* __TFG__VERSION__ */
   return StMaker::Init();
+#endif /* __TFG__VERSION__ */
 }
 
 

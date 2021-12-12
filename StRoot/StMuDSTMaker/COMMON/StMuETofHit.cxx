@@ -152,8 +152,19 @@ StMuETofHit::setHwAddress( const unsigned int sector, const unsigned int zPlane,
 }
 
 void
+#ifndef __TFG__VERSION__
+StMuETofHit::setIdTruth( unsigned short idtruth, unsigned short qatruth )
+#else /* __TFG__VERSION__ */
 StMuETofHit::setIdTruth( int idtruth, unsigned short qatruth )
+#endif /* __TFG__VERSION__ */
 {
+#ifndef __TFG__VERSION__
+    if( qatruth==0 ) qatruth = ( idtruth>>16 );
+    idtruth  = idtruth&((1<<16)-1);
+    mIdTruth = static_cast< UShort_t >( idtruth );
+    mQuality = static_cast< UShort_t >( qatruth );
+#else /* __TFG__VERSION__ */
   mIdTruth = idtruth;
   mQuality = qatruth;
+#endif /* __TFG__VERSION__ */
 }

@@ -11,7 +11,18 @@
 
 #include "StContainers.h"
 #include "StEvent/StEventTypes.h"
+#ifndef __TFG__VERSION__
+#include "StEvent/StTriggerData.h"
+#include "StEvent/StTriggerData2003.h"
+#include "StEvent/StTriggerData2004.h"
+#include "StEvent/StTriggerData2005.h"
+#include "StEvent/StTriggerData2007.h"
+#include "StEvent/StTriggerData2008.h"
+#include "StEvent/StTriggerData2009.h"
+
+#else /* __TFG__VERSION__ */
 #include "StEventUtilities/StGoodTrigger.h"
+#endif /* __TFG__VERSION__ */
 #include "StarClassLibrary/StTimer.hh"
 #include "StMuDstMaker.h"
 #include "StMuEvent.h"
@@ -25,10 +36,12 @@
 #include "StMuFcsUtil.h"
 #include "StMuFttUtil.h"
 #include "StMuPmdUtil.h"
+#ifdef __TFG__VERSION__
 #include "StMuMcVertex.h"
 #include "StMuMcTrack.h"
 #include "KFParticle/KFParticle.h"
 #include "KFParticle/KFVertex.h"
+#endif /* __TFG__VERSION__ */
 ///dongx
 #include "StBTofCollection.h"
 #include "StBTofRawHit.h"
@@ -51,8 +64,41 @@
 #include "StStrangeMuDstMaker/StXiMuDst.hh"
 #include "StStrangeMuDstMaker/StKinkMuDst.hh"
 #endif
+#ifndef __TFG__VERSION__
+TClonesArray** StMuDst::arrays       = 0;
+#ifndef __NO_STRANGE_MUDST__
+TClonesArray** StMuDst::strangeArrays= 0;
+#endif
+#endif /* ! __TFG__VERSION__ */
 #include "StMuMcVertex.h"
 #include "StMuMcTrack.h"
+#ifndef __TFG__VERSION__
+TClonesArray** StMuDst::mcArrays             = 0;
+TClonesArray** StMuDst::emcArrays            = 0;
+TClonesArray** StMuDst::fmsArrays            = 0;
+TClonesArray** StMuDst::fcsArrays            = 0;
+TClonesArray** StMuDst::fttArrays            = 0;
+TClonesArray** StMuDst::pmdArrays            = 0;
+TClonesArray** StMuDst::tofArrays            = 0;
+TClonesArray** StMuDst::btofArrays           = 0;   /// dongx
+TClonesArray** StMuDst::etofArrays           = 0;   /// jdb
+TClonesArray** StMuDst::epdArrays            = 0;   /// MALisa
+TClonesArray** StMuDst::mtdArrays            = 0;
+TClonesArray** StMuDst::fgtArrays            = 0;
+TClonesArray *StMuDst::mMuEmcCollectionArray = 0;
+StMuEmcCollection *StMuDst::mMuEmcCollection = 0;
+StMuFmsCollection *StMuDst::mMuFmsCollection = 0;
+StMuFcsCollection *StMuDst::mMuFcsCollection = 0;
+StMuFttCollection *StMuDst::mMuFttCollection = 0;
+TClonesArray *StMuDst::mMuPmdCollectionArray = 0;
+StMuPmdCollection *StMuDst::mMuPmdCollection = 0;
+StEmcCollection *StMuDst::mEmcCollection     = 0;
+StFmsCollection *StMuDst::mFmsCollection     = 0;
+TClonesArray** StMuDst::eztArrays            = 0;
+
+Int_t StMuDst::mCurrVertexId                 = -2;
+TObjArray* StMuDst::mCurrPrimaryTracks       = 0;
+#else /* __TFG__VERSION__ */
 Int_t StMuDst::MinNoTpcMcHits = 15;
 Int_t StMuDst::MinNoTpcRcHits = 15;
 Double_t StMuDst::fgerMax = 0;    // 50 um
@@ -70,9 +116,13 @@ static TH2F *pVxy = 0;
 StMuDst *StMuDst::fgMuDst = 0;
 ClassImp(StMuDst);
 //________________________________________________________________________________
+#endif /* __TFG__VERSION__ */
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
+#ifndef __TFG__VERSION__
+  /* no-op */
+#else /* __TFG__VERSION__ */
   fgMuDst = this;
   unset();
   mCurrVertexId                 = -2;
@@ -82,6 +132,7 @@ StMuDst::StMuDst() {
   SetVxXYrange(0,0,0,0);
   SetVxZrange(0,0);
   SetVxRmax(0);
+#endif /* __TFG__VERSION__ */
 }
 
 //-----------------------------------------------------------------------
@@ -101,22 +152,39 @@ void StMuDst::unset() {
     tofArrays     = 0;
     btofArrays    = 0;   // dongx
     mtdArrays     = 0;   // dongx
-    epdArrays     = 0;   // MALisa
+#ifndef __TFG__VERSION__
     etofArrays    = 0;   // jdb
+#endif /* ! __TFG__VERSION__ */
+    epdArrays     = 0;   // MALisa
+#ifdef __TFG__VERSION__
+    etofArrays    = 0;   // jdb
+#endif /* __TFG__VERSION__ */
     fgtArrays     = 0;
     mMuEmcCollectionArray = 0;
+#ifndef __TFG__VERSION__
+    mMuEmcCollection = 0; 
+	mMuFmsCollection = 0;
+#else /* __TFG__VERSION__ */
     mMuEmcCollection = 0;
     mMuFmsCollection = 0;
+#endif /* __TFG__VERSION__ */
     mMuFcsCollection = 0;
     mMuFttCollection = 0;
     mMuPmdCollectionArray = 0;
     mMuPmdCollection = 0;
+#ifndef __TFG__VERSION__
+    mEmcCollection = 0;
+	mFmsCollection = 0;
+    eztArrays      = 0;
+    mtdArrays = 0;
+#else /* __TFG__VERSION__ */
     mEmcCollection     = 0;
     mFmsCollection     = 0;
     eztArrays          = 0;
     mCurrVertexId      = -2;
     mCurrPrimaryTracks = 0;
     mtdArrays          = 0;
+#endif /* __TFG__VERSION__ */
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -153,14 +221,14 @@ void StMuDst::set(StMuDstMaker* maker) {
 
 #ifndef __NO_STRANGE_MUDST__
   StStrangeEvMuDst* ev = strangeEvent();
-  Int_t nV0s = v0s()->GetEntriesFast(); for (Int_t i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
-  Int_t nXis = xis()->GetEntriesFast(); for (Int_t i=0;i<nXis; i++) xis(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
-  //  Int_t nKinks = kinks()->GetEntriesFast(); for (Int_t i=0;i<nKinks; i++) kinks(i)->SetEvent(ev);
+  int nV0s = v0s()->GetEntriesFast(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
+  int nXis = xis()->GetEntriesFast(); for (int i=0;i<nXis; i++) xis(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
+  //  int nKinks = kinks()->GetEntriesFast(); for (int i=0;i<nKinks; i++) kinks(i)->SetEvent(ev);
 #endif
-  
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+#ifdef __TFG__VERSION__
 void StMuDst::ResetMaps() {
   mMcVx2McTkRMap.clear();
   mMcVx2McParentTkMap.clear();
@@ -197,6 +265,7 @@ void StMuDst::ResetMaps() {
   mIdKFTk2IndxMap.clear();
   mIdKFVx2IndxMap.clear();
 }
+#endif /* __TFG__VERSION__ */
 //-----------------------------------------------------------------------
 void StMuDst::set(TClonesArray** theArrays, 
 #ifndef __NO_STRANGE_MUDST__
@@ -268,10 +337,19 @@ void StMuDst::collectVertexTracks() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDst::setVertexIndex(Int_t vtx_id) {
+#ifndef __TFG__VERSION__
+  if (mCurrVertexId == vtx_id)  
+#else /* __TFG__VERSION__ */
   if (instance()->mCurrVertexId == vtx_id)  
+#endif /* __TFG__VERSION__ */
      return;
+#ifndef __TFG__VERSION__
+  mCurrVertexId = vtx_id;
+  collectVertexTracks();  
+#else /* __TFG__VERSION__ */
   instance()->mCurrVertexId = vtx_id;
   instance()->collectVertexTracks();  
+#endif /* __TFG__VERSION__ */
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -280,7 +358,11 @@ void StMuDst::fixTrackIndices() {
   /// global and primary tracks share the same id, so we can fix the 
   /// index2Global up in case they got out of order (e.g. by removing 
   /// a track from the TClonesArrays
+#ifndef __TFG__VERSION__
+    fixTrackIndices( arrays[muPrimary], arrays[muGlobal] );  
+#else /* __TFG__VERSION__ */
   fixTrackIndices( instance()->arrays[muPrimary], instance()->arrays[muGlobal] );  
+#endif /* __TFG__VERSION__ */
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -299,19 +381,19 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
   StTimer timer;
   timer.start();
 
-  static Int_t warningPrinted = 0;
+  static int warningPrinted = 0;
   if (!warningPrinted) {
      LOG_WARN << "WARNING: You are using " << __PRETTY_FUNCTION__ 
               << " which does not work properly " 
                  " for productions with FTPC >= SL04d and <= SL05g" << endm;
      warningPrinted = 1;
   }
-  Int_t nGlobals = global->GetEntriesFast();
-  Int_t nPrimaries = primary->GetEntriesFast();
+  int nGlobals = global->GetEntriesFast();
+  int nPrimaries = primary->GetEntriesFast();
   // map to keep track of index numbers, key is track->id(), value is index of track in MuDst
-  map<Short_t,UShort_t> globalIndex;
+  map<short,unsigned short> globalIndex;
 
-  for (Int_t i=0; i<nGlobals; i++) {
+  for (int i=0; i<nGlobals; i++) {
     StMuTrack *g = (StMuTrack*) global->UncheckedAt(i);
     if (g) {
       globalIndex[g->id()] = i+1;
@@ -320,7 +402,7 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
   }
   // set the indices for the primary tracks
   DEBUGVALUE2(primary->GetEntriesFast());
-  for (Int_t i=0; i<nPrimaries; i++) {
+  for (int i=0; i<nPrimaries; i++) {
     StMuTrack *p = (StMuTrack*) primary->UncheckedAt(i);
     if (p) {
       if (globalIndex[p->id()]) 
@@ -332,20 +414,20 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
   DEBUGVALUE2(timer.elapsedTime());
 }
 
-void StMuDst::fixTrackIndicesG(Int_t mult) {
+void StMuDst::fixTrackIndicesG(int mult) {
 	/// Match global track index to primary track
 	//mult = 0 means there is just a single vertex in the event, mult>0 means there are multiple...
 
 	if (mult==0){
 		if(!(fabs(event()->primaryVertexPosition().x()) < 1.e-5 && fabs(event()->primaryVertexPosition().y()) < 1.e-5 && fabs(event()->primaryVertexPosition().z()) < 1.e-5)){   
-			Int_t startpos = 0;
-			Int_t tid, pid;
+			int startpos = 0;
+			int tid, pid;
 			if(!globalTracks()) return;
-			for (Int_t i=0;i<globalTracks()->GetEntriesFast();i++){
+			for (int i=0;i<globalTracks()->GetEntriesFast();i++){
 				tid = globalTracks(i)->id();
 				globalTracks(i)->setIndex2Global(-2);
 				if(!primaryTracks()) return;
-				for(Int_t j=startpos;j<primaryTracks()->GetEntriesFast();j++){
+				for(int j=startpos;j<primaryTracks()->GetEntriesFast();j++){
 					pid = primaryTracks(j)->id();
 					if(pid==tid) {
 						globalTracks(i)->setIndex2Global(j);
@@ -360,25 +442,27 @@ void StMuDst::fixTrackIndicesG(Int_t mult) {
 	}
 	//New MuDsts with multiple vertices....	
 	if(!primaryVertices()) return;
-	const Int_t Nvert = primaryVertices()->GetEntriesFast();
+	const int Nvert = primaryVertices()->GetEntriesFast();
 	if(!Nvert) return;
-	Int_t curVer =  currentVertexIndex();
+	int curVer =  currentVertexIndex();
+#ifdef __TFG__VERSION__
 	if (curVer < 0) curVer = 0;
-	Int_t startpos[Nvert];
-	for(Int_t i=0;i<Nvert;i++) startpos[i]=0;	
-	Int_t tid, pid;
+#endif /* __TFG__VERSION__ */
+	int startpos[Nvert];
+	for(int i=0;i<Nvert;i++) startpos[i]=0;	
+	int tid, pid;
 	if(!globalTracks()) return;
 
-	for (Int_t i=0;i<globalTracks()->GetEntriesFast();i++){
+	for (int i=0;i<globalTracks()->GetEntriesFast();i++){
 		tid = globalTracks(i)->id();
 		globalTracks(i)->setIndex2Global(-2);
 		globalTracks(i)->setVertexIndex(-2);			
 		//Scan through vertices
-		for(Int_t j=0;j<Nvert;j++){
+		for(int j=0;j<Nvert;j++){
 			if(globalTracks(i)->index2Global() >= 0) break;
 			setVertexIndex(j);
 			if(!primaryTracks()) continue;
-			for(Int_t k=startpos[j];k<primaryTracks()->GetEntriesFast();k++){
+			for(int k=startpos[j];k<primaryTracks()->GetEntriesFast();k++){
 				pid = primaryTracks(k)->id();
 				if(pid==tid) {
 					globalTracks(i)->setIndex2Global(k);
@@ -411,22 +495,22 @@ void StMuDst::fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, T
   StTimer timer;
   timer.start();
 
-  Int_t nPrimarys = primary->GetEntriesFast();
-  Int_t nGlobals = global->GetEntriesFast();
-  Int_t nBTofHits = btofHit->GetEntriesFast();
+  int nPrimarys = primary->GetEntriesFast();
+  int nGlobals = global->GetEntriesFast();
+  int nBTofHits = btofHit->GetEntriesFast();
   // map to keep track of index numbers, key is track->id(), value is index of track in MuDst
-  map<Short_t,UShort_t> tofIndex;
-  map<Short_t,UShort_t> globalIndex;
-  map<Short_t,UShort_t> primaryIndex;
+  map<short,unsigned short> tofIndex;
+  map<short,unsigned short> globalIndex;
+  map<short,unsigned short> primaryIndex;
 
-  for (Int_t i=0; i<nBTofHits; i++) {
+  for (int i=0; i<nBTofHits; i++) {
     StMuBTofHit *t = (StMuBTofHit*) btofHit->UncheckedAt(i);
     if (t) {
       tofIndex[t->associatedTrackId()] = i+1;  // starting from 1
     }
   }
 
-  for (Int_t i=0; i<nGlobals; i++) {
+  for (int i=0; i<nGlobals; i++) {
     StMuTrack *g = (StMuTrack*) global->UncheckedAt(i);
     if (g) {
       globalIndex[g->id()] = i+1;
@@ -437,7 +521,7 @@ void StMuDst::fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, T
         g->setIndex2BTofHit(-1);
     }
   }
-  for (Int_t i=0; i<nPrimarys; i++) {
+  for (int i=0; i<nPrimarys; i++) {
     StMuTrack *p = (StMuTrack*) primary->UncheckedAt(i);
     if (p) {
       primaryIndex[p->id()] = i+1;
@@ -450,7 +534,7 @@ void StMuDst::fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, T
   }
 
   /// set the indices for BTofHits
-  for (Int_t i=0; i<nBTofHits; i++) {
+  for (int i=0; i<nBTofHits; i++) {
     StMuBTofHit *t = (StMuBTofHit*) btofHit->UncheckedAt(i);
     if (t) {
       if(globalIndex[t->associatedTrackId()])
@@ -567,15 +651,15 @@ void StMuDst::fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TC
   StTimer timer;
   timer.start();
 
- Int_t nPrimarys = primary->GetEntriesFast();
-  Int_t nGlobals = global->GetEntriesFast();
-  Int_t nMtdHits = mtdHit->GetEntriesFast();
+ int nPrimarys = primary->GetEntriesFast();
+  int nGlobals = global->GetEntriesFast();
+  int nMtdHits = mtdHit->GetEntriesFast();
   // map to keep track of index numbers, key is track->id(), value is index of track in MuDst
-  map<Short_t,UShort_t> mtdIndex;
-  map<Short_t,UShort_t> globalIndex;
-  map<Short_t,UShort_t> primaryIndex;
+  map<short,unsigned short> mtdIndex;
+  map<short,unsigned short> globalIndex;
+  map<short,unsigned short> primaryIndex;
 
-  for (Int_t i=0; i<nMtdHits; i++) {
+  for (int i=0; i<nMtdHits; i++) {
     StMuMtdHit *t = (StMuMtdHit*) mtdHit->UncheckedAt(i);
     if (t) {
       mtdIndex[t->associatedTrackKey()] = i+1;  // starting from 1
@@ -593,7 +677,7 @@ void StMuDst::fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TC
         g->setIndex2MtdHit(-1);
     }
   }
-  for (Int_t i=0; i<nPrimarys; i++) {
+  for (int i=0; i<nPrimarys; i++) {
     StMuTrack *p = (StMuTrack*) primary->UncheckedAt(i);
     if (p) {
       primaryIndex[p->id()] = i+1;
@@ -606,7 +690,7 @@ void StMuDst::fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TC
   }
 
   /// set the indices for MtdHits
-  for (Int_t i=0; i<nMtdHits; i++) {
+  for (int i=0; i<nMtdHits; i++) {
     StMuMtdHit *t = (StMuMtdHit*) mtdHit->UncheckedAt(i);
     if (t) {
       if(globalIndex[t->associatedTrackKey()])
@@ -737,13 +821,13 @@ StEvent* StMuDst::createStEvent() {
   ev->addPrimaryVertex(vp);
   vp->setPosition( mu->eventSummary().primaryVertexPosition() );
 
-  Int_t nGlobals = arrays[muGlobal]->GetEntriesFast();
+  int nGlobals = arrays[muGlobal]->GetEntriesFast();
 
   StSPtrVecTrackNode &trackNodes = ev->trackNodes();
   TArrayI global_indices(nGlobals); // Temporary array to keep track of index numbers on trackNodes
 
   // add global tracks to tracknodes
-  for (Int_t i=0; i<nGlobals; i++) {
+  for (int i=0; i<nGlobals; i++) {
     if(globalTracks(i)) {
       StTrackNode *node = new StTrackNode();
       node->addTrack(createStTrack(globalTracks(i)));
@@ -762,8 +846,8 @@ StEvent* StMuDst::createStEvent() {
 
   TObjArray *prim_tracks=primaryTracks();
 
-  Int_t nPrimaries = prim_tracks->GetEntriesFast();
-  for (Int_t i=0; i<nPrimaries; i++) if(primaryTracks(i)) {
+  int nPrimaries = prim_tracks->GetEntriesFast();
+  for (int i=0; i<nPrimaries; i++) if(primaryTracks(i)) {
     StTrack* t = createStTrack((StMuTrack*)prim_tracks->At(i));
     Int_t global_idx=primaryTracks(i)->index2Global();
     if (global_idx >= 0 && global_indices[global_idx] >= 0) 
@@ -782,8 +866,8 @@ StEvent* StMuDst::createStEvent() {
   /// we do this later
   
   // add detector states
-  Int_t nStates = arrays[muState]->GetEntriesFast();
-  for (Int_t i=0; i<nStates; i++) {
+  int nStates = arrays[muState]->GetEntriesFast();
+  for (int i=0; i<nStates; i++) {
       StDetectorState* det = new StDetectorState(*detectorStates(i));
       ev->addDetectorState(det);
   }
@@ -828,15 +912,15 @@ StEvent* StMuDst::createStEvent() {
 // now get tof (after fix from Xin)
   StTofCollection *tofcoll = new StTofCollection();
   ev->setTofCollection(tofcoll);
-  Int_t nTofData = tofArrays[muTofData]->GetEntriesFast();
-  for(Int_t i=0;i<nTofData;i++) {
+  int nTofData = tofArrays[muTofData]->GetEntriesFast();
+  for(int i=0;i<nTofData;i++) {
     StTofData *aData;
     if(tofData(i)) {
-      UShort_t id = tofData(i)->dataIndex();
-      UShort_t adc = tofData(i)->adc();
-      UShort_t tdc = tofData(i)->tdc();
-      Short_t tc = tofData(i)->tc();
-      UShort_t sc = tofData(i)->sc();
+      unsigned short id = tofData(i)->dataIndex();
+      unsigned short adc = tofData(i)->adc();
+      unsigned short tdc = tofData(i)->tdc();
+      short tc = tofData(i)->tc();
+      unsigned short sc = tofData(i)->sc();
       // run 5 - dongx
       aData = new StTofData(id, adc, tdc, tc, sc, 0, 0);
     } else {
@@ -845,16 +929,16 @@ StEvent* StMuDst::createStEvent() {
     tofcoll->addData(aData);
   }
   // run 5 - dongx
-  Int_t nTofRawData = tofArrays[muTofRawData]->GetEntriesFast();
-  for(Int_t i=0;i<nTofRawData;i++) {
+  int nTofRawData = tofArrays[muTofRawData]->GetEntriesFast();
+  for(int i=0;i<nTofRawData;i++) {
     StTofRawData *aRawData;
     if(tofRawData(i)) {
-      UShort_t tray = tofRawData(i)->tray();
-      UShort_t leteFlag = tofRawData(i)->leteFlag();
-      UShort_t channel = tofRawData(i)->channel();
-      UInt_t tdc = tofRawData(i)->tdc();
-      UInt_t triggertime = tofRawData(i)->triggertime();
-      UShort_t quality = tofRawData(i)->quality();
+      unsigned short tray = tofRawData(i)->tray();
+      unsigned short leteFlag = tofRawData(i)->leteFlag();
+      unsigned short channel = tofRawData(i)->channel();
+      unsigned int tdc = tofRawData(i)->tdc();
+      unsigned int triggertime = tofRawData(i)->triggertime();
+      unsigned short quality = tofRawData(i)->quality();
       aRawData = new StTofRawData(leteFlag,tray,channel,tdc,triggertime,quality);
     } else {
       aRawData = new StTofRawData(0, 0, 0, 0, 0, 0);
@@ -865,8 +949,8 @@ StEvent* StMuDst::createStEvent() {
   // now create, fill the StBTofCollection - dongx
   StBTofCollection *btofcoll = new StBTofCollection();
   ev->setBTofCollection(btofcoll);
-  Int_t nBTofRawHits = btofArrays[muBTofRawHit]->GetEntriesFast();
-  for(Int_t i=0;i<nBTofRawHits;i++) {
+  int nBTofRawHits = btofArrays[muBTofRawHit]->GetEntriesFast();
+  for(int i=0;i<nBTofRawHits;i++) {
     StBTofRawHit *aRawHit;
     if(btofRawHit(i)) {
       aRawHit = new StBTofRawHit(*(btofRawHit(i)));
@@ -896,7 +980,7 @@ StEvent* StMuDst::createStEvent() {
 
 #include "StarClassLibrary/SystemOfUnits.h"
 #include "StarClassLibrary/PhysicalConstants.h"
-StTrackGeometry* StMuDst::trackGeometry(Int_t q, StPhysicalHelixD* h) {
+StTrackGeometry* StMuDst::trackGeometry(int q, StPhysicalHelixD* h) {
   static StPhysicalHelixD nullHelix;
   StHelixModel* model=0; 
   if (nullHelix==*h) 			return 0;
@@ -977,9 +1061,18 @@ void StMuDst::Print(Option_t *option) const {
   StMuEvent *event = 0;
   if ((event = StMuDst::event())) {
     cout << "++++++++++++++ MuDst run " << event->runId() << " event " << event->eventId() << " ++++++++++++++" << endl;
+#ifndef __TFG__VERSION__
+    cout << endl << "primary vertex pos " << event->primaryVertexPosition() << endl;
+#endif /* ! __TFG__VERSION__ */
   }
   else 
     cout << "No event structure (StMuEvent) found!" << endl;
+#ifndef __TFG__VERSION__
+
+
+  cout << numberOfPrimaryVertices() << " vertices reconstructed" << endl;
+  cout << numberOfPrimaryTracks() << " primary tracks, ";
+#else /* __TFG__VERSION__ */
   if (StMuDst::primaryTracks()) {
     cout << "PrimaryVertices " << numberOfPrimaryVertices();
     cout << "\tPrimaryTracks " << numberOfPrimaryTracks();
@@ -994,20 +1087,52 @@ void StMuDst::Print(Option_t *option) const {
   cout << "\t" << StMuArrays::mcArrayTypes[0] << " " << mcVertices()->GetEntriesFast();
   cout << "\t" << StMuArrays::mcArrayTypes[1] << " " << mcTracks()->GetEntriesFast();
   cout << endl;
+#endif /* __TFG__VERSION__ */
   if (mCurrVertexId != 0)
     cout << "( note vtx_id " << mCurrVertexId << " ) " ; 
+#ifndef __TFG__VERSION__
+  cout << numberOfGlobalTracks() << " global " << endl;
+#endif /* ! __TFG__VERSION__ */
 
 #ifndef __NO_STRANGE_MUDST__
+#ifndef __TFG__VERSION__
+  cout << numberOfV0s() << " V0s, " << numberOfXis() << " Xis " 
+       << numberOfKinks() << " kinks" << endl;
+#else /* __TFG__VERSION__ */
   if (numberOfV0s() ||  numberOfXis() || numberOfKinks()) 
     cout << numberOfV0s() << " V0s, " << numberOfXis() << " Xis " 
 	 << numberOfKinks() << " kinks" << endl;
+#endif /* __TFG__VERSION__ */
 #endif
+#ifndef __TFG__VERSION__
+  cout << endl;
+  if (muEmcCollection())
+    cout << "EMC data present" << endl;
+  else
+    cout << "No EMC data present" << endl;
+   cout << endl;
+   if (muFmsCollection())
+     cout << "FMS data present" << endl;
+   else
+     cout << "No FMS data present" << endl;
+   if (pmdCollection())
+    cout << "PMD data present" << endl;
+  else
+    cout << "No PMD data present" << endl;
+
+  if (numberOfTofHit())
+    cout << "TOF data present" << endl;
+  else
+    cout << "No TOF data present" << endl;
+  cout << endl;
+#else /* __TFG__VERSION__ */
   Int_t i = 0;
   if (muEmcCollection())    {cout << "\tEMC"; i++;}
   if (muFmsCollection())    {cout << "\tFMS"; i++;}
   if (pmdCollection())      {cout << "\tPMD"; i++;}
   if (numberOfTofHit())     {cout << "\tTOF"; i++;}
   if (i) cout <<  " data presen" << endl;
+#endif /* __TFG__VERSION__ */
 }
 
 void StMuDst::printVertices()  {
@@ -1015,9 +1140,18 @@ void StMuDst::printVertices()  {
     cout << "No vertices stored (for older data, check StMuEvent)" << endl;
     return;
   }
+#ifndef __TFG__VERSION__
+  cout << endl;
+#endif /* ! __TFG__VERSION__ */
   cout << "+++++++++ vertex list ( " << numberOfPrimaryVertices() << " entries )" << endl << endl;
   for (UInt_t i_vtx = 0; i_vtx < numberOfPrimaryVertices(); i_vtx++) {
+#ifndef __TFG__VERSION__
+    cout << "+++ Vertex " << i_vtx << endl;
+#endif /* ! __TFG__VERSION__ */
     primaryVertex(i_vtx)->Print();
+#ifndef __TFG__VERSION__
+    cout << endl;
+#endif /* ! __TFG__VERSION__ */
   }
 }
 
@@ -1026,9 +1160,20 @@ void StMuDst::printPrimaryTracks() {
     cout << "No primary tracks found!" << endl;
     return;
   }
+#ifndef __TFG__VERSION__
+  cout << endl;
+  cout << "+++++++++ PRIMARY track list ( " << numberOfPrimaryTracks() << " entries )" << endl << endl;
+#else /* __TFG__VERSION__ */
   cout << "+++++++++ primary track list ( " << numberOfPrimaryTracks() << " entries )" << endl << endl;
+#endif /* __TFG__VERSION__ */
   for (UInt_t i_trk = 0; i_trk < numberOfPrimaryTracks(); i_trk++) {
+#ifndef __TFG__VERSION__
+    cout << "+++ Primary track " << i_trk << endl;
+#endif /* ! __TFG__VERSION__ */
     primaryTracks(i_trk)->Print();
+#ifndef __TFG__VERSION__
+    cout << endl;
+#else /* __TFG__VERSION__ */
   }
 }
 
@@ -1041,6 +1186,7 @@ void StMuDst::printAllPrimaryTracks() {
   cout << "+++++++++ all primary track list ( " << N << " entries )" << endl << endl;
   for (UInt_t i_trk = 0; i_trk < N; i_trk++) {
     ((StMuTrack *)  allPrimaryTracks()->UncheckedAt(i_trk))->Print();
+#endif /* __TFG__VERSION__ */
   }
 }
 
@@ -1049,11 +1195,23 @@ void StMuDst::printGlobalTracks()  {
     cout << "No global tracks found!" << endl;
     return;
   }
+#ifndef __TFG__VERSION__
+  cout << endl;
+  cout << "+++++++++ GLOBAL track list ( " << numberOfGlobalTracks() << " entries )" << endl << endl;
+#else /* __TFG__VERSION__ */
   cout << "+++++++++ global track list ( " << numberOfGlobalTracks() << " entries )" << endl << endl;
+#endif /* __TFG__VERSION__ */
   for (UInt_t i_trk = 0; i_trk < numberOfGlobalTracks(); i_trk++) {
+#ifndef __TFG__VERSION__
+    cout << "+++ Global track " << i_trk << endl;
+#endif /* ! __TFG__VERSION__ */
     globalTracks(i_trk)->Print();
+#ifndef __TFG__VERSION__
+    cout << endl;
+#endif /* ! __TFG__VERSION__ */
   }
 }
+#ifdef __TFG__VERSION__
 //________________________________________________________________________________
 void StMuDst::printKFVertices() {
   Int_t N = numberOfKFVertices();
@@ -2122,16 +2280,23 @@ UInt_t StMuDst::GetNBTofRawHit()      { return instance()->numberOfBTofRawHit();
 
 UInt_t StMuDst::GetNETofDigi()        { return instance()->numberOfETofDigi(); }
 UInt_t StMuDst::GetNETofHit()         { return instance()->numberOfETofHit(); }
+#endif /* __TFG__VERSION__ */
 
+#ifndef __TFG__VERSION__
+ClassImp(StMuDst)
+#else /* __TFG__VERSION__ */
 UInt_t StMuDst::GetNEpdHit()         { return instance()->numberOfEpdHit(); }
+#endif /* __TFG__VERSION__ */
 
+#ifdef __TFG__VERSION__
 UInt_t StMuDst::GetNMTDHit()         { return instance()->numberOfMTDHit(); }
 UInt_t StMuDst::GetNMTDRawHit()      { return instance()->numberOfBMTDRawHit(); }
+#endif /* __TFG__VERSION__ */
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
  * Revision 1.70  2019/02/21 13:32:54  jdb
- * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes ETofDigi, ETofHit, ETofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
+ * Inclusion of ETOF MuDst code. This code adds support for the full set of ETOF data which includes EtofDigi, EtofHit, EtofHeader. The code essentially copies similar structures from StEvent and additionally rebuilds the maps between Digis and Hits. Accessor methods are added based on the pattern from BTOF to provide access to data at various levels. The code for accessing the PID traits provided by ETOF is also provided
  *
  * Revision 1.69  2018/02/27 04:11:57  jdb
  * Added epdArrays

@@ -28,7 +28,12 @@
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StEmcUtil/projection/StEmcPosition.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
+#ifndef __TFG__VERSION__
+#include "StBichsel/Bichsel.h"
+#include "StBichsel/StdEdxModel.h"
+#else /* __TFG__VERSION__ */
 #include "StBichsel/StdEdxPull.h"
+#endif /* __TFG__VERSION__ */
 #include "THelixTrack.h"
 #include "TMath.h"
 #include "TString.h"
@@ -58,7 +63,9 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mIdTruth = track->idTruth();
   mQuality = track->qaTruth();
   mIdParentVx = track->idParentVx();
+#ifdef __TFG__VERSION__
   mLengthInTracking = track->length();
+#endif /* __TFG__VERSION__ */
   // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
   // pointers to track and pidTraits are set 
   // So, even though BestGuess will generate a "variable not used" warning, DO NOT DELETE THE NEXT LINES
@@ -121,7 +128,9 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mNHitsPossInner=track->numberOfPossiblePoints(kSvtId) & 0x7;
   if (! mNHitsPossInner) mNHitsPossInner=track->numberOfPossiblePoints(kIstId) & 0x7;
   mNHitsPossInner|=(track->numberOfPossiblePoints(kSsdId) & 0x3) << 3;
+#ifdef __TFG__VERSION__
   mNHitsPossInner|=(track->numberOfPossiblePoints(kSstId) & 0x3) << 3;
+#endif /* __TFG__VERSION__ */
   mNHitsPossInner|=(track->numberOfPossiblePoints(kPxlId) & 0x7) << 5;
   
   mNHitsFit = track->fitTraits().numberOfFitPoints();
@@ -146,7 +155,9 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mNHitsFitInner=track->fitTraits().numberOfFitPoints(kSvtId) & 0x7;
   if (! mNHitsFitInner) mNHitsFitInner=track->fitTraits().numberOfFitPoints(kIstId) & 0x7;
   mNHitsFitInner|=(track->fitTraits().numberOfFitPoints(kSsdId) & 0x3) << 3;
+#ifdef __TFG__VERSION__
   mNHitsFitInner|=(track->fitTraits().numberOfFitPoints(kSstId) & 0x3) << 3;
+#endif /* __TFG__VERSION__ */
   mNHitsFitInner|=(track->fitTraits().numberOfFitPoints(kPxlId) & 0x7) << 5;
 
   mChiSqXY = track->fitTraits().chi2(0);
@@ -195,11 +206,14 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
       mPt = mP.perp();
       mPhi = mP.phi();
       mEta = mP.pseudoRapidity();
+
+#ifdef __TFG__VERSION__
       if (TMath::Abs(mDCA.x()) > 999 ||
 	  TMath::Abs(mDCA.y()) > 999 ||
 	  TMath::Abs(mDCA.z()) > 999) {
 	mDCA = StThreeVectorF(-999,-999,-999);
       }
+#endif /* __TFG__VERSION__ */
       if (!l3) { // L3TRACKS seem to break pid    
 	Int_t charge = track->geometry()->charge();
 	//	StParticleDefinition* pc = (*mProbabilityPidAlgorithm)( *track, track->pidTraits() );
@@ -238,18 +252,22 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mIndex2ETofHit = -1;    
   fillMuETofPidTraits(track);
 
+#ifdef __TFG__VERSION__
   mIndex2ETofHit = -1;    
   fillMuETofPidTraits(track);
 
+#endif /* __TFG__VERSION__ */
   mIndex2MtdHit = -1;    
   fillMuMtdPidTraits(track);
 
   if ( track->outerGeometry() ) 
     mOuterHelix = StMuHelix(track->outerGeometry()->helix(),event->runInfo()->magneticField());
+#ifdef __TFG__VERSION__
 #ifdef  __kfpAtFirstHit__
   if (track->kfpTrackAtFirstHit()) mkfpTrackAtFirstHit = *(track->kfpTrackAtFirstHit());
   if (track->kfpTrackAtLastHit() ) mkfpTrackAtLastHit  = *(track->kfpTrackAtLastHit());
 #endif
+#endif /* __TFG__VERSION__ */
 }
 
 UShort_t StMuTrack::nHitsPoss() const {
@@ -291,7 +309,9 @@ UShort_t StMuTrack::nHitsPoss(StDetectorId det) const {
     return (mNHitsPossInner & 0x7);
     break;
   case kSsdId:
+#ifdef __TFG__VERSION__
   case kSstId:
+#endif /* __TFG__VERSION__ */
     return ((mNHitsPossInner >> 3) & 0x3);
     break;
   case kPxlId:
@@ -333,7 +353,9 @@ UShort_t StMuTrack::nHitsFit(StDetectorId det) const {
     return (mNHitsFitInner & 0x7);
     break;
   case kSsdId:
+#ifdef __TFG__VERSION__
   case kSstId:
+#endif /* __TFG__VERSION__ */
     return ((mNHitsFitInner >> 3) & 0x3);
     break;
   case kPxlId:
@@ -557,14 +579,24 @@ void StMuTrack::Print(Option_t *option) const {
        << "\t ( TPC "
        << nHitsFit(kTpcId) << ", FTPC "
        << nHitsFit(kFtpcEastId) + nHitsFit(kFtpcWestId) << ", SVT "  
+#ifndef __TFG__VERSION__
+       << nHitsFit(kSvtId) << ", SSD "
+       << nHitsFit(kSsdId) << " ) " << endl;
+#else /* __TFG__VERSION__ */
        << nHitsFit(kSvtId) << ", SSD/SST "
        << nHitsFit(kSsdId)+ nHitsFit(kSstId)<< " ) " << endl;
+#endif /* __TFG__VERSION__ */
 
   cout << "Possible points: " << nHitsPoss() << " \t( TPC "
        << nHitsPoss(kTpcId) << ", FTPC "
        << nHitsPoss(kFtpcEastId) + nHitsPoss(kFtpcWestId) << ", SVT "
+#ifndef __TFG__VERSION__
+       << nHitsPoss(kSvtId) << ", SSD "
+       << nHitsPoss(kSsdId) << " ) " << endl;
+#else /* __TFG__VERSION__ */
        << nHitsPoss(kSvtId) << ", SSD/SST "
        << nHitsPoss(kSsdId)+nHitsPoss(kSstId) << " ) " << endl;
+#endif /* __TFG__VERSION__ */
 
   cout << "\t first point " << mFirstPoint << endl;
   cout << "\t last point  " << mLastPoint << endl;
@@ -616,10 +648,14 @@ Int_t StMuTrack::vertexIndex() const {
 
 	//For old MuDsts where there was one vertex per event
 	if (StMuDst::numberOfPrimaryVertices()==0){
+#ifndef __TFG__VERSION__
+		if(!(fabs(StMuDst::event()->primaryVertexPosition().x()) < 1.e-5 && fabs(StMuDst::event()->primaryVertexPosition().y()) < 1.e-5 && fabs(StMuDst::event()->primaryVertexPosition().z()) < 1.e-5)){
+#else /* __TFG__VERSION__ */
 		if (StMuDst::event() && 
 		   !(fabs(StMuDst::event()->primaryVertexPosition().x()) < 1.e-5 && 
 		     fabs(StMuDst::event()->primaryVertexPosition().y()) < 1.e-5 && 
 		     fabs(StMuDst::event()->primaryVertexPosition().z()) < 1.e-5)){
+#endif /* __TFG__VERSION__ */
 			if(primaryTrack()!=0) return 0;
 		}
 		else return -1;
@@ -661,12 +697,12 @@ TArrayI StMuTrack::getTower(Bool_t useExitRadius,Int_t det) const{ //1=BTOW, 3=B
 	
 	StEmcPosition mEmcPosition;
 	Bool_t goodProjection;
-#if 0
+#ifndef __TFG__VERSION__
 	if(this) goodProjection = mEmcPosition.trackOnEmc(&position,&momentum,this,mField,radius);
 	else return tower;
-#else
+#else /* __TFG__VERSION__ */
 	goodProjection = mEmcPosition.trackOnEmc(&position,&momentum,this,mField,radius);
-#endif
+#endif /* __TFG__VERSION__ */
 	if(goodProjection){
 		Int_t m,e,s,id=0;
 		Float_t eta=position.pseudoRapidity();
@@ -732,15 +768,42 @@ double StMuTrack::energyBEMC() const { //Return energy of negative 100 GeV is no
 	}
 	return -100.0;
 }
-//________________________________________________________________________________
+
 Bool_t StMuTrack::matchBEMC() const {
 	double mEmcThres = 0.15;
 	if (energyBEMC() > mEmcThres) return true;
 	return false;
 }
 //________________________________________________________________________________
+#ifndef __TFG__VERSION__
+Double_t StMuTrack::dEdxPull(Double_t mass, Bool_t fit, Int_t charge) const {
+#else /* __TFG__VERSION__ */
 Double_t StMuTrack::dEdxPull(Double_t mass, UChar_t fit, Int_t charge) const {
+#endif /* __TFG__VERSION__ */
   Double_t z = -999.;
+#ifndef __TFG__VERSION__
+  if (probPidTraits().dEdxTrackLength() > 0 ) {
+    const StMuHelix &mh = muHelix();
+    Double_t momentum  = mh.p().mag();
+    Double_t log2dX = probPidTraits().log2dX();
+    if (log2dX <= 0) log2dX = 1;
+    Double_t dedx_measured, dedx_expected, dedx_resolution = -1;
+    if (! fit) { // I70
+      dedx_measured = probPidTraits().dEdxTruncated();
+      dedx_expected = 1.e-6*charge*charge*Bichsel::Instance()->GetI70M(TMath::Log10(momentum*TMath::Abs(charge)/mass)); 
+      dedx_resolution = probPidTraits().dEdxErrorTruncated();
+    } else if ( fit == 1) {     // Ifit
+      dedx_measured = probPidTraits().dEdxFit();
+      dedx_expected = 1.e-6*charge*charge*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(momentum*TMath::Abs(charge)/mass)));
+      dedx_resolution = probPidTraits().dEdxErrorFit();
+    } else {     // dNdx
+      dedx_measured = probPidTraits().dNdxFit();
+      dedx_expected = StdEdxModel::instance()->dNdx(momentum*TMath::Abs(charge)/mass,charge);
+      dedx_resolution = probPidTraits().dNdxErrorFit();
+    }
+    if (dedx_resolution > 0)
+      z = TMath::Log(dedx_measured/dedx_expected)/dedx_resolution;
+#else /* __TFG__VERSION__ */
   if (probPidTraits().dEdxTrackLength() <= 0 ) return z;
   const StMuHelix &mh = muHelix();
   Double_t momentum  = mh.p().mag();
@@ -755,9 +818,12 @@ Double_t StMuTrack::dEdxPull(Double_t mass, UChar_t fit, Int_t charge) const {
   } else {     // dNdx
     dedx_measured = probPidTraits().dNdxFit();
     dedx_resolution = probPidTraits().dNdxErrorFit();
+#endif /* __TFG__VERSION__ */
   }
+#ifdef __TFG__VERSION__
   if (dedx_resolution <= 0) return z;
   z = StdEdxPull::Eval(dedx_measured,dedx_resolution,betagamma,fit,charge);
+#endif /* __TFG__VERSION__ */
   return z;
 }
 //________________________________________________________________________________

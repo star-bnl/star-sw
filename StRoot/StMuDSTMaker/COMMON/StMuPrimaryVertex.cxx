@@ -13,6 +13,21 @@
 #include "TString.h"
 ClassImp(StMuPrimaryVertex)
   
+#ifndef __TFG__VERSION__
+StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex* vertex)
+{
+  mFlag                  = vertex->flag();
+  mPosition              = vertex->position();
+  mPosError              = vertex->positionError();
+  mVertexFinderId        = vertex->vertexFinderId();
+  mRanking               = vertex->ranking();
+  mNTracksUsed           = vertex->numTracksUsedInFinder();
+  mNBTOFMatch            = vertex->numMatchesWithBTOF();
+  mNCTBMatch             = vertex->numMatchesWithCTB();
+  mNBEMCMatch            = vertex->numMatchesWithBEMC();
+  mNEEMCMatch            = vertex->numMatchesWithEEMC();
+
+#else /* __TFG__VERSION__ */
 StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex* vertex) {
   mType           = vertex->type();
   mId             = vertex->key();
@@ -27,6 +42,7 @@ StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex* vertex) {
   mNCTBMatch      = vertex->numMatchesWithCTB();
   mNBEMCMatch     = vertex->numMatchesWithBEMC();
   mNEEMCMatch     = vertex->numMatchesWithEEMC();
+#endif /* __TFG__VERSION__ */
   mNBTOFNotMatch         = vertex->numNotMatchesWithBTOF();
   mNCTBNotMatch          = vertex->numNotMatchesWithCTB();
   mNBEMCNotMatch         = vertex->numNotMatchesWithBEMC();
@@ -64,7 +80,9 @@ void StMuPrimaryVertex::Print(Option_t *option) const {
 #endif
 //________________________________________________________________________________
 ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
+#ifdef __TFG__VERSION__
   os << Form("#V[%3i]",v.id());
+#endif /* __TFG__VERSION__ */
   const Char_t *beam = (v.isBeamConstrained()) ? "B" : " ";
   os << Form("%1s:",beam);
   if (v.nPostXtracks() < 10) os << Form("%i/",v.nPostXtracks());
@@ -73,11 +91,19 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
   else                                os <<       "*/";
   if (v.nCrossCentralMembrane() < 10) os << Form("%i/",v.nCrossCentralMembrane());
   else                                os <<       "*/";
+#ifndef __TFG__VERSION__
+  if ((v.nBEMCMatch()+v.nBTOFMatch()) < 10) os << Form("%i/",(v.nBEMCMatch()+v.nBTOFMatch()));
+#else /* __TFG__VERSION__ */
   if ((v.nCTBMatch()+v.nBTOFMatch()) < 10) os << Form("%i/",(v.nCTBMatch()+v.nBTOFMatch()));
   else                                os <<       "*/";
   if ((v.nBEMCMatch()) < 10) os << Form("%i/",(v.nBEMCMatch()));
+#endif /* __TFG__VERSION__ */
   else                                os <<       "*/";
+#ifndef __TFG__VERSION__
+  if ((v.nBEMCMatch()+v.nEEMCMatch()) < 10) os << Form("%i/",(v.nBEMCMatch()+v.nEEMCMatch()));
+#else /* __TFG__VERSION__ */
   if ((v.nEEMCMatch()) < 10) os << Form("%i/",(v.nEEMCMatch()));
+#endif /* __TFG__VERSION__ */
   else                                os <<       "*/";
   if (v.nTpcWestOnly() < 10) os << Form("%i/",v.nTpcWestOnly());
   else                                os <<       "*/";
@@ -87,11 +113,24 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
 	     v.position().x(),v.posError().x(),
 	     v.position().y(),v.posError().y(),
 	     v.position().z(),v.posError().z());
+#ifndef __TFG__VERSION__
+  os << Form(" Rank:%7.0f",v.ranking());
+#else /* __TFG__VERSION__ */
   os << Form(" Rank:%8.2f",v.ranking());
+#endif /* __TFG__VERSION__ */
   //  os << Form(" M:%4i:R%4i",v.noTracks(),v.refMult());
+#ifndef __TFG__VERSION__
+  os << Form(" M:%4i",v.noTracks());
+#endif /* ! __TFG__VERSION__ */
   //  os << Form(" RefMult:%4i(%4i%4i)",v.refMult(),v.refMultPos(),-v.refMultNeg());
+#ifndef __TFG__VERSION__
+  os << Form(" U:%4i ",v.nTracksUsed());
+  if (v.qaTruth())
+  os << Form(" QA:%3i",v.qaTruth());
+#else /* __TFG__VERSION__ */
   os << Form(" U/T:%4i,%4i ",v.nTracksUsed(),v.noTracks());
   if (v.idTruth()) os << Form(" IdT: %5i QA:%3i",v.idTruth(),v.qaTruth());
+#endif /* __TFG__VERSION__ */
   return os;
 }
 //________________________________________________________________________________

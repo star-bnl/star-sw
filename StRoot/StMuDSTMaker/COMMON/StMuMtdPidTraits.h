@@ -102,4 +102,3 @@ inline void StMuMtdPidTraits::setSigmaMuon(float sigma)        { mSigmaMuon=sigm
 inline void StMuMtdPidTraits::setProbMuon(float prob)          { mProbMuon=prob;         }
 inline void StMuMtdPidTraits::setExpTimeOfFlight(float time)   { mExpTimeOfFlight=time;  }
 #endif
-

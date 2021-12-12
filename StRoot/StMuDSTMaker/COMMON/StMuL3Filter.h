@@ -9,17 +9,20 @@
 #define StMuL3Filter_h
 
 #include "StMuCut.h"
-#if 0
+#ifndef __TFG__VERSION__
+
 class BetheBloch;
-#endif  
+  
+#endif /* __TFG__VERSION__ */
 class StMuL3Filter : public StMuCut {
  public: 
   StMuL3Filter();
   ~StMuL3Filter();
  protected: 
-#if 0
+#ifndef __TFG__VERSION__
   BetheBloch* mBB;
-#endif
+
+#endif /* __TFG__VERSION__ */
   bool accept( const StEvent*);
   bool accept( const StTrack*);
   bool accept( const StV0Vertex*);

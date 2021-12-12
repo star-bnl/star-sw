@@ -12,6 +12,7 @@ using namespace std;
 #endif
 
 
+
 enum StMuExceptionTypes {kUnknown=0, kNullPointer, kBadFlag, kBadValue, kEOF};
 /** 
     \class StMuException
@@ -45,7 +46,8 @@ EXE(BadValue);
 EXE(BadFlag);
 EXE(EOF);
 
-#endif
+
+#endif /* __ROOTCLING__ */
 
 
 

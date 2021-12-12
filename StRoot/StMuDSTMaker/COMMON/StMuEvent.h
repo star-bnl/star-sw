@@ -13,8 +13,11 @@
 #include "StMuEmcCollection.h"
 #include "StMuFmsCollection.h"
 #include "StMuTriggerIdCollection.h"
+
+#ifdef __TFG__VERSION__
 #include "StMuPrimaryVertex.h"
 #include "StMuTrack.h"
+#endif /* __TFG__VERSION__ */
 #include "StEvent/StEventInfo.h"
 #include "StEvent/StRunInfo.h"
 #include "StEvent/StEventSummary.h"
@@ -30,7 +33,9 @@
 #include "StEvent/StL0Trigger.h"
 #include "StEvent/StTriggerIdCollection.h"
 #include "StEvent/StDetectorState.h"
+#ifdef __TFG__VERSION__
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#endif /* __TFG__VERSION__ */
 
 #ifndef __NO_STRANGE_MUDST__
 #include "StStrangeMuDstMaker/StStrangeMuDst.hh"
@@ -54,11 +59,33 @@ class StMuEvent : public TObject {
   StMuEvent(const StEvent*); 
   virtual ~StMuEvent();
 
+#ifndef __TFG__VERSION__
+  int eventId();
+  int eventNumber();
+  int runId();
+  int runNumber();
+#else /* __TFG__VERSION__ */
   Int_t eventId()                               { return mEventInfo.id();}   
   Int_t eventNumber() 				{ return mEventInfo.id();}   
   Int_t runId()       				{ return mEventInfo.runId();}
   Int_t runNumber()   				{ return mEventInfo.runId();}
+#endif /* __TFG__VERSION__ */
   // classes taken straight from StEvent
+#ifndef __TFG__VERSION__
+  StRunInfo& runInfo();
+  StEventInfo& eventInfo();
+  StEventSummary& eventSummary();
+  StVpdTriggerDetector& vpdTriggerDetector();
+  StMtdTriggerDetector& mtdTriggerDetector();
+  StCtbTriggerDetector& ctbTriggerDetector();
+  StZdcTriggerDetector& zdcTriggerDetector();
+  StBbcTriggerDetector& bbcTriggerDetector();
+  StEmcTriggerDetector& emcTriggerDetector();
+  StFpdTriggerDetector& fpdTriggerDetector();
+  StFmsTriggerDetector& fmsTriggerDetector();
+  StFpdCollection& fpdCollection(); 
+  StL0Trigger& l0Trigger(); 
+#else /* __TFG__VERSION__ */
   StRunInfo& runInfo()                          { return mRunInfo;}
   StEventInfo& eventInfo()                      { return mEventInfo;} 
   StEventSummary& eventSummary()                { return mEventSummary;}
@@ -72,21 +99,28 @@ class StMuEvent : public TObject {
   StFmsTriggerDetector& fmsTriggerDetector()	{ return mFmsTriggerDetector;}
   StFpdCollection& fpdCollection()  		{ return mFpdCollection;}     
   StL0Trigger& l0Trigger() 			{ return mL0Trigger;}         
+#endif /* __TFG__VERSION__ */
   // Special classes for the muDst
+#ifndef __TFG__VERSION__
+  StMuL3EventSummary& l3EventSummary();
+  StMuTriggerIdCollection& triggerIdCollection();
+  const StTriggerData* triggerData() const;
+#else /* __TFG__VERSION__ */
   StMuL3EventSummary& l3EventSummary()          { return mL3EventSummary;}
   StMuTriggerIdCollection& triggerIdCollection(){ return mTriggerIdCollection;}
   const StTriggerData* triggerData() const      { return mTriggerData; }
+#endif /* __TFG__VERSION__ */
 
   /// Reference multiplicity of positive particles as defined in StEventUtilities/StuRefMult.hh for vertex vtx_id (-1 is default index from StMuDst)
-  UShort_t refMultPos(Int_t vtx_id = -1);
+  unsigned short refMultPos(int vtx_id = -1);
   /// Reference multiplicity of negative particles as defined in StEventUtilities/StuRefMult.hh for vertex vtx_id (-1 is default index from StMuDst)
-  UShort_t refMultNeg(Int_t vtx_id = -1);
+  unsigned short refMultNeg(int vtx_id = -1);
   /// Reference multiplicity of charged particles as defined in StEventUtilities/StuRefMult.hh for vertex vtx_id (-1 is default index from StMuDst)
-  UShort_t refMult(Int_t vtx_id = -1);
+  unsigned short refMult(int vtx_id = -1);
   /// Reference multiplicity of particles in the east FTPC as defined in StEventUtilities/StuFtpcRefMult.hh for vertex vtx_id (-1 is default index from StMuDst)
-  UShort_t refMultFtpcEast(Int_t vtx_id = -1);
+  unsigned short refMultFtpcEast(int vtx_id = -1);
   /// Reference multiplicity of particles in the west FTPC as defined in StEventUtilities/StuFtpcRefMult.hh for vertex vtx_id (-1 is default index from StMuDst)
-  UShort_t refMultFtpcWest(Int_t vtx_id = -1);
+  unsigned short refMultFtpcWest(int vtx_id = -1);
   /// Reference multiplicity of particles in the east+west FTPC as defined in StEventUtilities/StuFtpcRefMult.hh for vertex vtx_id (-1 is default index from StMuDst)
   unsigned short refMultFtpc(int vtx_id = -1);
   unsigned short grefmult(int vtx_id=-1);
@@ -96,9 +130,22 @@ class StMuEvent : public TObject {
   float nearestVertexZ(int vtx_id=-1);
 
 	/// Currently not filled properly.
+#ifndef __TFG__VERSION__
+  double reactionPlane(unsigned short);
+  void   setReactionPlane(unsigned short, double v);
+#else /* __TFG__VERSION__ */
   Double_t reactionPlane(UShort_t s)            { return (s==0) ? mReactionPlane[0] : mReactionPlane[1];}
   void   setReactionPlane(UShort_t s, Double_t v){(s==0) ? mReactionPlane[0]=v : mReactionPlane[1]=v;}
+#endif /* __TFG__VERSION__ */
   /// Currently not filled properly.
+#ifndef __TFG__VERSION__
+  double reactionPlanePtWgt(unsigned short);
+  void   setReactionPlanePtWgt(unsigned short, double v);
+  double magneticField();
+  double zdcAdcAttentuatedSumWest();
+  double zdcAdcAttentuatedSumEast();
+  double ctbMultiplicity();
+#else /* __TFG__VERSION__ */
   Double_t reactionPlanePtWgt(UShort_t s)       { return (s==0) ? mReactionPlanePtWgt[0] : mReactionPlanePtWgt[1];}
   void   setReactionPlanePtWgt(UShort_t s, Double_t v) {(s==0) ? mReactionPlanePtWgt[0]=v : mReactionPlanePtWgt[1]=v;}
   Double_t magneticField()                      { return mEventSummary.magneticField();}
@@ -114,12 +161,25 @@ class StMuEvent : public TObject {
     return ctb;
   }
 
+#endif /* __TFG__VERSION__ */
   ///    The StMuDst is supposed to be structured in 'physical events'.  Therefore there is only 1 primary vertex per mu event.
   StThreeVectorF primaryVertexPosition(int vtx_id = -1) const;
   StThreeVectorF primaryVertexErrors(int vtx_id = -1) const;
   TArrayI& L2Result(); // Raw L2Result[] array
 
   // Calibrated VPD info from StTofCollection in StEvent
+#ifndef __TFG__VERSION__
+  unsigned int numberOfVpdEastHits();  
+  unsigned int numberOfVpdWestHits();
+  float vpdTstart();
+  float vpdTdiff(); 
+  float vpdVz();
+
+  unsigned int numberOfPxlInnerHits();
+  unsigned int numberOfPxlOuterHits();
+  unsigned int numberOfIstHits();
+  unsigned int numberOfSsdHits();
+#else /* __TFG__VERSION__ */
   UInt_t numberOfVpdEastHits()  {  
     UInt_t num = 0;
     for(Int_t i=0;i<32;i++) {
@@ -145,6 +205,7 @@ class StMuEvent : public TObject {
   UInt_t numberOfSsdHits()			{ return mNHitsHFT[3]; }
 
 
+#endif /* __TFG__VERSION__ */
 
  protected:
   void clear();
@@ -187,14 +248,85 @@ class StMuEvent : public TObject {
   Float_t mVpdTstart;  // VPD start time (calibrated)
   Float_t mVpdTdiff;   // VPD time difference (calibrated)
   Float_t mVpdVz;      // VPD vertex z
+#ifndef __TFG__VERSION__
+
+#else /* __TFG__VERSION__ */
   trigDetSums_st mTrigDetSums; // RICH scalers
+#endif /* __TFG__VERSION__ */
   friend class StMuDst;
   friend class StMuDstMaker;
   friend class StMuMomentumShiftMaker;
   friend class StMuL3EventSummary;
+#ifndef __TFG__VERSION__
+  ClassDef(StMuEvent,15)
+#else /* __TFG__VERSION__ */
   ClassDef(StMuEvent,17)
+#endif /* __TFG__VERSION__ */
 };
 
+#ifndef __TFG__VERSION__
+inline int StMuEvent::eventId() { return mEventInfo.id();}
+inline int StMuEvent::eventNumber() { return mEventInfo.id();}
+inline int StMuEvent::runId() { return mEventInfo.runId();}
+inline int StMuEvent::runNumber() { return mEventInfo.runId();}
+inline StRunInfo& StMuEvent::runInfo() {return mRunInfo;}
+inline StEventInfo& StMuEvent::eventInfo() {return mEventInfo;}
+inline StEventSummary& StMuEvent::eventSummary() {return mEventSummary;}
+inline StVpdTriggerDetector& StMuEvent::vpdTriggerDetector() {return mVpdTriggerDetector;}
+inline StMtdTriggerDetector& StMuEvent::mtdTriggerDetector() {return mMtdTriggerDetector;}
+inline StCtbTriggerDetector& StMuEvent::ctbTriggerDetector() {return mCtbTriggerDetector;}
+inline StZdcTriggerDetector& StMuEvent::zdcTriggerDetector() {return mZdcTriggerDetector;}
+inline StBbcTriggerDetector& StMuEvent::bbcTriggerDetector() {return mBbcTriggerDetector;}
+inline StEmcTriggerDetector& StMuEvent::emcTriggerDetector() {return mEmcTriggerDetector;}
+inline StFpdTriggerDetector& StMuEvent::fpdTriggerDetector() {return mFpdTriggerDetector;}
+inline StFmsTriggerDetector& StMuEvent::fmsTriggerDetector() {return mFmsTriggerDetector;}
+inline StFpdCollection& StMuEvent::fpdCollection() {return mFpdCollection;} 
+inline StL0Trigger& StMuEvent::l0Trigger() {return mL0Trigger;} 
+// special classes for muDst
+inline StMuL3EventSummary& StMuEvent::l3EventSummary() {return mL3EventSummary;}
+inline StMuTriggerIdCollection& StMuEvent::triggerIdCollection(){return mTriggerIdCollection;}
+//inline const StTriggerData* StMuEvent::triggerData() const { if(mTriggerData!=0) {mTriggerData->setDebug(0); return mTriggerData; } else return 0; }
+inline const StTriggerData* StMuEvent::triggerData() const { return mTriggerData; }
+inline double StMuEvent::reactionPlane(unsigned short s) {return (s==0) ? mReactionPlane[0] : mReactionPlane[1];}
+inline void StMuEvent::setReactionPlane(unsigned short s, double v) {(s==0) ? mReactionPlane[0]=v : mReactionPlane[1]=v;}
+inline double StMuEvent::reactionPlanePtWgt(unsigned short s) {return (s==0) ? mReactionPlanePtWgt[0] : mReactionPlanePtWgt[1];}
+inline void StMuEvent::setReactionPlanePtWgt(unsigned short s, double v) {(s==0) ? mReactionPlanePtWgt[0]=v : mReactionPlanePtWgt[1]=v;}
+inline double StMuEvent::magneticField() { return mEventSummary.magneticField();}
+inline double StMuEvent::zdcAdcAttentuatedSumWest() { return mZdcTriggerDetector.adc(10);}
+inline double StMuEvent::zdcAdcAttentuatedSumEast() { return mZdcTriggerDetector.adc(13);}
+inline double StMuEvent::ctbMultiplicity() { 
+  double ctb=0;
+  for (unsigned int slat = 0; slat < mCtbTriggerDetector.numberOfSlats(); slat++) {
+    for (unsigned int tray = 0; tray < mCtbTriggerDetector.numberOfTrays(); tray++) {
+      ctb += mCtbTriggerDetector.mips(tray,slat,0);
+    }
+  }
+  return ctb;
+}
+inline TArrayI &StMuEvent::L2Result() { return mL2Result; }
+inline unsigned int StMuEvent::numberOfVpdEastHits() {  
+  unsigned int num = 0;
+  for(int i=0;i<32;i++) {
+    num += mVpdEast>>i & 1;
+  }
+  return num;
+}
+inline unsigned int StMuEvent::numberOfVpdWestHits() {
+  unsigned int num = 0;
+  for(int i=0;i<32;i++) {
+    num += mVpdWest>>i & 1;
+  }
+  return num;
+}
+inline float StMuEvent::vpdTstart() { return mVpdTstart; }
+inline float StMuEvent::vpdTdiff() { return mVpdTdiff; }
+inline float StMuEvent::vpdVz() { return mVpdVz; }
+inline unsigned int StMuEvent::numberOfPxlInnerHits() { return mNHitsHFT[0]; }
+inline unsigned int StMuEvent::numberOfPxlOuterHits() { return mNHitsHFT[1]; }
+inline unsigned int StMuEvent::numberOfIstHits() { return mNHitsHFT[2]; }
+inline unsigned int StMuEvent::numberOfSsdHits() { return mNHitsHFT[3]; }
+
+#endif /* ! __TFG__VERSION__ */
 #endif
 /***************************************************************************
  *
@@ -218,7 +350,7 @@ class StMuEvent : public TObject {
  * mNHitsHFT added but class version not incremented - fixed
  *
  * Revision 1.31  2015/03/06 20:02:01  jdb
- * Added 4 UShort_ts to StMuEvent at request of Xin Dong. Change StMuEvent.{h, cxx}
+ * Added 4 unsigned shorts to StMuEvent at request of Xin Dong. Change StMuEvent.{h, cxx}
  *
  * Revision 1.30  2010/05/28 19:47:51  tone421
  * Removed a cout needed for test purposes in StMuDstMaker. Made sure StTriggerData objects copied into the MuDst have a debug value of 0..
@@ -227,7 +359,7 @@ class StMuEvent : public TObject {
  * Added const protection to StTriggerData* StMuEvent::triggerData()
  *
  * Revision 1.27  2010/02/03 17:16:22  tone421
- * Added function StMuEvent::nearestVertexZ(Int_t vtx_id) which returns the z distance of the nearest vertex in relation to vertex vtx_id
+ * Added function StMuEvent::nearestVertexZ(int vtx_id) which returns the z distance of the nearest vertex in relation to vertex vtx_id
  *
  * Revision 1.26  2010/02/03 04:54:45  tone421
  * Added StMuEvent::btofTrayMultiplicity() to return only TOF hits from trays. Should be looked at instead of ctbSum for run 9 and beyond.
@@ -273,7 +405,7 @@ class StMuEvent : public TObject {
  * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks
  *    belonging to the 'current' primary vertex. The index number of the
  *    'current' vertex can be set using StMuDst::setCurrentVertex().
- *    This also affects StMuDst::primaryTracks(Int_t i) and
+ *    This also affects StMuDst::primaryTracks(int i) and
  *    StMuDst::numberOfprimaryTracks().
  * 2) refMult is now stored for all vertices, in StMuPrimaryVertex. The
  *    obvious way to access these numbers is from the StMuprimaryVertex structures,

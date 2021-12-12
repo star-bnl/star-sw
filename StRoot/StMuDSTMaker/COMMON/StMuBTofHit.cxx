@@ -36,8 +36,10 @@ StMuBTofHit::StMuBTofHit()
   mIndex2Global  = -1;
   mIdTruth       = 0;
   mQuality       = 0;
+#ifdef __TFG__VERSION__
   mPathLength       = 0;
   mTime             = 0;
+#endif /* __TFG__VERSION__ */
 }
 
 /// constructor from StBTofHit
@@ -54,8 +56,10 @@ StMuBTofHit::StMuBTofHit(const StBTofHit* tofHit)
   mIndex2Global  = -1;
   mIdTruth       = tofHit->idTruth();
   mQuality       = tofHit->qaTruth();
+#ifdef __TFG__VERSION__
   mPathLength    = tofHit->pathLength();
   mTime          = tofHit->time();
+#endif /* __TFG__VERSION__ */
 }
 
 StMuBTofHit::~StMuBTofHit()
@@ -64,6 +68,13 @@ StMuBTofHit::~StMuBTofHit()
 void
 StMuBTofHit::setIdTruth(int idtru,int qatru)
 {
+#ifndef __TFG__VERSION__
+    if (qatru==0) qatru = (idtru>>16);
+    idtru    = idtru&((1<<16)-1);
+    mIdTruth = static_cast<UShort_t>(idtru);
+    mQuality = static_cast<UShort_t>(qatru);
+#else /* __TFG__VERSION__ */
   mIdTruth = idtru;
   mQuality = qatru;
+#endif /* __TFG__VERSION__ */
 }

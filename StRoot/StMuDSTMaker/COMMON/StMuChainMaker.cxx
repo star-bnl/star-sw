@@ -20,9 +20,15 @@
 #include "TChain.h"
 #include "TSystem.h"
 #include "StMessMgr.h"
+#ifndef __TFG__VERSION__
+
+extern TSystem* gSystem;
+
+#else /* __TFG__VERSION__ */
 #include "TDirIter.h"
 //extern TSystem* gSystem;
 static Long64_t kMaxEntries = std::numeric_limits<Long64_t>::max();
+#endif /* __TFG__VERSION__ */
 string StMuChainMaker::mSQLConnection ="";
 
 ClassImp(StMuChainMaker)
@@ -135,9 +141,14 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
 
   if (dirFile.find(".lis")!=string::npos) 	        fromList(dirFile);
   else if (dirFile.find(".files")!=string::npos)        fromList(dirFile);
+#ifndef __TFG__VERSION__
+  else if (dirFile.find(".MuDst.root")!=string::npos)   fromFile(dirFile);
+#else /* __TFG__VERSION__ */
   //  else if (dirFile.find(".MuDst.root")!=string::npos)   fromFile(dirFile);
+#endif /* __TFG__VERSION__ */
   else if (dirFile.rfind("/") == dirFile.length()-1 )   fromDir(dirFile);
   else {
+#ifdef __TFG__VERSION__
     TDirIter Dir(dirFile.c_str());
     Char_t *name = 0;
     Int_t NFiles = 0;
@@ -149,9 +160,12 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
       }
     }
     if (! NFiles) {
+#endif /* __TFG__VERSION__ */
     FORCEDDEBUGMESSAGE("ATTENTION: don't know how to read input (you may have used a bogus constructor syntax)");
     return NULL;
+#ifdef __TFG__VERSION__
     }
+#endif /* __TFG__VERSION__ */
   }
  
   if ( mFileList.size() == 0 ) {
@@ -231,15 +245,15 @@ void StMuChainMaker::add( StMuStringIntPair filenameEvents) {
 	}
     }
     
-    if (entries==0 || entries==kMaxEntries) { // try to read the number of event from the db reader 
+    if (entries==0 || entries==TChain::kBigNumber) { // try to read the number of event from the db reader 
 	int tmp_entries = mDbReader->entries(file.c_str());
         if (tmp_entries != 0)
            entries = tmp_entries;
         else 
-           entries = kMaxEntries;  // If still not known, set to kMaxEntries to avoid opening of file 
+           entries = TChain::kBigNumber;  // If still not known, set to kBigNumber to avoid opening of file 
     }
     // If entries==0, TChain will open the file and get the number of entries
-    // If entries==kMaxEntries, TChain will start reading 
+    // If entries==TChain::kBigNumber, TChain will start reading 
     //    and figure out the numbers of events while going along
     mChain->Add( file.c_str(), entries );
     mFileCounter++;
@@ -263,7 +277,7 @@ void StMuChainMaker::fromDir(string dir) {
     if ( good && pass(name,mSubFilters) ) {
       char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
       // add it to the list of files
-      mFileList.push_back( StMuStringIntPair( fullFile, kMaxEntries ) );
+      mFileList.push_back( StMuStringIntPair( fullFile, TChain::kBigNumber ) );
       delete []fullFile;
     }
   }   
@@ -355,7 +369,7 @@ void StMuChainMaker::fromList(string list) {
       inputStream.getline(line,512);
 	  string ltest(line);
 	  if  (inputStream.good()) {
-	  int numberOfEvents = kMaxEntries;
+	  int numberOfEvents = TChain::kBigNumber;
 	  int iret = sscanf(line,"%s%i",name, &numberOfEvents);
 		  if(iret) {/*warnOff*/}
 	  if ( pass(name,mSubFilters) && ltest!="") {
@@ -370,7 +384,7 @@ void StMuChainMaker::fromList(string list) {
 void StMuChainMaker::fromFile(string file) {
   DEBUGMESSAGE2("");
   DEBUGMESSAGE2(mTreeName.c_str());
-  mFileList.push_back( StMuStringIntPair( file, kMaxEntries ) );
+  mFileList.push_back( StMuStringIntPair( file, TChain::kBigNumber ) );
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -397,7 +411,7 @@ void StMuChainMaker::fromFile(string file) {
   * Replace GetEnv by HostName()
   *
   * Revision 1.29  2007/08/02 18:57:49  mvl
-  * One more change to avoid reading all input files on initialisation: If the number of events is '0' for a given file, set it to kMaxEntries.
+  * One more change to avoid reading all input files on initialisation: If the number of events is '0' for a given file, set it to TChain::kBigNumber.
   *
   * Revision 1.28  2007/05/16 18:50:49  mvl
   * Cleanup of output. Replaced cout with LOG_INFO etc.
@@ -407,7 +421,7 @@ void StMuChainMaker::fromFile(string file) {
   *
   * Revision 1.26  2006/06/22 23:30:55  mvl
   * Minor change to prevent reading all files during initialisation.
-  * Files ar enow added with TChain::Add(filename,kMaxEntries) if no event count is available.
+  * Files ar enow added with TChain::Add(filename,kBigNumber) if no event count is available.
   *
   * Revision 1.25  2005/10/06 01:30:30  mvl
   * Changed some of the logic in StMuChainMaker: Now files are no longer opened

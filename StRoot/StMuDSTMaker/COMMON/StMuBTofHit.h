@@ -50,8 +50,10 @@ public:
     
     int idTruth() const;
     int qaTruth() const;
+#ifdef __TFG__VERSION__
     Float_t pathLength() const { return mPathLength;}
     Float_t time()       const { return mTime;}
+#endif /* __TFG__VERSION__ */
 
     void setTrayIndex(unsigned char);
     void setModuleIndex(unsigned char);
@@ -64,8 +66,10 @@ public:
     void setIndex2Global(int);
 
     void setIdTruth(Int_t idtru, Int_t qatru=0);
+#ifdef __TFG__VERSION__
     void setPathLength(Float_t p = 0)       { mPathLength = p;}
     void setTime(Float_t p = 0)             { mTime = p;}
+#endif /* __TFG__VERSION__ */
 
  protected:
     UChar_t mTray;
@@ -76,14 +80,24 @@ public:
     Short_t mAssociatedTrackId;
     Int_t mIndex2Primary;
     Int_t mIndex2Global;
+#ifndef __TFG__VERSION__
+    UShort_t mIdTruth;
+#else /* __TFG__VERSION__ */
     Int_t mIdTruth;
+#endif /* __TFG__VERSION__ */
     UShort_t mQuality;
+#ifdef __TFG__VERSION__
     Float_t   mPathLength; // MC
     Float_t   mTime;       // MC
+#endif /* __TFG__VERSION__ */
 
     friend class StMuDst;
     
+#ifndef __TFG__VERSION__
+    ClassDef(StMuBTofHit,1)
+#else /* __TFG__VERSION__ */
     ClassDef(StMuBTofHit,2)
+#endif /* __TFG__VERSION__ */
 };
 
 inline int StMuBTofHit::tray() const { return mTray; }

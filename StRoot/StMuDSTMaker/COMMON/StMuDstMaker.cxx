@@ -4,20 +4,42 @@
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
+#ifdef __TFG__VERSION__
 #include "StMuDstMaker.h"
 #include "StMuDst.h"
+#endif /* __TFG__VERSION__ */
 #include "TRegexp.h"
 #include "Stiostream.h"
 #include "Stsstream.h"
 #include "StChain.h"
 #include "THack.h"
+#ifndef __TFG__VERSION__
+#include "StEvent/StEvent.h"
+#include "StEvent/StTrack.h"
+#include "StEvent/StTrackNode.h"
+#include "StEvent/StRichSpectra.h"
+#include "StEvent/StDetectorState.h"
+#else /* __TFG__VERSION__ */
 #include "TROOT.h"
 #include "TVector3.h"
+#endif /* __TFG__VERSION__ */
 #include "StEvent/StEventTypes.h"
+#ifndef __TFG__VERSION__
+#include "StEvent/StRunInfo.h"
+#include "StEvent/StEventInfo.h"
+#include "StEvent/StDcaGeometry.h"
+#include "StEvent/StFgtCollection.h"
+#include "StEvent/StFgtStrip.h"
+#include "StEvent/StFgtHit.h"
+#include "StEvent/StEnumerations.h"
+#endif /* ! __TFG__VERSION__ */
 #include "StFgtUtil/StFgtConsts.h"
 #include "StEventUtilities/StuRefMult.hh"
 #include "StEventUtilities/StuProbabilityPidAlgorithm.h"
+
+#ifdef __TFG__VERSION__
 #include "StEventUtilities/StGoodTrigger.h"
+#endif /* __TFG__VERSION__ */
 #include "StarClassLibrary/StPhysicalHelixD.hh"
 #include "StarClassLibrary/StTimer.hh"
 #include "StarClassLibrary/StMatrixF.hh"
@@ -35,7 +57,10 @@
 #include "StStrangeMuDstMaker/StKinkMc.hh"
 #include "StStrangeMuDstMaker/StStrangeCuts.hh"
 #endif
+
+#ifdef __TFG__VERSION__
 #include "StMessMgr.h"
+#endif /* __TFG__VERSION__ */
 #include "StMuException.hh"
 #include "StMuEvent.h"
 #include "StMuPrimaryVertex.h"
@@ -48,6 +73,9 @@
 #include "StMuDebug.h"
 #include "StMuCut.h"
 #include "StMuFilter.h"
+#ifndef __TFG__VERSION__
+#include "StMuL3Filter.h"
+#endif /* ! __TFG__VERSION__ */
 #include "StMuChainMaker.h"
 #include "StMuEmcCollection.h"
 #include "StMuEmcUtil.h"
@@ -79,8 +107,10 @@
 #include "StMuTofHit.h"
 #include "StMuTofHitCollection.h"
 #include "StMuTofUtil.h"
+#ifdef __TFG__VERSION__
 #include "KFParticle/KFParticle.h"
 #include "KFParticle/KFVertex.h"
+#endif /* __TFG__VERSION__ */
 /// dongx
 #include "StEvent/StBTofCollection.h"
 #include "StEvent/StBTofRawHit.h"
@@ -97,6 +127,10 @@
 #include "EztTrigBlob.h"
 #include "EztFpdBlob.h"
 
+#ifndef __TFG__VERSION__
+#include "StMuDstMaker.h"
+#include "StMuDst.h"
+#endif /* ! __TFG__VERSION__ */
 
 #include "TFile.h"
 #include "TTree.h"
@@ -110,11 +144,15 @@
 #include "StMuMcVertex.h"
 #include "StMuMcTrack.h"
 #include "StG2TrackVertexMap.h"
+#ifdef __TFG__VERSION__
 #include "TArrayF.h"
 #include "TUnixTime.h"
 ClassImp(StMuDstMaker);
+#endif /* __TFG__VERSION__ */
 
+#ifdef __TFG__VERSION__
 StMuDstMaker *StMuDstMaker::gStMuDstMaker = 0;
+#endif /* __TFG__VERSION__ */
 class StEpdHit;  // MALisa
 
 ClassImp(StMuDstMaker)
@@ -122,6 +160,7 @@ ClassImp(StMuDstMaker)
 #if !(ST_NO_NAMESPACES)
   using namespace units;
 #endif
+
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -157,6 +196,10 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mFileName="";
   streamerOff();
   zeroArrays();
+#ifndef __TFG__VERSION__
+  if (mIoMode==ioRead) openRead();
+  if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
+#endif /* ! __TFG__VERSION__ */
 
   mEventCounter=0;
   mStMuDst = new StMuDst();
@@ -177,14 +220,19 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
 
 
   setProbabilityPidFile();
-#if 0
+#ifndef __TFG__VERSION__
+  StMuL3Filter* l3Filter = new StMuL3Filter(); setL3TrackFilter(l3Filter);
   StMuFilter* filter = new StMuFilter();       setTrackFilter(filter);
   FORCEDDEBUGMESSAGE("ATTENTION: use standard MuFilter");
   FORCEDDEBUGMESSAGE("ATTENTION: use standard l3 MuFilter");
-#endif
+
+#else /* __TFG__VERSION__ */
   gStMuDstMaker = this;
+#endif /* __TFG__VERSION__ */
 
 }
+
+#ifdef __TFG__VERSION__
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -200,6 +248,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   if (mIoMode==ioRead) openRead();
   if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
 }
+#endif /* __TFG__VERSION__ */
 /*! 
  * This method assigns individual TCloneArrays location from one
  * big global one. Dirty init MUST follow the order in StMuArrays.
@@ -456,19 +505,21 @@ StMuDstMaker::~StMuDstMaker() {
   SafeDelete(mBTofUtil);   /// dongx
   SafeDelete(mEpdUtil);    /// MALisa
   DEBUGMESSAGE3("after arrays");
-  SafeDelete(mProbabilityPidAlgorithm);
-  SafeDelete(mTrackFilter);
-  SafeDelete(mL3TrackFilter);
+  saveDelete(mProbabilityPidAlgorithm);
+  saveDelete(mTrackFilter);
+  saveDelete(mL3TrackFilter);
   DEBUGMESSAGE3("after filter");
   if (mIoMode== ioWrite ) closeWrite();
   if (mIoMode== ioRead ) closeRead();
   DEBUGMESSAGE3("after close");
-  SafeDelete(mChain);
-//VP  SafeDelete(mTTree);
+  saveDelete(mChain);
+//VP  saveDelete(mTTree);
   SafeDelete(mEmcCollectionArray);
   SafeDelete(mPmdCollectionArray);
   DEBUGMESSAGE3("out");
+#ifdef __TFG__VERSION__
   gStMuDstMaker = 0;
+#endif /* __TFG__VERSION__ */
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -478,9 +529,9 @@ StMuDstMaker::~StMuDstMaker() {
     the data members of the base class TObject
 */
 void  StMuDstMaker::streamerOff() {
-#if  ROOT_VERSION_CODE >= ROOT_VERSION(5,34,20)
+#if  ROOT_VERSION_CODE >= ROOT_VERSION(5,34,20) && defined(__TFG__VERSION__)
   if (mSplit > 0) return;
-#endif
+#endif /* __TFG__VERSION__ */
   StMuEvent::Class()->IgnoreTObjectStreamer();
   StMuL3EventSummary::Class()->IgnoreTObjectStreamer();
 #ifndef __NO_STRANGE_MUDST__
@@ -501,7 +552,9 @@ void  StMuDstMaker::streamerOff() {
   StMuHelix::Class()->IgnoreTObjectStreamer();
   StMuEmcHit::Class()->IgnoreTObjectStreamer();
   StMuEmcTowerData::Class()->IgnoreTObjectStreamer();
+#ifdef __TFG__VERSION__
   StMuFmsHit::Class()->IgnoreTObjectStreamer();
+#endif /* __TFG__VERSION__ */
   StMuPmdHit::Class()->IgnoreTObjectStreamer();
   StMuPmdCluster::Class()->IgnoreTObjectStreamer();
   EztEventHeader::Class()->IgnoreTObjectStreamer();
@@ -512,9 +565,9 @@ void  StMuDstMaker::streamerOff() {
   StMuFgtCluster::Class()->IgnoreTObjectStreamer();
   StMuFgtStripAssociation::Class()->IgnoreTObjectStreamer();
   StMuFgtAdc::Class()->IgnoreTObjectStreamer();
-#ifdef __kfpAtFirstHit__
+#if defined(__TFG__VERSION__) && defined(__kfpAtFirstHit__)
   KFPTrack::Class()->IgnoreTObjectStreamer();
-#endif
+#endif /* __TFG__VERSION__ */
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -538,7 +591,9 @@ TClonesArray* StMuDstMaker::clonesArray(TClonesArray*& p, const char* type, int 
   if (p) return p;
   DEBUGVALUE2(type);
   p = new TClonesArray(type, size);
+#ifdef __TFG__VERSION__
   p->SetOwner(kTRUE);
+#endif /* __TFG__VERSION__ */
   counter=0;
   return p;
 }
@@ -563,7 +618,11 @@ int StMuDstMaker::Init(){
   TDataSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers
   if (muDstSet ) muDstSet ->SetName("muDst");          ///< added for Valeri to be able to pick it up in other makers
 
+#ifndef __TFG__VERSION__
+  return 0;
+#else /* __TFG__VERSION__ */
   return StMaker::Init();
+#endif /* __TFG__VERSION__ */
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -597,7 +656,10 @@ void StMuDstMaker::Clear(const char *){
    will hold the current event if the io was successful, or return a null pointer.
 */
 int StMuDstMaker::Make(){
+
+#ifdef __TFG__VERSION__
   mStMuDst->SetInstance();
+#endif /* __TFG__VERSION__ */
   DEBUGMESSAGE2("");
   int returnStarCode = kStOK;
   StTimer timer;
@@ -625,7 +687,9 @@ Int_t StMuDstMaker::MakeRead()
    if (mIoMode == ioRead) {
      try {
        read();
+#ifdef __TFG__VERSION__
        if (! mStMuDst->IsGoodTrigger()) return kStSkip;
+#endif /* __TFG__VERSION__ */
      }
      catch(StMuExceptionEOF e) {
        e.print();
@@ -834,11 +898,11 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
       }
       chain->SetBranchStatus("EmcCollection*",1);
       chain->SetBranchAddress("EmcCollection",&mEmcCollectionArray);
-#if  ROOT_VERSION_CODE >= ROOT_VERSION(5,34,20)
+#if defined(__TFG__VERSION__) &&  ROOT_VERSION_CODE >= ROOT_VERSION(5,34,20)
       if (mSplit < 0) StMuEmcHit::Class()->IgnoreTObjectStreamer(0);
-#else
+#else /* ! __TFG__VERSION__ */
       StMuEmcHit::Class()->IgnoreTObjectStreamer(0);
-#endif
+#endif /* __TFG__VERSION__ */
       mStMuDst->set(this);
     }
   }
@@ -876,11 +940,11 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
       }
       chain->SetBranchStatus("PmdCollection*",1);
       chain->SetBranchAddress("PmdCollection",&mPmdCollectionArray);
-#if  ROOT_VERSION_CODE >= ROOT_VERSION(5,34,20)
+#if  ROOT_VERSION_CODE >= ROOT_VERSION(5,34,20) && defined(__TFG__VERSION__)
       if (mSplit < 0) StMuPmdCluster::Class()->IgnoreTObjectStreamer(0);
-#else
+#else /* ! __TFG__VERSION__ */
       StMuPmdCluster::Class()->IgnoreTObjectStreamer(0);
-#endif
+#endif /* __TFG__VERSION__ */
       mStMuDst->set(this);
     }
   }
@@ -949,7 +1013,9 @@ void StMuDstMaker::read(){
   fillHddr();
   mStMuDst->setVertexIndex(0);
   mStMuDst->collectVertexTracks();   // Make temp list of tracks for current prim vtx
+#ifdef __TFG__VERSION__
   mStMuDst->ResetMaps();
+#endif /* __TFG__VERSION__ */
   return;
 }
 //-----------------------------------------------------------------------
@@ -976,16 +1042,24 @@ void StMuDstMaker::openWrite(string fileName) {
   // Create a ROOT Tree and one superbranch
   DEBUGMESSAGE2("now create trees and branches");
 
+#ifdef __TFG__VERSION__  /* bug in TStreamerInfo*, fixed 09/05/14, ROOT_VERSION_CODE < ROOT_VERSION(5,34,20) */
   Int_t split = mSplit;
-#if  1 /* bug in TStreamerInfo*, fixed 09/05/14, ROOT_VERSION_CODE < ROOT_VERSION(5,34,20) */
   Int_t branchStyle = 1; //new style by default
   if (split < 0) {branchStyle = 0; split = -1-split;}
   TTree::SetBranchStyle(branchStyle);
-#endif
+#endif /* __TFG__VERSION__ */
   int bufsize = mBufferSize;
+#ifndef __TFG__VERSION__
+  if (mSplit) bufsize /= 4;
+#else /* __TFG__VERSION__ */
   if (split) bufsize /= 4;
+#endif /* __TFG__VERSION__ */
   //  all stuff
+#ifndef __TFG__VERSION__
+  mTTree = new TTree("MuDst", "StMuDst",mSplit);
+#else /* __TFG__VERSION__ */
   mTTree = new TTree("MuDst", "StMuDst",split);
+#endif /* __TFG__VERSION__ */
   mTTree->BranchRef();  // Activate autoloading of TRef-referenced objects
 #if ROOT_VERSION_CODE < ROOT_VERSION(5,26,0)
   Long64_t MAXLONG=100000000000LL; // 100 GB
@@ -996,7 +1070,11 @@ void StMuDstMaker::openWrite(string fileName) {
   DEBUGMESSAGE2("all arrays");
   for ( int i=0; i<__NALLARRAYS__; i++) {
     if (mStatusArrays[i]==0) continue;
+#ifndef __TFG__VERSION__
+    mTTree->Branch(StMuArrays::arrayNames[i],&mAArrays[i], bufsize, mSplit);
+#else /* __TFG__VERSION__ */
     mTTree->Branch(StMuArrays::arrayNames[i],&mAArrays[i], bufsize, split);
+#endif /* __TFG__VERSION__ */
   }
   mCurrentFileName = fileName;
 }
@@ -1005,9 +1083,11 @@ void StMuDstMaker::openWrite(string fileName) {
 //-----------------------------------------------------------------------
 void StMuDstMaker::closeWrite(){
   DEBUGMESSAGE(__PRETTYF__);
+#ifdef __TFG__VERSION__
   if (! gROOT->GetListOfFiles() || ! gROOT->GetListOfFiles()->FindObject(mCurrentFile)) {
     mCurrentFile = 0;
   }
+#endif /* __TFG__VERSION__ */
   if (mTTree && mCurrentFile) {
     LOG_INFO << " ##### " << __PRETTYF__ << endm;
     LOG_INFO << " ##### File=" << mCurrentFile->GetName() << " ";
@@ -1102,14 +1182,22 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     }
   }
 #endif
+#ifndef __TFG__VERSION__
+
+  //catch(StMuException e) {
+  //  e.print();
+  //  throw e;
+  //}
+
+#endif /* ! __TFG__VERSION__ */
   mStMuDst->set(this);
   mStMuDst->fixTofTrackIndices();
   mStMuDst->fixETofTrackIndices();
   mStMuDst->fixMtdTrackIndices();
   mStMuDst->fixTrackIndicesG(mStMuDst->numberOfPrimaryVertices());
 }
-  
-  
+
+
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1610,14 +1698,18 @@ void StMuDstMaker::fillVertices(StEvent* ev) {
   mVtxList.Clear();
   for (Int_t i_vtx=0; i_vtx < n_vtx; i_vtx++) {
     const StPrimaryVertex *vtx=ev->primaryVertex(i_vtx);
+#ifdef __TFG__VERSION__
     if (! vtx) continue;
+#endif /* __TFG__VERSION__ */
     addType( mArrays[muPrimaryVertex], vtx, typeOfVertex );
     mVtxList.AddAtAndExpand(ev->primaryVertex(i_vtx),i_vtx);
+#ifdef __TFG__VERSION__
     const StTrackMassFit* parent = vtx->parent();
     if (! parent) continue;
     const KFParticle* particle = parent->kfParticle();
     if (! particle) continue;
     fillKFVertices(particle);
+#endif /* __TFG__VERSION__ */
   }
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
@@ -1656,7 +1748,7 @@ void StMuDstMaker::fillTracks(StEvent* ev, StMuCut* cut) {
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-#ifdef StTrackMassFit_hh
+#if defined(__TFG__VERSION__) && defined(StTrackMassFit_hh)
 //-----------------------------------------------------------------------
 Int_t StMuDstMaker::fillKFTracks(const KFParticle *particle) {
   if (!particle) return -1;
@@ -1675,8 +1767,8 @@ Int_t StMuDstMaker::fillKFVertices(const KFParticle *particle) {
   new (KFVertices[j]) KFVertex(*particle);
   return j;
 }
-#endif /* StTrackMassFit_hh */
 //-----------------------------------------------------------------------
+#endif /* __TFG__VERSION__ */
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillL3Tracks(StEvent* ev, StMuCut* cut) {
   DEBUGMESSAGE2("");
@@ -1687,7 +1779,11 @@ void StMuDstMaker::fillL3Tracks(StEvent* ev, StMuCut* cut) {
   StSPtrVecTrackNode& nodes= ev->l3Trigger()->trackNodes();
   DEBUGVALUE2(nodes.size());
   for (StSPtrVecTrackNodeConstIterator iter=nodes.begin(); iter!=nodes.end(); iter++) {
+#ifndef __TFG__VERSION__
+    addTrackNode(ev, *iter, cut, mArrays[muL3], 0, 0, 0, 0, true );
+#else /* __TFG__VERSION__ */
     addTrackNode(ev, *iter, cut, mArrays[muL3], 0, 0, mArrays[muCovGlobTrack], 0, true );
+#endif /* __TFG__VERSION__ */
   }
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
@@ -1711,6 +1807,42 @@ void StMuDstMaker::fillDetectorStates(StEvent* ev) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+#ifndef  __TFG__VERSION__
+void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut,
+				  TClonesArray* gTCA, TClonesArray* pTCA, TClonesArray* oTCA, TClonesArray* covgTCA, TClonesArray* covpTCA, bool l3) {
+  DEBUGMESSAGE3("");
+  const StTrack* tr=0;
+
+  /// do global track
+  int index2Global =-1;
+  if (gTCA) {
+    const StTrack *pr_tr = node->track(primary);
+    const StVertex *vtx = 0;
+    if (pr_tr)
+       vtx = pr_tr->vertex();
+    if (vtx==0)
+       vtx = ev->primaryVertex();	
+	
+    tr= node->track(global);
+    if (tr && !tr->bad()) index2Global = addTrack(gTCA, ev, tr, vtx, cut, -1, l3, covgTCA, covpTCA);
+  }
+  /// do primary track track
+  if (pTCA) {
+    tr = node->track(primary);
+    if (tr && !tr->bad()) addTrack(pTCA, ev, tr, tr->vertex(), cut, index2Global, l3, covgTCA, covpTCA);
+  }
+  /// all other tracks
+  if (oTCA) {
+    size_t nEntries = node->entries();
+    for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
+      tr = node->track(j);
+      if (tr && !tr->bad() && (tr->type()!=global) && (tr->type()!=primary) ) { /// exclude global and primary tracks
+	addTrack(oTCA, ev, tr, tr->vertex(), cut, index2Global, l3);
+      }
+    }
+  }
+}
+#else /* __TFG__VERSION__ */
 void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut,
 				  TClonesArray* gTCA, TClonesArray* pTCA, TClonesArray* oTCA, TClonesArray* covgTCA, TClonesArray* covpTCA, bool l3) {
   DEBUGMESSAGE3("");
@@ -1759,6 +1891,7 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
     }
   }
 #endif
+  /// all other tracks
   if (oTCA) {
     const StTrack* tr=0;
     size_t nEntries = node->entries();
@@ -1770,6 +1903,7 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
     }
   }
 }
+#endif /* __TFG__VERSION__ */
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
@@ -1792,12 +1926,25 @@ int StMuDstMaker::addTrack(TClonesArray* tca, const StEvent*event, const StTrack
     StMuTrack *muTrack = new((*tca)[counter]) StMuTrack(event, track, vtx, index2Global, index2RichSpectra, l3, &mVtxList);
     if (track->type() == primary) {
       if (covpTCA) {
+#ifndef __TFG__VERSION__
+	Int_t countCOVPTCA = covpTCA->GetEntries();
+#if 0
+	const StMatrixF covMatrix = track->fitTraits().covariantMatrix();
+	new((*covpTCA)[countCOVPTCA]) StMuPrimaryTrackCovariance(covMatrix);
+#else
+	//	cout << track->fitTraits().covariantMatrix() << endl;
+	const Float_t*    cov      = track->fitTraits().covariance();
+	new((*covpTCA)[countCOVPTCA]) StMuPrimaryTrackCovariance(cov);
+#endif
+	muTrack->setIndex2Cov(countCOVPTCA);
+#else /* __TFG__VERSION__ */
 	if (track->fitTraits().covarianceMatrixF().GetSize() >= 9) {// valid cov. matrix
 	  Int_t countCOVPTCA = covpTCA->GetEntries();
 	  //	cout << track->fitTraits().covariantMatrix() << endl;
 	  new((*covpTCA)[countCOVPTCA]) StMuPrimaryTrackCovariance(track->fitTraits().covarianceMatrixF());
 	  muTrack->setIndex2Cov(countCOVPTCA);
 	}
+#endif /* __TFG__VERSION__ */
       }
     }
     else {
@@ -1876,16 +2023,12 @@ void StMuDstMaker::fillMC() {
   StMuMcTrack  *mctr = 0;
   g2t_vertex_st  *vertex =  g2t_vertex->GetTable();
   UInt_t NV = g2t_vertex->GetNRows();
-  for (UInt_t i = 0; i < NV; i++) {
-    Int_t counter = addType(mMCArrays[MCVertex], vertex[i], mcvx);   
-    assert(counter == vertex[i].id-1);
-  }
+  for (UInt_t i = 0; i < NV; i++) addType(mMCArrays[MCVertex], vertex[i], mcvx);   
   g2t_track_st  *track = g2t_track->GetTable();
   UInt_t NT = g2t_track->GetNRows();
   for (UInt_t i = 0; i < NT; i++) {
     if (track[i].pt<=1e-3) track[i].pt = -999;
-    Int_t counter = addType(mMCArrays[MCTrack], track[i], mctr);   
-    assert(counter == track[i].id-1);
+    addType(mMCArrays[MCTrack], track[i], mctr);   
   }
   
 }
@@ -2028,13 +2171,17 @@ void StMuDstMaker::printArrays()
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillHddr()
 {
+#ifdef __TFG__VERSION__
   static  Int_t eventIdC = 0;
+#endif /* __TFG__VERSION__ */
   StMuEvent 		*me = mStMuDst->event();
   if (me==0)
     return;
   StEventInfo 		&ei = me->eventInfo();
   StRunInfo 		&ri = me->runInfo();
   StEvtHddr *hd = GetEvtHddr();
+
+#ifdef __TFG__VERSION__
   Int_t id, it;
   TUnixTime ut(ei.time()); ut.GetGTime(id,it);
   hd->SetDateTime(id,it);
@@ -2043,8 +2190,11 @@ void StMuDstMaker::fillHddr()
     eventIdC++;
     ei.setId(eventIdC);
   }
+#endif /* __TFG__VERSION__ */
   hd->SetRunNumber(ei.runId())	;
+#ifdef __TFG__VERSION__
   hd->SetEventNumber(ei.id())	;
+#endif /* __TFG__VERSION__ */
   hd->SetEventType(ei.type().Data());
   hd->SetTriggerMask(ei.triggerMask())	;
 //hd->SetInputTriggerMask(???);
@@ -2062,6 +2212,9 @@ void StMuDstMaker::fillHddr()
   hd->SetProdDateTime(ri.productionTime());
 //hd->SetIventNumber(int iv)	;
   hd->SetEventSize(ei.eventSize());
+#ifndef __TFG__VERSION__
+  hd->SetEventNumber(ei.id())	;
+#endif /* ! __TFG__VERSION__ */
 //hd->SetGenerType(int g);
 }
 
@@ -2132,9 +2285,13 @@ void StMuDstMaker::connectPmdCollection() {
  * Revision 1.118  2013/12/04 19:56:32  jdb
  * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
  *
+ * Revision 1.117  2013/07/23 11:02:59  jeromel
+ * Undo changes (KF and other)
  * Revision 1.116  2013/07/16 14:30:30  fisyak
  * Restore mass fit tracks
  *
+ * Revision 1.115  2013/04/10 19:28:35  jeromel
+ * Step back to 04/04 version (van aware) - previous changes may be recoverred
  * Revision 1.114  2013/04/08 18:07:55  fisyak
  * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks
  *

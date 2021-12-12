@@ -123,7 +123,11 @@ public:
     /**
     ** @brief mc-true associated track id in simulation
     **/
+#ifndef __TFG__VERSION__
+    unsigned int idTruth()     const;
+#else /* __TFG__VERSION__ */
     int idTruth()     const;
+#endif /* __TFG__VERSION__ */
     /**
     ** @brief quality of this information (percentage of charge produced by mIdTruth)
     **/
@@ -158,7 +162,11 @@ public:
     void setIndex2Primary(     const int& id );
     void setIndex2Global(      const int& id );
 
+#ifndef __TFG__VERSION__
+    void setIdTruth( unsigned short idtruth, unsigned short qatruth=0 );
+#else /* __TFG__VERSION__ */
     void setIdTruth(int idtruth, unsigned short qatruth=0 );
+#endif /* __TFG__VERSION__ */
 
 
 private:
@@ -178,14 +186,22 @@ private:
     Int_t       mIndex2Primary;
     Int_t       mIndex2Global;
 
+#ifndef __TFG__VERSION__
+    UShort_t     mIdTruth;
+#else /* __TFG__VERSION__ */
     Int_t        mIdTruth;
+#endif /* __TFG__VERSION__ */
     UShort_t     mQuality;
 
     friend class StMuDst;
 
 
 
+#ifndef __TFG__VERSION__
+    ClassDef( StMuETofHit, 1 );
+#else /* __TFG__VERSION__ */
     ClassDef( StMuETofHit, 2 );
+#endif /* __TFG__VERSION__ */
 };
 
 
@@ -209,7 +225,11 @@ inline int  StMuETofHit::index2Global()        const { return mIndex2Global;    
 inline StMuTrack* StMuETofHit::primaryTrack() const { return ( mIndex2Primary>=0 ) ? ( StMuTrack* ) StMuDst::array( muPrimary )->UncheckedAt( mIndex2Primary ) : 0; }
 inline StMuTrack* StMuETofHit::globalTrack()  const { return ( mIndex2Global >=0 ) ? ( StMuTrack* ) StMuDst::array( muGlobal  )->UncheckedAt( mIndex2Global  ) : 0; }
 
+#ifndef __TFG__VERSION__
+inline unsigned int StMuETofHit::idTruth()    const { return mIdTruth; }
+#else /* __TFG__VERSION__ */
 inline          int StMuETofHit::idTruth()    const { return mIdTruth; }
+#endif /* __TFG__VERSION__ */
 inline unsigned int StMuETofHit::qaTruth()    const { return mQuality; }
 
 
