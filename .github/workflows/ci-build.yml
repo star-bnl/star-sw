@@ -26,29 +26,6 @@ jobs:
           name: star-sw-root5-build
           path: /tmp/star-sw-root5-build.tar
 
-  ROOT6:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        with:
-          driver-opts: env.BUILDKIT_STEP_LOG_MAX_SIZE=10000000
-
-      - name: Build with Docker
-        uses: docker/build-push-action@v2
-        with:
-          cache-from: type=registry,ref=ghcr.io/star-bnl/star-sw-root6-base@sha256:107736be0e111ef9eaac37281f9bcad95769ab3ce75a4c9624d8cea98b1eb966
-          push: false
-          tags: ghcr.io/star-bnl/star-sw-root6-build
-          file: docker/Dockerfile.root6
-          outputs: type=docker,dest=/tmp/star-sw-root6-build.tar
-
-      - name: Save built image for test jobs
-        uses: actions/upload-artifact@v2
-        with:
-          name: star-sw-root6-build
-          path: /tmp/star-sw-root6-build.tar
-
   ROOT5_test_setup:
     runs-on: ubuntu-latest
     needs: ROOT5
