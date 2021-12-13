@@ -273,7 +273,12 @@ Int_t StBTofCalibMaker::Init()
     resetPars();
     resetVpd();
 
-	if (IAttr("btofFXT")) mFXTMode = kTRUE; //True for FXT mode calib, default as false for collider mode calib
+
+    if (IAttr("btofFXT")){//True for FXT mode calib, default as false for collider mode calib
+      mFXTMode = kTRUE;
+      LOG_INFO << "btofFXT mode is on." << endm;
+    }
+
 
   if (IAttr("pppAMode")) {
       mPPPAMode = kTRUE;
