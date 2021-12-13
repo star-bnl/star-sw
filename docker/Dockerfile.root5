@@ -122,7 +122,10 @@ diff --git a/asps/rexe/Conscript b/asps/rexe/Conscript \n\
 
 RUN source /etc/profile \
  && cd /star-sw \
- && cons \
+ && cons +StarVMC/Geometry \
+ && cons %GeoTestMaker %Kinematics %OnlTools %StEEmcPool %StFgtPool %StHighptPool %StJetFinder \
+    %StRoot/Stv %StRoot/StvMaker %StRoot/StvSeed \
+    %StShadowMaker %StSpinMaker %StSpinPool %StStrangePool %pams/sim/g2r %StRoot/StHbtMaker \
  && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 
 RUN install /star-sw/StRoot/macros/.rootrc .
