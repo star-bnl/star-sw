@@ -209,7 +209,7 @@ protected:
     sd->Clear();
 
     return nhits;
-  };
+  }
 
   ClassDef(StGeant4Maker,1);
 

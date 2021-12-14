@@ -916,7 +916,8 @@ void StGeant4Maker::FinishEvent(){
 
   // Event information is (for the time being) zeroed out
   St_g2t_event*  g2t_event  = new St_g2t_event("g2t_event",1);          AddData(g2t_event);
-  g2t_event_st event = {0};
+  g2t_event_st event;
+  event = {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0};
   g2t_event->AddAt( &event );
 
   StMCParticleStack* stack    = (StMCParticleStack *)TVirtualMC::GetMC()->GetStack();
