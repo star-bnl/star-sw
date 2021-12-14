@@ -169,8 +169,8 @@ Int_t StFcsPi0FinderForEcal::Init()
 	//-----------------------
 	Int_t StFcsPi0FinderForEcal::Finish()
 	{
-		const char* fn=filename.c_str();
 		if (filename.length()==0) return kStOk;
+		const char* fn=filename.c_str();
 		TFile* MyFile=new TFile(fn,"RECREATE");
 		h1_num_entries->Write();
 		h1_inv_mass_cluster->Write();
