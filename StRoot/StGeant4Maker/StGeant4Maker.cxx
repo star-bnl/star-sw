@@ -1242,9 +1242,6 @@ void StGeant4Maker::Stepping(){
 
     } 
 
-    //    LOG_INFO << "Stopping track at z=" << vz << endm;
-    //    mPreviousVolume->Print();
-    //    mCurrentVolume->Print();
     mc->StopTrack();
     stopped = true;
     
@@ -1307,13 +1304,8 @@ void StGeant4Maker::Stepping(){
   }
 
   if ( stopped ) {
-    LOG_INFO << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
+    LOG_DEBUG << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
 		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
-  }
-  else {
-    LOG_INFO << Form("track continues x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
-		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
-    if ( gG3 ) LOG_INFO << "Current sensitve detector @ " << gG3->GetCurrentSensitiveDetector() << endm;
   }
 
 
