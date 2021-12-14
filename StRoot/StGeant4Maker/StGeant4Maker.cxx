@@ -548,32 +548,38 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
 //________________________________________________________________________________________________
 int StGeant4Maker::Init() {
 
-  LOG_INFO << "Initialize geometry" << endm;
+
   InitGeom();
 
-  LOG_INFO << "Create VMC application" << endm;
   mVmcApplication = new StarVMCApplication("g4star","STAR G4/VMC",DAttr("Application:Zmax"),DAttr("Application:Rmax"), SAttr("application:engine"), mMCStack );
 
-  LOG_INFO << "Create VMC run configuration" << endm;
   const bool specialStacking = false;
   const bool multiThreaded   = false;
   mRunConfig = new TG4RunConfiguration( SAttr("G4VmcOpt:Nav"), SAttr("G4VmcOpt:Phys" ), SAttr("G4VmcOpt:Process"), specialStacking, multiThreaded );
 
   AddObj( mVmcApplication, ".const", 0 ); // Register VMC application  
 
-  LOG_INFO << "Create GEANT4 instance" << endm;
-  if ( 0==std::strcmp( SAttr("application:engine"), "G4") || 0==std::strcmp( SAttr("application:engine"), "multi") )  gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig);
-  if ( 0==std::strcmp( SAttr("application:engine"), "G3") || 0==std::strcmp( SAttr("application:engine"), "multi") )  gG3 = new TGeant3TGeo(SAttr("G3VmcOpt:Name"), IAttr("G3VmcOpt:nwgeant" ) );
+  if ( 0==std::strcmp( SAttr("application:engine"), "G4") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
+    gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig);
+    LOG_INFO << "Created Geant 4 instance " << gG4->GetName() << endm;
+  }
+  if ( 0==std::strcmp( SAttr("application:engine"), "G3") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
+    gG3 = new TGeant3TGeo(SAttr("G3VmcOpt:Name"), IAttr("G3VmcOpt:nwgeant" ) );
+    LOG_INFO << "Created GEANT3  instance" << gG3->GetName() << endm;
+  }
 
   if ( gG4 ) AddObj( gG4, ".const", 0 );
   if ( gG3 ) AddObj( gG3, ".const", 0 );
+  if ( gG3 && gG4 ) {
+    LOG_INFO << "Application will run both G3 and G4 physics engines" << endm;
+  }
 
   //
   // Create the function which processes a single event
   //
 
-  trigger = [](){ std::cout << "Trigger warning... no trigger function has been defined.  No events produced." << std::endl; } ;
-  { 
+  trigger = [](){ std::cout << "StGeant4Maker::trigger warning. No trigger function defined.  No events produced." << std::endl; } ;
+  if ( gG3 || gG4 ) { 
     if ( 0==std::strcmp( SAttr("application:engine"), "G4" ) ) {
       trigger = []() { gG4->ProcessRun(1); }   ;
     }
@@ -661,9 +667,6 @@ int StGeant4Maker::Init() {
     InitializeMC( gG3 );
     SetStack( gG3 );
  
-    gG3 -> Init();
-    gG3 -> BuildPhysics();
- 
   }
 
   // Create histograms
@@ -718,11 +721,9 @@ void StarVMCApplication::ConstructGeometry(){
     LOG_FATAL << "Geometry manager is not available at StarVMCApplication::ConstructGeometry... this will not go well" << endm;
   }
   gGeoManager->CloseGeometry(); 
+
 }
 int  StGeant4Maker::InitGeom() {
-  // if ( gGeoManager ) {
-  //   LOG_INFO << "Running with existing geometry manager" << endm;
-  // }
 
   const DbAlias_t *DbAlias = GetDbAliases();
   if ( 0==gGeoManager ) {
@@ -750,10 +751,6 @@ int  StGeant4Maker::InitGeom() {
       gInterpreter->ProcessLine( Form( ".L %s", mac ) );
       gInterpreter->ProcessLine( "CreateTable();" );
       gInterpreter->ProcessLine( Form( ".U %s", mac ) );
-      //
-      // AgML should have initalized the geometry data structure.  Add it as a const.
-      //
-      //      AddConst( AgModule::Geom() );
       //
       // Cleanup file
       // 
@@ -824,14 +821,12 @@ void StGeant4Maker::Clear( const Option_t* opts ){
 void StarVMCApplication::InitGeometry(){ 
 
   _g4maker -> ConfigureGeometry(); 
-  //  _g4maker -> InitHits();
 
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::ConstructSensitiveDetectors() {
 
   assert(gGeoManager);
-  LOG_INFO << "Create and register sensitive detectors" << endm;
 
   // First collect all AgML extensions with sensitive volumes
   // by the family name of the volume
@@ -846,7 +841,7 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     TGeoVolume* volume = (TGeoVolume *)volumes->At(i);
     AgMLExtension* ae = getExtension(volume);
     if ( 0==ae ) {
-      LOG_DEBUG << "No agml extension on volume = " << volume->GetName() << endm;
+      LOG_INFO << "No agml extension on volume = " << volume->GetName() << endm;
       continue; // shouldn't happen
     }
     if ( 0==ae->GetSensitive() ) {
@@ -862,10 +857,8 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     
     AgMLVolumeId* identifier = AgMLVolumeIdFactory::Create( fname );
     if ( identifier ) {
-      LOG_DEBUG << "Setting volume identifier for " << fname.Data() << " " << vname.Data() << endm;
       ae -> SetVolumeIdentifier( identifier );
     }
-
 
     //
     // Get the sensitive detector.  If we don't have one registered
@@ -878,7 +871,6 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     }
 
     // Register this volume to the sensitive detector
-    LOG_DEBUG << vname.Data() << "/" << fname.Data() << " --> " << sd->GetName() << endm;
     if ( nullptr == TVirtualMC::GetMC()->GetSensitiveDetector( vname ) ) {
       TVirtualMC::GetMC()->SetSensitiveDetector( vname, sd );
     }
@@ -887,9 +879,6 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     sd->addVolume( volume );
 
   }
-
-
-
 
 }
 //________________________________________________________________________________________________
@@ -907,6 +896,7 @@ int  StGeant4Maker::ConfigureGeometry() {
     AgMLExtension* agmlExt = getExtension(volume);
     if ( 0==agmlExt ) continue;
     for ( auto kv : agmlExt->GetCuts() ) {
+      LOG_INFO << kv.first << " = " << kv.second << endm;
       TVirtualMC::GetMC()->Gstpar( media[id]=id, kv.first, kv.second );
     }
   }
@@ -924,9 +914,6 @@ void StGeant4Maker::BeginEvent(){
 void StarVMCApplication::FinishEvent(){ _g4maker -> FinishEvent(); }
 void StGeant4Maker::FinishEvent(){
 
-
-  LOG_INFO << "End of Event" << endm;
-
   // Event information is (for the time being) zeroed out
   St_g2t_event*  g2t_event  = new St_g2t_event("g2t_event",1);          AddData(g2t_event);
   g2t_event_st event = {0};
@@ -938,14 +925,8 @@ void StGeant4Maker::FinishEvent(){
   unsigned int nvertex = vertex.size();
   unsigned int ntrack  = particle.size();
 
-  LOG_INFO << " nvertex=" << nvertex << endm;
-  LOG_INFO << " ntrack =" << ntrack << endm;
-
   St_g2t_vertex* g2t_vertex = new St_g2t_vertex("g2t_vertex",nvertex);  AddData(g2t_vertex);
   St_g2t_track*  g2t_track  = new St_g2t_track ("g2t_track", ntrack);   AddData(g2t_track);
-
-
-  
 
   // Add tracks and vertices to the data structures...
 
@@ -1332,6 +1313,7 @@ void StGeant4Maker::Stepping(){
   else {
     LOG_INFO << Form("track continues x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
 		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
+    if ( gG3 ) LOG_INFO << "Current sensitve detector @ " << gG3->GetCurrentSensitiveDetector() << endm;
   }
 
 
