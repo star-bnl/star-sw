@@ -73,7 +73,7 @@ int   StFcsHit::nPeak()    const {return mNPeak;}
 float StFcsHit::energy()   const {return mEnergy;}
 
 void StFcsHit::setDepCh(unsigned short ns, unsigned short ehp, unsigned short dep, unsigned short ch) { 
-    mDepCh = (ns << 15) | (ehp<<13) | (dep<<8) | ch; 
+    mDepCh = ((ns&0x1) << 15) | ((ehp&0x3)<<13) | ((dep&0x1f)<<8) | (ch & 0xff);
 }
 void StFcsHit::setNS(unsigned short val)       { setDepCh(val,ehp(),dep(),channel());}
 void StFcsHit::setEHP(unsigned short val)      { setDepCh(ns(),val,dep(),channel());}
