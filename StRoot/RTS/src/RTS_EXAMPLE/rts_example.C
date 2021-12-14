@@ -2664,6 +2664,9 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 		want_ped = 1 ;
 	}
 
+	if(do_print) {
+		printf("FCS evt %d, token %d\n",good,evp->token) ;
+	}
 
 	dd = rdr->det("fcs")->get("ped") ;
 	while(dd && dd->iterate()) {
@@ -2677,10 +2680,20 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 			printf("FCS PED: %d: S%02d:%d: %d:%d:%d (V%d)\n",good,dd->sec,dd->rdo,
 			       p->det,p->ns,p->dep,p->fmt_version) ;
 
-			for(int c=0;c<32;c++) {
-				printf(" ch %02d: ped %6.3f, gain %6.3f\n",c,
-				       (double)p->ped[c].ped/8.0,(double)p->ped[c].gain/256.0) ;
+			printf(" s1_delay %d\n",p->s1_delay) ;
+
+			if(p->det<=2) {	// pedestals
+				for(int c=0;c<32;c++) {
+					printf(" ch %02d: ped %6.3f, gain %6.3f\n",c,
+					       (double)p->ped[c].ped/8.0,(double)p->ped[c].gain/256.0) ;
+				}
 			}
+			else {
+				printf(" ch_mask 0x%llX, dsm_delay %d, dsm_mode %d, dsm_pattern 0x%04X\n",
+				       p->ch_mask,p->dsm_delay,p->dsm_mode,p->dsm_pattern) ;
+			}
+
+
 
 		}
 
@@ -2743,22 +2756,32 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
        	dd = rdr->det("fcs")->get("zs") ;
 	if(dd) {
+//		fcs_meta_t *meta = (fcs_meta_t *)dd->meta ;
+
 		while(dd->iterate()) {
 			zs_found = 1  ;
 
-			if(do_print && want_zs) {
-				int sector = ((dd->sec >> 11) & 0x1F)+1 ;
-				int rdo = ((dd->sec >> 8) & 0x7)+1 ;
-				int det = (dd->sec >> 6) & 0x3;
-				int ns = (dd-> sec >> 5) & 1 ;
-				int dep = dd->row ;
-				int ch = dd->pad ;
+			int sector = ((dd->sec >> 11) & 0x1F)+1 ;
+			int rdo = ((dd->sec >> 8) & 0x7)+1 ;
+			int det = (dd->sec >> 6) & 0x3;
+			int ns = (dd-> sec >> 5) & 1 ;
+			int dep = dd->row ;
+			int ch = dd->pad ;
 
+			
+			//LOG(TERR,"META: version 0x%X: sector %d:%d, rdo %d:%d",meta->version,meta->sector1,sector,meta->rdo1,rdo) ;
+
+			if(do_print && want_zs) {
 
 				printf("FCS ZS %d: S%d:%d [det %d, ns %d, dep %d] ch %d, %d ADCs\n",good,sector,rdo,det,ns,dep,ch,dd->ncontent) ;
 
 				for(u_int i=0;i<dd->ncontent;i++) {
-					printf(" TB %5d, flags %d, ADC %4u\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
+					if(det==3) {
+						printf(" TB %5d, flags %d, ADC 0x%02X\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
+					}
+					else {
+						printf(" TB %5d, flags %d, ADC %4u\n",dd->adc[i].tb,dd->adc[i].adc>>12,dd->adc[i].adc&0xFFF) ;
+					}
 				}
 			}
 		}
@@ -2863,8 +2886,8 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 				u_char feb = vmm[i].feb_vmm >> 2 ;	// feb [0..5]
 				u_char vm = vmm[i].feb_vmm & 3 ;	// VMM [0..3]
 
-				printf("  FEB %d:%d [0x%X], ch %02d: ADC %3d, BCID %4d, tb %4d\n",feb,vm,vmm[i].feb_vmm,vmm[i].ch,
-				       vmm[i].adc,vmm[i].bcid,vmm[i].tb) ;
+				printf("  FEB %d:%d [0x%X], ch %02d: ADC %3d, BCID %4d, tb %4d, BCID_delta %4d\n",feb,vm,vmm[i].feb_vmm,vmm[i].ch,
+				       vmm[i].adc,vmm[i].bcid,vmm[i].tb,vmm[i].bcid_delta) ;
 			}
 		}
 	}

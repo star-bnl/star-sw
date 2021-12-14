@@ -46,8 +46,8 @@ stgc_data_c::stgc_data_c()
 	sector1 = 1 ;
 	rdo1 = 1 ;
 
-	xing_min = -10 ;
-	xing_max = 20 ;
+	xing_min = -65000 ;
+	xing_max = 65000 ;
 
 	event_any = event_data = 0 ;
 
@@ -139,7 +139,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 	st[1] = d[11]>>8 ;
 	st[0] = d[11]&0xFF ;
 
-
+	mhz_trg_marker = 0 ;
 	mhz_start_evt_marker = (((unsigned long)d[5]&0x3F)<<32)|((unsigned long)d[6]<<16)|(unsigned long)d[7] ;
 
 	echo = d[12] ;
@@ -165,8 +165,12 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 
 //	LOG(TERR,"d_last is 0x%04X",*d16_last) ;	// at the datum just before the first 0xFEED
 
-	mhz_stop_evt_marker = (d16_last[-1]<<16)|d16_last[0] ;
+	mhz_stop_evt_marker = (d16_last[-2]<<16)|d16_last[-1] ;
 
+//	if(realtime>90) {
+//		printf("before 0x%04X, last 0x%04X: stop 0x%08X (%u)\n",d16_last[-2],d16_last[-1],mhz_stop_evt_marker,
+//		       mhz_stop_evt_marker) ;
+//	}
 
 	d16_data = d + 13 ;	// first datum is at d[13]
 
@@ -212,8 +216,8 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 			sh |= 2 ;
 		}
 
-		if(echo==0) {	// VMM config
-			if((response & 0xFFFFFFFFFFFFFl) != 0x1150000000000l) sh |= 4;
+		if(echo==0 || echo==0x00C0) {	// VMM config
+//			if((response & 0xFFFFFFFFFFFFFl) != 0x1150000000000l) sh |= 4;
 		}
 		else {
 			if((response & 0xFFFFFFFFFFFFFl) != 0x2C00000000000l) sh |= 8;
@@ -403,6 +407,7 @@ int stgc_data_c::event_0001()
 		vmm.adc = 0 ;
 		vmm.bcid = 0 ;
 		vmm.tb = 0 ;
+		vmm.bcid_delta = 0 ;
 
 		adc_cou-- ;
 		trg_cou++ ;
@@ -448,6 +453,7 @@ int stgc_data_c::event_0001()
 		vmm.adc = 0 ;
 		vmm.bcid = 0 ;
 		vmm.tb = 0 ;
+		vmm.bcid_delta = 0 ;
 
 		bad_error |= evt_err ;
 
@@ -466,6 +472,12 @@ int stgc_data_c::event_0001()
 		vmm.ch = channel ;
 		vmm.adc = pdo ;
 		vmm.bcid = bcid ;
+
+		int delta = bcid - (mhz_trg_marker%4096) ;
+
+		if(delta<0) delta += 4096 ;
+
+		vmm.bcid_delta = delta ;
 	}
 
 
@@ -474,8 +486,8 @@ int stgc_data_c::event_0001()
 	int tb = (int)mhz_adc_marker - (int)(mhz_trg_marker&0x1FFFFFFF) ;
 
 	// since vmm.tb is only 16 bits
-	if(tb<-32000) vmm.tb = 0x8000 ;
-	else if(tb>32000) vmm.tb = 0x7FFF ;
+	if(tb<-0x8000) vmm.tb = 0x8000 ;
+	else if(tb>0x7FFF) vmm.tb = 0x7FFF ;
 	else vmm.tb = tb ;
 
 //	LOG(ERR,"Hack %d",tb) ;

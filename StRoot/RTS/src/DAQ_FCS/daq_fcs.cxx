@@ -60,6 +60,8 @@ daq_fcs::daq_fcs(daqReader *rts_caller)
 	zs = new daq_dta ;
 	ped = new daq_dta ;
 
+	zs->meta = (void *)&fcs_meta ;
+
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
 }
@@ -83,6 +85,9 @@ daq_dta *daq_fcs::get(const char *bank, int sec, int raw, int pad, void *p1, voi
 	Make() ;
 
 	if(present==0) return 0 ;
+
+
+	zs->meta = 0 ;
 
 	LOG(DBG,"%s: looking for bank %s",name,bank) ;
 
@@ -249,7 +254,9 @@ daq_dta *daq_fcs::handle_zs()
 	// bring in the bacon from the SFS file....
 	assert(caller) ;
 
-
+	memset(&fcs_meta,0,sizeof(fcs_meta)) ;
+	fcs_meta.version = 0x00000001 ;
+	zs->meta = (void *)&fcs_meta ;
 
 	// first check the global zs (new in May 2019)
 
@@ -260,6 +267,7 @@ daq_dta *daq_fcs::handle_zs()
 	sprintf(str,"%s/sec%02d/zs",sfs_name,s) ;
 
 	full_name = caller->get_sfs_name(str) ;
+
 
 
 	if(full_name) {
@@ -316,6 +324,9 @@ daq_dta *daq_fcs::handle_zs()
 		if(zs_int[0] & 0xF0000000) {
 			sec = zs_int[0] & 0xFFFF ;
 			rdo = zs_int[0] & 0x1F ;
+
+			fcs_meta.sector1 = ((sec>>11)&0x1F)+1 ;
+			fcs_meta.rdo1 = ((sec>>8)&0x7)+1 ;
 		}
 		else {
 			sec = 0 ;
@@ -373,7 +384,7 @@ daq_dta *daq_fcs::handle_zs()
 				}
 
 			}
-			
+						
 			zs->finalize(a_cou,sec,rdo,ch) ;
 		}
 

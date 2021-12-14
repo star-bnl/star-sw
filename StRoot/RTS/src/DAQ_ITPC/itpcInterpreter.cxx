@@ -1666,6 +1666,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 	u_int err = 0 ;
 	u_int soft_err = 0 ;
 	int fee_cou = 0 ;
+	u_int evt_status = 0 ;
 
 	int expect_fee_cou = itpc_config[sector_id].rdo[rdo_id-1].fee_count ;
 
@@ -2054,7 +2055,7 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 			LOG(ERR,".... %d = 0x%08X",i,data[i]) ;	
 		}
 		
-		if(err || soft_err) return -1 ;
+		if(err || soft_err) return -1 ;	// this is a bit harsh to return already here???
 	}
 
 	// this only works online
@@ -2072,8 +2073,10 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 
 	switch(data[0]) {
 	case 0x98001000 :	// start of trailer
-		if(data[1]!=0) {	// event status
+		evt_status = data[1] ;
+		if(evt_status!=0) {	// event status
 			run_err_add(rdo_id,8) ;
+
 			LOG(ERR,"RDO %d: bad event status 0x%08X",rdo_id,data[1]) ;
 		}
 
@@ -2129,6 +2132,10 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 			data++ ;
 		}
 		break ;
+	}
+
+	if(evt_status) {
+		LOG(ERR,"%d: evt_status 0x%08X",rdo_id,evt_status) ;
 	}
 
 	return 0 ;
@@ -2247,6 +2254,66 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 		return -1 ;
 	}
 
+
+	int no_fees = 0 ;
+	//ds is of the form 0x98000014
+
+	if((data[0]&0xFF00000F)==0x98000004) {
+		rdo_version = (data[0]>>4)&0xFF ;	// aka 1
+	}
+	else {
+		no_fees = 1 ;	// not a triggered event - no FEEs
+	}
+
+	if(dbg_level>1) LOG(TERR,"%d: ds 0x%08X, 0x%X %d, words %d,%d",rdo_id,data[0],rdo_version,no_fees,words,w_cou) ;
+
+
+	// I need the event status ala get_l2
+
+	int trl_ix = -1 ;
+	int trl_stop_ix = -1 ;
+	u_int evt_status = 0 ;
+//	for(int i=(words-6);i>=0;i--) {
+	for(int i=(words-12);i>=0;i--) {
+		if(dbg_level>1) LOG(TERR,"%d: 0x%08X",i,data[i]) ;
+
+		if(data[i]==0x98001000) {
+			trl_ix = i ;
+			break ;
+		}
+		if(data[i]==0x58001001) {
+			trl_stop_ix = i ;
+		}
+	}
+
+	if(no_fees==0) {	// triggered event with FEEs
+		if(trl_ix < 0) {
+			LOG(ERR,"%d: no trailer found, trl_stop_ix %d",rdo_id,trl_stop_ix) ;
+		}
+		else {
+			trl_ix++ ;
+
+			evt_status = (data[trl_ix++]) ;
+			int trg_cou = (data[trl_ix++]) & 0xFFFF ;
+
+			//if(dbg_level>1) LOG(TERR,"%d: evt_status 0x%08X, trg_cou %d, words %d",rdo_id,evt_status,trg_cou,words) ;
+			if(evt_status != 0 || trl_stop_ix<0) {	// FEE timeout
+				LOG(ERR,"%d: evt_status 0x%08X, trg_cou %d, words %d, trl_ix %d, trl_stop_ix %d",rdo_id,evt_status,trg_cou,words,trl_ix,trl_stop_ix) ;
+
+#if 0
+				for(int i=0;i<8;i++) {
+					LOG(TERR,"%d = 0x%08X",i,data[i]) ;
+				}
+				for(int i=(words-32);i<words;i++) {
+					LOG(TERR,"%d = 0x%08X",i,data[i]) ;
+				}
+#endif
+
+				//return -1 ;
+			}
+		}
+	}
+	
 	
 //	for(int i=0;i<16;i++) {
 //		LOG(TERR,"%d/%d = 0x%08X",i,words,data[i]) ;
@@ -2294,6 +2361,8 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 			}
 			else {
 				ret = ana_triggered(data,data_end) ;
+
+				
 			}
 			break ;
 		}

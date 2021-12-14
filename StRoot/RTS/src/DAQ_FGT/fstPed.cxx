@@ -135,7 +135,7 @@ int fstPed::run_stop()
 		int evts = fgt_stat[r].evts ;
 
 		if(fgt_stat[r].err) {
-			LOG(ERR,"RDO %d: %d errors in %d events",r+1,fgt_stat[r].err,evts) ;
+			LOG(WARN,"RDO %d: %d errors in %d events [but this is questionable]",r+1,fgt_stat[r].err,evts) ;
 		}
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {

@@ -92,6 +92,8 @@ long fcs_data_c::dep_to_char(int det, int ns, int dep)
 
 }
 
+#if 0
+// this was for stage2 and stage1 _before_ 23-Nov-2021
 const char *fcs_data_c::stage_labels[] = {
 	"FCS_HAD-HERATIO-THR", //
         "FCS_EM-HERATIO-THR", //
@@ -110,6 +112,78 @@ const char *fcs_data_c::stage_labels[] = {
         "FCS_HHTTHR",	// 13 //
         "FCS_PHTTHR"	// 14 //
 } ;
+#endif
+
+// FY22
+#if 0
+// From Christian
+Word	Type		Value
+0		2x uint8	(had_ratio_thr << 8) || em_ratio_thr
+1		uint11		had_thr_0
+2		uint11		had_thr_1
+3		uint11		had_thr_2
+4		uint11		em_thr_0
+5		uint11		em_thr_1
+6		uint11		em_thr_2
+7		uint11		ele_thr_0
+8		uint11		ele_thr_1
+9		uint11		ele_thr_2
+10		2x uint8	(jp_a_thr_1  << 8) || jp_a_thr_0
+11		2x uint8	(0x00 << 8)	   || jp_a_thr_2
+12		2x uint8	(jp_bc_thr_1 << 8) || jp_bc_thr_0
+13		2x uint8	(jp_bc_thr_d << 8) || jp_bc_thr_2
+14		2x uint8	(jp_de_thr_1 << 8) || jp_de_thr_0
+15		2x uint8	(jp_de_thr_d << 8) || jp_de_thr_2
+16		uint11		etot_thr
+17		uint11		htot_thr
+18		2x uint8	(hcal_ht_thr << 8) || ecal_ht_thr
+19		bit16		signature
+20		N/A
+
+
+#endif
+
+const char *fcs_data_c::stage_labels[32] = {
+	"FCS_HAD-HERATIO-THR", //0
+        "FCS_EM-HERATIO-THR", //1
+
+        "FCS_HADTHR0", //2
+        "FCS_HADTHR1", //3
+        "FCS_HADTHR2", //4
+
+        "FCS_EMTHR0", //5
+        "FCS_EMTHR1", //6
+        "FCS_EMTHR2", //7
+
+        "FCS_ELETHR0", //8
+        "FCS_ELETHR1", //9
+        "FCS_ELETHR2", //10
+
+        "FCS_JPATHR0", //11
+        "FCS_JPATHR1", //12
+        "FCS_JPATHR2", //13
+
+        "FCS_JPBCTHR0", //14
+        "FCS_JPBCTHR1", //15
+        "FCS_JPBCTHR2", //16
+        "FCS_JPBCTHRD", //17
+
+        "FCS_JPDETHR0", //18
+        "FCS_JPDETHR1", //19
+        "FCS_JPDETHR2", //20
+        "FCS_JPDETHRD", //21
+
+        "FCS_ETOTTHR",	//22
+        "FCS_HTOTTHR",	//23
+
+        "FCS_EHTTHR",	//24
+        "FCS_HHTTHR",	//25
+        "FCS_PHTTHR"	//26
+} ;
+
+
+
+
 
 int fcs_data_c::load_stage_params(int sec1, const char *fname)
 {
@@ -125,7 +199,7 @@ int fcs_data_c::load_stage_params(int sec1, const char *fname)
 
 	LOG(INFO,"sector %2d: stage_params %s opened",sec1,fname) ;
 
-	int max_i = 0 ;
+	u_int max_i = 0 ;
 
 	while(!feof(f)) {
 		char buff[128] ;
@@ -155,7 +229,7 @@ int fcs_data_c::load_stage_params(int sec1, const char *fname)
 			if(strcasecmp(stage_labels[i],name)==0) {
 				stage_params_txt[i] = val ;
 				got_it = i ;
-				max_i = i ;
+				if(i>max_i) max_i = i ;
 				break ;
 			}
 		}
@@ -171,7 +245,7 @@ int fcs_data_c::load_stage_params(int sec1, const char *fname)
 	}
 
 	if(sec1==11) {	// LOG from this one only
-		for(int i=0;i<max_i;i++) {
+		for(u_int i=0;i<max_i;i++) {
 			LOG(TERR,"stage_params_txt: %d/%d = %d",i,max_i,stage_params_txt[i]) ;
 		}
 	}
@@ -1418,6 +1492,8 @@ void fcs_data_c::ped_stop(int bad_ped)
 	u_int max_c = 0 ;
 
 
+	if(sector==11 && run_type==1) return ;
+
 //	if(rdo_map[s][r].det >= 3) {	// trigger DEPs
 //		LOG(WARN,"S%d:%d is a DEP/IO -- skipping ped_stop",sector,rdo) ;
 //		return ;
@@ -1538,7 +1614,7 @@ void fcs_data_c::ped_stop(int bad_ped)
 
 		switch(run_type) {
 		case 1 :
-			if((m<6.0)||(m>200.0)||(rms<0.3)||(rms>1.0)) err = 1 ;
+			if((m<3.0)||(m>200.0)||(rms<0.3)||(rms>2.2)) err = 1 ;
 			break ;
 		case 2 :
 			if(ped[s][r].bad_4[c]) {
@@ -1568,6 +1644,62 @@ void fcs_data_c::ped_stop(int bad_ped)
 	}
 
 	fclose(pedf) ;
+
+
+	if(!bad_ped && run_type==1) {
+
+		sprintf(fname,"/RTScache/fcs_pedestals_s%02d_r%d_f%u.txt",sector,rdo,rhic_freq) ;
+
+		LOG(WARN,"also making pedestals formal to [%s]",fname) ;
+
+		pedf = fopen(fname,"w") ;
+		if(pedf==0) {
+			LOG(ERR,"Can't open %s [%s]",fname,strerror(errno)) ;
+			return ;
+		}
+
+
+		int d = rdo_map[s][r].det ;
+		int n = rdo_map[s][r].ns ;
+		int p = rdo_map[s][r].dep ;
+
+		fprintf(pedf,"# Sector %2d, RDO %d\n",sector,rdo) ;
+		fprintf(pedf,"# Det %d, NS %d, DEP %d\n",d,n,p) ;
+		fprintf(pedf,"# RUN %08u, type %d %s\n",run_number,run_type,status) ;
+		fprintf(pedf,"# TIME %u\n",(unsigned int)now) ;
+		char *ctm = ctime(&now) ;
+		fprintf(pedf,"# DATE %s",ctm) ;
+		fprintf(pedf,"# RHIC %u, FEE state %d\n",rhic_freq,fee_state) ;
+
+		fprintf(pedf,"\n") ;
+
+		int c_max ;
+
+		if((s+1)==11) {
+			if((r+1)==5) c_max = 4 ;
+			else c_max = 37 ;
+		}
+		else c_max = 32 ;
+	
+		for(int c=0;c<c_max;c++) {
+			//double m = ped[s][r].mean[c] ;
+			//double rms = ped[s][r].rms[c] ;
+			
+			double rms8 = ped[s][r].rms_8[c] ;
+
+			if(run_type==2) rms8 = ped[s][r].bad_4[c] ;
+		
+			fprintf(pedf,"%d %d %d %d %d %d %f %f %f %f\n",sector,rdo,d,n,p,c,
+				ped[s][r].mean[c],ped[s][r].rms[c],
+				ped[s][r].mean_8[c],rms8) ;
+
+		}
+
+		fclose(pedf) ;
+	}
+	else {
+		LOG(ERR,"S%d:%d: not caching pedestals 0x%X",sector,rdo,bad_ped) ;
+	}
 
 }
 
