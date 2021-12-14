@@ -38,11 +38,11 @@ const float fstBuilder::maxTbFracOK       = 0.9;
 const float fstBuilder::landauFit_dn      = 10.0;
 const float fstBuilder::landauFit_up      = 2000.0;
 const float fstBuilder::cmnCut            = 3.0;
-const float fstBuilder::hitCut            = 4.0;
-const float fstBuilder::zsCut             = 4.0;
+const float fstBuilder::hitCut            = 25.0;
+const float fstBuilder::zsCut             = 25.0;
 const float fstBuilder::noiseChipCut      = 10.0;
 const int   fstBuilder::hitOccupancyCut   = 100;
-const int   fstBuilder::defTb             = 5;
+const int   fstBuilder::defTb             = 2;
 
 // constant used for FST Geometry Hit Map
 // all values are defined by inner direction
@@ -1401,7 +1401,7 @@ void fstBuilder::event(daqReader *rdr)
       int sigElecChanId = lclElecChanId%ChPerApv;                                        // 0-127
       int glbSecIdx     = (rdoIdx-1)*SecPerRdo + armIdx*SecPerArm + refApvIdx/ApvPerSec; // 0-71
 
-      float ran   = ranStdDevs[geoIdx];
+      float ran = ranStdDevs[geoIdx];
 
       //ZS data
       if( maxAdc_zs[geoIdx] > zsCut*ran && ran > minRanVal && ran < maxRanVal) {//roughly cut
