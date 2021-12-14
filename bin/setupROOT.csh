@@ -163,6 +163,10 @@ switch ( $STAR_HOST_SYS )
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++14"
      breaksw
     case *gcc6*:
+#     setenv ENABLE_CXX11 "--enable-cxx11"
+#     setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++14"
+     breaksw
+    case *gcc6*:
      setenv ENABLE_CXX11 "--enable-cxx11"
      setenv EXTRA_FLAGS " $EXTRA_FLAGS --cflags=--std=c++14"
      breaksw
