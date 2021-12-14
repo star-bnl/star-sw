@@ -70,7 +70,7 @@ void unit_test_tpc_hits( int longtest=0 ) {
   Accumulator_t step; // Step size
   Accumulator_t time; // Time per throw
   
-  for ( int sector=1; sector<=24; sector++ ) {
+  for ( int sector=1; sector<=1; sector++ ) {
 
     timer.Start();
     throw_muon_in_tpc_sector( sector );
@@ -156,8 +156,8 @@ void unit_test_tpc_hits( int longtest=0 ) {
 	return result;
       });
     check_track( Form("The track should have an eta=%f",_eta),     [=](const g2t_track_st* t){
-	double delta = abs(t->eta-_eta);	
-	return abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
+	double delta = TMath::Abs(t->eta-_eta);	
+	return TMath::Abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
     });
     check_track( "Expect 76 hits in the dev2021 geometry",         [=](const g2t_track_st* t){
       int n = t->n_tpc_hit;
@@ -251,8 +251,8 @@ void unit_test_tpc_hits( int longtest=0 ) {
 	  int rotator = (sector>12)? 12-sector : sector-12;
 	  double rotatord = (double) rotator;
 	  hitpos.RotateZ( rotatord * TMath::Pi() / 6.0 );
-	  bool isInSectorPhi = abs(hitpos.Phi() - TMath::Pi()/2.0) < TMath::Pi()/12.0;
-	  bool isInSectorR   = abs(hitpos.Perp() -124.0) < 76.0;
+	  bool isInSectorPhi = TMath::Abs(hitpos.Phi() - TMath::Pi()/2.0) < TMath::Pi()/12.0;
+	  bool isInSectorR   = TMath::Abs(hitpos.Perp() -124.0) < 76.0;
 	  bool isInSector    = isInSectorPhi && isInSectorR;	  
 	  std::string result = Form("(%f %f %f / in phi=%i r=%i",x,y,z,isInSectorPhi,isInSectorR);
 	  result += ( isInSector ) ? PASS : FAIL;	  

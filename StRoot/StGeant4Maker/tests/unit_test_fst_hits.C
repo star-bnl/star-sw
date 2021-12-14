@@ -98,8 +98,8 @@ void unit_test_fst_hits() {
 	  return result;
 	});
       check_track( Form("The track should have an eta=%f",_eta),     [=](const g2t_track_st* t){
-	  double delta = abs(t->eta-_eta);	
-	  return abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
+	  double delta = TMath::Abs(t->eta-_eta);	
+	  return TMath::Abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
 	});
       check_track( "Expect 3 hits in the dev2021 geometry",          [=](const g2t_track_st* t){
 	  int n = t->n_fts_hit;
@@ -160,7 +160,7 @@ void unit_test_fst_hits() {
 	  sqrt( h->x[0]*h->x[0] +
 		h->x[1]*h->x[1] +
 		h->x[2]*h->x[2] );			    
-	double diff = abs(c_tof-s_trk);
+	double diff = TMath::Abs(c_tof-s_trk);
 	if ( diff < 0.015 ) result = PASS;
 	result = Form("c_tof=%f cm  strack=%f cm diff=%f cm ",c_tof,s_trk,diff) + result;
 	return result;

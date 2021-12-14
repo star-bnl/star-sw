@@ -124,15 +124,15 @@ void unit_test_emc_hits() {
      	return result;
 	});
       check_track( "The track should has the expected eta",          [=](const g2t_track_st* t){
-	  double delta = abs(t->eta-_eta);	
+	  double delta = TMath::Abs(t->eta-_eta);	
 	  std::string result = FAIL;
-	  if ( abs(t->eta-_eta)<1E-5 ) 
+	  if ( TMath::Abs(t->eta-_eta)<1E-5 ) 
 	    result = PASS;
 	  result = Form(" expect %f got %f ", _eta, t->eta ) + result;
 	  return result;
 	});
       // check_track( "The track should has the expected phi",          [=](const g2t_track_st* t){
-      // 	  double delta = abs(t->phi-_phi);	
+      // 	  double delta = TMath::Abs(t->phi-_phi);	
       // 	  return delta<1E-5 ?PASS:FAIL;      
       // 	});
       check_track( "Expect 2 hits in the dev2021 geometry",          [=](const g2t_track_st* t){

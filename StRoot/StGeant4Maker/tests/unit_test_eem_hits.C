@@ -182,8 +182,8 @@ void unit_test_eem_hits() {
 	  return result;
 	});
       check_track( Form("The track should have an eta=%f",_eta),     [=](const g2t_track_st* t){
-	  double delta = abs(t->eta-_eta);	
-	  return abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
+	  double delta = TMath::Abs(t->eta-_eta);	
+	  return TMath::Abs(t->eta-_eta)<1E-5 ?PASS:FAIL;      
 	});
       check_track( "Expect 5 hits in the dev2021 geometry",          [=](const g2t_track_st* t){
 	  int n = t->n_eem_hit;
