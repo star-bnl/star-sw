@@ -38,11 +38,11 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 
 	       SecRow3  Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3
 	       SecRow3C PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C
 	       SecRow3P SecRow3PC SecRow3+SecRow3P SecRow3C+SecRow3PC 
-	       AdcI3 dZdY3 dXdY3  nPad3 nTbk3
-	       AdcI3C dZdY3C dXdY3C nPad3C nTbk3C
-	       AdcI3P dZdY3P dXdY3P  nPad3P nTbk3P
-	       AdcI3PC dZdY3PC dXdY3PC nPad3PC nTbk3PC
 	     );
+# 	       AdcI3 dZdY3 dXdY3  nPad3 nTbk3
+# 	       AdcI3C dZdY3C dXdY3C nPad3C nTbk3C
+# 	       AdcI3P dZdY3P dXdY3P  nPad3P nTbk3P
+# 	       AdcI3PC dZdY3PC dXdY3PC nPad3PC nTbk3PC
 #	       AdcI3P dZdY3P dXdY3P
 #	       AdcI3+AdcI3P dZdY3+dZdY3P dXdY3+dXdY3P
 # SecRow3  PressureTC Volt VoltCC  xyPad3C Edge3C TanL3DC TanL3DiTPCC   dX3iTPCC dX3C   SecRow3PC Z3OC Zdc3 Pressure Time 
@@ -54,10 +54,10 @@ if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 
   @histGP = qw (
 		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
 		 TPoints270 TPoints2F TPoints270U TPoints2FU  TPoints2N TPoints2NU
+ 		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
+ 		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
 	      );
 # 		 I70eP I70eN I70protonP I70protonN I70kaonP I70kaonN I70piP I70piN I70muP I70muN I70deuteronP I70deuteronN I70tritonP I70tritonN I70He3P I70He3N I70alphaP I70alphaN 
-# 		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
-# 		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
 #		 EtaF Eta70 
 #		 SecRow3C SecRow3PC
 #		 EtaiTPCF EtaiTPC70 TPoints70iTPC TPointsFiTPC TPoints70UiTPC TPointsFUiTPC  TPointsNiTPC TPointsNUiTPC
