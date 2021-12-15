@@ -7,7 +7,7 @@
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_STGC/daq_stgc.h>
 #include "Jevp/StJevpPlot/RunStatus.h"
-
+#include "Jevp/StJevpPlot/ImageWriter.h"
 #include <TH1D.h>
 #include <TH2F.h>
 #include <TString.h>
@@ -296,8 +296,9 @@ void fttBuilder::startrun(daqReader *rdr) {
 
 void fttBuilder::stoprun(daqReader *rdr) {
     
-    fitTriggerTime();
-
+    PCP;
+    fitTriggerTime(false);
+    PCP;
 
     // for ( int iPlane = 0; iPlane < 4; iPlane ++){
     //         for ( int iRow = 3; iRow < 5; iRow ++ ){
@@ -569,7 +570,23 @@ void fttBuilder::drawStrip( TH2 * h2, int row, int strip, VMMHardwareMap::Quadra
 
 
 
-void fttBuilder::fitTriggerTime(){
+void fttBuilder::fitTriggerTime(bool protect){
+    
+    // The fit is not local in root, so this causes segmentation faults
+    // if occuring at the same time as any histograms plotting
+    // prevent this.
+    //
+    // protect is on by default,  
+    // in stoprun, the mutex is already owned, so turn it off
+    //
+    if(protect && parent && parent->imageWriter) {
+	if(pthread_mutex_trylock(&parent->imageWriter->mux) != 0) {
+	    LOG(DBG, "Can't take imageWriter mutex");
+	    updateTimeFit = 0;  // don't try again right away!
+	    return;
+	}
+    }
+    PCP;
 
     if ( nullptr == f1TriggerTime )
         f1TriggerTime = new TF1( "fg", "gaus" );
@@ -588,6 +605,10 @@ void fttBuilder::fitTriggerTime(){
     contents.hitsPerTb400->Fit( f1TriggerTime, "RQ", "", m - s*1.5, m + s*1.5 );
     updateTimeFit = 0;
 
+    PCP;
+    if(protect && parent && parent->imageWriter) {
+	pthread_mutex_unlock(&parent->imageWriter->mux);
+    }
 }
 
 void fttBuilder::processVMMHit( int iPlane, VMMHardwareMap::Quadrant quad, stgc_vmm_t rawVMM ){
@@ -676,7 +697,9 @@ void fttBuilder::processVMMHit( int iPlane, VMMHardwareMap::Quadrant quad, stgc_
     }
 
     if ( updateTimeFit > fitUpdateInterval ) {
+	PCP;
         fitTriggerTime();
+	PCP;
     }
 
     updateTimeFit++;
@@ -728,7 +751,9 @@ void fttBuilder::processVMM(daqReader *rdr) {
 
 void fttBuilder::event(daqReader *rdr) {
     LOG(DBG, "-------> START EVENT, #%d",rdr->seq);
+    PCP;
     processVMM(rdr);
+    PCP;
 }
 
 void fttBuilder::main(int argc, char *argv[])

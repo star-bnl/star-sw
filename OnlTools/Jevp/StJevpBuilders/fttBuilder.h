@@ -297,7 +297,7 @@ class fttBuilder : public JevpBuilder {
   void event(daqReader *rdr);
 
   void processVMM(daqReader *rdr);
-  void fitTriggerTime();
+  void fitTriggerTime(bool protect=true);
 
   void fillPoint( TH2 * h2, float x, float y, float w = 1.0 );
   void fillLine( TH2 * h2, float x0, float y0, float x1, float y1 );
