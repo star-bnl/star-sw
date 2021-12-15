@@ -1,6 +1,7 @@
 #include <StHitCollection.h>
 
 #include <TVirtualMC.h>
+#include <TMCManager.h>
 #include <TGeoManager.h>
 #include <TGeoNavigator.h>
 
@@ -118,7 +119,10 @@ void StTrackerHitCollection::Initialize() {
 void StTrackerHitCollection::ProcessHits() {
 
   TGeoNavigator* navigator = gGeoManager->GetCurrentNavigator();
-  TVirtualMC*    mc = TVirtualMC::GetMC();
+  TVirtualMC*    mc = (TMCManager::Instance()) ? 
+    TMCManager::Instance()->GetCurrentEngine() :
+    TVirtualMC::GetMC();
+
   TGeoVolume*    current = navigator->GetCurrentVolume();
 
   LOG_INFO << mc->CurrentVolPath() << endm;
