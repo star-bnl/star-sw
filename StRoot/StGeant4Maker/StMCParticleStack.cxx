@@ -13,6 +13,8 @@ using namespace std;
 #include <TGeoVolume.h>
 #include <TGeoMedium.h>
 
+#include <TMCManager.h>
+
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 #include <GeometryUtils.h>
 #include <StMaker.h>
@@ -165,7 +167,6 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
 
   bool tracing = (vr2<Rmax2) && (TMath::Abs(vz)<mScoringZmax) && energy > mScoringEmin;
   
-
   //
   // And handle region-based track persistence
   //
@@ -195,6 +196,13 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
     vertex->setMedium(imed);
     vertex->setProcess( mech );
 
+  }
+
+  //
+  // Forward to TMCManager if it exists
+  //
+  if ( auto mgr = TMCManager::Instance() ) {
+    mgr -> ForwardTrack( toDo, ntr, parent, particle );
   }
 
 
