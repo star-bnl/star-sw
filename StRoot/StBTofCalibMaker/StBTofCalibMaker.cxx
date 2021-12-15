@@ -10,6 +10,11 @@
  *              - store into StBTofPidTraits
  *
  *****************************************************************
+ *Revision 1.24 2021/12/06 15:11:00, bkimel
+ *select vertex in target region 198<V_z<202 when mFXTMode == true,
+ *include nT0 iterative outlier rejection for mFXTMode with new nT0 == 1 and nT0 == 2
+ *cases
+ *
  *Revision 1.23 2020/10/09 11pm, Zaochen
  *add (if (IAttr("btofFXT")) mFXTMode = kTRUE;) in the Init(),
  *it could allow the chain option "btofFXT" to turn on the FXTMode easily
@@ -291,7 +296,12 @@ Int_t StBTofCalibMaker::Init()
     resetPars();
     resetVpd();
 
-	if (IAttr("btofFXT")) mFXTMode = kTRUE; //True for FXT mode calib, default as false for collider mode calib
+
+    if (IAttr("btofFXT")){//True for FXT mode calib, default as false for collider mode calib
+      mFXTMode = kTRUE;
+      LOG_INFO << "btofFXT mode is on." << endm;
+    }
+
 
   if (IAttr("pppAMode")) {
       mPPPAMode = kTRUE;
@@ -1121,6 +1131,17 @@ void StBTofCalibMaker::processStEvent()
     } else {   // Don't use VPD as the start time
 
         StPrimaryVertex *pVtx = mEvent->primaryVertex();
+	if(mFXTMode){
+	  int nPrimaryVertices = mEvent->numberOfPrimaryVertices();
+	  for(int iVtx=0; iVtx<nPrimaryVertices; iVtx++){
+	    pVtx = mEvent->primaryVertex(iVtx);
+	    if(pVtx->position().z() > 198. && pVtx->position().z() < 202.) break;
+	    else if(iVtx == nPrimaryVertices - 1){
+	      LOG_WARN << " No FXT primary vertex within target ... bye-bye" << endm;
+	      return;
+	    }
+	  }
+	}
         if(!pVtx) {
             LOG_WARN << " No primary vertex ... bye-bye" << endm;
             return;
@@ -1442,6 +1463,17 @@ void StBTofCalibMaker::processMuDst()
     } else { // don't use vpd as the start time
 
         StMuPrimaryVertex *pVtx = mMuDst->primaryVertex();
+	if(mFXTMode){
+          int nPrimaryVertices = mMuDst->numberOfPrimaryVertices();
+          for(int iVtx=0; iVtx<nPrimaryVertices; iVtx++){
+            pVtx = mMuDst->primaryVertex(iVtx);
+            if(pVtx->position().z() > 198. && pVtx->position().z() < 202.) break;
+            else if(iVtx == nPrimaryVertices - 1){
+	      LOG_WARN << " No FXT primary vertex within target ... bye-bye" <<endm;
+	      return;
+            }
+          }
+        }
         if(!pVtx) {
             LOG_WARN << " No primary vertex ... bye-bye" << endm;
             return;
@@ -2086,7 +2118,7 @@ void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPr
 
     Int_t nTzero = nCan;
 
-if(mPPPAMode || mPPPAOutlierRej)
+if(mPPPAMode || mPPPAOutlierRej || mFXTMode)
 {
     const float outlierCut = 2.5 * 0.086; // numberOfSigmas * time resolution (sigma) of a BTof pad
     if(nCan>1) {
@@ -2111,6 +2143,9 @@ if(mPPPAMode || mPPPAOutlierRej)
         } // end of while(nTzero>2)
         if(nTzero==2){
             if(fabs(t0[0]-t0[1])>sqrt(2.0)*outlierCut) {
+	      if(mFXTMode){
+		nTzero = 0; // in FXT mode, if only 2 tracks and too far apart in time, set nT0 to 0
+	      }else{
                 float vpdTDiffCut = 0.25; // Acceptance window between an individual t0 vlaue
                                           // and VPD start time based on the VPD resolution
                 double vpdStartTime = 0.;
@@ -2139,9 +2174,13 @@ if(mPPPAMode || mPPPAOutlierRej)
                 else {
                     nTzero = 0;
                 }
-            }
+	      }// end else (!mFXTMode)
+	    } // end if(fabs(t0[0]-t0[1])>sqrt(2.0)*outlierCut)
         } // end of if(nTzero==2)
     } // end of if(nCan>1)
+    else if(mFXTMode && nCan == 1){
+      nTzero = 0; //in FXT mode, if only 1 track set nT0 to 0 since contamination too easy
+    }
 }
 else
 {
@@ -2330,7 +2369,7 @@ void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVerte
     Int_t nTzero = nCan;
 
     // Adjusting the default outlier rejection to accomodate for PPPAMode
-    if(mPPPAMode || mPPPAOutlierRej)
+    if(mPPPAMode || mPPPAOutlierRej || mFXTMode)
     {
         if(mPPPAModeHist) {
             if(nCan==1) { // filling global DCA histograms before outlier rejection
@@ -2373,6 +2412,9 @@ void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVerte
             } // end of while(nTzero>2)
             if(nTzero==2){
                 if(fabs(t0[0]-t0[1])>sqrt(2.0)*outlierCut) {
+		  if(mFXTMode){
+		    nTzero = 0;
+		  }else{
                     float vpdTDiffCut = 0.25; // Acceptance window between an individual t0 vlaue
                                               //and VPD start time based on the VPD resolution
                     double vpdStartTime = 0.;
@@ -2407,9 +2449,13 @@ void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVerte
                     else {
                         nTzero = 0;
                     }
-                }
+		  }// end else (!mFXTMode)
+		}//end if(fabs(t0[0]-t0[1])>sqrt(2.0)*outlierCut)
             } // end of if(nTzero==2)
         } // end of if(nCan>1)
+	else if(mFXTMode && nCan == 1){
+	  nTzero = 0; //in FXT mode, if only 1 track set nT0 to 0 since contamination too easy
+	}
     }
     else
     {

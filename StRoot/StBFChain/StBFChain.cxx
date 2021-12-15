@@ -1042,6 +1042,7 @@ Int_t StBFChain::Instantiate()
       if  (GetOption("UseMCTstart"))        mk->SetAttr("UseMCTstart",kTRUE);
 #endif
       if  (GetOption("FXT"))                mk->SetAttr("btofFXT",kTRUE);
+      if (GetOption("btofFXT")) mk->SetAttr("btofFXT", kTRUE);
     }
     if (maker == "StVpdCalibMaker" && GetOption("pppAMode")) mk->SetAttr("pppAMode", kTRUE);
     if (maker == "StVpdCalibMaker" && GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
