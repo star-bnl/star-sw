@@ -570,8 +570,20 @@ int StGeant4Maker::Init() {
 
   if ( gG4 ) AddObj( gG4, ".const", 0 );
   if ( gG3 ) AddObj( gG3, ".const", 0 );
+
   if ( gG3 && gG4 ) {
-    LOG_INFO << "Application will run both G3 and G4 physics engines" << endm;
+    LOG_INFO << "Application will run both G3 and G4 physics engines, with default as "<< SAttr("all:physics") << endm;
+    //    TString default = SAttr("all:physics");
+
+    // Verify that G3 and G4 registered themselves with the manager
+    auto* mgr = TMCManager::Instance();
+    if ( mgr ) {
+      std::vector<TVirtualMC*> engines;
+      mgr->GetEngines(engines);
+      for ( auto* mc : engines ) {
+	mc->Print();
+      }
+    }
   }
 
   //
@@ -629,10 +641,11 @@ int StGeant4Maker::Init() {
     mc->SetRootGeometry();
   };
   auto SetStack            = [this](TVirtualMC* mc){ mc->SetStack(mMCStack); };
-  auto InitializeMC        = [SetDefaultCuts,SetDefaultProcesses,SetFieldAndGeometry](TVirtualMC* mc) {
+  auto InitializeMC        = [SetDefaultCuts,SetDefaultProcesses,SetFieldAndGeometry,SetStack](TVirtualMC* mc) {
     SetDefaultCuts(mc);
     SetDefaultProcesses(mc);
     SetFieldAndGeometry(mc);
+    SetStack(mc);
     mc->Init();
     mc->BuildPhysics();
   };
@@ -652,7 +665,7 @@ int StGeant4Maker::Init() {
     LOG_INFO << "Initialize Geant 4 standalone" << endm;
 
     InitializeMC( gG4 );
-    SetStack( gG4 );
+    //SetStack( gG4 );
     
     TG4RunManager* runManager = TG4RunManager::Instance();
     runManager->UseRootRandom(false);
@@ -665,7 +678,7 @@ int StGeant4Maker::Init() {
     LOG_INFO << "Initialize GEANT3 standalone" << endm;
     
     InitializeMC( gG3 );
-    SetStack( gG3 );
+    //SetStack( gG3 );
  
   }
 
@@ -871,6 +884,8 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     }
 
     // Register this volume to the sensitive detector
+
+    // TODO: handle multi-engine 
     if ( nullptr == TVirtualMC::GetMC()->GetSensitiveDetector( vname ) ) {
       TVirtualMC::GetMC()->SetSensitiveDetector( vname, sd );
     }
@@ -898,6 +913,7 @@ int  StGeant4Maker::ConfigureGeometry() {
     for ( auto kv : agmlExt->GetCuts() ) {
       LOG_INFO << kv.first << " = " << kv.second << endm;
       TVirtualMC::GetMC()->Gstpar( media[id]=id, kv.first, kv.second );
+      // TODO: handle multi-engine 
     }
   }
 
@@ -920,6 +936,7 @@ void StGeant4Maker::FinishEvent(){
   event = {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0};
   g2t_event->AddAt( &event );
 
+  // TODO: handle multi-engine 
   StMCParticleStack* stack    = (StMCParticleStack *)TVirtualMC::GetMC()->GetStack();
   auto&              vertex   = stack->GetVertexTable();
   auto&              particle = stack->GetParticleTable();
@@ -1085,6 +1102,7 @@ void StGeant4Maker::PostTrack()
 void StGeant4Maker::UpdateHistory() {
 
   static auto* navigator    = gGeoManager->GetCurrentNavigator();
+  // TODO: handle multi-engine 
   static auto* mc           = TVirtualMC::GetMC();
 
 
@@ -1133,7 +1151,9 @@ int StGeant4Maker::regionTransition( int curr, int prev ) {
   TString previous = (mPreviousNode) ? mPreviousNode->GetName() : "";
   int result = 0;
 
+  // TODO: handle multi-engine 
   static auto mc = TVirtualMC::GetMC();
+
   static double Rmin = DAttr("Stepping:Punchout:Rmin");
   static double Zmin = DAttr("Stepping:Punchout:Zmin");
 
@@ -1171,6 +1191,8 @@ void StGeant4Maker::Stepping(){
 
   //  static auto* navigator    = gGeoManager->GetCurrentNavigator();
   //  static auto* trackManager = TG4TrackManager::Instance();
+
+  // TODO: handle multi-engine 
   static auto* mc = TVirtualMC::GetMC(); 
   static auto* stack = (StMCParticleStack* )mc->GetStack();
 
