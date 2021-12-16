@@ -39,12 +39,22 @@ Int_t StFttQAMaker::Init()
 //_____________________________________________________________                                                       
 Int_t StFttQAMaker::InitRun(Int_t runnumber)
 { 
+    if ( mDebug ){
+        mCanvas = new TCanvas( "c", "c", 1200, 900 );
+        mClusterPdfName = TString::Format( "ClusterViz_Run%d.pdf", GetRunNumber() );
+        LOG_INFO << "Opening " << mClusterPdfName.Data() << endm;
+        mCanvas->Print( (mClusterPdfName + "[").Data() );
+    }
     return kStOk;
 }
 
 //_____________________________________________________________                                                       
 Int_t StFttQAMaker::FinishRun(Int_t runnumber)
 { 
+    if ( mDebug ){
+        LOG_INFO << "Closing " << mClusterPdfName.Data() << endm;
+        mCanvas->Print( (mClusterPdfName + "]").Data() );
+    }
     return kStOk;
 }
 
@@ -52,6 +62,11 @@ Int_t StFttQAMaker::FinishRun(Int_t runnumber)
 Int_t StFttQAMaker::Finish()
 { 
     LOG_INFO << "StFttQAMaker::Finish()" << endm;
+    if ( mDebug ){
+        LOG_INFO << "Closing " << mClusterPdfName.Data() << endm;
+        mCanvas->Print( (mClusterPdfName + "]").Data() );
+    }
+
     mFile->cd();
 
     WriteHistograms();
@@ -82,10 +97,13 @@ Int_t StFttQAMaker::Make()
     } else {
         LOG_DEBUG <<"Found StFttCollection"<<endm;
     }
+
+    mFttDb = static_cast<StFttDb*>(GetDataSet("fttDb"));
     
     MakeRawHitQA();
     MakeClusterQA();
-    
+
+    mFttTree->Fill();
     return kStOk;
 }
 
@@ -151,30 +169,13 @@ StFttQAMaker::MakeRawHitQA(){
 
         // LOG_INFO << "n = " << mFttData.N << endm;
     } // rawHits
-
-    mFttData.cN = 0;
-    for ( auto clu : mFttCollection->clusters() ) {
-        mFttData.cplane[mFttData.cN]   = clu->plane();
-        mFttData.cquad[mFttData.cN]    = clu->quadrant();
-        mFttData.cdir[mFttData.cN]     = clu->orientation();
-
-        mFttData.crow[mFttData.cN]     = clu->row();
-        mFttData.csumadc[mFttData.cN]  = clu->sumAdc();
-        mFttData.cnstrips[mFttData.cN] = clu->nStrips();
-        mFttData.cx[mFttData.cN]       = clu->x();
-        mFttData.csigma[mFttData.cN]   = clu->sigma();
-        mFttData.cN++;
-    }
-
-    mFttTree->Fill();
 }
 
 void StFttQAMaker::PlotClusterWithHits( vector<StFttRawHit*> hits ){
-    if( histCounter > 100 ) return;
+    if( histCounter > maxClusterViz ) return;
     LOG_INFO << "PlotClusterWithHits :: Event " << GetIventNumber() << endm;
 
     bool sort_and_dedup = true;
-
     string label = "(w/dups)";
     if ( sort_and_dedup ){
         auto cmp = [](StFttRawHit* a, StFttRawHit* b) { 
@@ -182,7 +183,8 @@ void StFttQAMaker::PlotClusterWithHits( vector<StFttRawHit*> hits ){
             return  a->plane() < b->plane() ||
                     a->quadrant() < b->quadrant() ||
                     a->row() < b->row() ||
-                    a->strip() < b->strip(); 
+                    a->strip() < b->strip() ||
+                    a->orientation() < b->orientation(); 
         };
     
         // NOTE according to SO this is faster than using ctor
@@ -190,19 +192,21 @@ void StFttQAMaker::PlotClusterWithHits( vector<StFttRawHit*> hits ){
         unsigned size = hits.size();
         for( auto h : hits ) s.insert( h );
         hits.assign( s.begin(), s.end() );
-    
+
+        // Sort the hits by row and strip
         sort(hits.begin(), hits.end(), [](const StFttRawHit * a, const StFttRawHit * b) -> bool { 
-                size_t indexA = a->strip() + a->row() * StFttDb::maxStripPerRow;
-                size_t indexB = b->strip() + b->row() * StFttDb::maxStripPerRow;
+                size_t indexA = a->orientation() + StFttDb::nStripOrientations * ( a->strip() + a->row() * StFttDb::maxStripPerRow);
+                size_t indexB = b->orientation() + StFttDb::nStripOrientations * ( b->strip() + b->row() * StFttDb::maxStripPerRow);
                 return indexA < indexB; 
             });
-        string label = "(wo/dups)";
+        label = "(wo/dups)";
     }
 
-    TCanvas *c = new TCanvas( "c", "c", 1200, 900 );
+    
     string n = TString::Format( "h%lu", histCounter ).Data();
     auto h0 = hits[0];
-    int indexHit = (int)h0->orientation() + 6 * ( h0->row() + 6 * ( h0->quadrant() + 5 * h0->plane() ));
+    // int indexHit = (int)h0->orientation() + 6 * ( h0->row() + 6 * ( h0->quadrant() + 5 * h0->plane() ));
+    size_t indexHit = StFttDb::uuid( h0, false );
     TH1 *h1 = new TH1F( n.c_str(), 
                         TString::Format( "[Event: %lu] Plane %d, Quadrant %d, Row %d, Dir %d %s", GetIventNumber(), h0->plane(), h0->quadrant(), h0->row(), h0->orientation(), label.c_str() ), 
                         200, -0.5, 200-0.5 );
@@ -222,7 +226,8 @@ void StFttQAMaker::PlotClusterWithHits( vector<StFttRawHit*> hits ){
 
     
     for ( auto clu : mFttCollection->clusters() ) {
-        int indexClu = (int)clu->orientation() + 6 * ( clu->row() + 6 * ( clu->quadrant() + 5 * clu->plane() ));
+        // int indexClu = (int)clu->orientation() + 6 * ( clu->row() + 6 * ( clu->quadrant() + 5 * clu->plane() ));
+        size_t indexClu = StFttDb::uuid( clu );
 
         if ( indexHit != indexClu ) continue;
 
@@ -239,8 +244,7 @@ void StFttQAMaker::PlotClusterWithHits( vector<StFttRawHit*> hits ){
         LOG_INFO << "Cluster at (" << clu->sumAdc() << ", " << clu->x() << ", " << clu->sigma() << " )" << endm;
     }
 
-    LOG_INFO << "Printing h" << histCounter << ".pdf" << endm;
-    c->Print( TString::Format( "h%lu.pdf", histCounter ) );
+    mCanvas->Print( mClusterPdfName.Data() );
 
     mH1d[n] = h1;
     LOG_INFO << "Adding Cluster+Hits Histogram: " << n << endm;
@@ -252,30 +256,43 @@ void StFttQAMaker::PlotClusterWithHits( vector<StFttRawHit*> hits ){
 void StFttQAMaker::MakeClusterQA(){
     LOG_INFO << "MakeClusterQA :: Event " << GetIventNumber() << " has " << mFttCollection->rawHits().size() << " rawHits" << endm;
 
+    // Fill the tree
+    mFttData.cN = 0;
+    for ( auto clu : mFttCollection->clusters() ) {
+        mFttData.cplane[mFttData.cN]   = clu->plane();
+        mFttData.cquad[mFttData.cN]    = clu->quadrant();
+        mFttData.cdir[mFttData.cN]     = clu->orientation();
+
+        mFttData.crow[mFttData.cN]     = clu->row();
+        mFttData.csumadc[mFttData.cN]  = clu->sumAdc();
+        mFttData.cnstrips[mFttData.cN] = clu->nStrips();
+        mFttData.cx[mFttData.cN]       = clu->x();
+        mFttData.csigma[mFttData.cN]   = clu->sigma();
+        mFttData.cN++;
+    }
 
 
-
+    size_t nGoodHits = 0;
+    // Prepare hits for cluster visualization
     map< int, vector<StFttRawHit*> > hitProj;
     for ( auto rawHit : mFttCollection->rawHits() ) {
-        int index = (int)rawHit->orientation() + 6 * ( rawHit->row() + 6 * ( rawHit->quadrant() + 5 * rawHit->plane() ));
-
+        // int index = (int)rawHit->orientation() + 6 * ( rawHit->row() + 6 * ( rawHit->quadrant() + 5 * rawHit->plane() ));
+        size_t index = StFttDb::uuid( rawHit, false );
         if ( rawHit->tb() < -70 || rawHit->tb() > 20 ) continue;
-
-        if ( 16 == GetIventNumber() ){
-            LOG_INFO << "[index=" << index << "] ->" << *rawHit << endm;
-        }
-
+        nGoodHits++;
         hitProj[index].push_back( rawHit );
     }
 
+    LOG_INFO << "StFttQAMaker found " << nGoodHits << " num good hits" << endm;
 
-    for ( auto kv : hitProj ){
-        PlotClusterWithHits( kv.second );
+    if ( mDebug ){
+        for ( auto kv : hitProj ){
+            PlotClusterWithHits( kv.second );
+        }
+        
     }
 
 }
-
-
 
 //_____________________________________________________________  
 void

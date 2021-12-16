@@ -39,15 +39,16 @@ public:
 
 private:
     void ApplyHardwareMap();
-    std::vector<StFttCluster*> FindClusters( std::vector<StFttRawHit * >, UChar_t );
+    std::vector<StFttCluster*> FindClusters( std::vector<StFttRawHit * > );
     StFttRawHit * FindMaxAdc( std::vector<StFttRawHit *>, size_t &pos );
 
     void InjectTestData();
     void SearchClusterEdges( std::vector< StFttRawHit * > hits, 
                                             size_t start, // start index at MaxADC
                                             size_t &left, size_t &right);
-
     void CalculateClusterInfo( StFttCluster * clu );
+
+    // selection of raw hits for cluster building
     float GetThresholdFor( StFttRawHit * hit ) { return 0.0;}
     bool PassTimeCut( StFttRawHit * hit );
 

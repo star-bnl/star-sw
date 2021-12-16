@@ -36,8 +36,8 @@ public:
   void setRun(int run);       //! set run# 
 
 
-  size_t uuid( StFttRawHit * h, bool includeStrip = false ) const;
-  size_t uuid( StFttCluster * c ) const;
+  static size_t uuid( StFttRawHit * h, bool includeStrip = false ) ;
+  static size_t uuid( StFttCluster * c ) ;
 
   // HARDWARE Mapping StFttRawHits
     uint16_t packKey( int feb, int vmm, int ch ) const;

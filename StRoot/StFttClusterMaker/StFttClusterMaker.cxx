@@ -35,7 +35,7 @@ StFttClusterMaker::StFttClusterMaker( const char* name )
 : StMaker( name ),
   mEvent( 0 ),          /// pointer to StEvent
   mRunYear( 0 ),        /// year in which the data was taken (switch at 1st Oct)
-  mDebug( false ),       /// print out of all full messages for debugging
+  mDebug( true ),       /// print out of all full messages for debugging
   mFttDb( nullptr )
 {
     LOG_DEBUG << "StFttClusterMaker::ctor"  << endm;
@@ -112,14 +112,14 @@ StFttClusterMaker::Make()
     // InjectTestData();
 
     // net we need to sort the hits into 1D projections
-    // process 1 quadrant at a time,
+    // process 1 quadrant (ROB) at a time,
     // process horizontal, vertical or diagonal strips one at a time
 
     // key == ROB
-    std::map< UChar_t, std::vector<StFttRawHit *> > hStripsPerRob;
-    std::map< UChar_t, std::vector<StFttRawHit *> > vStripsPerRob;
-    std::map< UChar_t, std::vector<StFttRawHit *> > hdStripsPerRob;
-    std::map< UChar_t, std::vector<StFttRawHit *> > vdStripsPerRob;
+    std::map< UChar_t, std::vector<StFttRawHit *> > hStripsPerRob; // Horizontal
+    std::map< UChar_t, std::vector<StFttRawHit *> > vStripsPerRob; // Vertical
+    std::map< UChar_t, std::vector<StFttRawHit *> > dhStripsPerRob; // Diagonal on Horizontal
+    std::map< UChar_t, std::vector<StFttRawHit *> > dvStripsPerRob; // Diagonal on Vertical
 
     size_t nStripsHit = 0;
     for ( StFttRawHit* hit : mFttCollection->rawHits() ) {
@@ -141,12 +141,12 @@ StFttClusterMaker::Make()
             nStripsHit++;
         }
         if ( kFttDiagonalH   == so ){
-            hdStripsPerRob[ rob ].push_back(hit);
+            dhStripsPerRob[ rob ].push_back(hit);
             // LOG_INFO << "DIAGONAL @ ROB = " << (int) rob << endm;
             nStripsHit++;
         }
         if ( kFttDiagonalV   == so ){
-            vdStripsPerRob[ rob ].push_back(hit);
+            dvStripsPerRob[ rob ].push_back(hit);
             // LOG_INFO << "DIAGONAL @ ROB = " << (int) rob << endm;
             nStripsHit++;
         }
@@ -158,29 +158,29 @@ StFttClusterMaker::Make()
         for ( UChar_t iRob = 1; iRob < StFttDb::nRob+1; iRob++ ){
             LOG_INFO << "ROB=" << (int)iRob << " has " << hStripsPerRob[iRob].size() << " horizontal, "
                 << vStripsPerRob[iRob].size() << " vertical, "
-                << hdStripsPerRob[iRob].size() << " diagonalH, "
-                << vdStripsPerRob[iRob].size() << " diagonalV, "
+                << dhStripsPerRob[iRob].size() << " diagonalH, "
+                << dvStripsPerRob[iRob].size() << " diagonalV, "
                 << " strips hit" << endm;
 
-            auto hClusters = FindClusters( hStripsPerRob[iRob], (UChar_t)kFttHorizontal );
+            auto hClusters = FindClusters( hStripsPerRob[iRob] );
             // Add them to StEvent  
             for ( StFttCluster * clu : hClusters ){
                 mFttCollection->addCluster( clu );
                 nClusters++;
             }
-            auto vClusters = FindClusters( vStripsPerRob[iRob], (UChar_t)kFttVertical );
+            auto vClusters = FindClusters( vStripsPerRob[iRob] );
             // Add them to StEvent  
             for ( StFttCluster * clu : vClusters ){
                 mFttCollection->addCluster( clu );
                 nClusters++;
             }
-            auto hdClusters = FindClusters( hdStripsPerRob[iRob], (UChar_t)kFttDiagonalH );
+            auto hdClusters = FindClusters( dhStripsPerRob[iRob] );
             // Add them to StEvent  
             for ( StFttCluster * clu : hdClusters ){
                 mFttCollection->addCluster( clu );
                 nClusters++;
             }
-            auto vdClusters = FindClusters( vdStripsPerRob[iRob], (UChar_t)kFttDiagonalV );
+            auto vdClusters = FindClusters( dvStripsPerRob[iRob] );
             // Add them to StEvent  
             for ( StFttCluster * clu : vdClusters ){
                 mFttCollection->addCluster( clu );
@@ -191,12 +191,10 @@ StFttClusterMaker::Make()
     LOG_INFO << "Found " << nClusters << " clusters this event" << endm;
 
     return kStOk;
-}
+} // Make
 
 void StFttClusterMaker::InjectTestData(){
     mFttCollection->rawHits().clear();
-
-    // TODO: inject clean strip hits to test cluster finder
 
     StFttRawHit *hit = new StFttRawHit( 1, 1, 1, 1, 1, 55, 1, 1 );
     hit->setMapping( 1, 1, 1, 23, kFttHorizontal ); // LEFT 2
@@ -218,14 +216,10 @@ void StFttClusterMaker::InjectTestData(){
     hit->setMapping( 1, 1, 1, 26, kFttHorizontal );
     mFttCollection->addRawHit( hit );
 
-    
-
     hit = new StFttRawHit( 1, 1, 1, 1, 1, 19, 1, 1 );
     hit->setMapping( 1, 1, 1, 28, kFttHorizontal );
     mFttCollection->addRawHit( hit );
-
-
-}
+} // InjectTestData
 
 
 bool StFttClusterMaker::PassTimeCut( StFttRawHit * hit ){
@@ -261,22 +255,20 @@ void StFttClusterMaker::SearchClusterEdges( std::vector< StFttRawHit * > hits,
     StFttRawHit *hitLeft = nullptr, *hitRight = nullptr;
 
     while ( searchRight || searchLeft ){
-        LOG_INFO << "LEFT: " << left << ", RIGHT: " << right <<  ", start = " << start << ", size=" << hits.size() << endm;
+        if ( mDebug ){
+            LOG_INFO << "LEFT: " << left << ", RIGHT: " << right <<  ", start = " << start << ", size=" << hits.size() << endm;
+        }
         if ( searchRight ){
             if ( right == hits.size() || right == hits.size() - 1 ){ 
-                LOG_INFO << "END SEARCH RIGHT EDGE" << endm;
                 searchRight = false;
             }
             else {
                 
                 hitRight = hits[right+1];
-                
                 if ( hitRight->adc() > lastHitRight->adc() || hitRight->adc() < GetThresholdFor( hitRight ) ){
-                    LOG_INFO << "END SEARCH RIGHT ADC" << endm;
                     searchRight = false;
                 }
                 if ( hitRight->row() != lastHitRight->row() || abs( hitRight->strip() - lastHitRight->strip() ) > 1 ){
-                    LOG_INFO << "END SEARCH RIGHT STRIP" << endm;
                     searchRight = false;
                 }
 
@@ -289,16 +281,13 @@ void StFttClusterMaker::SearchClusterEdges( std::vector< StFttRawHit * > hits,
 
         if ( searchLeft ){
             if ( left == 0 ){
-                LOG_INFO << "END SEARCH LEFT EDGE" << endm;
                 searchLeft = false;
             } else {
                 hitLeft = hits[left-1];
                 if ( hitLeft->adc() > lastHitLeft->adc() || hitLeft->adc() < GetThresholdFor( hitLeft ) ){
-                    LOG_INFO << "END SEARCH LEFT ADC" << endm;
                     searchLeft = false;
                 }
                 if ( hitLeft->row() != lastHitLeft->row() || abs( hitLeft->strip() - lastHitLeft->strip() ) > 1 ){
-                    LOG_INFO << "END SEARCH LEFT STRIP" << endm;
                     searchLeft = false;
                 }
 
@@ -321,23 +310,18 @@ void StFttClusterMaker::CalculateClusterInfo( StFttCluster * clu ){
     float m1Sum = 0;
     float m2Sum = 0;
 
-    if ( mDebug ){
-        LOG_INFO << "sumAdc = ";
-    }
     std::for_each (clu->rawHits().begin(), clu->rawHits().end(), [&](const StFttRawHit *h) {
         float x = ( h->strip() * 3.2 - 1.6 ); // replace with CONST
         
-        if ( mDebug ){
-            LOG_INFO << " + " << h->adc();
-        }
         m0Sum += h->adc();
         m1Sum += (h->adc() * x); 
         m2Sum += ( h->adc() * x * x );
     });
 
     if ( mDebug ) {
-        LOG_INFO << " = " << m0Sum << endm; 
-        LOG_INFO << "m1Sum = " << m1Sum << ", m2Sum = " << m2Sum << endm;
+        LOG_INFO << "m0Sum = " << m0Sum << endm; 
+        LOG_INFO << "m1Sum = " << m1Sum << endm;
+        LOG_INFO << "m2Sum = " << m2Sum << endm;
     }
 
     // m0Sum = sumAdc
@@ -352,25 +336,30 @@ void StFttClusterMaker::CalculateClusterInfo( StFttCluster * clu ){
 
 
 
-std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRawHit * > hits, UChar_t stripOrientattion ){
+std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRawHit * > hits ){
     std::vector<StFttCluster*> clusters;
     LOG_INFO << "FindClusters( std::vector< StFttRawHit * > hits, UChar_t stripOrientattion )" << endm;
 
     
-
     if ( mDebug ){
-        LOG_INFO << "We have " << hits.size() << " hits with dups" << endm;
+        LOG_INFO << "We have " << hits.size() << " hits with duplicates" << endm;
     }
 
-    bool dedup = true;
-
+    /* early data (i.e. cosmic data pre dec 10 2021)
+     * had duplicates where the hits are identical except 
+     * a different tb. Tonko fixed at some point
+     * So this could be wrapped in a run range block, but
+     * does no harm.
+     */
+    const bool dedup = true;
     if ( dedup ){
         auto cmp = [](StFttRawHit* a, StFttRawHit* b) { 
             
             return  a->plane() < b->plane() ||
                     a->quadrant() < b->quadrant() ||
                     a->row() < b->row() ||
-                    a->strip() < b->strip(); 
+                    a->strip() < b->strip() ||
+                    a->orientation() < b->orientation(); 
         };
     
         // NOTE according to SO this is faster than using ctor
@@ -382,23 +371,26 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
 
     // Sort the hits by row and strip
     sort(hits.begin(), hits.end(), [](const StFttRawHit * a, const StFttRawHit * b) -> bool { 
-            size_t indexA = a->strip() + a->row() * StFttDb::maxStripPerRow;
-            size_t indexB = b->strip() + b->row() * StFttDb::maxStripPerRow;
+            size_t indexA = a->orientation() + StFttDb::nStripOrientations * ( a->strip() + a->row() * StFttDb::maxStripPerRow);
+            size_t indexB = b->orientation() + StFttDb::nStripOrientations * ( b->strip() + b->row() * StFttDb::maxStripPerRow);
             return indexA < indexB; 
         });
 
     if ( mDebug ) {
-        LOG_INFO << "We have " << hits.size() << " hits after removing dups" << endm;
+        LOG_INFO << "We have " << hits.size() << " hits after removing duplicates" << endm;
     }
 
+
+    // Get the max ADC hit in this projection
     size_t anchor  = hits.size()+1;
     auto maxAdcHit = FindMaxAdc( hits, anchor );
 
+    // Loop as long as there is at least 1 hit left
     while ( maxAdcHit ){
         StFttCluster * clu = new StFttCluster();
 
-        LOG_INFO << "CLUSTER FIND START WITH HITS:" << endm;
         if ( mDebug ){
+            LOG_INFO << "CLUSTER FIND START WITH HITS:" << endm;
             size_t i = 0;
             for ( auto *h : hits ){
                 LOG_INFO << "[" << i << "]" << *h;
@@ -406,16 +398,18 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
             }
         }
 
-        // Set "location" from max ADC hit
-        clu->setPlane( maxAdcHit->plane() );
-        clu->setQuadrant( maxAdcHit->quadrant() );
-        clu->setRow( maxAdcHit->row() );
-        clu->setOrientation( maxAdcHit->orientation() );
+        // Set cluster "location" from max ADC hit
+        clu->setPlane       ( maxAdcHit->plane       ( ) );
+        clu->setQuadrant    ( maxAdcHit->quadrant    ( ) );
+        clu->setRow         ( maxAdcHit->row         ( ) );
+        clu->setOrientation ( maxAdcHit->orientation ( ) );
 
         // Now find the cluster edges
         size_t left = anchor, right = anchor;
         SearchClusterEdges( hits, anchor, left, right);
-        LOG_INFO << "Cluster points ( " << left << ", " << anchor << ", " << right << " )" << endm;
+        if ( mDebug ){
+            LOG_INFO << "Cluster points ( " << left << ", " << anchor << ", " << right << " )" << endm;
+        }
         
         // OK now add these hits to the cluster
         for ( size_t i = left; i < right + 1; i++ ){
@@ -425,15 +419,15 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
         // Compute cluster information from the added hits
         CalculateClusterInfo( clu );
 
-        LOG_INFO << *clu << endm;;
+        if (mDebug){
+            LOG_INFO << *clu << endm;;
+        }
         clusters.push_back( clu );
 
         // Now erase all hits from this cluster so that we can move on to find the next one
         hits.erase( hits.begin() + left, hits.begin() + right + 1 );
         maxAdcHit = FindMaxAdc( hits, anchor );
-    }
-
-
+    } // while maxAdcHit
     return clusters;
 }
 

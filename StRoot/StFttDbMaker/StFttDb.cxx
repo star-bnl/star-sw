@@ -42,7 +42,7 @@ int StFttDb::InitRun(int runNumber) {
 }
 
 
-size_t StFttDb::uuid( StFttRawHit * h, bool includeStrip ) const{
+size_t StFttDb::uuid( StFttRawHit * h, bool includeStrip ) {
     // this UUID is not really universally unique
     // it is unique up to the hardware location 
     // at the give precision
@@ -50,19 +50,21 @@ size_t StFttDb::uuid( StFttRawHit * h, bool includeStrip ) const{
     // calculations that combine all strips from given 
     // plane, quad, row, orientation
 
-    size_t _uuid = (size_t)h->orientation() * (nStripOrientations) * ( h->row() + nRowsPerQuad * ( h->quadrant() + nQuadPerPlane * h->plane() ) );
+    LOG_INFO << "h->row() = " << (int)h->row() << endm;
+    size_t _uuid = (size_t)h->orientation() + (nStripOrientations) * ( h->row() + nRowsPerQuad * ( h->quadrant() + nQuadPerPlane * h->plane() ) );
+    LOG_INFO << "UUID = " << _uuid << endm;
     if ( includeStrip ){
-        _uuid = (size_t) h->strip() * maxStripPerRow *( h->orientation() * (nStripOrientations) * ( h->row() + nRowsPerQuad * ( h->quadrant() + nQuadPerPlane * h->plane() ) ) );
+        _uuid = (size_t) h->strip() * maxStripPerRow *( h->orientation() + (nStripOrientations) * ( h->row() + nRowsPerQuad * ( h->quadrant() + nQuadPerPlane * h->plane() ) ) );
     } 
 
     return _uuid;
 }
 
-size_t StFttDb::uuid( StFttCluster * c ) const{
+size_t StFttDb::uuid( StFttCluster * c ) {
     // this UUID is not really universally unique
     // it is unique up to the hardware location 
 
-    size_t _uuid = (size_t)c->orientation() * (nStripOrientations) * ( c->row() + nRowsPerQuad * ( c->quadrant() + nQuadPerPlane * c->plane() ) );
+    size_t _uuid = (size_t)c->orientation() + (nStripOrientations) * ( c->row() + nRowsPerQuad * ( c->quadrant() + nQuadPerPlane * c->plane() ) );
     return _uuid;
 }
 

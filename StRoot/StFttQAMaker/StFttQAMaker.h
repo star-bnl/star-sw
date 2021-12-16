@@ -16,6 +16,8 @@
 #include "TH2.h"
 #include "TH2Poly.h"
 #include "TTree.h"
+#include "TCanvas.h"
+#include "TString.h"
 
 // STL
 #include <vector>
@@ -24,6 +26,7 @@ class TFile;
 class StEvent;
 class StFttCollection;
 class StFttRawHit;
+class StFttDb;
 
 const Int_t mMax = 10000;
 struct FttData
@@ -90,6 +93,7 @@ public:
 
     StEvent*             mEvent;
     StFttCollection*     mFttCollection;
+    StFttDb*             mFttDb;
 
     std::map< string, TH1* >    mH1d;
     std::map< string, TH2* >    mH2d;
@@ -100,6 +104,11 @@ public:
 
     size_t histCounter = 0;
     size_t f1CluCounter = 0;
+    TCanvas *mCanvas = nullptr;
+    bool mDebug = true;
+
+    static const size_t maxClusterViz = 1000;
+    TString mClusterPdfName;
 
     ClassDef(StFttQAMaker, 1)
 
