@@ -369,8 +369,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 		foreach (@ODIR){ if ( ! -d $ODIR[0] ){  mkdir($ODIR[0],0755);}}
 
 		# local or global install
-		if ( -e "mgr/agmlParser.py"){	$agml_cmd = "mgr/agmlParser.py";
-		} else {			$agml_cmd = $env->{ENV}->{STAR}."/mgr/agmlParser.py";}
+		if ( -e "mgr/agmlParser.py"){	$agml_root = "mgr";
+		} else {			$agml_root = $env->{ENV}->{STAR}."/mgr";}
+		$agml_cmd = "$agml_root/agmlParser.py";
 
 		foreach $xml (@xmlGeo){
 		    if ( $xml =~ /StarVMC\/Geometry\// ){
@@ -389,7 +390,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			# cons doesn't come with a scanner for python dependencies
 			use File::Find;
 			my @agml_deps;
-			find(sub { return unless -f; return unless /\.py$/; push @agml_deps, "#$File::Find::name"; }, "mgr/Dyson");
+			find(sub { return unless -f; return unless /\.py$/; push @agml_deps, "#$File::Find::name"; }, "$agml_root/Dyson");
 			push @agml_deps, "#$xml";
 			push @agml_deps, "#$agml_cmd";
 
