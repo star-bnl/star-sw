@@ -314,8 +314,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#print "\tAfter  ".($#src)." ".($#inc)."\n";
 
         if ($Dir =~ m#StarVMC/StarGeometry#) {
+            my($cpppath) = $env->_subst($env->{CPPPATH});
+            my($cscanner) = find scan::cpp($env->{_cwd}, $cpppath);
+            $env->{_IFLAGS} = "%(" . $cscanner->iflags($env) . "%)";
             Command $env ["$OBJ/StarVMC/StarGeometry/StarGeo_Cint.cxx", "$OBJ/StarVMC/StarGeometry/StarGeo_Cint.h"],
-                         ("$OBJ/StarVMC/StarGeometry/StarGeo.h", "#StarVMC/Geometry/StarGeoLinkDef.h"), qq(rootcint -f %> -c %1 %2);
+                         ("$OBJ/StarVMC/StarGeometry/StarGeo.h", "#StarVMC/Geometry/StarGeoLinkDef.h"), qq(rootcint -f %> -c %_IFLAGS %1 %2);
             push(@srcL, "$OBJ/StarVMC/StarGeometry/StarGeo_Cint.cxx");
         }
 
