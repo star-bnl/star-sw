@@ -163,6 +163,7 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20/ or $pwd =~ /P21/) {
   elsif ($pwd =~ /2021\/FF_OO_200GeV_2021/)        {$glob = "/2021/FF/TFG21e/FF_OO_200GeV_2021";}
   elsif ($pwd =~ /2021\/17p3GeV_2021/)             {$glob = "/2021/RF/TFG21e/17p3GeV_2021";}
   elsif ($pwd =~ /2021\/26p5GeV/)                  {$glob = "/2021/RF/TFG21g.B/26p5GeV_fixedTarget_2021/";}
+  elsif ($pwd =~ /2022\/pp500_2022/)               {$glob = "/2022/RF/pp500_2022/";}
 }
 print "PICOPATH = $PICOPATH; days = $dayMin  - $dayMax : glob = $glob\n" if ($debug);
 #if (! $glob) {die "glob = $glob";}
