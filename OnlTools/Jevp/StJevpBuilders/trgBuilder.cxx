@@ -651,10 +651,10 @@ void trgBuilder::event(daqReader *rdr)
     zdcsmd[5] = (TH1D*)contents.h334_zdcsmd_w_h_A;
     zdcsmd[6] = (TH1D*)contents.h335_zdcsmd_e_v_A;
     zdcsmd[7] = (TH1D*)contents.h336_zdcsmd_e_h_A;
-    zdcsmd[7] = (TH2D*)contents.h337_zdcsmd_w_v_A_2D;
-    zdcsmd[7] = (TH2D*)contents.h338_zdcsmd_w_h_A_2D;
-    zdcsmd[7] = (TH2D*)contents.h339_zdcsmd_e_v_A_2D;
-    zdcsmd[7] = (TH2D*)contents.h340_zdcsmd_e_h_A_2D;
+    zdcsmd[8] = (TH2D*)contents.h337_zdcsmd_w_v_A_2D;
+    zdcsmd[9] = (TH2D*)contents.h338_zdcsmd_w_h_A_2D;
+    zdcsmd[10] = (TH2D*)contents.h339_zdcsmd_e_v_A_2D;
+    zdcsmd[11] = (TH2D*)contents.h340_zdcsmd_e_h_A_2D;
     
     const int ZDCSMDTHR = 80;
     for(int i=0; i<2; i++){
