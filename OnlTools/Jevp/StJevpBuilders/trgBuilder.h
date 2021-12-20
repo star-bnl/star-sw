@@ -86,6 +86,10 @@ public:
 	  TH1* h334_zdcsmd_w_h_A;
 	  TH1* h335_zdcsmd_e_v_A;
 	  TH1* h336_zdcsmd_e_h_A;
+	  TH2* h337_zdcsmd_w_v_A_2D;
+	  TH2* h338_zdcsmd_w_h_A_2D;
+	  TH2* h339_zdcsmd_e_v_A_2D;
+	  TH2* h340_zdcsmd_e_h_A_2D;
 	  
 	  // L2UpsilonCounts...
 	  TH1* hL2ups_Tag;
