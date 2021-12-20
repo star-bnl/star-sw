@@ -10,8 +10,6 @@
 #include "StFstSensorHitCollection.h"
 #include "StFstHit.h"
 
-static const char rcsid[] = "$Id: StFstSensorHitCollection.cxx,v 2.1 2014/04/10 16:21:04 jeromel Exp $";
-
 ClassImp(StFstSensorHitCollection)
 
 StFstSensorHitCollection::StFstSensorHitCollection() : StObject() { /* noop */ }

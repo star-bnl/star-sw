@@ -8,13 +8,10 @@
 ***************************************************************************/
 
 #include "StFstWedgeHitCollection.h"
-static const char rcsid[] = "$Id: StFstWedgeHitCollection.cxx,v 2.1 2014/04/10 16:20:09 jeromel Exp $";
 
 ClassImp(StFstWedgeHitCollection)
 
 StFstWedgeHitCollection::StFstWedgeHitCollection() : StObject() { /* noop */ }
-
-StFstWedgeHitCollection::~StFstWedgeHitCollection() { /* noop */ }
 
 unsigned int StFstWedgeHitCollection::numberOfHits() const
 {

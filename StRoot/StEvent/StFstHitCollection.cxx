@@ -12,13 +12,9 @@
 #include "StFstSensorHitCollection.h"
 #include "StFstHit.h"
 
-static const char rcsid[] = "$Id: StFstHitCollection.cxx,v 2.1 2014/04/10 16:17:23 jeromel Exp $";
-
 ClassImp(StFstHitCollection)
 
 StFstHitCollection::StFstHitCollection() : StObject() { /* no op */ }
-
-StFstHitCollection::~StFstHitCollection() { /* no op */ }
 
 bool StFstHitCollection::addHit(StFstHit *hit)
 {

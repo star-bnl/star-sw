@@ -41,7 +41,7 @@ StFstHit::StFstHit(const StThreeVectorF &p, const StThreeVectorF &e, unsigned in
    mNRawHits(1),
    mNRawHitsR(0),
    mNRawHitsPhi(0),
-   mLocalPosition(),
+   mLocalPosition{0},
    mDetectorId(kFstId)
 {
 }
@@ -66,7 +66,7 @@ float StFstHit::localPosition(unsigned int i) const
       return 0;
 }
 
-ostream &operator<<(ostream &os, const StFstHit &hit)
+std::ostream &operator<<(std::ostream &os, const StFstHit &hit)
 {
    os << "FST Hit -I- disk: " << static_cast<int>(hit.getDisk())
       << " wedge: " << static_cast<int>(hit.getWedge())

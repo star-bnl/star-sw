@@ -14,7 +14,7 @@
 #include "StObject.h"
 #include "StFstWedgeHitCollection.h"
 #include "StEvent/StEnumerations.h"
-#include "StFstUtil/StFstConsts.h"
+#include "StEvent/StFstConsts.h"
 
 class StFstHit;
 
@@ -22,7 +22,6 @@ class StFstHitCollection : public StObject
 {
 public:
    StFstHitCollection();
-   ~StFstHitCollection();
 
    bool          addHit(StFstHit *);
    unsigned int  numberOfHits() const;

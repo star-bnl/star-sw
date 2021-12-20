@@ -13,15 +13,13 @@
 #include "StObject.h"
 #include "StFstSensorHitCollection.h"
 #include "StEvent/StEnumerations.h"
-#include "StFstUtil/StFstConsts.h"
+#include "StEvent/StFstConsts.h"
 
-//using namespace StFstConsts;
 
 class StFstWedgeHitCollection : public StObject
 {
 public:
    StFstWedgeHitCollection();
-   ~StFstWedgeHitCollection();
 
    unsigned int  numberOfHits() const;
 

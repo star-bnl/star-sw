@@ -13,9 +13,9 @@
 #include "StarClassLibrary/StMemoryPool.hh"
 #include "StEvent/StHit.h"
 #include "StEvent/StEnumerations.h"
-#include "StFstUtil/StFstConsts.h"
-//using namespace StFstConsts;
+#include "StEvent/StFstConsts.h"
 
+#include <iostream>
 
 class StFstHit : public StHit
 {
@@ -76,7 +76,7 @@ protected:
    ClassDef(StFstHit, 1)
 };
 
-ostream &operator<<(ostream &, const StFstHit &);
+std::ostream &operator<<(std::ostream &, const StFstHit &);
 
 inline unsigned char StFstHit::getDisk() const            { return 1 + (mHardwarePosition - 1) / kFstNumSensorsPerWedge / kFstNumWedgePerDisk;};
 inline unsigned char StFstHit::getWedge() const           { return 1 + (mHardwarePosition - 1) / kFstNumSensorsPerWedge;};
