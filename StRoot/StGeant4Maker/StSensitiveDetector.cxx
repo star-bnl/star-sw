@@ -4,7 +4,6 @@
 #include <TGeoNavigator.h>
 #include <TVirtualMC.h>
 
-#include <StMCParticleStack.h>
 #include <StMessMgr.h>
 #include <StHitCollection.h>
 
