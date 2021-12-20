@@ -656,20 +656,21 @@ void trgBuilder::event(daqReader *rdr)
     zdcsmd[7] = (TH2D*)contents.h339_zdcsmd_e_v_A_2D;
     zdcsmd[7] = (TH2D*)contents.h340_zdcsmd_e_h_A_2D;
     
+    const int ZDCSMDTHR = 80;
     for(int i=0; i<2; i++){
 	for(int j=0; j<2; j++){
 	    for(int k=1; k<=8; k++){
 		int adc = trgd->zdcSMD((StBeamDirection)i,j,k);
-		adc -= zdc_smd_ped[i][j][k-1];
-		if(adc>0){
+		if(adc > ZDCSMDTHR){
 		    zdcsmd[2 +j -i*2]->Fill(k);	    
+		}
+		if (adc > 3) {
 		    zdcsmd[6 +j -i*2]->Fill(k,adc);
 		    zdcsmd[10 +j -i*2]->Fill(k,adc);
 		}
 	    }
 	}
     }
-
     
     // L2
     L2UpsilonResult _L2;
