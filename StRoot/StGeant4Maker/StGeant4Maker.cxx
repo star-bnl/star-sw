@@ -559,10 +559,10 @@ int StGeant4Maker::Init() {
 
   AddObj( mVmcApplication, ".const", 0 ); // Register VMC application  
 
-  if ( 0==std::strcmp( SAttr("application:engine"), "G4") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
-    gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig);
-    LOG_INFO << "Created Geant 4 instance " << gG4->GetName() << endm;
-  }
+  // if ( 0==std::strcmp( SAttr("application:engine"), "G4") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
+  //   gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig);
+  //   LOG_INFO << "Created Geant 4 instance " << gG4->GetName() << endm;
+  // }
   if ( 0==std::strcmp( SAttr("application:engine"), "G3") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
     gG3 = new TGeant3TGeo(SAttr("G3VmcOpt:Name"), IAttr("G3VmcOpt:nwgeant" ) );
     LOG_INFO << "Created GEANT3  instance" << gG3->GetName() << endm;
@@ -571,7 +571,9 @@ int StGeant4Maker::Init() {
   if ( gG4 ) AddObj( gG4, ".const", 0 );
   if ( gG3 ) AddObj( gG3, ".const", 0 );
 
-  if ( gG3 && gG4 ) {
+  bool multimode = true; // gG3 && gG4
+
+  if ( multimode ) {
     LOG_INFO << "Application will run both G3 and G4 physics engines, with default as "<< SAttr("all:physics") << endm;
     //    TString default = SAttr("all:physics");
 
@@ -640,7 +642,9 @@ int StGeant4Maker::Init() {
     mc->SetMagField( mMagfield );
     mc->SetRootGeometry();
   };
-  auto SetStack            = [this](TVirtualMC* mc){ mc->SetStack(mMCStack); };
+  auto SetStack            = [this,multimode](TVirtualMC* mc) { 
+    if ( 0==multimode ) mc->SetStack(mMCStack); 
+  };
   auto InitializeMC        = [SetDefaultCuts,SetDefaultProcesses,SetFieldAndGeometry,SetStack](TVirtualMC* mc) {
     SetDefaultCuts(mc);
     SetDefaultProcesses(mc);
@@ -1069,6 +1073,8 @@ void StarVMCApplication::BeginPrimary(){ _g4maker -> BeginPrimary(); }
 void StGeant4Maker::BeginPrimary()
 {
 
+  LOG_INFO << "BeginPrimary" << endm;
+
   std::vector<StarMCParticle*>& truthTable    = mMCStack->GetTruthTable();
   truthTable.clear();
 
@@ -1080,6 +1086,8 @@ void StGeant4Maker::BeginPrimary()
 void StarVMCApplication::FinishPrimary(){ _g4maker->FinishPrimary(); }
 void StGeant4Maker::FinishPrimary()
 {
+
+  LOG_INFO << "FinishPrimary" << endm;
 
 }
 //________________________________________________________________________________________________
@@ -1331,6 +1339,9 @@ void StGeant4Maker::Stepping(){
 		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
   }
 
+    LOG_DEBUG << Form("track  x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
+		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
+
 
 }
 //________________________________________________________________________________________________
@@ -1386,7 +1397,6 @@ void StGeant4Maker::PushPrimaries() {
     }
 
   LOG_INFO << "Pushed " << ntr << " tracks from primary event generator" << endm;
-
 
 }
 //________________________________________________________________________________________________
