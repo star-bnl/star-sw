@@ -14,7 +14,7 @@
 //#define __DEBUG_dEdx__
 //#define __ADD_PROB__
 //#define __BENCHMARKS__DOFIT_ZN__
-//#define __FIT_PULLS__
+#define __FIT_PULLS__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 #include "StTpcdEdxCorrection.h" 
@@ -171,8 +171,10 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
 
   if (! DoOnce) {
     DoOnce = 1;
+    if (! IAttr("SkipdNdx")) {
     if ((GetDate() > 20171201 && m_TpcdEdxCorrection->IsFixedTarget()) ||
 	(GetDate() > 20181201)) fUsedNdx = kTRUE; // use dN/dx for fixed target for Run XVIII and year >= XIX
+    }
     if (TESTBIT(m_Mode, kCalibration)) {// calibration mode
       if (Debug()) LOG_WARN << "StdEdxY2Maker::InitRun Calibration Mode is On (make calibration histograms)" << endm;
       TFile *f = GetTFile();
