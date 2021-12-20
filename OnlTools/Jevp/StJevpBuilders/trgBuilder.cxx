@@ -116,6 +116,10 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     contents.h334_zdcsmd_w_h_A = new TH1D("h334_zdcsmd_w_h_A","ZDC_SMD_west_hor_A",8,0.5,8.5);
     contents.h335_zdcsmd_e_v_A = new TH1D("h335_zdcsmd_e_v_A","ZDC_SMD_east_ver_A",8,0.5,8.5);
     contents.h336_zdcsmd_e_h_A = new TH1D("h336_zdcsmd_e_h_A","ZDC_SMD_east_hor_A",8,0.5,8.5);
+    contents.h337_zdcsmd_w_v_A_2D = new TH2D("h337_zdcsmd_w_v_A_2D", "ZDC_SMD_west_ver_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
+    contents.h338_zdcsmd_w_h_A_2D = new TH2D("h338_zdcsmd_w_h_A_2D", "ZDC_SMD_west_hor_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
+    contents.h339_zdcsmd_e_v_A_2D = new TH2D("h339_zdcsmd_e_v_A_2D", "ZDC_SMD_east_ver_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
+    contents.h340_zdcsmd_e_h_A_2D = new TH2D("h340_zdcsmd_e_h_A_2D", "ZDC_SMD_east_hor_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
 
     // L2UpsilonCounts...
     contents.hL2ups_Tag = new TH1D("hL2ups_Tag","Tag",5,-0.5,4.5);
@@ -285,6 +289,10 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     plots[++n] = new JevpPlot(contents.h334_zdcsmd_w_h_A);
     plots[++n] = new JevpPlot(contents.h335_zdcsmd_e_v_A);
     plots[++n] = new JevpPlot(contents.h336_zdcsmd_e_h_A);
+    plots[++n] = new JevpPlot(contents.h337_zdcsmd_w_v_A_2D); plots[n]->setDrawOpts("colz");
+    plots[++n] = new JevpPlot(contents.h338_zdcsmd_w_h_A_2D); plots[n]->setDrawOpts("colz");
+    plots[++n] = new JevpPlot(contents.h339_zdcsmd_e_v_A_2D); plots[n]->setDrawOpts("colz");
+    plots[++n] = new JevpPlot(contents.h340_zdcsmd_e_h_A_2D); plots[n]->setDrawOpts("colz");
 
     // L2UpsilonCounts...
     plots[++n] = new JevpPlot(contents.hL2ups_Tag);
@@ -632,9 +640,9 @@ void trgBuilder::event(daqReader *rdr)
     if(trgd->spinBitBlueDown()) contents.h448_bunch_blue_down->Fill(bunch7bit);  
     if(trgd->spinBitBlueUnpol()) contents.h449_bunch_blue_unpol->Fill(bunch7bit); 
     */
-    
+  
     // zdcsmd...
-    TH1D *zdcsmd[8];
+    TH1 *zdcsmd[8];
     zdcsmd[0] = (TH1D*)contents.h329_zdcsmd_w_v_N;
     zdcsmd[1] = (TH1D*)contents.h330_zdcsmd_w_h_N;
     zdcsmd[2] = (TH1D*)contents.h331_zdcsmd_e_v_N;
@@ -643,21 +651,26 @@ void trgBuilder::event(daqReader *rdr)
     zdcsmd[5] = (TH1D*)contents.h334_zdcsmd_w_h_A;
     zdcsmd[6] = (TH1D*)contents.h335_zdcsmd_e_v_A;
     zdcsmd[7] = (TH1D*)contents.h336_zdcsmd_e_h_A;
-
+    zdcsmd[8] = (TH2D*)contents.h337_zdcsmd_w_v_A_2D;
+    zdcsmd[9] = (TH2D*)contents.h338_zdcsmd_w_h_A_2D;
+    zdcsmd[10] = (TH2D*)contents.h339_zdcsmd_e_v_A_2D;
+    zdcsmd[11] = (TH2D*)contents.h340_zdcsmd_e_h_A_2D;
     
+    const int ZDCSMDTHR = 80;
     for(int i=0; i<2; i++){
 	for(int j=0; j<2; j++){
 	    for(int k=1; k<=8; k++){
 		int adc = trgd->zdcSMD((StBeamDirection)i,j,k);
-		adc -= zdc_smd_ped[i][j][k-1];
-		if(adc>0){
+		if(adc > ZDCSMDTHR){
 		    zdcsmd[2 +j -i*2]->Fill(k);	    
+		}
+		if (adc > 3) {
 		    zdcsmd[6 +j -i*2]->Fill(k,adc);
+		    zdcsmd[10 +j -i*2]->Fill(k,adc);
 		}
 	    }
 	}
     }
-
     
     // L2
     L2UpsilonResult _L2;
