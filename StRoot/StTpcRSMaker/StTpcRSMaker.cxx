@@ -605,7 +605,23 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
     delete [] pbins;
     delete [] pbinsL;
   }
-return kStOK;
+  //#define __XIANGEI__RDO__PRINT__
+#ifdef __XIANGEI__RDO__PRINT__
+  for(int is = 1;is<=1;is++){// NoOfSectors;is++) {
+    for(int irow=1;irow<=St_tpcPadConfigC::instance()->numberOfRows(is); irow++) {
+      Int_t NoOfPadsAtRow = St_tpcPadPlanesC::instance()->padsPerRow(irow);
+      for(int ipad=1;ipad<=NoOfPadsAtRow;ipad++) {
+	Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(is,irow,ipad);
+	Int_t rdoon   = 1;
+	Int_t rowlive = 1;
+	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(is,iRdo)) rdoon = 0;
+	if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(is,irow)) rowlive=0;
+	cout<<"xxxx: "<<is<<"\t"<<irow<<"\t"<<iRdo<<"\t"<<rdoon<<"\t"<<rowlive<<"\t"<<ipad<<"\t"<<Form("%6.2f",St_tpcPadGainT0BC::instance()->Gain(is,irow,ipad))<<endl;
+      }
+    }
+  }
+#endif /* __XIANGEI__RDO__PRINT__ */
+  return kStOK;
 }
 //________________________________________________________________________________
 Int_t StTpcRSMaker::Make(){  //  PrintInfo();
