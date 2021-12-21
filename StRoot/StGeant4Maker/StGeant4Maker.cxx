@@ -432,6 +432,8 @@ StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title,
   TVirtualMCApplication(name,title),mZmax(zmax),mRmax(rmax),mMulti( multi=="multi" )
 {
 
+  mMCStack = stack;
+
   if ( mMulti && stack ) {
 
     LOG_INFO << "VMC Application Initialized for Multi-engine Run" << endm;
@@ -440,6 +442,7 @@ StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title,
     fMCManager->SetUserStack(stack);
 
   }
+
 }
 //________________________________________________________________________________________________
 StGeant4Maker::StGeant4Maker( const char* nm ) : 
@@ -559,19 +562,21 @@ int StGeant4Maker::Init() {
 
   AddObj( mVmcApplication, ".const", 0 ); // Register VMC application  
 
-  // if ( 0==std::strcmp( SAttr("application:engine"), "G4") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
-  //   gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig);
-  //   LOG_INFO << "Created Geant 4 instance " << gG4->GetName() << endm;
-  // }
+  if ( 0==std::strcmp( SAttr("application:engine"), "G4") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
+    gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig);
+    LOG_INFO << "Created Geant 4 instance " << gG4->GetName() << endm;
+  }
+
   if ( 0==std::strcmp( SAttr("application:engine"), "G3") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
     gG3 = new TGeant3TGeo(SAttr("G3VmcOpt:Name"), IAttr("G3VmcOpt:nwgeant" ) );
     LOG_INFO << "Created GEANT3  instance" << gG3->GetName() << endm;
   }
 
+
   if ( gG4 ) AddObj( gG4, ".const", 0 );
   if ( gG3 ) AddObj( gG3, ".const", 0 );
 
-  bool multimode = true; // gG3 && gG4
+  bool multimode = gG3 && gG4;
 
   if ( multimode ) {
     LOG_INFO << "Application will run both G3 and G4 physics engines, with default as "<< SAttr("all:physics") << endm;
@@ -885,6 +890,7 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     if ( 0==sd ) {
       // add sensitive detector to local map
       sd = sdmap[fname] = new StSensitiveDetector( fname, mname );
+      sd->SetUserStack( mMCStack );
     }
 
     // Register this volume to the sensitive detector
@@ -941,7 +947,7 @@ void StGeant4Maker::FinishEvent(){
   g2t_event->AddAt( &event );
 
   // TODO: handle multi-engine 
-  StMCParticleStack* stack    = (StMCParticleStack *)TVirtualMC::GetMC()->GetStack();
+  StMCParticleStack* stack    = mMCStack; // (StMCParticleStack *)TVirtualMC::GetMC()->GetStack();
   auto&              vertex   = stack->GetVertexTable();
   auto&              particle = stack->GetParticleTable();
   unsigned int nvertex = vertex.size();
@@ -1202,7 +1208,7 @@ void StGeant4Maker::Stepping(){
 
   // TODO: handle multi-engine 
   static auto* mc = TVirtualMC::GetMC(); 
-  static auto* stack = (StMCParticleStack* )mc->GetStack();
+  static auto* stack = mMCStack;// (StMCParticleStack* )mc->GetStack();
 
   // Get access to the current track
   TParticle* current = stack->GetCurrentTrack(); 

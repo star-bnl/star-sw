@@ -6,6 +6,7 @@
 #include <TGeoNavigator.h>
 
 #include <StSensitiveDetector.h>
+#include <TVirtualMCStack.h>
 #include <StMCParticleStack.h>
 #include <StMessMgr.h>
 
@@ -138,11 +139,12 @@ void StTrackerHitCollection::ProcessHits() {
   mc->TrackPosition( x, y, z );
   mc->TrackMomentum( px, py, pz, etot ); 
 
-  StMCParticleStack* stack = (StMCParticleStack *)mc->GetStack();
+  TVirtualMCStack* stack = (TVirtualMCStack *)mc->GetStack();
   
   // Get list of tracks from particle stack
-  std::vector<StarMCParticle*>& truthTable    = stack->GetTruthTable();
-  std::vector<StarMCParticle*>& particleTable = stack->GetParticleTable();
+  StMCParticleStack* userstack = (StMCParticleStack*)mUserStack;
+  std::vector<StarMCParticle*>& truthTable    = userstack->GetTruthTable();
+  std::vector<StarMCParticle*>& particleTable = userstack->GetParticleTable();
 
   // This should be the current particle truth 
   StarMCParticle* truth = truthTable.back();
@@ -195,7 +197,7 @@ void StTrackerHitCollection::ProcessHits() {
     // Assign the hit the ID truth of the current track (index + 1)
     //    hit->idtruth = particleTable.size();
     //    hit->idtruth = truthTable.size();
-    hit->idtruth = stack->GetIdTruth ( truth );
+    hit->idtruth = userstack->GetIdTruth ( truth );
 
 
 
@@ -285,11 +287,12 @@ void StCalorimeterHitCollection::ProcessHits() {
   mc->TrackPosition( x, y, z );
   mc->TrackMomentum( px, py, pz, etot ); 
 
-  StMCParticleStack* stack = (StMCParticleStack *)mc->GetStack();
+  TVirtualMCStack* stack = (TVirtualMCStack *)mc->GetStack();
   
   // Get list of tracks from particle stack
-  std::vector<StarMCParticle*>& truthTable = stack->GetTruthTable();
-  std::vector<StarMCParticle*>& particleTable = stack->GetParticleTable();
+  StMCParticleStack* userstack = (StMCParticleStack*)mUserStack;
+  std::vector<StarMCParticle*>& truthTable = userstack->GetTruthTable();
+  std::vector<StarMCParticle*>& particleTable = userstack->GetParticleTable();
 
   // This should be the current particle truth 
   StarMCParticle* truth = truthTable.back();
@@ -347,7 +350,7 @@ void StCalorimeterHitCollection::ProcessHits() {
     // Assign the hit the ID truth of the current track (index + 1)
     //    hit->idtruth = particleTable.size();
     //    hit->idtruth = truthTable.size();
-    hit->idtruth = stack->GetIdTruth ( truth );
+    hit->idtruth = userstack->GetIdTruth ( truth );
 
     // Score entrance
     mc->TrackPosition( hit->position_in[0], hit->position_in[1],  hit->position_in[2] );

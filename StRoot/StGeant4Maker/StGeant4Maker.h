@@ -104,6 +104,8 @@ protected:
 
   bool   mMulti;
 
+  StMCParticleStack* mMCStack;
+
   ClassDef(StarVMCApplication, 0);
 
 };

@@ -201,7 +201,9 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   //
   // Forward to TMCManager if it exists
   //
+
   if ( auto mgr = TMCManager::Instance() ) {
+    LOG_INFO << "Forward track " << toDo << " " << ntr << " " << parent << " @ 0x" << particle << endm;
     mgr -> ForwardTrack( toDo, ntr, parent, particle );
   }
 
@@ -245,9 +247,10 @@ StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, dou
 TParticle *StMCParticleStack::PopNextTrack( int &itrack )
 {
 
- 
   // Start with invalid track index
   itrack = -1;
+
+  LOG_INFO << "PopNextTrack stack size = " << mStack.size() << endm;
 
   // The stack is empty.  Signal the end.
   if ( mStack.empty() ) 
@@ -268,6 +271,8 @@ TParticle *StMCParticleStack::PopNextTrack( int &itrack )
 //___________________________________________________________________________________________________________________
 TParticle *StMCParticleStack::PopPrimaryForTracking( int i ) 
 {
+  LOG_INFO << "PopPrimaryForTracking array size = " << mArraySize << endm;
+
   assert(i<mArraySize);
   return (TParticle *)(*mArray)[i];
 }

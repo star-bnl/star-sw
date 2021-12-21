@@ -50,10 +50,12 @@ void StSensitiveDetector::addVolume( TGeoVolume* volume ) {
 
     if ( DetectorType::kTracker == detectorType() ) {
       mCollection = new StTrackerHitCollection(cname.Data(),ctitle.Data());
+      mCollection->SetUserStack(mUserStack);
       LOG_DEBUG << "Setting tracker collection" << endm;
     }
     if ( DetectorType::kCalorimeter == detectorType() ) {
       mCollection = new StCalorimeterHitCollection(cname.Data(),ctitle.Data());
+      mCollection->SetUserStack(mUserStack);
       LOG_DEBUG << "Setting calorimeter collection" << endm;
     }
 
@@ -106,4 +108,5 @@ StSensitiveDetector::DetectorType StSensitiveDetector::detectorType() {
 //____________________________________________________________________________________________
 int StSensitiveDetector::numberOfHits(){ return int( mCollection->numberOfHits() ); }
 //____________________________________________________________________________________________
+void StSensitiveDetector::SetUserStack( TVirtualMCStack* stack ) { mUserStack = stack; }       
 

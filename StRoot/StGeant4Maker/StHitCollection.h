@@ -11,6 +11,8 @@ class CalorimeterHit;
 #include <map>
 #include <iostream>
 
+class TVirtualMCStack;
+
 class StHitCollection : public TNamed {
 
 public:
@@ -25,8 +27,12 @@ public:
 
   virtual int  numberOfHits()  = 0;
 
+  void SetUserStack( TVirtualMCStack* stack ) { mUserStack = stack; }
+
 private:
 protected:
+
+  TVirtualMCStack* mUserStack;
   
   ClassDef(StHitCollection,0);
 

@@ -8,6 +8,8 @@
 #include <map>
 #include <TString.h>
 
+class TVirtualMCStack;
+
 class AgMLExtension;
 class StHitCollection;
 
@@ -86,6 +88,8 @@ public:
 
   DetectorType detectorType();
 
+  void SetUserStack( TVirtualMCStack* stack );
+
 private:
 protected:
 
@@ -94,6 +98,7 @@ protected:
   AgMLExtension* mAgMLInfo;
 
   StHitCollection* mCollection;
+  TVirtualMCStack* mUserStack;
 
 };
 
