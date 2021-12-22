@@ -108,18 +108,18 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     //contents.h449_bunch_blue_unpol = new TH1D("h449_bunch_blue_unpol","h449_bunch_blue_unpol",128,-0.5,127.5);
 
     // zdcsmd
-    contents.h329_zdcsmd_w_v_N = new TH1D("h329_zdcsmd_w_v_N","ZDC_SMD_west_ver_N",8,0.5,8.5);
-    contents.h330_zdcsmd_w_h_N = new TH1D("h330_zdcsmd_w_h_N","ZDC_SMD_west_hor_N",8,0.5,8.5);
-    contents.h331_zdcsmd_e_v_N = new TH1D("h331_zdcsmd_e_v_N","ZDC_SMD_east_ver_N",8,0.5,8.5);
-    contents.h332_zdcsmd_e_h_N = new TH1D("h332_zdcsmd_e_h_N","ZDC_SMD_east_hor_N",8,0.5,8.5);
-    contents.h333_zdcsmd_w_v_A = new TH1D("h333_zdcsmd_w_v_A","ZDC_SMD_west_ver_A",8,0.5,8.5);
-    contents.h334_zdcsmd_w_h_A = new TH1D("h334_zdcsmd_w_h_A","ZDC_SMD_west_hor_A",8,0.5,8.5);
-    contents.h335_zdcsmd_e_v_A = new TH1D("h335_zdcsmd_e_v_A","ZDC_SMD_east_ver_A",8,0.5,8.5);
-    contents.h336_zdcsmd_e_h_A = new TH1D("h336_zdcsmd_e_h_A","ZDC_SMD_east_hor_A",8,0.5,8.5);
-    contents.h337_zdcsmd_w_v_A_2D = new TH2D("h337_zdcsmd_w_v_A_2D", "ZDC_SMD_west_ver_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
-    contents.h338_zdcsmd_w_h_A_2D = new TH2D("h338_zdcsmd_w_h_A_2D", "ZDC_SMD_west_hor_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
-    contents.h339_zdcsmd_e_v_A_2D = new TH2D("h339_zdcsmd_e_v_A_2D", "ZDC_SMD_east_ver_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
-    contents.h340_zdcsmd_e_h_A_2D = new TH2D("h340_zdcsmd_e_h_A_2D", "ZDC_SMD_east_hor_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
+    contents.h329_zdcsmd_w_v_N = new TH1D("h329_zdcsmd_w_v_N","ZDC_SMD_west_ver_N(adc > 80)",8,0.5,8.5);
+    contents.h330_zdcsmd_w_h_N = new TH1D("h330_zdcsmd_w_h_N","ZDC_SMD_west_hor_N(adc > 80)",8,0.5,8.5);
+    contents.h331_zdcsmd_e_v_N = new TH1D("h331_zdcsmd_e_v_N","ZDC_SMD_east_ver_N(adc > 80)",8,0.5,8.5);
+    contents.h332_zdcsmd_e_h_N = new TH1D("h332_zdcsmd_e_h_N","ZDC_SMD_east_hor_N(adc > 80)",8,0.5,8.5);
+    contents.h333_zdcsmd_w_v_A = new TH1D("h333_zdcsmd_w_v_A","ZDC_SMD_west_ver_A(adc > 3)",8,0.5,8.5);
+    contents.h334_zdcsmd_w_h_A = new TH1D("h334_zdcsmd_w_h_A","ZDC_SMD_west_hor_A(adc > 3)",8,0.5,8.5);
+    contents.h335_zdcsmd_e_v_A = new TH1D("h335_zdcsmd_e_v_A","ZDC_SMD_east_ver_A(adc > 3)",8,0.5,8.5);
+    contents.h336_zdcsmd_e_h_A = new TH1D("h336_zdcsmd_e_h_A","ZDC_SMD_east_hor_A(adc > 3)",8,0.5,8.5);
+    contents.h337_zdcsmd_w_v_A_2D = new TH2D("h337_zdcsmd_w_v_A_2D", "ZDC_SMD_west_ver_A_2D(adc > 3)", 8, 0.5, 8.5, 200, 0, 2000);
+    contents.h338_zdcsmd_w_h_A_2D = new TH2D("h338_zdcsmd_w_h_A_2D", "ZDC_SMD_west_hor_A_2D(adc > 3)", 8, 0.5, 8.5, 200, 0, 2000);
+    contents.h339_zdcsmd_e_v_A_2D = new TH2D("h339_zdcsmd_e_v_A_2D", "ZDC_SMD_east_ver_A_2D(adc > 3)", 8, 0.5, 8.5, 200, 0, 2000);
+    contents.h340_zdcsmd_e_h_A_2D = new TH2D("h340_zdcsmd_e_h_A_2D", "ZDC_SMD_east_hor_A_2D(adc > 3)", 8, 0.5, 8.5, 200, 0, 2000);
 
     // L2UpsilonCounts...
     contents.hL2ups_Tag = new TH1D("hL2ups_Tag","Tag",5,-0.5,4.5);
