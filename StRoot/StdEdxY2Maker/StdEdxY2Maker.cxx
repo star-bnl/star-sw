@@ -1,4 +1,5 @@
 // $Id: StdEdxY2Maker.cxx,v 1.101 2021/05/10 16:54:45 fisyak Exp $
+#ifdef __TFG__VERSION__
 //#define CompareWithToF 
 //#define __CHECK_LargedEdx__
 //#define __KEEP_DX__
@@ -10,11 +11,12 @@
 #endif
 //#define __TEST_DX__
 //#define __LogProb__
-#define __BEST_VERTEX__
 //#define __DEBUG_dEdx__
 //#define __ADD_PROB__
 //#define __BENCHMARKS__DOFIT_ZN__
-//#define __FIT_PULLS__
+#define __FIT_PULLS__
+#endif /* __TFG__VERSION__ */
+#define __BEST_VERTEX__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 #include "StTpcdEdxCorrection.h" 
@@ -171,8 +173,10 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
 
   if (! DoOnce) {
     DoOnce = 1;
+    if (! IAttr("SkipdNdx")) {
     if ((GetDate() > 20171201 && m_TpcdEdxCorrection->IsFixedTarget()) ||
 	(GetDate() > 20181201)) fUsedNdx = kTRUE; // use dN/dx for fixed target for Run XVIII and year >= XIX
+    }
     if (TESTBIT(m_Mode, kCalibration)) {// calibration mode
       if (Debug()) LOG_WARN << "StdEdxY2Maker::InitRun Calibration Mode is On (make calibration histograms)" << endm;
       TFile *f = GetTFile();
