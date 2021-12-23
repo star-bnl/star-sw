@@ -287,7 +287,8 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
     static TH3F *ActivePads = 0;
     if (! ActivePads) {
       if (GetTFile()) GetTFile()->cd();
-      ActivePads = new TH3F("ActivePads","Active pads from RDO map, tpcGainPadT0,  and Tpc Anode Voltage:sector:row:pad",24,0.5,24.5,72,0.5,72.5,NoOfPads,0.5,NoOfPads+0.5);
+      Int_t nrows = St_tpcPadConfigC::instance()->numberOfRows(20);
+      ActivePads = new TH3F("ActivePads","Active pads from RDO map, tpcGainPadT0,  and Tpc Anode Voltage:sector:row:pad",24,0.5,24.5,nrows,0.5,nrows+.5,NoOfPads,0.5,NoOfPads+0.5);
     }
     for(Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
       Int_t noOfPadsAtRow = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row); 
