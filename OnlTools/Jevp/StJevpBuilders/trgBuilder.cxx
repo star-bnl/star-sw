@@ -108,7 +108,6 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     //contents.h449_bunch_blue_unpol = new TH1D("h449_bunch_blue_unpol","h449_bunch_blue_unpol",128,-0.5,127.5);
 
     // zdcsmd
-
     contents.h329_zdcsmd_w_v_N = new TH1D("h329_zdcsmd_w_v_N","ZDC_SMD_west_ver_N(adc > 80)",8,0.5,8.5);
     contents.h330_zdcsmd_w_h_N = new TH1D("h330_zdcsmd_w_h_N","ZDC_SMD_west_hor_N(adc > 80)",8,0.5,8.5);
     contents.h331_zdcsmd_e_v_N = new TH1D("h331_zdcsmd_e_v_N","ZDC_SMD_east_ver_N(adc > 80)",8,0.5,8.5);
@@ -153,7 +152,6 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     contents.h370_zdcsmd_e_h_A_strip6 = new TH1D("h370_zdcsmd_e_h_A_strip6", "ZDC_SMD_east_hor_A_strip6(adc > 3)", 200, 0, 2000);
     contents.h371_zdcsmd_e_h_A_strip7 = new TH1D("h371_zdcsmd_e_h_A_strip7", "ZDC_SMD_east_hor_A_strip7(adc > 3)", 200, 0, 2000);
     contents.h372_zdcsmd_e_h_A_strip8 = new TH1D("h372_zdcsmd_e_h_A_strip8", "ZDC_SMD_east_hor_A_strip8(adc > 3)", 200, 0, 2000);
-
 
     // L2UpsilonCounts...
     contents.hL2ups_Tag = new TH1D("hL2ups_Tag","Tag",5,-0.5,4.5);
@@ -220,7 +218,9 @@ void trgBuilder::initialize(int argc, char *argv[]) {
 
 
     // Add root histograms to Plots
-    JevpPlot *plots[100];
+    int np = sizeof(contents) / sizeof(TH1 *);
+
+    JevpPlot *plots[np];
     int n=0;
     plots[n] = new JevpPlot(contents.h76_zdc_time_east);
     plots[n]->logy = logTimePlots;
@@ -327,7 +327,6 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     plots[++n] = new JevpPlot(contents.h338_zdcsmd_w_h_A_2D); plots[n]->setDrawOpts("colz");
     plots[++n] = new JevpPlot(contents.h339_zdcsmd_e_v_A_2D); plots[n]->setDrawOpts("colz");
     plots[++n] = new JevpPlot(contents.h340_zdcsmd_e_h_A_2D); plots[n]->setDrawOpts("colz");
-
     plots[++n] = new JevpPlot(contents.h341_zdcsmd_w_v_A_strip1);
     plots[++n] = new JevpPlot(contents.h342_zdcsmd_w_v_A_strip2);
     plots[++n] = new JevpPlot(contents.h343_zdcsmd_w_v_A_strip3);
@@ -722,7 +721,6 @@ void trgBuilder::event(daqReader *rdr)
     zdcsmd[9] = contents.h338_zdcsmd_w_h_A_2D;
     zdcsmd[10] = contents.h339_zdcsmd_e_v_A_2D;
     zdcsmd[11] = contents.h340_zdcsmd_e_h_A_2D;
-
 
     TH1 *zdcsmd_strip[4][8] = {
         {contents.h341_zdcsmd_w_v_A_strip1, contents.h342_zdcsmd_w_v_A_strip2,

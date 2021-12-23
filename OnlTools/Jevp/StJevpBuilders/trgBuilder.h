@@ -90,7 +90,6 @@ public:
 	  TH2* h338_zdcsmd_w_h_A_2D;
 	  TH2* h339_zdcsmd_e_v_A_2D;
 	  TH2* h340_zdcsmd_e_h_A_2D;
-
 	  TH1* h341_zdcsmd_w_v_A_strip1;
 	  TH1* h342_zdcsmd_w_v_A_strip2;
 	  TH1* h343_zdcsmd_w_v_A_strip3;
