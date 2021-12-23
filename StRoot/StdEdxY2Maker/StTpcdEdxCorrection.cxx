@@ -181,6 +181,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     if (! m_Corrections[k].Chair) continue;
     LOG_WARN << "StTpcdEdxCorrection: " << m_Corrections[k].Name << "/" << m_Corrections[k].Title;
     table = m_Corrections[k].Chair->Table();
+    if (Debug() > 2) table->Print(0,10);
     if (! TESTBIT(m_Mask,k) || m_Corrections[k].Chair->Table()->IsMarked()) {
       LOG_WARN << " \tis missing"; 
       goto CLEAR;
