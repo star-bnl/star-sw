@@ -108,18 +108,52 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     //contents.h449_bunch_blue_unpol = new TH1D("h449_bunch_blue_unpol","h449_bunch_blue_unpol",128,-0.5,127.5);
 
     // zdcsmd
-    contents.h329_zdcsmd_w_v_N = new TH1D("h329_zdcsmd_w_v_N","ZDC_SMD_west_ver_N",8,0.5,8.5);
-    contents.h330_zdcsmd_w_h_N = new TH1D("h330_zdcsmd_w_h_N","ZDC_SMD_west_hor_N",8,0.5,8.5);
-    contents.h331_zdcsmd_e_v_N = new TH1D("h331_zdcsmd_e_v_N","ZDC_SMD_east_ver_N",8,0.5,8.5);
-    contents.h332_zdcsmd_e_h_N = new TH1D("h332_zdcsmd_e_h_N","ZDC_SMD_east_hor_N",8,0.5,8.5);
-    contents.h333_zdcsmd_w_v_A = new TH1D("h333_zdcsmd_w_v_A","ZDC_SMD_west_ver_A",8,0.5,8.5);
-    contents.h334_zdcsmd_w_h_A = new TH1D("h334_zdcsmd_w_h_A","ZDC_SMD_west_hor_A",8,0.5,8.5);
-    contents.h335_zdcsmd_e_v_A = new TH1D("h335_zdcsmd_e_v_A","ZDC_SMD_east_ver_A",8,0.5,8.5);
-    contents.h336_zdcsmd_e_h_A = new TH1D("h336_zdcsmd_e_h_A","ZDC_SMD_east_hor_A",8,0.5,8.5);
-    contents.h337_zdcsmd_w_v_A_2D = new TH2D("h337_zdcsmd_w_v_A_2D", "ZDC_SMD_west_ver_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
-    contents.h338_zdcsmd_w_h_A_2D = new TH2D("h338_zdcsmd_w_h_A_2D", "ZDC_SMD_west_hor_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
-    contents.h339_zdcsmd_e_v_A_2D = new TH2D("h339_zdcsmd_e_v_A_2D", "ZDC_SMD_east_ver_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
-    contents.h340_zdcsmd_e_h_A_2D = new TH2D("h340_zdcsmd_e_h_A_2D", "ZDC_SMD_east_hor_A_2D", 8, 0.5, 8.5, 200, 0, 2000);
+
+    contents.h329_zdcsmd_w_v_N = new TH1D("h329_zdcsmd_w_v_N","ZDC_SMD_west_ver_N(adc > 80)",8,0.5,8.5);
+    contents.h330_zdcsmd_w_h_N = new TH1D("h330_zdcsmd_w_h_N","ZDC_SMD_west_hor_N(adc > 80)",8,0.5,8.5);
+    contents.h331_zdcsmd_e_v_N = new TH1D("h331_zdcsmd_e_v_N","ZDC_SMD_east_ver_N(adc > 80)",8,0.5,8.5);
+    contents.h332_zdcsmd_e_h_N = new TH1D("h332_zdcsmd_e_h_N","ZDC_SMD_east_hor_N(adc > 80)",8,0.5,8.5);
+    contents.h333_zdcsmd_w_v_A = new TH1D("h333_zdcsmd_w_v_A","ZDC_SMD_west_ver_A(adc > 3)",8,0.5,8.5);
+    contents.h334_zdcsmd_w_h_A = new TH1D("h334_zdcsmd_w_h_A","ZDC_SMD_west_hor_A(adc > 3)",8,0.5,8.5);
+    contents.h335_zdcsmd_e_v_A = new TH1D("h335_zdcsmd_e_v_A","ZDC_SMD_east_ver_A(adc > 3)",8,0.5,8.5);
+    contents.h336_zdcsmd_e_h_A = new TH1D("h336_zdcsmd_e_h_A","ZDC_SMD_east_hor_A(adc > 3)",8,0.5,8.5);
+    contents.h337_zdcsmd_w_v_A_2D = new TH2D("h337_zdcsmd_w_v_A_2D", "ZDC_SMD_west_ver_A_2D(adc > 3)", 8, 0.5, 8.5, 200, 0, 2000);
+    contents.h338_zdcsmd_w_h_A_2D = new TH2D("h338_zdcsmd_w_h_A_2D", "ZDC_SMD_west_hor_A_2D(adc > 3)", 8, 0.5, 8.5, 200, 0, 2000);
+    contents.h339_zdcsmd_e_v_A_2D = new TH2D("h339_zdcsmd_e_v_A_2D", "ZDC_SMD_east_ver_A_2D(adc > 3)", 8, 0.5, 8.5, 200, 0, 2000);
+    contents.h340_zdcsmd_e_h_A_2D = new TH2D("h340_zdcsmd_e_h_A_2D", "ZDC_SMD_east_hor_A_2D(adc > 3)", 8, 0.5, 8.5, 200, 0, 2000);
+    contents.h341_zdcsmd_w_v_A_strip1 = new TH1D("h341_zdcsmd_w_v_A_strip1", "ZDC_SMD_west_ver_A_strip1(adc > 3)", 200, 0, 2000);
+    contents.h342_zdcsmd_w_v_A_strip2 = new TH1D("h342_zdcsmd_w_v_A_strip2", "ZDC_SMD_west_ver_A_strip2(adc > 3)", 200, 0, 2000);
+    contents.h343_zdcsmd_w_v_A_strip3 = new TH1D("h343_zdcsmd_w_v_A_strip3", "ZDC_SMD_west_ver_A_strip3(adc > 3)", 200, 0, 2000);
+    contents.h344_zdcsmd_w_v_A_strip4 = new TH1D("h344_zdcsmd_w_v_A_strip4", "ZDC_SMD_west_ver_A_strip4(adc > 3)", 200, 0, 2000);
+    contents.h345_zdcsmd_w_v_A_strip5 = new TH1D("h345_zdcsmd_w_v_A_strip5", "ZDC_SMD_west_ver_A_strip5(adc > 3)", 200, 0, 2000);
+    contents.h346_zdcsmd_w_v_A_strip6 = new TH1D("h346_zdcsmd_w_v_A_strip6", "ZDC_SMD_west_ver_A_strip6(adc > 3)", 200, 0, 2000);
+    contents.h347_zdcsmd_w_v_A_strip7 = new TH1D("h347_zdcsmd_w_v_A_strip7", "ZDC_SMD_west_ver_A_strip7(adc > 3)", 200, 0, 2000);
+    contents.h348_zdcsmd_w_v_A_strip8 = new TH1D("h348_zdcsmd_w_v_A_strip8", "ZDC_SMD_west_ver_A_strip8(adc > 3)", 200, 0, 2000);
+    contents.h349_zdcsmd_w_h_A_strip1 = new TH1D("h349_zdcsmd_w_h_A_strip1", "ZDC_SMD_west_hor_A_strip1(adc > 3)", 200, 0, 2000);
+    contents.h350_zdcsmd_w_h_A_strip2 = new TH1D("h350_zdcsmd_w_h_A_strip2", "ZDC_SMD_west_hor_A_strip2(adc > 3)", 200, 0, 2000);
+    contents.h351_zdcsmd_w_h_A_strip3 = new TH1D("h351_zdcsmd_w_h_A_strip3", "ZDC_SMD_west_hor_A_strip3(adc > 3)", 200, 0, 2000);
+    contents.h352_zdcsmd_w_h_A_strip4 = new TH1D("h352_zdcsmd_w_h_A_strip4", "ZDC_SMD_west_hor_A_strip4(adc > 3)", 200, 0, 2000);
+    contents.h353_zdcsmd_w_h_A_strip5 = new TH1D("h353_zdcsmd_w_h_A_strip5", "ZDC_SMD_west_hor_A_strip5(adc > 3)", 200, 0, 2000);
+    contents.h354_zdcsmd_w_h_A_strip6 = new TH1D("h354_zdcsmd_w_h_A_strip6", "ZDC_SMD_west_hor_A_strip6(adc > 3)", 200, 0, 2000);
+    contents.h355_zdcsmd_w_h_A_strip7 = new TH1D("h355_zdcsmd_w_h_A_strip7", "ZDC_SMD_west_hor_A_strip7(adc > 3)", 200, 0, 2000);
+    contents.h356_zdcsmd_w_h_A_strip8 = new TH1D("h356_zdcsmd_w_h_A_strip8", "ZDC_SMD_west_hor_A_strip8(adc > 3)", 200, 0, 2000);
+    contents.h357_zdcsmd_e_v_A_strip1 = new TH1D("h357_zdcsmd_e_v_A_strip1", "ZDC_SMD_east_ver_A_strip1(adc > 3)", 200, 0, 2000);
+    contents.h358_zdcsmd_e_v_A_strip2 = new TH1D("h358_zdcsmd_e_v_A_strip2", "ZDC_SMD_east_ver_A_strip2(adc > 3)", 200, 0, 2000);
+    contents.h359_zdcsmd_e_v_A_strip3 = new TH1D("h359_zdcsmd_e_v_A_strip3", "ZDC_SMD_east_ver_A_strip3(adc > 3)", 200, 0, 2000);
+    contents.h360_zdcsmd_e_v_A_strip4 = new TH1D("h360_zdcsmd_e_v_A_strip4", "ZDC_SMD_east_ver_A_strip4(adc > 3)", 200, 0, 2000);
+    contents.h361_zdcsmd_e_v_A_strip5 = new TH1D("h361_zdcsmd_e_v_A_strip5", "ZDC_SMD_east_ver_A_strip5(adc > 3)", 200, 0, 2000);
+    contents.h362_zdcsmd_e_v_A_strip6 = new TH1D("h362_zdcsmd_e_v_A_strip6", "ZDC_SMD_east_ver_A_strip6(adc > 3)", 200, 0, 2000);
+    contents.h363_zdcsmd_e_v_A_strip7 = new TH1D("h363_zdcsmd_e_v_A_strip7", "ZDC_SMD_east_ver_A_strip7(adc > 3)", 200, 0, 2000);
+    contents.h364_zdcsmd_e_v_A_strip8 = new TH1D("h364_zdcsmd_e_v_A_strip8", "ZDC_SMD_east_ver_A_strip8(adc > 3)", 200, 0, 2000);
+    contents.h365_zdcsmd_e_h_A_strip1 = new TH1D("h365_zdcsmd_e_h_A_strip1", "ZDC_SMD_east_hor_A_strip1(adc > 3)", 200, 0, 2000);
+    contents.h366_zdcsmd_e_h_A_strip2 = new TH1D("h366_zdcsmd_e_h_A_strip2", "ZDC_SMD_east_hor_A_strip2(adc > 3)", 200, 0, 2000);
+    contents.h367_zdcsmd_e_h_A_strip3 = new TH1D("h367_zdcsmd_e_h_A_strip3", "ZDC_SMD_east_hor_A_strip3(adc > 3)", 200, 0, 2000);
+    contents.h368_zdcsmd_e_h_A_strip4 = new TH1D("h368_zdcsmd_e_h_A_strip4", "ZDC_SMD_east_hor_A_strip4(adc > 3)", 200, 0, 2000);
+    contents.h369_zdcsmd_e_h_A_strip5 = new TH1D("h369_zdcsmd_e_h_A_strip5", "ZDC_SMD_east_hor_A_strip5(adc > 3)", 200, 0, 2000);
+    contents.h370_zdcsmd_e_h_A_strip6 = new TH1D("h370_zdcsmd_e_h_A_strip6", "ZDC_SMD_east_hor_A_strip6(adc > 3)", 200, 0, 2000);
+    contents.h371_zdcsmd_e_h_A_strip7 = new TH1D("h371_zdcsmd_e_h_A_strip7", "ZDC_SMD_east_hor_A_strip7(adc > 3)", 200, 0, 2000);
+    contents.h372_zdcsmd_e_h_A_strip8 = new TH1D("h372_zdcsmd_e_h_A_strip8", "ZDC_SMD_east_hor_A_strip8(adc > 3)", 200, 0, 2000);
+
 
     // L2UpsilonCounts...
     contents.hL2ups_Tag = new TH1D("hL2ups_Tag","Tag",5,-0.5,4.5);
@@ -293,6 +327,39 @@ void trgBuilder::initialize(int argc, char *argv[]) {
     plots[++n] = new JevpPlot(contents.h338_zdcsmd_w_h_A_2D); plots[n]->setDrawOpts("colz");
     plots[++n] = new JevpPlot(contents.h339_zdcsmd_e_v_A_2D); plots[n]->setDrawOpts("colz");
     plots[++n] = new JevpPlot(contents.h340_zdcsmd_e_h_A_2D); plots[n]->setDrawOpts("colz");
+
+    plots[++n] = new JevpPlot(contents.h341_zdcsmd_w_v_A_strip1);
+    plots[++n] = new JevpPlot(contents.h342_zdcsmd_w_v_A_strip2);
+    plots[++n] = new JevpPlot(contents.h343_zdcsmd_w_v_A_strip3);
+    plots[++n] = new JevpPlot(contents.h344_zdcsmd_w_v_A_strip4);
+    plots[++n] = new JevpPlot(contents.h345_zdcsmd_w_v_A_strip5);
+    plots[++n] = new JevpPlot(contents.h346_zdcsmd_w_v_A_strip6);
+    plots[++n] = new JevpPlot(contents.h347_zdcsmd_w_v_A_strip7);
+    plots[++n] = new JevpPlot(contents.h348_zdcsmd_w_v_A_strip8);
+    plots[++n] = new JevpPlot(contents.h349_zdcsmd_w_h_A_strip1);
+    plots[++n] = new JevpPlot(contents.h350_zdcsmd_w_h_A_strip2);
+    plots[++n] = new JevpPlot(contents.h351_zdcsmd_w_h_A_strip3);
+    plots[++n] = new JevpPlot(contents.h352_zdcsmd_w_h_A_strip4);
+    plots[++n] = new JevpPlot(contents.h353_zdcsmd_w_h_A_strip5);
+    plots[++n] = new JevpPlot(contents.h354_zdcsmd_w_h_A_strip6);
+    plots[++n] = new JevpPlot(contents.h355_zdcsmd_w_h_A_strip7);
+    plots[++n] = new JevpPlot(contents.h356_zdcsmd_w_h_A_strip8);
+    plots[++n] = new JevpPlot(contents.h357_zdcsmd_e_v_A_strip1);
+    plots[++n] = new JevpPlot(contents.h358_zdcsmd_e_v_A_strip2);
+    plots[++n] = new JevpPlot(contents.h359_zdcsmd_e_v_A_strip3);
+    plots[++n] = new JevpPlot(contents.h360_zdcsmd_e_v_A_strip4);
+    plots[++n] = new JevpPlot(contents.h361_zdcsmd_e_v_A_strip5);
+    plots[++n] = new JevpPlot(contents.h362_zdcsmd_e_v_A_strip6);
+    plots[++n] = new JevpPlot(contents.h363_zdcsmd_e_v_A_strip7);
+    plots[++n] = new JevpPlot(contents.h364_zdcsmd_e_v_A_strip8);
+    plots[++n] = new JevpPlot(contents.h365_zdcsmd_e_h_A_strip1);
+    plots[++n] = new JevpPlot(contents.h366_zdcsmd_e_h_A_strip2);
+    plots[++n] = new JevpPlot(contents.h367_zdcsmd_e_h_A_strip3);
+    plots[++n] = new JevpPlot(contents.h368_zdcsmd_e_h_A_strip4);
+    plots[++n] = new JevpPlot(contents.h369_zdcsmd_e_h_A_strip5);
+    plots[++n] = new JevpPlot(contents.h370_zdcsmd_e_h_A_strip6);
+    plots[++n] = new JevpPlot(contents.h371_zdcsmd_e_h_A_strip7);
+    plots[++n] = new JevpPlot(contents.h372_zdcsmd_e_h_A_strip8);
 
     // L2UpsilonCounts...
     plots[++n] = new JevpPlot(contents.hL2ups_Tag);
@@ -655,7 +722,27 @@ void trgBuilder::event(daqReader *rdr)
     zdcsmd[9] = contents.h338_zdcsmd_w_h_A_2D;
     zdcsmd[10] = contents.h339_zdcsmd_e_v_A_2D;
     zdcsmd[11] = contents.h340_zdcsmd_e_h_A_2D;
-    
+
+
+    TH1 *zdcsmd_strip[4][8] = {
+        {contents.h341_zdcsmd_w_v_A_strip1, contents.h342_zdcsmd_w_v_A_strip2,
+         contents.h343_zdcsmd_w_v_A_strip3, contents.h344_zdcsmd_w_v_A_strip4,
+         contents.h345_zdcsmd_w_v_A_strip5, contents.h346_zdcsmd_w_v_A_strip6,
+         contents.h347_zdcsmd_w_v_A_strip7, contents.h348_zdcsmd_w_v_A_strip8},
+        {contents.h349_zdcsmd_w_h_A_strip1, contents.h350_zdcsmd_w_h_A_strip2,
+         contents.h351_zdcsmd_w_h_A_strip3, contents.h352_zdcsmd_w_h_A_strip4,
+         contents.h353_zdcsmd_w_h_A_strip5, contents.h354_zdcsmd_w_h_A_strip6,
+         contents.h355_zdcsmd_w_h_A_strip7, contents.h356_zdcsmd_w_h_A_strip8},
+        {contents.h357_zdcsmd_e_v_A_strip1, contents.h358_zdcsmd_e_v_A_strip2,
+         contents.h359_zdcsmd_e_v_A_strip3, contents.h360_zdcsmd_e_v_A_strip4,
+         contents.h361_zdcsmd_e_v_A_strip5, contents.h362_zdcsmd_e_v_A_strip6,
+         contents.h363_zdcsmd_e_v_A_strip7, contents.h364_zdcsmd_e_v_A_strip8},
+        {contents.h365_zdcsmd_e_h_A_strip1, contents.h366_zdcsmd_e_h_A_strip2,
+         contents.h367_zdcsmd_e_h_A_strip3, contents.h368_zdcsmd_e_h_A_strip4,
+         contents.h369_zdcsmd_e_h_A_strip5, contents.h370_zdcsmd_e_h_A_strip6,
+         contents.h371_zdcsmd_e_h_A_strip7, contents.h372_zdcsmd_e_h_A_strip8},
+    };
+
     const int ZDCSMDTHR = 80;
     for(int i=0; i<2; i++){
 	for(int j=0; j<2; j++){
@@ -667,6 +754,7 @@ void trgBuilder::event(daqReader *rdr)
 		if (adc > 3) {
 		    zdcsmd[6 +j -i*2]->Fill(k,adc);
 		    zdcsmd[10 +j -i*2]->Fill(k,adc);
+		    zdcsmd_strip[2 +j -i*2][k-1]->Fill(adc);
 		}
 	    }
 	}
