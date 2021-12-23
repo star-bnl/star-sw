@@ -1,4 +1,5 @@
 // $Id: StdEdxY2Maker.cxx,v 1.101 2021/05/10 16:54:45 fisyak Exp $
+#ifdef __TFG__VERSION__
 //#define CompareWithToF 
 //#define __CHECK_LargedEdx__
 //#define __KEEP_DX__
@@ -10,11 +11,12 @@
 #endif
 //#define __TEST_DX__
 //#define __LogProb__
-#define __BEST_VERTEX__
 //#define __DEBUG_dEdx__
 //#define __ADD_PROB__
 //#define __BENCHMARKS__DOFIT_ZN__
 #define __FIT_PULLS__
+#endif /* __TFG__VERSION__ */
+#define __BEST_VERTEX__
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 #include "StTpcdEdxCorrection.h" 
