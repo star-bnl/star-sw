@@ -42,7 +42,7 @@ const float fstBuilder::hitCut            = 25.0;
 const float fstBuilder::zsCut             = 25.0;
 const float fstBuilder::noiseChipCut      = 10.0;
 const int   fstBuilder::hitOccupancyCut   = 100;
-const int   fstBuilder::defTb             = 2;
+const int   fstBuilder::defTb             = 1;
 
 // constant used for FST Geometry Hit Map
 // all values are defined by inner direction
@@ -497,7 +497,7 @@ void fstBuilder::initialize(int argc, char *argv[])
 
     sprintf(buffer,"HitMapOfFSTDisk%d_ZS", iDisk+1);
     sprintf(buffer2,"FST - Hit map (ZS) for Disk%d", iDisk+1);
-    hSumContents.hHitMap_ZS[iDisk] = new TH2S(buffer, buffer2, PhiSegPerMod*ModPerDisk, -0.5, PhiSegPerMod*ModPerDisk, RstripPerMod, -0.5, RstripPerMod-0.5);//1536*8 bins
+    hSumContents.hHitMap_ZS[iDisk] = new TH2S(buffer, buffer2, PhiSegPerMod*ModPerDisk, -0.5, PhiSegPerMod*ModPerDisk-0.5, RstripPerMod, -0.5, RstripPerMod-0.5);//1536*8 bins
     hSumContents.hHitMap_ZS[iDisk]->GetXaxis()->SetNdivisions(-ModPerDisk, false);
     hSumContents.hHitMap_ZS[iDisk]->GetYaxis()->SetNdivisions(-RstripPerMod, false);
     hSumContents.hHitMap_ZS[iDisk]->SetStats(false);
@@ -1787,7 +1787,7 @@ void fstBuilder::event(daqReader *rdr)
 
   //getting MPV value and CM noise every 50 evts for each section
   //Updating CMN every 1000 non-ZS events
-  if( !(evtCt_nonZS%500) && dd )
+  if( !(evtCt_nonZS%200) && dd )
   {
     // cout << "evtCt_nonZS = " << evtCt_nonZS << endl;
     // cout << "Updating CMN!" << endl;
