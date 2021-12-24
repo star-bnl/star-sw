@@ -24,11 +24,9 @@
 #include "TString.h"
 #include "tables/St_tpcPadGainT0_Table.h"
 #include "tables/St_itpcPadGainT0_Table.h"
-//#define __USE__RTS__ /* does not work with itpc and does not account dead FEE*/
-//#ifdef __USE__RTS__
+#define __USE__RTS__ /* does not work with itpc and does not account dead FEE*/
 #include "RTS/src/DAQ_TPX/tpxGain.h"
 #include "RTS/src/DAQ_TPX/tpxCore.h"
-//#endif /* __USE__RTS__ */
 #else
 class St_tpcPadGainT0;
 class St_itpcPadGainT0;
@@ -92,14 +90,17 @@ void MaketpcPadGainT0(TString FileName="tpx_gains.txt.20180326.052426"){ //"itpc
 	Int_t fee = pad;
 	int s_real, r_real;
 	tpx36_to_real(s,rdo,s_real,r_real) ;
+	cout << "Rejet sector = " << s << " rdo = " << rdo << " fee = " << fee  << " s_real = " << s_real << " r_real = " << r_real << endl;
 	for(int a=0;a<256;a++) {
 	  for(int c=0;c<16;c++) {
 	    tpx_from_altro(r_real-1,a,c,row,pad) ;
 	    if(row==255) continue ;
+	    cout << "\tReset Gain[" << s-1 << "}[" << row-1 << "][" << pad-1 << "] = " << GainT0.Gain[s-1][row-1][pad-1] << " to 0" << endl;
 	    GainT0.Gain[s-1][row-1][pad-1] = 0;
 	    GainT0.T0[s-1][row-1][pad-1] = 0;
 	  }
 	}
+	continue;
       }
       if (sec < 1 || sec > 24) continue;
       if (row < 1 || row > 45) continue;
