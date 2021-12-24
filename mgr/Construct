@@ -201,7 +201,7 @@ foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
 my @excludeDirList = qw(\. \.\. macros CVS html doc inc idl local run wrk example include kumac.*);
 my  $excludeDirList = join ("|", @excludeDirList);
 #my  @items = qw(StShadowMaker); #StFgtClusterTools StFgtPool); #   StHbtMaker StBTofPool StFgtPool
-my  @items = qw(StShadowMaker StFcsWaveformFitMaker StFwdTrackMaker  ); #StFgtClusterTools StFgtPool); #   StHbtMaker StBTofPool StFgtPool
+my  @items = qw(StShadowMaker StFwdTrackMaker  ); #  StFcsWaveformFitMaker#StFgtClusterTools StFgtPool); #   StHbtMaker StBTofPool StFgtPool
 if (! -r "$ROOSYS/include/TPythia6.h") {
   push @items, "StEStructPool"; # pyhtia
 }

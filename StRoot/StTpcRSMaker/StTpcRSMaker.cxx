@@ -26,6 +26,7 @@
 #include "TFile.h"
 #include "TBenchmark.h"
 #include "TProfile2D.h"
+#include "TH3.h"
 #include "TVirtualMC.h"
 #include "TInterpreter.h"
 #include "Math/SpecFuncMathMore.h"
@@ -248,6 +249,9 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
   lastOuterSectorAnodeWire       = gStTpcDb->WirePlaneGeometry()->lastOuterSectorAnodeWire ();
   anodeWirePitch                 = gStTpcDb->WirePlaneGeometry()->anodeWirePitch           ();
   anodeWireRadius                = gStTpcDb->WirePlaneGeometry()->anodeWireRadius(); 
+  if (St_tpcPadConfigC::instance()->iTPC(1)) { // iTpc for all TPC sectors
+    NoOfPads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(1,72);
+  } 
   Float_t BFieldG[3]; 
   Float_t xyz[3] = {0,0,0};
   StMagF::Agufld(xyz,BFieldG);
@@ -278,6 +282,24 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       if (nAliveInner > 1) innerSectorAnodeVoltage[sector-1] /= nAliveInner;
       if (nAliveOuter > 1) outerSectorAnodeVoltage[sector-1] /= nAliveOuter;
     }
+#define __CHECK_RDOMAP_AND_VOLTAGE__
+#ifdef __CHECK_RDOMAP_AND_VOLTAGE__
+    static TH3F *ActivePads = 0;
+    if (! ActivePads) {
+      if (GetTFile()) GetTFile()->cd();
+      Int_t nrows = St_tpcPadConfigC::instance()->numberOfRows(20);
+      ActivePads = new TH3F("ActivePads","Active pads from RDO map, tpcGainPadT0,  and Tpc Anode Voltage:sector:row:pad",24,0.5,24.5,nrows,0.5,nrows+.5,NoOfPads,0.5,NoOfPads+0.5);
+    }
+    for(Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
+      Int_t noOfPadsAtRow = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row); 
+      for(Int_t pad = 1; pad<=noOfPadsAtRow; pad++) {
+	Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
+	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+	if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
+	ActivePads->Fill(sector, row, pad, St_tpcPadGainT0BC::instance()->Gain(sector,row,pad));
+      }
+    }
+#endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
     for (Int_t io = 0; io < 2; io++) {// In/Out
       if (io == 0) {
 	if (sector > 1 && TMath::Abs(innerSectorAnodeVoltage[sector-1] - innerSectorAnodeVoltage[sector-2]) < 1) {
@@ -605,22 +627,6 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
     delete [] pbins;
     delete [] pbinsL;
   }
-  //#define __XIANGEI__RDO__PRINT__
-#ifdef __XIANGEI__RDO__PRINT__
-  for(int is = 1;is<=1;is++){// NoOfSectors;is++) {
-    for(int irow=1;irow<=St_tpcPadConfigC::instance()->numberOfRows(is); irow++) {
-      Int_t NoOfPadsAtRow = St_tpcPadPlanesC::instance()->padsPerRow(irow);
-      for(int ipad=1;ipad<=NoOfPadsAtRow;ipad++) {
-	Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(is,irow,ipad);
-	Int_t rdoon   = 1;
-	Int_t rowlive = 1;
-	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(is,iRdo)) rdoon = 0;
-	if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(is,irow)) rowlive=0;
-	cout<<"xxxx: "<<is<<"\t"<<irow<<"\t"<<iRdo<<"\t"<<rdoon<<"\t"<<rowlive<<"\t"<<ipad<<"\t"<<Form("%6.2f",St_tpcPadGainT0BC::instance()->Gain(is,irow,ipad))<<endl;
-      }
-    }
-  }
-#endif /* __XIANGEI__RDO__PRINT__ */
   return kStOK;
 }
 //________________________________________________________________________________
@@ -1472,7 +1478,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
   } else 
     digitalSector->clear();
   for (row = 1;  row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
-    Int_t NoOfPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
+    Int_t noOfPadsAtRow = St_tpcPadConfigC::instance()->St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
     Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
     if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {
       if (! (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row))) {
@@ -1482,7 +1488,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 #ifdef __DEBUG__
     Float_t AdcSumBeforeAltro = 0, AdcSumAfterAltro = 0;
 #endif /*     __DEBUG__ */
-    for (pad = 1; pad <= NoOfPadsAtRow; pad++) {
+    for (pad = 1; pad <= noOfPadsAtRow; pad++) {
       gain = St_tpcPadGainT0BC::instance()->Gain(Sector,row,pad);
       if (gain <= 0.0) continue;
       ped    = St_TpcResponseSimulatorC::instance()->AveragePedestal();
