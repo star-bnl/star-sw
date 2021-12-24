@@ -7,7 +7,6 @@
  *
  * Description:  Make clusters from StTpcRawData and fill the StEvent      */
 #include <assert.h>
-#include <sys/types.h>
 #include <stdio.h>
 #include "StTpcHitMaker.h"
 #include "StTpcRTSHitMaker.h"
@@ -167,7 +166,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	  gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,rowO,pad);
 	}
       }
-      // daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
+      // daq_dta::finalize(uint32_t obj_cou, int sec, int row, int pad)
       dta_Tpx->finalize(Npads+1,sector,rowO);
 #if 0
       if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
@@ -201,7 +200,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	  cout << Form("Gain/T0 s/r/p %3i/%3i/%3i %7.2f %7.2f",sector,row,pad,gain[pad].gain,gain[pad].t0) << endl;
 #endif /* __DEBUG_GAIN__ */
 	}
-	// daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
+	// daq_dta::finalize(uint32_t obj_cou, int sec, int row, int pad)
 	dta_iTpc->finalize(Npads+1,sector,row);
 #if 0
 	if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
@@ -408,7 +407,7 @@ Int_t StTpcRTSHitMaker::Make() {
 #ifdef __BENCHMARK__
 	    //	    myBenchmark->Start("StTpcRTSHitMaker::Make::finalize");
 #endif
-	    // daq_dta::finalize(u_int obj_cou, int s=0, int row=0, int pad=0) ;
+	    // daq_dta::finalize(uint32_t obj_cou, int s=0, int row=0, int pad=0) ;
 	    dta->finalize(l,sector,rowO,pad);
 #ifdef __BENCHMARK__
 	    //	    myBenchmark->Stop("StTpcRTSHitMaker::Make::finalize");
