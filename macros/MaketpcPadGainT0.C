@@ -4,13 +4,7 @@
     root.exe -q -b lDb.C 'MaketpcPadGainT0.C+("'${f}'")' >& ${f}.log
 #  foreach f (`find . -name "*.txt*" -amin -360`)   
    foreach f (`ls -d *txt.2*`)
-    root.exe -q -b lRTS.C 'MaketpcPadGainT0.C+("'${f}'")' >& ${f}.log
-  end
-   foreach f (`ls -d tpx*txt.2*`)
-   echo "${f}"
-    root.exe -q -b lRTS.C 'MaketpcPadGainT0.C+("'${f}'")' >& ${f}.log
-  end
-   foreach f (`ls -d itpc*txt.2*`)
+    echo "${f}"
     root.exe -q -b lRTS.C 'MaketpcPadGainT0.C+("'${f}'")' >& ${f}.log
   end
  */
@@ -24,181 +18,71 @@
 #include "TString.h"
 #include "tables/St_tpcPadGainT0_Table.h"
 #include "tables/St_itpcPadGainT0_Table.h"
-#define __USE__RTS__ /* does not work with itpc and does not account dead FEE*/
 #include "RTS/src/DAQ_TPX/tpxGain.h"
 #include "RTS/src/DAQ_TPX/tpxCore.h"
+#include "RTS/src/DAQ_ITPC/itpcCore.h"
+#include "RTS/src/DAQ_ITPC/itpcFCF.h"
 #else
 class St_tpcPadGainT0;
 class St_itpcPadGainT0;
 #endif
 St_tpcPadGainT0 *tpcPadGainT0 = 0;
 St_itpcPadGainT0 *itpcPadGainT0 = 0;
+static struct g_s_t {
+  float g ;
+  float t ;
+} g_s[25][41][121] ;
+
 //________________________________________________________________________________
 void MaketpcPadGainT0(TString FileName="tpx_gains.txt.20180326.052426"){ //"itpc_gains.txt.20191030.050318") {
   if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
-#ifndef __USE__RTS__
-  if (gClassTable->GetID("St_tpcPadGainT0") < 0) gSystem->Load("libStDb_Tables.so");
-  FILE *fp = fopen(FileName.Data(),"r");
-  if (! fp) {
-    cout << "Can't open\t" << FileName.Data() << endl;
-    return;
-  }
+  Bool_t itpc = kFALSE;
   Int_t d = 0;
   Int_t t = 0;
-  Bool_t itpc = kFALSE;
   if (FileName.BeginsWith("tpx_gains.txt.")) {
     Int_t n = sscanf(FileName.Data(),"tpx_gains.txt.%0d.%0d",&d,&t);
-    if (n != 2) {cout << "Illegal file name " << FileName.Data() << endl; return;}
-  } else if (FileName.BeginsWith("tpc_gains.txt.")) {
-    Int_t n = sscanf(FileName.Data(),"tpc_gains.txt.%0d.%0d",&d,&t);
     if (n != 2) {cout << "Illegal file name " << FileName.Data() << endl; return;}
   } else  if (FileName.BeginsWith("itpc_gains.txt.")) {
     Int_t n = sscanf(FileName.Data(),"itpc_gains.txt.%0d.%0d",&d,&t);
     if (n != 2) {cout << "Illegal file name " << FileName.Data() << endl; return;}
     itpc = kTRUE;
   }
-  if (! d ) {
-    cout << "Illegal file " << FileName.Data() << endl;
-    return;
-  }
-  TDatime timeET(d,t);
-  UInt_t uGMT = timeET.Convert(kTRUE);
-  TDatime time(uGMT);
-  Char_t line[121];
-  TFile *f = 0;
-  Int_t nEntry = 0;
-  if (! itpc) {
-    tpcPadGainT0 = new St_tpcPadGainT0("tpcPadGainT0",1);
-    tpcPadGainT0_st GainT0; 
-    memset (&GainT0, 0, sizeof(GainT0));
-    Int_t run = 0, sec, row, pad;
-    Float_t gain, t0;
-    Int_t n = 0;
-    while (fgets(&line[0],120,fp)) {
-      if (line[0] == '#') {
-	TString Line(line);
-	Int_t index = Line.Index("Run ");
-	if (index < 0) continue;
-	n = sscanf(&line[index+4],"%d",&run);
-	GainT0.run = run;
-	continue;
-      }
-      n = sscanf(&line[0],"%d%d%d%f%f",&sec,&row,&pad,&gain,&t0);
-      if (sec < 0) {// dead FEE, assumed that they come last
-	Int_t s = -sec;
-	Int_t rdo = row;
-	Int_t fee = pad;
-	int s_real, r_real;
-	tpx36_to_real(s,rdo,s_real,r_real) ;
-	cout << "Rejet sector = " << s << " rdo = " << rdo << " fee = " << fee  << " s_real = " << s_real << " r_real = " << r_real << endl;
-	for(int a=0;a<256;a++) {
-	  for(int c=0;c<16;c++) {
-	    tpx_from_altro(r_real-1,a,c,row,pad) ;
-	    if(row==255) continue ;
-	    cout << "\tReset Gain[" << s-1 << "}[" << row-1 << "][" << pad-1 << "] = " << GainT0.Gain[s-1][row-1][pad-1] << " to 0" << endl;
-	    GainT0.Gain[s-1][row-1][pad-1] = 0;
-	    GainT0.T0[s-1][row-1][pad-1] = 0;
-	  }
+  TFile *fOut = 0;
+  if (! itpc) { // tpx
+    // $STAR/StRoot/RTS/src/RTS_EXAMPLE/tpx_read_gains.C
+    tpxGain tpx_gain ;	// constructor
+    
+    tpx_gain.init(0) ;	// create and zap storage for the whole TPX
+  
+    Int_t ret = tpx_gain.from_file((Char_t *) FileName.Data()) ;	// read from file...
+    if(ret < 0) {
+      printf("********* some failure on file %s!\n",FileName.Data()) ;
+      return;
+    }
+  
+    printf("File opened: %s\n",FileName.Data()) ;
+    printf("Run used [if available]: %08u\n",tpx_gain.c_run) ;
+    printf("Date changed [if available]: date %08u, time %06u\n",tpx_gain.c_date,tpx_gain.c_time) ;
+    
+    // show how the gains & t0 is obtained and used...
+    
+    for(int s=1;s<=24;s++) {			// NOTE: sector counts from 1
+      for(int r=1;r<=45;r++) {		// NOTE: row counts from 1
+	for(int p=1;p<=182;p++) {	// NOTE: pads count from 1
+	  float g, t0 ;		// gains and t0 are actually stored as "float"...
+	  
+	  g = tpx_gain.get_gains(s,r,p)->g ;
+	  t0 = tpx_gain.get_gains(s,r,p)->t0 ;
+	  
+	  //				printf("%d %d %d %.3f %.3f\n",s,r,p,g,t0) ;
 	}
-	continue;
-      }
-      if (sec < 1 || sec > 24) continue;
-      if (row < 1 || row > 45) continue;
-      if (pad < 1 || pad > 182) continue;
-      GainT0.Gain[sec-1][row-1][pad-1] = gain;
-      GainT0.T0[sec-1][row-1][pad-1] = t0;
-      nEntry++;
-      if (nEntry%1000 == 1) {
-	printf("%7i: %2d %2d %3d %8.3f %8.3f\n",nEntry,sec,row,pad, GainT0.Gain[sec-1][row-1][pad-1], GainT0.T0[sec-1][row-1][pad-1]);
       }
     }
-    tpcPadGainT0->AddAt(&GainT0);
-    //  tpcPadGainT0->Print(0,1);
-    TString filename(Form("tpcPadGainT0.%08d.%06d",time.GetDate(),time.GetTime()));
-    printf("Create %s\n",filename.Data());
-    filename += ".root";
-    f = new TFile(filename.Data(),"recreate");
-    tpcPadGainT0->Write();
-  } else {
-    itpcPadGainT0 = new St_itpcPadGainT0("itpcPadGainT0",1);
-    itpcPadGainT0_st GainT0; 
-    memset (&GainT0, 0, sizeof(GainT0));
-    Int_t run = 0, sec, row, pad, rdo,port,ch;
-    Float_t gain, t0;
-    Int_t n = 0;
-    while (fgets(&line[0],120,fp)) {
-      if (line[0] == '#') {
-	TString Line(line);
-	Int_t index = Line.Index("Run ");
-	if (index < 0) continue;
-	n = sscanf(&line[index+4],"%d",&run);
-	GainT0.run = run;
-	continue;
-      }
-      // printf("%d %d %d %d %d %d %.3f %.3f%s\n",s+1,rdo,port,ch,r,p,g,t0,g==0.0?comment:"") ;
-      n = sscanf(&line[0],"%d%d%d%d%d%d%f%f",&sec,&rdo,&port,&ch,&row,&pad,&gain,&t0);
-      if (sec < 1 || sec > 24) continue;
-      if (row < 1 || row > 45) continue;
-      if (pad < 1 || pad > 182) continue;
-      GainT0.Gain[sec-1][row-1][pad-1] = gain;
-      GainT0.T0[sec-1][row-1][pad-1] = t0;
-      nEntry++;
-      if (nEntry%1000 == 1) {
-	printf("%7i: %2d %2d %3d %3d %3d %3d %8.3f %8.3f\n",nEntry,sec,row,pad, rdo, port, ch,GainT0.Gain[sec-1][row-1][pad-1], GainT0.T0[sec-1][row-1][pad-1]);
-      }
-    }
-    itpcPadGainT0->AddAt(&GainT0);
-    //  itpcPadGainT0->Print(0,1);
-    //    TString filename(Form("itpcPadGainT0.%08d.%06d",time.GetDate(),time.GetTime()));
-    TString filename(Form("tpcPadGainT0.%08d.%06d",time.GetDate(),time.GetTime()));
-    printf("Create %s\n",filename.Data());
-    filename += ".root";
-    f = new TFile(filename.Data(),"recreate");
-    itpcPadGainT0->Write();
-  }
-  delete f;
-  delete fp;
-#else /* __USE__RTS__ */
-  // $STAR/StRoot/RTS/src/RTS_EXAMPLE/tpx_read_gains.C
-  tpxGain tpx_gain ;	// constructor
-  
-  tpx_gain.init(0) ;	// create and zap storage for the whole TPX
-  
-  Int_t ret = tpx_gain.from_file((Char_t *) FileName.Data()) ;	// read from file...
-  if(ret < 0) {
-    printf("********* some failure on file %s!\n",FileName.Data()) ;
-    return;
-  }
-  
-  printf("File opened: %s\n",FileName.Data()) ;
-  printf("Run used [if available]: %08u\n",tpx_gain.c_run) ;
-  printf("Date changed [if available]: date %08u, time %06u\n",tpx_gain.c_date,tpx_gain.c_time) ;
-  
-  // show how the gains & t0 is obtained and used...
-  
-  for(int s=1;s<=24;s++) {			// NOTE: sector counts from 1
-    for(int r=1;r<=45;r++) {		// NOTE: row counts from 1
-      for(int p=1;p<=182;p++) {	// NOTE: pads count from 1
-	float g, t0 ;		// gains and t0 are actually stored as "float"...
-	
-	g = tpx_gain.get_gains(s,r,p)->g ;
-	t0 = tpx_gain.get_gains(s,r,p)->t0 ;
-	
-	//				printf("%d %d %d %.3f %.3f\n",s,r,p,g,t0) ;
-      }
-    }
-  }
-  // Fill table
-  TFile *f = 0;
-  Int_t run = tpx_gain.c_run;
-  Int_t d = tpx_gain.c_date;
-  Int_t t = tpx_gain.c_time;
-  Bool_t itpc = kFALSE;
-   if (FileName.BeginsWith("tpx_gains.txt.")) {
-  } else  if (FileName.BeginsWith("itpc_gains.txt.")) {
-    itpc = kTRUE;
-  }
-  if (! itpc) {
+    // Fill table
+    Int_t run = tpx_gain.c_run;
+    Int_t d = tpx_gain.c_date;
+    Int_t t = tpx_gain.c_time;
+    Bool_t itpc = kFALSE;
     tpcPadGainT0 = new St_tpcPadGainT0("tpcPadGainT0",1);
     tpcPadGainT0_st GainT0; 
     memset (&GainT0, 0, sizeof(GainT0));
@@ -219,19 +103,82 @@ void MaketpcPadGainT0(TString FileName="tpx_gains.txt.20180326.052426"){ //"itpc
     TString filename(Form("tpcPadGainT0.%08d.%06d",time.GetDate(),time.GetTime()));
     printf("Create %s\n",filename.Data());
     filename += ".root";
-    f = new TFile(filename.Data(),"recreate");
+    fOut = new TFile(filename.Data(),"recreate");
     tpcPadGainT0->Write();
-  } else {
+  } else { // iTPC
+    // online/RTS/src/ITPC_SUPPORT/test_gains.C
+    // online/RTS/src/ITPC_SUPPORT/gainDbWrite.C
+    itpc_fcf_c fcf ;
+    fcf.det_type = 1 ;      // itpc
+    fcf.init(0,FileName.Data()) ;
+    
+    int bad_ch = 0 ;
+    int all_ch = 0 ;
+    int bad_fee = 0 ;
+    
+    // example of gains; will use file for that
+    FILE *f = fopen(FileName.Data(),"r") ;
+    if(f==0) {
+      LOG(ERR,"Can't open gain file") ;
+      return;
+    }
+    while(!feof(f)) {
+      char buff[128] ;
+      int sec,rdo,port,ch,row,pad ;
+      float g, t ;
+      
+      if(fgets(buff,sizeof(buff),f)==0) continue ;
+      
+      if(buff[0]=='#') continue ;
+      if(strlen(buff)<1) continue ;
+      
+      int ret = sscanf(buff,"%d %d %d %d %d %d %f %f",&sec,&rdo,&port,&ch,&row,&pad,&g,&t) ;
+      if(ret != 8) continue ;
+      
+      
+      if(ch<0) {
+	bad_fee++ ;
+	fcf.zap_fee(sec,rdo,port) ;
+	continue ;
+      }
+      
+      //if(g<0.01) bad_ch++ ;
+      all_ch++ ;
+      
+      //              g_s[sec][row][pad].g = g ;
+      g_s[sec][row][pad].t = t ;
+    }
+
+
+    for(int s=1;s<=24;s++) {
+      for(int r=1;r<=40;r++) {
+        for(int p=1;p<=fcf.x_max(r,0);p++) {
+	  float g = fcf.get_gain(s,r,p) ;
+	  
+	  g_s[s][r][p].g = g ;
+	  
+	  if(g<0.01) {
+	    bad_ch++ ;
+	    
+	    printf("BAD CH: S%02d: row %2d, pad %3d\n",s,r,p) ;
+	  }
+	  
+        }}}
+    
+
+    LOG(INFO,"From gain file %s: %d bad fees, %d/%d bad channels",FileName.Data(),bad_fee,bad_ch,all_ch) ;
+    fclose(f) ;
+
     itpcPadGainT0 = new St_itpcPadGainT0("itpcPadGainT0",1);
     itpcPadGainT0_st GainT0; 
     memset (&GainT0, 0, sizeof(GainT0));
-    GainT0.run = run;
-    for(int s=1;s<=24;s++) {			// NOTE: sector counts from 1
-      for(int r=1;r<=40;r++) {		// NOTE: row counts from 1
-	for(int p=1;p<=120;p++) {	// NOTE: pads count from 1
-	  GainT0.Gain[s-1][r-1][p-1] = tpx_gain.get_gains(s,r,p)->g;
-	  GainT0.T0[s-1][r-1][p-1]   = tpx_gain.get_gains(s,r,p)->t0;
-	}
+    GainT0.run = 124; // run;
+    for(int s=1;s<=24;s++) {
+      for(int r=1;r<=40;r++) {
+        for(int p=1;p<=120;p++) {
+	  GainT0.Gain[s-1][r-1][p-1] = g_s[s][r][p].g ;
+	  GainT0.T0[s-1][r-1][p-1] = g_s[s][r][p].t ;
+        }
       }
     }
     itpcPadGainT0->AddAt(&GainT0);
@@ -240,12 +187,10 @@ void MaketpcPadGainT0(TString FileName="tpx_gains.txt.20180326.052426"){ //"itpc
     TString filename(Form("itpcPadGainT0.%08d.%06d",time.GetDate(),time.GetTime()));
     printf("Create %s\n",filename.Data());
     filename += ".root";
-    f = new TFile(filename.Data(),"recreate");
+    fOut = new TFile(filename.Data(),"recreate");
     itpcPadGainT0->Write();
   }
-  delete f;
-
-#endif
+  delete fOut;
 }
 /* Dmitry's scripts
    /star/u/stardb/dbcron/macros-new/Fill_itpcPadGainT0.C
