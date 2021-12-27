@@ -230,6 +230,7 @@ Int_t StFcsPi0FinderForEcal::Make() {
       cout << "current event:" << mNEvents << endl;
       if (mFilter == 1 && mFcsColl->numberOfHits(0) + mFcsColl->numberOfHits(1) + mFcsColl->numberOfHits(2) + mFcsColl->numberOfHits(3) == 0) return kStOK;
 
+      /*
       //trigger ID
       int trigID = -1;
       int HaveTrig = 0;
@@ -240,7 +241,6 @@ Int_t StFcsPi0FinderForEcal::Make() {
          //                        cout<<"trig ID:"<<trigID<<endl;
          if (trigID == 860009 || trigID == 860000) HaveTrig = 1;
       }
-
       if (HaveTrig == 0) return kStOK;
 
       //TOF mult
@@ -248,6 +248,8 @@ Int_t StFcsPi0FinderForEcal::Make() {
       int tofMult = trg->tofMultiplicity();
       //                cout<<"TOF mult="<<tofMult<<endl;
       if (tofMult > 20) return kStOK;
+      */
+      int tofMult = 0;
 
       mNAccepted++;
       int total_nc = 0;
