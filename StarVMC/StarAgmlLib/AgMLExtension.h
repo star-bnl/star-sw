@@ -61,6 +61,12 @@ public:
 
   void AddCut( TString cut, double value ){ mGstpar[cut] = value; }
   std::map<TString,double>& GetCuts() { return mGstpar; }
+
+  const static int Geant3 = 0;
+  const static int Geant4 = 1;
+
+  int GetEngine(){ return mEngine; }
+  void   SetEngine( int e ){ mEngine = e; }
   
   void Print( const char* opts="" );
  
@@ -85,6 +91,8 @@ protected:
 
   std::vector<AgMLScoring*> mHitScoring; // Vector of functors for hit scoring
   std::map<TString, double> mGstpar;     // GSTPAR tracking cuts for this volume
+
+  int mEngine;
 
   static std::map< TString, AgMLExtension* > mExtensionMap;
 

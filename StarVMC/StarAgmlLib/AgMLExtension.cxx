@@ -10,12 +10,15 @@ AgMLExtension::AgMLExtension() : TGeoRCExtension(),
 				 mBranchings(0),
 				 mVolumeId( new AgMLVolumeId ),
 				 mHitScoring(),
-				 mGstpar()
+				 mGstpar(),
+				 mEngine(-1)
 {
   Grab();
 }
 
 void AgMLExtension::Print( const char* opts ) {
+
+  static const char* en[] = { "default", "geant3", "geant4" };
 
   LOG_INFO << mModuleName.Data() << ":"
 	   << mFamilyName.Data() << ":"
@@ -24,7 +27,8 @@ void AgMLExtension::Print( const char* opts ) {
 	   << mSensitive << " tracking="
 	   << mTracking << " nbranch="
 	   << mBranchings << " nuser="
-	   << mHitScoring.size() << " "
+	   << mHitScoring.size() << " engine="
+    	   << (mEngine>=0 && mEngine < 2) ? en[mEngine] : "invalid!? " 
 	   << endm;
 
 }
