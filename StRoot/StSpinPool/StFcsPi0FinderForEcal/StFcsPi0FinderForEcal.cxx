@@ -46,12 +46,11 @@ StFcsPi0FinderForEcal::~StFcsPi0FinderForEcal() {}
 //-----------------------
 Int_t StFcsPi0FinderForEcal::Init() {
    mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
-   mFcsDb->setDbAccess(0);
    if (!mFcsDb) {
       LOG_ERROR << "StFcsEventDisplay::InitRun Failed to get StFcsDbMaker" << endm;
       return kStFatal;
    }
-
+   
    h1_num_entries = new TH1F("h1_num_entries", "# of entries", 10, 0, 10);
    h1_inv_mass_cluster = new TH1F("h1_inv_mass_cluster", "invariant mass plot for FCS ECal cluster", bins, m_low, m_up);
    h1_inv_mass_cluster->SetXTitle("invariant mass [GeV]");
@@ -160,7 +159,7 @@ Int_t StFcsPi0FinderForEcal::Init() {
 Int_t StFcsPi0FinderForEcal::Finish() {
    if (filename.length() == 0) return kStOk;
    const char* fn = filename.c_str();
-   TFile* MyFile = new TFile(fn, "RECREATE");
+   TFile MyFile(fn, "RECREATE");
    h1_num_entries->Write();
    h1_inv_mass_cluster->Write();
    h1_Zgg_cluster->Write();
@@ -207,7 +206,7 @@ Int_t StFcsPi0FinderForEcal::Finish() {
    h2_cluster_dgg_vs_E1pE2->Write();
    h2_point_dgg_vs_E1pE2->Write();
 
-   MyFile->Close();
+   MyFile.Close();
    return kStOK;
 }
 
