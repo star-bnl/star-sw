@@ -203,7 +203,6 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   //
 
   if ( auto mgr = TMCManager::Instance() ) {
-    LOG_INFO << "Forward track " << toDo << " " << ntr << " " << parent << " @ 0x" << particle << endm;
     mgr -> ForwardTrack( toDo, ntr, parent, particle );
   }
 

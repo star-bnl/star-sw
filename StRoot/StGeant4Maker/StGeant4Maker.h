@@ -122,7 +122,7 @@ public:
   int  InitRun( int run );
   int  InitGeom();
   int  InitHits();
-
+  
   /// Perform runtime initialization of per-medium track propagation cuts, processes, etc...
   int  ConfigureGeometry();
 
@@ -149,6 +149,9 @@ public:
   int  Finish();
 
   void SetDefaultEngine( int e ) { mDefaultEngine = e; }
+  
+  /// Sets the MC engine for a given module
+  void SetEngineForModule( const char* module_, const int engine );
 
 private:
 protected:

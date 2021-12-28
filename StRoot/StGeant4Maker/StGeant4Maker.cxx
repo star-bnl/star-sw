@@ -950,7 +950,40 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 
 }
 //________________________________________________________________________________________________
-int  StGeant4Maker::ConfigureGeometry() {
+void StGeant4Maker::SetEngineForModule( const char* module_, const int engine ) {
+
+  LOG_INFO << "Remapping all volumes in module " << module_ << " to MC engine " << engine << endm;
+
+  // Get list of volumes
+  TObjArray *volumes = gGeoManager->GetListOfVolumes();
+
+  // Get list of extensions mapped to volume 
+  for ( int i=0; i<volumes->GetEntries(); i++ ) {
+
+    TGeoVolume* volume = (TGeoVolume *)volumes->At(i);
+    AgMLExtension* ae = getExtension(volume);
+    if ( 0==ae ) {
+      LOG_INFO << "No agml extension on volume = " << volume->GetName() << endm;
+      continue; // shouldn't happen
+    }
+
+    // Name of the volume
+    TString vname=volume->GetName();
+    TString fname=ae->GetFamilyName();
+    TString mname=ae->GetModuleName();      
+    TString mname_ = module_;
+
+    if ( mname == mname_ ) {
+
+      ae->SetEngine( engine );
+
+    }
+  
+  }
+
+}
+//________________________________________________________________________________________________
+  int  StGeant4Maker::ConfigureGeometry() {
 
   // Iterate overall volumes and set volume specific tracking cuts
   std::map<int, int> media;
@@ -1265,7 +1298,6 @@ void StGeant4Maker::Stepping(){
 
 
     if ( current != target ) {
-      LOG_INFO << "current=" << current << " target=" << target << " node=" << mc->CurrentVolPath() << ((current!=target)?" [transfer]":"") << endm;
       mgr->TransferTrack(target);
     }
 
