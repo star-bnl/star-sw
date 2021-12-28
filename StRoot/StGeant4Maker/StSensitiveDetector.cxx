@@ -3,6 +3,7 @@
 #include <TGeoManager.h>
 #include <TGeoNavigator.h>
 #include <TVirtualMC.h>
+#include <TMCManager.h>
 
 #include <StMessMgr.h>
 #include <StHitCollection.h>
@@ -10,7 +11,7 @@
 #include <StarVMC/StarAgmlLib/AgMLExtension.h>
 #include <GeometryUtils.h>
 
-TVirtualMC*    mc        = 0;
+//TVirtualMC*    mc        = 0;
 TGeoNavigator* navigator = 0;
 
 #include <StMessMgr.h>
@@ -38,7 +39,7 @@ StSensitiveDetector::StSensitiveDetector( const char* name, const char* title ) 
 //____________________________________________________________________________________________
 void StSensitiveDetector::Initialize(){ 
   navigator = gGeoManager->GetCurrentNavigator();
-  mc = TVirtualMC::GetMC();
+
 }
 //____________________________________________________________________________________________
 void StSensitiveDetector::addVolume( TGeoVolume* volume ) {
@@ -68,6 +69,9 @@ void StSensitiveDetector::addVolume( TGeoVolume* volume ) {
 void StSensitiveDetector::ProcessHits(){ 
 
   // Is this a charged particle?  If not, skip it...
+  TVirtualMC*    mc = (TMCManager::Instance()) ? 
+    TMCManager::Instance()->GetCurrentEngine() :
+    TVirtualMC::GetMC();
   if ( 0 == mc->TrackCharge() ) return;
 
   // The actual hit processing occurs in the collection. 
