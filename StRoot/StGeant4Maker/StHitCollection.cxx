@@ -126,8 +126,6 @@ void StTrackerHitCollection::ProcessHits() {
 
   TGeoVolume*    current = navigator->GetCurrentVolume();
 
-  LOG_INFO << mc->CurrentVolPath() << endm;
-
   // Is this a charged particle?  If not, skip it...
   if ( 0 == mc->TrackCharge() ) return;
 
