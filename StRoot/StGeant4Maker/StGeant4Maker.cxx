@@ -460,7 +460,8 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   mCurrentTrackingRegion(2),
   mPreviousTrackingRegion(2),
   acurr(0),aprev(0),
-  mEventHeader(0)
+  mEventHeader(0),
+  mDefaultEngine(0)
 { 
 
   // Setup default attributes
@@ -534,12 +535,12 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr("LABS", 1);
   SetAttr("SYNC", 1);
 
-  SetAttr("all:physics",  "G4" );
-  SetAttr("ecal:physics", "G3" );
-  SetAttr("calb:physics", "G3" );
-  SetAttr("tpce:physics", "G3" );
+  SetAttr("all:engine",  "G3" );
+  // SetAttr("ecal:engine", "G3" );
+  // SetAttr("calb:engine", "G3" );
+  // SetAttr("tpce:engine", "G3" );
  
-  SetAttr("application:engine","G4"); // multi engine physics
+  SetAttr("application:engine","G4"); 
     
   // TODO-- 
   //  SetAttr( "AgMLOpt:Hits:Deactivate", "ECAL:*,TPCE:*,*" );
@@ -562,14 +563,14 @@ int StGeant4Maker::Init() {
 
   AddObj( mVmcApplication, ".const", 0 ); // Register VMC application  
 
-  if ( 0==std::strcmp( SAttr("application:engine"), "G4") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
-    gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig);
-    LOG_INFO << "Created Geant 4 instance " << gG4->GetName() << endm;
+  if ( 0==std::strcmp( SAttr("application:engine"), "G3") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
+    gG3 = new TGeant3TGeo(SAttr("G3VmcOpt:Name"), IAttr("G3VmcOpt:nwgeant" ) ); // ID = 0 in multi engine
+    LOG_INFO << "Created GEANT3  instance" << gG3->GetName() << endm;
   }
 
-  if ( 0==std::strcmp( SAttr("application:engine"), "G3") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
-    gG3 = new TGeant3TGeo(SAttr("G3VmcOpt:Name"), IAttr("G3VmcOpt:nwgeant" ) );
-    LOG_INFO << "Created GEANT3  instance" << gG3->GetName() << endm;
+  if ( 0==std::strcmp( SAttr("application:engine"), "G4") || 0==std::strcmp( SAttr("application:engine"), "multi") )  {
+    gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig); // ID = 1 in multi engine
+    LOG_INFO << "Created Geant 4 instance " << gG4->GetName() << endm;
   }
 
 
@@ -580,8 +581,6 @@ int StGeant4Maker::Init() {
 
   if ( multimode ) {
     LOG_INFO << "Application will run both G3 and G4 physics engines, with default as "<< SAttr("all:physics") << endm;
-    //    TString default = SAttr("all:physics");
-
     // Verify that G3 and G4 registered themselves with the manager
     auto* mgr = TMCManager::Instance();
     if ( mgr ) {
@@ -850,6 +849,43 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 
   assert(gGeoManager);
 
+  //
+  // Returns the engine enum (kGeant3 or kGeant4) from the command line option
+  // of the form NAME:engine=G3 or NAME:engine=G4
+  //
+  // NAME = all signifies the default engine
+  // NAME = modu is the first four letters (lower cased) of the module name.  All
+  //        volumes within that module will be assigned to the engine.
+  //
+  auto engineFromOption = []( const std::string _option ) -> int {
+    std::string option = _option;
+    int result;
+    // Get the default from the maker
+    std::string v;
+    const std::string default_ = _g4maker->SAttr("all:engine");
+
+    if ( option == "" ) v = default_;
+    else                v = _g4maker->SAttr(option.c_str());
+    if ( v == "" )      v = default_;
+
+    // Returns either geant3 or geant4
+    if      ( v == "G3" ) result = AgMLExtension::Geant3;
+    else if ( v == "G4" ) result = AgMLExtension::Geant4;        
+    else { assert(0); } // should never fall through
+    assert( result==0 || result==1 );
+    return result;
+  };
+  auto engineFromModule = [engineFromOption]( const std::string _m ) -> int {
+    int result;
+    // grab the first four characters of the module
+    std::string m4 = _m.substr(0,4); 
+    // is there an attribute set
+    std::string option = m4 + ":engine";
+    return engineFromOption( option );
+  };
+
+  _g4maker->SetDefaultEngine( engineFromOption("all:engine") );
+
   // First collect all AgML extensions with sensitive volumes
   // by the family name of the volume
   std::map<TString, StSensitiveDetector*> sdmap;
@@ -866,17 +902,22 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
       LOG_INFO << "No agml extension on volume = " << volume->GetName() << endm;
       continue; // shouldn't happen
     }
+
+    // Name of the volume
+    TString vname=volume->GetName();
+    TString fname=ae->GetFamilyName();
+    TString mname=ae->GetModuleName();      
+
+    int efm = engineFromModule( mname.Data() );
+
+    ae->SetEngine( engineFromModule( mname.Data() ) );
+    ae->Print();
+
     if ( 0==ae->GetSensitive() ) {
       LOG_DEBUG << "Not sensitive = " << volume->GetName() << endm;
       continue; 
     }
 
-    // Name of the volume
-    TString vname=volume->GetName();
-    TString fname=ae->GetFamilyName();
-    TString mname=ae->GetModuleName();
-
-    
     AgMLVolumeId* identifier = AgMLVolumeIdFactory::Create( fname );
     if ( identifier ) {
       ae -> SetVolumeIdentifier( identifier );
@@ -895,9 +936,11 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
 
     // Register this volume to the sensitive detector
 
-    // TODO: handle multi-engine 
-    if ( nullptr == TVirtualMC::GetMC()->GetSensitiveDetector( vname ) ) {
-      TVirtualMC::GetMC()->SetSensitiveDetector( vname, sd );
+    auto* mgr = TMCManager::Instance();
+    auto* mc =  TVirtualMC::GetMC();  // Question: Do we need to obtain pointer through TMCManager here?
+
+    if ( nullptr == mc->GetSensitiveDetector( vname ) ) {
+      mc->SetSensitiveDetector( vname, sd );
     }
     
     // Register this volume with the sensitive detector
@@ -1079,8 +1122,6 @@ void StarVMCApplication::BeginPrimary(){ _g4maker -> BeginPrimary(); }
 void StGeant4Maker::BeginPrimary()
 {
 
-  LOG_INFO << "BeginPrimary" << endm;
-
   std::vector<StarMCParticle*>& truthTable    = mMCStack->GetTruthTable();
   truthTable.clear();
 
@@ -1093,18 +1134,23 @@ void StarVMCApplication::FinishPrimary(){ _g4maker->FinishPrimary(); }
 void StGeant4Maker::FinishPrimary()
 {
 
-  LOG_INFO << "FinishPrimary" << endm;
-
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::PreTrack(){ _g4maker->PreTrack(); }
 void StGeant4Maker::PreTrack()
 {
+
+  auto* navigator    = gGeoManager->GetCurrentNavigator();
+
   // Reset the history (tracks always born in full tracking region)
   mPreviousNode = mCurrentNode = 0;
   mPreviousVolume = mCurrentVolume = 0;
   mCurrentTrackingRegion=2;
   mPreviousTrackingRegion=2;
+
+  mCurrentNode    = navigator->GetCurrentNode();
+  mCurrentVolume  = navigator->GetCurrentVolume();
+
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::PostTrack(){ _g4maker->PostTrack(); }
@@ -1171,8 +1217,6 @@ int StGeant4Maker::regionTransition( int curr, int prev ) {
   static double Rmin = DAttr("Stepping:Punchout:Rmin");
   static double Zmin = DAttr("Stepping:Punchout:Zmin");
 
-
-
   // TODO:  This is a hack.  We need to update the geometry and group these three
   //        detectors underneath a single integration volume / region.
   if ( previous == "PMOD" || 
@@ -1203,12 +1247,31 @@ int StGeant4Maker::regionTransition( int curr, int prev ) {
 void StarVMCApplication::Stepping(){ _g4maker -> Stepping(); }
 void StGeant4Maker::Stepping(){                                           
 
-  //  static auto* navigator    = gGeoManager->GetCurrentNavigator();
-  //  static auto* trackManager = TG4TrackManager::Instance();
+  // At start of user stepping, try to transfer the track between engine
+  auto* mgr = TMCManager::Instance();
+  auto* mc = TVirtualMC::GetMC(); 
 
-  // TODO: handle multi-engine 
-  static auto* mc = TVirtualMC::GetMC(); 
-  static auto* stack = mMCStack;// (StMCParticleStack* )mc->GetStack();
+  if ( mgr ) {
+    
+    mc = mgr->GetCurrentEngine();
+
+    int target  = mDefaultEngine;
+    int current = mc->GetId();
+
+    auto* ext = getExtension( mCurrentVolume );
+    if ( ext ) {     
+      target = ext->GetEngine();      
+    }
+
+
+    if ( current != target ) {
+      LOG_INFO << "current=" << current << " target=" << target << " node=" << mc->CurrentVolPath() << ((current!=target)?" [transfer]":"") << endm;
+      mgr->TransferTrack(target);
+    }
+
+  }
+
+  auto* stack = mMCStack;
 
   // Get access to the current track
   TParticle* current = stack->GetCurrentTrack(); 
@@ -1344,9 +1407,6 @@ void StGeant4Maker::Stepping(){
     LOG_DEBUG << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
 		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
   }
-
-    LOG_DEBUG << Form("track  x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
-		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
 
 
 }

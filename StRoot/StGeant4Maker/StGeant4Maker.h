@@ -148,6 +148,8 @@ public:
   /// Final end of run actions
   int  Finish();
 
+  void SetDefaultEngine( int e ) { mDefaultEngine = e; }
+
 private:
 protected:
 
@@ -212,6 +214,8 @@ protected:
 
     return nhits;
   }
+
+  int mDefaultEngine;
 
   ClassDef(StGeant4Maker,1);
 
