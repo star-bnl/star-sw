@@ -96,7 +96,7 @@ struct SD2Table_TPC {
       g2t_tpc_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_tpc_hit_st)); 
       
       g2t_hit.id        = hit->id;
-      // TODO: add pointer to next hit on the track 
+
       g2t_hit.track_p   = hit->idtruth;
       g2t_hit.volume_id = hit->volId;
       g2t_hit.de        = hit->de;
@@ -108,6 +108,9 @@ struct SD2Table_TPC {
       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
       g2t_hit.length    = hit->length;
       g2t_hit.lgam      = hit->lgam;
+
+      
+
       /*
 	these are used downstream by the slow simulator (and should not be filled here)
 
@@ -117,12 +120,17 @@ struct SD2Table_TPC {
 	g2t_hit.np = ...; // number of primary electrons
 
       */
-      
-      table -> AddAt( &g2t_hit );     
 
       int idtruth = hit->idtruth;
-      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-      trk->n_tpc_hit++;     
+      g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
+
+      g2t_hit.next_tr_hit_p = g2t_track->hit_tpc_p; // store next hit on the linked list
+      g2t_track->hit_tpc_p = hit->id;            // this hit becomes the head of the linked list
+      
+      g2t_track->n_tpc_hit++;     
+
+      // Add hit to the table
+      table -> AddAt( &g2t_hit );           
 
     }
     // TODO: increment hit count on track 
@@ -170,7 +178,6 @@ struct SD2Table_STGC {
       g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
       
       g2t_hit.id        = hit->id;
-      // TODO: add pointer to next hit on the track 
       g2t_hit.track_p   = hit->idtruth;
       g2t_hit.volume_id = hit->volId;
       g2t_hit.de        = hit->de;
@@ -179,13 +186,16 @@ struct SD2Table_STGC {
 	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
 	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
       }
-      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
-      
-      table -> AddAt( &g2t_hit );     
+      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] );             
 
       int idtruth = hit->idtruth;
-      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-      trk->n_stg_hit++;
+      g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
+
+      g2t_hit.next_tr_hit_p = g2t_track->hit_stg_p; // store next hit on the linked list
+      g2t_track->hit_stg_p = hit->id;            // this hit becomes the head of the linked list
+      g2t_track->n_stg_hit++;
+
+      table -> AddAt( &g2t_hit );     
       
     }
   } 
@@ -210,12 +220,15 @@ struct SD2Table_FST {
 	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
       }
       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
-      
-      table -> AddAt( &g2t_hit );     
-
+     
       int idtruth = hit->idtruth;
-      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-      trk->n_fts_hit++;
+      g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
+
+      g2t_hit.next_tr_hit_p = g2t_track->hit_fts_p; // store next hit on the linked list
+      g2t_track->hit_fts_p = hit->id;            // this hit becomes the head of the linked list
+      g2t_track->n_fts_hit++;
+
+      table -> AddAt( &g2t_hit );     
 
     }
   } 
