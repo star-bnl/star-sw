@@ -46,12 +46,11 @@ StFcsPi0FinderForEcal::~StFcsPi0FinderForEcal() {}
 //-----------------------
 Int_t StFcsPi0FinderForEcal::Init() {
    mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
-   mFcsDb->setDbAccess(0);
    if (!mFcsDb) {
       LOG_ERROR << "StFcsEventDisplay::InitRun Failed to get StFcsDbMaker" << endm;
       return kStFatal;
    }
-
+   
    h1_num_entries = new TH1F("h1_num_entries", "# of entries", 10, 0, 10);
    h1_inv_mass_cluster = new TH1F("h1_inv_mass_cluster", "invariant mass plot for FCS ECal cluster", bins, m_low, m_up);
    h1_inv_mass_cluster->SetXTitle("invariant mass [GeV]");
@@ -160,7 +159,7 @@ Int_t StFcsPi0FinderForEcal::Init() {
 Int_t StFcsPi0FinderForEcal::Finish() {
    if (filename.length() == 0) return kStOk;
    const char* fn = filename.c_str();
-   TFile* MyFile = new TFile(fn, "RECREATE");
+   TFile MyFile(fn, "RECREATE");
    h1_num_entries->Write();
    h1_inv_mass_cluster->Write();
    h1_Zgg_cluster->Write();
@@ -207,7 +206,7 @@ Int_t StFcsPi0FinderForEcal::Finish() {
    h2_cluster_dgg_vs_E1pE2->Write();
    h2_point_dgg_vs_E1pE2->Write();
 
-   MyFile->Close();
+   MyFile.Close();
    return kStOK;
 }
 
@@ -229,25 +228,18 @@ Int_t StFcsPi0FinderForEcal::Make() {
       mNEvents++;
       cout << "current event:" << mNEvents << endl;
       if (mFilter == 1 && mFcsColl->numberOfHits(0) + mFcsColl->numberOfHits(1) + mFcsColl->numberOfHits(2) + mFcsColl->numberOfHits(3) == 0) return kStOK;
-
-      //trigger ID
-      int trigID = -1;
-      int HaveTrig = 0;
-      const StTriggerIdCollection* trig = event->triggerIdCollection();
-      const StTriggerId* trigIdList = trig->nominal();
-      for (int trigi = 0; trigi < 10; trigi++) {
-         trigID = trigIdList->triggerId(trigi);
-         //                        cout<<"trig ID:"<<trigID<<endl;
-         if (trigID == 860009 || trigID == 860000) HaveTrig = 1;
+      
+      //TOF mult cut
+      int tofMult = 0;
+      const StTriggerData* trgdata = event->triggerData();
+      if(!trgdata && StMuDst::event()) trgdata = StMuDst::event()->triggerData();
+      if(trgdata){
+	  tofMult = trgdata->tofMultiplicity();
+	  LOG_DEBUG<<"TOF mult="<<tofMult<<endm;
+	  if (tofMult > 100) return kStOK;
+      }else{
+	  LOG_WARN << "No TriggerData found in StEvent nor Mudst. No TOFMult cut"<<endm;
       }
-
-      if (HaveTrig == 0) return kStOK;
-
-      //TOF mult
-      StTriggerData* trg = event->triggerData();
-      int tofMult = trg->tofMultiplicity();
-      //                cout<<"TOF mult="<<tofMult<<endl;
-      if (tofMult > 20) return kStOK;
 
       mNAccepted++;
       int total_nc = 0;
