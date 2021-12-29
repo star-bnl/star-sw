@@ -2,6 +2,7 @@
 
 #include "StGeant4Maker.h"
 #include "TMath.h"
+#include "TProfile.h"
 
 #ifndef __CINT__
 #include <boost/accumulators/accumulators.hpp>
@@ -25,6 +26,10 @@ stats< tag::count,
        tag::error_of<tag::mean>
        >>;
 #endif
+
+std::vector<TProfile*> sampling_fraction_vs_pt;
+std::vector<TProfile*> sampling_fraction_vs_eta;
+std::vector<TProfile*> sampling_fraction_vs_phi;
 
 #include <vector>
 //___________________________________________________________________
@@ -76,7 +81,7 @@ void eventSums() {
 }
 
 //___________________________________________________________________
-void unit_test_multi_engine_emc( int nevents = 5, const char* part = "pi+" ) {
+void unit_test_multi_engine_emc( int ntracks = 500, const char* part = "pi+" ) {
 
   gROOT->ProcessLine("initChain();");
 
@@ -87,30 +92,30 @@ void unit_test_multi_engine_emc( int nevents = 5, const char* part = "pi+" ) {
   LOG_TEST << "=======================================================" << std::endl;
   LOG_TEST << "Multi-engine testing of EMC" << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
-  LOG_TEST << Form("GEANT3 response to %i 1 GeV photons %s",nevents,part) << std::endl;
+  LOG_TEST << Form("GEANT3 response to %i 1 GeV photons %s",ntracks,part) << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
 
 
   auto* gm = dynamic_cast<StGeant4Maker*>( StMaker::GetChain()->GetMaker("geant4star") );
 
   gm->SetEngineForModule( "CALB", 0 ); 
-  throw_particle(nevents, part, 0.99995, 1.00005, -0.95, 0.95, 0., TMath::TwoPi() );
+  throw_particle(ntracks, part, 0.99995, 1.00005, -0.95, 0.95, 0., TMath::TwoPi() );
   eventSums();
 
   LOG_TEST << "=======================================================" << std::endl;
   LOG_TEST << "Multi-engine testing of EMC" << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
-  LOG_TEST << Form("Geant 4 response to %i 1 GeV %s",nevents,part) << std::endl;
+  LOG_TEST << Form("Geant 4 response to %i 1 GeV %s",ntracks,part) << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
 
   gm->SetEngineForModule( "CALB", 1 );
-  throw_particle(nevents, part, 0.99995, 1.00005, -0.95, 0.95, 0., TMath::TwoPi() );
+  throw_particle(ntracks, part, 0.99995, 1.00005, -0.95, 0.95, 0., TMath::TwoPi() );
   eventSums();
 
   LOG_TEST << "=======================================================" << std::endl;
   LOG_TEST << "Multi-engine testing of EMC" << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
-  LOG_TEST << Form("GEANT3 vs Geant 4 response to %i 1 GeV %s",nevents,part) << std::endl;
+  LOG_TEST << Form("GEANT3 vs Geant 4 response to %i 1 GeV %s",ntracks,part) << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
 
   LOG_TEST << Form( "energy deposition: sum           = %f %f keV", sum_[0], sum_[1] )          << std::endl;
