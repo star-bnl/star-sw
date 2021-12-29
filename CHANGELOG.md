@@ -1,6 +1,6 @@
 # Changelog
 
-## SL21d_2 - xxxx-xx-xx
+## SL21d_2 - 2012-12-29
 
 - Apply another bug fix to pass all tests:
   - Move back to MagFactor instead of starMagOnl for pre 2012 data (issue [#185](https://github.com/star-bnl/star-sw/pull/185)) ([#216](https://github.com/star-bnl/star-sw/pull/216))
