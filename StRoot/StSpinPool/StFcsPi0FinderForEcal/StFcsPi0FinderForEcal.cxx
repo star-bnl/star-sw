@@ -228,15 +228,18 @@ Int_t StFcsPi0FinderForEcal::Make() {
       mNEvents++;
       cout << "current event:" << mNEvents << endl;
       if (mFilter == 1 && mFcsColl->numberOfHits(0) + mFcsColl->numberOfHits(1) + mFcsColl->numberOfHits(2) + mFcsColl->numberOfHits(3) == 0) return kStOK;
-
-      /*
-      //TOF mult
-      StTriggerData* trg = event->triggerData();
-      int tofMult = trg->tofMultiplicity();
-      //                cout<<"TOF mult="<<tofMult<<endl;
-      if (tofMult > 20) return kStOK;
-      */
+      
+      //TOF mult cut
       int tofMult = 0;
+      const StTriggerData* trgdata = event->triggerData();
+      if(!trgdata && StMuDst::event()) trgdata = StMuDst::event()->triggerData();
+      if(trgdata){
+	  tofMult = trgdata->tofMultiplicity();
+	  LOG_DEBUG<<"TOF mult="<<tofMult<<endm;
+	  if (tofMult > 100) return kStOK;
+      }else{
+	  LOG_WARN << "No TriggerData found in StEvent nor Mudst. No TOFMult cut"<<endm;
+      }
 
       mNAccepted++;
       int total_nc = 0;
