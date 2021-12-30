@@ -85,6 +85,7 @@ void trackLoop() {
        	double pt = track->pt;
        	double eta = track->eta;
        	if ( pt > 0.100 && pt < 10.0 ) {
+	  LOG_INFO << "Accumulate track->id = " << track->id << " hit de = " << hit->de << std::endl;
        	  edep_per_track[ track->id ] += hit->de; // running sum
        	}	
        }
@@ -99,6 +100,7 @@ void trackLoop() {
        double eta = track->eta;
        // todo phi
        double E  = track->e + 1.0e-12; // prevent div by zero
+       LOG_INFO << "itrack=" << i << " idtruth=" << track->id << "Fill pt=" << pt << " eta=" << track->eta << " E=" << track->e << " edep=" << edep_per_track[ track->id ] << endm;
        if ( pt > 0.100 && pt < 10.0 && eta > -0.95 && eta < 0.95 ) {
    	sampling_fraction_vs_pt.back()->Fill( pt, edep_per_track[ track->id ] / E );
    	sampling_fraction_vs_eta.back()->Fill( eta, edep_per_track[ track->id ] / E );
@@ -137,7 +139,7 @@ void book_histograms() {
 
 }
 //___________________________________________________________________
-void unit_test_multi_engine_emc( int ntracks = 5, const char* part = "gamma" ) {
+void unit_test_multi_engine_emc( const char* part = "gamma", int ntracks = 10 ) {
 
   gROOT->ProcessLine("initChain();");
 
@@ -154,9 +156,11 @@ void unit_test_multi_engine_emc( int ntracks = 5, const char* part = "gamma" ) {
 
   auto* gm = dynamic_cast<StGeant4Maker*>( StMaker::GetChain()->GetMaker("geant4star") );
 
+  TFile* output = new TFile(Form("unit_test_multi_engine_emc_%s.root",part),"recreate");
+
   gm->SetEngineForModule( "CALB", 0 ); 
   book_histograms();
-  throw_particle(ntracks, part, 0.099995, 10.00005, -0.95, 0.95, 0., TMath::TwoPi() );
+  throw_particle(ntracks, part, 0.09995, 10.00005, -0.95, 0.95, 0., TMath::TwoPi() );
   trackLoop();
 
   LOG_TEST << "=======================================================" << std::endl;
@@ -167,8 +171,11 @@ void unit_test_multi_engine_emc( int ntracks = 5, const char* part = "gamma" ) {
 
   gm->SetEngineForModule( "CALB", 1 );
   book_histograms();
-  throw_particle(ntracks, part, 0.99995, 1.00005, -0.95, 0.95, 0., TMath::TwoPi() );
+  throw_particle(ntracks, part, 0.09995, 10.00005, -0.95, 0.95, 0., TMath::TwoPi() );
   trackLoop();
+
+  output->Write();
+  output->Close();
 
   LOG_TEST << "=======================================================" << std::endl;
   LOG_TEST << "Multi-engine testing of EMC" << std::endl;
@@ -183,7 +190,7 @@ void unit_test_multi_engine_emc( int ntracks = 5, const char* part = "gamma" ) {
   LOG_TEST << Form( "energy deposition: max           = %f %f keV", max_[0], max_[1]  )          << std::endl;
   LOG_TEST << Form( "energy deposition: error of mean = %f %f keV", error_of_mean_[0], error_of_mean_[1] ) << std::endl;
   LOG_TEST << Form( "number of hits:                    %i %i    ", nhits_[0], nhits_[1]         ) << std::endl;
-
+  
 }
 
 
