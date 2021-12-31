@@ -26,6 +26,8 @@
 #include "TCanvas.h"
 #include "TSystem.h"
 
+#include "StarRoot/TH1Helper.h"
+
 StMCSteppingHist *StMCSteppingHist::fThis=0;
 int Kount[10]={0,0,0,0,0,0,0,0,0,0};
 double hMin[4] = {99,99,99,99};
@@ -221,9 +223,7 @@ void StMCSteppingHist::SummArr()
        mh = new MyHolder(ts.Data(),fMedium->GetName());
         for (int i=0;i<2;i++) {
           TH1F *h = new TH1F(ts.Data(), "", 100, 0., 1.);
-#if  ROOT_VERSION_CODE < 395523
-          h->SetBit(TH1::kCanRebin);
-#endif
+          TH1Helper::SetCanRebin(h);
           h->SetDirectory(0);
           mh->fH[i] = h;
         }
