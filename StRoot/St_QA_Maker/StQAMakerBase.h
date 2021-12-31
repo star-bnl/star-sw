@@ -127,7 +127,8 @@ enum StQAHistSetType {
   StQA_run15 = 10,
   StQA_run17 = 11,
   StQA_run18 = 12,
-  StQA_run19 = 13
+  StQA_run19 = 13,
+  StQA_run22 = 14
   // when adding more, search for StQAHistSetType for other changes
 };
 
@@ -203,6 +204,13 @@ class StQAMakerBase : public StMaker {
   // TPC dE/dx over time
   TH3F     *m_dedx_Z3A; // dE/dx vs. drift distance
 
+  // FCS
+  TH1F     *m_h1_inv_mass_cluster; //!
+  TH1F     *m_h1_dgg_cluster; //!
+  TH1F     *m_h1_two_cluster_energy_allcut; //!
+  TH2F     *m_h2_cluster_dgg_vs_E1pE2; //!
+
+
   // signed DCA (impact parameter) over time
   TH2F     *m_glb_simpactTime; //! signed impact parameter from primary vertex vs. time
 
@@ -240,6 +248,7 @@ class StQAMakerBase : public StMaker {
   virtual void BookHistGeneral();
   virtual void BookHistTrigger();
   virtual void BookHistFcl();
+  virtual void BookHistFCS();
   virtual void BookHistFMS();
   virtual void BookHistDE();
   virtual void BookHistRP();
