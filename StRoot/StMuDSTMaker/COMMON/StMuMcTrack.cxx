@@ -39,7 +39,7 @@ StMuMcTrack::StMuMcTrack(const g2t_track_st &t) : TObject(), mGePid(t.ge_pid), m
     mHits[ktof] = 0xff & t.n_tof_hit;  /* Nhits in tof */
     mHits[ktpc] = 0xff & t.n_tpc_hit;  /* Nhits in tpc */
     mHits[kvpd] = 0xff & t.n_vpd_hit;  /* Nhits in vpd */
-
+    
 assert(t.pt<0 || mPxyz.perp()>1e-6);
 
 }
@@ -86,7 +86,7 @@ StMuMcTrack::StMuMcTrack(const g2t_track_st &t) : TObject(),mEgLabel(t.eg_label)
   mHits[khca] = 0xff & t.n_hca_hit;  /* Nhits in hca */
   mHits[kfts] = 0xff & t.n_fts_hit;  /* Nhits in fts */
   mHits[keto] = 0xff & t.n_eto_hit;  /* Nhits in eto */
-  
+  if (! mPDG) mPDG =TDatabasePDG::Instance()->ConvertGeant3ToPdg(mGePid);
   assert(t.pt<0 || mPxyz.perp()>1e-6);
 }
 #endif /* __TFG__VERSION__ */
@@ -95,7 +95,7 @@ StMuMcTrack::StMuMcTrack(const g2t_track_st &t) : TObject(),mEgLabel(t.eg_label)
   os << Form("Tk:%4i Vx:%4i Ge:%4i NoHits:%3i",v.Id(),v.IdVx(),v.GePid(),v.NoHits());
 #else /* __TFG__VERSION__ */
 ostream&              operator<<(ostream& os,  const StMuMcTrack& v) {
-  os << Form("McTk:%4i Vx:%4i Ge:%4i Pdg:%i7 NoHits:%3i",v.Id(),v.IdVx(),v.GePid(),v.Pdg(),v.NoHits());
+  os << Form("McTk:%4i Vx:%4i Ge:%4i Pdg:%7i NoHits:%3i",v.Id(),v.IdVx(),v.GePid(),v.Pdg(),v.NoHits());
 #endif /* __TFG__VERSION__ */
   os << Form(" q:%2i pT:%7.3f eta:%6.3f phi:%6.3f p:%8.3f px:%8.3f py:%8.3f pz:%8.3f",v.Charge(),v.pT(), v.Eta(), 
 	     TMath::ATan2(v.Pxyz().y(),v.Pxyz().x()), v.Ptot(), v.Pxyz().x(),v.Pxyz().y(),v.Pxyz().z());
