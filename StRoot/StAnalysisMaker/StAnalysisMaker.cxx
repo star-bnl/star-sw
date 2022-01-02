@@ -31,6 +31,8 @@
 //#define __TRIGGER_ID__
 #include "StAnalysisMaker.h"
 #include "StEventTypes.h"
+#include "StFttCollection.h"
+#include "StFcsCollection.h"
 #include "StMessMgr.h"
 #include "StDcaGeometry.h"
 #if ROOT_VERSION_CODE < 334081
@@ -1261,7 +1263,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	if(!aHit) continue;
 	if (aHit->associatedTrack()) m++;
       }
-      LOG_QA << Form("# Mtd  hits:\t%5i: \tMatched with tracks:%5i",n,m) << endm; 
+      LOG_QA << Form("# Mtd  hits:%8i: \tMatched with tracks:%5i",n,m) << endm; 
     }
   }
   const StPhmdCollection* pmdcol = event->phmdCollection();
@@ -1314,7 +1316,37 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   if (event->rpsCollection()) {
     Int_t n = event->rpsCollection()->clusters().size();
     if (n) {
-      LOG_QA << Form("# RPS    hits:%5i",n) << endm; 
+      LOG_QA << Form("# RPS    hits:%8i",n) << endm; 
+    }
+  }
+  if (event->fttCollection()) {
+    UInt_t nr = event->fttCollection()->numberOfRawHits();
+    UInt_t nc = event->fttCollection()->numberOfClusters();
+    UInt_t np = event->fttCollection()->numberOfPoints();
+    if (nr + nc + np > 0) {
+      LOG_QA << Form("# FTT  hits:%8i, clusters:%5i, points:%5i",nr,nc,np) << endm; 
+    }
+  }
+  if (event->fcsCollection()) {
+    UInt_t nr = 0;
+    UInt_t nc = 0;
+    UInt_t np = 0;
+    for (UInt_t det = 0; det <= kFcsNDet; det++) {
+      nr += event->fcsCollection()->numberOfHits(det);
+      nc += event->fcsCollection()->numberOfClusters(det);
+      np += event->fcsCollection()->numberOfPoints(det);
+    }
+    if (nr + nc + np > 0) {
+      LOG_QA << Form("# FCS  hits:%8i, clusters:%5i, points:%5i",nr,nc,np) << endm; 
+    }
+  }
+  if (event->stgcCollection()) {
+    UInt_t n = 0;
+    for (UInt_t det = 0; det <= kStgcNDet; det++) {
+     n += event->stgcCollection()->numberOfHits(det);
+    }
+    if (n) {
+      LOG_QA << Form("# STGC hits:%8i",n) << endm; 
     }
   }
   
