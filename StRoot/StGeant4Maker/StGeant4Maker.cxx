@@ -248,7 +248,6 @@ struct SD2Table_EMC {
       g2t_emc_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_emc_hit_st)); 
       
       g2t_hit.id        = hit->id;
-      // TODO: add pointer to next hit on the track 
       g2t_hit.track_p   = hit->idtruth;
       g2t_hit.volume_id = hit->volId;
       g2t_hit.de        = hit->de;
@@ -1131,7 +1130,7 @@ void StGeant4Maker::FinishEvent(){
     mytrack.p[0]     = t->px();
     mytrack.p[1]     = t->py();
     mytrack.p[2]     = t->pz();
-    mytrack.e        = t->E();
+    mytrack.e        = t->particle()->Energy();
     mytrack.pt       = t->pt(); // NOTE: starsim secondaries have pt = -999
     mytrack.eta      = t->particle()->Eta();
     mytrack.rapidity = t->particle()->Y();
@@ -1172,7 +1171,10 @@ void StGeant4Maker::BeginPrimary()
   truthTable.clear();
 
   int current = mMCStack->GetCurrentTrackNumber();
-  truthTable.push_back( mMCStack->GetPersistentTrack( current ) );
+  auto* track = mMCStack->GetPersistentTrack( current );
+  LOG_DEBUG << "Begin Primary current track number = " << current << " track=" << track << endm;
+  
+  truthTable.push_back( track ); 
 
 }
 //________________________________________________________________________________________________
@@ -1196,7 +1198,6 @@ void StGeant4Maker::PreTrack()
 
   mCurrentNode    = navigator->GetCurrentNode();
   mCurrentVolume  = navigator->GetCurrentVolume();
-
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::PostTrack(){ _g4maker->PostTrack(); }
