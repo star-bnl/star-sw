@@ -260,6 +260,8 @@ TParticle *StMCParticleStack::PopNextTrack( int &itrack )
   // Get the particle on the top of the stack
   TParticle *particle = mStack.back();    mStack.pop_back();
   itrack              = mStackIdx.back(); mStackIdx.pop_back();
+
+  // Set the current track number
   mCurrent            = itrack;
   
   return particle;
