@@ -9,6 +9,11 @@ The list of stable releases can be found TFG_Releases.md
 <li>  <b>starver .DEV2</b>
 <li>  <b>source $STAR/setupDEV2.csh</b>
 <li>  <b>starver _desired_TFG_version__</b>, from TFG16a  to TFG21n, .DEV2 == TFG is check out HEAD from TFG repository, it could be unstable.
+<li>  switch between ROOT5 and ROOT6: 
+<ul>
+  <li> setup root6
+  <li> setup root5
+</ul> 
 </ul>
 <p>
 In order to switch back to the "official" STAR software do: 
