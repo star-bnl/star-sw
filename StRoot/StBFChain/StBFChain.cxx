@@ -589,6 +589,7 @@ Int_t StBFChain::Instantiate()
       // When StiCA library is requested CA will be used as seed finder in StiMaker
       if ( GetOption("StiCA") ) {
 	mk->SetAttr("seedFinders", "CA DEF");
+	if ( GetOption("UseCAVxFinder") ) gEnv->SetValue("UseCAVxFinder", 1);
       }
       
       // Option to re-use hits in other tracks

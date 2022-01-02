@@ -14,6 +14,7 @@
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "TDatabasePDG.h"
 #include "TF1.h"
+#include "TEnv.h"
 //to obtain error coefficients
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
@@ -31,9 +32,11 @@
 #include <algorithm>
 using std::vector;
 StiCATpcTrackerInterface *StiCATpcTrackerInterface::fgStiCATpcTrackerInterface = 0;
+Bool_t StiCATpcTrackerInterface::fgUseCAVxFinder = kFALSE;
 //________________________________________________________________________________
 StiCATpcTrackerInterface &StiCATpcTrackerInterface::Instance() {
   if (! fgStiCATpcTrackerInterface) fgStiCATpcTrackerInterface = new StiCATpcTrackerInterface(); 
+  fgUseCAVxFinder = gEnv->GetValue("UseCAVxFinder", 0);
   return *fgStiCATpcTrackerInterface;
 }
 //________________________________________________________________________________
@@ -43,6 +46,7 @@ void StiCATpcTrackerInterface::SetNewEvent() {
   fSeedHits.clear(); 
   fHitsMap = 0; 
   StTPCCAInterface::SetNewEvent();
+  if (! fgUseCAVxFinder) return;
   if (! fSpectrum) {
     TFile *f = 0;
     if (StMaker::GetTopChain()) {
@@ -73,6 +77,7 @@ void StiCATpcTrackerInterface::SetNewEvent() {
       fVertexXYPlots[i]->Reset();
     }
   }
+
   //  StiKalmanTrackNode::SetExternalTriggerOffset(0);
 }
 //________________________________________________________________________________

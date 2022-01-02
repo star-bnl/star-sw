@@ -14,7 +14,6 @@ class StiCATpcTrackerInterface : public StTPCCAInterface {
   virtual void SetHits(HitMapToVectorAndEndType &map_){ fHitsMap = &map_; };// set hits data array.
   virtual vector<Seed_t> &GetSeeds(){ return fSeeds; };                   // get seeds. Should be called after Run(...).
   virtual vector<SeedHit_t>        GetSeedHits()    { return fSeedHits;}
-
  protected:
   virtual void MakeHits();     // fill fCaHits & fSeedHits
   virtual void MakeSeeds();    // fill fSeeds & fTrackParameters
@@ -25,5 +24,6 @@ class StiCATpcTrackerInterface : public StTPCCAInterface {
   StiCATpcSeedFinder       *fSeedFinder;
   vector<SeedHit_t>         fSeedHits;          // hits to make seeds
   static StiCATpcTrackerInterface *fgStiCATpcTrackerInterface;
+  static Bool_t             fgUseCAVxFinder;
 };
 #endif //  __StiCATpcTrackerInterface_h__
