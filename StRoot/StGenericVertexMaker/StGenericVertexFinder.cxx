@@ -307,7 +307,8 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
       (    - kx*ky*dx + (kx2 + 1)*dy -          ky*zv)/kx2_ky2_1,
       (       - kx*dx -        ky*dy + (kx2 + ky2)*zv)/kx2_ky2_1
    );
-
+   double dist_mag = dist_vec.mag();
+   if (dist_mag < 1e-7) return 0;
 
    double denom = kx2_ky2_1 * denom_sqrt;
 
@@ -336,8 +337,7 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
    // Finaly, calculate the covariance matrix along the vector connecting the beamline and the point
    // The result is a 1x1 matrix
    TRSymMatrix covarianceMprime(TRMatrix(1, 4, jacobian), TRArray::kAxSxAT, TRSymMatrix(4, covBeamline) );
-
-   double dist_mag = dist_vec.mag();
+   
    double chi2 = dist_mag*dist_mag/covarianceMprime[0];
 
    return chi2;
