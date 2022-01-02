@@ -147,6 +147,8 @@ void StTrackerHitCollection::ProcessHits() {
   // This should be the current particle truth 
   StarMCParticle* truth = truthTable.back();
 
+  LOG_DEBUG << "Process hits with track " << truth << " current tn=" << userstack->GetCurrentTrackNumber() << endm;
+
   bool isNewTrack      = mc->IsNewTrack();
   bool isTrackEntering = mc->IsTrackEntering();
   bool isTrackExiting  = mc->IsTrackExiting();
@@ -295,6 +297,7 @@ void StCalorimeterHitCollection::ProcessHits() {
   // This should be the current particle truth 
   StarMCParticle* truth = truthTable.back();
 
+  LOG_DEBUG << "Process hits with track " << truth << " current tn=" << userstack->GetCurrentTrackNumber() << endm;
 
   bool isNewTrack      = mc->IsNewTrack();
   bool isTrackEntering = mc->IsTrackEntering();
