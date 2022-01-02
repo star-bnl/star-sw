@@ -1141,12 +1141,13 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
     Double_t      z; // Global Z
     Double_t   AdcL; // TMath::Log(Adc_RC)
     Double_t   ratL; // TMath::Log(Adc_MC/Adc_RC)
+    Double_t   ratC; // TMath::Log(Charge_RC [keV]/Adc_RC)
   };
   const static Int_t NoDim = sizeof(Adc_t)/sizeof(Double_t);
-  const Char_t *Names[NoDim] = {"secWE","rowIO", "Ntmbks", "z",  "AdcL","ratL"};
-  const Int_t  nBins[NoDim]  = {      2,      2,       25,  110,    140,   250};
-  const Adc_t  xMin          = {    0.5,    0.5,      2.5,   -5,      3,  -0.75};
-  const Adc_t  xMax          = {   24.5,   80.5,     27.5,  215,     10,   1.75};
+  const Char_t *Names[NoDim] = {"secWE","rowIO", "Ntmbks", "z",  "AdcL","ratL","ratC"};
+  const Int_t  nBins[NoDim]  = {      2,      2,       25,  110,    140,   250,   200};
+  const Adc_t  xMin          = {    0.5,    0.5,      2.5,   -5,      3, -0.75,   -10};
+  const Adc_t  xMax          = {   24.5,   80.5,     27.5,  215,     10,  1.75,    -2};
 
   TProfile2D *profs[kTPC][kVar];
   TH3F       *hists[kTPC][kVar];
@@ -4620,28 +4621,32 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
   cout << "Output for " << output << endl;
   if (! fOut) fOut = new TFile(output,"recreate");
   TH2D *T[2] = {
-    new TH2D("TI","time bucket difference for Inner sector versus Z",210,-210,210,800,-5,5),
-    new TH2D("TO","time bucket difference for Outer sector versus Z",210,-210,210,800,-5,5)
+    new TH2D("TI","time bucket difference for Inner sector versus Z",210,-210,210,800,-2,2),
+    new TH2D("TO","time bucket difference for Outer sector versus Z",210,-210,210,800,-2,2)
   };
   TH2D *TR[2] = {
-    new TH2D("TRI","time bucket for Inner difference versus row",72,0.5,72.5,800,-5,5),
-    new TH2D("TRO","time bucket for Outer difference versus row",72,0.5,72.5,800,-5,5)
+    new TH2D("TRI","time bucket for Inner difference versus row",72,0.5,72.5,800,-2,2),
+    new TH2D("TRO","time bucket for Outer difference versus row",72,0.5,72.5,800,-2,2)
+  };
+  TH2D *TC[2] = {
+    new TH2D("TIC","time bucket after correction difference for Inner sector versus Z",210,-210,210,800,-2,2),
+    new TH2D("TOC","time bucket after correction difference for Outer sector versus Z",210,-210,210,800,-2,2)
   };
   TH2D *D[2] = {
-    new TH2D("DI","time bucket difference for Inner sector versus tanL",200,-2,2,800,-5,5),
-    new TH2D("DO","time bucket difference for Outer sector versus tanL",200,-2,2,800,-5,5)
+    new TH2D("DI","time bucket difference for Inner sector versus tanL",200,-2,2,800,-2,2),
+    new TH2D("DO","time bucket difference for Outer sector versus tanL",200,-2,2,800,-2,2)
   };
   TH2D *B[2] = {
-    new TH2D("BI","time bucket difference for Inner sector versus no. of time buckets",50,0.5,50.5,800,-5,5),
-    new TH2D("BO","time bucket difference for Outer sector versus no. of time buckets",50,0.5,50.5,800,-5,5)
+    new TH2D("BI","time bucket difference for Inner sector versus no. of time buckets",50,0.5,50.5,800,-2,2),
+    new TH2D("BO","time bucket difference for Outer sector versus no. of time buckets",50,0.5,50.5,800,-2,2)
   };
   TH2D *Z[2] = {
-    new TH2D("ZI","Z difference for Inner sector versus Z",210,-210,210,800,-5,5),
-    new TH2D("ZO","Z difference for Outer sector versus Z",210,-210,210,800,-5,5)
+    new TH2D("ZI","Z difference for Inner sector versus Z",210,-210,210,800,-2,2),
+    new TH2D("ZO","Z difference for Outer sector versus Z",210,-210,210,800,-2,2)
   };
   TH2D *ZR[2] = {
-    new TH2D("ZRI","Z difference for Inner sector versus row",72,0.5,72.5,800,-5,5),
-    new TH2D("ZRO","Z difference for Outer sector versus row",72,0.5,72.5,800,-5,5)
+    new TH2D("ZRI","Z difference for Inner sector versus row",72,0.5,72.5,800,-2,2),
+    new TH2D("ZRO","Z difference for Outer sector versus row",72,0.5,72.5,800,-2,2)
   };
   // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>TI(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90&&fMcHit.mVolumeId%100<=13","colz"); TI->FitSlicesY(); TI_1->Fit("pol2","er","",-100,100);
   // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>TO(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90&&fMcHit.mVolumeId%100>13","colz"); TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
@@ -4699,10 +4704,11 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
       Int_t io = 0;
       if (row > NoInnerRows) io = 1;
       if (fRcHit_mQuality[l] < 90) continue;
-      //      Double_t dT = fMcHit_mMcl_t[k]+(0.165+1e6*fMcHit_mTof[k])*Frequency-fRcHit_mMcl_t[l]/64.;
-      Double_t dT = fMcHit_mMcl_t[k]+(0.165+1e6*fMcHit_mTof[k])*Frequency-fRcHit_tb[k];
+      Double_t dT = fMcHit_mMcl_t[k]+(0.165+1e6*fMcHit_mTof[k])*Frequency-fRcHit_mMcl_t[l]/64.;
+      Double_t dTC = fMcHit_mMcl_t[k]+(0.165+1e6*fMcHit_mTof[k])*Frequency-fRcHit_tb[k];
       Double_t dZ = fMcHit_mPosition_mX3[k] - fRcHit_mPosition_mX3[k];
       T[io]->Fill(fMcHit_mPosition_mX3[k],dT);
+      TC[io]->Fill(fMcHit_mPosition_mX3[k],dTC);
       Z[io]->Fill(fMcHit_mPosition_mX3[k],dZ);
       TR[io]->Fill(row,dT);
       ZR[io]->Fill(row,dZ);
@@ -4724,6 +4730,15 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
     T1[io]->SetMarkerColor(io+1);
     if (! T1[io]) continue;
     T1[io]->Fit("pol2","er","",-100,100);
+  }
+  TH1D *TC1[2] = {0,0};
+  for (Int_t io = 0; io < 2; io++) {
+    cout << TC[io]->GetTitle() << endl;
+    TC[io]->FitSlicesY();
+    TC1[io] = (TH1D *) gDirectory->Get(Form("%s_1",TC[io]->GetName()));
+    TC1[io]->SetMarkerColor(io+1);
+    if (! TC1[io]) continue;
+    TC1[io]->Fit("pol2","er","",-100,100);
   }
   fOut->Write();
 }
