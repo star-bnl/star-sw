@@ -357,7 +357,7 @@ my @sysdirlist = qw(asps/Simulation/agetof
 		    StDb
 		   );# print "sysdirlist = @sysdirlist\n";
 if (-r "StarDb/AgiGeometry" ) {push @sysdirlist, "StarDb/AgiGeometry";}
-#if (-r "StarDb/AgMLGeometry") {push @sysdirlist, "StarDb/AgMLGeometry";}
+if (-r "StarDb/AgMLGeometry") {push @sysdirlist, "StarDb/AgMLGeometry";}
 if ($STAR_HOST_SYS !~ /darwin/) {
   push @sysdirlist, "asps/DAQBrowser";
 }
