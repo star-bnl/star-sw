@@ -284,19 +284,19 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
     }
 #define __CHECK_RDOMAP_AND_VOLTAGE__
 #ifdef __CHECK_RDOMAP_AND_VOLTAGE__
-    static TH3F *ActivePads = 0;
-    if (! ActivePads) {
+    static TH3F *AlivePads = 0;
+    if (! AlivePads) {
       if (GetTFile()) GetTFile()->cd();
       Int_t nrows = St_tpcPadConfigC::instance()->numberOfRows(20);
-      ActivePads = new TH3F("ActivePads","Active pads from RDO map, tpcGainPadT0,  and Tpc Anode Voltage:sector:row:pad",24,0.5,24.5,nrows,0.5,nrows+.5,NoOfPads,0.5,NoOfPads+0.5);
+      AlivePads = new TH3F("AlivePads","Active pads from RDO map, tpcGainPadT0,  and Tpc Anode Voltage:sector:row:pad",24,0.5,24.5,nrows,0.5,nrows+.5,NoOfPads,0.5,NoOfPads+0.5);
     }
     for(Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
       Int_t noOfPadsAtRow = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row); 
+      if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
       for(Int_t pad = 1; pad<=noOfPadsAtRow; pad++) {
 	Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
 	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
-	if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
-	ActivePads->Fill(sector, row, pad, St_tpcPadGainT0BC::instance()->Gain(sector,row,pad));
+	AlivePads->Fill(sector, row, pad, St_tpcPadGainT0BC::instance()->Gain(sector,row,pad));
       }
     }
 #endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
