@@ -18,7 +18,7 @@
   set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
   if ("${f}" == "") then
 #    root.exe -x -q -b 'TpcPrompt.C(1000000,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
-    root.exe -x -q -b 'TpcPrompt.C(10000,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
+    root.exe -x -q -b 'TpcPrompt.C(1000,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
   endif
   end
 </command>
@@ -50,6 +50,7 @@
 <input URL="file:/hlt/cephfs/daq/2021/349/22349029/hlt_*.daq" />
 <input URL="file:/hlt/cephfs/daq/2021/349/22349030/hlt_*.daq" />
 <input URL="file:/hlt/cephfs/daq/2021/352/*/hlt_22*.daq" />
--->
 <input URL="file:/hlt/cephfs/daq/2021/353/*/hlt_22*.daq" />
+--> 
+<input URL="file:/hlt/cephfs/daq/2022/001/*/hlt*.daq" />
 </job>

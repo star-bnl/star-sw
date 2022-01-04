@@ -33,12 +33,12 @@
    if (-r $mmuFile) continue;
 #   cp ${evtsFile} ${SCRATCH}/
 #   set input = ${SCRATCH}/${bf}.daq
-    set bla = ${SUBMITTINGDIRECTORY}/${bf}.bla.root
-    if (-r ${bla}) continue;
-    touch ${bla}
     if (-r ${SUBMITTINGDIRECTORY}/Submitted) then 
       rm ${SUBMITTINGDIRECTORY}/Submitted
     endif
+    set bla = ${SUBMITTINGDIRECTORY}/${bf}.bla.root
+    if (-r ${bla}) continue;
+    touch ${bla}
     set input = ${evtsFile};
 #  @ n =  $JOBINDEX % 20
   @ n =  $JOBINDEX % 100
@@ -46,7 +46,7 @@
    if ($n == 4) set evout = "evout";
 #root.exe -q -b 'bfc.C(100000,"P2022a,evout,NoHistos,noTags,noRunco,StiCA,-picoWrite,-picoDst,Cosmics","'${input}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(100000,"pp2022,StiCA,BEmcChkStat,evout","'${input}'")' &gt;&amp; ${logFile}
-   root.exe -q -b 'bfc.C(100000,"pp2022,StiCA,BEmcChkStat,'${evout}'","'${input}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'bfc.C(100000,"pp2022,StiCA,BEmcChkStat,'${evout}',NoHistos,noTags,noRunco","'${input}'")' &gt;&amp; ${logFile}
 #    cp -p ${logFile} ${SUBMITTINGDIRECTORY}/
 #    cp -p ${bf}*.root ${SUBMITTINGDIRECTORY}/
     rm ${SUBMITTINGDIRECTORY}/${bf}.bla.root
