@@ -568,7 +568,7 @@ class Tag( Handler ):
                 if 'Config.xml' in f:
                     name = f
                     name = name.replace('.xml','.h')
-                    self.includes.append( '%s' % name )
+                    self.includes.append( 'StarVMC/StarGeometry/%s' % name )
 
 
                 if 'Geo' in f and '.xml' in f:
@@ -631,7 +631,7 @@ class Tag( Handler ):
             for mod in self.modules:
                 document.impl( 'AgModule *_%s = 0;'%mod, unit='global' )
 
-            document.impl( '#include "StarGeo.h"',            unit='global' )
+            document.impl( '#include "StarVMC/StarGeometry/StarGeo.h"',            unit='global' )
             document.impl( '#include "StMessMgr.h"',                                    unit='global' )
             document.impl( '#include "TGeoManager.h"',                                  unit='global' )
 
@@ -709,7 +709,7 @@ class StarGeometry(Handler):
         document.head(header)
 
         implement1 = """
-#include "StarGeo.h"
+#include "StarVMC/StarGeometry/StarGeo.h"
 #include "TObjectSet.h"
 #include "TGeoManager.h"        
 #include <string>
@@ -782,7 +782,7 @@ class Geometry( Handler ):
         self.parent.addGeometry(self)
 
         # Build list of include files from either StarVMC/Geometry or $STAR/StarVMC/Geometry
-        self.includes.append('StarGeo.h')
+        self.includes.append('StarVMC/StarGeometry/StarGeo.h')
         for root, dirs, files in os.walk( 'StarVMC/Geometry' ):
             for f in files:
 
@@ -794,7 +794,7 @@ class Geometry( Handler ):
                 if 'Config.xml' in f:
                     name = f
                     name = name.replace('.xml','.h')
-                    self.includes.append( '%s' % name )
+                    self.includes.append( 'StarVMC/StarGeometry/%s' % name )
 
         ## self.name = attr.get('name', None)
         ## self.docum = attr.get('comment', None )
@@ -915,7 +915,7 @@ class Detector( Handler ):
         document.head( '#ifndef %s' % myguard )
         document.head( '#define %s' % myguard )        
 
-        document.impl( '#include "%s.h"\n\n' % document.agmodule )
+        document.impl( '#include "StarVMC/StarGeometry/%s.h"\n\n' % document.agmodule )
         document.impl( '#include "StMessMgr.h"\n' )
         document.impl( '#include "TGeoManager.h"\n' )
 
@@ -3619,7 +3619,7 @@ class Par(Handler):
         requireAttributes( tag, attr, ['name','value'] )
         
         #document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
-        document.impl( 'module()->AddPar(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )        
+        document.impl( '// parameter %s = %s (deferred)'%(name.lower(),value.lower()), unit=current )        
 class Cut(Handler):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p        
@@ -3631,7 +3631,7 @@ class Cut(Handler):
         value  = attr.get('value')
 
         #document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
-        document.impl( 'module()->AddCut(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )
+        document.impl( '// cut %s = %s (deferred)'%(name.lower(),value.lower()), unit=current )
 class Hits(Handler):
 # TODO        
     def __init__(self):
@@ -3711,7 +3711,7 @@ class Instrument(Handler):
             nbits=replacements(nbits).lower()
             mn   =replacements(mn).lower()
             mx   =replacements(mx).lower()
-            document.impl( 'module()->AddHit( "%s", "%s", %s, %s, %s, "%s");'%( block, meas, nbits, mn, mx, opts ), unit=current )
+            document.impl( '// deferred module()->AddHit( "%s", "%s", %s, %s, %s, "%s");'%( block, meas, nbits, mn, mx, opts ), unit=current )            
 
 
 class Gsckov(Handler):

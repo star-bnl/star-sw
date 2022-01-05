@@ -269,8 +269,9 @@ Int_t GetFileList(TFile *files[14]) {
   }
   return NF;
 }
+#if 0
 //________________________________________________________________________________
-void TpcRSdEdx(const Char_t *fopt = "I70") {
+void TpcRSdEdxHOLD(const Char_t *fopt = "I70") {
   Bool_t fI70 = kFALSE;
   TString fOpt(fopt);
   if (fOpt.Contains("I70")) fI70 = kTRUE;
@@ -309,11 +310,11 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
   else       c2->Clear();
   TH1F *hr2 = 0;
   if (fOpt.Contains("fitN",TString::kIgnoreCase)) {
-    h2r = c2->DrawFrame(-1,-0.2,6,0.2);
+    hr2 = c2->DrawFrame(-1,-0.2,6,0.2);
     hr2->SetTitle(Form("Deviation TpcRS log(dN/dx) from %s Prediction versus log_{ 10}(   #beta #gamma)",fopt));
     hr2->SetYTitle("log (dN/dx / Prediction)");  
   } else {
-    h2r = c2->DrawFrame(-1,-0.2,6,0.2);
+    hr2 = c2->DrawFrame(-1,-0.2,6,0.2);
     hr2->SetTitle(Form("Deviation TpcRS log(dE/dx) from %s Prediction versus log_{ 10}(   #beta #gamma)",fopt));
     hr2->SetYTitle("log (dE/dx / Prediction)");  
   }
@@ -462,5 +463,66 @@ void TpcRSdEdx(const Char_t *fopt = "I70") {
 #endif
   }
   //  delete fOut;
+}
+#endif
+//________________________________________________________________________________
+void TpcRSdEdx(const Char_t *fopt = "I70") {
+  Bool_t fI70 = kFALSE;
+  TString fOpt(fopt);
+  if (fOpt.Contains("I70")) fI70 = kTRUE;
+  Double_t scales[3] = {0};
+  Double_t sigmas[3] = {0.076, 0.076, 0.076};
+  //  Double_t scales[2] = {-6.75100587779081402e-03,-8.64200502877701150e-03}; // pi70->Interpolate(TMath::Log10(4.)); piz->Interpolate(TMath::Log10(4.));
+  //  Double_t sigmas[2] = { 7.56777648706270512e-02, 7.46023243878390085e-02}; // pi70S->Interpolate(TMath::Log10(4.)); pizS->Interpolate(TMath::Log10(4.));
+  Double_t scale = fI70 ? scales[0] : scales[1];
+  Double_t sigma = fI70 ? sigmas[0] : sigmas[1];
+  TString c1N(fopt); 
+  TString c2N("DeV"); c2N += fopt;
+  TString c3N("sigma"); c3N += fopt;
+
+  TFile *files[NHYP];
+  Int_t NF = GetFileList(files);
+  if (! NF) return;
+  TLegend *l1 = new TLegend(0.5,0.6,0.8,0.9);
+  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(c1N);
+  if (! c1 ) c1 = new TCanvas(c1N,c1N);
+  else       c1->Clear();
+  TH1F *hr = 0;
+  if (fOpt.Contains("fitN",TString::kIgnoreCase)) {
+    hr = c1->DrawFrame(-1,-0.2,6,0.2);
+    hr->SetTitle("TpcRS log(dN/dx) versus log_{ 10} (   #beta #gamma)");
+    hr->SetYTitle("log (dN/dx [1/cm])");  
+  } else {
+    hr = c1->DrawFrame(-1,-0.2,6,0.2);
+    hr->SetTitle("TpcRS log(dE/dx) versus log_{ 10} (   #beta #gamma)");
+    hr->SetYTitle("log (dE/dx [keV/cm])");  
+  }
+  hr->SetXTitle("log_{10} ( #beta#gamma  ) ");
+  c1->cd(); l1->Draw();
+  Int_t color = 0;
+  Int_t marker = 20;
+  TH1D *mu = 0;
+  //  for (Int_t i = 0; i < NHYP+1; i++) {
+  for (Int_t i = 0; i < NHYP; i++) {
+    TString name(Form("%s%s",fopt,namesh[i]));
+    if (i < NHYP) {
+      if (! files[i]) continue;
+      files[i]->cd();
+      mu = (TH1D *) files[i]->Get("mu");
+      if (! mu) continue;
+      //      if (mu->GetEntries() <100) continue;
+      color++;
+      if (color > 8) {
+	color = 1;
+	marker++;
+      }
+      mu->SetMarkerStyle(marker);
+      mu->SetMarkerColor(color);
+      c1->cd();
+      mu->Draw("same");
+      l1->AddEntry(mu,names[i]);
+      c1->Update();
+    }
+  }
 }
 

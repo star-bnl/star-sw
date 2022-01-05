@@ -181,7 +181,7 @@ public:
 
     char *mMeasureTime=0;                //! output file for measuring fitting time
 
-    int mEnergySelect=0;                 //! 0=MC (straight from dE), >0 see above
+    int mEnergySelect=10;                //! 0=MC (straight from dE), >0 see above
     int mCenterTB=50;                    //! center timebin for triggered crossing
     int mMinTB=0;                        //! center timebin for triggered crossing
     int mMaxTB=512;                      //! center timebin for triggered crossing

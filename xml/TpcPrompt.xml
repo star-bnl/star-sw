@@ -15,11 +15,11 @@
   set file = `basename ${file2} .daq`;
   echo "${file}"
   set logFile  = ${file}B.log
-#  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
-#  if ("${f}" == "") then
+  set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
+  if ("${f}" == "") then
 #    root.exe -x -q -b 'TpcPrompt.C(1000000,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
     root.exe -x -q -b 'TpcPrompt.C(1000,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
-#  endif
+  endif
   end
 </command>
 <!-- <input URL="file:/gpfs01/star/subsys-tpc/fisyak/Tpc/TpcRS/TpcRS_2016sdt/*event.root" /> -->
@@ -35,5 +35,22 @@
 <!-- <input URL="file:/hlt/cephfs/reco/2021/RF/DEV2/7p7GeV_2021/*/*/*event.root" /> -->
 <!-- <input URL="command:daq_2019T.pl" /> -->
 <!-- <input URL="command:daq_2020T.pl" /> -->
-<input URL="file:/hlt/cephfs/reco/2021/RF/TFG21c.B/7p7GeV_2021/*/*/*.event.root" />
+<!-- <input URL="file:/hlt/cephfs/reco/2021/RF/TFG21c.B/7p7GeV_2021/*/*/*.event.root" /> -->
+<!-- <input URL="file:/hlt/cephfs/daq/2021/347/*/hlt_22*.daq" /> -->
+<!-- <input URL="file:/hlt/cephfs/daq/2021/348/*/hlt_22*.daq" /> -->
+<!--
+<input URL="file:/hlt/cephfs/daq/2021/349/22349011/hlt_*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/349/22349013/hlt_*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/349/22349014/hlt_*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/349/22349015/hlt_*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/349/22349016/hlt_*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/349/22349017/hlt_*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/349/22349018/hlt_*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/349/22349028/hlt_*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/349/22349029/hlt_*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/349/22349030/hlt_*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/352/*/hlt_22*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/353/*/hlt_22*.daq" />
+--> 
+<input URL="file:/hlt/cephfs/daq/2022/001/*/hlt*.daq" />
 </job>

@@ -130,7 +130,9 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   } else if ( RunOpt.Contains("RC.y",TString::kIgnoreCase) ||
 	      RunOpt.Contains("MC.y",TString::kIgnoreCase) ||
               RunOpt.Contains("RC20",TString::kIgnoreCase) ||
-	      RunOpt.Contains("MC20",TString::kIgnoreCase) ) {
+	      RunOpt.Contains("MC20",TString::kIgnoreCase) ||
+              RunOpt.Contains("RC.20",TString::kIgnoreCase)||
+	      RunOpt.Contains("MC.20",TString::kIgnoreCase) ) {
     ChainOpt = RunOpt;
     ChainOpt += ",MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2";
     //  ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeakFull,"; // check that StTpcRSMaker::kDistortion bit is set
@@ -149,6 +151,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     else                                                           ChainOpt += "tags,";
 #endif
   }
+  cout << "ChainOpt\t" << ChainOpt.Data() << endl;
   // ChainOpt += "MiniMcMk,IdTruth,useInTracker,-hitfilt,CMuDst,Tree,tags,evout,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
     ChainOpt += ",tpl,tpcI,";
@@ -204,9 +207,10 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       if (gSystem->AccessPathName(FileIn.Data())) FileIn ="";
     }
   }
-  ChainOpt = RunOpt + ChainOpt;
+  //  ChainOpt = RunOpt + ChainOpt;
   if (FileIn = "") {
-    RootFile += Form("_%s_%i_%i",Opt.Data(),First,Last);
+    if (RootFile != "") RootFile += "_";
+    RootFile += Form("%s_%i_%i",Opt.Data(),First,Last);
   }
   RootFile.ReplaceAll(".root","");
   RootFile.ReplaceAll(",","_");

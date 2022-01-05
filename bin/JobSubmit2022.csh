@@ -12,7 +12,7 @@
 #cd /hlt/cephfs/reco/2021/FF/TFG21c.B/7p7GeV_2021
 #cd /hlt/cephfs/reco/2021/RF/TFG21h/7p7GeV_2021
 CreateRunDirs.pl
-foreach d (`ls -1d ???/2*`)
+foreach d (`ls -1d ???/23*`)
   cd $d;
   if (-r Done || -r Submitted) then
     cd -
@@ -37,7 +37,7 @@ foreach d (`ls -1d ???/2*`)
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG21h.xml
   /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2022.xml
 #  endif
-  touch Submitted
+#  touch Submitted
   cd -
 end
 #================================= Summurizing  ===============================================

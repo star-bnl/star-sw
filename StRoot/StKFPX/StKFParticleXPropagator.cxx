@@ -327,10 +327,13 @@ void StKFParticleXPropagator::Test(const Option_t *opt) {
     StDcaGeometry dca;
     dca.set(pars[t], errs[t]); cout << pdg << "\t"; dca.Print();
     KFParticle particle = dca.Particle(t+1); particle.Print();
+    particle.Print("");
     KFPTrack track; track.SetParameters(kfPAt1stp[t]); track.SetCovarianceMatrix(kfCAt1ste[t]); 
     track.SetCharge(1 - 2*t);
     track.SetID(t+1);
     KFParticle particle1(track, pdg); cout << "particle1" << endl; particle1.Print();
+    particle.TransportToPoint(&particle1.Parameter(0)); cout << "After Transport"; particle.Print();
+#if 0
     KFParticle particle2 = particle1;
     cout << "t = " << t << "--------------------------------------------------------------------------------" << endl;
     cout << "Transport particle1 to 0" << endl;
@@ -355,5 +358,7 @@ void StKFParticleXPropagator::Test(const Option_t *opt) {
                                             cout << "Start at \t"; particle.Print();
 					    cout << "Target   \t"; particle1.Print();
     particleF = instance->GetFParticle(); cout << "Final at R = " << R << "\t"; particleF.Print();
+#endif
+    break;
   }
 }

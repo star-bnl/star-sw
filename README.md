@@ -9,6 +9,11 @@ The list of stable releases can be found TFG_Releases.md
 <li>  <b>starver .DEV2</b>
 <li>  <b>source $STAR/setupDEV2.csh</b>
 <li>  <b>starver _desired_TFG_version__</b>, from TFG16a  to TFG21n, .DEV2 == TFG is check out HEAD from TFG repository, it could be unstable.
+<li>  switch between ROOT5 and ROOT6: 
+<ul>
+  <li> setup root6
+  <li> setup root5
+</ul> 
 </ul>
 <p>
 In order to switch back to the "official" STAR software do: 
@@ -16,7 +21,7 @@ In order to switch back to the "official" STAR software do:
 <li><b>source unsetupDEV2.csh</b>
 </ul>
 <p>
-To use macros available in TFG releases w advice you to add in ~/.rootrc files the next two lines: 
+To use macros available in TFG releases we advice you to add in your ~/.rootrc file the next two lines: 
 
 Unix.*.Root.DynamicPath:    :$HOME/macros:$STAR/macros/.$STAR_HOST_SYS:$STAR/macros:$STAR/macros/.$STAR_HOST_SYS:$(LD_LIBRARY_PATH)
 Unix.*.Root.MacroPath:      :$HOME/macros:$STAR/macros:$(ROOTSYS)/macros:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/mudst:$(STAR)/StRoot/macros:$(STAR)/StRoot/macros/graphics:$(STAR)/StRoot/macros/analysis:$(STAR)/StRoot/macros/test:$(STAR)/StRoot/macros/examples:$(STAR)/StRoot

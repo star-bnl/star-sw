@@ -1,7 +1,6 @@
 /* 
    root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
-   root.exe -q -b TpcPrompt.C >& TpcPrompt.log &
-   root.exe -q -b 'Chain.C+("TpcHit*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
+   root.exe -q -b 'Chain.C+("*.root","TpcHit")' 'TpcPrompt.C+(tChain)' >& TpcPrompt.log &
 
    Fit
    root.exe -q -b TpcHit.root TpcPrompt.C+

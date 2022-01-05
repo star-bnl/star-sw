@@ -226,6 +226,12 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
 // TPC dE/dx over time
   m_dedx_Z3A=0; // dE/dx vs. drift distance
 
+// FCS
+  m_h1_inv_mass_cluster = 0; //!
+  m_h1_dgg_cluster = 0; //!
+  m_h1_two_cluster_energy_allcut = 0; //!
+  m_h2_cluster_dgg_vs_E1pE2 = 0; //!
+
 // signed DCA (impact parameter) over time
   m_glb_simpactTime=0; 
 
@@ -376,6 +382,7 @@ void StQAMakerBase::BookHist() {
   // Real data with event classes for different triggers
 
     // any new StQAHistSetType values
+    case (StQA_run22) :
     case (StQA_run19) :
     case (StQA_run18) :
     case (StQA_run17) :
@@ -423,7 +430,8 @@ void StQAMakerBase::BookHist() {
   BookHistGeneral();
   BookHistDE();
   BookHistFcl();
-  if (histsSet>=StQA_run13) BookHistFMS(); 
+  if (histsSet>=StQA_run22) BookHistFCS(); 
+  if (histsSet>=StQA_run13 && histsSet<StQA_run22) BookHistFMS(); 
   if (histsSet>=StQA_run15) BookHistRP();
   if (histsSet>=StQA_run19) BookHistETOF();
 
@@ -503,6 +511,7 @@ void StQAMakerBase::BookHistDE(){
       }
     }
   }
+
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistFcl(){
@@ -544,6 +553,37 @@ void StQAMakerBase::BookHistFcl(){
       }
     }
   }
+}
+//_____________________________________________________________________________
+void StQAMakerBase::BookHistFCS(){
+
+  if (!(m_h1_inv_mass_cluster)) {
+    StMaker* fhMaker = GetMaker("FcsPi0F");
+    if (fhMaker) {
+      m_h1_inv_mass_cluster = (TH1F*) (fhMaker->GetHist("h1_inv_mass_cluster"));
+      m_h1_dgg_cluster = (TH1F*) (fhMaker->GetHist("h1_dgg_cluster"));
+      m_h1_two_cluster_energy_allcut = (TH1F*) (fhMaker->GetHist("h1_two_cluster_energy_allcut"));
+      m_h2_cluster_dgg_vs_E1pE2 = (TH2F*) (fhMaker->GetHist("h2_cluster_dgg_vs_E1pE2"));
+    } else {
+      // "FcsMIP" maker doesn't exist, so look in hist branch
+      St_DataSet* hDS = GetDataSet("histBranch");
+      if (hDS) {
+        // hDS->ls(9);
+        St_DataSet* fhDS = hDS->Find("FcsPi0F");
+        if (fhDS) {
+          m_h1_inv_mass_cluster = (TH1F*) (fhDS->FindObject("h1_inv_mass_cluster"));
+          m_h1_dgg_cluster = (TH1F*) (fhDS->FindObject("h1_dgg_cluster"));
+          m_h1_two_cluster_energy_allcut = (TH1F*) (fhDS->FindObject("h1_two_cluster_energy_allcut"));
+          m_h2_cluster_dgg_vs_E1pE2 = (TH2F*) (fhDS->FindObject("h2_cluster_dgg_vs_E1pE2"));
+        }
+      }
+    }
+    AddHist(m_h1_inv_mass_cluster);
+    AddHist(m_h1_dgg_cluster);
+    AddHist(m_h1_two_cluster_energy_allcut);
+    AddHist(m_h2_cluster_dgg_vs_E1pE2);
+  }
+    
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistFMS(){
