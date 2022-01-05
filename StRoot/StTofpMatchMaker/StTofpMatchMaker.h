@@ -126,8 +126,8 @@ private:
   Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
   string mHistoFileName; //! name of histogram file, if empty no write-out
 
-  Bool_t validAdc(const);
-  Bool_t validTdc(const);
+  Bool_t validAdc(float);
+  Bool_t validTdc(float);
   Bool_t validEvent(StEvent *);
   Bool_t validTrack(StTrack*);
   Bool_t validTofTrack(StTrack*);
