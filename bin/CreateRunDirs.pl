@@ -36,30 +36,32 @@ sub GoodRun($$) {
   my $run = shift;
   print "GoodRun:: run = $run" if $debug;
   foreach my $key (sort keys %$env ) {
+#    if ( $env->{$key}->{first} < 23001000) {next;}
     my $trig = $env->{$key}->{trig};
     if ($trig =~ /Cosmic_/) {$trig = "Cosmic";}
     print "$pwd, trig = $trig, field = $env->{$key}->{field}; first = $env->{$key}->{first}, last = $env->{$key}->{last}" if ($debug);
-    if ($pwd =~ /tune/ and $trig !~ /tune/) {print ", rejected by trig\n"  if ($debug); next;}
-    if ($pwd !~ /$trig/)  {print ", rejected by trig\n"  if ($debug); next;}
-    if ($pwd !~ /$env->{$key}->{field}/) {print ", rejected by field\n" if ($debug); next;}
-    if ($run < $env->{$key}->{first})    {print ", rejected by first\n" if ($debug); next;}
-    if ($run > $env->{$key}->{last})     {print ", rejected by last\n"  if ($debug); next;}
+    if ($pwd =~ /tune/ and $trig !~ /tune/) {print ", $run rejected by trig\n"  if ($debug); next;}
+    if ($pwd !~ /$trig/)  {print ", $run rejected by trig\n"  if ($debug); next;}
+    if ($pwd !~ /$env->{$key}->{field}/) {print ", $run rejected by field\n" if ($debug); next;}
+    if ($run < $env->{$key}->{first})    {print ", $run rejected by first\n" if ($debug); next;}
+    if ($run > $env->{$key}->{last})     {print ", $run rejected by last\n"  if ($debug); next;}
     print " accepted\n" if ($debug);
     return $run;
   }
-  print " rejected\n" if ($debug);
+  print "\t$run  rejected\n" if ($debug);
   return -1;
 }
 my $def = {@Runs};# print "Runs = @Runs\n";
-PrintHash($def,"Runs") if ($debug);
+#PrintHash($def,"Runs") if ($debug);
 #die;
 #my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /hlt/cephfs/daq/2020/???/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2020/2??/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2019/350/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2020/012/2101202?";  print "runs = @runs\n" if ($debug);
 my  @runs  = glob "/hlt/cephfs/daq/2021/3??/* /hlt/cephfs/daq/2022/???/*";  print "runs = @runs\n" if ($debug);
+#my  @runs  = glob "/hlt/cephfs/daq/2022/???/*";  print "runs = @runs\n" if ($debug);
 foreach my $run (@runs) {
-  my $r = File::Basename::basename($run);
+  my $r = File::Basename::basename($run); print "run = $run, r = $r\n" if ($debug);
   if (GoodRun($def,$r) < 0) {next;}
 #  if ($r < 21040001) {next;}
 #  if ($r < 21042001) {next;} # exclude 9p2GeV
