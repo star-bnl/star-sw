@@ -61,6 +61,11 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20/ or $pwd =~ /P21/) {
   elsif ($pwd =~ /2019\/14p5GeV_2019_P21ib2/) {$PICOPATH = "/gpfs01/star/data97"; $glob = "/reco/production_14p5GeV_2019/ReversedFullField/P21ib_calib/2019"; }
   elsif ($pwd =~ /2019\/14p5GeV_2019_P21ib/)  {$glob = "/reco/production_14p5GeV_2019/ReversedFullField/P21ib_calib/2019"; }
   elsif ($pwd =~ /2019\/14p5GeV_2019_P21ic/)  {$glob = "/reco/production_14p5GeV_2019/ReversedFullField/P21ic/2019"; }
+  elsif ($pwd =~ /2019\/31GeV_fixedTarget_2019/)  {$glob = "/reco/production_31GeV_fixedTarget_2019/ReversedFullField/P21id/2019"; }
+  elsif ($pwd =~ /2019\/7.3GeV_fixedTarget_2019/)  {$glob = "/reco/production_7.3GeV_fixedTarget_2019/ReversedFullField/P21id/2019"; }
+  elsif ($pwd =~ /2019\/3p85GeV_fixedTarget_2019/) {$glob = "/reco/production_3p85GeV_fixedTarget_2019/ReversedFullField/P21id/2019/";}
+  elsif ($pwd =~ /2019\/4p59GeV_fixedTarget_2019/) {$glob = "/reco/production_4p59GeV_fixedTarget_2019/ReversedFullField/P21id/2019/";}
+
   elsif ($pwd =~ /2017\/pp500/)               {$glob = "/reco/pp500_production_2017/ReversedFullField/P20ic/2017";}
   elsif ($pwd =~ /2021\/7p7GeV/)              {$glob = "/reco/production_7p7GeV_2021/ReversedFullField/dev/2021/";}
   elsif ($pwd =~ /2021\/44p5GeV_fixedTarget/) {$glob = "/reco/production_44p5GeV_fixedTarget_2021/ReversedFullField/dev/2021/";}
@@ -70,8 +75,6 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20/ or $pwd =~ /P21/) {
   elsif ($pwd =~ /2021\/ps_OO_200GeV/)        {$glob = "/reco/production_ps_OO_200GeV_2021/ReversedFullField/dev/2021/";}
   elsif ($pwd =~ /2021\/17p3GeV/)             {$glob = "/reco/production_17p3GeV_2021/ReversedFullField/dev/2021/";}
   elsif ($pwd =~ /2021\/26p5GeV/)             {$glob = "/reco/production_26p5GeV_fixedTarget_2021/ReversedFullField/dev/2021/";}
-  elsif ($pwd =~ /2019\/3p85GeV_fixedTarget/) {$glob = "/reco/production_3p85GeV_fixedTarget_2019/ReversedFullField/P21id/2019/";}
-  elsif ($pwd =~ /2019\/4p59GeV_fixedTarget/) {$glob = "/reco/production_4p59GeV_fixedTarget_2019/ReversedFullField/P21id/2019/";}
   elsif ($pwd =~ /2018\/isobar/)              {$glob = "/reco/production_isobar_2018/ReversedFullField/P21id/2018/"; $DST = "MuDst";}
   print "pwd = $pwd => glob = $glob\n" if ($debug);
 } else {# TFG
