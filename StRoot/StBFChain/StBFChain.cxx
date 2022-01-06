@@ -1019,9 +1019,11 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(cmd);
       }
     }
+#if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
     if (maker == "StMiniMcMaker" && fFileOut != "") {
       ProcessLine(Form("((StMiniMcMaker *) %p)->setFileName(\"%s\");", mk, fFileOut.Data()));
     }
+#endif
     if (maker == "StMcAnalysisMaker") {
       Int_t mode = 0;
       if (GetOption("McAnaTpc")) mode += 0x1;
