@@ -315,7 +315,8 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
 		   kFcsPresId   = kFcsPresIdentifier,		   
                    kEpdId       = kEpdIdentifier,
                    kFttId       = kFttIdentifier,
-                   kMaxDetectorId = 46};
+                   kFstId       = kFstIdentifier,
+                   kMaxDetectorId = 48};
 
 /*!
  * \enum StTrackType

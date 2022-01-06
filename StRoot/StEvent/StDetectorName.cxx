@@ -58,6 +58,7 @@ const char* DetectorName(int id) {
         DetectorNames[kPhmdId     ] = "Phmd";
         DetectorNames[kPxlId      ] = "Pxl";
         DetectorNames[kIstId      ] = "Ist";
+        DetectorNames[kFstId      ] = "Fst";
         DetectorNames[kFgtId      ] = "Fgt";
         DetectorNames[kEtrId      ] = "Etr";
         DetectorNames[kFpdWestId  ] = "FpdWest";
