@@ -13,7 +13,7 @@ void Load() {
 #if 1
   if (gClassTable->GetID("StDbManager") < 0) {
     gROOT->LoadMacro("bfc.C");
-    TString Chain("r2021,db,tpcDb,mysql,NoDefault");
+    TString Chain("r2019,db,tpcDb,mysql,NoDefault");
     bfc(-1,Chain.Data(),0,0,0);
     dbMk = (St_db_Maker *)chain->GetMaker("db");
     dbMk->SetDebug(1);
@@ -79,9 +79,9 @@ void PrintPad(Int_t sector = 3, Int_t row = 24, Int_t pad = 1, Int_t time = 0) {
   transform->operator()(coorP,coorLST, kTRUE,kFALSE);  cout << "Pixel   withot  T0, without tau\t" << coorLST << endl;
 }
 //________________________________________________________________________________
-void testTpcCoordinateTransform(Int_t date = 20040125, Int_t time = 0) {
+void testTpcCoordinateTransform(Int_t d = 20190307, Int_t t = 54036) {
   if (dbMk == 0) Load();
-  dbMk->SetDateTime(date,time); 
+  dbMk->SetDateTime(d,t); 
   chain->Init();
   chain->Make();
   if (! gStTpcDb) return;
