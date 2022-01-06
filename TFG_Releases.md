@@ -80,6 +80,6 @@
 <li> TFG21l The 1st release git@github.com:fisyak/star-sw.git TFG branch 2021-09-08 11:29:30 -0400  (HEAD -> TFG, tag: TFG21l)
 <li> TFG21m Merge with star-sw                                           2021-10-30 18:02:07 -0400  (HEAD -> TFG, tag: TFG21m)
 <li> TFG21n Merge with star-sw & Maksym                                  2021-11-22 15:50:40 -0500  (HEAD -> TFG, tag: TFG21n)
-<li> TFG22a Freeze release for 2022 express production Merge             2022-01-06 14:43:54 -0500  (HEAD -> TFG, tag: TFG22a_2)
+<li> TFG22a Freeze release for 2022 express production Merge             2022-01-06 17:27:49 -0500  (HEAD -> TFG, tag: TFG22a_4)
 <li>.DEV2  head of TFG git repository
 </ul>
