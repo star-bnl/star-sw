@@ -1356,6 +1356,7 @@ TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3, Double
   g->SetParameters(params);
   g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
   proj->Fit(g,opt);
+#if 0
   if (g->GetProb() > 0.01) return g;
   g->GetParameters(params);
   g = g1;
@@ -1381,6 +1382,7 @@ TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3, Double
     pm->SetMarkerSize(1.3);
     proj->Draw();
   }
+#endif
   return g;
 }
 //________________________________________________________________________________
