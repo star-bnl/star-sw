@@ -48,6 +48,7 @@
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StCoordinates.hh" 
 #endif /* __TPC_LOCAL_COORDINATES__ */
+#include "StDetectorDbMaker/St_tpcRDOMapC.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 //
 //  The following line defines a static string. Currently it contains
@@ -313,13 +314,13 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
   // plot = 1 => All hits;
   // plot = 2 => prompt hits only |z| > 190
   struct BPoint_t {
-    Int_t    sector, row;
+    Int_t    sector, row, rdo;
     Float_t  x,y,z,q,adc,pad,timebucket,IdTruth,npads,ntbks,xL,yL,zL,dX;
     Int_t    trigId, us,fl;
     Float_t  time, timeb;
     Float_t  vpdE, vpdW;
   };
-  static const Char_t *vname = "sector/I:row/I:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:dX:trigId/I:us/I:fl/I:time:timeb:vpdE:vpdW";
+  static const Char_t *vname = "sector/I:row/I:rdo/I:x:y:z:q:adc:pad:timebucket:IdTruth:npads:ntbks:xL:yL:zL:dX:trigId/I:us/I:fl/I:time:timeb:vpdE:vpdW";
   BPoint_t BPoint;
   BPoint.vpdE = BPoint.vpdW = 0;
   StEvent  *event = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
@@ -419,16 +420,15 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		    BPoint.timeb = 0;
 #endif /* __TPC_LOCAL_COORDINATES__ */
 		    BPoint.dX = tpcHit->dX();
-		    assert(tpcHit->sector() == i+1);
-		    assert(tpcHit->padrow() == (UInt_t) (j+1));
-		    BPoint.sector = i+1;
-		    BPoint.row = j+1;
+		    BPoint.sector = tpcHit->sector();
+		    BPoint.row = tpcHit->padrow();
 		    BPoint.x = xyz.x();
 		    BPoint.y = xyz.y();
 		    BPoint.z = xyz.z();
 		    BPoint.q = 1.e6*tpcHit->charge();
 		    BPoint.adc = tpcHit->adc();
 		    BPoint.pad = tpcHit->pad();
+		    BPoint.rdo = St_tpcRDOMapC::instance()->rdo(BPoint.sector, BPoint.pad+0.5);
 		    BPoint.timebucket = tpcHit->timeBucket();
 		    BPoint.IdTruth =  tpcHit->idTruth();
 		    BPoint.npads   =  tpcHit->padsInHit();
