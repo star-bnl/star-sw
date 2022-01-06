@@ -26,11 +26,11 @@
 #  touch ${bla}
   if ("${filelist}" != "") then
     foreach f (${filelist}) 
-#      if (${SITE} == "HLT") then
+      if (${SITE} == "HLT") then
         ln -s  ${inputDIR}/${f} .
-#      else 
-#        rsync  ${inputDIR}/${f} .
-#      endif
+      else 
+        rsync  ${inputDIR}/${f} .
+      endif
     end
   else 
       if (${SITE} == "HLT") then
