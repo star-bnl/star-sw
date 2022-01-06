@@ -963,7 +963,6 @@ StEvent::fstHitCollection() const
     _lookup(fstHitCollection, mContent);
     return fstHitCollection;
 }
->>>>>>> upstream/main
 
 StPxlHitCollection*
 StEvent::pxlHitCollection()
