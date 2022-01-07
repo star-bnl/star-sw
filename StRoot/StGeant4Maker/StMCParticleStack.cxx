@@ -37,8 +37,6 @@ ostream&  operator<<(ostream& os,  const StarMCParticle& part) {
 	     part.vx(),part.vy(),part.vz() 
             );
 
-
-
   if ( part.start() ) {
     os << std::endl << " [start] " << *part.start();
   }
@@ -76,6 +74,7 @@ StMCParticleStack::StMCParticleStack( const Char_t *name ) :
   mCurrent(-1),
   mArraySize(0),
   mArray(0),
+  mPersistentTrack(),
   mStackSize(0),
   mStack(),
   mStackIdx(),
@@ -121,10 +120,7 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
 	   return; // drop track on the ground
 	 }
 
-  // AgMLExtension* agmlext = dynamic_cast<AgMLExtension*>( node->GetUserExtension() );
-  // if ( 0==agmlext ) {
-  //   agmlext = dynamic_cast<AgMLExtension*>( volume->GetUserExtension() );
-  // }
+	 // NOTE:  No early returns allowed from this point
 
   AgMLExtension* agmlext = getExtension( node );
 
@@ -146,6 +142,9 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   particle->SetWeight(weight);
   particle->SetUniqueID(mech);
 
+  // mArray and mPersistent track should always have same number of entries
+  mPersistentTrack.push_back(0);
+
   bool isPrimary = parent<0;
   mNumPrimary += isPrimary;
 
@@ -158,9 +157,6 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
     }  
   ntr = mArraySize; // guess this is supposed to be track number (index in array)
           
-  // Increment mArraySize
-  mArraySize++;
-
 
   double Rmax2=mScoringRmax*mScoringRmax;
   double vr2 = vx*vx+vy*vy;
@@ -170,11 +166,13 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   //
   // And handle region-based track persistence
   //
-  if ( agmlreg == 2 && tracing || isPrimary ) {
+  if ( agmlreg == 2 || tracing || isPrimary ) {
 
     StarMCVertex* vertex = GetVertex( vx, vy, vz, vt, mech );
 
-    mParticleTable.push_back(new StarMCParticle(particle,vertex)); // mParticleTable owns the pointer
+    auto* persistent = new StarMCParticle(particle,vertex);
+    mParticleTable.push_back(persistent); // mParticleTable owns the pointer
+    mPersistentTrack[mArraySize] = persistent;
 
     mIdTruthFromParticle[ mParticleTable.back() ] = mParticleTable.size();
     // if ( parent > 0 ) { 
@@ -199,6 +197,16 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   }
 
   //
+  // Check to see if a persistent track has been assigned.  If not, inherit from parent.
+  //
+  if ( 0==mPersistentTrack[mArraySize] ) {
+    int mother = particle->GetFirstMother();
+    if ( mother >= 0 ) {
+      mPersistentTrack[mArraySize] = mPersistentTrack[mother];
+    }
+  }
+
+  //
   // Forward to TMCManager if it exists
   //
 
@@ -207,12 +215,17 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   }
 
 
+  // Increment mArraySize
+  mArraySize++;
+
+
+
+
 }
 //___________________________________________________________________________________________________________________
-StarMCParticle* StMCParticleStack::GetPersistentTrack( int stackIndex ) {    
-  auto track = mStackToTable[ stackIndex ];
-  assert(track);
-  return track;
+StarMCParticle* StMCParticleStack::GetCurrentPersistentTrack() {    
+  int index = GetCurrentTrackNumber();
+  return mPersistentTrack[ index ];
 }
 //___________________________________________________________________________________________________________________
 StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, double vt, int proc ) {
@@ -348,8 +361,8 @@ void StMCParticleStack::Clear( const Option_t *opts )
 #endif
 
 
-  mArray->Clear();
-  mStack.clear();
+  mArray->Clear();   mPersistentTrack.clear();
+  mStack.clear();    mStackIdx.clear();
   mCurrent = -1;
   mArraySize = 0;
   mStackSize = 0;
@@ -415,3 +428,72 @@ StarMCVertex::StarMCVertex( double x, double y, double z, double t, StarMCPartic
 double StarMCParticle::vx() const { assert(mStartVertex); return mStartVertex->vx(); }
 double StarMCParticle::vy() const { return mStartVertex->vy(); }
 double StarMCParticle::vz() const { return mStartVertex->vz(); }
+//___________________________________________________________________________________________________________________
+// Helper struct
+struct Particle {
+  int index;
+  TParticle* mc;
+  StarMCParticle* st;
+};
+// Printout 
+ostream& operator<<(ostream& os, const Particle& part ) {
+  os << Form( "%-5i %-5s %-04i %-6.3f %-6.3f %-6.3f %-6.3f %-6.3f %-6.3f %-06i %-06i %-06i", 
+	      part.index, 
+	      part.mc->GetName(),
+	      part.mc->GetStatusCode(),
+	      part.mc->Px(),
+	      part.mc->Py(),
+	      part.mc->Pz(),
+	      part.mc->Vx(),
+	      part.mc->Vy(),
+	      part.mc->Vz(),
+	      part.mc->GetFirstMother(),
+	      part.mc->GetFirstDaughter(),
+	      part.mc->GetLastDaughter()
+	      );
+
+  os << "|";
+
+  if ( 0==part.st ) {
+    os << " -null entry- ";
+    return os;    
+  }
+
+  auto* start = part.st->start();
+  std::string volume = (start)? "none" : start->volume();
+
+  os << Form( "%-5i %-5i %-6.3f %-6.3f %-6.3f %-6.3f %-6.3f %-6.3f %4s", 
+	      part.st->GetPdg(),
+	      part.st->GetStatus(),
+	      part.st->px(),part.st->py(),part.st->pz(),
+	      part.st->vx(),part.st->vy(),part.st->vz(),
+	      volume.c_str());
+
+
+  return os;
+};
+void StMCParticleStack::StackDump() {
+
+  LOG_INFO << "-----------------------------------------------------------------------------------------" << endm;
+  LOG_INFO << "StarMCParticleStack::StackDump()" << endm;
+  LOG_INFO << "-----------------------------------------------------------------------------------------" << endm;
+  LOG_INFO << "N primary:  " << mNumPrimary << endm;
+  LOG_INFO << "Stack size: " << mArraySize << endm;
+  LOG_INFO << "-----------------------------------------------------------------------------------------" << endm;
+  LOG_INFO << "TParticle                                                        | StarMCParticle"        << endm;
+  //           12345 12345 1234 123456 123456 123456 123456 123456 123456 123456 123456 123456|12345 12345 123456 123456 123456 123456 123456 123456 1234 
+  LOG_INFO << "index name  stat px     py     pz     vx     vy     vz     parent daughters     pdg   stat  px     py     pz     vx     vy     vz     volu " << endm;
+  Particle p;
+  for ( int i=0;i<mArraySize;i++ ) {
+
+    p.index = i;
+    p.mc = static_cast<TParticle*>( mArray->At(i) );
+    p.st = mPersistentTrack[i];
+
+    LOG_INFO << p << endm;
+
+  }
+  LOG_INFO << "-----------------------------------------------------------------------------------------" << endm;
+  
+
+}

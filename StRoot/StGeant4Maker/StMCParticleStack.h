@@ -121,7 +121,7 @@ public:
   TMCProcess process() const { return mMechanism; }
 
   void setVolume( const char* name ){ mVolume = name; }
-  std::string volume(){ return mVolume; }
+  std::string volume() const { return mVolume; }
 
   void setIntermediate( bool stat=true ){ mIntermediate=true; }
   bool intermediate(){ return mIntermediate; }
@@ -214,6 +214,9 @@ class StMCParticleStack : public TVirtualMCStack
   /// Get the current stack size
   virtual int GetStackSize(){ return mStack.size(); }
 
+  /// Print out the particle table
+  void StackDump();
+
 
   /// Obtain the current particle truth
 //  const StarMCParticle* GetCurrentTruth() const { return mParticleTable.back(); }
@@ -224,7 +227,7 @@ class StMCParticleStack : public TVirtualMCStack
 
   StarMCVertex* GetVertex( double vx, double vy, double vz, double vt, int proc=-1 );
 
-  StarMCParticle* GetPersistentTrack( int stackIndex );
+  StarMCParticle* GetCurrentPersistentTrack();
 
   int GetIdTruth( StarMCParticle* part ){ return mIdTruthFromParticle[part]; }
 
@@ -242,10 +245,12 @@ class StMCParticleStack : public TVirtualMCStack
 
   int                 mArraySize;
   TClonesArray       *mArray; 
+  std::vector<StarMCParticle *> mPersistentTrack;
 
-  int                      mStackSize;
-  std::list  <TParticle *> mStack;
-  std::list  <int>         mStackIdx;
+  int                           mStackSize;
+  std::list  <TParticle *>      mStack;     // note: vector may be faster
+  std::list  <int>              mStackIdx;  // note: vector may be faster 
+
 
 
   std::vector<StarMCParticle *> mTruthTable;
@@ -253,7 +258,6 @@ class StMCParticleStack : public TVirtualMCStack
   std::vector<StarMCVertex   *> mVertexTable;
 
   std::map<int, StarMCParticle*> mStackToTable;
-
   std::map<StarMCParticle*, int> mIdTruthFromParticle;
 
   float mScoringRmax;

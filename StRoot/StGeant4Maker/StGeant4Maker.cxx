@@ -844,6 +844,8 @@ int StGeant4Maker::Make() {
 //________________________________________________________________________________________________
 void StGeant4Maker::Clear( const Option_t* opts ){
 
+  mMCStack -> StackDump(); // stack dump before clear...
+
   mMCStack -> Clear(); // Clear the MC stack
   acurr = aprev = 0;   // zero out pointers to the current and previous agml extensions
 
@@ -1170,11 +1172,6 @@ void StGeant4Maker::BeginPrimary()
   std::vector<StarMCParticle*>& truthTable    = mMCStack->GetTruthTable();
   truthTable.clear();
 
-  int current = mMCStack->GetCurrentTrackNumber();
-  auto* track = mMCStack->GetPersistentTrack( current );
-  LOG_DEBUG << "Begin Primary current track number = " << current << " track=" << track << endm;
-  
-  truthTable.push_back( track ); 
 
 }
 //________________________________________________________________________________________________
@@ -1526,3 +1523,8 @@ int StGeant4Maker::Finish() {
 
   return kStOK;
 }
+
+
+
+//________________________________________________________________________________________________
+
