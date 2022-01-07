@@ -139,8 +139,9 @@ void bfcread_hist_prefixes_add(
      for (prefixNum=0; prefixNum < nPrefixes; prefixNum++) {
  
 // get the TList pointer to the histograms for this branch:
-      dirList = HU[nbranch]->FindHists(MakerHistDir,HU[nbranch]->GetPrefix(prefixNum));
-      if (dirList->GetSize()) {
+      bool created=kFALSE;
+      dirList = HU[nbranch]->FindHists(created,MakerHistDir,HU[nbranch]->GetPrefix(prefixNum));
+      if (dirList && dirList->GetSize()) {
 
        if (firstSet) {
          firstSet = kFALSE;
@@ -163,6 +164,7 @@ void bfcread_hist_prefixes_add(
            HU[nbranch]->GetPrefix(prefixNum) << " = " << hCCount << endl;
        } // first set or not
       } // found hists
+      if (created) delete dirList;
 
      } // loop over prefixes
 

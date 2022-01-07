@@ -84,7 +84,8 @@ void bfcread_hist_printinfo(
 
 // get the TList pointer to the histograms:
   TList  *dirList = 0;
-  dirList = HU->FindHists(MakerHistDir);
+  bool created=kFALSE;
+  dirList = HU->FindHists(created,MakerHistDir);
 
 // now make a copy of all histograms into my new histograms!
   Int_t hCCount=0;
@@ -93,6 +94,7 @@ void bfcread_hist_printinfo(
   cout << "bfcread_hist_printinfo.C, # histograms found = " << 
        hCCount << endl;
 
+  if (created) delete dirList;
 
 } // end of the macro!
  

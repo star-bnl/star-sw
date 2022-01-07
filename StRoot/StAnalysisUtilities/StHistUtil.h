@@ -158,9 +158,9 @@ class StHistUtil {
   virtual Bool_t  Debug() { return debug; }
   virtual Int_t   DrawHists(const Char_t *dirName="EventQA");
   virtual Int_t   ListHists(const Char_t *dirName="EventQA");
-  virtual TList*  FindHists(const Char_t *dirName="EventQA",
+  virtual TList*  FindHists(bool& created, const Char_t *dirName="EventQA",
                             const Char_t *withPrefix=0);
-  virtual TList*  FindHists(TFile* histFile, const Char_t* withPrefix=0);
+  virtual TList*  FindHists(bool& created, TFile* histFile, const Char_t* withPrefix=0);
   virtual Int_t   CopyHists(TList  *dirList);
   virtual Int_t   AddHists(TList  *dirList, Int_t nHistCopy=-1);
   virtual void    IgnorePrefixes(Bool_t ignore=kTRUE) {ignorePrefixes = ignore;}

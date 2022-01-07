@@ -139,7 +139,7 @@ void bfcread_hist_prefixes_add_to_ps(
 
 
     HO->SetDefaultPrintList(MakerHistDir,PrintList);
-    TList* dirList = HO->FindHists(MakerHistDir,HO->GetPrefix(0));
+    TList* dirList = HO->FindHists(created,MakerHistDir,HO->GetPrefix(0));
     Int_t hCCount = 0;
 
      int prefixNum;
@@ -148,8 +148,9 @@ void bfcread_hist_prefixes_add_to_ps(
      for (prefixNum=0; prefixNum < nPrefixes; prefixNum++) {
  
 // get the TList pointer to the histograms for this branch:
-      dirList = HO->FindHists(MakerHistDir,HO->GetPrefix(prefixNum));
-      if (dirList->GetSize()) {
+      bool created=kFALSE;
+      dirList = HO->FindHists(created,MakerHistDir,HO->GetPrefix(prefixNum));
+      if (dirList && dirList->GetSize()) {
 
        if (firstSet) {
          firstSet = kFALSE;
@@ -168,6 +169,7 @@ void bfcread_hist_prefixes_add_to_ps(
            HO->GetPrefix(prefixNum) << " = " << hCCount << endl;
        } // first set or not
       } // found hists
+      if (created) delete dirList;
 
      } // loop over prefixes
 

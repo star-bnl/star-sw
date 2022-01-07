@@ -196,6 +196,7 @@ void bfcread_hist_files_add(
    TList *dirList = 0;
    while (histContainer = (St_ObjectSet *)nextHistList.Next()) {
      dirList = (TList *) histContainer->GetObject();
+
      strcpy(MakerHistDir,histContainer->GetName());
      MakerHistDir[strlen(MakerHistDir)-4] = 0;
      //if (strcmp(MakerHistDir,"IO")==0 || strcmp(MakerHistDir,"IO_Root")==0) {
@@ -213,6 +214,7 @@ void bfcread_hist_files_add(
        }
      }
 
+     bool created=kFALSE;
      if (bnum==-1) {
        bnum = nbranch++;
        HM[bnum] = new StHistMaker(MakerHistDir);
@@ -221,7 +223,7 @@ void bfcread_hist_files_add(
        HU[bnum]->SetPntrToMaker(IOMk);
 
 // get the TList pointer to the histograms for this branch:
-       dirList = HU[bnum]->FindHists(MakerHistDir);
+       dirList = HU[bnum]->FindHists(created,MakerHistDir);
 
 // now make a copy of all histograms into the new histograms!
        hCCount = HU[bnum]->CopyHists(dirList);
@@ -235,7 +237,7 @@ void bfcread_hist_files_add(
      }  // first time
 
      else {
-       dirList = HU[bnum]->FindHists(MakerHistDir);
+       dirList = HU[bnum]->FindHists(created,MakerHistDir);
 
 // now make a copy of all histograms into my new histograms!
        hCCount = HU[bnum]->AddHists(dirList);
@@ -249,7 +251,7 @@ void bfcread_hist_files_add(
 
      }  //else (ifl not #1)
 
-     dirList->Delete();
+     if (created) dirList->Delete();
 
 // to see an example of histograms being added together:   
 //   TH1** kathyArray = HU[bnum]->getNewHist();
