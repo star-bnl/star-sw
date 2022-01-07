@@ -1129,7 +1129,7 @@ void StBTofCalibMaker::processStEvent()
     // keep a few counters:
     int nohitfound(0), ismchit(0),trayoutofbounds(0),notrack(0),
         gnopidtraits(0),gtraitisfalse(0), pidtoffalse(0),calibfailed(0),
-        pgnopidtraits(0), ptraitisfalse(0),tofisset(0), doPID(0);
+        pgnopidtraits(0), ptraitisfalse(0),tofisset(0), num_doPID(0);
 
     for(int i=0;i<nhits;i++) {
 
@@ -1259,7 +1259,7 @@ void StBTofCalibMaker::processStEvent()
         }
 
         if(!doPID) continue;
-        doPID++;
+        num_doPID++;
 
         Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
 
@@ -1311,7 +1311,7 @@ void StBTofCalibMaker::processStEvent()
 
     LOG_INFO << "nohitfound:"<< nohitfound << " ismchit:" <<ismchit << " trayoutofbounds:" << trayoutofbounds << " notrack:" << notrack << endm;
     LOG_INFO << " gnopidtraits:" <<  gnopidtraits <<" gtraitisfalse:" <<  gtraitisfalse << " pidtoffalse:"<< pidtoffalse <<" calibfailed:"<<  calibfailed << endm;
-    LOG_INFO << " pgnopidtraits:"<< pgnopidtraits << " ptraitisfalse:" <<  ptraitisfalse << " tofisset:"<<  tofisset << " doPID:" <<  doPID << endm;
+    LOG_INFO << " pgnopidtraits:"<< pgnopidtraits << " ptraitisfalse:" <<  ptraitisfalse << " tofisset:"<<  tofisset << " doPID:" <<  num_doPID << endm;
 
     return;
 }
@@ -1437,7 +1437,7 @@ void StBTofCalibMaker::processMuDst()
     // keep a few counters:
     int nohitfound(0), ismchit(0),trayoutofbounds(0),notrack(0),
         gnopidtraits(0),gtraitisfalse(0), pidtoffalse(0),calibfailed(0),
-        pgnopidtraits(0), ptraitisfalse(0),tofisset(0), doPID(0);
+        pgnopidtraits(0), ptraitisfalse(0),tofisset(0), num_doPID(0);
 
     for(int i=0;i<nhits;i++) {
         StMuBTofHit *aHit = (StMuBTofHit*)mMuDst->btofHit(i);
@@ -1525,7 +1525,7 @@ void StBTofCalibMaker::processMuDst()
         }
 
         if(doPID) {
-            doPID++;
+            num_doPID++;
             Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
 
             Double_t b_e  = ptot/sqrt(ptot*ptot+M_ELECTRON*M_ELECTRON);
@@ -1577,7 +1577,7 @@ void StBTofCalibMaker::processMuDst()
 
     LOG_INFO << "nohitfound:"<< nohitfound << " ismchit:" <<ismchit << " trayoutofbounds:" << trayoutofbounds << " notrack:" << notrack << endm;
     LOG_INFO << " gnopidtraits:" <<  gnopidtraits <<" gtraitisfalse:" <<  gtraitisfalse << " pidtoffalse:"<< pidtoffalse <<" calibfailed:"<<  calibfailed << endm;
-    LOG_INFO << " pgnopidtraits:"<< pgnopidtraits << " ptraitisfalse:" <<  ptraitisfalse << " tofisset:"<<  tofisset << " doPID:" <<  doPID << endm;
+    LOG_INFO << " pgnopidtraits:"<< pgnopidtraits << " ptraitisfalse:" <<  ptraitisfalse << " tofisset:"<<  tofisset << " doPID:" <<  num_doPID << endm;
 
     return;
 }
