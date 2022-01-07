@@ -1183,7 +1183,7 @@ void StBTofCalibMaker::processStEvent()
     // keep a few counters:
     int nohitfound(0), ismchit(0),trayoutofbounds(0),notrack(0),
         gnopidtraits(0),gtraitisfalse(0), pidtoffalse(0),calibfailed(0),
-        pgnopidtraits(0), ptraitisfalse(0),tofisset(0), doPID(0);
+        pgnopidtraits(0), ptraitisfalse(0),tofisset(0), num_doPID(0);
 
     for(int i=0;i<nhits;i++) {
 
@@ -1274,11 +1274,7 @@ void StBTofCalibMaker::processStEvent()
         /// PID calculation if the track is a "primary" track.
         Double_t L = -9999.;
         Double_t ptot = -9999.;
-#ifndef  __TFG__VERSION__
         Bool_t doPID = kFALSE;     //! switch indicating to calculate PID or not
-#else /*  __TFG__VERSION__ */
-        Int_t doPID = 0;     //! switch indicating to calculate PID or not
-#endif /*  __TFG__VERSION__ */
         if(mUseEventVertex) {
             if(!pTrack) {
                 LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
@@ -1291,11 +1287,7 @@ void StBTofCalibMaker::processStEvent()
                     StThreeVectorF primPos = thisVertex->position();
                     L = tofPathLength(&primPos, &pidTof->position(), theTrackGeometry->helix().curvature());
                     ptot = pTrack->geometry()->momentum().mag();
-#ifndef  __TFG__VERSION__
                     doPID = kTRUE;
-#else /*  __TFG__VERSION__ */
-                    doPID = 1;
-#endif /*  __TFG__VERSION__ */
                     LOG_DEBUG << "Pathlength and ptot set." << endm;
                 }
             }
@@ -1315,17 +1307,13 @@ void StBTofCalibMaker::processStEvent()
                 if(gTrack->dcaGeometry()) {
                     ptot = gTrack->dcaGeometry()->momentum().mag();
                 }
-#ifndef  __TFG__VERSION__
                 doPID = kTRUE;
-#else /*  __TFG__VERSION__ */
-                doPID = 1;
-#endif /*  __TFG__VERSION__ */
             }
 
         }
 
         if(!doPID) continue;
-        doPID++;
+        num_doPID++;
 
         Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
 
@@ -1377,7 +1365,7 @@ void StBTofCalibMaker::processStEvent()
 
     LOG_INFO << "nohitfound:"<< nohitfound << " ismchit:" <<ismchit << " trayoutofbounds:" << trayoutofbounds << " notrack:" << notrack << endm;
     LOG_INFO << " gnopidtraits:" <<  gnopidtraits <<" gtraitisfalse:" <<  gtraitisfalse << " pidtoffalse:"<< pidtoffalse <<" calibfailed:"<<  calibfailed << endm;
-    LOG_INFO << " pgnopidtraits:"<< pgnopidtraits << " ptraitisfalse:" <<  ptraitisfalse << " tofisset:"<<  tofisset << " doPID:" <<  doPID << endm;
+    LOG_INFO << " pgnopidtraits:"<< pgnopidtraits << " ptraitisfalse:" <<  ptraitisfalse << " tofisset:"<<  tofisset << " doPID:" <<  num_doPID << endm;
 
     return;
 }
@@ -1503,7 +1491,7 @@ void StBTofCalibMaker::processMuDst()
     // keep a few counters:
     int nohitfound(0), ismchit(0),trayoutofbounds(0),notrack(0),
         gnopidtraits(0),gtraitisfalse(0), pidtoffalse(0),calibfailed(0),
-        pgnopidtraits(0), ptraitisfalse(0),tofisset(0), doPID(0);
+        pgnopidtraits(0), ptraitisfalse(0),tofisset(0), num_doPID(0);
 
     for(int i=0;i<nhits;i++) {
         StMuBTofHit *aHit = (StMuBTofHit*)mMuDst->btofHit(i);
@@ -1556,11 +1544,7 @@ void StBTofCalibMaker::processMuDst()
         /// PID calculation if the track is a "primary" track.
         Double_t L = -9999.;
         Double_t ptot = -9999.;
-#ifndef __TFG__VERSION__
         Bool_t doPID = kFALSE;
-#else /* __TFG__VERSION__ */
-        Int_t doPID = 0;
-#endif /* __TFG__VERSION__ */
         if(mUseEventVertex) {
             if(!pTrack) {
                 LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
@@ -1574,11 +1558,7 @@ void StBTofCalibMaker::processMuDst()
                     StPhysicalHelixD thisHelix = pTrack->helix();
                     L = tofPathLength(&primPos, &pidTof.position(), thisHelix.curvature());
                     ptot = pTrack->momentum().mag();
-#ifndef __TFG__VERSION__
                     doPID = kTRUE;
-#else /* __TFG__VERSION__ */
-                    doPID = 1;
-#endif /* __TFG__VERSION__ */
                 }
             }
 
@@ -1594,20 +1574,12 @@ void StBTofCalibMaker::processMuDst()
             } else {
                 L = tofPathLength(&tofPos, &pidTof.position(), gHelix.curvature());
                 ptot = gTrack->momentum().mag();
-#ifndef __TFG__VERSION__
                 doPID = kTRUE;
-#else /* __TFG__VERSION__ */
-                doPID = 1;
-#endif /* __TFG__VERSION__ */
             }
         }
 
         if(doPID) {
-#ifndef __TFG__VERSION__
-            doPID++;
-#else /* __TFG__VERSION__ */
-	    doPID++;
-#endif /* __TFG__VERSION__ */
+            num_doPID++;
             Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
 
             Double_t b_e  = ptot/sqrt(ptot*ptot+M_ELECTRON*M_ELECTRON);
@@ -1659,7 +1631,7 @@ void StBTofCalibMaker::processMuDst()
 
     LOG_INFO << "nohitfound:"<< nohitfound << " ismchit:" <<ismchit << " trayoutofbounds:" << trayoutofbounds << " notrack:" << notrack << endm;
     LOG_INFO << " gnopidtraits:" <<  gnopidtraits <<" gtraitisfalse:" <<  gtraitisfalse << " pidtoffalse:"<< pidtoffalse <<" calibfailed:"<<  calibfailed << endm;
-    LOG_INFO << " pgnopidtraits:"<< pgnopidtraits << " ptraitisfalse:" <<  ptraitisfalse << " tofisset:"<<  tofisset << " doPID:" <<  doPID << endm;
+    LOG_INFO << " pgnopidtraits:"<< pgnopidtraits << " ptraitisfalse:" <<  ptraitisfalse << " tofisset:"<<  tofisset << " doPID:" <<  num_doPID << endm;
 
     return;
 }
