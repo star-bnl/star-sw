@@ -352,7 +352,6 @@
 #include "TObjString.h"
 #include "TMath.h"
 #include "TString.h"
-#include "TRegexp.h"
 #include "TPaveLabel.h"
 #include "TPaveText.h"
 #include "TLegend.h"
