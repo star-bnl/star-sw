@@ -77,9 +77,11 @@ void  TpcHit::Fill(Long64_t entry) {
     hist3DZ  = new TH3F("Z","|z| versus sector and row",24,0.5,24.5,72,0.5,72.5,260,200,213);
     hist3DZL = new TH3F("ZL","Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,500,-10,10);
     hist3DT  = new TH3F("T","time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,500,0,20);
+    hist3DTR = new TH3F("TR","time bucket versus sector and rdo",24,0.5,24.5,8,0.5,8.5,500,0,20);
     hist3DMZ  = new TH3F("ZM","Membrane |z| versus sector and row",24,0.5,24.5,72,0.5,72.5,400,-10,10);
     hist3DMZL = new TH3F("ZLM","Membrane Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,400,200,220);
     hist3DMT  = new TH3F("TM","Membrane time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,400,320,360);
+#if 0
     //  (VPDE+VPDW)/2 and cut on a narrow window 1400+-100 (2ns cut)
     hist3DZ1400  = new TH3F("Z1400","|z| versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,260,200,213);
     hist3DZL1400 = new TH3F("ZL1400","Drift distance sector local versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,500,-10,10);
@@ -87,15 +89,18 @@ void  TpcHit::Fill(Long64_t entry) {
     hist3DMZ1400  = new TH3F("ZM1400","Membrane |z| versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,400,-10,10);
     hist3DMZL1400 = new TH3F("ZLM1400","Membrane Drift distance sector local versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,400,200,220);
     hist3DMT1400  = new TH3F("TM1400","Membrane time bucket versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,400,320,360);
+#endif
     gDirectory = old;
   }
   if (! fl) {
     hist3DZ->Fill(sector,row,TMath::Abs(z));
     hist3DZL->Fill(sector,row,zL);
     hist3DT->Fill(sector,row,timebucket);
+    hist3DTR->Fill(sector,rdo,timebucket);
     hist3DMZ->Fill(sector,row,z);
     hist3DMZL->Fill(sector,row,zL);
     hist3DMT->Fill(sector,row,timebucket);
+#if 0
     if (TMath::Abs((vpdW+vpdE)/2-1400)<50) {
       hist3DZ1400->Fill(sector,row,TMath::Abs(z));
       hist3DZL1400->Fill(sector,row,zL);
@@ -104,6 +109,7 @@ void  TpcHit::Fill(Long64_t entry) {
       hist3DMZL1400->Fill(sector,row,zL);
       hist3DMT1400->Fill(sector,row,timebucket);
     }
+#endif
   }
 }
 //________________________________________________________________________________

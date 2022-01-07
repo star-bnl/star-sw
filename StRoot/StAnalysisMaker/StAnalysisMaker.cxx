@@ -428,7 +428,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		    BPoint.q = 1.e6*tpcHit->charge();
 		    BPoint.adc = tpcHit->adc();
 		    BPoint.pad = tpcHit->pad();
-		    BPoint.rdo = St_tpcRDOMapC::instance()->rdo(BPoint.sector, BPoint.pad+0.5);
+		    BPoint.rdo = St_tpcRDOMapC::instance()->rdo(BPoint.sector, BPoint.row, BPoint.pad+0.5);
 		    BPoint.timebucket = tpcHit->timeBucket();
 		    BPoint.IdTruth =  tpcHit->idTruth();
 		    BPoint.npads   =  tpcHit->padsInHit();

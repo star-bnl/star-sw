@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- <job  name="TpcPrompt" maxFilesPerProcess="10"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false"> -->
-<job  name="TpcPrompt" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<job  name="TpcPrompt" maxFilesPerProcess="50"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
 <stdout URL="file:./sched$JOBID.log" />
 <stderr URL="file:./sched$JOBID.err" />
 <command> 
@@ -18,7 +18,7 @@
   set f=`find . -maxdepth 1 -type f -name "*${file}*.root"`
   if ("${f}" == "") then
 #    root.exe -x -q -b 'TpcPrompt.C(1000000,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
-    root.exe -x -q -b 'TpcPrompt.C(1000,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
+    root.exe -x -q -b 'TpcPrompt.C(500,"'${evtsFile}'","'${file}'.root")' &gt;&amp; ${logFile}
   endif
   end
 </command>
@@ -52,5 +52,6 @@
 <input URL="file:/hlt/cephfs/daq/2021/352/*/hlt_22*.daq" />
 <input URL="file:/hlt/cephfs/daq/2021/353/*/hlt_22*.daq" />
 --> 
-<input URL="file:/hlt/cephfs/daq/2022/001/*/hlt*.daq" />
+<input URL="file:/hlt/cephfs/daq/2021/3??/*/hlt*.daq" />
+<input URL="file:/hlt/cephfs/daq/2022/???/*/hlt*.daq" /> 
 </job>

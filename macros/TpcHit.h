@@ -24,6 +24,7 @@ public :
    // Declaration of leaf types
    Int_t           sector;
    Int_t           row;
+   Int_t           rdo;
    Float_t         x;
    Float_t         y;
    Float_t         z;
@@ -49,6 +50,7 @@ public :
    // List of branches
    TBranch        *b_sector;   //!
    TBranch        *b_row;   //!
+   TBranch        *b_rdo;   //!
    TBranch        *b_x;   //!
    TBranch        *b_y;   //!
    TBranch        *b_z;   //!
@@ -145,6 +147,7 @@ void TpcHit::Init(TTree *tree)
 
    fChain->SetBranchAddress("sector/I", &sector, &b_sector);
    fChain->SetBranchAddress("row/I", &row, &b_row);
+   fChain->SetBranchAddress("rdo/I", &rdo, &b_rdo);
    fChain->SetBranchAddress("x", &x, &b_x);
    fChain->SetBranchAddress("y", &y, &b_y);
    fChain->SetBranchAddress("z", &z, &b_z);
