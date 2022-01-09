@@ -4,7 +4,8 @@ use Cwd;
 #my @list = glob "/gpfs01/star/scratch/fisyak/daq/2017/*/*/st_laser*.daq";
 my @list = ();
 if (-d  "/hlt/cephfs/daq/") {
-  @list = glob "/hlt/cephfs/daq/2021/*/*/*laser*.daq /hlt/cephfs/daq/2022/*/*/*laser*.daq";
+#  @list = glob "/hlt/cephfs/daq/2021/*/*/*laser*.daq /hlt/cephfs/daq/2022/*/*/*laser*.daq";
+  @list = glob "/hlt/cephfs/daq/2022/*/*/*laser*.daq";
 } else {
   @list = glob "/star/data03/daq/2021/*/*/st_laser*.daq /star/data03/daq/2022/*/*/st_laser*.daq";
 }

@@ -13,7 +13,7 @@
 #cd /hlt/cephfs/reco/2021/RF/TFG21h/7p7GeV_2021
 cd /hlt/cephfs/reco/2022/RF/pp500_2022
 CreateRunDirs.pl
-foreach d (`ls -1d ???/22*`)
+foreach d (`ls -1d ???/23*`)
   cd $d;
   if (-r Done || -r Submitted) then
     cd -
