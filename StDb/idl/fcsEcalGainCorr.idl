@@ -7,5 +7,5 @@
  */ 
 
 struct fcsEcalGainCorr {   
-  float gaincorr[1486];     /* gaincorr 2*748 */
+  float gaincorr[1496];     /* gaincorr 2*748 */
 };  

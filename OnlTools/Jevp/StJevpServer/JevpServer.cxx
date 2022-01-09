@@ -116,9 +116,9 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
     static char str[255];
  
-    if(arg == 28) return;
+    if(arg == 28) return;  // sigwinch (resize window)
 
-    if(arg == SIGCHLD) {
+    if(arg == SIGCHLD) {   // child, don't worry
 	int status;
 	waitpid(-1, &status, WNOHANG);
 	LOG(DBG, "Got signal SIGCHLD (reading pdf?) ");
@@ -467,16 +467,20 @@ void JevpServer::readSocket()
 		    }
 		    else {
 			int telapsed = time(NULL) - lastImageBuilderSendTime;
-			if(telapsed >= 20) {
+			if(telapsed >= 28) {
 			    sendNow = true;
 			}
 		    }
 		    if(sendNow) {
 			CP;
 			lastImageBuilderSendTime = time(NULL);
+			CP;
 			writingImageClock.record_time();
+			CP;
 			getServerTags(tmpServerTags, MSTL);
+			CP;
 			displays->setServerTags(tmpServerTags);
+			CP;
 			displays->updateDisplayRoot();
 
 			CP;
@@ -858,23 +862,27 @@ int JevpServer::updateDisplayDefs()
     LOG("JEFF","new PdfFileBuilder(): %d %d", strlen(displays->textBuff), displays->textBuffLen);
 
     displays->setDisplay(displays->getDisplayNodeFromIndex(0));
+    LOG("JEFF", "setdisplay");
     displays->updateDisplayRoot();
-
+    LOG("JEFF", "updatedisplayroot");
 
     if(pdfFileBuilder) delete pdfFileBuilder;
+    LOG("JEFF", "deleted");
     pdfFileBuilder = new PdfFileBuilder(displays, this, NULL);
-
+    LOG("JEFF", "built");
     
     if(canvasImageBuilder) canvasImageBuilder->setDisplays(displays);
- 
+    LOG("JEFF", "set");
+
     char *args[4];
     args[0] = (char *)"OnlTools/Jevp/archiveHistoDefs.pl";
     args[1] = basedir;
     args[2] = displays_fn;
     args[3] = NULL;
 
-    LOG(DBG, "archiveHistoDefs HistoDefs");
+    LOG("JEFF", "archiveHistoDefs HistoDefs");
     execScript("OnlTools/Jevp/archiveHistoDefs.pl", args);
+    LOG("JEFF", "archived");
     return 0;
 }
 
@@ -1434,16 +1442,16 @@ void JevpServer::performStopRun()
     getServerTags(tmpServerTags, MSTL);
     displays->setServerTags(tmpServerTags);
     displays->ignoreServerTags = 0;
-
+    CP;
     runStatus.setStatus("stopped");
-
+    CP;
     for(int i=0;i<displays->nDisplays();i++) {
 	LOG(NOTE,"Writing pdf for display %d, run %d",i,runStatus.run);
 	CP;
 	writeRunPdf(i, runStatus.run);
 	CP;
     }
-
+    CP;
   
     writeRootFiles();
     eventsThisRun = 0;
@@ -1773,15 +1781,17 @@ void JevpServer::writeRunPdf(int display, int run)
     RtsTimer_root pdfclock;
     pdfclock.record_time();
 
- 
-
     displays->setDisplay(displays->getDisplayNodeFromIndex(display));
     displays->updateDisplayRoot();
 
     if(runCanvasImageBuilder) {
 	LOG("JEFF", "status: %s", runStatus.status);
+	CP;
 	getServerTags(tmpServerTags, MSTL);
+	CP;
+	LOG("JEFF", "sentToImage");
 	int cnt = canvasImageBuilder->sendToImageWriter(&runStatus, eventsThisRun, tmpServerTags, true);
+	CP;
 
 	//canvasImageBuilder->writeIndex(imagewriterdir, "idx.txt");	
 	//canvasImageBuilder->writeRunStatus(imagewriterdir, &runStatus, eventsThisRun, serverTags);

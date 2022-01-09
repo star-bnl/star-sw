@@ -470,6 +470,7 @@ void mtdBuilder::ReadTraymaskoutList(){
 }
 
 void mtdBuilder::event(daqReader *rdr) {
+    PCP;
   int timeinbin=0;
   float time=0.;
   int halftrayid=-1;
@@ -482,6 +483,7 @@ void mtdBuilder::event(daqReader *rdr) {
   int triggerTimeStamp[2];
   for(int i=0; i<2; i++) { triggerTimeStamp[i] = 0; }
 
+  PCP;
   daq_dta *dd = rdr->det("mtd")->get("legacy");
   mtd_t *mtd;
   if (dd) {
@@ -574,6 +576,8 @@ void mtdBuilder::event(daqReader *rdr) {
     } //end dd iterate
   } //end if dd
 	  
+  PCP;
+
   //check bunchid
   int bunchidref1 	= allbunchid[0][mReferenceTray-1];
   int bunchidref2 	= allbunchid[1][mReferenceTray-1];
@@ -617,6 +621,7 @@ void mtdBuilder::event(daqReader *rdr) {
     }
   }
   
+  PCP;
   //painting label.. //can move to end of run
   char t[256];
   int nev = (int)(contents.MTD_EventCount->GetEntries());
@@ -646,6 +651,8 @@ void mtdBuilder::event(daqReader *rdr) {
   }
   MTD_Error2_label->SetText(.2,.8,t);
   
+  PCP;
+
   //error3 label
   if( err3== 0) {
     sprintf(t, "No read out errors in %d events",nev);
@@ -725,10 +732,12 @@ void mtdBuilder::event(daqReader *rdr) {
       delete trgd;
     }
 
+  PCP;
   return;
 }
 
 void mtdBuilder::stoprun(daqReader *rdr) {
+    PCP;
 //   printf("Stopping run #%d\n",run);
 //   status.setEndOfRun(1);
 //   send((TObject *)&status);

@@ -523,9 +523,9 @@ MODULE gstar_part Is the STAR Particle Database
 *
 * K0*(892) --> K+ pi-
 *
-   PARTICLE K0STAR_892 code=10013 pdg=313 mass=0.89166 tlife=khbar/0.5050 ,
+   PARTICLE K0STAR_892 code=10013 pdg=313 mass=0.89555 tlife=khbar/0.0473 ,
                        trktyp=4, bratio={1.0,} mode={1109,} charge=0
-   PARTICLE K0STAR_892bar code=10113 pdg=-313 mass=0.89166 tlife=khbar/0.5050 ,
+   PARTICLE K0STAR_892bar code=10113 pdg=-313 mass=0.89555 tlife=khbar/0.0473 ,
                        trktyp=4, bratio={1.0,} mode={1208,} charge=0
 
 
@@ -853,6 +853,18 @@ Particle H4Lambda_He4_pi_minus    code = 61055       ,
                                   trktyp = kGtHadr  ,  
                                   bratio = {1,}      , 
                                   mode = {004709,}
+
+Particle H4LambdaBar_He4Bar_pi_plus    code = 61056  , 
+                                  mass = 3.92727     , 
+                                  tlife = 2.6329e-10 , 
+                                  charge = -1        , 
+                                  pdg  = UNDEFINED   , 
+                                  trktyp = kGtHadr   ,  
+                                  bratio = {1,}      
+
+     uw = { 0, 8, 50047 }
+     Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
+
 
 Particle He4Lambda_He3_p_pi_minus code = 61057       , 
                                   mass = 3.92168     , 

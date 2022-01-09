@@ -1,8 +1,5 @@
-// $Id: StMagFMaker.cxx,v 1.20 2020/01/16 18:24:24 perev Exp $
+// $Id: StMagFMaker.cxx,v 1.19 2020/01/15 02:01:26 perev Exp $
 // $Log: StMagFMaker.cxx,v $
-// Revision 1.20  2020/01/16 18:24:24  perev
-// Buf fix. SAttr(...) always returns non zero pointer
-//
 // Revision 1.19  2020/01/15 02:01:26  perev
 // Option to change mag factor added
 //
@@ -78,13 +75,18 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <assert.h>
+#include "TError.h"
 #include <Stiostream.h>
 #include "StMagFMaker.h"
 #include "StDetectorDbMaker/St_MagFactorC.h"
+#include "StDetectorDbMaker/St_starMagOnlC.h"
+#include "StDetectorDbMaker/St_starMagAvgC.h"
 #include "StMessMgr.h" 
 #include "StMagF.h"
 #include "StarMagField.h"
 #include "StarCallf77.h"
+#include "tables/St_Survey_Table.h"
+#include "TMath.h"
 #if 0
 #define    agdetpnew	 F77_NAME(agdetpnew,AGDETPNEW)
 #define    agdetpadd	 F77_NAME(agdetpadd,AGDETPADD)
@@ -103,38 +105,66 @@ StMagFMaker::~StMagFMaker(){}
 //_____________________________________________________________________________
 Int_t StMagFMaker::InitRun(Int_t RunNo)
 {
-  
-
   if (StarMagField::Instance() && StarMagField::Instance()->IsLocked()) {
     // Passive mode, do not change scale factor
     gMessMgr->Info() << "StMagFMaker::InitRun passive mode. Don't update Mag.Field from DB" << endm;
-    return kStOK;
-  }
-  float myScale = (*SAttr("ScaleFactor"))? DAttr("ScaleFactor"):-9999;
-  Float_t  fScale = St_MagFactorC::instance()->ScaleFactor();
-assert(fabs(fScale)>0.005);
-  if (myScale>-999) {
-    if(myScale != fScale) {
-      printf("StMagFMaker::InitRun Attr scaleFactor %g is different from default %g\n",
-      myScale,fScale);
-      printf("StMagFMaker::InitRun Attr scaleFactor is assumed\n");
+  } else {
+    gMessMgr->Info() << "StMagFMaker::InitRun active mode " << endm;
+    Float_t  fScale = St_MagFactorC::instance()->ScaleFactor();
+    if (! St_starMagAvgC::instance()->Table()->IsMarked()) {
+      fScale = St_starMagAvgC::instance()->ScaleFactor();
+      gMessMgr->Info() << "StMagFMaker::InitRun use Scale Factor = " << fScale 
+		       << " average for run " << St_starMagAvgC::instance()->runNumber();
+      if (GetRunNumber() > 1000000) {// real data
+	if (GetRunNumber() != (Int_t) St_starMagAvgC::instance()->runNumber()) {
+	  gMessMgr->Error() << ", which does not matched with the current RunNo " << GetRunNumber();
+	}
+      }
+      gMessMgr->Info() << endm;
     }
-    fScale = myScale;
-  }
-
-  if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
-  gMessMgr->Info() << "StMagFMaker::InitRun active mode ";
-  if (! StarMagField::Instance()) {
-    new StarMagField ( StarMagField::kMapped, fScale);
-    gMessMgr->Info() << "Initialize STAR magnetic field with scale factor " << fScale << endm;
-  }
-  else if (StarMagField::Instance()) {
-    StarMagField::Instance()->SetFactor(fScale);
-    gMessMgr->Info() << "Reset STAR magnetic field with scale factor " << fScale << endm;
-  }
+#if 0
+    assert(TMath::Abs(fScale)>0.005);
+#else 
+    if (TMath::Abs(fScale)<=0.005) {
+      gMessMgr->Info() << "StMagFMaker::InitRun reset scale factor from  " << fScale;
+      fScale = 0.006;
+      gMessMgr->Info() << " to " << fScale << 	endm;
+    }
+#endif
+    gMessMgr->Info() << "StMagFMaker::InitRun from DB fScale = " << fScale << endm;
+    if (*SAttr("magFactor")) {
+      fScale = DAttr("magFactor");
+      gMessMgr->Info() <<  "StMagFMaker::InitRun from Attr \"magFactor\" fScale = " << fScale << endm;
+    }
+    if (*SAttr("ScaleFactor")) {
+      float myScale =  DAttr("ScaleFactor");
+      if(myScale != fScale) {
+	  gMessMgr->Info() <<  Form("StMagFMaker::InitRun Attr \"ScaleFactor\" %g is different from default %g",
+				    myScale,fScale) << endm;
+	  gMessMgr->Info() <<  "StMagFMaker::InitRun Attr \"ScaleFactor\" is assumed" << endm;
+	  fScale = myScale;
+      }
+    }
+    if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
+    if (fabs(fScale) < 1e-3) fScale = 1e-3;
+    if (StarMagField::Instance())     {
+      StarMagField::Instance()->SetFactor(fScale);
+      gMessMgr->Info() << "Reset STAR magnetic field with scale factor " << fScale << endm;
+    } else {
+      new StarMagField(StarMagField::kMapped, fScale);
+      gMessMgr->Info() << "Initialize STAR magnetic field with scale factor " << fScale << endm;
+    }
+#ifdef __RotateMagField__
+    St_Survey *tableSet = (St_Survey *) GetDataBase("StMagF/MagFieldRotation");
+    if (tableSet) {
+      Survey_st *row = tableSet->GetTable();
+      StarMagField::Instance()->SetStarMagFieldRotation(&row->r00);
+    }
+#endif
+  }    
   double myX[3]={0},myB[3];
   StarMagField::Instance()->BField(myX,myB);
-  printf("StMagFMaker::InitRun Bz(0) = %g\n",myB[2]);
+  gMessMgr->Info() << "StMagFMaker::InitRun Bz(0) = " << myB[2] << endm;
 
   return kStOK;
 }

@@ -125,9 +125,6 @@ typedef struct {
   unsigned short ZDClayer1[8];                /* layer1 ZDC DSM that feeds the VT201 DSM */
   unsigned short VPD[8];                      /* layer1 VPD DSM feeding ADC & TAC values to VT201*/
   unsigned short EPDlayer0t[16];	      /* layer0 EPD DSM feeding east & west TAC to EP101 */
-  unsigned short EPDlayer1b[8];		      /* 2nd layer1 EPD DSM taking EPD QT ADC data to VT201 */
-  unsigned short EPDlayer0a[16];              /* layer0 EPD DSM feeding east & west QT32C adcs to EP102 */
-  unsigned char EPDlayer0h[32]; 	      /* layer0 EPD DSM feeding east & west QT32B to EP102 */
 } BBCBlock;
 
 
