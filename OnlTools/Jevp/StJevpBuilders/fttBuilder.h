@@ -10,7 +10,7 @@
 #include <math.h>
 #include <memory>
 #include "TString.h"
-
+#include <fstream>
 
 
 
@@ -267,6 +267,7 @@ class fttBuilder : public JevpBuilder {
         TH1 *hitsPerVMM; // all Quadrants, all Planes
         TH1 *hitsPerTb;
         TH1 *hitsPerTb400;
+        TH1 *hitsPerTb100;
         // TH1 *SEC0;
         TH2 *hitsPerPlaneQuad; 
         TH2 *hitsPerVMMPlane; 
@@ -297,7 +298,7 @@ class fttBuilder : public JevpBuilder {
   void event(daqReader *rdr);
 
   void processVMM(daqReader *rdr);
-  void fitTriggerTime();
+  void fitTriggerTime(bool protect=true);
 
   void fillPoint( TH2 * h2, float x, float y, float w = 1.0 );
   void fillLine( TH2 * h2, float x0, float y0, float x1, float y1 );
