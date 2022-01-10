@@ -366,13 +366,8 @@ Int_t StFstRawHitMaker::Make()
 					{
 						Int_t geoId = mMappingVec[elecId];
 						int rstrip = (geoId % (kFstNumInnerSensorsPerWedge * kFstNumStripsPerInnerSensor + kFstNumOuterSensorsPerWedge * kFstNumStripsPerOuterSensor))/kFstNumPhiSegPerWedge;
-						for (int rindex = 0; rindex < kFstNumRStripsPerWedge; rindex++){
-							if(rindex == rstrip){
-								sumAdcPerRgroupPerEvent[rindex][timebin] += signalCorrected[channel][timebin];
-								counterAdcPerRgroupPerEvent[rindex][timebin]++;
-								break;
-							}
-						}
+						sumAdcPerRgroupPerEvent[rstrip][timebin] += signalCorrected[channel][timebin];
+						counterAdcPerRgroupPerEvent[rstrip][timebin]++;
 					}
 
 					LOG_DEBUG << " Corrected = " << signalCorrected[channel][timebin] << endm;
@@ -440,12 +435,7 @@ int StFstRawHitMaker::FillRawHitCollectionFromAPVData(unsigned char dataFlag, in
 		{
 			if (!mIsCaliMode && mDoCmnCorrection && dataFlag == mADCdata ){
 				int rstrip = (geoId % (kFstNumInnerSensorsPerWedge * kFstNumStripsPerInnerSensor + kFstNumOuterSensorsPerWedge * kFstNumStripsPerOuterSensor))/kFstNumPhiSegPerWedge;
-				for (int rindex = 0; rindex < kFstNumRStripsPerWedge; rindex++){
-					if(rindex == rstrip){
-						signalCorrected[iChan][iTBin] -= commonModeNoise[rindex][iTBin];
-						break;
-					}
-				}
+				signalCorrected[iChan][iTBin] -= commonModeNoise[rstrip][iTBin];
 			}
 		}
 

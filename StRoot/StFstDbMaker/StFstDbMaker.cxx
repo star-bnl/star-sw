@@ -92,7 +92,7 @@ Int_t StFstDbMaker::InitRun(Int_t runNumber)
       return kStErr;
    }
 
-   mFstDb->setPedNoise(mPedNoise->GetTable());
+   mFstDb->setPedNoise(mPedNoise->GetTableCpy());
    if(Debug()) mPedNoise->Print(0,1);
 
    // Access FST gain table
@@ -104,7 +104,7 @@ Int_t StFstDbMaker::InitRun(Int_t runNumber)
       return kStErr;
    }
 
-   mFstDb->setGain(mGain->GetTable());
+   mFstDb->setGain(mGain->GetTableCpy());
    if(Debug()) mGain->Print(0,1);
 
    St_fstMapping *mMapping = (St_fstMapping *) GetDataBase("Calibrations/fst/fstMapping");
@@ -115,7 +115,7 @@ Int_t StFstDbMaker::InitRun(Int_t runNumber)
       return kStErr;
    }
 
-   mFstDb->setMapping(mMapping->GetTable());
+   mFstDb->setMapping(mMapping->GetTableCpy());
    if(Debug()) mMapping->Print(0,1);
 
    // Access FST control table
@@ -127,7 +127,7 @@ Int_t StFstDbMaker::InitRun(Int_t runNumber)
       return kStErr;
    }
 
-   mFstDb->setControl(mControl->GetTable());
+   mFstDb->setControl(mControl->GetTableCpy());
    mControl->Print(0,1);
 
    // Access FST chip status table
@@ -139,7 +139,7 @@ Int_t StFstDbMaker::InitRun(Int_t runNumber)
       return kStErr;
    }
 
-   mFstDb->setChipStatus(mChipConfig->GetTable());
+   mFstDb->setChipStatus(mChipConfig->GetTableCpy());
    mChipConfig->Print(0,1);
                                     
    if ( GetDebug() >= 2)
