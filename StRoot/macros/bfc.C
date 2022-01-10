@@ -9,7 +9,11 @@
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
-#if !defined(__CINT__) || defined(__MAKECINT__)
+
+#pragma cling load("StUtilities")
+#pragma cling load("StBFChain")
+
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__MAKECINT__)
 
 #include "Stiostream.h"
 #include "TSystem.h"
