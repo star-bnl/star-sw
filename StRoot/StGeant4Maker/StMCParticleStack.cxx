@@ -464,14 +464,11 @@ ostream& operator<<(ostream& os, const Particle& part ) {
   double vy = part.st->vy();
   double vz = part.st->vz();
 
-  static auto* navigator    = gGeoManager->GetCurrentNavigator();
-         auto* node         = navigator->FindNode( vx, vy, vz );   
-         //auto* volume       = (node) ? node->GetVolume() : 0;  
+  // static auto* navigator    = gGeoManager->GetCurrentNavigator();
+  //        auto* node         = navigator->FindNode( vx, vy, vz );   
+  //        //auto* volume       = (node) ? node->GetVolume() : 0;  
 
-	 std::string volume = navigator->GetPath();
-
-	 
-
+  // 	 std::string volume = navigator->GetPath();       
 
   os << Form( "%-5i %-5i %-6.3f %-6.3f %-6.3f %-6.3f %-6.3f %-6.3f %4i %4i %s", 
 	      part.st->GetPdg(),
@@ -479,8 +476,7 @@ ostream& operator<<(ostream& os, const Particle& part ) {
 	      part.st->px(),part.st->py(),part.st->pz(),
 	      part.st->vx(),part.st->vy(),part.st->vz(),
 	      part.st->idTruth(),
-	      part.st->numberOfHits(),
-	      volume.c_str()
+	      part.st->numberOfHits()
 	      );
 
 
