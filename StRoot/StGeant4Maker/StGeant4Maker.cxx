@@ -770,7 +770,7 @@ int  StGeant4Maker::InitGeom() {
       //
       TString  rtag = "r"; rtag += DbAlias[i].tag;
       TString   tag =              DbAlias[i].tag;
-      if ( 0==bfc->GetOption(rtag.Data()) && 0==bfc->GetOption(tag.Data()) ) continue;
+           if ( 0==bfc->GetOption(rtag.Data()) && 0==bfc->GetOption(tag.Data()) ) continue;
       //
       // Get the geometry generation macro
       //
@@ -839,12 +839,13 @@ int StGeant4Maker::Make() {
   // Increment event number
   eventNumber++;
 
+  // Dump the  stack at the end of make
+  //  mMCStack -> StackDump(); 
+
   return kStOK; 
 }
 //________________________________________________________________________________________________
 void StGeant4Maker::Clear( const Option_t* opts ){
-
-  mMCStack -> StackDump(); // stack dump before clear...
 
   mMCStack -> Clear(); // Clear the MC stack
   acurr = aprev = 0;   // zero out pointers to the current and previous agml extensions
@@ -925,7 +926,7 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     int efm = engineFromModule( mname.Data() );
 
     ae->SetEngine( engineFromModule( mname.Data() ) );
-    ae->Print();
+    //    ae->Print();
 
     if ( 0==ae->GetSensitive() ) {
       LOG_DEBUG << "Not sensitive = " << volume->GetName() << endm;
