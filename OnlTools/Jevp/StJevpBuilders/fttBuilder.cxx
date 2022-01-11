@@ -54,7 +54,7 @@ void fttBuilder::initialize(int argc, char *argv[]) {
     // Control draw/visiblity options
     std::vector<std::string> setLogy   = { "hitsPerTb", "chargePerPlane0", "chargePerPlane1", "chargePerPlane2", "chargePerPlane3", "hitsTbPerPlane0", "hitsTbPerPlane1", "hitsTbPerPlane2", "hitsTbPerPlane3", "hitsPerPlane", "hitsPerQuad", "hitsPerFob", "hitsPerVMM", "hitsVMMPerPlane0", "hitsVMMPerPlane1", "hitsVMMPerPlane2", "hitsVMMPerPlane3", "nStripsFired" };
     std::vector<std::string> setLogz   = { "hitsPerPlaneQuad", "hitsFobQuadPerPlane0", "hitsFobQuadPerPlane1", "hitsFobQuadPerPlane2", "hitsFobQuadPerPlane3" };
-    std::vector<std::string> showStats = { "hitsPerTb400" };
+    std::vector<std::string> showStats = { "hitsPerTb400", "hitsPerTb100", "nStripsFired" };
     std::vector<std::string> drawOutline = {};
     std::vector<std::string> drawOutlineDH = {};
     std::vector<std::string> drawOutlineDV = {};
@@ -62,7 +62,7 @@ void fttBuilder::initialize(int argc, char *argv[]) {
     //////////////////////////////////////////////////////////////////////// 
     // General
     ////////////////////////////////////////////////////////////////////////
-        contents.nStripsFired            = new TH1D( "nStripsFired", "sTGC; nStripsFired; counts", 614, 0, 614 );
+        contents.nStripsFired            = new TH1D( "nStripsFired", "sTGC; nStripsFired; counts", 100, 0, 6000 );
 
     //////////////////////////////////////////////////////////////////////// 
     // hits and adc
@@ -73,6 +73,7 @@ void fttBuilder::initialize(int argc, char *argv[]) {
         contents.hitsPerVMM               = new TH1D( "hitsPerVMM", "sTGC (hits / VMM); VMM Index (96VMM / Plane); counts (hits)", nVMM,0.5, nVMM + 0.5 );
         contents.hitsPerTb                = new TH1D( "hitsPerTb", "sTGC (hits / Timebin); Tb; counts (hits)", 338, minTb, maxTb );
         contents.hitsPerTb400             = new TH1D( "hitsPerTb400", "sTGC (hits / Timebin); Tb; counts (hits)", 400, -400, 400 );
+        contents.hitsPerTb100             = new TH1D( "hitsPerTb100", "sTGC (hits / Timebin); Tb; counts (hits)", 150, -100, 50 );
         contents.hitsPerPlaneQuad         = new TH2D( "hitsPerPlaneQuad", "sTGC (hits / Quadrant); Plane; Quadrant", nPlane,0.5, nPlane + 0.5, nQuadPerPlane, 0.5, nQuadPerPlane + 0.5);
         contents.hitsPerVMMPlane          = new TH2D( "hitsPerVMMPlane", "sTGC (hits / VMM / Plane); VMM index; Plane", nVMMPerPlane, 0.5, nVMMPerPlane+0.5, nPlane,0.5, nPlane + 0.5);
         contents.adcVMM                   = new TH2D( "adcVMM", "sTGC; VMM; ADC", nVMM,0.5, nVMM + 0.5, maxADC/10.0, 0, maxADC);
@@ -295,35 +296,9 @@ void fttBuilder::startrun(daqReader *rdr) {
 }
 
 void fttBuilder::stoprun(daqReader *rdr) {
-    
-    PCP;
-    fitTriggerTime(false);
-    PCP;
-
-    // for ( int iPlane = 0; iPlane < 4; iPlane ++){
-    //         for ( int iRow = 3; iRow < 5; iRow ++ ){
-    //             for ( int iStrip = 0; iStrip < 152; iStrip+=1 ){
-                    
-    //                 if ( iRow == 4 && iStrip < 59 || iRow == 3 )
-    //                 {
-    //                     drawStrip(contents.dhStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::DiagonalH );
-    //                     drawStrip(contents.dhStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::B, VMMHardwareMap::StripOrientation::DiagonalH );
-    //                     drawStrip(contents.dhStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::C, VMMHardwareMap::StripOrientation::DiagonalH );
-    //                     drawStrip(contents.dhStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::D, VMMHardwareMap::StripOrientation::DiagonalH );
-    //                 }
-
-
-    //                 // if ( iRow == 3 && iStrip < 54 || iRow == 4 )
-    //                 if ( iRow == 4 && iStrip < 59 || iRow == 3 )
-    //                 {
-    //                     drawStrip(contents.dvStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::DiagonalV );
-    //                     drawStrip(contents.dvStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::B, VMMHardwareMap::StripOrientation::DiagonalV );
-    //                     drawStrip(contents.dvStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::C, VMMHardwareMap::StripOrientation::DiagonalV );
-    //                     drawStrip(contents.dvStripPerPlane[ iPlane ], iRow, iStrip, VMMHardwareMap::Quadrant::D, VMMHardwareMap::StripOrientation::DiagonalV );
-    //                 }
-    //             }
-    //         }
-    //     }
+    // PCP;
+    // fitTriggerTime(false);
+    // PCP;
 }
 
 
@@ -593,16 +568,16 @@ void fttBuilder::fitTriggerTime(bool protect){
 
     f1TriggerTime->SetLineColor( kRed );
 
-    int ix = contents.hitsPerTb400->GetMaximumBin();
-    float x = contents.hitsPerTb400->GetXaxis()->GetBinCenter( ix );
+    int ix = contents.hitsPerTb100->GetMaximumBin();
+    float x = contents.hitsPerTb100->GetXaxis()->GetBinCenter( ix );
 
-    contents.hitsPerTb400->Fit( f1TriggerTime, "RQ", "", x - 30, x + 30 );
+    contents.hitsPerTb100->Fit( f1TriggerTime, "RQ", "", x - 60, x + 60 );
     float m = f1TriggerTime->GetParameter(1);
     float s = f1TriggerTime->GetParameter(2);
-    contents.hitsPerTb400->Fit( f1TriggerTime, "RQ", "", m - s*2, m + s*2 );
+    contents.hitsPerTb100->Fit( f1TriggerTime, "RQ", "", m - s*3, m + s*3 );
     m = f1TriggerTime->GetParameter(1);
     s = f1TriggerTime->GetParameter(2);
-    contents.hitsPerTb400->Fit( f1TriggerTime, "RQ", "", m - s*1.5, m + s*1.5 );
+    contents.hitsPerTb100->Fit( f1TriggerTime, "RQ", "", m - s*2.5, m + s*2.5 );
     updateTimeFit = 0;
 
     PCP;
@@ -636,22 +611,24 @@ void fttBuilder::processVMMHit( int iPlane, VMMHardwareMap::Quadrant quad, stgc_
 
     size_t iChPerFob   = iCh + ( iVMM * nChPerVMM );
 
-    // global counter on strips fired
-    nStripsFired++;
+    contents.hitsPerTb->Fill( rawVMM.tb );
+    contents.hitsPerTb400->Fill( rawVMM.tb );
+    contents.hitsPerTb100->Fill( rawVMM.tb );
+    contents.hitsTbPerPlane[ iPlane ] ->Fill( rawVMM.tb );
+
 
     // count hits per
     contents.hitsPerPlane->Fill( thePlane ); // disk
     contents.hitsPerQuad->Fill( iQuadPerFtt+1 ); // quad index
     contents.hitsPerFob->Fill( iFobPerFtt+1 ); // Fob index
     contents.hitsPerVMM->Fill( iVMMPerFtt+1 ); // VMM index
-    contents.hitsPerTb->Fill( rawVMM.tb );
-    contents.hitsPerTb400->Fill( rawVMM.tb );
+    
     contents.hitsPerPlaneQuad->Fill( thePlane, theQuad ); // 2D Quadule vs. Plane
     contents.hitsPerVMMPlane->Fill( iVMMPerPlane+1, iPlane + 1 );
 
     contents.hitsVMMPerPlane[ iPlane ]->Fill( iVMMPerPlane + 1 );
     contents.hitsFobQuadPerPlane[ iPlane ]->Fill( theFob, theQuad );
-    contents.hitsTbPerPlane[ iPlane ] ->Fill( rawVMM.tb );
+    
     contents.chargePerPlane[ iPlane ] ->Fill( rawVMM.adc );
     contents.chargePerFob[iFobPerFtt] ->Fill( rawVMM.adc );
 
@@ -665,6 +642,12 @@ void fttBuilder::processVMMHit( int iPlane, VMMHardwareMap::Quadrant quad, stgc_
     // contents.adcChPerFob[ iFobPerFtt ]->Fill( iChPerFob+1, rawVMM.adc );
     contents.adcVMM->Fill( iVMMPerFtt+1, rawVMM.adc );
     contents.bcidVMM->Fill( iVMMPerFtt+1, rawVMM.bcid );
+
+
+    if ( rawVMM.tb < 30 && rawVMM.tb > -80 ){
+        // global counter on strips fired
+        nStripsFired++;
+    }
 
 
     
@@ -696,33 +679,13 @@ void fttBuilder::processVMMHit( int iPlane, VMMHardwareMap::Quadrant quad, stgc_
         }
     }
 
-    if ( updateTimeFit > fitUpdateInterval ) {
-	PCP;
-        fitTriggerTime();
-	PCP;
-    }
-
-    updateTimeFit++;
-
-    // outline detector
-    // drawStrip(contents.hStripPerPlane[ 0 ], 0, 167, VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::Horizontal );
-    // drawStrip(contents.hStripPerPlane[ 0 ], 1, 153, VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::Horizontal );
-    // drawStrip(contents.hStripPerPlane[ 0 ], 2, 94,  VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::Horizontal );
-    // for ( int i = 0; i < 300; i++ ){
-    //     drawStrip(contents.hStripPerPlane[ 0 ], 3, i,  VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::Horizontal );
-    //     if ( i > 93 )
-    //         drawStrip(contents.hStripPerPlane[ 0 ], 2, i,  VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::Horizontal );
-    //     if ( i > 152 )
-    //         drawStrip(contents.hStripPerPlane[ 0 ], 1, i,  VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::Horizontal );
-    //     if ( i > 166 )
-    //         drawStrip(contents.hStripPerPlane[ 0 ], 0, i,  VMMHardwareMap::Quadrant::A, VMMHardwareMap::StripOrientation::Horizontal );
+    // if ( updateTimeFit > fitUpdateInterval ) {
+    // PCP;
+    //     fitTriggerTime();
+    // PCP;
     // }
 
-    // drawStrip(contents.hStripPerPlane[ 0 ], 0, 167, VMMHardwareMap::Quadrant::B, VMMHardwareMap::StripOrientation::Horizontal );
-    // drawStrip(contents.hStripPerPlane[ 0 ], 1, 153, VMMHardwareMap::Quadrant::B, VMMHardwareMap::StripOrientation::Horizontal );
-    // drawStrip(contents.hStripPerPlane[ 0 ], 2, 94,  VMMHardwareMap::Quadrant::B, VMMHardwareMap::StripOrientation::Horizontal );
-
-    // drawOutline( contents.hStripPerPlane[ 0 ] );
+    updateTimeFit++;
 }
 
 void fttBuilder::processVMM(daqReader *rdr) {
@@ -746,6 +709,7 @@ void fttBuilder::processVMM(daqReader *rdr) {
         } // Loop over iHit
     } // iterate dd
 
+    // printf( "nStripsFired = %d\n", nStripsFired );
     contents.nStripsFired->Fill( nStripsFired );
 } // processVMM
 

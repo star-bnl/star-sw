@@ -267,6 +267,7 @@ class fttBuilder : public JevpBuilder {
         TH1 *hitsPerVMM; // all Quadrants, all Planes
         TH1 *hitsPerTb;
         TH1 *hitsPerTb400;
+        TH1 *hitsPerTb100;
         // TH1 *SEC0;
         TH2 *hitsPerPlaneQuad; 
         TH2 *hitsPerVMMPlane; 
