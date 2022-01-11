@@ -154,14 +154,46 @@ void unit_test_multi_engine_emc( const char* part = "gamma", int ntracks = 10 ) 
   LOG_TEST << "=======================================================" << std::endl;
 
 
-  auto* gm = dynamic_cast<StGeant4Maker*>( StMaker::GetChain()->GetMaker("geant4star") );
+  auto* gm    = dynamic_cast<StGeant4Maker*>( StMaker::GetChain()->GetMaker("geant4star") );
+  auto* stack = gm->stack();
 
   TFile* output = new TFile(Form("unit_test_multi_engine_emc_%s.root",part),"recreate");
 
   gm->SetEngineForModule( "CALB", 0 ); 
   book_histograms();
-  throw_particle(ntracks, part, 0.09995, 10.00005, -0.95, 0.95, 0., TMath::TwoPi() );
-  trackLoop();
+  throw_particle(ntracks, part, 0.09995, 10.00005, -0.55, 0.55, 0., TMath::TwoPi() );
+
+  stack->StackDump();
+
+  vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
+  track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
+  hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_emc_hit") ) ;
+
+  auto all_primary_tracks_have_hits = [=](g2t_track_st* begin_, g2t_track_st* end_) {
+
+
+    auto ret = PASS;
+    
+    int count = 0;
+    for ( const auto* track=begin_; track < end_; track++ ) {
+
+      LOG_INFO << "Track " << track->id << " pid=" << track->eg_pid << " n emc hits = " << track-> n_emc_hit << endm;
+      if ( track->n_emc_hit <= 0 ) {
+	ret = FAIL;
+      }
+      if ( ++count == ntracks ) break;
+
+    }
+    return ret;
+
+  };
+
+  check_track_table( "All primary tracks have hits", all_primary_tracks_have_hits );
+
+      
+  return;
+
+
 
   LOG_TEST << "=======================================================" << std::endl;
   LOG_TEST << "Multi-engine testing of EMC" << std::endl;
@@ -171,8 +203,9 @@ void unit_test_multi_engine_emc( const char* part = "gamma", int ntracks = 10 ) 
 
   gm->SetEngineForModule( "CALB", 1 );
   book_histograms();
-  throw_particle(ntracks, part, 0.09995, 10.00005, -0.95, 0.95, 0., TMath::TwoPi() );
-  trackLoop();
+
+  throw_particle(ntracks, part, 0.09995, 10.00005, -0.95, 0.95, 0., TMath::TwoPi() );  
+  //  trackLoop();
 
   output->Write();
   output->Close();
