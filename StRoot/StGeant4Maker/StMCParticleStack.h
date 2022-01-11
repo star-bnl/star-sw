@@ -64,6 +64,9 @@ public:
   void setIdStack( int id ) { mIdStack = id; } 
   int     idStack() const { return mIdStack; } 
 
+  void setIdTruth( int id ) { mIdTruth = id; }
+  int     idTruth() const { return mIdTruth; }
+
   //const long long numberOfHits(){ return mNumHits; } 
   //void  addHit(){ mNumHits++; } 
 
@@ -82,6 +85,7 @@ protected:
   StarMCVertex*              mStopVertex;           /// Pointer to the stop vertex  
 
   int                        mIdStack;              /// Track identity on stack 
+  int                        mIdTruth;
   long long                  mNumHits;              /// Number of hits registered on the track 
 
   std::vector<DetectorHit*>  mHits;                 /// List of hits on track
@@ -215,7 +219,7 @@ class StMCParticleStack : public TVirtualMCStack
   virtual int GetStackSize(){ return mStack.size(); }
 
   /// Print out the particle table
-  void StackDump();
+  void StackDump( int idtruth=-1 );
 
 
   /// Obtain the current particle truth

@@ -166,18 +166,17 @@ void StMCParticleStack::PushTrack( int toDo, int parent, int pdg,
   //
   // And handle region-based track persistence
   //
-  if ( agmlreg == 2 || tracing || isPrimary ) {
+  if ( tracing && (agmlreg == 2 || isPrimary) ) {
 
     StarMCVertex* vertex = GetVertex( vx, vy, vz, vt, mech );
 
     auto* persistent = new StarMCParticle(particle,vertex);
+    persistent->setIdTruth( mParticleTable.size() );
+    persistent->setStartVertex( vertex );
     mParticleTable.push_back(persistent); // mParticleTable owns the pointer
     mPersistentTrack[mArraySize] = persistent;
 
-    mIdTruthFromParticle[ mParticleTable.back() ] = mParticleTable.size();
-    // if ( parent > 0 ) { 
-    //   mTruthTable.push_back( mParticleTable.back() );
-    // }
+    mIdTruthFromParticle[ persistent ] = mParticleTable.size();
 
     // Set corrspondance between stack ID and table ID
     mStackToTable[ntr] = mParticleTable.back();
@@ -246,10 +245,11 @@ StarMCVertex* StMCParticleStack::GetVertex( double vx, double vy, double vz, dou
   }
 
   if ( 0==vertex ) {
-    mVertexTable.push_back( vertex = new StarMCVertex(vx,vy,vz,vt) ); // mVertexTable owns pointer
+    vertex = new StarMCVertex(vx,vy,vz,vt);
     auto* navigator = gGeoManager->GetCurrentNavigator();
     auto* volume    = navigator->GetCurrentVolume();
-    mVertexTable.back()->setVolume( volume->GetName() );
+    vertex->setVolume( volume->GetName() );
+    mVertexTable.push_back( vertex ); // mVertexTable owns pointer
   }
 
   return vertex;
@@ -261,8 +261,6 @@ TParticle *StMCParticleStack::PopNextTrack( int &itrack )
 
   // Start with invalid track index
   itrack = -1;
-
-  LOG_INFO << "PopNextTrack stack size = " << mStack.size() << endm;
 
   // The stack is empty.  Signal the end.
   if ( mStack.empty() ) 
@@ -390,6 +388,7 @@ StarMCParticle::StarMCParticle( TParticle* part, StarMCVertex* vert ) :
   mIntermediateVertices(),
   mStopVertex(0),
   mIdStack(-1), 
+  mIdTruth(-1),
   mNumHits(0),
   mHits()
 {
@@ -406,8 +405,7 @@ StarMCVertex::StarMCVertex() : mVertex{0,0,0,0},
 		    mMechanism(kPNoProcess),
 		    mMedium(0),
 		    mVolume("unkn"),
-		    mIntermediate(false)
-		    
+		    mIntermediate(false)		    
 {
 
 
@@ -459,30 +457,48 @@ ostream& operator<<(ostream& os, const Particle& part ) {
     return os;    
   }
 
-  auto* start = part.st->start();
-  std::string volume = (start)? "none" : start->volume();
+  auto* stop = part.st->stop();
+  //  std::string volume = (0==stop)? "none" : stop->volume();
 
-  os << Form( "%-5i %-5i %-6.3f %-6.3f %-6.3f %-6.3f %-6.3f %-6.3f %4s", 
+  double vx = part.st->vx();
+  double vy = part.st->vy();
+  double vz = part.st->vz();
+
+  static auto* navigator    = gGeoManager->GetCurrentNavigator();
+         auto* node         = navigator->FindNode( vx, vy, vz );   
+         //auto* volume       = (node) ? node->GetVolume() : 0;  
+
+	 std::string volume = navigator->GetPath();
+
+	 
+
+
+  os << Form( "%-5i %-5i %-6.3f %-6.3f %-6.3f %-6.3f %-6.3f %-6.3f %4i %4i %s", 
 	      part.st->GetPdg(),
 	      part.st->GetStatus(),
 	      part.st->px(),part.st->py(),part.st->pz(),
 	      part.st->vx(),part.st->vy(),part.st->vz(),
-	      volume.c_str());
+	      part.st->idTruth(),
+	      part.st->numberOfHits(),
+	      volume.c_str()
+	      );
 
 
   return os;
 };
-void StMCParticleStack::StackDump() {
+void StMCParticleStack::StackDump( int idtruth ) {
 
   LOG_INFO << "-----------------------------------------------------------------------------------------" << endm;
   LOG_INFO << "StarMCParticleStack::StackDump()" << endm;
   LOG_INFO << "-----------------------------------------------------------------------------------------" << endm;
-  LOG_INFO << "N primary:  " << mNumPrimary << endm;
-  LOG_INFO << "Stack size: " << mArraySize << endm;
+  LOG_INFO << "N primary:   " << mNumPrimary << endm;
+  LOG_INFO << "N particles: " << mArraySize << endm;
+  LOG_INFO << "Stack size:  " << mStackSize << endm;
+  LOG_INFO << "Truth size:  " << mParticleTable.size() << endm;
   LOG_INFO << "-----------------------------------------------------------------------------------------" << endm;
   LOG_INFO << "TParticle                                                        | StarMCParticle"        << endm;
   //           12345 12345 1234 123456 123456 123456 123456 123456 123456 123456 123456 123456|12345 12345 123456 123456 123456 123456 123456 123456 1234 
-  LOG_INFO << "index name  stat px     py     pz     vx     vy     vz     parent daughters     pdg   stat  px     py     pz     vx     vy     vz     volu " << endm;
+  LOG_INFO << "index name  stat px     py     pz     vx     vy     vz     parent daughters     pdg   stat  px     py     pz     vx     vy     vz     true " << endm;
   Particle p;
   for ( int i=0;i<mArraySize;i++ ) {
 
@@ -490,7 +506,7 @@ void StMCParticleStack::StackDump() {
     p.mc = static_cast<TParticle*>( mArray->At(i) );
     p.st = mPersistentTrack[i];
 
-    LOG_INFO << p << endm;
+    if ( idtruth==-1 || idtruth==p.st->idTruth() ) LOG_INFO << p << endm;
 
   }
   LOG_INFO << "-----------------------------------------------------------------------------------------" << endm;
