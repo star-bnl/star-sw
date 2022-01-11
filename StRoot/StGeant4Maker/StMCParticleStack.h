@@ -177,8 +177,7 @@ class StMCParticleStack : public TVirtualMCStack
 			  TMCProcess mech, int& ntr, double weight,
 			  int is);
 
-
-
+ 
   /// The stack has to provide two pop mechanisms:
   /// The first pop mechanism required.
   /// Pop all particles with toBeDone = 1, both primaries and seconadies.
