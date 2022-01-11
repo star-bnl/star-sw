@@ -952,10 +952,20 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     // Register this volume to the sensitive detector
 
     auto* mgr = TMCManager::Instance();
-    auto* mc =  TVirtualMC::GetMC();  // Question: Do we need to obtain pointer through TMCManager here?
+    if ( 0 == mgr ) {
 
-    if ( nullptr == mc->GetSensitiveDetector( vname ) ) {
-      mc->SetSensitiveDetector( vname, sd );
+      auto* mc =  TVirtualMC::GetMC();  // Question: Do we need to obtain pointer through TMCManager here?
+      if ( nullptr == mc->GetSensitiveDetector( vname ) ) {
+	mc->SetSensitiveDetector( vname, sd );
+      }
+
+    }
+    else { // multi engine mode
+
+      mgr->Apply( [sd,vname]( TVirtualMC* _mc ) {
+	  _mc->SetSensitiveDetector( vname, sd );
+	});
+
     }
     
     // Register this volume with the sensitive detector
@@ -1451,6 +1461,9 @@ void StGeant4Maker::Stepping(){
     LOG_DEBUG << Form("track stopped x=%f y=%f z=%f ds=%f transit=%d %d stopped=%s  %s",
 		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
   }
+
+  // Perform any post stepping actions
+  for ( auto f : mPostSteppingActions ) f();
 
 
 }
