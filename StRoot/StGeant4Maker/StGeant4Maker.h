@@ -11,10 +11,9 @@
 #include <StSensitiveDetector.h> 
 #include <map>
 #include <string>
-
+#include "StMCParticleStack.h"
 
 class StGeant4Maker;
-class StMCParticleStack;
 
 class AgMLExtension;
 
@@ -152,6 +151,9 @@ public:
   
   /// Sets the MC engine for a given module
   void SetEngineForModule( const char* module_, const int engine );
+
+  StMCParticleStack* stack(){ return mMCStack; }
+  
 
 private:
 protected:
