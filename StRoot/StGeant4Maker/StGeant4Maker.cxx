@@ -563,7 +563,6 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
 //________________________________________________________________________________________________
 int StGeant4Maker::Init() {
 
-
   InitGeom();
 
   mVmcApplication = new StarVMCApplication("g4star","STAR G4/VMC",DAttr("Application:Zmax"),DAttr("Application:Rmax"), SAttr("application:engine"), mMCStack );
@@ -583,7 +582,6 @@ int StGeant4Maker::Init() {
     gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig); // ID = 1 in multi engine
     LOG_INFO << "Created Geant 4 instance " << gG4->GetName() << endm;
   }
-
 
   if ( gG4 ) AddObj( gG4, ".const", 0 );
   if ( gG3 ) AddObj( gG3, ".const", 0 );
@@ -675,7 +673,6 @@ int StGeant4Maker::Init() {
     LOG_INFO << "Initialize Geant 4 + GEANT3 multiengine run" << endm;    
     TMCManager::Instance()->Init( InitializeMC );
 
-
   }
   
   // Geant4 standalone initialization
@@ -684,7 +681,6 @@ int StGeant4Maker::Init() {
     LOG_INFO << "Initialize Geant 4 standalone" << endm;
 
     InitializeMC( gG4 );
-    //SetStack( gG4 );
     
     TG4RunManager* runManager = TG4RunManager::Instance();
     runManager->UseRootRandom(false);
@@ -697,13 +693,8 @@ int StGeant4Maker::Init() {
     LOG_INFO << "Initialize GEANT3 standalone" << endm;
     
     InitializeMC( gG3 );
-    //SetStack( gG3 );
  
   }
-
-  // Create histograms
-  TH1* h;
-  AddHist( h = new TH2F("MC:vertex:RvsZ","MC vertex;z [cm];R [cm]",1801,-900.5,900.5,501,-0.5,500.5) );
 
   return StMaker::Init();
 }
@@ -1098,16 +1089,6 @@ void StGeant4Maker::FinishEvent(){
     myvertex.ge_medium = v->medium();
     myvertex.ge_proc   = v->process();
     myvertex.is_itrmd  = v->intermediate();
-
-    // Fill histograms
-    {
-      float& x = myvertex.ge_x[0];
-      float& y = myvertex.ge_x[1];
-      float& z = myvertex.ge_x[2];
-      float  r2 = x*x + y*y;
-      float  r = sqrt(r2);
-      GetHist("MC:vertex:RvsZ")->Fill(z,r);
-    }
 
     // TODO: map ROOT mechanism to G3 names
 
