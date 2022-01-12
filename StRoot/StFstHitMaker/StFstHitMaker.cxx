@@ -132,16 +132,16 @@ Int_t StFstHitMaker::Make()
                                 int moduleIdx;
 				if(disk == 1) // Disk 1
 					moduleIdx = wedge;
-				if(disk == 2)// Disk 2
+				else if(disk == 2)// Disk 2
 					moduleIdx = wedge-12;
-				if(disk == 3)// Disk 3
+				else if(disk == 3)// Disk 3
 					moduleIdx = wedge-24;
 				if(disk == 1 || disk == 3)
 				{// Disk 1 & 3
 					phiInner = kFstphiStart[moduleIdx-1]*TMath::Pi()/6.0 + 0.5*kFstzDirct[moduleIdx-1]*kFstStripPitchPhi;
 					phiOuter = kFstphiStop[moduleIdx-1]*TMath::Pi()/6.0  - 0.5*kFstzDirct[moduleIdx-1]*kFstStripPitchPhi;
 				}
-				if(disk == 2)
+				else if(disk == 2)
 				{ // Disk 2
 					phiInner = kFstphiStop[moduleIdx-1]*TMath::Pi()/6.0  - 0.5*kFstzDirct[moduleIdx-1]*kFstStripPitchPhi;
 					phiOuter = kFstphiStart[moduleIdx-1]*TMath::Pi()/6.0 + 0.5*kFstzDirct[moduleIdx-1]*kFstStripPitchPhi;
@@ -165,8 +165,8 @@ Int_t StFstHitMaker::Make()
 				}
 
 				if(disk == 1) local[2] = 146.6012; //unit: cm
-				if(disk == 2) local[2] = 160.1724; //unit: cm
-				if(disk == 3) local[2] = 173.7436; //unit: cm
+				else if(disk == 2) local[2] = 160.1724; //unit: cm
+				else if(disk == 3) local[2] = 173.7436; //unit: cm
 				newHit->setLocalPosition(local[0], local[1], local[2]); //set local position on sensor
 
 				fstHitCollection->addHit(newHit);
