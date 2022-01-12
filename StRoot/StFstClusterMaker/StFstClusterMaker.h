@@ -30,9 +30,6 @@ public:
    void setUsedTimeBin(unsigned char tb=UCHAR_MAX) { mTimeBin = tb; }
    void setClusterSplitFlag(bool splitFlag=true) { mSplitCluster = splitFlag; }
 
-   virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name: SL20a $ $Id: StFstClusterMaker.h,v 1.15 2015/07/27 18:50:31 huangbc Exp $ built " __DATE__ " " __TIME__  ; return cvs;}
-
 protected:
    StFstCollection *mFstCollectionPtr;
    StFstIClusterAlgo *mClusterAlgoPtr;
@@ -44,10 +41,3 @@ protected:
 };
 
 #endif
-
-
-/***************************************************************************
-* StFstClusterMaker.h,v 1.0
-* Revision 1.0 2021/09/21 Shenghui Zhang
-* Initial version
-****************************************************************************/

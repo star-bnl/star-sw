@@ -73,8 +73,6 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
 	//find all raw hits that are neighboring
 	std::vector<StFstRawHit *>::iterator rawHitsToMergePtr = rawHitsToMerge.begin();
 	rawHitMaxAdcTemp = *rawHitsToMergePtr;
-	// StFstRawHit *rawHitNext = 0;
-	// StFstRawHit *rawHitTempBack = 0;
 
 	// put all raw hits in one phi strip to rawHitsToMerge
 	while (rawHitsToMergePtr != rawHitsToMerge.end() && !rawHitsVec[sensorIdx][phiIdx].empty()) {
@@ -134,7 +132,6 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
 	  if(tempRStrip[iRawHit]>maxRStrip)
 	    maxRStrip = tempRStrip[iRawHit];
 	  meanRStrip = maxRStrip;
-	  //meanRStrip += tempRStrip[iRawHit] * tempCharge[iRawHit] / tempSumCharge;
 	  tempSumChargeErrSquare += tempChargeErr[iRawHit] * tempChargeErr[iRawHit];
 	}
 
@@ -185,7 +182,6 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
 	      meanRStrip     = (*clusterIt1)->getMeanRStrip();
 	      if ((*clusterIt2)->getMeanRStrip() > (*clusterIt1)->getMeanRStrip()) 
 		meanRStrip  = (*clusterIt2)->getMeanRStrip();
-	      //meanRStrip         = (*clusterIt1)->getMeanRStrip() * (*clusterIt1)->getTotCharge() / totCharge + (*clusterIt2)->getMeanRStrip() * (*clusterIt2)->getTotCharge() / totCharge;
 	      meanPhiStrip = (*clusterIt1)->getMeanPhiStrip() * (*clusterIt1)->getTotCharge() / totCharge + (*clusterIt2)->getMeanPhiStrip() * (*clusterIt2)->getTotCharge() / totCharge;
 
 	      (*clusterIt2)->setMeanRStrip(meanRStrip);
@@ -229,10 +225,3 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
 
   return kStOk;
 }
-
-
-/***************************************************************************
- * StFstScanRadiusClusterAlgo.cxx,v 1.0
- * Revision 1.0 2021/09/21 Shenghui Zhang
- * Initial version
- ****************************************************************************/

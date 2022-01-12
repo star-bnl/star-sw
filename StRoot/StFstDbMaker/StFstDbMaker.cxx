@@ -1,5 +1,3 @@
-/* $Id: StFstDbMaker.cxx,v */
-
 #include "StFstDbMaker/StFstDbMaker.h"
 #include "StFstDbMaker/StFstDb.h"
 #include "St_base/StMessMgr.h"
@@ -155,10 +153,3 @@ Int_t StFstDbMaker::Make()
 {
    return mReady;
 }
-
-
-/***************************************************************************
-* StFstDbMaker.cxx,v 1.0
-* Revision 1.0 2021/10/18 Shenghui Zhang
-* Initial version
-****************************************************************************/

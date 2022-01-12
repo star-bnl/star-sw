@@ -1,5 +1,3 @@
-/* $Id: StFstDbMaker.h,v */
-
 #ifndef StFstDbMaker_hh
 #define StFstDbMaker_hh
 
@@ -32,10 +30,3 @@ private:
 };
 
 #endif
-
-
-/***************************************************************************
-* StFstDbMaker.h,v 1.0
-* Revision 1.0 2021/10/18 Shenghui Zhang
-* Initial version
-****************************************************************************/

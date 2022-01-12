@@ -148,10 +148,3 @@ void StFstDb::Print(Option_t *opt) const
       sensorOnGlobal->Print();
    }
 }
-
-
-/***************************************************************************
-* StFstDb.cxx,v 1.0
-* Revision 1.0 2021/10/18 Shenghui Zhang
-* Initial version
-****************************************************************************/

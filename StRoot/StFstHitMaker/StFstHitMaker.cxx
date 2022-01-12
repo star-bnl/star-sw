@@ -23,8 +23,7 @@ ClassImp(StFstHitMaker);
 
 
 StFstHitMaker::StFstHitMaker( const char *name ) : StMaker(name), mSensorTransforms(0)
-{
-}
+{}
 
 
 Int_t StFstHitMaker::InitRun(Int_t runnumber)
@@ -186,7 +185,7 @@ Int_t StFstHitMaker::Make()
 				local[1] = newHit->localPosition(1);
 				local[2] = newHit->localPosition(2);
 
-                                //Ye: simple transformation. Need to revisit
+                //Ye: simple transformation. Need to revisit
 				int sensorId = 1000 + ((int)newHit->getWedge() - 1) * kFstNumSensorsPerWedge + (int)newHit->getSensor();
 				TGeoHMatrix *geoMSensorOnGlobal = (TGeoHMatrix *) mSensorTransforms->FindObject(Form("R%04i", sensorId));
 				geoMSensorOnGlobal->LocalToMaster(local, global);
@@ -205,10 +204,3 @@ Int_t StFstHitMaker::Make()
 
 	return kStOk;
 }
-
-
-/***************************************************************************
- * StFstHitMaker.cxx,v 1.0
- * Revision 1.0 2021/10/04 Shenghui Zhang
- * Initial version
- ****************************************************************************/
