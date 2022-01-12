@@ -1015,6 +1015,8 @@ void StGeant4Maker::SetEngineForModule( const char* module_, const int engine ) 
 //________________________________________________________________________________________________
 int  StGeant4Maker::ConfigureGeometry() {
 
+  auto* mgr = TMCManager::Instance();
+
   // Iterate overall volumes and set volume specific tracking cuts
   std::map<int, int> media;
   TObjArray* objArray = gGeoManager->GetListOfVolumes();
@@ -1026,10 +1028,16 @@ int  StGeant4Maker::ConfigureGeometry() {
     if ( media[id]>0 ) continue; // skip if medium already encountered
     AgMLExtension* agmlExt = getExtension(volume);
     if ( 0==agmlExt ) continue;
+    media[id] = id;
     for ( auto kv : agmlExt->GetCuts() ) {
-      LOG_INFO << kv.first << " = " << kv.second << endm;
-      TVirtualMC::GetMC()->Gstpar( media[id]=id, kv.first, kv.second );
-      // TODO: handle multi-engine 
+      if ( 0==mgr ) {
+	TVirtualMC::GetMC()->Gstpar( id, kv.first, kv.second );
+      }
+      else {
+	mgr->Apply( [id,kv]( TVirtualMC* mc ) {
+	    mc->Gstpar( id, kv.first, kv.second );
+	  });
+      }
     }
   }
 
@@ -1146,6 +1154,9 @@ void StGeant4Maker::FinishEvent(){
     // TODO: particle stop vertices need to be scored
     mytrack.start_vertex_p = truthVertex[ t->start() ];
     mytrack.stop_vertex_p  = truthVertex[ t->stop()  ];
+    // next, track parent
+    auto* parent = t->start()->parent();
+    mytrack.next_parent_p = truthTrack[ parent ];    
     //__________________________________________ next track
     g2t_track->AddAt(&mytrack);
     itrack++;
