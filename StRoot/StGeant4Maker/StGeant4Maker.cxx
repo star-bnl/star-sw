@@ -735,17 +735,18 @@ int StGeant4Maker::InitRun( int /* run */ ){
     result = kStFatal;
   }
   
-
   return result;
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::ConstructGeometry(){ 
+  // Geometry construction is the responsability of the framework and should
+  // have already occurred.  If the geometry is missing, it should be fatal.
   if ( 0==gGeoManager ) {
     LOG_FATAL << "Geometry manager is not available at StarVMCApplication::ConstructGeometry... this will not go well" << endm;
   }
   gGeoManager->CloseGeometry(); 
-
 }
+//________________________________________________________________________________________________
 int  StGeant4Maker::InitGeom() {
 
   const DbAlias_t *DbAlias = GetDbAliases();
@@ -778,7 +779,6 @@ int  StGeant4Maker::InitGeom() {
       // Cleanup file
       // 
       if (mac) delete [] mac;
-
     }
   }
 
@@ -851,6 +851,21 @@ void StarVMCApplication::InitGeometry(){
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::ConstructSensitiveDetectors() {
+
+  //
+  // This routine registers sensitive detectors to volumes.  Additionally,
+  // in multi-engine mode, this routine is responsible for associating
+  // a physics engine to each volume in the geometry.
+  //
+  // NOTE: physics engines are assigned at the granularity of geometry 
+  // modules.  Users have the ability to specify the physics engine for
+  // a given module (and all volumes defined within) by using the syntax
+  // 
+  // --syst:engine=G3 or --syst:engine=G4
+  //
+  // where "syst" denotes the first four letters of the name of the geometry
+  // module.
+  //
 
   assert(gGeoManager);
 
@@ -998,7 +1013,7 @@ void StGeant4Maker::SetEngineForModule( const char* module_, const int engine ) 
 
 }
 //________________________________________________________________________________________________
-  int  StGeant4Maker::ConfigureGeometry() {
+int  StGeant4Maker::ConfigureGeometry() {
 
   // Iterate overall volumes and set volume specific tracking cuts
   std::map<int, int> media;
