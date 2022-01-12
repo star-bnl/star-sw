@@ -115,8 +115,8 @@ public:
   void setParent  ( StarMCParticle* _parent   ){ mParent = _parent; } 
   void addDaughter( StarMCParticle* daughter ){ mDaughters.push_back( daughter ); } 
 
-  const             StarMCParticle*   parent()   { return mParent; } 
-  const std::vector<StarMCParticle*>& daughters(){ return mDaughters; } 
+  const             StarMCParticle*   parent()    const { return mParent; } 
+  const std::vector<StarMCParticle*>& daughters() const { return mDaughters; } 
 
   void setMedium( const int medium ) { mMedium = medium; }
   int  medium() const { return mMedium; }

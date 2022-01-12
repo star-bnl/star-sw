@@ -1155,8 +1155,7 @@ void StGeant4Maker::FinishEvent(){
     mytrack.start_vertex_p = truthVertex[ t->start() ];
     mytrack.stop_vertex_p  = truthVertex[ t->stop()  ];
     // next, track parent
-    auto* parent = t->start()->parent();
-    mytrack.next_parent_p = truthTrack[ parent ];    
+    mytrack.next_parent_p = truthTrack[ t->start()->parent() ];    
     //__________________________________________ next track
     g2t_track->AddAt(&mytrack);
     itrack++;
