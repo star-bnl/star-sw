@@ -547,17 +547,16 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr("LABS", 1);
   SetAttr("SYNC", 1);
 
-  SetAttr("all:engine",  "G3" );
-  // SetAttr("ecal:engine", "G3" );
-  // SetAttr("calb:engine", "G3" );
-  // SetAttr("tpce:engine", "G3" );
- 
+  SetAttr("all:engine",  "G3" ); // default engine in multi-engine mode is G3
+  SetAttr("calb:engine", "G4" ); // BEMC defaults to G4
+  SetAttr("ecal:engine", "G4" ); // EEMC defaults to G4
+  SetAttr("wcal:engine", "G4" ); // Forward EMC defaults to G4
+  SetAttr("hcal:engine", "G4" ); // Forward hcal defaults to G4
+
+  // Application defaults to single engine mode with Geant4
   SetAttr("application:engine","G4"); 
     
-  // TODO-- 
-  //  SetAttr( "AgMLOpt:Hits:Deactivate", "ECAL:*,TPCE:*,*" );
-  //  SetAttr( "AgMLOpt:Hits:Activate", "TPAD,CSUP,ESCI" );
-
+  // Naughty
   _g4maker = this; // Provide a global pointer to the G4 maker  
 
 }
