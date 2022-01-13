@@ -135,6 +135,7 @@ Int_t StFstHitMaker::Make()
 					moduleIdx = wedge-12;
 				else if(disk == 3)// Disk 3
 					moduleIdx = wedge-24;
+				// The simple transformation will be updated with the geomtry table in database later
 				if(disk == 1 || disk == 3)
 				{// Disk 1 & 3
 					phiInner = kFstphiStart[moduleIdx-1]*TMath::Pi()/6.0 + 0.5*kFstzDirct[moduleIdx-1]*kFstStripPitchPhi;
@@ -186,6 +187,7 @@ Int_t StFstHitMaker::Make()
 				local[2] = newHit->localPosition(2);
 
                 //Ye: simple transformation. Need to revisit
+		// The simple transformation will be updated with the geomtry table in database later
 				int sensorId = 1000 + ((int)newHit->getWedge() - 1) * kFstNumSensorsPerWedge + (int)newHit->getSensor();
 				TGeoHMatrix *geoMSensorOnGlobal = (TGeoHMatrix *) mSensorTransforms->FindObject(Form("R%04i", sensorId));
 				geoMSensorOnGlobal->LocalToMaster(local, global);

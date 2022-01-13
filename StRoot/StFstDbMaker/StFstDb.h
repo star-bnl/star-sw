@@ -54,11 +54,11 @@ public:
    const fstChipConfig_st *getChipStatus() const 	{return mFstChipStatus; }
       
    Int_t setGeoHMatrices(Survey_st **tables);
-   void setPedNoise(fstPedNoise_st *pedNoise) 	    { free(mFstPedNoise);   mFstPedNoise   = pedNoise;   }
-   void setGain(fstGain_st *gain)		    { free(mFstGain);       mFstGain       = gain;       }
-   void setMapping(fstMapping_st *mapping)    	    { free(mFstMapping);    mFstMapping    = mapping;    }
-   void setControl(fstControl_st *control)    	    { free(mFstControl);    mFstControl    = control;    }
-   void setChipStatus(fstChipConfig_st *chipStatus) { free(mFstChipStatus); mFstChipStatus = chipStatus; }
+   void setPedNoise(fstPedNoise_st *pedNoise) 	    { mFstPedNoise   = pedNoise;   }
+   void setGain(fstGain_st *gain)		    { mFstGain       = gain;       }
+   void setMapping(fstMapping_st *mapping)    	    { mFstMapping    = mapping;    }
+   void setControl(fstControl_st *control)    	    { mFstControl    = control;    }
+   void setChipStatus(fstChipConfig_st *chipStatus) { mFstChipStatus = chipStatus; }
    
    virtual void Print(Option_t *opt = "") const;
 
