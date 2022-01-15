@@ -1,27 +1,27 @@
 #if 0
-  foreach d (`ls -1d *GeV*`)
-    root.exe -q -b 'TpcT.C+("'${d}'/*/st*.tags.root","P","'${d}'.Plots.root")' >& ${d}.log &
-  end
+set star = '*';
+foreach d (`ls -1d *GeV*`)
+  root.exe -q -b 'TpcT.C+("'${d}'/'${star}'/st*.tags.root","P","'${d}'.Plots.root")' >& ${d}.log &
+end
   
-  foreach f (`ls -1d  /hlt/cephfs/reco/2020/TFG20h/RF/*.root`)
-    set b = `basename ${f} .Plots.root`;						      
-    set d = `dirname ${f}`;
-    mkdir ${b}; cd ${b};
-    ln -s ${f} .
-    ln -s ${d}/${b}/*/*.MuDst.root .
-    cd -
-  end
+  foreach f (`ls -1d  /hlt/cephfs/reco/2020/TFG20h/RF/'${star}'.root`)
+  set b = `basename ${f} .Plots.root`;						      
+set d = `dirname ${f}`;
+mkdir ${b}; cd ${b};
+ln -s ${f} .
+ln -s ${d}/${b}/'${star}'/'${star}'.MuDst.root .
+cd -
+end
 
-	     foreach d (`ls -1dr TpcRS_[1-9]*GeV*`)
-	     cd ${d}; pwd;
-	     root.exe -q *.Plots.root FitTpcT.C
-             cd -
-             end
-
+foreach d (`ls -1dr TpcRS_[1-9]*GeV*`)
+cd ${d}; pwd;
+root.exe -q *.Plots.root FitTpcT.C
+cd -
+end
 #endif
 // To build profile histograms: root.exe -q -b TpcT.C+
 // To fit them                : root.exe -q *H.root FitTpcT.C
-// To draw all of them        : root.exe */*Fit.root
+// To draw all of them        : root.exe */'${star}'Fit.root
 //                              .L DrawList.C+
 //                              DrawFAll()
 // t0 Offset:
@@ -51,6 +51,7 @@
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "TProfile2D.h"
+#include "TProfile3D.h"
 #include "TF1.h"
 #include "TF2.h"
 #include "TLegend.h"
@@ -68,6 +69,8 @@
 #include "TVector3.h"
 #include "TRMatrix.h"
 #include "TNtuple.h"
+#include "TAxis.h"
+#include "TPaveStats.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 //#include "MakePol.C"
 #include "TPolynomial.h"
@@ -89,6 +92,7 @@
 #include "TDecompChol.h"
 #include "TDecompSVD.h"
 #endif
+#include "Ask.h"
 #ifdef __Y2019__
 static Int_t NoInnerRows = 40; //-1; // Tpx
 static Int_t NoOfRows    = 72; //-1;
@@ -191,6 +195,8 @@ Bool_t AcceptFile(const TString &File) {
       File.Contains("hist") || File.Contains("runco") || File.Contains("MuMc") ||
       File.Contains("minimc") || File.Contains("event") || File.Contains("geant") ||
       File.Contains("hist") || File.Contains("runco") || File.Contains("geant") ||
+      File.Contains("QA") ||
+      File.Contains("T0") ||
       File.Contains("All") ||
       File.Contains("etofSim") ||
       File.Contains("picoDst") ||
@@ -4741,4 +4747,180 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
     TC1[io]->Fit("pol2","er","",-100,100);
   }
   fOut->Write();
+}
+//________________________________________________________________________________
+void TpcTQA(const Char_t *files="*.root", const Char_t *Out = "") {
+  // QA Plots
+  TDirIter Dir(files);
+  Char_t *file = 0;
+  Char_t *file1 = 0;
+  Int_t NFiles = 0;
+  TTreeIter iter("TpcT");
+  while ((file = (Char_t *) Dir.NextFile())) {
+    TString File(file);
+    if (! AcceptFile(File)) continue;
+    TFile *f = new TFile (File);
+    if (f) {
+      TTree *tree = (TTree *) f->Get("TpcT");
+      if (! tree ) continue;
+      //    tree->Show(0);
+      iter.AddFile(file); 
+      NFiles++; 
+      file1 = file;
+    }
+    delete f;
+  }
+  cout << files << "\twith " << NFiles << " files" << endl; 
+  if (! file1 ) return;
+  TString output(Out);
+  if (output == "") {
+    output = file1;
+    output.ReplaceAll(".root",".QA.root");
+  } else {
+    output += ".QA.root";
+  }
+  cout << "Output for " << output << endl;
+  if (! fOut) fOut = new TFile(output,"recreate");
+
+#ifdef __Y2018__ /* no iTPC */
+  Int_t nrows =  45;
+  Int_t npads = 182;
+  Int_t NoInnerRows = 13;
+#else 
+  Int_t nrows =  72;
+  Int_t npads = 144;
+  Int_t NoInnerRows = 40;
+#endif
+  TH1F *flagRC       = new TH1F("flagRC","cluaster flags",100,-0.5,99.5);
+  TH3F *padRC        = new TH3F("padRC","RC pad distribution versus sector and row", 24, 0.5, 24.5, nrows, 0.5, nrows+0.5, npads, 0.5, npads+0.5);
+  TProfile3D *padRCA = new TProfile3D("padRCA","RC <ADC> pad distribution versus sector and row", 24, 0.5, 24.5, nrows, 0.5, nrows+0.5, npads, 0.5, npads+0.5);
+  TH3F *tbRC         = new TH3F("tbRC","RC tb distribution versus sector and row", 24, 0.5, 24.5, nrows, 0.5, nrows+0.5, 412, -0.5, 411.5);
+  TProfile3D *tbRCA  = new TProfile3D("tbRCA","RC <ADC> tb distribution versus sector and row", 24, 0.5, 24.5, nrows, 0.5, nrows+0.5, 412, -0.5, 411.5);
+  TH3F *tbMC         = new TH3F("tbMC","MC tb distribution versus sector and row", 24, 0.5, 24.5, nrows, 0.5, nrows+0.5, 412, -0.5, 411.5);
+  TH3F *padMC        = new TH3F("padMC","MC pad distribution versus sector and row", 24, 0.5, 24.5, nrows, 0.5, nrows+0.5, npads, 0.5, npads+0.5);
+  TH2F *rzRC         = new TH2F("rzRC","row versus z",2100,-210,210,nrows, 0.5, nrows+0.5);
+  TProfile2D *rzRCP  = new TProfile2D("rzRCP","<npads> versus row and z",2100,-210,210,nrows, 0.5, nrows+0.5);
+  TProfile2D *rzRCT  = new TProfile2D("rzRCT","<ntmbks> versus row and z",2100,-210,210,nrows, 0.5, nrows+0.5);
+  TH2F *rzMC         = new TH2F("rzMC","row versus z",2100,-210,210,nrows, 0.5, nrows+0.5);
+  TH2F *xyRCW        = new TH2F("xyRCW","y versus x for z > 0",200,-200,200,200,-200,200);
+  TH2F *xyRCE  	     = new TH2F("xyRCE","y versus y for z < 0",200,-200,200,200,-200,200);
+  TH2F *xyMCW  	     = new TH2F("xyMCW","y versus x for z > 0",200,-200,200,200,-200,200);
+  TH2F *xyMCE  	     = new TH2F("xyMCE","y versus y for z < 0",200,-200,200,200,-200,200);
+
+  const Int_t&       fRun                                     = iter("fRun");
+  const Float_t&     Frequency                                = iter("Frequency");
+  const Int_t&       fNoMcHit                                 = iter("fNoMcHit");
+  const Int_t&       fNoRcHit                                 = iter("fNoRcHit");
+  const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
+  const Float_t*&    fMcHit_mAdc                           = iter("fMcHit.mAdc");
+  const Float_t*&    fMcHit_mMcl_x                            = iter("fMcHit.mMcl_x");
+  const Float_t*&    fMcHit_mMcl_t                            = iter("fMcHit.mMcl_t");
+  const Float_t*&    fMcHit_mPosition_mX1                     = iter("fMcHit.mPosition.mX1");
+  const Float_t*&    fMcHit_mPosition_mX2                     = iter("fMcHit.mPosition.mX2");
+  const Float_t*&    fMcHit_mPosition_mX3                     = iter("fMcHit.mPosition.mX3");
+  const Float_t*&    fMcHit_mLocalMomentum_mX1                = iter("fMcHit.mLocalMomentum.mX1");
+  const Float_t*&    fMcHit_mLocalMomentum_mX2                = iter("fMcHit.mLocalMomentum.mX2");
+  const Float_t*&    fMcHit_mLocalMomentum_mX3                = iter("fMcHit.mLocalMomentum.mX3");
+  const Float_t*&    fMcHit_mTof                              = iter("fMcHit.mTof");
+  const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
+  const Int_t*&      fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const Short_t*&    fRcHit_mMcl_x                            = iter("fRcHit.mMcl_x");
+  const Short_t*&    fRcHit_mMcl_t                            = iter("fRcHit.mMcl_t");
+  const Float_t*&    fRcHit_mCharge                           = iter("fRcHit.mCharge");
+  const Float_t*&    fRcHit_tb                                = iter("fRcHit.mTimeBucket");
+  const UChar_t*&    fRcHit_mMinpad                           = iter("fRcHit.mMinpad");
+  const UChar_t*&    fRcHit_mMaxpad                           = iter("fRcHit.mMaxpad");
+  const UChar_t*&    fRcHit_mMintmbk                          = iter("fRcHit.mMintmbk");
+  const UChar_t*&    fRcHit_mMaxtmbk                          = iter("fRcHit.mMaxtmbk");
+  const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
+  const Float_t*&    fRcHit_mPosition_mX1                     = iter("fRcHit.mPosition.mX1");
+  const Float_t*&    fRcHit_mPosition_mX2                     = iter("fRcHit.mPosition.mX2");
+  const Float_t*&    fRcHit_mPosition_mX3                     = iter("fRcHit.mPosition.mX3");
+  const UShort_t*&   fRcHit_mFlag                             = iter("fRcHit.mFlag");
+  const Int_t&       fNoRcTrack                               = iter("fNoRcTrack");
+  const Float_t*&    fRcTrack_fpx                             = iter("fRcTrack.fpx");
+  const Float_t*&    fRcTrack_fpy                             = iter("fRcTrack.fpy");
+  const Float_t*&    fRcTrack_fpz                             = iter("fRcTrack.fpz");
+  const UInt_t*&     fRcHit_mHardwarePosition                 = iter("fRcHit.mHardwarePosition");
+  Int_t ev = 0;
+  while (iter.Next()) {
+    Int_t year = fRun/1e6 - 1; //  20.332.022
+    for (Int_t k = 0; k < fNoRcHit; k++) {
+      Int_t IdTruth = fRcHit_mIdTruth[k];
+      Float_t sec = sector(fRcHit_mHardwarePosition[k]);
+      Float_t row = padrow(fRcHit_mHardwarePosition[k]);
+      Float_t pad = fRcHit_mMcl_x[k]/64.;
+      Float_t tb  = fRcHit_mMcl_t[k]/64.;
+      Float_t flag = fRcHit_mFlag[k]; 
+      Float_t npads = fRcHit_mMinpad[k] + fRcHit_mMaxpad[k] + 1;
+      Float_t ntbks = fRcHit_mMintmbk[k] + fRcHit_mMaxtmbk[k] + 1;
+      Double_t adc = fRcHit_mCharge[k];
+      flagRC->Fill(flag);
+      padRC->Fill(sec,row,pad);
+      tbRC->Fill(sec,row,tb);
+      padRCA->Fill(sec,row,pad, adc);
+      tbRCA->Fill(sec,row,tb, adc);
+      rzRC->Fill(fRcHit_mPosition_mX3[k], row);
+      rzRCP->Fill(fRcHit_mPosition_mX3[k], row, npads);
+      rzRCT->Fill(fRcHit_mPosition_mX3[k], row, ntbks);
+      if (fRcHit_mPosition_mX3[k] > 0) xyRCW->Fill(fRcHit_mPosition_mX1[k], fRcHit_mPosition_mX2[k]);
+      else                             xyRCE->Fill(fRcHit_mPosition_mX1[k], fRcHit_mPosition_mX2[k]);
+    }
+    for (Int_t k = 0; k < fNoMcHit; k++) {
+      Float_t sec = (fMcHit_mVolumeId[k]/100)%100;
+      Float_t row =  fMcHit_mVolumeId[k]%100;
+      Float_t pad = fMcHit_mMcl_x[k];
+      Float_t tb  = fMcHit_mMcl_t[k];
+      padMC->Fill(sec,row,pad);
+      tbMC->Fill(sec,row,tb);
+      rzMC->Fill(fMcHit_mPosition_mX3[k], row);
+      if (fMcHit_mPosition_mX3[k] > 0) xyMCW->Fill(fMcHit_mPosition_mX1[k], fMcHit_mPosition_mX2[k]);
+      else                             xyMCE->Fill(fMcHit_mPosition_mX1[k], fMcHit_mPosition_mX2[k]);
+      
+    }
+    if (! ev%1000) cout << "Processed event " << ev << endl;
+    ev++;
+  }
+  fOut->Write();
+}
+//________________________________________________________________________________
+void TpcTQAPlot(const Char_t *fileRC = "../daq_19GeV/st_physics_adc_20087007_raw_7500002.tags.QA.root",
+		const Char_t *fileMC = "st_physics_adc_20087007_raw_7500002.tags.QA.root") {
+  TFile *fRC = new TFile(fileRC); if (! fRC) return;
+  TFile *fMC = new TFile(fileMC); if (! fMC) return;
+  //
+  TFile *files[2] = {fRC, fMC};
+  TH3F *pads[2] = {0};
+  TH2D *padsYZ[2] = {0};
+  for (Int_t i = 0; i < 2; i++) {
+    pads[i] = (TH3F *) files[i]->Get("padRC");
+  }
+  const Char_t *RM[2] = {"RC","MC"};
+  for (Int_t s = 1; s <= 24; s++) {
+    TCanvas *c1 = new TCanvas(Form("PadVsRow_Sector_%02i",s),Form("sector %2i",s),1200,800);
+    c1->Divide(2,1);
+    for (Int_t i = 0; i < 2; i++) {		   
+      c1->cd(i+1);
+      TH3F *padRC = pads[i];
+      TAxis *x = padRC->GetXaxis();
+      x->SetRange(s,s);
+      c1->cd(i+1);
+      padsYZ[i] = (TH2D *) pads[i]->Project3D(Form("yz_%i%s",s,RM[i]));
+      padsYZ[i]->SetXTitle("pad");
+      padsYZ[i]->SetYTitle("pad");
+      padsYZ[i]->Draw("colz");
+      c1->Update();
+      TPaveStats *st = (TPaveStats *) padsYZ[i]->FindObject("stats");
+      if (st) {
+	st->SetX1NDC(0.65);
+	st->SetX2NDC(0.85);
+	st->SetY1NDC(0.15);
+	st->SetY2NDC(0.35);
+      }
+      padsYZ[i]->Draw("colz");
+      c1->Update();
+    }
+    c1->SaveAs(".png");
+    if (! gROOT->IsBatch() && Ask()) return;
+  }
 }
