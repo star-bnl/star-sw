@@ -1070,9 +1070,9 @@ Int_t StMcEventMaker::Make()
 		long ihit;
 		for(ihit=0; ihit<NHits; ihit++) {
 #if 0 /* keep all tpc hits => Inner TPC sector upgrade */
-		    if (tpcHitTable[ihit].volume_id < 101 || tpcHitTable[ihit].volume_id > 2445) {
-			if (tpcHitTable[ihit].volume_id <= 202445 &&
-			    tpcHitTable[ihit].volume_id > 2445) nPseudoPadrow++; 
+		    if (tpcHitTable[ihit].volume_id < 101 || tpcHitTable[ihit].volume_id > 2472) {
+			if (tpcHitTable[ihit].volume_id <= 202472 &&
+			    tpcHitTable[ihit].volume_id > 2472) nPseudoPadrow++; 
 			else nBadVolId++;
 			continue;
 		    }
