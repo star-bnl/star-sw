@@ -10,6 +10,8 @@
 class StBFChain;        
 class StMessMgr;
 
+#pragma cling load("St_base")
+#pragma cling load("StChain")
 #pragma cling load("StUtilities")
 #pragma cling load("StBFChain")
 
