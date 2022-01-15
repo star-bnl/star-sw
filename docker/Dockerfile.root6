@@ -129,8 +129,6 @@ RUN source /etc/profile \
  && cons \
  && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 
-RUN install /star-sw/StRoot/macros/.rootrc .
-
 # One might expect the single ENTRYPOINT command below to work but for some
 # reason it chokes on a complex command such as
 #
