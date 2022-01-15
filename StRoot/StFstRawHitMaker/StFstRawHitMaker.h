@@ -79,6 +79,7 @@ private:
    int FillRawHitCollectionFromAPVData(unsigned char dataFlag, int ntimebin, int counterAdcPerEvent[][kFstNumTimeBins], double sumAdcPerEvent[][kFstNumTimeBins], int apvElecId,
       std::array< std::array<double, kFstNumTimeBins>, kFstNumApvChannels > &signalUnCorrected,
       std::array< std::array<double, kFstNumTimeBins>, kFstNumApvChannels > &signalCorrected,
+      std::array< std::array<int, kFstNumTimeBins>, kFstNumApvChannels > &seedFlag,
       std::array<int, kFstNumApvChannels> &idTruth);
 
    int FillRawHitCollectionFromSimData();

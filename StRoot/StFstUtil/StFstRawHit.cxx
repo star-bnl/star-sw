@@ -14,7 +14,7 @@ bool rawHitPtrLessThan::operator() (const StFstRawHit *rawHit1, const StFstRawHi
 }
 
 
-StFstRawHit::StFstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mCharge(), mChargeErr(), mMaxTimeBin(3),
+StFstRawHit::StFstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mCharge(), mChargeErr(), mMaxTimeBin(1),
    mIdTruth(0)
 {
    std::fill_n(mCharge, kFstNumTimeBins, -999);
@@ -34,12 +34,12 @@ StFstRawHit::StFstRawHit(int channelId, int geoId,
 }
 
 
-int StFstRawHit::getChannelId() const              { return mChannelId;     };
-int StFstRawHit::getGeoId() const                  { return mGeoId;      };
-int StFstRawHit::getSeedhitflag() const            { return mSeedhitflag;      };
-unsigned char StFstRawHit::getMaxTimeBin() const   { return mMaxTimeBin;    };
-unsigned char StFstRawHit::getDefaultTimeBin()     { return mDefaultTimeBin;};
-unsigned short StFstRawHit::getIdTruth() const     { return mIdTruth;    };
+int StFstRawHit::getChannelId() const              { return mChannelId;      };
+int StFstRawHit::getGeoId() const                  { return mGeoId;          };
+int StFstRawHit::getSeedhitflag() const            { return mSeedhitflag;    };
+unsigned char StFstRawHit::getMaxTimeBin() const   { return mMaxTimeBin;     };
+unsigned char StFstRawHit::getDefaultTimeBin()     { return mDefaultTimeBin; };
+unsigned short StFstRawHit::getIdTruth() const     { return mIdTruth;        };
 
 unsigned char StFstRawHit::getDisk() const
 {
@@ -49,13 +49,6 @@ unsigned char StFstRawHit::getDisk() const
 unsigned char StFstRawHit::getWedge() const
 {
    return 1 + mGeoId / (kFstNumInnerSensorsPerWedge * kFstNumStripsPerInnerSensor + kFstNumOuterSensorsPerWedge * kFstNumStripsPerOuterSensor);
-};
-
-unsigned char StFstRawHit::getSensor() const
-{
-   int strip = mGeoId % (kFstNumInnerSensorsPerWedge * kFstNumStripsPerInnerSensor + kFstNumOuterSensorsPerWedge * kFstNumStripsPerOuterSensor);
-   if(strip < kFstNumStripsPerInnerSensor) return strip/kFstNumStripsPerInnerSensor;
-   else return strip / kFstNumStripsPerOuterSensor - 1;
 };
 
 unsigned char StFstRawHit::getPhiStrip() const
@@ -83,6 +76,13 @@ unsigned char StFstRawHit::getArm() const
 unsigned char StFstRawHit::getApv() const
 {
    return ((mChannelId % (kFstNumArmsPerRdo * kFstNumChanPerArm)) % kFstNumChanPerArm) / kFstNumApvChannels;
+};
+
+unsigned char StFstRawHit::getSensor() const
+{
+   int strip = mChannelId % (kFstNumInnerSensorsPerWedge * kFstNumStripsPerInnerSensor + kFstNumOuterSensorsPerWedge * kFstNumStripsPerOuterSensor);
+   if(strip < kFstNumStripsPerInnerSensor) return strip/kFstNumStripsPerInnerSensor;
+   else return strip / kFstNumStripsPerOuterSensor - 1;
 };
 
 unsigned char StFstRawHit::getChannel() const
