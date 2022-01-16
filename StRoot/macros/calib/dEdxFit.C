@@ -1343,10 +1343,12 @@ TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3, Double
   params[6] = 0;
   params[7] = 0;
   params[8] = 0;
+  Double_t sigma = nSigma*params[2];
+  if (sigma < 1.5) {sigma = 1.5;}
   if (gaus) {
     g = gaus;
     g->SetParameters(params);
-    g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+    g->SetRange(params[1]-sigma,params[1]+sigma);
     proj->Fit(g,opt);
     g->GetParameters(params);
     if (g->GetProb() > 0.01) return g;
@@ -1354,22 +1356,24 @@ TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3, Double
   }
   g = g0;
   g->SetParameters(params);
-  g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+  g->SetRange(params[1]-sigma,params[1]+sigma);
   proj->Fit(g,opt);
 #if 0
   if (g->GetProb() > 0.01) return g;
   g->GetParameters(params);
   g = g1;
   params[2] = TMath::Abs(params[2]);
+  sigma = nSigma*params[2];
   g->SetParameters(params);
-  g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+  g->SetRange(params[1]-sigma,params[1]+sigma);
   proj->Fit(g,opt);
   if (g->GetProb() > 0.01) return g;
   g->GetParameters(params);
   g = g2;
   params[2] = TMath::Abs(params[2]);
+  sigma = nSigma*params[2];
   g->SetParameters(params);
-  g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+  g->SetRange(params[1]-sigma,params[1]+sigma);
   proj->Fit(g,opt);
   if (! Opt.Contains("q",TString::kIgnoreCase)) {
     g->GetParameters(params);
@@ -1421,6 +1425,7 @@ TF1 *FitADC(TH1 *proj, Option_t *opt="Q", Double_t nSigma=3, Int_t pow=3) {
     params[2] = proj->GetRMS();
     if (params[2] > 0.25) params[2] = 0.25;
   }
+  Double_t sigma = nSigma*params[2];
   params[3] = 0;
   params[4] = 0;
   params[5] = 0;
@@ -1430,29 +1435,32 @@ TF1 *FitADC(TH1 *proj, Option_t *opt="Q", Double_t nSigma=3, Int_t pow=3) {
   if (gaus) {
     g = gaus;
     g->SetParameters(params);
-    g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+    g->SetRange(params[1]-sigma,params[1]+sigma);
     proj->Fit(g,opt);
     g->GetParameters(params);
     if (g->GetProb() > 0.01) return g;
     params[2] = TMath::Abs(params[2]);
   }
+  sigma = nSigma*params[2];
   g = g0;
   g->SetParameters(params);
-  g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+  g->SetRange(params[1]-sigma,params[1]+sigma);
   proj->Fit(g,opt);
   if (g->GetProb() > 0.01) return g;
   g->GetParameters(params);
   g = g1;
   params[2] = TMath::Abs(params[2]);
+  sigma = nSigma*params[2];
   g->SetParameters(params);
-  g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+  g->SetRange(params[1]-sigma,params[1]+sigma);
   proj->Fit(g,opt);
   if (g->GetProb() > 0.01) return g;
   g->GetParameters(params);
   g = g2;
   params[2] = TMath::Abs(params[2]);
+  sigma = nSigma*params[2];
   g->SetParameters(params);
-  g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
+  g->SetRange(params[1]-sigma,params[1]+sigma);
   proj->Fit(g,opt);
   if (! Opt.Contains("q",TString::kIgnoreCase)) {
     g->GetParameters(params);

@@ -71,7 +71,7 @@ int Fill_MagnetAvg(unsigned int runNumber,unsigned int startRunTime,unsigned int
   sprintf(query,
 	  //	  "select UNIX_TIMESTAMP(beginTime),mainMagnetCurrent,mainMagnetStatus from starMagnet where beginTime <= from_unixtime(%u) order by 1 desc limit 1",startRunTime);
 	  "select UNIX_TIMESTAMP(beginTime),cdev_mainMagnet2,cdev_mainMagnetm,beginTime  from starMagnet where beginTime >= from_unixtime(%u) and beginTime <=  from_unixtime(%u) and cdev_mainMagnetB != ''",startRunTime,endRunTime);
-  
+  cout << query << endl;
   // new source of magnet data:
   // wfgRamp.mainMagnet.wM,wfgRamp.pttEast.wM,wfgRamp.pttWest.wM,wfgRamp.trimEast.wM,wfgRamp.trimWest.wM
   
@@ -96,11 +96,13 @@ int Fill_MagnetAvg(unsigned int runNumber,unsigned int startRunTime,unsigned int
   double       current = 0;
   double    xN = 0, x2N = 0;
   double    RMS = 1e5;
+  double    RMSold = 1e5;
   double     N = 0;
   for(int n = 1; n <= nrows; n++){
     row = res->Next();
     tempTime = atoul(row->GetField(0));
     tempCurrent = fabs(atod(row->GetField(1)));
+    RMSold = RMS;
     if (TMath::Abs(tempCurrent) < 10000) {
       // cdev_mainMagnetm = 32778 => 100012
       //                    32768 => 100000
@@ -121,6 +123,15 @@ int Fill_MagnetAvg(unsigned int runNumber,unsigned int startRunTime,unsigned int
 	  Double_t RMS2 = x2N - xN*xN;
 	  if (RMS2 < 0) RMS2 = 0;
 	  RMS = TMath::Sqrt(RMS2);
+	} else {
+	  if (N > 10 && RMSold < 4.0) {
+	    cout << "Time : " << tempTime << "\t" << row->GetField(3) << "\tCurrent = " << tempCurrent << "\tStatus = " << tempStatus << "\txN = " << xN << "\tx2N = " << x2N << "\tRMS = " << RMS << endl;
+	    cout << "Current changed before end of run. Stop averaging, change endRunTime from " << endRunTime << " to " << tempTime << endl;
+	    delete row;
+	    RMS = RMSold;
+	    endRunTime = tempTime;
+	    break;
+	  }
 	}
       }
       cout << "Time : " << tempTime << "\t" << row->GetField(3) << "\tCurrent = " << tempCurrent << "\tStatus = " << tempStatus << "\txN = " << xN << "\tx2N = " << x2N << "\tRMS = " << RMS << endl;
