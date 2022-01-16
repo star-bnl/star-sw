@@ -17,6 +17,27 @@ Draw();
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("T1400","GP","R",-1,-1,1,1,10,1,0,12.0)' >& T.log &
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("ZLM1400","Freq","R",-1,-1,1,1,10,1,200,220.0)' >& ZLMFreq.log &
  root.exe -q -b lBichsel.C TpcHitZTMfl0.root  'dEdxFit.C+("TM1400","Freq","R",-1,-1,1,1,10,1,200,220.0)' >& TMFreq.log &
+================================================================================
+@ count = 0
+foreach d (` ls -1d hlt*.root | awk -F_ '{printf("%i\n",$2/1000)}' | sort -u `)
+  if (-r hist${d}.root) continue;
+  root.exe -q -b 'Chain.C+("hlt*'${d}'*.root","TpcHit")' 'TpcPrompt.C+(tChain,"hist'${d}'.root")' >&  hist${d}.log &
+  @ count++;  echo "count $count";
+  if ($count >= 10) then 
+    break;
+  endif
+end
+================================================================================
+#  root.exe -q -b lBichsel.C ${f} 'dEdxFit.C+("TR","GP","R",-1,-1,1,1,1,0,1.0,12.0)' >& TR${f}.log &
+#  root.exe -q -b lBichsel.C ${f} 'dEdxFit.C+("TR","GP","R", -1,-1,1,1,1,0,1.0,5.)' >& TR${f}.log &
+#  root.exe -q -b lBichsel.C ${f} 'dEdxFit.C+("TR","GP","R", -1,-1,1,1,1,0,5.0,12.)' >& TR${f}.log &
+#  root.exe -q -b lBichsel.C ${f} 'dEdxFit.C+("TR","GP","R", -1,-1,1,1,1,0,1.0,5.)' >& TR${f}.log &
+#    root.exe -q -b lBichsel.C ${f} 'dEdxFit.C+("TR","GP","R",-1,-1,1,1,1,0,1.0,12.0)' >& TR${f}.log &
+#  root.exe -q -b lBichsel.C ${f} 'dEdxFit.C+("TR","GP","R", -1,-1,1,1,1,0,5.0,12.)' >& TR${f}.log &
+#foreach f (`ls -1d hist*.root`)
+foreach f (hist23009.root hist23010.root hist23011.root)
+    root.exe -q -b lBichsel.C ${f} 'dEdxFit.C+("TR","GP","R",-1,-1,1,1,1,0,1.0,12.0)' >& TR${f}.log &
+end
 */
 #if !defined(__CINT__)
 
@@ -30,6 +51,7 @@ Draw();
 #endif
 //________________________________________________________________________________
 #ifndef __CINT__
+#include <assert.h>
 #include "Riostream.h"
 #include <stdio.h>
 #include "TROOT.h"
@@ -62,18 +84,19 @@ Draw();
 #include "TPolyMarker.h"
 #include "TKey.h"
 #include "TLegend.h"
+#include "TSystem.h"
 #endif
 #define TpcHit_cxx
 #include "TpcHit.h"
 void  TpcHit::Fill(Long64_t entry) {
-  static TH3F *hist3DZ = 0, *hist3DT = 0, *hist3DZL = 0;
+  static TH3F *hist3DZ = 0, *hist3DT = 0, *hist3DTR = 0, *hist3DZL = 0;
   static TH3F *hist3DMZ = 0, *hist3DMT = 0, *hist3DMZL = 0;
   static TH3F *hist3DZ1400 = 0, *hist3DT1400 = 0, *hist3DZL1400 = 0;
   static TH3F *hist3DMZ1400 = 0, *hist3DMT1400 = 0, *hist3DMZL1400 = 0;
   if (! hist3DZ) {
     TDirectory *old = gDirectory;
-    TString newF("TpcHitZTMfl0.root");
-    fOut = new TFile(newF,"recreate");
+    assert(fOut);
+    fOut->cd();
     hist3DZ  = new TH3F("Z","|z| versus sector and row",24,0.5,24.5,72,0.5,72.5,260,200,213);
     hist3DZL = new TH3F("ZL","Drift distance sector local versus sector and row",24,0.5,24.5,72,0.5,72.5,500,-10,10);
     hist3DT  = new TH3F("T","time bucket versus sector and row",24,0.5,24.5,72,0.5,72.5,500,0,20);
@@ -90,7 +113,7 @@ void  TpcHit::Fill(Long64_t entry) {
     hist3DMZL1400 = new TH3F("ZLM1400","Membrane Drift distance sector local versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,400,200,220);
     hist3DMT1400  = new TH3F("TM1400","Membrane time bucket versus sector and row, abs((vpdW+vpdE)/2-1400)<50",24,0.5,24.5,72,0.5,72.5,400,320,360);
 #endif
-    gDirectory = old;
+    old->cd();
   }
   if (! fl) {
     hist3DZ->Fill(sector,row,TMath::Abs(z));
@@ -169,18 +192,24 @@ class TpcHit;
 #endif
 #if !defined(__CINT__) || defined(__MAKECINT__)
 //________________________________________________________________________________
-void Draw(TChain *tree) {
+void Draw(TChain *tree, const Char_t *fOutName="") {
+  TString newF(fOutName);
+  if (newF == "") {
+    newF = "ZTMfl0.root";
+  }
+  TFile *fOut = new TFile(newF,"recreate"); 
   TpcHit hit(tree);
+  hit.fOut = fOut;
   hit.Loop();
 }
 //________________________________________________________________________________
-void Draw(const Char_t *tag = "New") {
+void Draw(const Char_t *fOutName="") {
   TChain *tree = (TChain *) gDirectory->Get("TpcHit");
   if (! tree) {
     cout << "No TpcHit tree has been found" << endl;
     return;
   }
-  Draw(tree);
+  Draw(tree, fOutName);
   
 }
 //________________________________________________________________________________
@@ -462,15 +491,15 @@ void T0Fit(TH3F *D = 0, Int_t iX = 0, Int_t iY = 0) {
   fOut->Write();
 }
 //________________________________________________________________________________
-void TpcPrompt(const Char_t *chainN = "TpcHit") {
+void TpcPrompt(const Char_t *chainN = "TpcHit", const Char_t *fOutName="") {
   TChain *chain = (TChain *) gDirectory->Get(chainN);
   if (! chain) return;
-  Draw(chain);
+  Draw(chain, fOutName);
 }
 //________________________________________________________________________________
-void TpcPrompt(TChain *chain) {
+void TpcPrompt(TChain *chain, const Char_t *fOutName="") {
   if (! chain) return;
-  Draw(chain);
+  Draw(chain, fOutName);
 }
 #else /* __CINT__ */
 //________________________________________________________________________________

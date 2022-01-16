@@ -468,7 +468,7 @@ void DrawF2List(const Char_t *pattern = "OuterPadRcNoiseConv*", const Char_t *ct
   TCanvas *c = new TCanvas(cTitle,cTitle);
   c->Divide(nx,ny);
   for (Int_t i = 0; i < NF; i++) {
-    TH2 *hist = (TH2*) array.At(i);
+    TH1 *hist = (TH1*) array.At(i);
     c->cd(i+1);
     hist->Draw("colz");
   }
@@ -480,6 +480,68 @@ void DrawF2List(const Char_t *pattern = "OuterPadRcNoiseConv*", const Char_t *ct
   TQtCanvas2Html  TQtCanvas2Html(c,  900, 600, "./", zoomer);
   //  TQtCanvas2Html  TQtCanvas2Html(c, zoom, "./", zoomer);
 #endif
+}
+//________________________________________________________________________________
+void DrawF3List(const Char_t *pattern = "f7_7", const Char_t *ctitle = "c", Int_t nx = 0, Int_t ny = 0) {
+  gStyle->SetOptStat(1000000001);
+  gStyle->SetOptFit(0);
+  
+  TString patt(pattern);
+  TPRegexp reg(pattern);
+  TString cTitle = ctitle;
+  cTitle += patt;
+  cTitle.ReplaceAll(".*","");
+  cTitle.ReplaceAll("^","");
+  cTitle.ReplaceAll("$","");
+  cTitle.ReplaceAll("*","");
+  Int_t NFiles = 0;
+  TSeqCollection *files = gROOT->GetListOfFiles();
+  if (! files) return;
+  Int_t nn = files->GetSize();  cout << "No. input files " << nn << endl;
+  if (! nn) return;
+  TFile **FitFiles = new TFile *[nn];
+  TIter next(files);
+  TFile *f = 0;
+  TObjArray array;
+  TObject *obj = 0;
+  TKey *key = 0;
+  Int_t nh = 0;
+  while ( (f = (TFile *) next()) ) { 
+    f->cd();
+    TString F(f->GetName()); cout << "File " << F << endl;
+    TH1 *hist = (TH1 *) f->Get(patt);
+    if (! hist) continue;
+    if (hist->GetEntries() <= 0) continue;
+    nh++;
+    array.Add(hist);
+  }
+  cout << "Found " << nh << " histograms " << patt.Data() << endl;
+  //________________________________________________________________________________
+  Int_t NF = array.GetEntriesFast();
+  if (NF < 1) return;
+  if (! nx || ! ny) {
+    ny = (Int_t) TMath::Sqrt(NF);
+    nx = NF/ny;
+    if (nx*ny != NF) nx++;
+  }
+  cout << "no. of histograms " << NF << " nx x ny " << nx << " x " << ny << endl;
+  TCanvas *c = new TCanvas(cTitle,cTitle, 900, 800);
+  c->Divide(nx,ny);
+  for (Int_t i = 0; i < NF; i++) {
+    TH1 *hist = (TH1*) array.At(i);
+    c->cd(i+1);
+    hist->SetStats(1);
+    hist->Draw("colz");
+    TLegend *l = new TLegend(0.1,0.75,0.5,0.9);
+    
+    TString Name(gSystem->BaseName(hist->GetDirectory()->GetName()));
+    Name.ReplaceAll("TRGP","");
+    Name.ReplaceAll("hist","");
+    Name.ReplaceAll(".root","");
+    l->AddEntry(hist, Name);
+    l->Draw();
+    c->SaveAs(".png");
+  }
 }
 //________________________________________________________________________________
 void DrawFAll(const Char_t *opt="Rc", const Char_t *select="") {
