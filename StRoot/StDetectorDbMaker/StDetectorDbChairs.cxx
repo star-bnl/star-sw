@@ -37,8 +37,8 @@ void PrintTable(const Char_t *str, TTable *table) {
   Bool_t iprt = kTRUE;
   if (St_db_Maker::GetValidity(table,t) > 0) {
     if (table->InheritsFrom("St_tpcCorrection")) {
-      St_tpcCorrection *t = (St_tpcCorrection *) table;
-      tpcCorrection_st *s = t->GetTable(); Nrows = s->nrows;}
+      St_tpcCorrection *tt = (St_tpcCorrection *) table;
+      tpcCorrection_st *s = tt->GetTable(); Nrows = s->nrows;}
     if (Nrows > 10) Nrows = 10;
     CHECKTABLE(tpcCorrection);
     CHECKTABLE(tpcHVPlanes);
@@ -306,9 +306,8 @@ MakeChairInstance2(tpcCorrection,St_TpcdXdYC,Calibrations/tpc/TpcdXdY);
 MakeChairInstance2(GatingGrid,St_GatingGridC,Calibrations/tpc/GatingGrid);
 //________________________________________________________________________________
 Double_t St_GatingGridC::CalcCorrection(Int_t i, Double_t x) {// drift time in microseconds
-  if (x < 0) return 0;
-  GatingGrid_st *cor =  ((St_GatingGrid *) Table())->GetTable() + i;
   Double_t value = -10;
+  GatingGrid_st *cor =  ((St_GatingGrid *) Table())->GetTable() + i;
   if (x <= cor->t0) return value;
   Double_t corD = 1. - TMath::Exp(-(x-cor->t0)/(cor->settingTime/4.6));
   if (corD < 1e-4) return value;
