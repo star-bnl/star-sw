@@ -51,7 +51,12 @@
 <input URL="file:/hlt/cephfs/daq/2021/349/22349030/hlt_*.daq" />
 <input URL="file:/hlt/cephfs/daq/2021/352/*/hlt_22*.daq" />
 <input URL="file:/hlt/cephfs/daq/2021/353/*/hlt_22*.daq" />
---> 
 <input URL="file:/hlt/cephfs/daq/2021/3??/*/hlt*.daq" />
 <input URL="file:/hlt/cephfs/daq/2022/???/*/hlt*.daq" /> 
+<input URL="file:/hlt/cephfs/daq/2022/007/*/hlt*.daq" />
+<input URL="file:/hlt/cephfs/daq/2022/008/*/hlt*.daq" /> 
+--> 
+<input URL="file:/hlt/cephfs/daq/2022/009/*/hlt*.daq" />
+<input URL="file:/hlt/cephfs/daq/2022/010/*/hlt*.daq" /> 
+<input URL="file:/hlt/cephfs/daq/2022/011/*/hlt*.daq" /> 
 </job>

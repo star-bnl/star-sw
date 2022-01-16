@@ -1,0 +1,8 @@
+# failed jobs
+if (! -d Zombie) mkdir Zombie
+foreach l (`find ??? -name "*B.log" -cmin +10 -size -100000c`) 
+  set d = `dirnamee ${l}`
+  set b = `basename ${l} B.log`
+  ls -1d ${d}/${b}*.root
+  if ($?) mv ${l} Zombie
+end

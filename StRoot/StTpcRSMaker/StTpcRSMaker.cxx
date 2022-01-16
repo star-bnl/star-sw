@@ -226,11 +226,11 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
     //    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
+    m_TpcdEdxCorrection->SetSimulation();
   }
   if (TESTBIT(m_Mode,kDistortion)) {
     LOG_INFO << "StTpcRSMaker:: use Tpc distortion correction" << endm;
   }
-  if (Debug() && gStTpcDb->PadResponse()) gStTpcDb->PadResponse()->Table()->Print(0,1);
   Double_t samplingFrequency     = 1.e6*gStTpcDb->Electronics()->samplingFrequency(); // Hz
   Double_t TimeBinWidth          = 1./samplingFrequency;
   /*
@@ -2020,7 +2020,6 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
   SignalSum_t *SignalSum = GetSignalSum(sector);
   for(Int_t row = rowMin; row <= rowMax; row++) {              
     //    if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45) { // ! iTpx
-    if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row)) continue;
     if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
       //    }
     Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
@@ -2065,6 +2064,7 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
     mPadResponseFunction[io][sector-1]->GetSaveL(Npads,xPadMin,XDirectionCouplings);
     //	      Double_t xPad = padMin - padX;
     for(Int_t pad = padMin; pad <= padMax; pad++) {
+      if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row,pad)) continue;
       Double_t gain = QAv*mGainLocal;
       Double_t dt = dT;
       //		if (St_tpcPadConfigC::instance()->numberOfRows(sector) ==45 && ! TESTBIT(m_Mode, kGAINOAtALL)) { 
@@ -2190,9 +2190,11 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
     St_tpcGas *tpcGas = m_TpcdEdxCorrection->tpcGas();
     if (tpcGas)
       CdEdx.ZdriftDistanceO2 = CdEdx.ZdriftDistance*(*tpcGas)[0].ppmOxygenIn;
-    dEdxCor = 0; // reject hits if they out of acceptance
-    if (! m_TpcdEdxCorrection->dEdxCorrection(CdEdx)) {
+    Int_t iok = m_TpcdEdxCorrection->dEdxCorrection(CdEdx);
+    if (! iok) {
       dEdxCor = CdEdx.F.dE;
+    } else {
+      dEdxCor = 0; // reject hits with wrong correction
     }
   }
   return dEdxCor;

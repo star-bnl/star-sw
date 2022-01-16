@@ -17,9 +17,16 @@ my @rootfiles = ();
 my $all = 0;
 #my $all = 1;
 #@histGF = qw (VoltageC);
+my $time = 0;
 my @opt;
 foreach my $arg (@ARGV) {
-  if ($arg =~ /\.root$/) {push @rootfiles, $arg; next;}
+  if ($arg =~ /\.root$/) {push @rootfiles, $arg;      }
+  if ($arg =~ /^time/) {$time = 1;} 
+}
+if ($time) {
+  $all = 1; @histGP = qw(Z T TR);
+  @opt = qw(GP);;
+  print "histGP = @histGP\n";
 }
 # ADC
 #  @histADC = qw(I3DZ I3DTanL I3DdX IC3DZ IC3DTanL IC3DdX I3Dnpads I3Dntmbks I3Dnpadtmbks

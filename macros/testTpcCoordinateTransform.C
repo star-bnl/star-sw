@@ -79,6 +79,15 @@ void PrintPad(Int_t sector = 3, Int_t row = 24, Int_t pad = 1, Int_t time = 0) {
   transform->operator()(coorP,coorLST, kTRUE,kFALSE);  cout << "Pixel   withot  T0, without tau\t" << coorLST << endl;
 }
 //________________________________________________________________________________
+void PrintXYZ(Double_t x = 59.3696, Double_t y = 0.871471, Double_t z = 208.707) {
+  cout << "Coordinates ============================" << endl;
+  StGlobalCoordinate   coorG(x,y,z); cout << "coorG\t" << coorG << endl;
+  StTpcLocalCoordinate  coorL; transform->operator()(coorG, coorL, 3, 3); cout << "coorL\t" << coorL << endl; 
+  StTpcLocalSectorCoordinate  coorLS; 
+  StTpcLocalSectorCoordinate  coorLSF;
+  transform->operator()(coorL,coorLS);  cout << "Cluster without T0, with    tau\t" << coorLS << endl;
+}
+//________________________________________________________________________________
 void testTpcCoordinateTransform(Int_t d = 20190307, Int_t t = 54036) {
   if (dbMk == 0) Load();
   dbMk->SetDateTime(d,t); 
