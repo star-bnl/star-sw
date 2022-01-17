@@ -2177,7 +2177,7 @@ my $NEvents = 100000;
 #$hist = "P21ic_calib_63"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/25/21 check with adev
 #$hist = "P21ic_calib_64"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/29/21 check MySQL after fixing beamInfo isFixedTarget
 #$hist = "P21ic_calib_65"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/03/21 check with  dev
-$hist = "P21ic_calib_66"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*7.3GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/29/21 check MySQL after fixing beamInfo isFixedTarget
+#$hist = "P21ic_calib_66"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*7.3GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/29/21 check MySQL after fixing beamInfo isFixedTarget
 $hist = "P21ic_calib_67"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/08/21 check with  dev after fix 7.3GeV_fixedTarge_2019
 ######################################## Run XXI express calibration ########################################
 #$hist = "RunXXI01"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2021/RF/DEV2/"; $RECO = "/7p7GeV_2021.C/*/";  $Production = "*"; $year 22= "/"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/04/21 start from 2020 express production: strong Z dependence, and SecRow3 ~4%, xypad ~ 10%
@@ -2260,6 +2260,8 @@ $hist = "P21ic_calib_67"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*G
 # $hist = "RunXXI102"
 # $hist = "RunXXI200"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG21h"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  08/07/21 - 08/09/21 Recheck 
 # $hist = "RunXXI201"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG21h"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  09/10/21 TpcZCorrectionC.y2021.C
+# Run XXII pp510_2022
+ $hist = "RunXXII00"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/pp500_2022"; $year = "/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  01/16/22 Check
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
