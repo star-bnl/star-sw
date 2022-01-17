@@ -312,9 +312,7 @@ double StGenericVertexFinder::CalcChi2Beamline(const StThreeVectorD& point)
    // assume) and if they are zero they are unphysical anyway.
    if (dist_mag < 1e-7) return 0;
 
-   // A note for future optimizers: The expression sqrt(...) below is actually
-   // the distance from the point to the beam line. Unfortunately, it is
-   // calculated unnecessarily twice...
+   // TODO check if the value of denom_sqrt is the same as dist_mag
    double denom_sqrt = kx2_ky2_1 * sqrt( ( (kx*dy - ky*dx)*(kx*dy - ky*dx) + (ky*zv - dy)*(ky*zv - dy) + (kx*zv - dx)*(kx*zv - dx) ) /kx2_ky2_1);
    double denom = kx2_ky2_1 * denom_sqrt;
 
