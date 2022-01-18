@@ -81,6 +81,7 @@ struct HitPoint_t {
 #define __STOPPED_ELECTRONS__
 #ifdef __TFG__VERSION__
 #define __DEBUG__
+#define __CHECK_RDOMAP_AND_VOLTAGE__
 #endif /* __TFG__VERSION__ */
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
@@ -282,7 +283,6 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       if (nAliveInner > 1) innerSectorAnodeVoltage[sector-1] /= nAliveInner;
       if (nAliveOuter > 1) outerSectorAnodeVoltage[sector-1] /= nAliveOuter;
     }
-#define __CHECK_RDOMAP_AND_VOLTAGE__
 #ifdef __CHECK_RDOMAP_AND_VOLTAGE__
     static TH3F *AlivePads = 0;
     if (! AlivePads) {
