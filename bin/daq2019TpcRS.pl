@@ -14,16 +14,24 @@ my $fNo = 0;
 my $glob = "../daq_" . $Trigger . "/*.MuDst.root"; print "glob = $glob\n" if ($debug);
 my @globs = glob $glob; print "globs = @globs\n" if ($debug);
 foreach my $file (@globs) {
-  my $b = File::Basename::basename($file,".daq"); 
-#  my $b = File::Basename::basename($file,".MuDst.root"); 
+#  my $b = File::Basename::basename($file,".daq"); 
+  my $b = File::Basename::basename($file,".MuDst.root"); 
   print "$b\n" if ($debug);
-  my $mufile = $b . ".MuDst.root";
-  if (-r $mufile) {next;}
-  my $pifile = $b . ".picoDst.root";
-  if (-r $pifile) {next;}
-  my $blafile = $b . ".event.root";
-  if (-r $blafile) {next;}
-  print "string:$file\n";
-  $fNo++;
+  my $i1 =   1;
+  my $N =  500;# 00;
+  my $step = 50;
+  for (my $i = $i1; $i <= $N; $i += $step) {
+    my $j1 = $i;
+    my $j2 = $i + $step - 1;
+    
+    #   my $mufile = $b . ".MuDst.root";
+    #   if (-r $mufile) {next;}
+    #   my $pifile = $b . ".picoDst.root";
+    #   if (-r $pifile) {next;}
+    #   my $blafile = $b . ".event.root";
+    #   if (-r $blafile) {next;}
+    print "string:$file:$j1:$j2\n";
+    $fNo++;
+  }
 }
 if (! $fNo) {die "Don't have input files\n";}
