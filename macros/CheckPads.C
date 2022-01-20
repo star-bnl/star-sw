@@ -56,7 +56,7 @@ void CheckPads(Int_t sector = 0) {
 	  } else {
 	    if (p == p2d + 1) p2d = p;
 	    else {
-	      cout << Dead.Data() << Form("%3i,%3i}",p1d, p2d) << endl;
+	      if (p1d < p2d) cout << Dead.Data() << Form("%3i,%3i}",p1d, p2d) << endl;
 	      p1d = p2d = p;
 	    }
 	  }
@@ -67,14 +67,14 @@ void CheckPads(Int_t sector = 0) {
 	  } else {
 	    if (p == p2a + 1) p2a = p;
 	    else {
-	      cout << Alive.Data() << Form("%3i,%3i}",p1a, p2a) << endl;
+	      if (p1a < p2a) cout << Alive.Data() << Form("%3i,%3i}",p1a, p2a) << endl;
 	      p1a = p2a = p;
 	    }
 	  }
 	}
       }
-      if (p1d <= p2d) cout << Dead.Data() << Form("%3i,%3i}",p1d, p2d) << endl;
-      if (p1a <= p2a) cout << Alive.Data() << Form("%3i,%3i}",p1a, p2a) << endl;
+      if (p1d < p2d) cout << Dead.Data() << Form("%3i,%3i}",p1d, p2d) << endl;
+      if (p1a < p2a) cout << Alive.Data() << Form("%3i,%3i}",p1a, p2a) << endl;
     }
     if (c1) {
       c1->cd(1); ActivePads->GetXaxis()->SetRange(s,s); ActivePads->Project3D(Form("yz_%i",s))->Draw("colz");
