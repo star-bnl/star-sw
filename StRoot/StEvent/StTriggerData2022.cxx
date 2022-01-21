@@ -176,6 +176,7 @@ void StTriggerData2022::readData(const TriggerDataBlk2022* data, int bs) {
         }
         int j; // j is length of the data for the crate including header. Header size is 8 for DSM, and 12 for QT. 
 	       // If a crate is in the run but not read out for the event, length would be 12 (8+4 for DSM, 12+0 for QT).
+	       // If the crate was not read out (j<=12), leave pointer as NULL, and don't swap.
         j=offlen[y22BC1_CONF_NUM].length; if (j>12){mBC1[i] = (BELayerBlock2022*)((char*)mData + offlen[y22BC1_CONF_NUM].offset); swapRawDet((DataBlock2022*)mBC1[i],y22BC1_CONF_NUM,j,bs);}
         j=offlen[y22MXQ_CONF_NUM].length; if (j>12){mMXQ[i] = (QTBlock2022*     )((char*)mData + offlen[y22MXQ_CONF_NUM].offset); swapRawDet((DataBlock2022*)mMXQ[i],y22MXQ_CONF_NUM,j,bs);}
         j=offlen[y22MIX_CONF_NUM].length; if (j>12){mMIX[i] = (MIXBlock2022*    )((char*)mData + offlen[y22MIX_CONF_NUM].offset); swapRawDet((DataBlock2022*)mMIX[i],y22MIX_CONF_NUM,j,bs);}
