@@ -164,9 +164,9 @@ Int_t StFstHitMaker::Make()
 					}
 				}
 
-				if(disk == 1) local[2] = 146.6012; //unit: cm
-				else if(disk == 2) local[2] = 160.1724; //unit: cm
-				else if(disk == 3) local[2] = 173.7436; //unit: cm
+				if(disk == 1) local[2] = 151.750; //unit: cm
+				else if(disk == 2) local[2] = 165.248; //unit: cm
+				else if(disk == 3) local[2] = 178.781; //unit: cm
 				newHit->setLocalPosition(local[0], local[1], local[2]); //set local position on sensor
 
 				fstHitCollection->addHit(newHit);
