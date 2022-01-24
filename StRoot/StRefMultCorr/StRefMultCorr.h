@@ -86,7 +86,7 @@
 
 #include "BadRun.h"
 
-//______________________________________________________________________________
+//_________________
 // Class to correct z-vertex dependence, luminosity dependence of multiplicity
 class StRefMultCorr {
  public:

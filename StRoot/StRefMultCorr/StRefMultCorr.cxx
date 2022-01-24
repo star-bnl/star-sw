@@ -86,7 +86,7 @@ namespace {
   typedef pair<Double_t, Int_t> keys;
 }
 
-//______________________________________________________________________________
+//_________________
 // Default constructor
 StRefMultCorr::StRefMultCorr(const TString name, const TString subname, const TString libname)
 : mName(name), mSubName(subname), mLibName(libname) {
@@ -103,13 +103,13 @@ StRefMultCorr::StRefMultCorr(const TString name, const TString subname, const TS
   readBadRunsFromHeaderFile() ;
 }
 
-//______________________________________________________________________________
+//_________________
 // Default destructor
 StRefMultCorr::~StRefMultCorr() {
   /* empty */
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::getBeginRun(const Double_t energy, const Int_t year) {
   keys key(std::make_pair(energy, year));
 
@@ -143,7 +143,7 @@ Int_t StRefMultCorr::getEndRun(const Double_t energy, const Int_t year) {
   return (*iter).second ;
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::clear() {
   // Clear all arrays, and set parameter index = -1
 
@@ -181,7 +181,7 @@ void StRefMultCorr::clear() {
   mgRefMultTriggerCorrDiffVzScaleRatio.clear() ;
 }
 
-//______________________________________________________________________________
+//_________________
 Bool_t StRefMultCorr::isBadRun(const Int_t RunId) {
   // Return true if a given run id is bad run
   vector<Int_t>::iterator iter = std::find(mBadRun.begin(), mBadRun.end(), RunId);
@@ -195,7 +195,7 @@ Bool_t StRefMultCorr::isBadRun(const Int_t RunId) {
   return ( iter != mBadRun.end() ) ;
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::initEvent(const UShort_t RefMult, const Double_t z, const Double_t zdcCoincidenceRate) {
   // Set refmult, vz and corrected refmult if current (refmult,vz) are different from inputs
   // User must call this function event-by-event before 
@@ -208,7 +208,7 @@ void StRefMultCorr::initEvent(const UShort_t RefMult, const Double_t z, const Do
   }
 }
 
-//______________________________________________________________________________
+//_________________
 Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch) {
   if( mParameterIndex>=30 && mParameterIndex<=35 ) { //Run18 27 GeV MB, cut curve parameters are from fit
     const Double_t min = 4.0;
@@ -282,8 +282,7 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
   }
 }
 
-
-//______________________________________________________________________________
+//_________________
 Bool_t StRefMultCorr::isIndexOk() const {
   // mParameterIndex not initialized (-1)
   if ( mParameterIndex == -1 ) {
@@ -292,7 +291,8 @@ Bool_t StRefMultCorr::isIndexOk() const {
     Error("StRefMultCorr::isIndexOk", "mParameterIndex = -1. exit");
     cout << endl;
     // Stop the process if invalid run number found
-    exit(0);
+    // exit(0);
+    return kFALSE;
   }
 
   // Out of bounds
@@ -306,13 +306,13 @@ Bool_t StRefMultCorr::isIndexOk() const {
   return kTRUE ;
 }
 
-//______________________________________________________________________________
+//_________________
 Bool_t StRefMultCorr::isZvertexOk() const {
   // Primary z-vertex check
   return ( mVz > mStart_zvertex[mParameterIndex] && mVz < mStop_zvertex[mParameterIndex] ) ;
 }
 
-//______________________________________________________________________________
+//_________________
 Bool_t StRefMultCorr::isRefMultOk() const {
   // Invalid index
   if ( !isIndexOk() ) return kFALSE ;
@@ -322,7 +322,7 @@ Bool_t StRefMultCorr::isRefMultOk() const {
 	   mRefMult_corr < mCentrality_bins[mNCentrality][mParameterIndex] );
 }
 
-//______________________________________________________________________________
+//_________________
 Bool_t StRefMultCorr::isCentralityOk(const Int_t icent) const {
   // Invalid centrality id
   if ( icent < -1 || icent >= mNCentrality+1 ) return kFALSE ;
@@ -349,7 +349,7 @@ Bool_t StRefMultCorr::isCentralityOk(const Int_t icent) const {
   return isOK ;
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::init(const Int_t RunId) {
   // Reset mParameterIndex
   mParameterIndex = -1 ;
@@ -358,7 +358,7 @@ void StRefMultCorr::init(const Int_t RunId) {
   setParameterIndex(RunId) ;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::setParameterIndex(const Int_t RunId) {
   // Determine the corresponding parameter set for the input RunId
   for(UInt_t npar = 0; npar < mStart_runId.size(); npar++) {
@@ -479,7 +479,7 @@ Int_t StRefMultCorr::setParameterIndex(const Int_t RunId) {
   return mParameterIndex ;
 }
 
-//______________________________________________________________________________
+//_________________
 Double_t StRefMultCorr::getRefMultCorr() const {
   // Call initEvent() first
   return mRefMult_corr ;
@@ -489,8 +489,7 @@ Double_t StRefMultCorr::getRefMultCorr() const {
 Double_t StRefMultCorr::getRefMultCorr(const UShort_t RefMult, 
 				       const Double_t z,
 				       const Double_t zdcCoincidenceRate, 
-				       const UInt_t flag
-				       ) const {
+				       const UInt_t flag) const {
   // Apply correction if parameter index & z-vertex are ok
   if (!isIndexOk() || !isZvertexOk()) return RefMult ;
 
@@ -575,7 +574,7 @@ Double_t StRefMultCorr::getRefMultCorr(const UShort_t RefMult,
   return RefMult_corr ;
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::readScaleForWeight(const Char_t* input) {
   ifstream fin(input) ;
   if(!fin) {
@@ -617,7 +616,7 @@ void StRefMultCorr::readScaleForWeight(const Char_t* input) {
 
 // NEW version to read Vz dependent weights from header
 // Implemented inside StRefMultCorr::setParameterIndex(RunId)
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::readScaleForWeight(const Int_t nRefmultbin, const Double_t *weight) {
 
   // Users must set the vz bin size by setVzForWeight() (see below)
@@ -649,7 +648,7 @@ void StRefMultCorr::readScaleForWeight(const Int_t nRefmultbin, const Double_t *
 
 // In NEW version, setVzForWeight() is implemented inside StRefMultCorr::setParameterIndex(RunId)
 // It does not need to be called by users.
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::setVzForWeight(const Int_t nbin, const Double_t min, const Double_t max) {
   // Do not allow multiple calls
   if ( !mVzEdgeForWeight.empty() ) {
@@ -673,7 +672,7 @@ void StRefMultCorr::setVzForWeight(const Int_t nbin, const Double_t min, const D
   }
 }
 
-//______________________________________________________________________________
+//_________________
 Double_t StRefMultCorr::getScaleForWeight() const {
   // Special scale factor for global refmult in Run14 (Run16)
   // to account for the relative difference of VPDMB5 w.r.t VPDMB30 (VPDMBnoVtx) 
@@ -712,7 +711,7 @@ Double_t StRefMultCorr::getScaleForWeight() const {
   return 1.0/VPD5weight;
 }
 
-//______________________________________________________________________________
+//_________________
 // For Run18 27 GeV
 Double_t StRefMultCorr::getShapeWeight_SubVz2Center() {
   if( mParameterIndex>=30 && mParameterIndex<=35 ) { //Run18 27 GeV MB
@@ -778,7 +777,7 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() {
   }
 }
 
-//______________________________________________________________________________
+//_________________
 Double_t StRefMultCorr::getWeight() { //const
 
   Double_t Weight = 1.0;
@@ -845,7 +844,7 @@ Double_t StRefMultCorr::getWeight() { //const
   return Weight ;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::getCentralityBin16() const {
   Int_t CentBin16 = -1;
 
@@ -869,7 +868,7 @@ Int_t StRefMultCorr::getCentralityBin16() const {
   return ( CentBin16==16 ) ? -1 : CentBin16;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::getCentralityBin9() const {
   Int_t CentBin9 = -1;
 
@@ -905,7 +904,7 @@ Int_t StRefMultCorr::getCentralityBin9() const {
   return CentBin9;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
   Int_t iBinVz = -1;
 
@@ -981,7 +980,7 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
   return iBinVz;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::getCentralityBin9VzDep() const {
   const Int_t vzid = getVzWindowForVzDepCentDef();
   Int_t iCent = 9999;
@@ -997,7 +996,7 @@ Int_t StRefMultCorr::getCentralityBin9VzDep() const {
   return ( iCent==9999 ) ? -1 : iCent;
 }
 
-//______________________________________________________________________________
+//_________________
 Int_t StRefMultCorr::getCentralityBin16VzDep() const {
   const Int_t vzid = getVzWindowForVzDepCentDef();
   Int_t iCent = 9999;
@@ -1020,7 +1019,7 @@ Int_t StRefMultCorr::getCentralityBin16VzDep() const {
 }
 
 
-//______________________________________________________________________________
+//_________________
 const Int_t StRefMultCorr::getRefX() const {
   if (      mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ) return 0; 
   else if ( mName.CompareTo("refmult",  TString::kIgnoreCase) == 0 ) return 1; 
@@ -1030,7 +1029,7 @@ const Int_t StRefMultCorr::getRefX() const {
   else return 9999;
 }
 
-//______________________________________________________________________________
+//_________________
 const Int_t StRefMultCorr::getNumberOfDatasets() const {
   if (      mName.CompareTo("grefmult", TString::kIgnoreCase) == 0 ) return nID_gref; 
   else if ( mName.CompareTo("refmult",  TString::kIgnoreCase) == 0 ) return nID_ref1; 
@@ -1040,7 +1039,7 @@ const Int_t StRefMultCorr::getNumberOfDatasets() const {
   else return 9999;
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::readHeaderFile() {
 
   //vector<string> sParam_ShapeWeight = StringSplit(getParamX_ShapeWeight(1,1),',');
@@ -1121,7 +1120,7 @@ void StRefMultCorr::readHeaderFile() {
        << endl;
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::readBadRunsFromHeaderFile() {
   for(Int_t i=0; i<nBadRun_refmult_2010; i++) {
     mBadRun.push_back(badrun_refmult_2010[i]);
@@ -1166,7 +1165,7 @@ void StRefMultCorr::readBadRunsFromHeaderFile() {
   }
 }
 
-//______________________________________________________________________________
+//_________________
 void StRefMultCorr::print(const Option_t* option) const {
   cout << "StRefMultCorr::print  Print input parameters for " 
        << mName << " ========================================" << endl << endl;
@@ -1223,7 +1222,7 @@ void StRefMultCorr::print(const Option_t* option) const {
   cout << "=====================================================================================" << endl;
 }
 
-//______________________________________________________________________________
+//_________________
 vector<string> StRefMultCorr::StringSplit( const string str, const char sep ) {
   vector<string> vstr;
   stringstream ss(str);
