@@ -15,12 +15,15 @@ StarPrimaryMaker *_primary = 0;
 class StarFilterMaker;
 StarFilterMaker *filter = 0;
 
+#define USE_PYTHIA8_DECAYER
+
 // ----------------------------------------------------------------------------
 void geometry( TString tag, Bool_t agml=true )
 {
   TString cmd = "DETP GEOM "; cmd += tag;
   if ( !geant_maker ) geant_maker = (St_geant_Maker *)chain->GetMaker("geant");
   geant_maker -> LoadGeometry(cmd);
+  //  if ( agml ) command("gexec $STAR_LIB/libxgeometry.so");
 }
 // ----------------------------------------------------------------------------
 void command( TString cmd )
@@ -30,10 +33,18 @@ void command( TString cmd )
 }
 // ----------------------------------------------------------------------------
 // trig()  -- generates one event
-// trig(n) -- generates n events.
+// trig(n) -- generates n+1 events.
+//
+// NOTE:  last event generated will be corrupt in the FZD file
+//
 void trig( Int_t n=1 )
 {
-  chain->EventLoop(n);
+  for ( int i=0;i<n; i++ ) {
+    chain->Clear();
+    chain->Make();
+    _primary->event()->Print();
+    command("gprint kine");
+  };
   
 }
 // ----------------------------------------------------------------------------
@@ -41,8 +52,6 @@ void trig( Int_t n=1 )
 // ----------------------------------------------------------------------------
 void Pythia8( TString config="pp:W", Double_t ckin3=0.0, Double_t ckin4=-1.0 )
 {
-
-  gSystem->Load( "Pythia8_3_03.so"  );
 
   //
   // Create the pythia 8 event generator and add it to 
@@ -94,65 +103,12 @@ void Pythia8( TString config="pp:W", Double_t ckin3=0.0, Double_t ckin4=-1.0 )
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void Pythia6( TString mode="pp:minbias", Double_t ckin3=0.0, Double_t ckin4=-1.0, Int_t tune=320, Int_t rngSeed=1234 )
-{
-  
-  //  gSystem->Load( "libStarGeneratorPoolPythia6_4_23.so" );
-  gSystem->Load( "libPythia6_4_23.so");
-  //  gSystem->Load( "StarPythia6.so"   );
-
-  // Setup RNG seed and captuire ROOT TRandom
-  StarRandom::seed(rngSeed);
-  StarRandom::capture();
- 
-  StarPythia6 *pythia6 = new StarPythia6("pythia6");
-
-  //
-  // Common blocks for configuration
-  //
-  PySubs_t &pysubs = pythia6->pysubs();
-
-  if ( mode=="pp:W" )
-  {
-    pythia6->SetFrame("CMS", 510.0 );
-    pythia6->SetBlue("proton");
-    pythia6->SetYell("proton");
-    if ( tune ) pythia6->PyTune( tune );
-
-    // Setup pythia process
-
-    pysubs.msel = 12;
-
-  }
-  if ( mode == "pp:minbias" )
-  {
-    pythia6->SetFrame("CMS", 510.0 );
-    pythia6->SetBlue("proton");
-    pythia6->SetYell("proton");
-    pythia6->PyTune( tune );
-    
-    // Setup pythia process
-
-    pysubs.msel = 1;
-
-  }
-
-  pysubs.ckin(3)=ckin3;
-  pysubs.ckin(4)=ckin4;
-
-  _primary->AddGenerator(pythia6);
-
-}
-
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
-void starsim( Int_t nevents=10, Double_t ckin3=3.0, Double_t ckin4=-1.0  )
+void starsim( Int_t nevents=10, Int_t rngSeed=1234 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2014x geant gstar usexgeom agml sdt20140530 DbV20150316 misalign";
+    TString simple = "y2014x geant gstar usexgeom agml sdt20140530 DbV20150316 misalign ";
     bfc(0, simple );
   }
 
@@ -161,26 +117,41 @@ void starsim( Int_t nevents=10, Double_t ckin3=3.0, Double_t ckin4=-1.0  )
   gSystem->Load( "StarGeneratorUtil.so");
   gSystem->Load( "StarGeneratorEvent.so");
   gSystem->Load( "StarGeneratorBase.so" );
+#ifdef USE_PYTHIA8_DECAYER
   gSystem->Load( "StarGeneratorDecay.so" );
+#endif
+  gSystem->Load( "Pythia8_3_03.so"  );
+
   gSystem->Load( "libMathMore.so"   );  
 
+  // Force loading of xgeometry
+  gSystem->Load( "xgeometry.so"     );
 
-
-  //  gSystem->Load("StarFilterMaker.so") ;
   gSystem->Load("$OPTSTAR/lib/libfastjet.so");
   gSystem->Load( "StarGeneratorFilt.so" );
   gSystem->Load( "FastJetFilter.so" );
- 
-  gMessMgr->SetLevel(999);
 
+//   // And unloading of geometry
+//   TString geo = gSystem->DynamicPathName("geometry.so");
+//   if ( !geo.Contains("Error" ) ) {
+//     std::cout << "Unloading geometry.so" << endl;
+//     gSystem->Unload( gSystem->DynamicPathName("geometry.so") );
+//   }
+
+
+  // Setup RNG seed and map all ROOT TRandom here
+  StarRandom::seed( rngSeed );
+  StarRandom::capture();
+  
   //
   // Create the primary event generator and insert it
   // before the geant maker
   //
+  //  StarPrimaryMaker *
   _primary = new StarPrimaryMaker();
   {
-    _primary -> SetFileName( Form("filter_%f_%f.gener.root",ckin3,ckin4) );
-    _primary -> SetVertex( 0.1, -0.2, 0.0 );
+    _primary -> SetFileName( "pythia8.starsim.root");
+    _primary -> SetVertex( 0.1, -0.1, 0.0 );
     _primary -> SetSigma ( 0.1,  0.1, 30.0 );
     chain -> AddBefore( "geant", _primary );
   }
@@ -188,9 +159,41 @@ void starsim( Int_t nevents=10, Double_t ckin3=3.0, Double_t ckin4=-1.0  )
   //
   // Setup an event generator
   //
+  double ckin3=3.0;
+  double ckin4=-1.0;
+
   Pythia8("pp:heavyflavor:D0jets", ckin3, ckin4 );
 
+#ifdef USE_PYTHIA8_DECAYER
+  //
+  // Setup decay manager
+  //
+  StarDecayManager   *decayMgr = AgUDecay::Manager();
+  StarPythia8Decayer *decayPy8 = new StarPythia8Decayer();
+  decayMgr->AddDecayer(    0, decayPy8 ); // Handle any decay requested 
+  decayPy8->SetDebug(1);
+  decayPy8->Set("WeakSingleBoson:all = on");
 
+  TString name;
+  double mass, lifetime, charge;
+  int tracktype, pdgcode, g3code;
+
+  // Particle data
+  StarParticleData& data = StarParticleData::instance();
+  //  One can add a particle to G3 using...
+  //data.AddParticleToG3( "MyD0", 0.1865E+01, 0.42800E-12, 0., 3, 421, 37, 0, 0 );
+  TParticlePDG* D0     = data.GetParticle("D0");
+  TParticlePDG* rho_pl = data.GetParticle("rho+");
+  TParticlePDG* rho_mn = data.GetParticle("rho-");
+  data.AddParticleToG3( D0, 37 );
+  data.AddParticleToG3( rho_pl, 153 );
+  data.AddParticleToG3( rho_mn, 154 );
+#else
+  command("call gstar_part"); 
+#endif
+
+
+#if 1
   //
   // Setup the generator filter
   //
@@ -214,51 +217,38 @@ void starsim( Int_t nevents=10, Double_t ckin3=3.0, Double_t ckin4=-1.0  )
   // to kill the event. 
   //---  primary->SetAttr("FilterSkipRejects", int(1) ); // enables event skipping 
   //---  chain->SetAttr(".Privilege",1,"StarPrimaryMaker::*" );
-
-
-#if 0
-  // TODO
-  
-  // Setup pythia8 decayer...
-  StarDecayManager   *decayMgr = AgUDecay::Manager();
-  StarPythia8Decayer *decayPy8 = new StarPythia8Decayer();
-  decayMgr->AddDecayer(    421, decayPy8 ); // Handle any decay requested 
-  decayPy8->SetDebug(1);
-  decayPy8->Set("WeakSingleBoson:all = on");
-
-
-
-  TString name;
-  double mass, lifetime, charge;
-  int tracktype, pdgcode, g3code;
-
-  // Map D0 to G3 ID 37
-
-  // Particle data
-  StarParticleData& data = StarParticleData::instance();
-  //  One can add a particle to G3 using...
-  //data.AddParticleToG3( "MyD0", 0.1865E+01, 0.42800E-12, 0., 3, 421, 37, 0, 0 );
-  TParticlePDG* D0     = data.GetParticle("D0");
-  //  TParticlePDG* rho_pl = data.GetParticle("rho+");
-  //  TParticlePDG* rho_mn = data.GetParticle("rho-");
-  data.AddParticleToG3( D0, 37 );
-  //  data.AddParticleToG3( rho_pl, 153 );
-  //  data.AddParticleToG3( rho_mn, 154 );
 #endif
 
+  //
+  // Setup cuts on which particles get passed to geant for
+  //   simulation.  (To run generator in standalone mode,
+  //   set ptmin=1.0E9.)
+  //                    ptmin  ptmax
+  _primary->SetPtRange  (0.0,  -1.0);         // GeV
+  //                    etamin etamax
+  _primary->SetEtaRange ( -3.0, +3.0 );
+  //                    phimin phimax
+  _primary->SetPhiRange ( 0., TMath::TwoPi() );
+  
+  
+  // 
+  // Setup a realistic z-vertex distribution:
+  //   x = 0 gauss width = 1mm
+  //   y = 0 gauss width = 1mm
+  //   z = 0 gauss width = 30cm
+  // 
+  _primary->SetVertex( 0., 0., 0. );
+  _primary->SetSigma( 0.1, 0.1, 30.0 );
 
+  
   //
   // Initialize primary event generator and all sub makers
   //
   _primary -> Init();
 
-  //
-  // Setup geometry and set starsim to use agusread for input
-  //
-
   command("gkine -4 0");
-  command( Form("gfile o filter_%f_%f.starsim.fzd",ckin3,ckin4) );
-
+  command("gfile o pythia8.starsim.fzd");
+  
 
   //
   // Trigger on nevents
