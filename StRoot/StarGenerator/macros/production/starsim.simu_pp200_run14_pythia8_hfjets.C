@@ -172,7 +172,11 @@ void starsim( Int_t nevents=10, Int_t rngSeed=1234 )
   StarPythia8Decayer *decayPy8 = new StarPythia8Decayer();
   decayMgr->AddDecayer(    0, decayPy8 ); // Handle any decay requested 
   decayPy8->SetDebug(1);
-  decayPy8->Set("WeakSingleBoson:all = on");
+  //  decayPy8->Set("WeakSingleBoson:all = on");
+  decayPy8->Set("421:onMode = 0");
+  decayPy8->Set("421:onIfAll = 321 -211");
+
+  // 
 
   TString name;
   double mass, lifetime, charge;
