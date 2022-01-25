@@ -290,6 +290,9 @@ Int_t StBFChain::Instantiate()
 	  // Determine flavors
 	  TString flavors = "ofl"; // default flavor for offline
 
+	  // fixed target flavor
+	  if (GetOption("FXT")) flavors.Prepend("FXT+");
+
 	  // simulation flavors
 	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) flavors.Prepend("sim+");
 
@@ -885,6 +888,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
       if (GetOption("setOutlierRej4BToft0"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
       if (GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
+      if (GetOption("btofFXT")) mk->SetAttr("btofFXT", kTRUE);
     }
     if (maker == "StVpdCalibMaker" && GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
 

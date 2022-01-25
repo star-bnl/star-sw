@@ -77,7 +77,7 @@ EMCdsm2Tree::clear() {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EMCdsm2Tree::setInput16bit(int ibrd, int ch, ushort val){
+EMCdsm2Tree::setInput16bit(int ibrd, int ch, unsigned short val){
   // printf("addY %d  %d %d\n",brd,ch,val);
   assert(ibrd>=0 && ibrd<Nbe2);
   be2[ibrd].setWord(ch,val);

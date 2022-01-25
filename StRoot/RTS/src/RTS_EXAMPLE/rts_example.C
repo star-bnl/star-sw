@@ -265,7 +265,8 @@ int main(int argc, char *argv[])
 		
 		if(print_det[0]) {
 		    if(strcmp(print_det, "tinfo") == 0) {		    
-			tinfo_doer(evp, "tinfo");
+			int ret = tinfo_doer(evp, "tinfo");
+			if(ret) LOG(INFO,"Trigger Info FOUND") ;
 		    }
 		}
 
@@ -1491,7 +1492,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 
 			if(do_print) {
-				printf("%s RAW: RDO %d: %d bytes, %d words\n",d_name,dd->rdo,dd->ncontent,dd->ncontent/4) ;
+				printf("%s RAW: RDO %d:%d: %d bytes, %d words\n",d_name,dd->sec,dd->rdo,dd->ncontent,dd->ncontent/4) ;
 				// dump a few ints
 				for(int i=0;i<10;i++) {
 					printf(" %3d: 0x%08X\n",i,d[i]) ;
@@ -1555,7 +1556,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 
 		if(do_print) {
-			printf("%s ADC: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
+			printf("EVT %d: %s ADC: RDO %d, ARM %d, APV %d: %d values\n",good,d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
 				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
@@ -1632,7 +1633,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 			printf("%s ZS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
-				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
+				printf(" %5d: ch %3d, tb %d = %3d (flags %d)\n",i,f[i].ch,f[i].tb,f[i].adc,f[i].flags) ;
 			}
 		}
 	}
@@ -1936,9 +1937,15 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 	    fcs2019 |= ((lastdsm[4] >> 15) & 1) << 8 ;	// bit 8: FCSIN-7 -- never fires?
 
 	    u_int fcs2021 = lastdsm[5] ;
-
 	    printf("fcs2021 0x%04X\n",fcs2021) ;
 
+	    u_int fcs_main_2022 = lastdsm[2] ;
+	    u_int fcs_north_2022 = lastdsm[5] & 0xFF ;
+	    u_int fcs_south_2022 = lastdsm[5] >> 8 ;
+
+	    printf("fcs_2022: main 0x%04X, north 0x%02X, south 0x%02X\n",fcs_main_2022,fcs_north_2022,fcs_south_2022) ;
+
+	    
             printf("bc7bit %3d, fcs2019 0x%04X : 0x%04X 0x%04X 0x%04X 0x%04X\n",bc7bit,fcs2019,
 		   lastdsm[0],lastdsm[1],lastdsm[2],lastdsm[3]) ;
 
@@ -1948,7 +1955,7 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
 		    printf("{%d=%d}",i,rdr->getOfflineId(i));
 		}
 	    }
-
+	    printf("\n") ;
 	    
 	    printf("   l1=0x%llx   trgDetMask=0%x   trgCrateMask=0x%x\n",rdr->daqbits64_l1,trgDetMask,trgCrateMask);
 
@@ -2721,7 +2728,12 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 					u_int flags = d16[i] >> 12 ;
 					u_int data = d16[i] & 0xFFF ;
 
-					printf(" %5d = 0x%X = %4u\n",i,flags,data) ;
+					if(det!=3) {	// main
+						printf(" %5d = 0x%X = %4u\n",i,flags,data) ;
+					}
+					else {
+						printf(" %5d = 0x%X = 0x%04X\n",i,flags,data) ;
+					}
 				}
 			}
 
@@ -2772,7 +2784,7 @@ static int fcs_doer(daqReader *rdr, const char *do_print)
 
 
 	if(raw_found || zs_found || ped_found) {
-		LOG(INFO,"FCS found [%s]",fstr) ;
+		LOG(INFO,"FCS found: %s",fstr) ;
 	}
 
 	return raw_found ;
@@ -2817,6 +2829,9 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 
 	dd = rdr->det("stgc")->get("altro") ;	
 
+	((daq_stgc *)rdr->det("stgc"))->xing_min = -65000 ;
+	((daq_stgc *)rdr->det("stgc"))->xing_max = 65000 ;
+
 	while(dd && dd->iterate()) {	
 		altro_found = 1 ;
 
@@ -2833,9 +2848,12 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 
 	dd = rdr->det("stgc")->get("vmm") ;
 
+//	LOG(TERR,"min %d, max %d",((daq_stgc *)rdr->det("stgc"))->xing_min,((daq_stgc *)rdr->det("stgc"))->xing_max) ;
+
 	while(dd && dd->iterate()) {	
 		vmm_found = 1 ;
 
+		
 		if(do_print) {
 			// there is NO RDO in the bank
 			printf("STGC VMM: evt %d: sec %d, RDO %d: hits %d\n",good,dd->sec,dd->rdo,dd->ncontent) ;
@@ -2845,7 +2863,7 @@ static int stgc_doer(daqReader *rdr, const char *do_print)
 				u_char feb = vmm[i].feb_vmm >> 2 ;	// feb [0..5]
 				u_char vm = vmm[i].feb_vmm & 3 ;	// VMM [0..3]
 
-				printf("  FEB %d:%d, ch %02d: ADC %3d, BCID %4d, tb %4d\n",feb,vm,vmm[i].ch,
+				printf("  FEB %d:%d [0x%X], ch %02d: ADC %3d, BCID %4d, tb %4d\n",feb,vm,vmm[i].feb_vmm,vmm[i].ch,
 				       vmm[i].adc,vmm[i].bcid,vmm[i].tb) ;
 			}
 		}

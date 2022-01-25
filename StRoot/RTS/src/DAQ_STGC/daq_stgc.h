@@ -54,6 +54,8 @@ public:
 	int xing_min ;
 	int xing_max ;
 
+	class stgc_data_c *stgc_d ;
+
 private:
 	int get_l2_vmm(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt=0) ;
 } ;

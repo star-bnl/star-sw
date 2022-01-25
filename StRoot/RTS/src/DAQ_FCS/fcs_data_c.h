@@ -175,26 +175,26 @@ public:
 	} ;
 
 	struct fcs_ped_t {
-		double mean[32] ;
-		double rms[32] ;
-		u_int cou[32] ;
+		double mean[37] ;
+		double rms[37] ;
+		u_int cou[37] ;
 
-		u_int bad_4[32] ;
+		u_int bad_4[37] ;
 
-		double mean_8[32] ;
-		double rms_8[32] ;
-		u_int cou_8[32] ;
+		double mean_8[37] ;
+		double rms_8[37] ;
+		u_int cou_8[37] ;
 
-		double tmp_val_8[32] ;
-		u_int tmp_cou_8[32] ;
+		double tmp_val_8[37] ;
+		u_int tmp_cou_8[37] ;
 
-		float el_gain[32] ;	// electronics gain
-		float et_gain[32] ;	// the Et adjustment due to position, from e.g. Akio
+		float el_gain[37] ;	// electronics gain
+		float et_gain[37] ;	// the Et adjustment due to position, from e.g. Akio
 
 
 		// loaded into DEP for trigger
-		u_short i_ped[32] ;	// integerized, multipled by 8
-		u_short i_gain[32] ;	// integerized in the 4.8 (12 bit) form
+		u_short i_ped[37] ;	// integerized, multipled by 8
+		u_short i_gain[37] ;	// integerized in the 4.8 (12 bit) form
 	} ;
 
 	struct rdo_map_t {
@@ -254,6 +254,15 @@ public:
 	static int load_rdo_map(const char *fname=0) ;
 	static int load_readout_map(const char *fname=0) ;
 	static int load_sc_map(const char *fname=0) ;
+
+	static u_char fcs_bad_ch_all[FCS_SECTOR_COU][8][34] ;
+	static u_char fcs_bad_ch[8][34] ;
+
+	static int load_bad_ch(const char *fname=0, int sector=0) ;
+
+	static const char *stage_labels[32] ;
+	static int stage_params_txt[32] ;	// from the params_xx file below
+	static int load_stage_params(int sec1, const char *fname=0) ;
 
 	// mutex for pedestals but also for statistics
 	static struct statistics_t {

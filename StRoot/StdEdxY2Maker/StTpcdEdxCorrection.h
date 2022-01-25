@@ -9,6 +9,7 @@
 #include "StDetectorDbMaker/St_tpcGasC.h"
 //#include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StTrackPidTraits.h"
+#include "TString.h"
 //class St_trigDetSums;
 //class trigDetSums_st;
 //________________________________________________________________________________
@@ -18,7 +19,11 @@ struct dE_t {
   Float_t dx;
   Float_t dEdx;
   Float_t dEdxL;
+  Float_t ddEdxL;
   Float_t dEdxN;
+  void    Print(Option_t *option="") const {
+    cout << Form("dE = %5.2f keV, dx = %f5.2f cm, dE/dx = %5.2f keV/cm, dEdxL = %f, ddEdxL = %f",1e6*dE,dx,1e6*dEdx,dEdxL,ddEdxL) << endl;
+  }
 };
 //________________________________________________________________________________
 struct dEdxCorrection_t {
@@ -36,40 +41,48 @@ class StTpcdEdxCorrection : public TObject {
  public:
   enum ESector : int {kTpcOuter = 0, kTpcInner = 1, kiTpc = 2};
   enum EOptions : int {
-    kUncorrected           =  0,//U   				           
-    kAdcCorrection         =  1,//R  					     
-    kEdge                  =  2,//E   correction near edge of chamber	     
-    kAdcCorrectionMDF      =  3,//RMDF  					     
-    kAdcCorrection3MDF     =  4,//RMDF 3D  					     
-    kTpcdCharge            =  5,//D  					     
-    kTpcrCharge            =  6,//D  					     
-    kTpcCurrentCorrection  =  7,//      					     
-    kTpcSecRowB            =  8,//S  					     
-    kTpcSecRowC            =  9,//S  					     
-    kTpcRowQ               = 10,//   	 					       	   
-    kTpcAccumulatedQ       = 11,//   	 					       	   
-    ktpcPressure           = 12,//P  					     
-    ktpcTime               = 13,//t  					     
-    kDrift                 = 14,//O  					     
-    kMultiplicity          = 15,//M  					     
-    kzCorrection           = 16,//Z  					     
-    ktpcMethaneIn          = 17,//m  					     
-    ktpcGasTemperature     = 18,//T  					     
-    ktpcWaterOut           = 19,//W   				7       	   
-    kSpaceCharge           = 20,//C   space charge near the wire	       	   
-    kPhiDirection          = 21,//p   correction wrt local interception angle  
-    kTanL                  = 22,//p   correction wrt local tan(lambda)  
-    kdXCorrection          = 23,//X  					     
-    kTpcEffectivedX        = 24,//X   Effective pad row height
-    kTpcPadTBins           = 25,//d  					     
-    kTpcZDC                = 26,//   					     
-    kTpcPadMDF             = 27, 
-    kTpcLast               = 28,//                                             
-    kTpcNoAnodeVGainC      = 29,//   					     
-    kTpcLengthCorrection   = 30,//                                             
-    kTpcLengthCorrectionMDF= 31,//   					   
-    kTpcdEdxCor            = 32,//   					   
-    kTpcAllCorrections     = 33 //                                             
+      kUncorrected           =  0,//U   				           
+      kAdcCorrection         =  1,//R  					     
+      kEdge                  =  2,//E   correction near edge of chamber	     
+      kAdcCorrectionMDF      =  3,//RMDF  					     
+      kAdcCorrection3MDF     =  4,//RMDF 3D  					     
+      kTpcdCharge            =  5,//D  					     
+      kTpcrCharge            =  6,//D  					     
+      kTpcCurrentCorrection  =  7,//      					     
+      kTpcSecRowB            =  8,//S  					     
+      kTpcSecRowC            =  9,//S  					     
+      kTpcRowQ               = 10,//   	 					       	   
+      kTpcAccumulatedQ       = 11,//   	 					       	   
+      ktpcPressure           = 12,//P  					     
+      ktpcTime               = 13,//t  					     
+      kDrift                 = 14,//O  					     
+      kMultiplicity          = 15,//M  					     
+      kGatingGrid            = 16,//G  					     
+      kzCorrectionC          = 17,//Z  					     
+      kzCorrection           = 18,//Z  					     
+      ktpcMethaneIn          = 19,//m  					     
+      ktpcGasTemperature     = 20,//T  					     
+      ktpcWaterOut           = 21,//W   				7       	   
+      kSpaceCharge           = 22,//C   space charge near the wire	       	   
+      kPhiDirection          = 23,//p   correction wrt local interception angle  
+      kTanL                  = 24,//p   correction wrt local tan(lambda)  
+      kdXCorrection          = 25,//X  					     
+      kTpcEffectivedX        = 26,//X   Effective pad row height
+      kTpcPadTBins           = 27,//d  					     
+      kTpcZDC                = 28,//   					     
+      kTpcPadMDF             = 29, 
+      kAdcI                  = 30,
+      knPad                  = 31, 
+      knTbk                  = 32,
+      kdZdY                  = 33, 
+      kdXdY                  = 34,
+      kTpcLast               = 35,//                                             
+      kTpcNoAnodeVGainC      = 36,//   					     
+      kTpcLengthCorrection   = 37,//                                             
+      kTpcLengthCorrectionMDF= 38,//   					   
+      kTpcLengthCorrectionMD2= 39,//   					   
+      kTpcdEdxCor            = 40,//   					   
+      kTpcAllCorrections     = 41 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
@@ -79,11 +92,11 @@ class StTpcdEdxCorrection : public TObject {
   void SettpcGas               (St_tpcGas          *m = 0) {m_tpcGas = m;}
   
   void SetDebug(Int_t m=0) {m_Debug = m;}
-  void SetMask (Int_t m=0) {m_Mask = m;}
+  void SetMask (Long_t m=0) {m_Mask = m;}
   void ReSetCorrections();
   St_tpcGas         *tpcGas()              {return m_tpcGas;}
   //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
-
+  const dEdxCorrection_t &CorrectionStatus(Int_t k = 0) {return  *&m_Corrections[k];}
   St_tpcCorrectionC *Correction(Int_t k = 0) { return dynamic_cast<St_tpcCorrectionC *>(m_Corrections[k].Chair);}
   St_tpcCorrectionC *drift()               {return Correction(kDrift);}
   St_tpcCorrectionC *Multiplicity()        {return Correction(kMultiplicity);}
@@ -97,13 +110,13 @@ class StTpcdEdxCorrection : public TObject {
   St_tpcCorrectionC *tpcGasTemperature()   {return Correction(ktpcGasTemperature);}
   St_tpcCorrectionC *tpcWaterOut()         {return Correction(ktpcWaterOut);}
   St_tpcCorrectionC *TpcPadTBins()         {return Correction(kTpcPadTBins);}
-  Int_t Debug()                            {return m_Debug;}
-  Int_t Mask()                             {return m_Mask;}
+  Int_t  Debug()                           {return m_Debug;}
+  Long_t Mask()                            {return m_Mask;}
   Float_t           Adc2GeV()              {return mAdc2GeV;}
   void Print(Option_t *opt = "") const;
   Bool_t            IsFixedTarget()        {return m_isFixedTarget;}
  private:
-  Int_t                m_Mask;                  //!
+  Long_t               m_Mask;                  //!
   St_tpcGas           *m_tpcGas;                //!
   dEdxY2_t            *mdEdx;
   Float_t              mAdc2GeV;                //! Outer/Inner conversion factors from ADC -> GeV
@@ -125,8 +138,8 @@ class dEdxY2_t {
   Int_t    row;
   Int_t    channel;
   Float_t  pad;
-  Int_t    Npads;
-  Int_t    Ntbins;
+  Int_t    Npads; // cluster size in pads
+  Int_t    Ntbks; // clustre size in time buckets
   Float_t  ZdriftDistance;     // drift distance
   Float_t  ZdriftDistanceO2;   // ZdriftDistance*ppmOxygenIn
   Float_t  ZdriftDistanceO2W;  // ZdriftDistance*ppmOxygenIn*ppmWaterOut
@@ -160,8 +173,9 @@ class dEdxY2_t {
   Float_t  tpcTime;
   dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections+1];
   dE_t     F;     //! 
-  Int_t    npads; // cluster size in pads
-  Int_t    ntmbks;// clustre size in time buckets
+  Float_t  AdcI;  // Log10(integrated ADC over time for a given socket0 or 0
+  Float_t  dZdY;  // cluster projection on on Z
+  Float_t  dXdY;  // cluster projection on Wire
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
 }; 

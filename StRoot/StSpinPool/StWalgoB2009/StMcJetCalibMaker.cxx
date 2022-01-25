@@ -102,7 +102,7 @@ StMcJetCalibMaker::calibrate(){
   hA[0]->Fill("verG",1.);
 
 #if 0 
-  for(uint i=0;i<mMcEvent->tracks().size();i++){//loop tracks
+  for(unsigned int i=0;i<mMcEvent->tracks().size();i++){//loop tracks
     StMcTrack* mcTrack = mMcEvent->tracks()[i];
     int pdgId=mcTrack->pdgId();
     const StLorentzVectorF &p4=mcTrack-> fourMomentum();

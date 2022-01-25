@@ -1140,6 +1140,15 @@ Bfc_st BFC[] = { // standard chains
    "B2021a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    ,    "","",        "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
 
+  // 2022 initial chains
+  {"B2022"  ,"","",
+   "ry2022,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
+   "","",                                                      "Base chain for run 2022 data (tpc)",kFALSE},
+
+  {"pp2022","" ,"",
+   "B2022,ITTF,BAna,hitfilt,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,etofa,btof,mtd,emcDY2,FttDat,fcs,trgd,ZDCvtx,analysis",
+   "","","Production chain for year 2022 pp data - no Corr (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
+
 
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
@@ -1207,6 +1216,8 @@ Bfc_st BFC[] = { // standard chains
   {"paw"         ,""  ,"",""                                      ,"","","Allocate memory for pawc",kFALSE},
   {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
+  {"FXT"         ,""  ,"","btofFXT",""                           ,"","enable anything FXT-specific",kFALSE},
+  {"btofFXT"     ,""  ,"","",""                                      ,"","enable FXT mode for btof",kFALSE},
   {"Corr1"       ,""  ,"","AlignSectors,ExB,OBmap,OClock,OPr13","",""
    ,                                                  "... AlignSectors,ExB,OBmap,OClock,OPr13 ...",kFALSE},
   {"Corr2"       ,""  ,"","Corr1,OTwist,OIFC"                     ,"","","...Corr1+OTwist,OIFC ...",kFALSE},
@@ -1687,17 +1698,20 @@ Bfc_st BFC[] = { // standard chains
   {"fmsfps"   ,"","", "event,fmsDb",
    "StFmsFpsMaker","StFmsFpsMaker","Fill FPS association in FMS points",                            kFALSE},
   // FCS
-  {"fcsSim",""    ,"","StEvent,fcsDb",
+  {"fcs","fcsChain","","fcsDat,fcsWFF,fcsCluster,fcsPoint",         "StMaker","StChain","FCS chain",kFALSE},
+  {"fcsSim",""    ,"fcsChain","StEvent,fcsDb",
    "StFcsFastSimulatorMaker","StFcsFastSimulatorMaker","FCS Fast Simulator",                        kFALSE},
-  {"fcsDat",""    ,"","StEvent,fcsDb",
+  {"fcsDat",""    ,"fcsChain","StEvent,fcsDb",
    "StFcsRawHitMaker","StFcsRawHitMaker","FCS daq file reader/hit maker",                           kFALSE},
-  {"fcsWFF"       ,"","", "StEvent,fcsDb",
+  {"fcsWFF"       ,"","fcsChain", "StEvent,fcsDb",
    "StFcsWaveformFitMaker","StFcsWaveformFitMaker","Fit FCS waveform",                              kFALSE},
-  {"fcsCluster"   ,"","", "StEvent,fcsDb",
+  {"fcsCluster"   ,"","fcsChain", "StEvent,fcsDb",
    "StFcsClusterMaker","StFcsClusterMaker","Fill FCS clusters",                                     kFALSE},
-  {"fcsPoint"   ,"","", "StEvent,fcsDb",
+  {"fcsPoint"   ,"","fcsChain", "StEvent,fcsDb",
    "StFcsPointMaker","StFcsPointMaker,libMinuit","Fill FCS points",                                 kFALSE},
-
+  // FTT
+  {"FttDat","","","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent",
+                                                            "sTGC Raw hit maker",                   kFALSE},
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 #else

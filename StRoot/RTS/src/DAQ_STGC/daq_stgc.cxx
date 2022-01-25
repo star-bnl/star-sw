@@ -86,8 +86,13 @@ daq_stgc::daq_stgc(daqReader *rts_caller)
 
 	LOG(DBG,"%s: constructor: caller %p",name, caller) ;
 
-	xing_min = -10 ;
-	xing_max = 20 ;
+//	xing_min = -10 ;
+//	xing_max = 20 ;
+
+	stgc_d = new stgc_data_c ;
+
+	xing_min = -32000 ;
+	xing_max = 32000 ;
 
 	return ;
 }
@@ -100,6 +105,7 @@ daq_stgc::~daq_stgc()
 	delete raw ;
 	delete altro ;
 	delete vmm ;
+	delete stgc_d ;
 
 	LOG(DBG,"%s: DEstructor done",name) ;
 	return ;
@@ -402,7 +408,7 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 		u_char rb ;
 		u_char sec ;
 	} obj[8*4] ;
-	stgc_data_c stgc ;
+
 
 	assert(caller) ;
 
@@ -421,8 +427,10 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 	max_rdo = 4 ;
 
 
-	stgc.xing_min = xing_min ;
-	stgc.xing_max = xing_max ;
+	stgc_d->xing_min = xing_min ;
+	stgc_d->xing_max = xing_max ;
+
+//	LOG(WARN,"xing_min %d, xing_max %d",stgc_d->xing_min,stgc_d->xing_max) ;
 
 	// calc total bytes
 	tot_bytes = 0 ;
@@ -486,12 +494,17 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 			LOG(NOTE,"%s: %s read %d bytes",name,str,ret) ;
 		}
 
-		int hits = 0 ;		
-		stgc.start((u_short *)mem,obj[i].bytes/2) ;
-		while(stgc.event()) {
-			if(stgc.vmm.feb_vmm==0 && stgc.vmm.adc==0 && stgc.vmm.bcid==0 && stgc.vmm.ch==0) continue ;
+		int hits = 0 ;			
+		stgc_d->sector1 = obj[i].sec ;
+		stgc_d->rdo1 = obj[i].rb ;
+		stgc_d->start((u_short *)mem,obj[i].bytes/2) ;
+		while(stgc_d->event()) {
+			if(stgc_d->vmm.feb_vmm==0 && stgc_d->vmm.adc==0 && stgc_d->vmm.bcid==0 && stgc_d->vmm.ch==0) {
+				//printf("... ODD: S%d:%d\n",obj[i].sec,obj[i].rb) ;
+				continue ;
+			}
 
-			vm[hits] = stgc.vmm ;
+			vm[hits] = stgc_d->vmm ;
 			hits++ ;
 			if(hits > vmm_max) {
 				LOG(ERR,"S%d:%d -- too many hits %d",obj[i].sec,obj[i].rb,hits) ;

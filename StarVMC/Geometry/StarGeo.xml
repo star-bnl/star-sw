@@ -14,7 +14,7 @@
 	 C chamber
     -->
  
-  <Geometry tag="dev2021" comment="DEPRECATED.  USE dev2022.  (development tag for the forward star upgrade)">
+   <Geometry tag="dev2021" comment="DEPRECATED.  USE dev2022.  (development tag for the forward star upgrade)">
     <Construct sys="cave" config="CAVE06"  />
     <Construct sys="upst" config="UPSTon"  />
     <Construct sys="shld" config="SHLDon"  />
@@ -42,7 +42,7 @@
     <Construct sys="pres" config="PRESof" simu="2" /> 
   </Geometry>
 
-  <Geometry tag="dev2022" comment="development tag for the 2022 forward star upgrade">
+ <Geometry tag="dev2022" comment="development tag for the 2022 forward star upgrade">
     <Construct sys="cave" config="CAVE06"  />
     <Construct sys="upst" config="UPSTon"  />
     <Construct sys="shld" config="SHLDon"  />
@@ -95,6 +95,7 @@
     <Construct sys="stgm" config="STGCv1" />
     <Construct sys="etof" config="ETOFv14f"  />
   </Geometry>
+
 
   <Geometry tag="dev2022m" comment="development tag for the 2022 forward star upgrade (misaligned FST)">
     <Construct sys="cave" config="CAVE06"  />
