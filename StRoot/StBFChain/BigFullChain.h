@@ -1575,8 +1575,9 @@ Bfc_st BFC[] = { // standard chains
   {"istRawHit",  "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
   {"istCluster", "", "", "istRawHit","StIstClusterMaker",  "StIstClusterMaker","IST Cluster maker", kFALSE},
   {"istHit",     "", "", "event,istCluster", "StIstHitMaker",       "StIstHitMaker","IST Hit Maker",kFALSE},
-
-  {"fstFastSim","fstChain","","StMcEvent,StEvent","StFstFastSimMaker","StFstSimMaker","FST fast simulator", 
+  // FST
+  {"fst","fstChain","","fstRawHit,fstCluster,fstHit", "StMaker","StChain","FST chain"              ,kFALSE},
+  {"fstFastSim","","fstChain","StMcEvent,StEvent","StFstFastSimMaker","StFstSimMaker","FST fast simulator", 
                                                                                                     kFALSE},
   {"fstRawHit", "", "fstChain", "fstUtil,fstDb","StFstRawHitMaker", "StFstRawHitMaker","FST raw hit maker", 
                                                                                                     kFALSE},
@@ -1584,7 +1585,7 @@ Bfc_st BFC[] = { // standard chains
                                                                                                     kFALSE},
   {"fstHit",     "", "fstChain", "event,fstCluster", "StFstHitMaker",       "StFstHitMaker","FST Hit Maker",
                                                                                                     kFALSE},
-  {"fstUtil"  , "", "fstChain", "",          "",       "StFstUtil",    "Fst Utilities",                     
+  {"fstUtil"  , "", "", "",          "",       "StFstUtil",    "Fst Utilities",                     
                                                                                                     kFALSE},
 
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
