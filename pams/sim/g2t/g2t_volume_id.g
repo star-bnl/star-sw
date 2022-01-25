@@ -1480,15 +1480,15 @@ c          write (*,*) csys, volume_id
       ENDIF
 
 
-     IF ( istat>=0 .and. fstg_version .eq. 1.2 ) then "misaligned geometry"
+     IF ( istat>=0 .and. fstg_version .ge. 1.2 ) then "misaligned geometry"
 
          ! loop over 3 disks
          ! loop over 12 wedges
          ! place 3 instances of FTUS
 
-         disk = numbv(1)  / 36
-         wedge = (mod(numbv(1),3)) / 12 + 1
-         sensor = mod(numbv(1),3)) + 1
+         disk = ( (numbv(1)-1)  / 36 ) + 4
+         wedge = mod((( numbv(1)-1 ) / 3 ), 12 ) + 1
+         sensor = mod((numbv(1)-1),3) + 1
          
       ENDIF
 
