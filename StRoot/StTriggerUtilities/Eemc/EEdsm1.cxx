@@ -48,7 +48,7 @@ void EEdsm1::setYear(int y, int *JPth, int TPthrSelc, int HTTPthrSelc){
 
 //--------------------------------------------------
 //--------------------------------------------------
-void EEdsm1::setWord(int ch, ushort val){
+void EEdsm1::setWord(int ch, unsigned short val){
   
   assert(ch>=0 && ch<nc);
   data[ch]=val;
@@ -60,7 +60,7 @@ void EEdsm1::setWord(int ch, ushort val){
 int 
 EEdsm1::getInp16bit(int ch) const { 
   assert(ch>=0 && ch<nc);
-  ushort val=data[ch];
+  unsigned short val=data[ch];
   return val;
 }
 
@@ -69,7 +69,7 @@ EEdsm1::getInp16bit(int ch) const {
 int 
 EEdsm1::getInpHT2bit(int ch) const { 
   assert(ch>=0 && ch<nc);
-  ushort val=(data[ch]& 0xfff) >>10;
+  unsigned short val=(data[ch]& 0xfff) >>10;
   return val;
 }
 
@@ -84,7 +84,7 @@ int
 EEdsm1::getInpTP2bit(int ch) const { 
   assert(ch>=0 && ch<nc);
   assert(mYear>=2006);
-  ushort val=data[ch] >>12;
+  unsigned short val=data[ch] >>12;
   return val&3;
 }
 
@@ -94,7 +94,7 @@ int
 EEdsm1::getInpHTTP2bit(int ch) const { 
   assert(ch>=0 && ch<nc);
   assert(mYear>=2006);
-  ushort val=data[ch] >>14;
+  unsigned short val=data[ch] >>14;
   return val&3;
 }
 
@@ -113,7 +113,7 @@ EEdsm1::getInpTPsum(int ch) const {
      Steve's JP#  \_6_/  \_1_/  \_2_/
   */
 
-  ushort val=0xfff;
+  unsigned short val=0xfff;
 
   if (type == 1) {
     switch (ch) {

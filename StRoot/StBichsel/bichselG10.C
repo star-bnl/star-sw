@@ -82,13 +82,14 @@
 #include "TClassTable.h"
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
+#include "StBichsel/StdEdxPull.h"
 #include "TLegend.h"
 #include "TROOT.h"
 #else
 class Bichsel;
 #endif
 Bichsel *m_Bichsel = 0;
-const Int_t NMasses = 19;
+const Int_t NMasses = 20;
 const Double_t kAu2Gev=0.9314943228;
 struct Part_t {
   const Char_t *Name;
@@ -97,30 +98,31 @@ struct Part_t {
   Int_t         Index;
   Double_t      Mass;
 };
-Part_t Part[NMasses] = {
+Part_t Part[NMasses] = {// https://periodictable.com/Isotopes/
   //name,   PiD, Charge,  Index, Mass 
-  {"p",       1,      1,      4, 0.93827231},                 // 0 p        
-  {"K",	      2,      1,      3, 0.493677},          	      // 1 K   
-  {"#pi",     3,      1,      2, 0.13956995},        	      // 2 pi  
   {"e",       0,      1,      0, 0.51099907e-3},     	      // 3 e   
-  {"d",	      5,      1,      5, 1.87561339},        	      // 4 d   
   {"#mu",     4,      1,      1, 0.1056584},         	      // 5 mu  
+  {"#pi",     3,      1,      2, 0.13956995},        	      // 2 pi  
+  {"K",	      2,      1,      3, 0.493677},          	      // 1 K   
+  {"p",       1,      1,      4, 0.93827231},                 // 0 p        
+  {"d",	      5,      1,      5, 1.87561339},        	      // 4 d   
   {"t",	      6,      1,      6, 2.80925},           	      // 6 t   
   {"He3",     7,      2,      7, 2.80923}, //GEANT3  	      // 7 He3 
-  {"#alpha",  8,      2,      8, 3.727417}, //GEANT3 	      // 8 He4 
-  {"He6",    -1,      2,     12, 3*kAu2Gev+14.931e-3},        // 9
-  {"Li6",    10,      3,     10, 5.6031},            	      //10 Li6 
-  {"Li7",     9,      3,      9, 6.5354},            	      //11 Li7 
-  {"Be7",    -1,      4,      0, 7.016003437*kAu2Gev},        //12
-  {"Be9",    -1,      4,      0, 9.01218307*kAu2Gev},        //13
-  {"Be10",   -1,      4,      0, 10.01353470*kAu2Gev},        //14
-  {"B10",    -1,      5,      0, 10.01353470*kAu2Gev},        //15
-  {"B11",    -1,      5,      0, 11.009305167*kAu2Gev},       //16
-  {"2#pi",    3,     -1,     -2, -0.13956995},       	      //17 2*pi
-  {"2p",      1,     -1,      0, -0.93827231}        	      //18 2*p 
+  {"#alpha",  8,      2,      8, 4.00260325415*kAu2Gev},      // 8 He4 
+  {"He6",    -1,      2,     12, 6.018889124*kAu2Gev},        // 9
+  {"He8",    -1,      2,     12, 8.033921897*kAu2Gev},        //10 
+  {"Li6",    10,      3,     10, 5.6031},            	      //11 Li6 
+  {"Li7",     9,      3,      9, 6.5354},            	      //12 Li7 
+  {"Be7",    -1,      4,      0, 7.016003437*kAu2Gev},        //13
+  {"Be9",    -1,      4,      0, 9.01218307*kAu2Gev},         //14
+  {"Be10",   -1,      4,      0, 10.01353470*kAu2Gev},        //15
+  {"B10",    -1,      5,      0, 10.01353470*kAu2Gev},        //16
+  {"B11",    -1,      5,      0, 11.009305167*kAu2Gev},       //17
+  {"2#pi",    3,     -1,     -2, -0.13956995},       	      //18 2*pi
+  {"2p",      1,     -1,      0, -0.93827231}        	      //19 2*p 
 };
 const Int_t NF = 10;  //          0,  1,     2,  3,   4,    5.  6,    7,       8,     9,
-const Char_t *FNames[NF] = {"Girrf","Sirrf","z","70","60","70M","dNdx","zM","70Trs","zTrs"};
+const Char_t *FNames[NF] = {"Girrf","Sirrf","z","I70","I60","I70M","dNdx","zM","70Trs","zTrs"};
 const Int_t Nlog2dx = 3;
 const Double_t log2dx[Nlog2dx] = {0,1,2};
 //________________________________________________________________________________
@@ -138,7 +140,9 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
     dx2 = TMath::Log2(5.);
   }
   scale *= charge*charge;
-  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
+  //  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
+  //  Charge*Charge* (TMath::Exp(Bichsel::Instance()->GetMostProbableZM(TMath::Log10(TMath::Abs(Charge)*p/M),dx2)))
+  return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 1, charge));
 }
 //________________________________________________________________________________
 Double_t bichselZM(Double_t *x,Double_t *par) {
@@ -154,9 +158,10 @@ Double_t bichselZM(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  scale *= charge*charge;
-  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->GetMostProbableZM(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
+  //  scale *= charge*charge;
+  //  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->GetMostProbableZM(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
   //return charge*charge*TMath::Log10(m_Bichsel->GetI70(TMath::Log10(poverm),1.));
+  return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 1, charge));
 }
 //________________________________________________________________________________
 Double_t bichsel70(Double_t *x,Double_t *par) {
@@ -172,9 +177,9 @@ Double_t bichsel70(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  scale *= charge*charge;
+  //  scale *= charge*charge;
   // return  TMath::Log10(scale*charge*charge*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
-  return TMath::Log10(scale*m_Bichsel->GetI70(TMath::Log10(poverm),1.));
+  return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 0, charge));
 }
 //________________________________________________________________________________
 Double_t bichsel70M(Double_t *x,Double_t *par) {
@@ -190,8 +195,9 @@ Double_t bichsel70M(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  scale *= charge*charge;
-  return  TMath::Log10(scale*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
+  //  scale *= charge*charge;
+  //  return  TMath::Log10(scale*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
+  return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 0, charge));
 }
 #if 0
 //________________________________________________________________________________
@@ -210,7 +216,6 @@ Double_t bichsel70Trs(Double_t *x,Double_t *par) {
   scale *= charge*charge;
   return TMath::Log10(scale*TMath::Exp(m_Bichsel->I70Trs(part,TMath::Log10(poverm))));
 }
-#endif
 //________________________________________________________________________________
 Double_t bichselZTrs(Double_t *x,Double_t *par) {
   Double_t pove   = TMath::Power(10.,x[0]);
@@ -230,6 +235,7 @@ Double_t bichselZTrs(Double_t *x,Double_t *par) {
   scale *= charge*charge;
   return  TMath::Log10(scale*TMath::Exp(m_Bichsel->IfitTrs(part,TMath::Log10(poverm))));//TMath::Exp(7.81779499999999961e-01));
 }
+#endif
 //________________________________________________________________________________
 Double_t dNdx(Double_t *x,Double_t *par) {
   Double_t pove   = TMath::Power(10.,x[0]);
@@ -242,7 +248,8 @@ Double_t dNdx(Double_t *x,Double_t *par) {
   if (par[1] > 1.0) charge = par[1];
   poverm *= charge;
   //  scale *= charge*charge;
-  return  TMath::Log10(scale*StdEdxModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
+  //  return  TMath::Log10(scale*StdEdxModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
+  return TMath::Log10(StdEdxPull::EvalPred(poverm, 2, charge));
 }
 #if !defined(__CINT__) && !defined(__CLING__)
 //________________________________________________________________________________
@@ -330,7 +337,7 @@ void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
     m_Bichsel = Bichsel::Instance();
   }
   TString Type(type);
-  TLegend *leg = new TLegend(0.65,0.45,0.75,0.9,"");
+  TLegend *leg = new TLegend(0.85,0.45,0.95,0.9,"");
   Double_t xmax = 4;
   Int_t f = 3;
   for (Int_t i = NF-1; i >=0; i--) {
@@ -346,10 +353,10 @@ void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
     Int_t dx = 1;
     Char_t *FunName = Form("%s%s%i",FNames[f],Part[h].Name,(int)log2dx[dx]);
     cout << "Make " << h << "\t" << FunName << endl;
-    Double_t xmin = -1.5;
+    Double_t xmin = -2.0;
     //    if (h == 0 || h >= 5) xmin = -0.75;
-    if (h == 4) xmin = -0.70;
-    if (h == 6) xmin = -0.50;
+    //    if (h == 4) xmin = -0.70;
+    //    if (h == 6) xmin = -0.50;
     TF1 *func = 0;
     if      (f == 3) func = new TF1(FunName,bichsel70,xmin, xmax,3);
     else if (f == 2) func = new TF1(FunName,bichselZ ,xmin, xmax,3);

@@ -14,9 +14,9 @@ using namespace ROOT::Math;
 #include "tables/St_tpcCorrection_Table.h"
 #include "tables/St_tpcSectorT0offset_Table.h"
 #include "tables/St_tofTrayConfig_Table.h"
-#define DEBUGTABLE(STRUCT) PrintTable(#STRUCT,table )
+#define DEBUGTABLED(STRUCT) PrintTable(#STRUCT,table )
 #define makeString(PATH) # PATH
-#define CHECKTABLE(C_STRUCT) \
+#define CHECKTABLED(C_STRUCT) \
   if (table->InheritsFrom("St_" makeSTRING(C_STRUCT))) {	  \
     St_ ## C_STRUCT  *t = (St_ ## C_STRUCT  *) table ;	      \
     ## C_STRUCT ## _st *s = t->GetTable(); Nrows = s->nrows;    \
@@ -33,14 +33,9 @@ using namespace ROOT::Math;
   }
 //___________________Debug Print out  _____________________________________________________________
 void PrintTable(const Char_t *str, TTable *table) {
-  TDatime t[2];
+  DEBUGTABLE(str);
   Bool_t iprt = kTRUE;
   if (St_db_Maker::GetValidity(table,t) > 0) {
-    Int_t Nrows = table->GetNRows();
-    LOG_WARN << "St_" << str << "C::instance found table " << table->GetName()
-     << " with NRows = " << Nrows << " in db" << endm;
-    LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
-     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     if (table->InheritsFrom("St_tpcCorrection")) {
       St_tpcCorrection *t = (St_tpcCorrection *) table;
       tpcCorrection_st *s = t->GetTable(); Nrows = s->nrows;}
@@ -138,6 +133,9 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
       if (x < 1e-7) X = -16.118;
       else          X = TMath::Log(x);
       break;
+    case 6:
+      X = TMath::Abs(x);
+      break;
     default:      X = x;    break;
     }
   }
@@ -146,8 +144,8 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     if (X < cor->min) X = cor->min;
     if (X > cor->max) X = cor->max;
   }
-  static TF1 *f1000 = 0, *f1100 = 0, *f1200 = 0, *f1300 = 0;
-  static TF1 *f2000 = 0, *f2100 = 0, *f2200 = 0, *f2300 = 0;
+  static TF1 *f1000 = 0, *f1100 = 0, *f1200 = 0, *f1300 = 0, *f1400 = 0, *f1500 = 0;
+  static TF1 *f2000 = 0, *f2100 = 0, *f2200 = 0, *f2300 = 0, *f2400 = 0, *f2500 = 0;
   TF1 *f = 0;
   switch (cor->type) {
   case 1: // Tchebyshev [-1,1]
@@ -195,6 +193,8 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   case 1100:
   case 1200:
   case 1300:
+  case 1400:
+  case 1500:
     if (cor->type == 1000) {
       if (! f1000) f1000 = new TF1("f1000","gaus+pol0(3)");
       f = f1000;
@@ -207,6 +207,12 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     } else if (cor->type == 1300) {
       if (! f1300) f1300 = new TF1("f1300","gaus+pol3(3)");
       f = f1300;
+    } else if (cor->type == 1400) {
+      if (! f1400) f1400 = new TF1("f1400","gaus+pol4(3)");
+      f = f1400;
+    } else if (cor->type == 1500) {
+      if (! f1500) f1500 = new TF1("f1500","gaus+pol5(3)");
+      f = f1500;
     }
     assert(f);
     f->SetParameters(cor->a);
@@ -216,6 +222,8 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   case 2100:
   case 2200:
   case 2300:
+  case 2400:
+  case 2500:
     if (cor->type == 2000) {
       if (! f2000) f2000 = new TF1("f2000","expo+pol0(2)");
       f = f2000;
@@ -228,6 +236,12 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     } else if (cor->type == 2300) {
       if (! f2300) f2300 = new TF1("f2300","expo+pol3(2)");
       f = f2300;
+    } else if (cor->type == 2400) {
+      if (! f2400) f2400 = new TF1("f2400","expo+pol4(2)");
+      f = f2400;
+    } else if (cor->type == 2500) {
+      if (! f2500) f2500 = new TF1("f2500","expo+pol5(2)");
+      f = f2500;
     }
     assert(f);
     f->SetParameters(cor->a);
@@ -248,6 +262,8 @@ MakeChairInstance2(tpcCorrection,St_TpcDriftDistOxygenC,Calibrations/tpc/TpcDrif
 MakeChairInstance2(tpcCorrection,St_TpcMultiplicityC,Calibrations/tpc/TpcMultiplicity);
 #include "St_TpcZCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcZCorrectionBC,Calibrations/tpc/TpcZCorrectionB);
+#include "St_TpcZCorrectionCC.h"
+MakeChairInstance2(tpcCorrection,St_TpcZCorrectionCC,Calibrations/tpc/TpcZCorrectionC);
 #include "St_TpcdXCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorrectionB);
 #include "St_tpcPressureBC.h"
@@ -276,6 +292,29 @@ MakeChairOptionalInstance2(tpcCorrection,St_TpcdChargeC,Calibrations/tpc/TpcdCha
 MakeChairOptionalInstance2(tpcCorrection,St_TpcrChargeC,Calibrations/tpc/TpcrCharge);
 #include "St_TpcTanLC.h"
 MakeChairInstance2(tpcCorrection,St_TpcTanLC,Calibrations/tpc/TpcTanL);
+#include "St_TpcAdcIC.h"
+MakeChairInstance2(tpcCorrection,St_TpcAdcIC,Calibrations/tpc/TpcAdcI);
+#include "St_TpcnPadC.h"
+MakeChairInstance2(tpcCorrection,St_TpcnPadC,Calibrations/tpc/TpcnPad);
+#include "St_TpcnTbkC.h"
+MakeChairInstance2(tpcCorrection,St_TpcnTbkC,Calibrations/tpc/TpcnTbk);
+#include "St_TpcdZdYC.h"
+MakeChairInstance2(tpcCorrection,St_TpcdZdYC,Calibrations/tpc/TpcdZdY);
+#include "St_TpcdXdYC.h"
+MakeChairInstance2(tpcCorrection,St_TpcdXdYC,Calibrations/tpc/TpcdXdY);
+#include "St_GatingGridC.h"
+MakeChairInstance2(GatingGrid,St_GatingGridC,Calibrations/tpc/GatingGrid);
+//________________________________________________________________________________
+Double_t St_GatingGridC::CalcCorrection(Int_t i, Double_t x) {// drift time in microseconds
+  if (x < 0) return 0;
+  GatingGrid_st *cor =  ((St_GatingGrid *) Table())->GetTable() + i;
+  Double_t value = -10;
+  if (x <= cor->t0) return value;
+  Double_t corD = 1. - TMath::Exp(-(x-cor->t0)/(cor->settingTime/4.6));
+  if (corD < 1e-4) return value;
+  return TMath::Log(corD);
+}
+
 #include "St_TpcCurrentCorrectionC.h"
 //MakeChairInstance2(tpcCorrection,St_TpcCurrentCorrectionC,Calibrations/tpc/TpcCurrentCorrection);
 ClassImp(St_TpcCurrentCorrectionC);
@@ -304,6 +343,8 @@ MakeChairInstance2(tpcCorrection,St_TpcDriftVelRowCorC,Calibrations/tpc/TpcDrift
 MakeChairInstance2(tpcCorrection,St_TpcAccumulatedQC,Calibrations/tpc/TpcAccumulatedQ);
 #include "St_TpcLengthCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMDF,Calibrations/tpc/TpcLengthCorrectionMDF);
+#include "St_TpcLengthCorrectionMD2.h"
+MakeChairInstance2(MDFCorrection,St_TpcLengthCorrectionMD2,Calibrations/tpc/TpcLengthCorrectionMD2);
 #include "St_TpcPadCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcPadCorrectionMDF,Calibrations/tpc/TpcPadCorrectionMDF);
 ClassImp(St_MDFCorrectionC);
@@ -1364,7 +1405,17 @@ Bool_t        St_beamInfoC::IsFixedTarget() {
   Bool_t isFixTag = kFALSE;
   Float_t MaxIntensity = TMath::Max(blueIntensity(), yellowIntensity());
   Float_t MinIntensity = TMath::Min(blueIntensity(), yellowIntensity());
-  if (MaxIntensity > 1.0 && MaxIntensity > 10*MinIntensity) isFixTag = kTRUE;
+  if (MaxIntensity > 0.5) {
+    if (MaxIntensity > 1000*MinIntensity) isFixTag = kTRUE;
+  } else if (yellowIntensity() < 0.5) {
+  //Fix for beamInfo for fixedTarget with yellowIntensity < 1
+    if ((runNumber() >= 20181040 && runNumber() <= 20181045) || // 4p59GeV_fixedTarget_2019
+	(runNumber() >= 20182006 && runNumber() <= 20182018) || 
+	 runNumber() == 22121022 ||                             // tune_3p85GeV_fixedTarget_2021
+	 runNumber() == 22158035 ||
+	 runNumber() == 22166031                                // 3p85GeV_fixedTarget_2021
+	)	isFixTag = kTRUE;
+  }
   return isFixTag;
 }
 //________________________________________________________________________________

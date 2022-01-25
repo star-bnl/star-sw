@@ -20,7 +20,7 @@ class StarMCHit : public TDataSet {
   StarMCHit(const Char_t *name="StarMCHit",const Char_t *title="") : cumulativeStep(0.0), cumulativeDedx(0.0) {
 		      active=true;
 		      if(LastHit()!=NULL && LastHit()->isActive()) {
-			cout<<"Warning: hit not finalized"<<endl;
+			std::cout<<"Warning: hit not finalized"<<std::endl;
 		      }
 		      path.Set(HIT_PATH_DEPTH);
 

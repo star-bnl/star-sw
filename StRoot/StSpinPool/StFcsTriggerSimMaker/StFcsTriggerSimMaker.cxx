@@ -52,10 +52,19 @@
 
 namespace {
   enum {kMaxNS=2, kMaxDet=3, kMaxDep=24, kMaxCh=32, kMaxEcalDep=24, kMaxHcalDep=8, kMaxPresDep=4, kMaxLink2=2};
-  u_int   fcs_trg_sim_adc[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
+  uint32_t   fcs_trg_sim_adc[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
   float   fcs_trg_pt_correction[kMaxNS][kMaxDet][kMaxDep][kMaxCh];
   float   fcs_trg_gain_correction[kMaxNS][kMaxDet][kMaxDep][kMaxCh];
-  u_short fcs_trg_pedestal[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
+  uint16_t fcs_trg_pedestal[kMaxNS][kMaxDet][kMaxDep][kMaxCh] ;
+
+  static const int mNTRG=21;
+  static const char* ctrg[mNTRG]={"JP2", "JPA1", "JPA0", "JPBC1", "JPBC0", "JPDE1", "JPDE0",
+				  "DiJP", "DiJPAsy",
+				  "DY","JPsi","DYNoEpd","DYAsy",
+				  "Had2","Had1","Had0",
+				  "EM2","EM1","EM0",
+				  "ELE2","EM3"};
+  int NTRG[mNTRG+1];
 }
 
 ClassImp(StFcsTriggerSimMaker);
@@ -97,81 +106,37 @@ int StFcsTriggerSimMaker::Init(){
 	mTrgSim->stage_version[1]=1;
 	mTrgSim->stage_version[2]=3;
 	mTrgSim->stage_version[3]=3;
-	//Thresholds
-	mTrgSim->EM_HERATIO_THR = 32;
-	mTrgSim->HAD_HERATIO_THR = 32;
-	if(0){
-	  mTrgSim->EMTHR1 = 32;
-	  mTrgSim->EMTHR2 = 48;
-	  mTrgSim->EMTHR3 = 64;
-	  mTrgSim->HADTHR1 = 32;
-	  mTrgSim->HADTHR2 = 48;
-	  mTrgSim->HADTHR3 = 64;
-	  mTrgSim->JETTHR1 = 64;
-	  mTrgSim->JETTHR2 = 128;
-	  mTrgSim->ETOTTHR = 128;
-	  mTrgSim->HTOTTHR = 64;
-	  mTrgSim->EHTTHR = 16;
-	  mTrgSim->HHTTHR = 16;
-	}
-	if(0){
-	  mTrgSim->EMTHR1 = 64;
-	  mTrgSim->EMTHR2 = 128;
-	  mTrgSim->EMTHR3 = 192;
-	  mTrgSim->HADTHR1 = 64;
-	  mTrgSim->HADTHR2 = 128;
-	  mTrgSim->HADTHR3 = 192;
-	  mTrgSim->JETTHR1 = 128;
-	  mTrgSim->JETTHR2 = 192;
-	  mTrgSim->ETOTTHR = 192;
-	  mTrgSim->HTOTTHR = 64;
-	  mTrgSim->EHTTHR = 64;
-	  mTrgSim->HHTTHR = 16;
-	}
-	if(0){
-	  mTrgSim->EMTHR1 = 180;
-	  mTrgSim->EMTHR2 = 240;
-	  mTrgSim->EMTHR3 = 250;
-	  mTrgSim->HADTHR1 = 180;
-	  mTrgSim->HADTHR2 = 240;
-	  mTrgSim->HADTHR3 = 250;
-	  mTrgSim->JETTHR1 = 150;
-	  mTrgSim->JETTHR2 = 250;
-	  mTrgSim->ETOTTHR = 250;
-	  mTrgSim->HTOTTHR = 150;
-	  mTrgSim->EHTTHR = 200;
-	  mTrgSim->HHTTHR = 40;
-	}
-	if(0){
-	  mTrgSim->EMTHR1 = 70;
-	  mTrgSim->EMTHR2 = 120;
-	  mTrgSim->EMTHR3 = 160;
-	  mTrgSim->HADTHR1 = 85;
-	  mTrgSim->HADTHR2 = 130;
-	  mTrgSim->HADTHR3 = 160;
-	  mTrgSim->JETTHR1 = 240;
-	  mTrgSim->JETTHR2 = 250;
-	  mTrgSim->ETOTTHR = 250;
-	  mTrgSim->HTOTTHR = 230;
-	  mTrgSim->EHTTHR = 80;
-	  mTrgSim->HHTTHR = 70;
-	}
-	if(1){
-	  mTrgSim->EMTHR1 = 70;
-	  mTrgSim->EMTHR2 = 50;
-	  mTrgSim->EMTHR3 = 160;
-	  mTrgSim->HADTHR1 = 85;
-	  mTrgSim->HADTHR2 = 50;
-	  mTrgSim->HADTHR3 = 160;
-	  mTrgSim->JETTHR1 = 240;
-	  mTrgSim->JETTHR2 = 250;
-	  mTrgSim->ETOTTHR = 100;
-	  mTrgSim->HTOTTHR = 80;
-	  mTrgSim->EHTTHR = 80;
-	  mTrgSim->HHTTHR = 70;
-	}
-	mTrgSim->PHTTHR = 160;    
+    }else if(mTrgSelect==202204){
+	mTrgSim->stage_version[0]=2;
+	mTrgSim->stage_version[1]=1;
+	mTrgSim->stage_version[2]=4;
+	mTrgSim->stage_version[3]=3;
+    }else if(mTrgSelect==202205){
+	mTrgSim->stage_version[0]=2;
+	mTrgSim->stage_version[1]=1;
+	mTrgSim->stage_version[2]=5;
+	mTrgSim->stage_version[3]=3;
+    }else if(mTrgSelect==202206){
+	mTrgSim->stage_version[0]=2;
+	mTrgSim->stage_version[1]=1;
+	mTrgSim->stage_version[2]=6;
+	mTrgSim->stage_version[3]=3;
+    }else if(mTrgSelect==202207){
+	mTrgSim->stage_version[0]=2;
+	mTrgSim->stage_version[1]=1;
+	mTrgSim->stage_version[2]=7;
+	mTrgSim->stage_version[3]=7;
     }
+
+    //Thresholds
+    if(mThresholdFile){
+	readThresholdFile();
+    }else if(mThresholdDb){
+	readThresholdDb();
+    }
+    //mTrgSim->EM_HERATIO_THR = 32;
+    //mTrgSim->HAD_HERATIO_THR = 32;
+
     //EPD mask
     if(mPresMask){
 	printf("Reading PresMask from %s\n",mPresMask);
@@ -193,6 +158,8 @@ int StFcsTriggerSimMaker::Init(){
 	    mTrgSim->fcs_readPresMaskFromText=1;	
 	}
     }
+
+    memset(NTRG,0,sizeof(NTRG));
     return kStOK;
 }
 
@@ -205,11 +172,15 @@ int StFcsTriggerSimMaker::InitRun(int runNumber){
     }
 
     //QA root file    
-    if(mQaFilename){
-	mQaFile=new TFile(mQaFilename,"RECREATE");
+    if(mQaTreeFilename){
+	mQaTreeFile=new TFile(mQaTreeFilename,"RECREATE");
 	mTree = new TTree("trgsim","trigger sim QA");
 	mTree->Branch("flt",&mFlt,"flt/I");
 	mTree->Branch("trg",&mTrg,"trg/I");
+    }
+    if(mQaHistFilename){
+	mQaHistFile=new TFile(mQaHistFilename,"RECREATE");
+	mTrgRate = new TH1F("FcsTrgRate","FcsTrgRate",mNTRG+1,0,mNTRG+1);
     }
 
     //Write Text event file & gainfile
@@ -227,8 +198,13 @@ int StFcsTriggerSimMaker::InitRun(int runNumber){
 	for(int id=0; id<nid; id++){
 	    int ehp,ns,crt,sub,dep,ch;
 	    mFcsDb->getDepfromId(det,id,ehp,ns,crt,sub,dep,ch);
-	    fcs_trg_pt_correction[ns][ehp][dep][ch] = mFcsDb->getEtGain(det,id);
-	    fcs_trg_gain_correction[ns][ehp][dep][ch] = mFcsDb->getGainCorrection(det,id);
+	    if(det<4){
+		fcs_trg_pt_correction[ns][ehp][dep][ch] = mFcsDb->getEtGain(det,id,mEtFactor);
+		fcs_trg_gain_correction[ns][ehp][dep][ch] = mFcsDb->getGainCorrection(det,id);
+	    }else{
+		fcs_trg_pt_correction[ns][ehp][dep][ch] = 1.0;
+		fcs_trg_gain_correction[ns][ehp][dep][ch] = 1.0;
+	    }
 	    fcs_trg_pedestal[ns][ehp][dep][ch] = 0;
 	    
 	    mTrgSim->p_g[ns][ehp][dep][ch].ped  = fcs_trg_pedestal[ns][ehp][dep][ch];
@@ -236,11 +212,11 @@ int StFcsTriggerSimMaker::InitRun(int runNumber){
 	    float ggg = fcs_trg_pt_correction[ns][ehp][dep][ch];
 	    //float ggg = (fcs_trg_pt_correction[ns][ehp][dep][ch]-1.0)/2.0 + 1.0;
 	    float gg = ggg * fcs_trg_gain_correction[ns][ehp][dep][ch];
-	    int g = (u_int)(gg*256.0+0.5) ;
+	    int g = (uint32_t)(gg*256.0+0.5) ;
 	    mTrgSim->p_g[ns][ehp][dep][ch].gain = g;
 
 	    /*
-	      printf("AAA %1d %1d %2d %2d pT=%6.3f corr=%6.3f ped=%4d\n",ns,ehp,dep,ch,
+	      printf("AAAGAIN %1d %1d %2d %2d pT=%6.3f corr=%6.3f ped=%4d\n",ns,ehp,dep,ch,
 	      fcs_trg_pt_correction[ns][ehp][dep][ch],
 	      fcs_trg_gain_correction[ns][ehp][dep][ch],
 	      fcs_trg_pedestal[ns][ehp][dep][ch]);
@@ -265,11 +241,22 @@ int StFcsTriggerSimMaker::Finish(){
 	printf("Closing %s\n",mFilename);
 	fclose(mFile);
     }
-    if(mQaFile){
-	printf("Closing %s\n",mQaFilename);
+    if(mQaTreeFile){
+	printf("Closing %s\n",mQaTreeFilename);
 	mTree->Write();
-	mQaFile->Close();
+	mQaTreeFile->Close();
     }
+    if(mQaHistFile){
+	printf("Closing %s\n",mQaHistFilename);
+	mTrgRate->Write();
+	mQaHistFile->Close();
+    }
+
+    int tot = NTRG[mNTRG];
+    LOG_INFO << "Triggers counts/"<<tot<<" (rate at 5MHz BBC)"<<endm; 
+    for(int i=0; i<mNTRG; i++)
+	LOG_INFO << Form("%8s  %9d (%12.2f)",ctrg[i],NTRG[i],double(NTRG[i])/tot*5.0e6)<<endm;
+
     return kStOK;
 }
 
@@ -282,7 +269,7 @@ int StFcsTriggerSimMaker::Make(){
     mTrgSim->start_event();
 
     //Feed ADC
-    static u_short data[8]; 
+    static uint16_t data[8]; 
     memset(data,0,sizeof(data)) ;
     memset(fcs_trg_sim_adc,0,sizeof(fcs_trg_sim_adc));
     int n=0;
@@ -320,8 +307,8 @@ int StFcsTriggerSimMaker::Make(){
     LOG_INFO << Form("StFcsTriggerSimMaker feeded %d hits",n) << endm;;
 
     //Run Trigger Simulation
-    //   u_short dsm_out = fcs_trg_run(mTrgSelect, mDebug);
-    u_short dsm_out = mTrgSim->end_event();
+    //   uint16_t dsm_out = fcs_trg_run(mTrgSelect, mDebug);
+    uint32_t dsm_out = mTrgSim->end_event();
 
     //QA Tree
     mFlt=0;
@@ -332,16 +319,62 @@ int StFcsTriggerSimMaker::Make(){
 	    mFlt=ge->GetFilterResult();
 	}
     }
-    mTrg=dsm_out;
-    if(mQaFile) mTree->Fill();
+    mTcu=dsm_out;
+    if(mQaTreeFile) mTree->Fill();
 
     //Results
-    LOG_INFO << Form("Output to DSM = 0x%03x  Filter=0x%03x\n",mTrg,mFlt)<<endm;
+    LOG_INFO << Form("Output to TCU = 0x%08x  Filter=0x%08x",mTcu,mFlt)<<endm;
+
+    //TCU Trigger Emulation 
+    int trg[mNTRG]; 
+    mTrg=0;
+    memset(trg,0,sizeof(trg));
+    if((dsm_out >> 6) & 0x1)       {trg[ 0]=1; mTrg+=1<<0;}  //JP2
+    if((dsm_out >> 7) & 0x1)       {trg[ 1]=1; mTrg+=1<<1;}  //JPA1
+    if((dsm_out >>10) & 0x1)       {trg[ 2]=1; mTrg+=1<<2;}  //JPA0
+    if((dsm_out >> 8) & 0x1)       {trg[ 3]=1; mTrg+=1<<3;}  //JPBC1
+    if((dsm_out >>11) & 0x1)       {trg[ 4]=1; mTrg+=1<<4;}  //JPBC0
+    if((dsm_out >> 9) & 0x1)       {trg[ 5]=1; mTrg+=1<<5;}  //JPDE1
+    if((dsm_out >>12) & 0x1)       {trg[ 6]=1; mTrg+=1<<6;}  //JPDE0
+    if((dsm_out >>13) & 0x1)       {trg[ 7]=1; mTrg+=1<<7;}  //DiJP
+    if((dsm_out >>14) & 0x1)       {trg[ 8]=1; mTrg+=1<<8;}  //DiJpAsy
+    if( ((dsm_out >>18) & 0x1) && 
+        ((dsm_out >>26) & 0x1) )   {trg[ 9]=1; mTrg+=1<<9;}  //DY 
+    if( ((dsm_out >>17) & 0x1) && 
+        ((dsm_out >>25) & 0x1) )   {trg[10]=1;  mTrg+=1<<10;} //Jpsi
+    if( ((dsm_out >>19) & 0x1) && 
+        ((dsm_out >>27) & 0x1) )   {trg[11]=1;  mTrg+=1<<11;} //DYNoEpd
+    if((dsm_out >>15) & 0x1)       {trg[12]=1;  mTrg+=1<<12;} //DYAsy     
+    if((dsm_out >> 2) & 0x1)       {trg[13]=1;  mTrg+=1<<13;} //Had2
+    if((dsm_out >> 1) & 0x1)       {trg[14]=1;  mTrg+=1<<14;} //Had1
+    if((dsm_out >> 0) & 0x1)       {trg[15]=1;  mTrg+=1<<15;} //Had0
+    if((dsm_out >> 5) & 0x1)       {trg[16]=1;  mTrg+=1<<16;} //EM2
+    if((dsm_out >> 4) & 0x1)       {trg[17]=1;  mTrg+=1<<17;} //EM1
+    if((dsm_out >> 3) & 0x1)       {trg[18]=1;  mTrg+=1<<18;} //EM0
+    if( ((dsm_out >>18) & 0x1) ||
+        ((dsm_out >>26) & 0x1) )   {trg[19]=1;  mTrg+=1<<19;} //ELE2
+    if( ((dsm_out >>19) & 0x1) ||
+        ((dsm_out >>27) & 0x1) )   {trg[20]=1;  mTrg+=1<<20;} //EM3
+
+    if(mTrgRate) mTrgRate->Fill(mNTRG);
+    NTRG[mNTRG]++;
+    for(int i=0; i<mNTRG; i++){ 
+	if(trg[i]) {
+	    if(mTrgRate) mTrgRate->Fill(i);
+	    NTRG[i]++;
+	}
+    }
+    
+    LOG_INFO << "Triggers = ";
+    for(int i=0; i<mNTRG; i++){ if(trg[i]) LOG_INFO << ctrg[i] << " ";}
+    LOG_INFO << endm;
+
     return kStOK;
 }    
 
 void StFcsTriggerSimMaker::runStage2(link_t ecal[], link_t hcal[], link_t pres[], geom_t& geo, link_t output[]){
-  mTrgSim->stage_2(ecal,hcal,pres,geo,output);
+  uint16_t s2_to_dsm;
+  mTrgSim->stage_2(ecal,hcal,pres,geo,output,&s2_to_dsm);
 }
 
 void StFcsTriggerSimMaker::print4B4(){
@@ -566,3 +599,54 @@ void StFcsTriggerSimMaker::printJP(){
     return;
 }
 
+void StFcsTriggerSimMaker::readThresholdFile(){
+    LOG_INFO << Form("Reading Thresholds from %s",mThresholdFile)<<endm;
+    FILE* F=fopen(mThresholdFile,"r");
+    if(F == NULL){
+	LOG_ERROR << Form("Could not open %s",mThresholdFile)<<endm;
+	return;
+    }
+    char f[10],name[100];
+    int i,id,v;
+    while(fscanf(F,"%s %d %d %s %d",f, &i, &id, name, &v) != EOF){
+	if(f[0] == '#') continue;
+	TString trg(name);
+	printf("Reading Threshold %s %d\n",trg.Data(),v);
+	if     (trg=="FCS_PHTTHR")          mTrgSim->PHTTHR=v;
+	else if(trg=="FCS_EM-HERATIO-THR")  mTrgSim->EM_HERATIO_THR=v;
+	else if(trg=="FCS_HAD-HERATIO-THR") mTrgSim->HAD_HERATIO_THR=v;
+	else if(trg=="FCS_EMTHR2")          mTrgSim->EMTHR2=v;
+	else if(trg=="FCS_EMTHR1")          mTrgSim->EMTHR1=v;
+	else if(trg=="FCS_EMTHR0")          mTrgSim->EMTHR0=v;
+	else if(trg=="FCS_ELETHR2")         mTrgSim->ELETHR2=v;
+	else if(trg=="FCS_ELETHR1")         mTrgSim->ELETHR1=v;
+	else if(trg=="FCS_ELETHR0")         mTrgSim->ELETHR0=v;
+	else if(trg=="FCS_HADTHR2")         mTrgSim->HADTHR2=v;
+	else if(trg=="FCS_HADTHR1")         mTrgSim->HADTHR1=v;
+	else if(trg=="FCS_HADTHR0")         mTrgSim->HADTHR0=v;
+	else if(trg=="FCS_JPATHR2")         mTrgSim->JPATHR2=v;
+	else if(trg=="FCS_JPATHR1")         mTrgSim->JPATHR2=v;
+	else if(trg=="FCS_JPATHR0")         mTrgSim->JPATHR0=v;
+	else if(trg=="FCS_JPBCTHR2")        mTrgSim->JPBCTHR2=v;
+	else if(trg=="FCS_JPBCTHR1")        mTrgSim->JPBCTHR1=v;
+	else if(trg=="FCS_JPBCTHR0")        mTrgSim->JPBCTHR0=v;
+	else if(trg=="FCS_JPBCTHRD")        mTrgSim->JPBCTHRD=v;
+	else if(trg=="FCS_JPDETHR2")        mTrgSim->JPDETHR2=v;
+	else if(trg=="FCS_JPDETHR1")        mTrgSim->JPDETHR1=v;
+	else if(trg=="FCS_JPDETHR0")        mTrgSim->JPDETHR0=v;
+	else if(trg=="FCS_JPDETHRD")        mTrgSim->JPDETHRD=v;
+	else if(trg=="FCS_EHTTHR")          mTrgSim->EHTTHR=v;
+	else if(trg=="FCS_HHTTHR")          mTrgSim->HHTTHR=v;
+	else if(trg=="FCS_ETOTTHR")         mTrgSim->ETOTTHR=v;
+	else if(trg=="FCS_HTOTTHR")         mTrgSim->HTOTTHR=v;
+	else{
+	    printf("No Threshold called %s %d\n",trg.Data(),v);
+	}
+    }
+    fclose(F);
+}
+
+//read from offline copy of online runlog DB
+void StFcsTriggerSimMaker::readThresholdDb(){
+  //to be implemented before run22 online DB moves to offline  
+}

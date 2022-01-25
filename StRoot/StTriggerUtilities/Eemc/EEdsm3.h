@@ -3,11 +3,10 @@
 /**************************************************************
  * $Id: EEdsm3.h,v 1.1 2009/10/12 18:04:26 pibero Exp $
  **************************************************************/
-typedef unsigned short ushort;
 
 class EEdsm3  {
   static const int nc=1; // # of used channels to DSM
-  ushort data[nc];
+  unsigned short data[nc];
   int mYear;// unpacking changed in 2006
 
  private:
@@ -17,22 +16,22 @@ class EEdsm3  {
   virtual ~EEdsm3();
   void  print(int k=0) const;
   void  clear();
-  void  setWord(int ch, ushort val);
+  void  setWord(int ch, unsigned short val);
   void  setYear(int y) { mYear=y;}
   int   getNc(){return nc;}
   
-  ushort getBarreJPthr2bit() const;                
-  ushort getBarreHTthr2bit() const;                                     
-  ushort getBarreEsumThr1bit() const;                         
-  ushort getJpsi1bit() const;                       
-  ushort getBarreHTTPthr1bit() const; 
-  ushort getBarreTPthr1bit() const; 
-  ushort getEndcapJPthr2bit() const;                    
-  ushort getEndcapHTthr2bit() const;
-  ushort getEndcapEsumthr1bit() const;
-  ushort getEndcapHTTPthr1bit() const;
-  ushort getEndcapTPthr1bit() const;
-  ushort getEtotThr1bit() const;
+  unsigned short getBarreJPthr2bit() const;                
+  unsigned short getBarreHTthr2bit() const;                                     
+  unsigned short getBarreEsumThr1bit() const;                         
+  unsigned short getJpsi1bit() const;                       
+  unsigned short getBarreHTTPthr1bit() const; 
+  unsigned short getBarreTPthr1bit() const; 
+  unsigned short getEndcapJPthr2bit() const;                    
+  unsigned short getEndcapHTthr2bit() const;
+  unsigned short getEndcapEsumthr1bit() const;
+  unsigned short getEndcapHTTPthr1bit() const;
+  unsigned short getEndcapTPthr1bit() const;
+  unsigned short getEtotThr1bit() const;
   
 };
 #endif

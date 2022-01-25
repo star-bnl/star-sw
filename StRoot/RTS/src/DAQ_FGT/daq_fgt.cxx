@@ -197,7 +197,7 @@ daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 	char *st ;
 	int r_start, r_stop ;
 	int bytes ;
-	int s = 1 ;
+	int s_start, s_stop ;
 
 	assert(caller) ;	// sanity...
 
@@ -220,9 +220,22 @@ daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 		r_start = r_stop = rdo ;
 	}
 
+	if(sec<=0) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else if(sec>3) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else {
+		s_start = s_stop = sec ;
+	}
+
+
 	raw->create(8*1024,"fgt_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
-
-
+	
+	for(int s=s_start;s<=s_stop;s++) {
 	for(int r=r_start;r<=r_stop;r++) {
 		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, s, r) ;
 		full_name = caller->get_sfs_name(str) ;
@@ -240,6 +253,7 @@ daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 
 	
 		raw->finalize(bytes,s,r,0) ;	// sector 0;
+	}
 	}
 
 	raw->rewind() ;
@@ -416,7 +430,8 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 			for(int i=0;i<tb_cou;i++) {
 				fgt_d[cou].ch = ch ;
 				fgt_d[cou].tb = i ;
-				fgt_d[cou].adc = d[ix] ;
+				fgt_d[cou].adc = d[ix] & 0xFFF ;	// new: 13 bits
+				fgt_d[cou].flags = d[ix]>>12 ;		// new: upper 3 are flags
 				cou++ ;
 
 				//printf("ZS: %d %d %d %d %d = %d\n",arc,arm,apv,ch,i,d[ix]) ;
@@ -455,7 +470,7 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 {
 	int r_start, r_stop ;
-	int s = 1 ;	// for now...
+	int s_start, s_stop ;
 	
 	adc->create(1000,"fgt_adc",rts_id,DAQ_DTA_STRUCT(fgt_adc_t)) ;
 
@@ -471,9 +486,21 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 		r_start = r_stop = rdo ;
 	}
 
+	if(sec<=0) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else if(sec>3) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else {
+		s_start = s_stop = sec ;
+	}
 
 	int found_some = 0 ;
 
+	for(int s=s_start;s<=s_stop;s++) {	
 	for(int r=r_start;r<=r_stop;r++) {
 		u_int *d ;
 
@@ -710,6 +737,7 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 						fgt_d[cou].ch = rch ;
 						fgt_d[cou].tb = tb ;
 						fgt_d[cou].adc = adc ;
+						fgt_d[cou].flags = 0 ;
 						cou++ ;
 					}
 				}
@@ -726,6 +754,7 @@ unrecoverable_error:
 		apv_meta.arc[r].error = 1 ;
 		LOG(WARN,"[evt %d]: RDO %d: Cannot reliably recover pointer to next item, dropping the rest of this event on this rdo",
 		    get_global_event_num(),r);
+	}
 	}
 
 	adc->rewind() ;
@@ -778,8 +807,17 @@ daq_dta *daq_fgt::handle_ped(int sec, int rdo)
 		LOG(ERR,"Bad pedestal version") ;
 	}
 
-	if(d[1] != 1 ) {
-		LOG(ERR,"Bad pedestal version") ;
+	int is_fst = 0 ;
+
+	switch(d[1]) {
+	case 1 :	// old, non FST
+		break ;
+	case 2 :
+		is_fst = 1 ;
+		break ;
+	default :
+		LOG(ERR,"Bad pedestal version 0x%X",d[1]) ;
+		break ;
 	}
 
 //	int arm_cou = d[2] ;
@@ -807,11 +845,18 @@ daq_dta *daq_fgt::handle_ped(int sec, int rdo)
 				for(int t=0;t<tb_cou;t++) {
 					u_short ped = d[ix++] ;
 					u_short rms = d[ix++] ;
+					u_short cmn_rms ;
+
+					if(is_fst) {	// SPECIAL
+						cmn_rms = d[ix++] ;
+					}
+					else cmn_rms = 0 ;
 
 					f_ped[cou].ch = ch ;
 					f_ped[cou].tb = t ;
 					f_ped[cou].ped = ((float)ped) / 16.0 ;
 					f_ped[cou].rms = ((float)rms) / 16.0 ;
+					f_ped[cou].cmn_rms = ((float)cmn_rms) / 16.0 ;
 					cou++ ;
 				}
 			}
@@ -898,7 +943,7 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	
-	LOG(DBG,"RDO %d: expect %d, in data %d",rdo,rdo_id[rdo],rdo_in_dta) ;
+	LOG(NOTE,"RDO %d: expect %d, in data %d",rdo,rdo_id[rdo],rdo_in_dta) ;
 
 
 	int format_code = (d32[2] >> 8) & 0xFF ;

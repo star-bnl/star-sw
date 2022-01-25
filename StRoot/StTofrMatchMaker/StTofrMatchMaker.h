@@ -150,8 +150,8 @@ private:
     void bookHistograms();
     void writeHistogramsToFile();
     
-    Bool_t validAdc(Float_t const);
-    Bool_t validTdc(Float_t const);
+    Bool_t validAdc(Float_t);
+    Bool_t validTdc(Float_t);
     Bool_t validEvent(StEvent *);
     Bool_t validTrack(StTrack*);
     Bool_t validTrackRun8(StGlobalTrack*);
@@ -390,8 +390,8 @@ inline void StTofrMatchMaker::setCreateTreeFlag(Bool_t tree){mSaveTree = tree;}
 
 inline void StTofrMatchMaker::setSaveGeometry(Bool_t geomSave){mGeometrySave = geomSave; }
 
-inline Bool_t StTofrMatchMaker::validAdc(const Float_t adc){return((adc>=mMinValidAdc) && (adc<=mMaxValidAdc));}
+inline Bool_t StTofrMatchMaker::validAdc(Float_t adc){return((adc>=mMinValidAdc) && (adc<=mMaxValidAdc));}
 
-inline Bool_t StTofrMatchMaker::validTdc(const Float_t tdc){return((tdc>=mMinValidTdc) && (tdc<=mMaxValidTdc));}
+inline Bool_t StTofrMatchMaker::validTdc(Float_t tdc){return((tdc>=mMinValidTdc) && (tdc<=mMaxValidTdc));}
 
 #endif

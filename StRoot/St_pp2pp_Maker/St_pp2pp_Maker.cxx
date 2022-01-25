@@ -751,16 +751,16 @@ Int_t St_pp2pp_Maker::MakeClusters() {
       if(trg_p){ 
 
 	if ( mVersion == 1 ) {  // 2009
-	  pp2ppColl->romanPot(i)->setAdc((u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UDOI[i],0),/// u_short -> u_int
-					 (u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UDOI[i],1) ); 
-	  pp2ppColl->romanPot(i)->setTac((u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UDOI[i],0),/// u_short -> u_int
-					 (u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UDOI[i],1) ); 
+	  pp2ppColl->romanPot(i)->setAdc((uint32_t) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UDOI[i],0),/// uint16_t -> uint32_t
+					 (uint32_t) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UDOI[i],1) ); 
+	  pp2ppColl->romanPot(i)->setTac((uint32_t) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UDOI[i],0),/// uint16_t -> uint32_t
+					 (uint32_t) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UDOI[i],1) ); 
 	}
 	else { // >= 2015
-	  pp2ppColl->romanPot(i)->setAdc((u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UD[i],0),/// u_short -> u_int
-					 (u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UD[i],1) ); 
-	  pp2ppColl->romanPot(i)->setTac((u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UD[i],0),/// u_short -> u_int
-					 (u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UD[i],1) ); 	  
+	  pp2ppColl->romanPot(i)->setAdc((uint32_t) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UD[i],0),/// uint16_t -> uint32_t
+					 (uint32_t) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UD[i],1) ); 
+	  pp2ppColl->romanPot(i)->setTac((uint32_t) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UD[i],0),/// uint16_t -> uint32_t
+					 (uint32_t) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UD[i],1) ); 	  
 	}
 
 	// for now (Jan. 2010) : use the status byte as "silicon_bunch - bunchId7Bit()"
