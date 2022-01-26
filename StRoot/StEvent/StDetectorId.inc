@@ -5,7 +5,7 @@
       INTEGER kBarrelSmdPhiStripId,kZdcWestId,kZdcEastId
       INTEGER kEndcapSmdUStripId,kEndcapSmdVStripId,kMwpcWestId,kMwpcEastId
       INTEGER kTpcSvtId,kTpcSsdId,kTpcSsdsvtId,kSsdSvtId,kPhmdCpvId,kPhmdId
-      INTEGER kPxlId,kIstId,kFgtId,kFpdWestId,kFpdEastId,kFmsId,kEtrId
+      INTEGER kPxlId,kIstId,kFstId,kFgtId,kFpdWestId,kFpdEastId,kFmsId,kEtrId
 
 #include "StDetectorDefinitions.h"
       PARAMETER (kUnknownId = kUnknownIdentifier)
@@ -37,6 +37,7 @@
       PARAMETER (kPhmdId = kPhmdIdentifier)
       PARAMETER (kPxlId       = kPxlIdentifier)
       PARAMETER (kIstId       = kIstIdentifier)
+      PARAMETER (kFstId       = kFstIdentifier)
       PARAMETER (kFgtId       = kFgtIdentifier)
       PARAMETER (kEtrId       = kEtrIdentifier)
       PARAMETER (kFpdWestId   = kFpdWestIdentifier)

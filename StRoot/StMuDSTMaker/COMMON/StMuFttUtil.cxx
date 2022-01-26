@@ -125,11 +125,9 @@ void StMuFttUtil::fillFttRawHits(StFttCollection* fttcol,
   while ((muHit = static_cast<StMuFttRawHit*>(next()))) {
     fttcol->addRawHit(new StFttRawHit);
     StFttRawHit* hit = fttcol->rawHits().back();
-
     hit->setRaw(
         muHit->sector(), muHit->rdo(), muHit->feb(),
         muHit->vmm(), muHit->channel(), muHit->adc(),
         muHit->bcid(), muHit->tb(), muHit->dbcid() );
-    // TODO: ACTUALLY DO IT
   }  // while
 } // fillFttHits

@@ -213,7 +213,7 @@ Int_t StFgtRawDaqReader::Make() {
       while(dd && dd->iterate()) {
          fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
 
-         for(u_int i=0;i<dd->ncontent;i++) {
+         for(uint32_t i=0;i<dd->ncontent;i++) {
             timebin=f[i].tb - mStartTbin;
 	    if(timebin<0 || timebin>=mNumTbin) continue;
 

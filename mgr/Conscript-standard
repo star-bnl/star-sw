@@ -314,8 +314,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#print "\tAfter  ".($#src)." ".($#inc)."\n";
 
         if ($Dir =~ m#StarVMC/StarGeometry#) {
+            my($cpppath) = $env->_subst($env->{CPPPATH});
+            my($cscanner) = find scan::cpp($env->{_cwd}, $cpppath);
+            $env->{_IFLAGS} = "%(" . $cscanner->iflags($env) . "%)";
             Command $env ["$OBJ/StarVMC/StarGeometry/StarGeo_Cint.cxx", "$OBJ/StarVMC/StarGeometry/StarGeo_Cint.h"],
-                         ("$OBJ/StarVMC/StarGeometry/StarGeo.h", "#StarVMC/Geometry/StarGeoLinkDef.h"), qq(rootcint -f %> -c %1 %2);
+                         ("$OBJ/StarVMC/StarGeometry/StarGeo.h", "#StarVMC/Geometry/StarGeoLinkDef.h"), qq(rootcint -f %> -c %_IFLAGS %1 %2);
             push(@srcL, "$OBJ/StarVMC/StarGeometry/StarGeo_Cint.cxx");
         }
 
@@ -369,8 +372,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 		foreach (@ODIR){ if ( ! -d $ODIR[0] ){  mkdir($ODIR[0],0755);}}
 
 		# local or global install
-		if ( -e "mgr/agmlParser.py"){	$agml_cmd = "mgr/agmlParser.py";
-		} else {			$agml_cmd = $env->{ENV}->{STAR}."/mgr/agmlParser.py";}
+		if ( -e "mgr/agmlParser.py"){	$agml_root = "mgr";
+		} else {			$agml_root = $env->{ENV}->{STAR}."/mgr";}
+		$agml_cmd = "$agml_root/agmlParser.py";
 
 		foreach $xml (@xmlGeo){
 		    if ( $xml =~ /StarVMC\/Geometry\// ){
@@ -386,12 +390,19 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			# generally enable all warnings for now
 			$env->{ENV}->{AGML_WARNINGS} = 1==1; # $param::debug;
 
+			# cons doesn't come with a scanner for python dependencies
+			use File::Find;
+			my @agml_deps;
+			find(sub { return unless -f; return unless /\.py$/; push @agml_deps, "#$File::Find::name"; }, "$agml_root/Dyson");
+			push @agml_deps, "#$xml";
+			push @agml_deps, "#$agml_cmd";
+
 			if ( $xml =~ m/Compat/ ){
-			    Depends $env ["$OBJ/$agE"], ("#$xml", "#$agml_cmd");
+			    Depends $env ["$OBJ/$agE"], @agml_deps;
 			    Command $env ["$OBJ/$agE"], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
 			} else {
-			    Depends $env ["$OBJ/$agX", "$OBJ/$agH", "$OBJ/$agE"], ("#$xml", "#$agml_cmd");
+			    Depends $env ["$OBJ/$agX", "$OBJ/$agH", "$OBJ/$agE"], @agml_deps;
 			    # Depends $env --> some rule to build extra dict on the fly
 
 			    Command $env ["$OBJ/$agX", "$OBJ/$agH"], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);

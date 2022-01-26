@@ -56,9 +56,9 @@ St2009pubJSMaker::doWanalysis(){
   //has access to whole W-algo-maker data via pointer 'wMK'
  
   // run through W cuts to fill other histos............
-  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+  for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
+    for(unsigned int it=0;it<V.eleTrack.size();it++) {
       if(it==0) etowQA(0,V.z); //if there is a reco track do etowQA
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
