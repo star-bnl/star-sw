@@ -601,7 +601,8 @@
 <tr><td><A NAME="PAW0">paw</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>Allocate memory for pawc</td></tr>
 <tr><td><A NAME="ALLEVENT0">AllEvent</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#TREE0">Tree</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>Write whole event to StTree</td></tr>
 <tr><td><A NAME="ALLTABLES0">AllTables</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>St_Tables</td><td>Load Star Tables</td></tr>
-<tr><td><A NAME="FXT0">FXT</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>enable anything FXT-specific</td></tr>
+<tr><td><A NAME="FXT0">FXT</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#BTOFFXT0">btofFXT</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>enable anything FXT-specific</td></tr>
+<tr><td><A NAME="BTOFFXT0">btofFXT</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>enable FXT mode for btof</td></tr>
 <tr><td><A NAME="CORR10">Corr1</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#ALIGNSECTORS0">AlignSectors</A> <A HREF="#EXB0">ExB</A> <A HREF="#OBMAP0">OBmap</A> <A HREF="#OCLOCK0">OClock</A> <A HREF="#OPR130">OPr13</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>... AlignSectors ExB OBmap OClock OPr13 ...</td></tr>
 <tr><td><A NAME="CORR20">Corr2</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#CORR10">Corr1</A> <A HREF="#OTWIST0">OTwist</A> <A HREF="#OIFC0">OIFC</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>...Corr1+OTwist OIFC ...</td></tr>
 <tr><td><A NAME="CORR30">Corr3</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#ALIGNSECTORS0">AlignSectors</A> <A HREF="#EXB0">ExB</A> <A HREF="#OBMAP2D0">OBmap2D</A> <A HREF="#OCLOCK0">OClock</A> <A HREF="#OPR130">OPr13</A> <A HREF="#OTWIST0">OTwist</A> <A HREF="#OIFC0">OIFC</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>... AlignSectors ExB OBmap2D OClock OPr13 OTwist OIFC ...</td></tr>
@@ -765,6 +766,7 @@
 <tr><td><A NAME="FGTDB0">fgtDb</A></td><td>fgtDb</td><td>&nbsp;</td><td><A HREF="#DB0">db</A> <A HREF="#FGTUTIL0">fgtutil</A> </td><td>StFgtDbMaker</td><td>StFgtDbMaker</td><td>Load FgtDbMaker</td></tr>
 <tr><td><A NAME="PXLDB0">pxlDb</A></td><td>pxlDb</td><td>&nbsp;</td><td><A HREF="#TPCDB0">tpcDb</A> <A HREF="#PXLUTIL0">PxlUtil</A> </td><td>StPxlDbMaker</td><td>StPxlDbMaker</td><td>Load PxlDbMaker</td></tr>
 <tr><td><A NAME="ISTDB0">istDb</A></td><td>istDb</td><td>&nbsp;</td><td><A HREF="#TPCDB0">tpcDb</A> </td><td>StIstDbMaker</td><td>StIstDbMaker</td><td>Load IstDbMaker</td></tr>
+<tr><td><A NAME="FSTDB0">fstDb</A></td><td>fstDb</td><td>&nbsp;</td><td><A HREF="#TPCDB0">tpcDb</A> </td><td>StFstDbMaker</td><td>StFstDbMaker</td><td>Load FstDbMaker</td></tr>
 <tr><td><A NAME="EPDDB0">epdDb</A></td><td>epdDb</td><td>&nbsp;</td><td><A HREF="#TPCDB0">tpcDb</A> </td><td>StEpdDbMaker</td><td>StEpdDbMaker</td><td>Load EpdDbMaker</td></tr>
 <tr BGCOLOR="cornsilk"><td colspan="7"><A NAME="MAKERS0">MAKERS</A></td></tr>
 <tr><td><A NAME="NTIN0">ntin</A></td><td>geant</td><td>&nbsp;</td><td><A HREF="#PAW0">paw</A> -fzin -geant -gstar <A HREF="#SIMU0">Simu</A> <A HREF="#GEANTL0">geantL</A> <A HREF="#GSTARLIB0">gstarLib</A> </td><td>St_geant_Maker</td><td>&nbsp;</td><td>read event generated Hbook nt-file</td></tr>
@@ -869,6 +871,12 @@
 <tr><td><A NAME="ISTRAWHIT0">istRawHit</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#ISTUTIL0">istUtil</A> <A HREF="#ISTDB0">istDb</A> </td><td>StIstRawHitMaker</td><td>StIstRawHitMaker</td><td>IST RAWhit maker</td></tr>
 <tr><td><A NAME="ISTCLUSTER0">istCluster</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#ISTRAWHIT0">istRawHit</A> </td><td>StIstClusterMaker</td><td>StIstClusterMaker</td><td>IST Cluster maker</td></tr>
 <tr><td><A NAME="ISTHIT0">istHit</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#EVENT0">event</A> <A HREF="#ISTCLUSTER0">istCluster</A> </td><td>StIstHitMaker</td><td>StIstHitMaker</td><td>IST Hit Maker</td></tr>
+<tr><td><A NAME="FST0">fst</A></td><td>fstChain</td><td>&nbsp;</td><td><A HREF="#FSTRAWHIT0">fstRawHit</A> <A HREF="#FSTCLUSTER0">fstCluster</A> <A HREF="#FSTHIT0">fstHit</A> </td><td>StMaker</td><td>StChain</td><td>FST chain</td></tr>
+<tr><td><A NAME="FSTFASTSIM0">fstFastSim</A></td><td>&nbsp;</td><td>fstChain</td><td><A HREF="#STMCEVENT0">StMcEvent</A> <A HREF="#STEVENT0">StEvent</A> </td><td>StFstFastSimMaker</td><td>StFstSimMaker</td><td>FST fast simulator</td></tr>
+<tr><td><A NAME="FSTRAWHIT0">fstRawHit</A></td><td>&nbsp;</td><td>fstChain</td><td><A HREF="#FSTUTIL0">fstUtil</A> <A HREF="#FSTDB0">fstDb</A> </td><td>StFstRawHitMaker</td><td>StFstRawHitMaker</td><td>FST raw hit maker</td></tr>
+<tr><td><A NAME="FSTCLUSTER0">fstCluster</A></td><td>&nbsp;</td><td>fstChain</td><td><A HREF="#FSTRAWHIT0">fstRawHit</A> </td><td>StFstClusterMaker</td><td>StFstClusterMaker</td><td>FST Cluster maker</td></tr>
+<tr><td><A NAME="FSTHIT0">fstHit</A></td><td>&nbsp;</td><td>fstChain</td><td><A HREF="#EVENT0">event</A> <A HREF="#FSTCLUSTER0">fstCluster</A> </td><td>StFstHitMaker</td><td>StFstHitMaker</td><td>FST Hit Maker</td></tr>
+<tr><td><A NAME="FSTUTIL0">fstUtil</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>StFstUtil</td><td>Fst Utilities</td></tr>
 <tr><td><A NAME="SSDDAT0">ssddat</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#SSD_DAQ0">ssd_daq</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>SSD full chain for Real Data</td></tr>
 <tr><td><A NAME="SSTDAT0">sstdat</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#SST_DAQ0">sst_daq</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>SST full chain for Real Data</td></tr>
 <tr><td><A NAME="SSD_DAQ0">ssd_daq</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#SSDCALDB0">ssdCalDb</A> <A HREF="#SVT_T0">svt_T</A> -sls -spa <A HREF="#SSDUTIL0">ssdUtil</A> </td><td>StSsdDaqMaker</td><td>StSsdDaqMaker</td><td>... SSD Daq</td></tr>
@@ -1684,7 +1692,8 @@
 <tr><td><A NAME="PAW1">paw</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>Allocate memory for pawc</td></tr>
 <tr><td><A NAME="ALLEVENT1">AllEvent</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#TREE1">Tree</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>Write whole event to StTree</td></tr>
 <tr><td><A NAME="ALLTABLES1">AllTables</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>St_Tables</td><td>Load Star Tables</td></tr>
-<tr><td><A NAME="FXT1">FXT</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>enable anything FXT-specific</td></tr>
+<tr><td><A NAME="FXT1">FXT</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#BTOFFXT1">btofFXT</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>enable anything FXT-specific</td></tr>
+<tr><td><A NAME="BTOFFXT1">btofFXT</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>enable FXT mode for btof</td></tr>
 <tr><td><A NAME="CORR11">Corr1</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#ALIGNSECTORS1">AlignSectors</A> <A HREF="#EXB1">ExB</A> <A HREF="#OBMAP1">OBmap</A> <A HREF="#OCLOCK1">OClock</A> <A HREF="#OPR131">OPr13</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>... AlignSectors ExB OBmap OClock OPr13 ...</td></tr>
 <tr><td><A NAME="CORR21">Corr2</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#CORR11">Corr1</A> <A HREF="#OTWIST1">OTwist</A> <A HREF="#OIFC1">OIFC</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>...Corr1+OTwist OIFC ...</td></tr>
 <tr><td><A NAME="CORR31">Corr3</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#ALIGNSECTORS1">AlignSectors</A> <A HREF="#EXB1">ExB</A> <A HREF="#OBMAP2D1">OBmap2D</A> <A HREF="#OCLOCK1">OClock</A> <A HREF="#OPR131">OPr13</A> <A HREF="#OTWIST1">OTwist</A> <A HREF="#OIFC1">OIFC</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>... AlignSectors ExB OBmap2D OClock OPr13 OTwist OIFC ...</td></tr>
@@ -1848,6 +1857,7 @@
 <tr><td><A NAME="FGTDB1">fgtDb</A></td><td>fgtDb</td><td>&nbsp;</td><td><A HREF="#DB1">db</A> <A HREF="#FGTUTIL1">fgtutil</A> </td><td>StFgtDbMaker</td><td>StFgtDbMaker</td><td>Load FgtDbMaker</td></tr>
 <tr><td><A NAME="PXLDB1">pxlDb</A></td><td>pxlDb</td><td>&nbsp;</td><td><A HREF="#TPCDB1">tpcDb</A> <A HREF="#PXLUTIL1">PxlUtil</A> </td><td>StPxlDbMaker</td><td>StPxlDbMaker</td><td>Load PxlDbMaker</td></tr>
 <tr><td><A NAME="ISTDB1">istDb</A></td><td>istDb</td><td>&nbsp;</td><td><A HREF="#TPCDB1">tpcDb</A> </td><td>StIstDbMaker</td><td>StIstDbMaker</td><td>Load IstDbMaker</td></tr>
+<tr><td><A NAME="FSTDB1">fstDb</A></td><td>fstDb</td><td>&nbsp;</td><td><A HREF="#TPCDB1">tpcDb</A> </td><td>StFstDbMaker</td><td>StFstDbMaker</td><td>Load FstDbMaker</td></tr>
 <tr><td><A NAME="EPDDB1">epdDb</A></td><td>epdDb</td><td>&nbsp;</td><td><A HREF="#TPCDB1">tpcDb</A> </td><td>StEpdDbMaker</td><td>StEpdDbMaker</td><td>Load EpdDbMaker</td></tr>
 <tr BGCOLOR="cornsilk"><td colspan="7"><A NAME="MAKERS1">MAKERS</A></td></tr>
 <tr><td><A NAME="NTIN1">ntin</A></td><td>geant</td><td>&nbsp;</td><td><A HREF="#PAW1">paw</A> -fzin -geant -gstar <A HREF="#SIMU1">Simu</A> <A HREF="#GEANTL1">geantL</A> <A HREF="#GSTARLIB1">gstarLib</A> </td><td>St_geant_Maker</td><td>&nbsp;</td><td>read event generated Hbook nt-file</td></tr>
@@ -1952,6 +1962,12 @@
 <tr><td><A NAME="ISTRAWHIT1">istRawHit</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#ISTUTIL1">istUtil</A> <A HREF="#ISTDB1">istDb</A> </td><td>StIstRawHitMaker</td><td>StIstRawHitMaker</td><td>IST RAWhit maker</td></tr>
 <tr><td><A NAME="ISTCLUSTER1">istCluster</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#ISTRAWHIT1">istRawHit</A> </td><td>StIstClusterMaker</td><td>StIstClusterMaker</td><td>IST Cluster maker</td></tr>
 <tr><td><A NAME="ISTHIT1">istHit</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#EVENT1">event</A> <A HREF="#ISTCLUSTER1">istCluster</A> </td><td>StIstHitMaker</td><td>StIstHitMaker</td><td>IST Hit Maker</td></tr>
+<tr><td><A NAME="FST1">fst</A></td><td>fstChain</td><td>&nbsp;</td><td><A HREF="#FSTRAWHIT1">fstRawHit</A> <A HREF="#FSTCLUSTER1">fstCluster</A> <A HREF="#FSTHIT1">fstHit</A> </td><td>StMaker</td><td>StChain</td><td>FST chain</td></tr>
+<tr><td><A NAME="FSTFASTSIM1">fstFastSim</A></td><td>&nbsp;</td><td>fstChain</td><td><A HREF="#STMCEVENT1">StMcEvent</A> <A HREF="#STEVENT1">StEvent</A> </td><td>StFstFastSimMaker</td><td>StFstSimMaker</td><td>FST fast simulator</td></tr>
+<tr><td><A NAME="FSTRAWHIT1">fstRawHit</A></td><td>&nbsp;</td><td>fstChain</td><td><A HREF="#FSTUTIL1">fstUtil</A> <A HREF="#FSTDB1">fstDb</A> </td><td>StFstRawHitMaker</td><td>StFstRawHitMaker</td><td>FST raw hit maker</td></tr>
+<tr><td><A NAME="FSTCLUSTER1">fstCluster</A></td><td>&nbsp;</td><td>fstChain</td><td><A HREF="#FSTRAWHIT1">fstRawHit</A> </td><td>StFstClusterMaker</td><td>StFstClusterMaker</td><td>FST Cluster maker</td></tr>
+<tr><td><A NAME="FSTHIT1">fstHit</A></td><td>&nbsp;</td><td>fstChain</td><td><A HREF="#EVENT1">event</A> <A HREF="#FSTCLUSTER1">fstCluster</A> </td><td>StFstHitMaker</td><td>StFstHitMaker</td><td>FST Hit Maker</td></tr>
+<tr><td><A NAME="FSTUTIL1">fstUtil</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>StFstUtil</td><td>Fst Utilities</td></tr>
 <tr><td><A NAME="SSDDAT1">ssddat</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#SSD_DAQ1">ssd_daq</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>SSD full chain for Real Data</td></tr>
 <tr><td><A NAME="SSTDAT1">sstdat</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#SST_DAQ1">sst_daq</A> </td><td>&nbsp;</td><td>&nbsp;</td><td>SST full chain for Real Data</td></tr>
 <tr><td><A NAME="SSD_DAQ1">ssd_daq</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#SSDCALDB1">ssdCalDb</A> <A HREF="#SVT_T1">svt_T</A> -sls -spa <A HREF="#SSDUTIL1">ssdUtil</A> </td><td>StSsdDaqMaker</td><td>StSsdDaqMaker</td><td>... SSD Daq</td></tr>
@@ -2206,6 +2222,6 @@
 <tr><td><A NAME="NEWTPCALIGNMENT1">NewTpcAlignment</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>Switch on new Tpc Alignment schema</td></tr>
 <tr><td><A NAME="ALIASED1">Aliased</A></td><td>time stamps</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 </table>
-<h5>Created by BFCOpt2Html.pl on Wed Jan 26 09:10:37 2022 - J. Lauret</h5>
+<h5>Created by BFCOpt2Html.pl on Wed Jan 26 17:16:56 2022 - J. Lauret</h5>
 </body>
 </html>

@@ -41,15 +41,15 @@ const int kFstNumWedsPerArm      = 2;     // 2 wedges per ARM
 
 //FST strip dimenssion
 const float kFstSensorActiveSizeR             = 5;  //cm, smallest radius of FST sensor active area in R direction
-const float kFstStripPitchR                   = 2.875;   	// cm, FST strip pitch in r direction is (28-16.5)/4. or (16.5-5)/4.
+const float kFstStripPitchR                   = 2.875;      // cm, FST strip pitch in r direction is (28-16.5)/4. or (16.5-5)/4.
 const float kFstStripPitchPhi                 = TMath::Pi()*30.0/180.0/kFstNumPhiSegPerSensor;  //rad, FST strip pitch in phi direction
 const float kFstStripGapPhi                   = TMath::Pi()*1.0/180.0; //rad, 1 degree gap between 2 outer sensor of FST
 const int   kFstzFilp[kFstNumDisk]            = {1,-1,1};
 const int   kFstzDirct[kFstNumWedgePerDisk]   = {1,-1,1,-1,1,-1,1,-1,1,-1,1,-1};
 const float kFstphiStart[kFstNumWedgePerDisk] = {2.0, 2.0, 0.0, 12.0, 10.0, 10.0, 8.0, 8.0, 6.0, 6.0, 4.0, 4.0}; // * pi/6
 const float kFstphiStop[kFstNumWedgePerDisk]  = {3.0, 1.0, 1.0, 11.0, 11.0,  9.0, 9.0, 7.0, 7.0, 5.0, 5.0, 3.0}; // * pi/6
-const float kFstrStart[kFstNumWedgePerDisk]   = {5.000, 7.875, 10.750, 13.625, 16.500, 19.375, 22.250, 25.125}; // in cm
-const float kFstrStop[kFstNumWedgePerDisk]    = {7.875, 10.750, 136.25, 16.500, 19.375, 22.250, 25.125, 28.000}; // in cm
+const float kFstrStart[kFstNumRStripsPerWedge]= {5.000, 7.875, 10.750, 13.625, 16.500, 19.375, 22.250, 25.125}; // in cm
+const float kFstrStop[kFstNumRStripsPerWedge] = {7.875, 10.750, 136.25, 16.500, 19.375, 22.250, 25.125, 28.000}; // in cm
 
 //general APV chip constants
 const unsigned char kFstNumTimeBins = 9;    // 9 time bins for ADC sampling (maximum time bin number)
