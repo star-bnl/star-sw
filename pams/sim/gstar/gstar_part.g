@@ -281,6 +281,15 @@ MODULE gstar_part Is the STAR Particle Database
                        trktyp=4, bratio={1.0,} mode={1208,} charge=0
 
 
+   PARTICLE Kplus_STAR_892  code=10014 pdg=323 mass=0.89170 tlife=khbar/0.0498 ,
+                       trktyp=4, bratio={1.0,} mode={9508,} charge=+1
+
+   PARTICLE Kminus_STAR_892 code=10015 pdg=-323 mass=0.89170 tlife=khbar/0.0498 ,
+                       trktyp=4, bratio={1.0,} mode={9509,} charge=-1
+
+
+
+
 * KAON 0 LONG GID=10
 
    Particle K0L_pi_ele_nu code=10010 pdg=0 mass=0.4977E+00 charge=0 tlife=0.51700E-07 ,
