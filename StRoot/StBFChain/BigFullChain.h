@@ -1733,7 +1733,7 @@ Bfc_st BFC[] = { // standard chains
                                                                            "sTGC Cluster maker",    kFALSE},
   {"FttPoint","","fttChain","StEvent,fttDb","StFttPointMaker","StFttPointMaker,StEvent,StFttDbMaker", 
                                                                              "sTGC Point maker",    kFALSE},
-  {"FttQA","","","fttChain","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker",                 kFALSE},
+  {"FttQA","","fttChain","","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker",                 kFALSE},
 
 
 #if 0
