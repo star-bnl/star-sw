@@ -11,7 +11,7 @@ void StarMuEventReader::SetMuDstFile(const Char_t *muDstFile) {
   fMuDstIter = new TTreeIter();
   fMuDstIter->AddFile(MuDstF);
   ReadEvent(1);
-};
+}
 //________________________________________________________________________________
 Int_t StarMuEventReader::Generate() {
   return ReadEvent();
@@ -40,7 +40,22 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
   static const Int_t*&      PrimaryTracks_mNSigmaProton              = (*fMuDstIter)("PrimaryTracks.mNSigmaProton");
   static const Int_t&       NoGlobalTracks                           = (*fMuDstIter)("GlobalTracks");
   static const Short_t*&    GlobalTracks_mFlag                       = (*fMuDstIter)("GlobalTracks.mFlag");
+#define __USE_GLOBAL__
+#ifdef __USE_GLOBAL__
+  static const Float_t*&    GlobalTracks_mP_mX1                      = (*fMuDstIter)("GlobalTracks.mP.mX1");
+  static const Float_t*&    GlobalTracks_mP_mX2                      = (*fMuDstIter)("GlobalTracks.mP.mX2");
+  static const Float_t*&    GlobalTracks_mP_mX3                      = (*fMuDstIter)("GlobalTracks.mP.mX3");
+  static const Short_t*&    GlobalTracks_mHelix_mQ                   = (*fMuDstIter)("GlobalTracks.mHelix.mQ");
+  static const Float_t*&    GlobalTracks_mFirstPoint_mX1             = (*fMuDstIter)("GlobalTracks.mFirstPoint.mX1");
+  static const Float_t*&    GlobalTracks_mFirstPoint_mX2             = (*fMuDstIter)("GlobalTracks.mFirstPoint.mX2");
+  static const Float_t*&    GlobalTracks_mFirstPoint_mX3             = (*fMuDstIter)("GlobalTracks.mFirstPoint.mX3");
+  static const Int_t*&      GlobalTracks_mNSigmaElectron             = (*fMuDstIter)("GlobalTracks.mNSigmaElectron");
+  static const Int_t*&      GlobalTracks_mNSigmaPion                 = (*fMuDstIter)("GlobalTracks.mNSigmaPion");
+  static const Int_t*&      GlobalTracks_mNSigmaKaon                 = (*fMuDstIter)("GlobalTracks.mNSigmaKaon");
+  static const Int_t*&      GlobalTracks_mNSigmaProton               = (*fMuDstIter)("GlobalTracks.mNSigmaProton");
+#endif
   static const Double_t __SIGMA_SCALE__ = 1000.;
+ NEXT:
   if (! fMuDstIter->Next()) {fStatus =  kStEOF; return fStatus;}
   Int_t id, it;
   TUnixTime ut(MuEvent_mEventInfo_mTime[0]); ut.GetGTime(id,it);
@@ -57,17 +72,19 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
   }
   Int_t nvtx = 0;
   Int_t ntrack = 0;
-  Int_t types[4][2] = {
+  Int_t types[5][2] = {
     { -11,  11},
     { 321, -321},
     {2212,-2212},
-    { 211, -211}
+    { 211, -211},
+    { -22,  22}
   };
   if (Debug()) {
     cout << "NoPrimaryVertices = " << NoPrimaryVertices 
 	 << "\tNoPrimaryTracks = " << NoPrimaryTracks
 	 << "\tNoGlobalTracks  = " << NoGlobalTracks << endl;
   }
+  fStarStack->Reset();
   // Option: to be tracked
   Int_t toBeDone = 1; 
   Double_t polx = 0.; 
@@ -76,6 +93,10 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
   Double_t px = 0, py = 0, pz = 0;
   Double_t vx = 0, vy = 0, vz = 0;
   Double_t tof = 0.;
+  Double_t e, mass;
+  Int_t t = 3;
+  Int_t pdg = 0;
+  Double_t nSigmaMin = 1e9;
   for (Int_t l = 0; l < NoPrimaryVertices; l++) {
     if (l) continue; // only 1st primary vertex
     vx = PrimaryVertices_mPosition_mX1[l];
@@ -96,26 +117,67 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
 	PrimaryTracks_mNSigmaPion[k]/__SIGMA_SCALE__};
       Int_t s = 0;
       if (PrimaryTracks_mHelix_mQ[k] < 0) s = 1;
-      Int_t t = 3;
-      Double_t nSigmaMin = 1e9;
+      t = 3;
+      nSigmaMin = 1e9;
       for (Int_t i = 0; i < 4; i++) {
 	if (TMath::Abs(nSigma[i]) <  nSigmaMin) {
 	  nSigmaMin = TMath::Abs(nSigma[i]); 
 	  t = i;
 	}
       }
-      if (nSigmaMin < 2) {t = 3;}
-      Int_t pdg = types[s][t];
-      Double_t mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
-      Double_t e  = TMath::Sqrt(mass*mass + px*px + py*py + pz*pz);
+      if (nSigmaMin > 4) {t = 3;} // for pion 
+      pdg = types[s][t];
+      mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
+      e  = TMath::Sqrt(mass*mass + px*px + py*py + pz*pz);
       ntrack++;
       // Add particle to stack 
       fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
 			    kPPrimary, ntrack, 1., 2);
     }
   }
+#ifdef __USE_GLOBAL__
+  for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
+    if (GlobalTracks_mFlag[kg] < 100) continue;
+    nSigmaMin = 1e9;
+    Double_t nSigma[4] = {
+      GlobalTracks_mNSigmaElectron[kg]/__SIGMA_SCALE__,
+      GlobalTracks_mNSigmaKaon[kg]/__SIGMA_SCALE__,
+      GlobalTracks_mNSigmaProton[kg]/__SIGMA_SCALE__,
+      GlobalTracks_mNSigmaPion[kg]/__SIGMA_SCALE__};
+    Int_t s = 0;
+    if (GlobalTracks_mHelix_mQ[kg] < 0) s = 1;
+    for (Int_t k = 0; k < NoPrimaryTracks; k++) {
+      if (kg == PrimaryTracks_mIndex2Global[k]) {
+	goto NEXTGL;
+      }
+    }
+    vx = GlobalTracks_mFirstPoint_mX1[kg];
+    vy = GlobalTracks_mFirstPoint_mX2[kg];
+    vz = GlobalTracks_mFirstPoint_mX3[kg];
+    px = GlobalTracks_mP_mX1[kg];
+    py = GlobalTracks_mP_mX2[kg];
+    pz = GlobalTracks_mP_mX3[kg];
+    t = 4;
+    for (Int_t i = 0; i < 4; i++) {
+      if (TMath::Abs(nSigma[i]) <  nSigmaMin) {
+	nSigmaMin = TMath::Abs(nSigma[i]); 
+	t = i;
+      }
+    }
+    if (nSigmaMin > 3) {t = 4;} // force muon
+    pdg = types[s][t];
+    mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
+    e  = TMath::Sqrt(mass*mass + px*px + py*py + pz*pz);
+    ntrack++;
+    // Add particle to stack 
+    fStarStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
+			  kPPrimary, ntrack, 1., 2);
+  NEXTGL:
+    continue;
+  }
+#endif
   if ( Debug() ) fStarStack->Print();
-  if (! nvtx || ! ntrack) return kStWarn;
+  if (! ntrack) goto NEXT;
   return kStOK;
 };
 //________________________________________________________________________________
