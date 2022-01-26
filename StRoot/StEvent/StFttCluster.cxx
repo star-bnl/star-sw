@@ -41,8 +41,8 @@ void StFttCluster::addNeighbor(StFttCluster* neighbor) {
         mNeighbors.push_back(neighbor);
 }
 
-ostream&
-operator<<( ostream &os, const StFttCluster& rh )
+std::ostream&
+operator<<( std::ostream &os, const StFttCluster& rh )
 {
 
     os << endl;

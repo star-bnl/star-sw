@@ -66,7 +66,7 @@ private:
     ClassDef(StFttCluster, 2)
 };
 
-ostream& operator << ( ostream&, const StFttCluster& clu ); // Printing operator
+std::stream& operator << ( std::ostream&, const StFttCluster& clu ); // Printing operator
 
 
 inline int StFttCluster::id() const { return mId; } // Cluster ID

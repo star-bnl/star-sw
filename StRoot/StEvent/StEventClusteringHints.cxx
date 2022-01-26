@@ -151,7 +151,6 @@ StEventClusteringHints::~StEventClusteringHints() {/*noop*/}
 
 StEventClusteringHints::StEventClusteringHints()
 {
-    printf( "CLUSTER\n" ); puts("");
     fParent = 0;
     mNameMap= 0;
 

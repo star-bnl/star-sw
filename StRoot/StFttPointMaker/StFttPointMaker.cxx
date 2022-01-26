@@ -155,20 +155,12 @@ void StFttPointMaker::MakeGlobalPoints() {
         StThreeVectorD global;
 
         if ( p->quadrant() == 0 ){
-            // p->setX( x );
-            // p->setY( y );
             global.set( x, y, z );
         } else if ( p->quadrant() == 1 ){
-            // p->setX( x + 101.6 );
-            // p->setY( -y );
             global.set( x + 101.6, -y, z );
         } else if ( p->quadrant() == 2 ){
-            // p->setX( -( x + 101.6 ) );
-            // p->setY( -y );
             global.set( -( x + 101.6 ), -y, z );
         } else if ( p->quadrant() == 3 ){
-            // p->setX( -x );
-            // p->setY( y );
             global.set( -x, y, z );
         }
 
@@ -211,13 +203,12 @@ void StFttPointMaker::clusterBounds( StFttCluster* clu, float &x1, float &y1, fl
         y1 = y2 = clu->x();
         x1 = clu->row() * rowWidth; // rowWidth is a rough estimate of strip width
         x2 = (clu->row() + 1) * rowWidth; // rowWidth is a rough estimate of strip width
-        // printf( " Horizontal -> row=%d, x: (%f, %f), y: (%f, %f)\n", clu->row(), x1, x2, y1, y2 );
     }
 
     if ( clu->orientation() == kFttVertical ){
         x1 = x2 = clu->x();
         y1 = clu->row() * rowWidth; // rowWidth is a rough estimate of strip width
         y2 = (clu->row() + 1) * rowWidth; // rowWidth is a rough estimate of strip width
-        // printf( " Vertical -> row=%d, x: (%f, %f), y: (%f, %f)\n", clu->row(), x1, x2, y1, y2 );
     }
 } // cluster bounds
+

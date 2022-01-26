@@ -126,28 +126,23 @@ StFttClusterMaker::Make()
         UChar_t rob = mFttDb->rob( hit );
         UChar_t so = mFttDb->orientation( hit );
 
-        //LOG_INFO << "StFttRawHit with tb= " << hit->tb() << StFttDb::orientationLabels[ so ] << endm;
         // Apply the time cut
         if ( !PassTimeCut( hit ) ) continue;
 
         if ( kFttHorizontal == so ){
             hStripsPerRob[ rob ].push_back(hit);
-            // LOG_INFO << "HORIZONTAL @ ROB = " << (int) rob << endm;
             nStripsHit++;
         }
         if ( kFttVertical   == so ){
             vStripsPerRob[ rob ].push_back(hit);
-            // LOG_INFO << "VERTICAL @ ROB = " << (int) rob << endm;
             nStripsHit++;
         }
         if ( kFttDiagonalH   == so ){
             dhStripsPerRob[ rob ].push_back(hit);
-            // LOG_INFO << "DIAGONAL @ ROB = " << (int) rob << endm;
             nStripsHit++;
         }
         if ( kFttDiagonalV   == so ){
             dvStripsPerRob[ rob ].push_back(hit);
-            // LOG_INFO << "DIAGONAL @ ROB = " << (int) rob << endm;
             nStripsHit++;
         }
     } // loop on hit
@@ -156,11 +151,6 @@ StFttClusterMaker::Make()
     LOG_INFO << "nStripsHit = " << nStripsHit << endm;
     if ( nStripsHit > 0 ){ // could make more strict?
         for ( UChar_t iRob = 1; iRob < StFttDb::nRob+1; iRob++ ){
-            //LOG_INFO << "ROB=" << (int)iRob << " has " << hStripsPerRob[iRob].size() << " horizontal, "
-            //    << vStripsPerRob[iRob].size() << " vertical, "
-            //    << dhStripsPerRob[iRob].size() << " diagonalH, "
-            //    << dvStripsPerRob[iRob].size() << " diagonalV, "
-            //    << " strips hit" << endm;
 
             auto hClusters = FindClusters( hStripsPerRob[iRob] );
             // Add them to StEvent  
@@ -223,7 +213,6 @@ void StFttClusterMaker::InjectTestData(){
 
 
 bool StFttClusterMaker::PassTimeCut( StFttRawHit * hit ){
-    // return ( hit->tb() > -70 && hit->tb() < 20 ); // about +/- 5 sigma based on RUN 22338015
     return (abs( hit->time() ) <=3); 
 }
 
@@ -233,7 +222,6 @@ StFttRawHit * StFttClusterMaker::FindMaxAdc( std::vector<StFttRawHit *> hits, si
                              hits.end(),
                              [](const StFttRawHit* a,const StFttRawHit* b) { return a->adc() < b->adc(); });
 
-    // LOG_INFO << "FindMaxAdc, pos = " << (pos) << endm; 
     pos = (itMax - hits.begin());
     if ( pos >= hits.size() )
         return nullptr;
@@ -350,7 +338,7 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
      * So this could be wrapped in a run range block, but
      * does no harm.
      */
-    const bool dedup = true;
+    const bool dedup = false;
     if ( dedup ){
         auto cmp = [](StFttRawHit* a, StFttRawHit* b) { 
             
@@ -437,23 +425,5 @@ void StFttClusterMaker::ApplyHardwareMap(){
         mFttDb->hardwareMap( rawHit );
     }
 
-    // HARDWARE MAP CHECK
-    // mSector = 4
-    // mRDO = 4
-    // mFEB = 3
-    // mVMM = 1
-    // mChannel = 46
-    // mADC = 1023
-    // mBCID = 360
-    // mTB = -29
-    // StFttRawHit * testHit = new StFttRawHit( 4, 4, 3, 1, 46, 1023, 360, -29 );
-    // LOG_INFO << "---------HARDWARE MAP TEST: ---------" << endm;
-    // mFttDb->hardwareMap( testHit );
-    // LOG_INFO << *testHit << endm;
-
-    
-    // LOG_INFO << "---------HARDWARE MAP TEST: ---------" << endm;
-    // StFttRawHit * testHit2 = new StFttRawHit( 4, 4, 2, 2, 11, 1023, 360, -29 );
-    // mFttDb->hardwareMap( testHit2 );
-    // LOG_INFO << *testHit2 << endm;
 }
+
