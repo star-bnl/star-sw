@@ -1712,11 +1712,15 @@ Bfc_st BFC[] = { // standard chains
   // FTT
   {"FttDat","","","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent",
                                                             "sTGC Raw hit maker",                   kFALSE},
+  {"FttHitCalib","","","StEvent,MuDST","StFttHitCalibMaker","StFttHitCalibMaker,StFttRawHitMaker,StEvent",
+                                                            "sTGC hit calib maker",                 kFALSE},
   {"FttClu","","","StEvent,fttDb","StFttClusterMaker","StFttClusterMaker,StEvent,StFttDbMaker", 
                                                                            "sTGC Cluster maker",    kFALSE},
   {"FttPoint","","","StEvent,fttDb","StFttPointMaker","StFttPointMaker,StEvent,StFttDbMaker", 
                                                                              "sTGC Point maker",    kFALSE},
   {"FttQA","","","","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker",                         kFALSE},
+
+
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 #else

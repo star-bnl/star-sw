@@ -20,6 +20,7 @@ class StFttDb;
 class StEvent;
 class StFttCollection;
 class StFttPoint;
+class StFttCluster;
 
 class StFttPointMaker: public StMaker {
 
@@ -38,6 +39,8 @@ public:
 private:
     void InjectTestData();
     void MakeLocalPoints();
+    void clusterBounds( StFttCluster* clu, float &x1, float &y1, float &x2, float &y2 );
+    StFttPoint *makePoint( StFttCluster * cluH, StFttCluster * cluV );
     void MakeGlobalPoints();
     
     StEvent*             mEvent;

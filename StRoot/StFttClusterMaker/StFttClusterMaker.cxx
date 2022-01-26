@@ -35,7 +35,7 @@ StFttClusterMaker::StFttClusterMaker( const char* name )
 : StMaker( name ),
   mEvent( 0 ),          /// pointer to StEvent
   mRunYear( 0 ),        /// year in which the data was taken (switch at 1st Oct)
-  mDebug( true ),       /// print out of all full messages for debugging
+  mDebug( false ),       /// print out of all full messages for debugging
   mFttDb( nullptr )
 {
     LOG_DEBUG << "StFttClusterMaker::ctor"  << endm;
@@ -126,7 +126,7 @@ StFttClusterMaker::Make()
         UChar_t rob = mFttDb->rob( hit );
         UChar_t so = mFttDb->orientation( hit );
 
-        LOG_INFO << "StFttRawHit with tb= " << hit->tb() << StFttDb::orientationLabels[ so ] << endm;
+        //LOG_INFO << "StFttRawHit with tb= " << hit->tb() << StFttDb::orientationLabels[ so ] << endm;
         // Apply the time cut
         if ( !PassTimeCut( hit ) ) continue;
 
@@ -156,11 +156,11 @@ StFttClusterMaker::Make()
     LOG_INFO << "nStripsHit = " << nStripsHit << endm;
     if ( nStripsHit > 0 ){ // could make more strict?
         for ( UChar_t iRob = 1; iRob < StFttDb::nRob+1; iRob++ ){
-            LOG_INFO << "ROB=" << (int)iRob << " has " << hStripsPerRob[iRob].size() << " horizontal, "
-                << vStripsPerRob[iRob].size() << " vertical, "
-                << dhStripsPerRob[iRob].size() << " diagonalH, "
-                << dvStripsPerRob[iRob].size() << " diagonalV, "
-                << " strips hit" << endm;
+            //LOG_INFO << "ROB=" << (int)iRob << " has " << hStripsPerRob[iRob].size() << " horizontal, "
+            //    << vStripsPerRob[iRob].size() << " vertical, "
+            //    << dhStripsPerRob[iRob].size() << " diagonalH, "
+            //    << dvStripsPerRob[iRob].size() << " diagonalV, "
+            //    << " strips hit" << endm;
 
             auto hClusters = FindClusters( hStripsPerRob[iRob] );
             // Add them to StEvent  
@@ -196,34 +196,35 @@ StFttClusterMaker::Make()
 void StFttClusterMaker::InjectTestData(){
     mFttCollection->rawHits().clear();
 
-    StFttRawHit *hit = new StFttRawHit( 1, 1, 1, 1, 1, 55, 1, 1 );
+    StFttRawHit *hit = new StFttRawHit( 1, 1, 1, 1, 1, 55, 1, 1, 0 );
     hit->setMapping( 1, 1, 1, 23, kFttHorizontal ); // LEFT 2
     mFttCollection->addRawHit( hit );
 
-    hit = new StFttRawHit( 1, 1, 1, 1, 1, 90, 1, 1 );
+    hit = new StFttRawHit( 1, 1, 1, 1, 1, 90, 1, 1, 0 );
     hit->setMapping( 1, 1, 1, 24, kFttHorizontal ); // LEFT 1
     mFttCollection->addRawHit( hit );
 
-    hit = new StFttRawHit( 1, 1, 1, 1, 1, 60, 1, 1 );
+    hit = new StFttRawHit( 1, 1, 1, 1, 1, 60, 1, 1, 0 );
     hit->setMapping( 1, 1, 1, 27, kFttHorizontal );
     mFttCollection->addRawHit( hit );
 
-    hit = new StFttRawHit( 1, 1, 1, 1, 1, 95, 1, 1 );
+    hit = new StFttRawHit( 1, 1, 1, 1, 1, 95, 1, 1, 0 );
     hit->setMapping( 1, 1, 1, 25, kFttHorizontal ); // CENTER
     mFttCollection->addRawHit( hit );
 
-    hit = new StFttRawHit( 1, 1, 1, 1, 1, 93, 1, 1 );
+    hit = new StFttRawHit( 1, 1, 1, 1, 1, 93, 1, 1, 0 );
     hit->setMapping( 1, 1, 1, 26, kFttHorizontal );
     mFttCollection->addRawHit( hit );
 
-    hit = new StFttRawHit( 1, 1, 1, 1, 1, 19, 1, 1 );
+    hit = new StFttRawHit( 1, 1, 1, 1, 1, 19, 1, 1, 0 );
     hit->setMapping( 1, 1, 1, 28, kFttHorizontal );
     mFttCollection->addRawHit( hit );
 } // InjectTestData
 
 
 bool StFttClusterMaker::PassTimeCut( StFttRawHit * hit ){
-    return ( hit->tb() > -70 && hit->tb() < 20 ); // about +/- 5 sigma based on RUN 22338015
+    // return ( hit->tb() > -70 && hit->tb() < 20 ); // about +/- 5 sigma based on RUN 22338015
+    return (abs( hit->time() ) <=3); 
 }
 
 
@@ -338,8 +339,6 @@ void StFttClusterMaker::CalculateClusterInfo( StFttCluster * clu ){
 
 std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRawHit * > hits ){
     std::vector<StFttCluster*> clusters;
-    LOG_INFO << "FindClusters( std::vector< StFttRawHit * > hits, UChar_t stripOrientattion )" << endm;
-
     
     if ( mDebug ){
         LOG_INFO << "We have " << hits.size() << " hits with duplicates" << endm;
@@ -447,14 +446,14 @@ void StFttClusterMaker::ApplyHardwareMap(){
     // mADC = 1023
     // mBCID = 360
     // mTB = -29
-    StFttRawHit * testHit = new StFttRawHit( 4, 4, 3, 1, 46, 1023, 360, -29 );
-    LOG_INFO << "---------HARDWARE MAP TEST: ---------" << endm;
-    mFttDb->hardwareMap( testHit );
-    LOG_INFO << *testHit << endm;
+    // StFttRawHit * testHit = new StFttRawHit( 4, 4, 3, 1, 46, 1023, 360, -29 );
+    // LOG_INFO << "---------HARDWARE MAP TEST: ---------" << endm;
+    // mFttDb->hardwareMap( testHit );
+    // LOG_INFO << *testHit << endm;
 
     
-    LOG_INFO << "---------HARDWARE MAP TEST: ---------" << endm;
-    StFttRawHit * testHit2 = new StFttRawHit( 4, 4, 2, 2, 11, 1023, 360, -29 );
-    mFttDb->hardwareMap( testHit2 );
-    LOG_INFO << *testHit2 << endm;
+    // LOG_INFO << "---------HARDWARE MAP TEST: ---------" << endm;
+    // StFttRawHit * testHit2 = new StFttRawHit( 4, 4, 2, 2, 11, 1023, 360, -29 );
+    // mFttDb->hardwareMap( testHit2 );
+    // LOG_INFO << *testHit2 << endm;
 }

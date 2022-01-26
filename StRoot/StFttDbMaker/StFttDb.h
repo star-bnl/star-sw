@@ -20,6 +20,7 @@
 
 class StFttRawHit;
 class StFttCluster;
+class StFttPoint;
 
 
 class StFttDb : public TDataSet {
@@ -50,6 +51,11 @@ public:
     UChar_t quadrant( StFttRawHit * hit );
     UChar_t fob( StFttRawHit * hit );
     UChar_t rob( StFttRawHit * hit );
+    UChar_t rob( StFttCluster * clu );
+
+
+    // void clusterBounds( StFttCluster* clu, float &x1, float &y1, float &x2, float &y2 );
+    // StFttPoint * makePoint( StFttCluster * cluH, StFttCluster * cluV );
     
 
   // Enum for strip orientation in descriptive terms
@@ -112,10 +118,12 @@ public:
  private:
   int   mDbAccess=1;                     //! enable(1) or disabe(0) DB access
   int   mRun=0;                          //! run#
-  int   mDebug=1;                        //! >0 dump tables to text files    
+  int   mDebug=0;                        //! >0 dump tables to text files    
 
     std :: map< uint16_t , uint16_t > mMap;
     std :: map< uint16_t , uint16_t > rMap; // reverse map 
+
+    // bool combineHVRows[nRowsPerQuad][nRowsPerQuad];
 
   ClassDef(StFttDb,1)   //StAF chain virtual base class for Makers        
 };

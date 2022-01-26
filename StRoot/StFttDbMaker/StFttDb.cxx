@@ -12,6 +12,7 @@
 #include "StMessMgr.h"
 #include "StEvent/StFttRawHit.h"
 #include "StEvent/StFttCluster.h"
+#include "StEvent/StFttPoint.h"
 #include <math.h>
 
 
@@ -50,9 +51,9 @@ size_t StFttDb::uuid( StFttRawHit * h, bool includeStrip ) {
     // calculations that combine all strips from given 
     // plane, quad, row, orientation
 
-    LOG_INFO << "h->row() = " << (int)h->row() << endm;
+    
     size_t _uuid = (size_t)h->orientation() + (nStripOrientations) * ( h->row() + nRowsPerQuad * ( h->quadrant() + nQuadPerPlane * h->plane() ) );
-    LOG_INFO << "UUID = " << _uuid << endm;
+    
     if ( includeStrip ){
         _uuid = (size_t) h->strip() * maxStripPerRow *( h->orientation() + (nStripOrientations) * ( h->row() + nRowsPerQuad * ( h->quadrant() + nQuadPerPlane * h->plane() ) ) );
     } 
@@ -247,6 +248,10 @@ UChar_t StFttDb::rob( StFttRawHit * hit ){
     return quadrant(hit) + ( plane(hit) * nQuadPerPlane ) + 1;
 }
 
+UChar_t StFttDb::rob( StFttCluster * clu ){
+    return clu->quadrant() + ( clu->plane() * StFttDb::nQuadPerPlane );
+}
+
 UChar_t StFttDb::fob( StFttRawHit * hit ){
     return hit->feb() + ( quadrant( hit ) * nFobPerQuad ) + ( plane(hit) * nFobPerPlane ) + 1;
 }
@@ -257,3 +262,4 @@ UChar_t StFttDb::orientation( StFttRawHit * hit ){
     }
     return kFttUnknownOrientation;
 }
+

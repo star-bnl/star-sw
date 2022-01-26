@@ -7,6 +7,7 @@
 #include "StEvent/StFttCollection.h"
 
 #include "StEvent/StFttCluster.h"
+#include "StEvent/StFttPoint.h"
 
 #include "StFttDbMaker/StFttDb.h"
 
@@ -99,9 +100,12 @@ Int_t StFttQAMaker::Make()
     }
 
     mFttDb = static_cast<StFttDb*>(GetDataSet("fttDb"));
+
+    mFttData.RUN       = GetRunNumber();
     
     MakeRawHitQA();
     MakeClusterQA();
+    MakePointQA();
 
     mFttTree->Fill();
     return kStOk;
@@ -111,6 +115,7 @@ Int_t StFttQAMaker::Make()
 void
 StFttQAMaker::MakeRawHitQA(){
     
+    LOG_INFO << "StFttQAMaker::mFttCollection->rawHits().size() = " << mFttCollection->rawHits().size() << endm;
 
     mFttData.N = 0;
     for ( auto rawHit : mFttCollection->rawHits() ) {
@@ -132,6 +137,8 @@ StFttQAMaker::MakeRawHitQA(){
         mFttData.vmm[mFttData.N]       = rawHit->vmm();
         mFttData.ch[mFttData.N]        = rawHit->channel();
         mFttData.bcid[mFttData.N]      = rawHit->bcid();
+        mFttData.dbcid[mFttData.N]     = rawHit->dbcid();
+        mFttData.time[mFttData.N]      = rawHit->time();
         mFttData.tb[mFttData.N]        = rawHit->tb();
 
         mFttData.plane[mFttData.N]     = rawHit->plane();
@@ -139,36 +146,41 @@ StFttQAMaker::MakeRawHitQA(){
         mFttData.row[mFttData.N]       = rawHit->row();
         mFttData.strip[mFttData.N]     = rawHit->strip();
         mFttData.dir[mFttData.N]       = rawHit->orientation();
-        mFttData.N++;
 
         TString name;
         name = Form("rdovsfeb_Plane_%d",rawHit->sector());
         mH2d[ name.Data() ]->Fill(rawHit->feb()+1,rawHit->rdo());
 
         mFttData.N++;
-        cout << " now at " << mFttData.N << "th event" << endl;
-        if ( rawHit->rdo() == 1 || rawHit->rdo() == 3)
-        {
-            name = Form("Plane_%d_",rawHit->sector());
-            cout << name.Data() << endl;
-            if ( rawHit->feb() == 0 || rawHit->feb() == 4 ) {name = name + "h"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
-            if ( rawHit->feb() == 1 || rawHit->feb() == 5 ) {name = name + "v"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
-            if ( rawHit->feb() == 2 ) {name = name + "Diag_2"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
-            if ( rawHit->feb() == 3 ) {name = name + "Diag_1"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
-        }
-        if ( rawHit->rdo() == 2 || rawHit->rdo() == 4)
-        {
-            TString name = Form("Plane_%d_",rawHit->sector());
-            cout << name.Data() << endl;
-            if ( rawHit->feb() == 1 || rawHit->feb() == 5 ) {name = name + "h"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
-            if ( rawHit->feb() == 0 || rawHit->feb() == 4 ) {name = name + "v"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
-            if ( rawHit->feb() == 2 ) {name = name + "Diag_1"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
-            if ( rawHit->feb() == 3 ) {name = name + "Diag_2"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
-        }
+        if ( mFttData.N > FTT_MAX_HITS - 10 ) break;
+        // cout << " now at " << mFttData.N << "th event" << endl;
+        // if ( rawHit->rdo() == 1 || rawHit->rdo() == 3)
+        // {
+        //     name = Form("Plane_%d_",rawHit->sector());
+        //     // cout << name.Data() << endl;
+        //     if ( rawHit->feb() == 0 || rawHit->feb() == 4 ) {name = name + "h"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
+        //     if ( rawHit->feb() == 1 || rawHit->feb() == 5 ) {name = name + "v"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
+        //     if ( rawHit->feb() == 2 ) {name = name + "Diag_2"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
+        //     if ( rawHit->feb() == 3 ) {name = name + "Diag_1"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
+        // }
+        // if ( rawHit->rdo() == 2 || rawHit->rdo() == 4)
+        // {
+        //     TString name = Form("Plane_%d_",rawHit->sector());
+        //     // cout << name.Data() << endl;
+        //     if ( rawHit->feb() == 1 || rawHit->feb() == 5 ) {name = name + "h"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
+        //     if ( rawHit->feb() == 0 || rawHit->feb() == 4 ) {name = name + "v"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
+        //     if ( rawHit->feb() == 2 ) {name = name + "Diag_1"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
+        //     if ( rawHit->feb() == 3 ) {name = name + "Diag_2"; cout << name.Data() << endl; Fill_sTGC( rawHit->feb()+1, rawHit->rdo(), mH2p[ name.Data() ] ,1);}
+        // }
         
 
         // LOG_INFO << "n = " << mFttData.N << endm;
     } // rawHits
+
+    if (mFttCollection->rawHits().size() != mFttData.N){
+        LOG_ERROR << "mFttData.N=" << mFttData.N << endm;
+    }
+
 }
 
 void StFttQAMaker::PlotClusterWithHits( vector<StFttRawHit*> hits ){
@@ -268,7 +280,17 @@ void StFttQAMaker::MakeClusterQA(){
         mFttData.cnstrips[mFttData.cN] = clu->nStrips();
         mFttData.cx[mFttData.cN]       = clu->x();
         mFttData.csigma[mFttData.cN]   = clu->sigma();
+
+
+        float satsum = 0;
+        for ( auto hit: clu->rawHits() ){
+            if ( hit->adc() >= 1023 )
+                satsum += hit->adc();
+        }
+
+        mFttData.csatfrac[mFttData.cN] = (satsum / clu->sumAdc());
         mFttData.cN++;
+        if ( mFttData.cN >= FTT_MAX_CLUSTERS - 1 ) break;
     }
 
 
@@ -293,6 +315,30 @@ void StFttQAMaker::MakeClusterQA(){
     }
 
 }
+
+void StFttQAMaker::MakePointQA(){
+
+    mFttData.pN = 0;
+    for ( auto p : mFttCollection->points() ) {
+        mFttData.pplane[mFttData.pN]   = p->plane();
+        mFttData.pquad[mFttData.pN]    = p->quadrant();
+        mFttData.px[mFttData.pN] = p->x();
+        mFttData.py[mFttData.pN] = p->y();
+        
+        mFttData.pgx[mFttData.pN] = p->xyz().x();
+        mFttData.pgy[mFttData.pN] = p->xyz().y();
+        mFttData.pgz[mFttData.pN] = p->xyz().z();
+        
+        mFttData.prowh[mFttData.pN] = p->cluster(0)->row();
+        mFttData.prowv[mFttData.pN] = p->cluster(1)->row();
+        mFttData.pN++;
+
+        if ( mFttData.pN > FTT_MAX_POINTS - 10 ) break;
+    }
+
+}
+
+
 
 //_____________________________________________________________  
 void
@@ -366,37 +412,52 @@ StFttQAMaker::BookHistograms()
 void
 StFttQAMaker::BookTree()
 {
-    cout << " Booking the event tree " << endl;
+    LOG_INFO << " Booking the Ftt QA tree " << endm;
     mFttTree = new TTree("ftt","ftt");
     mFttTree->SetAutoSave(1000); 
 
     // Event information
     mFttTree->Branch("EVT"      , &mFttData.EVT     , "EVT/I");
-    mFttTree->Branch("N"        , &mFttData.N       , "N/I");
+    mFttTree->Branch("RUN"      , &mFttData.RUN     , "RUN/I");
+    mFttTree->Branch("N"        , &mFttData.N       , "N/s");
 
     // Channel information
-    mFttTree->Branch("sec"      , mFttData.sec      , "sec[N]/I");
-    mFttTree->Branch("rdo"      , mFttData.rdo      , "rdo[N]/I");
-    mFttTree->Branch("plane"    , mFttData.plane    , "plane[N]/I");
-    mFttTree->Branch("quad"     , mFttData.quad     , "quad[N]/I");
-    mFttTree->Branch("feb"      , mFttData.feb      , "feb[N]/I");
-    mFttTree->Branch("febvmm"   , mFttData.febvmm   , "febvmm[N]/I");
-    mFttTree->Branch("vmm"      , mFttData.vmm      , "vmm[N]/I");
-    mFttTree->Branch("ch"       , mFttData.ch       , "ch[N]/I");
-    mFttTree->Branch("bcid"     , mFttData.bcid     , "bcid[N]/I");
-    mFttTree->Branch("adc"      , mFttData.adc      , "adc[N]/I");
-    mFttTree->Branch("tb"       , mFttData.tb       , "tb[N]/I");
-    mFttTree->Branch("row"      , mFttData.row      , "row[N]/I");
-    mFttTree->Branch("strip"    , mFttData.strip    , "strip[N]/I");
-    mFttTree->Branch("dir"      , mFttData.dir      , "dir[N]/I");
+    mFttTree->Branch("sec"      , mFttData.sec      , "sec[N]/b");
+    mFttTree->Branch("rdo"      , mFttData.rdo      , "rdo[N]/b");
+    mFttTree->Branch("plane"    , mFttData.plane    , "plane[N]/b");
+    mFttTree->Branch("quad"     , mFttData.quad     , "quad[N]/b");
+    mFttTree->Branch("feb"      , mFttData.feb      , "feb[N]/b");
+    mFttTree->Branch("febvmm"   , mFttData.febvmm   , "febvmm[N]/b");
+    mFttTree->Branch("vmm"      , mFttData.vmm      , "vmm[N]/b");
+    mFttTree->Branch("ch"       , mFttData.ch       , "ch[N]/b");
+    mFttTree->Branch("bcid"     , mFttData.bcid     , "bcid[N]/s");
+    mFttTree->Branch("dbcid"    , mFttData.dbcid    , "dbcid[N]/S");
+    mFttTree->Branch("time"     , mFttData.time     , "time[N]/S");
+    mFttTree->Branch("adc"      , mFttData.adc      , "adc[N]/s");
+    mFttTree->Branch("tb"       , mFttData.tb       , "tb[N]/S");
+    mFttTree->Branch("row"      , mFttData.row      , "row[N]/b");
+    mFttTree->Branch("strip"    , mFttData.strip    , "strip[N]/b");
+    mFttTree->Branch("dir"      , mFttData.dir      , "dir[N]/b");
 
-    mFttTree->Branch("cN"       , &mFttData.cN      , "cN/I");
-    mFttTree->Branch("cplane"   , mFttData.cplane   , "cplane[cN]/I");
-    mFttTree->Branch("cquad"    , mFttData.cquad    , "cquad[cN]/I");
-    mFttTree->Branch("crow"     , mFttData.crow     , "crow[cN]/I");
-    mFttTree->Branch("cdir"     , mFttData.cdir     , "cdir[cN]/I");
+    mFttTree->Branch("cN"       , &mFttData.cN      , "cN/s");
+    mFttTree->Branch("cplane"   , mFttData.cplane   , "cplane[cN]/b");
+    mFttTree->Branch("cquad"    , mFttData.cquad    , "cquad[cN]/b");
+    mFttTree->Branch("crow"     , mFttData.crow     , "crow[cN]/b");
+    mFttTree->Branch("cdir"     , mFttData.cdir     , "cdir[cN]/b");
     mFttTree->Branch("cx"       , mFttData.cx       , "cx[cN]/F");
     mFttTree->Branch("csigma"   , mFttData.csigma   , "csigma[cN]/F");
     mFttTree->Branch("cnstrips" , mFttData.cnstrips , "cnstrips[cN]/F");
-    mFttTree->Branch("csumadc"  , mFttData.csumadc  , "csumadc[cN]/I");
+    mFttTree->Branch("csumadc"  , mFttData.csumadc  , "csumadc[cN]/s");
+    mFttTree->Branch("csatfrac" , mFttData.csatfrac , "csatfrac[cN]/F");
+
+    mFttTree->Branch("pN"       , &mFttData.pN      , "pN/s");
+    mFttTree->Branch("pplane"   , mFttData.pplane   , "pplane[pN]/b");
+    mFttTree->Branch("pquad"    , mFttData.pquad    , "pquad[pN]/b");
+    mFttTree->Branch("px"       , mFttData.px       , "px[pN]/F");
+    mFttTree->Branch("py"       , mFttData.py       , "py[pN]/F");
+    mFttTree->Branch("pgx"      , mFttData.pgx      , "pgx[pN]/F");
+    mFttTree->Branch("pgy"      , mFttData.pgy      , "pgy[pN]/F");
+    mFttTree->Branch("pgz"      , mFttData.pgz      , "pgz[pN]/F");
+    mFttTree->Branch("prowh"    , mFttData.prowh    , "prowh[pN]/b");
+    mFttTree->Branch("prowv"    , mFttData.prowv    , "prowv[pN]/b");
 }

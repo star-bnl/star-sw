@@ -12,7 +12,7 @@
 #include "St_base/StMessMgr.h"
 
 
-StFttPoint::StFttPoint() :  StObject() { /* no op */ }
+StFttPoint::StFttPoint() :  StObject(), mClusters{0,0,0,0} { /* no op */ }
 
 StFttPoint::~StFttPoint() { /* no op */ }
 

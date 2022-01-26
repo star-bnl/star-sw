@@ -28,38 +28,63 @@ class StFttCollection;
 class StFttRawHit;
 class StFttDb;
 
-const Int_t mMax = 10000;
+const Int_t FTT_MAX_HITS = 50000;
+const Int_t FTT_MAX_CLUSTERS = 10000;
+const Int_t FTT_MAX_POINTS = 4000;
 struct FttData
 {
     // event information
     Int_t    EVT;
-    Int_t    N;
+    Int_t    RUN;
+    UShort_t N;
 
     //channel information
-    Int_t    sec[mMax];
-    Int_t    rdo[mMax];
-    Int_t    plane[mMax];
-    Int_t    quad[mMax];
-    Int_t    feb[mMax];
-    Int_t    febvmm[mMax];
-    Int_t    vmm[mMax];
-    Int_t    ch[mMax];
-    Int_t    bcid[mMax];
-    Int_t    adc[mMax];
-    Int_t    tb[mMax];
-    Int_t    row[mMax];
-    Int_t    strip[mMax];
-    Int_t    dir[mMax];
+    UChar_t    sec[FTT_MAX_HITS];
+    UChar_t    rdo[FTT_MAX_HITS];
+    UChar_t    plane[FTT_MAX_HITS];
+    UChar_t    quad[FTT_MAX_HITS];
+    UChar_t    feb[FTT_MAX_HITS];
+    UChar_t    febvmm[FTT_MAX_HITS];
+    UChar_t    vmm[FTT_MAX_HITS];
+    UChar_t    ch[FTT_MAX_HITS];
+    UShort_t   bcid[FTT_MAX_HITS];
+    Short_t    dbcid[FTT_MAX_HITS];
+    Short_t    time[FTT_MAX_HITS];
+    UShort_t   adc[FTT_MAX_HITS];
+    Short_t    tb[FTT_MAX_HITS];
+    UChar_t    row[FTT_MAX_HITS];
+    UChar_t    strip[FTT_MAX_HITS];
+    UChar_t    dir[FTT_MAX_HITS];
 
-    Int_t    cN;
-    Int_t    cplane[mMax];
-    Int_t    cquad[mMax];
-    Int_t    crow[mMax];
-    Int_t    cdir[mMax];
-    Int_t    csumadc[mMax];
-    Float_t  cx[mMax];
-    Float_t  csigma[mMax];
-    Float_t  cnstrips[mMax];
+    UShort_t cN;
+    UChar_t    cplane[FTT_MAX_CLUSTERS];
+    UChar_t    cquad[FTT_MAX_CLUSTERS];
+    UChar_t    crow[FTT_MAX_CLUSTERS];
+    UChar_t    cdir[FTT_MAX_CLUSTERS];
+    UShort_t   csumadc[FTT_MAX_CLUSTERS];
+    Float_t    cx[FTT_MAX_CLUSTERS];
+    Float_t    csigma[FTT_MAX_CLUSTERS];
+    Float_t    cnstrips[FTT_MAX_CLUSTERS];
+    Float_t    csatfrac[FTT_MAX_CLUSTERS];
+
+
+    UShort_t pN;
+    UChar_t  pplane[FTT_MAX_POINTS];
+    UChar_t  pquad[FTT_MAX_POINTS];
+    Float_t  px[FTT_MAX_POINTS];
+    Float_t  py[FTT_MAX_POINTS];
+
+    Float_t  pgx[FTT_MAX_POINTS];
+    Float_t  pgy[FTT_MAX_POINTS];
+    Float_t  pgz[FTT_MAX_POINTS];
+
+
+    UChar_t  prowh[FTT_MAX_POINTS];
+    UChar_t  prowv[FTT_MAX_POINTS];
+    UShort_t psumadc[FTT_MAX_POINTS];
+    UChar_t  pnstripsh[FTT_MAX_POINTS];
+    UChar_t  pnstripsv[FTT_MAX_POINTS];
+    
 
 };
 
@@ -84,6 +109,7 @@ public:
 
     void MakeRawHitQA();
     void MakeClusterQA();
+    void MakePointQA();
     void PlotClusterWithHits( vector<StFttRawHit*> hits );
 
 
@@ -105,7 +131,7 @@ public:
     size_t histCounter = 0;
     size_t f1CluCounter = 0;
     TCanvas *mCanvas = nullptr;
-    bool mDebug = true;
+    bool mDebug = false;
 
     static const size_t maxClusterViz = 1000;
     TString mClusterPdfName;
