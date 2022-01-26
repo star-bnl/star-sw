@@ -174,22 +174,24 @@ void StTriggerData2022::readData(const TriggerDataBlk2022* data, int bs) {
                 <<" mErrorFlag="<<mErrorFlag<<endm;
             }
         }
-        int j;
-        j=offlen[y22BC1_CONF_NUM].length; if (j>0){mBC1[i] = (BELayerBlock2022*)((char*)mData + offlen[y22BC1_CONF_NUM].offset); swapRawDet((DataBlock2022*)mBC1[i],y22BC1_CONF_NUM,j,bs);}
-        j=offlen[y22MXQ_CONF_NUM].length; if (j>0){mMXQ[i] = (QTBlock2022*     )((char*)mData + offlen[y22MXQ_CONF_NUM].offset); swapRawDet((DataBlock2022*)mMXQ[i],y22MXQ_CONF_NUM,j,bs);}
-        j=offlen[y22MIX_CONF_NUM].length; if (j>0){mMIX[i] = (MIXBlock2022*    )((char*)mData + offlen[y22MIX_CONF_NUM].offset); swapRawDet((DataBlock2022*)mMIX[i],y22MIX_CONF_NUM,j,bs);}
-        j=offlen[y22BCW_CONF_NUM].length; if (j>0){mBCW[i] = (BWestBlock2022*  )((char*)mData + offlen[y22BCW_CONF_NUM].offset); swapRawDet((DataBlock2022*)mBCW[i],y22BCW_CONF_NUM,j,bs);}
-        j=offlen[y22BCE_CONF_NUM].length; if (j>0){mBCE[i] = (BEastBlock2022*  )((char*)mData + offlen[y22BCE_CONF_NUM].offset); swapRawDet((DataBlock2022*)mBCE[i],y22BCE_CONF_NUM,j,bs);}
-        j=offlen[y22EQ3_CONF_NUM].length; if (j>0){mEQ3[i] = (QTBlock2022*     )((char*)mData + offlen[y22EQ3_CONF_NUM].offset); swapRawDet((DataBlock2022*)mEQ3[i],y22EQ3_CONF_NUM,j,bs);}
-        j=offlen[y22BBC_CONF_NUM].length; if (j>0){mBBC[i] = (BBCBlock2022*    )((char*)mData + offlen[y22BBC_CONF_NUM].offset); swapRawDet((DataBlock2022*)mBBC[i],y22BBC_CONF_NUM,j,bs);}
-        j=offlen[y22BBQ_CONF_NUM].length; if (j>0){mBBQ[i] = (QTBlock2022*     )((char*)mData + offlen[y22BBQ_CONF_NUM].offset); swapRawDet((DataBlock2022*)mBBQ[i],y22BBQ_CONF_NUM,j,bs);}
-        j=offlen[y22FMS_CONF_NUM].length; if (j>0){mFMS[i] = (FMSBlock2022*    )((char*)mData + offlen[y22FMS_CONF_NUM].offset); swapRawDet((DataBlock2022*)mFMS[i],y22FMS_CONF_NUM,j,bs);}
-        j=offlen[y22QT1_CONF_NUM].length; if (j>0){mQT1[i] = (QTBlock2022*     )((char*)mData + offlen[y22QT1_CONF_NUM].offset); swapRawDet((DataBlock2022*)mQT1[i],y22QT1_CONF_NUM,j,bs);}
-        j=offlen[y22QT2_CONF_NUM].length; if (j>0){mQT2[i] = (QTBlock2022*     )((char*)mData + offlen[y22QT2_CONF_NUM].offset); swapRawDet((DataBlock2022*)mQT2[i],y22QT2_CONF_NUM,j,bs);}
-        j=offlen[y22QT3_CONF_NUM].length; if (j>0){mQT3[i] = (QTBlock2022*     )((char*)mData + offlen[y22QT3_CONF_NUM].offset); swapRawDet((DataBlock2022*)mQT3[i],y22QT3_CONF_NUM,j,bs);}
-        j=offlen[y22QT4_CONF_NUM].length; if (j>0){mQT4[i] = (QTBlock2022*     )((char*)mData + offlen[y22QT4_CONF_NUM].offset); swapRawDet((DataBlock2022*)mQT4[i],y22QT4_CONF_NUM,j,bs);}
-        j=offlen[y22EQ1_CONF_NUM].length; if (j>0){mEQ1[i] = (QTBlock2022*     )((char*)mData + offlen[y22EQ1_CONF_NUM].offset); swapRawDet((DataBlock2022*)mEQ1[i],y22EQ1_CONF_NUM,j,bs);}
-        j=offlen[y22EQ2_CONF_NUM].length; if (j>0){mEQ2[i] = (QTBlock2022*     )((char*)mData + offlen[y22EQ2_CONF_NUM].offset); swapRawDet((DataBlock2022*)mEQ2[i],y22EQ2_CONF_NUM,j,bs);}
+        int j; // j is length of the data for the crate including header. Header size is 8 for DSM, and 12 for QT. 
+	       // If a crate is in the run but not read out for the event, length would be 12 (8+4 for DSM, 12+0 for QT).
+	       // If the crate was not read out (j<=12), leave pointer as NULL, and don't swap.
+        j=offlen[y22BC1_CONF_NUM].length; if (j>12){mBC1[i] = (BELayerBlock2022*)((char*)mData + offlen[y22BC1_CONF_NUM].offset); swapRawDet((DataBlock2022*)mBC1[i],y22BC1_CONF_NUM,j,bs);}
+        j=offlen[y22MXQ_CONF_NUM].length; if (j>12){mMXQ[i] = (QTBlock2022*     )((char*)mData + offlen[y22MXQ_CONF_NUM].offset); swapRawDet((DataBlock2022*)mMXQ[i],y22MXQ_CONF_NUM,j,bs);}
+        j=offlen[y22MIX_CONF_NUM].length; if (j>12){mMIX[i] = (MIXBlock2022*    )((char*)mData + offlen[y22MIX_CONF_NUM].offset); swapRawDet((DataBlock2022*)mMIX[i],y22MIX_CONF_NUM,j,bs);}
+        j=offlen[y22BCW_CONF_NUM].length; if (j>12){mBCW[i] = (BWestBlock2022*  )((char*)mData + offlen[y22BCW_CONF_NUM].offset); swapRawDet((DataBlock2022*)mBCW[i],y22BCW_CONF_NUM,j,bs);}
+        j=offlen[y22BCE_CONF_NUM].length; if (j>12){mBCE[i] = (BEastBlock2022*  )((char*)mData + offlen[y22BCE_CONF_NUM].offset); swapRawDet((DataBlock2022*)mBCE[i],y22BCE_CONF_NUM,j,bs);}
+        j=offlen[y22EQ3_CONF_NUM].length; if (j>12){mEQ3[i] = (QTBlock2022*     )((char*)mData + offlen[y22EQ3_CONF_NUM].offset); swapRawDet((DataBlock2022*)mEQ3[i],y22EQ3_CONF_NUM,j,bs);}
+        j=offlen[y22BBC_CONF_NUM].length; if (j>12){mBBC[i] = (BBCBlock2022*    )((char*)mData + offlen[y22BBC_CONF_NUM].offset); swapRawDet((DataBlock2022*)mBBC[i],y22BBC_CONF_NUM,j,bs);}
+        j=offlen[y22BBQ_CONF_NUM].length; if (j>12){mBBQ[i] = (QTBlock2022*     )((char*)mData + offlen[y22BBQ_CONF_NUM].offset); swapRawDet((DataBlock2022*)mBBQ[i],y22BBQ_CONF_NUM,j,bs);}
+        j=offlen[y22FMS_CONF_NUM].length; if (j>12){mFMS[i] = (FMSBlock2022*    )((char*)mData + offlen[y22FMS_CONF_NUM].offset); swapRawDet((DataBlock2022*)mFMS[i],y22FMS_CONF_NUM,j,bs);}
+        j=offlen[y22QT1_CONF_NUM].length; if (j>12){mQT1[i] = (QTBlock2022*     )((char*)mData + offlen[y22QT1_CONF_NUM].offset); swapRawDet((DataBlock2022*)mQT1[i],y22QT1_CONF_NUM,j,bs);}
+        j=offlen[y22QT2_CONF_NUM].length; if (j>12){mQT2[i] = (QTBlock2022*     )((char*)mData + offlen[y22QT2_CONF_NUM].offset); swapRawDet((DataBlock2022*)mQT2[i],y22QT2_CONF_NUM,j,bs);}
+        j=offlen[y22QT3_CONF_NUM].length; if (j>12){mQT3[i] = (QTBlock2022*     )((char*)mData + offlen[y22QT3_CONF_NUM].offset); swapRawDet((DataBlock2022*)mQT3[i],y22QT3_CONF_NUM,j,bs);}
+        j=offlen[y22QT4_CONF_NUM].length; if (j>12){mQT4[i] = (QTBlock2022*     )((char*)mData + offlen[y22QT4_CONF_NUM].offset); swapRawDet((DataBlock2022*)mQT4[i],y22QT4_CONF_NUM,j,bs);}
+        j=offlen[y22EQ1_CONF_NUM].length; if (j>12){mEQ1[i] = (QTBlock2022*     )((char*)mData + offlen[y22EQ1_CONF_NUM].offset); swapRawDet((DataBlock2022*)mEQ1[i],y22EQ1_CONF_NUM,j,bs);}
+        j=offlen[y22EQ2_CONF_NUM].length; if (j>12){mEQ2[i] = (QTBlock2022*     )((char*)mData + offlen[y22EQ2_CONF_NUM].offset); swapRawDet((DataBlock2022*)mEQ2[i],y22EQ2_CONF_NUM,j,bs);}
         if (mMXQ[i]) decodeQT(mMXQ[i]->length/4, mMXQ[i]->data, mxq[i], tmxq[i]);
         if (mEQ3[i]) decodeQT(mEQ3[i]->length/4, mEQ3[i]->data, eq3[i], teq3[i]);
         if (mBBQ[i]) decodeQT(mBBQ[i]->length/4, mBBQ[i]->data, bbq[i], tbbq[i]);
