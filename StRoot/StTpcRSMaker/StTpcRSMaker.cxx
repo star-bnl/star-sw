@@ -819,7 +819,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	TrackSegmentHits[nSegHits].indx = indx;
 	TrackSegmentHits[nSegHits].s = tpc_hitC->length;
 	if (tpc_hitC->length == 0 && nSegHits > 0) {
-	  TrackSegmentHits[nSegHits].s = TrackSegmentHits[nSegHits-1].s + TrackSegmentHits[nSegHits].tpc_hitC->ds;
+	  TrackSegmentHits[nSegHits].s = TrackSegmentHits[nSegHits-1].s + tpc_hitC->ds;
 	}
 	TrackSegment2Propagate(tpc_hitC, &gver[id3-1],TrackSegmentHits[nSegHits]);
  	if (TrackSegmentHits[nSegHits].Pad.timeBucket() < 0 || TrackSegmentHits[nSegHits].Pad.timeBucket() > NoOfTimeBins) continue;
@@ -1276,8 +1276,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
 	  if (! ntimebins) continue;
 	  static  Short_t ADCs[__MaxNumberOfTimeBins__];
-	  static UShort_t IDTs[__MaxNumberOfTimeBins__];
-	  //	  static Int_t IDTs[__MaxNumberOfTimeBins__];
+	  static  Int_t IDTs[__MaxNumberOfTimeBins__];
 	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
 	  for (UInt_t t = 0; t < __MaxNumberOfTimeBins__; t++) {
 	    if (ADCs[t] > 0 && IDTs[t]) {
@@ -1493,7 +1492,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
       if (gain <= 0.0) continue;
       ped    = St_TpcResponseSimulatorC::instance()->AveragePedestal();
       static  Short_t ADCs[__MaxNumberOfTimeBins__];
-      static UShort_t IDTs[__MaxNumberOfTimeBins__];
+      static  Int_t IDTs[__MaxNumberOfTimeBins__];
       memset(ADCs, 0, sizeof(ADCs));
       memset(IDTs, 0, sizeof(IDTs));
       Int_t NoTB = 0;
