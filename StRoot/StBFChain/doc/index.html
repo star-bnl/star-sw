@@ -948,11 +948,12 @@
 <tr><td><A NAME="FCSWFF0">fcsWFF</A></td><td>&nbsp;</td><td>fcsChain</td><td><A HREF="#STEVENT0">StEvent</A> <A HREF="#FCSDB0">fcsDb</A> </td><td>StFcsWaveformFitMaker</td><td>StFcsWaveformFitMaker</td><td>Fit FCS waveform</td></tr>
 <tr><td><A NAME="FCSCLUSTER0">fcsCluster</A></td><td>&nbsp;</td><td>fcsChain</td><td><A HREF="#STEVENT0">StEvent</A> <A HREF="#FCSDB0">fcsDb</A> </td><td>StFcsClusterMaker</td><td>StFcsClusterMaker</td><td>Fill FCS clusters</td></tr>
 <tr><td><A NAME="FCSPOINT0">fcsPoint</A></td><td>&nbsp;</td><td>fcsChain</td><td><A HREF="#STEVENT0">StEvent</A> <A HREF="#FCSDB0">fcsDb</A> </td><td>StFcsPointMaker</td><td>StFcsPointMaker libMinuit</td><td>Fill FCS points</td></tr>
-<tr><td><A NAME="FTTDAT0">FttDat</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#STEVENT0">StEvent</A> </td><td>StFttRawHitMaker</td><td>StFttRawHitMaker StEvent</td><td>sTGC Raw hit maker</td></tr>
-<tr><td><A NAME="FTTHITCALIB0">FttHitCalib</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#STEVENT0">StEvent</A> <A HREF="#MUDST0">MuDST</A> </td><td>StFttHitCalibMaker</td><td>StFttHitCalibMaker StFttRawHitMaker StEvent</td><td>sTGC hit calib maker</td></tr>
-<tr><td><A NAME="FTTCLU0">FttClu</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#STEVENT0">StEvent</A> <A HREF="#FTTDB0">fttDb</A> </td><td>StFttClusterMaker</td><td>StFttClusterMaker StEvent StFttDbMaker</td><td>sTGC Cluster maker</td></tr>
-<tr><td><A NAME="FTTPOINT0">FttPoint</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#STEVENT0">StEvent</A> <A HREF="#FTTDB0">fttDb</A> </td><td>StFttPointMaker</td><td>StFttPointMaker StEvent StFttDbMaker</td><td>sTGC Point maker</td></tr>
-<tr><td><A NAME="FTTQA0">FttQA</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>StFttQAMaker</td><td>StFttQAMaker</td><td>sTGC Raw hit QA maker</td></tr>
+<tr><td><A NAME="FTT0">ftt</A></td><td>fttChain</td><td>&nbsp;</td><td><A HREF="#FTTDAT0">FttDat</A> <A HREF="#FTTHITCALIB0">FttHitCalib</A> <A HREF="#FTTCLU0">FttClu</A> <A HREF="#FTTPOINT0">FttPoint</A> </td><td>StMaker</td><td>StChain</td><td>FST chain</td></tr>
+<tr><td><A NAME="FTTDAT0">FttDat</A></td><td>&nbsp;</td><td>fttChain</td><td><A HREF="#STEVENT0">StEvent</A> </td><td>StFttRawHitMaker</td><td>StFttRawHitMaker StEvent</td><td>sTGC Raw hit maker</td></tr>
+<tr><td><A NAME="FTTHITCALIB0">FttHitCalib</A></td><td>&nbsp;</td><td>fttChain</td><td><A HREF="#STEVENT0">StEvent</A> <A HREF="#MUDST0">MuDST</A> </td><td>StFttHitCalibMaker</td><td>StFttHitCalibMaker StFttRawHitMaker StEvent</td><td>sTGC hit calib maker</td></tr>
+<tr><td><A NAME="FTTCLU0">FttClu</A></td><td>&nbsp;</td><td>fttChain</td><td><A HREF="#STEVENT0">StEvent</A> <A HREF="#FTTDB0">fttDb</A> </td><td>StFttClusterMaker</td><td>StFttClusterMaker StEvent StFttDbMaker</td><td>sTGC Cluster maker</td></tr>
+<tr><td><A NAME="FTTPOINT0">FttPoint</A></td><td>&nbsp;</td><td>fttChain</td><td><A HREF="#STEVENT0">StEvent</A> <A HREF="#FTTDB0">fttDb</A> </td><td>StFttPointMaker</td><td>StFttPointMaker StEvent StFttDbMaker</td><td>sTGC Point maker</td></tr>
+<tr><td><A NAME="FTTQA0">FttQA</A></td><td>&nbsp;</td><td>&nbsp;</td><td>fttChain </td><td>StFttQAMaker</td><td>StFttQAMaker</td><td>sTGC Raw hit QA maker</td></tr>
 <tr><td><A NAME="FPD0">fpd</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>WARNING *** Option is OBSOLETE ***</td></tr>
 <tr><td><A NAME="FGT0">fgt</A></td><td>FgtChain</td><td>&nbsp;</td><td><A HREF="#FGTDAT0">fgtDat</A> <A HREF="#FGTCLU0">fgtClu</A> <A HREF="#FGTATOC0">fgtAtoC</A> </td><td>StMaker</td><td>StChain</td><td>Fgt data Chain</td></tr>
 <tr><td><A NAME="FGTDAT0">fgtDat</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#EVENT0">event</A> <A HREF="#FGTDB0">fgtdb</A> </td><td>StFgtRawMaker</td><td>StFgtRawMaker</td><td>FGT Data reader</td></tr>
@@ -2039,11 +2040,12 @@
 <tr><td><A NAME="FCSWFF1">fcsWFF</A></td><td>&nbsp;</td><td>fcsChain</td><td><A HREF="#STEVENT1">StEvent</A> <A HREF="#FCSDB1">fcsDb</A> </td><td>StFcsWaveformFitMaker</td><td>StFcsWaveformFitMaker</td><td>Fit FCS waveform</td></tr>
 <tr><td><A NAME="FCSCLUSTER1">fcsCluster</A></td><td>&nbsp;</td><td>fcsChain</td><td><A HREF="#STEVENT1">StEvent</A> <A HREF="#FCSDB1">fcsDb</A> </td><td>StFcsClusterMaker</td><td>StFcsClusterMaker</td><td>Fill FCS clusters</td></tr>
 <tr><td><A NAME="FCSPOINT1">fcsPoint</A></td><td>&nbsp;</td><td>fcsChain</td><td><A HREF="#STEVENT1">StEvent</A> <A HREF="#FCSDB1">fcsDb</A> </td><td>StFcsPointMaker</td><td>StFcsPointMaker libMinuit</td><td>Fill FCS points</td></tr>
-<tr><td><A NAME="FTTDAT1">FttDat</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#STEVENT1">StEvent</A> </td><td>StFttRawHitMaker</td><td>StFttRawHitMaker StEvent</td><td>sTGC Raw hit maker</td></tr>
-<tr><td><A NAME="FTTHITCALIB1">FttHitCalib</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#STEVENT1">StEvent</A> <A HREF="#MUDST1">MuDST</A> </td><td>StFttHitCalibMaker</td><td>StFttHitCalibMaker StFttRawHitMaker StEvent</td><td>sTGC hit calib maker</td></tr>
-<tr><td><A NAME="FTTCLU1">FttClu</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#STEVENT1">StEvent</A> <A HREF="#FTTDB1">fttDb</A> </td><td>StFttClusterMaker</td><td>StFttClusterMaker StEvent StFttDbMaker</td><td>sTGC Cluster maker</td></tr>
-<tr><td><A NAME="FTTPOINT1">FttPoint</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#STEVENT1">StEvent</A> <A HREF="#FTTDB1">fttDb</A> </td><td>StFttPointMaker</td><td>StFttPointMaker StEvent StFttDbMaker</td><td>sTGC Point maker</td></tr>
-<tr><td><A NAME="FTTQA1">FttQA</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>StFttQAMaker</td><td>StFttQAMaker</td><td>sTGC Raw hit QA maker</td></tr>
+<tr><td><A NAME="FTT1">ftt</A></td><td>fttChain</td><td>&nbsp;</td><td><A HREF="#FTTDAT1">FttDat</A> <A HREF="#FTTHITCALIB1">FttHitCalib</A> <A HREF="#FTTCLU1">FttClu</A> <A HREF="#FTTPOINT1">FttPoint</A> </td><td>StMaker</td><td>StChain</td><td>FST chain</td></tr>
+<tr><td><A NAME="FTTDAT1">FttDat</A></td><td>&nbsp;</td><td>fttChain</td><td><A HREF="#STEVENT1">StEvent</A> </td><td>StFttRawHitMaker</td><td>StFttRawHitMaker StEvent</td><td>sTGC Raw hit maker</td></tr>
+<tr><td><A NAME="FTTHITCALIB1">FttHitCalib</A></td><td>&nbsp;</td><td>fttChain</td><td><A HREF="#STEVENT1">StEvent</A> <A HREF="#MUDST1">MuDST</A> </td><td>StFttHitCalibMaker</td><td>StFttHitCalibMaker StFttRawHitMaker StEvent</td><td>sTGC hit calib maker</td></tr>
+<tr><td><A NAME="FTTCLU1">FttClu</A></td><td>&nbsp;</td><td>fttChain</td><td><A HREF="#STEVENT1">StEvent</A> <A HREF="#FTTDB1">fttDb</A> </td><td>StFttClusterMaker</td><td>StFttClusterMaker StEvent StFttDbMaker</td><td>sTGC Cluster maker</td></tr>
+<tr><td><A NAME="FTTPOINT1">FttPoint</A></td><td>&nbsp;</td><td>fttChain</td><td><A HREF="#STEVENT1">StEvent</A> <A HREF="#FTTDB1">fttDb</A> </td><td>StFttPointMaker</td><td>StFttPointMaker StEvent StFttDbMaker</td><td>sTGC Point maker</td></tr>
+<tr><td><A NAME="FTTQA1">FttQA</A></td><td>&nbsp;</td><td>&nbsp;</td><td>fttChain </td><td>StFttQAMaker</td><td>StFttQAMaker</td><td>sTGC Raw hit QA maker</td></tr>
 <tr><td><A NAME="FPD1">fpd</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>WARNING *** Option is OBSOLETE ***</td></tr>
 <tr><td><A NAME="FGT1">fgt</A></td><td>FgtChain</td><td>&nbsp;</td><td><A HREF="#FGTDAT1">fgtDat</A> <A HREF="#FGTCLU1">fgtClu</A> <A HREF="#FGTATOC1">fgtAtoC</A> </td><td>StMaker</td><td>StChain</td><td>Fgt data Chain</td></tr>
 <tr><td><A NAME="FGTDAT1">fgtDat</A></td><td>&nbsp;</td><td>&nbsp;</td><td><A HREF="#EVENT1">event</A> <A HREF="#FGTDB1">fgtdb</A> </td><td>StFgtRawMaker</td><td>StFgtRawMaker</td><td>FGT Data reader</td></tr>
@@ -2222,6 +2224,6 @@
 <tr><td><A NAME="NEWTPCALIGNMENT1">NewTpcAlignment</A></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>Switch on new Tpc Alignment schema</td></tr>
 <tr><td><A NAME="ALIASED1">Aliased</A></td><td>time stamps</td><td>&nbsp;</td><td>&nbsp; </td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 </table>
-<h5>Created by BFCOpt2Html.pl on Wed Jan 26 17:16:56 2022 - J. Lauret</h5>
+<h5>Created by BFCOpt2Html.pl on Wed Jan 26 17:48:11 2022 - J. Lauret</h5>
 </body>
 </html>
