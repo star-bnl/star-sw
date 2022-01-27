@@ -488,7 +488,6 @@ void mtdBuilder::ReadTraymaskoutList(){
 }
 
 void mtdBuilder::event(daqReader *rdr) {
-    PCP;
   int timeinbin=0;
   float time=0.;
   int halftrayid=-1;
@@ -507,17 +506,16 @@ void mtdBuilder::event(daqReader *rdr) {
   int triggerTimeStamp[2];
   for(int i=0; i<2; i++) { triggerTimeStamp[i] = 0; }
 
-  PCP;
   daq_dta *dd = rdr->det("mtd")->get("legacy");
+  if(!dd) return; // do not process if mtd is not in the readout
+
   mtd_t *mtd;
   if (dd) {
     while(dd->iterate()) {
       mtd = (mtd_t *)dd->Void;
       for (int ifib=0;ifib<2;ifib++){				// THUB-S is fiber 0, THUB-N is fiber 1
 	int ndataword = mtd->ddl_words[ifib];    
-	if(ndataword<=0) continue;
 	contents.MTD_EventCount->Fill(ifib+1);
-	//cout << "ndataword = " << ndataword << endl;
 	for(int iword=0;iword<ndataword;iword++){
 	  int dataword=mtd->ddl[ifib][iword];
 						
@@ -626,8 +624,6 @@ void mtdBuilder::event(daqReader *rdr) {
 	  contents.hMTD_ToT_good[ibl]->Fill(timediff);
 	}
     }
-	  
-  PCP;
 
   //check bunchid
   int bunchidref1 	= allbunchid[0][mReferenceTray-1];
@@ -638,7 +634,8 @@ void mtdBuilder::event(daqReader *rdr) {
   
   contents.MTD_bunchid->Fill(mReferenceTray, diff);
   if(bunchidref2!=-9999 && diff) contents.MTD_Error2->Fill(mReferenceTray);
-  if(bunchidref1==-9999 || bunchidref2==-9999) contents.MTD_Error3->Fill(mReferenceTray);
+  if(bunchidref1==-9999) contents.MTD_Error3->Fill(mReferenceTray);
+  if(bunchidref2==-9999) contents.MTD_Error3->Fill(mReferenceTray);
 
   int BunchIdError	= 1;
   for(int ihalf=0; ihalf<2; ihalf++){
@@ -671,11 +668,10 @@ void mtdBuilder::event(daqReader *rdr) {
       }
     }
   }
-  
-  PCP;
+
   //painting label.. //can move to end of run
   char t[256];
-  int nev = (int)(contents.MTD_EventCount->GetEntries());
+  int nev = (int)(contents.MTD_EventCount->GetEntries())/2;
   int err1 = (int)(contents.MTD_Error1->GetEntries());
   int err2 = (int)(contents.MTD_Error2->GetEntries());
   int err3 = (int)(contents.MTD_Error3->GetEntries());
@@ -701,8 +697,6 @@ void mtdBuilder::event(daqReader *rdr) {
     MTD_Error2_label->SetTextColor(2);
   }
   MTD_Error2_label->SetText(.2,.8,t);
-  
-  PCP;
 
   //error3 label
   if( err3== 0) {
@@ -783,12 +777,10 @@ void mtdBuilder::event(daqReader *rdr) {
       delete trgd;
     }
 
-  PCP;
   return;
 }
 
 void mtdBuilder::stoprun(daqReader *rdr) {
-    PCP;
 //   printf("Stopping run #%d\n",run);
 //   status.setEndOfRun(1);
 //   send((TObject *)&status);
