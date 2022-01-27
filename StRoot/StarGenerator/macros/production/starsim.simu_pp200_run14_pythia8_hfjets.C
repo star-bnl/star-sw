@@ -37,15 +37,22 @@ void command( TString cmd )
 //
 // NOTE:  last event generated will be corrupt in the FZD file
 //
-void trig( Int_t n=1 )
+double _vx      = 0;
+double _vy      = 0;
+double _vz      = 0;
+int    _runId   = 0;
+int    _eventId = 0;
+void trig( int runId, int eventId, double vz )
 {
-  for ( int i=0;i<n; i++ ) {
-    chain->Clear();
-    chain->Make();
-    _primary->event()->Print();
-    command("gprint kine");
-  };
-  
+
+  _primary -> SetVertex( 0.1, -0.1, vz );
+  _primary -> SetSigma ( 0.1E-12,  0.1E-12, 0.1E-12 );
+
+  chain->Clear();
+  chain->Make();
+  _primary->event()->Print();
+
+      
 }
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -98,13 +105,43 @@ void Pythia8( TString config="pp:W", Double_t ckin3=0.0, Double_t ckin4=-1.0 )
   pythia8 -> Set(Form("PhaseSpace:ptHatMax=%f", ckin4 ));
 
   _primary -> AddGenerator( pythia8 );
+
   
 }
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
+TString runfile = "";
+
+void getNextRun( int& event, int& run, double& z ) {
+
+  static ifstream myfile;
+  double x, y;
+
+  // Initialize on first call
+  if ( event == 0 ) {
+    myfile.open(runfile.Data());
+  }
+
+  // Handle end of file
+  if ( myfile.eof() ) {
+    event = 0;
+    run   = 0;
+    z     = -999.0;
+    return;
+  }
+
+  // 15165057 2586838 -0.23291 -0.151908 -2.82513
+  myfile >> run >> event >> x >> y >> z;
+
+}
+
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=10, Int_t rngSeed=1234 )
+
+void starsim( Int_t nevents=10, Int_t runnumber=15165057  )
 { 
+
+  int     rngSeed = runnumber;
+          runfile = Form("/gpfs01/star/pwg/droy1/EMBEDDING_2021_D0Analysis/VERTEX/VertexFiles/%i.txt",runnumber);
 
   gROOT->ProcessLine(".L bfc.C");
   {
@@ -151,8 +188,7 @@ void starsim( Int_t nevents=10, Int_t rngSeed=1234 )
   _primary = new StarPrimaryMaker();
   {
     _primary -> SetFileName( "pythia8.starsim.root");
-    _primary -> SetVertex( 0.1, -0.1, 0.0 );
-    _primary -> SetSigma ( 0.1,  0.1, 30.0 );
+    _primary->SetAttr("beamline", 1);
     chain -> AddBefore( "geant", _primary );
   }
 
@@ -241,8 +277,8 @@ void starsim( Int_t nevents=10, Int_t rngSeed=1234 )
   //   y = 0 gauss width = 1mm
   //   z = 0 gauss width = 30cm
   // 
-  _primary->SetVertex( 0., 0., 0. );
-  _primary->SetSigma( 0.1, 0.1, 30.0 );
+  //  _primary->SetVertex( 0., 0., 0. );
+  //_primary->SetSigma( 0.1, 0.1, 30.0 );
 
   
   //
@@ -257,7 +293,39 @@ void starsim( Int_t nevents=10, Int_t rngSeed=1234 )
   //
   // Trigger on nevents
   //
-  trig( nevents );
+  // for ( int i=0;i<nevents;i++ ) {
+  //   int event = 0;
+  //   int run = 0;
+  //   double z = 0;
+  //   getNextEvent( event, runnumber, z );
+  //   trig( event, run, z   );
+  // }
+  //
+
+  int count = 0;
+  while (true) {
+
+    int event;
+    double z;
+    getNextRun( event, runnumber, z );
+    if ( 0==runnumber ) {
+      std::cout << "End of run file encountered" << std::endl;
+      break;
+    }
+
+    // Set run and event number in starsim
+    command( Form( "rung %i %i", runnumber, event ) );
+
+    trig( event, runnumber, z );
+
+    if ( count++ > nevents ) {
+      std::cout << "Last event requested" << std::endl;
+      break;
+    }
+
+  }
+
+
 
   //
   // Finish the chain
