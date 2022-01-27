@@ -277,6 +277,7 @@ void fttBuilder::initialize(int argc, char *argv[]) {
 } // initialize
     
 void fttBuilder::startrun(daqReader *rdr) {
+    LOG("JEFF", "fttBuilder starting run");
     resetAllPlots();
     // Set the "time" window for accepting data
     int tCut = 65000;

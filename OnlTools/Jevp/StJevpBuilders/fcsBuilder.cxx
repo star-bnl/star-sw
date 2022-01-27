@@ -174,7 +174,7 @@ void fcsBuilder::initialize(int argc, char *argv[]) {
 }
   
 void fcsBuilder::startrun(daqReader *rdr) {
-    LOG(NOTE, "fcsBuilder starting run #%d",rdr->run);
+    LOG("JEFF", "fcsBuilder starting run #%d",rdr->run);
     resetAllPlots();    
     mEvt=-1;
     mPhyLed=-1;
