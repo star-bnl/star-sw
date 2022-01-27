@@ -19,14 +19,14 @@ void Fix2019itpcPadGainT0(const Char_t *newf = "itpcPadGainT0.20190119.000135.ro
     {14, 38, 41, 41}, // hot pad
     //{17, 31-35, 20, 40}, // possible time depended problem region
 #endif
-    {19, 13,  5, 22},
-    {19, 14,  2, 22},
-    {19, 15,  9, 22},
-    {19, 16, 14, 23},
-    {20,  7,  2,  3},
-    {20,  8,  2,  7},
-    {20,  9,  2, 25},
-    {20, 10,  2, 25}
+    {19, 13,  5, 22}, /* FEE 40 */
+    {19, 14,  2, 22}, /* FEE 40 */
+    {19, 15,  9, 22}, /* FEE 40 */
+    {19, 16, 14, 23}, /* FEE 40 */
+    {20,  7,  2,  3}, /* FEE 46 */
+    {20,  8,  2,  7}, /* FEE 46 */
+    {20,  9,  2, 25}, /* FEE 46 */
+    {20, 10,  2, 25}  /* FEE 46 */
   };
   St_itpcPadGainT0 *table = (St_itpcPadGainT0 *) gDirectory->Get("itpcPadGainT0");
   itpcPadGainT0_st *g = table->GetTable();

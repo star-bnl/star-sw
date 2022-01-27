@@ -15,6 +15,8 @@
   MergeDeadFee.pl AliveFEE.listSorted  | tee AliveFeeRuns
   sort AliveFeeRuns | tee AliveFeeRuns.sorted
                           add Alive
+  
+  cat *XIX_XX.sorted | sort | tee DeadOrAlived_Runx_XIX_XX.sorted
 */
 //   foreach f ( `ls -1d   */2*.root` )
 //________________________________________________________________________________
