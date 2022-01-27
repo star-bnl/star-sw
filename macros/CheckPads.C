@@ -1,14 +1,22 @@
 /*
   cd ~/work/dEdx/RunXIX68
-  foreach f ( `ls -1d   *19/2*.root *20/2*.root` )
+  foreach f ( `ls -1d   *19/2*.root *20/2*.root` )  
     set b = `basename ${f} .root`; root.exe -q -b ${f} CheckPads.C+ >& ${b}.list
   end
   grep Dead *.list > DeadFEE.list
-  remove Dead  string
-  sort DeadFEE.list > DeadFEE.listSorted
-  MergeDeadFee.pl  | tee DeadFeeRuns
+  remove Dead  string >  DeadFEE2.list
+  sort DeadFEE2.list > DeadFEE.listSorted
+  MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
   sort DeadFeeRuns | tee DeadFeeRuns.sorted
+                         add Dead
+  grep Alive *.list > AliveFEE.list
+  remove Alive  string >  AliveFEE2.list
+  sort AliveFEE2.list > AliveFEE.listSorted
+  MergeDeadFee.pl AliveFEE.listSorted  | tee AliveFeeRuns
+  sort AliveFeeRuns | tee AliveFeeRuns.sorted
+                          add Alive
 */
+//   foreach f ( `ls -1d   */2*.root` )
 //________________________________________________________________________________
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
