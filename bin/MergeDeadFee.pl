@@ -1,7 +1,13 @@
 #! /usr/bin/env perl
 use File::Basename;
 use Cwd;
-my $file = "DeadFEE.listSorted";
+my $file = "";
+if ($#ARGV < 0) {
+  print "Usage $0 DeadFEE.listSorted\n";
+  exit 0;
+} else {
+  $file = $ARGV[0];
+}
 open(In, $file) or die "Can't open $file";
 my $line;
 my $tagOld = "";
