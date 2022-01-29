@@ -63,11 +63,11 @@ public:
 	void stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_TAMU_202202(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
-	void stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_JP6_202204(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_JP6Carl_202205(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_JP5_202206(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
         void stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[], u_short* s2_to_dsm) ;
+	void stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_tonko_202101(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_tonko_202104(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 
@@ -104,6 +104,7 @@ public:
 
 	u_char want_stage_2_io ;	// only if I have full events
 	u_char want_stage_3_io ;	// only for eother full events or in sector 11
+	u_char want_stage_1_sim ;
 
 	// cleared at run start; logged at run stop
 	struct errors_t {
@@ -124,6 +125,9 @@ public:
 		int tcd_marker ;
 		int self_trg_marker ;
 	} statistics ;
+
+	u_char self_trigger ;	// for debugging
+	u_int dbg_xing ;	// for debugging
 
 	u_int run_number ;	// for logging
 	u_int evts ;		// for logging
@@ -208,8 +212,9 @@ public:
 	} d_out ;
 
 	// if there's any output to DSM
-	u_int dsm_any ;
-	int dsm_xing ;
+	int trg_xing ;	// normally 5
+	u_short s3_to_dsm ;
+	u_short s2_to_dsm[2] ;	// North/South
 
 	// statics below
 	static u_int data_format ;	// 0:pre FY21, 1=FY21
@@ -241,11 +246,25 @@ public:
 
 	static int fcs_trgDebug ;
 
+	static int run_type ;
+
 	// per event 
-	int event_bad ;
+	u_int event_bad ;
+
+	u_char s2_io_ns_bad ;
+	u_char s2_io_ch_bad ;	//0.33
+
+	u_char s3_io_ch_bad ;	//0..3
+
+	u_char s1_dep_bad ;	//0..19
+	u_char s1_det_bad ;	//0..2
+	u_char s1_ns_bad ;
+
+	u_char s2_ns_bad ;
+	u_char s2_ch_bad ;	//0..1
 
 	// stage_x algo params (same as in firmware)
-	static u_short stage_params[4][16] ;	// [stage][param_ix] ;
+	static u_short stage_params[4][32] ;	// [stage][param_ix] ;
 
 	// for use by stage_0; loaded in init()
 	static ped_gain_t p_g[NS_COU][ADC_DET_COU][DEP_COU][32] ;		
@@ -310,10 +329,12 @@ public:
         u_int padc[2][6][32];
         u_int phit[2][6][32];
         u_int sum [2][15][9];
+        u_int summax[2][15][9];
         float ratio[2][15][9];
+        float ratiomax[2][15][9];
         u_int em[2][15][9];
         u_int had[2][15][9];
-        u_int jet[2][3];
+        u_int jet[2][6];
         u_int etot[2];
         u_int htot[2];    
         u_int dsmout;
