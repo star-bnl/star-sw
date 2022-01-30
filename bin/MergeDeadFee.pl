@@ -2,12 +2,14 @@
 use File::Basename;
 use Cwd;
 my $file = "";
+my $flag = "Dead";
 if ($#ARGV < 0) {
   print "Usage $0 DeadFEE.listSorted\n";
   exit 0;
 } else {
   $file = $ARGV[0];
 }
+$flag = "Alive" if ($file =~ /Alive/);
 open(In, $file) or die "Can't open $file";
 my $line;
 my $tagOld = "";
@@ -28,7 +30,7 @@ while ($line = <In>) {
   } elsif ($tag ne $tagOld) {
     if ($run1 != 0) {
 #      print "$tagOld /* $run1 - $run2 */\n"; 
-      print " /* $run1 - $run2 */ $tagOld\n"; 
+      print " /* $run1 - $run2 */ $tagOld /* $flag */\n"; 
       $run1 = $run;
       $run2 = $run;
       $tagOld = $tag;
@@ -40,5 +42,6 @@ while ($line = <In>) {
   }
 }
 #print "$tagOld /* $run1 - $run2 */\n"; 
-      print " /* $run1 - $run2 */ $tagOld\n"; 
+#      print " /* $run1 - $run2 */ $tagOld\n"; 
+print " /* $run1 - $run2 */ $tagOld /* $flag */\n"; 
 

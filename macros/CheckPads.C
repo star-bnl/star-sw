@@ -3,20 +3,25 @@
   foreach f ( `ls -1d   *19/2*.root *20/2*.root` )  
     set b = `basename ${f} .root`; root.exe -q -b ${f} CheckPads.C+ >& ${b}.list
   end
-  grep Dead *.list > DeadFEE.list
-  remove Dead  string >  DeadFEE2.list
+  #grep Dead *.list > DeadFEE.list
+  #remove Dead  string >  DeadFEE2.list
+
+#  grep Dead *.list | awk -F\{ '{print "{"$2"}, /""* Dead  *""/"}' > DeadFEE2.list
+  grep Dead *.list | awk -F\{ '{print "{"$2}' > DeadFEE2.list
   sort DeadFEE2.list > DeadFEE.listSorted
   MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
   sort DeadFeeRuns | tee DeadFeeRuns.sorted
                          add Dead
-  grep Alive *.list > AliveFEE.list
-  remove Alive  string >  AliveFEE2.list
-  sort AliveFEE2.list > AliveFEE.listSorted
-  MergeDeadFee.pl AliveFEE.listSorted  | tee AliveFeeRuns
+#  grep Alive *.list > AliveFEE.list
+#  remove Alive  string >  AliveFEE2.list
+
+  grep Alive 2*.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
+  sort AliveFEE2.list > AliveFEE.sorted
+  MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
   sort AliveFeeRuns | tee AliveFeeRuns.sorted
                           add Alive
   
-  cat *XIX_XX.sorted | sort | tee DeadOrAlived_Runx_XIX_XX.sorted
+  cat *Runs.sorted | sort | tee DeadOrAlived_Runx_XIX_XX.sorted
 */
 //   foreach f ( `ls -1d   */2*.root` )
 //________________________________________________________________________________
