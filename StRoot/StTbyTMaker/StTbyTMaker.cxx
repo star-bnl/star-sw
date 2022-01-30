@@ -1,6 +1,7 @@
 //
 // $Id: StTbyTMaker.cxx,v 1.4 2013/01/16 21:56:45 fisyak Exp $
 //
+//#define __HIT_MATCH__
 #include <iostream>
 #include <algorithm>
 #include <set>
@@ -58,7 +59,6 @@ Int_t StTbyTMaker::Init() {
   trackTree = new TTree("trackMateComp","trackMateComp");
   fTrackMatch = new TrackMatch;
   trackBr = trackTree->Branch("TrackMatch",&fTrackMatch);
-#define __HIT_MATCH__
 #ifdef __HIT_MATCH__
   hitTree = new TTree("hitMateComp","hitMateComp");
   fHitMatch = new HitMatch;

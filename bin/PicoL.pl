@@ -3,6 +3,7 @@ use File::Basename;
 use Cwd;
 use File::stat;
 use Time::localtime;
+# dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/*
 #my $timestamp = ctime(stat($fh)->mtime);
 #my $glob =  "/net/l404/data/fisyak/Pico/BES-I/AuAu19_production/2011/???/*";
 #my $glob =  "/net/l401/data/scratch2/kehw/reco/2019/???/*";

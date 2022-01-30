@@ -36,7 +36,8 @@ end
 //#define __Y2018__ 
 #define __Y2019__   /* >= 2019 */
 //#define __LASER__
-//#define __Cosmics__
+#define __Cosmics__
+//#define  __ONLY_PRIMARY_TRACKS__
 //#define __useGainT0__
 //#define __PADCorrection__
 //#define __PRINCIPLE__
@@ -525,7 +526,9 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "S", const Char_t *O
     if (! fNoPixels ) continue;
     if (fNoRcHit != 1 || fNoRcTrack < 1) continue;
     if (fRcTrack_fNpoints[0] < 10) continue;
+#ifdef __ONLY_PRIMARY_TRACKS__
     if (fRcTrack_fifPrim[0] != 1) continue;
+#endif
     TVector3 mom(fRcTrack_fpx[0],fRcTrack_fpy[0],fRcTrack_fpz[0]);
 #if !defined( __LASER__ ) && !defined(__Cosmics__)
 #if 0
@@ -4749,7 +4752,7 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
   fOut->Write();
 }
 //________________________________________________________________________________
-void TpcTQA(const Char_t *files="*.root", const Char_t *Out = "") {
+void TpcTQA(const Char_t *files="*.root", const Char_t *Out = "QA.root") {
   // QA Plots
   TDirIter Dir(files);
   Char_t *file = 0;
@@ -4776,8 +4779,6 @@ void TpcTQA(const Char_t *files="*.root", const Char_t *Out = "") {
   if (output == "") {
     output = file1;
     output.ReplaceAll(".root",".QA.root");
-  } else {
-    output += ".QA.root";
   }
   cout << "Output for " << output << endl;
   if (! fOut) fOut = new TFile(output,"recreate");
@@ -4883,9 +4884,13 @@ void TpcTQA(const Char_t *files="*.root", const Char_t *Out = "") {
   }
   fOut->Write();
 }
+/*
+  tbRC->ProjectionZ("I",1,24,1,40)->Draw()
+
+ */
 //________________________________________________________________________________
-void TpcTQAPlot(const Char_t *fileRC = "../daq_19GeV/st_physics_adc_20087007_raw_7500002.tags.QA.root",
-		const Char_t *fileMC = "st_physics_adc_20087007_raw_7500002.tags.QA.root") {
+void TpcTQAPlotPR(const Char_t *fileRC = "../daq_19GeV/QA.root",
+		const Char_t *fileMC = "QA.root") {
   TFile *fRC = new TFile(fileRC); if (! fRC) return;
   TFile *fMC = new TFile(fileMC); if (! fMC) return;
   //
@@ -4907,7 +4912,7 @@ void TpcTQAPlot(const Char_t *fileRC = "../daq_19GeV/st_physics_adc_20087007_raw
       c1->cd(i+1);
       padsYZ[i] = (TH2D *) pads[i]->Project3D(Form("yz_%i%s",s,RM[i]));
       padsYZ[i]->SetXTitle("pad");
-      padsYZ[i]->SetYTitle("pad");
+      padsYZ[i]->SetYTitle("row");
       padsYZ[i]->Draw("colz");
       c1->Update();
       TPaveStats *st = (TPaveStats *) padsYZ[i]->FindObject("stats");
@@ -4923,4 +4928,162 @@ void TpcTQAPlot(const Char_t *fileRC = "../daq_19GeV/st_physics_adc_20087007_raw
     c1->SaveAs(".png");
     if (! gROOT->IsBatch() && Ask()) return;
   }
+}
+//________________________________________________________________________________
+void TpcTQAPlotTB(const Char_t *fileRC = "../daq_19GeV/QA.root",
+		const Char_t *fileMC = "QA.root") {
+  TFile *fRC = new TFile(fileRC); if (! fRC) return;
+  TFile *fMC = new TFile(fileMC); if (! fMC) return;
+  //
+  TFile *files[2] = {fRC, fMC};
+  TH3F *tbs[2] = {0};
+  TH1D *tbsZ[2] = {0};
+  for (Int_t i = 0; i < 2; i++) {
+    tbs[i] = (TH3F *) files[i]->Get("tbRC");
+  }
+  const Char_t *RM[2] = {"RC","MC"};
+  const Char_t *IO[2] = {"Inner", "Outer"};
+  TCanvas *c1 = new TCanvas("Tb","time buckets",1200,800);
+  c1->Divide(1,2);
+  for (Int_t io = 0; io < 2; io++) {
+    c1->cd(io+1);
+    TString same;
+    TLegend *l = new TLegend(0.2,0.7,0.5,0.9);
+    Int_t row1 =  1;
+    Int_t row2 = 40;
+    if (io == 1) {
+      row1 = 41;
+      row2 = 72;
+    }
+    for (Int_t i = 0; i < 2; i++) {		   
+      TH3F *tbRC = tbs[i];
+      TAxis *x = tbRC->GetXaxis();
+      tbsZ[i] = (TH1D *) tbs[i]->ProjectionZ(Form("%s_%s",IO[io],RM[i]),1,24,row1,row2);
+      tbsZ[i]->SetXTitle("time buckets");
+      tbsZ[i]->SetLineColor(i+1);
+      tbsZ[i]->SetMarkerColor(i+1);
+      tbsZ[i]->Draw(same);
+      //      if (i == 0) tbsZ[i]->Scale(0.25);
+      l->AddEntry(tbsZ[i],tbsZ[i]->GetName());
+      same = "same";
+      c1->Update();
+#if 0
+      TPaveStats *st = (TPaveStats *) padsYZ[i]->FindObject("stats");
+      if (st) {
+	st->SetX1NDC(0.65);
+	st->SetX2NDC(0.85);
+	st->SetY1NDC(0.15);
+	st->SetY2NDC(0.35);
+      }
+      tbsZ[i]->Draw("colz");
+      c1->Update();
+#endif
+    }
+    l->Draw();
+    c1->Update();
+    c1->SaveAs(".png");
+#if 0
+    if (! gROOT->IsBatch() && Ask()) return;
+#endif
+  }
+}
+//________________________________________________________________________________
+void TpcTQAPlotNpads(const Char_t *fileRC = "../daq_19GeV/QA.root",
+		  const Char_t *fileMC1 = "../TpcRS_19GeV32/QA.root",
+		  const Char_t *fileMC2 = "../TpcRS_19GeV33/QA.root") {
+  enum {kFiles = 3, kIO = 2};
+  TFile *files[kFiles] = {
+    new TFile(fileRC),
+    new TFile(fileMC1),
+    new TFile(fileMC2)
+  };
+  const Char_t *RM[kFiles] = {"RC","MC1", "MC2"};
+  const Char_t *IO[kIO] = {"Inner", "Outer"};
+  TProfile2D *npads[kFiles] = {0};
+  TH1D *npadsZ[kFiles] = {0};
+  for (Int_t i = 0; i < kFiles; i++) {
+    if (! files[0]) continue;
+    npads[i] = (TProfile2D *) files[i]->Get("rzRCP");
+  }
+  TCanvas *c1 = new TCanvas("Npads","No. pads",1200,800);
+  c1->Divide(1,2);
+  for (Int_t io = 0; io < kIO; io++) {
+    c1->cd(io+1);
+    TString same;
+    TLegend *l = new TLegend(0.2,0.7,0.5,0.9);
+    Int_t row1 =  1;
+    Int_t row2 = 40;
+    if (io == 1) {
+      row1 = 41;
+      row2 = 72;
+    }
+    for (Int_t i = kFiles - 1 ; i >= 0;  i--) {		   
+      if (! npads[i]) continue;
+      TProfile2D *rzRCP = npads[i];
+      npadsZ[i] = (TH1D *) npads[i]->ProfileX(Form("%s_%s",IO[io],RM[i]), row1, row2);
+      npadsZ[i]->SetXTitle("Z (cm)");
+      npadsZ[i]->SetLineColor(i+1);
+      npadsZ[i]->SetMarkerColor(i+1);
+      npadsZ[i]->Draw(same);
+      l->AddEntry(npadsZ[i],npadsZ[i]->GetName());
+      same = "same";
+      c1->Update();
+    }
+    l->Draw();
+    c1->Update();
+    c1->SaveAs(".png");
+  }
+}
+//________________________________________________________________________________
+void TpcTQAPlotNtbks(const Char_t *fileRC = "../daq_19GeV/QA.root",
+		  const Char_t *fileMC1 = "../TpcRS_19GeV32/QA.root",
+		  const Char_t *fileMC2 = "../TpcRS_19GeV33/QA.root") {
+  enum {kFiles = 3, kIO = 2};
+  TFile *files[kFiles] = {
+    new TFile(fileRC),
+    new TFile(fileMC1),
+    new TFile(fileMC2)
+  };
+  const Char_t *RM[kFiles] = {"RC","MC1", "MC2"};
+  const Char_t *IO[kIO] = {"Inner", "Outer"};
+  TProfile2D *ntbks[kFiles] = {0};
+  TH1D *ntbksZ[kFiles] = {0};
+  for (Int_t i = 0; i < kFiles; i++) {
+    if (! files[0]) continue;
+    ntbks[i] = (TProfile2D *) files[i]->Get("rzRCT");
+  }
+  TCanvas *c1 = new TCanvas("Ntbks","time buckets",1200,800);
+  c1->Divide(1,2);
+  for (Int_t io = 0; io < kIO; io++) {
+    c1->cd(io+1);
+    TString same;
+    TLegend *l = new TLegend(0.2,0.7,0.5,0.9);
+    Int_t row1 =  1;
+    Int_t row2 = 40;
+    if (io == 1) {
+      row1 = 41;
+      row2 = 72;
+    }
+    for (Int_t i = kFiles - 1 ; i >= 0;  i--) {		   
+      if (! ntbks[i]) continue;
+      TProfile2D *rzRCT = ntbks[i];
+      ntbksZ[i] = (TH1D *) ntbks[i]->ProfileX(Form("%s_%s",IO[io],RM[i]),row1,row2);
+      ntbksZ[i]->SetXTitle("Z (cm)");
+      ntbksZ[i]->SetLineColor(i+1);
+      ntbksZ[i]->SetMarkerColor(i+1);
+      ntbksZ[i]->Draw(same);
+      l->AddEntry(ntbksZ[i],ntbksZ[i]->GetName());
+      same = "same";
+      c1->Update();
+    }
+    l->Draw();
+    c1->Update();
+    c1->SaveAs(".png");
+  }
+}
+//________________________________________________________________________________
+void TpcTQAPlot(const Char_t *fileRC = "../daq_19GeV/QA.root",
+		const Char_t *fileMC = "QA.root") {
+  TpcTQAPlotPR(fileRC,fileMC);
+  TpcTQAPlotTB(fileRC,fileMC);
 }

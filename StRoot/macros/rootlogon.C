@@ -6,6 +6,10 @@
 //=======================================================================
 {
   //  cout << gSystem->GetDynamicPath() << endl;
+  if (gSystem->Getenv("LIBNEW")) {
+    printf("*** load libNew ***\n");
+    gSystem->Load("libNew"); 
+  }
   gSystem->ResetSignal(kSigChild,kTRUE);
   int rootlogon_fpe=0;const char *rootlogon_env=0;
   const Char_t *rootlogon_path  = ".:~";

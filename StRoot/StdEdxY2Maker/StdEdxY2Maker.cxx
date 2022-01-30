@@ -398,8 +398,10 @@ Int_t StdEdxY2Maker::Make(){
 	}
 	Int_t sector = tpcHit->sector();
 	if (sector < sectorMin || sector > sectorMax) continue;
-
 	Int_t row    = tpcHit->padrow();
+	Int_t pad    = tpcHit->pad();
+	Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
+	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
 	if (! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
@@ -909,6 +911,8 @@ Int_t StdEdxY2Maker::Make(){
 	      Int_t row    = tpcHit->padrow();
 	      Int_t pad    = tpcHit->pad();
 	      Int_t adc    = tpcHit->adc();
+	      Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
+	      if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
 	      ActivePads->Fill(sector, row, pad, adc);
 #endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
 	    }
