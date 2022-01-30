@@ -399,7 +399,7 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
       for(Int_t row=1;row<=St_tpcPadConfigC::instance()->numberOfRows(sector);row++) {
         Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
         totalSecPads += numPadsAtRow;
-        if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
+        if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row,1) &&
             St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
           liveSecPads += numPadsAtRow;
       }
@@ -599,7 +599,12 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	  if (! c || ! c->charge) continue;
 	  if (c->flags &&
 	     (c->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
-	  Int_t iok = hitCollection->addHit(CreateTpcHit(*c,sector,padrow+1));
+	  Int_t row = padrow + 1;
+	  Float_t pad  = c->p;
+	  Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
+	  if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+	  StTpcHit *tpcHit = CreateTpcHit(*c,sector,row);
+	  Int_t iok = hitCollection->addHit(tpcHit);
 	  assert(iok);
 	}
       }
@@ -630,7 +635,11 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
       if (cld->t2 <  0 || cld->t2 >= __MaxNumberOfTimeBins__) continue;
       if (cld->flags &&
 	 (cld->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
-      Int_t iok = hitCollection->addHit(CreateTpcHit(*cld,sector,row));
+      Float_t pad  = cld->pad;
+      Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
+      if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+      StTpcHit *tpcHit = CreateTpcHit(*cld,sector,row);
+      Int_t iok = hitCollection->addHit(tpcHit);
       assert(iok);
     }
   }
