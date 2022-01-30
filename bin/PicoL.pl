@@ -33,19 +33,20 @@ elsif ($pwd =~ /2013/) { $year = "y2013";}
 elsif ($pwd =~ /2012/) { $year = "y2012";} 
 elsif ($pwd =~ /2011/) { $year = "y2011";} 
 elsif ($pwd =~ /2010/) { $year = "y2010";} 
-if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20/ or $pwd =~ /P21/) {
+if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20/ or $pwd =~ /P21/ or $pwd =~ /SL/) {
   $PICOPATH = "/gpfs01/star/data*"; print "PICOPATH = $PICOPATH \n" if ($debug);
-  if    ($pwd =~ /2020\/5p75GeV_fixedTarget/) {$glob = "/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
+  if    ($pwd =~ /2020\/5p75GeV_fixedTarget_P21id/) {$glob = "/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/P21id/20*";}
+  elsif ($pwd =~ /2020\/5p75GeV_fixedTarget/) {$glob = "/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/11p5GeV_2020_P21ib/)  {$glob = "/reco/production_11p5GeV_2020/ReversedFullField/P21ib_calib/20*"; }
   elsif ($pwd =~ /2020\/11p5GeV.C/)           {$glob = "/reco/production_11p5GeV_2020/ReversedFullField/dev/20*"; $dayMin = 42;}
   elsif ($pwd =~ /2020\/11p5GeV/)             {$glob = "/reco/production_11p5GeV_2020/ReversedFullField/dev/20*"; $dayMax = 41;}
-  elsif ($pwd =~ /2020\/13p5GeV_fixedTarget/) {$glob = "/reco/production_13p5GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
+  elsif ($pwd =~ /2020\/13p5GeV_fixedTarget_P21id/) {$glob = "/reco/production_13p5GeV_fixedTarget_2020/ReversedFullField/P21id/20*";}
   elsif ($pwd =~ /2020\/19p5GeV_fixedTarget/) {$glob = "/reco/production_19p5GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/31p2GeV_fixedTarget/) {$glob = "/reco/production_31p2GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/7p3GeV_fixedTarget/)  {$glob = "/reco/production_7p3GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/9p2GeV_2020c/)        {$glob = "/reco/production_9p2GeV_2020c/ReversedFullField/P21ib_calib/2020";}
   elsif ($pwd =~ /2020\/9p2GeV_2020b/)        {$glob = "/reco/production_9p2GeV_2020b/ReversedFullField/P21ib_calib/2020";}
-  elsif ($pwd =~ /2020\/9p2GeV_2020/)         {$glob = "/reco/production_9p2GeV_2020/ReversedFullField/P21ib_calib/2020";}
+  elsif ($pwd =~ /2020\/9p2GeV_2020/)         {$glob = "/reco/productioxfn_9p2GeV_2020/ReversedFullField/P21ib_calib/2020";}
   elsif ($pwd =~ /2020\/9p2GeVc/)             {$glob = "/reco/production_9p2GeV_2020c/ReversedFullField/dev/2020";}
   elsif ($pwd =~ /2020\/9p2GeVb/)             {$glob = "/reco/production_9p2GeV_2020b/ReversedFullField/dev/2020";}
   elsif ($pwd =~ /2020\/9p2GeV/)              {$glob = "/reco/production_9p2GeV_2020/ReversedFullField/dev/20*";}
@@ -56,6 +57,8 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P20/ or $pwd =~ /P21/) {
   elsif ($pwd =~ /2019\/19GeV_2019_P21ib2/)   {$PICOPATH = "/gpfs01/star/data97"; $glob = "/reco/production_19GeV_2019/ReversedFullField/P21ib_calib/2019"; }
   elsif ($pwd =~ /2019\/19GeV_2019_P21ib/)    {$PICOPATH = "/gpfs01/star/data100"; $glob = "/reco/production_19GeV_2019/ReversedFullField/P21ib_calib/2019"; }
   elsif ($pwd =~ /2019\/19GeV_2019_DEV/)      {$PICOPATH = "/gpfs01/star/subsys-tpc/fisyak/Pico/2019/production_19GeV_2019_DEV"; $glob = "";}
+  elsif ($pwd =~ /2019\/19GeV_2019_SL21c/)    {$PICOPATH = "/gpfs01/star/scratch/kehw"; $glob = "/SL21c/reco/AuAu19/out"; }
+  elsif ($pwd =~ /2019\/19GeV_2019_SL21e/)    {$PICOPATH = "/gpfs01/star/scratch/kehw"; $glob = "/SL21e/reco/AuAu19/out"; }
   elsif ($pwd =~ /2019\/19GeV_2019_P21ic/)    {$glob = "/reco/production_19GeV_2019/ReversedFullField/P21ic/2019"; }
   elsif ($pwd =~ /2019\/14p5GeV_2019_DEV/)    {$glob = "/reco/production_14p5GeV_2019/ReversedFullField/DEV_calib/2019";}
   elsif ($pwd =~ /2019\/14p5GeV_2019_P21ib2/) {$PICOPATH = "/gpfs01/star/data97"; $glob = "/reco/production_14p5GeV_2019/ReversedFullField/P21ib_calib/2019"; }
