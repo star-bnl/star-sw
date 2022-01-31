@@ -352,6 +352,7 @@
 #include "TObjString.h"
 #include "TMath.h"
 #include "TString.h"
+#include "TRegexp.h"
 #include "TPaveLabel.h"
 #include "TPaveText.h"
 #include "TLegend.h"
@@ -777,6 +778,9 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
   TObject *obj = 0;
   TLine ruler;
   TLatex latex;
+  TF1* fcsFunc1 = 0;
+  TF1* fcsFunc2 = 0;
+  TF1* fcsFunc3 = 0;
 
   ofstream* C_ostr = 0;
   TFile* root_ofile = 0;
@@ -1240,6 +1244,29 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
                      << (analRepeat ? " Ref" : "")
                      << " QA Events (found vtx/total) "
                      << fndVtx << " / " << totVtx << endm;
+          }
+
+          if (oName.Contains("h1_inv_mass_cluster")) {
+            ruler.SetLineColor(2);
+            ruler.SetLineWidth(1);
+            ruler.DrawLine(0.135,0.,0.135,hobj->GetMaximum());
+          }
+
+          if (oName.Contains("h2_cluster_dgg_vs_E1pE2")) {
+            if (!fcsFunc1) {
+              fcsFunc1= new TF1("Zgg=0","156.20/x",4,30);
+              fcsFunc1->SetTitle("Z_{gg}=0");
+              fcsFunc2= new TF1("Zgg=0.35","166.747/x",4,30);
+              fcsFunc2->SetTitle("Z_{gg}=0.35");
+              fcsFunc3= new TF1("Zgg=0.70","218.72/x",4,30);
+              fcsFunc3->SetTitle("Z_{gg}=0.7");
+              fcsFunc1->SetLineColor(2);
+              fcsFunc2->SetLineColor(6);
+              fcsFunc3->SetLineColor(28);
+            }
+            fcsFunc1->Draw("same");
+            fcsFunc2->Draw("same");
+            fcsFunc3->Draw("same");
           }
 
           if (oName.Contains("iTpcSector")) {
@@ -2592,12 +2619,14 @@ void StHistUtil::SetDefaultPrintList(const Char_t *dirName, const Char_t *analTy
       if (addIt) ilgString.Remove(0,endDetSpec);
     }
     if (addIt) {
+      TRegexp fcsPattern("^h[12]_.+"); Ssiz_t ext=0;
       if (!(ilgString.BeginsWith("fcl") ||
             ilgString.BeginsWith("fms_qt_") ||
             ilgString.BeginsWith("Z3A") ||
             ilgString.Contains("etof",TString::ECaseCompare::kIgnoreCase) ||
             ilgString.Contains("_matchCand_") ||
             ilgString.BeginsWith("G_primary") ||
+            ilgString.Index(fcsPattern,&ext)==0 ||
             ilgString.BeginsWith("fpd_channel_"))) {
         for (Int_t k=0; k<numOfPosPrefixes; k++) {
           TString listString = type;

@@ -24,7 +24,7 @@ StFstCluster::StFstCluster(int key, int disk, int wedge, int sensor, int apv,
    mSensorId(sensor),
    mApv(apv),
    mClusteringType(clusteringType),
-   mMaxTimeBin(3), mNRawHits(1), mNRawHitsR(1),
+   mMaxTimeBin(1), mNRawHits(1), mNRawHitsR(1),
    mNRawHitsPhi(1), mRawHitVec()
 {
 }

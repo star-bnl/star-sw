@@ -164,7 +164,7 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
 	  for (clusterIt2 = clustersVec[sensorIdx][phiIdx2].begin(); clusterIt2 != clustersVec[sensorIdx][phiIdx2].end() && !clustersVec[sensorIdx][phiIdx1].empty(); clusterIt2++) {
 	    float rstripDfstance = (*clusterIt1)->getMeanRStrip() - (*clusterIt2)->getMeanRStrip();
 
-	    if (TMath::Abs(rstripDfstance) < 3.5) { //here 3.5 means the dfstance between two clusters' weighted centers in r direction smaller than 0.5
+	    if (TMath::Abs(rstripDfstance) < 3.5) { //here 3.5 means the dfstance between two clusters' weighted centers in r direction smaller than 3.5 rStrip
 	      maxTb   = (*clusterIt1)->getMaxTimeBin();
 	      idTruth = (*clusterIt1)->getIdTruth();
 	      apv     = (*clusterIt1)->getApv();
@@ -177,7 +177,13 @@ Int_t StFstScanRadiusClusterAlgo::doClustering(const StFstCollection &fstCollect
 	      totCharge      = (*clusterIt1)->getTotCharge() + (*clusterIt2)->getTotCharge();
 	      totChargeErr   = sqrt(((*clusterIt1)->getTotChargeErr() * (*clusterIt1)->getTotChargeErr() * (*clusterIt1)->getNRawHits() + (*clusterIt2)->getTotChargeErr() * (*clusterIt2)->getTotChargeErr() * (*clusterIt2)->getNRawHits()) / ((*clusterIt1)->getNRawHits() + (*clusterIt2)->getNRawHits()));
 	      clusterSize    = (*clusterIt1)->getNRawHits() + (*clusterIt2)->getNRawHits();
-	      clusterSizeR   = (*clusterIt1)->getNRawHitsR() + (*clusterIt2)->getNRawHitsR() - 1;
+	      int maxClusterR1 = (*clusterIt1)->getMeanRStrip(); 
+	      int minClusterR1 = (*clusterIt1)->getMeanRStrip() - (*clusterIt1)->getNRawHitsR() + 1; 
+	      int maxClusterR2 = (*clusterIt2)->getMeanRStrip(); 
+	      int minClusterR2 = (*clusterIt2)->getMeanRStrip() - (*clusterIt2)->getNRawHitsR() + 1; 
+	      int maxClusterR = maxClusterR1 > maxClusterR2 ? maxClusterR1 : maxClusterR2;
+	      int minClusterR = minClusterR1 < minClusterR2 ? minClusterR1 : minClusterR2;
+	      clusterSizeR   = maxClusterR - minClusterR + 1; // max at 4
 	      clusterSizePhi = (*clusterIt1)->getNRawHitsPhi() + (*clusterIt2)->getNRawHitsPhi();
 	      meanRStrip     = (*clusterIt1)->getMeanRStrip();
 	      if ((*clusterIt2)->getMeanRStrip() > (*clusterIt1)->getMeanRStrip()) 

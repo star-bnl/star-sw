@@ -1575,6 +1575,18 @@ Bfc_st BFC[] = { // standard chains
   {"istRawHit",  "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
   {"istCluster", "", "", "istRawHit","StIstClusterMaker",  "StIstClusterMaker","IST Cluster maker", kFALSE},
   {"istHit",     "", "", "event,istCluster", "StIstHitMaker",       "StIstHitMaker","IST Hit Maker",kFALSE},
+  // FST
+  {"fst","fstChain","","fstRawHit,fstCluster,fstHit", "StMaker","StChain","FST chain"              ,kFALSE},
+  {"fstFastSim","","fstChain","StMcEvent,StEvent","StFstFastSimMaker","StFstSimMaker","FST fast simulator", 
+                                                                                                    kFALSE},
+  {"fstRawHit", "", "fstChain", "fstUtil,fstDb","StFstRawHitMaker", "StFstRawHitMaker","FST raw hit maker", 
+                                                                                                    kFALSE},
+  {"fstCluster", "", "fstChain", "fstRawHit","StFstClusterMaker",  "StFstClusterMaker","FST Cluster maker", 
+                                                                                                    kFALSE},
+  {"fstHit",     "", "fstChain", "event,fstCluster", "StFstHitMaker",       "StFstHitMaker","FST Hit Maker",
+                                                                                                    kFALSE},
+  {"fstUtil"  , "", "", "",          "",       "StFstUtil",    "Fst Utilities",                     
+                                                                                                    kFALSE},
 
   {"fstFastSim","fstChain","","StMcEvent,StEvent","StFstFastSimMaker","StFstSimMaker","FST fast simulator", 
                                                                                                     kFALSE},
