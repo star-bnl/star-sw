@@ -139,7 +139,7 @@ StFcsDbMaker::StFcsDbMaker(const char *name) : StMaker(name){
 }; 
 
 StFcsDbMaker::~StFcsDbMaker() {
-  //delete mFcsDb;   //already deleted by chain because AddData in constructor
+    //delete mFcsDb;   //already deleted by chain because AddData in constructor
 }
 
 int StFcsDbMaker::Init(){
