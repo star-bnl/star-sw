@@ -7,7 +7,7 @@
   #remove Dead  string >  DeadFEE2.list
 
 #  grep Dead *.list | awk -F\{ '{print "{"$2"}, /""* Dead  *""/"}' > DeadFEE2.list
-  grep Dead *.list | awk -F\{ '{print "{"$2}' > DeadFEE2.list
+  grep Dead 2*.list | awk -F\{ '{print "{"$2}' > DeadFEE2.list
   sort DeadFEE2.list > DeadFEE.listSorted
   MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
   sort DeadFeeRuns | tee DeadFeeRuns.sorted
@@ -38,7 +38,7 @@
 #include "TLegend.h"
 #include "TCanvas.h"
 #endif
-struct rowpadFEEmap_t {
+struct rowpadFEEmap_t {// FEE & RDO map for iTPC
   Int_t row, padMin, padMax, fee, rdo;
 } rowpadFEE[] = {
   { 1,  1, 26, 54, 1},
@@ -281,12 +281,14 @@ struct rowpadFEEmap_t {
   {40, 21, 40,  2, 3},
   {40, 41, 60,  3, 3},
   {40, 61, 80,  4, 4},
-  {40, 81,100,  5, 4}
+  {40, 81,100,  5, 4},
+
 };
 Int_t NC = sizeof(rowpadFEE)/sizeof(rowpadFEEmap_t);
 //________________________________________________________________________________
 Int_t FEE(Int_t row, Int_t pad, Int_t &rdo) {
   Int_t fee = 0;
+  rdo = 0;
   if (row > 0 && row <= 40 && pad > 0) {
     for (Int_t i = 0; i < NC; i++) {
       if (row != rowpadFEE[i].row) continue;  
@@ -298,6 +300,14 @@ Int_t FEE(Int_t row, Int_t pad, Int_t &rdo) {
     }
     static Int_t ibreak;
     ibreak++;
+  } else if (row > 40 && row <= 72 && pad > 0) {
+    Int_t rold = row - 27;
+    Int_t rrdo = 0;
+    if      (rold < 22) rrdo = 3;
+    else if (rold < 30) rrdo = 4;
+    else if (rold < 38) rrdo = 5;
+    else                rrdo = 6;
+    rdo = rrdo + 2;
   }
   return fee;
 }
