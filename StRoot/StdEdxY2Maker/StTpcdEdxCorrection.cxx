@@ -24,7 +24,9 @@
 #include "StDetectorDbMaker/St_tpcPressureBC.h"
 #include "StDetectorDbMaker/St_TpcDriftDistOxygenC.h"
 #include "StDetectorDbMaker/St_TpcMultiplicityC.h"
+#include "StDetectorDbMaker/St_GatingGridC.h"
 #include "StDetectorDbMaker/St_TpcZCorrectionBC.h"
+#include "StDetectorDbMaker/St_TpcZCorrectionCC.h"
 #include "StDetectorDbMaker/St_tpcMethaneInC.h"
 #include "StDetectorDbMaker/St_tpcGasTemperatureC.h"
 #include "StDetectorDbMaker/St_tpcWaterOutC.h"
@@ -44,12 +46,13 @@
 #include "StDetectorDbMaker/St_tpcTimeDependenceC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StDetectorDbMaker/St_beamInfoC.h"
+#include "StDetectorDbMaker/St_starTriggerDelayC.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "TUnixTime.h"
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
   m_Mask(option), m_tpcGas(0),// m_trigDetSums(0), m_trig(0),
-  m_Debug(debug)
+  m_Debug(debug), m_IsSimulation(kFALSE)
 {
   assert(gStTpcDb);
   if (!m_Mask) m_Mask = -1;
@@ -79,6 +82,19 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   }
   SettpcGas(tpcGas);
   memset (m_Corrections, 0, sizeof(m_Corrections));
+  mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
+  mInnerSectorzOffset = StTpcDb::instance()->Dimensions()->zInnerOffset();
+  mOuterSectorzOffset = StTpcDb::instance()->Dimensions()->zOuterOffset();
+  Double_t trigT0 = 0, elecT0 = 0;
+  if (! St_starTriggerDelayC::instance()->Table()->IsMarked()) {// new scheme: offset  = clocks*timebin + t0
+    trigT0 = St_starTriggerDelayC::instance()->clocks()*mTimeBinWidth;
+    elecT0 = St_starTriggerDelayC::instance()->tZero();
+  } else { // old scheme 
+    trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are us
+    elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
+  }
+  m_TrigT0 = trigT0 + elecT0;
+  // Chairs
   m_Corrections[kUncorrected           ] = dEdxCorrection_t("UnCorrected"         ,""                                                                   ,0); 					       
   m_Corrections[kAdcCorrection         ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clustering nonlinearity correction"				,St_TpcAdcCorrectionBC::instance());	     
   m_Corrections[kEdge                  ] = dEdxCorrection_t("TpcEdge"             ,"Gain on distance from Chamber edge"                                 ,St_TpcEdgeC::instance());		     
@@ -95,7 +111,9 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[ktpcTime               ] = dEdxCorrection_t("tpcTime"       	  ,"Unregognized time dependce"						,St_tpcTimeDependenceC::instance()); 
   m_Corrections[kDrift                 ] = dEdxCorrection_t("TpcDriftDistOxygen"  ,"Correction for Electron Attachment due to O2"			,St_TpcDriftDistOxygenC::instance());	     
   m_Corrections[kMultiplicity          ] = dEdxCorrection_t("TpcMultiplicity"     ,"Global track multiplicity dependence"				,St_TpcMultiplicityC::instance());	     
-  m_Corrections[kzCorrection           ] = dEdxCorrection_t("TpcZCorrectionB"     ,"Variation on drift distance"					,St_TpcZCorrectionBC::instance());	     
+  m_Corrections[kGatingGrid            ] = dEdxCorrection_t("GatingGrid"          ,"Variation due to Gating Grid transperancy"				,St_GatingGridC::instance());	     
+  m_Corrections[kzCorrectionC          ] = dEdxCorrection_t("TpcZCorrectionC"     ,"Variation on drift distance with Gating Grid one"			,St_TpcZCorrectionCC::instance());	     
+  m_Corrections[kzCorrection           ] = dEdxCorrection_t("TpcZCorrectionB"     ,"Variation on drift distance without Gating Gird one"		,St_TpcZCorrectionBC::instance());	     
   m_Corrections[ktpcMethaneIn          ] = dEdxCorrection_t("tpcMethaneIn"        ,"Gain on Methane content"					        ,St_tpcMethaneInC::instance());	     
   m_Corrections[ktpcGasTemperature     ] = dEdxCorrection_t("tpcGasTemperature"   ,"Gain on Gas Dens. due to Temperature"			        ,St_tpcGasTemperatureC::instance());	         
   m_Corrections[ktpcWaterOut           ] = dEdxCorrection_t("tpcWaterOut"         ,"Gain on Water content"					        ,St_tpcWaterOutC::instance());		     
@@ -163,6 +181,18 @@ void StTpcdEdxCorrection::ReSetCorrections() {
       if (! npar ) {
 	LOG_INFO << " \thas no significant corrections => switch it off" << endm;
 	goto CLEAR;
+      }
+      if (k == kzCorrection) {
+	if ( m_Corrections[kzCorrectionC].Chair) { // if kzCorrectionC is already active
+	  LOG_WARN << "\tTpcZCorrectionC is already active => disbale TpcZCorrectionB";
+	  goto CLEAR;
+#if 0 /* Apply Gating Grid Correction with kzCorrectionC or kzCorrection */
+	} else {	 // disabled GatingGrid
+	  CLRBIT(m_Mask,kGatingGrid); 
+	  SafeDelete(m_Corrections[kGatingGrid].Chair);
+	  LOG_WARN << "\tTpcZCorrectionB is activated =>  Disable GatingGrid";
+#endif
+	}
       }
       m_Corrections[k].nrows = nrows;
       continue;
@@ -287,23 +317,25 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 #endif
 #endif  
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
+  Double_t driftDistance2GG = ZdriftDistance;
   ESector kTpcOutIn = kTpcOuter;
-  if (! St_tpcPadConfigC::instance()->iTpc(sector)) {
-    if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kTpcInner;
-  } else {
-    if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kiTpc;
-  }
-  St_tss_tssparC *tsspar = St_tss_tssparC::instance();
   Float_t gasGain = 1;
   Float_t gainNominal = 0;
-  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) {
-    gainNominal = tsspar->gain_out()*tsspar->wire_coupling_out();
-    gasGain = tsspar->gain_out(sector,row)*tsspar->wire_coupling_out();
-  } else {
+  St_tss_tssparC *tsspar = St_tss_tssparC::instance();
+  if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) {
+    kTpcOutIn = kTpcInner;
+    driftDistance2GG += mInnerSectorzOffset;
     gainNominal = tsspar->gain_in()*tsspar->wire_coupling_in();
     gasGain = tsspar->gain_in(sector,row) *tsspar->wire_coupling_in();
+  } else {
+    kTpcOutIn = kTpcOuter;
+    driftDistance2GG += mOuterSectorzOffset;
+    gainNominal = tsspar->gain_out()*tsspar->wire_coupling_out();
+    gasGain = tsspar->gain_out(sector,row)*tsspar->wire_coupling_out();
   }
+  if (St_tpcPadConfigC::instance()->iTpc(sector) && row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kiTpc;
   if (gasGain <= 0.0) return 4;
+  Double_t driftTime = driftDistance2GG/gStTpcDb->DriftVelocity(sector)*1e6; // musec
   //  Double_t gainAVcorr = gasGain/gainNominal;
   mAdc2GeV = tsspar->ave_ion_pot() * tsspar->scale()/gainNominal;
   Double_t Adc2GeVReal = tsspar->ave_ion_pot() * tsspar->scale()/gasGain;
@@ -313,7 +345,6 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   CdEdx.ZdriftDistanceO2 = ZdriftDistanceO2;
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
   Double_t gc, ADC, xL2, dXCorr;
-  Double_t iCut = 0;
   Double_t slope = 0;
   Int_t nrows = 0;
   Double_t VarXs[kTpcLast] = {-999.};
@@ -326,6 +357,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[ktpcPressure]          = TMath::Log(gas->barometricPressure);     
   VarXs[kDrift]                = ZdriftDistanceO2;      // Blair correction 
   VarXs[kMultiplicity]         = CdEdx.QRatio;     
+  VarXs[kGatingGrid]           = driftTime - m_TrigT0 ;
+  VarXs[kzCorrectionC]         = ZdriftDistance;
   VarXs[kzCorrection]          = ZdriftDistance;
   VarXs[ktpcMethaneIn]         = gas->percentMethaneIn*1000./gas->barometricPressure;     
   VarXs[ktpcGasTemperature]    = gas->outputGasTemperature;     
@@ -391,6 +424,14 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       dE = ADC*Adc2GeVReal*TMath::Exp(Cor);
       goto ENDL;
     }
+    if (k == kGatingGrid)  {
+#if 0 /* Apply Gating Grid Correction with kzCorrectionC or kzCorrection */
+      Double_t dEcor = ((St_GatingGridC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[kGatingGrid]);
+      if (dEcor < -9.9) return 3;
+      dE *= TMath::Exp(-dEcor);
+#endif
+      goto ENDL;
+    }
     cor = ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable();
     if (! cor) goto ENDL;
     nrows = cor->nrows;
@@ -405,7 +446,6 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       else if (nrows ==   4) {l = TMath::Min(kTpcOutIn, 1); if (sector > 12) l+= 2;} 
     }
     corl = cor + l;
-    iCut = 0;
     if (k == kAdcCorrection) {
       ADC = adcCF;
       if (ADC <= 0) return 3; //HACK to avoid FPE (VP)
@@ -421,7 +461,6 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       dE *=  TMath::Exp(-slope*CdEdx.dCharge);
       dE *=  TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2+l,CdEdx.dCharge));
       goto ENDL;
-    } else if (k == kzCorrection) {iCut = 1; // Always cut
     } else if (k == kdXCorrection) {
       xL2 = TMath::Log2(dx);
       dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xL2); 
@@ -448,11 +487,25 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xx));
       goto ENDL;
     }
+      if (k == kzCorrection || k == kzCorrectionC) {
+	if ((corl->min > corl->max) && (corl->min > VarXs[k] || VarXs[k] > corl->max)) {
+	  if (! IsSimulation()) return 2;
+	  if (corl->min > 0 && corl->min > VarXs[k])  VarXs[k] = corl->min;
+	  if (corl->min > 0 && corl->max < VarXs[k])  VarXs[k] = corl->max;
+	}
+	// Take care about prompt hits and Gating Grid region in Simulation
+	if (ZdriftDistance <= 0.0) goto ENDL; // prompt hits 
+	if (m_Corrections[kGatingGrid].Chair && (k == kzCorrectionC || IsSimulation())) {// take about Gating Grid for 
+	    Double_t dEcor = ((St_GatingGridC *)m_Corrections[kGatingGrid].Chair)->CalcCorrection(0,VarXs[kGatingGrid]);
+	    if (dEcor < -9.9) return 3;
+	    dE *= TMath::Exp(-dEcor);
+	}
+      }
     if (corl->type == 300) {
       if (corl->min > 0 && corl->min > VarXs[k]    ) VarXs[k] = corl->min;
       if (corl->max > 0 && VarXs[k]     > corl->max) VarXs[k] = corl->max;
     }
-    if (TMath::Abs(corl->npar) >= 100 || iCut) {
+    if (TMath::Abs(corl->npar) >= 100) {
       Int_t iok = 2;
       if (corl->min >= corl->max) {
 	iok = 0;

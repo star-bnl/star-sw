@@ -52,24 +52,26 @@ class StTpcdEdxCorrection : public TObject {
     ktpcTime               = 13,//t  					     
     kDrift                 = 14,//O  					     
     kMultiplicity          = 15,//M  					     
-    kzCorrection           = 16,//Z  					     
-    ktpcMethaneIn          = 17,//m  					     
-    ktpcGasTemperature     = 18,//T  					     
-    ktpcWaterOut           = 19,//W   				7       	   
-    kSpaceCharge           = 20,//C   space charge near the wire	       	   
-    kPhiDirection          = 21,//p   correction wrt local interception angle  
-    kTanL                  = 22,//p   correction wrt local tan(lambda)  
-    kdXCorrection          = 23,//X  					     
-    kTpcEffectivedX        = 24,//X   Effective pad row height
-    kTpcPadTBins           = 25,//d  					     
-    kTpcZDC                = 26,//   					     
-    kTpcPadMDF             = 27, 
-    kTpcLast               = 28,//                                             
-    kTpcNoAnodeVGainC      = 29,//   					     
-    kTpcLengthCorrection   = 30,//                                             
-    kTpcLengthCorrectionMDF= 31,//   					   
-    kTpcdEdxCor            = 32,//   					   
-    kTpcAllCorrections     = 33 //                                             
+    kGatingGrid            = 16,//G
+    kzCorrectionC          = 17,//Z
+    kzCorrection           = 18,//Z  					     
+    ktpcMethaneIn          = 19,//m  					     
+    ktpcGasTemperature     = 20,//T  					     
+    ktpcWaterOut           = 21,//W   				7       	   
+    kSpaceCharge           = 22,//C   space charge near the wire	       	   
+    kPhiDirection          = 23,//p   correction wrt local interception angle  
+    kTanL                  = 24,//p   correction wrt local tan(lambda)  
+    kdXCorrection          = 25,//X  					     
+    kTpcEffectivedX        = 26,//X   Effective pad row height
+    kTpcPadTBins           = 27,//d  					     
+    kTpcZDC                = 28,//   					     
+    kTpcPadMDF             = 29, 
+    kTpcLast               = 30,//                                             
+    kTpcNoAnodeVGainC      = 31,//   					     
+    kTpcLengthCorrection   = 32,//                                             
+    kTpcLengthCorrectionMDF= 33,//   					   
+    kTpcdEdxCor            = 34,//   					   
+    kTpcAllCorrections     = 35 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
@@ -80,6 +82,7 @@ class StTpcdEdxCorrection : public TObject {
   
   void SetDebug(Int_t m=0) {m_Debug = m;}
   void SetMask (Int_t m=0) {m_Mask = m;}
+  void SetSimulation(Bool_t k = kTRUE)     {m_IsSimulation = k;}
   void ReSetCorrections();
   St_tpcGas         *tpcGas()              {return m_tpcGas;}
   //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
@@ -102,6 +105,7 @@ class StTpcdEdxCorrection : public TObject {
   Float_t           Adc2GeV()              {return mAdc2GeV;}
   void Print(Option_t *opt = "") const;
   Bool_t            IsFixedTarget()        {return m_isFixedTarget;}
+  Bool_t            IsSimulation()         {return m_IsSimulation;}
  private:
   Int_t                m_Mask;                  //!
   St_tpcGas           *m_tpcGas;                //!
@@ -110,6 +114,11 @@ class StTpcdEdxCorrection : public TObject {
   dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
   Int_t                m_Debug;                 //!
   Bool_t               m_isFixedTarget;
+  Bool_t               m_IsSimulation;
+  Double_t             m_TrigT0; //us
+  Double_t             mTimeBinWidth; 
+  Double_t             mInnerSectorzOffset;
+  Double_t             mOuterSectorzOffset;
 };
 //________________________________________________________________________________
 class dEdxY2_t {
