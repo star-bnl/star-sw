@@ -19,6 +19,8 @@
 #include "StPicoEvent/StPicoETofPidTraits.h"
 #include "StdEdxY2Maker/StPidStatus.h"
 #include "StMaker.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "THelixTrack.h" 
 #endif /* __TFG__VERSION__ */
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
@@ -1305,8 +1307,9 @@ std::vector<int> StKFParticleInterface::GetPID(double m2, double p, int q, doubl
     double lowerLi6Bound = loweParameters[0]*TMath::Power(p, loweParameters[1] + loweParameters[2]*log(p) + loweParameters[3]*log(p)*log(p));
 
     double upperParameters[4] = {1.37012e+02,-1.14016e+00, 3.73116e-01,-1.85678e-02};
+#if 0
     double upperLi6Bound = upperParameters[0]*TMath::Power(p, upperParameters[1] + upperParameters[2]*log(p) + upperParameters[3]*log(p)*log(p));
-    
+#endif    
     if(dEdX > lowerLi6Bound){
       if(p<1.){
         if( isTofm2 && (m2>2) && (m2<4) )
@@ -1907,7 +1910,16 @@ bool StKFParticleInterface::ProcessEvent(StPicoDst* picoDst, std::vector<int>& t
     if(fUseHFTTracksOnly && !gTrack->hasIstHit()) continue;
 #endif /*  __USE_HFT__ */        
     StPicoTrackCovMatrix *cov = picoDst->trackCovMatrix(iTrack);
-    const StDcaGeometry dcaG = cov->dcaGeometry();
+    const StDcaGeometry &dcaG = cov->dcaGeometry();
+#if defined(__TFG__VERSION__)
+    if (StMuDst::dca3Dmax() > 0) {
+      // Cut large Dca
+      THelixTrack t = dcaG.thelix();
+      Double_t xyz[3] = {primaryVertex.X(), primaryVertex.Y(), primaryVertex.Z()};
+      Double_t dca3D = t.Dca(xyz);
+      if (dca3D > StMuDst::dca3Dmax()) continue;
+    }
+#endif /* __TFG__VERSION__ */
     Int_t q = 1; if (gTrack->charge() < 0) q = -1;
     KFPTrack track;
     if( !GetTrack(dcaG, track, q, index) ) continue;
@@ -2285,6 +2297,15 @@ bool StKFParticleInterface::ProcessEvent(StMuDst* muDst, vector<KFMCTrack>& mcTr
     if (dcaGeometryIndex < 0) continue;
     StDcaGeometry *dcaG = StMuDst::instance()->covGlobTracks(dcaGeometryIndex);
     if (! dcaG) continue;
+#if defined(__TFG__VERSION__)
+    if (StMuDst::dca3Dmax() > 0) {
+      // Cut large Dca
+      THelixTrack t = dcaG->thelix();
+      Double_t xyz[3] = {primaryVertex.X(), primaryVertex.Y(), primaryVertex.Z()};
+      Double_t dca3D = t.Dca(xyz);
+      if (dca3D > StMuDst::dca3Dmax()) continue;
+    }
+#endif /* __TFG__VERSION__ */
       
     KFPTrack track;
     if( !GetTrack(*dcaG, track, q, index) ) continue;

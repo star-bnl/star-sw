@@ -22,7 +22,8 @@ my $dayMax =  0;
 my $year = "y2020";
 my $Njobs = 0;
 my $DST = "picoDst";
-if    ($pwd =~ /2021/) { $year = "y2021";}
+if    ($pwd =~ /2022/) { $year = "y2022";}
+elsif ($pwd =~ /2021/) { $year = "y2021";}
 elsif ($pwd =~ /2020/) { $year = "y2020";}
 elsif ($pwd =~ /2019/) { $year = "y2019";} 
 elsif ($pwd =~ /2018/) { $year = "y2018";} 
