@@ -728,7 +728,7 @@ Int_t StKFParticleAnalysisMaker::Make()
         const KFParticle particle = fStKFParticleInterface->GetParticles()[iParticle];
         if(particle.GetPDG() == -1) continue;
         const int particleIndex = parteff.GetParticleIndex(particle.GetPDG());
-
+	if (particleIndex < 0) continue;
         if(!fIsStoreCandidate[particleIndex]) continue;
 
         fPartcileCandidate = fStKFParticleInterface->GetTopoReconstructor()->GetPrimVertex();
