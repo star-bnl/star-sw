@@ -21,7 +21,7 @@
   sort AliveFeeRuns | tee AliveFeeRuns.sorted
                           add Alive
   
-  cat *Runs.sorted | sort | tee DeadOrAlived_Runx_XIX_XX.sorted
+  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XX.sorted
 */
 //   foreach f ( `ls -1d   */2*.root` )
 //________________________________________________________________________________
