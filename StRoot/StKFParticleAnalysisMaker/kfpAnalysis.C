@@ -115,7 +115,7 @@ void kfpAnalysis(Int_t N = 10000000, const Char_t *input = "./*.picoDst.root", c
   //  {
   if (triggerSet != "y2022") {
     StKFParticleInterface::instance()->CleanLowPVTrackEvents();
-    StMuDst::SetMaxTrackDca(50.0);
+    StMuDst::SetMaxTrackDca(10.0); // dEdxW24 for pp510GeV_2022
   }
   //     StKFParticleInterface::instance()->UseHFTTracksOnly();
   //}
