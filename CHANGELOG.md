@@ -1,5 +1,11 @@
 # Changelog
 
+## SL21c_7 - 2022-02-02
+
+- Backport the latest TpcRS code and Run19 parameters to SL21c ([#294](https://github.com/star-bnl/star-sw/pull/294))
+- Backport PR [#281](https://github.com/star-bnl/star-sw/pull/281) to SL21c ([#289](https://github.com/star-bnl/star-sw/pull/289))
+
+
 ## SL21c_6 - 2021-12-15
 
 - Modified TPC RS
