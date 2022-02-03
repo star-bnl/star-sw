@@ -16,7 +16,7 @@ class SvtMatchedTree : public StMaker {
   void Print(Option_t *opt="") const;
   void SetMinNoHits(Int_t MinNoHits=0) {fMinNoHits = MinNoHits;}
   void SetpCut(Double_t pCut=0.0) {fpCut = pCut;}
-  void SetOut(Char_t *Out="Event") {fOut = Out;}
+  void SetOut(const Char_t *Out="Event") {fOut = Out;}
   void MakeListOfRotations();
  private:
   TFile   *fFile;
