@@ -206,10 +206,14 @@ int JevpPlotSet::getNumberOfPlots()
 
 void JevpPlotSet::resetAllPlots()
 {
+    int i=0;
     JevpPlot *curr = (JevpPlot *)plots.First();
     while(curr) {
+	PCPC(i);
 	curr->reset();
+	PCPC(i);
 	curr = (JevpPlot *)plots.After(curr);
+	PCPC(i++);
     }
 }
 

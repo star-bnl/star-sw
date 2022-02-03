@@ -28,7 +28,7 @@ class JevpServer;
 
 
 #define PCPC(x) dbgCallSourceLine=__LINE__;dbgCallParam=x
-#define PCP dbgSourceLine=__LINE__
+#define PCP dbgBuilderLine=__LINE__
 
 class RtsTimer_root;
 
@@ -38,14 +38,14 @@ class JevpPlotSet : public TObject {
   BuilderStatus builderStatus;
   JevpPlotSet(JevpServer *server = NULL);
   unsigned long long int getMemUse();
-  int dbgSourceLine;
+  int dbgBuilderLine;
   int dbgCallSourceLine;
   int dbgCallParam;
 
   char *getPlotSetName();
   char *getDebugInfo() {
     static char str[256];
-    sprintf(str, "%d:call %d: param %d", dbgSourceLine, dbgCallSourceLine, dbgCallParam);
+    sprintf(str, "%d:call %d: param %d", dbgBuilderLine, dbgCallSourceLine, dbgCallParam);
     return str;
   }
   
@@ -126,11 +126,10 @@ class JevpPlotSet : public TObject {
 
   void logDbVariable(char *variable_name, double value);
   static void staticLogDbVariable(char *name, double value, int my_run, int my_time, char *my_plotsetname, char *my_clientdatadir);
-  
- private:
 
   JevpServer *parent;
 
+ private:
   u_int lastevttm;
 
   int disabled;
