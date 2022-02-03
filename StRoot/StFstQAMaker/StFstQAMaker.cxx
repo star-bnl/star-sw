@@ -18,7 +18,6 @@
 #include "StRoot/StFstUtil/StFstCollection.h"
 #include "StRoot/StFstUtil/StFstRawHitCollection.h"
 #include "StRoot/StFstUtil/StFstRawHit.h"
-#include "StRoot/StFstUtil/StFstConsts.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StEvent.h"
 #include "StTrack.h"
@@ -46,26 +45,30 @@
 StFstQAMaker::StFstQAMaker( const char* name ) :
    StMaker(name), mEventCounter(0) {
    for(int iSensor=0; iSensor<kFstNumSensors; iSensor++) {
-	rawHitMap[iSensor] = NULL;
-	hitMap[iSensor] = NULL;
+	rawHitMap[iSensor]            = NULL;
+	hitMap[iSensor]               = NULL;
 	numOfRawHits_EventId[iSensor] = NULL;
    }
+
+   for(int iDisk = 0; iDisk < kFstNumDisk; iDisk++) {
+     hitMapOfFST[iDisk]   = NULL;
+     hitMapOfAPV[iDisk]   = NULL;
+     hitGlobalXY[iDisk]   = NULL;
+     hitGlobalRPhi[iDisk] = NULL;
+   }
+
    for(unsigned char iTimeBin=0; iTimeBin<kFstNumTimeBins; iTimeBin++)
     	rawHitCharge_TimeBin[iTimeBin] = NULL;
 
-   rawHitMaxTimeBin_APV = NULL;
-   hitMapOfFST = NULL;
-   hitMapOfAPV = NULL;
-   hitGlobalXY = NULL;
-   hitGlobalPhiZ = NULL;
-   rawHitChargeErr = NULL;
-   hitCharge_SensorId = NULL;
-   hitChargeErr_SensorId = NULL;
-   maxTimeBin_SensorId = NULL;
-   numOfRawHits_SensorId = NULL;
-   numOfHits_SensorId = NULL;
-   clusterSize_SensorId = NULL;
-   clusterSizeR_SensorId = NULL;
+   rawHitChargeErr         = NULL;
+   rawHitMaxTimeBin_APV    = NULL;
+   hitCharge_SensorId      = NULL;
+   hitChargeErr_SensorId   = NULL;
+   maxTimeBin_SensorId     = NULL;
+   numOfRawHits_SensorId   = NULL;
+   numOfHits_SensorId      = NULL;
+   clusterSize_SensorId    = NULL;
+   clusterSizeR_SensorId   = NULL;
    clusterSizePhi_SensorId = NULL;
 }
 
@@ -75,12 +78,12 @@ Int_t StFstQAMaker::Init()
     Int_t ierr = kStOk;
 
     fstRawHitTree = new TTree("fstRawHits", "fstRawHits_QA");
-    fstRawHitTree->Branch("rawHits", &fstRawHit, "channelId/I:geoId:wedge:sensor:phistrip:rstrip:maxTimeBin:rdo:arm:apv:channel:idTruth:EventId:charge[9]/F:chargeErr[9]/F");
+    fstRawHitTree->Branch("rawHits", &fstRawHit, "channelId/I:geoId:wedge:sensor:phistrip:rstrip:maxTimeBin:rdo:arm:apv:channel:idTruth:seedHitFlag:EventId:charge[9]/F:chargeErr[9]/F");
 
     fstHitTree = new TTree("fstHits", "fstHits_QA");
     fstHitTree->Branch("hits", &fstHit, "hitId/I:wedge/I:sensor/I:apv/I:idTruth/I:EventId/I:maxTimeBin/I:clusteringType/I:nRawHits/I:nRawHitsR/I:nRawHitsPhi/I:meanPhiStrip/F:meanRStrip/F:localR/F:localPhi/F:localZ/F:x/F:y/F:z/F:charge/F:chargeErr/F");
 
-    numOfRawHits_SensorId = new TH2S("numOfRawHits_SensorId", "The number of RawHits vs. sensor ID", 108, 1, 109, 128, 0, 128);
+    numOfRawHits_SensorId = new TH2S("numOfRawHits_SensorId", "The number of RawHits vs. sensor ID", 108, 0, 108, 128, 0, 128);
     numOfRawHits_SensorId->GetXaxis()->SetTitle("Sensor ID");
     numOfRawHits_SensorId->GetYaxis()->SetTitle("Number of Raw Hits");
 
@@ -91,65 +94,79 @@ Int_t StFstQAMaker::Init()
     char buffer[100];
     for(int iTimeBin=0; iTimeBin<kFstNumTimeBins; iTimeBin++) {
 	sprintf(buffer, "rawHitCharge_TimeBin%d", iTimeBin);
-	rawHitCharge_TimeBin[iTimeBin] = new TH2S(buffer, Form("ADC of raw hits at time bin %d vs. channel geometry ID",iTimeBin), 288, 1, 36865, 512, 0, kFstMaxAdc);
+	rawHitCharge_TimeBin[iTimeBin] = new TH2S(buffer, Form("ADC of raw hits at time bin %d vs. channel geometry ID",iTimeBin), 288, 0, 36864, 512, 0, kFstMaxAdc);
 	rawHitCharge_TimeBin[iTimeBin]->GetXaxis()->SetTitle("Channel ID");
 	rawHitCharge_TimeBin[iTimeBin]->GetYaxis()->SetTitle("ADC of Raw Hits");
     }
 
-    rawHitChargeErr = new TH2S("rawHitChargeErr", "RMS noise of raw hits vs. channel geometry ID", 288, 1, 36865, 128, 0, 64);
+    rawHitChargeErr = new TH2S("rawHitChargeErr", "RMS noise of raw hits vs. channel geometry ID", 288, 0, 36864, 128, 0, 64);
     rawHitChargeErr->GetXaxis()->SetTitle("Channel ID");
     rawHitChargeErr->GetYaxis()->SetTitle("RMS noise of Raw Hits");
 
-    numOfHits_SensorId = new TH2S("numOfHits_SensorId", "The number of hits vs. sensor ID", 108, 1, 109, 128, 0, 128);
+    numOfHits_SensorId = new TH2S("numOfHits_SensorId", "The number of hits vs. sensor ID", 108, 0, 108, 128, 0, 128);
     numOfHits_SensorId->GetXaxis()->SetTitle("Sensor ID");
     numOfHits_SensorId->GetYaxis()->SetTitle("Number of Hits");
 
-    hitCharge_SensorId = new TH2S("hitCharge_SensorId", "ADC of hits vs. sensor ID", 108, 1, 109, 512, 0, kFstMaxAdc);
+    hitCharge_SensorId = new TH2S("hitCharge_SensorId", "ADC of hits vs. sensor ID", 108, 0, 108, 512, 0, kFstMaxAdc);
     hitCharge_SensorId->GetXaxis()->SetTitle("Sensor ID");
     hitCharge_SensorId->GetYaxis()->SetTitle("ADC of Hits");
 
-    hitChargeErr_SensorId = new TH2S("hitChargeErr_SensorId", "RMS noise of hits vs. sensor ID", 108, 1, 109, 128, 0, 64);
+    hitChargeErr_SensorId = new TH2S("hitChargeErr_SensorId", "RMS noise of hits vs. sensor ID", 108, 0, 108, 128, 0, 64);
     hitChargeErr_SensorId->GetXaxis()->SetTitle("Sensor ID");
     hitChargeErr_SensorId->GetYaxis()->SetTitle("RMS noise of Hits");
 
-    maxTimeBin_SensorId = new TH2S("maxTimeBin_SensorId", "Max time bin of hits vs. sensor ID", 108, 1, 109, kFstNumTimeBins, 0, kFstNumTimeBins);
+    maxTimeBin_SensorId = new TH2S("maxTimeBin_SensorId", "Max time bin of hits vs. sensor ID", 108, 0, 108, kFstNumTimeBins, 0, kFstNumTimeBins);
     maxTimeBin_SensorId->GetXaxis()->SetTitle("Sensor ID");
     maxTimeBin_SensorId->GetYaxis()->SetTitle("Max Time Bin Index");
 
-    clusterSize_SensorId = new TH2S("clusterSize_SensorId", "Cluster size of hits vs. sensor ID", 108, 1, 109, 20, 0, 20);
+    clusterSize_SensorId = new TH2S("clusterSize_SensorId", "Cluster size of hits vs. sensor ID", 108, 0, 108, 20, 0, 20);
     clusterSize_SensorId->GetXaxis()->SetTitle("Sensor ID");
     clusterSize_SensorId->GetYaxis()->SetTitle("Cluster Size of Hits");
 
-    clusterSizeR_SensorId = new TH2S("clusterSizeR_SensorId", "Cluster size in R of hits vs. sensor ID", 108, 1, 109, 20, 0, 20);
+    clusterSizeR_SensorId = new TH2S("clusterSizeR_SensorId", "Cluster size in R of hits vs. sensor ID", 108, 0, 108, 20, 0, 20);
     clusterSizeR_SensorId->GetXaxis()->SetTitle("Sensor ID");
     clusterSizeR_SensorId->GetYaxis()->SetTitle("Cluster Size in R of Hits");
 
-    clusterSizePhi_SensorId = new TH2S("clusterSizePhi_SensorId", "Cluster size in #phi of hits vs. sensor ID", 108, 1, 109, 20, 0, 20);
+    clusterSizePhi_SensorId = new TH2S("clusterSizePhi_SensorId", "Cluster size in #phi of hits vs. sensor ID", 108, 0, 108, 20, 0, 20);
     clusterSizePhi_SensorId->GetXaxis()->SetTitle("Sensor ID");
     clusterSizePhi_SensorId->GetYaxis()->SetTitle("Cluster Size in #phi of hits");
 
-    hitMapOfFST = new TH2S("hitMapOfFST", "FST hit map in r-phi", 7, 1, 8, 128, 1, 129);
-    hitMapOfFST->GetXaxis()->SetTitle("RStrip");
-    hitMapOfFST->GetYaxis()->SetTitle("PhiStrip");
+    for(int iDisk = 0; iDisk < kFstNumDisk; ++iDisk)
+    {
+      TString HistName;
+      TString HistTitle;
 
-    hitMapOfAPV = new TH2S("hitMapOfAPV", "FST hit map in APV geometry Id vs. wedge", 8, 1, 9, 36, 1, 37);
-    hitMapOfAPV->GetXaxis()->SetTitle("APV geometry ID");
-    hitMapOfAPV->GetYaxis()->SetTitle("Wedge ID");
+      HistName = Form("hitMapOfFST_Disk%d",iDisk);
+      HistTitle = Form("FST hit map in r-phi for Disk%d",iDisk+1);
+      hitMapOfFST[iDisk] = new TH2S(HistName.Data(), HistTitle.Data(), kFstNumPhiSegPerWedge*kFstNumWedgePerDisk, 0, kFstNumPhiSegPerWedge*kFstNumWedgePerDisk, kFstNumRStripsPerWedge, 0, kFstNumRStripsPerWedge);
+      hitMapOfFST[iDisk]->GetXaxis()->SetTitle("PhiStrip");
+      hitMapOfFST[iDisk]->GetYaxis()->SetTitle("RStrip");
 
-    hitGlobalXY = new TH2F("hitGlobalXY", "Global X vs. Global Y", 140, -35, 35, 140, -35, 35);
-    hitGlobalXY->GetXaxis()->SetTitle("Global X [cm]");
-    hitGlobalXY->GetYaxis()->SetTitle("Global Y [cm]");
+      HistName = Form("hitMapOfAPV_Disk%d",iDisk);
+      HistTitle = Form("FST hit map in APV geometry Id vs. wedge for Disk%d",iDisk+1);
+      hitMapOfAPV[iDisk] = new TH2S(HistName.Data(), HistTitle.Data(), kFstNumWedgePerDisk, 1, kFstNumWedgePerDisk+1, kFstApvsPerWedge, 0, kFstApvsPerWedge);
+      hitMapOfAPV[iDisk]->GetXaxis()->SetTitle("Wedge ID");
+      hitMapOfAPV[iDisk]->GetYaxis()->SetTitle("APV geometry ID");
 
-    hitGlobalPhiZ = new TH2F("hitGlobalPhiZ", "Global #phi vs. Global r", 100, -3.14159, 3.14159, 230, 5, 28);
-    hitGlobalPhiZ->GetXaxis()->SetTitle("Global #phi [rad.]");
-    hitGlobalPhiZ->GetYaxis()->SetTitle("Global r [cm]");
+      HistName = Form("hitGlobalXY_Disk%d",iDisk);
+      HistTitle = Form("Global X vs. Global Y for Disk%d",iDisk+1);
+      hitGlobalXY[iDisk] = new TH2F(HistName.Data(), HistTitle.Data(), 140, -35, 35, 140, -35, 35);
+      hitGlobalXY[iDisk]->GetXaxis()->SetTitle("Global X [cm]");
+      hitGlobalXY[iDisk]->GetYaxis()->SetTitle("Global Y [cm]");
+
+      HistName = Form("hitGlobalRPhi_Disk%d",iDisk);
+      HistTitle = Form("Global #phi vs. Global r for Disk%d",iDisk+1);
+      hitGlobalRPhi[iDisk] = new TH2F(HistName.Data(), HistTitle.Data(), kFstNumPhiSegPerWedge*kFstNumWedgePerDisk/8, -TMath::Pi(), TMath::Pi(), kFstNumRStripsPerWedge, 5, 28);
+      hitGlobalRPhi[iDisk]->GetXaxis()->SetTitle("Global #phi [rad.]");
+      hitGlobalRPhi[iDisk]->GetYaxis()->SetTitle("Global r [cm]");
+    }
 
     char histtitle[128];
     for(int iWedge=0; iWedge<kFstNumWedges; iWedge++) {
 	for(int iSensor=0; iSensor<kFstNumSensorsPerWedge; iSensor++) {
 	    sprintf(histtitle, "Raw Hit phistrip vs. rstrip: Wedge %d Sensor %d", iWedge+1, iSensor);
 	    sprintf(buffer,"rawHitMap_Sensor%d", iWedge*3+iSensor+1);
-	    rawHitMap[iWedge*3+iSensor] = new TH2S(buffer, histtitle, 128, 1, 129, 8, 1, 9);
+	    rawHitMap[iWedge*3+iSensor] = new TH2S(buffer, histtitle, 128, 0, 128, 8, 0, 8);
 	    rawHitMap[iWedge*3+iSensor]->GetXaxis()->SetTitle("PhiStrip");
 	    rawHitMap[iWedge*3+iSensor]->GetYaxis()->SetTitle("RStrip");
 
@@ -161,7 +178,7 @@ Int_t StFstQAMaker::Init()
 
 	    sprintf(histtitle, "Hit mean phistrip vs. mean rstrip: Wedge %d Sensor %d", iWedge+1, iSensor);
             sprintf(buffer,"hitMap_Sensor%d", iWedge*3+iSensor+1);
-            hitMap[iWedge*3+iSensor] = new TH2S(buffer, histtitle, 128, 1, 129, 8, 1, 9);
+            hitMap[iWedge*3+iSensor] = new TH2S(buffer, histtitle, 128, 0, 128, 8, 0, 8);
             hitMap[iWedge*3+iSensor]->GetXaxis()->SetTitle("Mean PhiStrip");
             hitMap[iWedge*3+iSensor]->GetYaxis()->SetTitle("Mean RStrip");
 	}		
@@ -205,7 +222,7 @@ Int_t StFstQAMaker::Make(){
     }
 
    //*******Initialization of the raw hit and hit level variables********** 
-   fstRawHit.channelId = fstRawHit.geoId = fstRawHit.wedge = fstRawHit.sensor = fstRawHit.phistrip = fstRawHit.rstrip = fstRawHit.maxTimeBin = fstRawHit.rdo = fstRawHit.arm = fstRawHit.apv = fstRawHit.channel = fstRawHit.idTruth = fstRawHit.EventId = -1;
+   fstRawHit.channelId = fstRawHit.geoId = fstRawHit.wedge = fstRawHit.sensor = fstRawHit.phistrip = fstRawHit.rstrip = fstRawHit.maxTimeBin = fstRawHit.rdo = fstRawHit.arm = fstRawHit.apv = fstRawHit.channel = fstRawHit.idTruth = fstRawHit.seedHitFlag = fstRawHit.EventId = -1;
    for(int iTB=0; iTB<kFstNumTimeBins; iTB++) {
 	fstRawHit.charge[iTB] = 0.;
 	fstRawHit.chargeErr[iTB] = 0.;
@@ -263,12 +280,17 @@ Int_t StFstQAMaker::Make(){
 
 			fstHitTree->Fill();
 
-			sensorIdxTemp = ((int)hit->getWedge()-1)*kFstNumSensorsPerWedge + (int)hit->getSensor();
-			hitMap[sensorIdxTemp-1]->Fill((int)(hit->getMeanPhiStrip()-0.5)+1, (int)(hit->getMeanRStrip()-0.5)+1);
-			hitMapOfFST->Fill(((int)hit->getWedge()-1)*kFstNumRStripsPerWedge+(int)(hit->getMeanRStrip()-0.5)+1, (int)hit->getSensor()*kFstNumPhiSegPerWedge+(int)(hit->getMeanPhiStrip()-0.5)+1);
-			hitMapOfAPV->Fill(((int)hit->getSensor())*kFstApvsPerWedge/kFstNumSensorsPerWedge + (int)hit->getApv(), (int)hit->getWedge());
-			hitGlobalXY->Fill((float)P.x(), (float)P.y());
-			hitGlobalPhiZ->Fill((float)P.phi(), (float)P.z());
+			sensorIdxTemp = ((int)hit->getWedge()-1)*kFstNumSensorsPerWedge + (int)hit->getSensor(); // 0-107
+			int diskIdxTemp = ((int)hit->getWedge()-1)/kFstNumWedgePerDisk + 1; // 1-3
+			int wedgeIdxTemp = (int)hit->getWedge() - (diskIdxTemp-1)*kFstNumWedgePerDisk; // 1-12
+			int phiIdxTemp = (wedgeIdxTemp-1)*kFstNumPhiSegPerWedge+(int)(hit->getMeanPhiStrip()+0.5);
+			int rIdxTemp = (int)(hit->getMeanRStrip()+0.5);
+
+			hitMap[sensorIdxTemp]->Fill((int)(hit->getMeanPhiStrip()+0.5), (int)(hit->getMeanRStrip()+0.5));
+			hitMapOfFST[diskIdxTemp-1]->Fill(phiIdxTemp, rIdxTemp);
+			hitMapOfAPV[diskIdxTemp-1]->Fill(wedgeIdxTemp, (int)hit->getApv()+(wedgeIdxTemp%2-1)*kFstApvsPerWedge);
+			hitGlobalXY[diskIdxTemp-1]->Fill((float)P.x(), (float)P.y());
+			hitGlobalRPhi[diskIdxTemp-1]->Fill((float)P.phi(), (float)P.perp());
 
 			hitCharge_SensorId->Fill(sensorIdxTemp, (int)hit->charge());
 			hitChargeErr_SensorId->Fill(sensorIdxTemp, (int)(hit->getChargeErr()+0.5));
@@ -313,21 +335,22 @@ Int_t StFstQAMaker::Make(){
 		   rawHitMap[sensorId]->Fill((int)rawHit->getPhiStrip(), (int)rawHit->getRStrip());
 		   rawHitMaxTimeBin_APV->Fill(((int)rawHit->getRdo()-1)*48+(int)rawHit->getArm()*16+(int)rawHit->getApv(), (int)maxTimeBin);
 
-		   fstRawHit.channelId 	= (int)rawHit->getChannelId();
-		   fstRawHit.geoId      = (int)rawHit->getGeoId();
-		   fstRawHit.wedge	= (int)rawHit->getWedge();
-		   fstRawHit.sensor	= (int)rawHit->getSensor();
-		   fstRawHit.phistrip	= (int)rawHit->getPhiStrip();
-		   fstRawHit.rstrip	= (int)rawHit->getRStrip();
-		   fstRawHit.maxTimeBin = (int)maxTimeBin;
-		   fstRawHit.rdo	= (int)rawHit->getRdo();
-		   fstRawHit.arm        = (int)rawHit->getArm();
-		   fstRawHit.apv        = (int)rawHit->getApv();
-		   fstRawHit.channel    = (int)rawHit->getChannel();
-		   fstRawHit.idTruth	= (int)rawHit->getIdTruth();
-		   fstRawHit.EventId	= (int)eventPtr->id();
+		   fstRawHit.channelId   = (int)rawHit->getChannelId();
+		   fstRawHit.geoId       = (int)rawHit->getGeoId();
+		   fstRawHit.wedge       = (int)rawHit->getWedge();
+		   fstRawHit.sensor      = (int)rawHit->getSensor();
+		   fstRawHit.phistrip    = (int)rawHit->getPhiStrip();
+		   fstRawHit.rstrip      = (int)rawHit->getRStrip();
+		   fstRawHit.maxTimeBin  = (int)maxTimeBin;
+		   fstRawHit.rdo         = (int)rawHit->getRdo();
+		   fstRawHit.arm         = (int)rawHit->getArm();
+		   fstRawHit.apv         = (int)rawHit->getApv();
+		   fstRawHit.channel     = (int)rawHit->getChannel();
+		   fstRawHit.idTruth     = (int)rawHit->getIdTruth();
+		   fstRawHit.seedHitFlag = (int)rawHit->getSeedhitflag();
+		   fstRawHit.EventId     = (int)eventPtr->id();
 
-		   if(fstRawHitTree->GetEntries()<10000) fstRawHitTree->Fill();
+		   fstRawHitTree->Fill();
                 }//loop over raw hits
 		while (!rawHitVec.empty()) delete rawHitVec.back(), rawHitVec.pop_back();
              }//end raw hit collection
@@ -372,7 +395,7 @@ Int_t StFstQAMaker::Finish(){
     }
 
     //saving histograms 
-    //myRootFile->WriteTObject(fstRawHitTree);
+    myRootFile->WriteTObject(fstRawHitTree);
     myRootFile->WriteTObject(fstHitTree);
 
     myRootFile->WriteTObject(numOfRawHits_SensorId);
@@ -387,16 +410,19 @@ Int_t StFstQAMaker::Finish(){
     myRootFile->WriteTObject(clusterSize_SensorId);
     myRootFile->WriteTObject(clusterSizeR_SensorId);
     myRootFile->WriteTObject(clusterSizePhi_SensorId);
-    myRootFile->WriteTObject(hitMapOfFST);
-    myRootFile->WriteTObject(hitMapOfAPV);
-    myRootFile->WriteTObject(hitGlobalXY);
-    myRootFile->WriteTObject(hitGlobalPhiZ);
     for(int iWedge=0; iWedge<kFstNumWedges; iWedge++) {
         for(int iSensor=0; iSensor<kFstNumSensorsPerWedge; iSensor++) {
     	    myRootFile->WriteTObject(rawHitMap[iWedge*3+iSensor]);
             myRootFile->WriteTObject(hitMap[iWedge*3+iSensor]);
 	    myRootFile->WriteTObject(numOfRawHits_EventId[iWedge*3+iSensor]);
    	}
+    }
+    for(int iDisk = 0; iDisk < kFstNumDisk; iDisk++)
+    {
+      myRootFile->WriteTObject(hitMapOfFST[iDisk]);
+      myRootFile->WriteTObject(hitMapOfAPV[iDisk]);
+      myRootFile->WriteTObject(hitGlobalXY[iDisk]);
+      myRootFile->WriteTObject(hitGlobalRPhi[iDisk]);
     }
 
     myRootFile->Close();

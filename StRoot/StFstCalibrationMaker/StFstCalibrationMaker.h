@@ -18,8 +18,8 @@
 
 #include <string>
 #include "StMaker.h"
-#include "StRoot/StEvent/StFstConsts.h"
 #include "TH2S.h"
+#include "StEvent/StFstConsts.h"
 
 class StFstDb;
 
