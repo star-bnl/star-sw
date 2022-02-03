@@ -1,4 +1,5 @@
-//*-- Author : Yuri Fisyak 02/02/2016
+// *-- Author : Yuri Fisyak 02/02/2016
+//#define __PRIMAR_MC_TRACKS_ONLY__
 #include "StMuMcAnalysisMaker.h"
 #include "TDirectory.h"
 #include "TROOT.h"
@@ -764,7 +765,9 @@ void StMuMcAnalysisMaker::FillTrackPlots()
       IdVx = mcTrackP->IdVx();
       if (! IdVx) break;
     }
+#ifdef __PRIMAR_MC_TRACKS_ONLY__
     if (IdVx != 1) continue; // original vertex 
+#endif /* __PRIMAR_MC_TRACKS_ONLY__ */
     IdVx = mcTrack->IdVx(); // for the track
     Int_t noTpcHits =  mcTrack->No_tpc_hit();
     if (noTpcHits == 0 && mcTrack->No_tpc_hitA() > 0) {
