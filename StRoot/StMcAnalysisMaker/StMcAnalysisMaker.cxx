@@ -200,6 +200,7 @@ const Float_t StMcAnalysisMaker::mMinDeltaX = -0.52;
 const Float_t StMcAnalysisMaker::mMaxDeltaX =  0.52;
 const Float_t StMcAnalysisMaker::mMinDeltaZ = -0.52;
 const Float_t StMcAnalysisMaker::mMaxDeltaZ =  0.52;
+#ifdef __MRPair__
 struct TpcHitMRPair_t {
   Float_t sector, row, isDet,
     xM, yM, zM, pxM, pyM, pzM, dEM, dSM, nM,
@@ -221,6 +222,7 @@ struct SsdHitMRPair_t {
 };
 static const Char_t *vSsdHitMRPair = "ladder:wafer:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
 static SsdHitMRPair_t SsdHitMRPair;
+#endif /* __MRPair__ */
 ClassImp(StMcAnalysisMaker)
 
 //_________________________________________________
@@ -243,7 +245,7 @@ StMcAnalysisMaker::StMcAnalysisMaker(const char *name, const char *title):
   mPadRows(0),
   drawinit(0)
 {
-#if 0
+#ifdef __MRPair__
     //  StMcAnalysisMaker Constructor
     // - zero all pointers defined in the header file
     mAssociationCanvas = 0;
@@ -257,13 +259,13 @@ StMcAnalysisMaker::StMcAnalysisMaker(const char *name, const char *title):
     mTpcHitNtuple   = 0;
     mSvtHitNtuple   = 0;
     mSsdHitNtuple   = 0;
-#endif
+#endif /* __MRPair__ */
 }
 
 //_________________________________________________
 StMcAnalysisMaker::~StMcAnalysisMaker()
 {
-#if 0
+#ifdef __MRPair__
     //  StMcAnalysisMaker Destructor
     //  delete the histograms
     cout << "Inside StMcAnalysisMaker Destructor" << endl;
@@ -273,7 +275,7 @@ StMcAnalysisMaker::~StMcAnalysisMaker()
 //     SafeDelete(coordRec);
 //     SafeDelete(coordMcPartner);
 //     SafeDelete(mTrackNtuple);
-#endif
+#endif /* __MRPair__ */
 }
 
 //_____________________________________________________________________________
@@ -289,12 +291,12 @@ void StMcAnalysisMaker::Clear(const char*)
 //_________________________________________________
 Int_t StMcAnalysisMaker::Finish()
 {
-#if 0
+#ifdef __MRPair__
   if (mNtupleFile) {
     mNtupleFile->Write();
     mNtupleFile->Close();
   }
-#endif
+#endif /* __MRPair__ */
     return StMaker::Finish();
 }
 
@@ -302,7 +304,7 @@ Int_t StMcAnalysisMaker::Finish()
 //_________________________________________________
 Int_t StMcAnalysisMaker::Init()
 {
-#if 0
+#ifdef __MRPair__
     // StMcAnalysisMaker - Init
     SetZones();  // This is my method to set the zones for the canvas.
 
@@ -356,13 +358,13 @@ Int_t StMcAnalysisMaker::Init()
       mSsdHitNtuple = new TNtuple("SsdHitNtuple","the SSD hit pairs Info",vSsdHitMRPair);
       mSsdHitNtuple->SetAutoSave(100000000);
     }
-#endif
+#endif /* __MRPair__ */
     return StMaker::Init();
 }
 //_________________________________________________
 Int_t StMcAnalysisMaker::Make()
 {
-#if 0
+#ifdef __MRPair__
   // Get the pointers we need, we have to use the titles we gave them in the
   // macro.  I just used the defaults.
   
@@ -968,6 +970,6 @@ Int_t StMcAnalysisMaker::Make()
   
   
   //mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,900,500);
-#endif  
+#endif /* __MRPair__ */  
   return kStOK;
 }
