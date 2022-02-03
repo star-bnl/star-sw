@@ -1005,6 +1005,12 @@ void itpc_fcf_c::run_start()
 
 	memset(&f_stat,0,sizeof(f_stat)) ;
 
+	for(int r=0;r<=max_slice;r++) {
+	for(int p=0;p<=max_x;p++) {
+		get_row_pad(r,p)->s1_len = 0 ;
+	}
+	}
+
 
 }
 
@@ -1694,22 +1700,24 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 			if(cha > 0x7FFF) cha = 0x8000 | (cha/1024) ;
 
 			if(flags & 3) tmp_fl |= 0x8000 ;	// ROW_EDGE
+			// NEW 11-Jan-2022
+			else {
 
+				*obuff++ = (time_c << 16) | pad_c ;
+				*obuff++ = (cha << 16) | tmp_fl ;
 
-			*obuff++ = (time_c << 16) | pad_c ;
-			*obuff++ = (cha << 16) | tmp_fl ;
-
-			if(words_per_cluster>2) {
-				*obuff++ = (quality<<16)|track_id ;
-			}
-			if(words_per_cluster>3) {
-				*obuff++ = (pixels<<16)|adc_max ;
-			}
+				if(words_per_cluster>2) {
+					*obuff++ = (quality<<16)|track_id ;
+				}
+				if(words_per_cluster>3) {
+					*obuff++ = (pixels<<16)|adc_max ;
+				}
 
 #ifdef DO_DBG1
 //			LOG(TERR,"**** S %d: row %d: %f %f %f",clusters_cou,row,f_p_ave,f_t_ave,f_charge) ;
 #endif
-			clusters_cou++ ;
+				clusters_cou++ ;
+			}
 		}
 		else {	// multiple peak hauristics
 			int ip1, ip2 ;
@@ -1827,24 +1835,26 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				// add flags here
 				pad_c |= 0x8000 ;					// merged flag
 				if(flags & 3) tmp_fl |= 0x8000 ;			// ROW_EDGE
+				// NEW 11-Jan-2022
+				else {
 
 
+					*obuff++ = (time_c << 16) | pad_c ;
+					*obuff++ = (cha << 16) | tmp_fl ;
 
-				*obuff++ = (time_c << 16) | pad_c ;
-				*obuff++ = (cha << 16) | tmp_fl ;
-
-				if(words_per_cluster > 2) {
-					*obuff++ = (quality<<16)|track_id ;
-				}
-				if(words_per_cluster > 3) {
-					*obuff++ = (pixels<<16)|adc_max ;
-				}
+					if(words_per_cluster > 2) {
+						*obuff++ = (quality<<16)|track_id ;
+					}
+					if(words_per_cluster > 3) {
+						*obuff++ = (pixels<<16)|adc_max ;
+					}
 				
 #ifdef DO_DBG1
 //				LOG(TERR,"0x%X 0x%X 0x%X 0x%X - 0x%X 0x%X",pad_c,time_c,cha,tmp_fl, (time_c<16)|pad_c,(cha<<16)|tmp_fl) ;
 //				LOG(TERR,"**** D %d: %f %f %f",clusters_cou,f_p_ave,f_t_ave,f_charge) ;
 #endif				
-				clusters_cou++ ;
+					clusters_cou++ ;
+				}
 			}
 		}
 
