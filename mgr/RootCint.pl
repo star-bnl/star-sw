@@ -9,8 +9,11 @@ use File::Basename;
 
 #
 my $Cint_cxx = shift;
-my $Cint_h  = $Cint_cxx;
-$Cint_h  =~ s/_Cint\.cxx/_Cint\.h/g;
+my $Cint_h    = $Cint_cxx;
+my $Cint_map  = $Cint_cxx;
+$Cint_h     =~ s/_Cint\.cxx/_Cint\.h/g;
+$Cint_map   =~ s/_Cint\.cxx/\.rootmap/g;
+
 
 my $DirName = dirname($Cint_cxx);		#print "DirName = $DirName\n";
 my $LinkDef = $DirName . "/" . "LinkDef.h"; 	#print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
@@ -437,9 +440,10 @@ if ($h_files) {
     #	$cmd  = "rootcint -f $Cint_cxx -c  -D__NO_STRANGE_MUDST__ -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
     #	print "cmd (+extra) = ",$cmd,"\n";
     #} else {
-    	$cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+##    	$cmd  = "rootcint  -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
+    	$cmd  = "rootcling -rmf $Cint_map -f $Cint_cxx  -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
      	print "cmd (normal)= ",$cmd,"\n";
-    #	die;
+##    	die;
     #}
 
 

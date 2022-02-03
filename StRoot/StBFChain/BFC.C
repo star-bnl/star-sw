@@ -3,7 +3,11 @@
 #endif
 #include "Bfc.h"
 #if !defined(__CINT__)
-TableImpl(Bfc);
+//TableImpl(Bfc);
+//#define TableImpl(name)                                            \
+  TTableDescriptor *_NAME2_(St_,name)::fgColDescriptors = 0;       \
+  TableClassImp(_NAME2_(St_,name), _NAME2_(name,_st))              
+//  TableClassStreamerImp(_NAME2_(St_,name))
 #endif
 #include "BigFullChain.h"
 TDataSet *CreateTable() { 

@@ -22,7 +22,7 @@
 #include "StMessMgr.h"
 
 extern TSystem* gSystem;
-
+enum { kBigNumber = 0x7FFFFFFF};
 string StMuChainMaker::mSQLConnection ="";
 
 ClassImp(StMuChainMaker)
@@ -219,15 +219,15 @@ void StMuChainMaker::add( StMuStringIntPair filenameEvents) {
 	}
     }
     
-    if (entries==0 || entries==TChain::kBigNumber) { // try to read the number of event from the db reader 
+    if (entries==0 || entries==kBigNumber) { // try to read the number of event from the db reader 
 	int tmp_entries = mDbReader->entries(file.c_str());
         if (tmp_entries != 0)
            entries = tmp_entries;
         else 
-           entries = TChain::kBigNumber;  // If still not known, set to kBigNumber to avoid opening of file 
+           entries = kBigNumber;  // If still not known, set to kBigNumber to avoid opening of file 
     }
     // If entries==0, TChain will open the file and get the number of entries
-    // If entries==TChain::kBigNumber, TChain will start reading 
+    // If entries==kBigNumber, TChain will start reading 
     //    and figure out the numbers of events while going along
     mChain->Add( file.c_str(), entries );
     mFileCounter++;
@@ -251,7 +251,7 @@ void StMuChainMaker::fromDir(string dir) {
     if ( good && pass(name,mSubFilters) ) {
       char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
       // add it to the list of files
-      mFileList.push_back( StMuStringIntPair( fullFile, TChain::kBigNumber ) );
+      mFileList.push_back( StMuStringIntPair( fullFile, kBigNumber ) );
       delete []fullFile;
     }
   }   
@@ -343,7 +343,7 @@ void StMuChainMaker::fromList(string list) {
       inputStream.getline(line,512);
 	  string ltest(line);
 	  if  (inputStream.good()) {
-	  int numberOfEvents = TChain::kBigNumber;
+	  int numberOfEvents = kBigNumber;
 	  int iret = sscanf(line,"%s%i",name, &numberOfEvents);
 		  if(iret) {/*warnOff*/}
 	  if ( pass(name,mSubFilters) && ltest!="") {
@@ -358,7 +358,7 @@ void StMuChainMaker::fromList(string list) {
 void StMuChainMaker::fromFile(string file) {
   DEBUGMESSAGE2("");
   DEBUGMESSAGE2(mTreeName.c_str());
-  mFileList.push_back( StMuStringIntPair( file, TChain::kBigNumber ) );
+  mFileList.push_back( StMuStringIntPair( file, kBigNumber ) );
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------

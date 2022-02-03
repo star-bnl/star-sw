@@ -1,0 +1,30 @@
+StarEtc directory contains different auxiliary files for STAT+ROOT
+
+1. star.rootrc rootrc file for ROOT.60.24.00. To run ROOT must do copy:
+   cp 601600.rootrc ~/.rootrc 
+
+2. rootlogon.C ROOT logon which is called on init
+
+3. STAR.h include file with the set of popular STAR includes  used in macros.
+   for instance in bfc.C
+
+4 source skip_dirs.csh
+  An example how to skip compilation of non desirable directories
+
+
+5 source rstarroot.csh 
+  Initialisation of Root 6.24.00
+
+6. agmlupd.csh acro to compile & update AGML stuff.
+
+How to copile everything.
+Unfortunatelly in cons still existing soe bugs. As a result some dependency
+are not correct. But compilation still possible
+===========================================================================
+stardev
+cd $STAR
+source StarEtc/skip_dirs.csh   # if you need only subset of libbraries
+source StarEtc/starroot.csh   # in it of star version of Root6
+cons
+
+

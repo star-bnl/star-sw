@@ -103,6 +103,7 @@
       next if $f =~ /^-I/;
       push @List, $f;
     }
+
     if ($#List >= 0) {
       $ROOTCFLAGS = " " . join ' ', @List;
     }
@@ -173,8 +174,9 @@
     $CXXFLAGS = $CFLAGS = $LDFLAGS = $SOFLAGS = "$XMACHOPT";
 
     $CXXFLAGS      .= " -fPIC -w";
+$CXXFLAGS .= "-fdiagnostics-color=always -msse4.2 -std=c++11 -pipe  -Wshadow -Wall -W -Woverloaded-virtual -fsigned-char -pthread -DNDEBUG";
+
     $EXTRA_CXXFLAGS= "";
-    $CXXOPT        = "";
 
     $CC            = "gcc";
 
@@ -502,7 +504,7 @@
 		#   SL5 we had  4.3.2 supporting a weak set of c++11
 		#   SL6 had gcc 4.4.7 with more advanced c++11 implementations via std=c++0x
 		#   SL6 with gcc 4.8.2 supports all c++11 features via std=c++0x - for backward compat, 
-		$CXXFLAGS    .= " -std=c++0x"; # -fpermissive";
+		$CXXFLAGS    .= " -std=c++11"; # -fpermissive";
 		print "\tCXX version implies using C++/C++11 c++0x standard\n";
 	    }
 	}
@@ -653,7 +655,7 @@
 	" -fsigned-char -fno-common $FINK_CXXFLAGS " .
 	  "-DG__REGEXP -DG__UNIX -DG__SHAREDLIB " .
 	  "-DG__ROOT -DG__REDIRECTIO -DG__OSFDLL " .
-	  "-DG__STD_EXCEPTION";
+##??? Try ignore exceptions VP	  "-DG__STD_EXCEPTION";
       $CINTCFLAGS    = $CFLAGS .
 	" $FINK_CFLAGS -DG__REGEXP -DG__UNIX -DG__SHAREDLIB " .
 	  "-DG__ROOT -DG__REDIRECTIO -DG__OSFDLL -DG__STD_EXCEPTION";
@@ -777,6 +779,8 @@
 	$CFLAGS    .= $ROOTCFLAGS;
 	$CXXFLAGS  .= $ROOTCFLAGS;
     }
+
+
     # remove duplicates options coming from ROOTCFLAGS - used block to be sure
     # vars are gone when we go out of scope
     {
@@ -1104,6 +1108,11 @@
    $VcCPPFLAGS = " -DVC_IMPL=Scalar";
    if (-e "temp_gccflags.c") {`rm temp_gccflags.c`;}
  }
+##$CXXFLAGS = " -pthread -std=c++11 -m64 -fPIC "; 
+$CXXFLAGS = " -pthread -std=c++11 -m64 -fPIC -fdiagnostics-color=always -msse4.2  -fpermissive -Wall"; 
+
+
+
     my @params = (
 		  'Package'        => 'None',
 		  'CPP'            => $CPP,
