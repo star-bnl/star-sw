@@ -185,7 +185,8 @@ void bfcread_hist_integrated_to_ps(
       SHUidx = (prefixNum>0 ? 1 : 0);
       HU = SHU[SHUidx];
 // get the TList pointer to the histograms for this branch:
-      TList* dirList = HU->FindHists(MakerHistDir,HU->GetPrefix(prefixNum));
+      bool created=kFALSE;
+      TList* dirList = HU->FindHists(created,MakerHistDir,HU->GetPrefix(prefixNum));
       if (dirList && (dirList->GetSize())) {
 
        if (firstSet[SHUidx]) {
@@ -204,7 +205,7 @@ void bfcread_hist_integrated_to_ps(
          cout << "bfcread_hist_integrated_to_ps.C, # histograms added with prefix " <<
            HU->GetPrefix(prefixNum) << " = " << hCCount << endl;
        } // first set or not
-       delete dirList; // Only when using PrintList or Prefixes
+       if (created) delete dirList; // Only when using PrintList or Prefixes
       } // found hists
 
      } // loop over prefixes

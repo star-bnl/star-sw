@@ -766,7 +766,9 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
   // Now find the histograms
   // get the TList pointer to the histograms:
   PathCopy(m_dirName,dirName);
-  TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
+  bool created=kFALSE;
+  bool createdR=kFALSE;
+  TList* dirList = (m_PntrToMaker ? FindHists(created,m_dirName) : FindHists(created,m_PntrToPlainFile));
   if (!dirList) { LOG_INFO << " DrawHists - histograms not available! " << endm; }
 
   TIter nextHist(dirList);
@@ -796,7 +798,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
   TList* dirListR = 0;
   ofstream* R_ostr = 0;
   if (m_analMode) {
-    dirListR = FindHists(m_refInFile);
+    dirListR = FindHists(createdR,m_refInFile);
     // By default, save histograms to a ROOT file as future reference
     if (!root_ofile) root_ofile = new TFile(m_refOutFile,"RECREATE");
   }
@@ -977,11 +979,13 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 
           // set bottom margin of pad
           if (oName.Contains("TrigBits")) {
-            gPad->SetBottomMargin(0.35);
+            gPad->SetBottomMargin(0.34);
+            gPad->SetRightMargin(0.02);
             hobj->GetXaxis()->SetLabelSize(0.03);
             hobj->GetXaxis()->SetLabelFont(42);
           } else {
             gPad->SetBottomMargin(0.10);
+            gPad->SetRightMargin(0.10);
           }
 
           if (oName.Contains("GtrkPadfT")) hobj->SetMinimum(0.8);
@@ -1042,6 +1046,8 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
               oName.Contains("QaPmdTotal") ||
               oName.Contains("QaCpvTotal") ||
               oName.EndsWith("SImpactTime") ||
+              oName.EndsWith("MtdNHits") ||
+              oName.EndsWith("MtdNMatchHits") ||
               oName.EndsWith("trkGoodTTS")) {
             Float_t mean = hobj->GetMean(1);
             Float_t window = hobj->GetRMS(1);
@@ -1643,13 +1649,15 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
   if (root_ofile) delete root_ofile;
 
   CloseOutFile();
+  if (created) delete dirList;
+  if (createdR) delete dirListR;
   return histCounter;
 }
  
 //_____________________________________________________________________________
 
 
-TList* StHistUtil::FindHists(const Char_t *dirName, const Char_t *withPrefix) 
+TList* StHistUtil::FindHists(bool& created, const Char_t *dirName, const Char_t *withPrefix) 
 {  
 
 // NOTE - must have already used method SetPntrToMaker to get the
@@ -1661,6 +1669,7 @@ TList* StHistUtil::FindHists(const Char_t *dirName, const Char_t *withPrefix)
 // Find pointer to histograms under a Maker
 
   TList *dList=0;
+  created=kFALSE;
 
   LOG_INFO << " Beg: FindHists, dList pointer = " << dList << endm;
 
@@ -1742,7 +1751,7 @@ TList* StHistUtil::FindHists(const Char_t *dirName, const Char_t *withPrefix)
 
   }
 
-  if (dList && (withPrefix || m_ListOfPrint)) dList = TrimListByPrefix(dList,withPrefix);
+  if (dList && (withPrefix || m_ListOfPrint)) {dList = TrimListByPrefix(dList,withPrefix); created=kTRUE; }
 
   LOG_INFO << " FindHists, dList pointer = " << dList << endm;
   
@@ -1751,7 +1760,8 @@ TList* StHistUtil::FindHists(const Char_t *dirName, const Char_t *withPrefix)
 }
 //_____________________________________________________________________________
  
-TList* StHistUtil::FindHists(TFile* histFile, const Char_t* withPrefix) {
+TList* StHistUtil::FindHists(bool& created, TFile* histFile, const Char_t* withPrefix) {
+  created=kFALSE;
   if (!histFile) return 0;
   TList* dList = histFile->GetList();
   if (dList->GetSize() == 0) {
@@ -1764,7 +1774,7 @@ TList* StHistUtil::FindHists(TFile* histFile, const Char_t* withPrefix) {
   LOG_INFO << " Mid5: FindHists, test pointer =  " << test << endm;
   if (!test) dList = 0;
 
-  if (dList && (withPrefix || m_ListOfPrint)) dList = TrimListByPrefix(dList,withPrefix);
+  if (dList && (withPrefix || m_ListOfPrint)) {dList = TrimListByPrefix(dList,withPrefix); created=kTRUE; }
   return dList;
 }
 //_____________________________________________________________________________
@@ -1804,7 +1814,8 @@ Int_t StHistUtil::ListHists(const Char_t *dirName)
   }
 
 // get the TList pointer to the histograms:
-  TList* dirList = (m_PntrToMaker ? FindHists(dirName) : FindHists(m_PntrToPlainFile));
+  bool created=kFALSE;
+  TList* dirList = (m_PntrToMaker ? FindHists(created,m_dirName) : FindHists(created,m_PntrToPlainFile));
 
   if (!dirList) { LOG_INFO << " ListHists - histograms not available! " << endm; }
 
@@ -1829,6 +1840,7 @@ Int_t StHistUtil::ListHists(const Char_t *dirName)
   }
 
   LOG_INFO << " ListHists: Total No. Histograms Booked  = " << histReadCount <<endm;
+  if (created) delete dirList;
   return histReadCount;
 }
 
@@ -2659,7 +2671,8 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
   PathCopy(m_dirName,dirName);
 
 // get the TList pointer to the histograms
-  TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
+  bool created=kFALSE;
+  TList* dirList = (m_PntrToMaker ? FindHists(created,m_dirName) : FindHists(created,m_PntrToPlainFile));
 
 // check that directory exists
   if (!dirList)
@@ -2760,6 +2773,7 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
 
     newCanvas->Update();
 
+    if (created) delete dirList;
     return kStOk;
   }
 
@@ -2780,7 +2794,8 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
   PathCopy(m_dirName,dirName);
 
 // get the TList pointer to the histograms
-  TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
+  bool created=kFALSE;
+  TList* dirList = (m_PntrToMaker ? FindHists(created,m_dirName) : FindHists(created,m_PntrToPlainFile));
 
 // check that directory exists
   if (!dirList)
@@ -2880,6 +2895,7 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
 
     newCanvas->Update();
 
+    if (created) delete dirList;
     return kStOk;
   }
 

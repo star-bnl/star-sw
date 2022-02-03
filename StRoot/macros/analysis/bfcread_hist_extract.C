@@ -108,9 +108,11 @@ void bfcread_hist_extract(
 // - default is to print out QA hist branch
    Int_t NoHist=0;
    //NoHist = HU->ListHists(MakerHistDir);
-   TList* dList = HU->FindHists(MakerHistDir);
+   bool created=kFALSE;
+   TList* dList = HU->FindHists(created,MakerHistDir);
    if (PrintList) HU->SetDefaultPrintList(MakerHistDir,PrintList);
    NoHist = HU->CopyHists(dList);
+   if (created) delete dList;
    TH1** nh = HU->getNewHist();
 
    TString name = MainFile;
