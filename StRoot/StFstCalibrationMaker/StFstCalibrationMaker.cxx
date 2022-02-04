@@ -15,13 +15,13 @@
 #include <string>
 #include "StEvent.h"
 #include "StEvent/StEnumerations.h"
+#include "StEvent/StFstConsts.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StFstCalibrationMaker.h"
 #include "StRoot/StFstUtil/StFstCollection.h"
 #include "StRoot/StFstUtil/StFstRawHitCollection.h"
 #include "StRoot/StFstUtil/StFstRawHit.h"
 #include "StRoot/StFstDbMaker/StFstDb.h"
-#include "StRoot/StFstUtil/StFstConsts.h"
 
 #include "tables/St_fstMapping_Table.h"
 #include "tables/St_fstControl_Table.h"
