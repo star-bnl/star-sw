@@ -655,6 +655,17 @@ Int_t StBFChain::Instantiate()
     if ( maker == "StEmcRawMaker" && GetOption("BEmcChkStat"))
       mk->SetAttr("BEmcCheckStatus",kTRUE);
 
+    // trigger simu maker
+    if ( maker == "StTriggerSimuMaker" && GetOption("picoWrite") ) {
+      TString cmd(Form("StTriggerSimuMaker *pTSMk = (StTriggerSimuMaker*) %p;",mk));
+      cmd += "pTSMk->setMC(false);";                                 // Set TriggerSimuMaker parameters
+      cmd += "pTSMk->useBemc();";
+      cmd += "pTSMk->useEemc();";
+      cmd += "pTSMk->useOfflineDB();";
+      cmd += "pTSMk->bemc->setConfig(StBemcTriggerSimu::kOffline);";
+      ProcessLine(cmd);
+    }
+
     // MuDST and ezTree. Combinations are
     //  ezTree         -> ezTree only
     //  CMuDST         -> regular MuDST only
