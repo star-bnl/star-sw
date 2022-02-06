@@ -117,6 +117,7 @@ static TH1  *checkList[2][21] = {0};
 static TProfile2D  *SecRow[15] = {0};
 #endif /* __LASERINO__ */
 static TString TpcMedium("TPCE_SENSITIVE_GAS");
+Short_t StTpcRSMaker::mADCs[__MaxNumberOfTimeBins__];
 //________________________________________________________________________________
 ClassImp(StTpcRSMaker);
 //________________________________________________________________________________
@@ -141,7 +142,6 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
 }
 //________________________________________________________________________________
 StTpcRSMaker::~StTpcRSMaker() {
-  SafeDelete(mAltro);
   Finish();
 }
 //________________________________________________________________________________
@@ -156,6 +156,7 @@ Int_t StTpcRSMaker::Finish() {
       if (mShaperResponses[io][sec] && !mShaperResponses[io][sec]->TestBit(kNotDeleted)) {SafeDelete(mShaperResponses[io][sec]);}
       SafeDelete(mChargeFraction[io][sec]);
       SafeDelete(mPadResponseFunction[io][sec]);
+      if (mAltro[io][sec] && !mAltro[io][sec]->TestBit(kNotDeleted)) {SafeDelete(mAltro[io][sec]);}
     }
     SafeDelete(mPolya[io]);
   }
@@ -323,8 +324,9 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 							outerSectorAnodeVoltage[sector-1], t0IO[io]);
 	}
       }
-    }
-  }
+    } // IO
+  } // sector
+  
   for (Int_t io = 0; io < 2; io++) {// In/Out
     //  mPolya = new TF1F("Polya;x = G/G_0;signal","sqrt(x)/exp(1.5*x)",0,10); // original Polya 
     //  mPolya = new TF1F("Polya;x = G/G_0;signal","pow(x,0.38)*exp(-1.38*x)",0,10); //  Valeri Cherniatin
@@ -362,14 +364,13 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       fgTimeShape0[io]->GetXaxis()->SetTitle("time (secs)");
       fgTimeShape0[io]->GetYaxis()->SetTitle("signal"); 
     }
-    
+    //                             w       h         s      a       l   i
+    //  Double_t paramsI[6] = {0.2850, 0.2000,  0.4000, 0.0010, 1.1500, 0};
+    //  Double_t paramsO[6] = {0.6200, 0.4000,  0.4000, 0.0010, 1.1500, 0};
+    Double_t xmaxP =  4.5;//4.5*St_tpcPadConfigC::instance()->innerSectorPadWidth(sector);// 4.5 
+    Double_t xminP = -xmaxP; 
+    Double_t params[6];
     for (Int_t sector = 1; sector <= NoOfSectors; sector++) {
-      //                             w       h         s      a       l   i
-      //  Double_t paramsI[6] = {0.2850, 0.2000,  0.4000, 0.0010, 1.1500, 0};
-      //  Double_t paramsO[6] = {0.6200, 0.4000,  0.4000, 0.0010, 1.1500, 0};
-      Double_t xmaxP =  4.5;//4.5*St_tpcPadConfigC::instance()->innerSectorPadWidth(sector);// 4.5 
-      Double_t xminP = -xmaxP; 
-      Double_t params[6];
       if (! io) {
 	params[0] = St_tpcPadConfigC::instance()->innerSectorPadWidth(sector);                     // w = width of pad       
 	params[1] = gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
@@ -385,6 +386,8 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 	params[4] = 0;
 	params[5] = St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
       }
+      xmaxP =  4.5;//4.5*St_tpcPadConfigC::instance()->innerSectorPadWidth(sector);// 4.5 
+      xminP = -xmaxP; 
       if (! mPadResponseFunction[io][sector-1]) { 
 	mPadResponseFunction[io][sector-1] = new TF1F(io == 0 ? "PadResponseFunctionInner" : "PadResponseFunctionOuter",StTpcRSMaker::PadResponseFunc,xminP,xmaxP,6); 
 	mPadResponseFunction[io][sector-1]->SetParameters(params);
@@ -404,6 +407,7 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 	mPadResponseFunction[io][sector-1]->SetRange(-x,x);
 	mPadResponseFunction[io][sector-1]->Save(xminP,xmaxP,0,0,0,0);
       }
+       // check if the function has been created
       if (! mChargeFraction[io][sector-1]) {
 	xmaxP = 2.5;//5*St_tpcPadConfigC::instance()->innerSectorPadLength(sector); // 1.42
 	xminP = - xmaxP;
@@ -451,7 +455,6 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       // Trs uses x**1.5/exp(x)
       // tss used x**0.5/exp(1.5*x)
       if (St_tpcAltroParamsC::instance()->N(sector-1) < 0) {// old TPC
-	// check if the function has been created
 	for (Int_t sec = 1; sec < sector; sec++) {	 
 	  if (St_tpcAltroParamsC::instance()->N(sec-1) < 0 && mShaperResponses[io][sec-1]) {
 	    mShaperResponses[io][sector-1] = mShaperResponses[io][sec-1];
@@ -478,13 +481,7 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 	}
 	continue;
       } 
-      //Altro 
-      for (Int_t sec = 1; sec < sector; sec++) {
-	if (St_tpcAltroParamsC::instance()->N(sec-1) >= 0 && mShaperResponses[io][sec-1] ) {
-	  mShaperResponses[io][sector-1] = mShaperResponses[io][sec-1];
-	  break;
-	}
-      }
+      // Altro/Sampa
       if (! mShaperResponses[io][sector-1]) {
 	mShaperResponses[io][sector-1] = new TF1F(Form("ShaperFunc_%s_S%02i",Names[io],sector),
 						  StTpcRSMaker::shapeEI_I,timeBinMin,timeBinMax,5);  
@@ -505,6 +502,52 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       }
     }
   }
+  for (Int_t sector = 1; sector <= NoOfSectors; sector++) {
+    if (St_tpcAltroParamsC::instance()->N(sector-1) < 0) continue; // Not Altro or Sampa
+    // Check that Altro has been configured
+    if (! mAltro[0][sector-1] && ! mAltro[1][sector-1]) {
+      tpcAltroParams_st *Ssector = St_tpcAltroParamsC::instance()->Struct(sector-1);
+      for (Int_t sec = 1; sec < sector; sec++) {
+	if (mAltro[0][sec-1] && mAltro[1][sec-1]) {
+	  tpcAltroParams_st *Ssec = St_tpcAltroParamsC::instance()->Struct(sec-1);
+	  if (! memcmp(Ssector,Ssec,sizeof(tpcAltroParams_st))) {
+	    mAltro[0][sector-1] = mAltro[0][sec-1];
+	    mAltro[1][sector-1] = mAltro[1][sec-1];
+	    break;
+	  }
+	}
+      }
+    }
+    for (Int_t io = 0; io < 2; io++) {// In/Out
+      //Altro Inner/Outer
+      if (! mAltro[sector-1][io]) {
+	if (St_tpcAltroParamsC::instance()->N(sector-1) >= 0 && ! mAltro[io][sector-1]) {
+	  Int_t l = 0;
+	  if (St_tpcAltroParamsC::instance()->Table()->GetNRows() > sector) l = sector - 1;
+	  if (io == 0 && St_tpcAltroParamsC::instance()->Table()->GetNRows() > 24 + sector) l += 24;
+	  mAltro[io][sector-1] = new Altro(__MaxNumberOfTimeBins__,mADCs);
+	  //      ConfigAltro(ONBaselineCorrection1, ONTailcancellation, ONBaselineCorrection2, ONClipping, ONZerosuppression)
+	  if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {// Tonko 06/25/08
+	    mAltro[io][sector-1]->ConfigAltro(                    0,                  1,                     0,          1,                 1); 
+	    //       ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
+	    //altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);  // Tonko 06/25/08
+	    mAltro[io][sector-1]->ConfigTailCancellationFilter(St_tpcAltroParamsC::instance()->K1(l),
+							       St_tpcAltroParamsC::instance()->K2(l),
+							       St_tpcAltroParamsC::instance()->K3(l), // K1-3
+							       St_tpcAltroParamsC::instance()->L1(l),
+							       St_tpcAltroParamsC::instance()->L2(l),
+							       St_tpcAltroParamsC::instance()->L3(l));// L1-3
+	  } else {
+	    mAltro[io][sector-1]->ConfigAltro(0,0,0,1,1); 
+	  }
+	  mAltro[io][sector-1]->ConfigZerosuppression(St_tpcAltroParamsC::instance()->Threshold(l),
+						      St_tpcAltroParamsC::instance()->MinSamplesaboveThreshold(l),
+						      0,0);
+	  mAltro[io][sector-1]->PrintParameters();
+	}
+      }
+    } // io
+  } // sector
   // tss
   if (Debug()) Print();
   memset (hist, 0, sizeof(hist));
@@ -1275,16 +1318,15 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
         for(Int_t pad = 1; pad <= Npads; pad++) {
 	  UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
 	  if (! ntimebins) continue;
-	  static  Short_t ADCs[__MaxNumberOfTimeBins__];
 #ifdef __TFG__VERSION__
 	  static  Int_t IDTs[__MaxNumberOfTimeBins__];
 #else /* ! __TFG__VERSION__ */
 	  static UShort_t IDTs[__MaxNumberOfTimeBins__];
 #endif /* __TFG__VERSION__ */
-	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
+	  digitalSector->getTimeAdc(row,pad,mADCs,IDTs);
 	  for (UInt_t t = 0; t < __MaxNumberOfTimeBins__; t++) {
-	    if (ADCs[t] > 0 && IDTs[t]) {
-	      ADCmap2Track[IDTs[t]] += ADCs[t];
+	    if (mADCs[t] > 0 && IDTs[t]) {
+	      ADCmap2Track[IDTs[t]] += mADCs[t];
 	    }
 	  }
 	}
@@ -1483,6 +1525,8 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
   for (row = 1;  row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
     Int_t noOfPadsAtRow = St_tpcPadConfigC::instance()->St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
     Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
+    Int_t ioA = 1;
+    if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row) ) ioA = 0;
     if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {
       if (! (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row))) {
 	pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMSX();
@@ -1495,13 +1539,12 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
       gain = St_tpcPadGainT0BC::instance()->Gain(Sector,row,pad);
       if (gain <= 0.0) continue;
       ped    = St_TpcResponseSimulatorC::instance()->AveragePedestal();
-      static  Short_t ADCs[__MaxNumberOfTimeBins__];
 #ifdef __TFG__VERSION__
       static  Int_t IDTs[__MaxNumberOfTimeBins__];
 #else /* ! __TFG__VERSION__ */
       static UShort_t IDTs[__MaxNumberOfTimeBins__];
 #endif /* __TFG__VERSION__ */
-      memset(ADCs, 0, sizeof(ADCs));
+      memset(mADCs, 0, sizeof(mADCs));
       memset(IDTs, 0, sizeof(IDTs));
       Int_t NoTB = 0;
       index = NoOfTimeBins*((row-1)*NoOfPads+pad-1);
@@ -1524,7 +1567,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 	if (adc < 1) continue;
 	SignalSum[index].Adc = adc;
 	NoTB++;
-	ADCs[bin] = adc;
+	mADCs[bin] = adc;
 	IDTs[bin] = SignalSum[index].TrackId;
 #ifdef __DEBUG__
         if (adc > 3*pedRMS)	AdcSumBeforeAltro += adc;
@@ -1536,40 +1579,19 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 #endif
       }
       if (! NoTB) continue;
-      if (St_tpcAltroParamsC::instance()->N(sector-1) >= 0 && ! mAltro) {
-	mAltro = new Altro(__MaxNumberOfTimeBins__,ADCs);
-	if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {// Tonko 06/25/08
-	  //      ConfigAltro(ONBaselineCorrection1, ONTailcancellation, ONBaselineCorrection2, ONClipping, ONZerosuppression)
-	  mAltro->ConfigAltro(                    0,                  1,                     0,          1,                 1); 
-	  //       ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
-	  //altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);  // Tonko 06/25/08
-	  mAltro->ConfigTailCancellationFilter(St_tpcAltroParamsC::instance()->K1(),
-					       St_tpcAltroParamsC::instance()->K2(),
-					       St_tpcAltroParamsC::instance()->K3(), // K1-3
-					       St_tpcAltroParamsC::instance()->L1(),
-					       St_tpcAltroParamsC::instance()->L2(),
-					       St_tpcAltroParamsC::instance()->L3());// L1-3
-	} else {
-	  mAltro->ConfigAltro(0,0,0,1,1); 
-	}
-	mAltro->ConfigZerosuppression(St_tpcAltroParamsC::instance()->Threshold(),
-				      St_tpcAltroParamsC::instance()->MinSamplesaboveThreshold(),
-				      0,0);
-	mAltro->PrintParameters();
-      }
-      if (mAltro) {
+      if (mAltro[ioA][sector-1]) {
 	//#define PixelDUMP
 #ifdef PixelDUMP
 	static Short_t ADCsSaved[__MaxNumberOfTimeBins__];
-	memcpy(ADCsSaved, ADCs,sizeof(ADCsSaved));
+	memcpy(ADCsSaved, mADCs,sizeof(ADCsSaved));
 #endif
-	mAltro->RunEmulation();
+	mAltro[ioA][sector-1]->RunEmulation();
 #ifdef PixelDUMP
 	ofstream *out = new ofstream("digi.dump",ios_base::app);
 	for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	  if (ADCsSaved[i] > 0 || ADCs[i] > 0) {
-	    LOG_INFO << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i],mAltro->ADCkeep[i]) << endm;
-	    *out << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i],mAltro->ADCkeep[i]) << endl;
+	  if (ADCsSaved[i] > 0 || mADCs[i] > 0) {
+	    LOG_INFO << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],mADCs[i],mAltro[ioA][sector-1]->ADCkeep[i]) << endm;
+	    *out << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],mADCs[i],mAltro[ioA][sector-1]->ADCkeep[i]) << endl;
 	  }
 	}
 	delete out;
@@ -1577,15 +1599,15 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 	NoTB = 0;
 	Int_t ADCsum = 0;
 	for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	  if (ADCs[i] && ! mAltro->ADCkeep[i]) {ADCs[i] = 0;}
-	  if (ADCs[i]) {
+	  if (mADCs[i] && ! mAltro[ioA][sector-1]->ADCkeep[i]) {mADCs[i] = 0;}
+	  if (mADCs[i]) {
 	    NoTB++;
-	    ADCsum += ADCs[i];
+	    ADCsum += mADCs[i];
 #ifdef __DEBUG__
-	    if (ADCs[i] > 3*pedRMS) AdcSumAfterAltro += ADCs[i];
+	    if (mADCs[i] > 3*pedRMS) AdcSumAfterAltro += mADCs[i];
 	    if (Debug() > 12) {
 	      LOG_INFO << "Altro R/P/T/I = " << row << " /\t" << pad << " /\t" << i 
-		       << "\tAdc/TrackId = " << ADCs[i] << " /\t" << IDTs[i] << endm;
+		       << "\tAdc/TrackId = " << mADCs[i] << " /\t" << IDTs[i] << endm;
 	    }
 #endif
 	  } else {IDTs[i] = 0;}
@@ -1597,10 +1619,10 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 #endif	
       }
       else {
-	if (St_tpcAltroParamsC::instance()->N(sector-1) < 0) NoTB = AsicThresholds(ADCs);
+	if (St_tpcAltroParamsC::instance()->N(sector-1) < 0) NoTB = AsicThresholds();
       }
       if (NoTB > 0 && digitalSector) {
-	digitalSector->putTimeAdc(row,pad,ADCs,IDTs);
+	digitalSector->putTimeAdc(row,pad,mADCs,IDTs);
       }
     } // pads
 #ifdef __DEBUG__
@@ -1612,25 +1634,25 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
   return digitalSector;
 }
 //________________________________________________________________________________
-Int_t StTpcRSMaker::AsicThresholds(Short_t ADCs[__MaxNumberOfTimeBins__]) {
+Int_t StTpcRSMaker::AsicThresholds() {
   Int_t t1 = 0;
   Int_t nSeqLo = 0;
   Int_t nSeqHi = 0;
   Int_t noTbleft = 0;
   for (UInt_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
-    if (ADCs[tb] <= St_asic_thresholdsC::instance()->thresh_lo()) {
-      if (! t1) ADCs[tb] = 0;
+    if (mADCs[tb] <= St_asic_thresholdsC::instance()->thresh_lo()) {
+      if (! t1) mADCs[tb] = 0;
       else {
 	if (nSeqLo <= St_asic_thresholdsC::instance()->n_seq_lo() ||
 	    nSeqHi <= St_asic_thresholdsC::instance()->n_seq_hi()) 
-	  for (UInt_t t = t1; t <= tb; t++) ADCs[t] = 0;
+	  for (UInt_t t = t1; t <= tb; t++) mADCs[t] = 0;
 	else noTbleft += nSeqLo;
       }
       t1 = nSeqLo = nSeqHi = 0;
     }
     nSeqLo++; 
     if (! t1) t1 = tb;
-    if (ADCs[tb] > St_asic_thresholdsC::instance()->thresh_hi()) {nSeqHi++;}
+    if (mADCs[tb] > St_asic_thresholdsC::instance()->thresh_hi()) {nSeqHi++;}
   }
   return noTbleft;
 }
