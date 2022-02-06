@@ -1,7 +1,10 @@
 /*
   cd ~/work/dEdx/RunXIX68
   foreach f ( `ls -1d   *19/2*.root *20/2*.root` )  
-    set b = `basename ${f} .root`; root.exe -q -b ${f} CheckPads.C+ >& ${b}.list
+    set b = `basename ${f} .root`; 
+    echo "${b}"
+    if (-r ${b}.list) continue;
+    root.exe -q -b ${f} CheckPads.C+ >& ${b}.list
   end
   #grep Dead *.list > DeadFEE.list
   #remove Dead  string >  DeadFEE2.list
@@ -22,6 +25,35 @@
                           add Alive
   
   cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XX.sorted
+================================================================================
+  grep Dead 2*.list | awk -F\{ '{print "{"$2}' > DeadFEE2.list
+  sort DeadFEE2.list > DeadFEE.listSorted
+  MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
+  sort DeadFeeRuns | tee DeadFeeRuns.sorted
+  grep Alive 2*.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
+  sort AliveFEE2.list > AliveFEE.sorted
+  MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
+  sort AliveFeeRuns | tee AliveFeeRuns.sorted
+  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XX.sorted
+
+==================== Run XXII ============================================================
+  foreach f ( `ls -1d   pp500_2022/hlt*.root` )  
+   set b = `basename ${f} .root`; 
+    echo "${b}"
+    if (-r ${b}.list) continue;
+    root.exe -q -b ${f} CheckPads.C+ >& ${b}.list
+  end
+  grep Dead hlt*.list | sed -e 's/hlt_//' | awk -F\{ '{print "{"$2}' > DeadFEE2.list
+  sort DeadFEE2.list > DeadFEE.listSorted
+  MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
+  sort DeadFeeRuns | tee DeadFeeRuns.sorted
+  grep Alive hlt*.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
+  sort AliveFEE2.list > AliveFEE.sorted
+  MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
+  sort AliveFeeRuns | tee AliveFeeRuns.sorted
+  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XXII.sorted
+
+
 */
 //   foreach f ( `ls -1d   */2*.root` )
 //________________________________________________________________________________
@@ -327,6 +359,7 @@ void CheckPads(Int_t sector = 0) {
   TProfile3D *ActivePads = (TProfile3D *) gDirectory->Get("ActivePads");
   if (! ActivePads) {cout << "ActivePads is missing" << endl; return;}
   TString Dir(gSystem->BaseName(gDirectory->GetName()));
+  Dir.ReplaceAll("hlt_","");
   Int_t index = Dir.Index("_");
   TString Run(Dir,index); // cout << "Run = " << Run.Data() << endl;
   Run.Prepend(", /* ");
@@ -374,7 +407,7 @@ void CheckPads(Int_t sector = 0) {
 	  } else {
 	    if (fee == feeG && p == p2d + 1) p2d = p;
 	    else {
-	      if (p1d < p2d) cout << Dead.Data() << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << Run.Data() << endl;
+	      if (p1d + 2 < p2d) cout << Dead.Data() << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << Run.Data() << endl;
 	      p1d = p2d = p;
 	      feeG = fee;
 	      rdoG = rdo;
@@ -389,7 +422,7 @@ void CheckPads(Int_t sector = 0) {
 	  } else {
 	    if (fee == feeA && p == p2a + 1) p2a = p;
 	    else {
-	      if (p1a < p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << Run.Data() << endl;
+	      if (p1a + 2 < p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << Run.Data() << endl;
 	      p1a = p2a = p;
 	      feeA = fee;
 	      rdoA = rdo;
@@ -397,8 +430,8 @@ void CheckPads(Int_t sector = 0) {
 	  }
 	}
       }
-      if (p1d < p2d) cout << Dead.Data()  << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << Run.Data() << endl;
-      if (p1a < p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << Run.Data() << endl;
+      if (p1d + 2 < p2d) cout << Dead.Data()  << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << Run.Data() << endl;
+      if (p1a + 2< p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << Run.Data() << endl;
     }
     if (c1) {
       c1->cd(1); ActivePads->GetXaxis()->SetRange(s,s); ActivePads->Project3D(Form("yz_%i",s))->Draw("colz");
