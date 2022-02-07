@@ -657,13 +657,7 @@ Int_t StBFChain::Instantiate()
 
     // trigger simu maker
     if ( maker == "StTriggerSimuMaker" && GetOption("picoWrite") ) {
-      TString cmd(Form("StTriggerSimuMaker *pTSMk = (StTriggerSimuMaker*) %p;",mk));
-      cmd += "pTSMk->setMC(false);";                                 // Set TriggerSimuMaker parameters
-      cmd += "pTSMk->useBemc();";
-      cmd += "pTSMk->useEemc();";
-      cmd += "pTSMk->useOfflineDB();";
-      cmd += "pTSMk->bemc->setConfig(StBemcTriggerSimu::kOffline);";
-      ProcessLine(cmd);
+      mk->SetMode(10);  // picoDst production
     }
 
     // MuDST and ezTree. Combinations are
