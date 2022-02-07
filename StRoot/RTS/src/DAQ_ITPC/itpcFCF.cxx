@@ -53,14 +53,14 @@ static double delta(double v)
 	return mark() - v ;
 }
 
-itpc_fcf_c::itpc_fcf_c()
+itpc_fcf_c::itpc_fcf_c(int off)
 {	
         want_data = 1 ;		// ALWAYS!
         my_id = 0 ;		// normally starts from 1 so 0 is "un-initialized"
 
         version = VERSION ;
 	sector_id = 0 ;		// 0 is ALL sectors
-	offline = 0 ;		// not Offline!
+	offline = off ;		// switch to  Offline if not zero!
 
 
 	det_type = 1 ;		// ITPC
