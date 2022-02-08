@@ -1331,24 +1331,27 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
 
 void JevpServer::performStartRun()
 {
-  runStatus.run = rdr->run;
+    CP;
+    runStatus.run = rdr->run;
 
-  eventsThisRun = 0;
-  lastImageBuilderSendTime = time(NULL);
+    eventsThisRun = 0;
+    lastImageBuilderSendTime = time(NULL);
 
-  double mem = getMemUse();
-  mem /= 1024.0;
-  LOG("JEFF", "Start run #%d  (mem: %.1lfMB)",runStatus.run, mem);
+    double mem = getMemUse();
+    mem /= 1024.0;
+    LOG("JEFF", "Start run #%d  (mem: %.1lfMB)",runStatus.run, mem);
 
-  char *servername = "JevpServer";
-  if(isL4) {
-      servername = "L4JevpServer";
-  }
-  JevpPlotSet::staticLogDbVariable("MB_used", mem, runStatus.run, time(NULL), servername, clientdatadir);
+    char *servername = "JevpServer";
+    if(isL4) {
+	servername = "L4JevpServer";
+    }
+    JevpPlotSet::staticLogDbVariable("MB_used", mem, runStatus.run, time(NULL), servername, clientdatadir);
 
-  clearForNewRun();
-
-  runStatus.setStatus("running");
+    CP;
+    clearForNewRun();
+    CP;
+    runStatus.setStatus("running");
+    CP;
 }
 
 void JevpServer::writeRootFiles()
@@ -1431,7 +1434,9 @@ void JevpServer::performStopRun()
 	CP;
 
 	pthread_mutex_lock(&imageWriter->mux);
+	CP_ENTER_BUILDER(curr);
 	curr->stoprun(rdr);
+	CP_LEAVE_BUILDER;
 	pthread_mutex_unlock(&imageWriter->mux);
 	CP;
 
@@ -1471,7 +1476,8 @@ void JevpServer::clearForNewRun()
     // Delete all from histogram list
     // First free the actual histo, then remove the link...
     LOG(NOTE, "Clear for new run  #%d",runStatus.run);
-
+    CP;
+    
     eventHandlingTime = 0;
     waitingTime = 0;
     writingImageTime = 0;
@@ -1480,12 +1486,18 @@ void JevpServer::clearForNewRun()
 
     JevpPlotSet *curr;
     while((curr = (JevpPlotSet *)next())) {
-
-	LOG(DBG, "Send startrun for: %s", curr->getPlotSetName());
+	CP;
+	LOG("JEFF", "Send startrun for: %s", curr->getPlotSetName());
+	CP;
+	CP_ENTER_BUILDER(curr);
 	curr->_startrun(rdr);
+	CP_LEAVE_BUILDER;
+	CP;
     }
 
+    CP;
     freeServerTags();
+    CP;
 }
 
 
@@ -2260,6 +2272,7 @@ int JevpServer::execScript(const char *name, char *args[], int waitforreturn)
 	waitpid(pid,&stat,0);
     } while(WIFEXITED(stat) == 0);
 
+    CP;
     return WEXITSTATUS(stat);
 }
 

@@ -126,11 +126,10 @@ class JevpPlotSet : public TObject {
 
   void logDbVariable(char *variable_name, double value);
   static void staticLogDbVariable(char *name, double value, int my_run, int my_time, char *my_plotsetname, char *my_clientdatadir);
-  
- private:
 
   JevpServer *parent;
 
+ private:
   u_int lastevttm;
 
   int disabled;

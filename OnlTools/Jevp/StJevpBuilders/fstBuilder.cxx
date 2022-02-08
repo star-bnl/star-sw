@@ -38,11 +38,11 @@ const float fstBuilder::maxTbFracOK       = 0.9;
 const float fstBuilder::landauFit_dn      = 10.0;
 const float fstBuilder::landauFit_up      = 2000.0;
 const float fstBuilder::cmnCut            = 3.0;
-const float fstBuilder::hitCut            = 8.0;
-const float fstBuilder::zsCut             = 8.0;
+const float fstBuilder::hitCut            = 25.0;
+const float fstBuilder::zsCut             = 25.0;
 const float fstBuilder::noiseChipCut      = 10.0;
 const int   fstBuilder::hitOccupancyCut   = 100;
-const int   fstBuilder::defTb             = 5;
+const int   fstBuilder::defTb             = 1;
 
 // constant used for FST Geometry Hit Map
 // all values are defined by inner direction
@@ -497,7 +497,7 @@ void fstBuilder::initialize(int argc, char *argv[])
 
     sprintf(buffer,"HitMapOfFSTDisk%d_ZS", iDisk+1);
     sprintf(buffer2,"FST - Hit map (ZS) for Disk%d", iDisk+1);
-    hSumContents.hHitMap_ZS[iDisk] = new TH2S(buffer, buffer2, PhiSegPerMod*ModPerDisk, -0.5, PhiSegPerMod*ModPerDisk, RstripPerMod, -0.5, RstripPerMod-0.5);//1536*8 bins
+    hSumContents.hHitMap_ZS[iDisk] = new TH2S(buffer, buffer2, PhiSegPerMod*ModPerDisk, -0.5, PhiSegPerMod*ModPerDisk-0.5, RstripPerMod, -0.5, RstripPerMod-0.5);//1536*8 bins
     hSumContents.hHitMap_ZS[iDisk]->GetXaxis()->SetNdivisions(-ModPerDisk, false);
     hSumContents.hHitMap_ZS[iDisk]->GetYaxis()->SetNdivisions(-RstripPerMod, false);
     hSumContents.hHitMap_ZS[iDisk]->SetStats(false);
@@ -608,7 +608,7 @@ void fstBuilder::initialize(int argc, char *argv[])
     hSumContents.hRanNoise[iDisk]->GetXaxis()->SetNdivisions(-ModPerDisk,false);
     hSumContents.hRanNoise[iDisk]->SetStats(false);
     hSumContents.hRanNoise[iDisk]->GetXaxis()->SetTitle("Channel Geometry ID");
-    hSumContents.hRanNoise[iDisk]->GetYaxis()->SetTitle("ADC - Pedestal [ADC counts]");
+    hSumContents.hRanNoise[iDisk]->GetYaxis()->SetTitle("Random Noise [ADC counts]");
     hSumContents.hRanNoise[iDisk]->GetYaxis()->SetTitleOffset(1.1);
 
     sprintf(buffer,"CommonModeNoisePerAPVDisk%d", iDisk+1);
@@ -886,7 +886,7 @@ void fstBuilder::initialize(int argc, char *argv[])
   for(int i=0; i<totAPV; i++) {
     for(int iRstrip = 0; iRstrip < 4; ++iRstrip) {
       sprintf( buffer, "APV%d Group%d", i, iRstrip);
-      hCmnTemp.hCmnPerChip[i][iRstrip] = new TH1S(buffer, "Common mode noise per APV chip per Rstrip", 256, 0, 4096);
+      hCmnTemp.hCmnPerChip[i][iRstrip] = new TH1S(buffer, "Common mode noise per APV chip per Rstrip", 512, -4096, 4096);
     }
   }
 }
@@ -895,361 +895,385 @@ void fstBuilder::initialize(int argc, char *argv[])
 // ------------------------------------------
 void fstBuilder::startrun(daqReader *rdr) 
 {
-  LOG ( NOTE, "fstBuilder starting run #%d", rdr->run );
-  resetAllPlots();
-  run = rdr->run; 
+    LOG ( "JEFF", "fstBuilder starting run #%d", rdr->run );
+    PCP;
+    resetAllPlots();
+    PCP;
+    run = rdr->run; 
 
-  for ( int i=0; i<totCh; i++ ) 
-  {
-    aVals[i]           = 0;
-    //      rmsVals[i] = 0;
-    numVals[i]         = 0;
-    numOverOneSig[i]   = 0;
-    oldStdDevs[i]      = 0;
-    ranStdDevs[i]      = 0;
-    isChannelBad[i]    = false;
-    runningAvg[i]      = 0;
-    runningStdDevSq[i] = 0;
-    sumAdc[i]          = 0;
-    sum2Adc[i]         = 0;
-    couAdc[i]          = 0;
-  }
+    PCP;
 
-  //load external pedstal/RMS value for all channels
-  FILE *file;
-  char paraDir[256];
-  sprintf(paraDir, "%s/fst/fst_s1_pedestals.txt", clientdatadir);
-  // sprintf(paraDir, "/star/data01/pwg/sunxuhit/ForwardSiliconTracker/Data/FstInstallation/daqtest/fst_s1_pedestals.txt");
+    for ( int i=0; i<totCh; i++ ) 
+	{
+	    aVals[i]           = 0;
+	    //      rmsVals[i] = 0;
+	    numVals[i]         = 0;
+	    numOverOneSig[i]   = 0;
+	    oldStdDevs[i]      = 0;
+	    ranStdDevs[i]      = 0;
+	    isChannelBad[i]    = false;
+	    runningAvg[i]      = 0;
+	    runningStdDevSq[i] = 0;
+	    sumAdc[i]          = 0;
+	    sum2Adc[i]         = 0;
+	    couAdc[i]          = 0;
+	}
 
-  file = fopen(paraDir, "r");
-  if (file==0) {
-    LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
-    tableFound = false;
-    sprintf(paraDir, "%s/fst_s1_pedestals_local.txt", clientdatadir);
+    PCP;
+    //load external pedstal/RMS value for all channels
+    FILE *file;
+    char paraDir[256];
+    sprintf(paraDir, "%s/fst/fst_s1_pedestals.txt", clientdatadir);
+    // sprintf(paraDir, "/star/data01/pwg/sunxuhit/ForwardSiliconTracker/Data/FstInstallation/daqtest/fst_s1_pedestals.txt");
+
+    PCP;
+
     file = fopen(paraDir, "r");
-    if(file==0){
-      LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
-    }else{
-      //LOG(U_FST,"loading pedestals from %s ", paraDir);
-      while(!feof(file)) {
-	int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
-	float pp=0., rr=0., nn=0.;
-	char buff[256];
+    if (file==0) {
+	PCP;
+	LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+	tableFound = false;
+	sprintf(paraDir, "%s/fst_s1_pedestals_local.txt", clientdatadir);
+	file = fopen(paraDir, "r");
+	if(file==0){
+	    LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+	}else{
+	    PCP;
+	    //LOG(U_FST,"loading pedestals from %s ", paraDir);
+	    while(!feof(file)) {
+		int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
+		float pp=0., rr=0., nn=0.;
+		char buff[256];
 
-	if(fgets(buff,sizeof(buff),file) == 0) continue ;
-	switch(buff[0]) {
-	  case '#' :
-	  case '!' :
-	  case '*' :
-	  case '/' :
-	  case '.' :
-	    continue ;
+		if(fgets(buff,sizeof(buff),file) == 0) continue ;
+		switch(buff[0]) {
+		case '#' :
+		case '!' :
+		case '*' :
+		case '/' :
+		case '.' :
+		    continue ;
+		}
+		int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
+		if(ret!=8) continue;
+
+		// if(tbIdxTemp==defTb) { //only take the default time bin as sample
+		int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+		int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+		int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+		fstPedestal[tbIdxTemp][glbElecChanIdxTemp] = pp; // pedestal
+		fstRmsNoise[tbIdxTemp][glbElecChanIdxTemp] = rr; // total noise
+		fstRanNoise[tbIdxTemp][glbElecChanIdxTemp] = nn; // random noise
+		// }
+	    }
+	    tableFound = true;
+	    fclose(file);
+	    PCP;
 	}
-	int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
-	if(ret!=8) continue;
-
-	// if(tbIdxTemp==defTb) { //only take the default time bin as sample
-	  int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
-	  int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
-	  int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
-	  fstPedestal[tbIdxTemp][glbElecChanIdxTemp] = pp; // pedestal
-	  fstRmsNoise[tbIdxTemp][glbElecChanIdxTemp] = rr; // total noise
-	  fstRanNoise[tbIdxTemp][glbElecChanIdxTemp] = nn; // random noise
-	// }
-      }
-      tableFound = true;
-      fclose(file);
+	PCP;
     }
-  }
-  else {
-    //LOG(U_FST,"loading pedestals from %s ", paraDir);
-    while(!feof(file)) {
-      int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
-      float pp=0., rr=0., nn=0.;
-      char buff[256];
+    else {
+	PCP;
+	//LOG(U_FST,"loading pedestals from %s ", paraDir);
+	while(!feof(file)) {
+	    int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
+	    float pp=0., rr=0., nn=0.;
+	    char buff[256];
 
-      if(fgets(buff,sizeof(buff),file) == 0) continue ;
-      switch(buff[0]) {
-	case '#' :
-	case '!' :
-	case '*' :
-	case '/' :
-	case '.' :
-	  continue ;
-      }
-      int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
-      if(ret!=8) continue;
+	    if(fgets(buff,sizeof(buff),file) == 0) continue ;
+	    switch(buff[0]) {
+	    case '#' :
+	    case '!' :
+	    case '*' :
+	    case '/' :
+	    case '.' :
+		continue ;
+	    }
+	    int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
+	    if(ret!=8) continue;
 
-      // if(tbIdxTemp==defTb) { //only take the default time bin as sample
-	int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
-	int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
-	int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
-	fstPedestal[tbIdxTemp][glbElecChanIdxTemp] = pp; // pedestal
-	fstRmsNoise[tbIdxTemp][glbElecChanIdxTemp] = rr; // total noise
-	fstRanNoise[tbIdxTemp][glbElecChanIdxTemp] = nn; // random noise
-      // }
+	    // if(tbIdxTemp==defTb) { //only take the default time bin as sample
+	    int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+	    int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+	    int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+	    fstPedestal[tbIdxTemp][glbElecChanIdxTemp] = pp; // pedestal
+	    fstRmsNoise[tbIdxTemp][glbElecChanIdxTemp] = rr; // total noise
+	    fstRanNoise[tbIdxTemp][glbElecChanIdxTemp] = nn; // random noise
+	    // }
+	}
+	tableFound = true;
+	fclose(file);
+	PCP;
     }
-    tableFound = true;
-    fclose(file);
-  }
 
-  sprintf(paraDir, "%s/fst/fst_s2_pedestals.txt", clientdatadir);
-  // sprintf(paraDir, "/star/data01/pwg/sunxuhit/ForwardSiliconTracker/Data/FstInstallation/daqtest/fst_s2_pedestals.txt");
+    PCP;
+    sprintf(paraDir, "%s/fst/fst_s2_pedestals.txt", clientdatadir);
+    // sprintf(paraDir, "/star/data01/pwg/sunxuhit/ForwardSiliconTracker/Data/FstInstallation/daqtest/fst_s2_pedestals.txt");
 
-  FILE *file0;
+    PCP;
 
-  file0 = fopen(paraDir, "r");
-  if (file0==0) {
-    LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
-    tableFound = false;
-    sprintf(paraDir, "%s/fst_s2_pedestals_local.txt", clientdatadir);
+    FILE *file0;
+
     file0 = fopen(paraDir, "r");
-    if(file0==0){
-      LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
-    }else{
-      //LOG(U_FST,"loading pedestals from %s ", paraDir);
-      while(!feof(file0)) {
-	int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
-	float pp=0., rr=0., nn=0.;
-	char buff[256];
+    if (file0==0) {
+	PCP;
+	LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+	tableFound = false;
+	sprintf(paraDir, "%s/fst_s2_pedestals_local.txt", clientdatadir);
+	file0 = fopen(paraDir, "r");
+	if(file0==0){
+	    LOG(WARN,"ped::external table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
+	}else{
+	    //LOG(U_FST,"loading pedestals from %s ", paraDir);
+	    while(!feof(file0)) {
+		int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
+		float pp=0., rr=0., nn=0.;
+		char buff[256];
 
-	if(fgets(buff,sizeof(buff),file0) == 0) continue ;
-	switch(buff[0]) {
-	  case '#' :
-	  case '!' :
-	  case '*' :
-	  case '/' :
-	  case '.' :
-	    continue ;
+		if(fgets(buff,sizeof(buff),file0) == 0) continue ;
+		switch(buff[0]) {
+		case '#' :
+		case '!' :
+		case '*' :
+		case '/' :
+		case '.' :
+		    continue ;
+		}
+		int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
+		if(ret!=8) continue;
+
+		// if(tbIdxTemp==defTb) { //only take the defualt time bin as sample
+		int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+		int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+		int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+		fstPedestal[tbIdxTemp][glbElecChanIdxTemp] = pp; // pedestal
+		fstRmsNoise[tbIdxTemp][glbElecChanIdxTemp] = rr; // total noise
+		fstRanNoise[tbIdxTemp][glbElecChanIdxTemp] = nn; // random noise
+		// }
+	    }
+	    tableFound = true;
+	    fclose(file0);
 	}
-	int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
-	if(ret!=8) continue;
-
-	// if(tbIdxTemp==defTb) { //only take the defualt time bin as sample
-	  int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
-	  int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
-	  int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
-	  fstPedestal[tbIdxTemp][glbElecChanIdxTemp] = pp; // pedestal
-	  fstRmsNoise[tbIdxTemp][glbElecChanIdxTemp] = rr; // total noise
-	  fstRanNoise[tbIdxTemp][glbElecChanIdxTemp] = nn; // random noise
-	// }
-      }
-      tableFound = true;
-      fclose(file0);
+	PCP;
     }
-  }
-  else {
-    //LOG(U_FST,"loading pedestals from %s ", paraDir);
-    while(!feof(file0)) {
-      int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
-      float pp=0., rr=0., nn=0.;
-      char buff[256];
+    else {
+	PCP;
+	//LOG(U_FST,"loading pedestals from %s ", paraDir);
+	while(!feof(file0)) {
+	    int rdoIdxTemp=0, armIdxTemp=0, apvIdxTemp=0, chanIdxTemp=0, tbIdxTemp=0;
+	    float pp=0., rr=0., nn=0.;
+	    char buff[256];
 
-      if(fgets(buff,sizeof(buff),file0) == 0) continue ;
-      switch(buff[0]) {
-	case '#' :
-	case '!' :
-	case '*' :
-	case '/' :
-	case '.' :
-	  continue ;
-      }
-      int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
-      if(ret!=8) continue;
+	    if(fgets(buff,sizeof(buff),file0) == 0) continue ;
+	    switch(buff[0]) {
+	    case '#' :
+	    case '!' :
+	    case '*' :
+	    case '/' :
+	    case '.' :
+		continue ;
+	    }
+	    int ret = sscanf(buff,"%d %d %d %d %d %f %f %f",&rdoIdxTemp,&armIdxTemp,&apvIdxTemp,&chanIdxTemp,&tbIdxTemp,&pp,&rr,&nn);
+	    if(ret!=8) continue;
 
-      // if(tbIdxTemp==defTb) { //only take the defualt time bin as sample
-	int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
-	int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
-	int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
-	fstPedestal[tbIdxTemp][glbElecChanIdxTemp] = pp; // pedestal
-	fstRmsNoise[tbIdxTemp][glbElecChanIdxTemp] = rr; // total noise
-	fstRanNoise[tbIdxTemp][glbElecChanIdxTemp] = nn; // random noise
-      // }
+	    // if(tbIdxTemp==defTb) { //only take the defualt time bin as sample
+	    int portIdxTemp        = apvIdxTemp/ApvRoPerPort; // 0: 0-7 | 1: 12-19
+	    int refApvIdxTemp      = apvIdxTemp - portIdxTemp*ApvNumOffset + portIdxTemp*ApvPerPort; // 0-15
+	    int glbElecChanIdxTemp = (rdoIdxTemp-1)*ChPerRdo + armIdxTemp*ChPerArm + refApvIdxTemp*ChPerApv + chanIdxTemp; // 0-36863
+	    fstPedestal[tbIdxTemp][glbElecChanIdxTemp] = pp; // pedestal
+	    fstRmsNoise[tbIdxTemp][glbElecChanIdxTemp] = rr; // total noise
+	    fstRanNoise[tbIdxTemp][glbElecChanIdxTemp] = nn; // random noise
+	    // }
+	}
+	tableFound = true;
+	fclose(file0);
+	PCP;
     }
-    tableFound = true;
-    fclose(file0);
-  }
 
-  /*
-  // will active once needed
-  sprintf(paraDir, "%s/fst/fst_apv_bad.txt", clientdatadir);
-  //LOG(U_FST,"Loading file %s",paraDir);
-  FILE *file1;
-  file1 = fopen(paraDir,"rb");
-  if(file1==0){
+    /*
+    // will active once needed
+    sprintf(paraDir, "%s/fst/fst_apv_bad.txt", clientdatadir);
+    //LOG(U_FST,"Loading file %s",paraDir);
+    FILE *file1;
+    file1 = fopen(paraDir,"rb");
+    if(file1==0){
     LOG(WARN,"ped::misconfigured apv table can't open input file \"%s\" [%s]", paraDir, strerror(errno));
-  }else{
+    }else{
     int c=0, ret=-1;
     long offset=0;
     int runTemp=-1,rdoTemp=-1,armTemp=-1,groupTemp=-1,apvTemp=-1,tmp1=-1;
     fseek(file1,0,SEEK_END);
     while(1){
-      c = fgetc(file1);
-      char buff[256];
-      if(c=='\n'){
-	offset = ftell(file1);
-	fgets(buff,256,file1);
-	fseek(file1,offset-2,SEEK_SET);
-	ret = sscanf(buff,"%d %d %d %d %d %d",&runTemp,&rdoTemp,&armTemp,&groupTemp,&apvTemp,&tmp1);
-	if(ret!=6){ 
-	  // LOG(U_FST,"Wrong input:%s",buff);
-	}else{
-	  if(runTemp<run&&runTemp>10000000) break;
-	  else if(runTemp==run){
-	    LOG(DBG,"misconfigure mask rdo %d arm %d apv %d", rdoTemp, armTemp, groupTemp*ApvPerPort+apvTemp);
-	    int apvId = (rdoTemp-1)*ApvPerRdo + armTemp*ApvPerArm + groupTemp*ApvPerPort + apvTemp;
-	    for(int i=0;i<ChPerApv;i++){
-	      int chId  = apvId*ChPerApv+i;
-	      int geoId = fstGeomMapping[chId];
-	      isChannelBad[geoId] = true;
-	    }
-	  }
-	}
-      }else if(fseek(file1,-2,SEEK_CUR)==-1){
-	fseek(file1,0,SEEK_SET);
-	fgets(buff,256,file1);
+    c = fgetc(file1);
+    char buff[256];
+    if(c=='\n'){
+    offset = ftell(file1);
+    fgets(buff,256,file1);
+    fseek(file1,offset-2,SEEK_SET);
+    ret = sscanf(buff,"%d %d %d %d %d %d",&runTemp,&rdoTemp,&armTemp,&groupTemp,&apvTemp,&tmp1);
+    if(ret!=6){ 
+    // LOG(U_FST,"Wrong input:%s",buff);
+    }else{
+    if(runTemp<run&&runTemp>10000000) break;
+    else if(runTemp==run){
+    LOG(DBG,"misconfigure mask rdo %d arm %d apv %d", rdoTemp, armTemp, groupTemp*ApvPerPort+apvTemp);
+    int apvId = (rdoTemp-1)*ApvPerRdo + armTemp*ApvPerArm + groupTemp*ApvPerPort + apvTemp;
+    for(int i=0;i<ChPerApv;i++){
+    int chId  = apvId*ChPerApv+i;
+    int geoId = fstGeomMapping[chId];
+    isChannelBad[geoId] = true;
+    }
+    }
+    }
+    }else if(fseek(file1,-2,SEEK_CUR)==-1){
+    fseek(file1,0,SEEK_SET);
+    fgets(buff,256,file1);
 
-	ret = sscanf(buff,"%d %d %d %d %d %d",&runTemp,&rdoTemp,&armTemp,&groupTemp,&apvTemp,&tmp1);
-	if(ret!=6) LOG(WARN,"Wrong input:%s",buff);
-	else{
-	  if(runTemp<run&&runTemp>10000000) break;
-	  else if(runTemp==run){
-	    int apvId = (rdoTemp-1)*ApvPerRdo + armTemp*ApvPerArm + groupTemp*ApvPerPort + apvTemp;
-	    LOG(DBG,"misconfigure mask rdo %d arm %d apv %d", rdoTemp, armTemp, groupTemp*ApvPerPort+apvTemp);
-	    for(int i=0;i<ChPerApv;i++){
-	      int chId  = apvId*ChPerApv+i;
-	      int geoId = fstGeomMapping[chId];
-	      isChannelBad[geoId] = true;
-	    }
-	  }
-	}
-	break;
-      }
+    ret = sscanf(buff,"%d %d %d %d %d %d",&runTemp,&rdoTemp,&armTemp,&groupTemp,&apvTemp,&tmp1);
+    if(ret!=6) LOG(WARN,"Wrong input:%s",buff);
+    else{
+    if(runTemp<run&&runTemp>10000000) break;
+    else if(runTemp==run){
+    int apvId = (rdoTemp-1)*ApvPerRdo + armTemp*ApvPerArm + groupTemp*ApvPerPort + apvTemp;
+    LOG(DBG,"misconfigure mask rdo %d arm %d apv %d", rdoTemp, armTemp, groupTemp*ApvPerPort+apvTemp);
+    for(int i=0;i<ChPerApv;i++){
+    int chId  = apvId*ChPerApv+i;
+    int geoId = fstGeomMapping[chId];
+    isChannelBad[geoId] = true;
+    }
+    }
+    }
+    break;
+    }
     }
     fclose(file1);
-  }
+    }
 
-  sprintf(paraDir, "%s/fst/fst_bad_channels.txt", clientdatadir);
-  //LOG(U_FST,"Loading file %s",paraDir);
-  FILE *file2;
-  file2 = fopen(paraDir,"rb");
-  if(file2==0){
+    sprintf(paraDir, "%s/fst/fst_bad_channels.txt", clientdatadir);
+    //LOG(U_FST,"Loading file %s",paraDir);
+    FILE *file2;
+    file2 = fopen(paraDir,"rb");
+    if(file2==0){
     LOG(WARN,"ped::fst bad channel list can't open input file \"%s\" [%s]", paraDir, strerror(errno));
-  }else{
+    }else{
     while(!feof(file2)) {
-      int r, arm, apv, ch  ;
-      int apvId, chId, geoId;
-      char buff[256] ;
+    int r, arm, apv, ch  ;
+    int apvId, chId, geoId;
+    char buff[256] ;
 
-      if(fgets(buff,sizeof(buff),file2) == 0) continue ;
+    if(fgets(buff,sizeof(buff),file2) == 0) continue ;
 
-      switch(buff[0]) {
-	case '#' :
-	case '!' :
-	case '*' :
-	case '/' :
-	case '.' :
-	  continue ;
-      }
+    switch(buff[0]) {
+    case '#' :
+    case '!' :
+    case '*' :
+    case '/' :
+    case '.' :
+    continue ;
+    }
 
-      int ret = sscanf(buff,"%d %d %d %d",&r,&arm,&apv,&ch) ;
-      if(ret != 4) continue ;
+    int ret = sscanf(buff,"%d %d %d %d",&r,&arm,&apv,&ch) ;
+    if(ret != 4) continue ;
 
-      //check for negative 0!
-      char ca[4][16] ;
-      char n[4] ;
-      memset(n,0,sizeof(n)) ;
-      sscanf(buff,"%s %s %s %s",ca[0],ca[1],ca[2],ca[3]) ;
-      for(int i=0;i<4;i++) {
-	int dummy ;
-	if(sscanf(ca[i],"%d",&dummy)!=1) continue ;
-	if(dummy==0) {
-	  if(index(ca[i],'-')) n[i] = '-' ;
-	  else n[i] = '+' ;
-	}
-	else {
-	  if(dummy<0) n[i] = '-' ;
-	  else n[i] = '+' ;
-	}
-      }
+    //check for negative 0!
+    char ca[4][16] ;
+    char n[4] ;
+    memset(n,0,sizeof(n)) ;
+    sscanf(buff,"%s %s %s %s",ca[0],ca[1],ca[2],ca[3]) ;
+    for(int i=0;i<4;i++) {
+    int dummy ;
+    if(sscanf(ca[i],"%d",&dummy)!=1) continue ;
+    if(dummy==0) {
+    if(index(ca[i],'-')) n[i] = '-' ;
+    else n[i] = '+' ;
+    }
+    else {
+    if(dummy<0) n[i] = '-' ;
+    else n[i] = '+' ;
+    }
+    }
 
-      if(r<0) r *= -1 ;
-      if(arm < 0) arm *= -1 ;
-      if(apv < 0) apv *= -1 ;
-      if(ch < 0) ch *= -1 ;
+    if(r<0) r *= -1 ;
+    if(arm < 0) arm *= -1 ;
+    if(apv < 0) apv *= -1 ;
+    if(ch < 0) ch *= -1 ;
 
-      if(n[1]=='-') {	//nix ARM
-	for(int a=0;a<ApvPerArm;a++) {
-	  for(int c=0;c<ChPerApv;c++) {
-	    apvId = (r-1)*ArmPerRdo*ApvPerArm + arm*ApvPerArm + a;
-	    chId  = apvId*ChPerApv + c;
-	    geoId = fstGeomMapping[chId];
-	    isChannelBad[geoId-1] = true;
-	  }
-	  LOG(DBG,"mask rdo %d arm %d apv %d", r, arm, a);
-	}
-      }
-      else if(n[2]=='-') {	//nix APV
-	for(int c=0;c<ChPerApv;c++) {
+    if(n[1]=='-') {	//nix ARM
+    for(int a=0;a<ApvPerArm;a++) {
+    for(int c=0;c<ChPerApv;c++) {
+    apvId = (r-1)*ArmPerRdo*ApvPerArm + arm*ApvPerArm + a;
+    chId  = apvId*ChPerApv + c;
+    geoId = fstGeomMapping[chId];
+    isChannelBad[geoId-1] = true;
+    }
+    LOG(DBG,"mask rdo %d arm %d apv %d", r, arm, a);
+    }
+    }
+    else if(n[2]=='-') {	//nix APV
+    for(int c=0;c<ChPerApv;c++) {
 
-	  apvId = (r-1)*ArmPerRdo*ApvPerArm + arm*ApvPerArm + apv;
-	  chId  = apvId*ChPerApv + c;
-	  geoId = fstGeomMapping[chId];
-	  isChannelBad[geoId-1] = true;
-	}
-	LOG(DBG,"mask rdo %d arm %d apv %d", r, arm, apv);
-      }
-      else {
-	apvId = (r-1)*ArmPerRdo*ApvPerArm + arm*ApvPerArm + apv;
-	chId  = apvId*ChPerApv + ch;
-	geoId = fstGeomMapping[chId];
-	isChannelBad[geoId] = true;
-	LOG(DBG,"mask rdo %d arm %d apv %d ch %d", r, arm, apv, ch);
-      }
+    apvId = (r-1)*ArmPerRdo*ApvPerArm + arm*ApvPerArm + apv;
+    chId  = apvId*ChPerApv + c;
+    geoId = fstGeomMapping[chId];
+    isChannelBad[geoId-1] = true;
+    }
+    LOG(DBG,"mask rdo %d arm %d apv %d", r, arm, apv);
+    }
+    else {
+    apvId = (r-1)*ArmPerRdo*ApvPerArm + arm*ApvPerArm + apv;
+    chId  = apvId*ChPerApv + ch;
+    geoId = fstGeomMapping[chId];
+    isChannelBad[geoId] = true;
+    LOG(DBG,"mask rdo %d arm %d apv %d ch %d", r, arm, apv, ch);
+    }
     }
     fclose(file2);
-  }
+    }
 
-  sprintf(paraDir, "%s/fst/fst_noisy_chips.txt", clientdatadir);
-  //LOG(U_FST,"Loading file %s",paraDir);
-  FILE *file3;
-  file3 = fopen(paraDir,"rb");
-  if(file3==0){
+    sprintf(paraDir, "%s/fst/fst_noisy_chips.txt", clientdatadir);
+    //LOG(U_FST,"Loading file %s",paraDir);
+    FILE *file3;
+    file3 = fopen(paraDir,"rb");
+    if(file3==0){
     LOG(WARN,"ped::fst noisy chip list can't open input file \"%s\" [%s]", paraDir, strerror(errno));
-  }else{
+    }else{
     while(!feof(file3)) {
-      int r, arm, apv, ch  ;
-      int apvId;
-      char buff[256] ;
+    int r, arm, apv, ch  ;
+    int apvId;
+    char buff[256] ;
 
-      if(fgets(buff,sizeof(buff),file3) == 0) continue ;
+    if(fgets(buff,sizeof(buff),file3) == 0) continue ;
 
-      switch(buff[0]) {
-	case '#' :
-	case '!' :
-	case '*' :
-	case '/' :
-	case '.' :
-	  continue ;
-      }
+    switch(buff[0]) {
+    case '#' :
+    case '!' :
+    case '*' :
+    case '/' :
+    case '.' :
+    continue ;
+    }
 
-      int ret = sscanf(buff,"%d %d %d",&r,&arm,&apv) ;
-      if(ret != 3) continue ;
+    int ret = sscanf(buff,"%d %d %d",&r,&arm,&apv) ;
+    if(ret != 3) continue ;
 
-      apvId = (r-1)*ArmPerRdo*ApvPerArm + arm*ApvPerArm + apv;
-      isNoisyApv[apvId] = true;
-      LOG(DBG,"mask rdo %d arm %d apv %d", r, arm, apv);
+    apvId = (r-1)*ArmPerRdo*ApvPerArm + arm*ApvPerArm + apv;
+    isNoisyApv[apvId] = true;
+    LOG(DBG,"mask rdo %d arm %d apv %d", r, arm, apv);
 
     }
     fclose(file3);
-  }
-  */
+    }
+    */
 
-  errorMsg->SetText("No Error Message");    
-  sumHistogramsFilled  = 0;  
-  t_2min               = time(NULL);
-  t_10min              = time(NULL);
-  t_120min             = time(NULL);
+    PCP;
+    errorMsg->SetText("No Error Message");    
+    PCP;
+    sumHistogramsFilled  = 0;  
+    t_2min               = time(NULL);
+    t_10min              = time(NULL);
+    t_120min             = time(NULL);
+
+    PCP;
 
 }
 
@@ -1357,7 +1381,8 @@ void fstBuilder::event(daqReader *rdr)
 	maxTimeBin_zs[glbGeomChanId_zs] = f_zs[i].tb;
       }
       // if ( flag < 8) { // select seed hits & recovery hits
-      if ( flag == 1 || flag == 3 || flag == 5 || flag == 7) { // select seed hits only
+      // if ( flag == 1 || flag == 3 || flag == 5 || flag == 7) { // select seed hits only
+      if ( flag == 7) { // select seed hits only
 	cou_zs[f_zs[i].ch]++;
       }
     }//end current APV loop
@@ -1400,7 +1425,7 @@ void fstBuilder::event(daqReader *rdr)
       int sigElecChanId = lclElecChanId%ChPerApv;                                        // 0-127
       int glbSecIdx     = (rdoIdx-1)*SecPerRdo + armIdx*SecPerArm + refApvIdx/ApvPerSec; // 0-71
 
-      float ran   = ranStdDevs[geoIdx];
+      float ran = ranStdDevs[geoIdx];
 
       //ZS data
       if( maxAdc_zs[geoIdx] > zsCut*ran && ran > minRanVal && ran < maxRanVal) {//roughly cut
@@ -1786,7 +1811,7 @@ void fstBuilder::event(daqReader *rdr)
 
   //getting MPV value and CM noise every 50 evts for each section
   //Updating CMN every 1000 non-ZS events
-  if( !(evtCt_nonZS%500) && dd )
+  if( !(evtCt_nonZS%200) && dd )
   {
     // cout << "evtCt_nonZS = " << evtCt_nonZS << endl;
     // cout << "Updating CMN!" << endl;
@@ -1824,7 +1849,7 @@ void fstBuilder::event(daqReader *rdr)
       couAdc[geoIdx]  = 0;
     }
 
-    cout << "evtCt = " << evtCt << ", evtCt_ZS = " << evtCt_ZS << ", evtCt_nonZS = " << evtCt_nonZS << endl;
+    // cout << "evtCt = " << evtCt << ", evtCt_ZS = " << evtCt_ZS << ", evtCt_nonZS = " << evtCt_nonZS << endl;
   }
 
   // Reset rolling histos if necessary..
@@ -2088,6 +2113,10 @@ void fstBuilder::stoprun(daqReader *rdr)
       cmNoise[i][iRstrip] = 0;   
     }
   }
+
+  // cout << "evtCt = " << evtCt << ", evtCt_ZS = " << evtCt_ZS << ", evtCt_nonZS = " << evtCt_nonZS << endl;
+  // cout << "ZS Hit Counts: Disk1: " << hSumContents.hPolyHitMap_ZS[0]->GetEntries() << ", Disk2: " << hSumContents.hPolyHitMap_ZS[1]->GetEntries() << ", Disk3: " << hSumContents.hPolyHitMap_ZS[2]->GetEntries() << endl;
+  // cout << "non-ZS Hit Counts: Disk1: " << hSumContents.hPolyHitMap[0]->GetEntries() << ", Disk2: " << hSumContents.hPolyHitMap[1]->GetEntries() << ", Disk3: " << hSumContents.hPolyHitMap[2]->GetEntries() << endl;
 }
 
 void fstBuilder::main(int argc, char *argv[])
