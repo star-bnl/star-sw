@@ -1897,7 +1897,8 @@ int itpcInterpreter::ana_triggered(u_int *data, u_int *data_end)
 				}
 			}
 #endif
-			//soft_err |= 0x100 ;
+			// 26-Jan-2022: enabling
+			soft_err |= 0x100 ;
 			//err |= 0x400 ;
 			//goto done ;
 		}
