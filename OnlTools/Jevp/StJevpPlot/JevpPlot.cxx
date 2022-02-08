@@ -589,7 +589,12 @@ void JevpPlot::draw()
 	if(dimension == 1) {
 	    if(logy) {
 		if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(10.0);
-		if(curr->histo->GetMinimum() == 0.0) curr->histo->SetMinimum(1.0);
+		if(external_miny == -9999) {
+		    float max = curr->histo->GetMaximum();
+		    if(max <= 0.0) max = 10;
+		    float min = max / 10000;
+		    curr->histo->SetMinimum(min);
+		}
 	    }
 	    else {
 		if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(1.0);
