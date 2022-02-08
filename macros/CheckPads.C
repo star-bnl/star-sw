@@ -51,7 +51,7 @@
   sort AliveFEE2.list > AliveFEE.sorted
   MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
   sort AliveFeeRuns | tee AliveFeeRuns.sorted
-  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XXII.sorted
+  cat *Runs.sorted | sort | tee DeadOrAlived_RunXXII.sorted
 
 
 */
