@@ -40,8 +40,27 @@ public:
     void setRunHist(bool flag =false);
     void setPedCutFlag(bool flag =false);
     void setPedCut(float pedCut = 3.0);
-    // Get CVS
-    //virtual const char *GetCVS() const;
+
+    // ped, rms, ran, gain
+    struct pedNoiseData_t {
+        Int_t n;
+        Float_t ped;
+        Float_t rms;
+        Float_t ran;
+
+        pedNoiseData_t( int nIn=0, float p=0, float r=0, float d=0 ) : n(nIn), ped(p), rms(r), ran{d} { /* */ };
+    };
+    typedef std::vector< pedNoiseData_t > pedNoiseDataVec_t;
+    pedNoiseDataVec_t mPedVec;
+    // cmn
+    struct cmNoiseData_t {
+        Int_t n;
+        Float_t cmn;
+
+        cmNoiseData_t( int nIn=0, float c=0 ) : n(nIn), cmn(c) { /* */ };
+    };
+    typedef std::vector< cmNoiseData_t > cmNoiseDataVec_t;
+    cmNoiseDataVec_t mCmnVec; 
 
 protected:
     // mask for which time bins to save
@@ -72,26 +91,6 @@ protected:
     std::vector< int > mMathCouRanVec;
 
     Int_t evtIdx; 
-    // ped, rms, ran, gain
-    struct pedNoiseData_t {
-        Int_t n;
-        Float_t ped;
-        Float_t rms;
-        Float_t ran;
-
-        pedNoiseData_t( int nIn=0, float p=0, float r=0, float d=0 ) : n(nIn), ped(p), rms(r), ran{d} { /* */ };
-    };
-    typedef std::vector< pedNoiseData_t > pedNoiseDataVec_t;
-    pedNoiseDataVec_t mPedVec;
-    // cmn
-    struct cmNoiseData_t {
-        Int_t n;
-        Float_t cmn;
-
-        cmNoiseData_t( int nIn=0, float c=0 ) : n(nIn), cmn(c) { /* */ };
-    };
-    typedef std::vector< cmNoiseData_t > cmNoiseDataVec_t;
-    cmNoiseDataVec_t mCmnVec; 
    
     // functions that actually do the saving
     Int_t saveToFile();

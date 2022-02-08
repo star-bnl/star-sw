@@ -39,11 +39,6 @@ public:
   Int_t Make();                      		// invoked for every event
   Int_t Finish();                    		// called once at the end
 
-protected:
-  TFile* myRootFile;
-  TTree *fstRawHitTree;
-  TTree *fstHitTree;
-
   struct rawHitInfo {
 	int channelId, geoId, wedge, sensor, phistrip, rstrip, maxTimeBin, rdo, arm, apv, channel, idTruth, seedHitFlag, EventId;
 	float charge[kFstNumTimeBins], chargeErr[kFstNumTimeBins];
@@ -53,6 +48,11 @@ protected:
 	int hitId, wedge, sensor, apv, idTruth, EventId, maxTimeBin, clusteringType, nRawHits, nRawHitsR, nRawHitsPhi;
 	float meanPhiStrip, meanRStrip, localR, localPhi, localZ, x, y, z, charge, chargeErr;
   } fstHit;
+
+protected:
+  TFile* myRootFile;
+  TTree *fstRawHitTree;
+  TTree *fstHitTree;
 
   //position
   TH2S* rawHitMap[kFstNumSensors];  // raw hit phistrip vs. rstrip per sensor
