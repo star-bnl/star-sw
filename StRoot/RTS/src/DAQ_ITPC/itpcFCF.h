@@ -36,7 +36,7 @@ struct daq_dta ;
 
 class itpc_fcf_c : public itpcPed {
 public:
-	itpc_fcf_c(int off = 0) ;
+	itpc_fcf_c() ;
 	~itpc_fcf_c() ;
 
 

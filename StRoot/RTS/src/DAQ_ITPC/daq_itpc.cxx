@@ -228,7 +228,7 @@ daq_dta *daq_itpc::handle_cld_sim(int sec)
 
 
 		if(fcf[s]==0) {
-		  fcf[s] = new itpc_fcf_c (1);	// implicit run start within constructor
+			fcf[s] = new itpc_fcf_c ;	// implicit run start within constructor
 
 			fcf[s]->my_id = s ;
 			fcf[s]->sector_id = s ;
