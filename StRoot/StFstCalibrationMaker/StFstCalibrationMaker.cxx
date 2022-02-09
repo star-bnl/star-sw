@@ -31,7 +31,7 @@
 const string StFstCalibrationMaker::sectionLabel[72]={  "1I","1O","2I","2O","3I","3O","4I","4O","5I","5O","6I","6O","7I","7O","8I","8O","9I","9O","10I","10O","11I","11O","12I","12O","13I","13O","14I","14O","15I","15O","16I","16O","17I","17O","18I","18O","19I","19O","20I","20O","21I","21O","22I","22O","23I","23O","24I","24O","25I","25O","26I","26O","27I","27O","28I","28O","29I","29O","30I","30O","31I","31O","32I","32O","33I","33O","34I","34O","35I","35O","36I","36O"};
 
 // constructor
-StFstCalibrationMaker::StFstCalibrationMaker( const char* name ) : StMaker( name ), mTimeBinMask(0xFF), mRunHist(true), mDoPedCut(true), evtIdx(0), mHasFinished(0), mFstDb(0) {
+StFstCalibrationMaker::StFstCalibrationMaker( const char* name ) : StMaker( name ), mTimeBinMask(0xFF), mRunHist(true), mDoPedCut(true), evtIdx(0), mHasFinished(0), mFstDb(0), mDoOutput(false) {
   for(unsigned char iTb=0; iTb<kFstNumTimeBins; iTb++) {
     hist_meanPed[iTb]     = NULL;
     hist_rmsPed[iTb]      = NULL;
@@ -585,139 +585,142 @@ Int_t StFstCalibrationMaker::saveToFile()
 {
   Int_t ierr = kStOk;
 
-  //create output file
-  StIOMaker *ioMaker = (StIOMaker * )GetMaker("inputStream");
-  if (!ioMaker) {
-    gMessMgr->Warning() << "StFstCalibrationMaker::Init(): No StIOMaker" << endm;
-  }
+  if(mDoOutput)
+  {
+    //create output file
+    StIOMaker *ioMaker = (StIOMaker * )GetMaker("inputStream");
+    if (!ioMaker) {
+      LOG_WARN << "StFstCalibrationMaker::Init(): No StIOMaker" << endm;
+    }
 
-  TString filename = TString(ioMaker->GetFile());
-  int found = filename.Last('/');
-  if(found >= 0){
-    filename.Replace(0, found + 1, "");
-  }
-  found = filename.First(".");
-  if(found == 0) found = filename.Length();
+    TString filename = TString(ioMaker->GetFile());
+    int found = filename.Last('/');
+    if(found >= 0){
+      filename.Replace(0, found + 1, "");
+    }
+    found = filename.First(".");
+    if(found == 0) found = filename.Length();
 
-  TString mRootFilename = filename.Data();
-  TString mPedNoiseFilename_hist = filename.Data();
-  TString mCmNoiseFilename = filename.Data();    
-  TString mPedNoiseFilename_math = filename.Data();
+    TString mRootFilename = filename.Data();
+    TString mPedNoiseFilename_hist = filename.Data();
+    TString mCmNoiseFilename = filename.Data();    
+    TString mPedNoiseFilename_math = filename.Data();
 
-  mRootFilename.Replace(found, mRootFilename.Length() - found, ".fstCaliQa.root");
-  LOG_INFO << "FST Calibration QA File Name: " << mRootFilename << endm;
+    mRootFilename.Replace(found, mRootFilename.Length() - found, ".fstCaliQa.root");
+    LOG_INFO << "FST Calibration QA File Name: " << mRootFilename << endm;
 
-  //create QA file
-  myRootFile = new TFile(mRootFilename.Data(),"RECREATE");
-  if( !myRootFile ) {
-    LOG_WARN << "Error recreating file '" << mRootFilename << "'" << endl;
-    ierr = kStWarn;
-  }
-  //save calibration QA histograms
-  for(unsigned char iTB=0; iTB<kFstNumTimeBins; iTB++) {
-    myRootFile->WriteTObject(hist_meanPed[iTB]);
-    myRootFile->WriteTObject(hist_rmsPed[iTB]);
-    myRootFile->WriteTObject(hist_cmNoise[iTB]);
-    myRootFile->WriteTObject(hist_ranNoise[iTB]);
-    myRootFile->WriteTObject(hist_sumPed[iTB]);
-    myRootFile->WriteTObject(hist_sumRms[iTB]);
-    myRootFile->WriteTObject(hist_sumCmn[iTB]);
-    myRootFile->WriteTObject(hist_sumRan[iTB]);
-    myRootFile->WriteTObject(hist_adcSpectrum[iTB]);
-  }
-  myRootFile->Close();
+    //create QA file
+    TFile *myRootFile = new TFile(mRootFilename.Data(),"RECREATE");
+    if( !myRootFile ) {
+      LOG_WARN << "Error recreating file '" << mRootFilename << "'" << endl;
+      ierr = kStWarn;
+    }
+    //save calibration QA histograms
+    for(unsigned char iTB=0; iTB<kFstNumTimeBins; iTB++) {
+      myRootFile->WriteTObject(hist_meanPed[iTB]);
+      myRootFile->WriteTObject(hist_rmsPed[iTB]);
+      myRootFile->WriteTObject(hist_cmNoise[iTB]);
+      myRootFile->WriteTObject(hist_ranNoise[iTB]);
+      myRootFile->WriteTObject(hist_sumPed[iTB]);
+      myRootFile->WriteTObject(hist_sumRms[iTB]);
+      myRootFile->WriteTObject(hist_sumCmn[iTB]);
+      myRootFile->WriteTObject(hist_sumRan[iTB]);
+      myRootFile->WriteTObject(hist_adcSpectrum[iTB]);
+    }
+    myRootFile->Close();
 
-  //save pedestal and rms noise with mathematical method
-  mPedNoiseFilename_math.Replace(found, mPedNoiseFilename_math.Length() - found, ".fstPedNoise_math.dat");
-  LOG_INFO << "FST Pedestal and RMS File Name using math method: " << mPedNoiseFilename_math << endm;
+    //save pedestal and rms noise with mathematical method
+    mPedNoiseFilename_math.Replace(found, mPedNoiseFilename_math.Length() - found, ".fstPedNoise_math.dat");
+    LOG_INFO << "FST Pedestal and RMS File Name using math method: " << mPedNoiseFilename_math << endm;
 
-  std::ofstream fout_ped_math( mPedNoiseFilename_math.Data(), std::ios_base::out & std::ios_base::trunc );
-  if( !fout_ped_math ){
-    LOG_ERROR << "Error opening file '" << mPedNoiseFilename_math << "'" << endm;
-    ierr = kStFatal;
-  }
-  fout_ped_math.setf(std::ios::fixed, std::ios::floatfield);
-  fout_ped_math.precision(5);
-
-  for(int i=0; i<kFstNumTimeBins*kFstNumElecIds; i++) {
-    //obtain rdo/arm/apv/chan
-    int rdo = 0, arm = -1, apv = -1, chan = -1;
-    short timebin = i % kFstNumTimeBins;
-    int elecId    = i / kFstNumTimeBins;
-    rdo           = 1 + elecId/(kFstNumArmsPerRdo*kFstNumChanPerArm);
-    arm           = (elecId%(kFstNumArmsPerRdo*kFstNumChanPerArm))/kFstNumChanPerArm;
-    apv           = ((elecId%(kFstNumArmsPerRdo*kFstNumChanPerArm))%kFstNumChanPerArm)/kFstNumApvChannels;
-    chan          = ((elecId%(kFstNumArmsPerRdo*kFstNumChanPerArm))%kFstNumChanPerArm)%kFstNumApvChannels;
-
-    fout_ped_math << elecId << ' ' << rdo << ' ' << arm << ' ' << apv << ' ' << chan << ' ' << timebin << ' ' << mMathPedVec[i] << ' ' << mMathRmsVec[i] << ' ' << mMathRanVec[i] << endl;
-  }
-  fout_ped_math.close();
-
-  //create a link as fstPedNoiseTable.dat in 1st loop
-  if(!mDoPedCut) {
-    char cmd[128];
-    sprintf(cmd, "/bin/ln -f -s %s fstPedNoiseTable.dat", mPedNoiseFilename_math.Data());
-    system(cmd);
-  }
-
-  //save pedestal and rms noise with histogram method
-  if(mRunHist) {
-    mPedNoiseFilename_hist.Replace(found, mPedNoiseFilename_hist.Length() - found, ".fstPedNoise_hist.dat");
-    LOG_INFO << "FST Pedestal and RMS File Name using histogram method: " << mPedNoiseFilename_hist << endm;
-
-    std::ofstream fout_ped_hist( mPedNoiseFilename_hist.Data(), std::ios_base::out & std::ios_base::trunc );
-    if( !fout_ped_hist ){
-      LOG_ERROR << "Error opening file '" << mPedNoiseFilename_hist << "'" << endm;
+    std::ofstream fout_ped_math( mPedNoiseFilename_math.Data(), std::ios_base::out & std::ios_base::trunc );
+    if( !fout_ped_math ){
+      LOG_ERROR << "Error opening file '" << mPedNoiseFilename_math << "'" << endm;
       ierr = kStFatal;
     }
-    fout_ped_hist.setf(std::ios::fixed, std::ios::floatfield);
-    fout_ped_hist.precision(5);
+    fout_ped_math.setf(std::ios::fixed, std::ios::floatfield);
+    fout_ped_math.precision(5);
 
-    pedNoiseDataVec_t::iterator pedDataVecIter;
-    int idx = 0;
-    for( pedDataVecIter = mPedVec.begin(); pedDataVecIter != mPedVec.end() && !ierr; ++pedDataVecIter, ++idx ){
+    for(int i=0; i<kFstNumTimeBins*kFstNumElecIds; i++) {
       //obtain rdo/arm/apv/chan
       int rdo = 0, arm = -1, apv = -1, chan = -1;
-      short timebin = idx % kFstNumTimeBins;
-      int elecId    = idx / kFstNumTimeBins;
+      short timebin = i % kFstNumTimeBins;
+      int elecId    = i / kFstNumTimeBins;
       rdo           = 1 + elecId/(kFstNumArmsPerRdo*kFstNumChanPerArm);
       arm           = (elecId%(kFstNumArmsPerRdo*kFstNumChanPerArm))/kFstNumChanPerArm;
       apv           = ((elecId%(kFstNumArmsPerRdo*kFstNumChanPerArm))%kFstNumChanPerArm)/kFstNumApvChannels;
       chan          = ((elecId%(kFstNumArmsPerRdo*kFstNumChanPerArm))%kFstNumChanPerArm)%kFstNumApvChannels;
 
-      fout_ped_hist << elecId << ' ' << rdo << ' ' << arm << ' ' << apv << ' ' << chan << ' ' << timebin << ' ' << pedDataVecIter->ped << ' ' << pedDataVecIter->rms << ' ' << pedDataVecIter->ran << endl;
+      fout_ped_math << elecId << ' ' << rdo << ' ' << arm << ' ' << apv << ' ' << chan << ' ' << timebin << ' ' << mMathPedVec[i] << ' ' << mMathRmsVec[i] << ' ' << mMathRanVec[i] << endl;
     }
-    fout_ped_hist.close();
+    fout_ped_math.close();
+
+    //create a link as fstPedNoiseTable.dat in 1st loop
+    if(!mDoPedCut) {
+      char cmd[128];
+      sprintf(cmd, "/bin/ln -f -s %s fstPedNoiseTable.dat", mPedNoiseFilename_math.Data());
+      system(cmd);
+    }
+
+    //save pedestal and rms noise with histogram method
+    if(mRunHist) {
+      mPedNoiseFilename_hist.Replace(found, mPedNoiseFilename_hist.Length() - found, ".fstPedNoise_hist.dat");
+      LOG_INFO << "FST Pedestal and RMS File Name using histogram method: " << mPedNoiseFilename_hist << endm;
+
+      std::ofstream fout_ped_hist( mPedNoiseFilename_hist.Data(), std::ios_base::out & std::ios_base::trunc );
+      if( !fout_ped_hist ){
+	LOG_ERROR << "Error opening file '" << mPedNoiseFilename_hist << "'" << endm;
+	ierr = kStFatal;
+      }
+      fout_ped_hist.setf(std::ios::fixed, std::ios::floatfield);
+      fout_ped_hist.precision(5);
+
+      pedNoiseDataVec_t::iterator pedDataVecIter;
+      int idx = 0;
+      for( pedDataVecIter = mPedVec.begin(); pedDataVecIter != mPedVec.end() && !ierr; ++pedDataVecIter, ++idx ){
+	//obtain rdo/arm/apv/chan
+	int rdo = 0, arm = -1, apv = -1, chan = -1;
+	short timebin = idx % kFstNumTimeBins;
+	int elecId    = idx / kFstNumTimeBins;
+	rdo           = 1 + elecId/(kFstNumArmsPerRdo*kFstNumChanPerArm);
+	arm           = (elecId%(kFstNumArmsPerRdo*kFstNumChanPerArm))/kFstNumChanPerArm;
+	apv           = ((elecId%(kFstNumArmsPerRdo*kFstNumChanPerArm))%kFstNumChanPerArm)/kFstNumApvChannels;
+	chan          = ((elecId%(kFstNumArmsPerRdo*kFstNumChanPerArm))%kFstNumChanPerArm)%kFstNumApvChannels;
+
+	fout_ped_hist << elecId << ' ' << rdo << ' ' << arm << ' ' << apv << ' ' << chan << ' ' << timebin << ' ' << pedDataVecIter->ped << ' ' << pedDataVecIter->rms << ' ' << pedDataVecIter->ran << endl;
+      }
+      fout_ped_hist.close();
+    }
+
+    //save common mode noise
+    mCmNoiseFilename.Replace(found, mCmNoiseFilename.Length() - found, ".fstCmNoise.dat");
+    LOG_INFO << "FST Common Mode Noise File Name: " << mCmNoiseFilename << endm;
+
+    std::ofstream fout_cmn( mCmNoiseFilename.Data(), std::ios_base::out & std::ios_base::trunc );
+    if( !fout_cmn ){
+      LOG_ERROR << "Error opening file '" << mCmNoiseFilename << "'" << endm;
+      ierr = kStFatal;
+    }
+    fout_cmn.setf(std::ios::fixed, std::ios::floatfield);
+    fout_cmn.precision(5);
+
+    cmNoiseDataVec_t::iterator cmnDataVecIter;
+    int idx = 0;
+    for( cmnDataVecIter = mCmnVec.begin(); cmnDataVecIter != mCmnVec.end() && !ierr; ++cmnDataVecIter, ++idx ){
+      short timebin   = idx % kFstNumTimeBins;
+      int groupId     = idx / kFstNumTimeBins;
+      int rId         = groupId % kFstNumRStripsPerSensor;
+      int apvId       = groupId / kFstNumRStripsPerSensor;
+      int wedgeGeomId = 1 + apvId/kFstApvsPerWedge;
+      int rdo         = (wedgeGeomId-1)/kFstNumWedsPerRdo + 1;                 //1-6
+      int arm         = ((wedgeGeomId-1)%kFstNumWedsPerRdo)/kFstNumWedsPerArm; //0-2
+      // int apv         = apvId%(kFstNumArmsPerRdo*kFstNumRdos);                 //0-15
+      int apv         = apvId%kFstNumApvsPerArm;                 //0-15
+
+      fout_cmn << apvId << ' ' << rdo << ' ' << arm << ' '<< apv << ' ' <<  rId << ' ' << timebin << ' ' << cmnDataVecIter->cmn << endl;
+    }
+    fout_cmn.close();
   }
-
-  //save common mode noise
-  mCmNoiseFilename.Replace(found, mCmNoiseFilename.Length() - found, ".fstCmNoise.dat");
-  LOG_INFO << "FST Common Mode Noise File Name: " << mCmNoiseFilename << endm;
-
-  std::ofstream fout_cmn( mCmNoiseFilename.Data(), std::ios_base::out & std::ios_base::trunc );
-  if( !fout_cmn ){
-    LOG_ERROR << "Error opening file '" << mCmNoiseFilename << "'" << endm;
-    ierr = kStFatal;
-  }
-  fout_cmn.setf(std::ios::fixed, std::ios::floatfield);
-  fout_cmn.precision(5);
-
-  cmNoiseDataVec_t::iterator cmnDataVecIter;
-  int idx = 0;
-  for( cmnDataVecIter = mCmnVec.begin(); cmnDataVecIter != mCmnVec.end() && !ierr; ++cmnDataVecIter, ++idx ){
-    short timebin   = idx % kFstNumTimeBins;
-    int groupId     = idx / kFstNumTimeBins;
-    int rId         = groupId % kFstNumRStripsPerSensor;
-    int apvId       = groupId / kFstNumRStripsPerSensor;
-    int wedgeGeomId = 1 + apvId/kFstApvsPerWedge;
-    int rdo         = (wedgeGeomId-1)/kFstNumWedsPerRdo + 1;                 //1-6
-    int arm         = ((wedgeGeomId-1)%kFstNumWedsPerRdo)/kFstNumWedsPerArm; //0-2
-    // int apv         = apvId%(kFstNumArmsPerRdo*kFstNumRdos);                 //0-15
-    int apv         = apvId%kFstNumApvsPerArm;                 //0-15
-
-    fout_cmn << apvId << ' ' << rdo << ' ' << arm << ' '<< apv << ' ' <<  rId << ' ' << timebin << ' ' << cmnDataVecIter->cmn << endl;
-  }
-  fout_cmn.close();
 
   return ierr;
 };

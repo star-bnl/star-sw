@@ -21,16 +21,16 @@
 #include "StIOMaker/StIOMaker.h"
 #include "StEvent/StEnumerations.h"
 #include "StEvent/StFstConsts.h"
-#include "TString.h"
-#include "TNtuple.h"
-#include "TH2F.h"
-#include "TProfile.h"
 
 //using namespace StFstConsts;
 
 class StIOMaker;
 class StEvent;
 class StTrack;
+class TH2F;
+class TH2S;
+class TProfile;
+class TTree;
 
 class StFstQAMaker : public StMaker {
 public:
@@ -50,7 +50,7 @@ public:
   } fstHit;
 
 protected:
-  TFile* myRootFile;
+  // TFile* myRootFile;
   TTree *fstRawHitTree;
   TTree *fstHitTree;
 
@@ -78,8 +78,9 @@ protected:
   TH2S* clusterSizePhi_SensorId;   // hit cluster size in Phi direction
 
   Int_t  mEventCounter;            // Event countter
+  Bool_t mDoTreeOutput;
 
 private:
-  ClassDef(StFstQAMaker,1);
+  ClassDef(StFstQAMaker,0);
 };
 #endif

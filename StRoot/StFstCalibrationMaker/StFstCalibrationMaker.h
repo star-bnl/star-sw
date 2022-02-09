@@ -105,7 +105,7 @@ protected:
     MappingVec_t mMappingVec;
     
     // for saving to file
-    TFile *myRootFile; 			     // file to store histograms
+    Bool_t mDoOutput;
     TH1F *hist_meanPed[kFstNumTimeBins];     // mean pedestal = pedestal histogram -> GetMean()
     TH1F *hist_rmsPed[kFstNumTimeBins];      // standard deveriation = pedestal histogram -> GetRMS()
     TH1F *hist_cmNoise[kFstNumTimeBins];     // common mode noise per APV chip
@@ -119,7 +119,7 @@ protected:
 
 private:
     
-   ClassDef(StFstCalibrationMaker,1);
+   ClassDef(StFstCalibrationMaker,0);
 }; 
 
 // modifiers

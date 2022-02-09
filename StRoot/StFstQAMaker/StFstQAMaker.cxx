@@ -33,7 +33,7 @@
 #include "TClassTable.h"
 #include "TH2F.h"
 #include "TProfile.h"
-#include "TNtuple.h"
+#include "TTree.h"
 #include "TFile.h"
 #include "TString.h"
 #include "StThreeVectorF.hh"
@@ -43,7 +43,7 @@
 
 // constructor
 StFstQAMaker::StFstQAMaker( const char* name ) :
-   StMaker(name), mEventCounter(0) {
+   StMaker(name), mEventCounter(0), mDoTreeOutput(false) {
    for(int iSensor=0; iSensor<kFstNumSensors; iSensor++) {
 	rawHitMap[iSensor]            = NULL;
 	hitMap[iSensor]               = NULL;
@@ -371,61 +371,64 @@ Int_t StFstQAMaker::Make(){
 Int_t StFstQAMaker::Finish(){
    Int_t ierr = kStOk;
 
-   //create output file
-    StIOMaker *ioMaker = (StIOMaker * )GetMaker("inputStream");
-    if (!ioMaker) {
-        gMessMgr->Warning() << "StFstQAMaker::Init(): No StIOMaker" << endm;
-    }
+   if(mDoTreeOutput)
+   {
+     //create output file
+     StIOMaker *ioMaker = (StIOMaker * )GetMaker("inputStream");
+     if (!ioMaker) {
+       LOG_WARN << "StFstQAMaker::Init(): No StIOMaker" << endm;
+     }
 
-    TString mRootFilename = TString(ioMaker->GetFile());
-    int found = mRootFilename.Last('/');
-    if(found >= 0){
-        mRootFilename.Replace(0, found + 1, "");
-    }
-    found = mRootFilename.First(".");
-    if(found == 0) found = mRootFilename.Length();
-    mRootFilename.Replace(found, mRootFilename.Length() - found, ".fstQa.root");
-    LOG_INFO << "FST QA File Name: " << mRootFilename << endm;
+     TString mRootFilename = TString(ioMaker->GetFile());
+     int found = mRootFilename.Last('/');
+     if(found >= 0){
+       mRootFilename.Replace(0, found + 1, "");
+     }
+     found = mRootFilename.First(".");
+     if(found == 0) found = mRootFilename.Length();
+     mRootFilename.Replace(found, mRootFilename.Length() - found, ".fstQa.root");
+     LOG_INFO << "FST QA File Name: " << mRootFilename << endm;
 
-    cout << "QA file name: " << mRootFilename << endl;     
-    myRootFile = new TFile(mRootFilename.Data(),"RECREATE");
-    if( !myRootFile ) {
-        LOG_WARN << "Error recreating file '" << mRootFilename << "'" << endl;
-        ierr = kStWarn;
-    }
+     cout << "QA file name: " << mRootFilename << endl;     
+     TFile *myRootFile = new TFile(mRootFilename.Data(),"RECREATE");
+     if( !myRootFile ) {
+       LOG_WARN << "Error recreating file '" << mRootFilename << "'" << endl;
+       ierr = kStWarn;
+     }
 
-    //saving histograms 
-    myRootFile->WriteTObject(fstRawHitTree);
-    myRootFile->WriteTObject(fstHitTree);
+     //saving histograms 
+     myRootFile->WriteTObject(fstRawHitTree);
+     myRootFile->WriteTObject(fstHitTree);
 
-    myRootFile->WriteTObject(numOfRawHits_SensorId);
-    myRootFile->WriteTObject(numOfHits_SensorId);
-    for(int iTimeBin=0; iTimeBin<kFstNumTimeBins; iTimeBin++)
-   	myRootFile->WriteTObject(rawHitCharge_TimeBin[iTimeBin]);
-    myRootFile->WriteTObject(rawHitChargeErr);
-    myRootFile->WriteTObject(hitCharge_SensorId);
-    myRootFile->WriteTObject(hitChargeErr_SensorId);
-    myRootFile->WriteTObject(rawHitMaxTimeBin_APV);
-    myRootFile->WriteTObject(maxTimeBin_SensorId);
-    myRootFile->WriteTObject(clusterSize_SensorId);
-    myRootFile->WriteTObject(clusterSizeR_SensorId);
-    myRootFile->WriteTObject(clusterSizePhi_SensorId);
-    for(int iWedge=0; iWedge<kFstNumWedges; iWedge++) {
-        for(int iSensor=0; iSensor<kFstNumSensorsPerWedge; iSensor++) {
-    	    myRootFile->WriteTObject(rawHitMap[iWedge*3+iSensor]);
-            myRootFile->WriteTObject(hitMap[iWedge*3+iSensor]);
-	    myRootFile->WriteTObject(numOfRawHits_EventId[iWedge*3+iSensor]);
-   	}
-    }
-    for(int iDisk = 0; iDisk < kFstNumDisk; iDisk++)
-    {
-      myRootFile->WriteTObject(hitMapOfFST[iDisk]);
-      myRootFile->WriteTObject(hitMapOfAPV[iDisk]);
-      myRootFile->WriteTObject(hitGlobalXY[iDisk]);
-      myRootFile->WriteTObject(hitGlobalRPhi[iDisk]);
-    }
+     myRootFile->WriteTObject(numOfRawHits_SensorId);
+     myRootFile->WriteTObject(numOfHits_SensorId);
+     for(int iTimeBin=0; iTimeBin<kFstNumTimeBins; iTimeBin++)
+       myRootFile->WriteTObject(rawHitCharge_TimeBin[iTimeBin]);
+     myRootFile->WriteTObject(rawHitChargeErr);
+     myRootFile->WriteTObject(hitCharge_SensorId);
+     myRootFile->WriteTObject(hitChargeErr_SensorId);
+     myRootFile->WriteTObject(rawHitMaxTimeBin_APV);
+     myRootFile->WriteTObject(maxTimeBin_SensorId);
+     myRootFile->WriteTObject(clusterSize_SensorId);
+     myRootFile->WriteTObject(clusterSizeR_SensorId);
+     myRootFile->WriteTObject(clusterSizePhi_SensorId);
+     for(int iWedge=0; iWedge<kFstNumWedges; iWedge++) {
+       for(int iSensor=0; iSensor<kFstNumSensorsPerWedge; iSensor++) {
+	 myRootFile->WriteTObject(rawHitMap[iWedge*3+iSensor]);
+	 myRootFile->WriteTObject(hitMap[iWedge*3+iSensor]);
+	 myRootFile->WriteTObject(numOfRawHits_EventId[iWedge*3+iSensor]);
+       }
+     }
+     for(int iDisk = 0; iDisk < kFstNumDisk; iDisk++)
+     {
+       myRootFile->WriteTObject(hitMapOfFST[iDisk]);
+       myRootFile->WriteTObject(hitMapOfAPV[iDisk]);
+       myRootFile->WriteTObject(hitGlobalXY[iDisk]);
+       myRootFile->WriteTObject(hitGlobalRPhi[iDisk]);
+     }
 
-    myRootFile->Close();
+     myRootFile->Close();
+   }
 
     return ierr;
 }
