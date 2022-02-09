@@ -34,7 +34,7 @@ void fcsGain_db(char* opt = "", char* input) {
     if(option.Contains("corr") || option.Contains("both")) corr=1;
 
     TString data(input);
-    TString storeTime;
+    TString storeTime("");
     TString flavor;
     if(data.Contains("run22sim")){ 
 	storeTime = "2021-10-15 00:00:00"; flavor="sim"; 
@@ -45,16 +45,29 @@ void fcsGain_db(char* opt = "", char* input) {
 	if(hcal && corr) for(int i=0; i< 520; i++) hcorr.gaincorr[i]=1.0;//default 1
 	if(pres && corr) for(int i=0; i< 384; i++) pcorr.valley[i]=0.5;  //0.5 for 1/2 MIP
     }
-    else if(data.Contains("run22ofl")){  
-	storeTime = "2021-10-25 00:00:00"; flavor="ofl";
-	if(ecal && gain) for(int i=0; i<1496; i++) egain.gain[i]=0.0053;  //default 5.3MeV/ch
-	if(hcal && gain) for(int i=0; i< 520; i++) hgain.gain[i]=0.00265; //We found hcal has 1/2 gain
-	if(pres && gain) for(int i=0; i< 384; i++) pgain.gain[i]=0.01;    //100ch for MIP
-	if(ecal && corr) for(int i=0; i<1496; i++) ecorr.gaincorr[i]=1.0; //default 1
-	if(hcal && corr) for(int i=0; i< 520; i++) hcorr.gaincorr[i]=1.0; //default 1
-	if(pres && corr) for(int i=0; i< 384; i++) pcorr.valley[i]=0.5;   //0.5 for 1/2 MIP
+    if(data.Contains("run22ofl")){  
+	storeTime = "2021-10-25 00:00:10"; flavor="ofl";
+	if(ecal && gain) for(int i=0; i<1496; i++) egain.gain[i]=0.0053/5.31; 
+	if(hcal && gain) for(int i=0; i< 520; i++) hgain.gain[i]=0.0053*1.3*1.21*1.65;     
+	if(pres && gain) for(int i=0; i< 384; i++) pgain.gain[i]=1.0/600.0;  //600ch for MIP
+	if(ecal && corr) for(int i=0; i<1496; i++) ecorr.gaincorr[i]=1.21;   //avg gaincorr=1.21
+	if(hcal && corr) for(int i=0; i< 520; i++) hcorr.gaincorr[i]=1.0;    
+	if(pres && corr) for(int i=0; i< 384; i++) pcorr.valley[i]=0.5;      //0.5 for 1/2 MIP
+    } 
+    if(data.Contains("run22Dec01")){
+      storeTime = "2021-12-01 00:00:10 "; flavor="ofl";
+      if(ecal && gain) for(int i=0; i<1496; i++) egain.gain[i]=0.0053/5.31*2.7;  //Attenuator 1/2.7
     }
-    else{ 
+    if(data.Contains("run22Dec21")){
+      storeTime = "2021-12-22 03:50:10 "; flavor="ofl";
+      if(ecal && gain) for(int i=0; i<1496; i++) egain.gain[i]=0.0053;  //Attenuator 1/5.31
+    }
+    if(data.Contains("run22Jan27")){
+      storeTime = "2022-01-28 01:33:00 "; flavor="ofl";
+      if(hcal && gain) for(int i=0; i< 520; i++) hgain.gain[i]=0.0053*1.3*1.21; //increased V for *1.65 gain
+    }
+
+    if(storeTime==""){
 	std::cout<<"Invalid year range"<<std::endl; 
 	exit;
     }

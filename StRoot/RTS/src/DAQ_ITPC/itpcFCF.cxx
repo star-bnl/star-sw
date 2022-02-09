@@ -53,14 +53,14 @@ static double delta(double v)
 	return mark() - v ;
 }
 
-itpc_fcf_c::itpc_fcf_c(int off)
+itpc_fcf_c::itpc_fcf_c()
 {	
         want_data = 1 ;		// ALWAYS!
         my_id = 0 ;		// normally starts from 1 so 0 is "un-initialized"
 
         version = VERSION ;
 	sector_id = 0 ;		// 0 is ALL sectors
-	offline = off ;		// switch to  Offline if not zero!
+	offline = 1 ;		// new: offline is default
 
 
 	det_type = 1 ;		// ITPC
@@ -293,7 +293,7 @@ struct itpc_fcf_c::rp_t *itpc_fcf_c::get_row_pad(int row, int pad)
 {
 	int max_pad_all = max_x + 1 ;
 
-	if(offline) s1_data_length = 1 + max_y * 2 ;	// need more for track_id
+	if(offline) s1_data_length = (1 + max_y) * 2 ;	// need more for track_id
 	else s1_data_length = 1 + max_y ;
 
 	if(row_pad_store==0) {	// initialize on first use...
@@ -738,14 +738,15 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 		int t_start = tb_buff[i++] ;
 		int t_stop = t_start + t_cou - 1 ;
 
+		// happens too often, get rid of ERR
 		if(t_start <= t_stop_last) {
-			LOG(ERR,"%d:#%d: FEE %d:%d, words %d: %d <= %d",rdo,port,fee_id,fee_ch,words,t_start,t_stop_last) ;
+			LOG(NOTE,"%d:#%d: FEE %d:%d, words %d: %d <= %d",rdo,port,fee_id,fee_ch,words,t_start,t_stop_last) ;
 			seq_cou = 0 ;
 			err |= 4 ;
 			goto err_ret ;
 		}
 		if(t_stop > 511) {
-			LOG(ERR,"%d:#%d: FEE %d:%d, words %d: %d > 511",rdo,port,fee_id,fee_ch,words,t_stop) ;
+			LOG(NOTE,"%d:#%d: FEE %d:%d, words %d: %d > 511",rdo,port,fee_id,fee_ch,words,t_stop) ;
 			seq_cou = 0 ;
 			err |= 4 ;
 			goto err_ret ;
@@ -984,7 +985,11 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 			out_store = row_store ;	// rewind 
 		}
 
-		if((out_store-store_start)>(max_out_bytes/4-1000)) {
+		int ints_used = out_store - store_start ;
+		//int ints_needed = (max_out_bytes/4)-1000 ;
+		int ints_needed = (max_out_bytes/4)-400 ;
+
+		if(ints_used && (ints_used>ints_needed)) {
 			LOG(ERR,"not enough ints %d vs %d",out_store-store_start,max_out_bytes/4) ;
 			break ;
 		}		
