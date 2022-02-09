@@ -82,3 +82,6 @@ rsync -avrz -h  --include='*.root'  --exclude='*.*' /direct/gpfs02/eic/DATA/PYTH
 foreach r (`ls -1d st*.root | awk -F_ '{print $3}' | sort -u`)
   mkdir -p P21ic_calib/2019/169/${r}; mv st*${r}*event.root P21ic_calib/2019/169//${r}/
 end
+
+
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' .  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget  >& Dst.log &
