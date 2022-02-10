@@ -20,7 +20,7 @@ my $RECO = "/reco/*/*/";
 my $FILE = "/*/st_physics";
 my $NEvents = 100000;
 #================================================================================
-# dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/*/
+# dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/*
 #============================ Final Runs ===================================================
 # hist238  for Run I  (2001) 
 # RunII08             (2002)
