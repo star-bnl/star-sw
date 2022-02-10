@@ -35,7 +35,7 @@ while ($line = <>) {
   elsif ($scaleFactor >  0.8 && $scaleFactor <  1.2) {$field = "FF";}
   if ($run eq 'cmd' or $run eq 'runNumber') {next;}
 #  if ($rtsStatus != 0 || $shiftLeaderStatus != 0) {next;}
-  if ($trig !~  /production/ and $trig !~  /^tune/ and $trig !~ /^Cosmic/) {next;}
+  if ($trig !~  /production/ and $trig !~  /^tune/ and $trig !~ /^Cosmic/ and $trig !~ /Aligment/) {next;}
    if ($trig =~ /^ped/) {next;}
    if ($trig =~ /^las/) {next;}
    if ($trig =~ /^jml/) {next;}
