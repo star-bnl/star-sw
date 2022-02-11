@@ -105,7 +105,7 @@ StQAMakerBase(name,title,"StE"), event(0), primVtx(0), mHitHist(0), mPmdGeom(0),
   multiplicity = 0;
   qaEvents = 0;
   evtTime = -1;
-  if (GetMaker("fcsDbMkr")) AddMaker(new StFcsPi0FinderForEcal());
+  if (GetMaker("fcsDbMkr") && GetMaker("StFcsClusterMaker")) AddMaker(new StFcsPi0FinderForEcal());
 }
 
 //_____________________________________________________________________________
