@@ -129,6 +129,9 @@ namespace {
 StFcsWaveformFitMaker::StFcsWaveformFitMaker(const char* name) : StMaker(name) {
     mChWaveData.SetClass("TGraphAsymmErrors"); //Initialize with only one graph at first
     mPulseFit = new StFcsPulseFit( (TGraphAsymmErrors*)mChWaveData.ConstructedAt(0) );
+    mEnergySelect[0]=10; //default gaus fit for Ecal
+    mEnergySelect[1]=10; //default gaus fit for Hcal 
+    mEnergySelect[2]=1;  //default sum8 for Pres
 }
 
 StFcsWaveformFitMaker::~StFcsWaveformFitMaker() { 
@@ -229,13 +232,14 @@ int StFcsWaveformFitMaker::Make() {
 	return kStWarn;	
     }
     
-    if(mEnergySelect==0) return kStOK;  // don't touch energy, directly from MC
+    if(mEnergySelect[0]==0) return kStOK;  // don't touch energy, directly from MC
 
     //Loop over all hits and run waveform analysis of the choice
     float res[8];
     TF1* func=0;
-    for(int det=0; det<kFcsNDet; det++) {
+    for(int det=0; det<kFcsNDet; det++) {      
 	StSPtrVecFcsHit& hits = mFcsCollection->hits(det);
+	int ehp = det/2;
 	int nhit=hits.size();
 	for(int i=0; i<nhit; i++){ //loop over all hits  	    
 	  
@@ -263,7 +267,7 @@ int StFcsWaveformFitMaker::Make() {
 	  
 	  //run waveform analysis of the choice and store as AdcSum	  
 	  memset(res,0,sizeof(res));
-	  float integral = analyzeWaveform(mEnergySelect,hits[i],res,func,ped);
+	  float integral = analyzeWaveform(mEnergySelect[ehp],hits[i],res,func,ped);
 	  hits[i]->setAdcSum(integral);	    
 	  hits[i]->setFitPeak(res[2]);	    
 	  hits[i]->setFitSigma(res[3]);	    
@@ -659,7 +663,9 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
 	}	
     }else if(npeak>=mMaxPeak){
         res[5] = npeak;
-        printf("%s Finding too many peaks npeak=%d. Skip fitting\n",mDetName,npeak);	
+	sum8(g, res); // too many peak, taking sum8
+	res[0]/=1.21; // normarized by 1/1.21
+        LOG_INFO << Form("%s Finding too many peaks npeak=%d. Skip fitting. Taking Sum8",mDetName,npeak)<<endm;
     }
     //printf("func=%d res=%f\n",func,res[0]);
     return res[0];
