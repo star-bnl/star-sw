@@ -18,10 +18,10 @@
 
 #include <string>
 #include "StMaker.h"
-#include "TH2S.h"
 #include "StEvent/StFstConsts.h"
 
 class StFstDb;
+class TH2S;
 
 class StFstCalibrationMaker : public StMaker {
 public:

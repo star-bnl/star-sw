@@ -18,15 +18,8 @@
 #include <string>
 
 #include "StMaker.h"
-#include "StIOMaker/StIOMaker.h"
-#include "StEvent/StEnumerations.h"
 #include "StEvent/StFstConsts.h"
 
-//using namespace StFstConsts;
-
-class StIOMaker;
-class StEvent;
-class StTrack;
 class TH2F;
 class TH2S;
 class TProfile;
