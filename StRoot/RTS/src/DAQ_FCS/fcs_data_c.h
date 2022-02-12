@@ -150,12 +150,12 @@ public:
 //	int trigger_tick ;
 
 	struct fcs_ped_inline_t {
-		u_char fmt_version ;
+		u_char fmt_version ;	//1= 16 params,pre 24-Nov-2021; 2=32 params
 		u_char det ;
 		u_char ns ;
 		u_char dep ;
 
-		u_short params[16] ;	// stage params
+		u_short params[32] ;	// stage params
 
 		union {
 			struct {	// DEP/ADC

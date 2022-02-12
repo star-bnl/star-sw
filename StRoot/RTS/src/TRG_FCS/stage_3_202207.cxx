@@ -26,7 +26,7 @@ void fcs_trg_base::stage_3_202207(link_t link[], u_short *dsm_out)
     if( (link[1].d[1] & 0x06) || (link[3].d[1] & 0x06) ) *dsm_out |= 0x100;  //JPBC1
     if( (link[1].d[1] & 0x18) || (link[3].d[1] & 0x18) ) *dsm_out |= 0x200;  //JPDE1
 
-    if( (link[0].d[2] & 0x02) || (link[2].d[2] & 0x01) ) *dsm_out |= 0x400;  //JPA0
+    if( (link[0].d[2] & 0x01) || (link[2].d[2] & 0x01) ) *dsm_out |= 0x400;  //JPA0
     if( (link[0].d[2] & 0x06) || (link[2].d[2] & 0x06) ) *dsm_out |= 0x800;  //JPBC0
     if( (link[0].d[2] & 0x18) || (link[2].d[2] & 0x18) ) *dsm_out |= 0x1000; //JPDE0
 
