@@ -27,6 +27,7 @@
 #include "tables/St_fstControl_Table.h"
 
 #include "TMath.h"
+#include "TH2S.h"
 
 const string StFstCalibrationMaker::sectionLabel[72]={  "1I","1O","2I","2O","3I","3O","4I","4O","5I","5O","6I","6O","7I","7O","8I","8O","9I","9O","10I","10O","11I","11O","12I","12O","13I","13O","14I","14O","15I","15O","16I","16O","17I","17O","18I","18O","19I","19O","20I","20O","21I","21O","22I","22O","23I","23O","24I","24O","25I","25O","26I","26O","27I","27O","28I","28O","29I","29O","30I","30O","31I","31O","32I","32O","33I","33O","34I","34O","35I","35O","36I","36O"};
 
