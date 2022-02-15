@@ -50,6 +50,10 @@ void throw_muon_in_tpc_sector( int sectorid, int charge = 1 ) {
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_tpc_hit") ) ;
 
+  auto* gm    = dynamic_cast<StGeant4Maker*>( StMaker::GetChain()->GetMaker("geant4star") );
+  // auto* stack = gm->stack();
+  // stack->StackDump();
+
   assert(vertex_table);
 
 }
@@ -62,6 +66,29 @@ void unit_test_tpc_hits( int longtest=0 ) {
   pm->SetVertex(0.,0.,0.);
   pm->SetSigma(0.0,0.,0.);
 
+  // Setup post stepping debug output
+  auto* gm    = dynamic_cast<StGeant4Maker*>( StMaker::GetChain()->GetMaker("geant4star") );
+  auto* stack = gm->stack();
+  
+  if (0) 
+  gm->AddUserPostSteppingAction( [stack]() {
+      auto* nav = gGeoManager->GetCurrentNavigator();
+      auto* mc = TVirtualMC::GetMC();
+      const double *xyz = nav->GetCurrentPoint();
+      std::string path = nav->GetPath();
+      LOG_INFO << "Post step _________________________________________________________________" << endm;      
+      LOG_INFO << "step number    = " << mc->StepNumber() << endm;
+      LOG_INFO << "n secondaries  = " << mc->NSecondaries() << endm; 
+      LOG_INFO << "track is alive = " << mc->IsTrackAlive() << endm;
+      mc->Print();
+      LOG_INFO << "x=" << xyz[0] << " y= " << xyz[1] << " z=" << xyz[2] << " " << path.c_str() << endm;
+      int current = stack->GetCurrentTrackNumber();
+      LOG_INFO << "Current track = " << current << endm;
+      LOG_INFO << "Persistent track @ " << stack->GetCurrentPersistentTrack() << endm;
+      stack->StackDump(current); 
+    });
+
+
   LOG_TEST << "=======================================================" << std::endl;
   LOG_TEST << "Unit testing of tracks and TPC hits on single muons"     << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
@@ -70,7 +97,7 @@ void unit_test_tpc_hits( int longtest=0 ) {
   Accumulator_t step; // Step size
   Accumulator_t time; // Time per throw
   
-  for ( int sector=1; sector<=1; sector++ ) {
+  for ( int sector=1; sector<=24; sector++ ) {
 
     timer.Start();
     throw_muon_in_tpc_sector( sector );

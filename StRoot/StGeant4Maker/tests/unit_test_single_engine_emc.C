@@ -100,7 +100,7 @@ void trackLoop() {
        double eta = track->eta;
        // todo phi
        double E  = track->e + 1.0e-12; // prevent div by zero
-       LOG_INFO << "itrack=" << i << " idtruth=" << track->id << "Fill pt=" << pt << " eta=" << track->eta << " E=" << track->e << " edep=" << edep_per_track[ track->id ] << endm;
+       LOG_INFO << "itrack=" << i << " idtruth=" << track->id << "Fill pt=" << pt << " eta=" << track->eta << " E=" << track->e << " edep=" << edep_per_track[ track->id ] << endl;
        if ( pt > 0.100 && pt < 10.0 && eta > -0.95 && eta < 0.95 ) {
    	sampling_fraction_vs_pt.back()->Fill( pt, edep_per_track[ track->id ] / E );
    	sampling_fraction_vs_eta.back()->Fill( eta, edep_per_track[ track->id ] / E );
@@ -139,90 +139,51 @@ void book_histograms() {
 
 }
 //___________________________________________________________________
-void unit_test_multi_engine_emc( const char* part = "gamma", int ntracks = 10 ) {
+void unit_test_single_engine_emc( const char* part = "mu+", int ntracks = 10 ) {
 
   gROOT->ProcessLine("initChain();");
+
+  TString engineName;
+  if ( hasRuntimeArg("application:engine=G3") ) engineName = "GEANT3 ";
+  if ( hasRuntimeArg("application:engine=G4") ) engineName = "Geant 4 ";
+  std::cout << "Engine name = " << engineName.Data() << endl;
 
   auto* pm = dynamic_cast<StarPrimaryMaker*>( StMaker::GetChain()->GetMaker("PrimaryMaker") );
   pm->SetVertex(0.,0.,0.);
   pm->SetSigma(0.0,0.,0.);
 
   LOG_TEST << "=======================================================" << std::endl;
-  LOG_TEST << "Multi-engine testing of EMC" << std::endl;
+  LOG_TEST << "Single-engine testing of EMC" << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
   LOG_TEST << Form("GEANT3 response to %i 1 GeV photons %s",ntracks,part) << std::endl;
   LOG_TEST << "=======================================================" << std::endl;
 
 
-  auto* gm    = dynamic_cast<StGeant4Maker*>( StMaker::GetChain()->GetMaker("geant4star") );
-  auto* stack = gm->stack();
+  auto* gm = dynamic_cast<StGeant4Maker*>( StMaker::GetChain()->GetMaker("geant4star") );
 
-  TFile* output = new TFile(Form("unit_test_multi_engine_emc_%s.root",part),"recreate");
-
-  gm->SetEngineForModule( "CALB", 0 ); 
-  book_histograms();
-  throw_particle(ntracks, part, 0.09995, 10.00005, -0.55, 0.55, 0., TMath::TwoPi() );
-
-  stack->StackDump();
+  throw_particle(ntracks, part, 0.09995, 10.00005, -0.95, 0.95, 0., TMath::TwoPi() );
 
   vertex_table = dynamic_cast<TTable*>( chain->GetDataSet("g2t_vertex")  );
   track_table  = dynamic_cast<TTable*>( chain->GetDataSet("g2t_track")   );
   hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_emc_hit") ) ;
 
   auto all_primary_tracks_have_hits = [=](g2t_track_st* begin_, g2t_track_st* end_) {
-
-
-    auto ret = PASS;
-    
+   
     int count = 0;
+    int hits  = 0;
     for ( const auto* track=begin_; track < end_; track++ ) {
 
-      LOG_INFO << "Track " << track->id << " pid=" << track->eg_pid << " n emc hits = " << track-> n_emc_hit << endm;
-      if ( track->n_emc_hit <= 0 ) {
-	ret = FAIL;
-      }
+      if ( track->n_emc_hit ) hits++;
       if ( ++count == ntracks ) break;
 
     }
-    return ret;
+    return (hits == count) ? PASS : FAIL;
 
   };
 
   check_track_table( "All primary tracks have hits", all_primary_tracks_have_hits );
-
       
   return;
-
-
-
-  LOG_TEST << "=======================================================" << std::endl;
-  LOG_TEST << "Multi-engine testing of EMC" << std::endl;
-  LOG_TEST << "=======================================================" << std::endl;
-  LOG_TEST << Form("Geant 4 response to %i 1 GeV %s",ntracks,part) << std::endl;
-  LOG_TEST << "=======================================================" << std::endl;
-
-  gm->SetEngineForModule( "CALB", 1 );
-  book_histograms();
-
-  throw_particle(ntracks, part, 0.09995, 10.00005, -0.95, 0.95, 0., TMath::TwoPi() );  
-  //  trackLoop();
-
-  output->Write();
-  output->Close();
-
-  LOG_TEST << "=======================================================" << std::endl;
-  LOG_TEST << "Multi-engine testing of EMC" << std::endl;
-  LOG_TEST << "=======================================================" << std::endl;
-  LOG_TEST << Form("GEANT3 vs Geant 4 response to %i 1 GeV %s",ntracks,part) << std::endl;
-  LOG_TEST << "=======================================================" << std::endl;
-
-  LOG_TEST << Form( "energy deposition: sum           = %f %f keV", sum_[0], sum_[1] )          << std::endl;
-  LOG_TEST << Form( "energy deposition: mean          = %f %f keV", mean_[0], mean_[1] )          << std::endl;
-  LOG_TEST << Form( "energy deposition: median        = %f %f keV", median_[0], median_[1] )        << std::endl;
-  LOG_TEST << Form( "energy deposition: min           = %f %f keV", min_[0], min_[1]  )          << std::endl;
-  LOG_TEST << Form( "energy deposition: max           = %f %f keV", max_[0], max_[1]  )          << std::endl;
-  LOG_TEST << Form( "energy deposition: error of mean = %f %f keV", error_of_mean_[0], error_of_mean_[1] ) << std::endl;
-  LOG_TEST << Form( "number of hits:                    %i %i    ", nhits_[0], nhits_[1]         ) << std::endl;
   
 }
 

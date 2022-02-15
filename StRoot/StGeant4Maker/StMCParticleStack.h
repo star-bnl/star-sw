@@ -64,6 +64,9 @@ public:
   void setIdStack( int id ) { mIdStack = id; } 
   int     idStack() const { return mIdStack; } 
 
+  void setIdTruth( int id ) { mIdTruth = id; }
+  int     idTruth() const { return mIdTruth; }
+
   //const long long numberOfHits(){ return mNumHits; } 
   //void  addHit(){ mNumHits++; } 
 
@@ -82,6 +85,7 @@ protected:
   StarMCVertex*              mStopVertex;           /// Pointer to the stop vertex  
 
   int                        mIdStack;              /// Track identity on stack 
+  int                        mIdTruth;
   long long                  mNumHits;              /// Number of hits registered on the track 
 
   std::vector<DetectorHit*>  mHits;                 /// List of hits on track
@@ -111,8 +115,8 @@ public:
   void setParent  ( StarMCParticle* _parent   ){ mParent = _parent; } 
   void addDaughter( StarMCParticle* daughter ){ mDaughters.push_back( daughter ); } 
 
-  const             StarMCParticle*   parent()   { return mParent; } 
-  const std::vector<StarMCParticle*>& daughters(){ return mDaughters; } 
+  const             StarMCParticle*   parent()    const { return mParent; } 
+  const std::vector<StarMCParticle*>& daughters() const { return mDaughters; } 
 
   void setMedium( const int medium ) { mMedium = medium; }
   int  medium() const { return mMedium; }
@@ -121,7 +125,7 @@ public:
   TMCProcess process() const { return mMechanism; }
 
   void setVolume( const char* name ){ mVolume = name; }
-  std::string volume(){ return mVolume; }
+  std::string volume() const { return mVolume; }
 
   void setIntermediate( bool stat=true ){ mIntermediate=true; }
   bool intermediate(){ return mIntermediate; }
@@ -173,8 +177,7 @@ class StMCParticleStack : public TVirtualMCStack
 			  TMCProcess mech, int& ntr, double weight,
 			  int is);
 
-
-
+ 
   /// The stack has to provide two pop mechanisms:
   /// The first pop mechanism required.
   /// Pop all particles with toBeDone = 1, both primaries and seconadies.
@@ -214,6 +217,9 @@ class StMCParticleStack : public TVirtualMCStack
   /// Get the current stack size
   virtual int GetStackSize(){ return mStack.size(); }
 
+  /// Print out the particle table
+  void StackDump( int idtruth=-1 );
+
 
   /// Obtain the current particle truth
 //  const StarMCParticle* GetCurrentTruth() const { return mParticleTable.back(); }
@@ -224,7 +230,7 @@ class StMCParticleStack : public TVirtualMCStack
 
   StarMCVertex* GetVertex( double vx, double vy, double vz, double vt, int proc=-1 );
 
-  StarMCParticle* GetPersistentTrack( int stackIndex );
+  StarMCParticle* GetCurrentPersistentTrack();
 
   int GetIdTruth( StarMCParticle* part ){ return mIdTruthFromParticle[part]; }
 
@@ -242,10 +248,12 @@ class StMCParticleStack : public TVirtualMCStack
 
   int                 mArraySize;
   TClonesArray       *mArray; 
+  std::vector<StarMCParticle *> mPersistentTrack;
 
-  int                      mStackSize;
-  std::list  <TParticle *> mStack;
-  std::list  <int>         mStackIdx;
+  int                           mStackSize;
+  std::list  <TParticle *>      mStack;     // note: vector may be faster
+  std::list  <int>              mStackIdx;  // note: vector may be faster 
+
 
 
   std::vector<StarMCParticle *> mTruthTable;
@@ -253,7 +261,6 @@ class StMCParticleStack : public TVirtualMCStack
   std::vector<StarMCVertex   *> mVertexTable;
 
   std::map<int, StarMCParticle*> mStackToTable;
-
   std::map<StarMCParticle*, int> mIdTruthFromParticle;
 
   float mScoringRmax;

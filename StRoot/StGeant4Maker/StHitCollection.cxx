@@ -145,7 +145,9 @@ void StTrackerHitCollection::ProcessHits() {
   std::vector<StarMCParticle*>& particleTable = userstack->GetParticleTable();
 
   // This should be the current particle truth 
-  StarMCParticle* truth = truthTable.back();
+  StarMCParticle* truth = userstack->GetCurrentPersistentTrack(); 
+
+  LOG_DEBUG << "Process hits with track " << truth << " current tn=" << userstack->GetCurrentTrackNumber() << endm;
 
   bool isNewTrack      = mc->IsNewTrack();
   bool isTrackEntering = mc->IsTrackEntering();
@@ -293,8 +295,9 @@ void StCalorimeterHitCollection::ProcessHits() {
   std::vector<StarMCParticle*>& particleTable = userstack->GetParticleTable();
 
   // This should be the current particle truth 
-  StarMCParticle* truth = truthTable.back();
+  StarMCParticle* truth = userstack->GetCurrentPersistentTrack(); 
 
+  LOG_DEBUG << "Process hits with track " << truth << " current tn=" << userstack->GetCurrentTrackNumber() << endm;
 
   bool isNewTrack      = mc->IsNewTrack();
   bool isTrackEntering = mc->IsTrackEntering();

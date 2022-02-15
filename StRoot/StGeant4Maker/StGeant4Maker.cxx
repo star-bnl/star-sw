@@ -96,7 +96,7 @@ struct SD2Table_TPC {
       g2t_tpc_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_tpc_hit_st)); 
       
       g2t_hit.id        = hit->id;
-      // TODO: add pointer to next hit on the track 
+
       g2t_hit.track_p   = hit->idtruth;
       g2t_hit.volume_id = hit->volId;
       g2t_hit.de        = hit->de;
@@ -108,6 +108,9 @@ struct SD2Table_TPC {
       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
       g2t_hit.length    = hit->length;
       g2t_hit.lgam      = hit->lgam;
+
+      
+
       /*
 	these are used downstream by the slow simulator (and should not be filled here)
 
@@ -117,12 +120,17 @@ struct SD2Table_TPC {
 	g2t_hit.np = ...; // number of primary electrons
 
       */
-      
-      table -> AddAt( &g2t_hit );     
 
       int idtruth = hit->idtruth;
-      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-      trk->n_tpc_hit++;     
+      g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
+
+      g2t_hit.next_tr_hit_p = g2t_track->hit_tpc_p; // store next hit on the linked list
+      g2t_track->hit_tpc_p = hit->id;            // this hit becomes the head of the linked list
+      
+      g2t_track->n_tpc_hit++;     
+
+      // Add hit to the table
+      table -> AddAt( &g2t_hit );           
 
     }
     // TODO: increment hit count on track 
@@ -170,7 +178,6 @@ struct SD2Table_STGC {
       g2t_fts_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_fts_hit_st)); 
       
       g2t_hit.id        = hit->id;
-      // TODO: add pointer to next hit on the track 
       g2t_hit.track_p   = hit->idtruth;
       g2t_hit.volume_id = hit->volId;
       g2t_hit.de        = hit->de;
@@ -179,13 +186,16 @@ struct SD2Table_STGC {
 	g2t_hit.p[i]  = 0.5 * ( hit->momentum_in[i] + hit->momentum_out[i] );
 	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
       }
-      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
-      
-      table -> AddAt( &g2t_hit );     
+      g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] );             
 
       int idtruth = hit->idtruth;
-      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-      trk->n_stg_hit++;
+      g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
+
+      g2t_hit.next_tr_hit_p = g2t_track->hit_stg_p; // store next hit on the linked list
+      g2t_track->hit_stg_p = hit->id;            // this hit becomes the head of the linked list
+      g2t_track->n_stg_hit++;
+
+      table -> AddAt( &g2t_hit );     
       
     }
   } 
@@ -210,12 +220,15 @@ struct SD2Table_FST {
 	g2t_hit.x[i]  = 0.5 * ( hit->position_in[i] + hit->position_out[i] );
       }
       g2t_hit.tof       = 0.5 * ( hit->position_in[3] + hit->position_out[3] ); 
-      
-      table -> AddAt( &g2t_hit );     
-
+     
       int idtruth = hit->idtruth;
-      g2t_track_st* trk = (g2t_track_st*)track->At(idtruth-1);
-      trk->n_fts_hit++;
+      g2t_track_st* g2t_track = (g2t_track_st*)track->At(idtruth-1);
+
+      g2t_hit.next_tr_hit_p = g2t_track->hit_fts_p; // store next hit on the linked list
+      g2t_track->hit_fts_p = hit->id;            // this hit becomes the head of the linked list
+      g2t_track->n_fts_hit++;
+
+      table -> AddAt( &g2t_hit );     
 
     }
   } 
@@ -235,7 +248,6 @@ struct SD2Table_EMC {
       g2t_emc_hit_st g2t_hit; memset(&g2t_hit,0,sizeof(g2t_emc_hit_st)); 
       
       g2t_hit.id        = hit->id;
-      // TODO: add pointer to next hit on the track 
       g2t_hit.track_p   = hit->idtruth;
       g2t_hit.volume_id = hit->volId;
       g2t_hit.de        = hit->de;
@@ -535,23 +547,21 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr("LABS", 1);
   SetAttr("SYNC", 1);
 
-  SetAttr("all:engine",  "G3" );
-  // SetAttr("ecal:engine", "G3" );
-  // SetAttr("calb:engine", "G3" );
-  // SetAttr("tpce:engine", "G3" );
- 
+  SetAttr("all:engine",  "G3" ); // default engine in multi-engine mode is G3
+  SetAttr("calb:engine", "G4" ); // BEMC defaults to G4
+  SetAttr("ecal:engine", "G4" ); // EEMC defaults to G4
+  SetAttr("wcal:engine", "G4" ); // Forward EMC defaults to G4
+  SetAttr("hcal:engine", "G4" ); // Forward hcal defaults to G4
+
+  // Application defaults to single engine mode with Geant4
   SetAttr("application:engine","G4"); 
     
-  // TODO-- 
-  //  SetAttr( "AgMLOpt:Hits:Deactivate", "ECAL:*,TPCE:*,*" );
-  //  SetAttr( "AgMLOpt:Hits:Activate", "TPAD,CSUP,ESCI" );
-
+  // Naughty
   _g4maker = this; // Provide a global pointer to the G4 maker  
 
 }
 //________________________________________________________________________________________________
 int StGeant4Maker::Init() {
-
 
   InitGeom();
 
@@ -572,7 +582,6 @@ int StGeant4Maker::Init() {
     gG4 = new TGeant4(SAttr("G4VmcOpt:Name"), SAttr("G4VmcOpt:Title") ,mRunConfig); // ID = 1 in multi engine
     LOG_INFO << "Created Geant 4 instance " << gG4->GetName() << endm;
   }
-
 
   if ( gG4 ) AddObj( gG4, ".const", 0 );
   if ( gG3 ) AddObj( gG3, ".const", 0 );
@@ -664,7 +673,6 @@ int StGeant4Maker::Init() {
     LOG_INFO << "Initialize Geant 4 + GEANT3 multiengine run" << endm;    
     TMCManager::Instance()->Init( InitializeMC );
 
-
   }
   
   // Geant4 standalone initialization
@@ -673,7 +681,6 @@ int StGeant4Maker::Init() {
     LOG_INFO << "Initialize Geant 4 standalone" << endm;
 
     InitializeMC( gG4 );
-    //SetStack( gG4 );
     
     TG4RunManager* runManager = TG4RunManager::Instance();
     runManager->UseRootRandom(false);
@@ -686,13 +693,8 @@ int StGeant4Maker::Init() {
     LOG_INFO << "Initialize GEANT3 standalone" << endm;
     
     InitializeMC( gG3 );
-    //SetStack( gG3 );
  
   }
-
-  // Create histograms
-  TH1* h;
-  AddHist( h = new TH2F("MC:vertex:RvsZ","MC vertex;z [cm];R [cm]",1801,-900.5,900.5,501,-0.5,500.5) );
 
   return StMaker::Init();
 }
@@ -733,17 +735,18 @@ int StGeant4Maker::InitRun( int /* run */ ){
     result = kStFatal;
   }
   
-
   return result;
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::ConstructGeometry(){ 
+  // Geometry construction is the responsability of the framework and should
+  // have already occurred.  If the geometry is missing, it should be fatal.
   if ( 0==gGeoManager ) {
     LOG_FATAL << "Geometry manager is not available at StarVMCApplication::ConstructGeometry... this will not go well" << endm;
   }
   gGeoManager->CloseGeometry(); 
-
 }
+//________________________________________________________________________________________________
 int  StGeant4Maker::InitGeom() {
 
   const DbAlias_t *DbAlias = GetDbAliases();
@@ -758,7 +761,7 @@ int  StGeant4Maker::InitGeom() {
       //
       TString  rtag = "r"; rtag += DbAlias[i].tag;
       TString   tag =              DbAlias[i].tag;
-      if ( 0==bfc->GetOption(rtag.Data()) && 0==bfc->GetOption(tag.Data()) ) continue;
+           if ( 0==bfc->GetOption(rtag.Data()) && 0==bfc->GetOption(tag.Data()) ) continue;
       //
       // Get the geometry generation macro
       //
@@ -776,7 +779,6 @@ int  StGeant4Maker::InitGeom() {
       // Cleanup file
       // 
       if (mac) delete [] mac;
-
     }
   }
 
@@ -827,6 +829,9 @@ int StGeant4Maker::Make() {
   // Increment event number
   eventNumber++;
 
+  // Dump the  stack at the end of make
+  //  mMCStack -> StackDump(); 
+
   return kStOK; 
 }
 //________________________________________________________________________________________________
@@ -846,6 +851,21 @@ void StarVMCApplication::InitGeometry(){
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::ConstructSensitiveDetectors() {
+
+  //
+  // This routine registers sensitive detectors to volumes.  Additionally,
+  // in multi-engine mode, this routine is responsible for associating
+  // a physics engine to each volume in the geometry.
+  //
+  // NOTE: physics engines are assigned at the granularity of geometry 
+  // modules.  Users have the ability to specify the physics engine for
+  // a given module (and all volumes defined within) by using the syntax
+  // 
+  // --syst:engine=G3 or --syst:engine=G4
+  //
+  // where "syst" denotes the first four letters of the name of the geometry
+  // module.
+  //
 
   assert(gGeoManager);
 
@@ -911,7 +931,7 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     int efm = engineFromModule( mname.Data() );
 
     ae->SetEngine( engineFromModule( mname.Data() ) );
-    ae->Print();
+    //    ae->Print();
 
     if ( 0==ae->GetSensitive() ) {
       LOG_DEBUG << "Not sensitive = " << volume->GetName() << endm;
@@ -937,10 +957,20 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     // Register this volume to the sensitive detector
 
     auto* mgr = TMCManager::Instance();
-    auto* mc =  TVirtualMC::GetMC();  // Question: Do we need to obtain pointer through TMCManager here?
+    if ( 0 == mgr ) {
 
-    if ( nullptr == mc->GetSensitiveDetector( vname ) ) {
-      mc->SetSensitiveDetector( vname, sd );
+      auto* mc =  TVirtualMC::GetMC();  // Question: Do we need to obtain pointer through TMCManager here?
+      if ( nullptr == mc->GetSensitiveDetector( vname ) ) {
+	mc->SetSensitiveDetector( vname, sd );
+      }
+
+    }
+    else { // multi engine mode
+
+      mgr->Apply( [sd,vname]( TVirtualMC* _mc ) {
+	  _mc->SetSensitiveDetector( vname, sd );
+	});
+
     }
     
     // Register this volume with the sensitive detector
@@ -983,7 +1013,9 @@ void StGeant4Maker::SetEngineForModule( const char* module_, const int engine ) 
 
 }
 //________________________________________________________________________________________________
-  int  StGeant4Maker::ConfigureGeometry() {
+int  StGeant4Maker::ConfigureGeometry() {
+
+  auto* mgr = TMCManager::Instance();
 
   // Iterate overall volumes and set volume specific tracking cuts
   std::map<int, int> media;
@@ -996,10 +1028,16 @@ void StGeant4Maker::SetEngineForModule( const char* module_, const int engine ) 
     if ( media[id]>0 ) continue; // skip if medium already encountered
     AgMLExtension* agmlExt = getExtension(volume);
     if ( 0==agmlExt ) continue;
+    media[id] = id;
     for ( auto kv : agmlExt->GetCuts() ) {
-      LOG_INFO << kv.first << " = " << kv.second << endm;
-      TVirtualMC::GetMC()->Gstpar( media[id]=id, kv.first, kv.second );
-      // TODO: handle multi-engine 
+      if ( 0==mgr ) {
+	TVirtualMC::GetMC()->Gstpar( id, kv.first, kv.second );
+      }
+      else {
+	mgr->Apply( [id,kv]( TVirtualMC* mc ) {
+	    mc->Gstpar( id, kv.first, kv.second );
+	  });
+      }
     }
   }
 
@@ -1075,16 +1113,6 @@ void StGeant4Maker::FinishEvent(){
     myvertex.ge_proc   = v->process();
     myvertex.is_itrmd  = v->intermediate();
 
-    // Fill histograms
-    {
-      float& x = myvertex.ge_x[0];
-      float& y = myvertex.ge_x[1];
-      float& z = myvertex.ge_x[2];
-      float  r2 = x*x + y*y;
-      float  r = sqrt(r2);
-      GetHist("MC:vertex:RvsZ")->Fill(z,r);
-    }
-
     // TODO: map ROOT mechanism to G3 names
 
     // An intermediate vertex with no daughters makes no
@@ -1118,7 +1146,7 @@ void StGeant4Maker::FinishEvent(){
     mytrack.p[0]     = t->px();
     mytrack.p[1]     = t->py();
     mytrack.p[2]     = t->pz();
-    mytrack.e        = t->E();
+    mytrack.e        = t->particle()->Energy();
     mytrack.pt       = t->pt(); // NOTE: starsim secondaries have pt = -999
     mytrack.eta      = t->particle()->Eta();
     mytrack.rapidity = t->particle()->Y();
@@ -1126,6 +1154,8 @@ void StGeant4Maker::FinishEvent(){
     // TODO: particle stop vertices need to be scored
     mytrack.start_vertex_p = truthVertex[ t->start() ];
     mytrack.stop_vertex_p  = truthVertex[ t->stop()  ];
+    // next, track parent
+    mytrack.next_parent_p = truthTrack[ t->start()->parent() ];    
     //__________________________________________ next track
     g2t_track->AddAt(&mytrack);
     itrack++;
@@ -1158,8 +1188,6 @@ void StGeant4Maker::BeginPrimary()
   std::vector<StarMCParticle*>& truthTable    = mMCStack->GetTruthTable();
   truthTable.clear();
 
-  int current = mMCStack->GetCurrentTrackNumber();
-  truthTable.push_back( mMCStack->GetPersistentTrack( current ) );
 
 }
 //________________________________________________________________________________________________
@@ -1183,7 +1211,6 @@ void StGeant4Maker::PreTrack()
 
   mCurrentNode    = navigator->GetCurrentNode();
   mCurrentVolume  = navigator->GetCurrentVolume();
-
 }
 //________________________________________________________________________________________________
 void StarVMCApplication::PostTrack(){ _g4maker->PostTrack(); }
@@ -1440,6 +1467,9 @@ void StGeant4Maker::Stepping(){
 		     vx,vy,vz,mc->TrackStep(), mCurrentTrackingRegion, mPreviousTrackingRegion, (stopped)?"T":"F", mc->CurrentVolPath() ) << endm;
   }
 
+  // Perform any post stepping actions
+  for ( auto f : mPostSteppingActions ) f();
+
 
 }
 //________________________________________________________________________________________________
@@ -1512,3 +1542,8 @@ int StGeant4Maker::Finish() {
 
   return kStOK;
 }
+
+
+
+//________________________________________________________________________________________________
+

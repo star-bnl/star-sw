@@ -11,10 +11,11 @@
 #include <StSensitiveDetector.h> 
 #include <map>
 #include <string>
+#include "StMCParticleStack.h"
 
+#include <functional>
 
 class StGeant4Maker;
-class StMCParticleStack;
 
 class AgMLExtension;
 
@@ -153,6 +154,10 @@ public:
   /// Sets the MC engine for a given module
   void SetEngineForModule( const char* module_, const int engine );
 
+  StMCParticleStack* stack(){ return mMCStack; }
+
+  void AddUserPostSteppingAction( std::function<void()> f ) { mPostSteppingActions.push_back(f); }
+  
 private:
 protected:
 
@@ -220,7 +225,9 @@ protected:
 
   int mDefaultEngine;
 
-  ClassDef(StGeant4Maker,1);
+  std::vector< std::function<void()> > mPostSteppingActions;
+
+  ClassDef(StGeant4Maker,0);
 
 public:
 
