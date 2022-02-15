@@ -1,12 +1,10 @@
 /***************************************************************************
  *
  * StFttPointMaker.cxx
- *
  * Author: jdb 2021
  ***************************************************************************
  *
  * Description: StFttPointMaker - class to fill the StFttPoint in StEvent
- * 
  *
  ***************************************************************************/
 #include <vector>
@@ -78,8 +76,6 @@ StFttPointMaker::Finish()
 Int_t
 StFttPointMaker::Make()
 { 
-    LOG_INFO << "StFttPointMaker::Make()" << endm;
-
     mEvent = (StEvent*)GetInputDS("StEvent");
     if(mEvent) {
         LOG_DEBUG<<"Found StEvent"<<endm;
@@ -108,10 +104,8 @@ StFttPointMaker::Make()
 
 void StFttPointMaker::InjectTestData(){
     mFttCollection->rawHits().clear();
-
     // TODO: inject clean strip hits to test cluster finder
-    // StFttRawHit *hit = new StFttRawHit( sec, rdo, feb, vm, vmm[0].ch, vmm[0].adc, vmm[0].bcid, vmm[0].tb );
-    // hit->setMapping( plane, quadrant, row, strip ) 
+    // should be empty for production code
 }
 
 void StFttPointMaker::MakeLocalPoints(){
@@ -149,51 +143,61 @@ void StFttPointMaker::MakeLocalPoints(){
 void StFttPointMaker::MakeGlobalPoints() {
     for ( StFttPoint * p : mFttCollection->points() ){
 
-        double z = p->plane() * 60;
         float x = p->x();
         float y = p->y();
+        float z = 0.0;
         StThreeVectorD global;
 
-        if ( p->quadrant() == 0 ){
-            global.set( x, y, z );
-        } else if ( p->quadrant() == 1 ){
-            global.set( x + 101.6, -y, z );
-        } else if ( p->quadrant() == 2 ){
-            global.set( -( x + 101.6 ), -y, z );
-        } else if ( p->quadrant() == 3 ){
-            global.set( -x, y, z );
-        }
-
+        // dx is a local shift
+        float dx = 0, dy = 0, dz = 0;
+        // sx is only {1,-1} -> reflected or normal
+        float sx = 0, sy = 0, sz = 0;
+        mFttDb->getGloablOffset( p->plane(), p->quadrant(), dx, sx, dy, sy, dz, sz );
+        global.set( (x + dx) * sx, (y + dy) * sy, (z + dz) * sz );
         p->setXYZ( global );
-
     }
 }
 
 
-StFttPoint * StFttPointMaker::makePoint( StFttCluster * cluH, StFttCluster * cluV ){
+StFttPoint * StFttPointMaker::makePoint( StFttCluster * cluH, StFttCluster * cluV, int mode ){
 
     float x = cluV->x();
     float y = cluH->x();
 
-    float hx1, hx2, hy1, hy2;
-    clusterBounds( cluH, hx1, hy1, hx2, hy2 );
-    float vx1, vx2, vy1, vy2;
-    clusterBounds( cluV, vx1, vy1, vx2, vy2 );
-    
+    // No pad sepearation
+    if ( mode == 0 ) {
+        StFttPoint * p = new StFttPoint();
+        p->setPlane( cluV->plane() );
+        p->setQuadrant( cluV->quadrant() );
+        p->setX( x );
+        p->setY( y );
+        p->addCluster( cluH, kFttHorizontal );
+        p->addCluster( cluV, kFttVertical );
+        mFttCollection->addPoint(p);
+        return p;
+    } else if ( mode == 1 ){ // simple pad separation
+        float hx1, hx2, hy1, hy2;
+        clusterBounds( cluH, hx1, hy1, hx2, hy2 );
+        float vx1, vx2, vy1, vy2;
+        clusterBounds( cluV, vx1, vy1, vx2, vy2 );
+        
 
-    if ( y < vy1 || y > vy2 || x < hx1 || x > hx2 ){
-        return nullptr;
+        if ( y < vy1 || y > vy2 || x < hx1 || x > hx2 ){
+            return nullptr;
+        }
+        
+        StFttPoint * p = new StFttPoint();
+        p->setPlane( cluV->plane() );
+        p->setQuadrant( cluV->quadrant() );
+        p->setX( x );
+        p->setY( y );
+        p->addCluster( cluH, kFttHorizontal );
+        p->addCluster( cluV, kFttVertical );
+        mFttCollection->addPoint(p);
+        return p;
     }
-    
-    StFttPoint * p = new StFttPoint();
-    p->setPlane( cluV->plane() );
-    p->setQuadrant( cluV->quadrant() );
-    p->setX( x );
-    p->setY( y );
-    p->addCluster( cluH, kFttHorizontal );
-    p->addCluster( cluV, kFttVertical );
-    mFttCollection->addPoint(p);
-    return p;
+
+    return nullptr;
 } // makePoint
 
 void StFttPointMaker::clusterBounds( StFttCluster* clu, float &x1, float &y1, float &x2, float &y2 ){

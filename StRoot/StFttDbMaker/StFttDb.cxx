@@ -1,10 +1,8 @@
 /***************************************************************************
- * $id: StFttDb.cxx,v 1.22 2020/12/17 21:01:04 jdb Exp $
- * \author: jdb
+ * StFttDb.cxx
+ * jdb Feb, 2022
  ***************************************************************************
- *
- * Description: This interface between FCS and the STAR database
- *
+ * Description: This interface between FTT and the STAR database
  ***************************************************************************/
 
 #include "StFttDb.h"
@@ -21,6 +19,9 @@ ClassImp(StFttDb)
 
 double StFttDb::stripPitch = 3.2; // mm
 double StFttDb::rowLength = 180; // mm
+double StFttDb::lowerQuadOffsetX = 101.6; // mm
+double StFttDb::idealPlaneZLocations[] = { 280.90499, 303.70498, 326.60501, 349.40499 };
+
 vector<string> StFttDb::orientationLabels = { "Horizontal", "Vertical", "DiagonalH", "DiagonalV", "Unknown" };
 
 
@@ -263,3 +264,44 @@ UChar_t StFttDb::orientation( StFttRawHit * hit ){
     return kFttUnknownOrientation;
 }
 
+void StFttDb::getGloablOffset( UChar_t plane, UChar_t quad, 
+                                float &dx, float &sx,
+                                float &dy, float &sy, 
+                                float &dz, float &sz ){
+    // TODO: connect to DB for calibrated positions. 
+    // for now we use the ideal positions (from simulated geometry)
+    // calibration will come later
+
+    // scale factors
+    sx = 1.0;
+    sy = 1.0;
+    sz = 1.0;
+
+    // shifts
+    dx = 0.0;
+    dy = 0.0;
+    dz = 0.0;
+
+    if ( plane < 4 )
+        dz = StFttDb::idealPlaneZLocations[plane];
+
+    // upper quadrants are not displaced
+    if ( quad == 0 )
+        dx = 0.0; 
+    else if ( quad == 1 )
+        dx = StFttDb::lowerQuadOffsetX;
+    else if ( quad == 2 )
+        dx = StFttDb::lowerQuadOffsetX;
+    else if ( quad == 3 )
+        dx = 0.0;
+
+    // these are the reflections of a pentagon into the symmetric shape for quadrants A, B, C, D
+    if ( quad == 1 )
+        sy = -1.0;
+    else if ( quad == 2 ){
+        sx = -1.0;
+        sy = -1.0;
+    } else if ( quad == 3 )
+        sx = -1.0;
+
+}

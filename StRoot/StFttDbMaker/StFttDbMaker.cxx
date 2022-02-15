@@ -1,10 +1,8 @@
 /***************************************************************************
- * $id: StFttDbMaker.cxx,v 1.0 2020/12/17 21:01:04 jdb Exp $
- * \author: jdb
+ * StFttDbMaker.cxx
+ * jdb
  ***************************************************************************
- *
- * Description: This maker is the interface between FCS and the STAR database
- *
+ * Description: This maker is the interface between FTT and the STAR database
  ***************************************************************************/
 
 #include "StFttDbMaker.h"

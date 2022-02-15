@@ -86,14 +86,11 @@ StFttClusterMaker::Finish()
 Int_t
 StFttClusterMaker::Make()
 { 
-    LOG_INFO << "StFttClusterMaker::Make()" << endm;
-
-
     mEvent = (StEvent*)GetInputDS("StEvent");
     if(mEvent) {
-        LOG_DEBUG<<"Found StEvent"<<endm;
     } else {
-        return kStOk;
+        LOG_WARN<<"No StEvent!"<<endm;
+        return kStWarn;
     }
     mFttCollection=mEvent->fttCollection();
     if(!mFttCollection) {
@@ -102,16 +99,16 @@ StFttClusterMaker::Make()
     }
 
     mFttDb = static_cast<StFttDb*>(GetDataSet("fttDb"));
-
-    LOG_INFO << "Found " << mFttCollection->rawHits().size() << " Ftt Hits" << endm;
     assert( mFttDb );
+
+    LOG_DEBUG << "Found " << mFttCollection->rawHits().size() << " Ftt Hits" << endm;
     ApplyHardwareMap();
 
     
 
     // InjectTestData();
 
-    // net we need to sort the hits into 1D projections
+    // next we need to sort the hits into 1D projections
     // process 1 quadrant (ROB) at a time,
     // process horizontal, vertical or diagonal strips one at a time
 
@@ -178,7 +175,7 @@ StFttClusterMaker::Make()
             }
         } // loop on iRob
     } // nStripsHit
-    LOG_INFO << "Found " << nClusters << " clusters this event" << endm;
+    LOG_DEBUG << "Found " << nClusters << " clusters this event" << endm;
 
     return kStOk;
 } // Make
@@ -213,7 +210,16 @@ void StFttClusterMaker::InjectTestData(){
 
 
 bool StFttClusterMaker::PassTimeCut( StFttRawHit * hit ){
-    return (abs( hit->time() ) <=3); 
+    int time_cut0 = -999;
+    int time_cut1 =  999;
+    int time_cutm = 0;
+    //  in principle it could vary VMM to VMM;
+    mFttDb->getTimeCut(hit, time_cutm, time_cut0, time_cut1);
+    if ( time_cutm == 0 ) // default, cut on bunch crossing
+        return (hit->time() <= time_cut1 && hit->time() >= time_cut0); 
+
+    // cut on timebin
+    return (hit->tb() <= time_cut1 && hit->tb() >= time_cut0);
 }
 
 
@@ -223,8 +229,7 @@ StFttRawHit * StFttClusterMaker::FindMaxAdc( std::vector<StFttRawHit *> hits, si
                              [](const StFttRawHit* a,const StFttRawHit* b) { return a->adc() < b->adc(); });
 
     pos = (itMax - hits.begin());
-    if ( pos >= hits.size() )
-        return nullptr;
+    if ( itMax == hits.end() ) return nullptr;
     return *itMax;
 }
 
@@ -244,9 +249,7 @@ void StFttClusterMaker::SearchClusterEdges( std::vector< StFttRawHit * > hits,
     StFttRawHit *hitLeft = nullptr, *hitRight = nullptr;
 
     while ( searchRight || searchLeft ){
-        if ( mDebug ){
-            LOG_INFO << "LEFT: " << left << ", RIGHT: " << right <<  ", start = " << start << ", size=" << hits.size() << endm;
-        }
+            LOG_DEBUG << "LEFT: " << left << ", RIGHT: " << right <<  ", start = " << start << ", size=" << hits.size() << endm;
         if ( searchRight ){
             if ( right == hits.size() || right == hits.size() - 1 ){ 
                 searchRight = false;
@@ -327,10 +330,6 @@ void StFttClusterMaker::CalculateClusterInfo( StFttCluster * clu ){
 
 std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRawHit * > hits ){
     std::vector<StFttCluster*> clusters;
-    
-    if ( mDebug ){
-        LOG_INFO << "We have " << hits.size() << " hits with duplicates" << endm;
-    }
 
     /* early data (i.e. cosmic data pre dec 10 2021)
      * had duplicates where the hits are identical except 
@@ -376,11 +375,11 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
     while ( maxAdcHit ){
         StFttCluster * clu = new StFttCluster();
 
-        if ( mDebug ){
-            LOG_INFO << "CLUSTER FIND START WITH HITS:" << endm;
+        if ( Debug() ){
+            LOG_DEBUG << "CLUSTER FIND START WITH HITS:" << endm;
             size_t i = 0;
             for ( auto *h : hits ){
-                LOG_INFO << "[" << i << "]" << *h;
+                LOG_DEBUG << "[" << i << "]" << *h;
                 i++;
             }
         }
@@ -394,9 +393,9 @@ std::vector<StFttCluster*> StFttClusterMaker::FindClusters( std::vector< StFttRa
         // Now find the cluster edges
         size_t left = anchor, right = anchor;
         SearchClusterEdges( hits, anchor, left, right);
-        if ( mDebug ){
-            LOG_INFO << "Cluster points ( " << left << ", " << anchor << ", " << right << " )" << endm;
-        }
+        
+        LOG_DEBUG << "Cluster points ( " << left << ", " << anchor << ", " << right << " )" << endm;
+        
         
         // OK now add these hits to the cluster
         for ( size_t i = left; i < right + 1; i++ ){

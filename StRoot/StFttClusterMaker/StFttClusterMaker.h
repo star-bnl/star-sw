@@ -1,13 +1,6 @@
 /***************************************************************************
- *
- * $Id: StFttClusterMaker.h,v 1.3 2019/02/19 20:32:05 fseck Exp $
- *
- * Author: Florian Seck, April 2018
- ***************************************************************************
- *
- * Description: StFttClusterMaker - class to fill the StEvent from DAQ reader:
- * unpack raw data & save StETofHeader & StETofDigis in StETofCollection 
- *
+ * StFttClusterMaker.h
+ * Author: Daniel Brandenburg Feb, 2022
  ***************************************************************************/
 #ifndef STFTTCLUSTERMAKER_H
 #define STFTTCLUSTERMAKER_H
@@ -31,11 +24,11 @@ public:
     ~StFttClusterMaker();
 
 
-    Int_t  Init();
-    Int_t  InitRun( Int_t );
-    Int_t  FinishRun( Int_t );
-    Int_t  Finish();
-    Int_t  Make();
+    int  Init();
+    int  InitRun( int );
+    int  FinishRun( int );
+    int  Finish();
+    int  Make();
 
 private:
     void ApplyHardwareMap();
@@ -54,8 +47,8 @@ private:
 
     StEvent*             mEvent;
     StFttCollection*     mFttCollection;
-    Int_t                mRunYear;
-    Bool_t               mDebug;
+    int                  mRunYear;
+    bool                 mDebug;
     StFttDb*             mFttDb;
 
 

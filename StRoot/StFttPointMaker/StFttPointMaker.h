@@ -40,7 +40,7 @@ private:
     void InjectTestData();
     void MakeLocalPoints();
     void clusterBounds( StFttCluster* clu, float &x1, float &y1, float &x2, float &y2 );
-    StFttPoint *makePoint( StFttCluster * cluH, StFttCluster * cluV );
+    StFttPoint *makePoint( StFttCluster * cluH, StFttCluster * cluV, int mode = 0 );
     void MakeGlobalPoints();
     
     StEvent*             mEvent;

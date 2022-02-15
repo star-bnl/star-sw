@@ -28,9 +28,9 @@ public:
     UChar_t quadrant()   const; // detector quadrant.
     float x() const;  // x position in cell unit at which point intersects the sub-detector in local coordinate
     float y() const;  // y position in cell unit at which point intersects the sub-detector in local coordinate
-    int nParentClusters()   const; // Number of points in the parent cluster.
+    int nClusters() const; // Number of points in the parent cluster.
     StFttCluster* cluster( size_t i); //  Parent cluster of the photon.
-    const StThreeVectorD& xyz()   const; // XYZ position in global STAR coordinate
+    const StThreeVectorD& xyz() const; // XYZ position in global STAR coordinate
 
     void setPlane(UChar_t plane);
     void setQuadrant(UChar_t quad);
@@ -57,14 +57,13 @@ inline UChar_t StFttPoint::plane() const { return mPlane; }
 inline UChar_t StFttPoint::quadrant() const { return mQuadrant; }
 inline float StFttPoint::x() const { return mX; } // x position (cm) in local coords.
 inline float StFttPoint::y() const { return mY; } // y position (cm) in local coords.
-// inline int StFttPoint::nParentClusters() const { return mClusters.size(); } // Number of points in parent cluster
-inline StFttCluster* StFttPoint::cluster( size_t i ) { return mClusters[i % 4]; } //  Parent cluster of the photon.
+inline StFttCluster* StFttPoint::cluster( size_t i ) { if ( i < 4 ) return mClusters[i]; return nullptr; } //  Parent cluster of the photon.
 inline const StThreeVectorD& StFttPoint::xyz() const { return mXYZ; }
 inline void StFttPoint::setPlane(UChar_t plane) { mPlane = plane; }
 inline void StFttPoint::setQuadrant(UChar_t quadrant) { mQuadrant = quadrant; }
 inline void StFttPoint::setX(float xpos) { mX = xpos; }
 inline void StFttPoint::setY(float ypos) { mY = ypos; }
-inline void StFttPoint::addCluster(StFttCluster* cluster, UChar_t dir) { mClusters[dir % 4] = (cluster); }
+inline void StFttPoint::addCluster(StFttCluster* cluster, UChar_t dir) { mClusters[dir] = (cluster); }
 inline void StFttPoint::setXYZ(const StThreeVectorD& p3) { mXYZ = p3; }
 
 #endif  // StFttPoint_h
