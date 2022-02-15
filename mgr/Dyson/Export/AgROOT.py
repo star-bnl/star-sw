@@ -3616,7 +3616,7 @@ class Par(Handler):
         requireAttributes( tag, attr, ['name','value'] )
         
         #document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
-        document.impl( 'module()->AddPar(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )        
+        document.impl( '// parameter %s = %s (deferred)'%(name.lower(),value.lower()), unit=current )        
 class Cut(Handler):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p        
@@ -3628,8 +3628,7 @@ class Cut(Handler):
         value  = attr.get('value')
 
         #document.impl( '// _medium.par("%s") = %s;'%(name,val), unit=current )
-        #document.impl( 'module()->AddCut(active()->GetName(),"%s",%s);'%(name.lower(),value.lower()), unit=current )
-        document.impl( 'active()->AddCut("%s",%s);'%(name.lower(),value.lower()), unit=current )
+        document.impl( '// cut %s = %s (deferred)'%(name.lower(),value.lower()), unit=current )
 
 class Hits(Handler):
 # TODO        
@@ -3721,8 +3720,9 @@ class Instrument(Handler):
             nbits=replacements(nbits).lower()
             mn   =replacements(mn).lower()
             mx   =replacements(mx).lower()
+
             # This could be deprecated...
-            document.impl( 'module()->AddHit( "%s", "%s", %s, %s, %s, "%s");'%( block, meas, nbits, mn, mx, opts ), unit=current )
+            document.impl( '// deferred module()->AddHit( "%s", "%s", %s, %s, %s, "%s");'%( block, meas, nbits, mn, mx, opts ), unit=current )                        
             if self.userHit(meas):
                 toimpl = """
                 {  // Create and register new user-based hit scoring routine
@@ -3733,7 +3733,6 @@ class Instrument(Handler):
                 }
                 """%(meas,meas)
                 document.impl( toimpl, unit=current )
-
 
 class UserHit(Handler):
     def __init__(self): Handler.__init__(self)

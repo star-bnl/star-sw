@@ -1,4 +1,5 @@
 // $Id: StdEdxY2Maker.cxx,v 1.101 2021/05/10 16:54:45 fisyak Exp $
+#ifdef __TFG__VERSION__
 //#define CompareWithToF 
 //#define __CHECK_LargedEdx__
 //#define __KEEP_DX__
@@ -10,11 +11,16 @@
 #endif
 //#define __TEST_DX__
 //#define __LogProb__
-#define __BEST_VERTEX__
 //#define __DEBUG_dEdx__
 //#define __ADD_PROB__
 //#define __BENCHMARKS__DOFIT_ZN__
-//#define __FIT_PULLS__
+#define __FIT_PULLS__
+#define __CHECK_RDOMAP_AND_VOLTAGE__
+#endif /* __TFG__VERSION__ */
+#define __BEST_VERTEX__
+#ifdef __CHECK_RDOMAP_AND_VOLTAGE__
+#include "TProfile3D.h"
+#endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 #include "StTpcdEdxCorrection.h" 
@@ -72,6 +78,7 @@ using namespace units;
 #include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StPidStatus.h"
 #include "dEdxHist.h"
 #if defined(__CHECK_LargedEdx__) || defined( __DEBUG_dEdx__)
@@ -110,6 +117,10 @@ static TH1F *fTracklengthInTpcTotal = 0;
 static TH1F *fTracklengthInTpc = 0;
 #ifdef  __SpaceCharge__
   static TH2F *AdcSC = 0, *AdcOnTrack = 0, *dEOnTrack = 0;
+#endif
+#ifdef __CHECK_RDOMAP_AND_VOLTAGE__
+    static TH3F *AlivePads = 0;
+    static TProfile3D *ActivePads = 0;
 #endif
 //______________________________________________________________________________
 ClassImp(StdEdxY2Maker);
@@ -171,8 +182,10 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
 
   if (! DoOnce) {
     DoOnce = 1;
+    if (! IAttr("SkipdNdx")) {
     if ((GetDate() > 20171201 && m_TpcdEdxCorrection->IsFixedTarget()) ||
 	(GetDate() > 20181201)) fUsedNdx = kTRUE; // use dN/dx for fixed target for Run XVIII and year >= XIX
+    }
     if (TESTBIT(m_Mode, kCalibration)) {// calibration mode
       if (Debug()) LOG_WARN << "StdEdxY2Maker::InitRun Calibration Mode is On (make calibration histograms)" << endm;
       TFile *f = GetTFile();
@@ -385,8 +398,10 @@ Int_t StdEdxY2Maker::Make(){
 	}
 	Int_t sector = tpcHit->sector();
 	if (sector < sectorMin || sector > sectorMax) continue;
-
 	Int_t row    = tpcHit->padrow();
+	Int_t pad    = tpcHit->pad();
+	Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
+	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
 	if (! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
@@ -840,13 +855,38 @@ Int_t StdEdxY2Maker::Make(){
 		       << pEvent->trackNodes().size() << endm;
   }
   if (mHitsUsage) mHitsUsage->Fill(TMath::Log10(TotalNoOfTpcHits+1.), TMath::Log10(NoOfTpcHitsUsed+1.));
-#ifdef  __SpaceCharge__
+#if defined(__SpaceCharge__) || defined(__CHECK_RDOMAP_AND_VOLTAGE__)
   if ((TESTBIT(m_Mode, kCalibration))) {
+#ifdef  __SpaceCharge__
     if (! AdcSC) {
       AdcSC      = new TH2F("AdcSC","ADC total versus z and r",210,-210,210, 70, 50, 190);
       AdcOnTrack = new TH2F("AdcOnTrack","ADC on Track versus z and r",210,-210,210, 70, 50, 190);
       dEOnTrack  = new TH2F("dEOnTrack","Corrected dE on Track versus z and r",210,-210,210, 70, 50, 190);
     }
+#endif
+#ifdef __CHECK_RDOMAP_AND_VOLTAGE__
+    if (! AlivePads || ! ActivePads) {
+      Int_t NoOfPads = 182;
+      if (St_tpcPadConfigC::instance()->iTPC(1)) { // iTpc for all TPC sectors
+	NoOfPads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(1,72);
+      } 
+      Int_t nrows = St_tpcPadConfigC::instance()->numberOfRows(20);
+      //      if (GetTFile()) GetTFile()->cd();
+      AlivePads = new TH3F("AlivePads","Active pads from RDO map, tpcGainPadT0,  and Tpc Anode Voltage:sector:row:pad",24,0.5,24.5,nrows,0.5,nrows+.5,NoOfPads,0.5,NoOfPads+0.5);
+      for (Int_t sector = 1; sector <= 24; sector++) {
+	for(Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
+	  Int_t noOfPadsAtRow = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row); 
+	  if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
+	  for(Int_t pad = 1; pad<=noOfPadsAtRow; pad++) {
+	    Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
+	    if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+	    AlivePads->Fill(sector, row, pad, St_tpcPadGainT0BC::instance()->Gain(sector,row,pad));
+	  }
+	}
+      }
+      ActivePads = new TProfile3D("ActivePads","Cluster Adc:sector:row:pad",24,0.5,24.5,nrows,0.5,nrows+.5,NoOfPads,0.5,NoOfPads+0.5);
+    }
+#endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
     for (UInt_t i = 0; i <= TpcHitCollection->numberOfSectors(); i++) {
       StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
       if (sectorCollection) {
@@ -863,16 +903,25 @@ Int_t StdEdxY2Maker::Make(){
 	      Double_t Z = tpcHit->position().z();
 	      AdcSC->Fill(Z,R, tpcHit->adc());
 	      if (tpcHit->chargeModified() > 0) {
-	      AdcOnTrack->Fill(Z,R, tpcHit->adc());
-	      dEOnTrack->Fill(Z,R, tpcHit->chargeModified());
+		AdcOnTrack->Fill(Z,R, tpcHit->adc());
+		dEOnTrack->Fill(Z,R, tpcHit->chargeModified());
 	      }
+#ifdef __CHECK_RDOMAP_AND_VOLTAGE__
+	      Int_t sector = tpcHit->sector();
+	      Int_t row    = tpcHit->padrow();
+	      Int_t pad    = tpcHit->pad();
+	      Int_t adc    = tpcHit->adc();
+	      Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
+	      if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+	      ActivePads->Fill(sector, row, pad, adc);
+#endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
 	    }
 	  }
 	}
       }
     }
   }
-#endif /* __SpaceCharge__ */
+#endif /* __SpaceCharge__ || __CHECK_RDOMAP_AND_VOLTAGE__ */
 #ifdef __BENCHMARKS__DOFIT_ZN__
   Float_t rt, cp;
   myBenchmark.Summary(rt,cp);

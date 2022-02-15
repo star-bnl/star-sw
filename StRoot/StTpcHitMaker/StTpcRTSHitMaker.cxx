@@ -7,7 +7,6 @@
  *
  * Description:  Make clusters from StTpcRawData and fill the StEvent      */
 #include <assert.h>
-#include <sys/types.h>
 #include <stdio.h>
 #include "StTpcHitMaker.h"
 #include "StTpcRTSHitMaker.h"
@@ -167,7 +166,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	  gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,rowO,pad);
 	}
       }
-      // daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
+      // daq_dta::finalize(uint32_t obj_cou, int sec, int row, int pad)
       dta_Tpx->finalize(Npads+1,sector,rowO);
 #if 0
       if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
@@ -201,7 +200,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	  cout << Form("Gain/T0 s/r/p %3i/%3i/%3i %7.2f %7.2f",sector,row,pad,gain[pad].gain,gain[pad].t0) << endl;
 #endif /* __DEBUG_GAIN__ */
 	}
-	// daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
+	// daq_dta::finalize(uint32_t obj_cou, int sec, int row, int pad)
 	dta_iTpc->finalize(Npads+1,sector,row);
 #if 0
 	if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
@@ -408,7 +407,7 @@ Int_t StTpcRTSHitMaker::Make() {
 #ifdef __BENCHMARK__
 	    //	    myBenchmark->Start("StTpcRTSHitMaker::Make::finalize");
 #endif
-	    // daq_dta::finalize(u_int obj_cou, int s=0, int row=0, int pad=0) ;
+	    // daq_dta::finalize(uint32_t obj_cou, int s=0, int row=0, int pad=0) ;
 	    dta->finalize(l,sector,rowO,pad);
 #ifdef __BENCHMARK__
 	    //	    myBenchmark->Stop("StTpcRTSHitMaker::Make::finalize");
@@ -457,8 +456,10 @@ Int_t StTpcRTSHitMaker::Make() {
 	}
 	if (! dtaX) continue;
 	daq_dta *dd = dtaX;
+#ifndef __TFG__VERSION__
 	Double_t ADC2GeV = 0;
 	Int_t rowOld = -1;
+#endif /* ! __TFG__VERSION__ */
 	static Int_t iBreak = 0;
 	while(dd && dd->iterate()) {
 	  if (Debug()) {
@@ -502,11 +503,21 @@ Int_t StTpcRTSHitMaker::Make() {
 	    Int_t rowO = dd->row;
 	    Int_t padrow  = rowO;
 	    if (! iTpcType && St_tpcPadConfigC::instance()->iTPC(sector) && rowO > 13)  padrow = rowO + 40 - 13;
+	    Int_t row = padrow;
+	    Float_t pad  = cld.pad;
+	    Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
+	    if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+	    
 	    StTpcPadCoordinate Pad(dd->sec, padrow, cld.pad, cld.tb); PrPP(Make,Pad);
 	    static StTpcLocalSectorCoordinate LS;
 	    static StTpcLocalCoordinate L;
 	    transform(Pad,LS,kFALSE,kTRUE); PrPP(Make,LS); // don't useT0, useTau                  
 	    transform(LS,L);                                                                             PrPP(Make,L);
+	    UInt_t hw = 1;   // detid_tpc
+	    //yf        if (isiTpcSector) hw += 1U << 1;
+	    hw += dd->sec << 4;     // (padrow/100 << 4);   // sector
+	    hw += padrow  << 9;     // (padrow%100 << 9);   // padrow
+#ifndef __TFG__VERSION__
 	    if (padrow != rowOld) {
 	      rowOld = padrow;
 	      Double_t gain = St_tpcPadConfigC::instance()->IsRowInner(dd->sec,padrow) ? 
@@ -518,15 +529,10 @@ Int_t StTpcRTSHitMaker::Make() {
 	      ADC2GeV = ((Double_t) St_tss_tssparC::instance()->ave_ion_pot() * 
 			 (Double_t) St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 	    }
-	    UInt_t hw = 1;   // detid_tpc
-	    //yf        if (isiTpcSector) hw += 1U << 1;
-	    hw += dd->sec << 4;     // (padrow/100 << 4);   // sector
-	    hw += padrow  << 9;     // (padrow%100 << 9);   // padrow
-#if 1
 	    Double_t q = ADC2GeV*cld.charge;
 #else /* used in TFG till 07/31/20 */
 	    Double_t q = 0; 
-#endif
+#endif /* ! __TFG__VERSION__ */
 	    Id++;
 	    StTpcHit *hit = StTpcHitMaker::StTpcHitFlag(L.position(),hard_coded_errors,hw,q
 							, (UChar_t ) 0  // counter 

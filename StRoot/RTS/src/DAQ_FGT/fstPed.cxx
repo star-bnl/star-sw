@@ -135,7 +135,7 @@ int fstPed::run_stop()
 		int evts = fgt_stat[r].evts ;
 
 		if(fgt_stat[r].err) {
-			LOG(ERR,"RDO %d: %d errors in %d events",r+1,fgt_stat[r].err,evts) ;
+			LOG(WARN,"RDO %d: %d errors in %d events [but this is questionable]",r+1,fgt_stat[r].err,evts) ;
 		}
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
@@ -827,7 +827,7 @@ double fstPed::do_thresh(double ns, int k, int do_log)
 		b_all_all += b_all ;
 
 		if(err) {
-			LOG(ERR,"ARC %d: masked %d, misconfigd %d, bad %d, bad ped %d, unknown %d of %d all",
+			LOG(WARN,"ARC %d: masked %d, misconfigd %d, bad %d, bad ped %d, unknown %d of %d all",
 			    r+1,b_masked,b_misconfigured,b_bad,b_ped_0,b_unknown,b_all) ;
 
 		}

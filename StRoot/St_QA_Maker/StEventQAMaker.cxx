@@ -45,6 +45,11 @@
 //epd
 #include "StEpdCollection.h"
 
+//fcs
+#define SKIPDefImp
+#include "StSpinPool/StFcsPi0FinderForEcal/StFcsPi0FinderForEcal.cxx"
+#undef SKIPDefImp
+
 
 static StEmcGeom* emcGeom[4];
 
@@ -100,6 +105,7 @@ StQAMakerBase(name,title,"StE"), event(0), primVtx(0), mHitHist(0), mPmdGeom(0),
   multiplicity = 0;
   qaEvents = 0;
   evtTime = -1;
+  if (GetMaker("fcsDbMkr") && GetMaker("StFcsClusterMaker")) AddMaker(new StFcsPi0FinderForEcal());
 }
 
 //_____________________________________________________________________________
@@ -335,7 +341,9 @@ Int_t StEventQAMaker::Make() {
   }  // allTrigs
 
   // some identified StQAHistSetType values
-  if (run_year >=20) {
+  if (run_year >=23) {
+    if (realData) histsSet = StQA_run22; // for now, everything from run22 on uses this set
+  } else if (run_year >=20) {
     if (realData) histsSet = StQA_run19; // for now, everything from run19 on uses this set
   } else if (run_year >=19) {
     if (realData) histsSet = StQA_run18; // for now, everything from run18 on uses this set
@@ -394,6 +402,7 @@ Int_t StEventQAMaker::Make() {
       case (StQA_run17):
       case (StQA_run18):
       case (StQA_run19):
+      case (StQA_run22):
       case (StQA_AuAu) :
       case (StQA_dAu)  : break;
       default: nEvClasses=1; evClasses[0] = 1;
@@ -446,7 +455,7 @@ Int_t StEventQAMaker::Make() {
     if (makeStat != kStOk) break;
   }
   qaEvents++;
-  return makeStat;
+  return (makeStat == kStOk ? StMaker::Make() : makeStat);
 }
 
 

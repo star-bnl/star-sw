@@ -30,6 +30,7 @@ TDataSet *AgModule::Geom()
   else           return mGeomSet;
 };
 
+<<<<<<< HEAD
 Bool_t AgModule::AddHit( string _for, string meas, Float_t bitns, Float_t mn, Float_t mx, string opts )
 {
   /* deprecated */
@@ -49,6 +50,8 @@ Bool_t AgModule::AddPar( string block, string cut, Float_t value )
 };
 
 
+=======
+>>>>>>> 2a83e65bc902df19461c57074634636af6ff349b
 // ---------------------------------------------------------------------------------------------
 AgBlock *AgModule::AddBlock( const Char_t *name, AgBlock *_block )
 {
