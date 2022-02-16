@@ -810,10 +810,10 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoMan
 
    mGemTofGeom = (maker->GetDateTime().GetYear() >=2013);
 
-   if ( starHall )
-     InitFrom( *starHall );
-   else if ( geoManager )
+   if ( geoManager )
      InitFrom( *geoManager );
+   else    if ( starHall )
+     InitFrom( *starHall );
    else {
      LOG_ERROR << "StBTofGeometry::Init - Cannot build BTOF geometry without Geant or TGeo input" << endm;
    }
