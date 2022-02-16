@@ -46,7 +46,6 @@ StFcsPi0FinderForEcal::~StFcsPi0FinderForEcal() {}
 //-----------------------
 Int_t StFcsPi0FinderForEcal::Init() {
    mFcsDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
-   mFcsDb->setDbAccess(0);
    if (!mFcsDb) {
       LOG_ERROR << "StFcsEventDisplay::InitRun Failed to get StFcsDbMaker" << endm;
       return kStFatal;
@@ -160,7 +159,7 @@ Int_t StFcsPi0FinderForEcal::Init() {
 Int_t StFcsPi0FinderForEcal::Finish() {
    if (filename.length() == 0) return kStOk;
    const char* fn = filename.c_str();
-   TFile* MyFile = new TFile(fn, "RECREATE");
+   TFile MyFile(fn, "RECREATE");
    h1_num_entries->Write();
    h1_inv_mass_cluster->Write();
    h1_Zgg_cluster->Write();
@@ -207,7 +206,7 @@ Int_t StFcsPi0FinderForEcal::Finish() {
    h2_cluster_dgg_vs_E1pE2->Write();
    h2_point_dgg_vs_E1pE2->Write();
 
-   MyFile->Close();
+   MyFile.Close();
    return kStOK;
 }
 
@@ -242,7 +241,7 @@ Int_t StFcsPi0FinderForEcal::Make() {
 	LOG_WARN << "No TriggerData found in StEvent nor Mudst. No TOFMult cut"<<endm;
       }
 
-      //ZVERTEX
+      //TPC ZVERTEX
       float zTPC=-999.0;
       StPrimaryVertex* tpcvtx = event->primaryVertex();
       if(tpcvtx) {
@@ -251,10 +250,16 @@ Int_t StFcsPi0FinderForEcal::Make() {
 	StMuPrimaryVertex* mutpcvtx=StMuDst::primaryVertex();
 	if(mutpcvtx) zTPC=mutpcvtx->position().z();
       }
+
+      //BBC ZVERTEX
       float zBBC=-999.0;
       if(trgdata) zBBC = (4096 - trgdata->bbcTimeDifference())*0.016*30.0/2.0;      
       if(zBBC<-200 || zBBC>200) zBBC=-999;
-      float zVPD=StMuDst::btofHeader()->vpdVz();
+
+      //VPD ZVERTEX from MuDst(TOF data)
+      float zVPD=-999.0;
+      if(StMuDst::btofHeader()) zVPD=StMuDst::btofHeader()->vpdVz();
+
       LOG_INFO << Form("ZTPX = %6.2f ZBBC = %6.2f ZVPD = %6.2f",zTPC,zBBC,zVPD) << endm;
 
       //test getLorentzVector
