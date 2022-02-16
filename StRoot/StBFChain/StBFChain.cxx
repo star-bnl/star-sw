@@ -784,16 +784,12 @@ Int_t StBFChain::Instantiate()
     // Use status tables for raw BEMC data (helpful for QA)
     if ( maker == "StEmcRawMaker" && GetOption("BEmcChkStat"))
       mk->SetAttr("BEmcCheckStatus",kTRUE);
-<<<<<<< HEAD
-    
-=======
 
     // trigger simu maker
     if ( maker == "StTriggerSimuMaker" && GetOption("picoWrite") ) {
       mk->SetMode(10);  // picoDst production
     }
 
->>>>>>> upstream/main
     // MuDST and ezTree. Combinations are
     //  ezTree         -> ezTree only
     //  CMuDST         -> regular MuDST only
