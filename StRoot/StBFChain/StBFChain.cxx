@@ -655,6 +655,11 @@ Int_t StBFChain::Instantiate()
     if ( maker == "StEmcRawMaker" && GetOption("BEmcChkStat"))
       mk->SetAttr("BEmcCheckStatus",kTRUE);
 
+    // trigger simu maker
+    if ( maker == "StTriggerSimuMaker" && GetOption("picoWrite") ) {
+      mk->SetMode(10);  // picoDst production
+    }
+
     // MuDST and ezTree. Combinations are
     //  ezTree         -> ezTree only
     //  CMuDST         -> regular MuDST only

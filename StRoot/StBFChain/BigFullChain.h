@@ -1960,7 +1960,9 @@ Bfc_st BFC[] = { // standard chains
 #endif /* __NoStrangeMuDst__ */
   {"RMuDST"    ,"","","CMuDST"   ,"","","reads Common MuDST, do not disactivate if no output files",kFALSE},
 
-  {"picoWrite" ,"","PicoChain","picoDst","StPicoDstMaker",""               ,"Writes picoDST format",kFALSE},
+  {"trgSimu"        ,"","",""       ,"StTriggerSimuMaker","StTriggerUtilities","trigger simu maker",kFALSE},
+
+  {"picoWrite" ,"","PicoChain","trgSimu,picoDst","StPicoDstMaker",""       ,"Writes picoDST format",kFALSE},
   {"picoRead"  ,"","PicoChain","picoDst","StPicoDstMaker",""           ,"WritesRead picoDST format",kFALSE},
   {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
   {"PicoVtxVpd"     ,"","","-PicoVtxDefault"             ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
