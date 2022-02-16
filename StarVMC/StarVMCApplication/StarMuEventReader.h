@@ -16,9 +16,11 @@ public:
   Int_t Skip(Int_t Nskip);
   Int_t ReadEvent(Int_t N = 0);
   void  SetMuDstFile(const Char_t *muDstFile);
+  static void  UseGlobals() {fgUseOnlyPrimaries = kFALSE;}
 private:
 protected:
   TTreeIter *fMuDstIter;
+  static Bool_t fgUseOnlyPrimaries;
   ClassDef( StarMuEventReader, 1 );
 };
 
