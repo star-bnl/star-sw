@@ -28,6 +28,11 @@ public:
              unsigned short ns, unsigned short ehp, unsigned short dep, unsigned short ch, 
              float e);
     ~StMuFcsHit();
+
+    virtual void Clear (Option_t * opt=""){
+        TObject::Clear(opt);
+        if(mData) delete mData;
+    }
     
     unsigned short zs() const;
     unsigned short detectorId() const;
