@@ -1,5 +1,5 @@
 #! /usr/bin/tcsh -f
-#echo "pwd = $PWD"
+#echo "pwd = $PWD"xf
 #set dir = `basename ${PWD}`; #11p5GeV.B
 #set topdir = `dirname ${PWD}`;
 #set top = `basename  ${topdir}`
@@ -82,3 +82,15 @@ rsync -avrz -h  --include='*.root'  --exclude='*.*' /direct/gpfs02/eic/DATA/PYTH
 foreach r (`ls -1d st*.root | awk -F_ '{print $3}' | sort -u`)
   mkdir -p P21ic_calib/2019/169/${r}; mv st*${r}*event.root P21ic_calib/2019/169//${r}/
 end
+
+
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' .  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget  >& Dst.log &
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' .  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget  >& Dst3.log &
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' .  ~/work_tpc/reco/2018/Efficienes/AuAu3p85GeV_fixedTarget_2018  >& Dst3.log &
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' .  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j >& Dst.log &
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/H4LtpFixedFlat >& Dst.log &
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/He4LFixedFlat >& Dst.log &
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/H3LdpFixedFlat >& Dst.log &
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/He4LFixedFlat>& Dst.log &
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/wxsork_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/He5LFixedFlat >& Dst.log &
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/H3LdpFixedFlat >& Dst.log &

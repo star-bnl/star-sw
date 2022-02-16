@@ -10,7 +10,8 @@
   setenv STARFPE NO
 #  setup 64b
 #  setup 32b
-#  starver TFG20c
+#  starver TFG22a
+  starver TFG20j
 #  starver .DEV2
   echo $INPUTFILE0 | grep ':'
   if (! $?) then
@@ -37,7 +38,8 @@
                 H2LrFixedpFlat H2LFixedpFlat \
                 H3LdpFixedpFlat H3LFixedpFlat H3LrFixedpFlat H3RLFixedpFlat \
                 H4LtpFixedpFlat H4L2dFixedpFlat H4LFixedpFlat H5LFixedpFlat H6L3FixedpFlat H6LFixedpFlat \
-                He4LFixedpFlat  \
+                He4LFixedFlat He4LFixedpFlat  \
+                He5LFixedFlat \
                 He5L3FixedpFlat He5LFixedpFlat He5Li5FixedpFlat \
                 He6L3adFixedpFlat He6L3FixedpFlat He6LFixedpFlat \
                 He7L3FixedpFlat He7LFixedpFlat \
@@ -103,10 +105,12 @@
     if ( -r ../xyz.root) ln -s ../xyz.root PVxyz.root 
   endif
   if ( ! -r ${file}) then
-    root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
+#    root.exe -q -b -x 'bfc.C('${f}','${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
+    root.exe -q -b -x 'bfc.C('${N}',"'${Chain}'",0,"'${file}'","'${tag}'")' &gt;&amp; ${logFile}
   endif
 </command>
-<input URL="command:RunId.pl 1 1500 200 K_S0" />
+<!-- <input URL="command:RunId.pl 1 1500 200 K_S0" /> -->
 <!-- <input URL="command:RunId.pl 1 500 500 K_S0" /> -->
 <!-- <input URL="command:RunId.pl 1 1 10 K_S0" /> -->
+<input URL="command:RunId.pl 1 10 100 K_S0" />
 </job>

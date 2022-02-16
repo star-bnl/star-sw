@@ -53,16 +53,19 @@
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
-<!-- <input URL="file:/hlt/cephfs/daq/2019/054/20054064/hlt*.daq" /> -->
-<!-- <input URL="command:daq_2019.pl" /> -->
-<!-- <input URL="file:/hlt/cephfs/daq/2019/06*/*/hlt*.daq" /> -->
-<!-- <input URL="file:/gpfs01/star/daq/2019/071/20071001/st_physics_2007100*.daq" /> -->
-<!-- <input URL="file:/hlt/cephfs/daq/2019/354/20354003/hlt*.daq" /> -->
-<!-- <input URL="command:daq_2020.pl" /> -->
-<!-- <input URL="command:daq_2020dR.pl" /> -->
-<!-- <input URL="command:daq_2020d.pl" /> -->
-<!-- <input URL="file:/hlt/cephfs/daq/2019B/*/*/st_physics_adc*.daq" /> -->
-<!-- <input URL="file:/hlt/cephfs/daq/2019B/087/20087007/st_physics_adc_20087007_raw_0000005.daq" /> -->
-<!-- <input URL="file:/hlt/cephfs/daq/2019B/production_19GeV_2019/*/*/*adc*.daq" /> -->
+<!-- 
+<input URL="file:/hlt/cephfs/daq/2019/054/20054064/hlt*.daq" />
+<input URL="command:daq_2019.pl" />
+<input URL="file:/hlt/cephfs/daq/2019/06*/*/hlt*.daq" />
+<input URL="file:/gpfs01/star/daq/2019/071/20071001/st_physics_2007100*.daq" />
+<input URL="file:/hlt/cephfs/daq/2019/354/20354003/hlt*.daq" />
+<input URL="command:daq_2020.pl" />
+<input URL="command:daq_2020dR.pl" />
+<input URL="command:daq_2020d.pl" />
+<input URL="file:/hlt/cephfs/daq/2019B/*/*/st_physics_adc*.daq" />
+<input URL="file:/hlt/cephfs/daq/2019B/087/20087007/st_physics_adc_20087007_raw_0000005.daq" />
+<input URL="file:/hlt/cephfs/daq/2019B/production_19GeV_2019/*/*/*adc*.daq" />
 <input URL="file:/hlt/cephfs/daq/2019B/production_14p5GeV_2019/*/*/*adc*.daq" />
+-->
+<input URL="command:daqList.pl '/hlt/cephfs/daq/2019B/production_19GeV_2019/*/*/*adc*.daq'" />
 </job>

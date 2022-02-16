@@ -5,6 +5,7 @@
 #include "StMaker.h"
 #include "StEvtHddr.h"
 #include "TDatabasePDG.h"
+Bool_t    StarMuEventReader::fgUseOnlyPrimaries = kTRUE;
 //________________________________________________________________________________
 void StarMuEventReader::SetMuDstFile(const Char_t *muDstFile) {
   TString MuDstF(muDstFile);
@@ -40,8 +41,6 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
   static const Int_t*&      PrimaryTracks_mNSigmaProton              = (*fMuDstIter)("PrimaryTracks.mNSigmaProton");
   static const Int_t&       NoGlobalTracks                           = (*fMuDstIter)("GlobalTracks");
   static const Short_t*&    GlobalTracks_mFlag                       = (*fMuDstIter)("GlobalTracks.mFlag");
-#define __USE_GLOBAL__
-#ifdef __USE_GLOBAL__
   static const Float_t*&    GlobalTracks_mP_mX1                      = (*fMuDstIter)("GlobalTracks.mP.mX1");
   static const Float_t*&    GlobalTracks_mP_mX2                      = (*fMuDstIter)("GlobalTracks.mP.mX2");
   static const Float_t*&    GlobalTracks_mP_mX3                      = (*fMuDstIter)("GlobalTracks.mP.mX3");
@@ -53,7 +52,6 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
   static const Int_t*&      GlobalTracks_mNSigmaPion                 = (*fMuDstIter)("GlobalTracks.mNSigmaPion");
   static const Int_t*&      GlobalTracks_mNSigmaKaon                 = (*fMuDstIter)("GlobalTracks.mNSigmaKaon");
   static const Int_t*&      GlobalTracks_mNSigmaProton               = (*fMuDstIter)("GlobalTracks.mNSigmaProton");
-#endif
   static const Double_t __SIGMA_SCALE__ = 1000.;
  NEXT:
   if (! fMuDstIter->Next()) {fStatus =  kStEOF; return fStatus;}
@@ -135,7 +133,7 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
 			    kPPrimary, ntrack, 1., 2);
     }
   }
-#ifdef __USE_GLOBAL__
+  if (! fgUseOnlyPrimaries) {
   for (Int_t kg = 0; kg < NoGlobalTracks; kg++) {
     if (GlobalTracks_mFlag[kg] < 100) continue;
     nSigmaMin = 1e9;
@@ -175,7 +173,7 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
   NEXTGL:
     continue;
   }
-#endif
+  }
   if ( Debug() ) fStarStack->Print();
   if (! ntrack) goto NEXT;
   return kStOK;
