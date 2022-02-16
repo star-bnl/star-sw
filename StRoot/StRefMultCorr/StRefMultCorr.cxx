@@ -788,11 +788,6 @@ Double_t StRefMultCorr::getWeight() { //const
   // Invalid z-vertex
   if( !isZvertexOk() ) return Weight ;
 
-  // 200 GeV Isobar
-  if(mParameterIndex==36||mParameterIndex==37) {
-    return getShapeWeight_SubVz2Center();
-  }
-
   const Double_t par0 =   mPar_weight[0][mParameterIndex];
   const Double_t par1 =   mPar_weight[1][mParameterIndex];
   const Double_t par2 =   mPar_weight[2][mParameterIndex];
