@@ -92,4 +92,5 @@ rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/work_tpc/rec
 rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/He4LFixedFlat >& Dst.log &
 rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/H3LdpFixedFlat >& Dst.log &
 rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/He4LFixedFlat>& Dst.log &
-rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/He5LFixedFlat >& Dst.log &
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/wxsork_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/He5LFixedFlat >& Dst.log &
+rsync -avrz -h  --include='*Dst.root'  --exclude='*.*' *Dst.root  ~/work_tpc/reco/2019/Efficienes/AuAu3p85GeV_fixedTarget/TFG20j/H3LdpFixedFlat >& Dst.log &
