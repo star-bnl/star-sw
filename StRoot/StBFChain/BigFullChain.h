@@ -1640,7 +1640,6 @@ Bfc_st BFC[] = { // standard chains
                                                                                                     kFALSE},
   {"fstUtil"  , "", "", "",          "",       "StFstUtil",    "Fst Utilities",                     
                                                                                                     kFALSE},
-
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"sstdat"      ,"","","sst_daq"                             ,"","","SST full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
