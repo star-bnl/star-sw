@@ -27,8 +27,8 @@ void AgMLExtension::Print( const char* opts ) {
 	   << mSensitive << " tracking="
 	   << mTracking << " nbranch="
 	   << mBranchings << " nuser="
-	   << mHitScoring.size() << " engine="
-    	   << (mEngine>=0 && mEngine < 2) ? en[mEngine] : "invalid!? " 
+    //	   << mHitScoring.size() << " engine="
+    //    	   << (mEngine>=0 && mEngine < 2) ? en[mEngine] : "invalid!? " 
 	   << endm;
 
 }
