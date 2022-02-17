@@ -45,6 +45,7 @@
 #include "Jevp/StJevpBuilders/mtdBuilder.h"
 //#include "Jevp/StJevpBuilders/tpxBuilder.h"
 #include "Jevp/StJevpBuilders/tpcBuilder.h"
+#include "Jevp/StJevpBuilders/laserBuilder.h"
 #include "Jevp/StJevpBuilders/trgBuilder.h"
 #include "Jevp/StJevpBuilders/upcBuilder.h"
 //#include "Jevp/StJevpBuilders/fgtBuilder.h"
@@ -929,6 +930,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 	builders.Add(new mtdBuilder(this));
 	//builders.Add(new tpxBuilder(this));
 	builders.Add(new tpcBuilder(this));
+	builders.Add(new laserBuilder(this));
 	builders.Add(new trgBuilder(this));
 	builders.Add(new upcBuilder(this));
 	//builders.Add(new fgtBuilder(this));

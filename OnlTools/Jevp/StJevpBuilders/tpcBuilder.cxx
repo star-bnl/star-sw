@@ -15,7 +15,7 @@
 #include <math.h>
 #include "tpcBuilder.h"
 #include <RTS/include/rtsLog.h>
-#include "LaserReader.h"
+//#include "LaserReader.h"
 
 
 // TPC Jevp builder
@@ -67,7 +67,7 @@ tpcBuilder::tpcBuilder(JevpServer *parent) : JevpBuilder(parent) {
   memset(&extras, 0, sizeof(extras));
 
   setPhiAngleMap();
-  laserReader = new LaserReader();
+  //laserReader = new LaserReader();
 
 
 }
@@ -85,7 +85,7 @@ tpcBuilder::~tpcBuilder() {
     if(extras.array[i]) delete extras.array[i];
   }
 
-  delete laserReader;
+  //  delete laserReader;
 }
 
 void tpcBuilder::initialize(int argc, char *argv[]) {
@@ -229,7 +229,7 @@ void tpcBuilder::initialize(int argc, char *argv[]) {
   contents.h_tpx_chargeStep_s23 = new TH1D("h_tpx_chargeStep_s23","TPC adc vs time sector#23",512,0,512);
   contents.h_tpx_chargeStep_s24 = new TH1D("h_tpx_chargeStep_s24","TPC adc vs time sector#24",512,0,512);
  
-  contents.h_tpc_drift_vel = new TH1D("h_tpc_drift_vel", "TPC Drift Velocity (cm/us)",400,5.4,5.8);
+  //contents.h_tpc_drift_vel = new TH1D("h_tpc_drift_vel", "TPC Drift Velocity (cm/us)",400,5.4,5.8);
 
   contents.h_itpc_phi_charge = new TH1D("h_itpc_phi_charge","Azimuthal Distribution of iTPC Charge",360,-180,180);
   contents.h_itpc_sector_charge = new TH1D("h_itpc_sector_charge","iTPC Charge per Sector",24,0.5,24.5);
@@ -589,7 +589,7 @@ void tpcBuilder::initialize(int argc, char *argv[]) {
   plots[++n] = new JevpPlot(contents.h_tpx_chargeStep_s24);
   plots[n]->addHisto(extras.cl_tpx_chargeStep_s24);
  
-  plots[++n] = new JevpPlot(contents.h_tpc_drift_vel);
+  //plots[++n] = new JevpPlot(contents.h_tpc_drift_vel);
 
   plots[++n] = new JevpPlot(contents.h_itpc_phi_charge);
   plots[n]->addHisto(extras.cl_itpc_phi_charge);
@@ -704,11 +704,11 @@ void tpcBuilder::initialize(int argc, char *argv[]) {
 void tpcBuilder::startrun(daqReader *rdr) {
   LOG("JEFF", "tpcBuilder starting run #%d",rdr->run);
   resetAllPlots();
-  laserReader->resetAll();
+  //laserReader->resetAll();
   n_cld = 0;
   n_adc = 0;
   nlasers = 0;
-  drift_vel = 0;
+  //drift_vel = 0;
   event_no=0;
   run = rdr->run;
 
@@ -1157,13 +1157,15 @@ void tpcBuilder::event(daqReader *rdr)
 #if checklaser
     {
       
-      LOG(DBG, "Got a laser...");
+	LOG(DBG, "Got a laser...");
 
       contents.tpc_pix_occ_laser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
       extras.tpc_clpix_occ_laser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
       contents.itpc_pix_occ_laser->Fill(100.0 * (double)itpc_pixel_count / (itpc_max_channels * 400.0));
       extras.itpc_clpix_occ_laser->Fill(100.0 * (double)itpc_pix_count_cl / (itpc_cl_max_channels * 400.0));
 
+
+      /* Remove lasers from tpcBuilder
       double vDrift = laserReader->Make(rdr);
      
       LOG("JEFF","Laser Event Processed: run=%d evt=%d vDrift=%lf total_tpc_evts=%d",run, rdr->event_number, vDrift, numberOfEventsRun);
@@ -1198,6 +1200,7 @@ void tpcBuilder::event(daqReader *rdr)
 	  
 	  LOG("JEFF", "Wrote laser to .l4_drift_velocity file %lf %d", drift_vel, run);
       }
+      */
     }
 #endif
     break;

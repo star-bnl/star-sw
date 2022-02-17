@@ -8,13 +8,13 @@ class daqReader;
 
 #include <math.h>
 
-class LaserReader;
+//class LaserReader;
 
 class tpcBuilder : public JevpBuilder {
  public:
   int run;
   int nlasers;
-  double drift_vel;
+  //double drift_vel;
 
   int tpcDataInThisRun;
 
@@ -175,7 +175,7 @@ class tpcBuilder : public JevpBuilder {
       TH1 *h_tpx_chargeStep_s23;
       TH1 *h_tpx_chargeStep_s24;
 
-      TH1 *h_tpc_drift_vel;
+	//TH1 *h_tpc_drift_vel;
 
       TH1 *h_tpx_phi_charge;
       TH1 *h_tpx_sector_charge;
@@ -269,7 +269,7 @@ class tpcBuilder : public JevpBuilder {
     
   void  setPhiAngleMap();
   float mPhiAngleMap[24][72][144];
-  LaserReader *laserReader;
+  //LaserReader *laserReader;
 
   ClassDef(tpcBuilder, 1);
 };
