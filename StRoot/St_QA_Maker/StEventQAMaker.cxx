@@ -2961,7 +2961,6 @@ void StEventQAMaker::MakeHistTPC() {
                     m_tpc_adc_chargepersector->Fill(sector,pixV[iii].adc());
                   }
                 }
-                //pixV[iii].Print();                                                                                                                      
               }
               else {//TPX rows                                                                                                                            
                 m_tpc_adc_chargevstbTPX[sector-1]->Fill(pixV[iii].timebin(),pixV[iii].adc());
