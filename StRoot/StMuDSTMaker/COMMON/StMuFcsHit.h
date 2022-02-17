@@ -30,8 +30,7 @@ public:
     ~StMuFcsHit();
 
     virtual void Clear (Option_t * opt=""){
-        TObject::Clear(opt);
-        if(mData) delete mData;
+        mData.Set(0);
     }
     
     unsigned short zs() const;
@@ -44,8 +43,8 @@ public:
     unsigned int   nTimeBin() const;
     unsigned short timebin(int i) const;
     unsigned short data(int i) const;
-    unsigned short * data() const { return (unsigned short*)mData->GetArray();}
-    unsigned int nData() const { return mData->GetSize(); };
+    unsigned short * data() const { return (unsigned short*)mData.GetArray();}
+    unsigned int nData() const { return mData.GetSize(); };
     unsigned short adc(int i) const;
     unsigned short flag(int i) const;
     int   adcSum() const;
@@ -102,7 +101,7 @@ protected:
     UInt_t   mNPeak=0;        // number of peaks found
     Float_t  mEnergy=0.0;     // corrected energy
     StMuFcsCluster* mCluster=0; // pointer to cluster this hit belongs
-    TArrayS* mData=0;         // 12bit ADC values + flag at highest 4 bits, array of timebin
+    TArrayS mData=0;         // 12bit ADC values + flag at highest 4 bits, array of timebin
     
     ClassDef(StMuFcsHit,1)
 };
