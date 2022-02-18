@@ -64,6 +64,8 @@ public:
         mRocStarTs.clear();
         mMissMatchFlagVec.clear();
         mGoodEventFlagVec.clear();
+        mMissMatchFlagVec.shrink_to_fit();
+        mGoodEventFlagVec.shrink_to_fit();
     }
 
     double    trgGdpbFullTime()   const;
