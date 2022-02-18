@@ -29,7 +29,6 @@
 #include "StarClassLibrary/StPhysicalHelix.hh"
 #include "StarClassLibrary/PhysicalConstants.h"
 
-#include "StEvent/StEvent.h"
 #include "StEvent/StBTofHeader.h"
 #include "StEvent/StDcaGeometry.h"
 #include "StEvent/StEmcCollection.h"
@@ -862,14 +861,10 @@ Int_t StPicoDstMaker::MakeWrite() {
   Bool_t isFromDaq = kFALSE;
   if ( !mEmcCollection ) {
     isFromDaq = kTRUE;
-//    static StMuEmcUtil emcUtil;
+    static StMuEmcUtil emcUtil;
     // Recover StEmcCollection in case of broken/deleted pointer
     // This usually happens during daq->picoDst converstion
-    StEvent *evt = (StEvent *)GetDataSet("StEvent");
-    if(evt) {
-      mEmcCollection = evt->emcCollection();
-    }
-//    mEmcCollection = emcUtil.getEmc( mMuDst->muEmcCollection() );
+    mEmcCollection = emcUtil.getEmc( mMuDst->muEmcCollection() );
   }
 
   if (mEmcCollection) {

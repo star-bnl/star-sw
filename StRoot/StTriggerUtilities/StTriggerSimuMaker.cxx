@@ -153,14 +153,6 @@ Int_t StTriggerSimuMaker::Init() {
 
     }
 
-    if (GetMode() == 10) {
-      // Set parameters necessary for filling PicoDst in BFC
-      setMC(false);
-      useBemc();
-      useEemc();
-      useOfflineDB();
-      bemc->setConfig(StBemcTriggerSimu::kOffline);
-    }
 
     return StMaker::Init();
 }
