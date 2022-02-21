@@ -28,7 +28,7 @@ typedef std::vector<BFCTimeStamp> StVecBFCTS;
 class St_Bfc : public TTable {
  public:
   ClassDefTable(St_Bfc,Bfc_st)
-  ClassDef(St_Bfc,1) //C++ container for chain/makers status 
+  ClassDef(St_Bfc,0) //C++ container for chain/makers status 
 };
 
 #endif /* __Bfc_st__ */

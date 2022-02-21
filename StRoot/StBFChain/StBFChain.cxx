@@ -638,11 +638,14 @@ Int_t StBFChain::Instantiate()
     }
 
     if (maker == "StStrangeMuDstMaker" && GetOption("CMuDST")&& GetOption("StrngMuDST") ) {
-      TString cmd(Form("StStrangeMuDstMaker *pSMMk = (StStrangeMuDstMaker*) %p;",mk));
-      cmd += "pSMMk->DoV0();";                                 // Set StrangeMuDstMaker parameters
-      cmd += "pSMMk->DoXi();";
-      cmd += "pSMMk->DoKink();";
-      cmd += "pSMMk->SetNoKeep();";                            // Set flag for output OFF
+printf ("UUU Mk = %p\n",mk);
+ProcessLine("StStrangeMuDstMaker::Qwe()");
+      TString cmd(Form("StStrangeMuDstMaker *pSMMk = (StStrangeMuDstMaker*)%pUL;",mk));
+printf("UUUUU mk=%s\n",mk->GetName());
+//??      cmd += "pSMMk->DoV0();";                                 // Set StrangeMuDstMaker parameters
+//??      cmd += "pSMMk->DoXi();";
+//??      cmd += "pSMMk->DoKink();";
+//??      cmd += "pSMMk->SetNoKeep();";                            // Set flag for output OFF
       ProcessLine(cmd);
     }
 
