@@ -160,17 +160,17 @@ foreach my $file (@globs) {
   }
   my $step = 50;
   for (my $i = $i1; $i <= $N; $i += $step) {
-    my $j1 = $i;
-    my $j2 = $i + $step - 1;
-    if ($j2 > $N) {$j2 = $N;}
-    
-    #   my $mufile = $b . ".MuDst.root";
-    #   if (-r $mufile) {next;}
-    #   my $pifile = $b . ".picoDst.root";
-    #   if (-r $pifile) {next;}
-    #   my $blafile = $b . ".event.root";
-    #   if (-r $blafile) {next;}
-    print "string:$file:$j1:$j2\n";
+    my $f = $i;
+    my $l = $i + $step - 1;
+    if ($l > $N) {$l = $N;}
+    my $filel = $b . "_" . $f . "_" . $l;
+       my $mufile = $filel . ".MuDst.root";
+       if (-r $mufile) {next;}
+       my $pifile = $filel . ".picoDst.root";
+       if (-r $pifile) {next;}
+       my $blafile = $filel . ".event.root";
+       if (-r $blafile) {next;}
+    print "string:$file:$f:$l\n";
     $fNo++;
   }
 }
