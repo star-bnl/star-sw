@@ -457,8 +457,26 @@ StarVMCApplication::StarVMCApplication( const Char_t *name, const Char_t *title,
 
 }
 //________________________________________________________________________________________________
+void StGeant4Maker::PrintOptions( const char* opts ) {
+  if ( 0==opts ) {
+    
+    std::cout << std::endl << std::endl;
+    for ( auto o : mCmdOptions ) {
+
+      std::cout << o.name 
+		<< " value=" << SAttr(o.name.c_str()) << std::endl
+		<< "   " << o.help << std::endl;
+
+
+    }
+    std::cout << std::endl << std::endl;
+
+  }
+}
+//________________________________________________________________________________________________
 StGeant4Maker::StGeant4Maker( const char* nm ) : 
   StMaker(nm),
+  mCmdOptions(),
   mVmcApplication ( NULL ),
   mGeomPath       ( "./StarDb/AgMLGeometry:$STAR/StarDb/AgMLGeometry" ),
   mStarField      ( NULL ),
@@ -476,13 +494,18 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   mDefaultEngine(0)
 { 
 
+
+  LOG_INFO << "Geant4Maker configuration" << endm;
+  LOG_INFO << "Each option can be overridden using --option=value" << endm;
+
+
   // Setup default attributes
   //  SetAttr( "G4Opt:Nav",   "geomRoot" );// Default uses only possibility for us... ROOT geom with ROOT nav.  No VGM to convert to G4 geometry.
   //  Possibilities geomVMCtoGeant4 geomVMCtoRoot geomRoot geomRootToGeant4 geomGeant4
   SetAttr( "G4VmcOpt:Nav",   "geomVMCtoRoot" );
   SetAttr( "G4VmcOpt:Name",  "Geant4"  );
   SetAttr( "G4VmcOpt:Title", "The Geant4 Monte Carlo" );
-  SetAttr( "G4VmcOpt:Phys",  "FTFP_BERT" ); // default physics list
+  AddOption( "G4VmcOpt:Phys",  "FTFP_BERT", "Geant 4 physics list" ); // default physics list
   //  SetAttr( "G4VmcOpt:Process", "stepLimiter+specialCuts" ); // special process
   SetAttr( "G4VmcOpt:Process", "stepLimiter+specialControls+specialCuts+stackPopper" ); // special process
   //  SetAttr( "G4VmcOpt:Process", "stepLimiter+stackPopper" ); // special process
@@ -490,74 +513,78 @@ StGeant4Maker::StGeant4Maker( const char* nm ) :
   SetAttr("G3VmcOpt:Name", "GEANT3" );
   SetAttr("G3VmcOpt:nwgeant", 0 );
 
-  SetAttr( "AgMLOpt:TopVolume", "HALL" );
-  SetAttr( "Stepping:Punchout:Stop", 1 ); // 0=no action, 1=track stopped, 2=track stopped and re-injected            
-  SetAttr( "Stepping:Punchout:Rmin", 223.49 ); // min radius applied to punchout logic
-  SetAttr( "Stepping:Punchout:Zmin", 268.75 ); // min radius applied to punchout logic
-  SetAttr( "Random:G4", 12345); 
-  SetAttr( "field", -5.0 );
+  AddOption( "AgMLOpt:TopVolume", "HALL", "Name of the top-level volume" );
 
-  SetAttr( "Application:Zmax", DBL_MAX );
-  SetAttr( "Application:Rmax", DBL_MAX );
+  AddOption( "Stepping:Punchout:Stop", 1, "Punchout action: 0=no action, 1=track stopped, 2=track stopped and re-injected" );
+  AddOption( "Stepping:Punchout:Rmin", 223.49, "Min radius applied to punchout logic" );
+  AddOption( "Stepping:Punchout:Zmin", 268.75, "Min Z applied to punchout logic" );
+  AddOption( "Random:G4", 12345,       "Sets the Random number seed"); 
+  AddOption( "field", -5.0,            "Sets the STAR magnetic field [kG]" );
+
+  AddOption( "Application:Zmax", DBL_MAX, "Universe maximum z" );
+  AddOption( "Application:Rmax", DBL_MAX, "Universe maximum radius" );
 
   SetAttr("Scoring:Transit",0);
-  SetAttr("Scoring:Rmax",450.0);
-  SetAttr("Scoring:Zmax",2000.0);
-  SetAttr("Scoring:Emin",0.01);
+  AddOption("Scoring:Rmax",450.0,  "Maxium secondary production radius to enter truth tables" );
+  AddOption("Scoring:Zmax",2000.0, "Maximum secondary production z to enter truth tables");
+  AddOption("Scoring:Emin",0.01,   "Minimum secondary energy to enter truth tables");
 
-  SetAttr("vertex:x",0.0);
-  SetAttr("vertex:y",0.0);
-  SetAttr("vertex:z",0.0);
-  SetAttr("vertex:sigmax",0.0);
-  SetAttr("vertex:sigmay",0.0);
-  SetAttr("vertex:sigmaz",0.0);
+  AddOption("vertex:x",0.0, "Primary vertex x [cm]");
+  AddOption("vertex:y",0.0, "Primary vertex y [cm]");
+  AddOption("vertex:z",0.0, "Primary vertex z [cm]");
+  AddOption("vertex:sigmax",0.0, "Primary vertex width [cm]");
+  AddOption("vertex:sigmay",0.0, "Primary vertex width [cm]");
+  AddOption("vertex:sigmaz",0.0, "Primary vertex width [cm]");
 
 
-  SetAttr( "runnumber", 1 );
+  AddOption( "runnumber", 1, "Run number" );
 
 
   // Setup default cuts
-  SetAttr("CUTGAM", 0.001);
-  SetAttr("CUTELE", 0.001);
-  SetAttr("CUTHAD", 0.01);
-  SetAttr("CUTNEU", 0.01);
-  SetAttr("CUTMUO", 0.01);
-  SetAttr("BCUTE",  /*     R 'Cut for electron brems.'     D=*/     0.0001);
-  SetAttr("BCUTM",  /*     R 'Cut for muon brems.'         D=-1.*/  0.0001);
-  SetAttr("DCUTE",  /*     R 'Cut for electron delta-rays' D=*/     0.0001);
-  SetAttr("DCUTM",  /*     R 'Cut for muon delta-rays'     D=-1.*/  0.0001);
-  SetAttr("PPCUTM", /*     R 'Cut for e+e- pairs by muons' D=0.01*/ 0.01);
-  SetAttr("TOFMAX", /*     R 'Time of flight cut'          D=*/     1.E+10);
+  AddOption("CUTGAM", 0.001, "Minimum photon energy for track propagation");
+  AddOption("CUTELE", 0.001, "Minimum electron energy for track propagation" );
+  AddOption("CUTHAD", 0.01,  "Minimum charged hadron energy for track propagation");
+  AddOption("CUTNEU", 0.01,  "Minimum neutral hadron energy for track propagation");
+  AddOption("CUTMUO", 0.01,  "Minimum muon energy for track propagation");
+  AddOption("BCUTE",  /*     R 'Cut for electron brems.'     D=*/     0.0001, "Cut for electron brem" );
+  AddOption("BCUTM",  /*     R 'Cut for muon brems.'         D=-1.*/  0.0001, "Cut for muon brem" );
+  AddOption("DCUTE",  /*     R 'Cut for electron delta-rays' D=*/     0.0001, "Cut for electron delta rays" );
+  AddOption("DCUTM",  /*     R 'Cut for muon delta-rays'     D=-1.*/  0.0001, "Cut for muon delta rays" );
+  AddOption("PPCUTM", /*     R 'Cut for e+e- pairs by muons' D=0.01*/ 0.01,   "Cut for e+e- production by muons" );
+  AddOption("TOFMAX", /*     R 'Time of flight cut'          D=*/     1.E+10, "Maximum time-of-flight for tracks" );
 
   // Setup default physics
-  SetAttr("PAIR", 1);
-  SetAttr("COMP", 1);
-  SetAttr("PHOT", 1);
-  SetAttr("PFIS", 1);
-  SetAttr("DRAY", 1);
-  SetAttr("ANNI", 1);
-  SetAttr("BREM", 1);
-  SetAttr("HADR", 1);
-  SetAttr("MUNU", 1);
-  SetAttr("DCAY", 1);
-  SetAttr("LOSS", 2);
-  SetAttr("MULS", 1);
-  SetAttr("CKOV", 1);
-  SetAttr("RAYL", 1);
-  SetAttr("LABS", 1);
-  SetAttr("SYNC", 1);
-
-  SetAttr("all:engine",  "G3" ); // default engine in multi-engine mode is G3
-  SetAttr("calb:engine", "G4" ); // BEMC defaults to G4
-  SetAttr("ecal:engine", "G4" ); // EEMC defaults to G4
-  SetAttr("wcal:engine", "G4" ); // Forward EMC defaults to G4
-  SetAttr("hcal:engine", "G4" ); // Forward hcal defaults to G4
+  AddOption("PAIR", 1, "Enable/disable pair production");
+  AddOption("COMP", 1, "Enable/disable compton scattering" );
+  AddOption("PHOT", 1, "Enable/diable photoelectric effect" );
+  AddOption("PFIS", 1, "Enable/disable photo fission" );
+  AddOption("DRAY", 1, "Enable/disable delta rays");
+  AddOption("ANNI", 1, "Enable/disable positron annihilation");
+  AddOption("BREM", 1, "Enable/disable bremstrahlung");
+  AddOption("HADR", 1, "Enable/disable hadronic interactions");
+  AddOption("MUNU", 1, "Enable/disable muon-nucleus interactions");
+  AddOption("DCAY", 1, "Enable/disable decays");
+  AddOption("LOSS", 2, "Energy loss mode" );
+  AddOption("MULS", 1, "Multiple scattering");
+  AddOption("CKOV", 1, "Cherenkov radiation");
+  AddOption("RAYL", 1, "Rayleigh scattering");
+  AddOption("LABS", 1, "Absorption of ckov photons");
+  AddOption("SYNC", 1, "Synchrotron radiation");
 
   // Application defaults to single engine mode with Geant4
-  SetAttr("application:engine","G4"); 
+  AddOption("application:engine","G4","Application mode: G3=GEANT3, G4=Geant4, multi=mixed G3/G4 mode with defaults below"); 
+
+  AddOption("all:engine",  "G3", "In multi-engine mode, selects the default engine for all subsystems" ); // default engine in multi-engine mode is G3
+  AddOption("NAME:engine", "XX", "Specifies the physics engine (XX=G3 or XX=G4) for all volumes defined in NAMEGeo");
+  AddOption("wcal:engine", "G4", "Default engine for all volumes defined in WcalGeo" ); // Forward EMC defaults to G4
+  AddOption("hcal:engine", "G4", "Default engine for all volumes defined in HcalGeo" ); // Forward hcal defaults to G4
+
+
     
   // Naughty
   _g4maker = this; // Provide a global pointer to the G4 maker  
+
+  PrintOptions();
 
 }
 //________________________________________________________________________________________________
