@@ -31,18 +31,18 @@ foreach my $file (@list) {
 print "noRuns = $noRuns\n" if ($debug);
 my $Njobs = 0;
 my $now = time();
-my $dtmin = 999999;
 foreach my $key ( sort keys %runs ) {
   print "$key => $runs{$key}\n" if ($debug);
   my @files = glob "st_*" . $key . "*.root"; print "@files\n" if ($debug);
   my $finished = 1;
+  my $dtmin = 999999;
   foreach my $file (@files) {
      my ($dev,$ino,$mode,$nlink,$uid,$gid,$dev, $size, $atime, $mtim, $ctime, $blksize,$blocks) = stat($file);
      my $dt = $now - $ctime;
      if ($dt < $dtmin) {$dtmin = $dt;}
      print "$file dt = $dt  dtmin = $dtmin\n" if ($debug);
   }
-  if ($dtmin > 300) {
+  if ($dtmin > 600) {
     print "string:$key:$runs{$key}\n";
     $Njobs++;
   }
