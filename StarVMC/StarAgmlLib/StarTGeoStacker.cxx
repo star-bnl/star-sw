@@ -858,13 +858,12 @@ TGeoVolume *makeCopyVolume( TGeoVolume *org, AgShape shape, Bool_t copyDaughters
 Bool_t sanityCheck( TGeoVolume *volume )
 {
 
-  bool result = false;
+    bool result = false;
 
   if ( volume->IsAssembly() ) {
     result = true;
   } 
   else { 
-    
     TGeoShape *shape = volume->GetShape();
     if ( 0==shape ) { 
       result = false;
