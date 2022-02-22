@@ -1,9 +1,12 @@
 #ifndef __AgMath_h__
+
 #define __AgMath_h__
 
 #include "TObject.h"
 #include "TMath.h"
 #include <iostream>
+
+namespace AgMath { 
 
 // Provides single point to define and/or redefine mathematical
 // keywords used in AgSTAR syntax.  i.e. cos, sin, cosh, tanh, ...
@@ -53,8 +56,7 @@ Int_t nint(Float_t x);
 //
 // Fortran abs is fabs
 //
-//#define abs(x) TMath::Abs(x)
-inline double abs (double x) {return fabs(x);}
+#define abs(x) TMath::Abs(x)
 
 // VAX-Fortran (omfg) trig functions taking arguement in degrees
 Double_t tand(Double_t x);
@@ -67,10 +69,10 @@ template <typename T> T min(const T &a, const T &b ){ return TMath::Min(a,b); }
 Int_t mod(const Int_t &a, const Int_t &b);
 Float_t mod(const Float_t &a, const Float_t &b);
 
-// #define cos(x) TMath::Cos( (Double_t) x )
-// #define sin(x) TMath::Sin( (Double_t) x )
-// #define tan(x) TMath::Tan( (Double_t) x )
-// #define exp(x) TMath::Exp( (Double_t) x )
+#define cos(x) TMath::Cos( (Double_t) x )
+#define sin(x) TMath::Sin( (Double_t) x )
+#define tan(x) TMath::Tan( (Double_t) x )
+#define exp(x) TMath::Exp( (Double_t) x )
 
 // Overload the ^ operator
 
@@ -86,7 +88,11 @@ class AgPower
 Float_t operator*( const Float_t &A, const AgPower<Int_t> &power );
 Float_t operator*( const Float_t &A, const AgPower<Float_t> &power );
 
+}; // AgMath  
+
+
 //Float_t operator^(const Float_t &a, const Float_t &b);
 using namespace std;
+using namespace AgMath;
 #endif
  
