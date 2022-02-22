@@ -201,6 +201,37 @@ class StQAMakerBase : public StMaker {
   TH1F     *m_ftpc_fcl_radialW;  //! ftpc west cluster radial position
   TH1F     *m_ftpc_fcl_radialE;  //! ftpc east cluster radial position
 
+  // TPC raw data
+  //~~~per-sector histograms~~~//
+  //adcs
+  TH1F     *m_tpc_adc_chargevstb[24];      //! ADC charge vs. time bucket (inner)
+  TH1F     *m_tpc_adc_chargevstbTPX[24];   //! ADC charge vs. time bucket (outer)
+  TH2F     *m_tpc_adc_chargevsrowvstb[24]; //! charge vs. row vs. time bucket
+  TH2F     *m_tpc_adc_chargesum[24];       //! ADC sum over all events
+  //clusters
+  TH1F     *m_tpc_clust_stats[24];         //! status of clusters
+  TH2F     *m_tpc_clust_statsvsrow[24];    //! status of clusters vs. row
+  TH1F     *m_tpc_clust_charge[24];        //! charge per cluster (inner)
+  TH1F     *m_tpc_clust_chargeTPX[24];     //! charge per cluster (outer)
+  TH2F     *m_tpc_clust_chargesum[24];     //! cluster sum over all events
+  TH2F     *m_tpc_clust_chargevstb[24];    //! charge vs. time bucket (inner)
+  TH2F     *m_tpc_clust_chargevstbTPX[24]; //! charge vs. time bucket (outer)
+  TH2F     *m_tpc_clust_chargevsrow[24];   //! charge vs. row
+  //~~~~~~//
+  //~~~sector-integrated histograms~~~//
+  //adcs
+  TH1F     *m_tpc_adc_chargepersector;     //! charge per sector
+  TH1F     *m_tpc_adc_chargepersectorTPX;  //! charge per sector (TPX)
+  TH2F     *m_tpc_adc_numhitsvsrowvssector;//! adc hits vs row vs sector
+  //clusters
+  TH2F     *m_tpc_clust_pxltb;             //! cluster pixel time bucket size (inner)
+  TH2F     *m_tpc_clust_pxltbTPX;          //! cluster pixel time bucket size (outer)
+  TH2F     *m_tpc_clust_pxlp;              //! cluster pixel pad size (inner)
+  TH2F     *m_tpc_clust_pxlpTPX;           //! cluster pixel pad size (outer)
+  TH2F     *m_tpc_clust_numclust;          //! number of clusters vs. sector (inner)
+  TH2F     *m_tpc_clust_numclustTPX;       //! number of clusters vs. sector (outer)
+  //~~~~~~//
+
   // TPC dE/dx over time
   TH3F     *m_dedx_Z3A; // dE/dx vs. drift distance
 
@@ -234,6 +265,7 @@ class StQAMakerBase : public StMaker {
   Int_t histsSet;
   TString prefix[32];
   Int_t eventClass;
+  Int_t eventClassIdx;
   Int_t eventCount;
   Bool_t fillHists;
   Bool_t ITTF;
@@ -253,6 +285,7 @@ class StQAMakerBase : public StMaker {
   virtual void BookHistDE();
   virtual void BookHistRP();
   virtual void BookHistETOF();
+  virtual void BookHistTPC();
 
   virtual void MakeHistGlob() = 0;
   virtual void MakeHistDE() = 0;
@@ -274,6 +307,7 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistSST() {}
   virtual void MakeHistRP () {}
   virtual void MakeHistEPD() {}
+  virtual void MakeHistTPC() {}
   virtual void MakeHistiTPC() {}
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT
