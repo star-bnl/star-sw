@@ -157,26 +157,10 @@ public:
   StMCParticleStack* stack(){ return mMCStack; }
 
   void AddUserPostSteppingAction( std::function<void()> f ) { mPostSteppingActions.push_back(f); }
-
-  /// Registers a command line option 
-  template<typename T> 
-  void AddOption( const char* opt, T val, const char* help ){
-    SetAttr( opt, val );
-    mCmdOptions.push_back( { opt, help } );
-  }
-
-  void PrintOptions( const char* opts = 0 );
-
   
 private:
 protected:
 
-  struct CmdOption {
-    std::string name;
-    std::string help;
-  };
-  std::vector<CmdOption> mCmdOptions;
-  
   StarVMCApplication *mVmcApplication;
   TString mGeomPath; // Search path for geometry construction
   StarMagField *mStarField;
