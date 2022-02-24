@@ -1071,7 +1071,10 @@ void StBemcTriggerSimu::FEEout2009()
   // emcSim->setCheckStatus(kBarrelEmcTowerId,false);
   // emcSim->setMakeFullDetector(kBarrelEmcTowerId,true);
   // emcSim->setDoZeroSuppression(kBarrelEmcTowerId,false);
-  assert(nhits == kNTowers);
+  // assert(nhits == kNTowers);
+  if(nhits != kNTowers) {
+    LOG_WARN << " nhits not match to kNTowers " << nhits << "!=" << kNTowers << endm;
+  }
 
   // FEE LUT
   for (int crate = 1; crate <= kNCrates; ++crate) {

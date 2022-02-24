@@ -907,7 +907,7 @@ Int_t StPicoDstMaker::MakeWrite() {
 
   mTTree->Fill();
   if ( isFromDaq ) {
-    delete mEmcCollection;
+//    delete mEmcCollection;
     mEmcCollection = nullptr;
   }
 
