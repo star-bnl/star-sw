@@ -302,12 +302,10 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
    ((StLoggerManager *)mInstance)->SetStarOptionFilter(filter);
     // if (gMessMgr) delete gMessMgr; gMessMgr = 0;
     gMessMgr  = mInstance;
-#if 0
     // Set the ROOT ErrorHanlding via logger as well
     // See: $ROOTSYS/include/TError.h
     SetErrorHandler(Log4cxx4RootErrorHandler);
 //    Connect(gApplication,"Terminate(Int_t)",mInstance);
-#endif
   }
   return mInstance;
 }
