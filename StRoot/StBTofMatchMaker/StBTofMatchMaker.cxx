@@ -241,9 +241,12 @@ Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
   mBTofGeom = 0;
   if(TDataSet *geom = GetDataSet("btofGeometry")) {
     mBTofGeom = (StBTofGeometry *)geom->GetObject();
-    LOG_INFO << " Found btofGeometry ... " << endm; 
-    mInitFromOther = kTRUE;
-  } else {
+    if (mBTofGeom) {
+      LOG_INFO << " Found btofGeometry ... " << endm; 
+      mInitFromOther = kTRUE;
+    }
+  }
+  if (! mBTofGeom) {
     mBTofGeom = new StBTofGeometry("btofGeometry","btofGeometry in MatchMaker");
     LOG_INFO << " Create a new btofGeometry ... " << endm;
     AddConst(new TObjectSet("btofGeometry",mBTofGeom));
@@ -255,8 +258,8 @@ Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
     else                   mBTofGeom->SetMCOff();
     LOG_INFO << " Alignment file: " << mAlignFileName.c_str() << endm;
     mBTofGeom->SetAlignFile(mAlignFileName.c_str());
-      TVolume *starHall = gGeoManager ? nullptr : (TVolume *) GetDataSet("HALL");
-      mBTofGeom->Init(this, starHall, gGeoManager);
+    TVolume *starHall = gGeoManager ? nullptr : (TVolume *) GetDataSet("HALL");
+    mBTofGeom->Init(this, starHall, gGeoManager);
   }
 
   geomTimer.stop();

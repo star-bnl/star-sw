@@ -614,7 +614,7 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
 	    else            {adc2 = a[i+1];}
 	    //	    printf("i=%3d  tb0=%4.0lf  tb1=%4.0lf  tb2=%4.0lf  adc0=%5.0lf adc1=%5.0lf adc2=%5.0lf\n",
 	    //             i,tb0,tb1,tb2,adc0,adc1,adc2);
-            if(adc1>adc0 && adc1>=adc2){		
+            if( (adc1>adc0 || tb1==mMinTB) && adc1>=adc2){  //if falling from starting point, make it peak
 		para[1+npeak*3+1] = adc1;
 		para[1+npeak*3+2] = tb1;
 		para[1+npeak*3+3] = GSigma;

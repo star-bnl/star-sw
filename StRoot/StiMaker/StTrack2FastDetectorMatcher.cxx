@@ -20,8 +20,9 @@
 #include "StEmcCollection.h"
 #include "StBTofCollection.h" // dongx
 #include "StBTofUtil/StBTofGeometry.h"
-#include "TMath.h"
 #include "TGeoManager.h"
+#include "TMath.h"
+
 //________________________________________________________________________________
 StTrack2FastDetectorMatcher::StTrack2FastDetectorMatcher() : mTotEve(0), mMinZBtof(-3.0), mMaxZBtof(3.0), mMinAdcBemc(5), mMinAdcEemc(5),  
 							     isMC(kFALSE),
@@ -71,34 +72,21 @@ void StTrack2FastDetectorMatcher::fillArrays(StEvent* event) {
     if (dateY > 2008) {
       TObjectSet *btofGeom_dataset = (TObjectSet *) mydb->GetDataSet("btofGeometry");
       btofGeom = btofGeom_dataset ? (StBTofGeometry *) btofGeom_dataset->GetObject() : nullptr;
+      // If StBTofGeometry object is not found in the list of maker's objects create a new one
       if (! btofGeom) {
-	Int_t Debug = mydb->Debug();
-#if 0
-	if (gGeoManager) {
-	    LOG_INFO << " BTofGeometry initialization from VMC geometry ... " << endm;
-	    btofGeom = new StBTofGeometry("btofGeometry","btofGeometry");
-	    if (isMC) btofGeom->SetMCOn();
-	    else      btofGeom->SetMCOff();
-	    mydb->SetDebug(0);
-	    btofGeom->Init(mydb,0,gGeoManager);
-	} else {
-#endif
-	  TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
-	  if (starHall) {
-	    LOG_INFO << " BTofGeometry initialization ... " << endm;
-	    btofGeom = new StBTofGeometry("btofGeometry","btofGeometry");
-	    if (isMC) btofGeom->SetMCOn();
-	    else      btofGeom->SetMCOff();
-	    mydb->SetDebug(0);
-	    btofGeom->Init(mydb, starHall);
-	  }
-#if 0
-	}
-#endif
-	mydb->SetDebug(Debug);
+	// Build StBTofGeometry from TGeo geometry if available
+	TVolume *starHall = gGeoManager ? nullptr : (TVolume *)mydb->GetDataSet("HALL");
+	LOG_INFO << " BTofGeometry initialization ... " << endm;
+	btofGeom = new StBTofGeometry("btofGeometry","btofGeometry");
+	if (isMC) btofGeom->SetMCOn();
+	else      btofGeom->SetMCOff();
+	btofGeom->Init(mydb, starHall, gGeoManager);
 	mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
       }
-      if (btofGeom) {btofList  = new StBtofHitList; btofList->initRun();} // dongx
+
+      btofList = new StBtofHitList();
+      btofList->initRun();
+
     } else {
       ctbList   = new StCtbHitList; ctbList->initRun(); 
     }

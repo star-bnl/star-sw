@@ -1,3 +1,6 @@
+/*
+  root4star 'Ast2Root.C("y2019")'
+ */
 //#define OLD_GEANT_VMC
 void Ast2Root(const Char_t *vers="y2016a", const Char_t *geom = "useXgeom") {
   gROOT->LoadMacro("bfc.C");
@@ -25,13 +28,13 @@ void Ast2Root(const Char_t *vers="y2016a", const Char_t *geom = "useXgeom") {
   cmd += rzFile;
   cmd += " "; cmd += vers; cmd += ".h";
   gSystem->Exec(cmd);
-#endif
   TVolume *hall = geant->GetDataSet("HALL");
   if (hall) {
     TFile *f = new TFile(Form("HALL.%s.root",vers),"recreate");
     hall->Write();
     delete f;
   }
+#endif
   TString hfile(vers);
   hfile += ".h";
   geant->g2Root(hfile);

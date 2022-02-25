@@ -1,0 +1,10 @@
+@ count = 0
+foreach f (`ls -1d sched*.csh`)
+  if (! -r ${f}.log) then	
+   csh -x ${f} >& ${f}.log &	
+    @ count++;  echo "count $count";
+    if ($count > 20) then 
+        break;
+    endif
+  endif
+end

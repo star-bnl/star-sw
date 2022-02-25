@@ -36,8 +36,10 @@ end
 //#define __Y2018__ 
 #define __Y2019__   /* >= 2019 */
 //#define __LASER__
-#define __Cosmics__
-//#define  __ONLY_PRIMARY_TRACKS__
+//#define __Cosmics__
+#ifndef __Cosmics__
+#define  __ONLY_PRIMARY_TRACKS__
+#endif
 //#define __useGainT0__
 //#define __PADCorrection__
 //#define __PRINCIPLE__
@@ -284,7 +286,7 @@ public:
 ClassImp(TH1FSet);
 #endif
 //--------------------------------------------------------------------------------
-void TpcT(const Char_t *files="*.root", const Char_t *opt = "S", const Char_t *Out = ""){//, const Char_t *Time = "20090415.000000") {
+void TpcT(const Char_t *files="*.root", const Char_t *opt = "R", const Char_t *Out = ""){//, const Char_t *Time = "20090415.000000") {
   //	   Int_t ev, Double_t tanCut, Int_t NpadCut, Double_t pMomin, Double_t pMomax) {
 #ifdef __useGainT0__
   gSystem->Load("libStDb_Tables.so");
@@ -469,11 +471,12 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "S", const Char_t *O
     {"Time","Time"}
   };
   //               io  r  pt
-  TProfile2D  *hist[4][3][2];
-  TH1D       *histA[4][2];
-  TH2D       *histB[4];
-  TProfile  *profdL[4];
-  TH2D       *lqa[4]; memset (lqa, 0, sizeof(lqa));
+  TProfile2D  *hist[4][3][2] = {0};
+  TH1D       *histA[4][2] = {0};
+  TH2D       *histB[4] = {0};
+  TProfile  *profdL[4] = {0};
+  TH2D       *lqa[4] = {0}; 
+  TH2D       *padtbk[2][2] = {0};
   memset (hist, 0, sizeof(hist));
 #ifdef   __Y2008__
   Int_t NS = 4; // TPC + TPX
@@ -502,6 +505,8 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "S", const Char_t *O
     histB[io]    = new TH2D(Form("dPdT%s",InOut[io].Name),Form("delta Pad vs delta Time %s",InOut[io].Title),100,-.5,0.5,100,-.5,0.5);
     profdL[io]   = new TProfile(Form("dL%s",InOut[io].Name),Form("cos^{-2}(#lambda) vs delta hit Z for  %s",InOut[io].Title),nz,zmin,zmax);
     lqa[io]      = new TH2D(Form("lqa%s",InOut[io].Name),Form("Lambda versus QA for %s",InOut[io].Title),100,0,100,100,0.,100.);
+    padtbk[io][0]= new TH2D(Form("Npads%s",InOut[io].Name),Form("<Npads> vs Z for  %s",InOut[io].Title),nz,zmin,zmax,  16,-0.5,15.5);
+    padtbk[io][1]= new TH2D(Form("Ntmbks%s",InOut[io].Name),Form("<Ntmbks> vs Z for  %s",InOut[io].Title),nz,zmin,zmax,32,-0.5,31.5);
   }
 #ifdef __LASER__
   static   Double_t offset = -178.3;
@@ -606,6 +611,8 @@ void TpcT(const Char_t *files="*.root", const Char_t *opt = "S", const Char_t *O
     // require match pixels and RC hit in pads and time buckets
     const Int_t nP = kPadMax - kPadMin + 1;
     const Int_t nT = kTbMax  - kTbMin  + 1;
+    padtbk[io][0]->Fill(zRc,nP);
+    padtbk[io][1]->Fill(zRc,nT);
     const Int_t nPR = fRcHit_mMinpad[0] + fRcHit_mMaxpad[0] + 1;
     const Int_t nTR = fRcHit_mMintmbk[0] + fRcHit_mMaxtmbk[0] + 1;
     if (nP != nPR) continue;
@@ -5086,4 +5093,105 @@ void TpcTQAPlot(const Char_t *fileRC = "../daq_19GeV/QA.root",
 		const Char_t *fileMC = "QA.root") {
   TpcTQAPlotPR(fileRC,fileMC);
   TpcTQAPlotTB(fileRC,fileMC);
+}
+//________________________________________________________________________________
+void TpcTQAPlotX(const Char_t *histName = "rzRCT") {
+  TList *files = (TList *) gROOT->GetListOfFiles();
+  TString HistName(histName);
+  if (! files) return;
+  enum {kFiles = 10, kIO = 2};
+  TFile *FileList[kFiles] = {0};
+  const Char_t *RM[kFiles] = {0};
+  const Char_t *IO[kIO] = {"Inner", "Outer"};
+  TProfile2D *hist[kFiles] = {0};
+  TH1D *histZ[kFiles] = {0};
+  TIter next(files);
+  TFile *f = 0;
+  Int_t NF = 0;
+  while ( (f = (TFile *) next()) ) { 
+    if (! f) continue;
+    hist[NF] = (TProfile2D *) f->Get(histName);
+    if (hist[NF]) NF++;
+    if (NF == kFiles) break;
+  }
+  if (! NF) return;
+  TString Title("time backets");
+  if (HistName.EndsWith("P")) Title = "no. of pads";
+  TCanvas *c1 = new TCanvas(histName,Title,1200,800);
+  c1->Divide(1,2);
+  for (Int_t io = 0; io < kIO; io++) {
+    c1->cd(io+1);
+    TString same;
+    TLegend *l = new TLegend(0.2,0.7,0.5,0.9);
+    Int_t row1 =  1;
+    Int_t row2 = 40;
+    if (io == 1) {
+      row1 = 41;
+      row2 = 72;
+    }
+    for (Int_t i = NF - 1 ; i >= 0;  i--) {		   
+      if (! hist[i]) continue;
+      TProfile2D *rzRCT = hist[i];
+      TString dir = gSystem->DirName(hist[i]->GetDirectory()->GetName());
+      TString name = gSystem->BaseName(dir);
+      name.ReplaceAll("_19GeV","");
+      histZ[i] = (TH1D *) hist[i]->ProfileX(Form("%s_%s",IO[io],name.Data()),row1,row2);
+      histZ[i]->SetXTitle("Z (cm)");
+      histZ[i]->SetLineColor(i+1);
+      histZ[i]->SetMarkerColor(i+1);
+      histZ[i]->Draw(same);
+      l->AddEntry(histZ[i],histZ[i]->GetName());
+      same = "same";
+      c1->Update();
+    }
+    l->Draw();
+    c1->Update();
+    c1->SaveAs(".png");
+  }
+}
+//________________________________________________________________________________
+void TpcTQAPlotY(const Char_t *histName = "rzRCT") {
+  TList *files = (TList *) gROOT->GetListOfFiles();
+  TString HistName(histName);
+  if (! files) return;
+  enum {kFiles = 10, kIO = 2};
+  TFile *FileList[kFiles] = {0};
+  const Char_t *RM[kFiles] = {0};
+  const Char_t *IO[kIO] = {"Inner", "Outer"};
+  TProfile2D *hist[kFiles] = {0};
+  TH1D *histZ[kFiles] = {0};
+  TIter next(files);
+  TFile *f = 0;
+  Int_t NF = 0;
+  gStyle->SetOptStat(0);
+  while ( (f = (TFile *) next()) ) { 
+    if (! f) continue;
+    hist[NF] = (TProfile2D *) f->Get(histName);
+    if (hist[NF]) NF++;
+    if (NF == kFiles) break;
+  }
+  if (! NF) return;
+  TString Title("time backets");
+  if (HistName.EndsWith("P")) Title = "no. of pads";
+  TCanvas *c1 = new TCanvas(histName,Title);
+  TString same("");
+  TLegend *l = new TLegend(0.2,0.7,0.5,0.9);
+  for (Int_t i = 0 ; i < NF;  i++) {		   
+    if (! hist[i]) continue;
+    TProfile2D *rzRCT = hist[i];
+    TString dir = gSystem->DirName(hist[i]->GetDirectory()->GetName());
+    TString name = gSystem->BaseName(dir);
+    name.ReplaceAll("_19GeV","");
+    histZ[i] = (TH1D *) hist[i]->ProfileY(name.Data());
+    histZ[i]->SetXTitle("row");
+    histZ[i]->SetLineColor(i+1);
+    histZ[i]->SetMarkerColor(i+1);
+    histZ[i]->Draw(same);
+    l->AddEntry(histZ[i],histZ[i]->GetName());
+    same = "same";
+    c1->Update();
+  }
+  l->Draw();
+  c1->Update();
+  c1->SaveAs(".png");
 }
