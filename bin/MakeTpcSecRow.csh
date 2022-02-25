@@ -492,4 +492,6 @@
 # P21ic_calib_56
 #  root.exe -q -b ../P21ic_calib_55/TpcSecRowB.4p59GeV_fixedTarget_2019.root SecRow3CGF4p59GeV_fixedTarget_2019.root   'MakeTpcSecRowB.C(-1,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.log
 #~/work/Histograms/P21ic_calib_65
- root.exe -q -b SecRow3CGF7.3GeV_fixedTarget_2019.root 'MakeTpcSecRowB.C(-1,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.log
+# root.exe -q -b SecRow3CGF7.3GeV_fixedTarget_2019.root 'MakeTpcSecRowB.C(-1,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.log
+# /gpfs/mnt/gpfs01/star/subsys-tpc/fisyak/Histograms/RunXIX/RunXIX71
+root.exe -q -b SecRow3GFAuAu200GeV_2019.root  'MakeTpcSecRowB.C(20190710,110158,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190710,110158.log

@@ -584,9 +584,13 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	// Take care about prompt hits and Gating Grid region in Simulation
 	if (ZdriftDistance <= 0.0) goto ENDL; // prompt hits 
 	if (m_Corrections[kGatingGrid].Chair && (k == kzCorrectionC || IsSimulation())) {// take about Gating Grid for 
-	    Double_t dEcor = ((St_GatingGridC *)m_Corrections[kGatingGrid].Chair)->CalcCorrection(0,VarXs[kGatingGrid]);
-	    if (dEcor < -9.9) return 3;
-	    dE *= TMath::Exp(-dEcor);
+	  Double_t dEcor = ((St_GatingGridC *)m_Corrections[kGatingGrid].Chair)->CalcCorrection(0,VarXs[kGatingGrid]);
+	  Int_t np = TMath::Abs(corl->npar)%100;
+	  if (corl->type == 20 && TMath::Abs(corl->a[np]) > 1e-7) {// extra exponent 
+	    dEcor += corl->a[np]*TMath::Exp( corl->a[np+1]*VarXs[k]);
+	  }
+	  if (dEcor < -9.9) return 3;
+	  dE *= TMath::Exp(-dEcor);
 	}
       }
       if (corl->type == 300) {
