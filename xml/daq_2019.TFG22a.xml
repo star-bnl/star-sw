@@ -53,5 +53,5 @@
 <!-- <input URL="file:/gpfs01/star/daq/2017/*/*/st_W_*.daq" /> -->
 <!-- <input URL="command:daq_2019T.pl" /> -->
 <!-- <input URL="file:/star/data03/daq/2020/005/21005010/st_physics_*.daq" /> -->
-<input URL="/direct/gpfs01/star/embed/daq/2019/auau19_phys/*.daq" />
+<input URL="file:/gpfs01/star/embed/daq/2019/auau19_phys/*.daq" />
 </job>
