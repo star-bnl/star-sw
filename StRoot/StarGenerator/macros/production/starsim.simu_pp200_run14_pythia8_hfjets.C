@@ -50,7 +50,7 @@ void trig( int runId, int eventId, double vz )
 
   chain->Clear();
   chain->Make();
-  _primary->event()->Print();
+  //  _primary->event()->Print();
 
       
 }
@@ -137,11 +137,17 @@ void getNextRun( int& event, int& run, double& z ) {
 
 // ----------------------------------------------------------------------------
 
-void starsim( Int_t nevents=10, Int_t runnumber=15165057  )
+void starsim( Int_t nevents=10, Int_t runnumber=15165057, TString runfile_="", int sequence=0, int dummy = 0 )
 { 
 
-  int     rngSeed = runnumber;
-          runfile = Form("/gpfs01/star/pwg/droy1/EMBEDDING_2021_D0Analysis/VERTEX/VertexFiles/%i.txt",runnumber);
+  const int stride = 1;
+
+  int     rngSeed = runnumber * stride + sequence;
+  //          runfile = Form("/gpfs01/star/pwg/droy1/EMBEDDING_2021_D0Analysis/VERTEX/VertexFiles/%i.txt",runnumber);
+  //  runfile = Form("INPUTFILES/%i.txt",runnumber);
+  runfile = runfile_;
+
+  TString basename = Form("rcf22000_%i_%i_%ievts",runnumber,sequence,nevents);
 
   gROOT->ProcessLine(".L bfc.C");
   {
@@ -287,30 +293,19 @@ void starsim( Int_t nevents=10, Int_t runnumber=15165057  )
   _primary -> Init();
 
   command("gkine -4 0");
-  command("gfile o pythia8.starsim.fzd");
-  
-
-  //
-  // Trigger on nevents
-  //
-  // for ( int i=0;i<nevents;i++ ) {
-  //   int event = 0;
-  //   int run = 0;
-  //   double z = 0;
-  //   getNextEvent( event, runnumber, z );
-  //   trig( event, run, z   );
-  // }
-  //
+  command( Form("gfile o %s.fzd",basename.Data()) );
 
   int count = 0;
   while (true) {
 
     int event;
     double z;
-    getNextRun( event, runnumber, z );
-    if ( 0==runnumber ) {
-      std::cout << "End of run file encountered" << std::endl;
-      break;
+    for ( int _s=0;_s<stride;_s++) {
+      getNextRun( event, runnumber, z ); 
+      if ( 0==runnumber ) {
+	std::cout << "End of run file encountered" << std::endl;
+	goto DONE;
+      }
     }
 
     // Set run and event number in starsim
@@ -324,6 +319,9 @@ void starsim( Int_t nevents=10, Int_t runnumber=15165057  )
     }
 
   }
+
+ DONE:
+  std::cout << "Finishing up" << std::endl;
 
 
 
