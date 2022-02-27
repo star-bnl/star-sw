@@ -27,6 +27,7 @@ extern "C"
   //  Float_t type_of_call getvalue_(const Char_t *parN) { TString par(parN,sizeof(parN)); return StarVMCDetector::GetConfigEnv()->GetValue(par, 0.);}
   Float_t type_of_call getvalue_(DEFCHARD parN DEFCHARL parL) { 
     TString par(parN,parL); 
+    if (! StarVMCDetector::GetConfigEnv()) return 0;
     return StarVMCDetector::GetConfigEnv()->GetValue(par, 0.);
   }
 }
