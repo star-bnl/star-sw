@@ -124,7 +124,7 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
 	}
       }
       if (nSigmaMin > 4) {t = 3;} // for pion 
-      pdg = types[s][t];
+      pdg = types[t][s];
       mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
       e  = TMath::Sqrt(mass*mass + px*px + py*py + pz*pz);
       ntrack++;
@@ -163,7 +163,7 @@ Int_t StarMuEventReader::ReadEvent(Int_t N)
       }
     }
     if (nSigmaMin > 3) {t = 4;} // force muon
-    pdg = types[s][t];
+    pdg = types[t][s];
     mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
     e  = TMath::Sqrt(mass*mass + px*px + py*py + pz*pz);
     ntrack++;
