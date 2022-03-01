@@ -1717,9 +1717,11 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-geometry","Default,-TGiant3");
       SetOption("-geomNoField","Default,-TGiant3");
       SetOption("-UseXgeom","Default,-TGiant3");
-      SetOption("-AgML","Default,-TGiant3");
-      SetOption("-AgMLlib","Default,-TGiant3");
-      SetOption("-AgMLutil","Default,-TGiant3");
+      if (! GetOption("AgML")) {
+	SetOption("-AgML","Default,-TGiant3");
+	SetOption("-AgMLlib","Default,-TGiant3");
+	SetOption("-AgMLutil","Default,-TGiant3");
+      }
       if (  GetOption("mtin")) SetOption("simu","Default,mtin");
       if (  GetOption("simu")) SetOption("vmc","Default,simu");
       if (! GetOption("simu")) SetOption("VMCPassive","Default,-simu");
