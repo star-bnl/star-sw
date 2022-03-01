@@ -74,6 +74,8 @@ int FastJetFilter::Init() {
 
   jetdefinition = new fastjet::JetDefinition(algorithm, R, recombScheme, strategy);
 
+  return kStOK;
+
 }
 //______________________________________________________________________________________________
 int FastJetFilter::Filter( StarGenEvent *_event ) 
