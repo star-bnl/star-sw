@@ -576,10 +576,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	goto ENDL;
       } 
       if (k == kzCorrection || k == kzCorrectionC) {
-	if ((corl->min > corl->max) && (corl->min > VarXs[k] || VarXs[k] > corl->max)) {
+	if ((corl->min < corl->max) && (corl->min > VarXs[k] || VarXs[k] > corl->max)) {
 	  if (! IsSimulation()) return 2;
-	  if (corl->min > 0 && corl->min > VarXs[k])  VarXs[k] = corl->min;
-	  if (corl->min > 0 && corl->max < VarXs[k])  VarXs[k] = corl->max;
+	  VarXs[k] = TMath::Min(corl->max, TMath::Max( corl->min, VarXs[k]));
 	}
 	// Take care about prompt hits and Gating Grid region in Simulation
 	if (ZdriftDistance <= 0.0) goto ENDL; // prompt hits 
@@ -593,9 +592,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	  dE *= TMath::Exp(-dEcor);
 	}
       }
-      if (corl->type == 300) {
-	if (corl->min > 0 && corl->min > VarXs[k]    ) VarXs[k] = corl->min;
-	if (corl->max > 0 && VarXs[k]     > corl->max) VarXs[k] = corl->max;
+      if (corl->type == 300 && (corl->min < corl->max)) {
+	VarXs[k] = TMath::Min(corl->max, TMath::Max( corl->min, VarXs[k])); 
       }
       if (TMath::Abs(corl->npar) >= 100) {
 	Int_t iok = 2;
@@ -629,7 +627,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     } else  { // repeatable 
       for (m = 0; m < NLoops; m++, l += nrows) {
 	corl = cor + l;
-	if (corl->min <= VarXs[k] && VarXs[k] < corl->max) {
+	if (corl->min < corl->max && corl->min <= VarXs[k] && VarXs[k] < corl->max) {
 	  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
 	  break;
 	}	
