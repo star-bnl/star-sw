@@ -6,10 +6,10 @@ TDataSet *CreateTable() {
   memset(&row,0,tableSet->GetRowSize());
   row.idx   = 1;
   row.nrows = nrows;
-  row.min =  12.0;
-  row.max = 220.0;
+  row.min =  26.0;
+  row.max = 208.0;
   row.npar =            5;// AuAu200_2019
-  row.type = 20;
+  row.type =  0; // 20;
   row.a[0] =    -0.026642;
   row.a[1] =   0.00040864;
   row.a[2] =    -1.73e-06;
@@ -21,10 +21,10 @@ TDataSet *CreateTable() {
   memset(&row,0,tableSet->GetRowSize());
   row.idx   = 2;
   row.nrows = nrows;
-  row.min =  12.0;
-  row.max = 220.0;
+  row.min =  32.0;
+  row.max = 208.0;
   row.npar =            5;// AuAu200_2019
-  row.type = 20;
+  row.type = 0; //20;
   row.a[0] =     -0.11965;
   row.a[1] =    0.0090877;
   row.a[2] =  -0.00013051;

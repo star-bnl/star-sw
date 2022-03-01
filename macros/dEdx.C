@@ -40,7 +40,7 @@ StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = "", // + ",Display
 StBFChain *bfc(Int_t First, const Char_t *Chain = "MC2016,20Muons,vmc,Rung.1",
  	       const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0, const Char_t *chainName = "");
 //________________________________________________________________________________
-void dEdx(Int_t nevents=1000,
+void dEdx(Int_t First, Int_t Last,
 	  const char *MainFile=	"/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
 	  const char* rootFile="", Int_t mode = 2, const Char_t *year = "", const Char_t *opt = "") {
   TString Year(year);
@@ -139,7 +139,7 @@ void dEdx(Int_t nevents=1000,
   if (! gROOT->IsBatch()) dEdxY2->SetDebug(1);
   StMaker *db = chain->Maker("db");
   if (db) db->SetDebug(1);
-  if (nevents >= 0)   chain->Init();
+  if (First <= Last)   chain->Init();
   StIOMaker *inMk = (StIOMaker *) chain->GetMaker("inputStream");
   if (inMk) {
     inMk->SetIOMode("r");
@@ -148,5 +148,11 @@ void dEdx(Int_t nevents=1000,
     inMk->SetBranch("runcoBranch",0,"0");	//deactivate all branches
     inMk->SetBranch("dstBranch",0,"r");
   }
-  chain->EventLoop(1,nevents);
+  chain->EventLoop(First,Last);
+}
+//_________________________________________________________________________________
+void dEdx(Int_t nevents=1000,
+	  const char *MainFile=	"/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
+	  const char* rootFile="", Int_t mode = 2, const Char_t *year = "", const Char_t *opt = "") {
+  dEdx(1,nevents,MainFile,rootFile,mode,year,opt);
 }
