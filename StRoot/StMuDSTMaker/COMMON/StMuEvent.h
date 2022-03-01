@@ -58,6 +58,10 @@ class StMuEvent : public TObject {
   StMuEvent();
   StMuEvent(const StEvent*); 
   virtual ~StMuEvent();
+  virtual void Clear (Option_t * opt=""){
+    mL2Result.Set(0);
+    mEventSummary.Clear(opt);
+  }
 
 #ifndef __TFG__VERSION__
   int eventId();

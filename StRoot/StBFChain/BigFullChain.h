@@ -2120,7 +2120,6 @@ Bfc_st BFC[] = { // standard chains
   {"picoWrite" ,"","","picoDst,PicoVtxDefault",""                       ,"","Writes picoDST format",kFALSE},
   {"picoRead"  ,"","","RpicoDST","",""                                 ,"WritesRead picoDST format",kFALSE},
 #else /* ?trgSimu */
-  {"picoWrite" ,"","PicoChain","trgSimu,picoDst","StPicoDstMaker",""       ,"Writes picoDST format",kFALSE},
   {"picoRead"  ,"","PicoChain","picoDst","StPicoDstMaker",""           ,"WritesRead picoDST format",kFALSE},
 #endif
   {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
