@@ -28,6 +28,10 @@ public:
              unsigned short ns, unsigned short ehp, unsigned short dep, unsigned short ch, 
              float e);
     ~StMuFcsHit();
+
+    virtual void Clear (Option_t * opt=""){
+        mData.Set(0);
+    }
     
     unsigned short zs() const;
     unsigned short detectorId() const;
@@ -39,8 +43,8 @@ public:
     unsigned int   nTimeBin() const;
     unsigned short timebin(int i) const;
     unsigned short data(int i) const;
-    unsigned short * data() const { return (unsigned short*)mData->GetArray();}
-    unsigned int nData() const { return mData->GetSize(); };
+    unsigned short * data() const { return (unsigned short*)mData.GetArray();}
+    unsigned int nData() const { return mData.GetSize(); };
     unsigned short adc(int i) const;
     unsigned short flag(int i) const;
     int   adcSum() const;
@@ -62,7 +66,7 @@ public:
     void setDetectorId(unsigned short val);
     void setId(unsigned short val);
 
-    void setData(int n, const unsigned short* d);
+    void setData(int ndata, const unsigned short* d);
     void setDataAt(int tb, unsigned short val);
     void setAdcFlag(int tb, unsigned short adc, unsigned short flag);
     void setAdc(int tb, unsigned short val);
@@ -97,7 +101,7 @@ protected:
     UInt_t   mNPeak=0;        // number of peaks found
     Float_t  mEnergy=0.0;     // corrected energy
     StMuFcsCluster* mCluster=0; // pointer to cluster this hit belongs
-    TArrayS* mData=0;         // 12bit ADC values + flag at highest 4 bits, array of timebin
+    TArrayS mData=0;         // 12bit ADC values + flag at highest 4 bits, array of timebin
     
     ClassDef(StMuFcsHit,1)
 };

@@ -578,7 +578,7 @@ daq_dta *daq_itpc::handle_cld(int sec)
 			int ints_per_cluster = (row>>16) ;
 			row &= 0xFFFF ;
 
-			//LOG(TERR,"ROW %d: cou %d[0x%X], version 0x%04X, ints_per_cluster %d",row,int_cou,int_cou,version,ints_per_cluster) ;
+			LOG(DBG,"ROW %d: cou %d[0x%X], version 0x%04X, ints_per_cluster %d",row,int_cou,int_cou,version,ints_per_cluster) ;
 
 			int clusters = int_cou/ints_per_cluster ;	
 
@@ -795,14 +795,14 @@ int daq_itpc::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	char buff[128] ;
 	int buff_cou ;
 	u_int want_dump = 0 ;
-	int sector ;
+//	int sector ;
 
 	u_int *d = (u_int *)addr + 4 ;	// skip header
 	words -= 4 ;
 
 
 	//from Dec 2019
-	sector = rdo>>4 ;
+//	sector = rdo>>4 ;
 	rdo &= 0xF ;
 
 	// NOTE that since Dec 2017 the 16 bit words are swapped!!!

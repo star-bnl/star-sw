@@ -76,6 +76,8 @@ public:
 	unsigned long response ;	// from FEE response packet
 	unsigned long fee_status ;
 
+	u_int datum_ix ;
+
 	u_short *d16_start ;
 	u_short *d16_data ;
 	u_short *d16_last ;

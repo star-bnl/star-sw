@@ -146,6 +146,9 @@ class StEtrHit;
 class StFcsCluster;
 class StFcsHit;
 class StFcsPoint;
+class StFttRawHit;
+class StFttCluster;
+class StFttPoint;
 class StFgtHit;
 class StFgtPoint;
 class StFgtStrip;
@@ -165,6 +168,7 @@ class StHltTrackNode;
 class StHltTriggerReason;
 class StHltVpdHit;
 class StIstHit;
+class StFstHit;
 class StKinkVertex;
 class StL3AlgorithmInfo;
 class StMtdHit;
@@ -218,6 +222,9 @@ StCollectionDef(EtrHit)
 StCollectionDef(FcsCluster)
 StCollectionDef(FcsHit)
 StCollectionDef(FcsPoint)
+StCollectionDef(FttRawHit)
+StCollectionDef(FttCluster)
+StCollectionDef(FttPoint)
 StCollectionDef(FgtHit)
 StCollectionDef(FgtPoint)
 StCollectionDef(FgtStrip)
@@ -237,6 +244,7 @@ StCollectionDef(HltTrackNode)
 StCollectionDef(HltTriggerReason)
 StCollectionDef(HltVpdHit)
 StCollectionDef(IstHit)
+StCollectionDef(FstHit)
 StCollectionDef(KinkVertex)
 StCollectionDef(L3AlgorithmInfo)
 StCollectionDef(MtdHit)

@@ -1,0 +1,14 @@
+/* fttFobToHV.idl
+*
+* Table: fttFobToHV
+*
+* description: sTGC (ftt) map from FOB to HV
+*
+*/
+
+struct fttFobToHV {
+	octet fob[96]; /* fob 1-96 */
+	octet cable[96]; /* HV cable 1 - 32 */
+	octet board[96]; /* HV board 0 - 2 */
+	octet channel[96]; /* HV channel on board 1 - 11 */
+};

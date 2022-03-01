@@ -1,0 +1,25 @@
+/* fstControl.idl
+*
+*  Table: fstControl
+*
+*  description: Control parameters for the FST
+* 
+*/
+
+struct fstControl {
+  float kFstChanMaxRmsNoiseLevel;	// maximum rms noise level marked as regular channel
+  float kFstChanMinRmsNoiseLevel;       // minimum rms noise level marked as regular channel
+  float kFstApvMaxCmNoiseLevel;		// maximum common mode noise level marked as regular chip
+  float kFstPedCutDefault;		// pedestal cut for pedestal calculation: default value 3.0
+  float kFstMinHitCutDefault;           // hit S/N min cut: default value 2.5
+  float kFstMedHitCutDefault;           // hit S/N med cut: default value 3.5
+  float kFstMaxHitCutDefault;           // hit S/N max cut: default value 4.0
+  float kFstCMNCutDefault;		// common mode noise cut for CMN calculation: default value 3.0
+  long kFstMinNumOfRawHits;	        // min number of raw hits per event over a ladder area
+  long kFstMaxNumOfRawHits;	        // max number of raw hits per event over a ladder area
+  long kFstAlldata;			// all data
+  long kFstADCdata;			// non-ZS data
+  long kFstZSdata;			// ZS data
+  long kFstDefaultTimeBin;		// default maximum ADC time bin index
+  long kFstCurrentTimeBinNum;           // time bin number for current run/fill
+};
