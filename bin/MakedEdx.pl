@@ -2126,6 +2126,43 @@ my $NEvents = 100000;
 #'1206'=> {trig=>'4p59GeV_fixedTarget',  field => 'RF',  first=> '20179039',      last => '20179041',     list => '',  beginTime => '20190629.032834'}, #        2019-06-29      03:28:34        2019-06-29      04:38:17
 #'1217'=> {trig=>'4p59GeV_fixedTarget',  field => 'RF',  first=> '20182006',      last => '20182018',     list => '',  beginTime => '20190701.081137'}, #        2019-07-01      08:11:37        2019-07-02      03:36:50
 #'1261'=> {trig=>'31GeV_fixedTarget',    field => 'RF',  first=> '20189035',      last => '20189035',     list => '',  beginTime => '20190709.032312'}, #        2019-07-09      03:23:12        2019-07-09      03:36:39
+#'1267'=> {trig=>'AuAu200',              field => 'RF',	 first=> '20191005',	  last => '20191005',	  list => '',  beginTime => '20190710.110157'}, # 	2019-07-10	11:01:57	2019-07-10	11:40:57
+#'1276'=> {trig=>'AuAu200',       	 field => 'RF',	 first=> '20193025',	  last => '20193026',	  list => '',  beginTime => '20190712.191209'}, # 	2019-07-12	19:12:09	2019-07-15	08:51:41
+# St_TpcSecRowCorC::instance found table TpcSecRowB with NRows = 24 in db   Validity:20190710/110157 - 20190715/85141
+# MySQL [Calibrations_tpc]> select entryTime,elementID,beginTime,flavor,deactive from TpcSecRowB where elementID=1 and deactive = 0 and beginTime > "2019-01-01" order by beginTime limit 40;
+# +---------------------+-----------+---------------------+--------+----------+
+# | entryTime           | elementID | beginTime           | flavor | deactive |
+# +---------------------+-----------+---------------------+--------+----------+
+# | 2019-04-16 19:41:11 |         1 | 2019-02-01 00:00:03 | ofl    |        0 |
+# | 2019-04-28 20:49:12 |         1 | 2019-02-01 00:07:07 | ofl    |        0 |
+# | 2020-07-08 16:59:47 |         1 | 2019-02-25 20:23:29 | ofl    |        0 |
+# | 2021-05-10 20:35:27 |         1 | 2019-02-25 23:00:10 | ofl    |        0 |
+# | 2021-08-18 13:35:21 |         1 | 2019-02-25 23:00:25 | ofl    |        0 |
+# | 2021-05-10 20:35:31 |         1 | 2019-04-04 00:00:10 | ofl    |        0 |
+# | 2021-08-18 13:35:24 |         1 | 2019-04-04 00:00:25 | ofl    |        0 |
+# | 2021-10-21 17:21:21 |         1 | 2019-04-04 09:44:05 | ofl    |        0 |
+# | 2021-11-08 22:09:13 |         1 | 2019-04-17 13:34:01 | FXT    |        0 |
+# | 2021-10-21 17:21:24 |         1 | 2019-04-17 14:12:46 | ofl    |        0 |
+# | 2021-11-08 22:09:16 |         1 | 2019-04-23 15:54:18 | FXT    |        0 |
+# | 2021-10-21 17:21:28 |         1 | 2019-04-23 18:11:58 | ofl    |        0 |
+# | 2021-10-21 17:21:32 |         1 | 2019-06-03 22:36:55 | ofl    |        0 |
+# | 2021-10-21 17:13:53 |         1 | 2019-06-07 17:47:02 | FXT    |        0 |
+# | 2021-10-21 17:21:36 |         1 | 2019-06-07 20:22:44 | ofl    |        0 |
+# | 2021-10-21 17:13:57 |         1 | 2019-06-09 12:45:28 | FXT    |        0 |
+# | 2021-10-21 17:21:40 |         1 | 2019-06-10 02:41:09 | ofl    |        0 |
+# | 2021-11-08 22:09:18 |         1 | 2019-06-18 14:36:58 | FXT    |        0 |
+# | 2021-10-21 17:21:43 |         1 | 2019-06-19 02:51:26 | ofl    |        0 |
+# | 2021-10-21 17:21:47 |         1 | 2019-06-28 08:19:31 | ofl    |        0 |
+# | 2021-10-25 21:01:45 |         1 | 2019-06-29 03:28:34 | FXT    |        0 |
+# | 2021-10-21 17:21:51 |         1 | 2019-07-02 14:41:51 | ofl    |        0 |
+# | 2021-10-21 17:14:08 |         1 | 2019-07-09 03:23:12 | FXT    |        0 |
+# | 2021-10-21 17:21:55 |         1 | 2019-07-10 11:01:57 | ofl    |        0 | AuAu200
+# | 2021-10-21 17:21:59 |         1 | 2019-07-15 08:51:41 | ofl    |        0 |
+# | 2021-02-11 15:47:50 |         1 | 2019-11-20 19:00:02 | ofl    |        0 |
+# | 2021-02-11 15:47:52 |         1 | 2019-11-21 00:00:53 | ofl    |        0 |
+# | 2021-02-11 15:47:55 |         1 | 2019-12-08 09:13:08 | ofl    |        0 |
+# | 2021-10-21 17:14:12 |         1 | 2019-12-21 15:40:21 | FXT    |        0 |
+# | 2021-02-11 15:48:00 |         1 | 2019-12-21 19:00:32 | ofl    |        0 |
 #
 #'161' => {trig=>'5p75GeV_fixedTarget',  field => 'RF',  first=> '20355020',      last => '20355021',     list => '',  beginTime => '20191221.154021'}, #        2019-12-21      15:40:21        2019-12-21      19:00:32
 #'363' => {trig=>'31p2GeV_fixedTarget',  field => 'RF',  first=> '21028011',      last => '21028014',     list => '',  beginTime => '20200128.182912'}, #        2020-01-28      18:29:12        2020-01-28      20:30:12
@@ -2172,13 +2209,23 @@ my $NEvents = 100000;
 #$hist = "P21ic_calib_56"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/23/21 update TpcSecRowB for 26p5GeV_fixedTarget_2020 and 4p59GeV_fixedTarget_2019
 #$hist = "P21ic_calib_57"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*4p59GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/24/21 TpcSecRowB.20190629.032834.root -> TpcSecRowB.4p59GeV_fixedTarget_2019.root
 #$hist = "P21ic_calib_58"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*4p59GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/25/21 TpcSecRowB.20190629.032834.root -> TpcSecRowB.4p59GeV_fixedTarget_2019.root from P51
-#$hist = "P21ic_calib_59"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*4p59GeV_fixedTarget*/RxseversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/25/21 TpcZCorrectionC.20190629.032834.C -> /net/l402/data/fisyak/STAR/packages/.DEV2/hold/StarDb/Calibrations/tpc/P21ic_calib_51/TpcZCorrectionC.20190629.032834.C
+#$hist = "P21ic_calib_59"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*4p59GeV_fixedTarget*/RxseversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/25/21 TpcZCorrectionC.20190629.032834.C -> /net/l402/data/fisyak/STAR/packages/.DEV2/xchold/StarDb/Calibrations/tpc/P21ic_calib_51/TpcZCorrectionC.20190629.032834.C
 #$hist = "P21ic_calib_60"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/25/21 check with MySQL
 #$hist = "P21ic_calib_61"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "adev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/25/21 check with adev
 #$hist = "P21ic_calib_62"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*4p59GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/25/21 check with MySQL
 #$hist = "P21ic_calib_63"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/25/21 check with adev
 #$hist = "P21ic_calib_64"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/29/21 check MySQL after fixing beamInfo isFixedTarget
 #$hist = "P21ic_calib_65"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/03/21 check with  dev
+#$hist = "P21ic_calib_66"; $NEvents = 10000; $disk = "/hlt/cxsephfs/"; $RECO = "reco/*7.3GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/29/21 check MySQL after fixing beamInfo isFixedTarget
+#$hist = "P21ic_calib_67"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/08/21 check with  dev after fix 7.3GeV_fixedTarge_2019
+#$hist = "RunXIX68"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P2*_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/19/22 check whole Run XIX for Alive / Active
+#$hist = "RunXIX69"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P2*_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 01/30/22 check whole Run XIX for Alive / Active with removed masked out RDOs
+#$hist = "RunXIX70"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P2*_calib"; $year = "/2019/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/02/22 check new itpcPadGainT0 for Run XIX
+#$hist = "RunXIX71"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P2*_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/03/22 check new itpcPadGainT0 for Run XIX & XX in DB
+#$hist = "RunXIX71"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/*AuAu200*/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/17/22 checkAuAu200
+#$hist = "RunXIX72"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/17/22 SecRow3C
+$hist = "RunXIX73"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/24/22 TpcZCorrectionC.20190710.110157.C
+######################################## Run XXI express calibration ########################################a
 #$hist = "P21ic_calib_66"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*7.3GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/29/21 check MySQL after fixing beamInfo isFixedTarget
 #$hist = "P21ic_calib_67"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/08/21 check with  dev after fix 7.3GeV_fixedTarge_2019
 ######################################## Run XXI express calibration ########################################
@@ -2263,7 +2310,7 @@ my $NEvents = 100000;
 # $hist = "RunXXI200"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG21h"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  08/07/21 - 08/09/21 Recheck 
 # $hist = "RunXXI201"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG21h"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  09/10/21 TpcZCorrectionC.y2021.C
 # Run XXII pp510_2022
- $hist = "RunXXII00"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  01/16/22 Check
+# $hist = "RunXXII00"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  01/16/22 Check
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2396,7 +2443,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 #    print "file = $file\n";
     my @words = split '/', $file;# for (my $i = 0; $i < $#words; $i++) {print "$i $words[$i]\n";}
     my $dd = $words[4] . '_' . $words[5];
-    if ($dd !~ /GeV/) {
+    if ($dd !~ /GeV/ && $dd !~ /AuAu200/) {
       $dd = $words[7];
     }
     $dd =~ s/production_//;
