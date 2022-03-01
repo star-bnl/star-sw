@@ -50,7 +50,10 @@ void trig( int runId, int eventId, double vz )
 
   chain->Clear();
   chain->Make();
-  //  _primary->event()->Print();
+
+  //  command("message gprint kine:");
+  //  command("gprint kine");
+
 
       
 }
@@ -137,7 +140,7 @@ void getNextRun( int& event, int& run, double& z ) {
 
 // ----------------------------------------------------------------------------
 
-void starsim( Int_t nevents=10, Int_t runnumber=15165057, TString runfile_="", int sequence=0, int dummy = 0 )
+void starsim( Int_t nevents=10000, Int_t runnumber=15117062, TString runfile_="15117062.dat", int sequence=0, int dummy = 0 )
 { 
 
   const int stride = 1;
@@ -216,7 +219,8 @@ void starsim( Int_t nevents=10, Int_t runnumber=15165057, TString runfile_="", i
   decayPy8->SetDebug(1);
   //  decayPy8->Set("WeakSingleBoson:all = on");
   decayPy8->Set("421:onMode = 0");
-  decayPy8->Set("421:onIfAll = 321 -211");
+  //  decayPy8->Set("421:onIfAll = 321 -211");
+  decayPy8->Set("421:onIfMatch = 321 -211");
 
   // 
 
@@ -252,7 +256,7 @@ void starsim( Int_t nevents=10, Int_t runnumber=15165057, TString runfile_="", i
   // rejected.  If the tree size is too big (because the filter is too
   // powerful) you may want to set this equal to zero.  In which case
   // only header information is saved for the event.
-  _primary->SetAttr("FilterKeepAll",     int(1));
+  _primary->SetAttr("FilterKeepAll",     int(0));
 
   // By default, the primary maker enters an infinite loop and executes
   // the event generator until it yields an event which passes the filter.
