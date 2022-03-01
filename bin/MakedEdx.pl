@@ -19,6 +19,7 @@ my $maxDay = 366;
 my $RECO = "/reco/*/*/";
 my $FILE = "/*/st_physics";
 my $NEvents = 100000;
+my $step = 0;
 #================================================================================
 # dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/*
 #============================ Final Runs ===================================================
@@ -2224,7 +2225,10 @@ my $NEvents = 100000;
 #$hist = "RunXIX71"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/*GeV*/ReversedFullField";  $Production = "/P2*_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/03/22 check new itpcPadGainT0 for Run XIX & XX in DB
 #$hist = "RunXIX71"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/*AuAu200*/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/17/22 checkAuAu200
 #$hist = "RunXIX72"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/17/22 SecRow3C
-$hist = "RunXIX73"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/24/22 TpcZCorrectionC.20190710.110157.C
+#$hist = "RunXIX73"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/24/22 TpcZCorrectionC.20190710.110157.C
+#$hist = "RunXIX74"; $NEvents = 10000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/26/22 +  SecRow3+SecRow3PGFAuAu200_2019.root => TpcSecRowB.20190710.110158.root
+#$hist = "RunXIX75"; $NEvents = 20000; $step = 2000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 02/26/22 +  reduce range for TpcZCorrectionC
+$hist = "RunXIX76"; $NEvents = 20000; $step = 1000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/01/22 +  reduce range for TpcZCorrectionC, activate range 
 ######################################## Run XXI express calibration ########################################a
 #$hist = "P21ic_calib_66"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*7.3GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/29/21 check MySQL after fixing beamInfo isFixedTarget
 #$hist = "P21ic_calib_67"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/08/21 check with  dev after fix 7.3GeV_fixedTarge_2019
@@ -2427,7 +2431,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     $Total_Size += $size;
     $f =~ s|\.root||;
     foreach my $ff (@files ){goto ENDL if $ff eq $f;}
-    push @files, $f;
+    push @files, $f; print "push $f\n";
     (my $ff = $f) =~ s|st_physics_||;
     $dd =~ s|hlt_||;
     $ff =~ s|st_fmsslow_||;
@@ -2449,110 +2453,57 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     $dd =~ s/production_//;
     $dd =~ s/_ReversedFullField//;
     my $scrr = $scr . $dd . "/"; #print "scrr = $scrr\n";
-    my $root = $scrr . $ff . ".root"; print "root = $root\n";
-    my $logL = $ff . ".log";
-    my $log = $scrr . $logL;
-    my $SCRIPT = $script ."_" . $STAR_LEVEL ."_". $ff . ".csh";
-    next if   -r $SCRIPT;
-    my $LOG    = $script ."_" . $STAR_LEVEL ."_". $ff . ".log";
-    my $ERR    = $script ."_" . $STAR_LEVEL ."_". $ff . ".err";
-    # switch between all and 1-st one
-    my $ffile = $file; $ffile =~ s|0001\.dst|000\*\.dst|;
-    my $run   = $Run; #$ff; $run =~ s|_.*||; print "Run = $run\n";
-    next if -r $root;
-#    print "file=$file $Disk $prod $Year Day=$Day Run=$Run \n";
-    $fileno++;
-    if ($keep and $fileno%$keep != 1) {
-      open(REM,">>skipped.csh") or die "Can't open skipped.csh";
-      print REM "rm $file\n";
-      close (REM);
-      goto ENDL;
-    } # skip all except each "keep"-th file
-#    if ($fileno > 105) {goto ENDL;} # skip all except each 10-th file
-    if ($opened && $count == $maxFjob ) {
-      close (OUT); $opened = 0; $count = 0;
-      chmod 0755, $SCRIPT;
-    }
-    if (! $opened) {
-      print "Create $SCRIPT\n";
-      print XML "<input URL=\"file:" . $DIR . "/" .  $SCRIPT ."\" />\n";
-#      print CONDOR "
-#Universe       = vanilla
-#Notification   = never
-#Executable     = /afs/rhic.bnl.gov/star/users/fisyak/bin/trapguard.csh
-#Arguments      = /gpfs01/star/subsys-tpc/fisyak/dEdx/jobs/New/$SCRIPT
-#Output         = $LOG
-#Error          = $ERR
-#Requirements   = (CPU_Experiment == \"star\")
-#Log            = $LOG
-#Initialdir     = /gpfs01/star/subsys-tpc/fisyak/dEdx/jobs/New
-#+Experiment     = \"star\"
-#+Job_Type       = \"cas\"
-#kill_sig        = SIGINT
-#PeriodicRemove  = (NumJobStarts >=1 && JobStatus==1) || (JobStatus == 2 && (CurrentTime - JobCurrentStartDate > (54000)) && ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) < 0.10)) || (((CurrentTime - EnteredCurrentStatus) > (2*24*3600)) && JobStatus == 5) || (JobRunCount >= 1 && JobStatus == 1)
-#Priority        = +10
-#Queue
-#";
-      
-      open (OUT,">$SCRIPT") or die "Can't open $SCRIPT";
-      $opened = 1;
-      print OUT "#! /usr/local/bin/tcsh -f\n";
-#      print OUT "onintr  eviction\n";
-#      print OUT "source ~/startJob.csh\n";
-#      print OUT "source /afs/.rhic.bnl.gov/star/group/setup  icc;\n";
-      print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
-#      print OUT "source /afs/rhic.bnl.gov/star/users/fisyak/.tcshrc;\n";
-#      print OUT "source $GROUP_DIR/setup 64b;\n";
-#      print OUT "source $GROUP_DIR/setup gcc451;\n";
-      if ($STAR_LEVEL ne "\.DEV2") {
-# 	print OUT "source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh;\n";
-# 	print OUT "source $GROUP_DIR/setup gcc;\n";
-# 	print OUT "source $GROUP_DIR/setup 32b;\n";
-# 	print OUT "source $GROUP_DIR/setup nodebug;\n";
-	if ($STAR_LEVEL !~ "^\.DEV2" and $STAR_LEVEL !~ "^TFG") {
-#	  print OUT "source /afs/rhic.bnl.gov/star/packages/.DEV2/unsetupDEV2.csh;\n";
-	  print OUT "source ${GROUP_DIR}/setup gcc;\n";
-	}
-	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
-      }  else {
-# 	print OUT "setenv NODEBUG yes\n";
-#         print OUT "source $GROUP_DIR/setup 64b;\n";
-        print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+    if ($step == 0) {$step = $NEvents;}
+    for (my $First = 1; $First < $NEvents; $First += $step) {
+      my $Last = $First - 1 + $step;
+      my $bff = $ff  . "_" . $First . "_" . $Last;# print "$ff => $bff \n";
+      my $root = $scrr . $bff  .".root";# print "root = $root\n";
+      my $logL = $bff . ".log";
+      my $log = $scrr . $logL;
+      my $SCRIPT = $script ."_" . $STAR_LEVEL ."_". $bff . ".csh";
+      next if   -r $SCRIPT;
+      my $LOG    = $script ."_" . $STAR_LEVEL ."_". $bff . ".log";
+      my $ERR    = $script ."_" . $STAR_LEVEL ."_". $bff . ".err";
+      # switch between all and 1-st one
+      my $ffile = $file; $ffile =~ s|0001\.dst|000\*\.dst|;
+      my $run   = $Run; #$ff; $run =~ s|_.*||; print "Run = $run\n";
+      next if -r $root;
+      #    print "file=$file $Disk $prod $Year Day=$Day Run=$Run \n";
+      $fileno++;
+      if ($keep and $fileno%$keep != 1) {
+	open(REM,">>skipped.csh") or die "Can't open skipped.csh";
+	print REM "rm $file\n";
+	close (REM);
+	goto ENDL;
+      } # skip all except each "keep"-th file
+      if ($opened && $count == $maxFjob ) {
+	close (OUT); $opened = 0; $count = 0;
+	chmod 0755, $SCRIPT;
       }
-#     print OUT "setenv Calibrations_tpc reconYuri\n";
-#      print OUT " unsetenv Calibrations_tpc\n";
-#      print OUT "cd $homedir; \n"; 
-#      print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
-#      print OUT "cd /gpfs01/star/subsys-tpc/fisyak/dEdx/jobs/New\n";
-#      print OUT "cd /gpfs01/star/subsys-tpc/fisyak/dEdx/jobs\n";
-      print OUT "/usr/bin/test -d $scrr || mkdir -p $scrr;\n";
-#      print OUT "cd $scrr; \n";
+      if (! $opened) {
+	print "Create $SCRIPT\n";
+	print XML "<input URL=\"file:" . $DIR . "/" .  $SCRIPT ."\" />\n";
+	open (OUT,">$SCRIPT") or die "Can't open $SCRIPT";
+	$opened = 1;
+	print OUT "#! /usr/local/bin/tcsh -f\n";
+	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+	if ($STAR_LEVEL ne "\.DEV2") {
+	  if ($STAR_LEVEL !~ "^\.DEV2" and $STAR_LEVEL !~ "^TFG") {
+	    print OUT "source ${GROUP_DIR}/setup gcc;\n";
+	  }
+	  print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+	}  else {
+	  print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+	}
+	print OUT "/usr/bin/test -d $scrr || mkdir -p $scrr;\n";
+      }
+      my $cmd = "/usr/bin/test ! -r " . $root . " && root.exe -q -b  '" . $macro;
+      $cmd .= ".C(" . $First ."," .$Last. ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\' >& $log";
+      #    $cmd .= "; cp -p $logL $log;";
+      print OUT "$cmd\n";
+      $count++;
+    ENDL:
     }
-#    my $cmd = "Root.exe -q -b  '" . $macro;
-#    my $cmd = "root4star -q -b  '~/.dev/macros/" . $macro;
-#    my $cmd = "test ! -r " . $root . " && root4star -q -b  '" . $macro;
-    my $cmd = "/usr/bin/test ! -r " . $root . " && root.exe -q -b  '" . $macro;
-#    if ($Production =~ /P02gi2/ || $Production =~ /P02gi3/) {$cmd .= "N";}
-#    if ($Production =~ /^dAu/ or $Production =~ /^AuAu/) {$cmd .= "S";}
-#    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ",\"$Year\")\' >& $log";
-    $cmd .= ".C(" . $NEvents . ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\' >& $log";
-#    $cmd .= "; cp -p $logL $log;";
-#    $cmd .= ".C(10000,\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\'";
-#    $cmd .= ".C(10000,\"" . $ffile . "\",\"" . $root . "\")\'";
-    print OUT "$cmd\n";
-#    print OUT "# Function to pass batch system signals to the process, if need
-#eviction:
-#set PIDS=`ps  -o \"%p\" --no-headers --ppid \$\$`
-#foreach  process (\$PIDS)
-#  set killit=`ps -o \"%p\" --no-headers -p \$process`
-#  if ( \"x\$killit\" !~ \"x\" ) then
-#     echo \"evicting `ps  --no-headers -p\$process`\"
-#     kill -15 \$process
-#  endif
-#end
-#";
-    $count++;
-  ENDL:
   }
   if ($opened) {
     close (OUT); $opened = 0;
