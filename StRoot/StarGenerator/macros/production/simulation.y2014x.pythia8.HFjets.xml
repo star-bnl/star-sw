@@ -3,17 +3,17 @@
 <!ENTITY PRODNAME   "pythia8.200GeV.pp.HFjets">
 <!ENTITY RECOCHAIN  "P16idAuAu200hft">
 
-<!ENTITY NEVENTS    "20">
+<!ENTITY NEVENTS    "1000">
 <!ENTITY STRIDE     "100">
 
-<!ENTITY NFILES     "100">
+<!ENTITY NFILES     "5000">
 <!ENTITY WORKINGDIR "/gpfs/mnt/gpfs01/star/simu/simu/jwebb/2022/pp-200GeV-HF-jets-detroit/">
 <!ENTITY DATASET    "filelist:&WORKINGDIR;/simulation.y2014x.pythia8.HFjets.input.list" >
 
 
-<!ENTITY OUTDIR     "/star/simu/simu/jwebb/2022/Simulation.HFjets/out7/" >
-<!ENTITY LOGDIR     "/star/simu/simu/jwebb/2022/Simulation.HFjets/log7/" >
-<!ENTITY JOBFILES   "/star/simu/simu/jwebb/2022/Simulation.HFjets/job7/" > 
+<!ENTITY OUTDIR     "/star/simu/simu/jwebb/2022/Simulation.HFjets/out_production/" >
+<!ENTITY LOGDIR     "/star/simu/simu/jwebb/2022/Simulation.HFjets/log_production/" >
+<!ENTITY JOBFILES   "/star/simu/simu/jwebb/2022/Simulation.HFjets/job_production/" > 
 
 <!ENTITY GEOMETRY      "y2014x"> 
 <!ENTITY TIMESTAMP     "sdt20140530"> 
