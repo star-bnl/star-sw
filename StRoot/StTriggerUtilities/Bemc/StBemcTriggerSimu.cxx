@@ -79,12 +79,12 @@ void StBemcTriggerSimu::Init(){
   else {
     mAdc2e = static_cast<StEmcADCtoEMaker*> ( mHeadMaker->GetMakerInheritsFrom("StEmcADCtoEMaker") );
     StEmcRawMaker *emcRaw = static_cast<StEmcRawMaker*> ( mHeadMaker->GetMakerInheritsFrom("StEmcRawMaker") );
-    if(!mAdc2e && !emcRaw) {
+    if(mAdc2e) mTables = mAdc2e->getBemcData()->getTables();
+    else if(emcRaw) mTables = emcRaw->getBemcRaw()->getTables();
+    else {
       LOG_FATAL << "StBemcTriggerSimu couldn't find StEmcADCtoEMaker and StEmcRawMaker in chain" << endm;
       assert(0);
     }
-    if(mAdc2e) mTables = mAdc2e->getBemcData()->getTables();
-    else if(emcRaw) mTables = emcRaw->getBemcRaw()->getTables();
   }
 
   mDbThres->LoadTimeStamps();
