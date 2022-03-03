@@ -568,7 +568,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	goto ENDL;
       } else if (k == kEdge) {// Should be disabled in StTpcRSMaker
 	if (corl->type == 200) VarXs[kEdge] = TMath::Abs(CdEdx.edge);
-	if (corl->min > 0 && corl->min > VarXs[kEdge]    ) return 2;
+	if (corl->min > 0 && corl->min > VarXs[kEdge]    ) return 4;
       } else if (k == ktpcTime) { // use the correction if you have xmin < xmax && xmin <= x <= xmax
 	if (corl->min >= corl->max || corl->min > VarXs[ktpcTime] ||  VarXs[ktpcTime] > corl->max) goto ENDL;
 	Double_t xx = VarXs[ktpcTime];

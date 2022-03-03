@@ -109,7 +109,7 @@ void MakeTpcZCorrection1() {
 #else
   Int_t nrows = 2; 
   Int_t np = 5;
-  Int_t nextra = 2;
+  Int_t nextra = 0; //2;
   TF1 *fc = new TF1("fc",Form("pol%i(0)+expo(%i)",np-1,np),0.,210.);
 #endif
   out << "TDataSet *CreateTable() {" << endl;
@@ -136,13 +136,13 @@ void MakeTpcZCorrection1() {
     }
 #else /* AuAu200_2019 */
     if (idx % 2 == 1) { // Outer
-      min = 12;
+      min = 18;
       max = 220;
-      f[io] =  fc;
+      if (nextra) f[io] =  fc;
     } else {            // Inner
-      min =  12;
+      min =  18;
       max = 220;
-      f[io] =  fc;
+      if (nextra) f[io] =  fc;
     }
 #endif
     out << "  row.min = " << Form("%5.1f", min)  << ";" << endl;
@@ -171,7 +171,7 @@ void MakeTpcZCorrection1() {
     f[io]->SetParameters(params);
     hist->Fit(f[io],"er","",min,max);
     Int_t npar = f[io]->GetNpar();
-    out << "  row.npar = " << Form("%12i",np) << ";// " << fileIn.Data()  << endl;
+    out << "  row.npar = " << Form("%12i",npar-nextra) << ";// " << fileIn.Data()  << endl;
     if (nextra) {
       out << "  row.type = 20;" << endl;
     }
