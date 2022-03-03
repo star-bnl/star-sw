@@ -50,7 +50,7 @@ Int_t StFcsPi0FinderForEcal::Init() {
       LOG_ERROR << "StFcsEventDisplay::InitRun Failed to get StFcsDbMaker" << endm;
       return kStFatal;
    }
-   
+
    h1_num_entries = new TH1F("h1_num_entries", "# of entries", 10, 0, 10);
    h1_inv_mass_cluster = new TH1F("h1_inv_mass_cluster", "invariant mass plot for FCS ECal cluster", bins, m_low, m_up);
    h1_inv_mass_cluster->SetXTitle("invariant mass [GeV]");
@@ -228,18 +228,47 @@ Int_t StFcsPi0FinderForEcal::Make() {
       mNEvents++;
       cout << "current event:" << mNEvents << endl;
       if (mFilter == 1 && mFcsColl->numberOfHits(0) + mFcsColl->numberOfHits(1) + mFcsColl->numberOfHits(2) + mFcsColl->numberOfHits(3) == 0) return kStOK;
-      
-      //TOF mult cut
+
+      //TOF mult cut                                                                                                     
       int tofMult = 0;
       const StTriggerData* trgdata = event->triggerData();
       if(!trgdata && StMuDst::event()) trgdata = StMuDst::event()->triggerData();
       if(trgdata){
-	  tofMult = trgdata->tofMultiplicity();
-	  LOG_DEBUG<<"TOF mult="<<tofMult<<endm;
-	  if (tofMult > 100) return kStOK;
+	tofMult = trgdata->tofMultiplicity();
+	LOG_DEBUG<<"TOF mult="<<tofMult<<endm;
+	if (tofMult > 100) return kStOK;
       }else{
-	  LOG_WARN << "No TriggerData found in StEvent nor Mudst. No TOFMult cut"<<endm;
+	LOG_WARN << "No TriggerData found in StEvent nor Mudst. No TOFMult cut"<<endm;
       }
+
+      //TPC ZVERTEX
+      float zTPC=-999.0;
+      StPrimaryVertex* tpcvtx = event->primaryVertex();
+      if(tpcvtx) {
+	zTPC=tpcvtx->position().z();
+      }else{
+	StMuPrimaryVertex* mutpcvtx=StMuDst::primaryVertex();
+	if(mutpcvtx) zTPC=mutpcvtx->position().z();
+      }
+
+      //BBC ZVERTEX
+      float zBBC=-999.0;
+      if(trgdata) zBBC = (4096 - trgdata->bbcTimeDifference())*0.016*30.0/2.0;      
+      if(zBBC<-200 || zBBC>200) zBBC=-999;
+
+      //VPD ZVERTEX from MuDst(TOF data)
+      float zVPD=-999.0;
+      if(StMuDst::btofHeader()) zVPD=StMuDst::btofHeader()->vpdVz();
+
+      LOG_INFO << Form("ZTPX = %6.2f ZBBC = %6.2f ZVPD = %6.2f",zTPC,zBBC,zVPD) << endm;
+
+      //test getLorentzVector
+      StThreeVectorD xyz(20,0,720);     
+      StLorentzVectorD pbbc,ptpc,pvpd;
+      StLorentzVectorD p0 = mFcsDb->getLorentzVector((xyz), 10,    0);  LOG_INFO << "Zero " << p0 << endm;  	   
+      if(zBBC>-200) {pbbc  = mFcsDb->getLorentzVector((xyz), 10, zBBC);	LOG_INFO << "BBC  " << pbbc << endm;}
+      if(zTPC>-200) {ptpc  = mFcsDb->getLorentzVector((xyz), 10, zTPC);	LOG_INFO << "TPC  " << ptpc << endm;}
+      if(zVPD>-200) {pvpd  = mFcsDb->getLorentzVector((xyz), 10, zVPD); LOG_INFO << "VPD  " << pvpd << endm;}    
 
       mNAccepted++;
       int total_nc = 0;
@@ -318,7 +347,7 @@ Int_t StFcsPi0FinderForEcal::Make() {
             h2_cluster_position->Fill(cluPos_x, cluPos_y);
             h1_each_cluster_energy->Fill(clu_energy);
             StThreeVectorD xyz = mFcsDb->getStarXYZfromColumnRow(det, clu_x, clu_y);
-            StLorentzVectorD p = mFcsDb->getLorentzVector((xyz), clu_energy, 0);
+            StLorentzVectorD p = mFcsDb->getLorentzVector((xyz), clu_energy,    0);	   
             if (i == nc - 1) continue;
             for (int j = i + 1; j < nc; j++) {
                StFcsCluster* cluj = clusters[j];
