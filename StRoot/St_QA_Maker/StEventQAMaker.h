@@ -79,6 +79,7 @@ class StEventQAMaker : public StQAMakerBase {
   virtual void   MakeHistSST();
   virtual void   MakeHistRP();
   virtual void   MakeHistEPD();
+  virtual void   MakeHistTPC();
   virtual void   MakeHistiTPC();
   
   virtual void   AllTriggers() { allTrigs = kTRUE; }

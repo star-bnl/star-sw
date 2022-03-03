@@ -155,8 +155,13 @@ foreach $h (@h_files) {#print "h = $h\n";
  ENDL:
 }
 if ($#Defs > -1) {
-  my @CintFiles = 
-  ( $PKG . "_Cint.cxx", $PKG . "_Cint.h");
+  my @CintFiles = ("${PKG}_Cint.cxx", "${PKG}_Cint.h");
+
+  if ($env->{ENV}->{ROOT_VERSION_MAJOR} >= 6) {
+    push @CintFiles, "${PKG}_Cint_rdict.pcm";
+    Install $env $LIB, File::Basename::basename("${PKG}_Cint_rdict.pcm");
+  }
+
   my @defs = ();
   foreach my $def (@Defs) {
     next if $def =~ /LinkDef/;

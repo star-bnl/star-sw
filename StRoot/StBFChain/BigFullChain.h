@@ -1531,14 +1531,12 @@ Bfc_st BFC[] = { // standard chains
   {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
   {"RMuDST" ,"RMuDst","MuDSTChain","MuDst,ldEdxY2,noHistos,noRunco,Tree"
    ,                                                         "StMuDstMaker","","reads Common MuDST",kFALSE},
-  {"picoRead"  ,"","","RpicoDST","",""                                 ,"WritesRead picoDST format",kFALSE},
   {"RpicoDST"  ,"RPicoDst","","PicoDeps"                        ,"StPicoDstMaker","","read PicoDST",kFALSE},
   {"Generators", "Generators", "","sim_T,gen_T", ""
    ,"VMC,MathMore,StarGeneratorUtil,StarGeneratorEvent,StarGeneratorBase",  "Basic STAR Generators",kFALSE},
   {"StarPrimary0", "StarPrimary", "","Generators", "StarPrimaryMaker", "",  "Basic STAR Generators",kFALSE},
   {"mtin", "","","",""                                              ,"Read event from MuDst TTree", kFALSE},
   //________________________________________________________________________________
-  {"picoWrite" ,"","","picoDst,PicoVtxDefault",""                       ,"","Writes picoDST format",kFALSE},
   {"NoPiCovMtx","","","",""                                      ,"","Don't write Pico Cov. Matrix",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1758,6 +1756,17 @@ Bfc_st BFC[] = { // standard chains
   {"fstHit",     "", "fstChain", "event,fstCluster", "StFstHitMaker",       "StFstHitMaker","FST Hit Maker",
                                                                                                     kFALSE},
   {"fstUtil"  , "", "", "",          "",       "StFstUtil",    "Fst Utilities",                     
+                                                                                                    kFALSE},
+
+  {"fstFastSim","fstChain","","StMcEvent,StEvent","StFstFastSimMaker","StFstSimMaker","FST fast simulator", 
+                                                                                                    kFALSE},
+  {"fstRawHit", "", "fstChain", "fstUtil,fstDb","StFstRawHitMaker", "StFstRawHitMaker","FST raw hit maker", 
+                                                                                                    kFALSE},
+  {"fstCluster", "", "fstChain", "fstRawHit","StFstClusterMaker",  "StFstClusterMaker","FST Cluster maker", 
+                                                                                                    kFALSE},
+  {"fstHit",     "", "fstChain", "event,fstCluster", "StFstHitMaker",       "StFstHitMaker","FST Hit Maker",
+                                                                                                    kFALSE},
+  {"fstUtil"  , "", "fstChain", "",          "",       "StFstUtil",    "Fst Utilities",                     
                                                                                                     kFALSE},
 
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
@@ -2104,6 +2113,15 @@ Bfc_st BFC[] = { // standard chains
    ,                                                              "Load picoEvent and dependencies",kFALSE},
   {"picoDst"    ,"","","picoEvt,EmcUtil,TofUtil,BTofUtil,PmdUtil","StPicoDstMaker"
    ,                                                        "StPicoDstMaker","Load PicoDST library",kFALSE},
+  {"RMuDST"    ,"","","CMuDST"   ,"","","reads Common MuDST, do not disactivate if no output files",kFALSE},
+
+  {"trgSimu"        ,"","",""       ,"StTriggerSimuMaker","StTriggerUtilities","trigger simu maker",kFALSE},
+#if 1 
+  {"picoWrite" ,"","","picoDst,PicoVtxDefault",""                       ,"","Writes picoDST format",kFALSE},
+  {"picoRead"  ,"","","RpicoDST","",""                                 ,"WritesRead picoDST format",kFALSE},
+#else /* ?trgSimu */
+  {"picoRead"  ,"","PicoChain","picoDst","StPicoDstMaker",""           ,"WritesRead picoDST format",kFALSE},
+#endif
   {"PicoVtxDefault" ,"","",""                                       ,"" ,"","pico Vtx default mode",kFALSE},
   {"PicoVtxVpd"     ,"","","-PicoVtxDefault"             ,"" ,"","pico Vtx cut on Tof and VPD mode",kFALSE},
   {"PicoVtxVpdOrDefault","","","-PicoVtxDefault,-PicoVtxVpd"
