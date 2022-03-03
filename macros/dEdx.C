@@ -139,7 +139,7 @@ void dEdx(Int_t First, Int_t Last,
   if (! gROOT->IsBatch()) dEdxY2->SetDebug(1);
   StMaker *db = chain->Maker("db");
   if (db) db->SetDebug(1);
-  if (First <= Last)   chain->Init();
+  if (Last >= 0)   chain->Init();
   StIOMaker *inMk = (StIOMaker *) chain->GetMaker("inputStream");
   if (inMk) {
     inMk->SetIOMode("r");
