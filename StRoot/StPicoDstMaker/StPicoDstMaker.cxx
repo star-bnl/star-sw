@@ -1948,7 +1948,7 @@ void StPicoDstMaker::fillEmcTrigger() {
     mPicoDst->event()->setHighTowerThreshold(i, trigSimu->bemc->barrelHighTowerTh(i));
   }
 
-  if( bht0>=5 || bht1>=5 || bht2>=5 || bht3>=5 ) {  // avoid saving unuseful data in case all threshold values are zeros
+  if( bht0>0 || bht1>0 || bht2>0 || bht3>0 ) {  // avoid saving unuseful data in case all threshold values are zeros
   
   // Loop over all towers
   for(Int_t towerId=1; towerId<=4800; towerId++) {
@@ -2086,7 +2086,7 @@ void StPicoDstMaker::fillEmcTrigger() {
     mPicoDst->event()->setJetPatchThreshold(i, trigSimu->bemc->barrelJetPatchTh(i));
   }
 
-  if ( bjpth0 >= 10 || bjpth1 >= 10 || bjpth2 >= 10 ) {
+  if ( bjpth0 > 0 || bjpth1 > 0 || bjpth2 > 0 ) {
   
   // Loop over triggers
   for (int jp = 0; jp < 18; ++jp) {
