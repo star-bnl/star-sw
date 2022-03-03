@@ -242,7 +242,7 @@ void StMuDstMaker::clearArrays()
     __NMTDARRAYS__+__NFGTARRAYS__;
 
   for ( int i=0; i<ezIndex; i++) {
-    mAArrays[i]->Clear();
+    mAArrays[i]->Clear("C");
     StMuArrays::arrayCounters[i]=0;
   }
   // ezTree classes need Delete, because of TArrayS

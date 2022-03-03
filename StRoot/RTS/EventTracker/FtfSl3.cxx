@@ -901,7 +901,7 @@ void FtfSl3::setClustersFromGl3Event(gl3Event *event, int sector) {
     
     for(int i=event->sectorFirstHit[sector]; i < event->nHits; i++) {
 	if(i >= maxHits) {
-	    LOG(ERR, "Too many hits for sector %d, truncating", sector);
+	    LOG(ERR, "Too many hits for sector %d, (%d/%d) truncating", sector, i, maxHits);
 	    break;
 	}
 

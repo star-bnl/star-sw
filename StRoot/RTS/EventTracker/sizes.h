@@ -10,7 +10,7 @@
 #define szGL3_default_mHits    1000000    // global
 #define szGL3_default_mTracks  15000      // global
 
-#define szSL3_default_mHits    100000     // 1 sector
+#define szSL3_default_mHits    250000     // 1 sector
 #define szSL3_default_mTracks  1500       // 1 sector
 
 #define szSECP_max             75000
