@@ -150,7 +150,7 @@ void starsim( Int_t nevents=10000, Int_t runnumber=15117062, TString runfile_="1
   //  runfile = Form("INPUTFILES/%i.txt",runnumber);
   runfile = runfile_;
 
-  TString basename = Form("rcf22000_%i_%i_%ievts",runnumber,sequence,nevents);
+  TString basename = Form("rcf22000_%s_%i_%ievts",runfile.Data(),sequence,nevents);
 
   gROOT->ProcessLine(".L bfc.C");
   {
