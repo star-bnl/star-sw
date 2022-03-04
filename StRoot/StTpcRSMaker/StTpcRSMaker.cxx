@@ -26,6 +26,7 @@
 #include "TFile.h"
 #include "TBenchmark.h"
 #include "TProfile2D.h"
+#include "TH3.h"
 #include "TVirtualMC.h"
 #include "TInterpreter.h"
 #include "Math/SpecFuncMathMore.h"
@@ -80,6 +81,7 @@ struct HitPoint_t {
 #define __STOPPED_ELECTRONS__
 #ifdef __TFG__VERSION__
 #define __DEBUG__
+#define __CHECK_RDOMAP_AND_VOLTAGE__
 #endif /* __TFG__VERSION__ */
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
@@ -225,11 +227,11 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
     //    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
+    m_TpcdEdxCorrection->SetSimulation();
   }
   if (TESTBIT(m_Mode,kDistortion)) {
     LOG_INFO << "StTpcRSMaker:: use Tpc distortion correction" << endm;
   }
-  if (Debug() && gStTpcDb->PadResponse()) gStTpcDb->PadResponse()->Table()->Print(0,1);
   Double_t samplingFrequency     = 1.e6*gStTpcDb->Electronics()->samplingFrequency(); // Hz
   Double_t TimeBinWidth          = 1./samplingFrequency;
   /*
@@ -248,6 +250,9 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
   lastOuterSectorAnodeWire       = gStTpcDb->WirePlaneGeometry()->lastOuterSectorAnodeWire ();
   anodeWirePitch                 = gStTpcDb->WirePlaneGeometry()->anodeWirePitch           ();
   anodeWireRadius                = gStTpcDb->WirePlaneGeometry()->anodeWireRadius(); 
+  if (St_tpcPadConfigC::instance()->iTPC(1)) { // iTpc for all TPC sectors
+    NoOfPads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(1,72);
+  } 
   Float_t BFieldG[3]; 
   Float_t xyz[3] = {0,0,0};
   StMagF::Agufld(xyz,BFieldG);
@@ -278,6 +283,23 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       if (nAliveInner > 1) innerSectorAnodeVoltage[sector-1] /= nAliveInner;
       if (nAliveOuter > 1) outerSectorAnodeVoltage[sector-1] /= nAliveOuter;
     }
+#ifdef __CHECK_RDOMAP_AND_VOLTAGE__
+    static TH3F *AlivePads = 0;
+    if (! AlivePads) {
+      if (GetTFile()) GetTFile()->cd();
+      Int_t nrows = St_tpcPadConfigC::instance()->numberOfRows(20);
+      AlivePads = new TH3F("AlivePads","Active pads from RDO map, tpcGainPadT0,  and Tpc Anode Voltage:sector:row:pad",24,0.5,24.5,nrows,0.5,nrows+.5,NoOfPads,0.5,NoOfPads+0.5);
+    }
+    for(Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
+      Int_t noOfPadsAtRow = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row); 
+      if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
+      for(Int_t pad = 1; pad<=noOfPadsAtRow; pad++) {
+	Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
+	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+	AlivePads->Fill(sector, row, pad, St_tpcPadGainT0BC::instance()->Gain(sector,row,pad));
+      }
+    }
+#endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
     for (Int_t io = 0; io < 2; io++) {// In/Out
       if (io == 0) {
 	if (sector > 1 && TMath::Abs(innerSectorAnodeVoltage[sector-1] - innerSectorAnodeVoltage[sector-2]) < 1) {
@@ -605,7 +627,7 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
     delete [] pbins;
     delete [] pbinsL;
   }
-return kStOK;
+  return kStOK;
 }
 //________________________________________________________________________________
 Int_t StTpcRSMaker::Make(){  //  PrintInfo();
@@ -797,7 +819,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	TrackSegmentHits[nSegHits].indx = indx;
 	TrackSegmentHits[nSegHits].s = tpc_hitC->length;
 	if (tpc_hitC->length == 0 && nSegHits > 0) {
-	  TrackSegmentHits[nSegHits].s = TrackSegmentHits[nSegHits-1].s + TrackSegmentHits[nSegHits].tpc_hitC->ds;
+	  TrackSegmentHits[nSegHits].s = TrackSegmentHits[nSegHits-1].s + tpc_hitC->ds;
 	}
 	TrackSegment2Propagate(tpc_hitC, &gver[id3-1],TrackSegmentHits[nSegHits]);
  	if (TrackSegmentHits[nSegHits].Pad.timeBucket() < 0 || TrackSegmentHits[nSegHits].Pad.timeBucket() > NoOfTimeBins) continue;
@@ -1254,8 +1276,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
 	  if (! ntimebins) continue;
 	  static  Short_t ADCs[__MaxNumberOfTimeBins__];
+#ifdef __TFG__VERSION__
+	  static  Int_t IDTs[__MaxNumberOfTimeBins__];
+#else /* ! __TFG__VERSION__ */
 	  static UShort_t IDTs[__MaxNumberOfTimeBins__];
-	  //	  static Int_t IDTs[__MaxNumberOfTimeBins__];
+#endif /* __TFG__VERSION__ */
 	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
 	  for (UInt_t t = 0; t < __MaxNumberOfTimeBins__; t++) {
 	    if (ADCs[t] > 0 && IDTs[t]) {
@@ -1456,7 +1481,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
   } else 
     digitalSector->clear();
   for (row = 1;  row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
-    Int_t NoOfPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
+    Int_t noOfPadsAtRow = St_tpcPadConfigC::instance()->St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
     Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
     if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {
       if (! (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row))) {
@@ -1466,12 +1491,16 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 #ifdef __DEBUG__
     Float_t AdcSumBeforeAltro = 0, AdcSumAfterAltro = 0;
 #endif /*     __DEBUG__ */
-    for (pad = 1; pad <= NoOfPadsAtRow; pad++) {
+    for (pad = 1; pad <= noOfPadsAtRow; pad++) {
       gain = St_tpcPadGainT0BC::instance()->Gain(Sector,row,pad);
       if (gain <= 0.0) continue;
       ped    = St_TpcResponseSimulatorC::instance()->AveragePedestal();
       static  Short_t ADCs[__MaxNumberOfTimeBins__];
+#ifdef __TFG__VERSION__
+      static  Int_t IDTs[__MaxNumberOfTimeBins__];
+#else /* ! __TFG__VERSION__ */
       static UShort_t IDTs[__MaxNumberOfTimeBins__];
+#endif /* __TFG__VERSION__ */
       memset(ADCs, 0, sizeof(ADCs));
       memset(IDTs, 0, sizeof(IDTs));
       Int_t NoTB = 0;
@@ -1998,7 +2027,6 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
   SignalSum_t *SignalSum = GetSignalSum(sector);
   for(Int_t row = rowMin; row <= rowMax; row++) {              
     //    if (St_tpcPadConfigC::instance()->numberOfRows(sector) == 45) { // ! iTpx
-    if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row)) continue;
     if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
       //    }
     Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
@@ -2043,6 +2071,7 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
     mPadResponseFunction[io][sector-1]->GetSaveL(Npads,xPadMin,XDirectionCouplings);
     //	      Double_t xPad = padMin - padX;
     for(Int_t pad = padMin; pad <= padMax; pad++) {
+      if ( ! StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row,pad)) continue;
       Double_t gain = QAv*mGainLocal;
       Double_t dt = dT;
       //		if (St_tpcPadConfigC::instance()->numberOfRows(sector) ==45 && ! TESTBIT(m_Mode, kGAINOAtALL)) { 
@@ -2168,9 +2197,11 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
     St_tpcGas *tpcGas = m_TpcdEdxCorrection->tpcGas();
     if (tpcGas)
       CdEdx.ZdriftDistanceO2 = CdEdx.ZdriftDistance*(*tpcGas)[0].ppmOxygenIn;
-    dEdxCor = 0; // reject hits if they out of acceptance
-    if (! m_TpcdEdxCorrection->dEdxCorrection(CdEdx)) {
+    Int_t iok = m_TpcdEdxCorrection->dEdxCorrection(CdEdx);
+    if (! iok) {
       dEdxCor = CdEdx.F.dE;
+    } else {
+      dEdxCor = 0; // reject hits with wrong correction
     }
   }
   return dEdxCor;

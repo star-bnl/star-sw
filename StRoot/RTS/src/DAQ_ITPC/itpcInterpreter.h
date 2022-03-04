@@ -52,6 +52,8 @@ public:
 	int sector_id ;
 	int rdo_id ;
 
+	u_int evt_status ;
+
 	u_int status ;
 	u_int evt_bytes ;
 	u_int word_ix ;

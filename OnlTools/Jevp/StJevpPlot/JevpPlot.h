@@ -20,7 +20,7 @@ class PlotHisto : public TObject {
   
     PlotHisto(TH1 *hist = NULL);
     PlotHisto(PlotHisto &x);
-
+    
     // PlotHisto(TH1 *hist, char *legText=NULL, char *legArgs=NULL);
     void setLegText(const char *text);
     void setLegArgs(const char *text);

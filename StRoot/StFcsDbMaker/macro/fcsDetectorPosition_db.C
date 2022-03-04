@@ -15,7 +15,7 @@ void fcsDetectorPosition_db(char* opt = "", char* input) {
     std::cout << "writedb   = " << option.Contains("writedb")   << "\n";
     
     TString data(input);
-    TString storeTime;
+    TString storeTime("");
     TString flavor;
     if(data.Contains("run21sim")){ //nominal
 	storeTime = "2020-12-10 00:01:00"; flavor="sim"; 
@@ -24,70 +24,113 @@ void fcsDetectorPosition_db(char* opt = "", char* input) {
 	detpos.xoff[2]=-7.430*2.54; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 18.87
 	detpos.xoff[3]= 7.430*2.54; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54; //z=782.63
     }
-    else if(data.Contains("run21ofl")){  //open
+    if(data.Contains("run21ofl")){  //open
 	storeTime = "2020-12-20 00:00:00"; flavor="ofl";
 	detpos.xoff[0]=-6.570*2.54-50; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; 
 	detpos.xoff[1]= 6.570*2.54+50; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54; 
 	detpos.xoff[2]=-7.430*2.54-50; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; 
 	detpos.xoff[3]= 7.430*2.54+50; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54; 
     }
-    else if(data.Contains("run21Feb17")){ //closed but not quite
+    if(data.Contains("run21Feb17")){ //closed but not quite
 	storeTime = "2021-02-17 18:00:00"; flavor="ofl";
 	detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
 	detpos.xoff[1]= 6.850*2.54; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
 	detpos.xoff[2]=-8.380*2.54; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
 	detpos.xoff[3]= 8.380*2.54; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
     }
-    else if(data.Contains("run21Mar31")){ //wide open
+    if(data.Contains("run21Mar31")){ //wide open
 	storeTime = "2021-03-31 18:00:00"; flavor="ofl";
 	detpos.xoff[0]=-6.850*2.54-50; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; 
 	detpos.xoff[1]= 6.850*2.54+50; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54; 
 	detpos.xoff[2]=-8.380*2.54-50; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; 
 	detpos.xoff[3]= 8.380*2.54+50; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54; 
     }
-    else if(data.Contains("run21May06")){ //closed
+    if(data.Contains("run21May06")){ //closed
 	storeTime = "2021-05-06 20:00:00"; flavor="ofl";
 	detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
 	detpos.xoff[1]= 6.850*2.54; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
 	detpos.xoff[2]=-8.380*2.54; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
 	detpos.xoff[3]= 8.380*2.54; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
     }
-    else if(data.Contains("run21May20")){ //ecal open (hcal stayed closed)
+    if(data.Contains("run21May20")){ //ecal open (hcal stayed closed)
 	storeTime = "2021-05-20 18:00:00"; flavor="ofl";
 	detpos.xoff[0]=-6.850*2.54-50; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
 	detpos.xoff[1]= 6.850*2.54+50; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
 	detpos.xoff[2]=-8.380*2.54;    detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
 	detpos.xoff[3]= 8.380*2.54;    detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
     }
-    else if(data.Contains("run21May24")){ //hcal open (ecal stayed open)
+    if(data.Contains("run21May24")){ //hcal open (ecal stayed open)
 	storeTime = "2021-05-24 15:00:00"; flavor="ofl";
 	detpos.xoff[0]=-6.850*2.54-50; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
 	detpos.xoff[1]= 6.850*2.54+50; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
 	detpos.xoff[2]=-8.380*2.54-50; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
 	detpos.xoff[3]= 8.380*2.54+50; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
     }
-    else if(data.Contains("run21Jun27")){ //closed
+    if(data.Contains("run21Jun27")){ //closed
         storeTime = "2021-06-27 15:00:00"; flavor="ofl";
         detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
 	detpos.xoff[1]= 6.850*2.54; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
 	detpos.xoff[2]=-8.380*2.54; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
 	detpos.xoff[3]= 8.380*2.54; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
     }
-    else if(data.Contains("run22sim")){ //nominal
+    if(data.Contains("run22sim")){ //nominal
 	storeTime = "2021-10-15 00:00:00"; flavor="sim"; 
         detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
 	detpos.xoff[1]= 6.850*2.54; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
 	detpos.xoff[2]=-8.380*2.54; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
 	detpos.xoff[3]= 8.380*2.54; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
     }
-    else if(data.Contains("run22ofl")){  //closed
+    if(data.Contains("run22simA")){ //nominal with measured Y
+	storeTime = "2021-10-15 00:01:00"; flavor="sim"; 
+        detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=-5.26; detpos.zoff[0]=279.592*2.54; //x= 17.399
+	detpos.xoff[1]= 6.850*2.54; detpos.yoff[1]=-5.26; detpos.zoff[1]=279.592*2.54;
+	detpos.xoff[2]=-8.380*2.54; detpos.yoff[2]=+1.80; detpos.zoff[2]=308.123*2.54; //x= 21.285
+	detpos.xoff[3]= 8.380*2.54; detpos.yoff[3]=+1.80; detpos.zoff[3]=308.123*2.54;
+    }
+    if(data.Contains("run22ofl")){  //closed
 	storeTime = "2021-10-25 00:00:00"; flavor="ofl";
         detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399
 	detpos.xoff[1]= 6.850*2.54; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
 	detpos.xoff[2]=-8.380*2.54; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285
 	detpos.xoff[3]= 8.380*2.54; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
     }
-    else{ 
+    if(data.Contains("run22oflA")){  //closed with measured Y
+	storeTime = "2021-10-25 00:01:00"; flavor="ofl";
+        detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=-5.26; detpos.zoff[0]=279.592*2.54; //x= 17.399
+	detpos.xoff[1]= 6.850*2.54; detpos.yoff[1]=-5.26; detpos.zoff[1]=279.592*2.54;
+	detpos.xoff[2]=-8.380*2.54; detpos.yoff[2]=+1.80; detpos.zoff[2]=308.123*2.54; //x= 21.285
+	detpos.xoff[3]= 8.380*2.54; detpos.yoff[3]=+1.80; detpos.zoff[3]=308.123*2.54;
+    }
+    if(data.Contains("run22Dec01")){ //open
+      storeTime = "2021-12-01 00:00:00"; flavor="ofl";
+      detpos.xoff[0]=-6.850*2.54-50; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399                                   
+      detpos.xoff[1]= 6.850*2.54+50; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
+      detpos.xoff[2]=-8.380*2.54-50; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285                                   
+      detpos.xoff[3]= 8.380*2.54+50; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
+    }
+    if(data.Contains("run22Dec01A")){ //open with measured Y 
+      storeTime = "2021-12-01 00:01:00"; flavor="ofl";
+      detpos.xoff[0]=-6.850*2.54-50; detpos.yoff[0]=-5.26; detpos.zoff[0]=279.592*2.54; //x= 17.399                                   
+      detpos.xoff[1]= 6.850*2.54+50; detpos.yoff[1]=-5.26; detpos.zoff[1]=279.592*2.54;
+      detpos.xoff[2]=-8.380*2.54-50; detpos.yoff[2]=+1.80; detpos.zoff[2]=308.123*2.54; //x= 21.285                                   
+      detpos.xoff[3]= 8.380*2.54+50; detpos.yoff[3]=+1.80; detpos.zoff[3]=308.123*2.54;
+    }
+    if(data.Contains("run22Dec20")){ //closed
+      storeTime = "2021-12-20 16:30:00"; flavor="ofl";
+      detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=0.0; detpos.zoff[0]=279.592*2.54; //x= 17.399                                      
+      detpos.xoff[1]= 6.850*2.54; detpos.yoff[1]=0.0; detpos.zoff[1]=279.592*2.54;
+      detpos.xoff[2]=-8.380*2.54; detpos.yoff[2]=0.0; detpos.zoff[2]=308.123*2.54; //x= 21.285                                      
+      detpos.xoff[3]= 8.380*2.54; detpos.yoff[3]=0.0; detpos.zoff[3]=308.123*2.54;
+    }
+    if(data.Contains("run22Dec20A")){ //closed with measured Y
+      storeTime = "2021-12-20 16:30:10"; flavor="ofl";
+      detpos.xoff[0]=-6.850*2.54; detpos.yoff[0]=-5.26; detpos.zoff[0]=279.592*2.54; //x= 17.399                                      
+      detpos.xoff[1]= 6.850*2.54; detpos.yoff[1]=-5.26; detpos.zoff[1]=279.592*2.54;
+      detpos.xoff[2]=-8.380*2.54; detpos.yoff[2]=+1.80; detpos.zoff[2]=308.123*2.54; //x= 21.285                                      
+      detpos.xoff[3]= 8.380*2.54; detpos.yoff[3]=+1.80; detpos.zoff[3]=308.123*2.54;
+    }
+
+    if(storeTime==""){ 
 	std::cout<<"Invalid year range"<<std::endl; 
 	exit;
     }
