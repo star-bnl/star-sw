@@ -1602,14 +1602,8 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
     StSPtrVecTrackPidTraits &traits = gTrack->pidTraits();
     static StDedxPidTraits *pid = 0;
     static Double_t TrackLength, I70, fitZ, fitN;
-    static StProbPidTraits *pidprob = 0;
     StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
     Double_t pMomentum = g3.mag();
-    for (UInt_t i = 0; i < traits.size(); i++) {
-      if (! traits[i]) continue;
-      if ( traits[i]->IsZombie()) continue;
-      pidprob = dynamic_cast<StProbPidTraits*>(traits[i]);
-    }
     Int_t k;
     for (UInt_t i = 0; i < traits.size(); i++) {
       if (! traits[i]) continue;
@@ -1636,14 +1630,12 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	  if (TrackLength < 40) continue;
 	  k = 1;
 	  fTdEdx[k][0]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
-	  if (pidprob) {
-	    const StParticleDefinition* pd = gTrack->pidTraits(PidAlgorithmFitZ);
-	    if (pd) {
-	      if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Pion))     < 1) fTdEdx[k][1]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
-	      if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Electron)) < 1) fTdEdx[k][2]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
-	      if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Kaon))     < 1) fTdEdx[k][3]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
-	      if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Proton))   < 1) fTdEdx[k][4]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
-	    }
+	  const StParticleDefinition* pd = gTrack->pidTraits(PidAlgorithmFitZ);
+	  if (pd) {
+	    if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Pion))     < 1) fTdEdx[k][1]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
+	    if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Electron)) < 1) fTdEdx[k][2]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
+	    if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Kaon))     < 1) fTdEdx[k][3]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
+	    if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Proton))   < 1) fTdEdx[k][4]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
 	  }
 	}
 	if (pid->method() == kOtherMethodId) {
@@ -1652,14 +1644,12 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	  if (TrackLength < 40) continue;
 	  k = 2;
 	  fTdEdx[k][0]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
-	  if (pidprob) {
-	    const StParticleDefinition* pd = gTrack->pidTraits(PidAlgorithmFitN);
-	    if (pd) {
-	      if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Pion))     < 1) fTdEdx[k][1]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
-	      if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Electron)) < 1) fTdEdx[k][2]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
-	      if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Kaon))     < 1) fTdEdx[k][3]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
-	      if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Proton))   < 1) fTdEdx[k][4]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
-	    }
+	  const StParticleDefinition* pd = gTrack->pidTraits(PidAlgorithmFitN);
+	  if (pd) {
+	    if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Pion))     < 1) fTdEdx[k][1]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
+	    if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Electron)) < 1) fTdEdx[k][2]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
+	    if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Kaon))     < 1) fTdEdx[k][3]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
+	    if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Proton))   < 1) fTdEdx[k][4]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
 	  }
 	}
       }
