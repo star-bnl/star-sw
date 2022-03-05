@@ -294,7 +294,7 @@
       Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
       Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/,ifsc/0/,imtd/0/,ipxl/0/
-      Integer          iist/0/,isst/0/ !
+      Integer          iist/0/,isst/0/, ifst/0/
       Integer          istVersion/0/,istLayer/0/
       Integer          j	
 *     FPD
@@ -365,6 +365,9 @@
       Structure  ISTC { version, int misalign }
       Structure  SSDP { version, int contig, int placement, int misalign }
 
+      Structure  FSTG { Version }
+
+      Structure  GDAT {real mfscale, char gtag(2)}
 
       logical    first/.true./
       logical    printOnce/.true./
@@ -400,6 +403,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           USE  /DETM/PIXL/PIXL  stat=ipxl
           USE  /DETM/ISTD/ISTC  stat=iist
           USE  /DETM/SISD/SSDP  stat=isst
+          USE  /DETM/FSTM/FSTG  stat=ifst
         
           call RBPOPD
 #else /* __STAR_VMC__ */
@@ -1328,12 +1332,12 @@ c$$$    write (*,*) numbv
       ELSE IF (CSYS=='fts') THEN         
 
            volume_id = g2t_fst_volume_id( numbv )
-c           write (*,*) csys, volume_id
+c          write (*,*) csys, volume_id
 
       ELSE IF (CSYS=='fst') THEN "Forward silicon tracker" 
 
            volume_id = g2t_fst_volume_id( numbv )
-c           write (*,*) csys, volume_id
+c          write (*,*) csys, volume_id
 
       ELSE IF (CSYS=='stg') THEN "Small thin gap chambers"
            volume_id = g2t_stg_volume_id( numbv )
@@ -1615,9 +1619,18 @@ c           write (*,*) csys, volume_id
       Integer             :: disk, wedge, sensor
       Integer,parameter   :: mapping(3) = (/ 2, 3, 1 /)
 
+      Structure  FSTG { Version }
+      Integer    ifst
+      Logical    first /.true./
+
       Integer          Iprin,Nvb
       Character(len=4)              cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+
+      IF ( first ) then
+         USE  /DETM/FSTM/FSTG  stat=ifst
+      ENDIF 
+
 
       IF (cd=='FTUS' ) then     
 
@@ -1627,7 +1640,6 @@ c           write (*,*) csys, volume_id
       sensor = mapping(sensor)  " remap sensor 1=inner, 2,3=outer "
 
       ENDIF
-
 
       "Inner wedge assembly (deprecated geometry model)"
       IF (cd=='FTIS') then
@@ -1649,7 +1661,24 @@ c           write (*,*) csys, volume_id
 
       ENDIF
 
-      g2t_fst_volume_id = 1000*disk + 10*wedge + sensor
+
+     IF ( istat>=0 .and. fstg_version .ge. 1.2 ) then "misaligned geometry"
+
+         ! loop over 3 disks
+         ! loop over 12 wedges
+         ! place 3 instances of FTUS
+
+         disk = ( (numbv(1)-1)  / 36 ) + 4
+         wedge = mod((( numbv(1)-1 ) / 3 ), 12 ) + 1
+         sensor = mod((numbv(1)-1),3) + 1
+         
+      ENDIF
+
+     g2t_fst_volume_id = 1000*disk + 10*wedge + sensor   
+   
+
+
+
       
 !$$$  write (*,*) cd, numbv(1:5), g2t_fst_volume_id
 
