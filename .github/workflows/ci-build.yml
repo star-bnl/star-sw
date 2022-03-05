@@ -78,7 +78,7 @@ jobs:
              TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-root5-build star-sw/tests/executest.py -c ${{ matrix.test_id }})
              # Workaround https://sft.its.cern.ch/jira/browse/ROOT-7660 in ROOT 5 by checking the output log
              docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root5-build \
-               sh -c "set -e; $TEST_CMD 2>&1 | tee log; grep 'Run completed' log"
+               sh -c "set -e; MALLOC_CHECK_=3 $TEST_CMD 2>&1 | tee log; grep 'Run completed' log"
 
   ROOT6_test_ignore_fail:
     runs-on: ubuntu-latest
@@ -99,4 +99,4 @@ jobs:
       - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:v2
       - run: |
              TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-root6-build star-sw/tests/executest.py -c ${{ matrix.test_id }})
-             docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root6-build sh -c "$TEST_CMD || echo 'Failed with an exit code: '\$?"
+             docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root6-build sh -c "MALLOC_CHECK_=3 $TEST_CMD || echo 'Failed with an exit code: '\$?"
