@@ -1177,7 +1177,19 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       Double_t predB  = 1.e-6*TMath::Exp(FdEdx[k].zP);
       FdEdx[k].F.dEdxN  = TMath::Log(FdEdx[k].F.dEdx /predB);
       for (Int_t l = 0; l <= StTpcdEdxCorrection::kTpcLast; l++) {
-	FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - FdEdx[k].C[l].ddEdxL;
+	if (l == StTpcdEdxCorrection::kzCorrection || 
+	    l == StTpcdEdxCorrection::kzCorrectionC) {
+	  FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - (FdEdx[k].C[ StTpcdEdxCorrection::kzCorrectionC].ddEdxL + 
+						    FdEdx[k].C[ StTpcdEdxCorrection::kzCorrection ].ddEdxL);
+	} else if (l == StTpcdEdxCorrection::kTpcSecRowB ||
+	   	   l == StTpcdEdxCorrection::kTpcSecRowC ||
+	   	   l == StTpcdEdxCorrection::kTpcRowQ) {    
+	  FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - (FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB].ddEdxL +
+	   					    FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowC].ddEdxL +
+	   					    FdEdx[k].C[StTpcdEdxCorrection::kTpcRowQ].ddEdxL);   
+	} else {
+	  FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - FdEdx[k].C[l].ddEdxL;
+	}
       }
       Int_t cs = NumberOfChannels*(sector-1)+FdEdx[k].channel;
       if (pMomentum > pMomin && pMomentum < pMomax &&PiD.dEdxStatus(kMethod)->TrackLength() > 40 ) continue; // { // Momentum cut
@@ -1200,12 +1212,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  zdEMPV = TMath::Log(1.e-3*n_P*StdEdxModel::instance()->GetdEdNMPV(kTpc)->Interpolate(TMath::Log(n_P))); // log(dE[keV])
 #endif /* __LogProb__ */
 	}
-	Double_t dEdxNCor = 
-	    FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB].ddEdxL +
-	    FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowC].ddEdxL +
-	    FdEdx[k].C[StTpcdEdxCorrection::kTpcRowQ].ddEdxL;
 	Double_t Vars[9] = {
-	  FdEdx[k].F.dEdxN - dEdxNCor,
+	  FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB].dEdxN, 
 	  FdEdx[k].F.dEdxN,
 	  dEN - zdEMPV,
 	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidElectron]),
@@ -1239,9 +1247,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (Time)    Time->Fill(vars);
 	//	if (TimeP)  {vars[1] = FdEdx[k].C[StTpcdEdxCorrection::ktpcTime].dEdxN; TimeP->Fill(vars);}
 	if (TimeC)  {vars[1] = FdEdx[k].F.dEdxN; TimeC->Fill(vars);}
-
 #define __FILL__VARS__(SIGN) \
-	Vars[0] = FdEdx[k].F.dEdxN - dEdxNCor;			   \
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB].dEdxN; \
 	SecRow3 ## SIGN .Fill(sector,row,Vars);			       \
 	Voltage ## SIGN .Fill(cs,VN,Vars);			       \
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kzCorrection].dEdxN; \
@@ -1595,14 +1602,8 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
     StSPtrVecTrackPidTraits &traits = gTrack->pidTraits();
     static StDedxPidTraits *pid = 0;
     static Double_t TrackLength, I70, fitZ, fitN;
-    static StProbPidTraits *pidprob = 0;
     StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
     Double_t pMomentum = g3.mag();
-    for (UInt_t i = 0; i < traits.size(); i++) {
-      if (! traits[i]) continue;
-      if ( traits[i]->IsZombie()) continue;
-      pidprob = dynamic_cast<StProbPidTraits*>(traits[i]);
-    }
     Int_t k;
     for (UInt_t i = 0; i < traits.size(); i++) {
       if (! traits[i]) continue;
@@ -1629,14 +1630,12 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	  if (TrackLength < 40) continue;
 	  k = 1;
 	  fTdEdx[k][0]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
-	  if (pidprob) {
-	    const StParticleDefinition* pd = gTrack->pidTraits(PidAlgorithmFitZ);
-	    if (pd) {
-	      if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Pion))     < 1) fTdEdx[k][1]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
-	      if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Electron)) < 1) fTdEdx[k][2]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
-	      if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Kaon))     < 1) fTdEdx[k][3]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
-	      if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Proton))   < 1) fTdEdx[k][4]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
-	    }
+	  const StParticleDefinition* pd = gTrack->pidTraits(PidAlgorithmFitZ);
+	  if (pd) {
+	    if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Pion))     < 1) fTdEdx[k][1]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
+	    if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Electron)) < 1) fTdEdx[k][2]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
+	    if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Kaon))     < 1) fTdEdx[k][3]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
+	    if (TMath::Abs(PidAlgorithmFitZ.numberOfSigma(Proton))   < 1) fTdEdx[k][4]->Fill(TMath::Log10(pMomentum), Log10E*fitZ + 6.);
 	  }
 	}
 	if (pid->method() == kOtherMethodId) {
@@ -1645,14 +1644,12 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	  if (TrackLength < 40) continue;
 	  k = 2;
 	  fTdEdx[k][0]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
-	  if (pidprob) {
-	    const StParticleDefinition* pd = gTrack->pidTraits(PidAlgorithmFitN);
-	    if (pd) {
-	      if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Pion))     < 1) fTdEdx[k][1]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
-	      if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Electron)) < 1) fTdEdx[k][2]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
-	      if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Kaon))     < 1) fTdEdx[k][3]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
-	      if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Proton))   < 1) fTdEdx[k][4]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
-	    }
+	  const StParticleDefinition* pd = gTrack->pidTraits(PidAlgorithmFitN);
+	  if (pd) {
+	    if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Pion))     < 1) fTdEdx[k][1]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
+	    if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Electron)) < 1) fTdEdx[k][2]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
+	    if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Kaon))     < 1) fTdEdx[k][3]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
+	    if (TMath::Abs(PidAlgorithmFitN.numberOfSigma(Proton))   < 1) fTdEdx[k][4]->Fill(TMath::Log10(pMomentum),TMath::Log10(fitN));
 	  }
 	}
       }

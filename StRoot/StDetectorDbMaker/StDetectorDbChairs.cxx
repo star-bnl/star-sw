@@ -943,7 +943,33 @@ Float_t St_TpcAvgPowerSupplyC::AcChargeL(Int_t sector, Int_t channel) {
 
   return AcCharge(sector,channel)/Length[channel-1];
 }
-
+//________________________________________________________________________________
+void St_TpcAvgPowerSupplyC::PrintC() const {
+  const St_TpcAvgPowerSupply *TpcAvgPowerSupply = (St_TpcAvgPowerSupply *) GetThisTable();
+  const TpcAvgPowerSupply_st &avgC = *TpcAvgPowerSupply->GetTable();
+  Double_t AcCharge[2] = {0, 0};
+  for (Int_t sec = 1; sec <= 24; sec++) {
+    cout << "Voltage " << sec;
+    for (Int_t socket = 1; socket <= 8; socket++) cout << "\t" << Form("%10.3f",avgC.Voltage[8*(sec-1)+socket-1]);
+    cout << endl;
+  }
+  for (Int_t sec = 1; sec <= 24; sec++) {
+    cout << "Current " << sec;
+    for (Int_t socket = 1; socket <= 8; socket++) cout << "\t" << Form("%10.5f",avgC.Current[8*(sec-1)+socket-1]);
+    cout << endl;
+  }
+  for (Int_t sec = 1; sec <= 24; sec++) {
+    cout << "Charge " << sec;
+    for (Int_t socket = 1; socket <= 8; socket++) {
+      cout << "\t" << Form("%10.3f",avgC.Charge[8*(sec-1)+socket-1]);
+      Int_t io = 0;
+      if (socket > 4) io = 1;
+      AcCharge[io] += avgC.Charge[8*(sec-1)+socket-1];
+    }
+    cout << endl;
+  }
+  cout << "Run " << avgC.run << " Accumulated charge Inner = " << AcCharge[0] << " (C), Outer = " << AcCharge[1] << "(C)" << endl;
+}
 #include "St_tpcAnodeHVavgC.h"
 MakeChairInstance(tpcAnodeHVavg,Calibrations/tpc/tpcAnodeHVavg);
 //________________________________________________________________________________
