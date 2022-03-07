@@ -143,12 +143,21 @@ void getNextRun( int& event, int& run, double& z ) {
 void starsim( Int_t nevents=10000, Int_t runnumber=15117062, TString runfile_="15117062.dat", int sequence=0, int dummy = 0 )
 { 
 
+  // nevents -- number of events to process
+  // runnumber -- the run number this simulation is to be compared to
+  // runfile -- a file containing one event per line, specifying the run #, event #, reconstructed vx, vy, vz
+  // sequence -- can be used (with stride > 1) to specify independent RNG seeds for the same input file
+  // dummy -- is ignored
+
   const int stride = 1;
 
   int     rngSeed = runnumber * stride + sequence;
   //          runfile = Form("/gpfs01/star/pwg/droy1/EMBEDDING_2021_D0Analysis/VERTEX/VertexFiles/%i.txt",runnumber);
   //  runfile = Form("INPUTFILES/%i.txt",runnumber);
   runfile = runfile_;
+
+  
+
 
   TString basename = Form("rcf22000_%s_%i_%ievts",runfile.Data(),sequence,nevents);
 
