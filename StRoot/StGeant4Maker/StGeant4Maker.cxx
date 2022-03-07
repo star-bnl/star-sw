@@ -281,6 +281,7 @@ struct SD2Table_HCA {
 
     // Retrieve the hit collection 
     StCalorimeterHitCollection* collection = (StCalorimeterHitCollection *)sd->hits();
+
     // Iterate over all hits
     for ( auto hit : collection->hits() ) {
 
@@ -907,8 +908,11 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
   _g4maker->SetDefaultEngine( engineFromOption("all:engine") );
 
   // First collect all AgML extensions with sensitive volumes
-  // by the family name of the volume
-  std::map<TString, StSensitiveDetector*> sdmap;
+  // by the family name of the volume.  n.b. under multi-engine mode,
+  // Construct sensitive detectors will be called twice.  By making
+  // this map static, it ensures that we map the same sensitive detector
+  // to the same volume in both MC engines.
+  static std::map<TString, StSensitiveDetector*> sdmap;
 
   // Get list of volumes
   TObjArray *volumes = gGeoManager->GetListOfVolumes();
@@ -955,25 +959,17 @@ void StarVMCApplication::ConstructSensitiveDetectors() {
     }
 
     // Register this volume to the sensitive detector
+    // ConstructSensitiveDetectors is called for each MC in a multi-engine mode,
+    // so we do not need to access through the manager.
 
-    auto* mgr = TMCManager::Instance();
-    if ( 0 == mgr ) {
-
-      auto* mc =  TVirtualMC::GetMC();  // Question: Do we need to obtain pointer through TMCManager here?
-      if ( nullptr == mc->GetSensitiveDetector( vname ) ) {
-	mc->SetSensitiveDetector( vname, sd );
-      }
-
-    }
-    else { // multi engine mode
-
-      mgr->Apply( [sd,vname]( TVirtualMC* _mc ) {
-	  _mc->SetSensitiveDetector( vname, sd );
-	});
-
+    auto* mc =  TVirtualMC::GetMC();  
+    if ( nullptr == mc->GetSensitiveDetector( vname ) ) {
+       mc->SetSensitiveDetector( vname, sd );
     }
     
-    // Register this volume with the sensitive detector
+    // Register this volume with the sensitive detector.  (Note: because this
+    // can be called twice per volume in multi-engine mode, SD must ensure that
+    // the volume is only mapped onto the SD one time).
     sd->addVolume( volume );
 
   }
@@ -1323,10 +1319,10 @@ void StGeant4Maker::Stepping(){
       target = ext->GetEngine();      
     }
 
-
     if ( current != target ) {
       mgr->TransferTrack(target);
     }
+
 
   }
 

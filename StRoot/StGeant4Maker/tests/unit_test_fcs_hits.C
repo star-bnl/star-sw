@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+//#define __debug__
+
 //___________________________________________________________________
 double _eta  = 0; 
 double _phid = 0;
@@ -26,6 +28,7 @@ struct Cell {
 void unit_test_fcs_hits() {
 
   gROOT->ProcessLine("initChain();");
+#ifndef __debug__
   std::vector<Cell> wcal = {
     {  0,  0, 2.73468,102.1735,-19.9044, 92.2680,723.9693,    1001}
 ,   {  0,  1, 2.72053,105.4456,-25.4938, 92.2680,723.8004,    1002}
@@ -2046,6 +2049,22 @@ void unit_test_fcs_hits() {
 ,   {  1,258, 2.25995,-35.3794,134.0475,-95.1900,779.1513,    2259}
 ,   {  1,259, 2.21164,-33.4549,144.0629,-95.1900,778.8488,    2260}
 };
+#else
+  std::vector<Cell> wcal = {
+    {  0,  0, 2.73468,102.1735,-19.9044, 92.2680,723.9693,    1001}
+,   {  0,  1, 2.72053,105.4456,-25.4938, 92.2680,723.8004,    1002}
+,   {  0,  2, 2.70348,108.6177,-31.0833, 92.2680,723.6316,    1003}
+,   {  0,  3, 2.68384,111.6758,-36.6727, 92.2680,723.4628,    1004}
+,   {  0,  4, 2.66192,114.6095,-42.2622, 92.2680,723.2940,    1005}
+  };
+  std::vector<Cell> hcal = {
+    {  0,  0, 2.77314,104.0817,-23.8777, 95.1900,782.4788,    1001}
+,   {  0,  1, 2.74382,109.5987,-33.8931, 95.1900,782.1763,    1002}
+,   {  0,  2, 2.70697,114.7626,-43.9086, 95.1900,781.8738,    1003}
+,   {  0,  3, 2.66428,119.5310,-53.9240, 95.1900,781.5713,    1004}
+,   {  0,  4, 2.61734,123.8894,-63.9395, 95.1900,781.2688,    1005}
+  };
+#endif
 
   auto* pm = dynamic_cast<StarPrimaryMaker*>( StMaker::GetChain()->GetMaker("PrimaryMaker") );
   pm->SetSigma(0.0,0.,0.);
@@ -2080,7 +2099,8 @@ void unit_test_fcs_hits() {
 	hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_wca_hit") ) ;
       else 
 	hit_table    = dynamic_cast<TTable*>( chain->GetDataSet("g2t_hca_hit") ) ;
-      
+
+      LOG_TEST << "________________________________________________________________________________________________" << std::endl;
       LOG_TEST << GIVEN << "a 500 GeV muon @ eta=" << cell.eta << " phi=" << cell.phi << " volume=" << cell.volumeId << std::endl;
 
       check_track( "A muon must have been processed by geant",       [=](const g2t_track_st* t){

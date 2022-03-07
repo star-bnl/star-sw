@@ -18,6 +18,7 @@ TGeoNavigator* navigator = 0;
 #include <TString.h>
 
 #include <TMath.h> 
+
 //____________________________________________________________________________________________
 DetectorHit::DetectorHit() : id(0), idtruth(0), volu{0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0}, copy{0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0}, numbv{0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0}, path(), nsteps(0), user()
 { 
@@ -33,9 +34,7 @@ TrackerHit::TrackerHit() : DetectorHit(),
 CalorimeterHit::CalorimeterHit() : DetectorHit(), position_in{0,0,0,0}, de(0) { /* nada */ } 
 
 //____________________________________________________________________________________________
-StSensitiveDetector::StSensitiveDetector( const char* name, const char* title ) : TVirtualMCSensitiveDetector(name,title), mVolumes(), mAgMLInfo(0), mCollection(0) {
-  LOG_DEBUG << "SD created for " << name << " " << title << endm;
-} 
+StSensitiveDetector::StSensitiveDetector( const char* name, const char* title ) : TVirtualMCSensitiveDetector(name,title), mVolumes(), mVolumesMap(), mAgMLInfo(0), mCollection(0) { } 
 //____________________________________________________________________________________________
 void StSensitiveDetector::Initialize(){ 
   navigator = gGeoManager->GetCurrentNavigator();
@@ -62,7 +61,10 @@ void StSensitiveDetector::addVolume( TGeoVolume* volume ) {
 
   }
 
-  mVolumes.push_back( volume );  
+  if ( 0==mVolumesMap[volume] ) { // There can be only one
+    mVolumesMap[volume]++;
+    mVolumes.push_back( volume );  
+  }
 
 };
 //____________________________________________________________________________________________
@@ -72,6 +74,8 @@ void StSensitiveDetector::ProcessHits(){
   TVirtualMC*    mc = (TMCManager::Instance()) ? 
     TMCManager::Instance()->GetCurrentEngine() :
     TVirtualMC::GetMC();
+
+
   if ( 0 == mc->TrackCharge() ) return;
 
   // The actual hit processing occurs in the collection. 

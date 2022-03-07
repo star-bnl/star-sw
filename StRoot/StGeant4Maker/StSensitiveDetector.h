@@ -94,6 +94,7 @@ private:
 protected:
 
   std::vector<TGeoVolume*>   mVolumes;
+  std::map<TGeoVolume*,int>  mVolumesMap;
 
   AgMLExtension* mAgMLInfo;
 

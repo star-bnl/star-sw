@@ -209,7 +209,7 @@ void StTrackerHitCollection::ProcessHits() {
   } 
   
   if ( mHits.size() == 0 ) {
-    LOG_INFO << "No available hits" << endm;
+    LOG_DEBUG << "No available hits" << endm;
     return; 
   }
 
@@ -297,7 +297,7 @@ void StCalorimeterHitCollection::ProcessHits() {
   // This should be the current particle truth 
   StarMCParticle* truth = userstack->GetCurrentPersistentTrack(); 
 
-  LOG_DEBUG << "Process hits with track " << truth << " current tn=" << userstack->GetCurrentTrackNumber() << endm;
+  LOG_DEBUG << "Process hits with track " << truth << " current tn=" << userstack->GetCurrentTrackNumber() << " hit collection @ " << this << endm;
 
   bool isNewTrack      = mc->IsNewTrack();
   bool isTrackEntering = mc->IsTrackEntering();
@@ -316,7 +316,7 @@ void StCalorimeterHitCollection::ProcessHits() {
 
     // Make sure that the level is not too deep
     if ( navigator->GetLevel() > int(DetectorHit::maxdepth) ) {
-      LOG_INFO << "Cannot score hits with depth " <<   navigator->GetLevel() << endm;
+      LOG_DEBUG << "Cannot score hits with depth " <<   navigator->GetLevel() << endm;
       return; 
     }
 
@@ -340,7 +340,7 @@ void StCalorimeterHitCollection::ProcessHits() {
       if ( agmlext->GetBranchings() <= 1 ) continue; // skip unique volumes (and HALL)
       hit->numbv[ inumbv++ ] = hit->copy[ilvl];
     }
-
+   
     // Set the volume unique ID
     assert(agmlext);
     hit->volId = agmlext->GetVolumeId( hit->numbv );
@@ -360,7 +360,7 @@ void StCalorimeterHitCollection::ProcessHits() {
   }
   
   if ( mHits.size() == 0 ) {
-    LOG_INFO << "No available hits" << endm;
+    LOG_DEBUG << "No available hits" << endm;
     return; 
   }
 
@@ -377,7 +377,9 @@ void StCalorimeterHitCollection::ProcessHits() {
 
   // Grab the agml extension and evaluate user hits
   AgMLExtension* agmlext = getExtension( current ); 
-  if ( 0==agmlext ) return;
+  if ( 0==agmlext ) {
+    return;
+  }
 
   // Score user defined hit quantities
   for ( auto score : agmlext->GetUserHits() ) {
