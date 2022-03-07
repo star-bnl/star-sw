@@ -1,5 +1,12 @@
 #!/bin/csh -f
 
+
+#
+echo "Script for building FastJetFilter and setting up workflow for the pp HF jet "
+echo " simulation from my repo.  When PR#315 is folded into main... this becomes"
+echo " documentation only."
+#
+
 echo ""
 echo "Building FastJetFilter maker"
 echo ""
