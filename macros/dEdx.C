@@ -78,7 +78,9 @@ void dEdx(Int_t First, Int_t Last,
     tfgV = kTRUE;
     Chain += ",quiet,ForcedX";
     if (mode == 2) Chain += ",dEdxCalib"; //,DbV20211017"; // !!!!!!!!!!!!   check DbV
-  } 
+  } else {
+    Chain += ",CalcdNdx";
+  }
   Chain += opt;
   //  Chain += ",CMuDst,picoWrite,noHistos,noRunco,-evout"; // For PicoDst
   TString RootFile(rootFile);

@@ -361,7 +361,10 @@ void CheckPads(Int_t sector = 0) {
   TString Dir(gSystem->BaseName(gDirectory->GetName()));
   Dir.ReplaceAll("hlt_","");
   Int_t index = Dir.Index("_");
-  TString Run(Dir,index); // cout << "Run = " << Run.Data() << endl;
+  TString Run;
+  if (index > 0)  {
+    Run = TString(Dir,index); // cout << "Run = " << Run.Data() << endl;
+  }
   Run.Prepend(", /* ");
   Run += " */";
   Int_t nx = AlivePads->GetXaxis()->GetNbins();
