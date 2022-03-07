@@ -53,7 +53,7 @@ void Pythia8( TString config="pp:W", Double_t ckin3=0.0, Double_t ckin4=-1.0 )
   //
   StarPythia8 *pythia8 = new StarPythia8();    
   if ( config=="pp:W" )
-    {-
+    {
       pythia8->SetFrame("CMS", 510.0);
       pythia8->SetBlue("proton");
       pythia8->SetYell("proton");
