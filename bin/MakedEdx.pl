@@ -2233,6 +2233,7 @@ my $step = 0;
 #$hist = "RunXIX78"; $NEvents = 20000; $step = 1000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/02/22 new TpcZCorrectionC,RunXIX76 and fix bug in  TpcLengthCorrectionMD2.AuAu200_2019.C
 #$hist = "RunXIX79"; $NEvents = 20000; $step = 1000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/02/22 new RunXIX78/TpcSecRowB.20190710.110158.root
 #$hist = "RunXIX80"; $NEvents = 20000; $step = 1000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/04/22 new TpcLengthCorrectionMD2.AuAu200_2019.C
+$hist = "RunXIX81"; $NEvents = 20000; $step = 1000; $disk = "data*/"; $RECO = "reco/production_AuAu200_2019/ReversedFullField";  $Production = "/P21id"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 03/06/22 check wrt dev
 ######################################## Run XXI express calibration ########################################a
 #$hist = "P21ic_calib_66"; $NEvents = 10000; $disk = "/hlt/cephfs/"; $RECO = "reco/*7.3GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 10/29/21 check MySQL after fixing beamInfo isFixedTarget
 #$hist = "P21ic_calib_67"; $NEvents = 10000; $disk = "data100/"; $RECO = "reco/*GeV_fixedTarget*/ReversedFullField";  $Production = "/P21ic_calib"; $year = "/20*/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/08/21 check with  dev after fix 7.3GeV_fixedTarge_2019
@@ -2491,7 +2492,6 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 	open (OUT,">$SCRIPT") or die "Can't open $SCRIPT";
 	$opened = 1;
 	print OUT "#! /usr/local/bin/tcsh -f\n";
-	print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
 	if ($STAR_LEVEL ne "\.DEV2") {
 	  if ($STAR_LEVEL !~ "^\.DEV2" and $STAR_LEVEL !~ "^TFG") {
 	    print OUT "source ${GROUP_DIR}/setup gcc;\n";
