@@ -191,7 +191,6 @@ private:
 	 Bool_t 			mStrictPulserHandling;
     Bool_t        mUsePulserGbtxDiff;
     Bool_t        mDoQA;
-    Bool_t        mDebug;
     std::string                    mHistFileName;
     std::map< std::string, TH1* >  mHistograms;
 
@@ -220,7 +219,7 @@ inline double StETofCalibMaker::resetTimeCorr() const { return mResetTimeCorr; }
 
 inline void StETofCalibMaker::setStrictPulserHandling(  const bool StrictPulserHandling  ) { mStrictPulserHandling  = StrictPulserHandling;  }
 inline void StETofCalibMaker::setDoQA(  const bool doQA  ) { mDoQA  = doQA;  }
-inline void StETofCalibMaker::setDebug( const bool debug ) { mDebug = debug; }
+inline void StETofCalibMaker::setDebug( const bool debug ) { SetDebug(debug); }
 inline void StETofCalibMaker::setReferencePulserIndex( const int index ) { mReferencePulserIndex = index; }
 
 #endif // STETOFCALIBMAKER_H

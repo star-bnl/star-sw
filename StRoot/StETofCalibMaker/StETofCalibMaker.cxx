@@ -119,7 +119,6 @@ StETofCalibMaker::StETofCalibMaker( const char* name )
   mStrictPulserHandling( 0 ),
   mUsePulserGbtxDiff( true ),
   mDoQA( false ),
-  mDebug( false ),
   mHistFileName( "" )
 {
     /// default constructor
@@ -261,7 +260,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             mStatus[ channelToKey( i ) ] = status[ i ];
         }
     }
-    if (mDebug) {
+    if (Debug()) {
     for( const auto& kv : mStatus ) {
         LOG_INFO << "channel key: " << kv.first << " --> status = " << kv.second << endm;
     }
@@ -344,7 +343,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             return kStFatal;
         }
     }
-    if (mDebug) {
+    if (Debug()) {
     for( const auto& kv : mTimingWindow ) {
         LOG_INFO << "AFCK address: 0x" << std::hex << kv.first << std::dec << " --> timing window from " << kv.second.first << " to " << kv.second.second << " ns" << endm;
     }
@@ -479,7 +478,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             }
         }
     }
-    if (mDebug) {
+    if (Debug()) {
     for( const auto& kv : mSignalVelocity ) {
         LOG_INFO << "counter key: " << kv.first << " --> signal velocity = " << kv.second << " cm / ns" << endm;
     }
@@ -518,7 +517,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
 
             unsigned int strip = ( key % 1000 ) / 10;
             unsigned int side  = key % 10;
-            if( mDebug ) {
+            if( Debug() ) {
                 LOG_INFO << i << "  " << detector << "  " << strip << " " << side << "  " << digiTotCorrTable->totCorr[ i ] << endm;
 		//		assert(TMath::Finite(digiTotCorrTable->totCorr[ i ]));
             }
@@ -561,7 +560,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             unsigned int strip = ( key % 1000 ) / 10;
             unsigned int side  = key % 10;
 
-            if( mDebug ) {
+            if( Debug() ) {
                 LOG_INFO << i << "  " << detector << "  " << strip << " " << side << "  " << digiTimeCorrTable->timeCorr[ i ] << endm;
             }
 
@@ -678,7 +677,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
                 for( unsigned int counter = eTofConst::counterStart; counter <= eTofConst::counterStop; counter++ ) {
 
                     unsigned int key = sector * 100 + zPlane * 10  + counter;
-		    if (mDebug) {
+		    if (Debug()) {
                     LOG_INFO << "detectorId key: " << sector << " " << zPlane << " " << counter << endm;
 		    }
                     TString hname;
@@ -894,7 +893,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
         }
         
         paramFile.close();
-	if (mDebug) {
+	if (Debug()) {
         for( const auto& kv : param ) {
             LOG_INFO << "run: " << kv.first << " --> reset time corr = " << kv.second << " ns" << endm;
         }
@@ -960,7 +959,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
             }
         }
     }
-    if (mDebug) {
+    if (Debug()) {
     for( const auto& kv : mPulserPeakTot ) {
         LOG_INFO << "side key: " << kv.first << " --> pulser peak tot = " << kv.second << " (bin)" << endm;
     }
@@ -1035,7 +1034,7 @@ StETofCalibMaker::InitRun( Int_t runnumber )
     for( const auto& kv : mPulserTimeDiffGbtx ) {
         if( fabs( kv.second ) > 1e-4 ) allZero = false;
 
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_INFO << "side key: " << kv.first << " --> pulser time diff inside Gbtx ( to counter 1 ) = " << kv.second << endm;
         }
     }
@@ -1180,7 +1179,7 @@ StETofCalibMaker::processStEvent()
 		}*/
 
     size_t nDigis = etofDigis.size();
-    if( mDebug ) {
+    if( Debug() ) {
         LOG_INFO << "processStEvent() - # fired eTOF digis : " << nDigis << endm;
     }
 
@@ -1214,7 +1213,7 @@ StETofCalibMaker::processStEvent()
     }
 
            // LOG_INFO << "pulsers" << endm;
-    if( mDebug ) {
+    if( Debug() ) {
         LOG_INFO << "size of pulserCandMap: " << pulserCandMap.size() << endm;
     }
     calculatePulserOffsets( pulserCandMap );
@@ -1274,7 +1273,7 @@ StETofCalibMaker::processStEvent()
         // ignore digis that were sent in bulk from the same channel with exactly the same tot and time due to stuck firmware
         auto it = std::find( mStuckFwDigi.begin(), mStuckFwDigi.end(), current );
         if( it != mStuckFwDigi.end() ) {
-            if( mDebug ) {
+            if( Debug() ) {
                 LOG_INFO << "digi from stuck firmware (s" << aDigi->sector() << " m" << aDigi->zPlane() << " c" << aDigi->counter() << ") --> ignore" << endm;
             }
 
@@ -1442,7 +1441,7 @@ StETofCalibMaker::processMuDst()
         // ignore digis that were sent in bulk from the same channel with exactly the same tot and time due to stuck firmware
         auto it = std::find( mStuckFwDigi.begin(), mStuckFwDigi.end(), current );
         if( it != mStuckFwDigi.end() ) {
-            if( mDebug ) {
+            if( Debug() ) {
                 LOG_INFO << "digi from stuck firmware (s" << aDigi->sector() << " m" << aDigi->zPlane() << " c" << aDigi->counter() << ") --> ignore" << endm;
             }
 
@@ -1519,7 +1518,7 @@ StETofCalibMaker::applyMapping( StETofDigi* aDigi )
     mHwMap->mapToGeom( rocId, get4Id, elChan, geomVec );
 
     if( geomVec.size() < 5 ) {
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_ERROR << "geometry vector has wrong size !!! --> skip digi" << endm;
         }
         return;
@@ -1531,13 +1530,13 @@ StETofCalibMaker::applyMapping( StETofDigi* aDigi )
     unsigned int strip   = geomVec.at( 3 );
     unsigned int side    = geomVec.at( 4 );
 
-    if( mDebug && ( sector == 0 || zplane == 0 || counter == 0 || strip == 0 || side == 0 ) ) {
+    if( Debug() && ( sector == 0 || zplane == 0 || counter == 0 || strip == 0 || side == 0 ) ) {
         LOG_ERROR << "geometry vector has entries equal to zero !!! --> skip digi" << endm;
     }
 
     aDigi->setGeoAddress( sector, zplane, counter, strip, side );
 
-    if( mDebug ) {
+    if( Debug() ) {
         // print out the new information
         LOG_INFO << "sector, zplane, counter, strip, side: " << aDigi->sector() << ", ";
         LOG_INFO << aDigi->zPlane()    << ", " << aDigi->counter()  << ", ";
@@ -1587,20 +1586,20 @@ StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index, std::m
 void
 StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< unsigned int > >& pulserDigiMap )
 {
-    if( mDebug ) {
+    if( Debug() ) {
         for( auto it=pulserDigiMap.begin(); it!=pulserDigiMap.end(); it++ ) {
             LOG_INFO << "channel: " << it->first << "   nCandidates: " << it->second.size() << endm;
         }
     }
 
     if( mReferencePulserIndex == 0 ) {
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_INFO << "reference pulser index is 0 --> pulser correction is turned off" << endm;
         }
         return;
     }
 
-    if( mDebug ) {
+    if( Debug() ) {
         LOG_INFO << "reference pulser index: " << mReferencePulserIndex << endm;
     }
 
@@ -1634,7 +1633,7 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
             double timeToTrigger = pulserTime - mTriggerTime;
             double totToPeak     = pulserTot  - mPulserPeakTot.at( sideIndex );
 
-            if( mDebug && it->second.size() > 1 ) {
+            if( Debug() && it->second.size() > 1 ) {
                 LOG_INFO << it->second.size() <<  " pulsers @ " << sideIndex << " : timeToTrigger: " << timeToTrigger << "  tot: " << pulserTot << endm;
             }
             
@@ -1646,7 +1645,7 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
             }
         }
 
-        if( mDebug && it->second.size() > 1 ) {
+        if( Debug() && it->second.size() > 1 ) {
             LOG_INFO << " --> selected CAND-INDEX: " << candIndex << endm;
         }
 
@@ -1685,7 +1684,7 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
     if( mDoQA ) {
         if( pulserTimes.count( mReferencePulserIndex ) ) {
             referenceTime = pulserTimes.at( mReferencePulserIndex ); //only updated for QA?? needed to remove smeared pulsers
-            if( mDebug ) {
+            if( Debug() ) {
                 LOG_INFO << "preliminary reference time:" << referenceTime << endm;
             }
         }
@@ -2076,7 +2075,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 {
     int key = aDigi->sector() * 100000 + aDigi->zPlane() * 10000  + aDigi->counter() * 1000 + aDigi->strip() * 10 + aDigi->side();
     if( !mStatus.count( key) || mStatus.at( key ) != 1 ) {
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_INFO << "status of channel with key " << key << " was not ok ---> skip calibrating this digi" << endm;
         }
         return;
@@ -2084,7 +2083,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 
     // ignore digis flaged as pulsers ( calibTot = -999. )
     if( TMath::Abs( aDigi->calibTot() + 999. ) < 1.e-5 ) {
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_INFO << "digi flaged as pulser --> skip" << endm;
         }
         return;
@@ -2100,7 +2099,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 			if( mStrictPulserHandling ){
          int PulserKey = aDigi->sector() * 1000 + aDigi->zPlane() * 100 + aDigi->side() + 10 * aDigi->counter();
 				if( !mPulserPresent.count( PulserKey ) ) {
-				  if( mDebug ) {
+				  if( Debug() ) {
 						LOG_DEBUG << "no pulser in the same event for this counter --> digi skipped due to strict pulser handling" << endm;
 				  }
 				  return;
@@ -2108,7 +2107,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 			}
 
         double calibTot = aDigi->rawTot() * mGet4TotBinWidthNs * calibTotFactor( aDigi );
-        if( mDebug ) {
+        if( Debug() ) {
 	  LOG_INFO << "calibTot = " << calibTot << endm;
 	  static Int_t ibreak = 0;
 	  if (! TMath::Finite(calibTot)) {
@@ -2126,7 +2125,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 
         aDigi->setCalibTime( calibTime );
 
-        if( mDebug ) {
+        if( Debug() ) {
             // print out the new information
             LOG_INFO << "raw Time, ToT: "        << aDigi->rawTime()   << ", " << aDigi->rawTot()   << endm;
             LOG_INFO << "calibrated Time, ToT: " << aDigi->calibTime() << ", " << aDigi->calibTot() << endm;
@@ -2134,7 +2133,7 @@ StETofCalibMaker::applyCalibration( StETofDigi* aDigi, StETofHeader* etofHeader 
 
     }
     else{
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_INFO << "digi is outside the timing window (time to trigger = " << timeToTrigger << ")  --> skip" << endm;
         }
     }
@@ -2195,20 +2194,20 @@ StETofCalibMaker::calibTotFactor( StETofDigi* aDigi )
         float binContent = mDigiTotCorr.at( key )->GetBinContent( bin );
 
         if( TMath::Abs( binContent ) > 1e-5 ) {
-            if( mDebug ) {
+            if( Debug() ) {
                 LOG_INFO << "calibTotFactor: histogram with key " << key << " at bin " << bin << " -> return bin content: " << binContent << endm;
             }
             return (1.0/binContent); //invert here to get to fixed mean value!
         }
         else {
-            if( mDebug ) {
+            if( Debug() ) {
                 LOG_WARN << "calibTotFactor: histogram with key " << key << " at bin " << bin << " has content of 0 -> return 1" << endm;
             }
             return 1.;
         }
     }
     else {
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_WARN << "calibTotFactor: required histogram with key " << key << " doesn't exist -> return 1" << endm;
         }
         return 1.;
@@ -2228,13 +2227,13 @@ StETofCalibMaker::calibTimeOffset( StETofDigi* aDigi )
 
     if( mDigiTimeCorr.count( key ) ) {
         float binContent = mDigiTimeCorr.at( key )->GetBinContent( bin );
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_INFO << "calibTimeOffset: histogram with key " << key << " at bin " << bin << " -> return bin content: " << binContent << endm;
         }
         return binContent;
     }
     else {
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_WARN << "calibTimeOffset: required histogram with key " << key << " doesn't exist -> return 0" << endm;
         }
         return 0.;
@@ -2254,22 +2253,22 @@ StETofCalibMaker::slewingTimeOffset( StETofDigi* aDigi )
     if( mDigiSlewCorr.count( key ) ) {
 
         unsigned int totBin = mDigiSlewCorr.at( key )->FindBin( aDigi->rawTot() ); //adjusted. PW
-mDebug = true;
+	//	mDebug = true;
         if( mDigiSlewCorr.at( key )->GetBinEntries( totBin ) <= mMinDigisPerSlewBin && totBin < etofSlewing::nTotBins ) {
-            if( mDebug ) {
+            if( Debug() ) {
                 LOG_INFO << "slewingTimeOffset: insufficient statistics for slewing calibration in channel " << key << " at tot bin " << totBin << "  --> return 0" << endm;
             }
             return 0.;
         }
 
         float val = mDigiSlewCorr.at( key )->Interpolate( aDigi->rawTot() ); //adjusted. PW
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_INFO << "slewingTimeOffset: histogram with key " << key << "  with calib TOT of " << aDigi->calibTot() << " --> interpolated correction: " << val << endm;
         }
         return val;
     }
     else {
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_INFO << "slewingTimeOffset: required histogram with key " << key << " doesn't exist -> return 0" << endm;
         }
         return 0.;
@@ -2307,7 +2306,7 @@ StETofCalibMaker::triggerTime( StETofHeader* header )
     // count the occurance of a given trigger time stamp in the GdbpTs map of the eTOF header
     std::map< ULong64_t, short > countsGdpbTs;
     for( const auto& kv : header->rocGdpbTs() ) {
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_INFO << "triggerTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
         }
         ++countsGdpbTs[ kv.second ];
@@ -2346,7 +2345,7 @@ StETofCalibMaker::triggerTime( StETofHeader* header )
         triggerTime = mostProbableTriggerTs * eTofConst::coarseClockCycle;
     }
 
-    if( mDebug ) {
+    if( Debug() ) {
         LOG_INFO << "trigger TS: " << mostProbableTriggerTs << " -->  trigger time (ns): " << triggerTime << endm;
     }
 
@@ -2364,7 +2363,7 @@ StETofCalibMaker::resetTime( StETofHeader* header )
     // count the occurance of a given reset time stamp in the StarTs map of the eTOF header
     std::map< ULong64_t, short > countsStarTsRaw;
     for( const auto& kv : header->rocStarTs() ) {
-        if( mDebug ) {
+        if( Debug() ) {
             LOG_INFO << "resetTime (" << std::hex << "Ox" << kv.first << std::dec << ")  " << kv.second * eTofConst::coarseClockCycle * 1.e-9 << endm; 
         }
 
@@ -2442,7 +2441,7 @@ StETofCalibMaker::resetTime( StETofHeader* header )
         // Run19: trigger - reset time should be on the order of a few second up to 120 minutes (7.2*10^12 ns), i.e. max. run length
         // Run20: difference can be negative due to eTOF DAQ restarts at the beginning of runs while eTOF is put to "BUSY" in run control
         if( mTriggerTime - resetTime < 7.2e12 ) {
-            if( mDebug ) {
+            if( Debug() ) {
                 LOG_DEBUG << "reset time (ns): " << resetTime << " --> difference to trigger time in seconds: " << ( mTriggerTime - resetTime ) * 1.e-9 << endm;
             }
             LOG_DEBUG << "--> picked reset TS:" << mResetTs << endm;
