@@ -1199,9 +1199,14 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    if (BBCP) BBCP->Fill(TMath::Log10(St_trigDetSumsC::instance()->bbcX()), FdEdx[k].F.dEdxN);
 	  }
 	}
+	Double_t Vars[9] = {
+	  FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB].dEdxN, 
+	  FdEdx[k].F.dEdxN,
+	  0, 0, 0, 0, 0, 0, 
+	  FdEdx[k].F.dx};
 	Double_t dEN = 0;
 	Double_t zdEMPV = 0;
-	if (fUsedNdx) {
+	if (PiD.fdNdx) {
 	  Double_t n_P = FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion];
 	  dEN = TMath::Log(1e6*FdEdx[k].F.dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
 	  StdEdxModel::ETpcType kTpc = StdEdxModel::kTpcOuter;
@@ -1211,17 +1216,12 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #else /* ! __LogProb__ */
 	  zdEMPV = TMath::Log(1.e-3*n_P*StdEdxModel::instance()->GetdEdNMPV(kTpc)->Interpolate(TMath::Log(n_P))); // log(dE[keV])
 #endif /* __LogProb__ */
-	}
-	Double_t Vars[9] = {
-	  FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB].dEdxN, 
-	  FdEdx[k].F.dEdxN,
-	  dEN - zdEMPV,
-	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidElectron]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidKaon]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidProton]),
-	  TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidDeuteron]),
-	  FdEdx[k].F.dx
+	  Vars[2] = dEN - zdEMPV;
+	  Vars[3] = TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidElectron]);
+	  Vars[4] = TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion]);
+	  Vars[5] = TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidKaon]);
+	  Vars[6] = TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidProton]);
+	  Vars[7] = TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidDeuteron]);
 	};
 	// SecRow3
 	Double_t V = FdEdx[k].Voltage;
