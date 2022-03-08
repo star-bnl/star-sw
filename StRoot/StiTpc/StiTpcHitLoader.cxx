@@ -101,7 +101,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 	  cout << "add hit S/R =" << sector + 1 << "/" << row + 1 << " to detector " << *detector << endl;
 	}
       }
-      if (hitTest.width()>0.1) {
+      if (hitTest.width()>0.2) {// distortions 
 	printf("**** TPC hits too wide (%g) sector=%d row%d\n"
 	       ,hitTest.width(),sector,row);
       }
