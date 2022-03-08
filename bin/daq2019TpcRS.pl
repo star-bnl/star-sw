@@ -154,12 +154,12 @@ foreach my $file (@globs) {
   my $b = File::Basename::basename($file,".MuDst.root"); 
   print "$b\n" if ($debug);
   my $i1 =   1;
-  my $Nmax =  1000;#0;# 00;
+  my $Nmax =  500;#0;# 00;
   if ($Trigger eq '19GeV') {
     $N = $Runs19GeV{$b}; print "$b = > $N\n" if ($debug);
     if ($N > $Nmax) {$N = $Nmax;}
   }
-  my $step = 50;
+  my $step = 20;
   for (my $i = $i1; $i <= $N; $i += $step) {
     my $f = $i;
     my $l = $i + $step - 1;
