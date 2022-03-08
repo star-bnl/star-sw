@@ -1514,6 +1514,11 @@ Float_t        St_beamInfoC::Frequency() {
 MakeChairInstance(tpcRDOMasks,RunLog/onl/tpcRDOMasks);
 //________________________________________________________________________________
 UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
+  static UInt_t Sector = 0;
+  static UInt_t Mask   = 0;
+  if (Sector == sec) {
+    return Mask;
+  }
   UInt_t MASK = 0x0000; // default is to mask it out
   //UInt_t MASK = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
   if(sec < 1 || sec > 24 || getNumRows() == 0){
@@ -1525,13 +1530,17 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
   // Take care about unsorted tpcRDOMaks table
   Int_t i = -1;
   UInt_t j = (sec + 1) / 2 - 1;
-  for (i = 0; i < 12; i++) {
-    if (sector(i) == 2*j + 1) {break;}
+  if (sector(j) == 2*j + 1) {
+    i = j;
+  } else { 
+    for (i = 0; i < 12; i++) {
+      if (sector(i) == 2*j + 1) {break;}
+    }
   }
   assert(i >= 0);
   //  MASK = mask(((sec + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
   MASK = mask(i); // does the mapping from sector 1-24 to packed sectors
-  if (runNumber() <= 19000000 || (runNumber() < 20000000 && sec != 20)) {// no iTPC
+  if (! St_tpcPadConfigC::instance()->iTpc(sec)) {// no iTPC
     if (sec == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
     if( sec % 2 == 0){ // if its even relevent bits are 6-11
       MASK = MASK >> 6;
@@ -1544,9 +1553,28 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
     if( sec % 2 == 0){ // if its even relevent bits are 8-13
       MASK = MASK >> 8;
     }
-    // Otherwise want lower 6 bits
+    // Otherwise want lower 8 bits
     MASK &= 255; // Mask out higher order bits
   }
+  Sector = sec;
+  Mask   = MASK;
+  return MASK;
+}
+//________________________________________________________________________________
+Bool_t St_tpcRDOMasksC::isOn(Int_t sector,Int_t rdo)  {    
+  static Int_t Sector = -1;
+  static Int_t Rdo    = -1;
+  static Bool_t Mask  = kFALSE;
+  if (Sector == sector && Rdo == rdo) {
+    return Mask;
+  }
+  if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return 0;
+  UInt_t MASK = getSectorMask(sector);
+  MASK = MASK >> (rdo - 1);
+  MASK &= 0x00000001;
+  Sector = sector;
+  Rdo    = rdo;
+  Mask   = MASK;
   return MASK;
 }
 //________________________________________________________________________________
