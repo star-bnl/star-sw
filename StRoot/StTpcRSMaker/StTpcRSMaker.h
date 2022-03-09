@@ -102,7 +102,6 @@ class StTpcRSMaker : public StMaker {
   TH1D*    mdNdxL10;                  //!
   TH1D*    mdNdEL10;                  //!
   TF1F  *mShaperResponses[2][24];     //!
-  TF1F  *mShaperResponse;             //!
   TF1F  *mChargeFraction[2][24];      //!
   TF1F  *mPadResponseFunction[2][24]; //!
   TF1F  *mPolya[2];                   //!
