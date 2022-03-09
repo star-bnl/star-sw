@@ -68,4 +68,7 @@
 <input URL="file:/hlt/cephfs/daq/2019B/production_14p5GeV_2019/*/*/*adc*.daq" />
 -->
 <input URL="command:daqList.pl '/hlt/cephfs/daq/2019B/production_19GeV_2019/*/*/*adc*.daq'" />
+   <ResourceUsage>
+      <Priority>99</Priority>
+    </ResourceUsage>
 </job>

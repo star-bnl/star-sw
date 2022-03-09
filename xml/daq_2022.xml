@@ -20,7 +20,7 @@
   foreach  evtsFile(`cat $FILELIST`) 
     echo "${evtsFile}"
     if (! -r ${evtsFile}) continue;
-    set filel        = `basename $evtsFile .daq`1
+    set filel        = `basename $evtsFile .daq`
     set bf           = `basename $filel .root`
     set output  = ${bf}.event.root
     set logFile  = ${bf}B.log
@@ -76,4 +76,7 @@
     </Memory>
   </ResourceUsage>
 -->
+   <ResourceUsage>
+      <Priority>1</Priority>
+    </ResourceUsage>
 </job>

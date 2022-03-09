@@ -14,6 +14,7 @@
 #  starver dev
 #  starver .DEV2 
 #  starver TFG20k
+#  starver TFG22a
 #  chck adev
 #  setup gcc
 #  setup debug 
@@ -42,4 +43,7 @@
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/*/*/st_laser_*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2019/*/*/st_laser_*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2019/*/*/st_laser_*.daq" /> -->
+  <ResourceUsage>
+      <Priority>100</Priority>
+    </ResourceUsage>
 </job>
