@@ -387,7 +387,7 @@ void MakeTpcAvgPowerSupply(Int_t year = 2020) {
     if (u1 <= u95 || u1 > uNext || u2 <= u95 || u2 > uNext  || u2 <= u1) continue;
     runs[NoGoodRuns] = new Run_t(TString(row->GetField(0)).Atoi(),row->GetField(1), row->GetField(2));
     //    runs[NoGoodRuns]->stop.Set(row->GetField(2));
-    runs[NoGoodRuns]->Print();
+    //    runs[NoGoodRuns]->Print();
     NoGoodRuns++;
   }
   runs[NoGoodRuns] = new Run_t(*runs[NoGoodRuns-1]);
