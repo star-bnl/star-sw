@@ -52,6 +52,62 @@ class TPRegexp;
 using namespace std;
 void DrawdEdx();
 //________________________________________________________________________________
+void SetTitle(TString &Title) {
+  //      if (Title.Contains("602P03ih"))  Title.ReplaceAll("602P03ih"," default ");
+  Title.ReplaceAll("GPHist","");
+  Title.ReplaceAll("TPoints70BE","I70  East");
+  Title.ReplaceAll("TPointsBE"  ,"Ifit East  ");
+  Title.ReplaceAll("TPoints70BW","I70  West ");
+  Title.ReplaceAll("TPointsBW"  ,"Ifit West ");
+  Title.ReplaceAll("TPoints70B", "I70  ");
+  Title.ReplaceAll("TPoints70U", "U70  ");
+  Title.ReplaceAll("TPoints70" , "I70  ");
+  Title.ReplaceAll("TPointsN"  , "Nfit ");
+  Title.ReplaceAll("TPointsNU" , "NfitU");
+  Title.ReplaceAll("TPointsB"  , "Ifit ");
+  Title.ReplaceAll("TPointsU"  , "Ufit ");
+  Title.ReplaceAll("TPointsF"  , "Ifit ");
+  Title.ReplaceAll("TPoints"   , "Ifit ");
+  Title.ReplaceAll("production_","");
+  Title.ReplaceAll("_ReversedFullField","");
+  Title.ReplaceAll("_FullField","");
+  Title.ReplaceAll("GP","");
+  Title.ReplaceAll("P11ic_dedx_AuAu19_production_ReversedFullField","");
+  Title.ReplaceAll("dev_calib_pp500_production_2011_ReversedFullField","");
+  Title.ReplaceAll("AlAu200_P15ic_TOF_dEdx","CuAu200");
+  //       Title.ReplaceAll("TPointsBAGPHist" ,"Ancorr"); if (Title.Contains("Ancorr")) continue;
+  //       Title.ReplaceAll("TPointsBUGPHist" ,"Uncorr"); if (Title.Contains("Uncorr")) continue;
+  //       Title.ReplaceAll("MPoints70BGPHist","M70   "); if (Title.Contains("M70")) continue;
+  //       Title.ReplaceAll("MPointsBGPHist"  ,"Mfit  "); if (Title.Contains("MFit")) continue;
+  //       Title.ReplaceAll("MPointsBUGPHist" ,"MUncorr");if (Title.Contains("MUncorr")) continue;
+  if (Title.Contains("509P03iF"))  Title = "Fabrice's gain correction (Aug. 2003)";
+  if (Title.Contains("510P03if"))  Title = "Tonko's gain corection, (Feb. 2003)";
+  if (Title.Contains("511P03iF"))  Title = "Tonko's gain correction (Oct. 2003)";
+  if (Title.Contains("512P03iT"))  Title = "Tonko's gain corection, (Feb. 2003) SecRow.Contains(1";
+  if (Title.Contains("513P03iF"))  Title = "Fabrice's gain correction (Aug. 2003) SecRow.Contains(1";
+  if (Title.Contains("516P03iFT")) Title = "TonkoAndMe's gain correction (Oct. 2003) SecRow.Contains(1";
+  if (Title.Contains("527P03iT2")) Title = "Tonko's 'equalization' gain correction (Oct. 2003) SecRow.Contains(1";
+  //  root.exe TPoints70GPHist312DEV.root TPoints70BGPRunII08P07id.root TPoints70BGPHist543P03ih.root TPoints70BGPHist970P05ic.root TPoints70BGPHist032P05if_dedx.root TPoints70BGPHist128P06id_dedx.root TPoints70BGPRunVII69P07ie.root TPoints70BGPRunVIII20P08ic_p*.root Res.C
+  //  root.exe TPoints70BGPRunII08P07id.root TPoints70BGPHist543P03ih.root TPoints70BGPHist970P05ic.root TPoints70BGPHist032P05if_dedx.root TPoints70BGPHist128P06id_dedx.root TPoints70BGPRunVII69P07ie.root TPoints70BGPRunVIII20P08ic_p*.root Res.C
+  if (Title.Contains("312DEV"))            Title = "AuAu 200 (Run II)";
+  if (Title.Contains("RunII08P07id"))      Title = "AuAu 29 (Run II)";
+  if (Title.Contains("543P03ih"))          Title = "dAu 200 (Run III)";
+  //      if (Title.Contains("815P04if.ittf"))     Title = "dAu 200 (Run III ITTF)";
+  if (Title.Contains("969P05ia_dedx"))     Title = "AuAu 200 (Run IV)";
+  if (Title.Contains("970P05ic"))          Title = "AuAu 200 (Run IV)";
+  if (Title.Contains("032P05if_dedx"))     Title = "CuCu 200 (Run V )";
+  if (Title.Contains("128P06id_dedx"))     Title = "pp 200   (Run VI)";
+  //      if (Title.Contains("RunVII46dEdx3"))     Title = "AuAu 200 (Run VII)";
+  if (Title.Contains("RunVII69P07ie"))     Title = "AuAu 200 (Run VII)";
+  if (Title.Contains("RunVIII20P08ic_pp")) Title = "pp 200 (Run VIII)";
+  if (Title.Contains("RunVIII20P08ic_pr")) Title = "dAu 200 (Run VIII)";
+  if (Title.Contains("GPRunIX65P09ig_calibAB")) Title = "pp200 (Run IX, data)";
+  if (Title.Contains("GPrcf9108.zC"))      Title = " pp200 (Run IX, TpcRS)";
+  Title.ReplaceAll("Ifit 270","I_{70} ");
+  Title.ReplaceAll("Ifit 2F","I_{fit} ");
+  Title.ReplaceAll("Ifit 2N","dN/dx ");
+}
+//________________________________________________________________________________
 void Set(Int_t color=1) {
   cout << "Set color = " << color << endl;
   TTree *FitP = (TTree *) gDirectory->Get("FitP");
@@ -179,56 +235,7 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
       //      Hist->Fit("powfit","r");
       Hist->Draw("same");
       //      leg->AddEntry(sigma,Form("%s:  #sigma(@76cm) = %5.2f%%",FitNames[i],100*powfit->Eval(76)));
-      Title.ReplaceAll("GPHist","");
-      Title.ReplaceAll("TPoints70BE","I70  East");
-      Title.ReplaceAll("TPointsBE"  ,"Ifit East  ");
-      Title.ReplaceAll("TPoints70BW","I70  West ");
-      Title.ReplaceAll("TPointsBW"  ,"Ifit West ");
-      Title.ReplaceAll("TPoints70B", "I70  ");
-      Title.ReplaceAll("TPoints70U", "U70  ");
-      Title.ReplaceAll("TPoints70" , "I70  ");
-      Title.ReplaceAll("TPointsN"  , "Nfit ");
-      Title.ReplaceAll("TPointsNU" , "NfitU");
-      Title.ReplaceAll("TPointsB"  , "Ifit ");
-      Title.ReplaceAll("TPointsU"  , "Ufit ");
-      Title.ReplaceAll("TPointsF"  , "Ifit ");
-      Title.ReplaceAll("TPoints"   , "Ifit ");
-      Title.ReplaceAll("production_","");
-      Title.ReplaceAll("_ReversedFullField","");
-      Title.ReplaceAll("_FullField","");
-      Title.ReplaceAll("GP","");
-      Title.ReplaceAll("P11ic_dedx_AuAu19_production_ReversedFullField","");
-      Title.ReplaceAll("dev_calib_pp500_production_2011_ReversedFullField","");
-      Title.ReplaceAll("AlAu200_P15ic_TOF_dEdx","CuAu200");
-//       Title.ReplaceAll("TPointsBAGPHist" ,"Ancorr"); if (Title.Contains("Ancorr")) continue;
-//       Title.ReplaceAll("TPointsBUGPHist" ,"Uncorr"); if (Title.Contains("Uncorr")) continue;
-//       Title.ReplaceAll("MPoints70BGPHist","M70   "); if (Title.Contains("M70")) continue;
-//       Title.ReplaceAll("MPointsBGPHist"  ,"Mfit  "); if (Title.Contains("MFit")) continue;
-//       Title.ReplaceAll("MPointsBUGPHist" ,"MUncorr");if (Title.Contains("MUncorr")) continue;
-      if (Title.Contains("509P03iF"))  Title = "Fabrice's gain correction (Aug. 2003)";
-      if (Title.Contains("510P03if"))  Title = "Tonko's gain corection, (Feb. 2003)";
-      if (Title.Contains("511P03iF"))  Title = "Tonko's gain correction (Oct. 2003)";
-      if (Title.Contains("512P03iT"))  Title = "Tonko's gain corection, (Feb. 2003) SecRow.Contains(1";
-      if (Title.Contains("513P03iF"))  Title = "Fabrice's gain correction (Aug. 2003) SecRow.Contains(1";
-      if (Title.Contains("516P03iFT")) Title = "TonkoAndMe's gain correction (Oct. 2003) SecRow.Contains(1";
-      if (Title.Contains("527P03iT2")) Title = "Tonko's 'equalization' gain correction (Oct. 2003) SecRow.Contains(1";
-      //  root.exe TPoints70GPHist312DEV.root TPoints70BGPRunII08P07id.root TPoints70BGPHist543P03ih.root TPoints70BGPHist970P05ic.root TPoints70BGPHist032P05if_dedx.root TPoints70BGPHist128P06id_dedx.root TPoints70BGPRunVII69P07ie.root TPoints70BGPRunVIII20P08ic_p*.root Res.C
-      //  root.exe TPoints70BGPRunII08P07id.root TPoints70BGPHist543P03ih.root TPoints70BGPHist970P05ic.root TPoints70BGPHist032P05if_dedx.root TPoints70BGPHist128P06id_dedx.root TPoints70BGPRunVII69P07ie.root TPoints70BGPRunVIII20P08ic_p*.root Res.C
-      if (Title.Contains("312DEV"))            Title = "AuAu 200 (Run II)";
-      if (Title.Contains("RunII08P07id"))      Title = "AuAu 29 (Run II)";
-      if (Title.Contains("543P03ih"))          Title = "dAu 200 (Run III)";
-      //      if (Title.Contains("815P04if.ittf"))     Title = "dAu 200 (Run III ITTF)";
-      if (Title.Contains("969P05ia_dedx"))     Title = "AuAu 200 (Run IV)";
-      if (Title.Contains("970P05ic"))          Title = "AuAu 200 (Run IV)";
-      if (Title.Contains("032P05if_dedx"))     Title = "CuCu 200 (Run V )";
-      if (Title.Contains("128P06id_dedx"))     Title = "pp 200   (Run VI)";
-      //      if (Title.Contains("RunVII46dEdx3"))     Title = "AuAu 200 (Run VII)";
-      if (Title.Contains("RunVII69P07ie"))     Title = "AuAu 200 (Run VII)";
-      if (Title.Contains("RunVIII20P08ic_pp")) Title = "pp 200 (Run VIII)";
-      if (Title.Contains("RunVIII20P08ic_pr")) Title = "dAu 200 (Run VIII)";
-      if (Title.Contains("GPRunIX65P09ig_calibAB")) Title = "pp200 (Run IX, data)";
-      if (Title.Contains("GPrcf9108.zC"))      Title = " pp200 (Run IX, TpcRS)";
-      //      if (Title.Contains("602P03ih"))  Title.ReplaceAll("602P03ih"," default ");
+      SetTitle(Title);
       if (plot == "sigma") {
 	//	Title += Form(" : #sigma(@76cm) = %5.2f%\%",100*powfit->Eval(76));
 	Double_t L = 77.34;
@@ -326,16 +333,17 @@ void DrawFitP(const Char_t *pattern = "SecRow3C", const Char_t *plot="mu:rowSign
 }
 //________________________________________________________________________________
 void DrawdEdx() {
-  _file0->cd();
-  TString Name(gSystem->BaseName(_file0->GetName()));
+  //  _file0->cd();
+  TString Name(gSystem->BaseName(gDirectory->GetName()));
   Name.ReplaceAll(".root","");
+#if 0
   TString Res("Res_");
   Res += Name;
   Res += ".png";
   //  TVirtualX::Instance()->WritePixmap(c1->GetCanvasID(),-1,-1,(Char_t *)Res.Data());
   c1->SaveAs(Res);
   cout << "Draw #\t" << Res << endl;
-
+#endif
   Double_t w = 800;
   Double_t h = 3*500;
   TCanvas *c2 = new TCanvas(Name,Name,w,h);
@@ -343,13 +351,13 @@ void DrawdEdx() {
   c2->cd(1)->SetLogz(1);
   TdEdxI70->Draw("colz");
   gROOT->LoadMacro("bichselG10.C");
-  bichselG10("I70",17);
+  bichselG10("I70");
   c2->cd(2)->SetLogz(1);
   TdEdxF->Draw("colz");
-  bichselG10("z",17);
+  bichselG10("z");
   c2->cd(3)->SetLogz(1);
   TdEdxN->Draw("colz");
-  bichselG10("dNdx",17);
+  bichselG10("dNdx");
   //  TVirtualX::Instance()->WritePixmap(c2->GetCanvasID(),-1,-1,(Char_t *)pngName.Data());
   TString pngName(Name);
   pngName += ".png";
