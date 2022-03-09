@@ -72,7 +72,8 @@ void Load(const Char_t *options="");
 //TString defChain("gstar,K_S01,y2020a,tpcDb,TpcRS,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna");
 //TString defChain("MC2016,StiCA,20Muons,vmc,Rung.1");
 //TString defChain("MC.2017,sdt20170621.104909,StiCA,20Muons,vmc,Rung.1,UseCAVxFinder");
-TString defChain("MC2019,StiCA,20Muons,vmc,Rung.1");
+//TString defChain("MC2019,StiCA,20Muons,vmc,Rung.1"); //,AgML");
+TString defChain("MC2019,StiCA,20Muons,vmc,Rung.1,dEdxCalib"); //,AgML");
 //TString defChain("MC2020,StiCA,K_S01,vmc,Rung.1");
 //StBFChain * bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain, // + ",Display",
 //	 const Char_t *infile=0, const Char_t *outfile="HijingAuAuFixedTarget19.event.root", const Char_t *TreeFile="HijingAuAuFixedTarget19.root");
@@ -233,7 +234,7 @@ StBFChain *bfc(Int_t First, Int_t Last,
   chain = (StBFChain *) StMaker::New("StBFChain", chainName);
   cout << "Create chain " << chain->GetName() << endl;
   chain->cd();
-  chain->SetDebug(1);
+  //  chain->SetDebug(1);
   if (Last < -3) return chain;
   chain->SetFlags(tChain);
 #ifndef __CLING__
