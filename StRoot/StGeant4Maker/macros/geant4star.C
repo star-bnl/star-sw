@@ -140,6 +140,8 @@ void loadStar(TString mytag="dev2021", Bool_t agml = true  )
   addMaker( "primary", "StarPrimaryMaker()" );
   addMaker( "geant4",  "StGeant4Maker()" );
 
+  gROOT->ProcessLine( "_geant4->AddMaker(_primary);" );
+
   // Attach filters to the primary maker...
   for ( auto s : filters ) {
     addFilter( s.c_str() );

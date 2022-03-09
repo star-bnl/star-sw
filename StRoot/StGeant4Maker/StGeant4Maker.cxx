@@ -817,6 +817,8 @@ int StGeant4Maker::Make() {
 
   }
 
+  StMaker::Make();
+
   trigger();
 
   // Update event header.  Note that event header's SetRunNumber method sets the run number AND updates the previous run number.
