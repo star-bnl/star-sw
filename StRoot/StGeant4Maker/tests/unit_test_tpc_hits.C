@@ -1,6 +1,8 @@
 #include "tests/unit_tests.h"
 #include <assert.h>
 
+#include "TMCManager.h"
+
 // TODO: Implement test of prompt-hits
 
 #ifndef __CINT__
@@ -27,8 +29,6 @@ stats< tag::count,
 #endif
 
 #include <TVector3.h>
-
-
 
 //___________________________________________________________________
 double _eta  = 0; 
@@ -74,13 +74,24 @@ void unit_test_tpc_hits( int longtest=0 ) {
   gm->AddUserPostSteppingAction( [stack]() {
       auto* nav = gGeoManager->GetCurrentNavigator();
       auto* mc = TVirtualMC::GetMC();
+      auto* mgr = TMCManager::Instance();
       const double *xyz = nav->GetCurrentPoint();
       std::string path = nav->GetPath();
+      int ns = mc->NSecondaries();      
       LOG_INFO << "Post step _________________________________________________________________" << endm;      
       LOG_INFO << "step number    = " << mc->StepNumber() << endm;
-      LOG_INFO << "n secondaries  = " << mc->NSecondaries() << endm; 
+      LOG_INFO << "n secondaries  = " << ns << endm; 
       LOG_INFO << "track is alive = " << mc->IsTrackAlive() << endm;
+      LOG_INFO << "TVirtualMC::GetMC()" << endm;
       mc->Print();
+      for ( int is=0;is<ns; is++ ) { LOG_INFO << "Process: " << mc->ProdProcess(is) << endm; }
+      if ( mgr ) {
+	LOG_INFO << "Current engine from manager" << endm;
+	mgr->GetCurrentEngine();
+	mc->Print();	
+	int ns = mc->NSecondaries();      
+	for ( int is=0;is<ns; is++ ) { LOG_INFO << "Process: " << mc->ProdProcess(is) << endm; }
+      }
       LOG_INFO << "x=" << xyz[0] << " y= " << xyz[1] << " z=" << xyz[2] << " " << path.c_str() << endm;
       int current = stack->GetCurrentTrackNumber();
       LOG_INFO << "Current track = " << current << endm;
