@@ -1321,8 +1321,10 @@ void StGeant4Maker::Stepping(){
       target = ext->GetEngine();      
     }
 
+    // Transfer track to target engine
     if ( current != target ) {
       mgr->TransferTrack(target);
+      return;
     }
 
 
