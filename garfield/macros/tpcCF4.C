@@ -1,5 +1,5 @@
 /* Heinrich Schindler 04/22/13
-  root.exe lGarfield.C tpcGL.C+
+  root.exe lGarfield.C tpcCF4.C+
 */
 
 #include <iostream>
@@ -101,6 +101,23 @@ void tpcCF4(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   // STAR coordinate system (xS,yS,zS) => Garfield (yS,zG,xG,yG); Garfield(xG,yG,zG) = > Star(y,z,x)
   //  plottingEngine.SetDefaultStyle();
   // Setup the gas.
+  // Specify the gas mixture.
+  //  Double_t Fracs[3] = {0.8, 0.1, 0.1};
+  //  Double_t Fracs[3] = {0.87, 0.10, 0.03};
+  Double_t fAr  = 0.9;
+  Double_t fCH4 = 0.1;
+  Double_t fCF4 = 0.0;
+  if (Geometry.Contains("CF4")) {
+    TString CF4(Geometry);
+    CF4.ReplaceAll("CF4","");
+    Double_t aCF4 = CF4.Atof();
+    if (aCF4 > 0 && aCF4 <= 1.0) {
+      fCF4 = aCF4;
+      fAr  -= fCF4;
+      cout << "Set mixuture " << fAr << " Ar\t" << fCH4 << " CH4\t" << fCF4 << " CF4" << endl;
+    }
+  }
+  Double_t Fracs[3] = {fAr, fCH4, fCF4};
   const Double_t BarPressure         = 1010.8; // [mbar], TPC-PTB, barometricPressure
   const Double_t inputTPCGasPressure = 1.93;   // [mbar], TPC-PT8, difference between barometer pressure and pressure in TPC
   //  const Double_t pressure = (1011. / 1000.) * 750.; // 1 bar = 750.06 torr 
@@ -112,7 +129,7 @@ void tpcCF4(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   Int_t t = temperature;
   Int_t p = pressure;
   //  gasFile += Form("B%ikGT%iP%i0.87Ar0.1CH40.03CF4",b,t,p);
-  TString gasFile(Form("B%ikGT%iP%i_0.89Ar_0.1CH4_0.01CF4.gas",b,t,p));
+  TString gasFile(Form("B%ikGT%iP%i_%5.3fAr_%5.3fCH4_%5.3fCF4.gas",b,t,p,fAr,fCH4,fCF4));
   //Switch between Inner and Outer sector
   // Voltage settings
   Double_t vAnodeI  =   1100.;
@@ -130,10 +147,6 @@ void tpcCF4(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
   gas->SetTemperature(temperature);
   gas->SetPressure(pressure);
   gas->SetMaxElectronEnergy(300.);
-  // Specify the gas mixture.
-  //  Double_t Fracs[3] = {0.8, 0.1, 0.1};
-  //  Double_t Fracs[3] = {0.87, 0.10, 0.03};
-  Double_t Fracs[3] = {0.89, 0.10, 0.01};
   gas->SetComposition("ar", 100*Fracs[0], "ch4", 100*Fracs[1], "cf4", 100*Fracs[2]);
   gas->SetFieldGrid(100.,100e3, 20, true, BField, BField, 1, Angle, Angle, 1);
   const Double_t rPenning = 0.57;
@@ -147,7 +160,7 @@ void tpcCF4(Int_t nEvents = 0, const Char_t *OutName = "GL.root") {
     gas->GenerateGasTable(ncoll, verbose);
     // Save the gas table for later use
     gas->WriteGasFile(gasFile.Data());
-    return;
+    //    return;
   } else {
     gas->LoadGasFile(gasFile.Data());
   }
