@@ -987,18 +987,25 @@ void StBTofGeometry::InitFrom(TGeoManager &geoManager)
   for (int trayId = 1; trayId <= mNTrays; trayId++)
   {
     bool hasGmt = StBTofGeometry::TrayHasGmtModules(trayId);
-
+#ifndef __TFG__VERSION__
     std::string geoPath( FormTGeoPath(geoManager, trayId, hasGmt) );
 
-    if ( geoPath.empty() ) {
+    if ( geoPath.empty() && hasGmt) {
+      geoPath = FormTGeoPath(geoManager, trayId, kFALSE);
+    }
+    if ( geoPath.empty()) {
       LOG_WARN << "StBTofGeometry::InitFrom(...) - Cannot find path to BTOF tray "
-                  "(id " << trayId << "). Skipping...\n";
+	"(id " << trayId << "). Skipping...\n";
       continue;
     }
-
     mNValidTrays++;
 
     const TGeoPhysicalNode* gpNode = geoManager.MakePhysicalNode( geoPath.c_str() );
+#else /* __TFG__VERSION__ */
+    const TGeoPhysicalNode* gpNode = GetPhysicalNode(geoManager, trayId, hasGmt);
+    if (! gpNode) continue;
+    mNValidTrays++;
+#endif /* ! __TFG__VERSION__ */
 
     StThreeVectorD align(mTrayX0[trayId-1], mTrayY0[trayId-1], mTrayZ0[trayId-1]);
 
@@ -1009,20 +1016,29 @@ void StBTofGeometry::InitFrom(TGeoManager &geoManager)
 
     for(int moduleId = 1; moduleId <= maxModuleId; moduleId++)
     {
+#ifndef __TFG__VERSION__
       std::string geoPath( FormTGeoPath(geoManager, trayId, hasGmt, moduleId) );
 
-      if ( geoPath.empty() ) {
-         LOG_WARN << "StBTofGeometry::InitFrom(...) - Cannot find path to BTOF module "
-                     "(id " << moduleId << "). Skipping...\n";
-         continue;
+      if ( geoPath.empty() && hasGmt) {
+	geoPath = FormTGeoPath(geoManager, trayId, kFALSE, moduleId);
+      }
+      if ( geoPath.empty()) {
+	
+	LOG_WARN << "StBTofGeometry::InitFrom(...) - Cannot find path to BTOF module "
+	  "(id " << moduleId << "). Skipping...\n";
+	continue;
       }
 
       const TGeoPhysicalNode* gpNode = geoManager.MakePhysicalNode( geoPath.c_str() );
 
       mBTofSensor[mNValidTrays-1][moduleId-1] = new StBTofGeomSensor(moduleId, *gpNode, align);
+#else /* __TFG__VERSION__ */
+      const TGeoPhysicalNode* gpNode = GetPhysicalNode(geoManager, trayId, hasGmt, moduleId);
+      if (! gpNode) continue;
+      mBTofSensor[mNValidTrays-1][moduleId-1] = new StBTofGeomSensor(moduleId, *gpNode, align);
+#endif /* ! __TFG__VERSION__ */   
     }
   }
-
   mBTofConf = ( mNValidTrays == 120 ? 1 : 0 );
 
   mModulesInTray = mNModules;
@@ -1066,6 +1082,56 @@ std::string StBTofGeometry::FormTGeoPath(TGeoManager &geoManager,
   bool found = geoManager.CheckPath( geoPath.str().c_str() );
 
   return found ? geoPath.str() : "";
+}
+//________________________________________________________________________________
+TGeoPhysicalNode *StBTofGeometry::GetPhysicalNode(TGeoManager &geoManager,  int trayId, bool hasGmt, int moduleId)
+{
+  // BTOH_1/BTO1_2 - east/west
+  // TOF trayId map: west=1-60, east=61-120
+  int halfId   = ( trayId <= 60 ? 1 : 2 );
+  int sectorId = ( trayId <= 60 ? trayId : trayId - 60 );
+  
+  TString geoPath;
+  TGeoPhysicalNode *pNode = 0;
+  // Node paths depend on using TpcRefSys
+  bool trs = geoManager.FindVolumeFast("TpcRefSys");
+  geoPath = "/HALL_1/CAVE_1/"; geoPath += ((trs) ? "TpcRefSys_1/" : ""); geoPath += "BTOF_1"; geoPath += (halfId == 1 ? "/BTOH_" : "/BTO1_"); geoPath += halfId;
+  if (! geoManager.CheckPath(geoPath)) {
+    geoPath = "/HALL_1/CAVE_1/"; geoPath += ((trs) ? "TpcRefSys_1/" : ""); geoPath += "BTOF_1"; geoPath += "/BTOH_" ; geoPath += halfId;
+  }
+  if (! geoManager.CheckPath(geoPath)) {
+    LOG_WARN << "StBTofGeometry::GetPhysicalNode - Cannot find path to BTOF half "
+      "(id " << trayId  << ", half " <<  halfId << "). with path" << geoPath.Data() << "\t Skipping..." << endm;
+    return pNode;
+  }  
+  // Node names depend on whether this sector contains GMT modules
+  TString geoPathB = geoPath; geoPathB += ( hasGmt ? "/BSE1_"  : "/BSEC_" ); geoPathB += sectorId; geoPathB += ( hasGmt ? "/BTR1_1" : "/BTRA_1");
+  if (! geoManager.CheckPath(geoPathB)) {
+    geoPathB = geoPath; geoPathB += "/BSEC_" ; geoPathB += sectorId; geoPathB += "/BTRA_1";
+  }
+  if (! geoManager.CheckPath(geoPathB)) {
+    LOG_WARN << "StBTofGeometry::GetPhysicalNode - Cannot find path to BTOF sector "
+	     << "(id " << trayId  << ", half " <<  halfId << ", sector " << sectorId << " ). with path" << geoPathB.Data() << "\t Skipping..." << endm;
+    return pNode;
+  }
+  geoPath = geoPathB;
+  // Go deeper only when module is requested
+  if ( moduleId >= 1 )
+  {
+    geoPathB = geoPath; geoPathB += "/BXT1_1/BRT1_1/BGM1_1/BRM1_"; geoPathB += moduleId;
+    if (! geoManager.CheckPath(geoPathB)) {
+      geoPathB = geoPath; geoPathB += "/BXTR_1/BRTC_1/BGMT_1/BRMD_"; geoPathB += moduleId;
+    }
+    if (! geoManager.CheckPath(geoPathB)) {
+      LOG_WARN << "StBTofGeometry::GetPhysicalNode - Cannot find path to BTOF tray/sector/module "
+	       << "(id " << trayId  << ", half " <<  halfId << ", sector " << sectorId << ". module " << moduleId << "). with path" << geoPathB.Data() << "\t Skipping..." << endm;
+      return pNode;
+    }
+    geoPath = geoPathB;
+  }
+  pNode = geoManager.MakePhysicalNode( geoPath );
+
+  return pNode;
 }
 
 
