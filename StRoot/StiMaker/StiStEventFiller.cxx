@@ -1230,7 +1230,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack)
       // when EEMC is turned back on after BES-II, eTOF stays or goes?
       int evtTime = mEvent->time();
       bool doShort2EMC = (evtTime < 1538352000 || evtTime > 1633046400); // t < 2018-10-01 or t > 2021-10-01
-      bool doShort2ETOF = (evtTime > 1525910400 && evtTime < 1633046400); // 2018-05-10 < t < 2021-10-01
+      bool doShort2ETOF = (evtTime > 1525910400); // 2018-05-10 < t < (no end)
 
       if ((doShort2EMC || doShort2ETOF) && gTrack->geometry()) {
 	const StThreeVectorF &momentum = gTrack->geometry()->momentum();
