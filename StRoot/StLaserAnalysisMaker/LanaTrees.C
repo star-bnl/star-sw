@@ -98,7 +98,7 @@ static Int_t Time = 0;
 static Double_t  DVAll[2][3];
 static Double_t dDVAll[2][3];
 static Int_t  _debug = 0; 
-static Double_t sigmaAcceptedDV = 5e-4; // maximum sigma for acceptable drift velocity
+static Double_t sigmaAcceptedDV = 10e-4; // 5e-4; // maximum sigma for acceptable drift velocity
 TH2D *dv = 0;
 TH2D *slope = 0;
 TH2D *memAdc = 0;
