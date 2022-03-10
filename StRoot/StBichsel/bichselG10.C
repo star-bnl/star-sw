@@ -85,10 +85,7 @@
 #include "StBichsel/StdEdxPull.h"
 #include "TLegend.h"
 #include "TROOT.h"
-#else
-class Bichsel;
 #endif
-Bichsel *m_Bichsel = 0;
 const Int_t NMasses = 20;
 const Double_t kAu2Gev=0.9314943228;
 struct Part_t {
@@ -140,7 +137,7 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
     dx2 = TMath::Log2(5.);
   }
   scale *= charge*charge;
-  //  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
+  //  return  TMath::Log10(scale*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
   //  Charge*Charge* (TMath::Exp(Bichsel::Instance()->GetMostProbableZM(TMath::Log10(TMath::Abs(Charge)*p/M),dx2)))
   return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 1, charge));
 }
@@ -159,8 +156,8 @@ Double_t bichselZM(Double_t *x,Double_t *par) {
     dx2 = TMath::Log2(5.);
   }
   //  scale *= charge*charge;
-  //  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->GetMostProbableZM(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
-  //return charge*charge*TMath::Log10(m_Bichsel->GetI70(TMath::Log10(poverm),1.));
+  //  return  TMath::Log10(scale*TMath::Exp(Bichsel::Instance()->GetMostProbableZM(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
+  //return charge*charge*TMath::Log10(Bichsel::Instance()->GetI70(TMath::Log10(poverm),1.));
   return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 1, charge));
 }
 //________________________________________________________________________________
@@ -178,7 +175,7 @@ Double_t bichsel70(Double_t *x,Double_t *par) {
     dx2 = TMath::Log2(5.);
   }
   //  scale *= charge*charge;
-  // return  TMath::Log10(scale*charge*charge*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
+  // return  TMath::Log10(scale*charge*charge*Bichsel::Instance()->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
   return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 0, charge));
 }
 //________________________________________________________________________________
@@ -196,7 +193,7 @@ Double_t bichsel70M(Double_t *x,Double_t *par) {
     dx2 = TMath::Log2(5.);
   }
   //  scale *= charge*charge;
-  //  return  TMath::Log10(scale*m_Bichsel->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
+  //  return  TMath::Log10(scale*Bichsel::Instance()->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
   return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 0, charge));
 }
 #if 0
@@ -214,7 +211,7 @@ Double_t bichsel70Trs(Double_t *x,Double_t *par) {
     dx2 = TMath::Log2(5.);
   }
   scale *= charge*charge;
-  return TMath::Log10(scale*TMath::Exp(m_Bichsel->I70Trs(part,TMath::Log10(poverm))));
+  return TMath::Log10(scale*TMath::Exp(Bichsel::Instance()->I70Trs(part,TMath::Log10(poverm))));
 }
 //________________________________________________________________________________
 Double_t bichselZTrs(Double_t *x,Double_t *par) {
@@ -233,7 +230,7 @@ Double_t bichselZTrs(Double_t *x,Double_t *par) {
     dx2 = TMath::Log2(5.);
   }
   scale *= charge*charge;
-  return  TMath::Log10(scale*TMath::Exp(m_Bichsel->IfitTrs(part,TMath::Log10(poverm))));//TMath::Exp(7.81779499999999961e-01));
+  return  TMath::Log10(scale*TMath::Exp(Bichsel::Instance()->IfitTrs(part,TMath::Log10(poverm))));//TMath::Exp(7.81779499999999961e-01));
 }
 #endif
 //________________________________________________________________________________
@@ -329,12 +326,11 @@ Double_t aleph70(Double_t *x,Double_t *par) {
 #endif /* __CINT__ */
 //________________________________________________________________________________
 void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
-  if (gClassTable->GetID("StBichsel") < 0 || !m_Bichsel) {
+  if (gClassTable->GetID("StBichsel") < 0) {
     gSystem->Load("libTable");
     gSystem->Load("St_base");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StBichsel");
-    m_Bichsel = Bichsel::Instance();
   }
   TString Type(type);
   TLegend *leg = new TLegend(0.85,0.45,0.95,0.9,"");
