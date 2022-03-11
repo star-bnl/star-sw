@@ -29,7 +29,9 @@ StRefMultCorr::StRefMultCorr(const TString name, const TString subname,
                              mName(name), mSubName(subname), mLibName(libname) {
   mRefMult = 0 ;
   mVz = -9999. ;
-  mRefMult_corr = -1.0 ;
+  mRefMult_corr = -1.0;
+  mIsRu = false;
+  mIsZr = false;
 
   std::cout << mSubName.Data() <<"  "<< mLibName.Data() << std::endl;
 
@@ -600,9 +602,9 @@ Double_t StRefMultCorr::getRefMultCorr(const UShort_t refMult,
   Double_t refMult_d = sampleRefMult( refMult );
   Double_t refMultCorr  = -9999. ;
   switch (flag) {
-  case 0: refMultCorr = refMult_d * lumiCorr;
-  case 1: refMultCorr =  refMult_d * vzCorr;
-  case 2: refMultCorr = refMult_d * vzCorr * lumiCorr;
+  case 0: refMultCorr = refMult_d * lumiCorr; break;
+  case 1: refMultCorr =  refMult_d * vzCorr; break;
+  case 2: refMultCorr = refMult_d * vzCorr * lumiCorr; break;
   default: {
     Error("StRefMultCorr::getRefMultCorr", "invalid flag, flag=%d, should be 0, 1 or 2", flag);
     refMultCorr = -9999.;
