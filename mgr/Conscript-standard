@@ -568,6 +568,14 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 
 
+    } elsif ( $pkg =~ m/^FastJetFilter/ and $Dir =~ m/StarGenerator/ ){
+
+        if ( defined($ENV{FASTJET_DIR}) ) {
+          $CPPPATH = $ENV{FASTJET_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
+        } else {
+          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
+        }
+    
     } elsif ( $pkg =~ m/^Pythia8/ and $Dir =~ m/StarGenerator/ ){
 	# Append pythia 8 include path and define version
 	#print "***** DEBUG ****\n";

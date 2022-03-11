@@ -80,11 +80,14 @@ Int_t AgUDecay::operator()()
   // Perform the decay
   int  nretry = 0;
   int  np = 0;
+
  AGAIN: while ( true ) {
     if ( nretry ) {
       LOG_WARN << "Decay chain rejected (all or in part) due to unknown PDG" << endm;
       mArray->Print();
-      if ( nretry > 1000 ) throw MissingPdgEntry("No path to decay after 1000 attempts...");
+      TString msg = Form("No path to decay after 1k attempts: idpdg=%i idg3=%i",idPdg,idGeant3);
+      if ( nretry > 1000 ) throw 
+			     MissingPdgEntry(msg.Data());
     }
     mArray   -> Clear();
     
@@ -97,9 +100,23 @@ Int_t AgUDecay::operator()()
     // Possible that one or more particles are unknown to the PDG DB
     // If so, we will repeat (and warn).
 
+    bool go = false;
     for ( int ip = 0; ip<np; ip++ ) {
+
       TParticle* part = (TParticle *)mArray->At(ip);
-      if ( 0 == part->GetPDG() && ++nretry  ) goto AGAIN;
+
+      // Advance past any "system" entry when checking validity
+      int thispdgid = part->GetPdgCode();
+      if ( thispdgid == idPdg ) go = true;
+      if ( !go ) continue;
+
+      if ( 0 == part->GetPDG() && ++nretry  ) {
+	if ( nretry==1000 ) {
+	  LOG_INFO << "1k failures... this particle may be a culprit" << endm;
+	  part->Print();
+	}
+	goto AGAIN;
+      }
     }
 
     break; // Reach here only on a valid decay chain
