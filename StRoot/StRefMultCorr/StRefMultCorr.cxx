@@ -787,7 +787,7 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
     else if(tem_ShapeReweight>10) {
       ShapeReweight = 10.;
     }
-    else if(tem_ShapeReweight>=0.1&&tem_ShapeReweight<=10.) {
+    else if(tem_ShapeReweight>=0.1 && tem_ShapeReweight<=10.) {
       ShapeReweight = tem_ShapeReweight;
     }
 		
@@ -796,34 +796,41 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
   } // if ( mParameterIndex>=30 && mParameterIndex<=35 ) { // Run18 27 GeV MB
   else if ( mParameterIndex>=36 && mParameterIndex<=37 ) { // Isobar collision 200 GeV 2018
 
-    if (mVz>=-9 && mVz<=9) return 1.;
+    if (mVz >= -9 && mVz <= 9) {
+      return 1.;
+    }
 
     Int_t mShapeIndex = 0;
-    if ( mIsZr ) mShapeIndex = 1;
-    
-    //retrive shape weight 
-    if (iVzBinIndex>=22) {
-      weight = ShapeWeightArray[mShapeIndex][iVzBinIndex-9][TMath::Nint(mRefMult_corr)];
+    if (mIsZr) {
+      mShapeIndex = 1;
+    }
+
+    //retrive shape weight
+    if (iVzBinIndex >= 22) {
+      weight = ShapeWeightArray[mShapeIndex][iVzBinIndex - 9][TMath::Nint(mRefMult_corr)];
     }
     else {
       weight = ShapeWeightArray[mShapeIndex][iVzBinIndex][TMath::Nint(mRefMult_corr)];
     }
     //handle bad weight
-    if(weight == 0 || TMath::IsNaN(weight)) weight = 1.;
-  } // else if ( mParameterIndex>=36 && mParameterIndex<=37 ) { // Isobar collision 200 GeV 2018
-  else if ( mParameterIndex == 38 ) {  // Au+Au 19.6 GeV 2019
-    
-    if(iVzBinIndex<0 || iVzBinIndex>auau19_run19_nVzBins) return 1.0;
-    weight = auau19_run19_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
-    
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  }                                 // else if ( mParameterIndex>=36 && mParameterIndex<=37 ) { // Isobar collision 200 GeV 2018
+  else if (mParameterIndex == 38) { // Au+Au 19.6 GeV 2019
 
-    //handle bad weight
-    if(weight == 0 || TMath::IsNaN(weight)) weight = 1.;
-    return weight;
+    if (iVzBinIndex < 0 || iVzBinIndex > auau19_run19_nVzBins) return 1.0;
+
+    weight = auau19_run19_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
   } // else if ( mParameterIndex == 38 ) {  // Au+Au 19.6 GeV 2019
   else {
-    return 1.0;
+    weight = 1.0;
   }
+  return weight;
 }
 
 //________________
