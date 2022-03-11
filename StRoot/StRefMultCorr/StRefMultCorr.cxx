@@ -494,7 +494,7 @@ Double_t StRefMultCorr::getRefMultCorr() const {
 }
 
 //________________
-Double_t StRefMultCorr::luminosityCorrection(const Double_t zdcCoincidenceRate) {
+Double_t StRefMultCorr::luminosityCorrection(Double_t zdcCoincidenceRate) {
 
   Double_t lumiCorr = 1.;
   
@@ -510,10 +510,10 @@ Double_t StRefMultCorr::luminosityCorrection(const Double_t zdcCoincidenceRate) 
     Double_t b_prime = 1.;
     if(mParameterIndex==36) b_prime = 96.9914; // Zr
     if(mParameterIndex==37) b_prime = 97.9927; // Ru
-    lumiCorr = (par0_lum<std::numeric_limits<double>::epsilon) ? 1.0 : b_prime/(par0_lum+zdcCoincidenceRate*par1_lum);
+    lumiCorr = (par0_lum<std::numeric_limits<double>::epsilon() ) ? 1.0 : b_prime/(par0_lum+zdcCoincidenceRate*par1_lum);
   }
   else {
-    lumiCorr = (par0_lum < std::numeric_limits<double>::epsilon) ? 1.0 : 1.0/(1.0 + par1_lum/par0_lum*zdcCoincidenceRate/1000.);
+    lumiCorr = (par0_lum < std::numeric_limits<double>::epsilon() ) ? 1.0 : 1.0/(1.0 + par1_lum/par0_lum*zdcCoincidenceRate/1000.);
   }
 
   // from Run14, P16id, for VpdMB5/VPDMB30/VPDMB-noVtx, use refMult at ZdcX=30, other is at ZdcX=0;  
@@ -536,7 +536,7 @@ Double_t StRefMultCorr::luminosityCorrection(const Double_t zdcCoincidenceRate) 
 }
 
 //________________
-Double_t vzCorrection(const Double_t z) {
+Double_t StRefMultCorr::vzCorrection(Double_t z) {
 
   Double_t vzCorr = 1.;
   if ( mParameterIndex < 38 ) { 
@@ -1302,7 +1302,7 @@ void StRefMultCorr::print(const Option_t* option) const {
 //_________________
 std::vector<std::string> StRefMultCorr::StringSplit( const std::string str, const char sep ) {
   std::vector<std::string> vstr;
-  stringstream ss(str);
+  std::stringstream ss(str);
   std::string buffer;
   while( getline(ss,buffer,sep) ) {
     vstr.push_back(buffer);

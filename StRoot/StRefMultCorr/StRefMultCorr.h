@@ -80,9 +80,9 @@ class StRefMultCorr {
                           const Double_t zdcCoincidenceRate, const UInt_t flag = 2) const;
 
   /// Luminosity correction factor
-  Double_t luminosityCorrection(const Double_t zdcCoincidenceRate);
+  Double_t luminosityCorrection(Double_t zdcCoincidenceRate);
   /// Vz correction factor
-  Double_t vzCorrection(const Double_t z);
+  Double_t vzCorrection(Double_t z);
   /// Sample refMult -> convert integer to double
   Double_t sampleRefMult(Int_t refMult);
   /// Shape reweighting of refmult: ratio of refMult in each Vz bin to that in the center (|Vz|<10cm)
