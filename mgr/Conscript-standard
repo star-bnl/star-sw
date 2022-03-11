@@ -63,7 +63,7 @@ if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
 	    # normal case, use subdir name
 	    $pkg =~ s/.*StarGenerator\///;
 	}
-	print "\t[".File::Basename::basename($Dir)."] changed to $pkg\n";
+	# print "\t[".File::Basename::basename($Dir)."] changed to $pkg\n";
     } else {
 	$pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/  );
 	$pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
