@@ -19,7 +19,7 @@
 ClassImp(StRefMultCorr)
 
 namespace {
-  typedef pair<Double_t, Int_t> keys;
+  typedef std::pair<Double_t, Int_t> keys;
 }
 
 //_________________
@@ -51,13 +51,13 @@ Int_t StRefMultCorr::getBeginRun(const Double_t energy, const Int_t year) {
   keys key(std::make_pair(energy, year));
 
   // Make sure key exists
-  multimap<keys, Int_t>::iterator iterCheck = mBeginRun.find(key);
+  std::multimap<keys, Int_t>::iterator iterCheck = mBeginRun.find(key);
   if ( iterCheck == mBeginRun.end() ) {
     Error("StRefMultCorr::getBeginRun", "can't find energy = %1.1f, year = %d", energy, year);
     return -1;
   }
 
-  pair<multimap<keys, Int_t>::iterator, multimap<keys, Int_t>::iterator> iterRange = mBeginRun.equal_range(key);
+  std::pair<std::multimap<keys, Int_t>::iterator, std::multimap<keys, Int_t>::iterator> iterRange = mBeginRun.equal_range(key);
 
   return (*(iterRange.first)).second ;
 }
@@ -67,14 +67,14 @@ Int_t StRefMultCorr::getEndRun(const Double_t energy, const Int_t year) {
   keys key(std::make_pair(energy, year));
 
   // Make sure key exists
-  multimap<keys, Int_t>::iterator iterCheck = mEndRun.find(key);
+  std::multimap<keys, Int_t>::iterator iterCheck = mEndRun.find(key);
   if (iterCheck == mEndRun.end()) {
     Error("StRefMultCorr::getEndRun", "can't find energy = %1.1f, year = %d", energy, year);
     return -1;
   }
 
-  pair<multimap<keys, Int_t>::iterator, multimap<keys, Int_t>::iterator> iterRange = mEndRun.equal_range(key);
-  multimap<keys, Int_t>::iterator iter = iterRange.second;
+  std::pair<std::multimap<keys, Int_t>::iterator, std::multimap<keys, Int_t>::iterator> iterRange = mEndRun.equal_range(key);
+  std::multimap<keys, Int_t>::iterator iter = iterRange.second;
   iter--;
 
   return (*iter).second;

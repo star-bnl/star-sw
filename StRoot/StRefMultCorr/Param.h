@@ -80,7 +80,7 @@ const string mParamStr_gref[nID_gref][nSet_gref] = {
 //if you want to add new parameters, please always add after the current parameters, do not insert between them
 //the order of them is important!!!!!!!!!!!!!
 //=======================================================================================
-const Int_t nID_ref1  = 38;//after add N more new group of parameters, need to update nID_ref1 += N
+const Int_t nID_ref1  = 39;//after add N more new group of parameters, need to update nID_ref1 += N
 const Int_t nSet_ref1 = 6;
 const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
   // mParameterIndex = 0
@@ -454,7 +454,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
     "302.019,0.0270308,-0.0017795,0.000243777,1.18462e-05,-3.3121e-07,-1.22651e-08,0.00",
     "1.37693,-1.98371,8.98553e-02,7.45349e-01,-3.10780e-02,0,8.51081e-04,4.44704",  // trigger efficiency
     "98.113,-1.1624e-5"
-  }
+  },
   //mParameterIndex = 38
   //Run19 Au+Au 19.6 GeV
   {
