@@ -148,7 +148,7 @@ void StRefMultCorr::initEvent(const UShort_t RefMult, const Double_t z,
 
 //_________________
 Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch, 
-                                              Double_t vz /* default = 0*/) {
+                                              Double_t vz /* default = 0*/) const {
 
   if( mParameterIndex>=30 && mParameterIndex<=35 ) { // Au+Au 27 GeV 2018
     const Double_t min = 4.0;
@@ -494,7 +494,7 @@ Double_t StRefMultCorr::getRefMultCorr() const {
 }
 
 //________________
-Double_t StRefMultCorr::luminosityCorrection(Double_t zdcCoincidenceRate) {
+Double_t StRefMultCorr::luminosityCorrection(Double_t zdcCoincidenceRate) const {
 
   Double_t lumiCorr = 1.;
   
@@ -536,7 +536,7 @@ Double_t StRefMultCorr::luminosityCorrection(Double_t zdcCoincidenceRate) {
 }
 
 //________________
-Double_t StRefMultCorr::vzCorrection(Double_t z) {
+Double_t StRefMultCorr::vzCorrection(Double_t z) const {
 
   Double_t vzCorr = 1.;
   if ( mParameterIndex < 38 ) { 
@@ -571,7 +571,7 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) {
 }
 
 //________________
-Double_t StRefMultCorr::sampleRefMult(Int_t refMult) {
+Double_t StRefMultCorr::sampleRefMult(Int_t refMult) const {
 
   Double_t refMult_d = -9999.;
   if( mParameterIndex>=30 && mParameterIndex<=38 ) {
@@ -634,8 +634,7 @@ void StRefMultCorr::readScaleForWeight(const Char_t* input) {
     return;
   }
 
-  std::cout << "StRefMultCorr::readScaleForWeight  Read scale factor ..."
-       << flush;
+  std::cout << "StRefMultCorr::readScaleForWeight  Read scale factor ..." << std::flush;
 	
   while(fin) {
     Double_t scale[mnVzBinForWeight] ;
@@ -671,8 +670,7 @@ void StRefMultCorr::readScaleForWeight(const Int_t nRefmultbin, const Double_t *
     return;
   }
 
-  std::cout << "StRefMultCorr::readScaleForWeight  Read scale factor ..."
-       << flush;
+  std::cout << "StRefMultCorr::readScaleForWeight  Read scale factor ..." << std::flush;
 	
 
   for(Int_t i=0; i<nRefmultbin*mnVzBinForWeight; i++) {
@@ -751,14 +749,16 @@ Double_t StRefMultCorr::getScaleForWeight() const {
 
 //_________________
 // For Run18 27 GeV
-Double_t StRefMultCorr::getShapeWeight_SubVz2Center() {
+Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
+
+  Double_t weight = 1.;
+  Int_t iVzBinIndex = getVzWindowForVzDepCentDef();
 
   if ( mParameterIndex>=30 && mParameterIndex<=35 ) { // Run18 27 GeV MB
 
     if(mRefMult_corr>=500.) return 1.0; // almost no Refmult>500 for this collision energy
 		
     Int_t iRunPdIndex = mParameterIndex-30;
-    Int_t iVzBinIndex = getVzWindowForVzDepCentDef();
     Int_t iRefmultBin = (Int_t)(mRefMult_corr/2.); //find the refmult bin matching to the Parameter bin, if binWidth=2
     //Int_t iRefmultBin = (Int_t)(mRefMult_corr);  //find the refmult bin matching to the Parameter bin, if binWidth=1
 		
@@ -791,7 +791,7 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() {
       ShapeReweight = tem_ShapeReweight;
     }
 		
-    return (1./ShapeReweight);
+    weight = 1./ShapeReweight;
 
   } // if ( mParameterIndex>=30 && mParameterIndex<=35 ) { // Run18 27 GeV MB
   else if ( mParameterIndex>=36 && mParameterIndex<=37 ) { // Isobar collision 200 GeV 2018
@@ -801,10 +801,7 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() {
     Int_t mShapeIndex = 0;
     if ( mIsZr ) mShapeIndex = 1;
     
-    Int_t iVzBinIndex = getVzWindowForVzDepCentDef();
-
     //retrive shape weight 
-    Double_t weight = 1.;
     if (iVzBinIndex>=22) {
       weight = ShapeWeightArray[mShapeIndex][iVzBinIndex-9][TMath::Nint(mRefMult_corr)];
     }
@@ -813,18 +810,24 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() {
     }
     //handle bad weight
     if(weight == 0 || TMath::IsNaN(weight)) weight = 1.;
-    return weight;
-  }
+  } // else if ( mParameterIndex>=36 && mParameterIndex<=37 ) { // Isobar collision 200 GeV 2018
   else if ( mParameterIndex == 38 ) {  // Au+Au 19.6 GeV 2019
+    
+    if(iVzBinIndex<0 || iVzBinIndex>auau19_run19_nVzBins) return 1.0;
+    weight = auau19_run19_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    
 
-  }
+    //handle bad weight
+    if(weight == 0 || TMath::IsNaN(weight)) weight = 1.;
+    return weight;
+  } // else if ( mParameterIndex == 38 ) {  // Au+Au 19.6 GeV 2019
   else {
     return 1.0;
   }
 }
 
 //________________
-Double_t StRefMultCorr::triggerWeight() {
+Double_t StRefMultCorr::triggerWeight() const {
   
   Double_t weight = 1.;
 
@@ -866,7 +869,7 @@ Double_t StRefMultCorr::triggerWeight() {
 }
 
 //_________________
-Double_t StRefMultCorr::getWeight() {
+Double_t StRefMultCorr::getWeight() const {
 
   Double_t Weight = 1.0;
 
@@ -1029,7 +1032,7 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
   else if ( mParameterIndex == 38 ) {  // Au+Au 19.6 GeV 2019
 
     for ( Int_t iVz=0; iVz<auau19_run19_nVzBins; iVz++ ) {
-      if ( auau19_run19_vzRangeLimits[iVz][0] <= z && z < auau19_run19_vzRangeLimits[iVz][1] ) {
+      if ( auau19_run19_vzRangeLimits[iVz][0] <= mVz && mVz < auau19_run19_vzRangeLimits[iVz][1] ) {
         iBinVz = iVz;
         break;
       }

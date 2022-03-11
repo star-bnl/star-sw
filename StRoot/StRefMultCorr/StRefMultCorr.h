@@ -67,11 +67,11 @@ class StRefMultCorr {
   void initEvent(const UShort_t RefMult, const Double_t z, const Double_t zdcCoincidenceRate=0.0) ; // Set multiplicity, vz and zdc coincidence rate
 
   /// Check if pile-up event
-  Bool_t isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) {
+  Bool_t isPileUpEvent(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) const {
     return !passnTofMatchRefmultCut(refmult, ntofmatch, vz);
   }
   /// Check if NOT pile-up event
-  Bool_t passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch, Double_t vz=0.); 
+  Bool_t passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch, Double_t vz=0.) const; 
 
   /// Get corrected multiplicity, correction as a function of primary z-vertex
   Double_t getRefMultCorr() const;
@@ -80,18 +80,18 @@ class StRefMultCorr {
                           const Double_t zdcCoincidenceRate, const UInt_t flag = 2) const;
 
   /// Luminosity correction factor
-  Double_t luminosityCorrection(Double_t zdcCoincidenceRate);
+  Double_t luminosityCorrection(Double_t zdcCoincidenceRate) const;
   /// Vz correction factor
-  Double_t vzCorrection(Double_t z);
+  Double_t vzCorrection(Double_t z) const;
   /// Sample refMult -> convert integer to double
-  Double_t sampleRefMult(Int_t refMult);
+  Double_t sampleRefMult(Int_t refMult) const;
   /// Shape reweighting of refmult: ratio of refMult in each Vz bin to that in the center (|Vz|<10cm)
-  Double_t getShapeWeight_SubVz2Center();
+  Double_t getShapeWeight_SubVz2Center() const;
   /// Trigger efficiency: fit of the Glauber/Data
-  Double_t triggerWeight();
+  Double_t triggerWeight() const;
 
   /// Total weighting factor: incorporates shape and trigger efficiency weights
-  Double_t getWeight();
+  Double_t getWeight() const;
 
   /// Get 16 centrality bins (5% increment, 0-5, 5-10, ..., 75-80)
   Int_t getCentralityBin16() const;
