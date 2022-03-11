@@ -1310,7 +1310,7 @@ void StRefMultCorr::print(const Option_t* option) const {
 }
 
 //_________________
-std::vector<std::string> StRefMultCorr::StringSplit( const std::string str, const char sep ) {
+std::vector<std::string> StRefMultCorr::StringSplit( const std::string str, const char sep ) const {
   std::vector<std::string> vstr;
   std::stringstream ss(str);
   std::string buffer;

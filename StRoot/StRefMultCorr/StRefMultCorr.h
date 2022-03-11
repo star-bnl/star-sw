@@ -194,7 +194,7 @@ class StRefMultCorr {
   Int_t getVzWindowForVzDepCentDef() const;
   Int_t getCentralityBin9VzDep() const;
   Int_t getCentralityBin16VzDep() const;
-  std::vector<std::string> StringSplit( const std::string str, const char sep );
+  std::vector<std::string> StringSplit( const std::string str, const char sep ) const;
 
   // Read scale factor from header file
   void readScaleForWeight(const Int_t nRefmultBin, const Double_t *weight) ;
