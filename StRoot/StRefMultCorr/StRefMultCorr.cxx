@@ -845,32 +845,32 @@ Double_t StRefMultCorr::triggerWeight() const {
   const Double_t par2 =   mPar_weight[2][mParameterIndex];
   const Double_t par3 =   mPar_weight[3][mParameterIndex];
   const Double_t par4 =   mPar_weight[4][mParameterIndex];
-  const Double_t A    =   mPar_weight[5][mParameterIndex];    // Set to 0 if no z-dependent trigger weight is set
-  const Double_t par6 =   mPar_weight[6][mParameterIndex];//Add by guannan for run14
-  const Double_t par7 =   mPar_weight[7][mParameterIndex];//Add by guannan for run14
+  const Double_t A    =   mPar_weight[5][mParameterIndex]; // Set to 0 if no z-dependent trigger weight is set
+  const Double_t par6 =   mPar_weight[6][mParameterIndex];
+  const Double_t par7 =   mPar_weight[7][mParameterIndex];
 
   // Additional z-vetex dependent correction
   //const Double_t A = ((1.27/1.21))/(30.0*30.0); // Don't ask...
   //const Double_t A = (0.05/0.21)/(30.0*30.0); // Don't ask...
-  //std::cout<<"--------------------"<<std::endl;
-  //std::cout<<"par0: "<<par0<<std::endl;
-  //std::cout<<"par1: "<<par1<<std::endl;
-  //std::cout<<"par2: "<<par2<<std::endl;
-  //std::cout<<"par3: "<<par3<<std::endl;
-  //std::cout<<"par4: "<<par4<<std::endl;
-  //std::cout<<"--------------------"<<std::endl;
+
 
   if ( isRefMultOk() // 0-80%
        && mRefMult_corr < mNormalize_stop[mParameterIndex] // reweighting only apply up to normalization point
        && mRefMult_corr != -(par3/par2)  ) { // avoid denominator = 0 
 
     // Parametrization of MC/data RefMult ratio
-    weight = ( par0 +
-	       par1/(par2*mRefMult_corr + par3) +
-	       par4*(par2*mRefMult_corr + par3) +
-	       par6/TMath::Power(par2*mRefMult_corr+par3 ,2) +
-	       par7*TMath::Power(par2*mRefMult_corr+par3 ,2) ); 
-		
+    weight = (par0 +
+              par1 / (par2 * mRefMult_corr + par3) +
+              par4 * (par2 * mRefMult_corr + par3) +
+              par7 / TMath::Power(par2 * mRefMult_corr + par3, 2) +
+              par6 * TMath::Power(par2 * mRefMult_corr + par3, 2));
+    /*
+    std::cout << "par0: " << par0 << " par1: " << par1 << " par2: " << par2
+              << " par3: " << par3 << " par4: " << par4 << " A: " << A
+              << " par6: " << par6 << " par7: " << par7 << "\n"
+              << "refMultCorr: " << mRefMult_corr << " weight: " << weight << std::endl;
+              */
+
     weight = weight + (weight-1.0)*(A*mVz*mVz); // z-dependent weight correction
   }
 
