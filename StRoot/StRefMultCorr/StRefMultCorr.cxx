@@ -779,7 +779,7 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
 
     Double_t ShapeReweight = 1.0;
 
-    Double_t tem_ShapeReweight = stod( sParam_ShapeWeight[iRefmultBin] );
+    Double_t tem_ShapeReweight = std::stod( sParam_ShapeWeight[iRefmultBin] );
     //prevent the crazy numbers for the large fluctuations
     if( tem_ShapeReweight<0.1 ) {
       ShapeReweight = 0.1;
