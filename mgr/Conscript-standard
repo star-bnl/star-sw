@@ -63,7 +63,7 @@ if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
 	    # normal case, use subdir name
 	    $pkg =~ s/.*StarGenerator\///;
 	}
-	#print "\t[".File::Basename::basename($Dir)."] changed to $pkg\n";
+	# print "\t[".File::Basename::basename($Dir)."] changed to $pkg\n";
     } else {
 	$pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/  );
 	$pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
@@ -568,14 +568,16 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 
 
-    } elsif ( $pkg =~ m/^FastJetFilter/ and $Dir =~ m/StarGenerator/ ){
-
+    } elsif ( $pkg =~ m/^StarGeneratorFilt/ and $Dir =~ m/StarGenerator/ ){
+	# Package FILT is transformed to StarGeneratorFilt by StarGenerator directory rules
+	# We cannot narrow down futher..., so all filters will be built with the
+	# following dependencies...
         if ( defined($ENV{FASTJET_DIR}) ) {
           $CPPPATH = $ENV{FASTJET_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
         } else {
-          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
+          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;	      
         }
-    
+
     } elsif ( $pkg =~ m/^Pythia8/ and $Dir =~ m/StarGenerator/ ){
 	# Append pythia 8 include path and define version
 	#print "***** DEBUG ****\n";
