@@ -12,7 +12,7 @@
 #foreach D (`ls -d /hlt/cephfs/reco/2021/RF/TFG21h/Cosmic*`)
 #  cd ${D}
 #  cd /hlt/cephfs/reco/2022/ZF/Cosmic
-#  CreateRunDirs.pl
+  CreateRunDirs.pl
   foreach d (`ls -1d ???/2*`)
     cd $d;
     if (-r Done || -r Submitted) then

@@ -44,6 +44,16 @@
    dEdx:
    CosmicT->Draw("zK:-TMath::Log10(TMath::Abs(K.mPti-L.mPti)/2.)>>dEdx(30,-1,2,100,-0.25,0.25)","noFitpK>15&&noFitpL>15&&zK>-1","colz")
    CosmicT->Draw("zK:TMath::Log10(bgK)>>dEdxbg(50,0,5.,100,-.5,0.5)","noFitpK>15&&noFitpL>15&&zK>-1&&chi2<200","colz")
+
+   foreach d (`ls -1d ???`)
+     cd ${d}
+     if (! -r Cosmics.root) then
+        ln -s ~/macros/.sl* .
+        root.exe -q -b lMuDst.C Cosmics.C+ > & Cosmics.log &
+     endif
+     cd -
+   end
+
 */
 //#define DEBUG
 //#define __PrimaryVertices__
@@ -189,7 +199,7 @@ Int_t sector(Float_t x, Float_t y, Float_t z) {
   return sec;
 }
 //________________________________________________________________________________
-void Cosmics(const Char_t *files ="*.MuDst.root",
+void Cosmics(const Char_t *files ="*/*.MuDst.root",
 	     const Char_t *Out = "Cosmics.root"
 	    ){
   //  static const Double_t sigmaB[2] = {6.26273e-01, -5.80915e-01}; // Global Tracks, wrt Bichsel

@@ -1,4 +1,3 @@
-// @(#)root/main:$Name:  $:$Id: h2mdf.C,v 1.3 2014/12/22 23:50:53 fisyak Exp $
 /*
   root.exe TpcRS*2020/ADC/?I*ADC*.root mdf3ADC.C+
   root.exe ?I*U.root mdf3ADC.C+
@@ -6,7 +5,7 @@
   root.exe 'lDb.C("r2020",0)'  ?I*U.root mdf3ADC.C+
   root.exe 'lDb.C("r2020",0)' TpcRS*2020/ADC/?I*ADC*.root mdf3ADC.C+
 */
-//#define __CHECK__
+#define __CHECK__
 #ifndef __CINT__
 #include <stdlib.h>
 #include <string.h>
@@ -327,11 +326,10 @@ Double_t funcMDF(Double_t *x, Double_t *p=0) {
   return fit->Eval(x, p);
 }
 //________________________________________________________________________________
-void mdf3ADC(Int_t max=5, Int_t t = 0, Int_t maxTerm = 50, Double_t ymin = 0.2, Double_t ymax = 1)
-  {
+void mdf3ADC(Int_t t = 0) {
   // Global data parameters 
-  Int_t nVars       = 3;
-  
+  Int_t nVars      =  3;
+  Int_t maxTerm    = 50;
   // make fit object and set parameters on it. 
   //  fit = new TMultiDimFit(nVars, TMultiDimFit::kMonomials,"vk");
 #ifdef __CINT__
@@ -340,8 +338,8 @@ void mdf3ADC(Int_t max=5, Int_t t = 0, Int_t maxTerm = 50, Double_t ymin = 0.2, 
   TMultiDimFit::EMDFPolyType type = (TMultiDimFit::EMDFPolyType) t;
 #endif
   fit = new TMultiDimFit(nVars, type,"vk");
-
-  Int_t mPowers[]   = {max , max, max};
+  Int_t max = 3;
+  Int_t mPowers[]   = { max, 2, max};
   fit->SetMaxPowers(mPowers);
   fit->SetMaxFunctions(10000);
   fit->SetMaxStudy(10000);
@@ -388,7 +386,9 @@ void mdf3ADC(Int_t max=5, Int_t t = 0, Int_t maxTerm = 50, Double_t ymin = 0.2, 
   }
   // Print out the statistics
   fit->Print("s");
-  
+#ifdef __CHECK__
+  return;
+#endif  
   // Book histograms 
   fit->MakeHistograms();
 
