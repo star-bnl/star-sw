@@ -1195,6 +1195,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
       }
     }
   }
+#define __ADCPLOTS__
 #ifdef __ADCPLOTS__
   for (Int_t i = 0; i < kTPC; i++) 
     for (Int_t j = 0; j < kVar; j++) 
