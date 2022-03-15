@@ -18,8 +18,13 @@
 #include "StBTofCollection.h"
 #include "StBTofRawHit.h"
 #include "StBTofDaqMap.h"
+#ifndef __TFG__VERSION__
+#include "tables/St_tofTrgWindow_Table.h"
+#include "tables/St_vpdDelay_Table.h"
+#else /* __TFG__VERSION__ */
 #include "StDetectorDbMaker/St_tofTrgWindowC.h"
 #include "StDetectorDbMaker/St_vpdDelayC.h"
+#endif /* __TFG__VERSION__ */
 
 StBTofSortRawHit::StBTofSortRawHit() {
   mDaqMap = 0;
@@ -50,12 +55,20 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
   ///initial time windows
   LOG_INFO << "[StBTofSortRawHit] retrieving BTOF trigger time window cuts" << endm;
   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTrgWindow");
+#ifndef __TFG__VERSION__
+  St_tofTrgWindow* tofTrgWindow = static_cast<St_tofTrgWindow*>(mDbTOFDataSet->Find("tofTrgWindow"));
+#else /* __TFG__VERSION__ */
   const St_tofTrgWindow* tofTrgWindow = (const St_tofTrgWindow*) St_tofTrgWindowC::instance()->Table();
+#endif /* __TFG__VERSION__ */
   if(!tofTrgWindow) {
     LOG_ERROR << "unable to get tof Module map table" << endm;
     return; // kStErr;
   }
+#ifndef __TFG__VERSION__
+  tofTrgWindow_st* trgWin = static_cast<tofTrgWindow_st*>(tofTrgWindow->GetArray());
+#else /* __TFG__VERSION__ */
   const tofTrgWindow_st* trgWin = tofTrgWindow->GetTable();
+#endif /* __TFG__VERSION__ */
   for (Int_t i=0;i<mNTRAY;i++) {
     mTriggerTimeWindow[i][0] = (Float_t)trgWin[i].trgWindow_Min;
     mTriggerTimeWindow[i][1] = (Float_t)trgWin[i].trgWindow_Max;
@@ -69,14 +82,26 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
   if(maker->Debug()) mDebug = kTRUE;
 
   LOG_INFO << "[StBTofSortRawHit] retrieving VPD delay settings" << endm;
+#ifndef __TFG__VERSION__
+  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/vpdDelay");
+
+#endif /* ! __TFG__VERSION__ */
   //fg  
   if (mDbTOFDataSet){
+#ifndef __TFG__VERSION__
+    St_vpdDelay *vpdDelayTable = static_cast<St_vpdDelay*>(mDbTOFDataSet->Find("vpdDelay"));
+#else /* __TFG__VERSION__ */
     const St_vpdDelay *vpdDelayTable = (const St_vpdDelay *) St_vpdDelayC::instance()->Table();
+#endif /* __TFG__VERSION__ */
     if (!vpdDelayTable) {
       LOG_ERROR << "unable to find vpdDelay table" << endm;
       return;
     }
+#ifndef __TFG__VERSION__
+    vpdDelay_st* vpdDelay = static_cast<vpdDelay_st*>(vpdDelayTable->GetArray());
+#else /* __TFG__VERSION__ */
     const vpdDelay_st* vpdDelay = vpdDelayTable->GetTable();
+#endif /* __TFG__VERSION__ */
     if (!vpdDelay) {
       LOG_ERROR << "unable to get vpdDelay data" << endm;
       return;

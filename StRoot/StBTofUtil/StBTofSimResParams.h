@@ -2,6 +2,7 @@
 //  StBTofSimResParams.h
 //
 //
+//  Modified by Zaochen on 07/21/2021.
 //  Created by jdb on 03/08/18.
 //
 //
@@ -12,7 +13,12 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#ifndef __TFG__VERSION__
+#include "St_db_Maker/St_db_Maker.h"
+#include "tables/St_tofSimResParams_Table.h"
+#else /* __TFG__VERSION__ */
 #include "StDetectorDbMaker/St_tofSimResParamsC.h"
+#endif /* __TFG__VERSION__ */
 
 
 // using std::string;

@@ -77,7 +77,11 @@ class StBTofDaqMap{
   ~StBTofDaqMap();
 
   /// Initial function, need a maker to access the data base
+#ifndef __TFG__VERSION__
+  void Init(StMaker *maker);
+#else /* __TFG__VERSION__ */
   void Init(StMaker *maker=0 );
+#endif /* __TFG__VERSION__ */
   void Reset();
   
   /// Set the number valid trays

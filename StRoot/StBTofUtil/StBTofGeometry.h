@@ -279,7 +279,9 @@ class StBTofGeometry : public TNamed {
    static Int_t const mNModules = 32;
 
    std::string FormTGeoPath(TGeoManager &geoManager, int trayId, bool hasGmt = false, int moduleId = -1);
+#ifdef __TFG__VERSION__
    TGeoPhysicalNode *GetPhysicalNode(TGeoManager &geoManager, int trayId, bool hasGmt = false, int moduleId = -1);
+#endif /* __TFG__VERSION__ */
 
    static bool mGemTofGeom; //! indicate whether this geometry has GEMTOF trays (consider default "true" for all Runs13+)
    static bool TrayHasGmtModules(int trayId); //! flag a tray as a GEMTOF tray
@@ -317,7 +319,9 @@ class StBTofGeometry : public TNamed {
    Double_t    mTrayZ0[mNTrays];
 
  public:
+#ifdef __TFG__VERSION__
    void InitFromStar(TVolume *starHall) {InitFrom(*starHall);}
+#endif /* __TFG__VERSION__ */
    StBTofGeometry(const char* name="btofGeo",
                   const char* title="Simplified BTof Geometry");
    ~StBTofGeometry();
