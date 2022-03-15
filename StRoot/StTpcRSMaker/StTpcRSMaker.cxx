@@ -226,7 +226,16 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection3MDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
-    //    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
+    CLRBIT(Mask,StTpcdEdxCorrection::kzCorrectionC);
+    CLRBIT(Mask,StTpcdEdxCorrection::kzCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::kTpcPadTBins);
+    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcI);
+    CLRBIT(Mask,StTpcdEdxCorrection::knPad);
+    CLRBIT(Mask,StTpcdEdxCorrection::knTbk);
+    CLRBIT(Mask,StTpcdEdxCorrection::kdZdY);
+    CLRBIT(Mask,StTpcdEdxCorrection::kdXdY);
+
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
     m_TpcdEdxCorrection->SetSimulation();
   }
@@ -1240,7 +1249,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  }
 	  TotalSignal += TotalSignalInCluster;
 	} while (kTRUE); // Clusters
-	//	tpc_hitC->adc = -99;
+	//03.14.2022	tpc_hitC->adc = -99;
 	if (dESum > 0 && dSSum) {
 #ifdef __DEBUG__
 	  if (Debug() > 12) {
@@ -1250,7 +1259,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #endif
 	  tpc_hitC->de = dESum*eV; 
 	  tpc_hitC->ds = dSSum; 
-	  //	  tpc_hitC->adc = TotalSignal;
+	  //03.14.2022	  tpc_hitC->adc = TotalSignal;
 	  tpc_hitC->np = nP;
 	  tpc_hitC->ne = nTotal;
 	  if (row > 1)       tpc_hitC->adcs[0]  += rowsdEH[row-2];
@@ -1283,6 +1292,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	g2t_tpc_hit_st *tpc_hitC = TrackSegmentHits[iSegHits].tpc_hitC;
 	if (tpc_hitC->volume_id > 10000) continue;
 	Int_t row = tpc_hitC->volume_id%100;
+	//03.14.2022
 	tpc_hitC->adc += rowsdE[row-1];
 	Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
 	if (checkList[io][17])
