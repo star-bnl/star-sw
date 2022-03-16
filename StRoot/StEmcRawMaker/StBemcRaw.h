@@ -102,6 +102,7 @@ protected:
     controlADCtoE_st*        mControlADCtoE;
 
     Bool_t                   mSaveAllStEvent;
+    Bool_t                   mSaveAllBTOW;
     Bool_t                   mPsdMapBug;
     Bool_t                   mPsdMapBug2;
     Bool_t                   mTowerMapBug;
@@ -178,6 +179,10 @@ public:
     {
         mSaveAllStEvent = a;
     } ///< Set to kTRUE if all hits are to be saved on StEvent
+    void                      saveAllBTOW(Bool_t a)
+    {
+        mSaveAllBTOW = a;
+    } ///< Set to kTRUE if all BTOW hits are to be saved on StEvent (for picoDst/triggerSimu)
     void                      psdMapBug(Bool_t a)
     {
         mPsdMapBug = a;
