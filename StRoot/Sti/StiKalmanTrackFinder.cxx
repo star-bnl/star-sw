@@ -462,7 +462,14 @@ assert(direction || leadNode==track->getLastNode());
   //  const double ref2a  = 2.*3.1415927-ref1a;
   gLevelOfFind++;
   --mEventPerm;
+#ifndef __TFG__VERSION__
   assert(mEventPerm>=0 && "FATAL::TOO MANY permutations");
+#else /* __TFG__VERSION__ */
+  if (mEventPerm <= 0) {
+    LOG_ERROR << "StiKalmanTrackFinder::find  FATAL::TOO MANY permutations" << endm;
+    return;
+  }
+#endif /* ! __TFG__VERSION__ */
   if (--mTrackPerm==0) { mUseComb = 0; }
 
   StiDetector *tDet=0;

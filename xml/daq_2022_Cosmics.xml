@@ -66,4 +66,7 @@ root.exe -q -b 'bfc.C(100000,"P2022a,evout,NoHistos,noTags,noRunco,StiCA,-picoWr
     </Memory>
   </ResourceUsage>
 -->
+   <ResourceUsage>
+      <Priority>1</Priority>
+    </ResourceUsage>
 </job>

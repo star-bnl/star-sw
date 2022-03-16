@@ -29,8 +29,13 @@
  *
  *******************************************************************/
 #include <iostream>
+#ifndef __TFG__VERSION__
+#include "tables/St_tofDaqMap_Table.h"
+#include "tables/St_tofTrayConfig_Table.h"
+#else /* __TFG__VERSION__ */
 #include "StDetectorDbMaker/St_tofDaqMapC.h"
 #include "StDetectorDbMaker/St_tofTrayConfigC.h"
+#endif /* __TFG__VERSION__ */
 #include "StMessMgr.h"
 #include "StMaker.h"
 #include "StBTofDaqMap.h"
@@ -48,43 +53,108 @@ StBTofDaqMap::~StBTofDaqMap()
 /*!
  * Main initial function to access data base to retrieve the daq map parameters
  */
+#ifndef __TFG__VERSION__
+void StBTofDaqMap::Init(StMaker *maker) {
+#else /* __TFG__VERSION__ */
 void StBTofDaqMap::Init(StMaker */* maker */) {
+#endif /* __TFG__VERSION__ */
 
   LOG_INFO << "[StBTofDaqMap] retrieving BTOF DAQ map and tray config ..." << endm;
   ///////////////////////////////////////////////////////
   // Load configuration parameters from dbase
   //    need "[shell] setenv Calibrations_tof reconV0"
   ///////////////////////////////////////////////////////
+#ifndef __TFG__VERSION__
+
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofDaqMap");
+  St_tofDaqMap* tofDaqMap = static_cast<St_tofDaqMap*>(mDbTOFDataSet->Find("tofDaqMap"));
+  if(!tofDaqMap) {
+    LOG_ERROR << "unable to get tof Module map table" << endm;
+    return; // kStErr;
+  }
+  tofDaqMap_st* daqmap = static_cast<tofDaqMap_st*>(tofDaqMap->GetArray());
+#endif /* ! __TFG__VERSION__ */
   for (Int_t i=0;i<mNTOF;i++) {
+#ifndef __TFG__VERSION__
+    mMRPC2TDIGChan[i] = (Int_t)(daqmap[0].MRPC2TDIGChanMap[i]);
+#else /* __TFG__VERSION__ */
     mMRPC2TDIGChan[i] = (Int_t) St_tofDaqMapC::instance()->MRPC2TDIGChanMap()[i];
+#endif /* __TFG__VERSION__ */
     mTDIG2MRPCChan[mMRPC2TDIGChan[i]] = i;
+#ifndef __TFG__VERSION__
+    if(maker->Debug()) {
+      LOG_DEBUG << " MRPC = " << i << "  TDC chan = " << mMRPC2TDIGChan[i] << endm;
+    }
+#else /* __TFG__VERSION__ */
     LOG_DEBUG << " MRPC = " << i << "  TDC chan = " << mMRPC2TDIGChan[i] << endm;
+#endif /* __TFG__VERSION__ */
   }
   for (Int_t i=0;i<mNVPD;i++) {
+#ifndef __TFG__VERSION__
+    mWestPMT2TDIGLeChan[i] = (Int_t)(daqmap[0].PMT2TDIGLeChanMap[i]);
+    mWestPMT2TDIGTeChan[i] = (Int_t)(daqmap[0].PMT2TDIGTeChanMap[i]);
+    if(maker->Debug()) {
+      LOG_DEBUG << " VPD = " << i << "  TDC Lechan = " << mWestPMT2TDIGLeChan[i] << "  TDC TeChan = " << mWestPMT2TDIGTeChan[i] << endm;
+    }
+#else /* __TFG__VERSION__ */
     mWestPMT2TDIGLeChan[i] = (Int_t)St_tofDaqMapC::instance()->PMT2TDIGLeChanMap()[i];
     mWestPMT2TDIGTeChan[i] = (Int_t)St_tofDaqMapC::instance()->PMT2TDIGTeChanMap()[i];
     LOG_DEBUG << " VPD = " << i << "  TDC Lechan = " << mWestPMT2TDIGLeChan[i] << "  TDC TeChan = " << mWestPMT2TDIGTeChan[i] << endm;
+#endif /* __TFG__VERSION__ */
     mTDIGLe2WestPMTChan[mWestPMT2TDIGLeChan[i]] = i;
     mTDIGTe2WestPMTChan[mWestPMT2TDIGTeChan[i]] = i;
-    
+
     int j=i+mNVPD;
+#ifndef __TFG__VERSION__
+
+    mEastPMT2TDIGLeChan[i] = (Int_t)(daqmap[0].PMT2TDIGLeChanMap[j]);
+    mEastPMT2TDIGTeChan[i] = (Int_t)(daqmap[0].PMT2TDIGTeChanMap[j]);
+    if(maker->Debug()) {
+      LOG_DEBUG << " VPD = " << i << "  TDC Lechan = " << mEastPMT2TDIGLeChan[i] << "  TDC TeChan = " << mEastPMT2TDIGTeChan[i] << endm;
+    }
+#else /* __TFG__VERSION__ */
     
     mEastPMT2TDIGLeChan[i] = (Int_t)St_tofDaqMapC::instance()->PMT2TDIGLeChanMap()[j];
     mEastPMT2TDIGTeChan[i] = (Int_t)St_tofDaqMapC::instance()->PMT2TDIGTeChanMap()[j];
     LOG_DEBUG << " VPD = " << i << "  TDC Lechan = " << mEastPMT2TDIGLeChan[i] << "  TDC TeChan = " << mEastPMT2TDIGTeChan[i] << endm;
+#endif /* __TFG__VERSION__ */
     mTDIGLe2EastPMTChan[mEastPMT2TDIGLeChan[i]] = i;
     mTDIGTe2EastPMTChan[mEastPMT2TDIGTeChan[i]] = i;
   }
-  
+
   // valid tray Id
+#ifndef __TFG__VERSION__
+  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTrayConfig");
+  St_tofTrayConfig* trayConfig = static_cast<St_tofTrayConfig*>(mDbTOFDataSet->Find("tofTrayConfig"));
+  if(!trayConfig) {
+    LOG_ERROR << "unable to get tof tray configuration" << endm;
+    return; // kStErr;
+  }
+  tofTrayConfig_st* trayconf = static_cast<tofTrayConfig_st*>(trayConfig->GetArray());
+  if(maker->Debug()) { LOG_DEBUG << " Valid Trays: " << endm; }
+  mNValidTrays = (Int_t)(trayconf[0].entries);
+#else /* __TFG__VERSION__ */
   LOG_DEBUG << " Valid Trays: " << endm; 
   mNValidTrays = (Int_t)(St_tofTrayConfigC::instance()->entries());
+#endif /* __TFG__VERSION__ */
   for (Int_t i=0;i<mNValidTrays;i++) {
+#ifndef __TFG__VERSION__
+    mValidTrayId[i] = (Int_t)(trayconf[0].iTray[i]);
+    if(maker->Debug()) {
+      LOG_DEBUG << " " << mValidTrayId[i];
+    }
+#else /* __TFG__VERSION__ */
     mValidTrayId[i] = (Int_t)(St_tofTrayConfigC::instance()->iTray()[i]);
     LOG_DEBUG << " " << mValidTrayId[i];
+#endif /* __TFG__VERSION__ */
   }
+#ifndef __TFG__VERSION__
+  if(maker->Debug()) { LOG_DEBUG << endm; }
+
+#else /* __TFG__VERSION__ */
   LOG_DEBUG << endm;
   
+#endif /* __TFG__VERSION__ */
   LOG_DEBUG << "[StBTofDaqMap] ... done." << endm;
   return;
 }

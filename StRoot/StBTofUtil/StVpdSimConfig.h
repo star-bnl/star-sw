@@ -12,15 +12,24 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#ifndef __TFG__VERSION__
+#include "St_db_Maker/St_db_Maker.h"
+#include "tables/St_vpdSimParams_Table.h"
+#else /* __TFG__VERSION__ */
 #include "StMessMgr.h"
 #include "StDetectorDbMaker/St_vpdSimParamsC.h"
+#endif /* __TFG__VERSION__ */
 #include "phys_constants.h"
 #include <TRandom3.h>
 
 using std::string;
 class vpdSimParams_st;
 
+#ifndef __TFG__VERSION__
+class StVpdSimConfig : public StMaker {
+#else /* __TFG__VERSION__ */
 class StVpdSimConfig {
+#endif /* __TFG__VERSION__ */
 public:
 
 		StVpdSimConfig() {}
@@ -100,17 +109,62 @@ double singleTubeRes(UInt_t mVPDHitPatternEast, UInt_t mVPDHitPatternWest){
 
 	void loadVpdSimParams(const int date = 20160913, const int time = 175725, const char* Default_time = "2016-09-13 17:57:25")
 	{
+#ifndef __TFG__VERSION__
+
+        St_db_Maker *dbMk = dynamic_cast<St_db_Maker*>( GetChain()->GetMakerInheritsFrom("St_db_Maker") );
+
+        TDataSet *DB = GetDataBase("Calibrations/tof/vpdSimParams");
+
+        if (!DB) {
+            LOG_WARN << "No data set found, creating new St_db_Maker... with date/time" << date << "/" << time << endm;
+            dbMk = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
+            dbMk->SetDebug();
+            dbMk->SetDateTime(date,time); //! event or run start time, set to your liking
+            dbMk->SetFlavor("ofl");
+            dbMk->Init();
+            dbMk->Make();
+        }
+
+		if (!DB) {
+			LOG_WARN << "Failed to connect to Database!" << endm;
+            return;
+        }
+
+		St_vpdSimParams *dataset = 0;
+		dataset = (St_vpdSimParams*) DB->Find("vpdSimParams");
+
+        if (dataset) {
+			TDatime val[3];
+			dbMk->GetValidity((TTable*)dataset,val);
+			vpdSimParams_st* table = static_cast<vpdSimParams_st*>(dataset->GetTable());
+
+#endif /* ! __TFG__VERSION__ */
             //! Extract the parameter values from db into map
 			SingleTubeParams params;
 			for (int i = 0; i < MAX_ARRAY_INDEX; i++) {
+#ifndef __TFG__VERSION__
+				params.tubeId = table->tubeID[i];
+				params.singleTubeRes = table->tubeRes[i];
+				params.tubeStatusFlag = table->tubeStatusFlag[i];
+				params.tubeTriggerFlag = table->tubeTriggerFlag[i];
+				mSimParams[table->tubeID[i]] = params;
+#else /* __TFG__VERSION__ */
 				params.tubeId = St_vpdSimParamsC::instance()->tubeID()[i];
 				params.singleTubeRes = St_vpdSimParamsC::instance()->tubeRes()[i];
 				params.tubeStatusFlag = St_vpdSimParamsC::instance()->tubeStatusFlag()[i];
 				params.tubeTriggerFlag = St_vpdSimParamsC::instance()->tubeTriggerFlag()[i];
 				mSimParams[St_vpdSimParamsC::instance()->tubeID()[i]] = params;
+#endif /* __TFG__VERSION__ */
 			}
 
 			return;
+#ifndef __TFG__VERSION__
+		}
+		else {
+			LOG_WARN << "ERROR: dataset does not contain requested table" << endm;
+			return;
+		}
+#endif /* ! __TFG__VERSION__ */
 	}
 
 	/** Reads VPD Sim Params from a file for DEBUG purposes

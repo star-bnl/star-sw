@@ -199,11 +199,14 @@ do {
    mgIndex = 0;
    return 1;
  } while(0);
+ static Int_t noError = 0;
+ if (noError < 13) {
+   noError++;
   ::Error("StiDetector::insideL","Det=%s XYZ=(%g %g %g)"
          ,getName().c_str(),xl[0],xl[1],xl[2]);
   ::Error("StiDetector::insideL","idx=%d val=%g %g"
          ,mgIndex,mgValue[0],mgValue[1]);
-
+ }
   return 0;
 }
 //______________________________________________________________________________

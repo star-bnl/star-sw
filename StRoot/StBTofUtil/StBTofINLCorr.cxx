@@ -47,8 +47,13 @@
  *
  *******************************************************************/
 #include <iostream>
+#ifndef __TFG__VERSION__
+#include "tables/St_tofTDIGOnTray_Table.h"
+#include "tables/St_tofINLSCorr_Table.h"
+#else /* __TFG__VERSION__ */
 #include "StDetectorDbMaker/St_tofTDIGOnTrayC.h"
 #include "StDetectorDbMaker/St_tofINLSCorrC.h"
+#endif /* __TFG__VERSION__ */
 #include "StMessMgr.h"
 #include "StMaker.h"
 #include "StBTofINLCorr.h"
@@ -79,12 +84,21 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
   // Load configuration parameters from dbase
   ///////////////////////////////////////////////////////
 
+#ifndef __TFG__VERSION__
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTDIGOnTray");
+  St_tofTDIGOnTray* tofTDIGOnTray = static_cast<St_tofTDIGOnTray*>(mDbTOFDataSet->Find("tofTDIGOnTray"));
+#else /* __TFG__VERSION__ */
     const St_tofTDIGOnTray* tofTDIGOnTray = (const St_tofTDIGOnTray*) St_tofTDIGOnTrayC::instance()->Table();
+#endif /* __TFG__VERSION__ */
   if(!tofTDIGOnTray) {
     LOG_ERROR << "unable to get tofTDIGOnTray table" << endm;
     return;
   }
+#ifndef __TFG__VERSION__
+  tofTDIGOnTray_st* tdigOnTray = static_cast<tofTDIGOnTray_st*>(tofTDIGOnTray->GetArray());
+#else /* __TFG__VERSION__ */
   const tofTDIGOnTray_st* tdigOnTray = static_cast<const tofTDIGOnTray_st*>(tofTDIGOnTray->GetArray());
+#endif /* __TFG__VERSION__ */
 
   Int_t numRows = tofTDIGOnTray->GetNRows();
   for (Int_t i=0;i<mNTray+2;i++) {
@@ -102,12 +116,21 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
     }
   }
 
+#ifndef __TFG__VERSION__
+  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofINLSCorr");
+  St_tofINLSCorr* tofINLCorr = static_cast<St_tofINLSCorr*>(mDbTOFDataSet->Find("tofINLSCorr"));
+#else /* __TFG__VERSION__ */
   const St_tofINLSCorr* tofINLCorr = (const St_tofINLSCorr*) St_tofINLSCorrC::instance()->Table();
+#endif /* __TFG__VERSION__ */
   if(!tofINLCorr) {
     LOG_ERROR << "unable to get tofINLSCorr table" << endm;
     return;
   }
+#ifndef __TFG__VERSION__
+  tofINLSCorr_st* inlcorr = static_cast<tofINLSCorr_st*>(tofINLCorr->GetArray());
+#else /* __TFG__VERSION__ */
   const tofINLSCorr_st* inlcorr = static_cast<const tofINLSCorr_st*>(tofINLCorr->GetArray());
+#endif /* __TFG__VERSION__ */
   numRows = tofINLCorr->GetNRows();
   if(numRows>mNTDIGMAX*mNChanOnTDIG) {
     { LOG_WARN << "number of rows in tofINLSCorr table ("<< numRows<<") exceeds the array limit ("<<mNTDIGMAX*mNChanOnTDIG << ") in this function! Entries truncated !!!" << endm; }
@@ -192,6 +215,10 @@ float StBTofINLCorr::getTdigINLCorr(int tdigId, int tdcChannel, int bin) {
     index = -999;
   }
   if(index<0||index>=mNValidBoards) {
+#ifndef __TFG__VERSION__
+    LOG_WARN << " Missing INL table for TDIG-Id = " << tdigId << endm;
+    LOG_WARN << " Using the table from boardId # " << mBoardId[0] << " tdcchan # 0 " << endm;
+#else /* __TFG__VERSION__ */
     static Int_t noErrors = 0;
     static Int_t tdigIdOld = -1;
     if (tdigId != tdigIdOld || noErrors < 13) {
@@ -200,6 +227,7 @@ float StBTofINLCorr::getTdigINLCorr(int tdigId, int tdcChannel, int bin) {
     }
     if (tdigId == tdigIdOld) noErrors++;
     else                     {tdigIdOld = tdigId; noErrors = 1;}
+#endif /* __TFG__VERSION__ */
 //    return 0.0;
     return mINLCorr[0][0][bin]/100.;
   } else {

@@ -20,7 +20,7 @@
   foreach  evtsFile(`cat $FILELIST`) 
     echo "${evtsFile}"
     if (! -r ${evtsFile}) continue;
-    set filel        = `basename $evtsFile .daq`1
+    set filel        = `basename $evtsFile .daq`
     set bf           = `basename $filel .root`
     set output  = ${bf}.event.root
     set logFile  = ${bf}B.log
@@ -49,7 +49,9 @@
 #   root.exe -q -b 'bfc.C(100000,"pp2022,StiCA,BEmcChkStat,'${evout}',NoHistos,noTags,noRunco","'${input}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(2000,"pp2022,StiCA,BEmcChkStat,'${evout}',NoHistos,noTags,noRunco","'${input}'")' &gt;&amp; ${logFile}
 # 01/14/2022
-   root.exe -q -b 'bfc.C(1000,"pp2022,StiCA,PicoVtxVpdOrDefault,BEmcChkStat,'${evout}',NoHistos,noTags,noRunco","'${input}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(1000,"pp2022,StiCA,PicoVtxVpdOrDefault,BEmcChkStat,'${evout}',NoHistos,noTags,noRunco","'${input}'")' &gt;&amp; ${logFile}
+# 03/14/2022 -fcs
+   root.exe -q -b 'bfc.C(1000,"pp2022,StiCA,PicoVtxVpdOrDefault,BEmcChkStat,'${evout}',NoHistos,noTags,noRunco,-fcs,-fcsDb,-fcsDat,-fcsWFF,-fcsCluster,-fcsPoint","'${input}'")' &gt;&amp; ${logFile}
    gzip ${logFile}
 #    cp -p ${logFile} ${SUBMITTINGDIRECTORY}/
 #    cp -p ${bf}*.root ${SUBMITTINGDIRECTORY}/
@@ -76,4 +78,7 @@
     </Memory>
   </ResourceUsage>
 -->
+   <ResourceUsage>
+      <Priority>1</Priority>
+    </ResourceUsage>
 </job>

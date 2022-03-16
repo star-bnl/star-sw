@@ -194,16 +194,22 @@ const Var_t  xMax          = { 24.5, 64.5,    7.5,     21.5,     1.1,    1.5, 21
 //________________________________________________________________________________
 Bool_t AcceptFile(const TString &File) {
   Bool_t ok = kTRUE;
-  if (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
-      File.Contains("hist") || File.Contains("runco") || File.Contains("MuMc") ||
-      File.Contains("minimc") || File.Contains("event") || File.Contains("geant") ||
-      File.Contains("hist") || File.Contains("runco") || File.Contains("geant") ||
-      File.Contains("QA") ||
-      File.Contains("T0") ||
-      File.Contains("All") ||
-      File.Contains("etofSim") ||
-      File.Contains("picoDst") ||
-      File.Contains("MuDst.root")) ok = kFALSE;
+  if (! File.Contains("tags") &&
+      (File.Contains("Plot") || File.Contains("Fit") || File.Contains("ADC") || File.Contains("Pads") || 
+       File.Contains("hist") || File.Contains("runco") || File.Contains("MuMc") ||
+       File.Contains("minimc") || File.Contains("event") || File.Contains("geant") ||
+       File.Contains("hist") || File.Contains("runco") || File.Contains("geant") ||
+       File.Contains("QA") ||
+       File.Contains("T0") ||
+       File.Contains("All") ||
+       File.Contains("etofSim") ||
+       File.Contains("picoDst") ||
+       File.Contains("MuDst.root"))) ok = kFALSE;
+#if 0
+  cout << File.Data();
+  if (ok) cout << "\tAccepted" << endl;
+  else    cout << "\tRejectted" << endl;
+#endif  
   return ok;
 }
 //________________________________________________________________________________
@@ -1189,6 +1195,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
       }
     }
   }
+#define __ADCPLOTS__
 #ifdef __ADCPLOTS__
   for (Int_t i = 0; i < kTPC; i++) 
     for (Int_t j = 0; j < kVar; j++) 
@@ -4640,10 +4647,7 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
     new TH2D("TI","time bucket difference for Inner sector versus Z",210,-210,210,800,-2,2),
     new TH2D("TO","time bucket difference for Outer sector versus Z",210,-210,210,800,-2,2)
   };
-  TH2D *TR[2] = {
-    new TH2D("TRI","time bucket for Inner difference versus row",72,0.5,72.5,800,-2,2),
-    new TH2D("TRO","time bucket for Outer difference versus row",72,0.5,72.5,800,-2,2)
-  };
+  TH2D *TR = new TH2D("TR","time bucket difference versus row",72,0.5,72.5,800,-2,2);
   TH2D *TC[2] = {
     new TH2D("TIC","time bucket after correction difference for Inner sector versus Z",210,-210,210,800,-2,2),
     new TH2D("TOC","time bucket after correction difference for Outer sector versus Z",210,-210,210,800,-2,2)
@@ -4660,10 +4664,7 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
     new TH2D("ZI","Z difference for Inner sector versus Z",210,-210,210,800,-2,2),
     new TH2D("ZO","Z difference for Outer sector versus Z",210,-210,210,800,-2,2)
   };
-  TH2D *ZR[2] = {
-    new TH2D("ZRI","Z difference for Inner sector versus row",72,0.5,72.5,800,-2,2),
-    new TH2D("ZRO","Z difference for Outer sector versus row",72,0.5,72.5,800,-2,2)
-  };
+  TH2D *ZR = new TH2D("ZRI","Z difference fversus row",72,0.5,72.5,800,-2,2);
   // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>TI(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90&&fMcHit.mVolumeId%100<=13","colz"); TI->FitSlicesY(); TI_1->Fit("pol2","er","",-100,100);
   // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>TO(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90&&fMcHit.mVolumeId%100>13","colz"); TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
   const Int_t&       fRun                                     = iter("fRun");
@@ -4726,8 +4727,8 @@ void T0Offsets(const Char_t *files="*.root", const Char_t *Out = "") {
       T[io]->Fill(fMcHit_mPosition_mX3[k],dT);
       TC[io]->Fill(fMcHit_mPosition_mX3[k],dTC);
       Z[io]->Fill(fMcHit_mPosition_mX3[k],dZ);
-      TR[io]->Fill(row,dT);
-      ZR[io]->Fill(row,dZ);
+      TR->Fill(row,dT);
+      ZR->Fill(row,dZ);
       Int_t ntbk = fRcHit_mMaxtmbk[l] + fRcHit_mMintmbk[l] + 1;
       B[io]->Fill(ntbk,dT);
       Double_t pT = TMath::Sqrt(fMcHit_mLocalMomentum_mX1[k]*fMcHit_mLocalMomentum_mX1[k] + fMcHit_mLocalMomentum_mX2[k]*fMcHit_mLocalMomentum_mX2[k]);

@@ -17,7 +17,11 @@
 #include <string>
 #include <stdlib.h>
 #include <stdio.h>
+#ifndef __TFG__VERSION__
+#include "tables/St_tofGeomAlign_Table.h"
+#else /* __TFG__VERSION__ */
 #include "StDetectorDbMaker/St_tofGeomAlignC.h"
+#endif /* __TFG__VERSION__ */
 
 #include "StBTofGeometry.h"
 #include "TFile.h"
@@ -771,6 +775,25 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoMan
      inData.close();
    } else {
      LOG_INFO << "[StBTofGeometry] retrieving geometry alignment parameters from database" << endm;
+#ifndef __TFG__VERSION__
+     TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofGeomAlign");
+     if (!mDbTOFDataSet) {
+       LOG_WARN << "[StBTofGeometry] unable to find Calibrations/tof/tofGeomAlign! Use ideal geometry!" << endm;
+     } else {
+       St_tofGeomAlign* tofGeomAlign = static_cast<St_tofGeomAlign*>(mDbTOFDataSet->Find("tofGeomAlign"));
+       if(!tofGeomAlign) {
+	 LOG_WARN << "Unable to get tof geometry align parameter! Use ideal geometry!" << endm;
+       } else {
+         tofGeomAlign_st* geomAlign = static_cast<tofGeomAlign_st*>(tofGeomAlign->GetArray());
+
+         for (Int_t i=0;i<mNTrays;i++) {
+           phi0[i] = geomAlign[i].phi0;
+           x0[i]   = geomAlign[i].x0;
+           z0[i]   = geomAlign[i].z0;
+         }
+       }
+     }
+#else /* __TFG__VERSION__ */
      const St_tofGeomAlign* tofGeomAlign = (const St_tofGeomAlign*) St_tofGeomAlignC::instance()->Table();
      const tofGeomAlign_st* geomAlign = static_cast<tofGeomAlign_st*>(tofGeomAlign->GetArray());
      
@@ -779,6 +802,7 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoMan
        x0[i]   = geomAlign[i].x0;
        z0[i]   = geomAlign[i].z0;
      }
+#endif /* __TFG__VERSION__ */
    }
 
    for(int i=0;i<mNTrays;i++) {
@@ -800,7 +824,11 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoMan
      }
 
      if(maker->Debug()) {
+#ifndef __TFG__VERSION__
+       LOG_DEBUG << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
+#else /* __TFG__VERSION__ */
        LOG_INFO << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
+#endif /* __TFG__VERSION__ */
      }
    }
 
@@ -812,11 +840,17 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall, TGeoManager* geoMan
 
    if ( geoManager )
      InitFrom( *geoManager );
-   else    if ( starHall )
+   else if ( starHall )
      InitFrom( *starHall );
+#ifndef __TFG__VERSION__
+   else
+     LOG_ERROR << "StBTofGeometry::Init - Cannot build BTOF geometry without Geant or TGeo input\n";
+
+#else /* __TFG__VERSION__ */
    else {
      LOG_ERROR << "StBTofGeometry::Init - Cannot build BTOF geometry without Geant or TGeo input" << endm;
    }
+#endif /* __TFG__VERSION__ */
 
 /* Starting with geometry tags in Y2013, GMT units were installed into tof trays 8,23,93, & 108.
  * This caused a shift in the module index for geant[1-24] instead of daqs [5-28].
@@ -927,9 +961,13 @@ void StBTofGeometry::InitFrom(TVolume &starHall)
       if ( isec>60 ) ibtoh = 1;
       int sectorsInBTOH = mTopNode->GetListSize()/2;
       int trayIndex = ibtoh * sectorsInBTOH + secVolume->GetPosition()->GetId(); // secVolume
+#ifndef __TFG__VERSION__
+      LOG_DEBUG << " Tray # " << trayIndex << " has # of modules = " << detVolume->GetListSize() << endm;
+#else /* __TFG__VERSION__ */
       if(mDebug) {
 	LOG_INFO << " Tray # " << trayIndex << " has # of modules = " << detVolume->GetListSize() << endm;
       }
+#endif /* __TFG__VERSION__ */
       isensor = 0;   // clear for this tray
       if(detVolume->GetListSize()) {   // valid tray
 
@@ -944,8 +982,13 @@ void StBTofGeometry::InitFrom(TVolume &starHall)
         delete transPos;  transPos = 0;
 
         if(mDebug) {
+#ifndef __TFG__VERSION__
+          LOG_DEBUG << "   Initialize and save tray # " << mBTofTray[mNValidTrays-1]->Index() << " with " << detVolume->GetListSize() << " modules" << endm;
+          LOG_DEBUG << "   alignment parameters \t" << mTrayX0[itray] << " " <<  mTrayY0[itray] << " " <<  mTrayZ0[itray] << endm;
+#else /* __TFG__VERSION__ */
           LOG_INFO << "   Initialize and save tray # " << mBTofTray[mNValidTrays-1]->Index() << " with " << detVolume->GetListSize() << " modules" << endm;
           LOG_INFO << "   alignment parameters \t" << mTrayX0[itray] << " " <<  mTrayY0[itray] << " " <<  mTrayZ0[itray] << endm;
+#endif /* __TFG__VERSION__ */
           mBTofTray[mNValidTrays-1]->Print();
         }
 
@@ -987,18 +1030,30 @@ void StBTofGeometry::InitFrom(TGeoManager &geoManager)
   for (int trayId = 1; trayId <= mNTrays; trayId++)
   {
     bool hasGmt = StBTofGeometry::TrayHasGmtModules(trayId);
-
+#ifndef __TFG__VERSION__
     std::string geoPath( FormTGeoPath(geoManager, trayId, hasGmt) );
 
-    if ( geoPath.empty() ) {
+    if ( geoPath.empty() && hasGmt) {
+      geoPath = FormTGeoPath(geoManager, trayId, kFALSE);
+    }
+    if ( geoPath.empty()) {
       LOG_WARN << "StBTofGeometry::InitFrom(...) - Cannot find path to BTOF tray "
                   "(id " << trayId << "). Skipping...\n";
       continue;
     }
 
-    mNValidTrays++;
-
     const TGeoPhysicalNode* gpNode = geoManager.MakePhysicalNode( geoPath.c_str() );
+    if (! gpNode) continue;
+#else /* __TFG__VERSION__ */
+    const TGeoPhysicalNode* gpNode = GetPhysicalNode(geoManager, trayId, hasGmt);
+    if (! gpNode ) {
+      LOG_WARN << "StBTofGeometry::InitFrom(...) - Cannot find path to BTOF tray "
+                  "(id " << trayId << "). Skipping...\n";
+      continue;
+    }
+#endif /* ! __TFG__VERSION__ */
+
+    mNValidTrays++;
 
     StThreeVectorD align(mTrayX0[trayId-1], mTrayY0[trayId-1], mTrayZ0[trayId-1]);
 
@@ -1009,6 +1064,7 @@ void StBTofGeometry::InitFrom(TGeoManager &geoManager)
 
     for(int moduleId = 1; moduleId <= maxModuleId; moduleId++)
     {
+#ifndef __TFG__VERSION__
       std::string geoPath( FormTGeoPath(geoManager, trayId, hasGmt, moduleId) );
 
       if ( geoPath.empty() ) {
@@ -1019,6 +1075,15 @@ void StBTofGeometry::InitFrom(TGeoManager &geoManager)
 
       const TGeoPhysicalNode* gpNode = geoManager.MakePhysicalNode( geoPath.c_str() );
 
+#else /* __TFG__VERSION__ */
+      const TGeoPhysicalNode* gpNode = GetPhysicalNode(geoManager, trayId, hasGmt, moduleId);
+      if (! gpNode) {
+	LOG_WARN << "StBTofGeometry::InitFrom(...) - Cannot find path to BTOF module "
+	  "(id " << moduleId << "). Skipping...\n";
+	continue;
+      }
+
+#endif /* ! __TFG__VERSION__ */   
       mBTofSensor[mNValidTrays-1][moduleId-1] = new StBTofGeomSensor(moduleId, *gpNode, align);
     }
   }
@@ -1064,9 +1129,63 @@ std::string StBTofGeometry::FormTGeoPath(TGeoManager &geoManager,
   }
 
   bool found = geoManager.CheckPath( geoPath.str().c_str() );
-
+  if (mDebug && ! found) {
+    LOG_WARN << "StBTofGeometry::FormTGeoPath\t" << geoPath.str().c_str() << " has not been found" << endm;
+  }
   return found ? geoPath.str() : "";
 }
+#ifdef __TFG__VERSION__
+//________________________________________________________________________________
+TGeoPhysicalNode *StBTofGeometry::GetPhysicalNode(TGeoManager &geoManager,  int trayId, bool hasGmt, int moduleId)
+{
+  // BTOH_1/BTO1_2 - east/west
+  // TOF trayId map: west=1-60, east=61-120
+  int halfId   = ( trayId <= 60 ? 1 : 2 );
+  int sectorId = ( trayId <= 60 ? trayId : trayId - 60 );
+  
+  TString geoPath;
+  TGeoPhysicalNode *pNode = 0;
+  // Node paths depend on using TpcRefSys
+  bool trs = geoManager.FindVolumeFast("TpcRefSys");
+  geoPath = "/HALL_1/CAVE_1/"; geoPath += ((trs) ? "TpcRefSys_1/" : ""); geoPath += "BTOF_1"; geoPath += (halfId == 1 ? "/BTOH_" : "/BTO1_"); geoPath += halfId;
+  if (! geoManager.CheckPath(geoPath)) {
+    geoPath = "/HALL_1/CAVE_1/"; geoPath += ((trs) ? "TpcRefSys_1/" : ""); geoPath += "BTOF_1"; geoPath += "/BTOH_" ; geoPath += halfId;
+  }
+  if (! geoManager.CheckPath(geoPath)) {
+    LOG_WARN << "StBTofGeometry::GetPhysicalNode - Cannot find path to BTOF half "
+      "(id " << trayId  << ", half " <<  halfId << "). with path" << geoPath.Data() << "\t Skipping..." << endm;
+    return pNode;
+  }  
+  // Node names depend on whether this sector contains GMT modules
+  TString geoPathB = geoPath; geoPathB += ( hasGmt ? "/BSE1_"  : "/BSEC_" ); geoPathB += sectorId; geoPathB += ( hasGmt ? "/BTR1_1" : "/BTRA_1");
+  if (! geoManager.CheckPath(geoPathB)) {
+    geoPathB = geoPath; geoPathB += "/BSEC_" ; geoPathB += sectorId; geoPathB += "/BTRA_1";
+  }
+  if (! geoManager.CheckPath(geoPathB)) {
+    LOG_WARN << "StBTofGeometry::GetPhysicalNode - Cannot find path to BTOF sector "
+	     << "(id " << trayId  << ", half " <<  halfId << ", sector " << sectorId << " ). with path" << geoPathB.Data() << "\t Skipping..." << endm;
+    return pNode;
+  }
+  geoPath = geoPathB;
+  // Go deeper only when module is requested
+  if ( moduleId >= 1 )
+  {
+    geoPathB = geoPath; geoPathB += "/BXT1_1/BRT1_1/BGM1_1/BRM1_"; geoPathB += moduleId;
+    if (! geoManager.CheckPath(geoPathB)) {
+      geoPathB = geoPath; geoPathB += "/BXTR_1/BRTC_1/BGMT_1/BRMD_"; geoPathB += moduleId;
+    }
+    if (! geoManager.CheckPath(geoPathB)) {
+      LOG_WARN << "StBTofGeometry::GetPhysicalNode - Cannot find path to BTOF tray/sector/module "
+	       << "(id " << trayId  << ", half " <<  halfId << ", sector " << sectorId << ". module " << moduleId << "). with path" << geoPathB.Data() << "\t Skipping..." << endm;
+      return pNode;
+    }
+    geoPath = geoPathB;
+  }
+  pNode = geoManager.MakePhysicalNode( geoPath );
+
+  return pNode;
+}
+#endif /* __TFG__VERSION__ */
 
 
 //_____________________________________________________________________________
@@ -1765,7 +1884,9 @@ Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) co
 
     double s = helix.pathLength(R_tof[i]).first;
     if(s<0.) s = helix.pathLength(R_tof[i]).second;
+#ifdef __TFG__VERSION__
     if (s >= 999999998) continue;
+#endif /* __TFG__VERSION__ */
     StThreeVectorD point = helix.at(s);
     double phi = point.phi()*180/3.14159;
     double z = point.z();

@@ -3,7 +3,7 @@
 */
 static Int_t k = 0;
 static const TString separator("/_");
-void LoopOverToF(TGeoNode *nodeT = 0, TString pathT = "HALL_1/CAVE_1/BTOF_1", TString NameV = "BRSG") {
+void LoopOverToF(TGeoNode *nodeT = 0, TString pathT = "HALL_1/CAVE_1/TpcRefSys_1/BTOF_1", TString NameV = "BRSG") {
   if (! nodeT) {
     TObjectSet *set = 0;
     if (! gGeoManager) (TObjectSet *) gDirectory->Get("Geometry");
