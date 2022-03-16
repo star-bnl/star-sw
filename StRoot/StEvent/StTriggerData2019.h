@@ -70,9 +70,6 @@ public:
     unsigned int bunchCounterLow() const;
     unsigned int bunchId48Bit() const;
     unsigned int bunchId7Bit() const;
-    unsigned int revTick1() const;
-    unsigned int revTick2() const;
-    unsigned int revTick3() const;
     unsigned int spinBit() const;
     unsigned int spinBitYellowFilled() const;
     unsigned int spinBitYellowUp() const;

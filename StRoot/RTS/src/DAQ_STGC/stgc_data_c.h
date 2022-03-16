@@ -76,8 +76,6 @@ public:
 	unsigned long response ;	// from FEE response packet
 	unsigned long fee_status ;
 
-	u_int datum_ix ;
-
 	u_short *d16_start ;
 	u_short *d16_data ;
 	u_short *d16_last ;
@@ -85,10 +83,9 @@ public:
 
 	
 
-	unsigned long mhz_start_evt_marker ;
+	u_int mhz_start_evt_marker ;
 	u_int mhz_stop_evt_marker ;
-	unsigned long mhz_trg_marker ;
-	u_short trg_counter ;
+	u_int mhz_trg_marker ;
 
 	struct stgc_vmm_t vmm ;
 

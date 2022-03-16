@@ -4,31 +4,11 @@
 // what it does: 
 //=======================================================================
 
-void Load()
-{
-const char * const loadList[]={
- "St_base"
-,"St_Tables"
-,"StarRoot"
-,"StChain"
-,"StDetectorDbMaker"
-,"StBichsel"
-,"StarClassLibrary"
-,"StEvent"
-,"StEventUtilities"
-,"StUtilities"
-,"StTpcDb"
-,"StDbLib"
-,"StDbBroker"
-,"St_db_Maker"
-,"StTriggerDataMaker"
-,"StBFChain"
-,0};
-
-  for (int i=0;loadList[i];i++) {
-    TString ts(loadList[i]);
-    printf("  Loading %s\n",ts.Data());
-    int ians = gSystem->Load(ts.Data());
-    if (ians<0) printf("**Failed %s = %d\n",ts.Data(),ians);
-  }
+void Load(Char_t *loadList="St_base,St_Tables,StChain,StDetectorDbMaker,StBichsel,StEvent,StTpcDb,StUtilities,StDbLib,StDbBroker,St_db_Maker,StTriggerDataMaker,StEventUtilities,StBFChain"){
+  TString opt(loadList);
+  TString separator = "[^ ;,]+";
+  TObjArray *array = opt.Tokenize(separator);
+  TIter next(array);
+  while ((objs = (TObjString *) next())) {gSystem->Load(objs->GetString());}
+  delete array;
 }

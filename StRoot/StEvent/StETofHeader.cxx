@@ -24,8 +24,6 @@
  *
  ***************************************************************************/
 #include "StETofHeader.h"
-#include "StETofUtil/StETofConstants.h"
-
 #include <map>
 #include <vector>
 #include <iostream>
@@ -36,9 +34,7 @@ StETofHeader::StETofHeader()
   mStarToken( 0 ),
   mStarDaqCmdIn( 0 ),
   mStarTrgCmdIn( 0 ),
-  mEventStatusFlag( 0 ),
-  mMissMatchFlagVec( eTofConst::nGet4sInSystem, false ),
-  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
+  mEventStatusFlag( 0 )
 {
     mRocGdpbTs.clear();
     mRocStarTs.clear();
@@ -54,46 +50,34 @@ StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime
   mStarToken( starToken ),
   mStarDaqCmdIn( starDaqCmdIn ),
   mStarTrgCmdIn( starTrgCmdIn ),
-  mEventStatusFlag( eventStatusFlag ),
-  mMissMatchFlagVec( eTofConst::nGet4sInSystem, false ),
-  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
+  mEventStatusFlag( eventStatusFlag )
 {
     setRocGdpbTs( gdpbTs );
     setRocStarTs( starTs );
+    const size_t kNbGet4sInSystem = 1728;
+    mMissMatchFlagVec = vector<bool>( kNbGet4sInSystem, false ); 
 }
 
 StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime,
                             const map< unsigned int, uint64_t >& gdpbTs, const map< unsigned int, uint64_t >& starTs,
                             const unsigned int& starToken, const unsigned int& starDaqCmdIn, const unsigned int& starTrgCmdIn,
-                            const uint64_t& eventStatusFlag, const std::vector<bool>& MissMatchFlagVec )
+                            const uint64_t& eventStatusFlag, const vector<bool>& MissMatchFlagVec )
 : mTrgGdpbFullTime( trgGdpbTime ),
   mTrgStarFullTime( trgStarTime ),
   mStarToken( starToken ),
   mStarDaqCmdIn( starDaqCmdIn ),
   mStarTrgCmdIn( starTrgCmdIn ),
   mEventStatusFlag( eventStatusFlag ),
-  mMissMatchFlagVec( MissMatchFlagVec ),
-  mGoodEventFlagVec( eTofConst::nCountersInSystem, false )
+  mMissMatchFlagVec( MissMatchFlagVec )
 {
     setRocGdpbTs( gdpbTs );
     setRocStarTs( starTs );
-}
+    //const size_t kNbGet4sInSystem = 1728;
+    //mMissMatchFlagVec.resize( kNbGet4sInSystem );
+    //for( auto mapcheck : mMissMatchFlagVec ){
+    //	cout << mapcheck << endl;
+    // }
 
-StETofHeader::StETofHeader( const double& trgGdpbTime, const double& trgStarTime,
-                            const map< unsigned int, uint64_t >& gdpbTs, const map< unsigned int, uint64_t >& starTs,
-                            const unsigned int& starToken, const unsigned int& starDaqCmdIn, const unsigned int& starTrgCmdIn,
-                            const uint64_t& eventStatusFlag, const std::vector<bool>& MissMatchFlagVec, const std::vector<bool>& GoodEventFlagVec  )
-: mTrgGdpbFullTime( trgGdpbTime ),
-  mTrgStarFullTime( trgStarTime ),
-  mStarToken( starToken ),
-  mStarDaqCmdIn( starDaqCmdIn ),
-  mStarTrgCmdIn( starTrgCmdIn ),
-  mEventStatusFlag( eventStatusFlag ),
-  mMissMatchFlagVec( MissMatchFlagVec ),
-  mGoodEventFlagVec( GoodEventFlagVec )
-{
-    setRocGdpbTs( gdpbTs );
-    setRocStarTs( starTs ); 
 }
 
 
@@ -158,16 +142,10 @@ StETofHeader::eventStatusFlag() const
     return mEventStatusFlag;
 }
 
-std::vector <bool>
+vector <bool>
 StETofHeader::missMatchFlagVec() const
 {
     return mMissMatchFlagVec;
-}
-
-std::vector <bool>
-StETofHeader::goodEventFlagVec() const
-{
-    return mGoodEventFlagVec;
 }
 
 void
@@ -223,10 +201,4 @@ void
 StETofHeader::setEventStatusFlag( const uint64_t& statusFlag )
 {
     mEventStatusFlag = statusFlag;
-}
-
-void    
-StETofHeader::setGoodEventFlagVec( const std::vector<bool>& FlagVec )
-{
-    mGoodEventFlagVec = FlagVec;
 }

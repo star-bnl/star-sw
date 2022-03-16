@@ -3,6 +3,7 @@
 #ifndef STAR_StFtpcClusterDebug
 #define STAR_StFtpcClusterDebug
 
+#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "TFile.h"

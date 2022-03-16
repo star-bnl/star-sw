@@ -199,7 +199,6 @@ class StEtrHitCollection;
 class StEmcCollection;
 class StEpdCollection;
 class StFcsCollection;
-class StFttCollection;
 class StFmsCollection;
 class StRHICfCollection;
 class StRichCollection;
@@ -225,7 +224,6 @@ class StHltEvent;
 class StFgtCollection;
 class StPxlHitCollection;
 class StIstHitCollection;
-class StFstHitCollection;
 
 class StEvent : public StXRefMain {
 public:
@@ -264,8 +262,6 @@ public:
     const StEmcCollection*              emcCollection() const;
     StFcsCollection*                    fcsCollection();
     const StFcsCollection*              fcsCollection() const;
-    StFttCollection*                    fttCollection();
-    const StFttCollection*              fttCollection() const;
     StFmsCollection*                    fmsCollection();
     const StFmsCollection*              fmsCollection() const;
     StRHICfCollection*                  rhicfCollection();
@@ -298,8 +294,6 @@ public:
     const StPxlHitCollection*           pxlHitCollection() const;
     StIstHitCollection*                 istHitCollection();
     const StIstHitCollection*           istHitCollection() const;
-    StFstHitCollection*                 fstHitCollection();
-    const StFstHitCollection*           fstHitCollection() const;
     StEpdCollection*                    epdCollection();
     const StEpdCollection*              epdCollection() const;
     StL0Trigger*                        l0Trigger();
@@ -373,11 +367,9 @@ public:
     void setSstHitCollection(StSstHitCollection*);
     void setPxlHitCollection(StPxlHitCollection*);
     void setIstHitCollection(StIstHitCollection*);
-    void setFstHitCollection(StFstHitCollection*);
     void setEmcCollection(StEmcCollection*);
     void setEpdCollection(StEpdCollection*);
     void setFcsCollection(StFcsCollection*);
-    void setFttCollection(StFttCollection*);
     void setFmsCollection(StFmsCollection*);
     void setRHICfCollection(StRHICfCollection*);
     void setRichCollection(StRichCollection*);

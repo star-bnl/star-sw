@@ -57,7 +57,6 @@ namespace eTofConst{
     const int nChannelsPerSector  = nChannelsPerModule  * nPlanes;
     const int nChannelsInSystem   = nChannelsPerSector  * nSectors;
 
-    const int nGet4sInSystem   	 = nChannelsInSystem / 4;
 
     // clock related constants
     const double coarseClockCycle  = 6.25;   // [ns]  -- needs to be double otherwise strange things happen ...

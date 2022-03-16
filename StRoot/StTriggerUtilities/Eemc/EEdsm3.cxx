@@ -30,86 +30,86 @@ EEdsm3::clear() {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEdsm3::setWord(int ch, unsigned short val){
+EEdsm3::setWord(int ch, ushort val){
   assert(ch>=0 && ch<nc);
   data[ch]=val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getBarreJPthr2bit() const {
   int ch=0;
-  unsigned short val=data[ch] & 3;
+  ushort val=data[ch] & 3;
   return val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getBarreHTthr2bit() const {
   int ch=0;
-  unsigned short val=data[ch] >> 2;
+  ushort val=data[ch] >> 2;
   val=val & 3;
   return val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getBarreEsumThr1bit() const {
   int ch=0;
-  unsigned short val=data[ch] >> 4;
+  ushort val=data[ch] >> 4;
   val=val & 1;
   return val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getJpsi1bit() const {
   int ch=0;
-  unsigned short val=data[ch] >> 5;
+  ushort val=data[ch] >> 5;
   val=val & 1;
   return val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getBarreHTTPthr1bit() const {
   int ch=0;
-  unsigned short val=data[ch] >> 6;
+  ushort val=data[ch] >> 6;
   val=val & 1;
   return val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getBarreTPthr1bit() const {
   int ch=0;
-  unsigned short val=data[ch] >> 13;
+  ushort val=data[ch] >> 13;
   val=val & 1;
   return val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getEndcapJPthr2bit() const {
   int ch=0;
-  unsigned short val=data[ch] >> 7;
+  ushort val=data[ch] >> 7;
   val=val & 3;
   return val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getEndcapHTthr2bit() const {
   int ch=0;
-  unsigned short val=data[ch] >> 9;
+  ushort val=data[ch] >> 9;
   val=val & 3;
   return val;
 }
@@ -117,42 +117,42 @@ EEdsm3::getEndcapHTthr2bit() const {
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getEndcapEsumthr1bit() const {
   int ch=0;
-  unsigned short val=data[ch] >> 11;
+  ushort val=data[ch] >> 11;
   val=val & 1;
   return val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getEndcapHTTPthr1bit() const {
   assert(mYear>=2006);
   int ch=0;
-  unsigned short val=data[ch] >> 12;
+  ushort val=data[ch] >> 12;
   val=val & 1;
   return val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getEndcapTPthr1bit() const {
   assert(mYear>=2006);
   int ch=0;
-  unsigned short val=data[ch] >> 14;
+  ushort val=data[ch] >> 14;
   val=val & 1;
   return val;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
-unsigned short 
+ushort 
 EEdsm3::getEtotThr1bit() const {
   int ch=0;
-  unsigned short val=data[ch] >> 15;
+  ushort val=data[ch] >> 15;
   val=val & 1;
   return val;
 }

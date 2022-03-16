@@ -656,7 +656,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 	if(tpx_padplane) gain = 0 ;	// force it!
 
-	LOG(WARN,"apply_gains, sec %d",sec) ;
+	LOG(WARN,"apply_gains???") ;
 
 	if(gain == 0) {
 		LOG(WARN,"Sector %2d, gains NULL",sector) ;
@@ -1617,10 +1617,6 @@ void tpxFCF::dump(tpxFCF_cl *cl, int row)
 
 		}
 
-		if(do_cuts==1) {	// ADDED in FY22, pp500
-			// kill ONEDPAD unless they fall before the trigger
-			if((cl->t_max > 20) && (fla & FCF_ONEPAD)) return ;
-		}
 	}
 
 

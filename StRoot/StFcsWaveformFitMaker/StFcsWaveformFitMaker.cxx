@@ -76,8 +76,6 @@ ClassImp(StFcsWaveformFitMaker)
 #include <chrono>
 #include "TMath.h"
 #include "TF1.h"
-#include "TH1F.h"
-#include "TH2F.h"
 #include "TGraph.h"
 #include "TGraphAsymmErrors.h"
 #include "TGraphAsymmErrorsWithReset.h"
@@ -129,9 +127,6 @@ namespace {
 StFcsWaveformFitMaker::StFcsWaveformFitMaker(const char* name) : StMaker(name) {
     mChWaveData.SetClass("TGraphAsymmErrors"); //Initialize with only one graph at first
     mPulseFit = new StFcsPulseFit( (TGraphAsymmErrors*)mChWaveData.ConstructedAt(0) );
-    mEnergySelect[0]=10; //default gaus fit for Ecal
-    mEnergySelect[1]=10; //default gaus fit for Hcal 
-    mEnergySelect[2]=1;  //default sum8 for Pres
 }
 
 StFcsWaveformFitMaker::~StFcsWaveformFitMaker() { 
@@ -159,13 +154,7 @@ int StFcsWaveformFitMaker::InitRun(int runNumber) {
     if(mMeasureTime){
       mTime=new TH1F("FitTime","FitTime; msec",200,0,6);
     }
-    if(mFilter && mFilter[0]=='0'){
-      mTimeIntg[0]=new TH2F("Noboth",  "No both;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
-      mTimeIntg[1]=new TH2F("NoFall",  "No Fall;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
-      mTimeIntg[2]=new TH2F("NoRise",  "No Rise;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
-      mTimeIntg[3]=new TH2F("Accepted","Accepted; PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
-    }
-    
+
     if(mTail==1){
       GSigma = GSigma_1;
       A1     = A1_1;        
@@ -206,17 +195,6 @@ int StFcsWaveformFitMaker::Finish(){
     mTime->Draw();
     c->SaveAs(mMeasureTime);
   }
-  if(mFilter && mFilter[0]=='0'){
-    TCanvas *c= new TCanvas("Stage0","Stage0",10,10,800,800);
-    gStyle->SetOptStat(111110);
-    gStyle->SetLabelSize(0.02,"xy");
-    c->Divide(2,2);
-    c->cd(1)->SetLogy(); mTimeIntg[0]->Draw("colz");
-    c->cd(2)->SetLogy(); mTimeIntg[1]->Draw("colz");
-    c->cd(3)->SetLogy(); mTimeIntg[2]->Draw("colz");
-    c->cd(4)->SetLogy(); mTimeIntg[3]->Draw("colz");
-    c->SaveAs("stage0.png");
-  }
   return kStOK;
 }
 
@@ -232,14 +210,13 @@ int StFcsWaveformFitMaker::Make() {
 	return kStWarn;	
     }
     
-    if(mEnergySelect[0]==0) return kStOK;  // don't touch energy, directly from MC
+    if(mEnergySelect==0) return kStOK;  // don't touch energy, directly from MC
 
     //Loop over all hits and run waveform analysis of the choice
     float res[8];
     TF1* func=0;
-    for(int det=0; det<kFcsNDet; det++) {      
+    for(int det=0; det<kFcsNDet; det++) {
 	StSPtrVecFcsHit& hits = mFcsCollection->hits(det);
-	int ehp = det/2;
 	int nhit=hits.size();
 	for(int i=0; i<nhit; i++){ //loop over all hits  	    
 	  
@@ -267,7 +244,7 @@ int StFcsWaveformFitMaker::Make() {
 	  
 	  //run waveform analysis of the choice and store as AdcSum	  
 	  memset(res,0,sizeof(res));
-	  float integral = analyzeWaveform(mEnergySelect[ehp],hits[i],res,func,ped);
+	  float integral = analyzeWaveform(mEnergySelect,hits[i],res,func,ped);
 	  hits[i]->setAdcSum(integral);	    
 	  hits[i]->setFitPeak(res[2]);	    
 	  hits[i]->setFitSigma(res[3]);	    
@@ -342,7 +319,7 @@ TGraphAsymmErrors* StFcsWaveformFitMaker::makeTGraphAsymmErrors(TH1* hist){
 }
 
 TGraphAsymmErrors* StFcsWaveformFitMaker::makeTGraphAsymmErrors(StFcsHit* hit){  
-    //int N = mMaxTB - mMinTB +1;
+    int N = mMaxTB - mMinTB +1;
     int n = hit->nTimeBin();
     TGraphAsymmErrors* gae = resetGraph();
     mDb->getName(hit->detectorId(),hit->id(),mDetName);
@@ -380,43 +357,8 @@ float StFcsWaveformFitMaker::analyzeWaveform(int select, TGraphAsymmErrors* g, f
       LOG_WARN << "Unknown fit/sum method select=" << select << endm;
     }
     //if(func && (mFitDrawOn || mFilter ) && mFilename && mPage<=mMaxPage) drawFit(g,func);
-    int flag=1;
-    if(mFilter && mFilter[0]=='0'){
-      flag=0;
-      if(integral>0 && res[2]>47.0 && res[2]<54.0){	
-	int peak=0;
-	double* t=g->GetX();
-	double* a=g->GetY();
-	for(int i=0; i<g->GetN()-1; i++){
-	  int t0=t[i];
-	  int t1=t[i+1];
-	  int a0=a[i];
-	  int a1=a[i+1];
-	  int dt=t1-t0;
-	  int da=a1-a0;
-	  if(GetDebug()) printf("AAA t0=%4d t1=%4d a0=%4d a1=%4d dt=%4d da=%5d ",t0,t1,a0,a1,dt,da);
-	  if(t0==mCenterTB-3 && dt==1){
-	    if(da>0) {
-	      peak+=1;	
-	      if(GetDebug()) printf("R"); 
-	    } 
-	    else {if(GetDebug()) printf("X");}
-	  }
-	  if(t0==mCenterTB+3 && dt==1){
-	    if(da<0) {
-	      peak+=2; 
-	      if(GetDebug()) printf("F"); 
-	    }
-	    else {if(GetDebug()) printf("X");}
-	  }
-	  if(GetDebug()) printf("\n");
-	}
-	printf("BBB Intg=%8.2f peak=%6.2f Raise/Fall=%1d\n",integral,res[2],peak); 
-	if(peak<3 && integral>50 && res[2]>49) flag=1;
-	mTimeIntg[peak]->Fill(res[2],integral);
-      }
-    }else if(mFilter){
-      flag=0;
+    int flag=0;
+    if(mFilter){
       TString dname(mDetName);
       if(integral>50 && dname.Contains(mFilter)) flag=1;
     }
@@ -618,7 +560,7 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
 	    else            {adc2 = a[i+1];}
 	    //	    printf("i=%3d  tb0=%4.0lf  tb1=%4.0lf  tb2=%4.0lf  adc0=%5.0lf adc1=%5.0lf adc2=%5.0lf\n",
 	    //             i,tb0,tb1,tb2,adc0,adc1,adc2);
-            if( (adc1>adc0 || tb1==mMinTB) && adc1>=adc2){  //if falling from starting point, make it peak
+            if(adc1>adc0 && adc1>=adc2){		
 		para[1+npeak*3+1] = adc1;
 		para[1+npeak*3+2] = tb1;
 		para[1+npeak*3+3] = GSigma;
@@ -663,9 +605,7 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
 	}	
     }else if(npeak>=mMaxPeak){
         res[5] = npeak;
-	sum8(g, res); // too many peak, taking sum8
-	res[0]/=1.21; // normarized by 1/1.21
-        LOG_INFO << Form("%s Finding too many peaks npeak=%d. Skip fitting. Taking Sum8",mDetName,npeak)<<endm;
+        printf("%s Finding too many peaks npeak=%d. Skip fitting\n",mDetName,npeak);	
     }
     //printf("func=%d res=%f\n",func,res[0]);
     return res[0];

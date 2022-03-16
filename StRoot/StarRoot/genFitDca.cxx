@@ -25,7 +25,6 @@
 #include "TCernLib.h"    
 #include "TVector3.h"    
 #include "TVectorD.h" 
-#include "TString.h"
    
 double *Arr(TVector3 &v) {return (double*)&v[0];}
 

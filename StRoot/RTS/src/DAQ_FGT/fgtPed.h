@@ -53,10 +53,7 @@ public:
 	// allocated per RDO
 
 
-
 	struct peds_t {
-//		float cmn_rms[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][FGT_TB_COU] ;	// common noise stuff for FST
-
 		float ped[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][FGT_TB_COU] ;
 		float rms[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][FGT_TB_COU] ;
 		u_short thr[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;

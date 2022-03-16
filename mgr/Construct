@@ -4,8 +4,6 @@ use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
 
-my $ROOT_FEATURES = `root-config --features`;
-
 #my $xx=$ENV{ConstructLocation};
 #print "Path used for ConsDefs is $xx\n" unless ($param::quiet);
 
@@ -166,9 +164,6 @@ print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
 foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
   print "---> looking for include in $dir\n" if ($param::debug);
   next if ! -r $dir;
-
-  next if ( ($ROOT_FEATURES=~/table/) && ($dir =~ /Table$/) );   # Do not export Table headers if ROOT provides table support
-
   opendir( DIR, $dir ) or die "Can't open $dir\n";
   my @incs = readdir DIR; print "incs = @incs\n" if ($param::debug);
   closedir DIR;

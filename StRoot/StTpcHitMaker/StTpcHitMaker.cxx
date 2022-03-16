@@ -239,10 +239,6 @@
  * StTpcHitMaker - class to fille the StEvewnt from DAQ reader
  *
  **************************************************************************/
-//#define __MAKE_NTUPLE__
-//#define __CORRECT_S_SHAPE__
-//#define __TOKENIZED__
-//#define __USE__THnSparse__
 #include <assert.h>
 #include "StEvent/StTpcHit.h"
 #include <algorithm>
@@ -266,9 +262,7 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
-#ifdef __CORRECT_S_SHAPE__
 #include "StDetectorDbMaker/St_TpcPadCorrectionC.h"
-#endif /* __CORRECT_S_SHAPE__ */
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
@@ -295,6 +289,10 @@ Float_t StTpcHitMaker::fgDt    = .2;
 Float_t StTpcHitMaker::fgDperp = .1;
 Bool_t  StTpcHitMaker::fgCosmics = kFALSE;
 static Int_t _debug = 0;
+//#define __MAKE_NTUPLE__
+//#define __CORRECT_S_SHAPE__
+//#define __TOKENIZED__
+//#define __USE__THnSparse__
 #ifdef  __TOKENIZED__
 #define __NOT_ZERO_SUPPRESSED_DATA__
 #endif
@@ -399,7 +397,7 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
       for(Int_t row=1;row<=St_tpcPadConfigC::instance()->numberOfRows(sector);row++) {
         Int_t numPadsAtRow = St_tpcPadConfigC::instance()->padsPerRow(sector,row);
         totalSecPads += numPadsAtRow;
-        if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row,1) &&
+        if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
             St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
           liveSecPads += numPadsAtRow;
       }
@@ -599,12 +597,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	  if (! c || ! c->charge) continue;
 	  if (c->flags &&
 	     (c->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
-	  Int_t row = padrow + 1;
-	  Float_t pad  = c->p;
-	  Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
-	  if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
-	  StTpcHit *tpcHit = CreateTpcHit(*c,sector,row);
-	  Int_t iok = hitCollection->addHit(tpcHit);
+	  Int_t iok = hitCollection->addHit(CreateTpcHit(*c,sector,padrow+1));
 	  assert(iok);
 	}
       }
@@ -635,11 +628,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
       if (cld->t2 <  0 || cld->t2 >= __MaxNumberOfTimeBins__) continue;
       if (cld->flags &&
 	 (cld->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
-      Float_t pad  = cld->pad;
-      Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
-      if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
-      StTpcHit *tpcHit = CreateTpcHit(*cld,sector,row);
-      Int_t iok = hitCollection->addHit(tpcHit);
+      Int_t iok = hitCollection->addHit(CreateTpcHit(*cld,sector,row));
       assert(iok);
     }
   }

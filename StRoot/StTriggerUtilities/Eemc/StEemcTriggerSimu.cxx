@@ -328,7 +328,7 @@ StEemcTriggerSimu::Make(){
   StMuTriggerIdCollection *tic=&StMuDst::event()->triggerIdCollection();
   std::vector<unsigned int> trgL=(tic->nominal()).triggerIds();
   //  printf("   trigL len=%d \n",trgL.size());
-  unsigned int ii;
+  uint ii;
   for(ii=0;ii<trgL.size();ii++){ // collect all trigger ID's
     TString cID=Form("%d",trgL[ii]);
     hA[1]->Fill(cID.Data(),1.);
@@ -392,7 +392,7 @@ StEemcTriggerSimu::Make(){
     // Barrel DSM2 (3 boards), only 5bit Esum for 6 remaining inputs
     static const  int kA[6]={3,4,5,0,1,2}; // mapping between Renee & Hank  
     for(j=0;j<6;j++) {
-      unsigned short fakeInput=mBemcEsum5bit[kA[j]]; //DSM 5bit ADC
+      ushort fakeInput=mBemcEsum5bit[kA[j]]; //DSM 5bit ADC
       // higher bits ar not provided for the Barrel
       int ibr=j/2;
       int ich=j%2;
@@ -665,7 +665,7 @@ StEemcTriggerSimu::getDsm0123inputs(){
   StL0Trigger &L0trg=StMuDst::event()->l0Trigger();
   //int L0Num;
   //L0Num=L0trg.lastDsmArraySize();
-  unsigned short L0word=L0trg.lastDsmArray(0);
+  ushort L0word=L0trg.lastDsmArray(0);
   dsm3TRG->setWord(0, L0word);
   //printf("L0word=%d\n", L0word);
 

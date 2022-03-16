@@ -37,17 +37,17 @@ public:
   static  int Alive(void *obj);
 
   void setFastDelete()	{fFastDel=1;}
-  void setMaxIncrementCount(unsigned int maxCount)	{fMaxCount=maxCount;}
-  unsigned int getMaxIncrementCount() const		{return fMaxCount;  }
-  unsigned int getCurrentSize()  const 			{return fCurCount;  }
-  unsigned int getCurrentCount() const 			{return fCurCount;  }
+  void setMaxIncrementCount(uint maxCount)	{fMaxCount=maxCount;}
+  uint getMaxIncrementCount() const		{return fMaxCount;  }
+  uint getCurrentSize()  const 			{return fCurCount;  }
+  uint getCurrentCount() const 			{return fCurCount;  }
 protected:
-  unsigned int fMaxCount;
-  unsigned int fCurCount;
-  unsigned int fUseCount;
-  unsigned int fFastDel;
-  unsigned int fInstCount;
-  unsigned int fFreeCount;
+  uint fMaxCount;
+  uint fCurCount;
+  uint fUseCount;
+  uint fFastDel;
+  uint fInstCount;
+  uint fFreeCount;
 static double fgTotal;  
 };
 

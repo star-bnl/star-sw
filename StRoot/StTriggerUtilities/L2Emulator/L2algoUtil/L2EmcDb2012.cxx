@@ -418,7 +418,7 @@ L2EmcDb2012::changeMaskFullCrate(const char *fname, char BEflag, char *lbl) {
 
   if(fgets(buf,mx,fd)) strncpy(lbl,buf,txMxSize-1); //preserve label
 
-  unsigned int crate, stat, fail;
+  uint crate, stat, fail;
 
   while(1) {
     char *ret=fgets(buf,mx,fd);
@@ -523,7 +523,7 @@ L2EmcDb2012::changeMaskByName(const char *fname, char *lbl) {
   
   if(fd==0) goto crashIt;
   char cVal[100];
-  unsigned int  stat, fail;
+  uint  stat, fail;
   if(fgets(buf,mx,fd)) strncpy(lbl,buf,txMxSize-1); //preserve label
 
   while(1) {

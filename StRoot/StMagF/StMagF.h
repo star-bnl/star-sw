@@ -3,7 +3,7 @@
 #include "Rtypes.h"
 #include "TNamed.h"
 #include "StarMagField/StarMagField.h"
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #include "StarCallf77.h" 
 #endif
 class StMagF : public TNamed {

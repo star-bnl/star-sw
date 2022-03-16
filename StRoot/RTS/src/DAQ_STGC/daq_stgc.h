@@ -9,7 +9,6 @@ struct stgc_vmm_t {
 	u_char ch ;
 	u_short adc ;
 	u_short bcid ;
-	short bcid_delta ;
 	short tb ;	// from the trigger
 } ;
 
@@ -18,7 +17,6 @@ class daqReader;
 class daq_stgc : public daq_det {
 private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
-	class daq_dta *handle_vmmraw(int sec) ;
 	class daq_dta *handle_altro(int sec, int rdo) ;
 	class daq_dta *handle_ped(int sec) ;
 	class daq_dta *handle_vmm(int sec) ;
@@ -27,7 +25,6 @@ private:
 	class daq_dta *raw ;	
 	class daq_dta *altro ;
 	class daq_dta *vmm ;
-	class daq_dta *vmmraw ;
 
 	static const int MAX_SEC = 7 ;
 	static const int MAX_RDO = 6 ;

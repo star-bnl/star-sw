@@ -60,7 +60,7 @@ itpc_fcf_c::itpc_fcf_c()
 
         version = VERSION ;
 	sector_id = 0 ;		// 0 is ALL sectors
-	offline = 1 ;		// new: offline is default
+	offline = 0 ;		// not Offline!
 
 
 	det_type = 1 ;		// ITPC
@@ -293,7 +293,7 @@ struct itpc_fcf_c::rp_t *itpc_fcf_c::get_row_pad(int row, int pad)
 {
 	int max_pad_all = max_x + 1 ;
 
-	if(offline) s1_data_length = (1 + max_y) * 2 ;	// need more for track_id
+	if(offline) s1_data_length = 1 + max_y * 2 ;	// need more for track_id
 	else s1_data_length = 1 + max_y ;
 
 	if(row_pad_store==0) {	// initialize on first use...
@@ -738,15 +738,14 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 		int t_start = tb_buff[i++] ;
 		int t_stop = t_start + t_cou - 1 ;
 
-		// happens too often, get rid of ERR
 		if(t_start <= t_stop_last) {
-			LOG(NOTE,"%d:#%d: FEE %d:%d, words %d: %d <= %d",rdo,port,fee_id,fee_ch,words,t_start,t_stop_last) ;
+			LOG(ERR,"%d:#%d: FEE %d:%d, words %d: %d <= %d",rdo,port,fee_id,fee_ch,words,t_start,t_stop_last) ;
 			seq_cou = 0 ;
 			err |= 4 ;
 			goto err_ret ;
 		}
 		if(t_stop > 511) {
-			LOG(NOTE,"%d:#%d: FEE %d:%d, words %d: %d > 511",rdo,port,fee_id,fee_ch,words,t_stop) ;
+			LOG(ERR,"%d:#%d: FEE %d:%d, words %d: %d > 511",rdo,port,fee_id,fee_ch,words,t_stop) ;
 			seq_cou = 0 ;
 			err |= 4 ;
 			goto err_ret ;
@@ -985,11 +984,7 @@ int itpc_fcf_c::do_fcf(void *v_store, int bytes)
 			out_store = row_store ;	// rewind 
 		}
 
-		int ints_used = out_store - store_start ;
-		//int ints_needed = (max_out_bytes/4)-1000 ;
-		int ints_needed = (max_out_bytes/4)-400 ;
-
-		if(ints_used && (ints_used>ints_needed)) {
+		if((out_store-store_start)>(max_out_bytes/4-1000)) {
 			LOG(ERR,"not enough ints %d vs %d",out_store-store_start,max_out_bytes/4) ;
 			break ;
 		}		
@@ -1009,12 +1004,6 @@ void itpc_fcf_c::run_start()
 	LOG(NOTE,"%s: %d",__PRETTY_FUNCTION__,my_id) ;
 
 	memset(&f_stat,0,sizeof(f_stat)) ;
-
-	for(int r=0;r<=max_slice;r++) {
-	for(int p=0;p<=max_x;p++) {
-		get_row_pad(r,p)->s1_len = 0 ;
-	}
-	}
 
 
 }
@@ -1705,24 +1694,22 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 			if(cha > 0x7FFF) cha = 0x8000 | (cha/1024) ;
 
 			if(flags & 3) tmp_fl |= 0x8000 ;	// ROW_EDGE
-			// NEW 11-Jan-2022
-			else {
 
-				*obuff++ = (time_c << 16) | pad_c ;
-				*obuff++ = (cha << 16) | tmp_fl ;
 
-				if(words_per_cluster>2) {
-					*obuff++ = (quality<<16)|track_id ;
-				}
-				if(words_per_cluster>3) {
-					*obuff++ = (pixels<<16)|adc_max ;
-				}
+			*obuff++ = (time_c << 16) | pad_c ;
+			*obuff++ = (cha << 16) | tmp_fl ;
+
+			if(words_per_cluster>2) {
+				*obuff++ = (quality<<16)|track_id ;
+			}
+			if(words_per_cluster>3) {
+				*obuff++ = (pixels<<16)|adc_max ;
+			}
 
 #ifdef DO_DBG1
 //			LOG(TERR,"**** S %d: row %d: %f %f %f",clusters_cou,row,f_p_ave,f_t_ave,f_charge) ;
 #endif
-				clusters_cou++ ;
-			}
+			clusters_cou++ ;
 		}
 		else {	// multiple peak hauristics
 			int ip1, ip2 ;
@@ -1840,26 +1827,24 @@ int itpc_fcf_c::do_blobs_stage3(int row)
 				// add flags here
 				pad_c |= 0x8000 ;					// merged flag
 				if(flags & 3) tmp_fl |= 0x8000 ;			// ROW_EDGE
-				// NEW 11-Jan-2022
-				else {
 
 
-					*obuff++ = (time_c << 16) | pad_c ;
-					*obuff++ = (cha << 16) | tmp_fl ;
 
-					if(words_per_cluster > 2) {
-						*obuff++ = (quality<<16)|track_id ;
-					}
-					if(words_per_cluster > 3) {
-						*obuff++ = (pixels<<16)|adc_max ;
-					}
+				*obuff++ = (time_c << 16) | pad_c ;
+				*obuff++ = (cha << 16) | tmp_fl ;
+
+				if(words_per_cluster > 2) {
+					*obuff++ = (quality<<16)|track_id ;
+				}
+				if(words_per_cluster > 3) {
+					*obuff++ = (pixels<<16)|adc_max ;
+				}
 				
 #ifdef DO_DBG1
 //				LOG(TERR,"0x%X 0x%X 0x%X 0x%X - 0x%X 0x%X",pad_c,time_c,cha,tmp_fl, (time_c<16)|pad_c,(cha<<16)|tmp_fl) ;
 //				LOG(TERR,"**** D %d: %f %f %f",clusters_cou,f_p_ave,f_t_ave,f_charge) ;
 #endif				
-					clusters_cou++ ;
-				}
+				clusters_cou++ ;
 			}
 		}
 

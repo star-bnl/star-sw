@@ -3,11 +3,14 @@
 /**************************************************************
  * $Id: EEdsm1.h,v 1.2 2012/12/12 22:54:03 fisyak Exp $
  **************************************************************/
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include <stdlib.h>
 
 class EEdsm1  {
   enum{ nc=6, nJP=3, mxTh=3};
-  unsigned short data[nc];
+  ushort data[nc];
   int type;
   int mYear;// unpacking changed in 2006
   int JPthr[mxTh];
@@ -28,7 +31,7 @@ class EEdsm1  {
   void  print(int k=0) const;
   void  clear();
   void  compute();  
-  void  setWord(int ch, unsigned short val);
+  void  setWord(int ch, ushort val);
   void  setYear(int y, int *JPth, int TPthrSelc, int HTTPthrSelc);
   void  setType(int t) {type=t;}
 

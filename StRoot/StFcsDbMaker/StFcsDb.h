@@ -145,8 +145,8 @@ public:
   int getColumnNumber(int det, int id) const ;   //! get the column number for the channel
   int getId(int det, int row, int col) const ; //! get the id from row/col
   int getDepCh(int dep, int ch) const ; //! get the DEP/ch id
-  void getName(int det, int id, char name[]); //! Get Name of a channel
-  void getName(int ehp, int ns, int dep, int ch, char name[]); //! Get Name of a channel 
+  void getName(int det, int id, char name[]) const; //! Get Name of a channel
+  void getName(int ehp, int ns, int dep, int ch, char name[]) const; //! Get Name of a channel 
   static void getFromName(const char name[], int& det, int& id); //! Get det/id from name
   static int getDetFromName(const std::string& detname);  //! Get det from name
 
@@ -202,7 +202,7 @@ public:
   float getPresValley(int det, int id) const;      //! get the pres valley position for cut
   float getPresValley(StFcsHit* hit) const;            //! get the pres valley position for cut
 
-  enum GAINMODE { FIXED, DB, FORCED, TXT }; //! Gain mode switch
+  enum GAINMODE { FIXED, DB, FORCED }; //! Gain mode switch
   void forceFixGain()                      {mGainMode=GAINMODE::FIXED;}       //! fixed default gain
   void forceFixGainCorrection()            {mGainCorrMode=GAINMODE::FIXED;}   //! fixed default gaincorr
   void forceUniformGain(float ecal, float hcal=0.0053, float pres=0.01){
@@ -217,13 +217,11 @@ public:
     mForceUniformGainCorrectionHcal=hcal;
     mForceUniformGainCorrectionPres=pres;
   } 
+  void readGainFromText(const char* file="fcsgain.txt");                      //! reading gain from text file
+  void readGainCorrFromText(const char* file="fcsgaincorr.txt");              //! reading gaincorr from text file
 
-  //! reading gain from text files
-  void setReadGainFromText(char* file="fcsgain.txt")         {mGainFilename=file;     mGainMode=GAINMODE::TXT;}
-  void setReadGainCorrFromText(char* file="fcsgaincorr.txt") {mGainCorrFilename=file; mGainCorrMode=GAINMODE::TXT;}
-
-  //ETGain factor= 1(ET Match), 0(E Match), 0.5(halfway)
-  float getEtGain(int det, int id, float factor=1.0) const;  //! ET gain
+  //ETGain
+  float getEtGain(int det, int id) const;  //! ET Gain
   void printEtGain();                            //! print ET gain
   
   //! Fcs Map
@@ -266,15 +264,13 @@ public:
   float mForceUniformGainEcal=-1.0;       //! forcing a value
   float mForceUniformGainHcal=-1.0;       //! forcing a value
   float mForceUniformGainPres=-1.0;       //! forcing a value
-  char* mGainFilename=0;                  //! gain file name
-  void readGainFromText();
+  int   mReadGainFromText=0;              //! flag for reading gain from text
 
   GAINMODE mGainCorrMode = GAINMODE::DB;      //! GainCorr mode selection 
   float mForceUniformGainCorrectionEcal=-1.0; //! forcing a value
   float mForceUniformGainCorrectionHcal=-1.0; //! forcing a value
   float mForceUniformGainCorrectionPres=-1.0; //! forcing a value
-  char* mGainCorrFilename=0;                  //! gaincorr filename
-  void readGainCorrFromText();
+  int   mReadGainCorrectionFromText=0;        //! flag for reading gaincorr from text 
  
   //DEP sorted ped/gain/corr
   float mPed[kFcsEHP][kFcsNorthSouth][kFcsMaxDepBd][kFcsMaxDepCh]; //! Pedestal   
