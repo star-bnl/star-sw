@@ -616,7 +616,7 @@ Double_t StRefMultCorr::getRefMultCorr(const UShort_t refMult,
 
 //_________________
 void StRefMultCorr::readScaleForWeight(const Char_t* input) {
-  ifstream fin(input) ;
+  std::ifstream fin(input) ;
   if(!fin) {
     Error("StRefMultCorr::readScaleForWeight", "can't open %s", input);
     return;
