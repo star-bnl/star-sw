@@ -134,6 +134,16 @@ void StTriggerSimuMaker::useL2(StGenericL2Emulator2009* L2Mk){
 
 Int_t StTriggerSimuMaker::Init() {
     LOG_INFO <<Form("StTriggerSimuMaker::Init(), MCflag=%d",mMCflag)<<endm;
+
+    if (GetMode() == 10) {
+      // Set parameters necessary for filling PicoDst in BFC
+      setMC(false);
+      useBemc();
+      useEemc();
+      useOfflineDB();
+      bemc->setConfig(StBemcTriggerSimu::kOffline);
+    }
+
     if(eemc) {
         eemc->setHList(mHList);
     }
@@ -149,7 +159,6 @@ Int_t StTriggerSimuMaker::Init() {
       }
 
     }
-
 
     return StMaker::Init();
 }
