@@ -128,8 +128,8 @@ public:
   void useOfflineDB() { mUseOfflineDB = 1; }
 
 
-  //virtual const char *GetCVS() const
-  //{static const char cvs[]="Tag $Name:  $ $Id: StTriggerSimuMaker.h,v 1.35 2020/04/12 03:56:25 zchang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StTriggerSimuMaker.h $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StTriggerSimuMaker,0)
 };

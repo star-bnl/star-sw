@@ -1285,7 +1285,7 @@ void  StFcsDb::makeMap2019(){
 void StFcsDb::getIdfromEPD(int pp, int tt, int& det, int &id){
     det=-1; 
     id=-1;
-    int row,col;
+    int row=0,col=0;
     if(tt<0 || tt>=32) return;
     if(pp>=1 && pp<=6){ //north side
 	det=4;
@@ -1390,7 +1390,7 @@ void StFcsDb::printHeader4(FILE* f, int flag=0){
 }
 
 void StFcsDb::printMap(){
-    int ehp,ns,crt,slt,dep,ch,det,id,row,col;
+    int ehp,ns,crt,slt,dep,ch,det,id,row,col=0;
     
     FILE *f1  = fopen("fcsMap.txt","w");           printHeader(f1);
     FILE *f1c = fopen("fcsMap.csv","w");           printHeader(f1c,0,1);
