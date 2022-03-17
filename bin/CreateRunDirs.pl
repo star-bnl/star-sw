@@ -58,8 +58,9 @@ my $def = {@Runs};# print "Runs = @Runs\n";
 #my  @runs  = glob "/hlt/cephfs/daq/2020/2??/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2019/350/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2020/012/2101202?";  print "runs = @runs\n" if ($debug);
-my  @runs  = glob "/hlt/cephfs/daq/2021/3??/* /hlt/cephfs/daq/2022/???/*";  print "runs = @runs\n" if ($debug);
-#my  @runs  = glob "/hlt/cephfs/daq/2022/???/*";  print "runs = @runs\n" if ($debug);
+#my  @runs  = glob "/hlt/cephfs/daq/2021/???/*";  print "runs = @runs\n" if ($debug);
+#my  @runs  = glob "/hlt/cephfs/daq/2021/3??/* /hlt/cephfs/daq/2022/???/*";  print "runs = @runs\n" if ($debug);
+my  @runs  = glob "/hlt/cephfs/daq/2022/???/*";  print "runs = @runs\n" if ($debug);
 foreach my $run (@runs) {
   my $r = File::Basename::basename($run); print "run = $run, r = $r\n" if ($debug);
   if (GoodRun($def,$r) < 0) {next;}
