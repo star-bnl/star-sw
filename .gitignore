@@ -64,4 +64,4 @@ update.*
 bin/f77split
 .DS_Store
 .vscode/
-
+StRoot/StBFChain/doc/

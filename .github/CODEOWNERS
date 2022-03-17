@@ -55,8 +55,8 @@
 /StRoot/StFcs*                                     @akioogawa         @jdbrice
 /StRoot/StFms*                                     @akioogawa
 /StRoot/StFpd*                                     @akioogawa
-/StRoot/StFstSimMaker                              @jdbrice
-/StRoot/StFttSimMaker                              @jdbrice
+/StRoot/StFst*                                     @jdbrice           @sunxuhit    @yezhenyu2003   @techuan-huang
+/StRoot/StFtt*                                     @jdbrice
 /StRoot/StGenericVertexMaker                       @plexoos           @perevbnlgov @akioogawa   @klendathu2k @fisyak
 /StRoot/StHeavyPool                                @starsdong         @ullrich-bnl @fgeurts
 /StRoot/StHighPtTagsMaker                          @ullrich-bnl
