@@ -124,6 +124,7 @@ for(int r=3;r<=6;r++) {
 			bad_delta[s][r]++ ;
 			if(pr_all) printf("DELTA PED sector %d:%d = %f: %d %d %d %f %f\n",s,r,delta_ped,row,pad,tb,ped,rms) ;
 		}
+		if (row <= 0 || pad <= 0) continue;
 		if (bad_rms[s][row][pad ] || bad_ped[s][row][pad]) continue;
 
 		P.sec = s;
