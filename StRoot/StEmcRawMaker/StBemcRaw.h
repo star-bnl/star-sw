@@ -102,7 +102,7 @@ protected:
     controlADCtoE_st*        mControlADCtoE;
 
     Bool_t                   mSaveAllStEvent;
-    Bool_t                   mSaveAllBTOW;
+    Bool_t                   mSaveAllBTOW;        //! switch for saving all BTOW hits (used in daq->picoDst production)
     Bool_t                   mPsdMapBug;
     Bool_t                   mPsdMapBug2;
     Bool_t                   mTowerMapBug;
