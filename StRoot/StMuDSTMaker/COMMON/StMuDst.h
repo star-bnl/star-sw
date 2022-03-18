@@ -951,12 +951,10 @@ public:
   ClassDef(StMuDst,5)
 #else /* __TFG__VERSION__ */
   // Maps
-#if !defined(__CINT__) && !defined(__CLING__)
-  virtual Bool_t Accept(const StMuTrack *gTrack = 0);
-  virtual Bool_t Accept(const StMuPrimaryVertex *RcVx = 0);
-  virtual Bool_t Accept(const StMuMcTrack *McTrack = 0);
-  virtual Bool_t Accept(const StMuMcVertex *McVx = 0);
-#endif
+  Bool_t Accept(const StMuTrack *gTrack);
+  Bool_t Accept(const StMuPrimaryVertex *RcVx);
+  Bool_t Accept(const StMuMcTrack *McTrack);
+  Bool_t Accept(const StMuMcVertex *McVx);
   map<Int_t,Int_t>                            &IdGlTk2Indx();
   map<Int_t,Int_t>                            &IdPrTk2Indx();
   map<Int_t,Int_t>                            &IdPrVx2Indx();
