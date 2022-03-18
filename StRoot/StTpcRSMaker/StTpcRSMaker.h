@@ -106,7 +106,6 @@ class StTpcRSMaker : public StMaker {
   TF1F  *mChargeFraction[2][24];      //!
   TF1F  *mPadResponseFunction[2][24]; //!
   TF1F  *mPolya[2];                   //!
-  TF1F  *mGG;                         //! Gating Grid Transperency
   TF1   *mHeed;                       //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   Double_t InnerAlphaVariation[24];   //!
@@ -152,7 +151,7 @@ class StTpcRSMaker : public StMaker {
   const Double_t ElectronRangeEnergy; //!
   const Double_t ElectronRangePower;  //!
   const Int_t NoOfSectors;            //!
-  const Int_t NoOfPads;               //!
+  Int_t NoOfPads;                     //!
   const Int_t NoOfTimeBins;           //!
   Double_t   mCutEle;                 //! cut for delta electrons
  public:    

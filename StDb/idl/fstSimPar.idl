@@ -1,0 +1,13 @@
+/*    fstSimPar
+*
+*  Table: fstSimPar
+*
+* description: simulation parameters for FST (fast or slow)
+* 
+*/ 
+
+struct fstSimPar {
+  long mode;      /* effMode: 0-ideal; 1 (default) -momentum depenent; 2 nomimal */
+  float pCut;         /* momentum cut for momentum depenent efficiency */
+  float effFst;       /* FST efficiency */
+};

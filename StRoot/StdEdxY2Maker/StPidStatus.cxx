@@ -33,7 +33,7 @@ StBTofPidTraits StPidStatus::SetBTofPidTraits(const StMuBTofPidTraits &pid) {
   btofPidTraits.setProbProton   (pid.probProton());  
   return btofPidTraits;
 }
-#ifdef __TFG__VERSION_
+#ifdef __TFG__VERSION__
 //________________________________________________________________________________
 StBTofPidTraits StPidStatus::SetBTofPidTraits(const StPicoBTofPidTraits &pid) {
   StBTofPidTraits btofPidTraits;

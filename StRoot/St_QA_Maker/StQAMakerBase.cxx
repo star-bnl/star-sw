@@ -198,6 +198,7 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   fillHists = kFALSE;
   eventCount = 0;
   eventClass = 3;
+  eventClassIdx = 0;
   ITTF = kFALSE;
   EST = -1; // -1 = unknown
   allTrigs = kFALSE;
@@ -214,9 +215,6 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   mMultClass = 0;   // histogram for number of events in mult classes
   mTrigWord = 0;    // histogram for event trigger words
   mTrigBits = 0;    // histogram for event trigger bits
-  for (i=0; i<24; i++) mTpcSectorPlot[i] = 0;
-  m_pnt_rpTQW = 0;
-  m_pnt_rpTQE = 0;
 
 // FTPC histograms
   m_ftpc_chargestepW=0; //! Chargestep from ftpc west
@@ -224,8 +222,42 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   m_ftpc_fcl_radialW=0;  //! ftpc west cluster radial position
   m_ftpc_fcl_radialE=0;  //! ftpc east cluster radial position
 
+// TPC Raw
+  m_pnt_rpTQW = 0;
+  m_pnt_rpTQE = 0;
+  for (int i =0; i < 24; ++ i) {
+    mTpcSectorPlot[i] = 0;
+    m_tpc_adc_chargevstb[i] = 0;
+    m_tpc_adc_chargevstbTPX[i] = 0;
+    m_tpc_adc_chargevsrowvstb[i] = 0;
+    m_tpc_adc_chargesum[i] = 0;
+    m_tpc_clust_stats[i] = 0;
+    m_tpc_clust_statsvsrow[i] = 0;
+    m_tpc_clust_charge[i] = 0;
+    m_tpc_clust_chargeTPX[i] = 0;
+    m_tpc_clust_chargesum[i] = 0;
+    m_tpc_clust_chargevstb[i] = 0;
+    m_tpc_clust_chargevstbTPX[i] = 0;
+    m_tpc_clust_chargevsrow[i] = 0;
+  }
+  m_tpc_adc_chargepersector = 0;
+  m_tpc_adc_chargepersectorTPX = 0;
+  m_tpc_adc_numhitsvsrowvssector = 0;
+  m_tpc_clust_pxltb = 0;
+  m_tpc_clust_pxltbTPX = 0;
+  m_tpc_clust_pxlp = 0;
+  m_tpc_clust_pxlpTPX = 0;
+  m_tpc_clust_numclust = 0;
+  m_tpc_clust_numclustTPX = 0;
+
 // TPC dE/dx over time
   m_dedx_Z3A=0; // dE/dx vs. drift distance
+
+// FCS
+  m_h1_inv_mass_cluster = 0; //!
+  m_h1_dgg_cluster = 0; //!
+  m_h1_two_cluster_energy_allcut = 0; //!
+  m_h2_cluster_dgg_vs_E1pE2 = 0; //!
 
 // signed DCA (impact parameter) over time
   m_glb_simpactTime=0; 
@@ -244,9 +276,34 @@ StQAMakerBase::~StQAMakerBase() {
   if (mMultClass) delete mMultClass;
   if (mTrigWord) delete mTrigWord;
   if (mTrigBits) delete mTrigBits;
-  for (Int_t i=0; i<24; i++) { if (mTpcSectorPlot[i]) delete mTpcSectorPlot[i]; };
-  if (m_pnt_rpTQW) delete m_pnt_rpTQW;
-  if (m_pnt_rpTQE) delete m_pnt_rpTQE;
+  if (m_pnt_rpTQW) {
+    delete m_pnt_rpTQW;
+    delete m_pnt_rpTQE;
+    for (Int_t i=0; i<24; i++) {
+      delete mTpcSectorPlot[i];
+      delete m_tpc_adc_chargevstb[i];
+      delete m_tpc_adc_chargevstbTPX[i];
+      delete m_tpc_adc_chargevsrowvstb[i];
+      delete m_tpc_adc_chargesum[i];
+      delete m_tpc_clust_stats[i];
+      delete m_tpc_clust_statsvsrow[i];
+      delete m_tpc_clust_charge[i];
+      delete m_tpc_clust_chargeTPX[i];
+      delete m_tpc_clust_chargesum[i];
+      delete m_tpc_clust_chargevstb[i];
+      delete m_tpc_clust_chargevstbTPX[i];
+      delete m_tpc_clust_chargevsrow[i];
+    }
+    delete m_tpc_adc_chargepersector;
+    delete m_tpc_adc_chargepersectorTPX;
+    delete m_tpc_adc_numhitsvsrowvssector;
+    delete m_tpc_clust_pxltb;
+    delete m_tpc_clust_pxltbTPX;
+    delete m_tpc_clust_pxlp;
+    delete m_tpc_clust_pxlpTPX;
+    delete m_tpc_clust_numclust;
+    delete m_tpc_clust_numclustTPX;
+  }
 }
 //_____________________________________________________________________________
 Int_t StQAMakerBase::Init() {
@@ -290,6 +347,8 @@ Int_t StQAMakerBase::Make() {
   MakeHistPrim();
   // histograms from table primtrk & dst_dedx
   MakeHistPID();
+  // histograms from TPC raw data
+  if (!eventClassIdx) MakeHistTPC();
   // histograms from table dst_dedx
   MakeHistDE();
   // histograms from table point
@@ -309,7 +368,7 @@ Int_t StQAMakerBase::Make() {
   // histograms from TOF in StEvent
   if (histsSet>=StQA_run8) MakeHistTOF(); 
   // histograms from FMS in StEvent
-  if (histsSet>=StQA_run13) MakeHistFMS(); 
+  if (histsSet>=StQA_run13 && !eventClassIdx) MakeHistFMS(); 
   // histograms from MTD in StEvent
   if (histsSet>=StQA_run12all) MakeHistMTD(); 
   // histograms from HFT (PXL, IST, SST) in StEvent
@@ -320,7 +379,7 @@ Int_t StQAMakerBase::Make() {
     MakeHistSST(); 
   }
   // histograms from Roman-Pot in StEvent
-  if (histsSet>=StQA_run15) MakeHistRP();
+  if (histsSet>=StQA_run15 && !eventClassIdx) MakeHistRP();
   // histograms from EPD in StEvent
   if (histsSet>=StQA_run18) {
     MakeHistEPD();
@@ -377,6 +436,7 @@ void StQAMakerBase::BookHist() {
   // Real data with event classes for different triggers
 
     // any new StQAHistSetType values
+    case (StQA_run22) :
     case (StQA_run19) :
     case (StQA_run18) :
     case (StQA_run17) :
@@ -422,9 +482,11 @@ void StQAMakerBase::BookHist() {
 
   BookHistTrigger();
   BookHistGeneral();
+  BookHistTPC();
   BookHistDE();
   BookHistFcl();
-  if (histsSet>=StQA_run13) BookHistFMS(); 
+  if (histsSet>=StQA_run22) BookHistFCS(); 
+  if (histsSet>=StQA_run13 && histsSet<StQA_run22) BookHistFMS(); 
   if (histsSet>=StQA_run15) BookHistRP();
   if (histsSet>=StQA_run19) BookHistETOF();
 
@@ -451,21 +513,6 @@ void StQAMakerBase::BookHistGeneral(){
     mMultClass->SetXTitle("mult class (0=?/MC, 1=LM, 2=MM, 3=HM)");
     mMultClass->SetYTitle("# of events");
   }
-
-  char namebuf[32];
-  char titlebuf[64];
-  for (Int_t i=0; i<24; i++) {
-    int numOfRows = St_tpcPadConfigC::instance()->numberOfRows(i+1);
-    sprintf(namebuf ,"Qa%sTpcSector%d",(numOfRows > 45 ? "i" : ""),i+1);
-    sprintf(titlebuf,"Hits in %sTPC Sector %d",(numOfRows > 45 ? "i" : ""),i+1);
-    //mTpcSectorPlot[i] = QAH::H2F(namebuf,titlebuf,104,-52.,52.,150,50.,200.);
-    mTpcSectorPlot[i] = QAH::H2F(namebuf,titlebuf,104,-52.,52.,numOfRows+2,-0.5,((float) numOfRows)+1.5);
-    mTpcSectorPlot[i]->SetXTitle("along padrows [cm]");
-    //mTpcSectorPlot[i]->SetYTitle("across padrows [cm]");
-    mTpcSectorPlot[i]->SetYTitle("padrow");
-  }
-  m_pnt_rpTQW    = QAH::H2F("QaPointRPTpcQW","point: r-phi distribution of charge, tpcW",20,58.75,196.75,72,0,TMath::TwoPi());
-  m_pnt_rpTQE    = QAH::H2F("QaPointRPTpcQE","point: r-phi distribution of charge, tpcE",20,58.75,196.75,72,0,TMath::TwoPi());
 
   m_glb_simpactTime = QAH::H2F("QaGtrkSImpactTime","globtrk: signed impact param from prim vtx vs. time",
      18000,0.,3600.,120,-3.0,3.0);
@@ -504,6 +551,7 @@ void StQAMakerBase::BookHistDE(){
       }
     }
   }
+
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistFcl(){
@@ -545,6 +593,37 @@ void StQAMakerBase::BookHistFcl(){
       }
     }
   }
+}
+//_____________________________________________________________________________
+void StQAMakerBase::BookHistFCS(){
+
+  if (!(m_h1_inv_mass_cluster)) {
+    StMaker* fhMaker = GetMaker("FcsPi0F");
+    if (fhMaker) {
+      m_h1_inv_mass_cluster = (TH1F*) (fhMaker->GetHist("h1_inv_mass_cluster"));
+      m_h1_dgg_cluster = (TH1F*) (fhMaker->GetHist("h1_dgg_cluster"));
+      m_h1_two_cluster_energy_allcut = (TH1F*) (fhMaker->GetHist("h1_two_cluster_energy_allcut"));
+      m_h2_cluster_dgg_vs_E1pE2 = (TH2F*) (fhMaker->GetHist("h2_cluster_dgg_vs_E1pE2"));
+    } else {
+      // "FcsMIP" maker doesn't exist, so look in hist branch
+      St_DataSet* hDS = GetDataSet("histBranch");
+      if (hDS) {
+        // hDS->ls(9);
+        St_DataSet* fhDS = hDS->Find("FcsPi0F");
+        if (fhDS) {
+          m_h1_inv_mass_cluster = (TH1F*) (fhDS->FindObject("h1_inv_mass_cluster"));
+          m_h1_dgg_cluster = (TH1F*) (fhDS->FindObject("h1_dgg_cluster"));
+          m_h1_two_cluster_energy_allcut = (TH1F*) (fhDS->FindObject("h1_two_cluster_energy_allcut"));
+          m_h2_cluster_dgg_vs_E1pE2 = (TH2F*) (fhDS->FindObject("h2_cluster_dgg_vs_E1pE2"));
+        }
+      }
+    }
+    AddHist(m_h1_inv_mass_cluster);
+    AddHist(m_h1_dgg_cluster);
+    AddHist(m_h1_two_cluster_energy_allcut);
+    AddHist(m_h2_cluster_dgg_vs_E1pE2);
+  }
+    
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistFMS(){
@@ -642,6 +721,50 @@ void StQAMakerBase::BookHistETOF(){
     }
     for (int i=0; i<etofCnt; i++) AddHist(m_etofHist[i]);
   }
+}
+//_____________________________________________________________________________
+void StQAMakerBase::BookHistTPC(){
+
+  for (int i = 0; i < 24; ++ i) {//1 hist per sector                                       
+    int num_rows = St_tpcPadConfigC::instance()->numberOfRows(i+1);
+    mTpcSectorPlot[i] = QAH::H2F(Form("Qa%sTpcSector%d",(num_rows > 45 ? "i" : ""),i+1),
+                                 Form("Hits in %sTPC Sector %d",(num_rows > 45 ? "i" : ""),i+1),
+                                 104,-52.,52.,num_rows+2,-0.5,((float) num_rows)+1.5);
+    mTpcSectorPlot[i]->SetXTitle("along padrows [cm]");
+    mTpcSectorPlot[i]->SetYTitle("padrow");
+  }
+  m_pnt_rpTQW    = QAH::H2F("QaPointRPTpcQW","point: r-phi distribution of charge, tpcW",20,58.75,196.75,72,0,TMath::TwoPi());
+  m_pnt_rpTQE    = QAH::H2F("QaPointRPTpcQE","point: r-phi distribution of charge, tpcE",20,58.75,196.75,72,0,TMath::TwoPi());
+                                                                         
+  for (int i = 0; i < 24; ++ i) {//1 hist per sector                                       
+    int num_rows = St_tpcPadConfigC::instance()->numberOfRows(i+1);
+    int max_pads_per_row = St_tpcPadConfigC::instance()->numberOfPadsAtRow(i+1,num_rows);
+    m_tpc_adc_chargevstb[i] = QAH::H1F(Form("QaTpc_adc_chargevstb_%d",i+1),Form("ADC charge vs. time bucket (iTPC), sector %d",i+1),512,0,511);
+    m_tpc_adc_chargevstbTPX[i] = QAH::H1F(Form("QaTpc_adc_chargevstbTPX_%d",i+1),Form("ADC charge vs. time bucket (TPX), sector %d",i+1),512,0,511);
+    m_tpc_adc_chargevsrowvstb[i] = QAH::H2F(Form("QaTpc_adc_chargevsrowvstb_%d",i+1),Form("charge vs. row vs. time bucket, sector %d",i+1),400,0.5,0.5+400,72,0.5,72+0.5);
+    m_tpc_adc_chargesum[i] = QAH::H2F(Form("QaTpc_adc_chargesum_%d",i+1),Form("ADC sum over all events, sector %d",i+1),max_pads_per_row,0.5,max_pads_per_row+0.5,num_rows,0.5,num_rows+0.5);
+
+    m_tpc_clust_stats[i] = QAH::H1F(Form("QaTpc_clust_stats_%d",i+1),Form("status of clusters, sector %d",i+1),32,-0.5,31.5);
+    m_tpc_clust_statsvsrow[i] = QAH::H2F(Form("QaTpc_clust_statsvsrow_%d",i+1),Form("status of clusters vs. row, sector %d",i+1),72,0.5,72+0.5, 32,-0.5,31.5);
+    m_tpc_clust_charge[i] = QAH::H1F(Form("QaTpc_clust_charge_%d",i+1),Form("charge per cluster (iTPC), sector %d",i+1),1024,0,8096);
+    m_tpc_clust_chargeTPX[i] = QAH::H1F(Form("QaTpc_clust_chargeTPX_%d",i+1),Form("charge per cluster (TPX), sector %d",i+1),2048,0,2048);
+    m_tpc_clust_chargesum[i] = QAH::H2F(Form("QaTpc_clust_chargesum_%d",i+1),Form("cluster sum over all events, sector %d",i+1),max_pads_per_row,0.5,max_pads_per_row+0.5,num_rows,0.5,num_rows+0.5);
+    m_tpc_clust_chargevstb[i] = QAH::H2F(Form("QaTpc_clust_chargevstb_%d",i+1),Form("charge vs. time bucket (iTPC), sector %d",i+1),128,0.5,512+0.5,64,0.5,0.5+2048);
+    m_tpc_clust_chargevstbTPX[i] = QAH::H2F(Form("QaTpc_clust_chargevstbTPX_%d",i+1),Form("charge vs. time bucket (TPX), sector %d",i+1),128,0.5,512+0.5,64,0.5,0.5+2048);
+    m_tpc_clust_chargevsrow[i] = QAH::H2F(Form("QaTpc_clust_chargevsrow_%d",i+1),Form("charge vs. row, sector %d",i+1),72,0.5,72+0.5,128,0.5,0.5+2048);
+  }
+  m_tpc_adc_chargepersector = QAH::H1F("QaTpc_adc_chargepersector","charge per sector (iTPC)",24,0.5,24.5);
+  m_tpc_adc_chargepersectorTPX = QAH::H1F("QaTpc_adc_chargepersectorTPX","charge per sector (TPX)",24,0.5,24.5);
+  m_tpc_adc_numhitsvsrowvssector = QAH::H2F("QaTpc_adc_numhitsvsrowvssector","adc hits vs sector vs row",24,0.5,24.5,72,0.5,72.5);
+
+  m_tpc_clust_pxltb = QAH::H2F("QaTpc_clust_pxltb","cluster pixel time bucket size (iTPC)",24,0.5,24.5,100,0,100);
+  m_tpc_clust_pxltbTPX = QAH::H2F("QaTpc_clust_pxltbTPX","cluster pixel time bucket size (TPX)",24,0.5,24.5,100,0,100);
+  m_tpc_clust_pxlp = QAH::H2F("QaTpc_clust_pxlp","cluster pixel pad size (iTPC)",24,0.5,24.5,100,0,100);
+  m_tpc_clust_pxlpTPX = QAH::H2F("QaTpc_clust_pxlpTPX","cluster pixel pad size (TPX)",24,0.5,24.5,100,0,100);
+  m_tpc_clust_numclust = QAH::H2F("QaTpc_clust_numclust","number of clusters vs. sector (iTPC)",24,0.5,24.5,120,0,6);
+  m_tpc_clust_numclustTPX = QAH::H2F("QaTpc_clust_numclustTPX","number of clusters vs. sector (TPX)",24,0.5,24.5,120,0,6);
+  m_tpc_clust_numclust->SetYTitle("log_{10}(N_{clust})");                                    
+  m_tpc_clust_numclustTPX->SetYTitle("log_{10}(N_{clust})");   
 }
 //_____________________________________________________________________________
 

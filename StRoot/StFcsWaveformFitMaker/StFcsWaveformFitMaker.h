@@ -74,7 +74,7 @@ public:
     void Clear(Option_t* option = "");
     
     void setDebug(int v=1)        {SetDebug(v);}
-    void setEnergySelect(int v)   {mEnergySelect=v;}
+    void setEnergySelect(int ecal=10, int hcal=10, int pres=1) {mEnergySelect[0]=ecal; mEnergySelect[1]=hcal; mEnergySelect[2]=pres;}
     void setCenterTimeBins(int v, int min=0, int max=512) {mCenterTB=v; mMinTB=min; mMaxTB=max;}
     void setAdcSaturation(int v)  {mAdcSaturation=(double)v;}
     void setError(double v)       {mError=v;}
@@ -181,7 +181,7 @@ public:
 
     char *mMeasureTime=0;                //! output file for measuring fitting time
 
-    int mEnergySelect=0;                 //! 0=MC (straight from dE), >0 see above
+    int mEnergySelect[3];                //! 0=MC (straight from dE), >0 see above
     int mCenterTB=50;                    //! center timebin for triggered crossing
     int mMinTB=0;                        //! center timebin for triggered crossing
     int mMaxTB=512;                      //! center timebin for triggered crossing

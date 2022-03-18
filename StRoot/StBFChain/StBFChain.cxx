@@ -654,6 +654,16 @@ Int_t StBFChain::Instantiate()
     // Use status tables for raw BEMC data (helpful for QA)
     if ( maker == "StEmcRawMaker" && GetOption("BEmcChkStat"))
       mk->SetAttr("BEmcCheckStatus",kTRUE);
+      
+    // trigger simu maker
+    if ( maker == "StEmcRawMaker" && GetOption("picoWrite") ) {
+      mk->SetMode(10);  // picoDst production - save all BTOW hits for triggerSimuMaker
+    }
+
+    // trigger simu maker
+    if ( maker == "StTriggerSimuMaker" && GetOption("picoWrite") ) {
+      mk->SetMode(10);  // picoDst production
+    }
 
     // MuDST and ezTree. Combinations are
     //  ezTree         -> ezTree only
@@ -888,6 +898,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
       if (GetOption("setOutlierRej4BToft0"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
       if (GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
+      if (GetOption("btofFXT")) mk->SetAttr("btofFXT", kTRUE);
     }
     if (maker == "StVpdCalibMaker" && GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
 

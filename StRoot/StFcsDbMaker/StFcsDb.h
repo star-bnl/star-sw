@@ -219,8 +219,8 @@ public:
   } 
 
   //! reading gain from text files
-  void setReadGainFromText(char* file="fcsgain.txt")         {mGainFilename=file;     mGainMode=GAINMODE::TXT;}
-  void setReadGainCorrFromText(char* file="fcsgaincorr.txt") {mGainCorrFilename=file; mGainCorrMode=GAINMODE::TXT;}
+  void setReadGainFromText(const char* file="fcsgain.txt")         {strcpy(mGainFilename,file);     mGainMode=GAINMODE::TXT;}
+  void setReadGainCorrFromText(const char* file="fcsgaincorr.txt") {strcpy(mGainCorrFilename,file); mGainCorrMode=GAINMODE::TXT;}
 
   //ETGain factor= 1(ET Match), 0(E Match), 0.5(halfway)
   float getEtGain(int det, int id, float factor=1.0) const;  //! ET gain
@@ -266,14 +266,14 @@ public:
   float mForceUniformGainEcal=-1.0;       //! forcing a value
   float mForceUniformGainHcal=-1.0;       //! forcing a value
   float mForceUniformGainPres=-1.0;       //! forcing a value
-  char* mGainFilename=0;                  //! gain file name
+  char  mGainFilename[256];               //! gain file name
   void readGainFromText();
 
   GAINMODE mGainCorrMode = GAINMODE::DB;      //! GainCorr mode selection 
   float mForceUniformGainCorrectionEcal=-1.0; //! forcing a value
   float mForceUniformGainCorrectionHcal=-1.0; //! forcing a value
   float mForceUniformGainCorrectionPres=-1.0; //! forcing a value
-  char* mGainCorrFilename=0;                  //! gaincorr filename
+  char  mGainCorrFilename[256];               //! gaincorr filename
   void readGainCorrFromText();
  
   //DEP sorted ped/gain/corr

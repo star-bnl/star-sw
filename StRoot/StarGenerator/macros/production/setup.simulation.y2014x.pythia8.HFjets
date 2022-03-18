@@ -1,0 +1,35 @@
+#!/bin/csh -f
+
+
+#
+echo "Script for building FastJetFilter and setting up workflow for the pp HF jet "
+echo " simulation from my repo.  When PR#315 is folded into main... this becomes"
+echo " documentation only."
+#
+
+echo ""
+echo "Building FastJetFilter maker"
+echo ""
+
+cd star-sw-1
+git checkout simu_pp200_run14_pythia8_hfjets
+cd -
+
+mkdir -p StRoot/StarGenerator
+cp -R star-sw-1/StRoot/StarGenerator/FastJetFilter StRoot/StarGenerator
+cp -R star-sw-1/mgr .
+
+cons
+
+echo ""
+echo "Copying XML workflow and payload to local directory"
+echo ""
+
+cp star-sw-1/StRoot/StarGenerator/macros/production/simulation.y2014x.pythia8.HFjets.C          starsim.C
+cp star-sw-1/StRoot/StarGenerator/macros/production/reconstruction.y2014x.pythia8.HFjets.C      runBfc.C
+cp star-sw-1/StRoot/StarGenerator/macros/production/simulation.y2014x.pythia8.HFjets.input.list .
+cp star-sw-1/StRoot/StarGenerator/macros/production/simulation.y2014x.pythia8.HFjets.xml        .
+
+echo ""
+echo "Edit the XML files and specify OUTDIR, LOGDIR and JOBFILES directories"
+echo ""

@@ -82,6 +82,7 @@ public:
     rc_daq_run_pause        daq_run_pause;
     rc_daq_run_resume       daq_run_resume;
     rc_daq_send_config      daq_send_config;
+    rc_daq_send_config      daq_send_reconfig;
     rc_daq_set_busy         daq_set_busy;
     rc_daq_release_busy     daq_release_busy;
     rc_daq_flush_tokens     daq_flush_tokens;

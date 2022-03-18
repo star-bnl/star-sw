@@ -33,13 +33,7 @@ class St_tpcRDOMasksC : public TChair {
     //Function returns the rdo board number for a given padrow index. Range of map used is 1-72
     return St_tpcRDOMapC::instance()->rdo(sector, row, pad);
   }
-  Bool_t        isOn(Int_t sector,Int_t rdo)  {    
-    if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return 0;
-    UInt_t MASK = getSectorMask(sector);
-    MASK = MASK >> (rdo - 1);
-    MASK &= 0x00000001;
-    return MASK;
-  }
+  Bool_t        isOn(Int_t sector,Int_t rdo);
   Bool_t       isRowOn(Int_t sector, Int_t row, Int_t pad = 1) {return isOn(sector, rdoForPadrow(sector, row, pad));}
  protected:
   St_tpcRDOMasksC(St_tpcRDOMasks *table=0) : TChair(table) {}
