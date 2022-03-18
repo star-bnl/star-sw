@@ -136,10 +136,9 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  scale *= charge*charge;
   //  return  TMath::Log10(scale*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
   //  Charge*Charge* (TMath::Exp(Bichsel::Instance()->GetMostProbableZM(TMath::Log10(TMath::Abs(Charge)*p/M),dx2)))
-  return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 1, charge));
+  return TMath::Log10(1e6*scale*StdEdxPull::EvalPred(poverm, 1, charge));
 }
 //________________________________________________________________________________
 Double_t bichselZM(Double_t *x,Double_t *par) {
@@ -155,10 +154,7 @@ Double_t bichselZM(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  //  scale *= charge*charge;
-  //  return  TMath::Log10(scale*TMath::Exp(Bichsel::Instance()->GetMostProbableZM(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
-  //return charge*charge*TMath::Log10(Bichsel::Instance()->GetI70(TMath::Log10(poverm),1.));
-  return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 1, charge));
+  return TMath::Log10(1e6*scale*StdEdxPull::EvalPred(poverm, 1, charge));
 }
 //________________________________________________________________________________
 Double_t bichsel70(Double_t *x,Double_t *par) {
@@ -174,9 +170,7 @@ Double_t bichsel70(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  //  scale *= charge*charge;
-  // return  TMath::Log10(scale*charge*charge*Bichsel::Instance()->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
-  return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 0, charge));
+  return TMath::Log10(1e6*scale*StdEdxPull::EvalPred(poverm, 0, charge));
 }
 //________________________________________________________________________________
 Double_t bichsel70M(Double_t *x,Double_t *par) {
@@ -192,9 +186,7 @@ Double_t bichsel70M(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  //  scale *= charge*charge;
-  //  return  TMath::Log10(scale*Bichsel::Instance()->GetI70M(TMath::Log10(poverm),dx2));//TMath::Exp(7.81779499999999961e-01));
-  return TMath::Log10(1e6*StdEdxPull::EvalPred(poverm, 0, charge));
+  return TMath::Log10(1e6*scale*StdEdxPull::EvalPred(poverm, 0, charge));
 }
 #if 0
 //________________________________________________________________________________
@@ -244,9 +236,7 @@ Double_t dNdx(Double_t *x,Double_t *par) {
   Double_t dx2 = 1;
   if (par[1] > 1.0) charge = par[1];
   poverm *= charge;
-  //  scale *= charge*charge;
-  //  return  TMath::Log10(scale*StdEdxModel::instance()->dNdx(poverm,charge));//TMath::Exp(7.81779499999999961e-01));
-  return TMath::Log10(StdEdxPull::EvalPred(poverm, 2, charge));
+  return TMath::Log10(scale*StdEdxPull::EvalPred(poverm, 2, charge));
 }
 #if !defined(__CINT__) && !defined(__CLING__)
 //________________________________________________________________________________
