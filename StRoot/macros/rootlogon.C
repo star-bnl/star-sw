@@ -199,6 +199,9 @@
     // it was not in .$STAR_HOST_SYS but one level up. The backward compatibility
     // can be removed only at the net root release ... 
     gSystem->SetIncludePath(" -D__ROOT__ -I.");
+    if (STAR_LEVEL.Contains("TFG") || STAR_LEVEL.Contains(".DEV2")) {
+      gSystem->AddIncludePath(" -D__TFG__VERSION__");
+    }
     gSystem->AddIncludePath(" -I./.$STAR_HOST_SYS/include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/StRoot -I$STAR -I/usr/include/mysql");
     if (GARFIELD_HOME != "$GARFIELD_HOME") gSystem->AddIncludePath(" -I$GARFIELD_HOME/Include -I$GARFIELD_HOME/Heed");
     if (XOPTSTAR != "$XOPTSTAR")           gSystem->AddIncludePath(" -I$XOPTSTAR/include");
