@@ -495,4 +495,6 @@
 # root.exe -q -b SecRow3CGF7.3GeV_fixedTarget_2019.root 'MakeTpcSecRowB.C(-1,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.log
 # /gpfs/mnt/gpfs01/star/subsys-tpc/fisyak/Histograms/RunXIX/RunXIX71
 #root.exe -q -b SecRow3GFAuAu200GeV_2019.root  'MakeTpcSecRowB.C(20190710,110158,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190710,110158.log
-root.exe -q -b SecRow3+SecRow3PGFAuAu200_2019.root  'MakeTpcSecRowB.C(20190710,110158,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190710,110158.log
+#root.exe -q -b SecRow3+SecRow3PGFAuAu200_2019.root  'MakeTpcSecRowB.C(20190710,110158,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190710,110158.log
+#/gpfs/mnt/gpfs01/star/subsys-tpc/fisyak/Histograms/RunXIX/RunXIX82
+root.exe -q -b SecRow3+SecRow3PGF19GeV_2019.root 'MakeTpcSecRowB.C(20190225,230027,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225,230027.log
