@@ -22,6 +22,37 @@ my $NEvents = 100000;
 my $step = 0;
 #================================================================================
 # dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/*
+# dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/* | awk -F\/ '{print $6}' | sort -u 
+# on disks
+# production_26p5GeV_fixedTarget_2018
+# production_27GeV_fixedTarget_2018
+# production_isobar_2018
+
+# production_14p5GeV_2019
+# production_19GeV_2019
+# production_31GeV_fixedTarget_2019
+# production_7.3GeV_fixedTarget_2019
+# production_3p85GeV_fixedTarget_2019
+# production_4p59GeV_fixedTarget_2019
+# production_AuAu200_2019
+
+# production_11p5GeV_2020
+# production_13p5GeV_fixedTarget_2020
+# production_19p5GeV_fixedTarget_2020
+# production_26p5GeV_fixedTarget_2020
+# production_31p2GeV_fixedTarget_2020
+# production_5p75GeV_fixedTarget_2020
+# production_7p3GeV_fixedTarget_2020
+# production_9p2GeV_2020
+# production_9p2GeV_2020b
+# production_9p2GeV_2020c
+# production_9p8GeV_fixedTarget_2020
+
+# production_7p7GeV_2021
+# production_dAu200_2021
+# production_OO_200GeV_2021
+
+# production_pp500_2022
 #============================ Final Runs ===================================================
 # hist238  for Run I  (2001) 
 # RunII08             (2002)
