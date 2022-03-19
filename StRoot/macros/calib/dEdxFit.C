@@ -3332,7 +3332,9 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       Fit.prob  = 0;
       Fit.entries = proj->Integral();
       cout << "i/j\t" << i << "/" << j << "\t" <<  proj->GetName() << "\t" << proj->GetTitle() << "\tentries = " <<  Fit.entries<< endl;
-      if (Fit.entries < 100) {delete proj; continue;}
+      if (Fit.entries < 100 || TMath::IsNaN(Fit.entries) ) {
+	delete proj; continue;
+      }
       if (TString(FitName) == "GP") g = FitGP(proj,opt,nSigma,pow,zmin,zmax);
       else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
