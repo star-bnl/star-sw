@@ -48,6 +48,7 @@
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StDetectorDbMaker/St_tpcBXT0CorrEPDC.h"
+#include "StDetectorDbMaker/St_TpcPadPedRMSC.h"
 #include "StEventUtilities/StEbyET0.h"
 #include "StDetectorDbMaker/St_beamInfoC.h"
 #if 0
@@ -224,8 +225,9 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrectionMDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection3MDF);
-    CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
+#if 0
+    CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kzCorrectionC);
     CLRBIT(Mask,StTpcdEdxCorrection::kzCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kTpcPadTBins);
@@ -235,7 +237,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     CLRBIT(Mask,StTpcdEdxCorrection::knTbk);
     CLRBIT(Mask,StTpcdEdxCorrection::kdZdY);
     CLRBIT(Mask,StTpcdEdxCorrection::kdXdY);
-
+#endif
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
     m_TpcdEdxCorrection->SetSimulation();
   }
@@ -1539,6 +1541,12 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 #else /* ! __TFG__VERSION__ */
       static UShort_t IDTs[__MaxNumberOfTimeBins__];
 #endif /* __TFG__VERSION__ */
+      Double_t pedRMSpad = pedRMS;
+      if (pedRMSpad < 0) {
+	Double_t NPads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
+	Double_t x =  pad/NPads - 0.5;
+	pedRMSpad = St_TpcPadPedRMSC::instance()->CalcCorrection(1-ioA, x);
+      }
       memset(mADCs, 0, sizeof(mADCs));
       memset(IDTs, 0, sizeof(IDTs));
       Int_t NoTB = 0;
@@ -1547,10 +1555,10 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 	//	Int_t index= NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin;
 	// Digits : gain + ped
 	//  GG TF1F *ff = new TF1F("ff","TMath::Sqrt(4.76658e+01*TMath::Exp(-2.87987e-01*(x-1.46222e+01)))",21,56)
-	Double_t pRMS = pedRMS;
+	Double_t pRMS = pedRMSpad;
 #if 0
 	if (bin >= 21 && bin <= 56) {
-	  pRMS = TMath::Sqrt(pedRMS*pedRMS + 4.76658e+01*TMath::Exp(-2.87987e-01*(bin-1.46222e+01)));
+	  pRMS = TMath::Sqrt(pedRMSpad*pedRMSpad + 4.76658e+01*TMath::Exp(-2.87987e-01*(bin-1.46222e+01)));
 	}
 #endif
 	if (pRMS > 0) {
@@ -1565,7 +1573,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 	mADCs[bin] = adc;
 	IDTs[bin] = SignalSum[index].TrackId;
 #ifdef __DEBUG__
-        if (adc > 3*pedRMS)	AdcSumBeforeAltro += adc;
+        if (adc > 3*pRMS)	AdcSumBeforeAltro += adc;
 	if (Debug() > 11 && SignalSum[index].Sum > 0) {
 	  LOG_INFO << "digi R/P/T/I = " << row << " /\t" << pad << " /\t" << bin << " /\t" << index 
 		   << "\tSum/Adc/TrackId = " << SignalSum[index].Sum << " /\t" 
@@ -1599,7 +1607,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 	    NoTB++;
 	    ADCsum += mADCs[i];
 #ifdef __DEBUG__
-	    if (mADCs[i] > 3*pedRMS) AdcSumAfterAltro += mADCs[i];
+	    if (mADCs[i] > 3*pedRMSpad) AdcSumAfterAltro += mADCs[i];
 	    if (Debug() > 12) {
 	      LOG_INFO << "Altro R/P/T/I = " << row << " /\t" << pad << " /\t" << i 
 		       << "\tAdc/TrackId = " << mADCs[i] << " /\t" << IDTs[i] << endm;
