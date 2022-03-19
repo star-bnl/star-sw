@@ -81,6 +81,6 @@
 <li> TFG21m Merge with star-sw                                           2021-10-30 18:02:07 -0400  (HEAD -> TFG, tag: TFG21m)
 <li> TFG21n Merge with star-sw & Maksym                                  2021-11-22 15:50:40 -0500  (HEAD -> TFG, tag: TFG21n)
 <li> TFG22a Freeze release for 2022 express production Merge             2022-01-15 19:09:11 -0500  (HEAD -> TFG, tag: TFG22a_5)
-<li> TFG22b Fixes for StTpcRSMaker with Altro/Sampa                      2022-03-19 15:21:11 -0500  (HEAD -> TFG, tag: TFG22b)
+<li> TFG22b Fixes for StTpcRSMaker with Altro/Sampa                      2022-03-19 11:22:10 -0400  (HEAD -> TFG, tag: TFG22b)
 <li>.DEV2  head of TFG git repository
 </ul>
