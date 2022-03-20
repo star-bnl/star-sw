@@ -1437,5 +1437,10 @@ for (int i = 1; i <= 24; i++) {TH1 *proj = pTSP->ProjectionY(Form("pTP%i",i),i,i
 for (int i = 1; i <= 24; i++) {TH1 *proj = pTSN->ProjectionY(Form("pTN%i",i),i,i); proj->SetMarkerColor(2); proj->Draw("samee");}
 
 
+03/19/22 OO200GeV RF and FF 2021 confirm https://www.star.bnl.gov/~fisyak/star/Tpc/Alignment/2021/dYvesrusSector.png 
+root.exe  ?F/.DEV2/*/MuTpcG.root
+
+
+
  */
   
