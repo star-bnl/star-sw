@@ -27,13 +27,13 @@ public:
 
     StMuFttRawHit(    UChar_t mSector, UChar_t mRDO, UChar_t mFEB, 
                     UChar_t mVMM, UChar_t mChannel, UShort_t mADC, 
-                    UShort_t mBCID, Short_t mTB );
+                    UShort_t mBCID, Short_t mTB, Short_t mBCIDDelta );
 
     ~StMuFttRawHit() {}
 
     void setRaw(    UChar_t mSector, UChar_t mRDO, UChar_t mFEB, 
                     UChar_t mVMM, UChar_t mChannel, UShort_t mADC, 
-                    UShort_t mBCID, Short_t mTB );
+                    UShort_t mBCID, Short_t mTB, Short_t mBCIDDelta );
 
     void setMapping( UChar_t mPlane, UChar_t mQuadrant, UChar_t mRow, UChar_t mStrip, UChar_t mOrientation );
     void set( StFttRawHit * stHit );
@@ -47,6 +47,7 @@ public:
     UChar_t channel() const;
     UShort_t adc() const;
     UShort_t bcid() const;
+    Short_t dbcid() const;
     Short_t tb() const;
 
     UChar_t plane() const;
@@ -64,6 +65,7 @@ protected:
     UShort_t mADC;
     UShort_t mBCID;
     Short_t mTB;  // from the trigger
+    Short_t mBCIDDelta;  
 
     // mapped information
     UChar_t mPlane;
@@ -75,7 +77,7 @@ protected:
     // StFttCluster *mCluster;
     // StFttPoint   *mPoint;
 
-    ClassDef( StMuFttRawHit, 1 );
+    ClassDef( StMuFttRawHit, 2 );
 };
 
 std::ostream& operator << ( std::ostream&, const StMuFttRawHit& hit ); // Printing operator
@@ -87,6 +89,7 @@ inline UChar_t  StMuFttRawHit::vmm()         const { return mVMM;         };
 inline UChar_t  StMuFttRawHit::channel()     const { return mChannel;     };
 inline UShort_t StMuFttRawHit::adc()         const { return mADC;         };
 inline UShort_t StMuFttRawHit::bcid()        const { return mBCID;        };
+inline Short_t  StMuFttRawHit::dbcid()       const { return mBCIDDelta;   };
 inline Short_t  StMuFttRawHit::tb()          const { return mTB;          };
 
 inline UChar_t  StMuFttRawHit::plane()       const { return mPlane;       };

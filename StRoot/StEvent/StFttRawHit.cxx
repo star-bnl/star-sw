@@ -21,6 +21,8 @@ mChannel(0),
 mADC(0),
 mBCID(0),
 mTB(-32000),
+mBCIDDelta(-32000),
+mTime(-32000),
 mPlane(255),
 mQuadrant(kFttUnknownQuadrant),
 mRow(255),
@@ -30,21 +32,22 @@ mOrientation(kFttUnknownOrientation)
 
 StFttRawHit::StFttRawHit(   UChar_t mSector, UChar_t mRDO, UChar_t mFEB, 
                             UChar_t mVMM, UChar_t mChannel, UShort_t mADC, 
-                            UShort_t mBCID, Short_t mTB){
-    setRaw( mSector, mRDO, mFEB, mVMM, mChannel, mADC, mBCID, mTB);
+                            UShort_t mBCID, Short_t mTB, Short_t mBCIDDelta){
+    setRaw( mSector, mRDO, mFEB, mVMM, mChannel, mADC, mBCID, mTB, mBCIDDelta);
 }
 
 void StFttRawHit::setRaw(   UChar_t mSector, UChar_t mRDO, UChar_t mFEB, 
                             UChar_t mVMM, UChar_t mChannel, UShort_t mADC, 
-                            UShort_t mBCID, Short_t mTB){
-    this->mSector  = mSector;
-    this->mRDO     = mRDO;
-    this->mFEB     = mFEB;
-    this->mVMM     = mVMM;
-    this->mChannel = mChannel;
-    this->mADC     = mADC;
-    this->mBCID    = mBCID;
-    this->mTB      = mTB;
+                            UShort_t mBCID, Short_t mTB, Short_t mBCIDDelta){
+    this->mSector    = mSector;
+    this->mRDO       = mRDO;
+    this->mFEB       = mFEB;
+    this->mVMM       = mVMM;
+    this->mChannel   = mChannel;
+    this->mADC       = mADC;
+    this->mBCID      = mBCID;
+    this->mTB        = mTB;
+    this->mBCIDDelta = mBCIDDelta;
 }
 
 void StFttRawHit::setMapping(   UChar_t mPlane, UChar_t mQuadrant, 
@@ -69,7 +72,9 @@ operator<<( ostream &os, const StFttRawHit& rh )
     os << "\tmChannel = "     << (int)rh.channel()     << endl;
     os << "\tmADC = "         << (int)rh.adc()         << endl;
     os << "\tmBCID = "        << (int)rh.bcid()        << endl;
+    os << "\tmBCIDDelta = "   << (int)rh.dbcid()       << endl;
     os << "\tmTB = "          << (int)rh.tb()          << endl;
+    os << "\tmTime = "        << (int)rh.time()        << endl;
     os << "\tmPlane = "       << (int)rh.plane()       << endl;
     os << "\tmQuadrant = "    << (int)rh.quadrant()    << endl;
     os << "\tmRow = "         << (int)rh.row()         << endl;
