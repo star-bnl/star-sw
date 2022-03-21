@@ -40,3 +40,24 @@ void StFttCluster::addNeighbor(StFttCluster* neighbor) {
     for(int i=0; i<n; i++) if(mNeighbors[i]==neighbor) return; //already there, do nothing
         mNeighbors.push_back(neighbor);
 }
+
+std::ostream&
+operator<<( std::ostream &os, const StFttCluster& rh )
+{
+
+    os << endl;
+    os << "StFttCluster( "   << endl;
+    os << "\tid          = " << rh.id()               << endl;
+    os << "\tplane       = " << (int)rh.plane()       << endl;
+    os << "\tquadrant    = " << (int)rh.quadrant()    << endl;
+    os << "\torientation = " << (int)rh.orientation() << endl;
+    os << "\tnStrips     = " << rh.nStrips()          << endl;
+    os << "\tnPoints     = " << rh.nPoints()          << endl;
+    os << "\tnRawHits    = " << rh.nRawHits()         << endl;
+    os << "\tnNeighbors  = " << rh.nNeighbors()       << endl;
+    os << "\tsumAdc      = " << rh.sumAdc()           << endl;
+    os << "\tx           = " << rh.x()                << endl;
+    os << "\tsigma       = " << rh.sigma()            << endl;
+    os << ")"                << endl;
+    return os;
+}
