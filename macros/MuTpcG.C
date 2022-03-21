@@ -1439,7 +1439,14 @@ for (int i = 1; i <= 24; i++) {TH1 *proj = pTSN->ProjectionY(Form("pTN%i",i),i,i
 
 03/19/22 OO200GeV RF and FF 2021 confirm https://www.star.bnl.gov/~fisyak/star/Tpc/Alignment/2021/dYvesrusSector.png 
 root.exe  ?F/.DEV2/*/MuTpcG.root
-
+_file1->cd();
+dYS->Project3D("zx")->Draw("colz"); 
+dYS_zx->FitSlicesY()
+dYS_zx_1->Draw()
+_file0->cd()
+dYS->Project3D("zx")->Draw("colz"); 
+dYS_zx->FitSlicesY()
+dYS_zx_1->Draw()
 
 
  */
