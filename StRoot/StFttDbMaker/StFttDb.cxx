@@ -13,6 +13,9 @@
 #include "StEvent/StFttPoint.h"
 #include <math.h>
 
+#include "tables/St_fttHardwareMap_Table.h"
+#include "tables/St_fttDataWindows_Table.h"
+
 
 ClassImp(StFttDb)
 
@@ -38,7 +41,6 @@ void StFttDb::setDbAccess(int v) {mDbAccess =  v;}
 void StFttDb::setRun(int run) {mRun = run;}
 
 int StFttDb::InitRun(int runNumber) {
-    LOG_INFO << "StFttDb::InitRun - run = " << runNumber << endm;
     mRun=runNumber;
     return kStOK;
 }
@@ -93,6 +95,74 @@ void StFttDb::unpackVal( int val, int &row, int &strip ) const{
     strip = (val >> 3) & 0b11111111; // 8 bit
     return;
 }
+
+void StFttDb::loadDataWindowsFromDb( St_fttDataWindows * dataset ) {
+    if (dataset) {
+        Int_t rows = dataset->GetNRows();
+
+        if ( !rows ) return;
+
+        dwMap.clear();
+
+        fttDataWindows_st *table = dataset->GetTable();
+        for (Int_t i = 0; i < rows; i++) {
+            for ( int j = 0; j < StFttDb::nVMM; j++ ) {
+                // printf( "[feb=%d, vmm=%d, ch=%d] ==> [row=%d, strip%d]\n", table[i].feb[j], table[i].vmm[j], table[i].vmm_ch[j], table[i].row[j], table[i].strip[j] );
+
+
+                // uint16_t key = packKey( table[i].feb[j], table[i].vmm[j], table[i].vmm_ch[j] );
+                // uint16_t val = packVal( table[i].row[j], table[i].strip[j] );
+                // mMap[ key ] = val;
+                // rMap[ val ] = key;
+                FttDataWindow fdw;
+                fdw.uuid   = table[i].uuid[j];
+                fdw.mode   = table[i].mode[j];
+                fdw.min    = table[i].min[j];
+                fdw.max    = table[i].max[j];
+                fdw.anchor = table[i].anchor[j];
+                dwMap[ fdw.uuid ] = fdw;
+
+
+                // std::cout << (int)table[i].feb[j] << std::endl;
+            }
+            // sample output of first member variable
+        }
+    } else {
+        std::cout << "ERROR: dataset does not contain requested table" << std::endl;
+    }
+}
+
+void StFttDb::loadDataWindowsFromFile( std::string fn ) {
+
+
+}
+
+
+void StFttDb::loadHardwareMapFromDb( St_fttHardwareMap * dataset ) {
+    if (dataset) {
+        Int_t rows = dataset->GetNRows();
+        if (rows > 1) {
+            std::cout << "INFO: found INDEXED table with " << rows << " rows" << std::endl;
+        }
+
+        mMap.clear();
+        rMap.clear();
+
+        fttHardwareMap_st *table = dataset->GetTable();
+        for (Int_t i = 0; i < rows; i++) {
+            for ( int j = 0; j < 1250; j++ ) {
+                uint16_t key = packKey( table[i].feb[j], table[i].vmm[j], table[i].vmm_ch[j] );
+                uint16_t val = packVal( table[i].row[j], table[i].strip[j] );
+                mMap[ key ] = val;
+                rMap[ val ] = key;
+            }
+            // sample output of first member variable
+        }
+    } else {
+        std::cout << "ERROR: dataset does not contain requested table" << std::endl;
+    }
+}
+
 
 void StFttDb::loadHardwareMapFromFile( std::string fn ){
     std::ifstream inf;
@@ -210,22 +280,17 @@ bool StFttDb::hardwareMap( int rob, int feb, int vmm, int ch, int &row, int &str
 }
 
 bool StFttDb::hardwareMap( StFttRawHit * hit ) const{
-    // LOG_INFO << "hardwareMap: " << *hit << endm;
     uint16_t key = packKey( hit->feb()+1, hit->vmm()+1, hit->channel() );
-    // LOG_INFO << "\tkey: " << key << endm;
     if ( mMap.count( key ) ){
         uint16_t val = mMap.at( key );
         int row=-1, strip=-1;
         unpackVal( val, row, strip );
-        // LOG_INFO << " --> row=" << row << ", strip=" << strip << endm;
         
         u_char iPlane = hit->sector() - 1;
         u_char iQuad = hit->rdo() - 1;
         int rob = iQuad + ( iPlane *nQuadPerPlane ) + 1;
-        // LOG_INFO << "rob=" << rob << endm;
 
         UChar_t orientation = getOrientation( rob, hit->feb()+1, hit->vmm()+1, row );
-        // LOG_INFO << "dir=" << (int)orientation << endm;
         hit->setMapping( iPlane, iQuad, row, strip, orientation );
         return true;
     }

@@ -38,7 +38,29 @@ int StFttDbMaker::Make(){
 int StFttDbMaker::InitRun(int runNumber) {
   LOG_INFO << "StFttDbMaker::InitRun - run = " << runNumber << endm;
 
-  mFttDb->loadHardwareMapFromFile( "vmm_map.dat" );
+
+    std::ifstream file("vmm_map.dat");
+    if(file.is_open()){ // debugging / calibration only
+        file.close();
+        std::cout << "Loading Hardware Map from FILE!!" << std::endl;
+        std::cout << "Remove / rename file to load from DB" << std::endl;
+        mFttDb->loadHardwareMapFromFile( "vmm_map.dat" );
+    } else { // default
+
+        TDataSet *mDbDataSet = GetDataBase("Geometry/ftt/fttHardwareMap");
+        St_fttHardwareMap *dataset = (St_fttHardwareMap*) mDbDataSet->Find("fttHardwareMap");
+        mFttDb->loadHardwareMapFromDb( dataset );
+    }
+
+
+    TDataSet *mDbDataSetDW = GetDataBase("Calibrations/ftt/fttDataWindows");
+    
+    if ( mDbDataSetDW ) {
+        St_fttDataWindows *dataset = (St_fttDataWindows*) mDbDataSetDW->Find("fttDataWindows");
+        mFttDb->loadDataWindowsFromDb( dataset );
+    }
+
+  
 
   return kStOK;
 }

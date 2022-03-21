@@ -145,7 +145,7 @@ StFttClusterMaker::Make()
     } // loop on hit
 
     size_t nClusters = 0;
-    LOG_INFO << "nStripsHit = " << nStripsHit << endm;
+    LOG_DEBUG << "StFttClusterMaker::Make{ nStripsHit = " << nStripsHit << " }" << endm;
     if ( nStripsHit > 0 ){ // could make more strict?
         for ( UChar_t iRob = 1; iRob < StFttDb::nRob+1; iRob++ ){
 

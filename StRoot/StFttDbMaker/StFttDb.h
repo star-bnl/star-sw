@@ -21,6 +21,17 @@ class StFttRawHit;
 class StFttCluster;
 class StFttPoint;
 
+struct FttDataWindow {
+    UChar_t uuid;
+    UChar_t mode;
+    Short_t min;
+    Short_t max;
+    Short_t anchor;
+};
+
+
+class St_fttHardwareMap;
+class St_fttDataWindows;
 
 class StFttDb : public TDataSet {
 
@@ -45,6 +56,10 @@ public:
     uint16_t packVal( int row, int strip ) const;
     void unpackVal( int val, int &row, int &strip ) const;
     void loadHardwareMapFromFile( std::string fn );
+    void loadHardwareMapFromDb( St_fttHardwareMap * );
+    void loadDataWindowsFromFile( std::string fn );
+    void loadDataWindowsFromDb( St_fttDataWindows * );
+
 
     UChar_t plane( StFttRawHit * hit );
     UChar_t quadrant( StFttRawHit * hit );
@@ -87,8 +102,8 @@ public:
     static const size_t nStripOrientations = 5; // real orientations (4) + 1 for unkown                       = 5 total
     static const size_t maxStripPerRow     = 166; // max number of strips in a row (only row 0 has this many)
     
-
     static vector<string> orientationLabels;
+
 
 
     UChar_t orientation( StFttRawHit * hit );
@@ -113,6 +128,8 @@ public:
 
     std :: map< uint16_t , uint16_t > mMap;
     std :: map< uint16_t , uint16_t > rMap; // reverse map 
+
+    std :: map< uint16_t , FttDataWindow > dwMap;
 
     // bool combineHVRows[nRowsPerQuad][nRowsPerQuad];
 
