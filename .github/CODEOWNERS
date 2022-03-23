@@ -14,7 +14,7 @@
 /StRoot/StChain                                    @klendathu2k       @perevbnlgov @fisyak
 /StRoot/StDAQMaker                                 @perevbnlgov       @akioogawa
 /StRoot/StDaqLib                                   @jml985
-/StRoot/StDaqLib/EEMC                              @kkauder           @rkunnawa    @Navagyan
+/StRoot/StDaqLib/EEMC                              @kkauder           @rkunnawa    @zlchang
 /StRoot/StDaqLib/EMC                               @kkauder           @rkunnawa    @Navagyan
 /StRoot/StDaqLib/FPD                               @akioogawa
 /StRoot/StDaqLib/L3                                @jml985            @tonko-lj
@@ -39,12 +39,12 @@
 /StRoot/StDetectorDbMaker/St_tpcSCGLC*             @genevb
 /StRoot/StDetectorDbMaker/St_trigDetSums*          @genevb
 /StRoot/StDetectorDbMaker/St_vertexSeed*           @genevb
-/StRoot/StEEmc*                                    @kkauder           @rkunnawa    @Navagyan
-/StRoot/StEEmcSimulatorMaker                       @kkauder           @rkunnawa    @klendathu2k @Navagyan
-/StRoot/StEEmcUtil                                 @kkauder           @rkunnawa    @klendathu2k @tinglin-physics  @Navagyan
-/StRoot/StEEmcPool                                 @tinglin-physics
+/StRoot/StEEmc*                                    @kkauder           @rkunnawa    @zlchang
+/StRoot/StEEmcSimulatorMaker                       @kkauder           @rkunnawa    @klendathu2k @zlchang
+/StRoot/StEEmcUtil                                 @kkauder           @rkunnawa    @klendathu2k @tinglin-physics @zlchang
+/StRoot/StEEmcPool                                 @tinglin-physics   @zlchang
 /StRoot/StETof*                                    @PhilippWeidenkaff @ideppner    @YannickSoehngen
-/StRoot/StEmc*                                     @kkauder           @rkunnawa    @Navagyan
+/StRoot/StEmc*                                     @kkauder           @rkunnawa    @Navagyan    @zlchang
 /StRoot/StEmbeddingUtilities                       @zhux97
 /StRoot/StEvent*                                   @klendathu2k
 /StRoot/StEvent/StTpc*                             @fisyak
