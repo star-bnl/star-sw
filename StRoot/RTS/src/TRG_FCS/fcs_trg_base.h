@@ -53,16 +53,21 @@ public:
 	void stage_0_201900(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
 	void stage_0_202101(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
 	void stage_0_202103(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
+	void stage_0_202109(adc_tick_t adc, geom_t geo, ped_gain_t *pg, u_int *to_s1) ;
 
 	void stage_1(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
 	void stage_1_201900(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
 	void stage_1_202201(u_int from_s0[], geom_t geo, link_t to_s2[]) ;
 
-	void stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+        void stage_2(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[], u_short* s2_to_dsm) ;
 	void stage_2_201900(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_202201(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_TAMU_202202(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_JP6_202204(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_JP6Carl_202205(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+	void stage_2_JP5_202206(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
+        void stage_2_202207(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[], u_short* s2_to_dsm) ;
 	void stage_2_tonko_202101(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 	void stage_2_tonko_202104(link_t ecal[], link_t hcal[], link_t pres[], geom_t geo, link_t output[]) ;
 
@@ -71,6 +76,7 @@ public:
 	void stage_3_201900(link_t from_s2[], u_short *to_dsm) ;
 	void stage_3_202201(link_t from_s2[], u_short *to_dsm) ;
 	void stage_3_202203(link_t from_s2[], u_short *to_dsm) ;
+	void stage_3_202207(link_t from_s2[], u_short *to_dsm) ;
 	void stage_3_tonko_202101(link_t from_s2[], u_short *to_dsm) ;
 
 	virtual u_int get_version() ;
@@ -85,7 +91,7 @@ public:
 
 	int verify_event_io() ;
 
-	u_short run_event_sim(int xing, int type) ;	// returns DSM bits
+	u_int run_event_sim(int xing, int type) ;	// returns DSM bits
 
 	int verify_event_sim(int xing) ;
 
@@ -162,6 +168,8 @@ public:
 
 			// stage_2 data sent by DEP/ADC in stage_2 (ns,ch)
 			link_t s2_to_s3[2] ;			// stage_2 data _sent_ to stage_3; ns,ch
+
+			link_t s2_to_dsm ;			// new for FY22 -- direct link to Trigger
 		} s2[NS_COU] ;
 
 
@@ -187,6 +195,9 @@ public:
 		//output from stage_2 emulation ;
 		struct {
 			link_t s2_to_s3[2] ;
+
+			u_short s2_to_dsm ;	// new in FY22
+
 		} s2[NS_COU] ;
 
 		// output from stage_3 emulation
@@ -260,14 +271,30 @@ public:
 	// various thresholds
 	static u_short EM_HERATIO_THR ;
 	static u_short HAD_HERATIO_THR ;
+	static u_short EMTHR0 ;
 	static u_short EMTHR1 ;
 	static u_short EMTHR2 ;
-	static u_short EMTHR3 ;
+        static u_short EMTHR3 ; //obsolete for 202207 
+        static u_short ELETHR0 ;
+	static u_short ELETHR1 ;
+	static u_short ELETHR2 ;
+	static u_short HADTHR0 ;
 	static u_short HADTHR1 ;
-	static u_short HADTHR2 ;
-	static u_short HADTHR3 ;
-	static u_short JETTHR1 ;
-	static u_short JETTHR2 ;       
+  	static u_short HADTHR2 ;
+        static u_short HADTHR3 ; //obsolete for 202207
+        static u_short JETTHR1 ; //obsolete for 202207 
+        static u_short JETTHR2 ; //obsolete for 202207      
+        static u_short JPATHR2 ;      
+        static u_short JPATHR1 ;      
+        static u_short JPATHR0 ;      
+        static u_short JPBCTHR2 ;      
+        static u_short JPBCTHR1 ;      
+        static u_short JPBCTHR0 ;      
+        static u_short JPBCTHRD ;      
+        static u_short JPDETHR2 ;      
+        static u_short JPDETHR1 ;      
+        static u_short JPDETHR0 ;      
+        static u_short JPDETHRD ;      
 	static u_short ETOTTHR ;       
 	static u_short HTOTTHR ;       
 	static u_short EHTTHR ;
