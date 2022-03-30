@@ -24,22 +24,22 @@ foreach my $arg (@ARGV) {
   if ($arg =~ /\.root$/) {push @rootfiles, $arg;      }
   if ($arg =~ /^time/) {$time = 1;} 
 }
-if ($time) {
-  $all = 1; @histGP = qw(Z T TR);
-  @opt = qw(GP);;
-  print "histGP = @histGP\n";
-}
-# # ADC
-   @histADC = qw(I3DZ I3DTanL I3DdX IC3DZ IC3DTanL IC3DdX I3Dnpads I3Dntmbks I3Dnpadtmbks
- 		O3DZ O3DTanL O3DdX IC3DZ IC3DTanL IC3DdX O3Dnpads O3Dntmbks O3Dnpadtmbks);
- for (my $i = 1; $i <=13; $i++) {
-   push @histADC, "WI_" . $i;
-   push @histADC, "EI_" . $i;
-   push @histADC, "WO_" . $i;
-   push @histADC, "EO_" . $i;
- }
- my @opt = qw (ADC);
-# print "histADC = @histADC\n";
+# if ($time) {
+#   $all = 1; @histGP = qw(Z T TR);
+#   @opt = qw(GP);;
+#   print "histGP = @histGP\n";
+# }
+#  # # ADC
+#     @histADC = qw(I3DZ I3DTanL I3DdX IC3DZ IC3DTanL IC3DdX I3Dnpads I3Dntmbks I3Dnpadtmbks
+#   		O3DZ O3DTanL O3DdX IC3DZ IC3DTanL IC3DdX O3Dnpads O3Dntmbks O3Dnpadtmbks);
+#   for (my $i = 1; $i <=13; $i++) {
+#     push @histADC, "WI_" . $i;
+#     push @histADC, "EI_" . $i;
+#     push @histADC, "WO_" . $i;
+#     push @histADC, "EO_" . $i;
+#   }
+#   my @opt = qw (ADC);
+#  print "histADC = @histADC\n";
  ################################################################################
  if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 and $#histADC < 0) {
    @histGF = qw(

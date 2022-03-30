@@ -35,3 +35,6 @@ foreach my $part (@particles) {
 # 	    echo ${f}; hadd -T ${f}.root gstar*${f}*0.root
 # end
 # );
+# foreach p (muon+ muon- electron positron pion+ pion- kaon+ kaon- proton pbar deuteron triton He3 alpha pionMIP)
+#    hadd ${p}.root ../*${p}*.root >& ${p}.log &
+# end
