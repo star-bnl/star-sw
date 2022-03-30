@@ -1282,7 +1282,7 @@ StETofCalibMaker::processStEvent()
         }
         else if( current == prev ) {
             mStuckFwDigi.push_back( current );
-            resetToRaw( mMuDst->etofDigi( i-1 ) );
+            resetToRaw( etofDigis[ i-1 ] );
 
             nDuplicates++;
             continue;
