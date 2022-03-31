@@ -31,4 +31,4 @@ connect RunLog;
 select runNumber from detectorSet where runNumber>=$startrun and runNumber<=$endrun and detectorID=28;
 END2
 
-# mysql -h onldb.starp.bnl.gov --port=3501
+# mysql -h onldb2.starp.bnl.gov --port=3501
