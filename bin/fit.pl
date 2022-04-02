@@ -128,6 +128,7 @@ foreach my $rootfile (@rootfiles) {
       for (my $sec = $sec1; $sec <= $sec2; $sec++) {
 	my $ext = "";
 	if ($sec >= 0) {$ext = "_X" . $sec;}
+	if ($hist =~ /Edge/ || $hist =~ /xyPad/) {$ext = "_y3";}
 	my $dir = File::Basename::dirname($rootfile);
 	my $fil = File::Basename::basename($rootfile);
 	my $SCRIPT = $hist . $fittype . $ext . $fil;
@@ -145,7 +146,7 @@ foreach my $rootfile (@rootfiles) {
 	if ($sec >= 0) {
 	  $rootcmd .= "\",\"R\"," . $sec . ")'";
 	} else {
-	  if ($hist =~ /Edge/ || $hist =~ /xyPad/) {
+	  if ($ext eq "_y3") {
 	    $rootcmd .= "\",\"R\",-1,-1,1,3)'";
 	  } else {
 	    $rootcmd .=	"\")'";
