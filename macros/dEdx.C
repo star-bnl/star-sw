@@ -77,6 +77,7 @@ void dEdx(Int_t First, Int_t Last,
   if (STAR_VERSION.BeginsWith("TFG") || STAR_VERSION.Contains("DEV2")) {
     tfgV = kTRUE;
     Chain += ",quiet,ForcedX";
+    //    Chain += ",ForcedX";
     if (mode == 2) Chain += ",dEdxCalib"; //,DbV20211017"; // !!!!!!!!!!!!   check DbV
   } else {
     Chain += ",CalcdNdx";
