@@ -1,0 +1,76 @@
+#!/bin/csh -f
+
+# Run number to process
+set run=$1
+# Output directory
+set out=$2
+# Number per process
+set max=10
+# LSF batch que to submit to
+set que = star_cas_mem 
+
+set dat=dat/
+
+set seed_energy   = 0.40
+set expand_energy = 0.40 
+set strip_energy  = 5.0
+set strip_threshold = 0.5
+set min_strips = 3 
+
+#
+# Generates filelists for each run, each containing no more than "max" files
+# requires data on NFS, drops fast and zerobias
+#
+set i = 0
+set j = 0
+foreach file ( `get_file_list.pl -cond "production=P04ik,filetype=daq_reco_MuDst,storage=NFS,runnumber=${run}" -keys "path,filename" -delim / | grep -v fast | grep -v zerobias ` )
+  @ i++
+  if ( $i == 1 ) then
+    @ j++
+    if ( -e ${dat}/R${run}.$j.lis ) then
+       rm ${dat}/R${run}.$j.lis
+    endif
+  endif
+  echo ${file} >> ${dat}/R${run}.$j.lis
+  if ( $i >= $max ) then
+    @ i = 0
+  endif
+end
+
+#
+# Run lists for input
+#
+set runlist = ( `ls ${dat}/R${run}.*.lis` )
+
+if ( $#runlist != 0 ) then
+echo Submitting $#runlist jobs
+endif
+
+if ( $#runlist == 0 ) then
+echo No ${dat}/R${run}.*.lis ???
+endif
+
+
+@ i = 1
+while ( $i <= $#runlist )
+
+    set pi0tree = ${out}/R${run}.$i.pi0tree.root
+    set pi0hist = ${out}/R${run}.$i.pi0hist.root
+    set runscript = tmp/R${run}.$i.x
+
+cat <<EOF > ${runscript}
+#!/bin/csh -f
+stardev
+root4star -q -b macros/runEEmcPi0Maker.C\(-1,\"$runlist[$i]\",\"${pi0tree}\",\".\/\"\)
+EOF
+
+    set log = ${out}/R${run}.$i.pi0tree.log
+    set job = R${run}.$i
+
+    chmod u+x ${runscript}
+    bsub -o ${log} -q ${que} -J ${job} ${runscript}
+
+    @ i++
+
+end
+

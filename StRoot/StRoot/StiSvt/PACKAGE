@@ -1,0 +1,5 @@
+# $Id $
+# package StiSvt
+# author: 
+Library:libStiSvt.so:LIBS +=   -l_StEvent  -lStiGui -lGui  -lStChain -lSti -lStMcEvent  -lStSvtClassLibrary
+#Library:libStiSvt.so:LIBS +=   -lStEvent  -lStiGui  -lSti  -lStMcEvent  -lStSvtClassLibrary

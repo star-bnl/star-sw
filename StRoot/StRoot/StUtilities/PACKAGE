@@ -1,0 +1,4 @@
+# $Id $
+# package StUtilities
+# author: 
+Library:libStUtilities.so:LIBS += -lSt_base

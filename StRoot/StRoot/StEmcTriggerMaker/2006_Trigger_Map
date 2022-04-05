@@ -1,0 +1,342 @@
+
+ //Prepared by CARL and posted by Murad at: 
+  //http://cyclotron.tamu.edu/star/2006Jets/apr03_2007/DSMthresholds.txt
+  /* ppProductionTrans:
+
+
+   #0   Runs#7097009 - 7101054
+        2006-04-07 04:43:31 to 2006-04-11 17:21:09
+
+	HT0		E0=11,W0=5
+	  1		12
+	  2		E2=24,W0=22
+	HTTP0		1
+	    1		17
+	    2		31
+	JP0		42
+	  1		58
+	  2		110
+	ETOT		109
+
+
+	bemc-jp0-mb	        127501
+	bemc-jp1-mb             127221
+	bemc-http-mb-fast	127821
+	bemc-http-mb-l2gamma	127611
+	bemc-jp0-etot-mb-L2jet	127622
+	bemc-ht2-mb-emul	127212
+
+	eemc-jp0-mb	        127551
+	eemc-jp1-mb	        127271
+	eemc-http-mb-fast	127831
+	eemc-http-mb-L2gamma	127641
+	eemc-jp0-etot-mb-L2jet	127652
+	eemc-ht2-mb-emul	127262
+
+	jpsi-mb			117705
+	upsilon			117602
+
+  ----------------------------------
+
+   #1    Runs#7101075 - 7129065
+         2006-04-12 01:31:40 to 2006-05-09 21:16:07
+
+	HT0		E0=11,W0=5
+	  1		12
+	  2		24
+	HTTP0		1
+	    1		17
+	    2		31
+	JP0		42
+	  1		58
+	  2		110
+	ETOT		109
+
+
+	bemc-jp0-mb	        127501
+	bemc-jp1-mb             127221
+	bemc-http-mb-fast	127821
+	bemc-http-mb-l2gamma	127611
+	bemc-jp0-etot-mb-L2jet	127622
+	bemc-ht2-mb-emul	127213
+
+	eemc-jp0-mb	        127551
+	eemc-jp1-mb	        127271
+	eemc-http-mb-fast	127831
+	eemc-http-mb-L2gamma	127641
+	eemc-jp0-etot-mb-L2jet	127652
+	eemc-ht2-mb-emul	127262
+
+	jpsi-mb			117705
+	upsilon			117602
+
+
+  -------------------------------------------------------
+  -------------------------------------------------------
+   ppProductionLong
+
+   #2   Runs#7131043 - 7132027
+	2006-05-12 03:59:16 to 2006-05-12 09:16:22
+
+	HT0		5
+	  1		16
+	  2		24
+	HTTP0		1
+	  1		20
+	  2		31
+	JP0		48
+	  1		58
+	  2		110
+	ETOT		109
+
+	bemc-jp1-mb             137221
+	eemc-jp1-mb             137271
+	muon                    117402
+
+  -----------------------------
+
+
+   #3  Runs#7132062 - 7133051
+       2006-05-12 20:44:34 to 2006-05-13 21:50:03
+
+	HT0		5
+	  1		18
+	  2		24
+	HTTP0		1
+	    1		20
+	    2		31
+	JP0		49
+	  1		60
+	  2		110
+	ETOT		109
+
+  
+	bemc-jp0-mb             137501
+	bemc-jp1-mb             137222
+	bemc-http-mb-fast	137821 
+	bemc-jp0-etot-mb-L2jet	137622	
+	bemc-ht2-mb-emul	137213	
+	
+	eemc-jp0-mb             137551
+	eemc-jp1-mb             137272
+	eemc-http-mb-fast       137831		
+	eemc-jp0-etot-mb-L2jet	137652
+	eemc-ht2-mb-emul	137262
+
+	muon                    117402
+	upsilon                 137602
+
+  -----------------------------
+
+   #4  Runs#7133052 - 7135028
+       2006-05-13 21:52:49 to 2006-05-13 22:46:00		
+	
+	HT0		5
+	  1		16
+	  2		24
+	HTTP0		1
+	    1		19
+	    2		31
+	JP0		49
+	  1		60
+	  2		110
+	ETOT		109
+
+	bemc-jp0-mb             137501
+	bemc-jp1-mb             137222
+	bemc-http-mb-fast	137822 
+	bemc-jp0-etot-mb-L2jet	137622	
+	bemc-ht2-mb-emul	137213	
+	
+	eemc-jp0-mb             137551
+	eemc-jp1-mb             137273
+	eemc-http-mb-fast       137832		
+	eemc-jp0-etot-mb-L2jet	137652
+	eemc-ht2-mb-emul	137262
+
+	muon                    117402
+	upsilon                 137603
+
+
+  -----------------------------
+
+  #5  Runs#7135067 - 7156028
+      2006-05-16 02:38:55 to 2006-06-05 15:49:17	
+
+	HT0		5
+	  1		16
+	  2		24
+	HTTP0		1
+	    1		19
+	    2		31
+	JP0		49
+	  1		60
+	  2		110
+	ETOT		109
+
+	bemc-jp0-mb             137501
+	bemc-jp1-mb             137222
+	bemc-http-mb-fast	137822 
+	bemc-jp0-etot-mb-L2jet	137622	
+	bemc-ht2-mb-emul	137213
+	bemc-http-mb-l2gamma	137611	
+	
+	eemc-jp0-mb             137551
+	eemc-jp1-mb             137273
+	eemc-http-mb-fast       137832		
+	eemc-jp0-etot-mb-L2jet	137652
+	eemc-ht2-mb-emul	137262
+	eemc-http-mb-l2gamma	137641
+
+	muon                    117402
+	upsilon                 137603
+
+
+  -------------------------------------------------------
+  -------------------------------------------------------
+  */
+
+ 
+  //trigger dependence threshold place holders  
+  int ht0west_th,ht0east_th;
+  int ht1west_th,ht1east_th;
+  int ht2west_th,ht2east_th;
+  int http0_th,http1_th,http2_th;
+  int jp0_th,jp1_th,jp2_th,bemc_etot;
+  
+  ht0west_th = -1;
+  ht0east_th = -1;
+  ht1west_th = -1;
+  ht1east_th = -1;
+  ht2west_th = -1;
+  ht2east_th = -1;
+  http0_th = -1;
+  http1_th = -1;
+  http2_th = -1;
+  jp0_th = -1;
+  jp1_th = -1;
+  jp2_th = -1;
+  bemc_etot = -1;
+    
+  cout<<"Trig Id in StBemcTrigger="<<mTrigId<<endl;
+
+  if (mTrigId==127212) {
+
+      ht0west_th = 5;
+      ht0east_th = 11;
+      ht1west_th = 12;
+      ht1east_th = 12;
+      ht2west_th = 22;
+      ht2east_th = 24;
+      http0_th = 1;
+      http1_th = 17;
+      http2_th = 31;
+      jp0_th = 42;
+      jp1_th = 58;
+      jp2_th = 110;
+      bemc_etot =109;
+    }
+
+
+    if ((mTrigId==127501)||(mTrigId==127221)||(mTrigId==127821)||(mTrigId==127611)||
+	(mTrigId==127622)||(mTrigId==127213)||(mTrigId==127551)||(mTrigId==127271)||
+	(mTrigId==127831)||(mTrigId==127641)||(mTrigId==127652)||(mTrigId==127262)||
+	(mTrigId==117705)||(mTrigId==117602)) {
+      
+
+       ht0west_th = 5;
+       ht0east_th = 11;
+       ht1west_th = 12;
+       ht1east_th = 12;
+       ht2west_th = 24;
+       ht2east_th = 24;
+       http0_th = 1;
+       http1_th = 17;
+       http2_th = 31;
+       jp0_th = 42;
+       jp1_th = 58;
+       jp2_th = 110;
+       bemc_etot =109;
+    }
+    
+    
+    if ((mTrigId==137221)||(mTrigId==137271)||(mTrigId==137402)) {
+      
+       ht0west_th = 5;
+       ht0east_th = 5;
+       ht1west_th = 16;
+       ht1east_th = 16;
+       ht2west_th = 24;
+       ht2east_th = 24;
+       http0_th = 1;
+       http1_th = 20;
+       http2_th = 31;
+       jp0_th = 48;
+       jp1_th = 58;
+       jp2_th = 110;
+       bemc_etot =109;
+    }
+    
+    
+    if ((mTrigId==137821)||(mTrigId==137272)||(mTrigId==137831)||(mTrigId==137602)) {
+      
+       ht0west_th = 5;
+       ht0east_th = 5;
+       ht1west_th = 18;
+       ht1east_th = 18;
+       ht2west_th = 24;
+       ht2east_th = 24;
+       http0_th = 1;
+       http1_th = 20;
+       http2_th = 31;
+       jp0_th = 49;
+       jp1_th = 60;
+       jp2_th = 110;
+       bemc_etot =109;
+    }
+    
+    if ((mTrigId==137501)||(mTrigId==137222)||(mTrigId==137822)||(mTrigId==137622)||
+	(mTrigId==137213)||(mTrigId==137611)||(mTrigId==137551)||(mTrigId==137273)||
+	(mTrigId==137832)||(mTrigId==137652)||(mTrigId==137262)||(mTrigId==137641)||
+	(mTrigId==117402)||(mTrigId==137603)) {
+      
+       ht0west_th = 5;
+       ht0east_th = 5;
+       ht1west_th = 16;
+       ht1east_th = 16;
+       ht2west_th = 24;
+       ht2east_th = 24;
+       http0_th = 1;
+       http1_th = 19;
+       http2_th = 31;
+       jp0_th = 49;
+       jp1_th = 60;
+       jp2_th = 110;
+       bemc_etot =109;
+    }
+
+    if ((ht2west_th==-1)&&(ht2east_th==-1)&&(bemc_etot==-1)&&
+	(http0_th==-1)&&(http1_th==-1)&&(http2_th==-1)&&
+	(jp0_th==-1)&&(jp1_th==-1)&&(jp2_th==-1)&&
+	(ht0west_th==-1)&&(ht0east_th==-1)&&
+	(ht1west_th==-1)&&(ht0east_th==-1))
+      {  
+	cout<<"This Trigger ID is not supported for 2006!"<<endl;
+      }
+
+
+
+    const int HT0WEST_TH_2006 = ht0west_th;
+    const int HT0EAST_TH_2006 = ht0east_th;    
+    const int HT1WEST_TH_2006 = ht1west_th;    
+    const int HT1EAST_TH_2006 = ht1east_th;   
+    const int HT2WEST_TH_2006 = ht2west_th;    
+    const int HT2EAST_TH_2006 = ht2east_th;
+    const int HTTP0_TH_2006 = http0_th;
+    const int HTTP1_TH_2006 = http1_th;
+    const int HTTP2_TH_2006 = http2_th;
+    const int JP0_TH_2006 = jp0_th;
+    const int JP1_TH_2006 = jp1_th;
+    const int JP2_TH_2006 = jp2_th;
+    const int BEMC_ETOT_2006 =bemc_etot;
+    

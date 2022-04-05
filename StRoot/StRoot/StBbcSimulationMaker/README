@@ -1,0 +1,48 @@
+BBC response simulation.
+Author: M.L. Kopytine
+
+
+Model:
+08/30/02
+
+At present, the BBC response simulation operates in the following way:
+
+0) In GEANT (bbcmgeo.g), 'calorimetric' option is used to simulate both 
+time-of-flight and energy deposition. This means that gstar processes all 
+tracks for a given sensitive element to generate integrated output: ionization
+sum and (presumably) minimum time-of-flight among the contributing tracks.
+In the response simulation, the geometry of ionization within the tile is 
+ignored, including the actual number of tracks that contributed.
+
+1) Response simulation is done independently for TOF and dE. This means that
+any possible logics which may consider dE before deciding whether
+TOF need to be read out is not taken into account. dE and TOF are 'read out'
+whenever there is a GEANT hit.
+
+2) Groups of tiles are associated with PMTs according to information provided
+by Les Bland. For these groups, the PMT amplitude is calculated as a random
+number sampled from a Poissonian distribution with the mean equal to 15*the 
+number of MIPs equivalent of the total energy deposition in the tiles served 
+by given PMT, multiplied by the photoelectron->pC conversion factor 
+=0.3 pC/photoelectron. 
+(see BbcDE::GetDE). The PMT resolution associated with one photoelectron
+is assumed to be 30%. 
+For the outer ring, the energy depositions are multiplied by 0.8 to take
+their larger light absorbtion into account.
+
+3) For a group of tiles served by a given PMT, the minimum TOF is taken.
+(In fact, this feature is redundant for 2003 because there is one PMT per
+tile in the inner annuli, and the outer ones do not meaure TOF).
+To that, a random error with RMS of 900ps is added.
+
+4) Times and amplitudes are discretized into 256 bins. Underflow/overflow is
+stored in bins 0 and 255. For TOF, the range is between 0 and 25.6 ns (0.1 ns
+per bin). For the amplitude, the range is between 0 and 256*0.25 pC.
+
+
+Running options:
+
+At present (10/14/02), the following user flags are supported:
+BbcSimQa -- book and fill quality assurance histograms.
+To activate, run cons with argument
+cons EXTRA_CPPFLAGS="-DBbcSimQa"

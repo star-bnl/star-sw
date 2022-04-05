@@ -1,0 +1,5 @@
+# $Id $
+# package HanksTriggerDataReader
+# author: 
+Library:libStEEmcPoolHanksTriggerDataReader.so:LIBS +=   -lStChain
+#Library:libStEEmcPoolHanksTriggerDataReader.so:LIBS +=   -lStChain

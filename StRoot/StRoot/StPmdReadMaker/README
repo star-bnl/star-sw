@@ -1,0 +1,25 @@
+StPmdReadMaker
+===========
+
+	This Maker works as an interface between StDAQMaker (and StDaqLib) for PMD
+   and outside world of PMD reconstruction.
+
+   	It instantiates PMD reader from StDAQmaker and gets PMD data by using method
+   from StPmdReader in StDAQmaker.
+	The data are obtained in terms of secno,blockno,cram_no and channel no.
+
+      In this routine we apply mapping on those data-coordinates (mapping code exist in 
+   StPmdGeom in StPmdUtil) and then apply calibration constants from database to make the 
+   data uniform.
+
+   The PMD (and CPV) hits are then stored in StEvent container as StPhmdHit.
+
+11th. March, 2004: The following changes have been made before AuAu200GeV production
+
+	1. There is a switch based on the run number, which selects the proper VME crate 
+	   condition i.e. whether only one or both the crates are working.
+
+	2. The StPmdGeom reads a particular text file (xxxx_BoardDetail.txt) depending on
+	   the run number to apply proper mapping. This is needed because the status
+	   of the FEE boards changes(1 for present, 0 for absent) in course of time.
+

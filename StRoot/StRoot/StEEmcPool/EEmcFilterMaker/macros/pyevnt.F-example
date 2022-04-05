@@ -1,0 +1,25 @@
+C*********************************************************************
+C...PYEVNT Filter, following   Qinghua example.
+C.. imitates the oryginal PYEVBT , continue to generate new events until satysfying event if found
+C.. WARN: common block have been copy/paste, do NOT assume they are correct for an new Pythia version, JB
+
+C.. Modified to study energy deposit pattern on EEMC of energetic electron 
+C.. from decay of W and its background.                   WMZ 2/08/08  
+ 
+      SUBROUTINE PYEVNT
+ 
+
+C...Double precision and integer declarations.
+      IMPLICIT DOUBLE PRECISION(A-H, O-Z)
+      IMPLICIT INTEGER(I-N)
+      integer response
+
+      DO WHILE (1.EQ.1)
+         CALL PYEVNT_ORG        ! oryginal method
+         CALL STAR_FILTER_DECISION (response)
+c        print *, 'respOUT=',response
+         if( response.gt.0) goto 999
+c        print *, "ask for new Pythia"
+      ENDDO                     ! closing  'while'
+ 999  RETURN                    ! the event has been accepted
+      END

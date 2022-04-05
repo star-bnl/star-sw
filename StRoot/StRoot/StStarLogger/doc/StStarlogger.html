@@ -1,0 +1,731 @@
+<html>
+<head>
+  <title>STAR logger</title>
+  <meta name="Author" content="Valeri Fine">  
+</head>
+<body>
+<b><pre>
+
+     ***************************************************************
+     ***************************************************************
+     ****                    STAR logger:                       ****  
+     ****     The STAR offline logger-based message manager     ****
+     ***************************************************************
+     ***************************************************************
+</pre></b>
+STAR logger is a the <a href="http://wiki.apache.org/logging-log4j/Log4JProjectPages">logger-based</a> implementation of <a href="/public/comp/sofi/StMessMgr">
+STAR message manager interface</a>
+
+<p>
+Table of Contents:
+<ul>
+<li><a href="#logger">Integration log4j package for STAR framework</a>
+<li><a href="#makers">Logger for STAR Makers</a>
+<li><a href="#global">Global logger: "BFC","QA, and "UCM"</a>
+<li><a href="#default">The STAR logger default parameters</a>
+<li><a href="#macros">Standard CPP macros</a>
+<li><a href="#use">How to use</a>
+<li><a href="#conf">How to configure</a>
+<li><a href="#print">"Print statement" transition</a>
+<li><a href="#runtime">Run time level control</a>
+<li><a href="#root">ROOT messages handling</a>
+<li><a href="#examples">"Examples (under construction yet)"</a>
+<li><a href="#stones">"Underwater stones"</a>
+<li><a href="#deprecated">"The deprecated<a> functionality 
+                          of <a href="/public/comp/sofi/StMessMgr">the old messager"</a>
+</ul>
+<!-- ------------------------------------------------------------------------------ -->
+<a name="logger"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h2> Integration log4j package for STAR framework</h2>
+
+
+  Integration of the <a href="http://wiki.apache.org/logging-log4j/Log4JProjectPages">log4j</a> packages and STAR offline framework 
+  was straightforward due to an already existing OO  
+  <a href="/public/comp/sofi/StMessMgr">design</a> 
+  for processing message streams. For the STAR C++ production code  the 
+  <a href="http://logging.apache.org/log4cxx">C++ version</a> of the logger, 
+  so-called <a href="http://logging.apache.org/log4cxx">log4cxx</a> 
+  was chosen.
+  
+<p>
+  Most (if not all) components of the STAR production 
+  framework send their log messages to the abstract STAR messenger. 
+  To merge the STAR existing framework with the log4j package, 
+  it was only a matter of creating another implementation of 
+  the STAR messenger interface - 
+     <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/StStarLogger">
+     <b><code>StLoggerManager</code></b></a>. 
+  Additionally, to meet 
+  the STAR production needs, a standard set of the logger 
+  appender and filter features were either developed or enhanced. 
+  We added one extra appender to communicate with the STAR 
+  production MySQL database, namely
+  <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/StStarLogger">
+     <b><code>StMySQLAppender</code></b></a>, 
+   and created a custom logger filter, 
+  <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/StStarLogger">
+     <b><code>StarOptionFilter</code></b></a>.     
+  to be able to select/suspend the messages according to the 
+  STAR production manager's criteria. Once again, and due to 
+  the already existing OO messenger implementation in the 
+  STAR production system, enabling the new scheme does not 
+  require modifying any existing piece of the STAR code. 
+  It is sufficient to dynamically load the new implementation 
+  (see 
+  <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/macros/LoadLogger.C">
+  <b><code>LoadLogger.C</code></b></a> macro) 
+  and provide an external XML <a href="#conf">configuration file</a> 
+  for the logger as needed. 
+
+<!-- ------------------------------------------------------------------------------ -->
+<a name="makers"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h2> "Loggers" for STAR Makers  </h2>
+
+  The STAR framework initiates three common loggers: <b><code>"BFC"</code></b> 
+  ,<b><code>"QA"</code></b>, and <b><code>"UCM"</code></b> and each STAR StMaker subclass instantiates 
+  its own logger. The logger name is the subclass class name.
+  This allows to set the logger list of appenders, filters and level of 
+  the severity for entire production chain or / and for each STAR maker subclass separately.
+  The end user code is not to worry about the proper selection of the appropriated logger.
+  The user via set of the CPP <a href="#macros">macros</a> or 
+  via the <a href="/public/comp/sofi/StMessMgr#i1"><code>gMessMgr</code> 
+  global pointer</a>
+  communicate with the so-called "current logger".
+   The base StMaker class internally governs the logger selection to make sure the current
+  logger  matches the logger of the current active StMaker instance.
+
+<!-- ------------------------------------------------------------------------------ -->
+<a name="global"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h2>Global "Loggers": <code>"BFC"</code>,<code>"QA"</code>, and <code>"UCM"</code></h2>
+ The STAR software infrastructure provides two default global loggers. 
+<ul>
+<li>
+<blockquota>
+  The <b><code>"BFC"</code></b> logger is a top logger for all loggers created by any particular StMaker instance.
+  This logger is redirected  with the messages those are created out of the scope of any StMaker object. 
+</blockquota> 
+
+<li>
+<blockquota>
+  The <b><code>"QA"</code></b> logger is a dedicated global logger to  handle all messages 
+  sent with <a href="#macros"><b><code>LOG_QA</code></b></a> macro 
+  (see: <a href="#macros">"CPP macro"</a> section below)</a> 
+  for the so-called <a href="/public/comp/sofi/StMessMgr/#i1">"QAInfo - Q"-type messages.</a> 
+</blockquota> 
+
+<li>
+<blockquota>
+  The <b><code>"UCM"</code></b> logger is a dedicated global logger to  handle all messages 
+  sent with <a href="#macros"><b><code>LOG_UCM</code></b></a> macro (see: "CPP macro" section below)</a> 
+  The logger can be configured to forward all messages 
+  to the STAR 
+  <a href="http://drupal.star.bnl.gov/STAR/ucm-project-status-and-results">UCM ("<b>U</b>ser <b>C</b>entric <b>M</b>onitoring") </a>
+  MySQL Database at run-time. The job tracking can be actrivated by SUMS and it is available via the UCM Web portal
+  <a href="http://fc3.star.bnl.gov:8080/UCM">http://fc3.star.bnl.gov:8080/UCM</a>
+</blockquota> 
+</ul>
+
+Since each global logger ( <b><code>"UCM"</code></b>, <b><code>"QA"</code></b>, <b><code>"BFC"</code></b>) is the normal logger 
+it can be provided with the dedicated filters, layouts, and appenders to <a href="#conf">customize</a> it output.
+<!-- ------------------------------------------------------------------------------ -->
+<a name="default"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h2>The STAR logger default parameters</h2>
+By default 
+<ul>
+<li>
+  <blockquota>
+    The message level is <b><code>INFO</code></b>
+  </blockquota> 
+<li>
+  <blockquota>
+    There is no active filter. 
+  </blockquota> 
+<li>
+  <blockquota>
+    The  appender for all loggers is the <code><b>"ConsoleAppender"</b></code>
+  </blockquota> 
+<li>
+  <blockquota>
+    The  <code><b>ConsoleAppender</b></code> layout is <code><b>"%-3c{2}:%-5p - %m%n"</b></code>
+  </blockquota> 
+</ul>
+
+The default values for the logger components can be set via 
+the optional logger <a href=#file>configuration XML file</a> also.
+
+<!-- ------------------------------------------------------------------------------ -->
+<a name="macros"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h2> Standard CPP macros </h2>
+
+The base STAR message manager abstract interface was improved to provide better performance.
+It is recommended now instead of the direct using of the Messager global pointer one should apply 
+the CPP macros as follows:
+ 
+<ul>    
+  <li> <b><code>LOG_DEBUG</code></a> </b>
+  <li> <b><code>LOG_INFO</code></a> </b> &lt;---- This is the STAR default level
+  <li> <b><code>LOG_WARN</code></a> </b>
+  <li> <b><code>LOG_ERROR</code></a> </b>
+  <li> <b><code>LOG_FATAL</code></a> </b>
+<!-- ------------------------------------------------------------------------------ -->
+  <a name="log_qa_macros"></a>
+<!-- ------------------------------------------------------------------------------ -->
+  <li> <b><code>LOG_QA</code></a> </b>
+  <li> <b><code>LOG_UCM</code></a> </b>
+</ul>
+are followed by the C++ output "stream" elements  and ended up with the <b><code>"endm"</code></b> object.
+For example, to direct the message to the "error" logger on needs:
+
+<b><code> <pre>
+   { LOG_ERROR << "My error message" << endm; }
+</pre>  </code> </b>
+
+<!-- ------------------------------------------------------------------------------ -->
+<a name="nologgermacros"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<b>Attention !!! </b> Keep in mind the <b><code>LOG_ERROR </code> </b> 
+is a CPP macro with <b><code>if</code> </b> C++ statement inside.
+This means you should surround it with the curly brackets if the macro is used inside 
+of another <b><code>if</code> </b> statement.
+<P>
+For example:
+<b><code> <pre>
+    if ( a > 0)
+       LOG_ERROR << "the variable is positive" << endm;
+     else 
+       LOG_INFO << "the variable is Ok" << endm;
+</pre>  </code> </b>
+will not work as one expects. To get the desirable effect you need
+<b><code> <pre>
+    if ( a > 0) {
+       LOG_ERROR << "the variable is positive" << endm;
+    } else {
+       LOG_INFO << "the variable is Ok" << endm;
+    }
+</pre>  </code> </b>
+instead. 
+<P><small>
+Are you curious why very this implementation was chosen?  
+Please, read some <a href="log4cxx.html#performance">extra pages</a>.
+</small>
+<p>
+The macros above provide an extra benefit to develop and 
+use your code with no logger at all.
+Just add into your implementation the lines as follows:
+</pre> </code> </b>
+<ul>
+<li>
+<b><code> <pre>
+#ifndef LOG_INFO 
+#  define LOG_INFO cout
+#  define endm  endl
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_WARN 
+#  define LOG_WARN cout
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_INFO 
+#  define LOG_INFO cout
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_ERROR 
+#  define LOG_ERROR  cerr
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_FATAL
+#  define LOG_FATAL cerr
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_DEBUG
+#  define LOG_DEBUG cout
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_QA
+#  define LOG_QA cout
+#endif
+</pre> </code> </b>
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_UCM
+#  define LOG_UCM cout
+#endif
+</pre> </code> </b>
+</ul>
+or something like this.
+
+<!-- ------------------------------------------------------------------------------ -->
+<a name="use"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h2> How to use the manager </h2>
+
+To use the STAR message manager your code has to contain the STAR message manager 
+<a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/St_base/StMessMgr.h">interface header file</a>:
+
+  <b><code>
+   <pre>
+    #include "StMessMgr.h" 
+  </pre>
+   </code></b>
+  and use that interface <a href="#macros">CPP macros</a>
+
+<P>
+ By default STAR "root4star" framework works with the old STAR message 
+ manager implementation.
+
+<p>
+  To turn the new one one should load the extra shared library.
+  The ROOT macros <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/macros/LoadLogger.C"><b><code>LoadLogger.C</code></b></a> does just that.
+  This means to instantiate the new logger it is enough to call <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/macros/LoadLogger.C"><b><code>"LoadLogger.C"</code></b></a>
+  followed by you your ROOT macro invocation. 
+  <p>
+   However for <b><code>bfc.C</code></b> the new interface is set as "default". To tune it off and use the old version one should 
+   apply <b><code> "-logger" </code></b> option
+   
+   <b><code>
+   <pre>
+     &gt;root4star
+     root4star[0] .x bfc.C(1, ". . . -logger", . . .  )
+   </pre>
+   </code></b>
+ <p>
+   As soon as the new logger is loaded the output files, format and level of 
+   the verbosity may be defined by the external Logger configuration file.
+   It recommended to avoid using any method of the STAR message manager describing with 
+   <a href="/public/comp/sofi/StMessMgr"> document</a> and use <a href"#macros">the macros</a>
+   mentioned above only. This is to make the code free of the run-time and compilation-time
+   parameters; this can be defined via the <a href="#conf">logger configuration</a> file.
+ <p>
+   
+   In the other words the author of the code should not apply the "Advanced methods" described by   
+   <a href="/public/comp/sofi/StMessMgr"> "Section II"</a> 
+   from the user code as soon as this can be done outside of the code at run-time.
+ <p>
+   It is enough to define the desirable messages and its level. 
+   All other features can be ordered with the configuration 
+   file at run-time without any needs to change and re-compile the code.
+<!-- ------------------------------------------------------------------------------ -->
+<a name="conf"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h2>How to configure</h2>
+
+<!-- ------------------------------------------------------------------------------ -->
+<a name="file"></a>
+<!-- ------------------------------------------------------------------------------ -->
+To overwrite the STAR default output logger configuration one can provide 
+the <a href="#examples">custom configuration</a> with the file 
+in <a href="http://wiki.apache.org/logging-log4j/Log4jXmlFormat">XML format</a>, 
+<b><code>"log4j.xml"</code></b>,  in the current working directory.
+
+<!-- ------------------------------------------------------------------------------ -->
+<a name="env"></a>
+<!-- ------------------------------------------------------------------------------ -->
+The custom name and directory for the logger configuration file can be provided via ROOT resource file.
+One may add to his/her <b><code>".rootrc"</code></b> file the line:
+<b><code><pre>
+   Logger.Configuration     $STAR/StRoot/StStarLogger/doc/HardQuota.xml
+</pre></code></b>
+to do that. 
+<br>
+<blockquote>
+(About <b><code>".rootrc"</code></b> see: <a href="http://root.cern.ch/root/doc/RootDoc.html">ROOT User's Guide v4.04</a>. 
+<br><a href="ftp://root.cern.ch/root/doc/chapter2.pdf">Chapter 2. Getting Started.</a>
+ Section <b>Environment Setup</b>, page 21.
+</blockquote>
+<br>
+One can alternate the default configuration file name and its location via <b><code>STAR_LOGGER_PROPERTY</code></b>
+environment variable as well.
+<p>
+<!-- ------------------------------------------------------------------------------ -->
+<a name="fileExample"></a>
+<!-- ------------------------------------------------------------------------------ -->
+For example, <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/StRoot/StStarLogger/log4j.xml?rev=HEAD">the file <b><code>"log4j.xml"</code></b></a> 
+defines the "Console output" for entire STAR production chain and the <b><code>"Debug"</code></b> level of the messages.
+
+<p>
+
+"Jakarta log4j" is a community-supported project that includes the log4cxx, 
+ log4c, and log4perl packages (thereby supporting multiple computing languages) 
+ 
+ The output media and format and level are configured by providing the set of the different parameters 
+ via the external configuration file  
+ (of course we do provide the reasonable default. If one is happy with that no extra file is required). 
+ For all STAR StMaker subclass at once or /and for each separate subclass 
+ one may define the desirable output by combining 4 different logger components:
+ 
+<ul> 
+<li>    <a href="log4cxx.html#LoggersAppendersAndLayouts">loggers</a>
+<li>    <a href="log4cxx.html#AppendersAndLayouts">appenders</a>
+<li>    <a href="log4cxx.html#Layouts">layouts</a>
+<li>    <a href="http://logging.apache.org/log4cxx/apidocs/classlog4cxx_1_1spi_1_filter.html">filters</a>
+</ul>
+
+These four types are necessary to empower the developers with the capabilities 
+to log messages according to message type and level, to control at run-time 
+how these messages are formatted, and lastly to decide where they are reported. 
+<p>
+For each logger one can define the "priority value" (message level) and the arbitrary number 
+of the different appenders.
+For the standard levels, we have 
+<center><b><pre>DEBUG < INFO < WARN < ERROR < FATAL. 
+</pre></b></center>
+
+For each appender one can specify one layout if any  and arbitrary number of the filters. 
+The different "loggers" can share the appenders explicitly as an xml "appender-ref"  parameter defines.
+The "appenders" can be shared implicitly, since the "children" loggers inherit the "parent" appenders 
+and other attributes  "by default" (see: <a href="http://logging.apache.org/log4j/docs/manual.html" 
+<cite><b>Short Introduction to log4j</b></cite></a> for the futher information)
+<p>
+
+The C++ version of the package provides the ready-to-eat components to choose from:
+See: <a href="http://logging.apache.org/log4cxx/">http://logging.apache.org/log4cxx</a>
+<p>
+The layout may be supplied with <a href="http://logging.apache.org/log4j/docs/api/org/apache/log4j/PatternLayout.html">
+the custom format string</a>.
+
+<!-- ------------------------------------------------------------------------------ -->
+<a name="formats"></a>
+<!-- ------------------------------------------------------------------------------ -->
+   <b><code>
+   <pre>
+  Formats:
+     %c  - logger name %c{2} = b.c  ( a.b.c. )
+     %d  - date        %d{%H:%M:%S} or %d{%d %b %Y %H:%M:%S}. 
+                        a - short week date name, A - full week date name
+                        b - short month name,     B - full month name  m - month number (1-12)
+                        d - day of the month
+                        H - hours (0-23)          I - hours ( 1 - 12)
+     %F  - the file name where the logging request was issued
+     %l  - location information of the caller which generated the logging event
+     %L  - the line number from where the logging request was issued
+   </pre>
+   </code></b>
+   <b><i><code>
+   <pre>
+     %m  - the application (user) supplied message associated with the logging event
+   </pre>
+   </code></i></b>
+   <b><code>
+   <pre>
+     %n  - the platform dependent line separator character or characters ("newline" symbol)
+     %p  - the level(priority) of the logging event
+     %r  - the number of milliseconds elapsed since the start 
+     %x  - the NDC (nested diagnostic context) 
+   </pre>
+   </code></b>
+
+
+"By default" STAR message manager uses the "pattern layout" with the format:
+   <b><code>
+   <pre>
+        PatternLayout("%-3c{2}:%-5p - %m%n"));
+   </pre>
+   </code></b>
+
+According the format and layout that prints out:
+<ul>
+  <li> <b><code>"%-3c{2}"</code></b> - the current STAR "StMaker" class name within 3 symbols field
+  <li> <b><code>":"</code></b>  - the symbol ":" 
+  <li> <b><code>"%-3p"</code></b>  - the current level (defined for example by <a href="#macros">the macro applied</a>) of the message within the 5 symbols field 
+  <li> <b><code>" - "</code></b> - 3 symbols: blank, dash, blank
+  <li> <b><code>"%m"</code></b> - the user provided message (via CPP <a href="#macros">macros</a> within 30 letters at most field 
+  <li> <b><code>"%n"</code></b>  - the "end-of-line" symbol
+</ul>
+<p>
+Examples:
+
+   <b><code>
+   <pre>
+      QA :INFO  - Output root file name gtrack.root
+   </pre>
+   </code></b>
+
+
+   <b><code>
+   <pre>
+      BFC:INFO  - StTpcDbMaker::Using any drift velocity
+   </pre>
+   </code></b>
+
+   <b><code>
+   <pre>
+      BFC:WARN  -  Validity:19980101/0  -----   20010710/5436
+   </pre>
+   </code></b>
+<p>
+  
+<!-- ------------------------------------------------------------------------------ -->
+<a name="print"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h2> "Print statement" transition</h2>
+ To enjoy the new logger feature one should replace the "regular" C++ I/O stream output statement 
+ or C output function  with that calling the loggers.
+ This transition is simple and straightforward.
+ <p>
+ Make sure your source code contains the STAR "Message Manager Interface" header file
+ <p>
+  <b><code>
+   <pre>
+    #include "StMessMgr.h" 
+  </pre>
+   </code></b>
+<p>
+<!-- ------------------------------------------------------------------------------ -->
+<a name="printCplus"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h3> "C++" output stream statements </h3>
+ If you use the C++ output streams like <b><code>"cout"</code></b>, <b><code>"cerr"</code></b>  
+ to get an access to the logger it is enough to 
+<ul>
+<li> replace the <b><code>"cout"</code></b> and <b><code>"cerr"</code></b> object 
+with the appropriated <a href="#macros">logger macros</a>
+and 
+<li>replace the <b><code>"endl"</code></b> object with <b><code>"endm"</code></b> ones.
+</ul>
+
+For example, replace of your plain C++ statement:
+   <b><code>
+   <pre>
+          cout << "DbFill: structure: " << structName << endl;
+   </pre>
+   </code></b>
+
+with
+   <b><code>
+   <pre>
+      { LOG_INFO << "DbFill: structure: " << structName << endm; }
+   </pre>
+   </code></b>
+   
+   It is safe to add these macro to your code. You still will be able to use and compile your code with no logger with <a href="#nologgermacros">
+a simple addition</a>.
+   
+<!-- ------------------------------------------------------------------------------ -->
+<a name="printCprintf"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h3> "C"output subroutines</h3>
+
+Use the <a href="http://root.cern.ch/root/htmldoc/TString.html#TString:Form">"Form"</a> ROOT method 
+to simplify your programs transition those contain the C-language output subroutines like <b><code>"printf"</code></b> or <b><code>"fprintf"</code></b>.
+
+You may add the appropriated  <a href="#macros">logger macros</a> followed by the former <b><code>printf</code></b> statement 
+followed by <b><code>"endm"</code></b> object and 
+semicolon and replace the name of the C subrotuine (for example printf) 
+with the Form method.
+Don't forget to remove the end-of-line symbol ( <b><code>"\n"</code></b>
+) from the format string.
+<p>
+For example, to enable "logger", the line
+   <b><code>
+   <pre>
+   printf(" %d pre and %d post crossing data available\n",numberOfPreXing(),numberOfPostXing());
+   </pre>
+   </code></b>
+may be replaced with
+   <b><code>
+   <pre>
+ {
+   LOG_DEBUG <<
+      Form(" %d pre and %d post crossing data available",numberOfPreXing(),numberOfPostXing())
+             << endm;
+ }
+   </pre>
+   </code></b>
+<h3> STAR "Message Manager"</h3>
+Since the "logger" is  <a href="#logger">another implementation</a> of the STAR "Message Manager" abstract 
+interface, the existing invocations of the manager should work with the new "log4cxx" implemenation 
+without any change.
+However some functions became redundand and they are <a href="#deprecated">deprecated<a/>.
+
+Calling others should be adjusted for the sake of the consistency.
+<p>
+For example,  the expression
+   <b><code>
+   <pre>
+       gMessMgr->Error() << "StZdcVertexMaker::Init():  in ZdcVertexMaker did not find ZdcCalPars." << endm;
+   </pre>
+   </code></b>
+can be replaced with  
+   <b><code>
+   <pre>
+      { LOG_ERROR << "StZdcVertexMaker::Init():  in ZdcVertexMaker did not find ZdcCalPars." << endm; }
+   </pre>
+   </code></b>
+and versa verse.
+<!-- ------------------------------------------------------------------------------ -->
+<a name="runtime"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<H2>Run time level control</H2>
+The default parameters of the loggers are provided  either by <a href="#default">default</a>
+or via the logger <a href="#file">configuration file</a> at start time. 
+At run-time the parameters can be changed with the log4cxx API.
+
+However the the level of the logger associated with each StMaker instance can be set with 
+the <b><code>StMaker::SetDebug</code></b> method as well.
+<p>
+<center><b><code>
+<table border="1" cellspacing="0">
+<tr bgcolor="#aaaacc"><th align="center">StMaker::SetDebug parameter</th><th align="center">Logger level</th></tr>
+<tr bgcolor="#eeeeff"><td> &lt;-4</td><td>FATAL</td></tr>
+<tr bgcolor="#ffffff"><td>kFatal=-4</td><td>FATAL</td></tr>
+<tr bgcolor="#eeeeff"><td>kError=-3</td><td>ERROR</td></tr>
+<tr bgcolor="#ffffff"><td>kWarning=-2</td><td>WARN</td></tr>
+<tr bgcolor="#eeeeff"><td>kInfo=-1</td><td>INFO</td></tr>
+<tr bgcolor="#ffffff"><td>kDefault=0</td><td><a href="#default">STAR default </a> </td></tr>
+<tr bgcolor="#eeeeff"><td>kDebug=1</td><td>DEBUG</td></tr>
+<tr bgcolor="#ffffff"><td>kDebug2=2</td><td>DEBUG</td></tr>
+<tr bgcolor="#eeeeff"><td> &gt; 2</td><td>DEBUG</td></tr>
+</table>
+</code></b></center>
+
+StMaker::SetDEBUG method is to propagate the message level to all its child Makers as 
+usually.
+
+
+<!-- ------------------------------------------------------------------------------ -->
+<a name="root"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<H2>ROOT messages handling</H2>
+The messages generated by the ROOT system are handled by the messagger also. 
+ROOT distinguishes 6 levels of the messages.
+They are mapped to the appropriated logger level (see table) 
+and redirected to the current active logger. 
+This means the logger appender and filters are to handle the messages generated by ROOT classes 
+as soon as the ROOT methods are called by the said maker.
+<p>
+<center><b><code>
+<table border="1" cellspacing="0">
+<tr bgcolor="#aaaacc"><th align="center">ROOT level</th><th align="center">Logger</th></tr>
+<tr bgcolor="#eeeeff"><td>Info</td><td>Info</td></tr>
+<tr bgcolor="#ffffff"><td>Warning</td><td>Warning</td></tr>
+<tr bgcolor="#eeeeff"><td>Error</td><td>Error</td></tr>
+<tr bgcolor="#ffffff"><td>Break</td><td> Fatal</td></tr>
+<tr bgcolor="#eeeeff"><td>SysError</td><td>Fatal</td></tr>
+<tr bgcolor="#ffffff"><td>Fatal</td><td>Fatal</td></tr>
+</table>
+</code></b></center>
+ 
+<p>
+In addition the standard ROOT approach to define the severity of the ROOT messages is applied as well.
+Namely, one still can define it via "ROOT Environment" providing the line
+<b><code><pre>
+    Root.ErrorIgnoreLevel   Info
+ </pre></code></b>
+alike within his/her <a href="#conf">custom <b><code>".rootrc"</code></b> file</a>.  The ROOT rule is applied first.
+<!-- ------------------------------------------------------------------------------ -->
+<a name="examples"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<!-- <H2><a href="HowTo.html">"Examples</a> (under construction yet)"</H2>  -->
+<H2>Examples of the custom configuration files (under construction yet)</H2>
+
+The example of the configuration files below are available 
+to copy from <b><code>$STAR/StRoot/StStarLogger/doc</b></code> directory 
+or from <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/StStarLogger/doc">STAR CVS repository</a>
+<ul>
+<li><a href="Bfc.xml"> <b><code>Bfc.xml</code></b></a> - describes the STAR custom <b><code>StarOptionFilter</code></b> parameters
+<li><a href="HardQuotaRange.xml"> <b><code>HardQuotaRange.xml</code></b></a> - allows at most  400 messsage of the level "Debug" and "Info" 
+<li><a href="HardQuotaTpc.xml"> <b><code>HardQuotaTpc.xml</code></b></a> - allows at most 400 messages from <b><code>St_tpt_Maker</code></b>
+<li><a href="HardQuota.xml"> HardQuota.xml</code></b></a> - allows at most  400 non-Info  messages
+<li><a href="RollingQuota.xml"> <b><code>RollingQuota.xml</code></b></a> - allows 100 MGb log file at most   
+<li><a href="QACustom.xml"> <b><code>QACustom.xml</code></b></a> - defines the custom level and format for QA messages
+<li><a href="CollectSpecialMessages.xml"> <b><code>CollectSpecialMessages.xml</code></b></a> - redirects some messages defined by the custom patterns to the dedicated log file 
+<li><a href="SkipMessages.xml"> <b><code>SkipMessages.xml</code></b></a> - removes the unwanted messages from output defined by the custom patterns
+<li><a href="JanFilter.xml"> <b><code>JanFilter.xml</code></b></a> - customize the message levels for the selected STAR makers
+</ul>
+SkipMessages.xml
+<!-- ------------------------------------------------------------------------------ -->
+<a name="stones"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h2>Underwater stones</h2>
+
+Pay your attention to some non-obvious properties of <a href="http://logging.apache.org/log4j/docs/manual.html">the logger objects</a>.
+<ul>
+<li> <b>Appender Additivity</b>
+<br><blockquota>
+<cite>
+The output of a log statement of logger C will go to all the appenders in C and its ancestors. 
+This is the meaning of the term <a href="https://www.qos.ch/ac2001/F11-100.html">"appender additivity"</a>. 
+<br>
+However, if an ancestor of logger C, say P, has the additivity flag set to false, 
+then C's output will be directed to all the appenders in C and it's ancestors 
+upto and including P but not the appenders in any of the ancestors of P. 
+Loggers have their additivity flag set to true by default
+</cite>
+</blockquota>
+<P>
+The "additvity"  has some "side effect" that if one assignes the "appender" for the "root" logger and he/she does define 
+the same appender for the child logger explicitly then one may
+<a href="http://www.star.bnl.gov/rt2/Ticket/Display.html?id=621">have ended up with each program message 
+printed more then one time</a>. 
+</ul>
+
+
+<!-- ------------------------------------------------------------------------------ -->
+<a name="deprecated"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h2> Deprecated methods </h2>
+
+Some redundant functions described by<br> 
+
+<a href="/public/comp/sofi/StMessMgr"><b>Section II. Advanced features</b></a>,
+namely, 
+<ul>
+<li><a href="/public/comp/sofi/StMessMgr/#ii1">II-1.  Message summary </a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii2">II-2.  Specifying options and output streams</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii3">II-3.  Non-accounted messages</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii4">II-4.  Turning off printing of message prefix</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii5">II-5.  Turning off printing of the leading "St"</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii6">II-6.  Turning on printing of the time-date stamp</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii7">II-7.  Access to the current message</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii8">II-8.  Finding a message</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii9">II-9.  Finding a list of messages</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii10">II-10. Finding messages within a list</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii11">II-11. Printing a list of messages</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii12">II-12. Formatting output</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii13">II-13. Limiting message counts</a>
+<li><a href="/public/comp/sofi/StMessMgr/#ii14">II-14. Memory usage management </a>
+</ul>
+<br>
+
+still remain of the part of the STAR messager interface. However they are deprecated because they do allow to change
+the logger functionality from within the code.
+This way, it may have interfered with the options ordered through the configuration file.
+
+The presence  of these functions do not cause any run-time / compile error. However it does not lead to the expected behavior either.
+One is advised to remove the invocations of these functions from his/her code and use <a href="#conf"> the "xml" configuration file</a> instead.
+
+<hr>
+  <small>
+   <center>You are 
+     <IMG src="/cgi-bin/counter.cgi?counter=StarLogger&digit=3"> 
+     <IMG src="/cgi-bin/counter.cgi?counter=StarLogger&digit=2">
+     <IMG src="/cgi-bin/counter.cgi?counter=StarLogger&digit=1">
+     <IMG src="/cgi-bin/counter.cgi?counter=StarLogger&digit=0&w"> -th 
+     visitors.
+   </center>
+ </small>
+<hr>
+<small>
+Maintainer: <a href="mailto:fine@bnl.gov">Valeri Fine</a>
+</small>
+
+</body>
+</html>

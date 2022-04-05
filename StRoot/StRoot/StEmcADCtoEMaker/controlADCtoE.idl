@@ -1,0 +1,18 @@
+/*
+*********************************************************
+* Table:       controlADCtoE.idl
+* Description: define keys for managing StEmcADCtoEMaker
+* Author     : Aleksei Pavlinov, WSU 
+*********************************************************
+*/
+struct  controlADCtoE
+{
+    short DeductPedestal[8];    /* switch for deducting pedestal */
+    short Calibration[8];       /* switch for calibration */    
+    float CutOff[8];            /* cutoff value. See CutOffType for more information*/
+    short CutOffType[8];        /* cutoff type (0 = none, 1 = pedestal RMS, 2 = energy) */
+    short OnlyCalibrated[8];    /* save only calibrated hits */
+    short CheckStatus[8];       /* save only if status is ok */
+    short CheckCrate[8];        /* save only if crate is ok */
+    short messLimit;            /* limit for warning message */
+};

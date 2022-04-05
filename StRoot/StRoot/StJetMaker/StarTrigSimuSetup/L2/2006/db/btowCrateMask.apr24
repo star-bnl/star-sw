@@ -1,0 +1,12 @@
+# btowCrateMask:
+# Replace stat & fail  masks for channels already initialized from the DB 
+#     in specified crate
+#     format : {hexCrateID hexStat hexFatal ,  anythingElse}
+#     lines starting with '#' are ignored
+#     empty lines are not permitted
+#
+#  ...............BTOW......................
+#
+# was masked in L0 , so L2 follows
+0x18 0x0f 0x2f 
+#

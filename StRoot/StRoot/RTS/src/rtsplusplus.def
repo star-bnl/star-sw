@@ -1,0 +1,94 @@
+# Jeff's version of rtsplus.def
+#
+# Why?  I like to build all .o's in the local directory to completely
+# separate myself from any other compiles (broken subdirs bad makefiles 
+# or compiles for other cpu's or whatever...)
+#
+# Also, gets around the 2-make issue
+#
+# To use:
+#
+# 1. set the following variables:
+#    PROJDIR  - installation base dir
+#    CXXFLAGS - add any desired flags
+#    LDLIBS   - nullify to get rid of old-style compiled daq libs, then add as needed
+#    BINS     - executable code
+#    OBJS     - set to .o's for this directory
+#             - add $(STD_DAQ_OBJS) (if needed)
+#             - add $(MYRINET_OBJS) (if needed)
+#
+# 2. include ../myrinet.def AFTER LDLIBS definition if needed
+#
+# 3. set targets:
+#       all: $(BINS)
+#       mylib.a: $(OBJS)
+#		$(RTS_AR) mylib.a $?
+#       bintargets as a appropriate
+#
+
+STD_DAQ_OBJS := rtsComLib.o rtsLogUnix.o ipcQLib.o rtsMother.o shmLib.o rtsCfgLib.o fs_index.o sfs_index.o sfs_index_daq.o  ThreadsMem.o SimpleXmlDoc.o MemStack.o runControlClass.o HashTable.o GenericMon.o setLogLevel.o thread_dbg.o 
+
+JML_DAQ_OBJS := TokenManagerChooser.o JmlHisto.o EthernetServer.o  ThreadedEthernetServer.o MultiSender.o MultiServer.o EventShipper.o SplitMultiServer.o ThreadedMultiServer.o
+
+# these are obsolete now....
+#EVPREADER_OBJS := cfgutil.o emcReader.o evpReader.o evpSupport.o fpdReader.o ftpReader.o l3Reader.o msgNQLib.o pmdReader.o pp2ppReader.o ricReader.o sanityCheckers.o scReader.o ssdReader.o svtReader.o tofReader.o tpcFCFReader.o tpcReader.o trgReader10.o trgReader12.o trgReader20.o trgReader21.o trgReader22.o trgReader30.o trgReader32.o trgReader.o rts_reader.o daq_dta.o daq_det.o 
+
+#EVPREADER_OBJS += daq_tpx.o daq_itpc.o itpcCore.o itpcFCF.o itpcInterpreter.o itpcPed.o tpxCore.o tpxFCF.o tpxGain.o tpx_ped.o tpxPed.o tpxStat.o tpxFCF_2D.o
+#EVPREADER_OBJS += daq_pp2pp.o
+#EVPREADER_OBJS += fcfAfterburner.o fcfClass.o
+#EVPREADER_OBJS += daq_tof.o 
+
+
+
+#the preferred reader
+DAQREADER_OBJS := msgNQLib.o daqReader.o cfgutil.o daq_det.o daq_dta.o
+DAQREADER_OBJS += tpxCore.o daq_tpx.o  tpxFCF.o tpxGain.o tpxPed.o tpxStat.o tpxFCF_2D.o
+DAQREADER_OBJS += itpcCore.o daq_itpc.o  itpcFCF.o itpcInterpreter.o itpcPed.o 
+DAQREADER_OBJS += daq_tpc.o tpc_FCFReader.o tpc_reader.o
+DAQREADER_OBJS += fcfAfterburner.o fcfClass.o
+DAQREADER_OBJS += daq_l3.o l3_reader.o 
+DAQREADER_OBJS += daq_trg.o trgReader10.o trgReader12.o trgReader20.o trgReader21.o trgReader22.o trgReader30.o trgReader32.o trg_reader.o
+
+L3_SUPPORT_OBJS := l3_support.o
+
+MYRINET_OBJS := myriLib.o platform.o vxFileRequestServer.o
+
+EVENTTRACKER_OBJS := 	FtfFinder.o l3CoordinateTransformer.o FtfSl3.o FtfDedx.o FtfPara.o FtfTrack.o FtfBaseTrack.o l3Swap.o FtfBaseHit.o FtfHit.o FtfUtilities.o gl3Event.o gl3EMC.o gl3Track.o l3TrgReader.o l3TrgReaderV20.o l3TrgReaderV21.o l3TrgReaderV12.o gl3LMVertexFinder.o gl3Hit.o gl3Histo.o l3BankUtils.o l3EmcCalibration.o gl3HistoManager.o eventTrackerLib.o
+
+all:   
+
+OFFSRC = $(RTS_DIR_PATH)/src
+ONLSRC = $(RTS_DIR_PATH)/../../online/RTS/src
+OFFRTS = $(RTS_DIR_PATH)
+
+L2ALGOPATH = $(RTS_DIR_PATH)/../../StRoot/StTriggerUtilities/L2Emulator
+
+
+
+MY_VPATH := $(ONLSRC)/L2_SUPPORT:$(ONLSRC)/RTSCOM_STUB:$(OFFSRC)/LOG:$(ONLSRC)/MYRI:$(ONLSRC)/MISC_LIBS:$(ONLSRC)/SUNRT:$(ONLSRC)/RTSCFG:$(OFFSRC)/LOG:$(OFFSRC)/SFS:$(OFFSRC)/DAQ_READER:$(OFFRTS)/EventTracker:$(OFFSRC)/RTS_READER:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_ITPC:$(OFFSRC)/DAQ_TRG:$(OFFSRC)/DAQ_PP2PP:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_TOF:$(ONLSRC)/ETHLIB_NEW:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_TPC:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_L3:$(ONLSRC)/L3_SUPPORT:$(L2ALGOPATH)/L2algoUtil:$(L2ALGOPATH)/L2gammaAlgo:$(L2ALGOPATH)/L2hienAlgo:$(L2ALGOPATH)/L2jetAlgo:$(L2ALGOPATH)/L2pedAlgo:$(L2ALGOPATH)/L2upsilon:$(L2ALGOPATH)/L2wAlgo:$(ONLSRC)/XMLCFG:$(ONLSRC)/L4_SUPPORT:$(ONLSRC)/MON:$(ONLSRC)/MISC_LIBS:$(ONLSRC)/LIBJML
+
+MY_DEPVPATH1 := $(subst :,/*.C ,$(MY_VPATH))
+MY_DEPVPATH2 := $(subst :,/*.cxx ,$(MY_VPATH))
+MY_DEPVPATH3 := $(subst :,/*.c ,$(MY_VPATH))
+
+vpath %.C $(MY_VPATH)
+vpath %.c $(MY_VPATH)
+vpath %.cxx $(MY_VPATH)
+
+say:
+	@echo '******' $(SAY) and building: $(BINS)
+
+clean:
+	$(CLEAN) $(BINS)
+
+install:
+	$(INSTALL)  $(BINS) $(BINDIR)
+	$(INSTALL)  $(SHELLS) $(BINDIR)
+
+depend:
+	$(MAKEDEPEND)
+
+
+# $(MY_DEPVPATH1) $(MY_DEPVPATH2) $(MY_DEPVPATH3)
+
+

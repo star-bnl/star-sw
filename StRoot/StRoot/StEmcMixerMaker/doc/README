@@ -1,0 +1,35 @@
+********************************************************************************
+README File for StEmcEmbeddingMaker
+
+Maintenance: Alexandre Suaide (WSU)
+
+________________________________________________________________________________
+History
+--------------------------------------------------------------------------------
+Author: Alexandre Suaide
+First version - 01/03/2003
+
+--------------------------------------------------------------------------------
+Description - EMC Embedding
+--------------------------------------------------------------------------------
+
+
+This is the basic embedding scheme for EMC. This maker gets the output
+of two StEvent objects and merge the EMC hits of the second StEvent into
+the first one. Before doing that, the maker erases all the clusters and
+points, so cluster finder and point maker should run again. The order
+of the StEvent objects are defined by the macro you are using to run
+the maker. See ./macros for examples.
+
+The basic HIT embedding was extracted by an old maker written by Subhasis.
+
+This maker also have full conectivity to the EMC database so it will embed
+hits only if the tower is active in the real data. This connectivity can be
+disabled, if desired. If disabled, the full detector is active and the program
+will embed all hits of the second event into the first.
+
+This maker also has the feature of embed the global and primary tracks of
+the second StEvent into the first but THIS IS NOT A TPC EMBED. This feature
+can be turned off, if desired.
+
+

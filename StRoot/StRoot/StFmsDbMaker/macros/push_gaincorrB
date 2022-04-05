@@ -1,0 +1,12 @@
+root4star -b -q  fms_db_fmsgaincorrB.C'("readtext writedb","gaincorr_2015_20180222/FmsCorrQ077.txt","2015-03-18 00:00:00",20150318,0)'
+root4star -b -q  fms_db_fmsgaincorrB.C'("readtext writedb","gaincorr_2015_20180222/FmsCorrQ080.txt","2015-03-21 00:00:00",20150321,0)'
+root4star -b -q  fms_db_fmsgaincorrB.C'("readtext writedb","gaincorr_2015_20180222/FmsCorrQ082.txt","2015-03-22 00:00:00",20150322,0)'
+root4star -b -q  fms_db_fmsgaincorrB.C'("readtext writedb","gaincorr_2015_20180222/FmsCorrQ087.txt","2015-03-28 00:00:00",20150328,0)'
+root4star -b -q  fms_db_fmsgaincorrB.C'("readtext writedb","gaincorr_2015_20180222/FmsCorrQ133.txt","2015-05-05 00:00:00",20150513,0)'
+root4star -b -q  fms_db_fmsgaincorrB.C'("readtext writedb","gaincorr_2015_20180222/FmsCorrQ133.txt","2015-05-13 00:00:00",20150513,0)'
+root4star -b -q  fms_db_fmsgaincorrB.C'("readtext writedb","gaincorr_2015_20180222/FmsCorrQ139.txt","2015-05-19 00:00:00",20150519,0)'
+root4star -b -q  fms_db_fmsgaincorrB.C'("readtext writedb","gaincorr_2015_20180222/FmsCorrQ145.txt","2015-05-25 00:00:00",20150525,0)'
+root4star -b -q  fms_db_fmsgaincorrB.C'("readtext writedb","gaincorr_2015_20180222/FmsCorrQ150.txt","2015-05-30 00:00:00",20150530,0)'
+root4star -b -q  fms_db_fmsgaincorrB.C'("readtext writedb","gaincorr_2015_20180222/FmsCorrQ156.txt","2015-06-05 00:00:00",20150605,0)'
+
+root4star -b -q  fms_db_fmsgaincorrB.C'("readtext writedb","gaincorr_2017/FmsCorrE122.txt","2017-02-01 00:00:00",20170201,0)'

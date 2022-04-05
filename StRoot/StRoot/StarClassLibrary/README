@@ -1,0 +1,79 @@
+-*- mode:outline -*-
+This file is best viewed with x(emacs).
+Time-stamp: <00/03/16 16:28:14 ullrich> 
+ 
+* README File for StarClassLibrary
+==================================
+
+** Introduction
+---------------
+The StarClassLibrary (or SCL) is a C++ class library which
+contains general purpose classes such as:
+   3- and 4-vectors
+   matrices
+   helices
+   particle definitions
+   ascii file parser
+   command line prompt routines
+   random generators
+
+The classes are written in vanilla C++ and do not depend
+on other packages. This allows their usage also in small
+stand-alone applications. StEvent and StMcEvent make
+heavy use of them.
+Many classes are based on similar classes from:
+CLHEP, NA45, Geant4 and RogueWave but without their
+inherent dependencies.
+
+The SCL contains a lot of templates which causes trouble
+when using these classes in ROOT, or better in CINT.
+Most of the affected classes therefore have an equivalent
+non-templated version. All this is explained in detail
+in the documentation.
+
+** Documentation
+----------------
+*** On paper
+There is only ONE source of documentation and that
+is the "StarClassLibrary User Guide and Reference Manual".
+This README file is only to tell you how to get it:
+
+	cvs checkout StRoot/StarClassLibrary
+        cd StRoot/StarClassLibrary/doc/tex
+        make
+
+'make' will make StarClassLibrary.ps. Since the document
+is rather large (> 100 pages) it's best to print it on
+a duplex printer.
+'make' assumes that LaTeX and dvips is installed on your machine.
+There's also an 'make pdf' which creates an pdf file with
+bookmarks and hyperlinks.
+If you cannot manage to make them, have a look at the following
+URL: http://www.star.bnl.gov/STARAFS/comp/root/special_docs.html
+There you always get the actual 'dev' version of the manual.
+
+** Outline of the directory structure
+-------------------------------------
+*** StarClassLibrary:
+Contains all header and source files
+and the README file you are browsing.
+
+*** StarClassLibrary/doc:
+Contains the documentation and an
+index.html file which redirects to the
+SCL Home Page.
+
+**** StarClassLibrary/doc/tex:
+LaTeX documentation. This is the only real source of
+documentation there is. This is the one you need!
+
+*** StarClassLibrary/examples:
+Small, stand-alone example programs and a GNUmakefile.
+These programs are used to test almost all methods of
+the referring classes. They are especially useful when
+developing or debugging code or porting to new platforms. 
+
+** Authors
+----------
+The SCL was written by Brian Lasiuk and Thomas Ullrich. 
+For questions, comments or problems mail to thomas.ullrich@yale.edu

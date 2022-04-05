@@ -1,0 +1,5 @@
+# $Id $
+# package StMcEventMaker
+# author: 
+Library:libStMcEventMaker.so:LIBS +=   -lgen_Tables  -lsim_Tables  -lStChain  -l_StEEmcUtil  -l_StEmcUtil  -lStMcEvent
+#Library:libStMcEventMaker.so:LIBS +=   -lgen_Tables  -lsim_Tables  -lStChain  -lStEEmcUtil  -lStEmcUtil  -lStMcEvent

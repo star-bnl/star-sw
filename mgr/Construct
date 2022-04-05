@@ -365,6 +365,7 @@ if ($STAR_SYS !~ /x86_darwin/) {
 #if ( 1==0 ){  # disable the exclusion 
 #    if ( !($USE_64BITS and $USE_64BITS != "0") &&
      if (  $STAR_SYS !~ /x86_darwin/){
+	push @sysdirlist, "StRoot/Table";
 	push @sysdirlist, "asps/Simulation/geant321";
 	push @sysdirlist, "asps/Simulation/gcalor";
 	push @sysdirlist, "asps/rexe";

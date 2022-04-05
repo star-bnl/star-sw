@@ -1,0 +1,5 @@
+# $Id $
+# package StMiniMcMaker
+# author: 
+Library:libStMiniMcMaker.so:LIBS +=   -lStAssociationMaker  -lStChain    -l_StEvent  -lStMcEventMaker  -lStMcEvent  -lStMiniMcEvent
+#Library:libStMiniMcMaker.so:LIBS +=   -lStAssociationMaker  -lStChain  -lStEvent  -lStMcEventMaker  -lStMcEvent  -lStMiniMcEvent

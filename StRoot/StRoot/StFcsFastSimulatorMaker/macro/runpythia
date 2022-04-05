@@ -1,0 +1,85 @@
+#!/bin/csh 
+set nev=$1
+set run=$2
+set particle=$3
+set vz=$4
+set epdmask=$5
+set indir=$6
+set outdir=$7
+set nogeant=$8
+
+echo  nev=$nev run=$run particle=$particle epdmask=$epdmask indir=$indir outdir=$outdir nogeant=$nogeant
+ 
+stardev
+set dir=$cwd
+set sys=$STAR_HOST_SYS
+set tmpdir=/tmp/$USER/fcs
+
+if ( ! -e $tmpdir ) then
+  mkdir -p $tmpdir
+endif
+cd $tmpdir
+
+if ( ! -e $dir/$outdir ) then
+    mkdir $dir/$outdir
+endif
+
+if ( ! -e .$sys ) then
+  ln -s $dir/.$sys 
+endif
+
+if ( ! -e StRoot ) then
+  ln -s $dir/StRoot
+endif
+
+if ( ! -e runPythia.C ) then
+  ln -s $dir/runPythia.C
+endif
+
+if ( ! -e runSimBfc.C ) then
+  ln -s $dir/runSimBfc.C
+endif
+
+if ( ! -e fcs_daq_map.txt ) then
+  ln -s $dir/fcs_daq_map.txt
+endif
+
+if( ! -e fcs_ecal_et_gains.txt ) then
+  ln -s $dir/fcs_ecal_et_gains.txt
+endif
+
+if( ! -e fcs_hcal_et_gains.txt ) then
+  ln -s $dir/fcs_hcal_et_gains.txt
+endif
+
+if( ! -e mask ) then
+  ln -s $dir/mask
+endif
+
+if( ! -e stage_params.txt ) then
+  ln -s $dir/stage_params.txt
+endif
+
+pwd
+ls -ltra
+
+set name=pythia_${particle}_vz${vz}_run${run}
+echo name=$name 
+
+if ( $nogeant == 0 ) then 
+    echo root4star -b -q 'runPythia.C('$nev','$run',"'$particle'",'$vz')' 
+    root4star -b -q 'runPythia.C('$nev','$run',"'$particle'",'$vz')' 
+else
+    echo /bin/cp $dir/$indir/$name.fzd $tmpdir/
+    /bin/cp $dir/$indir/$name.fzd $tmpdir/
+endif
+
+echo root4star -b -q 'runSimBfc.C('$nev','$run',"'$particle'",202207,0,0,0.0,'$vz',"'$epdmask'")'
+root4star -b -q 'runSimBfc.C('$nev','$run',"'$particle'",202207,0,0,0.0,'$vz',"'$epdmask'")'
+
+echo moving $tmpdir/$name to $dir/$outdir/
+ls -ltra  $name.*
+/bin/mv $name.qahist.root $dir/$outdir/
+
+#/bin/rm {$name}.*
+

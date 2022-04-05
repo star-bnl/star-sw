@@ -1,0 +1,95 @@
+This is CSMStatusUtils, which outputs the status of either calorimeter to text
+and root status files.  
+
+History:
+I was given code from both Joanna and Thorsten to figure out the status of the
+calorimeter towers over all pp production runs.  I merged the two sets of code, and
+and created a package called CSMStatusUtils.
+
+Method:
+The first piece of code in CSMSU takes every run and fills a 2-d histogram of
+ALL channels vs hit number (in ADC counts, from 0 to 150).  A second routine
+then combines these histograms from run subsets into single histograms for each
+run.  From the second routine and on down, the EEMC and BEMC are done entirely
+separately; the code needs to be run twice, once for each detector.
+
+The code has an algorithm which then takes runs in each fill and combines them
+until the average number of hits above pedestal for all channels is greater
+than 100.  If runs are left over at the end of a fill, their statistics are
+added to prior runs in the fill.
+
+For each combined set of runs, the code puts each channel through a series of
+tests.  It finds the pedestal (and writes it out to a file, btw) and determines
+if the pedestal is abnormally wide, or whether it falls outside acceptable
+limits (ADC channels 0 to 3, or 147 to 150).  It compares all towers' mean
+number of hits (ten sigma) above pedestal, and then flags towers which have 10x
+as many hits as the average, or 40x fewer.  Finally, it looks for stuck bits
+(either on or off) in the 1, 2, 4, or 8 position, and flags channels with stuck
+bits.
+
+The code writes out a table (in text format) for each set of runs with the
+status of each channel clearly marked.  This table is also written in ROOT
+format, to be read by existing BEMC algorithms.  Also written is a hot tower
+plot, so the hot tower results can be eyeballed.  The code can also write out
+gif files of the spectra of every channel that failed a status test, so long as
+the number of channels in a given run set that failed the test is less than 25
+(**for 2004 pp, gif files were not written out**).  Finally, the code creates a
+nice html file containing links to html subfiles detailing the channel status
+for each run set, which in turn link to the gif files.
+
+As a final step, the code takes the text files and creates a new series of text
+status files with the results in differential format, meaning channels whose
+status didn't change from run set to run set are omitted.  However, since some
+channels fall very near the thresholds of certain status tests (for instance,
+channels whose pedestals sit at 2.9 ADC counts), I make the requirement that
+the channel's status must not have changed more than ten percent of the time
+over all runs sets, excluding runs in which all channels were bad (for nominal
+production running, this needs to be done, of course!).  If it has, it is
+marked bad once at the beginning, and then does not appear in any of the
+differential files.
+
+
+************************************************************************
+Running:
+To run CSMSU, the first step is to use the FileCatalog to create a list of all
+the files you wish to analyze.  The command I use is typically something like:
+
+get_file_list.pl -keys 'path,filename' -cond 'production=P04ik,tpc=1,emc=1,trgse
+tupname=productionPP||productionPPnoEndcap||pp||PP,filename~st_physics,filetype=
+daq_reco_mudst' -onefile -limit 100000 -distinct > allthephysicsfiles
+
+Note that the output format I use is just 'path,filename', and I keep the ::
+delimiter that the FileCatalog uses.  My next step is to call
+
+CSMSU/scripts/analysis0 allthephysicsfiles
+
+(YOU NEED TO CHANGE THE HEADER IN THIS FILE TO YOUR OWN OUTPUT DIRECTORY)
+
+, which takes the "allthephysicsfiles" file from FileCatalog, splits it up into
+groups of 20 miniruns, and submits the entire processing job to batch.  Note -
+if I knew how to use the XML submission scripts, I would, but the online
+documentation for them doesn't mention how to code up your macro (.C) file such
+that the XML header file will work.  No matter.
+
+PLEASE NOTE: Each minirun will generate about a 200k file.  This adds up to
+ENORMOUS disk space for large runs.  The 2004 pp run takes up about 1.4 Gig. 
+The 2004 Au-Au run would be even larger.  Thus, I really need to learn how to
+use the XML submission scripts.
+
+(FROM HERE ON, SCRIPT FILES CALL MACROS IN THE MACROS DIRECTORY.  YOU NEED TO
+CHANGE THE DEFAULT ARGUMENTS OF THE MACROS TO YOUR WORKING DIRECTORY.  YOU CAN
+DO THIS IN THE SCRIPT, OR JUST MAKE YOUR OWN SCRIPT, SINCE THEY'RE ALL TRIVIAL
+ONE LINE SCRIPTS ANYWAY.  SORRY ABOUT THE CAPS.)
+
+After all miniruns have been processed, the next step is to combine them into
+runs.  The script "analysis1" does this.  
+
+Next, you want to run the actual status code on the files.  The script
+"analysis2" does this.  PLEASE NOTE:  this macro requires an x window, as root
+needs to be able to Draw certain things.  I don't know how to do this in batch,
+so I always run this interactively.  It's not a good solution, but for now, it's
+a solution.
+
+Finally, you want to generate the ".root" status files and the concatenated
+status files (to alert you to changes in calorimeter tower status).  The script
+"analysis3" does this.

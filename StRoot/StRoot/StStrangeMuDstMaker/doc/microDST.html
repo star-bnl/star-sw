@@ -1,0 +1,251 @@
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<!-- 
+      Template by Torre Wenaus.
+      This page is MAINTAINED IN RAW HTML. Do NOT corrupt it
+      by editing it with a WYSIWYG HTML editor.
+ -->
+<head>
+<title>StStrangeMuDstMaker: micro-DST</title>
+<meta name="Author" content="Gene Van Buren">
+<meta name="Description" content="Prepared for the STAR computing and software website.">
+<meta name="KeyWords" content="STAR RHIC computing software documentation StStrangeMuDstMaker">
+<meta name="Generator" content="HomeSite 2.5">
+<meta http-equiv="Reply-to" content="gene@bnl.gov (Gene Van Buren)">
+</head>
+<body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
+<basefont face="verdana,arial,helvetica,sans-serif">
+
+<!-- Header material -->
+<table border=0   cellpadding=5 cellspacing=0 width="100%">
+        <tr bgcolor="#ffdc9f">
+        <td align=left> <font size="-1">
+        <a href="/STAR/">STAR</a>
+        &nbsp; <a href="/STAR/html/star_computing.html">Computing</a> 
+        &nbsp; <a href="/STAR/html/comp_l/root/documentation.html">Documentation</a> 
+        </td>
+        <td align=right> <font size="-1">
+        &nbsp;  <!-- top right corner  --> </font></td>
+        </tr>
+        <tr bgcolor="#ffdc9f"><td align=center colspan=2><font size="+2"> <b>
+        StStrangeMuDstMaker: micro-DST
+        </b></font></td></tr>
+        <tr bgcolor="#ffdc9f">
+        <td><font size="-1">Offline Software using ROOT in STAR</font></td>
+        <td align="right"><a href="/STAR/html/ofl_l/prodinfo.html">
+        <font size="2" face="verdana,arial,helvetica,sans-serif">Maintained</font>
+        </a> 
+         <font size="-1">
+         by <a href="mailto:gene@bnl.gov">G. Van Buren</a>
+         </font> </td> 
+        </tr>
+
+	<tr><td align=right> 
+	<td align=right> <font size="-1"> 
+            Last modified Tue Apr 11 15:30:19 2000
+          </FONT></TD></TR>
+
+
+</TABLE>
+
+<P>
+
+<center>
+<a href="index.html">StStrangeMuDstMaker</a>
+<p>
+<HR width=60%>
+
+<h1>The Micro-DST</h1>
+<a href="#structure">Structure</a><br>
+<a href="#components">Components</a><br>
+<a href="#usage">Usage</a><br>
+</center>
+
+<p>
+<HR width=60%>
+<p>
+
+<a name="structure"><h2>Structure of the Micro-DST</h2></a>
+The Micro-DST is built using a Root
+<a href="http://root.cern.ch/root/html/TTree.html">TTree</a>,
+a class designed specifically for DSTs. The TTree is organized
+such that event-wise structure is maintained. For every event
+on the micro-DST, there exist between one and eleven component types,
+described in the next subsection. While the event information is kept
+for each event on the micro-DST, the user may select which other
+components the DST will have during the creation process, selecting
+any combination of the components desired (see
+<a href="maker.html#creating">Creating Micro-DSTs</a>).<p>
+
+Each component has several sub-components - these are the actual data
+members of the component classes. Thus, for every event on the micro-DST,
+the structure appears something like this:
+
+<pre>
+TTree---
+       |
+       |---previous event...
+       |
+       |
+       |--------------...---------...---------------...----------...
+       |    |               |             |               |
+       |  Event             V0            Xi             Kink
+       |    |               |             |               |
+       |    |---------...   |-----...     |---------...   |----------...
+       |    |    |    |     |    |        |    |    |     |    |    |
+       |    e1   e2   e3    v1   v2       x1   x2   x3    k1   k2   k3
+       |
+       |
+       |---next event...
+       |
+      ...
+</pre>
+
+In the above, <tt>e1</tt>, <tt>e2</tt>, etc. would be data members of the
+<tt>Event</tt> component class.<p>
+
+A possible goal is to have some components written to
+separate files. This would allow someone interested in looking at
+V0's to need only the Event and V0 files available to them, as TTrees
+support the ability to read only the tree branches requested without
+reading in the entire tree. However, due to a possible bug in Root,
+all branches are currently stored in one file.<p>
+
+
+<hr width=10% align=left>
+<a name="components"><h2>Components of the Micro-DST</h2></a>
+
+Useful information on what member functions are provided by the
+component classes is found easily by looking at the <tt>St*I.hh</tt>
+header files of the component types in the package directory.
+More detailed information on what is stored in the component classes, and
+what member functions are provided by the classes is best learned by looking
+at the <tt>*.h</tt> header files of each class in the package directory.
+It should be noted that all St*MuDst and St*Mc classes listed below inherit
+from the class StStrangeMuDst.
+
+<dl>
+<dt>Event Information (<b>StStrangeEvMuDst</b>)
+<dd>This component stores information associated with the event which may
+be of import to a vertex component class, but only needs one instance for
+the event. For example, the event number and primary vertex position
+coordinates are stored here, as storing this information with every component
+class would be redundant and inefficient.<p>
+
+<dt>V0 Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0MuDst.html">
+(<b>StV0MuDst</b></a>, see interface <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0I.html">
+<b>StV0I</b>)</a>
+<dd>Information about the V0 daughter tracks are stored along with parameters
+of the vertex itself. Member functions are provided to get more detailed
+information such as the mass of the V0 under the lambda hypothesis.<p>
+
+<dt>Xi Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStXiMuDst.html">
+(<b>StXiMuDst</b></a>, see interfaces <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStXiI.html">
+<b>StXiI</b></a> and <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0I.html">
+<b>StV0I</b>)</a>
+<dd>Similar to the V0, information about the bachelor track and vertex
+parameters are stored. The class also inherits from <b>StV0MuDst</b> to
+store all the information about the associated V0.<p>
+
+<dt>Kink Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStKinkMuDst.html">
+(<b>StKinkMuDst</b></a>, see interface <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStKinkI.html">
+<b>StKinkI</b>)</a>
+<dd>This class keeps data on kink parent and daughter tracks and parameters
+of the kink decay vertex.<p>
+
+<dt>Event Monte Carlo Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStStrangeEvMuDst.html">
+(<b>StStrangeEvMuDst</b>)</a>
+<dd>The event-wise Monte Carlo information is stored using the same
+class as the reconstructed event-wise information.<p>
+
+<dt>V0 Monte Carlo Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0Mc.html">
+(<b>StV0Mc</b></a>, see interface <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0I.html">
+<b>StV0I</b>)</a>
+<dd>This class is for Monte Carlo V0 vertex information. There may be
+a different number of these than reconstructed V0 vertices.<p>
+
+<dt>Xi Monte Carlo Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStXiMc.html">
+(<b>StXiMc</b></a>, see interfaces <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStXiI.html">
+<b>StXiI</b></a> and <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0I.html">
+<b>StV0I</b></a> and <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStKinkI.html">
+<b>StKinkI</b>)</a>
+<dd>Monte Carlo storage class for Xi vertices, inheriting all functionality
+from the <b>StODMc</b> class which it shares with <b>StKinkMc</b>.<p>
+
+<dt>Kink Monte Carlo Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStKinkMc.html">
+(<b>StKinkMc</b></a>, see interface <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStKinkI.html">
+<b>StKinkI</b>)</a>
+<dd>Monte Carlo storage class for Kink vertices, also inheriting all
+functionality from <b>StODMc</b>.<p>
+
+<dt>Monte Carlo Association Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStStrangeAssoc.html">
+(<b>StStrangeAssoc</b>)</a>
+<dd>The <b>StStrangeAssoc</b> class links matching reconstructed and
+Monte Carlo vertices, and there exist only as many as the number of
+matches between the two sets. There will be an association component
+for each Monte Carlo component<p>
+
+<dt>Cut Information <a
+href="http://root.cern.ch/root/html/TCut">
+(<b>TCut</b></a>, see also <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStStrangeCuts.html">
+<b>StStrangeCuts</b>)</a>
+<dd>Cuts are stored in a generic Root class called <b>TCut</b>. Each
+cut has a name and value (using the title data member of <b>TCut</b>).
+Usage of the cuts is discussed  <a href="cuts.html">here</a>.
+
+</dl>
+
+
+<hr width=10% align=left>
+<a name="usage"><h2>Usage of the Micro-DST</h2></a>
+The micro-DST can be used in one of two primary modes:
+<ol>
+<li>As a generic TTree
+<li>As a fully-described TTree
+</ol>
+The difference between the two modes is significant:
+<ol>
+<li>In the generic TTree mode,
+nothing is known about the actual component classes - their libraries
+need not be loaded into Root, and no actual instances of the component
+classes are created. Technically speaking, the member functions of the
+component classes are not available. The result is that only the
+functionality of the TTree is present. However, this has significant
+advantages in terms of speed and efficiency for studying the data in
+the TTree. And the functionality of member functions can, for the most
+part, be emulated with TTreeFormulas. Please see the documentation for
+<a href="strangeFormulas.html">strangeFormulas.C</a> to learn more about
+using this mode.<p>
+
+<li>In the fully-described TTree mode, the TTree is read using the
+StStrangeMuDstMaker library package. This means that the library code
+must be loaded into Root, and that a chain is set up to run the maker.
+The advantages are full use of the component classes, at the drawback
+of significantly slower access to the data. See
+<a href="maker.html#reading">Reading Micro-DSTs</a>
+for more information on using this mode.
+
+</ol>
+
+<P>
+
+</BODY>
+</HTML>

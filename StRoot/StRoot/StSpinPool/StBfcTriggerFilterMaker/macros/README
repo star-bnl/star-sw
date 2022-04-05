@@ -1,0 +1,28 @@
+Trigger filter to accept events that fire selected bits of the
+output of the EMC layer 2 DSM, EM201. The output is a 16-bit integer
+that forms the basis of the trigger decision by the calorimeters.
+The definiton of the bits follows (as of Run 9):
+
+  (Bit 0:3) Barrel HT bits (4 bits)
+  (4:5) Endcap HT bits (2)
+  (6) JP1, unified over the BEMC+EEMC (1)
+  (7) JP2, unified over the BEMC+EEMC (1)
+  (8) BJP1 for the 18 BEMC-only patches (1)
+  (9) BJP2 for the 18 BEMC-only patches (1)
+  (10) EJP1 for the 6 EEMC-only patches (1)
+  (11) EJP2 for the 6 EEMC-only patches (1)
+  (12) AJP for BEMC and EEMC but NOT the boundary (1)
+  (13) BAJP for the BEMC-only patches (1)
+  (14) EAJP for the EEMC-only patches (1)
+  (15) Unused
+
+J.M. Engelage, C. Gagliardi, E.G. Judd: The Recabling Scheme and the New Algorithms for the EMC Trigger (April 5, 2010)
+
+http://www.star.bnl.gov/public/trg/run2009/emc_recabling.pdf
+
+An example usage is shown in the BFC macro bfcSpin.C that takes as input
+a fzd file then process each event through the EMC response.
+If the event doesn't fire any selected trigger from the EMC response
+alone further reconstruction is aborted at this stage. This is
+especially handy to decide whether or not to continue reconstruction of
+detectors like the TPC which can be computationally intensive.

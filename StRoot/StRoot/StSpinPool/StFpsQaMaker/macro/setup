@@ -1,0 +1,17 @@
+cp StRoot/StSpinPool/StFpsQaMaker/macro/* .
+
+\rm crontab.txt
+\rm makeplot
+\rm makepage.pl
+
+sed "s#/ldaphome/akio/fps2015#$PWD#g" StRoot/StSpinPool/StFpsQaMaker/macros/crontab.txt > crontab.txt
+sed "s#/ldaphome/akio/fps2015#$PWD#g" StRoot/StSpinPool/StFpsQaMaker/macros/runbitcheck > makeplot
+sed "s#/ldaphome/akio/fps2015#$PWD#g" StRoot/StSpinPool/StFpsQaMaker/macros/makepage.pl > makepage.pl
+
+chmod +x makeplot
+chmod +x makepage.pl
+ 
+stardev
+cons
+
+

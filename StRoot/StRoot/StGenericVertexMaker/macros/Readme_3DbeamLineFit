@@ -1,0 +1,46 @@
+0) run BFC with PPV VF and the following switch: VtxSeedCalG
+
+E.g. in 2012 this one worked:
+"pp2012a,mtdDat,btof,fmsDat,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-dstout,evout,VtxSeedCalG,DbV20120526",
+
+
+1) grep long files from BFC to generate text files with global track params at beam DCA, sort them by fill, assigne name:
+
+
+~15k lines
+grep -h track4beamLine /star/institutions/mit/balewski/2012-Wsampler-pass1/077/log/st_W_13077068*.out >globTr_R13077068.txt
+
+Alternatively, run doAllFills-stdin.sh  which sancs whole year worth of runs and generates the .xtx file per fill& run based on the input run list.
+
+
+
+*) fit 3 D line constrain to .txt file, program assumes all .xtx files are in inp/ sub-dir
+
+./mainFitBeamLine3D F16582_R13077068
+
+It produces hist file stored in to out/sub-dir and prints beam params in to the stdout:
+
+$grep #beamLine *log -h
+#beamLine X,Y,Ux,Uy for F16582_R13077067 = 0.120792 , -0.049037 , 0.002141 , 0.000131 
+#beamLineErr X,Y,Ux,Uy            = 0.000334 , 0.000327 , 0.000009 , 0.000008  nOkTr=7736
+Fitter is setup to start with the random seed, so each pass will give slightly different results
+
+*) Plot resulting QA histos per single fit:
+    root -b <<EOF
+    .x  pl3DbeamLine.C(1,"$core",1)
+    .x  pl3DbeamLine.C(2,"$core",1)
+    .x  pl3DbeamLine.C(3,"$core",1)
+EOF
+
+Adjust input to existing file location, names.
+
+
+-------- my notes -----
+nice fill
+#beamLine X,Y,Ux,Uy for F16582_R13077067 = 0.120792 , -0.049037 , 0.002141 , 0.000131 
+
+Strange fill:
+#beamLine X,Y,Ux,Uy for F16633_R13087049 = 0.484581 , 0.259809 , 0.006647 , -0.000612 
+
+
+#beamLine X,Y,Ux,Uy for F16693_R13099025 = 0.270044 , 1.213720 , 0.007738 , 0.000258 

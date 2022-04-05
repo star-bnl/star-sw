@@ -1,0 +1,421 @@
+# common definitions for RTS-related makefiles
+# works only with GNU make!
+
+# where are we executing: SunOS or Linux (ONLY!)
+export HOST_SYSTEM := $(shell uname)
+# useful for Linux
+export HOST_CPU := $(shell uname -m)
+
+
+
+# we want to treat daqman separately
+export HOST_NAME := $(shell uname -n)
+ifeq ($(HOST_NAME),daqman.starp.bnl.gov)
+	export ENABLE_CROSS_COMPILER := 1
+#else
+#	export ENABLE_CROSS_COMPILER := 0
+endif
+
+
+# jml...  TARGET_CPU_STRING to mean the full string...
+
+# go from "uname" to gcc -mcpu=TARGET_CPU variant
+ifeq ($(HOST_CPU),ppc)
+	export TARGET_CPU := 604
+else
+	ifeq ($(HOST_CPU),alpha)
+		export TARGET_CPU := 21264
+	else 
+		export TARGET_CPU := $(HOST_CPU)
+	endif
+endif
+
+
+# Get the RTS_PROJECT. Currently STAR or PP2PP.
+# Set to STAR if not defined... 
+# Should be defined by USER in his environment variable
+ifndef RTS_PROJECT
+export RTS_PROJECT := STAR
+endif
+
+
+
+# If TARGET_SYSTEM not defined (either by user of before this Makefile)
+# we'll assume the target is this system.
+# For vxWorks cross-compilers (MVME or I960) the TARGET_SYSTEM should be defined
+# in the Makefile before these rules!
+# The currently supported target systems are: SUN, LINUX, MVME, I960, mv167
+ifndef TARGET_SYSTEM
+ifeq (${HOST_SYSTEM},SunOS)
+	export TARGET_SYSTEM := SUN
+
+else
+ifeq (${HOST_SYSTEM},Linux)
+	export TARGET_SYSTEM := LINUX
+endif
+endif
+endif
+
+
+
+ifeq ($(TARGET_SYSTEM),SUN)
+	export TARGET_CPU := ultrasparc	# MANUAL override
+endif
+
+# set top level directory for bin, lib, conf  etc.
+ifndef PROJDIR
+ifeq ($(RTS_PROJECT),STAR)
+	export PROJDIR := /RTScache
+else
+ifeq ($(RTS_PROJECT),PP2PP)
+	export PROJDIR := /PP
+endif
+endif
+endif
+
+# if RTS_LOCAL defined in the environment
+# we override a bunch of things...
+ifdef RTS_LOCAL
+export RTS_DAQMAN := "127.0.0.1"
+endif
+
+ifndef RTS_DAQMAN
+export RTS_DAQMAN := "172.16.0.1"
+endif
+
+# if the RTS_DAQMAN exists in the environment we pass it on the
+# compiler defines otherwise it stays empty
+ifdef RTS_DAQMAN
+export RTS_DAQMAN_FLAGS := -DRTS_DAQMAN=\"${RTS_DAQMAN}\"
+endif
+
+
+# No USER definable changes after this point!
+# Misc. environment var. cleanup which nay cause confusion
+ifdef GCC_EXEC_PREFIX
+undef GCC_EXEC_PREFIX
+endif
+
+
+# set RTS_TYPE
+ifeq ($(RTS_PROJECT),STAR)
+	RTS_TYPE := RTS_PROJECT_STAR
+else
+ifeq ($(RTS_PROJECT),PP2PP)
+	RTS_TYPE := RTS_PROJECT_PP
+endif
+endif
+
+ifndef RTS_DEV_PREFIX
+export RTS_DEV_PREFIX := pro_
+endif
+
+
+# NEW: are we beneath StRoot or where?
+
+STROOT_STR:=StRoot
+IS_STROOT=$(findstring $(STROOT_STR), $(PWD))
+
+
+ifeq "$(STROOT_STR)" "$(IS_STROOT)" 
+	SAY="Working under StRoot"
+
+	IS_STROOT=1
+else
+	SAY="Working under RTS"
+
+	IS_STROOT=
+endif
+
+# jml 12/08 : stupid event tracker is in wrong location,
+# need an override for base path
+
+ifndef RTS_DIR_PATH
+RTS_DIR_PATH=../../../../StRoot/RTS
+endif
+
+INCLUDES =  -I. -I.. -I$(RTS_DIR_PATH)/include -I$(RTS_DIR_PATH)/src -I../../trg/include -I$(RTS_DIR_PATH)/trg/include
+
+# List misc. defaults assuming the target system is the
+# same as the local system. Can be overriden later.
+
+
+
+
+
+
+export CC := gcc
+export CXX := g++
+
+# by now we know the host system as well as the target
+INSTALL_SUFFIX :=
+
+ifeq (${TARGET_SYSTEM},LINUX) 
+#linux for pp2pp is a 604 but has older compiler
+	ifeq (${TARGET_CPU},604) 
+		HOSTFLAGS = -mcpu=$(TARGET_CPU)
+	else
+		ifeq (${TARGET_CPU},x86_64)
+			ifeq (${USE_64BITS},1) 
+				HOSTFLAGS = -m64
+				LDFLAGS += -m64
+			else
+				HOSTFLAGS = -m32
+				LDFLAGS += -m32
+			endif
+		else
+			HOSTFLAGS = -march=$(TARGET_CPU)
+		endif
+	endif
+else
+	HOSTFLAGS = -mcpu=$(TARGET_CPU)
+endif
+
+# any library used on the host i.e. -lsocket or such
+ifeq (${TARGET_SYSTEM},SUN)
+	HOSTFLAGS += 
+	HOSTLIBS := -lsocket -lnsl -lpthread -lposix4 -lcurses
+	HOSTDEFINES :=
+	HOSTINCLUDES := 
+	INSTALL_SUFFIX := $(TARGET_SYSTEM)
+
+else
+ifeq (${TARGET_SYSTEM},LINUX)
+ifeq (${HOST_CPU}, alpha)
+		HOSTFLAGS += 
+		HOSTLIBS := -lnsl -lpthread
+		HOSTFLAGS += -Dalpha
+else
+		HOSTFLAGS += 
+		HOSTLIBS := -lpthread -ldl 
+endif
+	HOSTDEFINES := 
+	HOSTINCLUDES :=
+	INSTALL_SUFFIX := $(TARGET_SYSTEM)/$(HOST_CPU)
+
+endif
+endif
+
+
+# cross-compiler overrides
+ifeq (${TARGET_SYSTEM},MVME)
+	export WIND_BASE:=/RTS/vxworks/wind_ppc
+
+	TOP_CROSS := ${WIND_BASE}/host/linux
+	export CC := powerpc-wrs-vxworks-gcc
+	export CXX := powerpc-wrs-vxworks-g++
+	export LD := powerpc-wrs-vxworks-ld
+	export NM := powerpc-wrs-vxworks-nm
+
+	TPATH :=${TOP_CROSS}/bin:${TOP_CROSS}/powerpc-wrs-vxworks/bin:
+	TPATH +=${PATH}
+
+	PATH :=${TPATH}
+
+	export GCC_EXEC_PREFIX:=${TOP_CROSS}/lib/gcc-lib/
+
+
+	HOSTDEFINES = -D_GNU_TOOL -DMV2600 -DCPU=PPC604 -fno-exceptions -fno-rtti
+	
+	TARGET_CPU := 604
+#	HOSTFLAGS =  -mcpu=604  -fno-builtin  -nostdinc 
+	HOSTFLAGS =  -mcpu=604   -nostdinc  -msdata=none 
+#	HOSTFLAGS =  -mcpu=604  -msdata=none
+#-v -print-search-dirs
+
+	HOSTINCLUDES	= \
+		-I${WIND_BASE}/target/config/all \
+		-I${WIND_BASE}/target/h \
+		-I${WIND_BASE}/target/h/drv/scsi \
+		-I${WIND_BASE}/target/src/config \
+		-I${WIND_BASE}/target/src/drv \
+		-I${WIND_BASE}/target/config/kern 
+
+	HOSTLIBS :=
+
+	INSTALL_SUFFIX := VX
+
+
+
+else
+ifeq (${TARGET_SYSTEM},I960)
+	export WIND_BASE:=/RTS/vxworks/wind_960
+
+	TOP_CROSS := ${WIND_BASE}/host/linux
+	export CC := i960-wrs-vxworks5.3-gcc
+	export CXX := i960-wrs-vxworks5.3-g++
+	export LD := i960-wrs-vxworks5.3-ld
+	export NM := i960-wrs-vxworks5.3-nm
+
+	TPATH :=${TOP_CROSS}/bin:${TOP_CROSS}/i960-wrs-vxworks5.3/bin:
+	TPATH +=${PATH}
+
+	PATH :=${TPATH}
+
+	export GCC_EXEC_PREFIX:=${TOP_CROSS}/lib/gcc-lib/
+
+
+	HOSTDEFINES = -D_GNU_TOOL -DCPU=I960HX -DVX_IGNORE_GNU_LIBS -DRW_MULTI_THREAD
+
+	TARGET_CPU := i960
+	HOSTFLAGS =  -mca  -mold-align -fno-for-scope -mstrict-align -ansi -nostdinc 
+
+	HOSTINCLUDES	= \
+		-I${WIND_BASE}/target/config/sunny_p1 \
+		-I${WIND_BASE}/target/config/all_sunny_p1 \
+		-I${WIND_BASE}/target/h \
+		-I${WIND_BASE}/target/src/config \
+		-I${WIND_BASE}/target/src/drv 
+
+	HOSTLIBS :=
+	
+	INSTALL_SUFFIX := VX
+
+else
+ifeq (${TARGET_SYSTEM},mv167)
+	export WIND_BASE:=/RTS/vxworks/wind_68k/vxworks
+
+	TOP_CROSS := ${WIND_BASE}/host/x86-linux
+
+	export CC := m68k-wrs-vxworks-gcc
+	export CXX := m68k-wrs-vxworks-g++
+	export LD := m68k-wrs-vxworks-ld
+	export NM := m68k-wrs-vxworks-nm
+
+	TPATH :=${TOP_CROSS}/bin:${TOP_CROSS}/m68k-wrs-vxworks/bin:
+	TPATH +=${PATH}
+
+	PATH :=${TPATH}
+
+	export GCC_EXEC_PREFIX:=${TOP_CROSS}/lib/gcc-lib/
+
+
+#	HOSTDEFINES = -D_GNU_TOOL -DCPU=MC68040 -DVX_IGNORE_GNU_LIBS -DRW_MULTI_THREAD
+	HOSTDEFINES := -DVxWorks -Dlint -DCPU=MC68040
+
+	TARGET_CPU := m68k
+	HOSTFLAGS :=  -m68040 -nostdinc -fno-builtin
+
+	HOSTINCLUDES	= \
+		-I${WIND_BASE}/target/config/all \
+		-I${WIND_BASE}/target/h \
+		-I${WIND_BASE}/target/src/config \
+		-I${WIND_BASE}/config/mv167 \
+		-I${WIND_BASE}/config/all \
+		-I${WIND_BASE}/target/src/drv 
+
+	HOSTLIBS :=
+	
+	INSTALL_SUFFIX := VX
+
+endif
+endif
+endif
+
+
+
+
+# setup endianness  RTS_LITTLE_ENDIAN / RTS_BIG_ENDIAN...
+# endianness soley upon cpu...
+# This list also shows the currently supported CPUs!
+ifeq (${TARGET_CPU}, i686)
+	HOSTDEFINES += -DRTS_LITTLE_ENDIAN
+else
+ifeq (${TARGET_CPU}, x86_64)
+	HOSTDEFINES += -DRTS_LITTLE_ENDIAN
+else
+ifeq (${TARGET_CPU}, 21264)
+	HOSTDEFINES += -DRTS_LITTLE_ENDIAN
+else
+ifeq (${TARGET_CPU}, i960)
+	HOSTDEFINES += -DRTS_LITTLE_ENDIAN
+else
+ifeq (${TARGET_CPU}, 604)
+	HOSTDEFINES += -DRTS_BIG_ENDIAN
+else
+ifeq (${TARGET_CPU}, m68k)
+	HOSTDEFINES += -DRTS_BIG_ENDIAN
+else
+ifeq (${TARGET_CPU}, ultrasparc)
+	HOSTDEFINES += -DRTS_BIG_ENDIAN
+else
+	HOSTDEFINES += -DRTS_BIG_ENDIAN
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+
+
+ifeq (${USE_64BITS}, 1)
+	HOSTDEFINES += -DUSE_64BITS=1
+endif
+
+export LIBDIR = $(PROJDIR)/$(RTS_DEV_PREFIX)lib/${INSTALL_SUFFIX}
+export BINDIR = $(PROJDIR)/$(RTS_DEV_PREFIX)bin/${INSTALL_SUFFIX}
+
+# finelize standard variables...
+INCLUDES += ${HOSTINCLUDES} 
+
+ifdef TEST_RDO_ZG
+HOSTDEFINES += -DTEST_RDO_ZG
+endif
+
+ifeq ($(HOST_NAME),daqman.starp.bnl.gov)
+	HOSTDEFINES += -DRTS_REAL_DAQMAN
+else
+
+endif
+
+DEFINES = -D_REENTRANT ${RTS_DAQMAN_FLAGS} -DRTS_HOST_NAME=\"${HOST_NAME}\" -DTARGET_SYSTEM=\"${TARGET_SYSTEM}\" -DPROJDIR=\"${PROJDIR}\"  -DINSTALL_SUFFIX=\"${INSTALL_SUFFIX}\" -D${RTS_TYPE} ${HOW} ${HOSTDEFINES} -DRTS_ONLINE
+
+
+BASEFLAGS = -O3 -Wall -pipe -fverbose-asm ${HOSTFLAGS} 
+#BASEFLAGS= -Wall -pipe -fverbose-asm ${HOSTFLAGS} 
+CCFLAGS  = ${BASEFLAGS} ${USRCCFLAGS}  ${DEFINES} ${INCLUDES} 
+CXXFLAGS = ${BASEFLAGS} ${USRCXXFLAGS} ${DEFINES} ${INCLUDES} 
+CFLAGS   = ${BASEFLAGS} ${USRCFLAGS}   ${DEFINES} ${INCLUDES} 
+
+# makes sense only for local system
+ifeq ($(RTS_PROJECT),STAR)
+	export LDLIBS = -L${LIBDIR} -lrtsComLib -lsunRT  -lrtsCfgLib -lrtslog -lsfs  ${HOSTLIBS}	
+else
+ifeq ($(RTS_PROJECT),PP2PP)
+	export LDLIBS = -L${LIBDIR} -lrtsComLib -lsunRT -lrtslog  ${HOSTLIBS}
+endif
+endif
+
+# noticed problems on Linux where the default linker gcc doesn't work well for g++ compiled
+# files
+LINK.o = $(CXX) $(LDFLAGS) $(TARGET_ARCH)
+
+# misc. executables
+export MAKEDEPEND = makedepend -Y -w7 -- ${CXXFLAGS} -- *.cxx *.C *.h *.c *.hh 2>rts.makedepend.err
+export INSTALL:=/RTS/bin/install.sh
+export CLEAN := rm -f rts.makedepend.err err out *.o *.a *.so *.bak *~ #* 
+
+#added stuff so that we can compile .cxx
+SUFFIXES += .cxx .hh
+.SUFFIXES += .cxx .hh
+
+%.hh:
+
+%.cxx:
+
+%: %.cxx
+#  commands to execute (built-in):
+	$(LINK.C) $^ $(LOADLIBES) $(LDLIBS) -o $@
+
+%.o: %.cxx
+#  commands to execute (built-in):
+	$(COMPILE.C) $(OUTPUT_OPTION) $<
+
+
+
+############ NEW boilerplate ##################
+RTS_AR = ar -rucvs $@ $?
+
+.PHONY: say libs clean depend install all subdirs update $(VPATH)
+

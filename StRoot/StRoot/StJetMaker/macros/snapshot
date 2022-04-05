@@ -1,0 +1,8 @@
+
+#rm, make the directory:
+cd scheduler
+rm -rf macros
+cp -r ../StRoot/StJetMaker/macros/ .
+cp -r ../StRoot/StJetMaker/StJetSimuUtil/macros/* macros/.
+cd ..
+

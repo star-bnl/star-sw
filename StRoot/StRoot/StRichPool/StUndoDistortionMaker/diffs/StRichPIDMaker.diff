@@ -1,0 +1,124 @@
+Only in StRoot/StRichPIDMaker: .consign
+Only in StRoot/StRichPIDMaker: CVS
+diff -urb StRoot_old/StRichPIDMaker/StRichPIDMaker.cxx StRoot/StRichPIDMaker/StRichPIDMaker.cxx
+--- StRoot_old/StRichPIDMaker/StRichPIDMaker.cxx	Fri Feb 22 09:34:25 2002
++++ StRoot/StRichPIDMaker/StRichPIDMaker.cxx	Tue Nov 19 13:46:45 2002
+@@ -340,7 +340,8 @@
+ 
+   //
+   // default version
+-  mProductionVersion = -999;
++  // No, this is the global thing
++  mProductionVersion = 20013;
+ 
+   //
+   // initialize cuts, values and parameters for processing
+@@ -356,16 +357,19 @@
+     //
+     // Event Level
+     //
+-    mVertexWindow = 200.*centimeter;
++    mVertexWindow = 25.*centimeter;
+ 
+ 
+     //
+     // Track Level
+     //
+-    mPtCut        = 0.5*GeV; // GeV/c
++    mPtCut        = 1.5*GeV; // GeV/c
+     mEtaCut       = 0.5; 
+     mLastHitCut   = 100.0*centimeter;
+-    mDcaCut       = 3.0*centimeter;
++//    mDcaCut       = 3.0*centimeter;
++// Remove DCA cut
++    mDcaCut = 10000.*centimeter;
++    
+     mFitPointsCut = 20;
+     mPathCut      = 500*centimeter;
+     mPadPlaneCut  = 1.0*centimeter;
+@@ -502,6 +506,8 @@
+ 	mGoodEvents++;
+     }
+ 
++    
++    
+     //
+     // Initialize Parameters
+     //
+@@ -527,6 +533,13 @@
+ 	richCollection = rEvent->richCollection();
+ 	mRichCollection = richCollection;
+ 	if (richCollection) {
++	    // Clear out the rich collection's track list
++	    {	    
++		StPtrVecTrack & richCollectionTracks = richCollection->getTracks();
++		richCollectionTracks.clear();
++	    }
++	    
++	    
+ 	    if (richCollection->pixelsPresent()) {
+ 		myRichPixels = richCollection->getRichPixels().size();
+ 		const StSPtrVecRichPixel& richPixels =
+@@ -796,7 +809,8 @@
+ 	    // (but the constant area is still ok) and 
+ 	    // number of points used in calculation == 3600
+ 	    //
+-	    ringCalc->calculateArea();
++// JCD: speed it up by NOT calculating the area
++//	    ringCalc->calculateArea();
+ 
+ 	    
+ 	    //
+@@ -996,9 +1010,19 @@
+     
+     mNumberOfPrimaries = tempEvent->primaryVertex()->numberOfDaughters();  
+     
+-    for (int ii=0; ii<mNumberOfPrimaries; ii++)  {
+-
+-	StTrack* track = tempEvent->primaryVertex()->daughter(ii);
++//      for (int ii=0; ii<mNumberOfPrimaries; ii++)  {
++//	StTrack* track = tempEvent->primaryVertex()->daughter(ii);
++    StSPtrVecTrackNode& theNodes = tempEvent->trackNodes();
++    for (StSPtrVecTrackNodeIterator titer = theNodes.begin();
++	 titer != theNodes.end(); ++titer) {
++	for (unsigned int ientry = 0; ientry < (*titer)->entries();
++	     ++ientry) {
++	    
++	    StTrack* track = (*titer)->track(ientry);
++	    if (!track) {
++		cout << "Huh?  No track " << endl;
++		continue;
++	    }
+ 
+ 	if (this->checkTrack(track)) {
+ 	    
+@@ -1090,11 +1114,13 @@
+ 	    }
+ 	}
+ 	//	if (tempTrack->geometry()->charge() < 0) {
+-	if (tempEvent->primaryVertex()->daughter(ii)->geometry()->charge() < 0) {
+-	    mNegativePrimaries++;
++//  	if (tempEvent->primaryVertex()->daughter(ii)->geometry()->charge() < 0) {
++//  	    mNegativePrimaries++;
++//  	}
+ 	}
+     }
+  
++ 
+     //
+     // make monte carlo associations 
+     //
+Only in StRoot/StRichPIDMaker: StRichPIDMaker.cxx.flc
+diff -urb StRoot_old/StRichPIDMaker/StRichPIDMaker.h StRoot/StRichPIDMaker/StRichPIDMaker.h
+--- StRoot_old/StRichPIDMaker/StRichPIDMaker.h	Fri Feb  1 11:18:16 2002
++++ StRoot/StRichPIDMaker/StRichPIDMaker.h	Tue Nov 19 13:46:45 2002
+@@ -387,7 +387,7 @@
+ #ifdef RICH_WITH_L3_TRACKS
+   double findL3ZVertex(globalTrack *,int);
+ #endif    
+-    virtual const char *GetCVS()
++    virtual const char *GetCVS() const
+     {static const char cvs[]="Tag $Name:  $ $Id: StRichPIDMaker.diff,v 1.2 2014/08/06 11:43:36 jeromel Exp $ built " __DATE__ " " __TIME__
+ 	 ; return cvs;}  
+   ClassDef(StRichPIDMaker,1)
+Only in StRoot/StRichPIDMaker: StRichTrack.cxx.flc

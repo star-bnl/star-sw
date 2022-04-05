@@ -1,0 +1,5 @@
+# $Id $
+# package St_ctf_Maker
+# author: 
+Library:libSt_ctf_Maker.so:LIBS +=   -lctf_Tables  -lStChain  -lSt_ctf
+#Library:libSt_ctf_Maker.so:LIBS +=   -lctf_Tables  -lStChain  -lSt_ctf

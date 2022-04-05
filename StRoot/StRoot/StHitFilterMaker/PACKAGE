@@ -1,0 +1,5 @@
+# $Id $
+# package StHitFilterMaker
+# author: 
+Library:libStHitFilterMaker.so:LIBS +=   -lStChain    -l_StEvent
+#Library:libStHitFilterMaker.so:LIBS +=   -lStChain  -lStEvent

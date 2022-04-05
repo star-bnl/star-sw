@@ -1,0 +1,5 @@
+# $Id $
+# package StBbcSimulationMaker
+# author: 
+Library:libStBbcSimulationMaker.so:LIBS +=   -lsim_Tables  -lStChain  -l_StEvent
+#Library:libStBbcSimulationMaker.so:LIBS +=   -lsim_Tables  -lStChain  -lStEvent

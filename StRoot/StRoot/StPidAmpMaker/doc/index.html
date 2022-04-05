@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<body bgcolor="#ffffff">
+
+  <head>
+    <title>StPidAmpMaker</title>
+  </head>
+
+  <body>
+   <center> <h1> StuProbabilityPIDAlgorithm  </h1></center>
+
+<p>Please send questions to aihong@cnr.physics.kent.edu </p>
+    <hr>
+
+<ul>
+
+<li><a href="#Algorithm">Algorithm</a>
+
+<li><a href="#Performance">Performance</a>
+<li><a href="#Tutorial">Tutorial</a>
+
+
+<hr>
+<h2><a name="Algorithm">Algorithm</h2>
+<p>The de/dx~p plots for tracks consists of several individual bands, namely the pion band, the kaon band,the proton band and the electron band. Our task is, given a track with de/dx and rigidity(p/z), figure out wich individual band that track mostly likely belongs to.</p>
+<p>To do so, we can try to establish the amplitude for each band. What is the amplitude here? Loosely speaking, the amplitude represents the density of dots  on the de/dx~p plot. If you fill de/dx and p into a 2D histogram and draw it as LEGO, the amplitude is the height of each cell on x-y plane. So you can imagine each band as a "ridge". See following graph of reconstructed "ridge" for pion band.</p>
+<center><img src="ampRecoPionBand.gif"></a></center>
+<p>Note that If we cut the "ridge" above at a given rigidity, we will get a gaussian curve. </p>
+<p>The picture above shows only the pion band, we can reconstruct all other bands as such "ridge" as well. By putting them together, we have sth. like following(not very clear, but, you got the ideal):</p>
+
+<center><img src="ampRecoAllBands.gif"></a></center>
+<p>The blue ridge is pion band, the red ridge is kaon band, the green is for proton, the magenta is for electron(such color convention will be used through this document).</p>
+<center><img src="ampAtBandCenter.gif"></center>
+<p>The plot above shows  amplitudes at band center versus momentum for 4 particle types. The amplitude at band center is the first fit parameter from multiple gaussian fitting. By fitting the amplitudes for band center as a function of momentum, the amplitude from merging area can be estimated.</p>
+
+
+<p>Then how to get the PID probability? Now surppose we have a track with rigidity(p/z)=0.68, de/dx=0.175e-05(Gev/cm). We make a vertical plane at rigidity=0.68 to cut the picture of Amplitudes Reconstruction, the cross-section we get is sth. like following:</p>
+<center><img src="pidAlgo.gif"></a></center>
+<p>On the plot, the color dash line represents amplitudes due to different band(The gaussian curve from electron band at this rigidity is so tiny that we can just see a flat line). Now we say:
+<p>The probability of this track(de/dx=0.175e-05Gev/cm, rigidity=0.68) to be a kaon = height of red dash line / sum of heights from all dash lines </p>
+
+<p>Sounds easy? But in the code we have to do thousands fittings to reach the goal!</p>
+
+<p>Now we can do even better. Let's take a look at de/dx~p plot for different nhits range(nhits=# of tpc hits used in mean de/dx calculation):</p>
+
+<center><img src="demoNHits.gif"></a></center>
+<p>The blue area is the <a href="regions.gif">overlapping</a> area.The  blue areas show that a fuzzy semi-overlapping area in de/dx~p plot for low nhits tracks could come to be clearn area in plot for high nhits tracks. So if we do PID without nhits binning, some signal could be washed out by fuzzy low nhits tracks. The reasonable way is to let high nhits band compete with high nhits band, low nhits band compete with low nhits band, and that is the way we implemented in the package.</p>
+
+<p>So we have to make nhits bin for PID, The current version of supporting table (/afs/rhic.bnl.gov/star/users/aihong/www/PIDTable.root) is got by bining in the following way: </p>
+
+
+<br>3 centrality bins: 1__26%__10% central 
+<br>2 dca bins: 0__3__ centimeter 
+<br>2 charge bins: -/+ 
+<br>100 momentum bins: 0__2Gev 
+<br>10 eta bins: 0__1.0 (if >1., belongs to the last bin) 
+<br>6 ndedx bins: 0__30 (if>30, belongs to the last bin) 
+
+
+
+<p>So you've got some ideal of the Probability PID algorithm. What the StPidAmpMaker(under revision) does is to produce a set of parameters which can be used to reconstruct those "ridges". The parameters will be read in by StuProbabilityPIDAlgorithm, wich will be constructed in your analysis code. Then StuProbilityPIDAlgorithm reconstructe the expected amplitude and yield the probability PID for each track.</p>
+<p>This tool does not take care of deuterons or heavier mass particle types.
+
+<hr>
+
+<h2><a name="Performance">Performance</h2>
+<p>An example of BetheBloch calibration :</p>
+<a href= "dedxPlot.gif"><img src="dedxPlotSmall.gif"></a>
+
+<p>Pid at different confidence level :</p>
+<a href= "primaryPidProb50.gif"> <img src="primaryProb50Small.jpg"> </a>
+<a href= "primaryPidProb60.gif"> <img src="primaryProb60Small.jpg"> </a>
+<a href= "primaryPidProb70.gif"> <img src="primaryProb70Small.jpg"> </a>
+<a href= "primaryPidProb80.gif"> <img src="primaryProb80Small.jpg"> </a>
+<a href= "primaryPidProb90.gif"> <img src="primaryProb90Small.jpg"> </a>
+<a href= "primaryPidProb95.gif"> <img src="primaryProb95Small.jpg"> </a>
+
+<p>In the plots above, blue dots represent pion tracks, red -> kaons, green -> protons, magenta -> e+/-, black -> tracks whose probability of the most likehood type is less than 50%/90% (declared as non-identified). The light blue dots are pions in the overlapping area.The StuProbabilityPidAlgorithm can give out a warning flag if a track in the overlapping area is identified. The plots show that as our confidence requirement increase, more tracks becomes non-identified (black), which is as expected.</p>
+
+<hr>
+<h2><a name="Tutorial">Tutorial</h2>
+<p> <font size=5 color=#EE1110>How to do the PID?</font></p>
+
+<br>1.  In your macro(sth. like doEvents.C): 
+<br>gSystem->Load("StEvent"); 
+<br>gSystem->Load("StEventUtilities"); 
+
+<br>
+
+<br>2. In your AnyMaker.cxx
+<br>#include "StuProbabilityPidAlgorithm.h"
+
+<br>
+
+<br>3. In your AnyMaker::Init()
+<br>      TString parameterfile = "PIDTable.root";
+<br>StuProbabilityPidAlgorithm::readParametersFromFile(parameterfile.Data());
+<br>
+
+<br>4. In your AnyMaker::Make(), somewhere before the track loop begins,
+<br> StuProbabilityPidAlgorithm myPID(AnObjectOfStEvent);
+<br>
+
+<br>5. Inside your track loop,
+<br> StParticleDefinition* def=theTrack->pidTraits(myPID); //invoke functor. 
+<br>if( myPID.getParticleGeantID(0)==3 && myPID.getProbability(0) > 0.9 ) 
+<br>printf("Got an electron at 90% confidence!\n"); 
+<br>
+<br>Some other functions that might be usefull at this level:
+<br>
+<br>//      int mostLikelihoodParticleGeantID()    const;
+<br>//      int secondLikelihoodParticleGeantID()  const;     
+<br>//      int thirdLikelihoodParticleGeantID()   const;
+<br>//      int getParticleGeantID(int i)          const;
+
+<br>//      double getProbability(int i);
+<br>//      double mostLikelihoodProbability();
+<br>//      double secondLikelihoodProbability();
+<br>//      double thirdLikelihoodProbability();
+  
+<br>//      double beingPionMinusProb()  const { return  mPionMinusProb;}
+<br>//      double beingElectronProb()   const { return  mElectronProb; }
+<br>//      double beingKaonMinusProb()  const { return  mKaonMinusProb;}
+<br>//      double beingAntiProtonProb() const { return  mAntiProtonProb;}
+     
+<br>//      double beingPionPlusProb()   const { return  mPionPlusProb; }
+<br>//      double beingPositronProb()   const { return  mPositronProb; }
+<br>//      double beingKaonPlusProb()   const { return  mKaonPlusProb; }
+<br>//      double beingProtonProb()     const { return  mProtonProb; }
+
+<br>
+
+<br>6. To make it run, a support PID Table named "PIDTable.root" must to be
+present in your working directory, you can copy it from:
+<br>/afs/rhic.bnl.gov/star/users/aihong/www/PIDTable.root
+
+
+
+
+
+
+
+<br><BR><BR>
+<hr>
+  <address><a href="mailto:aihong@cnr.physics.kent.gov">Aihong Tang</a></address>
+<!-- Created: Mon Feb 14 12:52:08 EST 2000 -->
+<!-- hhmts start -->
+Last modified: Thu Mar 29 10:53:58 EST 2001
+<!-- hhmts end -->
+  </body>
+</html>

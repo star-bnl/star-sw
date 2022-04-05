@@ -1,0 +1,61 @@
+int Bank_TRGD::SWITCH(HerbSwap)() {
+  int numToSwap,returnValue,i;
+
+
+  assert(header.ByteOrder==0x01020304||header.ByteOrder==0x04030201);
+  if(header.ByteOrder==0x04030201) return 0;
+
+  swapHerb2bytes( &(SWITCH(gs)->EvtDesc.TCU3.FIFO3.TriggerWd),   1);
+  swapHerb2bytes( &(SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgActionWd), 1);
+  swapHerb2bytes( &(SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgToken),    1);
+  swapHerb2bytes( &(SWITCH(gs)->EvtDesc.TCU2.FIFO2.DSMAddress),  1);
+  swapHerb2bytes( &(SWITCH(gs)->EvtDesc.TCU2.FIFO2.DSMInput),    1);
+  swapHerb2bytes( &(SWITCH(gs)->EvtDesc.TCUdataBytes),           1);
+  swapHerb2bytes( &(SWITCH(gs)->EvtDesc.npost),                  1);
+  swapHerb2bytes( &(SWITCH(gs)->EvtDesc.npre),                   1);
+  swapHerb2bytes( &(SWITCH(gs)->TrgSum.DSM.BCdata[0]),          16);
+  swapHerb2bytes( &(SWITCH(gs)->TrgSum.DSM.CPA[0]),             32);
+  /* This is now one-byte data, so no swapping needed. swapHerb2bytes( &(SWITCH(gs)->TrgSum.DSM.ZDCDSM[0]),8); */
+  swapHerb2bytes( &(SWITCH(gs)->TrgSum.DSM.lastDSM[0]),          8);
+  swapHerb2bytes( &(SWITCH(gs)->TrgSum.DSM.quadDSM[0]),          8);
+  swapHerb2bytes( &(SWITCH(gs)->TrgSum.L0SumBytes),              1);
+  swapHerb2bytes( &(SWITCH(gs)->TrgSum.L1SumBytes),              1);
+  swapHerb2bytes( &(SWITCH(gs)->TrgSum.L2SumBytes),              1);
+  swapHerb2bytes( &(SWITCH(gs)->TrgSum.TrgSumBytes),             1);
+  swapHerb4bytes( &(SWITCH(gs)->EvtDesc.bunchXing_hi),           1);
+  swapHerb4bytes( &(SWITCH(gs)->EvtDesc.bunchXing_lo),           1);
+  swapHerb4bytes( &(SWITCH(gs)->TrgSum.L1Result[0]),            32);
+  swapHerb4bytes( &(SWITCH(gs)->TrgSum.L1Sum[0]),                2);
+  swapHerb4bytes( &(SWITCH(gs)->TrgSum.L2Result[0]),            32);
+  swapHerb4bytes( &(SWITCH(gs)->TrgSum.L2Sum[0]),                2);
+  // fifo1 is in a union swapHerb4bytes( &(SWITCH(gs)->EvtDesc.TCU1.fifo1),1);
+  // fifo2 is in a union swapHerb4bytes( &(SWITCH(gs)->EvtDesc.TCU2.fifo2),1);
+  // fifo3 is in a union swapHerb4bytes( &(SWITCH(gs)->EvtDesc.TCU3.fifo3),1);
+  numToSwap=1+SWITCH(gs)->EvtDesc.npost+SWITCH(gs)->EvtDesc.npre; assert(numToSwap<50&&numToSwap>0);
+  for(i=0;i<numToSwap;i++) { // loop over NPRE, NPOST as well
+    swapHerb2bytes( &(SWITCH(gs)->RAW[i].CTBdataBytes),          1);
+    swapHerb2bytes( &(SWITCH(gs)->RAW[i].EMCdataBytes),          1);
+    swapHerb2bytes( &(SWITCH(gs)->RAW[i].MWCdataBytes),          1);
+    swapHerb2bytes( &(SWITCH(gs)->RAW[i].RawDetBytes),           1);
+    swapHerb4bytes( &(SWITCH(gs)->RAW[i].EMCfiller),             1);
+    swapHerb4bytes( &(SWITCH(gs)->RAW[i].MWCfiller),             1);
+  }
+
+  returnValue=header.swap();
+  assert(header.ByteOrder==0x04030201);
+  return returnValue;
+}
+void TRG_Reader::SWITCH(SanityCheck)(int check_s=1) {
+  if ( check_s){
+    assert( SWITCH(gs)->RAW[0].RawDetHeader[0]=='R');  // If one of these asserts()s
+    assert( SWITCH(gs)->RAW[0].RawDetHeader[1]=='D');  // fails, it probably means that the
+    assert(SWITCH(gs)->RAW[0].CTBdataHeader[0]=='C');  // trigger group wrote the .daq bank
+    assert(SWITCH(gs)->RAW[0].CTBdataHeader[1]=='T');  // with a new version of trgStructures.h.
+    assert(SWITCH(gs)->RAW[0].MWCdataHeader[0]=='M');  // If so, then you will have to modify all
+    assert(SWITCH(gs)->RAW[0].MWCdataHeader[1]=='W');  // the offline code to 
+    assert(SWITCH(gs)->RAW[0].EMCdataHeader[0]=='E');  // switch
+    assert(SWITCH(gs)->RAW[0].EMCdataHeader[1]=='M');  // between versions of trgStructures.h.
+  } else {
+    cout << "TRG_Reader::SanityCheck200x : Bank position sanity check is disabled" << endl;
+  }
+}

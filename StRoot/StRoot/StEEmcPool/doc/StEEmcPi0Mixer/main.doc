@@ -1,0 +1,25 @@
+/**
+
+\mainpage StEEmcPi0Mixer - Produces two-body kinematics from pairs of EEMC points.  
+\author Jason C. Webb         
+\date    created 2005
+\version 1.0
+
+
+ This class takes as input points found using StEEmcPointMaker or
+a derivative class.  We then loop over all possible pairs of 
+points to find pi0 (eta) --> gamma gamma candidates.  
+
+ Points from
+each event are stored in a E_T ranked pool, which we then mix
+to form combinatoric background candidates.  In the future we
+may create a separate maker for mixed events.
+
+The code allows two cuts:
+
+<ol>
+  <li>Trigger list -- the user may specify a list of triggers to process</li>
+  <li>Sector limits -- by default, points are mixed if in the same sector.  The user may specify other sector-wise limits.</li>
+</ol>
+*/
+

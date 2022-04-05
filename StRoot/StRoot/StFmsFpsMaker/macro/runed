@@ -1,0 +1,5 @@
+root4star -b -q runSimBfc.C'(100,100,"gamma",0,9)'
+root4star -b -q runSimBfc.C'(100,100,"electron",0,9)'
+root4star -b -q runSimBfc.C'(100,100,"pi-",0,9)'
+root4star -b -q runSimBfc.C'(100,100,"mu-",0,9)'
+root4star -b -q runSimBfc.C'(100,100,"pi0",0,9)'

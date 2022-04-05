@@ -1,0 +1,42 @@
+
+Package: St_TLA_Maker
+Responsible: Victor Perevoztchikov (perev@bnl.gov)
+
+Purpose: Template Maker doing nothing.
+
+Provides template for creation any user maker.
+
+1) Inherited from StMaker class
+
+2) User must provide at least its own methods
+
+  a) Init()  	//mandatory
+  b) Make()  	//mandatory
+  c) InitRun(newRunNumber) 	//if needed
+  d) FinishRun(oldRunNumber) 	//if needed
+  e) Clear() 	//if standard StMaker::Clear()  is not appropriate  
+  f) Finish()	//if standard StMaker::Finish() is not appropriate 
+
+3) User can define any other methods, but regularly they
+   should not be used by others makers. But some of them
+   could be used from Cint macro or root prompt
+   If possible, user method must be private. 
+
+TLA - Triple Letter Acronym. 
+
+In previous notation user module name must have 3 letters
+surrounded by "_".
+
+Now this limitation is obsolete. User maker now must be:
+
+St<User provided name>Maker
+User name must be separated by the following methods:
+
+  a) StXxxxxMaker
+
+  b) St_xxxxx_Maker
+  
+But actually it is only for clarity. Essential parts
+are only "St" and "Maker"
+
+

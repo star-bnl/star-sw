@@ -1,0 +1,30 @@
+README File for Associator of OO Data Models StEvent and StMcEvent
+Time-stamp:<99/06/28 16:20 calderon>
+
+Contact: Mike Lisa, Manuel Calderon de la Barca Sanchez
+
+Modification History
+====================
+
+06/28/99 Original version. Authors: Mike Lisa, Manuel Calderon de la Barca Sanchez
+
+Description
+===========
+
+Takes the StEvent and StMcEvent objects
+and builds multimaps so that one can query in
+with a rec. hit or track, and get the associated
+Monte Carlo hit or track.  In addition, for tracks
+one is also interested in the number of common hits
+the tracks have, so this information is also
+available.
+
+To be done
+==========
+Associate hits in SVT and FTPC.
+
+Tests done
+----------
+Compiles on i386_redhat51, sun4x_56, and hp_ux102
+
+

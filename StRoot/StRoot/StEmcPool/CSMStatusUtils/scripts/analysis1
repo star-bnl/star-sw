@@ -1,0 +1,5 @@
+#!/bin/bash
+
+#bsub -R "linux" -q star_cas_big  -J CSMjob1$USER -o OutPutLog   << EOF
+  root4star -b -q StRoot/StEmcPool/CSMStatusUtils/macros/createRunStatusHistograms.C'()'
+#EOF

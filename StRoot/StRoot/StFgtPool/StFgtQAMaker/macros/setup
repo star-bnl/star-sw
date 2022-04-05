@@ -1,0 +1,30 @@
+cvs co StRoot/StFgtPool/StFgtRawDaqReader
+cvs co StRoot/StFgtPool/StFgtPedMaker
+cvs co StRoot/StFgtPool/StFgtStatusMaker
+cvs co StRoot/StFgtPool/StFgtClusterTools
+cvs co StRoot/StFgtPool/StFgtAlignmentMaker
+
+cp StRoot/StFgtPool/StFgtQAMaker/macros/* .
+
+\rm crontab.txt
+\rm makeplot
+\rm makepage.pl
+
+sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macros/crontab.txt > crontab.txt
+sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macros/makeplot > makeplot
+sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macros/makepage.pl > makepage.pl
+
+chmod +x makeplot
+chmod +x makepage.pl
+chmod +x maketiny.pl
+chmod +x cron
+chmod +x runs
+chmod +x writeped.pl
+chmod +x writestat.pl 
+chmod +x runtime
+
+cp $STAR/.$STAR_HOST_SYS/include/fgtPedestal.h .
+cp $STAR/.$STAR_HOST_SYS/include/fgtStatus.h .
+
+stardev
+cons

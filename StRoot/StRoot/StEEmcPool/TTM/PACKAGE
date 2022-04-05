@@ -1,0 +1,5 @@
+# $Id $
+# package TTM
+# author: 
+Library:libStEEmcPoolTTM.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -l_StEEmcUtil  -l_StEvent  -l_StMuDSTMaker  -lPhysics
+#Library:libStEEmcPoolTTM.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -lStEEmcUtil  -lStEvent  -lStMuDSTMaker  -lPhysics

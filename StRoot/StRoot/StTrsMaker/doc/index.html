@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>TRS Mini Guide</title>
+  </head>
+  <body bgcolor="#ffffff" text="#000000">
+    <table border="0" width ="100%" cellpadding="10">
+      <tr bgcolor="darkblue">
+	<td align="center" valign="top">
+	  <h1>
+	    <font color="red">TPC Response Simulator<font>
+	  </h1>
+	</td>
+    </table>
+    <p>
+    For information on TRS itself, you can go to the
+    <a href="http://www.star.bnl.gov/STAR/html/comp_l/simu/TpcRespSim/src/Welcome.html">TRS Home Page</a>
+    </p>
+    <hr>
+    <center>
+      <h1>Mini Guide</h1>
+    </center>
+
+      
+
+
+    </p>
+    <p>
+      I'll describe here how to use the current reading/writing of StTrsMaker
+      event data.  We are still
+      developing, so this document is constantly changing.  We'll try to keep it up to date,
+      please let us know of any inconsistencies.
+
+    </p>
+
+    <hr>
+    <h2> Getting A Local StTrsMaker</h2>
+
+    <p>
+      The first thing is to get the code.  Unfortunately, a local build is currently needed because
+      the version of cons that is in dev does not have the latest fixes that Yuri made in .dev to
+      cope with the StTrsMaker include files.  This will hopefully change later.
+    </p>
+    <p>
+      To get the code, do the following:
+      <font face="courier">
+	<ul>
+	<li> mkdir mytrs
+	<li> cd mytrs
+	<li> klog
+	<li> stardev    
+	<li> cvs co StRoot/StTrsMaker
+	<li> star.dev
+	<li> cp $STAR/mgr/Conscript-standard StRoot/StTrsMaker/Conscript
+	<li> stardev
+	<li> cons +Trs
+	</ul>
+      </font>
+    </p>
+    <p>
+      Now you have a local copy of TRS.  When cons is updated in dev, the previous steps will
+      no longer be necessary.
+    </p>
+
+    <hr>
+    <h2> Macros </h2>
+    <p>
+      To run StTrsMaker in root, you'll want a macro to specify the desired behavior.  For example,
+      you might want to read a venus file, process it through geant, process the geant output,
+      through TRS, and write the trs event to a file.  Another case might be if you already have an
+      existing .trs file that you want to load.
+    </p>
+
+    <p>
+      Here are examples of each:
+      <ul>
+      <li><a href="../../macros/examples/TrsWrite.C">TrsWrite.C</a>
+	This macro will read a muon track, pass it to Geant, process the output through TRS,
+	and write .trs File
+      <li><a href="../../macros/examples/TrsRead.C">TrsRead.C</a>
+	Read .trs file produced with TrsWrite.C .
+      </ul>
+    </p>
+    <p>
+      You can get them via:
+      <ul>
+      <font face = "courier">
+	<li> cvs co StRoot/macros/examples/TrsWrite.C
+      </font>
+      or
+      <font face = "courier">
+	<li> cvs co StRoot/macros/examples/TrsRead.C
+      </font>
+      </ul>
+    </p>
+  
+    <hr>
+    <h2> Getting Event Data </h2>
+    <p>
+      Note that reading the .trs file prepares the event in TRS only.  To get to the Data itself,
+      you need to access it like DAQ, using DetectorReaders and ZeroSuppressedReaders.
+
+      For a description of the interface as defined for DAQ, you can download the
+      <a href="./trsinterface.pdf"> Trs Interface Document</a>
+      In it you can find example code to put in a Maker to get the data.
+    <hr>
+    <p>
+      This is a work in progress, for questions, you can contact
+    </p>
+    <address><a href="mailto:calderon@star.physics.yale.edu">Manuel Calderon de la Barca Sanchez</a></address>
+    or
+    <address><a href="mailto:lasiuk@star.physics.yale.edu">Brian Lasiuk</a></address>
+<!-- Created: Tue Nov  9 10:35:54 EST 1999 -->
+<!-- hhmts start -->
+Last modified: Tue Nov  9 14:09:37 EST 1999
+<!-- hhmts end -->
+  </body>
+</html>

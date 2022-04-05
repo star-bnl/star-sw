@@ -1,0 +1,5 @@
+# $Id $
+# package StPmdReadMaker
+# author: 
+Library:libStPmdReadMaker.so:LIBS +=   -lStChain  -lStDAQMaker  -lStDb_Tables  -l_StEvent  -lStPmdUtil
+#Library:libStPmdReadMaker.so:LIBS +=   -lStChain  -lStDAQMaker  -lStDb_Tables  -lStEvent  -lStPmdUtil

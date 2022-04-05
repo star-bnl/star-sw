@@ -1,0 +1,38 @@
+# $Id: README,v 1.4 2009/11/24 19:58:19 fine Exp $
+# *-- Author :    Valery Fine(fine@bnl.gov)   24/11/2009
+The directory contains a simple example of the transition the standalone application to ROOT loadable macro
+
+1. MyPackageMain.cxx - this is the original stand-alone package
+   You can build and execute it as follows:
+   
+   g++ MyPackageMain.cxx -o MyPackageMain
+   MyPackageMain
+   
+2. MyPackage.cxx is the modified version of MyPackageMain.cxx 
+   suitable to be used with ROOT ACliC. 
+   The MyPackage.cxx contains the copy of the code from MyPackageMain.cxx 
+   
+   It can be used as follows:
+   
+     >  root.exe --b -q -l MyPackage.cxx+
+       
+3. MyPackageFancy.cxx is the modified version of MyPackage.cxx
+   This file does not contain any copy of the code from MyPackageMain.cxx
+   It uses the CPP
+        #include "MyPackageMain.cxx" 
+   instead.
+
+   It can be used as follows:
+     >  root.exe --b -q -l MyPackageFancy.cxx+
+
+4. MyPackage.csh is the shell script to execute all 3 steps above
+
+   > ./MyPackage.csh 
+   
+5. To see how it works check the package out 
+   
+   >  cvs co -d./ StRoot/macros/aclic
+   
+   and invoke the MyPackage.csh  shell script
+
+   > ./MyPackage.csh

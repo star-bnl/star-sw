@@ -1,0 +1,54 @@
+LIST nodes:
+./spinDbAPI -p  beamV0 -T 
+
+Load V124
+./spinDbAPI -p beamV0/spinV124  -c "jan2-360 random2"  -s -f v124.inp
+./spinDbAPI -p beamV0/spinV124  -t 1117961056
+
+./spinDbAPI -p beamV0/spinV124  -c "F7238, CAD:P1_73, Jan "  -s -f /star/u/balewski/runList2005/rd-cdev/F7238.v124 -t 1117961055 -x 1117985300
+
+JIM's 1st record
+./spinDbAPI -p beamV0/spinV124  -c "F7306, B111 Y111 B-+-+ Y++--  P2 , Jim1 "  -s -f /star/u/sowinski/runlist/spinbits/begin_old/F7306.v124 -t 1119223895  -x 1119248488 
+
+
+mysql --host=robinson.star.bnl.gov --port=3306 Calibrations_rhic -e "select comment,dataID,beginTime,endTime from spinV124 where BeginTime>'2005-01-01' and  BeginTime<'2006-03-25'  order by beginTime "
+
+xxxxxxxxxxxxxx  DELETE spinV124  xxxxxxxxxxx
+mysql --host=robinson.star.bnl.gov --port=3306 Calibrations_rhic -e "delete from spinV124 where dataID=5"
+
+-------------------------------------------
+
+Load BXoffset
+./spinDbAPI -p beamV0/spinStar  -c "R6156028 test, jan"  -s -f star.inp -t "2005-06-05 06:16:00" -x "2005-06-05 06:46:00"
+
+./spinDbAPI -p beamV0/spinStar  -t "2005-06-05 06:26:00"
+
+mysql --host=robinson.star.bnl.gov --port=3306 Calibrations_rhic -e "select comment,dataID,beginTime,endTime from spinStar where BeginTime>'2005-01-01' and  BeginTime<'2006-03-25'  order by beginTime " 
+
+xxxxxxxxxxxxxx  DELETE spinStar  xxxxxxxxxxx
+mysql --host=robinson.star.bnl.gov --port=3306 Calibrations_rhic -e "delete from spinStar where dataID=6"
+
+-------------------------------------------
+
+Load BXmask
+
+./spinDbAPI -p beamV0/spinBXmask  -c "F7238, BXmask test, Jan "  -s -f ./F7238.mask -t 1117961055 -x 1117985300
+
+
+mysql --host=robinson.star.bnl.gov --port=3306 Calibrations_rhic -e "select comment,dataID,beginTime,endTime from spinBXmask where BeginTime>'2005-01-01' and  BeginTime<'2006-03-25'  order by beginTime "
+
+xxxxxxxxxxxxxx  DELETE spinBXmask  xxxxxxxxxxx
+mysql --host=robinson.star.bnl.gov --port=3306 Calibrations_rhic -e "delete from spinBXmask where dataID=1"
+
+
+
+
+
+
+
+get_file_list.pl -keys 'path,filename' -cond 'production=P05if,trgsetupname=ppProduction,filetype=daq_reco_MuDst,storage=NFS'
+
+get_file_list.pl -cond "production=P04ik,filetype=daq_reco_event,storage=NFS" -keys "path,filename" -delim / | grep -v fast | grep -v zerobias
+
+8-bit spin bits
+StRoot/StEvent>more StTriggerData2005.h

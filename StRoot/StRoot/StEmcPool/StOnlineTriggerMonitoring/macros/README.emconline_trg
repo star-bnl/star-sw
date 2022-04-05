@@ -1,0 +1,137 @@
+EMC Online trigger monitoring
+----------------------------------------------------------------------
+INSTALLATION
+
+Requirements:
+A. Access as onlmon on the onlXX machines. You can get access with your SSH key here:
+https://www.star.bnl.gov/starkeyw/
+
+You may also need access to log into the following:
+
+operator@daqman.starp.bnl.gov
+staruser@startrg.starp.bnl.gov
+sysuser@sc5.starp.bnl.gov
+evpops@evp.starp.bnl.gov
+
+B. Write access to the database
+Here we assume that the monitoring job has write access to the database, in Calibrations/emc.
+Please consult EMC or DB experts on how to set it up.
+
+Create a new directory. This code uses a "crontab"-type job, so it can be ran on onl11-13 machines. I generally run on onl11.
+mkdir /ldaphome/onlmon/bemctrgdbYYYY (YYYY = year)
+cd /ldaphome/onlmon/bemctrgdbYYYY
+
+1. Setup the local copy:
+-----------------------------
+These are usually stable and available from afs, no need to download:
+cvs co StRoot/St_base
+cvs co StRoot/St_Tables?
+cvs co StRoot/StChain
+cvs co StRoot/StDbLib
+cvs co StRoot/StDbBroker
+cvs co StRoot/St_db_Maker
+----------------------------- 
+These are EMC-related, likely to change from time to time, better to have local copy:
+cvs co StRoot/StDaqLib
+cvs co StRoot/StEmcPool/StOnlineTriggerMonitoring #trg monitoring itself, checkout this
+
+NOTE: I never have checked anything other than the StOnlineTriggerMonitoring package out of CVS, and it always works correctly. Do as you please. (JKA)
+
+2. Run the configuration script in /ldaphome/onlmon/bemctrgdbYYYY
+   sets the soft links for all code, etc.
+./StRoot/StOnlineTriggerMonitoring/macros/configure.emconline_trg
+
+The following files are created:
+    .emconline_trg.cfg.sh - configuration file
+    saveTriggerLoad.C     - ROOT script to run the trigger monitoring
+    job.emconline_trg     - script to be run as a cron job
+    status.emconline_trg  - set or report the current status
+    update.emconline_trg  - shell script to run monitoring
+    bce_table.txt, bcw_table.txt - DSM internal patches numeration
+    scp                   - Script which does the "scp"-ing between machines
+
+The "Trigger monitoring" icon also appears on the GNOME desktop showing the current status of the job.
+
+Update configuration file settings:
+ .emconline_trg.cfg.sh
+In this file one should/change set three things:
+   - EMCONLINE_TRG_DIR -> change to current working directory
+   - EMCONLINE_TRG_WEBDIR -> change to a directory for web monitoring that you have write access to (somewhere on /onlineweb/www/)
+   - EMCONLINE_TRG_STARVER -> Set to the STAR library version you will be compiling under (pro or dev)
+     NOTE: In 2015 'root4star' was not set up in starpro. Therefore the code would break and DEV was the only option
+
+3. Compile
+cons
+Don't forget to compile under the correct star level which you specified as EMCONLINE_TRG_STARVER above.
+
+4. Copy the file ".scprc" from a previous bemctrgdbYYYY/ directory to your current working bemctrgdbYYYY/ directory. This has the following form (if you cannot find it):
+
+function getPassw () {
+    if [[ "${1}" == "sysuser@sc5.starp.bnl.gov" ]] ; then echo '$properPass' ; fi
+    if [[ "${1}" == "evpops@evp.starp.bnl.gov" ]] ; then echo '$properPass' ; fi
+    if [[ "${1}" == "staruser@startrg.starp.bnl.gov" ]] ; then echo '$properPass' ; fi  
+    if [[ "${1}" == "operator@daqman.starp.bnl.gov" ]] ; then echo '$properPass' ; fi  
+}
+
+Where $properPass is the password associated with the node you wish to log into. If you don't know these, you will have to find someone that does (They're always in the control room...). The point of this file is for the "scp" script  to work correctly. The ".scprc" holds the login and password information to get and send information to other computer systems
+
+5. Start monitoring
+./status.emconline_trg RUN
+File RUNMODE.emconline_trg will contain the current monitoring status, RUN or STOP
+
+*NOTE* If you wish to stop monitoring, it's as simple as:
+./status.emconline_trg STOP
+
+6. Add the cron job to the list of crontabs
+   execute 'crontab -e'
+   In the editor type '*/10 * * * * csh -c "stardev; bash /ldaphome/onlmon/bemctrgdbYYYY/job.emconline_trg"
+
+   Note that if you're using "starpro" (didn't work for run15!!) then you'll need to change from stardev to starpro in the editor command
+
+   Note at the end of the run you should uninstall the cronjob command. So execute 'crontab -e' and remove the above command and save the file again to remove it completely (remember to log into the node which you installed the crontab)
+
+----------------------------------------------------------------------
+USAGE
+
+Report the status of monitoring
+./status.emconline_trg
+
+Start|Stop monitoring
+./status.emconline_trg RUN|STOP
+
+Run the monitoring script manually
+./job.emconline_trg
+or force, if monitoring is currently stopped
+./job.emconline_trg "" "" RUN
+or force update even if no changes found
+./job.emconline_trg "" yes RUN
+The first argument "" means the current time, or it can be a timestamp "YYYYDDMM.HHMMSS".
+
+Backup ROOT files are saved in ./backup.emconline_trg, gzipped logs in ./logs.emconline_trg,
+DB tables in ./tables.emconline_trg, last known configuration in ./last_conf.emconline_trg.
+Files left after the last running:
+    LAST_TIME_RUN.emconline_trg - short summary
+    last_log.emconline_trg.txt  - log file, stdout and stderr
+    bemcStatus.txt
+
+----------------------------------------------------------------------
+
+Notes:
+1.) The website you define (EMCONLINE_TRG_WEBDIR) will hold the records of the code running
+
+2.) The site should be checked daily for updates. If there are updates, one should check the log file for that time stamp, make sure ROOT files were produced, and make sure the file bemcStatus.txt is being produced correctly. Be cautious of failed "scp" commands in the log file, this can happen from time to time.
+
+3.) Errors in the log files should be attended to immediately!
+
+4.) EMCONLINE_TRG_SAVEDB in the .emconline_trg.cfg.sh may be set to "true". If this is done, the tables are written to the database every time there's an update. This is the choice of the user. If so, skip 6.) below
+
+5.) EMCONLINE_TRG_SAVETABLES should always be set to true so that the tables are saved even if they're written automatically to the DB
+
+6.) Saved tables may be uploaded to the DB after the run. Use the macro uploadToDB.C to do this, the directions are in the code and pretty simple to follow. One would have to set the DB_ACCESS_MODE to write for this code to run, and should be cautious when running it. Don't upload before you're ready, you can comment out the write command (or place a return statement) to stop accidential uploads - be prepared before you act!
+
+7.) In 2015, the libraries were in such a way that only "stardev" had the root4star variable defined in it. So, one must compile the code in dev, then have the stardev command in the cronjob command
+
+Oleksandr Grebenyuk
+April, 2007
+
+Updated 2/11/2015 - Kevin Adkins

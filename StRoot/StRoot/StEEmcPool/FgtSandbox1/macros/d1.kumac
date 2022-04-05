@@ -1,0 +1,41 @@
+debug  on
+switch 2 3
+switch 2 2
+*               ! Define the geometry tag to be used
+*detp geom upgr16             
+detp geom UPGR2012             
+*detp geom upgr17             
+*               ! Load the geometry according to the tag
+* gexec $STAR_LIB/geometry.so 
+*  gexec .sl44_gcc346/lib/geometry.so
+  gexec .sl53_gcc432/lib/geometry.so
+*               ! Finalize GEANT data structures 
+gclose all
+*gdump /DETM 
+*gdump /DETM/GEOM/GDAT
+*ld
+*  track  6          2.746972 22.949450 73.920486
+pId=6 
+pT=40
+*Y=1.45
+*Y=1.457
+Y=1.84
+ gfile   o d1.fzd
+
+*gkine 1 [pId] [pT] [pT] [Y] [Y] 3.7854 3.7854  
+*gkine 1 [pId] [pT] [pT] [Y] [Y] 3.7854 3.7854  216 deg
+*gkine 1 [pId] [pT] [pT] [Y] [Y] 2.1854 2.1854  
+*gkine 1 [pId] [pT] [pT] [Y] [Y] 4.5854 4.5854  262 deg see negative 
+gkine 1 [pId] [pT] [pT] [Y] [Y] 5.323 5.323 
+*gkine 1 [pId] [pT] [pT] [Y] [Y] 4.974-0.1745*1 4.974-0.1745*1  
+trig; 
+*gprint hits
+gprint hits fgtd
+
+ dhits
+*satt * SEEN 0
+*satt FGSC SEEN 1
+*satt FGS1 SEEN 1
+
+*draw FGMO 33 33 33 10 10  0.1 0.1 
+

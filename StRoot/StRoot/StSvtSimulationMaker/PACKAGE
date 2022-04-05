@@ -1,0 +1,5 @@
+# $Id $
+# package StSvtSimulationMaker
+# author: 
+Library:libStSvtSimulationMaker.so:LIBS +=   -lsim_Tables  -lStChain  -lStDbUtilities  -lStSvtClassLibrary  -l_StSvtDbMaker
+#Library:libStSvtSimulationMaker.so:LIBS +=   -lsim_Tables  -lStChain  -lStDbUtilities  -lStSvtClassLibrary  -lStSvtDbMaker

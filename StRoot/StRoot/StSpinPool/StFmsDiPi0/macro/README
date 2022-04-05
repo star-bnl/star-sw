@@ -1,0 +1,50 @@
+***(1)***  Get codes and scripts
+
+cd [your working dir]
+klog.krb5
+cvs co StRoot/StSpinPool/StFmsDiPi0
+stardev
+cons
+cp StRoot/StSpinPool/StFmsDiPi0/macro/* .
+
+***(2)***  Run mudst reading job creating tree - you can skip to (3) if you take akio's tree
+
+cvs co StRoot/StSpinPool/StFmsOfflineQaMaker
+cons
+ln -s [your data disk/dir] hist_pptrans
+ln -s [your data disk/dir] hist_pAu1
+ln -s [your data disk/dir] hist_pAu2
+ln -s [your data disk/dir] hist_pAl
+ln -s [your log disk/dir] log
+star-submit pptrans.xml
+star-submit pAu1.xml
+star-submit pAu2.xml
+star-submit pAl.xml
+
+***(3)*** links to the tree files akio made (skip if you did 2)
+
+ln -s /gpfs01/star/subsysg/FPS/hist_pptrans
+ln -s /gpfs01/star/subsysg/FPS/hist_pAu1
+ln -s /gpfs01/star/subsysg/FPS/hist_pAu2
+ln -s /gpfs01/star/subsysg/FPS/hist_pAl
+
+***(4)***  Running tree reading job and merging hist files
+
+mkdir www
+cp /star/u/akio/WWW/spin/fms2015/goodruns.*.txt www/
+ln -s [your data disk/dir] hist
+ln -s [your log disk/dir] log
+submit_tree [pptrans,pAu1,pAu2,pAl] [none,submit,2ndpass,3rdpass]
+  1st arg specify which period
+  2nd arg none = just create scripts 
+          submit = create scripts, 
+	           then submit tree reading histogram creating jobs (1 job per run),
+	           then also do 2nd and 3rd pass
+          2ndpass = merging histograms/run for days
+          3rdpass = merging histograms/day for the whole period
+
+***(5)*** plot
+
+root dipi0.C'()'
+
+

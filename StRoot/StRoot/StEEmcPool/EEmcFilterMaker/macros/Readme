@@ -1,0 +1,46 @@
+Pythia filtering.
+Details are given here:
+http://drupal.star.bnl.gov/STAR/subsys/upgr/fgt/filtering-pythia-events-starsim
+
+is done by instering a custom fortran code in to a private directory and add/replace the following files (remove '-example')
+
+pyevnt.F-example 
+star_filter.inc-example
+star_filter.F-example
+
+Those files needs to be customized for end-user needs.
+Macro 
+ plotPythia.kumac can be used to visalaise HBOOK histos from Pythia+GSTAR job tomonitor rejection factor.
+
+Macros generate various physics samples. 
+ppWdec.kumac  ppWprod.kumac  ppZjet.kumac
+ppQCDprod.kumac   ppWjet.kumac  ppWZ.kumac     ppZprod.kumac
+
+Macro
+skimMultiLogs.tcl 
+allows to fetch some variables from the log files, needed for integrated luminosity
+
+Macros:
+bsub_gstar_bfc.sh big_mcRun.sh
+allow massive submission of jobs vis LSF @ RCF
+
+========================================================
+This bfc.C was taken from dev in April of 2008,
+It has been modified to work with M-C events and
+to make use of the EndcapFilterMaker which aborts events if too little energy is seen in the endcap.
+Note, this BFC uses also beam line constrain shifted off x=y=0 - a special DB table is used for that.
+
+Search for string 'JAN' to find where bfc.c was changed.
+
+The goal is to reduce the footprint of output files.
+For example for QCD events partonic pt 10-30, already filtered on the pythia level by requirement 20 GeV ET (true energy) we can get another factor of ~20 in the reduction if Endcap response >16 GeV (using SF=1.0) is imposed in BFC.
+
+For QCD events with partonic pt 30-inf generated the same way, we win factor 6.3 in filter-1 and factor 1.5 in filter-2.
+
+For W-event we win factor of 3.
+
+I run the following BFC options:
+
+bsub -q star_cas_big -J Qcd-b3 -o LogBb3 root4star -b -q bfc.C'(1000,"DbV20080310 trs -ssd upgr13  Idst IAna l0 tpcI fcf -ftpc Tree logger ITTF Sti StiRnd  -IstIT -SvtIt -NoSvtIt SvtCL,svtDb -SsdIt MakeEvent McEvent geant evout geantout IdTruth  bbcSim emcY2 EEfs bigbig -dstout fzin -MiniMcMk McEvOut clearmem -ctbMatchVtx VFPPV eemcDb beamLine","/star/institutions/iucf/balewski/2008-FGT-simu/setC5-pilot/mit0018_3_5000evts.fzd")'
+ 
+Jan Balewski, May, 2008

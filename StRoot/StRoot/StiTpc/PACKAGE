@@ -1,0 +1,5 @@
+# $Id $
+# package StiTpc
+# author: 
+Library:libStiTpc.so:LIBS +=   -lStDbUtilities  -lStDetectorDbMaker  -l_StEvent  -lStiGui -lGui  -lStChain -lSti -lStMcEvent  -l_StTpcDb
+#Library:libStiTpc.so:LIBS +=   -lStDbUtilities  -lStDetectorDbMaker  -lStEvent  -lStiGui  -lSti  -lStMcEvent  -lStTpcDb

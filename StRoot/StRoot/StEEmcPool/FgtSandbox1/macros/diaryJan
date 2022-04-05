@@ -1,0 +1,139 @@
+
+cp -rp /star/u/jwebb/work/2011/03-28-2011-agml-sandbox 2011-04-FGT-wrk
+
+stardev
+cvs co  pams/geometry
+cons
+
+--------
+
+cp -rp /star/u/jwebb/work/2011/04-06-2011-agml-sandbox .
+cd 04-06-2011-agml-sandbox
+cp ../2011-04-FGT-wrk/StarVMC/Geometry/FgtdGeo/FgtdGeo3.xml StarVMC/Geometry/FgtdGeo/
+
+cp ../2011-04-FGT-wrk/d1.kumac .
+cp ../2011-04-FGT-wrk/makeV3.csh  .
+cp ../2011-04-FGT-wrk/SandBox.C .
+
+From Wei-Ming
+cp -rp /star/u/wzhang/fgtVMC/agmlsb/StRoot/StFgtSimulatorMaker StRoot/
+cp /star/u/wzhang/fgtVMC/agmlsb/xbfc.csh .
+cp $STAR/StRoot/macros/bfc.C .
+
+add Wei-Ming changes to BFC:
+
+
+--------- test radiantion length:
+a)  simRad.sh runs mat.kumac
+b) plot using plMat.C
+
+
+---- run BFC ----
+root4star -b -q bfc.C'(1,100,"fzin,nodefault,logger,-magF,-db","d1.fzd")' >&LogBfc&
+
+------ slow simu setup -------
+StChain:DEBUG - *** Call << StFgtSlowSimuMaker:Init() ***
+Hex Grid base: U(0.500,0.866025), V(-0.500,0.866025)  U*V=0.500
+ Parementers of StFgtGeom
+ -------------------------
+        Rout, Rmid, Rin = 37.1 cm, 18.8 cm, 11.5 cm
+        Rad/Phi Strip  pitch = 0.08 cm, 0.06 cm
+        Offset of Rad/Phi  = 0 cm, 0.0165437 cm
+        Number of Rad/Phi Strip Ids = 325 976
+        Z0 - Z4 = 69.08 79.08 89.08 99.08 109.08 cm
+        Z5 - Z8 = 119.08 168.68 218.68 66.98 cm
+
+StChain:INFO  - ::Init params
+  X,YamplSigma=0.0350 cm,  2DpixAmplThres=0.10 a.u., stripAmplThres=1.00 a.u.,
+  forcePerpTracks=0  useOnlyDisk=0 
+  RadGain(m=1.00,sig=0.03)  PhiGain(m=1.00,sig=0.03, 
+  GemHexLatice: pitch/um=140.0, phi1/deg=60.0, transDiffusion=170.0 um/1cmOfPath, cutoffOfBichel=9992)
+
+StChain:DEBUG - *** Call << StFgtClustFindMaker:Init() ***
+StChain:INFO  - ::Init params 
+ minPeakWidth=3, minPeakSepar=3 (# of strips), seedStripThres=30.0 a.u., 
+ clusterMinAmpl=0.0 a.u., stripNoiseSigma=12.0 a.u.
+
+-------------
+
+
+HIST LIST:
+Attaching file d1.root.fgt.hist.root as _file0...
+lsroot.exe [1] .ls
+TFile**         d1.root.fgt.hist.root
+ TFile*         d1.root.fgt.hist.root
+- reset for every event --
+  KEY: TH2F     digXY;1  2D digitization response of FGT quart
+  KEY: TH1F     digRad;1        rad-strips response of FGT disk
+  KEY: TH1F     digPhi;1        phi-strips response of FGT disk
+  KEY: TH2F     digXYAll;1       2D digitization response of all FGT quart
+  KEY: TH1F     digRadAll;1     rad-strips response of all FGT disks
+  KEY: TH1F     digPhiAll;1     phi-strips response of all FGT disks
+---- regular QA hists ----
+unpacking g2t table:
+  KEY: TH1F     ss_inDE;1       g2t  DE of hit
+  KEY: TH1F     ss_inDS;1       g2t  path length of hit
+  KEY: TH1F     ss_inZ;1        g2t  Z of hit (entrance)
+  KEY: TH1F     ss_hitStat;1    Where hits are lost, 1-10 general
+  KEY: TH2F     ss_inXY;1       Entrance X-Y , accepted hits, all disks
+  KEY: TH1F     ss_cTof;1       g2t  TOF of hit (before cut)
+  KEY: TH1F     ss_inR;1        g2t  Rxy of hit, w=1.
+  KEY: TH1F     ss_cPmag;1      g2t  P.Mag of hit (before cut)
+----
+  KEY: TH2F     ss_gXY0;1        hits accepted in Disk=0
+  KEY: TH2F     ss_gXY1;1        hits accepted in Disk=1
+  KEY: TH2F     ss_gXY2;1        hits accepted in Disk=2
+  KEY: TH2F     ss_gXY3;1        hits accepted in Disk=3
+  KEY: TH2F     ss_gXY4;1        hits accepted in Disk=4
+  KEY: TH2F     ss_gXY5;1        hits accepted in Disk=5
+  KEY: TH2F     ss_gXY6;1        hits accepted in Disk=6
+  KEY: TH2F     ss_gXY7;1        hits accepted in Disk=7
+  KEY: TH1F     fr_pairEne;1    Energy of pair per collision
+  KEY: TH1F     fr_nPrimPair;1  No. of prim pairs per track
+  KEY: TH1F     fr_totEne;1     Total energy deposit per track
+  KEY: TH1F     fr_nTotPair;1   Total No. of  pairs per track
+  KEY: TH1F     fr_pathL;1      Total path length in gas per track
+  KEY: TH1F     fr_avrPath;1    Average path length , w=nAnyEle
+  KEY: TH1F     fr_avrTPath;1   Average transverse path length , w=nAnyEle
+  KEY: TH1F     fr_Zdrf;1       Zdrift of prim ele 
+  KEY: TH2F     fr_Rdiff;1      Transverse diffusion
+  KEY: TH1F     cl_Stat1D;1     Found 1D clusters, odd=Rad, even=Phi
+  KEY: TH1F     cl_rMul;1       Mult Rad-clusters, 1D , any disks
+  KEY: TH1F     cl_pMul;1       Mult Phi-clusters, 1D , any disks
+  KEY: TH2F     cl_rpMul;1      Mult per quadrant, 2x1D, any disks
+  KEY: TH1F     cl_RmxAmp;1      Rad-strips 1D clust 
+  KEY: TH1F     cl_PmxAmp;1      phi-strips 1D clust 
+  KEY: TH1F     cl_Rwid;1        Rad-strips 1D clust 
+  KEY: TH1F     cl_Pwid;1        Phi-strips 1D clust 
+  KEY: TH1F     cl_Rpf;1         Rad-strips 1D clust 
+  KEY: TH1F     cl_Ppf;1         Phi-strips 1D clust 
+  KEY: TH1F     ev_Stat1D;1     Eval clust matching
+  KEY: TH1F     ev_errRad;1     error in reco  R (track-recoClust)
+  KEY: TH1F     ev_RerrPhi;1    error in reco phi*R   (track-recoClust)
+  KEY: TH2F     ev_dRad_R;1     #DeltaR    accuracy of reco cluster 
+  KEY: TH2F     ev_RdPhi_R;1    R*#Delta#Phi   accuracy of reco cluster 
+  KEY: TH2F     ev_RokXY;1      gen clust X-Y , R-matched (#DeltaR<0.700mm)
+  KEY: TH2F     ev_PhiokXY;1    gen clust X-Y , #Phi-matched (R#Delta#Phi<0.200mm)
+
+
+2007-FGT-FermiLab-v1/fitPed1.C     2007-FGT-v4b/hexSnap.C@       
+2007-FGT-FermiLab-v1/plGer.C       2007-FGT-v4b/plHexGrod.C      
+2007-FGT-FermiLab-v1/plQA.C        2007-FGT-v4b/plSnowflake.C    
+2007-FGT-FermiLab-v1/rdFLabTree.C  2007-FGT-v4b/plSS.C           
+2007-FGT-v4b/bfc.C                 2007-FGT-v4b/plStrips10x10.C  
+2007-FGT-v4b/evalResolution.C      2007-FGT-v4b/plStrips.C@      2010-FGT/plOpenGL1.C
+2007-FGT-v4/bfc.C                  2007-FGT-v4b/x1.C             
+
+
+A1:  The <var name="nCables" ...> appears in *two* contexts --
+
+    <Structure ...>
+    <var name="nCables" type="float"  />
+    </Structure ...>
+
+    <Fill ...>
+    <var name="nCables" value="3" comment=" number of cable boundles for FGT    "  />
+    </Fill>
+
+The first declares the structure, the second fills it.  See StarVMC/Geometry/doc/AgML.html
+for (important) details about structures.

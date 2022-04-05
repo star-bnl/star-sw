@@ -1,0 +1,70 @@
+This is FGT offline chain monitor README
+(http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/StRoot/StFgtPool/StFgtQAMaker/macros/README)
+
+How to setup:
+
+  ssh -t -A -Y rssh.rhic.bnl.gov -t -A -Y stargw.starp.bnl.gov ssh -A -Y onl0<N>
+  klog
+  cd <your working dir>
+  cvs co StRoot/StFgtPool/StFgtQAMaker
+  source StRoot/StFgtPool/StFgtQAMaker/macros/setup
+ 
+  mkdir /onlineweb/www/fgtStatus/<your web dir>
+  ln -s /onlineweb/www/fgtStatus/<your web dir> www
+  mv links.php www/
+
+  Webpage will be at http://online.star.bnl.gov/fgtStatus/<your web dir>
+
+  You may need to adjust in makepage.pl at near top:
+    $year = 14   
+    $start = `date -d "Feb 6 00:00:00" +%s`; $start=~s/\n//g;
+  for new RHIC run.
+
+How to run : 
+
+  run#s(14046056/110) and year/date(14046) need to be ones available on eventpool (/evp/a).
+  First you need a good pedestal run (pedAsPhys_tcd_only or fgtPedestal) to create ped & status, then analyze physics runs.
+         
+  runs 14046                              make runlist for a day, i.e. 14046/run.txt and fgtrun.txt from DB
+
+  root4star runqa.C"(14046056,1)"         runqa.C code with run#, pedestal(0 for physics)
+					  creating <yearday>/ped/pedestal.txt and <yearday>/status/status.txt
+  root makepedplot.C"(14046059)"          make plots for pedesral runs from ped/status text file created by runqa.C
+   or
+  makeplot 14046059 pedestal              run runqa.C and makepedplot.C, link pedestal.txt and status.txt to new one
+
+  root4star runqa.C"(14046110,0,100)"     runqa.C code with run#, as physics run (1 for pedestal), and limit to 100 events, 
+                                          creating <yearday>/fgtQA_<run>.root.
+  root makeqaplot.C"(14046110,0,1)"       make plots for physics runs from .root file created by runqa.C, and create all plots
+                                          (0 is all plots, 1 to 20 is for specific page) and make png files (0 for not saving png)
+   or
+  makeplot 14046110 physics               run runqa.C and makeqaplot.C (or makepedplot.C for pedestal) and copy png and pdf file to web area
+
+  makepage.pl                just make web page for today (not running qa nor making plots)
+  makepage.pl 0 submit       make web page for today, and submit makeplot job to condor as needed
+  makepage.pl 0 run          make web page for today, and run makeplot in this process (not on condor) as needed
+  makepage.pl 14046          make web page for day 14046
+
+  emacs crontab.txt       edit cron jobb specification: time interval to run "makepage" job
+  cron                    see if crontab is set
+  cron set                setup cron job with crontab.txt. output will be send by email on your account at onlxx
+  cron remove             remove cron job
+
+Files generated:
+   www/index.php              main web page listing days
+   www/<yearday>.php          webpage with plots and links for a day
+   www/<yearday>/*.png .pdf   QA plots
+
+   pedestal.txt               pedestal file linked to last one in <yearday>/ped/ped.<run>.txt
+   status.txt                 status file linked to last one in <yearday>/statusstatus.<run>.txt
+
+   <yearday>/run.txt          runlist from DB
+   <yearday>/fgtrun.txt       runlist with FGT from DB
+   <yearday>/log/*            log from running QA
+   <yearday>/ped/*            pedestal text files
+   <yearday>/status/*         status text files
+   <yearday>/condor/*         condor files
+   <yearday>/<run>.done       if file exist, it indicated script have done (or is doing) QA, remove this to redo 
+   <yearday>/fgtQA_<run>.root root file containing QA hists
+
+

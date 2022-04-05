@@ -1,0 +1,59 @@
+--------- simulate single muon in FGT in starsim ------
+starsim -w -b fgtEve.kumac
+
+output file is d1.fzd
+---------- run BFC on fzd file ----------
+Use customized bfc.C w/o DB
+
+root4star -b -q  bfc.C'(1,1000,"fzin,nodefault,logger,-magF,-db","d1.fzd")' >& Log1
+
+.......
+use of BFC w/ DB
+
+root4star -b 'bfc.C(10,"MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFPPVnoCTB,logger,-EventQA,-dstout,tags,Tree,EvOut,analysis,dEdxY2,IdTruth,useInTracker,-hitfilt,tpcDB,TpcHitMover,TpxClu,McAna,fzin,y2012,tpcrs,geant,geantout,beamLine,eemcDb,McEvOut,bigbig,emcY2,EEfs,bbcSim,ctf,-CMuDST","d1q.fzd")' -q > & Log1
+
+-------- display FGT view in starsim ------------
+
+starsim -w -b plFgt  (loads geometry)
+
+different view are encoeded in:
+exe plFgtGallery#s1   and other macros.
+There is also 
+exe plFgtGallery#all which does ~17 pages as PS file -takes several minutes
+
+
+------------ 3D root STAR viewer ----
+ You can, if you thought the build procedure went quickly.  If not, here's a work around.
+
+    Instruction for remote user:
+a) generate external root-geometry GDML file
+    root [0] .L StarVMC/Geometry/macros/loadStarGeometry.C
+    root [1] loadStarGeometry("y2012")
+    root [2] gGeoManager -> Export("y2012.root")
+b) copy this to your local machine along with a copy of viewStarGeometry.C.  You will need to have ROOT installed on your local system, then you can
+
+    root [0] .L viewStarGeometry.C
+    root [1] viewStarGeometry("y2012.gdml"); // loads the upgr2012.root file
+
+
+------------------------------------
+--------- scan radiation lenghts -----
+
+Working horse is macro  mat.kumac
+which takes the following arguments:
+    ntrig=4000   rmax=55.  emin=1.5  edel=0.5 core='test1' zVer=0
+It is called by the script simRad.sh  which does:
+defines eta range for sampleing, e.g. [0,3]
+and  loops over 2 radii: 12 & 55 cm,
+generating 2 root histos.
+
+Make sure you use local or official location of libraries - as you need it
+
+You need to run  simRad.sh 3 times with minor changes to get all plots for eta & phi distribution.
+* fulle eta range, varied R use 30k eve per jobe
+
+
+
+You need to have sub-dir radlen_fgt to store output histos.
+There are 2 root scripts 
+plMatEta.C , plMatPhi.C

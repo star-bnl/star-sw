@@ -1,0 +1,18 @@
+-----------------------------------------------------------------------------
+03/28/2006 jcw
+
+1. eemcConstants.h and bemcConstants.h to contain geometric constants
+   specifying the construction of the endcap and barrel. 
+2. jbook() called only once.  jclear() called during initRun resets all
+   histograms.  
+3. remove nested structures from L2gammaResult2006 and elevate version #,
+   and any reference to the nested structures in L2gammaAlgo.cxx.  this is
+   to prevent a "helpful" compiler from padding the elements in the 
+   L2result array. 
+4. error generated in initRun() if I_par[0] != 0 or 1. 
+5. the "L2 preprocessor" option now must be enabled by a compile time 
+   switch,  OPT_PREPROCESS.  Improves speed if running a single threshold. 
+6. MAX_TOWERS=4800 defined in header file.  b/eemcConstants.h moved from
+   L2gammaAlgo.h to .cxx.  
+7. cleanup of L2gammaResult2006.h (old "crap" deleted).
+8. 

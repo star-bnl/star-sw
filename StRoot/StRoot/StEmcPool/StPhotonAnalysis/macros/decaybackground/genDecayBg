@@ -1,0 +1,4 @@
+#!/bin/bash
+
+bsub -q star_cas_short -e err.err -o out.out root4star -b runPP.C\($1\)
+bsub -q star_cas_short -e err2.err -o out2.out root4star -b runDAU.C\($1\)

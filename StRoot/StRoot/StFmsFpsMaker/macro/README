@@ -1,0 +1,56 @@
+*** compile geometry
+cons +StarVMC/Geometry
+cons
+
+*** check overlap
+root.exe
+.L $STAR/StarVMC/Geometry/macros/loadStarGeometry.C
+loadStarGeometry("dev15a")
+gGeoManager->CheckOverlaps()
+new TBrowser()
+
+*** View geometry
+.L viewStarGeometry.C
+nocache=true
+viewall=true
+viewStarGeometry("dev15a")
+
+*** Run starsim alone via kumac file
+starsim
+exec ps.kumac
+
+*** Runnning single particle simulations 
+root4star -b -q runSimFlat.C'(1000,100,"gamma")'
+runsim 1000 1000 gamma fzd
+submitsim.pl
+submitsim.pl submit
+
+*** Runnning reconstruction on single particle simulation 
+root4star -b -q runSimBfc.C'(1000,100,"gamma",1)'
+runsimbfc 1000 100 gamma sim 1
+submitsimbfc.pl
+submitsimbfc.pl submit
+mergesim.pl
+
+*** Running reconstruction on daq file
+root4star runBfc.C'("/star/u/akio/pwg/fms2015/data/st_fms_16077027_raw_1000002.daq")'
+runbfc /star/u/akio/pwg/fms2015/data st_fms_16077027_raw_1000002.daq
+submitbfc.pl
+submitbfc.pl submit
+
+*** Running reconsturction on MuDst file
+root4star -b -q runMudst.C'("/star/u/akio/fms2015/mudst/st_fms_16077027_raw_4000001.MuDst.root",0,10000,"hist",1,0)'
+root4star -b -q runMudst.C'("/star/u/akio/fms2015/mudst/st_fms_16125053_raw_4500013.MuDst.root",0,10000,"hist",1,0)'
+runmudst /star/u/akio/pwg/fms2015/mudst st_fms_16077027_raw_4000001.MuDst.root 0 10000 hist_nomerge 1 0
+submit.pl
+submit.pl submit
+merge2.pl submit
+
+*** Get average CPU time / event from logfile
+grep 'Done with' log.speed | awk '{m+=$22} END{print m/NR}'
+	 
+*** Valgrind profiles
+valgrind --tool=callgrind `which root4star` -b -q 'runMudst.C()'
+
+*** Get file from distributed disk (xrootd)
+xrdcp root://xrdstar.rcf.bnl.gov:1095//home/starlib/home/starreco/reco/production_pp200trans_2015/ReversedFullField/P15ik/2015/069/16069001/st_fms_adc_16069001_raw_0000001.MuDst.root ./

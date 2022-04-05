@@ -1,0 +1,51 @@
+**************************************************************************************
+** StEmcTriggerMaker                    			                    **
+** 2007 by R. Fatemi			                        	            **
+**************************************************************************************
+
+The structure of this class was first developed by J.Klay and A. Suaide in 2001.
+It was originally designed to fill StEvent with the simulated L0 trigger response 
+but to my understanding was never fully implemented 
+
+Early in 2005, using code originally developed by Alex Stopolsky to emulate the BEMC
+FPGA/FEE output, I expanded the code to return full BEMC L0 JP/HT trigger emulation. 
+This code was motivated by the need to run the same trigger algorithm over data and 
+simulation. All DSM outputs are stored, for data only, in StTriggerDetector class. 
+
+To date (May 2007) this code only uses OFFLINE pedestals/gains/status and therefore 
+is not useful in determining the trigger as it was at the time of data collection. 
+Instead this code was developed as an analysis tool which allows the user to apply the 
+trigger as it "should" have been if the most accurately determed pedestas/gains/status 
+were known at the time of data taking.
+
+The ultimate design vision is for StEmcTriggerMaker to serve as the access Maker to the 
+StBemcTrigger and StEemcTrigger classes which will mock up the BEMC/EEMC FEE + L0 DSM 
+trigger algorithms, with the capability of toggling between ONLINE and OFFLINE 
+gains/status/peds.Interface to L2 should also take place in this class.
+
+****************BEMC CODE ACCESS*******************************************************
+
+Originally this code accessed trigger yes/no decisions, DSM ADC, and tower/Patch ID via 
+individual access methods. For example:
+
+is2003HT1()      //1=true,0=false,-1=problem
+get2003HT1_ADC() //returns 6 bit ADC of tower passing HT1 threshold
+get2003HT1_ID()  //returns software id of tower passing HT1 threshold
+
+This type of access breaks down once there are multiple triggers HT/JP triggers, and therefore 
+multiple thresholds, within a year. In 2006 a multiple threshold scheme (designed by Adam 
+Kocoloski) was implemented which allows the user to input the hardware trigger ID used in data 
+collection and therefore select the appropriate threshold. Instructions on how to use this new 
+interface are available in the macro Run2006TriggerMaker.C. Past years are also accessible 
+through this interface as well as the original access methods in order to preserve backwards 
+compatibility for already published results.
+
+Code Bugs: This code was initially developed before access functions associating TP->JP and 
+TP->Tower were defined in StEmcDecoder. As a result a separate mapping (PatchMap) was coded to 
+provide this function. This TP->Tower mapping in StEmcDecoder changed for the EAST side of the
+BEMC after PatchMap was coded and therefore the mapping was incorrect AND remains INCORRECT for 
+towerID > 2400 in year 2003-2005. This was left uncorrected because of the incomplete state of 
+the EAST BEMC during those years.For 2006 the use of PatchMap() was discontinued and Michael 
+Betancourt replaced function the correct access methods to StEmcDecoder, eliminating any duplicate code. 
+
+****************EEMC CODE ACCESS*******************************************************

@@ -1,0 +1,7 @@
+runStEEmcPointTreeMaker.C -- runs A2E, cluster and point maker.  TTree generated with points and clusters. 
+runEEmcPi0Maker.C -- runs A2E, cluster, point and pi0 (mix) maker.  TTree generated with pairs, points, fill quantities. 
+anachain.C -- used to chain toghether multiple TTrees. 
+
+To run the pi0 maker on a specified run, type
+
+submitRun [run number] [output directory]  

@@ -1,0 +1,47 @@
+all: say subdirs libs
+
+libs:
+
+subdirs:
+	@for dir in $(VPATH); do \
+		$(MAKE) -C $$dir libs; \
+	done
+
+say:
+	@echo '******' $(SAY) and building: $(LIBS) $(BINS)
+
+update:
+	@cvs -n $@ . 2>/dev/null
+	@for dir in $(VPATH); do \
+		cvs -n $@ $$dir 2>/dev/null ; \
+	done
+	@for dir in $(EXTERNAL_BINS); do \
+		cvs -n $@  $$dir 2>/dev/null ; \
+	done
+
+clean:
+	@$(CLEAN) $(BINS) $(LIBS)
+	@for dir in $(VPATH); do \
+		$(MAKE) -C $$dir $@; \
+	done
+	@for dir in $(EXTERNAL_BINS); do \
+		$(MAKE) -C $$dir $@; \
+	done
+	
+install:
+	@$(INSTALL)  $(BINS) $(BINDIR)
+	@$(INSTALL)  $(LIBS) $(LIBDIR)
+	@$(INSTALL)  $(SHELLS) $(BINDIR)
+	@for dir in $(EXTERNAL_BINS); do \
+		$(MAKE) -C $$dir $@; \
+	done
+
+depend:
+	@$(MAKEDEPEND)
+	@for dir in $(VPATH); do \
+		$(MAKE) -C $$dir $@; \
+	done
+	@for dir in $(EXTERNAL_BINS); do \
+		$(MAKE) -C $$dir $@; \
+	done
+

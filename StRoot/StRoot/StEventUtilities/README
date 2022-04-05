@@ -1,0 +1,370 @@
+-*- mode:outline -*-
+Time-stamp: <02/04/22 23:14:05 ullrich>
+
+* StEventUtitites
+  This repository contains small to moderate sized
+  analysis utilities and helper functions/classes
+  based on StEvent. Other than in StEvent there is
+  no restriction on DB access and use of external
+  libraries.
+  This file is best edited with (x)emacs.
+
+* Conventions
+  All Header files should start with "Stu" instead of
+  "St" to avoid name conflicts ("u" for utilities).
+  Standard STAR coding rules apply.
+  The rest is pretty much up to the author. Important
+  is that the class/function must be documented
+  in the README file (i.e. this file). Please see the
+  template at the end of the file.
+  Please no 'makers'!
+  If you want to modify an existing utility which was
+  not entered by yourself please contact the author
+  before you submit you changes.
+
+* List of Available Utilities
+
+** StuCounter: Functions to count selected global/primary tracks
+----------------------------------------------------------------
+Files:       StuCounter.hh
+Author:      Thomas Ullrich
+Date:        Nov 15, 1999
+Description:
+Set of functions which perform simple counting
+tasks. All functions are inline function and one
+only needs to include the header file to use them.
+No need to link with any library.
+
+Syntax:
+       unsigned int numberOfTracks(StEvent& evt, StTrackType ttyp,
+                                   unsigned int minHits = 0);
+Returns number of tracks in event 'evt' of type 'ttyp' (global/primary)
+with greater or equal 'minHits' hits. 'minHits' default to 0.
+
+There are two related specialised functions for the two track types:
+       unsigned int numberOfGlobalTracks(StEvent& evt, unsigned int minHits = 0);
+       unsigned int numberOfTracks(StEvent& evt, unsigned int minHits = 0);
+Examples:
+       int n = numberOfTracks(evt, global);
+       int m = numberOfGlobalTracks(evt);       // same as above
+       int k = numberOfPrimaryTracks(evt, 10);  // all primary tracks with >= 10 hits
+       int j = numberOfTracks(evt,primary, 10); // same as above
+
+
+** StuCutEvent and StuCutTrack: Classes for applying StEvent cuts
+-----------------------------------------------------------------
+Files:       StuCutTrack.hh, StuCutTrack.cxx,
+             StuCutEvent.hh, StuCutEvent.cxx 
+Author:      Art Poskanzer, LBNL
+Date:        Dec 1999
+Description:
+
+All functions and data members are static. Therefore, there is no need
+to instantiate. Just use StuCutEvent::func(); or
+StuCutTrack::func();. The reason for making them static was to keep
+count of the number of events and tracks removed by each cut. Call the
+PrintCutList functions in Finish to print these counters.
+
+Right now the event cuts are on multiplicity and primary vertex position.
+The track cuts are on fit points and the ratio of fit point to max points.
+It is set up so that other cuts can be easily added. If lo >= hi on a cut
+the cut is not applied.
+
+In CheckEvent and CheckTrack the calling argument is a pointer to the event
+or track.
+
+CutTrack also stores the number of tracks with positive and negative
+pseudorapidity. In CheckEvent::CheckEtaSymmetry these counters are used to 
+calculate (Pos - Neg) / (Pos + Neg) and put a cut on this ratio. The purpose
+is to eliminate beam-gas background where most of the particles would go one
+way or the other.
+
+
+** StuProbabilityPidAlgorithm: Class for Particle Identification
+-----------------------------------------------------------------
+Files:       StuProbabilityPidAlgorithm.h, StuProbabilityPidAlgorithm.cxx
+Author:      Aihong Tang, Kent State University 
+             Richard Witt (FORTRAN version), Kent State University
+Date:        March 2000
+Description:
+
+StuProbabilityPidAlgorithm is a functor inherited from StPidAlgorithm.
+It can give three most likehood particletypes for a given track in StEvent.
+
+It depends on a set of parmeters, which can be read in from database or 
+from the current working directory.
+
+For detail usage, go to tutorial section of:
+StRoot/StPidAmpMaker/doc/index.html
+
+** StuFixTopoMap: Used to fix the MDC3 files with a wrong topology map
+------------------------------------------
+Files:       StuFixTopoMap
+Author:      Thomas Ullrich, Mike Miller
+Date:        June 14, 2000
+Description:
+Some of the MDC3 files have a wrong topology map
+for primary tracks.  This implements a fix of the
+topology map after the fact.  Note that it can only
+use information at the StEvent level, so it is essentially
+a map of the of points NOT of the FIT
+points (which is the one that primary tracks have 
+by default).
+
+There is no header file, for this function, so
+one needs to define a prototype when one wants 
+to use the function
+
+bool StuFixTopoMap(StTrack* track);
+
+and then load the StEventUtilities shared library
+to get it in your analysis session.
+
+** StuRefMult: Function to return a standard event multiplicity
+----------------------------------------------------------------
+Files:       StuRefMult.hh
+Author:      Manuel Calderon de la Barca Sanchez
+Date:        Aug 24, 2000
+Description:
+Function to give a standard reference multiplicity for                   
+an event, uncorrected of course.  The agreed upon cuts are:              
+primary tracks only                                                      
+flag > 0                                                                 
+charge < 0                                                               
+fit points >= 10                                                         
+abs(eta) < 0.5                                                           
+dca < 3 cm                                                               
+The header file just contains an inline function and one
+only needs to include the header file to use it.
+No need to link with any library.
+
+Example:
+
+unsigned int mult = uncorrectedMultiplicity(evt);
+
+** StuJitterBug: Function to Abort a T0 jitter event
+----------------------------------------------------
+Files:       StuJitterBug.hh
+Author:      Peter G. Jones
+Date:        Sep 20, 2000
+Description:
+Contains a function which can be called to detect events in
+which the CTB signal is out of time (so-called T0 jitter).
+The algorithm sums over all slats the CTB signal for the event
+and the pre-sample preceding it. If the pre-sample is greater
+than 1% of the event sample, the function returns kTRUE.
+Else, it retruns kFALSE. Abort the event if kTRUE. You don't
+need to load any library to use it, just include the header file.
+Here's how:
+
+#include "StuJitterBug.hh"
+
+StEvent *event;
+if( jitterBugAbort(event) ) return kStWarn;
+
+
+** StuRefCentrality: Functions to return event multiplicity and centrality percentage defined in flow paper
+-----------------------------------------------------------------------------------
+Files:     StuRefCentrality.hh
+Author:    Yu Chen / UCLA  
+Date:      Feb 2001
+
+Description:
+
+Function to give a standard uncorrected reference multiplicity for 
+an event according to the definition in STAR flow paper. The purpose is
+to give a reference centrality bin.
+    The agreed upon track cuts are: 
+ a) primary tracks only
+ b) flag > 0
+ c) abs(eta) < 0.75
+ d) no cuts on either number of hits or number of fit points
+    The event cut:
+ PrimaryVertex pVertex->numberOfDaughters() > 10
+ should be used for giving percentages below.
+
+    The functions are:
+ 1) uncorrectedMultiplicity
+      return uncorrected multiplicity as a measure of centrality; 
+ 2) meanScaledMultiplicity
+      return mean Nch/Nch(max) for 8 centrality bins;
+ 3) binOfCentrality
+      return the number of centrality bins:
+      1-- most peripheral; ... ; 8-- most central  
+ 4) percentOfCentrality
+      return the higher edge of percentages that centrality bin covers:
+      1-- 85% (to 58%); ... ; 8-- 6% (to 0%)
+
+** StuRefCentrality2: Functions to return flow multiplicity and normalized centrality percentage
+-----------------------------------------------------------------------------------
+Files:     StuRefCentrality2.hh
+Author:    Yu Chen / UCLA  
+Date:      Sep 2001
+
+Description:
+
+Function to give a standard uncorrected reference multiplicity for 
+an event according to the definition in STAR flow paper. The purpose is
+to give a reference centrality bin.
+    The agreed upon track cuts are: 
+ a) primary tracks only
+ b) flag > 0
+ c) abs(eta) < 0.75
+ d) no cuts on either number of hits or number of fit points
+    The event cut:
+ PrimaryVertex pVertex->numberOfDaughters() > 10
+ is suggested to be used.
+
+    The functions are:
+ 1) uncorrectedMultiplicity
+      return uncorrected multiplicity as a measure of centrality; 
+ 2) binOfCentrality
+      return the number of centrality bins:
+      1-- most peripheral; ... ; 10-- most central  
+ 3) percentOfCentrality
+      return the higher edge of percentages that centrality bin covers
+    (based on published STAR h- paper, normalized):
+      1-- 100% (to 80%); ... ; 10-- 5% (to 0%)
+
+   binOfCentrality    percentOfCentrality   uncorrectedMultiplicity  
+         1                 1.00                    0
+         2                 0.80                   14
+         3                 0.70                   30
+         4                 0.60                   60
+         5                 0.50                  107
+         6                 0.40                  176
+         7                 0.30                  271
+         8                 0.20                  400
+         9                 0.10                  569
+        10                 0.05                  675
+ 
+<next entry comes here>
+
+** StuPostScript: PostScript Event Display
+------------------------------------------
+Files:       StuPostScript.h, StuPostScript.cc 
+Author:      Thomas Ullrich
+Date:        April 2002
+Description: PostScript Event Display
+             The class has only one public static methods write()
+             which produces an encapsulated PostScript (EPS) file.
+             There are various options available.
+
+Syntax:
+#include "StuPostScript.h"
+
+bool StuPostScript::write(const char* filename, const StEvent* event);
+bool StuPostScript::write(const char* filename, const StEvent* event,
+                          const char* options);
+bool StuPostScript::write(const char* filename, const StEvent* event,
+                          const char* options,
+                          vector<StTrack*>* userTracks);
+
+filename:   the name of the PostScript file. The extension should
+            be always '.eps'.
+event:      pointer to an event.
+options:    character string with options (see below).
+userTracks: optional vector of pointers to tracks.
+            If present only those tracks stored in the vector
+            are plotted. Note that 'event' is still needed.
+            This option allows to select and print only certain
+            tracks.
+Return Code: StuPostScript::write() return 'true' if successful
+             otherwise 'false'.
+
+Options (case sensitive):                                          
+b     Black background, white frame.                               
+      Otherwise the frame is dran in black and the                 
+      background is white.                                         
+p     Draw beampipe.                                               
+c     Use many colors for tracks (colored according to pt).        
+      red pt>1, green 0.5<pt<1, blue<0.5                           
+C     Use many colors for tracks (colored according to pt).        
+      Blue lowest, red highest.                                    
+f     Track drawn with fewer points (factor 4 less).               
+      Helix becomes slightly more chiseled                         
+      and files are considerable smaller.                          
+      Still good for small scale eps.                              
+t     Add text (event, run number, trigger etc.) to the plot.      
+a     Plot all global tracks.                                      
+      Without this option short tracks                             
+      (<10 points) get suppressed.                                 
+s     Plot sideview (zy)                                           
+      Default is front view (xy)                                   
+
+StuPostScript writes PS without dictionary. This makes the produced
+files slightly bigger but the code easier to maintain.
+
+Known Problems: The side view and text are not compatible. It works
+                bit doesn't look nice. 
+
+
+** StuDraw3DEvent: OpenInventor Event Display
+------------------------------------------
+Files:       StuDraw3DEvent.h StuDraw3DEvent.h EveDis.C
+Author:      Valeri Fine
+Date:        May 2008
+Description: The class derived from the StDraw3D (StarRoot package) 
+             to draw the StEvent component using OpenGL graphics 
+             and OpenInventor Viewer
+
+             Upon loading the StEventUtilities shared library one global 
+             instance of the class is to be created automatically and 
+             ready to be used.
+
+             It is available via "gEventDisplay" global pointer.
+
+             To see how it wokrs one can merely invoke the Draw3DTest() method
+
+                          gEventDisplay->Draw3DTest();
+                          
+EveDis.C is a ROOT macro that can be used as a templatee to create the custom
+         implementation by the end-user
+
+Example:   For example to draw  all tracks for StEvent object the 
+           ROOT session as follows can be used:
+           
+           > ln -s $STAR/StRoot/macros/.rootrc
+           > root4star
+
+           root[0] .x Load.C
+           root[1] .x bfc.C(0,"doevents","st_physics_6048025_raw_1020002.event.root")
+           root[2] chain->MakeEvent(); // to read the next event
+           root[3] StEvent *event = chain->GetDataSet("StEvent"); // to access the StEvent pointer
+           root[4] gEventDisplay->Tracks(event);  // to draw the tracks
+
+           to produce the picture:
+
+           http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/StEventTpcTracks.png               
+
+           To create the custom display, for example> to provide the custom cuts
+           one has to
+
+             - Copy the template from $STAR/StRoot/StEventUtilities/EveDis.C
+             - Edit he method EveDis::Hits() 
+               (see the comments inside of the EveDis.C file
+             - Start ROOT
+             - Load the standard STAR libraries
+             - Invoke AClIC
+             - Create the custom display instance as follows:
+
+                > ln -s $STAR/StRoot/macros/.rootrc
+                > root4star
+                   root [0].x Load.C
+                   root [1].L EveDis.C++
+                   root [2] EveDis display;
+                   root [3] display.Draw3DTest()
+
+
+* Template
+  Please use the following template for documentation.
+
+** <UtilityName>: <very short description>
+------------------------------------------
+Files:       <list of files>
+Author:      <authorsName>
+Date:        <checkindate>
+Description:
+<your detailed description goes here ...>>>>>>>> 1.2
+
+

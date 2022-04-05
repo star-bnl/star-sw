@@ -1,0 +1,42 @@
+-*- mode:outline -*-
+Time-stamp: <00/07/12 01:25:37 ullrich>
+
+* Package: StAnalysisMaker
+
+* Purpose:
+Sample analysis maker using StEvent.
+Note, that this is NOT a grown-up analysis package.
+It should only be used as a template or example
+on how to make one.
+
+* Author:
+Thomas Ullrich, BNL
+
+* History:
+00/07/12  T. Ullrich
+Added more comments. Remove tagFiller stuff
+and added code to show how ntuples are created
+and written to file.
+
+00/03/02  T. Ullrich
+Clean up, make code compile without
+warnings on Linux. Note: countPrimaryPions
+was added a while ago.
+
+11/04/1999 T. Ullrich
+Updated to deal with new version of StEvent.
+Code cleaned up a bit.
+
+02/11/1999 T. Wenaus
+- add sample tag DB loading: tagFiller.cc and associated maker mods.
+  Maker builds and manages tag, and makes it available.
+- cleanup
+
+02/10/1999 T. Wenaus
+- protection against null event
+- separate out event analysis into separate functions
+
+* Status:
+Running smoothly, compile on all platforms.
+
+

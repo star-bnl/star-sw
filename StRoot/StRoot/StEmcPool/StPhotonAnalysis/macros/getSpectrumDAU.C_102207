@@ -1,0 +1,890 @@
+Double_t pqcd(Double_t *x,Double_t *par)
+{
+  Double_t ret=par[0]*pow(1+x[0],par[1]);
+  return ret;
+}
+void getSpectrumDAU(const char *pid)
+{
+  gStyle->SetOptStat(0);
+  gStyle->SetOptFit(0);
+
+  Bool_t subtractNEUTRONS=kFALSE;
+  Bool_t doFIT=kFALSE;
+
+  //neutron data:
+  //hadron data for Levy function, nucl-ex/0601033:
+  //-->  d^2N/(2*pi*pT*N*dpT*dy = B/((1+((mT - m0)/nT))^n)
+  // {p-dAu; pbar-dAu; p-pp; pbar-pp} and m0 = m_neutron = 1.0 GeV.
+  Double_t B[]={0.3,0.23,0.072,0.061};//->[0]
+  //Double_t eB[]={0.01,0.01,0.005,0.005};
+  Double_t T[]={0.205,0.215,0.179,0.173};//->[1]
+  //Double_t eT[]={0.004,0.005,0.006,0.006};
+  Double_t n[]={11.00,12.55,10.87,10.49};//->[2]
+  //Double_t en[]={0.29,0.41,0.43,0.40};
+  TF1 *f_antineutron=new TF1("f_antineutron","[0]/pow((1.+(sqrt(x*x+1.) - 1.)/([1]*[2])),[2])",0.,15.);
+  f_antineutron->SetParameters(B[1],T[1],n[1]);
+
+  //PHENIX data points
+  TH1F *hist_phenix=new TH1F("hist_phenix","phenix",18,1.,10.);
+  hist_phenix->Sumw2();
+  ifstream PHENIX("./datapoints/phenix.dat");
+  Int_t jj=0;
+  while(jj<18)
+    {
+      Float_t xx,yy,eyy;
+      if(!PHENIX.good()) break;
+      PHENIX >> xx >> yy >>eyy;
+      hist_phenix->SetBinContent(1+jj,yy);
+      hist_phenix->SetBinError(1+jj,eyy);
+      jj++;
+    }
+  hist_phenix->SetMarkerStyle(25);
+
+  //get direct gammas pQCD:
+  ifstream pQCDphotons("./datapoints/pQCD_Werner/rhic_cteq6_gamma_inv_sc1.dat");
+  Float_t ppx[100];
+  Float_t ppy[100];
+  Int_t iii=0;
+  cout<<"pqcd photons:"<<endl;
+  while(iii<28){
+    if(!pQCDphotons.good()) break;
+    Float_t dummy=0.;
+    pQCDphotons>>ppx[iii]>>dummy>>dummy>>ppy[iii];
+    ppy[iii]*=1.e-09;
+    iii++;
+  }
+  TGraphErrors *pqcd_photon=new TGraphErrors(iii,ppx,ppy);
+  pqcd_photon->SetName("pqcd_photon");
+
+  //get direct gammas pQCD: scale 0.5*pT
+  ifstream pQCDphotons05("./datapoints/pQCD_Werner/rhic_cteq6_gamma_inv_sc05.dat");
+  Float_t ppx05[100];
+  Float_t ppy05[100];
+  Int_t iii05=0;
+  while(iii05<28){
+    if(!pQCDphotons05.good()) break;
+    Float_t dummy=0.;
+    pQCDphotons05>>ppx05[iii05]>>dummy>>dummy>>ppy05[iii05];
+    ppy05[iii05]*=1.e-09;
+    iii05++;
+  }
+  //get direct gammas pQCD: scale 2*pT
+  ifstream pQCDphotons2("./datapoints/pQCD_Werner/rhic_cteq6_gamma_inv_sc2.dat");
+  Float_t ppx2[100];
+  Float_t ppy2[100];
+  Int_t iii2=0;
+  while(iii2<28){
+    if(!pQCDphotons2.good()) break;
+    Float_t dummy=0.;
+    pQCDphotons2>>ppx2[iii2]>>dummy>>dummy>>ppy2[iii2];
+    ppy2[iii2]*=1.e-09;
+    iii2++;
+  }
+  //get pions KKP  scale pT
+  ifstream pQCDpions("./datapoints/pQCD_Werner/klaus_pi0inv_200_kkp_1.dat");
+  Float_t pionx[100];
+  Float_t piony[100];
+  Int_t ipion=0;
+  while(ipion<28){
+    if(!pQCDpions.good()) break;
+    pQCDpions>>pionx[ipion]>>piony[ipion];
+    piony[ipion]*=1.e-09;
+    ipion++;
+  }
+  TGraphErrors *kkp=new TGraphErrors(ipion,pionx,piony);
+  kkp->SetName("kkp");
+  TH1F *hist_kkp=new TH1F(*kkp->GetHistogram());
+  hist_kkp->Scale(7.5);//binary scaling..
+  TGraphErrors *kkp_scaled=new TGraphErrors(hist_kkp);
+  kkp_scaled->SetName("kkp_scaled");
+  kkp_scaled->SetLineColor(13);
+
+  //get pions KKP  scale 0.5*pT
+  ifstream pQCDpions05("./datapoints/pQCD_Werner/klaus_pi0inv_200_kkp_05.dat");
+  Float_t pionx05[100];
+  Float_t piony05[100];
+  Int_t ipion05=0;
+  while(ipion05<28){
+    if(!pQCDpions05.good()) break;
+    pQCDpions05>>pionx05[ipion05]>>piony05[ipion05];
+    piony05[ipion05]*=1.e-09;
+    ipion05++;
+  }
+  //get pions KKP  scale 2*pT
+  ifstream pQCDpions2("./datapoints/pQCD_Werner/klaus_pi0inv_200_kkp_2.dat");
+  Float_t pionx2[100];
+  Float_t piony2[100];
+  Int_t ipion2=0;
+  while(ipion2<28){
+    if(!pQCDpions2.good()) break;
+    pQCDpions2>>pionx2[ipion2]>>piony2[ipion2];
+    piony2[ipion2]*=1.e-09;
+    ipion2++;
+  }
+
+
+  TFile *f_decaybg=new TFile("~/MyDecay/gammaDecayDAUSum.root","OPEN");
+  TH1F *h_decaybg=(TH1F*)f_decaybg->Get("gamma");
+  TH1F *h_decaypion=(TH1F*)f_decaybg->Get("gamma_pion");
+  TF1 *fit_decay=new TF1("fit_decay","[0]/pow(x,[1])+[2]",.3,15.);
+  TF1 *fit_piondecay=new TF1(*fit_decay);
+  fit_decay->SetParameters(1.,1.,.5);
+  fit_piondecay->SetParameters(1.,1.,.5);
+  h_decaybg->Fit(fit_decay,"R0");
+  h_decaypion->Fit(fit_piondecay,"R0");
+
+  //take ratio gamma_direct/pion and divide by gamma/pi and then +1:
+  for(Int_t i=0;i<iii;i++){
+    ppy[i]=ppy[i]/piony[i];
+    ppy[i]=ppy[i]/fit_decay->Eval(ppx[i]);
+    ppy[i]+=1.;
+    ppy05[i]=ppy05[i]/piony05[i];
+    ppy05[i]=ppy05[i]/fit_decay->Eval(ppx05[i]);
+    ppy05[i]+=1.;
+    ppy2[i]=ppy2[i]/piony2[i];
+    ppy2[i]=ppy2[i]/fit_decay->Eval(ppx2[i]);
+    ppy2[i]+=1.;
+  }
+  TGraphErrors *g_photonpqcd=new TGraphErrors(iii,ppx,ppy);
+  g_photonpqcd->SetName("g_photonpqcd");
+  TGraphErrors *g_photonpqcd05=new TGraphErrors(iii05,ppx05,ppy05);
+  g_photonpqcd05->SetName("g_photonpqcd05");
+  TGraphErrors *g_photonpqcd2=new TGraphErrors(iii2,ppx2,ppy2);
+  g_photonpqcd2->SetName("g_photonpqcd2");
+
+  cout<<"got functions"<<endl;
+
+  //set outputfiles
+  TString dir("/star/u/russcher/gamma/analysis/output/dAu/");
+  dir.Append(pid);
+  dir.Append("/");
+  dir.Append(pid);
+  TString psout=dir;
+  TString psout2=dir;
+  TString psout3=dir;
+  TString eFile=dir;
+  TString pi0File=dir;
+  TString nbarFile=dir;
+  TString singleGammaFile=dir;
+  pi0File.Append("pi0_dAu.root");
+  eFile.Append("pion_eff.root");
+  nbarFile.Append("antineutron_eff.root");
+  singleGammaFile.Append("gamma_eff.root");
+  psout2.Append("correctedspec.ps");
+  psout.Append("invmassplots.ps");
+
+  //load *.so
+  gSystem->Load("$HOME/MyEvent/MyEvent");
+  gSystem->Load("$HOME/gamma/analysis/lib/AnaCuts");
+  gSystem->Load("$HOME/gamma/analysis/lib/EventMixer");
+  gSystem->Load("$HOME/gamma/analysis/lib/Pi0Analysis");
+
+  AnaCuts *cuts=new AnaCuts("dAu");
+
+  //get inv mass hists
+  TFile f(pi0File.Data(),"OPEN");
+  TH2F *h_mb=new TH2F(*h_minvMB);
+  TH2F *h_ht1=new TH2F(*h_minvHT1);
+  TH2F *h_ht2=new TH2F(*h_minvHT2);
+  TH1F *h_ev=new TH1F(*h_events);
+
+  //get prescales
+  int trigger=0;
+  Int_t numberOfMB=0;
+  Int_t numberOfHT1=0;
+  Int_t numberOfHT2=0;
+  for(Int_t i=1;i<=h_ev->GetNbinsX();i++)
+    {
+      trigger=(Int_t)h_ev->GetBinCenter(i);
+      if(trigger&1) numberOfMB+=(Int_t)h_ev->GetBinContent(i);
+      if(trigger&2) numberOfHT1+=(Int_t)h_ev->GetBinContent(i);
+      if(trigger&4) numberOfHT2+=(Int_t)h_ev->GetBinContent(i);
+    }
+
+  Float_t psMB=372.;//416. for HQ06
+  Float_t psHT1=9.6;//10. for HQ06
+  Float_t psHT2=1.;
+
+  numberOfMB/=0.93;
+  cout<<"nmb after 93% vertex eff.: "<<numberOfMB<<endl;
+
+  //get efficiencies+acceptance
+  TFile g(eFile.Data(),"OPEN");
+  TH1F *h_emb=new TH1F(*h_effMB);
+  TH1F *h_eht1=new TH1F(*h_effHT1);
+  TH1F *h_eht2=new TH1F(*h_effHT2);
+
+  //bin corrections
+  TFile binf("~/BinWidth/bincorrectionsDAU.root","OPEN"); 
+  TH1F *h_binmb=new TH1F(*h4mb);
+  TH1F *h_binht1=new TH1F(*h4ht1);
+  TH1F *h_binht2=new TH1F(*h4ht2);
+  h_binmb->Sumw2();
+  h_binht1->Sumw2();
+  h_binht2->Sumw2();
+  for(Int_t i=1;i<=h_binmb->GetNbinsX();i++) h_binmb->SetBinError(i,0);
+  for(Int_t i=1;i<=h_binht1->GetNbinsX();i++) h_binht1->SetBinError(i,0);
+  for(Int_t i=1;i<=h_binht2->GetNbinsX();i++) h_binht2->SetBinError(i,0);
+
+  //get yield
+  Pi0Analysis *pi0=new Pi0Analysis(psout.Data(),"/dev/null","dAu");
+  pi0->init("/dev/null");
+  TH1F *yieldMB=new TH1F(*pi0->getYield(h_mb,"mb"));
+  TH1F *yieldHT1=new TH1F(*pi0->getYield(h_ht1,"ht1"));
+  TH1F *yieldHT2=new TH1F(*pi0->getYield(h_ht2,"ht2"));
+
+  cout<<"***************************************"<<endl;
+  cout<<"got yield, dividing by rapidity bite!!!"<<endl;
+  float dy_pion=cuts->rapPionMaxCUT - cuts->rapPionMinCUT;
+  float dy_gamma=cuts->rapidityMaxCUT - cuts->rapidityMinCUT;
+  cout<<"***************************************"<<endl;
+  cout<<endl;
+  cout<<"    pion bite is "<<dy_pion<<endl;
+  cout<<"    gamma bite is "<<dy_gamma<<endl;
+  cout<<endl;
+  cout<<"***************************************"<<endl;
+  yieldMB->Scale(1./dy_pion);
+  yieldHT1->Scale(1./dy_pion);
+  yieldHT2->Scale(1./dy_pion);
+
+  
+  //set yield to zero
+  for(Int_t i=0;i<yieldMB->GetNbinsX();i++)
+    {
+      if(i<1)
+	{
+	  yieldMB->SetBinContent(i+1,0);
+	  yieldMB->SetBinError(i+1,0);
+	}
+    }
+  for(Int_t i=0;i<yieldHT1->GetNbinsX();i++)
+    {
+      if(i<4)
+        {
+          yieldHT1->SetBinContent(i+1,0);
+          yieldHT1->SetBinError(i+1,0);
+	}
+      if(i>10)
+	{
+	  yieldHT1->SetBinContent(i+1,0);
+          yieldHT1->SetBinError(i+1,0);
+	}
+    }
+  for(Int_t i=0;i<yieldHT2->GetNbinsX();i++)
+    {
+      if(i<6) 
+	{
+	  yieldHT2->SetBinContent(i+1,0);
+          yieldHT2->SetBinError(i+1,0);
+	}
+    }
+  
+
+  //apply all corrections and plot
+  TPostScript *ps=new TPostScript(psout2.Data(),-111);
+  TCanvas *c=new TCanvas("c","c",900,900);
+  c->Divide(3,3);
+  c->cd(1);
+  gPad->SetLogy();
+  yieldMB->SetMarkerStyle(25);
+  yieldMB->SetMarkerSize(1.0);
+  yieldMB->Draw("pe");
+  yieldMB->GetXaxis()->SetRange(1,10);
+  c->cd(2);
+  gPad->SetLogy();
+  yieldHT1->SetMarkerStyle(25);
+  yieldHT1->SetMarkerSize(1.0); 
+  yieldHT1->Draw("pe");
+  yieldHT1->GetXaxis()->SetRange(4,10);
+  yieldHT1->SetMarkerColor(4);
+  c->cd(3);
+  gPad->SetLogy();
+  yieldHT2->SetMarkerStyle(25);
+  yieldHT2->SetMarkerSize(1.0);
+  yieldHT2->Draw("pe");
+  yieldHT2->GetXaxis()->SetRange(7,14);
+  yieldHT2->SetMarkerColor(2);
+  
+  TF1 *scale=new TF1("scale","x",0.,15.);
+
+  c->cd(4);
+  gPad->SetLogy();
+  TH1F *yMB=new TH1F(*yieldMB);
+  yMB->SetNameTitle("yMB","corrected yield MB");
+  yMB->Divide(h_emb);
+  yMB->Scale(psMB/(psMB*numberOfMB*2.*TMath::Pi()));
+  yMB->Divide(scale);
+  yMB->Multiply(h_binmb);
+  yMB->SetMarkerStyle(8);
+  yMB->SetMarkerSize(1.0);
+  yMB->SetMarkerColor(1);
+  yMB->Draw("pe");
+  c->cd(5);
+  gPad->SetLogy();
+  TH1F *yHT1=new TH1F(*yieldHT1);
+  yHT1->SetNameTitle("yHT1","corrected yield HT1");
+  yHT1->Divide(h_eht1);
+  yHT1->Scale(psHT1/(psMB*numberOfMB*2.*TMath::Pi()));
+  yHT1->Divide(scale);
+  yHT1->Multiply(h_binht1);
+  yHT1->SetMarkerStyle(8);
+  yHT1->SetMarkerSize(1.0);
+  yHT1->SetMarkerColor(4);
+  yHT1->Draw("pe");
+  c->cd(6);
+  gPad->SetLogy();
+  TH1F *yHT2=new TH1F(*yieldHT2);
+  yHT2->SetNameTitle("yHT2","corrected yield HT2");
+  yHT2->Divide(h_eht2);
+  yHT2->Scale(psHT2/(psMB*numberOfMB*2.*TMath::Pi()));
+  yHT2->Divide(scale);
+  yHT2->Multiply(h_binht2);
+  yHT2->SetMarkerStyle(8);
+  yHT2->SetMarkerSize(1.0);
+  yHT2->SetMarkerColor(2);
+  yHT2->Draw("pe");
+
+  TH1F *yMBratio=new TH1F(*yMB);
+  TH1F *yHT1ratio=new TH1F(*yHT1);
+  TH1F *yHT2ratio=new TH1F(*yHT2);
+
+  c->cd(0);
+  c->Update();
+  ps->Close();
+
+  TCanvas *compare=new TCanvas("compare","compare",600,600);
+  compare->cd();
+
+  TMultiGraph *mg=new TMultiGraph();
+  mg->SetNameTitle("",";p_{T} (GeV/c);#frac{1}{2#piNp_{T}} #frac{d^{2}N}{dydp_{T}}");
+  mg->SetMinimum(1.1e-10);
+  mg->SetMaximum(1.e+00);
+  gPad->SetLogy();
+
+  TGraphErrors *grMB=new TGraphErrors(yMB);
+  grMB->RemovePoint(0);
+  grMB->SetName("grMB");
+  mg->Add(grMB);
+
+  TGraphErrors *grHT1=new TGraphErrors(yHT1);
+  grHT1->RemovePoint(0);
+  grHT1->RemovePoint(0);
+  grHT1->RemovePoint(0);
+  grHT1->RemovePoint(0);
+  grHT1->SetName("grHT1");
+  mg->Add(grHT1);
+
+  TGraphErrors *grHT2=new TGraphErrors(yHT2);
+  grHT2->RemovePoint(0);
+  grHT2->RemovePoint(0);
+  grHT2->RemovePoint(0);
+  grHT2->RemovePoint(0);
+  grHT2->RemovePoint(0);
+  grHT2->RemovePoint(0);
+  grHT2->SetName("grHT2");
+  mg->Add(grHT2);
+
+  
+  //first fit own data, then add PHENIX:
+  cout<<"***** fit data:"<<endl;
+  TF1 *fitDATA=new TF1("fitDATA",pqcd,1.,15.,2);
+  fitDATA->SetParameters(1000.,-10.);
+  mg->Fit("fitDATA","R0");
+  fitDATA->SetLineColor(16);
+  fitDATA->SetLineWidth(1);
+
+  TGraphErrors *phenix=new TGraphErrors(hist_phenix);
+  phenix->SetName("phenix");
+  mg->Add(phenix);
+
+  mg->Draw("ap");
+  TLegend *leg=new TLegend(.5,.65,.8,.8);
+  leg->AddEntry(grMB,"minimum bias","p");
+  leg->AddEntry(grHT1,"hightower 1","p");
+  leg->AddEntry(grHT2,"hightower 2","p");
+  leg->AddEntry(phenix,"PHENIX","p");
+  leg->Draw("same");
+  leg->SetFillColor(0);
+
+  compare->SaveAs((dir+"compare2pQCDlog.pdf").Data());
+  compare->SaveAs((dir+"compare2pQCDlog.C").Data());
+
+  TCanvas *compare2=new TCanvas("compare2","compare2",600,400);
+  compare2->cd();
+
+  TH1F *yMBfit=new TH1F(*yMB);
+  TH1F *yHT1fit=new TH1F(*yHT1);
+  TH1F *yHT2fit=new TH1F(*yHT2);
+  yMBfit->Divide(fitDATA);
+  yHT1fit->Divide(fitDATA);
+  yHT2fit->Divide(fitDATA);
+  hist_phenix->Divide(fitDATA);
+
+  TGraphErrors *g_yMBfit=new TGraphErrors(yMBfit);
+  g_yMBfit->RemovePoint(0);
+    
+  TGraphErrors *g_yHT1fit=new TGraphErrors(yHT1fit);
+  g_yHT1fit->RemovePoint(0);
+  g_yHT1fit->RemovePoint(0);
+  g_yHT1fit->RemovePoint(0);
+  g_yHT1fit->RemovePoint(0);
+
+  TGraphErrors *g_yHT2fit=new TGraphErrors(yHT2fit);
+  g_yHT2fit->RemovePoint(0);
+  g_yHT2fit->RemovePoint(0);
+  g_yHT2fit->RemovePoint(0);
+  g_yHT2fit->RemovePoint(0);
+  g_yHT2fit->RemovePoint(0);
+  g_yHT2fit->RemovePoint(0);
+
+  TGraphErrors *g_yPHENIX=new TGraphErrors(hist_phenix);
+  TMultiGraph *m_fit=new TMultiGraph();
+  m_fit->Add(g_yMBfit);
+  m_fit->Add(g_yHT1fit);
+  m_fit->Add(g_yHT2fit);
+
+  TF1 *refit=new TF1("refit","[0]*(1. - exp(-[1]*x))",0.,15.);
+  refit->SetParameters(1.,2.);
+  m_fit->Fit(refit);
+
+  m_fit->Add(g_yPHENIX);
+  m_fit->SetMinimum(0.00);
+  m_fit->SetMaximum(3.);
+  m_fit->Draw("ap");
+
+  TLegend *legg=new TLegend(.5,.65,.8,.8);
+  legg->AddEntry(g_yMBfit,"minimum bias","p");
+  legg->AddEntry(g_yHT1fit,"hightower 1","p");
+  legg->AddEntry(g_yHT2fit,"hightower 2","p");
+  legg->AddEntry(g_yPHENIX,"PHENIX","p");
+  legg->Draw("same");
+  legg->SetFillColor(0);
+
+  compare2->cd(0);
+  compare2->SaveAs((dir+"compare2pQCD.pdf").Data());    
+  compare2->SaveAs((dir+"compare2pQCD.C").Data());
+
+  //get ratio g/pi:
+  //gamma eff:
+  TFile gg(eFile.Data(),"OPEN");  
+  TH1F *effGammaMB=new TH1F(*h_effDaughtersMB);
+  TH1F *effGammaHT1=new TH1F(*h_effDaughtersHT1);
+  TH1F *effGammaHT2=new TH1F(*h_effDaughtersHT2);
+  
+  TFile ff(pi0File.Data(),"OPEN");
+  TH1F *gammaYieldMB=new TH1F(*h_gammaMB);
+  TH1F *gammaYieldHT1=new TH1F(*h_gammaHT1);
+  TH1F *gammaYieldHT2=new TH1F(*h_gammaHT2);
+  
+  gammaYieldMB->Scale(1./dy_gamma);
+  gammaYieldHT1->Scale(1./dy_gamma);
+  gammaYieldHT2->Scale(1./dy_gamma);
+
+  TCanvas *c_gamma=new TCanvas("c_gamma","c_gamma",600,600);
+  c_gamma->Divide(3,3);
+  c_gamma->cd(1);
+  gPad->SetLogy();
+  effGammaMB->SetMarkerStyle(8);
+  effGammaMB->SetMarkerSize(1);
+  effGammaMB->Draw("pe");
+  c_gamma->cd(2);
+  gPad->SetLogy();
+  effGammaHT1->SetMarkerStyle(8);
+  effGammaHT1->SetMarkerSize(1);
+  effGammaHT1->SetMarkerColor(4);
+  effGammaHT1->Draw("pe");
+  c_gamma->cd(3);
+  gPad->SetLogy();
+  effGammaHT2->SetMarkerStyle(8);
+  effGammaHT2->SetMarkerSize(1);
+  effGammaHT2->SetMarkerColor(2);
+  effGammaHT2->Draw("pe");
+  c_gamma->cd(4);
+  gPad->SetLogy();
+  gammaYieldMB->SetMarkerStyle(8);
+  gammaYieldMB->SetMarkerSize(1);
+  gammaYieldMB->Draw("pe");
+  c_gamma->cd(5);
+  gPad->SetLogy();
+  gammaYieldHT1->SetMarkerStyle(8);
+  gammaYieldHT1->SetMarkerSize(1);
+  gammaYieldHT1->SetMarkerColor(4);
+  gammaYieldHT1->Draw("pe");
+  c_gamma->cd(6);
+  gPad->SetLogy();
+  gammaYieldHT2->SetMarkerStyle(8);
+  gammaYieldHT2->SetMarkerSize(1);
+  gammaYieldHT2->SetMarkerColor(2);
+  gammaYieldHT2->Draw("pe");
+  c_gamma->cd(7);
+  gPad->SetLogy();
+  TH1F *corrYieldMB=new TH1F(*gammaYieldMB);
+  for(Int_t i=1;i<=corrYieldMB->GetNbinsX();i++){
+    corrYieldMB->SetBinContent(i,corrYieldMB->GetBinContent(i)/corrYieldMB->GetXaxis()->GetBinWidth(i));
+    corrYieldMB->SetBinError(i,corrYieldMB->GetBinError(i)/corrYieldMB->GetXaxis()->GetBinWidth(i));
+  }
+  corrYieldMB->Scale(psMB/(psMB*numberOfMB*2.*TMath::Pi()));
+  corrYieldMB->Divide(scale);// ../pT
+  corrYieldMB->Multiply(h_binmb);
+  //subtract MB neutrons before eff.corr.
+  if(subtractNEUTRONS){
+    TFile f(nbarFile.Data(),"OPEN");
+    TH1F *effNmb=new TH1F(*h_effMB);
+    //obsolete effNmb->Scale(delta_eta);
+    effNmb->Multiply(f_antineutron);
+    TCanvas *tc=new TCanvas();
+    gPad->SetLogy();
+    corrYieldMB->Draw();
+    effNmb->SetLineColor(4);
+    effNmb->Draw("same");
+    tc->SaveAs((dir+"nbar_contamination.pdf").Data());
+    corrYieldMB->Add(effNmb,-1);
+  }
+
+  corrYieldMB->Divide(effGammaMB);
+  corrYieldMB->SetMarkerStyle(8);
+  corrYieldMB->SetMarkerSize(1);
+  corrYieldMB->Draw("pe");
+
+  TGraphErrors *g_inclMB=new TGraphErrors(corrYieldMB);
+
+  c_gamma->cd(8);
+  gPad->SetLogy();
+  TH1F *corrYieldHT1=new TH1F(*gammaYieldHT1);
+  for(Int_t i=1;i<=corrYieldHT1->GetNbinsX();i++){
+    corrYieldHT1->SetBinContent(i,corrYieldHT1->GetBinContent(i)/corrYieldHT1->GetXaxis()->GetBinWidth(i));
+    corrYieldHT1->SetBinError(i,corrYieldHT1->GetBinError(i)/corrYieldHT1->GetXaxis()->GetBinWidth(i));
+  }
+
+
+  corrYieldHT1->Scale(psHT1/(psMB*numberOfMB*2.*TMath::Pi()));
+  corrYieldHT1->Divide(scale);// ../pT
+  corrYieldHT1->Multiply(h_binht1);
+  corrYieldHT1->Divide(effGammaHT1);
+  corrYieldHT1->SetMarkerStyle(8);
+  corrYieldHT1->SetMarkerSize(1);
+  corrYieldHT1->SetMarkerColor(4);
+  corrYieldHT1->GetXaxis()->SetRangeUser(4.,11.);
+  corrYieldHT1->Draw("pe");
+
+  //for xsec:
+  TH1F *photonXsHT1=new TH1F(*corrYieldHT1);
+
+  TGraphErrors *g_inclHT1=new TGraphErrors(corrYieldHT1);
+
+  c_gamma->cd(9);
+  gPad->SetLogy();
+  TH1F *corrYieldHT2=new TH1F(*gammaYieldHT2);
+  for(Int_t i=1;i<=corrYieldHT2->GetNbinsX();i++){
+    corrYieldHT2->SetBinContent(i,corrYieldHT2->GetBinContent(i)/corrYieldHT2->GetXaxis()->GetBinWidth(i));
+    corrYieldHT2->SetBinError(i,corrYieldHT2->GetBinError(i)/corrYieldHT2->GetXaxis()->GetBinWidth(i));
+  }
+  corrYieldHT2->Scale(psHT2/(psMB*numberOfMB*2.*TMath::Pi()));
+  corrYieldHT2->Divide(scale);// ../pT
+  corrYieldHT2->Multiply(h_binht2);
+  corrYieldHT2->Divide(effGammaHT2);
+  corrYieldHT2->SetMarkerStyle(8);
+  corrYieldHT2->SetMarkerSize(1);
+  corrYieldHT2->SetMarkerColor(2);
+  corrYieldHT2->GetXaxis()->SetRangeUser(6.,15.);
+  corrYieldHT2->Draw("pe");
+
+  //for xsec:
+  TH1F *photonXsHT2=new TH1F(*corrYieldHT2);
+
+
+  TGraphErrors *g_inclHT2=new TGraphErrors(corrYieldHT2);
+
+  c_gamma->cd(0);
+  c_gamma->SaveAs((dir+"gammaYield.pdf").Data());
+
+
+  TH1F *photonXsMB=new TH1F(*corrYieldMB);
+  TH1F *photonXsHT1=new TH1F(*corrYieldHT1);
+  TH1F *photonXsHT2=new TH1F(*corrYieldHT2);
+
+  TMultiGraph *m_incl=new TMultiGraph();
+  m_incl->SetTitle("inclusive photon invariant yield 0<y<1;p_{T} (GeV/c);#frac{1}{2#piNp_{T}} #frac{d^{2}N}{dydp_{T}}");
+  m_incl->Add(g_inclMB);
+  m_incl->Add(g_inclHT1);
+  m_incl->Add(g_inclHT2);
+  m_incl->SetMinimum(1.1e-10);
+  m_incl->SetMaximum(10.);
+  TCanvas *c_incl=new TCanvas("c_incl","c_incl",600,400);
+  gPad->SetLogy();
+  m_incl->Draw("ape");
+  //f_antineutron->Draw("same");
+  c_incl->SaveAs((dir+"inclGammaSpec.pdf").Data());
+  c_incl->SaveAs((dir+"inclGammaSpec.root").Data());
+
+  //get ratio:
+  TH1F *h_gammaYieldMB=new TH1F(*corrYieldMB);
+  h_gammaYieldMB->SetName("h_gammaYieldMB");
+  TH1F *h_gammaYieldHT1=new TH1F(*corrYieldHT1);
+  h_gammaYieldHT1->SetName("h_gammaYieldHT1");
+  TH1F *h_gammaYieldHT2=new TH1F(*corrYieldHT2);
+  h_gammaYieldHT2->SetName("h_gammaYieldHT2");
+
+  //divide pions:
+  corrYieldMB->Divide(yMBratio);
+  corrYieldHT1->Divide(yHT1ratio);
+  corrYieldHT2->Divide(yHT2ratio);
+
+  if(0){
+
+    //correct with right efficiencies:
+    TFile sgfile(singleGammaFile.Data(),"OPEN");
+    TH1F *effSinglePhotonMB=new TH1F(*h_effMB);
+    TH1F *effSinglePhotonHT1=new TH1F(*h_effHT1);
+    TH1F *effSinglePhotonHT2=new TH1F(*h_effHT2);
+    
+    //subtract pions:
+    corrYieldMB->Add(fit_piondecay,-1.);
+    corrYieldHT1->Add(fit_piondecay,-1.);
+    corrYieldHT2->Add(fit_piondecay,-1.);
+    
+    TH1F *effGammaMB_noE=new TH1F(*effGammaMB);
+    TH1F *effGammaHT1_noE=new TH1F(*effGammaHT1);
+    TH1F *effGammaHT2_noE=new TH1F(*effGammaHT2);
+    
+    for(Int_t i=1;i<=effGammaMB_noE->GetNbinsX();i++){effGammaMB_noE->SetBinError(i,0);}
+    for(Int_t i=1;i<=effGammaHT1_noE->GetNbinsX();i++){effGammaHT1_noE->SetBinError(i,0);}
+    for(Int_t i=1;i<=effGammaHT2_noE->GetNbinsX();i++){effGammaHT2_noE->SetBinError(i,0);}
+    
+    corrYieldMB->Multiply(effGammaMB_noE);
+    corrYieldHT1->Multiply(effGammaHT1_noE);
+    corrYieldHT2->Multiply(effGammaHT2_noE);
+    
+    TH1F *effSinglePhotonMB_noE=new TH1F(*effSinglePhotonMB);
+    TH1F *effSinglePhotonHT1_noE=new TH1F(*effSinglePhotonHT1);
+    TH1F *effSinglePhotonHT2_noE=new TH1F(*effSinglePhotonHT2);
+
+    for(Int_t i=1;i<=effSinglePhotonMB_noE->GetNbinsX();i++){effSinglePhotonMB_noE->SetBinError(i,0);}
+    for(Int_t i=1;i<=effSinglePhotonHT1_noE->GetNbinsX();i++){effSinglePhotonHT1_noE->SetBinError(i,0);}
+    for(Int_t i=1;i<=effSinglePhotonHT2_noE->GetNbinsX();i++){effSinglePhotonHT2_noE->SetBinError(i,0);}
+    
+    corrYieldMB->Divide(effSinglePhotonMB_noE);
+    corrYieldHT1->Divide(effSinglePhotonHT1_noE);
+    corrYieldHT2->Divide(effSinglePhotonHT2_noE);
+    
+    corrYieldMB->Add(fit_piondecay,+1.);
+    corrYieldHT1->Add(fit_piondecay,+1.);
+    corrYieldHT2->Add(fit_piondecay,+1.);
+
+  }
+
+  TCanvas *c_ratio=new TCanvas("c_ratio","c_ratio",400,200);
+
+  TMultiGraph *m_ratio=new TMultiGraph("m_ratio","d+Au 2003;p_{T};#gamma/#pi^{0}");
+  TGraphErrors *g_ratiomb=new TGraphErrors(corrYieldMB);
+  g_ratiomb->SetName("mb");
+  m_ratio->Add(g_ratiomb);
+  TGraphErrors *g_ratioht1=new TGraphErrors(corrYieldHT1);
+  g_ratioht1->SetName("ht1");
+  m_ratio->Add(g_ratioht1);
+  TGraphErrors *g_ratioht2=new TGraphErrors(corrYieldHT2);
+  g_ratioht2->SetName("ht2");
+  m_ratio->Add(g_ratioht2);
+
+  TLegend *leg3=new TLegend(.2,.65,.5,.8);
+  leg3->AddEntry(g_ratiomb,"minimum bias","p");
+  leg3->AddEntry(g_ratioht1,"hightower 1","p");
+  leg3->AddEntry(g_ratioht2,"hightower 2","p");
+
+  m_ratio->Draw("ap");
+  m_ratio->SetMinimum(.001);
+  m_ratio->SetMaximum(1.);
+
+  leg3->Draw("same");
+
+  fit_decay->SetLineColor(13);
+  fit_decay->SetLineWidth(1);
+  fit_decay->SetLineColor(1);
+  fit_decay->Draw("same");
+  fit_piondecay->SetLineColor(13);
+  fit_piondecay->SetLineWidth(1);
+  fit_piondecay->SetLineStyle(2);
+  fit_piondecay->Draw("same");
+
+
+  c_ratio->SaveAs((dir+"gammaRatio.pdf").Data());
+  c_ratio->SaveAs((dir+"gammaRatio.root").Data());
+
+  TCanvas *c_doubleratio=new TCanvas("c_doubleratio","c_doubleratio",400,600);
+  gStyle->SetOptStat(0);
+  c_doubleratio->Divide(1,2);
+  c_doubleratio->cd(1);
+  TGraphErrors *g_doubleratio=new TGraphErrors();
+  g_doubleratio->SetName("g_doubleratio");
+  g_doubleratio->SetMarkerStyle(21);
+  g_doubleratio->SetMarkerSize(1);
+  g_doubleratio->SetMarkerColor(4);
+  g_doubleratio->SetLineColor(1);
+
+  int npoint=0;
+  for(Int_t i=3;i<g_ratiomb->GetN();i++){
+    Double_t x=0;
+    Double_t y=0;
+    Double_t ex=0;
+    Double_t ey=0;
+    g_ratiomb->GetPoint(i,x,y);
+    ex=g_ratiomb->GetErrorX(i);
+    ey=g_ratiomb->GetErrorY(i);
+    npoint++;
+    g_doubleratio->SetPoint(npoint,x,y);
+    g_doubleratio->SetPointError(npoint,ex,ey);
+  }
+  for(Int_t i=6;i<9;i++){
+    Double_t x=0;
+    Double_t y=0;
+    Double_t ex=0;
+    Double_t ey=0;
+    g_ratioht1->GetPoint(i,x,y);
+    ex=g_ratioht1->GetErrorX(i);
+    ey=g_ratioht1->GetErrorY(i);
+    npoint++;
+    g_doubleratio->SetPoint(npoint,x,y);
+    g_doubleratio->SetPointError(npoint,ex,ey);
+  }
+  for(Int_t i=9;i<g_ratioht2->GetN();i++){
+    Double_t x=0;
+    Double_t y=0;
+    Double_t ex=0;
+    Double_t ey=0;
+    g_ratioht2->GetPoint(i,x,y);
+    ex=g_ratioht2->GetErrorX(i);
+    ey=g_ratioht2->GetErrorY(i);
+    npoint++;
+    g_doubleratio->SetPoint(npoint,x,y);
+    g_doubleratio->SetPointError(npoint,ex,ey);
+  }
+
+
+  g_doubleratio->Draw("ape");
+  g_doubleratio->SetMinimum(.001);
+  g_doubleratio->SetMaximum(1.);
+  g_doubleratio->SetTitle("d+Au 2003  (0<y<1);p_{T}(GeV/c);N_{#gamma} / N_{#pi^{0}}");
+  
+  fit_decay->SetLineColor(13);
+  fit_decay->SetLineWidth(2);
+  fit_decay->Draw("same");
+
+  TLegend *leg4=new TLegend(.2,.65,.6,.85);
+  leg4->AddEntry(g_doubleratio,"d+Au data","p");
+  leg4->AddEntry(fit_decay,"sim. background","l");
+  leg4->SetFillColor(0);
+  //leg4->Draw("same");  
+
+  c_doubleratio->cd(2);
+
+  gStyle->SetOptFit(0);
+
+  TGraphErrors *g_doubleratio2=new TGraphErrors(*g_doubleratio);
+
+  for(Int_t i=0;i<g_doubleratio2->GetN();i++){
+
+    Double_t x=0;
+    Double_t y=0;
+    Double_t ey=0;
+    g_doubleratio2->GetPoint(i,x,y);
+    ex=g_doubleratio->GetErrorX(i);
+    ey=g_doubleratio2->GetErrorY(i);    
+
+    y=y/fit_decay->Eval(x);
+    ey=ey/fit_decay->Eval(x);
+    g_doubleratio2->SetPoint(i,x,y);
+    g_doubleratio2->SetPointError(i,0,ey);
+
+    TF1 *cst=new TF1("cst","1.",0.,15.);
+    cst->SetLineWidth(2);
+    cst->SetLineStyle(2);
+    cst->SetLineColor(13);
+  }
+
+  TGraphErrors *g_doubleratio_sys=new TGraphErrors(*g_doubleratio);
+  for(Int_t i=0;i<g_doubleratio2->GetN();i++){
+    Double_t a=0.;
+    Double_t b=0.;
+    g_doubleratio2->GetPoint(i,a,b);
+    float syserror=0;
+    if(a<6.) syserror=12.1/100.;
+    else if(a<9.) syserror=12.7/100.;
+    else if(a>9.) syserror=12.5/100.;
+    Double_t ea=0.;
+    Double_t eb=0.;
+    ea=.1;
+    float abs_err=syserror*b;
+    eb=sqrt(g_doubleratio2->GetErrorY(i)*g_doubleratio2->GetErrorY(i) + abs_err*abs_err);
+    g_doubleratio_sys->SetPoint(i,a,b);
+    g_doubleratio_sys->SetPointError(i,ea,eb);
+  }
+  g_doubleratio_sys->SetMarkerColor(1);  
+  g_doubleratio_sys->SetMarkerStyle(1);
+
+  
+  TMultiGraph *m_dratio=new TMultiGraph;
+  m_dratio->SetMinimum(.5);
+  m_dratio->SetMaximum(2.5);
+
+  m_dratio->SetTitle("d+Au 2003 (0<y<1);p_{T}(GeV/c);#gamma/#pi^{0}|_{data}/#gamma/#pi^{0}|_{bg}");
+
+  g_photonpqcd->SetLineWidth(2);
+  g_photonpqcd->SetLineColor(2);
+  m_dratio->Add(g_photonpqcd);
+  g_photonpqcd05->SetLineWidth(2);
+  g_photonpqcd05->SetLineColor(2);
+  g_photonpqcd05->SetLineStyle(2);
+  m_dratio->Add(g_photonpqcd05);
+  m_dratio->Add(g_photonpqcd2);
+
+  m_dratio->Add(g_doubleratio_sys,"pe2");
+  g_doubleratio2->SetMarkerStyle(8);
+  g_doubleratio2->SetMarkerSize(1);
+  m_dratio->Add(g_doubleratio2,"p");
+
+  TF1 *fitGamma=new TF1("fitGamma","1.+[0]*pow(x,[1])",2.,15.);
+  fitGamma->SetParameters(1.,1.);
+  fitGamma->SetLineWidth(2);
+  fitGamma->SetLineColor(2);
+  g_photonpqcd->Fit(fitGamma,"R");
+  TF1 *fitGamma05=new TF1("fitGamma05","1.+[0]*pow(x,[1])",2.,15.);
+  fitGamma05->SetParameters(1.,1.);
+  fitGamma05->SetLineWidth(2);
+  fitGamma05->SetLineColor(2);
+  fitGamma05->SetLineStyle(2);
+  g_photonpqcd05->Fit(fitGamma05,"R");
+  TF1 *fitGamma2=new TF1("fitGamma2","1.+[0]*pow(x,[1])",2.,15.);
+  fitGamma2->SetParameters(1.,1.);
+  fitGamma2->SetLineWidth(2);
+  fitGamma2->SetLineColor(2);
+  fitGamma2->SetLineStyle(2);
+  g_photonpqcd2->Fit(fitGamma2,"R");
+
+  m_dratio->Draw("a");
+
+
+  TLegend *leg5=new TLegend(.15,.5,.65,.85);
+  leg5->AddEntry(g_doubleratio2,"1 + #frac{#gamma_{dir}}{#gamma_{incl}}","p");
+  leg5->AddEntry(g_photonpqcd,"NLO (CTEQ6+KKP) #mu=p_{T}","l");
+  leg5->AddEntry(g_photonpqcd05,"#mu=2p_{T}, #mu=p_{T}/2","l");
+  leg5->SetFillColor(0);
+  leg5->Draw("same");
+
+  c_doubleratio->cd(0);  
+  c_doubleratio->SaveAs((dir+"gammaDoubleRatio.pdf").Data());
+  c_doubleratio->SaveAs((dir+"gammaDoubleRatio.root").Data());
+
+  TFile *f_data=new TFile((dir+"_data.root").Data(),"RECREATE");
+  fitDATA->Write();
+
+  yMB->Write();
+  yHT1->Write();
+  yHT2->Write();
+  //and inv. gamma yield:
+  h_gammaYieldMB->Write();
+  h_gammaYieldHT1->Write();
+  h_gammaYieldHT2->Write();
+  f_data->Close();
+
+  return;
+}

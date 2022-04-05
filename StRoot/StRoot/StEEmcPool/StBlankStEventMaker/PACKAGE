@@ -1,0 +1,5 @@
+# $Id $
+# package StBlankStEventMaker
+# author: 
+Library:libStBlankStEventMaker.so:LIBS +=   -lStChain   -l_StEvent
+#Library:libStBlankStEventMaker.so:LIBS +=   -lStChain  -lStEvent

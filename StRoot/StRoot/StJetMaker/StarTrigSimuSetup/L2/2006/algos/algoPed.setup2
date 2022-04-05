@@ -1,0 +1,14 @@
+# L2-ped algo parameters
+# first int[], next float[], ignores lines starting w/ #, one param per line
+INTS  # needs it as key-word 
+ 1   # subtract ped on/off  
+ 1   # speed factor, use 16 for 180kTics=100muSec
+ 0   #    saveBinary on/off
+ 0   # debug verbose on/off 
+ 0   # prescale for Accept , 0==0ff
+# 
+# some text
+FLOATS  # needs it as key-word 
+#nothing
+
+

@@ -1,0 +1,18 @@
+#Inventor V2.1 ascii
+
+ DEF STAR_FLOOR Separator {
+   Translation { translation 0 -235 0  }
+   Separator {
+   Material {
+            diffuseColor  0.8 0.8 0.8
+            specularColor 0.7 0.7 0.7
+            shininess     0.9
+            transparency  0.9
+  } 
+  Cube {
+        width 560
+        height 2
+        depth 560
+    }
+ }
+}

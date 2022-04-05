@@ -1,0 +1,5 @@
+# $Id $
+# package StdEdxY2Maker
+# author: 
+Library:libStdEdxY2Maker.so:LIBS +=   -lStBFChain  -lStBichsel  -lStChain  -lStDb_Tables -lStEvent  -lStTpcDb  -lMinuit
+#Library:libStdEdxY2Maker.so:LIBS +=   -lStBFChain  -lStBichsel  -lStChain  -lStDb_Tables  -lStDbUtilities  -lStEvent  -lStTpcDb  -lMinuit

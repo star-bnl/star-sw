@@ -2540,8 +2540,6 @@ If LL>0
 
   case dev2021 { dev2021:  First cut forward upgrades; Geom =        'dev2021   '; call geom_dev2021;} 
   case dev2022 { dev2022:  First cut forward upgrades; Geom =        'dev2022   '; call geom_dev2022;} 
-  case dev2022m { dev2022m:  First cut forward upgrades; Geom =        'dev2022m   '; call geom_dev2022m;}
-  case dev2022sm { dev2022sm:  First cut forward upgrades; Geom =        'dev2022sm   '; call geom_dev2022sm;}
 
   Case ftsver1  { y2017 : y2017 baseline w/ ids and fts v1;     Geom = 'ftsver1   '; call geom_ftsver1;}
   Case ftsver2  { y2017 : y2017 baseline w/ ids and fts v2;     Geom = 'ftsver2   '; call geom_ftsver2;}

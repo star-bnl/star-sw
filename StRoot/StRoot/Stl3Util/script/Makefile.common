@@ -1,0 +1,101 @@
+# Makefile to be included by other L3 makefiles.
+#
+# Supplies architecture-specific options and variables and some 
+# implicit rules.
+
+
+# Architecture (alpha/i686) setup
+ARCH = $(shell uname -m)
+
+# Set some architecture specific switches
+ifeq ($(ARCH), alpha)
+CFLAGS   +=  -O2 -mcpu=ev6 -D__ALPHA
+CXXFLAGS += $(CFLAGS)
+else
+CFLAGS   +=  -O2 -D__I386
+CXXFLAGS += $(CFLAGS)
+endif
+
+# include paths
+INCLUDE = -I/RTS/include -I/RTS/include/L3 -I/RTS/include/TRG
+CXXFLAGS += $(INCLUDE)
+CFLAGS   += $(INCLUDE)
+
+# L3 bin/lib/include locations
+#
+# If the environment variable L3BASEDIR is set, its value is used to 
+# determine the paths, otherwise /L3
+#
+# Useful for local/test installations
+#
+ifndef L3BASEDIR
+L3BASEDIR  = /L3
+endif
+
+L3INCDIR       = $(L3BASEDIR)/include
+L3LIBBASEDIR   = $(L3BASEDIR)/lib
+L3LIBDIR       = $(L3LIBBASEDIR)/$(ARCH)
+L3BINBASEDIR   = $(L3BASEDIR)/bin
+L3BINDIR       = $(L3BINBASEDIR)/$(ARCH)
+
+CXXFLAGS  += -I$(L3INCDIR)
+CFLAGS    += -I$(L3INCDIR)
+LDFLAGS   += -L$(L3LIBDIR)
+
+
+# Binaries to be used (with options)
+INSTALL = /usr/bin/install
+
+
+# default rule: compile, but do not install
+default: all
+
+# rule disable: used as a dependency for a target, it prevents this rule
+# to be executed
+disable:
+	@echo 
+	@echo "    This rule has been disabled! Aborting."
+	@echo
+	exit
+
+# useful implicit rules
+build/$(ARCH)/%.o: %.cc
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+build/$(ARCH)/%.o: %.cxx
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+build/$(ARCH)/%.a:
+	ar -rs $@ $^
+
+
+install-binaries:
+	@for bin in $^; do \
+	  echo $(INSTALL) -m 775 $$lib $(L3BINBASEDIR)/$$bin; \
+	  $(INSTALL) -m 775 $$lib $(L3BINBASEDIR)/$$bin; \
+	done
+
+install-libs:
+	@for lib in $^; do \
+	  echo $(INSTALL) -m 664 $$lib $(L3LIBBASEDIR)/$$lib; \
+	  $(INSTALL) -m 664 $$lib $(L3LIBBASEDIR)/$$lib; \
+	done
+
+install-includes:
+	mkdir -p $(L3INCDIR)/
+	@for inc in $^; do \
+	  echo $(INSTALL) -m 664 $$inc $(L3INCDIR)/; \
+	  $(INSTALL) -m 664 $$inc $(L3INCDIR)/; \
+	done
+
+install: install-binaries install-libs install-includes
+
+##### cleaning #####
+.PHONY: clean reallyclean
+clean::
+	rm -f $(shell find $(ARCH)/ -mindepth 1 -maxdepth 1 -not -name CVS)
+
+reallyclean:: clean
+	rm -f *~
+
+

@@ -1,0 +1,27 @@
+macro material   ntrig=10000  rmin=0.  rmax=250.  emin=0.8  emax=2.2
+debug off
+*make geometry
+  make cavegeo
+*  make ecalgeo
+gclos all
+Call HERMES(0)
+*       Particle Emin-max  EtaMin-max     PhiMin-max
+gkine 1   48        10 10 [emin] [emax]    0  6.283
+ 1D  3000 'Number of geantinos vs rapidity' 200 [emin] [emax]
+ 2D  3001 'Material in rad.len vs rapidity' 200 [emin] [emax] 50 [rmin] [rmax]
+ 2D  3003 'Material in abs.len vs rapidity' 200 [emin] [emax] 50 [rmin] [rmax]
+ 1D  4000 'Number of geantinos vs phi'      200  -3.14  3.14
+ 2D  4001 'Material in rad.len vs phi'      200  -3.14  3.14  50 [rmin] [rmax]
+ 2D  4003 'Material in abs.len vs phi'      200  -3.14  3.14  50 [rmin] [rmax]
+trig [ntrig]
+
+exe po
+
+zone   2 2
+option nsta
+option nbox
+call agpmater([rmin],[rmax])
+exe pc
+call hrput(0,'mat.rz','N')
+return
+  

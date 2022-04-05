@@ -1,0 +1,21 @@
+#Inventor V2.1 ascii   
+  Separator {
+    renderCaching ON
+    boundingBoxCaching ON
+    OrthographicCamera {     }
+
+    DEF STARLOGO Separator {
+
+      Translation { translation 0 -1. 0 }
+      Separator {
+        Image {
+           width  -1
+           height -1
+           vertAlignment BOTTOM
+           horAlignment CENTER
+           filename "STAR-head.xpm"
+
+       }
+     }
+   }
+ }

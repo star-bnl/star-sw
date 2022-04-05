@@ -1,0 +1,16 @@
+RC_Config.h             Configuration File Definitions
+rc.h 			Default locations of config files/handler
+			and field keys for the config files
+
+iccp.h			ICCP protocol (includes all below)
+cmds.h			ICCP Command definitions
+iccpHeader.h		ICCP Header
+status.h		ICCP return status definitions
+tasks.h			Task definitions
+
+RC/Msg.hh		Class definition for a RC messages
+RC/MsgDefs.h		Payload definitions for RC messages
+RC/SysState.h           System state structure for RC Clients
+RC/daqMonRC.h         	RC monitoring structure definition
+
+

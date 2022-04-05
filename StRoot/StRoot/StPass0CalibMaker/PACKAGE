@@ -1,0 +1,5 @@
+# $Id $
+# package StPass0CalibMaker
+# author: 
+Library:libStPass0CalibMaker.so:LIBS +=   -lglobal_Tables  -lStChain  -lStDAQMaker  -lStDbLib  -lStDb_Tables  -lStDbUtilities  -lStDetectorDbMaker  -l_StEvent  -l_StMuDSTMaker -lStRTSClientFCF -l_StRTSClientFCFMaker  -l_St_tcl_Maker  -l_StTpcDb  -lStTpcHitMoverMaker
+#Library:libStPass0CalibMaker.so:LIBS +=   -lglobal_Tables  -lStChain  -lStDAQMaker  -lStDbLib  -lStDb_Tables  -lStDbUtilities  -lStDetectorDbMaker  -lStEvent  -lStMuDSTMaker  -lStRTSClientFCFMaker  -lSt_tcl_Maker  -lStTpcDb  -lStTpcHitMoverMaker

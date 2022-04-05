@@ -1,0 +1,5 @@
+# $Id $
+# package StSsdPointMaker
+# author: 
+Library:libStSsdPointMaker.so:LIBS +=   -lStChain  -lStDb_Tables  -l_StEvent  -lsvt_Tables
+#Library:libStSsdPointMaker.so:LIBS +=   -lStChain  -lStDb_Tables  -lStEvent  -lsvt_Tables

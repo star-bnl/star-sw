@@ -1,0 +1,5 @@
+# $Id $
+# package StEventCompendiumMaker
+# author: 
+Library:libStEventCompendiumMaker.so:LIBS +=   -lStChain  -lStDb_Tables  -lStEvent
+#Library:libStEventCompendiumMaker.so:LIBS +=   -lStChain  -lStDb_Tables  -lStEvent

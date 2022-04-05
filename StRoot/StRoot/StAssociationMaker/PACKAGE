@@ -1,0 +1,7 @@
+# $Id $
+# package StAssociationMaker
+# author: 
+# dependence l_StEmcUtil versus StDb_Tables 
+#Library:libStAssociationMaker.so:LIBS +=   -lStChain    -l_StEvent  -lStMcEventMaker  -lStMcEvent
+Library:libStAssociationMaker.so:LIBS +=   -lStChain   -l_StEvent  -lStMcEventMaker  -lStMcEvent
+#Library:libStAssociationMaker.so:LIBS +=   -lStChain  -lStEmcUtil  -lStEvent  -lStMcEventMaker  -lStMcEvent

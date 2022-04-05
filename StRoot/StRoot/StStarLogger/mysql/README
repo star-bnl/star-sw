@@ -1,0 +1,9 @@
+MySql Scripts to create / recreated job tracking Db:
+---------------------------------------------------
+  1. Create Job Table  CreateJobTable.sql
+  2. Re-Created job Table  RecreatedJobTable.sql
+  3. Clean teh current JobTable
+  3. Startr mysql
+
+                Valeri Fine (fine@bnl.gov)
+$Id: README,v 1.2 2006/01/27 00:55:35 fine Exp $

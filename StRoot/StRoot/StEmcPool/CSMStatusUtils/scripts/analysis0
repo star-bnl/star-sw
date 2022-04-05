@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#change the following to your own environment
+  outDir=/star/institutions/ucla/$USER/bemc/
+  outDirlog=$outDir/log
+
+# #############################################################################
+# loop over the list of files
+rm shortlists*
+filelist=`cat $1`
+ngflfiles=0;
+for line in $filelist ; do 
+
+  ngflfiles=`expr $ngflfiles + 1`
+  niters=`expr $ngflfiles / 20 + 1`
+  echo "$line" >> shortlists$niters
+done
+#next line just makes the code below pretty - it does not add an iteration!
+  niters=`expr $niters + 1`
+
+  queue=star_cas_big                 
+for (( iteration = 1 ; iteration < $niters ; iteration++ )) ; do
+#for (( iteration = 1 ; iteration < 3 ; iteration++ )) ; do
+  log=log.$iteration
+  blog=blog.$iteration
+  rm $outDirlog/$log.gz
+  rm $outDirlog/$blog
+  bsub -R "linux" -q $queue  -J CSM$USER$run -o $outDirlog/$blog   << EOF
+    ./StRoot/StEmcPool/CSMStatusUtils/scripts/submitOneRunBatch shortlists$iteration $outDir
+EOF
+done

@@ -1,0 +1,46 @@
+
+macro simple N=1 
+   gdrop *
+*  debug on
+* trace on
+  gdebug 3
+  switch 2 3
+  
+
+   detp geometry year2001 split_off
+*   detp mfld mfld.Bfield=2.5
+   detp mfld mfld.Bfield=5.0
+   
+   make sim/gstar
+   make geometry
+   make sim/g2t   
+      
+   GFILE o muon_10_neg.fzd
+
+   gr/del 1; dopen  1 
+   dcut CAVE z -10 10 10 0.03 0.03
+   dclose 1; next; dshow 1   
+
+    gr/del 2; dopen  2 
+    dcut CAVE z -10 50 100 0.03 0.03
+    dclose 2; next; dshow 2   
+   
+* f/file 10 twopions.ps
+* meta 10 -111
+    
+    dio/newfilestream outunit output w
+    dio/stream/putevent outunit Run
+
+     ACTION S
+    gexec protonstart
+    gfile u '2K_protons.fzd'
+      do i=1,100
+       next; dshow 1; trig 1; call g2t;
+      enddo
+          
+   dio/stream/close outunit
+   cd /dui/Event; ls
+   
+   
+* close 10
+ return

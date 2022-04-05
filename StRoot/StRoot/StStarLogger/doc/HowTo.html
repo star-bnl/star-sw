@@ -1,0 +1,68 @@
+<html>
+<body>
+<ul>
+<li> separate messages by severity level a-la-VMS (informational,
+   warning, error and fatal ... may be more but at least those
+   people have thought about). This implies
+   
+   <br> Having a way to enable/disable some severity level
+   <br>* Examples:
+   <ul>
+       <li>  turning all messages of level warning and below OFF
+       <li>  directing all FATAL messages to special appender (possible
+       hand-shake with ABHA or similar would be what I have in
+       mind)
+       <li>  moving to /dev/null all informational messages in case
+       of batch but not interactive
+     </ul>
+
+<li> this causes an immediate dilema: we know our users ... they
+   will declare all error as 'fatal' or 'error' if they figure
+   that informational are trashed to /dev/null so, we need to
+   <ul>
+   <li> have a separation by sub-systems such as TPC, FTPC, ...
+   <li> we need to have a granularity per maker
+   <li> we need to be able to control the AMOUNT of IO in KB, MB
+     or whatever else per 'grouping' (Maker, sub-systems, ..).
+     This would allow to do things as follow - 
+     Examples:
+   <ul>
+     <li> (really a random example ;-) ) - The sub-system E-EMC
+       displays too many messages. After 10 MB of message, all
+       messages are disabled in the serverity level ... This
+       would not penalize the level fatal or error ... unless
+       themselves they do reach some "quota"
+     <li> consecutive repeated messages should not be displayed
+       and not be accounted as per the IO "quota". Non repeating
+       messages is  a feature of our current Messenger by the way.
+     <li> A quota may be necessary at any level
+       <br> 1 GB total for root4star (to level)
+       <br> <a href="RollingQuota.xml">10 MB</a> / sub-system
+       <br>  2 MB / sub-system / severity
+       <br>Those being adjustable numbers.
+     </ul>
+    </ul>
+<li> Next is applicability. We need to develop an appender
+   RIGHT AWAY for initially level 'fatal' and 'warning'.
+   We need to relate this to the job tracing activity (one
+   more reason people to submit your discussions to the
+   list is that the different parts of the projects are
+   now coming together) and the GUI activity ...
+   <ul>
+   <li> We may try to go for some severity level only
+   <li> we may try to go for all messages
+   <li> we may even try to re-consider the global IO issue
+     (i.e. hard limit on N MB) and instead, consider rates
+     if possible. This would be MUCH more relevant as per
+     what the db back-end can absorb ...
+   <ul>
+
+	So, in summary, do we have those features
+
+<ul>
+<li> IO hard "quota" per <a href="HardQuota.xml">severity level</a> and per 
+<a href="HardQuotaTpc.xml"> sub-systems </a> ??
+<li> IO rates "quotas" ??
+<ul>
+</body>
+</html>

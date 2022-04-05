@@ -1,0 +1,485 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>StMcEvent Guide</title>
+  </head>
+
+  <body bgcolor="#ffffff" text="#000000">
+    <table border="0" width ="100%" cellpadding="10">
+      <tr bgcolor="darkblue">
+	<td align="center" valign="top">
+	  <h1>
+	    <font color="lightgreen">StMcEvent<font>
+	  </h1>
+	</td>
+    </table>
+    <center>
+      <h1>STAR Monte Carlo Data Model</h1>
+    </center>
+    <h2> New Version </h2>
+    
+    <p>
+      The new version of <b>StMcEvent</b> is ready for testing.  A full description will
+      be given in the User Guide.  The new
+      User's Guide & Reference Manual
+      is now ready too.  Gene made a nice page where the PS documentation
+      can be obtained. 
+      Click
+      <a href="http://www.star.bnl.gov/STARAFS/comp/root/special_docs.html">here</a> to get to Gene's page.
+      In the meantime,
+      a description of the main changes in <b>StMcEvent</b> will be given below.  The aim is
+      that it will help people get started while the more complete documentation is done.
+      For quick reference, look at the brief <a href="#class description">class description</a>
+      below.  This lists the most
+      commonly used methods of the <a href="#class description"><i>StMcEvent</i></a>,
+      <a href="#StMcTrack"><i>StMcTrack</i></a>, <a href="#StMcVertex"><i>StMcVertex</i></a> and
+      <a href="#StMcHit"><i>StMcHit</i></a> classes.
+    </p>
+    <p>
+      The Particle Table is now in!  Check out some conventions
+      that you have to look out for to use it properly in the <a href="#ParticleTable"> Particle Table section</a>
+      
+    </p>
+     <h2> Description </h2>
+    <p>
+      <b>StMcEvent</b> is a package that compliments the use of <b>StEvent</b>, STAR's
+      Data Model.
+      The aim of this package is for the user to be able
+      to access and analyze Monte Carlo with the same object oriented
+      approach as <b>StEvent</b> . The top class is an instance of <i>StMcEvent</i>, and a
+      pointer to this  class enables access to all the relevant Monte Carlo
+      information.  When running through a typical STAR analysis chain, like the one
+      in bfcread.C, a Maker does the actual filling of the <b>StMcEvent</b> objects.
+      In this
+      case, it is <b>StMcEventMaker</b>.  This Maker then has a member function to give
+      to the other makers down the chain
+      access to the instance of <i>StMcEvent</i>.  Through this pointer, one can then navigate
+      through the tracks, vertices and hits in the event.  The 
+      <a href="./ps/StMcEvent.psnup"> User's Guide</a> is now outdated.  The previous version
+      contained a list of all
+      the member functions of the previous <i>StMcEvent</i> class and all classes in the package.  The
+      new version has a different structure, and more classes.  A good place to look in the meantime
+      is the <b>StEvent</b> <a href="../../StEvent/doc/StEvent.pdf"> User's Guide</a>, since
+      <b>StMcEvent</b> follows the basic structure of <b>StEvent</b>.  The classes, of course, are
+      different, but most of the methods have the same names, and similar classes have similar names.  For
+      example, the basic class out of which all tracks in <b>StEvent</b> are made out of, is
+      <i>StTrack</i>.  In <b>StMcEvent</b>, all tracks are of type <i>StMcTrack</i>.  The difference is that
+      <b>StEvent</b> has many kinds of tracks:  <i>StGlobalTrack</i>, <i>StPrimaryTrack</i> while <b>StMcEvent</b>
+      only has <i>StMcTrack</i>.
+    </p>
+    <p>
+    The information contained in <b>StMcEvent</b> is designed to be simply
+    a reflection of the information already available in the existing
+    g2t tables.  The primary keys and foreign keys are replaced by
+    associations between classes through pointers.
+    </p>
+
+    <hr>
+    <h2> Getting Started</h2>
+    <p>
+      Currently, <b>StMcEvent</b> compiles and runs in Linux, Solaris and HP.  To use it,
+      there is a macro available under CVS: $STAR/StRoot/macros/examples/<b>StMcEventReadMacro.C</b>
+    </p>
+    <p>
+      This macro will read a geant.root
+      file (created using the bfc.C macro) and will load the <b>StMcEvent</b> objects from the
+      tables found in that file.
+      Note that it does not do any analysis or histogramming at all.  This step would be done later
+      by the user once <b>StMcEvent</b> is loaded.
+    </p>
+    <p>
+      However, a quick check to see if everything is in place can be made simply by running the
+      macro on a particular file.  (The current default is
+      /afs/rhic.bnl.gov/star/data/samples/*.geant.root)
+    </p>
+    <p>
+      <font face="courier">root4star[0] .x StMcEventReadMacro.C(1,"myfile.geant.root")</font>
+    </p>
+    <p>
+      The first argument in this invocation is the number of events to process, and the second
+      argument is the file name.
+      A successful run ensures that a) the file is there, b) it contains the
+      GEANT information, and c) you are able to run the packages in your environment.  You can
+      then start thinking about what to do with the GEANT information.  
+    </p>
+
+    <p>
+      However, looking at the Monte Carlo Data by itself doesn't provide the most fruitful possibility
+      for analysis.
+      That is why the main goal of <b>StMcEvent</b> is to be used in conjunction to <b>StEvent</b> to
+      analyze reconstructed and Monte Carlo data together.  This is done using
+      <b>StAssociationMaker</b>.  This package has its own
+      <a href="../../StAssociationMaker/doc/index.html">documentation</a>.
+    </p>
+
+    <p>
+      One thing to keep in mind when using <b>StAssociationMaker</b> or any code that uses  <b>StEvent</b>
+      is that these packages RELY ON THE NEW DST TABLES.  This means that to use them you have to make
+      sure that the *.dst.root file you want to use can actually be read by  <b>StEvent</b>.  Moreover,
+      most of the new dst files are NOT produced with their *.geant.root file.  So before running
+      <b>StAssociationMaker</b>, make sure that
+    <ul>
+      <li> You are using a dst.root file that can be read by the new <b>StEvent</b>.
+      <li> The geant.root file from the dst.root file you want to use was written out.
+      <li> Both files are in the same directory.
+    </ul>
+    
+    <hr>
+    <a name="ParticleTable"></a>
+    <h2>Conventions and use of Tracks from Particle Table</h2>
+    <p>
+      Originally, there was no particle table.  All tracks were obtained from
+      the g2t_track table.  The flag "event generator label" from the g2t_track
+      table gives you the index from the particle table where this particular
+      track is found.  If this variable is zero, that means that the track is
+      completely a geant track, and does not come from the event generator.  All
+      tracks, in addition, have a primary key.  Each track also knows about its
+      start and stop vertex, and those vertices in turn know about its parent
+      and daughter tracks, so you could navigate forth and back in this way,
+      going through the vertices.
+    </p>
+    <p>
+      Now, enter the particle table.  First of all, there is no such thing as
+      the corresponding vertex table for this.  All there is supposed to be in
+      the table in terms of mother-daughter relationships is:
+    </p>
+    <ul>
+      <li> the index of the mother(s) of the particle
+      <li> the index of the daughter(s) of the particle
+    </ul>
+    <p>
+      When I looked at some hijing events, I saw that the daughter indices were
+      ALWAYS ZERO.  No information was contained there. So at the moment I just
+      don't use this (but this is something to take up with the simulations
+      leader...) So all the information available there was the mother
+      indices.  In addition, the event generator ID's are kept according to the
+      PDG standard.
+    </p>
+    <p>
+      Now, the track entries in StMcEvent is done in the following way:
+      <br>
+    </p>
+    <p>
+      First of all, I fill all entries from the particle table.  All entries up
+      to this point will then have:
+    </p>
+    <p>
+      <ul>
+	<li> event generator label > 0
+	<li> PDG Id > 0  (which doesn't mean it will be a sensible value, there are some PDG codes reserved for
+	Monte Carlo Generators that are "by definition" undefined.)
+	<li> key = 0
+	<li> GEANT Id = 0
+    </ul>
+
+    If they have a parent (according to the "motherIndex" from particle.idmohep[0])
+    we enter it.
+
+  </p>
+    <p>
+      
+      Notice that the event generator will probably have additional
+      interactions, not necessarily only decays, that will give a parentage
+      relationship EVEN IF ALL DECAYS ARE TURNED OFF.  Hijing for example,
+      starts from the parton level, and the bookkeeping of the parton 
+      interactions will yield as a result entries in the particle table which
+      have a parent() != 0.
+    </p>
+    <p>
+      
+      After we fill from the particle table (and you already see that there will
+      be some tracks that have parent!=0 at this level at least for some event
+      generators) we fill the StMcEvent tracks from the g2t_track table.  This
+      is done in the same way as before the particle table came into the
+      game.  These tracks will then ALL have:
+    </p>
+    <p>
+    <ul>
+      <li> key > 0
+      <li> GEANT ID > 0
+    </ul>
+    </p>
+    <p>
+      
+      Now here's the tricky part.  The tracks that come directly from the event
+      generator will ALSO have "event generator label" > 0.  That's how we know
+      where to find them in the particle table.  So this track should already
+      have been entered into StMcEvent.  To avoid overcounting, I merge the
+      information of both tables into a single StMcTrack.  These entries will
+      then have
+    </p>
+    <p>
+    <ul>
+      <li> key > 0
+      <li> event generator label > 0
+      <li> PDG ID > 0
+      <li> GEANT ID > 0
+    </ul>
+    </p>
+    <p>
+      
+      And if the relevant entry in the particle table has a parent (and I
+      already said why this may be so even if decays are turned off) then we
+      assign it to this track appropriately.  Maybe you're getting confused
+      because as far as GEANT is concerned, these tracks don't have a
+      parent.  But remember that now were crossing the boundaries of GEANT,
+      and we're also looking in the particle table, and a track that in
+      GEANT will have no parent, most probably will have one in the particle 
+      table.  That is why I would NOT recommend
+      checking whether parent() == 0 to determine if a track is
+      primary.  Actually, if it IS zero, I would expect it to be one of the
+      initial partons, and most certainly these will not have any associated
+      tracks because they only live in the event generator.
+    </p>
+    <p>
+      
+      Now for all g2t_tracks, including those that came from the particle table,
+      we know its parent vertex from the g2t_vertex table.  Then a relationship
+      between them is established.  This is what determines which tracks come
+      from the primary vertex and which ones don't.
+    </p>
+    <p>
+      
+      There is even a data member from the g2t_event table that specifies the
+      number of primary tracks (at the table level).  In one of the checks I
+      always make when debugging is that this number should equal 
+    </p>
+    <p>
+      <center>
+	<pre>
+	mcEvent->primaryVertex()->daughters().size()
+	</pre>
+      </center>
+    </p>
+    <p>
+      There shouldn't be any discrepancy when things are fine.  If there is a discrepancy, then
+      this signals that something is amiss.
+      
+    </p>
+    <p>
+      
+      So the easiest way to get the primary tracks from StMcEvent is:
+      
+      <center>
+	<pre>
+	mcEvent->primaryVertex()->daughters()
+	</pre>
+      </center>
+      
+    </p>
+    <p>      
+      This should be it! But just to check what we're doing, check when you
+      loop over them if they have:
+    </p>
+    <p>
+    <ul>
+      <li> key > 0
+      <li> Geant Id > 0
+      <li> pdg Id > 0
+      <li> event generator label > 0
+    </ul>
+  </p>
+    <p>
+      If one is looking for a particle that was decayed in the event generator and
+      its products then passed to GEANT, then the only modification to the above procedure
+      is to ask for the parent of the relevant primary particles we are interested in.  For example,
+      if a phi is decayed into an e+e- pair, then we check whether the primary track is an
+      electron and if so, look at its parent.  If it is a phi, we're done.
+    <hr>
+    <a name="class description"></a>
+    <h2> Brief Class Description</h2>
+    <h3> <i>StMcEvent</i> </h3>
+    The top class is <i>StMcEvent</i>, and through it, all other objects like tracks and hits are accessed.  The
+    information stored in the g2t_event table is also stored here:
+    <pre>  
+    unsigned long                eventGeneratorEventLabel() const;
+    unsigned long                eventNumber() const;
+    unsigned long                runNumber() const;              
+    unsigned long                type() const;
+    unsigned long                zWest() const;
+    unsigned long                nWest() const;
+    unsigned long                zEast() const;
+    unsigned long                nEast() const;
+    unsigned long                numberOfPrimaryTracks() const;
+    float                        impactParameter() const;
+    float                        phiReactionPlane() const;
+    float                        triggerTimeOffset() const;
+    </pre>    
+    </p>
+    <p>
+      The other objects are accessed through the member functions:
+    <pre>
+    StMcVertex*                    primaryVertex();
+    StSPtrVecMcVertex&             vertices();
+    StSPtrVecMcTrack&              tracks();
+    StMcTpcHitCollection*          tpcHitCollection();
+    StMcSvtHitCollection*          svtHitCollection();
+    StMcFtpcHitCollection*         ftpcHitCollection();
+    </pre>
+    These methods also have a const version, in case these are needed.
+    </p>
+    <h3> <i>Flat Arrays</i> </h3>    
+    <p>
+      The naming convention follows that of <b>StEvent</b>.  However, the underlying arrays in StEvent
+      are persistent, and in StMcEvent these are really transient STL vectors.  The names mean roughly the
+      following.  StPtrVecMcVertex is a VECtor of PoinTeRs to objects of type StMcVertex.  StSPtrVecMcVertex
+      is a Structural VECtor of PoinTeRs to objects of type StMcVertex.  The difference is in terms of
+      ownership.  The "Structural" array owns the objects it points to, and it is responsible for
+      deleting the objects when the object itself gets deleted. 
+      The other one does not own the objects it points to and is just responsible for deleting itself.
+      This makes it easier for the developers to know who owns what to make sure
+      that SOMEONE deletes the objects and that they DON'T get deleted twice.
+    </p>
+
+    <p>
+      The tracks and vertices in <b>StMcEvent</b> are stored in a flat array.  There is a difference
+      with <b>StEvent</b> in that there is no need for Track Nodes, Global or Primary Tracks.  <b>StMcEvent</b>
+      only has <i>StMcTracks</i>.
+    </p>
+    <h3> <i>Hit Collections</i> </h3>
+    <p>
+      The HitCollections, are now classes in themselves, hits are not stored in flat arrays like before.
+      The idea is now to
+      store the hits in an ordered manner, according to sub detector structure.  This is done in the
+      follwing way:
+    </p>
+    <p>
+      StMcTpcHitCollection -> StMcTpcSectorHitCollection -> StMcTpcPadrowHitCollection -> Hits
+    </p>
+    <p>
+      StMcSvtHitCollection -> StMcSvtLayerHitCollection -> StMcSvtLadderHitCollection -> StMcSvtWaferHitCollection -> Hits
+    </p>
+    <p>
+      StMcFtpcHitCollection -> StMcFtpcPlaneHitCollection -> Hits
+    </p>
+    <p>
+      The FTPC Hit collection structure is different than StEvent because the Monte Carlo hits don't know
+      about FTPC Sectors.  These are determined by the reconstruction based on the magnetic field, ExB
+      distortions etc.
+    </p>
+    <p>
+      Here's example loop to get to the TPC Hits.  The loops for the SVT and FTPC will have the same
+      structure, replacing a TPC "sector" with an SVT "layer" or an FTPC "plane", etc. as in the structure
+      above.
+      
+      <pre>
+StMcTpcHitCollection* mcTpcHitColl = mcEvent->tpcHitCollection();
+  for (unsigned int iSector=0;
+       iSector < mcTpcHitColl->numberOfSectors(); iSector++) {
+
+    // Get the sector hit collection
+
+    StTpcSectorHitCollection* tpcSectHitColl = rcTpcHitColl->sector(iSector);
+
+      for (unsigned int iPadrow=0;
+           iPadrow<tpcSectHitColl->numberOfPadrows(); iPadrow++) {
+
+	// Get the Padrow hit collection of the sector 
+
+	StTpcPadrowHitCollection* tpcPadRowHitColl = tpcSectHitColl->padrow(iPadrow);
+
+	for (unsigned int iHit=0;
+	     iHit<tpcPadRowHitColl->hits().size(); iHit++){
+
+	  // get the hits in the padrow
+
+	  StMcTpcHit mcTpcHit = tpcPadRowHitColl->hits()[iHit];
+
+	  // use the hit now...
+	    
+      </pre>
+   </p>
+    The names of the methods are similar to those in <b>StEvent</b>,
+    only the classes are named differently.
+
+    Also note that the numbering scheme, as requested by the SVT group, has the hits
+    returning a layer, ladder, wafer (SVT), sector, padrow (TPC) and plane (FTPC) starting
+    from 1.  So if you use these methods along with arrays, make sure to subtract 1.  This is
+    also discussed in the <b>StEvent</b> manual.
+
+    <a name="StMcTrack"></a>
+    <h3> <i>StMcTrack</i> </h3>
+    Here is a list of the methods most commonly used for StMcTrack.  The "set" methods, constructors, and
+    other operators are not shown here.  An StMcTrack has knowledge of its four-momentum (and functions derived
+    from this), the hits that form a part of this track and the type of particle that produced the track.
+    
+    <pre>
+    const StLorentzVectorF&      fourMomentum() const;
+    const StThreeVectorF&        momentum() const; 
+    float                        energy() const; 
+    float                        pt() const; 
+    float                        rapidity() const; 
+    float                        pseudoRapidity() const; 
+    StMcVertex*                  startVertex(); 
+    StMcVertex*                  stopVertex(); 
+    StPtrVecMcVertex&            intermediateVertices();
+    StPtrVecMcTpcHit&            tpcHits(); 
+    StPtrVecMcSvtHit&            svtHits(); 
+    StPtrVecMcFtpcHit&           ftpcHits(); 
+    StParticleDefinition*        particleDefinition(); 
+    int                          isShower() const; // 1 = yes, 0 = no
+    long                         geantId() const;
+    </pre>
+
+    <a name="StMcVertex"></a>
+    <h3> <i>StMcVertex</i> </h3>
+    The vertices in <b>StMcEvent</b> know their position, geant volume, time of flight, geant
+    process that produced them and, more importantly, the daughter tracks and parent track.
+
+    <pre>
+    const StThreeVectorF&       position() const;
+    StPtrVecMcTrack&            daughters();
+    unsigned int                numberOfDaughters();
+    StMcTrack*                  daughter(unsigned int);
+    const StMcTrack*            parent();
+    string                      geantVolume() const;
+    float                       tof() const;
+    long                        geantProcess() const;
+    </pre>
+    
+    <a name="StMcHit"></a>
+    <h3> <i>StMcHit</i> </h3>
+    All hit classes inherit from <i>StMcHit</i>, which provides the following methods:
+    <pre>
+    const StThreeVectorF& position() const;
+    float                       dE() const; // energy loss
+    float                       dS() const; // path length within padrow
+    StMcTrack*         parentTrack() const;
+    </pre>
+    <p>
+      In addition, the derived hit classes know which subdetector they belong to:
+    </p>
+    <p> <i>StMcTpcHit</i> </p>
+    <pre>
+    unsigned long sector() const; // 1-24
+    unsigned long padrow() const; // 1-45
+    </pre>
+    <p> <i>StMcSvtHit</i> </p>
+    <pre>
+    unsigned long layer()  const; // layer=[1-6]
+    unsigned long ladder() const; // ladder=[1-8]
+    unsigned long wafer()  const; // wafer=[1-7]
+    unsigned long barrel() const; // barrel=[1-3]
+    </pre>
+    <p> <i>StMcFtpcHit</i> </p>
+    <pre>
+    unsigned long plane()  const; // 1-20
+    </pre>
+
+    This covers the basic classes and the methods that will most frequently be needed to
+    use <b>StMcEvent</b>.  The header files are nevertheless the definitive and more
+    complete source, and these can be accessed from the
+    <a href="http://duvall.star.bnl.gov/cgi-bin/prod/swguide.pl">software guide</a> this file is found in,
+    under the "src" link for <b>StMcEvent</b>.
+    
+    <hr>
+    <b>StMcEvent</b> is a work in progress.  For questions, contact
+    <address><a href="mailto:calderon@star.physics.yale.edu">Manuel Calderon de la Barca Sanchez</a></address>
+    or
+    <address><a href="mailto:lisa@mps.ohio-state.edu">Michael A. Lisa</a></address>
+    <!-- Created: Mon Sep 27 14:20:30 EDT 1999 -->
+<!-- hhmts start -->
+Last modified: Tue Apr 18 18:50:26 EDT 2000
+<!-- hhmts end -->
+  </body>
+</html>

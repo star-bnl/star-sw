@@ -1,0 +1,44 @@
+#!/bin/csh 
+set indir=$1
+set file=$2
+set mudstdir=mudst
+
+echo file=$indir/$file mudstdir=$mudstdir
+
+set dir=$cwd
+set sys=$STAR_HOST_SYS
+set tmpdir=/tmp/akio/fms2015
+
+if ( ! -e $mudstdir) then
+  mkdir $mudstdir
+endif
+
+if ( ! -e $tmpdir ) then
+  mkdir -p $tmpdir
+endif
+cd $tmpdir
+
+if ( ! -e .$sys ) then
+  ln -s $dir/.$sys 
+endif
+
+if ( ! -e StRoot ) then
+  ln -s $dir/StRoot
+endif
+
+if ( ! -e runBfc.C) then
+  ln -s $dir/runBfc.C
+endif
+
+if ( ! -e FmsGain.txt) then
+  ln -s $dir/FmsGain.txt 
+endif
+
+if ( ! -e $file ) then
+  /bin/cp $indir/$file .
+endif
+
+root4star -b -q 'runBfc.C("'$file'")'
+
+set mudstfile=`echo $file | sed s/daq/MuDst.root/g`;
+cp $mudstfile $dir/$mudstdir/

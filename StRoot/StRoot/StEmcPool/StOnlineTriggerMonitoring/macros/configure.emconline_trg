@@ -1,0 +1,86 @@
+#!/bin/bash
+
+    export CONFIGURE_EMCONLINE_TRG='yes'
+    export SRC_PATH=''
+    export DST_PATH=''
+    export SRC_PATH_DEFAULT=${0%/macros/*}
+    export DST_PATH_DEFAULT='.'
+        
+    export OPTIONS=$@
+        
+    for OPT in $OPTIONS ;
+    do
+        if [[ "$OPT" == "emconline_trg" ]] ; then export CONFIGURE_EMCONLINE_TRG='yes' ;
+        elif [[ "$OPT" == "all" ]]
+        then
+            export CONFIGURE_EMCONLINE_TRG='yes'
+        elif [[ "$SRC_PATH" == "" ]] ; then export SRC_PATH=$OPT ;
+        elif [[ "$DST_PATH" == "" ]] ; then export DST_PATH=$OPT ;
+        else echo "Skipping unknown option $OPT" ; fi
+    done
+
+    if [[ "$SRC_PATH" == "" ]] ; then export SRC_PATH=$SRC_PATH_DEFAULT ; fi
+    if [[ "$DST_PATH" == "" ]] ; then export DST_PATH=$DST_PATH_DEFAULT ; fi
+
+    pushd $SRC_PATH > /dev/null
+    export SRC_PATH=`pwd`
+    popd > /dev/null
+
+    pushd $DST_PATH > /dev/null
+    export DST_PATH=`pwd`
+    popd > /dev/null
+
+    echo "Code directory:            $SRC_PATH"
+    echo "Working directory:         $DST_PATH"
+
+    if [[ "${CONFIGURE_EMCONLINE_TRG}" != "no" ]]    
+    then
+	echo "Configuring the EMC Online trigger monitoring"
+
+        chmod a+x $SRC_PATH/macros/configure.emconline_trg
+        chmod a+x $SRC_PATH/macros/.emconline_trg.cfg.sh
+        chmod a+x $SRC_PATH/macros/job.emconline_trg
+        chmod a+x $SRC_PATH/macros/status.emconline_trg
+        chmod a+x $SRC_PATH/macros/update.emconline_trg
+        chmod a+x $SRC_PATH/macros/heartbeat.emconline_trg
+        chmod a+x $SRC_PATH/macros/stopped.emconline_trg
+
+	export CFG_FILE=$DST_PATH/.emconline_trg.cfg.sh
+	rm -f $CFG_FILE
+	echo "export EMCONLINE_TRG_DIR=$DST_PATH" > $CFG_FILE
+    	cat $SRC_PATH/macros/.emconline_trg.cfg.sh >> $CFG_FILE
+	chmod a+x $CFG_FILE
+
+        ln -sf $SRC_PATH/macros/job.emconline_trg $DST_PATH
+        ln -sf $SRC_PATH/macros/status.emconline_trg $DST_PATH
+        ln -sf $SRC_PATH/macros/update.emconline_trg $DST_PATH
+        ln -sf $SRC_PATH/macros/*.C $DST_PATH
+        ln -sf $SRC_PATH/macros/bce_table.txt $DST_PATH
+        ln -sf $SRC_PATH/macros/bcw_table.txt $DST_PATH
+	ln -sf $SRC_PATH/macros/scp $DST_PATH
+	ln -sf $SRC_PATH/macros/README.emconline_trg $DST_PATH
+
+	touch $DST_PATH/README
+	echo "`date`: EMC Online trigger monitoring installed, see README.emconline_trg" >> $DST_PATH/README
+	echo "" >> $DST_PATH/README
+
+	touch $DST_PATH/LAST_TIME_RUN.emconline_trg
+
+	$DST_PATH/status.emconline_trg STOP &> /dev/null
+
+	touch $DST_PATH/RUNSTATUS.emconline_trg
+
+	touch $DST_PATH/RUNMODE.emconline_trg
+	echo "STOP" >> $DST_PATH/RUNMODE.emconline_trg
+
+        ln -sf $SRC_PATH/macros/index_template_begin.html $DST_PATH
+        ln -sf $SRC_PATH/macros/index_template_line.html $DST_PATH
+        ln -sf $SRC_PATH/macros/index_template_end.html $DST_PATH
+
+        ln -sf $SRC_PATH/macros/heartbeat.emconline_trg $DST_PATH
+        ln -sf $SRC_PATH/macros/stopped.emconline_trg $DST_PATH
+
+	source $DST_PATH/.emconline_trg.cfg.sh
+	update_desktop_icon_trg
+
+    fi

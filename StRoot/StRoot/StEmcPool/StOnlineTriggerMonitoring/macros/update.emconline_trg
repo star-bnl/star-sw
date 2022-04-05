@@ -1,0 +1,330 @@
+#!/bin/bash
+
+# this script checks if ANY of the BEMC trigger
+# configuration had changed. If so, it updated the
+# database with the new trigger configuration
+#
+# it runs as a cronjob every 10 minutes in the onl11
+# machine
+#
+# this script follows the steps bellow
+#
+# 1. check the file RUNMODE. If content is not "RUN", exit the
+#    program. This is done if, for some reason, we
+#    want to stop the script from updating the DB
+#
+# 2. SCP the config_crate0x??.dat files from sc5 machine,
+#    the BemcConfig.dat file from sc5 machine, and 
+#    the daq_pedestal_crate0x??.dat files from daqman
+#
+# 3. SCP the trigger masks from startrg.starp.bnl.gov machine
+#
+# 4. Copy these files to the current_config.emconline_trg/ 
+#    directory
+#
+# 5. Compare these files to the files saved in the 
+#    last_config.emconline_trg/ directory
+#    
+# 6. If there is no difference, clear current_config.emconline_trg/
+#    directory and exit
+#
+# 7. If ANY difference was found, copy the contents of the
+#    current_config.emconline_trg/ directory to the 
+#    last_config.emconline_trg/ directory
+#    Also saves the directory with timestamped names in the
+#    backup directory
+#
+# 8. runs the root4star macro that create the tables from
+#    the files in those directories and save them to the DB
+#    It also creates plain text file bemcStatus.txt with the same information
+#    for the trigger people and pPlots
+#
+# 9. clear the current_config.emconline_trg  directory and exit
+#
+# you can also run it by hand with the command
+#
+#    updateTriggerDB TIMESTAMP FORCE
+#
+# where TIMESTAMP is on the format
+#
+#    YYYYMMDD.hhmmss
+# 
+# if FORCE = yes  we force saving the DB
+#
+# this procedure overwrites the RUNMODE variable
+#
+# AAPSUAIDE, 12/2004
+# Oleksandr Grebenyuk, April 2007
+
+export EMCONLINE_TRG_DIR=${0%/*}
+if [[ -f ./.emconline_trg.cfg.sh ]]
+then
+    source ./.emconline_trg.cfg.sh
+elif [[ -f ${EMCONLINE_TRG_DIR}/.emconline_trg.cfg.sh ]]
+then                                                                                                                                                                        
+    source ${EMCONLINE_TRG_DIR}/.emconline_trg.cfg.sh
+else
+    echo "EMC Online environment is not configured, please run configure.emconline_trg"
+    exit 1
+fi
+
+if { which expect &> /dev/null ; }
+then
+    echo "Command \"expect\" was found." > /dev/null
+else
+    echo "Command \"expect\" was not found. Please contact the machine admin. Exiting now..."
+    exit
+fi
+
+if { which root4star &> /dev/null ; }
+then
+    echo "Command \"root4star\" was found." > /dev/null
+else
+    echo "Command \"root4star\" was not found. Is the STAR environment set up? Exiting now..."
+    exit
+fi
+
+cd ${EMCONLINE_TRG_DIR}
+
+echo "EMC Online trigger monitoring"
+
+export STATUS=""
+if [[ -f ${EMCONLINE_TRG_RUNSTATUS_FILE} ]] ; then export STATUS=`cat ${EMCONLINE_TRG_RUNSTATUS_FILE}` ; fi
+export STATUS=`echo ${STATUS}`
+if [[ "${STATUS}" != "" ]]
+then
+    echo "Another instance is already running (see ${EMCONLINE_TRG_RUNSTATUS_FILE}), exit this now..."
+    exit
+fi
+
+export TIMESTAMP=${1}
+export FORCE=${2}
+export MODE=${3}
+if [[ "${TIMESTAMP}" == "" ]]
+then
+    # TIMESTAMP is SET in UTC time, not local time
+    echo "Getting timestamp from the system"
+    export TIMESTAMP=`date -u +%G%m%d.%H%M%S`
+else
+    export MODE=RUN
+fi
+if [[ "${MODE}" == "" ]]
+then
+    if [[ -f ${EMCONLINE_TRG_RUNMODE_FILE} ]] ; then export MODE=`cat ${EMCONLINE_TRG_RUNMODE_FILE}` ; fi
+    export MODE=`echo ${MODE}`
+fi
+if [[ "${FORCE}" == "" ]]
+then
+    export FORCE=no
+fi
+
+if [[ "${SCP}" == "" ]] ; then export SCP=scp ; fi
+
+rm -f ${EMCONLINE_TRG_LASTRUN_FILE}
+export DATE=`date -u`
+export DATE_LOCAL=`date`
+echo "LAST TIME IT WAS EXECUTED = ${DATE} (${DATE_LOCAL})" > ${EMCONLINE_TRG_LASTRUN_FILE}
+echo "TIMESTAMP = ${TIMESTAMP}" >> ${EMCONLINE_TRG_LASTRUN_FILE}
+echo "RUN MODE = ${MODE} " >> ${EMCONLINE_TRG_LASTRUN_FILE}
+
+cat ${EMCONLINE_TRG_LASTRUN_FILE}
+
+if [[ "${MODE}" != "RUN" ]]
+then
+    echo "Monitoring is disabled, exit now"
+    #${EMCONLINE_TRG_EPICS_STOPPED}
+    exit
+fi
+
+mkdir -p ${EMCONLINE_TRG_CURRCONF_DIR}
+mkdir -p ${EMCONLINE_TRG_LASTCONF_DIR}
+mkdir -p ${EMCONLINE_TRG_BACKUP_DIR}
+
+echo "Copying the files to this machine..."
+echo "Copying files to this machine" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+update_desktop_icon_trg
+
+rm -fr ${EMCONLINE_TRG_CURRCONF_DIR}/*
+cp -v ${EMCONLINE_SLOWCTRL_PED_DIR}/${CRATE_PEDESTAL_FILES_MASK} ${EMCONLINE_TRG_CURRCONF_DIR}
+${SCP} ${EMCONLINE_SLOWCTRL_CFG_DIR}/${CRATE_CONFIG_FILES_MASK} ${EMCONLINE_TRG_CURRCONF_DIR}
+${SCP} ${EMCONLINE_SLOWCTRL_CFG_DIR}/${CRATES_CONFIG_FILE_MASK} ${EMCONLINE_TRG_CURRCONF_DIR}
+${SCP} ${EMCONLINE_SLOWCTRL_DSMMASK_DIR}/${DSM_MASK_FILES_MASK} ${EMCONLINE_TRG_CURRCONF_DIR}
+
+echo "Checking files" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+update_desktop_icon_trg
+# start checking
+export SAVE=false
+export UPDATESTATUS=false
+export UPDATEPEDESTAL=false
+export UPDATELUT=false
+export DIFF_OPTIONS='-bBN'
+
+echo "Checking config files"
+for file in ${CRATE_CONFIG_FILES}
+do
+    export FILE1=${EMCONLINE_TRG_CURRCONF_DIR}/${file}
+    export FILE2=${EMCONLINE_TRG_LASTCONF_DIR}/${file}
+    if [[ -f ${FILE1} && -s ${FILE1} ]]
+    then
+	export DIFF=`diff ${DIFF_OPTIONS} ${FILE1} ${FILE2}`
+	echo "${file} ${DIFF}"
+	if [[ "`echo ${DIFF}`" != "" ]]
+	then
+	    export SAVE=true
+    	    export UPDATESTATUS=true
+    	    export UPDATELUT=true
+	fi
+    fi
+done
+
+echo "Checking Pedestal files"
+for file in ${CRATE_PEDESTAL_FILES}
+do
+    export FILE1=${EMCONLINE_TRG_CURRCONF_DIR}/${file}
+    export FILE2=${EMCONLINE_TRG_LASTCONF_DIR}/${file}
+    if [[ -f ${FILE1} && -s ${FILE1} ]]
+    then
+	export DIFF=`diff ${DIFF_OPTIONS} ${FILE1} ${FILE2}`
+	echo "${file} ${DIFF}"
+	if [[ "`echo ${DIFF}`" != "" ]]
+	then
+	    export SAVE=true
+	    export UPDATEPEDESTAL=true
+	fi
+    fi
+done
+
+echo "Checking BemcConfig.dat"
+for file in ${CRATES_CONFIG_FILE}
+do
+    export FILE1=${EMCONLINE_TRG_CURRCONF_DIR}/${file}
+    export FILE2=${EMCONLINE_TRG_LASTCONF_DIR}/${file}
+    if [[ -f ${FILE1} && -s ${FILE1} ]]
+    then
+	export TMP1=${EMCONLINE_TRG_DIR}/${file}.curr.tmp
+	export TMP2=${EMCONLINE_TRG_DIR}/${file}.last.tmp
+	rm -f ${TMP1}
+	rm -f ${TMP2}
+	cat ${FILE1} | grep TriggerPedestalShift > ${TMP1}  
+	cat ${FILE2} | grep TriggerPedestalShift > ${TMP2}  
+	export DIFF=`diff ${DIFF_OPTIONS} ${TMP1} ${TMP2}`
+	echo "${file} ${DIFF}"
+	if [[ "`echo ${DIFF}`" != "" ]]
+	then 
+	    export SAVE=true
+	    export UPDATEPEDESTAL=true
+	fi
+	rm -f ${TMP1}
+	rm -f ${TMP2}
+    fi
+done
+
+echo "Checking Trigger mask files"
+for file in ${DSM_MASK_FILES}
+do
+    export FILE1=${EMCONLINE_TRG_CURRCONF_DIR}/${file}
+    export FILE2=${EMCONLINE_TRG_LASTCONF_DIR}/${file}
+    if [[ -f ${FILE1} && -s ${FILE1} ]]
+    then
+	export DIFF=`diff ${DIFF_OPTIONS} ${FILE1} ${FILE2}`
+	echo "${file} ${DIFF}"
+	if [[ "`echo ${DIFF}`" != "" ]]
+	then 
+    	    export SAVE=true
+	    export UPDATESTATUS=true
+	fi
+    fi
+done
+
+if [[ "${FORCE}" == "yes" ]]
+then
+    export SAVE=true
+    export UPDATESTATUS=true
+    export UPDATEPEDESTAL=true
+    export UPDATELUT=true
+fi
+             
+echo "Forced mode = ${FORCE}"
+echo "Saving      = ${SAVE}"
+echo "  STATUS    = ${UPDATESTATUS}"
+echo "  PEDESTAL  = ${UPDATEPEDESTAL}"
+echo "  LUT       = ${UPDATELUT}"
+
+###############################################################
+###############################################################
+# this is the part that runs root4star and save the tables
+#
+
+if [[ "${SAVE}" == "true" ]]
+then
+    #${SCP} ${EMCONLINE_SLOWCTRL_PED_DIR}/${CRATE_PEDESTAL_FILES_MASK}.*timestamp ${EMCONLINE_TRG_CURRCONF_DIR}
+    #${SCP} ${EMCONLINE_SLOWCTRL_PED_DIR}/${CRATE_PEDESTAL_FILES_MASK}.first_loaded.timestamp ${EMCONLINE_TRG_CURRCONF_DIR}
+    #${SCP} ${EMCONLINE_SLOWCTRL_CFG_DIR}/${CRATE_CONFIG_FILES_MASK}.*timestamp ${EMCONLINE_TRG_CURRCONF_DIR}
+    #${SCP} ${EMCONLINE_SLOWCTRL_CFG_DIR}/${CRATE_CONFIG_FILES_MASK}.first_loaded.timestamp ${EMCONLINE_TRG_CURRCONF_DIR}
+    #${SCP} ${EMCONLINE_SLOWCTRL_CFG_DIR}/${CRATES_CONFIG_FILE_MASK}.*timestamp ${EMCONLINE_TRG_CURRCONF_DIR}
+    #${SCP} ${EMCONLINE_SLOWCTRL_CFG_DIR}/${CRATES_CONFIG_FILE_MASK}.first_loaded.timestamp ${EMCONLINE_TRG_CURRCONF_DIR}
+
+    echo "Running" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+    update_desktop_icon_trg
+
+    echo "Making backup of files with TS = ${TIMESTAMP}"
+    mkdir -p ${EMCONLINE_TRG_BACKUP_DIR}/${TIMESTAMP}
+    cp -rf ${EMCONLINE_TRG_CURRCONF_DIR}/* ${EMCONLINE_TRG_BACKUP_DIR}/${TIMESTAMP}/
+
+    echo "Removing old saved files"
+    rm -rf ${EMCONLINE_TRG_LASTCONF_DIR}/*
+
+    echo "Copying current files to last saved directory"
+    mv -f ${EMCONLINE_TRG_CURRCONF_DIR}/* ${EMCONLINE_TRG_LASTCONF_DIR}/
+
+    echo "Removing latest bemcStatus.txt file"
+    rm -f ${EMCONLINE_TRG_BEMCSTATUS_FILE}
+
+    mkdir -p ${EMCONLINE_TRG_TABLES_DIR}
+
+    echo "Saving data in the last saved directory with TS = ${TIMESTAMP}"
+    csh -c "starver ${EMCONLINE_TRG_STARVER}; setenv STDB_SERVERS $STAR/StDb/servers/dbServers_robinson.xml; if ( \"$EMCONLINE_TRG_SAVEDB\" == \"true\" ) setenv DB_ACCESS_MODE write; root4star -b -q ${EMCONLINE_TRG_SCRIPT}\(\\\"${TIMESTAMP}\\\",${UPDATESTATUS},${UPDATEPEDESTAL},${UPDATELUT},${EMCONLINE_TRG_SAVEDB},${EMCONLINE_TRG_SAVETABLES},\\\"${EMCONLINE_TRG_TABLES_DIR}\\\",\\\"${EMCONLINE_TRG_LASTCONF_DIR}\\\",\\\"${EMCONLINE_TRG_BEMCSTATUS_FILE}\\\",\\\"${EMCONLINE_TRG_BCECONF_FILE}\\\",\\\"${EMCONLINE_TRG_BCWCONF_FILE}\\\"\)"
+
+    cp -f ${EMCONLINE_TRG_BEMCSTATUS_FILE} ${EMCONLINE_TRG_BACKUP_DIR}/${TIMESTAMP}/
+    cp -f ${EMCONLINE_TRG_BEMCSTATUS_FILE} ${EMCONLINE_TRG_LASTCONF_DIR}/
+
+    if [[ -f ${EMCONLINE_TRG_BEMCSTATUS_FILE} ]]
+    then
+	echo "Delivering bemcStatus.txt" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+	#update_desktop_icon_trg
+	echo "Copying bemcStatus.txt to consumers"
+	for consumer in ${EMCONLINE_TRG_BEMCSTATUS_CONSUMERS}
+	do
+	    echo "${consumer}..."
+	    ${SCP} ${EMCONLINE_TRG_BEMCSTATUS_FILE} ${consumer}/
+	done
+    fi
+
+    echo "Updating webpage ${EMCONLINE_TRG_WEBDIR} ..."
+    mkdir -p ${EMCONLINE_TRG_WEBDIR}
+    touch ${EMCONLINE_TRG_WEBPAGE_BODY}
+    eval `cat ${EMCONLINE_TRG_WEBTEMPLATE_LINE}` >> ${EMCONLINE_TRG_WEBPAGE_BODY}
+    rm -f ${EMCONLINE_TRG_WEBPAGE}.tmp
+    touch ${EMCONLINE_TRG_WEBPAGE}.tmp
+    cat ${EMCONLINE_TRG_WEBTEMPLATE_BEGIN} >> ${EMCONLINE_TRG_WEBPAGE}.tmp
+    cat ${EMCONLINE_TRG_WEBPAGE_BODY} >> ${EMCONLINE_TRG_WEBPAGE}.tmp
+    cat ${EMCONLINE_TRG_WEBTEMPLATE_END} >> ${EMCONLINE_TRG_WEBPAGE}.tmp
+    mv -f ${EMCONLINE_TRG_WEBPAGE}.tmp ${EMCONLINE_TRG_WEBPAGE}
+    rm -f ${EMCONLINE_TRG_WEBPAGE}.tmp
+    echo "Finished updating webpage ${EMCONLINE_TRG_WEBDIR}"
+
+    #${EMCONLINE_TRG_EPICS_HEARTBEAT}
+else
+    echo "Nothing to do" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+    update_desktop_icon_trg
+
+    echo "Removing files from current directory"
+    rm -rf ${EMCONLINE_TRG_CURRCONF_DIR}/*
+
+    echo "Nothing happened. Exiting..."
+
+    #${EMCONLINE_TRG_EPICS_HEARTBEAT}
+fi
+
+echo "" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
+update_desktop_icon_trg

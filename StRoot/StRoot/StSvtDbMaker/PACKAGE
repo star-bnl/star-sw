@@ -1,0 +1,5 @@
+# $Id $
+# package StSvtDbMaker
+# author: 
+Library:libStSvtDbMaker.so:LIBS +=   -lStChain  -lStDbLib  -lStDb_Tables  -lStDbUtilities  -lStSvtClassLibrary
+#Library:libStSvtDbMaker.so:LIBS +=   -lStChain  -lStDbLib  -lStDb_Tables  -lStDbUtilities  -lStSvtClassLibrary

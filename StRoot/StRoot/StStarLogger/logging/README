@@ -1,0 +1,66 @@
+-----------------------------------------------------------------------------
+!  How to prepare the tar ball to deploy UCM on the stand-alone Tomcat server
+!  $Id: README,v 1.4 2010/10/05 14:44:45 fine Exp $
+-----------------------------------------------------------------------------
+
+1.  Check out the source code:
+
+   > mkdir -p StRoot
+   > cvs co -d StRoot/logging StRoot/StStarLogger/logging
+   > cvs up StRoot/logging
+   
+2. Build UCM stand-alone shared libraries and executable:
+
+    2.1. Compile the code and creates the shared lib abd executable:
+    
+       > make -f StRoot/logging/Makefile
+       
+    2.2  Create the X86 and X86_64 directories and collect there all shared 
+         libs those one needs to deploy the code (from $OPTSTAR as well)
+
+       > make -f StRoot/logging/Makefile dist
+    
+    2.3   Create the tar ball to be transfered to the server machine
+    
+       >  make -f StRoot/logging/Makefile upload
+       
+   
+3. Deploy the tar ball on Tomcat server  (see $STAR/StRoot/StStarLogger/logging/README4TOMCAT )
+
+
+# ---------------------------------------------
+   
+   
+4 Build and run C++ test suite
+
+   > StRoot/logging/testUcm.csh
+  
+4. Run C++ test suite:
+
+   >  testUcm 
+
+   
+6. Built Java test suite:
+
+   > javac -cp tx-ucm.jar StRoot/logging/testUcm.java
+   > ln -s StRoot/logging/testUcm.class .
+   
+   > javac -cp tx-ucm.jar StRoot/logging/txLoggingTest.java
+   > ln -s StRoot/logging/Test.class
+   
+7. run java test suite
+
+   > setenv LD_LIBRARY_PATH X86_64:$LD_LIBRARY_PATH
+   > java -cp . -Djava.library.path=X86_64:. Test
+   > java -cp . -Djava.library.path=X86_64:. testUcm
+
+ Valeri
+
+http://wiki.apache.org/tomcat/HowTo 
+ 
+" . . . this class and the shared library should be placed in the $CATALINA_HOME/shared/lib directory.
+
+Note that Tomcat 6.0.14 the $CATALINA_HOME/shared/lib directory does not exist. 
+You will need to add this and you will need to edit $CATALINA_HOME/conf/catalina.properties 
+so that the shared.loader line looks like this shared.loader=$CATALINA_HOME/shared/lib 
+

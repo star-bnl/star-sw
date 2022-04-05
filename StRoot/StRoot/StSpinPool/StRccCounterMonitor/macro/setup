@@ -1,0 +1,19 @@
+cp StRoot/StSpinPool/StRccCounterMonitor/macro/* .
+
+\rm crontab.txt
+\rm makeplot
+\rm makepage.pl
+
+sed "s#/ldaphome/akio/rcc#$PWD#g" StRoot/StSpinPool/StRccCounterMonitor/macro/crontab.txt > crontab.txt
+sed "s#/ldaphome/akio/rcc#$PWD#g" StRoot/StSpinPool/StRccCounterMonitor/macro/makeplot > makeplot
+sed "s#/ldaphome/akio/rcc#$PWD#g" StRoot/StSpinPool/StRccCounterMonitor/macro/makepage.pl > makepage.pl
+
+chmod +x makeplot
+chmod +x makepage.pl
+chmod +x maketiny.pl
+
+ln -s  /trg/trgdata 
+ 
+stardev
+cons
+

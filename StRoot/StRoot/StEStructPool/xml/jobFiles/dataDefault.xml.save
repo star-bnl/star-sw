@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+
+<!-- This file should contain generic information to run a Data job. -->
+<jobDescription>
+    <jobType>
+        <Data/>
+    </jobType>
+    <standardElements>
+        <jobControl>
+            <jobName widget='entry' id='jobName'>DataTesting</jobName>
+            <outputDir widget='entry' id='outputDir'>$env(MYDATA)/Data/test</outputDir>
+            <starLibVersion widget='entry' id='starLibVersion'>$env(STAR_VERSION)</starLibVersion>
+            <localDir widget='entry' id='localDir'>/afs/rhic/star/users/prindle/star/fluctuations/microDST/pool</localDir>
+            <eventsPerJob widget='entry' id='eventsPerJob'>0</eventsPerJob>
+            <jobPurpose widget='text'>You should replace this text with the reason for this job.
+            </jobPurpose>
+        </jobControl>
+
+        <!-- To drive everything we need an xml file for star-submit. -->
+        <starSubmit simulateSubmission='true' maxFilesPerProcess="200">
+            <command>
+        starver <refer refersTo='starLibVersion'/>
+        cd <refer refersTo='localDir'/>
+        root4star -q -b <refer refersTo='outputDir'/>/scripts/doEStruct.C\(\"$FILELIST\",\"$SCRATCH\",\"<refer refersTo='outputDir'/>/scripts\",<refer refersTo='eventsPerJob'/>\)
+            </command>
+            <stdout URL="file:logs/$JOBID.log"/>
+            <output fromScratch="data/*.root" toURL="file:data/" />
+            <output fromScratch="cuts/*.root" toURL="file:cuts/" />
+            <output fromScratch="QA/*.root"   toURL="file:QA/" />
+        </starSubmit>
+
+        <!-- Need appropriate event cuts. -->
+        <eventCuts>
+            <eventCut Comment = 'centrality cut, number of tracks in |eta| &lt; 0.5'>
+                <cutName>centrality</cutName>
+                <Value widget = 'entry'>1</Value>
+                <Value widget = 'entry'>2000</Value>
+            </eventCut>
+            <eventCut Comment = 'number of tracks passing track cuts'>
+                <cutName>numTracks</cutName>
+                <Value widget = 'entry'>1</Value>
+                <Value widget = 'entry'>2000</Value>
+            </eventCut>
+        </eventCuts>
+
+        <!-- And appropriate track cuts. -->
+        <trackCuts>
+            <trackCut Comment = 'Require good flag'>
+                <cutName>Flag</cutName>
+                <Value widget = 'entry'>0</Value>
+                <Value widget = 'entry'>2000</Value>
+            </trackCut>
+            <trackCut Comment = 'charge cut'>
+                <cutName>Charge</cutName>
+                <Value widget = 'entry'>-1</Value>
+                <Value widget = 'entry'>1</Value>
+            </trackCut>
+            <trackCut Comment = 'Number of fit points'>
+                <cutName>NFitPoints</cutName>
+                <Value widget = 'entry'>15</Value>
+                <Value widget = 'entry'>50</Value>
+            </trackCut>
+            <trackCut Comment = 'Ratio of Fit points / Maximum points on track'>
+                <cutName>NFitPerNMax</cutName>
+                <Value widget = 'entry'>0.53</Value>
+                <Value widget = 'entry'>1.0</Value>
+            </trackCut>
+            <trackCut Comment = 'DCA of global track'>
+                <cutName>GlobalDCA</cutName>
+                <Value widget = 'entry'>0.0</Value>
+                <Value widget = 'entry'>3.0</Value>
+            </trackCut>
+            <trackCut Comment = 'chi squared cut'>
+                <cutName>Chi2</cutName>
+                <Value widget = 'entry'>0.0</Value>
+                <Value widget = 'entry'>99.0</Value>
+            </trackCut>
+            <trackCut Comment = 'pt cut'>
+                <cutName>Pt</cutName>
+                <Value widget = 'entry'>0.15</Value>
+                <Value widget = 'entry'>2.0</Value>
+            </trackCut>
+            <trackCut Comment = 'phi cut'>
+                <cutName>Phi</cutName>
+                <Value widget = 'entry'>-1</Value>
+                <Value widget = 'entry'>1</Value>
+            </trackCut>
+            <trackCut Comment = 'eta cut'>
+                <cutName>Eta</cutName>
+                <Value widget = 'entry'>-1</Value>
+                <Value widget = 'entry'>1</Value>
+            </trackCut>
+        </trackCuts>
+
+        <!-- The doEStruct macro is complicated.
+             The main part should probably be in a generic file. -->
+        <doEStructMacro>
+            <analysisMode id='analysisMode' widget='entry'>4</analysisMode>
+            <libraries id='libraries' widget='none'/>
+            <ptCuts id='ptCuts' widget='entry'>0.15 0.5 2.0</ptCuts>
+            <declareHistograms id='declareHistograms' widget='text'/>
+            <fillHistograms id='fillHistograms' widget = 'text'/>
+            <saveHistograms id='saveHistograms' widget = 'text'/>
+            <declareReader id='declareReader' widget = 'text'>
+    <!-- Reader depends on type of data. -->
+    StMuDstMaker* mk = new StMuDstMaker(0,0,"",fileListFile,".",500);
+    StEStructMuDstReader *readers = new StEStructMuDstReader(mk,ecuts,tcuts,false);
+            </declareReader>
+        </doEStructMacro>
+
+    </standardElements>
+</jobDescription>

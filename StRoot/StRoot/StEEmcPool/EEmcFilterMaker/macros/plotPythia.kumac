@@ -1,0 +1,36 @@
+hi/file 1 star_filter.hbook
+if [#]= 1 then
+  for/file 90 star_filter.ps
+   meta 90 -111
+  mess PS file opened
+endif
+opt grid
+
+zone 2 2
+opt logy
+hi/set/minimum 10 1
+hi/plot 10
+hi/plot 52
+opt liny
+hi/plot 54
+opt logy
+hi/plot 53
+opt liny
+
+if [#]= 0 then
+  wait
+endif
+
+zone 1 2
+hi/plot 50 colz
+hi/plot 51 colz
+if [#]= 0 then
+  wait
+endif
+
+
+if [#]= 1 then
+  close 90
+  mess PS closed
+  quit
+endif

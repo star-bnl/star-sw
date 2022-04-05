@@ -1,0 +1,91 @@
+This directory contains the code to generate the .moretags.root files for an embedding request.
+The .tags.root file from real data production may not have enough information to do fine event 
+cuts, for example, the cuts on VpdVz, or select the VpdVz constrained vertex instead of using 
+the default highest ranking one. The code here will scan the MuDst.root files (corresponding to
+the sampled daq files) and write all the relavant event info to .moretags.root. The code also
+outputs the runID and eventID of those events that pass the event cuts to .chopper.txt file, 
+which can be used to estimate the embedding statistics per sample, or to chop the sampled daq 
+files if necessary.
+
+Step 1:
+generate the list of restaged MuDst.root files,
+find mudst_dir/ -name "*.MuDst.root" > a.mudst.list
+please use the full directory for the mudst_dir above, for example 
+/star/embed/reco/2016/auau200_hftphys
+
+Step 2:
+modify 'makeMuDstQA.C' according to the requested vertex selection and event cut information,
+or add new branches to moretags.root as needed. 
+One special change needed for HFT embedding is:
+comment out the mMoreTagsTree->Fill(); before the event cut, 
+and uncomment this line right after the event cuts.
+
+Step 3:
+run the first file for testing and compiling makeMuDstQA.C.
+./tryfirst.sh a.mudst.list SL15e_embed
+inspect the resulting two files in test/, see whether everything works as expected.
+
+Step 4:
+if the test works, submit the full job
+./submit.sh a.mudst.list SL15e_embed
+usually the job starts to run immediately and finishes quickly. but sometimes the job has to 
+wait a long time due to low slurm priority. if so, one can cancel the job, run it on the terminal
+with the following commands,
+scancel -u ausername
+find sums/sched9EC71*csh > tasks.csh
+./runterm.sh tasks.csh
+
+Step 5:
+Once the job finishes, the output/ directory will contain all the st*.moretags.root and 
+st*.chopper.txt files. MAKE SURE that all jobs completed properly by running the diagnosing
+script,
+./getfsetstat.sh a.mudst.list
+in the output, the numbers in the first two lines should be exactly the same. there are also
+other statistics shown about this sample. 
+if everything is correct, moretags files in output/ should be copied to the tags directory for
+embedding production. for example, 
+cp output/st*moretags.root ../tags/
+this tag full directory can be used in preparexmlslr.sh, for example, /star/embed/tags/2016/auau200_hftphys
+
+Step 6:
+the script 'getfsetstat.sh' accept another parameter for assigning the nevents cut for each daq file.
+it represents the maximum number of events used in each daq file for embedding. the default value
+is 1000 (same as the default in preparexmlslr.sh). one can use the following command,
+./getfsetstat.sh a.mudst.list 400
+to estimate the statistics in each fset if a maximum nevents of 400 is assigned. Then one can
+determine the -nevents value in preparexmlslr.sh according to the requested full statistics.
+Usually, the statistics per fset should be no less than 50K for minimum bias sample, but also not
+larger than 200K due to the limit in daq file volume and single job running time (the larger nevents 
+cut, the longer running time per job is expected).
+
+Step 7:
+OK, till now all the preparation of daq and tags for embedding finish. In some cases, for example,
+embedding into rare triggered events (like HT triggered) or events with large background (like 
+Au+Au 7.7 GeV data), the effective events are only a small fraction of the total events in a daq file. 
+the embedding job will waste a lot of computing time in reading those unused events. in order to
+reduce this lost, the original daq files need to be chopped to keep those effective events only.
+For HFT embedding, the event selection can not be done inside the embedding macros, but can only
+be done at the daq level based on the output/st*chopper.txt files from makeMuDstQA.C.
+One need to first create another directory parallel to the original daq file directory created in Step 6
+of daqtags/README, for example /star/embed/daq/2016/auau200_hftphys_chop in parallel to /star/embed/daq/2016/auau200_hftphys.
+then one create the daq file list which is restaged in Step 7 of daqtags/README
+find daq_dir/ -name "*daq" > a.daq.list
+please use the full directory name for 'daq_dir' above, for example, /star/embed/daq/2016/auau200_hftphys.
+Then run the following command to submit the daq chopper jobs.
+./submit_daqchop.sh a.daq.list /star/embed/daq/2016/auau200_hftphys_chop SL16j
+These jobs will automatically read the output/st*chopper.txt and keep only those events in the chopped daq files
+saved in /star/embed/daq/2016/auau200_hftphys_chop. this new daq directory will be used for embedding
+production setup in preparexmlslr.sh. The original daq directory can be removed to save disk space.
+Once the jobs are done, make sure the number of daq files in /star/embed/daq/2016/auau200_hftphys_chop and
+/star/embed/daq/2016/auau200_hftphys is the same by the comparison 
+ls -l /star/embed/daq/2016/auau200_hftphys/*daq |wc -l
+ls -l /star/embed/daq/2016/auau200_hftphys_chop/*daq |wc -l
+
+Step 8:
+For HFT embedding, we need to have another step, prepare the nevent_*.daq.list, which will be used for 
+the simulator to determine the # of events to simulate.
+./getnevents.sh good_daqfilelist.500.daq.list
+to prepare this file, nevents_good_daqfilelist.500.daq.list, and copy it to the Input/ directory in the embedding
+code setup.
+
+

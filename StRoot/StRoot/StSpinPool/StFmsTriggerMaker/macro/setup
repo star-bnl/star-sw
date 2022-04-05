@@ -1,0 +1,19 @@
+cp StRoot/StSpinPool/StFmsTriggerMaker/macro/* .
+
+\rm crontab.txt
+\rm runbitcheck
+\rm makepage.pl
+
+sed "s#/ldaphome/akio/fmstrg2017#$PWD#g" StRoot/StSpinPool/StFmsTriggerMaker/macro/crontab.txt > crontab.txt
+sed "s#/ldaphome/akio/fmstrg2017#$PWD#g" StRoot/StSpinPool/StFmsTriggerMaker/macro/runbitcheck > runbitcheck
+sed "s#/ldaphome/akio/fmstrg2017#$PWD#g" StRoot/StSpinPool/StFmsTriggerMaker/macro/makepage.pl > makepage.pl
+
+chmod +x runbitcheck
+chmod +x makepage.pl
+
+ln -s /net/trgscratch.starp.bnl.gov/data/trgdata trg 
+ 
+stardev
+cons
+
+

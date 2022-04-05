@@ -1,0 +1,97 @@
+MACRO  ppZjet nevent=10 file=test_Zjet.fzd seed=13543676
+
+detp geom UPGR13
+gexec $STAR_LIB/geometry.so
+gclose all
+
+echo seed=[seed] nevent=[nevent]
+*changing seed does give new first event
+rndm  9543713 [seed]
+
+*set z vertex distribution -60cm  but sigma 5 cm
+vsig 0.02 5.0
+vxyz 0.1 -0.2 -60.
+dcut cave z 0.1 10 10 0.02 0.02
+
+gfile o [file]
+
+
+gexec .sl44_gcc346/lib/pythia_6410.so
+gexec $STAR_LIB/bpythia.so
+*gexec $STAR_LIB/apythia.so
+
+ener 500.
+
+* PYTHIA Seed - Jan had this line not sure does something
+*R=PYR(0)
+
+*These are the defaults
+MSTP 52=1      ! 1:internal, 2:use pdflib
+MSTP 51=7      ! choose pdf. 7:CTEQ5L LO in Pythia 6.1 5:CTEQ NLO Best, 9:CTEQ LO best. 
+MSTP 131=0      ! off, i.e. only one event is generated at a time 
+
+
+MSEL 13 ! Z production ISUB=15,30
+
+* CDF Tune A
+MSTP (51)=7       !- 
+MSTP (81)=1       !- 
+MSTP (82)=4       !- 
+PARP (82)=2.0     !
+PARP (83)=0.5     !-
+PARP (84)=0.4     !-
+PARP (85)=0.9     !-
+PARP (86)=0.95    !-
+PARP (89)=1800    !-
+PARP (90)=0.25    !-
+PARP (91)=1.0     !-
+PARP (67)=4.0     !-
+
+*
+* Let Zdecay to defaults
+
+*caution pT bin
+*CKIN 1=0.0      ! sqrt(s) min 
+*CKIN 2=-1.0     ! sqrt(s) max 
+CKIN 3=10.0     ! pt min     <<<<<<<<<< Pt MIN cut here <<<<<<<<<<< 
+*CKIN 4=-1.0     ! pt max 
+*CKIN 7=-10.0    ! y min 
+*CKIN 8=10.0     ! y max 
+
+mdcy (23,1)=1    !make Z0 explicitely unstable
+
+* Make the following stable:
+*
+MDCY (102,1)=0  ! PI0 111
+MDCY (106,1)=0  ! PI+ 211
+*
+MDCY (109,1)=0  ! ETA 221
+*
+MDCY (116,1)=0  ! K+ 321
+*
+MDCY (112,1)=0  ! K_SHORT 310
+MDCY (105,1)=0  ! K_LONG 130
+*
+*
+MDCY (164,1)=0  ! LAMBDA0 3122
+*
+MDCY (167,1)=0  ! SIGMA0 3212
+MDCY (162,1)=0  ! SIGMA- 3112
+MDCY (169,1)=0  ! SIGMA+ 3222
+MDCY (172,1)=0  ! Xi- 3312
+MDCY (174,1)=0  ! Xi0 3322
+MDCY (176,1)=0  ! OMEGA- 3334
+*
+*call PYLIST(12) lists all the decays of particles
+
+*---------------- S I M U L A T I O N  -----------------
+ do i = 1, [nevent]
+     trig 1
+ enddo
+     call PYLIST(1)
+
+CALL PYSTAT(1)
+quit
+  
+
+

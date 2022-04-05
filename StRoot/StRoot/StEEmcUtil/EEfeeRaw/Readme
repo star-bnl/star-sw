@@ -1,0 +1,56 @@
+This class  serves as a temporary storage of EEMC events, taken with the
+stand alone miniDAQ. It could be also saved as TTree .
+
+To monitor data corruption this code is handy:
+
+TH1F *hs1, *hs2, *hs3, *hs4;// tmp for histo
+
+=================================
+
+  hs1=new TH1F("sn","sanity, crates Tw cr=0-5, Mapmt cr=6-21,  X= bits(cr)+ cr*10;bits: 0=crID, 1=token,2=len,3=trgCom,4=ErrFlg",250,-0.5,249.5);
+  hs2=new TH1F("sn2","total # of corruption bits per eve",120,-0.5,119.5);
+  hs3=new TH1F("bx48","48bit bXing for any input event",128,-0.5,127.5);
+  hs4=new TH1F("bx48s","48bit bXing for corrupted event",128,-0.5,127.5);
+  
+
+=================================
+
+    if(nEve%200==0)printf("nEve=%d nAcc=%d\n",nEve,nAcc);
+    int nCr=eFee->maskWrongCrates(timeStamp,eHead->getToken());
+    // printf("%d %d \n",eTrig->bX7bit,eTrig->get48bXing());
+    hs3->Fill(eTrig->get48bXing());
+    int sick=nCr!=22;
+    if(sick) {
+      hs4->Fill(eTrig->get48bXing());
+      // printf("nEve=%6d ID=%8d bXing48=%3d token=0x%04x ",nEve,eHead->getEventNumber(),eTrig->get48bXing(),eHead->getToken());
+      printf("%4d %5d   ",nEve,eHead->getEventNumber());
+    }
+    histoSanity(eFee,sick);
+
+=================================
+
+histoSanity(EEfeeRawEvent *e, int flag=0) {
+  int nb=e->block->GetEntries();
+  //  printf("\n Header check for nBlocks=%d\n",nb);
+  if(nb>22) nb=22;
+  int ic;
+  int totBit=0;
+  for(ic=0;ic<nb;ic++) {
+    EEfeeDataBlock *b=(EEfeeDataBlock *)e->block->At(ic);
+    UChar_t sn=b->getSanity();
+    //printf(" ic=%d crID=%d sanity=0x%02x\n",ic,b->getCrateID(),sn);
+    int i;
+    if(flag)printf("%02x  ",sn);
+    for(i=0;i<8;i++) {// examin all sanity bits
+      if(!(sn&(1<<i))) continue;
+      totBit++;
+      int k=ic*10+i;
+      //      printf("ic=%d on bit=%d k=%d   %d %d  \n",ic,i,k,1<<i,sn&(1<<i) );
+      hs1->Fill(k);
+    }
+    
+  }
+  hs2->Fill(totBit);
+  if(flag)printf(" tot=%d\n",totBit);
+  
+}

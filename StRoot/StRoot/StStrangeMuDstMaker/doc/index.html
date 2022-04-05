@@ -1,0 +1,94 @@
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<!-- 
+      Template by Torre Wenaus.
+      This page is MAINTAINED IN RAW HTML. Do NOT corrupt it
+      by editing it with a WYSIWYG HTML editor.
+ -->
+<head>
+<title>StStrangeMuDstMaker Documentation</title>
+<!-- Changed by: Peter Graham Jones, 13-Dec-2000 -->
+<meta name="Author" content="Gene Van Buren">
+<meta name="Description" content="Prepared for the STAR computing and software website.">
+<meta name="KeyWords" content="STAR RHIC computing software documentation StStrangeMuDstMaker">
+<meta name="Generator" content="HomeSite 2.5">
+<meta http-equiv="Reply-to" content="gene@bnl.gov (Gene Van Buren)">
+</head>
+<body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
+<basefont face="verdana,arial,helvetica,sans-serif">
+
+<!-- Header material -->
+<table border=0   cellpadding=5 cellspacing=0 width="100%">
+        <tr bgcolor="#ffdc9f">
+        <td align=left> <font size="-1">
+        <a href="/STAR/">STAR</a>
+        &nbsp; <a href="/STAR/html/star_computing.html">Computing</a> 
+        &nbsp; <a href="/STAR/html/comp_l/root/documentation.html">Documentation</a> 
+        </td>
+        <td align=right> <font size="-1">
+        &nbsp;  <!-- top right corner  --> </font></td>
+        </tr>
+        <tr bgcolor="#ffdc9f"><td align=center colspan=2><font size="+2"> <b>
+        StStrangeMuDstMaker Documentation
+        </b></font></td></tr>
+        <tr bgcolor="#ffdc9f">
+        <td><font size="-1">Offline Software using ROOT in STAR</font></td>
+        <td align="right"><a href="/STAR/html/ofl_l/prodinfo.html">
+        <font size="2" face="verdana,arial,helvetica,sans-serif">Maintained</font>
+        </a> 
+         <font size="-1">
+         by <a href="mailto:gene@bnl.gov">G. Van Buren</a>
+         </font> </td> 
+        </tr>
+
+	<tr><td align=right> 
+	<td align=right> <font size="-1"> 
+            Last modified Tue Apr 11 15:30:19 2000
+          </FONT></TD></TR>
+
+
+</TABLE>
+
+<P>
+<BLOCKQUOTE>
+The StStrangeMuDstMaker package implements a micro-DST for the
+STAR Strangeness Physics Working Group using TTrees.
+Several example macros are provided
+in the STAR macros area and are described below, in addition to the
+operation and usage of the package itself.
+</BLOCKQUOTE>
+
+<ul>
+<li><a href="microDST.html"><b>The Micro-DST</b></a>:<br>
+The StrangeMuDst micro-DST is a TTree-based DST which stores components
+relating to different vertex types for strangeness studies.<p>
+
+<li><a href="maker.html"><b>The Maker</b></a>:<br>
+The StStrangeMuDstMaker maker runs in a standard STAR chain, and allows
+several modes for creating/reading/filtering
+strangeness micro-DSTs described herein.<p>
+
+<li><a href="strangeFormulas.html"><b>The Formulas Macro</b></a>:<br>
+The strangeFormulas.C macro allows the user access to a complex, but
+efficient function set for use with the micro-DST.<p>
+
+<li><a href="cuts.html"><b>The Cuts</b></a>:<br>
+Cuts are stored in the StrangeCuts branch (formerly stored as a
+TOrdCollection along with the micro-DST tree in the files)
+which enumerates the cuts used to produce the micro-DST.<p>
+
+<li><a href="player.html"><b>The Player</b></a>:<br>
+The StStrangeMuDstPlayer is a new front-end to StrangeMuDstMaker,
+which provides a simplified user interface for making and filtering
+a micro-DST.<p>
+
+<li><a href="DcaService.html"><b>DcaService</b></a>:<br>
+DcaService is a tool for recalculating DCAs of various particles
+to the primary vertex in the micro-DST.<p>
+</ul>
+
+<P>
+
+
+</BODY>
+</HTML>

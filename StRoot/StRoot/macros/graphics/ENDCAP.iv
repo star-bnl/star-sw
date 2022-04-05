@@ -1,0 +1,1560 @@
+#Inventor V2.1 ascii
+
+
+DEF ShapesNode Separator {
+
+  DEF WiredShapes Separator {
+
+  }
+  DEF ClippingShapes Separator {
+
+    DEF RawShapes Separator {
+
+    }
+    DEF SolidShapes Separator {
+
+      DEF TObjectSet Group {
+
+        DEF CAVE Separator {
+
+        }
+        DEF Position Separator {
+
+          DEF PIPE+0 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE PIPE+0
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 1131.83
+
+            }
+          }
+          DEF UPST+1 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -1131.83
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE UPST+1
+        }
+        DEF Position Separator {
+
+          DEF SCON+2 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE SCON+2
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 19.75 0
+
+            }
+          }
+          DEF SROD+3 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -19.75 0
+
+            }
+          }
+          USE SROD+3
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 55.080002
+
+            }
+          }
+          DEF SBSP+4 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -55.080002
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE SBSP+4
+        }
+        DEF Position Separator {
+
+          DEF TPCE Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 209.5
+
+            }
+          }
+          DEF FTPC+5 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -209.5
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE FTPC+5
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -245.19501
+
+            }
+          }
+          DEF SUPO+6 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 245.19501
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE SUPO+6
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 309
+
+            }
+          }
+          DEF FTMO+7 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -309
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1 -1.2246064e-16 6.1230318e-17 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE FTMO+7
+        }
+        DEF Position Separator {
+
+          DEF BTOF Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 571.45001
+
+            }
+          }
+          DEF VPDD+8 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -571.45001
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE VPDD+8
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -16.51 540.45001
+
+            }
+          }
+          DEF IBEM+9 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -16.51 -542.35504
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE IBEM+9
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 24.110001 -60.099998 692.90997
+
+            }
+          }
+          DEF IBSA+10 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -24.110001 -60.099998 692.90997
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1 -1.2246064e-16 6.1230318e-17 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSA+10
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 24.110001 -60.099998 -694.815
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1 -1.2246064e-16 6.1230318e-17 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSA+10
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -24.110001 -60.099998 -694.815
+
+            }
+            DEF reflection MatrixTransform {
+              matrix -1 -1.2246064e-16 6.1230318e-17 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSA+10
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 24.110001 -69.5 631.20001
+
+            }
+            DEF straight MatrixTransform {
+              matrix 1 -0 6.1230318e-17 0
+                4.3296374e-17 0.70710677 -0.70710677 0
+                4.329637e-17 0.70710671 0.70710683 0
+                0 0 0 1
+
+            }
+          }
+          DEF IBSB+11 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -24.110001 -69.5 631.20001
+
+            }
+            DEF straight MatrixTransform {
+              matrix 4.3296374e-17 -0.70710677 -0.70710677 0
+                4.3296374e-17 0.70710677 -0.70710677 0
+                1 -0 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSB+11
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 24.110001 -69.5 -633.10504
+
+            }
+            DEF straight MatrixTransform {
+              matrix 4.329637e-17 -0.70710671 0.70710683 0
+                4.329637e-17 0.70710671 0.70710683 0
+                -1 -1.2246064e-16 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSB+11
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -24.110001 -69.5 -633.10504
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1 -1.2246064e-16 6.1230318e-17 0
+                4.329637e-17 0.70710671 0.70710683 0
+                4.3296374e-17 0.70710677 -0.70710677 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSB+11
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -23.6 581.09998
+
+            }
+          }
+          DEF IBSC+12 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -23.6 -583.005
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSC+12
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -11.01 397.70001
+
+            }
+          }
+          DEF IBSD+13 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -11.01 442.79999
+
+            }
+          }
+          USE IBSD+13
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -11.01 -399.60501
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSD+13
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -11.01 -444.70499
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSD+13
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -7.1999998 397.70001
+
+            }
+          }
+          USE IBSD+13
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -7.1999998 442.79999
+
+            }
+          }
+          USE IBSD+13
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -7.1999998 -399.60501
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSD+13
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -7.1999998 -444.70499
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSD+13
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 6.9899998 -13.44 397.70001
+
+            }
+          }
+          DEF IBSE+14 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -6.9899998 -13.44 397.70001
+
+            }
+          }
+          USE IBSE+14
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 6.9899998 -13.44 442.79999
+
+            }
+          }
+          USE IBSE+14
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -6.9899998 -13.44 442.79999
+
+            }
+          }
+          USE IBSE+14
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 6.9899998 -13.44 -399.60501
+
+            }
+          }
+          USE IBSE+14
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -6.9899998 -13.44 -399.60501
+
+            }
+          }
+          USE IBSE+14
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 6.9899998 -13.44 -444.70499
+
+            }
+          }
+          USE IBSE+14
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -6.9899998 -13.44 -444.70499
+
+            }
+          }
+          USE IBSE+14
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -16.51 411.70001
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1.2246064e-16 -1.4996607e-32 -1 0
+                6.1230318e-17 1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          DEF IBSF+15 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -16.51 -413.60501
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1.2246064e-16 -1.4996607e-32 -1 0
+                6.1230318e-17 1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSF+15
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -17.57 395.16
+
+            }
+            DEF straight MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                0 0 1 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          DEF IBSG+16 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -17.57 400.24002
+
+            }
+            DEF straight MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                0 0 1 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSG+16
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -17.57 440.25998
+
+            }
+            DEF straight MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                0 0 1 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSG+16
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -17.57 445.34
+
+            }
+            DEF straight MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                0 0 1 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSG+16
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -17.57 -397.065
+
+            }
+            DEF straight MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                0 0 1 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSG+16
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -17.57 -402.14502
+
+            }
+            DEF straight MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                0 0 1 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSG+16
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -17.57 -442.16498
+
+            }
+            DEF straight MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                0 0 1 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSG+16
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 -17.57 -447.245
+
+            }
+            DEF straight MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                0 0 1 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSG+16
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 6.3499999 0 397.70001
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1.2246064e-16 -1.4996607e-32 -1 0
+                6.1230318e-17 1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          DEF IBSH+17 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -6.3499999 0 397.70001
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1.2246064e-16 -1.4996607e-32 -1 0
+                6.1230318e-17 1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSH+17
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 6.3499999 0 -399.60501
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1.2246064e-16 -1.4996607e-32 -1 0
+                6.1230318e-17 1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSH+17
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -6.3499999 0 -399.60501
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1.2246064e-16 -1.4996607e-32 -1 0
+                6.1230318e-17 1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSH+17
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 7.6199999 0 442.79999
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1.2246064e-16 -1.4996607e-32 -1 0
+                6.1230318e-17 1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSH+17
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -7.6199999 0 442.79999
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1.2246064e-16 -1.4996607e-32 -1 0
+                6.1230318e-17 1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSH+17
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 7.6199999 0 -444.70499
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1.2246064e-16 -1.4996607e-32 -1 0
+                6.1230318e-17 1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSH+17
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -7.6199999 0 -444.70499
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1.2246064e-16 -1.4996607e-32 -1 0
+                6.1230318e-17 1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                0 0 0 1
+
+            }
+          }
+          USE IBSH+17
+        }
+        DEF Position Separator {
+
+          DEF CALB Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 289.38501
+
+            }
+          }
+          DEF ECAL Group {
+
+            DEF CoinShapeNode Separator {
+
+              DEF Transparent_Shape Group {
+
+                LightModel {
+                  model BASE_COLOR
+
+                }
+                DrawStyle {
+                  style LINES
+
+                }
+                BaseColor {
+                  rgb 0 0.78431374 0.78431374
+
+                }
+              }
+              NormalBinding {
+                value PER_FACE
+
+              }
+              Separator {
+
+                NormalBinding {
+                  value OVERALL
+
+                }
+                Normal {
+                  vector 0 0 1
+
+                }
+                Coordinate3 {
+                  point [ 79.32299 0 20.621994,
+                      237.8266 0 20.621994,
+                      75.440643 24.512152 20.621994,
+                      226.18654 73.492462 20.621994,
+                      64.173645 46.624886 20.621994,
+                      192.40576 139.79097 20.621994,
+                      46.624886 64.173645 20.621994,
+                      139.79097 192.40576 20.621994,
+                      24.512152 75.440643 20.621994,
+                      73.492462 226.18654 20.621994,
+                      4.856972e-15 79.32299 20.621994,
+                      1.4562199e-14 237.8266 20.621994,
+                      -24.512152 75.440643 20.621994,
+                      -73.492462 226.18654 20.621994,
+                      -46.624886 64.173645 20.621994,
+                      -139.79097 192.40576 20.621994,
+                      -64.173645 46.624886 20.621994,
+                      -192.40576 139.79097 20.621994,
+                      -75.440643 24.512152 20.621994,
+                      -226.18654 73.492462 20.621994,
+                      -79.32299 9.7139441e-15 20.621994,
+                      -237.8266 2.9124398e-14 20.621994,
+                      -75.440643 -24.512152 20.621994,
+                      -226.18654 -73.492462 20.621994,
+                      -64.173645 -46.624886 20.621994,
+                      -192.40576 -139.79097 20.621994,
+                      -46.624886 -64.173645 20.621994,
+                      -139.79097 -192.40576 20.621994,
+                      -24.512152 -75.440643 20.621994,
+                      -73.492462 -226.18654 20.621994,
+                      -1.4570915e-14 -79.32299 20.621994,
+                      -4.3686595e-14 -237.8266 20.621994,
+                      24.512152 -75.440643 20.621994,
+                      73.492462 -226.18654 20.621994,
+                      46.624886 -64.173645 20.621994,
+                      139.79097 -192.40576 20.621994,
+                      64.173645 -46.624886 20.621994,
+                      192.40576 -139.79097 20.621994,
+                      75.440643 -24.512152 20.621994,
+                      226.18654 -73.492462 20.621994,
+                      79.32299 0 20.621994,
+                      237.8266 0 20.621994 ]
+
+                }
+                QuadMesh {
+                  verticesPerColumn 21
+                  verticesPerRow 2
+
+                }
+              }
+              NormalBinding {
+                value PER_FACE
+
+              }
+              Separator {
+
+                NormalBinding {
+                  value OVERALL
+
+                }
+                Normal {
+                  vector 0 0 -1
+
+                }
+                Coordinate3 {
+                  point [ 64.625404 -20.998066 -20.621994,
+                      196.29869 -63.781307 -20.621994,
+                      54.973652 -39.940697 -20.621994,
+                      166.98163 -121.31926 -20.621994,
+                      39.940697 -54.973652 -20.621994,
+                      121.31926 -166.98163 -20.621994,
+                      20.998066 -64.625404 -20.621994,
+                      63.781307 -196.29869 -20.621994,
+                      -1.2482016e-14 -67.951172 -20.621994,
+                      -3.7913933e-14 -206.40065 -20.621994,
+                      -20.998066 -64.625404 -20.621994,
+                      -63.781307 -196.29869 -20.621994,
+                      -39.940697 -54.973652 -20.621994,
+                      -121.31926 -166.98163 -20.621994,
+                      -54.973652 -39.940697 -20.621994,
+                      -166.98163 -121.31926 -20.621994,
+                      -64.625404 -20.998066 -20.621994,
+                      -196.29869 -63.781307 -20.621994,
+                      -67.951172 8.321344e-15 -20.621994,
+                      -206.40065 2.5275954e-14 -20.621994,
+                      -64.625404 20.998066 -20.621994,
+                      -196.29869 63.781307 -20.621994,
+                      -54.973652 39.940697 -20.621994,
+                      -166.98163 121.31926 -20.621994,
+                      -39.940697 54.973652 -20.621994,
+                      -121.31926 166.98163 -20.621994,
+                      -20.998066 64.625404 -20.621994,
+                      -63.781307 196.29869 -20.621994,
+                      4.160672e-15 67.951172 -20.621994,
+                      1.2637977e-14 206.40065 -20.621994,
+                      20.998066 64.625404 -20.621994,
+                      63.781307 196.29869 -20.621994,
+                      39.940697 54.973652 -20.621994,
+                      121.31926 166.98163 -20.621994,
+                      54.973652 39.940697 -20.621994,
+                      166.98163 121.31926 -20.621994,
+                      64.625404 20.998066 -20.621994,
+                      196.29869 63.781307 -20.621994,
+                      67.951172 0 -20.621994,
+                      206.40065 0 -20.621994,
+                      64.625404 -20.998066 -20.621994,
+                      196.29869 -63.781307 -20.621994 ]
+
+                }
+                QuadMesh {
+                  verticesPerColumn 21
+                  verticesPerRow 2
+
+                }
+              }
+              NormalBinding {
+                value PER_VERTEX
+
+              }
+              Normal {
+                vector [ 0.78917557 0.12499313 -0.60131407,
+                    0.78917557 0.12499313 -0.60131407,
+                    0.75055057 0.24386866 -0.60131407,
+                    0.75055057 0.24386866 -0.60131407,
+                    0.63845646 0.46386576 -0.60131407,
+                    0.63845646 0.46386576 -0.60131407,
+                    0.46386576 0.63845646 -0.60131407,
+                    0.46386576 0.63845646 -0.60131407,
+                    0.24386866 0.75055057 -0.60131407,
+                    0.24386866 0.75055057 -0.60131407,
+                    1.6653345e-16 0.78917557 -0.60131407,
+                    1.6653345e-16 0.78917557 -0.60131407,
+                    -0.24386866 0.75055057 -0.60131407,
+                    -0.24386866 0.75055057 -0.60131407,
+                    -0.46386576 0.63845646 -0.60131407,
+                    -0.46386576 0.63845646 -0.60131407,
+                    -0.63845646 0.46386576 -0.60131407,
+                    -0.63845646 0.46386576 -0.60131407,
+                    -0.75055057 0.24386866 -0.60131407,
+                    -0.75055057 0.24386866 -0.60131407,
+                    -0.78917557 1.6653345e-16 -0.60131407,
+                    -0.78917557 1.6653345e-16 -0.60131407,
+                    -0.75055057 -0.24386866 -0.60131407,
+                    -0.75055057 -0.24386866 -0.60131407,
+                    -0.63845646 -0.46386576 -0.60131407,
+                    -0.63845646 -0.46386576 -0.60131407,
+                    -0.46386576 -0.63845646 -0.60131407,
+                    -0.46386576 -0.63845646 -0.60131407,
+                    -0.24386866 -0.75055057 -0.60131407,
+                    -0.24386866 -0.75055057 -0.60131407,
+                    -1.6653345e-16 -0.78917557 -0.60131407,
+                    -1.6653345e-16 -0.78917557 -0.60131407,
+                    0.24386866 -0.75055057 -0.60131407,
+                    0.24386866 -0.75055057 -0.60131407,
+                    0.46386576 -0.63845646 -0.60131407,
+                    0.46386576 -0.63845646 -0.60131407,
+                    0.63845646 -0.46386576 -0.60131407,
+                    0.63845646 -0.46386576 -0.60131407,
+                    0.71192557 -0.36274418 -0.60131407,
+                    0.71192557 -0.36274418 -0.60131407,
+                    0.78917557 0.12499313 -0.60131407,
+                    0.78917557 0.12499313 -0.60131407 ]
+
+              }
+              Coordinate3 {
+                point [ 237.8266 0 20.621994,
+                    206.40065 0 -20.621994,
+                    226.18654 73.492462 20.621994,
+                    196.29869 63.781307 -20.621994,
+                    192.40576 139.79097 20.621994,
+                    166.98163 121.31926 -20.621994,
+                    139.79097 192.40576 20.621994,
+                    121.31926 166.98163 -20.621994,
+                    73.492462 226.18654 20.621994,
+                    63.781307 196.29869 -20.621994,
+                    1.4562199e-14 237.8266 20.621994,
+                    1.2637977e-14 206.40065 -20.621994,
+                    -73.492462 226.18654 20.621994,
+                    -63.781307 196.29869 -20.621994,
+                    -139.79097 192.40576 20.621994,
+                    -121.31926 166.98163 -20.621994,
+                    -192.40576 139.79097 20.621994,
+                    -166.98163 121.31926 -20.621994,
+                    -226.18654 73.492462 20.621994,
+                    -196.29869 63.781307 -20.621994,
+                    -237.8266 2.9124398e-14 20.621994,
+                    -206.40065 2.5275954e-14 -20.621994,
+                    -226.18654 -73.492462 20.621994,
+                    -196.29869 -63.781307 -20.621994,
+                    -192.40576 -139.79097 20.621994,
+                    -166.98163 -121.31926 -20.621994,
+                    -139.79097 -192.40576 20.621994,
+                    -121.31926 -166.98163 -20.621994,
+                    -73.492462 -226.18654 20.621994,
+                    -63.781307 -196.29869 -20.621994,
+                    -4.3686595e-14 -237.8266 20.621994,
+                    -3.7913933e-14 -206.40065 -20.621994,
+                    73.492462 -226.18654 20.621994,
+                    63.781307 -196.29869 -20.621994,
+                    139.79097 -192.40576 20.621994,
+                    121.31926 -166.98163 -20.621994,
+                    192.40576 -139.79097 20.621994,
+                    166.98163 -121.31926 -20.621994,
+                    226.18654 -73.492462 20.621994,
+                    196.29869 -63.781307 -20.621994,
+                    237.8266 0 20.621994,
+                    206.40065 0 -20.621994 ]
+
+              }
+              QuadMesh {
+                verticesPerColumn 21
+                verticesPerRow 2
+
+              }
+              NormalBinding {
+                value PER_VERTEX
+
+              }
+              Normal {
+                vector [ -0.95298296 -0.15093768 0.26275706,
+                    -0.95298296 -0.15093768 0.26275706,
+                    -0.90634066 -0.29448792 0.26275706,
+                    -0.90634066 -0.29448792 0.26275706,
+                    -0.7709794 -0.56014931 0.26275706,
+                    -0.7709794 -0.56014931 0.26275706,
+                    -0.56014931 -0.7709794 0.26275706,
+                    -0.56014931 -0.7709794 0.26275706,
+                    -0.29448792 -0.90634066 0.26275706,
+                    -0.29448792 -0.90634066 0.26275706,
+                    -3.1918912e-16 -0.95298296 0.26275706,
+                    -3.1918912e-16 -0.95298296 0.26275706,
+                    0.29448792 -0.90634066 0.26275706,
+                    0.29448792 -0.90634066 0.26275706,
+                    0.56014931 -0.7709794 0.26275706,
+                    0.56014931 -0.7709794 0.26275706,
+                    0.7709794 -0.56014931 0.26275706,
+                    0.7709794 -0.56014931 0.26275706,
+                    0.90634066 -0.29448792 0.26275706,
+                    0.90634066 -0.29448792 0.26275706,
+                    0.95298296 -3.1918912e-16 0.26275706,
+                    0.95298296 -3.1918912e-16 0.26275706,
+                    0.90634066 0.29448792 0.26275706,
+                    0.90634066 0.29448792 0.26275706,
+                    0.7709794 0.56014931 0.26275706,
+                    0.7709794 0.56014931 0.26275706,
+                    0.56014931 0.7709794 0.26275706,
+                    0.56014931 0.7709794 0.26275706,
+                    0.29448792 0.90634066 0.26275706,
+                    0.29448792 0.90634066 0.26275706,
+                    3.3306691e-16 0.95298296 0.26275706,
+                    3.3306691e-16 0.95298296 0.26275706,
+                    -0.29448792 0.90634066 0.26275706,
+                    -0.29448792 0.90634066 0.26275706,
+                    -0.56014931 0.7709794 0.26275706,
+                    -0.56014931 0.7709794 0.26275706,
+                    -0.7709794 0.56014931 0.26275706,
+                    -0.7709794 0.56014931 0.26275706,
+                    -0.85969836 0.4380382 0.26275706,
+                    -0.85969836 0.4380382 0.26275706,
+                    -0.95298296 -0.15093768 0.26275706,
+                    -0.95298296 -0.15093768 0.26275706 ]
+
+              }
+              Coordinate3 {
+                point [ 67.951172 0 -20.621994,
+                    79.32299 0 20.621994,
+                    64.625404 20.998066 -20.621994,
+                    75.440643 24.512152 20.621994,
+                    54.973652 39.940697 -20.621994,
+                    64.173645 46.624886 20.621994,
+                    39.940697 54.973652 -20.621994,
+                    46.624886 64.173645 20.621994,
+                    20.998066 64.625404 -20.621994,
+                    24.512152 75.440643 20.621994,
+                    4.160672e-15 67.951172 -20.621994,
+                    4.856972e-15 79.32299 20.621994,
+                    -20.998066 64.625404 -20.621994,
+                    -24.512152 75.440643 20.621994,
+                    -39.940697 54.973652 -20.621994,
+                    -46.624886 64.173645 20.621994,
+                    -54.973652 39.940697 -20.621994,
+                    -64.173645 46.624886 20.621994,
+                    -64.625404 20.998066 -20.621994,
+                    -75.440643 24.512152 20.621994,
+                    -67.951172 8.321344e-15 -20.621994,
+                    -79.32299 9.7139441e-15 20.621994,
+                    -64.625404 -20.998066 -20.621994,
+                    -75.440643 -24.512152 20.621994,
+                    -54.973652 -39.940697 -20.621994,
+                    -64.173645 -46.624886 20.621994,
+                    -39.940697 -54.973652 -20.621994,
+                    -46.624886 -64.173645 20.621994,
+                    -20.998066 -64.625404 -20.621994,
+                    -24.512152 -75.440643 20.621994,
+                    -1.2482016e-14 -67.951172 -20.621994,
+                    -1.4570915e-14 -79.32299 20.621994,
+                    20.998066 -64.625404 -20.621994,
+                    24.512152 -75.440643 20.621994,
+                    39.940697 -54.973652 -20.621994,
+                    46.624886 -64.173645 20.621994,
+                    54.973652 -39.940697 -20.621994,
+                    64.173645 -46.624886 20.621994,
+                    64.625404 -20.998066 -20.621994,
+                    75.440643 -24.512152 20.621994,
+                    67.951172 0 -20.621994,
+                    79.32299 0 20.621994 ]
+
+              }
+              QuadMesh {
+                verticesPerColumn 21
+                verticesPerRow 2
+
+              }
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix -0.25881892 -0.96592587 6.1230318e-17 0
+                    0.96592587 -0.25881886 6.1230318e-17 0
+                    0 0 1 0
+                    0 0 0 1
+
+                }
+              }
+              DEF EAGA+18 Group {
+
+              }
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix 0.25881904 0.96592581 6.1230318e-17 0
+                    -0.96592581 0.25881904 6.1230318e-17 0
+                    0 0 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE EAGA+18
+            }
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 374.23999
+
+            }
+          }
+          DEF BBCM+19 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -374.23999
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1 -1.2246064e-16 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE BBCM+19
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -64.106995 0 -827
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1 -1.2246064e-16 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          DEF FBOX+20 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 64.106995 0 -827
+
+            }
+            DEF straight MatrixTransform {
+              matrix -1 -1.2246064e-16 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE FBOX+20
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation -63.799999 0 755.51251
+
+            }
+          }
+          DEF FBO1 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 63.799999 0 755.51251
+
+            }
+          }
+          DEF FBO2 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 1767.66
+
+            }
+          }
+          DEF ZCAL+21 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -1767.66
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE ZCAL+21
+        }
+        DEF Position Separator {
+
+          DEF MAGP Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF MUTD Group {
+
+          }
+        }
+      }
+    }
+  }
+}

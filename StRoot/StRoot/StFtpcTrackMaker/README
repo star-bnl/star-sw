@@ -1,0 +1,7 @@
+StFtpcTrackMaker replaces St_fpt_Maker in the FTPC reconstruction chain.
+It finds tracks in the FTPC using the conformal mapping algorithm (see
+P.Yepes NIM A 360(1996) 582-585) combined with a local follow your nose
+method.
+
+This maker was written by Markus Oldenburg (oldi@mppmu.mpg.de), 
+Holm Hümmler (hummler@mppmu.mpg.de) and Andreas Schüttauf (andreas@mppmu.mpg.de)

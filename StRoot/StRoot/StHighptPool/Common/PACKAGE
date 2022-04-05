@@ -1,0 +1,5 @@
+# $Id $
+# package Common
+# author: 
+Library:libStHighptPoolCommon.so:LIBS +=  -lStChain -l_StEvent  -lStHiMicroEvent
+#Library:libStHighptPoolCommon.so:LIBS +=   -lStEvent  -lStHiMicroEvent

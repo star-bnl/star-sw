@@ -1,0 +1,61 @@
+#!/bin/csh 
+set nev=$1
+set run=$2
+set particle=$3
+set outdir=$4
+set mg=$5
+
+echo particle=$particle nev=$nev run=$run outdir=$outdir mg=$mg
+
+#stardev
+set dir=$cwd
+set sys=$STAR_HOST_SYS
+set tmpdir=/tmp/akio/fms2015_$outdir
+
+if ( ! -e $outdir ) then
+  /bin/mkdir -p $outdir
+endif
+
+if ( ! -e $tmpdir ) then
+  /bin/mkdir -p $tmpdir
+endif
+cd $tmpdir
+
+if ( ! -e fzd ) then
+  /bin/mkdir fzd 
+endif
+set fzdfile=test_{$particle}_run$run.fzd
+echo $fzdfile
+/bin/cp $dir/fzd/$fzdfile fzd/
+
+if ( ! -e sim ) then
+  /bin/mkdir sim
+endif
+
+if ( ! -e .$sys ) then
+  ln -s $dir/.$sys 
+endif
+
+if ( ! -e runSimBfc.C) then
+  ln -s $dir/runSimBfc.C
+endif
+
+#if ( ! -e FmsGain.txt) then
+#  ln -s $dir/FmsGain.txt 
+#endif
+
+if ( ! -e fmsrecpar.txt) then
+  ln -s $dir/fmsrecpar.txt 
+endif
+
+echo root4star -b -q 'runSimBfc.C('$nev','$run',"'$particle'",'$mg')'
+root4star -b -q 'runSimBfc.C('$nev','$run',"'$particle'",'$mg')'
+
+ls
+set out=test_{$particle}_run$run.fmsfps.root
+echo moving $tmpdir/sim/$out to $dir/$outdir/
+/bin/mv $tmpdir/sim/$out $dir/$outdir/
+/bin/rm test_{$particle}_run$run.*
+/bin/rm fzd/$fzdfile
+/bin/rm dump*.txt
+

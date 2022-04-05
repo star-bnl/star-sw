@@ -1,0 +1,28 @@
+*** Begin of history file: Sat Nov  2 19:51:56 2002
+f/file 66 geo.ps; meta 66 -111
+
+*` for geom in year2000 year2001 year2002 year2003 complete year_2a
+
+ for geom in year2003 
+
+
+ detp geom [geom]
+ make geometry
+ ne; 
+ dcut cave x   1 10  5 .01 .01; 
+ daxis 0.0 0.0 0.0 90.0
+
+ dcut cave z   1 3 14 .01 .01; * BEMC
+ daxis 0.0 0.0 0.0 90.0
+
+ dcut cave z 270 17 14 .01 .01; *EEMC
+ daxis 0.0 0.0 0.0 90.0
+
+ dcut cave z 376 10 15 .04 .04; *BBC in  x4
+ dcut cave z 373 10 15 .04 .04;   *BBC out x4
+ daxis 0.0 0.0 0.0 30.0
+ tit =  [geom] STAR detector at RHIC
+ dhead 1101 $quote([tit]) 0.65
+
+endfor 
+close 66

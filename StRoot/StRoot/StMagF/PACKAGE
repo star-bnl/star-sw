@@ -1,0 +1,6 @@
+# $Id $
+# package StMagF
+# author: 
+#Library:libStMagF.so:LIBS +=   -lgeometry  -lStarMagField  -lStarVMCApplication  -lStChain  -lStDb_Tables
+Library:libStMagF.so:LIBS +=   -lStarMagField  -lStChain  -lStDb_Tables
+#Library:libStMagF.so:LIBS +=   -lgeometry  -lStarMagField  -lStarVMCApplication  -lStChain  -lStDb_Tables

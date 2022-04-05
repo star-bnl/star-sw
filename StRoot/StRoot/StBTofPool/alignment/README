@@ -1,0 +1,121 @@
+/*!
+ *
+ * Requirements
+ * ============
+ * 
+ * StRoot/StBTofMatchMaker/StBTofMatchMaker.cxx rev.1.17 or higher
+ * StRoot/StBTofMatchMaker/StBTofMatchMaker.h   rev.1.10 or higher
+ * StRoot/StBTofUtil/StBTofGeometry.cxx         rev.1.12 or higher
+ * StRoot/StBTofUtil/StBTofGeometry.h           rev.1.8 or higher
+ * 
+ * PACKAGE TREE
+ * ============
+ *
+ * StRoot/StBTofPool/alignment/
+ * ├── GNUmakefile
+ * ├── README
+ * ├── analysis.cxx
+ * ├── doMuDstEvents.C
+ * ├── fitfun.C
+ * ├── genOffset.C
+ * ├── getX0.C
+ * ├── getY0.C
+ * ├── submit_xml_list.sh
+ * ├── tof.cxx
+ * └── tof.h
+ *
+ *
+ * HOWTO
+ * =====
+ * 
+ * Basically, there are 4 steps to get the final calibration parameters as 
+ * an input for the database. 
+ *
+ * 0) Soft Links
+ * -------------
+ * create some soft links in your working directory first:
+ * ln -s StRoot/StBTofPool/alignment/doMuDstEvents.C doMuDstEvents.C
+ * ln -s StRoot/StBTofPool/alignment/submit_xml_list.sh submit_xml_list.sh
+ * ln -s StRoot/StBTofPool/alignment/analysis analysis
+ * ln -s <your root output dir> rootout
+ * 
+ * 1) Create some ntuples from MuDst via doMuDstEvents.C
+ * -----------------------------------------------------
+ *
+ * You don't need to modify any code under StRoot/, all the necessary choices 
+ * can be picked up using the public functions of StBTofMatchMaker.
+ * The macro doMuDstEvents.C tells you how to switch on/off these 
+ * options. So to perform alignment calculation, use 
+ * StBTofMatchMaker::setCalculateAlign(kTRUE), it will tell the program to open the local z 
+ * cut, and the geometry to also start from the initial ideal geometry. One 
+ * can also check the residuals with the parameters from step 4 applied, to confirm 
+ * these alignment constants by StBTofMatchMaker::setAlignFileName("xxxxx"). "xxxxx" is 
+ * the final output file after step 4.
+ *
+ * submit_xml_list.sh:
+ * For submitting jobs to the batch farm the script submit_xml_list.sh
+ * is distributed with the package. It calls doMuDstEvents.C and generates
+ * xml files to be send to the batach farm. It takes a filelist as an argument. See below
+ * on how to create this filelist. By default,'rootout' is set as output directory and
+ * 'lis' as input directory for filelists. Set the 'workdir' variable to your
+ * needs in the scripts. 'starver dev' is used.
+ * run it in c-shell!!
+ *
+ * filelist:
+ * - generate text file with absolute links to all st_physics root files of fast offline data
+ * - split this file ('InputList') via
+ * 	$ split -l NrFilesPerJob InputList Prefix
+ * - append '.lis' to generated split lists
+ * - generate filelist with all .lis split files (no .lis ending in this filelist!)
+ * 	this list serves as input to submit_xml_list.sh
+ * 
+ * 2) Loop ntuples created in step 1 to generate histograms for further fitting
+ * ----------------------------------------------------------------------------
+ *
+ * The main program is analysis.cxx and you can find its 
+ * dependency on other files from the GNUmakefile. So after this step, you 
+ * will have a root file containing all necessary histograms for offline 
+ * fitting.
+ * compile the program:
+ * 	make 
+ * run the resulting program 'analysis' to generate all needed histograms
+ * 	argument = <your root output directory> from step 1. All files in the directory are chained.
+ * 	output = 'align.root' (fixed, change in analysis.cxx if necessary)
+ * 
+ * 3) Fitting to get local offsets in each dimension
+ * -------------------------------------------------
+ *
+ * The following two macros need to be executed in this step. They both load 'fitfunc.C'.
+ * - getY0.C  - for local y offset
+ * - getX0.C  - to extract x,z offsets simultaneously
+ * 
+ * 	argument = TString align_file (from step 2)
+ * 	outputs = x(y)FitPar.root & x(y)Offset.dat
+ *
+ * 4) Generate the final file for db uploading macro
+ * -------------------------------------------------
+ *
+ * execute 'genOffset.C' to generate final DB upload file. Change the workdir to point to
+ * the directory containing x(y)Offset.dat from step 3.
+ * 
+ * You might want to do steps 3 and 4 on your local machine.
+ * 
+ * REITERATE
+ * =========
+ *
+ * Sometimes, I do a second iteration if the residuals seen are still 
+ * finite, this is probably because some correlations between y and z 
+ * offsets. So basically after applying the first set of alignment 
+ * parameters, I repeat 1-4 a second time, then the final parameters 
+ * will be just sum of two steps. You can see actually in the genOffset.C 
+ * in 4, I basically add two sets of parameters together.
+ * Change the script according to your number of reiterations.
+ * Make sure to set the right alignment input file in step 1 by switching from
+ * ideal geometry to the setAlignFileName() before reiterating.
+ *
+ * AUTHORS
+ * =======
+ * 
+ * Xin Dong, Patrick Huck
+ *
+ */ 

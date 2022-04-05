@@ -1,0 +1,9 @@
+#Inventor V2.1 ascii
+  Pendulum {
+        rotation 1 0 0  1.
+        rotation0 0 1 0  1.57
+        rotation1 0 0 1  -1.57
+        speed 0.3
+        on TRUE
+    }
+

@@ -1,0 +1,7 @@
+# $Id $
+# package StEvent
+# author: 
+# weird dependence of StEvent versus StFtpcTrackMaker via StFtpcHit => StFtpcPoint => StFtpcTrack
+#Library:libStEvent.so:LIBS +=   -lStBichsel  -l_StEmcUtil  -lStFtpcTrackMaker  -lPhysics
+Library:libStEvent.so:LIBS +=   -lgeometry_Tables  -lglobal_Tables -lStBichsel -lStChain -lStDbLib  -lStDb_Tables  -lStEmcUtil  -lPhysics -lTreePlayer
+#Library:libStEvent.so:LIBS +=   -lStBichsel  -lStEmcUtil  -lStFtpcTrackMaker  -lPhysics

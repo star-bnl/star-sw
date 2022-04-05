@@ -1,0 +1,29 @@
+-*- mode:outline -*-
+Time-stamp: <00/01/11 17:56:57 ullrich>
+
+* StEvent Online Info
+
+The StEvent documentation changes frequently.
+
+The most easy way to get a print ready manual is is to pick up the
+PS version of the manual at the following URL:
+http://www.star.bnl.gov/STARAFS/comp/root/special_docs.html
+At the moment pdf format is not supported on this page.
+
+In order to manually create an up-to-date version do the following:
+
+     mkdir wrk
+     cd wrk
+     cvs co StRoot/StEvent
+     cd StRoot/StEvent/doc/tex
+     make
+
+This creates a PS file StEvent.ps which you can print easily. This requires
+that you have a complete version of LaTeX installed on your system.
+Optionally you can also create directly a pdf file StEvent.pdf:
+
+make pdf
+
+This requires that you have the dvipdf program installed on you system.
+
+For question please send a mail to: thomas.ullrich@yale.edu.

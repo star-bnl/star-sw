@@ -1,0 +1,99 @@
+<html>
+<head><title>FTPC Cluster Finder</title></head>
+<body bgcolor=white>
+
+
+<!-- make some space using <pre>-tag   -->
+<pre>
+
+
+
+</pre>
+
+<h2> StFtpcClusterFinder - FTPC cluster finder </h2>
+calling parameters:<BR>
+<TABLE cellspacing=2 cellpadding=0 border=0 align="center" valign="middle" width="100%">
+<TR>
+<TD><b>fcl_(</b></TD> <TR>
+<TD><b> *ftpcndx_h, *ftpcndx,</b></TD> <TD> indices to beginning of tpcs (input data)</TD><TR>
+<TD><b> *ftpcsqndx_h, *ftpcsqndx,</b></TD> <TD> raw data sequence indices (input data)</TD><TR>
+<TD><b> *ftpcadc_h, *ftpcadc,</b></TD> <TD> raw data adc values (input data)</TD><TR>
+<TD><b> *fppoint_h, *fppoint,</b></TD> <TD> ftpc hit points (output data)</TD><TR>
+<TD><b> *ampslope_h, *ampslope, </b></TD> <TD> amplitude calibration slopes (parameters)</TD><TR>
+<TD><b> *ampoff_h, *ampoff, </b></TD> <TD> amplitude calibration offsets (parameters)</TD><TR>
+<TD><b> *timeoff_h, *timeoff,</b></TD> <TD> time calibration offsets (parameters)</TD><TR> 
+<TD><b> *padtrans_h, *padtrans,</b></TD> <TD> ExB drift calculation table (parameters)</TD><TR> 
+<TD><b> *det_h, *det,</b></TD> <TD> geometry and runtime parameters for fcl (parameters)</TD><TR>
+<TD><b> *zrow_h, *zrow)</b></TD> <TD> z positions of all padrows (parameters)</TD><TR>
+
+
+
+
+</TABLE>
+
+
+<h3> StFtpcClusterFinder is a high-speed cluster finder for the STAR Forward-TPCs
+with full two-dimensional unfolding, offline calibration, 
+coordinate transformation and ExB-correction. </h3>
+
+<p>
+The FTPC cluster finder is implemented in ROOT(StFtpcClusterMaker).
+
+<p>
+StFtpcClusterFinder is programmed in C++ and supported by <a href=mailto:hummler@mppmu.mpg.de> Holm H&uuml;mmler</a>.
+
+<p>
+<B>In the first step StFtpcClusterFinder follows the principle of the 
+peep-hole cluster finder used by
+<a href=mailto:kraut@ikf.uni-frankfurt.de>Dirk Schmischke</a>
+in the development of the online cluster finder: </B>
+Only the raw data sequences on each two consecutive pads are compared to find
+coherent areas of nonzero charge. In this step, the actual ADC values are 
+never accessed. Once an independent area of charge has been found, 
+its sequences are stored as a cluster.<BR>
+<B>In the second step the clusters are searched for peaks:</B>
+Looping over the ADC values for each sequence in a cluster, the peak for 
+each sequence is found. As this is the only time when all the ADC values are 
+accessed, this is also the point where the amplitude calibration can be done
+most efficiently. Comparing the sequence peaks with their neighbours,
+local maxima in the charge distribution are found. Each local maximum
+is stored as one hit. In this step, the original sequence data is never 
+accessed.<BR>
+<B>In the third step, the individual hits are fitted:</B>
+If a cluster contains only one hit, the cluster position can be determined
+using either a weighted mean over the whole cluster or a gaussian fit 
+around its peak independently for pad and time direction,
+depending on the input parameters.<BR>
+If a cluster contains more than one hit, it is unfolded: Starting with the
+local maxima as a first hypothesis, the influence of each hit on its
+neighbours is calculated and subtracted from their data for their 
+new fit. For simpler clusters, this procedure converges usually within
+less than four iterations. The algorithm can, however, also unfold very
+complicated clusters of more than 50 hits at the expense of longer
+calculation time.<BR>
+The fitting is also the step where the time calibration offsets for each
+pad are applied.<BR>
+<B>The coordinates for each reconstructed hit are then transformed
+from pad/time to x/y.</B> In this step, the ExB-correction is also applied.
+This can be done fast, because at the first call of fcl, the 
+transformation table has been calculated from a
+database (created using the MAGBOLTZ code) and the calibrated air pressure.
+Thus, the transformation from time to radius and ExB-shift is a simple
+interpolation.<BR>
+
+<p>
+<B>StFtpcClusterFinder is designed to work fast.</B> If there is no heavy unfolding necessary
+(clusters with 5 peaks or less), StFtpcClusterFinder needs less than 5 seconds for one
+event in both FTPCs. In the worst expected case of very high track densities
+due to slow delta-electrons, calculation time can go up to three minutes.<BR>
+You can <a href="high_density_sector.eps.gz">download a zipped ps-file</a> 
+of the data and reconstructed hits in one very heavily populated
+FTPC sector. Plotted is the time vs pad direction; the black dots show the 
+reconstructed hits.
+
+<p>
+<i>
+This page was updated by <a href=mailto:hummler@mppmu.mpg.de> Holm H&uuml;mmler</a> on February 23, 1999
+</i>
+
+</html>

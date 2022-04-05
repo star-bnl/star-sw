@@ -1,0 +1,13 @@
+This code is an example of a single code working both 
+in ezTree & StRoot framework.
+
+Use StTowersMaker.h in StRoot,
+execute rdMu2histoExample.C
+
+Use  EzTowers.h  in StRoot-Free (ezTree) analyzis
+execute rdEz2histoExample.C
+
+The working horse (analyzis, histograms) is EEtowers.h
+Histograms are saved 'by hand' in .C script (for easier access).
+
+Jan 

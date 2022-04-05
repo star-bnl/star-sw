@@ -1,0 +1,6 @@
+# $Id $
+# package StDbBroker
+# author: 
+#Library:libStDbBroker.so:LIBS +=  -lStDbLib    -lmysqlclient
+Library:libStDbBroker.so:LIBS +=  -lStDb_Tables  -lStDbLib    -lmysqlclient
+#Library:libStDbBroker.so:LIBS +=   -lStDbLib    -lmysqlclient

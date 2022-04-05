@@ -1,0 +1,30 @@
+#!/bin/bash
+
+  outDir=$2/log/
+  histDir=$2/
+
+#########
+runlist=`cat $1`
+for runline in $runlist ; do
+  inpDir=`echo $runline | awk 'BEGIN{FS="::"}{print $1}'`
+  mufile=`echo $runline | awk 'BEGIN{FS="::"}{print $2}'`
+  firsthalf=`echo $mufile | awk 'BEGIN{FS="_raw_"}{print $1}'`
+  runsuffix=`echo $mufile | awk 'BEGIN{FS="_raw_"}{print $2}' | cut -c1-7`
+  clippedrun=`echo $firsthalf | awk 'BEGIN{FS="_7"}{print $2}'`
+  
+  run=7$clippedrun-$runsuffix
+  
+  echo $firsthalf, $clippedrun, $run
+  echo outDir=$outDir  histDir=$histDir
+  echo inpDir=$inpDir  mufile=$mufile
+
+  log=log.$mufile
+  blog=blog.$mufile
+  rm $outDir/$log.gz
+  rm $outDir/$blog
+  root4star << EOF
+    .x ./StRoot/StEmcPool/CSMStatusUtils/macros/processMuDst.C("$run.","$inpDir/","$mufile","$histDir");
+EOF
+  gzip $outDir/$log
+
+done

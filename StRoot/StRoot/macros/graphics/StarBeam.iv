@@ -1,0 +1,30 @@
+#Inventor V2.1 ascii
+ DEF BLUE_BEAM Separator {
+   Rotation { rotation 1 0 0  1.57 }
+   Material {
+            diffuseColor  0 0 0.8
+            specularColor 0 0 0.7
+            shininess     0.99
+            transparency  0.9
+   }
+   DEF BEAM_ARROW Separator {
+   Translation {  translation 0 -70 0  }
+     Separator {
+        Cylinder    {  radius 5   height 100     parts (SIDES |BOTTOM )  } 
+        Translation {  translation 0 60 0  }
+        Cone {  bottomRadius 10    height 20   parts (SIDES | BOTTOM)  }
+      }
+    }
+ }
+ 
+
+ DEF YELLOW_BEAM Separator {
+   Rotation { rotation 1 0 0  -1.57 }
+   Material {
+            diffuseColor  0.8 0.8 0.0
+            specularColor 0.7 0.7 0.0
+            shininess     0.99
+            transparency  0.9
+     }
+     USE BEAM_ARROW 
+ }

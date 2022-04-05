@@ -1,0 +1,11 @@
+#!/bin/csh 
+set day=$1
+set zoom=$2
+set debug=$3
+
+if ( $debug == "0" ) then
+    root -b -q history.C"($day,$zoom)" >& /dev/null
+else
+    echo root -b -q history.C"($day,$zoom)"
+    root -b -q history.C"($day,$zoom)"
+endif

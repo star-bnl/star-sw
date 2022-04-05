@@ -1,0 +1,115 @@
+
+Package: StTpcT0Maker
+
+Responsible: David Hardtke (DHHardtke@lbl.gov)
+
+Purpose: This make calculates the t0 on an event-by-event basis.  The t0 can
+be used to adjust the drift velocity.
+
+The t0 is the drift time for a hypothetical particle at the central membrane.
+Assuming a normal drift velocity (5.4 cm/us), t0 is around 37 micro-seconds.
+t0 is related to the tpc length, drift velocity, and trigger offset by the following formula:
+ 
+t0 = L/v - triggerOffset
+
+t0 can be calculated directly from the data by tracking each half of the TPC
+separately.  From this, we extract two primary vertices (Zwest and Zeast).
+To do this we assume a t0a (actaully we assume an La,va, and triggerOffseta).
+The real t0 is then:
+
+t0 = 1/2va (Zeast-Zwest) + t0a
+
+If we assuming that the TPC length L and triggerOffset are correct, we can 
+then extract the drift velocity.  Note that the way to measure L and 
+triggerOffset is to vary the drift velocity, measure it via laser, and
+then extract t0 as a function of vdrift.  
+
+This maker has several useful member functions:
+
+SetDesiredEntries(int N)  -- tells the maker to quite after N t0 measurements
+                             have been made.  Default is 99999, but
+                             10 is probably a good number
+SetMinEntries(int N)      -- minimum number of entries for a valid t0 
+                             measurement.  Below this number, the 
+                             tpcDriftVelocity table will not be written out.
+                             Default is 5.
+SetMaxRMS(float RMS)      -- To protect agaist bad measurements, the
+                             driftVelocity measurement is only written
+                             if the RMS deviation of the t0 measurement
+                             is below this value.  Default is .05us.
+
+
+This maker produces two histograms.  To write them to a file named t0hist.root,
+call the WriteHistFile() member function or use the HistFileByDefault() 
+member funtion to automatically write out the result at Finish.  The
+histograms are:
+
+t0result                --  Event-by-event t0 
+t0 measured - t0 guess  --  measured t0 - guess taken from database        
+
+
+____________________________________________________________________________
+____________________________________________________________________________
+____________________________________________________________________________
+
+Package: StVertexSeedMaker
+
+Responsible: Gene Van Buren (Brookhaven National Lab - gene@bnl.gov)
+
+Purpose: This calibrates the beamline constraint for vertex finding in
+low multiplicity events.
+
+Usage:
+
+Calibration is a two step process. The first step allows calibration on
+a per DAQ file sequence basis. The second step aggregates information from
+fills to provide calibration on a per fill basis. Both steps need access
+to the beamInfo table from the RunLog_onl database.
+
+_____
+1) A step that can be run during FastOffline or
+afterwards. This needs to be run for every 10th
+or 100th daqFile (certainly not all of them - just
+enough to get sufficient statistics for each fill):
+
+    root4star -b -q 'bfc.C(10000,"VtxSeedCal",daqFile)'
+
+This produces a histogram file specific to a given
+daqFile (one specific file sequence) named something
+like:
+  vertexseedhist.20030126.213934.ROOT
+
+The date/timestamp is for that daqFile's first event.
+If statistics and fit errors are sufficient, a database
+table file may also be produced, named something like:
+  vertexSeed.20030126.213934.C
+
+These files will be placed in ./StarDb/Calibrations/rhic
+if they can, otherwise they will be placed in the working
+directory of the root4star job.
+
+Step 1 can actually produce output using the date/timestamp
+for the fill by invoking the UseFillDateTime() member
+function (useful if one daqFile can yield sufficient stats
+for an entire fill). The default is the date/timestamp of
+the first event.
+
+_____
+2) A second step aggregates data by fill. For this, we
+should move all the above vertexseedhist.*.ROOT files
+into one directory, and their suffix should be renamed
+to lowercase ".root". I'm not sure why we made step 1
+write out upper case, but that's what we did.
+
+Now, it is simple to run the aggregation:
+
+    root4star -b -q 'AggregateVtxSeed.C("/path/to/hists/")'
+
+This will then give similar hist and table output files as
+in step 1, but with date/timestamps that correspond to the
+start of the fill. One single root4star job will take care
+of all the fills. These table files (vertexSeed.*.C) should
+then be placed in the database so that they may be used for
+the beamline constraint in subsequent vertex finding.
+
+

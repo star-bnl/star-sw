@@ -1,0 +1,28 @@
+Setup for L2 simulator
+^^^^^^^^^^^^^^^^^^^^^^^^
+All is still in mess.
+
+1)
+May  be disabled in the main macro by the switch:
+ int useL2=1, // 0== off
+
+2)
+Thresholds & setup  of L2-algos are hardcoded in the maker, only one set. Will switch to external files soon.
+
+3) Need input directory with the following setup files
+>ls  L2setup-20060410 
+btowCrateMask.current  btowDb.current  etowCrateMask.current  etowDb.current  pedestal.current  towerMask.current
+
+Those are real files used by L2 during the run. The directory name reflects date of the run. We have not changed this setup too often.
+
+For M-C you use for now the same setup, just clone it.
+
+4) needs output directory:
+ L2out-20060410
+to store all output L2-histos in _customary_ format. One file per L2-algo.
+Run   binH2rootH program to convert them to regular histograms.
+
+
+5) StL2TriggerSimu provides light interface between L2Maker and L0maker, it has just 2 methods:
+StL2TriggerSimu::Init() connects to L2-maker
+StL2TriggerSimu::isTrigger(int trigId) querries L2maker for given triggerID

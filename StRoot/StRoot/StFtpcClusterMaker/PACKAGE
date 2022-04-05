@@ -1,0 +1,5 @@
+# $Id $
+# package StFtpcClusterMaker
+# author: 
+Library:libStFtpcClusterMaker.so:LIBS +=   -lftpc_Tables  -lsim_Tables  -lStChain  -l_StTpcDb -lStDAQMaker  -lStDb_Tables  -lStDetectorDbMaker  -l_StEvent  -l_StFtpcTrackMaker  -lPhysics
+#Library:libStFtpcClusterMaker.so:LIBS +=   -lftpc_Tables  -lsim_Tables  -lStChain  -lStDAQMaker  -lStDb_Tables  -lStDetectorDbMaker  -lStEvent  -lStFtpcTrackMaker  -lPhysics

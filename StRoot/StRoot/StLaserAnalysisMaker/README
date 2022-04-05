@@ -1,0 +1,30 @@
+<pre>
+-*- mode:outline -*-
+Time-stamp: <01/28/00 14:02:55 fisyak>  Introduce the package
+Time-stamp: <01/05/07 14:02:55 fisyak>  Rework the package to improve laser drift velocity calculations 
+
+* Package: StLaserAnalysisMaker
+
+* Purpose:
+Create TTree with predictions from reconstructed laser tracks at the mirrors, drift velocity calculation for each raft 
+(definition of raft can be found in "The laser system for the STAR time projection chamber", 
+J. Abel;e et al., NIM A 499 (2003) 692, Fig. 1 "Conseptual design of the laser system") 
+* History:
+The first release is for Run V, used in P07ib and P07ic production
+The release for Run VII
+==========================
+StLaserAnalysisMaker is maker to produce the TTree
+The simplest chain is 
+root.exe -q -b 'bfc.C(9999,"LanaDV,ITTF","path_to_st_laser_daq_file")'
+(run for 10 events only is not advisable because it could be no laser tracks at all for this no. of events)
+macros:
+LoopOverLaserTrees.C+("./st_laser_*.tags.root")-- analysis of TTree files (*tags.root) and produce tpcDriftVelocity.*.C
+CheckLasers.C                                  -- compare Alexei table for mirror position and 
+                                                  one obtained from a bunch of local to master transformations
+CheckMirrors.C+("./st_laser_*.tags.root")      -- calculate difference between laser track prediction and mirror position
+ConverL.C                                      -- recalculate Alexei table into bunch of transformation
+Db2NtDv.C                                      -- look for correlation between TPC gas parameters in DB and drift velocities 
+Laser.C                                        -- production of  tpcDriftVelocity.*.C for Run V
+RaftMirror.C                                   -- adjustment raft, bundle, mirror positions
+ 
+</pre>

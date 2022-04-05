@@ -1,0 +1,34 @@
+Package: StEmcSimulatorMaker
+
+Authors:
+A. Pavlinov, WSU (pavlinov@physics.wayne.edu).
+
+Emc Simulator Maker. This replace the St_ems_Maker.
+The main differences between two makers are:
+
+1. StEmcSimulatorMaker is clear C++ code;
+
+2. StEmcSimulatorMaker has method which taking into account
+   statistics of secondary electrons for BEMS and BPRS.
+   The brief decsroption of new method you can find
+   in initial fortran code which was written by V.Rykov
+   (see file ipmsig.fortrantext).
+
+Modification history (reverse chronological)
+====================
+
+13-may-2001 A.Pavlinov
+- Corrected for new version of StMcEvent staff for EMC.
+  In method StMcEmcHitCollection::module(m) m is 
+  module number(from 1 to ..), not index (from 0 to ..).
+
+22-mar-2001 A.Pavlinov
+- Clean up for MDC4.
+  Added method for comparing  of deposit energy hits for 
+  "OLD" and "NEW" simulator.
+
+02-Feb-2001  A.Pavlinov.
+- New function Browse() and cleanup for new version of BFC.
+
+Oct-2000  A.Pavlinov.
+- Created, tested and committed.

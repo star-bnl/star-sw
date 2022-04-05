@@ -1,0 +1,125 @@
+EMC Online pedestal monitoring
+
+----------------------------------------------------------------------
+INSTALLATION
+
+Requirements:
+A. The Event Pool directory
+The event pool must be mounted and EVP_DIR variable must contain its name in the
+filesystem, the default is "/evp".
+
+B. The EVP_READER library
+Reading data from the event pool requires EVP_READER library. Please ask DAQ or EMC
+experts how to compile it, here we assume it is already installed on your computer.
+The environment variable EVP_READER_LIB must contain either the full path and name
+of the library or only the name if it is in LD_LIBRARY_PATH.
+The default name is "libevpSO.2.0.so", it can later be changed in the 
+configuration file .emconline_ped.cfg.sh:
+export EVP_READER_LIB=libevpSO.2.0.so
+
+C. The STAR computing environment
+It must be set up for the user who will be running this monitoring job, it can
+be AFS-based or a completely local installation.
+
+D. Write access to the database
+Here we assume that the monitoring job has write access to the database, in Calibrations/emc.
+Please consult EMC or DB experts on how to set it up.
+
+If the requirements are met you can proceed to the installation.
+Create a new directory
+mkdir ./emconline_ped
+cd ./emconline_ped
+
+1. Set up the local copy:
+-----------------------------
+Those are usually stable and available from afs, no need to download
+cvs co StRoot/St_base
+#cvs co StRoot/St_Tables?
+cvs co StRoot/StUtilities
+cvs co StRoot/StChain
+cvs co StRoot/StEvent
+cvs co StRoot/StDbLib
+cvs co StRoot/StDbBroker
+cvs co StRoot/St_db_Maker
+-----------------------------
+Those are EMC-related, likely to change from time to time, better to have local copy
+cvs co StRoot/StDaqLib # this is needed for StEmcDecoder
+cvs co StRoot/StEmcUtil # this is needed for StEmcGeom
+cvs co StRoot/StEmcOnlineUtil # this is needed for the EVP_READER-based event reader
+cvs co StRoot/StEmcCalibrationMaker # ped monitoring itself, checkout this
+
+2. Configure
+chmod a+x ./StRoot/StEmcCalibrationMaker/macros/configure.emconline_ped
+./StRoot/StEmcCalibrationMaker/macros/configure.emconline_ped
+
+The following files are created:
+    .emconline_ped.cfg.sh - configuration file
+    crontab.emconline_ped - setup for the cron job
+    makeOnlinePed.C       - ROOT script to run the pedestal monitoring
+    job.emconline_ped     - script to be run as a cron job
+    status.emconline_ped  - set or report the current status
+    update.emconline_ped  - shell script to run monitoring
+    transformBackupHistoToDBTable.C - ROOT script to regenerate DB table files
+    transformBackupHistoToDBTable   - shell script to regenerate DB table files
+Other files:
+    DoEqualDaq.C
+    Equal.C
+Files created for backward compatibility:
+    job                   - (obsolete) cron job
+    startOnlinePed        - (obsolete) script to start monitoring
+    stopOnlinePed         - (obsolete) script to stop monitoring
+    updateOnlinePed       - (obsolete) script to run monitoring
+    LAST_TIME_RUN
+    RUNMODE
+    filelist.txt
+
+The "Pedestal monitoring" icon also appears on the GNOME desktop showing the current status of the job.
+
+Configuration file settings:
+See .emconline_ped.cfg.sh file.
+
+3. Compile
+The StEmcOnlineUtil requires evpReader.hh to compile, so the RTS path
+must be specified:
+cons -R <online/RTS directory>
+Don't forget to compile under the correct star level which you specified in the configuration file.
+
+4. Start monitoring
+./status.emconline_ped RUN
+File RUNMODE.emconline_ped will contain the current monitoring status, RUN or STOP
+
+5. Install the cron job
+crontab crontab.emconline_ped
+or
+crontab -e
+and insert the contents of crontab.emconline_ped
+
+----------------------------------------------------------------------
+USAGE
+
+Report the status of monitoring
+./status.emconline_ped
+
+Start|Stop monitoring
+./status.emconline_ped RUN|STOP
+
+Run the monitoring script manually
+./job.emconline_ped
+or force, if monitoring is currently stopped
+./job.emconline_ped "" RUN
+or run over one file
+./job.emconline_ped <file>
+or run over data from specific year and day and run, if it is still in the event pool directory
+./job.emconline_ped "" RUN [day] [year] [runId]
+
+Backup ROOT files are saved in ./backup.emconline_ped, gzipped logs in ./logs.emconline_ped,
+DB tables in ./tables.emconline_ped.
+Files left after the last running:
+    LAST_TIME_RUN.emconline_ped - short summary
+    last_log.emconline_ped.txt  - log file, stdout and stderr
+    runlist.emconline_ped.txt   - list of runs that were used last time
+    runlist_veto.emconline_ped.txt - list of runs that were already processed, to be excluded
+
+----------------------------------------------------------------------
+Oleksandr Grebenyuk
+April, 2007

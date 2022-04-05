@@ -1,0 +1,5 @@
+# $Id $
+# package muDst
+# author: 
+Library:libStEEmcPoolmuDst.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -l_StEEmcUtil    -l_StEvent  -l_StMuDSTMaker  -lPhysics
+#Library:libStEEmcPoolmuDst.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -lStEEmcUtil  -lStEmcUtil  -lStEvent  -lStMuDSTMaker  -lPhysics

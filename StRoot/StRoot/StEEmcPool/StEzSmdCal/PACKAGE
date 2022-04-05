@@ -1,0 +1,5 @@
+# $Id $
+# package StEzSmdCal
+# author: 
+Library:libStEzSmdCal.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -l_StEEmcUtil  -l_StEvent  -l_StMuDSTMaker  -lPhysics
+#Library:libStEzSmdCal.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -lStEEmcUtil  -lStEvent  -lStMuDSTMaker  -lPhysics

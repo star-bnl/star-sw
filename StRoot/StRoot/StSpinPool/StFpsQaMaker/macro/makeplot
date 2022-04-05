@@ -1,0 +1,52 @@
+#!/bin/csh 
+
+set run=$1
+set type=$2
+set skip=$3
+
+set anadir=/ldaphome/akio/fps2015
+set dir=$run
+@ dir /= 1000
+
+echo makeplot $run $type anadir=$anadir yearday=$dir
+
+stardev
+cd $anadir
+
+if ( "$type" == "pedestal" ) then
+  set ped=1
+  echo This is pedestal run
+else
+  set ped=0
+  echo This is physics run
+endif
+
+if ( ! -e $dir ) then 
+    mkdir $dir
+endif
+if ( ! -e $dir/log ) then 
+    mkdir $dir/log
+endif
+if ( ! -e $dir/condor ) then 
+    mkdir $dir/condor
+endif
+if ( -e $dir/log/$run.log ) then 
+    \rm $dir/log/$run.log
+endif
+
+if ( "$skip" == "skip" ) then
+  echo skipping runqa.C
+else
+  echo root4star -b -q runqa.C"($run,$ped)"      
+  root4star -b -q runqa.C"($run,$ped)" >& $dir/log/$run.log
+endif
+    
+#echo root -b -q plot.C"($run,$ped)"
+#root -b -q plot.C"($run,$ped)" >>&! $dir/log/$run.log
+ 
+\mv $dir/${run}.*.txt www/$dir/ 
+\mv $dir/${run}.*.png www/$dir/ 
+\rm www/$dir/*${run}*.tiny.png
+./maketiny.pl www/$dir
+
+endif

@@ -1,0 +1,150 @@
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<!-- 
+      Template by Torre Wenaus.
+      This page is MAINTAINED IN RAW HTML. Do NOT corrupt it
+      by editing it with a WYSIWYG HTML editor.
+ -->
+<head>
+<title>DcaService</title>
+<meta name="Author" content="Gene Van Buren">
+<meta name="Description" content="Prepared for the STAR computing and software website.">
+<meta name="KeyWords" content="STAR RHIC computing software documentation StStrangeMuDstMaker">
+<meta name="Generator" content="HomeSite 2.5">
+<meta http-equiv="Reply-to" content="gene@bnl.gov (Gene Van Buren)">
+</head>
+<body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
+<basefont face="verdana,arial,helvetica,sans-serif">
+
+<!-- Header material -->
+<table border=0   cellpadding=5 cellspacing=0 width="100%">
+        <tr bgcolor="#ffdc9f">
+        <td align=left> <font size="-1">
+        <a href="/STAR/">STAR</a>
+        &nbsp; <a href="/STAR/html/star_computing.html">Computing</a> 
+        &nbsp; <a href="/STAR/html/comp_l/root/documentation.html">Documentation</a> 
+        </td>
+        <td align=right> <font size="-1">
+        &nbsp;  <!-- top right corner  --> </font></td>
+        </tr>
+        <tr bgcolor="#ffdc9f"><td align=center colspan=2><font size="+2"> <b>
+        DcaService
+        </b></font></td></tr>
+        <tr bgcolor="#ffdc9f">
+        <td><font size="-1">Offline Software using ROOT in STAR</font></td>
+        <td align="right"><a href="/STAR/html/ofl_l/prodinfo.html">
+        <font size="2" face="verdana,arial,helvetica,sans-serif">Maintained</font>
+        </a> 
+         <font size="-1">
+         by <a href="mailto:gene@bnl.gov">G. Van Buren</a>
+         </font> </td> 
+        </tr>
+
+	<tr><td align=right> 
+	<td align=right> <font size="-1"> 
+            Last modified Tue Aug 8 15:30:19 2002
+          </FONT></TD></TR>
+
+
+</TABLE>
+
+
+<center>
+<a href="index.html">StStrangeMuDstMaker</a>
+<p>
+<HR width=60%>
+</center>
+
+DcaService is a tool for recalculating DCAs of various particles
+to the primary vertex
+in the micro-DST. One can obtain either signed or unsigned DCAs,
+where the sign is negative if the primary vertex is outside the
+circular projection of the track helix in the bend plane. All
+member functions of the class are static, and can be called
+from anywhere.
+<p>
+
+One way to use the service is to simply request a DCA value and use
+it as you like. The functions available for doing this are:
+<pre>
+  // Functions which return recalculated DCAs
+  static double dcaXiToPrimVertex(StXiMuDst* xi);
+  //   For daughter tracks:
+  //     Note that the track is assumed to pass
+  //     through the decay vertex, so the calc may
+  //     be different from the global track calc
+  static double dcaBachelorToPrimVertex(StXiMuDst* xi);
+  static double dcaPosToPrimVertex(StV0MuDst* v0);
+  static double dcaNegToPrimVertex(StV0MuDst* v0);
+
+  // Functions which return signed DCAs
+  static double signedDcaXiToPrimVertex(StXiMuDst* xi);
+  static double signedDcaBachelorToPrimVertex(StXiMuDst* xi);
+  static double signedDcaPosToPrimVertex(StV0MuDst* v0);
+  static double signedDcaNegToPrimVertex(StV0MuDst* v0);
+</pre>
+Before calling any of these functions, the DcaService class
+needs to be told about the magnetic field and the location of
+the primary vertex. This can be achieved with a call to either of:
+<pre>
+  static   void initEvent(StStrangeEvMuDst* ev);
+  static   void initEvent(StStrangeMuDstMaker* mk);
+</pre>
+An event loop which would utilize these might look something like:
+<pre>
+  for( Int_t i=0; i&lt;Nevents; i++ ) {
+    if( chain.Make() ) break;
+    DcaService::initEvent(&amp;strangeDst);
+    for( Int_t j=0; j&lt;strangeDst.GetNXi(); j++ ) {
+      newDca = DcaService::dcaXiToPrimVertex(strangeDst.GetXi(j));
+      ...do something with newDca...
+    }
+    if( i != Nevents) chain.Clear();
+  }
+</pre>
+<p>
+
+
+Additionally,
+DcaService can replace the stored data members of the DCAs in the
+data classes, allowing the user to write out a new version of a
+micro-DST with recalculated DCAs. Here are the relavant functions:
+<pre>
+  // Functions which replace the data members with the correct DCAs
+  static   void fixDcaXiToPrimVertex(StXiMuDst* xi);
+  static   void fixSignedDcaXiToPrimVertex(StXiMuDst* xi);
+  static   void fixSignedDcaBachelorToPrimVertex(StXiMuDst* xi);
+  static   void fixSignedDcaPosToPrimVertex(StV0MuDst* v0);
+  static   void fixSignedDcaNegToPrimVertex(StV0MuDst* v0);
+</pre>
+Functions are also provided which can loop over the vertices
+automatically while fixing their DCAs:
+<pre>
+  // Functions which call the event initialization,
+  // then loop over the event and fix the DCAs
+  static   void fixDcaXiToPrimVertex(StStrangeMuDstMaker* mk);
+  static   void fixSignedDcaXiToPrimVertex(StStrangeMuDstMaker* mk);
+  static   void fixSignedDcaBachelorToPrimVertex(StStrangeMuDstMaker* mk);
+  static   void fixSignedDcaPosToPrimVertex(StStrangeMuDstMaker* mk);
+  static   void fixSignedDcaNegToPrimVertex(StStrangeMuDstMaker* mk);
+  //   Multiple fixes simultaneously
+  static   void fixSignedDcasXis(StStrangeMuDstMaker* mk);
+  static   void fixSignedDcasV0s(StStrangeMuDstMaker* mk);
+  static   void fixSignedDcas(StStrangeMuDstMaker* mk);
+</pre>
+
+An event loop which demonstrates re-writing a micro-DST with
+altered DCAs is shown here:
+<pre>
+  for( Int_t i=0; i&lt;Nevents; i++ ) {
+    if( chain.Make() ) break;
+    DcaService::fixSignedDcas(&amp;strangeOldDst);
+    strangeNewDst.SelectEvent();
+    if( i != Nevents) chain.Clear();
+  }
+</pre>
+
+<P>
+</BODY>
+</HTML>
+

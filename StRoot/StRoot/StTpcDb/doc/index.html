@@ -1,0 +1,317 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Description" content="STAR computing tutorial">
+   <meta name="GENERATOR" content="Mozilla/4.61 [en] (X11; U; Linux 2.2.12-20 i686) [Netscape]">
+   <title>  title  </title>
+   <!-- Changed by: David Hardtke, 11-May-2000 -->
+</head>
+<body text="#000000" bgcolor="#FFF8DC" link="#000080" vlink="#800000" alink="#FF6347">
+&nbsp;
+<table BORDER=0 CELLSPACING=0 CELLPADDING=5 WIDTH="100%" >
+<tr BGCOLOR="#D3D3D3">
+<td ALIGN=LEFT><font size=-1><a href="http://www.star.bnl.gov/STAR/">STAR</a>&nbsp;
+
+<a href="http://www.star.bnl.gov/STAR/comp/">Computing</a></font></td>
+
+<td ALIGN=RIGHT><font size=-1><a href="http://www.star.bnl.gov/STAR/comp/train/tutorials.html">Tutorials
+main page</a></font></td>
+</tr>
+
+<tr BGCOLOR="#D3D3D3">
+<td ALIGN=CENTER COLSPAN="2"><b><font size=+2>How to Use StTpcDb&nbsp;</font></b></td>
+</tr>
+
+<tr BGCOLOR="#D3D3D3">
+<td ALIGN=LEFT><font size=-1>Offline computing tutorial&nbsp;</font></td>
+
+<td ALIGN=RIGHT><font size=-1><a href="http://www.star.bnl.gov/STAR/comp/ofl/prodinfo.html">Maintained
+by David Hardtke</a></font></td>
+</tr>
+
+<tr>
+<td ALIGN=RIGHT COLSPAN="2"></td>
+</tr>
+</table>
+<b><font size=+1>What is StTpcDb?</font></b>
+<p>StTpcDb is a utility that allows one to access the TPCdatabase information
+in a simpler way.&nbsp; In addition,
+<br>it hides the underlying implementation details from the user.&nbsp;
+All database information is served via a set
+<br>of abstract interfaces.&nbsp; The interfaces will stay the same even
+if the offline infrastructure changes.&nbsp; The
+<br>necessary modifcations are done behind the scenes, and the user need
+no longer worry that the next
+<br>release of the STAR offline software will break his/her code.
+<p>In addition to serving data directly from the database, StTpcDb is used
+to create derived quantities that are useful from an offline standpoint
+but that do not come directly from measurements.&nbsp; One other function
+of StTpcDb is to replace the tpg geometry transformation packages that
+were previously used in the tpc reconstruction and simulation code.&nbsp;
+StTpcDb wraps the necessary database information in fortran callable C-style
+functions.
+<br>&nbsp;
+<p><b><font size=+1>How to use StTpcDb:</font></b>
+<p>StTpcDb comes in two parts: StTpcDbMaker and StTpcDb.&nbsp; StTpcDb
+is the utility that allows one to access the database.&nbsp; StTpcDbMaker
+serves to initialize StTpcDb in bfc and contains the fortran callable C-Style
+functions.
+<p><b>Intializing StTpcDb:</b>
+<br>StTpcDb is initized automatically with the standard chain.&nbsp; The
+chain option is
+<br>"tpcDB", but this option is invoked whenever chain option "tpc" is
+invoked.&nbsp; Optionally, one can create a simple chain with StTpcDb.&nbsp;
+An example is shown in $STAR/StRoot/macros/test/tpcDbTest.C.&nbsp; This
+simple macro creates a chain, adds an instance of St_db_Maker and an instance
+of StTpcDbMaker, and
+<br>performs the Init() and Make().&nbsp; Note that St_db_Maker does the
+actually work (i.e. negotiation with
+<br>the mySQL database).&nbsp; StTpcDb is a (purely optional) abstract
+layer on top of the datasets associated
+<br>with St_db_Maker.
+<p><b>StTpcDbMaker Functionality:</b>
+<br>1) Create an instance of StTpcDb
+<br>2) implement C-Style fortran functions
+<br>3) return pointer to StTpcDb using function tpcDbInterface()
+<p><b>StTpcDb Functionality;</b>
+<br>1) return abstract interfaces:
+<br>&nbsp;&nbsp; public:
+<br>&nbsp;&nbsp;&nbsp; StTpcPadPlaneI* PadPlaneGeometry();
+<br>&nbsp;&nbsp;&nbsp; StTpcWirePlaneI* WirePlaneGeometry();
+<br>&nbsp;&nbsp;&nbsp; StTpcDimensionsI* Dimensions();
+<br>&nbsp;&nbsp;&nbsp; StTpcSlowControlSimI* SlowControlSim();
+<br>&nbsp;&nbsp;&nbsp; StTpcElectronicsI* Electronics();
+<br>&nbsp;&nbsp;&nbsp; StTpcGainI* Gain(int sector);
+<br>&nbsp;&nbsp;&nbsp; StTpcT0I* T0(int sector);
+<br>&nbsp;&nbsp;&nbsp; St_Table *getTpcTable(int i);
+<br>&nbsp;&nbsp;&nbsp; //small pieces of data:
+<br>&nbsp;&nbsp;&nbsp; float DriftVelocity();
+<br>&nbsp;&nbsp;&nbsp; float triggerTimeOffset();
+<br>2) Create/manange real implementation of abstract interfaces.&nbsp;
+Note that a table is generally not retrieved from the database until the
+corresponding abstarct interface is requested.
+<br>3) StTpcDb defines a global point (<b>gStTpcDb)</b> that points to
+the last instance of StTpcDb created (this of course is horrible object-oriented
+programming, but it sure makes life easy!)
+<p><b>Using StTpcDb from ROOT command line:</b>
+<br>1) Start root4star
+<br>2) execute test macro:
+<p>root4star [0] .x tpcDbTest.C
+<p>3) check global pointer:
+<p>root4star [1] gStTpcDb
+<br>(class StTpcDb*)0x29bea78
+<p>4) use data:
+<p>root4star [2] gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(13)
+<br>(int)182
+<p>5) you can see what interfaces are defined:
+<p>root4star [3] .class StTpcDb
+<br>===========================================================================
+<br>class StTpcDb
+<br>&nbsp;size=0xec
+<br>&nbsp;(tagnum=1369,voffset=-1,isabstract=0,parent=-1,gcomp=0,=~cd=0)
+<br>List of base class--------------------------------------------------------
+<br>List of member variable---------------------------------------------------
+<br>Defined in StTpcDb
+<br>0x1dcfea0&nbsp; static const enum StTpcDb:: kCalibration
+<br>0x1dcfeb0&nbsp; static const enum StTpcDb:: kGeometry
+<br>0x1dcfec0&nbsp; static const enum StTpcDb:: kConditions
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: StMaker* mk
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: StTpcPadPlaneI*
+PadPlane //!
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: StTpcWirePlaneI*
+WirePlane //!
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: StTpcDimensionsI*
+dimensions //!
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: StTpcSlowControlSimI*
+slowControlSim //!
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: StTpcElectronicsI*
+electronics //!
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: StTpcGainI*
+gain[24] //!
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: StTpcT0I* t0[24]
+//!
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: St_DataSet*
+tpc[3] //!
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: St_tpcDriftVelocity*
+dvel //!
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: long G__virtualinfo
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: static TClass*
+fgIsA
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 protected: StTpcDb StTpcDb(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 protected: void GetDataBase(StMaker* maker);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: StTpcDb StTpcDb(St_DataSet* input);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: StTpcDb StTpcDb(StMaker* makerDb);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: StTpcPadPlaneI* PadPlaneGeometry(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: StTpcWirePlaneI* WirePlaneGeometry(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: StTpcDimensionsI* Dimensions(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: StTpcSlowControlSimI* SlowControlSim(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: StTpcElectronicsI* Electronics(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: StTpcGainI* Gain(int sector);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: StTpcT0I* T0(int sector);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: St_Table* getTpcTable(int i);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: float DriftVelocity(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static const char* DeclFileName(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static int DeclFileLine(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static const char* ImplFileName(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static int ImplFileLine(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static Version_t Class_Version(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static TClass* Class(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual TClass* IsA(void) const;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual void ShowMembers(TMemberInspector&amp; insp,char* parent);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual void Streamer(TBuffer&amp; b);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static void Dictionary(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: StTpcDb StTpcDb(StTpcDb&amp;);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual void ~StTpcDb(void);
+<p>6) You can then query the individual interfaces:
+<p>root4star [13] .class StTpcDimensionsI
+<br>===========================================================================
+<br>class StTpcDimensionsI
+<br>&nbsp;size=0xc
+<br>&nbsp;(tagnum=1359,voffset=-1,isabstract=17,parent=-1,gcomp=0,=~cd=0)
+<br>List of base class--------------------------------------------------------
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public: TObject //Basic
+ROOT object
+<br>List of member variable---------------------------------------------------
+<br>Defined in StTpcDimensionsI
+<br>0x0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; private: static TClass*
+fgIsA
+<br>List of member function---------------------------------------------------
+<br>filename&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; line:size busy function
+type and name&nbsp; (in StTpcDimensionsI)
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual int numberOfSectors(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float ifcRadius(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float ofcRadius(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float tpcTotalLength(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float wheelInnerRadius(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float wheelOuterRadius(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float wheelThickness(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float senseGasOuterRadius(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float tpeaThickness(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float cathodeInnerRadius(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float cathodeOuterRadius(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float cathodeThickness(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float innerEffectiveDriftDistance(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float outerEffectiveDriftDistance(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float gatingGridZ(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float zInnerOffset(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual float zOuterOffset(void) const=0;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static const char* DeclFileName(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static int DeclFileLine(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static const char* ImplFileName(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static int ImplFileLine(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static Version_t Class_Version(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static TClass* Class(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual TClass* IsA(void) const;
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual void ShowMembers(TMemberInspector&amp; insp,char* parent);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: virtual void Streamer(TBuffer&amp; b);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: static void Dictionary(void);
+<br>(compiled)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0:0&nbsp;&nbsp;&nbsp;
+0 public: void ~StTpcDimensionsI(void);
+<p>The function names are intended to be self-explanatory (i.e. cathodeInnerRadius)
+<p><b>Using StTpcDb in your Maker:</b>
+<br>1) #include "StTpcDb.h"
+<br>2) get pointer to StTpcDbMaker:
+<br>&nbsp;&nbsp;&nbsp;&nbsp; option 1 (easy but uncouth way): Use global
+pointer <b>gStTpcDb</b>
+<br><b>&nbsp;&nbsp;&nbsp; </b>option 2 (hard but correct way): Use StRoot
+methods
+<p>TDataSet* MyDataSet = GetDataSet("tpcDb");
+<br>StTpcDbMaker* MakeItAMaker = (StTpcDbMaker*)MyDataSet;
+<br>StTpcDb* my_tpcdb = MakeItAMaker->tpcDbInterface();
+<p><b>Using some data in your old fortran programs:</b>
+<br>We have defined a few functions that pass data to fortran programs.&nbsp;
+If you need some other data, please
+<br>send an upgrade request.&nbsp; So far, we have the following functions:
+<br>extern "C" {
+<br>numberOfPadsAtRow_(int *);
+<br>tpc_row_to_y_(float *,float *);
+<br>tpc_pad_to_x_(float *,float *,float *);
+<br>tpc_x_to_pad_(float *,float *,float *);
+<br>tpc_local_to_global_(int *,float *,float *);
+<br>tpc_global_to_local_(int *,float *,float *);
+<br>tpc_global_to_local_p_(int *,float *,float *);
+<br>tpc_time_to_z_(int *,int *,int *,int *,float *);
+<br>tpc_z_to_time_(float *,int *,int *,int *,int *);
+<br>tpc_drift_velocity_(float *);
+<br>tpc_drift_volume_length_(float *);
+<br>tpc_row_par_(int *,float *,float *,float *);
+<br>tpc_global_to_sector_(int*, float*);
+<br>tpc_sec24_to_sec12_(int*, int*);
+<p>As you can see, most of these are actually geometry tranformation routines
+that use another package
+<br>called StDbUtilities.
+<p><b><font size=+1>How to override the mySQL database</font></b>
+<br>This has absolutely no connection to StTpcDb, but I will document it
+here since it is often requested:
+<br>In order to overide the database, you need to first write out the database
+tree using a function of&nbsp; St_db_Maker.&nbsp; This
+<br>is shown in $STAR/StRoot/macros/DbSave.C.&nbsp; Essentially, you find
+the St_db_Maker that contains the values
+<br>you want to overwrite and you invoke the Save(const char* path) member
+function.&nbsp; This writes out a tree structure
+<br>under a directory called StarDb.&nbsp; You can descend that directory
+until you find the table that contains the data that you need.&nbsp; You
+can then modify the value.&nbsp;&nbsp; If you now run bfc (assuming you're
+in the directory above StarDb), the local copy
+<br>of your database will be used, including your modified values.
+<p><b><u>Warning</u></b> The timestamp on the modified data must be valid
+in order for it to replace the mySQL data.
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p><i>Last Update -- 02-May-2000 by David Hardtke (DHHardtke@lbl.gov)</i>
+</body>
+</html>

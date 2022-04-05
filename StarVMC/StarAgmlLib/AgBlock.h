@@ -23,6 +23,8 @@ class AgModule;
 //class StarAgmlStacker;
 #include "StarAgmlStacker.h"
 
+#include "G3Commons.h"
+
 class AgBlock : public TNamed
 {
 

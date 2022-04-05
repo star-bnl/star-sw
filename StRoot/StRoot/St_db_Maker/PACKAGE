@@ -1,0 +1,6 @@
+# $Id $
+# package St_db_Maker
+# author: 
+#Library:libSt_db_Maker.so:LIBS +=   -lStChain  -lStDbBroker
+Library:libSt_db_Maker.so:LIBS +=   -lStChain -lStDb_Tables -lStDbLib  -lStUtilities  -lmysqlclient -lStDbBroker
+#Library:libSt_db_Maker.so:LIBS +=   -lStChain  -lStDbBroker

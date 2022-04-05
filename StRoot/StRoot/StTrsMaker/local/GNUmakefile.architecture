@@ -1,0 +1,150 @@
+############################################################################
+#
+# $Id: GNUmakefile.architecture,v 1.7 2006/08/15 21:42:19 jeromel Exp $
+#
+# Author: Thomas Ullrich, Mar 25 1998
+# --------------------------------------------------------------------------
+# Architecture dependent variables for GNUmakefile
+#
+#   hp_ux102      HP-UX 10.20, aCC compiler (A.01.06 or higher)
+# 
+#   i386_linux2   Linux, egcs 1.0.2 or g++ 2.8.1 compiler (or higher)
+#
+#   i386_redhat50 Linux, egcs 1.0.2 or g++ 2.8.1 compiler (or higher)
+#
+#   i386_redhat51 Linux, egcs 1.0.2 compiler (or higher)
+# 
+#   sun4x_54      SunOS 5.4, CC 4.2 (or higher)
+#
+#   sun4x_55      SunOS 5.5, CC 4.2 (or higher) 
+#
+#   sun4x_56      SunOS 5.6, CC 4.2 (or higher) 
+#
+# In any case one can use STAR_SYS=i386_linux2 to use the GNU compiler
+# on all platforms.
+#
+# Override variables with gmake -e, which causes environment
+# variables to take precedence, but watch for inadvertant overrides.
+#
+# Macros:
+#
+# AT_BNL
+# if this is being compiled at BNL, use the StarClassLibrary in the Library
+# and the ROOT Libraries.
+#
+# You can compile off-site with your own SCL with the macro
+# SCL_WITHOUT_ROOT
+# defined and be quite happy
+# --------------------------------------------------------------------------
+#
+# $Log: GNUmakefile.architecture,v $
+# Revision 1.7  2006/08/15 21:42:19  jeromel
+# Fix rhic -> rhic.bnl.gov
+#
+# Revision 1.6  1999/02/16 23:23:57  lasiuk
+# Optimization on HP...should really only be +O2
+#
+# Revision 1.5  1999/01/26 20:41:51  lasiuk
+# SUN/ROOT flags
+#
+############################################################################
+#AT_BNL := 1
+#
+# STAR_SYS defaults to 'unknown'
+#
+ifeq ($(strip $(STAR_SYS)),)
+	STAR_SYS := unknown
+endif
+
+#
+# If SCL_OPTIMISE not specified, the default compilation is SCL_DEBUG ...
+#
+ifndef TRS_OPTIMISE
+	TRS_DEBUG := 1
+endif
+
+#
+# Default archive call. Changed for: SUN-CC.
+#
+AR := ar -r
+
+#
+# Default echo used with makedepend. Changed for G++-Linux.
+#
+ECHO:= echo
+
+#
+# Place where to find the SCL
+#
+ifdef AT_BNL
+#         SCL_HOME := /star/u2b/lasiuk/SCL/StarClassLibrary/
+SCL_HOME := $(STAR)/StarClassLibrary/
+ROOTLIBS := -L$(ROOTSYS)/lib -lNew -lBase -lCint -lClib -lFunc \
+	-lGraf -lGraf3d -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet \
+	-lPostscript -lProof -lTree -lUnix -lZip -lRint -lCont
+else
+#use a local copy (Make sure SCL_WITHOUT_ROOT is defined
+SCL_HOME := /data/STAR/SCL/StarClassLibrary/
+endif
+
+#
+# Architecture dependent variables...
+#
+# -------- HP-aCC ---------
+ifeq ($(STAR_SYS),hp_ux102)
+	CXX          := aCC
+	CXXFLAGS     := +z
+	ifdef TRS_OPTIMISE
+		CXXFLAGS += +O3 +Olibcalls +Onolimit
+	else
+		CPPFLAGS += -DRWSTD_BOUNDS_CHECKING 
+		CXXFLAGS += -g +d -z
+	endif
+        MAKESHLIB    := 1
+        LD           := aCC
+        LDFLAGS      := -b -Wl,+vnocompatwarnings
+        SHEXT        := sl
+endif
+
+# -------- i386_linux2, i386_redhat50 ---------
+ifeq ($(findstring i386, $(STAR_SYS)),i386)
+	CXX          := g++ 
+	CPPFLAGS     := -DGNU_GCC -DST_NO_MEMBER_TEMPLATES
+        CPPFLAGS     += -DST_NO_NUMERIC_LIMITS -DST_NO_EXCEPTIONS
+	CPPFLAGS     += -DST_NO_NAMESPACES
+	CXXFLAGS     := -pipe -fno-for-scope
+	ifdef SCL_OPTIMISE
+		CXXFLAGS += -O 
+	else
+		CXXFLAGS += -g
+	endif
+	MAKESHLIB    := 1
+	SHEXT        := so
+	LD           := $(CXX)
+	LDFLAGS      := -shared
+        ECHO         := /bin/echo
+endif
+
+# -------- sun4x_54, sun4x_55, sun4x_56 ---------
+ifeq ($(findstring sun4x, $(STAR_SYS)),sun4x)
+	CXX          := CC
+	STDHOME      := /afs/rhic.bnl.gov/star/packages/ObjectSpace/2.0m
+	CPPFLAGS     := -I$(STDHOME) -I$(STDHOME)/ospace/std
+	CPPFLAGS     += -DST_NO_MEMBER_TEMPLATES -DST_NO_NUMERIC_LIMITS
+	CPPFLAGS     += -DST_NO_EXCEPTIONS -DST_NO_TEMPLATE_DEF_ARGS
+	CPPFLAGS     += -DST_NO_NAMESPACES
+	CXXFLAGS     := -PIC -Qoption ld -t
+	ifdef SCL_OPTIMISE
+		CXXFLAGS += -O
+	else
+		CXXFLAGS += -g
+	endif
+	LD           := $(CXX)
+	LDFLAGS      := -G
+	MAKESHLIB    := 1
+	SHEXT        := so
+        ECHO         := /bin/echo
+	TRS_TEMPLATE_REPOSITORY := Templates.DB
+endif
+# ----------------- sgi-irix ------------------
+#?

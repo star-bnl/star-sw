@@ -1,0 +1,14 @@
+This directory contains code developed by Bum Choi to to analyse the highpt uDSTs (StHiMicroEvent)
+created with StHiMicroMaker.
+
+J.L. Klay (LBNL)
+02-Apr-2002
+
+---------------------------------
+31-May-2002 JLK (LBNL)
+
+The new versions of the Analysis packages use the updated version of the cut classes, IO and utility functions
+which are now stored in a separate directory StRoot/StHighptPool/Common.
+
+Removed utility files and opened a new Common directory for storing these items.
+

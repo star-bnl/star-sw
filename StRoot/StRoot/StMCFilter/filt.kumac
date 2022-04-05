@@ -1,0 +1,98 @@
+*
+* runs GSTAR Pythia + Filter
+*
+*
+*
+*
+ MACRO filt nEve=1   file=filt seed=123
+* particle ID:  gamma=1  mu+=5 mu-=6 prot=14  elect=3 pi0=7 pi+=8  pi-=9 lambda=18 sig0=20 
+
+trace on
+  mess starsim will generate [nEve] events with pt=[pt] outputFile=[file] seed=[seed]
+  gfile o [file].fzd
+
+detp  geom y2008
+gexec $STAR_LIB/geometry.so
+gexec $STAR_LIB/libPythia6_4_23.so
+gexec $STAR_LIB/bpythia.so
+
+
+vsig  0.01  30.
+	
+ gstat time size mult stak
+*
+ exec StRoot/StMCFilter/loadlibs.kumac
+
+gfilt example
+* MUST NOT be tabs in the next line(VP???)
+ENER 50    ! Collision energy
+MSEL 1            ! Total cross section, i.e. elastic+inelastic D=1
+* caution -- Pt bin
+CKIN 3=3 
+CKIN 4=5 
+*
+MSTP (51)=7       ! - 
+MSTP (81)=1       ! - 
+MSTP (82)=4       ! - 
+PARP (82)=2.0     !-
+PARP (83)=0.5     !-
+PARP (84)=0.4     !-
+PARP (85)=0.9     !-
+PARP (86)=0.95    !-
+PARP (89)=1800    !-
+PARP (90)=0.25    !-
+PARP (91)=1.0     !-
+PARP (67)=4.0     !-
+
+
+
+*
+* Make the following stable:
+*
+MDCY (102,1)=0  ! PI0 111
+MDCY (106,1)=0  ! PI+ 211
+*
+MDCY (109,1)=0  ! ETA 221
+*
+MDCY (116,1)=0  ! K+ 321
+*
+MDCY (112,1)=0  ! K_SHORT 310
+MDCY (105,1)=0  ! K_LONG 130
+*
+*
+MDCY (164,1)=0  ! LAMBDA0 3122
+*
+MDCY (167,1)=0  ! SIGMA0 3212
+MDCY (162,1)=0  ! SIGMA- 3112
+MDCY (169,1)=0  ! SIGMA+ 3222
+MDCY (172,1)=0  ! Xi- 3312
+MDCY (174,1)=0  ! Xi0 3322
+MDCY (176,1)=0  ! OMEGA- 3334
+*
+swit 1 2 	!the content of the temporary stack for secondaries in the common /GCKING/ is printed;
+
+*swit 2 2  	!the current information on the track is printed 
+*swit 2 3	!the current step is drawn
+*swit 2 4	!the current step is drawn after
+
+swit 4 3	!
+
+debug on
+dhits
+* nicer plot of upper right cave
+ nex;dcut CAVE x 0.0 2.0 2.0 0.045 0.045
+
+* gkine #part. partID  ptrange   yrange   phirange  vertexrange
+* AGUSER/GKINE NTRACK ID [ PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH op
+                                     
+* AGUSER/GKINE 1 [gid] [pt] [pt] -[eta] [eta] 0.0 6.2831853 0 0 	
+* AGUSER/GKINE 1 [gid] [pt] [pt] 0.1 0.8 1.5 1.6 0 0 	
+    gkine -4 0 0 100 -3  3 0 6.3 -100 100
+rndm [seed] 1
+
+trig [nEve]
+
+**  gprint hits
+**  gprint trak
+ return
+

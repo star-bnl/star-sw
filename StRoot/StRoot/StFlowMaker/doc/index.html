@@ -1,0 +1,124 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.75C-CCK-MCD LBNL V4.73 Build 2 (Macintosh; U; PPC) [Netscape]">
+   <meta name="Author" content="Art Poskanzer">
+   <title>STAR flow analysis</title>
+</head>
+<body>
+&nbsp;
+<table BORDER=0 CELLSPACING=10 CELLPADDING=0 COLS=2 WIDTH="100%" wrap >
+<caption ALIGN="TOP">
+<h3>
+STAR Software for Analysis of Anisotropic Flow</h3>
+<i>R.J. Snellings and A.M. Poskanzer</i>
+<br><i>Nuclear Science Division, Lawrence Berkeley National Laboratory,
+Berkeley, CA 94720, USA</i></caption>
+
+<tr VALIGN=TOP>
+<td VALIGN=TOP WIDTH="50%"><!C- First column starts here>In the <a href="http://root.cern.ch/">ROOT</a>
+for <a href="http://www.star.bnl.gov/STAR/html/star_computing.html">STAR</a>
+environment, c++ programs have been written to analyze STAR data for anisotropic
+(directed and elliptic) flow. This document is a road map to the available
+documentation. The software consists of 7.3k lines of code in 33 files
+in three directories. The three "maker" modules are called from the STAR
+software chain and described in the overview <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/ebe_l/pub/flow/HTML_Presentation/">presentation</a>.
+The presentation is also available as a <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/ebe_l/pub/flow/Presentation.ps">postscript</a>
+file together with an overview <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/Diagram.ps">diagram</a>
+using the Unified Modeling Language. The chain of three makers is run off-line
+by the macro <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/macros/analysis/doFlowEvents.C">doFlowEvents.C</a>
+. In this macro, parameters can be set for the event cuts, track cuts,
+flags, event plane selections, and PID windows. Also in this macro <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowSelection.cxx">StFlowSelection</a>
+can be instantiated and passed to the Tag, Analysis, and Cumulant makers.
+This object can be set to select track PID.
+<p><b><a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/">StFlowMaker</a></b>
+is the interface with the STAR DST. It creates <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowEvent.cxx">StFlowEvent</a>
+from <a href="http://www.star.bnl.gov/STARAFS/comp/root/special_docs.html">StEvent</a>
+or <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowPicoEvent.cxx">StFlowPicoEvent</a>
+after <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowCutEvent.cxx">event</a>
+and <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowCutTrack.cxx">track</a>
+cuts. StFlowEvent consists of a <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowTrackCollection.h">track
+collection</a> of <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowTrack.h">tracks</a>.
+It also contains methods for calculating event-by-event quantities, like
+the event plane vector, from the data members of the tracks. The event
+plane is made isotropic in the laboratory with weights which are the inverse
+of the acceptance as determined from the azimuthal distribution of particles.
+This is all described in the <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/README">README</a>
+document. One can also view the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowMaker.h">header</a>,
+the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowMaker.cxx">implementation,</a>
+and the <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/StFlowMaker.html">interface</a>.
+A persistent sub-set of StFlowEvent can be written out to disk as <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowPicoEvent.cxx">StFlowPicoEvent</a>.
+Constants which are needed in more than one file are kept in <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowConstants.h">StFlowConstants</a>.
+<p><b><a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowTagMaker/">StFlowTagMaker</a></b>
+fills the <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/St_FlowTag.html">tag</a>
+database from StFlowEvent. This is described in the <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowTagMaker/README">README</a>
+document. One can also view the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowTagMaker/StFlowTagMaker.h">header</a>,
+the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowTagMaker/StFlowTagMaker.cxx">implementation,</a>
+and the <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/StFlowTagMaker.html">interface</a>.
+<p><b><a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/">StFlowAnalysisMaker</a></b>
+reads the event-by-event quantities from the tag database, if it exists,
+or if it does not, from StFlowEvent. It reads the particle quantities from
+StFlowEvent and does the flow analysis<sup>1</sup> by correlating the particles
+with the event plane after removing autocorrelations. The main results
+are double-differential flow values contained in 2D histograms of the flow
+variables, v_n, as a function of pseudorapidity and transverse momenta.
+For identified particles rapidity is used instead of pseudorapidity. A
+second analysis is done in terms of the normalized vector q which is equal
+to the length of the flow vector Q divided by the square-root of the sum
+of the squares of the weights. This integral measure of flow is good for
+studying the fluctuations in flow. This is all described in the <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowAnalysisMaker/README">README</a>
+document. One can also view the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/StFlowAnalysisMaker.h">header</a>,
+the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/StFlowAnalysisMaker.cxx">implementation,</a>
+and the <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/StFlowAnalysisMaker.html">interface</a>.
+The macros <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/plot.C">plot.C</a>
+and <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/plotCen.C">plotCen.C</a>
+are used to plot the resulting histograms. The macro <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/minBias.C">minBias.C</a>
+combines the histograms from different centralities to make a minimum bias
+histogram file.
+<p><b><a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/StFlowCumulantMaker.cxx">StFlowCumulantMaker</a></b>
+which is in the StFlowAnalysisMaker directory, can perform a multiparticle
+analysis using the cumulant method.<sup>7</sup> One can also view the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/StFlowCumulantMaker.h">header</a>,
+the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/StFlowCumulantMaker.cxx">implementation,</a>
+and the <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/StFlowCumulantMaker.html">interface</a>.
+The macro <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowAnalysisMaker/plotCumulant.C">plotCumulant.C</a>
+is used to plot the resulting histograms.
+<p>Simulated events which have been run through GEANT have been analyzed
+and <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/ebe_l/pub/flow/index.html">results</a>
+produced. There is also a STAR Note<sup>2</sup> which contains predictions
+for STAR, a paper<sup>3</sup> on the expected behavior of the directed
+flow,&nbsp; and a paper<sup>4</sup> on how to interpret the physics results.
+Now there are also first results for charged particles<sup>5 </sup>and
+identified particles.<sup>6</sup>
+<p><!C- End of first column></td>
+
+<td VALIGN=TOP WIDTH="50%"><!C- Begin second column>
+<br><i>Acknowledgments</i>
+<br>We thank Glenn Cooper for considerable help with c++ and ROOT. Markus
+Oldenburg contributed the FTPC code and Aihong Tang the cumulant analysis.&nbsp;
+<p><!C- References and footnotes here><i>Footnotes and References</i>
+<br><font size=-1>1. A.M. Poskanzer and S.A. Voloshin, "Methods for Analyzing
+Anisotropic Flow in Relativistic Nuclear Collisions", <a href="http://pubster.aip.org/AIPcgipath/doc/getabs-PRVCAN/disk3/journals/journal_cgi/getabs?KEY=PRVCAN&cvips=PRVCAN000058000003001671000001&gifs=yes">Phys.
+Rev. C <b>58</b>, 1671 (1998)</a>.</font>
+<p><font size=-1>2. R.J.M. Snellings, A.M. Poskanzer, and S.A. Voloshin,
+"Anisotropic Flow at STAR", STAR Note <a href="http://www.star.bnl.gov/STAR/sno/sno.html">SN0388(</a>1999).</font>
+<p><font size=-1>3. R.J.M. Snellings, H. Sorge, S.A. Voloshin, F.Q. Wang,
+and N. Xu, "Novel Rapidity Dependence of Directed Flow in High Energy Heavy
+Ion Collisions", Phys. Rev. Letters <b>84</b>, 2803 (2000). <a href="http://arXiv.org/abs/nucl-ex/9908001">nucl-ex/9908001</a>.</font>
+<p><font size=-1>4. S.A. Voloshin and A.M. Poskanzer, "The Physics of the
+Centrality Dependence of Elliptic Flow", Phys. Letters <b>B474</b>, 27
+(2000). <a href="http://xxx.lanl.gov/abs/nucl-th/9906075">nucl-th/9906075</a>.</font>
+<p><font size=-1>5. K.H. Ackermann <i>et al.</i>, "Elliptic Flow in Au+Au
+Collisions at sq_root(s)=130 GeV", Phys. Rev. Letters <b>86</b>, 402 (2001).
+<a href="http://xxx.lanl.gov/abs/nucl-ex/0009011">nucl-ex/0009011</a>.</font>
+<p><font size=-1>6. C. Adler <i>et al.</i>, "Identified Particle Elliptic
+Flow in Au+Au Collisions at sq_root(s)=130 GeV", Phys. Rev. Letters <b>87</b>,
+182301 (2001). <a href="http://xxx.lanl.gov/abs/nucl-ex/0107003">nucl-ex/0107003</a>.</font>
+<p><font size=-1>7. N. Borghini, P.M. Dinh, and J.Y. Ollitrault, "Flow
+Analysis from Cumulants: a Practical Guide". <a href="http://xxx.lanl.gov/abs/nucl-ex/0110016">nucl-ex/0110016.</a></font></td>
+</tr>
+</table>
+
+</body>
+</html>

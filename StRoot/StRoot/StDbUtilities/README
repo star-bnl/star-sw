@@ -1,0 +1,53 @@
+$Id: README,v 1.1 1999/12/17 20:35:07 calderon Exp $
+$Log: README,v $
+Revision 1.1  1999/12/17 20:35:07  calderon
+Description of usage of StTpcCoordinateTransform
+
+
+StDbUtilities is an area for packages that use the DB.  At the
+moment, we have here coordinate transformation routines which
+were originally developed in TRS.  The goal of these is for them
+to be easily accessible for other packages that need them.
+
+Usage of StTpcCoordinateTransform
+
+StTpcCoordinateTransform is a "functor" class.  The idea is
+to use it when changing TPC coordinates from global to local
+to pad.  These are represented via the classes
+
+StGlobalCoordinate
+StTpcLocalSectorCoordinate (local x and y, z is unchanged)
+StTpcPadCoordinate (sector, row, pad, timebucket)
+
+The way one goes from one system to the other is via the
+StTpcCoordinateTransform in the following way:
+
+One instantiates the tranformation class, using a pointer
+to StTpcDb in the constructor:
+
+StTpcCoordinateTransform transformer(gStTpcDb);
+
+Let's say we obtained a global coordinate from somewhere (this can be
+an StThreeVector of the position of some TPC hit)
+
+StGlobalCoordinate globalHitPosition(hit.position());
+
+Then we create a the coordinate we want to transform to, assume it is 
+a pad coordinate:
+
+StTpcPadCoordinate padCoord;
+
+Then we just call StTpcCoordinateTransform::operator() with the first
+argument being the coordinate we already have, and the second argument
+being the coordiante we want to get:
+
+transformer(globalHitPosition,padCoord);
+
+After this, padCoord should have the relevant pad coordinate corresponding
+to the global coordinate.  This call is the same for ALL the TPC
+coordinates specified in StDbUtilities.  One uses the same syntax for
+transforming global->local, local->pad, global->pad, pad->local,
+pad->global, local->global.  Just remember that the first argument is the
+one we have, and the second is the one we want to transform to.
+
+
