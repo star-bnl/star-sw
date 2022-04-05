@@ -65,6 +65,8 @@ foreach my $arg (@ARGV) {
    @histRL5 = @histGF;
    @histGP = qw (
  		 TPoints270 TPoints2F TPoints270U TPoints2FU  TPoints2N TPoints2NU
+ 		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP
+  		 TPoints270+TPoints270P TPoints2F+TPoints2FP TPoints270U+TPoints270UP TPoints2FU+TPoints2FUP  TPoints2N+TPoints2NP TPoints2NU+TPoints2NUP
   		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
   		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
  	      );
