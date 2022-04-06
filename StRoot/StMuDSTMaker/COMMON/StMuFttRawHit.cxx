@@ -36,21 +36,22 @@ StMuFttRawHit::StMuFttRawHit( StFttRawHit * stHit ){
 
 StMuFttRawHit::StMuFttRawHit(   UChar_t mSector, UChar_t mRDO, UChar_t mFEB, 
                             UChar_t mVMM, UChar_t mChannel, UShort_t mADC, 
-                            UShort_t mBCID, Short_t mTB){
-    setRaw( mSector, mRDO, mFEB, mVMM, mChannel, mADC, mBCID, mTB);
+                            UShort_t mBCID, Short_t mTB, Short_t mBCIDDelta){
+    setRaw( mSector, mRDO, mFEB, mVMM, mChannel, mADC, mBCID, mTB, mBCIDDelta);
 } // ctor setRaw
 
 void StMuFttRawHit::setRaw(   UChar_t mSector, UChar_t mRDO, UChar_t mFEB, 
                             UChar_t mVMM, UChar_t mChannel, UShort_t mADC, 
-                            UShort_t mBCID, Short_t mTB){
-    this->mSector  = mSector;
-    this->mRDO     = mRDO;
-    this->mFEB     = mFEB;
-    this->mVMM     = mVMM;
-    this->mChannel = mChannel;
-    this->mADC     = mADC;
-    this->mBCID    = mBCID;
-    this->mTB      = mTB;
+                            UShort_t mBCID, Short_t mTB, Short_t mBCIDDelta){
+    this->mSector    = mSector;
+    this->mRDO       = mRDO;
+    this->mFEB       = mFEB;
+    this->mVMM       = mVMM;
+    this->mChannel   = mChannel;
+    this->mADC       = mADC;
+    this->mBCID      = mBCID;
+    this->mTB        = mTB;
+    this->mBCIDDelta = mBCIDDelta;
 } // setRaw
 
 void StMuFttRawHit::setMapping(   UChar_t mPlane, UChar_t mQuadrant, 
@@ -63,7 +64,7 @@ void StMuFttRawHit::setMapping(   UChar_t mPlane, UChar_t mQuadrant,
 } // setMapping
 
 void StMuFttRawHit::set( StFttRawHit * stHit ){
-    setRaw( stHit->sector(), stHit->rdo(), stHit->feb(), stHit->vmm(), stHit->channel(), stHit->adc(), stHit->bcid(), stHit->tb());
+    setRaw( stHit->sector(), stHit->rdo(), stHit->feb(), stHit->vmm(), stHit->channel(), stHit->adc(), stHit->bcid(), stHit->tb(), stHit->dbcid());
     setMapping( stHit->plane(), stHit->quadrant(), stHit->row(), stHit->strip(), stHit->orientation() );
 } // set from StEvent object
 
@@ -81,6 +82,7 @@ operator<<( ostream &os, const StMuFttRawHit& rh )
     os << "\tmChannel = "     << (int)rh.channel()     << endl;
     os << "\tmADC = "         << (int)rh.adc()         << endl;
     os << "\tmBCID = "        << (int)rh.bcid()        << endl;
+    os << "\tmBCIDDelta = "   << (int)rh.dbcid()       << endl;
     os << "\tmTB = "          << (int)rh.tb()          << endl;
     os << "\tmPlane = "       << (int)rh.plane()       << endl;
     os << "\tmQuadrant = "    << (int)rh.quadrant()    << endl;
