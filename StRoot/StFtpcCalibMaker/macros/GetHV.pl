@@ -4,7 +4,8 @@ use DBI;
 use Time::Local;
 use strict;
 # Connect up to RunLog
-my $conrun = join(":","DBI:mysql","RunLog","onldb.starp.bnl.gov:3501");
+my $conrun = join(":","DBI:mysql","RunLog","onldb2.starp.bnl.gov:3501"); # online
+#my $conrun = join(":","DBI:mysql","RunLog","heston.star.bnl.gov:3501"); # offline
 my $dbhrun = DBI->connect($conrun,"","");
 unless (defined($dbhrun)) {
   print STDERR "Bad: $DBI::errstr\n";
