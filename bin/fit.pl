@@ -43,13 +43,13 @@ foreach my $arg (@ARGV) {
  ################################################################################
  if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 and $#histADC < 0) {
    @histGF = qw(
- 	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3
- 	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C
- 	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
+ 	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
+ 	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
+	       SecRow3 SecRow3C
  	     );
-
-#               nTbk3C nTbk3PC nTbk3C+nTbk3PC
-#               nPad3C nPad3PC nPad3C+nPad3PC
+ # 	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
+ #             nTbk3C nTbk3PC nTbk3C+nTbk3PC
+ #             nPad3C nPad3PC nPad3C+nPad3PC
  #             SecRow3 SecRow3C SecRow3P SecRow3PC 
  # 	       AdcI3 dZdY3 dXdY3  nPad3 nTbk3
  # 	       AdcI3C dZdY3C dXdY3C nPad3C nTbk3C
@@ -65,14 +65,14 @@ foreach my $arg (@ARGV) {
    @histRL5 = @histGF;
    @histGP = qw (
  		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
- 		 TPoints70P TPointsFP TPoints70UP TPointsFUP  TPointsNP TPointsNUP
-  		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
  		 TPoints270 TPoints2F TPoints270U TPoints2FU  TPoints2N TPoints2NU
- 		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP
-  		 TPoints270+TPoints270P TPoints2F+TPoints2FP TPoints270U+TPoints270UP TPoints2FU+TPoints2FUP  TPoints2N+TPoints2NP TPoints2NU+TPoints2NUP
-  		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
-  		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
  	      );
+ #  		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
+ #  		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
+ #		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP
+ #		 TPoints70P TPointsFP TPoints70UP TPointsFUP  TPointsNP TPointsNUP
+ # 		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
+ # 		 TPoints270+TPoints270P TPoints2F+TPoints2FP TPoints270U+TPoints270UP TPoints2FU+TPoints2FUP  TPoints2N+TPoints2NP TPoints2NU+TPoints2NUP
  #		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
  # 		 I70eP I70eN I70protonP I70protonN I70kaonP I70kaonN I70piP I70piN I70muP I70muN I70deuteronP I70deuteronN I70tritonP I70tritonN I70He3P I70He3N I70alphaP I70alphaN 
  #		 EtaF Eta70 
