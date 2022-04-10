@@ -21,7 +21,7 @@ In order to switch back to the "official" STAR software do:
 <li><b>source unsetupDEV2.csh</b>
 </ul>
 <p>
-To use macros available in TFG releases we advice you to add in your ~/.rootrc file the next two lines: 
+To use macros available in TFG releases we advise you to add in your ~/.rootrc file the next two lines: 
 
 Unix.*.Root.DynamicPath:    :$HOME/macros:$STAR/macros/.$STAR_HOST_SYS:$STAR/macros:$STAR/macros/.$STAR_HOST_SYS:$(LD_LIBRARY_PATH)
 Unix.*.Root.MacroPath:      :$HOME/macros:$STAR/macros:$(ROOTSYS)/macros:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/mudst:$(STAR)/StRoot/macros:$(STAR)/StRoot/macros/graphics:$(STAR)/StRoot/macros/analysis:$(STAR)/StRoot/macros/test:$(STAR)/StRoot/macros/examples:$(STAR)/StRoot
