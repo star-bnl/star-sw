@@ -10,6 +10,12 @@
 class StBadRunChecker {
  public:
   StBadRunChecker(TString Run="run19",TString CollisionMode="col" ,TString RunEnergy="19.6",TString Species="auau");
+  /*
+  Please follow the following naming convetions when calling StBadRunChecker (case insensitive).
+  So far, the available data sets are:
+  | RunYear  | CollisionMode | Energy    | Species |
+  | "run19"  | "col"         | "19.6"    | "auau"  |
+  */
   virtual ~StBadRunChecker(); /// Default destructor
  
   // Bad run rejection
