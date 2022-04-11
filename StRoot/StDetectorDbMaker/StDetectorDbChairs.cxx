@@ -307,13 +307,12 @@ MakeChairInstance2(tpcCorrection,St_TpcdZdYC,Calibrations/tpc/TpcdZdY);
 #include "St_TpcdXdYC.h"
 MakeChairInstance2(tpcCorrection,St_TpcdXdYC,Calibrations/tpc/TpcdXdY);
 #include "St_GatingGridC.h"
-MakeChairInstance2(GatingGrid,St_GatingGridC,Calibrations/tpc/GatingGrid);
+MakeChairInstance2(tpcCorrection,St_GatingGridC,Calibrations/tpc/GatingGrid);
 //________________________________________________________________________________
 Double_t St_GatingGridC::CalcCorrection(Int_t i, Double_t x) {// drift time in microseconds
   Double_t value = -10;
-  GatingGrid_st *cor =  ((St_GatingGrid *) Table())->GetTable() + i;
-  if (x <= cor->t0) return value;
-  Double_t corD = 1. - TMath::Exp(-(x-cor->t0)/(cor->settingTime/4.6));
+  if (x <= t0(i)) return value;
+  Double_t corD = 1. - TMath::Exp(-(x-t0(i))/(settingTime(i)/4.6));
   if (corD < 1e-4) return value;
   return TMath::Log(corD);
 }
@@ -705,7 +704,8 @@ Double_t St_MDFCorrection4C::Eval(Int_t k, Double_t *x) const {
     }
     returnValue = fFunc[k]->GetSave(xx);
   } else  {
-    returnValue = St_MDFCorrection4C::MDFunc(xx);
+    Double_t par[1] = {(Double_t) k};
+    returnValue = St_MDFCorrection4C::MDFunc(xx,par);
   }
   return returnValue;
 }
@@ -1480,13 +1480,31 @@ MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
 #include "St_trigDetSumsC.h"
 St_trigDetSumsC *St_trigDetSumsC::fgInstance = 0;
 St_trigDetSumsC *St_trigDetSumsC::instance() {
-  if (fgInstance) return fgInstance;
+  if (fgInstance) {
+    static trigDetSums_st *sOld = 0;
+    static Int_t iBreak = 0;
+    if (iBreak < 3) {
+      St_trigDetSums *table = (St_trigDetSums *) fgInstance->Table();
+      trigDetSums_st *s = table->GetTable();
+      if (s != sOld) {
+	DEBUGTABLE("trigDetSums");
+	sOld = s;
+	iBreak++;
+      }
+    }
+    return fgInstance;
+  }
   St_trigDetSums *table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("trigDetSums");
-  if (! table) table = (St_trigDetSums *) StMaker::GetChain()->GetDataBase("Calibrations/rich/trigDetSums");
-  assert(table);
+  if (! table) {
+    table = (St_trigDetSums *) StMaker::GetChain()->GetDataBase("Calibrations/rich/trigDetSums");
+    assert(table);
+#if 0
+    DEBUGTABLE("trigDetSums");
+#endif
+  }
   fgInstance = new St_trigDetSumsC(table);
   fgInstance->SetName("trigDetSumsC");
-  StMaker::GetChain()->AddData(fgInstance);
+  StMaker::GetChain()->AddConst(fgInstance);
   return fgInstance;
 }
 ClassImp(St_trigDetSumsC);
@@ -1841,9 +1859,8 @@ St_tpcSectorPositionC *St_tpcSectorPositionC::instance() {
       St_db_Maker::GetValidity(fgTables[sec-1],t);
       Int_t Nrows = fgTables[sec-1]->GetNRows();
       LOG_WARN << "St_tpcSectorPositionC::instance found table " << fgTables[sec-1]->GetName()
-	       << " with NRows = " << Nrows << " in db" << endm;
-      LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
-	       << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
+	       << " with NRows = " << Nrows << " in db" 
+	       << Form("\tValidity:%08i.%06i --- %08i.%06i",t[0].GetDate(),t[0].GetTime(),t[1].GetDate(),t[1].GetTime()) << endm;
       fgTables[sec-1]->Print(0,1);
     }
   }
