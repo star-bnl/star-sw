@@ -501,5 +501,7 @@
 #root.exe -q -b SecRow3+SecRow3PGFdEdx.root 'MakeTpcSecRowB.C(20190225,230029,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225,230029.log
 #root.exe -q -b SecRow3+SecRow3PGFdEdx.root 'MakeTpcSecRowB.C(20190225,230030,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225,230030.log
 #root.exe -q -b SecRow3+SecRow3PGFdEdx.root 'MakeTpcSecRowB.C(20190225,230031,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225,230031.log
-root.exe -q -b SecRow3GFdEdx.root 'MakeTpcSecRowB.C(20190225,230044,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225,230044.log
+#root.exe -q -b SecRow3GFdEdx.root 'MakeTpcSecRowB.C(20190225,230044,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225,230044.log
+#root.exe -q -b SecRow3GFdEdx.root 'MakeTpcSecRowB.C(20190225,230047,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225,230047.log
+root.exe -q -b SecRow3GFdEdx.root 'MakeTpcSecRowB.C(20190225,230049,"TpcSecRowB",0)' >& MakeTpcSecRowB.20190225,230049.log
 
