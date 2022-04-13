@@ -46,6 +46,7 @@ foreach my $arg (@ARGV) {
  	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
  	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
 	       SecRow3 SecRow3C
+	       dX3 dX3C
  	     );
  # 	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
  #             nTbk3C nTbk3PC nTbk3C+nTbk3PC
