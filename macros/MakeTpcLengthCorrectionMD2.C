@@ -75,7 +75,7 @@ void PrintRow() {
   //  return out;
 }
 //________________________________________________________________________________
-void h2mdf(const Char_t  *total = "mu", Int_t max=5, TMultiDimFit::EMDFPolyType type = TMultiDimFit::kMonomials, Int_t maxTerm = 10, Double_t ymax = 1){
+void h2mdf(const Char_t  *total = "mu", Int_t max=8, TMultiDimFit::EMDFPolyType type = TMultiDimFit::kMonomials, Int_t maxTerm = 20, Double_t ymax = 1){
   TH2D *total2D = (TH2D *) gDirectory->Get(total);
   if (! total2D) {
     cout << "Histogram  has not been found " << endl;
@@ -112,7 +112,8 @@ void h2mdf(const Char_t  *total = "mu", Int_t max=5, TMultiDimFit::EMDFPolyType 
   for (iy = 1; iy <= ny; iy++) {
     for (ix = 1; ix <= nx; ix++) {
       Double_t error = total2D->GetBinError(ix,iy);
-      if (error <= 0) continue;
+      if (error <= 4e-4) continue;
+      if (error >  1e-2) continue;
       Double_t value = total2D->GetBinContent(ix,iy);
       if (TMath::Abs(value) > ymax) continue;
       Double_t Length = xa->GetBinCenter(ix);
