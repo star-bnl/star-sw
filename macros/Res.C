@@ -50,7 +50,10 @@ class Bichsel;
 class TPRegexp;
 #endif
 using namespace std;
+#if 0
 void DrawdEdx();
+void bichselG10(const Char_t *type, Int_t Nhyps=9);
+#endif
 //________________________________________________________________________________
 void SetTitle(TString &Title) {
   //      if (Title.Contains("602P03ih"))  Title.ReplaceAll("602P03ih"," default ");
@@ -153,7 +156,8 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
   TString Plot;
   if (plot == "sigma") Plot = "Sigma";
   if (plot == "mu")    Plot = "Mu";
-  cout << "plot = " << plot.Data() << "\tPlot = " << Plot.Data() << " pattern " << Pattern.GetPattern().Data() << endl;
+  TString PlotH(Plot); PlotH += "(100,10,210)";
+  cout << "plot = " << plot.Data() << "\tPlot = " << PlotH.Data() << " pattern " << Pattern.GetPattern().Data() << endl;
   Int_t NF = 0;
   TSeqCollection *files = gROOT->GetListOfFiles();
   if (! files) return;
@@ -177,28 +181,41 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
   TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
   if (! c1 ) c1 = new TCanvas("c1","Resolution versus Track Length");
   c1->Clear();
+  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
+  if (! c1 ) c1 = new TCanvas("c1","Resolution versus Track Length");
+  c1->Clear();
   c1->SetTitle("Resolution versus Track Length");
   c1->SetGrid(); //x(9);
   //  c1->SetGridy(30);
   TH1F *frame = 0;
   if (plot == "sigma") {
-    frame = c1->DrawFrame(10,0.04,170,0.20);
+    frame = c1->DrawFrame(10,0.02,210,0.20);
     frame->SetTitle("Resolution versus Track Length");
     //    frame->SetYTitle("Resolution");
   } else {
-    frame = c1->DrawFrame(10,-0.05,170,0.10);
+    frame = c1->DrawFrame(10,-0.05,210,0.10);
     frame->SetTitle("Shift versus Track Length");
     //    frame->SetYTitle("Sift");
   }
   frame->SetXTitle("Track Length (cm)                   ");
   TLegend *leg = new TLegend(0.25,0.6,0.9,0.9,"");
   Int_t c = 0;
+  TF1 *powfit = 0;
+  if (plot == "sigma") {
+    powfit = new TF1("powfit","[0]*TMath::Power(x,[1])",40,160);
+    powfit->SetParameters(0.5,-0.5);
+  } else {
+    powfit = new TF1("powfit","pol0",40,160);
+    //	powfit->SetParameter(0,0.);
+  }
+
   for (int i = 0; i<NF; i++) {
     c = i + 1;
     if (c == 10) c = 11;
     if (FitFiles[i]) { 
       FitFiles[i]->cd();
       TH1 *Hist = 0;
+#if 1
       TH1 *hist = (TH1 *) FitFiles[i]->Get(plot);
       if (! hist) continue;
       if (hist->GetDimension() == 2) {
@@ -206,30 +223,31 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
       } else {
 	Hist = hist; 
       }
-      Hist->SetMarkerColor(c); Hist->SetMarkerStyle(20); Hist->SetLineColor(c);
+#endif
       TString Title(gSystem->BaseName(FitFiles[i]->GetName()));
       Title.ReplaceAll(".root","");
       if (! Title.Contains("TPoints")) continue;
       if (!Hist|| Hist->GetEntries() < 1.e-4) {
 	TTree *FitP = (TTree *) gDirectory->Get("FitP");
-	if (FitP) {
-	  FitP->Draw(Form("%s:x>>%s",plot.Data(),Plot.Data()),"sigma<0.2&&j==0","profgoff");
-	  Hist = (TProfile *) FitFiles[i]->Get(Plot);
+	if (! FitP) continue;
+	FitP->SetMarkerColor(c);
+	powfit->SetLineColor(c);
+	if (plot != "sigma") {
+	  //	    FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"(sigma<0.2&&i&&j==0&&chisq<200&&dmu<0.01&&sigma>0.03)/dmu**2","profsameggoff");
+	  FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"(sigma<0.2&&i&&j&&chisq<200&&dmu<0.01&&sigma>0.03)","profsame");
+	} else {
+	  cout << "FitP->Draw(\"" << Form("%s:x>>%s",plot.Data(),PlotH.Data()) << "\",\"i&&j&&chisq<200&&dmu<0.01&&sigma>0.03\",\"profsame\");" << endl;
+	  //	    FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"(i&&j==0&&chisq<200&&dmu<0.01&&sigma>0.03)/dsigma**2","profsameggoff");
+	  FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"(i&&j&&chisq<200&&dmu<0.01&&sigma>0.03)","profsame");
 	}
+	c1->Update();
+	Hist = (TProfile *) FitFiles[i]->Get(Plot);
       }
       if (! Hist) continue;
+      Hist->SetMarkerColor(c); Hist->SetMarkerStyle(20); Hist->SetLineColor(c);
       if (Hist->GetEntries() < 1.e-4) continue;
-      Hist->Rebin();
-      Hist->Scale(0.5);
-      TF1 *powfit = 0;
-      if (plot == "sigma") {
-	powfit = new TF1("powfit","[0]*TMath::Power(x,[1])",40,160);
-	powfit->SetParameters(0.5,-0.5);
-      } else {
-	powfit = new TF1("powfit","pol0",40,160);
-	//	powfit->SetParameter(0,0.);
-      }
-      powfit->SetLineColor(c);
+      //      Hist->Rebin();
+      //      Hist->Scale(0.5);
       Hist->Fit("powfit","rn");
       powfit->Draw("same");
       //      Hist->Fit("powfit","r");
@@ -331,11 +349,16 @@ void DrawFitP(const Char_t *pattern = "SecRow3C", const Char_t *plot="mu:rowSign
   }
   leg->Draw();
 }
+#if 0
 //________________________________________________________________________________
 void DrawdEdx() {
   //  _file0->cd();
   TString Name(gSystem->BaseName(gDirectory->GetName()));
   Name.ReplaceAll(".root","");
+  TH2 *TdEdxF = (TH2 *) gDirectory->Get("TdEdxF");
+  TH2 *TdEdxI70 = (TH2 *) gDirectory->Get("TdEdxI70");
+  TH2 *TdEdxN = (TH2 *) gDirectory->Get("TdEdxN");
+  if (! TdEdxF || ! TdEdxI70 || ! TdEdxN) return;
 #if 0
   TString Res("Res_");
   Res += Name;
@@ -353,8 +376,10 @@ void DrawdEdx() {
   gROOT->LoadMacro("bichselG10.C");
   bichselG10("I70");
   c2->cd(2)->SetLogz(1);
-  TdEdxF->Draw("colz");
-  bichselG10("z");
+  if (TdEdxF) {
+    TdEdxF->Draw("colz");
+    bichselG10("z");
+  }
   c2->cd(3)->SetLogz(1);
   TdEdxN->Draw("colz");
   bichselG10("dNdx");
@@ -371,3 +396,4 @@ void DrawdEdx() {
      root.exe ${p} TPoints70GP${p} TPointsFGP${p} TPointsNGP${p} Res.C
    end
  */
+#endif
