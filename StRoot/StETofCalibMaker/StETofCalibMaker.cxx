@@ -1674,9 +1674,9 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
     double referenceTime = 0.;
 
     // update reference time (for QA)
+  if( pulserTimes.count( mReferencePulserIndex ) ) {
+    referenceTime = pulserTimes.at( mReferencePulserIndex ); //only updated for QA?? needed to remove smeared pulsers
     if( mDoQA ) {
-        if( pulserTimes.count( mReferencePulserIndex ) ) {
-            referenceTime = pulserTimes.at( mReferencePulserIndex ); //only updated for QA?? needed to remove smeared pulsers
             if( mDebug ) {
                 LOG_INFO << "preliminary reference time:" << referenceTime << endm;
             }

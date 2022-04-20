@@ -568,7 +568,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	goto ENDL;
       } else if (k == kEdge) {// Should be disabled in StTpcRSMaker
 	if (corl->type == 200) VarXs[kEdge] = TMath::Abs(CdEdx.edge);
-	if (corl->min > 0 && corl->min > VarXs[kEdge]    ) return 2;
+	if (corl->min > 0 && corl->min > VarXs[kEdge]    ) return 4;
       } else if (k == ktpcTime) { // use the correction if you have xmin < xmax && xmin <= x <= xmax
 	if (corl->min >= corl->max || corl->min > VarXs[ktpcTime] ||  VarXs[ktpcTime] > corl->max) goto ENDL;
 	Double_t xx = VarXs[ktpcTime];
@@ -576,22 +576,24 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	goto ENDL;
       } 
       if (k == kzCorrection || k == kzCorrectionC) {
-	if ((corl->min > corl->max) && (corl->min > VarXs[k] || VarXs[k] > corl->max)) {
+	if ((corl->min < corl->max) && (corl->min > VarXs[k] || VarXs[k] > corl->max)) {
 	  if (! IsSimulation()) return 2;
-	  if (corl->min > 0 && corl->min > VarXs[k])  VarXs[k] = corl->min;
-	  if (corl->min > 0 && corl->max < VarXs[k])  VarXs[k] = corl->max;
+	  VarXs[k] = TMath::Min(corl->max, TMath::Max( corl->min, VarXs[k]));
 	}
 	// Take care about prompt hits and Gating Grid region in Simulation
 	if (ZdriftDistance <= 0.0) goto ENDL; // prompt hits 
 	if (m_Corrections[kGatingGrid].Chair && (k == kzCorrectionC || IsSimulation())) {// take about Gating Grid for 
-	    Double_t dEcor = ((St_GatingGridC *)m_Corrections[kGatingGrid].Chair)->CalcCorrection(0,VarXs[kGatingGrid]);
-	    if (dEcor < -9.9) return 3;
-	    dE *= TMath::Exp(-dEcor);
+	  Double_t dEcor = ((St_GatingGridC *)m_Corrections[kGatingGrid].Chair)->CalcCorrection(0,VarXs[kGatingGrid]);
+	  Int_t np = TMath::Abs(corl->npar)%100;
+	  if (corl->type == 20 && TMath::Abs(corl->a[np]) > 1e-7) {// extra exponent 
+	    dEcor += corl->a[np]*TMath::Exp( corl->a[np+1]*VarXs[k]);
+	  }
+	  if (dEcor < -9.9) return 3;
+	  dE *= TMath::Exp(-dEcor);
 	}
       }
-      if (corl->type == 300) {
-	if (corl->min > 0 && corl->min > VarXs[k]    ) VarXs[k] = corl->min;
-	if (corl->max > 0 && VarXs[k]     > corl->max) VarXs[k] = corl->max;
+      if (corl->type == 300 && (corl->min < corl->max)) {
+	VarXs[k] = TMath::Min(corl->max, TMath::Max( corl->min, VarXs[k])); 
       }
       if (TMath::Abs(corl->npar) >= 100) {
 	Int_t iok = 2;
@@ -625,7 +627,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     } else  { // repeatable 
       for (m = 0; m < NLoops; m++, l += nrows) {
 	corl = cor + l;
-	if (corl->min <= VarXs[k] && VarXs[k] < corl->max) {
+	if (corl->min < corl->max && corl->min <= VarXs[k] && VarXs[k] < corl->max) {
 	  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
 	  break;
 	}	

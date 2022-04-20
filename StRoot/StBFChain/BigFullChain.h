@@ -1475,6 +1475,7 @@ Bfc_st BFC[] = { // standard chains
   {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb"       ,"fmsDb","","db,fmsutil",          "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
   {"fcsDb"       ,"fcsDbMkr","","",                 "StFcsDbMaker","StFcsDbMaker","Load FcsDbMaker",kFALSE},
+  {"fttDb"       ,"fttDbMkr","","",                 "StFttDbMaker","StFttDbMaker","Load FttDbMaker",kFALSE},
   {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb"       ,"pxlDb","","tpcDb PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
@@ -1775,8 +1776,18 @@ Bfc_st BFC[] = { // standard chains
   {"fcsPoint"   ,"","fcsChain", "StEvent,fcsDb",
    "StFcsPointMaker","StFcsPointMaker,libMinuit","Fill FCS points",                                 kFALSE},
   // FTT
-  {"FttDat","","","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent",
+  {"ftt","fttChain","","FttDat,FttHitCalib,FttClu,FttPoint", "StMaker","StChain","FST chain"        ,kFALSE}, 
+  {"FttDat","","fttChain","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent",
                                                             "sTGC Raw hit maker",                   kFALSE},
+  {"FttHitCalib","","fttChain","StEvent,MuDST","StFttHitCalibMaker","StFttHitCalibMaker,StFttRawHitMaker,StEvent",
+                                                            "sTGC hit calib maker",                 kFALSE},
+  {"FttClu","","fttChain","StEvent,fttDb","StFttClusterMaker","StFttClusterMaker,StEvent,StFttDbMaker", 
+                                                                           "sTGC Cluster maker",    kFALSE},
+  {"FttPoint","","fttChain","StEvent,fttDb","StFttPointMaker","StFttPointMaker,StEvent,StFttDbMaker", 
+                                                                             "sTGC Point maker",    kFALSE},
+  {"FttQA","","fttChain","","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker",                 kFALSE},
+
+
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 #else
