@@ -655,11 +655,11 @@ Int_t StBFChain::Instantiate()
     if ( maker == "StEmcRawMaker" && GetOption("BEmcChkStat"))
       mk->SetAttr("BEmcCheckStatus",kTRUE);
       
-    // 
-    if ( maker == "StEmcRawMaker" && GetOption("picoWrite")) {
-      mk->SetMode(1);  // saveAllStEvent for picoDst
+    // trigger simu maker
+    if ( maker == "StEmcRawMaker" && GetOption("picoWrite") ) {
+      mk->SetMode(10);  // picoDst production - save all BTOW hits for triggerSimuMaker
     }
-    
+
     // trigger simu maker
     if ( maker == "StTriggerSimuMaker" && GetOption("picoWrite") ) {
       mk->SetMode(10);  // picoDst production
