@@ -5,7 +5,11 @@ void lMuDst(Int_t opt = -2, const Char_t *input = "", const Char_t *copt = "StEv
 #else
   gROOT->LoadMacro("bfc.C");
   TString Chain(copt);
-  if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2") Chain += ",TMVARank";
+  TString STAR_VERSION(gSystem->Getenv("STAR_VERSION"));
+  if (STAR_VERSION == ".DEV2" || STAR_VERSION.Contains("TFG")) {
+    Chain += ",TMVARank";
+    gSystem->AddIncludePath(" -D__TFG__VERSION__");
+  }
   bfc(opt,Chain,input,ofile,tfile);
   //  gROOT->LoadMacro("FitP_t.h+");
   gSystem->Load("libEG");
