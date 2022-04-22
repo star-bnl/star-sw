@@ -15,8 +15,8 @@
 #include "TArrayF.h"
 class THnSparseProject: public TObject {
  public:
-  THnSparseProject(const THnSparse *hs = 0);
-  ~THnSparseProject() {SafeDelete(fProjMap);}
+  THnSparseProject(const THnSparse *hs = 0, Int_t select = -1);
+  ~THnSparseProject() {} // SafeDelete(fProjMap);}
   static void SetDebug(Int_t k = 0) {_debug = k;}
   TH1D    *Next();
   Int_t   *GetBins() {return fBins.GetArray();}
@@ -27,9 +27,11 @@ class THnSparseProject: public TObject {
   Int_t    fNdim;
   TArrayI  fBins;
   TArrayI  fCoord;
+  TArrayI  fnBins;
   TArrayF  fX;
   TAxis   *fAxis;
   THashList *fProjMap;
+  Int_t   fSelect;
   static Int_t _debug; 
   ClassDef(THnSparseProject,1)
 };
