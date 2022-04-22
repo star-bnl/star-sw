@@ -265,7 +265,7 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
       }
       //      Title += Form(" : #sigma(@128cm) = %5.2f%\%",100*powfit->Eval(128));
       Title.Strip();
-      cout << Title << endl;
+      cout << gDirectory->GetName() << " " << Title << endl;
       leg->AddEntry(Hist,Title.Data());
     }
   }

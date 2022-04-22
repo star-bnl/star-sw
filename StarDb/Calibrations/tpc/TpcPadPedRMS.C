@@ -13,6 +13,8 @@ TDataSet *CreateTable() {
   row.a[0]     = 6.25337e-01;
   row.a[1]     = 0.00000e+00;
   row.a[2]     = 5.54285e-01;
+  row.a[3]     = 4.81557e+01; // <ped>
+  row.a[4]     = 8.99656e+00; // RMSped
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize());
   row.idx      = 2;
@@ -23,6 +25,8 @@ TDataSet *CreateTable() {
   row.a[0]     = 8.26510e-01;
   row.a[1]     = 0.00000e+00;
   row.a[2]     = 3.81718e-01;
+  row.a[3]     = 8.61555e+01;  // <ped>
+  row.a[4]     = 8.91453e+00;  // RMSped
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

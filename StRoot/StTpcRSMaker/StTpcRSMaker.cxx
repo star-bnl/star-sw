@@ -223,8 +223,12 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     LOG_INFO << "StTpcRSMaker:: use Tpc dE/dx correction from calibaration" << endm;
     Long_t Mask = -1; // 64 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrectionC);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrectionMDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection3MDF);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection4MDF);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection5MDF);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection6MDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
 #if 0
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
@@ -1522,8 +1526,8 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
   for (row = 1;  row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
     Int_t noOfPadsAtRow = St_tpcPadConfigC::instance()->St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
     Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
-    Int_t ioA = 1;
-    if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row) ) ioA = 0;
+    Int_t ioA = 1; // Outer 
+    if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row) ) ioA = 0; // Inner
     if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {
       if (! (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row))) {
 	pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMSX();
@@ -1546,6 +1550,7 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 	Double_t NPads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
 	Double_t x =  pad/NPads - 0.5;
 	pedRMSpad = St_TpcPadPedRMSC::instance()->CalcCorrection(1-ioA, x);
+        ped = gRandom->Gaus(St_TpcPadPedRMSC::instance()->a(1-ioA)[3],St_TpcPadPedRMSC::instance()->a(1-ioA)[4]);
       }
       memset(mADCs, 0, sizeof(mADCs));
       memset(IDTs, 0, sizeof(IDTs));
@@ -2195,7 +2200,7 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
       CdEdx.edge += 1 - St_tpcPadConfigC::instance()->numberOfPadsAtRow(CdEdx.sector,CdEdx.row);
     CdEdx.F.dE     = 1;
 #if 0
-    CdEdx.dCharge= tpcHit->chargeModified() - tpcHit->charge();
+    CdEdx.dCharge = 0;
     Int_t p1 = tpcHit->minPad();
     Int_t p2 = tpcHit->maxPad();
     Int_t t1 = tpcHit->minTmbk();

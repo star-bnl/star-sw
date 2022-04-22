@@ -21,6 +21,53 @@ my $FILE = "/*/st_physics";
 my $NEvents = 100000;
 my $step = 0;
 #================================================================================
+#  dir /gpfs01/star/data*/reco/production_7p7GeV_2021/ReversedFullField/P22ia/2021/*/*/*event.root
+#  dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/* | awk -F\/ '{print $6"/"$8}' | sort -u
+# production_11p5GeV_2020/P21ib_calib
+# production_13p5GeV_fixedTarget_2020/P21ic_calib
+# production_13p5GeV_fixedTarget_2020/P21id
+# production_14p5GeV_2019/P21ic
+# production_19GeV_2019b/P21ic
+# production_19GeV_2019/P20ic_calib
+# production_19GeV_2019/P21ic
+# production_19p5GeV_fixedTarget_2020/P21ic_calib
+# production_19p5GeV_fixedTarget_2020/P21id
+# production_26p5GeV_fixedTarget_2018/P19ie
+# production_26p5GeV_fixedTarget_2020/DEV
+# production_26p5GeV_fixedTarget_2020/P21ic_calib
+# production_27GeV_fixedTarget_2018/P19ie
+# production_27GeV_fixedTarget_2018/P19ie.SL20d
+# production_31GeV_fixedTarget_2019/P21ic_calib
+# production_31GeV_fixedTarget_2019/P21id
+# production_31p2GeV_fixedTarget_2020/P21ic_calib
+# production_31p2GeV_fixedTarget_2020/P21id
+# production_3p85GeV_fixedTarget_2019/P21ic_calib
+# production_3p85GeV_fixedTarget_2019/P21id
+# production_4p59GeV_fixedTarget_2019/P21ic_calib
+# production_4p59GeV_fixedTarget_2019/P21id
+# production_5p75GeV_fixedTarget_2020/P21ic_calib
+# production_5p75GeV_fixedTarget_2020/P21id
+# production_7.3GeV_fixedTarget_2019/P21ic_calib
+# production_7.3GeV_fixedTarget_2019/P21id
+# production_7p3GeV_fixedTarget_2020/P21ic_calib
+# production_7p3GeV_fixedTarget_2020/P21id
+# production_7p7GeV_2021/DEV
+# production_7p7GeV_2021/P22ia
+# production_9p2GeV_2020b/P21ib_calib
+# production_9p2GeV_2020c/P21ib_calib
+# production_9p2GeV_2020/P21ib_calib
+# production_9p8GeV_fixedTarget_2020/P21ic_calib
+# production_9p8GeV_fixedTarget_2020/P21id
+# production_AuAu200_2019/P21id
+# production_AuAu200_2019/P22ia
+# production_dAu200_2021/DEV
+# production_isobar_2018/P21id
+# production_isobar_2018/P21id.SL21d
+# production_isobar_2018/P22ia
+# production_OO_200GeV_2021/DEV
+# production_pp500_2022/dev
+# production_pp500_2022/DEV
+
 # dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/*
 # dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/* | awk -F\/ '{print $6}' | sort -u 
 # on disks
@@ -2360,7 +2407,9 @@ my $step = 0;
 # $hist = "RunXXI201"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG21h"; $year = "/*GeV*/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  09/10/21 TpcZCorrectionC.y2021.C
 # Run XXII pp510_2022
 # $hist = "RunXXII00"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  01/16/22 Check
- $hist = "RunXXII01"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  01/16/22 Check 03/01/22
+# $hist = "RunXXII01"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  01/16/22 Check 03/01/22
+# $hist = "RunXXII02"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = "TFG22b"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  04/19/22 check whole pp500 sample
+ $hist = "RunXXII03"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = "TFG22b"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  04/21/22 pcSecRowB.20211110.000002.root
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();

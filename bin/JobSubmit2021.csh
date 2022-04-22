@@ -1,7 +1,7 @@
 #! /bin/tcsh -f
-#cd ~/bin/; onl CURRENT | SortRun.pl | tee RunXXIDefs.pm
+#cd ~/bin/; onl CURRENT | SortRun.pl | tee RunXIXDefs.pm
 #git diff .
-#git ci -m "Update" RunXXIDefs.pm
+#git ci -m "Update" RunXIXDefs.pm
 #cd ~/reco/2020/TFG19m/RF/11p5GeV.B
 #cd CreateRunDirs.pl/net/l401/data/scratch2/reco/2020/TFG20a/RF/31p2GeV_fixedTarget
 #cd /net/l401/data/scratch2/reco/2020/TFG20a/RF/9p8GeV_fixedTarget
@@ -11,14 +11,14 @@
 #cd /hlt/cephfs/reco/2021/RF/TFG21c.B/7p7GeV_2021
 #cd /hlt/cephfs/reco/2021/FF/TFG21c.B/7p7GeV_2021
 #cd /hlt/cephfs/reco/2021/RF/TFG21h/7p7GeV_2021
-CreateRunDirs.pl
+CreateRunDirs2019.pl
 foreach d (`ls -1d ???/2*`)
   cd $d;
   if (-r Done || -r Submitted) then
     cd -
     continue
   endif
-  daq_2021dR.pl
+  daq_2019dR.pl
   if ($?) then
     ls -1d *bla.root
     if ($?) then
@@ -34,7 +34,7 @@ foreach d (`ls -1d ???/2*`)
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021StiCA.Minuit.TFG20a.xml
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021_Cosmics.xml
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG21c.xml
-  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG21h.xml
+  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2019.TFG22b.xml
 #  endif
   touch Submitted
   cd -

@@ -7,6 +7,7 @@
 #   setup 64b
 #   starver TFG21c
 #   starver TFG21h
+   starver TFG22b  # 04/02/2022
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`

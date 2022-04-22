@@ -2,6 +2,28 @@
   root.exe 'lDb.C("sdt20190226",0)' FitP.root 'mdf4ADCM.C+(1)' // Inner
   root.exe 'lDb.C("sdt20190226",0)' FitP.root 'mdf4ADCM.C+(2)' // Outer
   root.exe 'lDb.C("sdt20190226",0)' FitP.root  mdf4ADCM.C+     // Test
+  FitP->Draw("mu-0.27:exp(z3)>>A","i&&j&&chisq>0&&chisq<200&&dmu<0.01&&dsigma<0.01&&z3>4","profs")
+  A->Fit("expo")
+  FROM MIGRAD    STATUS=CONVERGED      91 CALLS          92 TOTAL
+                     EDM=4.61731e-08    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  Constant    -1.45082e+00   7.98415e-02   5.20957e-05   5.67786e-03
+   2  Slope       -7.00402e-04   1.05862e-04   6.90548e-08   5.23016e+00
+
+   
+   TF1 *F = new TF1("F","[0]+TMath::Exp([1]+[2]*TMath::Exp(x))",3,10)
+   F->SetParameters(0.27,-1.45082e+00,-7.00402e-04)
+   FitP->Draw("mu:z3>>E","i&&j&&chisq>0&&chisq<200&&dmu<0.01&&dsigma<0.01&&z3>4","profs")
+   root.exe [19] E->Fit(F,"er","",5,9)
+ FCN=8.28711 FROM MINOS     STATUS=SUCCESSFUL     54 CALLS         280 TOTAL
+                     EDM=6.05605e-08    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           2.81913e-01   9.95503e-03   3.10273e-04  -2.41698e-01
+   2  p1          -1.49290e+00   5.04312e-02   9.08945e-04  -6.33686e-02
+   3  p2          -8.55033e-04   1.51892e-04   1.51892e-04  -5.63747e+00
+
 */
 #include <stdlib.h>
 #include <string.h>
@@ -26,9 +48,11 @@
 #include "TCanvas.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_TpcAdcCorrectionBC.h"
+#include "StDetectorDbMaker/St_TpcAdcCorrectionCC.h"
 #include "StDetectorDbMaker/St_tpcPadConfigC.h"
 #include "StDetectorDbMaker/St_TpcAdcCorrection4MDF.h"
 #include "StDetectorDbMaker/St_TpcAdcCorrection5MDF.h"
+#include "StDetectorDbMaker/St_TpcAdcCorrection6MDF.h"
 #if 0
 class TMultiDimFit;
 enum EMDFPolyType {
@@ -47,6 +71,10 @@ Double_t mdf4(Int_t k, Double_t z0, Double_t z1, Double_t z2, Double_t z3) {
   return St_TpcAdcCorrection4MDF::instance()->Eval(k,z0,z1,z2,z3);
 }
 //--------------------------------------------------------------------------------
+Double_t mdf6(Int_t k, Double_t z0, Double_t z1, Double_t z2, Double_t z3) {
+  return St_TpcAdcCorrection6MDF::instance()->Eval(k,z0,z1,z2,z3);
+}
+//--------------------------------------------------------------------------------
 Double_t mdf5(Int_t k, Double_t z0, Double_t z1, Double_t z2, Double_t z3) {
   return St_TpcAdcCorrection5MDF::instance()->Eval(k,z0,z1,z2,z3);
 }
@@ -57,15 +85,39 @@ Double_t adcB(Int_t k, Double_t ADC, Double_t zG) {
    St_tss_tssparC *tsspar = St_tss_tssparC::instance();
   if (k == 1 ) {
     // kTpcOutIn = kTpcInner;
-    gainNominal = tsspar->gain_in()*tsspar->wire_coupling_in();
-    gasGain = tsspar->gain_in(1,1) *tsspar->wire_coupling_in();
+    gainNominal = tsspar->gain_in()*tsspar->wire_coupling_in(); // 3558 * 0.533
+    gasGain = tsspar->gain_in(1,1) *tsspar->wire_coupling_in(); // 
   } else {
     // kTpcOutIn = kTpcOuter;
-    gainNominal = tsspar->gain_out()*tsspar->wire_coupling_out();
-    gasGain = tsspar->gain_out(1,41)*tsspar->wire_coupling_out();
+    gainNominal = tsspar->gain_out()*tsspar->wire_coupling_out(); // 1310 * 0.512
+    gasGain = tsspar->gain_out(1,41)*tsspar->wire_coupling_out(); // 
   }
-  Double_t Adc2GeVReal = tsspar->ave_ion_pot() * tsspar->scale()/gasGain;
+  Double_t Adc2GeVReal = tsspar->ave_ion_pot() * tsspar->scale()/gasGain; // 2.85e-08 (GeV/electron) * 335 (electrons/ADC) / gasGain =
+  //                   =  2.85e-08 * 335 /( 3558 * 0.533) * 1e9 =  5.03 eV/ADC for Inner   => scale MC -> RC : -0.3542 TpcAdcCorrectionB.20190225.230054.C; MIP = 1.6 cm 2.54 keV/cm /5.03 ev/ADC = 795 ADC
+  //                   =  2.85e-08 * 335 /( 1310 * 0.512) * 1e9 = 14.23 ev/ADC for Outer                     : -0.6202                                          = 2.0    2.54        /14.23       = 361 ADC
   Double_t adc = St_TpcAdcCorrectionBC::instance()->CalcCorrection(k,ADC,TMath::Abs(zG));
+  Double_t dE = Adc2GeVReal*adc;
+  adc *= TMath::Exp(St_TpcAdcCorrectionBC::instance()->a(k)[0]); //TMath::Exp(-cor->a[0]);
+  return adc;
+}
+//--------------------------------------------------------------------------------
+Double_t adcC(Int_t k, Double_t ADC) {
+  Float_t gasGain = 1;
+  Float_t gainNominal = 0;
+   St_tss_tssparC *tsspar = St_tss_tssparC::instance();
+  if (k == 1 ) {
+    // kTpcOutIn = kTpcInner;
+    gainNominal = tsspar->gain_in()*tsspar->wire_coupling_in(); // 3558 * 0.533
+    gasGain = tsspar->gain_in(1,1) *tsspar->wire_coupling_in(); // 
+  } else {
+    // kTpcOutIn = kTpcOuter;
+    gainNominal = tsspar->gain_out()*tsspar->wire_coupling_out(); // 1310 * 0.512
+    gasGain = tsspar->gain_out(1,41)*tsspar->wire_coupling_out(); // 
+  }
+  Double_t Adc2GeVReal = tsspar->ave_ion_pot() * tsspar->scale()/gasGain; // 2.85e-08 (GeV/electron) * 335 (electrons/ADC) / gasGain =
+  //                   =  2.85e-08 * 335 /( 3558 * 0.533) * 1e9 =  5.03 eV/ADC for Inner   => scale MC -> RC : -0.3542 TpcAdcCorrectionB.20190225.230054.C
+  //                   =  2.85e-08 * 335 /( 1310 * 0.512) * 1e9 = 14.23 ev/ADC for Outer                     : -0.6202
+  Double_t adc = St_TpcAdcCorrectionBC::instance()->CalcCorrection(k,ADC);
   Double_t dE = Adc2GeVReal*adc;
   adc *= TMath::Exp(St_TpcAdcCorrectionBC::instance()->a(k)[0]); //TMath::Exp(-cor->a[0]);
   return adc;
@@ -367,8 +419,13 @@ void FitPS::Loop2()
   const Char_t *IO[kTPC] = {"I","O"};
   for (Int_t io = 0; io < 2; io++)
     for (Int_t j = 0; j < kVar; j++) {
+#if 0
       prof[io][j]  = new TProfile(Form("%s%s",Plots[j].vName,IO[io]),"mu-0.4",Plots[j].nx,Plots[j].xmin,Plots[j].xmax,"s");
       profC[io][j] = new TProfile(Form("%s%sC",Plots[j].vName,IO[io]),"predicted mu - 0.4",Plots[j].nx,Plots[j].xmin,Plots[j].xmax,"s");
+#else
+      prof[io][j]  = new TProfile(Form("%s%s",Plots[j].vName,IO[io]),"mu",Plots[j].nx,Plots[j].xmin,Plots[j].xmax,"s");
+      profC[io][j] = new TProfile(Form("%s%sC",Plots[j].vName,IO[io]),"predicted mu",Plots[j].nx,Plots[j].xmin,Plots[j].xmax,"s");
+#endif
       profC[io][j]->SetMarkerColor(2); profC[io][j]->SetLineColor(2); 
       profD[io][j] = new TProfile(Form("%s%sD",Plots[j].vName,IO[io]),"mu - predicted",Plots[j].nx,Plots[j].xmin,Plots[j].xmax,"s");
       profD[io][j]->SetMarkerColor(4); profD[io][j]->SetLineColor(4); 
@@ -390,9 +447,10 @@ void FitPS::Loop2()
     xx[1] = z1;// Npads
     xx[2] = z2;// z
     xx[3] = z3;// AdcL
-    //    Double_t pred = mdf4(io,z0,z1,z2,z3) + Adjust[io];
-    //    Double_t pred = mdf4(io,z0,z1,z2,z3) + Adjust[io];
     Int_t ioT = 1 - io;
+#if 0
+    //    Double_t pred = mdf4(io,z0,z1,z2,z3) + Adjust[io];
+    //    Double_t pred = mdf4(io,z0,z1,z2,z3) + Adjust[io];
     //    Double_t pred = TMath::Log(adcB(ioT, TMath::Exp(z3), TMath::Abs(207.707 - xx[2]))) - z3;
     Double_t pred = TMath::Log(adcB(ioT, TMath::Exp(z3), TMath::Abs(207.707 - xx[2]))) - z3 + mdf5(ioT,z0,z1,z2,z3);
     Double_t dmu = mu - pred;
@@ -402,6 +460,20 @@ void FitPS::Loop2()
       profD[io][j]->Fill(xx[j],dmu);
       h2[io][j]->Fill(xx[j],dmu);
     }
+#else
+    Double_t ADC = TMath::Exp(z3);
+    Double_t pred = adcC(ioT, ADC) + mdf5(ioT,z0,z1,z2,z3);
+    Double_t adcM = ADC*TMath::Exp(mu);
+    Double_t dval = adcM*dmu;
+    Double_t dmu  = adcM - pred;
+    
+    for (Int_t j = 0; j < kVar; j++) {
+      prof[io][j]->Fill(xx[j],adcM);
+      profC[io][j]->Fill(xx[j],pred);
+      profD[io][j]->Fill(xx[j],dmu);
+      h2[io][j]->Fill(xx[j],dmu);
+    }
+#endif
   }
   for (Int_t io = 0; io < 2; io++) {
     TCanvas *c1 = new TCanvas(Form("c%s",IO[io]),IO[io], 800, 800);
@@ -465,9 +537,17 @@ void FitPS::Loop()
     xx[3] = z3;// AdcL
     Int_t k = 2 - fgIO;
     Double_t ADC = TMath::Exp(z3);
+#if 0
     Double_t adc = adcB(k, ADC, TMath::Abs(207.707 - xx[2]));
     Double_t shift = TMath::Log(adc/ADC);
     fit->AddRow(xx, mu-shift, dmu*dmu);
+#else
+    Double_t adc = adcC(k, ADC);
+    Double_t adcM = ADC*TMath::Exp(mu);
+    Double_t dval = adcM*dmu;
+    Double_t val  = adcM - adc;
+    fit->AddRow(xx, val, dval*dval);
+#endif
     nev++;
   }
 }

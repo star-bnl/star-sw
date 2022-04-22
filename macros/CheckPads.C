@@ -1,4 +1,12 @@
 /*
+  cd ~/work/dEdx/RunXXII02
+  foreach f ( `ls -1d   pp500_2022/hlt_2*.root` )  
+    set b = `basename ${f} .root`; 
+    set c = `echo ${b} | sed -e 's/hlt_//'`;
+    echo "${c}"
+    if (-r ${c}.list) continue;
+    root.exe -q -b ${f} CheckPads.C+ >& ${c}.list
+  end
   cd ~/work/dEdx/RunXIX68
   foreach f ( `ls -1d   *19/2*.root *20/2*.root` )  
     set b = `basename ${f} .root`; 

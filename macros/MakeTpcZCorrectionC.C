@@ -102,7 +102,8 @@ void MakeTpcZCorrection1() {
   ofstream out;
   cout << "Create " << fOut.Data() << endl;
   out.open(fOut.Data());
-#ifdef __noAuAu200_2019__
+#define __West_East__
+#ifdef __West_East__
   Int_t nrows = 4; // for separate West and East
   Int_t np = 5;
   Int_t nextra = 0;
@@ -126,17 +127,17 @@ void MakeTpcZCorrection1() {
     out << "  memset(&row,0,tableSet->GetRowSize());" << endl;
     out << "  row.idx   = " << idx << ";" << endl;
     out << "  row.nrows = nrows;" << endl;
-#ifdef __noAuAu200_2019__
+#ifdef __West_East__
     if (idx % 2 == 1) { // Outer
-      min = 18;
+      min = 16.5; // 18;
       max = 208;
     } else {            // Inner
-      min =  18;
+      min =  15.; // 18;
       max = 208;
     }
-#else /* AuAu200_2019 */
+#else /* ! __West_East__ */
     if (idx % 2 == 1) { // Outer
-      min = 18;
+      min = 15.0; // 18;
       max = 220;
       if (nextra) f[io] =  fc;
     } else {            // Inner

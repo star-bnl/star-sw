@@ -94,12 +94,12 @@ MakeChairInstance(tpcChargeEvent,Calibrations/tpc/tpcChargeEvent);
 MakeChairInstance(tpcSCGL,Calibrations/tpc/tpcSCGL);
 ClassImp(St_tpcCorrectionC);
 //________________________________________________________________________________
-Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_t NparMax) {
+Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_t NparMax) const {
   tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
   return SumSeries(cor, x, z, NparMax);
 }
 //________________________________________________________________________________
-Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double_t z, Int_t NparMax) {
+Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double_t z, Int_t NparMax) const {
   Double_t Sum = 0;
   if (! cor) return Sum;
   Int_t N = TMath::Abs(cor->npar)%100;
@@ -114,6 +114,7 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     case 10:// ADC correction offset + poly for ADC
     case 11:// ADC correction offset + poly for log(ADC) and |Z|
     case 12:// ADC correction offset + poly for log(ADC) and TanL
+    case 13:// ADC correction without off set TF1 *F = new TF1("F","[0]+TMath::Exp([1]+[2]*TMath::Exp(x))",3,10) and offset correction via TpcAdcCorrection6MDF
       X = TMath::Log(x);      break;
     case 1: // Tchebyshev [-1,1]
       if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
@@ -189,6 +190,9 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
     Sum = cor->a[1] + z*cor->a[2] + z*z*cor->a[3] + TMath::Exp(X*(cor->a[4] + X*cor->a[5]) + cor->a[6]);
     Sum *= TMath::Exp(-cor->a[0]);
     break;
+  case 13: // ADC correction and offset correction via TpcAdcCorrection6MDF
+    Sum = x * TMath::Exp(cor->a[0] + cor->a[1] + TMath::Exp(cor->a[2] + cor->a[3]*x));
+    break;
   case 1000:
   case 1100:
   case 1200:
@@ -254,6 +258,28 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   }
   return Sum;
 }
+//________________________________________________________________________________
+Int_t St_tpcCorrectionC::IsActiveChair() const {
+  const St_tpcCorrection  *tableC = (const St_tpcCorrection  *) Table();
+  Int_t npar = 0;
+  if (! tableC) return npar;
+  tpcCorrection_st *cor = tableC->GetTable();
+  Int_t N = tableC->GetNRows();
+  if (! cor || ! N) {
+    return npar;
+  }
+  N = cor->nrows;
+  for (Int_t i = 0; i < N; i++, cor++) {
+    if (cor->nrows == 0 && cor->idx == 0) continue;
+    if (TMath::Abs(cor->npar) > 0       ||
+	TMath::Abs(cor->OffSet) > 1.e-7 ||
+	TMath::Abs(cor->min)    > 1.e-7 ||
+	TMath::Abs(cor->max)    > 1.e-7) {
+      npar++;
+    }
+  }
+  return npar;
+}
 #include "St_TpcRowQC.h"
 MakeChairInstance2(tpcCorrection,St_TpcRowQC,Calibrations/tpc/TpcRowQ);
 #include "St_TpcDriftDistOxygenC.h"
@@ -274,12 +300,18 @@ MakeChairInstance2(tpcCorrection,St_TpcPadPedRMSC,Calibrations/tpc/TpcPadPedRMS)
 MakeChairInstance2(tpcCorrection,St_TpcEdgeC,Calibrations/tpc/TpcEdge);
 #include "St_TpcAdcCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcAdcCorrectionBC,Calibrations/tpc/TpcAdcCorrectionB);
+#include "St_TpcAdcCorrectionCC.h"
+MakeChairInstance2(tpcCorrection,St_TpcAdcCorrectionCC,Calibrations/tpc/TpcAdcCorrectionC);
 #include "St_TpcAdcCorrectionMDF.h"
 MakeChairInstance2(MDFCorrection,St_TpcAdcCorrectionMDF,Calibrations/tpc/TpcAdcCorrectionMDF);
 #include "St_TpcAdcCorrection3MDF.h"
 MakeChairInstance2(MDFCorrection3,St_TpcAdcCorrection3MDF,Calibrations/tpc/TpcAdcCorrection3MDF);
 #include "St_TpcAdcCorrection4MDF.h"
 MakeChairInstance2(MDFCorrection4,St_TpcAdcCorrection4MDF,Calibrations/tpc/TpcAdcCorrection4MDF);
+#include "St_TpcAdcCorrection5MDF.h"
+MakeChairInstance2(MDFCorrection4,St_TpcAdcCorrection5MDF,Calibrations/tpc/TpcAdcCorrection5MDF);
+#include "St_TpcAdcCorrection6MDF.h"
+MakeChairInstance2(MDFCorrection4,St_TpcAdcCorrection6MDF,Calibrations/tpc/TpcAdcCorrection6MDF);
 #include "St_tpcMethaneInC.h"
 MakeChairInstance2(tpcCorrection,St_tpcMethaneInC,Calibrations/tpc/tpcMethaneIn);
 #include "St_tpcTimeBucketCorC.h"
@@ -486,6 +518,23 @@ Double_t St_MDFCorrectionC::EvalFactor(Int_t k, Int_t p, Double_t x) const {
   return r;
 }
 //________________________________________________________________________________
+Int_t St_MDFCorrectionC::IsActiveChair() const {
+  Int_t npar = 0;
+  const St_MDFCorrection *tableMDF = (const St_MDFCorrection *) Table();
+  if (! tableMDF) return npar;
+  MDFCorrection_st *corMDF = tableMDF->GetTable();
+  Int_t N = tableMDF->GetNRows();
+  if (! corMDF || ! N) {
+    return npar;
+  }
+  for (Int_t i = 0; i < N; i++, corMDF++) {
+    if (corMDF->nrows == 0 && corMDF->idx == 0) continue;
+    npar++;
+  }
+  return npar;
+}
+//________________________________________________________________________________
+//________________________________________________________________________________
 ClassImp(St_MDFCorrection3C);
 St_MDFCorrection3C *St_MDFCorrection3C::fgMDFCorrection3C = 0;
 //____________________________________________________________________
@@ -622,6 +671,23 @@ Double_t St_MDFCorrection3C::EvalFactor(Int_t k, Int_t p, Double_t x) const {
   }
   return r;
 }
+//________________________________________________________________________________
+Int_t St_MDFCorrection3C::IsActiveChair() const {
+  Int_t npar = 0;
+  const St_MDFCorrection3 *tableMDF = (const St_MDFCorrection3 *) Table();
+  if (! tableMDF) return npar;
+  MDFCorrection3_st *corMDF = tableMDF->GetTable();
+  Int_t N = tableMDF->GetNRows();
+  if (! corMDF || ! N) {
+    return npar;
+  }
+  for (Int_t i = 0; i < N; i++, corMDF++) {
+    if (corMDF->nrows == 0 && corMDF->idx == 0) continue;
+    npar++;
+  }
+  return npar;
+}
+//________________________________________________________________________________
 //________________________________________________________________________________
 ClassImp(St_MDFCorrection4C);
 St_MDFCorrection4C *St_MDFCorrection4C::fgMDFCorrection4C = 0;
@@ -765,7 +831,23 @@ Double_t St_MDFCorrection4C::EvalFactor(Int_t k, Int_t p, Double_t x) const {
   }
   return r;
 }
-
+//________________________________________________________________________________
+Int_t St_MDFCorrection4C::IsActiveChair() const {
+  Int_t npar = 0;
+  const St_MDFCorrection4 *tableMDF = (const St_MDFCorrection4 *) Table();
+  if (! tableMDF) return npar;
+  MDFCorrection4_st *corMDF = tableMDF->GetTable();
+  Int_t N = tableMDF->GetNRows();
+  if (! corMDF || ! N) {
+    return npar;
+  }
+  for (Int_t i = 0; i < N; i++, corMDF++) {
+    if (corMDF->nrows == 0 && corMDF->idx == 0) continue;
+    npar++;
+  }
+  return npar;
+}
+//________________________________________________________________________________
 #include "St_tpcEffectiveGeomC.h"
 MakeChairAltInstance(tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeomB,gEnv->GetValue("NewTpcAlignment",0));
 #include "St_tpcElectronicsC.h"
@@ -1094,6 +1176,7 @@ void St_TpcAvgPowerSupplyC::PrintC() const {
   const St_TpcAvgPowerSupply *TpcAvgPowerSupply = (St_TpcAvgPowerSupply *) GetThisTable();
   const TpcAvgPowerSupply_st &avgC = *TpcAvgPowerSupply->GetTable();
   Double_t AcCharge[2] = {0, 0};
+  cout << "TpcAvgPowerSupply for run = " << avgC.run << endl;
   for (Int_t sec = 1; sec <= 24; sec++) {
     cout << "Voltage " << sec;
     for (Int_t socket = 1; socket <= 8; socket++) cout << "\t" << Form("%10.3f",avgC.Voltage[8*(sec-1)+socket-1]);
@@ -1481,27 +1564,32 @@ MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
 St_trigDetSumsC *St_trigDetSumsC::fgInstance = 0;
 St_trigDetSumsC *St_trigDetSumsC::instance() {
   if (fgInstance) {
+#if 1
     static trigDetSums_st *sOld = 0;
     static Int_t iBreak = 0;
     if (iBreak < 3) {
       St_trigDetSums *table = (St_trigDetSums *) fgInstance->Table();
       trigDetSums_st *s = table->GetTable();
       if (s != sOld) {
+	LOG_QA << "new trigDetSums" << endm;
 	DEBUGTABLE("trigDetSums");
 	sOld = s;
 	iBreak++;
       }
     }
+#endif
     return fgInstance;
   }
   St_trigDetSums *table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("trigDetSums");
-  if (! table) {
-    table = (St_trigDetSums *) StMaker::GetChain()->GetDataBase("Calibrations/rich/trigDetSums");
-    assert(table);
-#if 0
-    DEBUGTABLE("trigDetSums");
-#endif
+  if (table) {
+    LOG_QA << "get trigDetSums from GetDataSet" << endm;
+    fgInstance = new St_trigDetSumsC(table);
+    StMaker::GetChain()->AddData(fgInstance);
+    return fgInstance;
   }
+  table = (St_trigDetSums *) StMaker::GetChain()->GetDataBase("Calibrations/rich/trigDetSums");
+  assert(table);
+  LOG_QA << "get trigDetSums from GetDataBase" << endm;
   fgInstance = new St_trigDetSumsC(table);
   fgInstance->SetName("trigDetSumsC");
   StMaker::GetChain()->AddConst(fgInstance);
