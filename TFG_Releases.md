@@ -83,6 +83,6 @@
 <li> TFG22a Freeze release for 2022 express production Merge             2022-01-15 19:09:11 -0500  (HEAD -> TFG, tag: TFG22a_5)
 <li> TFG22b Fixes for StTpcRSMaker with Altro/Sampa                      2022-03-19 11:22:10 -0400  (HEAD -> TFG, tag: TFG22b)
 <li> TFG22b Fix in      StETofCalibMaker                                 2022-04-22 10:59:36 -0400  (HEAD -> TFG, tag: TFG22c, origin/TFG)
-<li> TFG22c Fix before move to new dEdx                                  2022-04-22 12:07:02 -0400  (HEAD, tag: TFG22c)
+<li> TFG22c Fix before move to new dEdx, add chairs                      2022-04-22 16:25:31 -0400  (HEAD -> TFG, tag: TFG22c_1)
 <li>.DEV2  head of TFG git repository
 </ul>
