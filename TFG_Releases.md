@@ -82,6 +82,7 @@
 <li> TFG21n Merge with star-sw & Maksym                                  2021-11-22 15:50:40 -0500  (HEAD -> TFG, tag: TFG21n)
 <li> TFG22a Freeze release for 2022 express production Merge             2022-01-15 19:09:11 -0500  (HEAD -> TFG, tag: TFG22a_5)
 <li> TFG22b Fixes for StTpcRSMaker with Altro/Sampa                      2022-03-19 11:22:10 -0400  (HEAD -> TFG, tag: TFG22b)
-<li> TFG22b Fix in      StETofCalibMaker                                 2022-04-07 12:07:02 -0400  (HEAD, tag: TFG22b_1)
+<li> TFG22b Fix in      StETofCalibMaker                                 2022-04-22 10:59:36 -0400  (HEAD -> TFG, tag: TFG22c, origin/TFG)
+<li> TFG22c Fix before move to new dEdx                                  2022-04-22 12:07:02 -0400  (HEAD, tag: TFG22c)
 <li>.DEV2  head of TFG git repository
 </ul>
