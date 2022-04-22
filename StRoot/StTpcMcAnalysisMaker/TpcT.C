@@ -1874,7 +1874,7 @@ void TpcTPads(const Char_t *files="*.root", const Char_t *Out = "") {
   fOut->Write();
 }
 //________________________________________________________________________________
-Double_t fun2(Double_t *x, Double_t *par) {
+Double_t fun2r(Double_t *x, Double_t *par) {
   /*
     innerM
     FCN=49665 FROM MINOS     STATUS=UNCHANGED       0 CALLS         387 TOTAL
@@ -1906,13 +1906,13 @@ Double_t fun2(Double_t *x, Double_t *par) {
     Double_t offset = par[0] + Z*par[1] + Z*adcL*par[2];
     Double_t adc    = adcL*(par[3] + adcL*(par[4] + adcL*par[5]));
     Double_t adcS   = offset + TMath::Exp(adc);
-    if (adcS > 0) result = TMath::Log(adcS);
+    if (adcS > 0) result = TMath::Log(adcS) - x[0];;
   }
   return result;
 }
 //________________________________________________________________________________
-Double_t fun2r(Double_t *x, Double_t *par) {
-  return fun2(x,par) - x[0];
+Double_t fun2(Double_t *x, Double_t *par) {
+  return fun2r(x,par) + x[0];
 }
 //________________________________________________________________________________
 Double_t fun2TanL(Double_t *x, Double_t *par) {
@@ -2143,28 +2143,44 @@ Outer
   TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");
   //  const Char_t *histNames[4] = {"inner","outer","innerR","outerR"};
   const Char_t *histNames[4] = {"IZ","OZ","IZR","OZR"};
-  const Char_t *parNames[7] = {"offset","z","zxAdcL","adcL","adcL2","adcL3"};
+  const Char_t *parNames[7] = {"offset","z","zxAdcL","adcL","adcL2","adcL3","zFix"};
   TF2 *f2;
   TF1 *f1;
-  TCanvas *c[3] = {0};
-  for (Int_t k = 1; k < 2; k++) {
+  TCanvas *c[2][3] = {0};
+  for (Int_t k = 0; k < 2; k++) {
     if (k == 0) {
       f2 = new TF2("f2",fun2,3.0,10.0,0,210, 6);
-      c[0] = new TCanvas("c1A","Adc Corrections");
-      c[1] = new TCanvas("c2R","Adc Corrections Projections");
-      c[2] = new TCanvas("c3R","AdcL versus AdcLr and Z ");
+      c[k][0] = new TCanvas("c1A","Adc Corrections");
+      c[k][1] = new TCanvas("c2R","Adc Corrections Projections");
+      c[k][2] = new TCanvas("c3R","AdcL versus AdcLr and Z ");
     }
     else {
-      f2 = new TF2("f2r",fun2r,3.0,10.0,0,210, 6);
-      c[0] = new TCanvas("c1rA","Relative Adc Corrections");
-      c[1] = new TCanvas("c2rR","Relative Adc Corrections Projections");
-      c[2] = new TCanvas("c3R","AdcL-AdcLr versus AdcLr and Z ");
+      f2 = new TF2("f2r",fun2r,4.14,10.0,0,210, 6);
+      c[k][0] = new TCanvas("c1rA","Relative Adc Corrections");
+      c[k][1] = new TCanvas("c2rR","Relative Adc Corrections Projections");
+      c[k][2] = new TCanvas("c3rR","Relative AdcL-AdcLr versus AdcLr and Z ");
     }
     f2->SetParNames(parNames[0],parNames[1],parNames[2],parNames[3],parNames[4],parNames[5]);
-    c[0]->Divide(2,1);
-    c[1]->Divide(2,1);
-    c[2]->Divide(2,1);
+    c[k][0]->Divide(2,1);
+    c[k][1]->Divide(2,1);
+    c[k][2]->Divide(2,1);
     TProfile2D *hist = 0;
+    const Double_t adcL[71]   = {
+      3.00,  4.14,  4.28,  4.37,  4.44, 
+      4.49,  4.55,  4.59,  4.63,  4.66, 
+      4.70,  4.73,  4.76,  4.78,  4.81, 
+      4.84,  4.86,  4.89,  4.91,  4.93, 
+      4.95,  4.98,  5.00,  5.02,  5.04, 
+      5.06,  5.08,  5.11,  5.13,  5.15, 
+      5.17,  5.19,  5.22,  5.24,  5.26, 
+      5.29,  5.31,  5.33,  5.36,  5.38, 
+      5.41,  5.44,  5.47,  5.49,  5.52, 
+      5.55,  5.59,  5.62,  5.66,  5.71, 
+      5.75,  5.80,  5.85,  5.90,  5.97, 
+      6.04,  6.12,  6.21,  6.31,  6.42, 
+      6.53,  6.66,  6.79,  6.93,  7.10, 
+      7.29,  7.52,  7.80,  8.16,  8.83, 
+      10.00};
     for (Int_t i = 0; i < 2; i++) {
       hist = (TProfile2D *) gDirectory->Get(histNames[2*k+i]);
       if (! hist) {
@@ -2173,41 +2189,18 @@ Outer
 	if (i == 0) cut += "&&j==1";
 	else        cut += "&&j==2";
 	if (FitP) {
-	  if (k == 0) {
-	    hist = new TProfile2D(histNames[2*k+i],"log(simulated ADC)  versus log(recon. ADC) and Z", 36,4.,7.6, 105,0,210,"");
-	    c[2]->cd(i+1);
-	    FitP->Draw(Form("mu+z3:207.707-z2:z3>>%s",histNames[2*k+i]),cut,"profcolz");
-	  } else {
-	    hist = new TProfile2D(histNames[2*k+i],"log(simulated ADC) - log(recon. ADC)  versus log(recon. ADC) and Z", 36,4.,7.6, 105,0,210,"");
-	    c[2]->cd(i+1);
-	    FitP->Draw(Form("mu:207.707-z2:z3>>%s",histNames[2*k+i]),cut,"profcolz");
-	  }
+	  //	    hist = new TProfile2D(histNames[2*k+i],"log(simulated ADC)  versus log(recon. ADC) and Z", 70, adcL, 110,-5,215,"s");
+	    hist = new TProfile2D(histNames[2*k+i],"log(simulated ADC)  versus log(recon. ADC) and Z", 69, &adcL[1], 110,-5,215,"s");
+	    c[k][2]->cd(i+1);
+	    if (k == 0)  FitP->Draw(Form("mu+z3:207.707-z2:z3>>%s",histNames[2*k+i]),cut,"profcolz");
+	    else         FitP->Draw(Form("mu:207.707-z2:z3>>%s",histNames[2*k+i]),cut,"profcolz");
 	}
       }
-#if 0
-      if (k ==0) 
-      else       {
-	TH3 *h3 = (TH3 *)  gDirectory->Get(histNames[2*k+i]);
-	h3->GetYaxis()->SetRange(11,200);
-	hist = (TProfile2D *) h3->Project3DProfile("yx");
-	
-      }
-#endif
       if (! hist) continue;
-#if 0
-      if (k == 0) hist->SetMinimum(3);
-      else        hist->SetMinimum(-0.5);
-#endif
-      //    Int_t nx = hist->GetNbinsX();
       Int_t ny = hist->GetNbinsY();
-#if 0
-      TProfile2D *histM = (TProfile2D *) gDirectory->Get(Form("%sM",histNames[i]));
-      if (! histM) histM = CleanAdc(histNames[i]);
-#else
       TProfile2D *histM = hist;
-#endif
-      c[0]->cd(i+1);
-      f2->SetParameters(6.52745e+01,  0, 0,  1.11882e+00, -1.30767e-02,  0.00000e+00);
+      c[k][0]->cd(i+1);
+      f2->SetParameters(50,  0, 0,  1., 0, 0, 0);
       f2->FixParameter(1,0);
       f2->FixParameter(2,0);
       f2->FixParameter(3,1);
@@ -2215,17 +2208,18 @@ Outer
       f2->FixParameter(5,0);
       cout << "Fit " << histM->GetName() << "\t" << histM->GetTitle() << endl;
       histM->Fit(f2,"er");
-      f2->ReleaseParameter(1);
+      // f2->ReleaseParameter(1);
       //      f2->SetParLimits(1,0,100);
-      f2->ReleaseParameter(2);
+      //      f2->ReleaseParameter(2);
       f2->ReleaseParameter(3);
       f2->ReleaseParameter(4);
+      f2->ReleaseParameter(5);
       cout << "Fit " << histM->GetName() << "\t" << histM->GetTitle() << endl;
       histM->Fit(f2,"er");
       histM->Draw("colz");
       f2->Draw("cont1 same");
-      c[0]->Update();
-      c[1]->cd(i+1);
+      c[k][0]->Update();
+      c[k][1]->cd(i+1);
       TLegend *leg = new TLegend(0.6,0.1,0.9,0.4);
       TAxis *y = histM->GetYaxis();
       Double_t params[7];
@@ -2240,6 +2234,8 @@ Outer
 	h->SetMarkerStyle(20);
 	h->SetMarkerColor(color);
 	h->SetStats(0); 
+	if (k == 0) h->SetMinimum(3.8);
+	else        h->SetMinimum(0.2);
 	if (k == 0)  f1 = new TF1(Form("%s%i_%i",f2->GetName(),i,j),fun1,3,10,7);
 	else         f1 = new TF1(Form("%s%i_%i",f2->GetName(),i,j),fun1r,3,10,7);
 	params[6] = histM->GetYaxis()->GetBinCenter(j);
@@ -2253,7 +2249,7 @@ Outer
 	else            h->Draw("same");
 	f1->Draw("same");
 	leg->AddEntry(h,Form("z = %5.2f",params[6]));
-	c[1]->Update();
+	c[k][1]->Update();
       }
       leg->Draw();
     }

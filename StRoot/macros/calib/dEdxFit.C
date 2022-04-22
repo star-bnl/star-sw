@@ -1,7 +1,7 @@
 /* 
    root.exe -q -b lBichsel.C pionMIP.root 'dEdxFit.C+("SecRow3C","GF")'
 
-# Fit Sparse 
+# Fit Sparse : use ~/bin/SpareSubmit.csh to fit it in parallel  
 @ count = 2
 while  (1)
     root.exe -q -b AdcSparseD3.root lBichsel.C 'dEdxFit.C+("Sparse","GP","R",'${count}')' >& X${count}.log &
