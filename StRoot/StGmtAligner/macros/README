@@ -1,1 +1,19 @@
 codes for GMT alignmen from /star/u/gnigmat/macros/gmt/macros/
+
+
+GMT alignment:
+Stepan Manukhov (04/05/2022)
+
+1) Removed MuDst, copied event.root to a separate folder
+2) In the folder with macros:
+myterm@rcas $ root -l -b
+.L StGmtQAPlotter.C+
+.L GmtChain.C
+GmtChain("/gpfs01/star/scratch/manukhov/files",".root","OutputFileName.root")
+3) I copied the TDraw.C code from the star/u/gnigmat/macr/gmt/TDraw.C directory, then in the macros
+folder:
+root -l -b OutputFileName.root TDraw.C+
+The result is two files:
+Results.Barrel_-1_OutputFileName
+Results.Barrel_-1_OutputFileName.h
+

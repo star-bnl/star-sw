@@ -1,4 +1,7 @@
-#include "StGmtQAPlotter.h"
+/*
+  root.exe 'bfc.C(-1,"gmtAligner,tpcDb,mysql,nodefault,quiet")' GmtChain.C+
+ */
+#include "StGmtAligner/StGmtQAPlotter.h"
 #include <TChain.h>
 #include <TSystemDirectory.h>
 #include <TList.h>
@@ -9,7 +12,7 @@
 Int_t addfiles(TChain *ch, const Char_t *dirname=".", const Char_t *ext=".root");
 
 //_________________
-void GmtChain(const Char_t *dirname, const Char_t *ext, const Char_t *oFileName="test") {
+void GmtChain(const Char_t *dirname = ".", const Char_t *ext = ".root", const Char_t *oFileName="test") {
 
   //gROOT->LoadMacro("StGmtQAPlotter.C+");
   //gInterpreter->ProcessLine(".L StGmtQAPlotter.C+");
