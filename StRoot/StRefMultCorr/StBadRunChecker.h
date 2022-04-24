@@ -10,6 +10,12 @@
 class StBadRunChecker {
  public:
   StBadRunChecker(TString Run="run19",TString CollisionMode="col" ,TString RunEnergy="19.6",TString Species="auau");
+  /*
+  Please follow the following naming convetions when calling StBadRunChecker (case insensitive).
+  So far, the available data sets are:
+  | RunYear  | CollisionMode | Energy    | Species |
+  | "run19"  | "col"         | "19.6"    | "auau"  |
+  */
   virtual ~StBadRunChecker(); /// Default destructor
  
   // Bad run rejection
@@ -25,16 +31,16 @@ class StBadRunChecker {
   Bool_t isBadRunBEMCTrigger(const Int_t RunId) ;
   Bool_t isBadRunMTD(const Int_t RunId) ;
   Bool_t isBadRunAnalysis(const Int_t RunId) ; 
-  Bool_t isBadRun(const Int_t RunId,TString mSys) ; 
- private:
-  //void readBadRunsFromHeaderFile(TString Run="run19",TString RunEnergy="19.6");
-  void readBadRunsFromHeaderFile();
-  //std::vector<Int_t> mYear              ; /// Year
-  //std::vector<Int_t> mStart_runId       ; /// Start run id
-  //std::vector<Int_t> mStop_runId        ; /// Stop run id
+  Bool_t isBadRun(const Int_t RunId,TString mSys) ;
+  //Eligible sub-system names (mSys) are the ones in the mSubSysName[12] array. 
+  //Case insensitive; delimiter doesn't matter, comma, space... whichever you prefer.
+  //Example: isBadRun(20056032,"TPC,etof,epd"); 
+  //It will return 1 if 20056032 is marked bad by TPC OR eTOF OR EPD, return 0 otherwise.
+  //Note: if a run is marked bad by "injection", it means this run is a run during injection,
+  //we usually exclude those injection runs in the analysis. 
 
-  //std::multimap<std::pair<Double_t, Int_t>, Int_t> mBeginRun ; /// Begin run number for a given (energy, year)
-  //std::multimap<std::pair<Double_t, Int_t>, Int_t> mEndRun   ; /// End run number for a given (energy, year)
+ private:
+  void readBadRunsFromHeaderFile();
   std::vector<Int_t> mBadRun_all; /// Bad run number list
   std::vector<std::vector<Int_t>> mBadRun_sub;
   std::vector<Int_t> mRunRange;
