@@ -32,12 +32,14 @@ class StBadRunChecker {
   Bool_t isBadRunMTD(const Int_t RunId) ;
   Bool_t isBadRunAnalysis(const Int_t RunId) ; 
   Bool_t isBadRunSubSys(const Int_t RunId,TString mSys) ;
-  //Eligible sub-system names (mSys) are the ones in the mSubSysName[12] array. 
-  //Case insensitive; delimiter doesn't matter, comma, space... whichever you prefer.
-  //Example: isBadRun(20056032,"TPC,etof,epd"); 
-  //It will return 1 if 20056032 is marked bad by TPC OR eTOF OR EPD, return 0 otherwise.
-  //Note: if a run is marked bad by "injection", it means this run is a run during injection,
-  //we usually exclude those injection runs in the analysis. 
+  /*
+  Eligible sub-system names (mSys) are the ones in the mSubSysName[12] array. 
+  Case insensitive; delimiter doesn't matter, comma, space... whichever you prefer.
+  Example: isBadRunSubSys(20056032,"TPC,etof,epd"); 
+  It will return 1 if 20056032 is marked bad by TPC OR eTOF OR EPD, return 0 otherwise.
+  Note: if a run is marked bad by "injection", it means this run is a run during injection,
+  we usually exclude those injection runs in the analysis. 
+  */
 
  private:
   void readBadRunsFromHeaderFile();
