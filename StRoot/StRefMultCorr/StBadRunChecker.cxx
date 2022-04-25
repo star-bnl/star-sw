@@ -92,7 +92,7 @@ void StBadRunChecker::readBadRunsFromHeaderFile() {
 }
 
 
-Bool_t StBadRunChecker::isBadRun(const Int_t RunId,TString mS){
+Bool_t StBadRunChecker::isBadRunSubSys(const Int_t RunId,TString mS){
     // Return true if a given run id is bad run
     if (RunId<mRunRange[0]||RunId>mRunRange[1]){
         cout<<"Warning: "<<RunId<<" is not in "<<mRun<<" "<<mColMode<<" "<<mSpecies<<" "<<mEnergy<<"GeV. Exit!"<<endl;
@@ -121,59 +121,59 @@ Bool_t StBadRunChecker::isBadRun(const Int_t RunId,TString mS){
 
 Bool_t StBadRunChecker::isInjection(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"injection");
+    return isBadRunSubSys(RunId,"injection");
 }
 
 Bool_t StBadRunChecker::isBadRunTPC(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"tpc");
+    return isBadRunSubSys(RunId,"tpc");
 }
 
 Bool_t StBadRunChecker::isBadRunbTOFStatus(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"bTOFStatus");
+    return isBadRunSubSys(RunId,"bTOFStatus");
 }
 
 Bool_t StBadRunChecker::isBadRunbTOFPID(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"bTOFPID");
+    return isBadRunSubSys(RunId,"bTOFPID");
 }
 
 Bool_t StBadRunChecker::isBadRuneTOF(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"eTOF");
+    return isBadRunSubSys(RunId,"eTOF");
 }
 
 Bool_t StBadRunChecker::isBadRunEPD(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"EPD");
+    return isBadRunSubSys(RunId,"EPD");
 }
 
 Bool_t StBadRunChecker::isBadRunVPD(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"VPD");
+    return isBadRunSubSys(RunId,"VPD");
 }
 Bool_t StBadRunChecker::isBadRunBEMCStatus(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"BEMCStatus");
+    return isBadRunSubSys(RunId,"BEMCStatus");
 }
 
 Bool_t StBadRunChecker::isBadRunBEMCPID(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"BEMCPID");
+    return isBadRunSubSys(RunId,"BEMCPID");
 }
 
 Bool_t StBadRunChecker::isBadRunBEMCTrigger(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"BEMCTrigger");
+    return isBadRunSubSys(RunId,"BEMCTrigger");
 }
 
 Bool_t StBadRunChecker::isBadRunMTD(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"MTD");
+    return isBadRunSubSys(RunId,"MTD");
 }
 
 Bool_t StBadRunChecker::isBadRunAnalysis(const Int_t RunId){
     // Return true if a given run id is bad run
-    return isBadRun(RunId,"Analysis");
+    return isBadRunSubSys(RunId,"Analysis");
 }

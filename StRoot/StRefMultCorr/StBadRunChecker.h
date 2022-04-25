@@ -31,7 +31,7 @@ class StBadRunChecker {
   Bool_t isBadRunBEMCTrigger(const Int_t RunId) ;
   Bool_t isBadRunMTD(const Int_t RunId) ;
   Bool_t isBadRunAnalysis(const Int_t RunId) ; 
-  Bool_t isBadRun(const Int_t RunId,TString mSys) ;
+  Bool_t isBadRunSubSys(const Int_t RunId,TString mSys) ;
   //Eligible sub-system names (mSys) are the ones in the mSubSysName[12] array. 
   //Case insensitive; delimiter doesn't matter, comma, space... whichever you prefer.
   //Example: isBadRun(20056032,"TPC,etof,epd"); 
