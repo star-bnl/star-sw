@@ -51,11 +51,11 @@
     if (-r ${b}.list) continue;
     root.exe -q -b ${f} CheckPads.C+ >& ${b}.list
   end
-  grep Dead hlt*.list | sed -e 's/hlt_//' | awk -F\{ '{print "{"$2}' > DeadFEE2.list
+  grep Dead *.list | sed -e 's/hlt_//' | awk -F\{ '{print "{"$2}' > DeadFEE2.list
   sort DeadFEE2.list > DeadFEE.listSorted
   MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
   sort DeadFeeRuns | tee DeadFeeRuns.sorted
-  grep Alive hlt*.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
+  grep Alive *.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
   sort AliveFEE2.list > AliveFEE.sorted
   MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
   sort AliveFeeRuns | tee AliveFeeRuns.sorted
