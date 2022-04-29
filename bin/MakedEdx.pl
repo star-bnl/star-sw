@@ -21,7 +21,7 @@ my $FILE = "/*/st_physics";
 my $NEvents = 100000;
 my $step = 0;
 #================================================================================
-#  dir /gpfs01/star/data*/reco/production_7p7GeV_2021/ReversedFullField/P22ia/2021/*/*/*event.root
+#  dir /gpfs01/star/data*/reco/production_7p7GeV_2021/ReversedFullField/P22ia*/2021/*/*/*event.root
 #  dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/* | awk -F\/ '{print $6"/"$8}' | sort -u
 # production_11p5GeV_2020/P21ib_calib
 # production_13p5GeV_fixedTarget_2020/P21ic_calib

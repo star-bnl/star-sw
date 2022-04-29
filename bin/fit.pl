@@ -65,13 +65,14 @@ foreach my $arg (@ARGV) {
  #		ppmWaterOutP ppmWaterOutPA ppmWaterOutPC
    @histRL5 = @histGF;
    @histGP = qw (
-  		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
+ 		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
+		 TPoints70P TPointsFP TPoints70UP TPointsFUP  TPointsNP TPointsNUP 
+ 		 TPoints270 TPoints2F TPoints270U TPoints2FU  TPoints2N TPoints2NU
+ 		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP
+ 		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
   		 TPoints270+TPoints270P TPoints2F+TPoints2FP TPoints270U+TPoints270UP TPoints2FU+TPoints2FUP  TPoints2N+TPoints2NP TPoints2NU+TPoints2NUP
  	      );
- #		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
- #		 TPoints270 TPoints2F TPoints270U TPoints2FU  TPoints2N TPoints2NU
- #		 TPoints70P TPointsFP TPoints70UP TPointsFUP  TPointsNP TPointsNUP
- #  		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
+  #  		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
  #  		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
  #		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP
  #		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU

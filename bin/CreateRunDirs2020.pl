@@ -3,8 +3,8 @@ use File::Basename;
 use Cwd;
 use Env;
 use lib "/net/l402/data/fisyak/STAR/packages/.DEV2/bin";#$ENV{ConstructLocation}; 
-use RunXIXDefs;
-#use RunXXDefs;
+#use RunXIXDefs;
+use RunXXDefs;
 #use RunXXIDefs;
 #use RunXXIIDefs;
 my $pwd = cwd();
@@ -55,13 +55,13 @@ sub GoodRun($$) {
 my $def = {@Runs};# print "Runs = @Runs\n";
 #PrintHash($def,"Runs") if ($debug);
 #die;
-#my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /hlt/cephfs/daq/2020/???/*";  print "runs = @runs\n" if ($debug);
+my  @runs  = glob "/hlt/cephfs/daq/2019/???/* /hlt/cephfs/daq/2020/???/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2020/2??/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2019/350/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2020/012/2101202?";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2021/???/*";  print "runs = @runs\n" if ($debug);
 #my  @runs  = glob "/hlt/cephfs/daq/2021/3??/* /hlt/cephfs/daq/2022/???/*";  print "runs = @runs\n" if ($debug);
-my  @runs  = glob "/hlt/cephfs/daq/2019B/???/*";  print "runs = @runs\n" if ($debug);
+#my  @runs  = glob "/hlt/cephfs/daq/2019B/???/*";  print "runs = @runs\n" if ($debug);
 foreach my $run (@runs) {
   my $r = File::Basename::basename($run); print "run = $run, r = $r\n" if ($debug);
   if (GoodRun($def,$r) < 0) {next;}
