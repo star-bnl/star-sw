@@ -2032,7 +2032,12 @@ for (kz = 0; kz < 6; ++kz) {
    */
    //
     // extra particles
-    const Char_t *extraPartName[] = {"Sigma*+","Sigma*-"};
+   const Char_t *extraPartName[] = {"Sigma*+","Sigma*-",
+				    "Delta-","Delta0","Delta+","Delta++",
+				    "Delta-_bar","Delta0_bar","Delta+_bar","Delta--",
+				    "Xi*-","Xi*+","Xi*0","Xi*0_bar"
+				    
+   };
     Int_t Nextra = sizeof(extraPartName)/sizeof(Char_t *);
     for (Int_t i = 0; i < Nextra; i++) {
       TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(extraPartName[i]);
