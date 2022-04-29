@@ -160,7 +160,6 @@ ClassImp(StBemcRaw)
 StBemcRaw::StBemcRaw()
 {
     mSaveAllStEvent = kFALSE;
-    mSaveAllBTOW = kFALSE;
     mPsdMapBug = kFALSE;
     mPsdMapBug2 = kFALSE;
     mTowerMapBug = kFALSE;
@@ -682,44 +681,40 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
         if(id+shift < 0) return kZero; //mask lost channels
         id+=shift;
     }
-
-    // dongx - save all BTOW hits
-    Bool_t skipSave = !mSaveAllStEvent && ( !mSaveAllBTOW || det!=BTOW );
-    
     if(CRATE>0 && CRATE<=MAXCRATES && mControlADCtoE->CheckCrate[det-1]==1)
         if((mCrateStatus[det-1][CRATE-1]!=crateOK &&
                 mCrateStatus[det-1][CRATE-1]!=crateUnknown) &&
-                skipSave)
+                !mSaveAllStEvent)
             return kCrate;
 
-    if(skipSave && mCrateVeto && mAnyCorrupted)
+    if(!mSaveAllStEvent && mCrateVeto && mAnyCorrupted)
       return kCrate;
 
-    if(ADC==0 && skipSave)
+    if(ADC==0 && !mSaveAllStEvent)
         return kZero;
 
     if(mControlADCtoE->CheckStatus[det-1]==1)
     {
-      if(mCheckStatus[det-1][0]==1 && skipSave){
+      if(mCheckStatus[det-1][0]==1 && !mSaveAllStEvent){
         Int_t STATUS;
         mTables->getStatus(det,id,STATUS);
-        if(STATUS!=STATUS_OK && skipSave)
+        if(STATUS!=STATUS_OK && !mSaveAllStEvent)
             return kStatus;
       }
-      if(mCheckStatus[det-1][1]==1 && skipSave){
+      if(mCheckStatus[det-1][1]==1 && !mSaveAllStEvent){
 	Int_t pedSTATUS;
 	mTables->getStatus(det,id,pedSTATUS,"pedestal");
-	if(pedSTATUS!=STATUS_OK && skipSave)return kStatus;
+	if(pedSTATUS!=STATUS_OK && !mSaveAllStEvent)return kStatus;
       }
-      if(mCheckStatus[det-1][2]==1 && skipSave){
+      if(mCheckStatus[det-1][2]==1 && !mSaveAllStEvent){
 	Int_t calibSTATUS;
 	mTables->getStatus(det,id,calibSTATUS,"calib");
-        if(calibSTATUS!=STATUS_OK && skipSave)return kStatus;
+        if(calibSTATUS!=STATUS_OK && !mSaveAllStEvent)return kStatus;
       }
-      if(mCheckStatus[det-1][3]==1 && skipSave){
+      if(mCheckStatus[det-1][3]==1 && !mSaveAllStEvent){
 	Int_t gainSTATUS;
 	mTables->getStatus(det,id,gainSTATUS,"gain");
-	if(gainSTATUS!=STATUS_OK && skipSave)return kStatus;
+	if(gainSTATUS!=STATUS_OK && !mSaveAllStEvent)return kStatus;
       }
 
     }
@@ -733,12 +728,12 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
         // PSD and SMD as valid hits
 	// for 2006 keep these hits by setting DeductPedestal == 2
         if(mControlADCtoE->DeductPedestal[det-1]==1)
-		if(det>=BPRS && skipSave)
+		if(det>=BPRS && !mSaveAllStEvent)
 	            if(CAP==CAP1 || CAP==CAP2)
                 return kPed;
     }
 
-    if(mControlADCtoE->CutOffType[det-1]==1 && skipSave && mControlADCtoE->DeductPedestal[det-1] > 0) // pedestal cut
+    if(mControlADCtoE->CutOffType[det-1]==1 && !mSaveAllStEvent && mControlADCtoE->DeductPedestal[det-1] > 0) // pedestal cut
     {
         if(RMS<=0)
             return kRms;
@@ -760,16 +755,16 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
         mTables->getGain(det,id,C);
         E*=C;
 
-        if(mControlADCtoE->CutOffType[det-1]==2 && skipSave) // energy cut
+        if(mControlADCtoE->CutOffType[det-1]==2 && !mSaveAllStEvent) // energy cut
         {
             if(E<mControlADCtoE->CutOff[det-1])
                 return kEn;
         }
     }
 
-    if(mControlADCtoE->OnlyCalibrated[det-1]>0 && E==0 && skipSave)
+    if(mControlADCtoE->OnlyCalibrated[det-1]>0 && E==0 && !mSaveAllStEvent)
         return kCalib;
-        
+
     StDetectorId did = static_cast<StDetectorId>(det+kBarrelEmcTowerId-1);
     StEmcDetector* detector=emc->detector(did);
     StEmcGeom *geo = StEmcGeom::instance(det);

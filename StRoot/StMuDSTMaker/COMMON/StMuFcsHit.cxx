@@ -31,7 +31,7 @@ StMuFcsHit::StMuFcsHit(unsigned short zs, unsigned short det, unsigned short id,
 } 
 
 StMuFcsHit::~StMuFcsHit() {
-    mData.Set(0);
+    if(mData) delete mData;
 }
 
 unsigned short StMuFcsHit::zs()         const {return (mDetId >> 15 ) & 0x0001;}
@@ -42,21 +42,24 @@ unsigned short StMuFcsHit::ehp()        const {return (mDepCh >> 13 ) & 0x03;}
 unsigned short StMuFcsHit::dep()        const {return (mDepCh >> 8  ) & 0x1f;}
 unsigned short StMuFcsHit::channel()    const {return (mDepCh       ) & 0xff;}
 unsigned int StMuFcsHit::nTimeBin()     const {
-    if(zs()) return mData.GetSize()/2;
-    return mData.GetSize();
+    if(mData) {
+      if(zs()) return mData->GetSize()/2;
+      return mData->GetSize();
+    }
+    return 0;
 }
-unsigned short StMuFcsHit::data(int i) const {return mData.At(i);}
+unsigned short StMuFcsHit::data(int i) const {return mData->At(i);}
 unsigned short StMuFcsHit::timebin(int i) const {
-    if(zs()) return mData.At(i*2+1);
+    if(zs()) return mData->At(i*2+1);
     return i;
 }
 unsigned short StMuFcsHit::adc(int i) const {
-    if(zs()) return mData.At(i*2  ) & 0xfff;
-    return mData.At(i) & 0xfff;
+    if(zs()) return mData->At(i*2  ) & 0xfff;
+    return mData->At(i) & 0xfff;
 }
 unsigned short StMuFcsHit::flag(int i) const {
-    if(zs()) return mData.At(i*2  ) >> 12;
-    return mData.At(i) >> 12;
+    if(zs()) return mData->At(i*2  ) >> 12;
+    return mData->At(i) >> 12;
 }
 
 int   StMuFcsHit::adcSum()   const {return mAdcSum;}
@@ -81,11 +84,16 @@ void StMuFcsHit::setZS(unsigned short val)                       { setDetId(val,
 void StMuFcsHit::setDetectorId(unsigned short val)               { setDetId(zs(),val,id()); }
 void StMuFcsHit::setId(unsigned short val)                       { setDetId(zs(),detectorId(),val); }
 
-void StMuFcsHit::setData(int ndata, const unsigned short* data) {
-    mData.Set(ndata,(const short*)data);
+void StMuFcsHit::setData(int ntimebin, const unsigned short* data) {
+    if(!mData) {
+        mData = new TArrayS(ntimebin,(const short*)data);
+    }
+    else {
+        mData->Set(ntimebin,(const short*)data);
+  }
 }
-void StMuFcsHit::setDataAt(int i, unsigned short val)                       { mData.AddAt(val,i); }
-void StMuFcsHit::setAdcFlag(int i, unsigned short adc, unsigned short flag) { mData.AddAt(((flag&0xf)<<12) + adc, i); }
+void StMuFcsHit::setDataAt(int i, unsigned short val)                       { mData->AddAt(val,i); }
+void StMuFcsHit::setAdcFlag(int i, unsigned short adc, unsigned short flag) { mData->AddAt(((flag&0xf)<<12) + adc, i); }
 void StMuFcsHit::setAdc(int i, unsigned short val)                          { setAdcFlag(i,val,flag(i)); }
 void StMuFcsHit::setFlag(int i, unsigned short val)                         { setAdcFlag(i,adc(i),val); }
 

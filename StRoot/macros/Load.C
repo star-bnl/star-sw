@@ -7,7 +7,11 @@
 void Load()
 {
 const char * const loadList[]={
- "St_base"
+ "libCore"
+,"libPhysics"
+,"libTree"
+,"libGeom"
+,"St_base"
 ,"St_Tables"
 ,"StarRoot"
 ,"StChain"
@@ -22,6 +26,9 @@ const char * const loadList[]={
 ,"StDbBroker"
 ,"St_db_Maker"
 ,"StTriggerDataMaker"
+,"StStrangeMuDstMaker"
+,"StEmcUtil"
+,"StMuDSTMaker"
 ,"StBFChain"
 ,0};
 
@@ -29,6 +36,10 @@ const char * const loadList[]={
     TString ts(loadList[i]);
     printf("  Loading %s\n",ts.Data());
     int ians = gSystem->Load(ts.Data());
+    if (ians<0) printf("**Failed %s = %d\n",ts.Data(),ians);
+    ians = gSystem->Load(ts.Data());
+    if (ians<0) printf("**Failed %s = %d\n",ts.Data(),ians);
+    ians = gSystem->Load(ts.Data());
     if (ians<0) printf("**Failed %s = %d\n",ts.Data(),ians);
   }
 }

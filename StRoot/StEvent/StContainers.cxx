@@ -135,9 +135,6 @@
 #include "StFcsCluster.h"
 #include "StFcsHit.h"
 #include "StFcsPoint.h"
-#include "StFttRawHit.h"
-#include "StFttCluster.h"
-#include "StFttPoint.h"
 #include "StFgtHit.h"
 #include "StFgtPoint.h"
 #include "StFgtStrip.h"
@@ -156,7 +153,6 @@
 #include "StHltTriggerReason.h"
 #include "StHltVpdHit.h"
 #include "StIstHit.h"
-#include "StFstHit.h"
 #include "StKinkVertex.h"
 #include "StL3AlgorithmInfo.h"
 #include "StMtdHit.h"
@@ -206,9 +202,6 @@ StCollectionImp(EtrHit)
 StCollectionImp(FcsCluster)
 StCollectionImp(FcsHit)
 StCollectionImp(FcsPoint)
-StCollectionImp(FttRawHit)
-StCollectionImp(FttCluster)
-StCollectionImp(FttPoint)
 StCollectionImp(FgtHit)
 StCollectionImp(FgtPoint)
 StCollectionImp(FgtStrip)
@@ -228,7 +221,6 @@ StCollectionImp(HltTrackNode)
 StCollectionImp(HltTriggerReason)
 StCollectionImp(HltVpdHit)
 StCollectionImp(IstHit)
-StCollectionImp(FstHit)
 StCollectionImp(KinkVertex)
 StCollectionImp(L3AlgorithmInfo)
 StCollectionImp(MtdHit)

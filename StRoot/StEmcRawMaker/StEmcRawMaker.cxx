@@ -87,11 +87,6 @@ Int_t StEmcRawMaker::Init()
         mBemcRaw->saveAllStEvent(kTRUE);
         mBemcRaw->initQAHisto();
     }
-    if(m_Mode==10)
-    {
-               LOG_INFO << "Saveing all BTOW hits for bfc->picoDst production" << endm;
-               mBemcRaw->saveAllBTOW(kTRUE);
-    }
     //................EEMC stuff ..............
     eeStDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
     if(eeStDb==0)

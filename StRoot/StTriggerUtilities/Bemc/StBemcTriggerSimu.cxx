@@ -14,7 +14,6 @@
 #include "StEmcRawMaker/defines.h"
 #include "StEmcSimulatorMaker/StEmcSimulatorMaker.h"
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
-#include "StEmcRawMaker/StEmcRawMaker.h"
 #include "StBemcTriggerDbThresholds.h"
 
 //StEvent
@@ -78,13 +77,11 @@ void StBemcTriggerSimu::Init(){
   }
   else {
     mAdc2e = static_cast<StEmcADCtoEMaker*> ( mHeadMaker->GetMakerInheritsFrom("StEmcADCtoEMaker") );
-    StEmcRawMaker *emcRaw = static_cast<StEmcRawMaker*> ( mHeadMaker->GetMakerInheritsFrom("StEmcRawMaker") );
-    if(mAdc2e) mTables = mAdc2e->getBemcData()->getTables();
-    else if(emcRaw) mTables = emcRaw->getBemcRaw()->getTables();
-    else {
-      LOG_FATAL << "StBemcTriggerSimu couldn't find StEmcADCtoEMaker and StEmcRawMaker in chain" << endm;
+    if(!mAdc2e) {
+      LOG_FATAL << "StBemcTriggerSimu couldn't find StEmcADCtoEMaker in chain" << endm;
       assert(0);
     }
+    mTables = mAdc2e->getBemcData()->getTables();
   }
 
   mDbThres->LoadTimeStamps();

@@ -37,6 +37,12 @@ Int_t thisRun,thisEvent,lastRun,lastEvent,readEventNumber;
 TFile* lastFile;
 
 ClassImp(StStrangeMuDstMaker)
+
+void StStrangeMuDstMaker::Qwe() { printf ("UUUUUUUUUUUUUU Static\n");}
+
+
+
+
 //_____________________________________________________________________________
 StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
 

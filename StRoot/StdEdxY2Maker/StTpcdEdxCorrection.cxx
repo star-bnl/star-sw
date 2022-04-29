@@ -52,13 +52,12 @@
 #include "StDetectorDbMaker/St_tpcTimeDependenceC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StDetectorDbMaker/St_beamInfoC.h"
-#include "StDetectorDbMaker/St_starTriggerDelayC.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "TUnixTime.h"
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
   m_Mask(option), m_tpcGas(0),// m_trigDetSums(0), m_trig(0),
-  m_Debug(debug), m_IsSimulation(kFALSE)
+  m_Debug(debug)
 {
   assert(gStTpcDb);
   if (!m_Mask) m_Mask = -1;
@@ -122,19 +121,6 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   }
   SettpcGas(tpcGas);
   memset (m_Corrections, 0, sizeof(m_Corrections));
-  mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
-  mInnerSectorzOffset = StTpcDb::instance()->Dimensions()->zInnerOffset();
-  mOuterSectorzOffset = StTpcDb::instance()->Dimensions()->zOuterOffset();
-  Double_t trigT0 = 0, elecT0 = 0;
-  if (! St_starTriggerDelayC::instance()->Table()->IsMarked()) {// new scheme: offset  = clocks*timebin + t0
-    trigT0 = St_starTriggerDelayC::instance()->clocks()*mTimeBinWidth;
-    elecT0 = St_starTriggerDelayC::instance()->tZero();
-  } else { // old scheme 
-    trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are us
-    elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
-  }
-  m_TrigT0 = trigT0 + elecT0;
-  // Chairs
   m_Corrections[kUncorrected           ] = dEdxCorrection_t("UnCorrected"         ,""                                                                   ,0); 					       
   m_Corrections[kAdcCorrection         ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clustering nonlinearity correction"				,St_TpcAdcCorrectionBC::instance());	     
   m_Corrections[kEdge                  ] = dEdxCorrection_t("TpcEdge"             ,"Gain on distance from Chamber edge"                                 ,St_TpcEdgeC::instance());		     
@@ -195,7 +181,6 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     if (! m_Corrections[k].Chair) continue;
     LOG_WARN << "StTpcdEdxCorrection: " << m_Corrections[k].Name << "/" << m_Corrections[k].Title;
     table = m_Corrections[k].Chair->Table();
-    if (Debug() > 2) table->Print(0,10);
     if (! TESTBIT(m_Mask,k) || m_Corrections[k].Chair->Table()->IsMarked()) {
       LOG_WARN << " \tis missing"; 
       goto CLEAR;
@@ -243,12 +228,10 @@ void StTpcdEdxCorrection::ReSetCorrections() {
 	if ( m_Corrections[kzCorrectionC].Chair) { // if kzCorrectionC is already active
 	  LOG_WARN << "\tTpcZCorrectionC is already active => disbale TpcZCorrectionB";
 	  goto CLEAR;
-#if 0 /* Apply Gating Grid Correction with kzCorrectionC or kzCorrection */
 	} else {	 // disabled GatingGrid
 	  CLRBIT(m_Mask,kGatingGrid); 
 	  SafeDelete(m_Corrections[kGatingGrid].Chair);
 	  LOG_WARN << "\tTpcZCorrectionB is activated =>  Disable GatingGrid";
-#endif
 	}
       }
       m_Corrections[k].nrows = nrows;
@@ -395,25 +378,24 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 #endif
 #endif  
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
-  Double_t driftDistance2GG = ZdriftDistance;
+  Double_t driftTime = ZdriftDistance/gStTpcDb->DriftVelocity(sector)*1e6; // musec
   ESector kTpcOutIn = kTpcOuter;
+  if (! St_tpcPadConfigC::instance()->iTpc(sector)) {
+    if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kTpcInner;
+  } else {
+    if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kiTpc;
+  }
+  St_tss_tssparC *tsspar = St_tss_tssparC::instance();
   Float_t gasGain = 1;
   Float_t gainNominal = 0;
-  St_tss_tssparC *tsspar = St_tss_tssparC::instance();
-  if (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) {
-    kTpcOutIn = kTpcInner;
-    driftDistance2GG += mInnerSectorzOffset;
-    gainNominal = tsspar->gain_in()*tsspar->wire_coupling_in();
-    gasGain = tsspar->gain_in(sector,row) *tsspar->wire_coupling_in();
-  } else {
-    kTpcOutIn = kTpcOuter;
-    driftDistance2GG += mOuterSectorzOffset;
+  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) {
     gainNominal = tsspar->gain_out()*tsspar->wire_coupling_out();
     gasGain = tsspar->gain_out(sector,row)*tsspar->wire_coupling_out();
+  } else {
+    gainNominal = tsspar->gain_in()*tsspar->wire_coupling_in();
+    gasGain = tsspar->gain_in(sector,row) *tsspar->wire_coupling_in();
   }
-  if (St_tpcPadConfigC::instance()->iTpc(sector) && row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kiTpc;
   if (gasGain <= 0.0) return 4;
-  Double_t driftTime = driftDistance2GG/gStTpcDb->DriftVelocity(sector)*1e6; // musec
   //  Double_t gainAVcorr = gasGain/gainNominal;
   mAdc2GeV = tsspar->ave_ion_pot() * tsspar->scale()/gainNominal;
   Double_t Adc2GeVReal = tsspar->ave_ion_pot() * tsspar->scale()/gasGain;
@@ -423,6 +405,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   CdEdx.ZdriftDistanceO2 = ZdriftDistanceO2;
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
   Double_t gc, ADC, xL2, dXCorr;
+  Double_t iCut = 0;
   Double_t slope = 0;
   Int_t nrows = 0;
   Double_t VarXs[kTpcLast] = {-999.};
@@ -439,7 +422,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[ktpcTime]              = CdEdx.tpcTime; 
   VarXs[kDrift]                = ZdriftDistanceO2;      // Blair correction 
   VarXs[kMultiplicity]         = CdEdx.QRatio;     
-  VarXs[kGatingGrid]           = driftTime - m_TrigT0 ;
+  VarXs[kGatingGrid]           = driftTime;
   VarXs[kzCorrectionC]         = ZdriftDistance;
   VarXs[kzCorrection]          = ZdriftDistance;
   VarXs[ktpcMethaneIn]         = gas->percentMethaneIn*1000./gas->barometricPressure;     
@@ -511,11 +494,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       goto ENDL;
     }
     if (k == kGatingGrid)  {
-#if 0 /* Apply Gating Grid Correction with kzCorrectionC or kzCorrection */
       Double_t dEcor = ((St_GatingGridC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[kGatingGrid]);
       if (dEcor < -9.9) return 3;
       dE *= TMath::Exp(-dEcor);
-#endif
       goto ENDL;
     }
     cor = ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable();
@@ -534,6 +515,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     }
     if (NLoops == 1) {
       corl = cor + l;
+      iCut = 0;
       if (k == kAdcCorrection) {
 	ADC = adcCF;
 	if (ADC <= 0) return 3; //HACK to avoid FPE (VP)
@@ -549,6 +531,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	dE *=  TMath::Exp(-slope*CdEdx.dCharge);
 	dE *=  TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2+l,CdEdx.dCharge));
 	goto ENDL;
+      } else if (k == kzCorrection || k == kzCorrectionC) {
+	iCut = 1; // Always cut
       } else if (k == kdXCorrection) {
 	xL2 = TMath::Log2(dx);
 	dXCorr = ((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xL2); 
@@ -566,36 +550,20 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*l  ,CdEdx.QRatio)
 			   -((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(2*l+1,CdEdx.DeltaZ));
 	goto ENDL;
-      } else if (k == kEdge) {// Should be disabled in StTpcRSMaker
+      } else if (k == kEdge) {
 	if (corl->type == 200) VarXs[kEdge] = TMath::Abs(CdEdx.edge);
-	if (corl->min > 0 && corl->min > VarXs[kEdge]    ) return 4;
+	if (corl->min > 0 && corl->min > VarXs[kEdge]    ) return 2;
       } else if (k == ktpcTime) { // use the correction if you have xmin < xmax && xmin <= x <= xmax
 	if (corl->min >= corl->max || corl->min > VarXs[ktpcTime] ||  VarXs[ktpcTime] > corl->max) goto ENDL;
 	Double_t xx = VarXs[ktpcTime];
 	dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,xx));
 	goto ENDL;
-      } 
-      if (k == kzCorrection || k == kzCorrectionC) {
-	if ((corl->min < corl->max) && (corl->min > VarXs[k] || VarXs[k] > corl->max)) {
-	  if (! IsSimulation()) return 2;
-	  VarXs[k] = TMath::Min(corl->max, TMath::Max( corl->min, VarXs[k]));
-	}
-	// Take care about prompt hits and Gating Grid region in Simulation
-	if (ZdriftDistance <= 0.0) goto ENDL; // prompt hits 
-	if (m_Corrections[kGatingGrid].Chair && (k == kzCorrectionC || IsSimulation())) {// take about Gating Grid for 
-	  Double_t dEcor = ((St_GatingGridC *)m_Corrections[kGatingGrid].Chair)->CalcCorrection(0,VarXs[kGatingGrid]);
-	  Int_t np = TMath::Abs(corl->npar)%100;
-	  if (corl->type == 20 && TMath::Abs(corl->a[np]) > 1e-7) {// extra exponent 
-	    dEcor += corl->a[np]*TMath::Exp( corl->a[np+1]*VarXs[k]);
-	  }
-	  if (dEcor < -9.9) return 3;
-	  dE *= TMath::Exp(-dEcor);
-	}
       }
-      if (corl->type == 300 && (corl->min < corl->max)) {
-	VarXs[k] = TMath::Min(corl->max, TMath::Max( corl->min, VarXs[k])); 
+      if (corl->type == 300) {
+	if (corl->min > 0 && corl->min > VarXs[k]    ) VarXs[k] = corl->min;
+	if (corl->max > 0 && VarXs[k]     > corl->max) VarXs[k] = corl->max;
       }
-      if (TMath::Abs(corl->npar) >= 100) {
+      if (TMath::Abs(corl->npar) >= 100 || iCut) {
 	Int_t iok = 2;
 	if (corl->min >= corl->max) {
 	  iok = 0;
@@ -608,26 +576,26 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	  return iok;
 	}
       }
-    }
-    if (corl->npar%100) {
-      Double_t dECor = TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
+      if (corl->npar%100) {
+	Double_t dECor = TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
 #if 0
-      if (TMath::IsNaN(dECor)) {
-	static Int_t iBreak = 0;
-	iBreak++;
-      }
+	if (TMath::IsNaN(dECor)) {
+	  static Int_t iBreak = 0;
+	  iBreak++;
+	}
 #endif
-      dE *= dECor;
+	dE *= dECor;
 #if 0
-      if (TMath::IsNaN(dE)) {
-	static Int_t iBreak = 0;
-	iBreak++;
-      }
+	if (TMath::IsNaN(dE)) {
+	  static Int_t iBreak = 0;
+	  iBreak++;
+	}
 #endif
+      }
     } else  { // repeatable 
       for (m = 0; m < NLoops; m++, l += nrows) {
 	corl = cor + l;
-	if (corl->min < corl->max && corl->min <= VarXs[k] && VarXs[k] < corl->max) {
+	if (corl->min <= VarXs[k] && VarXs[k] < corl->max) {
 	  dE *= TMath::Exp(-((St_tpcCorrectionC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
 	  break;
 	}	

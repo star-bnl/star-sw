@@ -468,7 +468,7 @@ double StHelix::pathLength(const StThreeVector<double>& r,
 	
 	double a, f, fp;
 	double sOld = s = 0;  
-	double shiftOld = 0;
+//VP	double shiftOld = 0;
 	double shift;
 //		(cos(angMax)-1)/angMax = 0.1
         const double angMax = 0.21;
@@ -498,7 +498,7 @@ double StHelix::pathLength(const StThreeVector<double>& r,
                shift = f/fp;
             }
 	    s -= shift;
-	    shiftOld = shift;
+//VP	    shiftOld = shift;
 	    if (fabs(sOld-s) < MaxPrecisionNeeded) break;
 	    sOld = s;
 	}

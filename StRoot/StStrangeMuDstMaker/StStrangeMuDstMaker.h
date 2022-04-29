@@ -51,6 +51,8 @@ enum StrangeEnum {StrangeNoKeep, StrangeNoFile, StrangeWrite, StrangeRead};
 
 class StStrangeMuDstMaker : public StMaker {
  public: 
+static void Qwe();
+
   StStrangeMuDstMaker(const char *name="strangeMuDst");
   virtual ~StStrangeMuDstMaker();
   void DoT0JitterAbort(Bool_t doIt=kTRUE);

@@ -1013,12 +1013,6 @@ Bfc_st BFC[] = {
   {"P2021a","" ,"",
    "B2021a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    , "","", "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
-  {"B2022" ,"","",
-   "ry2022,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
-   "","", "Base chain for run 2022 data (tpc)",kFALSE},
-  {"pp2022","" ,"",
-   "B2022,ITTF,BAna,hitfilt,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,etofa,btof,mtd,emcDY2,FttDat,fcs,trgd,ZDCvtx,analysis",
-   "","","Production chain for year 2022 pp data - no Corr (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
@@ -1083,8 +1077,7 @@ Bfc_st BFC[] = {
   {"paw" ,"" ,"","" ,"","","Allocate memory for pawc",kFALSE},
   {"AllEvent" ,"" ,"","Tree" ,"","","Write whole event to StTree",kFALSE},
   {"AllTables" ,"" ,"","","" ,"St_Tables","Load Star Tables",kFALSE},
-  {"FXT" ,"" ,"","btofFXT","" ,"","enable anything FXT-specific",kFALSE},
-  {"btofFXT" ,"" ,"","","" ,"","enable FXT mode for btof",kFALSE},
+  {"FXT" ,"" ,"","","" ,"","enable anything FXT-specific",kFALSE},
   {"Corr1" ,"" ,"","AlignSectors,ExB,OBmap,OClock,OPr13","",""
    , "... AlignSectors,ExB,OBmap,OClock,OPr13 ...",kFALSE},
   {"Corr2" ,"" ,"","Corr1,OTwist,OIFC" ,"","","...Corr1+OTwist,OIFC ...",kFALSE},
@@ -1271,11 +1264,9 @@ Bfc_st BFC[] = {
   {"eemcDb" ,"eeDb" ,"","db,EEmcUtil", "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb" ,"fmsDb","","db,fmsutil", "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
   {"fcsDb" ,"fcsDbMkr","","", "StFcsDbMaker","StFcsDbMaker","Load FcsDbMaker",kFALSE},
-  {"fttDb" ,"fttDbMkr","","", "StFttDbMaker","StFttDbMaker","Load FttDbMaker",kFALSE},
   {"fgtDb" ,"fgtDb","","db,fgtutil", "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb" ,"pxlDb","","tpcDb PxlUtil", "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb" ,"istDb","","tpcDb", "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
-  {"fstDb" ,"fstDb","","tpcDb", "StFstDbMaker","StFstDbMaker","Load FstDbMaker",kFALSE},
   {"epdDb" ,"epdDb","","tpcDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1406,17 +1397,6 @@ Bfc_st BFC[] = {
   {"istRawHit", "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
   {"istCluster", "", "", "istRawHit","StIstClusterMaker", "StIstClusterMaker","IST Cluster maker", kFALSE},
   {"istHit", "", "", "event,istCluster", "StIstHitMaker", "StIstHitMaker","IST Hit Maker",kFALSE},
-  {"fst","fstChain","","fstRawHit,fstCluster,fstHit", "StMaker","StChain","FST chain" ,kFALSE},
-  {"fstFastSim","","fstChain","StMcEvent,StEvent","StFstFastSimMaker","StFstSimMaker","FST fast simulator",
-                                                                                                    kFALSE},
-  {"fstRawHit", "", "fstChain", "fstUtil,fstDb","StFstRawHitMaker", "StFstRawHitMaker","FST raw hit maker",
-                                                                                                    kFALSE},
-  {"fstCluster", "", "fstChain", "fstRawHit","StFstClusterMaker", "StFstClusterMaker","FST Cluster maker",
-                                                                                                    kFALSE},
-  {"fstHit", "", "fstChain", "event,fstCluster", "StFstHitMaker", "StFstHitMaker","FST Hit Maker",
-                                                                                                    kFALSE},
-  {"fstUtil" , "", "", "", "", "StFstUtil", "Fst Utilities",
-                                                                                                    kFALSE},
   {"ssddat" ,"","","ssd_daq" ,"","","SSD full chain for Real Data",kFALSE},
   {"sstdat" ,"","","sst_daq" ,"","","SST full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
@@ -1511,27 +1491,16 @@ Bfc_st BFC[] = {
    "StFmsPointMaker","StFmsPointMaker","Fill FMS clusters and points", kFALSE},
   {"fmsfps" ,"","", "event,fmsDb",
    "StFmsFpsMaker","StFmsFpsMaker","Fill FPS association in FMS points", kFALSE},
-  {"fcs","fcsChain","","fcsDat,fcsWFF,fcsCluster,fcsPoint", "StMaker","StChain","FCS chain",kFALSE},
-  {"fcsSim","" ,"fcsChain","StEvent,fcsDb",
+  {"fcsSim","" ,"","StEvent,fcsDb",
    "StFcsFastSimulatorMaker","StFcsFastSimulatorMaker","FCS Fast Simulator", kFALSE},
-  {"fcsDat","" ,"fcsChain","StEvent,fcsDb",
+  {"fcsDat","" ,"","StEvent,fcsDb",
    "StFcsRawHitMaker","StFcsRawHitMaker","FCS daq file reader/hit maker", kFALSE},
-  {"fcsWFF" ,"","fcsChain", "StEvent,fcsDb",
+  {"fcsWFF" ,"","", "StEvent,fcsDb",
    "StFcsWaveformFitMaker","StFcsWaveformFitMaker","Fit FCS waveform", kFALSE},
-  {"fcsCluster" ,"","fcsChain", "StEvent,fcsDb",
+  {"fcsCluster" ,"","", "StEvent,fcsDb",
    "StFcsClusterMaker","StFcsClusterMaker","Fill FCS clusters", kFALSE},
-  {"fcsPoint" ,"","fcsChain", "StEvent,fcsDb",
+  {"fcsPoint" ,"","", "StEvent,fcsDb",
    "StFcsPointMaker","StFcsPointMaker,libMinuit","Fill FCS points", kFALSE},
-  {"ftt","fttChain","","FttDat,FttHitCalib,FttClu,FttPoint", "StMaker","StChain","FST chain" ,kFALSE},
-  {"FttDat","","fttChain","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent",
-                                                            "sTGC Raw hit maker", kFALSE},
-  {"FttHitCalib","","fttChain","StEvent,MuDST","StFttHitCalibMaker","StFttHitCalibMaker,StFttRawHitMaker,StEvent",
-                                                            "sTGC hit calib maker", kFALSE},
-  {"FttClu","","fttChain","StEvent,fttDb","StFttClusterMaker","StFttClusterMaker,StEvent,StFttDbMaker",
-                                                                           "sTGC Cluster maker", kFALSE},
-  {"FttPoint","","fttChain","StEvent,fttDb","StFttPointMaker","StFttPointMaker,StEvent,StFttDbMaker",
-                                                                             "sTGC Point maker", kFALSE},
-  {"FttQA","","fttChain","","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker", kFALSE},
   {"fpd" ,"","","" ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"fgt" ,"FgtChain","","fgtDat,fgtClu,fgtAtoC" ,"StMaker","StChain","Fgt data Chain",kFALSE},
   {"fgtDat" ,"","", "event,fgtdb","StFgtRawMaker","StFgtRawMaker", "FGT Data reader",kFALSE},
@@ -2742,12 +2711,6 @@ Bfc_st BFC[] = {
   {"P2021a","" ,"",
    "B2021a,ITTF,BAna,iTpcIT,hitfilt,VFMinuit,etofa,btof,mtd,l3onl,emcDY2,epdHit,trgd,ZDCvtx,analysis"
    , "","", "Base chain for year 2020 AA data - no Corr (+ l3, epd, mtd, b/etof, b-emc)",kFALSE},
-  {"B2022" ,"","",
-   "ry2022,in,tpcX,UseXgeom,iTpcIT,CorrY,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,picoWrite,picoVtxDefault,picoCovMtxWrite",
-   "","", "Base chain for run 2022 data (tpc)",kFALSE},
-  {"pp2022","" ,"",
-   "B2022,ITTF,BAna,hitfilt,ppOpt,ImpBToFt0Mode,VFPPVnoCTB,beamline3D,l3onl,etofa,btof,mtd,emcDY2,FttDat,fcs,trgd,ZDCvtx,analysis",
-   "","","Production chain for year 2022 pp data - no Corr (+ l3, epd, mtf, b/etof, fcs, e/b-emc)",kFALSE},
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    , "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal","" ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","",""
@@ -2812,8 +2775,7 @@ Bfc_st BFC[] = {
   {"paw" ,"" ,"","" ,"","","Allocate memory for pawc",kFALSE},
   {"AllEvent" ,"" ,"","Tree" ,"","","Write whole event to StTree",kFALSE},
   {"AllTables" ,"" ,"","","" ,"St_Tables","Load Star Tables",kFALSE},
-  {"FXT" ,"" ,"","btofFXT","" ,"","enable anything FXT-specific",kFALSE},
-  {"btofFXT" ,"" ,"","","" ,"","enable FXT mode for btof",kFALSE},
+  {"FXT" ,"" ,"","","" ,"","enable anything FXT-specific",kFALSE},
   {"Corr1" ,"" ,"","AlignSectors,ExB,OBmap,OClock,OPr13","",""
    , "... AlignSectors,ExB,OBmap,OClock,OPr13 ...",kFALSE},
   {"Corr2" ,"" ,"","Corr1,OTwist,OIFC" ,"","","...Corr1+OTwist,OIFC ...",kFALSE},
@@ -3000,11 +2962,9 @@ Bfc_st BFC[] = {
   {"eemcDb" ,"eeDb" ,"","db,EEmcUtil", "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb" ,"fmsDb","","db,fmsutil", "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
   {"fcsDb" ,"fcsDbMkr","","", "StFcsDbMaker","StFcsDbMaker","Load FcsDbMaker",kFALSE},
-  {"fttDb" ,"fttDbMkr","","", "StFttDbMaker","StFttDbMaker","Load FttDbMaker",kFALSE},
   {"fgtDb" ,"fgtDb","","db,fgtutil", "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"pxlDb" ,"pxlDb","","tpcDb PxlUtil", "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb" ,"istDb","","tpcDb", "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
-  {"fstDb" ,"fstDb","","tpcDb", "StFstDbMaker","StFstDbMaker","Load FstDbMaker",kFALSE},
   {"epdDb" ,"epdDb","","tpcDb", "StEpdDbMaker","StEpdDbMaker","Load EpdDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -3135,17 +3095,6 @@ Bfc_st BFC[] = {
   {"istRawHit", "", "", "istUtil,istDb","StIstRawHitMaker", "StIstRawHitMaker","IST RAWhit maker", kFALSE},
   {"istCluster", "", "", "istRawHit","StIstClusterMaker", "StIstClusterMaker","IST Cluster maker", kFALSE},
   {"istHit", "", "", "event,istCluster", "StIstHitMaker", "StIstHitMaker","IST Hit Maker",kFALSE},
-  {"fst","fstChain","","fstRawHit,fstCluster,fstHit", "StMaker","StChain","FST chain" ,kFALSE},
-  {"fstFastSim","","fstChain","StMcEvent,StEvent","StFstFastSimMaker","StFstSimMaker","FST fast simulator",
-                                                                                                    kFALSE},
-  {"fstRawHit", "", "fstChain", "fstUtil,fstDb","StFstRawHitMaker", "StFstRawHitMaker","FST raw hit maker",
-                                                                                                    kFALSE},
-  {"fstCluster", "", "fstChain", "fstRawHit","StFstClusterMaker", "StFstClusterMaker","FST Cluster maker",
-                                                                                                    kFALSE},
-  {"fstHit", "", "fstChain", "event,fstCluster", "StFstHitMaker", "StFstHitMaker","FST Hit Maker",
-                                                                                                    kFALSE},
-  {"fstUtil" , "", "", "", "", "StFstUtil", "Fst Utilities",
-                                                                                                    kFALSE},
   {"ssddat" ,"","","ssd_daq" ,"","","SSD full chain for Real Data",kFALSE},
   {"sstdat" ,"","","sst_daq" ,"","","SST full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
@@ -3240,27 +3189,16 @@ Bfc_st BFC[] = {
    "StFmsPointMaker","StFmsPointMaker","Fill FMS clusters and points", kFALSE},
   {"fmsfps" ,"","", "event,fmsDb",
    "StFmsFpsMaker","StFmsFpsMaker","Fill FPS association in FMS points", kFALSE},
-  {"fcs","fcsChain","","fcsDat,fcsWFF,fcsCluster,fcsPoint", "StMaker","StChain","FCS chain",kFALSE},
-  {"fcsSim","" ,"fcsChain","StEvent,fcsDb",
+  {"fcsSim","" ,"","StEvent,fcsDb",
    "StFcsFastSimulatorMaker","StFcsFastSimulatorMaker","FCS Fast Simulator", kFALSE},
-  {"fcsDat","" ,"fcsChain","StEvent,fcsDb",
+  {"fcsDat","" ,"","StEvent,fcsDb",
    "StFcsRawHitMaker","StFcsRawHitMaker","FCS daq file reader/hit maker", kFALSE},
-  {"fcsWFF" ,"","fcsChain", "StEvent,fcsDb",
+  {"fcsWFF" ,"","", "StEvent,fcsDb",
    "StFcsWaveformFitMaker","StFcsWaveformFitMaker","Fit FCS waveform", kFALSE},
-  {"fcsCluster" ,"","fcsChain", "StEvent,fcsDb",
+  {"fcsCluster" ,"","", "StEvent,fcsDb",
    "StFcsClusterMaker","StFcsClusterMaker","Fill FCS clusters", kFALSE},
-  {"fcsPoint" ,"","fcsChain", "StEvent,fcsDb",
+  {"fcsPoint" ,"","", "StEvent,fcsDb",
    "StFcsPointMaker","StFcsPointMaker,libMinuit","Fill FCS points", kFALSE},
-  {"ftt","fttChain","","FttDat,FttHitCalib,FttClu,FttPoint", "StMaker","StChain","FST chain" ,kFALSE},
-  {"FttDat","","fttChain","StEvent","StFttRawHitMaker","StFttRawHitMaker,StEvent",
-                                                            "sTGC Raw hit maker", kFALSE},
-  {"FttHitCalib","","fttChain","StEvent,MuDST","StFttHitCalibMaker","StFttHitCalibMaker,StFttRawHitMaker,StEvent",
-                                                            "sTGC hit calib maker", kFALSE},
-  {"FttClu","","fttChain","StEvent,fttDb","StFttClusterMaker","StFttClusterMaker,StEvent,StFttDbMaker",
-                                                                           "sTGC Cluster maker", kFALSE},
-  {"FttPoint","","fttChain","StEvent,fttDb","StFttPointMaker","StFttPointMaker,StEvent,StFttDbMaker",
-                                                                             "sTGC Point maker", kFALSE},
-  {"FttQA","","fttChain","","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker", kFALSE},
   {"fpd" ,"","","" ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"fgt" ,"FgtChain","","fgtDat,fgtClu,fgtAtoC" ,"StMaker","StChain","Fgt data Chain",kFALSE},
   {"fgtDat" ,"","", "event,fgtdb","StFgtRawMaker","StFgtRawMaker", "FGT Data reader",kFALSE},
@@ -4084,11 +4022,14 @@ Int_t StBFChain::Instantiate()
     }
 
     if (maker == "StStrangeMuDstMaker" && GetOption("CMuDST")&& GetOption("StrngMuDST") ) {
-      TString cmd(Form("StStrangeMuDstMaker *pSMMk = (StStrangeMuDstMaker*) %p;",mk));
-      cmd += "pSMMk->DoV0();";                                 // Set StrangeMuDstMaker parameters
-      cmd += "pSMMk->DoXi();";
-      cmd += "pSMMk->DoKink();";
-      cmd += "pSMMk->SetNoKeep();";                            // Set flag for output OFF
+printf ("UUU Mk = %p\n",mk);
+ProcessLine("StStrangeMuDstMaker::Qwe()");
+      TString cmd(Form("StStrangeMuDstMaker *pSMMk = (StStrangeMuDstMaker*)%pUL;",mk));
+printf("UUUUU mk=%s\n",mk->GetName());
+//??      cmd += "pSMMk->DoV0();";                                 // Set StrangeMuDstMaker parameters
+//??      cmd += "pSMMk->DoXi();";
+//??      cmd += "pSMMk->DoKink();";
+//??      cmd += "pSMMk->SetNoKeep();";                            // Set flag for output OFF
       ProcessLine(cmd);
     }
 
@@ -4334,7 +4275,6 @@ Int_t StBFChain::Instantiate()
       if (GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
       if (GetOption("setOutlierRej4BToft0"))  mk->SetAttr("setPPPAOutlierRej", kTRUE);
       if (GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
-      if (GetOption("btofFXT")) mk->SetAttr("btofFXT", kTRUE);
     }
     if (maker == "StVpdCalibMaker" && GetOption("ImpBToFt0Mode")) mk->SetAttr("pppAMode", kTRUE);
 

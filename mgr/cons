@@ -3860,7 +3860,7 @@ sub build {
 
 sub _build {
     my($self) = @_;
-    print main::DEPFILE $self->path, "\n" if $param::depfile and !$param::depflag;
+#    print main::DEPFILE $self->path, "\n" ;# UUUU if $param::depfile and !$param::depflag;
     if ($param::depends) {
       printf("%2i  ",$level/2);
       print((' ' x $level), "Checking ", $self->path, "\n");
@@ -3871,6 +3871,8 @@ sub _build {
     #print("add ",$self->path,"\n");  #if $param::debug;
 
     if (!exists $self->{builder}) {
+#print "2UUUU Path = $self->path\n";
+
 	# We don't know how to build the file. This is OK, if
 	# the file is present as a source file, under either the
 	# local tree or a Repository.
@@ -3879,7 +3881,7 @@ sub _build {
 	    return $self->{status} = 'handled';
 	} else {
 	    my($name) = $self->path;
-	    print("$0: don't know how to construct \"$name\"\n");
+	    print("$0: don't know 1UUUU how to construct \"$name\"\n");
 	    exit(1) unless $param::kflag;
 	    return $self->{status} = 'errors'; # xxx used to be 'unknown'
 	}

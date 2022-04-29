@@ -1414,20 +1414,29 @@ void StMaker::Streamer(TBuffer &)
 //______________________________________________________________________________
 StMaker *StMaker::New(const Char_t *classname, const Char_t *name, void *title)
 {
+static char oldName[20]={0};
   // This static method creates a new StMaker object if provided 
   
   StMaker *maker = 0;
+  
+  const char* nam = (name )? (const char*)name:"";
+  const char* tit = (title)? (const char*)title:"";
   if (classname) 
   {
     TClass *cl = gROOT->GetClass(classname);
     if (cl) {
       maker = (StMaker *)cl->New();
       if (maker) {
-	if (name && strlen(name)) maker->SetName(name);
-	if (title) maker->SetTitle((Char_t *) title);
+	if (nam && strlen(nam)) maker->SetName(nam);
+	if (tit && strlen(tit)) maker->SetTitle(tit);
       }
+
     } 
   }
+  assert(maker);
+  printf (" ==== New %s(%p) %s\n",classname,maker,maker->GetName());
+//???  assert(!strcmp(oldName,maker->GetName()));
+
   return maker; 
 }
 //_____________________________________________________________________________

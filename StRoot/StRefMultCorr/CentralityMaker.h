@@ -46,7 +46,7 @@
 class StRefMultCorr ;
 #include "Rtypes.h"
 
-//_________________
+//____________________________________________________________________________________________________
 class CentralityMaker {
   public:
     static CentralityMaker* instance(); // Use this function to access StRefMultCorr

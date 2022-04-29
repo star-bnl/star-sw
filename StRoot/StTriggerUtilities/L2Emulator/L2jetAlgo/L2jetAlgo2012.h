@@ -106,7 +106,7 @@ class L2jetAlgo2012 : public  L2VirtualAlgo2012 {
   void createHisto();
   void clearEvent();
   int  projectAdc(const HitTower1 *hit, const int hitSize,
-		  unsigned short *phiBin, unsigned short *patchBin,
+		  ushort *phiBin, ushort *patchBin,
 		  L2Histo *hHot	 );
   float  scanPhi();
   void scanEta(int iJ);//int iphi0, int  *etaEneA, float *fetaBinMax, int *eneMax ,int *ietaBinLeft);

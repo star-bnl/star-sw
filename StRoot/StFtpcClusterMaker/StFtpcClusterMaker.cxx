@@ -352,6 +352,7 @@
 #include <Stiostream.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/fcntl.h>
 //VP#include "StDaqLib/GENERIC/EventReader.hh"

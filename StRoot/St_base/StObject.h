@@ -165,16 +165,14 @@ UInt_t   fMaxUdx;
 #ifndef __CINT__
 #include <list>
 #include <vector>
-#ifndef ST_NO_NAMESPACES
 using namespace std;
-#endif
 class StProxyUrr;
 
-typedef list<StProxyUrr*>  	        StCollList;
+typedef std::list<StProxyUrr*>  	StCollList;
 typedef StCollList::iterator 		StCollListIter;
-typedef list<StXRefManager*> 		StXRefManagerList;
+typedef std::list<StXRefManager*> 	StXRefManagerList;
 typedef StXRefManagerList::iterator 	StXRefManagerListIter;
-typedef vector<UInt_t> 			UIntVector;
+typedef std::vector<UInt_t> 		UIntVector;
 typedef UIntVector::iterator 		UIntVectorIter;
 //_____________________________________________________________________________
 
@@ -186,9 +184,9 @@ public:
   	StProxyUrr(TObject  **adr){fAdr = adr; 		   fType=1;}
   	StProxyUrr(StObject **adr){fAdr = (TObject **)adr; fType=1;}
        ~StProxyUrr(){fArr = 0;}
-int       GetType() {return fType;}
-TObject   *GetArr()  {return fArr;}
-TObject  **GetAdr()  {return fAdr;}
+int       GetType(){return fType;}
+TObject  *GetArr() {return fArr; }
+TObject **GetAdr() {return fAdr; }
 
 private:
 int  fType;

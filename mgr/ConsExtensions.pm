@@ -5,6 +5,8 @@ use Cwd;
 
 sub cons::ProjectFile {
     my $env = shift;
+#print "ENV = $env UUUUUUUUUUUUUUUUUU\n"
+
     my $dspgen = $env->{DSPGEN};
     my %opts = @_;
     my $dswfile = "#AllProjects.dsw";

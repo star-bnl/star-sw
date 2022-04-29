@@ -1,6 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> kretDbBlobS  <comment>       online-DB, any large string of characters, ver 2 </comment>
-  <dbString> dataS <length> 500000 </length> <comment>  string with  data  </comment> </dbString> 
-  <dbString> comment <length> 160 </length> </dbString>
-</StDbTable> 
-</StarDataBase>

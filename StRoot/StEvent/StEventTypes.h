@@ -193,7 +193,6 @@
 #include "StFcsCluster.h"
 #include "StFcsHit.h"
 #include "StFcsPoint.h"
-#include "StFttRawHit.h"
 #include "StFmsCollection.h"
 #include "StFmsCluster.h"
 #include "StFmsHit.h"

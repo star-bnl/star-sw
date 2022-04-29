@@ -23,8 +23,6 @@ enum fgtTypes {muFgtStrips=0, muFgtClusters, muFgtStripAssociations, muFgtAdcs }
 enum fmsTypes {muFmsHit=0, muFmsCluster, muFmsPoint, muFmsInfo};
 
 enum fcsTypes {muFcsHit=0, muFcsCluster, muFcsPoint, muFcsInfo}; 
-
-enum fttTypes {muFttRawHit=0, muFttCluster, muFttPoint}; 
 #ifndef __NO_STRANGE_MUDST__
 /// @enum strangeTypes enumeration to to index the strangeArrays
 enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0Mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc, smuCut};
@@ -64,7 +62,6 @@ __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArray
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
 __NFMSARRAYS__     =4 ,	///< size of the fms arrays, i.e. number of TClonesArrays  
 __NFCSARRAYS__     =4 ,  ///< size of the fcs arrays, i.e. number of TClonesArrays  
-__NFTTARRAYS__     =3 ,  ///< size of the ftt arrays, i.e. number of TClonesArrays  
 // run 5 - dongx
 __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NBTOFARRAYS__    =3 ,  /// dongx
@@ -76,9 +73,9 @@ __NEZTARRAYS__     =5 ,  ///< size of the ez arrays >
      
 /// dongx
 #ifndef __NO_STRANGE_MUDST__
-__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NFCSARRAYS__+__NFTTARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NETOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
+__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NFCSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NETOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
 #else
-__NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NFCSARRAYS__+__NFTTARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NETOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
+__NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NFCSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NETOFARRAYS__+__NEPDARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
 #endif
 };
 class StMuArrays {
@@ -95,7 +92,6 @@ class StMuArrays {
     static const char**      pmdArrayNames;//[__NPMDARRAYS__    ]
     static const char**      fmsArrayNames;//[__NFMSARRAYS__    ]
     static const char**      fcsArrayNames;//[__NFCSARRAYS__    ]
-    static const char**      fttArrayNames;//[__NFTTARRAYS__    ]
     static const char**      tofArrayNames;//[__NTOFARRAYS__    ]
     static const char**     btofArrayNames;//[__NBTOFARRAYS__   ] // dongx
     static const char**     etofArrayNames;//[__NETOFARRAYS__   ] // jdb
@@ -114,7 +110,6 @@ class StMuArrays {
     static const char**  pmdArrayTypes;//    [__NPMDARRAYS__    ]
     static const char**  fmsArrayTypes;//    [__NFMSARRAYS__    ]
     static const char**  fcsArrayTypes;//    [__NFCSARRAYS__    ]
-    static const char**  fttArrayTypes;//    [__NFTTARRAYS__    ]
     static const char**  tofArrayTypes;//    [__NTOFARRAYS__    ]
     static const char**  btofArrayTypes;//   [__NBTOFARRAYS__   ]  // dongx
     static const char**  etofArrayTypes;//   [__NETOFARRAYS__   ]  // jdb
@@ -133,7 +128,6 @@ class StMuArrays {
     static int*       pmdArraySizes;// [__NPMDARRAYS__    ]
     static int*       fmsArraySizes;// [__NFMSARRAYS__    ]
     static int*       fcsArraySizes;// [__NFCSARRAYS__    ]
-    static int*       fttArraySizes;// [__NFTTARRAYS__    ]
     static int*       tofArraySizes;// [__NTOFARRAYS__    ]
     static int*       btofArraySizes;// [__NBTOFARRAYS__   ]  // dongx
     static int*       etofArraySizes;// [__NETOFARRAYS__   ]  // jdb
@@ -152,7 +146,6 @@ class StMuArrays {
     static int*    pmdArrayCounters;// [__NPMDARRAYS__    ]
     static int*    fmsArrayCounters;// [__NFMSARRAYS__    ]
     static int*    fcsArrayCounters;// [__NFCSARRAYS__    ]
-    static int*    fttArrayCounters;// [__NFTTARRAYS__    ]
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
     static int*   btofArrayCounters;// [__NBTOFARRAYS__   ]  // dongx
     static int*   etofArrayCounters;// [__NETOFARRAYS__   ]  // jdb

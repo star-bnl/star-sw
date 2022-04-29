@@ -1,7 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbHVtemp  <comment>  *    online-DB, temp reported by HVsys </comment>
-  <dbString> name <length> 16 </length> <comment>   PMT ID:  sector/box, eg 06TB  </comment> </dbString> 
-  <dbFloat> tempC <comment>   temp in C  </comment> </dbFloat> 
-  <dbString> comment <length> 160 </length> </dbString>
-</StDbTable> 
-</StarDataBase>

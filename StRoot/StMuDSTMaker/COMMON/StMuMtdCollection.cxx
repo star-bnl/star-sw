@@ -1,3 +1,6 @@
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include "StMuMtdCollection.h"
 #include "StMuMtdRawHit.h"
 #include "StMuMtdHit.h"
@@ -23,14 +26,14 @@ StMuMtdCollection::StMuMtdCollection(const StMtdCollection & mtd){
 	
 	//Fill Hits
 	const StSPtrVecMtdHit& VecHit = mtdp->mtdHits();
-	for(uint32_t i=0; i< VecHit.size(); i++){
+	for(u_int i=0; i< VecHit.size(); i++){
 		StMtdHit *pHit = (StMtdHit*)VecHit.at(i);		
 		mMtdHits.push_back(StMuMtdHit(pHit));
 	}
 	
 	//Fill Raw Hits	
 	const StSPtrVecMtdRawHit& VecRawHit = mtdp->mtdRawHits();
-	for(uint32_t i=0; i< VecRawHit.size(); i++){
+	for(u_int i=0; i< VecRawHit.size(); i++){
 		StMtdRawHit *pRawHit = (StMtdRawHit*)VecRawHit.at(i);
 		mMtdRawHits.push_back(StMuMtdRawHit(pRawHit));
 	}

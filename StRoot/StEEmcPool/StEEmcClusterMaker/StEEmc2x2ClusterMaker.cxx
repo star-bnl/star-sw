@@ -352,7 +352,7 @@ Int_t StEEmc2x2ClusterMaker::buildSmdClusters()
 		  if ( energy > mSmdMinEnergy ) 
 		    {
 		      if ( !strip.fail() ) {
-			used[istrip] = true;
+			used[istrip]++;
 			cluster.add(strip);			
 		      }
 		      else
@@ -388,7 +388,7 @@ Int_t StEEmc2x2ClusterMaker::buildSmdClusters()
                   if ( energy > mSmdMinEnergy )
                     {
                       if ( !strip.fail() ) {
-			used[istrip] = true;
+			used[istrip]++;
 			cluster.add(strip);
 		      }
 		      else

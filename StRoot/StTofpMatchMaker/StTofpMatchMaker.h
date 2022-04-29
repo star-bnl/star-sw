@@ -126,8 +126,8 @@ private:
   Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
   string mHistoFileName; //! name of histogram file, if empty no write-out
 
-  Bool_t validAdc(float);
-  Bool_t validTdc(float);
+  Bool_t validAdc(float const);
+  Bool_t validTdc(float const);
   Bool_t validEvent(StEvent *);
   Bool_t validTrack(StTrack*);
   Bool_t validTofTrack(StTrack*);
@@ -206,7 +206,7 @@ inline void StTofpMatchMaker::setMinFitPointsPerTrack(Int_t nfitpnts){mMinFitPoi
 inline void StTofpMatchMaker::setMaxDCA(Float_t maxdca){mMaxDCA=maxdca;}
 inline void StTofpMatchMaker::setHistoFileName(Char_t* filename){mHistoFileName=filename;}
 inline void StTofpMatchMaker::createHistograms(Bool_t histos){mHisto = histos;}
-inline bool StTofpMatchMaker::validAdc(float adc){return((adc>=mMinValidAdc) && (adc<=mMaxValidAdc));}
-inline bool StTofpMatchMaker::validTdc(float tdc){return((tdc>=mMinValidTdc) && (tdc<=mMaxValidTdc));}
+inline bool StTofpMatchMaker::validAdc(const float adc){return((adc>=mMinValidAdc) && (adc<=mMaxValidAdc));}
+inline bool StTofpMatchMaker::validTdc(const float tdc){return((tdc>=mMinValidTdc) && (tdc<=mMaxValidTdc));}
 
 #endif

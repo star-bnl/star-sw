@@ -1,6 +1,8 @@
 #ifndef RC_CONFIG_HH
 #define RC_CONFIG_HH
 
+#include <sys/types.h>
+
 /***********************************************************************************
  * Configuration files for online
  *
@@ -62,13 +64,13 @@
 //
 struct TASK
 {
-  uint16_t node;
-  uint8_t task;
-  uint8_t inrun;                // Is the system in the run?
-  uint8_t stoprun;              // Is the system allowed to stop the run?
-  uint8_t start_order;          // start order
-  uint8_t typically_inrun;
-  uint8_t res2;
+  u_short node;
+  u_char task;
+  u_char inrun;                // Is the system in the run?
+  u_char stoprun;              // Is the system allowed to stop the run?
+  u_char start_order;          // start order
+  u_char typically_inrun;
+  u_char res2;
 };
   
 struct SUBSYS_TASKS
@@ -249,10 +251,10 @@ struct DAQ_DET_SETUP
   int analysis;
   int default_format;
 
-  uint8_t asic_seq_hi;
-  uint8_t asic_seq_lo;
-  uint8_t asic_thr_hi;
-  uint8_t asic_thr_lo;
+  u_char asic_seq_hi;
+  u_char asic_seq_lo;
+  u_char asic_thr_hi;
+  u_char asic_thr_lo;
   int time_bin_lo;
   int time_bin_hi;
   int clust_charge_lo;
@@ -260,7 +262,7 @@ struct DAQ_DET_SETUP
 
 struct DAQ_SUBDET
 {
-  uint32_t rb_mask;
+  u_int rb_mask;
 };
 
 struct DAQ_DET

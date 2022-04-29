@@ -13,6 +13,7 @@
 #define STAR_StFtpcGeantReader
 
 
+#include <sys/types.h>
 #include "TObject.h"
 
 #include "tables/St_g2t_vertex_Table.h"

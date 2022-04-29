@@ -37,8 +37,8 @@ void PrintTable(const Char_t *str, TTable *table) {
   Bool_t iprt = kTRUE;
   if (St_db_Maker::GetValidity(table,t) > 0) {
     if (table->InheritsFrom("St_tpcCorrection")) {
-      St_tpcCorrection *tt = (St_tpcCorrection *) table;
-      tpcCorrection_st *s = tt->GetTable(); Nrows = s->nrows;}
+      St_tpcCorrection *t = (St_tpcCorrection *) table;
+      tpcCorrection_st *s = t->GetTable(); Nrows = s->nrows;}
     if (Nrows > 10) Nrows = 10;
     CHECKTABLE(tpcCorrection);
     CHECKTABLE(tpcHVPlanes);
@@ -306,8 +306,9 @@ MakeChairInstance2(tpcCorrection,St_TpcdXdYC,Calibrations/tpc/TpcdXdY);
 MakeChairInstance2(GatingGrid,St_GatingGridC,Calibrations/tpc/GatingGrid);
 //________________________________________________________________________________
 Double_t St_GatingGridC::CalcCorrection(Int_t i, Double_t x) {// drift time in microseconds
-  Double_t value = -10;
+  if (x < 0) return 0;
   GatingGrid_st *cor =  ((St_GatingGrid *) Table())->GetTable() + i;
+  Double_t value = -10;
   if (x <= cor->t0) return value;
   Double_t corD = 1. - TMath::Exp(-(x-cor->t0)/(cor->settingTime/4.6));
   if (corD < 1e-4) return value;
@@ -943,33 +944,7 @@ Float_t St_TpcAvgPowerSupplyC::AcChargeL(Int_t sector, Int_t channel) {
 
   return AcCharge(sector,channel)/Length[channel-1];
 }
-//________________________________________________________________________________
-void St_TpcAvgPowerSupplyC::PrintC() const {
-  const St_TpcAvgPowerSupply *TpcAvgPowerSupply = (St_TpcAvgPowerSupply *) GetThisTable();
-  const TpcAvgPowerSupply_st &avgC = *TpcAvgPowerSupply->GetTable();
-  Double_t AcCharge[2] = {0, 0};
-  for (Int_t sec = 1; sec <= 24; sec++) {
-    cout << "Voltage " << sec;
-    for (Int_t socket = 1; socket <= 8; socket++) cout << "\t" << Form("%10.3f",avgC.Voltage[8*(sec-1)+socket-1]);
-    cout << endl;
-  }
-  for (Int_t sec = 1; sec <= 24; sec++) {
-    cout << "Current " << sec;
-    for (Int_t socket = 1; socket <= 8; socket++) cout << "\t" << Form("%10.5f",avgC.Current[8*(sec-1)+socket-1]);
-    cout << endl;
-  }
-  for (Int_t sec = 1; sec <= 24; sec++) {
-    cout << "Charge " << sec;
-    for (Int_t socket = 1; socket <= 8; socket++) {
-      cout << "\t" << Form("%10.3f",avgC.Charge[8*(sec-1)+socket-1]);
-      Int_t io = 0;
-      if (socket > 4) io = 1;
-      AcCharge[io] += avgC.Charge[8*(sec-1)+socket-1];
-    }
-    cout << endl;
-  }
-  cout << "Run " << avgC.run << " Accumulated charge Inner = " << AcCharge[0] << " (C), Outer = " << AcCharge[1] << "(C)" << endl;
-}
+
 #include "St_tpcAnodeHVavgC.h"
 MakeChairInstance(tpcAnodeHVavg,Calibrations/tpc/tpcAnodeHVavg);
 //________________________________________________________________________________
@@ -1514,11 +1489,6 @@ Float_t        St_beamInfoC::Frequency() {
 MakeChairInstance(tpcRDOMasks,RunLog/onl/tpcRDOMasks);
 //________________________________________________________________________________
 UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
-  static UInt_t Sector = 0;
-  static UInt_t Mask   = 0;
-  if (Sector == sec) {
-    return Mask;
-  }
   UInt_t MASK = 0x0000; // default is to mask it out
   //UInt_t MASK = 0xFFFF; // change to  ON by default ** THIS WAS A HACK
   if(sec < 1 || sec > 24 || getNumRows() == 0){
@@ -1530,17 +1500,13 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
   // Take care about unsorted tpcRDOMaks table
   Int_t i = -1;
   UInt_t j = (sec + 1) / 2 - 1;
-  if (sector(j) == 2*j + 1) {
-    i = j;
-  } else { 
-    for (i = 0; i < 12; i++) {
-      if (sector(i) == 2*j + 1) {break;}
-    }
+  for (i = 0; i < 12; i++) {
+    if (sector(i) == 2*j + 1) {break;}
   }
   assert(i >= 0);
   //  MASK = mask(((sec + 1) / 2) - 1); // does the mapping from sector 1-24 to packed sectors
   MASK = mask(i); // does the mapping from sector 1-24 to packed sectors
-  if (! St_tpcPadConfigC::instance()->iTpc(sec)) {// no iTPC
+  if (runNumber() <= 19000000 || (runNumber() < 20000000 && sec != 20)) {// no iTPC
     if (sec == 16 && MASK == 0 && runNumber() > 8181000 && runNumber() < 9181000) MASK = 4095;
     if( sec % 2 == 0){ // if its even relevent bits are 6-11
       MASK = MASK >> 6;
@@ -1553,28 +1519,9 @@ UInt_t       St_tpcRDOMasksC::getSectorMask(UInt_t sec) {
     if( sec % 2 == 0){ // if its even relevent bits are 8-13
       MASK = MASK >> 8;
     }
-    // Otherwise want lower 8 bits
+    // Otherwise want lower 6 bits
     MASK &= 255; // Mask out higher order bits
   }
-  Sector = sec;
-  Mask   = MASK;
-  return MASK;
-}
-//________________________________________________________________________________
-Bool_t St_tpcRDOMasksC::isOn(Int_t sector,Int_t rdo)  {    
-  static Int_t Sector = -1;
-  static Int_t Rdo    = -1;
-  static Bool_t Mask  = kFALSE;
-  if (Sector == sector && Rdo == rdo) {
-    return Mask;
-  }
-  if(sector < 1 || sector > 24 || rdo < 1 || rdo > 8)	return 0;
-  UInt_t MASK = getSectorMask(sector);
-  MASK = MASK >> (rdo - 1);
-  MASK &= 0x00000001;
-  Sector = sector;
-  Rdo    = rdo;
-  Mask   = MASK;
   return MASK;
 }
 //________________________________________________________________________________

@@ -1,8 +1,16 @@
 #include "StThreeVector.hh"
-#ifdef __ROOT__
 #include "TBuffer.h"
 #include "TClass.h"
 ClassImpT(StThreeVector,float);
+
+std::ostream&  operator<<(std::ostream& os, const StThreeVector<double>& v)
+{ return os << v.x() << '\t' << v.y() << '\t' << v.z();}
+std::ostream&  operator<<(std::ostream& os, const StThreeVector<float >& v)
+{ return os << v.x() << '\t' << v.y() << '\t' << v.z();}
+
+
+
+
 //________________________________________________________________________________
 template <> void StThreeVector<float>::Streamer(TBuffer &R__b)
 {
@@ -31,4 +39,3 @@ template <> void StThreeVector<double>::Streamer(TBuffer &R__b)
    }
    else Class()->WriteBuffer(R__b,this);
 }
-#endif
