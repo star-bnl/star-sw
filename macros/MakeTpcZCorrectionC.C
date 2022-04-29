@@ -1,5 +1,5 @@
 /*
-  root.exe Z3GF*.root lDb.C MakeTpcZCorrectionC.C+
+  root.exe Z3GF*.root MakeTpcZCorrectionC.C+
 */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
@@ -48,7 +48,7 @@
 #include "TLegend.h"
 #include "TObjectTable.h"
 #include "TObjArray.h"
-#include "tables/St_tpcCorrection_Table.h"
+//#include "tables/St_tpcCorrection_Table.h"
 #include "TROOT.h"
 #endif
 #include "Ask.h"
@@ -132,16 +132,16 @@ void MakeTpcZCorrection1() {
       min = 16.5; // 18;
       max = 208;
     } else {            // Inner
-      min =  15.; // 18;
+      min =  16.5; // 18;
       max = 208;
     }
 #else /* ! __West_East__ */
     if (idx % 2 == 1) { // Outer
-      min = 15.0; // 18;
+      min = 16.50; // 18;
       max = 220;
       if (nextra) f[io] =  fc;
     } else {            // Inner
-      min =  18;
+      min =  16.5;
       max = 220;
       if (nextra) f[io] =  fc;
     }
@@ -158,8 +158,13 @@ void MakeTpcZCorrection1() {
       else          cut += "&&x<0";
     }
     FitP->SetMarkerColor(idx+1);
+#if 0
     cout << "FitP->Draw(\"" << Form("mu:y>>%s(105,0,210)\"",histN[idx-1]) << ",\"" << cut << "\",\"" << prof << "\");" << endl;
     FitP->Draw(Form("mu:y>>%s(110,0,220)",histN[idx-1]),cut,prof);
+#else
+    cout << "FitP->Draw(\"" << Form("mu-muJ:y>>%s(105,0,210)\"",histN[idx-1]) << ",\"" << cut << "\",\"" << prof << "\");" << endl;
+    FitP->Draw(Form("mu-muJ:y>>%s(110,0,220)",histN[idx-1]),cut,prof);
+#endif
     TH1 *hist = (TH1 *) gDirectory->Get(histN[idx-1]);
     if (! hist) continue;
     Double_t params[10] = {0};
