@@ -198,20 +198,21 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   const TTable *table = 0;
   TDatime t[2];
   Int_t k = 0;
+  TString CommentLine;
   for (k = kUncorrected+1; k < kTpcAllCorrections; k++) {
     if (! m_Corrections[k].Chair) continue;
-    LOG_WARN << "StTpcdEdxCorrection: " << Form("%24s/%66s",m_Corrections[k].Name,m_Corrections[k].Title);
+    CommentLine = Form("StTpcdEdxCorrection: %24s/%66s",m_Corrections[k].Name,m_Corrections[k].Title);
     table = m_Corrections[k].Chair->Table();
     if (! table) continue;
     if (Debug() > 2) table->Print(0,10);
     if (! TESTBIT(m_Mask,k) || m_Corrections[k].Chair->Table()->IsMarked()) {
-      LOG_WARN << " \tis missing" << endm;
+      CommentLine += " \tis missing";
       CLRBIT(m_Mask,k); 
       SafeDelete(m_Corrections[k].Chair);
       continue;
     }
     if (St_db_Maker::GetValidity(table,t) > 0) {
-      LOG_WARN << Form("\tValidity:%08i.%06i --- %08i.%06i",t[0].GetDate(),t[0].GetTime(),t[1].GetDate(),t[1].GetTime());
+      CommentLine = Form("\tValidity:%08i.%06i --- %08i.%06i",t[0].GetDate(),t[0].GetTime(),t[1].GetDate(),t[1].GetTime());
     }
     chair    = dynamic_cast<const St_tpcCorrectionC *>(m_Corrections[k].Chair);
     chairMDF = dynamic_cast<const St_MDFCorrectionC *>(m_Corrections[k].Chair);
@@ -226,19 +227,18 @@ void StTpcdEdxCorrection::ReSetCorrections() {
       chairSecRow = dynamic_cast<const St_TpcSecRowCorC *>(m_Corrections[k].Chair);
       chairEffectivedX = dynamic_cast<const St_TpcEffectivedXC *>(m_Corrections[k].Chair);
       if (! chairSecRow && ! chairEffectivedX) {
-	LOG_WARN << "\tis not tpcCorrection, MDFCorrection, TpcEffectivedX, TpcEffectivedX, or TpcSecRowCor types";
+	CommentLine +=  "\tis not tpcCorrection, MDFCorrection, TpcEffectivedX, TpcEffectivedX, or TpcSecRowCor types";
       }
-      LOG_WARN << endm;
+      LOG_WARN << CommentLine.Data() << endm;
       continue;
     }
     if (! npar ) {
-      LOG_WARN << " \thas no significant corrections => switch it off";
-      LOG_WARN << " \tIt is cleaned" << endm;
+      CommentLine += " \thas no significant corrections => switch it off \tIt is cleaned";
       CLRBIT(m_Mask,k); 
       SafeDelete(m_Corrections[k].Chair);
       continue;
     }
-    LOG_WARN << endm;
+    LOG_WARN << CommentLine.Data() << endm;
   }
   // Check consistency of active chairs
   k = kzCorrection;
@@ -554,7 +554,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	ADC = chairC->CalcCorrection(l,adcCF);
 	if (m_Corrections[kAdcCorrection6MDF].Chair) {
 	  Double_t xx[4] = {(Double_t)  CdEdx.Ntbks, (Double_t)  CdEdx.Npads, TMath::Abs(CdEdx.zG), TMath::Log(adcCF)};
-	  ADC += ((St_MDFCorrection4C *)m_Corrections[kAdcCorrection6MDF].Chair)->Eval(l,xx) * TMath::Exp(chairC->a(l)[0]);
+	  ADC += ((St_MDFCorrection4C *)m_Corrections[kAdcCorrection6MDF].Chair)->Eval(l,xx);// * TMath::Exp(chairC->a(l)[0]);
 	}
 	dE = Adc2GeVReal*ADC;
 	goto ENDL;

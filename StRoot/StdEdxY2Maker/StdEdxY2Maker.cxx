@@ -1013,6 +1013,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   enum  {kTotalMethods = 6};
   //                 dx2  ch
   static TH3F *TPoints[2][2][kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"}; 0 => "+", 1 => "-";
+  static TH3F *NPoints[2][2][kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"}; 0 => "+", 1 => "-";
   static StDedxMethod kTPoints[kTotalMethods] = {// {"F","70","FU","70U","N", "NU"};
     kLikelihoodFitId,         // F
     kTruncatedMeanId,         // 70
@@ -1078,11 +1079,17 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       if (! fUsedNdx && t >= 4) continue;
       for (Int_t s = 0; s < 2; s++) {// charge 0 => "+", 1 => "-"
 	TPoints[0][s][t]   = new TH3F(Form("TPoints%s%s",N[t],NS[s]),
-				      Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s",T[t],TS[s]),
+				      Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s p > 0.4 GeV/c",T[t],TS[s]),
 				      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
 	TPoints[1][s][t]   = new TH3F(Form("TPoints2%s%s",N[t],NS[s]),
-				      Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s no dx2 in prediciton",T[t],TS[s]),
+				      Form("%s versus NdEdx Points and eta Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s no dx2 in predicition p > 0.4 GeV/c",T[t],TS[s]),
 				      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
+	NPoints[0][s][t]   = new TH3F(Form("NPoints%s%s",N[t],NS[s]),
+				      Form("%s versus Length in Tpc and <log_{2}(dX)>%s p > 0.4 GeV/c",T[t],TS[s]),
+				      100,0.5,100.5, 40, -2, 2, 500,-1.,4.);
+	NPoints[1][s][t]   = new TH3F(Form("NPoints2%s%s",N[t],NS[s]),
+				      Form("%s versus NdEdx poins and eta  %s no dx2 in predicition p > 0.4 GeV/c",T[t],TS[s]),
+				      100,0.5,100.5, 40, -2, 2, 500,-1.,4.);
 #ifdef  __FIT_PULLS__
 	Pulls[s][t] = new TH2F(Form("Pull%s%s",N[t],NS[s]),
 			       Form("Pull %s versus Length in TPC - iTPC %s",T[t],TS[s]),
@@ -1120,6 +1127,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   
   StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
   Double_t pMomentum = g3.mag();
+  Double_t etaG = g3.pseudoRapidity();
   StPidStatus PiDs[2] = {StPidStatus(gTrack, kTRUE), StPidStatus(gTrack, kFALSE)} ; 
   StPidStatus &PiD = fUsedx2 ? *&PiDs[0] :  *&PiDs[1];
   if (PiD.PiDStatus < 0) return;
@@ -1148,9 +1156,12 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #endif /*  __FIT_PULLS__ */
   for (Int_t j = 0; j < kTotalMethods; j++) {
     kMethod = kTPoints[j];
-    for (Int_t l = 0; l <2; l++) {// with and without dx2 in prediction
-      if (PiDs[l].dEdxStatus(kMethod)) {
-	TPoints[l][sCharge][j]->Fill(PiDs[l].dEdxStatus(kMethod)->TrackLength(),PiDs[l].dEdxStatus(kMethod)->log2dX(),PiDs[l].dEdxStatus(kMethod)->dev[kPidPion]);
+    if (pMomentum > 0.4) {
+      for (Int_t l = 0; l <2; l++) {// with and without dx2 in prediction
+	if (PiDs[l].dEdxStatus(kMethod)) {
+	  TPoints[l][sCharge][j]->Fill(PiDs[l].dEdxStatus(kMethod)->TrackLength(),PiDs[l].dEdxStatus(kMethod)->log2dX(),PiDs[l].dEdxStatus(kMethod)->dev[kPidPion]);
+	  NPoints[l][sCharge][j]->Fill(PiDs[l].dEdxStatus(kMethod)->N(), etaG, PiDs[l].dEdxStatus(kMethod)->dev[kPidPion]);
+	}
       }
     }
     if (PiD.dEdxStatus(kMethod)) {
