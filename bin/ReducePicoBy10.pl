@@ -4,19 +4,19 @@ use Cwd;
 my $daq = "";
 my $reduction = 0;
 my $pwd = cwd();
-for (my $run = 10; $run < 109; $run++) {
+for (my $run = 351; $run < 366; $run++) {
   my $rundir = $run;
   if ($run <  10) {$rundir = "00" . $run;}
   elsif ($run < 100) {$rundir =  "0" . $run;}
-  my $cmd = "find " . $rundir ." -name \"*event.root\" -cmin +60";
+  my $cmd = "find " . $rundir ." -name \"*picoDst.root\" -cmin +60";
   print "# cmd = $cmd\n";
-  my @list = `find $rundir -name "*event.root" -cmin +60`;
+  my @list = `$cmd`;
   #print "ist = @list\n";
   my $count = 0;
   foreach my $file (@list) { 
     $count++;
-    my $keep = $count%2;
-    if ($keep == 0) {
+    my $keep = $count%10;
+    if ($keep != 1) {
       print "rm     $file";
     } else {
       print "# keep $file";

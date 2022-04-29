@@ -15,6 +15,7 @@
 #   setup 64b
 #   starver TFG18m
 #    starver TFG21l
+#    starver TFG22c
   set fileB = `basename ${INPUTFILE0}`;
   set fileB = `basename ${INPUTFILE0}`;
   set file = `basename ${fileB} .event.root`;
@@ -33,10 +34,11 @@
     root.exe -x -q -b 'dEdx.C(10000,"'${INPUTFILE0}'","'${file}'.root",2)' &gt;&amp; ${logFile}
    endif
 </command>
-<input URL="command:dEdxSample.pl" />
+<!-- <input URL="command:dEdxSample.pl" /> -->
 <!-- <input URL="file:/star/u/xgn1992/Strangeness/Phi/3p85GeV_fixTarget/SL19e/Simulation/Data/jobs/production/*event.root" />  -->
 <!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit/*event.root" /> -->
 <!-- <input URL="file:/net/l403/data/fisyak/reco/2019/DEV2StiCA.Minuit2/*event.root" /> -->
+<input URL="file:/hlt/cephfs/reco/2019/RF/TFG22b/19GeV/*/*/*event.root" />
 <!--
  <ResourceUsage>
     <Memory>

@@ -138,6 +138,7 @@ public :
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
    virtual void     Loop();
+  //   virtual void     Loop2();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
@@ -258,7 +259,14 @@ Int_t FitPP::Cut(Long64_t entry)
 // This function may be called from Loop.
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
-   return 1;
+  Int_t iok = -1;
+  if (i == 0 || j == 0) return iok;
+  if (dmu  >  0.01) return iok;
+  if (prob < 1e-5) return iok;
+  if (dsigma <= 0 || dsigma > 0.01) return iok;
+  if (TMath::Abs(mu) > 0.5) return iok;
+  iok = 1;
+  return iok;
 }
 void FitPP::Loop()
 {
@@ -295,13 +303,8 @@ void FitPP::Loop()
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-      // if (Cut(ientry) < 0) continue;
+      if (Cut(ientry) < 0) continue;
       // FitP->Draw("mu:x>>MuX","i&&j&&dmu<0.1&&prob>1e-5&&dsigma>0&&dsigma<0.01&&abs(mu)<0.1","prof")
-      if (i == 0 || j == 0) continue;
-      if (dmu  >  0.1) continue;
-      if (prob < 1e-5) continue;
-      if (dsigma <= 0 || dsigma > 0.01) continue;
-      if (TMath::Abs(mu) > 0.1) continue;
       Double_t Length = x;
       Double_t dxLog2 = y;
       xx[0] = Length;
@@ -485,7 +488,9 @@ void  MakeTpcLengthCorrectionMD2(Int_t date = 0, Int_t time = 0){
 	}
       }
       out << "  tableSet->AddAt(&row);" << "// " << gDirectory->GetName() << ";\t" << idx << "\th2mdf(\"" << histN[m] << "\",5,1,20);" << endl;
+      break;
     }
+    break;
   }
   out << "  return (TDataSet *)tableSet;" << endl;
   out << "}" << endl;
