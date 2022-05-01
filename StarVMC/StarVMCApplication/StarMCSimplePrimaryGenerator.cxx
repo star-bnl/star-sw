@@ -36,6 +36,7 @@ void StarMCSimplePrimaryGenerator::PreSet() {
   fGunpX = fGunpY = fGunpZ = fGunX = fGunY = fGunZ = 0;
   fGunId = 0;
   fPVX = fPVY = fPVZ = fPVxyError = 0;
+  fPVxy = 0;
 }
 //_____________________________________________________________________________
 void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id, 
@@ -103,10 +104,16 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
       fPVY = (TH1 *) PVfile->Get("y"); assert(fPVY); fPVY->SetDirectory(0);
       fPVZ = (TH1 *) PVfile->Get("z"); assert(fPVZ); fPVZ->SetDirectory(0);
       fPVxyError = (TH1 *) PVfile->Get("hPVError"); if (fPVxyError) fPVxyError->SetDirectory(0);
-      delete PVfile;
-      LOG_WARN << "PVxyz.root with x, y and z histograms has been found. These histogram will be use to generate primary vertex x, y, z." << endm;
+      fPVxy = (TH2 *) PVfile->Get("xy"); 
+      if (fPVxy) {
+	fPVxy->SetDirectory(0);
+	LOG_WARN << "PVxyz.root with xy and z histograms has been found. These histogram will be use to generate primary vertex x, y, z." << endm;
+      } else {
+	LOG_WARN << "PVxyz.root with x, y and z histograms has been found. These histogram will be use to generate primary vertex x, y, z." << endm;
+      }
       if (fPVxyError) LOG_WARN << " hPVError histogram will be used for transverse PV error." << endm;
     }
+    delete PVfile;
     delete [] file;
   }
   fgInstance = this;
@@ -207,8 +214,15 @@ void StarMCSimplePrimaryGenerator::GeneratePrimaries(const TVector3& origin) {
 void StarMCSimplePrimaryGenerator::GeneratePrimaries() {
   if (! fSetVertex) {
     if (fPVX && fPVY && fPVZ) {
-      fOrigin.SetX(fPVX->GetRandom());
-      fOrigin.SetY(fPVY->GetRandom());
+      if (fPVxy) {
+	Double_t x, y;
+	fPVxy->GetRandom2(x,y);
+	fOrigin.SetX(x);
+	fOrigin.SetY(y);
+      } else {
+	fOrigin.SetX(fPVX->GetRandom());
+	fOrigin.SetY(fPVY->GetRandom());
+      }
       fOrigin.SetZ(fPVZ->GetRandom());
       if (fPVxyError) {
 	Double_t dxy = fPVxyError->GetRandom()/TMath::Sqrt(2.);
