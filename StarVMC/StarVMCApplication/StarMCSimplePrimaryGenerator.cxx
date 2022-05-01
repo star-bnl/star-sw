@@ -65,6 +65,7 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   } else {
     fGunIds.push_back(Id);
   }
+  assert(fGunIds.size());
   LOG_INFO << "Generate " << fNofPrimaries << " primary tracks with option :" << fOption.Data() << " of type ";
   for (auto xId : fGunIds) {
     LOG_INFO << "\t"<< xId;
