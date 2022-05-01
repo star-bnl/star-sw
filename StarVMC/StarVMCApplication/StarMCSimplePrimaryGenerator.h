@@ -17,6 +17,7 @@
 #define StarMCSimplePrimaryGenerator_h
 #include "StarMCPrimaryGenerator.h"
 #include "TH1.h"
+#include "TH2.h"
 #include <vector>
 class StarMCSimplePrimaryGenerator : public StarMCPrimaryGenerator  {
  public:
@@ -50,6 +51,7 @@ class StarMCSimplePrimaryGenerator : public StarMCPrimaryGenerator  {
   Double_t fGunpX, fGunpY, fGunpZ, fGunX, fGunY, fGunZ;
   Int_t    fGunId;
   TH1 *fPVX, *fPVY, *fPVZ, *fPVxyError; 
+  TH2 *fPVxy;
   static Double_t fTemperature;
   vector<Int_t> fGunIds;
   ClassDef(StarMCSimplePrimaryGenerator,1)  //StarMCSimplePrimaryGenerator

@@ -1,5 +1,5 @@
 /*
-  root.exe 11p5GeV.A+C.root
+  root.exe 11p5GeV.A+C.root PVxyz,C
  */
 
 void PVxyz() {
@@ -8,11 +8,13 @@ void PVxyz() {
   fName += gSystem->BaseName(dir->GetName());
   TFile *fOut = new TFile(fName,"recreate");
   TH1 *x = (TH1 *) dir->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/x");
-  x->Write();
+  if (x) x->Write();
   TH1 *y = (TH1 *) dir->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/y");
-  y->Write();
+  if (y) y->Write();
   TH1 *z = (TH1 *) dir->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/z");
-  z->Write();
+  if (z) z->Write();
   TH1 *e = (TH1 *) dir->Get("/Tracks/hPVError");
-  e->Write();
+  if (e) e->Write();
+  TH2 *xy = (TH1 *) dir->Get("/Particles/KFParticlesFinder/PrimaryVertexQA/xy");
+  if (xy) xy->Write();
 }
