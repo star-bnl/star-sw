@@ -69,7 +69,7 @@ RUN yum update -q -y \
  && yum clean all
 
 # Install extra python modules used by the STAR software
-RUN pip install pyparsing
+RUN pip install pyparsing==2.2.0
 
 ENV MODULEPATH=/opt/linux-scientific7-x86_64
 
@@ -87,6 +87,7 @@ ENV STAR_SYS=x8664_sl7
 ENV PATH=$CERN_ROOT/bin:$STAR_BIN:$STAR/mgr:$PATH
 ENV LD_LIBRARY_PATH=$STAR_LIB:$LD_LIBRARY_PATH
 ENV LIBPATH+=:/lib64:/lib
+ENV ROOT_INCLUDE_PATH=$STAR/.${STAR_HOST_SYS}/include
 
 ENV MYSQL=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/mysql-5.7.27-pfyt3fwtkubcc5eazmoqfick3lgp67mf
 ENV LIBXML2_DIR=/opt/software/linux-scientific7-x86_64/gcc-4.8.5/libxml2-2.9.10-4lxsmpa57bm3xs2cs3xapk3qccxflkfl

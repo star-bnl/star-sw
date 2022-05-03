@@ -91,8 +91,7 @@
     <var name="NY" value="34" comment=" number of tower in y "  />
     <var name="DX" value="5.542" comment=" tower size in x "  />
     <var name="DY" value="5.542" comment=" tower size in y "  />
-<!--    <var name="Clearance"      value="0.0"  comment=" space between towers "  /> -->
-    <var name="Clearance"      value="0.05"  comment=" space between towers "  /> 
+    <var name="Clearance"      value="0.03"  comment=" space between towers "  /> 
     <var name="NLayer"         value="66"    comment=" number of Scinti layers "  />
     <var name="DZFrontSpace"   value="13.90"  comment=" thinkness of space at front(FEEBds) "  />
     <var name="DZFrontSteel"   value="0.100" comment=" front steel plate thhickness "  />
@@ -107,7 +106,7 @@
   <Fill name="WOFF" comment="FCS ECAL position Offsets " >
     <var name="NS" value="1" comment=" North or South " />    
     <var name="XOffset" value="17.399" comment=" tower x offset from beam to nearlest tower @ front face"  />
-    <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
+    <var name="YOffset" value="-5.26" comment=" tower y offset from beam to the center of whole stack"  />
     <var name="ZOffset" value="710.16" comment=" tower z offset from IR to tower front face @ near beam "  />
     <var name="Angle"   value="1.73" comment=" Angle aroud y axis [degree] "  />
   </Fill>
@@ -115,7 +114,7 @@
   <Fill name="WOFF" comment="FCS ECAL position Offsets " >
     <var name="NS" value="2" comment=" North or South " />    
     <var name="XOffset" value="17.399" comment=" tower x offset from beam to nearlest tower @ front face"  />
-    <var name="YOffset" value="0.0" comment=" tower y offset from beam to the center of whole stack"  />
+    <var name="YOffset" value="-5.26" comment=" tower y offset from beam to the center of whole stack"  />
     <var name="ZOffset" value="710.16" comment=" tower z offset from IR to tower front face @ near beam "  />
     <var name="Angle"   value="1.73" comment=" Angle aroud y axis [degree] "  />
   </Fill>

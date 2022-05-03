@@ -2,7 +2,8 @@
 
 set run=$1
 
-set dbserver=onldb.starp.bnl.gov
+set dbserver=onldb2.starp.bnl.gov # online
+#set dbserver=heston.star.bnl.gov # offline
 set dbport=3501
 
 mysql --skip-column-names -h $dbserver --port=$dbport <<END

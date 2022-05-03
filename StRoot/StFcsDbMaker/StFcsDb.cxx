@@ -540,19 +540,10 @@ StThreeVectorD StFcsDb::getDetectorOffset(int det) const{
     return  StThreeVectorD(0.0, 0.0, 0.0);
   }else{
     if(mDbAccess==0){ //no DB
-      double a = getDetectorAngle(det) / 180.0 * M_PI;
-      if(det==0){
-	double x = -16.69 - 13.9*sin(a);
-	double z = 710.16 + 13.9*cos(a);
-	return StThreeVectorD(x, 0.0, z);
-      }
-      if(det==1){
-	double x =  16.69 + 13.9*sin(a);
-	double z = 710.16 + 13.9*cos(a);
-	return StThreeVectorD(x, 0.0, z);
-      }
-      if(det==2) return StThreeVectorD(-18.87, 0.0, 782.63);
-      if(det==3) return StThreeVectorD( 18.87, 0.0, 782.63);
+      if(det==0) return StThreeVectorD(-17.399, -5.26, 710.16);
+      if(det==1) return StThreeVectorD( 17.399, -5.26, 710.16);
+      if(det==2) return StThreeVectorD(-21.285, +1.80, 782.63);
+      if(det==3) return StThreeVectorD( 21.285, +1.80, 782.63);
       return StThreeVectorD(0.0, 0.0, 0.0);	  
     }else{ //from DB
       if(det>=0 && det<4) 	  
@@ -575,18 +566,14 @@ float StFcsDb::getDetectorAngle(int det) const{
 }
 
 float StFcsDb::getXWidth(int det) const{ 
-    if(det==0) return  5.542+0.05;
-    if(det==1) return  5.542+0.05;
-    if(det==2) return  10.00+0.02;
-    if(det==3) return  10.00+0.02;
-    if(det==4) return  85.0;
-    if(det==5) return  85.0;
+    if(det==0) return  5.542+0.03;
+    if(det==1) return  5.542+0.03;
+    if(det==2) return  9.99+0.00;
+    if(det==3) return  9.99+0.00;
     return 0.0;
 }
 
 float StFcsDb::getYWidth(int det) const{ 
-    if(det==4) return  5.00+0.02;
-    if(det==5) return  5.00+0.02;
     return getXWidth(det);
 }
 
@@ -669,8 +656,10 @@ double StFcsDb::getHcalProjectedToEcalY(int ns, double hcalLocalY, double zvtx){
     StThreeVectorD hcalfront = getDetectorOffset(ns+2);
     double ecalSMD = ecalfront.z() + getShowerMaxZ(ns) - zvtx;
     double hcalSMD = hcalfront.z() + getShowerMaxZ(ns+2) - zvtx;
-    double hcalLocalcm = hcalLocalY * getYWidth(ns+2); //convert to [cm]  
-    return (hcalLocalcm + hcalfront.y())*ecalSMD/hcalSMD - ecalfront.y(); 
+    double hcalLocalcm = hcalLocalY * getYWidth(ns+2); //convert to [cm] 
+    double hcalStar    = double(nRow(ns+2))/2.0*getYWidth(ns+2)+hcalfront.y()-hcalLocalcm; //STAR Y
+    double hcalatEcal  = hcalStar*ecalSMD/hcalSMD; //project assuming vtx_y=0
+    return double(nRow(ns))/2.0*getYWidth(ns) + ecalfront.y() - hcalatEcal; //put in Ecal local
 };
 
 //! Project Hcal cluster to Ecal plane and get distance from Ecal cluster [cm]
@@ -760,6 +749,8 @@ StLorentzVectorD StFcsDb::getLorentzVector(const StThreeVectorD& xyz, float ener
     double e=energy;
     StThreeVectorD mom3 = xyznew.unit() * e;
     if(mDebug>1){
+      LOG_DEBUG << Form("mVx=%8.4f  mVdxdz=%8.4f mThetaX=%8.4f",mVx,mVdxdz,mThetaX) << endm;
+      LOG_DEBUG << Form("mVy=%8.4f  mVdydz=%8.4f mThetaY=%8.4f",mVy,mVdydz,mThetaY) << endm;
       LOG_DEBUG << Form("xyz     = %lf %lf %lf",xyz.x(), xyz.y(), xyz.z()) << endm;
       LOG_DEBUG << Form("xyz rot = %lf %lf %lf",xyznew.x(), xyznew.y(), xyznew.z()) << endm;
       LOG_DEBUG << Form("p       = %lf %lf %lf %lf",mom3.x(), mom3.y(), mom3.z(),e) << endm;
@@ -839,7 +830,7 @@ float StFcsDb::getGain8(StFcsHit* hit) const  {
 }
 
 float StFcsDb::getGain8(int det, int id) const {
-  return getGain(det,id)*0.0070/0.0053;
+  return getGain(det,id)/1.21;
 }
 
 void StFcsDb::getDepfromId(int detectorId, int id, int &ehp, int &ns, int &crt, int &slt, int &dep, int &ch) const{
@@ -1294,7 +1285,7 @@ void  StFcsDb::makeMap2019(){
 void StFcsDb::getIdfromEPD(int pp, int tt, int& det, int &id){
     det=-1; 
     id=-1;
-    int row,col;
+    int row=0,col=0;
     if(tt<0 || tt>=32) return;
     if(pp>=1 && pp<=6){ //north side
 	det=4;
@@ -1399,7 +1390,7 @@ void StFcsDb::printHeader4(FILE* f, int flag=0){
 }
 
 void StFcsDb::printMap(){
-    int ehp,ns,crt,slt,dep,ch,det,id,row,col;
+    int ehp,ns,crt,slt,dep,ch,det,id,row,col=0;
     
     FILE *f1  = fopen("fcsMap.txt","w");           printHeader(f1);
     FILE *f1c = fopen("fcsMap.csv","w");           printHeader(f1c,0,1);
@@ -1841,10 +1832,11 @@ float StFcsDb::getEtGain(int det, int id, float factor) const{
 }
 
 void  StFcsDb::printEtGain(){
-    double norm[2]={0.24711, 0.21781}; // [MeV/coint]
+    // double norm[2]={0.24711, 0.21781}; // [MeV/coint]
+    double norm[2]={0.24711, 0.24711};
     for(int det=0; det<kFcsNDet; det++){
       int eh=det/2;
-      double gain=getGain8(det,0);
+      double gain=getGain(det,0);
       for(int i=0; i<maxId(det); i++){
 	double ratio=1.0;
 	if(eh<2){ //PRES stays 1.0
@@ -1873,7 +1865,7 @@ void  StFcsDb::printEtGain(){
     for(int det=0; det<kFcsNDet; det++){
 	int id=0;
 	int eh=det/2;
-	double gain=getGain8(det,0);
+	double gain=getGain(det,0);
 	fprintf(f2,"DET=%1d ET/ch [unit = MeV/count]\n", det);
 	fprintf(f3,"DET=%1d normalized ET/ch [unit=%f MeV/count]\n", det,norm[eh]);
         for(int row=1; row<=nRow(det); row++){

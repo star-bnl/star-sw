@@ -81,6 +81,7 @@ daq_stgc::daq_stgc(daqReader *rts_caller)
 	raw = new daq_dta ;	// in file, compressed
 	altro = new daq_dta ;
 	vmm = new daq_dta ;
+	vmmraw = new daq_dta ;
 
 	event_mode = 0 ;	// 0: TPX, 1:VMM
 
@@ -105,6 +106,7 @@ daq_stgc::~daq_stgc()
 	delete raw ;
 	delete altro ;
 	delete vmm ;
+	delete vmmraw ;
 	delete stgc_d ;
 
 	LOG(DBG,"%s: DEstructor done",name) ;
@@ -142,6 +144,9 @@ daq_dta *daq_stgc::get(const char *in_bank, int sec, int row, int pad, void *p1,
 	}
 	else if(strcasecmp(bank,"vmm")==0) {
 		return handle_vmm(sec) ;
+	}
+	else if(strcasecmp(bank,"vmmraw")==0) {
+		return handle_vmmraw(sec) ;
 	}
 	else {
 		LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
@@ -398,6 +403,105 @@ daq_dta *daq_stgc::handle_raw(int sec, int rdo)
 
 }
 
+
+daq_dta *daq_stgc::handle_vmmraw(int sec)
+{
+	char str[128] ;
+	int tot_bytes ;
+	int min_sec, max_sec, min_rdo, max_rdo ;
+	struct {
+		int sec ;
+		int rb ;
+		u_int bytes ;
+	} obj[16] ;
+
+	// sanity
+	if(sec <= 0) {		// ALL sectors
+		min_sec = 1 ;
+		max_sec = 4 ;
+	}
+	else if((sec<1) || (sec>4)) return 0 ;
+	else {
+		min_sec = max_sec = sec ;
+	}
+
+	min_rdo = 1 ;
+	max_rdo = 4 ;
+
+	assert(caller) ;
+
+
+	// calc total bytes
+	tot_bytes = 0 ;
+	int o_cou = 0 ;
+
+	for(int s=min_sec;s<=max_sec;s++) {
+	for(int r=min_rdo;r<=max_rdo;r++) {
+
+		sprintf(str,"%s/sec%02d/rdo%d/vmm_raw",sfs_name, s, r) ;
+	
+		LOG(DBG,"%s: trying sfs on \"%s\"",name,str) ;
+
+		char *full_name = caller->get_sfs_name(str) ;
+		if(full_name == 0) continue ;
+
+		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+		LOG(NOTE,"%s: sector %d, rdo %d : raw size %d",name,s,r,size) ;
+
+		if(size <= 0) {
+			if(size < 0) {
+				LOG(DBG,"%s: %s: not found in this event",name,str) ;
+			}
+			continue ;
+		}
+		else {
+			obj[o_cou].rb = r ;
+			obj[o_cou].sec = s ;
+			obj[o_cou].bytes = size ;
+
+			o_cou++ ;
+
+			tot_bytes += size ;
+
+			LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"raw", size) ;
+		}
+	}
+	}
+
+	vmmraw->create(tot_bytes,(char *)"vmmraw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+
+	// bring in the bacon from the SFS file....
+	for(int i=0;i<o_cou;i++) {
+		
+		sprintf(str,"%s/sec%02d/rdo%d/vmm_raw",sfs_name,obj[i].sec, obj[i].rb) ;
+		char *full_name = caller->get_sfs_name(str) ;
+		if(!full_name) continue ;
+
+		LOG(NOTE,"%s: request %d bytes",name,obj[i].bytes) ;
+		
+		char *mem = (char *) vmmraw->request(obj[i].bytes) ;
+
+		int ret = caller->sfs->read(full_name, mem, obj[i].bytes) ;
+
+		if(ret != (int)obj[i].bytes) {
+			LOG(ERR,"%s: %s: read failed, expect %d, got %d [%s]",name,str,
+				obj[i].bytes,ret,strerror(errno)) ;
+		}
+		else {
+			LOG(NOTE,"%s: %s read %d bytes",name,str,ret) ;
+		}
+		
+		vmmraw->finalize(obj[i].bytes, obj[i].sec, obj[i].rb, 0) ;
+	}
+
+	
+	LOG(DBG,"Returning from raw_handler") ;
+	vmmraw->rewind() ;
+	return vmmraw ;
+
+}
+
 daq_dta *daq_stgc::handle_vmm(int sec)
 {
 	char str[128] ;
@@ -472,13 +576,14 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 
 	// bring in the bacon from the SFS file....
 	for(int i=0;i<o_cou;i++) {
-		int vmm_max = obj[i].bytes/sizeof(stgc_vmm_t) ;
+//		int vmm_max = obj[i].bytes/sizeof(stgc_vmm_t) * 3 / 2 ;	// approx
+		int vmm_max = obj[i].bytes/8 ;	// approx: 4 shorts per hit
 
 		sprintf(str,"%s/sec%02d/rdo%d/vmm_raw",sfs_name,obj[i].sec, obj[i].rb) ;
 		char *full_name = caller->get_sfs_name(str) ;
 		if(!full_name) continue ;
 
-		LOG(NOTE,"%s: request %d bytes",name,obj[i].bytes) ;
+		LOG(NOTE,"%s: request: %d bytes raw, vmm_hits %d",name,obj[i].bytes,vmm_max) ;
 		
 		stgc_vmm_t *vm = (stgc_vmm_t *) vmm->request(vmm_max) ;
 
@@ -495,6 +600,7 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 		}
 
 		int hits = 0 ;			
+		int all_hits = 0 ;
 		stgc_d->sector1 = obj[i].sec ;
 		stgc_d->rdo1 = obj[i].rb ;
 		stgc_d->start((u_short *)mem,obj[i].bytes/2) ;
@@ -504,12 +610,21 @@ daq_dta *daq_stgc::handle_vmm(int sec)
 				continue ;
 			}
 
-			vm[hits] = stgc_d->vmm ;
-			hits++ ;
-			if(hits > vmm_max) {
-				LOG(ERR,"S%d:%d -- too many hits %d",obj[i].sec,obj[i].rb,hits) ;
-				break ;
+
+			// fixed bug
+			if(hits >= vmm_max) {
+				//LOG(ERR,"S%d:%d -- too many hits %d/%d",obj[i].sec,obj[i].rb,hits,vmm_max) ;
+				//break ;
 			}
+			else {
+				vm[hits] = stgc_d->vmm ;
+				hits++ ;
+			}
+			all_hits++ ;
+		}
+
+		if(all_hits>=vmm_max) {
+			LOG(ERR,"S%d:%d -- too many hits %d/%d",obj[i].sec,obj[i].rb,all_hits,vmm_max) ;
 		}
 
 #if 0

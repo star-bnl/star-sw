@@ -48,7 +48,9 @@ void getAvgExtraTemps(std::string dbpath = "Conditions_ftpc/ftpcTemps/extra1East
 	std::getline(ss, mTable, '/');
 	std::getline(ss, mParam, '/');
 
-	std::string dsn = "mysql://onldb.starp.bnl.gov:3502/";
+        std::string dsn = "mysql://onldb2.starp.bnl.gov:3502/"; // online
+        //std::string dsn = "mysql://heston.star.bnl.gov:3502/"; // offline
+
 	dsn.append(mDatabase);
 	TSQLServer *db = 0;
 	db = TSQLServer::Connect(dsn.c_str(),"staruser", "");

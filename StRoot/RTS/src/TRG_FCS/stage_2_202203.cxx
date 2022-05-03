@@ -115,6 +115,10 @@ void  fcs_trg_base::stage_2_202203(link_t ecal[], link_t hcal[], link_t pres[], 
 	    }
 //	    if(pres[i].d[j] > PHTTHR) fpre_or |= 1 ;	// Tonko: the FPRE S2 inputs are bitmasks so we _do_not_ apply PHTTHR here
 	    if(pres[i].d[j]) fpre_or |= 1 ;
+
+	    //if(pres[i].d[j]) {
+	    //	printf("S2:DEP %d:%d, j %d = %d\n",geo.ns,i,j,pres[i].d[j]) ;
+	    //}
 	}
     }
     

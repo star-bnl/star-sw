@@ -35,11 +35,13 @@ public:
     Int_t  Finish();
     Int_t  Make();
 
+	void setReadMuDst( int r = 0 ) { mReadMuDst = r; }
+
     void PrintTheVMM( stgc_vmm_t * the_vmm ){
         u_char feb = the_vmm[0].feb_vmm >> 2 ;  // feb [0..5]
         u_char vm = the_vmm[0].feb_vmm & 3 ;    // VMM [0..3]
         
-        printf("  FEB %d:%d, ch %02d: ADC %d, BCID %d, TB %d\n",feb,vm,the_vmm[0].ch,the_vmm[0].adc,the_vmm[0].bcid, the_vmm[0].tb) ;
+        printf("  FEB %d:%d, ch %02d: ADC %d, BCID %d, TB %d, BCID_Delta %d\n",feb,vm,the_vmm[0].ch,the_vmm[0].adc,the_vmm[0].bcid, the_vmm[0].tb, the_vmm[0].bcid_delta) ;
     }
 
 private:
@@ -47,6 +49,9 @@ private:
     StFttCollection*     mFttCollection;
     Int_t                mRunYear;
     Bool_t               mDebug;
+    Int_t                mReadMuDst;
+
+	int readMuDst();
 
     ClassDef( StFttRawHitMaker, 1 )
 };
