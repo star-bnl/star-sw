@@ -724,7 +724,7 @@ Particle H_dibaryon               code      = 60001,
    PARTICLE KAON_PLUS code=96 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
                       trktyp=4 bratio={1.0,} mode={080809,}
 
-  Particle K0short        code=95 TrkTyp=4 mass=.4977  charge=0  tlife= 1.e-24,
+  Particle K0short        code=95 TrkTyp=4 mass=.4977  charge=0  tlife=0.89260E-10,
                      pdg=311  bratio= { 0.5, 0.5}    mode= { 809, 908 }
 
 
