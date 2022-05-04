@@ -5,7 +5,7 @@ St_Survey *tableSet = new St_Survey("fstSensorOnWedge",108);
 //
 for(int i = 0; i < 108; i++){
     memset(&row,0,tableSet->GetRowSize());
-        row.Id   = i+1;
+        row.Id   = i+1000;
         row.r00  = 1.0;
         row.r01  = 0.0;
         row.r02  = 0.0;
