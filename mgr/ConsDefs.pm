@@ -1259,7 +1259,8 @@
 		       'MYSQL' => {
 			   'LIBDIR'=> $MYSQLLIBDIR,
 			   'INCDIR'=> $MYSQLINCDIR,
-			   'LIBS'  => $MYSQLLIB
+			   'LIBS'  => $MYSQLLIB,
+			   'LIB'   => "-lmysqlclient"
 		           },
 		       'QT' => {
 			    'QT_VERSION' => $QT_VERSION,
