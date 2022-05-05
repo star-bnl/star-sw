@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
-  set CURRENT_DIR = `pwd`
-  echo "pwd = ${CURRENT_DIR}"
-#         cd ${SUBMITTINGDIRECTORY}
+#  set CURRENT_DIR = `pwd`
+#  echo "pwd = ${CURRENT_DIR}"
+         cd ${SUBMITTINGDIRECTORY}
 #   setenv StarEndMakerShell
    setenv STARFPE NO
 #   setup debug
@@ -20,7 +20,7 @@
   set evtsFileB = `basename ${evtsFile}`
   set filel    = `basename ${evtsFileB} .daq`
   set output  = ${filel}.event.root
-#  if (! -r ${evtsFile}) exit 1;
+  if (! -r ${evtsFile}) exit 1;
   set logFile  = ${filel}B.log
 #  if ( -r ${SUBMITTINGDIRECTORY}/${logFile}) exit 0;
   set muFile = ${filel}.MuDst.root
@@ -50,9 +50,9 @@ set evout = "evout";
    gzip ${logFile}
 #  cp  ${filel}*.picoDst.root ${logFile}.gz ${SUBMITTINGDIRECTORY}
 #   cp  ${filel}* ${SUBMITTINGDIRECTORY}
-  cp  ${filel}*.picoDst.root ${filel}*.event.root ${logFile}.gz ${SUBMITTINGDIRECTORY}
+#  cp  ${filel}*.picoDst.root ${filel}*.event.root ${logFile}.gz ${SUBMITTINGDIRECTORY}
   rm ${bla}
-  rm -rf ${CURRENT_DIR}
+#  rm -rf ${CURRENT_DIR}
         </command>
 <!--
      <ResourceUsage>
@@ -63,6 +63,9 @@ set evout = "evout";
     </ResourceUsage>
 -->
        <stdout URL="file:./sched$JOBID.log" />
+   <ResourceUsage>
+      <Priority>1</Priority>
+    </ResourceUsage>
         <stderr URL="file:./sched$JOBID.err" />
 <!-- <input URL="file:/hlt/cephfs/daq/2019/054/20054064/hlt*.daq" /> -->
 <!-- <input URL="command:daq_2019.pl" /> -->
