@@ -691,6 +691,8 @@ Int_t StdEdxY2Maker::Make(){
       Double_t SumdEdX = 0;
       Double_t SumdX = 0;
       Int_t N70 = NdEdx - (int) (0.3*NdEdx + 0.5); 
+      StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
+      Double_t etaG = g3.pseudoRapidity();
       if (N70 > 1) {
 	Int_t k;
 	for (k = 0; k < N70; k++) {
@@ -731,7 +733,7 @@ Int_t StdEdxY2Maker::Make(){
 	  AddEdxTraits(tracks, dedx);
 	if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
 	  dedx.det_id    = kTpcId;    // TPC track
-	  m_TpcdEdxCorrection->dEdxTrackCorrection(0,dedx); 
+	  m_TpcdEdxCorrection->dEdxTrackCorrection(0,dedx, etaG); 
 	  dedx.det_id    = kTpcId;    // TPC track 
 	  dedx.method    = kTruncatedMeanId;
 	  AddEdxTraits(tracks, dedx);
@@ -762,7 +764,7 @@ Int_t StdEdxY2Maker::Make(){
 	    AddEdxTraits(tracks, dedx);
 	  if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) { 
 	  dedx.det_id    = kTpcId;    // TPC track
- 	    m_TpcdEdxCorrection->dEdxTrackCorrection(2,dedx); 
+ 	    m_TpcdEdxCorrection->dEdxTrackCorrection(2,dedx, etaG); 
 	    dedx.det_id    = kTpcId;    // TPC track 
 	    dedx.method    = kLikelihoodFitId;
 	    AddEdxTraits(tracks, dedx);
@@ -803,7 +805,7 @@ Int_t StdEdxY2Maker::Make(){
 	      dedx.dedx[2]   =  dXavLog2;
 	      AddEdxTraits(tracks, dedx);
 	      dedx.det_id    = kTpcId;    // TPC track
-	      m_TpcdEdxCorrection->dEdxTrackCorrection(1,dedx); 
+	      m_TpcdEdxCorrection->dEdxTrackCorrection(1,dedx, etaG); 
 	      dedx.det_id    =  kTpcId;    // TPC track 
 	      dedx.method    =  kOtherMethodId;
 	      AddEdxTraits(tracks, dedx);
