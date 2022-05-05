@@ -36,7 +36,7 @@ THnSparseProject::THnSparseProject(const THnSparse *hs, Int_t select) : fHs(hs),
     if (! proj) {
       proj = new TH1D(pName, fHs->GetTitle(), fAxis->GetNbins(), fAxis->GetXmin(), fAxis->GetXmax());
 #if 0
-      cout << "Histogram " << proj->GetName() << " has been created" << endl;
+      std::cout << "Histogram " << proj->GetName() << " has been created" << std::endl;
 #endif      
       fProjMap->AddLast(proj);
       NoProj++;
@@ -44,7 +44,7 @@ THnSparseProject::THnSparseProject(const THnSparse *hs, Int_t select) : fHs(hs),
     Int_t bin = coord[fNdim-1];
     proj->AddBinContent(bin, v);
   }
-  cout << "THnSparseProject::THnSparseProject made " << NoProj << " porjection with select = " << fSelect << endl;
+  std::cout << "THnSparseProject::THnSparseProject made " << NoProj << " porjection with select = " << fSelect << std::endl;
 }
 //________________________________________________________________________________
 TH1D* THnSparseProject::Next() {
