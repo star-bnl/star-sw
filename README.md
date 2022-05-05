@@ -33,3 +33,5 @@ or just copy
 <h2>
 A tutorial : How to use  KFParticle for analysis can be found at 
 https://drupal.star.bnl.gov/STAR/subsys/hlt/kfparticle-tutorial
+and Maxsym's presentation 2017 in Wuhan:
+https://indico.gsi.de/event/2715/contributions/11364/attachments/8578/10506/KFParticle_Zyzak_TW_13.05.2014.pdf
