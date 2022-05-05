@@ -64,7 +64,6 @@ my $def = {@param::defaults};
 $LIB = $BUILD . "/" . File::Basename::basename($STAR_LIB);
 $OBJ = $BUILD . "/" . File::Basename::basename($STAR_OBJ);
 $BIN = $BUILD . "/" . File::Basename::basename($STAR_BIN);
-
 $LIBPATH = $LIB;
 $LIBPATH .= $main::PATH_SEPARATOR . $def->{Packages}->{ROOT}->{LIBDIR};
 $LIBPATH .= $main::PATH_SEPARATOR . $def->{Packages}->{MYSQL}->{LIBDIR};
@@ -82,7 +81,6 @@ $repository = `echo $STAR`;
 chop($repository);
 print "repository = $repository\n" unless ($param::quiet);
 Repository($repository); 
-
 my @Repo = Repository_List;
 if ( defined( $ARG{Salt} ) ) { $Salt = $ARG{Salt}; }
 if ( defined( $ARG{NoKeep} ) ) { $NoKeep = $ARG{NoKeep}; }
@@ -96,7 +94,6 @@ if ( $#Repo > -1 ) {
     }
 }
 else { if (! $NoKeep) {$param::keep = 1; }}
-
 
 if ( $STAR_HOST_SYS =~ /^intel_wnt/ ) {
     $CPPPATH  = "";
@@ -125,6 +122,13 @@ print "Link $BUILD => $DirPath\n" unless ($param::quiet);
 $env = new cons(
   'LIBPATH'        => $LIBPATH,
 );
+
+$GITINFO = $LIB . "/etc/gitinfo.txt";
+if (-d .git) {
+#  my $opt = "'+%b %d %Y, %H:%M:%S";
+  Command $env [$GITINFO], ("#.git/HEAD", "#.git/FETCH_HEAD", "#.git/ORIG_HEAD"), #qq(cd %>:d; $ROOTROOT/root/build/unix/gitinfo.sh);
+    qq( git describe --all > %>;  git describe --always >> %>; date >> %>);
+}
 
 Ignore qw(
   include/geant321/incbeg.inc
@@ -170,7 +174,7 @@ PrintHash($env,"\$env->{") if ($param::debug);
 my @packages = ();
 #find_PACKAGE(\&find_PACKAGE,"."); #print "Packages found: @packages\n";
 my @subdirs = ();
-#if ($env->{ENV}-{ROOT_LEVEL} !~ /^6/) {
+#if ($env->{ENV}->{ROOT_LEVEL} !~ /^6/) {
 # install includes
 my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StarVMC/*/.includes_for_export.flg StarVMC/*/*/.includes_for_export.flg OnlTools/*/.includes_for_export.flg OnlTools/*/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/*/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg  StRoot/RTS/src/RTS_READER/.includes_for_export.flg";
 @DirsWithIncludes = map File::Basename::dirname($_), @DirsWithIncludes;
