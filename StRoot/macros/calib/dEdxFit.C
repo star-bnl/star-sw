@@ -1357,6 +1357,9 @@ TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3, Double
       return g;
     }
   }
+  // Last attempt reduce fit range to +/- 2 sigma
+  g->GetParameters(params);
+  Bool_t res = proj->Fit(g,opt,"",params[1]-2*params[2],params[1]+2*params[2]);
   return g;
 }
 //________________________________________________________________________________
@@ -3475,7 +3478,13 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       if (Fit.entries < 100 || TMath::IsNaN(Fit.entries) ) {
 	delete proj; continue;
       }
-      if (TString(FitName) == "GP") g = FitGP(proj,opt,nSigma,pow,zmin,zmax);
+      if (TString(FitName) == "GP") {
+	if (TString(HistName).Contains("TPoint")) {
+	  g = FitGP(proj,opt,3,-1,-1,1);
+	} else {
+	  g = FitGP(proj,opt,nSigma,pow,zmin,zmax);
+	}
+      }      
       else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
       else if (TString(FitName) == "Freq") g = FitFreq(proj,opt,zmin,zmax);
