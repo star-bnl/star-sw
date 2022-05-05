@@ -13,6 +13,12 @@ extern "C" {
     strncpy(args,Margv[*k],i); memset (args+i,' ',n-i); return 0;
   }
 }
+
+// A dummy global definition to satisfy the linker when linking mysqlclient library statically with --whole-archive
+// /opt/software/linux-scientific7-x86_64/gcc-4.8.5/mysql-5.7.27-pfyt3fwtkubcc5eazmoqfick3lgp67mf/lib/libmysqlclient.a(posix_timers.c.o): In function `my_timer_initialize':
+// (.text+0x140): undefined reference to `key_thread_timer_notifier'
+unsigned int key_thread_timer_notifier = 0;
+
 //______________________________________________________________________________
 int main(int argcp, char **argv)
 {
