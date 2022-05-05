@@ -1,16 +1,16 @@
 // @(#)root/main:$Name:  $:$Id: h2mdf.C,v 1.3 2014/12/22 23:50:53 fisyak Exp $
 /*
-  rcd("TPoints2BUGPRunXII19pp510P13ia_dEdx")
+  rcd("NPoints2BUGPRunXII19pp510P13ia_dEdx")
   .x h2mdf.C("mu",5,1,20)
   .x h2mdf.C("sigma",5,1,20)
-  root.exe TPoints2*U*+*.root  MakeTpcLengthCorrectionMD2.C+
+  root.exe NPoints2*U+*.root  MakeTpcLengthCorrectionMDN.C+
 
   foreach d (`ls -1d [0-9]*GeV*.root`)
      set b = `basename ${d} .root`;
-     root.exe -q -b TPoints2*U*${d}  MakeTpcLengthCorrectionMD2.C | tee ${b}.log
+     root.exe -q -b NPoints2*U*${d}  MakeTpcLengthCorrectionMDN.C | tee ${b}.log
   end 
- dir TpcZCorrectionB.20*.C | grep GeV | grep fixed | sed 's/TpcZCorrectionB/TpcLengthCorrectionMD2/g' | awk '{print "ln -s TpcLengthCorrectionMD2.FXT.C "$9}'
- dir TpcZCorrectionB.20*.C | grep GeV | grep -v fixed | sed 's/TpcZCorrectionB/TpcLengthCorrectionMD2/g' | awk '{print "ln -s TpcLengthCorrectionMD2.COL.C "$9}'
+ dir TpcZCorrectionB.20*.C | grep GeV | grep fixed | sed 's/TpcZCorrectionB/TpcLengthCorrectionMDN/g' | awk '{print "ln -s TpcLengthCorrectionMDN.FXT.C "$9}'
+ dir TpcZCorrectionB.20*.C | grep GeV | grep -v fixed | sed 's/TpcZCorrectionB/TpcLengthCorrectionMDN/g' | awk '{print "ln -s TpcLengthCorrectionMDN.COL.C "$9}'
  */
 #ifndef __CINT__
 #include <stdlib.h>
@@ -45,7 +45,7 @@ static Bool_t Sigma = kFALSE;
 // This class has been automatically generated on
 // Sat Apr 16 19:27:33 2022 by ROOT version 5.34/39
 // from TTree FitPP/Fit results
-// found on file: TPoints2F+TPoints2FPGPdEdx.root
+// found on file: NPoints2F+NPoints2FPGPdEdx.root
 //////////////////////////////////////////////////////////
 #ifndef FitPP_h
 #define FitPP_h
@@ -150,9 +150,9 @@ FitPP::FitPP(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("TPoints2F+TPoints2FPGPdEdx.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("NPoints2F+NPoints2FPGPdEdx.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("TPoints2F+TPoints2FPGPdEdx.root");
+         f = new TFile("NPoints2F+NPoints2FPGPdEdx.root");
       }
       f->GetObject("FitP",tree);
 
@@ -261,10 +261,10 @@ Int_t FitPP::Cut(Long64_t entry)
 // returns -1 otherwise.
   Int_t iok = -1;
   if (i == 0 || j == 0) return iok;
+  if (prob < 1e-2) return iok;
   if (dmu  >  0.01) return iok;
-  if (prob < 1e-5) return iok;
-  if (dsigma <= 0 || dsigma > 0.01) return iok;
-  if (TMath::Abs(mu) > 0.5) return iok;
+  if (dsigma > 0.01) return iok;
+  if (TMath::Abs(mu) > 0.3) return iok;
   iok = 1;
   return iok;
 }
@@ -305,10 +305,10 @@ void FitPP::Loop()
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       if (Cut(ientry) < 0) continue;
       // FitP->Draw("mu:x>>MuX","i&&j&&dmu<0.1&&prob>1e-5&&dsigma>0&&dsigma<0.01&&abs(mu)<0.1","prof")
-      Double_t Length = x;
-      Double_t dxLog2 = y;
-      xx[0] = TMath::Log(Length); //Length;
-      xx[1] = dxLog2;
+      Double_t NodEdx = x;
+      Double_t EtaG = y;
+      xx[0] = TMath::Log(NodEdx);
+      xx[1] = EtaG;
       if (! Sigma) {
 	fit->AddRow(xx, mu, dmu*dmu);
       } else {
@@ -370,7 +370,7 @@ void h2mdf(const Char_t  *total = "mu") {
   //  fit = new TMultiDimFit(nVars, TMultiDimFit::kMonomials,"vk");
   fit = new TMultiDimFit(nVars, type,"vk");
 
-  Int_t mPowers[]   = {9, 7};
+  Int_t mPowers[]   = {3, 5};
   fit->SetMaxPowers(mPowers);
   fit->SetMaxFunctions(1000);
   fit->SetMaxStudy(1000);
@@ -397,10 +397,10 @@ void h2mdf(const Char_t  *total = "mu") {
       if (error >  1e-2) continue;
       Double_t value = total2D->GetBinContent(ix,iy);
       if (TMath::Abs(value) > ymax) continue;
-      Double_t Length = xa->GetBinCenter(ix);
-      Double_t dxLog2 = ya->GetBinCenter(iy);
-      x[0]           = TMath::Log(Length); 
-      x[1]           = dxLog2;
+      Double_t NodEdx = xa->GetBinCenter(ix);
+      Double_t EtaG = ya->GetBinCenter(iy);
+      x[0]           = TMath::Log(NodEdx); 
+      x[1]           = EtaG;
       Double_t yy = value;
       Double_t ee = error*error;
       fit->AddRow(x,yy,ee);
@@ -430,7 +430,7 @@ void h2mdf(const Char_t  *total = "mu") {
   //  cout << PrintRow();
 }
 //____________________________________________________________________________
-void  MakeTpcLengthCorrectionMD2(Int_t date = 0, Int_t time = 0){
+void  MakeTpcLengthCorrectionMDN(Int_t date = 0, Int_t time = 0){
   TFile *fIn[3] = {0};
   const Char_t *histN[2] = {"mu","sigma"};
   TSeqCollection *files = gROOT->GetListOfFiles();
@@ -440,7 +440,7 @@ void  MakeTpcLengthCorrectionMD2(Int_t date = 0, Int_t time = 0){
   TString tag;
   while ( (f = (TFile *) next()) ) {
     TString F(f->GetName());
-    if (! F.Contains("TPoints2")) continue;
+    if (! F.Contains("NPoints2")) continue;
     Int_t l = -1;
     if (F.Contains("70U")) l = 0;
     else if (F.Contains("NU")) l = 1;
@@ -451,7 +451,7 @@ void  MakeTpcLengthCorrectionMD2(Int_t date = 0, Int_t time = 0){
     if (! mu || ! sigma) continue;
     if (tag == "") {
       tag = f->GetName();
-      tag.ReplaceAll("TPoints2","");
+      tag.ReplaceAll("NPoints2","");
       tag.ReplaceAll("70","");
       tag.ReplaceAll("F","");
       tag.ReplaceAll("N","");
@@ -463,14 +463,14 @@ void  MakeTpcLengthCorrectionMD2(Int_t date = 0, Int_t time = 0){
   }
   
   TString fOut;
-  if (date > 0) fOut =  Form("TpcLengthCorrectionMD2.%8i.%06i.C",date,time);
-  else          fOut =  Form("TpcLengthCorrectionMD2.%s.C",tag.Data());
+  if (date > 0) fOut =  Form("TpcLengthCorrectionMDN.%8i.%06i.C",date,time);
+  else          fOut =  Form("TpcLengthCorrectionMDN.%s.C",tag.Data());
   cout << "Create " << fOut << endl;
   out.open(fOut.Data());
   out << "TDataSet *CreateTable() {" << endl;
   out << "  if (!gROOT->GetClass(\"St_MDFCorrection\")) return 0;" << endl;
   out << "  MDFCorrection_st row;" << endl;
-  out << "  St_MDFCorrection *tableSet = new St_MDFCorrection(\"TpcLengthCorrectionMD2\",6);" << endl;
+  out << "  St_MDFCorrection *tableSet = new St_MDFCorrection(\"TpcLengthCorrectionMDN\",6);" << endl;
   out << "  Int_t nrows = 6;" << endl;
   Int_t idx = 0;
   for (Int_t l = 0; l < 3; l++) {
@@ -485,8 +485,8 @@ void  MakeTpcLengthCorrectionMD2(Int_t date = 0, Int_t time = 0){
 	fIn[l]->cd();
 	TH2D *h = (TH2D *) gDirectory->Get(histN[m]);
 	if (h) {
-	  //	  out << "  //" << gDirectory->GetName() << "; MakeTpcLengthCorrectionMD21(\"" << histN[m] << "\",5,1,20);" << endl;
-	  //	  MakeTpcLengthCorrectionMD21(histN[m],  5,type,20); 
+	  //	  out << "  //" << gDirectory->GetName() << "; MakeTpcLengthCorrectionMDN1(\"" << histN[m] << "\",5,1,20);" << endl;
+	  //	  MakeTpcLengthCorrectionMDN1(histN[m],  5,type,20); 
 	  h2mdf(histN[m]); 
 	  PrintRow();
 	}

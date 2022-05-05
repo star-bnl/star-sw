@@ -60,8 +60,14 @@
   MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
   sort AliveFeeRuns | tee AliveFeeRuns.sorted
   cat *Runs.sorted | sort | tee DeadOrAlived_RunXXII.sorted
-
-
+==================== Run XIX - RunXXII ============================================================
+foreach f ( `ls -1d   *_20??/hlt_2*.root *_20??/2*.root` ) 
+    set b = `basename ${f} .root`; 
+    set c = `echo ${b} | sed -e 's/hlt_//'`;
+    echo "${c}"
+    if (-r ${c}.list) continue;
+    root.exe -q -b ${f} CheckPads.C+ >& ${c}.list
+end
 */
 //   foreach f ( `ls -1d   */2*.root` )
 //________________________________________________________________________________
