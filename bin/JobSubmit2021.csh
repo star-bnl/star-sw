@@ -11,14 +11,14 @@
 #cd /hlt/cephfs/reco/2021/RF/TFG21c.B/7p7GeV_2021
 #cd /hlt/cephfs/reco/2021/FF/TFG21c.B/7p7GeV_2021
 #cd /hlt/cephfs/reco/2021/RF/TFG21h/7p7GeV_2021
-CreateRunDirs2019.pl
+CreateRunDirs2021.pl
 foreach d (`ls -1d ???/2*`)
   cd $d;
   if (-r Done || -r Submitted) then
     cd -
     continue
   endif
-  daq_2019dR.pl
+  daq_2021dR.pl
   if ($?) then
     ls -1d *bla.root
     if ($?) then
@@ -34,7 +34,8 @@ foreach d (`ls -1d ???/2*`)
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021StiCA.Minuit.TFG20a.xml
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021_Cosmics.xml
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG21c.xml
-  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2019.TFG22b.xml
+#  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2019.TFG22b.xml
+  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG22b.xml
 #  endif
   touch Submitted
   cd -
