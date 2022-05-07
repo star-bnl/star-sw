@@ -4,7 +4,7 @@ use Cwd;
 my $daq = "";
 my $reduction = 0;
 my $pwd = cwd();
-for (my $day = 107; $day < 122; $day++) {
+for (my $day = 1; $day < 366; $day++) {
   my $daydir = $day;
   if ($day <  10) {$daydir = "00" . $day;}
   elsif ($day < 100) {$daydir =  "0" . $day;}
