@@ -36,31 +36,6 @@ my $def = {@param::defaults};
   }
 }
 
-#
-# Change directory structure depending on options
-#
-# if ($def->{CXX}  =~ m/-Zoi/ ){
-#     # Drtup for INSURE tree directory.
-#     $LIB = $BUILD . "/ILIB";
-#     $BIN = $BUILD . "/IBIN";
-#     $OBJ = $BUILD . "/IOBJ";
-# } elsif ( defined($def->{GPROF}) ) {
-#     $LIB = $BUILD . "/GLIB";
-#     $BIN = $BUILD . "/GBIN";
-#     $OBJ = $BUILD . "/GOBJ";
-# } elsif ($def->{DEBUG}  =~ m/-O3/) {
-#     $LIB = $BUILD . "/LIB3";
-#     $BIN = $BUILD . "/BIN3";
-#     $OBJ = $BUILD . "/OBJ3";
-# } elsif ($def->{DEBUG}  =~ m/-O/ && ! ($def->{DEBUG}  =~ m/-Og/)) {
-#     $LIB = $BUILD . "/LIB";
-#     $BIN = $BUILD . "/BIN";
-#     $OBJ = $BUILD . "/OBJ";
-# } else {
-#     $LIB = $BUILD . "/lib";
-#     $BIN = $BUILD . "/bin";
-#     $OBJ = $BUILD . "/obj";
-# }
 $LIB = $BUILD . "/" . File::Basename::basename($STAR_LIB);
 $OBJ = $BUILD . "/" . File::Basename::basename($STAR_OBJ);
 $BIN = $BUILD . "/" . File::Basename::basename($STAR_BIN);
@@ -126,7 +101,7 @@ $env = new cons(
 $GITINFO = $LIB . "/etc/gitinfo.txt";
 if (-d .git) {
 #  my $opt = "'+%b %d %Y, %H:%M:%S";
-  Command $env [$GITINFO], ("#.git/HEAD", "#.git/FETCH_HEAD", "#.git/ORIG_HEAD"), #qq(cd %>:d; $ROOTROOT/root/build/unix/gitinfo.sh);
+  Command $env [$GITINFO], ("#.git/HEAD", "#.git/FETCH_HEAD", "#.git/ORIG_HEAD","#.git/COMMIT_EDITMSG"), #qq(cd %>:d; $ROOTROOT/root/build/unix/gitinfo.sh);
     qq( git describe --all > %>;  git describe --always >> %>; date >> %>);
 }
 

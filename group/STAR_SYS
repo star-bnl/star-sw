@@ -125,7 +125,6 @@ endif
     #
     setenv STAR_HOST_SYS $STAR_SYS
     set redhat = ""
-    if (! $?AVX) setenv AVX "";#    setenv AVX  "AVX"; # now for HLT machines only
     if (-f /etc/redhat-release) then
 	set rhflavor = `$AWK '{print $1 $2}' /etc/redhat-release | sed "s/[a-z]//g" | $AWK '{print tolower($1)}'`
 	set redhat   = `$AWK '{for (i=1;i<=NF;i++) if ($i == "release" || $i == "Release") print $(i+1)}' /etc/redhat-release`
@@ -213,15 +212,14 @@ endif
 		    breaksw
 		case "x86*":
 		case "amd64*":
-#		echo "${rhflavor}${redhat}_x8664_${STARCMPLC}${vers}${AVX}"
 		    if ( $USE_64BITS == 1 ) then
-			setenv STAR_HOST_SYS ${rhflavor}${redhat}_x8664_${STARCMPLC}${vers}${AVX}
+			setenv STAR_HOST_SYS ${rhflavor}${redhat}_x8664_${STARCMPLC}${vers}
 		    else
-			setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}${AVX}
+			setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}
 		    endif
 		    breaksw
 		default:
-		    setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}${AVX}
+		    setenv STAR_HOST_SYS ${rhflavor}${redhat}_${STARCMPLC}${vers}
 	    endsw
 	endif
 #	echo "STAR_HOST_SYS => $STAR_HOST_SYS"
@@ -236,8 +234,26 @@ endif
 # trick to handle non STAR nodes
 if ("${STAR_SYS}" == "sl64_gcc447"      ) setenv STAR_HOST_SYS sl64_gcc482
 if ("${STAR_SYS}" == "sl64_x8664_gcc447") setenv STAR_HOST_SYS sl64_x8664_gcc482
-if ($?DECHO) echo "STAR_SYS = ${STAR_SYS}, STAR_HOST_SYS = ${STAR_HOST_SYS}"
-
+echo $STAR_LEVEL | egrep '(.DEV2|TFG22[d-z]|TFG2[3-9])' > /dev/null
+if ($?) then 
+  if ($?STAR_NEW_ENVIRONMENT) unsetenv STAR_NEW_ENVIRONMENT
+  if ($?STAR_HOST_SYS_OPT)    unsetenv STAR_HOST_SYS_OPT
+  if ($?DECHO) echo "STAR_SYS = ${STAR_SYS}, STAR_HOST_SYS = ${STAR_HOST_SYS}"
+else 
+  setenv STAR_NEW_ENVIRONMENT yes
+  set opt = "";
+  if ($?NODEBUG) then 
+    set opt = "_opt";
+    if ($NODEBUG == "-O3") set opt = "_opt3";
+  endif
+  set R = "";
+  if (! $?ROOT_VERSION) setenv ROOT_VERSION ""
+  if ($ROOT_VERSION == "6") set R = "_R"$ROOT_VERSION
+  setenv STAR_HOST_SYS_OPT ${STAR_HOST_SYS}${opt}${R}
+  unset opt
+  unset R
+  if ($?DECHO) echo "STAR_SYS = ${STAR_SYS}, STAR_HOST_SYS = ${STAR_HOST_SYS}, STAR_HOST_SYS = ${STAR_HOST_SYS}, STAR_HOST_SYS_OPT = ${STAR_HOST_SYS_OPT}"
+endif
 #  $Log: STAR_SYS,v $
 #  Revision 1.61  2019/04/08 20:26:59  jeromel
 #  Adjust

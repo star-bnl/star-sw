@@ -156,8 +156,8 @@ switch ($pkg)
       unsetenv XOPTSTAR
 #      setup $xSTARCMPL
       if (-x $GROUP_DIR/dropit ) then
-	setenv PATH            `$GROUP_DIR/dropit $STAR_HOST_SYS /opt/star`
-        setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS /opt/star ^/usr/lib64`
+	setenv PATH            `$GROUP_DIR/dropit $STAR_HOST_SYS /opt/star cern64`
+        setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS /opt/star lib64 cern64`
       endif
 #      setenv OPTSTAR /afs/rhic.bnl.gov/star/packages/.DEV2/misc/opt/star/$STAR_HOST_SYS
       source $GROUP_DIR/STAR_SYS
