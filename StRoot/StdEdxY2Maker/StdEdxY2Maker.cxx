@@ -16,7 +16,7 @@
 //#define __ADD_PROB__
 //#define __BENCHMARKS__DOFIT_ZN__
 #define __FIT_PULLS__
-#define __CHECK_RDOMAP_AND_VOLTAGE__
+//#define __CHECK_RDOMAP_AND_VOLTAGE__
 #endif /* __TFG__VERSION__ */
 #define __BEST_VERTEX__
 #ifdef __CHECK_RDOMAP_AND_VOLTAGE__
@@ -913,7 +913,6 @@ Int_t StdEdxY2Maker::Make(){
 	      Int_t row    = tpcHit->padrow();
 	      Int_t rowc   = row;
 	      if (sector > 12) rowc = - row;
-	      Int_t pad    = tpcHit->pad();
 	      Int_t adc    = tpcHit->adc();
 	      Double_t Z = tpcHit->position().z();
 	      AdcSC->Fill(Z,rowc, adc);
@@ -924,6 +923,7 @@ Int_t StdEdxY2Maker::Make(){
 		}
 	      }
 #ifdef __CHECK_RDOMAP_AND_VOLTAGE__
+	      Int_t pad    = tpcHit->pad();
 	      Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
 	      if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
 	      ActivePads->Fill(sector, row, pad, adc);

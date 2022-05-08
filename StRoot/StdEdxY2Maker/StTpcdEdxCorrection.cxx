@@ -235,9 +235,9 @@ void StTpcdEdxCorrection::ReSetCorrections() {
       if (! chairSecRow && ! chairEffectivedX) {
 	CommentLine +=  "\tis not tpcCorrection, MDFCorrection, TpcEffectivedX, TpcEffectivedX, or TpcSecRowCor types";
       }
-      if (Debug()) {
-	LOG_WARN << CommentLine.Data() << endm;
-      }
+      //      if (Debug()) {
+      LOG_WARN << CommentLine.Data() << endm;
+      //      }
       continue;
     }
     if (! npar ) {
