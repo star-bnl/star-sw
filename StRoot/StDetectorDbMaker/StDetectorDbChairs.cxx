@@ -1506,6 +1506,7 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
     Int_t N = dead->getNumRows();
     for (Int_t i = 0; i < N; i++) {
       Int_t s = dead->sector(i);
+      if (s <= 0) break;
       Int_t r = dead->row(i);
       Int_t pmin = dead->padMin(i);
       Int_t pmax = dead->padMax(i);
