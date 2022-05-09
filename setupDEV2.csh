@@ -55,8 +55,7 @@ endif
 if (! $?PERL5LIB) setenv PERL5LIB ""
 setenv STAR_ROOT ${AFS_RHIC}
 setenv OPTSTAR   ${STAR_ROOT}/opt
-#setenv GROUP_DIR ${STAR_ROOT}/packages/.DEV2/group
-setenv GROUP_DIR `ls -1d $STAR_ROOT/packages/TFG2*/group | tail -1`
+setenv GROUP_DIR ${STAR_ROOT}/packages/.DEV2/group
 #unsetenv STAR
 source ${GROUP_DIR}/group_env.csh
 #source ${GROUP_DIR}/setup    gcc482
