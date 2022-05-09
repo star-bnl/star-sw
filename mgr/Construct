@@ -101,8 +101,14 @@ $env = new cons(
 $GITINFO = $LIB . "/etc/gitinfo.txt";
 if (-d .git) {
 #  my $opt = "'+%b %d %Y, %H:%M:%S";
-  Command $env [$GITINFO], ("#.git/HEAD", "#.git/FETCH_HEAD", "#.git/ORIG_HEAD","#.git/COMMIT_EDITMSG"), #qq(cd %>:d; $ROOTROOT/root/build/unix/gitinfo.sh);
-    qq( git describe --all > %>;  git describe --always >> %>; date >> %>);
+  my @DEPS = ();
+  my @gitFiles = qw(.git/HEAD .git/FETCH_HEAD .git/ORIG_HEAD .git/COMMIT_EDITMSG);
+  foreach my $file (@gitfiles) {
+    if (-r $file) {
+      push  @DEPS, "#" . $file;
+    } 
+  }
+  Command $env [$GITINFO], (@DEPS), qq( git describe --all > %>;  git describe --always >> %>; date >> %>);
 }
 
 Ignore qw(
