@@ -10,6 +10,9 @@
 
    FitPDraw("mu:TMath::Sign(208.707-y,x)","ZI", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)<40.5)", "prof", -0.4,  0.3, "All", "Z")
    FitPDraw("mu:TMath::Sign(208.707-y,x)","ZO", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)>40.5)", "prof", -0.4,  0.3, "All", "Z")
+   
+  PressureGF
+ FitPDraw("mu:y","IP", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)<40.5)", "prof", -0.4,  0.3, "All", "log(Pressure)")
 */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
