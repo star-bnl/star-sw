@@ -5,9 +5,9 @@
   .x h2mdf.C("sigma",5,1,20)
   root.exe NPoints2*U+*.root  MakeTpcLengthCorrectionMDN.C+
 
-  foreach d (`ls -1d [0-9]*GeV*.root`)
+  foreach d (`ls -1d [0-9]*GeV*.root pp500GeV*.root`)
      set b = `basename ${d} .root`;
-     root.exe -q -b NPoints2*U*${d}  MakeTpcLengthCorrectionMDN.C | tee ${b}.log
+     root.exe -q -b NPoints2*U*${d}  MakeTpcLengthCorrectionMDN.C+ | tee ${b}.log
   end 
  dir TpcZCorrectionB.20*.C | grep GeV | grep fixed | sed 's/TpcZCorrectionB/TpcLengthCorrectionMDN/g' | awk '{print "ln -s TpcLengthCorrectionMDN.FXT.C "$9}'
  dir TpcZCorrectionB.20*.C | grep GeV | grep -v fixed | sed 's/TpcZCorrectionB/TpcLengthCorrectionMDN/g' | awk '{print "ln -s TpcLengthCorrectionMDN.COL.C "$9}'

@@ -46,6 +46,13 @@ void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
   Double_t bgMinL10  = -2; // 3.5;// 1e2; // 1e-2;
   Double_t bgMaxL10  =  6;  // 1e2;// 1e5;
   Double_t mass   = -1;
+  TString workDir(gSystem->WorkingDirectory());
+  if (workDir.Contains("FXT"))  {
+    cout << "Fixed target" << endl;
+    Zlow = Zhigh = 200;
+    Ylow  = -2.9;
+    Yhigh =  0.1;
+  }
   for (Int_t i = 0; i < 15; i++) {
     if (RootFile.Contains(Names[i],TString::kIgnoreCase)) {
       ID =Ids[i];

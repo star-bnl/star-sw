@@ -1,4 +1,16 @@
-// root.exe SecRow3C*.root FitPDraw.C+
+/*
+  root.exe SecRow3C*.root FitPDraw.C+
+   
+            draw               ext nx xMin xMax                          cut      opt yMin yMax  side            var
+  SecRow3
+  FitPDraw("mu:rowsigned(y,x)","P", 0,   0,  0, "(i&&j&&abs(mu)<1)/(dmu**2)", "profg", -1,  1, "All", "sector*side")
+  Z3	      
+   FitPDraw("mu:TMath::Sign(y,x)","I", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)<40.5)", "prof", -0.4,  0.3, "All", "signed drift")
+   FitPDraw("mu:TMath::Sign(y,x)","O", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)>40.5)", "prof", -0.4,  0.3, "All", "signed drift ")
+
+   FitPDraw("mu:TMath::Sign(208.707-y,x)","ZI", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)<40.5)", "prof", -0.4,  0.3, "All", "Z")
+   FitPDraw("mu:TMath::Sign(208.707-y,x)","ZO", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)>40.5)", "prof", -0.4,  0.3, "All", "Z")
+*/
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
 #else
@@ -40,6 +52,49 @@
 #include "TLegend.h"
 #include "TStyle.h"
 #endif
+#define __RunXIX_RunXII__
+#ifdef __RunXIX_RunXII__
+static  Int_t N = 34;
+static  const Char_t *Names[34] = {
+  "19GeV_2019",
+  "14p5GeV_2019",
+  "7.3GeV_fixedTarget_2019",
+  "7p7GeV_2019",
+  "3p85GeV_fixedTarget_2019",
+  "9p2GeV_2019",
+  "4p59GeV_fixedTarget_2019",
+  "9p2GeV_2019",
+  "31GeV_fixedTarget_2019",
+  "AuAu200_2019",
+
+  "11p5GeV_2020",
+  "5p75GeV_fixedTarget_2020",
+  "31p2GeV_fixedTarget_2020",
+  "9p8GeV_fixedTarget_2020",
+  "9p2GeV_2020",
+  "19p5GeV_fixedTarget_2020",
+  "13p5GeV_fixedTarget_2020",
+  "7p3GeV_fixedTarget_2020",
+  "9p2GeVb_2020",
+  "9p2GeVc_2020",
+  "26p5GeV_fixedTarget_2020",
+  "7p7GeV_2020",
+
+  "7p7GeV_2021",
+  "3p85GeV_fixedTarget_2021",
+  "44p5GeV_fixedTarget_2021",
+  "70GeV_fixedTarget_2021",
+  "100GeV_fixedTarget_2021",
+  "OO_200GeV_2021",
+  "ps_OO_200GeV_2021",
+  "FF_OO_200GeV_2021",
+  "17p3GeV_2021",
+  "26p5GeV_fixedTarget_2021",
+  "dAu200_2021",
+
+  "pp500GeV_2022"
+};
+#else
 #define __RUNXXI__
 #if defined(__RUNXIX__)
 static  Int_t N = 8;
@@ -104,6 +159,7 @@ static const Char_t *Names[9] = {
   "OO_200GeV_2021",
   "ps_OO_200GeV_2021"};
   //  "Cosmic"
+#endif
 #endif
 TFile *F[100]  = {0};
 //________________________________________________________________________________
@@ -237,6 +293,7 @@ void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)",
       name.ReplaceAll("SecRow3CGF","");
       name.ReplaceAll("AvCurrentCGF","");
       name.ReplaceAll("Z3CGF","");
+      name.ReplaceAll("Z3GF","");
       leg->AddEntry(hist,name.Data());
       hist->SetTitle(Form("%s : %s",hist->GetTitle(), side));
       hist->SetXTitle(var);

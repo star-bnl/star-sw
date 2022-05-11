@@ -71,6 +71,21 @@ void SetTitle(TString &Title) {
   Title.ReplaceAll("TPointsU"  , "Ufit ");
   Title.ReplaceAll("TPointsF"  , "Ifit ");
   Title.ReplaceAll("TPoints"   , "Ifit ");
+
+  Title.ReplaceAll("NPoints70BE","I70  East");
+  Title.ReplaceAll("NPointsBE"  ,"Ifit East  ");
+  Title.ReplaceAll("NPoints70BW","I70  West ");
+  Title.ReplaceAll("NPointsBW"  ,"Ifit West ");
+  Title.ReplaceAll("NPoints70B", "I70  ");
+  Title.ReplaceAll("NPoints70U", "U70  ");
+  Title.ReplaceAll("NPoints70" , "I70  ");
+  Title.ReplaceAll("NPointsN"  , "Nfit ");
+  Title.ReplaceAll("NPointsNU" , "NfitU");
+  Title.ReplaceAll("NPointsB"  , "Ifit ");
+  Title.ReplaceAll("NPointsU"  , "Ufit ");
+  Title.ReplaceAll("NPointsF"  , "Ifit ");
+  Title.ReplaceAll("NPoints"   , "Ifit ");
+
   Title.ReplaceAll("production_","");
   Title.ReplaceAll("_ReversedFullField","");
   Title.ReplaceAll("_FullField","");
@@ -154,10 +169,9 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
   TPRegexp Pattern(pattern);
   TString plot(name);
   TString Plot;
+  Bool_t IsLength = kTRUE;
   if (plot == "sigma") Plot = "Sigma";
   if (plot == "mu")    Plot = "Mu";
-  TString PlotH(Plot); PlotH += "(100,10,210)";
-  cout << "plot = " << plot.Data() << "\tPlot = " << PlotH.Data() << " pattern " << Pattern.GetPattern().Data() << endl;
   Int_t NF = 0;
   TSeqCollection *files = gROOT->GetListOfFiles();
   if (! files) return;
@@ -167,20 +181,22 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
   TIter next(files);
   TFile *f = 0;
   TString Select(select);
+  TString Title;
   Int_t all = 0;
   if (Select.Contains("all",TString::kIgnoreCase)) all = 1;
   while ( (f = (TFile *) next()) ) { 
     TString F(f->GetName());
-    if (! F.Contains("TPoints") && ! F.Contains("MPoints")) continue;
+    TTree *FitP = (TTree *) gDirectory->Get("FitP");
+    if (! F.Contains("TPoints") && ! F.Contains("MPoints") && ! F.Contains("NPoints")) continue;
     if (Pattern.GetPattern() != ""  &&  F.Contains(Pattern)) continue;
     if (! all && (F.Contains("MPoints") || F.Contains("BUGP") || F.Contains("BAGP"))) continue;
     Int_t indx = 0;
     if ( F.Contains("70")) indx = 1;
-    FitFiles[NF] = f; NF++;
+    cout << "File \t" << F.Data() << endl;
+    if (F.Contains("NPoint")) IsLength = kFALSE;
+    FitFiles[NF] = f; 
+    NF++;
   }
-  TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
-  if (! c1 ) c1 = new TCanvas("c1","Resolution versus Track Length");
-  c1->Clear();
   TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c1");
   if (! c1 ) c1 = new TCanvas("c1","Resolution versus Track Length");
   c1->Clear();
@@ -188,34 +204,41 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
   c1->SetGrid(); //x(9);
   //  c1->SetGridy(30);
   TH1F *frame = 0;
+  Double_t xmin =  10;
+  Double_t xmax = 210;
+  if (! IsLength) {xmin = 2.5; xmax = 72.5;}
+  TString PlotH(Plot); PlotH += Form("(100,%f,%f)",xmin,xmax);
+  cout << "plot = " << plot.Data() << "\tPlot = " << PlotH.Data() << " pattern " << Pattern.GetPattern().Data() << endl;
   if (plot == "sigma") {
-    frame = c1->DrawFrame(10,0.02,210,0.20);
-    frame->SetTitle("Resolution versus Track Length");
+    frame = c1->DrawFrame(xmin,0.02,xmax,0.20);
+    if (IsLength) frame->SetTitle("Resolution versus Track Length");
+    else          frame->SetTitle("Resolution versus No. dEdx/dx points");
     //    frame->SetYTitle("Resolution");
   } else {
-    frame = c1->DrawFrame(10,-0.05,210,0.10);
-    frame->SetTitle("Shift versus Track Length");
+    frame = c1->DrawFrame(xmin,-0.05,xmax,0.10);
+    if (IsLength) frame->SetTitle("Shift versus Track Length");
+    else          frame->SetTitle("Shift versus No. dEdx/dx points");
     //    frame->SetYTitle("Sift");
   }
-  frame->SetXTitle("Track Length (cm)                   ");
+  if (IsLength) frame->SetXTitle("Track Length (cm)                   ");
+  else          frame->SetXTitle("No. dEdx/dx points                  ");
   TLegend *leg = new TLegend(0.25,0.6,0.9,0.9,"");
   Int_t c = 0;
   TF1 *powfit = 0;
   if (plot == "sigma") {
-    powfit = new TF1("powfit","[0]*TMath::Power(x,[1])",40,160);
+    powfit = new TF1("powfit","[0]*TMath::Power(x,[1])",xmin,xmax);
     powfit->SetParameters(0.5,-0.5);
   } else {
-    powfit = new TF1("powfit","pol0",40,160);
+    powfit = new TF1("powfit","pol0",xmin,xmax);
     //	powfit->SetParameter(0,0.);
   }
-
   for (int i = 0; i<NF; i++) {
     c = i + 1;
     if (c == 10) c = 11;
     if (FitFiles[i]) { 
       FitFiles[i]->cd();
       TH1 *Hist = 0;
-#if 1
+#if 0
       TH1 *hist = (TH1 *) FitFiles[i]->Get(plot);
       if (! hist) continue;
       if (hist->GetDimension() == 2) {
@@ -224,21 +247,24 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
 	Hist = hist; 
       }
 #endif
-      TString Title(gSystem->BaseName(FitFiles[i]->GetName()));
+      Title = gSystem->BaseName(FitFiles[i]->GetName());
       Title.ReplaceAll(".root","");
-      if (! Title.Contains("TPoints")) continue;
-      if (!Hist|| Hist->GetEntries() < 1.e-4) {
+      if (! (Title.Contains("TPoints") ||  Title.Contains("NPoints"))) continue;
+      if (! Hist || Hist->GetEntries() < 1.e-4) {
 	TTree *FitP = (TTree *) gDirectory->Get("FitP");
 	if (! FitP) continue;
 	FitP->SetMarkerColor(c);
 	powfit->SetLineColor(c);
 	if (plot != "sigma") {
 	  //	    FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"(sigma<0.2&&i&&j==0&&chisq<200&&dmu<0.01&&sigma>0.03)/dmu**2","profsameggoff");
-	  FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"(sigma<0.2&&i&&j&&chisq<200&&dmu<0.01&&sigma>0.03)","profsame");
+	    FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"(sigma<0.2&&i&&j&&chisq<200&&dmu<0.01&&sigma>0.03)","profsame");
 	} else {
-	  cout << "FitP->Draw(\"" << Form("%s:x>>%s",plot.Data(),PlotH.Data()) << "\",\"i&&j&&chisq<200&&dmu<0.01&&sigma>0.03\",\"profsame\");" << endl;
 	  //	    FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"(i&&j==0&&chisq<200&&dmu<0.01&&sigma>0.03)/dsigma**2","profsameggoff");
-	  FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"(i&&j&&chisq<200&&dmu<0.01&&sigma>0.03)","profsame");
+	  if (IsLength)
+	    FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"(sigma<0.2&&i&&j&&chisq<200&&dmu<0.01&&sigma>0.03)","profsame");
+	  else 
+	    //	    FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"i&&j&&prob>0.01&&dmu<0.01&&dsigma<0.01&&sigma<6/x","profsame");
+	    FitP->Draw(Form("%s:x>>%s",plot.Data(),PlotH.Data()),"i&&j&&chisq<80&&dmu<0.01&&dsigma<0.01","profsame");
 	}
 	c1->Update();
 	Hist = (TProfile *) FitFiles[i]->Get(Plot);
@@ -255,11 +281,16 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
       //      leg->AddEntry(sigma,Form("%s:  #sigma(@76cm) = %5.2f%%",FitNames[i],100*powfit->Eval(76)));
       SetTitle(Title);
       if (plot == "sigma") {
-	//	Title += Form(" : #sigma(@76cm) = %5.2f%\%",100*powfit->Eval(76));
-	Double_t L = 77.34;
-	Title += Form(" : #sigma(@%5.1f7cm) = %5.2f%\%",L,100*powfit->Eval(L));
-	L = 124.4;
-	Title += Form(" : #sigma(@%5.1fcm) = %5.2f%\%",L,100*powfit->Eval(112));
+	if (IsLength ) {
+	  //	Title += Form(" : #sigma(@76cm) = %5.2f%\%",100*powfit->Eval(76));
+	  Double_t L = 77.34;
+	  Title += Form(" : #sigma(@%5.1fcm) = %5.2f%\%",L,100*powfit->Eval(L));
+	  L = 124.4;
+	  Title += Form(" : #sigma(@%5.1fcm) = %5.2f%\%",L,100*powfit->Eval(112));
+	} else {
+	  Double_t L = 72;
+	  Title += Form(" : #sigma(@%2.0f npts) = %5.2f%\%",L,100*powfit->Eval(L));
+	}
       } else {
 	Title += Form(" : #mu = %5.2f%\%",100*powfit->GetParameter(0));
       }
@@ -269,20 +300,29 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
       leg->AddEntry(Hist,Title.Data());
     }
   }
-  if (plot == "sigma") {
-    //    Double_t PositionX = 76.2, PositionY = 0.076;
-    Double_t PositionX = 77.34, PositionY = 0.0742; // TPC
-    TPolyMarker *pm = new TPolyMarker(1, &PositionX, &PositionY);
-    frame->GetListOfFunctions()->Add(pm);
-    pm->SetMarkerStyle(20);
-    pm->SetMarkerColor(kRed);
-    pm->SetMarkerSize(2.3);
-    PositionX = 124.4; PositionY = 0.0598;
-    pm = new TPolyMarker(1, &PositionX, &PositionY);
-    frame->GetListOfFunctions()->Add(pm);
-    pm->SetMarkerStyle(20);
-    pm->SetMarkerColor(kBlue);
-    pm->SetMarkerSize(2.3);
+  if (plot == "sigma" ) {
+    if (IsLength) {
+      //    Double_t PositionX = 76.2, PositionY = 0.076;
+      Double_t PositionX = 77.34, PositionY = 0.0742; // TPC
+      TPolyMarker *pm = new TPolyMarker(1, &PositionX, &PositionY);
+      frame->GetListOfFunctions()->Add(pm);
+      pm->SetMarkerStyle(20);
+      pm->SetMarkerColor(kRed);
+      pm->SetMarkerSize(2.3);
+      PositionX = 124.4; PositionY = 0.0598;
+      pm = new TPolyMarker(1, &PositionX, &PositionY);
+      frame->GetListOfFunctions()->Add(pm);
+      pm->SetMarkerStyle(20);
+      pm->SetMarkerColor(kBlue);
+      pm->SetMarkerSize(2.3);
+    } else {
+      Double_t PositionX = 72,  PositionY = 0.0598;
+      TPolyMarker *pm = new TPolyMarker(1, &PositionX, &PositionY);
+      frame->GetListOfFunctions()->Add(pm);
+      pm->SetMarkerStyle(20);
+      pm->SetMarkerColor(kRed);
+      pm->SetMarkerSize(2.3);
+    }
   }
   leg->Draw();
   delete [] FitFiles;
