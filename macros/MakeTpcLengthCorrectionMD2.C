@@ -3,7 +3,7 @@
   rcd("TPoints2BUGPRunXII19pp510P13ia_dEdx")
   .x h2mdf.C("mu",5,1,20)
   .x h2mdf.C("sigma",5,1,20)
-  root.exe TPoints2*UG*.root  MakeTpcLengthCorrectionMD2.C+
+  root.exe TPoints2*U*+*.root  MakeTpcLengthCorrectionMD2.C+
 
   foreach d (`ls -1d [0-9]*GeV*.root`)
      set b = `basename ${d} .root`;
@@ -307,7 +307,7 @@ void FitPP::Loop()
       // FitP->Draw("mu:x>>MuX","i&&j&&dmu<0.1&&prob>1e-5&&dsigma>0&&dsigma<0.01&&abs(mu)<0.1","prof")
       Double_t Length = x;
       Double_t dxLog2 = y;
-      xx[0] = Length;
+      xx[0] = TMath::Log(Length); //Length;
       xx[1] = dxLog2;
       if (! Sigma) {
 	fit->AddRow(xx, mu, dmu*dmu);
@@ -413,6 +413,10 @@ void h2mdf(const Char_t  *total = "mu") {
   fit->Print("s");
   
   // Book histograms 
+  TDirectory *dirL = 0;
+  if (! Sigma) dirL = gDirectory->mkdir("MuFit");
+  else         dirL = gDirectory->mkdir("SigmaFit");
+  dirL->cd();
   fit->MakeHistograms();
 
   // Find the parameterization 
@@ -488,9 +492,9 @@ void  MakeTpcLengthCorrectionMD2(Int_t date = 0, Int_t time = 0){
 	}
       }
       out << "  tableSet->AddAt(&row);" << "// " << gDirectory->GetName() << ";\t" << idx << "\th2mdf(\"" << histN[m] << "\",5,1,20);" << endl;
-      break;
+      //      break;
     }
-    break;
+    //    break;
   }
   out << "  return (TDataSet *)tableSet;" << endl;
   out << "}" << endl;

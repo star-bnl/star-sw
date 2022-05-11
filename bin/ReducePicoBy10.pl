@@ -4,7 +4,7 @@ use Cwd;
 my $daq = "";
 my $reduction = 0;
 my $pwd = cwd();
-for (my $run = 351; $run < 366; $run++) {
+for (my $run = 1; $run < 108; $run++) {
   my $rundir = $run;
   if ($run <  10) {$rundir = "00" . $run;}
   elsif ($run < 100) {$rundir =  "0" . $run;}

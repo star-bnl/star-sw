@@ -2409,13 +2409,19 @@ my $step = 0;
 #$hist = "RunXXI202"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/production_7p7GeV_2021/ReversedFullField/";  $Production = "P22ia_calib"; $year = "/2021/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  04/25/2022 Check present status 
 #$hist = "RunXXI203"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/production_7p7GeV_2021/ReversedFullField/";  $Production = "P22ia_calib"; $year = "/2021/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  04/25/2022 Check present status disable  TpcAdcCorrection3MDF.r2019.C
 #$hist = "RunXXI204"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/production_7p7GeV_2021/ReversedFullField/";  $Production = "P22ia_calib"; $year = "/2021/*/*/"; $FILE = "st_"; $STAR_LEVEL = "SL22a"; $select = "*";  $keep = 10; $Mode = 2; $macro = "dEdx";#  04/25/2022 Check present status disable  TpcAdcCorrection3MDF.r2019.C
-$hist = "RunXXI205"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/production_7p7GeV_2021/ReversedFullField/";  $Production = "P22ia_calib"; $year = "/2021/*/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG21l"; $select = "*";  $keep = 10; $Mode = 2; $macro = "dEdx";#  04/25/2022 Check present status disable  TpcAdcCorrection3MDF.r2019.C
+#$hist = "RunXXI205"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/production_7p7GeV_2021/ReversedFullField/";  $Production = "P22ia_calib"; $year = "/2021/*/*/"; $FILE = "st_"; $STAR_LEVEL = "TFG21l"; $select = "*";  $keep = 10; $Mode = 2; $macro = "dEdx";#  04/25/2022 Check present status disable  TpcAdcCorrection3MDF.r2019.C
 ################################################################################
 # Run XXII pp510_2022
 # $hist = "RunXXII00"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  01/16/22 Check
 # $hist = "RunXXII01"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  01/16/22 Check 03/01/22
 # $hist = "RunXXII02"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = "TFG22b"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  04/19/22 check whole pp500 sample
 # $hist = "RunXXII03"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = "TFG22b"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  04/21/22 pcSecRowB.20211110.000002.root
+################################################################################
+#$hist = "RunXIX_XXII_01"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/01/2022 recheck with new calibration scheme  
+#$hist = "RunXIX_XXII_02"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/06/22  reset all ctable to 19GeV_2019
+#$hist = "RunXIX_XXII_02"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/06/22  reset all ctable to 19GeV_2019
+$hist = "RunXIX_XXII_03"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/08/22 TpcSecRowB for all BES-II + RunXXII samples 
+
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();

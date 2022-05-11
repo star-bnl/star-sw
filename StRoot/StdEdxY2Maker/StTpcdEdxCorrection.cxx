@@ -51,6 +51,7 @@
 #include "StDetectorDbMaker/St_TpcLengthCorrectionBC.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionMDF.h"
 #include "StDetectorDbMaker/St_TpcLengthCorrectionMD2.h"
+#include "StDetectorDbMaker/St_TpcLengthCorrectionMDN.h"
 #include "StDetectorDbMaker/St_TpcPadCorrectionMDF.h"
 #include "StDetectorDbMaker/St_TpcdEdxCorC.h" 
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
@@ -107,6 +108,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 				      "TpcLengthCorrectionB",
 				      "TpcLengthCorrectionMDF",        
 				      "TpcLengthCorrectionMD2",              
+				      "TpcLengthCorrectionMDN",              
 				      "TpcdEdxCor"};
   static Int_t NT = sizeof(FXTtables)/sizeof(const Char_t *);
   m_isFixedTarget = St_beamInfoC::instance()->IsFixedTarget();
@@ -187,6 +189,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kTpcLengthCorrection   ] = dEdxCorrection_t("TpcLengthCorrectionB"  ,"Variation vs Track length and relative error in Ionization"	,St_TpcLengthCorrectionBC::instance());     
   m_Corrections[kTpcLengthCorrectionMDF] = dEdxCorrection_t("TpcLengthCorrectionMDF","Variation vs Track length and <log2(dX)> and rel. error in dE/dx" ,St_TpcLengthCorrectionMDF::instance());         
   m_Corrections[kTpcLengthCorrectionMD2] = dEdxCorrection_t("TpcLengthCorrectionMD2","Variation vs Track length and <log2(dX)> for pred. with fixed dx2",St_TpcLengthCorrectionMD2::instance());         
+  m_Corrections[kTpcLengthCorrectionMDN] = dEdxCorrection_t("TpcLengthCorrectionMDN","Variation vs Track length and <log2(dX)> for pred. with fixed dx2",St_TpcLengthCorrectionMDN::instance());         
   m_Corrections[kTpcNoAnodeVGainC      ] = dEdxCorrection_t("TpcNoAnodeVGainC"      ,"Remove tpc Anode Voltage gain correction"				,0);					         
   m_Corrections[kTpcdEdxCor            ] = dEdxCorrection_t("TpcdEdxCor"            ,"dEdx correction wrt Bichsel parameterization"			,St_TpcdEdxCorC::instance());               
   const St_tpcCorrectionC *chair = 0;
@@ -198,20 +201,24 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   const TTable *table = 0;
   TDatime t[2];
   Int_t k = 0;
+  TString CommentLine;
   for (k = kUncorrected+1; k < kTpcAllCorrections; k++) {
     if (! m_Corrections[k].Chair) continue;
-    LOG_WARN << "StTpcdEdxCorrection: " << Form("%24s/%66s",m_Corrections[k].Name,m_Corrections[k].Title);
+    CommentLine = Form("StTpcdEdxCorrection: %24s/%66s",m_Corrections[k].Name,m_Corrections[k].Title);
     table = m_Corrections[k].Chair->Table();
     if (! table) continue;
     if (Debug() > 2) table->Print(0,10);
     if (! TESTBIT(m_Mask,k) || m_Corrections[k].Chair->Table()->IsMarked()) {
-      LOG_WARN << " \tis missing" << endm;
+      CommentLine += " \tis missing";
       CLRBIT(m_Mask,k); 
       SafeDelete(m_Corrections[k].Chair);
+      if (Debug()) {
+	LOG_WARN << CommentLine.Data() << endm;
+      }
       continue;
     }
     if (St_db_Maker::GetValidity(table,t) > 0) {
-      LOG_WARN << Form("\tValidity:%08i.%06i --- %08i.%06i",t[0].GetDate(),t[0].GetTime(),t[1].GetDate(),t[1].GetTime());
+      CommentLine += Form("\tValidity:%08i.%06i --- %08i.%06i",t[0].GetDate(),t[0].GetTime(),t[1].GetDate(),t[1].GetTime());
     }
     chair    = dynamic_cast<const St_tpcCorrectionC *>(m_Corrections[k].Chair);
     chairMDF = dynamic_cast<const St_MDFCorrectionC *>(m_Corrections[k].Chair);
@@ -226,19 +233,23 @@ void StTpcdEdxCorrection::ReSetCorrections() {
       chairSecRow = dynamic_cast<const St_TpcSecRowCorC *>(m_Corrections[k].Chair);
       chairEffectivedX = dynamic_cast<const St_TpcEffectivedXC *>(m_Corrections[k].Chair);
       if (! chairSecRow && ! chairEffectivedX) {
-	LOG_WARN << "\tis not tpcCorrection, MDFCorrection, TpcEffectivedX, TpcEffectivedX, or TpcSecRowCor types";
+	CommentLine +=  "\tis not tpcCorrection, MDFCorrection, TpcEffectivedX, TpcEffectivedX, or TpcSecRowCor types";
       }
-      LOG_WARN << endm;
+      //      if (Debug()) {
+      LOG_WARN << CommentLine.Data() << endm;
+      //      }
       continue;
     }
     if (! npar ) {
-      LOG_WARN << " \thas no significant corrections => switch it off";
-      LOG_WARN << " \tIt is cleaned" << endm;
+      CommentLine += " \thas no significant corrections => switch it off \tIt is cleaned";
       CLRBIT(m_Mask,k); 
       SafeDelete(m_Corrections[k].Chair);
+      if (Debug()) {
+	LOG_WARN << CommentLine.Data() << endm;
+      }
       continue;
     }
-    LOG_WARN << endm;
+    LOG_WARN << CommentLine.Data() << endm;
   }
   // Check consistency of active chairs
   k = kzCorrection;
@@ -275,7 +286,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     }
   }
   // Use only TpcLengthCorrection
-  Int_t PriorityListL[] = {kTpcLengthCorrectionMD2, kTpcLengthCorrectionMDF, kTpcLengthCorrection};
+  Int_t PriorityListL[] = {kTpcLengthCorrectionMDN,kTpcLengthCorrectionMD2, kTpcLengthCorrectionMDF, kTpcLengthCorrection};
   i = 0;
   for (auto k : PriorityListL) {
     i++;
@@ -286,7 +297,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
       if (j <= i) continue;
       if (! m_Corrections[x].Chair) continue;
       if (x == k) continue;
-      LOG_WARN << "With" << m_Corrections[k].Name << "activated. Deactivate " << m_Corrections[x].Name << endm;
+      LOG_WARN << "With " << m_Corrections[k].Name << " activated => Deactivate " << m_Corrections[x].Name << endm;
       CLRBIT(m_Mask,x); 
       SafeDelete(m_Corrections[x].Chair);
     }
@@ -554,7 +565,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	ADC = chairC->CalcCorrection(l,adcCF);
 	if (m_Corrections[kAdcCorrection6MDF].Chair) {
 	  Double_t xx[4] = {(Double_t)  CdEdx.Ntbks, (Double_t)  CdEdx.Npads, TMath::Abs(CdEdx.zG), TMath::Log(adcCF)};
-	  ADC += ((St_MDFCorrection4C *)m_Corrections[kAdcCorrection6MDF].Chair)->Eval(l,xx) * TMath::Exp(chairC->a(l)[0]);
+	  ADC += ((St_MDFCorrection4C *)m_Corrections[kAdcCorrection6MDF].Chair)->Eval(l,xx);// * TMath::Exp(chairC->a(l)[0]);
 	}
 	dE = Adc2GeVReal*ADC;
 	goto ENDL;
@@ -688,19 +699,28 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   return iok;
 }
 //________________________________________________________________________________
-Int_t StTpcdEdxCorrection::dEdxTrackCorrection(Int_t type, dst_dedx_st &dedx) {
+Int_t StTpcdEdxCorrection::dEdxTrackCorrection(Int_t type, dst_dedx_st &dedx, Double_t etaG) {
   Int_t ok = 0;
-  if      (m_Corrections[kTpcLengthCorrectionMD2].Chair) ok = dEdxTrackCorrection(kTpcLengthCorrectionMD2,type,dedx);
+  if      (m_Corrections[kTpcLengthCorrectionMDN].Chair) ok = dEdxTrackCorrection(kTpcLengthCorrectionMDN,type,dedx, etaG);
+  else if (m_Corrections[kTpcLengthCorrectionMD2].Chair) ok = dEdxTrackCorrection(kTpcLengthCorrectionMD2,type,dedx);
   else if (m_Corrections[kTpcLengthCorrectionMDF].Chair) ok = dEdxTrackCorrection(kTpcLengthCorrectionMDF,type,dedx);
   else if (m_Corrections[kTpcLengthCorrection   ].Chair) ok = dEdxTrackCorrection(kTpcLengthCorrection   ,type,dedx);
   if      (m_Corrections[kTpcdEdxCor].Chair)             ok = dEdxTrackCorrection(kTpcdEdxCor            ,type,dedx);
   return ok;
 }
 //________________________________________________________________________________
-Int_t StTpcdEdxCorrection::dEdxTrackCorrection(EOptions opt, Int_t type, dst_dedx_st &dedx) {
+Int_t StTpcdEdxCorrection::dEdxTrackCorrection(EOptions opt, Int_t type, dst_dedx_st &dedx, Double_t etaG) {
+  Double_t xx[2] = {0};
   Double_t LogTrackLength = TMath::Log((Double_t) (dedx.ndedx/100));
-  Double_t dxLog2   = dedx.dedx[2];
-  Double_t xx[2] = {LogTrackLength, dxLog2};
+  if (opt != kTpcLengthCorrectionMDN) {
+    Double_t dxLog2   = dedx.dedx[2];
+    xx[0] = LogTrackLength;
+    xx[1] = dxLog2;
+  } else {
+     Double_t LogNodEdx = TMath::Log((Double_t) (dedx.ndedx%100));
+     xx[0] = LogNodEdx;
+     xx[1] = etaG;
+  }
   Double_t I70L;
   Int_t k = opt;
   if (! m_Corrections[k].Chair) return 0;
@@ -728,6 +748,7 @@ Int_t StTpcdEdxCorrection::dEdxTrackCorrection(EOptions opt, Int_t type, dst_ded
     break;
   case kTpcLengthCorrectionMDF:
   case kTpcLengthCorrectionMD2:
+  case kTpcLengthCorrectionMDN:
     nrows = ((St_MDFCorrectionC *) m_Corrections[k].Chair)->nrows(l);
     if (dedx.det_id > 100 && nrows > l+6) l += 6;
     switch (type) {

@@ -71,6 +71,12 @@ foreach my $arg (@ARGV) {
  		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP
  		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
   		 TPoints270+TPoints270P TPoints2F+TPoints2FP TPoints270U+TPoints270UP TPoints2FU+TPoints2FUP  TPoints2N+TPoints2NP TPoints2NU+TPoints2NUP
+ 		 NPoints70 NPointsF NPoints70U NPointsFU  NPointsN NPointsNU
+		 NPoints70P NPointsFP NPoints70UP NPointsFUP  NPointsNP NPointsNUP 
+ 		 NPoints270 NPoints2F NPoints270U NPoints2FU  NPoints2N NPoints2NU
+ 		 NPoints270P NPoints2FP NPoints270UP NPoints2FUP  NPoints2NP NPoints2NUP
+ 		 NPoints70+NPoints70P NPointsF+NPointsFP NPoints70U+NPoints70UP NPointsFU+NPointsFUP  NPointsN+NPointsNP NPointsNU+NPointsNUP
+  		 NPoints270+NPoints270P NPoints2F+NPoints2FP NPoints270U+NPoints270UP NPoints2FU+NPoints2FUP  NPoints2N+NPoints2NP NPoints2NU+NPoints2NUP
  	      );
   #  		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
  #  		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 

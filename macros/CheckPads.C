@@ -51,17 +51,23 @@
     if (-r ${b}.list) continue;
     root.exe -q -b ${f} CheckPads.C+ >& ${b}.list
   end
-  grep Dead hlt*.list | sed -e 's/hlt_//' | awk -F\{ '{print "{"$2}' > DeadFEE2.list
+  grep Dead *.list | sed -e 's/hlt_//' | awk -F\{ '{print "{"$2}' > DeadFEE2.list
   sort DeadFEE2.list > DeadFEE.listSorted
   MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
   sort DeadFeeRuns | tee DeadFeeRuns.sorted
-  grep Alive hlt*.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
+  grep Alive *.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
   sort AliveFEE2.list > AliveFEE.sorted
   MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
   sort AliveFeeRuns | tee AliveFeeRuns.sorted
   cat *Runs.sorted | sort | tee DeadOrAlived_RunXXII.sorted
-
-
+==================== Run XIX - RunXXII ============================================================
+foreach f ( `ls -1d   *_20??/hlt_2*.root *_20??/2*.root` ) 
+    set b = `basename ${f} .root`; 
+    set c = `echo ${b} | sed -e 's/hlt_//'`;
+    echo "${c}"
+    if (-r ${c}.list) continue;
+    root.exe -q -b ${f} CheckPads.C+ >& ${c}.list
+end
 */
 //   foreach f ( `ls -1d   */2*.root` )
 //________________________________________________________________________________

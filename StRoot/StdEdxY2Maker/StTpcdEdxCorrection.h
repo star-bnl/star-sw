@@ -81,14 +81,15 @@ class StTpcdEdxCorrection : public TObject {
       kTpcLengthCorrection   = 41,//                                             
       kTpcLengthCorrectionMDF= 42,//   					   
       kTpcLengthCorrectionMD2= 43,//   					   
-      kTpcdEdxCor            = 44,//   					   
-      kTpcAllCorrections     = 45 //                                             
+      kTpcLengthCorrectionMDN= 44,//   					   
+      kTpcdEdxCor            = 45,//   					   
+      kTpcAllCorrections     = 46 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
   Int_t dEdxCorrection(dEdxY2_t &dEdx, Bool_t doIT=kTRUE); 
-  Int_t dEdxTrackCorrection(Int_t type, dst_dedx_st &dedx);
-  Int_t dEdxTrackCorrection(EOptions k, Int_t type, dst_dedx_st &dedx);
+  Int_t dEdxTrackCorrection(Int_t type, dst_dedx_st &dedx, Double_t etaG = 0);
+  Int_t dEdxTrackCorrection(EOptions k, Int_t type, dst_dedx_st &dedx, Double_t etaG = 0);
   void SettpcGas               (St_tpcGas          *m = 0) {m_tpcGas = m;}
   
   void SetDebug(Int_t m=0) {m_Debug = m;}

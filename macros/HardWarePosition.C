@@ -6,7 +6,7 @@
 #include "TMath.h"
 #endif
 //________________________________________________________________________________
-UInt_t bits(UInt_t mHardwarePosition, UInt_t bit, UInt_t nbits) {return (mHardwarePosition>>bit) & ~(~0UL<<nbits);};
+UInt_t bits(UInt_t mHardwarePosition, UInt_t bit, UInt_t nbits=1) {return (mHardwarePosition>>bit) & ~(~0UL<<nbits);};
 //________________________________________________________________________________
 UInt_t sector(UInt_t mHardwarePosition) {return bits(mHardwarePosition, 4, 5);}      // TPC
 //________________________________________________________________________________

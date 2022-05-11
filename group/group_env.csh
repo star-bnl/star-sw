@@ -77,7 +77,23 @@ if (! $?STAR_ROOT) then
     endif
 endif
 
-# Clear this out. First block STAF, second STAR
+## Clear this out. First block STAF, second STAR
+if ($?STAR_HOST_SYS) then
+  if (-x ${GROUP_DIR}/dropit) then
+     setenv                    PATH             `${GROUP_DIR}/dropit ${STAR_HOST_SYS} -p ${PATH}`
+     setenv                    LD_LIBRARY_PATH  `${GROUP_DIR}/dropit ${STAR_HOST_SYS} -p ${LD_LIBRARY_PATH}`
+     if ($?SHLIB_PATH)  setenv SHLIB_PATh       `${GROUP_DIR}/dropit ${STAR_HOST_SYS} -p ${SHLIB_PATH}`
+     if ($?MAN_PATH)    setenv MAN_PATH         `${GROUP_DIR}/dropit ${STAR_HOST_SYS} -p ${MAN_PATH}`
+  endif
+endif
+if ($?STAR) then
+  if (-x ${GROUP_DIR}/dropit) then
+     setenv                    PATH             `${GROUP_DIR}/dropit ${STAR} -p ${PATH}`
+     setenv                    LD_LIBRARY_PATH  `${GROUP_DIR}/dropit ${STAR} -p ${LD_LIBRARY_PATH}`
+     if ($?SHLIB_PATH)  setenv SHLIB_PATh       `${GROUP_DIR}/dropit ${STAR} -p ${SHLIB_PATH}`
+     if ($?MAN_PATH)    setenv MAN_PATH         `${GROUP_DIR}/dropit ${STAR} -p ${MAN_PATH}`
+  endif
+endif
 if ( $?DECHO) echo "$self :: Executing STAR_SYS"
 source ${GROUP_DIR}/STAR_SYS;#  echo "STAR_HOST_SYS = ${STAR_HOST_SYS}"
 
@@ -213,28 +229,28 @@ setenv STAR_VERSION ${STAR_LEVEL}
   if ( $?DECHO ) echo "$self :: Will test -r ${STAR_PATH}/${STAR_LEVEL}"
 
 
-if ( $?DECHO) echo "$self :: Setting STAF_VERSION"
+#if ( $?DECHO) echo "$self :: Setting STAF_VERSION"
+#
+#if ($?STAF_LEVEL == 0) then
+# if ( -r ${STAR_PATH}/StAF/${STAR_LEVEL}) then
+#    setenv STAF_LEVEL ${STAR_LEVEL}
+# else
+#    setenv STAF_LEVEL pro
+# endif
+#endif
 
-if ($?STAF_LEVEL == 0) then
- if ( -r ${STAR_PATH}/StAF/${STAR_LEVEL}) then
-    setenv STAF_LEVEL ${STAR_LEVEL}
- else
-    setenv STAF_LEVEL pro
- endif
-endif
-
-setenv STAF_VERSION ${STAF_LEVEL}
-if ($STAF_LEVEL  == "old" || $STAF_LEVEL  == "pro" || $STAF_LEVEL  == "new" || $STAF_LEVEL  == "dev" || $STAF_LEVEL  == ".dev") then
-  if( -r ${STAR_PATH}/StAF/${STAF_LEVEL}) then
-    set a = `ls -ld ${STAR_PATH}/StAF/${STAF_LEVEL}`
-    set b = `ls -ld ${STAR_PATH}/StAF/${STAF_LEVEL} | cut -f2 -d">"`
-    if ( "$a" != "$b") then
-	setenv STAF_VERSION $b
-    else
-	setenv STAF_VERSION ${STAF_LEVEL}
-    endif
-  endif
-endif
+#setenv STAF_VERSION ${STAF_LEVEL}
+#if ($STAF_LEVEL  == "old" || $STAF_LEVEL  == "pro" || $STAF_LEVEL  == "new" || $STAF_LEVEL  == "dev" || $STAF_LEVEL  == ".dev") then
+#  if( -r ${STAR_PATH}/StAF/${STAF_LEVEL}) then
+#    set a = `ls -ld ${STAR_PATH}/StAF/${STAF_LEVEL}`
+#    set b = `ls -ld ${STAR_PATH}/StAF/${STAF_LEVEL} | cut -f2 -d">"`
+#    if ( "$a" != "$b") then
+#	setenv STAF_VERSION $b
+#    else
+#	setenv STAF_VERSION ${STAF_LEVEL}
+#    endif
+#  endif
+#endif
 
 #+
 # use alternate gcc installations
@@ -242,121 +258,42 @@ endif
 # command 'gcc'
 #-
 if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH ""
-if ( $?USE_GCC_DIR ) then
-    if ( -x $USE_GCC_DIR/bin/gcc && -d $USE_GCC_DIR/lib ) then
-        # do not redefine it if already done to avoid having
-	# a messed up path and ldpath
-        if ( ! $?ALT_GCC ) then
-            setenv ALT_GCC $USE_GCC_DIR
-	
-            set path=($USE_GCC_DIR/bin $path)
-	    if ( $?LD_LIBRARY_PATH ) then
-	        setenv LD_LIBRARY_PATH $USE_GCC_DIR/lib:${LD_LIBRARY_PATH}
-	    else
-	        setenv LD_LIBRARY_PATH $USE_GCC_DIR/lib
-	    endif
-	endif
-    endif
-endif
-
-
-
-# Clear this out. First block STAF, second STAR
-#if ( $?DECHO) echo "$self :: Executing STAR_SYS"
-#source ${GROUP_DIR}/STAR_SYS;
-
-#
-# The above logic forces the creation of "a" compiler
-# specific path prior to setting up $OPTSTAR1 . This was
-# made on purpose so the environment would revert to a
-# default $OPTSTAR in case things are not quite in place.
-#
-
-# There is a second chance to define XOPTSTAR
-#if ( $?DECHO) echo "$self :: Checking  XOPTSTAR "
-#if ( ! $?XOPTSTAR ) then
-#    if ( -r ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS} ) then
-#	setenv XOPTSTAR ${AFS_RHIC}/star/packages/.DEV2/misc/opt/star/${STAR_HOST_SYS}
-#    if ( -r ${AFS_RHIC}/${STAR_SYS}/opt/star ) then
-#       setenv XOPTSTAR ${AFS_RHIC}/${STAR_SYS}/opt/star
-#    else
-#	# well, as good as anything else (we cannot find a
-#	# global reference)
-#	setenv XOPTSTAR $OPTSTAR
-#    endif
-#endif
-
 if ( $?OPTSTAR ) then
     if (!  $?optstar ) setenv  optstar  ${OPTSTAR}
-    if (! $?xoptstar ) setenv xoptstar ${XOPTSTAR}#
-#
-#    if ( -r ${OPTSTAR}/${STAR_HOST_SYS} ) then
-#	# Redhat > 7.3  transition ; adding one level
-#	setenv OPTSTAR    ${optstar}/${STAR_HOST_SYS}
-#    endif
-#    if ( -r ${xoptstar}/${STAR_HOST_SYS} ) then
-#	setenv XOPTSTAR  ${xoptstar}/${STAR_HOST_SYS}
-#    endif
+    if (! $?xoptstar ) setenv xoptstar ${XOPTSTAR}
 endif
-
-
-# Display the messages here now
-#if (  $?OPTSTAR ) then
-#    if ($ECHO) echo   "Setting up OPTSTAR   = ${OPTSTAR}"
-#else
-#    # nothing found, so set it to nothing and the login
-#    # will be able to proceed (at least, repair will be
-#    # possible)...
-#    setenv OPTSTAR
-#
-#endif
-#if (  $XOPTSTAR == "/dev/null" ) then
-#    if ($ECHO) echo   "WARNING : XOPTSTAR points to /dev/null (no AFS area for it)"
-#else
-#    if ($ECHO) echo   "Setting up XOPTSTAR  = ${XOPTSTAR}"
-#endif
-
 
 
 
 if (! $?ROOT_VERSION) setenv ROOT_VERSION ""
-# STAF
-setenv STAF ${STAR_PATH}/StAF/${STAF_VERSION} ;   if ($ECHO) echo   "Setting up STAF      = ${STAF}"
-setenv STAF_LIB  $STAF/.${STAR_HOST_SYS}/lib  ;   if ($ECHO) echo   "Setting up STAF_LIB  = ${STAF_LIB}"
-setenv STAF_BIN  $STAF/.${STAR_HOST_SYS}/bin  ;   if ($ECHO) echo   "Setting up STAF_BIN  = ${STAF_BIN}"
 # STAR
 setenv STAR      ${STAR_PATH}/${STAR_VERSION}   ;   if ($ECHO) echo   "Setting up STAR      = ${STAR}"
-if (! $?NODEBUG) then
-setenv STAR_LIB  ${STAR}/.${STAR_HOST_SYS}/lib${ROOT_VERSION}  ;   if ($ECHO) echo   "Setting up STAR_LIB  = ${STAR_LIB}"
-setenv STAR_OBJ  ${STAR}/.${STAR_HOST_SYS}/obj${ROOT_VERSION}  ;   if ($ECHO) echo   "Setting up STAR_OBJ  = ${STAR_OBJ}"
-setenv STAR_BIN  ${STAR}/.${STAR_HOST_SYS}/bin${ROOT_VERSION}  ;   if ($ECHO) echo   "Setting up STAR_BIN  = ${STAR_BIN}"
+if ($?STAR_NEW_ENVIRONMENT) then
+    setenv MINE_LIB        .${STAR_HOST_SYS_OPT}/lib
+    setenv MINE_BIN        .${STAR_HOST_SYS_OPT}/bin
+    setenv MINE_OBJ        .${STAR_HOST_SYS_OPT}/obj
+    setenv MINE_INCLUDE    .${STAR_HOST_SYS_OPT}/include
 else
-setenv STAR_LIB  ${STAR}/.${STAR_HOST_SYS}/LIB${ROOT_VERSION}  ;   if ($ECHO) echo   "Setting up STAR_LIB  = ${STAR_LIB}"
-setenv STAR_OBJ  ${STAR}/.${STAR_HOST_SYS}/OBJ${ROOT_VERSION}  ;   if ($ECHO) echo   "Setting up STAR_OBJ  = ${STAR_OBJ}"
-setenv STAR_BIN  ${STAR}/.${STAR_HOST_SYS}/BIN${ROOT_VERSION}  ;   if ($ECHO) echo   "Setting up STAR_BIN  = ${STAR_BIN}"
+    setenv MINE_INCLUDE    .${STAR_HOST_SYS}/include
+    if (! $?NODEBUG) then
+	setenv MINE_LIB         .${STAR_HOST_SYS}/lib${ROOT_VERSION}
+	setenv MINE_BIN         .${STAR_HOST_SYS}/bin${ROOT_VERSION}
+	setenv MINE_OBJ         .${STAR_HOST_SYS}/obj${ROOT_VERSION}
+    else
+	setenv MINE_LIB         .${STAR_HOST_SYS}/LIB${ROOT_VERSION}
+	setenv MINE_BIN         .${STAR_HOST_SYS}/BIN${ROOT_VERSION}
+	setenv MINE_OBJ         .${STAR_HOST_SYS}/OBJ${ROOT_VERSION}
+    endif
 endif
+setenv STAR_LIB      ${STAR}/${MINE_LIB} ;     
+setenv STAR_OBJ      ${STAR}/${MINE_OBJ} ;     
+setenv STAR_BIN      ${STAR}/${MINE_BIN} ;     
+setenv STAR_INCLUDE  ${STAR}/${MINE_INCLUDE} ; 
 setenv GARFIELD_HOME ${STAR}/garfield
 setenv HEED_DATABASE ${GARFIELD_HOME}/Heed/heed++/database
 
-                                                  if ($ECHO) echo   "Setting up STAR_LIB  = ${STAR_LIB}"
-setenv MINE_LIB        .${STAR_HOST_SYS}/lib${ROOT_VERSION}
-setenv MY_BIN          .${STAR_HOST_SYS}/bin${ROOT_VERSION}
+if ($ECHO) echo   "Setting up STAR_LIB  = ${STAR_LIB}"
 setenv G3SYS           ${STAR}/StarVMC/geant3
-
-
-# YP fix
-#if( ! $?DOMAINNAME) then
-#    if ( -x "domainname" ) then
-#	setenv DOMAINNAME `domainname`
-#    elsecd
-#	setenv DOMAINNAME "(none)"
-#    endif
-#    setenv DOMAINNAME `hostname -d`
-#    # Fake it
-#    if ( "$DOMAINNAME" == "(none)") then
-#       setenv DOMAINNAME `hostname | sed 's/^[^\.]*\.//'`
-#    endif
-#endif
 if( ! $?DOMAINNAME) then
   setenv DOMAINNAME `hostname -d`
 endif
@@ -436,54 +373,6 @@ if ( $?SITE ) then
 endif
 
 
-
-# Options my alter *_BIN and/or add *_lib. All options should
-# be treated here. Defaults hould be preserved above.
-if ($?INSURE) then
-  # Do it conditional because this is a late addition.
-  # The directory structure may not exist for all library version.
-  if( -r ${STAR}/.${STAR_HOST_SYS}/ILIB${ROOT_VERSION}) then
-   if (-f $GROUP_DIR/parasoftenv.csh) then
-     source $GROUP_DIR/parasoftenv.csh
-     setenv STAR_lib  ${STAR}/.${STAR_HOST_SYS}/ILIB${ROOT_VERSION} ;  if ($ECHO) echo   "Setting up STAR_lib  = ${STAR_lib}"
-     setenv MINE_lib        .${STAR_HOST_SYS}/ILIB${ROOT_VERSION}
-     setenv STAR_BIN  ${STAR}/.${STAR_HOST_SYS}/IBIN${ROOT_VERSION}
-     setenv MY_BIN          .${STAR_HOST_SYS}/IBIN${ROOT_VERSION}
-   else
-     if ($ECHO) echo "Setting up STAR_lib  = Insure not found (not set)"
-   endif
-  else
-   if ($ECHO) echo  "Setting up STAR_lib  = Cannot Set (missing tree)"
-  endif
-
-else if ($?GPROF) then
-  setenv STAR_lib  ${STAR}/.${STAR_HOST_SYS}/GLIB${ROOT_VERSION} ;  if ($ECHO) echo   "Setting up STAR_lib  = ${STAR_lib}"
-  setenv MINE_lib        .${STAR_HOST_SYS}/GLIB${ROOT_VERSION}
-  setenv STAR_BIN  ${STAR}/.${STAR_HOST_SYS}/GBIN${ROOT_VERSION}
-  setenv MY_BIN          .${STAR_HOST_SYS}/GBIN${ROOT_VERSION}
-
-else if ($?NODEBUG) then
-    setenv OVersion ""
-    echo $NODEBUG | grep -i o3 
-    if (! $?) then 
-      setenv OVersion "3"
-      setenv DEBUG_OPTIONS "-O3 -g"
-    endif
-  setenv STAR_lib  ${STAR}/.${STAR_HOST_SYS}/LIB${ROOT_VERSION}${OVersion} ;  if ($ECHO) echo   "Setting up STAR_lib  = ${STAR_lib}"
-  setenv MINE_lib        .${STAR_HOST_SYS}/LIB${ROOT_VERSION}${OVersion} 
-  setenv STAR_BIN  ${STAR}/.${STAR_HOST_SYS}/BIN${ROOT_VERSION}${OVersion} 
-  setenv MY_BIN          .${STAR_HOST_SYS}/BIN${ROOT_VERSION}${OVersion} 
-  setenv STAR_OBJ  ${STAR}/.${STAR_HOST_SYS}/OBJ${ROOT_VERSION}${OVersion} 
-  setenv MY_OBJ          .${STAR_HOST_SYS}/OBJ${ROOT_VERSION}${OVersion} 
-
-else
-  if ( ${STAR_LEVEL} != "cal" ) then
-    if ($?DECHO)    echo   "$self :: unseting STAR_lib and MINE_lib for Level=[${STAR_LEVEL}]"
-    if ($?STAR_lib) unsetenv STAR_lib
-    if ($?MINE_lib) unsetenv MINE_lib
-  endif
-endif
-
 if ($ECHO)    echo   "Setting up STAR_BIN  = ${STAR_BIN}"
 
 # Common stuff
@@ -559,11 +448,11 @@ endif
 
 if ( $?DECHO ) echo "$self :: Paths alteration for STAR_MGR, STAR_SCRIPTS STAR_CGI etc ... begins"
 if ( -x ${GROUP_DIR}/dropit) then
-    setenv GROUPPATH `${GROUP_DIR}/dropit -p ${GROUP_DIR} -p mgr -p ${STAR_MGR}  -p mgr/bin -p ${STAR_MGR}/bin -p ${STAR_SCRIPTS} -p ${STAR_CGI} -p ${MY_BIN} -p ${STAR_BIN} -p ${STAF}/mgr -p ${STAF_BIN}`
+    setenv GROUPPATH `${GROUP_DIR}/dropit -p ${GROUP_DIR} -p mgr -p ${STAR_MGR}  -p mgr/bin -p ${STAR_MGR}/bin -p ${STAR_SCRIPTS} -p ${STAR_CGI} -p ${MINE_BIN} -p ${STAR_BIN}` # -p ${STAF}/mgr -p ${STAF_BIN}`
     setenv PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/bin -p ${OPTSTAR}/bin -p $PATH`
     setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${XOPTSTAR}/lib -p ${OPTSTAR}/lib -p $LD_LIBRARY_PATH`
 else
-    setenv GROUPPATH ${GROUP_DIR}:mgr:${STAR_MGR}:mgr/bin:${STAR_MGR}/bin:${STAR_SCRIPTS}:${STAR_CGI}:${MY_BIN}:${STAR_BIN}:${STAF}/mgr:${STAF_BINn}
+    setenv GROUPPATH ${GROUP_DIR}:mgr:${STAR_MGR}:mgr/bin:${STAR_MGR}/bin:${STAR_SCRIPTS}:${STAR_CGI}:${MINE_BIN}:${STAR_BIN} #:${STAF}/mgr:${STAF_BIN}
     setenv PATH  ${XOPTSTAR}/bin:${OPTSTAR}/bin:$PATH
     setenv LD_LIBRARY_PATH ${XOPTSTAR}/lib:${OPTSTAR}/lib:${LD_LIBRARY_PATH}
 endif
@@ -636,11 +525,11 @@ switch (${STAR_SYS})
       if ($?SHLIB_PATH == 0) setenv SHLIB_PATH
       if ( -x ${GROUP_DIR}/dropit) setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${SHLIB_PATH} ${STAR_PATH}`
       if ($?MINE_lib == 1 && $?STAR_lib == 1) then
-        setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${MINE_lib} -p ${MINE_LIB} -p ${STAR_lib} -p ${STAR_LIB} -p ${STAF_LIB} -p ${SHLIB_PATH}`
+        setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${MINE_lib} -p ${MINE_LIB} -p ${STAR_lib} -p ${STAR_LIB} -p ${SHLIB_PATH}` #  -p ${STAF_LIB}
       else
 	if ( -x ${GROUP_DIR}/dropit) setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${SHLIB_PATH} .${STAR_HOST_SYS}/LIB`
 ##VP         setenv SHLIB_PATH ${MINE_LIB}:${STAR_LIB}:${STAF_LIB}:${SHLIB_PATH}
-        setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${MINE_LIB} -p ${STAR_LIB} -p ${STAF_LIB} -p ${SHLIB_PATH}`
+        setenv SHLIB_PATH `${GROUP_DIR}/dropit -p ${MINE_LIB} -p ${STAR_LIB} -p ${SHLIB_PATH}` #  -p ${STAF_LIB}
       endif
       setenv LD_LIBRARY_PATH ${SHLIB_PATH}
       setenv BFARCH hp_ux102
@@ -680,11 +569,7 @@ switch (${STAR_SYS})
 	setenv PATH `${GROUP_DIR}/dropit -p $SUNOPT/$SUNWS/bin -p ${PATH}`
 	setenv MANPATH `${GROUP_DIR}/dropit -p $SUNOPT/$SUNWS/man -p ${MANPATH}`
 
-	if ($?MINE_lib == 1 && $?STAR_lib == 1 ) then
-	    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${MINE_lib} -p ${MINE_LIB} -p ${STAR_lib} -p ${STAR_LIB} -p ${STAF_LIB} -p ${LD_LIBRARY_PATH}`
-        else
-	    setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${MINE_LIB} -p ${STAR_LIB} -p ${STAF_LIB} -p ${LD_LIBRARY_PATH}`
-        endif
+	setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${MINE_LIB} -p ${STAR_LIB} -p ${LD_LIBRARY_PATH}` # -p ${STAF_LIB} 
       endif
 
       setenv  BFARCH SunOS5
@@ -739,15 +624,9 @@ switch (${STAR_SYS})
 
 
       # Final path adjustement
-      if ($?MINE_lib == 1 && $?STAR_lib == 1) then
-        if ( -x ${GROUP_DIR}/dropit) then
-          setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${MINE_lib} -p ${MINE_LIB} -p ${STAR_lib} -p ${STAR_LIB} -p ${STAF_LIB} -p ${LD_LIBRARY_PATH}`
-        endif
-      else
-       if ( -x ${GROUP_DIR}/dropit) then 
-         setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH} -p .${STAR_HOST_SYS}/LIB`
-         setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${MINE_LIB} -p ${STAR_LIB} -p ${STAF_LIB} -p ${LD_LIBRARY_PATH}`
-       endif
+      if ( -x ${GROUP_DIR}/dropit) then 
+#        setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${LD_LIBRARY_PATH}` # -p .${STAR_HOST_SYS}/LIB`
+        setenv LD_LIBRARY_PATH `${GROUP_DIR}/dropit -p ${MINE_LIB} -p ${STAR_LIB} -p ${LD_LIBRARY_PATH}` # -p ${STAF_LIB}
       endif
       if ( $?DECHO ) echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
       #  cygwin tcsh has no 'limit' command embedded

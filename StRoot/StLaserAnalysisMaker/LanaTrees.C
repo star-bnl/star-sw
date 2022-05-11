@@ -606,4 +606,34 @@ _file1->cd();
 RunNT->Draw("dvAll:utime-788936400>>WO16","ok==1","same");
 l->AddEntry(WO16,"Withot Sector 16");
 l->Draw();
- */
+
+Run XXII
+ root.exe 2022*.root 
+
+TCanvas *c1 = new TCanvas("c1","c1");
+TH1* frame = c1->DrawFrame(845e6,5.3,862e6,5.6);
+frame->SetTitle("Tpc drift verlocity versus date");
+.x DrawTime.C(frame)
+TLegend *l = new TLegend(0.7,0.3,0.8,0.4)
+TSeqCollection *files = gROOT->GetListOfFiles();
+  TIter  next(files);
+ TFile *f = 0;  
+ Int_t color = 0;
+ while ((f = (TFile *) next())) {
+   TString name(gSystem->BaseName(f->GetName()));
+   name.ReplaceAll(".root","");
+   name.Prepend("L");
+   color++;
+   TNtuple *RunNT = (TNtuple*) f->Get("RunNT");
+   if (! RunNT) continue;
+   RunNT->SetMarkerColor(color);
+   RunNT->Draw(Form("dvAll:utime-788936400>>%s",name.Data()),"ok==1","same");
+   TH1 *hist = (TH1 *) f->Get(name):
+   l->AddEntry(hist,name);
+}
+
+
+
+RunNT->SetMarkerColor(1);
+
+*/

@@ -24,7 +24,7 @@ class SvtMatchedTree : public StMaker {
   EventT  *fEvent;
   Int_t    fMinNoHits;
   Double_t fpCut;
-  Char_t  *fOut;
+  const Char_t  *fOut;
   ClassDef(SvtMatchedTree,1)
 };
 #endif
