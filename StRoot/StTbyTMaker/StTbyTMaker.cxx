@@ -1,7 +1,7 @@
 //
 // $Id: StTbyTMaker.cxx,v 1.4 2013/01/16 21:56:45 fisyak Exp $
 //
-//#define __HIT_MATCH__
+#define __HIT_MATCH__
 #include <iostream>
 #include <algorithm>
 #include <set>
