@@ -7,7 +7,7 @@ const char* path[] = {
 "-I StRoot",
 "-I StarVMC",
 "-I ${STAR}",
-"-I ${STAR}/.${STAR_HOST_SYS}/include",
+"-I ${STAR}/.${STARSYS}/include",
 "-I ${STAR}/StRoot",
 "-I ${STAR}/StarVMC",
 "-I ${STAR}/StarEtc",
