@@ -1,6 +1,6 @@
 ARG starenv=root5
 
-FROM ghcr.io/star-bnl/star-spack:v0.1.3-${starenv}
+FROM ghcr.io/star-bnl/star-spack:v0.1.4-${starenv}
 
 ENV NODEBUG=yes
 ENV STAR=/star-sw
@@ -15,7 +15,7 @@ COPY . /star-sw
 
 RUN cd /star-sw \
  && source /etc/profile \
- && module load vc_-0.7.4 \
+ && module load vc-0.7.4 \
  && MYSQL=$(dirname $(mysql_config --variable=pkgincludedir)) \
     LIBXML2_DIR=$(xml2-config --prefix) \
     GSL_DIR=$(gsl-config --prefix) \
