@@ -294,6 +294,41 @@ MakeChairInstance2(tpcCorrection,St_TpcZCorrectionCC,Calibrations/tpc/TpcZCorrec
 MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorrectionB);
 #include "St_tpcPressureBC.h"
 MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB);
+#include "St_TpcdEdxModelC.h"
+MakeChairInstance2(tpcCorrection,St_TpcdEdxModelC,Calibrations/tpc/TpcdEdxModel);
+TF1 *St_TpcdEdxModelC::fProb = 0;
+//________________________________________________________________________________
+Double_t St_TpcdEdxModelC::MostProbablenE(Double_t nP) {
+  // Most probable no. of conducting electons (ne) versus no. of primary clusters
+  if (nP <= 1.0) return 0;
+  Double_t X = TMath::Log(nP);
+  Double_t mu = instance()->CalcCorrection(0, X);
+  return nP*TMath::Exp(TMath::Exp(mu));
+}
+//________________________________________________________________________________
+Double_t St_TpcdEdxModelC::funcProb(Double_t *x, Double_t *p) {
+  Double_t de = x[0];
+  Double_t nP = p[0];
+  Double_t ne = nE(de);
+  if (nP < 1 || ne < nP) return 0;
+  Double_t X = TMath::Log(nP);
+  Double_t Y = TMath::Log(ne/nP);
+  if (Y <= 0.0) return 0;
+  Double_t Z = TMath::Log(Y);
+  Double_t mu    = instance()->CalcCorrection(0, X);
+  Double_t sigma = instance()->CalcCorrection(1, X);
+  return TMath::Gaus(Z, mu, sigma, kTRUE);
+}
+//________________________________________________________________________________
+TF1 *St_TpcdEdxModelC::Prob() {
+  if (! fProb) {
+    fProb = new TF1("St_TpcdEdxModelC::Prob",St_TpcdEdxModelC::funcProb,0.0, 100e-6, 1);
+    fProb->SetParName(0,"nP");
+    fProb->SetParameter(0,100.);
+  }
+  return fProb;
+}
+//________________________________________________________________________________
 #include "St_TpcPadPedRMSC.h"
 MakeChairInstance2(tpcCorrection,St_TpcPadPedRMSC,Calibrations/tpc/TpcPadPedRMS);
 #include "St_TpcEdgeC.h"
