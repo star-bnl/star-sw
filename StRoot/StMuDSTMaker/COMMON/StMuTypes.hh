@@ -44,3 +44,6 @@
 #include "StMuFttCollection.h"
 #include "StMuFttRawHit.h"
 #include "StMuFttUtil.h"
+#include "StMuFstCollection.h"
+#include "StMuFstHit.h"
+#include "StMuFstUtil.h"
