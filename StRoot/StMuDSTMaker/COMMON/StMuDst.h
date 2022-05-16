@@ -517,7 +517,7 @@ public:
   friend class StMuIOMaker;
 
   // Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDst,5)
+  ClassDef(StMuDst,6)
 };
 
 #endif

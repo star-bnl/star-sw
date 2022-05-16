@@ -399,7 +399,7 @@ virtual   void closeRead();
   //  StMuEpdHitCollection *mMuEpdHitCollection;   // MALisa
 
   // Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDstMaker, 8)
+  ClassDef(StMuDstMaker, 9)
 };
 
 inline StMuDst* StMuDstMaker::muDst() { return mStMuDst;}
