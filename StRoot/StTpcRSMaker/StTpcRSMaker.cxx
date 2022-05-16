@@ -840,6 +840,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       Int_t sIndex = sortedIndex;
       if (Debug() > 13) cout << "sortedIndex = " << sortedIndex << "\tno_tpc_hits = " << no_tpc_hits << endl;
       Int_t ID = 0;
+      Double_t pOld = 0;
+      Double_t zOld = -999;
       Int_t TrackDirection = 0; // 0 - increase no of row, 1 - decrease no of. row.
       for (nSegHits = 0, sIndex = sortedIndex;  
 	   sIndex < no_tpc_hits && nSegHits < NoMaxTrackSegmentHits; sIndex++) {
@@ -847,7 +849,18 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	g2t_tpc_hit_st *tpc_hitC = tpc_hit_begin + indx;
 	if ((tpc_hitC->volume_id%10000)/100 != sector) break;
 	if (ID > 0 && ID != tpc_hitC->track_p) break;
+	// separater delta electons 
+	Double_t pNew = TMath::Sqrt(tpc_hitC->p[0]*tpc_hitC->p[0] + tpc_hitC->p[1]*tpc_hitC->p[1] + tpc_hitC->p[2]*tpc_hitC->p[2]);
+	Double_t zNew = tpc_hitC->x[2];
+	if (pOld > 0) {
+	  Double_t rNewOld = pNew/pOld;
+	  if (rNewOld < 0.1 || rNewOld > 10) break;
+	  if (zOld > -999 && TMath::Abs(zNew - zOld) > 10) break;
+	}
+	pOld = pNew;
+	zOld = zNew;
 	ID = tpc_hitC->track_p;
+	
 	if (nSegHits == 1) { // No Loopers !
 	  if (TrackSegmentHits[nSegHits-1].tpc_hitC->volume_id%100 <= tpc_hitC->volume_id%100) {
 	    TrackDirection = 0;
