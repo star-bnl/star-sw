@@ -615,6 +615,8 @@ public:
   TClonesArray** fcsArrays;
   /// array of TClonesArrays for the stuff inherited from the Ftt
   TClonesArray** fttArrays;
+  /// array of TClonesArrays for the stuff inherited from the Fst 
+  TClonesArray** fstArrays;
   /// array of TClonesArrays for the stuff inherited from the Pmd 
   TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
@@ -641,6 +643,8 @@ public:
   StMuFcsCollection *mMuFcsCollection; 
   /// pointer to FttCollection (manages the FttArrays)
   StMuFttCollection *mMuFttCollection; 
+  /// pointer to FstCollection (manages the FstArrays)
+  StMuFstCollection *mMuFstCollection; 
   /// pointer to PmdCollection (manages the PmdArrays)
   StMuPmdCollection *mMuPmdCollection;
   /// pointer to EmcCollecion (for Emc clusterfinding etc)
@@ -802,6 +806,8 @@ public:
       static StMuFcsCollection* muFcsCollection();
   /// returns pointer to current StMuFttCollection
 	static StMuFttCollection* muFttCollection();
+  /// returns pointer to current StMuFstCollection
+	static StMuFstCollection* muFstCollection();
   /// returns pointer to current StMuPmdCollection
   static StMuPmdCollection* pmdCollection() ;
   /// returns pointer to current StEmcCollection
