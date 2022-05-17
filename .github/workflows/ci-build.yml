@@ -17,6 +17,7 @@ jobs:
       - name: Build with Docker
         uses: docker/build-push-action@v3
         with:
+          build-args: starenv=${{ matrix.starenv }}
           tags: ghcr.io/star-bnl/star-sw-${{ matrix.starenv }}-build
           outputs: type=docker,dest=/tmp/star-sw-${{ matrix.starenv }}-build.tar
 
