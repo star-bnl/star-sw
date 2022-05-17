@@ -69,11 +69,11 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: star-sw-root6-build
+          name: star-sw-root616-build
           path: /tmp
 
-      - run: docker load --input /tmp/star-sw-root6-build.tar
+      - run: docker load --input /tmp/star-sw-root616-build.tar
       - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:v2
       - run: |
-             TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-root6-build star-sw/tests/executest.py -c ${{ matrix.test_id }})
-             docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root6-build sh -c "MALLOC_CHECK_=3 $TEST_CMD || echo 'Failed with an exit code: '\$?"
+             TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-root616-build star-sw/tests/executest.py -c ${{ matrix.test_id }})
+             docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root616-build sh -c "MALLOC_CHECK_=3 $TEST_CMD || echo 'Failed with an exit code: '\$?"
