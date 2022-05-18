@@ -607,7 +607,7 @@ void StBemcTriggerSimu::FEEout() {
   
   if(!mEvent) {LOG_WARN << "StBemcTriggerSimu -- no StEvent!" << endm;}
   
-  StEmcCollection *emc = mEvent->emcCollection();
+  StEmcCollection *emc = (mEvent ? mEvent->emcCollection() : 0);
   if(!emc)    {LOG_WARN << "StBemcTriggerSimu -- no StEmcCollection!" << endm;}
   
   StEmcDetector* detector=emc->detector(kBarrelEmcTowerId);
@@ -1030,7 +1030,7 @@ void StBemcTriggerSimu::FEEout2009()
 {
   const bool debug = false;
 
-  StEmcCollection* emc = mEvent->emcCollection();
+  StEmcCollection* emc = (mEvent ? mEvent->emcCollection() : 0);
   if (!emc) {
     LOG_WARN << "No StEmcCollection" << endm;
     return;
