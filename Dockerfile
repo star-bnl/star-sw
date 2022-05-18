@@ -26,5 +26,5 @@ RUN cd /star-sw \
 RUN install /star-sw/StRoot/macros/.rootrc .
 
 RUN echo -e '#!/bin/bash --login\n set -e; eval "$@"' > entrypoint.sh && chmod 755 entrypoint.sh
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]
