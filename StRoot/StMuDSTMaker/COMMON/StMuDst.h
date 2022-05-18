@@ -43,6 +43,7 @@ class StMuEmcCollection;
 class StMuFmsCollection;
 class StMuFcsCollection;
 class StMuFttCollection;
+class StMuFstCollection;
 class StMuPmdCollection;
 
 class StEvent;
@@ -150,6 +151,7 @@ public:
 		    TClonesArray** fms_ptca=0, 
             TClonesArray** fcs_ptca=0, 
             TClonesArray** ftt_ptca=0, 
+            TClonesArray** fst_ptca=0, 
 		    TClonesArray** pmd_ptca=0, 
 		    TClonesArray** tof_ptca=0, 
 		    TClonesArray** btof_ptca=0,
@@ -168,6 +170,7 @@ public:
             StMuFcsCollection *fcs_col=0,
             StMuFttCollection *ftt_col=0,
 #endif /* __TFG__VERSION__ */
+            StMuFstCollection *fst_col=0, 
 		    TClonesArray *pmd_tca=0, 
 		    StMuPmdCollection *pmd_col=0
 );
@@ -272,6 +275,8 @@ public:
   static TClonesArray** fcsArrays;
   /// array of TClonesArrays for the stuff inherited from the Ftt
   static TClonesArray** fttArrays;
+  /// array of TClonesArrays for the stuff inherited from the Fst
+  static TClonesArray** fstArrays;
   /// array of TClonesArrays for the stuff inherited from the Pmd 
   static TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
@@ -298,6 +303,8 @@ public:
   static StMuFcsCollection *mMuFcsCollection; 
   /// pointer to FttCollection (manages the FttArrays)
   static StMuFttCollection *mMuFttCollection; 
+  /// pointer to FstCollection (manages the FstArrays)
+  static StMuFstCollection *mMuFstCollection; 
   /// pointer to PmdCollection (manages the PmdArrays)
   static StMuPmdCollection *mMuPmdCollection;
   /// pointer to EmcCollecion (for Emc clusterfinding etc)
@@ -335,6 +342,8 @@ public:
   static TClonesArray* fcsArray(int type) { return fcsArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the ftt arrays
   static TClonesArray* fttArray(int type) { return fttArrays[type]; }
+  /// returns pointer to the n-th TClonesArray from the fst arrays
+  static TClonesArray* fstArray(int type) { return fstArrays[type]; }
     /// returns pointer to the n-th TClonesArray from the pmd arrays
   static TClonesArray* pmdArray(int type) { return pmdArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the tof arrays
@@ -449,6 +458,8 @@ public:
   static StMuFcsCollection* muFcsCollection() { return mMuFcsCollection; }
   /// returns pointer to current StMuFttCollection
   static StMuFttCollection* muFttCollection() { return mMuFttCollection; }
+  /// returns pointer to current StMuFstCollection
+  static StMuFstCollection* muFstCollection() { return mMuFstCollection; }
   /// returns pointer to current StMuPmdCollection
   static StMuPmdCollection* pmdCollection() { if (mMuPmdCollectionArray)  return (StMuPmdCollection*) mMuPmdCollectionArray->UncheckedAt(0); else return mMuPmdCollection; }
   /// returns pointer to current StEmcCollection
@@ -604,6 +615,8 @@ public:
   TClonesArray** fcsArrays;
   /// array of TClonesArrays for the stuff inherited from the Ftt
   TClonesArray** fttArrays;
+  /// array of TClonesArrays for the stuff inherited from the Fst 
+  TClonesArray** fstArrays;
   /// array of TClonesArrays for the stuff inherited from the Pmd 
   TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
@@ -630,6 +643,8 @@ public:
   StMuFcsCollection *mMuFcsCollection; 
   /// pointer to FttCollection (manages the FttArrays)
   StMuFttCollection *mMuFttCollection; 
+  /// pointer to FstCollection (manages the FstArrays)
+  StMuFstCollection *mMuFstCollection; 
   /// pointer to PmdCollection (manages the PmdArrays)
   StMuPmdCollection *mMuPmdCollection;
   /// pointer to EmcCollecion (for Emc clusterfinding etc)
@@ -791,6 +806,8 @@ public:
       static StMuFcsCollection* muFcsCollection();
   /// returns pointer to current StMuFttCollection
 	static StMuFttCollection* muFttCollection();
+  /// returns pointer to current StMuFstCollection
+	static StMuFstCollection* muFstCollection();
   /// returns pointer to current StMuPmdCollection
   static StMuPmdCollection* pmdCollection() ;
   /// returns pointer to current StEmcCollection
@@ -948,7 +965,7 @@ public:
 
 #ifndef __TFG__VERSION__
   // Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDst,5)
+  ClassDef(StMuDst,6)
 #else /* __TFG__VERSION__ */
   // Maps
   Bool_t Accept(const StMuTrack *gTrack);
@@ -1038,7 +1055,7 @@ public:
   static void SetTpcVpdVzDiffCut(Float_t cut = 3) { instance()->mTpcVpdVzDiffCut = cut;}
   
   /// Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDst,6)
+  ClassDef(StMuDst,7)
 #endif /* __TFG__VERSION__ */
 };
 

@@ -79,6 +79,10 @@ class StMuFcsUtil;
 #include "StMuFttCollection.h"
 class StMuFttUtil;
 
+/// fst stuff
+#include "StMuFstCollection.h"
+class StMuFstUtil;
+
 #include "StMuEpdHitCollection.h" // MALisa
 class StMuEpdUtil;
 /// PMD by Supriya Das
@@ -203,6 +207,7 @@ class StMuDstMaker : public StIOInterFace {
   StMuFmsUtil* muFmsUtil() { return mFmsUtil; } ///< return pointer to StMuFmsUtil;
   StMuFcsUtil* muFcsUtil() { return mFcsUtil; } ///< return pointer to StMuFcsUtil;
   StMuFttUtil* muFttUtil() { return mFttUtil; } ///< return pointer to StMuFttUtil;
+  StMuFstUtil* muFstUtil() { return mFstUtil; } ///< return pointer to StMuFstUtil;
   StMuPmdUtil* muPmdUtil() { return mPmdUtil; } ///< return pointer to StMuPmdUtil;
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
@@ -219,6 +224,7 @@ protected:
   void connectFmsCollection();
   void connectFcsCollection();
   void connectFttCollection();
+  void connectFstCollection();
   void connectPmdCollection();
 #ifdef __TFG__VERSION__
  public:
@@ -248,6 +254,7 @@ protected:
   StMuFmsUtil* mFmsUtil;
   StMuFcsUtil* mFcsUtil;
   StMuFttUtil* mFttUtil;
+  StMuFstUtil* mFstUtil;
   StMuPmdUtil* mPmdUtil;
   StMuTofUtil* mTofUtil;
   /// dongx
@@ -326,6 +333,7 @@ virtual   void closeRead();
   void fillFms(StEvent* ev);
   void fillFcs(StEvent* ev);
   void fillFtt(StEvent* ev);
+  void fillFst(StEvent* ev);
 #ifndef __NO_STRANGE_MUDST__
   void fillStrange(StStrangeMuDstMaker*);
 #endif
@@ -399,6 +407,7 @@ virtual   void closeRead();
   TClonesArray** mFmsArrays;    //[__NFMSARRAYS__    ];
   TClonesArray** mFcsArrays;    //[__NFCSARRAYS__    ];
   TClonesArray** mFttArrays;    //[__NFTTARRAYS__    ];
+  TClonesArray** mFstArrays;    //[__NFSTARRAYS__    ];
   TClonesArray** mPmdArrays;    //[__NPMDARRAYS__    ];
   TClonesArray** mTofArrays;    //[__NTOFARRAYS__    ];
   /// dongx
@@ -415,6 +424,7 @@ virtual   void closeRead();
   StMuFmsCollection *mFmsCollection;
   StMuFcsCollection *mFcsCollection;
   StMuFttCollection *mFttCollection;
+  StMuFstCollection *mFstCollection;
   TClonesArray*  mPmdCollectionArray; // Needed to hold old format
   StMuPmdCollection *mPmdCollection;
 #ifdef __TFG__VERSION__
@@ -423,7 +433,7 @@ virtual   void closeRead();
   //  StMuEpdHitCollection *mMuEpdHitCollection;   // MALisa
 
   // Increment this by 1 every time the class structure is changed
-  ClassDef(StMuDstMaker, 8)
+  ClassDef(StMuDstMaker, 9)
 };
 
 inline StMuDst* StMuDstMaker::muDst() { return mStMuDst;}
