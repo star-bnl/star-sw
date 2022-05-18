@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:latest
+
 ARG starenv=root5
 
 FROM ghcr.io/star-bnl/star-spack:v0.1.4-${starenv}
@@ -11,20 +13,25 @@ ENV PATH=$STAR_BIN:$STAR/mgr:$PATH
 ENV LD_LIBRARY_PATH=$STAR_LIB:$LD_LIBRARY_PATH
 ENV ROOT_INCLUDE_PATH=$STAR/.${STAR_HOST_SYS}/include
 
-COPY . /star-sw
+WORKDIR ${STAR}
+COPY . ${STAR}
 
-RUN cd /star-sw \
- && source /etc/profile \
- && module load vc-0.7.4 \
+SHELL ["/bin/bash", "-l", "-c"]
+
+RUN module load vc-0.7.4 \
  && MYSQL=$(dirname $(mysql_config --variable=pkgincludedir)) \
     LIBXML2_DIR=$(xml2-config --prefix) \
     GSL_DIR=$(gsl-config --prefix) \
     FASTJET_DIR=$(fastjet-config --prefix) \
     cons \
- && find /star-sw/.$STAR_HOST_SYS -name *.o -exec rm '{}' \;
+ && find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 
-RUN install /star-sw/StRoot/macros/.rootrc .
+COPY --chmod=0755 <<-"EOF" /opt/entrypoint.sh
+	#!/bin/bash -l
+	set -e
+	install $STAR/StRoot/macros/.rootrc .
+	exec "$@"
+EOF
 
-RUN echo -e '#!/bin/bash --login\n set -e; eval "$@"' > entrypoint.sh && chmod 755 entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/opt/entrypoint.sh"]
 CMD ["/bin/bash"]
