@@ -297,34 +297,52 @@ MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB)
 #include "St_TpcdEdxModelC.h"
 MakeChairInstance2(tpcCorrection,St_TpcdEdxModelC,Calibrations/tpc/TpcdEdxModel);
 TF1 *St_TpcdEdxModelC::fProb = 0;
+#if 0
 //________________________________________________________________________________
-Double_t St_TpcdEdxModelC::MostProbablenE(Double_t nP) {
+Double_t St_TpcdEdxModelC::MostProbablenN(Double_t N) {
   // Most probable no. of conducting electons (ne) versus no. of primary clusters
-  if (nP <= 1.0) return 0;
-  Double_t X = TMath::Log(nP);
+  if (N <= 1.0) return 0;
+  Double_t X = TMath::Log(N);
   Double_t mu = instance()->CalcCorrection(0, X);
-  return nP*TMath::Exp(TMath::Exp(mu));
+  return N*TMath::Exp(TMath::Exp(mu));
 }
+#endif
 //________________________________________________________________________________
 Double_t St_TpcdEdxModelC::funcProb(Double_t *x, Double_t *p) {
-  Double_t de = x[0];
-  Double_t nP = p[0];
-  Double_t ne = nE(de);
-  if (nP < 1 || ne < nP) return 0;
-  Double_t X = TMath::Log(nP);
-  Double_t Y = TMath::Log(ne/nP);
+  Double_t e = x[0]; // deposited energy (GeV)
+  Double_t P = p[0]; // no. of primary clusters
+  Double_t ne = n(e);// no. of connduction electrons
+  if (P < 1 || ne < P) return 0;
+  Double_t X = TMath::Log(P);
+  Double_t Y = TMath::Log(ne/P);
   if (Y <= 0.0) return 0;
+  /*
+    dNde  = dnde * dNdn 
+    =       dnde * dNdY                      * dYdn  
+    =       dnde * dNdZ                      * dZdY         * dYdn 
+    =       dnde * Gaus(Z, mu, sigma, kTRUE) * 1/Y          * 1/n // ne == n
+    =       dnde * Gaus(Z, mu, sigma, kTRUE) * 1/log(n/P)   * 1/n // ne == n
+    dNdn  =        Gaus(Z, mu, sigma, kTRUE) * 1/log(n/P)   * 1/n // ne == n
+    d(dNdn)/dn = 0 = dNdn*[(-(Z-mu)/sigma**2)*dZ/dn - 1/(n*log(n/P)) 
+   */
   Double_t Z = TMath::Log(Y);
   Double_t mu    = instance()->CalcCorrection(0, X);
   Double_t sigma = instance()->CalcCorrection(1, X);
-  return TMath::Gaus(Z, mu, sigma, kTRUE);
+  Double_t dNdZ = TMath::Gaus(Z, mu, sigma, kTRUE);
+  Double_t dZdY = 1./Y;
+  Double_t dNdY = dNdZ * dZdY;
+  Double_t dYdn = 1./ne;
+  Double_t dNdn = dNdY * dYdn;
+  Double_t dnde = E(1.);
+  Double_t dNde  = dnde * dNdn;
+  return dNde;
 }
 //________________________________________________________________________________
 TF1 *St_TpcdEdxModelC::Prob() {
   if (! fProb) {
-    fProb = new TF1("St_TpcdEdxModelC::Prob",St_TpcdEdxModelC::funcProb,0.0, 100e-6, 1);
-    fProb->SetParName(0,"nP");
-    fProb->SetParameter(0,100.);
+    fProb = new TF1("St_TpcdEdxModelC::Prob",St_TpcdEdxModelC::funcProb,0.0, 20e-6, 1);
+    fProb->SetParName(0,"N");
+    fProb->SetParameter(0,29.7); // MIP
   }
   return fProb;
 }
