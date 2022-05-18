@@ -695,6 +695,11 @@ StThreeVectorD StFcsDb::getStarXYZ(StFcsHit* hit, float FcsZ) const{
     return getStarXYZ(hit->detectorId(),hit->id(),FcsZ);
 }
 
+//! get coordinates of the cluster STAR frame from StFcsCluster
+StThreeVectorD StFcsDb::getStarXYZ(StFcsCluster* clu, float FcsZ) const{ 
+    return getStarXYZfromColumnRow(clu->detectorId(),clu->x(),clu->y(),FcsZ);
+}
+
 //! get coordinates of center of the cell in STAR frame from det/id
 StThreeVectorD StFcsDb::getStarXYZ(int det, int id, float FcsZ) const{ 
     return getStarXYZ(det,getColumnNumber(det,id),getRowNumber(det,id),FcsZ);   
