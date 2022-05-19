@@ -30,12 +30,19 @@
  *
  ***************************************************************************/
 #include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <string>
 
 #include "TGeoManager.h"
+#include "TGeoNavigator.h"
 #include "TGeoVolume.h" 
 #include "TGeoPhysicalNode.h"
 #include "TGeoMatrix.h"
 #include "TGeoBBox.h"
+#include "TRotation.h"
+#include "TMath.h"
+#include "TFile.h"
 
 #include "StETofUtil/StETofGeometry.h"
 #include "StMessMgr.h"
@@ -60,16 +67,7 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode )
 {
 
     mGeoMatrix = static_cast< TGeoHMatrix* > ( gpNode.GetMatrix() );
-    /*
-    double* trans  = mGeoMatrix->GetTranslation();
-    double* rot    = mGeoMatrix->GetRotationMatrix();
 
-    LOG_INFO << trans[0] << "  " << trans[1] << "  " << trans[2] << endm;
-    
-    LOG_INFO << rot[0] << "  " << rot[1] << "  " << rot[2] << endm;
-    LOG_INFO << rot[3] << "  " << rot[4] << "  " << rot[5] << endm;
-    LOG_INFO << rot[6] << "  " << rot[7] << "  " << rot[8] << endm;
-    */
     mBox = static_cast< TGeoBBox* > ( gpNode.GetShape() );
 
     buildMembers();
@@ -95,11 +93,53 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const f
 
     // resize mBox with dx and dy
     float dz = mBox->GetDZ();
-    mBox->SetBoxDimensions( dx, dy, dz );
+    mBox->SetBoxDimensions( dx, dy, dz ); 
 
     buildMembers();
 }
 
+StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const StThreeVectorD alignment )
+: mSafetyMarginX( 0. ),
+  mSafetyMarginY( 0. ), 
+  mDebug( false )
+{
+
+    mGeoMatrix = static_cast< TGeoHMatrix* > ( gpNode.GetMatrix() );
+
+    mBox = static_cast< TGeoBBox* > ( gpNode.GetShape() );
+
+
+
+    // resize mBox with dx and dy
+    float dz = mBox->GetDZ();
+    mBox->SetBoxDimensions( dx, dy, dz ); 
+
+    //  modified  buildMembers() method. PW;
+    // build member variables: mMinEta, mMaxEta, mMinPhi, mMaxPhi, mCenter, mNormal 
+    double xl[3] = { -alignment.x(), -alignment.y(), -alignment.z() };
+//z alignment is positive to reflect the correct direction in which z has to be moved in global coordinates. x and y are negative to match the numbers from hit-intersection 
+    double xm[3];
+    local2Master( xl, xm );
+    mCenter = StThreeVectorD( xm[ 0 ], xm[ 1 ], xm[ 2 ] );
+	 mGeoMatrix->SetDx(xm[ 0 ]);
+	 mGeoMatrix->SetDy(xm[ 1 ]);
+	 mGeoMatrix->SetDz(xm[ 2 ]);
+	//correct counter rotation is implemented in .XML	
+
+    LOG_DEBUG << "StETofNode::Created physical node at: "<< xm[ 0 ]<<","<< xm[ 1 ]<<"," << xm[ 2 ]<<" with alignments: "<< alignment.x()<<","<< alignment.y()<<"," << alignment.z()<< endm;//debug PW.
+
+    mNormal = calcXYPlaneNormal();
+
+    mEtaMin = calcEta( -1. );
+    mEtaMax = calcEta(  1. );
+
+    mPhiMin = calcPhi( -1, -1. );
+    mPhiMax = calcPhi( -1,  1. );
+
+    if( mDebug ) print();
+
+//    buildMembers();
+}
 
 void
 StETofNode::convertPos( StETofNode* from, const double* pos_from, StETofNode* to, double* pos_to )
@@ -135,7 +175,7 @@ StThreeVectorD
 StETofNode::calcCenterPos()
 {
     // calculate center position of the node in global coordinates
-    double xl[3] = { 0, 0, 0 };
+    double xl[3] = { 0, 0, 0 }; //can change centers here, but might not change actual box dimensions
     double xm[3];
 
     local2Master( xl, xm );
@@ -150,7 +190,7 @@ StETofNode::calcXYPlaneNormal()
     // calculate the normal vector to the local XY-plane
     // i.e. the global representation of the local unit vector (0,0,1)
 
-    double xl[ 3 ] = { 0, 0, 1 };
+    double xl[ 3 ] = { 0, 0, 1 }; //change to x = 0.0227. PW.
     double xm[ 3 ];
 
     // transform to global coordinates
@@ -317,7 +357,7 @@ StETofNode::helixCross( const StPicoHelix& helix, double& pathLength, TVector3& 
     // find intersection between helix & the node's XY-plane
     TVector3 center( mCenter.x(), mCenter.y(), mCenter.z() );
     TVector3 normal( mNormal.x(), mNormal.y(), mNormal.z() );
-    pathLength = helix.pathLength( center, normal );
+    pathLength = helix.pathLength( center, normal ); //pathlength at the crossing with counter plane defined by counter center and normal vector
 
     if( pathLength > 0 && pathLength < maxPathLength ) {
         cross = helix.at( pathLength );
@@ -389,6 +429,16 @@ void
 StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins )
 {
     StETofGeomCounter* counter = new StETofGeomCounter( gpNode, dx, dy, moduleId, counterId );
+
+    counter->setSafetyMargins( safetyMargins );
+
+    mETofCounter.push_back( counter );
+}
+
+void
+StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins, const StThreeVectorD alignment )
+{
+    StETofGeomCounter* counter = new StETofGeomCounter( gpNode, dx, dy, moduleId, counterId, alignment );
 
     counter->setSafetyMargins( safetyMargins );
 
@@ -468,7 +518,6 @@ StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const int 
     if( mDebug ) print();
 }
 
-
 StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId )
 : StETofNode( gpNode, dx, dy ),
   mModuleIndex( moduleId ),
@@ -483,6 +532,19 @@ StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const floa
     if( mDebug ) print();
 }
 
+StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const StThreeVectorD alignment )
+: StETofNode( gpNode, dx, dy, alignment ),
+  mModuleIndex( moduleId ),
+  mCounterIndex( counterId ),
+  mDebug( false )
+{
+    mSector = calcSector( moduleId  );
+    mPlane  = calcPlane( moduleId );
+
+    createGeomStrips();
+
+    if( mDebug ) print();
+}
 
 int
 StETofGeomCounter::calcSector( const int moduleId )
@@ -562,7 +624,8 @@ StETofGeometry::StETofGeometry( const char* name, const char* title )
   mNValidModules( 0 ),
   mInitFlag( false ),
   mDebug( false ),
-  mStarBField( nullptr )
+  mStarBField( nullptr ),
+  mFileNameAlignParam ("")
 {
 
 }
@@ -600,6 +663,14 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins, cons
 
     mNValidModules = 0;
 
+
+	 if( mFileNameAlignParam != ""){
+	 	readAlignmentParameters();
+	 }
+
+	 geoManager->AddNavigator();
+
+	 int iCounterAlignment = 0;
     // loop over sectors
     for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
         // loop over planes
@@ -607,16 +678,13 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins, cons
             std::string geoPath( formTGeoPath( geoManager, plane, sector ) );
 
             if( geoPath.empty() ) {
-                LOG_DEBUG << "StETofGeometry::Init(...) - cannot find path to ETOF module "
+                LOG_INFO << "StETofGeometry::Init(...) - cannot find path to ETOF module "
                             "(id " << plane << sector << "). Skipping..." << endm;
                 continue;
             }
             mNValidModules++;
-
             const TGeoPhysicalNode* gpNode = geoManager->MakePhysicalNode( geoPath.c_str() );
-
             int moduleId = calcModuleIndex( sector, plane );
-
             mETofModule[ mNValidModules-1 ] = new StETofGeomModule( *gpNode, moduleId );
 
 
@@ -653,9 +721,12 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins, cons
                 LOG_DEBUG << activeVolume->GetDX() << "  " << activeVolume->GetDY() << "  " << activeVolume->GetDZ() << endm;
 
                 int counterId = counter - eTofConst::counterStart;
-
-                mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins );
-
+					if( mAlignmentParameters.size() == 108 ){ //alignment parameters for all counters available
+						mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins, mAlignmentParameters.at(iCounterAlignment) );
+						iCounterAlignment++;
+					}else{
+                	mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins );
+					}
 
             } // end of loop over counters
 
@@ -715,23 +786,19 @@ StETofGeometry::formTGeoPath( const TGeoManager* geoManager, int plane, int sect
     std::ostringstream geoPath;
 
     geoPath << "/HALL_1/CAVE_1/MagRefSys_1/ETOF_" << plane << sector;
-
     bool found = geoManager->CheckPath( geoPath.str().c_str() );
-
     if( !found ) {
         geoPath.str("");
         geoPath.clear();
 
         geoPath << "/HALL_1/CAVE_1/ETOF_" << plane << sector;
     }
-
     // go deeper if counter is requested
     if( counter >= 1 ) {
         geoPath << "/EGAS_1/ECOU_" << counter;
     }
 
     found = geoManager->CheckPath( geoPath.str().c_str() );
-
     return found ? geoPath.str() : "";
 }
 
@@ -830,6 +897,21 @@ StETofGeometry::findETofNode( const int moduleId, const int counterId )
     }
 
     return mETofModule[ iModule ]->counter( iCounter );
+}
+
+void
+StETofGeometry::pointMaster2local( const int moduleId, const int counterId, const double* master,  double* local )
+{
+    local[ 0 ] = 0;
+    local[ 1 ] = 0;
+    local[ 2 ] = 0;
+
+    if( !findETofNode( moduleId, counterId ) ) {
+        LOG_ERROR << "ETOF volume of a hit is not loaded in the geometry" << endl;
+        return;
+    }
+
+    findETofNode( moduleId, counterId )->master2Local( master, local );
 }
 
 
@@ -1435,8 +1517,6 @@ StETofGeometry::logPoint( const char* text, const TVector3& point )
     LOG_INFO << text << " at (" << point.x() << ", " << point.y() << ", " << point.z() << ")" << endm;
 }
 
-
-
 StThreeVectorD
 StETofGeometry::getField( const StThreeVectorD& pos ) {
     if( !mStarBField ) {
@@ -1489,3 +1569,37 @@ StETofGeometry::getFieldZ( const double& x, const double& y, const double& z ) {
 
     return B[ 2 ];
 }
+
+void 
+StETofGeometry::readAlignmentParameters(){
+      LOG_INFO << "etofAlignParam: filename provided --> use parameter file: " << mFileNameAlignParam.c_str() << endm;
+        
+		  //add check for no alignment set here.
+	
+		  ifstream paramFile;		
+        paramFile.open( mFileNameAlignParam.c_str() );
+
+        if( !paramFile.is_open() ) {
+            LOG_INFO << "unable to get the alignments parameters from file --> file does not exist" << endm;
+            return;
+        }
+
+	     StThreeVectorD counterAlignmentParameter;
+        float tempX;
+		  float tempY;
+		  float tempZ;
+        while( paramFile >> tempX >> tempY >> tempZ ) {
+		  counterAlignmentParameter = StThreeVectorD( tempX, tempY, tempZ );
+            mAlignmentParameters.push_back( counterAlignmentParameter );
+        }
+        
+        paramFile.close();
+
+        if( mAlignmentParameters.size() != 108 ) {
+            LOG_INFO << "parameter file for alignments has not the right amount of entries: ";
+            LOG_INFO << mAlignmentParameters.size() << " instead of 108 !!!!" << endm;
+            return;
+        }
+
+}
+
