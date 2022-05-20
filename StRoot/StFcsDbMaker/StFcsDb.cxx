@@ -691,12 +691,12 @@ double StFcsDb::getProjectedDistance(StFcsPoint* ecal,  StFcsCluster* hcal, doub
 };
 
 //! get coordinates of center of the cell STAR frame from StFcsHit
-StThreeVectorD StFcsDb::getStarXYZ(StFcsHit* hit, float FcsZ) const{ 
+StThreeVectorD StFcsDb::getStarXYZ(const StFcsHit* hit, float FcsZ) const{ 
     return getStarXYZ(hit->detectorId(),hit->id(),FcsZ);
 }
 
 //! get coordinates of the cluster STAR frame from StFcsCluster
-StThreeVectorD StFcsDb::getStarXYZ(StFcsCluster* clu, float FcsZ) const{ 
+StThreeVectorD StFcsDb::getStarXYZ(const StFcsCluster* clu, float FcsZ) const{ 
     return getStarXYZfromColumnRow(clu->detectorId(),clu->x(),clu->y(),FcsZ);
 }
 
