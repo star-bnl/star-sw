@@ -1,7 +1,7 @@
 *                                                  @plexoos           @nigmatkulov
 /OnlTools                                          @plexoos           @jml985
-/StDb                                              @dmarkh            @plexoos
-/StDb/idl                                          @akioogawa         @dmarkh      @fgeurts     @iraklic     @plexoos @fisyak
+/StDb                                              @dmarkh
+/StDb/idl                                          @akioogawa         @dmarkh      @fgeurts     @iraklic     @fisyak
 /StRoot/RTS                                        @akioogawa         @jml985      @tonko-lj
 /StRoot/StAnalysisMaker                            @fisyak
 /StRoot/StAnalysisUtilities/StHistUtil*            @genevb
@@ -22,10 +22,10 @@
 /StRoot/StDaqLib/TOF                               @ZaochenYe         @fgeurts     @starsdong   @jdbrice
 /StRoot/StDaqLib/TRG                               @akioogawa
 /StRoot/StDataFilterMaker                          @genevb
-/StRoot/StDb*                                      @dmarkh            @plexoos
-/StRoot/StDbUtilities                              @fisyak           @plexoos
+/StRoot/StDb*                                      @dmarkh
+/StRoot/StDbUtilities                              @fisyak
 /StRoot/StDbUtilities/StMagUtilities*              @genevb
-/StRoot/StDetectorDbMaker                          @dmarkh            @fisyak     @plexoos
+/StRoot/StDetectorDbMaker                          @dmarkh            @fisyak
 /StRoot/StDetectorDbMaker/StDetectorDbBeamInfo*    @genevb
 /StRoot/StDetectorDbMaker/StDetectorDbGridLeak*    @genevb
 /StRoot/StDetectorDbMaker/StDetectorDbRichScalers* @genevb
@@ -97,7 +97,7 @@
 /StRoot/St_QA_Maker                                @genevb
 /StRoot/St_TLA_Maker                               @perevbnlgov
 /StRoot/St_base*                                   @perevbnlgov       @fisyak
-/StRoot/St_db_Maker                                @dmarkh            @plexoos     @perevbnlgov
+/StRoot/St_db_Maker                                @dmarkh            @perevbnlgov
 /StRoot/St_geant_Maker                             @klendathu2k       @perevbnlgov @fisyak
 /StRoot/St_geant_Maker/Embed                       @zhux97         
 /StRoot/St_l3Clufi_Maker                           @jml985            @tonko-lj
@@ -142,5 +142,5 @@
 /mgr                                               @genevb            @klendathu2k @fisyak     @plexoos
 /pams                                              @klendathu2k       @fisyak
 /pams/sim                                          @akioogawa         @klendathu2k
-/pams/tables                                       @dmarkh            @plexoos
+/pams/tables                                       @dmarkh
 /asps                                              @klendathu2k       @perevbnlgov
