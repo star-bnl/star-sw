@@ -2,7 +2,7 @@
 
 ARG starenv=root5
 
-FROM ghcr.io/star-bnl/star-spack:v0.1.4-${starenv}
+FROM ghcr.io/star-bnl/star-spack:v0.1.5-${starenv}
 
 ENV NODEBUG=yes
 ENV STAR=/star-sw
