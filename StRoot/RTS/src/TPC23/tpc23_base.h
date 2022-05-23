@@ -55,7 +55,8 @@ public:
 	int gains_from_cache(const char *fname=0) ;
 	virtual u_int get_token_s(char *c_addr, int words) { return 0xFFFFF ;} ;
 
-	static struct row_pad_t {
+	//	static 
+	struct row_pad_t {
 		float gain ;
 		float t0 ;
 		u_char flags ;
@@ -65,7 +66,8 @@ public:
 	int row_min ;
 	int row_max ;
 
-	static struct sim_dta_t {
+	//	static 
+	struct sim_dta_t {
 		struct {
 			char *mem ;
 			int bytes ;
@@ -79,7 +81,8 @@ public:
 	// simulation
 	void sim_evt_start() ;
 	void sim_do_pad(int row, int pad, short *adc, int *track_id) ;
-	static int fcf_decode(u_int *p_buff, daq_sim_cld_x *dc, u_int version) ;
+	//	static 
+	int fcf_decode(u_int *p_buff, daq_sim_cld_x *dc, u_int version) ;
 
 //private:
 

@@ -70,19 +70,24 @@ class daq_tpx;
 class daq_itpc;
 class daq_dta;
 class daq_cld;
+class tpc23_base;
 class StTpcRTSHitMaker : public StMaker {
  public:
- StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
+ StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), fTpx23(0), fiTpc23(0),fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
   Int_t               InitRun(Int_t runnumber);
+  Int_t               InitRun23(Int_t runnumber);
   Int_t               Make();
+  Int_t               Make23();
   void PrintCld(daq_cld *cld = 0, Int_t IdTruth = 0, Int_t quality=0);
   void PrintAdc(daq_dta *dta  = 0);
  private:
   daq_tpx  *fTpx; //!
   daq_itpc *fiTpc; //!
+  tpc23_base   *fTpx23; //!
+  tpc23_base  *fiTpc23; //!
   Bool_t    fNoiTPCLu; //!
   Double_t  fminCharge; // ! minimum cluster charge in ADC
   Int_t     maxHits[24];

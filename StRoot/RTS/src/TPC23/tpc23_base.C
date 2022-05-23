@@ -1100,7 +1100,7 @@ int tpc23_base::from22to23(char *dta, int words)	// rewrite the old FY22 raw dat
 
 // statics
 
-tpc23_base::row_pad_t tpc23_base::rp_gain[24][ROW_MAX+1][PAD_MAX+1] ;	// max for both dets
+//tpc23_base::row_pad_t tpc23_base::rp_gain[24][ROW_MAX+1][PAD_MAX+1] ;	// max for both dets
 
 int tpc23_base::gains_from_cache(const char *fname)
 {
@@ -1218,7 +1218,7 @@ int tpc23_base::gains_from_cache(const char *fname)
 }
 
 
-tpc23_base::sim_dta_t tpc23_base::sim_dta[SIM_FIFOS] ;
+//tpc23_base::sim_dta_t tpc23_base::sim_dta[SIM_FIFOS] ;
 
 int tpc23_base::load_replay(const char *fname, int sec_soft)
 {
