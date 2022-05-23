@@ -1063,7 +1063,7 @@ TGraphErrors *OmegaTau() {
   return gr2;
 }
 //________________________________________________________________________________
-void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD3.root") {
+void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD4.root") {
   TDirIter Dir(files);
   Char_t *file = 0;
   Char_t *file1 = 0;
@@ -1104,6 +1104,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD3.root
   const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
   const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
   const Int_t*&      fMcHit_mnP                               = iter("fMcHit.mnP");
+  const Int_t*&      fMcHit_mne                               = iter("fMcHit.mne");
   const Float_t*&    fMcHit_mAdc                              = iter("fMcHit.mAdc");
   const Float_t*&    fMcHit_mLgamma                           = iter("fMcHit.mLgamma");
   const Float_t*&    fMcHit_mAdc0                             = iter("fMcHit.mAdc0");
@@ -1180,6 +1181,12 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD3.root
       return ok;
     }
   };
+  TH2F *neP[2] = {0};
+  TH2F *lneP[2] = {0};
+  neP[0] = new TH2F("nePI","log(ne/nP) versus log(nP) for Inner sectors",120,1.5,12.5,100,-1,4);
+  neP[1] = new TH2F("nePO","log(ne/nP) versus log(nP) for Outer sectors",120,1.5,12.5,100,-1,4);
+  lneP[0] = new TH2F("lnePI","log(log(ne/nP)) versus log(nP) for Outer sectors",120,1.5,12.5,150,-1.5,1.5);
+  lneP[1] = new TH2F("lnePO","log(log(ne/nP)) versus log(nP) for Outer sectors",120,1.5,12.5,150,-1.5,1.5);
   const static Int_t NoDim = sizeof(Adc_t)/sizeof(Double_t);
   //  const Int_t  nBins[NoDim]  = {      2,      2,       25,      25, 110,    140,   250}; //,   200};
   const Char_t *Names[NoDim] = {"secWE","rowIO", "Ntmbks", "Npads", "z",  "AdcL","ratL"}; //,"ratC"};
@@ -1253,7 +1260,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD3.root
     }
   }
 #endif /* __WE_IO_NTB__ */
-#define __ADCPLOTS__
+  //#define __ADCPLOTS__
 #ifdef __ADCPLOTS__
   for (Int_t i = 0; i < kTPC; i++) 
     for (Int_t j = 0; j < kVar; j++) 
@@ -1306,6 +1313,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD3.root
     //    if (fNoMcHit != 1 && fNoMcHit != 3) continue;
     if (fRcHit_mAdc[0] <= 0) continue;
     if (fMcHit_mnP[0] <= 0) continue;
+    if (fMcHit_mne[0] <= 0) continue;
     for (Int_t k = 0; k < fNoMcHit; k++) {
       if (fMcHit_mKey[k] != fRcHit_mIdTruth[k]) continue;
       if (fRcHit_mQuality[k] < 95) continue;
@@ -1325,6 +1333,10 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD3.root
 #endif
       //      if (fMcHit_mdS[k] < dsCut[io]) continue;
       if (fMcHit_mdS[k] < 0.1) continue;
+      Double_t nP = fMcHit_mnP[k];
+      Double_t ne = fMcHit_mne[k];
+      neP[io]->Fill(TMath::Log(nP),TMath::Log(ne/nP));
+      if (ne > nP) lneP[io]->Fill(TMath::Log(nP),TMath::Log(TMath::Log(ne/nP)));
       Double_t ratio = fMcHit_mAdc[k]/fRcHit_mAdc[0];
       if (ratio < 0.1 || ratio > 10) continue;
       Double_t r0 =  fMcHit_mAdc0[k]/fMcHit_mAdc[k];

@@ -2,7 +2,7 @@
    root.exe -q -b lBichsel.C pionMIP.root 'dEdxFit.C+("SecRow3C","GF")'
 
 # Fit Sparse : use ~/bin/SpareSubmit.csh to fit it in parallel  
-@ count = 2
+@ count = 0
 while  (1)
     root.exe -q -b AdcSparseD3.root lBichsel.C 'dEdxFit.C+("Sparse","GP","R",'${count}')' >& X${count}.log &
     @ count++;  echo "count $count";
@@ -1311,6 +1311,103 @@ TF1 *FitFreq(TH1 *proj, Option_t *opt="", Double_t zmin = 205, Double_t zmax = 2
   return g2;
 }
 //________________________________________________________________________________
+Double_t funcLN(Double_t *x, Double_t *p = 0) {
+  //  static 
+  Double_t Sqrt2piI = 1./TMath::Sqrt(TMath::TwoPi());
+  if (x[0] <= 0.0) return 0;
+  Double_t lnX = -100;
+  if (x[0] > 0) lnX = TMath::Log(x[0]);
+  Double_t Norm  = TMath::Exp(p[0]);
+  Double_t mu    = p[1];
+  Double_t sigma = p[2];
+  Double_t dev    = (lnX - mu)/sigma;
+  Double_t val = Norm*Sqrt2piI/sigma*TMath::Exp(-dev*dev/2. - lnX);
+  return val;
+}
+//________________________________________________________________________________
+TF1 *LogNor(Double_t Mean, Double_t RMS) {
+  static TF1 *f = 0;
+  if (! f) {
+    f = new TF1("LogNor",funcLN, -2, 5, 3);
+    f->SetParName(0,"logNorm");
+    f->SetParName(1,"mu");
+    f->SetParName(2,"sigma");
+  }
+  /*
+    root.exe [127] bin->Fit("gaus")
+ FCN=2.23005e+07 FROM MIGRAD    STATUS=CONVERGED     144 CALLS         145 TOTAL
+                     EDM=1.64469e-06    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  Constant     7.73934e-01   7.37966e-05   1.43110e-04   2.32586e+01
+   2  Mean         8.26344e-01   2.98068e-05   4.48187e-05   4.11637e+01
+   3  Sigma        2.53134e-01   1.30189e-05   1.98117e-05  -4.61696e+01
+
+  Mean = exp(mu-sigma**2/2)
+  RMS = Mean*sqrt(exp(sigma**2)-1)
+
+  (RMS/Mean)**2 = exp(sigma**2) - 1
+  exp(sigma**2) = (RMS/Mean)**2 + 1
+  sigma = sqrt(log((RMS/Mean)**2 + 1)) => 1.54909878849684235e+00
+  double RMS =       2.53134e-01
+  double Mean  =       8.26344e-01
+  double sigma = sqrt(log(RMS/Mean)**2) + 1)) = 1.54909878849684235e+00
+  mu - sigma**2/2 = log(Mean);
+  double mu = sigma*sigma/2 + log(Mean) = 1.00910940099364188e+00
+  */ 
+  Double_t sigma = TMath::Sqrt(TMath::Log((RMS/Mean)*(RMS/Mean) + 1));
+  Double_t mu = sigma*sigma/2 + TMath::Log(Mean);
+  f->SetParameters(0, mu, sigma);
+  return f;
+}
+//________________________________________________________________________________
+TF1 *FitLN(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3, Double_t zmin = -2, Double_t zmax = 5, Double_t SX = 1) { // log normal
+  if (! proj) return 0;
+  Double_t params[9];
+#if 0
+  Int_t binMin = proj->GetXaxis()->FindBin(zmin);
+  Int_t binMax = proj->GetXaxis()->FindBin(zmax);
+  proj->GetXaxis()->SetRange(binMin,binMax);
+#endif
+  Int_t peak = proj->GetMaximumBin();
+  Double_t peakX = proj->GetBinCenter(peak);
+  Double_t peakY = proj->GetBinContent(peak);
+  if (peakY <= 0.) return 0;
+  params[0] = TMath::Log(peakY);
+  params[1] = peakX; // proj->GetMean();
+  params[2] = 0.5*proj->GetRMS();
+  params[3] = 0;
+  params[4] = 0;
+  params[5] = 0;
+  params[6] = 0;
+  params[7] = 0;
+  params[8] = 0;
+  Double_t sigma = nSigma*params[2];
+  TF1 *g = LogNor(proj->GetMean(),proj->GetRMS());
+  if (SX > 0) {
+    g->FixParameter(2,SX);
+  } else {
+    g->ReleaseParameter(2);
+  }
+#if 0
+  g->SetParameters(params);
+  g->SetRange(params[1]-sigma,params[1]+sigma);
+  g->SetRange(params[1]-sigma,params[1]+sigma);
+  g->SetParLimits(1, params[1]-params[2], params[1]+params[2]);
+  g->SetParLimits(2, 1e-3, proj->GetRMS());
+#endif
+  Bool_t res = proj->Fit(g,opt);
+#if 0
+  if (g->GetProb() > 0.01) {
+    return g;
+  }
+  // Last attempt reduce fit range to +/- 2 sigma
+  g->GetParameters(params);
+  Bool_t res = proj->Fit(g,opt,"",params[1]-2*params[2],params[1]+2*params[2]);
+#endif
+  return g;
+}
+//________________________________________________________________________________
 TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3, Double_t zmin = -2, Double_t zmax = 2) {
   if (! proj) return 0;
   Double_t params[9];
@@ -1348,10 +1445,12 @@ TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3, Double
       }
     }
     g->SetParameters(params);
-    g->SetRange(params[1]-sigma,params[1]+sigma);
-    g->SetRange(params[1]-sigma,params[1]+sigma);
-    g->SetParLimits(1, params[1]-params[2], params[1]+params[2]);
-    g->SetParLimits(2, 1e-3, proj->GetRMS());
+    if (sigma > 0) {
+      g->SetRange(params[1]-sigma,params[1]+sigma);
+      g->SetRange(params[1]-sigma,params[1]+sigma);
+      g->SetParLimits(1, params[1]-params[2], params[1]+params[2]);
+      g->SetParLimits(2, 1e-3, proj->GetRMS());
+    }
     Bool_t res = proj->Fit(g,opt);
     if (g->GetProb() > 0.01) {
       return g;
@@ -3217,6 +3316,8 @@ void dEdxFitSparse(THnSparse *hist, const Char_t *FitName = "GP",
     }
     if (TString(FitName) == "GP") {
       g = FitGP(proj,opt,nSigma,0,zmin,zmax);
+    } else if (TString(FitName) == "LN") { 
+      g = FitLN(proj,opt,nSigma,0,zmin,zmax);
     }
     else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
     else if (TString(FitName) == "G2") g = FitG2(proj,opt);
@@ -3273,7 +3374,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	     Int_t ix = -1, Int_t jy = -1, 
 	     Int_t mergeX=1, Int_t mergeY=1, 
 	     Double_t nSigma=3, Int_t pow=1,
-	     Double_t zmin = -2, Double_t zmax = 2) {
+	     Double_t zmin = -2, Double_t zmax = 5) {
   TString Opt(opt);
   if (! Opt.Contains("Q",TString::kIgnoreCase)) {
     canvas = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("Fit");
@@ -3474,8 +3575,12 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       Fit.chisq = -100;
       Fit.prob  = 0;
       Fit.entries = proj->Integral();
-      cout << "i/j\t" << i << "/" << j << "\t" <<  proj->GetName() << "\t" << proj->GetTitle() << "\tentries = " <<  Fit.entries<< endl;
-      if (Fit.entries < 100 || TMath::IsNaN(Fit.entries) ) {
+      Int_t kx1 = proj->FindFirstBinAbove(1e-5);
+      Int_t kx2 = proj->FindLastBinAbove(1e-5);
+      cout << "i/j\t" << i << "/" << j << "\t" <<  proj->GetName() << "\t" << proj->GetTitle() << "\tentries = " <<  Fit.entries<< " k1,2 " << kx1 << "," << kx2 << endl;
+      if (Fit.entries < 100 || 
+	  TMath::IsNaN(Fit.entries) || 
+	  kx2 - kx1 <= 3 ) {
 	delete proj; continue;
       }
       if (TString(FitName) == "GP") {
@@ -3484,6 +3589,28 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	} else {
 	  g = FitGP(proj,opt,nSigma,pow,zmin,zmax);
 	}
+      } else if (TString(FitName) == "LN") { 
+	Double_t SX = -1;
+#if 1
+	/*
+	  Attaching file nePI+nePOLNAdcSparseD3.root as _file0...
+	  FitP->Draw("sigma:x>>SX","(i&&j&&abs(mu)<1&&dsigma<02e-3&&dmu<2e-3)/dsigma**2","profg")
+	  root.exe [14] SX->Fit("pol2","+")
+
+	  ****************************************
+	  Minimizer is Linear
+	  Chi2                      =  6.91369e+21
+	  NDf                       =           11
+	  p0                        =      1.07622   +/-   2.02152e-12 
+	  p1                        =    -0.209312   +/-   7.4276e-13  
+	  p2                        =    0.0104733   +/-   6.79137e-14 
+	*/
+	if (Fit.i > 0) {
+	  //	  SX = TMath::Exp(8.86919e-01 -4.26364e-01*Fit.x);
+	  SX =  1.07622  + Fit.x*(-0.209312 + Fit.x*0.0104733);
+	}
+#endif
+	g = FitLN(proj,opt,nSigma,0,-2,5,SX);
       }      
       else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);

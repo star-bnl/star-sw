@@ -16,7 +16,7 @@
 //#define __ADD_PROB__
 //#define __BENCHMARKS__DOFIT_ZN__
 #define __FIT_PULLS__
-//#define __CHECK_RDOMAP_AND_VOLTAGE__
+#define __CHECK_RDOMAP_AND_VOLTAGE__
 #endif /* __TFG__VERSION__ */
 #define __BEST_VERTEX__
 #ifdef __CHECK_RDOMAP_AND_VOLTAGE__
