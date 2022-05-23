@@ -174,7 +174,8 @@ public:
   //! get the STAR frame cooridnates from other way
   StThreeVectorD getStarXYZfromColumnRow(int det,float col, float row, float FcsZ=-1.0) const; //from column/row[cell size unit]
   StThreeVectorD getStarXYZ(int det, int col, int row, float FcsZ=-1.0) const;   //from column/row [cell unit]
-  StThreeVectorD getStarXYZ(StFcsHit* hit, float FcsZ=-1.0) const;                   //from StFcsHit
+  StThreeVectorD getStarXYZ(const StFcsHit* hit, float FcsZ=-1.0) const;         //from StFcsHit
+  StThreeVectorD getStarXYZ(const StFcsCluster* clu, float FcsZ=-1.0) const;     //from StFcsCluster
   StThreeVectorD getStarXYZ(int det, int id, float FcsZ=-1.0) const;             //center of the cell
   
   //! Get the STAR frame cooridnates for 4x4 sum
