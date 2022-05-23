@@ -74,7 +74,7 @@ void dEdx(Int_t First, Int_t Last,
   }
   TString STAR_VERSION(gSystem->Getenv("STAR_VERSION"));
   Bool_t tfgV = kFALSE;
-  if (STAR_VERSION.BeginsWith("TFG") || STAR_VERSION.Contains("DEV2")) {
+  if (STAR_VERSION.BeginsWith("TFG") && ! STAR_VERSION.Contains("Export") || STAR_VERSION.Contains("DEV2")) {
     tfgV = kTRUE;
     Chain += ",quiet,ForcedX";
     //    Chain += ",ForcedX";

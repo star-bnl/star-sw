@@ -1,4 +1,41 @@
+/*
+  TH2F *neP = new TH2F(*nePI);
+  neP->SetName("neP");
+  neP->Add(nePO);
+  TH2F *nePNorm = new TH2F(*neP); nePNorm->SetName("nePNprm"); 
+  .x Norm.C(neP,nePNorm);
+
+ */
 void Norm(TH2F *hxz, TH2F *newh=0)
+{
+  if (! newh) {
+    newh = new TH2F(*hxz);
+    newh->SetName(Form("%sNorm",hxz->GetName()));
+  }
+  Int_t nx = hxz->GetNbinsX();
+  Int_t ny = hxz->GetNbinsY();
+  Double_t Sum;
+  Int_t i,j;
+  for (i=1;i<=nx;i++) {
+    Sum = 0.;
+    for (j=1;j<=ny;j++) {
+      Sum += hxz->GetCellContent(i,j);// printf("%i %i %f\n",i,j,Sum);
+    }
+    if (Sum > 10.0) {
+      for (j=1;j<=ny;j++) {
+	Double_t cont = hxz->GetCellContent(i,j)/Sum;
+	Double_t err  = sqrt(cont*(1.-cont)/Sum);
+	//	 printf("%i %i %f +/- %f\n",i,j,cont,err);
+	if (newh) {
+	  newh->SetCellContent(i,j,cont);
+	  newh->SetCellError(i,j,err);
+	}
+      }
+    }
+  }
+}
+//________________________________________________________________________________
+void NormL(TH2F *hxz, TH2F *newh=0)
 {
   Int_t nx = hxz->GetNbinsX();
   Int_t ny = hxz->GetNbinsY();
@@ -7,16 +44,17 @@ void Norm(TH2F *hxz, TH2F *newh=0)
   for (i=1;i<=nx;i++) {
     Sum = 0.;
     for (j=1;j<=ny;j++) {
-      Sum += hxz->GetCellContent(i,j); printf("%i %i %f\n",i,j,Sum);
+      Sum += hxz->GetCellContent(i,j);// printf("%i %i %f\n",i,j,Sum);
     }
     if (Sum > 10.0) {
       for (j=1;j<=ny;j++) {
 	Double_t cont = hxz->GetCellContent(i,j)/Sum;
 	Double_t err  = sqrt(cont*(1.-cont)/Sum);
-	 printf("%i %i %f +/- %f\n",i,j,cont,err);
+	//	 printf("%i %i %f +/- %f\n",i,j,cont,err);
+	if (cont <= 0) continue;
 	if (newh) {
-	  newh->SetCellContent(i,j,cont);
-	  newh->SetCellError(i,j,err);
+	  newh->SetCellContent(i,j,TMath::Log(cont));
+	  newh->SetCellError(i,j,err/cont);
 	}
       }
     }
@@ -100,4 +138,49 @@ void PrintPars(TF1 *fit, Int_t Npar=12) {
     printf ("%f,",par);
   }
   printf("};\n");
+}
+//________________________________________________________________________________
+Double_t funcLN(Double_t *x, Double_t *p = 0) {
+  //  static 
+  Double_t Sqrt2piI = 1./TMath::Sqrt(TMath::TwoPi());
+  if (x[0] <= 0.0) return 0;
+  Double_t lnX = -100;
+  if (x[0] > 0) lnX = TMath::Log(x[0]);
+  Double_t Norm  = TMath::Exp(p[0]);
+  Double_t mu    = p[1];
+  Double_t sigma = p[2];
+  Double_t dev    = (lnX - mu)/sigma;
+  Double_t val = Norm*Sqrt2piI/(sigma *x[0])*TMath::Exp(-dev*dev/2.);
+  return val;
+}
+//________________________________________________________________________________
+TF1 *LogNor() {
+  TF1 *f = new TF1("LogNor",funcLN, 0, 2.5, 3);
+  f->SetParName(0,"logNorm");
+  f->SetParName(1,"mu");
+  f->SetParName(2,"sigma");
+  /*
+root.exe [127] bin->Fit("gaus")
+ FCN=2.23005e+07 FROM MIGRAD    STATUS=CONVERGED     144 CALLS         145 TOTAL
+                     EDM=1.64469e-06    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  Constant     7.73934e-01   7.37966e-05   1.43110e-04   2.32586e+01
+   2  Mean         8.26344e-01   2.98068e-05   4.48187e-05   4.11637e+01
+   3  Sigma        2.53134e-01   1.30189e-05   1.98117e-05  -4.61696e+01
+
+  Mean = exp(mu-sigma**2/2)
+  Sigma = Mean*sqrt(exp(sigma**2)-1)
+
+  (Sigma/Mean)**2 = exp(sigma**2) - 1
+  exp(sigma**2) = (Sigma/Mean)**2 + 1
+  sigma = sqrt(log(Sigma/Mean)**2 + 1) => 1.54909878849684235e+00
+  double Sigma =       2.53134e-01
+  double Mean  =       8.26344e-01
+  double sigma = sqrt(log(Sigma/Mean)**2 + 1) = 1.54909878849684235e+00
+  mu - sigma**2/2 = log(Mean);
+  double mu = sigma*sigma/2 + log(Mean) = 1.00910940099364188e+00
+  */ 
+  f->SetParameters(0, 1.0, 1.55);
+  return f;
 }
