@@ -32,9 +32,9 @@ Bool_t Root4Star = kFALSE;
 //________________________________________________________________________________
 void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
   cout << "Call SetPartGen with RootFile = " << RootFile.Data() << "\tRunOpt = " << RunOpt.Data() << "\t Opt = " << Opt.Data() << endl;
-  Int_t Ids[15] =            {      5,      6,           3,          2,       8,       9,      11,      12,       14,     15,         45,       46,    49,      47,         9};
-  Double_t Masses[15] = {    0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231,1.875613,2.80925,2.80923,3.727417,0.13956995  };
-  const Char_t  *Names[15] = {"muon+", "muon-", "electron", "positron", "pion+", "pion-", "kaon+", "kaon-", "proton", "pbar", "deuteron", "triton", "He3", "alpha", "pionMIP"};
+  Int_t Ids[14] =            {        5,        6,            3,            2,         8,         9,      11,      12,        14,        15,       45,        46,     49,      47};
+  Double_t Masses[14] =      {0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231, 1.875613,   2.80925,2.80923,3.727417};
+  const Char_t  *Names[15] = {  "muon+",  "muon-",  "electron-",  "electron+",   "pion+",   "pion-", "kaon+", "kaon-", "proton+", "proton-","deuteron", "triton",  "He3", "alpha"};
   Int_t    NTRACK = 100;
   Int_t    ID = 5;
   Double_t Ylow   =  -1; 
@@ -53,11 +53,19 @@ void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
     Ylow  = -2.9;
     Yhigh =  0.1;
   }
-  for (Int_t i = 0; i < 15; i++) {
+  TString optG("GBL");
+  for (Int_t i = 0; i < 14; i++) {
     if (RootFile.Contains(Names[i],TString::kIgnoreCase)) {
       ID =Ids[i];
-      if (i == 14) {bgMinL10 = 0.544; bgMaxL10 = 0.653;}
       mass = Masses[i];;
+      if (RootFile.Contains("MIP",TString::kIgnoreCase)) {
+	Double_t pMoMIP = 0.526; // MIP from Heed bg = 3.77 => p_pion = 0.526
+	Double_t pMomin = pMoMIP - 0.05; // 0.45;
+	Double_t pMomax = pMoMIP + 0.05; // 0.55;
+	bgMinL10 = TMath::Log10(pMomin/Masses[4]);
+	bgMaxL10 = TMath::Log10(pMomax/Masses[4]);
+	optG += "pionMIP";
+      }
       break;
     }
   }
@@ -109,9 +117,9 @@ void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
       delete gener; gener = 0;
     }
     if (! gener) gener =  new 
-      StarMCSimplePrimaryGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GBL");
+      StarMCSimplePrimaryGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, optG);
     else
-      gener->SetGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, "GBL");
+      gener->SetGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, optG);
     StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
     cout << "Set StarMCSimplePrimaryGenerator" << endl;
   }
@@ -158,6 +166,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     else                                                           ChainOpt += "tags,";
 #endif
   }
+  ChainOpt += ",dEdxCalib";
   cout << "ChainOpt\t" << ChainOpt.Data() << endl;
   // ChainOpt += "MiniMcMk,IdTruth,useInTracker,-hitfilt,CMuDst,Tree,tags,evout,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {

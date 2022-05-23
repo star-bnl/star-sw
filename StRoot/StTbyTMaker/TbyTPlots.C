@@ -532,8 +532,7 @@ void DrawRpTDiff(Int_t k = 0, const Char_t *opt="pTDiffR", Double_t pmax = 5.0) 
       sigma->SetStats(0);
       if (i == 0) {
 	sigma->SetAxisRange(0,pmax);
-	sigma->SetTitle(sTitle);
-	sigma->SetXTitle("pT (GeV/c)");
+	sigma->SetTitle(sTitle);	sigma->SetXTitle("pT (GeV/c)");
 	TString s("#sigma(");
 	s += yTitle; s+= ")";
 	sigma->SetYTitle(s);

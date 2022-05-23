@@ -3,20 +3,21 @@ use File::Basename;
 use Cwd;
 #my @particles = qw(pythia);
 #my @particles = qw(pionMIP);
-#my @particles = qw(electron muon pion kaon proton deuteron triton He3 alpha pionMIP);
+#my @particles = qw(electron- muon pion kaon proton+ deuteron triton He3 alpha pionMIP);
 #my @particles = qw(pion He3 alpha);
-#my @particles = qw(electron positron);
-my @particles = qw(muon+ muon- electron positron pion+ pion- kaon+ kaon- proton pbar deuteron triton He3 alpha pionMIP);
-#my @particles = qw(muon+ muon- electron positron pion+ pion- kaon+ kaon- proton pbar deuteron triton He3 alpha);
-#my @particles = qw(proton pionMIP);
+#my @particles = qw(electron- electron+);
+#my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha pionMIP);
+#my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha);
+#my @particles = qw(proton+ pionMIP);
 #my @particles = qw(pion+ pion-);
 #my @particles = (pionMIP);
 #my @particles = (pionMIP1);
 #my @particles = (phi);
+my @particles = qw(electron-MIP electron+MIP pion+MIP pion-MIP kaon+MIP kaon-MIP proton+MIP proton-MIP deuteronMIP );
 foreach my $part (@particles) {
   my $i1 =  1;
   my $N =  50;# 00;
-  if ($part =~ /MIP/) {$N = 200;}
+#  if ($part =~ /MIP/) {$N = 200;}
   for (my $i = $i1; $i <= $N; $i++) {
 #    my $log = $part . "_" . $i . "B.log";
 #    if (! -r $log) {
@@ -31,10 +32,10 @@ foreach my $part (@particles) {
 #  last;
 }
 # my @cmd = qw(
-# foreach f (muon pion proton pbar deuteron triton He3 alpha pionMIP)
+# foreach f (muon pion proton+ proton- deuteron triton He3 alpha pionMIP)
 # 	    echo ${f}; hadd -T ${f}.root gstar*${f}*0.root
 # end
 # );
-# foreach p (muon+ muon- electron positron pion+ pion- kaon+ kaon- proton pbar deuteron triton He3 alpha pionMIP)
+# foreach p (muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha pionMIP)
 #    hadd ${p}.root ../*${p}*.root >& ${p}.log &
 # end

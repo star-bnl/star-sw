@@ -73,9 +73,9 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   }
   LOG_INFO << " in ";
   if (! fOption.Contains("BL",TString::kIgnoreCase)) {
-    LOG_INFO << fpT_min << " <  pT < " << fpT_max << endm;
+    LOG_INFO << fpT_min << " <  pT < " << fpT_max << " with " <<  fOption.Data() <<  endm;
   } else {
-    LOG_INFO << fpT_min << " <  log10(beta*gamma) < " << fpT_max << endm;
+    LOG_INFO << fpT_min << " <  log10(beta*gamma) < " << fpT_max << " with " <<  fOption.Data() <<  endm;
   }
   if (fOption.Contains("mtsq",TString::kIgnoreCase)) {
     LOG_INFO << "Use dN/dmT^2 = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endm;
@@ -158,7 +158,13 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
 	pz = pT*TMath::SinH(eta);
 	  
       } else {
-	if (fOption.Contains("BL",TString::kIgnoreCase)) {
+	if (fOption.Contains("BLpion",TString::kIgnoreCase)) {
+	  Double_t p = -1;
+	  Double_t bgL10   = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
+	  Double_t bg      = TMath::Power(10.,bgL10);
+	  p       = 0.13956995*bg;
+	  pT               = p/TMath::CosH(eta);
+	} else if (fOption.Contains("BL",TString::kIgnoreCase)) {
 	  Double_t p = -1;
 	  Double_t bgL10   = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
 	  Double_t bg      = TMath::Power(10.,bgL10);

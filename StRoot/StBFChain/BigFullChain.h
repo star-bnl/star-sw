@@ -1683,6 +1683,7 @@ Bfc_st BFC[] = { // standard chains
   {"TpxClu","tpc_hits","tpcChain","rts,tpcDb,detDb,-tpx,-tpc_daq,-fcf,MakeEvent","StTpcRTSHitMaker"
    ,"StTpcHitMaker",                                                    "RTS(online) cluster maker",kFALSE},
   {"TpxClu2D"    ,"","","TpxClu","","",                              "RTS(online) 2D-cluster maker",kFALSE},
+  {"TPC23"       ,"","","TpxClu","","",                           "RTS(online) tpc23-cluster maker",kFALSE},
   {"NoiTPCLu"    ,"","","TpxClu","","",                "RTS(online) use 1+1D cluster find for iTPC",kFALSE},
   {"NoTpxAfterBurner","","","","","",       "Switch off AfterBurner for RTS(online) cluster makers",kFALSE},
   {"TpcAvCluster","TpcAvCluster","tpcChain","rts,detDb","StTpcAvClusterMaker","StTpcHitMaker"

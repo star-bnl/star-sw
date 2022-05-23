@@ -15,7 +15,7 @@
 #    starver TFG20i
      set evtsFile = $INPUTFILE0;
      set f        = 1
-     set l        = 2000
+     set l        = 500; # 2000
   echo "${evtsFile}"
  if (! -r ${evtsFile}) exit 1;
   set evtsFileB = `basename ${evtsFile}`
@@ -37,9 +37,9 @@
 #  echo "cp ${evtsFile} ${evtsFileB}"
 #  cp ${evtsFile} ${evtsFileB}
    set chain = P2019a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault
-#   echo {SUBMITTINGDIRECTORY} | grep noTpxClu
-#   if ($?) set chain = ${chain},TpxRaw,TpxClu;
-  set chain = ${chain},TpxRaw,TpxClu,McTpcAna;
+   echo ${SUBMITTINGDIRECTORY} | grep noTpxClu
+   if ($? != 0) set chain = ${chain},TpxRaw,TpxClu;
+#  set chain = ${chain},TpxRaw,TpxClu,McTpcAna;
    root.exe -b -q 'bfc.C('${f}','${l}',"'${chain}'","'${evtsFile}'")' &gt;&amp; ${logFile}
 #   root.exe -b -q 'bfc.C('${f}','${l}',"P2019a,StiCA,TpxRaw,TpxClu,McTpcAna,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}
 #  root.exe -b -q 'bfc.C('${f}','${l}',"P2019a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault","'${evtsFile}'")' &gt;&amp; ${logFile}

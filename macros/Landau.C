@@ -1,3 +1,4 @@
+#include "TF1.h"
 TF1* Landau(){
 #if 0
   TF1 *LandauF = new TF1("LandauF","exp([0]-0.5*((x-[1])/[2])*((x-[1])/[2])+exp([3]-0.5*((x-[4])/[5])*((x-[4])/[5])))",-5,10);
