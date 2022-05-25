@@ -73,7 +73,7 @@ class daq_cld;
 class tpc23_base;
 class StTpcRTSHitMaker : public StMaker {
  public:
- StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), fTpx23(0), fiTpc23(0),fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
+ StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), fTpx23(0), fiTpc23(0),fminCharge(0) {}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
@@ -93,8 +93,6 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t     maxHits[24];
   Int_t     maxBin0Hits;
   Int_t     bin0Hits;
-  static UChar_t mTpx_RowLen[46];
-  static UChar_t miTpc_RowLen[41];
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $ $Id: StTpcRTSHitMaker.h,v 1.19 2021/05/10 21:13:19 fisyak Exp $  built " __DATE__ " " __TIME__ ; return cvs;

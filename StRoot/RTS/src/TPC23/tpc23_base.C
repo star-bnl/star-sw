@@ -23,6 +23,9 @@
 #include "tpc23_base.h"
 
 
+tpc23_base::row_pad_t (*tpc23_base::rp_gain_tpx)[ROW_MAX+1][PAD_MAX+1] ;
+tpc23_base::row_pad_t (*tpc23_base::rp_gain_itpc)[ROW_MAX+1][PAD_MAX+1] ;
+
 int tpc23_base::fcf_decode(u_int *p_buff, daq_sim_cld_x *dc, u_int version)
 {
 	daq_cld cld ;
@@ -53,8 +56,10 @@ int tpc23_base::fcf_decode(u_int *p_buff, daq_sim_cld_x *dc, u_int version)
 	return words_used + 3 ;
 }
 
-void tpc23_base::sim_evt_start()
+void tpc23_base::sim_evt_start(int sec1)
 {
+	sector1 = sector1 ;
+	
 	if(s1_dta==0) {
 		s1_dta = (u_short *) malloc(ROW_MAX*PAD_MAX*512*sizeof(*s1)) ;
 	}
@@ -918,7 +923,7 @@ int tpc23_base::evt_stop()
 			}
 			else {			// TPX is a little different
 				row_store[0] = 0x20230000 | row ;
-				row_store[1] = wds/2 ;	// hits
+				row_store[1] = wds ;	// hits
 			}
 		}
 		else {
@@ -1017,7 +1022,7 @@ int tpc23_base::run_start()
 // Called at run-stop: generally dumps statistics
 int tpc23_base::run_stop()
 {
-	LOG(INFO,"%d: run_stop: %d/%d events",id,evt_trgd,evt) ;
+  //	LOG(INFO,"%d: run_stop: %d/%d events",id,evt_trgd,evt) ;
 
 	return 0 ;
 }
@@ -1025,7 +1030,7 @@ int tpc23_base::run_stop()
 
 tpc23_base::tpc23_base()
 {
-	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
+//	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
 
 	online = 0 ;	// assume offline!
 
@@ -1036,6 +1041,11 @@ tpc23_base::tpc23_base()
 	s2_start = 0 ;
 	s2_dta = 0 ;
 	s2_words = 0 ;
+
+	rp_gain_tpx = 0 ;
+	rp_gain_itpc = 0 ;
+	rp_gain = 0 ;
+
 
 	
 	for(int f=0;f<SIM_FIFOS;f++) {
@@ -1061,7 +1071,7 @@ tpc23_base::tpc23_base()
 
 tpc23_base::~tpc23_base()
 {
-	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
+//	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
 
 	if(s1_dta) free(s1_dta) ;
 	if(s1_track_id) free(s1_track_id) ;
@@ -1105,6 +1115,8 @@ int tpc23_base::from22to23(char *dta, int words)	// rewrite the old FY22 raw dat
 int tpc23_base::gains_from_cache(const char *fname)
 {
 	int ret = 0 ;
+
+//	LOG(TERR,"%s [%s;%p]",__PRETTY_FUNCTION__,fname,rp_gain) ;
 
 	// set defaults, again
 	for(int s=0;s<24;s++) {
@@ -1218,7 +1230,7 @@ int tpc23_base::gains_from_cache(const char *fname)
 }
 
 
-//tpc23_base::sim_dta_t tpc23_base::sim_dta[SIM_FIFOS] ;
+tpc23_base::sim_dta_t tpc23_base::sim_dta[SIM_FIFOS] ;
 
 int tpc23_base::load_replay(const char *fname, int sec_soft)
 {
