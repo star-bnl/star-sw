@@ -878,9 +878,16 @@ u_int itpc23::get_token_s(char *c_addr, int words)
 
 itpc23::itpc23()
 {
-	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
+//	LOG(TERR,"%s",__PRETTY_FUNCTION__) ;
 
 	rts_id = ITPC_ID ;
+
+	if(rp_gain_itpc==0) {
+		rp_gain_itpc = (row_pad_t (*)[ROW_MAX+1][PAD_MAX+1]) malloc(sizeof(row_pad_t)*24*(ROW_MAX+1)*(PAD_MAX+1)) ;
+	}
+
+	rp_gain = rp_gain_itpc ;
+
 }
 
 

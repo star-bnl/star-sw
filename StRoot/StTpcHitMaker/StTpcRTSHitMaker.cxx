@@ -54,8 +54,6 @@ ClassImp(StTpcRTSHitMaker);
 #else
 #define PrPP(A,B)
 #endif
-UChar_t StTpcRTSHitMaker::mTpx_RowLen[46]  = {0};
-UChar_t StTpcRTSHitMaker::miTpc_RowLen[41] = {0};
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
   SafeDelete(fTpx);
@@ -76,25 +74,6 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
   if (IAttr("Cosmics")) StTpcHitMaker::SetCosmics();
-  Int_t sector = 20;
-  // Fill no. of pad per row 
-  //    mTpx_RowLen = new UChar_t[St_tpcPadConfigC::instance()->numberOfRows(sector)+1];
-  for (Int_t row = 1; row <= St_tpcPadPlanesC::instance()->padRows(); row++) {
-    mTpx_RowLen[row] = St_tpcPadPlanesC::instance()->padsPerRow(row);
-  }
-  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
-    for (Int_t row = 1; row <= St_tpcPadPlanesC::instance()->innerPadRows(); row++) {
-      mTpx_RowLen[row] = St_tpcPadPlanesC::instance()->padsPerRow(row);
-    }
-  }
-#if 0
-  cout << "sec:" << sector<< endl << " Tpx:";
-  for (Int_t row = 0; row <= 45; row++) {cout << "\t" << (int) mTpx_RowLen[row]; if (row%10 == 0) cout << endl;} 
-  cout << endl;
-  cout << "\tiTpc:";
-  for (Int_t row = 0; row <= 40; row++) {cout << "\t" << (int) miTpc_RowLen[row]; if (row%10 == 0) cout << endl;} 
-  cout << endl;
-#endif
   SetAttr("maxRow",St_tpcPadConfigC::instance()->numberOfRows(20));
   SafeDelete(fTpx);
   SafeDelete(fiTpc);
@@ -132,52 +111,19 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   }
   StMaker* maskMk = GetMakerInheritsFrom("StMtdTrackingMaskMaker");
   unsigned int mask = (maskMk ? maskMk->UAttr("TpcSectorsByMtd") : ~0U); // 24 bit masking for sectors 1..24
-#if 0 
- // Prepare scaled hit maxima
-  // No hit maxima if these DB params are 0
-  Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
-  Int_t maxBinZeroHits = St_tpcMaxHitsC::instance()->maxBinZeroHits();
-  Int_t livePads = 0;
-  Int_t totalPads = 0;
-  Float_t liveFrac = 1;
-#endif
+  // Load gains
   if (fTpx) {
-    // Load gains
     // do gains example; one loads them from database but I don't know how...
-    daq_dta *dta_Tpx  = fTpx->put("gain"); // , 0, 45,0, mTpx_RowLen);
-#if 0
-    Int_t totalSecPads = 0;
-#endif
+    daq_dta *dta_Tpx  = fTpx->put("gain"); 
     for(Int_t sector=1;sector<=24;sector++) {
       if (!((1U<<(sector-1)) & mask)) continue; // sector masking
-#if 0
-      Int_t liveSecPads = 0;
-      totalSecPads = 0;
-#endif
       // Tpx
       Int_t rowMin = 1;
       if (St_tpcPadConfigC::instance()->iTPC(sector)) rowMin = 14; 
       for(Int_t rowO = 1; rowO <= 45; rowO++) {
 	Int_t Npads = St_tpcPadPlanesC::instance()->padsPerRow(rowO);
-#if 0
-	Int_t nBadPads = 3;
-	if (rowO ==  1 || 
-	    (rowO >= 5 && rowO <= 14) || 
-	    rowO == 19 ||
-	    rowO == 23 ||
-	    rowO == 24 ||
-	    rowO == 29 ||
-	    rowO == 33 ||
-	    rowO == 34 ||
-	    rowO == 39 ||
-	    rowO == 43)  nBadPads = 2;
-	else if (rowO >= 44) nBadPads = 1;
-	Int_t padMin = nBadPads + 1;
-	Int_t padMax = Npads - nBadPads;
-#else
 	Int_t padMin = 1;
 	Int_t padMax = Npads;
-#endif
 	daq_det_gain *gain = (daq_det_gain *) dta_Tpx->request(Npads+1);    // max pad+1            
 	for(Int_t pad = 0; pad <= Npads; pad++) {
 	  gain[pad].gain = 0.; // be sure that dead pads are killed
@@ -190,22 +136,13 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	}
 	// daq_dta::finalize(uint32_t obj_cou, int sec, int row, int pad)
 	dta_Tpx->finalize(Npads+1,sector,rowO);
-#if 0
-	if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
-	  totalSecPads += Npads;
-	  Int_t row = rowO;
-	  if (St_tpcPadConfigC::instance()->iTPC(sector) && rowO > 13)  row = rowO + 40 - 13;
-	  if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
-	      St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
-	    liveSecPads += Npads;
-	}
-#endif
       }
     }
   }
   // iTpc
   if (fiTpc) {
     daq_dta * dta_iTpc = fiTpc->put("gain"); // , 0, 40, 0, miTpc_RowLen);
+    
     for(Int_t sector=1;sector<=24;sector++) {
       if (! St_tpcPadConfigC::instance()->iTPC(sector)) continue;
       for(Int_t row = 1; row <= 40; row++) {
@@ -225,51 +162,52 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	}
 	// daq_dta::finalize(uint32_t obj_cou, int sec, int row, int pad)
 	dta_iTpc->finalize(Npads+1,sector,row);
-#if 0
-	if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
-	  totalSecPads += Npads;
-	  if (StDetectorDbTpcRDOMasks::instance()->isRowOn(sector,row) &&
-	      St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
-	    liveSecPads += Npads;
-	}
-#endif
       }
     }
-#if 0
-    livePads += liveSecPads;
-    totalPads += totalSecPads;
-    if (maxHitsPerSector > 0) {
-      liveFrac = TMath::Max(0.1f,
-			    ((Float_t) liveSecPads) / (1e-15f + (Float_t) totalSecPads));
-      maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
-      if (Debug()) {LOG_INFO << "maxHits in sector " << sector
-			     << " = " << maxHits[sector-1] << endm;}
-    } else {
-      maxHits[sector-1] = 0;
-      if (Debug()) {LOG_INFO << "No maxHits in sector " << sector << endm;}
-    }
-    if (maxBinZeroHits > 0) {
-      liveFrac = TMath::Max(0.1f,
-			    ((Float_t) livePads) / (1e-15f + (Float_t) totalPads));
-      maxBin0Hits = (Int_t) (liveFrac * maxBinZeroHits);
-      if (Debug()) {LOG_INFO << "maxBinZeroHits " << maxBin0Hits << endm;}
-    } else {
-      maxBin0Hits = 0;
-      if (Debug()) {LOG_INFO << "No maxBinZeroHits" << endm;}
-    }
-#endif
   }
-  /*
-    InitRun will setup the internal representations of gain 
-    and other necessary structures but if the gains have not
-    been previously loaded as shown in the example above they
-    will be set to 1.0!
-  */
-#if 0
-  if (St_tpcPadConfigC::instance()->numberOfRows(20) <= 45) { // hack for now take Tonko's defaults for iTpx
-    fTpx->InitRun(runnumber);
+  if (fTpx23) {
+    // Tpx
+    for(Int_t sector=1;sector<=24;sector++) {
+      if (!((1U<<(sector-1)) & mask)) continue; // sector masking
+      Int_t rowMin = 1;
+      if (St_tpcPadConfigC::instance()->iTPC(sector)) rowMin = 14; 
+      for(Int_t rowO = 1; rowO <= 45; rowO++) {
+	Int_t Npads = St_tpcPadPlanesC::instance()->padsPerRow(rowO);
+	Int_t padMin = 1;
+	Int_t padMax = Npads;
+	for(Int_t pad = 0; pad <= Npads; pad++) {
+	  fTpx23->rp_gain[sector-1][rowO][pad].gain = 0.; // be sure that dead pads are killed
+	  fTpx23->rp_gain[sector-1][rowO][pad].t0   = 0.;
+	  if (rowO >= rowMin && pad >= padMin && pad <= padMax) {
+	    if (St_tpcPadGainT0C::instance()->Gain(sector,rowO,pad) <= 0) continue;
+	    fTpx23->rp_gain[sector-1][rowO][pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,rowO,pad);
+	    fTpx23->rp_gain[sector-1][rowO][pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,rowO,pad);
+	  }
+	}
+      }
+    }
   }
-#endif
+  if (fiTpc23) {
+    for(Int_t sector=1;sector<=24;sector++) {
+      if (!((1U<<(sector-1)) & mask)) continue; // sector masking
+      if (! St_tpcPadConfigC::instance()->iTPC(sector)) continue;
+      for(Int_t row = 1; row <= 40; row++) {
+	Int_t Npads = St_itpcPadPlanesC::instance()->padsPerRow(row);
+	for(Int_t pad = 0; pad <= Npads; pad++) {
+	  fiTpc23->rp_gain[sector-1][row][pad].gain = 0.; // be sure that dead pads are killed
+	  fiTpc23->rp_gain[sector-1][row][pad].t0   = 0.;
+	  if (pad < 1) continue; // kill pad0 just in case..
+	  if (St_itpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
+	  fiTpc23->rp_gain[sector-1][row][pad].gain = St_itpcPadGainT0C::instance()->Gain(sector,row,pad);
+	  fiTpc23->rp_gain[sector-1][row][pad].t0   = St_itpcPadGainT0C::instance()->T0(sector,row,pad);
+	  //#define __DEBUG_GAIN__
+#ifdef __DEBUG_GAIN__
+	  cout << Form("Gain/T0 s/r/p %3i/%3i/%3i %7.2f %7.2f",sector,row,pad,fiTpc23->rp_gain[sector-1][row][pad].gain,fiTpc23->rp_gain[sector-1][row][pad].t0) << endl;
+#endif /* __DEBUG_GAIN__ */
+	}
+      }
+    }
+  }
   PrintAttr();
   return kStOK;
 }
@@ -389,16 +327,16 @@ Int_t StTpcRTSHitMaker::Make() {
 	//           put(const char *in_bank="*", int sector=-1, int row=-1, int pad=-1, void *p1=0, void *p2=0)
 	if (! iTpcType) { // Tpx
 	  row1 = TMath::Max(row1, 41); 
-	  if (fTpx) dta = fTpx->put("adc_sim"); // , 0, 45,0, mTpx_RowLen); 
+	  if (fTpx) dta = fTpx->put("adc_sim"); 
 	  else  tpc23 = fTpx23;
 	} else { // iTpc           {
 	  row2 = TMath::Min(40, row2); 
-	  if (fiTpc) dta = fiTpc->put("adc_sim"); // , 0, 40, 0, miTpc_RowLen); 
+	  if (fiTpc) dta = fiTpc->put("adc_sim"); 
 	  else  tpc23 = fTpx23;
 	}
       } else { // no iTPC
 	row2 = TMath::Min(45, row2);
-	if (fTpx) dta = fTpx->put("adc_sim"); // , 0, 45,0, mTpx_RowLen);
+	if (fTpx) dta = fTpx->put("adc_sim"); 
 	else  tpc23 = fTpx23;
       }
       if (! dta) continue;
@@ -452,33 +390,18 @@ Int_t StTpcRTSHitMaker::Make() {
 	dta = dtaX;
 	if (Debug()) {
 	  PrintAdc(dta);
-#if 0
-	  // verify data!
-	  while(dta && dta->iterate()) {
-	    LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dta->sec,dta->row,dta->pad,dta->ncontent) << endm;
-	    for(UInt_t i=0;i<dta->ncontent;i++) {
-	      if (Debug() > 1 || dta->sim_adc[i].track_id) {
-		LOG_INFO << Form("    %2d: adc %4d, tb %3d: track %4d",i,
-			   dta->sim_adc[i].adc,
-				 dta->sim_adc[i].tb,
-				 dta->sim_adc[i].track_id
-				 ) << endm;
-	      }
-	    }
-	  }
-#endif
 	}
 	dtaX  = 0;
 	if (! iTpcType) { //Tpx
 	  if (! fTpx) continue;
 	  if (IAttr("TpxClu2D")) {
-	    dtaX = fTpx->get("cld_2d_sim"); //, sector, rowO, 0, &mTpx_RowLen); // rerun the 2D cluster finder on the simulated data...
+	    dtaX = fTpx->get("cld_2d_sim"); 
 	  } else {
-	    dtaX = fTpx->get("cld_sim");;   //, sector, rowO, 0, &mTpx_RowLen); // rerun the cluster finder on the simulated data...
+	    dtaX = fTpx->get("cld_sim");;   
 	  }
 	} else { // iTpc
 	  if (! fiTpc) continue;
-	  dtaX = fiTpc->get("cld_sim"); // ,sector, sector, row, 0, mTpx_RowLen); // rerun the cluster finder on the simulated data...
+	  dtaX = fiTpc->get("cld_sim"); 
 	}
 	if (! dtaX) continue;
 	daq_dta *dd = dtaX;
@@ -664,24 +587,19 @@ Int_t StTpcRTSHitMaker::Make23() {
 	//           put(const char *in_bank="*", int sector=-1, int row=-1, int pad=-1, void *p1=0, void *p2=0)
 	if (! iTpcType) { // Tpx
 	  row1 = TMath::Max(row1, 41); 
-	  //	  if (! fTpx) dta = fTpx->put("adc_sim"); // , 0, 45,0, mTpx_RowLen); 
-	  //	  else  
-	    tpc23 = fTpx23;
+	  tpc23 = fTpx23;
 	} else { // iTpc           {
 	  row2 = TMath::Min(40, row2); 
-	  //	  if (fiTpc) dta = fiTpc->put("adc_sim"); // , 0, 40, 0, miTpc_RowLen); 
 	  tpc23 = fiTpc23;
 	}
       } else { // no iTPC
 	row2 = TMath::Min(45, row2);
-	//	if (fTpx) dta = fTpx->put("adc_sim"); // , 0, 45,0, mTpx_RowLen);
-	//	else  
 	tpc23 = fTpx23;
       }
       if (! tpc23) continue;
       for (Int_t row = row1; row <= row2; row++) {
 	if (! St_tpcPadGainT0BC::instance()->livePadrow(sector,row)) continue;
-	tpc23->sim_evt_start() ;	// prepare start of event
+	tpc23->sim_evt_start(sector) ;	// prepare start of event
 	Int_t NoAdcs = 0;
 	Int_t Npads = digitalSector->numberOfPadsInRow(row);
 	Int_t rowO = row;
@@ -739,11 +657,28 @@ Int_t StTpcRTSHitMaker::Make23() {
 	      cout << Form("*** sequences found %d",tpc23->sequence_cou) << endl ;
 	    }
 	    while(p_buff < end_buff) {
-	      u_int padrow = *p_buff++ ;
-	      u_int version = *p_buff++ ;
-	      u_int int_cou = *p_buff++ ;
+				u_int padrow ;
+				u_int version ;
+				u_int int_cou ;
+				int ints_per_cluster ;
+				// TPX and iTPC have slightly different formats; maintained compatibility
+				if(tpc23 == fTpx23) {// det==0) {	// TPX
+					padrow = *p_buff++ ;
+					int_cou = *p_buff++ ;
+
+					version = (padrow>>16) ;
+
+					ints_per_cluster = 5 ;	// 5 for sim, 2 for real
+				}
+				else {	
+					padrow = *p_buff++ ;
+					version = *p_buff++ ;
+					int_cou = *p_buff++ ;
+
+					ints_per_cluster = (padrow>>16) ;
+					
+				}
 	  
-	  int ints_per_cluster = (padrow>>16) ;
 	  padrow &= 0xFFFF ;
 	  
 	  int clusters = int_cou / ints_per_cluster ;
@@ -800,12 +735,6 @@ Int_t StTpcRTSHitMaker::Make23() {
 	      #define FCF_DEAD_EDGE          64      // 0x40 touches a dead pad 
 	    */
 	    if ( dc.cld.flags && (dc.cld.flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE))) continue;
-#if 0 /* only padrow == rowO */
-	    //	    Int_t rowO = row;
-	    Int_t padrow  = rowO;
-	    if (! iTpcType && St_tpcPadConfigC::instance()->iTPC(sector) && rowO > 13)  padrow = rowO + 40 - 13;
-	    Int_t row = padrow;
-#endif
 	    Float_t pad  = dc.cld.pad;
 	    Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
 	    if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;

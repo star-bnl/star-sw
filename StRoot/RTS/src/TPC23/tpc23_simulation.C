@@ -20,23 +20,20 @@
 
 int main(int argc, char *argv[])
 {
-	const char *det = "itpc" ;	// default
 	int events = 10 ;		// default
 	int log_level = 0 ;
 
-	const char *fname ;
-	tpc23_base *tpc ;
+	const char *tpx_fname ;
+	const char *itpc_fname ;
+	tpc23_base *tpc[2] ;
 	int c ;
 
 	rtsLogOutput(RTS_LOG_STDERR) ;
 
-	while((c=getopt(argc,argv,"e:D:l:"))!=EOF) {
+	while((c=getopt(argc,argv,"e:l:"))!=EOF) {
 	switch(c) {
 	case 'e' :
 		events = atoi(optarg) ;
-		break ;
-	case 'D' :
-		det = optarg ;
 		break ;
 	case 'l' :
 		log_level = atoi(optarg) ;
@@ -45,25 +42,27 @@ int main(int argc, char *argv[])
 	}
 
 	// choose flavor: only makes a difference to row count and pad extents
-	if(strstr(det,"tpx")) {
-		tpc = new tpx23 ;
-		fname = "/RTS/conf/tpx/tpx_gains.txt.12Sep19.1" ;
-	}
-	else {
-		tpc = new itpc23 ;
-		fname = "/RTS/conf/itpc/itpc_gains.txt.11Sep19.1" ;
-	}
+	tpc[0] = new tpx23 ;
+	tpx_fname = "/RTS/conf/tpx/tpx_gains.txt.12Sep19.1" ;
 
-	tpc->log_level = log_level ;	// keep it at 0 (default) normaly
+	tpc[1] = new itpc23 ;
+	itpc_fname = "/RTS/conf/itpc/itpc_gains.txt.11Sep19.1" ;
+
+
+	tpc[0]->log_level = log_level ;	// keep it at 0 (default) normaly
+	tpc[1]->log_level = log_level ;	// keep it at 0 (default) normaly
 
 	// override to NO gain corrections for this test
-	fname = "none" ;
+	tpx_fname = "none" ;
+	tpc[0]->gains_from_cache(tpx_fname) ;	// REQUIRED even if no gain correction
 
-	tpc->gains_from_cache(fname) ;	// REQUIRED even if no gain correction
 
+	itpc_fname = "none" ;
+	tpc[1]->gains_from_cache(itpc_fname) ;	// REQUIRED even if no gain correction
 
 	// Does some initialization: REQUIRED at least once at the start of everyhing
-	tpc->run_start() ;
+	tpc[0]->run_start() ;
+	tpc[1]->run_start() ;
 
 	// prepare some test data: MUST be 512 timebins!
 	static short adc[512] ;	
@@ -76,37 +75,62 @@ int main(int argc, char *argv[])
 	}
 
 
-	for(int i=0;i<events;i++) {
+	for(int i=0;i<events;i++) {	// loop over events
+	for(int det=0;det<2;det++) {	// loop over TPX and then iTPC
 
-		tpc->sim_evt_start() ;	// prepare start of event
+//	if(det==0) continue ;
+
+	for(int sector=1;sector<=24;sector++) {
+		tpc[det]->sim_evt_start(sector) ;	// "start" event when changing the sector...
 
 		// fill in the data: ADC and Track Id: Just an example
-		for(int row=12;row<=13;row++) {
+		for(int row=20;row<=23;row++) {
 			for(int pad=10;pad<=20;pad++) {
-				tpc->sim_do_pad(row,pad,adc,track) ;
+				tpc[det]->sim_do_pad(row,pad,adc,track) ;
 			}
 		}
 
 		// allocate output storage based upon the count of found sequences
-		tpc->s2_max_words = tpc->sequence_cou*2 + 1024 ;
-		tpc->s2_start = (u_int *) malloc(tpc->s2_max_words*4) ;
+		tpc[det]->s2_max_words = tpc[det]->sequence_cou*2 + 1024 ;	// add abit more...
+		tpc[det]->s2_start = (u_int *) malloc(tpc[det]->s2_max_words*4) ;
 			
-		// this actually runs the clusterfinder
-		tpc->evt_stop() ;
+		// this actually runs the clusterfinder; s2_start MUST have been allocated
+		tpc[det]->evt_stop() ;
 
 		
-		if(tpc->s2_words) {	// if anything found..
-			u_int *p_buff = tpc->s2_start ;
-			u_int *end_buff = p_buff + tpc->s2_words ;
+		if(tpc[det]->s2_words) {	// if anything found..
+			u_int *p_buff = tpc[det]->s2_start ;
+			u_int *end_buff = p_buff + tpc[det]->s2_words ;
 
-			printf("*** Event %d: sequences found %d\n",i+1,tpc->sequence_cou) ;
+			printf("*** Event %d: det %d, sector %d: sequences found %d\n",i+1,
+			       det,sector,tpc[det]->sequence_cou) ;
 
 			while(p_buff < end_buff) {
-				u_int row = *p_buff++ ;
-				u_int version = *p_buff++ ;
-				u_int int_cou = *p_buff++ ;
+				u_int row ;
+				u_int version ;
+				u_int int_cou ;
+				int ints_per_cluster ;
 
-				int ints_per_cluster = (row>>16) ;
+				// TPX and iTPC have slightly different formats; maintained compatibility
+				if(det==0) {	// TPX
+					row = *p_buff++ ;
+					int_cou = *p_buff++ ;
+
+					version = (row>>16) ;
+
+					ints_per_cluster = 5 ;	// 5 for sim, 2 for real
+				}
+				else {	
+					row = *p_buff++ ;
+					version = *p_buff++ ;
+					int_cou = *p_buff++ ;
+
+					ints_per_cluster = (row>>16) ;
+					
+				}
+
+				//printf("... 0x%X 0x%X; version 0x%X\n",row,int_cou,version) ;
+
 				row &= 0xFFFF ;
 
 				int clusters = int_cou / ints_per_cluster ;
@@ -114,8 +138,9 @@ int main(int argc, char *argv[])
 				for(int i=0;i<clusters;i++) {
 					daq_sim_cld_x dc ;
 
-					tpc->fcf_decode(p_buff,&dc,version) ;
+					tpc[det]->fcf_decode(p_buff,&dc,version) ;
 
+					
 					// nice flags printout
 					char c_flags[128] ;
 					c_flags[0] = 0 ;
@@ -147,20 +172,20 @@ int main(int argc, char *argv[])
 			}
 
 			// free allocated storage
-			free(tpc->s2_start) ;
-			tpc->s2_start = 0 ;
+			free(tpc[det]->s2_start) ;
+			tpc[det]->s2_start = 0 ;
 
 			
 		}
+	}	// sector loop
+	}	// detector loop
+	}	// event loop
 
-		// end of event
+	tpc[0]->run_stop() ;	// dumps some statistics...
+	tpc[1]->run_stop() ;	// dumps some statistics...
 
-	}
-
-
-	tpc->run_stop() ;	// dumps some statistics...
-
-	delete tpc ;		// to be a nice citizen
+	delete tpc[0] ;		// to be a nice citizen
+	delete tpc[1] ;		// to be a nice citizen
 
 	return 0 ;
 }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <time.h>
+#include <stdlib.h>
 
 #include <rtsLog.h>
 
@@ -368,6 +369,12 @@ tpx23::tpx23()
 
 	rts_id = TPX_ID ;
 
+	if(rp_gain_tpx==0) {
+		rp_gain_tpx = (row_pad_t (*)[ROW_MAX+1][PAD_MAX+1]) malloc(sizeof(row_pad_t)*24*(ROW_MAX+1)*(PAD_MAX+1)) ;
+	}
+
+	rp_gain = rp_gain_tpx ;
+	
 }
 
 
