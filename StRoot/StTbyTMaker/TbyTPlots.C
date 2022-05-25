@@ -559,11 +559,12 @@ void SetNewOld() {
   TString pwd(gSystem->BaseName( gSystem->WorkingDirectory()));
   TObjArray *obj = pwd.Tokenize("_");
   Int_t nParsed = obj->GetEntries();
-  if (nParsed >= 2) {
+  if (nParsed >= 2) {// _Old_New
     Old = ((TObjString *) obj->At(nParsed-2))->GetName();
     New = ((TObjString *) obj->At(nParsed-1))->GetName();
   }
   delete obj;
+  cout << "New = " << New.Data() << " versus Old = " << Old.Data() << endl;
 }
 //________________________________________________________________________________
 void Init(const Char_t *file="Plots.root") {
