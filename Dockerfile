@@ -18,12 +18,7 @@ COPY . ${STAR}
 
 SHELL ["/bin/bash", "-l", "-c"]
 
-RUN module load vc-0.7.4 \
- && MYSQL=$(dirname $(mysql_config --variable=pkgincludedir)) \
-    LIBXML2_DIR=$(xml2-config --prefix) \
-    GSL_DIR=$(gsl-config --prefix) \
-    FASTJET_DIR=$(fastjet-config --prefix) \
-    cons \
+RUN cons \
  && find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 
 COPY --chmod=0755 <<-"EOF" /opt/entrypoint.sh

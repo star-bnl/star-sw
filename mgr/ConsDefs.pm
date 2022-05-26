@@ -873,7 +873,7 @@
 	    script::find_lib($MYSTAR . "/bin " .  $MYSTAR . "/bin/mysql ".
 			     $MYSQL . " ".
 			     $MYSQL . "/bin ".
-			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ",
+			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin " . dirname(`which mysql_config`),
 			     "mysql_config");
     # } else {
     #	($MYSQLCONFIG,$mysqlconf) =
@@ -1051,7 +1051,7 @@
     }
     # xml2
     my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
-    my ($xml) =  script::find_lib($MYSTAR . "/bin /usr/bin " . $LIBXML2_DIR . "/bin",
+    my ($xml) =  script::find_lib($MYSTAR . "/bin /usr/bin " . $LIBXML2_DIR . "/bin " . dirname(`which xml2-config`),
 				  "xml2-config");
     if ($xml) {
 	$xml .= "/xml2-config";
@@ -1097,6 +1097,10 @@
     } else {
 	print "Could not find xml libs\n" if (! $param::quiet);
     }
+
+    chomp($FASTJET_PREFIX = `fastjet-config --prefix`);
+    chomp($GSL_PREFIX = `gsl-config --prefix`);
+
  #Vc check SSE support
  my $cmd = "touch temp_gccflags.c; $CXX -E -dM -o - temp_gccflags.c | grep -q SSE";
  my $VcCPPFLAGS = " -DVC_IMPL=SSE";
@@ -1256,6 +1260,12 @@
 			    'CPPFLAGS' => $CERNLIB_CPPFLAGS,
 			    'CERNLIBS' => $CERNLIBS
 			    },
+                       'FASTJET' => {
+                           'INCDIR'=> "$FASTJET_PREFIX/include"
+                           },
+                       'GSL' => {
+                           'INCDIR'=> "$GSL_PREFIX/include"
+                           },
 		       'MYSQL' => {
 			   'LIBDIR'=> $MYSQLLIBDIR,
 			   'INCDIR'=> $MYSQLINCDIR,
