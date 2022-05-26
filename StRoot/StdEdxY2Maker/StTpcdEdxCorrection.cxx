@@ -32,6 +32,7 @@
 #include "StDetectorDbMaker/St_TpcDriftDistOxygenC.h"
 #include "StDetectorDbMaker/St_TpcMultiplicityC.h"
 #include "StDetectorDbMaker/St_GatingGridC.h"
+#include "StDetectorDbMaker/St_GatingGridBC.h"
 #include "StDetectorDbMaker/St_TpcZCorrectionBC.h"
 #include "StDetectorDbMaker/St_TpcZCorrectionCC.h"
 #include "StDetectorDbMaker/St_tpcMethaneInC.h"
@@ -166,7 +167,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[ktpcTime               ] = dEdxCorrection_t("tpcTime"       	  ,"Unregognized time dependce"						,St_tpcTimeDependenceC::instance()); 
   m_Corrections[kDrift                 ] = dEdxCorrection_t("TpcDriftDistOxygen"  ,"Correction for Electron Attachment due to O2"			,St_TpcDriftDistOxygenC::instance());	     
   m_Corrections[kMultiplicity          ] = dEdxCorrection_t("TpcMultiplicity"     ,"Global track multiplicity dependence"				,St_TpcMultiplicityC::instance());	     
-  m_Corrections[kGatingGrid            ] = dEdxCorrection_t("GatingGrid"          ,"Variation due to Gating Grid transperancy"				,St_GatingGridC::instance());	     
+  m_Corrections[kGatingGrid            ] = dEdxCorrection_t("GatingGrid"          ,"Variation due to Gating Grid transperancy"				,St_GatingGridBC::instance());	     
   m_Corrections[kzCorrectionC          ] = dEdxCorrection_t("TpcZCorrectionC"     ,"Variation on drift distance with Gating Grid one"			,St_TpcZCorrectionCC::instance());	     
   m_Corrections[kzCorrection           ] = dEdxCorrection_t("TpcZCorrectionB"     ,"Variation on drift distance without Gating Gird one"		,St_TpcZCorrectionBC::instance());	     
   m_Corrections[ktpcMethaneIn          ] = dEdxCorrection_t("tpcMethaneIn"        ,"Gain on Methane content"					        ,St_tpcMethaneInC::instance());	     
@@ -647,9 +648,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       }
     }
     if (corl->npar%100) {
-      Double_t dECor = 0;
+      Double_t dECor = 0; 
       if (k == kGatingGrid) {
-	dECor = TMath::Exp(-((St_GatingGridC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
+	dECor = TMath::Exp(-((St_GatingGridBC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[k]));
       } else {
 	dECor = TMath::Exp(-chairC->CalcCorrection(l,VarXs[k]));
       }
