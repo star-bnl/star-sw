@@ -63,8 +63,6 @@ template <typename T> class Array_t
   Int_t _size;
   Int_t _n, _m;
   Int_t _min, _max;
-
-  //c l a s s d e f (Array_t,0);
    
 };
 
