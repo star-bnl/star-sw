@@ -80,8 +80,8 @@ TDataSet *CreateTable() {
   row.K3OR       	    = 0.61;//(row)  for a/s = 2.5e-3 and h/s = 1.0 
   row.FanoFactor 	    = 0.3; //                                                                        
   row.AveragePedestal       = 50.0;// 
-  row.AveragePedestalRMS    = 1.0; // Old Tpc electronics or iTPC  1.4 => 1.0; Tonko 12/12/2019
-  row.AveragePedestalRMSX   = 0.7; // New Tpx electronics 
+  row.AveragePedestalRMS    = -1.0; // Tpx, Use St_TpcPadPedRMSC chair
+  row.AveragePedestalRMSX   = -1.0; // iTPC, -"- 
   row.tauIntegration        = 2.5*74.6e-9;//   secs 
   row.tauF                  = 394.0e-9;// secs Tpc 
   row.tauP                  = 775.0e-9;// secs Tpc 
@@ -89,31 +89,31 @@ TDataSet *CreateTable() {
   row.tauXO                 =  74.6e-9;// secs Tpx Outer integration time 
   row.tauCI                 =   0;  
   row.tauCO                 =   0;  
-  row.SigmaJitterTI         = 0.0; //1.5*0.4317/4.5;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
-  row.SigmaJitterTO         = 0.52; //1.5*0.4300/5.;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
-  row.SigmaJitterXI         = 0.1027785/2.;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
-  row.SigmaJitterXO         = 0.107525/2.; // 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
+  row.SigmaJitterTI         = 0.45;
+  row.SigmaJitterTO         = 0.45; 
+  row.SigmaJitterXI         = 0.07;
+  row.SigmaJitterXO         = 0.00; //0.107525/2.; // 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
   row.longitudinalDiffusion = 0.03624; // Magboltz // HD 0.03624*1.5; //HC 0.03624; // Magboltz 
-  row.longitudinalDiffusionI= row.longitudinalDiffusion*0.63;
+  row.longitudinalDiffusionI= row.longitudinalDiffusion;// *0.63;
   row.transverseDiffusion   = 0.02218*TMath::Sqrt(1 + row.OmegaTau*row.OmegaTau) ; // Magboltz
-  row.transverseDiffusionI  = 0.66  *row.transverseDiffusion;
+  row.transverseDiffusionI  = 0.91*row.transverseDiffusion;// 0.66  *row.transverseDiffusion;
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        =  2.145*1.515;// HC 1.;// 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] =  6.21777e-01 -4.23291e-02;
-  row.SecRowCorIW[1] = row.SecRowCorIE[1] = -1.54623e-03 +1.26327e-03;
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] =  9.59474e-01 +2.50905e-02;
-  row.SecRowCorOW[1] = row.SecRowCorOE[1] =  1.72672e-03 -1.97991e-03;
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] =  6.21777e-01 -4.23291e-02 + 1.31883e-02 -6.37730e-02;
+  row.SecRowCorIW[1] = row.SecRowCorIE[1] = -1.54623e-03 +1.26327e-03 + 4.57111e-04;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] =  9.59474e-01 +2.50905e-02 + 1.21909e-02 +8.57133e-04;
+  row.SecRowCorOW[1] = row.SecRowCorOE[1] =  1.72672e-03 -1.97991e-03; -1.25414e-04;
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
   //                                          3.22907e-01                          2.72715e-01
   // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
   // diff                                   : 9.13675e-02                          6.29849e-02
   // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
   const Double_t RowSigmaTrs[4] = {
-    0.2313675,   0,  // 9.13675e-02, 0,  // Inner // 9.13675e-02+0.14
-    6.29849e-02, 0}; // Outer
+    0.09, 0,  // 0.2313675,   0,  // 9.13675e-02, 0,  // Inner // 9.13675e-02+0.14
+    0.11, 0}; //6.29849e-02, 0}; // Outer
   Float_t *b = &row.SecRowSigIW[0];
   for (Int_t i = 0; i < 8; i++) {
     b[i] = RowSigmaTrs[i%4];
