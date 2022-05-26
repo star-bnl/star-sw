@@ -10,6 +10,15 @@ namespace AgMath {
 
 // Provides single point to define and/or redefine mathematical
 // keywords used in AgSTAR syntax.  i.e. cos, sin, cosh, tanh, ...
+//
+// Each of the definitions below were added for added to either workaround
+// issues in translating codes written by users in FORtran to
+// something compilable in c++, or minimizing numerical differences
+// between the geant3 geometries (created using MORtran / FORtran),
+// and the ROOT geometry created using c++.  Any changes to this
+// file requires material balance checks for all production geometries.  
+// Tread lighlty.
+//
 
 //
 // Define some often used constants
