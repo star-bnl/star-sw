@@ -1,7 +1,7 @@
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_tpcCorrection")) return 0;
 /* 
- Table: GatingGrid : parameters from Timothy Camarda, 08/09/21
+ Table: GatingGridB : parameters from Timothy Camarda, 08/09/21
  Old Gating Grid for Run < 18: t0 = 320 ns, setting time = 2.5  us, tau = 2.5  / 4.6  = 543 ns
  New Gating Grid for Run   18: t0 = 240 ns, setting time = 1.43 us, tau = 1.43 / 4.6  = 311 ns      
  Old Gating Grid for Runs 19 - 21
@@ -34,22 +34,15 @@ root.exe [72] I->Fit(GG,"er","",0.3,6)
    1  p0           2.42155e-01   6.17075e-03  -3.49149e-05   2.97485e-03
    2  p1           1.23716e+00   1.72556e-02   1.72556e-02  -2.32131e-03
 */ 
-  Int_t nrows = 2;
-  St_tpcCorrection *tableSet = new St_tpcCorrection("GatingGrid",nrows);
+  Int_t nrows = 1;
+  St_tpcCorrection *tableSet = new St_tpcCorrection("GatingGridB",nrows);
   tpcCorrection_st row;
   memset(&row,0,tableSet->GetRowSize());
   row.idx           = 1;
   row.nrows         = nrows;
   row.npar          = 2;
-  row.a[0]          = 2.85771e-01; // t0
-  row.a[1]          = 1.68566e+00; // settingTime
-  tableSet->AddAt(&row); // Outer
-  memset(&row,0,tableSet->GetRowSize());
-  row.idx           = 2;
-  row.nrows         = nrows;
-  row.npar          = 2;
-  row.a[0]          = 2.42155e-01; // t0
-  row.a[1]          = 1.23716e+00; // settingTime
+  row.a[0]          = 0.32; // t0
+  row.a[1]          = 2.50; // settingTime
   tableSet->AddAt(&row); // Outer
   return (TDataSet *)tableSet;
 }
