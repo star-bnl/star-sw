@@ -11,7 +11,7 @@ TDataSet *CreateTable() {
  description: Gating Grid transperancy = 0, for t < t0, and 1 - exp(-(t-t0)/tau), for t > t0
 */ 
   St_GatingGrid *tableSet = new St_GatingGrid("GatingGrid",1);
-  GatingGrid_st row = {0.24, 1.43  };
+  GatingGrid_st row = {0.24, 2.0  };
   tableSet->AddAt(&row);
   return (TDataSet *)tableSet;
 }

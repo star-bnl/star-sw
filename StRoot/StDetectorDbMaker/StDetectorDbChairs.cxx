@@ -392,9 +392,20 @@ MakeChairInstance2(tpcCorrection,St_TpcdZdYC,Calibrations/tpc/TpcdZdY);
 #include "St_TpcdXdYC.h"
 MakeChairInstance2(tpcCorrection,St_TpcdXdYC,Calibrations/tpc/TpcdXdY);
 #include "St_GatingGridC.h"
-MakeChairInstance2(tpcCorrection,St_GatingGridC,Calibrations/tpc/GatingGrid);
+MakeChairInstance2(GatingGrid,St_GatingGridC,Calibrations/tpc/GatingGrid);
 //________________________________________________________________________________
 Double_t St_GatingGridC::CalcCorrection(Int_t i, Double_t x) {// drift time in microseconds
+  Double_t value = -10;
+  GatingGrid_st *cor =  ((St_GatingGrid *) Table())->GetTable() + i;
+  if (x <= cor->t0) return value;
+  Double_t corD = 1. - TMath::Exp(-(x-cor->t0)/(cor->settingTime/4.6));
+  if (corD < 1e-4) return value;
+  return TMath::Log(corD);
+}
+#include "St_GatingGridBC.h"
+MakeChairInstance2(tpcCorrection,St_GatingGridBC,Calibrations/tpc/GatingGridB);
+//________________________________________________________________________________
+Double_t St_GatingGridBC::CalcCorrection(Int_t i, Double_t x) {// drift time in microseconds
   Double_t value = -10;
   if (x <= t0(i)) return value;
   Double_t corD = 1. - TMath::Exp(-(x-t0(i))/(settingTime(i)/4.6));
