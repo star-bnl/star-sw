@@ -1220,7 +1220,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	}
       }
       Int_t cs = NumberOfChannels*(sector-1)+FdEdx[k].channel;
-      if (pMomentum > pMomin && pMomentum < pMomax &&PiD.dEdxStatus(kMethod)->TrackLength() > 40 ) continue; // { // Momentum cut
+      //      if (pMomentum > pMomin && pMomentum < pMomax &&PiD.dEdxStatus(kMethod)->TrackLength() > 40 ) continue; // { // Momentum cut
+      if (pMomentum > pMomin && pMomentum < pMomax) { // Momentum cut
 	if (St_trigDetSumsC::instance()) {
 	  if (FdEdx[k].Zdc > 0 && ZdcCP) ZdcCP->Fill(TMath::Log10(FdEdx[k].Zdc), FdEdx[k].F.dEdxN);
 	  if (St_trigDetSumsC::instance()->bbcX() > 0)  {
@@ -1300,13 +1301,14 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	nTbk3  ## SIGN .Fill(rowS,FdEdx[k].Ntbks,&Vars[1]);      \
 
 #endif
-#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
+#if defined(__NEGATIVE_AND_POSITIVE__) 
 	__FILL__VARS__();
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kAdcI].dEdxN;
 #ifdef __AdcI3__
 	AdcI3.Fill(rowS,FdEdx[k].AdcI,&Vars[1]);
 #endif /* __AdcI3__ */
-#else /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
+#else /* ! __NEGATIVE_AND_POSITIVE__ */
+  #if defined(__NEGATIVE_ONLY__) || defined(__NEGATIVE_AND_POSITIVE__)
 	if (sCharge == 1)  {
 	__FILL__VARS__();
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kAdcI].dEdxN;
@@ -1314,7 +1316,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	AdcI3.Fill(rowS,FdEdx[k].AdcI,&Vars[1]);
 #endif /* __AdcI3__ */
 	}
-#ifdef __NEGATIVE_AND_POSITIVE__
+     #if defined(__NEGATIVE_AND_POSITIVE__)
 	if (sCharge == 0)  {
 	__FILL__VARS__(P);
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kAdcI].dEdxN;
@@ -1322,9 +1324,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	AdcI3P.Fill(rowS,FdEdx[k].AdcI,&Vars[1]);
 #endif /* __AdcI3__ */
 	}
+     #endif /* __NEGATIVE_AND_POSITIVE__ */
+  #endif /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
 #endif /* __NEGATIVE_AND_POSITIVE__ */
-#endif /* ! __NEGATIVE_ONLY__ && ! __NEGATIVE_AND_POSITIVE__ */
-    }
+      } // MIP momentum cut
+    } // loop over dEdx points 
   }
   return;
 }
