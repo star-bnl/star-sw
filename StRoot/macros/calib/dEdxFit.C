@@ -100,6 +100,9 @@ end
 #include "RooRandom.h"
 #include "RooFitResult.h"
 #include "RooWorkspace.h"
+#include "TArrayI.h"
+#include "TArrayF.h"
+#include "TArrayD.h"
 using namespace RooFit ;
 #endif /* __USE_ROOFIT__ */
 #include "TObjectTable.h"
@@ -165,22 +168,22 @@ static const  peak_t Peaks[6] = {
 	  { 0.0251, 0.0902, 0.1477, 0.2007, 0.2416, 0.2669, 0.0278}  // Y
   },
   {       0.557112,       0.174024,       0.493677,       "kaon",
-	  5,// kaonNzB
+	  0, // 5,// kaonNzB
 	  { 0.1000, 0.3000, 0.5000, 0.7000, 0.9000}, // X
 	  { 0.0177, 0.1928, 0.3611, 0.3618, 0.0666}  // Y
   },
   {       0.421061,       0.0096963,      0.000510999,    "e",
-	  3,// eNzB
+	  0, // 3,// eNzB
 	  { 0.3900, 0.4100, 0.4300}, // X
 	  { 0.0262, 0.3455, 0.6283}  // Y
   },
   {       2.60851,        0.347455,       1.87561,        "deuteron",
-      8,// deuteronNzB
+	  0, // 8,// deuteronNzB
 	{ 1.7000, 1.9000, 2.1000, 2.3000, 2.5000, 2.7000, 2.9000, 3.1000}, // X
 	  { 0.0142, 0.0499, 0.0854, 0.1259, 0.1671, 0.1893, 0.2353, 0.1330}  // Y
   },
   {       0.000482817,    0.0128277,      0.105658,       "mu",
-	  4,// muNzB
+	  0, // 4,// muNzB
 	  {-0.0300,-0.0100, 0.0100, 0.0300}, // X
 	  { 0.0452, 0.4258, 0.4626, 0.0663}  // Y
   }
@@ -1598,44 +1601,59 @@ void PreSetParameters(TH1 *proj, TF1 *g2) {
   // Find pion peak
   Int_t nfound = fSpectrum->Search(proj);
   if (nfound < 1) return;
-  Int_t npeaks = 0;
+  
 #if  ROOT_VERSION_CODE < ROOT_VERSION(6,0,0)
-  Float_t *xpeaks = fSpectrum->GetPositionX();
+  TArrayF X(nfound,fSpectrum->GetPositionX());
+  TArrayF Y(nfound,fSpectrum->GetPositionY());
 #else
-  Double_t *xpeaks = fSpectrum->GetPositionX();
+  TArrayD X(nfound,fSpectrum->GetPositionX());
+  TArrayD Y(nfound,fSpectrum->GetPositionY());
 #endif
-  Float_t xp = 0;
-  if (nfound > 2) nfound = 2;
-  Double_t xpi = 9999;
-  Double_t significance = 0;
-  for (Int_t p = 0; p < nfound; p++) {
-    xp = xpeaks[p];
+  TArrayI idxT(nfound);
+  TMath::Sort(nfound,Y.GetArray(),idxT.GetArray());
+  //                             pi,        proton,          kaon,             e,     deuteron, 
+  Double_t frac[5] = {           1.,          1e-6,          1e-6,          1e-6,          1e-6};
+  Double_t post[5] = {Peaks[0].peak, Peaks[1].peak, Peaks[2].peak, Peaks[3].peak, Peaks[4].peak};
+  Double_t tots[5] = {0};
+  Int_t nP = 0;
+  Double_t xpi = 0;
+  Double_t T = 0;
+  for (Int_t i = 0; i < nfound; i++) {
+    Int_t p = idxT[i];
+    Double_t xp = X[p];
     Int_t bin = proj->GetXaxis()->FindBin(xp);
     Double_t yp = proj->GetBinContent(bin);
     Double_t ep = proj->GetBinError(bin);
     if (yp-5*ep < 0) continue;
-    Double_t sig = yp/ep;
-    if (sig < significance) continue;
-    significance = sig;
-    xpi = xp;
+    Double_t dx = 9999;
+    Int_t j = -1;
+    for (Int_t l = 0; l < 5; l++) {
+      if (TMath::Abs(xp - post[l]) < TMath::Abs(dx)) {
+	dx = xp - post[l];
+	j = l;
+      }
+    }
+    if (j >= 0 && TMath::Abs(dx) < 0.2) {
+      tots[j] = yp;
+      T += tots[j];
+      nP++;
+      if (nP == 1) xpi = dx;
+      else         xpi = ((nP-1) * xpi + dx)/nP;
+    }
+  }
+  g2->SetParameters(1, xpi);
+  g2->SetParameter(2, 0.35);
+  for (Int_t l = 1; l < 5; l++) {
+    if (tots[l] > 0) {
+      frac[l] = tots[l]/T;
+    }
+    Double_t phi = TMath::ASin(TMath::Sqrt(frac[l]));
+    g2->FixParameter(l+2, phi);
   }
   Double_t total = proj->Integral()*proj->GetBinWidth(5);
-  //  g2->SetParameters(0, proj->GetMean(), proj->GetRMS(), 0.1, 0.1, 0.1, 0.1,0.1,-1.);
-  //   Int_t binmax = proj->GetMaximumBin();
-  //   Double_t xmax = proj->GetXaxis()->GetBinCenter(binmax);
-  if (TMath::Abs(Peaks[0].peak - xpi) > TMath::Abs(Peaks[1].peak - xpi)) {
-    // proton
-    //    g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,TMath::Pi()/2);
-    //    g2->SetParameters(0, 0, 0.35, 0.9*TMath::Pi()/2, 0.0, 0.0, 0.0,0.0,-1.,1);
-    g2->SetParameters(0, 0, 0.35, 0.0, 0.0, 0.0, 0.0,0.0,-1.,1);
-  } else {
-    g2->SetParameters(0, xpi, 0.35, 0.6, 0.1, 0.1, 0.1,0.1,-1.,1);
-  }
-  g2->FixParameter(4,1e-6);
-  g2->FixParameter(5,1e-6);
-  g2->FixParameter(6,1e-6);
   g2->FixParameter(7,total);
   g2->FixParameter(8,-1);
+  g2->FixParameter(9, 1);
 }
 //________________________________________________________________________________
 TF1 *FitGF(TH1 *proj, Option_t *opt="") {
@@ -1647,9 +1665,9 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
   if (! g2) {
     g2 = new TF1("GF",gfFunc, -5, 5, 10);
     g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
-    g2->SetParName(1,"mu");     g2->SetParLimits(1,-2.5,2.5);
+    g2->SetParName(1,"mu");     g2->SetParLimits(1,-0.5,0.5);
     g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.05,0.8);
-    g2->SetParName(3,"P");      g2->SetParLimits(3,0,0.5);
+    g2->SetParName(3,"P");      g2->SetParLimits(3,0,1.5);
     g2->SetParName(4,"K");      g2->SetParLimits(4,0.0,0.5);
     g2->SetParName(5,"e");      g2->SetParLimits(5,0.0,0.5);
     g2->SetParName(6,"d");      g2->SetParLimits(6,0.0,0.5);
@@ -1660,7 +1678,7 @@ TF1 *FitGF(TH1 *proj, Option_t *opt="") {
   }
   PreSetParameters(proj, g2);
   proj->Fit(g2,Opt.Data());
-  g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,0.5);
+  g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,1.5);
   g2->ReleaseParameter(4); g2->SetParLimits(4,0.0,0.5);
   g2->ReleaseParameter(5); g2->SetParLimits(5,0.0,0.5);
   g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,0.5);
