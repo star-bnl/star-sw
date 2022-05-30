@@ -47,6 +47,8 @@
 
 #include "StETofUtil/StETofConstants.h"
 
+#include "StMaker.h"
+
 class TNamed;
 
 class StETofHit;
@@ -288,9 +290,9 @@ public:
     StETofGeometry( const char* name = "etofGeo", const char* title = "simplified ETOF Geometry" );
     ~StETofGeometry();
 
-    void init( TGeoManager* geoManager );
-    void init( TGeoManager* geoManager, const double* safetyMargins );
-    void init( TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer );
+    void init( TGeoManager* geoManager ); //does not load alignment from local file or database
+    void init( TGeoManager* geoManager, const double* safetyMargins ); //does not load alignment from local file or database
+    void init( StMaker* maker, TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer );
 
     void reset();
 
@@ -363,6 +365,7 @@ public:
     unsigned int      nValidModules() const;
 
 	 void readAlignmentParameters();
+	 void readAlignmentDatabase(StMaker* maker); 
 	 void setFileNameAlignParam(std::string FileNameAlignParam);
 
     void debugOn();
