@@ -306,9 +306,24 @@ StETofHitMaker::Make()
     LOG_DEBUG << "StETofHitMaker::Make(): starting ..." << endm;
 
     mEvent = ( StEvent* ) GetInputDS( "StEvent" );
+   // mEvent = NULL; //don't check for StEvent for genDst.C testing. PW
 
     if ( mEvent ) {
         LOG_DEBUG << "Make() - running on StEvent" << endm;
+		  StETofCollection* etofCollection = mEvent->etofCollection();
+
+		  if( !etofCollection ) { //additional check for empty StEvents structures produced by other Makers. Needed for genDst.C
+		     LOG_WARN << "Make() - Found StEvent data structure, but no eTOF collection. Try MuDst processing instead" << endm;
+		     mMuDst = ( StMuDst* ) GetInputDS( "MuDst" );
+
+		     if( mMuDst ) {
+		         LOG_DEBUG << "Make() - running on MuDsts" << endm;
+
+		         processMuDst();
+
+		         return kStOk;
+		     }
+		  }
 
         processStEvent();
 
