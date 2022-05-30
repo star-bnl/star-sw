@@ -51,6 +51,8 @@
 #include "StMuDSTMaker/COMMON/StMuETofHit.h"
 #include "StPicoEvent/StPicoETofHit.h"
 
+#include "tables/St_etofAlign_Table.h"
+
 #include "StarMagField.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -641,18 +643,18 @@ void
 StETofGeometry::init( TGeoManager* geoManager )
 {
     double safetyMargins[ 2 ] = { 0., 0. };
-    init( geoManager, safetyMargins, false );
+    init( NULL, geoManager, safetyMargins, false );
 }
 
 void
 StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins )
 {
-    init( geoManager, safetyMargins, false );
+    init( NULL, geoManager, safetyMargins, false );
 }
 
 
 void
-StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer )
+StETofGeometry::init(StMaker* maker, TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer )
 {
     if( !geoManager ) {
         LOG_ERROR << " *** StETofGeometry::Init - cannot find TGeoManager *** " << endm;
@@ -666,6 +668,8 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins, cons
 
 	 if( mFileNameAlignParam != ""){
 	 	readAlignmentParameters();
+	 }else{
+		readAlignmentDatabase(maker);
 	 }
 
 	 geoManager->AddNavigator();
@@ -1601,5 +1605,49 @@ StETofGeometry::readAlignmentParameters(){
             return;
         }
 
+}
+
+void 
+StETofGeometry::readAlignmentDatabase(StMaker* maker){
+        LOG_INFO << "No etof alignment file provided --> use database: " << endm;
+        
+		  //add check for no alignment set here.
+	
+    	  TDataSet* dbDataSet = nullptr;
+
+		 if(!maker){
+			LOG_WARN << "No valid pointer to any StMaker given. Do not load alignment from database" << endm;
+			return;
+		 }
+
+        dbDataSet = maker->GetDataBase( "Geometry / etof / etofAlign" );
+
+        St_etofAlign* etofAlign = static_cast< St_etofAlign * > ( dbDataSet->Find( "etofAlign" ) );
+        if( !etofAlign ) {
+            LOG_ERROR << "unable to get the align params from the database" << endm;
+            return;
+        }
+
+        etofAlign_st* table = etofAlign->GetTable();
+	     StThreeVectorD counterAlignmentParameter;
+        float tempX;
+		  float tempY;
+		  float tempZ;
+
+		  for( int iCounter = 0; iCounter < eTofConst::nCounters; iCounter++){
+       		tempX = table[iCounter].detectorAlignX[0];
+       		tempY = table[iCounter].detectorAlignY[0];
+       		tempZ = table[iCounter].detectorAlignZ[0];
+		  		StThreeVectorD counterAlignmentParameter = StThreeVectorD( tempX, tempY, tempZ );
+            mAlignmentParameters.push_back( counterAlignmentParameter );
+        }
+
+        if( mAlignmentParameters.size() != 108 ) {
+            LOG_WARN << "parameter vector for alignments has not the right amount of entries: ";
+            LOG_WARN << mAlignmentParameters.size() << " instead of 108 !!!!" << endm;
+            return;
+        }else{
+				return;
+		 }
 }
 
