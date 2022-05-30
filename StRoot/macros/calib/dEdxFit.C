@@ -1955,6 +1955,35 @@ TF1 *FitGB(TH1 *proj, Option_t *opt="", Double_t dX = 2.364) {
   return g2;
 }
 //________________________________________________________________________________
+Double_t ggaus(Double_t *x, Double_t *p) {
+  Double_t X = x[0];
+  Double_t NormL = p[0];
+  Double_t mu = p[1];
+  Double_t sigma = p[2];
+  Double_t alpha = p[3];
+  Double_t t = (X  - mu)/sigma;
+  Double_t v = t/TMath::Sqrt2();
+  return TMath::Exp(NormL)*TMath::Gaus(t,0,1,kTRUE)/sigma*(1. + TMath::Erf(alpha*v));
+}
+//________________________________________________________________________________
+TF1 *GG() {
+  static TF1 *f = 0;
+  if (! f) {
+    f = new TF1("GG",ggaus,-5,5,4);
+    f->SetParNames("norl","mu","sigma","alpha");
+  }
+  f->SetParameters(0,0,1,1);
+  return f;
+}
+//________________________________________________________________________________
+TF1 *FitGG(TH1 *proj, Option_t *opt="RQ") {
+  if (! proj) return 0;
+  Double_t params[9];
+  TF1 *g = GG();
+  proj->Fit(g,opt);
+  return g;
+}
+//________________________________________________________________________________
 TF1 *FitG2(TH1 *proj, Option_t *opt="RQ") {
   if (! proj) return 0;
   Double_t params[9];
@@ -2332,37 +2361,6 @@ TF1 *FitG(TH1 *proj, TF1 *g=0, TF1 *ga=0){//, Double_t scaleM=-2., Double_t scal
     return ga;
   }
   return g;
-}
-//________________________________________________________________________________
-Int_t FitGG(TH1 *proj, TF1 *g1, TF1 *g2=0, TF1 *ga2=0, Double_t scaleM=-2., Double_t scaleP=2.) {
-  Double_t params[9];
-  proj->Fit("g1","R");
-  g1->GetParameters(params);
-  Double_t chisq = g1->GetChisquare();
-  if (chisq <= 0. || chisq > 1.e10) return -1;
-  params[3] = 1;
-  params[4] = params[1]+0.1;
-  params[5] = params[2];
-  g2->SetParameters(params);
-  proj->Fit("g2");
-  chisq = g2->GetChisquare();
-  if (chisq <= 0. || chisq > 1.e10) return -1;
-  g2->GetParameters(params);
-  if (ga2) {
-    params[6] = 0;
-    params[7] = 0;
-    params[8] = 0;
-    ga2->SetParameters(params);
-    proj->Fit("ga2","R");
-    ga2->GetParameters(params);
-    ga2->SetRange(params[1]+scaleM*params[2],params[1]+scaleP*params[2]);
-    proj->Fit("ga2","R");
-  }
-//   if (gPad) {
-//     gPad->Update();
-//     gPad->WaitPrimitive();
-//   }
-  return 0;
 }
 //________________________________________________________________________________
 void FitX(TH2 *hist=0, Double_t range=1, Int_t Ibin = 0) {
@@ -3321,6 +3319,7 @@ void dEdxFitSparse(THnSparse *hist, const Char_t *FitName = "GP",
     }
     else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
     else if (TString(FitName) == "G2") g = FitG2(proj,opt);
+    else if (TString(FitName) == "GG") g = FitGG(proj,opt);
     else if (TString(FitName) == "Freq") g = FitFreq(proj,opt,zmin,zmax);
     else if (TString(FitName) == "GMP") g = FitG(proj,GMP());
     else if (TString(FitName) == "GMN") g = FitG(proj,GMN());
@@ -3614,6 +3613,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       }      
       else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
+      else if (TString(FitName) == "GG") g = FitGG(proj,opt);
       else if (TString(FitName) == "Freq") g = FitFreq(proj,opt,zmin,zmax);
       else if (TString(FitName) == "GMP") g = FitG(proj,GMP());
       else if (TString(FitName) == "GMN") g = FitG(proj,GMN());
