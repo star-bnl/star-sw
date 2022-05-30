@@ -311,7 +311,7 @@ StETofMatchMaker::InitRun( Int_t runnumber )
 
         LOG_DEBUG << " gGeoManager: " << gGeoManager << endm;
 
-        mETofGeom->init( gGeoManager, etofProjection::safetyMargins, mUseHelixSwimmer );
+        mETofGeom->init( (StMaker*)this, gGeoManager, etofProjection::safetyMargins, mUseHelixSwimmer ); //provide backline to initiating maker to load DB tables
     }
 
     if( mDoQA ) {
@@ -394,13 +394,31 @@ StETofMatchMaker::Make()
     mIsMuDstIn   = false;
 
     mEvent = ( StEvent* ) GetInputDS( "StEvent" );
+   // mEvent = NULL; //don't check for StEvent for genDst.C testing. PW
 
     if ( mEvent ) {
         LOG_DEBUG << "Make() - running on StEvent" << endm;
 
-        mIsStEventIn = true;
+		  StETofCollection* etofCollection = mEvent->etofCollection();
 
-        cleanUpTraits();
+		  if( !etofCollection ) { //additional check for empty StEvents structures produced by other Makers. Needed for genDst.C
+		     LOG_WARN << "Make() - Found StEvent data structure, but no eTOF collection. Try MuDst processing instead" << endm;
+		     mMuDst = ( StMuDst* ) GetInputDS( "MuDst" );
+
+		     if( mMuDst ) {
+             LOG_DEBUG << "Make() - running on MuDsts" << endm;
+
+             mIsMuDstIn = true;
+
+             fillIndexToPrimaryMap();
+
+             cleanUpTraits();
+		     }
+		  }else{
+		     mIsStEventIn = true;
+
+		     cleanUpTraits();
+		 }
     }
     else {
         LOG_DEBUG << "Make(): no StEvent found" << endm;
