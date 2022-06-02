@@ -1973,15 +1973,38 @@ TF1 *FitGB(TH1 *proj, Option_t *opt="", Double_t dX = 2.364) {
   return g2;
 }
 //________________________________________________________________________________
+Double_t ggauso(Double_t *x, Double_t *p) {
+  Double_t X = x[0];
+  Double_t NormL = p[0];
+  Double_t ksi = p[1];
+  Double_t w = p[2];
+  Double_t alpha = p[3];
+  Double_t t = (X  - ksi)/w;
+  Double_t v = t/TMath::Sqrt2();
+  return TMath::Exp(NormL)*TMath::Gaus(t,0,1,kTRUE)/w*(1. + TMath::Erf(alpha*v));
+}
+//________________________________________________________________________________
 Double_t ggaus(Double_t *x, Double_t *p) {
   Double_t X = x[0];
   Double_t NormL = p[0];
-  Double_t mu = p[1];
-  Double_t sigma = p[2];
+  Double_t mu    = p[1]; // Mode = ksi + w *m_0(alpha); most propable value
+  Double_t sigma = p[2]; // Sqrt(Variance);
   Double_t alpha = p[3];
-  Double_t t = (X  - mu)/sigma;
-  Double_t v = t/TMath::Sqrt2();
-  return TMath::Exp(NormL)*TMath::Gaus(t,0,1,kTRUE)/sigma*(1. + TMath::Erf(alpha*v));
+  Double_t ksi   = mu;
+  Double_t w     = sigma;
+  if (TMath::Abs(alpha) > 1e-7) {
+    Double_t delta =alpha/TMath::Sqrt(1 + alpha*alpha);
+    Double_t muz = delta/TMath::Sqrt(TMath::PiOver2());
+    Double_t sigmaz = TMath::Sqrt(1 - muz*muz);
+    Double_t gamma1 = (4 - TMath::Pi())/2 * TMath::Power(delta*TMath::Sqrt(2./TMath::Pi()), 3) 
+      /                                     TMath::Power(1 - 2*delta*delta/TMath::Pi(), 1.5);
+    Double_t m_0 = muz - gamma1*sigmaz/2 - TMath::Sign(1.,alpha)/2*TMath::Exp(-2*TMath::Pi()/TMath::Abs(alpha));
+    w   = sigma/TMath::Sqrt(1 - 2* delta*delta/TMath::Pi()); 
+    ksi = mu - w*m_0;
+    //    Double_t mean = ksi + w * muz;
+  }
+  Double_t par[4] = {NormL, ksi, w, alpha};
+  return ggauso(x, par);
 }
 //________________________________________________________________________________
 TF1 *GG() {
@@ -1990,7 +2013,9 @@ TF1 *GG() {
     f = new TF1("GG",ggaus,-5,5,4);
     f->SetParNames("norl","mu","sigma","alpha");
   }
-  f->SetParameters(0,0,1,1);
+  f->SetParameters(0,0.8,1,1);
+  f->SetParLimits(1,0.6,1.0);
+  f->SetParLimits(3,-0.1,4.0);
   return f;
 }
 //________________________________________________________________________________
@@ -1998,6 +2023,65 @@ TF1 *FitGG(TH1 *proj, Option_t *opt="RQ") {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *g = GG();
+  proj->Fit(g,opt);
+  return g;
+}
+//________________________________________________________________________________
+TF1 *FitGG2(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG2")'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG2","R",-1,-1,2)'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG2","R",-1,-1,3)'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG2","R",-1,-1,4)'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG2","R",-1,-1,5)'
+  if (! proj) return 0;
+  Double_t params[9];
+  TF1 *g = GG();
+  Double_t xx = TMath::Max(3.1, TMath::Min(6.5, fitX));
+  Double_t sigma =        1.10043e+00   + xx * (-2.14927e-01   + xx * 9.77528e-03);
+  g->FixParameter(2, sigma);
+  proj->Fit(g,opt);
+  return g;
+}
+//________________________________________________________________________________
+TF1 *FitGG3(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG3")'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG3","R",-1,-1,2)'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG3","R",-1,-1,3)'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG3","R",-1,-1,4)'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG3","R",-1,-1,5)'
+  if (! proj) return 0;
+  Double_t params[9];
+  TF1 *g = GG();
+  Double_t xx = TMath::Max(3.1, TMath::Min(6.5, fitX));
+  Double_t sigma =        1.10043e+00   + xx * (-2.14927e-01   + xx * 9.77528e-03);
+  g->FixParameter(2, sigma);
+  // tChain->Draw("a0:x>>alpha(40,3,7)","i&&j&&dmu<0.01&&a0>-0.1&&a0<3.9&&mu>0.65","prof")
+  Double_t alpha =    -22.6936   + xx*(    16.2998   + xx*(   -3.28817   + xx*   0.209148 ));
+  g->FixParameter(3, alpha);
+  proj->Fit(g,opt);
+  return g;
+}
+//________________________________________________________________________________
+TF1 *FitGG4(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG4")'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG4","R",-1,-1,2)'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG4","R",-1,-1,3)'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG4","R",-1,-1,4)'
+  //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG4","R",-1,-1,5)'
+  if (! proj) return 0;
+  Double_t params[9];
+  TF1 *g = GG();
+  Double_t xx = TMath::Max(3.1, TMath::Min(6.5, fitX));
+  Double_t sigma =        1.10043e+00   + xx * (-2.14927e-01   + xx * 9.77528e-03);
+  g->FixParameter(2, sigma);
+  // tChain->Draw("a0:x>>alpha(40,3,7)","i&&j&&dmu<0.01&&a0>-0.1&&a0<3.9&&mu>0.65","prof")
+  Double_t alpha =    -22.6936   + xx*(    16.2998   + xx*(   -3.28817   + xx*   0.209148 ));
+  g->FixParameter(3, alpha);
+  // tChain->Draw("mu:x>>mu(58,3.1,8.9)","i&&j&&dmu<0.01","prof")
+  // mu->Fit("pol5","er","",3.1,7.)
+  xx = TMath::Max(3.1, TMath::Min(7.0, fitX));
+  Double_t mu =  -2.08815e+01 + xx*(  2.57192e+01 + xx*( -1.17647e+01 + xx*(  2.59742e+00 + xx*( -2.77836e-01 + xx*  1.15642e-02))));
+  g->FixParameter(1, mu);
   proj->Fit(g,opt);
   return g;
 }
@@ -3338,6 +3422,9 @@ void dEdxFitSparse(THnSparse *hist, const Char_t *FitName = "GP",
     else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
     else if (TString(FitName) == "G2") g = FitG2(proj,opt);
     else if (TString(FitName) == "GG") g = FitGG(proj,opt);
+    else if (TString(FitName) == "GG2") g = FitGG2(proj,opt);
+    else if (TString(FitName) == "GG3") g = FitGG3(proj,opt);
+    else if (TString(FitName) == "GG4") g = FitGG4(proj,opt);
     else if (TString(FitName) == "Freq") g = FitFreq(proj,opt,zmin,zmax);
     else if (TString(FitName) == "GMP") g = FitG(proj,GMP());
     else if (TString(FitName) == "GMN") g = FitG(proj,GMN());
@@ -3632,6 +3719,9 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
       else if (TString(FitName) == "GG") g = FitGG(proj,opt);
+      else if (TString(FitName) == "GG2") g = FitGG2(proj,opt, Fit.x, Fit.y);
+      else if (TString(FitName) == "GG3") g = FitGG3(proj,opt, Fit.x, Fit.y);
+      else if (TString(FitName) == "GG4") g = FitGG4(proj,opt, Fit.x, Fit.y);
       else if (TString(FitName) == "Freq") g = FitFreq(proj,opt,zmin,zmax);
       else if (TString(FitName) == "GMP") g = FitG(proj,GMP());
       else if (TString(FitName) == "GMN") g = FitG(proj,GMN());
