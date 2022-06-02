@@ -13,6 +13,15 @@
    
   PressureGF
  FitPDraw("mu:y","IP", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)<40.5)", "prof", -0.4,  0.3, "All", "log(Pressure)")
+  
+root.exe neP*.root
+FitPDraw("mu:x","MuG", 70,   3,  10, "(i&&j&&dmu<0.01&&dsigma<0.01)/dmu**2", "profg", 0.6, 1.0, "", "log(nP)")
+FitPDraw("sigma:x","SigG", 70,   3,  10, "(i&&j&&dmu<0.01&&dsigma<0.01)/dsigma**2", "profg", 0, 0.6, "", "log(nP)")
+FitPDraw("a0:x","alphaG", 70,   3,  10, "(i&&j&&dmu<0.01&&dsigma<0.01)/da0**2", "profg", -5, 5, "", "log(nP)")
+
+FitPDraw("mu:x","Mu", 70,   3,  10, "i&&j&&dmu<0.01&&dsigma<0.01", "prof", 0.6, 1.0, "", "log(nP)")
+FitPDraw("sigma:x","Sig", 70,   3,  10, "(i&&j&&dmu<0.01&&dsigma<0.01)", "prof", 0, 0.6, "", "log(nP)")
+FitPDraw("a0:x","alpha", 70,   3,  10, "(i&&j&&dmu<0.01&&dsigma<0.01)", "prof", -5, 5, "", "log(nP)")
 */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
@@ -279,7 +288,7 @@ void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)",
 	}
       }
     } else {
-      p = new TProfile(histN,"#mu versus pad row",nx, xMin, xMax);
+      p = new TProfile(histN,Draw,nx, xMin, xMax);
     }
     p->SetMarkerColor(icol);
     p->SetLineColor(icol);
