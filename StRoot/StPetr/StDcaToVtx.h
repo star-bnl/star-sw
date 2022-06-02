@@ -1,92 +1,64 @@
 #ifndef STDCATOVTX_H
 #define STDCATOVTX_H
-#include "Rtypes.h"
+#include "TObject.h"
 #include "THelixTrack.h"
+#include "StDcaGeometry.h"
+#include "TDatabasePDG.h"
+#include "TParticlePDG.h"
 
 class TGeoMaterial;
 class THelixTrack;
 class StvELossTrak;
-//..............................................................................
-class DcaPar_t
-{ 
-public:
-  /// Signed impact parameter; Signed in such a way that:
-  /// x =  -impact*sin(Psi), y =   impact*cos(Psi)
-  void operator=(const Float_t *arr) { memcpy(&mImp,arr,sizeof(DcaPar_t));}
-  Float16_t mImp;
-  /// Z position of the track fitted to (0,0,z)
-  Float16_t mZ;
-  /// Psi angle of the track
-  Float16_t mPsi;        //[-pi,pi,20]
-  /// Pti of the track ( 1/pT )
-  Float16_t mPti;
-  /// Tangent of the track momentum dip angle
-  Float16_t mTan;        //[-10,10,20]
-  /// Curvature
-  Float16_t mCurv;
-  /// Diagonal elements
-  Float16_t mSigma[5];
-  /// Off-diagonal elements
-  Float16_t mCorr[10];   //[-1,1,20] 
-};
-
-
-class DcaEmx_t
-{
-public:
-  void operator=(const Float_t *arr) { memcpy(&mImpImp,arr,sizeof(DcaEmx_t));}
-  Float_t& operator[](int i) { return (&mImpImp)[i];};
-                                                          //    j    0     1     2     3     4
-    Float_t  mImpImp;                                     //  i 0  0(0) 
-    Float_t  mZImp,   mZZ;                                //    1  1(0)  2(1)
-    Float_t  mPsiImp, mPsiZ, mPsiPsi;                     //    2  3(1)  4(2)  5(2)
-    Float_t  mPtiImp, mPtiZ, mPtiPsi, mPtiPti;            //    3  6(3)  7(4)  8(5)  9(3)
-    Float_t  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;   //    4 10(6) 11(7) 12(8) 13(9) 14(4)
-};
-
 class THPar_t
 {
-public:
-double mPos[3];
-double mDir[3];
-double mCur;
+ public:
+  double mPos[3];
+  double mDir[3];
+  double mCur;
 };
 
-class StDcaToVtx
+class StDcaToVtx : public TObject
 {
-public:
+ public:
   StDcaToVtx();
   virtual ~StDcaToVtx();
+  void Set(Int_t pdg) {mPdg = pdg; mM = 0; TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(mPdg); if (p) mM = p->Mass();}
+  void Set(Double_t M) {mM = M;}
+  void Add(Double_t R, TGeoMaterial *mat) {mRxy[mN] = R; mMat[mN] = mat; mN++;}
   void Set(double M,const TGeoMaterial *matA,double RxyA,
-                    const TGeoMaterial *matB,double RxyB,
-		    const TGeoMaterial *matC,double RxyC=0);
-  void Set(Float_t Vtx[3],Float_t *dcaPar);
+	   const TGeoMaterial *matB,double RxyB,
+	   const TGeoMaterial *matC,double RxyC=0);
+  void Set(Float_t Vtx[3],StDcaGeometry *dcaG);
   void UpdateELoss(double len,const TGeoMaterial *mat);
+  void UpdateDca();
   void Shooter();
-
-THEmx_t      *GetEmx() {return mHlx->Emx();};
-THelixTrack  *GetHlx() {return mHlx       ;};
-StvELossTrak *ELoss()  {return mELoss     ;};
-double       *GetRxy() {return mRxy       ;};  
-
+  virtual void        Print(Option_t *option="") const;
+  THEmx_t      *GetEmx() {return mHlx->Emx();};
+  THelixTrack  *GetHlx() {return mHlx       ;};
+  StvELossTrak *ELoss()  {return mELoss     ;};
+  double       *GetRxy() {return mRxy       ;};  
+  const StDcaGeometry &Dca() {return *&mDca;}
+  const KFParticle    &Particle() {return *&mParticle;}
   void SetTest();
   void InitTest();
   static void Test();
-protected:
-double mM;
-double mRxy[4];
-const TGeoMaterial *mMat[4];
-DcaPar_t mDcaPar;
-DcaEmx_t mDcaEmx;
-double mP;
-double mCurv;
-double mHz;
-double mVtx[3];
-THPar_t mHlxPar;
-THEmx_t mHlxEmx;
-THelixTrack *mHlx;
-StvELossTrak *mELoss;
-ClassDef(StDcaToVtx,0)
+  static void TestDCA();
+ protected:
+  double mM;
+  Int_t mN;
+  double mRxy[20];
+  const TGeoMaterial *mMat[20];
+  double mP;
+  double mCurv;
+  double mHz;
+  double mVtx[3];
+  THPar_t mHlxPar;
+  THEmx_t mHlxEmx;
+  THelixTrack *mHlx;
+  StvELossTrak *mELoss;
+  Int_t         mPdg;
+  StDcaGeometry mDca;
+  KFParticle    mParticle;
+  ClassDef(StDcaToVtx,0)
 };
-
 #endif
