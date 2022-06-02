@@ -228,4 +228,52 @@ PminOCAll->SetXTitle("row")
 PminOCAll->SetYTitle("min pad")
 PminOCAll->GetXaxis()->SetRange(1,45);
 PminOCAll->Draw("colz")
+
+================================ Efficiencies ================================================
+hitMateComp->Draw("newP.row>>RN(72,0.5,72.5)","newP.sector>0")
+hitMateComp->Draw("oldP.row>>RO(72,0.5,72.5)","oldP.sector>0")
+hitMateComp->Draw("oldP.row>>RON(72,0.5,72.5)","oldP.sector>0&&newP.sector>0")
+TEfficiency *newE = new TEfficiency(*RON,*RO)
+TEfficiency *oldE = new TEfficiency(*RON,*RN)
+
+TH1F *frame = c1->DrawFrame(0.5,0.7,72.5,0.96)
+frame->SetTitle("Old and New (TPC23) cluster efficiencies")
+frame->SetXTitle("row")
+newE->Draw("same")
+TLegend *l = new TLegend(0.7,0.2,0.9,0.4)
+l->AddEntry(newE,"new")
+l->Draw()
+oldE->SetMarkerColor(2)
+oldE->Draw("same")
+l->AddEntry(oldE,"old")
+
+
+fl==0
+
+hitMateComp->Draw("newP.row>>RN(72,0.5,72.5)","newP.sector>0&&newP.fl==0")
+hitMateComp->Draw("oldP.row>>RO(72,0.5,72.5)","oldP.sector>0&&oldP.fl==0")
+hitMateComp->Draw("oldP.row>>RON(72,0.5,72.5)","oldP.sector>0&&newP.sector>0&&newP.fl==0&&oldP.fl==0")
+TEfficiency *newE = new TEfficiency(*RON,*RO)
+TEfficiency *oldE = new TEfficiency(*RON,*RN)
+
+TH1F *frame = c1->DrawFrame(0.5,0.7,72.5,0.96)
+frame->SetTitle("Old and New (TPC23) cluster efficiencies")
+frame->SetXTitle("row")
+newE->Draw("same")
+TLegend *l = new TLegend(0.7,0.2,0.9,0.4)
+l->AddEntry(newE,"new")
+l->Draw()
+old->SetMarkerColor(2)
+oldE->Draw("same")
+l->AddEntry(oldE,"old")
+
+================================================================================
+c1->SetLogz(1);
+ hitMateComp->Draw("newP.pad-oldP.pad:oldP.row>>padR(72,0.5,72.5,64,-0.5,0.5)","oldP.sector>0&&newP.sector>0&&newP.fl==0&&oldP.fl==0","colz")
+  padR->SetXTitle("row")
+ hitMateComp->Draw("newP.timebucket-oldP.timebucket:oldP.row>>timebucketR(72,0.5,72.5,64,-0.5,0.5)","oldP.sector>0&&newP.sector>0&&newP.fl==0&&oldP.fl==0","colz")
+  timebucketR->SetXtitle("row")
+  hitMateComp->Draw("TMath::Log(newP.adc/oldP.adc):oldP.row>>adcR(72,0.5,72.5,64,-0.5,0.5)","oldP.sector>0&&newP.sector>0&&newP.fl==0&&oldP.fl==0","colz")
+ adcR->SetXTitle("row")
 */
+
