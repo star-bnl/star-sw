@@ -9,6 +9,7 @@
 #include <assert.h>
 #include "TGeoMaterial.h"
 #include "StvELossTrak.h"
+#include "TGeoManager.h"
 static int gNoEloss = 0;
 
 //SUBROUTINE G3DRELX(A,Z,DENS,T,HMASS,DEDX)
@@ -793,7 +794,7 @@ static const double DGEV=0.153536E-3,EMASS=0.0005109990615;
 //______________________________________________________________________________
 void StvELossTrak::Test()
 {
-
+  if (! gGeoManager) new TGeoManager;
 //Stores the following standard material constants in the data structure [] JMATE.
 //Material	No.	A	Z	Density	Radiat L
 class MyMat_t {public: const char* Material; int No; double A,Z,Density,RadLen;}; 

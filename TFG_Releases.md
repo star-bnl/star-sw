@@ -85,5 +85,6 @@
 <li> TFG22c Fix before move to new dEdx, add chairs                      2022-04-22 16:31:18 -0400  (HEAD -> TFG, tag: TFG22c_1)
 <li> TFG22d Add new dEdx, dead FEE, Freeze 19GeV_2019, separate builds   2022-05-08 19:13:42 -0400  (HEAD -> TFG, tag: TFG22d)
 <li> TFG22e Freeze 7p7GeV 2021 dE/dx calibration                         2022-05-23 14:34:38 -0400  (HEAD -> TFG, tag: TFG21e)
+<li> TFG22f Fix TFG StTrackTopologyMap, TPC23, ClusteringHins streamer   2022-06-04 09:16:14 -0400  (HEAD -> TFG, tag: TFG22f)
 <li>.DEV2   head of TFG git repository
 </ul>

@@ -48,7 +48,8 @@ setenv STARFPE NO
   if (! $?) exit 0;
 #ifdef TpcRS_Part.pl
 ## TpcRS_Part.pl RunXIX 19GeV
-   root.exe -q -b 'TpcRS.C(100,"MC.y2019,TpcRS,McTpcAna,StiCA,-geantOut,phys_off,Rung.'${runG}'",0,"Bichsel,'${file}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'TpcRS.C(100,"MC.y2019,TpcRS,McTpcAna,StiCA,-geantOut,phys_off,Rung.'${runG}'",0,"Bichsel,'${file}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'TpcRS.C(100,"MC.y2019,TpcRS,McTpcAna,StiCA,-geantOut,phys_off,Rung.'${runG}'",0,"'${file}'")' &gt;&amp; ${logFile}
 #else
 # data MuDst.root
 # setenv MALLOC_CHECK_  3

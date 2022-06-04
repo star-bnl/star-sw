@@ -34,6 +34,7 @@
 #include "DAQ_TPX/daq_tpx.h"
 #include "DAQ_ITPC/daq_itpc.h"
 #include "DAQ_READER/daq_dta.h"
+#include "DAQ_READER/daq_det.h"
 #include "DAQ_READER/daqReader.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 #include "RTS/src/DAQ_TPX/daq_tpx.h"
@@ -53,6 +54,11 @@ ClassImp(StTpcRTSHitMaker);
 #define PrPP(A,B) if (Debug()%10 > 1) {LOG_INFO << "StTpcRTSHitMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
 #define PrPP(A,B)
+#endif
+#if 0
+static struct rp_dta_t {
+	short adc[512] ;
+} rp_dta[46][183] ;
 #endif
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
@@ -643,7 +649,10 @@ Int_t StTpcRTSHitMaker::Make23() {
 	  // Tonko's     ------------------------------------------------------------ 
 	  
 	  // allocate output storage based upon the count of found sequences
-	  tpc23->s2_max_words = tpc23->sequence_cou*2 + 1024 ;
+	  const int words_per_cluster = 5 ;       // 5 for simulation, 2 normally
+
+	  tpc23->s2_max_words = tpc23->sequence_cou*words_per_cluster + 2000 ;      // and add a bit more...
+	  
 	  tpc23->s2_start = (u_int *) malloc(tpc23->s2_max_words*4) ;
 	  
 	  // this actually runs the clusterfinder
@@ -656,6 +665,12 @@ Int_t StTpcRTSHitMaker::Make23() {
 	    if (Debug()) {
 	      cout << Form("*** sequences found %d",tpc23->sequence_cou) << endl ;
 	    }
+
+                       if(tpc23->s2_words >= tpc23->s2_max_words) {
+			 LOG_ERROR << "Whoa -- lots of words " << tpc23->s2_words << "/" << tpc23->s2_max_words << "\t"
+				   <<  "\tsector " << sector << "\trow " << row << endm;
+                       }
+
 	    while(p_buff < end_buff) {
 				u_int padrow ;
 				u_int version ;
@@ -746,8 +761,8 @@ Int_t StTpcRTSHitMaker::Make23() {
 	    transform(LS,L);                                                                             PrPP(Make,L);
 	    UInt_t hw = 1;   // detid_tpc
 	    //yf        if (isiTpcSector) hw += 1U << 1;
-	    hw += sector << 4;     // (padrow/100 << 4);   // sector
-	    hw += row  << 9;     // (padrow%100 << 9);   // padrow
+	    hw += sector << 4;     // (row/100 << 4);   // sector
+	    hw += row  << 9;       // (row%100 << 9);   // row
 #ifndef __TFG__VERSION__
 	    Double_t q = ADC2GeV*dc.cld.charge;
 #else /* used in TFG till 07/31/20 */

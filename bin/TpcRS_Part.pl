@@ -7,21 +7,21 @@ use Cwd;
 #my @particles = qw(pion He3 alpha);
 #my @particles = qw(electron- electron+);
 #my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha pionMIP);
-#my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha);
+my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha);
 #my @particles = qw(proton+ pionMIP);
 #my @particles = qw(pion+ pion-);
 #my @particles = (pionMIP);
 #my @particles = (pionMIP1);
 #my @particles = (phi);
-my @particles = qw(electron-MIP electron+MIP pion+MIP pion-MIP kaon+MIP kaon-MIP proton+MIP proton-MIP deuteronMIP );
+#my @particles = qw(electron-MIP electron+MIP pion+MIP pion-MIP kaon+MIP kaon-MIP proton+MIP proton-MIP deuteronMIP );
 foreach my $part (@particles) {
-  my $i1 =  1;
-  my $N =  50;# 00;
+  my $i1 = 51;
+  my $N =  100;# 00;
 #  if ($part =~ /MIP/) {$N = 200;}
   for (my $i = $i1; $i <= $N; $i++) {
 #    my $log = $part . "_" . $i . "B.log";
 #    if (! -r $log) {
-    my $glob = "./*" . $part . "*.MuDst.root";
+    my $glob = "./*" . $part . "_" . $i ."*.MuDst.root";
     my @list = glob $glob;# print"$glob => @list\n";
     if ($#list < 0) {
       my $string = "string:" . $part . "_" . $i;

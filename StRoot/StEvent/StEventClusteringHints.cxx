@@ -367,7 +367,7 @@ StEventClusteringHints::print(ostream& os)
     }
 }
 
-#if 0
+#if 1
 static TBuffer&  operator<<(TBuffer& buf, const map<string,string> &s)
 {
   TString ts1,ts2;
@@ -420,14 +420,21 @@ void StEventClusteringHints::Streamer(TBuffer &R__b)
    UChar_t mode;
    UInt_t R__s, R__c;
    if (R__b.IsReading()) {
-      Version_t R__v = R__b.ReadVersion(&R__s, &R__c); if (R__v) { }
+      Version_t R__v = R__b.ReadVersion(&R__s, &R__c); 
+      if (R__v > 1) { 
+	R__b.ReadClassBuffer(StEventClusteringHints::Class(),this, R__v, R__s, R__c);
+	return;
+      }
+      //====process old versions before automatic schema evolution
+   //      TObject::Streamer(R__b);
       R__b >> mode; mNameMap=(mode)? &mMiniDstMap:&mDstMap;
       R__b >>  mDstMap;     
       R__b >>  mMiniDstMap;     
       R__b >>  mBranchIds;
-      R__b.CheckByteCount(R__s, R__c, Class());  
+      R__b.CheckByteCount(R__s, R__c, StEventClusteringHints::IsA());  
       
    } else { /*writing*/   
+#if 0
       R__c = R__b.WriteVersion(Class(), kTRUE);
       mode = (mNameMap == &mMiniDstMap);
       R__b <<  mode;     
@@ -435,6 +442,9 @@ void StEventClusteringHints::Streamer(TBuffer &R__b)
       R__b <<  mMiniDstMap;     
       R__b <<  mBranchIds;
       R__b.SetByteCount(R__c, kTRUE);
+#else
+      R__b.WriteClassBuffer(StEventClusteringHints::Class(),this);
+#endif
    }
 }
 #endif

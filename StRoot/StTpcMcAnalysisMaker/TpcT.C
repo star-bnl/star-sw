@@ -1148,7 +1148,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD4.root
     {"Z",         70, 3, 10, 210, -210,  210},
     {"TanL",      70, 3, 10, 150, -7.5,  7.5},
     {"dXLog",     70, 3, 10, 100,    0,    5},
-    {"npads",     70, 3, 10,  50x[,  1.5, 51.5},
+    {"npads",     70, 3, 10,  50,  1.5, 51.5},
     {"ntmbks",    70, 3, 10,  50,  1.5, 51.5},
     {"npadtmbks", 70, 3, 10, 100,  1.5,101.5}
   };
