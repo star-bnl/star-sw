@@ -1,8 +1,20 @@
 <h1>  TFG (Tracking Focus Group) branch of the offline Software libraries for STAR experiment</h1> 
 <p> This repository (TFG)  has been forked from the github "official" STAR software (upsteam git@github.com:star-bnl/star-sw.git)
 in order to provide express calibration, express production, and express analysis.
+<p>
+ TFG software version contains multiple changes with respect to ~official~ one, but most essential modifications are:
+<ol>
+<li>CA tracker (loopers (2020+)  and Vc 1.4.2),
+<li>KFParticle, 
+<li>VMC simulation (based on ALICE geant3 version),
+<li>ROOT6 (6.27/01) used for TMVA related tasks, and
+<li>Support of gcc versions 4.8.5, 6.3.1, 10.3.0, 11.2.0.
+<li> ...
+</ol>
+
 This repository is located at  git@github.com:fisyak/star-sw.git (as TFG branch).
 The list of stable releases can be found TFG_Releases.md
+
 
 <h2>How to use  TFG release </h2>
 <ul>

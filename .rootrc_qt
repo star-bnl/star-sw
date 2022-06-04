@@ -1,0 +1,49 @@
+# .rootrc:$Name:  $:$Id: unix.rootrc,v 1.5 2004/07/12 16:44:32 fine Exp $
+# Author: Valeri Fine 10/10/2003
+# ROOT Environment settings are handled via the class TEnv. To see
+# which values are active do: gEnv->Print().
+# The custom ROOT env to turn on the Qt-edition of ROOT gui
+#  see: http://root.bnl.gov
+#
+# One has to define only the custom parameters.
+# All others are to be picked from the standard place, namely
+#        $ROOTSYS/etc/system.rootrc
+#
+Unix.*.Root.DynamicPath:    :$HOME/macros:$STAR/macros/.$STAR_HOST_SYS:$STAR/macros:$STAR/macros/.$STAR_HOST_SYS:$(LD_LIBRARY_PATH)
+Unix.*.Root.MacroPath:      :$HOME/macros:$STAR/macros:$(ROOTSYS)/macros:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/mudst:$(STAR)/StRoot/macros:$(STAR)/StRoot/macros/graphics:$(STAR)/StRoot/macros/analysis:$(STAR)/StRoot/macros/test:$(STAR)/StRoot/macros/examples:$(STAR)/StRoot/macros/html:$(STAR)/StRoot/macros/qa:$(STAR)/StRoot/macros/mudst:$(STAR)/StRoot/macros/calib:./StRoot/macros/embedding:$(STAR)/StRoot/macros/embedding:$(ROOTSYS)/macros:$ROOTSYS/tutorials:$(ROOTROOT)/root/tmva/test
++ACLiC.IncludePaths:          -D__TFG__VERSION__ -I$HOME/macros -IStRoot/GenFit -I$STAR/StRoot/GenFit 
+# -I$STAR/.$STAR_HOST_SYS/include
+#ACLiC.BuildDir:              .$STAR_HOST_SYS
+#Rint.Logon:              rootlogon.C
+#Rint.Logoff:             rootlogoff.C
+#Rint.Logon:              /afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/macros/rootlogon.C
+#Rint.Logoff:             /afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/macros/rootlogoff.C
+#Unix.*.Root.PluginPath:     :./plugins:~/plugins:$STAR/QtRoot/plugins:$ROOTSYS/etc/plugins:
+#Root.Stacktrace:           no
+Plugin.TVirtualPadEditor:   ^Ged TQtGedEditor    QtGed          "TQtGedEditor(TCanvas*)"
+Plugin.TVirtualViewer3D:    ^ogl   TQtRootViewer3D  RQTGL    "TQtRootViewer3D(TVirtualPad*)"
++Plugin.TVirtualViewer3D    ^oiv   TQtRootCoinViewer3D  RQIVTGL    "TQtRootCoinViewer3D(TVirtualPad*)"
+# GUI specific settings
+Gui.Style:                  windows
+Gui.Backend:                qt
+Gui.Factory:                qtgui
+Plugin.TVirtualX            ^qt      TGQt          GQt          "TGQt(const char*,const char*)"
+Plugin.TGuiFactory          ^qtgui   TQtGUIFactory  QtRootGui       "TQtGUIFactory()"
+#Plugin.TGuiFactory          ^qtgui    TQtRootGuiFactory QtRoot       "TQtRootGuiFactory()"
+
+Logger.Configuration        $STAR/Bfc.xml
+Logger.Color                yes
+#Root.Debug:                1
+Root.MemStat:               1
+Root.ObjectStat:            1
+Root.ErrorIgnoreLevel      Warning
+# Default Fitter (current choices are Minuit and Fumili).
+# Root.Fitter:             Fumili
+# Default 3d Viewer.
+# By default 3-D views are shown in the pad,
+# if the next line is activated, the default viewer will be OpenGL.
+# Viewer3D.DefaultDrawOption:   ogl
+# Browser Options (plugins)
+# F: File browser E: Text Editor H: HTML browser
+# C: Canvas I: I/O redirection P: Proof G: GL viewer
+#Browser.Options:             CEI
