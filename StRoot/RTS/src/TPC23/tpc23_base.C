@@ -58,13 +58,13 @@ int tpc23_base::fcf_decode(u_int *p_buff, daq_sim_cld_x *dc, u_int version)
 
 void tpc23_base::sim_evt_start(int sec1)
 {
-	sector1 = sector1 ;
+	sector1 = sec1 ;
 	
 	if(s1_dta==0) {
-		s1_dta = (u_short *) malloc(ROW_MAX*PAD_MAX*512*sizeof(*s1)) ;
+		s1_dta = (u_short *) malloc((ROW_MAX+1)*(PAD_MAX+1)*512*sizeof(*s1)) ;
 	}
 	if(s1_track_id==0) {
-		s1_track_id = (int *) malloc(ROW_MAX*PAD_MAX*512*sizeof(*s1_track_id)) ;
+		s1_track_id = (int *) malloc((ROW_MAX+1)*(PAD_MAX+1)*512*sizeof(*s1_track_id)) ;
 	}
 	if(store_track_id==0) {
 		store_track_id = (int *) malloc((PAD_MAX+1)*512*sizeof(*store_track_id)) ;
@@ -113,6 +113,11 @@ void tpc23_base::sim_do_pad(int row, int pad, short *adc, int *track_id)
 				s_cou++ ;
 
 				t_start = -1 ;
+
+				if(s_cou>=SEQ_MAX) {
+					LOG(WARN,"too many sequences %d: sec %d, row %d, pad %d, tb %d",s_cou,sector1,row,pad,t-1) ;
+					goto done ;
+				}
 			}
 		}
 	}
@@ -122,6 +127,12 @@ void tpc23_base::sim_do_pad(int row, int pad, short *adc, int *track_id)
 		seq[s_cou].t_hi = 511 ;
 		s_cou++ ;
 	}
+
+	if(s_cou>=SEQ_MAX) {
+		LOG(ERR,"still too many sequences %d: sec %d, row %d, pad %d",s_cou,sector1,row,pad) ;
+	}
+
+	done:;
 
 	sequence_cou += s_cou ;
 
@@ -737,8 +748,8 @@ int tpc23_base::row_stage1(int row)
 		if(seq_l->t_hi==0) continue ; // no data ;
 
 		while(seq_l->t_hi) {	
-			int tl_hi = seq_l->t_hi ;
-			int tl_lo = seq_l->t_lo ;
+			u_int tl_hi = seq_l->t_hi ;
+			u_int tl_lo = seq_l->t_lo ;
 			int bl = seq_l->blob_id ;
 			
 			got_one++ ;	// count sequences
@@ -753,11 +764,12 @@ int tpc23_base::row_stage1(int row)
 			flags |= flags_r ;
 
 			while(seq_r->t_hi) {
-				int tr_hi = seq_r->t_hi ;
-				int tr_lo = seq_r->t_lo ;
+				u_int tr_hi = seq_r->t_hi ;
+				u_int tr_lo = seq_r->t_lo ;
 				int br = seq_r->blob_id ;
 
-
+				if(tr_hi>=512 || tr_lo>=512) LOG(ERR,"tr_hi %d, tr_lo %d: row %d, pad %d",
+								 tr_hi,tr_lo,row,pad) ;
 
 				int merge = 0 ;
 
