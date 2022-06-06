@@ -31,8 +31,6 @@
  ***************************************************************************/
 #include <algorithm>
 #include <fstream>
-#include <sstream>
-#include <string>
 
 #include "TGeoManager.h"
 #include "TGeoNavigator.h"
@@ -41,8 +39,6 @@
 #include "TGeoMatrix.h"
 #include "TGeoBBox.h"
 #include "TRotation.h"
-#include "TMath.h"
-#include "TFile.h"
 
 #include "StETofUtil/StETofGeometry.h"
 #include "StMessMgr.h"
@@ -81,16 +77,6 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const f
   mDebug( false )
 {
     mGeoMatrix = static_cast< TGeoHMatrix* > ( gpNode.GetMatrix() );
-    /*
-    double* trans  = mGeoMatrix->GetTranslation();
-    double* rot    = mGeoMatrix->GetRotationMatrix();
-
-    LOG_INFO << trans[0] << "  " << trans[1] << "  " << trans[2] << endm;
-
-    LOG_INFO << rot[0] << "  " << rot[1] << "  " << rot[2] << endm;
-    LOG_INFO << rot[3] << "  " << rot[4] << "  " << rot[5] << endm;
-    LOG_INFO << rot[6] << "  " << rot[7] << "  " << rot[8] << endm;
-    */
     mBox = static_cast< TGeoBBox* > ( gpNode.GetShape() );
 
     // resize mBox with dx and dy
@@ -109,8 +95,6 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const f
     mGeoMatrix = static_cast< TGeoHMatrix* > ( gpNode.GetMatrix() );
 
     mBox = static_cast< TGeoBBox* > ( gpNode.GetShape() );
-
-
 
     // resize mBox with dx and dy
     float dz = mBox->GetDZ();
@@ -140,7 +124,6 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const f
 
     if( mDebug ) print();
 
-//    buildMembers();
 }
 
 void
@@ -197,15 +180,6 @@ StETofNode::calcXYPlaneNormal()
 
     // transform to global coordinates
     local2Master( xl, xm );
-
-    // subtract vector pointing to the center
-    /*
-    xm[ 0 ] -= mGeoMatrix->GetTranslation()[ 0 ];
-    xm[ 1 ] -= mGeoMatrix->GetTranslation()[ 1 ];
-    xm[ 2 ] -= mGeoMatrix->GetTranslation()[ 2 ];
-
-    return StThreeVectorD( xm[ 0 ], xm[ 1 ], xm[ 2 ] );
-    */
 
     StThreeVectorD norm( xm[ 0 ], xm[ 1 ], xm[ 2 ] );
 
@@ -1642,12 +1616,6 @@ StETofGeometry::readAlignmentDatabase(StMaker* maker){
             mAlignmentParameters.push_back( counterAlignmentParameter );
         }
 
-        if( mAlignmentParameters.size() != 108 ) {
-            LOG_WARN << "parameter vector for alignments has not the right amount of entries: ";
-            LOG_WARN << mAlignmentParameters.size() << " instead of 108 !!!!" << endm;
-            return;
-        }else{
-				return;
-		 }
+		return;
 }
 
