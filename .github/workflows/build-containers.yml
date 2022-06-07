@@ -15,8 +15,9 @@ jobs:
     strategy:
       matrix:
         starenv: [root5, root6]
+        compiler: [gcc485]
     env:
-      STARENV: ${{ matrix.starenv }}
+      STARENV: ${{ matrix.starenv }}-${{ matrix.compiler }}
     steps:
       - name: Get branch name
         id: branch-name
@@ -35,6 +36,8 @@ jobs:
       - name: Build a release container
         uses: docker/build-push-action@v3
         with:
-          build-args: starenv=${{ matrix.starenv }}
+          build-args: |
+            starenv=${{ matrix.starenv }}
+            compiler=${{ matrix.compiler }}
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }}

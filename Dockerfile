@@ -2,7 +2,10 @@
 
 ARG starenv=root5
 
-FROM ghcr.io/star-bnl/star-spack:v0.1.5-${starenv}
+# Pick one from [gcc485, gcc11]
+ARG compiler=gcc485
+
+FROM ghcr.io/star-bnl/star-spack:v0.1.6-${starenv}-${compiler}
 
 ENV NODEBUG=yes
 ENV STAR=/star-sw

@@ -8,8 +8,9 @@ jobs:
     strategy:
       matrix:
         starenv: [root5, root6]
+        compiler: [gcc485]
     env:
-      STARENV: ${{ matrix.starenv }}
+      STARENV: ${{ matrix.starenv }}-${{ matrix.compiler }}
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -19,7 +20,9 @@ jobs:
       - name: Build with Docker
         uses: docker/build-push-action@v3
         with:
-          build-args: starenv=${{ matrix.starenv }}
+          build-args: |
+            starenv=${{ matrix.starenv }}
+            compiler=${{ matrix.compiler }}
           tags: ghcr.io/star-bnl/star-sw-${{ env.STARENV }}
           outputs: type=docker,dest=/tmp/star-sw-${{ env.STARENV }}.tar
 
@@ -36,7 +39,7 @@ jobs:
       matrix:
         test_id: [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60, 76, 77, 78, 90, 91, 92, 119, 120]
     env:
-      STARENV: root5
+      STARENV: root5-gcc485
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
@@ -59,7 +62,7 @@ jobs:
       matrix:
         test_id: [50, 52, 54, 90, 91, 92, 119, 120]
     env:
-      STARENV: root6
+      STARENV: root6-gcc485
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
