@@ -33,17 +33,17 @@ jobs:
       - name: Build latest container for the branch
         uses: docker/build-push-action@v3
         with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}-base:cache
-          cache-to:   type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}-base:cache,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}:cache
+          cache-to:   type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}:cache,mode=max
           build-args: starenv=${{ matrix.starenv }}
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}-base:${{ steps.branch-name.outputs.current_branch }}_latest
+          tags: ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}:${{ steps.branch-name.outputs.current_branch }}_latest
 
       - name: Build release container
         if: steps.branch-name.outputs.is_tag == 'true'
         uses: docker/build-push-action@v3
         with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}-base:cache
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}:cache
           build-args: starenv=${{ matrix.starenv }}
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}-build:${{ steps.branch-name.outputs.tag }}
+          tags: ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}:${{ steps.branch-name.outputs.tag }}
