@@ -62,18 +62,17 @@ private:
     Float_t  mX=0.0;         ///  Fitted x-position in local coordinate
     Float_t  mY=0.0;         ///  Fitted y-position in local coordinate
     Int_t    mNParentClusterPhotons=0;  ///< Number of photons in the parent cluster
-    StMuFcsCluster* mCluster=0;
+    TRef mCluster;
     TLorentzVector mFourMomentum;  ///< Photon 4-momentum
     TVector3   mXYZ;           //Photon position in STAR coordinate
 
-  ClassDef(StMuFcsPoint, 1)
+  ClassDef(StMuFcsPoint, 2)
 };
 
 inline unsigned short StMuFcsPoint::detectorId() const { return mDetectorId; }
 inline float StMuFcsPoint::energy() const { return mEnergy; }
 inline float StMuFcsPoint::x() const { return mX; } // x position in cm at which point intersects the sub-detector.
 inline float StMuFcsPoint::y() const { return mY; } // y position in cm at which point intersects the sub-detector.
-inline StMuFcsCluster* StMuFcsPoint::cluster() { return mCluster; } //  Parent cluster of the photon.
 inline int StMuFcsPoint::nParentClusterPhotons() const { return mNParentClusterPhotons; } // Number of points in parent cluster
 inline const TVector3& StMuFcsPoint::xyz() const { return mXYZ; }
 inline const TLorentzVector& StMuFcsPoint::fourMomentum() const { return mFourMomentum; }
@@ -81,7 +80,6 @@ inline void StMuFcsPoint::setDetectorId(unsigned short det) { mDetectorId = det;
 inline void StMuFcsPoint::setEnergy(float energy) { mEnergy = energy; }
 inline void StMuFcsPoint::setX(float xpos) { mX = xpos; }
 inline void StMuFcsPoint::setY(float ypos) { mY = ypos; }
-inline void StMuFcsPoint::setCluster(StMuFcsCluster* cluster) { mCluster = cluster; }
 inline void StMuFcsPoint::setNParentClusterPhotons(int nclph) { mNParentClusterPhotons = nclph; }
 inline void StMuFcsPoint::setXYZ(const TVector3& p3) { mXYZ = p3; }
 inline void StMuFcsPoint::setFourMomentum(const TLorentzVector& p4) { mFourMomentum = p4; }
