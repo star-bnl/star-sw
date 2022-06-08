@@ -37,7 +37,7 @@ jobs:
           cache-to:   type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}:cache,mode=max
           build-args: starenv=${{ matrix.starenv }}
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}:${{ steps.branch-name.outputs.current_branch }}_latest
+          tags: ghcr.io/${{ github.repository_owner }}/star-sw-${{ matrix.starenv }}:${{ steps.branch-name.outputs.current_branch }}
 
       - name: Build release container
         if: steps.branch-name.outputs.is_tag == 'true'
