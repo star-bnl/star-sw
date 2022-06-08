@@ -8,6 +8,8 @@ jobs:
     strategy:
       matrix:
         starenv: [root5, root6]
+    env:
+      STARENV: ${{ matrix.starenv }}
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -18,14 +20,14 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           build-args: starenv=${{ matrix.starenv }}
-          tags: ghcr.io/star-bnl/star-sw-${{ matrix.starenv }}-build
-          outputs: type=docker,dest=/tmp/star-sw-${{ matrix.starenv }}-build.tar
+          tags: ghcr.io/star-bnl/star-sw-${{ env.STARENV }}
+          outputs: type=docker,dest=/tmp/star-sw-${{ env.STARENV }}.tar
 
       - name: Save built image for test jobs
         uses: actions/upload-artifact@v3
         with:
-          name: star-sw-${{ matrix.starenv }}-build
-          path: /tmp/star-sw-${{ matrix.starenv }}-build.tar
+          name: star-sw-${{ env.STARENV }}
+          path: /tmp/star-sw-${{ env.STARENV }}.tar
 
   ROOT5_test:
     runs-on: ubuntu-latest
@@ -33,19 +35,21 @@ jobs:
     strategy:
       matrix:
         test_id: [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60, 76, 77, 78, 90, 91, 92, 119, 120]
+    env:
+      STARENV: root5
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: star-sw-root5-build
+          name: star-sw-${{ env.STARENV }}
           path: /tmp
 
-      - run: docker load --input /tmp/star-sw-root5-build.tar
+      - run: docker load --input /tmp/star-sw-${{ env.STARENV }}.tar
       - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:v2
       - run: |
-             TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-root5-build tests/executest.py -c ${{ matrix.test_id }})
+             TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-${{ env.STARENV }} tests/executest.py -c ${{ matrix.test_id }})
              # Workaround https://sft.its.cern.ch/jira/browse/ROOT-7660 in ROOT 5 by checking the output log
-             docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root5-build \
+             docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
                sh -c "set -e; MALLOC_CHECK_=3 $TEST_CMD 2>&1 | tee log; grep 'Run completed' log"
 
   ROOT6_test_ignore_fail:
@@ -54,15 +58,18 @@ jobs:
     strategy:
       matrix:
         test_id: [50, 52, 54, 90, 91, 92, 119, 120]
+    env:
+      STARENV: root6
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: star-sw-root6-build
+          name: star-sw-${{ env.STARENV }}
           path: /tmp
 
-      - run: docker load --input /tmp/star-sw-root6-build.tar
+      - run: docker load --input /tmp/star-sw-${{ env.STARENV }}.tar
       - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:v2
       - run: |
-             TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-root6-build tests/executest.py -c ${{ matrix.test_id }})
-             docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-root6-build sh -c "MALLOC_CHECK_=3 $TEST_CMD || echo 'Failed with an exit code: '\$?"
+             TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-${{ env.STARENV }} tests/executest.py -c ${{ matrix.test_id }})
+             docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
+               sh -c "MALLOC_CHECK_=3 $TEST_CMD || echo 'Failed with an exit code: '\$?"
