@@ -1100,8 +1100,8 @@ StETofCalibMaker::Make()
 {
     LOG_DEBUG << "StETofCalibMaker::Make(): starting ..." << endm;
 
-    //mEvent = ( StEvent* ) GetInputDS( "StEvent" );
-    mEvent = NULL; //don't check for StEvent for genDst.C testing. PW
+    mEvent = ( StEvent* ) GetInputDS( "StEvent" );
+    //mEvent = NULL; //don't check for StEvent for genDst.C testing. PW
 
     if ( mEvent ) {
         LOG_DEBUG << "Make(): running on StEvent" << endm;
