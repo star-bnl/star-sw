@@ -48,6 +48,7 @@
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StDetectorDbMaker/St_tpcBXT0CorrEPDC.h"
+#include "StDetectorDbMaker/St_TpcPadPedRMSC.h"
 #include "StEventUtilities/StEbyET0.h"
 #include "StDetectorDbMaker/St_beamInfoC.h"
 #if 0
@@ -117,6 +118,7 @@ static TH1  *checkList[2][21] = {0};
 static TProfile2D  *SecRow[15] = {0};
 #endif /* __LASERINO__ */
 static TString TpcMedium("TPCE_SENSITIVE_GAS");
+Short_t StTpcRSMaker::mADCs[__MaxNumberOfTimeBins__];
 //________________________________________________________________________________
 ClassImp(StTpcRSMaker);
 //________________________________________________________________________________
@@ -141,7 +143,6 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
 }
 //________________________________________________________________________________
 StTpcRSMaker::~StTpcRSMaker() {
-  SafeDelete(mAltro);
   Finish();
 }
 //________________________________________________________________________________
@@ -156,6 +157,7 @@ Int_t StTpcRSMaker::Finish() {
       if (mShaperResponses[io][sec] && !mShaperResponses[io][sec]->TestBit(kNotDeleted)) {SafeDelete(mShaperResponses[io][sec]);}
       SafeDelete(mChargeFraction[io][sec]);
       SafeDelete(mPadResponseFunction[io][sec]);
+      if (mAltro[io][sec] && !mAltro[io][sec]->TestBit(kNotDeleted)) {SafeDelete(mAltro[io][sec]);}
     }
     SafeDelete(mPolya[io]);
   }
@@ -221,11 +223,25 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     LOG_INFO << "StTpcRSMaker:: use Tpc dE/dx correction from calibaration" << endm;
     Long_t Mask = -1; // 64 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrectionC);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrectionMDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection3MDF);
-    CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection4MDF);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection5MDF);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection6MDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
-    //    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
+#if 0
+    CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::kzCorrectionC);
+    CLRBIT(Mask,StTpcdEdxCorrection::kzCorrection);
+    CLRBIT(Mask,StTpcdEdxCorrection::kTpcPadTBins);
+    CLRBIT(Mask,StTpcdEdxCorrection::kTanL);
+    CLRBIT(Mask,StTpcdEdxCorrection::kAdcI);
+    CLRBIT(Mask,StTpcdEdxCorrection::knPad);
+    CLRBIT(Mask,StTpcdEdxCorrection::knTbk);
+    CLRBIT(Mask,StTpcdEdxCorrection::kdZdY);
+    CLRBIT(Mask,StTpcdEdxCorrection::kdXdY);
+#endif
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
     m_TpcdEdxCorrection->SetSimulation();
   }
@@ -295,8 +311,16 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
       for(Int_t pad = 1; pad<=noOfPadsAtRow; pad++) {
 	Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(sector,row,pad);
-	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
-	AlivePads->Fill(sector, row, pad, St_tpcPadGainT0BC::instance()->Gain(sector,row,pad));
+	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) {
+	  continue;
+	} else {
+	  Double_t gain = St_tpcPadGainT0BC::instance()->Gain(sector,row,pad);
+	  if (gain <= 0.0) {
+	    continue;
+	  } else {
+	    AlivePads->Fill(sector, row, pad, gain);
+	  }
+	}
       }
     }
 #endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
@@ -323,12 +347,22 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 							outerSectorAnodeVoltage[sector-1], t0IO[io]);
 	}
       }
-    }
-  }
+    } // IO
+  } // sector
+  
   for (Int_t io = 0; io < 2; io++) {// In/Out
     //  mPolya = new TF1F("Polya;x = G/G_0;signal","sqrt(x)/exp(1.5*x)",0,10); // original Polya 
     //  mPolya = new TF1F("Polya;x = G/G_0;signal","pow(x,0.38)*exp(-1.38*x)",0,10); //  Valeri Cherniatin
     //   mPoly = new TH1D("Poly","polyaAvalanche",100,0,10);
+    //  TF1F *func = new TF1F("funcP","x*sqrt(x)/exp(2.5*x)",0,10);
+    // see http://www4.rcf.bnl.gov/~lebedev/tec/polya.html
+    // Gain fluctuation in proportional counters follows Polya distribution. 
+    // x = G/G_0
+    // P(m) = m(m(x)**(m-1)*exp(-m*x)/Gamma(m);
+    // original Polya  m = 1.5 (R.Bellazzini and M.A.Spezziga, INFN PI/AE-94/02). 
+    // Valeri Cherniatin (cherniat@bnlarm.bnl.gov) recomends m=1.38
+    // Trs uses x**1.5/exp(x)
+    // tss used x**0.5/exp(1.5*x)
     Double_t gamma;
     if (!io ) gamma = St_TpcResponseSimulatorC::instance()->PolyaInner();
     else      gamma = St_TpcResponseSimulatorC::instance()->PolyaOuter();
@@ -362,14 +396,13 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
       fgTimeShape0[io]->GetXaxis()->SetTitle("time (secs)");
       fgTimeShape0[io]->GetYaxis()->SetTitle("signal"); 
     }
-    
+    //                             w       h         s      a       l   i
+    //  Double_t paramsI[6] = {0.2850, 0.2000,  0.4000, 0.0010, 1.1500, 0};
+    //  Double_t paramsO[6] = {0.6200, 0.4000,  0.4000, 0.0010, 1.1500, 0};
+    Double_t xmaxP =  4.5;//4.5*St_tpcPadConfigC::instance()->innerSectorPadWidth(sector);// 4.5 
+    Double_t xminP = -xmaxP; 
+    Double_t params[6];
     for (Int_t sector = 1; sector <= NoOfSectors; sector++) {
-      //                             w       h         s      a       l   i
-      //  Double_t paramsI[6] = {0.2850, 0.2000,  0.4000, 0.0010, 1.1500, 0};
-      //  Double_t paramsO[6] = {0.6200, 0.4000,  0.4000, 0.0010, 1.1500, 0};
-      Double_t xmaxP =  4.5;//4.5*St_tpcPadConfigC::instance()->innerSectorPadWidth(sector);// 4.5 
-      Double_t xminP = -xmaxP; 
-      Double_t params[6];
       if (! io) {
 	params[0] = St_tpcPadConfigC::instance()->innerSectorPadWidth(sector);                     // w = width of pad       
 	params[1] = gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
@@ -385,6 +418,8 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 	params[4] = 0;
 	params[5] = St_tpcPadConfigC::instance()->outerSectorPadPitch(sector);
       }
+      xmaxP =  4.5;//4.5*St_tpcPadConfigC::instance()->innerSectorPadWidth(sector);// 4.5 
+      xminP = -xmaxP; 
       if (! mPadResponseFunction[io][sector-1]) { 
 	mPadResponseFunction[io][sector-1] = new TF1F(io == 0 ? "PadResponseFunctionInner" : "PadResponseFunctionOuter",StTpcRSMaker::PadResponseFunc,xminP,xmaxP,6); 
 	mPadResponseFunction[io][sector-1]->SetParameters(params);
@@ -404,6 +439,7 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 	mPadResponseFunction[io][sector-1]->SetRange(-x,x);
 	mPadResponseFunction[io][sector-1]->Save(xminP,xmaxP,0,0,0,0);
       }
+       // check if the function has been created
       if (! mChargeFraction[io][sector-1]) {
 	xmaxP = 2.5;//5*St_tpcPadConfigC::instance()->innerSectorPadLength(sector); // 1.42
 	xminP = - xmaxP;
@@ -441,51 +477,37 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 	mLocalYDirectionCoupling[io][sector-1][j] = mChargeFraction[io][sector-1]->Eval(anodeWirePitch*j);
       }
 #endif
-      //  TF1F *func = new TF1F("funcP","x*sqrt(x)/exp(2.5*x)",0,10);
-      // see http://www4.rcf.bnl.gov/~lebedev/tec/polya.html
-      // Gain fluctuation in proportional counters follows Polya distribution. 
-      // x = G/G_0
-      // P(m) = m(m(x)**(m-1)*exp(-m*x)/Gamma(m);
-      // original Polya  m = 1.5 (R.Bellazzini and M.A.Spezziga, INFN PI/AE-94/02). 
-      // Valeri Cherniatin (cherniat@bnlarm.bnl.gov) recomends m=1.38
-      // Trs uses x**1.5/exp(x)
-      // tss used x**0.5/exp(1.5*x)
-      if (St_tpcAltroParamsC::instance()->N(sector-1) < 0) {// old TPC
-	// check if the function has been created
-	for (Int_t sec = 1; sec < sector; sec++) {	 
-	  if (St_tpcAltroParamsC::instance()->N(sec-1) < 0 && mShaperResponses[io][sec-1]) {
+      Int_t l = 0;
+      if (St_tpcAltroParamsC::instance()->Table()->GetNRows() > sector) l = sector - 1;
+      if (io == 0 && St_tpcAltroParamsC::instance()->Table()->GetNRows() > 24 + sector) l += 24;
+#if 1
+      // Check that Shaper has initialized before
+      tpcAltroParams_st *Ssector = St_tpcAltroParamsC::instance()->Struct(l);
+      for (Int_t sec = 1; sec < sector; sec++) {	 
+	Int_t lc = 0;
+	if (St_tpcAltroParamsC::instance()->Table()->GetNRows() > sec) lc = sec - 1;
+	if (io == 0 && St_tpcAltroParamsC::instance()->Table()->GetNRows() > 24 + sector) lc += 24;
+	if (mShaperResponses[io][sec-1]) {
+	  tpcAltroParams_st *Ssec = St_tpcAltroParamsC::instance()->Struct(lc);
+	  if (! memcmp(Ssector,Ssec,sizeof(tpcAltroParams_st))) {
 	    mShaperResponses[io][sector-1] = mShaperResponses[io][sec-1];
+	    mAltro[io][sector-1] = mAltro[io][sec-1];
 	    break;
 	  }
 	}
-	if (! mShaperResponses[io][sector-1]) {
-	  mShaperResponses[io][sector-1] = new TF1F(Form("ShaperFunc_%s_S%02i",Names[io],sector), 
-						    StTpcRSMaker::shapeEI3_I,timeBinMin,timeBinMax,7);  
-	  mShaperResponses[io][sector-1]->SetParameters(params3);
-	  mShaperResponses[io][sector-1]->SetParNames("t0","tauF","tauP", "tauI", "width","norm","io");
-	  mShaperResponses[io][sector-1]->SetTitle(mShaperResponses[io][sector-1]->GetName());
-	  mShaperResponses[io][sector-1]->GetXaxis()->SetTitle("time (buckets)");
-	  mShaperResponses[io][sector-1]->GetYaxis()->SetTitle("signal");
-	  // Cut tails
-	  Double_t t = timeBinMax;
-	  Double_t ymax = mShaperResponses[io][sector-1]->Eval(0.5);
-	  for (; t > 5; t -= 1) {
-	    Double_t r = mShaperResponses[io][sector-1]->Eval(t)/ymax;
-	    if (r > 1e-2) break;
-	  }
-	  mShaperResponses[io][sector-1]->SetRange(timeBinMin,t);
-	  mShaperResponses[io][sector-1]->Save(timeBinMin,t,0,0,0,0);
-	}
-	continue;
-      } 
-      //Altro 
-      for (Int_t sec = 1; sec < sector; sec++) {
-	if (St_tpcAltroParamsC::instance()->N(sec-1) >= 0 && mShaperResponses[io][sec-1] ) {
-	  mShaperResponses[io][sector-1] = mShaperResponses[io][sec-1];
-	  break;
-	}
       }
-      if (! mShaperResponses[io][sector-1]) {
+      if (mShaperResponses[io][sector-1]) continue;
+#endif
+      if (St_tpcAltroParamsC::instance()->N(l) < 0) {// old TPC
+	mShaperResponses[io][sector-1] = new TF1F(Form("ShaperFunc_%s_S%02i",Names[io],sector), 
+						  StTpcRSMaker::shapeEI3_I,timeBinMin,timeBinMax,7);  
+	mShaperResponses[io][sector-1]->SetParameters(params3);
+	mShaperResponses[io][sector-1]->SetParNames("t0","tauF","tauP", "tauI", "width","norm","io");
+	mShaperResponses[io][sector-1]->SetTitle(mShaperResponses[io][sector-1]->GetName());
+	mShaperResponses[io][sector-1]->GetXaxis()->SetTitle("time (buckets)");
+	mShaperResponses[io][sector-1]->GetYaxis()->SetTitle("signal");
+	assert(! mAltro[io][sector-1]);
+      } else if (St_tpcAltroParamsC::instance()->N(l) >= 0) {// Altro/Sampa
 	mShaperResponses[io][sector-1] = new TF1F(Form("ShaperFunc_%s_S%02i",Names[io],sector),
 						  StTpcRSMaker::shapeEI_I,timeBinMin,timeBinMax,5);  
 	mShaperResponses[io][sector-1]->SetParameters(params0);
@@ -493,19 +515,41 @@ select firstInnerSectorAnodeWire,lastInnerSectorAnodeWire,numInnerSectorAnodeWir
 	mShaperResponses[io][sector-1]->SetTitle(mShaperResponses[io][sector-1]->GetName());
 	mShaperResponses[io][sector-1]->GetXaxis()->SetTitle("time (buckets)");
 	mShaperResponses[io][sector-1]->GetYaxis()->SetTitle("signal");
-	// Cut tails
-	Double_t t = timeBinMax;
-	Double_t ymax = mShaperResponses[io][sector-1]->Eval(0.5);
-	for (; t > 5; t -= 1) {
-	  Double_t r = mShaperResponses[io][sector-1]->Eval(t)/ymax;
-	  if (r > 1e-2) break;
+	// Altro/Sampa
+	mAltro[io][sector-1] = new Altro(__MaxNumberOfTimeBins__,mADCs);
+	if (St_tpcAltroParamsC::instance()->N(l) == 0) {// no tail cancellation
+	 mAltro[io][sector-1] = new Altro(__MaxNumberOfTimeBins__,mADCs);
+	 mAltro[io][sector-1]->ConfigAltro(0,0,0,1,1); 
+	} else {      // Altro/Sampa with shaping parameters
+	  //      ConfigAltro(ONBaselineCorrection1, ONTailcancellation, ONBaselineCorrection2, ONClipping, ONZerosuppression)
+	  mAltro[io][sector-1]->ConfigAltro(                    0,                  1,                     0,          1,                 1); 
+	  //       ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
+	  //altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);  // Tonko 06/25/08
+	  mAltro[io][sector-1]->ConfigTailCancellationFilter(St_tpcAltroParamsC::instance()->K1(l),
+							     St_tpcAltroParamsC::instance()->K2(l),
+							     St_tpcAltroParamsC::instance()->K3(l), // K1-3
+							     St_tpcAltroParamsC::instance()->L1(l),
+							     St_tpcAltroParamsC::instance()->L2(l),
+							     St_tpcAltroParamsC::instance()->L3(l));// L1-3
 	}
-	mShaperResponses[io][sector-1]->SetRange(timeBinMin,t);
-	mShaperResponses[io][sector-1]->Save(timeBinMin,t,0,0,0,0);
+	if (mAltro[io][sector-1]) {
+	  mAltro[io][sector-1]->ConfigZerosuppression(St_tpcAltroParamsC::instance()->Threshold(l),
+						      St_tpcAltroParamsC::instance()->MinSamplesaboveThreshold(l),
+						      0,0);
+	  mAltro[io][sector-1]->PrintParameters();
+	}
       }
-    }
-  }
-  // tss
+      // Cut tails
+      Double_t t = timeBinMax;
+      Double_t ymax = mShaperResponses[io][sector-1]->Eval(0.5);
+      for (; t > 5; t -= 1) {
+	Double_t r = mShaperResponses[io][sector-1]->Eval(t)/ymax;
+	if (r > 1e-2) break;
+      }
+      mShaperResponses[io][sector-1]->SetRange(timeBinMin,t);
+      mShaperResponses[io][sector-1]->Save(timeBinMin,t,0,0,0,0);
+    } // sector
+  } // io
   if (Debug()) Print();
   memset (hist, 0, sizeof(hist));
   memset (checkList, 0, sizeof(checkList));
@@ -863,7 +907,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	}
 	// Generate signal 
 	Double_t Gain = St_tss_tssparC::instance()->gain(sector,row); 
-	mShaperResponse = mShaperResponses[io][sector-1];
 	if (ClusterProfile) {
 	  checkList[io][2]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),Gain);
 #ifdef __LASERINO__
@@ -1212,7 +1255,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  }
 	  TotalSignal += TotalSignalInCluster;
 	} while (kTRUE); // Clusters
-	//	tpc_hitC->adc = -99;
+	//03.14.2022	tpc_hitC->adc = -99;
 	if (dESum > 0 && dSSum) {
 #ifdef __DEBUG__
 	  if (Debug() > 12) {
@@ -1222,7 +1265,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #endif
 	  tpc_hitC->de = dESum*eV; 
 	  tpc_hitC->ds = dSSum; 
-	  //	  tpc_hitC->adc = TotalSignal;
+	  //03.14.2022	  tpc_hitC->adc = TotalSignal;
 	  tpc_hitC->np = nP;
 	  tpc_hitC->ne = nTotal;
 	  if (row > 1)       tpc_hitC->adcs[0]  += rowsdEH[row-2];
@@ -1255,6 +1298,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	g2t_tpc_hit_st *tpc_hitC = TrackSegmentHits[iSegHits].tpc_hitC;
 	if (tpc_hitC->volume_id > 10000) continue;
 	Int_t row = tpc_hitC->volume_id%100;
+	//03.14.2022
 	tpc_hitC->adc += rowsdE[row-1];
 	Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
 	if (checkList[io][17])
@@ -1275,16 +1319,15 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
         for(Int_t pad = 1; pad <= Npads; pad++) {
 	  UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
 	  if (! ntimebins) continue;
-	  static  Short_t ADCs[__MaxNumberOfTimeBins__];
 #ifdef __TFG__VERSION__
 	  static  Int_t IDTs[__MaxNumberOfTimeBins__];
 #else /* ! __TFG__VERSION__ */
 	  static UShort_t IDTs[__MaxNumberOfTimeBins__];
 #endif /* __TFG__VERSION__ */
-	  digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
+	  digitalSector->getTimeAdc(row,pad,mADCs,IDTs);
 	  for (UInt_t t = 0; t < __MaxNumberOfTimeBins__; t++) {
-	    if (ADCs[t] > 0 && IDTs[t]) {
-	      ADCmap2Track[IDTs[t]] += ADCs[t];
+	    if (mADCs[t] > 0 && IDTs[t]) {
+	      ADCmap2Track[IDTs[t]] += mADCs[t];
 	    }
 	  }
 	}
@@ -1483,6 +1526,8 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
   for (row = 1;  row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
     Int_t noOfPadsAtRow = St_tpcPadConfigC::instance()->St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
     Double_t pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMS();
+    Int_t ioA = 1; // Outer 
+    if ( St_tpcPadConfigC::instance()->IsRowInner(sector,row) ) ioA = 0; // Inner
     if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {
       if (! (St_tpcPadConfigC::instance()->iTPC(sector) && St_tpcPadConfigC::instance()->IsRowInner(sector,row))) {
 	pedRMS = St_TpcResponseSimulatorC::instance()->AveragePedestalRMSX();
@@ -1495,13 +1540,19 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
       gain = St_tpcPadGainT0BC::instance()->Gain(Sector,row,pad);
       if (gain <= 0.0) continue;
       ped    = St_TpcResponseSimulatorC::instance()->AveragePedestal();
-      static  Short_t ADCs[__MaxNumberOfTimeBins__];
 #ifdef __TFG__VERSION__
       static  Int_t IDTs[__MaxNumberOfTimeBins__];
 #else /* ! __TFG__VERSION__ */
       static UShort_t IDTs[__MaxNumberOfTimeBins__];
 #endif /* __TFG__VERSION__ */
-      memset(ADCs, 0, sizeof(ADCs));
+      Double_t pedRMSpad = pedRMS;
+      if (pedRMSpad < 0) {
+	Double_t NPads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(sector,row);
+	Double_t x =  pad/NPads - 0.5;
+	pedRMSpad = St_TpcPadPedRMSC::instance()->CalcCorrection(1-ioA, x);
+        ped = gRandom->Gaus(St_TpcPadPedRMSC::instance()->a(1-ioA)[3],St_TpcPadPedRMSC::instance()->a(1-ioA)[4]);
+      }
+      memset(mADCs, 0, sizeof(mADCs));
       memset(IDTs, 0, sizeof(IDTs));
       Int_t NoTB = 0;
       index = NoOfTimeBins*((row-1)*NoOfPads+pad-1);
@@ -1509,10 +1560,10 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 	//	Int_t index= NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin;
 	// Digits : gain + ped
 	//  GG TF1F *ff = new TF1F("ff","TMath::Sqrt(4.76658e+01*TMath::Exp(-2.87987e-01*(x-1.46222e+01)))",21,56)
-	Double_t pRMS = pedRMS;
+	Double_t pRMS = pedRMSpad;
 #if 0
 	if (bin >= 21 && bin <= 56) {
-	  pRMS = TMath::Sqrt(pedRMS*pedRMS + 4.76658e+01*TMath::Exp(-2.87987e-01*(bin-1.46222e+01)));
+	  pRMS = TMath::Sqrt(pedRMSpad*pedRMSpad + 4.76658e+01*TMath::Exp(-2.87987e-01*(bin-1.46222e+01)));
 	}
 #endif
 	if (pRMS > 0) {
@@ -1524,10 +1575,10 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 	if (adc < 1) continue;
 	SignalSum[index].Adc = adc;
 	NoTB++;
-	ADCs[bin] = adc;
+	mADCs[bin] = adc;
 	IDTs[bin] = SignalSum[index].TrackId;
 #ifdef __DEBUG__
-        if (adc > 3*pedRMS)	AdcSumBeforeAltro += adc;
+        if (adc > 3*pRMS)	AdcSumBeforeAltro += adc;
 	if (Debug() > 11 && SignalSum[index].Sum > 0) {
 	  LOG_INFO << "digi R/P/T/I = " << row << " /\t" << pad << " /\t" << bin << " /\t" << index 
 		   << "\tSum/Adc/TrackId = " << SignalSum[index].Sum << " /\t" 
@@ -1536,40 +1587,19 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 #endif
       }
       if (! NoTB) continue;
-      if (St_tpcAltroParamsC::instance()->N(sector-1) >= 0 && ! mAltro) {
-	mAltro = new Altro(__MaxNumberOfTimeBins__,ADCs);
-	if (St_tpcAltroParamsC::instance()->N(sector-1) > 0) {// Tonko 06/25/08
-	  //      ConfigAltro(ONBaselineCorrection1, ONTailcancellation, ONBaselineCorrection2, ONClipping, ONZerosuppression)
-	  mAltro->ConfigAltro(                    0,                  1,                     0,          1,                 1); 
-	  //       ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
-	  //altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);  // Tonko 06/25/08
-	  mAltro->ConfigTailCancellationFilter(St_tpcAltroParamsC::instance()->K1(),
-					       St_tpcAltroParamsC::instance()->K2(),
-					       St_tpcAltroParamsC::instance()->K3(), // K1-3
-					       St_tpcAltroParamsC::instance()->L1(),
-					       St_tpcAltroParamsC::instance()->L2(),
-					       St_tpcAltroParamsC::instance()->L3());// L1-3
-	} else {
-	  mAltro->ConfigAltro(0,0,0,1,1); 
-	}
-	mAltro->ConfigZerosuppression(St_tpcAltroParamsC::instance()->Threshold(),
-				      St_tpcAltroParamsC::instance()->MinSamplesaboveThreshold(),
-				      0,0);
-	mAltro->PrintParameters();
-      }
-      if (mAltro) {
+      if (mAltro[ioA][sector-1]) {
 	//#define PixelDUMP
 #ifdef PixelDUMP
 	static Short_t ADCsSaved[__MaxNumberOfTimeBins__];
-	memcpy(ADCsSaved, ADCs,sizeof(ADCsSaved));
+	memcpy(ADCsSaved, mADCs,sizeof(ADCsSaved));
 #endif
-	mAltro->RunEmulation();
+	mAltro[ioA][sector-1]->RunEmulation();
 #ifdef PixelDUMP
 	ofstream *out = new ofstream("digi.dump",ios_base::app);
 	for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	  if (ADCsSaved[i] > 0 || ADCs[i] > 0) {
-	    LOG_INFO << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i],mAltro->ADCkeep[i]) << endm;
-	    *out << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i],mAltro->ADCkeep[i]) << endl;
+	  if (ADCsSaved[i] > 0 || mADCs[i] > 0) {
+	    LOG_INFO << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],mADCs[i],mAltro[ioA][sector-1]->ADCkeep[i]) << endm;
+	    *out << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],mADCs[i],mAltro[ioA][sector-1]->ADCkeep[i]) << endl;
 	  }
 	}
 	delete out;
@@ -1577,15 +1607,15 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 	NoTB = 0;
 	Int_t ADCsum = 0;
 	for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	  if (ADCs[i] && ! mAltro->ADCkeep[i]) {ADCs[i] = 0;}
-	  if (ADCs[i]) {
+	  if (mADCs[i] && ! mAltro[ioA][sector-1]->ADCkeep[i]) {mADCs[i] = 0;}
+	  if (mADCs[i]) {
 	    NoTB++;
-	    ADCsum += ADCs[i];
+	    ADCsum += mADCs[i];
 #ifdef __DEBUG__
-	    if (ADCs[i] > 3*pedRMS) AdcSumAfterAltro += ADCs[i];
+	    if (mADCs[i] > 3*pedRMSpad) AdcSumAfterAltro += mADCs[i];
 	    if (Debug() > 12) {
 	      LOG_INFO << "Altro R/P/T/I = " << row << " /\t" << pad << " /\t" << i 
-		       << "\tAdc/TrackId = " << ADCs[i] << " /\t" << IDTs[i] << endm;
+		       << "\tAdc/TrackId = " << mADCs[i] << " /\t" << IDTs[i] << endm;
 	    }
 #endif
 	  } else {IDTs[i] = 0;}
@@ -1597,10 +1627,10 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
 #endif	
       }
       else {
-	if (St_tpcAltroParamsC::instance()->N(sector-1) < 0) NoTB = AsicThresholds(ADCs);
+	if (St_tpcAltroParamsC::instance()->N(sector-1) < 0) NoTB = AsicThresholds();
       }
       if (NoTB > 0 && digitalSector) {
-	digitalSector->putTimeAdc(row,pad,ADCs,IDTs);
+	digitalSector->putTimeAdc(row,pad,mADCs,IDTs);
       }
     } // pads
 #ifdef __DEBUG__
@@ -1612,25 +1642,25 @@ StTpcDigitalSector  *StTpcRSMaker::DigitizeSector(Int_t sector){
   return digitalSector;
 }
 //________________________________________________________________________________
-Int_t StTpcRSMaker::AsicThresholds(Short_t ADCs[__MaxNumberOfTimeBins__]) {
+Int_t StTpcRSMaker::AsicThresholds() {
   Int_t t1 = 0;
   Int_t nSeqLo = 0;
   Int_t nSeqHi = 0;
   Int_t noTbleft = 0;
   for (UInt_t tb = 0; tb < __MaxNumberOfTimeBins__; tb++) {
-    if (ADCs[tb] <= St_asic_thresholdsC::instance()->thresh_lo()) {
-      if (! t1) ADCs[tb] = 0;
+    if (mADCs[tb] <= St_asic_thresholdsC::instance()->thresh_lo()) {
+      if (! t1) mADCs[tb] = 0;
       else {
 	if (nSeqLo <= St_asic_thresholdsC::instance()->n_seq_lo() ||
 	    nSeqHi <= St_asic_thresholdsC::instance()->n_seq_hi()) 
-	  for (UInt_t t = t1; t <= tb; t++) ADCs[t] = 0;
+	  for (UInt_t t = t1; t <= tb; t++) mADCs[t] = 0;
 	else noTbleft += nSeqLo;
       }
       t1 = nSeqLo = nSeqHi = 0;
     }
     nSeqLo++; 
     if (! t1) t1 = tb;
-    if (ADCs[tb] > St_asic_thresholdsC::instance()->thresh_hi()) {nSeqHi++;}
+    if (mADCs[tb] > St_asic_thresholdsC::instance()->thresh_hi()) {nSeqHi++;}
   }
   return noTbleft;
 }
@@ -2031,6 +2061,8 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
       //    }
     Int_t io = (row <= St_tpcPadConfigC::instance()->numberOfInnerRows(sector)) ? 0 : 1;
     StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, row);
+    TF1F *ShaperResponse = mShaperResponses[io][sector-1];
+
     static StTpcPadCoordinate Pad;
     transform(xyzW,Pad,kFALSE,kFALSE); // don't use T0, don't use Tau
     Float_t bin = Pad.timeBucket();//L  - 1; // K
@@ -2099,12 +2131,12 @@ void StTpcRSMaker::GenerateSignal(HitPoint_t &TrackSegmentHits, Int_t sector, In
 	checkList[io][14]->Fill(TrackSegmentHits.xyzG.position().z(),XYcoupling);
       }
       if(XYcoupling < minSignal)  continue;
-      Int_t bin_low  = TMath::Max(0             ,binT + TMath::Nint(dt+mShaperResponse->GetXmin()-0.5));
-      Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+mShaperResponse->GetXmax()+0.5));
+      Int_t bin_low  = TMath::Max(0             ,binT + TMath::Nint(dt+ShaperResponse->GetXmin()-0.5));
+      Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+ShaperResponse->GetXmax()+0.5));
       Int_t index = NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin_low;
       Int_t Ntbks = TMath::Min(bin_high-bin_low+1, kTimeBacketMax);
       Double_t tt = -dt + (bin_low - binT);
-      mShaperResponse->GetSaveL(Ntbks,tt,TimeCouplings);
+      ShaperResponse->GetSaveL(Ntbks,tt,TimeCouplings);
       for(Int_t itbin=bin_low;itbin<=bin_high;itbin++, index++){
 	Double_t signal = XYcoupling*TimeCouplings[itbin-bin_low];
 	if (signal < minSignal)  continue;
@@ -2168,7 +2200,7 @@ Double_t StTpcRSMaker::dEdxCorrection(HitPoint_t &TrackSegmentHits) {
       CdEdx.edge += 1 - St_tpcPadConfigC::instance()->numberOfPadsAtRow(CdEdx.sector,CdEdx.row);
     CdEdx.F.dE     = 1;
 #if 0
-    CdEdx.dCharge= tpcHit->chargeModified() - tpcHit->charge();
+    CdEdx.dCharge = 0;
     Int_t p1 = tpcHit->minPad();
     Int_t p2 = tpcHit->maxPad();
     Int_t t1 = tpcHit->minTmbk();
