@@ -33,12 +33,10 @@
 #include <fstream>
 
 #include "TGeoManager.h"
-#include "TGeoNavigator.h"
 #include "TGeoVolume.h" 
 #include "TGeoPhysicalNode.h"
 #include "TGeoMatrix.h"
 #include "TGeoBBox.h"
-#include "TRotation.h"
 
 #include "StETofUtil/StETofGeometry.h"
 #include "StMessMgr.h"
@@ -175,7 +173,7 @@ StETofNode::calcXYPlaneNormal()
     // calculate the normal vector to the local XY-plane
     // i.e. the global representation of the local unit vector (0,0,1)
 
-    double xl[ 3 ] = { 0, 0, 1 }; //change to x = 0.0227. PW.
+    double xl[ 3 ] = { 0, 0, 1 };
     double xm[ 3 ];
 
     // transform to global coordinates
@@ -646,7 +644,7 @@ StETofGeometry::init(StMaker* maker, TGeoManager* geoManager, const double* safe
 		readAlignmentDatabase(maker);
 	 }
 
-	 geoManager->AddNavigator();
+	 //geoManager->AddNavigator();
 
 	 int iCounterAlignment = 0;
     // loop over sectors
@@ -718,7 +716,7 @@ StETofGeometry::init(StMaker* maker, TGeoManager* geoManager, const double* safe
     if( useHelixSwimmer ) {
         // get magnetic field map
         if( !StarMagField::Instance() ) {
-            LOG_INFO << " no StMagField available ... " << endl;
+            LOG_INFO << " no StMagField available ... " << endm;
         }
         else {
             mStarBField = StarMagField::Instance();
@@ -885,7 +883,7 @@ StETofGeometry::pointMaster2local( const int moduleId, const int counterId, cons
     local[ 2 ] = 0;
 
     if( !findETofNode( moduleId, counterId ) ) {
-        LOG_ERROR << "ETOF volume of a hit is not loaded in the geometry" << endl;
+        LOG_ERROR << "ETOF volume of a hit is not loaded in the geometry" << endm;
         return;
     }
 
@@ -901,7 +899,7 @@ StETofGeometry::hitLocal2Master( const int moduleId, const int counterId, const 
     master[ 2 ] = 0;
 
     if( !findETofNode( moduleId, counterId ) ) {
-        LOG_ERROR << "ETOF volume of a hit is not loaded in the geometry" << endl;
+        LOG_ERROR << "ETOF volume of a hit is not loaded in the geometry" << endm;
         return;
     }
 
@@ -920,7 +918,7 @@ StETofGeometry::hitLocal2Master( StETofHit* hit )
     int counterId = hit->counter() - 1;
 
     if( !findETofNode( moduleId, counterId ) ) {
-        LOG_ERROR << "ETOF volume of a hit is not loaded in the geometry" << endl;
+        LOG_ERROR << "ETOF volume of a hit is not loaded in the geometry" << endm;
         return StThreeVectorD( 0., 0., 0. );
     }
 
@@ -948,7 +946,7 @@ StETofGeometry::hitLocal2Master( StPicoETofHit* hit )
     int counterId = hit->counter() - 1;
 
     if( !findETofNode( moduleId, counterId ) ) {
-        LOG_ERROR << "ETOF volume of a hit is not loaded in the geometry" << endl;
+        LOG_ERROR << "ETOF volume of a hit is not loaded in the geometry" << endm;
         return TVector3( 0., 0., 0. );
     }
 
@@ -1550,12 +1548,12 @@ StETofGeometry::getFieldZ( const double& x, const double& y, const double& z ) {
 
 void 
 StETofGeometry::readAlignmentParameters(){
-      LOG_INFO << "etofAlignParam: filename provided --> use parameter file: " << mFileNameAlignParam.c_str() << endm;
+      LOG_INFO << "etofAlignParam: filename provided --> use parameter file: " << mFileNameAlignParam << endm;
         
 		  //add check for no alignment set here.
 	
 		  ifstream paramFile;		
-        paramFile.open( mFileNameAlignParam.c_str() );
+        paramFile.open( mFileNameAlignParam );
 
         if( !paramFile.is_open() ) {
             LOG_INFO << "unable to get the alignments parameters from file --> file does not exist" << endm;
