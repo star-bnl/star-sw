@@ -615,18 +615,18 @@ void
 StETofGeometry::init( TGeoManager* geoManager )
 {
     double safetyMargins[ 2 ] = { 0., 0. };
-    init( NULL, geoManager, safetyMargins, false );
+    init( geoManager, safetyMargins, false );
 }
 
 void
 StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins )
 {
-    init( NULL, geoManager, safetyMargins, false );
+    init( geoManager, safetyMargins, false );
 }
 
 
 void
-StETofGeometry::init(StMaker* maker, TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer )
+StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer )
 {
     if( !geoManager ) {
         LOG_ERROR << " *** StETofGeometry::Init - cannot find TGeoManager *** " << endm;
@@ -641,7 +641,7 @@ StETofGeometry::init(StMaker* maker, TGeoManager* geoManager, const double* safe
     if ( !mFileNameAlignParam.empty() ) {
 	 	readAlignmentParameters();
 	 }else{
-		readAlignmentDatabase(maker);
+		readAlignmentDatabase();
 	 }
 
 	 int iCounterAlignment = 0;
@@ -1578,17 +1578,12 @@ StETofGeometry::readAlignmentParameters(){
 }
 
 void 
-StETofGeometry::readAlignmentDatabase(StMaker* maker){
+StETofGeometry::readAlignmentDatabase(){
         LOG_INFO << "No etof alignment file provided --> use database: " << endm;
         
 		  //add check for no alignment set here.
 	
     	  TDataSet* dbDataSet = nullptr;
-
-		 if(!maker){
-			LOG_WARN << "No valid pointer to any StMaker given. Do not load alignment from database" << endm;
-			return;
-		 }
 
         dbDataSet = StMaker::GetChain()->GetDataBase("Geometry/etof/etofAlign");
 

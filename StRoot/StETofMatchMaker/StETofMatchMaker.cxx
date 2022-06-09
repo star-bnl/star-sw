@@ -311,7 +311,7 @@ StETofMatchMaker::InitRun( Int_t runnumber )
 
         LOG_DEBUG << " gGeoManager: " << gGeoManager << endm;
 
-        mETofGeom->init( (StMaker*)this, gGeoManager, etofProjection::safetyMargins, mUseHelixSwimmer ); //provide backline to initiating maker to load DB tables
+        mETofGeom->init( gGeoManager, etofProjection::safetyMargins, mUseHelixSwimmer ); //provide backline to initiating maker to load DB tables
     }
 
     if( mDoQA ) {
