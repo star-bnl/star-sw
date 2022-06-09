@@ -638,7 +638,7 @@ StETofGeometry::init(StMaker* maker, TGeoManager* geoManager, const double* safe
     mNValidModules = 0;
 
 
-	 if( mFileNameAlignParam != ""){
+    if ( !mFileNameAlignParam.empty() ) {
 	 	readAlignmentParameters();
 	 }else{
 		readAlignmentDatabase(maker);
