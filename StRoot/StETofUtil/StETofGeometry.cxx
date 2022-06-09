@@ -1611,7 +1611,5 @@ StETofGeometry::readAlignmentDatabase(StMaker* maker){
 		  		StThreeVectorD counterAlignmentParameter = StThreeVectorD( tempX, tempY, tempZ );
             mAlignmentParameters.push_back( counterAlignmentParameter );
         }
-
-		return;
 }
 
