@@ -79,7 +79,7 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const f
 
     // resize mBox with dx and dy
     float dz = mBox->GetDZ();
-    mBox->SetBoxDimensions( dx, dy, dz ); 
+    mBox->SetBoxDimensions( dx, dy, dz );
 
     buildMembers();
 }
