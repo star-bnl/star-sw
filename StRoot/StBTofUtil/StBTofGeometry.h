@@ -33,7 +33,6 @@
 #include "StThreeVectorD.hh"
 #include "StHelixD.hh"
 #include "TVolume.h"
-#include "TVolumePosition.h"
 #include "TVolumeView.h"
 #include "TVolumeViewIter.h"
 #include "StMaker.h"
@@ -49,7 +48,6 @@ class StBTofGeomTray;
 class StBTofGeomSensor;
 class StBTofGeometry;
 
-class TVolumeView;
 class TGeoPhysicalNode;
 class TGeoManager;
 
@@ -92,8 +90,8 @@ class StBTofNode : public TObject {
     StBTofNode() {}
    ~StBTofNode() {
      if ( TestBit(kIsOwner) ) {
+       if (pView != fView->GetPosition()) delete pView;
        delete fView;
-       delete pView;
        delete mMasterNode;
        delete mTVolume;
        delete mTShape;

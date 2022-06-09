@@ -16,6 +16,7 @@
 #include "StThreeVectorD.hh" 
 #include "StPhysicalHelixD.hh"
 #include "tables/St_trigDetSums_Table.h"
+#include "TGraph.h"
 class StGlobalTrack;
 class TMinuit; 
 class StEvent;
@@ -71,6 +72,7 @@ class StdEdxY2Maker : public StMaker {
   static  void fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   static  Double_t gaus2(Double_t *x, Double_t *p);
   static  TF1 *Gaus2();
+  static  TGraph *dNdxGraph() {return fdNdxGraph;}
   void     IntegrateAdc(const StTpcHitCollection* TpcHitCollection);
   Double_t IntegratedAdc(const StTpcHit* tpcHit);
  private:
@@ -99,6 +101,7 @@ class StdEdxY2Maker : public StMaker {
   static Double_t      bField;
   static Bool_t        fUsedNdx;
   static TH2F         *fIntegratedAdc;
+  static TGraph       *fdNdxGraph;
  public:
   virtual const char *GetCVS() const {
     static const char cvs[]=
