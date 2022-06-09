@@ -644,8 +644,6 @@ StETofGeometry::init(StMaker* maker, TGeoManager* geoManager, const double* safe
 		readAlignmentDatabase(maker);
 	 }
 
-	 //geoManager->AddNavigator();
-
 	 int iCounterAlignment = 0;
     // loop over sectors
     for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
