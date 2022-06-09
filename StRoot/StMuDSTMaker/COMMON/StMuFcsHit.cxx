@@ -13,6 +13,7 @@
 #include "StMuFcsHit.h"
 #include "TString.h"
 
+#include "StMuFcsCluster.h"
 ClassImp(StMuFcsHit)
 
 StMuFcsHit::StMuFcsHit() { /* no operation */}
@@ -127,4 +128,17 @@ void StMuFcsHit::print(Option_t *option) const {
     cout << Form("%4d (%3d) ",adc(i),timebin(i));
     }
     cout << endl;
+}
+
+
+void StMuFcsHit::setCluster( StMuFcsCluster* cluster ){
+    mCluster = cluster;
+}
+
+StMuFcsCluster* StMuFcsHit::cluster() {
+    return static_cast<StMuFcsCluster*>( mCluster.GetObject() );
+}
+
+const StMuFcsCluster* StMuFcsHit::cluster() const {
+    return static_cast<StMuFcsCluster*>( mCluster.GetObject() );
 }
