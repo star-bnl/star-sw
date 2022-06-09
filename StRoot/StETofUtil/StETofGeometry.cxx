@@ -1590,7 +1590,7 @@ StETofGeometry::readAlignmentDatabase(StMaker* maker){
 			return;
 		 }
 
-        dbDataSet = maker->GetDataBase( "Geometry / etof / etofAlign" );
+        dbDataSet = StMaker::GetChain()->GetDataBase("Geometry/etof/etofAlign");
 
         St_etofAlign* etofAlign = static_cast< St_etofAlign * > ( dbDataSet->Find( "etofAlign" ) );
         if( !etofAlign ) {
