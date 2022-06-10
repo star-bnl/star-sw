@@ -11,6 +11,16 @@ class StBFChain;
 class StMessMgr;
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "St_base/Stiostream.h"
+
+#pragma cling load("StarRoot")
+#pragma cling load("St_base")
+#pragma cling load("StChain")
+#pragma cling load("StUtilities")
+#pragma cling load("StBFChain")
+
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__MAKECINT__)
+
+#include "Stiostream.h"
 #include "TSystem.h"
 #include "TClassTable.h"
 #include "TApplication.h"
