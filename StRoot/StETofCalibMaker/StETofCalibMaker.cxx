@@ -1360,11 +1360,11 @@ StETofCalibMaker::processMuDst()
 	}*/
 
     size_t nDigis = mMuDst->numberOfETofDigi();
-    //LOG_INFO << "processMuDst() - # fired eTOF digis : " << nDigis << endm;
+    LOG_INFO << "processMuDst() - # fired eTOF digis : " << nDigis << endm;
 
     mTriggerTime = triggerTime( ( StETofHeader* ) etofHeader );
     mResetTime   = fmod( resetTime( ( StETofHeader* ) etofHeader ), eTofConst::bTofClockCycle );
-    //LOG_INFO << "created pulser digi map" << endm;
+    LOG_INFO << "created pulser digi map" << endm;
     std::map< unsigned int, std::vector< unsigned int >> pulserCandMap;
 
     /// first loop over digis to apply hardware mappping and find the pulsers
@@ -1395,6 +1395,7 @@ StETofCalibMaker::processMuDst()
     //LOG_INFO << "size of pulserCandMap: " << pulserCandMap.size() << endm;
 
     calculatePulserOffsets( pulserCandMap );
+    LOG_INFO << "still alive" << endm;
     
     // collect status bit information and fill good event flag for 2020+ data
 	 TClass* headerClass = etofHeader->IsA();
@@ -1596,6 +1597,7 @@ StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index, std::m
 void
 StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< unsigned int > >& pulserDigiMap )
 {
+    LOG_INFO << "calculating pulser offsets" << endm;
     if( mDebug ) {
         for( auto it=pulserDigiMap.begin(); it!=pulserDigiMap.end(); it++ ) {
             LOG_DEBUG << "channel: " << it->first << "   nCandidates: " << it->second.size() << endm;
@@ -1612,7 +1614,6 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
     if( mDebug ) {
         LOG_INFO << "reference pulser index: " << mReferencePulserIndex << endm;
     }
-
 
     std::map< int, double > pulserTimes;
     mNPulsersCounter.clear();
@@ -1631,15 +1632,13 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
         for( size_t j=0; j<it->second.size(); j++ ) {
             double pulserTime = 0.;
             double pulserTot  = 0.;
-            if( mEvent ) {
+            if( mMuDst ) {
+                pulserTime = mMuDst->etofDigi( it->second.at( j ) )->rawTime();
+                pulserTot  = mMuDst->etofDigi( it->second.at( j ) )->rawTot();
+            } else if( mEvent ) {
                 pulserTime = ( mEvent->etofCollection()->etofDigis() )[ it->second.at( j ) ]->rawTime();
                 pulserTot  = ( mEvent->etofCollection()->etofDigis() )[ it->second.at( j ) ]->rawTot();
             }
-            else if( mMuDst ) {
-                pulserTime = mMuDst->etofDigi( it->second.at( j ) )->rawTime();
-                pulserTot  = mMuDst->etofDigi( it->second.at( j ) )->rawTot();
-            }
-
             double timeToTrigger = pulserTime - mTriggerTime;
             double totToPeak     = pulserTot  - mPulserPeakTot.at( sideIndex );
 
@@ -1660,17 +1659,17 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
         }
 
         double pulserTime = 0.;
-        if( mEvent ) {
+
+			if( mMuDst ) {
+				      pulserTime = mMuDst->etofDigi( it->second.at( candIndex ) )->rawTime();
+
+				      // set calibTot to -999. to exclude it from being calibrated in the next step --> pulser will not be used to build hits
+				      mMuDst->etofDigi( it->second.at( candIndex ) )->setCalibTot( -999. );
+		  } else if( mEvent ) {
             pulserTime = ( mEvent->etofCollection()->etofDigis() )[ it->second.at( candIndex ) ]->rawTime();
 
             // set calibTot to -999. to exclude it from being calibrated in the next step --> pulser will not be used to build hits
             mEvent->etofCollection()->etofDigis() [ it->second.at( candIndex ) ]->setCalibTot( -999. );
-        }
-        else if( mMuDst ) {
-            pulserTime = mMuDst->etofDigi( it->second.at( candIndex ) )->rawTime();
-
-            // set calibTot to -999. to exclude it from being calibrated in the next step --> pulser will not be used to build hits
-            mMuDst->etofDigi( it->second.at( candIndex ) )->setCalibTot( -999. );
         }
 
         pulserTimes[ sideIndex ] = pulserTime;
