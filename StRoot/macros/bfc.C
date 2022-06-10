@@ -12,13 +12,13 @@ class StMessMgr;
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "St_base/Stiostream.h"
 
+#if defined(__CLING__)
 #pragma cling load("StarRoot")
 #pragma cling load("St_base")
 #pragma cling load("StChain")
 #pragma cling load("StUtilities")
 #pragma cling load("StBFChain")
-
-#if !(defined(__CINT__) || defined(__CLING__)) || defined(__MAKECINT__)
+#endif /* __CLING__ */
 
 #include "Stiostream.h"
 #include "TSystem.h"
@@ -26,11 +26,9 @@ class StMessMgr;
 #include "TApplication.h"
 #include "TInterpreter.h"
 #include "StBFChain.h"
-#ifndef __CLING__1
 #include "StMessMgr.h"
 #include "StStarLogger/StLoggerManager.h"
 #include "StarRoot/TAttr.h"
-#endif
 #include "TROOT.h"
 #include "TAttr.h"
 #include "Rtypes.h"
