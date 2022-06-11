@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         starenv: [root5, root6]
-        compiler: [gcc485]
+        compiler: [gcc485, gcc11]
     env:
       STARENV: ${{ matrix.starenv }}-${{ matrix.compiler }}
     steps:
