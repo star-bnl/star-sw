@@ -39,7 +39,6 @@ const Double_t keV    = 0.001 * MeV;
 #define dup _dup_
 
 #define tanf _tanf_
-#define fpos _fpos_
 //
 // Implement some bitwise functions from fortran land
 //
@@ -50,11 +49,7 @@ Int_t ieor(Int_t x, Int_t y);
 Int_t nint(Double_t x);
 Int_t nint(Float_t x);
 
-//
-// Fortran abs is fabs
-//
-//#define abs(x) TMath::Abs(x)
-inline double abs (double x) {return fabs(x);}
+using std::abs;
 
 // VAX-Fortran (omfg) trig functions taking arguement in degrees
 Double_t tand(Double_t x);
