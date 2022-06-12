@@ -70,7 +70,7 @@ class vpdBuilder : public JevpBuilder {
 
   // Histo declarations!
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       TH2 *cdb[4];
       TH2 *tac_east_vs_tac_west;
