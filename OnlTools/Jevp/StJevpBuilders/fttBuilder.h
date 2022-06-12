@@ -259,7 +259,7 @@ class fttBuilder : public JevpBuilder {
 
   // Histo declarations!
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
         // VMM electronics
         TH1 *hitsPerPlane;

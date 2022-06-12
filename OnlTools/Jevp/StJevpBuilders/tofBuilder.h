@@ -50,7 +50,7 @@ public:
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
 
       // TOFL0HistogramGroup
@@ -87,7 +87,7 @@ public:
   //*** End Histogram Declarations...
 
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       TH1 *TOF_Tray_TEhitmap[NTRAYS];
     };
