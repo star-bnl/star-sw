@@ -47,8 +47,6 @@
 
 #include "StETofUtil/StETofConstants.h"
 
-#include "StMaker.h"
-
 class TNamed;
 
 class StETofHit;
