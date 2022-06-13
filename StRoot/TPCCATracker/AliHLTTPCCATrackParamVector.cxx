@@ -597,7 +597,7 @@ std::istream &operator>>( std::istream &in, AliHLTTPCCATrackParamVector &t )
 
 std::ostream &operator<<( std::ostream &out, const AliHLTTPCCATrackParamVector &t )
 {
-  if ( out == std::cerr ) {
+  if ( &out == &std::cerr ) {
     out << "------------------------------ Track Param ------------------------------"
         << "\n             X: " << t.X()
         << "\n    SignCosPhi: " << t.SignCosPhi()
