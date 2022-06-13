@@ -17,7 +17,7 @@ VPATH += $(RTS_ST_ROOT)/src/DAQ_ITPC $(RTS_ST_ROOT)/src/DAQ_TPX $(RTS_ST_ROOT)/s
 
 LDLIBS := -lm -lpthread
 
-BINS = tpc23_offline fcf_new tpc23_test tpc23_simulation copyover irdo_fast 
+BINS = itpc_rerun tpc23_offline fcf_new tpc23_test tpc23_simulation copyover irdo_fast 
 #tpx
 
 all:   $(BINS)
@@ -29,7 +29,8 @@ tpc23_test: tpc23_test.o tpx23.o itpc23.o tpc23_base.o $(VOBJS)
 
 tpc23_simulation: tpc23_simulation.o tpx23.o itpc23.o tpc23_base.o $(VOBJS)
 
-
+itpc_rerun: itpc_rerun.o $(VOBJS)
+	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
 tpc23_offline: tpc23_offline.o itpc23.o tpx23.o tpc23_base.o libitpc.a libtpx.a libdaqReader.a libsfs.a librtslog.a 
 	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
