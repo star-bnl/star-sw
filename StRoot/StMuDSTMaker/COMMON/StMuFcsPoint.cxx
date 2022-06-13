@@ -14,8 +14,6 @@
 #include "StMuFcsPoint.h"
 #include "StMuFcsCluster.h"
 
-static const char rcsid[] = "$Id: StMuFcsPoint.cxx,v 2.1 2021/01/11 20:25:37 ullrich Exp $";
-
 StMuFcsPoint::StMuFcsPoint() :  mFourMomentum(0.,0.,0.,0.) { /* no op */ }
 
 StMuFcsPoint::~StMuFcsPoint() { /* no op */ }
@@ -29,4 +27,19 @@ void StMuFcsPoint::print(int opt) {
      << endl;
 }
 
-unsigned int StMuFcsPoint::parentClusterId() const { return mCluster->id(); } //parent cluster Id
+unsigned int StMuFcsPoint::parentClusterId() const { 
+    StMuFcsCluster * clu = static_cast<StMuFcsCluster*>( mCluster.GetObject() );
+    if ( nullptr == clu ) 
+        return 9999999; // TODO: a better default for none?
+    return clu->id(); 
+} //parent cluster Id
+
+
+StMuFcsCluster* StMuFcsPoint::cluster() { 
+    return static_cast<StMuFcsCluster*>( mCluster.GetObject() ); 
+} //  Parent cluster of the photon.
+
+void StMuFcsPoint::setCluster(StMuFcsCluster* cluster) 
+{ 
+    mCluster = cluster; 
+}

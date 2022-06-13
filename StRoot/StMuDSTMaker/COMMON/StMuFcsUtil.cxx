@@ -110,7 +110,13 @@ void StMuFcsUtil::rebuildRelationships(StFcsCollection* fcscol,
 
             if ( mMapHits.count( fcscol->hits(idet)[i] ) > 0 ) {
                 StMuFcsHit * muHit = static_cast<StMuFcsHit*>(mMapHits[ fcscol->hits(idet)[i] ]);
-                muHit->setCluster( static_cast<StMuFcsCluster*>(mMapClusters[ fcscol->hits(idet)[i]->cluster() ]) );
+                if ( nullptr == fcscol->hits(idet)[i]->cluster() ) continue;
+                if ( mMapClusters.count( fcscol->hits(idet)[i]->cluster() ) == 0 
+                    || mMapClusters[ fcscol->hits(idet)[i]->cluster() ] == nullptr )
+                    continue;
+
+                StMuFcsCluster* muCluster = mMapClusters[ fcscol->hits(idet)[i]->cluster() ];
+                muHit->setCluster( muCluster );
             } else {
                 // By construction the StFcs objectts should always exist in the map, so this is an error
                 LOG_ERROR << "Cannot find StMuFcsHit for StFcsHit=" << fcscol->hits(idet)[i] << endm;
@@ -123,13 +129,15 @@ void StMuFcsUtil::rebuildRelationships(StFcsCollection* fcscol,
         StSPtrVecFcsCluster &vecClu = fcscol->clusters(idet);
         for(unsigned int i=0; i<vecClu.size(); i++){
 
+            assert( mMapClusters.count( vecClu[i] ) > 0 );
+
             StMuFcsCluster * clu             = static_cast<StMuFcsCluster*>( mMapClusters[ vecClu[i]] );
             StPtrVecFcsHit& vecHits          = vecClu[i]->hits();
             StPtrVecFcsCluster& vecNeighbors = vecClu[i]->neighbor();
             StPtrVecFcsPoint& vecPoints      = vecClu[i]->points();
 
             for (unsigned int j = 0; j < vecHits.size(); j++ ){
-                if ( vecHits[j] && mMapHits.count( vecHits[j] ) > 0 ) {
+                if ( vecHits[j] && mMapHits.count( vecHits[j] ) > 0 && mMapHits[vecHits[j]] != nullptr ) {
                     StMuFcsHit * muHit = static_cast<StMuFcsHit*>( mMapHits[ vecHits[j]] );
                     clu->hits()->Add( muHit );
                 } else {
@@ -138,7 +146,7 @@ void StMuFcsUtil::rebuildRelationships(StFcsCollection* fcscol,
             } // for j
 
             for (unsigned int j = 0; j < vecNeighbors.size(); j++ ){
-                if ( vecNeighbors[j] && mMapClusters.count( vecNeighbors[j] ) > 0 ) {
+                if ( vecNeighbors[j] && mMapClusters.count( vecNeighbors[j] ) > 0 && mMapClusters[vecNeighbors[j]] != nullptr) {
                     StMuFcsCluster * muCluster = static_cast<StMuFcsCluster*>(  mMapClusters[vecNeighbors[j]]);
                     clu->addNeighbor( muCluster );
                 } else {
@@ -147,7 +155,7 @@ void StMuFcsUtil::rebuildRelationships(StFcsCollection* fcscol,
             } // for j
 
             for (unsigned int j = 0; j < vecPoints.size(); j++ ){
-                if ( vecPoints[j] && mMapPoints.count( vecPoints[j] ) > 0 ) {
+                if ( vecPoints[j] && mMapPoints.count( vecPoints[j] ) > 0 && mMapPoints[vecPoints[j]] != nullptr ) {
                     StMuFcsPoint * muPoint = static_cast<StMuFcsPoint*>( mMapPoints[vecPoints[j]]);
                     clu->addPoint( muPoint );
                 } else {
@@ -157,18 +165,18 @@ void StMuFcsUtil::rebuildRelationships(StFcsCollection* fcscol,
         } // for i
     } // for idet
 
-    // Take care of the Points
-    for (unsigned int idet = 0; idet < kFcsNDet; idet++){
-        // StSPtrVecFcsHit vecHit = fcscol->hits(idet);
-        for(unsigned int i=0; i<fcscol->numberOfPoints(idet); i++){
-            if ( mMapPoints.count( fcscol->points(idet)[i] ) > 0 ) {
-                StMuFcsPoint * muPoint = static_cast<StMuFcsPoint*>(mMapPoints[ fcscol->points(idet)[i] ]);
-                muPoint->setCluster( static_cast<StMuFcsCluster*>(mMapClusters[ fcscol->points(idet)[i]->cluster() ]) );
-            } else {
-                LOG_ERROR << "Cannot find StMuFcsPoint for StFcsPoint=" << fcscol->points(idet)[i] << endm;
-            } // if / else
-        } // for i
-    } // for idet
+    // // Take care of the Points
+    // for (unsigned int idet = 0; idet < kFcsNDet; idet++){
+    //     // StSPtrVecFcsHit vecHit = fcscol->hits(idet);
+    //     for(unsigned int i=0; i<fcscol->numberOfPoints(idet); i++){
+    //         if ( mMapPoints.count( fcscol->points(idet)[i] ) > 0 ) {
+    //             StMuFcsPoint * muPoint = static_cast<StMuFcsPoint*>(mMapPoints[ fcscol->points(idet)[i] ]);
+    //             muPoint->setCluster( static_cast<StMuFcsCluster*>(mMapClusters[ fcscol->points(idet)[i]->cluster() ]) );
+    //         } else {
+    //             LOG_ERROR << "Cannot find StMuFcsPoint for StFcsPoint=" << fcscol->points(idet)[i] << endm;
+    //         } // if / else
+    //     } // for i
+    // } // for idet
 } // rebuildRelationships(...)
 
 
