@@ -38,8 +38,9 @@ jobs:
     strategy:
       matrix:
         test_id: [10, 11, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60, 76, 77, 78, 90, 91, 92, 102, 103, 119, 120, 121, 122]
+        compiler: [gcc485, gcc11]
     env:
-      STARENV: root5-gcc485
+      STARENV: root5-${{ matrix.compiler }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
@@ -61,8 +62,9 @@ jobs:
     strategy:
       matrix:
         test_id: [102, 121, 122]
+        compiler: [gcc485, gcc11]
     env:
-      STARENV: root5-gcc485
+      STARENV: root5-${{ matrix.compiler }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
@@ -84,8 +86,9 @@ jobs:
     strategy:
       matrix:
         test_id: [102, 121, 122]
+        compiler: [gcc485, gcc11]
     env:
-      STARENV: root5-gcc485
+      STARENV: root5-${{ matrix.compiler }}
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v3
