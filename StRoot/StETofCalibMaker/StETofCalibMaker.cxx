@@ -1364,7 +1364,6 @@ StETofCalibMaker::processMuDst()
 
     mTriggerTime = triggerTime( ( StETofHeader* ) etofHeader );
     mResetTime   = fmod( resetTime( ( StETofHeader* ) etofHeader ), eTofConst::bTofClockCycle );
-    LOG_INFO << "created pulser digi map" << endm;
     std::map< unsigned int, std::vector< unsigned int >> pulserCandMap;
 
     /// first loop over digis to apply hardware mappping and find the pulsers
@@ -1395,7 +1394,6 @@ StETofCalibMaker::processMuDst()
     //LOG_INFO << "size of pulserCandMap: " << pulserCandMap.size() << endm;
 
     calculatePulserOffsets( pulserCandMap );
-    LOG_INFO << "still alive" << endm;
     
     // collect status bit information and fill good event flag for 2020+ data
 	 TClass* headerClass = etofHeader->IsA();
@@ -1597,7 +1595,6 @@ StETofCalibMaker::flagPulserDigis( StETofDigi* aDigi, unsigned int index, std::m
 void
 StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< unsigned int > >& pulserDigiMap )
 {
-    LOG_INFO << "calculating pulser offsets" << endm;
     if( mDebug ) {
         for( auto it=pulserDigiMap.begin(); it!=pulserDigiMap.end(); it++ ) {
             LOG_DEBUG << "channel: " << it->first << "   nCandidates: " << it->second.size() << endm;
