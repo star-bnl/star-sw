@@ -224,7 +224,7 @@ void RichEventReader::InitEventReader(int fdes, long offset, int MMap)
 
   if (strncmp(DATAP,"RICP", 4) == 0) {
     // copy the logical record into local struct lr
-    if (memcpy(&lr,DATAP,sizeof(lr))<0) perror("error in memcpy");
+    if (!memcpy(&lr,DATAP,sizeof(lr))) perror("error in memcpy");
     // check the CRC
     if (!lr.test_CRC()) ERROR(ERR_CRC);
     // swap bytes

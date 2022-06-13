@@ -390,7 +390,7 @@ static int nCall=0; nCall++;
     for (int i=0;i<(int)mAux.size();i++) { mAux[i].Test(i); }
  
     Relink();
-    if (mMinIdx<0) return 0;
+    if (!mMinIdx) return 0;
     for (int i=0;i<(int)mAux.size();i++) { mAux[i].Test(i); }
 
 
