@@ -397,7 +397,7 @@ inline void  StETofGeometry::debugOn()  { mDebug = true;  }
 inline void  StETofGeometry::debugOff() { mDebug = false; }
 
 inline bool  StETofGeometry::isDebugOn() const { return mDebug; }
-inline void  StETofGeometry::setFileNameAlignParam(std::string FileNameAlignParam) {mFileNameAlignParam = FileNameAlignParam;}
+inline void  StETofGeometry::setFileNameAlignParam(std::string fileNameAlignParam) {mFileNameAlignParam = fileNameAlignParam;}
 
 
 #endif /// STETOFGEOMETRY_H
