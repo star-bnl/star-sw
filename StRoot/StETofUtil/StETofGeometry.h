@@ -70,7 +70,7 @@ public:
     ~StETofNode() {}
 
     StETofNode( const TGeoPhysicalNode& gpNode );
-    StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy );
+    //StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy );
     StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const StThreeVectorD alignment );
 
     void    convertPos( StETofNode* from, const double* pos_from, StETofNode* to, double* pos_to );
@@ -167,8 +167,8 @@ public:
     
     void  addCounter( const TGeoPhysicalNode& gpNode, const int moduleId, const int counterId );  
     void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId );
-    void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins );
-    void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins, const StThreeVectorD alignment  );
+    //void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins );
+    void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double safetyMargins[2], const StThreeVectorD alignment  );
 
     StETofGeomCounter* counter( const unsigned int i ) const;  
 
@@ -228,7 +228,7 @@ public:
     ~StETofGeomCounter() {}
 
     StETofGeomCounter( const TGeoPhysicalNode& gpNode, const int moduleId, const int counterId );
-    StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId );
+    //StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId );
     StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const StThreeVectorD alignment );
     void createGeomStrips();
     
@@ -289,8 +289,8 @@ public:
     ~StETofGeometry();
 
     void init( TGeoManager* geoManager ); 
-    void init( TGeoManager* geoManager, const double* safetyMargins );
-    void init( TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer );
+    //void init( TGeoManager* geoManager, const double* safetyMargins );
+    void init( TGeoManager* geoManager, const double safetyMargins[2], const bool& useHelixSwimmer );
 
     void reset();
 

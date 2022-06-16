@@ -457,7 +457,7 @@ StETofMatchMaker::Make()
     readETofDetectorHits( detectorHitVec );
 
     if( detectorHitVec.size() == 0 ) {
-        LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+        //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
         return kStOk;
     }
@@ -484,7 +484,7 @@ StETofMatchMaker::Make()
     findTrackIntersections( intersectionVec, nPrimaryWithIntersection );
 
     if( intersectionVec.size() == 0 ) {
-        LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+        //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
         return kStOk;
     }
@@ -499,7 +499,7 @@ StETofMatchMaker::Make()
     matchETofHits( detectorHitVec, intersectionVec, matchCandVec );
 
     if( matchCandVec.size() == 0 ) {
-        LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+        //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
         return kStOk;
     }
@@ -514,7 +514,7 @@ StETofMatchMaker::Make()
     sortSingleMultipleHits( matchCandVec, singleTrackMatchVec, multiTrackMatchVec );
 
     if( singleTrackMatchVec.size() == 0 ) {
-        LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+        //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
         return kStOk;
     }
@@ -527,12 +527,12 @@ StETofMatchMaker::Make()
     finalizeMatching( singleTrackMatchVec, finalMatchVec );
 
     if( finalMatchVec.size() == 0 ) {
-        LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+        //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
         return kStOk;
     }
     else{
-        LOG_INFO << "Make() -- number of found matches of eTOF hits with tracks: " << finalMatchVec.size() << endm;        
+        //LOG_INFO << "Make() -- number of found matches of eTOF hits with tracks: " << finalMatchVec.size() << endm;        
     }
 
     //.........................................................................
@@ -557,7 +557,7 @@ StETofMatchMaker::Make()
     fillSlewHistograms( finalMatchVec );
 
 
-    LOG_INFO << "Make() -- event done ... bye-bye" << endm;
+    //LOG_INFO << "Make() -- event done ... bye-bye" << endm;
 
     return kStOk;
 }
@@ -744,16 +744,16 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
     // event selection ... only continue with events that have eTOF hits
     if( mIsStEventIn ) {
         if( !mEvent->etofCollection() ) {
-            LOG_INFO << "readETofDetectorHits() - no etof collection --> nothing to do ... bye-bye" << endm;
+            LOG_WARN << "readETofDetectorHits() - no etof collection --> nothing to do ... bye-bye" << endm;
             return;
         }
         if( !mEvent->etofCollection()->hitsPresent() ) {
-            LOG_INFO << "readETofDetectorHits() - no etof hits present --> nothing to do ... bye-bye" << endm;
+            LOG_WARN << "readETofDetectorHits() - no etof hits present --> nothing to do ... bye-bye" << endm;
             return;
         }
         
         nHits = mEvent->etofCollection()->etofHits().size();
-        LOG_INFO << " number of ETOF hits: " << nHits << endm;
+        //LOG_INFO << " number of ETOF hits: " << nHits << endm;
     }
     else if( mIsMuDstIn ) {
         if( !mMuDst->etofArray( muETofHit ) ) {
@@ -767,7 +767,7 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
         }
 
         nHits = mMuDst->numberOfETofHit();
-        LOG_INFO << " number of ETOF hits: " << nHits << endm;
+        //LOG_INFO << " number of ETOF hits: " << nHits << endm;
     }
 
     if( mDoQA ) {
@@ -1076,7 +1076,7 @@ StETofMatchMaker::findTrackIntersections( eTofHitVec& intersectionVec, int& nPri
         }
     }   // end of MuDst processing
 
-    LOG_INFO << "# tracks in the event: " << nNodes << "  ... out of which " << intersectionVec.size() << " intersect with eTOF" << endm;
+    //LOG_INFO << "# tracks in the event: " << nNodes << "  ... out of which " << intersectionVec.size() << " intersect with eTOF" << endm;
 
     if( mDoQA ) {
         mHistograms.at( "intersectionMult" )->Fill( intersectionVec.size() );
@@ -1468,7 +1468,7 @@ StETofMatchMaker::sortSingleMultipleHits( eTofHitVec& matchCandVec, eTofHitVec& 
         }
     }
 
-    LOG_INFO << "nSingleTrackMatch: " << nSingleTrackMatch << " ... nMultiTrackMatch: " << nMultiTrackMatch << endm;
+    //LOG_INFO << "nSingleTrackMatch: " << nSingleTrackMatch << " ... nMultiTrackMatch: " << nMultiTrackMatch << endm;
 
     if( mDoQA ) {
         mHistograms.at( "singleTrackMatchMult" )->Fill( singleTrackMatchVec.size() );
@@ -2269,8 +2269,8 @@ StETofMatchMaker::startTime( const eTofHitVec& finalMatchVec ) {
 
     double t0Diff = moduloDist( tstartETof - tstartBTof, eTofConst::bTofClockCycle );
 
-    LOG_INFO << "startTime(): -- start time comparison: bTOF " << tstartBTof << "  eTOF " << tstartETof;
-    LOG_INFO << " nCand_etofT0: " << nCand_etofT0 << "  difference: " << t0Diff << " mT0corr: " << mT0corr << endm;
+    //LOG_INFO << "startTime(): -- start time comparison: bTOF " << tstartBTof << "  eTOF " << tstartETof;
+    //LOG_INFO << " nCand_etofT0: " << nCand_etofT0 << "  difference: " << t0Diff << " mT0corr: " << mT0corr << endm;
 
     if( mDoQA && tstartBTof != -9999. && tstartETof != -9999. ) {
         mHistograms.at( "startTimeDiff"       )->Fill( t0Diff );
@@ -2501,7 +2501,7 @@ StETofMatchMaker::fillQaHistograms( eTofHitVec& finalMatchVec )
             float pathlength = matchCand.pathLength;
             float m2         = mom * mom * ( -1 + 1 / ( beta * beta ) );
 
-            LOG_INFO << "momentum: " << mom << " ... beta: " << beta << " ... m^2: " << m2 << " ... dEdx: " << dEdx << endm;
+            //LOG_INFO << "momentum: " << mom << " ... beta: " << beta << " ... m^2: " << m2 << " ... dEdx: " << dEdx << endm;
             //LOG_DEBUG << "pathlength: " << pathlength << " ... time-of-flight: " << matchCand.tof << " ... mom: " << mom << " ... beta: " << beta << " ...  charge: " << charge << " ... m^2: " << m2 << " ... dEdx: " << dEdx << endm;
 
             if( fabs( tof+999. ) < 1.e-5 || fabs( pathlength+999. ) < 1.e-5 ) {

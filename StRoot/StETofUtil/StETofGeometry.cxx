@@ -71,7 +71,7 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode )
     buildMembers();
 }
 
-StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy )
+/*StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy )
 : mSafetyMarginX( 0. ),
   mSafetyMarginY( 0. ),
   mDebug( false )
@@ -84,9 +84,9 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const f
     mBox->SetBoxDimensions( dx, dy, dz );
 
     buildMembers();
-}
+}*/
 
-StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const StThreeVectorD alignment )
+StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const StThreeVectorD alignment = { 0, 0, 0 } )
 : mSafetyMarginX( 0. ),
   mSafetyMarginY( 0. ), 
   mDebug( false )
@@ -392,7 +392,7 @@ StETofGeomModule::StETofGeomModule( const TGeoPhysicalNode& gpNode, const int mo
 }
 
 
-void
+/*void
 StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const int moduleId, const int counterId )
 {
     StETofGeomCounter* counter = new StETofGeomCounter( gpNode, moduleId, counterId );
@@ -409,10 +409,10 @@ StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, c
     counter->setSafetyMargins( safetyMargins );
 
     mETofCounter.push_back( counter );
-}
+}*/
 
 void
-StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins, const StThreeVectorD alignment )
+StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double safetyMargins[2] = (double[2]){ 0, 0 }, const StThreeVectorD alignment = {0,0,0} )
 {
     StETofGeomCounter* counter = new StETofGeomCounter( gpNode, dx, dy, moduleId, counterId, alignment );
 
@@ -493,7 +493,7 @@ StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const int 
 
     if( mDebug ) print();
 }
-
+/*
 StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId )
 : StETofNode( gpNode, dx, dy ),
   mModuleIndex( moduleId ),
@@ -506,9 +506,9 @@ StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const floa
     createGeomStrips();
 
     if( mDebug ) print();
-}
+}*/
 
-StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const StThreeVectorD alignment )
+StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const StThreeVectorD alignment = { 0, 0, 0 } )
 : StETofNode( gpNode, dx, dy, alignment ),
   mModuleIndex( moduleId ),
   mCounterIndex( counterId ),
@@ -612,7 +612,7 @@ StETofGeometry::~StETofGeometry()
     reset();
 }
 
-
+/*
 void
 StETofGeometry::init( TGeoManager* geoManager )
 {
@@ -625,10 +625,10 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins )
 {
     init( geoManager, safetyMargins, false );
 }
-
+*/
 
 void
-StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer )
+StETofGeometry::init( TGeoManager* geoManager, const double safetyMargins[2] = (double[2]){ 0, 0 }, const bool& useHelixSwimmer = false )
 {
     if( !geoManager ) {
         LOG_ERROR << " *** StETofGeometry::Init - cannot find TGeoManager *** " << endm;
@@ -1572,8 +1572,7 @@ StETofGeometry::readAlignmentParameters(){
         paramFile.close();
 
         if( mAlignmentParameters.size() != 108 ) {
-            LOG_INFO << "parameter file for alignments has not the right amount of entries: ";
-            LOG_INFO << mAlignmentParameters.size() << " instead of 108 !!!!" << endm;
+            LOG_WARN << "parameter file for alignments has not the right amount of entries: " << mAlignmentParameters.size() << " instead of 108 !!!!" << endm;
             return;
         }
 
@@ -1584,10 +1583,8 @@ StETofGeometry::readAlignmentDatabase(){
         LOG_INFO << "No etof alignment file provided --> use database: " << endm;
         
 		  //add check for no alignment set here.
-	
-    	  TDataSet* dbDataSet = nullptr;
 
-        dbDataSet = StMaker::GetChain()->GetDataBase("Geometry/etof/etofAlign");
+        TDataSet* dbDataSet = StMaker::GetChain()->GetDataBase("Geometry/etof/etofAlign");
 
         St_etofAlign* etofAlign = static_cast< St_etofAlign * > ( dbDataSet->Find( "etofAlign" ) );
         if( !etofAlign ) {

@@ -1360,7 +1360,7 @@ StETofCalibMaker::processMuDst()
 	}*/
 
     size_t nDigis = mMuDst->numberOfETofDigi();
-    LOG_INFO << "processMuDst() - # fired eTOF digis : " << nDigis << endm;
+    //LOG_INFO << "processMuDst() - # fired eTOF digis : " << nDigis << endm;
 
     mTriggerTime = triggerTime( ( StETofHeader* ) etofHeader );
     mResetTime   = fmod( resetTime( ( StETofHeader* ) etofHeader ), eTofConst::bTofClockCycle );

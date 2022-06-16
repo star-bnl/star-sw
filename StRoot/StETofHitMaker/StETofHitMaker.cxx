@@ -392,7 +392,7 @@ StETofHitMaker::processStEvent()
             nDigisInStore++;
         }
     }
-    LOG_INFO << "processStEvent() - storage is filled with " << nDigisInStore << " digis" << endm;
+   // LOG_INFO << "processStEvent() - storage is filled with " << nDigisInStore << " digis" << endm;
 
     matchSides();
 
@@ -413,12 +413,12 @@ StETofHitMaker::processStEvent()
 
     if( etofCollection->hitsPresent() ) {
         StSPtrVecETofHit& etofHits = etofCollection->etofHits();
-        LOG_INFO << "processStEvent() - etof hit collection: " << etofHits.size() << " entries" << endm;
+        //LOG_INFO << "processStEvent() - etof hit collection: " << etofHits.size() << " entries" << endm;
 
         fillHitQA( isMuDst, tstart );
     }
     else {
-        LOG_INFO << "processStEvent() - no hits" << endm;
+       // LOG_INFO << "processStEvent() - no hits" << endm;
     }
 }
 
@@ -461,7 +461,7 @@ StETofHitMaker::processMuDst()
             nDigisInStore++;
         }
     }
-    LOG_INFO << "processMuDst() - storage is filled with " << nDigisInStore << " digis" << endm;
+    //LOG_INFO << "processMuDst() - storage is filled with " << nDigisInStore << " digis" << endm;
 
     matchSides();
 
@@ -483,12 +483,12 @@ StETofHitMaker::processMuDst()
 
     if( mMuDst->numberOfETofHit() ) {
         size_t nHits = mMuDst->numberOfETofHit();
-        LOG_INFO << "processMuDst() - etof hits: " << nHits << " entries" << endm;
+        //LOG_INFO << "processMuDst() - etof hits: " << nHits << " entries" << endm;
 
         fillHitQA( isMuDst, tstart );
     }
     else {
-        LOG_INFO << "processMuDst() - no hits" << endm;
+        //LOG_INFO << "processMuDst() - no hits" << endm;
     }
 }
 //_____________________________________________________________
@@ -1201,7 +1201,7 @@ StETofHitMaker::fillUnclusteredHitQA( const double& tstart, const bool isMuDst )
     int nHitsPrinted = 0;
 
     int eventTime = ( this->GetTime() / 10000 ) * 3600 + ( ( this->GetTime() % 10000 ) / 100 ) * 60 + ( this->GetTime() % 100 );
-    LOG_INFO << "fillUnclusteredHitQA(): -- event time: " << eventTime << endm;
+    //LOG_INFO << "fillUnclusteredHitQA(): -- event time: " << eventTime << endm;
 
     for( const auto& kv : mStoreHit ) {
         unsigned int detIndex  = kv.first;
