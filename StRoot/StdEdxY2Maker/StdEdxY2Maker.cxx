@@ -12,7 +12,7 @@
 //#define __TEST_DX__
 //#define __LogProb__
 //#define __DEBUG_dEdx__
-//#define __DEBUG_dNdx__
+#define __DEBUG_dNdx__
 //#define __ADD_PROB__
 //#define __BENCHMARKS__DOFIT_ZN__
 #define __FIT_PULLS__
@@ -81,6 +81,7 @@ using namespace units;
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
+#include "StDetectorDbMaker/St_TpcdEdxModelC.h"
 #include "StPidStatus.h"
 #include "dEdxHist.h"
 #if defined(__CHECK_LargedEdx__) || defined( __DEBUG_dEdx__) || defined( __DEBUG_dNdx__)
@@ -958,7 +959,6 @@ void StdEdxY2Maker::SortdEdx() {
 void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   // Histograms
   static THnSparseF *Time = 0, *TimeC = 0; // , *TimeP = 0
-  Hists3D::NtotHist = 2;
   Int_t NoRows = St_tpcPadConfigC::instance()->numberOfRows(20);
   //  static Hists3D PressureT("PressureT","log(dE/dx)","row","Log(Pressure*298.2/inputGasTemperature)",-NoRows,150, 6.84, 6.99);
   
@@ -971,16 +971,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 		      100,0.,10.,
 		      0,-1,
 		      1); //   Hists3D::NtotHist = 1;
-  Hists3D::NtotHist = 2;
 #ifndef MakeString
 #define MakeString(PATH) # PATH
 #endif
 #define __BOOK__VARS__(SIGN,NEGPOS) \
-  if (fUsedNdx) {		    \
-    Hists3D::NtotHist = 9;	    \
-  }									\
   static Hists3D SecRow3 ## SIGN ("SecRow3" MakeString(SIGN) ,"<log(dEdx/Pion)>"  MakeString(NEGPOS) ,"sector","row",numberOfSectors,NoRows); \
-  Hists3D::NtotHist = 2;						\
   static Hists3D Pressure ## SIGN ("Pressure" MakeString(SIGN) ,"log(dE/dx)" MakeString(NEGPOS) ,"row","Log(Pressure)",-NoRows,150, 6.84, 6.99); \
   static Hists3D Voltage ## SIGN ("Voltage" MakeString(SIGN) ,"log(dE/dx)" MakeString(NEGPOS) ,"Sector*Channels","Voltage - Voltage_{nominal}", numberOfSectors*NumberOfChannels,22,-210,10); \
   static Hists3D Z3 ## SIGN ("Z3" MakeString(SIGN) ,"<log(dEdx/Pion)>" MakeString(NEGPOS) ,"row","Drift Distance",-NoRows,220,-5,215); \
@@ -1013,9 +1008,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static TH2F *ZdcCP = 0, *BBCP = 0;
   //  static TH2F *ctbWest = 0, *ctbEast = 0, *ctbTOFp = 0, *zdcWest = 0, *zdcEast = 0;
   enum  {kTotalMethods = 6};
-  //                 dx2  ch
-  static TH3F *TPoints[2][2][kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"}; 0 => "+", 1 => "-";
-  static TH3F *NPoints[2][2][kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"}; 0 => "+", 1 => "-";
+  //                   ch
+  static TH3F *TPoints[2][kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"}; 0 => "+", 1 => "-";
+  static TH3F *NPoints[2][kTotalMethods] = {0}; // *N[6] = {"B","70B","BU","70BU","N", "NU"}; 0 => "+", 1 => "-";
   static StDedxMethod kTPoints[kTotalMethods] = {// {"F","70","FU","70U","N", "NU"};
     kLikelihoodFitId,         // F
     kTruncatedMeanId,         // 70
@@ -1080,17 +1075,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     for (Int_t t = 0; t < kTotalMethods; t++) {
       if (! fUsedNdx && t >= 4) continue;
       for (Int_t s = 0; s < 2; s++) {// charge 0 => "+", 1 => "-"
-	TPoints[0][s][t]   = new TH3F(Form("TPoints%s%s",N[t],NS[s]),
-				      Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s p > 0.4 GeV/c",T[t],TS[s]),
-				      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
-	TPoints[1][s][t]   = new TH3F(Form("TPoints2%s%s",N[t],NS[s]),
-				      Form("%s versus NdEdx Points and eta Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s no dx2 in predicition p > 0.4 GeV/c",T[t],TS[s]),
-				      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
-	NPoints[0][s][t]   = new TH3F(Form("NPoints%s%s",N[t],NS[s]),
+ 	TPoints[s][t]   = new TH3F(Form("TPoints%s%s",N[t],NS[s]),
+	             	      Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s p > 0.4 GeV/c",T[t],TS[s]),
+	             	      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
+	NPoints[s][t]   = new TH3F(Form("NPoints%s%s",N[t],NS[s]),
 				      Form("%s versus Length in Tpc and <log_{2}(dX)>%s p > 0.4 GeV/c",T[t],TS[s]),
-				      100,0.5,100.5, 40, -2, 2, 500,-1.,4.);
-	NPoints[1][s][t]   = new TH3F(Form("NPoints2%s%s",N[t],NS[s]),
-				      Form("%s versus NdEdx poins and eta  %s no dx2 in predicition p > 0.4 GeV/c",T[t],TS[s]),
 				      100,0.5,100.5, 40, -2, 2, 500,-1.,4.);
 #ifdef  __FIT_PULLS__
 	Pulls[s][t] = new TH2F(Form("Pull%s%s",N[t],NS[s]),
@@ -1159,11 +1148,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   for (Int_t j = 0; j < kTotalMethods; j++) {
     kMethod = kTPoints[j];
     if (pMomentum > 0.4) {
-      for (Int_t l = 0; l <2; l++) {// with and without dx2 in prediction
-	if (PiDs[l].dEdxStatus(kMethod)) {
-	  TPoints[l][sCharge][j]->Fill(PiDs[l].dEdxStatus(kMethod)->TrackLength(),PiDs[l].dEdxStatus(kMethod)->log2dX(),PiDs[l].dEdxStatus(kMethod)->dev[kPidPion]);
-	  NPoints[l][sCharge][j]->Fill(PiDs[l].dEdxStatus(kMethod)->N(), etaG, PiDs[l].dEdxStatus(kMethod)->dev[kPidPion]);
-	}
+      if (PiDs[1].dEdxStatus(kMethod)) {
+	TPoints[sCharge][j]->Fill(PiDs[1].dEdxStatus(kMethod)->TrackLength(),PiDs[1].dEdxStatus(kMethod)->log2dX(),PiDs[1].dEdxStatus(kMethod)->dev[kPidPion]);
+	NPoints[sCharge][j]->Fill(PiDs[1].dEdxStatus(kMethod)->N(), etaG, PiDs[1].dEdxStatus(kMethod)->dev[kPidPion]);
       }
     }
     if (PiD.dEdxStatus(kMethod)) {
@@ -1228,29 +1215,18 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    if (BBCP) BBCP->Fill(TMath::Log10(St_trigDetSumsC::instance()->bbcX()), FdEdx[k].F.dEdxN);
 	  }
 	}
-	Double_t Vars[9] = {
+	Double_t Vars[4] = {
 	  FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB].dEdxN, 
 	  FdEdx[k].F.dEdxN,
-	  0, 0, 0, 0, 0, 0, 
+	  0, 
 	  FdEdx[k].F.dx};
 	Double_t dEN = 0;
 	Double_t zdEMPV = 0;
 	if (PiD.fdNdx) {
 	  Double_t n_P = FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion];
-	  dEN = TMath::Log(1e6*FdEdx[k].F.dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
-	  StdEdxModel::ETpcType kTpc = StdEdxModel::kTpcOuter;
-	  if (St_tpcPadConfigC::instance()->IsRowInner(sector,row)) kTpc = StdEdxModel::kTpcInner;
-#ifdef __LogProb__
-	  zdEMPV = TMath::Log(1.e-3*n_P) + StdEdxModel::instance()->GetLogdEdNMPV(kTpc)->Interpolate(TMath::Log(n_P)); // log(dE[keV])
-#else /* ! __LogProb__ */
-	  zdEMPV = TMath::Log(1.e-3*n_P*StdEdxModel::instance()->GetdEdNMPV(kTpc)->Interpolate(TMath::Log(n_P))); // log(dE[keV])
-#endif /* __LogProb__ */
+	  dEN = TMath::Log(FdEdx[k].F.dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
+	  zdEMPV = St_TpcdEdxModelC::instance()->LogdEMPV(n_P); // ? Check dx
 	  Vars[2] = dEN - zdEMPV;
-	  Vars[3] = TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidElectron]);
-	  Vars[4] = TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion]);
-	  Vars[5] = TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidKaon]);
-	  Vars[6] = TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidProton]);
-	  Vars[7] = TMath::Log10(FdEdx[k].dxC*PiD.fdNdx->Pred[kPidDeuteron]);
 	};
 	// SecRow3
 	Double_t V = FdEdx[k].Voltage;
@@ -1741,71 +1717,31 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     Y.clear();
   }
 #endif /* __DEBUG_dNdx__ */
-  //  Double_t Val[2];
-  static TH2F *ProbV[3] = {0}, *ProbdX[3] = {0}, *ProbdY[3] = {0};
-  static Double_t xMin[3], xMax[3], yMin[3], yMax[3];
-  if (! ProbV[2]) {
-    for (Int_t k = 0; k < 3; k++) {
-      StdEdxModel::ETpcType kTpc = (StdEdxModel::ETpcType) k;
-#ifdef __LogProb__
-      ProbV[kTpc]  = StdEdxModel::instance()->GetLogdEdN(StdEdxModel::kProb,    kTpc);
-      ProbdX[kTpc] = StdEdxModel::instance()->GetLogdEdN(StdEdxModel::kdProbdX, kTpc);
-      ProbdY[kTpc] = StdEdxModel::instance()->GetLogdEdN(StdEdxModel::kdProbdY, kTpc);
-#else /* ! __LogProb__ */
-      ProbV[kTpc]  = StdEdxModel::instance()->GetdEdN(StdEdxModel::kProb,    kTpc);
-      ProbdX[kTpc] = StdEdxModel::instance()->GetdEdN(StdEdxModel::kdProbdX, kTpc);
-      ProbdY[kTpc] = StdEdxModel::instance()->GetdEdN(StdEdxModel::kdProbdY, kTpc);
-#endif /* __LogProb__ */
-      xMin[kTpc] = ProbV[kTpc]->GetXaxis()->GetXmin();
-      xMax[kTpc] = ProbV[kTpc]->GetXaxis()->GetXmax();
-      yMin[kTpc] = ProbV[kTpc]->GetYaxis()->GetXmin();
-      yMax[kTpc] = ProbV[kTpc]->GetYaxis()->GetXmax();
-    }
-  }
   f = 0;
   gin[0] = 0.;
   Double_t dNdx = par[0]; // Mu
   for (Int_t i = 0; i < NdEdx; i++) {
-    StdEdxModel::ETpcType kTpc = StdEdxModel::kTpcOuter;
-    if (St_tpcPadConfigC::instance()->IsRowInner(FdEdx[i].sector,FdEdx[i].row)) kTpc = StdEdxModel::kTpcInner;
-    Double_t dE = 1e9*FdEdx[i].F.dE; // GeV => eV
+    Double_t dE = FdEdx[i].F.dE;
+    Double_t nE = St_TpcdEdxModelC::instance()->n(dE);
     Double_t dX = FdEdx[i].dxC;
     Double_t Np = dNdx*dX;
-    Double_t X = TMath::Log(Np);
-#ifdef __LogProb__
-    Double_t Y = TMath::Log(dE/Np);
-#else /* ! __LogProb__ */
-    Double_t Y = dE/Np;
-#endif /* __LogProb__ */
-    FdEdx[i].Prob = 0;
-    if (X < xMin[kTpc] || X > xMax[kTpc] ||
-	Y < yMin[kTpc] || Y > yMax[kTpc]) {
-      f += 100;
-      continue;
-    }
-    Double_t Prob = ProbV[kTpc]->Interpolate(X,Y);
+    Double_t X[1] = {TMath::Log(nE/Np)};
+    Double_t params[4] = {0};
+    params[1] = St_TpcdEdxModelC::instance()->Mu(Np);
+    params[2] = St_TpcdEdxModelC::instance()->Sigma(Np);
+    params[3] = St_TpcdEdxModelC::instance()->Alpha(Np);
+    Double_t Prob = StdEdxModel::gausw(X,params);
     if (Prob <= 0.0) {
       f += 100;
+      FdEdx[i].Prob = 0;
       continue;
     }
     f -= 2*TMath::Log(Prob);
     FdEdx[i].Prob = Prob;
-    Double_t dProbOverdX = ProbdX[kTpc]->Interpolate(X,Y);
-    Double_t dProbOverdY = ProbdY[kTpc]->Interpolate(X,Y);
-    Double_t dNpOverdMu = dX;
-    Double_t dXOverdNp =  1./Np;
-#ifdef __LogProb__
-    Double_t dYOverdNp = - 1./Np;
-#else /* ! __LogProb__ */
-    Double_t dYOverdNp = - Y/Np;
-#endif /* __LogProb__ */
-    Double_t dProbOverNp  = dProbOverdX * dXOverdNp + dProbOverdY * dYOverdNp;
-    Double_t dProbOverdMu = dProbOverNp * dNpOverdMu;
-    Double_t dfOverdMu = -2*dProbOverdMu/Prob;
-    gin[0] += dfOverdMu;
   }
+  gin[0] = 0;
   if (_debug > 0) {
-    if (_debug > 1) {
+    if (_debug > 2) {
       cout << " dNdx = " << dNdx << "\tf = " << f << endl;
       PrintdEdx(1);
       cout << "===================" << endl;
@@ -1821,7 +1757,7 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
       TArrayD YA(N);
       for (Int_t i = 0; i < N; i++) {
 	XA[i] = X[i];
-      YA[i] = Y[i];
+	YA[i] = Y[i];
       }
       if (fdNdxGraph) delete fdNdxGraph;
       fdNdxGraph = new TGraph(N, XA.GetArray(), YA.GetArray());
@@ -1833,16 +1769,15 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
 }
 //________________________________________________________________________________
 void StdEdxY2Maker::DoFitN(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
-
   Double_t dNdx = 1e6*TMath::Exp(fitZ)/0.080; // 80 eV per primary interaction
-  Double_t arglist[10];
+  Double_t arglist[10] = {0};
   Int_t ierflg = 0;
   m_Minuit->SetFCN(fcnN);
-  //    m_Minuit->SetPrintLevel(-1);
+    arglist[0] = 1;
   if (Debug() < 2) {
     arglist[0] = -1;
-    m_Minuit->mnexcm("set print",arglist, 1, ierflg);
   }
+  m_Minuit->mnexcm("set print",arglist, 1, ierflg);
   m_Minuit->mnexcm("set NOW",arglist, 0, ierflg);
   m_Minuit->mnexcm("CLEAR",arglist, 0, ierflg);
   arglist[0] = 0.5;
@@ -1853,7 +1788,7 @@ void StdEdxY2Maker::DoFitN(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
   else                   arglist[0] = 0.;   // Check gradient 
   arglist[0] = 1.0;
   m_Minuit->mnexcm("CALLfcn", arglist ,1,ierflg);
-  m_Minuit->mnexcm("SET GRAD",arglist,1,ierflg);
+  //  m_Minuit->mnexcm("SET GRAD",arglist,1,ierflg);
   arglist[0] = 500;
   arglist[1] = 1.;
   //    m_Minuit->mnexcm("MIGRAD", arglist ,2,ierflg);

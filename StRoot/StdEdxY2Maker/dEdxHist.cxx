@@ -1,5 +1,5 @@
 #include "dEdxHist.h"
-Int_t Hists3D::NtotHist = 9;
+Int_t Hists3D::NtotHist = 3;
 Hists3D::Hists3D(const Char_t *Name, const Char_t *Title,
 		 const Char_t *TitleX, const Char_t *TitleY,
 		 Int_t nXBins, 
