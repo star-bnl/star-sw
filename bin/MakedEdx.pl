@@ -21,6 +21,7 @@ my $FILE = "/*/st_physics";
 my $NEvents = 100000;
 my $step = 0;
 #================================================================================
+#  dir -ltr /star/data14/GRID/NFS_FileList/
 #  dir /gpfs01/star/data*/reco/production_7p7GeV_2021/ReversedFullField/P22ia*/2021/*/*/*event.root
 #  dir -ltrd /gpfs01/star/data*/reco/production_*/*/*/* | awk -F\/ '{print $6"/"$8}' | sort -u
 # production_11p5GeV_2020/P21ib_calib
@@ -2414,7 +2415,7 @@ my $step = 0;
 #$hist = "RunXXI207"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/production_7p7GeV_2021/ReversedFullField/";  $Production = "P22ia_calib"; $year = "/2021/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  09/12/2022 TpcLengthCorrectionMDN TpcSecRowB TpcZCorrectionC
 #$hist = "RunXXI208"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/production_7p7GeV_2021/ReversedFullField/";  $Production = "P22ia_calib"; $year = "/2021/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/27/2022 check with dev 
 #$hist = "RunXXI209"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/production_7p7GeV_2021/ReversedFullField/";  $Production = "P22ia_calib"; $year = "/2021/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/30/2022 recheck MySQL with .DEV2 
-$hist = "RunXXI210"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/production_7p7GeV_2021/ReversedFullField/";  $Production = "P22ia_calib"; $year = "/2021/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/31/2022 check with dev  after putting TpcnTbk & TpcnPad to MySQL
+#$hist = "RunXXI210"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/production_7p7GeV_2021/ReversedFullField/";  $Production = "P22ia_calib"; $year = "/2021/*/*/"; $FILE = "st_"; $STAR_LEVEL = "dev"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/31/2022 check with dev  after putting TpcnTbk & TpcnPad to MySQL
 ################################################################################
 # Run XXII pp510_2022
 # $hist = "RunXXII00"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/2022/RF"; $Production = "/.DEV2"; $year = "/pp500_2022/*/*/*"; $FILE = "hlt_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  01/16/22 Check
@@ -2432,6 +2433,8 @@ $hist = "RunXXI210"; $NEvents = 1000; $disk = "data*/"; $RECO = "reco/production
 #$hist = "RunXIX_XXII_06"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*AuAu200*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/16/22 MySQL versions
 #$hist = "RunXIX_XXII_07"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/24/22 more MySQL versions
 #$hist = "RunXIX_XXII_08"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/26/22 Check after fix with SecRow3 +/- and MIP selection
+#$hist = "RunXIX_XXII_09"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/08/22  check new dN/dx
+$hist = "RunXIX_XXII_10"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/10/22  new scale nE tp dE
 
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
