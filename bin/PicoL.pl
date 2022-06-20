@@ -37,7 +37,8 @@ elsif ($pwd =~ /2011/) { $year = "y2011";}
 elsif ($pwd =~ /2010/) { $year = "y2010";} 
 if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P2/ or $pwd =~ /SL/) {
   $PICOPATH = "/gpfs01/star/data*"; print "PICOPATH = $PICOPATH \n" if ($debug);
-  if    ($pwd =~ /2021\/7p7GeV.P22ia_calib/)  {$glob = "/reco/production_7p7GeV_2021/ReversedFullField/P22ia_calib/2021/";}
+  if    ($pwd =~ /2021\/p7p7_21_DEV_calib/)  {$PICOPATH = "/star/data*"; $glob = "/reco/production_7p7GeV_2021/ReversedFullField/p7p7_21_DEV_calib/2021/";}
+  elsif ($pwd =~ /2021\/7p7GeV.P22ia_calib/)  {$glob = "/reco/production_7p7GeV_2021/ReversedFullField/P22ia_calib/2021/";}
   elsif ($pwd =~ /2020\/5p75GeV_fixedTarget_P21id/) {$glob = "/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/P21id/20*";}
   elsif ($pwd =~ /2020\/5p75GeV_fixedTarget/) {$glob = "/reco/production_5p75GeV_fixedTarget_2020/ReversedFullField/dev/20*";}
   elsif ($pwd =~ /2020\/11p5GeV_2020_P21ib/)  {$glob = "/reco/production_11p5GeV_2020/ReversedFullField/P21ib_calib/20*"; }

@@ -5,9 +5,8 @@
 //#define __KEEP_DX__
 #define __SpaceCharge__
 //#define __NEGATIVE_ONLY__
-//#define __AdcI3__
 #ifndef  __NEGATIVE_ONLY__
-#define __NEGATIVE_AND_POSITIVE__
+//#define __NEGATIVE_AND_POSITIVE__
 #endif
 //#define __TEST_DX__
 //#define __LogProb__
@@ -328,9 +327,6 @@ Int_t StdEdxY2Maker::Make(){
     return kStOK;        // if no event, we're done
   }
   TotalNoOfTpcHits = TpcHitCollection->numberOfHits();
-#ifdef __AdcI3__
-  IntegrateAdc(TpcHitCollection);
-#endif
   StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
   UInt_t nTracks = trackNode.size();
   for (UInt_t i=0; i < nTracks; i++) { 
@@ -458,13 +454,6 @@ Int_t StdEdxY2Maker::Make(){
 	  } else {
 	    dZdY = dXdY = 0;
 	  }
-#ifdef __AdcI3__
-	  Double_t sumAdc = IntegratedAdc(tpcHit);
-	  if (sumAdc > 0) AdcI = TMath::Log10(sumAdc);
-	  else            AdcI = 0;
-#else
-	  AdcI = 0;
-#endif
 	  // Check for Membernane
 	  if (xyz[1].z() * xyz[2].z() < 0) {
 	    Double_t dZ = TMath::Abs(xyz[1].z()) + TMath::Abs(xyz[2].z());
@@ -990,19 +979,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #endif
 #if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
   __BOOK__VARS__(,);
-#ifdef __AdcI3__
-  static Hists3D AdcI3 ## SIGN ("AdcI3","log(dEdx/Pion)","Sector*Channels","Log10(AdcI)",-NoRows,70,0,7);
-#endif /* __AdcI3__ */*nPadTbkAll
 #else
   __BOOK__VARS__(, for negative);
-#ifdef __AdcI3__
-  static Hists3D AdcI3("AdcI3" MakeString(SIGN) ,"log(dEdx/Pion) for neagative","Sector*Channels","Log10(AdcI)",-NoRows,70,0,7);
-#endif /* __AdcI3__ */
 #ifdef __NEGATIVE_AND_POSITIVE__
   __BOOK__VARS__(P, for positive);
-#ifdef __AdcI3__
-  static Hists3D AdcI3P("AdcI3P","log(dEdx/Pion) for positive","Sector*Channels","Log10(AdcI)",-NoRows,70,0,7);
-#endif /* __AdcI3__ */
 #endif
 #endif
   static TH2F *ZdcCP = 0, *BBCP = 0;
@@ -1277,28 +1257,16 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	nTbk3  ## SIGN .Fill(rowS,FdEdx[k].Ntbks,&Vars[1]);      \
 
 #endif
-#if defined(__NEGATIVE_AND_POSITIVE__) 
+#if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
 	__FILL__VARS__();
-	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kAdcI].dEdxN;
-#ifdef __AdcI3__
-	AdcI3.Fill(rowS,FdEdx[k].AdcI,&Vars[1]);
-#endif /* __AdcI3__ */
 #else /* ! __NEGATIVE_AND_POSITIVE__ */
   #if defined(__NEGATIVE_ONLY__) || defined(__NEGATIVE_AND_POSITIVE__)
 	if (sCharge == 1)  {
 	__FILL__VARS__();
-	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kAdcI].dEdxN;
-#ifdef __AdcI3__
-	AdcI3.Fill(rowS,FdEdx[k].AdcI,&Vars[1]);
-#endif /* __AdcI3__ */
 	}
      #if defined(__NEGATIVE_AND_POSITIVE__)
 	if (sCharge == 0)  {
 	__FILL__VARS__(P);
-	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kAdcI].dEdxN;
-#ifdef __AdcI3__
-	AdcI3P.Fill(rowS,FdEdx[k].AdcI,&Vars[1]);
-#endif /* __AdcI3__ */
 	}
      #endif /* __NEGATIVE_AND_POSITIVE__ */
   #endif /* __NEGATIVE_ONLY__ || __NEGATIVE_AND_POSITIVE__ */
