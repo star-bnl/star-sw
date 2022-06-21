@@ -1491,9 +1491,11 @@ void JevpServer::clearForNewRun()
 	CP;
 	LOG("JEFF", "Send startrun for: %s", curr->getPlotSetName());
 	CP;
+	pthread_mutex_lock(&imageWriter->mux);
 	CP_ENTER_BUILDER(curr);
 	curr->_startrun(rdr);
 	CP_LEAVE_BUILDER;
+	pthread_mutex_unlock(&imageWriter->mux);
 	CP;
     }
 
@@ -1825,16 +1827,20 @@ void JevpServer::writeRunPdf(int display, int run)
     if(pdfdir) {
 	RtsTimer_root ttt;
 	ttt.record_time();
+	CP;
 	pthread_mutex_lock(&imageWriter->mux);
 	double tttt =  ttt.record_time();
 	if(tttt > .1) {
 	    LOG("JEFF", "writePDF mux took %lf seconds", tttt);
 	}
+	CP;
 	pdfFileBuilder->writePdf(filename, 1);
+	CP;
 	pthread_mutex_unlock(&imageWriter->mux);
-	
+	CP;
     }
 
+    CP;
     t = pdfclock.record_time();
     LOG("JEFF", "write PDF[%d:%s]:  writepdf took %lf",display,displays->displayRoot->name,t);
     CP;

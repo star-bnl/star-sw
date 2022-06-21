@@ -39,7 +39,7 @@ class laserBuilder : public JevpBuilder {
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       TH1 *h_tpc_drift_vel;
     };

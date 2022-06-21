@@ -50,7 +50,7 @@ public:
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
   union {
-    TH2 *array[];
+    TH2 *array[1];
     struct {
       TH2* q1;
       TH2* q2;
