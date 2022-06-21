@@ -412,7 +412,7 @@ StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, c
 }*/
 
 void
-StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double safetyMargins[2] = (double[2]){ 0, 0 }, const StThreeVectorD alignment = {0,0,0} )
+StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins = initializer_list<double>({0, 0}).begin(), const StThreeVectorD alignment = {0,0,0} )
 {
     StETofGeomCounter* counter = new StETofGeomCounter( gpNode, dx, dy, moduleId, counterId, alignment );
 
@@ -628,7 +628,7 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins )
 */
 
 void
-StETofGeometry::init( TGeoManager* geoManager, const double safetyMargins[2] = (double[2]){ 0, 0 }, const bool& useHelixSwimmer = false )
+StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins = initializer_list<double>({0, 0}).begin(), const bool& useHelixSwimmer = false )
 {
     if( !geoManager ) {
         LOG_ERROR << " *** StETofGeometry::Init - cannot find TGeoManager *** " << endm;

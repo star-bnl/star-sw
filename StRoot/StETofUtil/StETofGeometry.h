@@ -168,7 +168,7 @@ public:
     void  addCounter( const TGeoPhysicalNode& gpNode, const int moduleId, const int counterId );  
     void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId );
     //void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins );
-    void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double safetyMargins[2], const StThreeVectorD alignment  );
+    void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins, const StThreeVectorD alignment  );
 
     StETofGeomCounter* counter( const unsigned int i ) const;  
 
@@ -290,7 +290,7 @@ public:
 
     void init( TGeoManager* geoManager ); 
     //void init( TGeoManager* geoManager, const double* safetyMargins );
-    void init( TGeoManager* geoManager, const double safetyMargins[2], const bool& useHelixSwimmer );
+    void init( TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer );
 
     void reset();
 
