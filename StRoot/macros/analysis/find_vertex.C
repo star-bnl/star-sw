@@ -99,6 +99,7 @@ void find_vertex(char * fname="high_053/st_physics_6053108_raw_2020002.event.roo
     gSystem->Load("StTriggerDataMaker"); // new starting from April 2003
     gSystem->Load("StBichsel");
     gSystem->Load("StEvent");
+    gSystem->Load("StTpcDb");
     gSystem->Load("StEventUtilities");
     gSystem->Load("StEmcUtil"); 
     gSystem->Load("StTofUtil");
