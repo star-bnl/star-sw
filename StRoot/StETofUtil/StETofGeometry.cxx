@@ -391,26 +391,6 @@ StETofGeomModule::StETofGeomModule( const TGeoPhysicalNode& gpNode, const int mo
     if( mDebug ) print();
 }
 
-
-/*void
-StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const int moduleId, const int counterId )
-{
-    StETofGeomCounter* counter = new StETofGeomCounter( gpNode, moduleId, counterId );
-
-    mETofCounter.push_back( counter );
-}
-
-
-void
-StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins )
-{
-    StETofGeomCounter* counter = new StETofGeomCounter( gpNode, dx, dy, moduleId, counterId );
-
-    counter->setSafetyMargins( safetyMargins );
-
-    mETofCounter.push_back( counter );
-}*/
-
 void
 StETofGeomModule::addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins = initializer_list<double>({0, 0}).begin(), const StThreeVectorD alignment = {0,0,0} )
 {
@@ -493,20 +473,7 @@ StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const int 
 
     if( mDebug ) print();
 }
-/*
-StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId )
-: StETofNode( gpNode, dx, dy ),
-  mModuleIndex( moduleId ),
-  mCounterIndex( counterId ),
-  mDebug( false )
-{
-    mSector = calcSector( moduleId  );
-    mPlane  = calcPlane( moduleId );
 
-    createGeomStrips();
-
-    if( mDebug ) print();
-}*/
 
 StETofGeomCounter::StETofGeomCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const StThreeVectorD alignment = { 0, 0, 0 } )
 : StETofNode( gpNode, dx, dy, alignment ),
@@ -612,20 +579,6 @@ StETofGeometry::~StETofGeometry()
     reset();
 }
 
-/*
-void
-StETofGeometry::init( TGeoManager* geoManager )
-{
-    double safetyMargins[ 2 ] = { 0., 0. };
-    init( geoManager, safetyMargins, false );
-}
-
-void
-StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins )
-{
-    init( geoManager, safetyMargins, false );
-}
-*/
 
 void
 StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins = initializer_list<double>({0, 0}).begin(), const bool& useHelixSwimmer = false )
