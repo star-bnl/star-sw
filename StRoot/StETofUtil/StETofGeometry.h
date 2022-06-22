@@ -166,7 +166,7 @@ public:
     
     void  addCounter( const TGeoPhysicalNode& gpNode, const int moduleId, const int counterId );  
     void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId );
-    void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins, const StThreeVectorD alignment  );
+    void  addCounter( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const int moduleId, const int counterId, const double* safetyMargins, const StThreeVectorD alignment );
 
     StETofGeomCounter* counter( const unsigned int i ) const;  
 
@@ -285,7 +285,7 @@ public:
     StETofGeometry( const char* name = "etofGeo", const char* title = "simplified ETOF Geometry" );
     ~StETofGeometry();
 
-    void init( TGeoManager* geoManager ); 
+    void init( TGeoManager* geoManager );
     void init( TGeoManager* geoManager, const double* safetyMargins, const bool& useHelixSwimmer );
 
     void reset();
@@ -303,7 +303,7 @@ public:
 
     StETofNode* findETofNode( const int moduleId, const int counter );
 
-	 void				 pointMaster2local( const int moduleId, const int counterId, const double* master,  double* local );
+    void           pointMaster2local( const int moduleId, const int counterId, const double* master,  double* local );
     void           hitLocal2Master( const int moduleId, const int counter, const double* local,  double* master );
     StThreeVectorD hitLocal2Master( StETofHit* hit );
     StThreeVectorD hitLocal2Master( StMuETofHit* hit );
@@ -358,9 +358,9 @@ public:
     StETofGeomModule* module( const unsigned int i );
     unsigned int      nValidModules() const;
 
-	 void readAlignmentParameters();
-	 void readAlignmentDatabase(); 
-	 void setFileNameAlignParam(std::string FileNameAlignParam);
+    void readAlignmentParameters();
+    void readAlignmentDatabase(); 
+    void setFileNameAlignParam(std::string FileNameAlignParam);
 
     void debugOn();
     void debugOff();
@@ -376,8 +376,8 @@ private:
 
     StarMagField*     mStarBField;
 
-	 std::string 		 mFileNameAlignParam;
-	 std::vector<StThreeVectorD> mAlignmentParameters;
+    std::string                 mFileNameAlignParam;
+    std::vector<StThreeVectorD> mAlignmentParameters;
 
     ClassDef( StETofGeometry, 1 )
 };

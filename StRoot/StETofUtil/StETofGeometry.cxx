@@ -65,33 +65,16 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode )
 {
 
     mGeoMatrix = static_cast< TGeoHMatrix* > ( gpNode.GetMatrix() );
-
     mBox = static_cast< TGeoBBox* > ( gpNode.GetShape() );
 
     buildMembers();
 }
 
-/*StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy )
+StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const StThreeVectorD alignment = { 0, 0, 0 } )
 : mSafetyMarginX( 0. ),
   mSafetyMarginY( 0. ),
   mDebug( false )
 {
-    mGeoMatrix = static_cast< TGeoHMatrix* > ( gpNode.GetMatrix() );
-    mBox = static_cast< TGeoBBox* > ( gpNode.GetShape() );
-
-    // resize mBox with dx and dy
-    float dz = mBox->GetDZ();
-    mBox->SetBoxDimensions( dx, dy, dz );
-
-    buildMembers();
-}*/
-
-StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const float& dy, const StThreeVectorD alignment = { 0, 0, 0 } )
-: mSafetyMarginX( 0. ),
-  mSafetyMarginY( 0. ), 
-  mDebug( false )
-{
-
     mGeoMatrix = static_cast< TGeoHMatrix* > ( gpNode.GetMatrix() );
 
     mBox = static_cast< TGeoBBox* > ( gpNode.GetShape() );
@@ -103,13 +86,14 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const f
     //  modified  buildMembers() method. PW;
     // build member variables: mMinEta, mMaxEta, mMinPhi, mMaxPhi, mCenter, mNormal 
     double xl[3] = { -alignment.x(), -alignment.y(), -alignment.z() };
-//z alignment is positive to reflect the correct direction in which z has to be moved in global coordinates. x and y are negative to match the numbers from hit-intersection 
+    //z alignment is positive to reflect the correct direction in which z has to be moved in global coordinates. x and y are negative to match the numbers from hit-intersection 
     double xm[3];
     local2Master( xl, xm );
+
     mCenter = StThreeVectorD( xm[ 0 ], xm[ 1 ], xm[ 2 ] );
-	 mGeoMatrix->SetDx(xm[ 0 ]);
-	 mGeoMatrix->SetDy(xm[ 1 ]);
-	 mGeoMatrix->SetDz(xm[ 2 ]);
+	mGeoMatrix->SetDx(xm[ 0 ]);
+	mGeoMatrix->SetDy(xm[ 1 ]);
+	mGeoMatrix->SetDz(xm[ 2 ]);
 	//correct counter rotation is implemented in .XML	
 
     LOG_DEBUG << "StETofNode::Created physical node at: "<< xm[ 0 ]<<","<< xm[ 1 ]<<"," << xm[ 2 ]<<" with alignments: "<< alignment.x()<<","<< alignment.y()<<"," << alignment.z()<< endm;//debug PW.
@@ -123,7 +107,6 @@ StETofNode::StETofNode( const TGeoPhysicalNode& gpNode, const float& dx, const f
     mPhiMax = calcPhi( -1,  1. );
 
     if( mDebug ) print();
-
 }
 
 void
@@ -568,7 +551,7 @@ StETofGeometry::StETofGeometry( const char* name, const char* title )
   mInitFlag( false ),
   mDebug( false ),
   mStarBField( nullptr ),
-  mFileNameAlignParam ("")
+  mFileNameAlignParam("")
 {
 
 }
@@ -592,14 +575,13 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins = ini
 
     mNValidModules = 0;
 
-
     if ( !mFileNameAlignParam.empty() ) {
-	 	readAlignmentParameters();
-	 }else{
-		readAlignmentDatabase();
-	 }
+        readAlignmentParameters();
+    } else {
+        readAlignmentDatabase();
+    }
 
-	 int iCounterAlignment = 0;
+     int iCounterAlignment = 0;
     // loop over sectors
     for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
         // loop over planes
@@ -612,8 +594,11 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins = ini
                 continue;
             }
             mNValidModules++;
+
             const TGeoPhysicalNode* gpNode = geoManager->MakePhysicalNode( geoPath.c_str() );
+
             int moduleId = calcModuleIndex( sector, plane );
+
             mETofModule[ mNValidModules-1 ] = new StETofGeomModule( *gpNode, moduleId );
 
 
@@ -650,12 +635,12 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins = ini
                 LOG_DEBUG << activeVolume->GetDX() << "  " << activeVolume->GetDY() << "  " << activeVolume->GetDZ() << endm;
 
                 int counterId = counter - eTofConst::counterStart;
-					if( mAlignmentParameters.size() == 108 ){ //alignment parameters for all counters available
-						mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins, mAlignmentParameters.at(iCounterAlignment) );
-						iCounterAlignment++;
-					}else{
-                	mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins );
-					}
+                if( mAlignmentParameters.size() == 108 ){ //alignment parameters for all counters available
+                    mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins, mAlignmentParameters.at(iCounterAlignment) );
+                    iCounterAlignment++;
+                } else {
+                    mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins );
+                }
 
             } // end of loop over counters
 
@@ -715,19 +700,23 @@ StETofGeometry::formTGeoPath( const TGeoManager* geoManager, int plane, int sect
     std::ostringstream geoPath;
 
     geoPath << "/HALL_1/CAVE_1/MagRefSys_1/ETOF_" << plane << sector;
+
     bool found = geoManager->CheckPath( geoPath.str().c_str() );
+
     if( !found ) {
         geoPath.str("");
         geoPath.clear();
 
         geoPath << "/HALL_1/CAVE_1/ETOF_" << plane << sector;
     }
+
     // go deeper if counter is requested
     if( counter >= 1 ) {
         geoPath << "/EGAS_1/ECOU_" << counter;
     }
 
     found = geoManager->CheckPath( geoPath.str().c_str() );
+
     return found ? geoPath.str() : "";
 }
 
@@ -1501,62 +1490,60 @@ StETofGeometry::getFieldZ( const double& x, const double& y, const double& z ) {
 
 void 
 StETofGeometry::readAlignmentParameters(){
-      LOG_INFO << "etofAlignParam: filename provided --> use parameter file: " << mFileNameAlignParam << endm;
-        
-		  //add check for no alignment set here.
-	
-		  ifstream paramFile;		
-        paramFile.open( mFileNameAlignParam );
+    LOG_INFO << "etofAlignParam: filename provided --> use parameter file: " << mFileNameAlignParam << endm;
 
-        if( !paramFile.is_open() ) {
-            LOG_INFO << "unable to get the alignments parameters from file --> file does not exist" << endm;
-            return;
-        }
+    //add check for no alignment set here.
 
-	     StThreeVectorD counterAlignmentParameter;
-        float tempX;
-		  float tempY;
-		  float tempZ;
-        while( paramFile >> tempX >> tempY >> tempZ ) {
-		  counterAlignmentParameter = StThreeVectorD( tempX, tempY, tempZ );
-            mAlignmentParameters.push_back( counterAlignmentParameter );
-        }
-        
-        paramFile.close();
+    ifstream paramFile;        
+    paramFile.open( mFileNameAlignParam );
 
-        if( mAlignmentParameters.size() != 108 ) {
-            LOG_WARN << "parameter file for alignments has not the right amount of entries: " << mAlignmentParameters.size() << " instead of 108 !!!!" << endm;
-            return;
-        }
+    if( !paramFile.is_open() ) {
+        LOG_INFO << "unable to get the alignments parameters from file --> file does not exist" << endm;
+        return;
+    }
 
+    StThreeVectorD counterAlignmentParameter;
+    float tempX;
+    float tempY;
+    float tempZ;
+    while( paramFile >> tempX >> tempY >> tempZ ) {
+      counterAlignmentParameter = StThreeVectorD( tempX, tempY, tempZ );
+      mAlignmentParameters.push_back( counterAlignmentParameter );
+    }
+
+    paramFile.close();
+
+    if( mAlignmentParameters.size() != 108 ) {
+        LOG_WARN << "parameter file for alignments has not the right amount of entries: " << mAlignmentParameters.size() << " instead of 108 !!!!" << endm;
+        return;
+    }
 }
 
 void 
 StETofGeometry::readAlignmentDatabase(){
-        LOG_INFO << "No etof alignment file provided --> use database: " << endm;
-        
-		  //add check for no alignment set here.
+    LOG_INFO << "No etof alignment file provided --> use database: " << endm;
+    
+    //add check for no alignment set here.
 
-        TDataSet* dbDataSet = StMaker::GetChain()->GetDataBase("Geometry/etof/etofAlign");
+    TDataSet* dbDataSet = StMaker::GetChain()->GetDataBase("Geometry/etof/etofAlign");
 
-        St_etofAlign* etofAlign = static_cast< St_etofAlign * > ( dbDataSet->Find( "etofAlign" ) );
-        if( !etofAlign ) {
-            LOG_ERROR << "unable to get the align params from the database" << endm;
-            return;
-        }
+    St_etofAlign* etofAlign = static_cast< St_etofAlign * > ( dbDataSet->Find( "etofAlign" ) );
+    if( !etofAlign ) {
+        LOG_ERROR << "unable to get the align params from the database" << endm;
+        return;
+    }
 
-        etofAlign_st* table = etofAlign->GetTable();
-	     StThreeVectorD counterAlignmentParameter;
-        float tempX;
-		  float tempY;
-		  float tempZ;
+    etofAlign_st* table = etofAlign->GetTable();
+    StThreeVectorD counterAlignmentParameter;
+    float tempX;
+    float tempY;
+    float tempZ;
 
-		  for( int iCounter = 0; iCounter < eTofConst::nCounters; iCounter++){
-       		tempX = table[iCounter].detectorAlignX[0];
-       		tempY = table[iCounter].detectorAlignY[0];
-       		tempZ = table[iCounter].detectorAlignZ[0];
-		  		StThreeVectorD counterAlignmentParameter = StThreeVectorD( tempX, tempY, tempZ );
-            mAlignmentParameters.push_back( counterAlignmentParameter );
-        }
+    for( int iCounter = 0; iCounter < eTofConst::nCounters; iCounter++){
+        tempX = table[iCounter].detectorAlignX[0];
+        tempY = table[iCounter].detectorAlignY[0];
+        tempZ = table[iCounter].detectorAlignZ[0];
+        StThreeVectorD counterAlignmentParameter = StThreeVectorD( tempX, tempY, tempZ );
+        mAlignmentParameters.push_back( counterAlignmentParameter );
+    }
 }
-

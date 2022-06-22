@@ -1106,26 +1106,25 @@ StETofCalibMaker::Make()
     if ( mEvent ) {
         LOG_DEBUG << "Make(): running on StEvent" << endm;
 
-		  StETofCollection* etofCollection = mEvent->etofCollection();
-
-		  if( !etofCollection ) { //additional check for empty StEvents structures produced by other Makers. Needed for genDst.C
-		     LOG_WARN << "Make() - Found StEvent data structure, but no eTOF collection. Try MuDst processing instead" << endm;
-		     mMuDst = ( StMuDst* ) GetInputDS( "MuDst" );
-
-		     if( mMuDst ) {
-		         LOG_DEBUG << "Make() - running on MuDsts" << endm;
-
-		         processMuDst();
-
-		         return kStOk;
-		     }
-		  }
+        StETofCollection* etofCollection = mEvent->etofCollection();
+      
+        if( !etofCollection ) { //additional check for empty StEvents structures produced by other Makers. Needed for genDst.C
+           LOG_WARN << "Make() - Found StEvent data structure, but no eTOF collection. Try MuDst processing instead" << endm;
+           mMuDst = ( StMuDst* ) GetInputDS( "MuDst" );
+      
+           if( mMuDst ) {
+               LOG_DEBUG << "Make() - running on MuDsts" << endm;
+      
+               processMuDst();
+      
+               return kStOk;
+           }
+        }
 
         processStEvent();
 
         return kStOk;
     }
-
     else {
         LOG_DEBUG << "Make(): no StEvent found" << endm;
 
@@ -1368,7 +1367,7 @@ StETofCalibMaker::processMuDst()
 
     /// first loop over digis to apply hardware mappping and find the pulsers
     for( size_t i=0; i<nDigis; i++ ) {
-    //LOG_INFO << "accessing etof digis: "<< i <<"/"<< nDigis << endm;
+        //LOG_INFO << "accessing etof digis: "<< i <<"/"<< nDigis << endm;
         StMuETofDigi* aDigi = mMuDst->etofDigi( i );
 
         if( !aDigi ) {
@@ -1376,12 +1375,12 @@ StETofCalibMaker::processMuDst()
             continue;
         }
         /// reset digi to carry only raw information (needed for afterburner mode)
-    //LOG_INFO << "resetting digi "<< i <<"/"<< nDigis << endm;
+        //LOG_INFO << "resetting digi "<< i <<"/"<< nDigis << endm;
         resetToRaw( aDigi );
 
         /// apply hardware mapping from rocId, chipId, channelId to
         /// sector, zplane, counter, strip, side
-    //LOG_INFO << "mapping digi: "<< i <<"/"<< nDigis << endm; 
+        //LOG_INFO << "mapping digi: "<< i <<"/"<< nDigis << endm; 
         applyMapping( aDigi );
 
         /// flag pulser digis
@@ -1657,12 +1656,12 @@ StETofCalibMaker::calculatePulserOffsets( std::map< unsigned int, std::vector< u
 
         double pulserTime = 0.;
 
-			if( mMuDst ) {
-				      pulserTime = mMuDst->etofDigi( it->second.at( candIndex ) )->rawTime();
+        if( mMuDst ) {
+            pulserTime = mMuDst->etofDigi( it->second.at( candIndex ) )->rawTime();
 
-				      // set calibTot to -999. to exclude it from being calibrated in the next step --> pulser will not be used to build hits
-				      mMuDst->etofDigi( it->second.at( candIndex ) )->setCalibTot( -999. );
-		  } else if( mEvent ) {
+            // set calibTot to -999. to exclude it from being calibrated in the next step --> pulser will not be used to build hits
+            mMuDst->etofDigi( it->second.at( candIndex ) )->setCalibTot( -999. );
+        } else if( mEvent ) {
             pulserTime = ( mEvent->etofCollection()->etofDigis() )[ it->second.at( candIndex ) ]->rawTime();
 
             // set calibTot to -999. to exclude it from being calibrated in the next step --> pulser will not be used to build hits

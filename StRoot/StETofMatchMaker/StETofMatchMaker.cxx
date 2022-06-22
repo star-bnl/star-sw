@@ -399,13 +399,13 @@ StETofMatchMaker::Make()
     if ( mEvent ) {
         LOG_DEBUG << "Make() - running on StEvent" << endm;
 
-		  StETofCollection* etofCollection = mEvent->etofCollection();
+          StETofCollection* etofCollection = mEvent->etofCollection();
 
-		  if( !etofCollection ) { //additional check for empty StEvents structures produced by other Makers. Needed for genDst.C
-		     LOG_WARN << "Make() - Found StEvent data structure, but no eTOF collection. Try MuDst processing instead" << endm;
-		     mMuDst = ( StMuDst* ) GetInputDS( "MuDst" );
+          if( !etofCollection ) { //additional check for empty StEvents structures produced by other Makers. Needed for genDst.C
+             LOG_WARN << "Make() - Found StEvent data structure, but no eTOF collection. Try MuDst processing instead" << endm;
+             mMuDst = ( StMuDst* ) GetInputDS( "MuDst" );
 
-		     if( mMuDst ) {
+             if( mMuDst ) {
              LOG_DEBUG << "Make() - running on MuDsts" << endm;
 
              mIsMuDstIn = true;
@@ -413,12 +413,12 @@ StETofMatchMaker::Make()
              fillIndexToPrimaryMap();
 
              cleanUpTraits();
-		     }
-		  }else{
-		     mIsStEventIn = true;
+             }
+          }else{
+             mIsStEventIn = true;
 
-		     cleanUpTraits();
-		 }
+             cleanUpTraits();
+         }
     }
     else {
         LOG_DEBUG << "Make(): no StEvent found" << endm;
