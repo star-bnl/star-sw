@@ -15,8 +15,9 @@ jobs:
     strategy:
       matrix:
         starenv: [root5, root6]
+        compiler: [gcc485]
     env:
-      STARENV: ${{ matrix.starenv }}
+      STARENV: ${{ matrix.starenv }}-${{ matrix.compiler }}
     steps:
       - name: Get branch name
         id: branch-name
@@ -32,20 +33,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build latest container for the branch
+      - name: Build a release container
         uses: docker/build-push-action@v3
         with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw:cache-${{ env.STARENV }}
-          cache-to:   type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw:cache-${{ env.STARENV }},mode=max
-          build-args: starenv=${{ matrix.starenv }}
+          build-args: |
+            starenv=${{ matrix.starenv }}
+            compiler=${{ matrix.compiler }}
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }}
-
-      - name: Build release container
-        if: steps.branch-name.outputs.is_tag == 'true'
-        uses: docker/build-push-action@v3
-        with:
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/star-sw:cache-${{ env.STARENV }}
-          build-args: starenv=${{ matrix.starenv }}
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.tag }}-${{ env.STARENV }}
