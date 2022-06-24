@@ -1488,8 +1488,6 @@ StETofGeometry::getFieldZ( const double& x, const double& y, const double& z ) {
 
     return B[ 2 ];
 }
-<<<<<<< HEAD
-=======
 
 void 
 StETofGeometry::readAlignmentParameters(){
@@ -1550,4 +1548,3 @@ StETofGeometry::readAlignmentDatabase(){
         mAlignmentParameters.push_back( counterAlignmentParameter );
     }
 }
->>>>>>> upstream/main
