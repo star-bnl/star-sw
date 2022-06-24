@@ -166,7 +166,7 @@ StETofMatchMaker::StETofMatchMaker( const char* name )
   mIsMuDstIn( false ),
   mOuterTrackGeometry( true ),
   mUseHelixSwimmer( false ),
-  mUseOnlyBTofHeaderStartTime( false ),
+  mUseOnlyBTofHeaderStartTime( true ),
   mIsSim( false ),
   mDoQA( false ),
   mDebug( false ),
