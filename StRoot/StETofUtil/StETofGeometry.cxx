@@ -581,6 +581,11 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins = ini
         readAlignmentDatabase();
     }
 
+	 if( mAlignmentParameters.size() != eTofConst::nCounters ){
+       LOG_ERROR << "StETofGeometry::Init(...) - Wrong size of counter alignment vector. Either incomplete alignment file or non-existant database table." << endm;
+		 return;
+	 }
+
      int iCounterAlignment = 0;
     // loop over sectors
     for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
@@ -635,13 +640,8 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins = ini
                 LOG_DEBUG << activeVolume->GetDX() << "  " << activeVolume->GetDY() << "  " << activeVolume->GetDZ() << endm;
 
                 int counterId = counter - eTofConst::counterStart;
-                if( mAlignmentParameters.size() == 108 ){ //alignment parameters for all counters available
-                    mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins, mAlignmentParameters.at(iCounterAlignment) );
-                    iCounterAlignment++;
-                } else {
-                    mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins );
-                }
-
+                mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins, mAlignmentParameters.at(iCounterAlignment) );
+                iCounterAlignment++;
             } // end of loop over counters
 
         } // end of loop over planes
@@ -683,6 +683,7 @@ StETofGeometry::reset()
     LOG_INFO << "StETofGeometry cleared up ...." << endm;
 
     mNValidModules = 0;
+	 mAlignmentParameters.clear();
     mInitFlag = false;
 
     mStarBField = nullptr;
