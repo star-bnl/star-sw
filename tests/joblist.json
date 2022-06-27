@@ -1087,5 +1087,14 @@
         "inppath": "/star/rcf/test/daq/2021/134", 
         "outpath": "/star/rcf/test/dev/daq_sl302.stica/${thisday}/year_2021/production_OO_200GeV_2021", 
         "nevents": "1000"
+    },
+    {
+        "jobid": "122",
+        "descr": "2022 dataset",
+        "chopts": "pp2022,StiCA,BEmcChkStat,epdhit",
+        "inpfile": "st_physics_23010027_raw_1000015.daq",
+        "inppath": "/star/rcf/test/daq/2022/010/23010027",
+        "outpath": "/star/rcf/test/dev/daq_sl302.stica_opt/${thisday}/year_2022/production_pp500_2022_64bit",
+        "nevents": "1000"
     }
 ]
