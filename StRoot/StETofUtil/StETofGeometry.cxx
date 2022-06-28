@@ -581,7 +581,7 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins = ini
         readAlignmentDatabase();
     }
 
-	 if( mAlignmentParameters.size() != eTofConst::nCounters ){
+	 if( mAlignmentParameters.size() != eTofConst::nCounters * eTofConst::nModules ){
        LOG_ERROR << "StETofGeometry::Init(...) - Wrong size of counter alignment vector. Either incomplete alignment file or non-existant database table." << endm;
 		 return;
 	 }
@@ -1540,7 +1540,7 @@ StETofGeometry::readAlignmentDatabase(){
     float tempY;
     float tempZ;
 
-    for( int iCounter = 0; iCounter < eTofConst::nCounters; iCounter++){
+    for( int iCounter = 0; iCounter < eTofConst::nCounters * eTofConst::nModules; iCounter++){
         tempX = table[iCounter].detectorAlignX[0];
         tempY = table[iCounter].detectorAlignY[0];
         tempZ = table[iCounter].detectorAlignZ[0];
