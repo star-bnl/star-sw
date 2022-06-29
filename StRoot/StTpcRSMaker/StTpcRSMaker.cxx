@@ -183,41 +183,23 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     LOG_ERROR << "StTpcRSMaker::InitRun: mCutEle has not been found in GEANT3 for \"" << TpcMedium.Data() << "\" parameters." 
 	      << "Probably due to missing  Set it to default " << mCutEle << endm;
   }
-  if (TESTBIT(m_Mode, kBICHSEL)) {
-    LOG_INFO << "StTpcRSMaker:: use H.Bichsel model for dE/dx simulation" << endm;
-    if (! mdNdEL10 || ! mdNdx) {
-      const Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx"
-	":./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
-      const Char_t *Files[2] = {"dNdE_Bichsel.root","dNdx_Bichsel.root"};
-      for (Int_t i = 0; i < 2; i++) { // Inner/Outer
-	Char_t *file = gSystem->Which(path,Files[i],kReadPermission);
-	if (! file) Fatal("StTpcRSMaker::Init","File %s has not been found in path %s",Files[i],path);
-	else        Warning("StTpcRSMaker::Init","File %s has been found as %s",Files[i],file);
-	TFile       *pFile = new TFile(file);
-	if (i == 0) {mdNdEL10 = (TH1D *) pFile->Get("dNdEL10"); assert(mdNdEL10);   mdNdEL10->SetDirectory(0);}
-	if (i == 1) {mdNdx = (TH1D *) pFile->Get("dNdx"); assert(mdNdx);   mdNdx->SetDirectory(0);}
-	delete pFile;
-	delete [] file;
-      }
+  LOG_INFO << "StTpcRSMaker:: use H.Bichsel model for dE/dx simulation" << endm;
+  if (! mdNdEL10 || ! mdNdx) {
+    const Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx"
+      ":./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
+    const Char_t *Files[2] = {"dNdE_Bichsel.root","dNdx_Bichsel.root"};
+    for (Int_t i = 0; i < 2; i++) { // Inner/Outer
+      Char_t *file = gSystem->Which(path,Files[i],kReadPermission);
+      if (! file) Fatal("StTpcRSMaker::Init","File %s has not been found in path %s",Files[i],path);
+      else        Warning("StTpcRSMaker::Init","File %s has been found as %s",Files[i],file);
+      TFile       *pFile = new TFile(file);
+      if (i == 0) {mdNdEL10 = (TH1D *) pFile->Get("dNdEL10"); assert(mdNdEL10);   mdNdEL10->SetDirectory(0);}
+      if (i == 1) {mdNdx = (TH1D *) pFile->Get("dNdx"); assert(mdNdx);   mdNdx->SetDirectory(0);}
+      delete pFile;
+      delete [] file;
     }
-  } else if (TESTBIT(m_Mode, kHEED)) {
-    LOG_INFO << "StTpcRSMaker:: use Heed model for dE/dx simulation" << endm;
-    if (! mdNdEL10 || ! mdNdxL10) {
-      const Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx"
-	":./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
-      const Char_t *Files[2] = {"dNdx_Heed.root","dNdx_Heed.root"};
-      for (Int_t i = 0; i < 2; i++) { // Inner/Outer
-	Char_t *file = gSystem->Which(path,Files[i],kReadPermission);
-	if (! file) Fatal("StTpcRSMaker::Init","File %s has not been found in path %s",Files[i],path);
-	else        Warning("StTpcRSMaker::Init","File %s has been found as %s",Files[i],file);
-	TFile       *pFile = new TFile(file);
-	if (i == 0) {mdNdEL10 = (TH1D *) pFile->Get("dNdEL10"); assert(mdNdEL10);   mdNdEL10->SetDirectory(0);}
-	if (i == 1) {mdNdxL10 = (TH1D *) pFile->Get("dNdxL10"); assert(mdNdxL10);   mdNdxL10->SetDirectory(0);}
-	delete pFile;
-	delete [] file;
-      }
-    }
-  } else {LOG_INFO << "StTpcRSMaker:: use GEANT321 model for dE/dx simulation" << endm;}
+    assert(mdNdEL10 && mdNdx);
+  }
   // Distortions
   if (TESTBIT(m_Mode,kdEdxCorr)) {
     LOG_INFO << "StTpcRSMaker:: use Tpc dE/dx correction from calibaration" << endm;
