@@ -68,6 +68,15 @@ foreach f ( `ls -1d   *_20??/hlt_2*.root *_20??/2*.root` )
     if (-r ${c}.list) continue;
     root.exe -q -b ${f} CheckPads.C+ >& ${c}.list
 end
+  grep Dead 2*.list | awk -F\{ '{print "{"$2}' > DeadFEE2.list
+  sort DeadFEE2.list > DeadFEE.listSorted
+  MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
+  sort DeadFeeRuns | tee DeadFeeRuns.sorted
+  grep Alive 2*.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
+  sort AliveFEE2.list > AliveFEE.sorted
+  MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
+  sort AliveFeeRuns | tee AliveFeeRuns.sorted
+  cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XXII.sorted
 */
 //   foreach f ( `ls -1d   */2*.root` )
 //________________________________________________________________________________

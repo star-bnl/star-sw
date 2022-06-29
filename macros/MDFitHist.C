@@ -1,10 +1,11 @@
 #ifndef __CINT__
-#include <iostream.h>
+#include "Riostream.h"
 #include "TROOT.h"
 #include "TApplication.h"
 #include "TCanvas.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TF2.h"
 #include "TSystem.h"
 #include "TBrowser.h"
 #include "TFile.h"
@@ -15,6 +16,16 @@ class TH1;
 class TH2;
 class TMultiDimFit;
 #endif
+TMultiDimFit *fit = 0;
+//________________________________________________________________________________
+Double_t mdfFunc(Double_t *x, Double_t *p = 0) {
+  if (! fit) return 0;
+  Double_t val = fit->Eval(x);
+  //  cout << "x : " << x[0] << "\ty : " << x[1] << "\tval = " << val << endl;
+  if (val >   0) val = 0;
+  if (val < -12) val = 0;
+  return val;
+}
 //____________________________________________________________________
 Int_t MDFitHist(TH2 *hist, Int_t npx=3, Int_t npy=3) 
 {
@@ -26,7 +37,7 @@ Int_t MDFitHist(TH2 *hist, Int_t npx=3, Int_t npy=3)
   const Int_t nVars       = 2;
 
   // make fit object and set parameters on it. 
-  TMultiDimFit* fit = new TMultiDimFit(nVars, TMultiDimFit::kMonomials,"v");
+  fit = new TMultiDimFit(nVars, TMultiDimFit::kMonomials,"v");
   //  TMultiDimFit* fit = new TMultiDimFit(nVars, TMultiDimFit::kChebyshev,"v");
 
   Int_t mPowers[nVars] ;
@@ -56,7 +67,7 @@ Int_t MDFitHist(TH2 *hist, Int_t npx=3, Int_t npy=3)
   Int_t ny = hist->GetNbinsY();
   TAxis *fXaxis = hist->GetXaxis();
   TAxis *fYaxis = hist->GetYaxis();
-
+  Int_t np = 0;
   for (i = 1; i <= nx; i++) {
     for (j = 1; j <= ny; j++) {
       z[0] = fXaxis->GetBinCenter(i);
@@ -68,7 +79,8 @@ Int_t MDFitHist(TH2 *hist, Int_t npx=3, Int_t npy=3)
       d = hist->GetCellContent(i,j);
       e = hist->GetCellError(i,j);///hist->GetCellContent(i,j);
       if (e < 1.e-7) continue;
-      printf("bin: %i,%i x,y: %f %f d=%f e=%f\n",i,j,x[0],x[1],d,e);
+      np++;
+      printf("point: %i bin: %i,%i x,y: %f %f d=%f e=%f\n",np,i,j,x[0],x[1],d,e);
       e *= e;
       // Add the row to the fit object
       fit->AddRow(x,d,e);
@@ -98,12 +110,13 @@ Int_t MDFitHist(TH2 *hist, Int_t npx=3, Int_t npy=3)
   fit->MakeCode(hist->GetName());
 
   // Write histograms to disk, and close file 
-//   output->Write();
-//   output->Close();
-//   delete output;
-
+  //   output->Write();
+  //   output->Close();
+  //   delete output;
+  TF2 *MDF = new TF2("MDF", mdfFunc, fXaxis->GetXmin(), fXaxis->GetXmax(), fYaxis->GetXmin(), fYaxis->GetXmax(), 0);
+  MDF->Draw("colz");
   // We're done 
-  delete fit;
+  //  delete fit;
   cout << "The END" << endl;
 
   return 0;

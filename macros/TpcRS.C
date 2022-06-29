@@ -30,21 +30,21 @@ St_db_Maker *dbMk = 0;
 #endif
 Bool_t Root4Star = kFALSE;
 //________________________________________________________________________________
-void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
+Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
   cout << "Call SetPartGen with RootFile = " << RootFile.Data() << "\tRunOpt = " << RunOpt.Data() << "\t Opt = " << Opt.Data() << endl;
-  Int_t Ids[14] =            {        5,        6,            3,            2,         8,         9,      11,      12,        14,        15,       45,        46,     49,      47};
-  Double_t Masses[14] =      {0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231, 1.875613,   2.80925,2.80923,3.727417};
-  const Char_t  *Names[15] = {  "muon+",  "muon-",  "electron-",  "electron+",   "pion+",   "pion-", "kaon+", "kaon-", "proton+", "proton-","deuteron", "triton",  "He3", "alpha"};
+  Int_t Ids[22] =            {        5,        6,            3,            2,         8,         9,      11,      12,        14,        15,       45,        46,     49,      47, 0,0,0,0,0,0,0,0};
+  Double_t Masses[22] =      {0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231, 1.875613,   2.80925,2.80923,3.727417, 0,0,0,0,0,0,0,0};
+  const Char_t  *Names[22] = {  "muon+",  "muon-",  "electron-",  "electron+",   "pion+",   "pion-", "kaon+", "kaon-", "proton+", "proton-","deuteron", "triton",  "He3", "alpha","HE6","Li5","Li6","Li7","Be7","Be9","Be10","B11"};
   Int_t    NTRACK = 100;
   Int_t    ID = 5;
-  Double_t Ylow   =  -1; 
-  Double_t Yhigh  =   1;
+  Double_t Ylow   =  -2; 
+  Double_t Yhigh  =   2;
   Double_t Philow =   0;
   Double_t Phihigh= 2*TMath::Pi();
-  Double_t Zlow   =  -50; 
-  Double_t Zhigh  =   50; 
-  Double_t bgMinL10  = -2; // 3.5;// 1e2; // 1e-2;
-  Double_t bgMaxL10  =  6;  // 1e2;// 1e5;
+  Double_t Zlow   =  -125; 
+  Double_t Zhigh  =   125; 
+  Double_t bgMinL10  = -3; // 3.5;// 1e2; // 1e-2;
+  Double_t bgMaxL10  = 10;  // 1e2;// 1e5;
   Double_t mass   = -1;
   TString workDir(gSystem->WorkingDirectory());
   if (workDir.Contains("FXT"))  {
@@ -54,10 +54,33 @@ void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
     Yhigh =  0.1;
   }
   TString optG("GBL");
-  for (Int_t i = 0; i < 14; i++) {
+  for (Int_t i = 0; i < 22; i++) {
     if (RootFile.Contains(Names[i],TString::kIgnoreCase)) {
-      ID =Ids[i];
-      mass = Masses[i];;
+      ID = Ids[i];
+      mass = Masses[i];
+      cout << RootFile.Data() << " matched with " << Names[i] << "\tID = " << ID << "\tmass = " << mass << endl;
+      if (ID <= 0) {
+	TParticlePDG *p = TDatabasePDG::Instance()->GetParticle(Names[i]);
+	if (! p) {
+	  cout << "TDatabasePDG::GetParticle(" << name.Data() << ") is not found" << endl; 
+	  return 1;
+	} else {
+	  cout << p->GetName() << " found" << endl;
+	}
+	Int_t pdg = p->PdgCode();
+	if (!pdg) {
+	  cout << "Particle " << p->GetName() << " pdg is not defined" << endl;
+	  return 1;
+	} else {
+	  cout << "pdg = " << pdg << endl;
+	}
+	ID  = TVirtualMC::GetMC()->IdFromPDG(pdg);
+	if (! ID) {
+	  cout << "TGeant3TGeo::IdFromPDG(" << pdg << ") is not found" << endl; 
+	  return 1;
+	}
+	mass = p->Mass();
+      }
       if (RootFile.Contains("MIP",TString::kIgnoreCase)) {
 	Double_t pMoMIP = 0.526; // MIP from Heed bg = 3.77 => p_pion = 0.526
 	Double_t pMomin = pMoMIP - 0.05; // 0.45;
@@ -71,7 +94,7 @@ void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
   }
   if (mass < 0) {
     cout << Opt.Data() << " is not identified. Abort" << endl;
-    return;
+    return 1;
   }
   Double_t pTmin = mass*TMath::Power(10.,bgMinL10);
   Double_t pTmax = mass*TMath::Power(10.,bgMaxL10);
@@ -110,8 +133,8 @@ void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
     }
   } else { // VMC
     cout << "Initialize STAR VMC interface" << endl;
-    if (! StVMCMaker::instance()) return 0;
-    if (! StarVMCApplication::Instance()) return 0;
+    if (! StVMCMaker::instance()) return 1;
+    if (! StarVMCApplication::Instance()) return 1;
     StarMCSimplePrimaryGenerator *gener = (StarMCSimplePrimaryGenerator *) StarMCPrimaryGenerator::Instance();
     if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
       delete gener; gener = 0;
@@ -123,6 +146,7 @@ void SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
     StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
     cout << "Set StarMCSimplePrimaryGenerator" << endl;
   }
+  return 0;
 }
 //________________________________________________________________________________
 void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",  
@@ -325,7 +349,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   }
   cout << "FileIn = " << FileIn.Data() << " ====================" << endl;
   if (FileIn == "") {
-    SetPartGan(RootFile, RunOpt, Opt);
+    if (SetPartGan(RootFile, RunOpt, Opt)) return;
+    
   }
   if (Last > 0)  chain->EventLoop(First,Last);
 }
