@@ -118,8 +118,8 @@ Part_t Part[NMasses] = {// https://periodictable.com/Isotopes/
   {"2#pi",    3,     -1,     -2, -0.13956995},       	      //18 2*pi
   {"2p",      1,     -1,      0, -0.93827231}        	      //19 2*p 
 };
-const Int_t NF = 10;  //          0,  1,     2,  3,   4,    5.  6,    7,       8,     9,
-const Char_t *FNames[NF] = {"Girrf","Sirrf","z","I70","I60","I70M","dNdx","zM","70Trs","zTrs"};
+const Int_t NF =   8;  //          0,      1,  2,    3,    4,     5.     6,   7,      8,     9,
+const Char_t *FNames[10] = {"Girrf","Sirrf","z","I70","I60","I70M","dNdx","zM","70Trs","zTrs"};
 const Int_t Nlog2dx = 3;
 const Double_t log2dx[Nlog2dx] = {0,1,2};
 //________________________________________________________________________________
