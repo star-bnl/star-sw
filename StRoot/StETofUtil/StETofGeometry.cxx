@@ -1527,6 +1527,10 @@ StETofGeometry::readAlignmentDatabase(){
     //add check for no alignment set here.
 
     TDataSet* dbDataSet = StMaker::GetChain()->GetDataBase("Geometry/etof/etofAlign");
+    if( !dbDataSet ) {
+        LOG_ERROR << "unable to get the dataset from the database" << endm;
+        return;
+    }
 
     St_etofAlign* etofAlign = static_cast< St_etofAlign * > ( dbDataSet->Find( "etofAlign" ) );
     if( !etofAlign ) {
