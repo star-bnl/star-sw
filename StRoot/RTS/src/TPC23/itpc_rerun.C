@@ -111,12 +111,8 @@ int main(int argc, char *argv[])
 
 		for(u_int i=0;i<dd->ncontent;i++) {
 //			if(dd->adc[i].adc<2) printf("pad %d, tb %d, adc %d\n",dd->pad,dd->adc[i].tb,dd->adc[i].adc) ;
-			if(dd->adc[i].adc==0) {
-				sim_d[i].adc = 0xFFFF ;
-			}
-			else {
-				sim_d[i].adc = dd->adc[i].adc ;
-			}
+
+			sim_d[i].adc = dd->adc[i].adc ;
 			sim_d[i].tb = dd->adc[i].tb ;
 			sim_d[i].track_id = 0xFFFF ;
 		}
