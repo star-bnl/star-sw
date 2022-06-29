@@ -145,14 +145,14 @@ using namespace Heed;
 #if 1
       const EnergyMesh *energyMesh = track.EnergyMesh();
       const int nValues = energyMesh->get_q();
-#else
-      const int nValues = nEnergyIntervals;
-#endif
       const EnTransfCS* transferCs = track.Transfercs();
       const double nc = transferCs->quanC;
       const double dedx = transferCs->meanC * 1.e3;
       const double dedxLeft = transferCs->meanCleft * 1.e3;
       const double dedx1 = transferCs->meanC1 * 1.e3;
+#else
+      const int nValues = nEnergyIntervals;
+#endif
       const HeedMatterDef* matter = track.Matter();
       const double w = matter->W * 1.e6;
       const double f = matter->F;
