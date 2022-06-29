@@ -70,6 +70,8 @@
 #include "TPaletteAxis.h"
 #include "TDirIter.h"
 #endif
+static TString Old("Old");
+static TString New("New");
 // Clusters
 struct Name_t {
   const Char_t *histName;
@@ -600,6 +602,52 @@ void TbyThits() {
   hitMateComp t(tChain);
   t.Loop();
   fOut->Write();
+}
+//________________________________________________________________________________
+void SetNewOld() {
+  TString pwd(gSystem->BaseName( gSystem->WorkingDirectory()));
+  TObjArray *obj = pwd.Tokenize("_");
+  Int_t nParsed = obj->GetEntries();
+  if (nParsed >= 2) {// _Old_New
+    Old = ((TObjString *) obj->At(nParsed-2))->GetName();
+    New = ((TObjString *) obj->At(nParsed-1))->GetName();
+  }
+  delete obj;
+  cout << "New = " << New.Data() << " versus Old = " << Old.Data() << endl;
+}
+//________________________________________________________________________________
+void PlotEff() {
+  SetNewOld();
+  TH1D *RN  = (TH1D *) gDirectory->Get("RN");
+  TH1D *RO  = (TH1D *) gDirectory->Get("RO");
+  TH1D *RON = (TH1D *) gDirectory->Get("RON");
+  TH1D *RNO = (TH1D *) gDirectory->Get("RNO");
+  TEfficiency *newE = new TEfficiency(*RON,*RO);
+  TEfficiency *oldE = new TEfficiency(*RON,*RN);
+  TCanvas *ceff = new TCanvas("ceff"<"ClusterEfficiencies");
+  TH1F *frame = ceff->DrawFrame(0.5,0.9,72.5,1.02);
+  frame->SetTitle(Form("%s and %s cluster efficiencies",Old.Data(),New.Data()));
+  frame->SetXTitle("row");
+  newE->Draw("same");
+  TLegend *l = new TLegend(0.2,0.2,0.4,0.4);
+  l->AddEntry(newE,New.Data());
+  l->Draw();
+  oldE->SetMarkerColor(2);
+  oldE->Draw("same");
+  l->AddEntry(oldE,Old.Data());
+  ceff->SaveAs("ClusterEffeciency.png");
+}
+//________________________________________________________________________________
+void PlotPar() {
+#if 0
+c1->SetLogz(1);
+ hitMateComp->Draw("newP.pad-oldP.pad:oldP.row>>padR(72,0.5,72.5,64,-0.5,0.5)","oldP.sector>0&&newP.sector>0&&newP.fl==0&&oldP.fl==0","colz")
+  padR->SetXTitle("row")
+ hitMateComp->Draw("newP.timebucket-oldP.timebucket:oldP.row>>timebucketR(72,0.5,72.5,64,-0.5,0.5)","oldP.sector>0&&newP.sector>0&&newP.fl==0&&oldP.fl==0","colz")
+  timebucketR->SetXtitle("row")
+  hitMateComp->Draw("TMath::Log(newP.adc/oldP.adc):oldP.row>>adcR(72,0.5,72.5,64,-0.5,0.5)","oldP.sector>0&&newP.sector>0&&newP.fl==0&&oldP.fl==0","colz")
+ adcR->SetXTitle("row")
+#endif
 }
 /*
 // 2020 
