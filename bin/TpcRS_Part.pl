@@ -7,16 +7,15 @@ use Cwd;
 #my @particles = qw(pion He3 alpha);
 #my @particles = qw(electron- electron+);
 #my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha pionMIP);
-my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha);
+#my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha);
 #my @particles = qw(proton+ pionMIP);
 #my @particles = qw(pion+ pion-);
-#my @particles = (pionMIP);
-#my @particles = (pionMIP1);
-#my @particles = (phi);
-#my @particles = qw(electron-MIP electron+MIP pion+MIP pion-MIP kaon+MIP kaon-MIP proton+MIP proton-MIP deuteronMIP );
+#my @particles = qw(electron-MIP electron+MIP pion+MIP pion-MIP kaon+MIP kaon-MIP proton+MIP proton-MIP deuteronMIP tritonMIP muon+MIP muon-MIP);
+#my @particles = qw(tritonMIP muon+MIP muon-MIP);
+my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha HE6 Li5 Li6 Li7 Be7 Be9 Be10 B11);
 foreach my $part (@particles) {
-  my $i1 = 51;
-  my $N =  100;# 00;
+  my $i1 = 1;
+  my $N =  200;# 00;
 #  if ($part =~ /MIP/) {$N = 200;}
   for (my $i = $i1; $i <= $N; $i++) {
 #    my $log = $part . "_" . $i . "B.log";

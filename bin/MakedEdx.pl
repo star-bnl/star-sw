@@ -2438,7 +2438,14 @@ my $step = 0;
 #$hist = "RunXIX_XXII_07"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/24/22 more MySQL versions
 #$hist = "RunXIX_XXII_08"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  05/26/22 Check after fix with SecRow3 +/- and MIP selection
 #$hist = "RunXIX_XXII_09"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/08/22  check new dN/dx
-$hist = "RunXIX_XXII_10"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/10/22  new scale nE tp dE
+#$hist = "RunXIX_XXII_10"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/10/22  new scale nE to dE
+#$hist = "RunXIX_XXII_11"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/20/22  update dN/dx
+#$hist = "RunXIX_XXII_12"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/21/22  use prediction from dN/dx analysis (inverse order of most probable value from dx ?)
+#$hist = "RunXIX_XXII_13"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/21/22  + Bichsel::Instance()->Parameterization()->MostProbableZShift(); 
+#$hist = "RunXIX_XXII_14"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/21/22  - Bichsel::Instance()->Parameterization()->MostProbableZShift(); 
+#$hist = "RunXIX_XXII_15"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/21/22  - TpcSecRowB.19GeV_2019.root
+#$hist = "RunXIX_XXII_16"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/21/22  - TpcSecRowB.19GeV_2019.root reinstal old prediction
+$hist = "RunXIX_XXII_17"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  06/21/22  - disable TpcSecRowB.20190225,202321.root.HOLD.062422
 
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
@@ -2564,6 +2571,7 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     $ff =~ s|st_hlt_||;
     $ff =~ s|st_mtd_||;
     $ff =~ s|adc_||;
+    $ff =~ s|hlt_||;
 #    $ff =~ s|_raw_0001||;
     $ff =~ s/\.(dst|event)//g;
     $ff =~ s/rcf//g; $ff =~ s/evts//;

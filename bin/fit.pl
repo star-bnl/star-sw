@@ -13,6 +13,7 @@ my @histRL5 = ();
 my @histNF = ();
 my @histXF = ();
 my @histADC = ();
+my @histG4F = ();
 my @rootfiles = ();
 my $all = 0;
 #my $all = 1;
@@ -40,12 +41,14 @@ foreach my $arg (@ARGV) {
 #   }
 #   my @opt = qw (ADC);
 #  print "histADC = @histADC\n";
- ################################################################################
- if (! $all and $#histGF < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 and $#histADC < 0) {
+################################################################################
+ if (! $all and $#histGF < 0 and $#histG4F < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 and $#histADC < 0) {
    @histGF = qw(
  	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
  	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
 	       SecRow3 SecRow3C
+	       SecRow3P SecRow3PC
+  	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
 	       dX3 dX3C
  	     );
  # 	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
@@ -63,22 +66,30 @@ foreach my $arg (@ARGV) {
  #		ppmOxygenInP  inputGasTemperatureP 
  #		percentMethaneInP percentMethaneInPA percentMethaneInPC
  #		ppmWaterOutP ppmWaterOutPA ppmWaterOutPC
+   @histG4F = qw(
+ 	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
+ 	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
+	       SecRow3 SecRow3C
+	       SecRow3P SecRow3PC
+  	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
+	       dX3 dX3C
+ 	     );
    @histRL5 = @histGF;
    @histGP = qw (
  		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
 		 TPoints70P TPointsFP TPoints70UP TPointsFUP  TPointsNP TPointsNUP 
- 		 TPoints270 TPoints2F TPoints270U TPoints2FU  TPoints2N TPoints2NU
- 		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP
  		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
-  		 TPoints270+TPoints270P TPoints2F+TPoints2FP TPoints270U+TPoints270UP TPoints2FU+TPoints2FUP  TPoints2N+TPoints2NP TPoints2NU+TPoints2NUP
  		 NPoints70 NPointsF NPoints70U NPointsFU  NPointsN NPointsNU
 		 NPoints70P NPointsFP NPoints70UP NPointsFUP  NPointsNP NPointsNUP 
- 		 NPoints270 NPoints2F NPoints270U NPoints2FU  NPoints2N NPoints2NU
- 		 NPoints270P NPoints2FP NPoints270UP NPoints2FUP  NPoints2NP NPoints2NUP
- 		 NPoints70+NPoints70P NPointsF+NPointsFP NPoints70U+NPoints70UP NPointsFU+NPointsFUP  NPointsN+NPointsNP NPointsNU+NPointsNUP
-  		 NPoints270+NPoints270P NPoints2F+NPoints2FP NPoints270U+NPoints270UP NPoints2FU+NPoints2FUP  NPoints2N+NPoints2NP NPoints2NU+NPoints2NUP
- 	      );
-  #  		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
+	       );
+#   		 TPoints270+TPoints270P TPoints2F+TPoints2FP TPoints270U+TPoints270UP TPoints2FU+TPoints2FUP  TPoints2N+TPoints2NP TPoints2NU+TPoints2NUP
+#  		 TPoints270 TPoints2F TPoints270U TPoints2FU  TPoints2N TPoints2NU
+#  		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP
+#  		 NPoints270 NPoints2F NPoints270U NPoints2FU  NPoints2N NPoints2NU
+#  		 NPoints270P NPoints2FP NPoints270UP NPoints2FUP  NPoints2NP NPoints2NUP
+#  		 NPoints70+NPoints70P NPointsF+NPointsFP NPoints70U+NPoints70UP NPointsFU+NPointsFUP  NPointsN+NPointsNP NPointsNU+NPointsNUP
+#   		 NPoints270+NPoints270P NPoints2F+NPoints2FP NPoints270U+NPoints270UP NPoints2FU+NPoints2FUP  NPoints2N+NPoints2NP NPoints2NU+NPoints2NUP
+ #  		 fitZeP fitZeN fitZprotonP fitZprotonN fitZkaonP fitZkaonN fitZpiP fitZpiN fitZmuP fitZmuN fitZdeuteronP fitZdeuteronN fitZtritonP fitZtritonN fitZHe3P fitZHe3N fitZalphaP fitZalphaN 
  #  		 fitNeP fitNeN fitNprotonP fitNprotonN fitNkaonP fitNkaonN fitNpiP fitNpiN fitNmuP fitNmuN fitNdeuteronP fitNdeuteronN fitNtritonP fitNtritonN fitNHe3P fitNHe3N fitNalphaP fitNalphaN 
  #		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP
  #		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
@@ -89,16 +100,17 @@ foreach my $arg (@ARGV) {
  #	      );
  #  @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N SecRow3PN dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
    #  @histXF = @histNF;
-   @opt = qw (GF GP NF);# XF);# RL5);
+   @opt = qw (GF G4F GP NF);# XF);# RL5);
  }
 print "fit.pl for  @rootfiles \n"; 
 if ($#histGF >= 0) {print " with GF: @histGF \n";}
+if ($#histG4F >= 0) {print " with G4F: @histG4F \n";}
 if ($#histGP >= 0) {print " with GP: @histGP \n";}
 if ($#histRL5 >= 0){print " with RL5:@histRL5\n";}
 if ($#histNF >= 0) {print " with NF: @histNF \n";}
 if ($#histXF >= 0) {print " with NF: @histXF \n";}
 exit if $#rootfiles < 0;
-#my @opt = qw (GF GP NF);# XF);# RL5);
+#my @opt = qw (GF G4F  GP NF);# XF);# RL5);
 my $XML = "fit.xml";
 open (XML,">$XML") or die "Can't open $XML";
 print XML '<?xml version="1.0" encoding="utf-8" ?>
@@ -118,6 +130,7 @@ foreach my $rootfile (@rootfiles) {
     if    ($fitype eq 'GP') {@histos = @histGP;}
     elsif ($fitype eq 'ADC') {@histos = @histADC;}
     elsif ($fitype eq 'GF') {@histos = @histGF;}
+    elsif ($fitype eq 'G4F') {@histos = @histG4F;}
     elsif ($fitype eq 'RL5'){@histos = @histRL5;}
     elsif ($fitype eq 'NF') {
       @histos = @histNF; 
