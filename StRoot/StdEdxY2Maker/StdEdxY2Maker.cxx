@@ -6,7 +6,7 @@
 #define __SpaceCharge__
 //#define __NEGATIVE_ONLY__
 #ifndef  __NEGATIVE_ONLY__
-//#define __NEGATIVE_AND_POSITIVE__
+#define __NEGATIVE_AND_POSITIVE__
 #endif
 //#define __TEST_DX__
 //#define __LogProb__
@@ -54,6 +54,7 @@
 #include "StMessMgr.h" 
 #include "StBichsel/Bichsel.h"
 #include "StBichsel/StdEdxModel.h"
+#include "StBichsel/StdEdxPull.h"
 #include "StDetectorId.h"
 #include "StDedxMethod.h"
 // StarClassLibrary
@@ -99,6 +100,7 @@ dEdxY2_t *StdEdxY2Maker::dEdxS = 0;
 static Int_t numberOfSectors = 0;
 static Int_t numberOfTimeBins = 0;
 static Int_t NumberOfChannels = 8;
+TGraph *StdEdxY2Maker::fdNdxGraph[3] = {0};
 
 //const static Double_t pMomin = 0.35; // range for dE/dx calibration
 //const static Double_t pMomax = 0.75;
@@ -127,7 +129,6 @@ static TH2F *fPadTbkBad = 0;
     static TH3F *AlivePads = 0;
     static TProfile3D *ActivePads = 0;
 #endif
-TGraph *StdEdxY2Maker::fdNdxGraph = 0;
 //______________________________________________________________________________
 ClassImp(StdEdxY2Maker);
 //_____________________________________________________________________________
@@ -765,7 +766,9 @@ Int_t StdEdxY2Maker::Make(){
 #if defined(__DEBUG_dEdx__) || defined(__DEBUG_dNdx__)
 	  StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
 	  Double_t pMomentum = g3.mag();
+	  Double_t bgPion = pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass();
 	  Double_t dEdxFitL10 = TMath::Log10(	1e6*dedx.dedx[0]);
+	  Double_t dNdx = StdEdxPull::EvalPred(bgPion, 2);
 	  if ((TMath::Abs(pMomentum - 1.0) < 0.1 && dEdxFitL10 > 0.5 && dEdxFitL10 < 0.8) ||
 	      (TMath::Abs(pMomentum - 0.5) < 0.1 && dEdxFitL10 > 1.0 && dEdxFitL10 < 1.4)) {
 	    static Int_t ibreak = 0;
@@ -1142,7 +1145,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	StTrackNode *node = gTrack->node();
 	StPrimaryTrack *pTrack = static_cast<StPrimaryTrack*>(node->track(primary));
 	if (pTrack) {
-	  StPrimaryVertex *primVx = (StPrimaryVertex *) pTrack->vertex();
+	  StPrimaryVertex s*primVx = (StPrimaryVertex *) pTrack->vertex();
 	  if (primVx) {
 	    if (TMath::Abs(primVx->position().z()) < 10) {
 	      StThreeVectorD P = pTrack->geometry()->helix().momentum(bField);
@@ -1165,11 +1168,19 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
       Int_t row    = FdEdx[k].row;
       Int_t rowS   = row;
       if (sector > 12) rowS = - rowS;
+#if 1
       FdEdx[k].zP = // Bichsel::Instance()->GetMostProbableZ(bgL10,1.);
 	Bichsel::Instance()->GetMostProbableZ(bgL10,TMath::Log2(FdEdx[k].F.dx)); //remove dX
       FdEdx[k].sigmaP = //Bichsel::Instance()->GetRmsZ(bgL10,1.);
 	Bichsel::Instance()->GetRmsZ(bgL10,TMath::Log2(FdEdx[k].F.dx)); //remove dX	
       Double_t predB  = 1.e-6*TMath::Exp(FdEdx[k].zP);
+#else
+      Double_t n_P = FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion];
+      Double_t zdEMPV = St_TpcdEdxModelC::instance()->LogdEMPV(n_P) - Bichsel::Instance()->Parameterization()->MostProbableZShift(); 
+      FdEdx[k].zP = zdEMPV;
+      FdEdx[k].sigmaP = St_TpcdEdxModelC::instance()->Sigma(n_P);
+      Double_t predB  = TMath::Exp(FdEdx[k].zP);
+#endif
       FdEdx[k].F.dEdxN  = TMath::Log(FdEdx[k].F.dEdx /predB);
       for (Int_t l = 0; l <= StTpcdEdxCorrection::kTpcLast; l++) {
 	if (l == StTpcdEdxCorrection::kzCorrection || 
@@ -1200,6 +1211,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  FdEdx[k].F.dEdxN,
 	  0, 
 	  FdEdx[k].F.dx};
+#if 0
 	Double_t dEN = 0;
 	Double_t zdEMPV = 0;
 	if (PiD.fdNdx) {
@@ -1208,6 +1220,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  zdEMPV = St_TpcdEdxModelC::instance()->LogdEMPV(n_P); // ? Check dx
 	  Vars[2] = dEN - zdEMPV;
 	};
+#endif
 	// SecRow3
 	Double_t V = FdEdx[k].Voltage;
 	Double_t VN = (row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) ? V - 1170 : V - 1390;
@@ -1677,34 +1690,53 @@ Int_t StdEdxY2Maker::Propagate(const StThreeVectorD &middle,const StThreeVectorD
 void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
   static Int_t _debug = 0; 
 #ifdef __DEBUG_dNdx__
-  static TCanvas *c1 = new TCanvas("fcn","fcn");
+  static TCanvas *c1 = 0;
   static vector<Double_t> X;
-  static vector<Double_t> Y;
+  static vector<Double_t> F;
+  static vector<Double_t> E;
+  static vector<Double_t> P;
+  static vector<Double_t> I;
   if (_debug > 0 && iflag == 1) {
     X.clear();
-    Y.clear();
+    F.clear();
+    E.clear();
+    P.clear();
+    I.clear();
+    if (!c1) c1 =new TCanvas("fcn","fcn",500,1500);
+    else     c1->Clear();
+    c1->Divide(1,3);
   }
 #endif /* __DEBUG_dNdx__ */
   f = 0;
   gin[0] = 0.;
   Double_t dNdx = par[0]; // Mu
+  //  Double_t sigma = par[1]; // extra sigma
   for (Int_t i = 0; i < NdEdx; i++) {
     Double_t dE = FdEdx[i].F.dE;
-    Double_t nE = St_TpcdEdxModelC::instance()->n(dE);
+    Double_t nE = 1.2*St_TpcdEdxModelC::instance()->n(dE);
     Double_t dX = FdEdx[i].dxC;
     Double_t Np = dNdx*dX;
-    Double_t X[1] = {TMath::Log(nE/Np)};
-    Double_t params[4] = {0};
+    Double_t ee = TMath::Log(nE/Np);
+    Double_t params[5] = {0};
     params[1] = St_TpcdEdxModelC::instance()->Mu(Np);
-    params[2] = St_TpcdEdxModelC::instance()->Sigma(Np);
+    Double_t Sigma  = St_TpcdEdxModelC::instance()->Sigma(Np);
+    //    params[2] = TMath::Sqrt(Sigma*Sigma + sigma*sigma);
+    params[2] = Sigma;
     params[3] = St_TpcdEdxModelC::instance()->Alpha(Np);
-    Double_t Prob = StdEdxModel::gausw(X,params);
+    StdEdxModel::GGaus()->SetParameters(params);
+    Double_t Prob = StdEdxModel::GGaus()->Eval(ee);
+    if (_debug && iflag == 3) {
+      E.push_back(ee);
+      P.push_back(Prob);
+      Double_t In = StdEdxModel::GGaus()->Integral(-1.,ee);
+      I.push_back(In);
+    }
     if (Prob <= 0.0) {
       f += 100;
       FdEdx[i].Prob = 0;
       continue;
     }
-    f -= 2*TMath::Log(Prob);
+    f -= TMath::Log(Prob);
     FdEdx[i].Prob = Prob;
   }
   gin[0] = 0;
@@ -1716,20 +1748,38 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     }
 #ifdef __DEBUG_dNdx__
     X.push_back(dNdx);
-    Y.push_back(f);
+    F.push_back(f);
     if (iflag == 3) {
-      c1->cd();
-      c1->Clear();
+      c1->cd(1);
       Int_t N = X.size();
       TArrayD XA(N);
       TArrayD YA(N);
       for (Int_t i = 0; i < N; i++) {
 	XA[i] = X[i];
-	YA[i] = Y[i];
+	YA[i] = F[i];
       }
-      if (fdNdxGraph) delete fdNdxGraph;
-      fdNdxGraph = new TGraph(N, XA.GetArray(), YA.GetArray());
-      fdNdxGraph->Draw("axp");
+      if (fdNdxGraph[0]) delete fdNdxGraph[0];
+      fdNdxGraph[0] = new TGraph(N, XA.GetArray(), YA.GetArray());
+      fdNdxGraph[0]->SetName("fcn");
+      fdNdxGraph[0]->Draw("axp");
+      TArrayD EA(NdEdx);
+      TArrayD PA(NdEdx);
+      TArrayD IA(NdEdx);
+      for (Int_t i = 0; i < NdEdx; i++) {
+	EA[i] = E[i];
+	PA[i] = P[i];
+	IA[i] = I[i];
+      }
+      if (fdNdxGraph[1]) delete fdNdxGraph[1];
+      fdNdxGraph[1] = new TGraph(N, EA.GetArray(), PA.GetArray());
+      fdNdxGraph[1]->SetName("Prob");
+      c1->cd(2);
+      fdNdxGraph[1]->Draw("axp");
+      if (fdNdxGraph[2]) delete fdNdxGraph[2];
+      fdNdxGraph[2] = new TGraph(N, EA.GetArray(), IA.GetArray());
+      fdNdxGraph[2]->SetName("Integral");
+      c1->cd(3);
+      fdNdxGraph[2]->Draw("axp");
       c1->Update();
     }
 #endif /* __DEBUG_dNdx__ */
@@ -1737,7 +1787,8 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
 }
 //________________________________________________________________________________
 void StdEdxY2Maker::DoFitN(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
-  Double_t dNdx = 1e6*TMath::Exp(fitZ)/0.080; // 80 eV per primary interaction
+  //  Double_t dNdx = 1e9*TMath::Exp(fitZ)/92.24; // 0.080; // 80 eV per primary interaction
+  Double_t dNdx = 1e9*TMath::Exp(fitZ)/80.; // 0.080; // 80 eV per primary interaction
   Double_t arglist[10] = {0};
   Int_t ierflg = 0;
   m_Minuit->SetFCN(fcnN);
@@ -1751,7 +1802,8 @@ void StdEdxY2Maker::DoFitN(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ){
   arglist[0] = 0.5;
   m_Minuit->mnexcm("SET ERR", arglist ,1,ierflg);
   //    m_Minuit->mnparm(0, "LogdNdx", TMath::Log(dNdx), 0.5, 0.,0.,ierflg); //First Guess
-  m_Minuit->DefineParameter(0, "dNdx", dNdx, 0.5, 0.6*dNdx, 1.5*dNdx);
+  m_Minuit->DefineParameter(0, "dNdx", dNdx, 0.5, 0.2*dNdx, 5*dNdx);
+  //  m_Minuit->DefineParameter(1, "sigma", 0.01, 0.01, 0.0, 0.5);
   if (Debug() < 4)       arglist[0] = 1.;   // 1.
   else                   arglist[0] = 0.;   // Check gradient 
   arglist[0] = 1.0;

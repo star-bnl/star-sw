@@ -99,6 +99,11 @@ Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_
   return SumSeries(cor, x, z, NparMax);
 }
 //________________________________________________________________________________
+Double_t St_tpcCorrectionC::CalcXDerivative(Int_t i, Double_t x, Double_t z, Int_t NparMax) const {
+  tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
+  return SumSeriesXDerivative(cor, x, z, NparMax);
+}
+//________________________________________________________________________________
 Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double_t z, Int_t NparMax) const {
   Double_t Sum = 0;
   if (! cor) return Sum;
@@ -259,6 +264,68 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   return Sum;
 }
 //________________________________________________________________________________
+Double_t St_tpcCorrectionC::SumSeriesXDerivative(tpcCorrection_st *cor,  Double_t x, Double_t z, Int_t NparMax) const {
+  // Only for polynomials for now
+  Double_t Sum = 0;
+  if (! cor) return Sum;
+  Int_t N = TMath::Abs(cor->npar)%100;
+  if (N == 0) return Sum;
+  if (NparMax > 0) N = NparMax;
+  // parameterization variable
+  Double_t X = x;
+  Double_t Jacobian = 1;
+  if (cor->npar  < 0) {X = TMath::Exp(x); Jacobian = X;}
+  else {
+    switch  (cor->type) {
+    case 10:// ADC correction offset + poly for ADC
+    case 11:// ADC correction offset + poly for log(ADC) and |Z|
+    case 12:// ADC correction offset + poly for log(ADC) and TanL
+    case 13:// ADC correction without off set TF1 *F = new TF1("F","[0]+TMath::Exp([1]+[2]*TMath::Exp(x))",3,10) and offset correction via TpcAdcCorrection6MDF
+      X = TMath::Log(x);      
+      Jacobian = 1./x;
+      break;
+    case 1: // Tchebyshev [-1,1]
+      if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      Jacobian = 0;
+      break;
+    case 2: // Shifted TChebyshev [0,1]
+      if (cor->min < cor->max)   X = TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      Jacobian = 0;
+      break;
+    case 3:
+      if (TMath::Abs(x) >= 1) X = 0;
+      else                    X = TMath::Log(1. - TMath::Abs(x));
+      Jacobian = 0;
+      break;
+    case 4:
+      if (TMath::Abs(x) >= 1) X = 0;
+      else                    X = TMath::Sign(TMath::Log(1. - TMath::Abs(x)),x);
+      Jacobian = 0;
+      break;
+    case 5:
+      if (x < 1e-7) X = -16.118;
+      else          X = TMath::Log(x);
+      Jacobian = TMath::Exp(-X);
+      break;
+    case 6:
+      X = TMath::Abs(x);
+      Jacobian = TMath::Sign(1., x);
+      break;
+    default:      X = x;    break;
+    }
+  }
+  if (TMath::Abs(Jacobian) < 1e-7) return 0;
+  if (cor->type != 1 && cor->type != 2 &&
+      cor->min < cor->max) {
+    if (X < cor->min) X = cor->min;
+    if (X > cor->max) X = cor->max;
+  }
+  Sum = cor->a[N-1] * (N - 1);
+  for (int n = N-2; n>=1; n--) Sum = X*Sum + cor->a[n] * n;
+  Sum *= Jacobian;
+  return Sum;
+}
+//________________________________________________________________________________
 Int_t St_tpcCorrectionC::IsActiveChair() const {
   const St_tpcCorrection  *tableC = (const St_tpcCorrection  *) Table();
   Int_t npar = 0;
@@ -296,55 +363,27 @@ MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorr
 MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB);
 #include "St_TpcdEdxModelC.h"
 MakeChairInstance2(tpcCorrection,St_TpcdEdxModelC,Calibrations/tpc/TpcdEdxModel);
-TF1 *St_TpcdEdxModelC::fProb = 0;
-#if 0
+/* CERN-77-09 Sauli Yellow report
+   Gas  dens(g/cm**3) Wi (ev)   dE/dx (keV/cm) np (1/cm)  nT(1/cm)
+   Ar   1.66e-3        26       2.44           29.4       94
+   CH4  6.70e-4        13.1     2.21           16         53
+   P10  1.561ee-3      25.44    2.43           28.82      92.24
+ */
+Double_t St_TpcdEdxModelC::GeVperElectron               = 43.5e-9;  //39.41e-9;  // 24.95e-9; // deposited energy per conducting electron 
+Double_t St_TpcdEdxModelC::LogGeVperElectron = TMath::Log(43.5e-9); //39.41e-9); // TMath::Log(24.95e-9);
 //________________________________________________________________________________
-Double_t St_TpcdEdxModelC::MostProbablenN(Double_t N) {
-  // Most probable no. of conducting electons (ne) versus no. of primary clusters
-  if (N <= 1.0) return 0;
-  Double_t X = TMath::Log(N);
-  Double_t mu = instance()->CalcCorrection(0, X);
-  return N*TMath::Exp(TMath::Exp(mu));
-}
-#endif
-//________________________________________________________________________________
-Double_t St_TpcdEdxModelC::funcProb(Double_t *x, Double_t *p) {
-  Double_t e = x[0]; // deposited energy (GeV)
-  Double_t P = p[0]; // no. of primary clusters
-  Double_t ne = n(e);// no. of connduction electrons
-  if (P < 1 || ne < P) return 0;
-  Double_t X = TMath::Log(P);
-  Double_t Y = TMath::Log(ne/P);
-  if (Y <= 0.0) return 0;
-  /*
-    dNde  = dnde * dNdn 
-    =       dnde * dNdY                      * dYdn  
-    =       dnde * dNdZ                      * dZdY         * dYdn 
-    =       dnde * Gaus(Z, mu, sigma, kTRUE) * 1/Y          * 1/n // ne == n
-    =       dnde * Gaus(Z, mu, sigma, kTRUE) * 1/log(n/P)   * 1/n // ne == n
-    dNdn  =        Gaus(Z, mu, sigma, kTRUE) * 1/log(n/P)   * 1/n // ne == n
-    d(dNdn)/dn = 0 = dNdn*[(-(Z-mu)/sigma**2)*dZ/dn - 1/(n*log(n/P)) 
-   */
-  Double_t Z = TMath::Log(Y);
-  Double_t mu    = instance()->CalcCorrection(0, X);
-  Double_t sigma = instance()->CalcCorrection(1, X);
-  Double_t dNdZ = TMath::Gaus(Z, mu, sigma, kTRUE);
-  Double_t dZdY = 1./Y;
-  Double_t dNdY = dNdZ * dZdY;
-  Double_t dYdn = 1./ne;
-  Double_t dNdn = dNdY * dYdn;
-  Double_t dnde = E(1.);
-  Double_t dNde  = dnde * dNdn;
-  return dNde;
+Double_t St_TpcdEdxModelC::Parameter(Double_t Np, Int_t k) {
+  // Most Probable log (ne/Np) versus log of Np
+  if (Np <= 1.0) return 0;
+  Double_t X = TMath::Log(Np);
+  return instance()->CalcCorrection(k, X);
 }
 //________________________________________________________________________________
-TF1 *St_TpcdEdxModelC::Prob() {
-  if (! fProb) {
-    fProb = new TF1("St_TpcdEdxModelC::Prob",St_TpcdEdxModelC::funcProb,0.0, 20e-6, 1);
-    fProb->SetParName(0,"N");
-    fProb->SetParameter(0,29.7); // MIP
-  }
-  return fProb;
+Double_t St_TpcdEdxModelC::Derivative(Double_t Np, Int_t k) {
+  // Most Probable log (ne/Np) versus log of Np
+  if (Np <= 1.0) return 0;
+  Double_t X = TMath::Log(Np);
+  return instance()->CalcXDerivative(k, X);
 }
 //________________________________________________________________________________
 #include "St_TpcPadPedRMSC.h"
