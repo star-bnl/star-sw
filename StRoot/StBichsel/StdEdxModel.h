@@ -11,6 +11,8 @@
 #include "TString.h"
 #include "TF1.h"
 class StdEdxModel {
+  // Np = no. of primary clusters
+  // ne == n = no. of conductining electorns
  public: 
   enum ETpcType  {kTpcOuter = 0, kTpcInner = 1, kTpcAll};
   enum EValType  {kProb, kdProbdX, kdProbdY};
@@ -20,16 +22,37 @@ class StdEdxModel {
   static TH1D         *GetdNdx()       {return    mdNdx;}       // dN/dx versus beta*gamma
   static Double_t      gausw(Double_t *x, Double_t *p); // vesus ksi, w, alpha
   static Double_t      ggaus(Double_t *x, Double_t *p);  // versus mu, sigm, alpha
+  static Double_t      gausexp(Double_t *x, Double_t *); // versus mu, sigma, k 
   static Double_t      dNdx(Double_t poverm, Double_t charge = 1.0);
   static TF1          *GGaus() {return fGGaus;}
+  static TF1          *GausExp() {return fGausExp;}
+  static Double_t E(Double_t ne) {return GeVperElectron*ne;} // deposited energy GeV from ne
+  static Double_t n(Double_t e) {return e/GeVperElectron;}   // ne  from energy (GeV)
+  static Double_t LogE(Double_t Logne) {return LogGeVperElectron  + Logne;} // deposited energy GeV from ne
+  static Double_t Logne(Double_t LogE) {return LogE - LogGeVperElectron;}   // ne  from energy (GeV)
+  static void Parameters(Double_t Np, Double_t *pars, Double_t *derivatives = 0); 
+  static Double_t Derivative(Double_t Np, Int_t k = 0) {return 0;}
+  static Double_t Parameter(Double_t Np, Int_t k = 0);
+  static Double_t Mu(Double_t Np)    {return  Parameter(Np, 0);} // Most Probable log (ne/Np) versus Np
+  static Double_t Sigma(Double_t Np) {return  Parameter(Np, 1);} // RMS
+  static Double_t Alpha(Double_t Np) {return  Parameter(Np, 2);} // assymetry
+  static Double_t K(Double_t Np)     {return  Parameter(Np, 2);} // assymetry
+  static Double_t MuDeriv(Double_t Np)    {return  Derivative(Np, 0);} // Most Probable log (ne/Np) versus Np derivateive wrt log(Np)
+  static Double_t SigmaDeriv(Double_t Np) {return  Derivative(Np, 1);} // RMS       -"-
+  static Double_t AlphaDeriv(Double_t Np) {return  Derivative(Np, 2);} // assymetry -"-
+  static Double_t LogdEMPV(Double_t Np)   {return LogE(Mu(Np) + TMath::Log(Np));} // 
+  static Double_t Prob(Double_t ee, Double_t Np); // probability for give log(ne/Np) versus Np
  private:
   static StdEdxModel *fgStdEdxModel; //! last instance          
+  static Double_t GeVperElectron;
+  static Double_t LogGeVperElectron;
   StdEdxModel();
   static TH1D         *mdNdxL10;    // dN/dx versus log10(beta*gamma)
   static TH1D         *mdNdx;       // dN/dx versus beta*gamma
   static Double_t      fScale;
   static Int_t        _debug;
   static TF1          *fGGaus;        
+  static TF1          *fGausExp;        
   ClassDef(StdEdxModel,0)
 };
 #endif
