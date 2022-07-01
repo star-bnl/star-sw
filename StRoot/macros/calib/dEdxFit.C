@@ -2141,6 +2141,7 @@ TF1 *CrystalBall() {
   //  f->SetParLimits(3,-0.1,4.0);
   return f;
 }
+#if 0
 //--------------------------------------------------------------------------------
 Double_t gausexp(Double_t *x, Double_t *p) {
   // Souvik Das, "A simple alternative to the Crystal Ball function"
@@ -2182,15 +2183,20 @@ Double_t gausexp(Double_t *x, Double_t *p) {
   Double_t N = (D + C)*sigma;
   return TMath::Exp(normL)*V/N;
 }
+#endif
 //________________________________________________________________________________
 TF1 *GausExp() {
   static TF1 *f = 0;
   if (! f) {
-    f = new TF1("GausExp",gausexp,-5,5,4);
-    f->SetParNames("norl","mu","sigma","k");
-    f->SetParLimits(3,1,5);
+    f = new TF1("GausExp",StdEdxModel::gausexp,-5,15,5);
+    f->SetLineColor(2);
+    f->SetParNames("norl","mu","sigma","k","l");
+    f->SetParLimits(1,2.,5.);
+    f->SetParLimits(2,0.05,1.0);
+    f->SetParLimits(3,0.01,2.0);
+    f->SetParameters(0.0,0.0,1,2,0);
   }
-  f->SetParameters(0,0.0,1,2);
+  f->FixParameter(4,0);
   //  f->SetParLimits(1,0.6,1.0);
   //  f->SetParLimits(3,-0.1,4.0);
   return f;
@@ -2296,6 +2302,7 @@ TF1 *FitGG(TH1 *proj, Option_t *opt="RQ") {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *g = GG();
+  g->SetParameters(0,4,1,10,0);
   proj->Fit(g,opt);
   return g;
 }
@@ -2320,19 +2327,33 @@ TF1 *FitGE2(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0) {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *g = GausExp();
-  static Double_t parsk[6] = {    2.3604,   -0.60483,   -0.63702,    0.36249,    0.11801,  -0.059348};
-  Double_t X = TMath::Log(fitX);
-  static TF1 *pol5 = 0;
-  if (! pol5) {
-    pol5 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol5");
-    if (! pol5) {
-      TF1::InitStandardFunctions();
-      pol5 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol5");
+  Double_t k = 6.70823e-01;
+  if (fitX > 2) {
+    static Double_t parsk[7] = {    -8.959,     13.454,    -6.6549,     1.6064,   -0.20527,     0.0133, -0.00034269};
+    static TF1 *pol6 = 0;
+    Double_t X = fitX;
+    if (! pol6) {
+      pol6 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol6");
+      if (! pol6) {
+	TF1::InitStandardFunctions();
+	pol6 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol6");
+      }
+    }
+    Double_t k = pol6->EvalPar(&X, parsk);
+  }
+  g->SetParameter(1,proj->GetMean());
+  g->SetParameter(2,proj->GetRMS());
+  g->FixParameter(3, k);
+  Int_t status = proj->Fit(g,opt);
+  if (status) {
+    g->SetParameter(1,proj->GetMean());
+    g->SetParameter(2,proj->GetRMS());
+    g->FixParameter(3, k);
+    status = proj->Fit(g,opt);
+    if (status) {
+      cout << "Failed 2-nd time" << endl;
     }
   }
-  Double_t k = pol5->EvalPar(&X, parsk);
-  g->FixParameter(3, k);
-  proj->Fit(g,opt);
   return g;
 }
 //________________________________________________________________________________
@@ -2340,23 +2361,38 @@ TF1 *FitGE3(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0) {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *g = GausExp();
-  static Double_t parsk[6]    = {    2.3604,   -0.60483,   -0.63702,    0.36249,    0.11801,  -0.059348};
-  static Double_t parSigma[6] = {    1.0032,    0.10447,  -0.070332,   -0.16418,    0.14711,    -0.0316};
-  if (fitX < 0.5) fitX = 0.5;
-  Double_t X = TMath::Log(fitX);
-  static TF1 *pol5 = 0;
-  if (! pol5) {
-    pol5 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol5");
-    if (! pol5) {
+  static TF1 *pol6 = 0;
+  static TF1 *pol2 = 0;
+  if (! pol6) {
+    pol6 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol6");
+    pol2 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol2");
+    if (! pol6) {
       TF1::InitStandardFunctions();
-      pol5 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol5");
+      pol6 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol6");
+      pol2 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol2");
     }
   }
-  Double_t k = pol5->EvalPar(&X, parsk);
+  Double_t k = 6.70823e-01;
+  if (fitX > 2) {
+    static Double_t parsk[7] = {    -8.959,     13.454,    -6.6549,     1.6064,   -0.20527,     0.0133, -0.00034269};
+    k = pol6->EvalPar(&fitX, parsk);
+  }
+  Double_t pars6Sig[7] = {   0.82995,   0.033141,   -0.36552,   -0.18875,     0.2694,  -0.073444,  0.0038834};
+  Double_t X = TMath::Log(fitX);
+  Double_t sigma = pol6->EvalPar(&X, pars6Sig);
   g->FixParameter(3, k);
-  Double_t sigma = pol5->EvalPar(&X,parSigma);
   g->FixParameter(2, sigma);
-  proj->Fit(g,opt);
+  g->SetParameter(1,proj->GetMean());
+  Int_t status = proj->Fit(g,opt);
+  if (status) {
+    g->SetParameter(1,proj->GetMean());
+    g->FixParameter(2, sigma);
+    g->FixParameter(3, k);
+    status = proj->Fit(g,opt);
+    if (status) {
+      cout << "Failed 2-nd time" << endl;
+    }
+  }
   return g;
 }
 //________________________________________________________________________________
@@ -2364,26 +2400,45 @@ TF1 *FitGE4(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0) {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *g = GausExp();
-  static Double_t parsk[6]    = {    2.3604,   -0.60483,   -0.63702,    0.36249,    0.11801,  -0.059348};
-  static Double_t parSigma[6] = {    1.0032,    0.10447,  -0.070332,   -0.16418,    0.14711,    -0.0316};
-  static Double_t parsMu[6]   = { 0.0098068,  -0.024598,   0.036548,    -0.0916,   0.057158,  -0.010253};
-  if (fitX < 0.5) fitX = 0.5;
-  Double_t X = TMath::Log(fitX);
-  static TF1 *pol5 = 0;
-  if (! pol5) {
-    pol5 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol5");
-    if (! pol5) {
+  static TF1 *pol6 = 0;
+  static TF1 *pol2 = 0;
+  if (! pol6) {
+    pol6 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol6");
+    pol2 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol2");
+    if (! pol6) {
       TF1::InitStandardFunctions();
-      pol5 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol5");
+      pol6 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol6");
+      pol2 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol2");
     }
   }
-  Double_t k = pol5->EvalPar(&X, parsk);
+  Double_t k = 6.70823e-01;
+  if (fitX > 2) {
+    static Double_t parsk[7] = {    -8.959,     13.454,    -6.6549,     1.6064,   -0.20527,     0.0133, -0.00034269};
+    k = pol6->EvalPar(&fitX, parsk);
+  }
+  Double_t pars6Sig[7] = {   0.82995,   0.033141,   -0.36552,   -0.18875,     0.2694,  -0.073444,  0.0038834};
+  Double_t X = TMath::Log(fitX);
+  Double_t sigma = pol6->EvalPar(&X, pars6Sig);
+  //  Double_t parsMu1[7] = {    3.0608,    0.04283,    -0.9276,    0.99929,  -0.058499,   -0.22824,    0.06416};
+  //  Double_t parsMu2[7] = {   0.33622,     3.2863,    -1.3061,    0.27857,  -0.032664,  0.0019921, -4.944e-05};
+  Double_t parsMu1[7] = {    3.0767,  -0.054267,   -0.69433,    0.71462,    0.12861,   -0.29135,   0.072728};
+  Double_t parsMu2[7] = {   0.33622,     3.2863,    -1.3061,    0.27857,  -0.032664,  0.0019922, -4.944e-05};
+  Double_t mu = 0;
+  if (fitX < 2) mu = pol6->EvalPar(&fitX, parsMu1);
+  else          mu = pol6->EvalPar(&fitX, parsMu2);
   g->FixParameter(3, k);
-  Double_t sigma = pol5->EvalPar(&X,parSigma);
   g->FixParameter(2, sigma);
-  Double_t mu = pol5->EvalPar(&X,parsMu);
   g->FixParameter(1, mu);
-  proj->Fit(g,opt);
+  Int_t status = proj->Fit(g,opt);
+  if (status) {
+    g->FixParameter(1,mu);
+    g->FixParameter(2, sigma);
+    g->FixParameter(3, k);
+    status = proj->Fit(g,opt);
+    if (status) {
+      cout << "Failed 2-nd time" << endl;
+    }
+  }
   return g;
 }
 //________________________________________________________________________________
@@ -4103,16 +4158,19 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
   Double_t params[20] = {0};
   TH1 *proj = 0;
   TF1 *g = 0;
-  Int_t ix1 = ix, jy1 = jy;
-  if (ix > 0) nx = ix;
-  if (jy > 0) ny = jy;
-  if (ix1 < 0) ix1 = 0;
-  if (jy1 < 0) jy1 = 0;
-  for (int i=ix1;i<=nx-mergeX+1;i++){
+  Int_t ix1 = 0;
+  Int_t ix2 = nx-mergeX+1;
+  Int_t jy1 = 0;
+  Int_t jy2 = ny-mergeY+1;
+  if (ix > 0) {ix1 = ix2 = ix;
+    if (ny == 1) jy1 = jy2 = 1;
+  }
+  if (jy > 0) {jy1 = jy2 = jy;}
+  for (int i=ix1;i<=ix2;i++){
     Int_t ir0 = i;
     Int_t ir1=i+mergeX-1;
     if (i == 0) {ir0 = 1; ir1 = nx;}
-    for (int j=jy1;j<=ny-mergeY+1;j++){
+    for (int j=jy1;j<=jy2;j++){
       Int_t jr0 = j;
       Int_t jr1 = j+mergeY-1;
       if (j == 0) {jr0 = 1; jr1 = ny;}
