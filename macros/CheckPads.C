@@ -1,3 +1,4 @@
+//   root.exe D/*/*20057003*.root 'CheckPads.C+(1)'
 /*
   cd ~/work/dEdx/RunXXII02
   foreach f ( `ls -1d   pp500_2022/hlt_2*.root` )  
@@ -92,6 +93,7 @@ end
 #include "TProfile3D.h"
 #include "TLegend.h"
 #include "TCanvas.h"
+#include "TIterator.h"
 #endif
 struct rowpadFEEmap_t {// FEE & RDO map for iTPC
   Int_t row, padMin, padMax, fee, rdo;
@@ -377,10 +379,28 @@ void CheckPads(Int_t sector = 0) {
     114,116,118,120,122,122,124,126,128,128,
     130,132,134,136,138,138,140,142,144,144,
     144,144};
+  // Merge files if any
   TH3F *AlivePads = (TH3F *) gDirectory->Get("AlivePads");
   if (! AlivePads) {cout << "AlivePads is missing" << endl; return;}
   TProfile3D *ActivePads = (TProfile3D *) gDirectory->Get("ActivePads");
   if (! ActivePads) {cout << "ActivePads is missing" << endl; return;}
+  TSeqCollection *files = gROOT->GetListOfFiles();
+  Int_t nn = files->GetSize();
+  if (nn > 1) {
+    cout << "Merge " << nn << " files" << endl;
+    TDirectory *savedir = gDirectory;
+    TFile *f = 0;
+    Int_t i = 0; 
+    TIter next(files);
+    while ( (f = (TFile *) next()) ) { 
+      i++;
+      if (i == nn) break;
+      TH3F *alivePads = (TH3F *) f->Get("AlivePads");
+      if (alivePads) AlivePads->Add(alivePads);
+      TProfile3D *activePads = (TProfile3D *) f->Get("ActivePads");
+      if (activePads) ActivePads->Add(activePads);
+    }
+  }
   TString Dir(gSystem->BaseName(gDirectory->GetName()));
   Dir.ReplaceAll("hlt_","");
   Int_t index = Dir.Index("_");
@@ -463,6 +483,7 @@ void CheckPads(Int_t sector = 0) {
       c1->cd(1); ActivePads->GetXaxis()->SetRange(s,s); ActivePads->Project3D(Form("yz_%i",s))->Draw("colz");
       c1->cd(2); AlivePads->GetXaxis()->SetRange(s,s); AlivePads->Project3D(Form("yz_%i",s))->Draw("colz");
       c1->Update();
+      c1->SaveAs(Form("%s_%i.png",Run.Data(),sector);
     }
   }
 }

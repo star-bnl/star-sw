@@ -1,18 +1,26 @@
 /*  Compare dE/dx distributions from Bichsel with dN/dx parameerizations
-    root.exe lBichsel.C 'lDb.C(0,0)' dNdxFunc.C
+    root.exe lBichsel.C dNdxFunc.C
 */
+#include "TMath.h"
+#include "TF1.h"
+#include "StBichsel/StdEdxModel.h"
+#include "StBichsel/Bichsel.h"
+#include "TLegend.h"
+#include "TCanvas.h"
+Bichsel *m_Bichsel = 0;
+
 //________________________________________________________________________________
-Double_t *zMP(Double_t *x, Double_t *p) {
+Double_t zMP(Double_t *x, Double_t *p) {
   Double_t log10bg = x[0];
   Double_t pOverM  = TMath::Power(10., log10bg);
   Double_t log2dx  = p[0];
   Double_t dx      = TMath::Power( 2., log2dx);
   Double_t dNdx = StdEdxModel::instance()->dNdx(pOverM);
   Double_t Np = dNdx*dx;
-  Double_t mu = St_TpcdEdxModelC::instance()->Mu(Np); 
-  Double_t ne  = Np*TMath::Exp(mu);
-  Double_t dEdx  = St_TpcdEdxModelC::instance()->E(ne)/dx;
-  return TMath::Log(1e6*dEdx);// - Bichsel::Instance()->Parameterization()->MostProbableZShift();
+  Double_t mu = StdEdxModel::instance()->Mu(Np); 
+  Double_t dEdx  = dNdx*TMath::Exp(mu);
+  Double_t shift = TMath::Log(1e-3) + m_Bichsel->MostProbableZShift() - 7.26742600141722234e-02;
+  return shift + TMath::Log(dEdx);// - m_Bichsel->Parameterization()->MostProbableZShift();
 }
 //________________________________________________________________________________
 TF1 *ZMP(Double_t log2dx = 1) {
@@ -27,7 +35,7 @@ TF1 *ZMP(Double_t log2dx = 1) {
 }
 //________________________________________________________________________________
 Double_t bichselZ(Double_t *x,Double_t *par) {
-  return Bichsel::Instance()->GetMostProbableZ(x[0],par[0]);
+  return m_Bichsel->GetMostProbableZ(x[0],par[0]);
 }
 //________________________________________________________________________________
 TF1 *ZMPB(Double_t log2dx = 1) {
@@ -41,13 +49,14 @@ TF1 *ZMPB(Double_t log2dx = 1) {
 }
 //________________________________________________________________________________
 void dNdxFunc(Double_t log2dx = 1) {
+  if (!m_Bichsel) m_Bichsel = Bichsel::Instance();
   TCanvas *c1 = new TCanvas("c1","c1");
   TLegend *l = new TLegend(0.4,0.6,0.8,0.9);
   TH1F *frame = c1->DrawFrame(-1,0.5,4,4.5);
-  for (Int_t color = 1; color < 6; color++) {
+  for (Int_t color = 1; color < 8; color++) {
     Double_t log2dx = color - 2;
     Double_t dx = TMath::Power(2.,log2dx);
-#if 0
+#if 1
     TF1 *fn = ZMP(log2dx);
     fn->SetLineColor(color);
     fn->SetMarkerColor(color);
@@ -68,7 +77,7 @@ void dNdxFunc(Double_t log2dx = 1) {
 Double_t checkParameters(Double_t *x, Double_t *p) {
   Double_t X = TMath::Exp(x[0]);
   Int_t k = p[0];
-  return St_TpcdEdxModelC::instance()->Parameter(X, k);
+  return StdEdxModel::instance()->Parameter(X, k);
     }
 //________________________________________________________________________________
 TF1 *CheckParameters(Int_t k = 0) {
