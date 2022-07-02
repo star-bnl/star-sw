@@ -29,6 +29,7 @@ if __name__ == "__main__":
     parser.add_argument("jobid")
     parser.add_argument("-d", "--description", default=False, action="store_true", help="Print job description")
     parser.add_argument("-c", "--command",     default=False, action="store_true", help="Print command")
+    parser.add_argument("-a", "--attribute",   default='', choices=JobInfo._fields + ('fullpath', ), help="Print job's attribute")
     args = parser.parse_args()
 
     joblist_file = os.path.join(os.path.dirname(__file__), "joblist.json")
@@ -40,3 +41,8 @@ if __name__ == "__main__":
         if job.jobid != args.jobid: continue
         if args.description: print("{descr}".format(**job._asdict())) 
         if args.command:     print("root4star -b -q -l \'bfc.C({nevents}, \"{chopts}\", \"{inppath}/{inpfile}\")\'".format(**job._asdict()))
+        if args.attribute:
+            if args.attribute == 'fullpath':
+                print("{}/{}".format(job.inppath, job.inpfile))
+            else:
+                print(job._asdict()[args.attribute])
