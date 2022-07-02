@@ -17,10 +17,9 @@ Double_t zMP(Double_t *x, Double_t *p) {
   Double_t dx      = TMath::Power( 2., log2dx);
   Double_t dNdx = StdEdxModel::instance()->dNdx(pOverM);
   Double_t Np = dNdx*dx;
-  Double_t mu = StdEdxModel::instance()->Mu(Np); 
-  Double_t dEdx  = dNdx*TMath::Exp(mu);
-  Double_t shift = TMath::Log(1e-3) + m_Bichsel->MostProbableZShift() - 7.26742600141722234e-02;
-  return shift + TMath::Log(dEdx);// - m_Bichsel->Parameterization()->MostProbableZShift();
+  Double_t dEkeVLog = StdEdxModel::instance()->LogdEMPVkeV(Np); 
+  Double_t dEdxLog  = dEkeVLog - TMath::Log(dx);
+  return   dEdxLog;
 }
 //________________________________________________________________________________
 TF1 *ZMP(Double_t log2dx = 1) {

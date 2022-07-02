@@ -8,6 +8,7 @@
 #include "TSystem.h"
 #include "TMath.h"
 #include "StdEdxModel.h"
+#include "Bichsel.h"
 //#include "StMessMgr.h" 
 using namespace std;
 ClassImp(StdEdxModel)
@@ -18,8 +19,13 @@ Double_t      StdEdxModel::fScale = 1; //TMath::Exp(9.12015e-02); // Bichsel
 Int_t         StdEdxModel::_debug   = 1;
 TF1          *StdEdxModel::fGGaus = 0;
 TF1          *StdEdxModel::fGausExp = 0;
+
+Double_t      StdEdxModel::shift2keV = 0;
+Double_t      StdEdxModel::shift2GeV = 0;
+Double_t      StdEdxModel::shift2eV = 0;
 Double_t StdEdxModel::GeVperElectron               = 43.5e-9;  //39.41e-9;  // 24.95e-9; // deposited energy per conducting electron 
 Double_t StdEdxModel::LogGeVperElectron = TMath::Log(43.5e-9); //39.41e-9); // TMath::Log(24.95e-9);
+
 //________________________________________________________________________________
 StdEdxModel* StdEdxModel::instance() {
   if (! fgStdEdxModel) new StdEdxModel();
@@ -55,6 +61,9 @@ StdEdxModel::StdEdxModel() {
   fGausExp->SetParNames("NormL","mu","sigma","k","l");
   fGausExp->SetParameters(0,0,0.3,5.,0);
   fGausExp->FixParameter(4,0.0);
+  shift2eV  = Bichsel::Instance()->MostProbableZShift() - 7.26742600141722234e-02;
+  shift2keV = TMath::Log(1e-3) + shift2eV;
+  shift2GeV = TMath::Log(1e-9) + shift2eV;
 }
 //________________________________________________________________________________
 StdEdxModel::~StdEdxModel() {
