@@ -1545,10 +1545,11 @@ StETofGeometry::readAlignmentDatabase(){
     float tempZ;
 
     for( int iCounter = 0; iCounter < eTofConst::nCounters * eTofConst::nModules; iCounter++){
-        tempX = table[iCounter].detectorAlignX[0];
-        tempY = table[iCounter].detectorAlignY[0];
-        tempZ = table[iCounter].detectorAlignZ[0];
+        tempX = table->detectorAlignX[iCounter];
+        tempY = table->detectorAlignY[iCounter];
+        tempZ = table->detectorAlignZ[iCounter];
         StThreeVectorD counterAlignmentParameter = StThreeVectorD( tempX, tempY, tempZ );
         mAlignmentParameters.push_back( counterAlignmentParameter );
+        //LOG_INFO <<" Setting alignment parameters for counter "<< iCounter << " X: "<< tempX << " Y: "<< tempY <<" Z: "<< tempZ << endm;
     }
 }

@@ -306,7 +306,7 @@ StETofMatchMaker::InitRun( Int_t runnumber )
 
         if( !gGeoManager ) {
             LOG_ERROR << "Cannot get GeoManager" << endm;
-            return kStErr;
+            return kStFatal;
         }
 
         LOG_DEBUG << " gGeoManager: " << gGeoManager << endm;
@@ -316,7 +316,7 @@ StETofMatchMaker::InitRun( Int_t runnumber )
 
     if( mETofGeom && !mETofGeom->isInitDone() ) { //if initialization attempt above failed.
        LOG_ERROR << "Initialization of StEtofGeometry failed" << endm;
-       return kStErr;
+       return kStFatal;
 	 }
 
     if( mDoQA ) {
