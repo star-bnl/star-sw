@@ -75,7 +75,8 @@ jobs:
       - run: |
              TEST_FILE=$(echo "$(docker run --rm ghcr.io/star-bnl/star-sw-${{ env.STARENV }} tests/executest.py ${{ matrix.test_id }} -a fullpath)" | sed -E 's/\.(daq|fzd)$/.event.root/')
              TEST_CMD="root4star -b -q -l 'StRoot/macros/analysis/doEvents.C(100, \"$TEST_FILE\")'"
-             docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} sh -c "$TEST_CMD"
+             docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
+               sh -c "set -e; $TEST_CMD 2>&1 | tee log;  grep '<StIOMaker::Finish> IO:' log"
 
   ROOT5_test_find_vertex:
     runs-on: ubuntu-latest
@@ -98,7 +99,7 @@ jobs:
              TEST_FILE=$(echo "$(docker run --rm ghcr.io/star-bnl/star-sw-${{ env.STARENV }} tests/executest.py ${{ matrix.test_id }} -a fullpath)" | sed -E 's/\.(daq|fzd)$/.event.root/')
              TEST_CMD="root4star -b -q -l 'StRoot/macros/analysis/find_vertex.C(\"$TEST_FILE\")'"
              docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
-               sh -c "set -e; $TEST_CMD 2>&1 | tee log;  grep 'This is the end of STAR ROOT -- Goodbye' log"
+               sh -c "set -e; $TEST_CMD 2>&1 | tee log;  grep '<StIOMaker::Finish> IO:' log"
 
   ROOT6_test_ignore_fail:
     runs-on: ubuntu-latest
