@@ -3,7 +3,7 @@ use File::Basename;
 use Cwd;
 use Env;
 use lib "/net/l402/data/fisyak/STAR/packages/.DEV2/bin";#$ENV{ConstructLocation}; 
-use RunXXDefs;
+use RunXXIIDefs;
 my $pwd = cwd();
 #my $day = File::Basename::basename(File::Basename::dirname($pwd));
 #my $run =  File::Basename::basename($pwd);
@@ -32,11 +32,12 @@ sub PrintHash($$) {
 #    if ($env->{$key}->{trig} !~ /GeV/) {next;}
 #    if ($env->{$key}->{trig} =~ /fixed/) {next;}
     if ($env->{$key}->{trig} =~ /Cosmic/) {next;}
+    if ($env->{$key}->{trig} =~ /tune/) {next;}
     if ($env->{$key}->{trig} eq $oldTrig) {next;}
     $oldTrig = $env->{$key}->{trig};
 #    print "{ $key }\t=> {'$env->{$key}->{trig}', \tfield=>`$env->{$key}->{field}',\tfirst=>'$env->{$key}->{first}', \tlast=>'$env->{$key}->{last}', \tbeginTime=>'$env->{$key}->{beginTime}'\n";
 #    printf("%-20s %s\n",$env->{$key}->{trig},$env->{$key}->{beginTime});
-#    printf("ln -sf TpcSecRowB.%-40s  TpcSecRowB.%s\n",$env->{$key}->{trig} . "_2020.C",$env->{$key}->{beginTime} . ".C");
+#    printf("ln -sf TpcSecRowB.%-40s  TpcSecRowB.%s\n",$env->{$key}->{trig} . ".C",$env->{$key}->{beginTime} . ".C");
 #   Add a second
     my ($d,$t) = split /\./, $env->{$key}->{beginTime}; # print "$env->{$key}->{beginTime} ->d = $d, t = $t\n";
     my $s = $t%100;
@@ -45,8 +46,8 @@ sub PrintHash($$) {
     $s++;
     if ($s >= 60) {$s = 0; $m++;}
     if ($m >= 60) {$m = 0; $h++;}
-#    printf("ln -sf TpcSecRowB.%-40s  TpcSecRowB.%08i.%06i.C\n",$env->{$key}->{trig} . "_2019.C",$d,$t+1);
-    printf("ln -sf TpcSecRowB.%-40s  TpcSecRowB.%08i.%02i%02i%02i.C \# %s \n",$env->{$key}->{trig} . "_2020.C",$d,$h,$m,$s, $env->{$key}->{beginTime});
+#    printf("ln -sf TpcSecRowB.%-40s  TpcSecRowB.%08i.%06i.C\n",$env->{$key}->{trig} . ".C",$d,$t+1);
+    printf("ln -sf TpcSecRowB.%-40s  TpcSecRowB.%08i.%02i%02i%02i.C \# %s \n",$env->{$key}->{trig} . "_2022.C",$d,$h,$m,$s, $env->{$key}->{beginTime});
 #      my $fileN = $TableName . "." . $env->{$key}->{trig} . ".C";
 #      if (-r $fileN) {
 #        my $fileT = $TableName . "." .  $env->{$key}->{beginTime} . ".C";

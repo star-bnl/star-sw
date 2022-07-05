@@ -514,7 +514,7 @@
 # RunXXII
 #root.exe -q -b SecRow3GFRunXXII02.root  'MakeTpcSecRowB.C(20211110,2,"TpcSecRowB",0)' >& MakeTpcSecRowB.20211110,2.log
 # RunXIX - XXII
-foreach f (`ls -1d SecRow3G*.root`) 
+foreach f (`ls -1d SecRow3+SecRow3PG4E*.root`) 
     set b = `echo ${f} | sed -e 's/SecRow3GF//' -e 's/\.root//'`
     root.exe -q -b  ${f} 'MakeTpcSecRowB.C(20350101,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
     mv TpcSecRowB.20350101.000001.root TpcSecRowB.${b}.root

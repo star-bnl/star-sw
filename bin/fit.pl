@@ -14,6 +14,7 @@ my @histNF = ();
 my @histXF = ();
 my @histADC = ();
 my @histG4F = ();
+my @histG4E = ();
 my @rootfiles = ();
 my $all = 0;
 #my $all = 1;
@@ -42,7 +43,7 @@ foreach my $arg (@ARGV) {
 #   my @opt = qw (ADC);
 #  print "histADC = @histADC\n";
 ################################################################################
- if (! $all and $#histGF < 0 and $#histG4F < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 and $#histADC < 0) {
+ if (! $all and $#histGF < 0 and $#histG4F < 0  and $#histG4E < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 and $#histADC < 0) {
    @histGF = qw(
  	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
  	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
@@ -66,7 +67,15 @@ foreach my $arg (@ARGV) {
  #		ppmOxygenInP  inputGasTemperatureP 
  #		percentMethaneInP percentMethaneInPA percentMethaneInPC
  #		ppmWaterOutP ppmWaterOutPA ppmWaterOutPC
-   @histG4F = qw(
+#    @histG4F = qw(
+#  	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
+#  	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
+# 	       SecRow3 SecRow3C
+# 	       SecRow3P SecRow3PC
+#   	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
+# 	       dX3 dX3C
+#  	     );
+   @histG4E = qw(
  	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
  	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
 	       SecRow3 SecRow3C
@@ -100,17 +109,18 @@ foreach my $arg (@ARGV) {
  #	      );
  #  @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N SecRow3PN dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
    #  @histXF = @histNF;
-   @opt = qw (GF G4F GP NF);# XF);# RL5);
+   @opt = qw (GF G4F G4E GP NF);# XF);# RL5);
  }
 print "fit.pl for  @rootfiles \n"; 
 if ($#histGF >= 0) {print " with GF: @histGF \n";}
 if ($#histG4F >= 0) {print " with G4F: @histG4F \n";}
+if ($#histG4E >= 0) {print " with G4E: @histG4E \n";}
 if ($#histGP >= 0) {print " with GP: @histGP \n";}
 if ($#histRL5 >= 0){print " with RL5:@histRL5\n";}
 if ($#histNF >= 0) {print " with NF: @histNF \n";}
 if ($#histXF >= 0) {print " with NF: @histXF \n";}
 exit if $#rootfiles < 0;
-#my @opt = qw (GF G4F  GP NF);# XF);# RL5);
+#my @opt = qw (GF G4F G4E  GP NF);# XF);# RL5);
 my $XML = "fit.xml";
 open (XML,">$XML") or die "Can't open $XML";
 print XML '<?xml version="1.0" encoding="utf-8" ?>
@@ -131,6 +141,7 @@ foreach my $rootfile (@rootfiles) {
     elsif ($fitype eq 'ADC') {@histos = @histADC;}
     elsif ($fitype eq 'GF') {@histos = @histGF;}
     elsif ($fitype eq 'G4F') {@histos = @histG4F;}
+    elsif ($fitype eq 'G4E') {@histos = @histG4E;}
     elsif ($fitype eq 'RL5'){@histos = @histRL5;}
     elsif ($fitype eq 'NF') {
       @histos = @histNF; 
