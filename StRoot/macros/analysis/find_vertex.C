@@ -23,6 +23,8 @@ class StChain;
 class StMinuitVertexFinder;
 class StGenericVertexFinder;
 class StGenericVertexMaker;
+class StEvent;
+class StPrimaryVertex;
 
 StChain *chain=0;
 TH1F *dca_z_h=0;
@@ -122,6 +124,7 @@ void find_vertex(char * fname="high_053/st_physics_6053108_raw_2020002.event.roo
  
   gSystem->Load("Sti");
   gSystem->Load("libStEEmcUtil");
+  gSystem->Load("libMinuit");
   gSystem->Load("StGenericVertexMaker");
   
   TFile *fout = new TFile("vtx_tree.root","RECREATE");
