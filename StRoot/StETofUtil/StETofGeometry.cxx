@@ -581,6 +581,11 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins = ini
         readAlignmentDatabase();
     }
 
+    if( mAlignmentParameters.size() != eTofConst::nCounters * eTofConst::nModules ){
+        LOG_ERROR << "StETofGeometry::Init(...) - Wrong size of counter alignment vector. Either incomplete alignment file or non-existant database table." << endm;
+        return;
+    }
+
      int iCounterAlignment = 0;
     // loop over sectors
     for( int sector = eTofConst::sectorStart; sector <= eTofConst::sectorStop; sector++ ) {
@@ -635,13 +640,8 @@ StETofGeometry::init( TGeoManager* geoManager, const double* safetyMargins = ini
                 LOG_DEBUG << activeVolume->GetDX() << "  " << activeVolume->GetDY() << "  " << activeVolume->GetDZ() << endm;
 
                 int counterId = counter - eTofConst::counterStart;
-                if( mAlignmentParameters.size() == 108 ){ //alignment parameters for all counters available
-                    mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins, mAlignmentParameters.at(iCounterAlignment) );
-                    iCounterAlignment++;
-                } else {
-                    mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins );
-                }
-
+                mETofModule[ mNValidModules-1 ]->addCounter( *gpNode, dx, dy, moduleId, counterId, safetyMargins, mAlignmentParameters.at(iCounterAlignment) );
+                iCounterAlignment++;
             } // end of loop over counters
 
         } // end of loop over planes
@@ -683,6 +683,7 @@ StETofGeometry::reset()
     LOG_INFO << "StETofGeometry cleared up ...." << endm;
 
     mNValidModules = 0;
+    mAlignmentParameters.clear();
     mInitFlag = false;
 
     mStarBField = nullptr;
@@ -1526,6 +1527,10 @@ StETofGeometry::readAlignmentDatabase(){
     //add check for no alignment set here.
 
     TDataSet* dbDataSet = StMaker::GetChain()->GetDataBase("Geometry/etof/etofAlign");
+    if( !dbDataSet ) {
+        LOG_ERROR << "unable to get the dataset from the database" << endm;
+        return;
+    }
 
     St_etofAlign* etofAlign = static_cast< St_etofAlign * > ( dbDataSet->Find( "etofAlign" ) );
     if( !etofAlign ) {
@@ -1539,11 +1544,12 @@ StETofGeometry::readAlignmentDatabase(){
     float tempY;
     float tempZ;
 
-    for( int iCounter = 0; iCounter < eTofConst::nCounters; iCounter++){
-        tempX = table[iCounter].detectorAlignX[0];
-        tempY = table[iCounter].detectorAlignY[0];
-        tempZ = table[iCounter].detectorAlignZ[0];
+    for( int iCounter = 0; iCounter < eTofConst::nCounters * eTofConst::nModules; iCounter++){
+        tempX = table->detectorAlignX[iCounter];
+        tempY = table->detectorAlignY[iCounter];
+        tempZ = table->detectorAlignZ[iCounter];
         StThreeVectorD counterAlignmentParameter = StThreeVectorD( tempX, tempY, tempZ );
         mAlignmentParameters.push_back( counterAlignmentParameter );
+        //LOG_INFO <<" Setting alignment parameters for counter "<< iCounter << " X: "<< tempX << " Y: "<< tempY <<" Z: "<< tempZ << endm;
     }
 }
