@@ -314,10 +314,10 @@ StETofMatchMaker::InitRun( Int_t runnumber )
         mETofGeom->init( gGeoManager, etofProjection::safetyMargins, mUseHelixSwimmer ); //provide backline to initiating maker to load DB tables
     }
 
-    if( mETofGeom && !mETofGeom->isInitDone() ) { //if initialization attempt above failed.
-       LOG_ERROR << "Initialization of StEtofGeometry failed" << endm;
-       return kStFatal;
-	 }
+    if ( mETofGeom && !mETofGeom->isInitDone() ) { //if initialization attempt above failed.
+        LOG_ERROR << "Initialization of StEtofGeometry failed" << endm;
+        return kStFatal;
+    }
 
     if( mDoQA ) {
         // for geometry debugging
