@@ -2449,7 +2449,9 @@ my $step = 0;
 #$hist = "RunXIX_XXII_18"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/02/22  - new dEdxModel
 #$hist = "RunXIX_XXII_18"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/AuAu200GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/02/22  - new dEdxModel
 #$hist = "RunXIX_XXII_19"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/AuAu200GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/03/22  - new TpcSecRowB
-$hist = "RunXIX_XXII_19"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/03/22  -  new TpcSecRowB
+#$hist = "RunXIX_XXII_19"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/19GeV_2019/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/03/22  -  new TpcSecRowB
+#$hist = "RunXIX_XXII_20"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/05/22  -  reset all tables: Redo ; TpcSecRowB, TpcAccumulatedQ, TpcZCorrectionC, TpcPadCorrectionMDF, TpcLengthCorrectionMDN
+$hist = "RunXIX_XXII_21"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/06/22  -  reset all tables: Redo ; TpcSecRowB, TpcAccumulatedQ, TpcZCorrectionC, TpcPadCorrectionMDF, TpcLengthCorrectionMDN Check linnks once again
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2650,7 +2652,7 @@ print XML '
 <!--
  <ResourceUsage>
     <Memory>
-      <MinMemory>1500</MinMemory>
+      <MinMemory>2500</MinMemory>
     </Memory>
   </ResourceUsage>
 -->

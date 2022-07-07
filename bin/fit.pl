@@ -44,14 +44,14 @@ foreach my $arg (@ARGV) {
 #  print "histADC = @histADC\n";
 ################################################################################
  if (! $all and $#histGF < 0 and $#histG4F < 0  and $#histG4E < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 and $#histADC < 0) {
-   @histGF = qw(
- 	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
- 	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
-	       SecRow3 SecRow3C
-	       SecRow3P SecRow3PC
-  	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
-	       dX3 dX3C
- 	     );
+#    @histGF = qw(
+#  	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
+#  	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
+# 	       SecRow3 SecRow3C
+# 	       SecRow3P SecRow3PC
+#   	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
+# 	       dX3 dX3C
+#  	     );
  # 	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
  #             nTbk3C nTbk3PC nTbk3C+nTbk3PC
  #             nPad3C nPad3PC nPad3C+nPad3PC
@@ -76,21 +76,22 @@ foreach my $arg (@ARGV) {
 # 	       dX3 dX3C
 #  	     );
    @histG4E = qw(
- 	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
- 	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
-	       SecRow3 SecRow3C
-	       SecRow3P SecRow3PC
-  	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
-	       dX3 dX3C
- 	     );
+	       SecRow3 SecRow3P SecRow3+SecRow3P  Z3 G3
+	       SecRow3C SecRow3PC SecRow3C+SecRow3PC Z3C G3C
+	     );
+#
+# 	       dX3 dX3C
+#
+# 	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
+# 	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
    @histRL5 = @histGF;
-   @histGP = qw (
- 		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
-		 TPoints70P TPointsFP TPoints70UP TPointsFUP  TPointsNP TPointsNUP 
- 		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
- 		 NPoints70 NPointsF NPoints70U NPointsFU  NPointsN NPointsNU
-		 NPoints70P NPointsFP NPoints70UP NPointsFUP  NPointsNP NPointsNUP 
-	       );
+ #   @histGP = qw (
+#  		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
+# 		 TPoints70P TPointsFP TPoints70UP TPointsFUP  TPointsNP TPointsNUP 
+#  		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
+#  		 NPoints70 NPointsF NPoints70U NPointsFU  NPointsN NPointsNU
+# 		 NPoints70P NPointsFP NPoints70UP NPointsFUP  NPointsNP NPointsNUP 
+# 	       );
 #   		 TPoints270+TPoints270P TPoints2F+TPoints2FP TPoints270U+TPoints270UP TPoints2FU+TPoints2FUP  TPoints2N+TPoints2NP TPoints2NU+TPoints2NUP
 #  		 TPoints270 TPoints2F TPoints270U TPoints2FU  TPoints2N TPoints2NU
 #  		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP

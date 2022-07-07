@@ -10,9 +10,9 @@ use Cwd;
 #my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha);
 #my @particles = qw(proton+ pionMIP);
 #my @particles = qw(pion+ pion-);
-my @particles = qw(electron-MIP electron+MIP pion+MIP pion-MIP kaon+MIP kaon-MIP proton+MIP proton-MIP deuteronMIP tritonMIP muon+MIP muon-MIP);
+#my @particles = qw(electron-MIP electron+MIP pion+MIP pion-MIP kaon+MIP kaon-MIP proton+MIP proton-MIP deuteronMIP tritonMIP muon+MIP muon-MIP);
 #my @particles = qw(tritonMIP muon+MIP muon-MIP);
-#my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha HE6 Li5 Li6 Li7 Be7 Be9 Be10 B11);
+my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha HE6 Li5 Li6 Li7 Be7 Be9 Be10 B11);
 foreach my $part (@particles) {
   my $i1 = 1;
   my $N =  200;# 00;
