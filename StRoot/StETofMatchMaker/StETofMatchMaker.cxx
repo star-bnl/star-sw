@@ -166,7 +166,7 @@ StETofMatchMaker::StETofMatchMaker( const char* name )
   mIsMuDstIn( false ),
   mOuterTrackGeometry( true ),
   mUseHelixSwimmer( false ),
-  mUseOnlyBTofHeaderStartTime( false ),
+  mUseOnlyBTofHeaderStartTime( true ),
   mIsSim( false ),
   mDoQA( false ),
   mDebug( false ),
@@ -306,12 +306,17 @@ StETofMatchMaker::InitRun( Int_t runnumber )
 
         if( !gGeoManager ) {
             LOG_ERROR << "Cannot get GeoManager" << endm;
-            return kStErr;
+            return kStFatal;
         }
 
         LOG_DEBUG << " gGeoManager: " << gGeoManager << endm;
 
         mETofGeom->init( gGeoManager, etofProjection::safetyMargins, mUseHelixSwimmer ); //provide backline to initiating maker to load DB tables
+    }
+
+    if ( mETofGeom && !mETofGeom->isInitDone() ) { //if initialization attempt above failed.
+        LOG_ERROR << "Initialization of StEtofGeometry failed" << endm;
+        return kStFatal;
     }
 
     if( mDoQA ) {
