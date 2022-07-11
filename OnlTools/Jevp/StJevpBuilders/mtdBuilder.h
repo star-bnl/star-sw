@@ -33,7 +33,7 @@ class mtdBuilder : public JevpBuilder {
  private:
 
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       // MTDhits histogram group
       TH2* hMTD_hitmap2D;

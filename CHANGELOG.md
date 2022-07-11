@@ -1,5 +1,37 @@
 # Changelog
 
+## SL22b_0 - 2022-06-22
+
+* sTGC offline reconstruction chain / makers by @jdbrice in  ([#287](https://github.com/star-bnl/star-sw/pull/287))
+* CODEOWNER update for StEvent/StETOF/EMC by @starsdong in  ([#334](https://github.com/star-bnl/star-sw/pull/334))
+* docker: install the same version of pyparsing as on SDCC by @veprbl in  ([#264](https://github.com/star-bnl/star-sw/pull/264))
+* Fixing pulser correction in production code by @PhilippWeidenkaff in  ([#335](https://github.com/star-bnl/star-sw/pull/335))
+* Avoid onldb master usage when possible by @genevb in  ([#336](https://github.com/star-bnl/star-sw/pull/336))
+* Fix the issues causing FST codes not running by @techuan-huang in  ([#338](https://github.com/star-bnl/star-sw/pull/338))
+* Gstar part updates by @klendathu2k in  ([#342](https://github.com/star-bnl/star-sw/pull/342))
+* eTOF Geometry changes based on technical drawings by @PhilippWeidenkaff in  ([#344](https://github.com/star-bnl/star-sw/pull/344))
+* CODEOWNERS: Remove inactive maintainers by @plexoos in  ([#347](https://github.com/star-bnl/star-sw/pull/347))
+* Enable shared linking of mysqlclient lib to root4stat by @plexoos in  ([#346](https://github.com/star-bnl/star-sw/pull/346))
+* adding etof-alignment table by @YannickSoehngen in  ([#348](https://github.com/star-bnl/star-sw/pull/348))
+* Add FST hits in MuDst by @techuan-huang in  ([#341](https://github.com/star-bnl/star-sw/pull/341))
+* ci: Bump versions of GitHub action by @plexoos in  ([#350](https://github.com/star-bnl/star-sw/pull/350))
+* Check for non-zero StEvent pointer before using it by @genevb in  ([#352](https://github.com/star-bnl/star-sw/pull/352))
+* Switch to single Dockerfile with matrix using ROOT5 and ROOT6 star-spack environments by @plexoos in  ([#349](https://github.com/star-bnl/star-sw/pull/349))
+* Build containers using star-spack environments by @plexoos in  ([#351](https://github.com/star-bnl/star-sw/pull/351))
+* Fix memory issue in destruction of StBTofGeometry by @genevb in  ([#355](https://github.com/star-bnl/star-sw/pull/355))
+* A small StFcsDb update by @akioogawa in  ([#354](https://github.com/star-bnl/star-sw/pull/354))
+* Bump base image to v0.1.5 + nitpicking by @plexoos in  ([#356](https://github.com/star-bnl/star-sw/pull/356))
+* Help cons figure out location of dependencies by @plexoos in  ([#357](https://github.com/star-bnl/star-sw/pull/357))
+* dEdx Run XXI calibrations (1st pass) by @fisyak in  ([#353](https://github.com/star-bnl/star-sw/pull/353))
+* bfc.C: fix for cling by @veprbl in  ([#278](https://github.com/star-bnl/star-sw/pull/278))
+* MuDst corruption fix by @jdbrice in  ([#360](https://github.com/star-bnl/star-sw/pull/360))
+* Refactor CI workflow files  by @plexoos in  ([#361](https://github.com/star-bnl/star-sw/pull/361))
+* ci: avoid a duplicate step in build-containers.yml by @veprbl in  ([#364](https://github.com/star-bnl/star-sw/pull/364))
+* Bump starenv to v0.1.6 with compiler as build argument by @plexoos in  ([#362](https://github.com/star-bnl/star-sw/pull/362))
+* Transfer documentation from star-git-tools by @plexoos in  ([#367](https://github.com/star-bnl/star-sw/pull/367))
+* genDst adaption for eTOF by @PhilippWeidenkaff in  ([#358](https://github.com/star-bnl/star-sw/pull/358))
+
+
 ## SL22a_0 - 2022-03-13
 
 ### Enhancements

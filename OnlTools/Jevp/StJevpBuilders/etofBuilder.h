@@ -56,7 +56,7 @@ class etofBuilder : public JevpBuilder {
     int disable_builder;
 
     union {
-      TH1* array[];
+      TH1* array[1];
       struct {
         TH1* nDigis;
         TH1* nDigisVsTofTrgMult;
@@ -92,7 +92,7 @@ class etofBuilder : public JevpBuilder {
     } contents;
     
     union {
-      TH1* array[];
+      TH1* array[1];
       struct {
         TH1* nMissingPulsersPerSide[ 12 ];
         TH1* triggerTimeDiffSectorsOverflow[ 11 ];

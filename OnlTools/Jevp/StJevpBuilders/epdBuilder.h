@@ -30,7 +30,7 @@ class epdBuilder : public JevpBuilder {
     int disable_builder;
 
     union {
-      TH1 *array[];
+      TH1 *array[1];
       struct {
 	TH2 *hDummyAdc[2]; // Dummy plot to hold the polar plot, without this polar cdt won't work
 	TProfile2D *hPolPlotAdc[2][2]; // 1st index for east or west, 2nd index: 0 for 1st ring, 1 for rest

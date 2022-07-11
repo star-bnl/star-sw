@@ -515,9 +515,8 @@ int StFcsDb::getDetFromName(const std::string& detname){
     else if( detname=="ES") {return 1;}
     else if( detname=="HN") {return 2;}
     else if( detname=="HS") {return 3;}
-    else if( detname=="HN") {return 4;}
-    else if( detname=="PN") {return 5;}
-    else if( detname=="PS") {return 6;}
+    else if( detname=="PN") {return 4;}
+    else if( detname=="PS") {return 5;}
     else {
 	LOG_ERROR << "ERROR:Invalid name for detector;Input:"<<detname<<endm;
 	return -1;
