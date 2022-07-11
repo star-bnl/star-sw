@@ -42,7 +42,7 @@ public:
  private:
 
   union {
-      TH1 *array[];
+      TH1 *array[1];
       
       struct {
 	  TH1* h76_zdc_time_east;

@@ -28,7 +28,7 @@ public:
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       // UPC_Zdc_HG
       TH1* h_zdce_sum;             // spectrum of ZDCE unattanuated sum

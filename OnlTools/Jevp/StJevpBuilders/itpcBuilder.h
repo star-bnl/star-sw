@@ -35,7 +35,7 @@ class itpcBuilder : public JevpBuilder {
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       //TH1 *itpc_occ_physics;
       //TH1 *h44_itpc_occ_laser;
@@ -132,7 +132,7 @@ class itpcBuilder : public JevpBuilder {
  
   // These are the cluster based versions of above...
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       TH1 *itpc_clpix_occ_physics;
       TH1 *itpc_clpix_occ_laser;
