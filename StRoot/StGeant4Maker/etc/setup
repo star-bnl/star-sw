@@ -1,0 +1,25 @@
+setup 64b
+
+module use /cvmfs/star.sdcc.bnl.gov/star-spack/spack/share/spack/modules/linux-rhel7-x86_64
+#module load root-6.24.00
+source /star/simu/simu/jwebb/ROOT/local/bin/thisroot.csh
+
+module load clhep-2.4.4.0
+module load geant4-10.4.0
+module load geant4-data-10.4.0
+
+# This for root 6.24
+#module load geant4-vmc-root-6.24.00
+
+setenv PATH ${PATH}:/star/simu/simu/jwebb/GEANT4VMC/bin:`root-config --bindir`
+setenv CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH}:/star/simu/simu/jwebb/GEANT4VMC:`root-config --prefix`
+setenv CPATH ${CPATH}:/star/simu/simu/jwebb/GEANT4VMC/include:`root-config --incdir`
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/star/simu/simu/jwebb/GEANT4VMC/lib64:`root-config --libdir`
+
+setenv STAR .
+
+
+
+
+
+
