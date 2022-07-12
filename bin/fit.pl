@@ -75,23 +75,25 @@ foreach my $arg (@ARGV) {
 #   	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
 # 	       dX3 dX3C
 #  	     );
-   @histG4E = qw(
-	       SecRow3 SecRow3P SecRow3+SecRow3P  Z3 G3
-	       SecRow3C SecRow3PC SecRow3C+SecRow3PC Z3C G3C
-	     );
+   @histG4E = qw(Z3+Z3P);
+#     @histG4E = qw(
+#  	       SecRow3+SecRow3P  Z3+Z3P 
+#  	       SecRow3C+SecRow3PC Z3C+Z3PC 
+#  	     );
 #
-# 	       dX3 dX3C
+# 	       dX3 dX3C G3+G3P G3C+G3PC
 #
 # 	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
 # 	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
    @histRL5 = @histGF;
- #   @histGP = qw (
-#  		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
-# 		 TPoints70P TPointsFP TPoints70UP TPointsFUP  TPointsNP TPointsNUP 
-#  		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
-#  		 NPoints70 NPointsF NPoints70U NPointsFU  NPointsN NPointsNU
-# 		 NPoints70P NPointsFP NPoints70UP NPointsFUP  NPointsNP NPointsNUP 
-# 	       );
+    @histGP = qw (
+  		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
+ 		 TPoints70P TPointsFP TPoints70UP TPointsFUP  TPointsNP TPointsNUP 
+  		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
+  		 NPoints70 NPointsF NPoints70U NPointsFU  NPointsN NPointsNU
+ 		 NPoints70P NPointsFP NPoints70UP NPointsFUP  NPointsNP NPointsNUP 
+  		 NPoints70+NPoints70P NPointsF+NPointsFP NPoints70U+NPoints70UP NPointsFU+NPointsFUP  NPointsN+NPointsNP NPointsNU+NPointsNUP
+ 	       );
 #   		 TPoints270+TPoints270P TPoints2F+TPoints2FP TPoints270U+TPoints270UP TPoints2FU+TPoints2FUP  TPoints2N+TPoints2NP TPoints2NU+TPoints2NUP
 #  		 TPoints270 TPoints2F TPoints270U TPoints2FU  TPoints2N TPoints2NU
 #  		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP
@@ -128,7 +130,7 @@ print XML '<?xml version="1.0" encoding="utf-8" ?>
 <job name="dEdxFit" maxFilesPerProcess="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
 	 <command>
 setup 64b
-setenv NODEBUG yes
+unsetenv NODEBUG 
 starver .DEV2
 csh -x $INPUTFILE0
          </command>
