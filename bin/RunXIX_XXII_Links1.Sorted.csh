@@ -1,6 +1,12 @@
 #set p = TpcSecRowB;
 #set ext = root;
 #
+#foreach p (TpcSecRowB TpcAccumulatedQ TpcZCorrectionC TpcPadCorrectionMDF TpcLengthCorrectionMDN)
+# set ext = C
+# if (${p} == "TpcSecRowB") set ext = root;
+#echo "ln -s ${p}.3p85GeV_fixedTarget_2019.${ext}                ${p}.20190607.174703.${ext}" 
+#end
+
 foreach p (TpcSecRowB TpcAccumulatedQ TpcZCorrectionC TpcPadCorrectionMDF TpcLengthCorrectionMDN)
  set ext = C
  if (${p} == "TpcSecRowB") set ext = root;

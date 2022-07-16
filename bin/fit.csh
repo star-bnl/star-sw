@@ -1,12 +1,12 @@
 #! /bin/tcsh -f
 @ count = 0
 #foreach f (`ls -1d SecRow3*G4E3p85GeV_fixedTarget_2021.csh`)
-foreach f (`ls -1d *G4E*.csh`)
+foreach f (`ls -1d Z3+Z3PG4E*.csh Z3C+Z3PCG4E*.csh`)
   set d = `basename ${f} .csh`
   set root = ${d}.root;  
   if (-r $root) continue;  
     echo "${f}"
-#  csh -x ${f} >& ${f}.log &  
+  csh -x ${f} >& ${f}.log &  
   @ count++;  echo "count $count => $root";
   if ($count > 20) break
 end

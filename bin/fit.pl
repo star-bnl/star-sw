@@ -75,13 +75,21 @@ foreach my $arg (@ARGV) {
 #   	       SecRow3+SecRow3P SecRow3C+SecRow3PC 
 # 	       dX3 dX3C
 #  	     );
-   @histG4E = qw(Z3+Z3P);
-#     @histG4E = qw(
-#  	       SecRow3+SecRow3P  Z3+Z3P 
-#  	       SecRow3C+SecRow3PC Z3C+Z3PC 
-#  	     );
+#   @histG4E = qw(Z3+Z3P);
+     @histG4E = qw(
+  	       SecRow3+SecRow3P SecRow3C+SecRow3PC
+	       Z3+Z3P Z3C+Z3PC 
+	       G3+G3P G3C+G3PC
+	       xyPad3+xyPad3P xyPad3C+xyPad3PC
+	       Pressure+PressureP PressureC+PressurePC
+	       Voltage+VoltageP VoltageC+VoltagePC
+	       G3+G3P G3C+G3PC
+	       Qcm QcmC 
+	       AvCurrent AvCurrentC
+	       Time TimeC
+  	     );
 #
-# 	       dX3 dX3C G3+G3P G3C+G3PC
+# 	       dX3 dX3C 
 #
 # 	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
 # 	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
@@ -168,7 +176,7 @@ foreach my $rootfile (@rootfiles) {
       for (my $sec = $sec1; $sec <= $sec2; $sec++) {
 	my $ext = "";
 	if ($sec >= 0) {$ext = "_X" . $sec;}
-	if ($hist =~ /Edge/ || $hist =~ /xyPad/) {$ext = "_y3";}
+#	if ($hist =~ /Edge/ || $hist =~ /xyPad/) {$ext = "_y3";}
 	my $dir = File::Basename::dirname($rootfile);
 	my $fil = File::Basename::basename($rootfile);
 	my $SCRIPT = $hist . $fittype . $ext . $fil;
