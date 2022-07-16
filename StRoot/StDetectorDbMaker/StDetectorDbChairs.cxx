@@ -361,30 +361,6 @@ MakeChairInstance2(tpcCorrection,St_TpcZCorrectionCC,Calibrations/tpc/TpcZCorrec
 MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorrectionB);
 #include "St_tpcPressureBC.h"
 MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB);
-#include "St_TpcdEdxModelC.h"
-MakeChairInstance2(tpcCorrection,St_TpcdEdxModelC,Calibrations/tpc/TpcdEdxModel);
-/* CERN-77-09 Sauli Yellow report
-   Gas  dens(g/cm**3) Wi (ev)   dE/dx (keV/cm) np (1/cm)  nT(1/cm)
-   Ar   1.66e-3        26       2.44           29.4       94
-   CH4  6.70e-4        13.1     2.21           16         53
-   P10  1.561ee-3      25.44    2.43           28.82      92.24
- */
-Double_t St_TpcdEdxModelC::GeVperElectron               = 43.5e-9;  //39.41e-9;  // 24.95e-9; // deposited energy per conducting electron 
-Double_t St_TpcdEdxModelC::LogGeVperElectron = TMath::Log(43.5e-9); //39.41e-9); // TMath::Log(24.95e-9);
-//________________________________________________________________________________
-Double_t St_TpcdEdxModelC::Parameter(Double_t Np, Int_t k) {
-  // Most Probable log (ne/Np) versus log of Np
-  if (Np <= 1.0) return 0;
-  Double_t X = TMath::Log(Np);
-  return instance()->CalcCorrection(k, X);
-}
-//________________________________________________________________________________
-Double_t St_TpcdEdxModelC::Derivative(Double_t Np, Int_t k) {
-  // Most Probable log (ne/Np) versus log of Np
-  if (Np <= 1.0) return 0;
-  Double_t X = TMath::Log(Np);
-  return instance()->CalcXDerivative(k, X);
-}
 //________________________________________________________________________________
 #include "St_TpcPadPedRMSC.h"
 MakeChairInstance2(tpcCorrection,St_TpcPadPedRMSC,Calibrations/tpc/TpcPadPedRMS);
