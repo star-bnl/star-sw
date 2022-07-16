@@ -13,7 +13,6 @@
 using namespace std;
 ClassImp(StdEdxModel)
 StdEdxModel  *StdEdxModel::fgStdEdxModel = 0;
-TH1D         *StdEdxModel::mdNdxL10 = 0;  
 TH1D         *StdEdxModel::mdNdx = 0;  
 Double_t      StdEdxModel::fScale = 1; //TMath::Exp(9.12015e-02); // Bichsel
 Int_t         StdEdxModel::_debug   = 1;
@@ -69,14 +68,12 @@ StdEdxModel::StdEdxModel() {
 StdEdxModel::~StdEdxModel() {
   fgStdEdxModel = 0;
   SafeDelete(mdNdx);
-  SafeDelete(mdNdxL10);
   SafeDelete(fGGaus);
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::dNdx(Double_t poverm, Double_t charge) {
   if (!fgStdEdxModel) instance();
   if (mdNdx)    return fScale*charge*charge*mdNdx->Interpolate(poverm);
-  if (mdNdxL10) return fScale*charge*charge*mdNdxL10->Interpolate(TMath::Log10(poverm));
   return 0;
 }
 //________________________________________________________________________________
@@ -291,4 +288,37 @@ Double_t StdEdxModel::Prob(Double_t /* log(nE/Np) */ ee, Double_t Np) {
   Parameters(Np, &params[1]);
   Double_t V = gausexp(&ee, params);
   return V;
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::ProbdEGeVlog(Double_t dEGeVLog, Double_t Np) {
+  Double_t params[3] = {0};
+  Parameters(Np, &params[1]);
+  Double_t ee = dEGeVLog - shift2GeV - TMath::Log(Np);
+  Double_t V = gausexp(&ee, params);
+  return V;
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::zMP(Double_t *x, Double_t *p) {
+  Double_t log10bg = x[0];
+  Double_t pOverM  = TMath::Power(10., log10bg);
+  Double_t log2dx  = p[0];
+  Double_t charge  = p[1];
+  Double_t dx      = TMath::Power( 2., log2dx);
+  Double_t dNdx = StdEdxModel::instance()->dNdx(pOverM, charge);
+  Double_t Np = dNdx*dx;
+  Double_t dEkeVLog = StdEdxModel::instance()->LogdEMPVkeV(Np); 
+  Double_t dEdxLog  = dEkeVLog - TMath::Log(dx);
+  return   dEdxLog;
+}
+//________________________________________________________________________________
+TF1 *StdEdxModel::ZMP(Double_t log2dx) {
+  TF1 *f = 0;
+  if (! f) {
+    f = new TF1(Form("N%i",(int)log2dx+2),zMP,-2,5,2);
+    f->SetParName(0,"log2dx");
+    f->SetLineStyle(2);
+    f->SetParameter(0,log2dx);
+    f->SetParameter(1, 1.0); // charge
+  }
+  return f;
 }

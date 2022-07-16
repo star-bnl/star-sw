@@ -18,7 +18,6 @@ class StdEdxModel {
   enum EValType  {kProb, kdProbdX, kdProbdY};
   virtual ~StdEdxModel();
   static  StdEdxModel* instance();
-  static TH1D         *GetdNdxL10()    {return    mdNdxL10;}    // dN/dx log10(versus beta*gamma)
   static TH1D         *GetdNdx()       {return    mdNdx;}       // dN/dx versus beta*gamma
   static Double_t      gausw(Double_t *x, Double_t *p); // vesus ksi, w, alpha
   static Double_t      ggaus(Double_t *x, Double_t *p);  // versus mu, sigm, alpha
@@ -45,16 +44,19 @@ class StdEdxModel {
   static Double_t LogdEMPVkeV(Double_t Np)   {return  shift2keV + LogdEMPV(Np);}
   static Double_t LogdEMPVGeV(Double_t Np)   {return  shift2GeV + LogdEMPV(Np);}
   static Double_t Prob(Double_t ee, Double_t Np); // probability for give log(dE/Np) versus Np
+  static Double_t ProbdEGeVlog(Double_t dEGeVLog, Double_t Np); // probability for give log(dE(GeV)) versus Np
   static Double_t Shift2keV() {return shift2keV;}
   static Double_t Shift2GeV() {return shift2GeV;}
   static Double_t Shift2eV () {return shift2eV ;}
-  
+  static void     SetScale(Double_t scale = 1.0) {fScale = scale;}
+  static Double_t dNdxScale() {return fScale;}
+  static Double_t zMP(Double_t *x, Double_t *p); // most probable log (dE) versus x = log10(p/M) and p[0] = log2dx and p[1] =  charge
+  static TF1     *ZMP(Double_t log2dx = 1);
  private:
   StdEdxModel();
   static StdEdxModel *fgStdEdxModel; //! last instance          
   static Double_t GeVperElectron;
   static Double_t LogGeVperElectron;
-  static TH1D         *mdNdxL10;    // dN/dx versus log10(beta*gamma)
   static TH1D         *mdNdx;       // dN/dx versus beta*gamma
   static Double_t      fScale;
   static Int_t        _debug;
