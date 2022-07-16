@@ -1331,7 +1331,7 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
   //
   // Gopt for arbitrary property on 3 letter name (wildcard would be added) and length
   // 6 for a value. Not advertized / not used and implementation is not complete (needed
-  // a case and di not have a clear one). TBD.
+  // a case and do not have a clear one). TBD.
   //
   // 2011/11 added the possibility of detector sub-system specific timestamps.
   // DBV only for now, logic is similar if we equally parse.
