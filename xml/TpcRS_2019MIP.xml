@@ -53,8 +53,9 @@ setenv STARFPE NO
 # data MuDst.root
 # setenv MALLOC_CHECK_  3
 # root.exe -q -b 'bfc.C('${f}','${l}',"mtin,MC.2019,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco,RunG.'${runG}'","'${evtsFile}'","'$output'")'  &gt;&amp;  ${logFile}
-   root.exe -q -b 'TpcRS.C(20,"MC.y2019,TpcRS,McTpcAna,StiCA,-geantOut,phys_off,Rung.'${runG}'",0,"'${file}'")' &gt;&amp; ${logFile}
-#endif
+#   root.exe -q -b 'TpcRS.C(20,"MC.y2019,TpcRS,McTpcAna,StiCA,-geantOut,phys_off,Rung.'${runG}'",0,"'${file}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'TpcRS.C(20,"MC2019.Ideal,TpcRS,McTpcAna,StiCA,-geantOut,phys_off,Rung.'${runG}'",0,"'${file}'")' &gt;&amp; ${logFile}
+XS#endif
 </command>
 <input URL="command:TpcRS_Part.pl" />
 <!-- <input URL="command:daq2019TpcRS.pl" />   -->

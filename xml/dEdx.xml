@@ -7,7 +7,7 @@
    cd ${SUBMITTINGDIRECTORY}  
    setenv STARFPE NO
 #   source $STAR/unsetupDEV2.csh
-   setup debug
+#   setup debug
 #   setup gcc
 #   setup 32b
 #   starver dev
