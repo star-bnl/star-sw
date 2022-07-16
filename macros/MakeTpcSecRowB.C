@@ -1,4 +1,25 @@
-//#define __RECOVER__
+//________________________________________________________________________________
+#if !defined(__CINT__) || defined(__MAKECINT__)
+/*
+  root.exe lDb.C MakeTpcSecRowB.C+
+ */
+//#include <map>
+//#include <array>
+#include "Riostream.h"
+#include <stdio.h>
+#include "TROOT.h"
+#include "TClass.h"
+#include "TClassTable.h"
+#include "TSystem.h"
+#include "TMath.h"
+#include "TH2.h"
+#include "TFile.h"
+#include "TNtuple.h"
+#include "TFitResult.h"
+#include "TCanvas.h"
+#include "tables/St_TpcSecRowCor_Table.h"
+#endif
+#define __RECOVER__
 #define __NO_TpcRowQ__
 //________________________________________________________________________________
 void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,

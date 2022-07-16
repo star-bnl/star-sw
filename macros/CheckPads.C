@@ -56,30 +56,41 @@
   sort DeadFEE2.list > DeadFEE.listSorted
   MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
   sort DeadFeeRuns | tee DeadFeeRuns.sorted
+
   grep Alive *.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
   sort AliveFEE2.list > AliveFEE.sorted
   MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
   sort AliveFeeRuns | tee AliveFeeRuns.sorted
   cat *Runs.sorted | sort | tee DeadOrAlived_RunXXII.sorted
 ==================== Run XIX - RunXXII ============================================================
-foreach f ( `ls -1d   *_20??/hlt_2*.root *_20??/2*.root` ) 
+*/
+//foreach f ( `ls -1d   */2*.root` ) 
+/*
     set b = `basename ${f} .root`; 
     set c = `echo ${b} | sed -e 's/hlt_//'`;
     echo "${c}"
     if (-r ${c}.list) continue;
     root.exe -q -b ${f} CheckPads.C+ >& ${c}.list
 end
-  grep Dead 2*.list | awk -F\{ '{print "{"$2}' > DeadFEE2.list
-  sort DeadFEE2.list > DeadFEE.listSorted
+  grep Dead 2*.list | awk -F\{ '{print "{"$2}' | tee DeadFEE2.list
+  sort DeadFEE2.list | tee  DeadFEE.listSorted
   MergeDeadFee.pl DeadFEE.listSorted | tee DeadFeeRuns
   sort DeadFeeRuns | tee DeadFeeRuns.sorted
-  grep Alive 2*.list | awk -F\{ '{print "{"$2}' > AliveFEE2.list
-  sort AliveFEE2.list > AliveFEE.sorted
+  grep Alive 2*.list | awk -F\{ '{print "{"$2}' | tee AliveFEE2.list
+  sort AliveFEE2.list | tee  AliveFEE.sorted
   MergeDeadFee.pl AliveFEE.sorted  | tee AliveFeeRuns
   sort AliveFeeRuns | tee AliveFeeRuns.sorted
   cat *Runs.sorted | sort | tee DeadOrAlived_Runs_XIX_XXII.sorted
 */
-//   foreach f ( `ls -1d   */2*.root` )
+//foreach f ( `ls -1d   */2*.root | awk -F_ '{print $1"_"$2}' | sort -u `)
+/*
+    set c = `basename ${f}`; 
+    echo "${c}"
+    if (-r ${c}.list) continue;
+    root.exe -q -b ${f}*.root CheckPads.C+ >& ${c}.list
+end
+  
+ */
 //________________________________________________________________________________
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -90,6 +101,7 @@ end
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TFile.h"
 #include "TProfile3D.h"
 #include "TLegend.h"
 #include "TCanvas.h"
@@ -408,8 +420,9 @@ void CheckPads(Int_t sector = 0) {
   if (index > 0)  {
     Run = TString(Dir,index); // cout << "Run = " << Run.Data() << endl;
   }
-  Run.Prepend(", /* ");
-  Run += " */";
+  TString RunC(Run);
+  RunC.Prepend(", /* ");
+  RunC += " */";
   Int_t nx = AlivePads->GetXaxis()->GetNbins();
   Int_t ny = AlivePads->GetYaxis()->GetNbins();
   Int_t nz = AlivePads->GetZaxis()->GetNbins();
@@ -453,7 +466,7 @@ void CheckPads(Int_t sector = 0) {
 	  } else {
 	    if (fee == feeG && p == p2d + 1) p2d = p;
 	    else {
-	      if (p1d + 2 < p2d) cout << Dead.Data() << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << Run.Data() << endl;
+	      if (p1d + 2 < p2d) cout << Dead.Data() << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
 	      p1d = p2d = p;
 	      feeG = fee;
 	      rdoG = rdo;
@@ -468,7 +481,7 @@ void CheckPads(Int_t sector = 0) {
 	  } else {
 	    if (fee == feeA && p == p2a + 1) p2a = p;
 	    else {
-	      if (p1a + 2 < p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << Run.Data() << endl;
+	      if (p1a + 2 < p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << RunC.Data() << endl;
 	      p1a = p2a = p;
 	      feeA = fee;
 	      rdoA = rdo;
@@ -476,14 +489,14 @@ void CheckPads(Int_t sector = 0) {
 	  }
 	}
       }
-      if (p1d + 2 < p2d) cout << Dead.Data()  << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << Run.Data() << endl;
-      if (p1a + 2< p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << Run.Data() << endl;
+      if (p1d + 2 < p2d) cout << Dead.Data()  << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
+      if (p1a + 2< p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << RunC.Data() << endl;
     }
     if (c1) {
       c1->cd(1); ActivePads->GetXaxis()->SetRange(s,s); ActivePads->Project3D(Form("yz_%i",s))->Draw("colz");
       c1->cd(2); AlivePads->GetXaxis()->SetRange(s,s); AlivePads->Project3D(Form("yz_%i",s))->Draw("colz");
       c1->Update();
-      c1->SaveAs(Form("%s_%i.png",Run.Data(),sector);
+      c1->SaveAs(Form("%s_s%i.png",Run.Data(),sector));
     }
   }
 }

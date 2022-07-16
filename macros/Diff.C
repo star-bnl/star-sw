@@ -1,3 +1,33 @@
+//________________________________________________________________________________
+TH1D *Diff(TProfile *h1, TProfile *h2) {
+  if (! h1 && ! h2) return 0;
+  TAxis *x1 = h1->GetXaxis();
+  TAxis *x2 = h2->GetXaxis();
+  if (h1->GetNbinsX() != h2->GetNbinsX() ||
+      x1->GetXmin() != x2->GetXmin() ||
+      x1->GetXmax() != x2->GetXmax()) {
+    cout << "Try to subtruct histograms with different limits " << h1->GetName() << "\t" << h2->GetName() << endl;
+    return 0;
+  }
+  TH1D *diff = new TH1D("diff",h1->GetTitle(), x1->GetNbins(),  x1->GetXmin(),  x1->GetXmax());
+  Int_t nbinsx = h1->GetNbinsX();
+  for (Int_t binx=0;binx<=nbinsx+1;binx++) {
+    Double_t y1 = h1->GetBinContent(binx);
+    Double_t y2 = h2->GetBinContent(binx);
+    Double_t e1 = h1->GetBinError(binx);
+    Double_t e2 = h2->GetBinError(binx);
+    Double_t y  = y1-y2;
+    Double_t ee = e1*e1+e2*e2;
+    cout << binx 
+	 << "\t" << y1 << " +/- " << e1 
+	 << "\t" << y2 << " +/- " << e2
+	 << "\t" << y  << " +/- " << TMath::Sqrt(ee) << endl;
+    diff->SetBinContent(binx,y);
+    diff->SetBinError(binx,TMath::Sqrt(ee));
+  }
+  return diff;
+}
+//________________________________________________________________________________
 TH1D *Diff(TH1D *h1, TH1D *h2, TH1D *h3=0, TH1D *h4=0) {
   if (! h1 && ! h2) return 0;
   TAxis *x1 = h1->GetXaxis();

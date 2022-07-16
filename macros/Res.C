@@ -288,7 +288,7 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
 	  L = 124.4;
 	  Title += Form(" : #sigma(@%5.1fcm) = %5.2f%\%",L,100*powfit->Eval(112));
 	} else {
-	  Double_t L = 72;
+	  Double_t L = 72.0 * 0.9;
 	  if (Title.Contains("70")) L *= 2./3.;
 	  Title += Form(" : #sigma(@%2.0f npts) = %5.2f%\%",L,100*powfit->Eval(L));
 	}

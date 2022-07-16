@@ -8,7 +8,13 @@
 ls -1d TpcZCorrectionB*GeV* | grep -v fixed | awk -F\. '{print "ln -s TpcPadCorrectionMDF.COL.C TpcPadCorrectionMDF."$2".C"}'
 ls -1d TpcZCorrectionB*GeV* | grep    fixed | awk -F\. '{print "ln -s TpcPadCorrectionMDF.FXT.C TpcPadCorrectionMDF."$2".C"}'
 dir TpcZCorrectionB.20* | grep GeV | awk '{print "ln -s "$11" "$9}' | sed -e 's/TpcZCorrectionB/TpcPadCorrectionMDF/g'
-
+  foreach f (`ls -1d xyPad3+xyPad3PG4E*.root`)
+     set b = `basename ${f} .root | sed -e 's/xyPad3+xyPad3PG4E//' -e 's/_y3//'`;
+     echo "${b}"
+     root.exe -q -b ${f} 'MakeTpcPadCorrectionMDF.C("mu",7,20,20210129,5)'| tee ${b}.log; 
+     mv TpcPadCorrectionMDF.20210129.000005.C TpcPadCorrectionMDF.${b}.C
+     sleep 2
+  end
  */
 #ifndef __CINT__
 #include <stdlib.h>

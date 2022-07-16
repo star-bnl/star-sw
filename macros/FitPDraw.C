@@ -223,24 +223,21 @@ Int_t SetFileList() {
   return NF;
 }
 //________________________________________________________________________________
-void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)", 
+void MuDraw(const Char_t *draw="mu:rowsigned(y,x)", 
 	      const Char_t *ext = "P",
 	      Int_t    nx = 0,   // 45,
 	      Double_t xMin = 0, //  0.5,
 	      Double_t xMax = 0, // 45.5,
-	      const Char_t *cut = "(i&&j&&abs(mu)<1)/(dmu**2)", 
-	      const Char_t *opt = "profg",
+	      const Char_t *cut = "(i&&j&&abs(mu)<1)", // "(i&&j&&abs(mu)<1)/(dmu**2)", 
+	      const Char_t *opt = "prof", // "profg",
 	      Double_t ymin = -1,
 	      Double_t ymax =  1,
 	      const Char_t *side = "All",
 	      const Char_t *var  = "sector*side" // log_{10}(#Sigma Adc)"
 	      ) {
-#if 0
   TCanvas *c1 = (TCanvas*)gROOT->GetListOfCanvases()->FindObject("c1");
-  if (! c1 && xMin < xMax) {
-    
-  }
-#endif
+  if (! c1)  c1 = new TCanvas("c1","c1",1400,1200);
+  else       c1->Clear();
   Int_t NF = SetFileList();  
   if (! NF) return;
   TString Current(gDirectory->GetName());
@@ -266,7 +263,7 @@ void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)",
     TString same(opt);
     if (k != 0) same += "same";
     TString Draw(draw);
-#if 1
+#if 0
     if (Draw.Contains("muS")) {
       TH1 *mu = (TH1 *) gDirectory->Get("mu");
       if (mu) {
@@ -275,40 +272,64 @@ void FitPDraw(const Char_t *draw="mu:rowsigned(y,x)",
     }
 #endif
     TString histN(ext); histN += k;
-    Draw += " >> "; Draw += histN;
+    TString Drawh(Draw);
+    Drawh += " >> "; Drawh += histN;
     TProfile *p = 0;
     if (xMin == 0 && xMax == 0) {
       TH2 *mu = (TH2 *) gDirectory->Get("mu");
       if (mu) {
-	if (Draw.Index("y") >= 0) {
-	  //      Draw += Form("(%i,%f,%f)",mu->GetYaxis()->GetNbins(), mu->GetYaxis()->GetXmin(), mu->GetYaxis()->GetXmax());
-	  p = new TProfile(histN,"#mu versus pad row",2*mu->GetYaxis()->GetNbins()+1, -mu->GetYaxis()->GetXmax(), mu->GetYaxis()->GetXmax());
-	} else {
+	TString DirName(gDirectory->GetName());
+	if (DirName.Contains("Z3")) {
+	  //      Drawh += Form("(%i,%f,%f)",mu->GetYaxis()->GetNbins(), mu->GetYaxis()->GetXmin(), mu->GetYaxis()->GetXmax());
 	  p = new TProfile(histN,"#mu versus pad row",2*mu->GetXaxis()->GetNbins()+1, -mu->GetXaxis()->GetXmax(), mu->GetXaxis()->GetXmax());
+	} else if (DirName.Contains("xyPad3")) {
+	  //      Drawh += Form("(%i,%f,%f)",mu->GetYaxis()->GetNbins(), mu->GetYaxis()->GetXmin(), mu->GetYaxis()->GetXmax());
+	  p = new TProfile(histN,"#mu versus sector phi  ", nx, xMin, xMax);
+	} else if (DirName.Contains("SecRow3")) {
+	  p = new TProfile(histN,"#mu versus signed drift distance",2*mu->GetYaxis()->GetNbins()+1, -mu->GetYaxis()->GetXmax(), mu->GetYaxis()->GetXmax());
 	}
       }
     } else {
-      p = new TProfile(histN,Draw,nx, xMin, xMax);
+      p = new TProfile(histN,Drawh,nx, xMin, xMax);
     }
     p->SetMarkerColor(icol);
     p->SetLineColor(icol);
     p->SetMarkerStyle(kM);
     p->SetMarkerSize(1);
+#if 0
     cout << k << "\t" << F[k]->GetName() << endl;
-    cout << "FitP->Draw(\"" << Draw << "\",\"" << cut << "\",\"" << same << "\")" << endl;
-    FitP->Draw(Draw,cut,same);
+    cout << "FitP->Draw(\"" << Drawh << "\",\"" << cut << "\",\"" << same << "\")" << endl;
+#endif
+    FitP->Draw("mu>>muH",cut,"goff");
+    TH1 *muH = (TH1 *) gDirectory->Get("muH");
+    Double_t RMS = -99;
+    if (muH) RMS = 100*muH->GetRMS();
+    FitP->Draw(Drawh,cut,same);
     TH1 *hist = (TH1 *) gDirectory->Get(histN);
     if (hist) {
-      if (ymin < ymax) {hist->SetMinimum(ymin); hist->SetMaximum(ymax);}
       TString name(gSystem->BaseName(gDirectory->GetName()));
       name.ReplaceAll(".root","");
-      name.ReplaceAll("SecRow3CGF","");
-      name.ReplaceAll("AvCurrentCGF","");
-      name.ReplaceAll("Z3CGF","");
-      name.ReplaceAll("Z3GF","");
-      leg->AddEntry(hist,name.Data());
+      name.ReplaceAll("SecRow3C+SecRow3PC","cor");
+      name.ReplaceAll("SecRow3+SecRow3P","");
+      name.ReplaceAll("SecRow3C","");
+      name.ReplaceAll("SecRow3","");
+      name.ReplaceAll("Z3C+Z3PC","");
+      name.ReplaceAll("Z3+Z3P","cor");
+      name.ReplaceAll("Z3C","");
+      name.ReplaceAll("Z3","");
+      name.ReplaceAll("xyPad3C+xyPad3PC","cor");
+      name.ReplaceAll("xyPad3+xyPad3P","");
+      name.ReplaceAll("xyPad3C","");
+      name.ReplaceAll("xyPad3","");
+      name.ReplaceAll("_y3","");
+      name.ReplaceAll("G4E","");
+      leg->AddEntry(hist,Form("%s %s",name.Data(),side));
       hist->SetTitle(Form("%s : %s",hist->GetTitle(), side));
       hist->SetXTitle(var);
+      //      cout << k << "\t" << name.Data() << "\tmin = " << 100*hist->GetMinimum() << "\tmax = " <<  100*hist->GetMaximum() << " %" << endl;
+      TString nn(name);
+      cout << Form("%-28s%-4s: min/max = %7.2f/%7.2f rms %7.2f (\%)", nn.Data(), side, 100*hist->GetMinimum(), 100*hist->GetMaximum(), RMS) << endl;
+      if (ymin < ymax) {hist->SetMinimum(ymin); hist->SetMaximum(ymax);}
     }
   }
   leg->Draw();
@@ -411,8 +432,32 @@ void FitPMu(const Char_t *draw="mu",
     name.ReplaceAll("SecRow3CGF","");
     name.ReplaceAll("AvCurrentCGF","");
     name.ReplaceAll("Z3CGF","");
+    name.ReplaceAll("xyPad3CGF","");
     TH1 *hist = (TH1 *) gDirectory->Get("Mu");
     leg->AddEntry(hist,name.Data());
   }
   leg->Draw();
+}
+//________________________________________________________________________________
+void FitPDraw(TString Opt = "I") {
+  if (! gDirectory) {return;}
+  TString Name(gDirectory->GetName());
+  if        (Name.BeginsWith("SecRow3")) {  MuDraw();
+  } else if (Name.BeginsWith("Z3"))      {
+    if (Opt == "") {
+      MuDraw("mu-muJ:TMath::Sign(208.707-y,x)","ZI", 0,   0,  0, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "All", "Z");
+    } else if (Opt == "I") {
+      MuDraw("mu-muJ:TMath::Sign(208.707-y,x)","ZI", 0,   0,  0, "(i&&j&&abs(x)<40.5&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "Inner", "Z");
+    } else {
+      MuDraw("mu-muJ:TMath::Sign(208.707-y,x)","ZO", 0,   0,  0, "(i&&j&&abs(x)>40.5&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "Outer", "Z");
+    }
+  } else if (Name.BeginsWith("xyPad3"))      {
+    if (Opt == "") {
+      MuDraw("mu:0.5*y+TMath::Nint(x)","xy", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", 0.25,  0.15, "All", "xy");
+    } else if (Opt == "I") {
+      MuDraw("mu:0.5*y+TMath::Nint(x)","xyI", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))<0)", "prof", 0.25,  0.15, "Inner", "xy");
+    } else {
+      MuDraw("mu:0.5*y+TMath::Nint(x)","xyO", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))>0)", "prof", 0.25,  0.15, "Outer", "xy");
+    }
+  }
 }
