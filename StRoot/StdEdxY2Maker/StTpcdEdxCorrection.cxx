@@ -253,16 +253,14 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     LOG_WARN << CommentLine.Data() << endm;
   }
   // Check consistency of active chairs
-  k = kzCorrection;
-  if (m_Corrections[k].Chair) {
-    if ( m_Corrections[kzCorrectionC].Chair) { // if kzCorrectionC is already active
-      LOG_WARN << "\t" << m_Corrections[kzCorrectionC].Name << " is already active => disanle " << m_Corrections[k].Name << endm;
-      CLRBIT(m_Mask,k); 
-      SafeDelete(m_Corrections[k].Chair);
-    } else {	 // disabled GatingGrid
-      LOG_WARN << "\t" << m_Corrections[k].Name << " is activated =>  Disable " << m_Corrections[kGatingGrid].Name << endm;
-      CLRBIT(m_Mask,kGatingGrid); 
-      SafeDelete(m_Corrections[kGatingGrid].Chair);
+  if ( m_Corrections[kzCorrectionC].Chair) { // if kzCorrectionC is already active
+    vector<Int_t> kvect = {kzCorrection, kGatingGrid};
+    for (auto k : kvect) {
+      if (m_Corrections[k].Chair) {
+	LOG_WARN << "\t" << m_Corrections[kzCorrectionC].Name << " is already active => disable " << m_Corrections[k].Name << endm;
+	CLRBIT(m_Mask,k); 
+	SafeDelete(m_Corrections[k].Chair);
+      }
     }
   }
   // Use only one set of ADC correction

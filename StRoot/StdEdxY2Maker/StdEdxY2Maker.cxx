@@ -3,24 +3,24 @@
 //#define CompareWithToF 
 //#define __CHECK_LargedEdx__
 //#define __KEEP_DX__
-#define __SpaceCharge__
+  #define __SpaceCharge__
 //#define __NEGATIVE_ONLY__
-#ifndef  __NEGATIVE_ONLY__
-#define __NEGATIVE_AND_POSITIVE__
-#endif
+  #ifndef  __NEGATIVE_ONLY__
+     #define __NEGATIVE_AND_POSITIVE__
+  #endif /* ! __NEGATIVE_ONLY__ */
 //#define __TEST_DX__
 //#define __LogProb__
 //#define __DEBUG_dEdx__
-#define __DEBUG_dNdx__
+  #define __DEBUG_dNdx__
 //#define __ADD_PROB__
 //#define __BENCHMARKS__DOFIT_ZN__
-#define __FIT_PULLS__
-#define __CHECK_RDOMAP_AND_VOLTAGE__
+  #define __FIT_PULLS__
+//#define __CHECK_RDOMAP_AND_VOLTAGE__
+  #define __BEST_VERTEX__
+  #ifdef __CHECK_RDOMAP_AND_VOLTAGE__
+     #include "TProfile3D.h"
+  #endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
 #endif /* __TFG__VERSION__ */
-#define __BEST_VERTEX__
-#ifdef __CHECK_RDOMAP_AND_VOLTAGE__
-#include "TProfile3D.h"
-#endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 #include "StTpcdEdxCorrection.h" 
@@ -81,7 +81,6 @@ using namespace units;
 #include "StDetectorDbMaker/St_TpcAvgPowerSupplyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
-#include "StDetectorDbMaker/St_TpcdEdxModelC.h"
 #include "StPidStatus.h"
 #include "dEdxHist.h"
 #if defined(__CHECK_LargedEdx__) || defined( __DEBUG_dEdx__) || defined( __DEBUG_dNdx__)
@@ -123,12 +122,17 @@ static TH1F *fTracklengthInTpc = 0;
 static TH2F *fPadTbkAll = 0;
 static TH2F *fPadTbkBad = 0;
 #ifdef  __SpaceCharge__
-  static TH2F *AdcSC = 0, *AdcOnTrack = 0, *dEOnTrack = 0;
+static TH2F *AdcSC = 0, *AdcOnTrack = 0, *dEOnTrack = 0;
 #endif
 #ifdef __CHECK_RDOMAP_AND_VOLTAGE__
-    static TH3F *AlivePads = 0;
-    static TProfile3D *ActivePads = 0;
+static TH3F *AlivePads = 0;
+static TProfile3D *ActivePads = 0;
 #endif
+#ifdef __BEST_VERTEX__
+static TH3F *PVxyz = 0, *PVxyzC = 0;
+static TH2F *EtaVspT[2][2]  = {0}; // Global and Primary, Positive and Negative
+static TH2F *EtaVspTC[2] = {0}; // Positive and Negative global track used for calibration
+#endif /* __BEST_VERTEX__ */
 //______________________________________________________________________________
 ClassImp(StdEdxY2Maker);
 //_____________________________________________________________________________
@@ -296,28 +300,32 @@ Int_t StdEdxY2Maker::Make(){
   }
   if (pEvent->runInfo()) bField = pEvent->runInfo()->magneticField()*kilogauss;
   if (TMath::Abs(bField) < 1.e-5*kilogauss) return kStOK;
+  UInt_t NoPV = pEvent->numberOfPrimaryVertices();
+  if (! NoPV)  return kStOK;
 #ifdef __BEST_VERTEX__
   const StBTofCollection* tof = pEvent->btofCollection();
-  StPrimaryVertex *pVbest  = 0;
+  StPrimaryVertex *pVbest  =  pEvent->primaryVertex(0);
+  Double_t VpdZ = -300;
   if (tof) {
-    Double_t VpdZ = -300;
     if (tof->tofHeader()) VpdZ = tof->tofHeader()->vpdVz();
-    if (TMath::Abs(VpdZ) < 200) {
-      Double_t dZbest = 999;
-      UInt_t NoPV = pEvent->numberOfPrimaryVertices();
-      for (UInt_t ipr = 0; ipr < NoPV; ipr++) {
-	StPrimaryVertex *pVertex = pEvent->primaryVertex(ipr);
-	if (! pVertex) continue;
-	Double_t zTPC = pVertex->position().z();
-	Double_t dZ = TMath::Abs(zTPC-VpdZ);
-	if (dZ < dZbest) {
-	  dZbest = dZ;
-	  pVbest = pVertex;
-	}
-      }
-      if (dZbest > 3.0) pVbest = 0;
-    }
   }
+  if (m_TpcdEdxCorrection->IsFixedTarget())  VpdZ = 200;
+  if (TMath::Abs(VpdZ) < 250) {
+    Double_t dZbest = 999;
+    for (UInt_t ipr = 0; ipr < NoPV; ipr++) {
+      StPrimaryVertex *pVertex = pEvent->primaryVertex(ipr);
+      if (! pVertex) continue; 
+      if (PVxyz) PVxyz->Fill( pVertex->position().x(),  pVertex->position().y(), pVertex->position().z());
+      Double_t zTPC = pVertex->position().z();
+      Double_t dZ = TMath::Abs(zTPC-VpdZ);
+      if (dZ < dZbest) {
+	dZbest = dZ;
+	pVbest = pVertex;
+      }
+    }
+    if (dZbest > 3.0) pVbest = 0;
+  }
+  if (pVbest &&PVxyzC) PVxyzC->Fill( pVbest->position().x(),  pVbest->position().y(), pVbest->position().z());
 #endif /* __BEST_VERTEX__ */
   // no of tpc hits
   Int_t TotalNoOfTpcHits = 0;
@@ -343,6 +351,17 @@ Int_t StdEdxY2Maker::Make(){
     if (pTrack && pTrack->bad()) {pTrack = 0;}
     StTrack *track = 0;
     StTrack *tracks[2] = {gTrack, pTrack};
+#ifdef __BEST_VERTEX__
+    for (Int_t l = 0; l < 2; l++) {
+      track = tracks[l];
+      if (track) {
+	Int_t sCharge = 0;
+	if (track->geometry()->charge() < 0) sCharge = 1;
+	StThreeVectorD g3 = track->geometry()->momentum(); // p of global track
+	EtaVspT[l][sCharge]->Fill(TMath::Log10(g3.perp()), g3.pseudoRapidity());
+      }
+    }
+#endif /* __BEST_VERTEX__ */   
     StPhysicalHelixD helixO = gTrack->outerGeometry()->helix();
     StPhysicalHelixD helixI = gTrack->geometry()->helix();
     if (Debug() > 1) {
@@ -763,6 +782,7 @@ Int_t StdEdxY2Maker::Make(){
 #ifdef __BENCHMARKS__DOFIT_ZN__
 	  myBenchmark.Stop("StdEdxY2Maker::DoFitZ");
 #endif /* __BENCHMARKS__DOFIT_ZN__ */
+#ifdef __DEBUG1__
 #if defined(__DEBUG_dEdx__) || defined(__DEBUG_dNdx__)
 	  StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
 	  Double_t pMomentum = g3.mag();
@@ -781,6 +801,7 @@ Int_t StdEdxY2Maker::Make(){
 	    ibreak++;
 	  }
 #endif
+#endif /* __DEBUG1__ */
 	  if (fUsedNdx) {
 	    // likelihood fit of no. of primary cluster per cm
 	    Double_t chisqN, fitN = fitZ, fitdN;
@@ -802,7 +823,7 @@ Int_t StdEdxY2Maker::Make(){
 	      dedx.det_id    =  kTpcId;    // TPC track 
 	      dedx.method    =  kOtherMethodId;
 	      AddEdxTraits(tracks, dedx);
-#ifdef  __DEBUG_dNdx__
+#ifdef  __DEBUG_dNdx__1
 	      Double_t dEdxL10 = TMath::LogE()*fitZ + 6;
 	      Double_t dNdxL10 = TMath::Log10(fitN);
 	      if (dNdxL10 > 3.70 && dEdxL10 > -0.4) {
@@ -1038,6 +1059,16 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     // book histograms
     Bool_t fSetDefaultSumw2 = TH1::GetDefaultSumw2();
     TH1::SetDefaultSumw2(kFALSE);
+#ifdef __BEST_VERTEX__
+    PVxyz         = new TH3F("PVxyz","xyz for all primary vertices",100,-10,10,100,-10,10,210,-210,210); 
+    PVxyzC        = new TH3F("PVxyzC","xyz for the best primary vertex",100,-10,10,100,-10,10,210,-210,210); 
+    EtaVspT[0][0] = new TH2F("EtaVspTGlP","Eta vs Log_{10}p_{T} for All positive tracks", 350, -2, 1.5, 600, -3.0, 3.0);
+    EtaVspT[0][1] = new TH2F("EtaVspTGlN","Eta vs Log_{10}p_{T} for All negative tracks", 350, -2, 1.5, 600, -3.0, 3.0);
+    EtaVspT[1][0] = new TH2F("EtaVspTPrP","Eta vs Log_{10}p_{T} for All positive primary tracks", 350, -2, 1.5, 600, -3.0, 3.0);
+    EtaVspT[1][1] = new TH2F("EtaVspTPrN","Eta vs Log_{10}p_{T} for All negative primary tracks", 350, -2, 1.5, 600, -3.0, 3.0);
+    EtaVspTC[0]   = new TH2F("EtaVspTPC","Eta vs Log_{10}p_{T} for All positive global tracks used for calibration", 350, -2, 1.5, 600, -3.0, 3.0);
+    EtaVspTC[1]   = new TH2F("EtaVspTNC","Eta vs Log_{10}p_{T} for All negative global tracks used for calibration", 350, -2, 1.5, 600, -3.0, 3.0);
+#endif /* __BEST_VERTEX__ */
     mHitsUsage  = new TH2F("HitsUsage","log10(No.of Used in dE/dx hits) versus log10(Total no. of Tpc Hits",
 			   80,0,8,60,0,6);
     Int_t      nZBins = 200;
@@ -1108,6 +1139,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   //  Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
   Int_t sCharge = 0;
   if (gTrack->geometry()->charge() < 0) sCharge = 1;
+#ifdef __BEST_VERTEX__
+  EtaVspTC[sCharge]->Fill(TMath::Log10(g3.perp()), g3.pseudoRapidity());
+#endif /* __BEST_VERTEX__ */
   StDedxMethod kMethod;
 #ifdef  __FIT_PULLS__
   // Pulls
@@ -1162,26 +1196,28 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   if (PiD.dEdxStatus(kMethod) && PiD.dEdxStatus(kMethod)->TrackLength() > 20) { 
     //  if (NoFitPoints >= 20) { 
     Int_t k;
-    Double_t bgL10 = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
+    //    Double_t bgL10 = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
     for (k = 0; k < NdEdx; k++) {
       Int_t sector = FdEdx[k].sector;
       Int_t row    = FdEdx[k].row;
       Int_t rowS   = row;
       if (sector > 12) rowS = - rowS;
-#if 1
+#if 0
       FdEdx[k].zP = // Bichsel::Instance()->GetMostProbableZ(bgL10,1.);
 	Bichsel::Instance()->GetMostProbableZ(bgL10,TMath::Log2(FdEdx[k].F.dx)); //remove dX
       FdEdx[k].sigmaP = //Bichsel::Instance()->GetRmsZ(bgL10,1.);
 	Bichsel::Instance()->GetRmsZ(bgL10,TMath::Log2(FdEdx[k].F.dx)); //remove dX	
       Double_t predB  = 1.e-6*TMath::Exp(FdEdx[k].zP);
-#else
-      Double_t n_P = FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion];
-      Double_t zdEMPV = St_TpcdEdxModelC::instance()->LogdEMPV(n_P) - Bichsel::Instance()->Parameterization()->MostProbableZShift(); 
-      FdEdx[k].zP = zdEMPV;
-      FdEdx[k].sigmaP = St_TpcdEdxModelC::instance()->Sigma(n_P);
-      Double_t predB  = TMath::Exp(FdEdx[k].zP);
-#endif
       FdEdx[k].F.dEdxN  = TMath::Log(FdEdx[k].F.dEdx /predB);
+#else
+      if (! PiD.fdNdx)  continue; // 
+      Double_t n_P = FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion];
+      Double_t zdEMPV = StdEdxModel::instance()->LogdEMPVGeV(n_P);//LogdEMPV(n_P) - Bichsel::Instance()->Parameterization()->MostProbableZShift(); 
+      FdEdx[k].zP = zdEMPV;
+      FdEdx[k].sigmaP = StdEdxModel::instance()->Sigma(n_P);
+      Double_t predB  = TMath::Exp(FdEdx[k].zP);
+      FdEdx[k].F.dEdxN  = TMath::Log(FdEdx[k].F.dE/predB);
+#endif
       for (Int_t l = 0; l <= StTpcdEdxCorrection::kTpcLast; l++) {
 	if (l == StTpcdEdxCorrection::kzCorrection || 
 	    l == StTpcdEdxCorrection::kzCorrectionC) {
@@ -1217,7 +1253,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (PiD.fdNdx) {
 	  Double_t n_P = FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion];
 	  dEN = TMath::Log(FdEdx[k].F.dE); // scale to <dE/dx>_MIP = 2.4 keV/cm
-	  zdEMPV = St_TpcdEdxModelC::instance()->LogdEMPV(n_P); // ? Check dx
+	  zdEMPV = StdEdxModel::instance()->LogdEMPV(n_P); // ? Check dx
 	  Vars[2] = dEN - zdEMPV;
 	};
 #endif
@@ -1574,7 +1610,7 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	const Char_t *parT[5] = {"All","|nSigmaPion| < 1","|nSigmaElectron| < 1","|nSigmaKaon| < 1","|nSigmaProton| < 1"};
 	Int_t ny = 500;
 	Double_t ymin = 0, ymax = 2.5;
-	if (k == 2) {ny = 600; ymin = 1.2; ymax = 4.2;}
+	if (k == 2) {ny = 600; ymin = 0.7; ymax = 3.7;}
 	for (Int_t t = 0; t < 5; t++) {
 	  TString Title(Form("log10(dE/dx(%s)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",FitName[k],parT[t]));
 	  if (k == 2) Title = Form("log10(dN/dx) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",parT[t]);
@@ -1713,19 +1749,11 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
   //  Double_t sigma = par[1]; // extra sigma
   for (Int_t i = 0; i < NdEdx; i++) {
     Double_t dE = FdEdx[i].F.dE;
-    Double_t nE = 1.2*St_TpcdEdxModelC::instance()->n(dE);
     Double_t dX = FdEdx[i].dxC;
     Double_t Np = dNdx*dX;
-    Double_t ee = TMath::Log(nE/Np);
-    Double_t params[5] = {0};
-    params[1] = St_TpcdEdxModelC::instance()->Mu(Np);
-    Double_t Sigma  = St_TpcdEdxModelC::instance()->Sigma(Np);
-    //    params[2] = TMath::Sqrt(Sigma*Sigma + sigma*sigma);
-    params[2] = Sigma;
-    params[3] = St_TpcdEdxModelC::instance()->Alpha(Np);
-    StdEdxModel::GGaus()->SetParameters(params);
-    Double_t Prob = StdEdxModel::GGaus()->Eval(ee);
+    Double_t Prob = StdEdxModel::ProbdEGeVlog(TMath::Log(dE),Np);
     if (_debug && iflag == 3) {
+      Double_t ee = dE + TMath::Log(1e9) -TMath::Log(Np); // to eV/Np
       E.push_back(ee);
       P.push_back(Prob);
       Double_t In = StdEdxModel::GGaus()->Integral(-1.,ee);
