@@ -96,7 +96,8 @@ void bichsel() {
   //                     Mass Type Length  log2(dx)
   Double_t params[5] = {  1.0,  0.,   60., 1., 1e-3};  
   TLegend *leg = new TLegend(0.4,0.7,0.9,0.9,"");//TLegend(0.79,0.91,0.89,0.89,"");
-  for (Int_t h = 0; h < 4; h++) { // Masses
+  //  for (Int_t h = 0; h < 4; h++) { // Masses
+  for (Int_t h = 2; h < 3; h++) { // Masses
     params[0] = Masses[h];
     params[1] = h;
     for (Int_t f = 0; f < NF; f++) { // Functions
@@ -132,7 +133,7 @@ void bichsel() {
 	if (! func) continue;
 	func->SetParameters(params); 
 	func->Draw("same");
-	if (dx == 0 && h == 0) {
+	if (dx == 0 && h == 2) {
 	  TString name(FNames[f]);
 	  if (name == "Sirrf") name += ": Fitted from Year 1 data";
 	  else if (name == "Girrf") name += ": Geant3 prediction";
