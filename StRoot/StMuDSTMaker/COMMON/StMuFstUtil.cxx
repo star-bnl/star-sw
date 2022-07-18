@@ -1,7 +1,11 @@
 #include "StEvent/StFstHitCollection.h"
 #include "StEvent/StFstHit.h"
+#include "StRoot/StFstUtil/StFstCollection.h"
+#include "StRoot/StFstUtil/StFstRawHitCollection.h"
+#include "StRoot/StFstUtil/StFstRawHit.h"
 
 #include "StMuDSTMaker/COMMON/StMuFstHit.h"
+#include "StMuDSTMaker/COMMON/StMuFstRawHit.h"
 #include "StMuDSTMaker/COMMON/StMuFstUtil.h"
 #include "StMuDSTMaker/COMMON/StMuFstCollection.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -28,12 +32,12 @@ StMuFstUtil::~StMuFstUtil()
 {
 }
 
-StMuFstCollection* StMuFstUtil::getMuFst(StFstHitCollection *fstcol)
+StMuFstCollection* StMuFstUtil::getMuFst(StFstHitCollection *fstcol, StFstCollection *fstCollectionPtr)
 {
     LOG_DEBUG << "StMuFstUtil::getMuFst" << endm;
     if(!fstcol) return NULL;
     StMuFstCollection* muFst=new StMuFstCollection();
-    fillMuFst(muFst,fstcol);
+    fillMuFst(muFst,fstcol,fstCollectionPtr);
     return muFst;
 } // getMuFst
 
@@ -46,13 +50,13 @@ StFstHitCollection* StMuFstUtil::getFst(StMuFstCollection* muFst)
     return fst;
 } //getFst
 
-void StMuFstUtil::fillMuFst(StMuFstCollection *muFst,StFstHitCollection *fstcol)
+void StMuFstUtil::fillMuFst(StMuFstCollection *muFst,StFstHitCollection *fstcol,StFstCollection *fstCollectionPtr)
 {
     LOG_INFO << "fillMuFst" << endm;
     if(!fstcol) return;
     if(!muFst) return;
 
-    fillMuFstHits(muFst, fstcol);
+    fillMuFstHits(muFst, fstcol, fstCollectionPtr);
 
 } // fillMuFst
 
@@ -64,10 +68,29 @@ void StMuFstUtil::fillFst(StFstHitCollection* fstcol,StMuFstCollection* muFst)
 } // fillFst
 
 void StMuFstUtil::fillMuFstHits(StMuFstCollection* muFst,
-        StFstHitCollection* fstcol)
+        StFstHitCollection* fstcol,
+        StFstCollection *fstCollectionPtr)
 {
     LOG_INFO << "fillMuFstHits" << endm;
+    //fill FST Raw Hits
+    if(fstCollectionPtr->getNumRawHits() > 0) {
+        for(int wedgeIdx=0; wedgeIdx<kFstNumWedges; ++wedgeIdx ){
+            StFstRawHitCollection *rawHitCollectionPtr = fstCollectionPtr->getRawHitCollection( wedgeIdx );
+            if( rawHitCollectionPtr ){
+                std::vector<StFstRawHit*>& rawHitVec = rawHitCollectionPtr->getRawHitVec();
+                std::vector< StFstRawHit* >::iterator rawHitIter;
 
+                for( rawHitIter = rawHitVec.begin(); rawHitIter != rawHitVec.end(); ++rawHitIter ){
+                    StFstRawHit* rawHit = *rawHitIter;
+
+                    StMuFstRawHit* muFstRawHit = muFst->addRawHit();
+                    muFstRawHit->set( rawHit );
+                } // for raw hit
+            }
+        } // for wedgeIdx
+    } // if has FST Raw hit
+
+    //fill FST hits
     for(int wedgeIdx=0; wedgeIdx<kFstNumWedges; wedgeIdx++ )
     {
         StFstWedgeHitCollection* wedgeHitCollection = fstcol->wedge(wedgeIdx);

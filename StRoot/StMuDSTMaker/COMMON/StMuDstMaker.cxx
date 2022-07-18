@@ -71,6 +71,7 @@
 #include "StMuFttRawHit.h"
 #include "StMuFstCollection.h"
 #include "StMuFstUtil.h"
+#include "StMuFstRawHit.h"
 #include "StMuFstHit.h"
 #include "StMuEpdHit.h"  // MALisa
 #include "StMuEpdHitCollection.h"  // MALisa
@@ -1208,7 +1209,19 @@ void StMuDstMaker::fillFst(StEvent* ev) {
     connectFstCollection();
     mStMuDst->set(this);
   }
-  mFstUtil->fillMuFst(mFstCollection,fstcol);
+
+  //raw hit data input
+  TObjectSet* fstDataSet = (TObjectSet*)GetDataSet("fstRawHitAndCluster");
+  if (!fstDataSet) {
+      LOG_WARN << "StMuDstMaker::Make() - there is no fstDataSet (raw hit) " << endm;
+  }        
+
+  StFstCollection* fstCollectionPtr = (StFstCollection*)fstDataSet->GetObject();
+  if(!fstCollectionPtr) {
+      LOG_WARN << "StMuDstMaker::Make() - no fstCollection for FST raw hit."<<endm;
+  }
+
+  mFstUtil->fillMuFst(mFstCollection,fstcol,fstCollectionPtr);
 
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
@@ -2042,6 +2055,7 @@ void StMuDstMaker::connectFttCollection() {
 //-----------------------------------------------------------------------
 void StMuDstMaker::connectFstCollection() {
   LOG_INFO << "Setting Fst arrays" << endm;
+  mFstCollection->setFstRawHitArray(mFstArrays[muFstRawHit]);
   mFstCollection->setFstHitArray(mFstArrays[muFstHit]);
 }
 //-----------------------------------------------------------------------
