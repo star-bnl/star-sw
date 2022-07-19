@@ -2460,7 +2460,8 @@ my $step = 0;
 #$hist = "RunXIX_XXII_26"; $NEvents = 4000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/13/22  - new RunXIX_XXII_25/TpcSecRowB*.root
 #$hist = "RunXIX_XXII_27"; $NEvents = 4000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/14/22  - use deflault or Vpd vertex, new RunXIX_XXII_26/TpcSecRowB*.root and TpcZCorrectionC
 #$hist = "RunXIX_XXII_28"; $NEvents = 4000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/15/22  - new TpcPadCorrectionMDF
-$hist = "RunXIX_XXII_29"; $NEvents = 4000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/16/22  - new TpcSecRowB
+#$hist = "RunXIX_XXII_29"; $NEvents = 4000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/16/22  - new TpcSecRowB
+$hist = "RunXIX_XXII_30"; $NEvents = 4000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22b"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  07/17/22  - new TpcLengthCorrectionMDN, new prediction for Ifit
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();

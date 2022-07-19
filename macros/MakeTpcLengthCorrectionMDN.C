@@ -11,7 +11,12 @@
   end 
  dir TpcZCorrectionB.20*.C | grep GeV | grep fixed | sed 's/TpcZCorrectionB/TpcLengthCorrectionMDN/g' | awk '{print "ln -s TpcLengthCorrectionMDN.FXT.C "$9}'
  dir TpcZCorrectionB.20*.C | grep GeV | grep -v fixed | sed 's/TpcZCorrectionB/TpcLengthCorrectionMDN/g' | awk '{print "ln -s TpcLengthCorrectionMDN.COL.C "$9}'
- */
+
+  foreach b (`ls -1d NPoints*U+*.root | sed -e 's/.*GP//' -e 's/.root//'`)
+  echo "${b}"
+  root.exe -q -b NPoints*U+*${b}.root  MakeTpcLengthCorrectionMDN.C+ | tee ${b}.log
+  end 
+*/
 #ifndef __CINT__
 #include <stdlib.h>
 #include <string.h>
@@ -440,7 +445,7 @@ void  MakeTpcLengthCorrectionMDN(Int_t date = 0, Int_t time = 0){
   TString tag;
   while ( (f = (TFile *) next()) ) {
     TString F(f->GetName());
-    if (! F.Contains("NPoints2")) continue;
+    if (! F.Contains("NPoints")) continue;
     Int_t l = -1;
     if (F.Contains("70U")) l = 0;
     else if (F.Contains("NU")) l = 1;
@@ -451,10 +456,10 @@ void  MakeTpcLengthCorrectionMDN(Int_t date = 0, Int_t time = 0){
     if (! mu || ! sigma) continue;
     if (tag == "") {
       tag = f->GetName();
-      tag.ReplaceAll("NPoints2","");
-      tag.ReplaceAll("70","");
-      tag.ReplaceAll("F","");
-      tag.ReplaceAll("N","");
+      tag.ReplaceAll("NPoints70","");
+      tag.ReplaceAll("NPointsF","");
+      tag.ReplaceAll("NPointsN","");
+      tag.ReplaceAll("U+UPGP","");
       tag.ReplaceAll("UGP","");
       tag.ReplaceAll(".root","");
     }

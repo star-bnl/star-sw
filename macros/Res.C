@@ -57,34 +57,48 @@ void bichselG10(const Char_t *type, Int_t Nhyps=9);
 //________________________________________________________________________________
 void SetTitle(TString &Title) {
   //      if (Title.Contains("602P03ih"))  Title.ReplaceAll("602P03ih"," default ");
-  Title.ReplaceAll("GPHist","");
-  Title.ReplaceAll("TPoints70BE","I70  East");
-  Title.ReplaceAll("TPointsBE"  ,"Ifit East  ");
-  Title.ReplaceAll("TPoints70BW","I70  West ");
-  Title.ReplaceAll("TPointsBW"  ,"Ifit West ");
-  Title.ReplaceAll("TPoints70B", "I70  ");
-  Title.ReplaceAll("TPoints70U", "U70  ");
-  Title.ReplaceAll("TPoints70" , "I70  ");
-  Title.ReplaceAll("TPointsN"  , "Nfit ");
-  Title.ReplaceAll("TPointsNU" , "NfitU");
-  Title.ReplaceAll("TPointsB"  , "Ifit ");
-  Title.ReplaceAll("TPointsU"  , "Ufit ");
-  Title.ReplaceAll("TPointsF"  , "Ifit ");
-  Title.ReplaceAll("TPoints"   , "Ifit ");
+  //  cout << "Set Title: " << Title.Data();
+  Title.ReplaceAll("TPoints70U+TPoints70UP", "U70+-");
+  Title.ReplaceAll("TPointsNU+TPointsNUP",   "UN+-");
+  Title.ReplaceAll("TPointsFU+TPointsFUP",   "UF+-");
+  Title.ReplaceAll("TPoints70+TPoints70P" ,  "70+-");
+  Title.ReplaceAll("TPointsN+TPointsNP" ,    "N+-");
+  Title.ReplaceAll("TPointsF+TPointsFP" ,    "F+-");
 
-  Title.ReplaceAll("NPoints70BE","I70  East");
-  Title.ReplaceAll("NPointsBE"  ,"Ifit East  ");
-  Title.ReplaceAll("NPoints70BW","I70  West ");
-  Title.ReplaceAll("NPointsBW"  ,"Ifit West ");
-  Title.ReplaceAll("NPoints70B", "I70  ");
-  Title.ReplaceAll("NPoints70U", "U70  ");
-  Title.ReplaceAll("NPoints70" , "I70  ");
-  Title.ReplaceAll("NPointsN"  , "Nfit ");
-  Title.ReplaceAll("NPointsNU" , "NfitU");
-  Title.ReplaceAll("NPointsB"  , "Ifit ");
-  Title.ReplaceAll("NPointsU"  , "Ufit ");
-  Title.ReplaceAll("NPointsF"  , "Ifit ");
-  Title.ReplaceAll("NPoints"   , "Ifit ");
+  Title.ReplaceAll("TPoints70U", "U70-");
+  Title.ReplaceAll("TPointsNU",   "UN-");
+  Title.ReplaceAll("TPointsFU",   "UF-");
+  Title.ReplaceAll("TPoints70" ,  "70-");
+  Title.ReplaceAll("TPointsN" ,    "N-");
+  Title.ReplaceAll("TPointsF" ,    "F-");
+
+  Title.ReplaceAll("TPoints70UP", "U70+");
+  Title.ReplaceAll("TPointsNUP",   "UN+");
+  Title.ReplaceAll("TPointsFUP",   "UF+");
+  Title.ReplaceAll("TPoints70P" ,  "70+");
+  Title.ReplaceAll("TPointsNP" ,    "N+");
+  Title.ReplaceAll("TPointsFP" ,    "F+");
+
+  Title.ReplaceAll("NPoints70U+NPoints70UP", "U70+-");
+  Title.ReplaceAll("NPointsNU+NPointsNUP",   "UN+-");
+  Title.ReplaceAll("NPointsFU+NPointsFUP",   "UF+-");
+  Title.ReplaceAll("NPoints70+NPoints70P" ,  "70+-");
+  Title.ReplaceAll("NPointsN+NPointsNP" ,    "N+-");
+  Title.ReplaceAll("NPointsF+NPointsFP" ,    "F+-");
+
+  Title.ReplaceAll("NPoints70U", "U70-");
+  Title.ReplaceAll("NPointsNU",   "UN-");
+  Title.ReplaceAll("NPointsFU",   "UF-");
+  Title.ReplaceAll("NPoints70" ,  "70-");
+  Title.ReplaceAll("NPointsN" ,    "N-");
+  Title.ReplaceAll("NPointsF" ,    "F-");
+
+  Title.ReplaceAll("NPoints70UP", "U70+");
+  Title.ReplaceAll("NPointsNUP",   "UN+");
+  Title.ReplaceAll("NPointsFUP",   "UF+");
+  Title.ReplaceAll("NPoints70P" ,  "70+");
+  Title.ReplaceAll("NPointsNP" ,    "N+");
+  Title.ReplaceAll("NPointsFP" ,    "F+");
 
   Title.ReplaceAll("production_","");
   Title.ReplaceAll("_ReversedFullField","");
@@ -124,6 +138,7 @@ void SetTitle(TString &Title) {
   Title.ReplaceAll("Ifit 270","I_{70} ");
   Title.ReplaceAll("Ifit 2F","I_{fit} ");
   Title.ReplaceAll("Ifit 2N","dN/dx ");
+  //  cout << "\t" << Title.Data() << endl;
 }
 //________________________________________________________________________________
 void Set(Int_t color=1) {
@@ -165,6 +180,7 @@ void Set(Int_t color=1) {
 }
 //________________________________________________________________________________
 void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pattern = "") {
+  TString Summary;
   //  const Char_t *FitNames[3] = {"Fit","I70","I60"};
   TPRegexp Pattern(pattern);
   TString plot(name);
@@ -203,10 +219,13 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
   c1->SetTitle("Resolution versus Track Length");
   c1->SetGrid(); //x(9);
   //  c1->SetGridy(30);
+  TCanvas *c2 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject("c2");
+  if (! c2 ) c2 = new TCanvas("c2","c2");
+  c1->cd();
   TH1F *frame = 0;
   Double_t xmin =  10;
   Double_t xmax = 210;
-  if (! IsLength) {xmin = 2.5; xmax = 72.5;}
+  if (! IsLength) {xmin = 10.5; xmax = 72.5;}
   TString PlotH(Plot); PlotH += Form("(100,%f,%f)",xmin,xmax);
   cout << "plot = " << plot.Data() << "\tPlot = " << PlotH.Data() << " pattern " << Pattern.GetPattern().Data() << endl;
   if (plot == "sigma") {
@@ -226,8 +245,11 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
   Int_t c = 0;
   TF1 *powfit = 0;
   if (plot == "sigma") {
-    powfit = new TF1("powfit","[0]*TMath::Power(x,[1])",xmin,xmax);
-    powfit->SetParameters(0.5,-0.5);
+    //    powfit = new TF1("powfit","[0]*TMath::Power(x,[1])",xmin,xmax);
+    //    powfit = new TF1("powfit","TMath::Exp([0]+TMath::Log(x)*([1]+TMath::Log(x)*[2]))",xmin,xmax);
+    powfit = new TF1("powfit","TMath::Exp([0]+TMath::Log(x)*([1]+TMath::Log(x)*([2]+TMath::Log(x)*[3])))",xmin,xmax);
+    //    powfit = new TF1("powfit","TMath::Exp([0]+TMath::Log(x)*[1])",xmin,xmax);
+    powfit->SetParameters(-0.7,-0.5,0.0);
   } else {
     powfit = new TF1("powfit","pol0",xmin,xmax);
     //	powfit->SetParameter(0,0.);
@@ -274,31 +296,38 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
       if (Hist->GetEntries() < 1.e-4) continue;
       //      Hist->Rebin();
       //      Hist->Scale(0.5);
-      Hist->Fit("powfit","rn");
-      powfit->Draw("same");
+      powfit->SetLineColor(c);
+      c2->cd();
+      Hist->Fit(powfit,"r","",xmin,xmax);
       //      Hist->Fit("powfit","r");
+      c1->cd();
       Hist->Draw("same");
       //      leg->AddEntry(sigma,Form("%s:  #sigma(@76cm) = %5.2f%%",FitNames[i],100*powfit->Eval(76)));
       SetTitle(Title);
+      TString ltit;
       if (plot == "sigma") {
 	if (IsLength ) {
-	  //	Title += Form(" : #sigma(@76cm) = %5.2f%\%",100*powfit->Eval(76));
+	  //	ltit += Form(" : #sigma(@76cm) = %5.2f%%\%",100*powfit->Eval(76));
 	  Double_t L = 77.34;
-	  Title += Form(" : #sigma(@%5.1fcm) = %5.2f%\%",L,100*powfit->Eval(L));
+	  ltit = Form("#sigma(@%5.1fcm) = %5.2f%\%",L,100*powfit->Eval(L)); 
 	  L = 124.4;
-	  Title += Form(" : #sigma(@%5.1fcm) = %5.2f%\%",L,100*powfit->Eval(112));
+	  ltit = Form("#sigma(@%5.1fcm) = %5.2f%\%",Title.Data(),L,100*powfit->Eval(L));
 	} else {
-	  Double_t L = 72.0 * 0.9;
-	  if (Title.Contains("70")) L *= 2./3.;
-	  Title += Form(" : #sigma(@%2.0f npts) = %5.2f%\%",L,100*powfit->Eval(L));
+	  Double_t L = 72.0 * 0.85; // 
+	  if (ltit.Contains("70")) L *= 2./3.;
+	  ltit = Form("#sigma(@%2.0f npts) = %5.2f%\%",L,100*powfit->Eval(L));
 	}
       } else {
-	Title += Form(" : #mu = %5.2f%\%",100*powfit->GetParameter(0));
+	ltit = Form("#mu = %5.2f%\%",100*powfit->GetParameter(0));
       }
-      //      Title += Form(" : #sigma(@128cm) = %5.2f%\%",100*powfit->Eval(128));
-      Title.Strip();
-      cout << gDirectory->GetName() << " " << Title << endl;
-      leg->AddEntry(Hist,Title.Data());
+      //      cout << "ltit " << ltit.Data() << endl;
+      ltit += " for ";
+      ltit += Title;
+      //      ltit += Form(" : #sigma(@128cm) = %5.2f%%\%",100*powfit->Eval(128));
+      //      ltit.Strip();
+      cout << gDirectory->GetName() << " " << ltit << endl;
+      leg->AddEntry(Hist,ltit.Data());
+      Summary += ltit; Summary += "\n";
     }
   }
   if (plot == "sigma" ) {
@@ -327,6 +356,7 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
   }
   leg->Draw();
   delete [] FitFiles;
+  cout << Summary.Data() << endl;
   //  DrawdEdx();
 }
 //________________________________________________________________________________
