@@ -102,15 +102,16 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] =  6.21777e-01 -4.23291e-02 + 1.31883e-02 -6.37730e-02;
-  row.SecRowCorIW[1] = row.SecRowCorIE[1] = -1.54623e-03 +1.26327e-03 + 4.57111e-04;
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] =  9.59474e-01 +2.50905e-02 + 1.21909e-02 +8.57133e-04;
-  row.SecRowCorOW[1] = row.SecRowCorOE[1] =  1.72672e-03 -1.97991e-03; -1.25414e-04;
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] =  0;// 6.21777e-01 -4.23291e-02 + 1.31883e-02 -6.37730e-02;
+  row.SecRowCorIW[1] = row.SecRowCorIE[1] =  0; // -1.54623e-03 +1.26327e-03 + 4.57111e-04;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] =  0; // 9.59474e-01 +2.50905e-02 + 1.21909e-02 +8.57133e-04;
+  row.SecRowCorOW[1] = row.SecRowCorOE[1] =  0; // 1.72672e-03 -1.97991e-03; -1.25414e-04;
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
   //                                          3.22907e-01                          2.72715e-01
   // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
   // diff                                   : 9.13675e-02                          6.29849e-02
   // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
+#if 0
   const Double_t RowSigmaTrs[4] = {
     0.09, 0,  // 0.2313675,   0,  // 9.13675e-02, 0,  // Inner // 9.13675e-02+0.14
     0.11, 0}; //6.29849e-02, 0}; // Outer
@@ -118,6 +119,7 @@ TDataSet *CreateTable() {
   for (Int_t i = 0; i < 8; i++) {
     b[i] = RowSigmaTrs[i%4];
   }
+#endif
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
   //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X

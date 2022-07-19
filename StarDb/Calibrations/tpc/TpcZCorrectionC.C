@@ -14,7 +14,6 @@ TDataSet *CreateTable() {
   row.nrows = nrows;
   row.min =  18.0;
   row.max = 220.0;
-  row.npar =            6;// AuAu200_2019
   tableSet->AddAt(&row);
   return (TDataSet *)tableSet;
 }
