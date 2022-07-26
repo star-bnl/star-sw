@@ -210,7 +210,7 @@
     $STIC          = "stic";
     $STICFLAGS     = "";
     $AGETOF        = "agetof";
-    $AGETOFLAGS    = "-V 1";
+    $AGETOFLAGS    = "-V 1 -d $STAR_BIN/agetof.def";
     $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
 
