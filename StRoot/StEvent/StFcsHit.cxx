@@ -15,8 +15,10 @@
  *
  **************************************************************************/
 #include "StFcsHit.h"
+#include <algorithm>
 
 ClassImp(StFcsHit)
+using namespace std;
 
 StFcsHit::StFcsHit() { /* no operation */}
 
@@ -139,3 +141,20 @@ void StFcsHit::print(Option_t *option) const {
     }
     cout << endl;
 }
+
+void StFcsHit::addGeantTrack(unsigned int id, float e){    
+    unsigned int n=mGeantTracks.size();
+    for(unsigned int i=0; i<n; i++){
+	if(mGeantTracks[i].first == id) {mGeantTracks[i].second += e; return;}
+    }
+    mGeantTracks.push_back(make_pair(id,e));
+    return;
+}
+
+void StFcsHit::sortGeantTracks(){  //Sort Geant Track by descending order of energy
+    std::sort(mGeantTracks.begin(), mGeantTracks.end(), 
+	 [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
+	     return b.second < a.second;
+	 });
+}
+

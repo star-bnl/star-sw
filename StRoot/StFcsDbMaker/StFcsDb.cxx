@@ -1979,3 +1979,119 @@ void StFcsDb::readGainCorrFromText(){
   }
   fclose(F);
 }
+
+//g2t track info                                                                                                   
+unsigned int StFcsDb::backTraceG2tTrack(unsigned int id, g2t_track_st* g2ttrk){
+  int i = id - 1;
+  while(g2ttrk[i].next_parent_p !=0){
+    if(mDebug>3)
+      LOG_INFO<<Form("  BackTrace from=%3d id=%3d Epid=%4d Gpid=%3d Vtx=%3d Parent=%3d E=%6.2f",
+                     id,g2ttrk[i].id,g2ttrk[i].eg_pid,g2ttrk[i].ge_pid,g2ttrk[i].start_vertex_p,
+		     g2ttrk[i].next_parent_p,g2ttrk[i].e)<<endm;
+    i = g2ttrk[i].next_parent_p - 1;
+  }
+  if(mDebug>3) LOG_INFO<<Form("  BackTrace from=%3d id=%3d Epid=%4d Gpid=%3d Vtx=%3d Parent=%3d E=%6.2f Primary!!",
+			      id,g2ttrk[i].id,g2ttrk[i].eg_pid,g2ttrk[i].ge_pid,g2ttrk[i].start_vertex_p,
+			      g2ttrk[i].next_parent_p,g2ttrk[i].e)<<endm;
+  return i + 1;
+}
+    
+g2t_track_st* StFcsDb::getParentG2tTrack(StFcsHit* h, g2t_track_st* g2ttrk, float& fraction, unsigned int order){
+  const vector<pair<unsigned int, float>>& gt = h->getGeantTracks();  
+  int ntrk=gt.size();
+  float detot=0;
+  if(order > gt.size()) {fraction=0; return 0;}
+  for(int itrk=0; itrk<ntrk; itrk++) detot += gt[itrk].second;
+  fraction = gt[order].second / detot;
+  return &g2ttrk[gt[order].first-1];
+}
+
+g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsHit* h, g2t_track_st* g2ttrk, float& fraction, unsigned int order){
+  const vector<pair<unsigned int, float>>& gt = h->getGeantTracks();
+  vector<pair<unsigned int, float>> primary;
+  int ntrk=gt.size();
+  float detot=0;
+  for(int itrk=0; itrk<ntrk; itrk++){
+    float de=gt[itrk].second;
+    unsigned int id=backTraceG2tTrack(gt[itrk].first, g2ttrk);
+    int found=0;
+    unsigned int np=primary.size();
+    for(unsigned int jtrk=0; jtrk<np; jtrk++){
+      if(primary[jtrk].first == id) {primary[jtrk].second += de; found=1; break;}
+    }
+    if(found==0) primary.push_back(make_pair(id,de));
+    detot+=de;
+  }
+  if(order > primary.size()) {fraction=0; return 0;}
+  std::sort(primary.begin(), primary.end(),
+	    [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
+	      return b.second < a.second;
+	    });
+  if(order > primary.size()) {fraction=0; return 0;}
+  fraction = primary[order].second / detot;
+  return &g2ttrk[primary[order].first-1];
+}
+
+g2t_track_st* StFcsDb::getParentG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, unsigned int order){
+  float detot=0;
+  vector<pair<unsigned int, float>> parents;
+  StPtrVecFcsHit& hits = c->hits();  
+  int nhit = hits.size();
+  for(int ihit=0; ihit<nhit; ihit++){    
+    const vector<pair<unsigned int, float>>& gt = hits[ihit]->getGeantTracks();
+    int ntrk=gt.size();
+    for(int itrk=0; itrk<ntrk; itrk++){
+      unsigned int id=gt[itrk].first;
+      float de=gt[itrk].second;
+      int found=0;
+      unsigned int np=parents.size();
+      for(unsigned int jtrk=0; jtrk<np; jtrk++){
+	if(parents[jtrk].first == id) {parents[jtrk].second += de; found=1; break;}
+      }
+      if(found==0) parents.push_back(make_pair(id,de));
+      detot+=de;
+    }
+  }
+  if(order > parents.size()) {fraction=0; return 0;}
+  std::sort(parents.begin(), parents.end(),
+	    [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
+	      return b.second < a.second;
+	    });
+  fraction = parents[order].second / detot;
+  return &g2ttrk[parents[order].first-1];
+}
+
+g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, unsigned int order){
+  float detot=0;
+  vector<pair<unsigned int, float>> primary;
+  StPtrVecFcsHit& hits = c->hits();  
+  int nhit = hits.size();
+  for(int ihit=0; ihit<nhit; ihit++){    
+    const vector<pair<unsigned int, float>>& gt = hits[ihit]->getGeantTracks();
+    int ntrk=gt.size();
+    for(int itrk=0; itrk<ntrk; itrk++){
+      unsigned int id=backTraceG2tTrack(gt[itrk].first,g2ttrk);
+      float de=gt[itrk].second;
+      int found=0;
+      unsigned int np=primary.size();
+      for(unsigned int jtrk=0; jtrk<np; jtrk++){
+	if(primary[jtrk].first == id) {primary[jtrk].second += de; found=1; break;}
+      }
+      if(found==0) primary.push_back(make_pair(id,de));
+      detot+=de;
+    }
+  }
+  if(order > primary.size()) {fraction=0; return 0;}
+  std::sort(primary.begin(), primary.end(),
+	    [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
+	      return b.second < a.second;
+	    });
+  if(mDebug>3){
+    unsigned int np=primary.size();
+    for(unsigned int jtrk=0; jtrk<np; jtrk++){
+      LOG_INFO << Form("Sorted Primary G2T Track %3d id=%3d dE=%f",jtrk,primary[jtrk].first,primary[jtrk].second)<<endm;
+    }
+  }
+  fraction = primary[order].second / detot;
+  return &g2ttrk[primary[order].first-1];
+}

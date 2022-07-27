@@ -105,6 +105,7 @@
 #include "tables/St_fcsHcalGainCorr_Table.h"
 #include "tables/St_fcsPresValley_Table.h"
 #include "tables/St_vertexSeed_Table.h"
+#include "tables/St_g2t_track_Table.h"
 class StFcsHit;
 class StFcsCluster;
 class StFcsPoint;
@@ -256,6 +257,13 @@ public:
   void setPedestal(int ehp, int ns, int dep, int ch, float ped); //! setting pedestal
   void readPedFromText(const char* file="fcsped.txt"); //! reading pedestal from text
   
+  //g2t track info
+  unsigned int backTraceG2tTrack(unsigned int id, g2t_track_st* g2ttrk);
+  g2t_track_st* getParentG2tTrack(StFcsHit* h,      g2t_track_st* g2ttrk, float& fraction, unsigned int order=0);
+  g2t_track_st* getParentG2tTrack(StFcsCluster* c,  g2t_track_st* g2ttrk, float& fraction, unsigned int order=0);
+  g2t_track_st* getPrimaryG2tTrack(StFcsHit* h,     g2t_track_st* g2ttrk, float& fraction, unsigned int order=0);
+  g2t_track_st* getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, unsigned int order=0);
+
  private:
   int   mDbAccess=1;                     //! enable(1) or disabe(0) DB access
   int   mRun=0;                          //! run#

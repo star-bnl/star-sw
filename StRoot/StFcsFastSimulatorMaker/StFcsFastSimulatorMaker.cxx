@@ -149,6 +149,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	    fcshit = mEcalMap[ns][id];
 	    fcshit->setEnergy(fcshit->energy() + de);
 	  }
+	  fcshit->addGeantTrack(hit->track_p,de);
 	  hit++;
 	}
       }
@@ -200,6 +201,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	      fcshit = mHcalMap[ns][id];
 	      fcshit->setEnergy(fcshit->energy() + de);
 	    }
+	    fcshit->addGeantTrack(hit->track_p,de);
 	    hit++;
 	  }else{ //leaky hcal with up to 4 WLSP getting lights from a tower
 	    float de[4];
@@ -234,6 +236,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 		fcshit = mHcalMap[ns][id2];
 		fcshit->setEnergy(fcshit->energy() + de[j]);
 	      }
+	      fcshit->addGeantTrack(hit->track_p,de[j]);
 	    }
 	    hit++;
 	  }
@@ -291,6 +294,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
 	    fcshit->setEnergy(fcshit->energy() + de);
 	  }
 	  hit++;
+	  fcshit->addGeantTrack(hit->track_p,de);
 	}
       }
     }
@@ -318,6 +322,7 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
       int ehp = mFcsDb->ecalHcalPres(det);
       hits[i]->setAdc(0,adc);
       hits[i]->setEnergy(digi_energy);
+      hits[i]->sortGeantTracks();
       fcscollection->addHit(det,hits[i]); 
       etot[ehp] += digi_energy;
 	     nhit[ehp]++;

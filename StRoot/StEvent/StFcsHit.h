@@ -87,9 +87,13 @@ public:
     void setCluster(StFcsCluster* clu) {mCluster = clu;}
     StFcsCluster *cluster() {return mCluster;}
 
+    const vector<pair<unsigned int, float>>& getGeantTracks() const {return mGeantTracks;}
+    void addGeantTrack(unsigned int id, float e);
+    void sortGeantTracks();
+
     void print(Option_t *option="") const;
 
-protected:
+ protected:
     UShort_t mDetId=0;        // 1 bit ZS, 3 bits DetectorId, 12 bits id
     UShort_t mDepCh=0;        // 1 bit for NS, 2 bits for EHP, 5 bits for DEP, 8 bits for channal
     UInt_t   mAdcSum=0;       // ADC sum 
@@ -100,9 +104,10 @@ protected:
     Float_t  mEnergy=0.0;     // corrected energy
     StFcsCluster* mCluster=0; // pointer to cluster this hit belongs
     TArrayS* mData=0;         // 12bit ADC values + flag at highest 4 bits, array of timebin
-    
-    ClassDef(StFcsHit,5)
 
+    vector<pair<unsigned int, float>> mGeantTracks; // parent G2T track id and dE
+    
+    ClassDef(StFcsHit,6)
 };
 
 #endif
