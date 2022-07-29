@@ -145,9 +145,9 @@ void StFcsHit::print(Option_t *option) const {
 void StFcsHit::addGeantTrack(const unsigned int id, float e){    
     // auto cmp = [](auto t){ return t.first == id; }; //c++20
     auto cmp = [id](decltype(mGeantTracks)::value_type t){ return t.first == id; };
-    auto trk = find_if(begin(mGeantTracks), end(mGeantTracks), cmp);
-    if(trk == end(mGeantTracks)){
-      mGeantTracks.insert(trk, make_pair(id, e));
+    auto trk = find_if(mGeantTracks.rbegin(), mGeantTracks.rend(), cmp);
+    if(trk == mGeantTracks.rend()){
+      mGeantTracks.push_back(make_pair(id, e));
     }else{
       trk->second += e;
     }
