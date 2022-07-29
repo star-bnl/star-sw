@@ -238,6 +238,11 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
   TCanvas *c1 = (TCanvas*)gROOT->GetListOfCanvases()->FindObject("c1");
   if (! c1)  c1 = new TCanvas("c1","c1",1400,1200);
   else       c1->Clear();
+#if 0
+  TCanvas *c2 = (TCanvas*)gROOT->GetListOfCanvases()->FindObject("c2");
+  if (! c2)  c2 = new TCanvas("c2","c2");
+  else       c2->Clear();
+#endif
   Int_t NF = SetFileList();  
   if (! NF) return;
   TString Current(gDirectory->GetName());
@@ -287,6 +292,8 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
 	  p = new TProfile(histN,"#mu versus sector phi  ", nx, xMin, xMax);
 	} else if (DirName.Contains("SecRow3")) {
 	  p = new TProfile(histN,"#mu versus signed drift distance",2*mu->GetYaxis()->GetNbins()+1, -mu->GetYaxis()->GetXmax(), mu->GetYaxis()->GetXmax());
+	} else if (DirName.Contains("GEX")) {
+	  p = new TProfile(histN,"#mu versus Log(n_{P})",mu->GetXaxis()->GetNbins()+1, mu->GetXaxis()->GetXmin(), mu->GetXaxis()->GetXmax());
 	}
       }
     } else {
@@ -296,14 +303,18 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
     p->SetLineColor(icol);
     p->SetMarkerStyle(kM);
     p->SetMarkerSize(1);
-#if 0
+#if 1
     cout << k << "\t" << F[k]->GetName() << endl;
     cout << "FitP->Draw(\"" << Drawh << "\",\"" << cut << "\",\"" << same << "\")" << endl;
+#endif
+#if 0
+    c2->cd();
 #endif
     FitP->Draw("mu>>muH",cut,"goff");
     TH1 *muH = (TH1 *) gDirectory->Get("muH");
     Double_t RMS = -99;
     if (muH) RMS = 100*muH->GetRMS();
+    c1->cd();
     FitP->Draw(Drawh,cut,same);
     TH1 *hist = (TH1 *) gDirectory->Get(histN);
     if (hist) {
@@ -439,7 +450,7 @@ void FitPMu(const Char_t *draw="mu",
   leg->Draw();
 }
 //________________________________________________________________________________
-void FitPDraw(TString Opt = "I") {
+void FitPDraw(TString Opt = "I", TString plot = "") {
   if (! gDirectory) {return;}
   TString Name(gDirectory->GetName());
   if        (Name.BeginsWith("SecRow3")) {  MuDraw();
@@ -458,6 +469,23 @@ void FitPDraw(TString Opt = "I") {
       MuDraw("mu:0.5*y+TMath::Nint(x)","xyI", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))<0)", "prof", 0.25,  0.15, "Inner", "xy");
     } else {
       MuDraw("mu:0.5*y+TMath::Nint(x)","xyO", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))>0)", "prof", 0.25,  0.15, "Outer", "xy");
+    }
+  } else if (Name.Contains("GEX"))      {
+    if (Opt == "sigma") {
+      MuDraw("sigma:x","znpL", 0,   0, 0, "(i&&dmu<2e-2&&dsigma<2e-2&&da0<1&&x>3)", "prof", 0.0,  1.0, "All", "npL");
+    } else if (Opt == "k") {
+      MuDraw("a0:x","znpL", 0,   0, 0, "(i&&dmu<2e-2&&dsigma<2e-2&&da0<1&&x>3)", "prof", -10.0,  10.0, "All", "npL");
+    } else {
+      if (plot == "") {
+	MuDraw("mu:x","znpL", 0,   0, 0, "(i&&dmu>0&&dmu<2e-2&&dsigma<2e-2&&da0<1)", "prof", -0.4,  1.6, "All", "npL");
+      } else {
+	if (plot.Contains("sigma")) 
+	  MuDraw(plot.Data(),"znpL", 75,   3.0, 10.5, "(i&&dmu<2e-2&&dsigma<2e-2&&da0<1&&x>3)", "", 0.0,  0.6, "All", "npL");
+	else if (plot.Contains("a0")) 
+	  MuDraw(plot.Data(),"znpL", 75,   3.0, 10.5, "(i&&dmu<2e-2&&dsigma<2e-2&&da0<1&&x>3)", "", -10.,  10., "All", "npL");
+	else 
+	  MuDraw(plot.Data(),"znpL", 75,   3.0, 10.5, "(i&&dmu<2e-2&&dsigma<2e-2&&da0<1&&x>3)", "", -0.4,  6.2, "All", "npL");
+      }
     }
   }
 }

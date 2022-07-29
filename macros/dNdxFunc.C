@@ -10,33 +10,6 @@
 #include "TArrayD.h"
 #include "TGraph.h"
 Bichsel *m_Bichsel = 0;
-#if 0
-//________________________________________________________________________________
-Double_t zMP(Double_t *x, Double_t *p) {
-  Double_t log10bg = x[0];
-  Double_t pOverM  = TMath::Power(10., log10bg);
-  Double_t log2dx  = p[0];
-  Double_t charge  = p[1];
-  Double_t dx      = TMath::Power( 2., log2dx);
-  Double_t dNdx = StdEdxModel::instance()->dNdx(pOverM, charge);
-  Double_t Np = dNdx*dx;
-  Double_t dEkeVLog = StdEdxModel::instance()->LogdEMPVkeV(Np); 
-  Double_t dEdxLog  = dEkeVLog - TMath::Log(dx);
-  return   dEdxLog;
-}
-//________________________________________________________________________________
-TF1 *ZMP(Double_t log2dx = 1) {
-  TF1 *f = 0;
-  if (! f) {
-    f = new TF1(Form("N%i",(int)log2dx+2),zMP,-2,5,2);
-    f->SetParName(0,"log2dx");
-    f->SetLineStyle(2);
-    f->SetParameter(0,log2dx);
-    f->SetParameter(1, 1.0); // charge
-  }
-  return f;
-}
-#endif
 //________________________________________________________________________________
 Double_t bichselZ(Double_t *x,Double_t *par) {
   return m_Bichsel->GetMostProbableZ(x[0],par[0]);
@@ -56,11 +29,19 @@ void dNdxFunc(Double_t log2dx = 1) {
   if (!m_Bichsel) m_Bichsel = Bichsel::Instance();
   TCanvas *c1 = new TCanvas("c1","c1");
   TLegend *l = new TLegend(0.4,0.6,0.8,0.9);
-  TH1F *frame = c1->DrawFrame(-2,0.5,4,10);
-  for (Int_t color = 1; color < 8; color++) {
+  TH1F *frame = c1->DrawFrame(-1,0.5,4,6);
+  frame->SetTitle("The most probable log(dE/dx[keV/cm]) versu log_{10}(#beta #gamma)");
+  frame->SetXTitle("log_{10}(#beta #gamma)");
+  //  for (Int_t color = 1; color < 8; color++) {
+  for (Int_t color = 2; color <= 4; color++) {
     Double_t log2dx = color - 2;
     Double_t dx = TMath::Power(2.,log2dx);
 #if 1
+    TF1 *fnOld = StdEdxModel::ZMPold(log2dx);
+    fnOld->SetLineColor(color);
+    fnOld->SetMarkerColor(color);
+    fnOld->Draw("same");
+    l->AddEntry(fnOld,Form("%4.1fcm Old",dx));
     TF1 *fn = StdEdxModel::ZMP(log2dx);
     fn->SetLineColor(color);
     fn->SetMarkerColor(color);

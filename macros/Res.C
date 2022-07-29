@@ -301,6 +301,7 @@ void Res(const Char_t *select="x", const Char_t *name="sigma", const Char_t *pat
       Hist->Fit(powfit,"r","",xmin,xmax);
       //      Hist->Fit("powfit","r");
       c1->cd();
+      Hist->SetStats(0);
       Hist->Draw("same");
       //      leg->AddEntry(sigma,Form("%s:  #sigma(@76cm) = %5.2f%%",FitNames[i],100*powfit->Eval(76)));
       SetTitle(Title);

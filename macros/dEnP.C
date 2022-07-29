@@ -15,6 +15,8 @@ TH2F *znpL  = 0;
 TH2F *znpLS = 0;
 TH2F *zenpL  = 0;
 TH2F *zenpLS = 0;
+TH1F *dN = 0;
+TH1F *ne  = 0;
 TFile *fOut = 0;
 //________________________________________________________________________________
 Double_t Ec(Double_t *x, Double_t *p) {
@@ -28,7 +30,8 @@ TF1 *fEc(Double_t w) {
   f->SetParameter(0,w);
   return f;
 }
-void dEnP() {
+//________________________________________________________________________________
+void dEnP(Double_t tMax = 1e6, Int_t nev = 10e6) {
   new TRandom3;
   TF1::InitStandardFunctions();
   if (! mdNdEL10) {
@@ -48,39 +51,13 @@ void dEnP() {
   Double_t xl1 =  0.4;
   Double_t xl2 = 10.4;
   if (! znpL) {
-    if (! fOut) fOut = new TFile("znpLS9,root","recreate");
-    znpL = new TH2F("znpL","z = log(dE/nP) versus log(nP)",nx,xl1,xl2,14000,1.,8.);
-    zenpL = new TH2F("zenpL","z = log(ne/nP) versus log(nP)",nx,xl1,xl2,14000,-2,5);
-#if 0
-    znpLS = new TH2F("znpLS","z = log(dE/nP) versus log(nP) shifted and scaled",nx,xl1,xl2,2000,-5.0,15.0);
-    zenpLS = new TH2F("zenpLS","z = log(ne/nP) versus log(nP) shifted and scaled",nx,xl1,xl2,2000,-5.0,15.0);
-#endif
+    //    if (! fOut) fOut = new TFile(Form("znptMax_%5.0e_%5.0e.root", tMax, (Double_t ) nev),"recreate");
+    if (! fOut) fOut = new TFile(Form("znptMax_%5.0e.root", tMax),"recreate");
+    znpL = new TH2F("znpL","z = log(dE/nP) versus log(nP)",  nx,xl1,xl2,2000, 0.0,10.);
+    zenpL = new TH2F("zenpL","z = log(ne/nP) versus log(nP)",nx,xl1,xl2,2000,-2.0, 8.);
+    dN = new TH1F("dN","Nc/Np",100,0.0, 2.0);
+    ne = new TH1F("ne","dNp/dNe",100,-0.5, 95.5);
   }
-  /*
-root.exe [30] znpL_1->Fit("pol2","er","",0.5,5.5)
- FCN=1619.97 FROM MINOS     STATUS=SUCCESSFUL     30 CALLS         152 TOTAL
-                     EDM=1.85318e-11    STRATEGY= 1      ERROR MATRIX ACCURATE 
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           2.93649e+00   3.69754e-04   3.64080e-09  -8.12008e-08
-   2  p1           7.33224e-03   2.31856e-04  -9.65120e-10  -1.13890e-04
-   3  p2           2.23307e-03   3.39739e-05   3.39739e-05  -1.61530e-04
-root.exe [10] znpL_2->Fit("pol4","e")
- FCN=21198.4 FROM MINOS     STATUS=FAILURE       502 CALLS        2566 TOTAL
-                     EDM=1.58937e-13    STRATEGY= 1      ERR MATRIX NOT POS-DEF
-  EXT PARAMETER                APPROXIMATE        STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           2.97780e-01   5.06605e-05  -6.92102e-06  -9.18198e-04
-   2  p1          -1.24762e-01   1.17656e-05   8.17163e-06  -6.35876e-04
-   3  p2           2.54248e-02   1.52554e-06  -2.70691e-06   6.29532e-02
-   4  p3          -2.51517e-03   1.77540e-07   3.42556e-07  -4.55810e-02
-   5  p4           9.36223e-05   1.47646e-08   1.47646e-08   6.76410e-01
-   */
-  Double_t parsShift[10] = {    2.9183,  -0.087344,     0.1909,   0.021381,  -0.073944,  0.0014578,   0.013435, -0.0017357, -0.00080603, 0.00015234};
-  Double_t parsSigma[10] = {   0.59488,   -0.13761,   -0.18675, -0.00066448,   0.051821, -0.0049375, -0.0074166,  0.0020477, 0.00037501, -0.00016473};
-  TF1 *pol9 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol9");
-  if (! pol9) return;
-  Int_t nev = 10000000;
   Double_t W = 26.2;// eV 
   TF1 *mHeed = fEc(W);
   static Double_t cLog10 = TMath::Log(10.);
@@ -92,54 +69,39 @@ root.exe [10] znpL_2->Fit("pol4","e")
     Double_t ddE = 0;
     Double_t dEr = 0;
     Double_t Nt = 0; // HeedCsize(dE, dEr,rs);
+    Double_t nPc = 0;
     for (Int_t iP = 1; iP <= nP; iP++) {
-#if 0
-      while (1) {
+      ddE = TMath::Exp(cLog10*mdNdEL10->GetRandom());
+#ifdef __Cut3__
+      if (ddE < W/2) continue;
+      if (ddE > tMax) continue;
+#else /* __Cut5__ Cut6*/
+      while ((ddE < W/2 || ddE > tMax)) {
 	ddE = TMath::Exp(cLog10*mdNdEL10->GetRandom());
-	if (ddE > W/2) break;
-	Nt++;
       }
-      dE += ddE;
-#else
-      while ((ddE = TMath::Exp(cLog10*mdNdEL10->GetRandom())) < W/2) {}
+#endif
       Double_t dET = ddE + dEr;
       dEr = dET;
       Double_t EC;
+      Double_t nec = 0;
       while ((EC = mHeed->GetRandom()) < dEr) { 
 	dEr -= EC; 
 	Nt++;
+	nec++;
 	dE += EC; 
       }
-#endif
+      if (nec) nPc++;
+      ne->Fill(nec);
     }
     if (Nt <= 0.0) continue;
+    dN->Fill(nPc/P);
     dE /= P;
     if (dE <= 0.0) continue;
     Double_t yL = TMath::Log(dE);
     znpL->Fill(xl, yL);
     Double_t nL = TMath::Log(Nt/P);
     zenpL->Fill(xl, nL);
-#if 0
-#if 0
-    Double_t X = xl;
-    if (X < 0.5) X = 0.5;
-    if (X > 5.5) X = 5.5;
-    Double_t shift = 2.93649e+00 + X*(7.33224e-03 + X*2.23307e-03);
-    X = xl;
-    Double_t scale =  2.97780e-01
-      +      X *(    -1.24762e-01
-      +      X *(     2.54248e-02
-      +      X *(    -2.51517e-03
-      +      X *      9.36223e-05)));
-#else
-    Double_t X = 0;
-    if (xl > 0) X = TMath::Log(xl);
-    Double_t shift = pol9->EvalPar(&X, parsShift);
-    Double_t scale = pol9->EvalPar(&X, parsSigma);
-#endif
-    Double_t yS = (yL - shift)/scale;
-    znpLS->Fill(xl, yS);
-#endif
+    if (nev > 100 && (ev % (nev/100)) == 0) {cout << ev << endl;}
   }
   fOut->Write();
 }
