@@ -142,13 +142,19 @@ void StFcsHit::print(Option_t *option) const {
     cout << endl;
 }
 
-void StFcsHit::addGeantTrack(unsigned int id, float e){    
-    unsigned int n=mGeantTracks.size();
-    for(unsigned int i=0; i<n; i++){
-	if(mGeantTracks[i].first == id) {mGeantTracks[i].second += e; return;}
+void StFcsHit::addGeantTrack(const unsigned int id, float e){    
+    // auto cmp = [](auto t){ return t.first == id; }; //c++20
+    auto cmp = [id](decltype(mGeantTracks)::value_type t){ return t.first == id; };
+    auto trk = find_if(begin(mGeantTracks), end(mGeantTracks), cmp);
+    if(trk == end(mGeantTracks)){
+      mGeantTracks.insert(trk, make_pair(id, e));
+    }else{
+      trk->second += e;
     }
-    mGeantTracks.push_back(make_pair(id,e));
-    return;
+    // Old way
+    //for(unsigned int i=0; i<mGeantTracks.size(); i++)
+    //  if(mGeantTracks[i].first == id) {mGeantTracks[i].second += e; return;}
+    //mGeantTracks.push_back(make_pair(id,e));
 }
 
 void StFcsHit::sortGeantTracks(){  //Sort Geant Track by descending order of energy

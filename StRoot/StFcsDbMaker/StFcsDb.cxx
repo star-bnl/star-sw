@@ -1996,22 +1996,27 @@ unsigned int StFcsDb::backTraceG2tTrack(unsigned int id, g2t_track_st* g2ttrk){
   return i + 1;
 }
     
-g2t_track_st* StFcsDb::getParentG2tTrack(StFcsHit* h, g2t_track_st* g2ttrk, float& fraction, unsigned int order){
+const g2t_track_st* StFcsDb::getParentG2tTrack(StFcsHit* h, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order){
   const vector<pair<unsigned int, float>>& gt = h->getGeantTracks();  
-  int ntrk=gt.size();
+  ntrk=gt.size();
   float detot=0;
   if(order > gt.size()) {fraction=0; return 0;}
   for(int itrk=0; itrk<ntrk; itrk++) detot += gt[itrk].second;
   fraction = gt[order].second / detot;
+  if(mDebug>3){
+    for(unsigned int jtrk=0; jtrk<ntrk; jtrk++){
+      LOG_INFO << Form("Hit's parent G2T Track %3d id=%3d dE=%f",jtrk,gt[jtrk].first,gt[jtrk].second)<<endm;
+    }
+  }
   return &g2ttrk[gt[order].first-1];
 }
 
-g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsHit* h, g2t_track_st* g2ttrk, float& fraction, unsigned int order){
+const g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsHit* h, g2t_track_st* g2ttrk, float& fraction, int& ntrk,unsigned int order){
   const vector<pair<unsigned int, float>>& gt = h->getGeantTracks();
   vector<pair<unsigned int, float>> primary;
-  int ntrk=gt.size();
+  int n=gt.size();
   float detot=0;
-  for(int itrk=0; itrk<ntrk; itrk++){
+  for(int itrk=0; itrk<n; itrk++){
     float de=gt[itrk].second;
     unsigned int id=backTraceG2tTrack(gt[itrk].first, g2ttrk);
     int found=0;
@@ -2022,25 +2027,25 @@ g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsHit* h, g2t_track_st* g2ttrk, flo
     if(found==0) primary.push_back(make_pair(id,de));
     detot+=de;
   }
-  if(order > primary.size()) {fraction=0; return 0;}
+  ntrk = primary.size();
+  if(order > ntrk) {fraction=0; return 0;}
   std::sort(primary.begin(), primary.end(),
 	    [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
 	      return b.second < a.second;
 	    });
-  if(order > primary.size()) {fraction=0; return 0;}
   fraction = primary[order].second / detot;
   return &g2ttrk[primary[order].first-1];
 }
 
-g2t_track_st* StFcsDb::getParentG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, unsigned int order){
+const g2t_track_st* StFcsDb::getParentG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order){
   float detot=0;
   vector<pair<unsigned int, float>> parents;
   StPtrVecFcsHit& hits = c->hits();  
   int nhit = hits.size();
   for(int ihit=0; ihit<nhit; ihit++){    
     const vector<pair<unsigned int, float>>& gt = hits[ihit]->getGeantTracks();
-    int ntrk=gt.size();
-    for(int itrk=0; itrk<ntrk; itrk++){
+    int n=gt.size();
+    for(int itrk=0; itrk<n; itrk++){
       unsigned int id=gt[itrk].first;
       float de=gt[itrk].second;
       int found=0;
@@ -2052,7 +2057,8 @@ g2t_track_st* StFcsDb::getParentG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, 
       detot+=de;
     }
   }
-  if(order > parents.size()) {fraction=0; return 0;}
+  ntrk=parents.size();
+  if(order > ntrk) {fraction=0; return 0;}
   std::sort(parents.begin(), parents.end(),
 	    [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
 	      return b.second < a.second;
@@ -2061,15 +2067,15 @@ g2t_track_st* StFcsDb::getParentG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, 
   return &g2ttrk[parents[order].first-1];
 }
 
-g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, unsigned int order){
+const g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order){
   float detot=0;
   vector<pair<unsigned int, float>> primary;
   StPtrVecFcsHit& hits = c->hits();  
   int nhit = hits.size();
   for(int ihit=0; ihit<nhit; ihit++){    
     const vector<pair<unsigned int, float>>& gt = hits[ihit]->getGeantTracks();
-    int ntrk=gt.size();
-    for(int itrk=0; itrk<ntrk; itrk++){
+    int n=gt.size();
+    for(int itrk=0; itrk<n; itrk++){
       unsigned int id=backTraceG2tTrack(gt[itrk].first,g2ttrk);
       float de=gt[itrk].second;
       int found=0;
@@ -2081,15 +2087,15 @@ g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk,
       detot+=de;
     }
   }
-  if(order > primary.size()) {fraction=0; return 0;}
+  ntrk=primary.size();
+  if(order > ntrk) {fraction=0; return 0;}
   std::sort(primary.begin(), primary.end(),
 	    [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
 	      return b.second < a.second;
 	    });
   if(mDebug>3){
-    unsigned int np=primary.size();
-    for(unsigned int jtrk=0; jtrk<np; jtrk++){
-      LOG_INFO << Form("Sorted Primary G2T Track %3d id=%3d dE=%f",jtrk,primary[jtrk].first,primary[jtrk].second)<<endm;
+    for(unsigned int jtrk=0; jtrk<ntrk; jtrk++){
+      LOG_INFO << Form("Cluster's Primary G2T Track %3d id=%3d dE=%f",jtrk,primary[jtrk].first,primary[jtrk].second)<<endm;
     }
   }
   fraction = primary[order].second / detot;

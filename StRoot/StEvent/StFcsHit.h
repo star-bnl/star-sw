@@ -88,7 +88,7 @@ public:
     StFcsCluster *cluster() {return mCluster;}
 
     const vector<pair<unsigned int, float>>& getGeantTracks() const {return mGeantTracks;}
-    void addGeantTrack(unsigned int id, float e);
+    void addGeantTrack(const unsigned int id, float e);
     void sortGeantTracks();
 
     void print(Option_t *option="") const;

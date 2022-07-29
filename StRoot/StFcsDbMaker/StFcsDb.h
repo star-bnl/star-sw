@@ -257,12 +257,18 @@ public:
   void setPedestal(int ehp, int ns, int dep, int ch, float ped); //! setting pedestal
   void readPedFromText(const char* file="fcsped.txt"); //! reading pedestal from text
   
-  //g2t track info
+  // Tracing back from a given g2t_track_id to primary track's g2t_track_id
   unsigned int backTraceG2tTrack(unsigned int id, g2t_track_st* g2ttrk);
-  g2t_track_st* getParentG2tTrack(StFcsHit* h,      g2t_track_st* g2ttrk, float& fraction, unsigned int order=0);
-  g2t_track_st* getParentG2tTrack(StFcsCluster* c,  g2t_track_st* g2ttrk, float& fraction, unsigned int order=0);
-  g2t_track_st* getPrimaryG2tTrack(StFcsHit* h,     g2t_track_st* g2ttrk, float& fraction, unsigned int order=0);
-  g2t_track_st* getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, unsigned int order=0);
+
+  // Getting pointer to parent & primary g2t_track from StFcsHit & StFcsCluster
+  // User need to provide g2t_track_st table from geant.root file
+  // order=0 (default) gives the top contributing g2t_track for the hit/cluster. 1,2... for lower contributer
+  // It also return fraction of dE from the g2t_track to the hit/cluster
+  // It also returns number of g2t_tracks contributing to the hit/cluster 
+  const g2t_track_st* getParentG2tTrack(StFcsHit* h,      g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
+  const g2t_track_st* getParentG2tTrack(StFcsCluster* c,  g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
+  const g2t_track_st* getPrimaryG2tTrack(StFcsHit* h,     g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
+  const g2t_track_st* getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0);
 
  private:
   int   mDbAccess=1;                     //! enable(1) or disabe(0) DB access

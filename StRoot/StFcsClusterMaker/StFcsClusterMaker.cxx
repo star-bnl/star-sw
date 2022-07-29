@@ -236,26 +236,29 @@ int StFcsClusterMaker::makeCluster(int det) {
       }
     }
     if(g2ttrk){
+      int ntrk=0;
       float frc=0;
       int nh = hits.size();
       for(int i=0; i<nh; i++){
 	StFcsHit* hit=hits[i];
-	g2t_track_st* trk = mDb->getParentG2tTrack(hit,g2ttrk,frc);
-	printf("Det=%1d Id=%3d E=%8.3f Parent  Id=%4d Pid=%4d E=%8.3f Frc=%6.3f\n",
-	       det,hit->id(),hit->energy(),trk->id,trk->ge_pid,trk->e,frc);
-	g2t_track_st* ptrk = mDb->getPrimaryG2tTrack(hit,g2ttrk,frc);
-	printf("Det=%1d Id=%3d E=%8.3f Primary Id=%4d Pid=%4d E=%8.3f Frc=%6.3f\n",
-	       det,hit->id(),hit->energy(),ptrk->id,ptrk->ge_pid,ptrk->e,frc);
+	const g2t_track_st* trk = mDb->getParentG2tTrack(hit,g2ttrk,frc,ntrk);
+	//const g2t_track_st* trk=0; 
+	//std::tie(trk,frc,ntrk) = mDb->getParentG2tTrack(hit,g2ttrk);
+	LOG_INFO << Form("Det=%1d Id=%3d E=%8.3f Parent  Id=%4d Pid=%4d E=%8.3f Frc=%6.3f N=%d",
+			 det,hit->id(),hit->energy(),trk->id,trk->ge_pid,trk->e,frc,ntrk)<<endm;
+	const g2t_track_st* ptrk = mDb->getPrimaryG2tTrack(hit,g2ttrk,frc,ntrk);
+	LOG_INFO << Form("Det=%1d Id=%3d E=%8.3f Primary Id=%4d Pid=%4d E=%8.3f Frc=%6.3f N=%d",
+			 det,hit->id(),hit->energy(),ptrk->id,ptrk->ge_pid,ptrk->e,frc,ntrk)<<endm;
       }
       int nc = clusters.size();
       for(int j=0; j<nc; j++){
 	StFcsCluster* clu=clusters[j];
-	g2t_track_st* trk = mDb->getParentG2tTrack(clu,g2ttrk,frc);
-	printf("Det=%1d C#=%3d E=%8.3f Parent  Id=%4d Pid=%4d E=%8.3f Frc=%6.3f\n",
-	       det,j,clu->energy(),trk->id,trk->ge_pid,trk->e,frc);
-	g2t_track_st* ptrk = mDb->getPrimaryG2tTrack(clu,g2ttrk,frc);
-	printf("Det=%1d C#=%3d E=%8.3f Primary Id=%4d Pid=%4d E=%8.3f Frc=%6.3f\n",
-	       det,j,clu->energy(),ptrk->id,ptrk->ge_pid,ptrk->e,frc);
+	const g2t_track_st* trk = mDb->getParentG2tTrack(clu,g2ttrk,frc,ntrk);
+	LOG_INFO << Form("Det=%1d C#=%3d E=%8.3f Parent  Id=%4d Pid=%4d E=%8.3f Frc=%6.3f N=%d",
+			 det,j,clu->energy(),trk->id,trk->ge_pid,trk->e,frc,ntrk)<<endm;
+	const g2t_track_st* ptrk = mDb->getPrimaryG2tTrack(clu,g2ttrk,frc,ntrk);
+	LOG_INFO << Form("Det=%1d C#=%3d E=%8.3f Primary Id=%4d Pid=%4d E=%8.3f Frc=%6.3f N=%d",
+			 det,j,clu->energy(),ptrk->id,ptrk->ge_pid,ptrk->e,frc,ntrk)<<endm;
       }
     }
   }
