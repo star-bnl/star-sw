@@ -166,21 +166,21 @@ struct Fitx_t {
   Float_t muJ;
   Float_t dmuJ;
   Float_t NormL; // par[0]
-  Float_t mu;   // par[1]
+  Float_t mu;    // par[1]
   Float_t sigma;
-  Float_t a0;
-  Float_t a1;
-  Float_t a2;
-  Float_t a3;
-  Float_t a4;
-  Float_t a5;
-  Float_t a6;
-  Float_t a7;
-  Float_t a8;
-  Float_t a9; // 
-  Float_t a10; //  par[13]; 
+  Float_t a0;    // P
+  Float_t a1;    // K
+  Float_t a2;    // e
+  Float_t a3;    // d
+  Float_t a4;    // Total
+  Float_t a5;    // Case
+  Float_t a6;    // occupancy
+  Float_t a7;    // IO
+  Float_t a8;    // sign
+  Float_t a9;    // recombin 
+  Float_t a10;   //  par[13]; 
   Float_t dNormL; // dpar[0]
-  Float_t dmu;   // dpar[1]
+  Float_t dmu;    // dpar[1]
   Float_t dsigma;
   Float_t da0;
   Float_t da1;
@@ -3375,8 +3375,12 @@ minimu log10(p/m) alpga    -0.7   40 keV          -0.850  0.141 -1.9688383655156
     Mu += shift*dbetaL;
 #endif /* __BETA_SHIFT__ */
 #ifdef __RECOMBINATION__ 
-    Double_t ar = recombination*dNdxMIP[i];
-    if (ar > -1)  Mu += - TMath::Log(1 + ar);
+    //    Double_t ar = recombination*dNdxMIP[i];
+    //    if (ar > -1)  Mu += - TMath::Log(1 + ar);
+    Double_t alpha = recombination;
+    Double_t recom = (1. - alpha*dNdxMIP[i])/(1. - alpha*dNdxMIP[0]);
+    if (recom < 0.8) recom = 0.8;
+    Mu += TMath::Log(recom);
 #endif
     Double_t pars[4] = {0, Mu, parMIP[i][sign][IO][2] + sigma, parMIP[i][sign][IO][3]};
     Value += frac[i]*g->EvalPar(XX, pars);
