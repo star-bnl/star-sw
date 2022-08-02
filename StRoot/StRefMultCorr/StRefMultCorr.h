@@ -197,7 +197,17 @@ class StRefMultCorr {
   std::vector<std::string> StringSplit( const std::string str, const char sep ) const;
 
   // Read scale factor from header file
-  void readScaleForWeight(const Int_t nRefmultBin, const Double_t *weight) ;
+  void readScaleForWeight(const Int_t nRefmultBin, const Double_t *weight);
+
+  /// Calculate maximal or minimal refMult value for pile-up 
+  /// rejection (b parameters for refMultMax, c parameters for refMultMin)
+  Double_t calcPileUpRefMult(Double_t ntofmatch, Double_t x0, Double_t x1, 
+                             Double_t x2, Double_t x3, Double_t x4) const;
+  /// Check if refMult is between refMultLow and refMultHi values (for pile-up rejection)
+  Bool_t isInPileUpRefMultLimits(Double_t refMult, Double_t low, Double_t hi) const 
+  { return ( low < refMult && refMult < hi); }
+
+
 
   ClassDef(StRefMultCorr, 0)
 };
