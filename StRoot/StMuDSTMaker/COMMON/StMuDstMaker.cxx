@@ -1211,14 +1211,17 @@ void StMuDstMaker::fillFst(StEvent* ev) {
   }
 
   //raw hit data input
-  TObjectSet* fstDataSet = (TObjectSet*)GetDataSet("fstRawHitAndCluster");
-  if (!fstDataSet) {
-      LOG_WARN << "StMuDstMaker::Make() - there is no fstDataSet (raw hit) " << endm;
-  }        
+  StFstCollection* fstCollectionPtr = 0;
+  if (IAttr("fstMuRawHit")){//True for storing FST Raw hits
+    TObjectSet* fstDataSet = (TObjectSet*)GetDataSet("fstRawHitAndCluster");
+    if (!fstDataSet) {
+        LOG_WARN << "StMuDstMaker::Make() - there is no fstDataSet (raw hit) " << endm;
+    }        
 
-  StFstCollection* fstCollectionPtr = (StFstCollection*)fstDataSet->GetObject();
-  if(!fstCollectionPtr) {
-      LOG_WARN << "StMuDstMaker::Make() - no fstCollection for FST raw hit."<<endm;
+    fstCollectionPtr = (StFstCollection*)fstDataSet->GetObject();
+    if(!fstCollectionPtr) {
+        LOG_WARN << "StMuDstMaker::Make() - no fstCollection for FST raw hit."<<endm;
+    }
   }
 
   mFstUtil->fillMuFst(mFstCollection,fstcol,fstCollectionPtr);
