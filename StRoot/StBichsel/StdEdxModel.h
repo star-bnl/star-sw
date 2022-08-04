@@ -50,8 +50,19 @@ class StdEdxModel {
   static Double_t Shift2eV () {return shift2eV ;}
   static void     SetScale(Double_t scale = 1.0) {fScale = scale;}
   static Double_t dNdxScale() {return fScale;}
+  static Double_t zMPold(Double_t *x, Double_t *p); // most probable log (dE) versus x = log10(p/M) and p[0] = log2dx and p[1] =  charge
+  static TF1     *ZMPold(Double_t log2dx = 1);
   static Double_t zMP(Double_t *x, Double_t *p); // most probable log (dE) versus x = log10(p/M) and p[0] = log2dx and p[1] =  charge
   static TF1     *ZMP(Double_t log2dx = 1);
+  static Double_t zMPR(Double_t *x, Double_t *p); // + recombination
+  static TF1     *ZMPR(Double_t log2dx = 1); // -"-
+  // from 100 keV Tcut (GEXNor.C0
+  static void InitPar();
+  static Double_t muPar(Double_t x, Double_t tCutL10 = 5); // log_10{Tcut[eV]}
+  static Double_t sigmaPar(Double_t x, Double_t tCutL10 = 5); // log_10{Tcut[eV]}
+  static Double_t a0Par(Double_t x, Double_t tCutL10 = 5); // log_10{Tcut[eV]}
+  static void SetOld(Bool_t k = kTRUE) { fOld = k;}
+  static Double_t tmaxL10eV(Double_t betagamma); // eV
  private:
   StdEdxModel();
   static StdEdxModel *fgStdEdxModel; //! last instance          
@@ -59,13 +70,17 @@ class StdEdxModel {
   static Double_t LogGeVperElectron;
   static TH1D         *mdNdx;       // dN/dx versus beta*gamma
   static Double_t      fScale;
+  static Double_t      fTmaxL10eV;
   static Int_t        _debug;
   static TF1          *fGGaus;        
   static TF1          *fGausExp;        
   static Double_t      shift2keV;
   static Double_t      shift2GeV;
   static Double_t      shift2eV;
+  static Bool_t        fOld;
+  static TF1          *fpol2F;
+  static TF1          *fpol5F;
+  static TF1          *fpol6F;
   ClassDef(StdEdxModel,0)
 };
 #endif
-

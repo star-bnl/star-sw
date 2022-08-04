@@ -18,13 +18,16 @@ Double_t      StdEdxModel::fScale = 1; //TMath::Exp(9.12015e-02); // Bichsel
 Int_t         StdEdxModel::_debug   = 1;
 TF1          *StdEdxModel::fGGaus = 0;
 TF1          *StdEdxModel::fGausExp = 0;
-
+Double_t      StdEdxModel::fTmaxL10eV = 5; // Tcut = 100 keV
 Double_t      StdEdxModel::shift2keV = 0;
 Double_t      StdEdxModel::shift2GeV = 0;
 Double_t      StdEdxModel::shift2eV = 0;
 Double_t StdEdxModel::GeVperElectron               = 43.5e-9;  //39.41e-9;  // 24.95e-9; // deposited energy per conducting electron 
 Double_t StdEdxModel::LogGeVperElectron = TMath::Log(43.5e-9); //39.41e-9); // TMath::Log(24.95e-9);
-
+TF1 *StdEdxModel::fpol2F = 0;
+TF1 *StdEdxModel::fpol5F = 0;
+TF1 *StdEdxModel::fpol6F = 0;
+Bool_t StdEdxModel::fOld = kFALSE;
 //________________________________________________________________________________
 StdEdxModel* StdEdxModel::instance() {
   if (! fgStdEdxModel) new StdEdxModel();
@@ -73,6 +76,7 @@ StdEdxModel::~StdEdxModel() {
 //________________________________________________________________________________
 Double_t StdEdxModel::dNdx(Double_t poverm, Double_t charge) {
   if (!fgStdEdxModel) instance();
+  fTmaxL10eV = tmaxL10eV(poverm);
   if (mdNdx)    return fScale*charge*charge*mdNdx->Interpolate(poverm);
   return 0;
 }
@@ -198,9 +202,14 @@ Double_t StdEdxModel::gausexp(Double_t *x, Double_t *p) {
   Double_t normL = p[0];
   Double_t mu    = p[1];
   Double_t sigma = p[2];
-  Double_t k     = p[3];
+  Double_t kh    = p[3];
   Double_t t     = (x[0] - mu)/sigma;
   Double_t V     = 0.;
+  Double_t k     = kh;
+  if (kh < 0) {
+    k = - kh;
+    t = - t;
+  }
   if (t < k) {
     V = TMath::Exp(-t*t/2); // der = - V * t => - k * V
   } else {
@@ -226,7 +235,7 @@ Double_t StdEdxModel::gausexp(Double_t *x, Double_t *p) {
 //                                     %e
 // (%o6)                               ------
 //                                       k
- static Double_t SQ2pi = TMath::Sqrt(TMath::Pi())/TMath::Sqrt2();
+  static Double_t SQ2pi = TMath::Sqrt(TMath::Pi())/TMath::Sqrt2();
   Double_t D = SQ2pi*(1 + TMath::Erf(k/TMath::Sqrt2()));
   Double_t C = TMath::Exp(-k*k/2)/k;
   Double_t N = (D + C)*sigma;
@@ -243,37 +252,34 @@ Double_t StdEdxModel::gausexp(Double_t *x, Double_t *p) {
 */
 //________________________________________________________________________________
 void StdEdxModel::Parameters(Double_t Np, Double_t *parameters, Double_t *derivatives) {
-  // Most Probable log (ne/Np) versus log of Np
-  static Double_t parsMu1[7]  = {    3.0767,  -0.054267,   -0.69433,    0.71462,    0.12861,   -0.29135,   0.072728};
-  static Double_t parsMu2[7]  = {   0.33622,     3.2863,    -1.3061,    0.27857,  -0.032664,  0.0019922, -4.944e-05};
-  static Double_t pars6Sig[7] = {   0.82995,   0.033141,   -0.36552,   -0.18875,     0.2694,  -0.073444,  0.0038834}; // log(log(fitX))
-  static Double_t parsk[7]    = {    -8.959,     13.454,    -6.6549,     1.6064,   -0.20527,     0.0133, -0.00034269};
-  static TF1 *pol6 = 0, *pol5 = 0;
-  if (! pol6) {
-    pol6 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol6");
-    if (! pol6) {
-      TF1::InitStandardFunctions();
-      pol6 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol6");
-    }
-    pol5 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol5");
-    assert(pol5 && pol6);
-  }
   parameters[0] = parameters[1] = parameters[2] = 0;
+  if (Np <= 1.0) return;
   Double_t &mu    = *&parameters[0];
   Double_t &sigma = *&parameters[1];
   Double_t &k     = *&parameters[2];
-  if (Np <= 1.0) return;
-  Double_t fitX = TMath::Log(Np);
-  if (fitX < 0.5) fitX = 0.5;
-  Double_t X = TMath::Log(fitX);
-  if (fitX < 2) mu = pol6->EvalPar(&fitX, parsMu1);
-  else          mu = pol6->EvalPar(&fitX, parsMu2);
-  sigma = pol6->EvalPar(&X, pars6Sig);
-  k = 6.70823e-01;
-  if (fitX > 2) {
-    k = pol6->EvalPar(&fitX, parsk);
+  if (fOld) {
+    // Most Probable log (ne/Np) versus log of Np
+    static Double_t parsMu1[7]  = {    3.0767,  -0.054267,   -0.69433,    0.71462,    0.12861,   -0.29135,   0.072728};
+    static Double_t parsMu2[7]  = {   0.33622,     3.2863,    -1.3061,    0.27857,  -0.032664,  0.0019922, -4.944e-05};
+    static Double_t pars6Sig[7] = {   0.82995,   0.033141,   -0.36552,   -0.18875,     0.2694,  -0.073444,  0.0038834}; // log(log(fitX))
+    static Double_t parsk[7]    = {    -8.959,     13.454,    -6.6549,     1.6064,   -0.20527,     0.0133, -0.00034269};
+    if (! fpol5F || ! fpol6F) InitPar();
+    Double_t fitX = TMath::Log(Np);
+    if (fitX < 0.5) fitX = 0.5;
+    Double_t X = TMath::Log(fitX);
+    if (fitX < 2) mu = fpol6F->EvalPar(&fitX, parsMu1);
+    else          mu = fpol6F->EvalPar(&fitX, parsMu2);
+    sigma = fpol6F->EvalPar(&X, pars6Sig);
+    k = 6.70823e-01;
+    if (fitX > 2) {
+      k = fpol6F->EvalPar(&fitX, parsk);
+    }
+  } else { // new version based on 100 keV Tcut
+    Double_t x = TMath::Log(Np);
+    mu    = muPar(x);
+    sigma = sigmaPar(x);
+    k     = a0Par(x);
   }
-  
   return;
 }
 //________________________________________________________________________________
@@ -298,7 +304,34 @@ Double_t StdEdxModel::ProbdEGeVlog(Double_t dEGeVLog, Double_t Np) {
   return V;
 }
 //________________________________________________________________________________
+Double_t StdEdxModel::zMPold(Double_t *x, Double_t *p) {
+  fOld = kTRUE;
+  Double_t log10bg = x[0];
+  Double_t pOverM  = TMath::Power(10., log10bg);
+  Double_t log2dx  = p[0];
+  Double_t charge  = p[1];
+  Double_t dx      = TMath::Power( 2., log2dx);
+  Double_t dNdx = StdEdxModel::instance()->dNdx(pOverM, charge);
+  Double_t Np = dNdx*dx;
+  Double_t dEkeVLog = StdEdxModel::instance()->LogdEMPVkeV(Np); 
+  Double_t dEdxLog  = dEkeVLog - TMath::Log(dx);
+  return   dEdxLog;
+}
+//________________________________________________________________________________
+TF1 *StdEdxModel::ZMPold(Double_t log2dx) {
+  TF1 *f = 0;
+  if (! f) {
+    f = new TF1(Form("N%iold",(int)log2dx+2),zMPold,-2,5,2);
+    f->SetParName(0,"log2dx");
+    f->SetLineStyle(2);
+    f->SetParameter(0,log2dx);
+    f->SetParameter(1, 1.0); // charge
+  }
+  return f;
+}
+//________________________________________________________________________________
 Double_t StdEdxModel::zMP(Double_t *x, Double_t *p) {
+  fOld = kFALSE;  
   Double_t log10bg = x[0];
   Double_t pOverM  = TMath::Power(10., log10bg);
   Double_t log2dx  = p[0];
@@ -316,9 +349,92 @@ TF1 *StdEdxModel::ZMP(Double_t log2dx) {
   if (! f) {
     f = new TF1(Form("N%i",(int)log2dx+2),zMP,-2,5,2);
     f->SetParName(0,"log2dx");
-    f->SetLineStyle(2);
+    f->SetLineStyle(3);
     f->SetParameter(0,log2dx);
     f->SetParameter(1, 1.0); // charge
   }
   return f;
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::zMPR(Double_t *x, Double_t *p) {
+  fOld = kFALSE;  
+  Double_t log10bg = x[0];
+  Double_t pOverM  = TMath::Power(10., log10bg);
+  Double_t log2dx  = p[0];
+  Double_t charge  = p[1];
+  Double_t dx      = TMath::Power( 2., log2dx);
+  Double_t dNdx = StdEdxModel::instance()->dNdx(pOverM, charge);
+  static Double_t alpha = 2e-3;
+  Double_t recom = (1. - alpha*dNdx)/(1. - alpha*30);
+  if (recom < 0.8) recom = 0.8;
+  Double_t dNdxR = dNdx*recom;
+  if (dNdxR <= 0.0) return 0;
+  Double_t Np = dNdxR*dx;
+  Double_t dEkeVLog = StdEdxModel::instance()->LogdEMPVkeV(Np); 
+  Double_t dEdxLog  = dEkeVLog - TMath::Log(dx);
+  return   dEdxLog;
+}
+//________________________________________________________________________________
+TF1 *StdEdxModel::ZMPR(Double_t log2dx) {
+  TF1 *f = 0;
+  if (! f) {
+    f = new TF1(Form("R%i",(int)log2dx+2),zMPR,-2,5,2);
+    f->SetParName(0,"log2dx");
+    f->SetLineStyle(4);
+    f->SetParameter(0,log2dx);
+    f->SetParameter(1, 1.0); // charge
+  }
+  return f;
+}
+//________________________________________________________________________________
+void  StdEdxModel::InitPar() {
+  fpol2F = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol2");
+  fpol5F = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol5");
+  fpol6F = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol6");
+  if (! fpol2F || ! fpol5F || ! fpol6F) {
+    TF1::InitStandardFunctions();
+    fpol2F = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol2");
+    fpol5F = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol5");
+    fpol6F = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol6");
+  }
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::muPar(Double_t x, Double_t tCutL10) {
+  if (! fpol5F || !fpol2F) InitPar();
+  // tChain->Draw("mu:x>>muP(20,2.5,10.5)","i&&dmu<2e-2&&dsigma<2e-2&&da0<4&&x>2.5&&a0>0","prof")
+  //  muP->Fit("pol5")
+  //  Double_t pars[6] = {  -0.99981,     1.2513,   -0.38066,   0.059075, -0.0043761, 0.00012296}; // 100 keV
+  //  Double_t pars[6] = {   -1.1105,     1.2167,   -0.35485,     0.0527, -0.0037333, 0.00010016};
+  Double_t val = 3.27959195495368894e+00; // 26.56 eV
+  static Double_t parsTmax[3] = {  -0.53035,    0.52464,  -0.043713};
+  if (fTmaxL10eV < 5) val += (fpol2F->EvalPar(&fTmaxL10eV, parsTmax) - 1.0);
+  static Double_t pars[6] = {  -0.89898,      1.016,   -0.28193,   0.040223, -0.0027295, 6.9597e-05};
+  return val + fpol5F->EvalPar(&x, pars);
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::sigmaPar(Double_t x, Double_t tCutL10) { 
+  if (! fpol5F) InitPar();
+  // tChain->Draw("sigma:x>>sigmaP(20,2.5,10.5)","i&&dmu<2e-2&&dsigma<2e-2&&da0<4&&a0>0","prof")
+  //  Double_t pars[6] = {    1.6935,   -0.56485,   0.059062, 0.00081105, -0.00046914, 1.9862e-05};
+  static Double_t pars[6] = {    1.9662,   -0.74794,    0.11477, -0.0082309, 0.00027025, -3.7396e-06};
+  return fpol5F->EvalPar(&x, pars);
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::a0Par(Double_t x, Double_t tCutL10) {
+  if (! fpol5F) InitPar();
+  // tChain->Draw("a0:x>>a0P(20,2.5,10.5)","i&&dmu<2e-2&&dsigma<2e-2&&da0<4&&a0>0","prof")
+  //  Double_t pars[6] = {    5.6594,    -3.6107,     1.1259,   -0.18641,   0.015486, -0.0004892};
+  //  tChain->Draw("a0-a0Par(x):x>>a0PC(20,2.5,10.5)","i&&dmu<2e-2&&dsigma<2e-2&&da0<4&&a0>0","prof")
+  // FitP->Draw("a0:x>>a0P(20,2.5,10.5)","i&&dmu<2e-2&&dsigma<2e-2&&da0<4&&a0<4","prof")
+  static Double_t pars[6] = {    9.1532,    -6.0693,      1.783,   -0.26302,   0.018738, -0.00049388};
+  return fpol5F->EvalPar(&x, pars);
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::tmaxL10eV(Double_t bg) {
+  static Double_t Tcut = 1e-4; // 100 keV maximum cluster size (~80 keV)
+  static Double_t m_e  = 0.51099907e-3;
+  Double_t bg2 = bg*bg;
+  //  Double_t gamma = TMath::Sqrt(bg2 + 1);
+  Double_t tMax =  2*m_e*bg2; // /(1. + mOverM*(2*gamma + mOverM)); 
+  return TMath::Log10(1e9*TMath::Min(Tcut, tMax));
 }
