@@ -103,7 +103,7 @@ void FitMIP() {
   }
 #if 1
   for (Int_t p1 = 0; p1 < np; p1++) {
-    for (Int_t p2 = p1; p2 < np; p2++) {
+    for (Int_t p2 = 0; p2 < np; p2++) {
       c->SetTitle(F[p1] + F[p2]);
       for (Int_t i = 0; i < NI; i++) {
 	for (Int_t j = 0; j < NJ; j++) {

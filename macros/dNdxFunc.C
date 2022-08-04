@@ -29,7 +29,7 @@ void dNdxFunc(Double_t log2dx = 1) {
   if (!m_Bichsel) m_Bichsel = Bichsel::Instance();
   TCanvas *c1 = new TCanvas("c1","c1");
   TLegend *l = new TLegend(0.4,0.6,0.8,0.9);
-  TH1F *frame = c1->DrawFrame(-1,0.5,4,6);
+  TH1F *frame = c1->DrawFrame(-2.5,0.5,5,9);
   frame->SetTitle("The most probable log(dE/dx[keV/cm]) versu log_{10}(#beta #gamma)");
   frame->SetXTitle("log_{10}(#beta #gamma)");
   //  for (Int_t color = 1; color < 8; color++) {
@@ -47,6 +47,11 @@ void dNdxFunc(Double_t log2dx = 1) {
     fn->SetMarkerColor(color);
     fn->Draw("same");
     l->AddEntry(fn,Form("%4.1fcm",dx));
+    TF1 *fr = StdEdxModel::ZMPR(log2dx);
+    fr->SetLineColor(color);
+    fr->SetMarkerColor(color);
+    fr->Draw("same");
+    l->AddEntry(fr,Form("R%4.1fcm",dx));
 #endif
 #if 1
     TF1 *bn = ZMPB(log2dx);
