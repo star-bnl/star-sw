@@ -209,20 +209,25 @@
     }
     cout << endl;
     // note that the above bacward support the old mode for include whenever
-    // it was not in .$STAR_HOST_SYS but one level up. The backward compatibility
+    // it was not in .$STAR_HOST_SYS_OPT but one level up. The backward compatibility
     // can be removed only at the net root release ... 
     gSystem->SetIncludePath(" -D__ROOT__ -I.");
     if (STAR_LEVEL.Contains("TFG") || STAR_LEVEL.Contains(".DEV2")) {
       gSystem->AddIncludePath(" -D__TFG__VERSION__");
     }
-    gSystem->AddIncludePath(" -I./.$STAR_HOST_SYS/include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/StRoot -I$STAR -I/usr/include/mysql");
+    if (TString(gSystem->Getenv("STAR_HOST_SYS_OPT")) != "") {
+      gSystem->AddIncludePath(" -I./.$STAR_HOST_SYS_OPT/include -I./StRoot -I$STAR/.$STAR_HOST_SYS_OPT/include -I$STAR/StRoot -I$STAR -I/usr/include/mysql");
+      gSystem->SetBuildDir(".$STAR_HOST_SYS_OPT",kTRUE);
+    } else {
+      gSystem->AddIncludePath(" -I./.$STAR_HOST_SYS/include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/StRoot -I$STAR -I/usr/include/mysql");
+      gSystem->SetBuildDir(".$STAR_HOST_SYS",kTRUE);
+    }
     if (GARFIELD_HOME != "$GARFIELD_HOME") gSystem->AddIncludePath(" -I$GARFIELD_HOME/Include -I$GARFIELD_HOME/Heed");
     if (XOPTSTAR != "$XOPTSTAR")           gSystem->AddIncludePath(" -I$XOPTSTAR/include");
     if (OPTSTAR != "$OPTSTAR" && XOPTSTAR != OPTSTAR)             
                                            gSystem->AddIncludePath(" -I$OPTSTAR/include");
     if (QTDIR != "$QTDIR")                 gSystem->AddIncludePath(" -I$QTDIR/include -I$QTDIR/include/Qt -I$QTDIR/include/QtCore -I$QTDIR/include/QtGui");
     //    gSystem->AddIncludePath(" -I$ROOTSYS/include");
-    gSystem->SetBuildDir(".$STAR_HOST_SYS",kTRUE);
   }
   Char_t *file = gSystem->Which(rootlogon_path,"rootlogon.C",kReadPermission);
   if (file) {
