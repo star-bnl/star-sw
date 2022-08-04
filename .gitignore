@@ -37,7 +37,8 @@ ir.out
 *.tgz 
 i686* 
 i386*  
-hold 
+hold* 
+HOLD* 
 *.d 
 *.log 
 .svn* 
