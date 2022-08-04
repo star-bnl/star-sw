@@ -2,13 +2,12 @@
 #ifdef __TFG__VERSION__
 //#define CompareWithToF 
 //#define __CHECK_LargedEdx__
-//#define __KEEP_DX__
+  #define __TEST_DX__
   #define __SpaceCharge__
 //#define __NEGATIVE_ONLY__
   #ifndef  __NEGATIVE_ONLY__
      #define __NEGATIVE_AND_POSITIVE__
   #endif /* ! __NEGATIVE_ONLY__ */
-//#define __TEST_DX__
 //#define __LogProb__
 //#define __DEBUG_dEdx__
   #define __DEBUG_dNdx__
@@ -264,17 +263,16 @@ Int_t StdEdxY2Maker::Make(){
 #ifdef __BENCHMARKS__DOFIT_ZN__
   TBenchmark myBenchmark;
 #endif /* __BENCHMARKS__DOFIT_ZN__ */
-#ifdef __KEEP_DX__
   static Bool_t ForcedX = IAttr("ForcedX");
-#endif /* __KEEP_DX__ */
 #ifdef __TEST_DX__
-  Double_t dX_GenFit = 0;
-  TH3F *dXTest = 0;
+  Double_t dX_TrackFit = 0;
+  static TH3F *dXTest = 0, *dXTestP = 0;
   if (! dXTest) {
     TFile  *f = GetTFile();
     assert(f);
     f->cd();
-    dXTest = new TH3F("dxTest","dX = dX_GenFit - dX_Propagete versus setor and dX_GenFit",24,0.5,24.5,100,-1.,9.,100,-0.1,0.1);
+    dXTest  = new TH3F("dxTest" ,"dX = dX_TrackFit - dX_Propagete versus pad row and dX_TrackFit for Negative",72,0.5,72.5,100,-1.,9.,100,-0.05,0.05);
+    dXTestP = new TH3F("dxTestP","dX = dX_TrackFit - dX_Propagete versus pad row and dX_TrackFit for Positive",72,0.5,72.5,100,-1.,9.,100,-0.05,0.05);
   }
 #endif /* __TEST_DX__ */
   tpcTime = GetDateTime().Convert() - timeOffSet;
@@ -351,12 +349,12 @@ Int_t StdEdxY2Maker::Make(){
     if (pTrack && pTrack->bad()) {pTrack = 0;}
     StTrack *track = 0;
     StTrack *tracks[2] = {gTrack, pTrack};
+    Int_t sCharge = 0;
+    if (gTrack->geometry()->charge() < 0) sCharge = 1;
 #ifdef __BEST_VERTEX__
     for (Int_t l = 0; l < 2; l++) {
       track = tracks[l];
       if (track) {
-	Int_t sCharge = 0;
-	if (track->geometry()->charge() < 0) sCharge = 1;
 	StThreeVectorD g3 = track->geometry()->momentum(); // p of global track
 	EtaVspT[l][sCharge]->Fill(TMath::Log10(g3.perp()), g3.pseudoRapidity());
       }
@@ -428,17 +426,13 @@ Int_t StdEdxY2Maker::Make(){
 	if (! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
-#ifdef __KEEP_DX__
-	dx = tpcHit->dX();
+	dX_TrackFit = tpcHit->dX();
+	dx = dX_TrackFit; 
 	if (ForcedX) dx = 0;
-#else /* ! __KEEP_DX__ */
-	dx = 0;
-#endif /* __KEEP_DX__ */
-	AdcI = dZdY = dXdY = 0;
 #ifdef __TEST_DX__
-	dX_GenFit = dx;
 	dx = 0;
 #endif /* __TEST_DX__ */
+	AdcI = dZdY = dXdY = 0;
 	static StGlobalDirection  globalDirectionOfTrack;
 	Int_t iokCheck = 0;
 	if (dx <= 0.0) {
@@ -448,18 +442,38 @@ Int_t StdEdxY2Maker::Make(){
 	  StThreeVectorD dif = upper - lower;
 	  StThreeVectorD normal = dif.unit();
 	  // check that helix prediction is consistent with measurement
-	  if (Propagate(middle,normal,helixI,helixO,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
+	  if (Propagate(middle,normal,helixI,helixO,xyz[0],dirG,s,w)) {
+	    cout << "Prediction Failed" << endl;
+#ifndef __TEST_DX__
+	    BadHit(2,tpcHit->position()); 
+	    continue;
+#endif /* __TEST_DX__ */
+	  }
 	  if (Debug() > 1) {
 	    cout << " Prediction:\t" << xyz[0] 
 		 << "\tat s=\t" << s[0] << "/" << s[1] 
 		 << "\tw = " << w[0] << "/" << w[1] << endl;
 	  }
+#ifndef __TEST_DX__
 	  dif = xyz[3] - xyz[0];
 	  if (dif.perp() > 2.0) {if (Debug() > 1) {cout << "Prediction is to far from hit:\t" << xyz[3] << endl;}
 	    continue;
 	  }
-	  if (Propagate(upper,normal,helixI,helixO,xyz[1],dirG,s_out,w_out)) {BadHit(2,tpcHit->position()); continue;}
-	  if (Propagate(lower,normal,helixI,helixO,xyz[2],dirG,s_in ,w_in )) {BadHit(2,tpcHit->position()); continue;}
+#endif /* __TEST_DX__ */
+	  if (Propagate(upper,normal,helixI,helixO,xyz[1],dirG,s_out,w_out)) {
+	    cout << "Prediction Failed" << endl;
+#ifndef __TEST_DX__
+	    BadHit(2,tpcHit->position()); 
+	    continue;
+#endif /* __TEST_DX__ */
+	  }
+	  if (Propagate(lower,normal,helixI,helixO,xyz[2],dirG,s_in ,w_in )) {
+	    cout << "Prediction Failed" << endl;
+#ifndef __TEST_DX__
+	    BadHit(2,tpcHit->position()); 
+	    continue;
+#endif /* __TEST_DX__ */
+	  }
 	  dx = ((s_out[0] - s_in[0])*w[1] + (s_out[1] - s_in[1])*w[0]);
 	  dif = xyz[1] - xyz[2];
 	  StThreeVectorD &v = *&normal;
@@ -493,7 +507,10 @@ Int_t StdEdxY2Maker::Make(){
 	    ibreak++;
 	  }
 #ifdef __TEST_DX__
-	  dXTest->Fill(sector, dX_GenFit, dX_GenFit - dx);
+	  if (! sCharge) 
+	    dXTest->Fill(row, dX_TrackFit, dX_TrackFit - dx);
+	  else 
+	    dXTestP->Fill(row, dX_TrackFit, dX_TrackFit - dx);
 #endif /* __TEST_DX__ */
 	  if (dx <= 0.0) {if (Debug() > 1) {cout << "negative dx " << dx << endl;}
 	    continue;
@@ -552,7 +569,10 @@ Int_t StdEdxY2Maker::Make(){
 	    s_in[1]  = TMath::Max(s_inP[1] , s_in[1] );
 	    dx = ((s_out[0] - s_in[0])*w[1] + (s_out[1] - s_in[1])*w[0]);
 #ifdef __TEST_DX__
-	    dXTest->Fill(sector, dX_GenFit, dX_GenFit - dx);
+	    if (! sCharge) 
+	      dXTest->Fill(row, dX_TrackFit, dX_TrackFit - dx);
+	    else 
+	      dXTestP->Fill(row, dX_TrackFit, dX_TrackFit - dx);
 #endif /* __TEST_DX__ */
 	    if (dx <= 0.0) {if (Debug() > 1) {cout << "negative dx " << dx << endl;}
 	      continue;
@@ -564,7 +584,8 @@ Int_t StdEdxY2Maker::Make(){
 	    }
 	  }
 #endif /* __PROMPT_HITS__ */
-	  tpcHit->setdX(dx);
+	  if (ForcedX || dX_TrackFit <= 0.0 ) 
+	    tpcHit->setdX(dx);
 	  transform(localSect[0],PadOfTrack);
 	  transform(globalDirectionOfTrack,localDirectionOfTrack,sector,row);
 	  transform(localSect[3],Pad);
@@ -610,6 +631,7 @@ Int_t StdEdxY2Maker::Make(){
 	  transform(xyz[3],localSect[3],sector,row);
 	  transform(localSect[3],Pad);
 	} // end of dx calculation
+	dx = tpcHit->dX();
 	TrackLengthTotal += dx;
 	//________________________________________________________________________________      
 	if (tpcHit->adc() <= 0) {
@@ -1713,11 +1735,21 @@ Int_t StdEdxY2Maker::Propagate(const StThreeVectorD &middle,const StThreeVectorD
   dirG = StThreeVectorD();
   s[0] = helixI.pathLength(middle, normal);
   s[1] = helixO.pathLength(middle, normal);
-  Double_t sA[2] = {s[0]*s[0], s[1]*s[1]};
-  if (sA[0] > 1.e6 || sA[1] > 1.e6) {return 1;}
-  Double_t sN = sA[0] + sA[1];
-  w[0] = sA[0]/sN;
-  w[1] = sA[1]/sN;
+  w[0] = w[1] = 0;
+  Double_t sA[2] = {0};
+  if (s[0] > 1e6 && s[1] > 1e6) {
+    return 1;
+  } else if (s[0] <= 1e6 && s[1] < 1e6) {
+    sA[0] = s[0]*s[0];
+    sA[1] = s[1]*s[1];
+    Double_t sN = sA[0] + sA[1];
+    w[0] = sA[0]/sN;
+    w[1] = sA[1]/sN;
+  } else if (s[0] <= 1e6) {
+    w[1] = 1.;
+  } else {
+    w[0] = 1.;
+  }
   if (w[0] > 1.e-4) {xyz += w[0]*helixO.at(s[1]); dirG += w[0]*helixO.momentumAt(s[1],bField);}
   if (w[1] > 1.e-4) {xyz += w[1]*helixI.at(s[0]); dirG += w[1]*helixI.momentumAt(s[0],bField);}
   return 0;
