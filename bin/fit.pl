@@ -9,12 +9,14 @@ my $DIR = Cwd::cwd();
 $ENV{STARFPE} = "NO";
 my @histGF = (); #SecRow3C);
 my @histGP = ();
+my @histG0P = ();
 my @histRL5 = ();
 my @histNF = ();
 my @histXF = ();
 my @histADC = ();
 my @histG4F = ();
 my @histG4E = ();
+my @histG4EX = ();
 my @rootfiles = ();
 my $all = 0;
 #my $all = 1;
@@ -23,7 +25,20 @@ my $time = 0;
 my $adc = 0;
 my @opt;
 foreach my $arg (@ARGV) {
-  if ($arg =~ /\.root$/) {push @rootfiles, $arg;      }
+  if ($arg =~ /\.root$/) {
+    if ($arg =~ /^Av/  || 
+	$arg =~ /^fit/ || 
+	$arg =~ /^G3/  || 
+	$arg =~ /^NP/  ||
+	$arg =~ /^Pre/ ||
+	$arg =~ /^Qcm/ ||
+	$arg =~ /^Sec/ || 
+	$arg =~ /^Time/ || 
+	$arg =~ /^TP/ || 
+	$arg =~ /^Vol/ || 
+	$arg =~ /^xy/) {next;}
+    push @rootfiles, $arg;      
+  } 
   if ($arg =~ /^time/) {$time = 1;} 
 }
 # if ($time) {
@@ -43,7 +58,7 @@ foreach my $arg (@ARGV) {
 #   my @opt = qw (ADC);
 #  print "histADC = @histADC\n";
 ################################################################################
- if (! $all and $#histGF < 0 and $#histG4F < 0  and $#histG4E < 0 and $#histGP < 0 and $#histRL5 < 0 and $#histNF < 0 and $#histADC < 0) {
+ if (! $all and $#histGF < 0 and $#histG4F < 0  and $#histG4E < 0 and $#histG4EX < 0 and $#histGP < 0 and $#histG0P < 0 and $#histRL5 < 0 and $#histNF < 0 and $#histADC < 0) {
 #    @histGF = qw(
 #  	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
 #  	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
@@ -76,32 +91,37 @@ foreach my $arg (@ARGV) {
 # 	       dX3 dX3C
 #  	     );
 #   @histG4E = qw(Z3+Z3P);
-     @histG4E = qw(
-  	       SecRow3+SecRow3P SecRow3C+SecRow3PC
-	       Z3+Z3P Z3C+Z3PC 
-	       G3+G3P G3C+G3PC
-	       xyPad3+xyPad3P xyPad3C+xyPad3PC
-	       Pressure+PressureP PressureC+PressurePC
-	       Voltage+VoltageP VoltageC+VoltagePC
-	       G3+G3P G3C+G3PC
-	       Qcm QcmC 
-	       AvCurrent AvCurrentC
-	       Time TimeC
+#      @histG4E = qw(
+#   	       SecRow3 SecRow3P SecRow3+SecRow3P
+#   	       SecRow3C SecRow3PC SecRow3C+SecRow3PC
+# 	       Z3+Z3P Z3C+Z3PC 
+# 	       G3+G3P G3C+G3PC
+# 	       xyPad3+xyPad3P xyPad3C+xyPad3PC
+# 	       Pressure+PressureP PressureC+PressurePC
+# 	       Voltage+VoltageP VoltageC+VoltagePC
+# 	       G3+G3P G3C+G3PC
+# 	       Qcm QcmC 
+# 	       AvCurrent AvCurrentC
+# 	       Time TimeC
+#   	     );
+     @histG4EX = qw(
+  	       SecRow3 SecRow3P SecRow3+SecRow3P
+  	       SecRow3C SecRow3PC SecRow3C+SecRow3PC
   	     );
 #
 # 	       dX3 dX3C 
 #
 # 	       Pressure  Time  Voltage Voltage  Qcm  AvCurrent  Z3  xyPad3 G3
 # 	       PressureC TimeC Voltage VoltageC QcmC AvCurrentC Z3C xyPad3C G3C
-   @histRL5 = @histGF;
-    @histGP = qw (
-  		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
- 		 TPoints70P TPointsFP TPoints70UP TPointsFUP  TPointsNP TPointsNUP 
-  		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
-  		 NPoints70 NPointsF NPoints70U NPointsFU  NPointsN NPointsNU
- 		 NPoints70P NPointsFP NPoints70UP NPointsFUP  NPointsNP NPointsNUP 
-  		 NPoints70+NPoints70P NPointsF+NPointsFP NPoints70U+NPoints70UP NPointsFU+NPointsFUP  NPointsN+NPointsNP NPointsNU+NPointsNUP
- 	       );
+#    @histRL5 = @histGF;
+#     @histGP = qw (
+#   		 TPoints70 TPointsF TPoints70U TPointsFU  TPointsN TPointsNU
+#  		 TPoints70P TPointsFP TPoints70UP TPointsFUP  TPointsNP TPointsNUP 
+#   		 TPoints70+TPoints70P TPointsF+TPointsFP TPoints70U+TPoints70UP TPointsFU+TPointsFUP  TPointsN+TPointsNP TPointsNU+TPointsNUP
+#   		 NPoints70 NPointsF NPoints70U NPointsFU  NPointsN NPointsNU
+#  		 NPoints70P NPointsFP NPoints70UP NPointsFUP  NPointsNP NPointsNUP 
+#   		 NPoints70+NPoints70P NPointsF+NPointsFP NPoints70U+NPoints70UP NPointsFU+NPointsFUP  NPointsN+NPointsNP NPointsNU+NPointsNUP
+#  	       );
 #   		 TPoints270+TPoints270P TPoints2F+TPoints2FP TPoints270U+TPoints270UP TPoints2FU+TPoints2FUP  TPoints2N+TPoints2NP TPoints2NU+TPoints2NUP
 #  		 TPoints270 TPoints2F TPoints270U TPoints2FU  TPoints2N TPoints2NU
 #  		 TPoints270P TPoints2FP TPoints270UP TPoints2FUP  TPoints2NP TPoints2NUP
@@ -118,20 +138,33 @@ foreach my $arg (@ARGV) {
  #		 SecRow3C SecRow3PC
  #		 EtaiTPCF EtaiTPC70 TPoints70iTPC TPointsFiTPC TPoints70UiTPC TPointsFUiTPC  TPointsNiTPC TPointsNUiTPC
  #	      );
+# @histG0P = qw (
+# fitNeP fitNeN fitNeA 
+# fitNprotonP fitNprotonN fitNprotonA 
+# fitNkaonP fitNkaonN fitNkaonA 
+# fitNpiP fitNpiN fitNpiA 
+# fitNmuP fitNmuN fitNmuA 
+# fitNdeuteronP 
+# fitNtritonP 
+# fitNHe3P
+# fitNalphaP
+# );
  #  @histNF = qw(PressureN VoltageN AvCurrentN QcmN Z3N SecRow3N SecRow3PN dX3N TanL3DN); # Edge3N Edge3N PressureTN VoltN Zdc3N  Z3ON 
    #  @histXF = @histNF;
-   @opt = qw (GF G4F G4E GP NF);# XF);# RL5);
+   @opt = qw (GF G4F G4E G4EX GP G0P NF);# XF);# RL5);
  }
 print "fit.pl for  @rootfiles \n"; 
 if ($#histGF >= 0) {print " with GF: @histGF \n";}
 if ($#histG4F >= 0) {print " with G4F: @histG4F \n";}
 if ($#histG4E >= 0) {print " with G4E: @histG4E \n";}
+if ($#histG4EX >= 0) {print " with G4E: @histG4EX \n";}
 if ($#histGP >= 0) {print " with GP: @histGP \n";}
+if ($#histG0P >= 0) {print " with GP: @histG0P \n";}
 if ($#histRL5 >= 0){print " with RL5:@histRL5\n";}
 if ($#histNF >= 0) {print " with NF: @histNF \n";}
 if ($#histXF >= 0) {print " with NF: @histXF \n";}
 exit if $#rootfiles < 0;
-#my @opt = qw (GF G4F G4E  GP NF);# XF);# RL5);
+#my @opt = qw (GF G4F G4E G$EX  GP NF);# XF);# RL5);
 my $XML = "fit.xml";
 open (XML,">$XML") or die "Can't open $XML";
 print XML '<?xml version="1.0" encoding="utf-8" ?>
@@ -149,10 +182,12 @@ foreach my $rootfile (@rootfiles) {
     my @histos = ();
     my $NoSectors =  -1;
     if    ($fitype eq 'GP') {@histos = @histGP;}
+    elsif ($fitype eq 'G0P') {@histos = @histG0P;}
     elsif ($fitype eq 'ADC') {@histos = @histADC;}
     elsif ($fitype eq 'GF') {@histos = @histGF;}
     elsif ($fitype eq 'G4F') {@histos = @histG4F;}
     elsif ($fitype eq 'G4E') {@histos = @histG4E;}
+    elsif ($fitype eq 'G4EX') {@histos = @histG4EX;}
     elsif ($fitype eq 'RL5'){@histos = @histRL5;}
     elsif ($fitype eq 'NF') {
       @histos = @histNF; 
