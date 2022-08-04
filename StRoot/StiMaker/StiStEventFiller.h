@@ -214,6 +214,7 @@ private:
  void fillPulls  (StiKalmanTrack *ktrack,const StGlobalTrack *gTrack,int gloPri);
  bool accept(StiKalmanTrack* kTrack);
  void FillStHitErr(StHit *hh,const StiKalmanTrackNode *node);
+ void FillTpcdX(StHit *hh,const StiKalmanTrackNode *node);
 private:
     StEvent* mEvent;
     StiTrackContainer* mTrackStore;
