@@ -1,6 +1,5 @@
 #include "AgMath.h"
 #include "TMath.h"
-//using namespace AgMath;
 
 namespace AgMath { 
 

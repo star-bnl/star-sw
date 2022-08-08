@@ -7,7 +7,7 @@
 #include <TTable.h>
 #include "RVersion.h" 
 #include "StMessMgr.h"                                                                                                                  
-#include <StChain.h>
+#include "StChain.h"
 #include <algorithm>
 #include <iostream>
 

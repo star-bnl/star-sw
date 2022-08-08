@@ -6,5 +6,3 @@
 #pragma link C++ class StarTGeoStacker+;
 #pragma link C++ class AgMLExtension+;
 #endif
-
-

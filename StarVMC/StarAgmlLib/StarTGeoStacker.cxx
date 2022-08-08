@@ -638,7 +638,7 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 
       // AgML extented volume information
       AgMLExtension* agmlExt = gAgMLExt[ block->GetName() ]; 
-      if ( 0==agmlExt ) { 
+      if ( !agmlExt ) { 
 	// Create new agml extension
 	gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); 
 	// Add user hits to the extension
@@ -732,7 +732,7 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 	  // AgML extented volume information
 
 	  AgMLExtension* agmlExt = gAgMLExt[ block->GetName() ]; 
-	  if ( 0==agmlExt ) { 
+	  if ( !agmlExt ) { 
 	    // Create new agml extension
 	    gAgMLExt[ block->GetName() ] = agmlExt = new AgMLExtension(); 
 	    // Add user hits to the extension
