@@ -1,6 +1,6 @@
 #if 1
-void Run1Ev(Int_t NEvents=1, Int_t iD = 5, 
-	    Double_t pTlow=0.45,Double_t pThigh=0.45, // Double_t pTlow=1,Double_t pThigh=1,
+void Run1Ev(Int_t NEvents=1, Int_t iD = 46, 
+	    Double_t pTlow=1.0,Double_t pThigh=1.0, // Double_t pTlow=1,Double_t pThigh=1,
 	    Double_t Ylow=0.1, Double_t Yhigh=0.1,
 #if 0
 	    Double_t Philow=0, Double_t Phihigh=0,
@@ -79,7 +79,7 @@ void Run1Ev(Int_t NEvents=1, Int_t iD = 5,
      HIST  (1)             - system histogram flag
      GRAP  (1)             - system graphics level
      SIMU  (1)             - store GEANT hits flag
-     DIGI  (1)             - digitisation flag
+     DIGI  (1)             - digitisation flag2
      RECO  (1)             - reconstruction flag
      MFLD  (1)             - magnetic field flag
      ANAL  (0)             - user analysis level

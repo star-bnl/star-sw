@@ -36,17 +36,19 @@ void dNdxFunc(Double_t log2dx = 1) {
   for (Int_t color = 2; color <= 4; color++) {
     Double_t log2dx = color - 2;
     Double_t dx = TMath::Power(2.,log2dx);
-#if 1
+#if 0
     TF1 *fnOld = StdEdxModel::ZMPold(log2dx);
     fnOld->SetLineColor(color);
     fnOld->SetMarkerColor(color);
     fnOld->Draw("same");
     l->AddEntry(fnOld,Form("%4.1fcm Old",dx));
+#endif
     TF1 *fn = StdEdxModel::ZMP(log2dx);
     fn->SetLineColor(color);
     fn->SetMarkerColor(color);
     fn->Draw("same");
     l->AddEntry(fn,Form("%4.1fcm",dx));
+#if 0
     TF1 *fr = StdEdxModel::ZMPR(log2dx);
     fr->SetLineColor(color);
     fr->SetMarkerColor(color);

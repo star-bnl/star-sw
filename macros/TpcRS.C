@@ -29,20 +29,21 @@ class St_db_Maker;
 St_db_Maker *dbMk = 0;
 #endif
 Bool_t Root4Star = kFALSE;
+Int_t    NTRACK = 100; // 100;
+Int_t    DEBUG  = 0; 
 //________________________________________________________________________________
 Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
   cout << "Call SetPartGen with RootFile = " << RootFile.Data() << "\tRunOpt = " << RunOpt.Data() << "\t Opt = " << Opt.Data() << endl;
   Int_t Ids[22] =            {        5,        6,            3,            2,         8,         9,      11,      12,        14,        15,       45,        46,     49,      47, 0,0,0,0,0,0,0,0};
   Double_t Masses[22] =      {0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231, 1.875613,   2.80925,2.80923,3.727417, 0,0,0,0,0,0,0,0};
   const Char_t  *Names[22] = {  "muon+",  "muon-",  "electron-",  "electron+",   "pion+",   "pion-", "kaon+", "kaon-", "proton+", "proton-","deuteron", "triton",  "He3", "alpha","HE6","Li5","Li6","Li7","Be7","Be9","Be10","B11"};
-  Int_t    NTRACK = 100;
   Int_t    ID = 5;
   Double_t Ylow   =  -2; 
   Double_t Yhigh  =   2;
   Double_t Philow =   0;
   Double_t Phihigh= 2*TMath::Pi();
-  Double_t Zlow   =  -125; 
-  Double_t Zhigh  =   125; 
+  Double_t Zlow   = -125; 
+  Double_t Zhigh  =  125; 
   Double_t bgMinL10  = -3; // 3.5;// 1e2; // 1e-2;
   Double_t bgMaxL10  = 10;  // 1e2;// 1e5;
   Double_t mass   = -1;
@@ -83,8 +84,8 @@ Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
       }
       if (RootFile.Contains("MIP",TString::kIgnoreCase)) {
 	Double_t pMoMIP = 0.526; // MIP from Heed bg = 3.77 => p_pion = 0.526
-	Double_t pMomin = pMoMIP - 0.05; // 0.45;
-	Double_t pMomax = pMoMIP + 0.05; // 0.55;
+	Double_t pMomin = pMoMIP - 0.15; // 0.45;
+	Double_t pMomax = pMoMIP + 1.50; // 0.55;
 	bgMinL10 = TMath::Log10(pMomin/Masses[4]);
 	bgMaxL10 = TMath::Log10(pMomax/Masses[4]);
 	optG += "pionMIP";
@@ -145,6 +146,46 @@ Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
       gener->SetGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, optG);
     StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
     cout << "Set StarMCSimplePrimaryGenerator" << endl;
+    if (DEBUG) {
+        TGeant3TGeo *geant3 = (TGeant3TGeo *)gMC;
+        Gcflag_t* cflag = geant3->Gcflag();
+        cflag->idebug = 1;
+        cflag->idemax = 10000;
+        cflag->iswit[0] = 2;
+        cflag->iswit[1] = 2;
+        cflag->iswit[2] = 2; 
+    }
+#if 0
+      //      gener->SetGun();
+      //      StarVMCApplication::Instance()->DoMisAlignment(kFALSE);
+      //      geant->SetSetAttr("phys_off",kTRUE); // physics off
+      gMC->SetProcess("DCAY", 0);
+      gMC->SetProcess("ANNI", 0);
+      gMC->SetProcess("BREM", 0);
+      gMC->SetProcess("COMP", 0);
+      gMC->SetProcess("HADR", 0);
+      gMC->SetProcess("MUNU", 0);
+      gMC->SetProcess("PAIR", 0);
+      gMC->SetProcess("PFIS", 0);
+      gMC->SetProcess("PHOT", 0);
+      gMC->SetProcess("RAYL", 0);
+      //      gMC->SetProcess("LOSS", 4); // no fluctuations 
+      gMC->SetProcess("DRAY", 0);
+      gMC->SetProcess("MULS", 0);
+      gMC->SetProcess("STRA", 0);
+      gMC->SetCut("CUTGAM",	1e-5  );
+      gMC->SetCut("CUTELE", 	1e-5  );
+      gMC->SetCut("CUTHAD", 	1e-3  );
+      gMC->SetCut("CUTNEU", 	1e-14 );
+      gMC->SetCut("CUTMUO", 	1e-3  );
+      gMC->SetCut("BCUTE", 	1e-3  );
+      gMC->SetCut("BCUTM", 	1e-3  );
+      gMC->SetCut("DCUTE", 	1e-3  );
+      gMC->SetCut("DCUTM", 	1e-3  );
+      gMC->SetCut("PPCUTM", 	1e-3  );
+      gMC->SetCut("TOFMAX", 	1e3);
+      gMC->BuildPhysics();
+#endif
   }
   return 0;
 }
@@ -223,7 +264,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	   Opt.Contains("PhysicsOff",TString::kIgnoreCase)) ChainOpt += "phys_off,";
     if      (Opt.Contains("FieldOff" ,TString::kIgnoreCase)) ChainOpt += "FieldOff,";
     else if (Opt.Contains("HalfField",TString::kIgnoreCase)) ChainOpt += "HalfField,";
-    else                                                     ChainOpt += "FieldOn,";
+    else if (Opt.Contains("FieldOn",TString::kIgnoreCase)) ChainOpt += "FieldOn,";   
+    else if (Opt.Contains("ReverseField",TString::kIgnoreCase)) ChainOpt += "ReverseField,";   
   } else {
     RootFile += Form("%s",gSystem->BaseName(FileIn.Data())); 
     if        (FileIn.Contains(".daq",TString::kIgnoreCase)) {

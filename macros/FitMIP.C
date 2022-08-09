@@ -1,6 +1,6 @@
 /*/hlt/cephfs/fisyak/TpcRS_MIP4/dEdx4/Fit
   root.exe pion.root proton.root kaon.root electron.root deuteron.root lBichsel.C dEdxFit.C+ FitMIP.C+
-
+root.exe  pion.root proton.root kaon.root electron.root deuteron.root muon.root triton.root He3.root alpha.root HE6.root Li5.root Li6.root Li7.root lBichsel.C dEdxFit.C+ FitMIP.C+
 */
 #include "Riostream.h"
 #include "TSeqCollection.h"
@@ -54,7 +54,7 @@ void FitMIP() {
   Int_t np = 0;
   Int_t NI = 3; // -,+,All
   Int_t NJ = 2; // I,O,All
-  TH1D *hists[10][3][3] = {0};
+  TH1D *hists[20][3][3] = {0};
   TString F[NF];
   TCanvas *c = new TCanvas("c1","c1",600*NI,400*NJ);
   c->Divide(NI,NJ);
@@ -101,9 +101,9 @@ void FitMIP() {
     c->Clear();
     c->Divide(NI,NJ);
   }
-#if 1
+#if 0
   for (Int_t p1 = 0; p1 < np; p1++) {
-    for (Int_t p2 = 0; p2 < np; p2++) {
+    for (Int_t p2 = p1; p2 < np; p2++) {
       c->SetTitle(F[p1] + F[p2]);
       for (Int_t i = 0; i < NI; i++) {
 	for (Int_t j = 0; j < NJ; j++) {
@@ -133,4 +133,28 @@ void FitMIP() {
 #endif  
   out << "  };" << endl;
   out.close();
+}
+//________________________________________________________________________________
+void SecRow() {
+  TSeqCollection *files = gROOT->GetListOfFiles();
+  if (! files) return;
+  Int_t NF = files->GetSize(); cout << "found " << NF << " files" << endl;
+  TFile *f = 0;
+  TString F;
+  TIter next(files);
+  while ( (f = (TFile *) next()) ) { 
+    f->cd();
+    F = gSystem->BaseName(f->GetName());
+    F.ReplaceAll(".root","");
+    //    cout << "Open " << F.Data() << endl;
+    const Char_t *HistName[4] = {"SecRow3C","SecRow3PC","SecRow3","Secrow3P"};
+    cout << "file " << F.Data();
+    for (Int_t i = 0; i < 4; i++) {
+      TH1 *h = (TH1 *) gDirectory->Get(HistName[i]);
+      if (h) {
+	cout << "\t" << HistName[i] << " = " << h->GetEntries();
+      }
+    }
+    cout << endl;
+  }
 }
