@@ -11,7 +11,6 @@
 #ifndef StMuFstRawHit_h
 #define StMuFstRawHit_h
 
-#include <TVector3.h>
 #include <TObject.h>
 #include <TRefArray.h>
 #include "StEnumerations.h"
