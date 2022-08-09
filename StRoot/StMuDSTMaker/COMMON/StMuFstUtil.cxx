@@ -71,9 +71,10 @@ void StMuFstUtil::fillMuFstHits(StMuFstCollection* muFst,
         StFstHitCollection* fstcol,
         StFstCollection *fstCollectionPtr)
 {
+    LOG_INFO << "fillMuFstHits" << endm;
     //fill FST Raw Hits
     if(fstCollectionPtr) {
-        LOG_INFO << "fillMuFstHits (raw hits)" << endm;
+        LOG_DEBUG << "fillMuFstHits (raw hits)" << endm;
         if(fstCollectionPtr->getNumRawHits() > 0) {
             for(int wedgeIdx=0; wedgeIdx<kFstNumWedges; ++wedgeIdx ){
                 StFstRawHitCollection *rawHitCollectionPtr = fstCollectionPtr->getRawHitCollection( wedgeIdx );
@@ -93,7 +94,6 @@ void StMuFstUtil::fillMuFstHits(StMuFstCollection* muFst,
     } // if has FST Raw hit/cluster collection
 
     //fill FST hits
-    LOG_INFO << "fillMuFstHits (hits)" << endm;
     for(int wedgeIdx=0; wedgeIdx<kFstNumWedges; wedgeIdx++ )
     {
         StFstWedgeHitCollection* wedgeHitCollection = fstcol->wedge(wedgeIdx);
