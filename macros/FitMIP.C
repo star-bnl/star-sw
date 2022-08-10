@@ -1,6 +1,7 @@
 /*/hlt/cephfs/fisyak/TpcRS_MIP4/dEdx4/Fit
   root.exe pion.root proton.root kaon.root electron.root deuteron.root lBichsel.C dEdxFit.C+ FitMIP.C+
 root.exe  pion.root proton.root kaon.root electron.root deuteron.root muon.root triton.root He3.root alpha.root HE6.root Li5.root Li6.root Li7.root lBichsel.C dEdxFit.C+ FitMIP.C+
+root.exe  pion.root proton.root kaon.root electron.root deuteron.root muon.root triton.root He3.root alpha.root lBichsel.C dEdxFit.C+ FitMIP.C+
 */
 #include "Riostream.h"
 #include "TSeqCollection.h"
@@ -48,13 +49,13 @@ void FitMIP() {
   ofstream out;
   if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
   else                              out.open(Out, ios::app);
-  out << "  static Double_t parMIP[6][3][3][4] = {" << endl << "    {{" << endl << "// particle, norml, mu, sigma, alpha" << endl; 
 
   TFile *f = 0;
   Int_t np = 0;
   Int_t NI = 3; // -,+,All
   Int_t NJ = 2; // I,O,All
-  TH1D *hists[20][3][3] = {0};
+  out << "  static MIPFitParX_t parMIPs[" << NF + NF*(NF+1)/2 << "][" << NI << "][" << NI << "] = {" << endl << "    {{" << endl << "// particle, norml, mu, sigma, alpha" << endl; 
+  TH1D *hists[120][3][3] = {0};
   TString F[NF];
   TCanvas *c = new TCanvas("c1","c1",600*NI,400*NJ);
   c->Divide(NI,NJ);
@@ -78,20 +79,26 @@ void FitMIP() {
 	  SecRow[i]->Add(SecRow[1]);
 	}
       }
-      if (! SecRow[i]) continue;
       for (Int_t j = 0; j < NJ; j++) {// Inner/Outer
-        if      (j == 0) hists[np][i][j] = SecRow[i]->ProjectionZ("zI"+N,1,24,1,40); else if (j == 1) hists[np][i][j] = SecRow[i]->ProjectionZ("zO"+N,1,24,41,72);
-	else             hists[np][i][j] = SecRow[i]->ProjectionZ("zAll"+N,1,24,1,72);
-	if (hists[np][i][j]->GetEntries() < 1e3) continue;
-	c->cd(NI*j+i+1);
-	g->SetParameters(0,hists[np][i][j]->GetMean(),1,1);
-	//	hists[np][i][j]->Fit(g,"m");
-	hists[np][i][j]->Fit(g,"m");
-	out << Form("  /* %10s */ {%10.5f, %10.5f, %10.5f, %10.5f}", hists[np][i][j]->GetName(),g->GetParameter(0),g->GetParameter(1),g->GetParameter(2),g->GetParameter(3));
-	if      (j != NJ - 1)   out << ",";
-	else if (i != NI - 1)   out << " },{";
-	else                    out << " }},{{";
-	out << endl;
+	TString Line;
+	if (SecRow[i]) {
+	  if      (j == 0) hists[np][i][j] = SecRow[i]->ProjectionZ("zI"+N,1,24,1,40); else if (j == 1) hists[np][i][j] = SecRow[i]->ProjectionZ("zO"+N,1,24,41,72);
+	  else             hists[np][i][j] = SecRow[i]->ProjectionZ("zAll"+N,1,24,1,72);
+	  if (hists[np][i][j]->GetEntries() < 1e3) continue;
+	  c->cd(NI*j+i+1);
+	  g->SetParameters(0,hists[np][i][j]->GetMean(),1,1);
+	  //	hists[np][i][j]->Fit(g,"m");
+	  hists[np][i][j]->Fit(g,"m");
+	  TString histName(hists[np][i][j]->GetName());
+	  histName.Prepend("\"");
+	  histName.Append("\"");
+	  Line = Form("\t{%2i,%2i,%2i,%2i,%-20s, %10.5f, %10.5f, %10.5f, %10.5f}", np,-1,i,j,histName.Data(),g->GetParameter(0),g->GetParameter(1),g->GetParameter(2),g->GetParameter(3));
+	}
+   	if      (j != NJ - 1)   Line +=  ",";
+	else if (i != NI - 1)   Line +=  " },{";
+	else                    Line +=  " }},{{";
+	cout << Line << endl;
+	out << Line << endl;
 	c->Update();
       }
     }
@@ -101,26 +108,31 @@ void FitMIP() {
     c->Clear();
     c->Divide(NI,NJ);
   }
-#if 0
+#if 1
   for (Int_t p1 = 0; p1 < np; p1++) {
-    for (Int_t p2 = p1; p2 < np; p2++) {
+    for (Int_t p2 = 0; p2 <= p1; p2++) {
       c->SetTitle(F[p1] + F[p2]);
       for (Int_t i = 0; i < NI; i++) {
-	for (Int_t j = 0; j < NJ; j++) {
-	  if (!hists[p1][i][j] || !hists[p2][i][j]) continue;
-	  TH1D *h3 = AddZ(hists[p1][i][j],hists[p2][i][j]);
-	  if (! h3) continue;
-	  if (h3->GetEntries() < 1e3) continue;
-	  c->cd(NI*j+i+1);
-	  g->SetParameters(0,h3->GetMean(),1,1);
-	  //	h3->Fit(g,"m");
-	  h3->Fit(g,"m");
-	  out << Form("  /* %10s */ {%10.5f, %10.5f, %10.5f, %10.5f}", h3->GetName(),g->GetParameter(0),g->GetParameter(1),g->GetParameter(2),g->GetParameter(3));
-	  if      (j != NJ - 1)   out << ",";
-	  else if (i != NI - 1)   out << " },{";
-	  else if (p1 != np - 1)  out << " }},{{";
-	  else                    out << " }}";
-	  out << endl;
+	for (Int_t j = 0; j <= NJ; j++) {
+	  TString Line("//================================================================================");
+	  if (hists[p1][i][j] && hists[p2][i][j]) {
+	    TH1D *h3 = AddZ(hists[p1][i][j],hists[p2][i][j]);
+	    if (h3 && h3->GetEntries() > 1e3) {
+	      c->cd(NI*j+i+1);
+	      g->SetParameters(0,h3->GetMean(),1,1);
+	      //	h3->Fit(g,"m");
+	      h3->Fit(g,"m");
+	      TString histName(h3->GetName());
+	      histName.Prepend("\"");
+	      histName.Append("\"");
+	      Line = Form("\t{%2i,%2i,%2i,%2i,%-20s, %10.5f, %10.5f, %10.5f, %10.5f}", p1,p2,i,j,histName.Data(),g->GetParameter(0),g->GetParameter(1),g->GetParameter(2),g->GetParameter(3));
+	    }
+	    if      (j != NJ - 1)   Line +=  ",";
+	    else if (i != NI - 1)   Line +=  " },{";
+	    else                    Line +=  " }},{{";
+	  }
+	  cout << Line << endl;
+	  out << Line << endl;
 	  c->Update();
 	}
       } 

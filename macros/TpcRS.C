@@ -44,8 +44,6 @@ Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
   Double_t Phihigh= 2*TMath::Pi();
   Double_t Zlow   = -125; 
   Double_t Zhigh  =  125; 
-  Double_t bgMinL10  = -3; // 3.5;// 1e2; // 1e-2;
-  Double_t bgMaxL10  = 10;  // 1e2;// 1e5;
   Double_t mass   = -1;
   TString workDir(gSystem->WorkingDirectory());
   if (workDir.Contains("FXT"))  {
@@ -54,7 +52,6 @@ Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
     Ylow  = -2.9;
     Yhigh =  0.1;
   }
-  TString optG("GBL");
   for (Int_t i = 0; i < 22; i++) {
     if (RootFile.Contains(Names[i],TString::kIgnoreCase)) {
       ID = Ids[i];
@@ -82,14 +79,6 @@ Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
 	}
 	mass = p->Mass();
       }
-      if (RootFile.Contains("MIP",TString::kIgnoreCase)) {
-	Double_t pMoMIP = 0.526; // MIP from Heed bg = 3.77 => p_pion = 0.526
-	Double_t pMomin = pMoMIP - 0.15; // 0.45;
-	Double_t pMomax = pMoMIP + 1.50; // 0.55;
-	bgMinL10 = TMath::Log10(pMomin/Masses[4]);
-	bgMaxL10 = TMath::Log10(pMomax/Masses[4]);
-	optG += "pionMIP";
-      }
       break;
     }
   }
@@ -97,6 +86,18 @@ Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
     cout << Opt.Data() << " is not identified. Abort" << endl;
     return 1;
   }
+#if 0
+  if (RootFile.Contains("MIP",TString::kIgnoreCase)) {
+    Double_t pMoMIP = 0.526; // MIP from Heed bg = 3.77 => p_pion = 0.526
+    Double_t pMomin = pMoMIP - 0.15; // 0.45;
+    Double_t pMomax = pMoMIP + 1.50; // 0.55;
+    bgMinL10 = TMath::Log10(pMomin/Masses[4]);
+    bgMaxL10 = TMath::Log10(pMomax/Masses[4]);
+    optG += "pionMIP";
+  }
+  Double_t bgMinL10  = -3; // 3.5;// 1e2; // 1e-2;
+  Double_t bgMaxL10  = 10;  // 1e2;// 1e5;
+  TString optG("GBL");
   Double_t pTmin = mass*TMath::Power(10.,bgMinL10);
   Double_t pTmax = mass*TMath::Power(10.,bgMaxL10);
   if (pTmax > 10) {
@@ -104,6 +105,12 @@ Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
     bgMaxL10 = TMath::Log10(pTmax/mass);
     //    cout << "Reduce bgMax10 = " << bgMaxL10 << endl;
   }
+#else
+  TString optG("GmTsq");
+  Double_t bgMinL10 = 0.1;
+  Double_t bgMaxL10 = 10.0;
+  
+#endif
   if (Root4Star) {
     cout << "Initialize Root4star starsim " << endl;
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
