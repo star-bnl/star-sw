@@ -1216,9 +1216,9 @@ void StMuDstMaker::fillFst(StEvent* ev) {
     TObjectSet* fstDataSet = (TObjectSet*)GetDataSet("fstRawHitAndCluster");
     if (!fstDataSet) {
         LOG_WARN << "StMuDstMaker::Make() - there is no fstDataSet (raw hit) " << endm;
-    }        
+    }
 
-    fstCollectionPtr = (StFstCollection*)fstDataSet->GetObject();
+    fstCollectionPtr = (fstDataSet ? (StFstCollection*)fstDataSet->GetObject() : 0);
     if(!fstCollectionPtr) {
         LOG_WARN << "StMuDstMaker::Make() - no fstCollection for FST raw hit."<<endm;
     }
