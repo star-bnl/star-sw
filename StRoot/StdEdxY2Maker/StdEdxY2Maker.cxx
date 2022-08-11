@@ -308,12 +308,12 @@ Int_t StdEdxY2Maker::Make(){
     if (tof->tofHeader()) VpdZ = tof->tofHeader()->vpdVz();
   }
   if (m_TpcdEdxCorrection->IsFixedTarget())  VpdZ = 200;
-  if (TMath::Abs(VpdZ) < 250) {
-    Double_t dZbest = 999;
-    for (UInt_t ipr = 0; ipr < NoPV; ipr++) {
-      StPrimaryVertex *pVertex = pEvent->primaryVertex(ipr);
-      if (! pVertex) continue; 
-      if (PVxyz) PVxyz->Fill( pVertex->position().x(),  pVertex->position().y(), pVertex->position().z());
+  Double_t dZbest = 999;
+  for (UInt_t ipr = 0; ipr < NoPV; ipr++) {
+    StPrimaryVertex *pVertex = pEvent->primaryVertex(ipr);
+    if (! pVertex) continue; 
+    if (PVxyz) PVxyz->Fill( pVertex->position().x(),  pVertex->position().y(), pVertex->position().z());
+    if (TMath::Abs(VpdZ) < 250) {
       Double_t zTPC = pVertex->position().z();
       Double_t dZ = TMath::Abs(zTPC-VpdZ);
       if (dZ < dZbest) {
@@ -321,8 +321,8 @@ Int_t StdEdxY2Maker::Make(){
 	pVbest = pVertex;
       }
     }
-    if (dZbest > 3.0) pVbest = 0;
   }
+  if (dZbest < 999 && dZbest > 3.0) pVbest = 0;
   if (pVbest &&PVxyzC) PVxyzC->Fill( pVbest->position().x(),  pVbest->position().y(), pVbest->position().z());
 #endif /* __BEST_VERTEX__ */
   // no of tpc hits
@@ -476,18 +476,22 @@ Int_t StdEdxY2Maker::Make(){
 	  }
 	  dx = ((s_out[0] - s_in[0])*w[1] + (s_out[1] - s_in[1])*w[0]);
 	  dif = xyz[1] - xyz[2];
-	  StThreeVectorD &v = *&normal;
+#if 0
+	  StThreeVectorD &V = *&normal;
 	  Double_t zd = sector <=12 ? 1: -1;
-	  StThreeVectorD w = StThreeVectorD(0,0,zd);
-	  StThreeVectorD u = v.cross(w);
-	  StThreeVectorD d = dif.unit();
-	  Double_t dY = d.dot(v);
+	  StThreeVectorD W = StThreeVectorD(0,0,zd);
+	  StThreeVectorD U = V.cross(W);
+	  StThreeVectorD D = dif.unit();
+	  Double_t dY = D.dot(V);
 	  if (TMath::Abs(dY) > 1e-7) {
-	    dZdY = d.dot(w)/dY;
-	    dXdY = d.dot(u)/dY;
+	    dZdY = D.dot(W)/dY;
+	    dXdY = D.dot(U)/dY;
 	  } else {
 	    dZdY = dXdY = 0;
 	  }
+#else
+	  dZdY = dXdY = 0;
+#endif
 	  // Check for Membernane
 	  if (xyz[1].z() * xyz[2].z() < 0) {
 	    Double_t dZ = TMath::Abs(xyz[1].z()) + TMath::Abs(xyz[2].z());
