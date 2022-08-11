@@ -10,13 +10,12 @@ use Cwd;
 #my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha);
 #my @particles = qw(proton+ pionMIP);
 #my @particles = qw(pion+ pion-);
-#my @particles = qw(electron-MIP electron+MIP pion+MIP pion-MIP kaon+MIP kaon-MIP proton+MIP proton-MIP deuteronMIP tritonMIP muon+MIP muon-MIP);
+my @particles = qw(electron-MIP electron+MIP pion+MIP pion-MIP kaon+MIP kaon-MIP proton+MIP proton-MIP deuteronMIP tritonMIP muon+MIP muon-MIP);
 #my @particles = qw(tritonMIP muon+MIP muon-MIP);
-#my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha HE6); # Li5 Li6 Li7 Be7 Be9 Be10 B11);
-my @particles = qw(deuteron triton He3 alpha HE6); # Li5 Li6 Li7 Be7 Be9 Be10 B11);
+#my @particles = qw(muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha HE6 Li5 Li6 Li7 Be7 Be9 Be10 B11);
 foreach my $part (@particles) {
-  my $i1 = 201;
-  my $N =  400; # 400;# 00;
+  my $i1 = 21;
+  my $N =  100;# 00;
 #  if ($part =~ /MIP/) {$N = 200;}
   for (my $i = $i1; $i <= $N; $i++) {
 #    my $log = $part . "_" . $i . "B.log";
@@ -39,23 +38,3 @@ foreach my $part (@particles) {
 # foreach p (muon+ muon- electron- electron+ pion+ pion- kaon+ kaon- proton+ proton- deuteron triton He3 alpha pionMIP)
 #    hadd ${p}.root ../*${p}*.root >& ${p}.log &
 # end
-#  foreach p (muon electron pion kaon proton deuteron triton He3 alpha )
-#    if (! -d ${p})  mkdir ${p}
-#    cd ${p}
-#    hadd.pl files='../'${p}'*.root'
-#    /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit hadd{p}.xml
-#    cd ..
-#  end
-# cd Fit
-#  foreach p (muon electron pion kaon proton deuteron triton He3 alpha )
-#     hadd ${p}.root ../${p}/All*.root >& ${p}.log &
-#   end
-#   foreach p (muon electron pion kaon proton deuteron triton He3 alpha )
-#     if (! -d ${p})  mkdir ${p}
-#     hadd.pl option=-T files='../'${p}'*0.root'
-#     /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit hadd${p}0.xml
-#   end
-   foreach p (muon electron pion kaon proton deuteron triton He3 alpha )
-      hadd ${p}.root All*${p}*.root >& ${p}.log &
-   end
-

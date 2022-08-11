@@ -18,7 +18,8 @@ foreach d (`ls -1d ???/2*`)
     cd -
     continue
   endif
-  daq_2021dR.pl
+#  daq_2021dR.pl
+  daq_2021dR2.pl
   if ($?) then
     ls -1d *bla.root
     if ($?) then
