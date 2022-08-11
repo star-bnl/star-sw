@@ -131,6 +131,7 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
     Int_t pdg  = xId;
     if (fGun) pdg = fGunId;
     Double_t mass      = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
+    Double_t charge    = TDatabasePDG::Instance()->GetParticle(pdg)->Charge()/3.;
     // Polarization
     Double_t polx = 0.; 
     Double_t poly = 0.; 
@@ -162,7 +163,7 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
 	  Double_t p = -1;
 	  Double_t bgL10   = fpT_min + (fpT_max - fpT_min)*gRandom->Rndm();
 	  Double_t bg      = TMath::Power(10.,bgL10);
-	  p       = 0.13956995*bg;
+	  p       = 0.13956995*bg*TMath::Abs(charge);
 	  pT               = p/TMath::CosH(eta);
 	} else if (fOption.Contains("BL",TString::kIgnoreCase)) {
 	  Double_t p = -1;
