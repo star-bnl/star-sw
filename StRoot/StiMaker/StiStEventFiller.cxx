@@ -966,7 +966,9 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       if (!refCountIncr) 	continue;
       hh->setFitFlag(stiHit->timesUsed());
       // TPC dX base on local track position
-      FillTpcdX(hh,node);
+#if 1
+      FillTpcdX(track,node,hh);
+#endif
 //Kind of HACK, save residials into StiHack 
       fillResHack(hh,stiHit,node);
   }
@@ -1475,31 +1477,30 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
 
 }
 //_____________________________________________________________________________
-void StiStEventFiller::FillTpcdX(StHit *hh,const StiKalmanTrackNode *node)
+void StiStEventFiller::FillTpcdX(const StiKalmanTrack* track, const StiKalmanTrackNode *node, StHit *hh)
 {
-  if (! node || ! hh) return;
   StTpcHit *tpcHit = dynamic_cast<StTpcHit*>(hh); 
   if (! tpcHit) return;
-  //  const StThreeVectorF& P = tpcHit->position(); 
-  const StThreeVectorF& U = tpcHit->positionU(); 
-  const StThreeVectorF& L = tpcHit->positionL(); 
-  const StiNodePars &pars = node->fitPars(); 
+  if (! node || ! hh) return;
+  originD->setX(node->x_g());
+  originD->setY(node->y_g());
+  originD->setZ(node->z_g());
 
-  Double_t alfa = node->getAlpha();
-  Double_t setp[6] = {pars.y(),    pars.z(),    pars.eta(),
-		      pars.ptin(), pars.tanl(), pars.curv()};
-  setp[2]+= alfa;  
-  Double_t psi  = setp[2];
-  Double_t cosL = 1./TMath::Sqrt(1 + pars.tanl()*pars.tanl());
-  Double_t nx = TMath::Cos(psi)*cosL;
-  Double_t ny = TMath::Sin(psi)*cosL;
-  Double_t nz = pars.tanl()*cosL;
-  StThreeVectorD N(nx,ny,nz);
-  StThreeVectorD D = U - L;
-  StThreeVectorD unit = D.unit();
-  Double_t cos = N.dot(unit);
-  Double_t dS = D.mag()/cos;
-  tpcHit->setdX(dS);
+  physicalHelix->setParameters(fabs(node->getCurvature()),
+			       node->getDipAngle(),
+			       node->getPhase(),
+			       *originD,
+			       node->getHelicity());
+  StThreeVectorD upper(tpcHit->positionU().x(),tpcHit->positionU().y(),tpcHit->positionU().z());
+  StThreeVectorD lower(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
+  StThreeVectorD middle(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
+  StThreeVectorD dif = upper - lower;
+  StThreeVectorD normal = dif.unit();
+  Double_t s[2];
+  s[0] = physicalHelix->pathLength(upper, normal);
+  s[1] = physicalHelix->pathLength(lower, normal);
+  Double_t dx = TMath::Abs(s[0]) + TMath::Abs(s[1]); 
+  tpcHit->setdX(dx);
 }
 //_____________________________________________________________________________
 void StiStEventFiller::FillStHitErr(StHit *hh,const StiKalmanTrackNode *node)
