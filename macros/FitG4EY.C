@@ -17,14 +17,20 @@ Double_t gf4EYFunc(Double_t *x, Double_t *par) {
   // par[13] - occupancy = probability to have 2d hits in the cluster 
   // par[14] - IO
   // par[15] - sign
-  // par[16] - recombination
+  // par[16] - eLoss
   Double_t mu    = par[1];
   Double_t sigma = par[2];
   Double_t occupancy = par[13];
-#define __RECOMBINATION__
-#ifdef __RECOMBINATION__
-  Double_t recombination = par[16];
-#endif /* __RECOMBINATION__ */
+  //#define __ELOSS__
+#ifdef __ELOSS__
+  Double_t eLoss = par[16];
+#else 
+  //#define __SCALE__
+#ifdef __SCALE__
+  Double_t scale = 1 + par[16];
+  XX[0] *= scale;
+#endif /* __SCALE__ */
+#endif /* __ELOSS__ */
   Int_t IO = par[14];
   Int_t sign = par[15];
   Double_t frac[9];
@@ -427,7 +433,7 @@ Double_t gf4EYFunc(Double_t *x, Double_t *par) {
 	{ 8, 8, 2, 0,"zIalpha+zIalpha"   ,    8.12819,    4.77121,    0.15965,    0.33141},
 	{ 8, 8, 2, 1,"zOalpha+zOalpha"   ,    5.45762,    5.00000,    0.08705,    2.31971} }}
   };
-#ifdef __RECOMBINATION__  
+#ifdef __ELOSS__  
   /*
                         bgL10min Tcut            bgL10MIP     bg  log(beta)                 dN/dx    scale = -1.13000e-01; alpha = 1.13000e-01/9.27077905202451547e+01 = 1.21888354113372510e-03
                                                                                                                     scale = 1/(1 +alpha*dNdx) - 1 
@@ -441,9 +447,10 @@ minimu log10(p/m) alpga    -0.7   40 keV          -0.850  0.141 -1.9688383655156
                   e         2.0  100 keV           3.012  1028. -4.73133358730884409e-07  4.03895078708591129e+01
 
   */
-  //                                pi+         p       K+       e+       d      mu+        t      He3    alpha
-  static Double_t dNdxMIP[9] = {29.7388,  93.6498, 45.0091, 40.3891, 273.02, 29.9792, 539.102, 2156.38, 3486.43};
-#endif /* __RECOMBINATION__  */
+  //                                    pi+           p        K+             e+          d       mu+        t      He3     alpha
+  static Double_t dNdxMIP[9] = {    29.7388,    93.6498,  45.0091,       40.3891,    273.02,  29.9792, 539.102, 2156.38,  3486.43};
+  const Double_t  Masses[9]  = { 0.13956995, 0.93827231, 01.493677, 0.51099907e-3, 0.1056584, 1.875613, 2.80925, 2.80923, 3.727417};
+#endif /* __ELOSS__  */
   Double_t Value = 0;
   Int_t icase = (Int_t) par[12];
   Int_t i1 = 0;
@@ -453,14 +460,13 @@ minimu log10(p/m) alpga    -0.7   40 keV          -0.850  0.141 -1.9688383655156
   static Int_t _debug = 0;
   for (Int_t i = i1; i <= i2; i++) { 
     Double_t Mu = mu + parMIPs[i][sign][IO].mu - parMIPs[0][sign][IO].mu;
-#ifdef __RECOMBINATION__ 
-    //    Double_t ar = recombination*dNdxMIP[i];
-    //    if (ar > -1)  Mu += - TMath::Log(1 + ar);
-    Double_t alpha = recombination;
-    Double_t recom = (1. - alpha*dNdxMIP[i])/(1. - alpha*dNdxMIP[0]);
-    if (recom < 0.8) recom = 0.8;
-    Mu += TMath::Log(recom);
+#ifdef __ELOSS__ 
+    Double_t eps = dNdxMIP[i]/dNdxMIP[0] - 1;
+    Double_t dMu = eps*eLoss*TMath::Exp(XX[0]);
+    if (dMu > 0.1) dMu = 0.1;
+    Mu += dMu;
 #endif
+    //    Double_t pars[4] = {0, Mu, parMIPs[i][sign][IO].sigma*(1 + sigma), parMIPs[i][sign][IO].alpha};
     Double_t pars[4] = {0, Mu, parMIPs[i][sign][IO].sigma + sigma, parMIPs[i][sign][IO].alpha};
     Value += frac[i]*g->EvalPar(XX, pars);
     if (_debug) {
@@ -564,7 +570,11 @@ TF1 *FitG4EY(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
   //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
   TF1 *g2 = (TF1*) gROOT->GetFunction("G4EY");
   if (! g2) {
+#ifdef __ELOSS__
     g2 = new TF1("G4EY",gf4EYFunc, -5, 5, 17);
+#else
+    g2 = new TF1("G4EY",gf4EYFunc, -5, 5, 16);
+#endif
     g2->SetParName(0,"norm");      g2->SetParLimits(0,-0.2,0.2); // g2->FixParameter(0,0.0); // 
     g2->SetParName(1,"mu");        g2->SetParLimits(1,-0.2,0.4);				     
     g2->SetParName(2,"Sigma");     g2->FixParameter(2,0.0); g2->SetParLimits(2,0.0,0.1);	     
@@ -581,13 +591,13 @@ TF1 *FitG4EY(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
     g2->SetParName(13,"occupancy"); g2->FixParameter(13,0); g2->SetParLimits(13,0.0,0.25);
     g2->SetParName(14,"IO");       g2->FixParameter(14,IO); 
     g2->SetParName(15,"sign");     g2->FixParameter(15,Sign); 
-#ifdef __RECOMBINATION__
-    g2->SetParName(16,"recombin"); {g2->FixParameter(16,0.0); g2->SetParLimits(16,-0.01,0.01);}
+#ifdef __ELOSS__
+    g2->SetParName(16,"eLoss"); {g2->FixParameter(16,0.0); g2->SetParLimits(16,-0.01,0.01);}
 #endif
     //    g2->SetParName(15,"factor"); g2->SetParLimits(15,-.1,0.1);
   }
   PreSetParametersY(proj, g2);
-  g2->FixParameter(2, 0.0);
+  g2->ReleaseParameter(2);
   g2->ReleaseParameter(3);
   g2->FixParameter(4,0.01); 
   g2->FixParameter(5,0.01);
@@ -600,7 +610,9 @@ TF1 *FitG4EY(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
   g2->FixParameter(13,0.);
   g2->FixParameter(14,IO); 
   g2->FixParameter(15,Sign); 
+#ifdef __ELOSS__
   g2->FixParameter(16,0.0);
+#endif
   //  Fit pion + proton 
   proj->Fit(g2,Opt.Data());
   //  g2->ReleaseParameter(2);
@@ -614,7 +626,11 @@ TF1 *FitG4EY(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
 	 << proj->GetName() << "/" << proj->GetTitle() << " Try one again" << endl; 
     proj->Fit(g2,Opt.Data());
   }
-  g2->ReleaseParameter(7);     g2->SetParLimits(4,0.0,0.6); // TMath::Pi()/2); 
+#ifdef __ELOSS__
+  g2->ReleaseParameter(16);
+  iok = proj->Fit(g2,Opt.Data());
+#endif
+  //  g2->ReleaseParameter(7);     g2->SetParLimits(4,0.0,0.6); // TMath::Pi()/2); 
   g2->ReleaseParameter(8);     g2->SetParLimits(5,0.0,TMath::Pi()/2);		
   //  g2->ReleaseParameter(9);     g2->SetParLimits(6,0.0, 1.0); // TMath::Pi()/2);
   //  g2->ReleaseParameter(10);     g2->SetParLimits(6,0.0, 1.0); // TMath::Pi()/2);

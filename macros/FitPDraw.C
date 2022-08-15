@@ -320,17 +320,23 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
     if (hist) {
       TString name(gSystem->BaseName(gDirectory->GetName()));
       name.ReplaceAll(".root","");
+#if 0
       name.ReplaceAll("SecRow3C+SecRow3PC","cor");
       name.ReplaceAll("SecRow3+SecRow3P","");
       name.ReplaceAll("SecRow3C","");
+#endif
       name.ReplaceAll("SecRow3","");
+#if 0
       name.ReplaceAll("Z3C+Z3PC","");
       name.ReplaceAll("Z3+Z3P","cor");
       name.ReplaceAll("Z3C","");
+#endif
       name.ReplaceAll("Z3","");
+#if 0
       name.ReplaceAll("xyPad3C+xyPad3PC","cor");
       name.ReplaceAll("xyPad3+xyPad3P","");
       name.ReplaceAll("xyPad3C","");
+#endif
       name.ReplaceAll("xyPad3","");
       name.ReplaceAll("_y3","");
       name.ReplaceAll("G4E","");

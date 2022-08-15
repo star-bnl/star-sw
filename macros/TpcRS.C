@@ -29,7 +29,7 @@ class St_db_Maker;
 St_db_Maker *dbMk = 0;
 #endif
 Bool_t Root4Star = kFALSE;
-Int_t    NTRACK = 100; // 100;
+Int_t    NTRACK = 10; //0; // 100;
 Int_t    DEBUG  = 0; 
 //________________________________________________________________________________
 Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
@@ -216,6 +216,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     ChainOpt += ",McTpcAna,";
   } else if ( RunOpt.Contains("RC.y",TString::kIgnoreCase) ||
 	      RunOpt.Contains("MC.y",TString::kIgnoreCase) ||
+	      RunOpt.Contains("MCy",TString::kIgnoreCase) ||
               RunOpt.Contains("RC20",TString::kIgnoreCase) ||
 	      RunOpt.Contains("MC20",TString::kIgnoreCase) ||
               RunOpt.Contains("RC.20",TString::kIgnoreCase)||
@@ -316,7 +317,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   }
   
   TString output = RootFile;
-  output.ReplaceAll(".root","O.root");
+  //  output.ReplaceAll(".root","O.root");
   output.ReplaceAll("*","");
   if (RunOpt.Contains("devT,",TString::kIgnoreCase)) ChainOpt += ",useXgeom";
   bfc(-1,ChainOpt.Data(),fileIn,output.Data(),RootFile.Data());

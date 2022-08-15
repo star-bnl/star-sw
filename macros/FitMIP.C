@@ -2,6 +2,7 @@
   root.exe pion.root proton.root kaon.root electron.root deuteron.root lBichsel.C dEdxFit.C+ FitMIP.C+
 root.exe  pion.root proton.root kaon.root electron.root deuteron.root muon.root triton.root He3.root alpha.root HE6.root Li5.root Li6.root Li7.root lBichsel.C dEdxFit.C+ FitMIP.C+
 root.exe  pion.root proton.root kaon.root electron.root deuteron.root muon.root triton.root He3.root alpha.root lBichsel.C dEdxFit.C+ FitMIP.C+
+root.exe  pion.root proton.root kaon.root electron.root deuteron.root muon.root triton.root He3.root alpha.root HE6.root Li5.root Li6.root Li7.root Be10.root B11.root  lBichsel.C dEdxFit.C+ FitMIP.C+
 */
 #include "Riostream.h"
 #include "TSeqCollection.h"
@@ -88,7 +89,11 @@ void FitMIP() {
 	  c->cd(NI*j+i+1);
 	  g->SetParameters(0,hists[np][i][j]->GetMean(),1,1);
 	  //	hists[np][i][j]->Fit(g,"m");
-	  hists[np][i][j]->Fit(g,"m");
+	  Int_t kx1 = hists[np][i][j]->FindFirstBinAbove(1e-5);
+	  Int_t kx2 = hists[np][i][j]->FindLastBinAbove(1e-5);
+	  hists[np][i][j]->GetXaxis()->SetRange(kx1,kx2);
+	  if (hists[np][i][j]->Integral() < 1e3) continue;
+	  hists[np][i][j]->Fit(g,"mr");
 	  TString histName(hists[np][i][j]->GetName());
 	  histName.Prepend("\"");
 	  histName.Append("\"");
@@ -118,9 +123,13 @@ void FitMIP() {
 	  if (hists[p1][i][j] && hists[p2][i][j]) {
 	    TH1D *h3 = AddZ(hists[p1][i][j],hists[p2][i][j]);
 	    if (h3 && h3->GetEntries() > 1e3) {
+	      Int_t kx1 = h3->FindFirstBinAbove(1e-5);
+	      Int_t kx2 = h3->FindLastBinAbove(1e-5);
+	      h3->GetXaxis()->SetRange(kx1,kx2);
 	      c->cd(NI*j+i+1);
 	      g->SetParameters(0,h3->GetMean(),1,1);
 	      //	h3->Fit(g,"m");
+	      if (h3->Integral() < 1e3) continue;
 	      h3->Fit(g,"m");
 	      TString histName(h3->GetName());
 	      histName.Prepend("\"");
