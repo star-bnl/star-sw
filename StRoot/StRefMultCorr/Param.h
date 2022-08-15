@@ -467,10 +467,10 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
   //Run19 Au+Au 14.6 GeV
   {
     "2019:14.6:20094048,20154013:-145,145",                     // Year, energy, run start end, Vz range
-    "6,9,13,18,24,32,41,53,67,84,103,127,154,185,223,270", // Centrality definition
+    "6,9,13,18,24,32,41,53,67,84,103,127,154,185,223,270",      // Centrality definition
     "20",    // Normalization start
-    "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00", // Vz correction parameters (need to update)
-    "1.,1.,1.,1.,1.,0,1.,1.",  // Trigger efficiency
+    "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
+    "1.05956,-1.25292,5.51106e-01,1.65283,-1.48792,0,1.31733e+01,8.15878e-06",  // Trigger efficiency
     "0,0" // Luminosity correction
   }
 };
@@ -487,8 +487,8 @@ const Int_t CentBin9_vzdep[5][9] = {
   { 7,15,29,52,84,131,195,285,344 }, // -30<Vz<-29
   { 7,16,30,54,88,137,204,298,359 }, // -29<Vz<-27
   { 7,15,29,51,84,131,195,285,344 }, // 25<Vz<27
-  { 5,13,27,47,76,119,177,259,315 },   // 27<Vz<29
-  { 5,13,26,46,75,117,175,256,311 }    // 29<Vz<30
+  { 5,13,27,47,76,119,177,259,315 }, // 27<Vz<29
+  { 5,13,26,46,75,117,175,256,311 }  // 29<Vz<30
 };
 
 
