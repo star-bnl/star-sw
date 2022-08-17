@@ -225,6 +225,7 @@ class StKFParticleInterface: public TObject
   TH1F* fHistoMomentumTracks[NTrackHistoFolders];
   TH2F* fHistodEdXPull[NTrackHistoFolders];
   TH2F* fHistodEdXZ[NTrackHistoFolders];
+  TH2F* fHistodEdXnSigma[NTrackHistoFolders];
 #ifdef __TFG__VERSION__
   TH2F* fHistodNdXTracks[NTrackHistoFolders];
   TH2F* fHistodNdXwithToFTracks[NTrackHistoFolders];

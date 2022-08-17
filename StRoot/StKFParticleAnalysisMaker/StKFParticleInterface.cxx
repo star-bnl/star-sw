@@ -468,9 +468,14 @@ void StKFParticleInterface::CollectPIDHistograms()
 #ifndef __TFG__VERSION__
     if (! fHistodEdXPull[iTrackHisto]) fHistodEdXPull[iTrackHisto] = new TH2F("hdEdXPull", "hdEdXPull", 500, 0, 10, 300, -30, 30);
 #else /* __TFG__VERSION__ */
-    if (! fHistodEdXPull[iTrackHisto]) fHistodEdXPull[iTrackHisto] = new TH2F("hdEdXPull", "hdEdXPull", 2000, -2, 2, 120, -6, 6);
-    fHistodEdXPull[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXPull");
-    if (! fHistodEdXPull[iTrackHisto]) fHistodEdXPull[iTrackHisto] = new TH2F("hdEdXPull", "hdEdXPull", 2000, -2, 2, 120, -6, 6);
+    if (! fHistodEdXPull[iTrackHisto]) fHistodEdXPull[iTrackHisto] = new TH2F("hdEdXPull", "hdEdXPull", 2000, -5, 5, 120, -6, 6);
+#endif /* __TFG__VERSION__ */
+
+    fHistodEdXnSigma[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXnSigma");
+#ifndef __TFG__VERSION__
+    if (! fHistodEdXnSigma[iTrackHisto]) fHistodEdXnSigma[iTrackHisto] = new TH2F("hdEdXnSigma", "hdEdXnSigma", 500, 0, 10, 300, -30, 30);
+#else /* __TFG__VERSION__ */
+    if (! fHistodEdXnSigma[iTrackHisto]) fHistodEdXnSigma[iTrackHisto] = new TH2F("hdEdXnSigma", "hdEdXnSigma", 2000, -5, 5, 120, -6, 6);
 #endif /* __TFG__VERSION__ */
     
     fHistodEdXZ[iTrackHisto] = (TH2F *)   dirs[2]->Get("hdEdXZ");
@@ -1565,8 +1570,13 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
         if (isETofm2) fHistoETofPIDTracks[iTrackHisto] -> Fill(pL10, m2Etof);
 #endif /* __TFG__VERSION__ */
         
+        if(abs(pdg)==11)
+        {
+          fHistodEdXnSigma[iTrackHisto] -> Fill(momentum, gTrack->nSigmaElectron());
+	}
         if(abs(pdg)==211)
         {
+          fHistodEdXnSigma[iTrackHisto] -> Fill(momentum, gTrack->nSigmaPion());
 #ifndef __TFG__VERSION__
           fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.139570, fdEdXMode, 1));
 #else /* __TFG__VERSION__ */
@@ -1583,6 +1593,7 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
         }
         if(abs(pdg)==321)
         {
+          fHistodEdXnSigma[iTrackHisto] -> Fill(momentum, gTrack->nSigmaKaon());
 #ifndef __TFG__VERSION__
           fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.493677, fdEdXMode, 1));
 #else /* __TFG__VERSION__ */
@@ -1599,6 +1610,7 @@ void StKFParticleInterface::FillPIDHistograms(StPicoTrack *gTrack, const std::ve
         }
         if(abs(pdg)==2212)
         {
+          fHistodEdXnSigma[iTrackHisto] -> Fill(momentum, gTrack->nSigmaProton());
 #ifndef __TFG__VERSION__
           fHistodEdXPull[iTrackHisto] -> Fill(momentum, gTrack->dEdxPull(0.938272, fdEdXMode, 1));
 #else /* __TFG__VERSION__ */
