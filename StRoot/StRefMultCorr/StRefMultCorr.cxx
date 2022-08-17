@@ -1038,7 +1038,7 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
       iBinVz = TMath::Nint(VtxZBinDouble);
     }
   }
-  else if ( (mParameterIndex == 38) || (mParamIndex == 39) ) {  // Au+Au 19.6 GeV 2019 || Au+Au 14.6 GeV 2019
+  else if ( (mParameterIndex == 38) || (mParameterIndex == 39) ) {  // Au+Au 19.6 GeV 2019 || Au+Au 14.6 GeV 2019
 
     for ( Int_t iVz=0; iVz<auau19_run19_nVzBins; iVz++ ) { // Utilize same Vz binning: (29 bins, -145., 145.)
       if ( auau19_run19_vzRangeLimits[iVz][0] <= mVz && mVz < auau19_run19_vzRangeLimits[iVz][1] ) {
