@@ -228,7 +228,7 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
 	      Int_t    nx = 0,   // 45,
 	      Double_t xMin = 0, //  0.5,
 	      Double_t xMax = 0, // 45.5,
-	      const Char_t *cut = "(i&&j&&abs(mu)<1)", // "(i&&j&&abs(mu)<1)/(dmu**2)", 
+	      const Char_t *cut = "(i&&j&&abs(mu)<1&&dmu>0&&dmu<0.02)", // "(i&&j&&abs(mu)<1)/(dmu**2)", 
 	      const Char_t *opt = "prof", // "profg",
 	      Double_t ymin = -1,
 	      Double_t ymax =  1,
@@ -324,8 +324,8 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
       name.ReplaceAll("SecRow3C+SecRow3PC","cor");
       name.ReplaceAll("SecRow3+SecRow3P","");
       name.ReplaceAll("SecRow3C","");
-#endif
       name.ReplaceAll("SecRow3","");
+#endif
 #if 0
       name.ReplaceAll("Z3C+Z3PC","");
       name.ReplaceAll("Z3+Z3P","cor");
