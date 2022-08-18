@@ -35,6 +35,7 @@
 #include <map>
 
 // ROOT headers
+#include "Rtypes.h"
 #include "TString.h"
 #include "BadRun.h"
 

@@ -2,14 +2,14 @@
 #include "Param.h"
 
 //________________
-const string getParamX_ShapeWeight( const Int_t irun, const Int_t ivz) {
+const string getParamX_ShapeWeight( const int irun, const int ivz) {
   string temstr;
   temstr = RefmultShapeRatio[irun][ivz];
   return temstr;
 }
 
 //________________
-const string getParamX( const Int_t x, const Int_t y1, const Int_t y2 ) {
+const string getParamX( const int x, const int y1, const int y2 ) {
   string str;
   switch(x) {
     case 0:  str = mParamStr_gref[y1][y2]; break;

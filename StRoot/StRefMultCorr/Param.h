@@ -1,8 +1,6 @@
 #ifndef __Param_h__
 #define __Param_h__
 
-#include "Rtypes.h"
-
 #include <string>
 using std::string;
 
