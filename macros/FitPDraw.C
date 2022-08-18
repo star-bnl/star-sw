@@ -246,7 +246,7 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
   Int_t NF = SetFileList();  
   if (! NF) return;
   TString Current(gDirectory->GetName());
-  gStyle->SetOptStat(0);
+  //  gStyle->SetOptStat(0);
   Int_t icol = 0;
   TLegend *leg = new TLegend(0.6,0.1,0.9,0.3);
   //  gStyle->SetMarkerSize(0.4);
@@ -420,7 +420,7 @@ void FitPMu(const Char_t *draw="mu",
   Int_t NF = SetFileList();
   if (! NF) return;
   TString Current(gDirectory->GetName());
-  gStyle->SetOptStat(0);
+  //  gStyle->SetOptStat(0);
   Int_t icol = 0;
   TLegend *leg = new TLegend(0.5,0.7,1.0,1.0);
   //  gStyle->SetMarkerSize(0.4);

@@ -5141,8 +5141,8 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       else if (TString(FitName) == "G4E" || TString(FitName) == "G4EX" || TString(FitName) == "G4EY") {
 	Int_t Sign = 0;
 	if (HName.Contains("3P")) {
-	  if (HName.Contains("+")) Sign = 1;
-	  else                     Sign = 2;
+	  if (HName.Contains("+")) Sign = 2;
+	  else                     Sign = 1;
 	} 
 	Int_t IO = 2;
 	if (nx == 72 || nx == 144) {
