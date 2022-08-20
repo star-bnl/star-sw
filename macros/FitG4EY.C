@@ -25,7 +25,7 @@ Double_t gf4EYFunc(Double_t *x, Double_t *par) {
 #ifdef __ELOSS__
   Double_t eLoss = par[16];
 #else 
-  //#define __SCALE__
+#define __SCALE__
 #ifdef __SCALE__
   Double_t scale = 1 + par[16];
   XX[0] *= scale;
@@ -1445,7 +1445,7 @@ TF1 *FitG4EY(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
   //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
   TF1 *g2 = (TF1*) gROOT->GetFunction("G4EY");
   if (! g2) {
-#ifdef __ELOSS__
+#if defined(__ELOSS__) || defined(__SCALE__)
     g2 = new TF1("G4EY",gf4EYFunc, -5, 5, 17);
 #else
     g2 = new TF1("G4EY",gf4EYFunc, -5, 5, 16);
@@ -1468,6 +1468,10 @@ TF1 *FitG4EY(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
     g2->SetParName(15,"sign");     g2->FixParameter(15,Sign); 
 #ifdef __ELOSS__
     g2->SetParName(16,"eLoss"); {g2->FixParameter(16,0.0); g2->SetParLimits(16,-0.01,0.01);}
+#else
+#ifdef __SCALE__
+    g2->SetParName(16,"Scale"); {g2->FixParameter(16,0.0); g2->SetParLimits(16,-0.1,0.1);}
+#endif
 #endif
     //    g2->SetParName(15,"factor"); g2->SetParLimits(15,-.1,0.1);
   }
@@ -1485,7 +1489,7 @@ TF1 *FitG4EY(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
   g2->FixParameter(13,0.);
   g2->FixParameter(14,IO); 
   g2->FixParameter(15,Sign); 
-#ifdef __ELOSS__
+#if defined(__ELOSS__) || defined(__SCALE__)
   g2->FixParameter(16,0.0);
 #endif
   //  Fit pion + proton 
@@ -1501,7 +1505,7 @@ TF1 *FitG4EY(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
 	 << proj->GetName() << "/" << proj->GetTitle() << " Try one again" << endl; 
     proj->Fit(g2,Opt.Data());
   }
-#ifdef __ELOSS__
+#if defined(__ELOSS__) || defined(__SCALE__)
   g2->ReleaseParameter(16);
   iok = proj->Fit(g2,Opt.Data());
 #endif
@@ -1522,7 +1526,18 @@ TF1 *FitG4EY(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
   Opt += "m";
   iok = proj->Fit(g2,Opt.Data());
   if (iok < 0 ) return 0;
-  
+  Int_t fixit = 0;
+  for (Int_t p = 3; p <= 10; p++) {
+    Double_t par = g2->GetParameter(p);
+    if (par != 0) {
+      Double_t dpar = g2->GetParError(p);
+      if (TMath::Abs(par) < dpar) {
+	fixit++;
+	g2->FixParameter(p, 0);
+      }
+    }
+  }
+  if (fixit) iok = proj->Fit(g2,Opt.Data());
   if (! Opt.Contains("q",TString::kIgnoreCase)) {
     Double_t params[20];
     g2->GetParameters(params);
