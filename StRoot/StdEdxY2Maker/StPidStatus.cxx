@@ -239,9 +239,11 @@ StPidStatus::StPidStatus(StPicoTrack *picoTrack, Bool_t Usedx2) : PiDStatus(-1),
   static StETofPidTraits pidETof; //!
   static StMtdPidTraits  pidMtd; //!
   if (picoTrack->dEdx() > 0) {
+#if 0 /* no I70 on picoDst */
     pidI70 = StDedxPidTraits(kTpcId, kTruncatedMeanId, picoTrack->nHitsDedx(), 
 			     1e-6*picoTrack->dEdx(), picoTrack->dEdxError());
     fI70 = new StdEdxStatus(&pidI70);
+#endif
     pidFit = StDedxPidTraits(kTpcId, kLikelihoodFitId, picoTrack->nHitsDedx(), 
 			     1e-6*picoTrack->dEdx(), picoTrack->dEdxError());
     fFit = new StdEdxStatus(&pidFit);
