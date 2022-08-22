@@ -1216,6 +1216,7 @@
 		  'ENV'    => {
 		      'CPATH'           => $CPATH,
 		      'PATH'            => $PATH,
+		      'PYTHONPATH'      => $PYTHONPATH,
 		      'LM_LICENSE_FILE' => $LM_LICENSE_FILE,
 		      'INCLUDE'         => $INCLUDE_PATH,
 		      'ROOT'            => $ROOT,
