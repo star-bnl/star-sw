@@ -1615,6 +1615,10 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
   fgInstance = new St_itpcPadGainT0C(table);
   return fgInstance;
 }
+//________________________________________________________________________________
+#include "St_tpcExtraGainCorrectionC.h"
+MakeChairInstance(tpcExtraGainCorrection,Calibrations/tpc/tpcExtraGainCorrection);
+//________________________________________________________________________________
 #include "St_tpcPadGainT0BC.h"
 // tpcPadGainT0B table (indexed) is not used any more. tpcPadGainT0BChair combines nonindexed tpcPadGainT0 and itpcPadGainT0
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::fgInstance = 0;
@@ -1632,6 +1636,20 @@ Float_t 	St_tpcPadGainT0BC::Gain(Int_t sector, Int_t row, Int_t pad) const {
     gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
   }
   return gain;
+}
+//________________________________________________________________________________
+Float_t        *St_tpcPadGainT0BC::Gains(Int_t sector, Int_t row) {
+  Float_t *gains = 0;
+  if (St_tpcPadConfigC::instance()->iTPC(sector)) {
+    if (row <= 40) {
+      gains = St_itpcPadGainT0C::instance()->Gains(sector,row);
+    } else {
+      gains = St_tpcPadGainT0C::instance()->Gains(sector,row-40+13);
+    }
+  } else { // Tpx
+    gains = St_tpcPadGainT0C::instance()->Gains(sector,row);
+  }
+  return gains;
 }
 //________________________________________________________________________________
 Float_t 	  St_tpcPadGainT0BC::T0(Int_t sector, Int_t row, Int_t pad) const {
