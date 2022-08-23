@@ -36,11 +36,7 @@ void AgMLDbMatrix::operator()( const char* table, const int row, double matrix[4
   TString tablename = table;
   tablename.ReplaceAll(" ","");
 
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,00,0) 
   TTable* ttable = (TTable *)StMaker::GetChain() -> GetDataBase( tablename );
-#else
-  TTable* ttable = 0;
-#endif
 
   if ( ttable )
     {

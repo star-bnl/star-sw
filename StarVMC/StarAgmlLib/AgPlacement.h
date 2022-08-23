@@ -75,9 +75,7 @@ public:
   enum { kAlphaX,  kAlphaY, kAlphaZ };
 
   Translation             mTranslation;
-#if  !defined(__CLING__)
   std::vector< Rotation > mRotation;
-#endif
   std::vector< int      > mType;
   double                  mRotationMatrix[9];
 
