@@ -24,7 +24,7 @@ class AgMLExtension : public TGeoRCExtension {
 public:
 
   AgMLExtension();
-  virtual ~AgMLExtension(){ /* nada */ };
+  virtual ~AgMLExtension() { delete mVolumeId; mVolumeId = nullptr; }
 
   void SetModuleName( const char* name ){ mModuleName = name; }
   void SetFamilyName( const char* name ){ mFamilyName = name; }
@@ -41,7 +41,7 @@ public:
 
   void SetBranchings( int b ) { mBranchings=b; }  
 
-  void SetVolumeIdentifier( AgMLVolumeId* identifier ){ mVolumeId = identifier; }
+  void SetVolumeIdentifier( AgMLVolumeId* identifier ){ delete mVolumeId; mVolumeId = identifier; }
   void AddHitScoring( AgMLScoring* sc ){ mHitScoring.push_back( sc ); }
 
 
@@ -49,7 +49,7 @@ public:
   TString GetFamilyName(){ return mFamilyName; }
   TString GetVolumeName(){ return mVolumeName; }
 
-  int GetVolumeId( int* numbv ){ return mVolumeId->id( numbv ); }
+  int GetVolumeId( int* numbv ){ return mVolumeId ? mVolumeId->id( numbv ) : 0; }
 
   bool GetSensitive() { return mSensitive; }
   short GetTracking() { return mTracking; }
