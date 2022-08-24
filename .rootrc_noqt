@@ -11,15 +11,14 @@
 #
 Unix.*.Root.DynamicPath:    :$HOME/macros:$STAR/macros/.$STAR_HOST_SYS:$STAR/macros:$STAR/macros/.$STAR_HOST_SYS:$(LD_LIBRARY_PATH)
 Unix.*.Root.MacroPath:      :$HOME/macros:$STAR/macros:$(ROOTSYS)/macros:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/mudst:$(STAR)/StRoot/macros:$(STAR)/StRoot/macros/graphics:$(STAR)/StRoot/macros/analysis:$(STAR)/StRoot/macros/test:$(STAR)/StRoot/macros/examples:$(STAR)/StRoot/macros/html:$(STAR)/StRoot/macros/qa:$(STAR)/StRoot/macros/mudst:$(STAR)/StRoot/macros/calib:./StRoot/macros/embedding:$(STAR)/StRoot/macros/embedding:$(ROOTSYS)/macros:$ROOTSYS/tutorials:$(ROOTROOT)/root/tmva/test
-+Unix.*.Root.DynamicPath:    :$HOME/macros
-+Unix.*.Root.MacroPath:      :$HOME/macros:$ROOTSYS/tutorials
-+ACLiC.IncludePaths:         -D__TFG__VERSION__ -I$HOME/macros -I$STAR -I$GARFIELD_HOME/Include -I$GARFIELD_HOME/Heed -I$STAR/.$STAR_HOST_SYS/include
-#ACLiC.BuildDir:              .$STAR_HOST_SYS
++ACLiC.IncludePaths:          -I$HOME/macros -IStRoot/GenFit -I$STAR/StRoot/GenFit 
+#Rint.Logon:              /afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/macros/rootlogon.C
+#Rint.Logoff:             /afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/macros/rootlogoff.C
 #Unix.*.Root.PluginPath:     :./plugins:~/plugins:$STAR/QtRoot/plugins:$ROOTSYS/etc/plugins:
 #Root.Stacktrace:           no
-#Plugin.TVirtualPadEditor:   ^Ged TQtGedEditor    QtGed          "TQtGedEditor(TCanvas*)"
-#Plugin.TVirtualViewer3D:    ^ogl   TQtRootViewer3D  RQTGL    "TQtRootViewer3D(TVirtualPad*)"
-#+Plugin.TVirtualViewer3D    ^oiv   TQtRootCoinViewer3D  RQIVTGL    "TQtRootCoinViewer3D(TVirtualPad*)"
+Plugin.TVirtualPadEditor:   ^Ged TQtGedEditor    QtGed          "TQtGedEditor(TCanvas*)"
+Plugin.TVirtualViewer3D:    ^ogl   TQtRootViewer3D  RQTGL    "TQtRootViewer3D(TVirtualPad*)"
++Plugin.TVirtualViewer3D    ^oiv   TQtRootCoinViewer3D  RQIVTGL    "TQtRootCoinViewer3D(TVirtualPad*)"
 # GUI specific settings
 Gui.Style:                  windows
 Gui.Backend:                native
@@ -30,15 +29,15 @@ Plugin.TGuiFactory          root      TRootGuiFactory Gui        "TRootGuiFactor
 Logger.Configuration        $STAR/Bfc.xml
 Logger.Color                yes
 #Root.Debug:                1
-#Root.MemStat:              1
-#Root.ObjectStat:            1
-#Root.ErrorIgnoreLevel      Warning
+Root.MemStat:               1
+Root.ObjectStat:            1
+Root.ErrorIgnoreLevel      Warning
 # Default Fitter (current choices are Minuit and Fumili).
 # Root.Fitter:             Fumili
 # Default 3d Viewer.
 # By default 3-D views are shown in the pad,
 # if the next line is activated, the default viewer will be OpenGL.
-Viewer3D.DefaultDrawOption:   ogl
+# Viewer3D.DefaultDrawOption:   ogl
 # Browser Options (plugins)
 # F: File browser E: Text Editor H: HTML browser
 # C: Canvas I: I/O redirection P: Proof G: GL viewer
