@@ -1,0 +1,13 @@
+/*    rhicfPedestalF.idl
+*
+*  Table: rhicfPedestalF
+*
+*       description: // RHICf detector pedestals
+*
+*/ 
+
+struct rhicfPedestalF {
+	float plate[32];             
+	float smallbar[160];
+	float largebar[320];
+};
