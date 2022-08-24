@@ -11,7 +11,8 @@
 #
 Unix.*.Root.DynamicPath:    :$HOME/macros:$STAR/macros/.$STAR_HOST_SYS:$STAR/macros:$STAR/macros/.$STAR_HOST_SYS:$(LD_LIBRARY_PATH)
 Unix.*.Root.MacroPath:      :$HOME/macros:$STAR/macros:$(ROOTSYS)/macros:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/mudst:$(STAR)/StRoot/macros:$(STAR)/StRoot/macros/graphics:$(STAR)/StRoot/macros/analysis:$(STAR)/StRoot/macros/test:$(STAR)/StRoot/macros/examples:$(STAR)/StRoot/macros/html:$(STAR)/StRoot/macros/qa:$(STAR)/StRoot/macros/mudst:$(STAR)/StRoot/macros/calib:./StRoot/macros/embedding:$(STAR)/StRoot/macros/embedding:$(ROOTSYS)/macros:$ROOTSYS/tutorials:$(ROOTROOT)/root/tmva/test
-+ACLiC.IncludePaths:          -D__TFG__VERSION__ -I$HOME/macros -IStRoot/GenFit -I$STAR/StRoot/GenFit 
+#+ACLiC.IncludePaths:          -D__TFG__VERSION__ -I$HOME/macros -IStRoot/GenFit -I$STAR/StRoot/GenFit 
++ACLiC.IncludePaths:          -I$HOME/macros -IStRoot/GenFit -I$STAR/StRoot/GenFit 
 # -I$STAR/.$STAR_HOST_SYS/include
 #ACLiC.BuildDir:              .$STAR_HOST_SYS
 #Rint.Logon:              rootlogon.C
