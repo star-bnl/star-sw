@@ -152,8 +152,10 @@ struct MIPFitPar_t {
   Double_t        mu;
   Double_t     sigma;
   Double_t     alpha;
-  void Print(Option_t *opt="") {
-    cout << Form("%25s mu: %8.3f sigma:%8.3f alpha:%8.3f",Name,mu,sigma,alpha) << endl;
+  void Print(Option_t *opt="", Double_t *pars = 0) {
+    cout << Form("%3i %3i %25s mu: %8.3f sigma:%8.3f alpha:%8.3f",Name,mu,sigma,alpha);
+    if (pars) cout << Form("\t mu: %8.3f sigma:%8.3f alpha:%8.3f",pars[1], pars[2], pars[3]);
+    cout << endl;
   }
 };
 struct MIPFitParX_t {
@@ -166,8 +168,10 @@ struct MIPFitParX_t {
   Double_t        mu;
   Double_t     sigma;
   Double_t     alpha;
-  void Print(Option_t *opt="") {
-    cout << Form("%3i %3i %25s mu: %8.3f sigma:%8.3f alpha:%8.3f",p1,p2,Name,mu,sigma,alpha) << endl;
+  void Print(Option_t *opt="", Double_t *pars = 0) {
+    cout << Form("%3i %3i %25s mu: %8.3f sigma:%8.3f alpha:%8.3f",p1,p2,Name,mu,sigma,alpha);
+    if (pars) cout << Form("\t mu: %8.3f sigma:%8.3f alpha:%8.3f",pars[1], pars[2], pars[3]);
+    cout << endl;
   }
 };
 struct Fitx_t {
@@ -4860,12 +4864,14 @@ void dEdxFitSparse(THnSparse *hist, const Char_t *FitName = "GP",
 	   Fit.i,Fit.j,Fit.x,Fit.y,Fit.mean,Fit.rms,Fit.entries,Fit.mu,Fit.sigma,Fit.chisq,Fit.prob);
     if (FitP)  FitP->Fill(&Fit.i);
     if (canvas) {
-      canvas->Update();
+      canvas->Update();if (Ask()) goto ENDL;
+      
     }
     fOut->cd();
     //    proj->Write();
     SafeDelete(proj);
   }
+ ENDL:
   fOut->cd();
   FitP->Write();
 }
@@ -4949,7 +4955,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
   NewRootFile += "/";
   NewRootFile += HistName;
   NewRootFile += FitName;
-  NewRootFile += Opt;
+  //  NewRootFile += Opt;
   if (ix >= 0) NewRootFile += Form("_X%i",ix);
   if (jy >= 0) NewRootFile += Form("_Y%i",jy);
   if (mergeX != 1) NewRootFile += Form("_x%i",mergeX);
@@ -5144,11 +5150,11 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	  if (HName.Contains("+")) Sign = 2;
 	  else                     Sign = 1;
 	} 
-	Int_t IO = 2;
-	if (nx == 72 || nx == 144) {
+	Int_t IO = 1;
+	if (nx == 72 || nx == 145) {
 	  IO = 0;
 	  if (TMath::Abs(Fit.x) > 40.5) IO = 1;
-	} else if (ny == 72 || ny == 144) {
+	} else if (ny == 72 || ny == 145) {
 	  IO = 0;
 	  if (TMath::Abs(Fit.y) > 40.5) IO = 1;
 	}

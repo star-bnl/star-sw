@@ -286,7 +286,7 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
 	TString DirName(gDirectory->GetName());
 	if (DirName.Contains("Z3")) {
 	  //      Drawh += Form("(%i,%f,%f)",mu->GetYaxis()->GetNbins(), mu->GetYaxis()->GetXmin(), mu->GetYaxis()->GetXmax());
-	  p = new TProfile(histN,"#mu versus pad row",2*mu->GetXaxis()->GetNbins()+1, -mu->GetXaxis()->GetXmax(), mu->GetXaxis()->GetXmax());
+	  p = new TProfile(histN,"#mu versus pad row",2*mu->GetYaxis()->GetNbins()+1, -mu->GetYaxis()->GetXmax(), mu->GetYaxis()->GetXmax());
 	} else if (DirName.Contains("xyPad3")) {
 	  //      Drawh += Form("(%i,%f,%f)",mu->GetYaxis()->GetNbins(), mu->GetYaxis()->GetXmin(), mu->GetYaxis()->GetXmax());
 	  p = new TProfile(histN,"#mu versus sector phi  ", nx, xMin, xMax);
@@ -304,8 +304,8 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
     p->SetMarkerStyle(kM);
     p->SetMarkerSize(1);
 #if 1
-    cout << k << "\t" << F[k]->GetName() << endl;
-    cout << "FitP->Draw(\"" << Drawh << "\",\"" << cut << "\",\"" << same << "\")" << endl;
+    //    cout << Form("%2i %-52s\t", k, F[k]->GetName()); //  << endl;
+    //    cout << "FitP->Draw(\"" << Drawh << "\",\"" << cut << "\",\"" << same << "\")" << "\t"; //  endl;
 #endif
 #if 0
     c2->cd();
@@ -345,7 +345,7 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
       hist->SetXTitle(var);
       //      cout << k << "\t" << name.Data() << "\tmin = " << 100*hist->GetMinimum() << "\tmax = " <<  100*hist->GetMaximum() << " %" << endl;
       TString nn(name);
-      cout << Form("%-28s%-4s: min/max = %7.2f/%7.2f rms %7.2f (\%)", nn.Data(), side, 100*hist->GetMinimum(), 100*hist->GetMaximum(), RMS) << endl;
+      cout << Form("%3i %-45s%4s: min/max = %7.2f/%7.2f rms %7.2f (\%)", k, nn.Data(), side, 100*hist->GetMinimum(), 100*hist->GetMaximum(), RMS) << endl;
       if (ymin < ymax) {hist->SetMinimum(ymin); hist->SetMaximum(ymax);}
     }
   }
@@ -461,6 +461,7 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
   TString Name(gDirectory->GetName());
   if        (Name.BeginsWith("SecRow3")) {  MuDraw();
   } else if (Name.BeginsWith("Z3"))      {
+#if 1
     if (Opt == "") {
       MuDraw("mu-muJ:TMath::Sign(208.707-y,x)","ZI", 0,   0,  0, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "All", "Z");
     } else if (Opt == "I") {
@@ -468,6 +469,15 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
     } else {
       MuDraw("mu-muJ:TMath::Sign(208.707-y,x)","ZO", 0,   0,  0, "(i&&j&&abs(x)>40.5&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "Outer", "Z");
     }
+#else
+    if (Opt == "") {
+      MuDraw("mu:TMath::Sign(208.707-y,x)","ZI", 0,   0,  0, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "All", "Z");
+    } else if (Opt == "I") {
+      MuDraw("mu:TMath::Sign(208.707-y,x)","ZI", 0,   0,  0, "(i&&j&&abs(x)<40.5&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "Inner", "Z");
+    } else {
+      MuDraw("mu:TMath::Sign(208.707-y,x)","ZO", 0,   0,  0, "(i&&j&&abs(x)>40.5&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "Outer", "Z");
+    }
+#endif
   } else if (Name.BeginsWith("xyPad3"))      {
     if (Opt == "") {
       MuDraw("mu:0.5*y+TMath::Nint(x)","xy", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", 0.25,  0.15, "All", "xy");

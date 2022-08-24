@@ -62,17 +62,8 @@ void MakeTpcZCorrection1() {
   if (! fileIn.BeginsWith("Z3")) return;
   TNtuple *FitP = (TNtuple *) gDirectory->Get("FitP");
   if (! FitP) return;
-  fileIn.ReplaceAll("Z3PCGF","");
-  fileIn.ReplaceAll("Z3PGF","");
-  fileIn.ReplaceAll("Z3CGF","");
-  fileIn.ReplaceAll("Z3GF","");
-
-  fileIn.ReplaceAll("Z3C+Z3PCG4E","");
-  fileIn.ReplaceAll("Z3+Z3PG4E","");
-  fileIn.ReplaceAll("Z3PCG4E","");
-  fileIn.ReplaceAll("Z3PG4E","");
-  fileIn.ReplaceAll("Z3CG4E","");
-  fileIn.ReplaceAll("Z3G4E","");
+  fileIn.ReplaceAll("Z3C+Z3PCG4EY","");
+  fileIn.ReplaceAll("Z3+Z3PG4EY","");
 
   fileIn.ReplaceAll(".root","");
   TString fOut =  Form("%s.%s.C", tableName, fileIn.Data());
@@ -92,7 +83,7 @@ void MakeTpcZCorrection1() {
   else if (fileIn.Contains("19GeV_2019"))   		  {} // ok
   else if (fileIn.Contains("19p5GeV_fixedTarget_2020"))   {} // ok
   else if (fileIn.Contains("26p5GeV_fixedTarget_2020"))   {} // ok
-  else if (fileIn.Contains("26p5GeV_fixedTarget_2021"))   {nrows = 2; np = 3;} 
+  else if (fileIn.Contains("26p5GeV_fixedTarget_2021"))   {nrows = 0;} // 2; np = 3;} 
   else if (fileIn.Contains("31GeV_fixedTarget_2019"))     {nrows = 4; np = 3;} 
   else if (fileIn.Contains("31p2GeV_fixedTarget_2020"))   {} // ok
   else if (fileIn.Contains("3p85GeV_fixedTarget_2019"))   {nrows = 0;} //
@@ -101,11 +92,11 @@ void MakeTpcZCorrection1() {
   else if (fileIn.Contains("4p59GeV_fixedTarget_2019"))   {nrows = 0;} //{} // ok
   else if (fileIn.Contains("5p75GeV_fixedTarget_2020"))   {} // ok
   else if (fileIn.Contains("70GeV_fixedTarget_2021"))     {} // ok
-  else if (fileIn.Contains("7.3GeV_fixedTarget_2019"))    {nrows = 0;} //{} // ok
+  else if (fileIn.Contains("7.3GeV_fixedTarget_2019"))    {} // ok
   else if (fileIn.Contains("7p3GeV_fixedTarget_2020"))    {} // ok
   else if (fileIn.Contains("7p7GeV_2019"))                {nrows = 2; np = 5; npO = 2;}
   else if (fileIn.Contains("7p7GeV_2020"))  		  {nrows = 2; np = 5; npO = 2;}
-  else if (fileIn.Contains("7p7GeV_2021"))  		  {nrows = 2; np = 5; npO = 2;}
+  else if (fileIn.Contains("7p7GeV_2021"))  		  {nrows = 4; np = 5; npO = 2;}
   else if (fileIn.Contains("9p2GeV_2019"))  		  {nrows = 2; np = 5; npO = 2;}
   else if (fileIn.Contains("9p2GeV_2020"))  		  {nrows = 2; np = 5; npO = 2;}
   else if (fileIn.Contains("9p2GeVb_2020")) 		  {nrows = 2; np = 5; npO = 2;}
