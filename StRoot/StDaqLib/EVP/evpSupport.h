@@ -8,7 +8,7 @@
 #define EVP_NO_DATA	(-1)
 #define EVP_DATA_ERR	(-2) 
 namespace  OLDEVP {
-extern int checkBank(char *m, char *what) ;
+extern int checkBank(char *m, const char *what) ;
 
 // UGLY UGLY hack
 extern u_int evp_daqbits ;

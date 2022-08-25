@@ -177,7 +177,7 @@ void St_trg_Maker::Emc2003(St_dst_TrgDet *dst1) {
 int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,
 			  St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
 
-  char *oo,*ptr,isLaser=0,isPhysics=0,isPulser=0,thisEventOk=0;
+  char *ptr,isLaser=0,isPhysics=0,isPulser=0,thisEventOk=0;
   fVictorPrelim=(StDAQReader*)(herb->GetObject()); assert(fVictorPrelim);
   fVictor=fVictorPrelim->getTRGReader(); assert(fVictor);
 
@@ -222,7 +222,7 @@ int St_trg_Maker::Daq2003(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger
   if((m_Mode&4)&&isPulser)  thisEventOk=7;
 
 
-  oo = "unknown";
+  const char *oo = "unknown";
   if(isPhysics) oo="Physics"; 
   if(isLaser)   oo="Laser"; 
   if(isPulser)  oo="Pulser";

@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "StChain.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StEventMaker/StEventMaker.h"
@@ -17,13 +19,13 @@ ClassImp(StrangeMuDstPlayer)
 
 char empty = '\0';
 char slash = '/';
-void ParseFileName(Char_t *output, Char_t **file, Char_t **dir) {
-  if ((*file = strrchr(output,slash))) {
+void ParseFileName(const Char_t *output, Char_t **file, Char_t **dir) {
+  if ((*file = std::strrchr(const_cast<char*>(output),slash))) {
     (*file)++;
     *dir = new char[strlen(output)+5];
     strncpy(*dir,output,(strlen(output)-strlen(*file)));
   } else {
-    *file = output;
+    *file = const_cast<char*>(output);
     *dir = &empty;
   }
 }
@@ -53,7 +55,7 @@ StrangeMuDstPlayer::StrangeMuDstPlayer() {
   xiDcaBachelorToPrimVertex = 0.;
 }
 
-void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
+void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, const Char_t* output) {
 
   StStrangeMuDstMaker *muDstMakers[3];
   StStrangeMuDstMaker *v0MuDstMaker, *xiMuDstMaker, *kinkMuDstMaker;
@@ -166,7 +168,7 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
   }
 }
 
-void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
+void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, const Char_t* output) {
 
   StStrangeMuDstMaker *oldMuDstMaker=0;
   StStrangeMuDstMaker *newMuDstMakers[3];
@@ -366,7 +368,7 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
   }
 }
 
-void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
+void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, const Char_t* output) {
 
   StStrangeMuDstMaker *oldMuDstMaker=0;
   StStrangeMuDstMaker *newMuDstMakers[3];
@@ -592,7 +594,7 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   }
 }
 
-void StrangeMuDstPlayer::Copy(Int_t NEvents, StFile* input, Char_t* output) {
+void StrangeMuDstPlayer::Copy(Int_t NEvents, StFile* input, const Char_t* output) {
 
   StStrangeMuDstMaker *oldMuDstMaker=0;
   StStrangeMuDstMaker *newMuDstMakers[3];

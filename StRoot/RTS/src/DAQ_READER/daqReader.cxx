@@ -2024,7 +2024,7 @@ int daqReader::fillSummaryInfo_v02(SummaryInfo *info, gbPayload_0x02 *pay) {
       msg.head.status = 0 ;
       msg.ld.dword[0] = htonl(getpid()) ;
 
-      char *user ;
+      const char *user ;
 
       struct passwd *passwd = getpwuid(getuid()) ;
       if(passwd == NULL) {

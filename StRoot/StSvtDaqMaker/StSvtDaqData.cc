@@ -52,7 +52,7 @@ StSvtDaqData::StSvtDaqData() :
   StSvtData()
 {}
 
-StSvtDaqData::StSvtDaqData(const char* config, StSVTReader* reader, char* option, int run, int event, int trigger) : 
+StSvtDaqData::StSvtDaqData(const char* config, StSVTReader* reader, const char* option, int run, int event, int trigger) :
   StSvtData(config, run, event, trigger)
 {
   // The Same as StSvtHybridCollection, with two additional parameters: 
@@ -66,7 +66,7 @@ StSvtDaqData::StSvtDaqData(const char* config, StSVTReader* reader, char* option
     setData(reader,option);
 }
 
-StSvtDaqData::StSvtDaqData(StSvtConfig* config, StSVTReader* reader, char* option, int run, int event, int trigger) : 
+StSvtDaqData::StSvtDaqData(StSvtConfig* config, StSVTReader* reader, const char* option, int run, int event, int trigger) :
   StSvtData(config, run, event, trigger)
 {
   // The Same as StSvtHybridCollection, with two additional parameters: 
@@ -80,7 +80,7 @@ StSvtDaqData::StSvtDaqData(StSvtConfig* config, StSVTReader* reader, char* optio
     setData(reader,option);
 }
 
-int StSvtDaqData::setData(StSVTReader* reader, char* option)
+int StSvtDaqData::setData(StSVTReader* reader, const char* option)
 {
   int status, index;
 

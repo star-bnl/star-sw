@@ -59,7 +59,7 @@ Structure that defines Tower data format after decodification.
 */ 
 struct BTOWERDATA
 {
-  char * BankType;                            ///< Will be filled with a 9 char array (8 letters + NULL)
+  const char * BankType;                      ///< Will be filled with a 9 char array (8 letters + NULL)
   unsigned int   DetFlag;                     ///< DAQ Detector flag for BEMC, PRS, SMDE or SMDP
   unsigned int   EventNumber;                 ///< Token number
   unsigned int   PedFlag;                     ///< Pedestal subtracted or not (??)
@@ -106,7 +106,7 @@ Structure that defines SMD data format after decodification
 */ 
 struct BSMDDATA
 {
-  char            *BankType;                    ///< Will be filled with a 9 char array (8 letters + NULL)
+  const char      *BankType;                    ///< Will be filled with a 9 char array (8 letters + NULL)
   unsigned int    DetFlag;                      ///< Daq detector flag
   unsigned int    EventNumber;                  ///< Token number
   unsigned int    PedFlag;                      ///< Pedestal subtracted or not (??)

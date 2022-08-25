@@ -133,7 +133,7 @@ public:
     void setMinFitPointsPerTrack(Int_t);
     void setMinFitPointsOverMax(Float_t);
     void setMaxDCA(Float_t);
-    void setHistoFileName(Char_t*);
+    void setHistoFileName(const Char_t*);
     void setNtupleFileName(Char_t*);
     void setSaveGeometry(Bool_t geomSave=kFALSE);
 
@@ -382,7 +382,7 @@ inline void StTofrMatchMaker::setMinFitPointsOverMax(Float_t ratio) {mMinFitPoin
 
 inline void StTofrMatchMaker::setMaxDCA(Float_t maxdca){mMaxDCA=maxdca;}
 
-inline void StTofrMatchMaker::setHistoFileName(Char_t* filename){mHistoFileName=filename;}
+inline void StTofrMatchMaker::setHistoFileName(const Char_t* filename){mHistoFileName=filename;}
 
 inline void StTofrMatchMaker::setCreateHistoFlag(Bool_t histos){mHisto = histos;}
 

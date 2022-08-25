@@ -139,7 +139,6 @@ daq_dta *daq_btow::handle_raw()
 	const char *full_name = "?" ;	// just a dummy...
 
 	from = 0 ;
-	full_name = "?" ;
 
 	assert(caller) ;
 
