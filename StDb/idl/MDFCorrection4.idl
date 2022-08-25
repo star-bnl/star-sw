@@ -1,0 +1,22 @@
+//:Description: TMultiDimFit
+//:Synonyms::::
+//:Source:
+//:Update:
+//:Update frequncy:
+//:Reminder:
+//:Recall frequency:
+//:Size of Data:
+//:Pointer to data:  MDFCorrection4.time:
+struct MDFCorrection4 {
+  octet   idx; // row index
+  octet   nrows; // total no. of real rows in the table; For Db interface (where nrows = 50)
+  octet   PolyType;  // type = 0 kMonomials, type = 1 kChebyshev, type = 2 kLegendre
+  octet   NVariables;// <= 4 for now.
+  octet   NCoefficients;// <= 50
+  octet   Power[150];    //  p_ijk = Power[i * NVariables + j];
+  double  DMean; // 
+  double  XMin[4];
+  double  XMax[4];
+  double  Coefficients[50]; 
+  double  CoefficientsRMS[50]; 
+};

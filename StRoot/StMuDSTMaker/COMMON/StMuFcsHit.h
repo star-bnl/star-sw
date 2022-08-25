@@ -15,6 +15,7 @@
 #include <TObject.h>
 #include "TArrayS.h"
 #include "Stiostream.h"
+#include <TRef.h>
 
 class StMuFcsCluster;
 
@@ -86,8 +87,9 @@ public:
                    unsigned short ns, unsigned short ehp, unsigned short dep, unsigned short ch, 
            float e);
     
-    void setCluster(StMuFcsCluster* clu) {mCluster = clu;}
-    StMuFcsCluster *cluster() {return mCluster;}
+    void setCluster(StMuFcsCluster* clu);
+    const StMuFcsCluster *cluster() const;
+    StMuFcsCluster *cluster();
 
     void print(Option_t *option="") const;
 
@@ -100,10 +102,11 @@ protected:
     Float_t  mFitChi2=0.0;    // fit chi2
     UInt_t   mNPeak=0;        // number of peaks found
     Float_t  mEnergy=0.0;     // corrected energy
-    StMuFcsCluster* mCluster=0; // pointer to cluster this hit belongs
+    // StMuFcsCluster* mCluster=0; // pointer to cluster this hit belongs
+    TRef mCluster;
     TArrayS mData=0;         // 12bit ADC values + flag at highest 4 bits, array of timebin
     
-    ClassDef(StMuFcsHit,1)
+    ClassDef(StMuFcsHit,2)
 };
 
 ostream& operator<<(ostream&, const StMuFcsHit&);

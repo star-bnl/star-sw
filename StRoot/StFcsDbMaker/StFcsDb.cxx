@@ -515,9 +515,8 @@ int StFcsDb::getDetFromName(const std::string& detname){
     else if( detname=="ES") {return 1;}
     else if( detname=="HN") {return 2;}
     else if( detname=="HS") {return 3;}
-    else if( detname=="HN") {return 4;}
-    else if( detname=="PN") {return 5;}
-    else if( detname=="PS") {return 6;}
+    else if( detname=="PN") {return 4;}
+    else if( detname=="PS") {return 5;}
     else {
 	LOG_ERROR << "ERROR:Invalid name for detector;Input:"<<detname<<endm;
 	return -1;
@@ -691,8 +690,13 @@ double StFcsDb::getProjectedDistance(StFcsPoint* ecal,  StFcsCluster* hcal, doub
 };
 
 //! get coordinates of center of the cell STAR frame from StFcsHit
-StThreeVectorD StFcsDb::getStarXYZ(StFcsHit* hit, float FcsZ) const{ 
+StThreeVectorD StFcsDb::getStarXYZ(const StFcsHit* hit, float FcsZ) const{ 
     return getStarXYZ(hit->detectorId(),hit->id(),FcsZ);
+}
+
+//! get coordinates of the cluster STAR frame from StFcsCluster
+StThreeVectorD StFcsDb::getStarXYZ(const StFcsCluster* clu, float FcsZ) const{ 
+    return getStarXYZfromColumnRow(clu->detectorId(),clu->x(),clu->y(),FcsZ);
 }
 
 //! get coordinates of center of the cell in STAR frame from det/id

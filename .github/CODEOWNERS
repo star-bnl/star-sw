@@ -1,12 +1,11 @@
 *                                                  @plexoos           @nigmatkulov
-/OnlTools                                          @kehw              @plexoos     @jml985
-/StDb                                              @dmarkh            @plexoos
-/StDb/idl                                          @akioogawa         @dmarkh      @fgeurts     @iraklic     @plexoos @fisyak
-/StRoot/RTS                                        @kehw              @akioogawa   @jml985      @tonko-lj
-/StRoot/StAnalysisMaker                            @ullrich-bnl       @fisyak
+/OnlTools                                          @plexoos           @jml985
+/StDb                                              @dmarkh
+/StDb/idl                                          @akioogawa         @dmarkh      @fgeurts     @iraklic     @fisyak
+/StRoot/RTS                                        @akioogawa         @jml985      @tonko-lj
+/StRoot/StAnalysisMaker                            @fisyak
 /StRoot/StAnalysisUtilities/StHistUtil*            @genevb
-/StRoot/StAssociationMaker                         @ullrich-bnl
-/StRoot/StAssociationMaker/EMC                     @ullrich-bnl       @kkauder     @rkunnawa    @Navagyan
+/StRoot/StAssociationMaker/EMC                     @kkauder           @rkunnawa    @Navagyan
 /StRoot/StBFChain                                  @genevb            @plexoos     @klendathu2k @fisyak
 /StRoot/StBichsel                                  @fisyak
 /StRoot/StBTof*                                    @ZaochenYe         @fgeurts     @starsdong   @jdbrice
@@ -23,10 +22,10 @@
 /StRoot/StDaqLib/TOF                               @ZaochenYe         @fgeurts     @starsdong   @jdbrice
 /StRoot/StDaqLib/TRG                               @akioogawa
 /StRoot/StDataFilterMaker                          @genevb
-/StRoot/StDb*                                      @dmarkh            @plexoos
-/StRoot/StDbUtilities                              @fisyak           @plexoos
+/StRoot/StDb*                                      @dmarkh
+/StRoot/StDbUtilities                              @fisyak
 /StRoot/StDbUtilities/StMagUtilities*              @genevb
-/StRoot/StDetectorDbMaker                          @dmarkh            @fisyak     @plexoos
+/StRoot/StDetectorDbMaker                          @dmarkh            @fisyak
 /StRoot/StDetectorDbMaker/StDetectorDbBeamInfo*    @genevb
 /StRoot/StDetectorDbMaker/StDetectorDbGridLeak*    @genevb
 /StRoot/StDetectorDbMaker/StDetectorDbRichScalers* @genevb
@@ -58,9 +57,7 @@
 /StRoot/StFst*                                     @jdbrice           @sunxuhit    @yezhenyu2003   @techuan-huang
 /StRoot/StFtt*                                     @jdbrice
 /StRoot/StGenericVertexMaker                       @plexoos           @perevbnlgov @akioogawa   @klendathu2k @fisyak
-/StRoot/StHeavyPool                                @starsdong         @ullrich-bnl @fgeurts
-/StRoot/StHighPtTagsMaker                          @ullrich-bnl
-/StRoot/StHltMaker                                 @kehw
+/StRoot/StHeavyPool                                @starsdong         @fgeurts
 /StRoot/StIOMaker                                  @plexoos           @perevbnlgov
 /StRoot/StIst*                                     @plexoos           @starsdong
 /StRoot/StJetFinder                                @zlchang           @veprbl
@@ -71,7 +68,6 @@
 /StRoot/StMc*                                      @klendathu2k       @perevbnlgov
 /StRoot/StMcAnalysisMaker                          @klendathu2k
 /StRoot/StMcEvent*                                 @klendathu2k
-/StRoot/StMiniDstMaker                             @ullrich-bnl
 /StRoot/StMtd*                                     @marrbnl
 /StRoot/StMuDSTMaker                               @jdbrice
 /StRoot/StMuDSTMaker/EMC                           @kkauder           @rkunnawa    @Navagyan
@@ -79,10 +75,9 @@
 /StRoot/StPass0CalibMaker                          @genevb            @iraklic
 /StRoot/StPico*                                    @nigmatkulov       @marrbnl     @plexoos
 /StRoot/StPxl*                                     @starsdong         @GuannanXie
-/StRoot/StRefMultCorr                              @nigmatkulov	      @ToshihiroNonaka
+/StRoot/StRefMultCorr                              @nigmatkulov
 /StRoot/StRTSClient                                @jml985            @tonko-lj
 /StRoot/StShadowMaker                              @genevb
-/StRoot/StSpectraTagsMaker                         @ullrich-bnl
 /StRoot/StSpinPool                                 @akioogawa         @zlchang     @veprbl
 /StRoot/StSsd*                                     @starsdong         @plexoos
 /StRoot/StSst*                                     @starsdong         @plexoos
@@ -102,25 +97,24 @@
 /StRoot/St_QA_Maker                                @genevb
 /StRoot/St_TLA_Maker                               @perevbnlgov
 /StRoot/St_base*                                   @perevbnlgov       @fisyak
-/StRoot/St_db_Maker                                @dmarkh            @plexoos     @perevbnlgov
+/StRoot/St_db_Maker                                @dmarkh            @perevbnlgov
 /StRoot/St_geant_Maker                             @klendathu2k       @perevbnlgov @fisyak
 /StRoot/St_geant_Maker/Embed                       @zhux97         
 /StRoot/St_l3Clufi_Maker                           @jml985            @tonko-lj
 /StRoot/St_l3t_Maker                               @jml985            @tonko-lj
 /StRoot/St_tcl_Maker                               @fisyak           @iraklic
 /StRoot/Star2Root                                  @perevbnlgov       @fisyak
-/StRoot/StarClassLibrary                           @ullrich-bnl       @klendathu2k
+/StRoot/StarClassLibrary                           @klendathu2k
 /StRoot/StarGenerator                              @klendathu2k       @perevbnlgov
 /StRoot/StarMagField                               @fisyak
 /StRoot/StarRoot                                   @klendathu2k       @perevbnlgov @fisyak
 /StRoot/StdEdx*                                    @fisyak
 /StRoot/Sti*                                       @klendathu2k       @plexoos     @starsdong   @perevbnlgov @fisyak
 /StRoot/Stl3*                                      @jml985            @tonko-lj
-/StRoot/StppSpin                                   @ullrich-bnl
 /StRoot/Stv*                                       @perevbnlgov
 /StRoot/StvUtil                                    @klendathu2k       @perevbnlgov
-/StRoot/TPCCATracker                               @fisyak           @kehw
-/StRoot/macros                                     @genevb            @ullrich-bnl @plexoos     @fisyak
+/StRoot/TPCCATracker                               @fisyak
+/StRoot/macros                                     @genevb            @plexoos     @fisyak
 /StRoot/macros/embedding                           @zhux97
 /StRoot/macros/mudst                               @nigmatkulov       @plexoos
 /StarDb                                            @dmarkh            @perevbnlgov @fisyak
@@ -148,5 +142,5 @@
 /mgr                                               @genevb            @klendathu2k @fisyak     @plexoos
 /pams                                              @klendathu2k       @fisyak
 /pams/sim                                          @akioogawa         @klendathu2k
-/pams/tables                                       @dmarkh            @plexoos
+/pams/tables                                       @dmarkh
 /asps                                              @klendathu2k       @perevbnlgov

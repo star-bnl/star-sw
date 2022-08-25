@@ -18,8 +18,9 @@ class St_tpcCorrectionC : public TChair {
   Double_t 	min(Int_t i = 0) 	const {return Struct(i)->min;}
   Double_t 	max(Int_t i = 0) 	const {return Struct(i)->max;}
   Double_t* 	a(Int_t i = 0) 	        const {return Struct(i)->a;}
-  Double_t CalcCorrection(Int_t i, Double_t x, Double_t z = 0, Int_t NparMax = -1);
-  Double_t SumSeries(tpcCorrection_st *cor, Double_t x, Double_t z = 0, Int_t NparMax = -1);
+  Double_t      CalcCorrection(Int_t i, Double_t x, Double_t z = 0, Int_t NparMax = -1) const;
+  Double_t      SumSeries(tpcCorrection_st *cor, Double_t x, Double_t z = 0, Int_t NparMax = -1) const;
+  Int_t         IsActiveChair() const;
   ClassDefChair(St_tpcCorrection, tpcCorrection_st )
   ClassDef(St_tpcCorrectionC,1) //C++ TChair for tpcCorrection table class
 };

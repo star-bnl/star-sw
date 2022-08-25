@@ -1,0 +1,14 @@
+/*    itpcDeadFEE.idl
+*
+*  Table: itpcDeadFEE
+*
+*       description: list of pad with bad pulser data
+*/ 
+struct itpcDeadFEE { 
+  short   sector;
+  short   row;
+  short   padMin;
+  short   padMax;
+  short   RDO;
+  short   FEE; // if positive reactivate intire FEE else if negative use row and [padMin,padMax] range
+ };  

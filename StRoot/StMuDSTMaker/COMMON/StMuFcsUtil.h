@@ -40,9 +40,9 @@ private:
   void fillFcsHits(StFcsCollection*, StMuFcsCollection*);
 
   /** holds relation between StEvent and StMuDst types (in memory)**/
-  map< const StFcsHit*, TObject* > mMapHits;
-  map< const StFcsCluster*, TObject* > mMapClusters;
-  map< const StFcsPoint*, TObject* > mMapPoints;
+  map< const StFcsHit*, StMuFcsHit* > mMapHits;
+  map< const StFcsCluster*, StMuFcsCluster* > mMapClusters;
+  map< const StFcsPoint*, StMuFcsPoint* > mMapPoints;
 
   ClassDef(StMuFcsUtil,1)
 };

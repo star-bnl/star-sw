@@ -572,11 +572,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	# Package FILT is transformed to StarGeneratorFilt by StarGenerator directory rules
 	# We cannot narrow down futher..., so all filters will be built with the
 	# following dependencies...
-        if ( defined($ENV{FASTJET_DIR}) ) {
-          $CPPPATH = $ENV{FASTJET_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
-        } else {
-          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;	      
-        }
+        $CPPPATH = $env1->{Packages}->{FASTJET}->{INCDIR}.$main::PATH_SEPARATOR.$CPPPATH;
 
     } elsif ( $pkg =~ m/^Pythia8/ and $Dir =~ m/StarGenerator/ ){
 	# Append pythia 8 include path and define version
@@ -713,11 +709,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
 	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
 
-        if ( defined($ENV{GSL_DIR}) ) {
-          $CPPPATH = $ENV{GSL_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
-        } else {
-          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
-        }
+        $CPPPATH = $env1->{Packages}->{GSL}->{INCDIR}.$main::PATH_SEPARATOR.$CPPPATH;
 
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 	# According to description, all client requirering this
@@ -774,11 +766,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
     } elsif ( $pkg =~ m/^StJetFinder$/ ){
 
-        if ( defined($ENV{FASTJET_DIR}) ) {
-          $CPPPATH = $ENV{FASTJET_DIR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
-        } else {
-          $CPPPATH = $env1->{ENV}->{OPTSTAR}."/include".$main::PATH_SEPARATOR.$CPPPATH;
-        }
+        $CPPPATH = $env1->{Packages}->{FASTJET}->{INCDIR}.$main::PATH_SEPARATOR.$CPPPATH;
 
     } elsif ( $pkg =~ m/^StFwdTrackMaker$/ ){ 
 		$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";

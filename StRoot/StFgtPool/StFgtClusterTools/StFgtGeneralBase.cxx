@@ -565,7 +565,7 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 		  {
 		    //construct new cluster
 		    oldClusIdx=clusIdx;
-		    if(pFgtHit>0)
+		    if(pFgtHit)
 		      hitCollectionPtr[disc]->getHitVec().push_back(pFgtHit);
 		    StMuFgtCluster* clus = static_cast< StMuFgtCluster* >( (*fgtClusters)[clusIdx] );
 		    Int_t clusCentGeoId=clus->getCentralStripGeoId();
@@ -636,7 +636,7 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 	      }
 	  }
 	//put last cluster in...
-	if(pFgtHit>0)
+	if(pFgtHit)
 	  hitCollectionPtr[disc]->getHitVec().push_back(pFgtHit);
       }
       else
