@@ -107,6 +107,8 @@ class StarAgmlChecker : public TGeoChecker
 			    const Double_t  zmax  = +4000.0,
 			    const Option_t *opts = "top" );
 
+  
+
   /// Provides a checksum for the volume
   TMD5 CheckSum( const Char_t *volume );
 

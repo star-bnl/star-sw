@@ -12,7 +12,7 @@
 #include <assert.h>
 #include "StMessMgr.h"
 
-StarAgmlChecker::StarAgmlChecker( TGeoManager *m ) : TGeoChecker(m)
+StarAgmlChecker::StarAgmlChecker( TGeoManager *m ) : TGeoChecker(m), mSkipList(), mTimer(0), mFlags(0), mVal1(0), mVal2(0), mCheckSum()
 {
 
   //Skip("UPST");
