@@ -470,7 +470,7 @@ const string mParamStr_ref1[nID_ref1][nSet_ref1] = {
     "6,9,13,18,24,32,41,53,67,84,103,127,154,185,223,270",      // Centrality definition
     "20",    // Normalization start
     "0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00",   // Vz correction parameters (switched to new scheme, parameters defined near the shape corrections)
-    "1.05956,-1.25292,5.51106e-01,1.65283,-1.48792,0,1.31733e+01,8.15878e-06",  // Trigger efficiency
+    "1.05956,-1.25292,5.51106e-01,1.65283,-1.48792e-3,0,1.31733e+01,8.15878e-06",  // Trigger efficiency
     "0,0" // Luminosity correction
   }
 };
