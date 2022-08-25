@@ -12,7 +12,7 @@
 #include <assert.h>
 #include "StMessMgr.h"
 
-StarAgmlChecker::StarAgmlChecker( TGeoManager *m ) : TGeoChecker(m), mSkipList(), mTimer(0), mFlags(0), mVal1(0), mVal2(0), mCheckSum()
+StarAgmlChecker::StarAgmlChecker( TGeoManager *m, bool score ) : TGeoChecker(m), mSkipList(), mTimer(0), mFlags(0), mVal1(0), mVal2(0), mCheckSum(), mScoreAir(score)
 {
 
 }
@@ -68,7 +68,6 @@ TObjectSet *StarAgmlChecker::MaterialPlot( const Char_t   *_top   ,
   TObjectSet *topSet = new TObjectSet(name, hist);
 
   filler.push_back( Hist_t(hist) );
-
 
   TGeoNode *node = 0;
   while( (node=(TGeoNode *)next()) )
@@ -142,7 +141,21 @@ void StarAgmlChecker::Fill( TObjectSet *set, Double_t rmin, Double_t rmax, Doubl
 	if ( gGeoManager->IsOutside() ) startnode = 0;
 
 	matprop = 0;
-	if ( startnode ) matprop = startnode->GetVolume()->GetMaterial()->GetRadLen();        	 
+	if ( startnode ) {
+	  TGeoMaterial* material = startnode->GetVolume()->GetMaterial();
+	  matprop = material->GetRadLen();
+	  TString nm = material->GetName();
+	  nm.ToLower();
+	  if ( nm.Contains("air") ) {                                   // use the name of the material to select air...
+	    if ( false == mScoreAir ) {                                 // user option to ignore air in detector volumes
+	      if ( !name.Contains("CAVE") && !name.Contains("HALL") ) { // will still count air in the cave and hall histograms
+		matprop = 0;                                            // property will not be scored
+	      }
+	    }
+	  }
+
+	  
+	}
 
 	gGeoManager -> FindNextBoundary();	
 	endnode = gGeoManager->Step();
