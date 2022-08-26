@@ -195,7 +195,19 @@ void StarAgmlChecker::Fill( TObjectSet *set, Double_t rmin, Double_t rmax, Doubl
 	    // generate an extra step to cross boundary
 	    startnode = endnode;
 	    matprop = 0;
-	    if ( startnode ) matprop = startnode->GetVolume()->GetMaterial()->GetRadLen();    
+	    if ( startnode ) {
+	      TGeoMaterial* material = startnode->GetVolume()->GetMaterial();
+	      matprop = material->GetRadLen();
+	      TString nm = material->GetName();
+	      nm.ToLower();
+	      if ( nm.Contains("air") ) {                                   // use the name of the material to select air...
+		if ( false == mScoreAir ) {                                 // user option to ignore air in detector volumes
+		  if ( !name.Contains("CAVE") && !name.Contains("HALL") ) { // will still count air in the cave and hall histograms
+		    matprop = 0;                                            // property will not be scored
+		  }
+		}
+	      }
+	    }
 
 	    gGeoManager->FindNextBoundary();
             endnode = gGeoManager->Step();
