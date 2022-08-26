@@ -12,17 +12,8 @@
 #include <assert.h>
 #include "StMessMgr.h"
 
-StarAgmlChecker::StarAgmlChecker( TGeoManager *m ) : TGeoChecker(m)
+StarAgmlChecker::StarAgmlChecker( TGeoManager *m, bool score ) : TGeoChecker(m), mSkipList(), mTimer(0), mFlags(0), mVal1(0), mVal2(0), mCheckSum(), mScoreAir(score)
 {
-
-  //Skip("UPST");
-  //  Skip("EXSG"); // Endcap SMD planes are bad w/ roundoff
-  //  Skip("EXS1");
-  //  Skip("EXS2");
-  //  Skip("EXS3");
-  //  Skip("EXS4");
-  //  Skip("EXS5");
-  //  Skip("EXS6");
 
 }
 // ................................................................................................
@@ -77,7 +68,6 @@ TObjectSet *StarAgmlChecker::MaterialPlot( const Char_t   *_top   ,
   TObjectSet *topSet = new TObjectSet(name, hist);
 
   filler.push_back( Hist_t(hist) );
-
 
   TGeoNode *node = 0;
   while( (node=(TGeoNode *)next()) )
@@ -151,7 +141,21 @@ void StarAgmlChecker::Fill( TObjectSet *set, Double_t rmin, Double_t rmax, Doubl
 	if ( gGeoManager->IsOutside() ) startnode = 0;
 
 	matprop = 0;
-	if ( startnode ) matprop = startnode->GetVolume()->GetMaterial()->GetRadLen();        	 
+	if ( startnode ) {
+	  TGeoMaterial* material = startnode->GetVolume()->GetMaterial();
+	  matprop = material->GetRadLen();
+	  TString nm = material->GetName();
+	  nm.ToLower();
+	  if ( nm.Contains("air") ) {                                   // use the name of the material to select air...
+	    if ( false == mScoreAir ) {                                 // user option to ignore air in detector volumes
+	      if ( !name.Contains("CAVE") && !name.Contains("HALL") ) { // will still count air in the cave and hall histograms
+		matprop = 0;                                            // property will not be scored
+	      }
+	    }
+	  }
+
+	  
+	}
 
 	gGeoManager -> FindNextBoundary();	
 	endnode = gGeoManager->Step();
@@ -191,15 +195,25 @@ void StarAgmlChecker::Fill( TObjectSet *set, Double_t rmin, Double_t rmax, Doubl
 	    // generate an extra step to cross boundary
 	    startnode = endnode;
 	    matprop = 0;
-	    if ( startnode ) matprop = startnode->GetVolume()->GetMaterial()->GetRadLen();    
+	    if ( startnode ) {
+	      TGeoMaterial* material = startnode->GetVolume()->GetMaterial();
+	      matprop = material->GetRadLen();
+	      TString nm = material->GetName();
+	      nm.ToLower();
+	      if ( nm.Contains("air") ) {                                   // use the name of the material to select air...
+		if ( false == mScoreAir ) {                                 // user option to ignore air in detector volumes
+		  if ( !name.Contains("CAVE") && !name.Contains("HALL") ) { // will still count air in the cave and hall histograms
+		    matprop = 0;                                            // property will not be scored
+		  }
+		}
+	      }
+	    }
 
 	    gGeoManager->FindNextBoundary();
             endnode = gGeoManager->Step();
             step = gGeoManager->GetStep();
 
 	  }
-
-	//	hist->Fill( eta, phi, x );
 	
       }
 					         
@@ -483,24 +497,7 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoMaterial *material )
   sum += Round( material->GetIntLen() );
   Bool_t mix = material->IsMixture();
   sum += Int_t( mix );
-  return; // because the above is sufficient
-  /*  
-  if ( mix )
-    {
-      TGeoMixture *mixture = (TGeoMixture *)material;
-      Int_t nele = mixture -> GetNelements();
-      sum += nele;
-      for ( Int_t i=0;i<nele; i++ )
-	{
-	  TGeoElement *element = mixture->GetElement(i);
-	  sum += shiftDecimal( element->A(), 5);
-	  sum += shiftDecimal( element->Z(), 5);
-	  if ( mixture->GetNmixt() )	  sum += shiftDecimal(mixture->GetNmixt()[i], 5);
-	  if ( mixture->GetWmixt() )      sum += shiftDecimal(mixture->GetWmixt()[i], 5);
-	  if ( mixture->GetZmixt() )      sum += shiftDecimal(mixture->GetZmixt()[i], 5);
-	}
-    }
-  */
+  return; 
 };
 
 // Updates checksum for the specified volume.  
@@ -508,12 +505,7 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoVolume *volume )
 {
   CheckSum_t &sum = *_sum;
   TString name = volume->GetName();
-
   
-   // If it is a sensitive volume, name could be significant...
-  // if ( volume->GetMedium()->GetParam(0) ) sum += name;
-
-
   if ( !volume->IsAssembly() ) 
     { // Assemblies have no material, medium or shape...
       
@@ -585,9 +577,6 @@ TMD5 StarAgmlChecker::CheckSum( const Char_t *name )
 
   // Update based on the volume parameters.
   Update( mCheckSum[volume], volume );
-
-  // Print checksum
-  //  std::cout << name << " " << volume << " " << (Char_t *)mCheckSum[volume] << std::endl;
 
  DONE:
   
