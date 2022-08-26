@@ -142,7 +142,7 @@ void StFcsHit::print(Option_t *option) const {
     cout << endl;
 }
 
-void StFcsHit::addGeantTrack(const unsigned int id, float e){    
+void StFcsHit::addGeantTrack(unsigned int id, float e){    
     // auto cmp = [](auto t){ return t.first == id; }; //c++20
     auto cmp = [id](decltype(mGeantTracks)::value_type t){ return t.first == id; };
     auto trk = find_if(mGeantTracks.rbegin(), mGeantTracks.rend(), cmp);
