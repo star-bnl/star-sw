@@ -74,7 +74,7 @@ void StMuFttUtil::fillFtt(StFttCollection* fttcol,StMuFttCollection* muFtt)
 void StMuFttUtil::fillMuFttRawHits(StMuFttCollection* muFtt,
                                    StFttCollection* fttcol) {
     LOG_INFO << "fillMuFttRawHits" << endm;
-    StSPtrVecFttRawHit vecHit = fttcol->rawHits();
+    const StSPtrVecFttRawHit& vecHit = fttcol->rawHits();
     for(unsigned int i=0; i<fttcol->numberOfRawHits(); i++){
 
         StMuFttRawHit* muFttHit = muFtt->addRawHit();
@@ -94,7 +94,7 @@ void StMuFttUtil::rebuildRelationships(StFttCollection* fttcol,
 void StMuFttUtil::fillMuFttClusters(StMuFttCollection* muFtt,
                                     StFttCollection* fttcol) {
     LOG_INFO << "fillMuFttClusters" << endm;
-    StSPtrVecFttCluster vecClu = fttcol->clusters();
+    const StSPtrVecFttCluster& vecClu = fttcol->clusters();
     for(unsigned int i=0; i<fttcol->numberOfClusters(); i++){
 
         StMuFttCluster* muFttCluster = muFtt->addCluster();
@@ -107,7 +107,7 @@ void StMuFttUtil::fillMuFttClusters(StMuFttCollection* muFtt,
 void StMuFttUtil::fillMuFttPoints(StMuFttCollection* muFtt,
                                   StFttCollection* fttcol) {
     LOG_INFO << "fillMuFttPoints" << endm;
-    StSPtrVecFttPoint vecPoint = fttcol->points();
+    const StSPtrVecFttPoint& vecPoint = fttcol->points();
     for(unsigned int i=0; i<fttcol->numberOfPoints(); i++){
 
         StMuFttPoint* muFttPoint = muFtt->addPoint();
