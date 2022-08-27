@@ -22,9 +22,11 @@ StMaker("fttHitCalib",name), mHelper(nullptr)
     mHelper = new HitCalibHelper();
 }
 //_____________________________________________________________                                                       
-// StFttHitCalibMaker::~StFttHitCalibMaker()
-// { 
-// }
+StFttHitCalibMaker::~StFttHitCalibMaker()
+{
+  if(mHelper) delete mHelper;
+  mHelper = nullptr;
+}
 
 //_____________________________________________________________                                                       
 Int_t StFttHitCalibMaker::Init()
@@ -49,7 +51,29 @@ Int_t StFttHitCalibMaker::FinishRun(Int_t runnumber)
 Int_t StFttHitCalibMaker::Finish()
 { 
     LOG_INFO << "StFttHitCalibMaker::Finish()" << endm;
+
+    if (this->mCalibMode == StFttHitCalibMaker::CalibMode::Calibration) {
+        LOG_INFO << "Writing StFttHitCalib parameters to plaintext: " << endm;
+        // this->WriteCalibrationToPlainText();
+    }
+    this->WriteCalibrationToPlainText();
+
     return kStOk;
+}
+
+
+void StFttHitCalibMaker::WriteCalibrationToPlainText() {
+
+    ofstream outf( "fttRawHitTime.dat" );
+    for ( int uuid = 0; uuid <= 400; uuid++ ){
+        Short_t anchor = mHelper->anchor( uuid );
+        auto hist = mHelper->histFor( uuid );
+        size_t counts = hist.size(); 
+        size_t samples = mHelper->samples( uuid );
+        outf << TString::Format( "%d\t%d\t%lu\t%lu", uuid, (int) anchor, counts, samples ) << endl;
+    }
+    outf.close();
+
 }
 
 //_____________________________________________________________                                                       
@@ -77,6 +101,8 @@ Int_t StFttHitCalibMaker::Make()
 
         UShort_t fob = (UShort_t)mFttDb->fob( rawHit );
         UShort_t uuid = rawHit->vmm() + ( StFttDb::nVMMPerFob * fob );
+        // LOG_INFO << "vmm = " << ((int)rawHit->vmm()) << ", fob == " << fob << ", StFttDb::nVMMPerFob=" << StFttDb::nVMMPerFob << endm;
+        // LOG_INFO << "UUID = " << uuid << endm;
 
         mHelper->fill( uuid, rawHit->dbcid() );
 

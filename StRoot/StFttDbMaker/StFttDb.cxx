@@ -28,7 +28,10 @@ double StFttDb::idealPlaneZLocations[] = { 280.90499, 303.70498, 326.60501, 349.
 vector<string> StFttDb::orientationLabels = { "Horizontal", "Vertical", "DiagonalH", "DiagonalV", "Unknown" };
 
 
-StFttDb::StFttDb(const char *name) : TDataSet(name) {}; 
+StFttDb::StFttDb(const char *name) : TDataSet(name) {
+    // default time cut for calibrations
+    setTimeCut( TimeCutMode::TimebinMode, -70, 30 );
+}; 
 
 StFttDb::~StFttDb() {}
 

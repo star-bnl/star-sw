@@ -37,18 +37,31 @@ public:
 
 /// Default constructor                                                                                          
     StFttHitCalibMaker(const char *name="fttHitCalib");
-
+    ~StFttHitCalibMaker();
+    
     Int_t  Init();
     Int_t  InitRun(Int_t);
     Int_t  FinishRun(Int_t);
     Int_t  Finish();
     Int_t  Make();
 
+    void WriteCalibrationToPlainText();
+
+    enum CalibMode {
+        Live = 0,
+        Production = 1,
+        Calibration = 2
+    };
+
+    void SetMode( StFttHitCalibMaker::CalibMode  mode ){
+        mCalibMode = mode;
+    }
 
     StEvent*             mEvent;
     StFttCollection*     mFttCollection;
     StFttDb*             mFttDb;
     HitCalibHelper*      mHelper;
+    StFttHitCalibMaker::CalibMode            mCalibMode;
 
     bool mDebug = false;
 
