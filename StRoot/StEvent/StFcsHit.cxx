@@ -156,11 +156,3 @@ void StFcsHit::addGeantTrack(unsigned int id, float e){
     //  if(mGeantTracks[i].first == id) {mGeantTracks[i].second += e; return;}
     //mGeantTracks.push_back(make_pair(id,e));
 }
-
-void StFcsHit::sortGeantTracks(){  //Sort Geant Track by descending order of energy
-    std::sort(mGeantTracks.begin(), mGeantTracks.end(), 
-	 [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
-	     return b.second < a.second;
-	 });
-}
-

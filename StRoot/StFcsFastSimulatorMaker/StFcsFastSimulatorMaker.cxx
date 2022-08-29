@@ -1,3 +1,4 @@
+
 // $Id: StFcsFastSimulatorMaker.cxx,v 1.2 2021/03/30 13:40:09 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFcsFastSimulatorMaker.cxx,v $
@@ -322,7 +323,6 @@ void StFcsFastSimulatorMaker::fillStEvent(StEvent* event) {
       int ehp = mFcsDb->ecalHcalPres(det);
       hits[i]->setAdc(0,adc);
       hits[i]->setEnergy(digi_energy);
-      hits[i]->sortGeantTracks();
       fcscollection->addHit(det,hits[i]); 
       etot[ehp] += digi_energy;
 	     nhit[ehp]++;
