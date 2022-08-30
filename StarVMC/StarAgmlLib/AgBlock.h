@@ -14,7 +14,6 @@ class AgMixture;
 class AgVolume;
 class AgModule;
 #include "AgPlacement.h"
-#include "AgMath.h"
 #include "AgAttribute.h"
 #include "AgCreate.h"
 
@@ -154,6 +153,9 @@ public:
   int numberBranches() const { return mNumberBranches; }
   void branch(){ mNumberBranches++; }
 
+  void AddCut( TString cut, double value ){ mGstpar[cut] = value; }
+  std::map<TString, double>& GetCuts() { return mGstpar; }
+
  private:
  protected:
 
@@ -185,6 +187,8 @@ public:
 
   /// Counts the number of volume branchings
   int mNumberBranches;
+
+  std::map<TString, double> mGstpar; // GSTPAR cuts and parameters
 
   friend class _AgBlockDummy;
 
