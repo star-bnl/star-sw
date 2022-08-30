@@ -676,6 +676,11 @@ Int_t StBFChain::Instantiate()
       ProcessLine(cmd);
     }
 
+    // FST Raw hits in StEvent
+    if (maker == "StFstRawHitMaker" && GetOption("fstEvtRawHit") ){
+      mk->SetAttr("fstEvtRawHit", kTRUE);
+    }
+
     // FST Raw hits in MuDST
     if (maker == "StMuDstMaker" && GetOption("fstMuRawHit") ){
       mk->SetAttr("fstMuRawHit", kTRUE);

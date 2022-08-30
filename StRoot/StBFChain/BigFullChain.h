@@ -1587,6 +1587,7 @@ Bfc_st BFC[] = { // standard chains
                                                                                                     kFALSE},
   {"fstHit",     "", "fstChain", "event,fstCluster", "StFstHitMaker",       "StFstHitMaker","FST Hit Maker",
                                                                                                     kFALSE},
+  {"fstEvtRawHit", "", "", "fstRawHit",                       "","","Store FST Raw Hit in StEvent", kFALSE},
   {"fstMuRawHit", "", "", "CMuDST",                             "","","Store FST Raw Hit in MuDst", kFALSE},
 
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},

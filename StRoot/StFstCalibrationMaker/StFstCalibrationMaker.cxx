@@ -20,7 +20,7 @@
 #include "StFstCalibrationMaker.h"
 #include "StRoot/StFstUtil/StFstCollection.h"
 #include "StRoot/StFstUtil/StFstRawHitCollection.h"
-#include "StRoot/StFstUtil/StFstRawHit.h"
+#include "StEvent/StFstRawHit.h"
 #include "StRoot/StFstDbMaker/StFstDb.h"
 
 #include "tables/St_fstMapping_Table.h"
