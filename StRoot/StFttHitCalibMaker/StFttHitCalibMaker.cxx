@@ -54,9 +54,8 @@ Int_t StFttHitCalibMaker::Finish()
 
     if (this->mCalibMode == StFttHitCalibMaker::CalibMode::Calibration) {
         LOG_INFO << "Writing StFttHitCalib parameters to plaintext: " << endm;
-        // this->WriteCalibrationToPlainText();
+        WriteCalibrationToPlainText();
     }
-    this->WriteCalibrationToPlainText();
 
     return kStOk;
 }

@@ -131,21 +131,25 @@ public:
       mode = mTimeCutMode;
       l = mTimeCutLow;
       h = mTimeCutHigh;
-      // mode = StFttDb::TimeCutMode::CalibratedBunchCrossingMode;
-      // l = -3;
-      // h = 3;
-      //mode = StFttDb::TimeCutMode::TimebinMode;
-      // ideal; take +/- 3 bunch crossings
-      //l = -70;
-      //h = 30;
-      // TODO: store in DB?
-    }
+	  if (mUserDefinedTimeCut)
+		return;
+
+	  // load calibrated data windows from DB 
+	  size_t hit_uuid = uuid( hit );
+	  if ( dwMap.count( hit_uuid ) ){
+		mode = dwMap[ hit_uuid ].mode;
+		l = dwMap[ hit_uuid ].min;
+		h = dwMap[ hit_uuid ].max;
+	  }
+	
+	}
 
  private:
   int   mDbAccess=1;                     //! enable(1) or disabe(0) DB access
   int   mRun=0;                          //! run#
   int   mDebug=0;                        //! >0 dump tables to text files    
 
+  bool mUserDefinedTimeCut = false;
   TimeCutMode mTimeCutMode;
   int mTimeCutLow, mTimeCutHigh;
 

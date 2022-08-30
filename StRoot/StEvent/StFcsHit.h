@@ -99,7 +99,7 @@ protected:
     UInt_t   mNPeak=0;        // number of peaks found
     Float_t  mEnergy=0.0;     // corrected energy
     StFcsCluster* mCluster=0; // pointer to cluster this hit belongs
-    TArrayS* mData=0;         //-> 12bit ADC values + flag at highest 4 bits, array of timebin
+    TArrayS* mData=0;         // 12bit ADC values + flag at highest 4 bits, array of timebin
     
     ClassDef(StFcsHit,5)
 
