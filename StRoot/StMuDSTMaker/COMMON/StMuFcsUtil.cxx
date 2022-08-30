@@ -72,7 +72,7 @@ void StMuFcsUtil::fillMuFcsHits(StMuFcsCollection* muFcs,
                                 StFcsCollection* fcscol) {
   
     for ( unsigned int idet = 0; idet < kFcsNDet+1; idet++ ){
-        StSPtrVecFcsHit vecHit = fcscol->hits(idet);
+        const StSPtrVecFcsHit& vecHit = fcscol->hits(idet);
         for(unsigned int i=0; i<fcscol->numberOfHits(idet); i++){
 
             StMuFcsHit* muFcsHit = muFcs->addHit();
@@ -126,7 +126,7 @@ void StMuFcsUtil::rebuildRelationships(StFcsCollection* fcscol,
 
     // Take care of the clusters
     for (unsigned int idet = 0; idet < kFcsNDet; idet++){
-        StSPtrVecFcsCluster &vecClu = fcscol->clusters(idet);
+        const StSPtrVecFcsCluster &vecClu = fcscol->clusters(idet);
         for(unsigned int i=0; i<vecClu.size(); i++){
 
             assert( mMapClusters.count( vecClu[i] ) > 0 );
