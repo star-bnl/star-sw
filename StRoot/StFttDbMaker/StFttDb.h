@@ -46,8 +46,6 @@ public:
   void setDbAccess(int v=1);  //! enable(1) or disable(0) offline DB access
   void setRun(int run);       //! set run# 
 
-  
-
 
   static size_t uuid( StFttRawHit * h, bool includeStrip = false ) ;
   static size_t uuid( StFttCluster * c ) ;

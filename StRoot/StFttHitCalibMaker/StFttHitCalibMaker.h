@@ -38,7 +38,7 @@ public:
 /// Default constructor                                                                                          
     StFttHitCalibMaker(const char *name="fttHitCalib");
     ~StFttHitCalibMaker();
-    
+ 
     Int_t  Init();
     Int_t  InitRun(Int_t);
     Int_t  FinishRun(Int_t);
@@ -64,7 +64,6 @@ public:
     StFttHitCalibMaker::CalibMode            mCalibMode;
 
     bool mDebug = false;
-
 
     ClassDef(StFttHitCalibMaker, 1)
 

@@ -27,6 +27,7 @@ ClassImp(StMuFttUtil)
 StMuFttUtil::StMuFttUtil()
 {
 }
+
 StMuFttUtil::~StMuFttUtil()
 {
 }

@@ -38,13 +38,13 @@ public:
 
     
     size_t samples( UShort_t uuid ) {
-         if (  dbcidHist.count(uuid) > 0 ){
+        if (  dbcidHist.count(uuid) > 0 ){
             size_t n = 0;
             for ( auto kv : dbcidHist[uuid]  ){
                 n += kv.second;
             }
             return n;
-         }
+        }
         return 0;
     }
 
@@ -73,7 +73,5 @@ protected:
     map< UShort_t, Short_t> dbcidAnchor;
 
 };
-
-
 
 #endif
