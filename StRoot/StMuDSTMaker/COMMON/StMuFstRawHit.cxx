@@ -11,7 +11,7 @@
 #include "StMuFstRawHit.h"
 #include "St_base/StMessMgr.h"
 #include "StEvent/StEnumerations.h"
-#include "StRoot/StFstUtil/StFstRawHit.h"
+#include "StEvent/StFstRawHit.h"
 
 ClassImp(StMuFstRawHit)
 
