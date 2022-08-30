@@ -100,8 +100,6 @@ Int_t StFttHitCalibMaker::Make()
 
         UShort_t fob = (UShort_t)mFttDb->fob( rawHit );
         UShort_t uuid = rawHit->vmm() + ( StFttDb::nVMMPerFob * fob );
-        // LOG_INFO << "vmm = " << ((int)rawHit->vmm()) << ", fob == " << fob << ", StFttDb::nVMMPerFob=" << StFttDb::nVMMPerFob << endm;
-        // LOG_INFO << "UUID = " << uuid << endm;
 
         mHelper->fill( uuid, rawHit->dbcid() );
 
