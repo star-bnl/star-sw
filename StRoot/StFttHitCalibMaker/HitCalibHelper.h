@@ -30,6 +30,32 @@ public:
         return dbcid - dbcidAnchor[ uuid ]; // TODO: handle wrap around?
     }
 
+    Short_t anchor( UShort_t uuid ) {
+        if ( dbcidAnchor.count( uuid ) == 0 )
+            return -1;
+        return dbcidAnchor[ uuid ];
+    }
+
+    
+    size_t samples( UShort_t uuid ) {
+        if (  dbcidHist.count(uuid) > 0 ){
+            size_t n = 0;
+            for ( auto kv : dbcidHist[uuid]  ){
+                n += kv.second;
+            }
+            return n;
+        }
+        return 0;
+    }
+
+     map<Short_t, Int_t> histFor( UShort_t uuid ) {
+        return dbcidHist[ uuid ];
+     }
+
+    map< UShort_t, Short_t> &getAnchorMap(){
+        return dbcidAnchor;
+    }
+
     void clear(){
         dbcidHist.clear();
         dbcidAnchor.clear();
@@ -38,16 +64,14 @@ public:
 
 protected:
 
-    // key - unique VMM Id [0,384)
+    // key - unique VMM Id (0,386]
     // value - histogram (map) with key: deltaBCID, value: counts;
     map< UShort_t, map<Short_t, Int_t> > dbcidHist;
 
-    // key - unique VMM Id [0, 384)
+    // key - unique VMM Id (0, 386]
     // value - dbcid reference
     map< UShort_t, Short_t> dbcidAnchor;
 
 };
-
-
 
 #endif

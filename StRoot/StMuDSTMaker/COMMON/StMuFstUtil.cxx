@@ -101,7 +101,7 @@ void StMuFstUtil::fillMuFstHits(StMuFstCollection* muFst,
         {
             StFstSensorHitCollection* sensorHitCollection = wedgeHitCollection->sensor(sensorIdx);
 
-            StSPtrVecFstHit &vecHit = sensorHitCollection->hits();
+            const StSPtrVecFstHit &vecHit = sensorHitCollection->hits();
             for(unsigned int i=0; i<sensorHitCollection->numberOfHits(); i++)
             {
                 StMuFstHit* muFstHit = muFst->addHit();
