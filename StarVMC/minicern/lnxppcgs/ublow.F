@@ -33,8 +33,8 @@ C
       data iblan1/z'00202020'/
       data mask1/z'ff000000'/
 #else
-      data iblan1/x'00202020'/
-      data mask1/x'ff000000'/
+      data iblan1/z'00202020'/
+      data mask1/z'ff000000'/
 #endif
 
       NCH = NCHP(1)

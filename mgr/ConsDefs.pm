@@ -156,7 +156,7 @@
 	$G77FLAGS .= " -std=legacy -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
 	
 	$FFLAGS    = $G77FLAGS;     # will be overwritten below, ignore
-	$FLIBS     = "-lgfortran";
+	$FLIBS     = "-lgfortran -lquadmath";
 
     } else {
 	$G77       = "g77";
@@ -210,7 +210,7 @@
     $STIC          = "stic";
     $STICFLAGS     = "";
     $AGETOF        = "agetof";
-    $AGETOFLAGS    = "-V 1";
+    $AGETOFLAGS    = "-V 1 -d $STAR_BIN/agetof.def";
     $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
 
@@ -1216,6 +1216,7 @@
 		  'ENV'    => {
 		      'CPATH'           => $CPATH,
 		      'PATH'            => $PATH,
+		      'PYTHONPATH'      => $PYTHONPATH,
 		      'LM_LICENSE_FILE' => $LM_LICENSE_FILE,
 		      'INCLUDE'         => $INCLUDE_PATH,
 		      'ROOT'            => $ROOT,

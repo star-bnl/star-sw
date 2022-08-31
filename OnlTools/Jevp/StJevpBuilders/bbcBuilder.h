@@ -27,7 +27,7 @@ class bbcBuilder : public JevpBuilder {
  private:
 
   union {
-    TH1 *array[];
+    TH1 *array[1];
     struct {
       TH1 *h190_bbc_hitmap_EAST;
       TH1 *h191_bbc_hitmap_WEST;
