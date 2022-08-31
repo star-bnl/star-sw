@@ -75,7 +75,7 @@
 /StRoot/StPass0CalibMaker                          @genevb            @iraklic
 /StRoot/StPico*                                    @nigmatkulov       @marrbnl     @plexoos
 /StRoot/StPxl*                                     @starsdong         @GuannanXie
-/StRoot/StRefMultCorr                              @nigmatkulov
+/StRoot/StRefMultCorr                              @nigmatkulov       @zsweger
 /StRoot/StRTSClient                                @jml985            @tonko-lj
 /StRoot/StShadowMaker                              @genevb
 /StRoot/StSpinPool                                 @akioogawa         @zlchang     @veprbl
