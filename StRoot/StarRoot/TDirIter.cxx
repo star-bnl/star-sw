@@ -219,7 +219,7 @@ TString TDirIter::MakeWild(const char *re)
   for (int i=0;re[i];i++)
   {
     if (i == 0)		{ts+="^" ;}
-    if (re[i]=='*')	{ts+="[a-zA-Z0-9_\\.,-= ]*"; 	continue;}
+    if (re[i]=='*')	{ts+="[a-zA-Z0-9_\\.,-=+ ]*"; 	continue;}
     if (re[i]=='#')	{ts+=".*"; 			continue;}
     if (re[i] == '.')	{ts+="\\.";			continue;}		
     ts += re[i];
