@@ -38,6 +38,7 @@ THnSparseProject::THnSparseProject(const THnSparse *hs, Int_t select) : fHs(hs),
 #if 0
       std::cout << "Histogram " << proj->GetName() << " has been created" << std::endl;
 #endif      
+      proj->SetDirectory(0);
       fProjMap->AddLast(proj);
       NoProj++;
     }
