@@ -17,7 +17,7 @@
   l->AddEntry(N_pfx,"Negative")
 */
 //#define DEBUG
-#define __TFG__VERSION__
+//#define __TFG__VERSION__
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
 #include "Riostream.h"
@@ -186,8 +186,10 @@ const static  Double_t pTMaxL = TMath::Log(pTMax/0.1);
 const static  Double_t etaMax = 1.2;
 const static  Char_t *NameV[NoDim] = {"refMult",  "charge*pT", "#eta",               "hyp", "z"};
 const static  Int_t  nBins[NoDim]  = {       10,          NpT,   Neta,     KPidParticles+1,1000};
+#ifdef __TFG__VERSION__
 const static  Var_t  xMin          = {       0.,           0.,-etaMax,                -1.5, -3.};
 const static  Var_t  xMax          = {    3000.,       pTMaxL, etaMax, KPidParticles - 0.5,  7.};
+#endif
 FitP_t FitParams;
 
 //ClassImp(FitP_t);
@@ -209,6 +211,15 @@ Double_t log2dX70(Double_t pT, Double_t eta) {
   //  Double_t poverm = p/Masses[kPidPion];
   //  return par[0]+TMath::Log(m_Bichsel->GetI70(TMath::Log10(poverm),TMath::Log2(dX)))
   
+}
+//__________________________________________________________________________________________
+Double_t nSigma(StPicoTrack *gTrack, Int_t l) {
+  Double_t nSig = -9999;
+  if      (l == kPidElectron ) nSig = gTrack->nSigmaElectron();
+  else if (l == kPidProton)    nSig = gTrack->nSigmaProton();
+  else if (l == kPidKaon)      nSig = gTrack->nSigmaKaon();
+  else if (l == kPidPion)      nSig = gTrack->nSigmaPion();
+  return nSig;
 }
 //______________________________________________________________________
 Int_t IndexH(const Char_t *name) {
@@ -254,7 +265,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
   TH2F *dEdxP  = new TH2F("dEdxP","dEdx vesus regidity",250,-2.5,2.5,500,0,100);
   TH2F *betaToF  = new TH2F("beta","BToF 1/beta -1 versus regity",350,-3.5,3.5,500,-0.6,4.4);
   TH2F *betaEToF  = new TH2F("Ebeta","EToF 1/beta -1 versus regity",350,-3.5,3.5,500,-0.6,4.4);
-#define  __Use_dNdx__
+  //#define  __Use_dNdx__
 #ifdef     __Use_dNdx__
   enum  {kTotalMethods = 3};
 #else
@@ -270,23 +281,33 @@ void Pico(const Char_t *files ="./*.picoDst.root",
     //    ,kOtherMethodId2          // NU
 #endif
   };
-  static TH2F *fTdEdx[3][5] = {0};
+  static TH2F *fTdEdx[2][kTotalMethods][5] = {0};
+  static TH2F *fnSigma[4] = {0};
   static TH2F *fdEdxVsdNdx = 0;
   for (Int_t k = 0; k < kTotalMethods; k++) {
-    const Char_t *parN[5] = {"","pi","e","K","P"};
+    const Char_t *parN[5] = {"","e","P","K","pi"};
     const Char_t *parT[5] = {"All","|nSigmaPion| < 1","|nSigmaElectron| < 1","|nSigmaKaon| < 1","|nSigmaProton| < 1"};
     const Char_t *FitName[3] = {"F","I70","N"};
     Double_t ymin = 0, ymax = 2.5;
     if (k == 2) {ymin = 1.2; ymax = 4.2;}
-    for (Int_t t = 0; t < 1; t++) {//5; t++) {
+    for (Int_t t = 0; t < 5; t++) {
       TString Title(Form("log10(dE/dx(%s)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",FitName[k],parT[t]));
       if (k == 2) Title = Form("log10(dN/dx) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",parT[t]);
-      fTdEdx[k][t] = new TH2F(Form("TdEdx%s%s",FitName[k],parN[t]),Title,
+      fTdEdx[0][k][t] = new TH2F(Form("TdEdx%s%s",FitName[k],parN[t]),Title,
 			      350,-1.5,2., 500, ymin, ymax);
-      fTdEdx[k][t]->SetMarkerStyle(1);
-      fTdEdx[k][t]->SetMarkerColor(t+1);
+      fTdEdx[0][k][t]->SetMarkerStyle(1);
+      fTdEdx[0][k][t]->SetMarkerColor(t+1);
+
+      fTdEdx[1][k][t] = new TH2F(Form("TdEdx%s%sS",FitName[k],parN[t]),Title + " nSigma",
+			      350,-1.5,2., 500, ymin, ymax);
+      fTdEdx[1][k][t]->SetMarkerStyle(1);
+      fTdEdx[1][k][t]->SetMarkerColor(t+1);
       if (k == 2 && t == 0) {
 	fdEdxVsdNdx = new TH2F("dEdN","Log10(dN/dx) versus Log10(dE/dx)",350,0,2.5,350,1.2,4.2);
+      }
+      if (k == 0) {// nsigma for Fit only
+	Title = Form("nSigma%s% versus log10(p(GeV/c))",FitName[k],parT[t]);
+	fnSigma[t] = new TH2F(Form("nSigma%s%s",FitName[k],parN[t]),Title, 350,-1.5,2., 200, -4, 4);
       }
     }
   } 
@@ -309,14 +330,16 @@ void Pico(const Char_t *files ="./*.picoDst.root",
   delete [] phiBins;
   delete [] zBins;
   delete [] LBins;
-  //#define __fit__
+#define __fit__
 #ifdef __fit__
-  Hists2D I70("I70");
   Hists2D fitZ("fitZ");
+#ifdef     __Use_dNdx__
   Hists2D fitN("fitN");
-  static TH2F *Eta[3] = {0};     // 0 -> F, 1 -> 70, 2 -> N
+  Hists2D I70("I70");
+#endif
+  static TH2F *Eta[kTotalMethods] = {0};     // 0 -> F, 1 -> 70, 2 -> N
   // TPoints block
-  for (Int_t t = 0; t < 3; t++) {
+  for (Int_t t = 0; t < kTotalMethods; t++) {
     const Char_t *N[6] = {"F","70","N", "FU","70U","NU"};
     const Char_t *T[6] = {"dEdx(fit)/Pion",
 			  "dEdx(I70)/Pion",
@@ -422,6 +445,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
       Int_t charge = gTrack->charge();
       Int_t sCharge = (charge + 1)%2;
       EtapT->Fill(pTrack->pMom().Eta(), charge*pTrack->pMom().Pt());
+#ifdef __TFG__VERSION__
       StDcaGeometry dcaG  = gCov->dcaGeometry();
       Double_t xyzp[6], CovXyzp[21];
       dcaG.GetXYZ(xyzp,CovXyzp);
@@ -435,6 +459,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
       KFParticle particle = dcaG.Particle(k);
 #ifdef DEBUG
       cout << k << "\t" << particle <<endl;
+#endif
 #endif
       StPidStatus PiD(gTrack); 
       if (PiD.PiDStatus < 0) continue;
@@ -454,78 +479,87 @@ void Pico(const Char_t *files ="./*.picoDst.root",
       if (Var.eta < 0) phi -= 360;
       Double_t zPred[3][KPidParticles];
       Double_t sPred[3][KPidParticles]; // errors versus bg10
-      Double_t dEdx[3] = {PiD.fI70.I(), PiD.fFit.I(), PiD.fdNdx.I()};
-      if (dEdx[0] <= 0 || dEdx[1] <= 0) continue;
-      Double_t dEdxL[3]   = {TMath::Log(dEdx[0]), TMath::Log(dEdx[1]), dEdx[2] > 0 ? TMath::Log(dEdx[2]):0};
-      Double_t dEdxL10[3] = {TMath::Log10(dEdx[0]), TMath::Log10(dEdx[1]), dEdx[2] > 0 ? TMath::Log10(dEdx[2]):0};
-      Double_t sigmas[3] = {pTrack->dEdxError(), pTrack->dEdxError(), pTrack->dEdxError()};
-      if (fdEdxVsdNdx && dEdx[1] > 0 && dEdx[2] > 0) fdEdxVsdNdx->Fill(dEdxL10[1]+6,dEdxL10[2]);
-      Double_t nSigmasPi[3] = {PiD.fI70.D(), PiD.fFit.D(), PiD.fdNdx.D()};
-      Double_t Zs[3] = {PiD.fI70.dev[kPidPion], PiD.fFit.dev[kPidPion], PiD.fdNdx.dev[kPidPion]};
+      StdEdxStatus *PiDs[3] = { PiD.fFit, PiD.fI70, PiD.fdNdx};
+      Double_t dEdx[3] = {0};
+      Double_t dEdxL[3] = {0};
+      Double_t dEdxL10[3] = {0};
+      Double_t sigmas[3] = {0};
+      Double_t nSigmasPi[3] = {0};
+      Double_t Zs[3] = {0};
       for (Int_t k = 0; k < kTotalMethods; k++) {// I70 && Fit && dNdx
-	StDedxMethod m = kTPoints[k];
-	if (! PiD.Status(m)) continue;
-	if (sigmas[k] > 0) {
-	  Var.hyp = -1;
-	  Var.z = Zs[k]; //	  if (TPs[m])	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
-	  //	  if (Pulls[k])	  Pulls[k]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[k]/sigmas[k]);
-	  if (k < 2) fTdEdx[k][0]->Fill(TMath::Log10(p), dEdxL10[k]+6);
-	  else       fTdEdx[k][0]->Fill(TMath::Log10(p), dEdxL10[k]);
-#ifdef __DEBUG__
-	  if (k == 1 && (
-			 (TMath::Abs(p-0.5) < 0.1 && dEdxL10[k]+6 > 1.0 && dEdxL10[k]+6 < 1.5) ||
-			 (TMath::Abs(p-1.0) < 0.1 && dEdxL10[k]+6 > 0.5 && dEdxL10[k]+6 < 0.8)
-			 )
-	      ) {
-	    TChain *tc = maker->chain();
-	    if (tc) {
-	      cout << tc->GetCurrentFile()->GetName() << "\thas abnormal dEdx : p = " << p << "\tdEdxL10 = " << dEdxL10[k]+6 << endl;
+	if (! PiDs[k]) continue;
+	dEdx[k] =  PiDs[k]->I();
+	if (dEdx[k] <= 0.0) continue;
+	dEdxL[k] = TMath::Log(dEdx[k]);
+	dEdxL10[k] = TMath::Log10(dEdx[k]);
+	sigmas[k] = gTrack->dEdxError();
+	if (sigmas[k] <= 0.0) continue;
+	nSigmasPi[k] = PiDs[k]->D();
+	Zs[k] =  PiDs[k]->dev[kPidPion];
+	//	StDedxMethod m = kTPoints[k];
+	//	if (! PiD.dEdxStatus((StDedxMethod)m)) continue;
+	Var.hyp = -1;
+	Var.z = Zs[k]; //	  if (TPs[m])	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
+	//	  if (Pulls[k])	  Pulls[k]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[k]/sigmas[k]);
+	if (k < 2) fTdEdx[0][k][0]->Fill(TMath::Log10(p), dEdxL10[k]+6);
+	else       fTdEdx[0][k][0]->Fill(TMath::Log10(p), dEdxL10[k]);
+	dEdxP->Fill(rigity, 1e6*PiD.fFit->I());
+#ifdef __fit__
+	//	for (Int_t l = kPidElectron; l < KPidParticles; l++) {
+	for (Int_t l = kPidElectron; l < 4; l++) {
+	  Int_t t = l+1;
+	  Double_t nSigmal =  nSigma(gTrack,l);
+	  if (t >= 0 && TMath::Abs(nSigmal) < 4) {
+	    fnSigma[t]->Fill(TMath::Log10(p), nSigmal);
+	    if (TMath::Abs(nSigmal) < 1) {
+	      if (k < 2) fTdEdx[1][k][t]->Fill(TMath::Log10(p), dEdxL10[k]+6);
+	      else       fTdEdx[1][k][t]->Fill(TMath::Log10(p), dEdxL10[k]);
+	    }
+	  }
+	  if (TMath::Abs(PiD.fFit->devS[l] ) < 1) {
+	    if (k < 2) fTdEdx[0][k][t]->Fill(TMath::Log10(p), dEdxL10[k]+6);
+	    else       fTdEdx[0][k][t]->Fill(TMath::Log10(p), dEdxL10[k]);
+	  }
+	  
+	  if (PiD.fFit) {
+	    fitZ.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
+	    fitZ.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
+	    if (Debug()) cout << "fitZ->dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fFit->dev[l] << "\tpull = " << PiD.fFit->devS[l] 
+			      << " nSigma = " <<nSigmal 
+			      << endl;
+	    if (k >= 0) {
+	      fitZ.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
+	      fitZ.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
+	      if (Debug()) cout << "fitZ->dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fFit->dev[l] << "\tpull = " << PiD.fFit->devS[l] 
+				<< " nSigma = " <<nSigmal  
+				<< endl;
+	    }
+	  }
+#ifdef     __Use_dNdx__
+	  if (PiD.fI70) {
+	    I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
+	    I70.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
+	    if (Debug()) cout << "I70->dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fI70->dev[l] << endl;
+	    if (k >= 0) {
+	      I70.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
+	      I70.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
+	      if (Debug()) cout << "I70->dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fI70->dev[l] << endl;
+	    }
+	  }
+	  if (PiD.fdNdx) {
+	    fitN.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
+	    fitN.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
+	    if (Debug()) cout << "fitN->dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fdNdx->dev[l] << endl;
+	    if (k >= 0) {
+	      fitN.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
+	      fitN.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx->dev[l]);
+	      if (Debug()) cout << "fitN->dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fdNdx->dev[l] << endl;
 	    }
 	  }
 #endif
-	  dEdxP->Fill(rigity, 1e6*PiD.fFit.I());
-#ifdef __fit__
-	  if (pMom >= 0.4 && pMom <= 0.5) {
-	    Eta[k]->Fill(pTrack->pMom().Eta(),Zs[k]);
-	  }
+	}
 #endif
-	}
       }
-#ifdef __fit__
-      for (Int_t l = kPidElectron; l < KPidParticles; l++) {
-	Int_t k = PiD.PiDkeyU3;
-	if (PiD.fI70.fPiD) {
-	  I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
-	  I70.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
-	  if (Debug()) cout << "I70.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fI70.dev[l] << endl;
-	  if (k >= 0) {
-	    I70.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
-	    I70.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fI70.dev[l]);
-	    if (Debug()) cout << "I70.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fI70.dev[l] << endl;
-	  }
-	}
-	if (PiD.fFit.fPiD) {
-	  fitZ.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
-	  fitZ.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
-	  if (Debug()) cout << "fitZ.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fFit.dev[l] << endl;
-	  if (k >= 0) {
-	    fitZ.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
-	    fitZ.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fFit.dev[l]);
-	    if (Debug()) cout << "fitZ.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fFit.dev[l] << endl;
-	  }
-	}
-	if (PiD.fdNdx.fPiD) {
-	  fitN.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
-	  fitN.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
-	  if (Debug()) cout << "fitN.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fdNdx.dev[l] << endl;
-	  if (k >= 0) {
-	    fitN.devT[l][sCharge]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
-	    fitN.devT[l][      2]->Fill(PiD.bghyp[l],PiD.fdNdx.dev[l]);
-	    if (Debug()) cout << "fitN.dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fdNdx.dev[l] << endl;
-	  }
-	}
-      }
-#endif
       // ToF
       if (gTrack->isTofTrack()) {
 	Int_t iTofTrait = gTrack->bTofPidTraitsIndex();
