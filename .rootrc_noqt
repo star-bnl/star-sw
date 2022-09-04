@@ -13,7 +13,8 @@ Unix.*.Root.DynamicPath:    :$HOME/macros:$STAR/macros/.$STAR_HOST_SYS:$STAR/mac
 Unix.*.Root.MacroPath:      :$HOME/macros:$STAR/macros:$(ROOTSYS)/macros:./StRoot/macros:./StRoot/macros/graphics:./StRoot/macros/analysis:./StRoot/macros/test:./StRoot/macros/examples:./StRoot/macros/html:./StRoot/macros/qa:./StRoot/macros/mudst:$(STAR)/StRoot/macros:$(STAR)/StRoot/macros/graphics:$(STAR)/StRoot/macros/analysis:$(STAR)/StRoot/macros/test:$(STAR)/StRoot/macros/examples:$(STAR)/StRoot/macros/html:$(STAR)/StRoot/macros/qa:$(STAR)/StRoot/macros/mudst:$(STAR)/StRoot/macros/calib:./StRoot/macros/embedding:$(STAR)/StRoot/macros/embedding:$(ROOTSYS)/macros:$ROOTSYS/tutorials:$(ROOTROOT)/root/tmva/test
 +Unix.*.Root.DynamicPath:    :$HOME/macros
 +Unix.*.Root.MacroPath:      :$HOME/macros:$ROOTSYS/tutorials
-+ACLiC.IncludePaths:         -D__TFG__VERSION__ -I$HOME/macros -I$STAR -I$GARFIELD_HOME/Include -I$GARFIELD_HOME/Heed -I$STAR/.$STAR_HOST_SYS/include
+#+ACLiC.IncludePaths:         -D__TFG__VERSION__ -I$HOME/macros -I$STAR -I$GARFIELD_HOME/Include -I$GARFIELD_HOME/Heed -I$STAR/.$STAR_HOST_SYS/include
++ACLiC.IncludePaths:         -I$HOME/macros -I$STAR -I$GARFIELD_HOME/Include -I$GARFIELD_HOME/Heed -I$STAR/.$STAR_HOST_SYS/include
 #ACLiC.BuildDir:              .$STAR_HOST_SYS
 #Unix.*.Root.PluginPath:     :./plugins:~/plugins:$STAR/QtRoot/plugins:$ROOTSYS/etc/plugins:
 #Root.Stacktrace:           no
