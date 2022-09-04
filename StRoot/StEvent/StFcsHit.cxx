@@ -93,7 +93,7 @@ void StFcsHit::setData(int ntimebin, const unsigned short* data) {
     }
     else {
         mData->Set(ntimebin,(const short*)data);
-  }
+    }
 }
 void StFcsHit::setDataAt(int i, unsigned short val)                       { mData->AddAt(val,i); }
 void StFcsHit::setAdcFlag(int i, unsigned short adc, unsigned short flag) { mData->AddAt(((flag&0xf)<<12) + adc, i); }
