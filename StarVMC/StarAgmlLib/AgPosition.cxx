@@ -4,12 +4,14 @@
 #include <TGeoMatrix.h>
 #include <TROOT.h>
 
-#include <StChain.h>
 #include <TTable.h>
-#include <StDetectorDbMaker/St_SurveyC.h>
-#include <StMessMgr.h>
+#include "RVersion.h" 
+#include "StMessMgr.h"                                                                                                                  
+#include "StChain.h"
 #include <algorithm>
 #include <iostream>
+
+#include <StDetectorDbMaker/St_SurveyC.h>
 
 #include "StarVMC/StarAgmlLib/StarAgmlStacker.h"
 #include "TGeoManager.h"
@@ -26,7 +28,6 @@ void AgPosition::SetDebug( int d ){ debuglvl = d; }
 
 /// Helper function to retrive a DB table and extract the full translation, rotation matrix
 //void GetMatrixFromDb( const char* table, const int row, double matrix[4][4] )
-#define chain StMaker::GetChain()
 
 void AgMLDbMatrix::operator()( const char* table, const int row, double matrix[4][4] )
 {
@@ -35,7 +36,8 @@ void AgMLDbMatrix::operator()( const char* table, const int row, double matrix[4
   TString tablename = table;
   tablename.ReplaceAll(" ","");
 
-  TTable *ttable = (TTable *)chain-> GetDataBase( tablename );
+  TTable* ttable = (TTable *)StMaker::GetChain() -> GetDataBase( tablename );
+
   if ( ttable )
     {
 
@@ -112,6 +114,7 @@ void AgPosition::SetIdeal()
 AgPosition::AgPosition() :
   AgTransform(),
   AgParameterList(),
+  TNamed("agposition","default initialization"),
   mOrderOps(kRotTran),
   mX(0),
   mY(0),
