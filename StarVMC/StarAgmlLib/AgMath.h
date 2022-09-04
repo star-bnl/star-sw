@@ -1,12 +1,24 @@
 #ifndef __AgMath_h__
+
 #define __AgMath_h__
 
 #include "TObject.h"
 #include "TMath.h"
 #include <iostream>
 
+namespace AgMath { 
+
 // Provides single point to define and/or redefine mathematical
 // keywords used in AgSTAR syntax.  i.e. cos, sin, cosh, tanh, ...
+//
+// Each of the definitions below were added to either workaround
+// issues in translating codes written by users in FORtran to
+// something compilable in c++, or minimizing numerical differences
+// between the geant3 geometries (created using MORtran / FORtran),
+// and the ROOT geometry created using c++.  Any changes to this
+// file requires material balance checks for all production geometries.  
+// Tread lighlty.
+//
 
 //
 // Define some often used constants
@@ -69,11 +81,13 @@ template <typename T> T min(const T &a, const T &b ){ return TMath::Min(a,b); }
 Int_t mod(const Int_t &a, const Int_t &b);
 Float_t mod(const Float_t &a, const Float_t &b);
 #ifndef __ROOTCLING__
+
 #define cos(x) TMath::Cos( (Double_t) x )
 #define sin(x) TMath::Sin( (Double_t) x )
 #define tan(x) TMath::Tan( (Double_t) x )
 #define exp(x) TMath::Exp( (Double_t) x )
-#endif
+#endif /* ! __ROOTCLING__ */
+
 // Overload the ^ operator
 
 
@@ -88,7 +102,11 @@ class AgPower
 Float_t operator*( const Float_t &A, const AgPower<Int_t> &power );
 Float_t operator*( const Float_t &A, const AgPower<Float_t> &power );
 
+}; // AgMath  
+
+
 //Float_t operator^(const Float_t &a, const Float_t &b);
 using namespace std;
+using namespace AgMath;
 #endif
  

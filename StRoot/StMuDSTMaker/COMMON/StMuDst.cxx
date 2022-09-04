@@ -898,7 +898,7 @@ StEvent* StMuDst::createStEvent() {
      StFmsCollection *FMS = mFmsUtil->getFms(fms);
      if(FMS) ev->setFmsCollection(FMS);
   }
-  // now get the FMS stuff and put it in the StEvent
+  // now get the FCS stuff and put it in the StEvent
   static StMuFcsUtil* mFcsUtil = new StMuFcsUtil();
   StMuFcsCollection *fcs = muFcsCollection();
   if(fcs) { // transform to StEvent format and fill it
