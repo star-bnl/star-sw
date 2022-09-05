@@ -1651,7 +1651,11 @@ Bfc_st BFC[] = { // standard chains
   {"tpc" ,"","","TpxRaw,TpxClu,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use TpxClu instead",kFALSE},
   {"tpcI" ,"tpcChain","","db,tpcDB,TpcHitMover",                "StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
+#ifndef __TFG__VERSION__
   {"Trs","Trs","tpcChain","scl,tpcDB,TrsToF,StEvent,EmbeddingShortCut","StTrsMaker","StTrsMaker","",kFALSE},
+#else
+  {"Trs","","","TpcRS"                                                                    ,"","","",kFALSE},
+#endif
   {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut,TTreeFile","StTpcRSMaker"
    ,"libMathMore,StPicoEvent,StdEdxY2Maker,StTpcRSMaker",              "New Tpc Response Simulator",kFALSE},
   {"tfs"     ,"","","TpcFastSim" ,"","","WARNING *** Option is OBSOLETE *** use TpcFastSim instead",kFALSE},

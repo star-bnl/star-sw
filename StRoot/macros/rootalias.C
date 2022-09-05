@@ -29,7 +29,7 @@ char *pwd()
   return (char *) gSystem->WorkingDirectory();
 }
 
-#if 1
+#if 0
 //______________________________________________________________________________
 void ls(char *path=0)
 {

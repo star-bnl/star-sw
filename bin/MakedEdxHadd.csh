@@ -13,8 +13,7 @@ foreach d (`ls -1d *GeV*`)
   endif
   cd -;
 end
-
-#foreach y (2019 2020 2021)
-#  hadd FXT_${y}.root *get_${y}.root >& FXT_${y}.log &  
-#  hadd COLGeV_${y}.root [0-9]*GeV_${y}.root >& COLGeV_${y}.log &
+#foreach y (2019 2020 2021) 
+#   hadd COLGeV_${y}.root [0-9]*GeV_${y}.root >& COLGeV_${y}.log &
+#   hadd FXT_${y}.root [0-9]*get_${y}.root >& FXT_${y}.log &
 #end
