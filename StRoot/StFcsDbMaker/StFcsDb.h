@@ -313,7 +313,7 @@ public:
   fcsEcalGainCorr_st      mFcsEcalGainCorr;
   fcsHcalGainCorr_st      mFcsHcalGainCorr;
   fcsPresValley_st        mFcsPresValley;
-  
+
   /// Getting pointer to parent & primary g2t_track from StFcsCluster
   /// mode=0 for parent, and mode=1 for primary
   const g2t_track_st* getG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order=0, int mode=0);

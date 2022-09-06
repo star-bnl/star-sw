@@ -92,7 +92,7 @@ public:
 
     void print(Option_t *option="") const;
 
- protected:
+protected:
     UShort_t mDetId=0;        // 1 bit ZS, 3 bits DetectorId, 12 bits id
     UShort_t mDepCh=0;        // 1 bit for NS, 2 bits for EHP, 5 bits for DEP, 8 bits for channal
     UInt_t   mAdcSum=0;       // ADC sum 
@@ -105,7 +105,7 @@ public:
     TArrayS* mData=0;         // 12bit ADC values + flag at highest 4 bits, array of timebin
 
     vector<pair<unsigned int, float>> mGeantTracks; // parent G2T track id and dE
-    
+
     ClassDef(StFcsHit,6)
 };
 

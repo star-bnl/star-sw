@@ -1,4 +1,3 @@
-
 // $Id: StFcsFastSimulatorMaker.cxx,v 1.2 2021/03/30 13:40:09 akio Exp $                                            
 //                                                                                                                     
 // $Log: StFcsFastSimulatorMaker.cxx,v $

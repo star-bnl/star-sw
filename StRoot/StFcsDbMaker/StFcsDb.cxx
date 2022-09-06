@@ -1987,12 +1987,12 @@ unsigned int StFcsDb::backTraceG2tTrack(unsigned int id, g2t_track_st* g2ttrk){
     if(mDebug>3)
       LOG_INFO<<Form("  BackTrace from=%3d id=%3d Epid=%4d Gpid=%3d Vtx=%3d Parent=%3d E=%6.2f",
                      id,g2ttrk[i].id,g2ttrk[i].eg_pid,g2ttrk[i].ge_pid,g2ttrk[i].start_vertex_p,
-		     g2ttrk[i].next_parent_p,g2ttrk[i].e)<<endm;
+                     g2ttrk[i].next_parent_p,g2ttrk[i].e)<<endm;
     i = g2ttrk[i].next_parent_p - 1;
   }
   if(mDebug>3) LOG_INFO<<Form("  BackTrace from=%3d id=%3d Epid=%4d Gpid=%3d Vtx=%3d Parent=%3d E=%6.2f Primary!!",
-			      id,g2ttrk[i].id,g2ttrk[i].eg_pid,g2ttrk[i].ge_pid,g2ttrk[i].start_vertex_p,
-			      g2ttrk[i].next_parent_p,g2ttrk[i].e)<<endm;
+                              id,g2ttrk[i].id,g2ttrk[i].eg_pid,g2ttrk[i].ge_pid,g2ttrk[i].start_vertex_p,
+                              g2ttrk[i].next_parent_p,g2ttrk[i].e)<<endm;
   return i + 1;
 }
     
@@ -2029,7 +2029,7 @@ const g2t_track_st* StFcsDb::getG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, 
       float de=gt.second;
       int found=0;
       for(pair<unsigned int, float>& p : parents){
-	if(p.first == id) {p.second += de; found=1; break;}
+        if(p.first == id) {p.second += de; found=1; break;}
       }
       if(found==0) parents.push_back(make_pair(id,de));
       detot+=de;
@@ -2038,9 +2038,9 @@ const g2t_track_st* StFcsDb::getG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, 
   ntrk=parents.size();
   if(order >= ntrk) {fraction=0; return 0;}
   std::nth_element(parents.begin(), parents.begin()+order, parents.end(),
-	    [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
-	      return b.second < a.second;
-	    });
+            [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
+              return b.second < a.second;
+            });
   fraction = parents[order].second / detot;
   if(mDebug>3){
     for(unsigned int jtrk=0; jtrk<ntrk; jtrk++){
