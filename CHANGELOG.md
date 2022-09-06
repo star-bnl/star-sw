@@ -19,6 +19,7 @@
 * Fix memory leaks when MuDst included with FWD data. Introduce a switch for FTT calibration mode (dump values to file) by @jdbrice in  ([#387](https://github.com/star-bnl/star-sw/pull/387))
 * Removing old hardcoded alignment from StEtofMatchMaker.cxx by @PhilippWeidenkaff in  ([#390](https://github.com/star-bnl/star-sw/pull/390))
 * Add Geant track info (g2t) to StFcsHit by @akioogawa in  ([#379](https://github.com/star-bnl/star-sw/pull/379))
+* StRefMultCorr updated for standalone compilation by @nigmatkulov in  ([#388](https://github.com/star-bnl/star-sw/pull/388))
 
 
 ## SL22b_0 - 2022-06-22
