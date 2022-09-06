@@ -144,6 +144,7 @@ void StTriggerData2022::readData(const TriggerDataBlk2022* data, int bs) {
     memset(mQT4,0,sizeof(mQT4));
     memset(mEQ1,0,sizeof(mEQ1));
     memset(mEQ2,0,sizeof(mEQ2));
+    memset(mEQ4,0,sizeof(mEQ4));
     memset(mxq,0,sizeof(mxq)); memset(tmxq,0,sizeof(tmxq));
     memset(eq3,0,sizeof(eq3)); memset(teq3,0,sizeof(teq3));
     memset(bbq,0,sizeof(bbq)); memset(tbbq,0,sizeof(tbbq));
@@ -153,6 +154,7 @@ void StTriggerData2022::readData(const TriggerDataBlk2022* data, int bs) {
     memset(qt4,0,sizeof(qt4)); memset(tqt4,0,sizeof(tqt4));
     memset(eq1,0,sizeof(eq1)); memset(teq1,0,sizeof(teq1));
     memset(eq2,0,sizeof(eq2)); memset(teq2,0,sizeof(teq2));
+    memset(eq4,0,sizeof(eq4)); memset(teq4,0,sizeof(teq4));
     TrgOfflen2022* offlen;
     
     for (int i=0; i<1+npre+npost; i++) {
@@ -192,6 +194,7 @@ void StTriggerData2022::readData(const TriggerDataBlk2022* data, int bs) {
         j=offlen[y22QT4_CONF_NUM].length; if (j>12){mQT4[i] = (QTBlock2022*     )((char*)mData + offlen[y22QT4_CONF_NUM].offset); swapRawDet((DataBlock2022*)mQT4[i],y22QT4_CONF_NUM,j,bs);}
         j=offlen[y22EQ1_CONF_NUM].length; if (j>12){mEQ1[i] = (QTBlock2022*     )((char*)mData + offlen[y22EQ1_CONF_NUM].offset); swapRawDet((DataBlock2022*)mEQ1[i],y22EQ1_CONF_NUM,j,bs);}
         j=offlen[y22EQ2_CONF_NUM].length; if (j>12){mEQ2[i] = (QTBlock2022*     )((char*)mData + offlen[y22EQ2_CONF_NUM].offset); swapRawDet((DataBlock2022*)mEQ2[i],y22EQ2_CONF_NUM,j,bs);}
+        j=offlen[y22EQ4_CONF_NUM].length; if (j>12){mEQ4[i] = (QTBlock2022*     )((char*)mData + offlen[y22EQ4_CONF_NUM].offset); swapRawDet((DataBlock2022*)mEQ4[i],y22EQ4_CONF_NUM,j,bs);}
         if (mMXQ[i]) decodeQT(mMXQ[i]->length/4, mMXQ[i]->data, mxq[i], tmxq[i]);
         if (mEQ3[i]) decodeQT(mEQ3[i]->length/4, mEQ3[i]->data, eq3[i], teq3[i]);
         if (mBBQ[i]) decodeQT(mBBQ[i]->length/4, mBBQ[i]->data, bbq[i], tbbq[i]);
@@ -201,6 +204,7 @@ void StTriggerData2022::readData(const TriggerDataBlk2022* data, int bs) {
         if (mQT4[i]) decodeQT(mQT4[i]->length/4, mQT4[i]->data, qt4[i], tqt4[i]);
         if (mEQ1[i]) decodeQT(mEQ1[i]->length/4, mEQ1[i]->data, eq1[i], teq1[i]);
         if (mEQ2[i]) decodeQT(mEQ2[i]->length/4, mEQ2[i]->data, eq2[i], teq2[i]);
+        if (mEQ4[i]) decodeQT(mEQ4[i]->length/4, mEQ4[i]->data, eq4[i], teq4[i]);
     }
     if (mDebug==1) dump();
 }
@@ -317,7 +321,7 @@ unsigned int StTriggerData2022::tcuCounter() const
 
 unsigned int StTriggerData2022::rccCounter(int crate) const
 {
-    if(crate >= y22L1_CONF_NUM && crate <= y22EQ2_CONF_NUM){
+    if(crate >= y22L1_CONF_NUM && crate <= y22EQ4_CONF_NUM){
         return TrgSum->LocalClocks[crate];
     }
     return 0;
@@ -660,7 +664,7 @@ unsigned short StTriggerData2022::epdLayer0hMult(int ch, int mult12, int prepost
 }
 
 unsigned short StTriggerData2022::epdNHitsQT(int crate, int qt, int mult12, int prepost) const {
-  //crate=1 for EQ1, crate=2 for EQ2, crate=3 for EQ3
+  //crate=1 for EQ1, crate=2 for EQ2, crate=3 for EQ3 
   //qt=1 for EQ0?1, qt=2 for EQ0?2, ... qt=10 for EQ0?A, qt=11 for EQ0?B
   //mult12=1 for 1st multiplicity, and mult12=2 for 2nd
   const unsigned short dsmmap[3][11]={
@@ -1403,7 +1407,7 @@ unsigned short StTriggerData2022::mtd4AtAddress(int address, int prepost) const 
 unsigned short StTriggerData2022::fmsADC(int crt, int adr, int ch, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && crt>=1 && crt<=7 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+    if (buffer >= 0 && crt>=1 && crt<=8 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
 	    case 0: return bbq[buffer][adr][ch];
 	    case 1: return qt1[buffer][adr][ch];
@@ -1413,6 +1417,7 @@ unsigned short StTriggerData2022::fmsADC(int crt, int adr, int ch, int prepost) 
             case 5: return eq3[buffer][adr][ch];
             case 6: return eq1[buffer][adr][ch];
             case 7: return eq2[buffer][adr][ch];
+            case 8: return eq4[buffer][adr][ch];
         }
     }
     return 0;
@@ -1421,7 +1426,7 @@ unsigned short StTriggerData2022::fmsADC(int crt, int adr, int ch, int prepost) 
 unsigned short StTriggerData2022::fmsTDC(int crt, int adr, int ch, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && crt>=0 && crt<=7 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+    if (buffer >= 0 && crt>=0 && crt<=8 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
             case 0: return tbbq[buffer][adr][ch];
             case 1: return tqt1[buffer][adr][ch];
@@ -1431,6 +1436,7 @@ unsigned short StTriggerData2022::fmsTDC(int crt, int adr, int ch, int prepost) 
             case 5: return teq3[buffer][adr][ch];
             case 6: return teq1[buffer][adr][ch];
             case 7: return teq2[buffer][adr][ch];
+            case 8: return teq4[buffer][adr][ch];
         }
     }
     return 0;
@@ -1439,11 +1445,12 @@ unsigned short StTriggerData2022::fmsTDC(int crt, int adr, int ch, int prepost) 
 unsigned short StTriggerData2022::epdADC(int crt, int adr, int ch, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && crt>=1 && crt<=3 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+    if (buffer >= 0 && crt>=1 && crt<=4 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
             case 1: return eq1[buffer][adr][ch];
             case 2: return eq2[buffer][adr][ch];
             case 3: return eq3[buffer][adr][ch];
+            case 4: return eq4[buffer][adr][ch];
         }
     }
     return 0;
@@ -1452,11 +1459,12 @@ unsigned short StTriggerData2022::epdADC(int crt, int adr, int ch, int prepost) 
 unsigned short StTriggerData2022::epdTDC(int crt, int adr, int ch, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && crt>=1 && crt<=3 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+    if (buffer >= 0 && crt>=1 && crt<=4 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
             case 1: return teq1[buffer][adr][ch];
             case 2: return teq2[buffer][adr][ch];
             case 3: return teq3[buffer][adr][ch];
+            case 4: return teq4[buffer][adr][ch];
         }
     }
     return 0;
@@ -1717,7 +1725,7 @@ void StTriggerData2022::dump() const
 		     {0x0b,0x0b,0xff, 0x0b,0x0b,0xff, 0x0b,0x0b,0xff, 0x0c,0x0c,0xff, 0x0c,0x0c,0x0c, 0xff},
 		     {0x0b,0x0b,0xff, 0x0b,0x0c,0xff, 0x0c,0x0b,0xff, 0x0b,0x0b,0xff, 0x0c,0x0c,0xff, 0xff}};
     int epdm[3][16]; memset(epdm,0,sizeof(epdm));
-    for(int c=1; c<=3; c++){
+    for(int c=1; c<=4; c++){
       for(int s=0; s<16; s++){
 	int bd=map[c][s] & 0x0f;
 	printf("EQ%1d S=%2d EQ0%02x bd=%1x 1/2 : ",c,s,map[c-1][s],bd); 	
@@ -1779,7 +1787,7 @@ void StTriggerData2022::swapRawDet(DataBlock2022* data, int name, int hlength,in
     switch(name){
         case y22MXQ_CONF_NUM : case y22EQ3_CONF_NUM : case y22BBQ_CONF_NUM : 
         case y22QT1_CONF_NUM : case y22QT2_CONF_NUM : case y22QT3_CONF_NUM : case y22QT4_CONF_NUM :
-        case y22EQ1_CONF_NUM : case y22EQ2_CONF_NUM :
+        case y22EQ1_CONF_NUM : case y22EQ2_CONF_NUM : case y22EQ4_CONF_NUM  :
             header_length = 12; break;
     }
     if (hlength != data->length + header_length){
@@ -1828,6 +1836,7 @@ void StTriggerData2022::swapRawDet(DataBlock2022* data, int name, int hlength,in
             case y22QT4_CONF_NUM :
             case y22EQ1_CONF_NUM :
             case y22EQ2_CONF_NUM :
+            case y22EQ4_CONF_NUM :
                 qtdata = (QTBlock2022*) data;
                 swapI((unsigned int*)&qtdata->dataLoss);
                 swapIn(qtdata->data, qtdata->length/4);
