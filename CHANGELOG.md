@@ -1,5 +1,27 @@
 # Changelog
 
+## SL22c_0 - 2022-09-06
+
+* ci: Expand tests with 2012, 2021, and 2022 data samples by @plexoos in  ([#371](https://github.com/star-bnl/star-sw/pull/371))
+* A minor bug fix in StFcsDb::getDetFromName by @akioogawa in  ([#373](https://github.com/star-bnl/star-sw/pull/373))
+* Fix misconfigured alignment correction in #358, change default start time in eTOF by @PhilippWeidenkaff in  ([#372](https://github.com/star-bnl/star-sw/pull/372))
+* ci: Add test jobs with doEvents.C from StRoot/macros by @plexoos in  ([#374](https://github.com/star-bnl/star-sw/pull/374))
+* Fix errrors reported by GCC 11.2.1 by @plexoos in  ([#366](https://github.com/star-bnl/star-sw/pull/366))
+* ci: Enable tests for ROOT5 GCC11 environment by @plexoos in  ([#370](https://github.com/star-bnl/star-sw/pull/370))
+* StMuDSTMaker: fixes for TChain::kBigNumber from ROOT6 by @veprbl in  ([#236](https://github.com/star-bnl/star-sw/pull/236))
+* docs: Add section about containers by @plexoos in  ([#380](https://github.com/star-bnl/star-sw/pull/380))
+* cons: Help agetof to find definition file by @plexoos in  ([#381](https://github.com/star-bnl/star-sw/pull/381))
+* cons: Pass PYTHONPATH to build environment by @plexoos in  ([#382](https://github.com/star-bnl/star-sw/pull/382))
+* New RHICf calibrations tables for Minho by @dmarkh in  ([#385](https://github.com/star-bnl/star-sw/pull/385))
+* Add official centrality calibration for 14.6 GeV Run 19 by @nigmatkulov in  ([#384](https://github.com/star-bnl/star-sw/pull/384))
+* Add Runtime Option to Ignore Air in Material Plots by @klendathu2k in  ([#386](https://github.com/star-bnl/star-sw/pull/386))
+* [g4star] Miscellaneous updates to StarAgmlLib by @klendathu2k in  ([#308](https://github.com/star-bnl/star-sw/pull/308))
+* Fix memory leaks when MuDst included with FWD data. Introduce a switch for FTT calibration mode (dump values to file) by @jdbrice in  ([#387](https://github.com/star-bnl/star-sw/pull/387))
+* Removing old hardcoded alignment from StEtofMatchMaker.cxx by @PhilippWeidenkaff in  ([#390](https://github.com/star-bnl/star-sw/pull/390))
+* Add Geant track info (g2t) to StFcsHit by @akioogawa in  ([#379](https://github.com/star-bnl/star-sw/pull/379))
+* StRefMultCorr updated for standalone compilation by @nigmatkulov in  ([#388](https://github.com/star-bnl/star-sw/pull/388))
+
+
 ## SL22b_0 - 2022-06-22
 
 * sTGC offline reconstruction chain / makers by @jdbrice in  ([#287](https://github.com/star-bnl/star-sw/pull/287))

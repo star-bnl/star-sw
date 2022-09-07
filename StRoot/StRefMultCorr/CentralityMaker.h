@@ -56,7 +56,7 @@ class CentralityMaker : public TObject  {
     StRefMultCorr* getRefMult2Corr() ; // For refmult2
     StRefMultCorr* getRefMult3Corr() ; // For refmult3
     StRefMultCorr* getRefMultCorr_Isobar()  ; // For refmult
-   // StRefMultCorr* getTofTrayMultCorr() ; // For TOF tray multiplicity
+    // StRefMultCorr* getTofTrayMultCorr() ; // For TOF tray multiplicity
     StRefMultCorr* getgRefMultCorr()  ; // For grefmult //Run14 AuAu200GeV
     StRefMultCorr* getgRefMultCorr_Run14_AuAu200_VpdMB5_P16id()  ; 
     StRefMultCorr* getgRefMultCorr_Run14_AuAu200_VpdMB30_P16id()  ; 
@@ -77,7 +77,7 @@ class CentralityMaker : public TObject  {
     StRefMultCorr* fRefMult2Corr ; // refmult2 based centrality
     StRefMultCorr* fRefMult3Corr ; // refmult3 based centrality
     StRefMultCorr* fRefMultCorr_Isobar  ; // refmult based centrality
-   // StRefMultCorr* fTofTrayMultCorr ; // tofTrayMult based centrality
+    // StRefMultCorr* fTofTrayMultCorr ; // tofTrayMult based centrality
     StRefMultCorr* fgRefMultCorr  ; // grefmult based centrality
     StRefMultCorr* fgRefMultCorr_Run14_AuAu200_VpdMB5_P16id  ;
     StRefMultCorr* fgRefMultCorr_Run14_AuAu200_VpdMB30_P16id  ;

@@ -1979,3 +1979,73 @@ void StFcsDb::readGainCorrFromText(){
   }
   fclose(F);
 }
+
+//g2t track info                                                                                                   
+unsigned int StFcsDb::backTraceG2tTrack(unsigned int id, g2t_track_st* g2ttrk){
+  int i = id - 1;
+  while(g2ttrk[i].next_parent_p !=0){
+    if(mDebug>3)
+      LOG_INFO<<Form("  BackTrace from=%3d id=%3d Epid=%4d Gpid=%3d Vtx=%3d Parent=%3d E=%6.2f",
+                     id,g2ttrk[i].id,g2ttrk[i].eg_pid,g2ttrk[i].ge_pid,g2ttrk[i].start_vertex_p,
+                     g2ttrk[i].next_parent_p,g2ttrk[i].e)<<endm;
+    i = g2ttrk[i].next_parent_p - 1;
+  }
+  if(mDebug>3) LOG_INFO<<Form("  BackTrace from=%3d id=%3d Epid=%4d Gpid=%3d Vtx=%3d Parent=%3d E=%6.2f Primary!!",
+                              id,g2ttrk[i].id,g2ttrk[i].eg_pid,g2ttrk[i].ge_pid,g2ttrk[i].start_vertex_p,
+                              g2ttrk[i].next_parent_p,g2ttrk[i].e)<<endm;
+  return i + 1;
+}
+    
+const g2t_track_st* StFcsDb::getParentG2tTrack(StFcsHit* h, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order){
+  StFcsCluster c;
+  c.hits().push_back(h); //dummy cluster with 1 hit
+  return getG2tTrack(&c,g2ttrk,fraction,ntrk,order,0);
+}
+
+const g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsHit* h, g2t_track_st* g2ttrk, float& fraction, int& ntrk,unsigned int order){
+  StFcsCluster c;
+  c.hits().push_back(h); //dummy cluster with 1 hit
+  return getG2tTrack(&c,g2ttrk,fraction,ntrk,order,1);
+}
+
+const g2t_track_st* StFcsDb::getParentG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order){
+  return getG2tTrack(c,g2ttrk,fraction,ntrk,order,0);
+}
+
+const g2t_track_st* StFcsDb::getPrimaryG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order){
+  return getG2tTrack(c,g2ttrk,fraction,ntrk,order,1);
+}
+
+const g2t_track_st* StFcsDb::getG2tTrack(StFcsCluster* c, g2t_track_st* g2ttrk, float& fraction, int& ntrk, unsigned int order, int mode){
+  float detot=0;
+  vector<pair<unsigned int, float>> parents;
+  for(const StFcsHit* hit : c->hits()) {
+    for(const pair<unsigned int, float> & gt : hit->getGeantTracks()){
+      unsigned int id=0;
+      switch(mode){
+      case 0: id=gt.first; break;
+      case 1: id=backTraceG2tTrack(gt.first,g2ttrk); break;
+      }
+      float de=gt.second;
+      int found=0;
+      for(pair<unsigned int, float>& p : parents){
+        if(p.first == id) {p.second += de; found=1; break;}
+      }
+      if(found==0) parents.push_back(make_pair(id,de));
+      detot+=de;
+    }
+  }
+  ntrk=parents.size();
+  if(order >= ntrk) {fraction=0; return 0;}
+  std::nth_element(parents.begin(), parents.begin()+order, parents.end(),
+            [](const pair<unsigned int,float>&a, const pair<unsigned int,float>&b){
+              return b.second < a.second;
+            });
+  fraction = parents[order].second / detot;
+  if(mDebug>3){
+    for(unsigned int jtrk=0; jtrk<ntrk; jtrk++){
+      LOG_INFO << Form("Cluster's G2T Track %3d mode=%1d id=%3d dE=%f",jtrk,mode,parents[jtrk].first,parents[jtrk].second)<<endm;
+    }
+  }
+  return &g2ttrk[parents[order].first-1];
+}
