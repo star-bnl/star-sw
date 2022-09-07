@@ -15,8 +15,10 @@
  *
  **************************************************************************/
 #include "StFcsHit.h"
+#include <algorithm>
 
 ClassImp(StFcsHit)
+using namespace std;
 
 StFcsHit::StFcsHit() { /* no operation */}
 
@@ -138,4 +140,19 @@ void StFcsHit::print(Option_t *option) const {
 	cout << Form("%4d (%3d) ",adc(i),timebin(i));
     }
     cout << endl;
+}
+
+void StFcsHit::addGeantTrack(unsigned int id, float e){    
+    // auto cmp = [](auto t){ return t.first == id; }; //c++20
+    auto cmp = [id](decltype(mGeantTracks)::value_type t){ return t.first == id; };
+    auto trk = find_if(mGeantTracks.rbegin(), mGeantTracks.rend(), cmp);
+    if(trk == mGeantTracks.rend()){
+      mGeantTracks.push_back(make_pair(id, e));
+    }else{
+      trk->second += e;
+    }
+    // Old way
+    //for(unsigned int i=0; i<mGeantTracks.size(); i++)
+    //  if(mGeantTracks[i].first == id) {mGeantTracks[i].second += e; return;}
+    //mGeantTracks.push_back(make_pair(id,e));
 }

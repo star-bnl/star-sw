@@ -68,6 +68,7 @@
 #include "StEvent/StFcsHit.h"
 #include "StEvent/StFcsCluster.h"
 #include "StFcsDbMaker/StFcsDb.h"
+#include "tables/St_g2t_track_Table.h"
 
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -217,6 +218,51 @@ int StFcsClusterMaker::makeCluster(int det) {
     if(ret==kStErr) ret=clusterMomentAnalysis(clu,0.0);   //Redo with 0 threshold
     categorization(clu);
   }
+
+  //debug MC info
+  if(GetDebug()>=5){
+    g2t_track_st* g2ttrk=0;
+    St_g2t_track* trackTable = static_cast<St_g2t_track*>(GetDataSet("g2t_track"));
+    if(!trackTable) {
+      LOG_INFO << "g2t_track Table not found" << endm;
+    }else{
+      const int nTrk = trackTable->GetNRows();
+      LOG_INFO << Form("g2t_track table has %d tracks",nTrk) << endm;
+      if(nTrk>0){
+        g2ttrk = trackTable->GetTable();
+        if(!g2ttrk){
+          LOG_INFO << "g2t_track GetTable failed" << endm;
+        }
+      }
+    }
+    if(g2ttrk){
+      int ntrk=0;
+      float frc=0;
+      int nh = hits.size();
+      for(int i=0; i<nh; i++){
+        StFcsHit* hit=hits[i];
+        const g2t_track_st* trk = mDb->getParentG2tTrack(hit,g2ttrk,frc,ntrk);
+        //const g2t_track_st* trk=0; 
+        //std::tie(trk,frc,ntrk) = mDb->getParentG2tTrack(hit,g2ttrk);
+        LOG_INFO << Form("Det=%1d Id=%3d E=%8.3f Parent  Id=%4d Pid=%4d E=%8.3f Frc=%6.3f N=%d",
+                         det,hit->id(),hit->energy(),trk->id,trk->ge_pid,trk->e,frc,ntrk)<<endm;
+        const g2t_track_st* ptrk = mDb->getPrimaryG2tTrack(hit,g2ttrk,frc,ntrk);
+        LOG_INFO << Form("Det=%1d Id=%3d E=%8.3f Primary Id=%4d Pid=%4d E=%8.3f Frc=%6.3f N=%d",
+                         det,hit->id(),hit->energy(),ptrk->id,ptrk->ge_pid,ptrk->e,frc,ntrk)<<endm;
+      }
+      int nc = clusters.size();
+      for(int j=0; j<nc; j++){
+        StFcsCluster* clu=clusters[j];
+        const g2t_track_st* trk = mDb->getParentG2tTrack(clu,g2ttrk,frc,ntrk);
+        LOG_INFO << Form("Det=%1d C#=%3d E=%8.3f Parent  Id=%4d Pid=%4d E=%8.3f Frc=%6.3f N=%d",
+                         det,j,clu->energy(),trk->id,trk->ge_pid,trk->e,frc,ntrk)<<endm;
+        const g2t_track_st* ptrk = mDb->getPrimaryG2tTrack(clu,g2ttrk,frc,ntrk);
+        LOG_INFO << Form("Det=%1d C#=%3d E=%8.3f Primary Id=%4d Pid=%4d E=%8.3f Frc=%6.3f N=%d",
+                         det,j,clu->energy(),ptrk->id,ptrk->ge_pid,ptrk->e,frc,ntrk)<<endm;
+      }
+    }
+  }
+
   return kStOk;
 }
 
