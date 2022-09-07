@@ -310,25 +310,26 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     //(void) printf("StBFChain:: Options list : %d %d %d %d %d %d %d %d\n",
     //		  kPadrow13,kTwist,kClock,kMembrane,kEndcap,
     //            kIFCShift,kSpaceCharge,kSpaceChargeR2);
-    if( IAttr("OBmap")      ) mask |= ( kBMap         << 1);
-    if( IAttr("OPr13")      ) mask |= ( kPadrow13     << 1);
-    if( IAttr("OPr40")      ) mask |= ( kPadrow40     << 1);
-    if( IAttr("OTwist")     ) mask |= ( kTwist        << 1);
-    if( IAttr("OClock")     ) mask |= ( kClock        << 1);
-    if( IAttr("OCentm")     ) mask |= ( kMembrane     << 1);
-    if( IAttr("OECap")      ) mask |= ( kEndcap       << 1);
-    if( IAttr("OIFC")       ) mask |= ( kIFCShift     << 1);
-    if( IAttr("OSpaceZ")    ) mask |= ( kSpaceCharge  << 1);
-    if( IAttr("OSpaceZ2")   ) mask |= ( kSpaceChargeR2<< 1);
-    if( IAttr("OShortR")    ) mask |= ( kShortedRing  << 1);
-    if( IAttr("OBMap2d")    ) mask |= ( kFast2DBMap   << 1);
-    if( IAttr("OGridLeak")  ) mask |= ( kGridLeak     << 1);
-    if( IAttr("OGridLeak3D")) mask |= ( k3DGridLeak   << 1);
+    if( IAttr("OBmap")        ) mask |= ( kBMap           << 1);
+    if( IAttr("OPr13")        ) mask |= ( kPadrow13       << 1);
+    if( IAttr("OPr40")        ) mask |= ( kPadrow40       << 1);
+    if( IAttr("OTwist")       ) mask |= ( kTwist          << 1);
+    if( IAttr("OClock")       ) mask |= ( kClock          << 1);
+    if( IAttr("OCentm")       ) mask |= ( kMembrane       << 1);
+    if( IAttr("OECap")        ) mask |= ( kEndcap         << 1);
+    if( IAttr("OIFC")         ) mask |= ( kIFCShift       << 1);
+    if( IAttr("OSpaceZ")      ) mask |= ( kSpaceCharge    << 1);
+    if( IAttr("OSpaceZ2")     ) mask |= ( kSpaceChargeR2  << 1);
+    if( IAttr("OSpaceFXT")    ) mask |= ( kSpaceChargeFXT << 1);
+    if( IAttr("OShortR")      ) mask |= ( kShortedRing    << 1);
+    if( IAttr("OBMap2d")      ) mask |= ( kFast2DBMap     << 1);
+    if( IAttr("OGridLeak")    ) mask |= ( kGridLeak       << 1);
+    if( IAttr("OGridLeak3D")  ) mask |= ( k3DGridLeak     << 1);
     if( IAttr("OGridLeakFull")) mask |= ( kFullGridLeak   << 1);
-    if( IAttr("OGGVoltErr") ) mask |= ( kGGVoltError  << 1);
-    if( IAttr("OSectorAlign"))mask |= ( kSectorAlign  << 1);
-    if( IAttr("ODistoSmear")) mask |= ( kDistoSmearing<< 1);
-    if( IAttr("OAbortGap"))   mask |= ( kAbortGap     << 1);
+    if( IAttr("OGGVoltErr")   ) mask |= ( kGGVoltError    << 1);
+    if( IAttr("OSectorAlign") ) mask |= ( kSectorAlign    << 1);
+    if( IAttr("ODistoSmear")  ) mask |= ( kDistoSmearing  << 1);
+    if( IAttr("OAbortGap")    ) mask |= ( kAbortGap       << 1);
     LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;
