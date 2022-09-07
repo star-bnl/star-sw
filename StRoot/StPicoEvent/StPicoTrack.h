@@ -1,4 +1,4 @@
-/**
+/*
  * \class StPicoTrack
  * \brief Holds information about track parameters
  *
@@ -117,12 +117,12 @@ class StPicoTrack : public TObject {
   /// Return a map of hits in HFT
   UInt_t  hftHitsMap() const             { return topologyMap(0) >> 1 & 0x7F; }
 #if !defined(__TFG__VERSION__)
-  /// Return dE/dx (GeV/cm) of the track
+  /// Return dE/dx (in keV/cm) of the track
   Float_t dEdx() const                   { return mDedx; }
-  /// Return dE/dx error of the track
+  /// Return relative dE/dx error of the track 
   Float_t dEdxError() const              { return mDedxError; }
 #else /* __TFG__VERSION__ */
-  /// Return dE/dx (GeV/cm) of the track
+  /// Return dE/dx (keV/cm) of the track
   Float_t dEdx(UChar_t fit = 1) const  { return (fit == 2) ? mDnDx : mDedx; }
   Float_t dEdxError(UChar_t fit = 1) const  { return (fit == 2) ?  mDnDxError: fgdEdxErrorScale*mDedxError; }
   static  void    setdEdxErrorScale(Float_t scale = 1) {fgdEdxErrorScale = scale;}
