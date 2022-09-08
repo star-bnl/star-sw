@@ -966,9 +966,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       if (!refCountIncr) 	continue;
       hh->setFitFlag(stiHit->timesUsed());
       // TPC dX base on local track position
-#if 1
       FillTpcdX(track,node,hh);
-#endif
 //Kind of HACK, save residials into StiHack 
       fillResHack(hh,stiHit,node);
   }
