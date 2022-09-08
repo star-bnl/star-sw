@@ -2941,12 +2941,6 @@ void StMagUtilities::UndoSpaceChargeFXTDistortion( const Float_t x[], Float_t Xp
   Float_t   Er_integral, Ephi_integral ;
   Double_t  r, phi, z ;
 
-  // re-use these two radial E-field arrays from the R0 and R2 distributions
-  // since the R0 and R2 corrections cannot be used at the same time as FXT
-  // (someday better to replace these arrays with STL, but that's a lot to change)
-#define spaceFXTErE spaceEr
-#define spaceFXTErW spaceR2Er
-
   if (fSpaceChargeR2) { GetSpaceChargeR2();} // need to reset it; re-use the R2 database table and access
 
   if ( DoOnce )
@@ -2965,31 +2959,31 @@ void StMagUtilities::UndoSpaceChargeFXTDistortion( const Float_t x[], Float_t Xp
       //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.
 
       for ( Int_t j = 0 ; j < COLUMNS ; j++ )
-  {
-    Double_t zed = j*GRIDSIZEZ ;
-    Zedlist[j] = zed ;
-    for ( Int_t i = 0 ; i < ROWS ; i++ )
-      {
-        Double_t Radius = IFCRadius + i*GRIDSIZER ;
-        ArrayVE(i,j) = 0 ;
-        ChargeE(i,j) = 0 ;
-        ArrayVW(i,j) = 0 ;
-        ChargeW(i,j) = 0 ;
-        Rlist[i] = Radius ;
-      }
-  }
+        {
+          Double_t zed = j*GRIDSIZEZ ;
+          Zedlist[j] = zed ;
+          for ( Int_t i = 0 ; i < ROWS ; i++ )
+            {
+              Double_t Radius = IFCRadius + i*GRIDSIZER ;
+              ArrayVE(i,j) = 0 ;
+              ChargeE(i,j) = 0 ;
+              ArrayVW(i,j) = 0 ;
+              ChargeW(i,j) = 0 ;
+              Rlist[i] = Radius ;
+            }
+        }
 
       for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )
-  {
-    Double_t zed = j*GRIDSIZEZ ;
-    for ( Int_t i = 1 ; i < ROWS-1 ; i++ )
-      {
-        Double_t Radius = IFCRadius + i*GRIDSIZER ;
-        Double_t zterm = (TPC_Z0-zed) * (OFCRadius*OFCRadius - IFCRadius*IFCRadius) / TPC_Z0 ;
-        ChargeE(i,j) = zterm * SpaceChargeFXTRadialDependenceEast(Radius) ;
-        ChargeW(i,j) = zterm * SpaceChargeFXTRadialDependenceWest(Radius) ;
-      } // All cases normalized to have same total charge as the Uniform Charge case == 1.0 * Volume of West End of TPC
-  }
+        {
+          Double_t zed = j*GRIDSIZEZ ;
+          for ( Int_t i = 1 ; i < ROWS-1 ; i++ )
+            {
+              Double_t Radius = IFCRadius + i*GRIDSIZER ;
+              Double_t zterm = (TPC_Z0-zed) * (OFCRadius*OFCRadius - IFCRadius*IFCRadius) / TPC_Z0 ;
+              ChargeE(i,j) = zterm * SpaceChargeFXTRadialDependenceEast(Radius) ;
+              ChargeW(i,j) = zterm * SpaceChargeFXTRadialDependenceWest(Radius) ;
+            } // All cases normalized to have same total charge as the Uniform Charge case == 1.0 * Volume of West End of TPC
+        }
 
       PoissonRelaxation( ArrayVE, ChargeE, EroverEzE, ITERATIONS ) ;
       PoissonRelaxation( ArrayVW, ChargeW, EroverEzW, ITERATIONS ) ;
@@ -2998,23 +2992,23 @@ void StMagUtilities::UndoSpaceChargeFXTDistortion( const Float_t x[], Float_t Xp
       Int_t ilow=0, jlow=0 ;
       Float_t save_Er[2] ;
       for ( Int_t i = 0 ; i < EMap_nZ ; ++i )
-  {
-    z = TMath::Abs( eZList[i] ) ;
-    TMatrix& EroverEz = ( eZList[i] < 0 ? EroverEzE : EroverEzW );
-    for ( Int_t j = 0 ; j < EMap_nR ; ++j )
-      { // Linear interpolation
-        r = eRList[j] ;
-        Search( ROWS,   Rlist, r, ilow ) ;  // Note switch - R in rows and Z in columns
-        Search( COLUMNS, Zedlist, z, jlow ) ;
-        if ( ilow < 0 ) ilow = 0 ;  // artifact of Root's binsearch, returns -1 if out of range
-        if ( jlow < 0 ) jlow = 0 ;
-        if ( ilow + 1  >=  ROWS - 1 ) ilow =  ROWS - 2 ;
-        if ( jlow + 1  >=  COLUMNS - 1 ) jlow =  COLUMNS - 2 ;
-        save_Er[0] = EroverEz(ilow,jlow) + (EroverEz(ilow,jlow+1)-EroverEz(ilow,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
-        save_Er[1] = EroverEz(ilow+1,jlow) + (EroverEz(ilow+1,jlow+1)-EroverEz(ilow+1,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
-        spaceR2Er[i][j] = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ; // re-use the R2 array
-      }
-  }
+        {
+          z = TMath::Abs( eZList[i] ) ;
+          TMatrix& EroverEz = ( eZList[i] < 0 ? EroverEzE : EroverEzW );
+          for ( Int_t j = 0 ; j < EMap_nR ; ++j )
+            { // Linear interpolation
+              r = eRList[j] ;
+              Search( ROWS,   Rlist, r, ilow ) ;  // Note switch - R in rows and Z in columns
+              Search( COLUMNS, Zedlist, z, jlow ) ;
+              if ( ilow < 0 ) ilow = 0 ;  // artifact of Root's binsearch, returns -1 if out of range
+              if ( jlow < 0 ) jlow = 0 ;
+              if ( ilow + 1  >=  ROWS - 1 ) ilow =  ROWS - 2 ;
+              if ( jlow + 1  >=  COLUMNS - 1 ) jlow =  COLUMNS - 2 ;
+              save_Er[0] = EroverEz(ilow,jlow) + (EroverEz(ilow,jlow+1)-EroverEz(ilow,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+              save_Er[1] = EroverEz(ilow+1,jlow) + (EroverEz(ilow+1,jlow+1)-EroverEz(ilow+1,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+              spaceR2Er[i][j] = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ; // re-use the R2 array
+            }
+        }
 
     }
 
