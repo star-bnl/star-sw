@@ -2679,9 +2679,8 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
-  if (((mDistortionMode/kSpaceCharge)    & 1) +
-      ((mDistortionMode/kSpaceChargeR2)  & 1) +
-      ((mDistortionMode/kSpaceChargeFXT) & 1) > 1) {
+  int active_options = mDistortionMode & (kSpaceCharge | kSpaceChargeR2 | kSpaceChargeFXT);
+  if (active_options & (active_options-1)) { // more than one active option
       cout << "StMagUtilities ERROR **** Do not use multiple SpaceCharge modes at the same time" << endl ;
       cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
       exit(1) ;
@@ -5267,9 +5266,8 @@ Float_t StMagUtilities::LimitZ( Int_t& Sector , const Float_t x[] )
 void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
 
-  if (((mDistortionMode/kGridLeak)     & 1) +
-      ((mDistortionMode/k3DGridLeak)   & 1) +
-      ((mDistortionMode/kFullGridLeak) & 1) > 1) {
+  int active_options = mDistortionMode & (kGridLeak | k3DGridLeak | kFullGridLeak);
+  if (active_options & (active_options-1)) { // more than one active option
       cout << "StMagUtilities ERROR **** Do not use multiple GridLeak modes at the same time" << endl ;
       cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
       exit(1) ;
