@@ -208,9 +208,9 @@ beamBeamSystem::probabilityOfHadronBreakup(const double impactparameter)
 
 	static int IFIRSTH = 0;
 	static double DELL=0., DELR=0., SIGNN=0., R1=0., A1=0., R2=0., RHO1=0.;
-	static double RHO2=0., NZ1=0., NZ2=0., NR1=0., NR2=0.,RR1=0., NY=0., NX=0.;
+	static double RHO2=0., NZ1=0., NZ2=0., NR1=0., RR1=0., NY=0., NX=0.;
 	static double AN1=0., AN2=0.;
-	double delo=0.,RSQ=0.,Z1=0.,Y=0.,X=0.,XB=0.,RPU=0.,IRUP=0.,RTU=0.;
+	double RSQ=0.,Z1=0.,Y=0.,X=0.,XB=0.,RPU=0.,IRUP=0.,RTU=0.;
 	double IRUT=0.,T1=0.,T2=0.;
 	static double DEN1[20002], DEN2[20002];
 	if (IFIRSTH != 0) goto L100;
@@ -233,7 +233,6 @@ beamBeamSystem::probabilityOfHadronBreakup(const double impactparameter)
 	NZ1  = ((R1+5.)/DELR);
 	NR1  = NZ1;
 	NZ2  = ((R2+5.)/DELR);
-	NR2  = NZ2;
 	RR1  = -DELR;
 	NY   = ((R1+5.)/DELL);
 	NX   = 2*NY;
@@ -262,7 +261,6 @@ beamBeamSystem::probabilityOfHadronBreakup(const double impactparameter)
         
 	AN2 = AN1; //This will also probably need to be changed?
 
-	delo = .05;
 	//.1 to turn mb into fm^2
 	//Calculate breakup probability here
  L100:

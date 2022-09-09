@@ -245,7 +245,7 @@ St2009pubMcMaker::doWefficiency(){
   cout<<"number of associated tracks = "<<nTrackAssoc<<endl;
 
   // track efficiency
-  bool foundTrack=false; int nTrk=0; float recoPt=0; 
+  bool foundTrack=false; int nTrk=0;
   for(unsigned int iv=0;iv<wMK->wEve.vertex.size();iv++) {
     WeveVertex &V=wMK->wEve.vertex[iv];
     if(V.eleTrack.size()>0){ //track with pt > 10
@@ -261,7 +261,6 @@ St2009pubMcMaker::doWefficiency(){
 	WeveEleTrack &T=V.eleTrack[it];
 	int idTruth=0; //T.prMuTrack->idTruth(); //again need private StMuTrack
 	if( eleTrId==idTruth ) { //reco track matches to electron
-	  recoPt=T.primP.Perp();
 	  nTrk++;
 	}
       }
@@ -602,7 +601,7 @@ St2009pubMcMaker::doZMCanalysis(){
   if(!mMcEvent) return false;
 
   //initialize momentum vectors
-  StThreeVectorF pZ;        float eZ;
+  StThreeVectorF pZ;
   StThreeVectorF pPositron; //float eNeutrino;
   StThreeVectorF pElectron; //float eElectron;
 
@@ -622,7 +621,6 @@ St2009pubMcMaker::doZMCanalysis(){
 	pElectron=mcTrack->momentum();
 	LOG_DEBUG<<"pdgId "<<pdgId<<" pt "<<pt<<" pz "<<mcTrack->momentum().z()<<endm;
 	pZ=mcTrack->parent()->momentum();
-	eZ=mcTrack->parent()->energy();
 	LOG_DEBUG<<"pdgId "<<mcTrack->parent()->pdgId()<<" pt "<<mcTrack->parent()->pt()<<" pz "<<mcTrack->parent()->momentum().z()<<endm;
 	found++;
       }
@@ -632,7 +630,6 @@ St2009pubMcMaker::doZMCanalysis(){
 	pPositron=mcTrack->momentum();
 	LOG_DEBUG<<"pdgId "<<pdgId<<" pt "<<pt<<" pz "<<mcTrack->momentum().z()<<endm;
 	pZ=mcTrack->parent()->momentum();
-	eZ=mcTrack->parent()->energy();
 	LOG_DEBUG<<"pdgId "<<mcTrack->parent()->pdgId()<<" pt "<<mcTrack->parent()->pt()<<" pz "<<mcTrack->parent()->momentum().z()<<endm;
 	found++;
       }

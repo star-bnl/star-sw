@@ -46,7 +46,6 @@ Int_t StFcsEcalHcalMipMaker::Init(){
   
   const char* nameEH[2] = {"Ecal","Hcal"};
   const char* nameNS[kFcsNorthSouth] = {"N","S"};
-  char f[100], t[100]; //histogram file names
   
   for(int eh=0; eh<2; eh++){
     mNClu[eh] = new TH1F(Form("NCluster_%s",nameEH[eh]),

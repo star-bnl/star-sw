@@ -112,7 +112,6 @@ St_ctf_Maker::~St_ctf_Maker(){
 }
 //_____________________________________________________________________________
 Int_t St_ctf_Maker::Init(){
-  int iInit=0;
 
 // Create tables
   St_DataSet *ctfg = GetInputDB("ctf/ctg");
@@ -124,7 +123,6 @@ Int_t St_ctf_Maker::Init(){
   m_ctb_slat     = (St_ctg_slat     *) gime("ctb_slat");
 
   Int_t Res_ctg_ctb  =  ctg (m_ctb,m_ctb_slat_phi,m_ctb_slat_eta,m_ctb_slat);
-  if (Res_ctg_ctb!=kSTAFCV_OK) iInit = kStWarn;
   m_tof          = (St_ctg_geo      *) gime("tof");
   m_tof_slat_phi = (St_ctg_slat_phi *) gime("tof_slat_phi");
   m_tof_slat_eta = (St_ctg_slat_eta *) gime("tof_slat_eta");

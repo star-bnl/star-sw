@@ -1421,11 +1421,9 @@ void  DIGMAPS::InspectEvent(Int_t EventNumber)
 {
   DIGAction *myAction = GetAction();
   Char_t *myDoit = myAction->GetDoit();  
-  Int_t myIntAction = 0;
   Char_t action2[200] = "plot";
   if(!strncmp( action2, myDoit,strlen(action2))  ){
     cout<<" WE CAN PLOT THAT !"<<endl;
-    myIntAction=2;
   }else{
     cout<<" No action plot done before !"<<endl;
     return;

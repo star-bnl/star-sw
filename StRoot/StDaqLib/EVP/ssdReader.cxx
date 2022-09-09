@@ -305,7 +305,7 @@ static int unpackRaw(int rb, int mz, int what, char *mem)
 {
 
 	u_char *adcdata ;
-	int as, ch, strip, cou ;
+	int as, ch;
 	u_char *dta ;
 	int row ;
 

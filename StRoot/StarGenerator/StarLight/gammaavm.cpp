@@ -273,7 +273,7 @@ bool Gammaavectormeson::fourBodyDecay
 double Gammaavectormeson::getDaughterMass(starlightConstants::particleTypeEnum &ipid)
 {
 	//This will return the daughter particles mass, and the final particles outputed id...
-	double ytest=0.,mdec=0.;
+	double mdec=0.;
   
 	switch(_VMpidtest){
 	case starlightConstants::RHO:
@@ -313,7 +313,6 @@ double Gammaavectormeson::getDaughterMass(starlightConstants::particleTypeEnum &
 	case starlightConstants::UPSILON2S:
 	case starlightConstants::UPSILON3S:
 		//  decays 50% to e+/e-, 50% to mu+/mu-
-		ytest = _randy.Rndom();//random()/(RAND_MAX+1.0);
     
 		mdec = starlightConstants::muonMass;
 		ipid = starlightConstants::MUON;
@@ -406,16 +405,12 @@ void Gammaavectormeson::momenta(double W,double Y,double &E,double &px,double &p
 	//     given W and Y,   without interference.  Subroutine vmpt.f handles
 	//     production with interference
  
-	double dW,dY;
 	double Egam,Epom,tmin,pt1,pt2,phi1,phi2;
 	double px1,py1,px2,py2;
 	double pt,xt,xtest;
 	double photon_spectrum;
 	double t1,t2;
 
-	dW = (_VMWmax-_VMWmin)/double(_VMnumw);
-	dY  = (_VMYmax-_VMYmin)/double(_VMnumy);
-  
 	//Find Egam,Epom in CM frame
 	Egam = 0.5*W*exp(Y);
 	Epom = 0.5*W*exp(-Y);

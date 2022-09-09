@@ -205,13 +205,13 @@ void StMCStepping::postTrack()
   //
   Float_t eta = fCurrentPosition.Vect().Eta();
   Float_t phi = fCurrentPosition.Vect().Phi(); // phi returned in degrees
-  Float_t zzz = fCurrentPosition[2];
+  //Float_t zzz = fCurrentPosition[2];
   Float_t xxx = fCurrentPosition[0];
   Float_t yyy = fCurrentPosition[1];
-  Float_t rrr = TMath::Sqrt(xxx*xxx+yyy*yyy);
+  //Float_t rrr = TMath::Sqrt(xxx*xxx+yyy*yyy);
 
   Float_t cos_theta = TMath::Abs(fCurrentPosition.Vect().CosTheta());
-  Float_t sin_theta = TMath::Sqrt(1.0 - cos_theta*cos_theta);
+  //Float_t sin_theta = TMath::Sqrt(1.0 - cos_theta*cos_theta);
 
   phi *= 180.0 / TMath::Pi();
 

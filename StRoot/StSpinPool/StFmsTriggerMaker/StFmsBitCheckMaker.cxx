@@ -75,7 +75,6 @@ void printCount(int id, const char* name, unsigned int n[MAXDT][4][32][4], int r
   printf("\n");
   printf("%8d %15s Mismatch\% = ",run,name); 
   int dt=MAXD;
-  int d=dt-MAXD;
   float mm=float(nt[dt]-ng[dt])/float(nt[dt])*100.0;
   printf("%6.3f ",mm);
   MM[dt][id]=mm;
@@ -285,7 +284,7 @@ int StFmsBitCheckMaker::Make(){
   if(! (cratemask>>QT4_CONF_NUM) & 0x1) return kStOK;
 
   static int dbc0 = -999;
-  unsigned long long bxinghi,bxing1,bxinglo,bx,bxdiff;
+  unsigned long long bxinghi,bxing1,bxinglo,bx;
   bxinghi = td->bcData(3);
   bxing1 =  td->bcData(10);
   bxinglo = (bxing1 << 16) + td->bcData(11);

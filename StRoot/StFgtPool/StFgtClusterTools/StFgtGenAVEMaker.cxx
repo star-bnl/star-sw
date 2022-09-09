@@ -326,8 +326,6 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 
   Double_t maxRCharge=-9999;
   Double_t maxPhiCharge=-9999;
-  Double_t maxRChargeUncert=-9999;
-  Double_t maxPhiChargeUncert=-9999;
   Int_t maxRInd=-1;
   Int_t maxPInd=-1;
   Int_t maxRTb=-1;
@@ -352,12 +350,8 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
   Short_t disc, quadrant,strip;
   Char_t layer;
   //These variables will store the APV number at which the relevant stuff happens for the overall quad.                                                                                                    
-  Int_t APVmaxRCharge=-9999;
-  Int_t APVmaxPhiCharge=-9999;
   //Int_t APVmaxRChargeUncert=-9999;
   //Int_t APVmaxPhiChargeUncert=-9999;
-  Int_t APVmaxRInd=-1;
-  Int_t APVmaxPInd=-1;
   Int_t APVmaxRTb=-1;
   Int_t APVmaxPTb=-1;
   Int_t APVmaxRAdc=-1;
@@ -411,15 +405,12 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 		      clusterChargeP=-9999;
 		    }
 		  maxPhiCharge=pStrip.charge;
-		  maxPhiChargeUncert=pStrip.chargeUncert;
 		  maxPInd=i;
 		  maxPAdc=-9999;
 		  maxSigAdcP=-9999;
 		  numFSigP=0;
 		  firstFSigTbP=-1;
 		  firstTbSigP=-1;
-		  APVmaxPhiCharge=-1;
-                  APVmaxPInd=-1;
                   APVmaxPAdc=-1;
                   APVmaxSigAdcP=-1;
                   APVnumFSigP=-1;
@@ -482,14 +473,11 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 		  
 		  maxRCharge=pStrip.charge;
 		  maxRInd=i;
-		  maxRChargeUncert=pStrip.chargeUncert;
 		  maxRAdc=-9999;
 		  maxSigAdcR=-9999;
 		  numFSigR=0;
 		  firstFSigTbR=-1;
 		  firstTbSigR=-1;
-		  APVmaxRCharge=-1;
-                  APVmaxRInd=-1;
                   APVmaxRAdc=-1;
                   APVmaxSigAdcR=-1;
                   APVnumFSigR=-1;
@@ -645,7 +633,6 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
     {
 
       //      cout <<" part of p cluster " << endl;
-	    float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
 	    float chi2Ndf;
 	    float amp;
 	    float t0;
@@ -683,7 +670,6 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
     {
 
       //      cout <<" part of R cluster " << endl;
-	    float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
 	    float chi2Ndf;
 	    float amp;
 	    float t0;
@@ -893,8 +879,8 @@ Double_t StFgtGenAVEMaker::findClosestPoint(float mx, float bx, float my, float 
 	    {
 	      dist2=mDist;
 	      //recalculate distance with proper alignment
-	      float tmpX, tmpY,tmpZ,tmpP,tmpR;
 #ifdef COSMIC
+	      float tmpX, tmpY,tmpZ,tmpP,tmpR;
 	      getAlign(iD,phi,r,tmpX,tmpY,tmpZ,tmpP,tmpR);
 	      Double_t xExpUpdate=mx*tmpZ+bx;
 	      Double_t yExpUpdate=my*tmpZ+by;
@@ -1557,14 +1543,12 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 
 Double_t StFgtGenAVEMaker::getRPhiRatio(vector<generalCluster>::iterator hitIterBegin, vector<generalCluster>::iterator hitIterEnd)
 {
-    Short_t quad;
   Char_t layer; 
   Int_t numR=0;
   Int_t numPhi=0;
   vector<generalCluster>::iterator hitIter=hitIterBegin;
   for(;hitIter!=hitIterEnd;hitIter++)
     {
-      quad=hitIter->quad;
       layer=hitIter->layer;
 
       if(layer=='R')
@@ -1589,28 +1573,6 @@ Int_t StFgtGenAVEMaker::Make()
   (*outTxtFile) <<"----------------------------- Event Nr: " << evtNr<<" -----------------" <<endl;
   StFgtGeneralBase::Make();
   unsigned int oldNumTracks=m_tracks.size();
-
-  //  cout <<"eff disk : " << m_effDisk <<endl;
-
-  //    cout <<" mtracks size: " << m_tracks.size() << " oldnum: "<< oldNumTracks <<endl;
-  for(int i=0;i<6;i++)
-    {
-      //      cout <<"there are " << pClusters[i]->size() << " clusters in disk " << i <<endl;
-      for(int j=0;j<pClusters[i]->size();j++)
-	{
-	  /*	  if((*(pClusters[i]))[j].layer=='R')
-	    cout <<"R layer, ";
-	  else
-	  cout <<"Phi layer, ";*/
-	  Int_t seedType=(*(pClusters[i]))[j].seedType;
-	  Double_t posPhi=(*(pClusters[i]))[j].posPhi;
-	  Double_t posR=(*(pClusters[i]))[j].posR;
-	  Int_t clusSize=(*(pClusters[i]))[j].clusterSize;
-	  Double_t charge=(*(pClusters[i]))[j].clusterCharge;
-	  Int_t cntGeoId=(*(pClusters[i]))[j].centralStripGeoId;
-	  //	  cout <<"cluster pos phi: " << posPhi <<" posR: " << posR <<" clusSize: " << clusSize << " charge: "<< charge <<" geoId: "<< cntGeoId <<" seedT : " << seedType<<endl;
-	}
-    }
 
   for(int iD=0;iD<6;iD++)
     {

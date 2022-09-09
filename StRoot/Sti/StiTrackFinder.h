@@ -20,10 +20,10 @@ public:
   /// Find all tracks of the currently loaded event
   virtual void findTracks(){;}; 
   /// Find/extend the given track, in the given direction
-  virtual bool find(StiTrack *track, int direction, double rmin=0){return 0;}
+  virtual bool find(StiTrack* /*track*/, int /*direction*/, double rmin=0){return 0;}
   /// Find the next track 
   virtual StiTrack * findTrack(double){return 0;};
-  virtual void extendTracksToVertices(const std::vector<StiHit*> &vertices){;};
+  virtual void extendTracksToVertices(const std::vector<StiHit*> & /*vertices*/){;};
   /// Reset the tracker
   virtual void reset(){;};
   virtual void unset(){;}
@@ -34,7 +34,7 @@ public:
   /// Set the vertex finder used by this tracker
   void setComb(int comb=7)		{mComb = comb;}
   int  useComb() const			{return mComb;}
-  virtual void FeedBack(int badGood){;};
+  virtual void FeedBack(int /*badGood*/){;};
   
 
 protected:

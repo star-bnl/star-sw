@@ -80,9 +80,6 @@ void TGeoSwim::Set(double Rmax,double Zmin,double zMax,double sMax)
 //_____________________________________________________________________________
 int TGeoSwim::Set(const double* pos,const double* dir, double curv)
 {
-THelixTrack **helx = fHelx;
-double *B = fB;
-double *inOut = fInOutLen;
   if (fEnd) fEnd->Reset();
   fPt=0;fP=0;fPLoss=0;fTimeFly=0; memset(fB,0,sizeof(fB));
   fC = curv;
@@ -138,9 +135,6 @@ static const double kMaxLoss = 0.1;// Max momentum loss
 
 enum {kMaxIter=100};
 enum {kInside  = 1, kOutside  = 0};
-THelixTrack **helx = fHelx;
-double *B = fB;
-double *inOut = fInOutLen;
 
   *fHelx[1] = *fHelx[0];
   double maxLen = maxLenP;

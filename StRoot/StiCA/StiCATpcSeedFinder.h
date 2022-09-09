@@ -22,7 +22,7 @@ class Seed_t {
   StiNodePars lastNodePars;
   StiNodeErrs firstNodeErrs;
   StiNodeErrs lastNodeErrs;
-  virtual void Print(Option_t *option="") const {
+  virtual void Print() const {
     firstNodePars.print();
     firstNodeErrs.print();
     lastNodePars.print();

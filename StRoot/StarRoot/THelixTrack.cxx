@@ -2367,7 +2367,7 @@ void TCircleFitter::Test(int iTest)
 
 //  enum {nPts=20};
   enum {nPts=5};
-  double e[4],x[3],dir[2];    
+  double x[3],dir[2];    
   double aShift[6];
   aShift[0]=-acos(0.25);
   aShift[1]=-acos(0.50);
@@ -2453,9 +2453,9 @@ static const int nEv = 100000;
               shift=0;
               double SS = sin(ang+shift);
               double CC = cos(ang+shift);
-              e[0] = pow(RERR*SS,2);
-              e[1] =-pow(RERR   ,2)*CC*SS;
-              e[2] = pow(RERR*CC,2);
+              //e[0] = pow(RERR*SS,2);
+              //e[1] =-pow(RERR   ,2)*CC*SS;
+              //e[2] = pow(RERR*CC,2);
 
               x[0] = myX[0] + (R)*(S-S0);
               x[1] = myX[1] - (R)*(C-C0);
@@ -3072,13 +3072,12 @@ if (kase&128) helx.Show();
 	for (int ih=0;ih<nHH;ih++) { hh[ih]->Fill(hf[ih]);}
 
 //		Fill 2nd histo group
-        double xIde[3],pIde[3],xFit[3],pFit[3],eSpot[3],hfil,sIde,sFit;
+        double xIde[3],pIde[3],xFit[3],pFit[3],eSpot[3],hfil,sFit;
 //        if(fabs(dip)>1) continue;
         int closePoint=0;
         spotSurf[0] = -110;
   
         { spotSurf[0] = -x[0]; closePoint=2006;}
-        sIde = trak.Step(200.,spotSurf,4, xIde,pIde,closePoint);
  
         if (fabs(spotSurf[0]+TCL::vdot(xIde,spotSurf+1,3))>0.001) {
           printf("***Wrong point found**\n");

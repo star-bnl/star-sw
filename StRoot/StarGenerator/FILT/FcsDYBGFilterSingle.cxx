@@ -51,7 +51,7 @@ Int_t FcsDYBGFilterSingle::Filter( StarGenEvent *mEvent){
     StarGenParticle *p = 0;
     vector<StarGenParticle*> forwardParticles;
     while( ( p = (StarGenParticle*)Iterator.Next() ) ){
-	int pid = abs(p->GetId());
+//	int pid = abs(p->GetId());
 //	if(p->GetStatus()!=1 || pid==111) continue;
         if(p->GetStatus()!=1) continue;
 	if(p->GetPz()<0.0) continue; // +z direction only
@@ -60,7 +60,6 @@ Int_t FcsDYBGFilterSingle::Filter( StarGenEvent *mEvent){
     }
     unsigned int size=forwardParticles.size();
     if(size<1) return StarGenEvent::kReject;
-    UInt_t res = 0x10;
     bool isInSouth=0;
     for(unsigned int i=0; i<size; i++){
 	StarGenParticle *p=forwardParticles.at(i);
