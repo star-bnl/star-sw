@@ -426,7 +426,8 @@ enum   DistortSelect                                                  <br>
   kFullGridLeak      = 0x80000,  // Bit 20                            <br>
   kDistoSmearing     = 0x100000, // Bit 21                            <br>
   kPadrow40          = 0x200000, // Bit 22                            <br>
-  kAbortGap          = 0x400000  // Bit 23                            <br>
+  kAbortGap          = 0x400000, // Bit 23                            <br>
+  kSpaceChargeFXT    = 0x800000, // Bit 24                            <br>
 } ;                                                                   <br>
 
 Note that the option flag used in the chain is 2x larger 
@@ -510,6 +511,14 @@ Float_t GL_rho_outer_of_outerSec(Float_t voltage=1390.0)
 
 double SpaceChargeRadialDependence(double Radius) {
   return ( 3191./(Radius*Radius) + 122.5/Radius - 0.395 ) / 15823. ;
+}
+double SpaceChargeFXTRadialDependenceEast(double Radius) {
+  // normalized for integral[47.9,200.0] (2427.3/R + 42.2021) * R dR
+  return ( 2427.3/Radius + 42.2021 ) / 1164374.8 ;
+}
+double SpaceChargeFXTRadialDependenceWest(double Radius) {
+  // normalized for integral[47.9,200.0] (5706.44/R + 16.2186) * R dR
+  return ( 5706.44/Radius + 16.2186 ) / 1173715.5 ;
 }
 
 //________________________________________
@@ -855,6 +864,10 @@ Int_t StMagUtilities::GetSpaceChargeMode()
      if (fSpaceChargeR2) return 20;
      else return 21;
    }
+   if (mDistortionMode & kSpaceChargeFXT) {
+     if (fSpaceChargeR2) return 30;
+     else return 31;
+   }
    return 0;
 }
 
@@ -1080,8 +1093,9 @@ void StMagUtilities::CommonStart ( Int_t mode )
     mDistortionMode &= ~(mDistortionMode & kClock);
     mDistortionMode &= ~(mDistortionMode & kFast2DBMap);
   }
-  if ( !( mode & ( kBMap | kPadrow13 | kPadrow40 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 |
-                   kAbortGap | kShortedRing | kFast2DBMap | kGridLeak | k3DGridLeak | kGGVoltError | kSectorAlign | kFullGridLeak))) 
+  if ( !( mode & ( kBMap | kFast2DBMap | kPadrow13 | kPadrow40 | kTwist | kClock | kMembrane | kEndcap |
+                   kIFCShift | kSpaceCharge | kSpaceChargeR2 | kSpaceChargeFXT | kAbortGap | kShortedRing |
+                   kGridLeak | k3DGridLeak | kFullGridLeak | kGGVoltError | kSectorAlign))) 
     {
        mDistortionMode |= kPadrow40 ;
        mDistortionMode |= kAbortGap ;
@@ -1108,6 +1122,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
   if ( mDistortionMode & kIFCShift )      printf (" + IFCShift") ;
   if ( mDistortionMode & kSpaceCharge )   printf (" + SpaceCharge") ;
   if ( mDistortionMode & kSpaceChargeR2 ) printf (" + SpaceChargeR2") ;
+  if ( mDistortionMode & kSpaceChargeFXT) printf (" + SpaceChargeFXT") ;
   if ( mDistortionMode & kAbortGap )      printf (" + AbortGapSpaceR2") ;
   if ( mDistortionMode & kMembrane )      printf (" + Central Membrane") ;
   if ( mDistortionMode & kEndcap )        printf (" + Endcap") ;
@@ -1345,7 +1360,7 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
       memcpy(Xprime1,Xprime2,threeFloats);
   }
 
-  if (mDistortionMode & (kSpaceCharge | kSpaceChargeR2)) { 
+  if (mDistortionMode & (kSpaceCharge | kSpaceChargeR2 | kSpaceChargeFXT)) { 
       UndoSpaceChargeDistortion ( Xprime1, Xprime2, Sector ) ;
       memcpy(Xprime1,Xprime2,threeFloats);
   }
@@ -2664,8 +2679,9 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
-  if ((mDistortionMode & kSpaceCharge) && (mDistortionMode & kSpaceChargeR2)) {
-      cout << "StMagUtilities ERROR **** Do not use kSpaceCharge and kSpaceChargeR2 at the same time" << endl ;
+  int active_options = mDistortionMode & (kSpaceCharge | kSpaceChargeR2 | kSpaceChargeFXT);
+  if (active_options & (active_options-1)) { // more than one active option
+      cout << "StMagUtilities ERROR **** Do not use multiple SpaceCharge modes at the same time" << endl ;
       cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
       exit(1) ;
   }
@@ -2674,6 +2690,8 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
       UndoSpaceChargeR0Distortion ( x, Xprime, Sector ) ;
   } else if (mDistortionMode & kSpaceChargeR2) { 
       UndoSpaceChargeR2Distortion ( x, Xprime, Sector ) ;
+  } else if (mDistortionMode & kSpaceChargeFXT) { 
+      UndoSpaceChargeFXTDistortion ( x, Xprime, Sector ) ;
   }
 
 }
@@ -2906,6 +2924,117 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 
   
 //________________________________________
+
+
+/// FixedTarget 1/r SpaceCharge Distortion
+/*!
+  Similar to R2 distortion correction for SpaceCharge, but using distinct radiual distributions on
+  the east and west sides as determined by studies of URQMD simulations of fixed target
+  collisions conducted by Yue-Hang Leung in June 2022.
+*/
+void StMagUtilities::UndoSpaceChargeFXTDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
+{
+  
+  const Int_t     ORDER       =    1 ;  // Linear interpolation = 1, Quadratic = 2
+
+  Float_t   Er_integral, Ephi_integral ;
+  Double_t  r, phi, z ;
+
+  if (fSpaceChargeR2) { GetSpaceChargeR2();} // need to reset it; re-use the R2 database table and access
+
+  if ( DoOnce )
+    {
+      cout << "StMagUtilities::UndoSpace  Please wait for the tables to fill ...  ~10 seconds" << endl ;
+      const Int_t     ROWS        =  257 ;  // (2**n + 1)
+      const Int_t     COLUMNS     =  129 ;  // (2**m + 1)
+      const Int_t     ITERATIONS  =  100 ;  // About 0.05 seconds per iteration
+      const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
+      const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
+      TMatrix  ArrayVE(ROWS,COLUMNS), ChargeE(ROWS,COLUMNS) ;
+      TMatrix  EroverEzE(ROWS,COLUMNS) ;
+      TMatrix  ArrayVW(ROWS,COLUMNS), ChargeW(ROWS,COLUMNS) ;
+      TMatrix  EroverEzW(ROWS,COLUMNS) ;
+      Float_t  Rlist[ROWS], Zedlist[COLUMNS] ;
+      //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.
+
+      for ( Int_t j = 0 ; j < COLUMNS ; j++ )
+        {
+          Double_t zed = j*GRIDSIZEZ ;
+          Zedlist[j] = zed ;
+          for ( Int_t i = 0 ; i < ROWS ; i++ )
+            {
+              Double_t Radius = IFCRadius + i*GRIDSIZER ;
+              ArrayVE(i,j) = 0 ;
+              ChargeE(i,j) = 0 ;
+              ArrayVW(i,j) = 0 ;
+              ChargeW(i,j) = 0 ;
+              Rlist[i] = Radius ;
+            }
+        }
+
+      for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )
+        {
+          Double_t zed = j*GRIDSIZEZ ;
+          for ( Int_t i = 1 ; i < ROWS-1 ; i++ )
+            {
+              Double_t Radius = IFCRadius + i*GRIDSIZER ;
+              Double_t zterm = (TPC_Z0-zed) * (OFCRadius*OFCRadius - IFCRadius*IFCRadius) / TPC_Z0 ;
+              ChargeE(i,j) = zterm * SpaceChargeFXTRadialDependenceEast(Radius) ;
+              ChargeW(i,j) = zterm * SpaceChargeFXTRadialDependenceWest(Radius) ;
+            } // All cases normalized to have same total charge as the Uniform Charge case == 1.0 * Volume of West End of TPC
+        }
+
+      PoissonRelaxation( ArrayVE, ChargeE, EroverEzE, ITERATIONS ) ;
+      PoissonRelaxation( ArrayVW, ChargeW, EroverEzW, ITERATIONS ) ;
+
+      //Interpolate results onto standard grid for Electric Fields
+      Int_t ilow=0, jlow=0 ;
+      Float_t save_Er[2] ;
+      for ( Int_t i = 0 ; i < EMap_nZ ; ++i )
+        {
+          z = TMath::Abs( eZList[i] ) ;
+          TMatrix& EroverEz = ( eZList[i] < 0 ? EroverEzE : EroverEzW );
+          for ( Int_t j = 0 ; j < EMap_nR ; ++j )
+            { // Linear interpolation
+              r = eRList[j] ;
+              Search( ROWS,   Rlist, r, ilow ) ;  // Note switch - R in rows and Z in columns
+              Search( COLUMNS, Zedlist, z, jlow ) ;
+              if ( ilow < 0 ) ilow = 0 ;  // artifact of Root's binsearch, returns -1 if out of range
+              if ( jlow < 0 ) jlow = 0 ;
+              if ( ilow + 1  >=  ROWS - 1 ) ilow =  ROWS - 2 ;
+              if ( jlow + 1  >=  COLUMNS - 1 ) jlow =  COLUMNS - 2 ;
+              save_Er[0] = EroverEz(ilow,jlow) + (EroverEz(ilow,jlow+1)-EroverEz(ilow,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+              save_Er[1] = EroverEz(ilow+1,jlow) + (EroverEz(ilow+1,jlow+1)-EroverEz(ilow+1,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
+              spaceR2Er[i][j] = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ; // re-use the R2 array
+            }
+        }
+
+    }
+
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
+
+  Interpolate2DEdistortion( ORDER, r, z, spaceR2Er, Er_integral ) ;
+  Ephi_integral = 0.0 ;  // E field is symmetric in phi
+
+  // Subtract to Undo the distortions and apply the EWRatio on the East end of the TPC
+  if ( r > 0.0 )
+    {
+      double Weight = SpaceChargeR2 * (doingDistortion ? SmearCoefSC : 1.0);
+      if ( z < 0) Weight *= SpaceChargeEWRatio ;
+      phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;
+      r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;
+    }
+
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
+  Xprime[2] = x[2] ;
+
+}
+
+  //________________________________________
   
 
 /// Abort Gap Cleaning Cycle space charge correction
@@ -4524,7 +4653,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t sec, Int_t Charge, Flo
        Ztrack[i]  =   VertexZ + DeltaTheta*Z_coef ;
        xx[0] = Xtrack[i] ; xx[1] = Ytrack[i] ; xx[2] = Ztrack[i] ;
 
-       if (mDistortionMode & (kSpaceCharge | kSpaceChargeR2)) {    // Daisy Chain all possible distortions and sort on flags
+       if (mDistortionMode & (kSpaceCharge | kSpaceChargeR2 | kSpaceChargeFXT)) {    // Daisy Chain all possible distortions and sort on flags
 	 UndoSpaceChargeDistortion ( xx, xxprime ) ;
 	 InnerOuterRatio = 1.3 ;  // JT test.  Without the GridLeak, GVB prefers 1.3  (real world == 0.5)  
 	 for ( unsigned int j = 0 ; j < 3; ++j ) 
@@ -4709,7 +4838,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t sec, Int_t Charge, Flo
      DoDistortion ( xx, xxprime, 3 ) ;
    }
    Int_t tempDistortionMode = mDistortionMode;
-   mDistortionMode = (tempDistortionMode & kSpaceChargeR2);
+   mDistortionMode = (tempDistortionMode & (kSpaceChargeR2 | kSpaceChargeFXT));
         if (tempDistortionMode & kFullGridLeak) mDistortionMode |= kFullGridLeak ;
    else if (tempDistortionMode & k3DGridLeak  ) mDistortionMode |= k3DGridLeak   ;
    else if (tempDistortionMode & kGridLeak    ) mDistortionMode |= kGridLeak     ;
@@ -4940,7 +5069,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t NHits, Int_t Charge, F
                                                    // but keep EWRatio that was previously defined 
    if (DoOnce) UndoDistortion(0,0,0); // make sure everything is initialized for mDistortionMode
    Int_t tempDistortionMode = mDistortionMode;
-   mDistortionMode = (tempDistortionMode & (kSpaceCharge | kSpaceChargeR2 | kGridLeak | k3DGridLeak | kFullGridLeak));
+   mDistortionMode = (tempDistortionMode & (kSpaceCharge | kSpaceChargeR2 | kSpaceChargeFXT | kGridLeak | k3DGridLeak | kFullGridLeak));
  
    memset(xx,0,3*sizeof(Float_t));  // Get the B field at the vertex 
    BFieldTpc(xx,B) ;
@@ -5137,9 +5266,8 @@ Float_t StMagUtilities::LimitZ( Int_t& Sector , const Float_t x[] )
 void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
 
-  if (((mDistortionMode/kGridLeak)     & 1) +
-      ((mDistortionMode/k3DGridLeak)   & 1) +
-      ((mDistortionMode/kFullGridLeak) & 1) > 1) {
+  int active_options = mDistortionMode & (kGridLeak | k3DGridLeak | kFullGridLeak);
+  if (active_options & (active_options-1)) { // more than one active option
       cout << "StMagUtilities ERROR **** Do not use multiple GridLeak modes at the same time" << endl ;
       cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
       exit(1) ;
@@ -5618,6 +5746,7 @@ void StMagUtilities::UndoFullGridLeakDistortion( const Float_t x[], Float_t Xpri
                   // (Garfield simulations assumed flat radial dependence).
                   // Note that this dlightly destroys getting the total charge in the middle sheet
                   // to be equal to that in 3DGridLeak, but this is more accurate.
+                  // This line needs modified if used for anything but R2 SpaceCharge
 	          Float_t SCscale = SpaceChargeRadialDependence(Radius)/SpaceChargeRadialDependence(GAPRADIUS) ;
 
 		  Float_t top = 0, bottom = 0 ;
