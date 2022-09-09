@@ -688,23 +688,17 @@ inline int StEStructPairCuts::cutMass() {
     }
     int iBin = mode[it1][it2];
 
-    double e, e1, e2, p1, p2, p[3], m, m1, m2;
+    double e, e1, e2, p1, p2, p[3], m;
     p1   = Track1()->Ptot();
     p2   = Track2()->Ptot();
     p[0] = Track1()->Px() + Track2()->Px();
     p[1] = Track1()->Py() + Track2()->Py();
     p[2] = Track1()->Pz() + Track2()->Pz();
-    float Mass[]  = {0.1396,  0.1396,  0.497, 0.9383};
     float Mass2[] = {0.01949, 0.01949, 0.247, 0.880};
     if (9 == iBin) {
-        // For o-o try using m1 = m2 = 0.
-        m1 = 0;
-        m2 = 0;
         e1 = p1;
         e2 = p2;
     } else {
-        m1 = Mass[it1];
-        m2 = Mass[it2];
         e1 = sqrt(p1*p1 + Mass2[it1]);
         e2 = sqrt(p2*p2 + Mass2[it2]);
     }

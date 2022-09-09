@@ -41,7 +41,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
   if(argc !=2) exit(1);
-  if(!gSystem) TUnixSystem *gSystem = new TUnixSystem();
+  //if(!gSystem) TUnixSystem *gSystem = new TUnixSystem();
 
   //----------------------------------
   // Open files and add to the chain
@@ -75,10 +75,6 @@ int main(int argc, char **argv)
   //----------------------
   // Book the histograms
   //----------------------
-  Float_t mrpcA[32] = { 0.,  0.,  0.,  0.,  0., 0., 16., 16.,
-                       20., 22., 22., 22., 22., 22., 26., 26.,
-                                  26., 26., 30., 30., 32., 32., 32., 32.,
-                                  32., 32., 32., 32., 32., 32., 32., 32.};
   Int_t MIdStart[8] = {1, 7, 9, 10, 15, 19, 21, 33};
   TH2D *mYLocal[7];
   TH2D *mZLocal[7];

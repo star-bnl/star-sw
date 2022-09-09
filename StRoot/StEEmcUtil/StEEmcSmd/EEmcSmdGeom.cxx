@@ -99,9 +99,9 @@ void EEmcSmdGeom::buildSmdGeom(){
   float y1[kEEmcNumStrips];
   float y2[kEEmcNumStrips]; 
   float length[kEEmcNumStrips];
-  float x0Edge[kEEmcNumEdgeStrips];
+  //float x0Edge[kEEmcNumEdgeStrips];
   float y1Edge[kEEmcNumEdgeStrips];
-  float y2Edge[kEEmcNumEdgeStrips];
+  //float y2Edge[kEEmcNumEdgeStrips];
   float lengthEdge[kEEmcNumEdgeStrips];
 
 // fill variable arrays with data in EmcStripGeom.h 
@@ -112,9 +112,9 @@ void EEmcSmdGeom::buildSmdGeom(){
        length[i] = EEmcStripGeomData[i].length;
   }
   for (int i = 0; i < kEEmcNumEdgeStrips; i++) {
-       x0Edge[i] = EEmcEdgeStripGeomData[i].x0;
+       //x0Edge[i] = EEmcEdgeStripGeomData[i].x0;
        y1Edge[i] = EEmcEdgeStripGeomData[i].y1;
-       y2Edge[i] = EEmcEdgeStripGeomData[i].y2;
+       //y2Edge[i] = EEmcEdgeStripGeomData[i].y2;
        lengthEdge[i] = EEmcEdgeStripGeomData[i].length;
   }
 /*

@@ -820,12 +820,6 @@ int StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant, StBTofCol
 	double pathL = tofHitsFromGeant->s_track;
 	double q = 0.;
 
-	double Rawtof = tofHitsFromGeant->tof*1000./nanosecond;
-	float Rawbeta=pathL/Rawtof/3e-2;
-	double momentum=partnerTrk->momentum().mag();
-	double mass=partnerTrk->fourMomentum().m();
-	double calcTof=pathL/(3e-2)/sqrt(1 - mass*mass/(momentum*momentum + mass*mass));
-
 	double time_blur = ranGauss.shoot()*mSimResDb->timeres_tof(itray, imodule, icell)*1e-9/nanosecond;
 	double tof = tofHitsFromGeant->tof*1000./nanosecond + time_blur;    //! 85ps per channel
 
@@ -853,7 +847,6 @@ int StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant, StBTofCol
 
 	//    tof = tof - mSimDb->toffset();  // Apply offset correction.
 	double t0 = tofHitsFromGeant->tof*1000./nanosecond;
-	float beta=pathL/tof/3e-2;
 
 	StMcBTofHit *mcBTofHit = new StMcBTofHit(itray,imodule,icell,de,pathL,t0,tof,q);
 	mcBTofHit->setPosition(local);

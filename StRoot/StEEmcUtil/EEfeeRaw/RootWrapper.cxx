@@ -121,10 +121,10 @@ eemcfeerootfill_(unsigned short& evtype, unsigned short& evtoken, unsigned short
 
   for(unsigned short *p = e; (p-e)<size; ) {
     b->clear();
-    *p++;                 // skip marker
+    p++;                 // skip marker
     unsigned int wordcnt   = *p++;    
-    *p++;                    // 0 resword1 
-    *p++;                    // 1 resword2 
+    p++;                    // 0 resword1
+    p++;                    // 1 resword2
     unsigned short token   = *p++;    // 2
     unsigned short cratrig = *p++;    // 3
     if(token!=evtoken) {

@@ -456,14 +456,14 @@ void StBTofNtupleMaker::processMuDst() {
   // Collect global data for both ntuples
 
   StMuEvent *mMuEvent = mMuDst->event();
-  Bool_t istrigger = 0;
+  //Bool_t istrigger = 0;
 
   
   if(mMuEvent) {
     if(Debug()) { LOG_INFO<<"runId: "<<mMuEvent->runId()<<"  evtId: "<<mMuEvent->eventId()<<endm; }
     mCellData.run = mMuEvent->runId();    // the run number
     mCellData.evt = mMuEvent->eventId();       // the event number
-   istrigger = ((mMuEvent->triggerIdCollection().nominal().isTrigger(7))||(mMuEvent->triggerIdCollection().nominal().isTrigger(250107)));
+    //istrigger = ((mMuEvent->triggerIdCollection().nominal().isTrigger(7))||(mMuEvent->triggerIdCollection().nominal().isTrigger(250107)));
   } else {
     mCellData.run = 0;
     mCellData.evt = 0;

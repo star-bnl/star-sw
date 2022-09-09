@@ -215,11 +215,9 @@ StBarrelMonitorMaker::unpackStTiles(int ibp){
   StEmcCollection *emc = mEvent->emcCollection();
   assert (emc);
 
-  int jBP=BTOW; 
   StEmcDetector* detector=emc->detector(kBarrelEmcTowerId);
   StEmcGeom  *geomB=mBtowGeom;
   if( ibp==kBPrs) {// change pointers for  preshower
-    jBP=BPRS; 
     geomB=mBprsGeom;
     detector=emc->detector(kBarrelEmcPreShowerId);
   }

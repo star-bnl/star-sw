@@ -7,7 +7,7 @@
 using namespace OLDEVP;
 
 int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
-  int returnValue,npre,npost,swap,res;
+  int npre,npost,swap,res;
   
   if ( ! pTRGP){
     printf("TRG_Reader::UnpackTrg2007 - not pTRGP\n");
@@ -18,10 +18,8 @@ int TRG_Reader::UnpackTrg2007(Bank_TRGP *pTRGP){
 	 pTRGP->header.ByteOrder==0x04030201);
   if(pTRGP->header.ByteOrder==0x04030201) {
     swap=1;
-    returnValue=0;
   }else{
     swap=1;
-    returnValue=pTRGP->header.swap();
   }
   if(pTRGP->header.ByteOrder!=0x04030201){
     printf("TRG_Reader::UnpackTrg2007: Swap Header error %s %d.\n",__FILE__,__LINE__);    

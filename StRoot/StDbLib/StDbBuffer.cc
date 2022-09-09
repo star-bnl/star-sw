@@ -468,19 +468,16 @@ return true;
 #define Rarray(tpe,tpelist) \
 bool  StDbBuffer::ReadArray(tpe* &s, int &len,const char *aName)\
 { bool tRetVal=false; \
-  bool newCheck=false;\
  if (Find_Col(aName)) \
   {int  i;\
   if (mCol[mCur].type==_char ) {\
     len=mCol[mCur].length/sizeof(tpe);\
     s=new tpe[len];\
-    newCheck=true;\
     MemSwapCpy((char*)s,(char*)mCol[mCur].val,len*sizeof(tpe),mycswapl[tpelist],Auto);\
     tRetVal=true;\
   } else {\
     len=mCol[mCur].length;\
     s=new tpe[len];\
-    newCheck=true;\
     for (i=0;i<len;i++)\
       { if (!(WriteMem(&s[i],(void*)(((char*)mCol[mCur].val)+i*mycsize[mCol[mCur].type]),mCol[mCur].type))) break;}\
       if (i==(int)mCol[mCur].length) tRetVal=true;}}\

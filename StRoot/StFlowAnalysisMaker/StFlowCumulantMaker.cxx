@@ -140,7 +140,7 @@ Int_t StFlowCumulantMaker::Init() {
       char theCumulOrder[2]; // if >10, need to use char*
       sprintf(theCumulOrder,"%d",(ord+1)*2);
       histTitle = new TString("Flow_Cumul_Order"); 
-      *histTitle->Append(*theCumulOrder);           
+      histTitle->Append(*theCumulOrder);           
       histTitle->Append("_Sel");                      
       *histTitle += k+1;          
       histFull[k].mHistCumul[ord] =  
@@ -894,7 +894,7 @@ Int_t StFlowCumulantMaker::Finish() {
     double  meanIntegV4[Flow::nHars];    // V**4
     double  cumulInteg1[Flow::nHars];    // outside of harmonic loop
     double  cumulInteg2[Flow::nHars];
-    double  cumulInteg3[Flow::nHars];
+    //double  cumulInteg3[Flow::nHars];
     
     double cumulIntegMix[Flow::nHars];
     double meanIntegVMix[Flow::nHars];
@@ -906,7 +906,7 @@ Int_t StFlowCumulantMaker::Finish() {
       meanIntegV4[j] = 0.;
       cumulInteg1[j] = 0.;
       cumulInteg2[j] = 0.;
-      cumulInteg3[j] = 0.;
+      //cumulInteg3[j] = 0.;
       cumulIntegMix[j] = 0.;
       meanIntegVMix[j] = 0.;
     }
@@ -958,8 +958,7 @@ Int_t StFlowCumulantMaker::Finish() {
       cumulInteg2[j] = ((-10.*CpInteg[1-1]) + (8.*CpInteg[2-1]) - 
 			 (2.*CpInteg[3-1])) / (r0Sq*r0Sq); 
       
-      cumulInteg3[j] = ( (18.*CpInteg[1-1]) - (18.*CpInteg[2-1]) + (6.*CpInteg[3-1]))
-			/ (r0Sq*r0Sq*r0Sq);
+      //cumulInteg3[j] = ( (18.*CpInteg[1-1]) - (18.*CpInteg[2-1]) + (6.*CpInteg[3-1])) / (r0Sq*r0Sq*r0Sq);
       
       // now histograms for flow results:
       histFull[k].histFullHar[j].mHist_v2D  = new TH2D*[Flow::nCumulDiffOrders];

@@ -440,7 +440,7 @@ unsigned int TOF_Reader::GetTrailingTdc(int ihit) {
 
 int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
 
-  unsigned short numberOfDataWords, slot, channel;
+  unsigned short numberOfDataWords;
   int dataDWord, value;
   //TofPTR->print();
   unsigned short Token = TofPTR->header.Token;
@@ -484,8 +484,6 @@ int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
       //slot    = (int)TofAdcD->data[dataDWord].adc.slot;
       //channel = (int)TofAdcD->data[dataDWord].adc.channel; 
       //value   = (int)TofAdcD->data[dataDWord].adc.data;
-      slot    = int( TofAdcD->data[dataDWord].data & 0x000000FF);
-      channel = int((TofAdcD->data[dataDWord].data & 0x0000FF00) >> 8);
       value   = int((TofAdcD->data[dataDWord].data & 0xFFFF0000) >> 16);
       mTheTofArray.AdcData[dataDWord]=value;
     }    
@@ -512,8 +510,6 @@ int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
       //slot    = (int)TofTdcD->data[dataDWord].tdc.slot;
       //channel = (int)TofTdcD->data[dataDWord].tdc.channel; 
       //value   = (int)TofTdcD->data[dataDWord].tdc.data;
-      slot    = int( TofTdcD->data[dataDWord].data & 0x000000FF);
-      channel = int((TofTdcD->data[dataDWord].data & 0x0000FF00) >> 8);
       value   = int((TofTdcD->data[dataDWord].data & 0xFFFF0000) >> 16);
       mTheTofArray.TdcData[dataDWord]=value;
     }    
@@ -540,8 +536,6 @@ int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
       //slot    = (int)TofA2dD->data[dataDWord].a2d.slot;
       //channel = (int)TofA2dD->data[dataDWord].a2d.channel; 
       //value   = (int)TofA2dD->data[dataDWord].a2d.data;
-      slot    = int( TofA2dD->data[dataDWord].data & 0x000000FF);
-      channel = int((TofA2dD->data[dataDWord].data & 0x0000FF00) >> 8);
       value   = int(int(TofA2dD->data[dataDWord].data) >> 16);// A2D values might be negative
       mTheTofArray.A2dData[dataDWord]=value;
     }    
@@ -567,7 +561,6 @@ int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
     for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
       //channel = (int)TofScaD->data[dataDWord].sca.channel; 
       //value   = (int)TofScaD->data[dataDWord].sca.data;
-      channel = int( TofScaD->data[dataDWord].data & 0x000000FF);
       value   = int((TofScaD->data[dataDWord].data & 0xFFFFFF00) >> 8);
       mTheTofArray.ScaData[dataDWord]=value;
     }
