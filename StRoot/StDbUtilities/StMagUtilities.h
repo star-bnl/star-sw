@@ -232,7 +232,8 @@ enum   DistortSelect
   kFullGridLeak      = 0x80000,  // Bit 20
   kDistoSmearing     = 0x100000, // Bit 21
   kPadrow40          = 0x200000, // Bit 22
-  kAbortGap          = 0x400000  // Bit 23
+  kAbortGap          = 0x400000, // Bit 23
+  kSpaceChargeFXT    = 0x800000  // Bit 24
 } ;
 enum   CorrectSelect
 {
@@ -451,6 +452,7 @@ class StMagUtilities {
   virtual void    UndoSpaceChargeDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoSpaceChargeR0Distortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoSpaceChargeR2Distortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoSpaceChargeFXTDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    Undo2DGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    Undo3DGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
