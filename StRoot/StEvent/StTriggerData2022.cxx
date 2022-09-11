@@ -1729,17 +1729,17 @@ void StTriggerData2022::dump() const
     int epdm[4][16]; memset(epdm,0,sizeof(epdm));
     for(int c=1; c<=4; c++){
       for(int s=0; s<16; s++){
-	int bd=mbc[c-1][s] & 0x0f;
+	int bcd=mbc[c-1][s] & 0x0f;
 	int eq=map[c-1][s];
 	if(eq!=0xff){
-	  printf("EQ%1d S=%2d EQ0%02x bd=%1x 1/2 : ",c,s,eq,bd); 	
+	  printf("EQ%1d S=%2d EQ0%02x bd=%1x 1/2 : ",c,s,eq,bcd); 	
 	}else{
 	  printf("EQ%1d S=%2d EQ    bd=  1/2 : ",c,s); 	
 	}
 	for (int ch=0; ch<32; ch++){
 	  if(ch==16){
 	    if(eq!=0xff){
-	      printf("\nEQ%1d S=%2d EQ0%02x bd=%1x 2/2 : ",c,s,eq,bd); 	
+	      printf("\nEQ%1d S=%2d EQ0%02x bd=%1x 2/2 : ",c,s,eq,bcd); 	
 	    }else{
 	      printf("\nEQ%1d S=%2d EQ    bd=  1/2 : ",c,s);
 	    }
@@ -1747,13 +1747,13 @@ void StTriggerData2022::dump() const
 	  printf("%4d ",epdADC(c,s,ch));	  
 	  if(map[c-1][s]<0xff){
 	    if(mbc[c-1][s]==0xb){
-	      if(epdADC(c,s,ch)>16) epdm[c-1][bd]++;
+	      if(epdADC(c,s,ch)>16) epdm[c-1][s]++;
 	    }else if(mbc[c-1][s]==0xc && (ch/4)%2==0){
-	      if(epdADC(c,s,ch)>16 && epdADC(c,s,ch+4)>300 && epdADC(c,s,ch+4)<2900) epdm[c-1][bd]++;
+	      if(epdADC(c,s,ch)>16 && epdADC(c,s,ch+4)>300 && epdADC(c,s,ch+4)<2900) epdm[c-1][s]++;
 	    }
 	  }
 	}
-	printf(" mult=%d\n",epdm[c-1][bd]);
+	printf(" mult=%d\n",epdm[c-1][s]);
       }
     }    
     printf("EP001 TAC+hit: "); for(int c=0;  c<8;  c++){ printf("%4x ",epdLayer0t(c));} printf("\n");
