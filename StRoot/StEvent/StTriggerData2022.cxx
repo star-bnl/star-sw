@@ -1729,10 +1729,21 @@ void StTriggerData2022::dump() const
     int epdm[4][16]; memset(epdm,0,sizeof(epdm));
     for(int c=1; c<=4; c++){
       for(int s=0; s<16; s++){
-	int bd=map[c][s] & 0x0f;
-	printf("EQ%1d S=%2d EQ0%02x bd=%1x 1/2 : ",c,s,map[c-1][s],bd); 	
+	int bd=mbc[c-1][s] & 0x0f;
+	int eq=map[c-1][s];
+	if(eq!=0xff){
+	  printf("EQ%1d S=%2d EQ0%02x bd=%1x 1/2 : ",c,s,eq,bd); 	
+	}else{
+	  printf("EQ%1d S=%2d EQ    bd=  1/2 : ",c,s); 	
+	}
 	for (int ch=0; ch<32; ch++){
-	  if(ch==16) printf("\nEQ%1d S=%2d EQ0%02x bd=%1x 2/2 : ",c,s,map[c-1][s],bd); 	
+	  if(ch==16){
+	    if(eq!=0xff){
+	      printf("\nEQ%1d S=%2d EQ0%02x bd=%1x 2/2 : ",c,s,eq,bd); 	
+	    }else{
+	      printf("\nEQ%1d S=%2d EQ    bd=  1/2 : ",c,s);
+	    }
+	  }
 	  printf("%4d ",epdADC(c,s,ch));	  
 	  if(map[c-1][s]<0xff){
 	    if(mbc[c-1][s]==0xb){
