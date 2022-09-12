@@ -19,13 +19,14 @@ ClassImp(StrangeMuDstPlayer)
 
 char empty = '\0';
 char slash = '/';
-void ParseFileName(const Char_t *output, Char_t **file, Char_t **dir) {
-  if ((*file = std::strrchr(const_cast<char*>(output),slash))) {
+void ParseFileName(const Char_t *output, const Char_t **file, const Char_t **dir) {
+  if ((*file = std::strrchr(output,slash))) {
     (*file)++;
-    *dir = new char[strlen(output)+5];
-    strncpy(*dir,output,(strlen(output)-strlen(*file)));
+    char *_dir = new char[strlen(output)+5];
+    strncpy(_dir,output,(strlen(output)-strlen(*file)));
+    *dir = _dir;
   } else {
-    *file = const_cast<char*>(output);
+    *file = output;
     *dir = &empty;
   }
 }
@@ -64,7 +65,7 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, const Char_t* output
   StMcEventMaker *mcEventReader;
   StAssociationMaker *associator;
 //   StRandyTopMapMaker *topoMapFixer;  // RWitt: Commented 7/24/15 to remove dependency on StHbtMaker
-  Char_t *file, *dir, *outfile[3], line[80];
+  const Char_t *file, *dir; Char_t *outfile[3], line[80];
   TString prefix[3];
   Int_t mNDstMakers = 0;
 
@@ -175,7 +176,7 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, const Char_t* outp
   StStrangeMuDstMaker *v0MuDstMaker=0;
   StStrangeMuDstMaker *xiMuDstMaker=0;
   StStrangeMuDstMaker *kinkMuDstMaker=0;
-  Char_t *file, *dir, *outfile[3], line[80];
+  const Char_t *file, *dir; Char_t *outfile[3], line[80];
   TString prefix[3];
   Int_t mNDstMakers = 0;
 
@@ -380,7 +381,7 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, const Char_t* output
   StMcEventMaker *mcEventReader;
   StAssociationMaker *associator;
   //   StRandyTopMapMaker *topoMapFixer; // RWitt: Commented 7/24/15 to remove dependency on StHbtMaker
-  Char_t *file, *dir, *outfile[3], line[80];
+  const Char_t *file, *dir; Char_t *outfile[3], line[80];
   TString prefix[3];
   Int_t mNDstMakers = 0;
 
@@ -601,7 +602,7 @@ void StrangeMuDstPlayer::Copy(Int_t NEvents, StFile* input, const Char_t* output
   StStrangeMuDstMaker *v0MuDstMaker=0;
   StStrangeMuDstMaker *xiMuDstMaker=0;
   StStrangeMuDstMaker *kinkMuDstMaker=0;
-  Char_t *file, *dir, *outfile[3], line[80];
+  const Char_t *file, *dir; Char_t *outfile[3], line[80];
   TString prefix[3];
   Int_t mNDstMakers = 0;
 
