@@ -193,6 +193,7 @@
 #include "StTrackPidTraits.h"
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
+#include "StFwdTrack.h"
 
 StCollectionImp(BTofHit)
 StCollectionImp(BTofRawHit)
@@ -267,3 +268,4 @@ StCollectionImp(TrackNode)
 StCollectionImp(TrackPidTraits)
 StCollectionImp(V0Vertex)
 StCollectionImp(XiVertex)
+StCollectionImp(FwdTrack)

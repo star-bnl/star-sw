@@ -226,6 +226,7 @@ class StFgtCollection;
 class StPxlHitCollection;
 class StIstHitCollection;
 class StFstHitCollection;
+class StFwdTrackCollection;
 
 class StEvent : public StXRefMain {
 public:
@@ -336,6 +337,9 @@ public:
     StSPtrVecKinkVertex&                kinkVertices();
     const StSPtrVecKinkVertex&          kinkVertices() const;
 
+    StFwdTrackCollection*               fwdTrackCollection();
+    const StFwdTrackCollection*         fwdTrackCollection() const;
+
     StDetectorState*                    detectorState(StDetectorId);
     const StDetectorState*              detectorState(StDetectorId) const;
     
@@ -396,6 +400,7 @@ public:
     void setL3Trigger(StL3Trigger*);
     void setHltEvent(StHltEvent*);
     void setFgtCollection(StFgtCollection*);
+    void setFwdTrackCollection(StFwdTrackCollection*);
     void addPrimaryVertex(StPrimaryVertex*, StPrimaryVertexOrder = orderByNumberOfDaughters);
     void addCalibrationVertex(StCalibrationVertex*);
     void addDetectorState(StDetectorState*);

@@ -182,6 +182,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StSPtrVecTrackDetectorInfo",  "evt_tracks",   4);
     setBranch("StSPtrVecPrimaryVertex",      "evt_tracks",   4);
     setBranch("StSPtrVecTrackNode",          "evt_tracks",   4);
+    setBranch("StFwdTrackCollection",        "evt_tracks",   4);
     setBranch("StSPtrVecKinkVertex",         "evt_vertices", 5);
     setBranch("StSPtrVecV0Vertex",           "evt_vertices", 5);
     setBranch("StSPtrVecXiVertex",           "evt_vertices", 5);
@@ -269,6 +270,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRnDHitCollection",          "event", 1);
     setBranch("StHltEvent",                  "event", 1);
     setBranch("StFgtCollection",             "event", 1);
+    setBranch("StFwdTrackCollection",        "event", 1);
 } 
 
 void
