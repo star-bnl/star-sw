@@ -254,6 +254,7 @@
 #include "StFstHitCollection.h"
 #include "StTrackNode.h"
 #include "StTrack.h"
+#include "StFwdTrackCollection.h"
 
 #ifndef ST_NO_NAMESPACES
 using std::swap;
@@ -986,6 +987,22 @@ StEvent::trackNodes() const
     return *nodes;
 }
 
+StFwdTrackCollection*
+StEvent::fwdTrackCollection()
+{
+    StFwdTrackCollection *fwdTracks = 0;
+    _lookup(fwdTracks, mContent);
+    return fwdTracks;
+}
+
+const StFwdTrackCollection*
+StEvent::fwdTrackCollection() const
+{
+    StFwdTrackCollection *fwdTrack = 0;
+    _lookup(fwdTrack, mContent);
+    return fwdTrack;
+}
+
 unsigned int
 StEvent::numberOfPrimaryVertices() const
 {
@@ -1436,6 +1453,12 @@ StEvent::setFstHitCollection(StFstHitCollection* val)
 
 void
 StEvent::setPxlHitCollection(StPxlHitCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
+StEvent::setFwdTrackCollection(StFwdTrackCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
