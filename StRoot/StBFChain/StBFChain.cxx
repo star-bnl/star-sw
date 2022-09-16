@@ -791,7 +791,10 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OECap")      ) mk->SetAttr("OECap"      , kTRUE);
 	if( GetOption("OIFC")       ) mk->SetAttr("OIFC"       , kTRUE);
 	if( GetOption("OSpaceZ")    ) mk->SetAttr("OSpaceZ"    , kTRUE);
-	if( GetOption("OSpaceZ2")   ) mk->SetAttr("OSpaceZ2"   , kTRUE);
+	if( GetOption("OSpaceZ2")   ) {
+          if( GetOption("FXT")      ) mk->SetAttr("OSpaceFXT"  , kTRUE);
+          else                        mk->SetAttr("OSpaceZ2"   , kTRUE);
+        }
 	if( GetOption("OShortR")    ) mk->SetAttr("OShortR"    , kTRUE);
 	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , kTRUE);
 	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , kTRUE);
