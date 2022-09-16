@@ -20,8 +20,8 @@ Author: David Kapukchyan
 Painter class for PeakAna
 */
 
-#ifndef __MYTOOLS_PeakAnaPainter_HH__
-#define __MYTOOLS_PeakAnaPainter_HH__
+#ifndef STROOT_STFCSWAVEFORMFITMAKER_PEAKANAPAINTER_H_
+#define STROOT_STFCSWAVEFORMFITMAKER_PEAKANAPAINTER_H_
 
 //C++ Headers
 #include <vector>

@@ -7,8 +7,8 @@ Author: David Kapukchyan
 PeakAnaPainter abstract base class
 */
 
-#ifndef __MYTOOLS_PeakAnaVirtualPainter_HH__
-#define __MYTOOLS_PeakAnaVirtualPainter_HH__
+#ifndef STROOT_STFCSWAVEFORMFITMAKER_PEAKANAVIRTUALPAINTER_H_
+#define STROOT_STFCSWAVEFORMFITMAKER_PEAKANAVIRTUALPAINTER_H_
 
 //C++ Headers
 #include <vector>

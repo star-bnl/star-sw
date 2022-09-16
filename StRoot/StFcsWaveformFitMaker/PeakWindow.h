@@ -27,8 +27,8 @@ Author: David Kapukchyan
 Helper class for PeakAna
 */
 
-#ifndef __STAR_PeakWindow_HH__
-#define __STAR_PeakWindow_HH__
+#ifndef STROOT_STFCSWAVEFORMFITMAKER_PEAKWINDOW_H_
+#define STROOT_STFCSWAVEFORMFITMAKER_PEAKWINDOW_H_
 
 //C++ Headers
 #include <iostream>

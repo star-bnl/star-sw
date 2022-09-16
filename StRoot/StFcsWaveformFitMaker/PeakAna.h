@@ -63,8 +63,8 @@ There is a helper data class *PeakWindow* which holds the data and does not inhe
 
 */
 
-#ifndef __STAR_PeakAna_HH__
-#define __STAR_PeakAna_HH__
+#ifndef STROOT_STFCSWAVEFORMFITMAKER_PEAKANA_H_
+#define STROOT_STFCSWAVEFORMFITMAKER_PEAKANA_H_
 
 //C++ Headers
 #include <iostream>

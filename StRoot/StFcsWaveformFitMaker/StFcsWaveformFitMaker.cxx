@@ -86,47 +86,8 @@ ClassImp(StFcsWaveformFitMaker)
 #include "TColor.h"
 #include "TStyle.h"
 #include "TROOT.h"
-/*
-namespace {
-  static const double sqrtpi    = sqrt(3.141592654);
-  static const double sqrt2pi   = sqrt(2.0 * 3.141592654);
-  static const double TBPerRC   = 8;
-  static const double nsecPerTB = 107.0/TBPerRC;
-  
-  //pulse shape
-  double GSigma=24.5/nsecPerTB;
-  double A1=0;    
-  double A2=0;    
-  double Xoff1=0; 
-  double Xoff2=0; 
-  double Tau1=1;  
-  double Tau2=1;  
-  double P1=1;  
-  double P2=1;    
-  
-  //Data from Gerard 2020 summer
-  static const double GSigma_1    = 24.5/nsecPerTB;
-  static const double A1_1        = 1.0/0.154/GSigma_1;
-  static const double A2_1        = 0.2/0.154/GSigma_1;
-  static const double Xoff1_1     = (70 - 129)/nsecPerTB;
-  static const double Xoff2_1     = (220 - 129)/nsecPerTB;
-  static const double Tau1_1      = 200.0/nsecPerTB;
-  static const double Tau2_1      = 40.0/nsecPerTB;
-  static const double P1_1        = 1.0;
-  static const double P2_1        = 1.0;
-  
-  //Data from WAH with real detector/LED system 2021 Jan
-  static const double GSigma_2    = 2.347;
-  static const double A1_2        = 2543.0/854.0/GSigma_2;
-  static const double A2_2        = 0.0;
-  static const double Xoff1_2     = 211.3-215.7;
-  static const double Xoff2_2     = 0.0;
-  static const double Tau1_2      = 4.375;
-  static const double Tau2_2      = 0.0;
-  static const double P1_2        = 1.0;
-  static const double P2_2        = 0.0;  
-}
-*/
+
+
 StFcsWaveformFitMaker::StFcsWaveformFitMaker(const char* name) : StMaker(name) {
     mChWaveData.SetClass("TGraphAsymmErrors"); //Initialize with only one graph at first
     //mPulseFit = new StFcsPulseFit( (TGraphAsymmErrors*)mChWaveData.ConstructedAt(0) );
@@ -134,8 +95,8 @@ StFcsWaveformFitMaker::StFcsWaveformFitMaker(const char* name) : StMaker(name) {
 
     mOutFile = 0;
     
-    mEnergySelect[0]=10; //default gaus fit for Ecal
-    mEnergySelect[1]=10; //default gaus fit for Hcal 
+    mEnergySelect[0]=13; //default PulseFit2 for Ecal
+    mEnergySelect[1]=13; //default PulseFit2 for Hcal
     mEnergySelect[2]=1;  //default sum8 for Pres
 
     for( UShort_t i=0; i<7; ++i ){
