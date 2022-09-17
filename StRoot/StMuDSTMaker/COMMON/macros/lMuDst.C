@@ -1,5 +1,5 @@
 #include "Riostream.h"
-void lMuDst(Int_t opt = -2, const Char_t *input = "", const Char_t *copt = "StEvent,Stu,RMuDst,picoEvt,mysql,tpcDb,magF,nodefault",const Char_t *tfile =  0,const Char_t *ofile =  0) {
+void lMuDst(Int_t opt = -2, const Char_t *input = "", const Char_t *copt = "StEvent,Stu,RMuDst,picoRead,mysql,tpcDb,magF,nodefault",const Char_t *tfile =  0,const Char_t *ofile =  0) {
 #if !defined(__CINT__)
   std::cout << "This code cannot be compiled" << std::endl;
 #else
@@ -13,6 +13,9 @@ void lMuDst(Int_t opt = -2, const Char_t *input = "", const Char_t *copt = "StEv
   bfc(opt,Chain,input,ofile,tfile);
   //  gROOT->LoadMacro("FitP_t.h+");
   gSystem->Load("libEG");
+#ifndef __TFG__VERSION__
+  gSystem->Load("libStdEdxY2Maker");
+#endif
 #if 0
   gSystem->Load("libKFParticlePerformance");
   gSystem->AddIncludePath(" -I$ROOTROOT/root/tmva/test");
