@@ -1,6 +1,4 @@
 /*
-  root.exe lMuDst.C 'Pico.C+("/gpfs01/star/pwg_tasks/hf05/Pico/BES-I/AuAu27_production_2011/2011/172/12172013/*.picoDst.root","PicoOut.root")'
-  root.exe lMuDst.C 'Pico.C+("/gpfs01/star/pwg/iraklic/Run2018/IB/SL19e/Ru/0-500/*.picoDst.root","PicoOut.root")'
   root.exe  lMuDst.C Pico.C+
   
   PicoDst->Draw("Track->gMom().Phi():Track->gMom().Eta()","Track->isPrimary()&&Track->nHits()>15&&Track->charge()<0","colz")
@@ -265,7 +263,10 @@ void Pico(const Char_t *files ="./*.picoDst.root",
   TH2F *dEdxP  = new TH2F("dEdxP","dEdx vesus regidity",250,-2.5,2.5,500,0,100);
   TH2F *betaToF  = new TH2F("beta","BToF 1/beta -1 versus regity",350,-3.5,3.5,500,-0.6,4.4);
   TH2F *betaEToF  = new TH2F("Ebeta","EToF 1/beta -1 versus regity",350,-3.5,3.5,500,-0.6,4.4);
-  //#define  __Use_dNdx__
+#ifdef __TFG__VERSION__
+#define  __Use_dNdx__
+#define __fit__
+#endif /* __TFG__VERSION__ */
 #ifdef     __Use_dNdx__
   enum  {kTotalMethods = 3};
 #else
@@ -281,33 +282,36 @@ void Pico(const Char_t *files ="./*.picoDst.root",
     //    ,kOtherMethodId2          // NU
 #endif
   };
-  static TH2F *fTdEdx[2][kTotalMethods][5] = {0};
-  static TH2F *fnSigma[4] = {0};
+  static TH2F *fTdEdx[2][kTotalMethods][5][3] = {0};
+  static TH2F *fnSigma[4][3] = {0};
   static TH2F *fdEdxVsdNdx = 0;
+  const Char_t *parN[5] = {"","e","P","K","pi"};
+  const Char_t *parT[5] = {"All","|nSigmaPion| < 1","|nSigmaElectron| < 1","|nSigmaKaon| < 1","|nSigmaProton| < 1"};
+  const Char_t *FitName[3] = {"F","I70","N"};
+  const Char_t *SignName[3] = {"","pos","neg"};
   for (Int_t k = 0; k < kTotalMethods; k++) {
-    const Char_t *parN[5] = {"","e","P","K","pi"};
-    const Char_t *parT[5] = {"All","|nSigmaPion| < 1","|nSigmaElectron| < 1","|nSigmaKaon| < 1","|nSigmaProton| < 1"};
-    const Char_t *FitName[3] = {"F","I70","N"};
     Double_t ymin = 0, ymax = 2.5;
     if (k == 2) {ymin = 1.2; ymax = 4.2;}
     for (Int_t t = 0; t < 5; t++) {
-      TString Title(Form("log10(dE/dx(%s)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",FitName[k],parT[t]));
-      if (k == 2) Title = Form("log10(dN/dx) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",parT[t]);
-      fTdEdx[0][k][t] = new TH2F(Form("TdEdx%s%s",FitName[k],parN[t]),Title,
-			      350,-1.5,2., 500, ymin, ymax);
-      fTdEdx[0][k][t]->SetMarkerStyle(1);
-      fTdEdx[0][k][t]->SetMarkerColor(t+1);
-
-      fTdEdx[1][k][t] = new TH2F(Form("TdEdx%s%sS",FitName[k],parN[t]),Title + " nSigma",
-			      350,-1.5,2., 500, ymin, ymax);
-      fTdEdx[1][k][t]->SetMarkerStyle(1);
-      fTdEdx[1][k][t]->SetMarkerColor(t+1);
-      if (k == 2 && t == 0) {
-	fdEdxVsdNdx = new TH2F("dEdN","Log10(dN/dx) versus Log10(dE/dx)",350,0,2.5,350,1.2,4.2);
-      }
-      if (k == 0) {// nsigma for Fit only
-	Title = Form("nSigma%s% versus log10(p(GeV/c))",FitName[k],parT[t]);
-	fnSigma[t] = new TH2F(Form("nSigma%s%s",FitName[k],parN[t]),Title, 350,-1.5,2., 200, -4, 4);
+      for (Int_t s = 0; s < 3; s++) {
+	TString Title(Form("log10(dE/dx(%s)(keV/cm)) versus log10(p(GeV/c)) %s %s",FitName[k],parT[t],SignName[s]));
+	if (k == 2) Title = Form("log10(dN/dx) versus log10(p(GeV/c)) %s %s",parT[t],SignName[s]);
+	fTdEdx[0][k][t][s] = new TH2F(Form("TdEdx%s%s%s",FitName[k],parN[t],SignName[s]),Title,
+				      350,-1.5,2., 500, ymin, ymax);
+	fTdEdx[0][k][t][s]->SetMarkerStyle(1);
+	fTdEdx[0][k][t][s]->SetMarkerColor(t+1);
+	
+	fTdEdx[1][k][t][s] = new TH2F(Form("TdEdx%s%sS%s",FitName[k],parN[t],SignName[s]),Title + " nSigma",
+				      350,-1.5,2., 500, ymin, ymax);
+	fTdEdx[1][k][t][s]->SetMarkerStyle(1);
+	fTdEdx[1][k][t][s]->SetMarkerColor(t+1);
+	if (k == 2 && t == 0) {
+	  fdEdxVsdNdx = new TH2F("dEdN","Log10(dN/dx) versus Log10(dE/dx)",350,0,2.5,350,1.2,4.2);
+	}
+	if (k == 0 && t != 0) {// nsigma for Fit only
+	  Title = Form("nSigma%s%s versus log10(p(GeV/c))",FitName[k],parT[t]);
+	  fnSigma[t][s]  = new TH2F(Form("nSigma%s%s%s",FitName[k],parN[t],SignName[s]),Title, 350,-1.5,2., 200, -4, 4);
+	}
       }
     }
   } 
@@ -330,7 +334,6 @@ void Pico(const Char_t *files ="./*.picoDst.root",
   delete [] phiBins;
   delete [] zBins;
   delete [] LBins;
-#define __fit__
 #ifdef __fit__
   Hists2D fitZ("fitZ");
 #ifdef     __Use_dNdx__
@@ -351,7 +354,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
 		      Form("%s for primary tracks versus Eta for |zPV| < 10cm and TpcLength > 40cm, TPC - iTPC",T[t]),
 		      100,-2.5,2.5,500,-1.,4.);
   }
-#endif
+#endif /* __fit__ */
 #if 1
   maker = new StPicoDstMaker(StPicoDstMaker::IoRead,files);
   maker->Init();
@@ -443,7 +446,8 @@ void Pico(const Char_t *files ="./*.picoDst.root",
       StPicoTrackCovMatrix *gCov = pico->trackCovMatrix(k);
       if (! gCov) continue;
       Int_t charge = gTrack->charge();
-      Int_t sCharge = (charge + 1)%2;
+      Int_t sCharge = (charge + 1)/2; // 0 => -1; 1 => +
+      Int_t s = 2 - sCharge; // 0 => All, 1 => +, 2 => -
       EtapT->Fill(pTrack->pMom().Eta(), charge*pTrack->pMom().Pt());
 #ifdef __TFG__VERSION__
       StDcaGeometry dcaG  = gCov->dcaGeometry();
@@ -461,8 +465,10 @@ void Pico(const Char_t *files ="./*.picoDst.root",
       cout << k << "\t" << particle <<endl;
 #endif
 #endif
+#ifdef __TFG__VERSION__
       StPidStatus PiD(gTrack); 
       if (PiD.PiDStatus < 0) continue;
+#endif /*  __TFG__VERSION__ */
       memset (&Var.refMult, 0, sizeof(Var_t));
       Var.refMult = NoGlobalTracks;
       Double_t p = gTrack->gMom().Mag();
@@ -479,7 +485,11 @@ void Pico(const Char_t *files ="./*.picoDst.root",
       if (Var.eta < 0) phi -= 360;
       Double_t zPred[3][KPidParticles];
       Double_t sPred[3][KPidParticles]; // errors versus bg10
+#ifdef __TFG__VERSION__
       StdEdxStatus *PiDs[3] = { PiD.fFit, PiD.fI70, PiD.fdNdx};
+#else
+      StdEdxStatus *PiDs[3] = { 0};
+#endif /*  __TFG__VERSION__ */
       Double_t dEdx[3] = {0};
       Double_t dEdxL[3] = {0};
       Double_t dEdxL10[3] = {0};
@@ -487,40 +497,53 @@ void Pico(const Char_t *files ="./*.picoDst.root",
       Double_t nSigmasPi[3] = {0};
       Double_t Zs[3] = {0};
       for (Int_t k = 0; k < kTotalMethods; k++) {// I70 && Fit && dNdx
+#ifdef __TFG__VERSION__
 	if (! PiDs[k]) continue;
 	dEdx[k] =  PiDs[k]->I();
+#else  /*  !__TFG__VERSION__ */
+	if (k != 0) continue;
+	dEdx[k] = 1e-6*gTrack->dEdx();
+#endif /*  __TFG__VERSION__ */
 	if (dEdx[k] <= 0.0) continue;
 	dEdxL[k] = TMath::Log(dEdx[k]);
 	dEdxL10[k] = TMath::Log10(dEdx[k]);
 	sigmas[k] = gTrack->dEdxError();
 	if (sigmas[k] <= 0.0) continue;
+#ifdef __TFG__VERSION__
 	nSigmasPi[k] = PiDs[k]->D();
 	Zs[k] =  PiDs[k]->dev[kPidPion];
 	//	StDedxMethod m = kTPoints[k];
 	//	if (! PiD.dEdxStatus((StDedxMethod)m)) continue;
+#else  /*  !__TFG__VERSION__ */
+	dEdx[k] = gTrack->dEdxError();
+	nSigmasPi[k] = nSigma(gTrack,kPidPion );
+	Zs[k] = 0;
+#endif /*  __TFG__VERSION__ */
 	Var.hyp = -1;
 	Var.z = Zs[k]; //	  if (TPs[m])	  TPs[m]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[m]);
 	//	  if (Pulls[k])	  Pulls[k]->Fill(pTrack->probPidTraits().dEdxTrackLength(), Zs[k]/sigmas[k]);
-	if (k < 2) fTdEdx[0][k][0]->Fill(TMath::Log10(p), dEdxL10[k]+6);
-	else       fTdEdx[0][k][0]->Fill(TMath::Log10(p), dEdxL10[k]);
-	dEdxP->Fill(rigity, 1e6*PiD.fFit->I());
-#ifdef __fit__
+#define __fTdEdx_Fill__(c,t,s)					\
+	if (k < 2) {						\
+	  fTdEdx[c][k][t][0]->Fill(TMath::Log10(p), dEdxL10[k]+6);	\
+	  fTdEdx[c][k][t][s]->Fill(TMath::Log10(p), dEdxL10[k]+6);	\
+	} else {						\
+	  fTdEdx[c][k][t][0]->Fill(TMath::Log10(p), dEdxL10[k]);	\
+	  fTdEdx[c][k][t][s]->Fill(TMath::Log10(p), dEdxL10[k]);	\
+	}
+	__fTdEdx_Fill__(0,0,s);
+	dEdxP->Fill(rigity, dEdx[k]);
 	//	for (Int_t l = kPidElectron; l < KPidParticles; l++) {
 	for (Int_t l = kPidElectron; l < 4; l++) {
 	  Int_t t = l+1;
 	  Double_t nSigmal =  nSigma(gTrack,l);
 	  if (t >= 0 && TMath::Abs(nSigmal) < 4) {
-	    fnSigma[t]->Fill(TMath::Log10(p), nSigmal);
-	    if (TMath::Abs(nSigmal) < 1) {
-	      if (k < 2) fTdEdx[1][k][t]->Fill(TMath::Log10(p), dEdxL10[k]+6);
-	      else       fTdEdx[1][k][t]->Fill(TMath::Log10(p), dEdxL10[k]);
-	    }
+	    fnSigma[t][0]->Fill(TMath::Log10(p), nSigmal);
+	    fnSigma[t][s]->Fill(TMath::Log10(p), nSigmal);
 	  }
-	  if (TMath::Abs(PiD.fFit->devS[l] ) < 1) {
-	    if (k < 2) fTdEdx[0][k][t]->Fill(TMath::Log10(p), dEdxL10[k]+6);
-	    else       fTdEdx[0][k][t]->Fill(TMath::Log10(p), dEdxL10[k]);
+	  if (TMath::Abs(nSigmal) < 1) {
+	    __fTdEdx_Fill__(1,t,s);
 	  }
-	  
+#ifdef __fit__
 	  if (PiD.fFit) {
 	    fitZ.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
 	    fitZ.dev[l][      2]->Fill(PiD.bghyp[l],PiD.fFit->dev[l]);
@@ -535,6 +558,7 @@ void Pico(const Char_t *files ="./*.picoDst.root",
 				<< endl;
 	    }
 	  }
+#endif /* __fit__ */
 #ifdef     __Use_dNdx__
 	  if (PiD.fI70) {
 	    I70.dev[l][sCharge]->Fill(PiD.bghyp[l],PiD.fI70->dev[l]);
@@ -556,9 +580,8 @@ void Pico(const Char_t *files ="./*.picoDst.root",
 	      if (Debug()) cout << "fitN->dev l = " << l << "\t bg = " << PiD.bghyp[l] << "\tdevZ = " << PiD.fdNdx->dev[l] << endl;
 	    }
 	  }
-#endif
+#endif /* __Use_dNdx_ */
 	}
-#endif
       }
       // ToF
       if (gTrack->isTofTrack()) {
