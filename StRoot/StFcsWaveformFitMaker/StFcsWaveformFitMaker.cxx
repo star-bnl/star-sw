@@ -1253,6 +1253,10 @@ float StFcsWaveformFitMaker::PulseFit1(TGraphAsymmErrors* gae, float* res, TF1*&
       mH1F_NPeaksFiltered[6]->Fill(npeaks);
     }
     res[0] = sum8(gae,res);
+    //Scale sum8 to match fitted sum (These may need to be confirmed by data year by year)
+    if( det0==0 || det0==1 ){res[0]/=1.226;}
+    if( det0==2 || det0==3 ){res[0]/=1.195;}
+    if( det0==4 || det0==5 ){res[0]/=1.29;}
     res[1] = mPulseFit->GetPeak(compidx).mPeakY;
     res[2] = mPulseFit->GetPeak(compidx).mPeakX;
     res[3] = mDbPulse->GSigma();
@@ -1307,6 +1311,10 @@ float StFcsWaveformFitMaker::PulseFit1(TGraphAsymmErrors* gae, float* res, TF1*&
     }
     else{//Don't need to fit as other peaks don't contribute to found peak
       res[0] = sum8(gae,res);
+      //Scale sum8 to match fitted sum (These may need to be confirmed by data year by year)
+      if( det0==0 || det0==1 ){res[0]/=1.226;}
+      if( det0==2 || det0==3 ){res[0]/=1.195;}
+      if( det0==4 || det0==5 ){res[0]/=1.29;}
       res[1] = mPulseFit->GetPeak(compidx).mPeakY;
       res[2] = mPulseFit->GetPeak(compidx).mPeakX;
       res[3] = mDbPulse->GSigma();
@@ -1326,6 +1334,10 @@ float StFcsWaveformFitMaker::PulseFit1(TGraphAsymmErrors* gae, float* res, TF1*&
     mH1F_Sum8Res0[6]->Fill(sum8res[0]);
     mH1F_Sum8Res0Zoom[6]->Fill(sum8res[0]);
     float savesum8 = sum8res[0];
+    //Scale sum8 to match fitted sum
+    //if( det0==0 || det0==1 ){savesum8/=1.226;}
+    //if( det0==2 || det0==3 ){savesum8/=1.195;}
+    //if( det0==4 || det0==5 ){savesum8/=1.29;}
 
     if( npeaks>=1 ){//No found peak skip fitting
       if( func==0 ){//No fit performed above so do a fit now
@@ -1392,6 +1404,10 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
   if( compidx==npeaks ){ res[0] = 0; }//no found peak case sum is 0
   else if( npeaks<=1 ){ //0 or 1 peak case with a valid peak;  do sum 8
     res[0] = sum8(gae,res);
+    //Scale sum8 to match fitted sum (These may need to be confirmed by data year by year)
+    if( det0==0 || det0==1 ){res[0]/=1.226;}
+    if( det0==2 || det0==3 ){res[0]/=1.195;}
+    if( det0==4 || det0==5 ){res[0]/=1.29;}
     res[1] = mPulseFit->GetPeak(compidx).mPeakY;
     res[2] = mPulseFit->GetPeak(compidx).mPeakX;
     res[3] = mDbPulse->GSigma();
@@ -1427,6 +1443,10 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
     }
     else{//Don't need to fit as other peaks don't contribute to found peak
       res[0] = sum8(gae,res);
+      //Scale sum8 to match fitted sum (These may need to be confirmed by data year by year)
+      if( det0==0 || det0==1 ){res[0]/=1.226;}
+      if( det0==2 || det0==3 ){res[0]/=1.195;}
+      if( det0==4 || det0==5 ){res[0]/=1.29;}
       res[1] = mPulseFit->GetPeak(compidx).mPeakY;
       res[2] = mPulseFit->GetPeak(compidx).mPeakX;
       res[3] = mDbPulse->GSigma();
@@ -1447,6 +1467,9 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
     mH1F_Sum8Res0[6]->Fill(sum8res[0]);
     mH1F_Sum8Res0Zoom[6]->Fill(sum8res[0]);
     float savesum8 = sum8res[0];
+    //if( det0==0 || det0==1 ){savesum8/=1.226;}
+    //if( det0==2 || det0==3 ){savesum8/=1.195;}
+    //if( det0==4 || det0==5 ){savesum8/=1.29;}
     
     if( mPulseFit->NPeaks()>=1 ){//No found peak skip fitting
       TF1* testfunc = mDbPulse->createPulse(mMinTB,mMaxTB,2+(mPulseFit->NPeaks())*3);//Want to compare when doing fit to all peaks
