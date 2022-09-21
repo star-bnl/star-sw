@@ -231,6 +231,103 @@ void StFcsWaveformFitMaker::Clear(Option_t* option) {
   StMaker::Clear(option);
 }
 
+int StFcsWaveformFitMaker::Init()
+{
+  if(mFilename){
+    mCanvas=new TCanvas("FCSWaveFormFit","FCSWaveFormFit",10,10,2000,2000);
+    gStyle->SetOptStat(0);
+    char file[100];
+    if( mFitDrawOn>=0 ){
+      sprintf(file,"%s.pdf[",mFilename);//Opens fileA but does not save anything
+      mCanvas->Print(file);
+    }
+  }
+  if(mMeasureTime){
+    mTime=new TH1F("FitTime","FitTime;msec",1000,0,1000);
+  }
+  if(mFilter && mFilter[0]=='0'){
+    mTimeIntg[0]=new TH2F("Noboth",  "No both;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
+    mTimeIntg[1]=new TH2F("NoFall",  "No Fall;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
+    mTimeIntg[2]=new TH2F("NoRise",  "No Rise;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
+    mTimeIntg[3]=new TH2F("Accepted","Accepted; PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
+  }
+  if( mOutFile!=0 ){
+    for( UShort_t i=0; i<7; ++i ){
+      std::stringstream ss;
+      ss << i;
+      if( i<3 ){
+	if( mTest==1 ){
+	  mH2_Dep0DepMod[i]=new TH2F( ("H2_Dep0DepMod_"+ss.str()).c_str(), ("Sum Dep0 vs DepMod "+ss.str()).c_str(),100,0,1000,100,0,1000);
+	  mH2_Sum8Dep0[i]=new TH2F( ("H2_Sum8Dep0_"+ss.str()).c_str(), ("Sum 8 vs Dep0 "+ss.str()).c_str(),100,0,1000,100,0,1000);
+	  mH2_Sum8DepMod[i]=new TH2F( ("H2_Sum8DepMod_"+ss.str()).c_str(), ("Sum 8 vs DepMod "+ss.str()).c_str(),100,0,1000,100,0,1000);
+	}
+      }
+      if( i<6 ){
+	if( mTest==2 ){
+	  mH2F_AdcTbAkio[i] = new TH2F( ("H2_AdcTbAkio_"+ss.str()).c_str(),"Akio Peaks Adc vs. Tb",102,-1.5,100.5,4097,-0.5,4096.5);
+	  mH2F_AdcTbMine[i] = new TH2F( ("H2_AdcTbMine_"+ss.str()).c_str(),"My Peaks Adc vs. Tb",102,-1.5,100.5,4097,-0.5,4096.5);
+	  mH2F_SumFitvSumWin[i] = new TH2F( ("H2_SumFitvSumWin_"+ss.str()).c_str(),"Fitted Sum vs. Peak Window Sum",100,0,2000,100,0,2000);
+	  mH2F_APeakvMPeak[i] = new TH2F( ("H2_APeakvMPeak_"+ss.str()).c_str(),"Peak Locations Akio v. Mine",80,-0.5,79.5,80,-0.5,79.5);
+	  mH1F_PeakStart[i] = new TH1F( ("H1_PeakStart_"+ss.str()).c_str(),"PeakWindow start times",102,-1.5,100.5);
+	  mH1F_PeakEnd[i] = new TH1F( ("H1_PeakEnd_"+ss.str()).c_str(),"PeakWindow end time",102,-1.5,100.5);
+	}
+	if( mTest==3 ){
+	  mH2F_NOvsId[i] = new TH2F( ("H2_NOvsId_"+ss.str()).c_str(),"Number of overlaps vs. Ch Id", 748,-0.5,747.5, 11,-0.5,10.5);
+	}
+      }
+      //i<7 histograms
+      if( mTest==2 ){
+	if( i<1 ){  //Test=2 only needs 1 histogram
+	  mH1F_NPeaks[i] = new TH1F( ("H1_NPeaks_"+ss.str()).c_str(),"Number of peaks from finder", 11,-0.5,10.5);
+	  mH1F_NPeaksFiltered[i] = new TH1F( ("H1_NPeaksFiltered_"+ss.str()).c_str(),"Number of peaks from finder when a valid peak was found", 11,-0.5,10.5);
+	}
+	mH2F_AdcTbValidPeak[i] = new TH2F( ("H2_AdcTbValidPeak_"+ss.str()).c_str(),"Valid Peaks Adc vs. Tb",102,-1.5,100.5,4097,-0.5,4096.5);
+      }
+      if( mTest==3 || mTest==6 ){
+	mH1F_NPeaks[i] = new TH1F( ("H1_NPeaks_"+ss.str()).c_str(),"Number of peaks from finder", 11,-0.5,10.5);
+	mH1F_NPeaksFiltered[i] = new TH1F( ("H1_NPeaksFiltered_"+ss.str()).c_str(),"Number of peaks from finder when a valid peak was found", 11,-0.5,10.5);
+	mH1F_Res0[i] = new TH1F( ("H1_Res0_"+ss.str()).c_str(),"All ADC sums", 100,0,2000 );
+	mH1F_Res0Zoom[i] = new TH1F( ("H1_Res0Zoom_"+ss.str()).c_str(),"All ADC sums", 201,-0.5,200.5 );
+	mH1F_Sum8Res0[i] = new TH1F( ("H1_Sum8Res0_"+ss.str()).c_str(),"All ADC sums using sum 8", 100,0,2000 );
+	mH1F_Sum8Res0Zoom[i] = new TH1F( ("H1_Sum8Res0Zoom_"+ss.str()).c_str(),"All ADC sums using sum 8", 201,-0.5,200.5 );
+	mH1F_FitRes0[i] = new TH1F( ("H1_FitRes0_"+ss.str()).c_str(),"All ADC sums using fitting", 100,0,2000 );
+	mH1F_FitRes0Zoom[i] = new TH1F( ("H1_FitRes0Zoom_"+ss.str()).c_str(),"All ADC sums using fitting", 201,-0.5,200.5 );
+	mH2F_Sum8vFit[i] = new TH2F(("H2_Sum8vFit_"+ss.str()).c_str(),"sum 8 vs fit sum", 100,0,2000, 100,0,2000);
+      }
+    }
+    
+    if( mTest==2 ){
+      mH1_NPeaksAkio = new TH1F("H1_NPeaksAkio","Number of peaks from current method", 11,-0.5,10.5);
+      mH1_NPeaksFilteredAkio = new TH1F("H1_NPeaksFilteredAkio","Number of peaks from current method when a valid peak is found", 11,-0.5,10.5);
+      mH1_PeakTiming = new TH1F("H1_PeakTiming","Timing to just find peak",200,0,5);
+    }
+    if( mTest==3 ){
+      mH2_NPeakvsPeakXdiff = new TH2F("H2_NPeakvsPeakXdiff","NPeak vs. Peak X difference", 41,-20.5,20.5, 11,-0.5,10.5);
+      mH2_NPeakvsPeakYratio = new TH2F("H2_NPeakvsPeakYratio","NPeak vs. Peak Y ratio", 100,0,10, 11,-0.5,10.5);
+      mH1_VOverlap = new TH1F("H1_VOverlap","Peak Compare values",4,-0.5,3.5 );
+      mH2_NOvsNPeaks = new TH2F("H2_NOvsNPeaks","Number of Overlapping peaks vs. Number of Peaks", 11,-0.5,10.5, 11,-0.5,10.5);
+      mH2_VvsNOverlap = new TH2F("H2_VvsNOverlap","Value of Comparison vs. Peak index", 21,-10.5,10.5, 4,-0.5,3.5);
+    }
+    if( mTest==3 || mTest==6 ){
+      mH1_TimeFitPulse = new TH1F("H1_TimeFitPulse","FitTime;msec",1000,0,1000);
+    }
+    if( mTest==4 ){
+      mH2_HeightvsSigma = new TH2F("H2_HeightvsSigma","Fitted Peak Height vs. Sigma;Sigma;Height", 31,-0.5,30.5, 4000,-0.5,3999.5);
+      mH2_HeightvsSigmaTrig = new TH2F("H2_HeightvsSigmaTrig","Fitted Peak Height vs. Sigma Triggered Xing;Sigma;Height", 31,-0.5,30.5, 4000,-0.5,3999.5);
+      mH1_ChiNdf = new TH1F("H1_ChiNdf","Chi^2/NDF for all fits;Chi^2/NDF", 50,-0.5,99.5);
+      mH2_HeightvsChiNdf = new TH2F("H2_HeightvsChiNdf", "Peak Height TXing vs. Chi^2/NDF;Chi^2/NDF;Height", 50,-0.5,99.5, 500,-0.5,499.5);
+      mH2_MeanvsChiNdf = new TH2F("H2_MeanvsChiNdf", "Peak Mean TXing vs. Chi^2/NDF;Chi^2/NDF;Mean", 50,-0.5,99.5, 21,39.5,60.5 );
+      mH2_SigmavsChiNdf = new TH2F("H2_SigmavsChiNdf", "Peak Sigma TXing vs. Chi^2/NDF;Chi^2/NDF;Sigma", 50,-0.5,99.5, 21,-0.5,20.5 );
+    }
+    if( mTest==5 ){
+      mH1_PeakTimingGaus = new TH1F("H1_PeakTimingGaus","gausFit timing;msec", 1000,0,1000 );
+      mH1_PeakTimingPuls = new TH1F("H1_PeakTimingPuls","PulseFit timing;msec", 1000,0,1000 );
+      mH2_PeakTimingCompare = new TH2F("H2_PeakTimingCompare","PulseFit vs. gausFit;ms;ms", 200,0,6, 200,0,6 );
+    }
+  }
+  return StMaker::Init(); 
+}
+
 int StFcsWaveformFitMaker::InitRun(int runNumber) {
     LOG_DEBUG << "StFcsWaveformFitMaker initializing run" << endm;
     mDb = static_cast<StFcsDb*>(GetDataSet("fcsDb"));
@@ -246,98 +343,6 @@ int StFcsWaveformFitMaker::InitRun(int runNumber) {
     mDbPulse->setTail(mTail);
     if( mPulseFit==0 ){ mPulseFit = new StFcsPulseAna(); SetupDavidFitterMay2022(); mPulseFit->setDbPulse(mDbPulse); }
     
-    if(mFilename){
-      mCanvas=new TCanvas("FCSWaveFormFit","FCSWaveFormFit",10,10,2000,2000);
-      gStyle->SetOptStat(0);
-      char file[100];
-      if( mFitDrawOn>=0 ){
-	sprintf(file,"%s.pdf[",mFilename);//Opens fileA but does not save anything
-	mCanvas->Print(file);
-      }
-    }
-    if(mMeasureTime){
-      mTime=new TH1F("FitTime","FitTime;msec",1000,0,1000);
-    }
-    if(mFilter && mFilter[0]=='0'){
-      mTimeIntg[0]=new TH2F("Noboth",  "No both;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
-      mTimeIntg[1]=new TH2F("NoFall",  "No Fall;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
-      mTimeIntg[2]=new TH2F("NoRise",  "No Rise;  PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
-      mTimeIntg[3]=new TH2F("Accepted","Accepted; PeakTB; Integral",100,47.0,54.0,400,0.0,2000);
-    }
-    if( mOutFile!=0 ){
-	for( UShort_t i=0; i<7; ++i ){
-	  std::stringstream ss;
-	  ss << i;
-	  if( i<3 ){
-	    if( mTest==1 ){
-	      mH2_Dep0DepMod[i]=new TH2F( ("H2_Dep0DepMod_"+ss.str()).c_str(), ("Sum Dep0 vs DepMod "+ss.str()).c_str(),100,0,1000,100,0,1000);
-	      mH2_Sum8Dep0[i]=new TH2F( ("H2_Sum8Dep0_"+ss.str()).c_str(), ("Sum 8 vs Dep0 "+ss.str()).c_str(),100,0,1000,100,0,1000);
-	      mH2_Sum8DepMod[i]=new TH2F( ("H2_Sum8DepMod_"+ss.str()).c_str(), ("Sum 8 vs DepMod "+ss.str()).c_str(),100,0,1000,100,0,1000);
-	    }
-	  }
-	  if( i<6 ){
-	    if( mTest==2 ){
-	      mH2F_AdcTbAkio[i] = new TH2F( ("H2_AdcTbAkio_"+ss.str()).c_str(),"Akio Peaks Adc vs. Tb",102,-1.5,100.5,4097,-0.5,4096.5);
-	      mH2F_AdcTbMine[i] = new TH2F( ("H2_AdcTbMine_"+ss.str()).c_str(),"My Peaks Adc vs. Tb",102,-1.5,100.5,4097,-0.5,4096.5);
-	      mH2F_SumFitvSumWin[i] = new TH2F( ("H2_SumFitvSumWin_"+ss.str()).c_str(),"Fitted Sum vs. Peak Window Sum",100,0,2000,100,0,2000);
-	      mH2F_APeakvMPeak[i] = new TH2F( ("H2_APeakvMPeak_"+ss.str()).c_str(),"Peak Locations Akio v. Mine",80,-0.5,79.5,80,-0.5,79.5);
-	      mH1F_PeakStart[i] = new TH1F( ("H1_PeakStart_"+ss.str()).c_str(),"PeakWindow start times",102,-1.5,100.5);
-	      mH1F_PeakEnd[i] = new TH1F( ("H1_PeakEnd_"+ss.str()).c_str(),"PeakWindow end time",102,-1.5,100.5);
-	    }
-	    if( mTest==3 ){
-	      mH2F_NOvsId[i] = new TH2F( ("H2_NOvsId_"+ss.str()).c_str(),"Number of overlaps vs. Ch Id", 748,-0.5,747.5, 11,-0.5,10.5);
-	    }
-	  }
-	  //i<7 histograms
-	  if( mTest==2 ){
-	    if( i<1 ){  //Test=2 only needs 1 histogram
-	      mH1F_NPeaks[i] = new TH1F( ("H1_NPeaks_"+ss.str()).c_str(),"Number of peaks from finder", 11,-0.5,10.5);
-	      mH1F_NPeaksFiltered[i] = new TH1F( ("H1_NPeaksFiltered_"+ss.str()).c_str(),"Number of peaks from finder when a valid peak was found", 11,-0.5,10.5);
-	    }
-	    mH2F_AdcTbValidPeak[i] = new TH2F( ("H2_AdcTbValidPeak_"+ss.str()).c_str(),"Valid Peaks Adc vs. Tb",102,-1.5,100.5,4097,-0.5,4096.5);
-	  }
-	  if( mTest==3 || mTest==6 ){
-	    mH1F_NPeaks[i] = new TH1F( ("H1_NPeaks_"+ss.str()).c_str(),"Number of peaks from finder", 11,-0.5,10.5);
-	    mH1F_NPeaksFiltered[i] = new TH1F( ("H1_NPeaksFiltered_"+ss.str()).c_str(),"Number of peaks from finder when a valid peak was found", 11,-0.5,10.5);
-	    mH1F_Res0[i] = new TH1F( ("H1_Res0_"+ss.str()).c_str(),"All ADC sums", 100,0,2000 );
-	    mH1F_Res0Zoom[i] = new TH1F( ("H1_Res0Zoom_"+ss.str()).c_str(),"All ADC sums", 201,-0.5,200.5 );
-	    mH1F_Sum8Res0[i] = new TH1F( ("H1_Sum8Res0_"+ss.str()).c_str(),"All ADC sums using sum 8", 100,0,2000 );
-	    mH1F_Sum8Res0Zoom[i] = new TH1F( ("H1_Sum8Res0Zoom_"+ss.str()).c_str(),"All ADC sums using sum 8", 201,-0.5,200.5 );
-	    mH1F_FitRes0[i] = new TH1F( ("H1_FitRes0_"+ss.str()).c_str(),"All ADC sums using fitting", 100,0,2000 );
-	    mH1F_FitRes0Zoom[i] = new TH1F( ("H1_FitRes0Zoom_"+ss.str()).c_str(),"All ADC sums using fitting", 201,-0.5,200.5 );
-	    mH2F_Sum8vFit[i] = new TH2F(("H2_Sum8vFit_"+ss.str()).c_str(),"sum 8 vs fit sum", 100,0,2000, 100,0,2000);
-	  }
-	}
-	
-	if( mTest==2 ){
-	  mH1_NPeaksAkio = new TH1F("H1_NPeaksAkio","Number of peaks from current method", 11,-0.5,10.5);
-	  mH1_NPeaksFilteredAkio = new TH1F("H1_NPeaksFilteredAkio","Number of peaks from current method when a valid peak is found", 11,-0.5,10.5);
-	  mH1_PeakTiming = new TH1F("H1_PeakTiming","Timing to just find peak",200,0,5);
-	}
-	if( mTest==3 ){
-	  mH2_NPeakvsPeakXdiff = new TH2F("H2_NPeakvsPeakXdiff","NPeak vs. Peak X difference", 41,-20.5,20.5, 11,-0.5,10.5);
-	  mH2_NPeakvsPeakYratio = new TH2F("H2_NPeakvsPeakYratio","NPeak vs. Peak Y ratio", 100,0,10, 11,-0.5,10.5);
-	  mH1_VOverlap = new TH1F("H1_VOverlap","Peak Compare values",4,-0.5,3.5 );
-	  mH2_NOvsNPeaks = new TH2F("H2_NOvsNPeaks","Number of Overlapping peaks vs. Number of Peaks", 11,-0.5,10.5, 11,-0.5,10.5);
-	  mH2_VvsNOverlap = new TH2F("H2_VvsNOverlap","Value of Comparison vs. Peak index", 21,-10.5,10.5, 4,-0.5,3.5);
-	}
-	if( mTest==3 || mTest==6 ){
-	  mH1_TimeFitPulse = new TH1F("H1_TimeFitPulse","FitTime;msec",1000,0,1000);
-	}
-	if( mTest==4 ){
-	  mH2_HeightvsSigma = new TH2F("H2_HeightvsSigma","Fitted Peak Height vs. Sigma;Sigma;Height", 31,-0.5,30.5, 4000,-0.5,3999.5);
-	  mH2_HeightvsSigmaTrig = new TH2F("H2_HeightvsSigmaTrig","Fitted Peak Height vs. Sigma Triggered Xing;Sigma;Height", 31,-0.5,30.5, 4000,-0.5,3999.5);
-	  mH1_ChiNdf = new TH1F("H1_ChiNdf","Chi^2/NDF for all fits;Chi^2/NDF", 50,-0.5,99.5);
-	  mH2_HeightvsChiNdf = new TH2F("H2_HeightvsChiNdf", "Peak Height TXing vs. Chi^2/NDF;Chi^2/NDF;Height", 50,-0.5,99.5, 500,-0.5,499.5);
-	  mH2_MeanvsChiNdf = new TH2F("H2_MeanvsChiNdf", "Peak Mean TXing vs. Chi^2/NDF;Chi^2/NDF;Mean", 50,-0.5,99.5, 21,39.5,60.5 );
-	  mH2_SigmavsChiNdf = new TH2F("H2_SigmavsChiNdf", "Peak Sigma TXing vs. Chi^2/NDF;Chi^2/NDF;Sigma", 50,-0.5,99.5, 21,-0.5,20.5 );
-	}
-	if( mTest==5 ){
-	  mH1_PeakTimingGaus = new TH1F("H1_PeakTimingGaus","gausFit timing;msec", 1000,0,1000 );
-	  mH1_PeakTimingPuls = new TH1F("H1_PeakTimingPuls","PulseFit timing;msec", 1000,0,1000 );
-	  mH2_PeakTimingCompare = new TH2F("H2_PeakTimingCompare","PulseFit vs. gausFit;ms;ms", 200,0,6, 200,0,6 );
-	}
-    }
     
     return StMaker::InitRun(runNumber);
 }
@@ -356,6 +361,7 @@ int StFcsWaveformFitMaker::Finish(){
     c->cd(1)->SetLogy();
     mTime->Draw();
     c->SaveAs(mMeasureTime);
+    delete c;
   }
   if(mFilter && mFilter[0]=='0'){
     TCanvas *c= new TCanvas("Stage0","Stage0",10,10,800,800);
@@ -367,6 +373,7 @@ int StFcsWaveformFitMaker::Finish(){
     c->cd(3)->SetLogy(); mTimeIntg[2]->Draw("colz");
     c->cd(4)->SetLogy(); mTimeIntg[3]->Draw("colz");
     c->SaveAs("stage0.png");
+    delete c;
   }
   if( mOutFile!=0 ){
     //mOutFile = new TFile(mOutFileName.c_str(),"RECREATE");

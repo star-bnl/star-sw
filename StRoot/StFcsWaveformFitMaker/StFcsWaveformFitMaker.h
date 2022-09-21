@@ -72,6 +72,7 @@ public:
     
     StFcsWaveformFitMaker(const char* name = "StFcsWaveformFitMaker");
     ~StFcsWaveformFitMaker();
+    virtual int Init();
     virtual int InitRun(int runNumber);
     virtual int Make();
     virtual int Finish(); 
