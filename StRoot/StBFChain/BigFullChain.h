@@ -232,62 +232,62 @@ Bfc_st BFC[] = { // standard chains
   {"MC.y2016a","","","MC.2016a",                                                          "","","",kFALSE},
   {"MC.2017","","","y2017,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti"
-   ,                                                                                      "","","/",kFALSE},
-  {"MC2016.Ideal","","","MC.2016a,istSlowSim,pxlSlowSim,StiHftC,MC.Sti"                   ,"","","",kFALSE},
+   ,                                                                                       "","","",kFALSE},
+  {"MC2016.Ideal","","","MC.2016a,istSlowSim,pxlSlowSim,StiHftC,MC.StiCA"                 ,"","","",kFALSE},
   {"MC2016",      "","","MC2016.Ideal,VMCAlignment,sdt20160301"                           ,"","","",kFALSE},
   {"MC.y2017","","","MC.2017",                                                             "","","",kFALSE},
-  {"MC2017.Ideal","","","MC.2017,MC.Sti"                                                  ,"","","",kFALSE},
+  {"MC2017.Ideal","","","MC.2017,MC.StiCA"                                                ,"","","",kFALSE},
   {"MC2017",      "","","MC2017.Ideal"                                                    ,"","","",kFALSE},
   {"MC.2018","","","y2018,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti"
-   ,                                                                                      "","","/",kFALSE},
+   ,                                                                                       "","","",kFALSE},
   {"MC.y2018","","","MC.2018",                                                             "","","",kFALSE},
-  {"MC2018.Ideal","","","MC.2018,MC.Sti,NewTpcAlignment"                                  ,"","","",kFALSE},
+  {"MC2018.Ideal","","","MC.2018,MC.StiCA,NewTpcAlignment"                                ,"","","",kFALSE},
   {"MC2018",      "","","MC2018.Ideal,vmc,VMCAlignment,sdt20180601.032240"                ,"","","",kFALSE},
   {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti"
    ,                                                                                       "","","",kFALSE},
   {"MC.y2019","","","MC2019",                                                              "","","",kFALSE},
-  {"MC2019.Ideal","","","MC.2019,MC.Sti,vmc,NewTpcAlignment,ExB"                          ,"","","",kFALSE},
-  {"MC2019",      "","","MC.2019,sdt20190401,MC.Sti,vmc,NewTpcAlignment,CorrY"            ,"","","",kFALSE},
+  {"MC2019.Ideal","","","MC.2019,MC.StiCA,vmc,NewTpcAlignment,ExB"                        ,"","","",kFALSE},
+  {"MC2019",      "","","MC.2019,sdt20190401,MC.StiCA,vmc,NewTpcAlignment,CorrY"          ,"","","",kFALSE},
   {"MC2019a"  ,"","","MC.2019a",                                                           "","","",kFALSE},
-  {"MC.2019a","","","y2019a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.Sti,NewTpcAlignment,vmc"
+  {"MC.2019a","","","y2019a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.StiCA,NewTpcAlignment,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
-   ",geantout,big,MiniMcMk,Sti,NewTpcAlignment",                                          "","","/",kFALSE},
+   ",geantout,big,MiniMcMk,Sti,NewTpcAlignment",                                           "","","",kFALSE},
   {"MC.y2019a","","","MC2019a",                                                            "","","",kFALSE},
   {"MC.2019","","","y2019,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,tags,emcY2,evout,IdTruth,geantout,big,MiniMcMk,Sti"
    ,                                                                                       "","","",kFALSE},
   {"MC.y2020","","","MC2020",                                                              "","","",kFALSE},
-  {"MC2020.Ideal","","","MC.2020,MC.Sti,vmc,NewTpcAlignment,ExB"                          ,"","","",kFALSE},
-  {"MC2020",      "","","MC.2020,sdt20200292,MC.Sti,vmc,NewTpcAlignment,ExB"              ,"","","",kFALSE},
+  {"MC2020.Ideal","","","MC.2020,MC.StiCA,vmc,NewTpcAlignment,ExB"                        ,"","","",kFALSE},
+  {"MC2020",      "","","MC.2020,sdt20200292,MC.StiCA,vmc,NewTpcAlignment,ExB"            ,"","","",kFALSE},
   {"MC.2020"  ,"","","MC.2020a",                                                           "","","",kFALSE},
   {"MC2020a"  ,"","","MC.2020a",                                                           "","","",kFALSE},
   {"MC.y2021","","","MC2021",                                                              "","","",kFALSE},
-  {"MC2021.Ideal","","","MC.2021,MC.Sti,vmc,NewTpcAlignment,ExB"                          ,"","","",kFALSE},
+  {"MC2021.Ideal","","","MC.2021,MC.StiCA,vmc,NewTpcAlignment,ExB"                        ,"","","",kFALSE},
   {"MC2021",      "","","MC.2021,sdt20210209,MC.StiCA,vmc,NewTpcAlignment,ExB"            ,"","","",kFALSE},
   {"MC.2021"  ,"","","MC.2021a",                                                           "","","",kFALSE},
   {"MC2021a"  ,"","","MC.2021a",                                                           "","","",kFALSE},
 #if  ROOT_VERSION_CODE < 393216 /* ROOT_VERSION(6,0,0) */
-  {"MC.2020a","","","y2020a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.Sti,CorrY,vmc"
+  {"MC.2020a","","","y2020a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.StiCA,CorrY,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
-   ",geantout,big,MiniMcMk,Sti,NewTpcAlignment",                                          "","","/",kFALSE},
-  {"MC.2021a","","","y2021a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.Sti,CorrY,vmc"
+   ",geantout,big,MiniMcMk,Sti,NewTpcAlignment",                                           "","","",kFALSE},
+  {"MC.2021a","","","y2021a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,BAna,MC.StiCA,CorrY,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
-   ",geantout,big,MiniMcMk,Sti,NewTpcAlignment",                                          "","","/",kFALSE},
+   ",geantout,big,MiniMcMk,Sti,NewTpcAlignment",                                           "","","",kFALSE},
   {"MC.Sti",   "","","Sti,geantOut,noRunco,noHistos,picoWrite,PicoVtxVpd,McTpcAna,tags"   ,"","","",kFALSE},
 #else
-  {"MC.2020a","","","y2020a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,Bana,MC.Sti,CorrY,vmc"
+  {"MC.2020a","","","y2020a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,Bana,MC.StiCA,CorrY,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
-   ",geantout,big,Sti,NewTpcAlignment",                                                   "","","/",kFALSE},
+   ",geantout,big,StiCA,NewTpcAlignment",                                                  "","","",kFALSE},
   {"MC.Sti",   "","","Sti,geantOut,noRunco,noHistos,McTpcAna,tags"                        ,"","","",kFALSE},
   {"MC.2021a","","","y2021a,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,Bana,MC.Sti,CorrY,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
-   ",geantout,big,Sti,NewTpcAlignment",                                                   "","","/",kFALSE},
+   ",geantout,big,Sti,NewTpcAlignment",                                                    "","","",kFALSE},
 #endif
   {"MC.2022","","","y2022,TpcRS,TpxClu,useXgeom,NoSsdIt,NoSvtIt,Idst,Bana,MC.Sti,CorrY,vmc"
    ",VFMinuit,tpcDB,TpcHitMover,bbcSim,btofsim,btofMatch,btofCalib,ETofSim,etofa,tags,emcY2,evout,IdTruth"
-   ",geantout,big,Sti,NewTpcAlignment",                                              "","","/",kFALSE},
+   ",geantout,big,Sti,NewTpcAlignment",                                                    "","","",kFALSE},
 
   {"MC.StiCA",   "","","MC.Sti,StiCA"                                                     ,"","","",kFALSE},
   {"XC",          "","","TpcRS,TpxClu,VMC,GeantOut,noRunco,noHistos,20Muons,"
