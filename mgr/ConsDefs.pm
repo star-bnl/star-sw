@@ -1084,7 +1084,7 @@
     }
     if ( ! $param::quiet ){
         if ( $XMLLIBDIR ){
-            print "Use xml $xml XMLLIBDIR = $XMLLIBDIR \tXMLINCDIR = $XMLINCDIR \tXMLLIBS = $XMLLIBS XMLCPPFlag =$XMLCPPFlag\n";
+            print "Using $xml\n\tXMLLIBDIR = $XMLLIBDIR\n\tXMLINCDIR = $XMLINCDIR\n\tXMLLIBS = $XMLLIBS\n\tXMLCPPFlag = $XMLCPPFlag\n" if !$param::quiet;
         } else {
             print "Use xml -> WARNING ** Could not define XMLLIBDIR, XMLINCDIR, XMLLIBS\n";
         }
