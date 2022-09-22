@@ -1051,43 +1051,43 @@
     }
 
     # xml2
+    chomp(my $xml = `which xml2-config`);
+
+    if ($?) {
+        die "No xml2-config found\n";
+    }
+
     my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
-    my ($xml) =  script::find_lib($MYSTAR . "/bin /usr/bin " . $LIBXML2_DIR . "/bin " . dirname(`which xml2-config`),
-				  "xml2-config");
-    if ($xml) {
-	$xml .= "/xml2-config";
-	$XMLINCDIR = `$xml --cflags`;
-	chomp($XMLINCDIR);
-	$XMLINCDIR =~ s/-I//;
-	my $XML  = `$xml --libs`; # die "$XML\n";
-	my(@libs)= split(" ", $XML);
 
-	$XMLLIBDIR = shift(@libs);
-	if ($XMLLIBDIR =~ /-L/){
-	    $XMLLIBDIR =~ s/-L//;
-	    $XMLLIBS   = join(" ",@libs);
-	} else {
-	    # no -L, assume all were LIBS
-	    $XMLLIBS   = $XMLLIBDIR ." ".join(" ",@libs);
-	    # and fix -L / should work for both 32 and 64
-	    $XMLLIBDIR = "/usr/$LLIB";
-	}
+    $XMLINCDIR = `$xml --cflags`;
+    chomp($XMLINCDIR);
+    $XMLINCDIR =~ s/-I//;
+    my $XML  = `$xml --libs`; # die "$XML\n";
+    my(@libs)= split(" ", $XML);
 
-	my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
-	my ($major,$minor) = split '\.', $XMLVersion; # print "major = $major,minor = $minor\n";
-	$XMLCPPFlag = "";#-DXmlTreeReader";
-	if ($major < 2 or $major == 2 and $minor < 5) {
-	    $XMLCPPFlag = "-DNoXmlTreeReader";
-	}
-	if ( ! $param::quiet ){
-	    if ( $XMLLIBDIR ){
-		print "Use xml $xml XMLLIBDIR = $XMLLIBDIR \tXMLINCDIR = $XMLINCDIR \tXMLLIBS = $XMLLIBS XMLCPPFlag =$XMLCPPFlag\n";
-	    } else {
-		print "Use xml -> WARNING ** Could not define XMLLIBDIR, XMLINCDIR, XMLLIBS\n";
-	    }
-	}
+    $XMLLIBDIR = shift(@libs);
+    if ($XMLLIBDIR =~ /-L/){
+        $XMLLIBDIR =~ s/-L//;
+        $XMLLIBS   = join(" ",@libs);
     } else {
-	print "Could not find xml libs\n" if (! $param::quiet);
+        # no -L, assume all were LIBS
+        $XMLLIBS   = $XMLLIBDIR ." ".join(" ",@libs);
+        # and fix -L / should work for both 32 and 64
+        $XMLLIBDIR = "/usr/$LLIB";
+    }
+
+    my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
+    my ($major,$minor) = split '\.', $XMLVersion; # print "major = $major,minor = $minor\n";
+    $XMLCPPFlag = "";#-DXmlTreeReader";
+    if ($major < 2 or $major == 2 and $minor < 5) {
+        $XMLCPPFlag = "-DNoXmlTreeReader";
+    }
+    if ( ! $param::quiet ){
+        if ( $XMLLIBDIR ){
+            print "Use xml $xml XMLLIBDIR = $XMLLIBDIR \tXMLINCDIR = $XMLINCDIR \tXMLLIBS = $XMLLIBS XMLCPPFlag =$XMLCPPFlag\n";
+        } else {
+            print "Use xml -> WARNING ** Could not define XMLLIBDIR, XMLINCDIR, XMLLIBS\n";
+        }
     }
 
     chomp($FASTJET_PREFIX = `fastjet-config --prefix`);
