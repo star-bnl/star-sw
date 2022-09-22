@@ -12,8 +12,8 @@
 class StjTowerEnergyCutEt : public StjTowerEnergyCut {
 
 public:
-  StjTowerEnergyCutEt(double min = 0, double max = 50000.0)
-    : _min(min), _max(max) { }
+  StjTowerEnergyCutEt(double min = 0, double max = 50000.0, bool flag = true)
+    : _min(min), _max(max), _flag(flag) { }
   virtual ~StjTowerEnergyCutEt() { }
 
   bool operator()(const StjTowerEnergy& deposit)
@@ -21,8 +21,10 @@ public:
     TVector3 vec3;
     vec3.SetPtEtaPhi(deposit.towerR, deposit.towerEta, deposit.towerPhi);
     //vertex
-    TVector3 vertex(deposit.vertexX, deposit.vertexY, deposit.vertexZ);
-    vec3 = vec3 - vertex;
+    if(_flag){
+      TVector3 vertex(deposit.vertexX, deposit.vertexY, deposit.vertexZ);
+      vec3 = vec3 - vertex;
+    }
 
     double Et = (deposit.energy)*TMath::Sin(vec3.Theta());
 
@@ -38,6 +40,7 @@ private:
   double _min;
   double _max;
 
+  bool _flag;
   ClassDef(StjTowerEnergyCutEt, 1)
 
 };
