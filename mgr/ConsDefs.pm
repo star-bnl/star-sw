@@ -860,9 +860,8 @@
             $MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
         }
     }
-    print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
-          if ! $param::quiet;
 
+    print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR\n\tMYSQLLIBDIR = $MYSQLLIBDIR\n\tMYSQLLIB = $MYSQLLIB\n" if !$param::quiet;
 
 
     # QT
