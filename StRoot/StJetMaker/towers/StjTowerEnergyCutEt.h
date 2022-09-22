@@ -20,6 +20,10 @@ public:
   {
     TVector3 vec3;
     vec3.SetPtEtaPhi(deposit.towerR, deposit.towerEta, deposit.towerPhi);
+    //vertex
+    TVector3 vertex(deposit.vertexX, deposit.vertexY, deposit.vertexZ);
+    vec3 = vec3 - vertex;
+
     double Et = (deposit.energy)*TMath::Sin(vec3.Theta());
 
     if(Et <= _min) return true;
