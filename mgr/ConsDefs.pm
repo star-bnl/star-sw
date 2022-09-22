@@ -1049,6 +1049,7 @@
 	    "LIBDIR = $LoggerLIBDIR \tLoggerINCDIR = $LoggerINCDIR \tLoggerLIBS = $LoggerLIBS\n"
 	    if $LoggerLIBDIR && ! $param::quiet;
     }
+
     # xml2
     my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
     my ($xml) =  script::find_lib($MYSTAR . "/bin /usr/bin " . $LIBXML2_DIR . "/bin " . dirname(`which xml2-config`),
@@ -1071,15 +1072,6 @@
 	    # and fix -L / should work for both 32 and 64
 	    $XMLLIBDIR = "/usr/$LLIB";
 	}
-
-
-	# ($XMLLIBDIR,$XMLLIBS) = split(' ', $XML);
-	# if ($XMLLIBDIR =~ /-L/){
-	#    $XMLLIBDIR =~ s/-L//;
-	# } else {
-	#    # may not have any -L
-	#    if ($XMLLIBS
-	# }
 
 	my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
 	my ($major,$minor) = split '\.', $XMLVersion; # print "major = $major,minor = $minor\n";
