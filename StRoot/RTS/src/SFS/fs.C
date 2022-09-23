@@ -60,72 +60,72 @@ int fs_pwd()
 
 int fs_mount(int argc, char *argv[])
 {
-  if(idx) {
-    idx->umount();
-    delete idx;
-  }
+    if(idx) {
+	idx->umount();
+	delete idx;
+    }
 
-  double t = record_time();
-  if(argc < 2) {
-    printf("mount <daqfilename>\n");
-    return -1;
-  }
+    double t = record_time();
+    if(argc < 2) {
+	printf("mount <daqfilename>\n");
+	return -1;
+    }
 
-  char *pwd=getenv("PWD");
-  char fn[255];
+    const char *pwd=getenv("PWD");
+    char fn[255];
   
-  if(argv[1][0] == '/') {
-    strcpy(fn,argv[1]);
-  }
-  else {
-    if(pwd == NULL) pwd = "/";
-    sprintf(fn,"%s/%s",pwd,argv[1]);
-  }
+    if(argv[1][0] == '/') {
+	strcpy(fn,argv[1]);
+    }
+    else {
+	if(pwd == NULL) pwd = "/";
+	sprintf(fn,"%s/%s",pwd,argv[1]);
+    }
 
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-  struct stat64 filestat;
-  if(stat64(fn,&filestat) < 0) 
+    struct stat64 filestat;
+    if(stat64(fn,&filestat) < 0) 
 #else
-  struct stat filestat;
-  if(stat(fn,&filestat) < 0) 
+	struct stat filestat;
+    if(stat(fn,&filestat) < 0) 
 #endif
-  {
-    printf("Error reading file %s: %s\n",fn,strerror(errno));
-    return 1;
-  }
+	{
+	    printf("Error reading file %s: %s\n",fn,strerror(errno));
+	    return 1;
+	}
   
 #if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-  idx_fd = open64(fn, O_RDONLY);
+    idx_fd = open64(fn, O_RDONLY);
 #else
-  idx_fd = open(fn, O_RDONLY);
+    idx_fd = open(fn, O_RDONLY);
 #endif
  
-  if(idx_fd < 0) {
-    printf("Error reading file %s\n",fn);
-    strcpy(g_filename, "NONE");
+    if(idx_fd < 0) {
+	printf("Error reading file %s\n",fn);
+	strcpy(g_filename, "NONE");
     
-    //write_env("MOUNT", "NONE");
-    //write_env("PWD", "NONE");
-    return -1;
-  }
+	//write_env("MOUNT", "NONE");
+	//write_env("PWD", "NONE");
+	return -1;
+    }
 
-  idx = new sfs_index;
+    idx = new sfs_index;
 
-  idx->mount(fn, O_RDONLY);
-  t = record_time();
+    idx->mount(fn, O_RDONLY);
+    t = record_time();
 
 #if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-  printf("Mounted file %s: %lld bytes in %5.2f sec\n",fn,(long long int)filestat.st_size,t);
+    printf("Mounted file %s: %lld bytes in %5.2f sec\n",fn,(long long int)filestat.st_size,t);
 #else
-  printf("Mounted file %s: %d bytes in %5.2f sec\n",fn,filestat.st_size,t);
+    printf("Mounted file %s: %d bytes in %5.2f sec\n",fn,filestat.st_size,t);
 #endif
 
-  //write_env("MOUNT", fn);
-  //write_env("PWD", "/");
+    //write_env("MOUNT", fn);
+    //write_env("PWD", "/");
 
-  // printf("MNTDI\n");
-  strcpy(g_filename, fn);
-  return 0;
+    // printf("MNTDI\n");
+    strcpy(g_filename, fn);
+    return 0;
 }
 
 int getDirSize(fs_dir *dir) {
@@ -160,7 +160,7 @@ int getEntrySize(fs_dirent *entry)
     return sz;
 }
 
-int ls_dir(char *tabs, int recurse, fs_dir *dir)
+int ls_dir(const char *tabs, int recurse, fs_dir *dir)
 {
   //  char ntabs[40];
   // sprintf(ntabs, "%s\t", tabs);
@@ -403,7 +403,7 @@ int main(int argc, char *argv[])
 	}
 
 	if(argc == 2) {
-	    av[0] = "mount";
+	    av[0] = (char *)"mount";
 	    av[1] = argv[1];
 	    ac = 2;
 
