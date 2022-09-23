@@ -41,7 +41,7 @@ private:
   double _max;
 
   bool _flag;
-  ClassDef(StjTowerEnergyCutEt, 1)
+  ClassDef(StjTowerEnergyCutEt, 2)
 
 };
 
