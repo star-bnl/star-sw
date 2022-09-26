@@ -1609,6 +1609,31 @@ TF1 *FitG0P(TH1 *proj, Option_t *opt="R", Int_t pow=-1, Double_t zmin = -0.4, Do
   return g;
 }
 //________________________________________________________________________________
+TF1 *FitG(TH1 *proj, Option_t *opt="R") {
+  if (! proj) return 0;
+  TString fName("gaus");
+  TF1 *g = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
+#if 0
+  if (! g) {
+    TString Func("TMath::Exp([0])*TMath::Gaus(x, [1], [2],1)");
+    g = new TF1(fName,Func,-5,5);
+    g->SetParName(0,"log(Const)");
+    g->SetParName(1,"Mean");
+    g->SetParName(2,"sigma");
+  }
+  g->SetParameters(0,TMath::Log(proj->GetEntries()));
+  g->SetParameters(1,proj->GetMean());
+  g->SetParameters(2,proj->GetRMS());
+  // Last attempt reduce fit range to +/- 2 sigma
+#endif
+  if (! g) {
+    TF1::InitStandardFunctions();
+    g = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
+  }
+  Bool_t res = proj->Fit(g,opt);
+  return g;
+}
+//________________________________________________________________________________
 TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3, Double_t zmin = -2, Double_t zmax = 2) {
   if (! proj) return 0;
   Double_t params[9];
@@ -1672,18 +1697,18 @@ TF1 *FitADC(TH1 *proj, Option_t *opt="Q", Double_t nSigma=3, Int_t pow=3) {
   if (pow >= 0) g0 = new TF1("g0",Form("gaus(0)+pol%i(3)",pow),-2.0,2.0);
   else          g0 = new TF1("g0","gaus",-2.0,2.0); 
   g0->SetParName(0,"Constant");
-  g0->SetParName(1,"Mean");
-  g0->SetParName(2,"Sigma");
+  g0->SetParName(1,"Mean");  g0->SetParLimits(1, -0.1, 0.8);
+  g0->SetParName(2,"Sigma"); g0->SetParLimits(2,  0.0, 0.1);
   for (int i=0; i<=pow;i++) g0->SetParName(3+i,Form("a%i",i));
   TF1 *g1 = new TF1("g1",Form("gaus(0)+pol%i(3)",pow+1),-2.0,2.0);
   g1->SetParName(0,"Constant");
-  g1->SetParName(1,"Mean");
-  g1->SetParName(2,"Sigma");
+  g1->SetParName(1,"Mean");  g1->SetParLimits(1, -0.1, 0.8);
+  g1->SetParName(2,"Sigma"); g1->SetParLimits(2,  0.0, 0.1);
   for (int i=0; i<=pow+1;i++) g1->SetParName(3+i,Form("a%i",i));
   TF1 *g2 = new TF1("g2",Form("gaus(0)+pol%i(3)",pow+2),-2.0,2.0);
   g2->SetParName(0,"Constant");
-  g2->SetParName(1,"Mean");
-  g2->SetParName(2,"Sigma");
+  g2->SetParName(1,"Mean");  g2->SetParLimits(1, -0.1, 0.8);
+  g2->SetParName(2,"Sigma"); g2->SetParLimits(2,  0.0, 0.1);
   for (int i=0; i<=pow+2;i++) g2->SetParName(3+i,Form("a%i",i));
   Double_t params[9];
   Int_t peak = proj->GetMaximumBin();
@@ -1691,12 +1716,11 @@ TF1 *FitADC(TH1 *proj, Option_t *opt="Q", Double_t nSigma=3, Int_t pow=3) {
   params[0] = proj->GetBinContent(peak);
   if (peakX > 10.5) {
     params[1] = 0;
-    params[2] = 0.2;
+    params[2] = 0.05;
   }
   else {
     params[1] = peakX;
-    params[2] = proj->GetRMS();
-    if (params[2] > 0.25) params[2] = 0.25;
+    params[2] = 0.05;
   }
   Double_t sigma = nSigma*params[2];
   params[3] = 0;
@@ -1705,36 +1729,44 @@ TF1 *FitADC(TH1 *proj, Option_t *opt="Q", Double_t nSigma=3, Int_t pow=3) {
   params[6] = 0;
   params[7] = 0;
   params[8] = 0;
+  Int_t iok = 0;
   if (gaus) {
     g = gaus;
     g->SetParameters(params);
     g->SetRange(params[1]-sigma,params[1]+sigma);
-    proj->Fit(g,opt);
-    g->GetParameters(params);
-    if (g->GetProb() > 0.01) return g;
-    params[2] = TMath::Abs(params[2]);
+    iok = proj->Fit(g,opt);
+    if (! iok) {
+      if (g->GetProb() > 0.01) return g;
+       g->GetParameters(params);
+      params[2] = TMath::Abs(params[2]);
+    }
   }
-  sigma = nSigma*params[2];
+  sigma = 0.1; // nSigma*params[2];
   g = g0;
   g->SetParameters(params);
   g->SetRange(params[1]-sigma,params[1]+sigma);
-  proj->Fit(g,opt);
-  if (g->GetProb() > 0.01) return g;
-  g->GetParameters(params);
+  iok =  proj->Fit(g,opt);
+  if (! iok) {
+    if (g->GetProb() > 0.01) return g;
+    g->GetParameters(params);
+    params[2] = TMath::Abs(params[2]);
+  }
   g = g1;
-  params[2] = TMath::Abs(params[2]);
-  sigma = nSigma*params[2];
+  //  sigma = nSigma*params[2];
   g->SetParameters(params);
   g->SetRange(params[1]-sigma,params[1]+sigma);
-  proj->Fit(g,opt);
-  if (g->GetProb() > 0.01) return g;
-  g->GetParameters(params);
+  iok = proj->Fit(g,opt);
+  if (! iok) {
+    if (g->GetProb() > 0.01) return g;
+    g->GetParameters(params);
+    params[2] = TMath::Abs(params[2]);
+  }
   g = g2;
   params[2] = TMath::Abs(params[2]);
-  sigma = nSigma*params[2];
+  //  sigma = nSigma*params[2];
   g->SetParameters(params);
   g->SetRange(params[1]-sigma,params[1]+sigma);
-  proj->Fit(g,opt);
+  iok = proj->Fit(g,opt);
   if (! Opt.Contains("q",TString::kIgnoreCase)) {
     g->GetParameters(params);
     Double_t X = params[1];
@@ -2504,8 +2536,14 @@ TF1 *GG2() {
 TF1 *FitGG(TH1 *proj, Option_t *opt="RQ") {
   if (! proj) return 0;
   Double_t params[9];
+  proj->Fit("gaus");
+  TF1 *gaus = (TF1 *) proj->GetListOfFunctions()->FindObject("gaus");
+  gaus->GetParameters(params);
+  params[0] = TMath::Log(params[0]);
+  params[3] = 10;
+  params[4] = 0;
   TF1 *g = GG();
-  g->SetParameters(0,4,1,10,0);
+  g->SetParameters(params);
   proj->Fit(g,opt);
   return g;
 }
@@ -3418,8 +3456,18 @@ TF1 *FitGG2(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *g = GG();
+#if 0
   Double_t xx = TMath::Max(3.1, TMath::Min(6.5, fitX));
   Double_t sigma =        1.10043e+00   + xx * (-2.14927e-01   + xx * 9.77528e-03);
+#else /* 09/14/2022  all->Draw("sigma:log(x)","i&&j&&dmu<0.01&&dsigma<0.01&&dp3<0.5&&chisq<2e2","prof") */
+  Double_t xx = TMath::Log(fitX);
+#if 0
+  Double_t pars[3] = {    2.2404,    -1.8257,    0.37502}; // pol2
+#else /* 09/25/2022  */
+  Double_t pars[3] = {    2.1392,    -1.7129,    0.34465}; //
+#endif
+  Double_t sigma = pars[0] + xx * ( pars[1] + xx * pars[2]);
+#endif 
   g->FixParameter(2, sigma);
   proj->Fit(g,opt);
   return g;
@@ -3434,11 +3482,27 @@ TF1 *FitGG3(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *g = GG();
+#if 0
   Double_t xx = TMath::Max(3.1, TMath::Min(6.5, fitX));
   Double_t sigma =        1.10043e+00   + xx * (-2.14927e-01   + xx * 9.77528e-03);
-  g->FixParameter(2, sigma);
   // tChain->Draw("a0:x>>alpha(40,3,7)","i&&j&&dmu<0.01&&a0>-0.1&&a0<3.9&&mu>0.65","prof")
   Double_t alpha =    -22.6936   + xx*(    16.2998   + xx*(   -3.28817   + xx*   0.209148 ));
+#else /* 09/14/2022   all->Draw("p3:x>>ap3","i&&j&&dmu<0.01&&dsigma<0.01&&dp3<0.5&&chisq<2e2","prof");  ap3->Fit("pol3","e") */
+  Double_t xx = TMath::Log(fitX);
+#if 0 
+  Double_t parsS[3] = {    2.2404,    -1.8257,    0.37502}; // pol2
+  Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
+  Double_t parsA[4] = {    25.659,    -8.4331,    0.97394,  -0.037646}; //
+  xx = fitX;
+  Double_t alpha  = parsA[0] + xx * ( parsA[1] + xx * (parsA[2] + xx * parsA[3]));
+#else /* 09/25/2022 */
+  Double_t parsS[3] = {    2.1392,    -1.7129,    0.34465}; // log(x)
+  Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
+  Double_t parsA[4] = {   -55.709,     106.35,    -62.082,     11.565}; // log(x)
+  Double_t alpha  = parsA[0] + xx * ( parsA[1] + xx * (parsA[2] + xx * parsA[3]));
+#endif
+#endif
+  g->FixParameter(2, sigma);
   g->FixParameter(3, alpha);
   proj->Fit(g,opt);
   return g;
@@ -3453,6 +3517,7 @@ TF1 *FitGG4(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *g = GG();
+#if 0
   Double_t xx = TMath::Max(3.1, TMath::Min(6.5, fitX));
   Double_t sigma =        1.10043e+00   + xx * (-2.14927e-01   + xx * 9.77528e-03);
   g->FixParameter(2, sigma);
@@ -3464,6 +3529,18 @@ TF1 *FitGG4(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   xx = TMath::Max(3.1, TMath::Min(7.0, fitX));
   Double_t mu =  -2.08815e+01 + xx*(  2.57192e+01 + xx*( -1.17647e+01 + xx*(  2.59742e+00 + xx*( -2.77836e-01 + xx*  1.15642e-02))));
   g->FixParameter(1, mu);
+#else /* 09/26/2022 */
+  Double_t xx = TMath::Log(fitX);
+  Double_t parsS[3] = {    2.1392,    -1.7129,    0.34465}; // log(x)
+  Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
+  Double_t parsA[4] = {   -55.709,     106.35,    -62.082,     11.565}; // log(x)
+  Double_t alpha  = parsA[0] + xx * ( parsA[1] + xx * (parsA[2] + xx * parsA[3]));
+  Double_t parsM[6] = {    78.047,    -199.11,     203.54,    -103.58,     26.358,    -2.6949}; //log(x)
+  Double_t mu     = parsM[0] + xx * ( parsM[1] + xx * (parsM[2] + xx * (parsM[3] + xx * (parsM[4] + xx * parsM[5]))));
+  g->FixParameter(1, mu);
+  g->FixParameter(2, sigma);
+  g->FixParameter(3, alpha);
+#endif
   proj->Fit(g,opt);
   return g;
 }
@@ -3820,129 +3897,6 @@ void FitB4G(Int_t icase = 0, Int_t hyp=-1, Int_t bin=0,
     }
   }
   if (f) {delete f;}
-}
-//________________________________________________________________________________
-TF1 *FitG(TH1 *proj, TF1 *g=0, TF1 *ga=0){//, Double_t scaleM=-2., Double_t scaleP=2.) {
-  if (! g) return 0;
-  Double_t params[10];
-  proj->Fit(g,"R");
-  Double_t chisq = g->GetChisquare();
-  if (chisq <= 0. || chisq > 1.e10) return 0;
-  if (ga) {
-    g->GetParameters(params);
-    params[3] = 0;
-    params[4] = 0;
-    params[5] = 0;
-    params[6] = 0;
-    params[7] = 0;
-    params[8] = 0;
-    params[9] = 0;
-    ga->SetParameters(params);
-    proj->Fit(ga,"r");
-    //  proj->Fit("ga","rIM");
-    chisq = g->GetChisquare();
-    if (chisq <= 0. || chisq > 1.e10) return 0;
-    return ga;
-  }
-  return g;
-}
-//________________________________________________________________________________
-void FitX(TH2 *hist=0, Double_t range=1, Int_t Ibin = 0) {
-  TFile *fRootFile = (TFile *) gDirectory->GetFile();
-  if (! fRootFile ) {printf("Cannot find/open %s",fRootFile->GetName()); return;}
-  if (!hist) {
-    const Char_t *HistName = "FPoints";
-    hist = (TH2D *) fRootFile->Get(HistName);
-    if (!hist) {printf("Cannot histogram %s\n",HistName); return;}
-  }
-  //  const Int_t nx = hist->GetNbinsX();
-  TF1 *g = new TF1("g","gaus",-range,range);
-  //  TF1 *ga = g;
-  TString fitN("gaus(0)+exp(pol3(3))");
-  if (range > 2.) fitN = "gaus(0)+exp(pol5(3))";
-  TF1 *ga= new TF1("ga",fitN.Data(),-range,range);
-  ga->SetParName(0,"Area  Pi");
-  ga->SetParName(1,"Mean  Pi"); 
-  ga->SetParName(2,"Sigma Pi");
-  ga->SetParName(3,"A0");
-  ga->SetParName(4,"A1");
-  ga->SetParName(5,"A2");
-  ga->SetParName(6,"A3");
-  ga->SetParName(7,"A4");
-  ga->SetParName(8,"A5");
-  
-  TCanvas *c = new TCanvas("Fit","Fit results");
-  int i;
-  TString name(hist->GetName());
-  name += "MuFG";
-  Int_t nBins = hist->GetXaxis()->GetNbins();
-  Double_t xlow = hist->GetXaxis()->GetXmin();
-  Double_t xup  = hist->GetXaxis()->GetXmax();
-  TH1D *MuF = new TH1D(name.Data(),"Avarage shift versus no. of measurement points",
-		       nBins,  xlow, xup);
-  name = hist->GetName();
-  name += "SigmaFG";
-  TH1D *SigmaF = new TH1D(name.Data(),"Sigma of z versus no. of measurement points",
-		       nBins,  xlow, xup);
-  Int_t i1 = 1, i2 = nBins;
-  if (Ibin > 0 && Ibin <= nBins) {i1 = Ibin; i2 = Ibin;}
-  Double_t XFitP, dXFitP,  MuFitP,dMuFitP,SigmaFitP,dSigmaFitP;
-  TH1 *proj = 0;
-  for (i=i1; i<=i2; i++) {
-    if (proj) delete proj;
-    proj = hist->ProjectionY("proj",i,i);
-    XFitP = hist->GetXaxis()->GetBinCenter(i);
-    dXFitP = hist->GetXaxis()->GetBinWidth(i);
-    Double_t chisq = -999;
-    if (proj->Integral() < 1000) {
-      if (N>0) goto NEXT;
-      continue;
-    }
-    if (FitG(proj,g,ga)) goto NEXT;
-    //    proj->Fit("g","R");
-    if (ga->GetParError(1) <= 0 || ga->GetParError(1) > 0.01 ) {
-      printf("============= REJECT ================\n");
-      goto NEXT;
-    }
-    MuFitP  = ga->GetParameter(1);
-    dMuFitP = ga->GetParError(1);///MuFitP;
-    //    MuFitP = TMath::Log(MuFitP);
-    SigmaFitP  = ga->GetParameter(2);
-    dSigmaFitP = ga->GetParError(2);
-    chisq = ga->GetChisquare();
-    if (chisq > 1.e4) goto NEXT; 
-    MuF->SetCellContent(i,0,MuFitP);
-    MuF->SetCellError(i,0,dMuFitP);
-    SigmaF->SetCellContent(i,0,SigmaFitP);
-    SigmaF->SetCellError(i,0,dSigmaFitP);
-    proj->Draw(); c->Update();
-    printf("Bin: %i x: %f +/- %f MuF: %f+/-%f Sigma: %f+/-%f chisq: %f \n",
-	   i,XFitP,dXFitP,MuFitP,dMuFitP,SigmaFitP,dSigmaFitP,chisq);
- NEXT:   
-    N++;  
-    //    delete proj;
-  }
-  if (! Ibin ) {
-    c->Clear();
-    //   c->Divide(2,1);
-    //   c->cd(1);
-    //   MuF->Draw();
-    //   c->cd(2);
-    SigmaF->SetMarkerStyle(20);
-    TF1 *p = new TF1("p","[0]/pow(x,[1])");
-    p->SetParameter(0,0.64);
-    p->SetParameter(1,0.50);
-    SigmaF->Fit("p","R");
-    SigmaF->SetMinimum(0.06);
-    SigmaF->Draw();
-  }
-  TString NewRootFile(hist->GetName());
-  NewRootFile += fRootFile->GetName();
-  TFile *f = new TFile(NewRootFile.Data(),"update");
-  MuF->Write();
-  SigmaF->Write();
-  delete f;
-  fRootFile->cd();
 }
 //________________________________________________________________________________
 void Fit4G(Int_t ng=2, Int_t hyp=-1, Int_t bin=0, 
@@ -4717,7 +4671,7 @@ void dEdxFitSparse(THnSparse *hist, const Char_t *FitName = "GP",
 	     Option_t *opt="R", 
 	     Int_t ix = -1, Int_t jy = -1, 
 	     Int_t mergeX=1, Int_t mergeY=1, 
-	     Double_t nSigma=3, Int_t pow=3,
+	     Double_t nSigma=3, Int_t pow=0,
 	     Double_t zmin = -1, Double_t zmax = 2) {
   if (! hist) return;
   struct Fit_t {
@@ -4827,8 +4781,6 @@ void dEdxFitSparse(THnSparse *hist, const Char_t *FitName = "GP",
     else if (TString(FitName) == "G2") g = FitG2(proj,opt);
     else if (TString(FitName) == "GG") g = FitGG(proj,opt);
     else if (TString(FitName) == "Freq") g = FitFreq(proj,opt,zmin,zmax);
-    else if (TString(FitName) == "GMP") g = FitG(proj,GMP());
-    else if (TString(FitName) == "GMN") g = FitG(proj,GMN());
     else {cout << FitName << " has not been definded" << endl; break;}
     if ( g ) {
       Int_t kpeak = 0;
@@ -4863,12 +4815,12 @@ void dEdxFitSparse(THnSparse *hist, const Char_t *FitName = "GP",
     printf("%i/%i %f/%f mean %f rms = %f entries = %f mu = %f sigma = %f chisq = %f prob = %f\n",
 	   Fit.i,Fit.j,Fit.x,Fit.y,Fit.mean,Fit.rms,Fit.entries,Fit.mu,Fit.sigma,Fit.chisq,Fit.prob);
     if (FitP)  FitP->Fill(&Fit.i);
+    fOut->cd();
+    proj->Write();
     if (canvas) {
       canvas->Update();if (Ask()) goto ENDL;
       
     }
-    fOut->cd();
-    //    proj->Write();
     SafeDelete(proj);
   }
  ENDL:
@@ -4951,7 +4903,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
   }
   Fitx_t Fit;
   //  TString NewRootFile(gSystem->DirName(fRootFile->GetName()));
-  TString NewRootFile(gSystem->DirName(gSystem->BaseName(fRootFile->GetName())));
+  TString NewRootFile(gSystem->BaseName(gSystem->DirName(fRootFile->GetName())));
   NewRootFile += "/";
   NewRootFile += HistName;
   NewRootFile += FitName;
@@ -5125,6 +5077,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	g = FitLN(proj,opt,nSigma,0,-2,5,SX);
       }      
       else if (TString(FitName) == "ADC") g = FitADC(proj,opt,nSigma,pow);
+      else if (TString(FitName) == "G")   g = FitG(proj,opt);
       else if (TString(FitName) == "G2") g = FitG2(proj,opt);
       else if (TString(FitName) == "CB") g = FitCB(proj,opt);
       else if (TString(FitName) == "GE") g = FitGE(proj,opt);
@@ -5140,8 +5093,6 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       else if (TString(FitName) == "GG3") g = FitGG3(proj,opt, Fit.x, Fit.y);
       else if (TString(FitName) == "GG4") g = FitGG4(proj,opt, Fit.x, Fit.y);
       else if (TString(FitName) == "Freq") g = FitFreq(proj,opt,zmin,zmax);
-      else if (TString(FitName) == "GMP") g = FitG(proj,GMP());
-      else if (TString(FitName) == "GMN") g = FitG(proj,GMN());
       else if (TString(FitName) == "GF") g = FitGF(proj,opt);
       else if (TString(FitName) == "G4F") g = FitG4F(proj,opt);
       else if (TString(FitName) == "G4E" || TString(FitName) == "G4EX" || TString(FitName) == "G4EY") {

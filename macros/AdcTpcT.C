@@ -5,7 +5,7 @@
      root.exe -q -b 'AdcTpcT.C("../../'${p}'*0.root","'${p}'Adc.root")' >& ${p}.log &
   end
  */
-void AdcTpcT(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD5.root") {
+void AdcTpcT(const Char_t *files="*.root", const Char_t *Out = "") {
   gROOT->LoadMacro("TpcT.C+");
   TpcTAdc(files,Out);
 }

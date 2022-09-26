@@ -283,15 +283,21 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
     if (xMin == 0 && xMax == 0) {
       TH2 *mu = (TH2 *) gDirectory->Get("mu");
       if (mu) {
-	TString DirName(gDirectory->GetName());
+	TString DirName(gSystem->BaseName(gDirectory->GetName()));
 	if (DirName.Contains("Z3")) {
 	  //      Drawh += Form("(%i,%f,%f)",mu->GetYaxis()->GetNbins(), mu->GetYaxis()->GetXmin(), mu->GetYaxis()->GetXmax());
 	  p = new TProfile(histN,"#mu versus pad row",2*mu->GetYaxis()->GetNbins()+1, -mu->GetYaxis()->GetXmax(), mu->GetYaxis()->GetXmax());
 	} else if (DirName.Contains("xyPad3")) {
 	  //      Drawh += Form("(%i,%f,%f)",mu->GetYaxis()->GetNbins(), mu->GetYaxis()->GetXmin(), mu->GetYaxis()->GetXmax());
 	  p = new TProfile(histN,"#mu versus sector phi  ", nx, xMin, xMax);
+	} else if (DirName.Contains("Pressure")) {
+	  p = new TProfile(histN,"#mu versus log(P)",mu->GetYaxis()->GetNbins(), mu->GetYaxis()->GetXmin(), mu->GetYaxis()->GetXmax());
+	} else if (DirName.Contains("neP")) {
+	  p = new TProfile(histN,"#mu versus log(nP)",mu->GetXaxis()->GetNbins(), mu->GetXaxis()->GetXmin(), mu->GetXaxis()->GetXmax());
+	} else if (DirName.Contains("neN")) {
+	  p = new TProfile(histN,"#mu versus log(nP)",mu->GetXaxis()->GetNbins(), mu->GetXaxis()->GetXmin(), mu->GetXaxis()->GetXmax());
 	} else if (DirName.Contains("SecRow3")) {
-	  p = new TProfile(histN,"#mu versus signed drift distance",2*mu->GetYaxis()->GetNbins()+1, -mu->GetYaxis()->GetXmax(), mu->GetYaxis()->GetXmax());
+	  p = new TProfile(histN,"#mu versus signed pad row",2*mu->GetYaxis()->GetNbins()+1, -mu->GetYaxis()->GetXmax(), mu->GetYaxis()->GetXmax());
 	} else if (DirName.Contains("GEX")) {
 	  p = new TProfile(histN,"#mu versus Log(n_{P})",mu->GetXaxis()->GetNbins()+1, mu->GetXaxis()->GetXmin(), mu->GetXaxis()->GetXmax());
 	}
@@ -299,13 +305,15 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
     } else {
       p = new TProfile(histN,Drawh,nx, xMin, xMax);
     }
-    p->SetMarkerColor(icol);
-    p->SetLineColor(icol);
-    p->SetMarkerStyle(kM);
-    p->SetMarkerSize(1);
+    if (p) {
+      p->SetMarkerColor(icol);
+      p->SetLineColor(icol);
+      p->SetMarkerStyle(kM);
+      p->SetMarkerSize(1);
+    }
 #if 1
-    //    cout << Form("%2i %-52s\t", k, F[k]->GetName()); //  << endl;
-    //    cout << "FitP->Draw(\"" << Drawh << "\",\"" << cut << "\",\"" << same << "\")" << "\t"; //  endl;
+    cout << Form("%2i %-52s\t", k, F[k]->GetName()); //  << endl;
+    cout << "FitP->Draw(\"" << Drawh << "\",\"" << cut << "\",\"" << same << "\")" << "\t"; //  endl;
 #endif
 #if 0
     c2->cd();
@@ -318,7 +326,11 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
     FitP->Draw(Drawh,cut,same);
     TH1 *hist = (TH1 *) gDirectory->Get(histN);
     if (hist) {
-      TString name(gSystem->BaseName(gDirectory->GetName()));
+      //      TString name(gSystem->BaseName(gDirectory->GetName()));
+      TString ddir(gSystem->DirName(gDirectory->GetName()));
+      TString dir(gSystem->BaseName(ddir));
+      if (dir == "./") dir = "";
+      TString name = gSystem->BaseName(gDirectory->GetName());
       name.ReplaceAll(".root","");
 #if 0
       name.ReplaceAll("SecRow3C+SecRow3PC","cor");
@@ -340,7 +352,7 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
       name.ReplaceAll("xyPad3","");
       name.ReplaceAll("_y3","");
       name.ReplaceAll("G4E","");
-      leg->AddEntry(hist,Form("%s %s",name.Data(),side));
+      leg->AddEntry(hist,Form("%s%s %s",dir.Data(), name.Data(),side));
       hist->SetTitle(Form("%s : %s",hist->GetTitle(), side));
       hist->SetXTitle(var);
       //      cout << k << "\t" << name.Data() << "\tmin = " << 100*hist->GetMinimum() << "\tmax = " <<  100*hist->GetMaximum() << " %" << endl;
@@ -458,7 +470,7 @@ void FitPMu(const Char_t *draw="mu",
 //________________________________________________________________________________
 void FitPDraw(TString Opt = "I", TString plot = "") {
   if (! gDirectory) {return;}
-  TString Name(gDirectory->GetName());
+  TString Name(gSystem->BaseName(gDirectory->GetName()));
   if        (Name.BeginsWith("SecRow3")) {  MuDraw();
   } else if (Name.BeginsWith("Z3"))      {
 #if 1
@@ -483,9 +495,34 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
       MuDraw("mu:0.5*y+TMath::Nint(x)","xy", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", 0.25,  0.15, "All", "xy");
     } else if (Opt == "I") {
       MuDraw("mu:0.5*y+TMath::Nint(x)","xyI", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))<0)", "prof", 0.25,  0.15, "Inner", "xy");
-    } else {
+    } else if (Opt == "O") {
       MuDraw("mu:0.5*y+TMath::Nint(x)","xyO", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))>0)", "prof", 0.25,  0.15, "Outer", "xy");
+    } else if (Opt == "IJ") {
+      MuDraw("mu-muJ:0.5*y+TMath::Nint(x)","xyI", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))<0)", "prof", 0.25,  0.15, "Inner", "xy");
+    } else if (Opt == "OJ") {
+      MuDraw("mu-muJ:0.5*y+TMath::Nint(x)","xyO", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))>0)", "prof", 0.25,  0.15, "Outer", "xy");
+    } else if (Opt == "x") {
+      MuDraw("mu:x","xy", 24*20,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", 0.25,  0.15, "xAll", "xy");
+    } else if (Opt == "xJ") {
+      MuDraw("mu-muJ:x","xyI", 24*20,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.", "prof", 0.25,  0.15, "xInner", "xy");
     }
+  } else if (Name.BeginsWith("Pressure"))      {
+    if (Opt == "I") {
+      MuDraw("mu:y","PI", 0,   0,  0, "(i&&j&&abs(x)<40.5&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "Inner", "log(P)");
+    } else if (Opt == "O") {
+      MuDraw("mu:y","PO", 0,   0,  0, "(i&&j&&abs(x)>40.5&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "Outer", "log(P)");
+    } else if (Opt == "IJ") {
+      MuDraw("mu:y","PI", 0,   0,  0, "(i&&j&&abs(x)<40.5&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "Inner", "log(P)");
+    } else if (Opt == "OJ") {
+      MuDraw("mu:y","PO", 0,   0,  0, "(i&&j&&abs(x)>40.5&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "Outer", "log(P)");
+    } else {
+      MuDraw("mu:y","PI", 0,   0,  0, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "All", "log(P)");
+    }
+  } else if (Name.BeginsWith("neP"))      {
+    //      MuDraw("mu:x","PI", 0,   0,  0, "(i&&j&&dmu>0&&dmu<0.01&&dsigma<0.01&&dp3<0.5&&chisq<2e2)", "prof", -0.5,  1.5, "All", "neP");
+      MuDraw("mu:x","PI", 70,   3.0,  10.0, "(i&&j&&mu>0&&dmu>0&&dmu<0.01)", "prof", 0.6,  1.2, "All", "neP");
+  } else if (Name.BeginsWith("neN"))      {
+      MuDraw("mu:x","PI", 0,   0,  0, "(i&&j&&dmu<0.1&&dsigma<0.04&&dp3<1&&mu<1&&p3>0)", "prof", 0.5,  1.0, "All", "neN");
   } else if (Name.Contains("GEX"))      {
     if (Opt == "sigma") {
       MuDraw("sigma:x","znpL", 0,   0, 0, "(i&&dmu<2e-2&&dsigma<2e-2&&da0<1&&x>3)", "prof", 0.0,  1.0, "All", "npL");

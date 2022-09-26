@@ -1,7 +1,7 @@
-/* Global Alignment
+#if 0
    FPE_OFF
    setup debug
-   root.exe -q -b 'lMuDst.C(-1,"./*MuDst.root","RMuDst,tpcDb,detDb,mysql,magF,nodefault,CorrY,quiet","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
+   root.exe -q -b 'lMuDst.C(-1,"*MuDst.root","RMuDst,tpcDb,detDb,mysql,magF,nodefault,CorrY,quiet","MuTpcG.root")'  MuTpcG.C+ >& MuTpcG.log &
    foreach d (`ls -1d ???/2*`)
      cd ${d}
      ln -s ../../.sl* .
@@ -25,7 +25,7 @@
    Draw();
    root.exe MuTpcG.root MuTpcGPrint.C
    
-*/
+#endif
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <assert.h>
 #include <map>
@@ -1413,6 +1413,30 @@ void LoopOverFiles(const Char_t *opt="") {
   }  
 }
 //________________________________________________________________________________
+void LoopOverFilesdYS(const Char_t *opt="") {
+  TSeqCollection *files = gROOT->GetListOfFiles();
+  TIter next(files);
+  TFile *f = 0;
+  TCanvas *c1 = new TCanvas("c1","c1");
+  TH1F *frame = c1->DrawFrame(0,-0.5,25,0.5);
+  Int_t color = 1;
+  TLegend *l = new TLegend(0.6,0.6,0.9,0.9);
+  while ( (f = (TFile *) next()) ) { 
+    f->cd();
+    TH3F *dYS = (TH3F *) gDirectory->Get("dYS");
+    if (! dYS) continue;
+    ((TH2 *)dYS->Project3D("zx"))->FitSlicesY();
+    TH1D *dYS_zx_1 = (TH1D *) gDirectory->Get("dYS_zx_1");
+    if (! dYS_zx_1) continue;
+    dYS_zx_1->SetMarkerColor(color);
+    dYS_zx_1->SetLineColor(color);
+    color++;
+    dYS_zx_1->Draw("same");
+    l->AddEntry(dYS_zx_1, gDirectory->GetName());
+  }  
+  l->Draw();
+}
+//________________________________________________________________________________
 /*
   dZ->FitSlicesY(0,0,-1,0,"QNRG3S")
 .L PrintTH1.C
@@ -1438,7 +1462,7 @@ for (int i = 1; i <= 24; i++) {TH1 *proj = pTSN->ProjectionY(Form("pTN%i",i),i,i
 
 
 03/19/22 OO200GeV RF and FF 2021 confirm https://www.star.bnl.gov/~fisyak/star/Tpc/Alignment/2021/dYvesrusSector.png 
-root.exe  ?F/.DEV2/*/MuTpcG.root
+root.exe  *MuTpcG.root
 _file1->cd();
 dYS->Project3D("zx")->Draw("colz"); 
 dYS_zx->FitSlicesY()
@@ -1449,5 +1473,5 @@ dYS_zx->FitSlicesY()
 dYS_zx_1->Draw()
 
 
- */
+*/
   

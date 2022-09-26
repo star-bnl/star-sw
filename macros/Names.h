@@ -1,9 +1,9 @@
 #ifndef __NAMES_H__
 #define __NAMES_H__
-enum { NHYPS = 18, NHypTypes = NHYPS/2};
-const Char_t *NamesF[NHYPS]    = {"electron","antiproton","kaon-","pion-","muon-","dbar","tbar","He3Bar","alphabar"
+enum { NHYPS = 18, NHypTypes = NHYPS/2, NTpcRSParts = 22};
+const Char_t *NamesF[NHYPS]    = {"electron","antiproton","kaon-","pion-","muon-","dbar","tbar","He3Bar","alphabar",
 				  "positron","proton"    ,"kaon+","pion+","muon+","deuteron"   ,"triton"   ,"He3"    ,"alpha"};
-const Char_t *Names[NHYPS]     = {"e-","pbar","K-","pi-","mu-","dbar","tbar","He3Bar","alphabar"
+const Char_t *Names[NHYPS]     = {"e-","pbar","K-","pi-","mu-","dbar","tbar","He3Bar","alphabar",
 				  "e+","p"   ,"K+","pi+","mu+","d"   ,"t"   ,"He3"    ,"alpha"};
 const Char_t *HistNames[NHYPS] = {"eNzB","protonNzB","kaonNzB","piNzB","muNzB","deuteronNzB","tritonNzB","He3NzB","alphaNzB",
 				  "ePzB","protonPzB","kaonPzB","piPzB","muPzB","deuteronPzB","tritonPzB","HePzB","alphaPzB"};
@@ -15,6 +15,41 @@ const Double_t Masses[NHYPS] = {0.51099907e-3,0.93827231,0.493677,0.13956995,0.1
 				0.51099907e-3,0.93827231,0.493677,0.13956995,0.1056584,1.875613,2.80925, 2.80923,3.727417};
 const Int_t GEANTiD[NHYPS]    = { 3, 15, 12,  9, 6, 53, 50046, 50049, 50047, // GEANT part Id
 				  2, 14, 11,  8, 5, 45,    46,    49,   47};
+#if 0
+const Char_t *NamesT[NHYPS]    = {"electron","antiproton","kaon","pion","muon","dbar",    "tbar",  "He3Bar","alphabar",
+				  "positron","proton"    ,"kaon","pion","muon","deuteron","triton","He3"   ,"alpha"};
+const Int_t ChargeT[NHYPS]     = {       -1,          -1,    -1,    -1,   -1,        -1,       -1,  -2,  -2,
+					  1,           1,     1,     1,    1,         1,        1,   2,   2};
+#endif
+struct TpcRSPart_t {
+  const Char_t *name;
+  Double_t      mass;
+  Int_t       charge;
+};
+TpcRSPart_t TpcRSPart[NTpcRSParts] = {
+  {"muon+",               0.1056584,  1}, 
+  {"muon-",    	          0.1056584, -1},
+  {"pion+",    	         0.13956995,  1},
+  {"pion-",    	         0.13956995, -1},
+  {"electron-",       0.51099907e-3, -1},
+  {"electron+",       0.51099907e-3,  1},
+  {"kaon+",                0.493677,  1},
+  {"kaon-",    	           0.493677, -1},
+  {"proton+",            0.93827231,  1}, 
+  {"proton-",  		 0.93827231, -1},
+  {"deuteron",        1.87561294257,  1}, 
+  {"triton",          2.80892113298,  1}, 
+  {"He3",             2.80839160743,  2}, 
+  {"alpha",            3.7273794066,  2}, 
+  {"HE6",                 5.6055375,  2}, 
+  {"Li5",  		  4.6676161,  3},
+  {"Li6",  		  5.6015181,  3},
+  {"Li7",  		  6.5338336,  3},
+  {"Be7",                 6.5341844,  4}, 
+  {"Be9",  9.012182201*0.9314943228,  4}, 
+  {"Be10",10.013533818*0.9314943228,  4}, 
+  {"B11", 11.0216577497*0.9314943228, 5}
+};
 #if 0
 enum PidParticle {
   kPidElectron ,

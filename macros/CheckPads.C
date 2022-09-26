@@ -84,7 +84,7 @@ end
 */
 //foreach f ( `ls -1d   */2*.root | awk -F_ '{print $1"_"$2}' | sort -u `)
 /*
-    set c = `basename ${f}`; 
+    set c = `basename ${f}`
     echo "${c}"
     if (-r ${c}.list) continue;
     root.exe -q -b ${f}*.root CheckPads.C+ >& ${c}.list
@@ -435,6 +435,7 @@ void CheckPads(Int_t sector = 0) {
   //  for (Int_t s = 1; s <= nx; s++) {
   Int_t s1 = 1, s2 = nx;
   if (sector > 0) {s1 = s2 = sector;}
+  Int_t minpaddiff = 5;
   for (Int_t s = s1; s <= s2; s++) {
     for (Int_t r = 1; r <= ny; r++) {
       TString  Dead(Form("/*Dead: */ {%2i,%3i,",s,r));
@@ -466,7 +467,7 @@ void CheckPads(Int_t sector = 0) {
 	  } else {
 	    if (fee == feeG && p == p2d + 1) p2d = p;
 	    else {
-	      if (p1d + 2 < p2d) cout << Dead.Data() << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
+	      if (p1d + minpaddiff < p2d) cout << Dead.Data() << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
 	      p1d = p2d = p;
 	      feeG = fee;
 	      rdoG = rdo;
@@ -481,7 +482,7 @@ void CheckPads(Int_t sector = 0) {
 	  } else {
 	    if (fee == feeA && p == p2a + 1) p2a = p;
 	    else {
-	      if (p1a + 2 < p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << RunC.Data() << endl;
+	      if (p1a + minpaddiff < p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << RunC.Data() << endl;
 	      p1a = p2a = p;
 	      feeA = fee;
 	      rdoA = rdo;
@@ -489,8 +490,8 @@ void CheckPads(Int_t sector = 0) {
 	  }
 	}
       }
-      if (p1d + 2 < p2d) cout << Dead.Data()  << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
-      if (p1a + 2< p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << RunC.Data() << endl;
+      if (p1d + minpaddiff < p2d) cout << Dead.Data()  << Form("%3i,%3i,%2i,%3i}",p1d, p2d, rdoG, feeG) << RunC.Data() << endl;
+      if (p1a + minpaddiff< p2a) cout << Alive.Data() << Form("%3i,%3i,%2i,%3i}",p1a, p2a, rdoA, feeA) << RunC.Data() << endl;
     }
     if (c1) {
       c1->cd(1); ActivePads->GetXaxis()->SetRange(s,s); ActivePads->Project3D(Form("yz_%i",s))->Draw("colz");

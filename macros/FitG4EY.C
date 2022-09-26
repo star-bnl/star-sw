@@ -33,6 +33,7 @@ Double_t gf4EYFunc(Double_t *x, Double_t *par) {
 #endif /* __SCALE__ */
 #endif /* __ELOSS__ */
   Int_t IO = par[14];
+  IO = TMath::Max(0, TMath::Min(1, IO));
   Int_t sign = par[15];
   Double_t frac[9];
   Double_t ff[9] = {0};

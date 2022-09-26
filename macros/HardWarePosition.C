@@ -1,6 +1,7 @@
 #ifndef  __HardwarePosition__
 #define  __HardwarePosition__
 #if !defined(__CINT__) || defined(__MAKECINT__)
+#include "Riostream.h"
 #include "Rtypes.h"
 #include "TVector3.h"
 #include "TMath.h"
@@ -179,4 +180,37 @@ Float_t SignedY(Double_t x, Double_t y) {
 }
 //________________________________________________________________________________
 void HardWarePosition() {}
+//________________________________________________________________________________
+UInt_t getSectorMask(UInt_t sec=1, UInt_t MASK=65535) {
+   if( sec % 2 == 0){ // if its even relevent bits are 8-13
+     MASK = MASK >> 8; // with iTPC 8 bits otherwise 6
+   }
+   return MASK &= 255;
+}
+//________________________________________________________________________________
+UInt_t isRdoOn(UInt_t sec=1, Int_t rdo = 1, UInt_t MASK=65535) {
+  return getSectorMask(sec, MASK) >> (rdo-1) & 0x00000001;
+}
+//________________________________________________________________________________
+void isRdosOn(UInt_t sec=1,  UInt_t MASK=65535) {
+  for (Int_t rdo = 1; rdo <= 8; rdo++) 
+    cout << "rdo " << rdo << " is " << isRdoOn(sec, rdo, MASK) << endl;
+}
+//________________________________________________________________________________
+Double_t xPad(Double_t pad, Int_t row) {
+  Int_t nPads[72] = { //J.Thomas, 05/31/2016
+    52, 54, 56, 58, 60, 62, 62, 64, 66, 68,
+    70, 72, 74, 74, 76, 78, 80, 82, 84, 86,
+    86, 88, 90, 92, 94, 96, 98, 98,100,102,
+    104,106,108,110,110,112,114,116,118,120,
+    98 ,    100,    102,    104,    106,    106,    108,    110,    112,    112,
+    114,    116,    118,    120,    122,    122,    124,    126,    128,    128,
+    130,    132,    134,    136,    138,    138,    140,    142,    144,    144,    
+    144,    144};
+  Double_t x =  -2;
+  if (row > 0 && row < 73) {
+    x = 2*pad / ( nPads[row-1] + 1.0) - 1;
+  }
+  return x;
+}
 #endif

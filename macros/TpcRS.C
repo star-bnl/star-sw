@@ -27,12 +27,13 @@ class StBFChain;
 StBFChain *chain;
 class St_db_Maker;
 St_db_Maker *dbMk = 0;
+class  StTpcRSMaker;
 #endif
 Bool_t Root4Star = kFALSE;
-Int_t    NTRACK = 10; //0; // 100;
+Int_t    NTRACK = 100; //0; // 100;
 Int_t    DEBUG  = 0; 
 //________________________________________________________________________________
-Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
+Int_t SetPartGun(TString RootFile,TString RunOpt, TString Opt) {
   cout << "Call SetPartGen with RootFile = " << RootFile.Data() << "\tRunOpt = " << RunOpt.Data() << "\t Opt = " << Opt.Data() << endl;
   Int_t Ids[22] =            {        5,        6,            3,            2,         8,         9,      11,      12,        14,        15,       45,        46,     49,      47, 0,0,0,0,0,0,0,0};
   Double_t Masses[22] =      {0.1056584,0.1056584,0.51099907e-3,0.51099907e-3,0.13956995,0.13956995,0.493677,0.493677,0.93827231,0.93827231, 1.875613,   2.80925,2.80923,3.727417, 0,0,0,0,0,0,0,0};
@@ -98,6 +99,13 @@ Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
   Double_t bgMinL10  = -3; // 3.5;// 1e2; // 1e-2;
   Double_t bgMaxL10  = 10;  // 1e2;// 1e5;
   TString optG("GBL");
+#else
+  //  TString optG("GmTsqSW");
+  TString optG("GmTsq");
+  Double_t bgMinL10 = 0.1;
+  Double_t bgMaxL10 = 10.0;
+  
+#endif
   Double_t pTmin = mass*TMath::Power(10.,bgMinL10);
   Double_t pTmax = mass*TMath::Power(10.,bgMaxL10);
   if (pTmax > 10) {
@@ -105,39 +113,28 @@ Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
     bgMaxL10 = TMath::Log10(pTmax/mass);
     //    cout << "Reduce bgMax10 = " << bgMaxL10 << endl;
   }
-#else
-  TString optG("GmTsq");
-  Double_t bgMinL10 = 0.1;
-  Double_t bgMaxL10 = 10.0;
-  
-#endif
   if (Root4Star) {
     cout << "Initialize Root4star starsim " << endl;
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
     //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
     //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
     cout << "Options: " << Opt.Data() << "=========================================================" << endl;
-    if (FileIn == "") {
-      if (kuip) {
-	TString Kuip(kuip);
-	geant->Do(kuip);
-      } else if ( RunOpt.Contains("Mickey",TString::kIgnoreCase)) {
-      } else if ( Opt.Contains("laser",TString::kIgnoreCase)) {
-	gSystem->Load("gstar.so");
-	geant->Do("call gstar");
-	geant->Do("gkine 1 170   1   1  0   0   0  0    180.00    180.00;");
-	geant->Do("gprint kine");
-	geant->Do("gvert 0  54   0");
-	geant->Do("mode TRAC prin 15");
-      } else if (TString(geant->SAttr("GeneratorFile")) == "") {
-	if (RunOpt.Contains("gstarLib",TString::kIgnoreCase)) {geant->Do("call gstar");}
-	if (pTmin < 0) pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
-	if (pTmax < 0) pTmax = mass*bgMax; if (pTmax >   10.00) pTmax =   10.00;
-	//	TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
-	TString Kine(Form("gkine %i %i %f %f -3  3 0 %f -200 200;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
-	cout << "Set kinematics: " << Kine.Data() << endl;
-	geant->Do(Kine.Data());
-      }
+    if ( RunOpt.Contains("Mickey",TString::kIgnoreCase)) {
+    } else if ( Opt.Contains("laser",TString::kIgnoreCase)) {
+      gSystem->Load("gstar.so");
+      geant->Do("call gstar");
+      geant->Do("gkine 1 170   1   1  0   0   0  0    180.00    180.00;");
+      geant->Do("gprint kine");
+      geant->Do("gvert 0  54   0");
+      geant->Do("mode TRAC prin 15");
+    } else if (TString(geant->SAttr("GeneratorFile")) == "") {
+      if (RunOpt.Contains("gstarLib",TString::kIgnoreCase)) {geant->Do("call gstar");}
+      if (pTmin < 0) pTmin = mass*bgMin; if (pTmin <    0.01) pTmin =    0.01;
+      if (pTmax < 0) pTmax = mass*bgMax; if (pTmax >   10.00) pTmax =   10.00;
+      //	TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
+      TString Kine(Form("gkine %i %i %f %f -3  3 0 %f -200 200;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
+      cout << "Set kinematics: " << Kine.Data() << endl;
+      geant->Do(Kine.Data());
     }
   } else { // VMC
     cout << "Initialize STAR VMC interface" << endl;
@@ -162,37 +159,6 @@ Int_t SetPartGan(TString RootFile,TString RunOpt, TString Opt) {
         cflag->iswit[1] = 2;
         cflag->iswit[2] = 2; 
     }
-#if 0
-      //      gener->SetGun();
-      //      StarVMCApplication::Instance()->DoMisAlignment(kFALSE);
-      //      geant->SetSetAttr("phys_off",kTRUE); // physics off
-      gMC->SetProcess("DCAY", 0);
-      gMC->SetProcess("ANNI", 0);
-      gMC->SetProcess("BREM", 0);
-      gMC->SetProcess("COMP", 0);
-      gMC->SetProcess("HADR", 0);
-      gMC->SetProcess("MUNU", 0);
-      gMC->SetProcess("PAIR", 0);
-      gMC->SetProcess("PFIS", 0);
-      gMC->SetProcess("PHOT", 0);
-      gMC->SetProcess("RAYL", 0);
-      //      gMC->SetProcess("LOSS", 4); // no fluctuations 
-      gMC->SetProcess("DRAY", 0);
-      gMC->SetProcess("MULS", 0);
-      gMC->SetProcess("STRA", 0);
-      gMC->SetCut("CUTGAM",	1e-5  );
-      gMC->SetCut("CUTELE", 	1e-5  );
-      gMC->SetCut("CUTHAD", 	1e-3  );
-      gMC->SetCut("CUTNEU", 	1e-14 );
-      gMC->SetCut("CUTMUO", 	1e-3  );
-      gMC->SetCut("BCUTE", 	1e-3  );
-      gMC->SetCut("BCUTM", 	1e-3  );
-      gMC->SetCut("DCUTE", 	1e-3  );
-      gMC->SetCut("DCUTM", 	1e-3  );
-      gMC->SetCut("PPCUTM", 	1e-3  );
-      gMC->SetCut("TOFMAX", 	1e3);
-      gMC->BuildPhysics();
-#endif
   }
   return 0;
 }
@@ -239,7 +205,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     else                                                           ChainOpt += "tags,";
 #endif
   }
+#ifdef __TFG__VERSION__
   ChainOpt += ",dEdxCalib";
+#else
+  ChainOpt.ReplaceAll("MC2021","sdt20210209,MC.StiCA,vmc,NewTpcAlignment,ExB");
+  ChainOpt.ReplaceAll("MC.StiCA","StiCA,geantOut,noRunco,noHistos,McTpcAna,tags");
+#endif
   cout << "ChainOpt\t" << ChainOpt.Data() << endl;
   // ChainOpt += "MiniMcMk,IdTruth,useInTracker,-hitfilt,CMuDst,Tree,tags,evout,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
@@ -399,7 +370,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   }
   cout << "FileIn = " << FileIn.Data() << " ====================" << endl;
   if (FileIn == "") {
-    if (SetPartGan(RootFile, RunOpt, Opt)) return;
+    if (SetPartGun(RootFile, RunOpt, Opt)) return;
     
   }
   if (Last > 0)  chain->EventLoop(First,Last);
