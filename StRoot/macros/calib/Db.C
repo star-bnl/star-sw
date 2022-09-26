@@ -116,7 +116,8 @@ void Db(const Char_t *tabNam  =
 	"Geometry/tpc/itpcPadPlanes",
 	Int_t date = -1, Int_t time = 0,
 	Int_t debugL = 1,
-	const Char_t *flavor="sim+ofl+laserDV+TFG+FXT"
+	const Char_t *flavor="sim+ofl+laserDV+TFG+FXT",
+	Int_t run = 0
 	){ 
   if (dbMk == 0) DbLoad();
   dbMk->SetDebug(debugL);
@@ -131,6 +132,10 @@ void Db(const Char_t *tabNam  =
     cout << "Set GMT Date " << D << " Time " << T << endl;
   }
   dbMk->SetDateTime(D,T); 
+  if (run > 0) {
+    StEvtHddr* fEvtHddr = (StEvtHddr* ) dbMk->GetDataSet("EvtHddr");
+    if (fEvtHddr) fEvtHddr->SetRunNumber(run);
+  }
   TString TabNam(tabNam);
   if (TabNam.BeginsWith("StarDb/")) TabNam.ReplaceAll("StarDb/","");
   TString name(gSystem->BaseName(tabNam));
