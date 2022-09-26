@@ -308,7 +308,7 @@ virtual   void closeWrite();
   void streamerOff();
 
 virtual   int openRead();
-virtual   void read();
+virtual   Int_t read();
 void setBranchAddresses();
 virtual   void closeRead();
 

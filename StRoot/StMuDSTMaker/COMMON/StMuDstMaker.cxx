@@ -694,7 +694,7 @@ Int_t StMuDstMaker::MakeRead()
    int returnStarCode = kStOK;
    if (mIoMode == ioRead) {
      try {
-       read();
+       returnStarCode = read();
 #ifdef __TFG__VERSION__
        if (! mStMuDst->IsGoodTrigger()) return kStSkip;
 #endif /* __TFG__VERSION__ */
@@ -992,11 +992,11 @@ int StMuDstMaker::openRead() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::read(){
+Int_t StMuDstMaker::read(){
   if (!mChain){
     DEBUGMESSAGE2("ATTENTION: No StMuChain ... results won't be exciting (nothing to do)");
     throw StMuExceptionNullPointer("No input files",__PRETTYF__);
-    return;
+    return kStEOF;
   }
 
   DEBUGMESSAGE2("");
@@ -1030,7 +1030,7 @@ void StMuDstMaker::read(){
 #ifdef __TFG__VERSION__
   mStMuDst->ResetMaps();
 #endif /* __TFG__VERSION__ */
-  return;
+  return kStOK;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
