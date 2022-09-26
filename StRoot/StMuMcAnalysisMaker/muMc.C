@@ -3,15 +3,15 @@
   root.exe -q -b -x 'muMc.C(1e6,"../*MuDst.root")'
 */
 void muMc(Int_t N = 1000000, 
-	  const Char_t *input = "*.MuDst.root", 
+	  const Char_t *input = "../*.MuDst.root", 
 	  const Char_t *output = "muMc.root", 
-	  const Char_t *ChainOpt = "RMuDst,KFPInter,MuMc,quiet,mysql,nodefault,y2019") {
+	  const Char_t *ChainOpt = "RMuDst,KFPInter,MuMc,quiet,mysql,nodefault,y2021") {
 #if !defined(__CINT__)
   std::cout << "This code cannot be compiled" << std::endl;
 #else
   //  gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
   gROOT->LoadMacro("lMuDst.C");
-#if 1 //=> 1 if you want to replot
+#if 0 //=> 1 if you want to replot
   Char_t *file = gSystem->Which("./",output,kReadPermission);
 #else
   Char_t *file = 0;
