@@ -18,8 +18,8 @@ foreach d (`ls -1d ???/2*`)
     cd -
     continue
   endif
-#  daq_2021dR.pl
-  daq_2021dR2.pl
+  daq_2021dR.pl
+#  daq_2021dR2.pl
   if ($?) then
     ls -1d *bla.root
     if ($?) then
@@ -37,7 +37,8 @@ foreach d (`ls -1d ???/2*`)
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG21c.xml
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2019.TFG22b.xml
 #  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG22b.xml
-  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.DEV2.xml
+#  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.DEV2.xml
+  /net/l402/data/fisyak/STAR/packages/.DEV2/scripts/star-submit -p bnl_condor_online_CpuModelNumber6X ~/xml/daq_2021.TFG22g.xml
 #  endif
   touch Submitted
   cd -

@@ -521,8 +521,24 @@
 #end
 #foreach f (`ls -1d SecRow3G4E*.root`) 
 #foreach f (`ls -1d SecRow3G4E*.root`) 
-foreach f (`ls -1d SecRow3+*.root`) 
-    set b = `echo ${f} | sed -e 's/SecRow3+SecRow3PG4E//' -e 's/\.root//'`
+#foreach f (`ls -1d SecRow3+*.root`) 
+#    set b = `echo ${f} | sed -e 's/SecRow3+SecRow3PG4E//' -e 's/\.root//'`
+#    root.exe -q -b lDb.C  ${f} 'MakeTpcSecRowB.C+(20350101,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
+#    mv TpcSecRowB.20350101.000001.root TpcSecRowB.${b}.root
+#end
+
+#foreach f (`ls -1d SecRow3G*.root`) 
+#    set b = `echo ${f} | sed -e 's/SecRow3G4EYRM//' -e 's/\.root//'`
+#    root.exe -q -b lDb.C  ${f} 'MakeTpcSecRowB.C+(20350101,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
+#    mv TpcSecRowB.20350101.000001.root TpcSecRowB.${b}.root
+#end
+#foreach f (`ls -1d SecRow3+SecRow3PG4EYRM*.root`) 
+#    set b = `echo ${f} | sed -e 's/SecRow3+SecRow3PG4EYRM//' -e 's/\.root//'`
+#    root.exe -q -b lDb.C  ${f} 'MakeTpcSecRowB.C+(20350101,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
+#    mv TpcSecRowB.20350101.000001.root TpcSecRowB.${b}.root
+#end
+foreach f (`ls -1d SecRow3+SecRow3PG4EY*.root`) 
+    set b = `echo ${f} | sed -e 's/SecRow3+SecRow3PG4EY//' -e 's/\.root//'`
     root.exe -q -b lDb.C  ${f} 'MakeTpcSecRowB.C+(20350101,1,"TpcSecRowB",0)' >& MakeTpcSecRowB.${b}.log
     mv TpcSecRowB.20350101.000001.root TpcSecRowB.${b}.root
 end

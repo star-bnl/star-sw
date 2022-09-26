@@ -57,9 +57,9 @@ print "runs = @runs\n" if ($debug);
 foreach my $run (@runs) {
   my $r = File::Basename::basename($run);
   if (GoodRun($def,$r) < 0) {next;}
-#  foreach my $tag (qw(st_physics_2 hlt)) {
-  foreach my $tag (qw(hlt)) {
-    my @files = glob $run . "/" . $tag . "*.daq";#print "files = @files\n" if ($debug);
+  foreach my $tag (qw(st_physics_2 hlt)) {
+#    foreach my $tag (qw(hlt)) {
+    my @files = glob $run . "/" . $tag . "*.daq"; print "files = @files\n" if ($debug);
     if ($#files < 0) {next;}
     #  print "files = @files\n";
     #    my $day = int ($r/1000 - 20000); #print "ru = $r => day = $day\n";
