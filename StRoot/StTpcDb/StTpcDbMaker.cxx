@@ -234,6 +234,7 @@
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcChargeEventC.h"
+#include "StDetectorDbMaker/St_beamInfoC.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
@@ -297,6 +298,9 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   StTpcDb::instance()->SetDriftVelocity();
   
   if (IAttr("ExB")) { 
+    if(! IAttr("OSpaceFXT") && St_beamInfoC::instance()->IsFixedTarget() ) {
+      SetAttr("OSpaceFXT"  , kTRUE);
+    }
     // Backward compatibility preserved.
     Int_t mask=1;                                    // Al Saulys request
     if        ( IAttr("EB1") ){      // Do nothing (i.e. bit 1 at 0)
