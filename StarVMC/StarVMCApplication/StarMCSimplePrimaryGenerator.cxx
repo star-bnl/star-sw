@@ -79,6 +79,9 @@ void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id,
   }
   if (fOption.Contains("mtsq",TString::kIgnoreCase)) {
     LOG_INFO << "Use dN/dmT^2 = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endm;
+  }  
+  if (fOption.Contains("sw",TString::kIgnoreCase)) {
+    LOG_INFO << "Use randomly switch particle <=> antipartilce " << endm;
   } else if (fOption.Contains("mt",TString::kIgnoreCase)) {
     LOG_INFO << "Use dN/dmT = exp(-mT/T) pT generation with T = " << Temperature() << " GeV/c" << endm;
   }
@@ -130,6 +133,9 @@ void StarMCSimplePrimaryGenerator::GeneratePrimary() {
   for (auto xId : fGunIds) {
     Int_t pdg  = xId;
     if (fGun) pdg = fGunId;
+    if (fOption.Contains("sw",TString::kIgnoreCase)) {
+      if (gRandom->Rndm() > 0.5) pdg = - pdg;
+    }
     Double_t mass      = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
     Double_t charge    = TDatabasePDG::Instance()->GetParticle(pdg)->Charge()/3.;
     // Polarization
