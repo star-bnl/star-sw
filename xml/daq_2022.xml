@@ -7,7 +7,8 @@
 #   setup 64b
 #   starver TFG21c
 #   starver TFG21h
-   starver TFG22b  # 04/02/2022
+#   starver TFG22b  # 04/02/2022
+   starver TFG22g  # 09/22/2022
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -42,9 +43,10 @@
     touch ${bla}
     set input = ${evtsFile};
 #  @ n =  $JOBINDEX % 20
-  @ n =  $JOBINDEX % 100
-   set evout = "-evout";
-   if ($n == 4) set evout = "evout";
+#  @ n =  $JOBINDEX % 100
+#   set evout = "-evout";
+#   if ($n == 4) set evout = "evout";
+   set evout = "evout";
 #root.exe -q -b 'bfc.C(100000,"P2022a,evout,NoHistos,noTags,noRunco,StiCA,-picoWrite,-picoDst,Cosmics","'${input}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(100000,"pp2022,StiCA,BEmcChkStat,evout","'${input}'")' &gt;&amp; ${logFile}
 #   root.exe -q -b 'bfc.C(100000,"pp2022,StiCA,BEmcChkStat,'${evout}',NoHistos,noTags,noRunco","'${input}'")' &gt;&amp; ${logFile}
@@ -69,7 +71,8 @@
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2019/019/*/st_cosmic_*.daq" /> -->
 <!-- <input URL="file:/hlt/cephfs/daq/2019/*/*/st_cosmic_*.daq" /> -->
 <!-- <input URL="command:2020Cosmic.pl" /> -->
-<input URL="command:daq_2022dR.pl" />
+<!-- <input URL="command:daq_2022dR.pl" /> -->
+<input URL="command:daq_2022dR2.pl" />
 <!-- <output fromScratch="*.root" toURL="file./"/> -->
 <!-- <output fromScratch="*B.log" toURL="file:./"/> -->
 <!--

@@ -25,12 +25,12 @@ setenv STARFPE NO
 #  if ("$f" == "") then
   ls -l *${fileB}*.root
   if (! $?) exit 0;
- root.exe -q -b 'bfc.C(500,"mtin,MC.2021,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
+# root.exe -q -b 'bfc.C(20,"mtin,MC.2021,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco","'${file}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'TpcRS.C(20,"MC.2021,TpcRS,McTpcAna,StiCA,-geantOut,phys_off,Rung.'${runG}'",0,"'${file}'")' &gt;&amp; ${logFile}
 </command>
 <!-- <input URL="command:TpcRS_Part.pl" /> -->
 <!-- <input URL="command:daq2020TpcRS.pl" /> -->
 <!-- <input URL="file:/hlt/cephfs/reco/2019/TFG20j/RF/19GeV/*MuDst.root" /> -->
-<!-- <input URL="command:TpcRS_Part.pl" />  -->
 <input URL="file:/net/l404/data/fisyak/Tpc/TpcRS/2021/7p7GeV_2021/*MuDst.root" />
 </job>
 

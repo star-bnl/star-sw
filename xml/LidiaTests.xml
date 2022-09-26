@@ -24,6 +24,9 @@ switch (${SUBMITTINGDIRECTORY})  # 64/32 bits
     breaksw
 endsw # 
 switch (${SUBMITTINGDIRECTORY})  # gcc
+  case "*gcc631":
+    setup gcc631
+    breaksw
   case "*gcc1010*":
     setup gcc/10
     breaksw
@@ -61,13 +64,14 @@ switch (${SUBMITTINGDIRECTORY}) # STAR version
     breaksw
 endsw # 
 #set controlFile = /star/u/starreco/newtest/sampleList_nonopt.txt 
-#set controlFile = $STAR/StRoot/StBFChain/sampleList.txt
-set controlFile = /afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StBFChain/sampleList.txt
+set controlFile = $STAR/StRoot/StBFChain/sampleList.txt
+#set controlFile = /afs/rhic.bnl.gov/star/packages/.DEV2/StRoot/StBFChain/sampleList.txt
 set nevents = `grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *nevents" | head -1 | sed 's| *nevents *= *\([0-9]*\) *$|\1|'`
 set chain = `grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *chain" | head -1 | sed 's| *chain *= *\(.*\) *$|\1|'`
 set out_dir = ${SUBMITTINGDIRECTORY}/`grep -A5 job${JOBINDEX} ${controlFile}  | grep -e " *out_dir" | head -1 | sed 's| *out_dir *= *\(.*\) *$|\1|'`
 
 set inputfile = `grep -A5 job${JOBINDEX} ${controlFile} | grep -e " *inputfile" | head -1 | sed 's| *inputfile *= *\(.*\) *$|\1|'`
+if (! -r $inputfile) set inputfile = `echo $inputfile | sed -e 's#/star/rcf/test#/hlt/cephfs#'`
 set logFile = `echo $inputfile | sed 's|.*/\([A-Za-z_0-9.]*\).[df][az][qd]|\1.log|'` 
 
 set infile0 = `echo $inputfile | sed 's|.*/\([A-Za-z_0-9.]*\)|\1|'` 

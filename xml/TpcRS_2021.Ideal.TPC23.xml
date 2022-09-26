@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<job  name="TpcRS" maxFilesPerProcess="1"  filesPerHour="1" simulateSubmission="false" fileListSyntax="paths" copyInputLocally="false">
+<stdout URL="file:./sched$JOBID.log" />
+<stderr URL="file:./sched$JOBID.err" />
+<command> 
+  cd ${SUBMITTINGDIRECTORY}  
+setenv STARFPE NO
+#  unsetenv DEBUG yes
+#   setup debug
+#  setup 64b
+#  starver .DEV2 
+#  starver TFG17j
+#   starver TFG19e
+#  starver .DEV2
+#  starver TFG20j
+#  starver TFG21l
+  limit stacksize 16m
+  set evtsFile = $INPUTFILE0;
+  set file1   = `basename $evtsFile .daq`
+  set file    = `basename $file1 .MuDst.root`
+  set f       = 1
+  set l       = 500
+  set filel   = ${file}
+  set runG    = 1   
+#ifndef TpcRS_Part.pl
+#  echo $INPUTFILE0 | grep ':'
+#  if (! $?) then
+#    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
+#    set file1    = `basename $evtsFile .daq`
+#    set file     = `basename $file1 .MuDst.root`
+#    set f        = `echo $INPUTFILE0 | awk -F\: '{print $2}'`
+#    set l        = `echo $INPUTFILE0 | awk -F\: '{print $3}'`
+#    set filel    = ${file}_${f}_${l}
+#    set runG     = `echo $INPUTFILE0 | awk -F\: '{print $5}'`
+#  endif
+#  echo "${evtsFile}"
+#else TpcRS_Part.pl
+  set runG = `echo $file | awk -F\_ '{print $2}'`
+#endif
+  echo "${file}"
+  set output  = ${filel}.event.root
+  set logFile  = ${filel}B.log
+#  set Name = `basename $PWD`
+#  set f=`find . -maxdepth 1 -type f -name "*${fileB}*.root"`
+#  if ("$f" == "") then
+  ls -l *${filel}*.root
+  if (! $?) exit 0;
+#ifdef TpcRS_Part.pl
+## TpcRS_Part.pl RunXIX 19GeV
+#   root.exe -q -b 'TpcRS.C(100,"MC.y2021,TpcRS,McTpcAna,StiCA,-geantOut,phys_off,Rung.'${runG}'",0,"Bichsel,'${file}'")' &gt;&amp; ${logFile}
+#else
+# data MuDst.root
+# setenv MALLOC_CHECK_  3
+# root.exe -q -b 'bfc.C('${f}','${l}',"mtin,MC.2021,TpcRS,McTpcAna,StiCA,-geantOut,NoHistos,noRunco,RunG.'${runG}'","'${evtsFile}'","'$output'")'  &gt;&amp;  ${logFile}
+#   root.exe -q -b 'TpcRS.C(20,"MC2021.Ideal,TpcRS,McTpcAna,StiCA,-geantOut,phys_off,Rung.'${runG}'",0,"'${file}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'TpcRS.C(20,"MC2021.Ideal,TPC23,TpcRS,McTpcAna,StiCA,-geantOut,phys_off,Rung.'${runG}'",0,"'${file}'")' &gt;&amp; ${logFile}
+#endif
+</command>
+<input URL="command:TpcRS_Part.pl" />
+<!-- <input URL="command:daq2021TpcRS.pl" />   -->
+<!-- <input URL="file:/hlt/cephfs/reco/2021/TFG20j/RF/19GeV/*MuDst.root" />  -->
+<!-- <input URL="command:TpcRS_Part.pl" /> -->
+   <ResourceUsage>
+      <Priority>99</Priority>
+    <Memory>
+      <MinMemory>3000</MinMemory>
+    </Memory>
+    </ResourceUsage>
+
+</job>
+
+

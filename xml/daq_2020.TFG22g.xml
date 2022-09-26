@@ -45,6 +45,7 @@
 #          root.exe -b -q  'bfc.C(5000,"P2019a,StiCA,gmt,PicoVtxVpdOrDefault,BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
 #          root.exe -b -q  'bfc.C(5000,"P2019a,StiCA,gmt,'${PicoMode}',BEmcChkStat,NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
           root.exe -b -q  'bfc.C(5000,"P2020a,StiCA,btof,mtd,etofA,BEmcChkStat,,gmt,'${PicoMode}',NoHistos,noTags,noRunco,evout","'${evtsFile}'")' &gt;&amp; ${logFile}
+   gzip ${logFile}
 #   cp  ${filel}* ${SUBMITTINGDIRECTORY}
 #   rm ${bla}
         </command>
