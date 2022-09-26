@@ -1348,6 +1348,10 @@ void StPicoDstMaker::fillTracks() {
 	// Set sigma and correlation arrays
 	covMatrix->setSigmas( SigmaArr );
 	covMatrix->setCorrelations( CorrArr );
+	Float_t pIn =  gTrk->muHelix().p().mag();
+	Float_t pOut =  gTrk->muOuterHelix().p().mag();
+	covMatrix->setPin(pIn);
+	covMatrix->setPout(pOut);
       } //if(dcaG)
     } //if( mCovMtxMode == PicoCovMtxMode::Write )
 
