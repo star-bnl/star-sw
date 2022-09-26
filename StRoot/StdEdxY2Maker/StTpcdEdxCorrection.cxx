@@ -320,7 +320,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Double_t adcCF = CdEdx.adc;
   Int_t iok = 0;
   if (dx <= 0 || (dEU <= 0 && adcCF <= 0)) {
-    iok = 3;
+    iok = 1;
     return iok;
   }
   Int_t channel = St_TpcAvgPowerSupplyC::instance()->ChannelFromRow(sector,row); 
@@ -355,7 +355,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     if (u2() < u() + 30) {
       LOG_ERROR <<  "StTpcdEdxCorrection::dEdxCorrection Illegal TpcAvgPowerSupply stop time = " << u2() << " GMT from local " << u2.GetGString() 
 		<< " < event time = " << u()  << " GMT\t=" << StMaker::GetChain()->GetDateTime().AsString() << endm;
-      iok = kStErr;
+      iok = 1;
       return iok;
     }
   }
@@ -380,7 +380,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   }
   if (St_tpcPadConfigC::instance()->iTpc(sector) && row <= St_tpcPadConfigC::instance()->innerPadRows(sector)) kTpcOutIn = kiTpc;
   if (gasGain <= 0.0) {
-    iok = 3;
+    iok = 1;
     return iok;
   }
   CdEdx.driftTime = driftDistance2GG/gStTpcDb->DriftVelocity(sector)*1e6 - m_TrigT0;// musec
@@ -442,8 +442,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       const TpcSecRowCor_st *gain = table->GetTable() + sector - 1;
       gc =  gain->GainScale[row-1];
       if (gc <= 0.0) {
-	iok = 1;
-	return iok;
+	return k;
       }
       dE *= gc;
       CdEdx.Weight = 1;
@@ -462,8 +461,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     } else if (k == kAdcCorrectionMDF) {
       ADC = adcCF;
       if (ADC <= 0) {
-	iok = 3; //HACK to avoid FPE (VP)
-	return iok;
+	return k;
       }
       l = kTpcOutIn;
       Int_t nrows = ((St_TpcAdcCorrectionMDF *) m_Corrections[k].Chair)->nrows();
@@ -475,8 +473,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     } else if (k == kAdcCorrection3MDF) {
       ADC = adcCF;
       if (ADC <= 0) {
-	iok = 3; //HACK to avoid FPE (VP)
-	return iok;
+	return k;
       }
       l = kTpcOutIn;
       Int_t nrows = ((St_TpcAdcCorrection3MDF *) m_Corrections[k].Chair)->nrows();
@@ -488,8 +485,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     } else if (k == kAdcCorrection4MDF) {
       ADC = adcCF;
       if (ADC <= 0) {
-	iok = 3; //HACK to avoid FPE (VP)
-	return iok;
+	return k;
       }
       l = kTpcOutIn;
       Int_t nrows = ((St_TpcAdcCorrection4MDF *) m_Corrections[k].Chair)->nrows();
@@ -515,8 +511,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (ZdriftDistance <= 0.0) goto ENDL; // prompt hits 
       Double_t dEcor = ((St_GatingGridC *)m_Corrections[k].Chair)->CalcCorrection(l,VarXs[kGatingGrid]);
       if (dEcor < -9.9) {
-	iok = 3; 
-	return iok;
+	return k;
       }
       dE *= TMath::Exp(-dEcor);
       goto ENDL;
@@ -541,16 +536,14 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (k == kAdcCorrection) {
 	ADC = adcCF;
 	if (ADC <= 0) {
-	  iok = 3; //HACK to avoid FPE (VP)
-	  return iok;
+	  return k;
 	}
 	if (corl->type == 12) 
 	  dE = Adc2GeVReal*chairC->CalcCorrection(l,ADC,VarXs[kTanL]);
 	else 
 	  dE = Adc2GeVReal*chairC->CalcCorrection(l,ADC,TMath::Abs(CdEdx.zG));
 	if (dE <= 0) {
-	  iok = 3; 
-	  return iok;
+	  return k;
 	}
 	goto ENDL;
       } else if (k == kAdcCorrection6MDF) { 
@@ -558,8 +551,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       } else if (k == kAdcCorrectionC) {
 	ADC = adcCF;
 	if (adcCF <= 0) {
-	  iok = 3; //HACK to avoid FPE (VP)
-	  return iok;
+	  return k;
 	}
 	ADC = chairC->CalcCorrection(l,adcCF);
 	if (m_Corrections[kAdcCorrection6MDF].Chair) {
@@ -578,8 +570,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	xL2 = TMath::Log2(dx);
 	dXCorr = chairC->CalcCorrection(l,xL2); 
 	if (TMath::Abs(dXCorr) > 10) {
-	  iok = 3; 
-	  return iok;
+	  return k;
 	}
 	if (nrows == 7) {// old schema without iTPC
 	  dXCorr += chairC->CalcCorrection(2,xL2);
@@ -605,8 +596,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	if (ZdriftDistance <= 0.0) goto ENDL; // prompt hits 
 	if ((corl->min < corl->max) && (corl->min > VarXs[k] || VarXs[k] > corl->max)) {
 	  if (! IsSimulation()) {
-	    iok = 2; 
-	    return iok;
+	    return k;
 	  }
 	  VarXs[k] = TMath::Min(corl->max, TMath::Max( corl->min, VarXs[k]));
 	}
@@ -615,8 +605,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	  if (TMath::Abs(corl->a[np]) > 1e-7) {// extra exponent 
 	    Double_t dEcor = corl->a[np]*TMath::Exp( corl->a[np+1]*VarXs[k]);
 	    if (dEcor < -9.9) {
-	      iok = 3; 
-	      return iok;
+	      return k;
 	    }
 	    dE *= TMath::Exp(-dEcor);
 	  }
@@ -624,8 +613,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       }
       if (corl->type == 200 && (corl->min < corl->max) &&  ! IsSimulation() ) {// cut out the range
 	if ((corl->min > VarXs[k] || corl->max < VarXs[k])) {
-	  iok = 4; 
-	  return iok;
+	  return k;
 	}
       }
       if (corl->type == 300 && (corl->min < corl->max)) {
@@ -641,7 +629,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	  }
 	}
 	if (iok) {
-	  return iok;
+	  return k;
 	}
       }
     }
