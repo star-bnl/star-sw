@@ -1819,10 +1819,10 @@ block TPAD is a real padrow with dimensions defined at positioning time
       material p10
       material sensitive_gas  ISVOL=1  stemax=2.5*tprs_width
       SHAPE    BOX   dx=0   dy=0   dz=0
-      Call     GSTPAR(ag_imed,'CUTGAM',1e-5)
-      Call     GSTPAR(ag_imed,'CUTELE',1e-5)
-      Call     GSTPAR(ag_imed,'DCUTE',1e-5)
-      Call     GSTPAR(ag_imed,'DCUTM',1e-5)
+      Call     GSTPAR(ag_imed,'CUTGAM',1e-4)
+      Call     GSTPAR(ag_imed,'CUTELE',1e-4)
+      Call     GSTPAR(ag_imed,'DCUTE',1e-4)
+      Call     GSTPAR(ag_imed,'DCUTM',1e-4)
 *     Call     GSTPAR(ag_imed,'STRA',1.)
       Call     GSTPAR(ag_imed,'LOSS',1.)
 *
@@ -1844,10 +1844,10 @@ block TDEA is a dead region in pad row
       attribute TDEA seen=1 colo=4
       material p10
       SHAPE    BOX dx=0 dy=0 dz=0 
-      Call     GSTPAR(ag_imed,'CUTGAM',1e-5)
-      Call     GSTPAR(ag_imed,'CUTELE',1e-5)
-      Call     GSTPAR(ag_imed,'DCUTE',1e-5)
-      Call     GSTPAR(ag_imed,'DCUTM',1e-5)
+      Call     GSTPAR(ag_imed,'CUTGAM',1e-4)
+      Call     GSTPAR(ag_imed,'CUTELE',1e-4)
+      Call     GSTPAR(ag_imed,'DCUTE',1e-4)
+      Call     GSTPAR(ag_imed,'DCUTM',1e-4)
 *     Call     GSTPAR(ag_imed,'STRA',1.)
       Call     GSTPAR(ag_imed,'LOSS',1.)
 endblock

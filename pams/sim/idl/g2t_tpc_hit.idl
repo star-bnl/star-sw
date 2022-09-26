@@ -3,8 +3,8 @@
        long      next_tr_hit_p;/* Id of next hit on same track */
        long      track_p;    /* Id of parent track */
        long      volume_id;  /* 100000*isdet+100*sector+row, isdet = 1 or 2 for before or after */
-       float     de;         /* energy deposition at hit */
-       float     ds;         /* path length within padrow */
+       float     de;         /* energy deposition at hit GEANT */
+       float     ds;         /* path length within padrow GEANT */
        float     p[3];       /* global momentum */
        float     tof;        /* time of flight */
        float     x[3];       /* coordinate (Cartesian) */
@@ -16,4 +16,7 @@
        long      np;         /* no. of primary interactions per hit */
        long      ne;         /* no. of conducting electrons per hit */
        float     adcs[3];    /* adc signal in 0 => row - 1, 1 => row, 2 => row+1 */
+       float     dNdx;       /* dNdx at local momentum, TpcRS */
+       float     dSSum;      /* dx in TpcRS simulation, TpcRS */
+       float     dESum;      /* dE in TpcRS simulation, TpcRS */
 };
