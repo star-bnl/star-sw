@@ -352,7 +352,7 @@ daq_dta *daq_bsmd::handle_ped_rms(int rdo, int is_ped)
 			full_name = caller->get_sfs_name(str) ;
 
 			if(!full_name) continue ;
-
+			
 			l_bytes = caller->sfs->fileSize(full_name) ;
 
 			bytes += l_bytes ;

@@ -605,7 +605,7 @@ static int l4_doer(daqReader *rdr, const char  *do_print)
 			l4_gl3_t *h = (l4_gl3_t *) dd->Void ;
 			UINT32 *x = (UINT32 *)h->data;
 			printf("L4 GL3 sec %02d: bytes %d: %d %s [0x%08x 0x%08x 0x%08x 0x%08x]\n",dd->sec,dd->ncontent,h->bytes,h->name,x[0],x[1],x[2],x[3]) ;
-			printf("sizeof %d  offset %d\n", sizeof(l4_gl3_t), (char *)h->data - (char *)h); 
+			printf("sizeof %ld  offset %ld\n", sizeof(l4_gl3_t), (char *)h->data - (char *)h); 
 		}
 	}
 

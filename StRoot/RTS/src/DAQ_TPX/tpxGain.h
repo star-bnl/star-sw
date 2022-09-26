@@ -206,7 +206,7 @@ public:
 
 
 	// below used only during calculation
-	int to_file(char *fname) ;
+	int to_file(const char *fname) ;
 
 	void init(int sec=0) ;			// zap's structs; assume all TPX
 	void accum(char *evbuff, int bytes) ;	// parses one RDO's worth of pulser data

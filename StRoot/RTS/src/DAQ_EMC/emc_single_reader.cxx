@@ -8,7 +8,7 @@
 #include <DAQ_READER/daq_det.h>
 
 const struct hdrs {
-	const char *emcp ;
+        const char *emcp ;
 	const char *secp ;
 	const char *rbp ;
 	const char *adc ;
