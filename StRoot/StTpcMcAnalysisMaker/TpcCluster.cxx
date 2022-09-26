@@ -12,20 +12,17 @@ ClassImp(TpcCluster)
 ClassImp(TpcTrack)
 //______________________________________________________________________________
 TpcCluster::TpcCluster() : TObject() {
-   if (!fgPixels) fgPixels = new TClonesArray("StTpcPixel", 1000);
-   if (!fgMcHit)  fgMcHit  = new TClonesArray("StMcTpcHit",  1000);
-   if (!fgRcHit)  fgRcHit  = new TClonesArray("StTpcHit", 1000);
-   if (!fgRcTrack)  fgRcTrack  = new TClonesArray("TpcTrack", 1000);
-   if (!fgRcTHit)  fgRcTHit  = new TClonesArray("StTpcHit", 1000);
-   fPixels = fgPixels;
-   fMcHit  = fgMcHit;
-   fRcHit  = fgRcHit;
-   fRcTrack  = fgRcTrack;
-   fRcTHit  = fgRcTHit;
-   DVelWest =   DVelEast =   fNofPV =  fNoTracksAtBestPV = -1;
-   fxV =    fyV=   fzV = 0;
-   
-   Clear();
+  if (!fgPixels) fgPixels = new TClonesArray("StTpcPixel", 1000);
+  if (!fgMcHit)  fgMcHit  = new TClonesArray("StMcTpcHit",  1000);
+  if (!fgRcHit)  fgRcHit  = new TClonesArray("StTpcHit", 1000);
+  if (!fgRcTrack)  fgRcTrack  = new TClonesArray("TpcTrack", 1000);
+  if (!fgRcTHit)  fgRcTHit  = new TClonesArray("StTpcHit", 1000);
+  fPixels = fgPixels;
+  fMcHit  = fgMcHit;
+  fRcHit  = fgRcHit;
+  fRcTrack  = fgRcTrack;
+  fRcTHit  = fgRcTHit;
+  Clear();
 }
 //______________________________________________________________________________
 void TpcCluster::Clear(Option_t *option)
@@ -36,7 +33,11 @@ void TpcCluster::Clear(Option_t *option)
   fRcHit->Clear();  fNoRcHit    = 0;
   fRcTrack->Clear();  fNoRcTrack    = 0;
   fRcTHit->Clear();  fNoRcTHit    = 0;
+  DVelWest =   DVelEast =   fNofPV =  fNoTracksAtBestPV = -1;
+  fxV =    fyV=   fzV = 0;
+  fpIn = fpOut = fTrackLength = fMcpIn = fMcpOut = fMcTrackLength = 0;
   fSector = fRow = 0;
+  fpIn = fpOut = fTrackLength = fMcpIn = fMcpOut = fMcTrackLength = 0;
 }
 
 //______________________________________________________________________________

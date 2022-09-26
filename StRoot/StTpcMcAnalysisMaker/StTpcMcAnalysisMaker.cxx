@@ -293,6 +293,13 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
     if (NoTracks >= 10 && pTrack &&  pTrack->flag() > 0) {
       if (pTrack->vertex() == primVtx) ifPrim = 1;
     }
+    StDcaGeometry *dca = gTrack->dcaGeometry();
+    if (! dca) continue;
+    StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
+    Double_t pIn = g3.mag();
+    StThreeVectorD g3Out = gTrack->outerGeometry()->momentum(); 
+    Double_t pOut = g3Out.mag();
+    Float_t length = gTrack->length();
     StPtrVecHit hvec = gTrack->detectorInfo()->hits(kTpcId);
     if (! hvec.size()) continue;
     Int_t npoints = gTrack->detectorInfo()->numberOfPoints(kTpcId);
@@ -312,7 +319,36 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 	  TrackLength70 = pid70->length(); 
 	}
       }
-    }	  
+    }
+    Float_t sMin = 9999;
+    Float_t sMax =    0;
+    const StMcTpcHit *mHitFirst = 0;
+    const StMcTpcHit *mHitLast = 0;
+    for (UInt_t j=0; j<hvec.size(); j++) {// hit loop
+      const StTpcHit *rHit = dynamic_cast<StTpcHit *> (hvec[j]);
+      if (! rHit) continue;
+      if (! rHit->usedInFit() || rHit->flag()) continue;
+      if (rHit->TestBit(StMcHit::kMatched)) {
+	if (Debug()) rHit->Print();
+	pair<rcTpcHitMapIter,rcTpcHitMapIter>
+	  recBounds = theHitMap->equal_range(rHit);
+	for (rcTpcHitMapIter it2=recBounds.first; it2!=recBounds.second; ++it2){
+	  const StMcTpcHit *mHit = dynamic_cast<const StMcTpcHit *> ((*it2).second);
+	  assert ( mHit);
+	  if (mHit->isDet()) continue;
+	  if (mHit->length() < 55.0) continue;
+	  if (Debug()) mHit->Print();
+	  if (mHit->length() < sMin) {
+	    sMin = mHit->length();
+	    mHitFirst = mHit;
+	  }
+	  if (mHit->length() > sMax) {
+	    sMax = mHit->length();
+	    mHitLast = mHit;
+	  }
+	}
+      }
+    }
     for (UInt_t j=0; j<hvec.size(); j++) {// hit loop
       const StTpcHit *rHit = dynamic_cast<StTpcHit *> (hvec[j]);
       if (! rHit) continue;
@@ -366,6 +402,8 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
       fCluster->SetNofPV(rEvent->numberOfPrimaryVertices());
       fCluster->SetNoTracksAtBestPV(NoTracks);
       fCluster->SetSecRow(sector,row);
+      fCluster->SetGlobalMom(pIn, pOut, length);
+      fCluster->SetDca(dca);
       if (primVtx)
 	fCluster->SetXyzPV(primVtx->position().x(),primVtx->position().y(),primVtx->position().z());
       if (tpcRawData) {
@@ -425,6 +463,7 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 #endif
       }
       if (theHitMap) {
+	
 	if (rHit->TestBit(StMcHit::kMatched)) {
 	  if (Debug()) rHit->Print();
 	  pair<rcTpcHitMapIter,rcTpcHitMapIter>
@@ -437,6 +476,13 @@ Int_t StTpcMcAnalysisMaker::SingleCluster() {
 	    fCluster->AddMcHit(mHit);
 	  }
 	}
+      }
+      if (mHitFirst && mHitLast) {
+	Float_t pMcIn = mHitFirst->localMomentum().mag();
+	Float_t pMcOut = mHitLast->localMomentum().mag();
+	fCluster->SetMcMom(pMcIn, pMcOut, sMax - sMin);
+      } else {
+	fCluster->SetMcMom(0., 0., 0.);
       }
       mTpcT->Fill();
     }

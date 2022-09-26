@@ -13,6 +13,7 @@
 #include "TObject.h"
 #include "TClonesArray.h"
 #include "StTpcPixel.h"
+#include "StDcaGeometry.h"
 class StTpcHit;
 class StMcTpcHit;
 
@@ -38,7 +39,7 @@ class TpcTrack : public TObject {
   Float_t fpz;
   Float_t fdEdx;
   Float_t fTrackLength70;
-  ClassDef(TpcTrack,2)
+  ClassDef(TpcTrack,3)
 };
 class TpcCluster : public TObject {
  public:
@@ -60,6 +61,9 @@ class TpcCluster : public TObject {
   void SetNoTracksAtBestPV(Int_t m) {fNoTracksAtBestPV = m;}
   void SetXyzPV(Float_t x = 0, Float_t y = 0, Float_t z = 0) { fxV =x;  fyV =y;  fzV =z;}
   void SetSecRow(Int_t sec, Int_t row) {fSector = sec; fRow = row;}
+  void SetGlobalMom(Double_t pIn, Double_t pOut, Double_t length) {fpIn = pIn; fpOut = pOut; fTrackLength = length;}
+  void SetMcMom(Double_t pIn, Double_t pOut, Double_t length) {fMcpIn = pIn; fMcpOut = pOut; fMcTrackLength = length;}
+  void SetDca(StDcaGeometry *dca) {fDca = *dca;}
   TClonesArray *Pixels() {return fPixels;}
   TClonesArray *McHit()  {return fMcHit;}
   TClonesArray *RcHit()  {return fRcHit;}
@@ -84,6 +88,13 @@ private:
   Float_t fzV;
   Int_t   fSector;
   Int_t   fRow;
+  Float_t fpIn;  // momentum at the fisrt hit
+  Float_t fpOut; // momentum at the last point
+  Float_t fTrackLength; // length
+  Float_t fMcpIn;  // MC momentum at the fisrt RC hit
+  Float_t fMcpOut; // MC momentum at the last RC hit
+  Float_t fMcTrackLength; // length from MC
+  StDcaGeometry fDca;
   TClonesArray *fPixels;
   TClonesArray *fMcHit;
   TClonesArray *fRcHit;
@@ -95,7 +106,7 @@ private:
   static TClonesArray *fgRcTrack;
   static TClonesArray *fgRcTHit;
   
-  ClassDef(TpcCluster,4)  //TpcCluster structure
+  ClassDef(TpcCluster,6)  //TpcCluster structure
 };
 
 #endif
