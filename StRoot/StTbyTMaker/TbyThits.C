@@ -78,34 +78,23 @@ struct Name_t {
   const Char_t *varName;
   const Char_t *cutName;
 };
-Name_t Names[24] = {
-  {"PadFC",       "newP.pad:newP.row","oldP.sector<=0&&newP.sector!=20"},
-  {"PminFC",     "newP.pmin:newP.row","oldP.sector<=0&&newP.sector!=20"},
-  {"PmaxFC",     "newP.pmax:newP.row","oldP.sector<=0&&newP.sector!=20"},
-  {"PadFCAll",    "newP.pad:newP.row","newP.sector!=20"},
-  {"PminFCAll",  "newP.pmin:newP.row","newP.sector!=20"},
-  {"PmaxFCAll",  "newP.pmax:newP.row","newP.sector!=20"},
+Name_t Names[12] = {
+  {"PadnewLost",      "newP.pad:newP.row missing in old but reconstructed by new","oldP.sector<=0"},  //0
+  {"PminnewLost",     "newP.pmin:newP.row missing in old but reconstructed by new","oldP.sector<=0"}, //1
+  {"PmaxnewLost",     "newP.pmax:newP.row missing in old but reconstructed by new","oldP.sector<=0"}, //2
+
+  {"PadnewAll",   "newP.pad:newP.row  reconstructed by new",""},                                      //3
+  {"PminnewAll",  "newP.pmin:newP.row reconstructed by new",""},                                      //4
+  {"PmaxnewAll",  "newP.pmax:newP.row reconstructed by new",""},                                      //5
   
-  {"PadOC",       "oldP.pad:oldP.row","newP.sector<=0&&oldP.sector!=20"},
-  {"PminOC",     "oldP.pmin:oldP.row","newP.sector<=0&&oldP.sector!=20"},
-  {"PmaxOC",     "oldP.pmax:oldP.row","newP.sector<=0&&oldP.sector!=20"},
-  {"PadOCAll",    "oldP.pad:oldP.row","oldP.sector!=20"},
-  {"PminOCAll",  "oldP.pmin:oldP.row","oldP.sector!=20"},
-  {"PmaxOCAll",  "oldP.pmax:oldP.row","oldP.sector!=20"},
+  {"PadoldLost",      "oldP.pad:oldP.row missing in new but reconstructed by old","newP.sector<=0"},  //6
+  {"PminoldLost",     "oldP.pmin:oldP.row missing in new but reconstructed by old","newP.sector<=0"}, //7
+  {"PmaxoldLost",     "oldP.pmax:oldP.row missing in new but reconstructed by old","newP.sector<=0"}, //8
+
+  {"PadoldAll",   "oldP.pad:oldP.row reconstructed by old",""},					      //9
+  {"PminoldAll",  "oldP.pmin:oldP.row reconstructed by old",""},				      //10
+  {"PmaxoldAll",  "oldP.pmax:oldP.row reconstructed by old",""},				      //11
   
-  {"PadFC20",       "newP.pad:newP.row","oldP.sector<=0&&newP.sector==20"},
-  {"PminFC20",     "newP.pmin:newP.row","oldP.sector<=0&&newP.sector==20"},
-  {"PmaxFC20",     "newP.pmax:newP.row","oldP.sector<=0&&newP.sector==20"},
-  {"PadFC20All",    "newP.pad:newP.row","newP.sector==20"},
-  {"PminFC20All",  "newP.pmin:newP.row","newP.sector==20"},
-  {"PmaxFC20All",  "newP.pmax:newP.row","newP.sector==20"},
-  
-  {"PadOC20",       "oldP.pad:oldP.row","newP.sector<=0&&oldP.sector==20"},
-  {"PminOC20",     "oldP.pmin:oldP.row","newP.sector<=0&&oldP.sector==20"},
-  {"PmaxOC20",     "oldP.pmax:oldP.row","newP.sector<=0&&oldP.sector==20"},
-  {"PadOC20All",    "oldP.pad:oldP.row","oldP.sector==20"},
-  {"PminOC20All",  "oldP.pmin:oldP.row","oldP.sector==20"},
-  {"PmaxOC20All",  "oldP.pmax:oldP.row","oldP.sector==20"}
   
 };
 //________________________________________________________________________________
@@ -304,10 +293,16 @@ void hitMateComp::Loop()
    TH2F *padD = new TH2F("padD","pad diff. new - old versus row",72,0.5,72.5,256,-2.0,2.0);
    TH2F *timD = new TH2F("timD","time diff. new - old versus row",72,0.5,72.5,256,-2.0,2.0);
    TH2F *adcR = new TH2F("adcR","log(adc_{new}/adc_{old} versus row",72,0.5,72.5,256,-2.0,2.0);
-   TH2F *npadONi = new TH2F("npadONi","no. of pad new versus old inner",32,0.5,32.5,32,0.5,32.5);
-   TH2F *npadONo = new TH2F("npadONo","no. of pad new versus old outer",32,0.5,32.5,32,0.5,32.5);  
-   TH2F *ntimONi = new TH2F("ntimONi","no. of time buchets  new versus old inner",32,0.5,32.5,32,0.5,32.5);
-   TH2F *ntimONo = new TH2F("ntimONo","no. of time buchets  new versus old outer",32,0.5,32.5,32,0.5,32.5); 
+   TH2F *PadRow[12][24] = {0}; 
+   for (Int_t k = 0; k < 12; k++) {
+    for (Int_t sec = 1; sec <= 24; sec++) {
+      PadRow[k][sec-1] = new TH2F(Form("%s%i",Names[k].histName,sec),Form("%s for %i",Names[k].varName,sec), 72,0.5,72.5,182,0.5,182.5);
+      PadRow[k][sec-1]->SetXTitle("row");
+      PadRow[k][sec-1]->SetYTitle("pad");
+    }
+   }
+   
+
    Long64_t nentries = fChain->GetEntriesFast();
 
    Long64_t nbytes = 0, nb = 0;
@@ -316,24 +311,36 @@ void hitMateComp::Loop()
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
-      if (oldP_sector > 0) {
+      if (oldP_sector <= 0 && newP_sector <= 0) continue;
+      if (oldP_sector > 0 && newP_sector > 0) {
+	if (oldP_sector != newP_sector) continue;
 	RO->Fill(oldP_row);
-      }
-      if (newP_sector > 0) {
 	RN->Fill(newP_row);
-      }
-      if (oldP_sector <= 0 || newP_sector <= 0) continue;
-      RNO->Fill(oldP_row);
-      RON->Fill(newP_row);
-      padD->Fill(newP_row, newP_pad - oldP_pad);
-      timD->Fill(newP_row, newP_timebucket - oldP_timebucket);
-      if (newP_adc > 0 && oldP_adc > 0) adcR->Fill(newP_row, TMath::Log(newP_adc/oldP_adc));
-      if (newP_row < 40.5) {
-	npadONi->Fill(oldP_npads,  newP_npads);
-	ntimONi->Fill(oldP_ntbks,  newP_ntbks);
-      } else {
-	npadONo->Fill(oldP_npads,  newP_npads);
-	ntimONo->Fill(oldP_ntbks,  newP_ntbks);
+	Int_t s = oldP_sector - 1;
+	PadRow[ 3][s]->Fill(newP_row, newP_pad);
+	PadRow[ 4][s]->Fill(newP_row, newP_pmin);
+	PadRow[ 5][s]->Fill(newP_row, newP_pmax);
+
+	PadRow[ 9][s]->Fill(oldP_row, oldP_pad);
+	PadRow[10][s]->Fill(oldP_row, oldP_pmin);
+	PadRow[11][s]->Fill(oldP_row, oldP_pmax);
+	RNO->Fill(oldP_row);
+	RON->Fill(newP_row);
+	padD->Fill(newP_row, newP_pad - oldP_pad);
+	timD->Fill(newP_row, newP_timebucket - oldP_timebucket);
+	if (newP_adc > 0 && oldP_adc > 0) adcR->Fill(newP_row, TMath::Log(newP_adc/oldP_adc));
+      } else if (oldP_sector <= 0) {
+	RN->Fill(newP_row);
+	Int_t s = newP_sector - 1;
+	PadRow[0][s]->Fill(newP_row, newP_pad);
+	PadRow[1][s]->Fill(newP_row, newP_pmin);
+	PadRow[2][s]->Fill(newP_row, newP_pmax);
+      } else if (newP_sector <= 0) {
+	RO->Fill(oldP_row);
+	Int_t s = oldP_sector - 1;
+	PadRow[0][s]->Fill(oldP_row, oldP_pad);
+	PadRow[1][s]->Fill(oldP_row, oldP_pmin);
+	PadRow[2][s]->Fill(oldP_row, oldP_pmax);
       }
    }
 }
