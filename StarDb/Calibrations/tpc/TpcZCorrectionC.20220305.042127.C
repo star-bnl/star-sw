@@ -1,1 +1,1 @@
-TpcZCorrectionC.pp500GeV_2022.C
+TpcZCorrectionC.pp500_2022.C

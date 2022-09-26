@@ -1,1 +1,1 @@
-TpcAccumulatedQ.fixedTarget_2020.C
+TpcAccumulatedQ.C

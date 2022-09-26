@@ -1,1 +1,1 @@
-TpcAccumulatedQ.pp500GeV_2022.C
+TpcAccumulatedQ.pp500_2022.C

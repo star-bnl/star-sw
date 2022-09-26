@@ -8,9 +8,10 @@ TDataSet *CreateTable() {
   row.nrows = nrows;
   row.min =  22.5;
   row.max = 208.0;
-  row.npar =            2;// COLGeV_2021
-  row.a[0] =     0.021926;
-  row.a[1] =  -0.00010694;
+  row.npar =            3;// COLGeV_2021
+  row.a[0] =    -0.011677;
+  row.a[1] =   0.00032938;
+  row.a[2] =  -1.3826e-06;
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize());
   row.idx   = 2;
@@ -18,20 +19,21 @@ TDataSet *CreateTable() {
   row.min =  16.5;
   row.max = 208.0;
   row.npar =            5;// COLGeV_2021
-  row.a[0] =    -0.066745;
-  row.a[1] =    0.0059675;
-  row.a[2] =  -8.2296e-05;
-  row.a[3] =   3.9986e-07;
-  row.a[4] =  -6.7354e-10;
+  row.a[0] =    -0.016645;
+  row.a[1] =    0.0040149;
+  row.a[2] =  -5.4503e-05;
+  row.a[3] =    2.676e-07;
+  row.a[4] =  -4.5573e-10;
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize());
   row.idx   = 3;
   row.nrows = nrows;
   row.min =  22.5;
   row.max = 208.0;
-  row.npar =            2;// COLGeV_2021
-  row.a[0] =     0.025804;
-  row.a[1] =  -0.00013741;
+  row.npar =            3;// COLGeV_2021
+  row.a[0] =    -0.015862;
+  row.a[1] =   0.00039204;
+  row.a[2] =  -1.6591e-06;
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize());
   row.idx   = 4;
@@ -39,11 +41,11 @@ TDataSet *CreateTable() {
   row.min =  16.5;
   row.max = 208.0;
   row.npar =            5;// COLGeV_2021
-  row.a[0] =    -0.084271;
-  row.a[1] =    0.0076011;
-  row.a[2] =  -0.00010707;
-  row.a[3] =    5.307e-07;
-  row.a[4] =  -9.0343e-10;
+  row.a[0] =    -0.015633;
+  row.a[1] =    0.0048364;
+  row.a[2] =  -6.6551e-05;
+  row.a[3] =   3.2975e-07;
+  row.a[4] =  -5.6329e-10;
   tableSet->AddAt(&row);
   return (TDataSet *)tableSet;
 }

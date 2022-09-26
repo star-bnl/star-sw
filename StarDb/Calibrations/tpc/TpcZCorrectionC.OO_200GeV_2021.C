@@ -9,20 +9,19 @@ TDataSet *CreateTable() {
   row.min =  22.5;
   row.max = 208.0;
   row.npar =            2;// OO_200GeV_2021
-  row.a[0] =    -0.043671;
-  row.a[1] =   0.00031128;
+  row.a[0] =    -0.053578;
+  row.a[1] =   0.00036176;
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize());
   row.idx   = 2;
   row.nrows = nrows;
   row.min =  16.5;
   row.max = 208.0;
-  row.npar =            5;// OO_200GeV_2021
-  row.a[0] =     -0.19749;
-  row.a[1] =    0.0083381;
-  row.a[2] =  -0.00013062;
-  row.a[3] =   7.8764e-07;
-  row.a[4] =   -1.546e-09;
+  row.npar =            4;// OO_200GeV_2021
+  row.a[0] =      0.15834;
+  row.a[1] =   -0.0054502;
+  row.a[2] =   4.4321e-05;
+  row.a[3] =  -9.7022e-08;
   tableSet->AddAt(&row);
   return (TDataSet *)tableSet;
 }
