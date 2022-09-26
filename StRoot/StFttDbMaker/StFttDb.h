@@ -113,12 +113,34 @@ public:
 
     void getGloablOffset( UChar_t plane, UChar_t quad, float &dx, float &sx, float &dy, float &sy, float &dz, float &sz );
 
+    enum TimeCutMode {
+      CalibratedBunchCrossingMode = 0,
+      TimebinMode = 1
+    };
+
+    void setTimeCut(TimeCutMode mode, int low=-70, int high=30)
+    {
+        mUserDefinedTimeCut = true;
+        mTimeCutMode=mode; 
+        mTimeCutLow=low; 
+        mTimeCutHigh=high;
+    }
+
     void getTimeCut( StFttRawHit * hit, int &mode, int &l, int &h ){
-      mode = 0;
-      // ideal; take +/- 3 bunch crossings
-      l = -3;
-      h = 3;
-      // TODO: store in DB?
+        mode = mTimeCutMode;
+        l = mTimeCutLow;
+        h = mTimeCutHigh;
+        if (mUserDefinedTimeCut)
+            return;
+
+        // load calibrated data windows from DB 
+        size_t hit_uuid = uuid( hit );
+        if ( dwMap.count( hit_uuid ) ){
+            mode = dwMap[ hit_uuid ].mode;
+            l = dwMap[ hit_uuid ].min;
+            h = dwMap[ hit_uuid ].max;
+        }
+    
     }
 
  private:
@@ -126,12 +148,14 @@ public:
   int   mRun=0;                          //! run#
   int   mDebug=0;                        //! >0 dump tables to text files    
 
+  bool mUserDefinedTimeCut = false;
+  TimeCutMode mTimeCutMode;
+  int mTimeCutLow, mTimeCutHigh;
+
     std :: map< uint16_t , uint16_t > mMap;
     std :: map< uint16_t , uint16_t > rMap; // reverse map 
 
     std :: map< uint16_t , FttDataWindow > dwMap;
-
-    // bool combineHVRows[nRowsPerQuad][nRowsPerQuad];
 
   ClassDef(StFttDb,1)   //StAF chain virtual base class for Makers        
 };

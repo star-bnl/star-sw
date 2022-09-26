@@ -78,7 +78,7 @@ protected:
 class StarAgmlChecker : public TGeoChecker
 {
  public:
-  StarAgmlChecker( TGeoManager *manager );
+  StarAgmlChecker( TGeoManager *manager, bool scoreAir=true );
   ~StarAgmlChecker(){ /* nada */ };
 
   /// Produces plots showing the total amount of material within the top 
@@ -107,6 +107,8 @@ class StarAgmlChecker : public TGeoChecker
 			    const Double_t  zmax  = +4000.0,
 			    const Option_t *opts = "top" );
 
+  
+
   /// Provides a checksum for the volume
   TMD5 CheckSum( const Char_t *volume );
 
@@ -128,6 +130,9 @@ class StarAgmlChecker : public TGeoChecker
   Double_t   *mVal1, *mVal2;
 
   std::map< TGeoVolume *, CheckSum_t *> mCheckSum; // stores volume-wise checksum
+
+  bool mScoreAir;
+
 
   void Update( CheckSum_t *sum, TGeoMaterial *mat ); /// Adds material to checksum
   void Update( CheckSum_t *sum, TGeoNode     *nod ); /// Adds node to checksum
