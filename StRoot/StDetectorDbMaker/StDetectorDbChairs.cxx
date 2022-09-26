@@ -1325,16 +1325,7 @@ MakeChairInstance(itpcDeadFEE,Calibrations/tpc/itpcDeadFEE);
 //#define MakeChairInstance(STRUCT,PATH)
 ClassImp(St_itpcPadGainT0C);
 St_itpcPadGainT0C *St_itpcPadGainT0C::fgInstance = 0;
-St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
-  if (fgInstance) return fgInstance;
-  St_itpcPadGainT0 *table = (St_itpcPadGainT0 *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/itpcPadGainT0");
-  if (! table) {
-    LOG_WARN << "St_itpcPadGainT0C::instance Calibrations/tpc/itpcPadGainT0\twas not found" << endm;
-    assert(table);
-  }
-  static struct rowpadFEEmap_t {// FEE & RDO map for iTPC
-    Int_t row, padMin, padMax, fee, rdo;
-  } rowpadFEE[] = {
+rowpadFEEmap_t  St_itpcPadGainT0C::rowpadFEE[] = {
     { 1,  1, 26, 54, 1},
     { 1, 27, 52, 55, 1},
     { 2,  1, 27, 54, 1},
@@ -1576,9 +1567,15 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
     {40, 41, 60,  3, 3},
     {40, 61, 80,  4, 4},
     {40, 81,100,  5, 4},
-    
   };
-  static Int_t NC = sizeof(rowpadFEE)/sizeof(rowpadFEEmap_t);
+Int_t St_itpcPadGainT0C::NCrowpadFEE = sizeof(St_itpcPadGainT0C::rowpadFEE)/sizeof(rowpadFEEmap_t);
+St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
+  if (fgInstance) return fgInstance;
+  St_itpcPadGainT0 *table = (St_itpcPadGainT0 *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/itpcPadGainT0");
+  if (! table) {
+    LOG_WARN << "St_itpcPadGainT0C::instance Calibrations/tpc/itpcPadGainT0\twas not found" << endm;
+    assert(table);
+  }
   St_itpcDeadFEEC *dead = St_itpcDeadFEEC::instance();
   if (dead) {
     itpcPadGainT0_st *g = table->GetTable();
@@ -1593,7 +1590,7 @@ St_itpcPadGainT0C *St_itpcPadGainT0C::instance() {
       //      Int_t rdo = dead->RDO(i);
       Int_t nFEE = 1;
       if (fee > 0) {
-	nFEE = NC;
+	nFEE = NCrowpadFEE;
       }
       for (Int_t j = 0; j < nFEE; j++) {
 	if (fee > 0) {
@@ -1622,7 +1619,45 @@ MakeChairInstance(tpcExtraGainCorrection,Calibrations/tpc/tpcExtraGainCorrection
 #include "St_tpcPadGainT0BC.h"
 // tpcPadGainT0B table (indexed) is not used any more. tpcPadGainT0BChair combines nonindexed tpcPadGainT0 and itpcPadGainT0
 St_tpcPadGainT0BC *St_tpcPadGainT0BC::fgInstance = 0;
-St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {if (! fgInstance) fgInstance = new St_tpcPadGainT0BC(); return fgInstance;}
+St_tpcPadGainT0BC *St_tpcPadGainT0BC::instance() {
+  if (! fgInstance) {
+    fgInstance = new St_tpcPadGainT0BC(); 
+    // Apply additional correction for gain tables
+    Int_t run = StMaker::GetChain()->GetRunNumber();
+    St_tpcExtraGainCorrectionC *extra = St_tpcExtraGainCorrectionC::instance();
+    Int_t nrows = extra->nrows();
+    for (Int_t i = 0; i < nrows; i++) {
+      if (extra->idx(i) <= 0) continue;
+      if (run < extra->runMin(i) || run > extra->runMax(i)) continue;
+      Int_t sector = extra->sector(i);
+      if (sector < 0 || sector > 24) continue;
+      Int_t row    = extra->row(i);
+      Int_t padMin = extra->padMin(i);
+      Int_t padMax = extra->padMax(i);
+      Int_t RDO    = extra->RDO(i);
+      Int_t FEE    = extra->FEE(i);
+      Int_t status = extra->status(i);
+      LOG_WARN << "St_tpcPadGainT0BC::instance found extra correction for run = " << run 
+	       << Form(" with sec = %2i, row = %2i, padMin/Max = %3i/%3i, RDO = %2i, FEE = %2i, status = %i", 
+		       sector, row, padMin, padMax, RDO, FEE, status) << endm;
+      if (! status) continue;
+      Int_t rowMin = row;
+      Int_t rowMax = row;
+      if (row <= 0) {rowMin = 1; rowMax = 72;}
+      if (padMin > padMax) {
+	// Calculate padMin/Max from FEE or RDO
+      }
+      for (Int_t r = rowMin; r <= rowMax; r++) {
+	Float_t *gains = St_tpcPadGainT0BC::instance()->Gains(sector, r);
+	for (Int_t p = padMin; p <= padMax; p++) {
+	  LOG_WARN << "St_tpcPadGainT0BC::instance reset gain[" << sector-1 << "][" << r - 1 << "][" << p-1 << "] = " << gains[p-1] << " to zero" << endm;
+	  gains[p-1] = 0;
+	}
+      }
+    }
+  }
+  return fgInstance;
+}
 //________________________________________________________________________________
 Float_t 	St_tpcPadGainT0BC::Gain(Int_t sector, Int_t row, Int_t pad) const {
   Float_t gain = 0;

@@ -4,6 +4,9 @@
 #include "TChair.h"
 #include "tables/St_itpcPadGainT0_Table.h"
 
+struct rowpadFEEmap_t {// FEE & RDO map for iTPC
+    Int_t row, padMin, padMax, fee, rdo;
+};
 class St_itpcPadGainT0C : public TChair {
  public:
   static St_itpcPadGainT0C* 	instance();
@@ -23,6 +26,8 @@ class St_itpcPadGainT0C : public TChair {
     for (Int_t pad=1; pad<=120; pad++) if (Gain(sector,row,pad)>0) return kTRUE;
     return kFALSE;
   }
+  static rowpadFEEmap_t rowpadFEE[];
+  static Int_t NCrowpadFEE;
  protected:
   St_itpcPadGainT0C(St_itpcPadGainT0 *table=0) : TChair(table) {}
   virtual ~St_itpcPadGainT0C() {fgInstance = 0;}
