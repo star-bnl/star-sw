@@ -833,8 +833,9 @@ StETofMatchMaker::readETofDetectorHits( eTofHitVec& detectorHitVec )
         StThreeVectorF globalPos( xg[ 0 ], xg[ 1 ], xg[ 2 ] );
 
         hit.globalPos = globalPos;
-
-        hit.strip = ( ( StETofGeomCounter* ) mETofGeom->findETofNode( moduleId, counterId ) )->findStrip( xl );
+	StETofGeomCounter* node =( StETofGeomCounter* )  mETofGeom->findETofNode( moduleId, counterId );
+	if (! node) continue;
+        hit.strip = node->findStrip( xl );
 
         if( mDebug ) {
             LOG_DEBUG << "hit( " << hit.index2ETofHit << " ) at sector: " << hit.sector;
