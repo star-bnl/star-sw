@@ -123,8 +123,6 @@ void PeakAna::Copy(TObject& obj) const
   ((PeakAna&)obj).mTunnelThreshold = mTunnelThreshold;
   
   ((PeakAna&)obj).mPainter = 0;//Dont' copy painter
-  
-  return;  
 }
 
 TObject* PeakAna::Clone(const char* newname) const
@@ -307,7 +305,7 @@ void PeakAna::ResetPeak()
 
 void PeakAna::SetData(TGraph* graph)
 {
-  //if( graph==0 ){std::cout << "ERROR:Graph cannot be 0!" << std::endl; exit(0);}
+  if( graph==0 ){std::cout << "ERROR:Graph cannot be 0!" << std::endl; exit(0);}
   ResetPeak();
   if( mInternalSignal && mG_Data!=0 ){delete mG_Data;}
   mG_Data = graph;
@@ -432,8 +430,7 @@ void PeakAna::ConvertPeaksToGraph()
 PeakAna* PeakAna::ConvertPeaksToAna(const PeakAna &Ana)
 {
   TGraph* graph = new TGraph();
-  for( Int_t ipeak=0; ipeak<Ana.NPeaks(); ++ipeak )
-  {
+  for( Int_t ipeak=0; ipeak<Ana.NPeaks(); ++ipeak ){
     graph->SetPoint(ipeak, Ana.GetPeak(ipeak).mPeakX, Ana.GetPeak(ipeak).MidPoint() );
   }
   PeakAna* NewAna = new PeakAna(Ana,graph);

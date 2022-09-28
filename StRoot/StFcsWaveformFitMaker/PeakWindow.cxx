@@ -37,13 +37,13 @@ PeakWindow::PeakWindow(Double_t start, Double_t end)
 
 PeakWindow::PeakWindow(const PeakWindow &oldpeak)
 {
-  ((PeakWindow&)oldpeak).Copy(*this);
+  oldpeak.Copy(*this);
 }
 
 PeakWindow& PeakWindow::operator=(const PeakWindow& rhs)
 {
   if( this == &rhs ){ return *this; }
-  ((PeakWindow&)rhs).Copy(*this);
+  rhs.Copy(*this);
 
   return *this;
 }

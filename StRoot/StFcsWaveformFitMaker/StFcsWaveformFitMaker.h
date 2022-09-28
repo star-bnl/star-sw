@@ -52,7 +52,6 @@
 #define STROOT_STFCSWAVEFORMFITMAKER_STFCSWAVEFORMFITMAKER_H_
 
 #include "StMaker.h"
-//#include "StFcsPulseFit.h"
 #include "StFcsPulseAna.h"
 
 #include "TH2.h"
@@ -64,8 +63,6 @@ class StFcsDbPulse;
 class TGraphAsymmErrors;
 class TGraph;
 class TCanvas;
-//class TH2F;
-//class TFile;
 
 class StFcsWaveformFitMaker : public StMaker {
 public:
@@ -75,7 +72,7 @@ public:
     virtual int Init();
     virtual int InitRun(int runNumber);
     virtual int Make();
-    virtual int Finish(); 
+    virtual int Finish();
     virtual void Clear(Option_t* option = "");
     
     void setDebug(int v=1)        {SetDebug(v);}
@@ -153,11 +150,7 @@ public:
     // res[6] pedestal Sigma
     // res[7] pedestal Chi2/NDF
     float LedFit( TGraphAsymmErrors* g, float* res, TF1*& f);//! mEnergySelect=31 (TF1 is for LED pulse fit)
-
-    //pulse shape functions
-    //double pulseShape(double* x, double* p);
-    //double multiPulseShape(double* x, double* p);
-
+  
     //Draw fits    
     void setMaxPage(int v){mMaxPage=v;}         
     void setSkip(int v){mSkip=v;}         
@@ -177,8 +170,6 @@ public:
     void printArray() const;
     void drawFitter(Option_t* opt){ if(mPulseFit!=0){mPulseFit->Draw(opt);} }
     void drawCh(UInt_t detid, UInt_t ch) const;
-    
-    //static Int_t getYMinMax(TGraphAsymmErrors* gae, Double_t &Ymin, Double_t &Ymax, Double_t xmin=-5, Double_t xmax=2000);//Returns index for max y
 
  protected:
     TClonesArray mChWaveData;  //Contains all graph data

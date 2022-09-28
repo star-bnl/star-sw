@@ -81,7 +81,7 @@ class StFcsDbPulse : public TDataSet {
   int mTail;
   static const int mAdcSaturation = 4000;
 
-  ClassDef(StFcsDbPulse, 1.0);
+  ClassDef(StFcsDbPulse, 1);
 };
 
 #endif
