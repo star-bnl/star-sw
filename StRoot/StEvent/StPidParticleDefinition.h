@@ -11,7 +11,8 @@ enum StPidParticle {
     kPidTriton   ,
     kPidHe3      ,
     kPidAlpha    ,
-    kPidHe6      ,
+    KPidParticles,
+    kPidHe6 = KPidParticles,
     kPidLi5      ,
     kPidLi6      ,
     kPidLi7      ,
@@ -19,6 +20,6 @@ enum StPidParticle {
     kPidBe9      ,
     kPidBe10     ,
     kPidB11      ,
-    KPidParticles
+    KPidAllParticles
 };
 #endif /* __StPidParticleDefinition_h__ */
