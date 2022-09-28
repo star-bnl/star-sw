@@ -87,6 +87,6 @@
 <li> TFG22e Freeze 7p7GeV 2021 dE/dx calibration                         2022-05-23 14:34:38 -0400  (HEAD -> TFG, tag: TFG21e)
 <li> TFG22f Fix TFG StTrackTopologyMap, TPC23, ClusteringHints streamer  2022-06-04 09:16:14 -0400  (HEAD -> TFG, tag: TFG22f)
 <li> TFG22g Freeze new dE/dx model                                       2022-08-11 10:05:12 -0400  (HEAD -> TFG, tag: TFG22g)
-<li> TFG22h Freeze befoore updating dE/dx model                          2022-09-26 10:05:12 -0400  (HEAD -> TFG, tag: TFG22h)
+<li> TFG22h Freeze befoore updating dE/dx model, fix   KPidParticles     2022-09-28 15:33:43 -0400  (HEAD -> TFG, tag: TFG22h_1)
 <li>.DEV2   head of TFG git repository
 </ul>
