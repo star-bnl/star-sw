@@ -4,7 +4,7 @@ module use /cvmfs/star.sdcc.bnl.gov/star-spack/spack/share/spack/modules/linux-r
 #module load root-6.24.00
 source /star/simu/simu/jwebb/ROOT/local/bin/thisroot.csh
 
-module load clhep-2.4.4.0
+module load clhep-2.4.5.1
 module load geant4-10.4.0
 module load geant4-data-10.4.0
 
