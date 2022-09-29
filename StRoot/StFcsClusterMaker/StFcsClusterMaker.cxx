@@ -115,6 +115,7 @@ int StFcsClusterMaker::Make() {
       if(det==0){
 	mNeighborDistance = mNeighborDistance_Ecal;
 	mDistanceAdvantage = mDistanceAdvantage_Ecal;
+	mTowerEThreSeed = mTowerEThreSeed_Ecal;
 	mTowerEThreshold = mTowerEThreshold_Ecal;
 	mTowerEThreMoment = mTowerEThreMoment_Ecal;
 	mTowerERatio2Split = mTowerERatio2Split_Ecal;    
@@ -122,6 +123,7 @@ int StFcsClusterMaker::Make() {
       if(det==2){
 	mNeighborDistance = mNeighborDistance_Hcal;
 	mDistanceAdvantage = mDistanceAdvantage_Hcal;
+	mTowerEThreSeed = mTowerEThreSeed_Hcal;
 	mTowerEThreshold = mTowerEThreshold_Hcal;
 	mTowerEThreMoment = mTowerEThreMoment_Hcal;
 	mTowerERatio2Split = mTowerERatio2Split_Hcal;    
@@ -174,18 +176,22 @@ int StFcsClusterMaker::makeCluster(int det) {
       }
     }
     StFcsCluster* cluster=0;
-    if(neighborClusterId==-1){ 
+    if(neighborClusterId==-1) {
       //no neighbor, thus found new cluster seed
-      cluster = new StFcsCluster();
-      cluster->setId(ncluster);
-      cluster->setDetectorId(det);
-      cluster->hits().push_back(hit);
-      hit->setCluster(cluster);
-      updateCluster(cluster);
-      mFcsCollection->addCluster(det,cluster); 
-      neighbor.push_back(cluster);
-      //      neighbor[nNeighbor]=cluster;
-      nNeighbor++;
+      if(e >= mTowerEThreSeed){ 
+	cluster = new StFcsCluster();
+	cluster->setId(ncluster);
+	cluster->setDetectorId(det);
+	cluster->hits().push_back(hit);
+	hit->setCluster(cluster);
+	updateCluster(cluster);
+	mFcsCollection->addCluster(det,cluster); 
+	neighbor.push_back(cluster);
+	nNeighbor++;
+      }else{
+	//no neighbor and not exceeding seed threshold 
+	//what should we do??? I guess nothing...
+      }
     }else{ 
       //found neighbor tower which has higher energy
       //add to the cluster with closest cluster

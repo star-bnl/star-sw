@@ -71,6 +71,7 @@ public:
 
     void setNeighborDistance(float e, float h){mNeighborDistance_Ecal=e; mNeighborDistance_Hcal=h;}
     void setDistanceAdvantage(float e, float h){mDistanceAdvantage_Ecal=e; mDistanceAdvantage_Hcal=h;}
+    void setTowerEThreSeed(float e, float h){mTowerEThreSeed_Ecal=e; mTowerEThreSeed_Hcal=h;}
     void setTowerEThreshold(float e, float h){mTowerEThreshold_Ecal=e; mTowerEThreshold_Hcal=h;}
     void setTowerEThreMoment(float e, float h){mTowerEThreMoment_Ecal=e; mTowerEThreMoment_Hcal=h;}
     void setTowerERatio2Split(float e, float h){mTowerERatio2Split_Ecal=e; mTowerERatio2Split_Hcal=h;}
@@ -97,6 +98,10 @@ public:
     float mDistanceAdvantage      = 1.2;  //! if similar distanced cluster found, higher E cluster takes it
     float mDistanceAdvantage_Ecal = 1.2;  //! for Ecal
     float mDistanceAdvantage_Hcal = 1.2;  //! for Hcal
+
+    float mTowerEThreSeed      = 1.0;     //! Tower E threshold for cluster seed [GeV]
+    float mTowerEThreSeed_Ecal = 1.0;     //! for Ecal
+    float mTowerEThreSeed_Hcal = 1.0;     //! for Hcal
 
     float mTowerEThreshold      = 0.01;   //! Tower E threshold for clustering [GeV] 
     float mTowerEThreshold_Ecal = 0.01;   //! for Ecal
