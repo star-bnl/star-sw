@@ -81,7 +81,8 @@ There is a helper data class *PeakWindow* which holds the data and does not inhe
 
 //Custom Headers
 #include "PeakWindow.h"
-#include "PeakAnaVirtualPainter.h"
+//#include "PeakAnaVirtualPainter.h"
+class PeakAnaPainter;
 
 class PeakAna : public TObject
 {
@@ -142,7 +143,7 @@ public:
   //                       *A* is to show for all peaks,
   //                       *D* is whether to show detailed printout or not (works with option *S* or *A*)
   virtual void Paint(Option_t *opt="");
-  PeakAnaVirtualPainter* GetPainter(Option_t *opt="");
+  PeakAnaPainter* GetPainter(Option_t *opt="");
   
   void ForceInternal(){ mInternalSignal=true; }//Call this to force this class to delete the internal TGraph object
   PeakAna* GausFilter(Int_t sizeavgs=0, bool copy=true);//If 'copy'=true return a new "PeakAna" that has Gaussian Filtered data.
@@ -332,7 +333,7 @@ protected:
   Int_t mFilterScale;//Filter scale, i.e. how many points to group together when applying filter
   //Double_t mFilterSigma;//Filter sigma, i.e. sigma to use to use for Gaussian Filter (0 means sigma=mFilterScale/2)
   
-  PeakAnaVirtualPainter* mPainter;
+  PeakAnaPainter* mPainter;
   
   static double* GaussianMatrix2D(int rx,  double sx=0, int ry=0, double sy=0, bool kNorm=true);
   

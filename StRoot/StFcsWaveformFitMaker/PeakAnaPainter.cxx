@@ -1,4 +1,5 @@
 #include "PeakAnaPainter.h"
+#include "PeakAna.h"
 
 ClassImp(PeakAnaPainter)
 
@@ -72,6 +73,7 @@ void PeakAnaPainter::SetHitLineWidth(Width_t width)
 
 void PeakAnaPainter::Paint(Option_t* opt)
 {
+  if( mPA==0 ){ return; }
   std::string option(opt);
 
   CleanPainter();
@@ -95,17 +97,6 @@ void PeakAnaPainter::Paint(Option_t* opt)
   }
   else{ mGraphOption = option; }
 
-  //std::cout << "|GraphOption:"<<mGraphOption << std::endl;
-  //std::cout << "|PeakOption:"<<mPeakOption << std::endl;
-  //std::cout << "|StatsOption:"<<mStatsOption << std::endl;
-  
-  //Ssiz_t statsoptpos = option.Index("S",TString::kIgnoreCase);
-  //if( statsoptpos>0 ){
-  //  TString drawoption( option(0,statsoptpos) );
-  //  mStatsOption = option( statsoptpos+1,option.Length() );
-  //  option = drawoption;
-  //}
-
   mPeakOption.ToLower();
   if( mGraphOption.Length()==0 ){ drawgraph=false; }
   //if( peakopts.Contains("e") ){ drawgraph=false; }
@@ -114,14 +105,7 @@ void PeakAnaPainter::Paint(Option_t* opt)
   if( mPeakOption.Contains("f") ){ drawfoundpeakqa=true; }
   if( mPeakOption.Contains("p") ){ drawfullpeakqa=true;  }
   if( mPeakOption.Contains("a") ){ drawbaselines=true; drawfullpeakqa=true; }
-  /*
-  if( option.Contains("R",TString::kIgnoreCase) ){ this->PaintFoundPeak(); }
-  if( option.Contains("F",TString::kIgnoreCase) ){ this->PaintFoundPeakQa(); }
-  if( option.Contains("A",TString::kIgnoreCase) ){ this->PaintPeakQa();    }//A bit redundant to do both F and A need to be more careful
-  if( option.Contains("B",TString::kIgnoreCase) ){ this->PaintBaselines(); }
-  if( option.Contains("F",TString::kIgnoreCase) ){ this->PaintFoundPeak(); }
-  if( option.Contains("P",TString::kIgnoreCase) ){ this->PaintPeakRanges(); }
-  */
+
   if( drawfoundpeakqa && drawfullpeakqa ){ drawfoundpeakqa=false; }//Redundant to do both found and all peaks
   if( drawgraph )                { this->PaintRawData(); }
   if( region && drawgraph )      { this->PaintFoundPeak(); } //Doesn't make sense to restrict graph range if graph is not being drawn

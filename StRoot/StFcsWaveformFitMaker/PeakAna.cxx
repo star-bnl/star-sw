@@ -1,4 +1,5 @@
 #include "PeakAna.h"
+#include "PeakAnaPainter.h"
 
 ClassImp(PeakAna)
 
@@ -1085,9 +1086,13 @@ void PeakAna::Paint(Option_t* opt)
   }
 }
 
-PeakAnaVirtualPainter* PeakAna::GetPainter(Option_t *opt)
+PeakAnaPainter* PeakAna::GetPainter(Option_t *opt)
 {
-  if( mPainter==0 ){mPainter = PeakAnaVirtualPainter::MakePainter(this);}
+  //if( mPainter==0 ){mPainter = PeakAnaPainter::MakePainter(this);}
+  if( mPainter==0 ){
+    mPainter = new PeakAnaPainter();
+    mPainter->SetPeakAna(this);
+  }
   mOption = opt;
   return mPainter;
 }

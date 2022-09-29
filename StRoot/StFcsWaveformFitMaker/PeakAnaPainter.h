@@ -31,13 +31,14 @@ Painter class for PeakAna
 #include "TObject.h"
 #include "TKey.h"
 #include "TH1.h"
+#include "TPaveText.h"
 
 //Custom Headers
 #include "PeakWindow.h"
-#include "PeakAnaVirtualPainter.h"
-#include "PeakAna.h"
 
-class PeakAnaPainter : public PeakAnaVirtualPainter
+class PeakAna;
+
+class PeakAnaPainter
 {
 public:
   PeakAnaPainter();
