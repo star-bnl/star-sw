@@ -32,11 +32,18 @@ set MYROOTLIB="/cvmfs/star.sdcc.bnl.gov/star-spack/spack/opt/spack/linux-rhel7-x
 set INCLUDES = "-I /star/simu/simu/jwebb/GEANT3/include/TGeant3/ -I/star/simu/simu/jwebb/GEANT4VMC/include/geant4vmc/ "
 
 
+     cons +stic
+     
      cons $1 ${EXCLUDE} \
              LIBPATH="#.sl73_x8664_gcc485/lib:${MYROOTLIB}:/usr/lib64/mysql:/opt/star/sl73_x8664_gcc485/qt4/lib:/opt/star/sl73_x8664_gcc485/lib " \
              CXXFLAGS="`geant4-config --cflags` -fdiagnostics-color=always $INCLUDES -m64 -fPIC -pipe -Wall -Woverloaded-virtual -std=c++0x -Wno-long-long -pthread -Wno-shadow -Wno-unused-variable -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-overloaded-virtual -Wno-unused-but-set-variable -Wno-return-type"
 
-cp StRoot/StGeant4Maker/macros/geant4star .$STAR_HOST_SYS/bin 
+     cons +asps \
+             LIBPATH="#.sl73_x8664_gcc485/lib:${MYROOTLIB}:/usr/lib64/mysql:/opt/star/sl73_x8664_gcc485/qt4/lib:/opt/star/sl73_x8664_gcc485/lib " \
+             CXXFLAGS="`geant4-config --cflags` -fdiagnostics-color=always $INCLUDES -m64 -fPIC -pipe -Wall -Woverloaded-virtual -std=c++0x -Wno-long-long -pthread -Wno-shadow -Wno-unused-variable -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-overloaded-virtual -Wno-unused-but-set-variable -Wno-return-type"
+
+
+# TODO -- cp StRoot/StGeant4Maker/macros/geant4star .$STAR_HOST_SYS/bin 
 
 
 setenv STAR $MYSTAR 
