@@ -178,11 +178,11 @@ void StMuChainMaker::subFilter(string filter) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuChainMaker::add( StMuStringIntPairVector fileList ) {
+void StMuChainMaker::add( StMuStringLongPairVector fileList ) {
     DEBUGMESSAGE3("");
     // if no entries in db, just add file
 
-    StMuStringIntPairVectorIterator iter;
+    StMuStringLongPairVectorIterator iter;
     for ( iter=fileList.begin(); iter!=fileList.end(); iter++) {
 	if (mFileCounter>=mMaxFiles) break;
 	add( *iter );
@@ -193,7 +193,7 @@ void StMuChainMaker::add( StMuStringIntPairVector fileList ) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /// This method contains a hidden assumption for STAR Scheduler purposes
-void StMuChainMaker::add( StMuStringIntPair filenameEvents) { 
+void StMuChainMaker::add( StMuStringLongPair filenameEvents) {
     string file = filenameEvents.first;
     int entries = filenameEvents.second;
 
@@ -251,7 +251,8 @@ void StMuChainMaker::fromDir(string dir) {
     if ( good && pass(name,mSubFilters) ) {
       char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
       // add it to the list of files
-      mFileList.push_back( StMuStringIntPair( fullFile, TChain::kBigNumber ) );
+      const auto TChain_kBigNumber = TChain::kBigNumber; // https://github.com/root-project/root/issues/9422
+      mFileList.push_back( StMuStringLongPair( fullFile, TChain_kBigNumber ) );
       delete []fullFile;
     }
   }   
@@ -319,7 +320,7 @@ void StMuChainMaker::fromFileCatalog(string list) {
     file += +"/";
     file += row->GetField(1);
     entries = atoi(row->GetField(2));
-    mFileList.push_back( StMuStringIntPair(file, entries ));
+    mFileList.push_back( StMuStringLongPair(file, entries ));
   }
 
   server->Close();
@@ -343,11 +344,11 @@ void StMuChainMaker::fromList(string list) {
       inputStream.getline(line,512);
 	  string ltest(line);
 	  if  (inputStream.good()) {
-	  int numberOfEvents = TChain::kBigNumber;
+	  Long_t numberOfEvents = TChain::kBigNumber;
 	  int iret = sscanf(line,"%s%i",name, &numberOfEvents);
 		  if(iret) {/*warnOff*/}
 	  if ( pass(name,mSubFilters) && ltest!="") {
-	      mFileList.push_back( StMuStringIntPair( name, numberOfEvents) );
+	      mFileList.push_back( StMuStringLongPair( name, numberOfEvents) );
 	  }
       }
   }   
@@ -358,7 +359,8 @@ void StMuChainMaker::fromList(string list) {
 void StMuChainMaker::fromFile(string file) {
   DEBUGMESSAGE2("");
   DEBUGMESSAGE2(mTreeName.c_str());
-  mFileList.push_back( StMuStringIntPair( file, TChain::kBigNumber ) );
+  const auto TChain_kBigNumber = TChain::kBigNumber; // https://github.com/root-project/root/issues/9422
+  mFileList.push_back( StMuStringLongPair( file, TChain_kBigNumber ) );
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------

@@ -175,6 +175,53 @@ Assuming the default STAR environment on a RACF interactive node the code can be
 compiled as usual with the `cons` command.
 
 
+## Containers
+
+Containers are useful for many reasons. In particular, they can be used to
+eliminate the necessity to setup the build and run time software environments
+for the developers and users while allowing to run containerized application on
+different operating systems and platforms.
+
+It is possible to recreate the environment that includes all dependencies
+required to compile the STAR libraries by using the [`star-sw` Docker
+images](https://github.com/star-bnl/star-sw/pkgs/container/star-sw). These
+images are automatically updated on every successful merge into the main branch
+and created for every tagged release.
+
+If `singularity` is installed on your system and, for example, you want to work
+with the STAR libraries built against ROOT5 with GCC 4.8.5 run the following
+command:
+
+```shell
+singularity run docker://ghcr.io/star-bnl/star-sw:main-root5-gcc485 bash -l
+```
+
+It may take some time to download the image and instantiate a singularity
+container but once completed you should see a shell prompt from where you can
+browse your local files. At this point you should be able to compile and test
+modifications made to a package in your local `StRoot/` by running `cons` as
+usual.
+
+In the above example `bash -l` is a command we wanted to run inside the
+container. The shell process is interactive, therefore, in order to quit it just
+type `exit` in the terminal. Similarly, an interactive ROOT session inside the
+container environment can be started by executing the following command:
+
+```shell
+singularity run docker://ghcr.io/star-bnl/star-sw:main-root5-gcc485 root4star
+```
+
+In a more elaborate example below, we will bind a volume mounted on interactive
+SDCC machines (`/star/rcf`) inside the container and run the `bfc.C` macro over
+one of our test files via `root4star` in the batch mode. After the process
+completes it should return to your normal host environment.
+
+```shell
+singularity run -B /star/rcf docker://ghcr.io/star-bnl/star-sw:main-root5-gcc485 root4star -b -q -l 'bfc.C(10, \"pp2022,StiCA,BEmcChkStat,epdhit\", \"/star/rcf/test/daq/2022/010/23010027/st_physics_23010027_raw_1000015.daq\")'
+```
+
+
+
 ## Contributing to the STAR software library
 
 ### Common workflow

@@ -5,12 +5,12 @@ ClassImp(AgBlock);
 #include <iostream>
 #include "AgMaterial.h"
 #include "AgShape.h"
-//#include "AgMedium.h"
 #include "AgModule.h"
 #include "AgPlacement.h"
+#include "AgMath.h" 
 
 #include "StarAgmlStacker.h"
-#include "StMessMgr.h"
+#include "StMessMgr.h"                                                                                                                  
 
 // Setup static members
 AgBlock                      *AgBlock::mCurrent=0;
@@ -51,7 +51,8 @@ AgBlock::AgBlock(const Char_t *name, const Char_t *title)
     mNicknames(),
     mGroups(),
     mMakeAssembly(0),
-    mNumberBranches(0)
+    mNumberBranches(0),
+    mGstpar()
 {
   addNickname(name); // ensure that the vector is populated
   _valid = true;
@@ -209,14 +210,4 @@ void AgBlock::List(Option_t *opts)
   LOG_INFO << endm;
   
 }
-
-// ---------------------------------------------------------------------------------------------------
-// --
-//Bool_t AgBlock::isSame( const AgAttribute &attr )
-//{
-//  Bool_t same = true;
-//  same &= attr("serial") == _attribute("serial");
-//  return same;
-//
-//}
 

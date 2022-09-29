@@ -152,40 +152,47 @@ void StRefMultCorr::initEvent(const UShort_t RefMult, const Double_t z,
 Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmatch, 
                                               Double_t vz /* default = 0*/) const {
 
+  Double_t a0{}, a1{}, a2{}, a3{}, a4{};
+  Double_t b0{}, b1{}, b2{}, b3{}, b4{};
+  Double_t c0{}, c1{}, c2{}, c3{}, c4{};
+  Double_t refmultcutmax{};
+  Double_t refmultcutmin{};
+
+  Bool_t notPileUp = kFALSE;
+
+
   if( mParameterIndex>=30 && mParameterIndex<=35 ) { // Au+Au 27 GeV 2018
     const Double_t min = 4.0;
     const Double_t max = 5.0;
 
     if(ntofmatch<=2)  return false;
 
-    const double a0 = -0.704787625248525;
-    const double a1 = 0.99026234637141;
-    const double a2 = -0.000680713101607504;
-    const double a3 = 2.77035215460421e-06;
-    const double a4 = -4.04096185674966e-09;
-    const double b0 = 2.52126730672253;
-    const double b1 = 0.128066911940844;
-    const double b2 = -0.000538959206681944;
-    const double b3 = 1.21531743671716e-06;
-    const double b4 = -1.01886685404478e-09;
-    const double c0 = 4.79427731664144;
-    const double c1 = 0.187601372159186;
-    const double c2 = -0.000849856673886957;
-    const double c3 = 1.9359155975421e-06;
-    const double c4 = -1.61214724626684e-09;
+    a0 = -0.704787625248525;
+    a1 = 0.99026234637141;
+    a2 = -0.000680713101607504;
+    a3 = 2.77035215460421e-06;
+    a4 = -4.04096185674966e-09;
+    b0 = 2.52126730672253;
+    b1 = 0.128066911940844;
+    b2 = -0.000538959206681944;
+    b3 = 1.21531743671716e-06;
+    b4 = -1.01886685404478e-09;
+    c0 = 4.79427731664144;
+    c1 = 0.187601372159186;
+    c2 = -0.000849856673886957;
+    c3 = 1.9359155975421e-06;
+    c4 = -1.61214724626684e-09;
 
     double refmultCenter = a0+a1*(ntofmatch)+a2*pow(ntofmatch,2)+a3*pow(ntofmatch,3)+a4*pow(ntofmatch,4);
-    double refmultLower  = b0+b1*(ntofmatch)+b2*pow(ntofmatch,2)+b3*pow(ntofmatch,3)+b4*pow(ntofmatch,4);
-    double refmultUpper  = c0+c1*(ntofmatch)+c2*pow(ntofmatch,2)+c3*pow(ntofmatch,3)+c4*pow(ntofmatch,4);
+    double refmultLower  = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+    double refmultUpper  = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
 
-    double refmultCutMin = refmultCenter - min*refmultLower;
-    double refmultCutMax = refmultCenter + max*refmultUpper;
-    return ( refmultCutMin < refmult && refmult < refmultCutMax );
+    refmultcutmin = refmultCenter - min*refmultLower;
+    refmultcutmax = refmultCenter + max*refmultUpper;
+    notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
   }
   else if( mParameterIndex>=36 && mParameterIndex<=37 ) { // Isobars 200 GeV 2018
 
-    double b0, b1, b2, b3, b4;
-    double c0, c1, c2, c3, c4;
     // Zr+Zr
     if(mParameterIndex==36) {
       b0=13.5244327901538;
@@ -212,13 +219,11 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       c3=-4.68933832723005e-06;
       c4=4.4151761900593e-09;
     }
-    double refmultcutmax = ( b0 + b1*(ntofmatch) + b2*pow(ntofmatch,2) + b3*pow(ntofmatch,3) + b4*pow(ntofmatch,4) );
-    double refmultcutmin = ( c0 + c1*(ntofmatch) + c2*pow(ntofmatch,2) + c3*pow(ntofmatch,3) + c4*pow(ntofmatch,4) );
-    return ( refmultcutmin < refmult && refmult<refmultcutmax );
+    refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+    refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+    notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
   }
   else if ( mParameterIndex==38 ) { // Au+Au 19.6 GeV 2019
-    double b0, b1, b2, b3, b4;
-    double c0, c1, c2, c3, c4;
 
     if ( -145. <= vz && vz < -87. ) {
       b0=33.7732676854599;
@@ -281,13 +286,30 @@ Bool_t StRefMultCorr::passnTofMatchRefmultCut(Double_t refmult, Double_t ntofmat
       c4=-1.1450298089717e-08;
     }
 
-    double refmultcutmax = ( b0 + b1*(ntofmatch) + b2*pow(ntofmatch,2) + b3*pow(ntofmatch,3) + b4*pow(ntofmatch,4) );
-    double refmultcutmin = ( c0 + c1*(ntofmatch) + c2*pow(ntofmatch,2) + c3*pow(ntofmatch,3) + c4*pow(ntofmatch,4) );
-    return ( refmultcutmin < refmult && refmult < refmultcutmax );
+    refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+    refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+    notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
+  }
+  else if ( mParameterIndex==39 ) { // Au+Au 14.6 GeV 2019
+      b0 =  36.4811873257854;
+      b1 =  1.96363692967013;
+      b2 = -0.00491528146300182;
+      b3 =  1.45179464078414e-05;;
+      b4 = -1.82634741809226e-08;
+      c0 = -16.176117733536;;
+      c1 =  0.780745107634961;
+      c2 = -2.03347057620351e-05;
+      c3 =  3.80646723724747e-06;
+      c4 = -9.43403282145648e-09;
+      refmultcutmax = calcPileUpRefMult(ntofmatch, b0, b1, b2, b3, b4);
+      refmultcutmin = calcPileUpRefMult(ntofmatch, c0, c1, c2, c3, c4);
+      notPileUp = isInPileUpRefMultLimits(refmult, refmultcutmin, refmultcutmax);
   }
   else {
-    return true;
+    notPileUp = kTRUE;
   }
+
+  return notPileUp;
 }
 
 //_________________
@@ -563,11 +585,14 @@ Double_t StRefMultCorr::vzCorrection(Double_t z) const {
       vzCorr = (RefMult_ref + par7)/RefMult_z;
     }
   }
-  else if ( mParameterIndex == 38 ) { 
-    // New Vz correction. All vz bins bins are normalize to that at the center
+  else if ( mParameterIndex == 38 ) {  // Au+Au 19.6 GeV Run 19
+    // New Vz correction. All vz bins bins are normalize to the one at the center
     vzCorr = auau19_run19_vzCorr[ getVzWindowForVzDepCentDef() ];
-
   } // else if ( mParameterIndex == 38 )
+  else if ( mParameterIndex == 39 ) {
+    // New Vz correction. All vz bins bins are normalize to that at the center
+    vzCorr = auau14_run19_vzCorr[ getVzWindowForVzDepCentDef() ];
+  }
 
   return vzCorr;
 }
@@ -829,6 +854,16 @@ Double_t StRefMultCorr::getShapeWeight_SubVz2Center() const {
       weight = 1.;
     }
   } // else if ( mParameterIndex == 38 ) {  // Au+Au 19.6 GeV 2019
+  else if (mParameterIndex == 39) { // Au+Au 14.6 GeV 2019
+
+    if (iVzBinIndex < 0 || iVzBinIndex > auau14_run19_nVzBins) return 1.0;
+
+    weight = auau14_run19_shapeWeightArray[iVzBinIndex][TMath::Nint(mRefMult_corr)];
+    // Handle bad weight
+    if (weight == 0 || TMath::IsNaN(weight)) {
+      weight = 1.;
+    }
+  } // else if ( mParameterIndex == 39 ) {  // Au+Au 14.6 GeV 2019
   else {
     weight = 1.0;
   }
@@ -862,8 +897,8 @@ Double_t StRefMultCorr::triggerWeight() const {
     weight = (par0 +
               par1 / (par2 * mRefMult_corr + par3) +
               par4 * (par2 * mRefMult_corr + par3) +
-              par7 / TMath::Power(par2 * mRefMult_corr + par3, 2) +
-              par6 * TMath::Power(par2 * mRefMult_corr + par3, 2));
+              par6 / TMath::Power(par2 * mRefMult_corr + par3, 2) +
+              par7 * TMath::Power(par2 * mRefMult_corr + par3, 2));
     /*
     std::cout << "par0: " << par0 << " par1: " << par1 << " par2: " << par2
               << " par3: " << par3 << " par4: " << par4 << " A: " << A
@@ -1003,44 +1038,9 @@ Int_t StRefMultCorr::getVzWindowForVzDepCentDef() const {
       iBinVz = TMath::Nint(VtxZBinDouble);
     }
   }
-  /*
-    else if(mParameterIndex>=36 &&mParameterIndex<=37)//Run18 200 GeV isobar 
-    {
-    if(     mVz>=-35.&&mVz<-33.) iBinVz = 0;
-    else if(mVz>=-33.&&mVz<-31.) iBinVz = 1;
-    else if(mVz>=-31.&&mVz<-29.) iBinVz = 2;
-    else if(mVz>=-29.&&mVz<-27.) iBinVz = 3;
-    else if(mVz>=-27.&&mVz<-25.) iBinVz = 4;
-    else if(mVz>=-25.&&mVz<-23.) iBinVz = 5;
-    else if(mVz>=-23.&&mVz<-21.) iBinVz = 6;
-    else if(mVz>=-21.&&mVz<-19.) iBinVz = 7;
-    else if(mVz>=-19.&&mVz<-17.) iBinVz = 8;
-    else if(mVz>=-17.&&mVz<-15.) iBinVz = 9;
-    else if(mVz>=-15.&&mVz<-13.) iBinVz = 10;
-    else if(mVz>=-13.&&mVz<-11.) iBinVz = 11;
-    else if(mVz>=-11.&&mVz<-9.) iBinVz = 12;
-    else if(mVz>=-9.&&mVz<-7.) iBinVz = 13;
-    else if(mVz>=-7.&&mVz<-5.) iBinVz = 14;
-    else if(mVz>=-5.&&mVz<-3.) iBinVz = 15;
-    else if(mVz>=-3.&&mVz<-1.) iBinVz = 16;
-    else if(mVz>=-1.&&mVz<1.) iBinVz = 17;
-    else if(mVz>=1.&&mVz<3.) iBinVz = 18;
-    else if(mVz>=3.&&mVz<5.) iBinVz = 19;
-    else if(mVz>=5.&&mVz<7.) iBinVz = 20;
-    else if(mVz>=7.&&mVz<9.) iBinVz = 21;
-    else if(mVz>=9.&&mVz<11.) iBinVz = 22;
-    else if(mVz>=11.&&mVz<13.) iBinVz = 23;
-    else if(mVz>=13.&&mVz<15.) iBinVz = 24;
-    else if(mVz>=15.&&mVz<17.) iBinVz = 25;
-    else if(mVz>=17.&&mVz<19.) iBinVz = 26;
-    else if(mVz>=19.&&mVz<21.) iBinVz = 27;
-    else if(mVz>=21.&&mVz<23.) iBinVz = 28;
-    else if(mVz>=23.&&mVz<=25.) iBinVz = 29;
-    }
-  */
-  else if ( mParameterIndex == 38 ) {  // Au+Au 19.6 GeV 2019
+  else if ( (mParameterIndex == 38) || (mParameterIndex == 39) ) {  // Au+Au 19.6 GeV 2019 || Au+Au 14.6 GeV 2019
 
-    for ( Int_t iVz=0; iVz<auau19_run19_nVzBins; iVz++ ) {
+    for ( Int_t iVz=0; iVz<auau19_run19_nVzBins; iVz++ ) { // Utilize same Vz binning: (29 bins, -145., 145.)
       if ( auau19_run19_vzRangeLimits[iVz][0] <= mVz && mVz < auau19_run19_vzRangeLimits[iVz][1] ) {
         iBinVz = iVz;
         break;
@@ -1322,3 +1322,8 @@ std::vector<std::string> StRefMultCorr::StringSplit( const std::string str, cons
   return vstr;
 }
 
+//________________
+Double_t StRefMultCorr::calcPileUpRefMult(Double_t ntofmatch, Double_t x0, Double_t x1, 
+                                          Double_t x2, Double_t x3, Double_t x4) const {
+  return ( x0 + x1*(ntofmatch) + x2*pow(ntofmatch,2) + x3*pow(ntofmatch,3) + x4*pow(ntofmatch,4) );
+}
