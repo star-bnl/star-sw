@@ -959,17 +959,18 @@
     }
 
     # Logger
-    $LoggerDir = $MYSTAR . "/include/log4cxx";
+    chomp($LoggerDir = `pkg-config --variable=prefix liblog4cxx`);
+    $LoggerDir = $MYSTAR unless $LoggerDir;
 
-    if (-d $LoggerDir) {
-	$LoggerINCDIR = $MYSTAR . "/include";
-	$LoggerLIBDIR = $MYSTAR . "/lib";
-	$LoggerLIBS   = "-llog4cxx";
-	print
-	    "Use Logger  ",
-	    "LIBDIR = $LoggerLIBDIR \tLoggerINCDIR = $LoggerINCDIR \tLoggerLIBS = $LoggerLIBS\n"
-	    if $LoggerLIBDIR && ! $param::quiet;
+    if (not -d $LoggerDir."/include/log4cxx") {
+        die "No log4cxx found\n";
     }
+
+    $LoggerINCDIR = $LoggerDir . "/include";
+    $LoggerLIBDIR = $LoggerDir . "/lib";
+    $LoggerLIBS   = "-llog4cxx";
+
+    print "Using $LoggerDir\n\tLoggerLIBDIR = $LoggerLIBDIR\n\tLoggerINCDIR = $LoggerINCDIR\n\tLoggerLIBS = $LoggerLIBS\n" unless $param::quiet;
 
     # xml2
     chomp(my $xml = `which xml2-config`);
