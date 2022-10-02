@@ -837,110 +837,31 @@
     #
     # *** Standard package first, then MYSTAR ***
     #	
-    my ($MYSQLINCDIR,$mysqlheader);
-    if ( defined($ENV{USE_LOCAL_MYSQL}) ){
-	($MYSQLINCDIR,$mysqlheader) =
-	    script::find_lib( $MYSTAR . "/include " .  $MYSTAR . "/include/mysql ".
-			      $MYSQL . " " .
-			      $MYSQL . "/include " .
-			      "/sw/include/mysql ".
-			      "/include /usr/include ".
-			      "/usr/include/mysql  ".
-			      "/usr/mysql/include  ".
-			      "/usr/mysql  ",
-			      "mysql.h");
-    } else { 
-	($MYSQLINCDIR,$mysqlheader) =
-	    script::find_lib( $MYSQL . " " .
-			      $MYSQL . "/include " .
-			      "/sw/include/mysql ".
-			      "/include /usr/include ".
-			      "/usr/include/mysql  ".
-			      "/usr/mysql/include  ".
-			      "/usr/mysql  ".
-			      $MYSTAR . "/include " .  $MYSTAR . "/include/mysql " ,
-			      "mysql.h");
-    }
 
-    if (! $MYSQLINCDIR) {
-	die "Can't find mysql.h in standard path and $MYSTAR/include  $MYSTAR/include/mysql\n";
-    }
 
     # search for the config    
-    my ($MYSQLCONFIG,$mysqlconf);
-    # if ( defined($ENV{USE_LOCAL_MYSQL}) ){
-	($MYSQLCONFIG,$mysqlconf) =
-	    script::find_lib($MYSTAR . "/bin " .  $MYSTAR . "/bin/mysql ".
-			     $MYSQL . " ".
-			     $MYSQL . "/bin ".
-			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin " . dirname(`which mysql_config`),
-			     "mysql_config");
-    # } else {
-    #	($MYSQLCONFIG,$mysqlconf) =
-    #	    script::find_lib($MYSQL . " ".
-    #			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ".
-    #			     $MYSTAR . "/bin " .  $MYSTAR . "/bin/mysql ",
-    #			     "mysql_config");
-    # } 
+    chomp(my $mysqlconf = `which mysql_config`);
 
-
-    # Associate the proper lib with where the inc was found
-    my ($mysqllibdir)=$MYSQLINCDIR;
-    $mysqllibdir =~ s/include/$LLIB/;
-
-    # print "DEBUG :: $mysqllibdir\n";
-    # Note - there is a trick here - the first element uses mysqllibdir
-    #        which is dreived from where the INC is found hence subject to 
-    #        USE_LOCAL_MYSQL switch. This may not have been obvious.
-    # my ($MYSQLLIBDIR,$MYSQLLIB) =
-    #	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
-    #			 $MYSTAR . "/lib " .  $MYSTAR . "/lib/mysql ",
-    #			 "libmysqlclient");
-    #			 # "libmysqlclient_r libmysqlclient");
-    # # die "*** $MYSQLLIBDIR,$MYSQLLIB\n";
-
-    # if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
-    if ( $mysqlconf ){
-	$mysqlconf = "$MYSQLCONFIG/$mysqlconf";
-	# if ( 1==1 ){
-	# Do not guess, just take it - this leads to a cons error though TBC
-	chomp($MYSQLLIB = `$mysqlconf  --libs`);
-	# but remove -L which are treated separately by cons
-	my(@libs) = split(" ", $MYSQLLIB);
-	my($test) = shift(@libs);
-	if ( $test =~ /-L/){
-	    $MYSQLLIBDIR = $test; $MYSQLLIBDIR =~ s/-L//;
-	    $MYSQLLIB = "";
-	    foreach my $el (@libs){
-		$MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
-	    }
-	}
-	
-	# here is a check for libmysqlclient
-	
-	
-	# die "DEBUG got $MYSQLLIBDIR $MYSQLLIB\n";
-	
-	# mysqlconf returns (on SL5, 64 bits)
-	#  -L/usr/lib64/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib64 -lssl -lcrypto
-	# } else {
-	#    $MYSQLLIB .= " -L/usr/$LLIB";
-	#    if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
-	#    if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
-	#    if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
-	#    if ( $MYSQLLIB =~ m/client_r/     ) {$MYSQLLIB .= " -lpthread";}
-	#    # if (-r "/usr/$LLIB/libk5crypto.a" ) {$MYSQLLIB .= " -lcrypto";}
-	#    $MYSQLLIB .= " -lz";
-	#    # $MYSQLLIB .= " -lz -lcrypt -lnsl";
-	# }
-    } else {
-	die "No mysql_config found\n";
+    if ($?) {
+        die "No mysql_config found\n";
     }
-    print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
-          if ! $param::quiet;
 
-    # die "\n";
+    chomp(my $MYSQLINCDIR = `mysql_config --variable=pkgincludedir`);
+    chomp(my $MYSQLLIBDIR = `mysql_config --variable=pkglibdir`);
 
+    chomp(my $MYSQLLIB = `$mysqlconf --libs`);
+    # Remove -L which are treated separately by cons
+    my(@libs) = split(" ", $MYSQLLIB);
+    my($test) = shift(@libs);
+    if ( $test =~ /-L/) {
+        $MYSQLLIBDIR = $test; $MYSQLLIBDIR =~ s/-L//;
+        $MYSQLLIB = "";
+        foreach my $el (@libs) {
+            $MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
+        }
+    }
+
+    print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR\n\tMYSQLLIBDIR = $MYSQLLIBDIR\n\tMYSQLLIB = $MYSQLLIB\n" if !$param::quiet;
 
 
     # QT
