@@ -33,17 +33,19 @@ TF1 *ZMPB(Double_t log2dx = 1) {
   return f;
 }
 //________________________________________________________________________________
-void dNdxFunctions(Double_t log2dx = 1) {
+void dNdxFunctions(Int_t col = 0) {
   if (!m_Bichsel) m_Bichsel = Bichsel::Instance();
   TCanvas *c1 = new TCanvas("c1","c1");
   TLegend *l = new TLegend(0.4,0.6,0.8,0.9);
   TH1F *frame = c1->DrawFrame(-2.5,0.5,5,9);
   frame->SetTitle("The most probable log(dE/dx[keV/cm]) versu log_{10}(#beta #gamma)");
   frame->SetXTitle("log_{10}(#beta #gamma)");
-
   //  for (Int_t color = 1; color < 8; color++) {
-  for (Int_t color = 2; color <= 4; color++) {
-    Double_t log2dx = color - 2;
+  Int_t col1 = 1;
+  Int_t col2 = 3;
+  if (col > 0) {col1 = col2 = col;}
+  for (Int_t color = col1; color <= col2; color++) {
+    Double_t log2dx = TMath::Log2(1.5 + 0.5*(color - 1));
     Double_t dx = TMath::Power(2.,log2dx);
 #if 0
     TF1 *fnOld = StdEdxModel::ZMPold(log2dx);
@@ -51,19 +53,22 @@ void dNdxFunctions(Double_t log2dx = 1) {
     fnOld->SetMarkerColor(color);
     fnOld->Draw("same");
     l->AddEntry(fnOld,Form("%4.1fcm Old",dx));
-#endif
     TF1 *fn = StdEdxModel::ZMP(log2dx);
     fn->SetLineColor(color);
     fn->SetMarkerColor(color);
     fn->Draw("same");
     l->AddEntry(fn,Form("%4.1fcm",dx));
-#if 0
     TF1 *fr = StdEdxModel::ZMPR(log2dx);
     fr->SetLineColor(color);
     fr->SetMarkerColor(color);
     fr->Draw("same");
     l->AddEntry(fr,Form("R%4.1fcm",dx));
 #endif
+    TF1 *fnew = StdEdxModel::ZMPnew(log2dx);
+    fnew->SetLineColor(color);
+    fnew->SetMarkerColor(color);
+    fnew->Draw("same");
+    l->AddEntry(fnew,Form("New%4.1fcm",dx));
 #if 1
     TF1 *bn = ZMPB(log2dx);
     bn->SetLineColor(color);
@@ -282,7 +287,7 @@ TF1 *dXCorrection(Int_t charge=2, Double_t mass=3.727417) {
   return f;
 }
 //________________________________________________________________________________
-TString TF1Print(TF1 *sat=0, const Char_t *partName = "") {
+TString TF1Print(TF1 *sat, Int_t pdg, Int_t io, const Char_t *partName = "") {
   TString Line;
   if (sat) {
     Double_t *pars = sat->GetParameters();
@@ -290,7 +295,7 @@ TString TF1Print(TF1 *sat=0, const Char_t *partName = "") {
     Double_t chisq = sat->GetChisquare();
     Int_t NDF = sat->GetNDF();
     sat->GetParameters(pars);
-    Line = Form("  Double_t pars[%i] = {",N);
+    Line = Form("  Int_t pdg = %10i; Int_t io = %1i;  Double_t pars[%i] = {",pdg, io, N);
     for (Int_t i = 0; i < N; i++) {
       Line += Form("%10.5g", pars[i]);
       if (i == N - 1) {Line += "}; // "; Line += partName; Line += Form("\tchisq = %f / NDF = %i",chisq,NDF);}
@@ -303,6 +308,7 @@ TString TF1Print(TF1 *sat=0, const Char_t *partName = "") {
 void dNdxCorrections() {
   TSeqCollection *files = gROOT->GetListOfFiles();
   if (! files) return;
+#if 0
   TF1 *pol7 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol7");
   if (! pol7) {
     TF1::InitStandardFunctions();
@@ -310,6 +316,9 @@ void dNdxCorrections() {
   }
   Double_t pars[8] = {  -0.07368,  0.0070045,  0.0056807, -0.0045777, -0.0030487,  0.0027636, -0.00067063,  5.342e-05}; //
   pol7->SetParameters(pars);
+#else
+  TF1 *satanh = StdEdxModel::instance()->SaturTanH();
+#endif
   TString Out = "dNdxCorrections.data";
   ofstream out;
   if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
@@ -328,7 +337,7 @@ void dNdxCorrections() {
   while ( (f = (TFile *) next()) ) { 
     f->cd();
     const Char_t *IO[3] = {"","I","O"};
-    for (Int_t io = 0; io < 3; io++) {
+    for (Int_t io = 1; io < 3; io++) {
       TH2F *dNdxVsBgC = (TH2F *) f->Get(Form("dNdxVsBgC%s",IO[io]));
       part[i] = 0;
       if (! dNdxVsBgC) continue;
@@ -364,7 +373,15 @@ void dNdxCorrections() {
       for (Int_t k = 1; k <= nx; k++) {
 	//	Double_t v = part[i]->GetBinContent(k);
 	Double_t x = part[i]->GetBinCenter(k);
+#if 0
+#if 0
 	Double_t v = part[i]->GetBinContent(k) - pol7->Eval(x);
+#else
+	Double_t v = part[i]->GetBinContent(k) - satanh->Eval(x);
+#endif
+#else
+	Double_t v = part[i]->GetBinContent(k);
+#endif
 	Double_t e = part[i]->GetBinError(k);
 	if (e < 1e-6 || TMath::Abs(v) < 3*e) {//  || v > -0.055 | TMath::Abs(v+0.07) > 0.02) {
 	  part[i]->SetBinContent(k, 0);
@@ -382,10 +399,19 @@ void dNdxCorrections() {
       }
       Double_t fMass = -1;
       Int_t   fCharge = 0;
+      Int_t   pdg = 0;
       for (Int_t h = 0; h < NTpcRSParts; h++) {
-	if (TString(TpcRSPart[h].name).Contains(partName, TString::kIgnoreCase)) {
+	TString particle(partName);
+	particle.ReplaceAll("COLI","");
+	particle.ReplaceAll("FXTI","");
+	particle.ReplaceAll("COLO","");
+	particle.ReplaceAll("FXTO","");
+	particle.ReplaceAll("COL","");
+	particle.ReplaceAll("FXT","");
+	if (TString(TpcRSPart[h].name).Contains(particle, TString::kIgnoreCase)) {
 	  fMass = TpcRSPart[h].mass;
 	  fCharge = TpcRSPart[h].charge;
+	  pdg  = TpcRSPart[h].pdg;
 	  break;
 	}
       }
@@ -425,7 +451,7 @@ void dNdxCorrections() {
       TCanvas *c = new TCanvas("c"+partName,"c"+partName);
       part[i]->Draw();
       TF1 *sat = StdEdxModel::Saturation();
-      sat->SetParameters(-0.07,     1.,    1.,     part[i]->GetMean(),  0.0, 0.0, 0.0);
+      sat->SetParameters(-0.07,   -0.01,    0.6,     part[i]->GetMean(),  0.0, 0.0, 0.0);
       sat->SetParLimits(2, -10, 10);
       Double_t xmin = part[i]->GetXaxis()->GetBinLowEdge(k1);
       Double_t xmax = part[i]->GetXaxis()->GetBinUpEdge(k2);
@@ -435,21 +461,21 @@ void dNdxCorrections() {
       sat->FixParameter(6, 0);
       part[i]->Fit(sat);
       TString Line;
-#if 0
+#if 1
       sat->ReleaseParameter(4);
       part[i]->Fit(sat);
-      Line = TF1Print(sat, partName);
+      Line = TF1Print(sat, pdg, io, partName);
       cout << Line << endl;
       out  << Line << endl;
       sat->ReleaseParameter(5);
       part[i]->Fit(sat);
-      Line = TF1Print(sat, partName);
+      Line = TF1Print(sat, pdg, io, partName);
       cout << Line << endl;
       out  << Line << endl;
       sat->ReleaseParameter(6);
 #endif
       part[i]->Fit(sat);
-      Line = TF1Print(sat, partName);
+      Line = TF1Print(sat, pdg, io, partName);
       cout << Line << endl;
       out  << Line << endl;
       i++;
@@ -505,6 +531,7 @@ void dXdS() {
     }
   }
 }
+#if 0
 //________________________________________________________________________________
 void dPCorrections() {
   TSeqCollection *files = gROOT->GetListOfFiles();
@@ -633,7 +660,7 @@ void dPCorrections() {
 #if 1
     sat->ReleaseParameter(4);
     part[i]->Fit(sat);
-    Line = TF1Print(sat, partName);
+    Line = TF1Print(sat, 0, 0, partName);
     cout << Line << endl;
     out  << Line << endl;
     sat->ReleaseParameter(5);
@@ -644,7 +671,7 @@ void dPCorrections() {
     sat->ReleaseParameter(6);
 #endif
     part[i]->Fit(sat);
-    Line = TF1Print(sat, partName);
+    Line = TF1Print(sat, io,  partName);
     cout << Line << endl;
     out  << Line << endl;
     i++;
@@ -660,10 +687,12 @@ void dPCorrections() {
   fOut->Write();
   out.close();
 }
+#endif
 //________________________________________________________________________________
 void dNdxFunc() {
   dNdxCorrections();
   //dXdS();
+  //dNdxFunctions();
 }
 /*--------------------------------------------------------------------------------
 c1->Divide(2,2)

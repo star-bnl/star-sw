@@ -1630,6 +1630,7 @@ TF1 *FitG(TH1 *proj, Option_t *opt="R") {
     TF1::InitStandardFunctions();
     g = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
   }
+  g->SetRange(-5,5);
   Bool_t res = proj->Fit(g,opt);
   return g;
 }
