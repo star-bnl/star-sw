@@ -129,7 +129,7 @@ TPaveText* PeakAnaPainter::MakePaveText(Double_t xmin, Double_t ymin, Double_t x
 
 bool PeakAnaPainter::ValidGraph()
 {
-  if( mPA->GetData()==0 || mPA->GetData()->GetN()==0 ){return false;}
+  if( mPA==0 || mPA->GetData()==0 || mPA->GetData()->GetN()==0 ){return false;}
   else{ return true; }
 }
 

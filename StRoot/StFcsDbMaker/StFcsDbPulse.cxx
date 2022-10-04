@@ -40,6 +40,7 @@ int StFcsDbPulse::Init()
 void StFcsDbPulse::setTail(int tail)
 {
   mTail = tail;
+  if( tail == 0 ){return;}
   if( tail == 1 )
     {
       //Data from Gerard 2020 summer
@@ -66,11 +67,11 @@ void StFcsDbPulse::setTail(int tail)
       mP1        = 1.0;
       mP2        = 0.0;
     }
-  else{ std::cout << "WARNING:Invalid Tail value" << std::endl; }
+  else{ LOG_WARN << "StFcsDbPulse::setTail - Invalid Tail value " << tail << endm; }
 }
 
 void StFcsDbPulse::setTGraphAsymmErrors(TGraphAsymmErrors* gae, const int &i, const double &adc, double Yerr, double YerrSat){
-  if( gae == 0 ){std::cout << "ERROR:Graph object cannot be zero" << std::endl; return;}
+  if( gae == 0 ){LOG_ERROR << "StFcsDbPulse::setTGraphAsymmErrors - Graph object cannot be zero" << endm; return;}
   double HighY = 0;
   if(adc<mAdcSaturation) { HighY=Yerr; }
   else                   { HighY=YerrSat; }
@@ -106,13 +107,12 @@ double StFcsDbPulse::multiPulseShape(double* x, double* p) {
 
 TF1* StFcsDbPulse::createPulse(double xlow, double xhigh, int npars)
 {
-  if( npars<5 ){std::cout << "StFcsDbPulse::createPulse - npars must be greater than or equal to 5 paramaters" <<std::endl; return 0;}
-  else if( xlow>=xhigh ){std::cout << "StFcsDbPulse::createPulse - Invalid range" <<std::endl; return 0;}
+  if( npars<5 ){LOG_WARN << "StFcsDbPulse::createPulse - npars must be greater than or equal to 5 paramaters" <<endm; return 0;}
+  else if( xlow>=xhigh ){LOG_ERROR << "StFcsDbPulse::createPulse - Invalid range" <<endm; return 0;}
     else{return new TF1("F1_fcsDbPulse",this,&StFcsDbPulse::multiPulseShape,xlow,xhigh,npars);}//More unique name in future??
 }
 
 int StFcsDbPulse::GenericPadPos(int value, int Nvals, int PadNums )
-//PadNums is not total pads but number pads in the row or column, Nvals is number of stuff per column or row to put on same pad
 {
   if( value<=0 ){return ceil( static_cast<double>(value+(Nvals*PadNums))/static_cast<double>(Nvals) );}
   else{ return GenericPadPos(value-(Nvals*PadNums), Nvals, PadNums); }
@@ -132,7 +132,7 @@ int StFcsDbPulse::PadNum4x4(int det, int col, int row)
       ncol = 2;
       nrow = 2;
     }
-  else{ std::cout << "This only works for Ecal and Hcal" << std::endl; return 0;}
+  else{ LOG_ERROR << "This only works for Ecal and Hcal" << endm; return 0;}
   int padcol = GenericPadPos(col,ncol,4);
   int padrow = GenericPadPos(row,nrow,4);
   return 4*(padrow-1)+padcol;
@@ -143,8 +143,8 @@ Int_t StFcsDbPulse::getYMinMax(TGraphAsymmErrors* gae, Double_t &Ymin, Double_t 
   if( gae==0 ){ return -1; }
   Int_t index = -1;
   //Start with invalid values
-  Double_t MinY = 5000;
-  Double_t MaxY = -5;
+  Double_t MinY = Ymax;
+  Double_t MaxY = Ymin;
   for( int i=0; i<gae->GetN(); ++i )
     {
       Double_t X; Double_t Y;

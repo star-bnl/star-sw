@@ -7,8 +7,12 @@
  > Copied StFcsPulseFit so that I can inherit from and use the PeakAna class methods from MyTools
 */
 
-#ifndef STROOT_STFCSWAVEFORMFITMAKER_STFCSPULSEANA_H_
-#define STROOT_STFCSWAVEFORMFITMAKER_STFCSPULSEANA_H_
+/*!
+  This class is an extension of #PeakAna to analyze specifically STAR data from the DEP boards. The DEP boards are used in the Forward Calorimeter System (FCS) and comprises of an electromagnetic, and hadronic calorimeters as well as a presower.
+*/
+
+#ifndef STFCSPULSEANA_H
+#define STFCSPULSEANA_H
 
 //ROOT Headers
 #include "TMath.h"
@@ -18,15 +22,10 @@
 #include "TGraphAsymmErrors.h"
 #include "TMultiGraph.h"
 #include "TH1.h"
-//#include "TH2.h"
-//#include "TH2I.h"
-//#include "TProfile.h"
+
 #include "TLine.h"
 #include "TPaveText.h"
 #include "TPaveStats.h"
-//#include "TColor.h"
-//#include "TGaxis.h"
-//#include "TFrame.h"
 
 #include "StFcsDbMaker/StFcsDbPulse.h"
 #include "PeakAna.h"
@@ -34,100 +33,88 @@
 class StFcsPulseAna : public PeakAna
 {
  public:
-  StFcsPulseAna();
-  StFcsPulseAna( std::string name );
-  explicit StFcsPulseAna( TGraph* Sig, std::string name = "StFcsPulseAna");//Construct with a known TGraph
-  StFcsPulseAna(const StFcsPulseAna& old, const char* post_name="_copy", TGraph* graph=0);//Copy Constructor
-  StFcsPulseAna& operator=(const StFcsPulseAna& rhs);//Assignment operator
-  //explicit StFcsPulseAna( int ntb, double* tb, double* adc, std::string name = "StFcsPulseAna");//Array of timebins and ADC values with known size (ntb)
-  virtual ~StFcsPulseAna();
+  StFcsPulseAna();                    //!< Default constructor
+  StFcsPulseAna( std::string name );  //!< Constructor with name
+  explicit StFcsPulseAna( TGraph* Sig, std::string name = "StFcsPulseAna"); //!< Construct with a known TGraph
+  StFcsPulseAna(const StFcsPulseAna& old, const char* post_name="_copy", TGraph* graph=0); //!< Copy Constructor can be called with a new graph and post-fix to the name
+  StFcsPulseAna& operator=(const StFcsPulseAna& rhs);   //!< Assignment operator
 
-  virtual void Copy(TObject& obj) const;
-  virtual TObject* Clone(const char* newname) const;
+  virtual ~StFcsPulseAna();  //!< Destructor
 
-  virtual Int_t AnalyzeForPeak();
+  virtual void Copy(TObject& obj) const;              //!< Internal method use Clone instead.
+  virtual TObject* Clone(const char* newname) const;  //!< Clones internal graph as opposed to just copying the pointer
 
-  static double MaxwellBoltzmannDist(double* x, double* p);//Maxwell Boltzmann Distribution function
-  static void GetMBPars(const double& xpeak, const double& xrise, const double& yh, const double& ped, double& height, double& scale );//Get parameters for a Maxwell Boltzmann distribution from above based on the 4 const parameters 
+  virtual Int_t AnalyzeForPeak();  //!< Overwritten from #PeakAna to process peak tunneling after finding all peaks
 
-  virtual TGraphAsymmErrors* GetData()const{return (TGraphAsymmErrors*)mG_Data;}
+  static double MaxwellBoltzmannDist(double* x, double* p);//!< Maxwell Boltzmann Distribution function
+  static void GetMBPars(const double& xpeak, const double& xrise, const double& yh, const double& ped, double& height, double& scale );//!< Get parameters for a Maxwell Boltzmann distribution from above based on the 4 const parameters 
 
-  const char* GetName() const {return mName.c_str();}
-  std::string& Name() {return mName;}
-  const std::string& Name() const {return mName;}
-  //void LoadHit(int det, StFcsHit* hit);
+  virtual TGraphAsymmErrors* GetData()const{return (TGraphAsymmErrors*)mG_Data;} //!< Overwrite from #PeakAna to type convert for #StFcsWaveformFitMaker
 
-  void setDbPulse(StFcsDbPulse* p){mDbPulse = p;}
+  const char* GetName() const {return mName.c_str();} //!< @return #mName as const char*
+  std::string& Name() {return mName;}                 //!< @return #mName
+  const std::string& Name() const {return mName;}     //!< @return #mName
+
+  void setDbPulse(StFcsDbPulse* p){mDbPulse = p;}     //!< @param p sets #mDbPulse
   
-  void ResetFinder();//Resets all histograms and values
-  void ResetBaseline();//Resets baseline values
-  void ResetSum();//Only resets variables related to finding the sum
+  void ResetFinder();   //!< Resets all histograms and values
+  void ResetBaseline(); //!< Resets baseline values
+  void ResetSum();      //!< Only resets variables related to finding the sum
   
-  //void SetBaselineSearchParam();//if baseline search is set to zero will not find baseline
-  Int_t Sum(Int_t Start, Int_t End);//Generic sum funcition to add ADC within a given range and subtract baseline
-  Int_t SumWindow();//Sum the data inside the found window
-  Double_t GausFit(Int_t Start=0,Int_t End=0);
-  void SignalMBPars(double& height, double& scale);
-  double SumMB();
-  Double_t MBFit(Int_t Start=0,Int_t End=0);
-  Double_t PulseFit(Int_t Start=0, Int_t End=0);
-  //TF1* PulseFit(float* res);
-  void SetFitPars(TF1* func);
+  Int_t Sum(Int_t Start, Int_t End);                //!< Add raw ADC within a given range and subtract the baseline
+  Int_t SumWindow();                                //!< Sum the ADC in the peak defined by #mFoundPeak and subtract the baseline
+  Double_t GausFit(Int_t Start=0,Int_t End=0);      //!< Do a Gaussian fit on #mFoundPeak and return the integral subtracted by the baseline
+  void SignalMBPars(double& height, double& scale); //!< Figure out the height and scale of a Maxwell-Boltzmann distribution that approximates the signal 
+  double SumMB();                                   //!< Integral of an approximated Maxwell-Boltzmann distribution minus the baseline
+  Double_t MBFit(Int_t Start=0,Int_t End=0);        //!< Fit a Maxwell-Boltzmann distribution to #mFoundPeak and return the integral minus the baseline
+  Double_t PulseFit(Int_t Start=0, Int_t End=0);    //!< Fit the pulse shape defined in #StFcsDbPulse::multiPulseShape() to all peaks and return the integral of the found peak minus the baseline
 
-  static void FillAdc(TGraphAsymmErrors* g, unsigned short& counter, int Start, unsigned short* adcdata);//Needed for SumDep0, et al. It basically fills in tb vs. adc sequentially so all timebins from a given start value have an adc.
-  static int SumDep0(TGraphAsymmErrors* gdata, int Start, int ped=0);
-  static int SumDep0Mod(TGraphAsymmErrors* gdata, int Start, int ped=0);
+  void SetFitPars(TF1* func);                       //!< Set the parameters of an external TF1 function that has the form of #StFcsDbPulse::multiPulseShape()
 
-  //void SetSignal(TGraphAsymmErrors* SigGraph);//replaced with setdata
-  void SetFitSignal(TF1* func){mF1_SignalFit=func;}
-  void SetBaselineFit(TF1* func){mF1_BaselineFit=func;}
+  static void FillAdc(TGraphAsymmErrors* g, unsigned short& counter, int Start, unsigned short* adcdata);//!< Needed for SumDep0, et al. It basically fills in tb vs. adc sequentially so all timebins from a given start value have an adc.
+  static int SumDep0(TGraphAsymmErrors* gdata, int Start, int ped=0);     //!< Test of sum method in DEP board
+  static int SumDep0Mod(TGraphAsymmErrors* gdata, int Start, int ped=0);  //!< Test my modified sum method to DEP board
 
-  //void SetBaselineRange(Int_t Nbins, Double_t Xmin, Double_t Xmax);//Need to implment?
+  void SetFitSignal(TF1* func){mF1_SignalFit=func;}      //!< @param func sets #mF1_SignalFit
+  void SetBaselineFit(TF1* func){mF1_BaselineFit=func;}  //!< @param func sets #mF1_BaselineFit
+
   void SetZS(){SetBaseline(0,0.6);}//Call this for ZS data which uses thresholds that are relevant for that. (like 0 baseline and 0.5 sigma so thereshold is at 2 since ZS is pedestal subtracted. Maybe even 0.3 so it is above one.
 
-  void AnalyzeForPedestal(); //Analyze graph data to determine baseline internally
+  void AnalyzeForPedestal(); //!< Analyze graph data to determine baseline internally
   
-  TH1F* BaselineHist()const{return mH1_Baseline;}
+  TH1F* BaselineHist()const{return mH1_Baseline;} //!< @return mH1_Baseline
   TF1* SignalFit(const char option ='n');//Replace with a function that actually calls "fit" and then returns the function?Arguments can be values and range?A little more complicated since hard to tell when user would want to call a fit or just get the function itself?Maybe no arguments means give me function, arguments means do a refit?
-  TF1* SignalFit() const {return mF1_SignalFit;}
-  TF1* BaselineFit()const{return mF1_BaselineFit;}//see above "^"?
+  TF1* SignalFit() const {return mF1_SignalFit;}    //!< @return mF1_SignalFit
+  TF1* BaselineFit()const{return mF1_BaselineFit;}  //!< @return mF1_BaselineFit
 
-  //void ReFitBaseline(){mG_Signal->Fit(mF1_BaselineFit,"R");}
+  virtual StFcsPulseAna* DrawCopy(Option_t* opt="",const char* name_postfix = "_copy", TGraph* graph=0) const; //!< Clone and draw, see #PeakAna::Draw() for options
 
-  virtual StFcsPulseAna* DrawCopy(Option_t* opt="",const char* name_postfix = "_copy", TGraph* graph=0) const;
+  virtual void Print(Option_t* opt="") const; //!< Print class variables @param opt "ana" means call #PeakAna::Print(), "debug" print extra information
 
-  virtual void Print(Option_t* opt="") const;
-
-  virtual void MergeByProbability(std::vector<PeakWindow>& merged);
-  //void FillInMissingData();
+  virtual void MergeByProbability(std::vector<PeakWindow>& merged); //!< Overwritten from #PeakAna::MergeByProbability() to change merge criteria
 
  protected:
-  void Init(); //Sets everything to zero except signal and background histograms
+  void Init(); //!< Initialize everything to zero except signal and background histograms
 
-  StFcsDbPulse* mDbPulse;
+  StFcsDbPulse* mDbPulse; //!< Pointer to #StFcsDbPulse
 
-  TH1F* mH1_Baseline;//This histogram holds projection info from mG_Signal
+  TH1F* mH1_Baseline;     //!< Histogram that holds projection of mG_Data for baseline determination
   //Main fit functions
-  TF1*  mF1_SignalFit;
-  TF1*  mF1_BaselineFit;
+  TF1*  mF1_SignalFit;    //!< Function to fit to the data
+  TF1*  mF1_BaselineFit;  //!< Gaussian function to fit to #mH1_Baseline to determine baseline
 
-  bool FindBaseline();//Does Gaussian fitting to mH1_Background to determine baseline
+  bool FindBaseline();    //!< Does Gaussian fitting to #mH1_Baseline to determine baseline
 
  private:
   
-  std::string mName;
+  std::string mName;      //!< Name of class
 
-  bool mWindowSum;
-  bool mFitSum;
+  bool mWindowSum;        //!< true if a sum using #SumWindow() was called
+  bool mFitSum;           //!< true if any sum method that uses fitting was called
     
   //Variables to hold sum values.  This is to avoid tedious recomputation
-  Int_t mSumAdc;
-  Double_t mSumAdcFit;
-  
-  //These two variables are in PeakAna as mMaxY and mMaxX respectively
-  //Double_t mMaxAdc;//Maximum value for Adc
-  //Double_t mMaxTb;//Timebin where maximum value of Adc occurs
-  
+  Int_t mSumAdc;          //!< holds the value from #SumWindow() when it is called
+  Double_t mSumAdcFit;    //!< holds the value from a fitting sum method when one is called
 
   ClassDef(StFcsPulseAna,1)
 

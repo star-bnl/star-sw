@@ -2,37 +2,17 @@
 
 ClassImp(PeakWindow)
 
-PeakWindow::PeakWindow()
+PeakWindow::PeakWindow():mStartX(0),mEndX(1),mStartY(0),mEndY(0),mP_Peak(-1),mPeakX(-1),mPeakY(-1),mStartLine(0),mPeakMarker(0),mEndLine(0)
 {
-  mStartX=0;mEndX=1;
-  mStartY = 0; mEndY = 0;
-  mP_Peak=-1;
-  mPeakX=-1; mPeakY=-1;
-
-  mStartLine=0;
-  mPeakMarker=0;
-  mEndLine=0;
 }
 
-PeakWindow::PeakWindow(Double_t start, Double_t end)
+PeakWindow::PeakWindow(Double_t start, Double_t end):PeakWindow()
 {
   if( start<end ){
     mStartX=start;
     mEndX=end;
+    mPeakX=start-1;//In order for PeakAna algorithm for finding peaks to work peak x-value must be less than start
   }
-  else{
-    mStartX = 0;
-    mEndX = 1;
-  }
-  mStartY = 0;
-  mEndY = 0;
-  mP_Peak = -1;
-  mPeakX=start-1;//In order for PeakAna algorithm for finding peaks to work peak x-value must be less than start
-  mPeakY = -1;
-
-  mStartLine=0;
-  mPeakMarker=0;
-  mEndLine=0;
 }
 
 PeakWindow::PeakWindow(const PeakWindow &oldpeak)
@@ -82,10 +62,9 @@ TObject* PeakWindow::Clone(const char* newname) const
 
 PeakWindow::~PeakWindow()
 {
-  //std::cout << "~PeakWindow"<<mStartLine << std::endl;
-  if( mStartLine!=0 ){ delete mStartLine; }
-  if( mPeakMarker!=0 ){ delete mPeakMarker; }
-  if( mEndLine!=0 ){ delete mEndLine; }
+  delete mStartLine;
+  delete mPeakMarker;
+  delete mEndLine;
 }
 
 void PeakWindow::SetWindow(Double_t s, Double_t e)

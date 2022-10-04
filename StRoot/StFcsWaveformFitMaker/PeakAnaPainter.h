@@ -1,5 +1,8 @@
 /*
 Author: David Kapukchyan
+@[September 29, 2022]
+> Got rid of the virtual painter
+
 @[June 12, 2022]
 > Painter now sets the found peak line color
 
@@ -16,12 +19,14 @@ Author: David Kapukchyan
 
 @[March 9, 2022]
 > This class will be used to draw PeakAna. It is a first try after reading ROOT code and and seeing that by having a separate painter class is better due to how TCanvas objects work and drawing in ROOT in general works. Also after splitting up the various classes I realized that it really is easier to have a separate painter and analysis class. The painter class essentially assumes a canvas/pad exists and only draws on it the things it needs independent of what else is on the canvas/pad. This is the philosophy to keep in mind when writing painter classes.
+*/
 
+/*!
 Painter class for PeakAna
 */
 
-#ifndef STROOT_STFCSWAVEFORMFITMAKER_PEAKANAPAINTER_H_
-#define STROOT_STFCSWAVEFORMFITMAKER_PEAKANAPAINTER_H_
+#ifndef PEAKANAPAINTER_H
+#define PEAKANAPAINTER_H
 
 //C++ Headers
 #include <vector>
@@ -45,22 +50,18 @@ public:
   virtual ~PeakAnaPainter();
   
   virtual void Paint(Option_t *opt="");
-  virtual void PaintRawData();//Raw data with no modifications
-  virtual void PaintFoundPeak();//Raw data inside zoomed in on found signal region
-  virtual void PaintFoundPeakQa();//Draw signal and found signal window
-  virtual void PaintPeakQa();//Show all found signal windows and signal
-  virtual void PaintBaselines();//Just draw the baseline and hitlines
-  virtual void PaintFoundRange();//Just draw the found peak on the current pad
-  virtual void PaintPeakRanges();//Draw all found peaks on the current pad
-  virtual void PaintStats();//Draw Stats box for peak finding
+  virtual void PaintRawData();      //!< Raw data with no modifications
+  virtual void PaintFoundPeak();    //!< Raw data inside zoomed in on found signal region
+  virtual void PaintFoundPeakQa();  //!< Draw signal and found signal window
+  virtual void PaintPeakQa();       //!< Show all found signal windows and signal
+  virtual void PaintBaselines();    //!< Just draw the baseline and hitlines
+  virtual void PaintFoundRange();   //!< Just draw the found peak on the current pad
+  virtual void PaintPeakRanges();   //!< Draw all found peaks on the current pad
+  virtual void PaintStats();        //!< Draw Stats box for peak finding
   
-  //virtual void Print(Option_t* opt="") const;
+  virtual void CleanPainter();      //!< Clean up internal objects
   
-  virtual void CleanPainter();
-  
-  virtual void SetPeakAna(PeakAna* ana);
-  //virtual const char* GetStatsOption(){ return mStatsOption.Data(); };
-  //virtual void SetStatsOption(const char* opt="");
+  virtual void SetPeakAna(PeakAna* ana); //!< @param ana set the #PeakAna object to paint
   
   virtual Color_t GetBaseLineColor();
   virtual Style_t GetBaseLineStyle();
@@ -80,26 +81,26 @@ public:
   virtual void SetHitLineStyle(Style_t style);
   virtual void SetHitLineWidth(Width_t width);
   
-  bool ValidGraph();
+  bool ValidGraph();              //!< Check if #PeakAna object loaded and has a non-zero TGraph
   
 protected:
-  void Init();//Not virtual since called in constructor
+  void Init();//!< Initialize internal variables to null
   
-  TLine* mTheBaseLine;    //Found baseline value or for ZS data the default in 'AnalyzeForT0'
-  TLine* mTheHitLine;     //The hit threshold which is 4\sigma over baseline by default
+  TLine* mTheBaseLine;    //!< line for the #PeakAna::mBaseline
+  TLine* mTheHitLine;     //!< threshold for a peak #PeakAna::mBaseline + #PeakAna::mBaselineSigma*#PeakAna::mBaselineSigmaScale
   
-  virtual TPaveText* MakePaveText(Double_t xmin=0.7,Double_t ymin=0.5, Double_t xmax=1.0, Double_t ymax=1.0);
+  virtual TPaveText* MakePaveText(Double_t xmin=0.7,Double_t ymin=0.5, Double_t xmax=1.0, Double_t ymax=1.0); //!< Makes the stats box to show peak infomation
   
-  PeakAna* mPA;//PA=PeakAna
-  TPaveText* mPaveT_PA;//for custom stats box
-  TString mGraphOption;
-  TString mPeakOption;
-  TString mStatsOption;
+  PeakAna* mPA;         //!< pointer to #PeakAna for drawing (PA=PeakAna)
+  TPaveText* mPaveT_PA; //!< for custom stats box
+  TString mGraphOption; //!< option for drawing the TGraph 
+  TString mPeakOption;  //!< option for drawing the peaks
+  TString mStatsOption; //!< option for what to put in stats box
   
   //[March 23, 2022]>Need a variable to know if something needs to repainted or not this will prevent multiple calls to delete??
   
 private:
-  UInt_t mDEBUG;
+  UInt_t mDEBUG;        //!< debug level, 0=none
   
   ClassDef(PeakAnaPainter,2);
 };

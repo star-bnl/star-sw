@@ -145,9 +145,9 @@ TObject* PeakAna::Clone(const char* newname) const
 
 PeakAna::~PeakAna()
 {
-  if(mG_Data!=0 && mInternalSignal ){delete mG_Data;}
-  if( mFilterWeights!=0 ){ delete [] mFilterWeights; mFilterWeights=0; }
-  if( mPainter!=0 ){ delete mPainter; mPainter=0; }
+  if(mInternalSignal ){delete mG_Data;}
+  delete [] mFilterWeights;
+  delete mPainter;
 }
 
 Int_t PeakAna::AnalyzeForPeak()
@@ -225,19 +225,17 @@ bool PeakAna::GoodWindow()
 void PeakAna::GetXYMax(Double_t xmin, Double_t xmax)
 {
   if( mG_Data==0 ){ return; }
-  for( int i=0; i<mG_Data->GetN(); ++i )
-    {
-      Double_t X; Double_t Y;
-      mG_Data->GetPoint(i,X,Y);
-      if( X<xmin || X>xmax ){continue;}
-      if( Y>mMaxY ){ mMaxY=Y; mMaxX=X; }
-    }
-  if( mMaxY<0 && mMaxX<0 )
-    {
-      std::cout << "Unable to find a maximum adc\nSetting to impossible values" << std::endl;
-      mMaxY = 5000;
-      mMaxX = 5000;
-    }
+  for( int i=0; i<mG_Data->GetN(); ++i ){
+    Double_t X; Double_t Y;
+    mG_Data->GetPoint(i,X,Y);
+    if( X<xmin || X>xmax ){continue;}
+    if( Y>mMaxY ){ mMaxY=Y; mMaxX=X; }
+  }
+  if( mMaxY<0 && mMaxX<0 ){
+    std::cout << "Unable to find a maximum adc\nSetting to impossible values" << std::endl;
+    mMaxY = 5000;
+    mMaxX = 5000;
+  }
 }
 
 Double_t PeakAna::PeakX()
@@ -306,7 +304,7 @@ void PeakAna::ResetPeak()
 
 void PeakAna::SetData(TGraph* graph)
 {
-  if( graph==0 ){std::cout << "ERROR:Graph cannot be 0!" << std::endl; exit(0);}
+  if( graph==0 ){LOG_ERROR << "PeaAna::SetData - Graph cannot be 0!" << endm; return;}
   ResetPeak();
   if( mInternalSignal && mG_Data!=0 ){delete mG_Data;}
   mG_Data = graph;
@@ -315,7 +313,7 @@ void PeakAna::SetData(TGraph* graph)
 
 void PeakAna::SetData(TH1* hist, UInt_t numavgs)
 {
-  if( hist==0 ){std::cout << "ERROR:Histogram cannot be 0" << std::endl; exit(0);}
+  if( hist==0 ){LOG_ERROR << "PeakAna::SetData - Histogram cannot be 0" << endm; return;}
   ResetPeak();
   if( mInternalSignal ){delete mG_Data;}
   mG_Data = PeakAna::ConvertHistToGraph(hist,numavgs);
@@ -334,7 +332,7 @@ void PeakAna::SetFilter( UInt_t filter, Int_t scale, Double_t sigma )
 
 void PeakAna::SetBaseline(Double_t value, Double_t sigma)
 {
-  if( sigma<0){ std::cout << "PeakAna::SetBaseline - WARNING:Baseline sigma should not be less than zero\n" << std::endl; }
+  if( sigma<0){ LOG_WARN << "PeakAna::SetBaseline - Baseline sigma should not be less than zero\n" << std::endl; }
   mBaseline = value;
   mBaselineSigma = sigma;
 }
@@ -396,7 +394,7 @@ TGraph* PeakAna::ConvertHistToGraph(TH1* hist, UInt_t numavgs)
     for(Int_t i=ibin; i<ibin+static_cast<Int_t>(numavgs) && i<=nbins; ++i ){ sum += hist->GetBinContent(i); ++counter; }
     Double_t avg = sum/static_cast<Double_t>(counter);
     //std::cout << std::endl<< "|sum:"<<sum << "|avg:"<<avg <<"|val:"<<hist->GetBinContent(ibin) << std::endl;
-	  //Set graph's point to center of x range
+    //Set graph's point to center of x range
     Double_t xlow = hist->GetBinLowEdge(ibin);
     Double_t xhigh = hist->GetBinLowEdge(ibin+counter);
     //AvgGr->SetPoint(AvgGr->GetN(),static_cast<Double_t>(ibin)+static_cast<Double_t>(numavgs)*0.5,avg);//This is for knowing which bin

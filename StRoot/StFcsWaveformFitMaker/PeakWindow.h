@@ -24,11 +24,14 @@ Author: David Kapukchyan
 @[February 18, 2022]
 > Moved *PeakWindow* to it's implementation file as it's become a more composite structure
 
-Helper class for PeakAna
+/*!
+  Data class to hold properties of a found peak like the peak position and its start and end points. Mostly used as a helper class for #PeakAna.
+
+  A "peak window" consists of 3 points: where a peak starts (first positive slope after negative slopes leading up to peak), where it plateaus (slope is zero i.e. the peak position), and where the peak ends (last negative slope before changing to positive slopes)
 */
 
-#ifndef STROOT_STFCSWAVEFORMFITMAKER_PEAKWINDOW_H_
-#define STROOT_STFCSWAVEFORMFITMAKER_PEAKWINDOW_H_
+#ifndef PEAKWINDOW_H
+#define PEAKWINDOW_H
 
 //C++ Headers
 #include <iostream>
@@ -44,57 +47,115 @@ Helper class for PeakAna
 #include "TLine.h"
 #include "TMath.h"
 
-//This class is for holding the peak position information
 class PeakWindow : public TObject{
 public:
-  PeakWindow();//Default values are range 0 to 1 with P_Peak and Peak equal to -1 (i.e. impossible point)
-  PeakWindow(Double_t start, Double_t end);//point and peak gets set to imposible values
-  PeakWindow(const PeakWindow& oldpeak); //Copy Constructor
-  PeakWindow& operator=(const PeakWindow& rhs);//Assignment operator
-  virtual ~PeakWindow();
+  /**@brief Default Constructor
+
+     Start and end points of peak are set to a range of 0 to 1 and #mP_Peak, #mPeakX, and #mPeakY equal to -1 (impossible point)
+   */
+  PeakWindow();
+  PeakWindow(Double_t start, Double_t end);     //!< Construct with known start and end points, peak gets set to imposible values
+  PeakWindow(const PeakWindow& oldpeak);        //!< Copy Constructor
+  PeakWindow& operator=(const PeakWindow& rhs); //!< Assignment operator
+  virtual ~PeakWindow();                        //!< Destructor
   
-  virtual void Copy(TObject& obj) const;
-  virtual TObject* Clone(const char* newname="") const;//Not named objects
+  virtual void Copy(TObject& obj) const;                //!< Only copies variables, to copy TLines use #Clone()
+  virtual TObject* Clone(const char* newname="") const; //!< Clone whole object, name is irrelevant
   
-  //To ease computation time I store the x,y values of the peak range rather than the graph point
-  Double_t mStartX; Double_t mEndX;//x values of where the peak is located
-  Double_t mStartY; Double_t mEndY;//y values of the peak
-  Int_t mP_Peak;//Point Number of peak (P for point), value contains point such that slope with previous point will be positive and next point will be negative
-  Double_t mPeakX;//Actual Peak position determined by making line of slopes from (P_Peak,P_Peak+1) and (P_Peak+1,P_Peak+2)
-  Double_t mPeakY;//y value at mP_Peak
+  //To ease computation time I store the x,y values of the peak window/range rather than the graph point
+  Double_t mStartX; //!< x-value for start of the peak window
+  Double_t mStartY; //!< y value associated with #mStartX
+  Double_t mEndX;   //!< x value for end of the peak window
+  Double_t mEndY;   //!< y value associated with #mEndX
+  Int_t mP_Peak;    //!< Point Number of peak in a TGraph object (P for point), point is such that slope with previous point will be positive and next point will be negative
+  Double_t mPeakX;  //!< x-value of peak position as determined by #SetPeak()
+  Double_t mPeakY;  //!< y-value at #mP_Peak
   
-  void SetWindow(Double_t s, Double_t e);
-  void GetWindow(Double_t &s, Double_t &e) const;
-  void SetPeak(TGraph* gdata);//Requires P_Peak has been set correctly
-  
+  void SetWindow(Double_t s, Double_t e);          //!< @param s set x-value for start of peak @param e set x-value for end of peak
+  void GetWindow(Double_t &s, Double_t &e) const;  //!< @param s get x-value for start of peak @param e get x-value for end of peak
+  /**@brief sets #mPeakX based on #mP_Peak using line of slopes from points (#mP_Peak-1,#mP_Peak) and (#mP_Peak,#mP_Peak+1)
+
+     This function is used to set #mPeakX to a value from the left and right slopes of #mP_Peak to correct for any discretization coming from points on a graph. Requires #mP_Peak has been set correctly
+     @param gdata TGraph where data is stored
+  */
+  void SetPeak(TGraph* gdata);
+
+  /**@brief combine two #PeakWindow objects
+
+     @param leftpeak one of the peaks to be combined and assumed to have the lower x-value
+     @param rightpeak one of the peaks to be combined and assumed to have the higher x-value
+     @param keepleft boolean to determine which peak position should be kept in the combined peak, true means "leftpeak", false means "rightpeak"
+     @return combined #PeakWindow object is returned
+  */
   static PeakWindow Combine(const PeakWindow &leftpeak, const PeakWindow &rightpeak, bool keepleft=true);
+  /**@brief merges one #PeakWindow into another
+
+     Changes "this" peak to include the "other" peak.
+     @param other #PeakWindow to merge with this one
+     @param keepthis true means keep "this" peak's position, false means keep "other" peak's position
+   */
   virtual void Combine( const PeakWindow &other, bool keepthis=true );
+  
+  /**@brief compare two #PeakWindow objects
+
+     Compares two #PeakWindow's and returns a value based on how different they are
+     @return comparison flag\n 
+       0 = different #PeakWindow's\n 
+       1 = same #mStartX and #mStartY only\n 
+       2 = "1" + same #mP_Peak only\n 
+       3 = "1" + "2" + same #mStartY and #mEndY only\n 
+       4 = "1" + "2" + "3" + same #mPeakX only\n 
+       5 = same #PeakWindow's ("1"+"2"+"3"+"4"+same #mPeakY)
+   */
   virtual UShort_t CompareTo( const PeakWindow& other ) const;
-  Double_t StartEndLineSlope() const;
-  Double_t StartEndSlopeUncertainty(Double_t sigma) const;
-  Double_t StartEndLineYint() const;
-  //void StartEndLine(Double_t& x, Double_t& y) const;
+  Double_t StartEndLineSlope() const;     //!< Computes the slope of the line formed by the points (#mStartX,#mStartY) and (#mEndX,#mEndY)
+  Double_t StartEndSlopeUncertainty(Double_t sigma) const; //!< Uncertainty int the slope of the line formed by the points (#mStartX,#mStartY) and (#mEndX,#mEndY)
+  Double_t StartEndLineYint() const;      //!< Computes the y-intercept of the line formed by the points (#mStartX,#mStartY) and (#mEndX,#mEndY)
+
+  /**@brief Computes the the line formed by the points (#mStartX,#mStartY) and (#mEndX,#mEndY) and evaluates that line at #mPeakX
+
+     The function is mostly needed in computing the probablity for peak tunneling since the difference of #MidPoint() and #mPeakY is used in the probability formula.
+     @param graph if graph given use that graph's x-value at #mP_Peak rather than #mPeakX
+     @return y-value evaluated at #mPeakX of line formed by points (#mStartX,#mStartY) and (#mEndX,#mEndY)
+   */
   Double_t MidPoint(TGraph* graph=0) const;
   virtual Double_t SlopeChirality(Double_t scale) const;//function to compute chirality factor for startendslope
   virtual Double_t PeakChirality(Double_t slopescale, Double_t peakscale) const;//for peakscale 1 means peak is centered in window, peakscale>1 peak center shifted towards start, peakscale<1 peak center shifted towards end (peakscale>0)
   virtual Double_t PeakChiralityProb(Double_t probscale, Double_t chirality) const;
   virtual Double_t PeakChiralityProb(Double_t probscale, Double_t peakscale, Double_t chirscale) const;//Returns probabilty not to merge or probabilty is a "real" peak
-  virtual Double_t PeakTunnelProb(TGraph* graph, Double_t scale=1.0, Double_t sigma=1.0 ) const;//Probablity is Exp(-scale*StartEndDiff)*Erfc(PeakHeightDiff/(sqrt(2)*s)) or 1 if peakheightdiff<=0
+
+  /**@brief Compute probablity that a given #PeakWindow is a real peak
+     
+     \f{equation}{ Probability = 1/(scale*StartEndDiff^2+1)*Erfc(PeakHeightDiff/(sqrt(2)*sigma)) \f} or 1 if PeakHeightDiff<=0\n
+     Erfc = complimentary error function\n 
+     StartEndDiff = #mEndX-#mStartX\n 
+     PeakHeightDiff = #mPeakY - #MidPoint()\n
+
+     This function will work even if #SetPeak() is not called since it requires a TGraph and will read the values from there
+
+     @param graph TGraph of data points
+     @param scale StartEndDiff scale in formula of probability
+     @param sigma sigma of Erfc to use in formula of probability 
+  */
+  virtual Double_t PeakTunnelProb(TGraph* graph, Double_t scale=1.0, Double_t sigma=1.0 ) const;
   //bool ChirMerge(const Rtools::PeakWindow& other, Double_t scalechir=1) const;//returns true if "this" should be merged with "other" PeakWindow according to PeakChirality
   //bool ChirMergeLeft(const Rtools::PeakWindow& left, const Rtools::PeakWindow& right, Double_t scalechir=1) const;//based on chirality - returns true if should be merged with "left" PeakWindow; false if should be merged with "right" PeakWindow
-  virtual void Reset(Double_t start, Double_t end);
-  virtual void Print(Option_t* opt="") const;
+  virtual void Reset(Double_t start, Double_t end);  //!< Reset #PeakWindow to constructor state
+  virtual void Print(Option_t* opt="") const;        //!< Prints information about PeakWindow
   
-  //Functions for TLine and drawing
-  //Options include:
-  // - "" (empty string) means draw start line, peak marker and end line.
-  // - "s" means draw start line
-  // - "p" means draw peak marker
-  // - "e" means draw end line
+  /**@brief Draw the PeakWindow
+     
+     @param opt options for drawing:
+       - "" (empty string) means draw start line, peak marker and end line.\n 
+       - "s" means draw start line\n 
+       - "p" means draw peak marker\n 
+       - "e" means draw end line
+  */
   virtual void Draw(Option_t* opt="");
-  virtual void Paint(Option_t* opt="");
-  
-  TLine* GetStartLine(Double_t ymin=0, Double_t ymax=0);
+  virtual void Paint(Option_t* opt=""); //!< paint method see #Draw() for options
+
+  //Options for drawing
+  TLine* GetStartLine(Double_t ymin=0, Double_t ymax=0); //!< Create and return a TLine for the start of the peak window
   Color_t GetStartLineColor() const;
   Style_t GetStartLineStyle() const;
   Width_t GetStartLineWidth() const;
@@ -103,7 +164,7 @@ public:
   void SetStartLineStyle(Style_t style);
   void SetStartLineWidth(Width_t width);
   
-  TMarker* GetPeakMarker();
+  TMarker* GetPeakMarker();  //!< Create and return a TMarker to mark the location of the peak
   Color_t GetPeakMarkerColor() const;
   Style_t GetPeakMarkerStyle() const;
   Size_t GetPeakMarkerSize() const;
@@ -112,7 +173,7 @@ public:
   void SetPeakMarkerStyle(Style_t style);
   void SetPeakMarkerSize(Size_t size);
   
-  TLine* GetEndLine(Double_t ymin=0, Double_t ymax=0);
+  TLine* GetEndLine(Double_t ymin=0, Double_t ymax=0); //!< Create and return a TLine for the end of the peak window
   Color_t GetEndLineColor() const;
   Style_t GetEndLineStyle() const;
   Width_t GetEndLineWidth() const;
@@ -122,9 +183,9 @@ public:
   void SetEndLineWidth(Width_t width);
   
 protected:
-  TLine* mStartLine;
-  TMarker* mPeakMarker;
-  TLine* mEndLine;
+  TLine* mStartLine;     //!< TLine for drawing the start of the peak window
+  TMarker* mPeakMarker;  //!< TMarker for drawing the peak location
+  TLine* mEndLine;       //!< TLine for drawing the end of the peak window
   
   ClassDef(PeakWindow,3);
 };

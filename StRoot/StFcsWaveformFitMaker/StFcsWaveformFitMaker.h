@@ -87,9 +87,8 @@ public:
     void setMaxPeak(int v)        {mMaxPeak=v;}
     void setPedTimeBins(int min, int max) {mPedMin=min; mPedMax=max;}
 
-    // Create or Reset TGraphAsymmErrors (at mHitIdx)
-    TGraphAsymmErrors* resetGraph();
-
+    TGraphAsymmErrors* resetGraph();    //! Create or Reset TGraphAsymmErrors (at mHitIdx)
+  
     // Return TGraphAsymmErrors at idx
     // if idx<0 (default) it returns "current" which is idx=mHitIdx-1
     // makeTGraphAsymmErrors() makes all at idx=mHitIdx=0 except when 
@@ -176,7 +175,7 @@ public:
     void drawFit(TGraphAsymmErrors* g, TF1* func);
     StFcsPulseAna* mPulseFit;
 
-    int mTest = 0;
+    int mTest = 0; //! Variable to use when testing StFcsWaveformFitMaker algorithms
     //0 = no testing
     //1 = test DEP algorithm
     //2 = test PeakAna vs. gausFit
@@ -271,7 +270,7 @@ public:
     char* mFilename=0;
     char* mFilter=0;
     char mDetName[100];
-    int mFitDrawOn=0;   //! If set, it will also create a new TGraphAsymmErrors for each hit
+    int mFitDrawOn=0;   //! If set to 1 it will create a new TGraphAsymmErrors for each hit, if set to 2 will create new TGraphAsmmErrors for each hit up to mMaxPage then reset
 
     virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
 
