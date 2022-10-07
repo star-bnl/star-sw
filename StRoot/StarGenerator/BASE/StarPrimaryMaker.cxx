@@ -29,11 +29,21 @@ ClassImp(StarPrimaryMaker);
 #include "TMCProcess.h"
 
 #include "tables/St_vertexSeed_Table.h"
+#include <map>
+#include <string>
 
 using namespace std;
 
 // 1 mm / speed of light
 const double mmOverC = 1.0E-3 / TMath::C();
+
+std::map< std::string, std::function< TLorentzVector()> > vertexFunctionMap;
+
+void StarPrimaryMaker::SetVertexing( const char* name ) {
+
+  mVertexFunction = vertexFunctionMap[name];
+
+};
 
 StarPrimaryMaker *fgPrimary      = 0;
 // --------------------------------------------------------------------------------------------------------------
@@ -68,6 +78,40 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   AddData( &pdb, ".const" );
 
   SetAttr("FilterKeepHeader", int(1) );
+
+  // Default vertex function
+  mVertexFunction = [this]() -> TLorentzVector {
+    Double_t x=0,y=0,z=0,t=0;
+    TVector2 xy = StarRandom::Instance().gauss2d( this->mSx, this->mSy, this->mRho );
+    x = mVx + xy.X();
+    y = mVy + xy.Y();
+    z = mVz + StarRandom::Instance().gauss( this->mSz );
+    Double_t dist = TMath::Sqrt(x*x+y*y+z*z);
+    t = dist / TMath::Ccgs();
+    return TLorentzVector(x,y,z,t);
+  };
+
+  vertexFunctionMap["gaussXYZ"] = mVertexFunction;
+  vertexFunctionMap["flatZ"]  = [this]() -> TLorentzVector {
+    double x=0,y=0,z=0,t=0;                                 
+    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+    z = this->mVz - this->mSz + StarRandom::Instance().flat() * ( this-> mSz * 2.0 );
+    x = this->mVx;
+    y = this->mVy;
+    double dist = TMath::Sqrt(x*x+y*y+z*z);   
+    t = dist / TMath::Ccgs(); 
+    return TLorentzVector(x,y,z,t); 
+  };
+  vertexFunctionMap["flatXYZ"]  = [this]() -> TLorentzVector {
+    double x=0,y=0,z=0,t=0;                                 
+    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+    z = this->mVz - this->mSz + StarRandom::Instance().flat() * ( this-> mSz * 2.0 );
+    x = this->mVx - this->mSx + StarRandom::Instance().flat() * ( this-> mSx * 2.0 );
+    y = this->mVy - this->mSy + StarRandom::Instance().flat() * ( this-> mSy * 2.0 );
+    double dist = TMath::Sqrt(x*x+y*y+z*z);   
+    t = dist / TMath::Ccgs(); 
+    return TLorentzVector(x,y,z,t); 
+  };
 
 }
 // --------------------------------------------------------------------------------------------------------------
@@ -505,7 +549,7 @@ Int_t StarPrimaryMaker::Finalize()
   //
   // Generate the primary vertex within allowed limits
   //
-  TLorentzVector primary = Vertex(); while ( primary.Z() < mZMin || primary.Z() > mZMax ) primary = Vertex();
+  TLorentzVector primary = mVertexFunction(); while ( primary.Z() < mZMin || primary.Z() > mZMax ) primary = mVertexFunction();
 
   mPrimaryVertex = primary;
 
@@ -520,7 +564,7 @@ Int_t StarPrimaryMaker::Finalize()
 
       // Obtain the vertex for this event.  If the generator is marked as
       // pileup, sample a new vertex.  Otherwise use the primary vertex
-      TLorentzVector vertex = (generator->IsPileup())?	Vertex() : primary;
+      TLorentzVector vertex = (generator->IsPileup())?	mVertexFunction() : primary;
 
       StarGenEvent *event = generator->Event();
       Int_t npart = event->GetNumberOfParticles();

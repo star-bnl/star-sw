@@ -13,6 +13,10 @@
 
 #include "TEventList.h"
 
+#ifndef __CINT__
+#include <functional>
+#endif
+
 class StarGenerator;
 class StarGenEvent;
 class StarFilterMaker;
@@ -163,6 +167,9 @@ class StarPrimaryMaker : public StMaker
   /// Return a pointer to the event
   StarGenEvent *event() { return mPrimaryEvent; }
 
+  /// Set vertexing function from named options
+  void SetVertexing( const char* name );
+
   virtual const char *GetCVS() const
   {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.8 2015/06/15 13:23:00 jwebb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
@@ -221,6 +228,10 @@ class StarPrimaryMaker : public StMaker
 
   StarFilterMaker *mFilter;
   TEventList      *mAccepted; //*< event list containing accepted events
+
+#ifndef __CINT__
+  std::function< TLorentzVector() > mVertexFunction;
+#endif
 
   ClassDef(StarPrimaryMaker,1);
 
