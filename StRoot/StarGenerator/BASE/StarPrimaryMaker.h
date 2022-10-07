@@ -177,8 +177,6 @@ class StarPrimaryMaker : public StMaker
  protected:
 
 
-  TLorentzVector Vertex();
-
   Int_t     PreGenerate();
   Int_t        Generate();
   Int_t    PostGenerate();

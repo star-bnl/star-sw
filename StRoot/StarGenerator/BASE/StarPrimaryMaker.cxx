@@ -687,20 +687,6 @@ Int_t StarPrimaryMaker::Finalize()
 }
 
 // --------------------------------------------------------------------------------------------------------------
-TLorentzVector StarPrimaryMaker::Vertex()
-{  
-  Double_t x=0,y=0,z=0,t=0;
-
-  TVector2 xy = StarRandom::Instance().gauss2d( mSx, mSy, mRho );
-  x = mVx + xy.X();
-  y = mVy + xy.Y();
-  z = mVz + StarRandom::Instance().gauss( mSz );
-  Double_t dist = TMath::Sqrt(x*x+y*y+z*z);
-  t = dist / TMath::Ccgs();
-
-  return TLorentzVector(x,y,z,t);
-}
-// --------------------------------------------------------------------------------------------------------------
 void StarPrimaryMaker::BuildTables()
 {
 
