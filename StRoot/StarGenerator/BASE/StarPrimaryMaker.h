@@ -167,7 +167,15 @@ class StarPrimaryMaker : public StMaker
   /// Return a pointer to the event
   StarGenEvent *event() { return mPrimaryEvent; }
 
-  /// Set vertexing function from named options
+  /// Set vertexing function from named options.  The vertex center parameters (Vx,Vy,Vz) set using SetVertex define the center of
+  /// the distribution.  The vertex widths Sx,Sy,Sz (plus Rho) set using SetSigma define the gaussain widths for the gaussian vertexing
+  /// option.  For the other options, they are used as follows.
+  /// @param name specifies the vertexing option.
+  /// name = "gausXYZ" is the default.
+  /// name = "flatZ"   throws points uniform on a line from Vz - Sz to Vz + Sz
+  /// name = "flatXYZ" thows within a rectangular box Vx+/-Sx, Vy+/-Sy, Vz+/-Sz
+  /// name = "flatRZ"  throws within a cylinder of radius Sx centered on Vx,Vy, from z=Vz-Sz to Vz+Sz
+  /// name = "flatABZ" throws within an eliptical cyilnder of major axis A minor axis B, rotated by Rho
   void SetVertexing( const char* name );
 
   virtual const char *GetCVS() const

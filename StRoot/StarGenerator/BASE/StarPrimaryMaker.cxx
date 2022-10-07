@@ -90,7 +90,6 @@ StarPrimaryMaker::StarPrimaryMaker()  :
     t = dist / TMath::Ccgs();
     return TLorentzVector(x,y,z,t);
   };
-
   vertexFunctionMap["gaussXYZ"] = mVertexFunction;
   vertexFunctionMap["flatZ"]  = [this]() -> TLorentzVector {
     double x=0,y=0,z=0,t=0;                                 
@@ -101,6 +100,39 @@ StarPrimaryMaker::StarPrimaryMaker()  :
     double dist = TMath::Sqrt(x*x+y*y+z*z);   
     t = dist / TMath::Ccgs(); 
     return TLorentzVector(x,y,z,t); 
+  };
+  vertexFunctionMap["flatABZ"]  = [this]() -> TLorentzVector {
+    double x=0,y=0,z=0,t=0;                                 
+    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+    z = this->mVz - this->mSz + StarRandom::Instance().flat() * ( this-> mSz * 2.0 );
+    double a = this->mSx;
+    double b = this->mSy;
+    while (true) {
+      // Sample uniformly in rectangle length 2a width 2b
+      x = ( StarRandom::Instance().flat() * 2 * a - a );
+      y = ( StarRandom::Instance().flat() * 2 * b - b );
+      // If point w/in perimeter of the elipse... accept the point
+      if ( (x/a)*(x/a) + (y/b)*(y/b) <= 1.0 ) break;
+    };
+    double dist = TMath::Sqrt(x*x+y*y+z*z);   
+    t = dist / TMath::Ccgs(); 
+    TLorentzVector result(x,y,z,t);
+    result.RotateZ( this->mRho );    
+    return result;
+  };
+  vertexFunctionMap["flatRZ"]  = [this]() -> TLorentzVector {
+    double x=0,y=0,z=0,t=0;                                 
+    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+    z = this->mVz - this->mSz + StarRandom::Instance().flat() * ( this-> mSz * 2.0 );
+    double R = this->mSx;
+    double r   = R * sqrt(StarRandom::Instance().flat());
+    double phi = 2.0 * TMath::Pi() * StarRandom::Instance().flat();
+    x = r * TMath::Cos(phi);
+    y = r * TMath::Sin(phi);
+    double dist = TMath::Sqrt(x*x+y*y+z*z);   
+    t = dist / TMath::Ccgs(); 
+    TLorentzVector result(x,y,z,t);
+    return result;
   };
   vertexFunctionMap["flatXYZ"]  = [this]() -> TLorentzVector {
     double x=0,y=0,z=0,t=0;                                 
