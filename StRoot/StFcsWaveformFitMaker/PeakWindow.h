@@ -23,7 +23,7 @@ Author: David Kapukchyan
 
 @[February 18, 2022]
 > Moved *PeakWindow* to it's implementation file as it's become a more composite structure
-
+*/
 /*!
   Data class to hold properties of a found peak like the peak position and its start and end points. Mostly used as a helper class for #PeakAna.
 

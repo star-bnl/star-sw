@@ -78,6 +78,7 @@ void StFcsDbPulse::setTGraphAsymmErrors(TGraphAsymmErrors* gae, const int &i, co
   gae->SetPointError(i,0,0,Yerr,HighY);
 }
 
+//this one is just shower shape function
 double StFcsDbPulse::pulseShape(double* x, double* p) {
     double ret =  p[0]*exp(-0.5*pow((x[0]-p[1])/p[2],2));
     if(mTail>0){

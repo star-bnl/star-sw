@@ -90,7 +90,6 @@ ClassImp(StFcsWaveformFitMaker)
 
 StFcsWaveformFitMaker::StFcsWaveformFitMaker(const char* name) : StMaker(name) {
     mChWaveData.SetClass("TGraphAsymmErrors"); //Initialize with only one graph at first
-    //mPulseFit = new StFcsPulseFit( (TGraphAsymmErrors*)mChWaveData.ConstructedAt(0) );
     mPulseFit = 0;
 
     mOutFile = 0;
@@ -222,6 +221,11 @@ void StFcsWaveformFitMaker::setTest(int v)
     if( mEnergySelect[1]!=13  ){ mEnergySelect[1]=13; }
     if( mEnergySelect[2]!=13  ){ mEnergySelect[2]=13; }
   }
+  if( mTest==7 ){//Test level 6 is for testing the steering code in PulseFit2()
+    if( mEnergySelect[0]!=13  ){ mEnergySelect[0]=13; }
+    if( mEnergySelect[1]!=13  ){ mEnergySelect[1]=13; }
+    if( mEnergySelect[2]!=1   ){ mEnergySelect[2]=1;  }
+  }
 }
 
 void StFcsWaveformFitMaker::setTail(int v){mTail=v;}
@@ -283,11 +287,13 @@ int StFcsWaveformFitMaker::Init()
 	}
 	mH2F_AdcTbValidPeak[i] = new TH2F( ("H2_AdcTbValidPeak_"+ss.str()).c_str(),"Valid Peaks Adc vs. Tb",102,-1.5,100.5,4097,-0.5,4096.5);
       }
-      if( mTest==3 || mTest==6 ){
+      if( mTest==3 || mTest==6 || mTest==7 ){
 	mH1F_NPeaks[i] = new TH1F( ("H1_NPeaks_"+ss.str()).c_str(),"Number of peaks from finder", 11,-0.5,10.5);
 	mH1F_NPeaksFiltered[i] = new TH1F( ("H1_NPeaksFiltered_"+ss.str()).c_str(),"Number of peaks from finder when a valid peak was found", 11,-0.5,10.5);
 	mH1F_Res0[i] = new TH1F( ("H1_Res0_"+ss.str()).c_str(),"All ADC sums", 100,0,2000 );
 	mH1F_Res0Zoom[i] = new TH1F( ("H1_Res0Zoom_"+ss.str()).c_str(),"All ADC sums", 201,-0.5,200.5 );
+      }
+      if( mTest==3 || mTest==6 ){
 	mH1F_Sum8Res0[i] = new TH1F( ("H1_Sum8Res0_"+ss.str()).c_str(),"All ADC sums using sum 8", 100,0,2000 );
 	mH1F_Sum8Res0Zoom[i] = new TH1F( ("H1_Sum8Res0Zoom_"+ss.str()).c_str(),"All ADC sums using sum 8", 201,-0.5,200.5 );
 	mH1F_FitRes0[i] = new TH1F( ("H1_FitRes0_"+ss.str()).c_str(),"All ADC sums using fitting", 100,0,2000 );
@@ -342,7 +348,7 @@ int StFcsWaveformFitMaker::InitRun(int runNumber) {
     }
     mDbPulse->setTail(mTail);
     if( mPulseFit==0 ){ mPulseFit = new StFcsPulseAna(); SetupDavidFitterMay2022(); mPulseFit->setDbPulse(mDbPulse); }
-    
+    mPulseFit->setDbPulse(mDbPulse);
     
     return StMaker::InitRun(runNumber);
 }
@@ -691,6 +697,14 @@ float StFcsWaveformFitMaker::analyzeWaveform(int select, TGraphAsymmErrors* g, f
 	mH2_Sum8Dep0[det/2]->Fill(sumdep0,integral);
 	mH2_Sum8DepMod[det/2]->Fill(sumdepmod,integral);
       }
+      if( mTest==7 ){
+	int det0 = 0; int ch0=0;
+	mDb->getFromName( g->GetName(), det0,ch0 );
+	mH1F_Res0[det0]->Fill(res[0]);
+	mH1F_Res0Zoom[det0]->Fill(res[0]);
+	mH1F_Res0[6]->Fill(res[0]);
+	mH1F_Res0Zoom[6]->Fill(res[0]);
+      }
     }
     return integral;
 }
@@ -812,35 +826,7 @@ float StFcsWaveformFitMaker::highest3(TGraphAsymmErrors* g, float* res){
     //res[5]= 0.0;        //no # of peak
     return sum;		  //this is the 3 timebin sum
 }
-/*
-//this one is just shower shape function
-double StFcsWaveformFitMaker::pulseShape(double* x, double* p) {
-    double ret =  p[0]*exp(-0.5*pow((x[0]-p[1])/p[2],2));
-    if(mTail>0){
-      double x1 = x[0] - p[1] - Xoff1;
-      if(x1>0){
-        double a0 = p[0] * p[2];
-        ret += a0*A1/Tau1/Tau1*pow(x1,P1)*exp(-x1/Tau1);
-	if(A2>0){
-	  double x2 = x[0] - p[1] - Xoff2;
-	  if(x2>0){
-	    ret += a0*A2/Tau2/Tau2*pow(x2,P2)*exp(-x2/Tau2);
-	  }
-	}
-      }
-    }
-    return ret;
-}
 
-double StFcsWaveformFitMaker::multiPulseShape(double* x, double* p) {
-    int npulse = p[0];
-    double ret = p[1];
-    for(int i=0; i<npulse; i++){
-	ret += pulseShape(x, &p[2+i*3]);
-    }    
-    return ret;
-}
-*/
 float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& func, float ped){
     char Opt[10]="Q  ";
     if(GetDebug()>2) sprintf(Opt,"  ");
@@ -1069,13 +1055,15 @@ void StFcsWaveformFitMaker::drawCh(UInt_t detid, UInt_t ch) const
 	ggdraw->SetMarkerStyle(kBlack);
 	ggdraw->SetMarkerStyle(4);
 	ggdraw->SetMarkerSize(0.5);
+	ggdraw->GetXaxis()->SetTitle("timebin");
+	ggdraw->GetYaxis()->SetTitle("ADC");
 	if( mPulseFit!=0 ){
 	  int det=-1;
 	  int ch=-1;
 	  StFcsDb::getFromName(ggdraw->GetName(),det,ch);
 	  char post[50];
 	  sprintf(post,"_D%dC%d",det,ch);
-	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;A",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
+	  StFcsPulseAna* ana = mPulseFit->DrawCopy("LP;P",post,ggdraw);//Sets 'kCanDelete' so an external canvas will delete this object when "Clear" is called
 	  ana->GetData()->SetLineColor(kBlue);
 	  ana->GetData()->SetMarkerStyle(kBlue);
 	  ana->GetData()->SetMarkerStyle(4);
@@ -1107,7 +1095,7 @@ float StFcsWaveformFitMaker::gausFitWithPed(TGraphAsymmErrors* g, float* res, TF
   float ped = float(p)/(mPedMax-mPedMin+1.0);
   res[6] = ped;
   res[7] = sqrt( ( sumsq-((double(p)*double(p))/(mPedMax-mPedMin+1.0)) )/(mPedMax-mPedMin) );//Variance/StdDev using naive algorithm from https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-  printf("Pedestal=%6.2f/(%6.2f-%6.2f+1)=%6.2f\n",float(p),float(mPedMax),float(mPedMin),ped);
+  printf("Pedestal=%6.2f/(%6.2f-%6.2f+1)=%6.2f +- %6.2f\n",float(p),float(mPedMax),float(mPedMin),ped,res[7]);
   return gausFit(g, res, func, ped);
 }
 
@@ -1424,7 +1412,7 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
     Double_t xmin, xmax;
     int trigfitidx = compidx;//this is starting condition is needed to pick out the right index
     npeaks = NPeaksPre2Post1(trigfitidx,xmin,xmax);//Check for peaks near triggered crossing (counts triggered crosing peak)
-    if( mTest==6 ){
+    if( mTest==6 || mTest==7 ){
       mH1F_NPeaksFiltered[det0]->Fill(npeaks);
       mH1F_NPeaksFiltered[6]->Fill(npeaks);
     }
@@ -1615,18 +1603,24 @@ int StFcsWaveformFitMaker::NPeaksPre2Post1(int& trigidx,Double_t& xmin, Double_t
   return npeaksxing;
 }
 
-
-void StFcsWaveformFitMaker::SetupDavidFitterMay2022()
+StFcsPulseAna* StFcsWaveformFitMaker::InitFitter(Double_t ped)
 {
-  if( mPulseFit==0 ){return;}
-  //Need to set baseline to zero, or greater than zero, to prevent baseline finding.  
-  //This is good for zero-suppressed data but should be left unset otherwise.  Also can be used to adjust adc threshold 
+  if( mPulseFit==0 ){ mPulseFit = new StFcsPulseAna(); }
+  //Need to set baseline to zero, or greater than zero, to prevent baseline finding.
+  //This is good for zero-suppressed data but should be left unset otherwise.  Also can be used to adjust adc threshold
   //for acceptance by changing the 0.75 to some other number (default ADC acceptance = 4.0*0.75)
-  mPulseFit->SetBaseline(0,0.39);
+  mPulseFit->SetBaseline(ped,0.39);
   mPulseFit->SetBaselineSigmaScale(5);
   mPulseFit->SetRange(-4,0,2000,5000);
   mPulseFit->SetSearchWindow(centerTB(),4);//Check +- 4tb around triggered crossing; some suitable starting search parameter may need to be adjusted based on data
   mPulseFit->SetContinuity(1.0);
+  return mPulseFit;
+}
+
+void StFcsWaveformFitMaker::SetupDavidFitterMay2022(Double_t ped)
+{
+  if( mPulseFit==0 ){return;}
+  InitFitter(ped);
   //mPulseFit->SetFilter(1,1);//Mean filter with "radius" 1
   //mPulseFit->SetFilter(1,2);//Mean filter with "radius" 2
   //mPulseFit->SetFilter(2,1,0.5);//Gaus filter with "radius" 1 and sigma 0.5.

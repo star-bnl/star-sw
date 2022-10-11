@@ -162,6 +162,7 @@ public:
     int centerTB()const{return mCenterTB;}
     void setDavidFitter(StFcsPulseAna* v){if(mPulseFit==0){mPulseFit=v;}}
     StFcsPulseAna* davidFitter(){return mPulseFit;}
+    StFcsPulseAna* InitFitter(Double_t ped=0);     //! Sets up basic values needed by #StFcsPulseAna
     static int GenericPadPos(int value, int Nvals, int PadNums );
     static int PadNum4x4(int det, int col, int row);
     void drawRegion(int det, int col_low, int row_low, int col_high, int row_high, int event=0);
@@ -175,14 +176,21 @@ public:
     void drawFit(TGraphAsymmErrors* g, TF1* func);
     StFcsPulseAna* mPulseFit;
 
-    int mTest = 0; //! Variable to use when testing StFcsWaveformFitMaker algorithms
-    //0 = no testing
-    //1 = test DEP algorithm
-    //2 = test PeakAna vs. gausFit
-    //3 = test PulseFit1 picking sum method
-    //4 = test PulseFit1 all data with peaks
-    //5 = test timing of gausFit() vs. PulseFit1()
-    //6 = like test==3 but for PulseFit2()
+    /**@brief Variable to use when testing StFcsWaveformFitMaker algorithms
+
+       Self contained analysis for testing various components/functions of #StFcsWaveformFitMaker
+       
+       - 0 = no testing
+       - 1 = test DEP algorithm
+       - 2 = test PeakAna vs. gausFit
+       - 3 = test PulseFit1 picking sum method
+       - 4 = test PulseFit1 all data with peaks
+       - 5 = test timing of gausFit() vs. PulseFit1()
+       - 6 = like test==3 but for PulseFit2()
+       - 7 = test PulseFit2() for overall quality doesn't include preshower
+    */
+    int mTest = 0;
+
     TFile* mOutFile;//Root output file for testing
     //For testing Dep0 algo (mTest==1)
     TH2F* mH2_Dep0DepMod[3];
@@ -229,7 +237,7 @@ public:
     TH1F* mH1_PeakTimingPuls = 0;               //Histogram to test timing of PulseFit()
     TH2F* mH2_PeakTimingCompare = 0;            //Histogram to test timing between gausFit() and PulseFit()
 
-    void SetupDavidFitterMay2022();    //This special function is used to set all the parameters for 'mPulseFit' to test on the Run 22 data. It's parameters are based on the Cosmic data for the Hcal taken last year.
+    void SetupDavidFitterMay2022(Double_t ped=0);    //! This special function is used to set all the parameters for #StFcsPulseAna based on cosmic and Run 22 data. It is intended to be used only for Run 22 data
     int PeakCompare(const PeakWindow& pwin1, const PeakWindow& pwin2 ); //Compare if two peaks overlap and return a bit vector of tests passed/failed for comparing pwin1 to pwin2. 0 means all tests passed and pwin1 does not overlap with pwin2
     int NPeaksPre2Post1(int& trigidx, Double_t& xmin, Double_t& xmax) const;//xmin and xmax will be the range of the pre-crossing -2 and post-crossing +1 peaks. trigidx is needed to pick up the triggered crossing in the new number of peaks
 
