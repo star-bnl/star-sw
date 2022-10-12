@@ -1739,7 +1739,7 @@ Bfc_st BFC[] = { // standard chains
 
   // forward track maker
   {"FwdTrack","","","","StFwdTrackMaker",
-  "XMLIO.so,genfit2.so,KiTrack.so,StarGeneratorUtil.so,libMathMore.so,StEventUtilities.so,StEpdUtil,StFwdTrackMaker", 
+  "XMLIO,genfit2,KiTrack,StarGeneratorUtil,libMathMore,StEventUtilities,StEpdUtil,StFwdTrackMaker", 
                                                             "Forward Track Maker",                  kFALSE},
 
 #if 0
