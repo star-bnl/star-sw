@@ -1,0 +1,2 @@
+module use /cvmfs/star.sdcc.bnl.gov/star-spack/spack/share/spack/modules/linux-rhel7-x86_64/
+module load star-env-0.2.3-root-5.34.38
