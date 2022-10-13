@@ -1105,5 +1105,14 @@
         "inppath": "/star/rcf/test/daq/2022/040/23040001",
         "outpath": "",
         "nevents": "50"
+    },
+    {
+        "jobid": "124",
+        "descr": "2023 dataset",
+        "chopts": "pp2022,StiCA,BEmcChkStat,epdhit,FwdTrack",
+        "inpfile": "st_physics_23072022_raw_4000001.daq",
+        "inppath": "/star/rcf/test/daq/2023/072/23072022/",
+        "outpath": "",
+        "nevents": "200"
     }
 ]

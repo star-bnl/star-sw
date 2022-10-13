@@ -1736,6 +1736,9 @@ Bfc_st BFC[] = { // standard chains
                                                                              "sTGC Point maker",    kFALSE},
   {"FttQA","","fttChain","","StFttQAMaker","StFttQAMaker", "sTGC Raw hit QA maker",                 kFALSE},
 
+  {"FwdTrack","","","","StFwdTrackMaker",
+   "libxml2,genfit2,KiTrack,StarGeneratorUtil,libMathMore,StEventUtilities,StEpdUtil,StFwdTrackMaker",
+                                                                             "Forward Track Maker", kFALSE},
 
 #if 0
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
