@@ -38,8 +38,9 @@
 #  cp ${evtsFile} ${evtsFileB}
 #   set chain = P2019a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault,McTpcAna
    set chain = P2019a,StiCA,evout,NoHistos,noTags,noRunco,PicoVtxVpdOrDefault
-   echo ${SUBMITTINGDIRECTORY} | grep noTpxClu
-   if ($? != 0) set chain = ${chain},TpxRaw,TpxClu;
+#   echo ${SUBMITTINGDIRECTORY} | grep noTpxClu
+   echo ${SUBMITTINGDIRECTORY} | grep TpxRaw
+   if (! $? ) set chain = ${chain},TpxRaw,TpxClu;
    echo ${SUBMITTINGDIRECTORY} | grep TPC23
    if ($? == 0) set chain = ${chain},TpxRaw,TPC23;
 #  set chain = ${chain},TpxRaw,TpxClu,McTpcAna;

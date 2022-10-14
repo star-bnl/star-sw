@@ -2,13 +2,13 @@
 <job maxFilesPerProcess="1" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
          cd ${SUBMITTINGDIRECTORY}
-   setenv StarEndMakerShell
+#   setenv StarEndMakerShell
    setenv STARFPE NO
    setenv NODEBUG yes
 #SL18f
-   setup gcc
-   setup 32b
-   starver SL18h
+#   setup gcc
+#   setup 32b
+#   starver SL18h
 # dev
 #   starver dev
 #.DEV2
@@ -59,7 +59,11 @@
 # SL18f
 #   root4star -q -b 'bfc.C(1000,"P2018a,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
 # TFG
-   root.exe -q -b 'bfc.C(1000,"P2018a,-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
+  set TpxRaw = "";
+  echo ${SUBMITTINGDIRECTORY} | grep TpxRaw
+  if (! $?) set TpxRaw = ",TpxRaw,TpxClu"
+#   root.exe -q -b 'bfc.C(1000,"P2018a'${TpxRaw}',-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
+   root.exe -q -b 'bfc.C(1000,"P2018a'${TpxRaw}',-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
@@ -84,5 +88,6 @@
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/production_3p85GeV_fixedTarget_2018/*/*/*_adc_*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/production_3p85GeV_fixedTarget_2018/*/*/*.daq" /> -->
 <!-- <input URL="file:/net/l401/data/scratch1/daq/2018/production_26p5GeV_fixedTarget_2018/*/*/*_adc_*.daq" /> -->
-<input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" />
+<!-- <input URL="file:/net/l401/data/scratch1/daq/2018/27GeV_production_2018/168/*/*.daq" />-->
+<input URL="file:/hlt/cephfs/daq/2018/166/19166011/*.daq" />
 </job>

@@ -153,3 +153,9 @@ foreach p (`ls -1d *- | sed -e 's/-//'`)
  end
 
 fit.pl */ADCut23.root G=
+
+#add signs
+ foreach p (muon pion electron kaon proton)
+   hadd -f ${p}COL/ADCut27.root ${p}?COL/ADCut27.root >& ${p}COL/hadd.log &
+   hadd -f ${p}FXT/ADCut27.root ${p}?FXT/ADCut27.root >& ${p}FXT/hadd.log &
+ end

@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job maxFilesPerProcess="10" filesPerHour="1.0" fileListSyntax="paths" simulateSubmission ="false" copyInputLocally="false">
         <command>
-#         cd ${SUBMITTINGDIRECTORY}
+#ifdef  SUBMITTINGDIRECTORY
+         cd ${SUBMITTINGDIRECTORY}
+#endif
    setenv STARFPE NO
 #   setenv NODEBUG yes
 #   setup 64b
 #   starver TFG21c
-   starver TFG21h
+#   starver TFG21h
+   starver TFG22h
 #  echo $INPUTFILE0 | grep ':'
 #  if (! $?) then
 #    set evtsFile = `echo $INPUTFILE0 | awk -F\: '{print $1}'`
@@ -41,8 +44,10 @@
     endif
     set input = ${evtsFile};
 root.exe -q -b 'bfc.C(100000,"P2021a,evout,NoHistos,noTags,noRunco,StiCA,-picoWrite,-picoDst,Cosmics","'${input}'")' &gt;&amp; ${logFile}
-    cp -p ${logFile} ${SUBMITTINGDIRECTORY}/
-    cp -p ${bf}*.root ${SUBMITTINGDIRECTORY}/
+#ifndef SUBMITTINGDIRECTORY
+#    cp -p ${logFile} ${SUBMITTINGDIRECTORY}/
+#    cp -p ${bf}*.root ${SUBMITTINGDIRECTORY}/
+#endif
     rm ${SUBMITTINGDIRECTORY}/${bf}.bla.root
   end
         </command>

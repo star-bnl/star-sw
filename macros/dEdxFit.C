@@ -4600,7 +4600,7 @@ void FitH3D(TH1 *hist, TF1 *fun,
 	  {  proj = ((TH2 *) hist)->ProjectionY(Form("f%i_%i",ir0,ir1),ir0,ir1);cout<<"Histogram "<<proj->GetName()<<" was created"<<endl;}
 	if (! proj) continue;
 	TString title(proj->GetTitle());
-	title += Form("in x [%5.1f,%5.1f] range",
+	title += Form(" in x [%5.1f,%5.1f] range",
 		      xax->GetBinLowEdge(ir0), xax->GetBinUpEdge(ir1));
 	proj->SetTitle(title.Data());
       }
@@ -5013,7 +5013,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	  {  proj = ((TH2 *) hist)->ProjectionY(Form("f%i_%i",ir0,ir1),ir0,ir1);cout<<"Histogram "<<proj->GetName()<<" was created"<<endl;}
 	if (! proj) continue;
 	TString title(proj->GetTitle());
-	title += Form("in x [%5.1f,%5.1f] range",
+	title += Form(" in x [%5.1f,%5.1f] range",
 		      xax->GetBinLowEdge(ir0), xax->GetBinUpEdge(ir1));
 	proj->SetTitle(title.Data());
       }

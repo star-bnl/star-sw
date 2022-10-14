@@ -558,5 +558,7 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
     MuDraw("mu:x","PI", 60, -2, 5, "(i&&j&&dmu>0&&dmu<0.01&&dsigma<0.01&&mu<0)", "prof", -0.5,  0.0, "All", "neN","#mu versus log_{10}(#beta #gamma)");
   } else if (Name.BeginsWith("NpdN"))      {
     MuDraw("mu:x","PI", 70, 3, 10, "(i&&j&&dmu>0&&dmu<0.01&&dsigma<0.01)", "prof", -0.1,  0.6, "All", "log(nP)","#mu of log(((dN/dx)*dX)/(nP)) versus log(nP)");
+  } else if (Name.BeginsWith("dNNp"))      {
+    MuDraw("mu:x","PI", 120, 4, 10, "(i&&j&&dmu>0&&dmu<0.01&&dsigma<0.01)/dmu**2", "profg", -0.2,  -0.05, "All", "log(dN/dx*dx)","#mu of log(Np/(dN/dx*dx)) versus log((dN/dx)*dX))");
   }
 }
