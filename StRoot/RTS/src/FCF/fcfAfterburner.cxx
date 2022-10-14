@@ -46,7 +46,7 @@ fcfAfterburner::fcfAfterburner()
 	If "str" is non-NULL it prepends it to the line
 	as a label.
 */
-void fcfAfterburner::print_hit(char *str, struct fcfHit *h)
+void fcfAfterburner::print_hit(const char *str, struct fcfHit *h)
 {
         if(str) {
                 fprintf(stdout,"%s: ",str) ; 
