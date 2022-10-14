@@ -88,5 +88,6 @@
 <li> TFG22f Fix TFG StTrackTopologyMap, TPC23, ClusteringHints streamer  2022-06-04 09:16:14 -0400  (HEAD -> TFG, tag: TFG22f)
 <li> TFG22g Freeze new dE/dx model                                       2022-08-11 10:05:12 -0400  (HEAD -> TFG, tag: TFG22g)
 <li> TFG22h Freeze befoore updating dE/dx model, fix   KPidParticles     2022-09-28 15:35:34 -0400  (HEAD -> TFG, tag: TFG22h_3, origin/TFG)
+<li> TFG22i Replace loading gain from dta_Tpx->request to tpxGain        2022-10-14 12:21:16 -0400  (HEAD -> TFG, tag: TFG22i)
 <li>.DEV2   head of TFG git repository
 </ul>
