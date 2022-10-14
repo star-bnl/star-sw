@@ -120,7 +120,11 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   // Load gains
   if (fTpx) {
     // do gains example; one loads them from database but I don't know how...
-    daq_dta *dta_Tpx  = fTpx->put("gain"); 
+    //    daq_dta *dta_Tpx  = fTpx->put("gain"); 
+    tpxGain *gain = fTpx->gain_algo;
+    const char *fname  = "none" ;
+    // gain->do_default(sector) ;	// zap to all 1...
+    gain->from_file(fname, 0);
     for(Int_t sector=1;sector<=24;sector++) {
       if (!((1U<<(sector-1)) & mask)) continue; // sector masking
       // Tpx
@@ -130,20 +134,23 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	Int_t Npads = St_tpcPadPlanesC::instance()->padsPerRow(rowO);
 	Int_t padMin = 1;
 	Int_t padMax = Npads;
-	daq_det_gain *gain = (daq_det_gain *) dta_Tpx->request(Npads+1);    // max pad+1            
+	//	daq_det_gain *gain = (daq_det_gain *) dta_Tpx->request(Npads+1);    // max pad+1            
 	for(Int_t pad = 0; pad <= Npads; pad++) {
-	  gain[pad].gain = 0.; // be sure that dead pads are killed
-	  gain[pad].t0   = 0.;
+	  //	  gain[pad].gain = 0.; // be sure that dead pads are killed
+	  //	  gain[pad].t0   = 0.;
+	  gain->set_gains(sector, rowO, pad, 0, 0);
 	  if (rowO >= rowMin && pad >= padMin && pad <= padMax) {
 	    if (St_tpcPadGainT0C::instance()->Gain(sector,rowO,pad) <= 0) continue;
-	    gain[pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,rowO,pad);
-	    gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,rowO,pad);
+	    //	    gain[pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,rowO,pad);
+	    //	    gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,rowO,pad);
+	    gain->set_gains(sector, rowO, pad, St_tpcPadGainT0C::instance()->Gain(sector,rowO,pad), St_tpcPadGainT0C::instance()->T0(sector,rowO,pad));
 	  }
 	}
 	// daq_dta::finalize(uint32_t obj_cou, int sec, int row, int pad)
-	dta_Tpx->finalize(Npads+1,sector,rowO);
+	//	dta_Tpx->finalize(Npads+1,sector,rowO);
       }
     }
+    //    ((daq_tpx*) dta_Tpx)->InitRun(runnumber);
   }
   // iTpc
   if (fiTpc) {
@@ -169,6 +176,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	// daq_dta::finalize(uint32_t obj_cou, int sec, int row, int pad)
 	dta_iTpc->finalize(Npads+1,sector,row);
       }
+      //      ((daq_itpc *) dta_iTpc)->InitRun(runnumber);
     }
   }
   if (fTpx23) {
