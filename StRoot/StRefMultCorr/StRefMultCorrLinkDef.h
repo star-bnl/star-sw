@@ -6,5 +6,6 @@
 
 #pragma link C++ class StRefMultCorr+;
 #pragma link C++ class CentralityMaker+;
+#pragma link C++ class StBadRunChecker+;
 
 #endif

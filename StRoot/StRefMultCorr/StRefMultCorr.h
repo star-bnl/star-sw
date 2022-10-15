@@ -39,6 +39,9 @@
 #include "TString.h"
 #include "BadRun.h"
 
+// Forward declaration
+class StBadRunChecker;
+
 //_________________
 // Class to correct z-vertex dependence, luminosity dependence of multiplicity
 class StRefMultCorr {
@@ -102,6 +105,23 @@ class StRefMultCorr {
   /// Initialization of centrality bins etc
   void init(const Int_t RunId);
 
+    //Bad run rejection based on sub-systems for BESII
+  //void initBadRunChecker(TString Run="run19",TString CollisionMode="col" ,TString RunEnergy="19.6",TString Species="auau");
+  void initBadRunChecker(TString Run,TString CollisionMode ,TString RunEnergy,TString Species);
+  Bool_t isBadRunSubSys(const Int_t RunId,TString mSys) ;
+  Bool_t isInjection(const Int_t RunId) ;
+  Bool_t isBadRunTPC(const Int_t RunId) ;
+  Bool_t isBadRunbTOFStatus(const Int_t RunId) ;
+  Bool_t isBadRunbTOFPID(const Int_t RunId) ;
+  Bool_t isBadRuneTOF(const Int_t RunId) ;
+  Bool_t isBadRunEPD(const Int_t RunId) ;
+  Bool_t isBadRunVPD(const Int_t RunId) ;
+  Bool_t isBadRunBEMCStatus(const Int_t RunId) ;
+  Bool_t isBadRunBEMCPID(const Int_t RunId) ;
+  Bool_t isBadRunBEMCTrigger(const Int_t RunId) ;
+  Bool_t isBadRunMTD(const Int_t RunId) ;
+  Bool_t isBadRunAnalysis(const Int_t RunId) ;  
+
   // Read scale factor from text file
   void setVzForWeight(const Int_t nbin, const Double_t min, const Double_t max) ;
   void readScaleForWeight(const Char_t* input) ;
@@ -115,6 +135,7 @@ class StRefMultCorr {
   void print(const Option_t* option="") const ;
 
  private:
+
   /// refmult, refmult2, refmult3 or toftray (case insensitive)
   const TString mName;
   /// Specify triggers, in case there are multiple parameters/definitions in the same runs 
@@ -208,7 +229,7 @@ class StRefMultCorr {
   Bool_t isInPileUpRefMultLimits(Double_t refMult, Double_t low, Double_t hi) const 
   { return ( low < refMult && refMult < hi); }
 
-
+  StBadRunChecker *mBadRunChecker;
 
   ClassDef(StRefMultCorr, 0)
 };
