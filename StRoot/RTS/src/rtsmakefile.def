@@ -372,8 +372,17 @@ endif
 DEFINES = -D_REENTRANT ${RTS_DAQMAN_FLAGS} -DRTS_HOST_NAME=\"${HOST_NAME}\" -DTARGET_SYSTEM=\"${TARGET_SYSTEM}\" -DPROJDIR=\"${PROJDIR}\"  -DINSTALL_SUFFIX=\"${INSTALL_SUFFIX}\" -D${RTS_TYPE} ${HOW} ${HOSTDEFINES} -DRTS_ONLINE
 
 
-BASEFLAGS = -O3 -Wall -pipe -fverbose-asm ${HOSTFLAGS} 
-#BASEFLAGS= -Wall -pipe -fverbose-asm ${HOSTFLAGS} 
+# Set strict errors in LINUX
+BASEFLAGS = -O3 -Wall -Werror -Wno-error=strict-overflow -Wno-error=maybe-uninitialized -Wno-error=unused-label -Wno-error=unused-value -Wno-error=unused-variable -Wno-error=unused-function -Wno-unused-but-set-variable -pipe -fverbose-asm ${HOSTFLAGS}
+
+ifneq (${TARGET_SYSTEM}, LINUX)
+     BASEFLAGS = -O3 -Wall  -pipe -fverbose-asm ${HOSTFLAGS} 
+endif
+
+ifeq (${HOST_NAME},xvme01.daq.bnl.local) 
+     BASEFLAGS = -O3 -Wall -Werror -Wno-error=strict-overflow -Wno-error=unused-label -Wno-error=unused-value -Wno-error=unused-variable -Wno-error=unused-function -Wno-unused-but-set-variable -pipe -fverbose-asm ${HOSTFLAGS}
+endif
+
 CCFLAGS  = ${BASEFLAGS} ${USRCCFLAGS}  ${DEFINES} ${INCLUDES} 
 CXXFLAGS = ${BASEFLAGS} ${USRCXXFLAGS} ${DEFINES} ${INCLUDES} 
 CFLAGS   = ${BASEFLAGS} ${USRCFLAGS}   ${DEFINES} ${INCLUDES} 

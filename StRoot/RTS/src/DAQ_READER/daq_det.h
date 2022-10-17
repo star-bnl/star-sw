@@ -33,7 +33,7 @@ class daqReader ;
 class daq_det ;
 
 // helpers
-extern int checkBank(char *in, char *expect) ;
+extern int checkBank(const char *in, const char *expect) ;
 extern int *legacyDetp(int rts_id, char *datap) ;
 
 
@@ -127,7 +127,7 @@ public:
 	} ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.11 2018/06/21 13:48:44 tonko Exp $: built " __DATE__ " " __TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.12 2022/09/23 19:55:47 jml Exp $: built " __DATE__ " " __TIME__ ; 
 		return cvs;
 	} ;
 

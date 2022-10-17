@@ -201,7 +201,7 @@ public:
 	int compare(u_int *p1[3], u_int *p2[3]) ;
 
 	void decode(u_int *data, fcfHit *h, u_int *sim = 0) ;	// utility: from FCF to local
-	void print_hit(char *, fcfHit *hit) ;	// utility
+	void print_hit(const char *, fcfHit *hit) ;	// utility
 
 	u_int do_swap ;		// 0=no, 1=yes => set by "burn"
 	u_int do_merge ;	// merge broken rows

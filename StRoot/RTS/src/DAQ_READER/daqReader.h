@@ -94,7 +94,7 @@ class daqReader {
   //    space separated files  --> read from each file in turn
   //
   daqReader(char *buffer, int size);
-  daqReader(char *fname) ;
+  daqReader(const char *fname) ;
   ~daqReader(void) ;
 
   void init();
@@ -111,7 +111,7 @@ class daqReader {
   void insert(daq_det *which, int rts_id) ;
   void de_insert(int rts_id) ;
   void Make() ;
-  char *get_sfs_name(char *snippet=0) ;	// returns the full name of the SFS
+  char *get_sfs_name(const char *snippet=0) ;	// returns the full name of the SFS
   char *get(int which, int type=EVP_TYPE_ANY) ;	
   char *skip_then_get(int numToSkip, int num, int type=EVP_TYPE_ANY);
   // The following are the descriptors and pointers defining the event
@@ -246,7 +246,7 @@ class daqReader {
   u_int L3summary[4];
 
   int fixDatapSummary(DATAP *datap);
-  char *getInputType();
+  const char *getInputType();
   int getNextEventFilename(int num, int type);
   int getNextEventFilenameFromLive(int type);
   int getNextEventFilenameFromDir(int eventNum);

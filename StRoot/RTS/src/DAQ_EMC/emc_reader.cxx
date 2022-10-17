@@ -62,11 +62,11 @@ static char *inst2char(int inst)
 static struct emc_describe_t {
 	int id ;
 
-	char *p ;
-	char *secp ;
-	char *rbp ;
-	char *adcr ;
-	char *adcd ;	
+	const char *p ;
+	const char *secp ;
+	const char *rbp ;
+	const char *adcr ;
+	const char *adcd ;	
 	int trg_index ;
 	int type ;	// 0 Barrel, 1 Endcap
 	int sub ;	// 0 tower, 1 SMD
