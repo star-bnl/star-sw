@@ -216,6 +216,20 @@ float itpc_fcf_c::get_gain(int sec1, int row1, int pad1)
 
 }
 
+float itpc_fcf_c::get_t0(int sec1, int row1, int pad1)
+{
+	if(row1==0 || pad1==0) return 0.0 ;
+
+	gain_rp_t (*gain_p)[MAX_PHYS_PAD+1] ;
+	
+	if(sec_gains[sec1]==0) return 0.0 ;	// bad
+
+	gain_p = (gain_rp_t (*)[MAX_PHYS_PAD+1]) sec_gains[sec1] ;
+
+	return gain_p[row1][pad1].t0 ;
+
+}
+
 void itpc_fcf_c::set_gain(int sec1, int row1, int pad1, float gain)
 {
 //	if(row1==0 || pad1==0) return 0.0 ;
@@ -293,7 +307,9 @@ struct itpc_fcf_c::rp_t *itpc_fcf_c::get_row_pad(int row, int pad)
 {
 	int max_pad_all = max_x + 1 ;
 
+// HACK
 	if(offline) s1_data_length = (1 + max_y) * 2 ;	// need more for track_id
+//	if(offline) s1_data_length = 1 + max_y * 2 ;	// need more for track_id
 	else s1_data_length = 1 + max_y ;
 
 	if(row_pad_store==0) {	// initialize on first use...
@@ -764,6 +780,7 @@ int itpc_fcf_c::do_ch(int fee_id, int fee_ch, u_int *data, int words)
 
 		for(int t=t_start;t<=t_stop;t++) {
 			// initial cuts, where I blow of data
+// Test: was 0
 #if 0
 			// cut timebin due to gating grid pickup
 			if(t>425) {
@@ -883,7 +900,13 @@ int itpc_fcf_c::do_ch_sim(int row, int pad, u_short *tb_buff, u_short *track_id)
 				t_start = i ;
 				seq_cou++ ;
 			}
-			*s1_data++ = tb_buff[i] ;
+			//NEW in 11Jun2023
+			if(tb_buff[i]==0xFFFF) {	// this is how I skip zeros
+				*s1_data++ = 0 ;
+			}
+			else {
+				*s1_data++ = tb_buff[i] ;	// ADC data
+			}
 			*s1_data++ = track_id[i] ;
 			t_cou++ ;
 		}
