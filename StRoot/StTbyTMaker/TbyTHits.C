@@ -27,9 +27,6 @@
 #else
 // source code suitable for a standalone executable
 #endif
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
-#define __USE_ROOFIT__
-#endif
 //________________________________________________________________________________
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -58,8 +55,6 @@
 //#include "DeDxTree.C"
 #include "TMinuit.h"
 #include "TSpectrum.h"
-#include "StBichsel/Bichsel.h"
-#include "StBichsel/StdEdxModel.h"
 #include "TString.h"
 #include "TLine.h"
 #include "TText.h"
@@ -69,6 +64,7 @@
 #include "TLegend.h"
 #include "TPaletteAxis.h"
 #include "TDirIter.h"
+#include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 #endif
 static TString Old("Old");
 static TString New("New");
@@ -78,24 +74,10 @@ struct Name_t {
   const Char_t *varName;
   const Char_t *cutName;
 };
-Name_t Names[12] = {
-  {"PadnewLost",      "newP.pad:newP.row missing in old but reconstructed by new","oldP.sector<=0"},  //0
-  {"PminnewLost",     "newP.pmin:newP.row missing in old but reconstructed by new","oldP.sector<=0"}, //1
-  {"PmaxnewLost",     "newP.pmax:newP.row missing in old but reconstructed by new","oldP.sector<=0"}, //2
-
-  {"PadnewAll",   "newP.pad:newP.row  reconstructed by new",""},                                      //3
-  {"PminnewAll",  "newP.pmin:newP.row reconstructed by new",""},                                      //4
-  {"PmaxnewAll",  "newP.pmax:newP.row reconstructed by new",""},                                      //5
-  
-  {"PadoldLost",      "oldP.pad:oldP.row missing in new but reconstructed by old","newP.sector<=0"},  //6
-  {"PminoldLost",     "oldP.pmin:oldP.row missing in new but reconstructed by old","newP.sector<=0"}, //7
-  {"PmaxoldLost",     "oldP.pmax:oldP.row missing in new but reconstructed by old","newP.sector<=0"}, //8
-
-  {"PadoldAll",   "oldP.pad:oldP.row reconstructed by old",""},					      //9
-  {"PminoldAll",  "oldP.pmin:oldP.row reconstructed by old",""},				      //10
-  {"PmaxoldAll",  "oldP.pmax:oldP.row reconstructed by old",""},				      //11
-  
-  
+Name_t Names[3] = {
+  {"Pad",              "newP.pad:newP.row found by both old and new","oldP.sector&&newP.sector"}, 
+  {"PaNew",            "newP.pad:newP.row found by only new","oldP.sector==0&&newP.sector"},
+  {"PaOld",            "oldP.pad:oldP.row found by only old","oldP.sector&&P.sector==0"}
 };
 //________________________________________________________________________________
 //////////////////////////////////////////////////////////
@@ -293,16 +275,14 @@ void hitMateComp::Loop()
    TH2F *padD = new TH2F("padD","pad diff. new - old versus row",72,0.5,72.5,256,-2.0,2.0);
    TH2F *timD = new TH2F("timD","time diff. new - old versus row",72,0.5,72.5,256,-2.0,2.0);
    TH2F *adcR = new TH2F("adcR","log(adc_{new}/adc_{old} versus row",72,0.5,72.5,256,-2.0,2.0);
-   TH2F *PadRow[12][24] = {0}; 
-   for (Int_t k = 0; k < 12; k++) {
-    for (Int_t sec = 1; sec <= 24; sec++) {
-      PadRow[k][sec-1] = new TH2F(Form("%s%i",Names[k].histName,sec),Form("%s for %i",Names[k].varName,sec), 72,0.5,72.5,182,0.5,182.5);
-      PadRow[k][sec-1]->SetXTitle("row");
-      PadRow[k][sec-1]->SetYTitle("pad");
-    }
+   TH2F *PadRow[3][24] = {0}; 
+   for (Int_t k = 0; k < 3; k++) {
+     for (Int_t sec = 1; sec <= 24; sec++) {
+       PadRow[k][sec-1] = new TH2F(Form("%s%i",Names[k].histName,sec),Form("%s for %i",Names[k].varName,sec), 72,0.5,72.5,182,0.5,182.5);
+       PadRow[k][sec-1]->SetXTitle("row");
+       PadRow[k][sec-1]->SetYTitle("pad");
+     }
    }
-   
-
    Long64_t nentries = fChain->GetEntriesFast();
 
    Long64_t nbytes = 0, nb = 0;
@@ -311,19 +291,15 @@ void hitMateComp::Loop()
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
+      if (oldP_sector > 0 && oldP_fl > 0 && oldP_fl & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)) oldP_sector = 0;
+      if (newP_sector > 0 && newP_fl > 0 && newP_fl & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)) newP_sector = 0;
       if (oldP_sector <= 0 && newP_sector <= 0) continue;
       if (oldP_sector > 0 && newP_sector > 0) {
 	if (oldP_sector != newP_sector) continue;
 	RO->Fill(oldP_row);
 	RN->Fill(newP_row);
 	Int_t s = oldP_sector - 1;
-	PadRow[ 3][s]->Fill(newP_row, newP_pad);
-	PadRow[ 4][s]->Fill(newP_row, newP_pmin);
-	PadRow[ 5][s]->Fill(newP_row, newP_pmax);
-
-	PadRow[ 9][s]->Fill(oldP_row, oldP_pad);
-	PadRow[10][s]->Fill(oldP_row, oldP_pmin);
-	PadRow[11][s]->Fill(oldP_row, oldP_pmax);
+	PadRow[0][s]->Fill(newP_row, newP_pad);
 	RNO->Fill(oldP_row);
 	RON->Fill(newP_row);
 	padD->Fill(newP_row, newP_pad - oldP_pad);
@@ -332,15 +308,11 @@ void hitMateComp::Loop()
       } else if (oldP_sector <= 0) {
 	RN->Fill(newP_row);
 	Int_t s = newP_sector - 1;
-	PadRow[0][s]->Fill(newP_row, newP_pad);
-	PadRow[1][s]->Fill(newP_row, newP_pmin);
-	PadRow[2][s]->Fill(newP_row, newP_pmax);
+	PadRow[1][s]->Fill(newP_row, newP_pad);
       } else if (newP_sector <= 0) {
 	RO->Fill(oldP_row);
 	Int_t s = oldP_sector - 1;
-	PadRow[0][s]->Fill(oldP_row, oldP_pad);
-	PadRow[1][s]->Fill(oldP_row, oldP_pmin);
-	PadRow[2][s]->Fill(oldP_row, oldP_pmax);
+	PadRow[2][s]->Fill(oldP_row, oldP_pad);
       }
    }
 }
@@ -512,71 +484,7 @@ TH2 *DrawRatio(TCanvas *c1, TH2F *P, TH2F *PAll) {
   return R;
 }
 //________________________________________________________________________________
-void DrawAll() {
-  for (Int_t l = 0; l < 4; l++) {
-    for (Int_t k = 0; k < 3; k++) {
-      TCanvas *c1 = (TCanvas *) gROOT->GetListOfCanvases()->FindObject(Form("c%i",l));
-      if (! c1 ) c1 = new TCanvas(Form("c%i",Names[6*l+k]));
-      c1->SetLogz(1);
-      TH2F *P = (TH2F *) gDirectory->Get(Names[6*l+k].histName);
-      TH2F *PAll = (TH2F *) gDirectory->Get(Names[6*l+k+3].histName);
-      DrawRatio(c1, P, PAll);
-      if (! P || ! PAll) continue;
-      TH2 *R = DrawRatio(c1, P, PAll);
-    }
-  }
-}
-//________________________________________________________________________________
-void TbyThitsPads() {
-  TChain *tChain = 0;
-  TFile *fOut = 0;
-  //  fOut = new TFile("hit.root","update");
-  if (! fOut) {
-    TDirIter Dir("trackMateFilest_physics_adc*.root");
-    TFile *f = 0;
-    const Char_t *TreeName = "hitMateComp";
-    tChain = new TChain(TreeName);
-    Int_t NFiles = 0;
-    ULong64_t nEvents = 0;
-    ULong64_t nEvTot = 0;
-    Char_t *file = 0;
-    while ( (file = (Char_t *) Dir.NextFile()) ) {   
-      f = new TFile(file);
-      if (! f) {cout << "missing file " << file << endl; continue;}
-      TTree *tree = (TTree *) f->Get(TreeName);
-      cout << "#\t" << NFiles << "\t" << f->GetName();
-      if (tree) {
-	NFiles++;
-	nEvents = tree->GetEntries();
-	cout << "\tNo,Events = " << nEvents << endl;
-	nEvTot += nEvents;
-	tChain->Add(f->GetName());
-      } else {
-	cout << "\tTTree is missing" << endl;
-      }
-      delete f; 
-    }
-    cout	<< "chained " << NFiles  << " files \t" 
-		<< "with total " << nEvTot << " events \t" 
-		<< "chain returned pointer: " << tChain << endl;
-    if (! fOut) fOut = new TFile("hit2D.root","recreate");
-    TCanvas *c1 = new TCanvas();
-    c1->SetLogz(1);
-    for (Int_t k = 0; k < 24; k++) {
-      TH2F *hist = (TH2F *) gDirectory->Get("Names[k].histName");
-      if ( hist) continue;
-      tChain->Draw(Form("%s>>%s(72,0.5,72.5,182,0.5,182.5)",Names[k].varName,Names[k].histName),Form("%s",Names[k].cutName),"goff",100000000);
-      hist = (TH2F *) gDirectory->Get("Names[k].histName");
-      if (! hist) continue;
-      hist->SetXTitle("row");
-      hist->SetYTitle("pad");
-    }
-  }
-  DrawAll();
-  fOut->Write();
-}
-//________________________________________________________________________________
-void TbyThits() {
+void TbyTHits() {
   TChain *tChain = 0;
   TDirIter Dir("trackMateFilest_physics_adc*.root");
   TFile *f = 0;
@@ -605,7 +513,7 @@ void TbyThits() {
   cout	<< "chained " << NFiles  << " files \t" 
 	<< "with total " << nEvTot << " events \t" 
 	<< "chain returned pointer: " << tChain << endl;
-  TFile *fOut =  new TFile("hits.root","recreate");
+  TFile *fOut =  new TFile("Hits.root","recreate");
   hitMateComp t(tChain);
   t.Loop();
   fOut->Write();
@@ -743,5 +651,12 @@ c1->SetLogz(1);
   timebucketR->SetXtitle("row")
   hitMateComp->Draw("TMath::Log(newP.adc/oldP.adc):oldP.row>>adcR(72,0.5,72.5,64,-0.5,0.5)","oldP.sector>0&&newP.sector>0&&newP.fl==0&&oldP.fl==0","colz")
  adcR->SetXTitle("row")
+
+
+
+hitMateComp->Scan("newP.sector:newP.row:newP.adc:newP.pad:newP.timebucket:newP.npads:newP.ntbks:newP.us:newP.fl:oldP.sector:oldP.row:oldP.adc:oldP.pad:oldP.timebucket:oldP.npads:oldP.ntbks:oldP.us:oldP.fl","newP.sector!=oldP.sector&&newP.fl==0&&oldP.fl==0")
+ hitMateComp->Draw("newP.timebucket:oldP.timebucket>>TT(400,-0.5,399.5,400,-0.5,399.5)","newP.sector!=oldP.sector&&newP.fl==0&&oldP.fl==0","",10000000)
+ hitMateComp->Draw("newP.pad:oldP.pad>>PP(145,-0.5,144.5,145,-0.5,144.5)","newP.sector!=oldP.sector&&newP.fl==0&&oldP.fl==0","",10000000)
+ hitMateComp->Draw("oldP.timebucket:oldP.pad>>TP(145,-0.5,144.5,400,-0.5,399.5)","newP.sector!=oldP.sector&&newP.fl==0&&oldP.fl==0&&newP.sector==0","colz",10000000)
 */
 
