@@ -1,0 +1,16 @@
+
+# FY22 November
+18 1 16 -1 0 0 0.0 0.0		# comes and goes
+
+# FY22 October commissioning
+# entire FEEs
+# 2 1  6 -1 0 0 0.0 0.0		# comes and goes
+ 4 4  8 -1 0 0 0.0 0.0		# POK problem
+ 5 2 14 -1 0 0 0.0 0.0		# comes and goes
+#18 3  7 -1 0 0 0.0 0.0		# FEE swapped
+#20 3 12 -1 0 0 0.0 0.0		# FEE swapped
+
+### Moved from port #8 to #7
+#21 1  8 -1 0 0 0.0 0.0		# FEE swapped but still bad; cable or iRDO
+# singles
+18 4 15 46 38 98 0.0 0.0 	# digitally flaky channel; old in FY21

@@ -1,0 +1,33 @@
+# $Id: tpx_gains.txt,v 1.6 2009/08/29 17:44:50 tonko Exp $
+# Run 01100441
+#-21 1 164 0.000 0.000	// noisy in FY09
+#-21 1 165 0.000 0.000	// noisy in FY09
+#-21 1 157 0.000 0.000	// noisy in FY09
+#-21 1 173 0.000 0.000	// noisy in FY09
+#-21 1 171 0.000 0.000	// noisy in FY09
+#-21 1 168 0.000 0.000	// noisy in FY09
+#-21 1 161 0.000 0.000	// noisy in FY09
+#-21 1 174 0.000 0.000	// noisy in FY09
+#-21 1 164 0.000 0.000	// noisy in FY09
+#-21 6   0 0.000 0.000	// dead due to TOF leak
+#-21 6   9 0.000 0.000	// dead due to TOF leak
+#-19 6   5 0.000 0.000   // suddenly missing on Aug 27, 09
+-5  1 177 0.000 0.000
+-5  1 179 0.000 0.000  
+# Date 20090824
+# Time 174400
+# Date 20090827
+# Time 201526
+# Unix 1251418526
+# Date 20090827
+# Time 201641
+# Unix 1251418601
+# Date 20090828
+# Time 113844
+# Unix 1251473924
+# Date 20090829
+# Time 134056
+# Unix 1251567656
+# Date 20090829
+# Time 134450
+# Unix 1251567890
