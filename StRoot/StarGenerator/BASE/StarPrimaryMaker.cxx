@@ -37,8 +37,6 @@ using namespace std;
 // 1 mm / speed of light
 const double mmOverC = 1.0E-3 / TMath::C();
 
-std::map< std::string, std::function< TLorentzVector()> > vertexFunctionMap;
-
 void StarPrimaryMaker::SetVertexing( const char* name ) {
 
   mVertexFunction = vertexFunctionMap[name];
@@ -61,7 +59,10 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mPtMin(0), mPtMax(-1), mRapidityMin(0), mRapidityMax(-1), mPhiMin(0), mPhiMax(-1), mZMin(-999), mZMax(+999),
   mRunNumber(0),
   mPrimaryVertex(0,0,0,0),
-  mFilter(0),mAccepted(0)
+  mFilter(0),
+  mAccepted(0),
+  mVertexFunction(),
+  vertexFunctionMap()
 {
   assert(fgPrimary == 0); // cannot create more than one primary generator
   fgPrimary = this;

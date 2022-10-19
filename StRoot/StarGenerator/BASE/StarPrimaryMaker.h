@@ -15,6 +15,7 @@
 
 #ifndef __CINT__
 #include <functional>
+#include <map>
 #endif
 
 class StarGenerator;
@@ -237,6 +238,7 @@ class StarPrimaryMaker : public StMaker
 
 #ifndef __CINT__
   std::function< TLorentzVector() > mVertexFunction;
+  std::map< std::string, std::function< TLorentzVector() > > vertexFunctionMap;
 #endif
 
   ClassDef(StarPrimaryMaker,1);
