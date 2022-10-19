@@ -84,9 +84,9 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mVertexFunction = [this]() -> TLorentzVector {
     Double_t x=0,y=0,z=0,t=0;
     TVector2 xy = StarRandom::Instance().gauss2d( this->mSx, this->mSy, this->mRho );
-    x = mVx + xy.X();
-    y = mVy + xy.Y();
-    z = mVz + StarRandom::Instance().gauss( this->mSz );
+    x = this->mVx + xy.X();
+    y = this->mVy + xy.Y();
+    z = this->mVz + StarRandom::Instance().gauss( this->mSz );
     Double_t dist = TMath::Sqrt(x*x+y*y+z*z);
     t = dist / TMath::Ccgs();
     return TLorentzVector(x,y,z,t);
