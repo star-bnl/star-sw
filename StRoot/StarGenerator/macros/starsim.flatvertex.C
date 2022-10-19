@@ -148,10 +148,7 @@ void starsim( Int_t nevents=100, Int_t rngSeed=1234 )
   // 
   _primary->SetVertex( 0., 0., 0. );
   _primary->SetSigma( 0.1, 0.1, 5.0 );
-
-  // flatRZ option uniformly distributes the vertex w/in a cylinder whose radius
-  // is given by dX and whose half length is given by dZ
-  _primary->SetVertexing( "flatRZ" );
+  _primary->SetAttr( "vertexDistribution", "flatRZ" );
 
   //
   // Initialize primary event generator and all sub makers
