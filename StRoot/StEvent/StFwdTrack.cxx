@@ -20,7 +20,7 @@ StFwdTrack::StFwdTrack( genfit::Track *t ) : mGenfitTrack(t), mProjections(0) {
 
 }
 
-const bool StFwdTrack::didFitConverge() const {
+bool StFwdTrack::didFitConverge() const {
     if (!mGenfitTrack)
         return false;
     // uses the default track rep
@@ -30,7 +30,7 @@ const bool StFwdTrack::didFitConverge() const {
     return fitStatus->isFitConverged();
 }
 
-const bool StFwdTrack::didFitConvergeFully() const {
+bool StFwdTrack::didFitConvergeFully() const {
     if (!mGenfitTrack)
         return false;
     // uses the default track rep
@@ -40,7 +40,7 @@ const bool StFwdTrack::didFitConvergeFully() const {
     return fitStatus->isFitConvergedFully();
 }
 
-const int StFwdTrack::numberOfFailedPoints() const {
+int StFwdTrack::numberOfFailedPoints() const {
     if (!mGenfitTrack)
         return false;
     // uses the default track rep
@@ -50,7 +50,7 @@ const int StFwdTrack::numberOfFailedPoints() const {
     return fitStatus->getNFailedPoints();
 }
 
-const double StFwdTrack::chi2() const {
+double StFwdTrack::chi2() const {
     if (!mGenfitTrack)
         return false;
     // uses the default track rep
@@ -60,7 +60,7 @@ const double StFwdTrack::chi2() const {
     return fitStatus->getChi2();
 }
 
-const double StFwdTrack::ndf() const {
+double StFwdTrack::ndf() const {
     if (!mGenfitTrack)
         return false;
     // uses the default track rep
@@ -70,7 +70,7 @@ const double StFwdTrack::ndf() const {
     return fitStatus->getNdf();
 }
 
-const double StFwdTrack::pval() const {
+double StFwdTrack::pval() const {
     if (!mGenfitTrack)
         return false;
     // uses the default track rep
@@ -83,7 +83,7 @@ const double StFwdTrack::pval() const {
 /* momentum
  * get the track momentum at the first point (PV if included)
  */
-const StThreeVectorD StFwdTrack::momentum() const{
+StThreeVectorD StFwdTrack::momentum() const{
     if (!mGenfitTrack)
         return StThreeVectorD( 0, 0, 0 );
     auto cr = mGenfitTrack->getCardinalRep();
@@ -94,7 +94,7 @@ const StThreeVectorD StFwdTrack::momentum() const{
 /* momentumAt
  * get the track momentum at the nthh point (if available)
  */
-const StThreeVectorD StFwdTrack::momentumAt(int _id) const{
+StThreeVectorD StFwdTrack::momentumAt(int _id) const{
     if (!mGenfitTrack)
         return StThreeVectorD( 0, 0, 0 );
     
@@ -116,12 +116,13 @@ const StThreeVectorD StFwdTrack::momentumAt(int _id) const{
     LOG_INFO << "Momentum at point: " << id << endm;
     return StThreeVectorD( p.X(), p.Y(), p.Z() );
 }
-const char StFwdTrack::charge() const{
+
+char StFwdTrack::charge() const{
     auto cr = mGenfitTrack->getCardinalRep();
     return cr->getCharge(mGenfitTrack->getFittedState(0, cr)); // at the first fit point
 }
 
-const unsigned int StFwdTrack::numberOfFitPoints() const {
+unsigned int StFwdTrack::numberOfFitPoints() const {
     if ( !mGenfitTrack )
         return 0;
     return mGenfitTrack->getNumPoints();
