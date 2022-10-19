@@ -43,6 +43,7 @@ void StarPrimaryMaker::SetVertexing( const char* name ) {
 
 };
 
+// --------------------------------------------------------------------------------------------------------------
 StarPrimaryMaker *fgPrimary      = 0;
 // --------------------------------------------------------------------------------------------------------------
 StarPrimaryMaker::StarPrimaryMaker()  : 
@@ -80,71 +81,13 @@ StarPrimaryMaker::StarPrimaryMaker()  :
 
   SetAttr("FilterKeepHeader", int(1) );
 
-  // Default vertex function
-  mVertexFunction = [this]() -> TLorentzVector {
-    Double_t x=0,y=0,z=0,t=0;
-    TVector2 xy = StarRandom::Instance().gauss2d( this->mSx, this->mSy, this->mRho );
-    x = this->mVx + xy.X();
-    y = this->mVy + xy.Y();
-    z = this->mVz + StarRandom::Instance().gauss( this->mSz );
-    Double_t dist = TMath::Sqrt(x*x+y*y+z*z);
-    t = dist / TMath::Ccgs();
-    return TLorentzVector(x,y,z,t);
-  };
-  vertexFunctionMap["gaussXYZ"] = mVertexFunction;
-  vertexFunctionMap["flatZ"]  = [this]() -> TLorentzVector {
-    double x=0,y=0,z=0,t=0;                                 
-    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
-    z = this->mVz - this->mSz + StarRandom::Instance().flat() * ( this-> mSz * 2.0 );
-    x = this->mVx;
-    y = this->mVy;
-    double dist = TMath::Sqrt(x*x+y*y+z*z);   
-    t = dist / TMath::Ccgs(); 
-    return TLorentzVector(x,y,z,t); 
-  };
-  vertexFunctionMap["flatABZ"]  = [this]() -> TLorentzVector {
-    double x=0,y=0,z=0,t=0;                                 
-    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
-    z = this->mVz - this->mSz + StarRandom::Instance().flat() * ( this-> mSz * 2.0 );
-    double a = this->mSx;
-    double b = this->mSy;
-    while (true) {
-      // Sample uniformly in rectangle length 2a width 2b
-      x = ( StarRandom::Instance().flat() * 2 * a - a );
-      y = ( StarRandom::Instance().flat() * 2 * b - b );
-      // If point w/in perimeter of the elipse... accept the point
-      if ( (x/a)*(x/a) + (y/b)*(y/b) <= 1.0 ) break;
-    };
-    double dist = TMath::Sqrt(x*x+y*y+z*z);   
-    t = dist / TMath::Ccgs(); 
-    TLorentzVector result(x,y,z,t);
-    result.RotateZ( this->mRho );    
-    return result;
-  };
-  vertexFunctionMap["flatRZ"]  = [this]() -> TLorentzVector {
-    double x=0,y=0,z=0,t=0;                                 
-    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
-    z = this->mVz - this->mSz + StarRandom::Instance().flat() * ( this-> mSz * 2.0 );
-    double R = this->mSx;
-    double r   = R * sqrt(StarRandom::Instance().flat());
-    double phi = 2.0 * TMath::Pi() * StarRandom::Instance().flat();
-    x = r * TMath::Cos(phi);
-    y = r * TMath::Sin(phi);
-    double dist = TMath::Sqrt(x*x+y*y+z*z);   
-    t = dist / TMath::Ccgs(); 
-    TLorentzVector result(x,y,z,t);
-    return result;
-  };
-  vertexFunctionMap["flatXYZ"]  = [this]() -> TLorentzVector {
-    double x=0,y=0,z=0,t=0;                                 
-    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
-    z = this->mVz - this->mSz + StarRandom::Instance().flat() * ( this-> mSz * 2.0 );
-    x = this->mVx - this->mSx + StarRandom::Instance().flat() * ( this-> mSx * 2.0 );
-    y = this->mVy - this->mSy + StarRandom::Instance().flat() * ( this-> mSy * 2.0 );
-    double dist = TMath::Sqrt(x*x+y*y+z*z);   
-    t = dist / TMath::Ccgs(); 
-    return TLorentzVector(x,y,z,t); 
-  };
+
+  vertexFunctionMap["gaussXYZ"] = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
+  vertexFunctionMap["flatZ"]    = std::bind( &StarPrimaryMaker::vertexFlatZ,    this );
+  vertexFunctionMap["flatABZ"]  = std::bind( &StarPrimaryMaker::vertexFlatABZ,  this );
+  vertexFunctionMap["flatRZ"]   = std::bind( &StarPrimaryMaker::vertexFlatRZ,   this );
+  vertexFunctionMap["flatXYZ"]  = std::bind( &StarPrimaryMaker::vertexFlatXYZ,  this );
+  SetVertexing( "gaussXYZ" );
 
 }
 // --------------------------------------------------------------------------------------------------------------
@@ -773,3 +716,74 @@ void StarPrimaryMaker::RotateBeamline( Double_t &px, Double_t &py, Double_t &pz,
   pz = moment[2];
 
 }
+
+
+//_________________________________________________________________________________________
+TLorentzVector StarPrimaryMaker::vertexGaussXYZ() {
+    double x=0,y=0,z=0,t=0;
+    TVector2 xy = StarRandom::Instance().gauss2d( this->mSx, this->mSy, this->mRho );
+    x = mVx + xy.X();
+    y = mVy + xy.Y();
+    z = mVz + StarRandom::Instance().gauss( mSz );
+    double dist = TMath::Sqrt(x*x+y*y+z*z);
+    t = dist / TMath::Ccgs();
+    return TLorentzVector(x,y,z,t);
+};
+//_________________________________________________________________________________________
+TLorentzVector StarPrimaryMaker::vertexFlatZ() {
+  double x=0,y=0,z=0,t=0;                                 
+  // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+  z = mVz - mSz + StarRandom::Instance().flat() * (  mSz * 2.0 );
+  x = mVx;
+  y = mVy;
+  double dist = TMath::Sqrt(x*x+y*y+z*z);   
+  t = dist / TMath::Ccgs(); 
+  return TLorentzVector(x,y,z,t); 
+};
+//_________________________________________________________________________________________
+TLorentzVector StarPrimaryMaker::vertexFlatABZ() {
+    double x=0,y=0,z=0,t=0;                                 
+    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+    z = mVz - mSz + StarRandom::Instance().flat() * (  mSz * 2.0 );
+    double a = mSx;
+    double b = mSy;
+    while (true) {
+      // Sample uniformly in rectangle length 2a width 2b
+      x = ( StarRandom::Instance().flat() * 2 * a - a );
+      y = ( StarRandom::Instance().flat() * 2 * b - b );
+      // If point w/in perimeter of the elipse... accept the point
+      if ( (x/a)*(x/a) + (y/b)*(y/b) <= 1.0 ) break;
+    };
+    double dist = TMath::Sqrt(x*x+y*y+z*z);   
+    t = dist / TMath::Ccgs(); 
+    TLorentzVector result(x,y,z,t);
+    result.RotateZ( mRho );    
+    return result;
+  };
+//_________________________________________________________________________________________
+TLorentzVector StarPrimaryMaker::vertexFlatRZ() {
+    double x=0,y=0,z=0,t=0;                                 
+    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+    z = mVz - mSz + StarRandom::Instance().flat() * (  mSz * 2.0 );
+    double R = mSx;
+    double r   = R * sqrt(StarRandom::Instance().flat());
+    double phi = 2.0 * TMath::Pi() * StarRandom::Instance().flat();
+    x = r * TMath::Cos(phi);
+    y = r * TMath::Sin(phi);
+    double dist = TMath::Sqrt(x*x+y*y+z*z);   
+    t = dist / TMath::Ccgs(); 
+    TLorentzVector result(x,y,z,t);
+    return result;
+};
+//_________________________________________________________________________________________
+TLorentzVector StarPrimaryMaker::vertexFlatXYZ() {
+  double x=0,y=0,z=0,t=0;                                 
+  // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+  z = mVz - mSz + StarRandom::Instance().flat() * (  mSz * 2.0 );
+  x = mVx - mSx + StarRandom::Instance().flat() * (  mSx * 2.0 );
+  y = mVy - mSy + StarRandom::Instance().flat() * (  mSy * 2.0 );
+  double dist = TMath::Sqrt(x*x+y*y+z*z);   
+  t = dist / TMath::Ccgs(); 
+  return TLorentzVector(x,y,z,t); 
+};
+//_________________________________________________________________________________________

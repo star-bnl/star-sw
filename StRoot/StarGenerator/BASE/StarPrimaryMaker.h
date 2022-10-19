@@ -241,6 +241,12 @@ class StarPrimaryMaker : public StMaker
   std::map< std::string, std::function< TLorentzVector() > > vertexFunctionMap;
 #endif
 
+  TLorentzVector vertexGaussXYZ(); // gaussian XYZ
+  TLorentzVector vertexFlatZ();    // uniform distribution along z (point in XY)
+  TLorentzVector vertexFlatXYZ();  // uniform distribution in rectangle xyz
+  TLorentzVector vertexFlatRZ();   // uniform distribution in cylinder rz
+  TLorentzVector vertexFlatABZ();  // uniform distribution in ellipical cylinder xyz
+
   ClassDef(StarPrimaryMaker,1);
 
 };
