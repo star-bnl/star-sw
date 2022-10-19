@@ -37,12 +37,6 @@ using namespace std;
 // 1 mm / speed of light
 const double mmOverC = 1.0E-3 / TMath::C();
 
-void StarPrimaryMaker::SetVertexing( const char* name ) {
-
-  mVertexFunction = vertexFunctionMap[name];
-
-};
-
 // --------------------------------------------------------------------------------------------------------------
 StarPrimaryMaker *fgPrimary      = 0;
 // --------------------------------------------------------------------------------------------------------------
@@ -87,7 +81,15 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   vertexFunctionMap["flatABZ"]  = std::bind( &StarPrimaryMaker::vertexFlatABZ,  this );
   vertexFunctionMap["flatRZ"]   = std::bind( &StarPrimaryMaker::vertexFlatRZ,   this );
   vertexFunctionMap["flatXYZ"]  = std::bind( &StarPrimaryMaker::vertexFlatXYZ,  this );
-  SetVertexing( "gaussXYZ" );
+
+  SetAttr( "vertexDistribution", "gaussXYZ" );
+  /// name = "gaussXYZ" is the default.
+  /// name = "flatZ"   throws points uniform on a line from Vz - Sz to Vz + Sz
+  /// name = "flatXYZ" thows within a rectangular box Vx+/-Sx, Vy+/-Sy, Vz+/-Sz
+  /// name = "flatRZ"  throws within a cylinder of radius Sx centered on Vx,Vy, from z=Vz-Sz to Vz+Sz
+  /// name = "flatABZ" throws within an eliptical cyilnder of major axis A minor axis B, rotated by Rho
+
+  mVertexFunction = vertexFunctionMap[ SAttr("vertexDistribution") ];
 
 }
 // --------------------------------------------------------------------------------------------------------------
@@ -118,7 +120,9 @@ Int_t StarPrimaryMaker::Init()
   // Initialize runtime flags
   //
   mDoBeamline = IAttr("beamline");
-  
+
+  // Vertex function
+  mVertexFunction = vertexFunctionMap[ SAttr("vertexDistribution") ];  
   
   //
   // Initialize all submakers first
@@ -330,6 +334,8 @@ Int_t StarPrimaryMaker::InitRun( Int_t runnumber )
   // Set the run number
   mPrimaryEvent->SetRunNumber(runnumber);
   mRunNumber = runnumber;
+  
+  mVertexFunction = vertexFunctionMap[ SAttr("vertexDistribution") ];
 
   return StMaker::InitRun( runnumber );
 }
