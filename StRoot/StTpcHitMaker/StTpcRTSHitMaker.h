@@ -70,26 +70,40 @@ class daq_tpx;
 class daq_itpc;
 class daq_dta;
 class daq_cld;
+class tpc23_base;
 class StTpcRTSHitMaker : public StMaker {
  public:
- StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), fminCharge(0) {memset(mTpx_RowLen, 0, sizeof(mTpx_RowLen));}
+ StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), 
+#ifdef __TFG__VERSION__
+    fTpx23(0), fiTpc23(0),
+#endif /*  __TFG__VERSION__ */
+    fminCharge(0) {}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
   Int_t               InitRun(Int_t runnumber);
+  Int_t               InitRun23(Int_t runnumber);
   Int_t               Make();
+#ifdef __TFG__VERSION__
+  Int_t               Make23();
+#endif /*  __TFG__VERSION__ */
+#ifdef __USE_GAIN_FROM_FILE__
+  Int_t               from_file(daq_dta *gain_dta, const Char_t *fname = "");
+#endif /* __USE_GAIN_FROM_FILE__ */
   void PrintCld(daq_cld *cld = 0, Int_t IdTruth = 0, Int_t quality=0);
   void PrintAdc(daq_dta *dta  = 0);
  private:
   daq_tpx  *fTpx; //!
   daq_itpc *fiTpc; //!
+#ifdef __TFG__VERSION__
+  tpc23_base   *fTpx23; //!
+  tpc23_base  *fiTpc23; //!
+#endif /*  __TFG__VERSION__ */
   Bool_t    fNoiTPCLu; //!
   Double_t  fminCharge; // ! minimum cluster charge in ADC
   Int_t     maxHits[24];
   Int_t     maxBin0Hits;
   Int_t     bin0Hits;
-  static UChar_t mTpx_RowLen[46];
-  static UChar_t miTpc_RowLen[41];
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $ $Id: StTpcRTSHitMaker.h,v 1.19 2021/05/10 21:13:19 fisyak Exp $  built " __DATE__ " " __TIME__ ; return cvs;
