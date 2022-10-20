@@ -360,7 +360,7 @@ void StPicoEvent::setETofGoodEventFlag( std::vector<bool> flagVec ) {
 	if( flagVec.size() != 108 ){
 	    LOG_INFO << "StPicoEvent::setETofGoodEventFlag() - eTof flag vector wrong size " << flagVec.size() <<" / 108"<< endm;
 	}else{
-		for( auto iterCounter : flagVec ){
+		for( int iterCounter = 0; iterCounter < flagVec.size(); iterCounter++ ){
 			 mETofGoodEventFlag[iterCounter] = flagVec[iterCounter];
 		}
 	}
