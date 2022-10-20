@@ -73,7 +73,11 @@ class daq_cld;
 class tpc23_base;
 class StTpcRTSHitMaker : public StMaker {
  public:
- StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), fTpx23(0), fiTpc23(0),fminCharge(0) {}
+ StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fiTpc(0), 
+#ifdef __TFG__VERSION__
+    fTpx23(0), fiTpc23(0),
+#endif /*  __TFG__VERSION__ */
+    fminCharge(0) {}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
