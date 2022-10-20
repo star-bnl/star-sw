@@ -799,5 +799,8 @@ std::function<TLorentzVector()> StarPrimaryMaker::GetVertexFunction( const char*
     {
       result = mVertexFunctionMap[ name ];
     }
+  else {
+    LOG_WARN << "Vertex function " << name << " not defined.  Defaulting to gaussian." << endm;
+  }
   return result;
 }
