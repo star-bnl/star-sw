@@ -1,6 +1,4 @@
 #include "StarPrimaryMaker.h"
-ClassImp(StarPrimaryMaker);
-//#include "StarGenerator.h"
 
 #include "g2t/St_g2t_particle_Module.h"
 #include "tables/St_g2t_event_Table.h"
