@@ -39,6 +39,7 @@ u_int fcs_data_c::run_type ;
 
 // for ZS
 float fcs_data_c::n_sigma ;
+float fcs_data_c::n_sigma_epd ;
 short fcs_data_c::n_pre ;
 short fcs_data_c::n_post ;
 short fcs_data_c::n_cou ;
@@ -263,6 +264,10 @@ int fcs_data_c::zs_start(u_short *buff)
 	int l_pre, l_post ;
 	int is_trg = 0 ;
 	int i_ped ;
+	float sigma ;
+
+	if(hdr_det==2) sigma = n_sigma_epd ;
+	else sigma = n_sigma ;
 
 	// trigger channels are special so figure this out
 	if(ch >= 32) is_trg = 1 ;
@@ -281,16 +286,16 @@ int fcs_data_c::zs_start(u_short *buff)
 		LOG(DBG,"S%d:%d:%d mean %f, n_sigma %f, rms %f",
 		    sector,rdo,ch,
 		    (float)ped[sector-1][rdo-1].mean[ch],
-		    (float)n_sigma,
+		    (float)sigma,
 		    (float)ped[sector-1][rdo-1].rms[ch]) ;
 
 		// I don't think that a threshold as a function of RMS is a good idea.
 		// I should do what the ASICs do and have a fixed digital threshold
 		if(n_mode==0) {
-			thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma * ped[sector-1][rdo-1].rms[ch] + 0.5) ;
+			thr = (int)(ped[sector-1][rdo-1].mean[ch] + sigma * ped[sector-1][rdo-1].rms[ch] + 0.5) ;
 		}
 		else {
-			thr = (int)(ped[sector-1][rdo-1].mean[ch] + n_sigma) ;
+			thr = (int)(ped[sector-1][rdo-1].mean[ch] + sigma) ;
 		}
 
 		l_cou = n_cou ;
