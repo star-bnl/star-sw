@@ -729,7 +729,7 @@ void StarPrimaryMaker::RotateBeamline( Double_t &px, Double_t &py, Double_t &pz,
 //_________________________________________________________________________________________
 TLorentzVector StarPrimaryMaker::vertexGaussXYZ() {
     double x=0,y=0,z=0,t=0;
-    TVector2 xy = StarRandom::Instance().gauss2d( this->mSx, this->mSy, this->mRho );
+    TVector2 xy = StarRandom::Instance().gauss2d( mSx, mSy, mRho );
     x = mVx + xy.X();
     y = mVy + xy.Y();
     z = mVz + StarRandom::Instance().gauss( mSz );
