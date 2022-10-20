@@ -196,7 +196,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 	// echo and timer have len 0
 	// response has adc_cou 4 
 	// physics has 
-//	LOG(TERR,"d_last is 0x%04X; effective length %d",*d16_last,adc_cou) ;	// at the datum just before the first 0xFEED
+//	LOG(TERR,"%d: type 0x%04X: d_last is 0x%04X; effective length %d",rdo1,evt_type,*d16_last,adc_cou) ;	// at the datum just before the first 0xFEED
 //	for(int i=0;i<32;i++) {
 //		LOG(TERR,"... %d/%d = 0x%04X",i,shorts,d[i]) ;
 //	}
@@ -251,7 +251,7 @@ int stgc_data_c::hdr_check(u_short *d, int shorts)
 
 		break ;
 	case 0x5445 :	// timer
-		if(realtime>1) LOG(TERR,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts) ;
+		if(realtime>1) LOG(TERR,"S%d:%d: %d: T %d, trg %d, daq %d; shorts %d (timer evt)",sector1,rdo1,id,token,trg_cmd,daq_cmd,shorts) ;
 
 		token = 4096 ;
 		trg_cmd = daq_cmd = 0 ;
@@ -500,8 +500,8 @@ int stgc_data_c::event_0001()
 		}
 
 		adc_cou-- ;
-//		return 0 ;	// stop at the first occurence
-		return 1 ;
+		return 0 ;	// stop at the first occurence
+//		return 1 ;
 	}
 	else {
 //		vmm.feb_vmm = ((feb_id-1)<<2)|(vmm_id-4) ;

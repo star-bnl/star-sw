@@ -119,10 +119,6 @@ tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
 tpxStat.o: tpxCore.h
 tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxStat.o: tpxStat.h
-tpxDecodeGains.o: ../DAQ_TPX/tpxGain.h
-tpxDecodeGains.o: tpxCore.h
-tpxDecodeGains.o: ../../../../StRoot/RTS/include/rtsLog.h
-tpxDecodeGains.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 daq_tpx.o: ../DAQ_READER/daq_det.h
 tpxCore.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h

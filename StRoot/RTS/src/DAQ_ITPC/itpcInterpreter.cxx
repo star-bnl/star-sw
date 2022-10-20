@@ -2230,7 +2230,7 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 
 	// the data is already SWAPPED if processed in the sector brokers!!!
 	for(int i=0;i<w_cou;i++) {
-		LOG(NOTE,"...%d/%d = 0x%08X",i,words,data[i]) ;
+//		LOG(TERR,"...%d/%d = 0x%08X",i,words,data[i]) ;
 
 		if((data[i] == 0xCCCC001C)||(data[i] == 0x001CCCCC)) {
 			data = data + i ;
@@ -2241,7 +2241,7 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 	w_cou = data_end - data ;
 
 	if(data[0]==0xCCCC001C) {	// need swapping!!!!
-		LOG(NOTE,"swapping") ;
+//		LOG(TERR,"swapping: data 0x%08X, w_cou %d",data[0],w_cou) ;
 		for(int i=0;i<w_cou;i++) {
 			data[i] = sw16(data[i]) ;
 		}
@@ -2262,15 +2262,18 @@ int itpcInterpreter::rdo_scan_top(u_int *data, int words)
 	int no_fees = 0 ;
 	//ds is of the form 0x98000014
 
+
+
 	if((data[0]&0xFF00000F)==0x98000004) {
 		rdo_version = (data[0]>>4)&0xFF ;	// aka 1
 	}
 	else {
+		// I'll also be here if the data is from the new FY2023 iTPC Upgrade!
 		no_fees = 1 ;	// not a triggered event - no FEEs
 	}
 
-	if(dbg_level>1) LOG(TERR,"%d: ds 0x%08X, 0x%X %d, words %d,%d",rdo_id,data[0],rdo_version,no_fees,words,w_cou) ;
-
+//	if(dbg_level>1) LOG(TERR,"%d: ds 0x%08X, 0x%X %d, words %d,%d",rdo_id,data[0],rdo_version,no_fees,words,w_cou) ;
+//	LOG(TERR,"%d: ds 0x%08X, 0x%X %d, words %d,%d",rdo_id,data[0],rdo_version,no_fees,words,w_cou) ;
 
 	// I need the event status ala get_l2
 
