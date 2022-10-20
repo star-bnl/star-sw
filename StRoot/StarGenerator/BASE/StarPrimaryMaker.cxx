@@ -76,6 +76,8 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   SetAttr("FilterKeepHeader", int(1) );
 
 
+  // Defaults to gaussian
+  vertexFunctionMap[""]         = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
   vertexFunctionMap["gaussXYZ"] = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
   vertexFunctionMap["flatZ"]    = std::bind( &StarPrimaryMaker::vertexFlatZ,    this );
   vertexFunctionMap["flatABZ"]  = std::bind( &StarPrimaryMaker::vertexFlatABZ,  this );
@@ -89,7 +91,7 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   /// name = "flatRZ"  throws within a cylinder of radius Sx centered on Vx,Vy, from z=Vz-Sz to Vz+Sz
   /// name = "flatABZ" throws within an eliptical cyilnder of major axis A minor axis B, rotated by Rho
 
-  mVertexFunction = vertexFunctionMap[ SAttr("vertexDistribution") ];
+  mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
 
 }
 // --------------------------------------------------------------------------------------------------------------
@@ -122,7 +124,7 @@ Int_t StarPrimaryMaker::Init()
   mDoBeamline = IAttr("beamline");
 
   // Vertex function
-  mVertexFunction = vertexFunctionMap[ SAttr("vertexDistribution") ];  
+  mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
   
   //
   // Initialize all submakers first
@@ -335,7 +337,7 @@ Int_t StarPrimaryMaker::InitRun( Int_t runnumber )
   mPrimaryEvent->SetRunNumber(runnumber);
   mRunNumber = runnumber;
   
-  mVertexFunction = vertexFunctionMap[ SAttr("vertexDistribution") ];
+  mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
 
   return StMaker::InitRun( runnumber );
 }
@@ -793,3 +795,11 @@ TLorentzVector StarPrimaryMaker::vertexFlatXYZ() {
   return TLorentzVector(x,y,z,t); 
 };
 //_________________________________________________________________________________________
+std::function<TLorentzVector()> StarPrimaryMaker::GetVertexFunction( const char* name ){  
+  auto result = vertexFunctionMap[ "gaussXYZ" ];
+  if ( vertexFunctionMap.count(name) == 1 ) 
+    {
+      result = vertexFunctionMap[ name ];
+    }
+  return result;
+}
