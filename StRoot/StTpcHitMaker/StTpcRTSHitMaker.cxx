@@ -61,11 +61,6 @@ ClassImp(StTpcRTSHitMaker);
 #else
 #define PrPP(A,B)
 #endif
-#if 0
-static struct rp_dta_t {
-	short adc[512] ;
-} rp_dta[46][183] ;
-#endif
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
   SafeDelete(fTpx);
@@ -692,16 +687,6 @@ Int_t StTpcRTSHitMaker::Make23() {
 	    rowO = row - 40 + 13; // old row countx1
 	  }
 	}
-#if 0
-	Double_t gain = St_tpcPadConfigC::instance()->IsRowInner(sector,row) ? 
-	  St_tss_tssparC::instance()->gain_in() : 
-	  St_tss_tssparC::instance()->gain_out();
-	Double_t wire_coupling = St_tpcPadConfigC::instance()->IsRowInner(sector,row) ? 
-	  St_tss_tssparC::instance()->wire_coupling_in() : 
-	  St_tss_tssparC::instance()->wire_coupling_out();
-	Double_t ADC2GeV = ((Double_t) St_tss_tssparC::instance()->ave_ion_pot() * 
-			    (Double_t) St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
-#endif
 	for(Int_t pad = 1; pad <= Npads; pad++) {
 	  UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
 	  if (! ntimebins) continue;
