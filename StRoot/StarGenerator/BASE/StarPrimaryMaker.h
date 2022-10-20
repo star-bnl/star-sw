@@ -227,7 +227,7 @@ class StarPrimaryMaker : public StMaker
 
 #ifndef __CINT__
   std::function< TLorentzVector() > mVertexFunction;
-  std::map< std::string, std::function< TLorentzVector() > > vertexFunctionMap;
+  std::map< std::string, std::function< TLorentzVector() > > mVertexFunctionMap;
   std::function< TLorentzVector() > GetVertexFunction(const char* name);
 #endif
 

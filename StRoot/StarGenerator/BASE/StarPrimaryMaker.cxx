@@ -57,7 +57,7 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mFilter(0),
   mAccepted(0),
   mVertexFunction(),
-  vertexFunctionMap()
+  mVertexFunctionMap()
 {
   assert(fgPrimary == 0); // cannot create more than one primary generator
   fgPrimary = this;
@@ -77,12 +77,12 @@ StarPrimaryMaker::StarPrimaryMaker()  :
 
 
   // Defaults to gaussian
-  vertexFunctionMap[""]         = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
-  vertexFunctionMap["gaussXYZ"] = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
-  vertexFunctionMap["flatZ"]    = std::bind( &StarPrimaryMaker::vertexFlatZ,    this );
-  vertexFunctionMap["flatABZ"]  = std::bind( &StarPrimaryMaker::vertexFlatABZ,  this );
-  vertexFunctionMap["flatRZ"]   = std::bind( &StarPrimaryMaker::vertexFlatRZ,   this );
-  vertexFunctionMap["flatXYZ"]  = std::bind( &StarPrimaryMaker::vertexFlatXYZ,  this );
+  mVertexFunctionMap[""]         = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
+  mVertexFunctionMap["gaussXYZ"] = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
+  mVertexFunctionMap["flatZ"]    = std::bind( &StarPrimaryMaker::vertexFlatZ,    this );
+  mVertexFunctionMap["flatABZ"]  = std::bind( &StarPrimaryMaker::vertexFlatABZ,  this );
+  mVertexFunctionMap["flatRZ"]   = std::bind( &StarPrimaryMaker::vertexFlatRZ,   this );
+  mVertexFunctionMap["flatXYZ"]  = std::bind( &StarPrimaryMaker::vertexFlatXYZ,  this );
 
   SetAttr( "vertexDistribution", "gaussXYZ" );
   /// name = "gaussXYZ" is the default.
@@ -796,10 +796,10 @@ TLorentzVector StarPrimaryMaker::vertexFlatXYZ() {
 };
 //_________________________________________________________________________________________
 std::function<TLorentzVector()> StarPrimaryMaker::GetVertexFunction( const char* name ){  
-  auto result = vertexFunctionMap[ "gaussXYZ" ];
-  if ( vertexFunctionMap.count(name) == 1 ) 
+  auto result = mVertexFunctionMap[ "gaussXYZ" ];
+  if ( mVertexFunctionMap.count(name) == 1 ) 
     {
-      result = vertexFunctionMap[ name ];
+      result = mVertexFunctionMap[ name ];
     }
   return result;
 }
