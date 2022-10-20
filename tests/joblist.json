@@ -186,7 +186,7 @@
         "inpfile": "st_physics_8352025_raw_1030011.daq", 
         "inppath": "/star/rcf/test/daq/2007/352", 
         "outpath": "/star/rcf/test/dev/daq_sl302.ittf/${thisday}/year_2008/production_dAu2008", 
-        "nevents": "400"
+        "nevents": "40"
     }, 
     {
         "jobid": "21", 
@@ -204,7 +204,7 @@
         "inpfile": "st_physics_7129023_raw_1020003.daq", 
         "inppath": "/star/rcf/test/daq/2006/129/7129023", 
         "outpath": "/star/rcf/test/dev/daq_sl302.ittf/${thisday}/year_2006/ppProdTrans", 
-        "nevents": "1000"
+        "nevents": "100"
     }, 
     {
         "jobid": "23", 
@@ -213,7 +213,7 @@
         "inpfile": "st_physics_6171062_raw_2040010.daq", 
         "inppath": "/star/rcf/test/daq/2005/171", 
         "outpath": "/star/rcf/test/dev/daq_sl302.ittf/${thisday}/year_2005/ppProduction", 
-        "nevents": "500"
+        "nevents": "50"
     }, 
     {
         "jobid": "24", 
@@ -222,7 +222,7 @@
         "inpfile": "st_physics_6048025_raw_1020002.daq", 
         "inppath": "/star/rcf/test/daq/2005/048", 
         "outpath": "/star/rcf/test/dev/daq_sl302.ittf/${thisday}/year_2005/CuCu200_MinBias", 
-        "nevents": "200"
+        "nevents": "20"
     }, 
     {
         "jobid": "25", 
