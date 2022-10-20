@@ -80,14 +80,21 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t               InitRun(Int_t runnumber);
   Int_t               InitRun23(Int_t runnumber);
   Int_t               Make();
+#ifdef __TFG__VERSION__
   Int_t               Make23();
+#endif /*  __TFG__VERSION__ */
+#ifdef __USE_GAIN_FROM_FILE__
+  Int_t               from_file(daq_dta *gain_dta, const Char_t *fname = "");
+#endif /* __USE_GAIN_FROM_FILE__ */
   void PrintCld(daq_cld *cld = 0, Int_t IdTruth = 0, Int_t quality=0);
   void PrintAdc(daq_dta *dta  = 0);
  private:
   daq_tpx  *fTpx; //!
   daq_itpc *fiTpc; //!
+#ifdef __TFG__VERSION__
   tpc23_base   *fTpx23; //!
   tpc23_base  *fiTpc23; //!
+#endif /*  __TFG__VERSION__ */
   Bool_t    fNoiTPCLu; //!
   Double_t  fminCharge; // ! minimum cluster charge in ADC
   Int_t     maxHits[24];
