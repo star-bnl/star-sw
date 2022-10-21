@@ -12,8 +12,8 @@
 class StjTowerEnergyCutEt : public StjTowerEnergyCut {
 
 public:
-  StjTowerEnergyCutEt(double min = 0, double max = 50000.0, bool flag = true)
-    : _min(min), _max(max), _flag(flag) { }
+  StjTowerEnergyCutEt(double min = 0, double max = 50000.0, bool respect_vertex_position = true)
+    : _min(min), _max(max), _flag(respect_vertex_position) { }
   virtual ~StjTowerEnergyCutEt() { }
 
   bool operator()(const StjTowerEnergy& deposit)
