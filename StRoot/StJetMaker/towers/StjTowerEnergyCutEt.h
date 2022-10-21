@@ -12,7 +12,7 @@
 class StjTowerEnergyCutEt : public StjTowerEnergyCut {
 
 public:
-  StjTowerEnergyCutEt(double min = 0, double max = 50000.0, bool flag = true)
+  StjTowerEnergyCutEt(double min = 0, double max = 50000.0, bool respect_vertex_position = true)
     : _min(min), _max(max), _flag(flag) { }
   virtual ~StjTowerEnergyCutEt() { }
 
