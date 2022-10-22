@@ -495,7 +495,7 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
   TString Name(gSystem->BaseName(gDirectory->GetName()));
   cout << Name << "\t";
   if        (Name.BeginsWith("SecRow3")) { 
-    MuDraw("mu:rowsigned(y,x)", "P", 2*nx+1, -xMax, xMax, "(i&&j&&abs(mu)<1&&dmu>0&&dmu<0.02)", "prof", -yMax, yMax, "All", "sector&side", "#mu versus pad row");
+    MuDraw("mu:rowsigned(y,x)", "P", 2*nx+1, -yMax, yMax, "(i&&j&&abs(mu)<1&&dmu>0&&dmu<0.02)", "prof", -1, 1, "All", "sector&side", "#mu versus pad row");
   } else if (Name.BeginsWith("Z3"))      {
     if (Opt == "") {
       MuDraw("mu-muJ:TMath::Sign(208.707-y,x)","ZI", 2*ny, -yMax, yMax, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "All", "Z", "#mu versus pad row");

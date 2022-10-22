@@ -1,1 +1,0 @@
-../StRoot/StTbyTMaker/TbyThits.C

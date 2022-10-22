@@ -4,7 +4,11 @@
          cd ${SUBMITTINGDIRECTORY}
 #   setenv StarEndMakerShell
    setenv STARFPE NO
-   setenv NODEBUG yes
+#   setenv NODEBUG yes
+   unsetenv NODEBUG 
+   setup gcc
+#   starver .DEV2
+   starver TFG.Export
 #SL18f
 #   setup gcc
 #   setup 32b
@@ -63,7 +67,9 @@
   echo ${SUBMITTINGDIRECTORY} | grep TpxRaw
   if (! $?) set TpxRaw = ",TpxRaw,TpxClu"
 #   root.exe -q -b 'bfc.C(1000,"P2018a'${TpxRaw}',-hitfilt,mtd,btof,BEmcChkStat,CorrX,-Opr13,OPr40,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
-   root.exe -q -b 'bfc.C(1000,"P2018a'${TpxRaw}',-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(1000,"P2018a'${TpxRaw}',-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
+#   root.exe -q -b 'bfc.C(1000,"P2018a'${TpxRaw}',iTpcIT,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
+   root4star -q -b 'bfc.C(1000,"P2018a'${TpxRaw}',iTpcIT,-hitfilt,mtd,btof,BEmcChkStat,CorrX,OSpaceZ2,OGridLeakFull,evout,NoHistos,noTags,noRunco,StiCA,evout,-picowrite,-picodst","'${evtsFile}'")' &gt;&amp; ${logFile}
         </command>
         <stdout URL="file:./sched$JOBID.log" />
         <stderr URL="file:./sched$JOBID.err" />
