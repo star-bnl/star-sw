@@ -1200,7 +1200,7 @@ void StMuDstMaker::fillFtt(StEvent* ev) {
 void StMuDstMaker::fillFst(StEvent* ev) {
   DEBUGMESSAGE2("");
   StFstHitCollection* fstcol=(StFstHitCollection*)ev->fstHitCollection();
-  if (!fstcol)  return; //throw StMuExceptionNullPointer("no StFstCollection",__PRETTYF__);
+  if (!fstcol)  return; //throw StMuExceptionNullPointer("no StFstHitCollection",__PRETTYF__);
   StTimer timer;
   timer.start();
 
@@ -1211,20 +1211,12 @@ void StMuDstMaker::fillFst(StEvent* ev) {
   }
 
   //raw hit data input
-  StFstCollection* fstCollectionPtr = 0;
+  StFstEvtCollection *fstevtcol = 0;
   if (IAttr("fstMuRawHit")){//True for storing FST Raw hits
-    TObjectSet* fstDataSet = (TObjectSet*)GetDataSet("fstRawHitAndCluster");
-    if (!fstDataSet) {
-        LOG_WARN << "StMuDstMaker::Make() - there is no fstDataSet (raw hit) " << endm;
-    }
-
-    fstCollectionPtr = (fstDataSet ? (StFstCollection*)fstDataSet->GetObject() : 0);
-    if(!fstCollectionPtr) {
-        LOG_WARN << "StMuDstMaker::Make() - no fstCollection for FST raw hit."<<endm;
-    }
+    fstevtcol=(StFstEvtCollection*)ev->fstEvtCollection();
   }
 
-  mFstUtil->fillMuFst(mFstCollection,fstcol,fstCollectionPtr);
+  mFstUtil->fillMuFst(mFstCollection,fstcol,fstevtcol);
 
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
