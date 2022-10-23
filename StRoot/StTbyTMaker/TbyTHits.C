@@ -75,9 +75,9 @@ struct Name_t {
   const Char_t *cutName;
 };
 Name_t Names[3] = {
-  {"Pad",              "newP.pad:newP.row found by both old and new","oldP.sector&&newP.sector"}, 
-  {"PaNew",            "newP.pad:newP.row found by only new","oldP.sector==0&&newP.sector"},
-  {"PaOld",            "oldP.pad:oldP.row found by only old","oldP.sector&&P.sector==0"}
+  {"Pad",              "newP.pad:newP.row found both by old and new","oldP.sector&&newP.sector"}, 
+  {"PadNew",           "newP.pad:newP.row found only by new","oldP.sector==0&&newP.sector"},
+  {"PadOld",           "oldP.pad:oldP.row found only by old","oldP.sector&&P.sector==0"}
 };
 //________________________________________________________________________________
 //////////////////////////////////////////////////////////
@@ -482,6 +482,21 @@ TH2 *DrawRatio(TCanvas *c1, TH2F *P, TH2F *PAll) {
     c1->Update();
   }
   return R;
+}
+//________________________________________________________________________________
+void PrintStatus() {
+  cout << gSystem->pwd() << "/" << gDirectory->GetName() << endl;
+  for (Int_t s = 1; s <= 24; s++) {
+    TH2 *Pad = (TH2 *) gDirectory->Get(Form("Pad%i",s));
+    TH2 *PadN = (TH2 *) gDirectory->Get(Form("PadNew%i",s));
+    TH2 *PadO = (TH2 *) gDirectory->Get(Form("PadOld%i",s));
+    Double_t effN = -1, effO = -1;
+    if (Pad) {
+      if (PadN) effN = PadN->GetEntries()/Pad->GetEntries();
+      if (PadO) effO = PadO->GetEntries()/Pad->GetEntries();
+    }
+    cout << Form("sector %2i : extra new  = %5.2f %%, extra old = %5.2f %%", s, 100*effN, 100*effO) << endl;
+  }
 }
 //________________________________________________________________________________
 void TbyTHits() {
