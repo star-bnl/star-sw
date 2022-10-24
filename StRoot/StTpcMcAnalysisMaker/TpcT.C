@@ -97,7 +97,7 @@ end
 #endif
 #include "Ask.h"
 #include "Names.h"
-
+#include "StBichsel/StdEdxModel.h"
 #ifdef __Y2019__
 static Int_t NoInnerRows = 40; //-1; // Tpx
 static Int_t NoOfRows    = 72; //-1;
@@ -1097,7 +1097,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD6.root
     output = file1;
     output.ReplaceAll(".root",".ADCut12.root");
 #else
-    output = "ADCut23.root";
+    output = "ADCut31.root";
 #endif
   }
   cout << "Output for " << output << endl;
@@ -1215,6 +1215,12 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD6.root
   TH2F *dPL = new TH2F("dPL"," Log(McpIn/q/pIn) versus log_{10} (pIn)", 300,-2,1,100,-0.2,0.2);
   TH2F *dBGL = new TH2F("dBGL","(beta*gamma)_{MC} - (beta*Gamma)_{RC} versus log(beta_{RC})", 500, -5.0, 0.0,400,-0.4,0.4);
   TH2F *dBG = new TH2F("dBG","(beta*gamma)_{MC} - (beta*Gamma)_{RC} versus beta_{RC}", 500, 0.0, 1.0, 400,-0.4,0.4);
+  TH2F *Adcne[2] = {0};
+  Adcne[0] = new TH2F("AdcneI","log(AdcMc/ne) versus log(ne) Inner",120,1,13,140,-2,5);
+  Adcne[1] = new TH2F("AdcneO","log(AdcMc/ne) versus log(ne) Outer",120,1,13,140,-2,5);
+  TH1F *r1ADC[2] = {0};
+  r1ADC[0] = new TH1F("r1ADCI","ratio Adc_1/Adc for Inner",100,0.5,1.5);
+  r1ADC[1] = new TH1F("r1ADCO","ratio Adc_1/Adc for Outer",100,0.5,1.5);
   const static Int_t NoDim = sizeof(Adc_t)/sizeof(Double_t);
   //  const Int_t  nBins[NoDim]  = {      2,      2,       25,      25, 110,    140,   250}; //,   200};
   const Char_t *NameV[NoDim] = {"secWE","rowIO", "Ntmbks", "Npads", "z",  "AdcL","ratL"}; //,ratC; 
@@ -1334,6 +1340,18 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD6.root
   dNdxVsBgC[0] = new TH2F("dNdxVsBgC","log((nP/dX)/(dN/dx)) versus log10(local beta*gamma after dN/dx Cut",140,-2,5,1000,-1.,1.);
   dNdxVsBgC[1] = new TH2F("dNdxVsBgCI","log((nP/dX)/(dN/dx)) versus log10(local beta*gamma after dN/dx Cut, Inner",140,-2,5,1000,-1.,1.);
   dNdxVsBgC[2] = new TH2F("dNdxVsBgCO","log((nP/dX)/(dN/dx)) versus log10(local beta*gamma after dN/dx Cut, Outer",140,-2,5,1000,-1.,1.);
+  TH2F *dNdxVsBgCC[3] = {0};
+  dNdxVsBgCC[0] = new TH2F("dNdxVsBgCC","log((nP/dX)/(dN/dx)) versus log10(local beta*gamma after dN/dx Cut, and NPCorrection",140,-2,5,1000,-1.,1.);
+  dNdxVsBgCC[1] = new TH2F("dNdxVsBgCCI","log((nP/dX)/(dN/dx)) versus log10(local beta*gamma after dN/dx Cut, Inner, and NPCorrection",140,-2,5,1000,-1.,1.);
+  dNdxVsBgCC[2] = new TH2F("dNdxVsBgCCO","log((nP/dX)/(dN/dx)) versus log10(local beta*gamma after dN/dx Cut, Outer, and NPCorrection",140,-2,5,1000,-1.,1.);
+  TH2F *NpdN[3] = {0};
+  NpdN[0] = new TH2F("NpdN", "log(((dN/dx)*dX)/(nP)) versus log(nP)",140,3.0,10.0,1000,-2.,2.);
+  NpdN[1] = new TH2F("NpdNI","log(((dN/dx)*dX)/(nP)) versus log(nP) for Inner",140,3.0,10.0,1000,-2.,2.);
+  NpdN[2] = new TH2F("NpdNO","log(((dN/dx)*dX)/(nP)) versus log(nP) for Outer",140,3.0,10.0,1000,-2.,2.);
+  TH2F *dNNp[3] = {0};
+  dNNp[0] = new TH2F("dNNp", "log(nP/(dN/dx)*dX)) versus log(dN/dx)*dX))",140,3.0,10.0,1000,-2.,2.);
+  dNNp[1] = new TH2F("dNNpI","log(nP/(dN/dx)*dX)) versus log(dN/dx)*dX)) for Inner",140,3.0,10.0,1000,-2.,2.);
+  dNNp[2] = new TH2F("dNNpO","log(nP/(dN/dx)*dX)) versus log(dN/dx)*dX)) for Outer",140,3.0,10.0,1000,-2.,2.);
   TString  currentFileName;
   TChain *chain = iter.Chain();
   Double_t fMass = -1;
@@ -1374,10 +1392,11 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD6.root
       if (fMcHit_mKey[k] > 100) continue; // secondaries   Only for TpcRS_Part
       if (fRcHit_mQuality[k] < 95) continue;
       if (fRcHit_mIdTruth[k] > 100) continue; // secondaries
-      if (fMcHit_mdE[k] <= 0 || fMcHit_mdE[k] > 1e-3) continue;
+      if (fMcHit_mdE[k] <= 1e-6 || fMcHit_mdE[k] > 1e-3) continue;
       if (fMcHit_mAdc[k] <= 0) continue;
       if (fRcHit_mAdc[k] <= 0) continue;
       if (fRcHit_mCharge[k] <= 0) continue;
+      if (fRcHit_mdX[0] <= 0) continue;
       Int_t sector = (fMcHit_mVolumeId[k]/100)%100;
       Int_t row    =  fMcHit_mVolumeId[k]%100;
       Int_t io = 0;
@@ -1393,14 +1412,16 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD6.root
       if (fMcHit_mLength[k] < 55.0) continue;
       dPL->Fill(TMath::Log10(fpIn), TMath::Log(fMcpIn/TMath::Abs(fCharge)/fpIn));
       Double_t nP = fMcHit_mnP[k];
-      Double_t nPdNdx = fMcHit_mdNdx[0]*fRcHit_mdX[0];
+      Double_t dX = (io == 1) ? fRcHit_mdX[0]*2.00/1.95 : fRcHit_mdX[0]*1.60/1.55*1.005;
+      Double_t nPdNdx = fMcHit_mdNdx[0]*dX;
       Double_t ne = fMcHit_mne[k];
       neP[io]->Fill(TMath::Log(nP),TMath::Log(ne/nP));
       neN[io]->Fill(TMath::Log(nPdNdx),TMath::Log(ne/nPdNdx));
       if (ne > nP) lneP[io]->Fill(TMath::Log(nP),TMath::Log(TMath::Log(ne/nP)));
       Double_t ratio = fMcHit_mAdc[k]/fRcHit_mAdc[0];
       if (ratio < 0.1 || ratio > 10) continue;
-      if (fCharge && fMcHit_mnP[0] > 0 && fRcHit_mdX[0] > 0 ) {
+      Adcne[io]->Fill(TMath::Log(ne),TMath::Log(fMcHit_mAdc[k]/ne));
+      if (fCharge && fMcHit_mnP[0] > 0) {
 #if 0
 	TVector3 locmom(fMcHit_mLocalMomentum_mX1[0],fMcHit_mLocalMomentum_mX2[0],fMcHit_mLocalMomentum_mX3[0]);
 	Double_t lmom = locmom.Mag();
@@ -1415,20 +1436,28 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD6.root
 	  if (bgL10 < fL10bgMin) continue;
 	  dNdxVsBgC[0]->Fill(bgL10, TMath::Log(fMcHit_mnP[0]/nPdNdx));
 	  dNdxVsBgC[io+1]->Fill(bgL10, TMath::Log(fMcHit_mnP[0]/nPdNdx));
+	  Double_t nPdNdxC = nPdNdx*StdEdxModel::instance()->NpCorrection(bgRC);
+	  dNdxVsBgCC[0]->Fill(bgL10, TMath::Log(fMcHit_mnP[0]/nPdNdxC));
+	  dNdxVsBgCC[io+1]->Fill(bgL10, TMath::Log(fMcHit_mnP[0]/nPdNdxC));
 	  neN3D[io]->Fill(TMath::Log(nPdNdx),bgL10, TMath::Log(ne/nPdNdx));
-	  dXdSR[io]->Fill(bgL10, fRcHit_mdX[0]/fMcHit_mdS[0] - 1.0);
+	  dXdSR[io]->Fill(bgL10, dX/fMcHit_mdS[0] - 1.0);
 	  dPL->Fill(TMath::Log10(fpIn), TMath::Log(fMcpIn/TMath::Abs(fCharge)/fpIn));
 	  Double_t betaRC = bgRC/TMath::Sqrt(bgRC*bgRC + 1);
 	  dBGL->Fill(TMath::Log(betaRC), bgMC - bgRC);
 	  dBG->Fill(betaRC, bgMC - bgRC);
+	  NpdN[0]->Fill(   TMath::Log(fMcHit_mnP[0]), TMath::Log(nPdNdx/fMcHit_mnP[0]));
+	  NpdN[io+1]->Fill(TMath::Log(fMcHit_mnP[0]), TMath::Log(nPdNdx/fMcHit_mnP[0]));
+	  dNNp[0]->Fill(   TMath::Log(nPdNdx), TMath::Log(fMcHit_mnP[0]/nPdNdx));
+	  dNNp[io+1]->Fill(TMath::Log(nPdNdx), TMath::Log(fMcHit_mnP[0]/nPdNdx));
 	}
       }
       Double_t r0 =  fMcHit_mAdc0[k]/fMcHit_mAdc[k];
       Double_t r1 =  fMcHit_mAdc1[k]/fMcHit_mAdc[k];
+      r1ADC[io]->Fill(r1);
       Double_t r2 =  fMcHit_mAdc2[k]/fMcHit_mAdc[k];
       TVector3 pxyzL(fMcHit_mLocalMomentum_mX1[k],fMcHit_mLocalMomentum_mX2[k],fMcHit_mLocalMomentum_mX3[k]);
       Double_t TanL = pxyzL.z()/pxyzL.Perp();
-      Double_t y[kVar] = { fMcHit_mPosition_mX3[k], TanL, TMath::Log(fRcHit_mdX[0]),
+      Double_t y[kVar] = { fMcHit_mPosition_mX3[k], TanL, TMath::Log(dX),
 			   (Double_t) fRcHit_mMinpad[0]+fRcHit_mMaxpad[0]+1,
 			   (Double_t) fRcHit_mMintmbk[0]+fRcHit_mMaxtmbk[0]+1,
 			   (Double_t) fRcHit_mMinpad[0]+fRcHit_mMaxpad[0]+1+fRcHit_mMintmbk[0]+fRcHit_mMaxtmbk[0]+1
