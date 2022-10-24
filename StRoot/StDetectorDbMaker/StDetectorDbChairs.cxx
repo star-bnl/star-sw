@@ -1709,6 +1709,7 @@ Bool_t    St_tpcPadGainT0BC::livePadrow(Int_t sector, Int_t row) const {
   }
   return St_tpcPadGainT0C::instance()->livePadrow(sector,row);
 }
+#ifdef __TFG__VERSION__
 #include "StPath2tpxGain.h"
 MakeChairInstance2(FilePath,StPath2tpxGain,Calibrations/tpc/Path2tpxGain);
 #include "StPath2itpcGain.h"
@@ -1721,6 +1722,7 @@ const Char_t * St_FilePathC::GetPath(const Char_t *prepend) {
   gSystem->ExpandPathName(path); 
   return path.Data();
 }
+#endif /*  __TFG__VERSION__ */
 //________________________________________________________________________________
 #include "St_tpcSlewingC.h"
 MakeChairInstance(tpcSlewing,Calibrations/tpc/tpcSlewing);
