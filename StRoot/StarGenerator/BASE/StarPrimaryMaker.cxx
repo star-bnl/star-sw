@@ -1,6 +1,4 @@
 #include "StarPrimaryMaker.h"
-ClassImp(StarPrimaryMaker);
-//#include "StarGenerator.h"
 
 #include "g2t/St_g2t_particle_Module.h"
 #include "tables/St_g2t_event_Table.h"
@@ -35,12 +33,15 @@ ClassImp(StarPrimaryMaker);
 #include "TMCProcess.h"
 
 #include "tables/St_vertexSeed_Table.h"
+#include <map>
+#include <string>
 
 using namespace std;
 
 // 1 mm / speed of light
 const double mmOverC = 1.0E-3 / TMath::C();
 
+// --------------------------------------------------------------------------------------------------------------
 StarPrimaryMaker *fgPrimary      = 0;
 // --------------------------------------------------------------------------------------------------------------
 StarPrimaryMaker::StarPrimaryMaker()  : 
@@ -57,7 +58,10 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mPtMin(0), mPtMax(-1), mRapidityMin(0), mRapidityMax(-1), mPhiMin(0), mPhiMax(-1), mZMin(-999), mZMax(+999),
   mRunNumber(0),
   mPrimaryVertex(0,0,0,0),
-  mFilter(0),mAccepted(0)
+  mFilter(0),
+  mAccepted(0),
+  mVertexFunction(),
+  mVertexFunctionMap()
 {
   assert(fgPrimary == 0); // cannot create more than one primary generator
   fgPrimary = this;
@@ -74,6 +78,24 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   AddData( &pdb, ".const" );
 
   SetAttr("FilterKeepHeader", int(1) );
+
+
+  // Defaults to gaussian
+  mVertexFunctionMap[""]         = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
+  mVertexFunctionMap["gaussXYZ"] = std::bind( &StarPrimaryMaker::vertexGaussXYZ, this );
+  mVertexFunctionMap["flatZ"]    = std::bind( &StarPrimaryMaker::vertexFlatZ,    this );
+  mVertexFunctionMap["flatABZ"]  = std::bind( &StarPrimaryMaker::vertexFlatABZ,  this );
+  mVertexFunctionMap["flatRZ"]   = std::bind( &StarPrimaryMaker::vertexFlatRZ,   this );
+  mVertexFunctionMap["flatXYZ"]  = std::bind( &StarPrimaryMaker::vertexFlatXYZ,  this );
+
+  SetAttr( "vertexDistribution", "gaussXYZ" );
+  /// name = "gaussXYZ" is the default.
+  /// name = "flatZ"   throws points uniform on a line from Vz - Sz to Vz + Sz
+  /// name = "flatXYZ" thows within a rectangular box Vx+/-Sx, Vy+/-Sy, Vz+/-Sz
+  /// name = "flatRZ"  throws within a cylinder of radius Sx centered on Vx,Vy, from z=Vz-Sz to Vz+Sz
+  /// name = "flatABZ" throws within an eliptical cyilnder of major axis A minor axis B, rotated by Rho
+
+  mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
 
 }
 // --------------------------------------------------------------------------------------------------------------
@@ -102,7 +124,9 @@ Int_t StarPrimaryMaker::Init()
   // Initialize runtime flags
   //
   mDoBeamline = IAttr("beamline");
-  
+
+  // Vertex function
+  mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
   
   //
   // Initialize all submakers first
@@ -316,6 +340,8 @@ Int_t StarPrimaryMaker::InitRun( Int_t runnumber )
   // Set the run number
   mPrimaryEvent->SetRunNumber(runnumber);
   mRunNumber = runnumber;
+  
+  mVertexFunction = GetVertexFunction( SAttr("vertexDistribution") );
 
   return StMaker::InitRun( runnumber );
 }
@@ -509,12 +535,9 @@ Int_t StarPrimaryMaker::Finalize()
   // Generate the primary vertex within allowed limits
   //
   TLorentzVector primary(0,0,0,0);
-  //  static Bool_t FreezePV = IAttr("FreezePV");
   static Bool_t UseGeneratorPV = IAttr("UseGeneratorPV");
-  //  static Bool_t FreezePV = kFALSE;
-  if (! UseGeneratorPV ) {
-    primary = Vertex(); while ( primary.Z() < mZMin || primary.Z() > mZMax ) primary = Vertex();
-  }
+  if (! UseGeneratorPV ) 
+    primary = mVertexFunction(); while ( primary.Z() < mZMin || primary.Z() > mZMax ) primary = mVertexFunction();
   mPrimaryVertex = primary;
 
   //
@@ -528,10 +551,8 @@ Int_t StarPrimaryMaker::Finalize()
 
       // Obtain the vertex for this event.  If the generator is marked as
       // pileup, sample a new vertex.  Otherwise use the primary vertex
-      TLorentzVector vertex = primary;
-      if (generator->IsPileup()) {
-	vertex = Vertex();
-      }
+      TLorentzVector vertex = (generator->IsPileup())?	mVertexFunction() : primary;
+
       StarGenEvent *event = generator->Event();
       Int_t npart = event->GetNumberOfParticles();
 
@@ -653,6 +674,7 @@ Int_t StarPrimaryMaker::Finalize()
 }
 
 // --------------------------------------------------------------------------------------------------------------
+<<<<<<< HEAD
 TLorentzVector StarPrimaryMaker::Vertex()
 {  
   Double_t x=0,y=0,z=0,t=0;
@@ -666,6 +688,8 @@ TLorentzVector StarPrimaryMaker::Vertex()
   return TLorentzVector(x,y,z,t);
 }
 // --------------------------------------------------------------------------------------------------------------
+=======
+>>>>>>> upstream/main
 void StarPrimaryMaker::BuildTables()
 {
 
@@ -718,4 +742,86 @@ void StarPrimaryMaker::RotateBeamline( Double_t &px, Double_t &py, Double_t &pz,
   py = moment[1];
   pz = moment[2];
 
+}
+
+
+//_________________________________________________________________________________________
+TLorentzVector StarPrimaryMaker::vertexGaussXYZ() {
+    double x=0,y=0,z=0,t=0;
+    TVector2 xy = StarRandom::Instance().gauss2d( mSx, mSy, mRho );
+    x = mVx + xy.X();
+    y = mVy + xy.Y();
+    z = mVz + StarRandom::Instance().gauss( mSz );
+    double dist = TMath::Sqrt(x*x+y*y+z*z);
+    t = dist / TMath::Ccgs();
+    return TLorentzVector(x,y,z,t);
+};
+//_________________________________________________________________________________________
+TLorentzVector StarPrimaryMaker::vertexFlatZ() {
+  double x=0,y=0,z=0,t=0;                                 
+  // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+  z = mVz - mSz + StarRandom::Instance().flat() * (  mSz * 2.0 );
+  x = mVx;
+  y = mVy;
+  double dist = TMath::Sqrt(x*x+y*y+z*z);   
+  t = dist / TMath::Ccgs(); 
+  return TLorentzVector(x,y,z,t); 
+};
+//_________________________________________________________________________________________
+TLorentzVector StarPrimaryMaker::vertexFlatABZ() {
+    double x=0,y=0,z=0,t=0;                                 
+    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+    z = mVz - mSz + StarRandom::Instance().flat() * (  mSz * 2.0 );
+    double a = mSx;
+    double b = mSy;
+    while (true) {
+      // Sample uniformly in rectangle length 2a width 2b
+      x = ( StarRandom::Instance().flat() * 2 * a - a );
+      y = ( StarRandom::Instance().flat() * 2 * b - b );
+      // If point w/in perimeter of the elipse... accept the point
+      if ( (x/a)*(x/a) + (y/b)*(y/b) <= 1.0 ) break;
+    };
+    double dist = TMath::Sqrt(x*x+y*y+z*z);   
+    t = dist / TMath::Ccgs(); 
+    TLorentzVector result(x,y,z,t);
+    result.RotateZ( mRho );    
+    return result;
+  };
+//_________________________________________________________________________________________
+TLorentzVector StarPrimaryMaker::vertexFlatRZ() {
+    double x=0,y=0,z=0,t=0;                                 
+    // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+    z = mVz - mSz + StarRandom::Instance().flat() * (  mSz * 2.0 );
+    double R = mSx;
+    double r   = R * sqrt(StarRandom::Instance().flat());
+    double phi = 2.0 * TMath::Pi() * StarRandom::Instance().flat();
+    x = r * TMath::Cos(phi);
+    y = r * TMath::Sin(phi);
+    double dist = TMath::Sqrt(x*x+y*y+z*z);   
+    t = dist / TMath::Ccgs(); 
+    TLorentzVector result(x,y,z,t);
+    return result;
+};
+//_________________________________________________________________________________________
+TLorentzVector StarPrimaryMaker::vertexFlatXYZ() {
+  double x=0,y=0,z=0,t=0;                                 
+  // Throw uniform between -sigmaZ and + sigmaZ (and etc...)
+  z = mVz - mSz + StarRandom::Instance().flat() * (  mSz * 2.0 );
+  x = mVx - mSx + StarRandom::Instance().flat() * (  mSx * 2.0 );
+  y = mVy - mSy + StarRandom::Instance().flat() * (  mSy * 2.0 );
+  double dist = TMath::Sqrt(x*x+y*y+z*z);   
+  t = dist / TMath::Ccgs(); 
+  return TLorentzVector(x,y,z,t); 
+};
+//_________________________________________________________________________________________
+std::function<TLorentzVector()> StarPrimaryMaker::GetVertexFunction( const char* name ){  
+  auto result = mVertexFunctionMap[ "gaussXYZ" ];
+  if ( mVertexFunctionMap.count(name) == 1 ) 
+    {
+      result = mVertexFunctionMap[ name ];
+    }
+  else {
+    LOG_WARN << "Vertex function " << name << " not defined.  Defaulting to gaussian." << endm;
+  }
+  return result;
 }

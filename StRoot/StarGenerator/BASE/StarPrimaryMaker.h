@@ -13,6 +13,11 @@
 
 #include "TEventList.h"
 
+#ifndef __CINT__
+#include <functional>
+#include <map>
+#endif
+
 class StarGenerator;
 class StarGenEvent;
 class StarFilterMaker;
@@ -185,8 +190,6 @@ LOG_INFO << " -- StarPrimaryMaker -- phimn=" << (mPhiMin = phimin) << " phimx=" 
  protected:
 
 
-  TLorentzVector Vertex();
-
   Int_t     PreGenerate();
   Int_t        Generate();
   Int_t    PostGenerate();
@@ -236,6 +239,19 @@ LOG_INFO << " -- StarPrimaryMaker -- phimn=" << (mPhiMin = phimin) << " phimx=" 
 
   StarFilterMaker *mFilter;
   TEventList      *mAccepted; //*< event list containing accepted events
+
+#ifndef __CINT__
+  std::function< TLorentzVector() > mVertexFunction;
+  std::map< std::string, std::function< TLorentzVector() > > mVertexFunctionMap;
+  std::function< TLorentzVector() > GetVertexFunction(const char* name);
+#endif
+
+  TLorentzVector vertexGaussXYZ(); // gaussian XYZ
+  TLorentzVector vertexFlatZ();    // uniform distribution along z (point in XY)
+  TLorentzVector vertexFlatXYZ();  // uniform distribution in rectangle xyz
+  TLorentzVector vertexFlatRZ();   // uniform distribution in cylinder rz
+  TLorentzVector vertexFlatABZ();  // uniform distribution in ellipical cylinder xyz
+
   ClassDef(StarPrimaryMaker,1);
 
 };
