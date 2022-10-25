@@ -20,10 +20,10 @@ inline float fswap(float swapped)
 
 #ifdef RTS_LITTLE_ENDIAN
 #define l2hfloat(x) (x)
-#define b2hfloat(x) (fswap(x))
+//#define b2hfloat(x) (fswap(x))
 #else
 #define l2hfloat(x) (fswap(x))
-#define b2hfloat(x) (x)
+//#define b2hfloat(x) (x)
 #endif
 
 
@@ -73,7 +73,7 @@ int l3_reader(char *m, struct l3_t *l3, u_int driver)
 
 		LOG(DBG,"L3_P bytes %d",len,0,0,0) ;
 
-		if(checkBank(l3p->bh.bank_type,"L3_P") < 0) {
+		if(checkBank(l3p->bh.bank_type,(char *)"L3_P") < 0) {
 			return -1 ;
 		}
 
@@ -93,7 +93,7 @@ int l3_reader(char *m, struct l3_t *l3, u_int driver)
 	      struct L3_GTD* l3gtd = (struct L3_GTD *) l3_gtd_start ;
 
 // Tonko, sanity check
-		if(checkBank(l3gtd->bh.bank_type,"L3_GTD") < 0) {
+	      if(checkBank(l3gtd->bh.bank_type,(char *)"L3_GTD") < 0) {
 			return -1 ;
 		}
 

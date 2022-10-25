@@ -58,6 +58,8 @@ public:
 	static float get_gain(int sec1, int row1, int pad1) ;
 	static void set_gain(int sec1, int row1, int pad1, float gain) ;
 
+	static float get_t0(int sec1, int row1, int pad1) ;
+
 	static u_char get_flags(int sec1, int row1, int pad1) ;
 	static void set_flags(int sec1, int row1, int pad1, u_char flags) ;
 
