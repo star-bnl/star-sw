@@ -49,7 +49,7 @@ jobs:
           path: /tmp
 
       - run: docker load --input /tmp/star-sw-${{ env.STARENV }}.tar
-      - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:latest
+      - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:v5
       - run: |
              TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-${{ env.STARENV }} tests/executest.py -c ${{ matrix.test_id }})
              # Workaround https://sft.its.cern.ch/jira/browse/ROOT-7660 in ROOT 5 by checking the output log
@@ -61,7 +61,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        test_id: [102, 121, 122]
+        test_id: [121, 122]
         compiler: [gcc485, gcc11]
     env:
       STARENV: root5-${{ matrix.compiler }}
@@ -73,7 +73,7 @@ jobs:
           path: /tmp
 
       - run: docker load --input /tmp/star-sw-${{ env.STARENV }}.tar
-      - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:latest
+      - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:v5
       - run: |
              TEST_FILE=$(echo "$(docker run --rm ghcr.io/star-bnl/star-sw-${{ env.STARENV }} tests/executest.py ${{ matrix.test_id }} -a fullpath)" | sed -E 's/\.(daq|fzd)$/.event.root/')
              TEST_CMD="root4star -b -q -l 'StRoot/macros/analysis/doEvents.C(100, \"$TEST_FILE\")'"
@@ -97,7 +97,7 @@ jobs:
           path: /tmp
 
       - run: docker load --input /tmp/star-sw-${{ env.STARENV }}.tar
-      - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:latest
+      - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:v5
       - run: |
              TEST_FILE=$(echo "$(docker run --rm ghcr.io/star-bnl/star-sw-${{ env.STARENV }} tests/executest.py ${{ matrix.test_id }} -a fullpath)" | sed -E 's/\.(daq|fzd)$/.event.root/')
              TEST_CMD="root4star -b -q -l 'StRoot/macros/analysis/find_vertex.C(\"$TEST_FILE\")'"
@@ -120,7 +120,7 @@ jobs:
           path: /tmp
 
       - run: docker load --input /tmp/star-sw-${{ env.STARENV }}.tar
-      - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:latest
+      - run: docker run --name star-test-data --volume /star ghcr.io/star-bnl/star-test-data:v5
       - run: |
              TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-${{ env.STARENV }} tests/executest.py -c ${{ matrix.test_id }})
              docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
