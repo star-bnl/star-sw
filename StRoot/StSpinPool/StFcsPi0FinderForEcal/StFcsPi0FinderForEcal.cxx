@@ -247,10 +247,8 @@ Int_t StFcsPi0FinderForEcal::Make() {
       if(tpcvtx) {
 	zTPC=tpcvtx->position().z();
       }else{
-	if (StMuDst::numberOfPrimaryVertices() > 0){
-	  StMuPrimaryVertex* mutpcvtx=StMuDst::primaryVertex();
-	  if(mutpcvtx) zTPC=mutpcvtx->position().z();
-	}
+	StMuPrimaryVertex* mutpcvtx=StMuDst::primaryVertex();
+	if(mutpcvtx) zTPC=mutpcvtx->position().z();
       }
 
       //BBC ZVERTEX
