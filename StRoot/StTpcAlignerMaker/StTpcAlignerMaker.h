@@ -29,7 +29,6 @@
 #include "TNamed.h"
 #include "THelixTrack.h"
 #include "TGeoMatrix.h"
-class StTpcHit;
 //________________________________________________________________________________
 class HelixPar_t : public TObject {
  public:
@@ -56,15 +55,6 @@ class HelixPar_t : public TObject {
   ClassDef(HelixPar_t,1)
 };
 ostream&  operator<<(ostream& os, const HelixPar_t v);
-//________________________________________________________________________________
-class Hit_t : public TObject {
- public:
-  Int_t    row;
-  Double_t x, y, z;
-  Double_t err2xy, err2z;
-  StTpcHit *hit;
-  ClassDef(Hit_t,1); 
-};
 //________________________________________________________________________________
 class StTpcInOutMatch : public TObject {
 public:
@@ -142,7 +132,7 @@ class StTpcAlignerMaker : public StMaker {
   virtual       ~StTpcAlignerMaker() {}
   virtual Int_t Init();
   virtual Int_t Make();
-  static  TRMatrix &GetSti2R(Double_t nx, Double_t ny, Double_t nz);
+  static  TRMatrix GetSti2R(Double_t nx, Double_t ny, Double_t nz);
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $ $Id: StTpcAlignerMaker.h,v 1.7 2014/09/10 13:54:58 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
