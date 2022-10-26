@@ -250,7 +250,7 @@ static int nCall =0; nCall++;
     static Int_t iwarn = 0;
     if (iwarn <= 13 && mTimesUsed > mMaxTimes) {
       iwarn++; 
-      LOG_ERROR << "StiHit::addTimesUsed : mTimesUsed = " << mTimesUsed << " > mMaxTimes " << mMaxTimes <<endm;
+      LOG_ERROR << "StiHit::addTimesUsed : mTimesUsed = " << (UInt_t) mTimesUsed << " > mMaxTimes " << mMaxTimes <<endm;
     }
 }
 //_____________________________________________________________________________
