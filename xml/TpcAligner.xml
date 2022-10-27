@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="50" fileListSyntax="paths" copyInputLocally="false">
-<!-- <job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false"> -->
+<!-- <job maxFilesPerProcess="50" fileListSyntax="paths" copyInputLocally="false"> -->
+<job maxFilesPerProcess="1" filesPerHour="1" fileListSyntax="paths" copyInputLocally="false">
 	<command>
          cd ${SUBMITTINGDIRECTORY}
   setenv STARFPE NO
@@ -8,6 +8,7 @@
 #  setup 64b
 #  starver TFG20j
 #  ln -s ${SUBMITTINGDIRECTORY}/StarDb .
+#  setup debug
   foreach  evtsFile(`cat $FILELIST`) 
 #  set evtsFile = $INPUTFILE0;
   echo "${evtsFile}"
