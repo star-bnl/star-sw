@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[])
 {
-	char *fname = "/RTS/conf/tpx/tpx_gains.txt" ;	// default
+        const char *fname = "/RTS/conf/tpx/tpx_gains.txt" ;	// default
 	int ret ;
 
 	if(argc==2) {	// override default if provided
