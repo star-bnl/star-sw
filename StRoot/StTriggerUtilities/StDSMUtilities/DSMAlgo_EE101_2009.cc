@@ -131,4 +131,9 @@ void DSMAlgo_EE101_2009::operator()(DSM& dsm)
   dsm.info[0] = jpa;
   dsm.info[1] = jpb;
   dsm.info[2] = jpc;
+  
+  //low partial eta sum
+  dsm.info[3] = lowEtaSumA; //4 o'clock
+  dsm.info[4] = lowEtaSumB; //6 o'clock
+  dsm.info[5] = lowEtaSumC; //8 o'clock
 }
