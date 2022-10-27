@@ -1,27 +1,5 @@
 /*
   root.exe SecRow3C*.root FitPDraw.C+
-   
-            draw               ext nx xMin xMax                          cut      opt yMin yMax  side            var
-  SecRow3
-  FitPDraw("mu:rowsigned(y,x)","P", 0,   0,  0, "(i&&j&&abs(mu)<1)/(dmu**2)", "profg", -1,  1, "All", "sector*side")
-  Z3	      
-   FitPDraw("mu:TMath::Sign(y,x)","I", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)<40.5)", "prof", -0.4,  0.3, "All", "signed drift")
-   FitPDraw("mu:TMath::Sign(y,x)","O", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)>40.5)", "prof", -0.4,  0.3, "All", "signed drift ")
-
-   FitPDraw("mu:TMath::Sign(208.707-y,x)","ZI", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)<40.5)", "prof", -0.4,  0.3, "All", "Z")
-   FitPDraw("mu:TMath::Sign(208.707-y,x)","ZO", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)>40.5)", "prof", -0.4,  0.3, "All", "Z")
-   
-  PressureGF
- FitPDraw("mu:y","IP", 0,   0,  0, "(i&&j&&abs(mu)<1&&abs(x)<40.5)", "prof", -0.4,  0.3, "All", "log(Pressure)")
-  
-root.exe neP*.root
-FitPDraw("mu:x","MuG", 70,   3,  10, "(i&&j&&dmu<0.01&&dsigma<0.01)/dmu**2", "profg", 0.6, 1.0, "", "log(nP)")
-FitPDraw("sigma:x","SigG", 70,   3,  10, "(i&&j&&dmu<0.01&&dsigma<0.01)/dsigma**2", "profg", 0, 0.6, "", "log(nP)")
-FitPDraw("a0:x","alphaG", 70,   3,  10, "(i&&j&&dmu<0.01&&dsigma<0.01)/da0**2", "profg", -5, 5, "", "log(nP)")
-
-FitPDraw("mu:x","Mu", 70,   3,  10, "i&&j&&dmu<0.01&&dsigma<0.01", "prof", 0.6, 1.0, "", "log(nP)")
-FitPDraw("sigma:x","Sig", 70,   3,  10, "(i&&j&&dmu<0.01&&dsigma<0.01)", "prof", 0, 0.6, "", "log(nP)")
-FitPDraw("a0:x","alpha", 70,   3,  10, "(i&&j&&dmu<0.01&&dsigma<0.01)", "prof", -5, 5, "", "log(nP)")
 */
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
@@ -192,23 +170,6 @@ Int_t SetFileList() {
   //  F = new TFile*[NF]; 
   memset(F, 0, NF*sizeof(TFile*));
   TFile *f = 0;  
-#if 0
-  for (Int_t k = 0; k < N; k++) {
-    TIter  iter(fs);
-    while ((f = (TFile *) iter())) {
-      TNtuple *FitP = (TNtuple *) f->Get("FitP");
-      if (! FitP) continue;
-      TString name(gSystem->BaseName(f->GetName()));
-      name.ReplaceAll(".root","");
-      if (k == 0 && ! name.Contains(Names[k])) continue;
-      if (k != 0 && ! name.EndsWith(Names[k])) continue;
-      F[k] = f;
-      cout << NF << "\tAdd " << F[k]->GetName() << endl;
-      NF++;
-      break;
-    }
-  }
-#else
   TIter  iter(fs);
   Int_t k = 0;
   while ((f = (TFile *) iter())) {
@@ -219,7 +180,6 @@ Int_t SetFileList() {
     k++;
   }
   if (NF != k) {cout << "NF = " << NF << " k = " << k << " mismatched" << endl;}
-#endif
   return NF;
 }
 //________________________________________________________________________________
@@ -241,11 +201,6 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
   TCanvas *c1 = (TCanvas*)gROOT->GetListOfCanvases()->FindObject("c1");
   if (! c1)  c1 = new TCanvas("c1","c1",1400,1200);
   else       c1->Clear();
-#if 0
-  TCanvas *c2 = (TCanvas*)gROOT->GetListOfCanvases()->FindObject("c2");
-  if (! c2)  c2 = new TCanvas("c2","c2");
-  else       c2->Clear();
-#endif
   Int_t NF = SetFileList();  
   if (! NF) return;
   TString Current(gDirectory->GetName());
@@ -271,45 +226,10 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
     TString same(opt);
     if (k != 0) same += "same";
     TString Draw(draw);
-#if 0
-    if (Draw.Contains("muS")) {
-      TH1 *mu = (TH1 *) gDirectory->Get("mu");
-      if (mu) {
-	Draw.ReplaceAll("muS",Form("mu-%f",mu->GetBinContent(0)));
-      }
-    }
-#endif
     TString histN(ext); histN += k;
     TString Drawh(Draw);
     Drawh += " >> "; Drawh += histN;
     TProfile *p = new TProfile(histN,title,nx, xMin, xMax, yMin, yMax);
-#if 0    
-    if (xMin == 0 && xMax == 0) {
-      TH2 *mu = (TH2 *) gDirectory->Get("mu");
-      if (mu) {
-	TString DirName(gSystem->BaseName(gDirectory->GetName()));
-	if (DirName.Contains("Z3")) {
-	  //      Drawh += Form("(%i,%f,%f)",mu->GetYaxis()->GetNbins(), mu->GetYaxis()->GetXmin(), mu->GetYaxis()->GetXmax());
-	  p = new TProfile(histN,"#mu versus pad row",2*mu->GetYaxis()->GetNbins()+1, -mu->GetYaxis()->GetXmax(), mu->GetYaxis()->GetXmax());
-	} else if (DirName.Contains("xyPad3")) {
-	  //      Drawh += Form("(%i,%f,%f)",mu->GetYaxis()->GetNbins(), mu->GetYaxis()->GetXmin(), mu->GetYaxis()->GetXmax());
-	  p = new TProfile(histN,"#mu versus sector phi  ", nx, xMin, xMax);
-	} else if (DirName.Contains("Pressure")) {
-	  p = new TProfile(histN,"#mu versus log(P)",mu->GetYaxis()->GetNbins(), mu->GetYaxis()->GetXmin(), mu->GetYaxis()->GetXmax());
-	} else if (DirName.Contains("neP")) {
-	  p = new TProfile(histN,"#mu versus log(nP)",mu->GetXaxis()->GetNbins(), mu->GetXaxis()->GetXmin(), mu->GetXaxis()->GetXmax());
-	} else if (DirName.Contains("neN")) {
-	  p = new TProfile(histN,"#mu versus log(nP)",mu->GetXaxis()->GetNbins(), mu->GetXaxis()->GetXmin(), mu->GetXaxis()->GetXmax());
-	} else if (DirName.Contains("SecRow3")) {
-	  p = new TProfile(histN,"#mu versus signed pad row",2*mu->GetYaxis()->GetNbins()+1, -mu->GetYaxis()->GetXmax(), mu->GetYaxis()->GetXmax());
-	} else if (DirName.Contains("GEX")) {
-	  p = new TProfile(histN,"#mu versus Log(n_{P})",mu->GetXaxis()->GetNbins()+1, mu->GetXaxis()->GetXmin(), mu->GetXaxis()->GetXmax());
-	}
-      }
-    } else {
-      p = new TProfile(histN,Drawh,nx, xMin, xMax);
-    }
-#endif
     if (p) {
       p->SetMarkerColor(icol);
       p->SetLineColor(icol);
@@ -319,9 +239,6 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
 #if 1
     cout << Form("%2i %-52s\t", k, F[k]->GetName()); //  << endl;
     cout << "FitP->Draw(\"" << Drawh << "\",\"" << cut << "\",\"" << same << "\")" << "\t"; //  endl;
-#endif
-#if 0
-    c2->cd();
 #endif
     FitP->Draw("mu>>muH",cut,"goff");
     TH1 *muH = (TH1 *) gDirectory->Get("muH");
@@ -342,21 +259,17 @@ void MuDraw(const Char_t *draw="mu:rowsigned(y,x)",
       name.ReplaceAll("SecRow3+SecRow3P","");
       name.ReplaceAll("SecRow3C","");
       name.ReplaceAll("SecRow3","");
-#endif
-#if 0
       name.ReplaceAll("Z3C+Z3PC","");
       name.ReplaceAll("Z3+Z3P","cor");
       name.ReplaceAll("Z3C","");
-#endif
       name.ReplaceAll("Z3","");
-#if 0
       name.ReplaceAll("xyPad3C+xyPad3PC","cor");
       name.ReplaceAll("xyPad3+xyPad3P","");
       name.ReplaceAll("xyPad3C","");
-#endif
       name.ReplaceAll("xyPad3","");
       name.ReplaceAll("_y3","");
       name.ReplaceAll("G4E","");
+#endif
       leg->AddEntry(hist,Form("%s%s %s",dir.Data(), name.Data(),side));
       hist->SetTitle(Form("%s : %s",hist->GetTitle(), side));
       hist->SetXTitle(var);
@@ -405,11 +318,6 @@ void DrawHist(const Char_t *dir="TPoints70BG",
     icol = k + 1;
     Int_t kM = 20;
     if (icol == 3) kM = 24;
-#if 0
-    if      (icol == 1) kM = 20;
-    else if (icol == 5) kM = 20;
-    else if (icol >  7) kM = 27;
-#endif
     hist->SetMarkerStyle(kM);
     hist->SetMarkerColor(icol);
     hist->SetLineColor(icol);
@@ -533,8 +441,13 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
       MuDraw("mu:y","PI", nx, xMin, xMax, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "All", "log(P)", "#mu versus log(P)");
     }
   } else if (Name.BeginsWith("neP"))      {
-    //      MuDraw("mu:x","PI", nx, xMin, xMax, "(i&&j&&dmu>0&&dmu<0.01&&dsigma<0.01&&dp3<0.5&&chisq<2e2)", "prof", -0.5,  1.5, "All", "neP");
-    MuDraw("mu:x","PI", 70,   3.0,  10.0, "(i&&j&&mu>0&&dmu>0&&dmu<0.01)", "prof", 0.6,  1.2, "All", "neP","#mu versus log(nP)");
+    if (plot == "sigma") {
+      MuDraw("sigma:x","S", 35,   3.0,  10.0, "(i&&j&&mu>0&&dmu>0&&dmu<0.01)", "prof", 0.0,  0.6, "All", "neP","#sigma versus log(nP)");
+    }  else if (plot == "alpha") {
+      MuDraw("p3:x","A", 35,   3.0,  10.0, "(i&&j&&mu>0&&dmu>0&&dmu<0.01)", "prof", -3.0,  4.0, "All", "neP","#sigma versus log(nP)");
+    } else {
+      MuDraw("mu:x","M", 35,   3.0,  10.0, "(i&&j&&mu>0&&dmu>0&&dmu<0.01)", "prof", 0.6,  1.2, "All", "neP","#mu versus log(nP)");
+    }
   } else if (Name.BeginsWith("neN"))      {
     MuDraw("mu:x","PI", nx, xMin, xMax, "(i&&j&&dmu<0.1&&dsigma<0.04&&dp3<1&&mu<1&&p3>0)", "prof", 0.5,  1.0, "All", "neN","#mu versus log(nP)");
   } else if (Name.Contains("GEX"))      {

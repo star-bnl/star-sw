@@ -338,7 +338,8 @@ void dNdxCorrections() {
     f->cd();
     const Char_t *IO[3] = {"","I","O"};
     for (Int_t io = 1; io < 3; io++) {
-      TH2F *dNdxVsBgC = (TH2F *) f->Get(Form("dNdxVsBgC%s",IO[io]));
+      //      TH2F *dNdxVsBgC = (TH2F *) f->Get(Form("dNdxVsBgC%s",IO[io]));
+      TH2F *dNdxVsBgC = (TH2F *) f->Get(Form("dNdxVsBgCC%s",IO[io]));
       part[i] = 0;
       if (! dNdxVsBgC) continue;
       TString partName(gSystem->DirName(f->GetName()));
@@ -447,7 +448,7 @@ void dNdxCorrections() {
       part[i]->SetMarkerStyle(Marker);
       hist->Draw("same");
       c2D->Update();
-      if (Ask()) break;
+      if (Ask()) goto BREAK;
       TCanvas *c = new TCanvas("c"+partName,"c"+partName);
       part[i]->Draw();
       TF1 *sat = StdEdxModel::Saturation();
@@ -480,11 +481,12 @@ void dNdxCorrections() {
       out  << Line << endl;
       i++;
       c->Update();
-      if (Ask()) break;
+      if (Ask()) goto BREAK;
     }
   }
+ BREAK:
   TCanvas *c1 = new TCanvas("c1","Summary");
-  TH1F *frame = c1->DrawFrame(-1,-0.2,5,0.0);
+  TH1F *frame = c1->DrawFrame(-1,-0.1,5,0.1);
   frame->SetTitle("log((nP/dX)/(dN/dx)) versus log_{10}(#beta #gamma) at the first hit");
   frame->SetXTitle(" log_{10}(#beta #gamma)");
   TLegend *l = new TLegend(0.2,0.4,0.5,0.8);
@@ -531,163 +533,6 @@ void dXdS() {
     }
   }
 }
-#if 0
-//________________________________________________________________________________
-void dPCorrections() {
-  TSeqCollection *files = gROOT->GetListOfFiles();
-  if (! files) return;
-  TString Out = "dPLCorrections.data";
-  ofstream out;
-  if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
-  else                              out.open(Out, ios::app);
-  TDatime t;
-  out  << "// " << gSystem->WorkingDirectory() << "\t" << t.AsString()  << endl;
-  Int_t nn = files->GetSize();
-  if (! nn) return;
-  TFile **FitFiles = new TFile *[nn];
-  TH1D **part = new TH1D*[nn];
-  TIter next(files);
-  TFile *f = 0;
-  Int_t i = 0;
-  TFile *fOut = new TFile("dPLCorrections.root","recreate");
-  TObjArray *arr = new TObjArray(4);
-  while ( (f = (TFile *) next()) ) { 
-    f->cd();
-    TH2F *dNdxVsBgC = (TH2F *) f->Get("dNdxVsBgC");
-    part[i] = 0;
-    if (! dNdxVsBgC) continue;
-    TString partName(gSystem->DirName(f->GetName()));
-    if (dNdxVsBgC->GetEntries() <10) {
-      cout << dNdxVsBgC->GetName() << " for " << partName.Data() << " is empty" << endl;
-      continue;
-    }
-    TH1D *projX = dNdxVsBgC->ProjectionX();
-    Int_t kx1 = projX->FindFirstBinAbove(100);
-    Int_t kx2 = projX->FindLastBinAbove(100);
-    if (kx1 >= kx2) continue;
-    //    dNdxVsBgC->FitSlicesY(0, kx1, kx2, 0, "QNRg3s", arr);
-    dNdxVsBgC->FitSlicesY(0, kx1, kx2, 0, "QNRg5s", arr);
-    TH1D *hist = (TH1D *) (*arr)[1];
-    TCanvas *c2D = new TCanvas(partName+"2D",partName+"2D");
-    c2D->SetLogz(1);
-    dNdxVsBgC->Draw("colz");
-    Int_t color = i%6 + 1;
-    Int_t Marker = 20 + i/6;
-    hist->SetMarkerColor(color);
-    hist->SetMarkerStyle(Marker);
-    c2D->Update();
-    fOut->cd();
-    part[i] = new TH1D(*hist); part[i]->SetName(partName);
-    //    part[i]->Draw();
-    c2D->Update();
-    Int_t nx = part[i]->GetXaxis()->GetNbins();
-    Int_t k1 = nx;
-    Int_t k2 = 1;
-    Int_t nn = 0;
-    for (Int_t k = 1; k <= nx; k++) {
-      Double_t x = part[i]->GetBinCenter(k);
-      Double_t v = part[i]->GetBinContent(k); // - pol7->Eval(x);
-      Double_t e = part[i]->GetBinError(k);
-      if (e < 1e-6 || TMath::Abs(v) < 3*e) {//  || v > -0.055 | TMath::Abs(v+0.07) > 0.02) {
-	part[i]->SetBinContent(k, 0);
-	part[i]->SetBinError(k, 0);
-	continue;
-      }
-      k1 = TMath::Min(k, k1);
-      k2 = TMath::Max(k, k1);
-      nn++;
-    }
-    if (k1 < k2) {
-      dNdxVsBgC->GetXaxis()->SetRange(k1,k2);
-      part[i]->GetXaxis()->SetRange(k1,k2);
-    }
-    Double_t fMass = -1;
-    Int_t   fCharge = 0;
-    for (Int_t h = 0; h < NTpcRSParts; h++) {
-      if (TString(TpcRSPart[h].name).Contains(partName, TString::kIgnoreCase)) {
-	fMass = TpcRSPart[h].mass;
-	fCharge = TpcRSPart[h].charge;
-	break;
-      }
-    }
-    Int_t charge = fCharge;
-#if 0
-    if      (partName.Contains("alpha",TString::kIgnoreCase) || 
-	     partName.Contains("He",TString::kIgnoreCase)) charge = 2;
-    else if (partName.Contains("Li",TString::kIgnoreCase)) charge = 3;
-    else if (partName.Contains("Be",TString::kIgnoreCase)) charge = 4;
-    else if (partName.Contains("B",TString::kIgnoreCase)) charge = 5;
-    /*
-      alpha bgL10Min -1.4
-      deuteron       -1.5
-      electron        1.0
-      He3            -1.4
-      kaon           -1.2
-      muon           -0.8
-      proton         -1.4
-       triton        -1.6
-     */
-#endif
-#if 0
-    TF1 *lg = LdNdxL10bg(charge);
-    TAxis *xax = part[i]->GetXaxis();
-    for (Int_t k = kx2; k >= kx1; k--) {
-      Double_t xx = xax->GetBinCenter(k);
-      Double_t v = part[i]->GetBinContent(k);
-      Double_t f = lg->Eval(xx);
-      part[i]->SetBinContent(k, v - f);
-
-    }
-#endif
-    part[i]->SetMarkerColor(color);
-    part[i]->SetMarkerStyle(Marker);
-    hist->Draw("same");
-    c2D->Update();
-    if (Ask()) goto ENDL;
-    TCanvas *c = new TCanvas("c"+partName,"c"+partName);
-    part[i]->Draw();
-    TF1 *sat = StdEdxModel::Saturation();
-    sat->SetParameters(-0.07,     1.,    1.,     part[i]->GetMean(),  0.0, 0.0, 0.0);
-    sat->SetParLimits(2, -10, 10);
-    Double_t xmin = part[i]->GetXaxis()->GetBinLowEdge(k1);
-    Double_t xmax = part[i]->GetXaxis()->GetBinUpEdge(k2);
-    sat->SetParLimits(3, xmin, xmax);
-    sat->FixParameter(4, 0);
-    sat->FixParameter(5, 0);
-    sat->FixParameter(6, 0);
-    part[i]->Fit(sat);
-    TString Line;
-#if 1
-    sat->ReleaseParameter(4);
-    part[i]->Fit(sat);
-    Line = TF1Print(sat, 0, 0, partName);
-    cout << Line << endl;
-    out  << Line << endl;
-    sat->ReleaseParameter(5);
-    part[i]->Fit(sat);
-    Line = TF1Print(sat, partName);
-    cout << Line << endl;
-    out  << Line << endl;
-    sat->ReleaseParameter(6);
-#endif
-    part[i]->Fit(sat);
-    Line = TF1Print(sat, io,  partName);
-    cout << Line << endl;
-    out  << Line << endl;
-    i++;
-    c->Update();
-    if (Ask()) goto ENDL;
-  }
- ENDL:
-  TCanvas *c1 = new TCanvas("c1","Summary");
-  TH1F *frame = c1->DrawFrame(-1,-0.2,5,0.0);
-  TLegend *l = new TLegend(0.2,0.4,0.5,0.8);
-  for (Int_t j = 0; j < i; j++) {part[j]->SetStats(0); part[j]->Draw("same"); l->AddEntry(part[j], part[j]->GetName());}
-  l->Draw();
-  fOut->Write();
-  out.close();
-}
-#endif
 //________________________________________________________________________________
 void dNdxFunc() {
   dNdxCorrections();

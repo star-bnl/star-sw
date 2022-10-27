@@ -38,7 +38,7 @@ class StTpcAlignerMaker;
 #endif
 //#define OLDdEdx
 //________________________________________________________________________________
-void TpcAligner(Int_t nevents=1e8,
+void TpcAligner(Int_t First, Int_t Last, 
 		const char *MainFile="*.event.root", 
 		//		const char *MainFile="st_physics_19168025_raw_1500001.event.root", 
 		//"st_laser_adc_19169021_raw_3500001.event.root",
@@ -80,17 +80,20 @@ void TpcAligner(Int_t nevents=1e8,
     rFile.ReplaceAll(",","_");
 #if 0
     rFile += "_";
-    rFile += nevents;
+    rFile += First;
+    rFile += "_";
+    rFile += Last;
 #endif
     rFile.Strip();
     rFile += "Aligner.root";
   }
   bfc(-1,Chain.Data(),MainFile,0,rFile.Data());
-  if (nevents < 0) return;
+  if (Last < First) return;
   //  StTpcAlignerMaker *aligner = (StTpcAlignerMaker *) chain->Maker("TpcAligner");
   //  aligner->SetMode(2); // take out misalignment
   //  aligner->SetDebug(12);
-  if (nevents >= 0)   chain->Init();
+  //  if (First >= Last)  
+  chain->Init();
 //   StIOMaker *inMk = (StIOMaker *) chain->GetMaker("inputStream");
 //   if (inMk) {
 //     inMk->SetIOMode("r");
@@ -99,5 +102,17 @@ void TpcAligner(Int_t nevents=1e8,
 //     inMk->SetBranch("runcoBranch",0,"0");	//deactivate all branches
 //     inMk->SetBranch("dstBranch",0,"r");
 //   }
-  chain->EventLoop(nevents);
+  chain->EventLoop(First,Last);
+}
+//________________________________________________________________________________
+void TpcAligner(Int_t nevents=1e8,
+		const char *MainFile="*.event.root", 
+		//		const char *MainFile="st_physics_19168025_raw_1500001.event.root", 
+		//"st_laser_adc_19169021_raw_3500001.event.root",
+		// "/star/data45/reco/productionMinBias/FullField/P04ij/2004/030/st_physics_5030012_raw_4010010.event.root",
+		//	  "/star/data08/reco/dAuMinBias/FullField/P03ih/2003/040/st_physics_4040004_raw_0010010.event.root",
+		//		const char* rootFile="TpcAlignerFullFieldOldHelix.root")
+		const char *Tag = "", // "y2018,CorrX",
+		const Char_t *output = 0) {
+  TpcAligner(1, nevents, MainFile, Tag, output);
 }

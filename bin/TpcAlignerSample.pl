@@ -4,6 +4,7 @@ use Cwd;
 my $pwd = cwd(); #print "pwd = $pwd\n";
 my $FIELD = "";
 my $year  = "";
+my $debug = 0;
 if    ($pwd =~ /2019/) {$year = "2019";}
 elsif ($pwd =~ /2020/) {$year = "2020";}
 elsif ($pwd =~ /2021/) {$year = "2021";}
@@ -16,7 +17,8 @@ if (! $FIELD) {die "Field is not defined";}
 #my $glob = "/hlt/cephfs/reco/2019/" . $FIELD . "/*.event.root"; #print "glob = $glob\n";
 #my $glob = "/net/l401/data/scratch1/reco/2019/" . $FIELD . "/*.event.root"; #print "glob = $glob\n";
 #my $glob = "/hlt/cephfs/reco/" . $year . "/.DEV2/" . $FIELD . "/Cosmic/*.event.root"; #print "glob = $glob\n";
-my $glob = "/hlt/cephfs/reco/" . $year . "/" . $FIELD . "/Cosmic/*/*/*.event.root"; #print "glob = $glob\n";
+#my $glob = "/hlt/cephfs/reco/" . $year . "/" . $FIELD . "/Cosmic/*/*/*.event.root"; print "glob = $glob\n" if ($debug);
+my $glob = "/hlt/cephfs/reco/" . $year . "/Cosmic/" . $FIELD . "/*/*/*.event.root"; print "glob = $glob\n" if ($debug);
 my @Files = glob $glob; #print "Files = @Files\n";
 my $n = 0;
 foreach my $file (@Files) {

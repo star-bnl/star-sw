@@ -1,4 +1,5 @@
 void lBichsel() {
+#if defined(__CINT__) && ! defined(__MAKECINT__)
   if (gClassTable->GetID("StBichsel") < 0) {
     //    gSystem->Load("libTable");
     gSystem->Load("St_base");
@@ -18,4 +19,7 @@ void lBichsel() {
       cout << endl;
    }
   }
+#else
+  cout << "Please don't run it withc AClick" << endl;
+#endif
 }

@@ -3509,6 +3509,37 @@ TF1 *FitGG3(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   return g;
 }
 //________________________________________________________________________________
+TF1 *FitGG5(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Int_t IO=1) {
+  if (! proj) return 0;
+  Double_t params[9];
+  TF1 *g = GG();
+  // 10/26/22
+  Double_t xx = fitX;
+  Double_t parsA[2] = {    5.9122,   -0.63601}; //alpha
+  Double_t alpha  = 0;
+  if (xx < 8.0) alpha = parsA[0] + xx * parsA[1];
+  Double_t parsS[4] = {    1.2538,   -0.27805,   0.017227, -0.00012342}; //Sigma
+  Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * (parsS[2] + xx * parsS[3]));
+#if 0
+  Double_t parsM[3] = {  0.014451,    0.21908,  -0.013445}; //Mu
+  xx = TMath::Max(4.9, TMath::Min(9.0, xx));
+  Double_t mu     = parsM[0] + xx * ( parsM[1] + xx * parsM[2]);
+  g->SetParameter(1, mu);
+#else
+  Double_t parsM[2][3] = {
+    {   0.61239,   0.036834,          0}, //mu Inner
+    {   0.10942,    0.19366,  -0.011761}  //mu Outer
+  };
+  xx = TMath::Max(4.9, TMath::Min(9.0, xx));
+  Double_t mu     = parsM[IO][0] + xx * ( parsM[IO][1] + xx * parsM[IO][2]);
+  g->FixParameter(1, mu);
+#endif
+  g->FixParameter(2, sigma);
+  g->FixParameter(3, alpha);
+  proj->Fit(g,opt);
+  return g;
+}
+//________________________________________________________________________________
 TF1 *FitGG4(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG4")'
   //  root.exe AdcSparseD4.root lBichsel.C 'dEdxFit.C+("nePI+nePO","GG4","R",-1,-1,2)'
@@ -5093,6 +5124,11 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       else if (TString(FitName) == "GG2") g = FitGG2(proj,opt, Fit.x, Fit.y);
       else if (TString(FitName) == "GG3") g = FitGG3(proj,opt, Fit.x, Fit.y);
       else if (TString(FitName) == "GG4") g = FitGG4(proj,opt, Fit.x, Fit.y);
+      else if (TString(FitName) == "GG5") {
+	Int_t IO = 1;
+	if (HName.BeginsWith("I") || HName.EndsWith("I"))   IO = 0;
+	g = FitGG5(proj,opt, Fit.x, IO);
+      }
       else if (TString(FitName) == "Freq") g = FitFreq(proj,opt,zmin,zmax);
       else if (TString(FitName) == "GF") g = FitGF(proj,opt);
       else if (TString(FitName) == "G4F") g = FitG4F(proj,opt);

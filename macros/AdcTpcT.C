@@ -6,6 +6,10 @@
   end
  */
 void AdcTpcT(const Char_t *files="*.root", const Char_t *Out = "") {
+#if defined(__CINT__) && ! defined(__MAKECINT__)
   gROOT->LoadMacro("TpcT.C+");
   TpcTAdc(files,Out);
+#else
+  cout << "Please don't run it withc AClick" << endl;
+#endif
 }
