@@ -425,19 +425,7 @@ Int_t StFstRawHitMaker::Make()
 
                     for( rawHitIter = rawHitVec.begin(); rawHitIter != rawHitVec.end(); ++rawHitIter ){
                         StFstRawHit* rawHit = *rawHitIter;
-
-                        StFstRawHit* newRawHit = new StFstRawHit();
-                        newRawHit->setChannelId( rawHit->getChannelId() );
-                        newRawHit->setGeoId( rawHit->getGeoId() );
-                        newRawHit->setSeedhitflag( rawHit->getSeedhitflag() );
-                        for(int itb=0; itb<kFstNumTimeBins; itb++){
-                            newRawHit->setCharge( rawHit->getCharge(itb), itb );
-                            newRawHit->setChargeErr( rawHit->getChargeErr(itb), itb );
-                        }
-                        newRawHit->setMaxTimeBin( (int)rawHit->getMaxTimeBin() );
-                        newRawHit->setDefaultTimeBin( (int)rawHit->getDefaultTimeBin() );
-                        newRawHit->setIdTruth( rawHit->getIdTruth() );
-
+                        StFstRawHit* newRawHit = new StFstRawHit( rawHit );
                         mFstEvtCollection->addRawHit(newRawHit);
                     }
                 }

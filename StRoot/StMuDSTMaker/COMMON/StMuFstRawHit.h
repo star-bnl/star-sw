@@ -39,7 +39,7 @@ public:
     unsigned char     getApv()        const; //!< 0-15
     unsigned char     getSensor()     const; //!< 0-2
     unsigned char     getChannel()    const; //!< 0-127
-    static unsigned char  getDefaultTimeBin();
+    unsigned char     getDefaultTimeBin();
     unsigned short    getIdTruth()    const; //!< for embedding, 0 as background
 
     //modifiers
@@ -48,9 +48,9 @@ public:
     void setSeedhitflag(int rSeedhitflag);
     void setCharge(float charge, int tb = -1);
     void setChargeErr(float chargeErr, int tb = -1);
-    void        setMaxTimeBin(int tb) ;
-    static void setDefaultTimeBin( int tb );
-    void        setIdTruth(unsigned short idTruth);
+    void setMaxTimeBin(int tb) ;
+    void setDefaultTimeBin( int tb );
+    void setIdTruth(unsigned short idTruth);
 
     void print(int nTimeBins) ;
 
@@ -67,7 +67,7 @@ private:
     UChar_t     mMaxTimeBin;                ///< the max ADC time bin index of the raw hit
     UShort_t    mIdTruth;                   ///< for embedding, 0 as background
 
-    static UChar_t mDefaultTimeBin;
+    UChar_t     mDefaultTimeBin;
 
     ClassDef(StMuFstRawHit, 1)
 };
