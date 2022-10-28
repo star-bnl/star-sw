@@ -5,11 +5,12 @@
      root.exe -q -b 'AdcTpcT.C("../../'${p}'*0.root","'${p}'Adc.root")' >& ${p}.log &
   end
  */
+#include "Riostream.h"
 void AdcTpcT(const Char_t *files="*.root", const Char_t *Out = "") {
 #if defined(__CINT__) && ! defined(__MAKECINT__)
   gROOT->LoadMacro("TpcT.C+");
   TpcTAdc(files,Out);
 #else
-  cout << "Please don't run it withc AClick" << endl;
+  cout << "Please don't run it with AClick" << endl;
 #endif
 }

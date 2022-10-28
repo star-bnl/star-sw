@@ -20,6 +20,6 @@ void lBichsel() {
    }
   }
 #else
-  cout << "Please don't run it withc AClick" << endl;
+  cout << "Please don't run it with AClick" << endl;
 #endif
 }

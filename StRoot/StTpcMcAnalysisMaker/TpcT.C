@@ -1097,7 +1097,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD6.root
     output = file1;
     output.ReplaceAll(".root",".ADCut12.root");
 #else
-    output = "ADCut31.root";
+    output = "ADCut32.root";
 #endif
   }
   cout << "Output for " << output << endl;
@@ -1379,24 +1379,15 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD6.root
 	}
       }
     }
-    if (fNoRcHit != 1) continue;
     if (fNoMcHit != 1) continue;
-    if (fRcHit_mFlag[0]) continue;
-    if (! fRcHit_mFitFlag[0]) continue;
     //    if (fNoMcHit != 1 && fNoMcHit != 3) continue;
-    if (fRcHit_mAdc[0] <= 0) continue;
     if (fMcHit_mnP[0] <= 0) continue;
     if (fMcHit_mne[0] <= 0) continue;
     for (Int_t k = 0; k < fNoMcHit; k++) {
-      if (fMcHit_mKey[k] != fRcHit_mIdTruth[k]) continue;
       if (fMcHit_mKey[k] > 100) continue; // secondaries   Only for TpcRS_Part
-      if (fRcHit_mQuality[k] < 95) continue;
-      if (fRcHit_mIdTruth[k] > 100) continue; // secondaries
       if (fMcHit_mdE[k] <= 1e-6 || fMcHit_mdE[k] > 1e-3) continue;
       if (fMcHit_mAdc[k] <= 0) continue;
-      if (fRcHit_mAdc[k] <= 0) continue;
-      if (fRcHit_mCharge[k] <= 0) continue;
-      if (fRcHit_mdX[0] <= 0) continue;
+
       Int_t sector = (fMcHit_mVolumeId[k]/100)%100;
       Int_t row    =  fMcHit_mVolumeId[k]%100;
       Int_t io = 0;
@@ -1412,26 +1403,38 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD6.root
       if (fMcHit_mLength[k] < 55.0) continue;
       dPL->Fill(TMath::Log10(fpIn), TMath::Log(fMcpIn/TMath::Abs(fCharge)/fpIn));
       Double_t nP = fMcHit_mnP[k];
-      Double_t dX = (io == 1) ? fRcHit_mdX[0]*2.00/1.95 : fRcHit_mdX[0]*1.60/1.55*1.005;
-      Double_t nPdNdx = fMcHit_mdNdx[0]*dX;
       Double_t ne = fMcHit_mne[k];
       neP[io]->Fill(TMath::Log(nP),TMath::Log(ne/nP));
-      neN[io]->Fill(TMath::Log(nPdNdx),TMath::Log(ne/nPdNdx));
       if (ne > nP) lneP[io]->Fill(TMath::Log(nP),TMath::Log(TMath::Log(ne/nP)));
+      Adcne[io]->Fill(TMath::Log(ne),TMath::Log(fMcHit_mAdc[k]/ne));
+      Double_t r0 =  fMcHit_mAdc0[k]/fMcHit_mAdc[k];
+      Double_t r1 =  fMcHit_mAdc1[k]/fMcHit_mAdc[k];
+      r1ADC[io]->Fill(r1);
+      Double_t r2 =  fMcHit_mAdc2[k]/fMcHit_mAdc[k];
+      TVector3 pxyzL(fMcHit_mLocalMomentum_mX1[k],fMcHit_mLocalMomentum_mX2[k],fMcHit_mLocalMomentum_mX3[k]);
+      Double_t TanL = pxyzL.z()/pxyzL.Perp();
+      // RC block
+      if (fNoRcHit != 1) continue;
+      if (fRcHit_mFlag[0]) continue;
+      if (fRcHit_mAdc[0] <= 0) continue;
+      if (! fRcHit_mFitFlag[0]) continue;
       Double_t ratio = fMcHit_mAdc[k]/fRcHit_mAdc[0];
       if (ratio < 0.1 || ratio > 10) continue;
-      Adcne[io]->Fill(TMath::Log(ne),TMath::Log(fMcHit_mAdc[k]/ne));
+      if (fMcHit_mKey[k] != fRcHit_mIdTruth[k]) continue;
+      if (fRcHit_mQuality[k] < 95) continue;
+      if (fRcHit_mIdTruth[k] > 100) continue; // secondaries
+      if (fRcHit_mAdc[k] <= 0) continue;
+      if (fRcHit_mCharge[k] <= 0) continue;
+      if (fRcHit_mdX[0] <= 0) continue;
+      Double_t dX = (io == 1) ? fRcHit_mdX[0]*2.00/1.95 : fRcHit_mdX[0]*1.60/1.55*1.005;
+      Double_t nPdNdx = fMcHit_mdNdx[0]*dX;
       if (fCharge && fMcHit_mnP[0] > 0) {
-#if 0
-	TVector3 locmom(fMcHit_mLocalMomentum_mX1[0],fMcHit_mLocalMomentum_mX2[0],fMcHit_mLocalMomentum_mX3[0]);
-	Double_t lmom = locmom.Mag();
-#else
 	Double_t lmom = fMcpIn;
-#endif
 	if (fMass > 0) {
 	  Double_t bgRC = TMath::Abs(fCharge)*fpIn/fMass;
 	  Double_t bgMC = fMcpIn/fMass;
 	  Double_t bgL10 = TMath::Log10(bgRC);
+	  neN[io]->Fill(TMath::Log(nPdNdx),TMath::Log(ne/nPdNdx));
 	  dNdxVsBg->Fill(bgL10, TMath::Log(fMcHit_mnP[0]/nPdNdx));
 	  if (bgL10 < fL10bgMin) continue;
 	  dNdxVsBgC[0]->Fill(bgL10, TMath::Log(fMcHit_mnP[0]/nPdNdx));
@@ -1451,12 +1454,6 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "AdcSparseD6.root
 	  dNNp[io+1]->Fill(TMath::Log(nPdNdx), TMath::Log(fMcHit_mnP[0]/nPdNdx));
 	}
       }
-      Double_t r0 =  fMcHit_mAdc0[k]/fMcHit_mAdc[k];
-      Double_t r1 =  fMcHit_mAdc1[k]/fMcHit_mAdc[k];
-      r1ADC[io]->Fill(r1);
-      Double_t r2 =  fMcHit_mAdc2[k]/fMcHit_mAdc[k];
-      TVector3 pxyzL(fMcHit_mLocalMomentum_mX1[k],fMcHit_mLocalMomentum_mX2[k],fMcHit_mLocalMomentum_mX3[k]);
-      Double_t TanL = pxyzL.z()/pxyzL.Perp();
       Double_t y[kVar] = { fMcHit_mPosition_mX3[k], TanL, TMath::Log(dX),
 			   (Double_t) fRcHit_mMinpad[0]+fRcHit_mMaxpad[0]+1,
 			   (Double_t) fRcHit_mMintmbk[0]+fRcHit_mMaxtmbk[0]+1,

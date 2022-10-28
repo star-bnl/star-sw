@@ -446,7 +446,15 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
     }  else if (plot == "alpha") {
       MuDraw("p3:x","A", 35,   3.0,  10.0, "(i&&j&&mu>0&&dmu>0&&dmu<0.01)", "prof", -3.0,  4.0, "All", "neP","#sigma versus log(nP)");
     } else {
-      MuDraw("mu:x","M", 35,   3.0,  10.0, "(i&&j&&mu>0&&dmu>0&&dmu<0.01)", "prof", 0.6,  1.2, "All", "neP","#mu versus log(nP)");
+      MuDraw("mu:x","M", 35,   3.0,  10.0, "(i&&j&&mu>0&&dmu>0&&dmu<0.01)", "prof", 0.0,  1.0, "All", "neP","#mu versus log(nP)");
+    }
+  } else if (Name.BeginsWith("Adcne"))      {
+    if (plot == "sigma") {
+      MuDraw("sigma:x","S", 35,   3.0,  10.0, "(i&&j&&mu>0&&dmu>0&&dmu<0.01)", "prof", 0.0,  0.6, "All", "neP","#sigma versus log(nP)");
+    }  else if (plot == "alpha") {
+      MuDraw("p3:x","A", 35,   3.0,  10.0, "(i&&j&&mu>0&&dmu>0&&dmu<0.01)", "prof", -3.0,  4.0, "All", "neP","#sigma versus log(nP)");
+    } else {
+      MuDraw("mu:x","M", 35,   3.0,  10.0, "(i&&j&&mu>0&&dmu>0&&dmu<0.01)", "prof", 0.0,  1.0, "All", "neP","#mu versus log(nP)");
     }
   } else if (Name.BeginsWith("neN"))      {
     MuDraw("mu:x","PI", nx, xMin, xMax, "(i&&j&&dmu<0.1&&dsigma<0.04&&dp3<1&&mu<1&&p3>0)", "prof", 0.5,  1.0, "All", "neN","#mu versus log(nP)");

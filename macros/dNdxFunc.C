@@ -24,11 +24,13 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
 }
 //________________________________________________________________________________
 TF1 *ZMPB(Double_t log2dx = 1) {
-  TF1 *f = 0;
+  TString fName(Form("B%i",(int)(2*(log2dx+2))));
+  TF1 *f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
   if (! f) {
-    f = new TF1(Form("B%i",(int)log2dx+2),bichselZ,-1,4,1);
+    f = new TF1(Form(fName,(int)(2*log2dx+2)),bichselZ,-1,4,1);
     f->SetParName(0,"log2dx");
     f->SetParameter(0,log2dx);
+    cout << "Create ZMPB with name " << f->GetName() << " for log2dx = " << log2dx << endl;
   }
   return f;
 }
@@ -37,12 +39,12 @@ void dNdxFunctions(Int_t col = 0) {
   if (!m_Bichsel) m_Bichsel = Bichsel::Instance();
   TCanvas *c1 = new TCanvas("c1","c1");
   TLegend *l = new TLegend(0.4,0.6,0.8,0.9);
-  TH1F *frame = c1->DrawFrame(-2.5,0.5,5,9);
+  TH1F *frame = c1->DrawFrame(-2.5,0.5,5,6);
   frame->SetTitle("The most probable log(dE/dx[keV/cm]) versu log_{10}(#beta #gamma)");
   frame->SetXTitle("log_{10}(#beta #gamma)");
   //  for (Int_t color = 1; color < 8; color++) {
   Int_t col1 = 1;
-  Int_t col2 = 3;
+  Int_t col2 = 5;
   if (col > 0) {col1 = col2 = col;}
   for (Int_t color = col1; color <= col2; color++) {
     Double_t log2dx = TMath::Log2(1.5 + 0.5*(color - 1));
@@ -535,9 +537,9 @@ void dXdS() {
 }
 //________________________________________________________________________________
 void dNdxFunc() {
-  dNdxCorrections();
+  //  dNdxCorrections();
   //dXdS();
-  //dNdxFunctions();
+  dNdxFunctions();
 }
 /*--------------------------------------------------------------------------------
 c1->Divide(2,2)

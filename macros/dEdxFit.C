@@ -3458,6 +3458,7 @@ TF1 *FitGG2(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   Double_t params[9];
   TF1 *g = GG();
 #if 0
+#if 0
   Double_t xx = TMath::Max(3.1, TMath::Min(6.5, fitX));
   Double_t sigma =        1.10043e+00   + xx * (-2.14927e-01   + xx * 9.77528e-03);
 #else /* 09/14/2022  all->Draw("sigma:log(x)","i&&j&&dmu<0.01&&dsigma<0.01&&dp3<0.5&&chisq<2e2","prof") */
@@ -3469,6 +3470,11 @@ TF1 *FitGG2(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
 #endif
   Double_t sigma = pars[0] + xx * ( pars[1] + xx * pars[2]);
 #endif 
+#else /* 10/27/22 */
+  Double_t parsS[3] = {    1.6924,    -1.2912,    0.24698}; //sigma versus log(x)	 
+  Double_t xx = (fitX > 0) ? TMath::Log(fitX) : 0;
+  Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
+#endif
   g->FixParameter(2, sigma);
   proj->Fit(g,opt);
   return g;
@@ -3483,6 +3489,7 @@ TF1 *FitGG3(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *g = GG();
+#if 0
 #if 0
   Double_t xx = TMath::Max(3.1, TMath::Min(6.5, fitX));
   Double_t sigma =        1.10043e+00   + xx * (-2.14927e-01   + xx * 9.77528e-03);
@@ -3502,6 +3509,13 @@ TF1 *FitGG3(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   Double_t parsA[4] = {   -55.709,     106.35,    -62.082,     11.565}; // log(x)
   Double_t alpha  = parsA[0] + xx * ( parsA[1] + xx * (parsA[2] + xx * parsA[3]));
 #endif
+#endif
+#else /* 10/27/22 */
+  Double_t parsS[3] = {    1.6924,    -1.2912,    0.24698}; //sigma versus log(x)	 
+  Double_t xx = (fitX > 0) ? TMath::Log(fitX) : 0;
+  Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
+  Double_t parsA[2] = {    5.4634,   -0.57598}; //alpha x
+  Double_t alpha  = parsA[0] + fitX *  parsA[1];
 #endif
   g->FixParameter(2, sigma);
   g->FixParameter(3, alpha);
@@ -3550,6 +3564,7 @@ TF1 *FitGG4(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   Double_t params[9];
   TF1 *g = GG();
 #if 0
+#if 0
   Double_t xx = TMath::Max(3.1, TMath::Min(6.5, fitX));
   Double_t sigma =        1.10043e+00   + xx * (-2.14927e-01   + xx * 9.77528e-03);
   g->FixParameter(2, sigma);
@@ -3569,6 +3584,29 @@ TF1 *FitGG4(TH1 *proj, Option_t *opt="RQ", Double_t fitX=0, Double_t fitY=0) {
   Double_t alpha  = parsA[0] + xx * ( parsA[1] + xx * (parsA[2] + xx * parsA[3]));
   Double_t parsM[6] = {    78.047,    -199.11,     203.54,    -103.58,     26.358,    -2.6949}; //log(x)
   Double_t mu     = parsM[0] + xx * ( parsM[1] + xx * (parsM[2] + xx * (parsM[3] + xx * (parsM[4] + xx * parsM[5]))));
+  g->FixParameter(1, mu);
+  g->FixParameter(2, sigma);
+  g->FixParameter(3, alpha);
+#endif
+#else /* 10/27/22 */
+  Double_t parsA[2] = {    5.4634,   -0.57598}; //alpha x
+  Double_t alpha  = parsA[0] + fitX *  parsA[1];
+  Double_t parsS[3] = {    1.6924,    -1.2912,    0.24698}; //sigma versus log(x)	 
+  Double_t xx = (fitX > 0) ? TMath::Log(fitX) : 0;
+  Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
+#if 0
+  Double_t parsM[4] = {   -1.9767,     3.0618,    -1.4888,   0.093299}; //mu log(x) ex1 : [0]+[1]*(1.0-TMath::Exp([2]*(x-[3])))
+  if (xx > 2.0) xx = 2.0;
+  Double_t mu = parsM[0]+parsM[1]*(1.0-TMath::Exp(parsM[2]*(xx-parsM[3])));
+#else
+  TF1 *pol7 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol7");
+  if (! pol7) {
+    TF1::InitStandardFunctions();
+    pol7 = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol7");
+  }
+  Double_t parsM[8] = {   -4.3432,     4.6327,    -1.9522,     0.4691,  -0.066615,  0.0055111, -0.00024531, 4.5394e-06}; //mu pol7
+  Double_t mu = pol7->EvalPar(&fitX, parsM);
+#endif
   g->FixParameter(1, mu);
   g->FixParameter(2, sigma);
   g->FixParameter(3, alpha);
