@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <ctime>
 
 static unsigned short log8to10_table[256] = {
     0,    1,    2,    3,    4,    5,    6,    7,

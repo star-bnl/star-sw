@@ -8,9 +8,9 @@
  *
  ***************************************************************************
  **************************************************************************/
+#include <ctime>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <assert.h>
 #include "TUnixTime.h"
 #include "TDatime.h"
