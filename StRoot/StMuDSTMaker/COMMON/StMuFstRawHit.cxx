@@ -11,14 +11,11 @@
 #include "StMuFstRawHit.h"
 #include "St_base/StMessMgr.h"
 #include "StEvent/StEnumerations.h"
-#include "StEvent/StFstRawHit.h"
+#include "StRoot/StFstUtil/StFstRawHit.h"
 
 ClassImp(StMuFstRawHit)
 
-StMuFstRawHit::StMuFstRawHit() :  TObject()
-{ 
-    mDefaultTimeBin = kFstDefaultTimeBin;
-}
+StMuFstRawHit::StMuFstRawHit() :  TObject() { /* no op */ }
 
 StMuFstRawHit::~StMuFstRawHit() { /* no op */ }
 
@@ -133,16 +130,18 @@ void StMuFstRawHit::setMaxTimeBin(int tb)
 
 void StMuFstRawHit::print(int nTimeBins)
 {
-    LOG_DEBUG << " elecId=" << getChannelId() << " Charge=(" ;
+    cout << " elecId=" << getChannelId() << " Charge=(" ;
     for(int i=0; i<nTimeBins; i++)
-        LOG_DEBUG << getCharge(i) << " " ;
-    LOG_DEBUG << ") ChargeErr=(" ;
+        cout << getCharge(i) << " " ;
+    cout << ") ChargeErr=(" ;
 
     for(int i=0; i<nTimeBins; i++)
-        LOG_DEBUG << getChargeErr(i) << " " ;
-    LOG_DEBUG << ") decode0: at disk=" << (short) getDisk() << " wedge=" << (short) getWedge() << " sensor=" << (short) getSensor()
-        << " rstrip=" << (short) getRStrip() << " phistrip=" << (short) getPhiStrip() << endm;
+        cout << getChargeErr(i) << " " ;
+    cout << ") decode0: at disk=" << (short) getDisk() << " wedge=" << (short) getWedge() << " sensor=" << (short) getSensor()
+        << " rstrip=" << (short) getRStrip() << " phistrip=" << (short) getPhiStrip() << endl;
 }
+
+unsigned char StMuFstRawHit::mDefaultTimeBin = 2;
 
 void StMuFstRawHit::set( StFstRawHit *hit ){
 

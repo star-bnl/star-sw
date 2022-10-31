@@ -22,7 +22,7 @@ public:
       const Container &charges, const Container &chargeErrs = Container{},
       UChar_t maxTimeBin = 1, UShort_t idTruth = 0);
 
-   StFstRawHit(const StFstRawHit *rawHit);
+   StFstRawHit(const StFstRawHit &rawHit);
 
    //accessors
    int               getChannelId()  const; //!< 0-36863

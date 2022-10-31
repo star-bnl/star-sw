@@ -425,7 +425,7 @@ Int_t StFstRawHitMaker::Make()
 
                     for( rawHitIter = rawHitVec.begin(); rawHitIter != rawHitVec.end(); ++rawHitIter ){
                         StFstRawHit* rawHit = *rawHitIter;
-                        StFstRawHit* newRawHit = new StFstRawHit( rawHit );
+                        StFstRawHit* newRawHit = new StFstRawHit( *rawHit );
                         mFstEvtCollection->addRawHit(newRawHit);
                     }
                 }

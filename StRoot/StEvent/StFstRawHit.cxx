@@ -33,18 +33,18 @@ StFstRawHit::StFstRawHit(int channelId, int geoId,
    std::copy(std::begin(chargeErrs), std::end(chargeErrs), mChargeErr);
 }
 
-StFstRawHit::StFstRawHit(const StFstRawHit *rawHit)
+StFstRawHit::StFstRawHit(const StFstRawHit &rawHit)
 {
-    mChannelId = rawHit->getChannelId();
-    mGeoId = rawHit->getGeoId();
-    mSeedhitflag = rawHit->getSeedhitflag();
+    mChannelId = rawHit.getChannelId();
+    mGeoId = rawHit.getGeoId();
+    mSeedhitflag = rawHit.getSeedhitflag();
     for(int itb=0; itb<kFstNumTimeBins; itb++){
-        mCharge[itb] = rawHit->getCharge(itb);
-        mChargeErr[itb] = rawHit->getChargeErr(itb);
+        mCharge[itb] = rawHit.getCharge(itb);
+        mChargeErr[itb] = rawHit.getChargeErr(itb);
     }
-    mMaxTimeBin = (int)rawHit->getMaxTimeBin();
-    mIdTruth = (int)rawHit->getDefaultTimeBin();
-    mDefaultTimeBin = rawHit->getIdTruth();
+    mMaxTimeBin = (int)rawHit.getMaxTimeBin();
+    mIdTruth = (int)rawHit.getDefaultTimeBin();
+    mDefaultTimeBin = rawHit.getIdTruth();
 }
 
 int StFstRawHit::getChannelId() const              { return mChannelId;      };
