@@ -125,6 +125,8 @@ if ($pkg eq "RTS") {
   else {
     $CPPFLAGS .= ' -D_LARGEFILE64_SOURCE';
   }
+    # Turn off compiler warnings for StRoot/RTS
+    $CXXFLAGS .= " -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-unused-value -Wno-unused-label -Wno-unused-function -Wno-write-strings -Wno-ignored-qualifiers -Wno-empty-body -Wno-maybe-uninitialized";
     $CPPFLAGS .= ' -DNEW_DAQ_READER -DRTS_PROJECT_STAR -DTPXREADER '
 	      .  '-DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
     $CPPFLAGS =~ s/-D__ROOT__//;# print " ------------  CPPFLAGS ==== " .  $CPPFLAGS . "\n";
