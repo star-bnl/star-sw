@@ -1115,7 +1115,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 	char s_found[128] ;
 	daq_dta *dd ;
 
-	const char *d_name = 0 ;
+	char *d_name = 0 ;
 
 
 	switch(which) {

@@ -66,7 +66,7 @@ l3CoordinateTransformer::~l3CoordinateTransformer()
 
 #include "mapbin.h"
 
-int l3CoordinateTransformer::LoadTPCLookupTable(const char *)
+int l3CoordinateTransformer::LoadTPCLookupTable(char *)
 {
   //     if (TPCmap) free(TPCmap);
   //     TPCmap = NULL;
