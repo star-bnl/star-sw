@@ -14,32 +14,19 @@
 using namespace std;
 ClassImp(StdEdxModel)
 StdEdxModel  *StdEdxModel::fgStdEdxModel = 0;
-TH1D         *StdEdxModel::mdNdx = 0;  
-Double_t      StdEdxModel::fScale = 1; //TMath::Exp(9.12015e-02); // Bichsel
 Int_t         StdEdxModel::_debug   = 1;
-TF1          *StdEdxModel::fGGaus = 0;
-TF1          *StdEdxModel::fGausExp = 0;
-Double_t      StdEdxModel::fTmaxL10eV = 5; // Tcut = 100 keV
-Double_t      StdEdxModel::shift2keV = 0;
-Double_t      StdEdxModel::shift2GeV = 0;
-Double_t      StdEdxModel::shift2eV = 0;
-Double_t StdEdxModel::GeVperElectron               = 43.5e-9;  //39.41e-9;  // 24.95e-9; // deposited energy per conducting electron 
-Double_t StdEdxModel::LogGeVperElectron = TMath::Log(43.5e-9); //39.41e-9); // TMath::Log(24.95e-9);
-TF1 *StdEdxModel::fpol2F = 0;
-TF1 *StdEdxModel::fpol5F = 0;
-TF1 *StdEdxModel::fpol6F = 0;
-TF1 *StdEdxModel::fpol7F = 0;
-StdEdxModel::EParameterizationType StdEdxModel::fParametrization = StdEdxModel::kNewBG;
 //________________________________________________________________________________
 StdEdxModel* StdEdxModel::instance() {
-  if (! fgStdEdxModel) {
-    new StdEdxModel();
-    InitPar();
-  }
+  if (! fgStdEdxModel) new StdEdxModel();
   return fgStdEdxModel;
 }
 //________________________________________________________________________________
-StdEdxModel::StdEdxModel() {
+StdEdxModel::StdEdxModel() : mdNdx(0), fScale(1)
+			   , fTmaxL10eV(5) // Tcut = 100 keV
+			   , fGGaus(0), fGausExp(0)
+			   , fpol2F(0), fpol5F(0), fpol6F(0), fpol7F(0)
+			   , fLogkeVperElectron(0)
+{
   //  LOG_INFO << "StdEdxModel:: use StTpcRSMaker model for dE/dx calculations" << endm;
   cout << "StdEdxModel:: use StTpcRSMaker model for dE/dx calculations" << endl;
   if (! fgStdEdxModel) {
@@ -68,9 +55,15 @@ StdEdxModel::StdEdxModel() {
   fGausExp->SetParNames("NormL","mu","sigma","k","l");
   fGausExp->SetParameters(0,0,0.3,5.,0);
   fGausExp->FixParameter(4,0.0);
-  shift2eV  = Bichsel::Instance()->MostProbableZShift() - 7.26742600141722234e-02;
-  shift2keV = TMath::Log(1e-3) + shift2eV;
-  shift2GeV = TMath::Log(1e-9) + shift2eV;
+  InitPar();
+  // Set normalization point the same as for I70 (increase energy per conduction electron from 20 eB to 52 eV)
+  Double_t dEdxMIPLog = TMath::Log(2.62463815285237434); //TMath::Log(2.39761562607903311); // [keV/cm] for dX = 2 cm
+  Double_t MIPBetaGamma10 = TMath::Log10(4.);
+  //                  log2dx, charge
+  Double_t pars[3] = {   1.0,    1.0};
+  Double_t dEdxLog = zMP(&MIPBetaGamma10, pars);
+  fLogkeVperElectron = dEdxMIPLog - dEdxLog;
+  cout << "StdEdxModel:: set scale = " << Form("%5.1f",1e3*keVperElectron()) << " eV/electron" << endl;
 }
 //________________________________________________________________________________
 StdEdxModel::~StdEdxModel() {
@@ -268,39 +261,34 @@ Double_t StdEdxModel::gausexp(Double_t *x, Double_t *p) {
 void StdEdxModel::Parameters(Double_t Np, Double_t *parameters, Double_t *derivatives) {
   parameters[0] = parameters[1] = parameters[2] = 0;
   if (Np <= 1.0) return;
-  Double_t &mu    = *&parameters[0];
-  Double_t &sigma = *&parameters[1];
-  Double_t &k     = *&parameters[2];
-  if (fParametrization == kOld) {
-    // Most Probable log (ne/Np) versus log of Np
-    static Double_t parsMu1[7]  = {    3.0767,  -0.054267,   -0.69433,    0.71462,    0.12861,   -0.29135,   0.072728};
-    static Double_t parsMu2[7]  = {   0.33622,     3.2863,    -1.3061,    0.27857,  -0.032664,  0.0019922, -4.944e-05};
-    static Double_t pars6Sig[7] = {   0.82995,   0.033141,   -0.36552,   -0.18875,     0.2694,  -0.073444,  0.0038834}; // log(log(fitX))
-    static Double_t parsk[7]    = {    -8.959,     13.454,    -6.6549,     1.6064,   -0.20527,     0.0133, -0.00034269};
-    if (! fpol5F || ! fpol6F) InitPar();
-    Double_t fitX = TMath::Log(Np);
-    if (fitX < 0.5) fitX = 0.5;
-    Double_t X = TMath::Log(fitX);
-    if (fitX < 2) mu = fpol6F->EvalPar(&fitX, parsMu1);
-    else          mu = fpol6F->EvalPar(&fitX, parsMu2);
-    sigma = fpol6F->EvalPar(&X, pars6Sig);
-    k = 6.70823e-01;
-    if (fitX > 2) {
-      k = fpol6F->EvalPar(&fitX, parsk);
-    }
-  } else { // new version based on 100 keV Tcut
-    Double_t x = TMath::Log(Np);
-    mu    = muPar(x);
-    sigma = sigmaPar(x);
-    k     = a0Par(x);
+  for (Int_t l = 0; l < 3; l++) {
+    parameters[l] = Parameter(Np, l);
   }
-  return;
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::Parameter(Double_t Np, Int_t l) {
-  Double_t params[3];
-  Parameters(Np, params);
-  return params[l];
+  static Double_t parsA[2] = {    5.4634,   -0.57598}; //alpha x
+  static Double_t parsS[3] = {    1.6924,    -1.2912,    0.24698}; //sigma versus log(x)	 
+  static Double_t parsM[8] = {   -4.3432,     4.6327,    -1.9522,     0.4691,  -0.066615,  0.0055111, -0.00024531, 4.5394e-06}; //mu pol7
+  Double_t x = TMath::Log(Np);
+  if (l == 2) {
+    Double_t alpha  = parsA[0] + x *  parsA[1];
+    return alpha;
+  } else if (l == 1) {
+    Double_t xx = (x > 0) ? TMath::Log(x) : 0;
+    Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
+    return sigma;
+  } else if (l == 0) {
+    Double_t mu = fpol7F->EvalPar(&x, parsM);
+    return mu;
+  } else {
+    assert(0);
+    return 0;
+  }
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::MukeV(Double_t Np) {
+  return Parameter(Np, 0) + fLogkeVperElectron + TMath::Log(Np);
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::Prob(Double_t /* log(nE/Np) */ ee, Double_t Np) {
@@ -311,164 +299,38 @@ Double_t StdEdxModel::Prob(Double_t /* log(nE/Np) */ ee, Double_t Np) {
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::ProbdEGeVlog(Double_t dEGeVLog, Double_t Np) {
-  Double_t params[3] = {0};
-  Parameters(Np, &params[1]);
-  Double_t ee = dEGeVLog - shift2GeV - TMath::Log(Np);
-  Double_t V = gausexp(&ee, params);
-  return V;
+  Double_t ee = Logne(dEGeVLog) - TMath::Log(Np);
+  return Prob(ee, Np);
 }
 //________________________________________________________________________________
-Double_t StdEdxModel::zMPold(Double_t *x, Double_t *p) {
-  
-  SetParametrization(kOld);
+Double_t StdEdxModel::zMP(Double_t *x, Double_t *p) { // log(keV/cm)
   Double_t log10bg = x[0];
-  Double_t pOverM  = TMath::Power(10., log10bg);
+  Double_t pOverMRC  = TMath::Power(10., log10bg);
   Double_t log2dx  = p[0];
   Double_t charge  = p[1];
   Double_t dx      = TMath::Power( 2., log2dx);
-  Double_t dNdx = StdEdxModel::instance()->dNdx(pOverM, charge);
+  Double_t dNdx = StdEdxModel::instance()->dNdxEff(pOverMRC, charge); // */dNdxVsBgC*.root [-1.5,5]
   Double_t Np = dNdx*dx;
-  Double_t dEkeVLog = StdEdxModel::instance()->LogdEMPVkeV(Np); 
-  Double_t dEdxLog  = dEkeVLog - TMath::Log(dx);
-  return   dEdxLog;
-}
-//________________________________________________________________________________
-TF1 *StdEdxModel::ZMPold(Double_t log2dx) {
-  TString fName(Form("N%iold",(int)(2*(log2dx+2))));
-  TF1 *f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
-  if (! f) {
-    f = new TF1(fName,zMPold,-2,5,2);
-    f->SetParName(0,"log2dx");
-    f->SetLineStyle(2);
-    f->SetParameter(0,log2dx);
-    f->SetParameter(1, 1.0); // charge
-  }
-  return f;
-}
-//________________________________________________________________________________
-Double_t StdEdxModel::zMP(Double_t *x, Double_t *p) {
-  SetParametrization(kNew);  
-  Double_t log10bg = x[0];
-  Double_t pOverM  = TMath::Power(10., log10bg);
-  Double_t log2dx  = p[0];
-  Double_t charge  = p[1];
-  Double_t dx      = TMath::Power( 2., log2dx);
-  Double_t dNdx = StdEdxModel::instance()->dNdx(pOverM, charge); 
-  Double_t Np = dNdx*dx;
-  Double_t dEkeVLog = StdEdxModel::instance()->LogdEMPVkeV(Np); 
+  //  Double_t NpLog = TMath::Log(Np);
+  //  Double_t mu    = instance()->Parameter(Np, 0);
+  //  Double_t sigma = instance()->Parameter(Np, 1);
+  //  Double_t alpha = instance()->Parameter(Np, 2);
+  //  Double_t dEkeVLog = NpLog + mu -3.13746587897608142e+00 +1.78334647296254700e-01;// + 7.02725079814016507e+00;// - 3.13746587897608142e+00;// 43.4 eV/conducting electron 
+  Double_t dEkeVLog = instance()->MukeV(Np); // Parameter(Np, 0); 
   Double_t dEdxLog  = dEkeVLog - TMath::Log(dx);
   return   dEdxLog;
 }
 //________________________________________________________________________________
 TF1 *StdEdxModel::ZMP(Double_t log2dx) {
-  TString fName(Form("N%i",(int)(2*(log2dx+2))));
-  TF1 *f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
-  if (! f) {
-    f = new TF1(fName,zMP,-2,5,2);
-    f->SetParName(0,"log2dx");
-    f->SetLineStyle(3);
-    f->SetParameter(0,log2dx);
-    f->SetParameter(1, 1.0); // charge
-  }
-  return f;
-}
-#if 0
-//________________________________________________________________________________
-Double_t StdEdxModel::zMPnew(Double_t *x, Double_t *p) {  // 09/27/2022
-  SetParametrization(kNew);  
-  Double_t log10bg = x[0];
-  Double_t pOverMRC  = TMath::Power(10., log10bg);
-  Double_t log2dx  = p[0];
-  Double_t charge  = p[1];
-  Double_t dx      = TMath::Power( 2., log2dx);
-  Double_t dNdx = StdEdxModel::instance()->dNdxEff(pOverMRC, charge); // */dNdxVsBgC*.root [-1.5,5]
-  Double_t Np = dNdx*dx;
-  /* 09/26/2022 */
-  Double_t NpLog = TMath::Log(Np);
-  Double_t NpLogX = TMath::Max(3.2, NpLog);
-  //  Double_t NpLogX = TMath::Max(2.3, NpLog);
-  Double_t xx = TMath::Log(NpLogX);
-  Double_t parsS[3] = {    2.1392,    -1.7129,    0.34465}; // log(x)
-  Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
-  Double_t parsA[4] = {   -55.709,     106.35,    -62.082,     11.565}; // log(x)
-  Double_t alpha  = parsA[0] + xx * ( parsA[1] + xx * (parsA[2] + xx * parsA[3]));
-  Double_t parsM[6] = {    78.047,    -199.11,     203.54,    -103.58,     26.358,    -2.6949}; //log(x)
-  Double_t mu     = parsM[0] + xx * ( parsM[1] + xx * (parsM[2] + xx * (parsM[3] + xx * (parsM[4] + xx * parsM[5]))));
-  mu = TMath::Min(1.08, mu);
-  Double_t dEkeVLog = NpLog + mu -3.13746587897608142e+00;// + 7.02725079814016507e+00;// - 3.13746587897608142e+00;// 43.4 eV/conducting electron 
-  Double_t dEdxLog  = dEkeVLog - TMath::Log(dx);
-  return   dEdxLog;
-}
-#else /* 10/27/2022 */
-//________________________________________________________________________________
-Double_t StdEdxModel::zMPnew(Double_t *x, Double_t *p) {  
-  SetParametrization(kNew);  
-  Double_t log10bg = x[0];
-  Double_t pOverMRC  = TMath::Power(10., log10bg);
-  Double_t log2dx  = p[0];
-  Double_t charge  = p[1];
-  Double_t dx      = TMath::Power( 2., log2dx);
-  Double_t dNdx = StdEdxModel::instance()->dNdxEff(pOverMRC, charge); // */dNdxVsBgC*.root [-1.5,5]
-  Double_t Np = dNdx*dx;
-  Double_t NpLog = TMath::Log(Np);
-  Double_t fitX = NpLog;
-
-  Double_t parsA[2] = {    5.4634,   -0.57598}; //alpha x
-  Double_t alpha  = parsA[0] + fitX *  parsA[1];
-  Double_t parsS[3] = {    1.6924,    -1.2912,    0.24698}; //sigma versus log(x)	 
-  Double_t xx = (fitX > 0) ? TMath::Log(fitX) : 0;
-  Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
-  Double_t parsM[8] = {   -4.3432,     4.6327,    -1.9522,     0.4691,  -0.066615,  0.0055111, -0.00024531, 4.5394e-06}; //mu pol7
-  Double_t mu = fpol7F->EvalPar(&fitX, parsM);
-  Double_t dEkeVLog = NpLog + mu -3.13746587897608142e+00 +1.78334647296254700e-01;// + 7.02725079814016507e+00;// - 3.13746587897608142e+00;// 43.4 eV/conducting electron 
-  Double_t dEdxLog  = dEkeVLog - TMath::Log(dx);
-  return   dEdxLog;
-}
-#endif
-//________________________________________________________________________________
-TF1 *StdEdxModel::ZMPnew(Double_t log2dx) {
-  SetParametrization(kNewBG);  
   TString fName(Form("New%i",(int)(2*(log2dx+2))));
   TF1 *f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
   if (! f) {
-    f = new TF1(fName,zMPnew,-2,5,2);
+    f = new TF1(fName,zMP,-2,5,2);
     f->SetParName(0,"log2dx");
     f->SetLineStyle(4);
     f->SetParameter(0,log2dx);
     f->SetParameter(1, 1.0); // charge
     cout << "Create ZMPNew with name " << f->GetName() << " for log2dx = " << log2dx << endl;
-  }
-  return f;
-}
-//________________________________________________________________________________
-Double_t StdEdxModel::zMPR(Double_t *x, Double_t *p) {
-  SetParametrization(kNew);  
-  Double_t log10bg = x[0];
-  Double_t pOverM  = TMath::Power(10., log10bg);
-  Double_t log2dx  = p[0];
-  Double_t charge  = p[1];
-  Double_t dx      = TMath::Power( 2., log2dx);
-  Double_t dNdx = StdEdxModel::instance()->dNdx(pOverM, charge);
-  static Double_t alpha = 2e-3;
-  Double_t recom = (1. - alpha*dNdx)/(1. - alpha*30);
-  if (recom < 0.8) recom = 0.8;
-  Double_t dNdxR = dNdx*recom;
-  if (dNdxR <= 0.0) return 0;
-  Double_t Np = dNdxR*dx;
-  Double_t dEkeVLog = StdEdxModel::instance()->LogdEMPVkeV(Np); 
-  Double_t dEdxLog  = dEkeVLog - TMath::Log(dx);
-  return   dEdxLog;
-}
-//________________________________________________________________________________
-TF1 *StdEdxModel::ZMPR(Double_t log2dx) {
-  TString fName(Form("R%i",(int)(2*(log2dx+2))));
-  TF1 *f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
-  if (! f) {
-    f = new TF1(fName,zMPR,-2,5,2);
-    f->SetParName(0,"log2dx");
-    f->SetLineStyle(4);
-    f->SetParameter(0,log2dx);
-    f->SetParameter(1, 1.0); // charge
   }
   return f;
 }
@@ -485,37 +347,6 @@ void  StdEdxModel::InitPar() {
     fpol6F = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol6");
     fpol7F = (TF1 *) gROOT->GetListOfFunctions()->FindObject("pol7");
   }
-}
-//________________________________________________________________________________
-Double_t StdEdxModel::muPar(Double_t x, Double_t tCutL10) {
-  if (! fpol5F || !fpol2F) InitPar();
-  // tChain->Draw("mu:x>>muP(20,2.5,10.5)","i&&dmu<2e-2&&dsigma<2e-2&&da0<4&&x>2.5&&a0>0","prof")
-  //  muP->Fit("pol5")
-  //  Double_t pars[6] = {  -0.99981,     1.2513,   -0.38066,   0.059075, -0.0043761, 0.00012296}; // 100 keV
-  //  Double_t pars[6] = {   -1.1105,     1.2167,   -0.35485,     0.0527, -0.0037333, 0.00010016};
-  Double_t val = 3.27959195495368894e+00; // 26.56 eV
-  static Double_t parsTmax[3] = {  -0.53035,    0.52464,  -0.043713};
-  if (fTmaxL10eV < 5) val += (fpol2F->EvalPar(&fTmaxL10eV, parsTmax) - 1.0);
-  static Double_t pars[6] = {  -0.89898,      1.016,   -0.28193,   0.040223, -0.0027295, 6.9597e-05};
-  return val + fpol5F->EvalPar(&x, pars);
-}
-//________________________________________________________________________________
-Double_t StdEdxModel::sigmaPar(Double_t x, Double_t tCutL10) { 
-  if (! fpol5F) InitPar();
-  // tChain->Draw("sigma:x>>sigmaP(20,2.5,10.5)","i&&dmu<2e-2&&dsigma<2e-2&&da0<4&&a0>0","prof")
-  //  Double_t pars[6] = {    1.6935,   -0.56485,   0.059062, 0.00081105, -0.00046914, 1.9862e-05};
-  static Double_t pars[6] = {    1.9662,   -0.74794,    0.11477, -0.0082309, 0.00027025, -3.7396e-06};
-  return fpol5F->EvalPar(&x, pars);
-}
-//________________________________________________________________________________
-Double_t StdEdxModel::a0Par(Double_t x, Double_t tCutL10) {
-  if (! fpol5F) InitPar();
-  // tChain->Draw("a0:x>>a0P(20,2.5,10.5)","i&&dmu<2e-2&&dsigma<2e-2&&da0<4&&a0>0","prof")
-  //  Double_t pars[6] = {    5.6594,    -3.6107,     1.1259,   -0.18641,   0.015486, -0.0004892};
-  //  tChain->Draw("a0-a0Par(x):x>>a0PC(20,2.5,10.5)","i&&dmu<2e-2&&dsigma<2e-2&&da0<4&&a0>0","prof")
-  // FitP->Draw("a0:x>>a0P(20,2.5,10.5)","i&&dmu<2e-2&&dsigma<2e-2&&da0<4&&a0<4","prof")
-  static Double_t pars[6] = {    9.1532,    -6.0693,      1.783,   -0.26302,   0.018738, -0.00049388};
-  return fpol5F->EvalPar(&x, pars);
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::tmaxL10eV(Double_t bg) {
@@ -552,123 +383,6 @@ TF1 *StdEdxModel::Saturation(Int_t particle) {
   //                       "offset","slope","scale","shift","decay",decay2","decay3"
   Double_t params[1][7] = {{      0.,     1.,    1.,      0.,  0.0, 0.0, 0.0}}; 
   /*
-//    muon+ muon- pion+ pion- electron- electron+ kaon+ kaon- proton+ proton- deuteron triton He3 alpha  HE6 Li5 Li6 Li7 Be7 Be9 Be10 B11
-  Double_t pars[6] = { -0.069754,  0.0096439,     3.3618,    0.34362,   0.080825, 0.0}; //pion
-  Double_t pars[6] = { -0.070392,  0.0092189,     3.2517,    0.35073,   0.071063, 0.0}; //pion+
-  Double_t pars[6] = { -0.069003,   0.010194,      3.476,    0.33636,   0.093771, 0.0}; //pion-
-
-  Double_t pars[6] = { -0.070037,  0.0084161,     3.3316,    0.43196,   0.060741, 0.0}; //muon
-  Double_t pars[6] = { -0.070581,  0.0077046,     3.1618,    0.44949,   0.048593, 0.0}; //muon+
-  Double_t pars[6] = { -0.069342,  0.0093344,      3.473,     0.4168,   0.077696, 0.0}; //muon-
-  
-  Double_t pars[6] = { -0.077527,  0.0030426,     3.1981,      2.924,  -0.018933, 0.0}; //electron [1.5,5.0]
-  Double_t pars[6] = { -0.077226,  0.0031247,      2.812,     2.9768,  -0.016703, 0.0}; //electron+ [1.5,5.0]
-  Double_t pars[6] = { -0.076561,  0.0032965,     3.3269,     2.8795,  -0.015984, 0.0}; //electron- [1.5,5.0]
-
-  Double_t pars[6] = { -0.068983,  -0.010225,    -3.6599,    0.14705,    0.10115, 0.0}; //kaon
-  Double_t pars[6] = { -0.069257,   -0.01048,    -3.5196,     0.1541,    0.10816, 0.0}; //kaon+
-  Double_t pars[6] = { -0.068765, -0.0094219,     -4.006,    0.14183,   0.080608, 0.0}; //kaon-
-
-  Double_t pars[6] = { -0.069263,    0.01079,     3.2997,   0.098691,    0.11402, 0.0}; //proton
-  Double_t pars[6] = { -0.069434,   0.011068,     3.2247,    0.10424,    0.12358, 0.0}; //proton+
-  Double_t pars[6] = { -0.069086,   0.010355,     3.4201,   0.094182,    0.10077, 0.0}; //proton-
-
-  Double_t pars[6] = { -0.069804,  0.0063906,     4.9205,   0.092017,   0.019268, 0.0}; //deuteron
-  Double_t pars[6] = { -0.069985,  0.0049321,     5.7371,   0.088682,  -0.019409, 0.0}; //triton
-
-  Double_t pars[6] = {  -0.26751,    0.23006,    0.78369,    -1.5566,    0.61911, 0.0}; //He3
-  Double_t pars[6] = {  -0.12966,   0.085683,     1.0917,   -0.71112,    0.61608, 0.0}; //alpha
-  Double_t pars[6] = {  -0.14076,   0.093768,     1.1577,   -0.78164,    0.60239, 0.0}; //He6
-
-  Double_t pars[6] = { -0.056214,          0,          1,          0,          0,          0}; //Li5
-  Double_t pars[6] = { -0.072191,          0,          1,          0,          0,          0}; //Li6
-  Double_t pars[6] = { -0.073465,          0,          1,          0,   -0.02401,   -0.36052}; //Li7
-  Double_t pars[6] = { -0.069281,          0,          1,          0,          0,          0}; //Be7
-  Double_t pars[6] = { -0.068158,          0,          1,          0,          0,          0}; //Be9
-  Double_t pars[6] = { -0.068274,          0,          1,          0,          0,          0}; //Be10
-  Double_t pars[6] = { -0.067544,          0,          1,          0,          0,          0}; //B11
-
-
-// /hlt/cephfs/fisyak/dEdx202100keV	Tue Sep 20 17:53:18 2022
-  Double_t pars[7] = { -0.073601,    0.75141,    0.01337,   0.062348,   0.063945,          0,          0}; // alpha	chisq = 484.892639 / NDF = 21
-  Double_t pars[7] = { -0.073747,    0.59382,   0.010598,   0.076641,   0.013279, -0.0082442,          0}; // alpha	chisq = 480.020891 / NDF = 20
-  Double_t pars[7] = { -0.073136,     1.5345,   0.027354,   0.024053,    0.49131,    0.30569,    0.19983}; // alpha	chisq = 21.290233 / NDF = 19
-  Double_t pars[7] = { -0.079363,    0.88696,  -0.030323,    0.41884,   -0.44251,          0,          0}; // Be10	chisq = 69.678232 / NDF = 9
-  Double_t pars[7] = { -0.080956,     1.0472,  -0.035763,    0.34609,   -0.60403,    0.19983,          0}; // Be10	chisq = 61.518572 / NDF = 8
-  Double_t pars[7] = { -0.094642,     1.3531,  -0.044628,    0.44296,   -0.90129,    0.78034,   -0.97989}; // Be10	chisq = 22.730086 / NDF = 7
-  Double_t pars[7] = { -0.068737,      1.041,  -0.022125,  -0.049352,   -0.31066,          0,          0}; // Be7	chisq = 15.053611 / NDF = 9
-  Double_t pars[7] = { -0.068401,     1.3249,  -0.028126,  -0.039017,   -0.52284,    0.19577,          0}; // Be7	chisq = 11.074288 / NDF = 8
-  Double_t pars[7] = { -0.068082,     1.5828,  -0.033582,  -0.032613,   -0.74306,     0.5157,   -0.38286}; // Be7	chisq = 9.538102 / NDF = 7
-  Double_t pars[7] = { -0.062668,     1.0199,  -0.020292,   -0.30786,   -0.26803,          0,          0}; // Be9	chisq = 96.902501 / NDF = 7
-  Double_t pars[7] = { -0.059955,     1.4917,  -0.029628,   -0.20143,   -0.61779,    0.44373,          0}; // Be9	chisq = 66.734790 / NDF = 6
-  Double_t pars[7] = { -0.057759,     1.8793,  -0.037307,   -0.15765,   -0.93501,     1.1297,    -1.7592}; // Be9	chisq = 7.831630 / NDF = 5
-  Double_t pars[7] = { -0.071336,  -0.004178,    -4.6637,   0.075488,  0.0025174,          0,          0}; // deuteron	chisq = 2495.768345 / NDF = 42
-  Double_t pars[7] = { -0.071883, -0.0029722,    -6.0932,   0.047572,  -0.028641,   -0.02862,          0}; // deuteron	chisq = 2182.997226 / NDF = 41
-  Double_t pars[7] = { -0.071863, -0.0022604,    -7.4294,   0.057791,  -0.059625,  -0.025715,    0.03694}; // deuteron	chisq = 1957.552463 / NDF = 40
-  Double_t pars[7] = { -0.076162,  0.0028375,     3.8266,     2.8381,  -0.011619,          0,          0}; // electron-	chisq = 1077.707662 / NDF = 57
-  Double_t pars[7] = { -0.058508,  0.0035046,     2.9347,     2.7793,    0.16362,   -0.02408,          0}; // electron-	chisq = 823.242003 / NDF = 56
-  Double_t pars[7] = {   -0.0925,   0.012058,      1.963,     2.7701,   -0.42068,    0.19256,  -0.023926}; // electron-	chisq = 686.085038 / NDF = 55
-  Double_t pars[7] = { -0.081233,   0.042534,   0.063869,     1.7527,  -0.020328,          0,          0}; // electron	chisq = 10556.978217 / NDF = 59
-  Double_t pars[7] = { -0.020628,  0.0034742,     1.4362,     2.5744,     1.5498,   -0.19651,          0}; // electron	chisq = 2840.783492 / NDF = 58
-  Double_t pars[7] = { -0.034596,   0.002144,     2.7584,     2.7582,    0.89959,   -0.21835,   0.016411}; // electron	chisq = 2334.467584 / NDF = 57
-  Double_t pars[7] = { -0.078616,  0.0020549,     4.1571,     2.9287,  -0.020356,          0,          0}; // electron+	chisq = 1745.477073 / NDF = 59
-  Double_t pars[7] = { -0.054616,  0.0027916,     3.0399,     2.8348,    0.23179,  -0.035896,          0}; // electron+	chisq = 1090.069902 / NDF = 58
-  Double_t pars[7] = { -0.087318,  0.0096707,     2.0515,      2.827,   -0.37628,     0.1809,  -0.023231}; // electron+	chisq = 955.346917 / NDF = 57
-  Double_t pars[7] = { -0.074372,     0.1709,   0.070609,   0.013178,    0.09813,          0,          0}; // He3	chisq = 1795.781570 / NDF = 26
-  Double_t pars[7] = { -0.081081,   0.014953,    0.99332,   -0.47341,   0.093059,  -0.065326,          0}; // He3	chisq = 1036.039834 / NDF = 25
-  Double_t pars[7] = { -0.078447,  0.0051381,     2.8885,   -0.36878,   0.013826,   -0.13149,   0.057101}; // He3	chisq = 91.436056 / NDF = 24
-  Double_t pars[7] = { -0.074038,    0.71338,   0.015905,  -0.017015,   0.071685,          0,          0}; // HE6	chisq = 322.485188 / NDF = 21
-  Double_t pars[7] = {  -0.07399,    0.56099,   0.012562,  -0.020485,   0.013213,  -0.010264,          0}; // HE6	chisq = 317.488559 / NDF = 20
-  Double_t pars[7] = { -0.074361,      1.396,   0.031224,  -0.014293,    0.50475,    0.33328,    0.24132}; // HE6	chisq = 42.913616 / NDF = 19
-  Double_t pars[7] = { -0.069836,  -0.008358,    -3.8113,    0.11371,   0.088091,          0,          0}; // kaon-	chisq = 1003.343228 / NDF = 48
-  Double_t pars[7] = { -0.069453,  -0.007588,     -4.119,    0.13623,   0.065963,   0.018019,          0}; // kaon-	chisq = 778.855773 / NDF = 47
-  Double_t pars[7] = { -0.068673,  -0.013415,    -3.0211,    0.11656,    0.22962,   0.076787,  -0.088963}; // kaon-	chisq = 381.538322 / NDF = 46
-  Double_t pars[7] = { -0.070177, -0.0079598,    -3.8416,    0.12605,   0.079716,          0,          0}; // kaon	chisq = 1561.369639 / NDF = 49
-  Double_t pars[7] = { -0.069986, -0.0075879,    -3.9865,    0.13779,   0.068826,  0.0091704,          0}; // kaon	chisq = 1442.803731 / NDF = 48
-  Double_t pars[7] = { -0.069191,   -0.01394,     -2.894,    0.11541,    0.24216,   0.070801,  -0.092271}; // kaon	chisq = 617.202756 / NDF = 47
-  Double_t pars[7] = { -0.070509, -0.0077028,    -3.8248,    0.13737,   0.074229,          0,          0}; // kaon+	chisq = 665.545095 / NDF = 48
-  Double_t pars[7] = { -0.070475, -0.0076415,    -3.8474,    0.13949,   0.072397,  0.0016176,          0}; // kaon+	chisq = 663.688018 / NDF = 47
-  Double_t pars[7] = { -0.069695,  -0.014384,     -2.789,     0.1144,    0.25175,   0.064514,  -0.093955}; // kaon+	chisq = 277.972539 / NDF = 46
-  Double_t pars[7] = { -0.068107,     1.4558,  -0.031939,   -0.13614,   -0.67474,          0,          0}; // Li5	chisq = 1528.425350 / NDF = 7
-  Double_t pars[7] = { -0.075783,     1.0908,  -0.059209,    0.02118,   -0.95215,    0.43123,          0}; // Li5	chisq = 1004.816487 / NDF = 6
-  Double_t pars[7] = {  -0.07558,    0.89535,  -0.048682,   0.025404,   -0.67003,  -0.046156,    0.39288}; // Li5	chisq = 936.675106 / NDF = 5
-  Double_t pars[7] = { -0.048749,     1.4441,   0.030852,    0.56134,    0.54716,          0,          0}; // Li6	chisq = 2597.699313 / NDF = 14
-  Double_t pars[7] = { -0.056064,     1.1095,   0.023699,    0.67206,     0.2915,      -0.22,          0}; // Li6	chisq = 2551.528794 / NDF = 13
-  Double_t pars[7] = { -0.055483,     1.1493,    0.02457,    0.64679,    0.31998,   -0.20637,  -0.023835}; // Li6	chisq = 2547.965416 / NDF = 12
-  Double_t pars[7] = { -0.066122,  -0.025065,    -1.4473,    0.20196,    0.35495,          0,          0}; // Li7	chisq = 119.786609 / NDF = 15
-  Double_t pars[7] = { -0.081217,   -0.06161,    -1.1441,   -0.11373,    0.84387,    0.31613,          0}; // Li7	chisq = 102.816620 / NDF = 14
-  Double_t pars[7] = { -0.077592,  -0.021138,    -1.8127,   -0.11779,    0.39463,   -0.26869,   -0.32607}; // Li7	chisq = 76.740215 / NDF = 13
-  Double_t pars[7] = { -0.070404,  0.0078884,     3.5324,    0.40205,   0.064262,          0,          0}; // muon-	chisq = 1282.602144 / NDF = 56
-  Double_t pars[7] = { -0.069543,   0.010323,     2.9705,    0.36291,    0.14564,  -0.026972,          0}; // muon-	chisq = 1124.241131 / NDF = 55
-  Double_t pars[7] = { -0.066119,   0.017606,     2.1586,    0.35782,    0.25951,    0.13777,  -0.083934}; // muon-	chisq = 242.927919 / NDF = 54
-  Double_t pars[7] = { -0.070868,  0.0070857,     3.5032,     0.4237,   0.052866,          0,          0}; // muon	chisq = 2194.271282 / NDF = 57
-  Double_t pars[7] = { -0.069832,  0.0096729,     2.8846,    0.37943,    0.13917,  -0.028511,          0}; // muon	chisq = 1827.724279 / NDF = 56
-  Double_t pars[7] = { -0.066283,   0.017608,     2.0468,    0.36435,     0.2665,    0.12683,  -0.080257}; // muon	chisq = 447.107626 / NDF = 55
-  Double_t pars[7] = { -0.071269,  0.0064184,     3.4553,    0.44737,   0.044061,          0,          0}; // muon+	chisq = 933.884599 / NDF = 54
-  Double_t pars[7] = { -0.070067,  0.0090864,     2.8041,    0.39862,    0.13328,  -0.029336,          0}; // muon+	chisq = 738.071444 / NDF = 53
-  Double_t pars[7] = { -0.066284,   0.017726,     1.9469,    0.37386,    0.27318,    0.12364,  -0.079441}; // muon+	chisq = 217.300272 / NDF = 52
-  Double_t pars[7] = { -0.070095,  0.0088641,     3.4964,    0.32256,   0.081893,          0,          0}; // pion-	chisq = 1320.830372 / NDF = 54
-  Double_t pars[7] = { -0.069669,   0.012476,     2.8361,    0.26856,     0.1923,   -0.03869,          0}; // pion-	chisq = 1012.596163 / NDF = 53
-  Double_t pars[7] = {   -0.0674,   0.024185,     2.0107,    0.21972,    0.43126,    0.14851,   -0.11584}; // pion-	chisq = 126.535495 / NDF = 52
-  Double_t pars[7] = {   -0.0682,     2.1625,  0.0010472,     2.0745,  -0.031068,          0,          0}; // pion	chisq = 67755.078969 / NDF = 57
-  Double_t pars[7] = { -0.075258, -0.0014257, 6.9559e-07,     2.1993,   -0.20179,   0.094268,          0}; // pion	chisq = 22458.927436 / NDF = 56
-  Double_t pars[7] = {  -0.04016,   -0.12179,    -0.2486,     1.2591,    0.19597,   -0.15774,     0.3494}; // pion	chisq = 3189.524934 / NDF = 55
-  Double_t pars[7] = { -0.071355,  0.0072479,     3.5443,    0.34468,   0.051769,          0,          0}; // pion+	chisq = 1026.769917 / NDF = 53
-  Double_t pars[7] = { -0.070613,   0.011347,     2.7157,    0.28021,    0.17479,  -0.043166,          0}; // pion+	chisq = 661.762814 / NDF = 52
-  Double_t pars[7] = { -0.068516,   0.023561,     1.8697,    0.21984,    0.40777,    0.11349,  -0.099351}; // pion+	chisq = 163.566087 / NDF = 51
-  Double_t pars[7] = { -0.070389, -0.0077741,    -3.5279,   0.068167,   0.078742,          0,          0}; // proton-	chisq = 2103.762827 / NDF = 44
-  Double_t pars[7] = { -0.070561, -0.0077177,     -3.535,    0.06075,   0.077959, -0.0070446,          0}; // proton-	chisq = 2076.958600 / NDF = 43
-  Double_t pars[7] = {  -0.07066, -0.0057095,     -4.174,   0.068798,   0.018758,  -0.017705,   0.037162}; // proton-	chisq = 2015.458793 / NDF = 42
-  Double_t pars[7] = { -0.070562, -0.0077168,    -3.4873,   0.077743,   0.079321,          0,          0}; // proton	chisq = 4008.217571 / NDF = 43
-  Double_t pars[7] = { -0.070848, -0.0076799,    -3.4825,   0.064966,    0.07951,  -0.011741,          0}; // proton	chisq = 3873.636898 / NDF = 42
-  Double_t pars[7] = {  -0.07101, -0.0052236,    -4.3182,   0.074543,  0.0074196,  -0.025585,   0.045856}; // proton	chisq = 3684.400936 / NDF = 41
-  Double_t pars[7] = {  -0.07072, -0.0083803,    -3.2265,   0.084608,   0.094851,          0,          0}; // proton+	chisq = 2055.338021 / NDF = 43
-  Double_t pars[7] = { -0.071159, -0.0079663,    -3.3295,   0.066829,   0.087892,  -0.017291,          0}; // proton+	chisq = 1912.431139 / NDF = 42
-  Double_t pars[7] = { -0.071408, -0.0045683,    -4.5718,   0.080685,  -0.010314,  -0.035956,   0.061825}; // proton+	chisq = 1751.488703 / NDF = 41
-  Double_t pars[7] = { -0.073334,   0.046675,    0.59824,  -0.025063,    0.24963,          0,          0}; // triton	chisq = 3288.188698 / NDF = 36
-  Double_t pars[7] = { -0.072183,  0.0019079,      7.248,   0.038967,  -0.058785,  -0.052737,          0}; // triton	chisq = 1207.289343 / NDF = 35
-  Double_t pars[7] = { -0.072138,  0.0018391,     7.4457,   0.044421,  -0.062916,  -0.048811,  0.0092688}; // triton	chisq = 1189.783216 / NDF = 34
-09/24/2022
 // /hlt/cephfs/fisyak/Fit	Sat Sep 24 11:19:27 2022
   Double_t pars[7] = { -0.077712, -0.0033412,    -3.3287,     2.8284,   -0.02002,          0,          0}; // electron-COL	chisq = 400.355859 / NDF = 59
   Double_t pars[7] = { -0.038331, -0.0039637,    -2.1902,     2.7107,    0.56673,   -0.08022,          0}; // electron-COL	chisq = 172.642030 / NDF = 58
@@ -851,4 +565,31 @@ Double_t StdEdxModel::dNdxEff(Double_t poverm, Double_t charge) {
   Double_t dNdxMC = dNdx(bgMC, charge);
   Double_t dNdx = dNdxMC*NpCorrection(poverm); 
   return dNdx;
+}
+//________________________________________________________________________________
+Double_t StdEdxModel::extremevalueG(Double_t *x, Double_t *p) {
+  Double_t normL  = p[0];
+  Double_t mu     = p[1];
+  Double_t sigmaI = p[2];
+  Double_t phase  = p[3];
+  Double_t sigmaG = p[4];
+  Double_t t = (mu - x[0])*sigmaI;
+  Double_t frac = TMath::Sin(phase);
+  frac *= frac;
+  return TMath::Exp(normL)*((1. - frac)*TMath::Abs(sigmaI)*TMath::Exp(t - TMath::Exp(t)) + frac*TMath::Gaus(t, 0., sigmaG, kTRUE));
+}
+//________________________________________________________________________________
+TF1 *StdEdxModel::ExValG() {
+  TString fName("ExValG");
+  TF1 *f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
+  if (! f) {
+    f = new TF1(fName, extremevalueG, -2, 5, 5);
+    f->SetParNames("normL","mu","sigmaI", "phase","sigmaG");
+    f->SetParLimits(2, 0.1, 10.0);
+    f->SetParLimits(3, 0., TMath::PiOver2());
+    //    f->SetParLimits(4, 0.1, 1.0);
+    f->FixParameter(4, 1.0);
+  }
+  f->SetParameters(0., 0., 2.5, 0.75, 1.0);
+  return f;
 }

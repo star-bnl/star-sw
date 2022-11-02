@@ -564,6 +564,20 @@ Int_t StdEdxY2Maker::Make(){
 	} else {
 	  dx =  dX_TrackFit;
 	}
+#if 1
+	// Scale dX to 
+	if (St_tpcPadConfigC::instance()->iTpc(sector)) {
+	  Int_t io = 1;
+	  if (row > St_tpcPadConfigC::instance()->innerPadRows(sector)) io = 0;
+	  Double_t padlength = (io == 1) ? 
+	    St_tpcPadConfigC::instance()->innerSectorPadLength(sector) : 
+	    St_tpcPadConfigC::instance()->outerSectorPadLength(sector);
+	  Double_t rowPitch  = (io == 1) ? 
+	    St_tpcPadConfigC::instance()->innerSectorRowPitch1(sector) : 
+	    St_tpcPadConfigC::instance()->outerSectorRowPitch(sector);
+	  dx *= rowPitch/padlength;
+	}
+#endif
 	TrackLengthTotal += dx;
 	//________________________________________________________________________________      
 	if (tpcHit->adc() <= 0) {
@@ -1183,7 +1197,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   if (PiD.dEdxStatus(kMethod) && PiD.dEdxStatus(kMethod)->TrackLength() > 20) { 
     //  if (NoFitPoints >= 20) { 
     Int_t k;
-    //    Double_t bgL10 = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
+#if 0
+    Double_t bgL10 = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
+#endif
     for (k = 0; k < NdEdx; k++) {
       Int_t sector = FdEdx[k].sector;
       Int_t row    = FdEdx[k].row;
@@ -1199,6 +1215,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #else
       if (! PiD.fdNdx)  continue; // 
       Double_t n_P = FdEdx[k].dxC*PiD.fdNdx->Pred[kPidPion];
+      //      Double_t zdEMPV = StdEdxModel::instance()->LogdEMPVGeV(n_P);//LogdEMPV(n_P) - Bichsel::Instance()->Parameterization()->MostProbableZShift(); 
       Double_t zdEMPV = StdEdxModel::instance()->LogdEMPVGeV(n_P);//LogdEMPV(n_P) - Bichsel::Instance()->Parameterization()->MostProbableZShift(); 
       FdEdx[k].zP = zdEMPV;
       FdEdx[k].sigmaP = StdEdxModel::instance()->Sigma(n_P);
@@ -1588,7 +1605,7 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	  TString Title(Form("log10(dE/dx(%s)(keV/cm)) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",FitName[k],parT[t]));
 	  if (k == 2) Title = Form("log10(dN/dx) versus log10(p(GeV/c)) for Tpc TrackLength > 40 cm %s",parT[t]);
 	  fTdEdx[k][t] = new TH2F(Form("TdEdx%s%s",FitName[k],parN[t]),Title,
-				  330,-1.3,1., ny, ymin, ymax);
+				  300,-1.5,1.5, ny, ymin, ymax);
 	  fTdEdx[k][t]->SetMarkerStyle(1);
 	  fTdEdx[k][t]->SetMarkerColor(t+1);
 	}
@@ -1768,12 +1785,12 @@ void StdEdxY2Maker::fcnN(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par,
     Double_t dE = FdEdx[i].F.dE;
     Double_t dX = FdEdx[i].dxC;
     Double_t Np = dNdx*dX;
-    Double_t Prob = StdEdxModel::ProbdEGeVlog(TMath::Log(dE),Np);
+    Double_t Prob = StdEdxModel::instance()->ProbdEGeVlog(TMath::Log(dE),Np);
     if (_debug && iflag == 3) {
       Double_t ee = dE + TMath::Log(1e9) -TMath::Log(Np); // to eV/Np
       E.push_back(ee);
       P.push_back(Prob);
-      Double_t In = StdEdxModel::GGaus()->Integral(-1.,ee);
+      Double_t In = StdEdxModel::instance()->GGaus()->Integral(-1.,ee);
       I.push_back(In);
     }
     if (Prob <= 0.0) {

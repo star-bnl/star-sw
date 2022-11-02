@@ -26,7 +26,7 @@ my @rootfiles = ();
 my $all = 1;
 my $time = 0;
 my $adc = 0;
-my @FitOptions = qw (G GF GDP RL5 NF NX ADC G4F G4E G4EX G4EY GG GG2 GG3 GG4);
+my @FitOptions = qw (G GF GDP RL5 NF NX ADC G4F G4E G4EX G4EY G4EG GG GG2 GG3 GG4);
 my %Opts  = ();
 my @opt;
 foreach my $arg (@ARGV) {
@@ -102,7 +102,7 @@ csh -x $INPUTFILE0
 ';
 foreach my $rootfile (@rootfiles) {
   my $dirname =  File::Basename::dirname($rootfile); 
-  if ($dirname eq './') {$dirname = "";}
+  if ($dirname eq '.')  {$dirname = "";}
   else                  {$dirname .= "_";}
 #  print "$rootfile => $dirname\n";
   foreach my $fittype ( keys %Opts) {

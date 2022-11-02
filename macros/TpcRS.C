@@ -102,10 +102,10 @@ Int_t SetPartGun(TString RootFile,TString RunOpt, TString Opt) {
 #else
   //  TString optG("GmTsqSW");
   TString optG("GmTsq");
-  Double_t bgMinL10 = 0.1;
+#if 0
+  Double_t bgMinL10 = 0.05;
   Double_t bgMaxL10 = 10.0;
   
-#endif
   Double_t pTmin = mass*TMath::Power(10.,bgMinL10);
   Double_t pTmax = mass*TMath::Power(10.,bgMaxL10);
   if (pTmax > 10) {
@@ -113,6 +113,11 @@ Int_t SetPartGun(TString RootFile,TString RunOpt, TString Opt) {
     bgMaxL10 = TMath::Log10(pTmax/mass);
     //    cout << "Reduce bgMax10 = " << bgMaxL10 << endl;
   }
+#else
+  Double_t pTmin =  0.05;
+  Double_t pTmax = 10.00;
+#endif
+#endif
   if (Root4Star) {
     cout << "Initialize Root4star starsim " << endl;
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
@@ -144,10 +149,17 @@ Int_t SetPartGun(TString RootFile,TString RunOpt, TString Opt) {
     if ( gener && ! gener->IsA()->InheritsFrom( "StarMCSimplePrimaryGenerator" ) ) {
       delete gener; gener = 0;
     }
+#if 0
     if (! gener) gener =  new 
       StarMCSimplePrimaryGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, optG);
     else
       gener->SetGenerator( NTRACK, ID, bgMinL10, bgMaxL10,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, optG);
+#else
+    if (! gener) gener =  new 
+      StarMCSimplePrimaryGenerator( NTRACK, ID, pTmin, pTmax,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, optG);
+    else
+      gener->SetGenerator( NTRACK, ID, pTmin, pTmax,Ylow, Yhigh, Philow, Phihigh, Zlow, Zhigh, optG);
+#endif
     StarVMCApplication::Instance()->SetPrimaryGenerator(gener);
     cout << "Set StarMCSimplePrimaryGenerator" << endl;
     if (DEBUG) {

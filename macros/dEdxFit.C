@@ -174,6 +174,23 @@ struct MIPFitParX_t {
     cout << endl;
   }
 };
+struct MIPFitParG_t {// extremevalueG/ ExValG
+  Int_t           p1;
+  Int_t           p2;
+  Int_t            i;
+  Int_t            j;
+  const Char_t *Name;
+  Double_t     normL;
+  Double_t        mu;
+  Double_t    sigmaI;
+  Double_t     phase;
+  Double_t    sigmaG;
+  void Print(Option_t *opt="", Double_t *pars = 0) {
+    cout << Form("%3i %3i %25s mu: %8.3f sigmaI:%8.3f phase:%8.3f sigmaG:%8.3f",p1,p2,Name,mu,sigmaI,phase,sigmaG);
+    if (pars) cout << Form("\t mu: %8.3f sigmaI:%8.3f phase:%8.3f sigmaG:%8.3f",pars[1], pars[2], pars[3],pars[4]);
+    cout << endl;
+  }
+};
 struct Fitx_t {
   Float_t i;
   Float_t j;
@@ -3216,6 +3233,7 @@ TF1 *FitG4F(TH1 *proj, Option_t *opt="") {
 }
 #include "FitG4EX.C"
 #include "FitG4EY.C"
+#include "FitG4EG.C"
 //________________________________________________________________________________
 Double_t gf4EFunc(Double_t *x, Double_t *par) {
   // par[0] - norm
@@ -5170,7 +5188,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
       else if (TString(FitName) == "Freq") g = FitFreq(proj,opt,zmin,zmax);
       else if (TString(FitName) == "GF") g = FitGF(proj,opt);
       else if (TString(FitName) == "G4F") g = FitG4F(proj,opt);
-      else if (TString(FitName) == "G4E" || TString(FitName) == "G4EX" || TString(FitName) == "G4EY") {
+      else if (TString(FitName) == "G4E" || TString(FitName) == "G4EX" || TString(FitName) == "G4EY" || TString(FitName) == "G4EG") {
 	Int_t Sign = 0;
 	if (HName.Contains("3P")) {
 	  if (HName.Contains("+")) Sign = 2;
@@ -5187,6 +5205,7 @@ void dEdxFit(const Char_t *HistName,const Char_t *FitName = "GP",
 	if (TString(FitName) == "G4E")  	g = FitG4E(proj,opt,IO, Sign);
 	if (TString(FitName) == "G4EX") 	g = FitG4EX(proj,opt,IO, Sign);
 	if (TString(FitName) == "G4EY") 	g = FitG4EY(proj,opt,IO, Sign);
+	if (TString(FitName) == "G4EG") 	g = FitG4EG(proj,opt,IO, Sign);
       }
       else if (TString(FitName) == "L5") g = FitL5(proj,opt,5);
       else if (TString(FitName) == "L1") g = FitL5(proj,opt,0);

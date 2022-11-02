@@ -17,17 +17,16 @@
 #include "Ask.h"
 #include "Names.h"
 #include "TDatime.h"
-Bichsel *m_Bichsel = 0;
 //________________________________________________________________________________
 Double_t bichselZ(Double_t *x,Double_t *par) {
-  return m_Bichsel->GetMostProbableZ(x[0],par[0]);
+  return Bichsel::Instance()->GetMostProbableZ(x[0],par[0]);
 }
 //________________________________________________________________________________
 TF1 *ZMPB(Double_t log2dx = 1) {
   TString fName(Form("B%i",(int)(2*(log2dx+2))));
   TF1 *f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
   if (! f) {
-    f = new TF1(Form(fName,(int)(2*log2dx+2)),bichselZ,-1,4,1);
+    f = new TF1(fName, bichselZ,-1,4,1);
     f->SetParName(0,"log2dx");
     f->SetParameter(0,log2dx);
     cout << "Create ZMPB with name " << f->GetName() << " for log2dx = " << log2dx << endl;
@@ -36,7 +35,6 @@ TF1 *ZMPB(Double_t log2dx = 1) {
 }
 //________________________________________________________________________________
 void dNdxFunctions(Int_t col = 0) {
-  if (!m_Bichsel) m_Bichsel = Bichsel::Instance();
   TCanvas *c1 = new TCanvas("c1","c1");
   TLegend *l = new TLegend(0.4,0.6,0.8,0.9);
   TH1F *frame = c1->DrawFrame(-2.5,0.5,5,6);
@@ -49,28 +47,11 @@ void dNdxFunctions(Int_t col = 0) {
   for (Int_t color = col1; color <= col2; color++) {
     Double_t log2dx = TMath::Log2(1.5 + 0.5*(color - 1));
     Double_t dx = TMath::Power(2.,log2dx);
-#if 0
-    TF1 *fnOld = StdEdxModel::ZMPold(log2dx);
-    fnOld->SetLineColor(color);
-    fnOld->SetMarkerColor(color);
-    fnOld->Draw("same");
-    l->AddEntry(fnOld,Form("%4.1fcm Old",dx));
-    TF1 *fn = StdEdxModel::ZMP(log2dx);
-    fn->SetLineColor(color);
-    fn->SetMarkerColor(color);
-    fn->Draw("same");
-    l->AddEntry(fn,Form("%4.1fcm",dx));
-    TF1 *fr = StdEdxModel::ZMPR(log2dx);
-    fr->SetLineColor(color);
-    fr->SetMarkerColor(color);
-    fr->Draw("same");
-    l->AddEntry(fr,Form("R%4.1fcm",dx));
-#endif
-    TF1 *fnew = StdEdxModel::ZMPnew(log2dx);
-    fnew->SetLineColor(color);
-    fnew->SetMarkerColor(color);
-    fnew->Draw("same");
-    l->AddEntry(fnew,Form("New%4.1fcm",dx));
+    TF1 *f = StdEdxModel::instance()->ZMP(log2dx);
+    f->SetLineColor(color);
+    f->SetMarkerColor(color);
+    f->Draw("same");
+    l->AddEntry(f,Form("N%4.1fcm",dx));
 #if 1
     TF1 *bn = ZMPB(log2dx);
     bn->SetLineColor(color);
@@ -102,8 +83,8 @@ Double_t scanleFCn(Double_t *x, Double_t *p) {
   Double_t bg10pi = TMath::Log10(pMoMIP/0.13956995);// =  5.76193821239086468e-01
   Double_t bg10P = TMath::Log10(pMoMIP/0.93827231); //  = -2.51343155597725409e-01;
   Double_t difMIP = 1.18931 - (-0.03569); // Positive Outer
-  StdEdxModel::SetScale(x[0]);
-  TF1 *F = StdEdxModel::ZMP(1.0);
+  StdEdxModel::instance()->SetScale(x[0]);
+  TF1 *F = StdEdxModel::instance()->ZMP(1.0);
   Double_t  diff1 =  F->Eval(bg10P) - F->Eval(bg10pi) - difMIP;
   return diff1;
 }
@@ -453,7 +434,7 @@ void dNdxCorrections() {
       if (Ask()) goto BREAK;
       TCanvas *c = new TCanvas("c"+partName,"c"+partName);
       part[i]->Draw();
-      TF1 *sat = StdEdxModel::Saturation();
+      TF1 *sat = StdEdxModel::instance()->Saturation();
       sat->SetParameters(-0.07,   -0.01,    0.6,     part[i]->GetMean(),  0.0, 0.0, 0.0);
       sat->SetParLimits(2, -10, 10);
       Double_t xmin = part[i]->GetXaxis()->GetBinLowEdge(k1);
@@ -541,6 +522,50 @@ void dNdxFunc() {
   //dXdS();
   dNdxFunctions();
 }
+//________________________________________________________________________________
+Double_t extremevalue(Double_t *x, Double_t *p) {
+  Double_t normL = p[0];
+  Double_t mu    = p[1];
+  Double_t sigmaI= p[2];
+  Double_t t = (mu - x[0])*sigmaI;
+  return TMath::Exp(normL)*TMath::Abs(sigmaI)*TMath::Exp(t - TMath::Exp(t));
+}
+//________________________________________________________________________________
+TF1 *ExVal() {
+  TString fName("ExVal");
+  TF1 *f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
+  if (! f) {
+    f = new TF1(fName, extremevalue, -2, 5, 3);
+    f->SetParNames("normL","mu","sigmaI");
+    f->SetParameters(0., 0., 1.);
+  }
+  return f;
+  
+}
+//________________________________________________________________________________
+Double_t extremevalueG(Double_t *x, Double_t *p) {
+  Double_t normL  = p[0];
+  Double_t mu     = p[1];
+  Double_t sigmaI = p[2];
+  Double_t phase  = p[3];
+  Double_t sigmaG = p[4];
+  Double_t t = (mu - x[0])*sigmaI;
+  Double_t frac = TMath::Sin(phase);
+  frac *= frac;
+  return TMath::Exp(normL)*((1. - frac)*TMath::Abs(sigmaI)*TMath::Exp(t - TMath::Exp(t)) + frac*TMath::Gaus(t, 0., sigmaG, kTRUE));
+}
+//________________________________________________________________________________
+TF1 *ExValG() {
+  TString fName("ExValG");
+  TF1 *f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fName);
+  if (! f) {
+    f = new TF1(fName, extremevalueG, -2, 5, 5);
+    f->SetParNames("normL","mu","sigmaI", "phase","sigmaG");
+    f->SetParameters(0., 0., 1., 0.5, 0.9);
+  }
+  return f;
+}
+//________________________________________________________________________________
 /*--------------------------------------------------------------------------------
 c1->Divide(2,2)
 c1->Clear()
