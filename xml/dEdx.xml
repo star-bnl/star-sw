@@ -15,7 +15,7 @@
 #   setup 64b
 #   starver TFG18m
 #    starver TFG21l
-#    starver TFG22c
+#    starver TFG22h
   set fileB = `basename ${INPUTFILE0}`;
   set fileB = `basename ${INPUTFILE0}`;
   set file = `basename ${fileB} .event.root`;
