@@ -44,7 +44,7 @@ StBemcTriggerSimu::StBemcTriggerSimu()
   mTables   = NULL;
   mHList    = NULL;
   mConfig   = 0;
-
+  mTestMode = false;
 }
 //==================================================
 //==================================================
