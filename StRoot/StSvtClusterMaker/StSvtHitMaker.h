@@ -106,7 +106,7 @@ class StSvtHitMaker : public StMaker
   void TransformIntoSpacePoint();
   void SaveIntoNtuple(int numOfCluster, int index);
   void SetWriteNtuple(int iwrite){iWrite = iwrite;};
-  void SetFileNames(char* name1="/dev/null", char* name2="/dev/null");
+  void SetFileNames(const char* name1="/dev/null", const char* name2="/dev/null");
   Int_t Eval();
   double LaserTemperatureCorrection();
 
@@ -145,8 +145,8 @@ class StSvtHitMaker : public StMaker
   TH1F *mZHitResolution;  //!
   TH2F *mHitResolution;   //!
 
-  char* filenameN;
-  char* filenameC;
+  const char* filenameN;
+  const char* filenameC;
 
   ClassDef(StSvtHitMaker,0)   //virtual base class for Makers
 

@@ -123,7 +123,7 @@ public:
 
   long NextEventOffset();
   void setVerbose(int); // 0 turns off all internal printout
-  char * findBank(char *bankid); // navigates to pointer bnk below DATAP
+  char * findBank(const char *bankid); // navigates to pointer bnk below DATAP
   int verbose;
 
   ~RichEventReader();
