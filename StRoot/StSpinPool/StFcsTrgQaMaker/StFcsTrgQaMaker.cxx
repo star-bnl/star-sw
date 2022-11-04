@@ -45,7 +45,7 @@ Int_t StFcsTrgQaMaker::Init(){
       int yday=mRun/1000;
       sprintf(mFilename,"%d/%d.trgQa.root",yday,mRun);
   }else if(mFilename==0){
-    static char* fname = "fcs.trgqa.root";
+    static char* fname = const_cast<char*>("fcs.trgqa.root");
     mFilename=fname;
   }
   printf("StFcsTrgQaMaker::Init - Opening %s\n",mFilename);

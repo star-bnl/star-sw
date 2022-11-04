@@ -49,7 +49,7 @@ Int_t StFcsCosmicMaker::Init(){
   }
   mFile=new TFile(mFilename,"RECREATE");
 
-  char* nameEHP[kFcsEHP] = {"Ecal","Hcal","Pres"};
+  const char* nameEHP[kFcsEHP] = {"Ecal","Hcal","Pres"};
   char t[100],t2[100];
   for(int ehp=0; ehp<2; ehp++){
     sprintf(t,"%4s_ADC",nameEHP[ehp]);

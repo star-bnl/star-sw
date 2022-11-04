@@ -15,7 +15,7 @@ class StReadRare
 {
  public:
       StReadRare();
-      StReadRare(Int_t nEvents, Char_t* histoFileName="RareEventPlots.root");
+      StReadRare(Int_t nEvents, const Char_t* histoFileName="RareEventPlots.root");
       virtual ~StReadRare(){};
       void  Init();
       Int_t Run();

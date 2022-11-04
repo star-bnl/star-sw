@@ -466,7 +466,7 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
     
     if(Debug()) gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << " for INL tables" << endm;
     
-    Char_t *boardName;
+    const Char_t *boardName;
     Short_t boardId;
     Short_t tdcId;
     Float_t INLcorr[1024];

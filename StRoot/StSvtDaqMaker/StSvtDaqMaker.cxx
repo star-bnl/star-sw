@@ -83,7 +83,7 @@
 ClassImp(StSvtDaqMaker)
 
 //_____________________________________________________________________________
-  StSvtDaqMaker::StSvtDaqMaker(const char *name, char* config, char* data):StMaker(name)
+  StSvtDaqMaker::StSvtDaqMaker(const char *name, const char* config, const char* data):StMaker(name)
 {
   fConfig = config;
   fDataType = data;
