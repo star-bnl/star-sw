@@ -35,16 +35,16 @@ StFstRawHit::StFstRawHit(int channelId, int geoId,
 
 StFstRawHit::StFstRawHit(const StFstRawHit &rawHit)
 {
-    mChannelId = rawHit.getChannelId();
-    mGeoId = rawHit.getGeoId();
-    mSeedhitflag = rawHit.getSeedhitflag();
+    mChannelId = rawHit.mChannelId;
+    mGeoId = rawHit.mGeoId;
+    mSeedhitflag = rawHit.mSeedhitflag;
     for(int itb=0; itb<kFstNumTimeBins; itb++){
-        mCharge[itb] = rawHit.getCharge(itb);
-        mChargeErr[itb] = rawHit.getChargeErr(itb);
+        mCharge[itb] = rawHit.mCharge[itb];
+        mChargeErr[itb] = rawHit.mChargeErr[itb];
     }
-    mMaxTimeBin = (int)rawHit.getMaxTimeBin();
-    mIdTruth = (int)rawHit.getDefaultTimeBin();
-    mDefaultTimeBin = rawHit.getIdTruth();
+    mMaxTimeBin = rawHit.mMaxTimeBin;
+    mIdTruth = rawHit.mIdTruth;
+    mDefaultTimeBin = rawHit.mDefaultTimeBin;
 }
 
 int StFstRawHit::getChannelId() const              { return mChannelId;      };
