@@ -178,6 +178,8 @@ StPtrVec ## QWERTY(Int_t sz=0):StRefArray(sz){};\
 StPtrVec ## QWERTY(const StPtrVec ## QWERTY &from):StRefArray(from){};\
 virtual        ~StPtrVec ## QWERTY(){};\
 \
+ using value_type = St ## QWERTY *;\
+\
  St ## QWERTY * const &at(Int_t idx) const {return (St ## QWERTY  * const &)fV[idx];}\
  St ## QWERTY *       &at(Int_t idx)       {return (St ## QWERTY  *       &)fV[idx];}\
 \
@@ -208,6 +210,8 @@ class StSPtrVec ## QWERTY : public StStrArray \
 public: \
 StSPtrVec ## QWERTY(Int_t sz=0):StStrArray(sz){};\
 StSPtrVec ## QWERTY(const StSPtrVec ## QWERTY &from):StStrArray(from){};\
+\
+ using value_type = St ## QWERTY *;\
 \
  St ## QWERTY * const &at(Int_t idx) const {return (St ## QWERTY  * const &)fV[idx];}\
  St ## QWERTY *       &at(Int_t idx)       {return (St ## QWERTY  *       &)fV[idx];}\
