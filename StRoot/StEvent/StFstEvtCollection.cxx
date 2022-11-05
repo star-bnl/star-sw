@@ -13,15 +13,6 @@
 ClassImp(StFstEvtCollection)
 
 StFstEvtCollection::StFstEvtCollection() {/* no operation*/}
-StFstEvtCollection::~StFstEvtCollection()
-{
-    // Usually this wouldn't be necessary but mRawHits is a polymorphic container and StFstRawHit provides
-    // its own new/delete operator
-    for (unsigned int i=0; i<mRawHits.size(); i++) {
-        delete mRawHits[i];
-        mRawHits[i] = 0;
-    }
-}
 
 void StFstEvtCollection::addRawHit(StFstRawHit *hit)
 {

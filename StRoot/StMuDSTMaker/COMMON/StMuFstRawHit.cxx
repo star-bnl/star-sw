@@ -130,15 +130,15 @@ void StMuFstRawHit::setMaxTimeBin(int tb)
 
 void StMuFstRawHit::print(int nTimeBins)
 {
-    cout << " elecId=" << getChannelId() << " Charge=(" ;
+    LOG_DEBUG << " elecId=" << getChannelId() << " Charge=(" ;
     for(int i=0; i<nTimeBins; i++)
-        cout << getCharge(i) << " " ;
-    cout << ") ChargeErr=(" ;
+        LOG_DEBUG << getCharge(i) << " " ;
+    LOG_DEBUG << ") ChargeErr=(" ;
 
     for(int i=0; i<nTimeBins; i++)
-        cout << getChargeErr(i) << " " ;
-    cout << ") decode0: at disk=" << (short) getDisk() << " wedge=" << (short) getWedge() << " sensor=" << (short) getSensor()
-        << " rstrip=" << (short) getRStrip() << " phistrip=" << (short) getPhiStrip() << endl;
+        LOG_DEBUG << getChargeErr(i) << " " ;
+    LOG_DEBUG << ") decode0: at disk=" << (short) getDisk() << " wedge=" << (short) getWedge() << " sensor=" << (short) getSensor()
+        << " rstrip=" << (short) getRStrip() << " phistrip=" << (short) getPhiStrip() << endm;
 }
 
 unsigned char StMuFstRawHit::mDefaultTimeBin = 2;
