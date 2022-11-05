@@ -23,7 +23,7 @@ class StFstEvtCollection : public StObject
 {
 public:
    StFstEvtCollection();
-   ~StFstEvtCollection();
+   ~StFstEvtCollection() {}
 
    void          addRawHit(StFstRawHit *);
    unsigned int  numberOfRawHits() const;
