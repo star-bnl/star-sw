@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include "StFstRawHitMaker.h"
 
 #include "StEvent.h"
@@ -423,7 +421,13 @@ Int_t StFstRawHitMaker::Make()
                 StFstRawHitCollection *rawHitCollectionPtr = mFstCollectionPtr->getRawHitCollection( wedgeIdx );
                 if( rawHitCollectionPtr ){
                     std::vector<StFstRawHit*>& rawHitVec = rawHitCollectionPtr->getRawHitVec();
-                    std::transform(begin(rawHitVec), end(rawHitVec), back_inserter(mFstEvtCollection->rawHits()), [](const StFstRawHit* h) { return new StFstRawHit(*h); } );
+                    std::vector< StFstRawHit* >::iterator rawHitIter;
+
+                    for( rawHitIter = rawHitVec.begin(); rawHitIter != rawHitVec.end(); ++rawHitIter ){
+                        StFstRawHit* rawHit = *rawHitIter;
+                        StFstRawHit* newRawHit = new StFstRawHit( *rawHit );
+                        mFstEvtCollection->addRawHit(newRawHit);
+                    }
                 }
             }
         }
