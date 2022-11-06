@@ -1,4 +1,4 @@
-static const Int_t Npart = 6;
+static const Int_t Npart4EG = 6;
 //________________________________________________________________________________
 Double_t gf4EGFunc(Double_t *x, Double_t *par) {
   Double_t XX[1] = {x[0]};
@@ -434,14 +434,16 @@ Double_t gf4EGFunc(Double_t *x, Double_t *par) {
   Double_t Value = 0;
   Int_t icase = (Int_t) par[12];
   Int_t i1 = 0;
-  Int_t i2 = Npart - 1;
+  Int_t i2 = Npart4EG - 1;
   if (icase >= 0) {i1 = i2 = icase;}
   TF1 *g = StdEdxModel::instance()->ExValG();
   static Int_t _debug = 0;
   for (Int_t i = i1; i <= i2; i++) { 
     if (frac[i] <= 0.0) continue;
     //    Double_t Mu = (mu + parMIPs[i][sign][IO].mu - parMIPs[0][sign][IO].mu)/(scale + MuShiftIO[IO]);
+    //    Double_t Mu = (mu + parMIPs[i][sign][IO].mu - parMIPs[0][0][IO].mu)/(scale + MuShiftIO[IO]);
     Double_t Mu = (mu + parMIPs[i][sign][IO].mu - parMIPs[0][0][IO].mu)/(scale + MuShiftIO[IO]);
+    //    Double_t Mu = mu + parMIPs[i][sign][IO].mu;
     Double_t pars[5] = {0, Mu, parMIPs[i][sign][IO].sigmaI, parMIPs[i][sign][IO].phase, parMIPs[i][sign][IO].sigmaG};
     Value += frac[i]*g->EvalPar(XX, pars);
     if (_debug) {
@@ -453,12 +455,13 @@ Double_t gf4EGFunc(Double_t *x, Double_t *par) {
     for (Int_t i = i1; i <= i2; i++) { 
       if (frac[i] <= 0.0) continue;
       Double_t cont = 0;
-      for (Int_t j = 0; j < Npart; j++) {
+      for (Int_t j = 0; j < Npart4EG; j++) {
 	if (frac[j] <= 0.0) continue;
 	Int_t l = (i <= j) ? i + j*(j+1)/2 : j + i*(i+1)/2;
-	l += Npart;
+	l += Npart4EG;
 	//	Double_t Mu =      (mu    + parMIPs[l][sign][IO].mu     - parMIPs[0][sign][IO].mu)/(scale + MuShiftIO[IO]);
 	Double_t Mu =      (mu    + parMIPs[l][sign][IO].mu     - parMIPs[0][0][IO].mu)/(scale + MuShiftIO[IO]);
+	//	Double_t Mu = mu + parMIPs[l][sign][IO].mu;
 	Double_t pars[5] = {0, Mu, parMIPs[l][sign][IO].sigmaI, parMIPs[l][sign][IO].phase, parMIPs[l][sign][IO].sigmaG}; 
 	cont += frac[j]*g->EvalPar(XX, pars);
 	if (_debug) {
@@ -570,7 +573,8 @@ TF1 *FitG4EG(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
     //    g2->SetParName(15,"factor"); g2->SetParLimits(15,-.1,0.1);
   }
   PreSetParametersG(proj, g2);
-  g2->ReleaseParameter(2);  g2->SetParLimits(2,-0.1,0.1);
+  //  g2->ReleaseParameter(2);  g2->SetParLimits(2,-0.1,0.1);
+  g2->FixParameter(2, 0);
   g2->ReleaseParameter(3);  g2->SetParLimits(3,0.0,TMath::Pi()/2);
   g2->FixParameter(4,0.01); 
   g2->FixParameter(5,0.01);
@@ -586,7 +590,6 @@ TF1 *FitG4EG(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
   g2->FixParameter(16,0.0);
   //  Fit pion + proton 
   proj->Fit(g2,Opt.Data());
-  //  g2->ReleaseParameter(2);
   g2->ReleaseParameter(4);     g2->SetParLimits(4,0.0,TMath::Pi()/2); 
   g2->ReleaseParameter(5);     g2->SetParLimits(5,0.0,TMath::Pi()/2);		
   g2->ReleaseParameter(6);     g2->SetParLimits(6,0.0,TMath::Pi()/2);
@@ -607,6 +610,7 @@ TF1 *FitG4EG(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
   //  g2->ReleaseParameter(10);     g2->SetParLimits(6,0.0, 1.0); // TMath::Pi()/2);
   //  Fit pion + proton + K + e + d + mu + triton // + He3 + alpha
   iok = proj->Fit(g2,Opt.Data());
+#if 0
   // + occupancy
   g2->ReleaseParameter(13); g2->SetParLimits(13,0.0,0.15);
   iok = proj->Fit(g2,Opt.Data());
@@ -615,6 +619,7 @@ TF1 *FitG4EG(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
 	 << proj->GetName() << "/" << proj->GetTitle() << " Try one again" << endl; 
     proj->Fit(g2,Opt.Data());
   }
+#endif
   Opt += "m";
   iok = proj->Fit(g2,Opt.Data());
   if (iok < 0 ) return 0;
@@ -641,7 +646,7 @@ TF1 *FitG4EG(TH1 *proj, Option_t *opt="RM", Int_t IO = 0, Int_t Sign = 2) {
     pm->SetMarkerColor(kRed);
     pm->SetMarkerSize(1.3);
     Double_t occupancy = params[13];
-    for (int i = 0; i < Npart; i++) {
+    for (int i = 0; i < Npart4EG; i++) {
       Double_t frac = 1.0;
       if (i > 0) frac = TMath::Power(TMath::Sin(g2->GetParameter(2+i)), 2);
       if (frac < 1e-3) continue;

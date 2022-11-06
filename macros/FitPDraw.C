@@ -414,15 +414,15 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
     }
   } else if (Name.BeginsWith("xyPad3"))      {
     if (Opt == "") {
-      MuDraw("mu:0.5*y+TMath::Nint(x)","xy", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", 0.25,  0.15, "All", "xy", "#mu versus sector phi");
+      MuDraw("mu:0.5*y+TMath::Nint(x)","xy", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.45,  0.15, "All", "xy", "#mu versus sector phi");
     } else if (Opt == "I") {
-      MuDraw("mu:0.5*y+TMath::Nint(x)","xyI", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))<0)", "prof", 0.25,  0.15, "Inner", "xy", "#mu versus sector phi");
+      MuDraw("mu:0.5*y+TMath::Nint(x)","xyI", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))<0)", "prof", -0.45,  0.15, "Inner", "xy", "#mu versus sector phi");
     } else if (Opt == "O") {
-      MuDraw("mu:0.5*y+TMath::Nint(x)","xyO", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))>0)", "prof", 0.25,  0.15, "Outer", "xy", "#mu versus sector phi");
+      MuDraw("mu:0.5*y+TMath::Nint(x)","xyO", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))>0)", "prof", -0.45,  0.15, "Outer", "xy", "#mu versus sector phi");
     } else if (Opt == "IJ") {
-      MuDraw("mu-muJ:0.5*y+TMath::Nint(x)","xyI", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))<0)", "prof", 0.25,  0.15, "Inner", "xy", "#mu versus sector phi");
+      MuDraw("mu-muJ:0.5*y+TMath::Nint(x)","xyI", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))<0)", "prof", -0.45,  0.15, "Inner", "xy", "#mu versus sector phi");
     } else if (Opt == "OJ") {
-      MuDraw("mu-muJ:0.5*y+TMath::Nint(x)","xyO", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))>0)", "prof", 0.25,  0.15, "Outer", "xy", "#mu versus sector phi");
+      MuDraw("mu-muJ:0.5*y+TMath::Nint(x)","xyO", 24*32,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4&&(x-TMath::Nint(x))>0)", "prof", -0.45,  0.15, "Outer", "xy", "#mu versus sector phi");
     } else if (Opt == "x") {
       MuDraw("mu:x","xy", 24*20,   0.5, 24.5, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", 0.25,  0.15, "xAll", "xy", "#mu versus sector phi");
     } else if (Opt == "xJ") {
