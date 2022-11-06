@@ -66,7 +66,7 @@ void dEdx(Int_t First, Int_t Last,
     gSystem->Load("libStarRoot");
   }
   gROOT->LoadMacro("bfc.C");
-  TString Chain("in,TpcHitMover,OSpaceZ2,OGridLeakFull,dEdxY2,magF,StEvent,mysql,NoDefault");
+  TString Chain("in,dEdxY2,magF,StEvent,mysql,NoDefault");
   if        (Year.Contains("2019")) { Chain += ",CorrY"; // ,analysis to add OPr40 for y2019
   } else if (Year.Contains("202"))  { Chain += ",CorrY"; // ,analysis to add OPr40 for y2020
   } else if (Year.Contains("2005")) { Chain += ",SCEbyE,OGridLeak,OShortR,OSpaceZ2,";
@@ -76,8 +76,8 @@ void dEdx(Int_t First, Int_t Last,
   Bool_t tfgV = kFALSE;
   if (STAR_VERSION.BeginsWith("TFG") && ! STAR_VERSION.Contains("Export") || STAR_VERSION.Contains("DEV2")) {
     tfgV = kTRUE;
-    // Chain += ",quiet,ForcedX";
-    Chain += ",quiet"; //,ForcedX";
+    // Chain += ",quiet,TpcHitMover,OSpaceZ2,OGridLeakFull,ForcedX";
+    Chain += ",quiet"; //,TpcHitMover,OSpaceZ2,OGridLeakFull,ForcedX";
     //    Chain += ",ForcedX";
     if (mode == 2) Chain += ",dEdxCalib"; //,DbV20211017"; // !!!!!!!!!!!!   check DbV
   } else {

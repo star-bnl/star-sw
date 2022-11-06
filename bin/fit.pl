@@ -26,15 +26,18 @@ my @rootfiles = ();
 my $all = 1;
 my $time = 0;
 my $adc = 0;
+my $debug = 0;
 my @FitOptions = qw (G GF GDP RL5 NF NX ADC G4F G4E G4EX G4EY G4EG GG GG2 GG3 GG4);
 my %Opts  = ();
 my @opt;
 foreach my $arg (@ARGV) {
+  print "arg = $arg\n" if ($debug);
   if ($arg =~ /\.root$/) {
-    my $rootf = File::Basename::dirname($arg);
+    my $rootf = File::Basename::basename($arg); print "rootf = $rootf\n" if ($debug);
     if ($rootf =~ /^Av/  || 
 	$rootf =~ /^fit/ || 
 	$rootf =~ /^G3/  || 
+	$rootf =~ /^Z3/  || 
 	$rootf =~ /^NP/  ||
 	$rootf =~ /^Pre/ ||
 	$rootf =~ /^Qcm/ ||
@@ -44,7 +47,7 @@ foreach my $arg (@ARGV) {
 	$rootf =~ /^Vol/ || 
 	$rootf =~ /^xy/) {next;}
     push @rootfiles, $arg;      
-#    print "$#rootfiles $arg\n";
+    print "$#rootfiles $arg\n";
     next;
   } 
   if ($arg =~ /^time/) {$time = 1;} 
@@ -127,7 +130,7 @@ foreach my $rootfile (@rootfiles) {
 	my $SCRIPT = $dirname . $hist . $fittype . $ext . $fil;
 	$SCRIPT =~ s/\.root/\.csh/;
 	my $newfilew = $dir . "/" . $hist . $fittype . $ext . $fil;
-#	print "$rootfile -> $hist => $fittype new file: $newfilew\n";
+#	print "$rootfile -> $hist => $hist fittype = $fittype ext = $ext fill = $fil new file: $newfilew\n";
 	next if -r $newfilew;
 	my $log = $newfilew;
 	$log =~ s/\.root/\.log/;
