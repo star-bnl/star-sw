@@ -2077,6 +2077,7 @@ my $step = 0;
 #$hist = "RunXX50"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/23/21 restart from express productioon TFG20a h with TpcAdcCorrectionB.y2019.C
 #$hist = "RunXX50"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/25/21 restart from express productioon TFG20a h with TpcAdcCorrectionB.y2019.C
 #$hist = "RunXX100"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/16/2022 start with current .DEV2
+$hist = "RunXX200"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/02/2022 new dEdxModel
 # restore ln -s TpcAdcCorrectionB.y2019.C TpcAdcCorrectionB.y2020.C; mv TpcAdcCorrectionB.r2020.C TpcAdcCorrectionB.r2020.C.HOLD.012621
 # TpcAdcCorrectionB.y2020.C
 # TpcAvgPowerSupply.y2020.C
@@ -2481,7 +2482,7 @@ my $step = 0;
 #$hist = "RunXIX_XXII_43"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG22g"; $year = "/*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  09/01/22  reprocessed 2021 with TFG22g
 #$hist = "RunXIX_XXII_44"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG22g"; $year = "/*OO*2021/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  09/20/22  reprocessed FF_OO_200GeV_2021 with TFG22g
 #$hist = "RunXIX_XXII_45"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG22g"; $year = "/7p7GeV_2021/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  10/31/2022 new dEdxModel
-$hist = "RunXIX_XXII_45"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22g"; $year = "/*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/01/2022 new dEdxModel
+#$hist = "RunXIX_XXII_45"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22g"; $year = "/*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/01/2022 new dEdxModel
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
