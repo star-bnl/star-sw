@@ -83,6 +83,7 @@ if ($pwd =~ /dev/ or $pwd  =~ /DEV/ or $pwd =~ /P2/ or $pwd =~ /SL/) {
   elsif ($pwd =~ /2021\/17p3GeV/)             {$glob = "/reco/production_17p3GeV_2021/ReversedFullField/dev/2021/";}
   elsif ($pwd =~ /2021\/26p5GeV/)             {$glob = "/reco/production_26p5GeV_fixedTarget_2021/ReversedFullField/dev/2021/";}
   elsif ($pwd =~ /2018\/isobar/)              {$glob = "/reco/production_isobar_2018/ReversedFullField/P21id/2018/"; $DST = "MuDst";}
+  elsif ($pwd =~ /2019\/AuAu200/)             {$glob = "/reco/production_AuAu200_2019/ReversedFullField/P22ia/2019"; $DST = "MuDst";}
   print "pwd = $pwd => glob = $glob\n" if ($debug);
 } else {# TFG
   $PICOPATH = "/gpfs01/star/pwg_tasks/tfg02"; 
