@@ -1,45 +1,12 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.cxx,v 1.10 2009/01/26 15:05:33 fisyak Exp $
+ * $Id: StTofrGeometry.cxx,v 1.12 2018/02/26 23:26:51 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
  *
  * Description: Collection of geometry classes for the TOF-MRPC
  *              initializes from GEANT geometry
- *
- *******************************************************************
- * $Log: StTofrGeometry.cxx,v $
- * Revision 1.10  2009/01/26 15:05:33  fisyak
- * rename TMemStat => StMemStat due to clash with ROOT class
- *
- * Revision 1.9  2008/03/27 00:15:39  dongx
- *  Update for Run8 finished.
- *
- * Revision 1.8  2007/04/17 23:01:52  dongx
- * replaced with standard STAR Loggers
- *
- * Revision 1.7  2007/02/28 23:28:17  dongx
- * R_tof used for pre-match calculation updated to ~215cm
- *
- * Revision 1.6  2004/05/03 23:07:49  dongx
- * -Introduce data members to save the Tray and Sensor geometries in the initialization.
- * -Optimize the HelixCrossCellIds() function to save CPU time
- * -Introduce a new function projTrayVector()
- * -Update the ClassDef number 1->2
- *
- *
- * Revision 1.4  2004/03/09 16:45:16  dongx
- * Remove InitDaqMap() since a StTofrDaqMap is introduced
- *
- * Revision 1.3  2003/09/11 05:49:23  perev
- * ansi corrs
- *
- * Revision 1.2  2003/09/07 03:49:06  perev
- * gcc 3.2 + WarnOff
- *
- * Revision 1.1  2003/08/06 23:00:53  geurts
- * First Release
  *
  *******************************************************************/
 #include "Stiostream.h"
@@ -78,15 +45,12 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef __ROOT__      
-ClassImp(StTofrNode)
-#endif
 
 Bool_t StTofrNode::mDebug = kFALSE;
 Double_t const StTofrGeomSensor::mSensorDy = 10.35;   // Actual module length;
-const Char_t* const StTofrGeometry::sectorPref = "BSEC";
-const Char_t* const StTofrGeometry::trayPref   = "BTRA";
-const Char_t* const StTofrGeometry::senPref    = "BRMD";
+const char* const StTofrGeometry::sectorPref = "BSEC";
+const char* const StTofrGeometry::trayPref   = "BTRA";
+const char* const StTofrGeometry::senPref    = "BRMD";
 
 //_____________________________________________________________________________
 StTofrNode::StTofrNode(TVolumeView *element, TVolumeView *top)
@@ -459,9 +423,6 @@ StTofrGeomNode::StTofrGeomNode(const char* name, const char* title,
 }
 */
 
-#ifdef __ROOT__      
-ClassImp(StTofrGeomNode)
-#endif
 
 Bool_t StTofrGeomNode::mDebug = kFALSE;
 //_____________________________________________________________________________
@@ -826,9 +787,6 @@ const
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef __ROOT__      
-ClassImp(StTofrGeomTray)
-#endif
 
 Bool_t StTofrGeomTray::mDebug = kFALSE;
 
@@ -1013,9 +971,6 @@ void StTofrGeomTray::Print(const Option_t *opt) const
 //
 //////////////////////////////////////////////////////////////////////////////
 
-#ifdef __ROOT__      
-ClassImp(StTofrGeomSensor)
-#endif
 
 Bool_t StTofrGeomSensor::mDebug = kFALSE;
 
@@ -1172,9 +1127,6 @@ void StTofrGeomSensor::Print(const Option_t *opt) const
 StTofrGeometry *gTofrGeometry = 0;
 static const Int_t CELLSINMODULE = 6;
 
-#ifdef __ROOT__      
-ClassImp(StTofrGeometry)
-#endif
 
 Bool_t StTofrGeometry::mDebug = kFALSE;
 
@@ -1335,11 +1287,9 @@ void StTofrGeometry::InitFromStar(TVolume *starHall)
   mTrays = 0;     // non-emtry tray number
   while ( (secVolume = (TVolumeView *)nextSector()) ) {
     TVolumeView *trayVolume = (TVolumeView *)secVolume->First();
-    if (trayVolume && trayVolume->GetListSize() ) {
+    if ( trayVolume->GetListSize() ) {
       mTrays++;
       mModulesInTray = trayVolume->GetListSize();
-    } else {
-      gMessMgr->Error("","OS") << " Sector Volume " <<  secVolume->GetName() << " does not have trays" << endm;
     }
   }
   mTofrConf = 0;
@@ -1358,7 +1308,7 @@ void StTofrGeometry::InitFromStar(TVolume *starHall)
   for(Int_t i=0;i<list->GetSize();i++) {
     sectorVolume = dynamic_cast<TVolumeView*> (list->At(i));
     TVolumeView *trayVolume = (TVolumeView *)sectorVolume->First();
-    if(!trayVolume ||  !trayVolume->GetListSize() ) continue;
+    if( !trayVolume->GetListSize() ) continue;
     if ( i>=60 ) ibtoh = 1;
     //    gMessMgr->Info("","OS") << " test sector size = " << trayVolume->GetListSize() << endm;
     mTofrTray[mNValidTrays] = new StTofrGeomTray(ibtoh, sectorVolume, mTopNode);
@@ -2612,3 +2562,43 @@ Bool_t lackTofrgeometry(const char* fromWhere)
    } else return kFALSE;
 }
 */
+
+/*******************************************************************
+ * $Log: StTofrGeometry.cxx,v $
+ * Revision 1.12  2018/02/26 23:26:51  smirnovd
+ * StTof: Remove outdated ClassImp macro
+ *
+ * Revision 1.11  2018/02/26 23:13:21  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.10  2009/01/26 15:05:33  fisyak
+ * rename TMemStat => StMemStat due to clash with ROOT class
+ *
+ * Revision 1.9  2008/03/27 00:15:39  dongx
+ *  Update for Run8 finished.
+ *
+ * Revision 1.8  2007/04/17 23:01:52  dongx
+ * replaced with standard STAR Loggers
+ *
+ * Revision 1.7  2007/02/28 23:28:17  dongx
+ * R_tof used for pre-match calculation updated to ~215cm
+ *
+ * Revision 1.6  2004/05/03 23:07:49  dongx
+ * -Introduce data members to save the Tray and Sensor geometries in the initialization.
+ * -Optimize the HelixCrossCellIds() function to save CPU time
+ * -Introduce a new function projTrayVector()
+ * -Update the ClassDef number 1->2
+ *
+ *
+ * Revision 1.4  2004/03/09 16:45:16  dongx
+ * Remove InitDaqMap() since a StTofrDaqMap is introduced
+ *
+ * Revision 1.3  2003/09/11 05:49:23  perev
+ * ansi corrs
+ *
+ * Revision 1.2  2003/09/07 03:49:06  perev
+ * gcc 3.2 + WarnOff
+ *
+ * Revision 1.1  2003/08/06 23:00:53  geurts
+ * First Release
+ */

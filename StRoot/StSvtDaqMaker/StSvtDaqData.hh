@@ -30,10 +30,10 @@ class StSvtDaqData: public StSvtData
 {
 public:
   StSvtDaqData();
-  StSvtDaqData(const char* config, StSVTReader* reader=0, char* option = "ZS", int run=0, int event=0, int trigger=0);
-  StSvtDaqData(StSvtConfig* config, StSVTReader* reader=0, char* option = "ZS", int run=0, int event=0, int trigger=0);
+  StSvtDaqData(const char* config, StSVTReader* reader=0, const char* option = "ZS", int run=0, int event=0, int trigger=0);
+  StSvtDaqData(StSvtConfig* config, StSVTReader* reader=0, const char* option = "ZS", int run=0, int event=0, int trigger=0);
 
-  int setData(StSVTReader* reader, char* option = "ZS");
+  int setData(StSVTReader* reader, const char* option = "ZS");
 
 protected:
 

@@ -25,9 +25,9 @@ class StSVTReader;
 class StSvtHybridDaqData: public StSvtHybridData
 {
 public:
-  StSvtHybridDaqData(int barrel, int ladder, int wafer, int hybrid, StSVTReader* reader=0, char* option="ZS");
+  StSvtHybridDaqData(int barrel, int ladder, int wafer, int hybrid, StSVTReader* reader=0, const char* option="ZS");
 
-  int setHybridData(StSVTReader* reader, char* option = "ZS");
+  int setHybridData(StSVTReader* reader, const char* option = "ZS");
 
 protected:
 

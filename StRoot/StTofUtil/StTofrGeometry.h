@@ -1,39 +1,12 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.h,v 1.8 2008/03/27 00:15:39 dongx Exp $
+ * $Id: StTofrGeometry.h,v 1.10 2018/02/26 23:27:02 smirnovd Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
  *
  * Description: Collection of geometry classes for the TOF-MRPC
  *              initializes from GEANT geometry
- *
- *******************************************************************
- * $Log: StTofrGeometry.h,v $
- * Revision 1.8  2008/03/27 00:15:39  dongx
- *  Update for Run8 finished.
- *
- * Revision 1.7  2005/07/07 01:22:28  fisyak
- * Hide typedefs IntVec, DoubleVec, PointVec and methods HelixCrossCellIds,HelixCross, projTrayVector from CINT
- *
- * Revision 1.6  2005/07/06 19:24:59  fisyak
- * Use templated StThreeVector
- *
- * Revision 1.5  2004/05/03 23:07:49  dongx
- * -Introduce data members to save the Tray and Sensor geometries in the initialization.
- * -Optimize the HelixCrossCellIds() function to save CPU time
- * -Introduce a new function projTrayVector()
- * -Update the //classDef number 1->2
- *
- *
- * Revision 1.3  2004/03/09 16:45:16  dongx
- * Remove InitDaqMap() since a StTofrDaqMap is introduced
- *
- * Revision 1.2  2003/09/11 05:49:23  perev
- * ansi corrs
- *
- * Revision 1.1  2003/08/06 23:00:53  geurts
- * First Release
  *
  *******************************************************************/
 #ifndef STTOFRGEOMETRY_H
@@ -67,7 +40,7 @@
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS)
 typedef vector<Int_t>  IntVec;
 typedef vector<Double_t>  DoubleVec;
@@ -148,9 +121,7 @@ class StTofrGeomNode : public TNode {
                               Double_t &pathLen, StThreeVectorD &cross);
    virtual void    Print() const;
 
-#ifdef __ROOT__
  C_l_assDef(StTofrGeomNode,2)  //Virutal TNode for TOFr geometry
-#endif
 };
 #endif
 
@@ -227,9 +198,7 @@ class StTofrNode : public TObject {
                               Double_t &pathLen, StThreeVectorD &cross);
    virtual void    Print(const Option_t *opt="") const;
 
-#ifdef __ROOT__
   ClassDef(StTofrNode,2)  //Virutal TNode for TOFr geometry
-#endif
 };
 
 
@@ -280,9 +249,7 @@ class StTofrGeomTray : public StTofrNode {
    StTofrGeomSensor* GetSensor(const Int_t imodule) const;
    virtual void      Print(const Option_t *opt="") const;
 
-#ifdef __ROOT__      
   ClassDef(StTofrGeomTray,1)  //Tray node in TOFr geometry
-#endif
 };
 
 
@@ -337,9 +304,7 @@ class StTofrGeomSensor : public StTofrNode {
    StThreeVectorD    GetCellPosition(const Int_t icell);
    virtual void      Print(Option_t *opt="") const ;
 
-#ifdef __ROOT__      
    ClassDef(StTofrGeomSensor,2)  //Module node in TOFr geometry
-#endif
 };
 
 //_____________________________________________________________________________
@@ -397,9 +362,9 @@ class StTofrGeometry : public TNamed {
 
    static Bool_t   mDebug;     //!Control message printing of this class
 
-   static const Char_t* const sectorPref ;//= "BSEC";
-   static const Char_t* const trayPref   ;//= "BTRA";
-   static const Char_t* const senPref    ;//= "BRMD";
+   static const char* const sectorPref ;//= "BSEC";
+   static const char* const trayPref   ;//= "BTRA";
+   static const char* const senPref    ;//= "BRMD";
 
  protected:
    //void        InitFromXdf(const char* xdffile);
@@ -477,7 +442,7 @@ class StTofrGeometry : public TNamed {
    Int_t             GetAtOfTray(const Int_t itray=0)   const;
 
    Int_t             CellIdPointIn(const StThreeVectorD& point) const;
-#if !defined(__CINT__) && !defined(__CLING__)
+#ifndef __CINT__
    Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec,
 				       DoubleVec &pathVec, PointVec &crossVec) const;
    Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec) const;
@@ -485,11 +450,43 @@ class StTofrGeometry : public TNamed {
    Bool_t            HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec) const;
    Bool_t            projTrayVector(const StHelixD &helix, IntVec &trayVec) const;
 #endif
-#ifdef __ROOT__      
   ClassDef(StTofrGeometry,2)  //Simplified TOFr Geometry
-#endif
 };
 
 R__EXTERN  StTofrGeometry* gTofrGeometry;
 
 #endif  //end of STTOFRGEOMETRY_H
+
+/*******************************************************************
+ * $Log: StTofrGeometry.h,v $
+ * Revision 1.10  2018/02/26 23:27:02  smirnovd
+ * Remove unnecessary guards around ClassDef macro
+ *
+ * Revision 1.9  2018/02/26 23:13:21  smirnovd
+ * Move embedded CVS log messages to the end of file
+ *
+ * Revision 1.8  2008/03/27 00:15:39  dongx
+ *  Update for Run8 finished.
+ *
+ * Revision 1.7  2005/07/07 01:22:28  fisyak
+ * Hide typedefs IntVec, DoubleVec, PointVec and methods HelixCrossCellIds,HelixCross, projTrayVector from CINT
+ *
+ * Revision 1.6  2005/07/06 19:24:59  fisyak
+ * Use templated StThreeVector
+ *
+ * Revision 1.5  2004/05/03 23:07:49  dongx
+ * -Introduce data members to save the Tray and Sensor geometries in the initialization.
+ * -Optimize the HelixCrossCellIds() function to save CPU time
+ * -Introduce a new function projTrayVector()
+ * -Update the //classDef number 1->2
+ *
+ *
+ * Revision 1.3  2004/03/09 16:45:16  dongx
+ * Remove InitDaqMap() since a StTofrDaqMap is introduced
+ *
+ * Revision 1.2  2003/09/11 05:49:23  perev
+ * ansi corrs
+ *
+ * Revision 1.1  2003/08/06 23:00:53  geurts
+ * First Release
+ */
