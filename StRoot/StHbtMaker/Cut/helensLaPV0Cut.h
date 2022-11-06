@@ -109,7 +109,7 @@ private:   // here are the quantities we want to cut on...
   long              mNV0sPassed;
   long              mNV0sFailed;
 
-  char*             V0Type;                // String selecting v0 (la,antil,k0)
+  const char*       V0Type;                // String selecting v0 (la,antil,k0)
 
 #ifdef __ROOT__ 
   ClassDef(helensLaPV0Cut, 1)

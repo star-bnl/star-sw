@@ -921,7 +921,7 @@ char * EventReader::findBank(const char *bankid)
   
 }
 
-void EventReader::fprintError(int err,const char *file, int line, char *userstring)
+void EventReader::fprintError(int err, const char *file, int line, const char *userstring)
 {
   if (logfd==NULL) return; //no file designated
   if (err<0 || err>MX_MESSAGE) return; //protect against bad error code

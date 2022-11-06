@@ -420,7 +420,7 @@ void RichEventReader::setVerbose(int v)
   verbose = v;
 }
 
-char * RichEventReader::findBank(char *bankid)
+char * RichEventReader::findBank(const char *bankid)
 {
   // Fix up DATAP
   Bank_RICP *pBankDATAP = (Bank_RICP *)this->getDATAP();

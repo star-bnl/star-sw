@@ -2483,6 +2483,8 @@ $hist = "RunXX200"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/Reversed
 #$hist = "RunXIX_XXII_44"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG22g"; $year = "/*OO*2021/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  09/20/22  reprocessed FF_OO_200GeV_2021 with TFG22g
 #$hist = "RunXIX_XXII_45"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG22g"; $year = "/7p7GeV_2021/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  10/31/2022 new dEdxModel
 #$hist = "RunXIX_XXII_45"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22g"; $year = "/*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/01/2022 new dEdxModel
+$hist = "RunXIX_XXII_46"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/05/2022 new TpcSecRowB
+#$hist = "RunXIX_XXII_46"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22g"; $year = "/*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/05/2022 new TpcSecRowB
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();

@@ -60,8 +60,8 @@ class TObjectSet;
 class StSvtDaqMaker : public StMaker {
 
  private:
-  char             *fConfig;   //!           
-  char             *fDataType; //!
+  const char             *fConfig;   //!
+  const char             *fDataType; //!
            
   StSvtHybridDaqData     *fData;     //!
   StSvtDaqData           *fSvtData;  //!
@@ -79,10 +79,10 @@ class StSvtDaqMaker : public StMaker {
  protected:
 
  public: 
-  StSvtDaqMaker(const char *name="SvtDaq", char* config="FULL", char* data="ZS");
+  StSvtDaqMaker(const char *name="SvtDaq", const char* config="FULL", const char* data="ZS");
   virtual       ~StSvtDaqMaker();
-  void   SetConfiguration(char* config){fConfig = config;}
-  void   SetDataType(char* data){fDataType = data;}
+  void   SetConfiguration(const char* config){fConfig = config;}
+  void   SetDataType(const char* data){fDataType = data;}
   Int_t  SetSvtData();
   Int_t  SetSvtPed();
   Int_t  SetSvtRMSPed();

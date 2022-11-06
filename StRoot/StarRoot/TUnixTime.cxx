@@ -8,9 +8,9 @@
  *
  ***************************************************************************
  **************************************************************************/
+#include <ctime>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <assert.h>
 #include "TUnixTime.h"
 #include "TDatime.h"
@@ -111,30 +111,29 @@ void TUnixTime::SetLTime(Int_t idate, Int_t itime)
 //______________________________________________________________________________
 void TUnixTime::GetGTime(Int_t &idate, Int_t &itime)
 {
-  struct tm gt;
-  gt = *gmtime((time_t*)&fUTime);
-  tm2DateTime(idate,itime,&gt);
+  std::time_t utime = fUTime;
+  std::tm *gt = gmtime(&utime);
+  tm2DateTime(idate, itime, gt);
 
 }
 //______________________________________________________________________________
 void TUnixTime::GetLTime(Int_t &idate, Int_t &itime)
 {
-  struct tm gt;
-  gt = *localtime((time_t*)&fUTime);
-  tm2DateTime(idate,itime,&gt);
-
+  std::time_t utime = fUTime;
+  std::tm *gt = localtime(&utime);
+  tm2DateTime(idate, itime, gt);
 }
 //______________________________________________________________________________
 TString TUnixTime::GetLString()
 {
-  TString ts(ctime((time_t*)&fUTime));
-  return ts;
+  std::time_t utime = fUTime;
+  return TString(ctime(&utime));
 }  
 //______________________________________________________________________________
 TString TUnixTime::GetGString()
 {
-  TString ts(asctime(gmtime((time_t*)&fUTime)));
-  return ts;
+  std::time_t utime = fUTime;
+  return TString(asctime(gmtime(&utime)));
 }  
 //______________________________________________________________________________
 void TUnixTime::SetLTime(const TDatime &loc)

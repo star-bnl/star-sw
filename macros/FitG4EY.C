@@ -1148,7 +1148,8 @@ minimu log10(p/m) alpga    -0.7   40 keV          -0.850  0.141 -1.9688383655156
   static Int_t _debug = 0;
   for (Int_t i = i1; i <= i2; i++) { 
     if (frac[i] <= 0.0) continue;
-    Double_t Mu = (mu + parMIPs[i][sign][IO].mu - parMIPs[0][sign][IO].mu)/(scale + MuShiftIO[IO]);
+    //    Double_t Mu = (mu + parMIPs[i][sign][IO].mu - parMIPs[0][sign][IO].mu)/(scale + MuShiftIO[IO]);
+    Double_t Mu = (mu + parMIPs[i][sign][IO].mu - parMIPs[0][0][IO].mu)/(scale + MuShiftIO[IO]);
     Double_t Sigma =                  (parMIPs[i][sign][IO].sigma + sigma)/(scale + MuShiftIO[IO]);
 #ifdef __ELOSS__ 
     Double_t eps = dNdxMIP[i]/dNdxMIP[0] - 1;
@@ -1172,7 +1173,8 @@ minimu log10(p/m) alpga    -0.7   40 keV          -0.850  0.141 -1.9688383655156
 	if (frac[j] <= 0.0) continue;
 	Int_t l = (i <= j) ? i + j*(j+1)/2 : j + i*(i+1)/2;
 	l += Npart4EY;
-	Double_t Mu =    (mu    + parMIPs[l][sign][IO].mu     - parMIPs[0][sign][IO].mu)/(scale + MuShiftIO[IO]);
+	//	Double_t Mu =    (mu    + parMIPs[l][sign][IO].mu     - parMIPs[0][sign][IO].mu)/(scale + MuShiftIO[IO]);
+	Double_t Mu =    (mu    + parMIPs[l][sign][IO].mu     - parMIPs[0][0][IO].mu)/(scale + MuShiftIO[IO]);
 	Double_t Sigma = (sigma + parMIPs[l][sign][IO].sigma                           )/(scale + MuShiftIO[IO]);
 	Double_t pars[4] = {0, Mu, Sigma, parMIPs[l][sign][IO].alpha};
 	cont += frac[j]*g->EvalPar(XX, pars);

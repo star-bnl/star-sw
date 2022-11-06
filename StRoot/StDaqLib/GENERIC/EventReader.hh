@@ -136,7 +136,7 @@ using std::string;
 
 #include "RecHeaderFormats.hh"
 #include "Error.hh"
-#include "Rtypes.h"
+
 #define TRUE  1
 #define FALSE 0
 
@@ -154,7 +154,7 @@ struct EventInfo // return from EventReader::getEventInfo()
 {
   int EventLength;
   int Token;
-  ULong_t       UnixTime;
+  unsigned int  UnixTime;
   unsigned int  EventSeqNo;
   unsigned int  TrigWord;
   unsigned int  TrigInputWord;
@@ -477,7 +477,7 @@ public:
   int system_present(Bank_DATAP *datap, int sys);
 
   void printEventInfo(FILE *fd=stdout);
-  void fprintError(int err, const char *file, int line, char *userstring);
+  void fprintError(int err, const char *file, int line, const char *userstring);
 
   int runno() { return runnum; }
   int errorNo() { return errnum; };
