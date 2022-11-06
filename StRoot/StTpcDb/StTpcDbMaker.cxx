@@ -300,6 +300,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   if (IAttr("ExB")) { 
     if(! IAttr("OSpaceFXT") && St_beamInfoC::instance()->IsFixedTarget() ) {
       SetAttr("OSpaceFXT"  , kTRUE);
+      SetAttr("OSpaceZ2"   , kFALSE);
     }
     // Backward compatibility preserved.
     Int_t mask=1;                                    // Al Saulys request
