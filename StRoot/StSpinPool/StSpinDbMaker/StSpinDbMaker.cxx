@@ -187,7 +187,7 @@ void  StSpinDbMaker::optimizeTables  (){
 
   } 
 
-  char *polDir="scrambled";
+  string polDir="scrambled";
   if(isPolDirTrans()) polDir="Transverse";
   if(isPolDirLong()) polDir="Longitudinal";
   
@@ -487,9 +487,9 @@ void StSpinDbMaker::print(int level) {
     int yellBx=(bXstar+getBucketOffsets()[yellRing]/3)%SPINDbMaxBXings;
     int spin8=spin8usingBX48(bx48);
     int spin4=spin4usingBX48(bx48);
-    char *ftt="empty ";
+    const char *ftt="empty ";
     if (isBXfilledUsingBX48(bx48))ftt="filled";
-    char *mtt="use "; 
+    const char *mtt="use ";
     if(isMaskedUsingBX48(bx48))mtt="*mask*";
      printf("  %3d    0x%02x       %2d    %6s   %6s   %3d     %3d    %3d\n",bXstar,spin8,spin4,ftt,mtt,bx48,blueBx,yellBx);
     //  printf("bx48=%d mU=%d bxStar=%d mR=%d\n", bx48,isMaskedUsingBX48(bx48),bXstar,mTabSpinBXmask->bXmask[bXstar]);

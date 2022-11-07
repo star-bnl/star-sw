@@ -465,7 +465,7 @@ public:
 
   long NextEventOffset();
   void setVerbose(int); // 0 turns off all internal printout
-  char * findBank(char *bankid); // navigates to pointer bnk below DATAP
+  char * findBank(const char *bankid); // navigates to pointer bnk below DATAP
   int verbose;
 
   ~EventReader();
@@ -477,7 +477,7 @@ public:
   int system_present(Bank_DATAP *datap, int sys);
 
   void printEventInfo(FILE *fd=stdout);
-  void fprintError(int err, char *file, int line, char *userstring);
+  void fprintError(int err, const char *file, int line, const char *userstring);
 
   int runno() { return runnum; }
   int errorNo() { return errnum; };

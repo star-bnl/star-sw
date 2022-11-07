@@ -128,8 +128,8 @@ Short_t HMapSCBRA[10];
 Short_t HMapSCPP[10];
 Short_t HMapSCJ[10];
 
-char* colW[4]={"Green ","Brown ","Orange","Blue  "};
-char* colJ[8]={"Blue  ","Orange","Violet","Black ",
+const char* colW[4]={"Green ","Brown ","Orange","Blue  "};
+const char* colJ[8]={"Blue  ","Orange","Violet","Black ",
 	       "Yellow","Red   ","Grey  ","Blue  "};
 float leng[8]={     6.5,     6.5,     5.0,    5.0,
       	            3.5,     3.5,     8.0,    8.0};
@@ -347,7 +347,7 @@ int jacketColor(int ehp, int dep, int ch){
 }
 
 void getName(Int_t det, Int_t id, char name[]){
-  char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
+  const char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
   int ehp,ns,crt,slt,dep,ch;
   int c=getColumnNumber(det,id);
   int r=getRowNumber(det,id);
@@ -359,7 +359,7 @@ void getName(Int_t det, Int_t id, char name[]){
 }
 
 void getName(Int_t ehp, Int_t ns, Int_t dep, Int_t ch, char name[]){
-  char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
+  const char* nameDET[6]={"EN","ES","HN","HS","PN","PS"};
   int det,id,crt,slt;
   getIdfromDep(ehp,ns,dep,ch,det,id,crt,slt);
   // printf("%1d %1d %2d %2d : %1d %3d\n",ehp,ns,dep,ch,det,id);                                                                                     
@@ -743,9 +743,9 @@ void printMap(){
     FILE *f7  = fopen("fcsEpdMap.txt","w");    
     FILE *fpp = fopen("fcsPPMap.txt","w");    
 
-    char* EHP[3]={"Ecal","Hcal","Pres"};
-    char* CRT[5]={"EN","MN","MA","MS","ES"};
-    char* DET[6]={"EN","ES","HN","HS","PN","PS"};
+    const char* EHP[3]={"Ecal","Hcal","Pres"};
+    const char* CRT[5]={"EN","MN","MA","MS","ES"};
+    const char* DET[6]={"EN","ES","HN","HS","PN","PS"};
     
     //Ecal
     for(ns=0; ns<2; ns++){

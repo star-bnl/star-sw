@@ -86,7 +86,7 @@ public:
   // 6=AVTrack and MuDST (vertex, eemc hits) : FGT+vetex+EEMC tracking (no TPC hits in MUDST)
   
   inline void setWriteTree(int v=1) {mOutTreeFile=v;} 
-  inline void setReadTree(char* v="alignment.root")  {mInTreeFile=v;}
+  inline void setReadTree(const char* v="alignment.root")  {mInTreeFile=v;}
   
   //Set resolution for each detector to normalize residuals (also used for fake data gaussian sigma)
   inline void setError(Float_t fgt, Float_t vtx, Float_t vtxz, Float_t tpci, Float_t tpco, Float_t tpcz, Float_t ppt, Float_t emc) {
@@ -97,7 +97,7 @@ public:
     mFakeNtrk=n; mFakeEmin=emin; mFakeEmax=emax; mFakeEtamin=etamin; mFakeEtamax=etamax; mFakePhimin=phimin; mFakePhimax=phimax; mFakeVtxSig=vsig;
   }
   inline void setRunNumber(Int_t v, Int_t s=0, Int_t d=0) {mRunNumber=v; mSeqNumber=s; mDay=d;}
-  inline void setReadParFile(char* v="alignment.dat") {mReadParFile=v;}
+  inline void setReadParFile(const char* v="alignment.dat") {mReadParFile=v;}
 
   void setStep(int discmask,int quadmask, int parmask, int hitmask_disc, int residmask,
 	       int trackType, int minHit, int minFgtHit, int minVtx, int minTpcHit, int minPromptHit, int minEemcHit,
@@ -148,8 +148,8 @@ private:
   Float_t mFakeEmin, mFakeEmax, mFakeEtamin, mFakeEtamax, mFakePhimin, mFakePhimax, mFakeVtxSig; //fake track kinematics
   Int_t   mDataSource;   //!  0=reading from StEvent(primary) 1=StEvent Global, 2=AVTrack 3=Reading from TTree(alignment.root) 4=Fake
   Int_t  mOutTreeFile;   //!  output Tree file
-  Char_t* mInTreeFile;   //!  input Tree file name
-  Char_t* mReadParFile;  //!  input parameter file instead of DB
+  const Char_t* mInTreeFile;   //!  input Tree file name
+  const Char_t* mReadParFile;  //!  input parameter file instead of DB
   Int_t   mRunNumber;    //!  Run# for output file name
   Int_t   mSeqNumber;    //!  Seq# for output file name
   Int_t   mDay;          //!  Dat# for output file name

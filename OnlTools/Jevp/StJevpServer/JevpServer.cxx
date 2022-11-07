@@ -141,7 +141,7 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
 	l4sourceline = l4BuilderSourceLine;
     }
     
-    char *line_builder = "";
+    const char *line_builder = "";
     int plotSetLine = 0;
     int plotSetCallParam = 0;
     int builderLine = 0;
@@ -1341,7 +1341,7 @@ void JevpServer::performStartRun()
     mem /= 1024.0;
     LOG("JEFF", "Start run #%d  (mem: %.1lfMB)",runStatus.run, mem);
 
-    char *servername = "JevpServer";
+    const char *servername = "JevpServer";
     if(isL4) {
 	servername = "L4JevpServer";
     }

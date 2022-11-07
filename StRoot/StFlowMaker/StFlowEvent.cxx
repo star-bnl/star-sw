@@ -376,7 +376,7 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
 
 //-------------------------------------------------------------
 
-TVector2 StFlowEvent::ReCentPar(StFlowSelection* pFlowSelect, char* TPC) {
+TVector2 StFlowEvent::ReCentPar(StFlowSelection* pFlowSelect, const char* TPC) {
   // For LYZ
   // Calculate weighted recentering vector per particle for each TPC
   // TPC can be "TPC", "TPCE", or "TPCW"
@@ -417,7 +417,7 @@ TVector2 StFlowEvent::ReCentPar(StFlowSelection* pFlowSelect, char* TPC) {
 
 //-------------------------------------------------------------
 
-TVector2 StFlowEvent::ReCentEPPar(StFlowSelection* pFlowSelect, char* TPC) {
+TVector2 StFlowEvent::ReCentEPPar(StFlowSelection* pFlowSelect, const char* TPC) {
   // For ana
   // Calculate the recentering vector per particle for each TPC
   // TPC can be "TPCE", "TPCW", "FTPCE", or "FTPCW"
