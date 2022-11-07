@@ -2007,7 +2007,7 @@ MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
 St_trigDetSumsC *St_trigDetSumsC::fgInstance = 0;
 St_trigDetSumsC *St_trigDetSumsC::instance() {
   if (fgInstance) {
-#if 1
+#if 0
     static trigDetSums_st *sOld = 0;
     static Int_t iBreak = 0;
     if (iBreak < 3) {
@@ -2023,9 +2023,13 @@ St_trigDetSumsC *St_trigDetSumsC::instance() {
 #endif
     return fgInstance;
   }
-  St_trigDetSums *table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("trigDetSums");
+  St_trigDetSums *table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("StEvent/trigDetSums");
   if (table) {
-    LOG_QA << "get trigDetSums from GetDataSet" << endm;
+    static Int_t iBreak = 0;
+    if (iBreak < 3) {
+      LOG_QA << "get trigDetSums from GetDataSet" << endm;
+      iBreak++;
+    }
     fgInstance = new St_trigDetSumsC(table);
     StMaker::GetChain()->AddData(fgInstance);
     return fgInstance;
