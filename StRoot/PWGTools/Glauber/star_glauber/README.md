@@ -170,6 +170,12 @@ Go the LOG_Scan, and find the output log files like “doScanX_my_1_27_1_8_0_16_
 parameter values, so it should be easy to find it.  Copy the line 173-204 and paste them to 
 “StRoot/StCentralityMaker/StCentrality.cxx” and change all the npp, k, x and eff values to those you obtained in the same code.
 
+Important! After updating `StCentrality.cxx` with the correct parameters, recompile and then re-generate the glauber trees that were created in the first step:
+```bash
+cons
+./all_submit_doFastGlauberMcMaker.csh RuRu_Case1 200 0 5 1
+```
+
 ```bash
 ./createList.csh
 ```
