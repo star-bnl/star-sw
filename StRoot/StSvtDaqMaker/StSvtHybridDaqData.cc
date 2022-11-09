@@ -39,7 +39,7 @@
 
 ClassImp(StSvtHybridDaqData)
 
-StSvtHybridDaqData::StSvtHybridDaqData(int barrel, int ladder, int wafer, int hybrid, StSVTReader* reader, char* option) : 
+StSvtHybridDaqData::StSvtHybridDaqData(int barrel, int ladder, int wafer, int hybrid, StSVTReader* reader, const char* option) :
   StSvtHybridData(barrel, ladder, wafer, hybrid)
 {
   assert(sizeof(TPCSequence)==sizeof(StSequence));
@@ -51,7 +51,7 @@ StSvtHybridDaqData::StSvtHybridDaqData(int barrel, int ladder, int wafer, int hy
     setHybridData(reader,option);
 }
 
-int StSvtHybridDaqData::setHybridData(StSVTReader* reader, char* option)
+int StSvtHybridDaqData::setHybridData(StSVTReader* reader, const char* option)
 {
   // fills the data members of this object, 
   // so one can access the data through the two methods mentioned below. 

@@ -91,7 +91,7 @@ Int_t StPeCLumiMaker::InitRun(Int_t runnr) {
   StIOMaker* pIOMaker = (StIOMaker*)GetMaker("IO");
   if ( pIOMaker) {
      uDstFileName = pIOMaker->GetFile() ;
-     char* ccc = "/" ;
+     const char* ccc = "/" ;
      Ssiz_t slashPosition = uDstFileName.Last(*ccc) ;
      if ( slashPosition != -1 &&
           slashPosition < uDstFileName.Length() ) 

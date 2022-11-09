@@ -92,11 +92,11 @@ JevpPlotSet::JevpPlotSet(JevpServer *server)
   PCP;
 }
 
-void JevpPlotSet::logDbVariable(char *name, double value) {
+void JevpPlotSet::logDbVariable(const char *name, double value) {
     JevpPlotSet::staticLogDbVariable(name, value, run, lastevttm, plotsetname, clientdatadir);
 }
 
-void JevpPlotSet::staticLogDbVariable(char *name, double value, int my_run, int my_time, char *my_plotsetname, char *my_clientdatadir) { 
+void JevpPlotSet::staticLogDbVariable(const char *name, double value, int my_run, int my_time, const char *my_plotsetname, const char *my_clientdatadir) {
     char fn[256];
     sprintf(fn, "%s/%s", my_clientdatadir, "dbVariable.tosend");
        
@@ -959,7 +959,7 @@ void JevpPlotSet::writePdfFile()
 }
 
 // ugly, but threadsafe if parent->addServerTags() is threadsafe!
-void JevpPlotSet::addServerTags(char *tags)
+void JevpPlotSet::addServerTags(const char *tags)
 {
     char *tmp = (char *)malloc(strlen(tags) + 3);
     if(!tmp) {

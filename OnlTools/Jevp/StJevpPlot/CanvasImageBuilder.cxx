@@ -139,7 +139,7 @@ void CanvasImageBuilder::writeIndexFiles(FILE *f, DisplayNode *node, int page, i
     }
 }
 
-int CanvasImageBuilder::writeIndexFromNode(FILE *f, DisplayNode *node, char *currdir, int page, int tabs) {
+int CanvasImageBuilder::writeIndexFromNode(FILE *f, DisplayNode *node, const char *currdir, int page, int tabs) {
     int npages = 0;
     if(node->leaf) {
 	fprintf(f,"%s : %d\n", currdir, page); 
