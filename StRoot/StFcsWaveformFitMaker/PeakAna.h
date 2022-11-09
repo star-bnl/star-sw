@@ -132,8 +132,8 @@ public:
   */
   static TGraph* ConvertPeaksToGraph(const std::vector<PeakWindow> &Peaks);
   void ConvertPeaksToGraph();  //!< same as #ConvertPeaksToGraph() but creates a new graph that replaces old one
-  static PeakAna* ConvertPeaksToAna(const PeakAna &Ana);  //!< same as #ConvertPeaksToGraph() but returns a new PeakAna with same settings without modifying old one
-  PeakAna* ConvertPeaksToAna();//!< same as #ConvertPeaksToAna() but returns new PeakAna with same settings without modifying current one
+  static PeakAna ConvertPeaksToAna(const PeakAna &Ana);  //!< same as #ConvertPeaksToGraph() but returns a new PeakAna with same settings without modifying old one
+  PeakAna ConvertPeaksToAna();//!< same as #ConvertPeaksToAna() but returns new PeakAna with same settings without modifying current one
 
   /**@brief Finds all possible Peaks in signal with some criteria
 

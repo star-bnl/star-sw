@@ -38,9 +38,9 @@ class StFcsDbPulse : public TDataSet {
   
   //Constants for simulating pulses
   void setTBPerRC(double v){mTBPerRC = v;}         //!< @param v set #mTBPerRC
-  double TBPerRC(){return mTBPerRC;}               //!< @return #mTBPerRC
-  double nsecPerTB(){return 107.0/TBPerRC();}      //!< nanoseconds per timebin
-  double BeamLengthSig(){return 10.0/nsecPerTB();} //!< beam length sigma
+  double TBPerRC()const{return mTBPerRC;}               //!< @return #mTBPerRC
+  double nsecPerTB()const{return 107.0/TBPerRC();}      //!< nanoseconds per timebin
+  double BeamLengthSig()const{return 10.0/nsecPerTB();} //!< beam length sigma
 
   /**@brief Sets the variables needed by the sum of xexp functions that describe the tail of the pulse shape
      
@@ -63,15 +63,15 @@ class StFcsDbPulse : public TDataSet {
   void setP2(double v){mP2 = v;}         //!< @param v set #mP2
 
   //Variables related to the tail function
-  double GSigma(){return mGSigma;}  //!< @return #mGSigma
-  double A1(){return mA1;}          //!< @return #mA1
-  double A2(){return mA2;}          //!< @return #mA2
-  double Xoff1(){return mXoff1;}    //!< @return #mXoff1
-  double Xoff2(){return mXoff2;}    //!< @return #mXoff2
-  double Tau1(){return mTau1;}      //!< @return #mTau1
-  double Tau2(){return mTau2;}      //!< @return #mTau2
-  double P1(){return mP1;}          //!< @return #mP1
-  double P2(){return mP2;}          //!< @return #mP2
+  double GSigma()const{return mGSigma;}  //!< @return #mGSigma
+  double A1()const{return mA1;}          //!< @return #mA1
+  double A2()const{return mA2;}          //!< @return #mA2
+  double Xoff1()const{return mXoff1;}    //!< @return #mXoff1
+  double Xoff2()const{return mXoff2;}    //!< @return #mXoff2
+  double Tau1()const{return mTau1;}      //!< @return #mTau1
+  double Tau2()const{return mTau2;}      //!< @return #mTau2
+  double P1()const{return mP1;}          //!< @return #mP1
+  double P2()const{return mP2;}          //!< @return #mP2
 
   /**@brief Figure out and set the errors on FCS pulse data stored in a TGraphAsymmErrors object
      
@@ -148,7 +148,7 @@ class StFcsDbPulse : public TDataSet {
   */
   static Int_t getYMinMax(TGraphAsymmErrors* gae, Double_t &Ymin, Double_t &Ymax, Double_t xmin=-5, Double_t xmax=2000);
 
-  void Print(Option_t* opt = ""); //!< Print all the constants associated with this class
+  virtual void Print(Option_t* opt = "") const; //!< Print all the constants associated with this class
 
  protected:
   double mTBPerRC;  //!< number of timebins in one RHIC crossing

@@ -681,8 +681,8 @@ float StFcsWaveformFitMaker::analyzeWaveform(int select, TGraphAsymmErrors* g, f
       if(integral>50 && dname.Contains(mFilter)) flag=1;
     }
     if(mFitDrawOn && flag && mFilename && mPage<=mMaxPage) {
-      printf("hit:%u det=%s func=%d mFitDrawOn=%d mFilter=%s mFilename=%s mPage=%d mMaxPage=%d integral=%f\n",
-	     mHitIdx,mDetName,func,mFitDrawOn,mFilter,mFilename,mPage,mMaxPage,integral);	
+      printf("hit:%u det=%s func=%p mFitDrawOn=%d mFilter=%s mFilename=%s mPage=%d mMaxPage=%d integral=%f\n",
+	     mHitIdx,mDetName,(void*)func,mFitDrawOn,mFilter,mFilename,mPage,mMaxPage,integral);	
       drawFit(g,func);
     }
 
@@ -1380,16 +1380,6 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
 
   int det0 = 0; int ch0=0;
   mDb->getFromName( gae->GetName(), det0,ch0 );
-  //std::cout << "|det:"<<det0 << "|ch:"<<ch0 << std::endl;
-  //if( det0==5 && ch0==169 ){
-  //if( det0==0 && ch0==161 ){
-  /*if( det0==1 && ch0==485 ){
-    mPulseFit->SetDebug(3);
-    mPulseFit->ResetPeak();
-    mPulseFit->AnalyzeForPeak();
-    mPulseFit->SetDebug(0);
-    }*/
-
 
   //std::cout << "|compidx:"<<compidx << "|npeaks:"<<npeaks <<std::endl;
   if( mTest==6 ){

@@ -52,10 +52,10 @@ TObject* PeakWindow::Clone(const char* newname) const
 {
   PeakWindow* window = new PeakWindow();
   Copy(*window);
-  //Also copy color, style, and size??
-  if( this->mStartLine!=0 ){ window->GetStartLine(this->mStartLine->GetY1(),this->mStartLine->GetY2()); }
-  if( this->mPeakMarker!=0 ){ window->GetPeakMarker(); }
-  if( this->mEndLine!=0 )  { window->GetEndLine(  this->mEndLine->GetY1(),  this->mStartLine->GetY2()); }
+  //Also copy color, style, and size?
+  if( mStartLine!=0 ){ window->GetStartLine( mStartLine->GetY1(), mStartLine->GetY2()); }
+  if( mPeakMarker!=0 ){ window->GetPeakMarker(); }
+  if( mEndLine!=0 )  { window->GetEndLine(  mEndLine->GetY1(), mStartLine->GetY2()); }
 
   return window;
 }
@@ -95,7 +95,7 @@ void PeakWindow::Reset(Double_t start, Double_t end)
 
 void PeakWindow::Print(Option_t* opt)const
 {
-	std::cout << "|Start:("<<mStartX<<","<<mStartY<<")"
+	std::cout <<"|Start:("<<mStartX<<","<<mStartY<<")"
 		  <<"|End:("<<mEndX<<","<<mEndY<<")"
 		  <<"|Ppeak:"<<mP_Peak<<"|Peak:("<<mPeakX<<","<<mPeakY<<")";
 }
@@ -184,7 +184,6 @@ Double_t PeakWindow::StartEndLineYint() const
 
 Double_t PeakWindow::MidPoint(TGraph* graph) const
 {
-  //std::cout << "===== PeakAna::PeakTunnelProb - DeepDebug =====" << std::endl;
   Double_t xdiff = mEndX-mStartX;
   Double_t ydiff = mEndY-mStartY;
   Double_t mslope = ydiff/xdiff; //slope of the line formed by the point (mStartX,mStartY) and (mEndX,mEndY)
@@ -199,17 +198,11 @@ Double_t PeakWindow::MidPoint(TGraph* graph) const
 }
 
 Double_t PeakWindow::SlopeChirality(Double_t scale) const
-{
-	/*if( slope<0 ){return -1.0*exp(slope); }
-	else{ return exp(slope); }*/
-	/*if( slope<0 ){ return sinh(slope)-1.0; }
-	else{ return sinh(slope)+1.0; }*/
-	//[Feb 28, 2022]>Use small fluctation around zero to return 0??
-	Double_t slope = StartEndLineSlope();
-	if( slope<0 ){ return -1.0*cosh(scale*slope); }
-	else{ return cosh(scale*slope); }
-	/*if( slope<0 ){ return -1.0*(slope*slope)-1; }
-	else{ return (slope*slope)+1.0; }*/
+{  
+  //[Feb 28, 2022]>Use small fluctation around zero to return 0??
+  Double_t slope = StartEndLineSlope();
+  if( slope<0 ){ return -1.0*cosh(scale*slope); }
+  else{ return cosh(scale*slope); }
 }
 
 Double_t PeakWindow::PeakChirality(Double_t slopescale, Double_t scale) const
@@ -231,68 +224,60 @@ Double_t PeakWindow::PeakChirality(Double_t slopescale, Double_t scale) const
 
 Double_t PeakWindow::PeakChiralityProb(Double_t probscale,Double_t chirality) const
 {
-	if( probscale<0 ){ probscale = fabs(probscale); }
-	//Probability is 1/(chir^2+1). This was chosen because 1/x^2+1 "falls softer" than e^-|x|. This returns a probabilty to NOT merge a peak meaning if the chirality is 0 then should return 1 and when chirality is +-inf should return 0.
-	return static_cast<Double_t>(1)/(probscale*chirality*chirality+static_cast<Double_t>(1));
+  if( probscale<0 ){ probscale = fabs(probscale); }
+  //Probability is 1/(chir^2+1). This was chosen because 1/x^2+1 "falls softer" than e^-|x|. This returns a probabilty to NOT merge a peak meaning if the chirality is 0 then should return 1 and when chirality is +-inf should return 0.
+  return static_cast<Double_t>(1)/(probscale*chirality*chirality+static_cast<Double_t>(1));
 }
 
 Double_t PeakWindow::PeakChiralityProb(Double_t probscale, Double_t peakscale, Double_t chirscale ) const
 {
-	Double_t chir = PeakChirality(peakscale, chirscale);
-	return this->PeakChiralityProb(peakscale,chir);
+  Double_t chir = PeakChirality(peakscale, chirscale);
+  return this->PeakChiralityProb(peakscale,chir);
 }
 
 Double_t PeakWindow::PeakTunnelProb(TGraph* graph, Double_t scale, Double_t sigma) const
 {
-	//std::cout << "===== PeakAna::PeakTunnelProb - DeepDebug =====" << std::endl;
-	if( sigma<0 ){sigma = fabs(sigma);}
-	else if(sigma==0){std::cout << "PeakWindow::PeakTunnelProb - ERROR:sigma cannot be 0 - Returning probability of 0" << std::endl; return 0;}
-	//Double_t base = window.mStartX;
-	//Double_t xpeak = 0; Double_t ypeak=0;
-	//mG_Data->GetPoint(window.mP_Peak,xpeak,ypeak);
-	Double_t xdiff = mEndX-mStartX;
-	Double_t ydiff = mEndY-mStartY;
-	Double_t mslope = ydiff/xdiff; //slope of the line formed by the point (mStartX,mStartY) and (mEndX,mEndY)
-	Double_t yint = mStartY-mslope*mStartX;//y-intercept of the line above "^"
-	Double_t peakx=0; Double_t peaky=0;
-	graph->GetPoint(mP_Peak,peakx,peaky);
-	Double_t yline = mslope*peakx+yint;//y-value at peak x value, use mPeak instead(may not be set so check and pick)??
-	Double_t heightdiff = peaky-yline;
-	//return 1.0/scale*exp(-1.0*scale*heightdiff*xdiff);//Alternative probablity that is not so easy to normalize
-	if( heightdiff<=0 ){ return 1; }//if peak value is less than the line value automatically tunnel
-	else{
-		//Double_t prob = TMath::Exp(-1.0*fabs(scale)*fabs(xdiff)) * (TMath::Erfc((heightdiff)/(TMath::Sqrt2()*sigma)));
-		//std::cout << "|xd:"<<xdiff<<"|yd:"<<ydiff<<"|slope:"<<mslope<<"|yint:"<<yint<<"|yline:"<<yline << "|peaky:"<<peaky << "|hd:"<<heightdiff << "|P:"<<prob  << std::endl;
-		//return prob;
-		//return TMath::Exp(-1.0*fabs(scale)*fabs(xdiff)) * (TMath::Erfc((heightdiff)/(TMath::Sqrt2()*sigma)));
+  if( sigma<0 ){sigma = fabs(sigma);}
+  else if(sigma==0){std::cout << "PeakWindow::PeakTunnelProb - ERROR:sigma cannot be 0 - Returning probability of 0" << std::endl; return 0;}
+  Double_t xdiff = mEndX-mStartX;
+  Double_t ydiff = mEndY-mStartY;
+  Double_t mslope = ydiff/xdiff; //slope of the line formed by the point (mStartX,mStartY) and (mEndX,mEndY)
+  Double_t yint = mStartY-mslope*mStartX;//y-intercept of the line above "^"
+  Double_t peakx=0; Double_t peaky=0;
+  graph->GetPoint(mP_Peak,peakx,peaky);
+  Double_t yline = mslope*peakx+yint;//y-value at peak x value, use mPeak instead(may not be set so check and pick)??
+  Double_t heightdiff = peaky-yline;
+  //return 1.0/scale*exp(-1.0*scale*heightdiff*xdiff);//Alternative probablity that is not so easy to normalize
+  if( heightdiff<=0 ){ return 1; }//if peak value is less than the line value automatically tunnel
+  else{
+    //return TMath::Exp(-1.0*fabs(scale)*fabs(xdiff)) * (TMath::Erfc((heightdiff)/(TMath::Sqrt2()*sigma)));
     return (1.0/(scale*xdiff*xdiff+1.0))*(TMath::Erfc((heightdiff)/(TMath::Sqrt2()*sigma)));
-	}
-	//The idea for this probablity distribution (not probability density function) comes from two assumptions about the underlying data
-	//1. As the distance between the start and end x-values increases the probability of tunneling through will decrease exponentially with some scale that must be determined based on the input data. One-tenth of the difference in x-values may work.
-	//2. There is some noise in the y-value of the data that follows a Normal distribution. The mean ('yline') will be the y-value of the line connecting the start and end points evaluated at the x-value of the peak. The sigma should be the noise level of the data. The cumulative distribution function (which is the actual probability) for a Normal Distribution is the complimentary error function (Erfc). Note that the normalization constant of 1/2 has been removed since this is a probability distribution not a probability density function and hence does not need to be normalized as long as the value returned is between 0 and 1. This is true for Erfc as long as 'peaky'>='yline' which is the case here.
-	//The total proability of tunneling is then (@1)*(@2) with two free parameters the scale and the sigma. Note the scale and sigma must be positive
+  }
+  //The idea for this probablity distribution (not probability density function) comes from two assumptions about the underlying data
+  //1. As the distance between the start and end x-values increases the probability of tunneling through will decrease exponentially with some scale that must be determined based on the input data. One-tenth of the difference in x-values may work.
+  //2. There is some noise in the y-value of the data that follows a Normal distribution. The mean ('yline') will be the y-value of the line connecting the start and end points evaluated at the x-value of the peak. The sigma should be the noise level of the data. The cumulative distribution function (which is the actual probability) for a Normal Distribution is the complimentary error function (Erfc). Note that the normalization constant of 1/2 has been removed since this is a probability distribution not a probability density function and hence does not need to be normalized as long as the value returned is between 0 and 1. This is true for Erfc as long as 'peaky'>='yline' which is the case here.
+  //The total proability of tunneling is then (@1)*(@2) with two free parameters the scale and the sigma. Note the scale and sigma must be positive
 }
 
 UShort_t PeakWindow::CompareTo(const PeakWindow& other) const
 {
   UShort_t check = 0;
-  if( this->mStartX == other.mStartX ){
-    if( this->mEndX == other.mEndX ){ check = 1; }
+  if( mStartX == other.mStartX ){
+    if( mEndX == other.mEndX ){ check = 1; }
   }
-  if( check>0 && this->mP_Peak == other.mP_Peak ){check=2;}
-  if( check>1 && this->mStartY == other.mStartY ){
-    if( this->mEndY == other.mEndY ){
+  if( check>0 && mP_Peak == other.mP_Peak ){check=2;}
+  if( check>1 && mStartY == other.mStartY ){
+    if( mEndY == other.mEndY ){
       check = 3;
     }
   }
-  if( check>2 && this->mPeakX == other.mPeakX ){ check = 4;}
-  if( check>3 && this->mPeakY == other.mPeakY ){ check = 5;}
+  if( check>2 && mPeakX == other.mPeakX ){ check = 4;}
+  if( check>3 && mPeakY == other.mPeakY ){ check = 5;}
   return check;
 }
 
 void PeakWindow::Draw(Option_t* opt)
 {
-  //this->Paint(opt);
   AppendPad(opt);
 }
 

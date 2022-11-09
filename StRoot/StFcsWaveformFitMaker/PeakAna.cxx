@@ -49,7 +49,7 @@ void PeakAna::Init()
   mYRangeMin = 0;
   mYRangeMax = 1;
   mFoundPeak.SetWindow(mXRangeMin,mXRangeMax);
-  //mF1_SignalFit = 0;
+
   mTunnelScale = 1;//1 is default
   mTunnelSigma = 1;//1 is default
   mTunnelThreshold = -1;//Turn off by default
@@ -128,17 +128,17 @@ void PeakAna::Copy(TObject& obj) const
 
 TObject* PeakAna::Clone(const char* newname) const
 {
-  TGraph* cloneg = (TGraph*)this->GetData()->Clone(newname);
+  TGraph* cloneg = (TGraph*)GetData()->Clone(newname);
   PeakAna* ana = new PeakAna(cloneg);
   Copy(*ana);
   ana->ForceInternal();//Cloned graphs should always be internal
-  if( this->FoundPeakIndex()>=0 ){
+  if( FoundPeakIndex()>=0 ){
     //If mComputedIndex>=0 this means AnalyzeForPeak() was called and need to copy the peaks. This is preffered over re-running the analysis as copy should be faster than re-running the data
-    ana->mComputedIndex = this->mComputedIndex;
+    ana->mComputedIndex = mComputedIndex;
     for( UInt_t i=0; i<mPeaks.size(); ++i ){
       ana->mPeaks.push_back( mPeaks.at(i) );
     }
-    ana->mFoundPeak = this->mFoundPeak;
+    ana->mFoundPeak = mFoundPeak;
   }
   return ana;
 }
@@ -163,12 +163,11 @@ Int_t PeakAna::AnalyzeForPeak()
     mPeaks.swap( mergedpeaks );
   };
   mComputedIndex = this->SearchForPeak( mPeaks );//Returns a valid index for the possible peak vector or the size of the vector for an invalid peak
-  if( mComputedIndex<static_cast<Int_t>(mPeaks.size()) ){ mFoundPeak = mPeaks.at(mComputedIndex); } //No offset for now rethink in the future??
+  if( mComputedIndex<static_cast<Int_t>(mPeaks.size()) ){ mFoundPeak = mPeaks.at(mComputedIndex); }
   else{
     mFoundPeak.SetWindow(mXRangeMax+1,mXRangeMax+1);//If no valid index then set found peak to greater than max X values so it is obvious something's wrong
   }
   //@[May 10, 2022]>mFoundPeak is a copy of the one in the vector. When drawing the windows the one in the vector is accessed not 'mFoundPeak' which is why the color for the one in the vector is changed and not mFoundPeak.
-  //SetFoundPeakLineColor(kRed, kOrange);//Auto checks for valid index
   return mComputedIndex;
 }
 
@@ -181,16 +180,15 @@ Int_t PeakAna::AnalyzeForPeak(Double_t peak, Double_t width)
 Int_t PeakAna::AnalyzeForNoisyPeak()
 {
   ResetPeak();
-  //mPeaks = this->GetPossiblePeaks();//This is the sigma to compute the threshold
   this->GetPossiblePeaks();
-  PeakAna* noisyana = PeakAna::ConvertPeaksToAna(*this);
-  noisyana->SetTunnelThreshold(-1);//Don't use peak tunneling for this kind of peak finding
-  noisyana->AnalyzeForPeak();
+  PeakAna noisyana = PeakAna::ConvertPeaksToAna(*this);
+  noisyana.SetTunnelThreshold(-1);//Don't use peak tunneling for this kind of peak finding
+  noisyana.AnalyzeForPeak();
   //Replace old peak values with new one (maybe use swap in future??)
   mPeaks.clear();
-  for( Int_t inoisy=0; inoisy<noisyana->NPeaks(); ++inoisy )
+  for( Int_t inoisy=0; inoisy<noisyana.NPeaks(); ++inoisy )
   {
-    mPeaks.push_back( noisyana->GetPeak(inoisy) );
+    mPeaks.push_back( noisyana.GetPeak(inoisy) );
   }
   mComputedIndex = this->SearchForPeak( mPeaks );//Returns a valid index for the possible peak vector or the size of the vector for an invalid peak
   if( mComputedIndex<static_cast<Int_t>(mPeaks.size()) ){
@@ -200,7 +198,6 @@ Int_t PeakAna::AnalyzeForNoisyPeak()
     //mPeaks.at(mComputedIndex).SetEndLineColor(kOrange);
   }
   else{mFoundPeak.SetWindow(mXRangeMax+1,mXRangeMax+1);}//If no valid index then set found peak to greater than max X values so it is obvious something's wrong
-  delete noisyana;
   return mComputedIndex;
 }
 
@@ -214,11 +211,11 @@ bool PeakAna::GoodWindow()
 {
   if( mComputedIndex<0 ){this->AnalyzeForPeak();}
   //First check if start and end times are within our max timebin window of 0-1023
-  if( mFoundPeak.mStartX<mXRangeMin || mFoundPeak.mStartX>mXRangeMax ){/*std::cout<<"StartOut"<<std::endl;*/return false;}
-  else if( mFoundPeak.mEndX<mXRangeMin || mFoundPeak.mEndX > mXRangeMax ){/*std::cout<<"EndOut"<<std::endl;*/return false;}
+  if( mFoundPeak.mStartX<mXRangeMin || mFoundPeak.mStartX>mXRangeMax ){return false;}
+  else if( mFoundPeak.mEndX<mXRangeMin || mFoundPeak.mEndX > mXRangeMax ){return false;}
   //Next check if values make physical sense
-  else if( mFoundPeak.mStartX==mFoundPeak.mEndX ){/*std::cout<<"Equal"<<std::endl;*/return false;}
-  else if( mFoundPeak.mStartX > mFoundPeak.mEndX ){/*std::cout<<"Start>End"<<std::endl;*/return false;}
+  else if( mFoundPeak.mStartX==mFoundPeak.mEndX ){return false;}
+  else if( mFoundPeak.mStartX > mFoundPeak.mEndX ){return false;}
   else{return true;}
 }
 
@@ -351,7 +348,7 @@ void PeakAna::SetRange( Double_t xmin, Double_t ymin, Double_t xmax, Double_t ym
 }
 void PeakAna::SetSearchWindow(Double_t peak, Double_t width)
 {
-	mSearch.SetWindow(peak,width);
+  mSearch.SetWindow(peak,width);
   ResetPeak();//reset since old found peak should be invalid
 }
 
@@ -393,11 +390,9 @@ TGraph* PeakAna::ConvertHistToGraph(TH1* hist, UInt_t numavgs)
     UInt_t counter=0;//In case number of averages is not same as how many sums were performed
     for(Int_t i=ibin; i<ibin+static_cast<Int_t>(numavgs) && i<=nbins; ++i ){ sum += hist->GetBinContent(i); ++counter; }
     Double_t avg = sum/static_cast<Double_t>(counter);
-    //std::cout << std::endl<< "|sum:"<<sum << "|avg:"<<avg <<"|val:"<<hist->GetBinContent(ibin) << std::endl;
     //Set graph's point to center of x range
     Double_t xlow = hist->GetBinLowEdge(ibin);
     Double_t xhigh = hist->GetBinLowEdge(ibin+counter);
-    //AvgGr->SetPoint(AvgGr->GetN(),static_cast<Double_t>(ibin)+static_cast<Double_t>(numavgs)*0.5,avg);//This is for knowing which bin
     AvgGr->SetPoint(AvgGr->GetN(),(xlow+xhigh)/2.0,avg);//This is for knowing the x-value
   }
   return AvgGr;
@@ -421,34 +416,32 @@ void PeakAna::ConvertPeaksToGraph()
   {
     graph->SetPoint( ipeak,mPeaks.at(ipeak).mPeakX,mPeaks.at(ipeak).MidPoint() );
   }
-  this->SetData(graph);
-  this->ForceInternal();//new graph replaces old one so needs to be deleted
+  SetData(graph);
+  ForceInternal();//new graph replaces old one so needs to be deleted
   return;
 }
 
-PeakAna* PeakAna::ConvertPeaksToAna(const PeakAna &Ana)
+PeakAna PeakAna::ConvertPeaksToAna(const PeakAna &Ana)
 {
   TGraph* graph = new TGraph();
   for( Int_t ipeak=0; ipeak<Ana.NPeaks(); ++ipeak ){
     graph->SetPoint(ipeak, Ana.GetPeak(ipeak).mPeakX, Ana.GetPeak(ipeak).MidPoint() );
   }
-  PeakAna* NewAna = new PeakAna(Ana,graph);
-  NewAna->ForceInternal();//new graph so needs to be deleted
+  PeakAna NewAna(Ana,graph);
+  NewAna.ForceInternal();//new graph so needs to be deleted
   return NewAna;
 }
 
 PeakAna* PeakAna::MeanFilter( Int_t sizeavgs, bool copy )
 {
-  if( this->GetData()==0 ){return this;}
-  //std::cout << "|sizeavgs:"<<sizeavgs <<"|npoints:"<<npoints << std::endl;
-  const int npoints = this->GetData()->GetN();
+  if( GetData()==0 ){return this;}
+  const int npoints = GetData()->GetN();
   if( sizeavgs==0 || npoints<=1 ){ return this; }
   if( sizeavgs<0 ){ sizeavgs = -sizeavgs; }
   double ynew[npoints];
-  double* xdata = this->GetData()->GetX();
-  double* ydata = this->GetData()->GetY();
+  double* xdata = GetData()->GetX();
+  double* ydata = GetData()->GetY();
   for( int ipoint=0; ipoint<npoints; ++ipoint ){
-    //std::cout << "|ipoint:"<<ipoint<< "|J-:"<<static_cast<Int_t>(ipoint) - static_cast<Int_t>(sizeavgs) << "|J+:"<<ipoint+sizeavgs<< std::endl;
     double sumweights = 1;
     if( mFilterWeights!=0 ){ sumweights = mFilterWeights[sizeavgs]; }
     double sumvalues = sumweights*ydata[ipoint];
@@ -457,13 +450,10 @@ PeakAna* PeakAna::MeanFilter( Int_t sizeavgs, bool copy )
     double lastx_m = xdata[ipoint];
     double lastx_p = xdata[ipoint];
     for( int sizecounter=0; sizecounter<sizeavgs; ++sizecounter ){
-      //std::cout << "|i:"<<ipoint << "|sc:"<<sizecounter << "|n_m:"<<nextpoint_m << "|n_p:"<<nextpoint_p << "|l_m:"<<lastx_m << "|l_p:"<<lastx_p << std::endl;
       //@[July 6, 2022]>Also need to check minimum and maximum x-values??
       Double_t delxerr = 0.001*mDeltaX;//Since comparing doubles add 0.1% tolerance to mDeltaX
       if( (nextpoint_m-1)>=0 ){
-	//std::cout << "    + |n_m-1>=0" << std::endl;
 	if( mDeltaX<=0 || ((mDeltaX-delxerr)<=fabs(xdata[nextpoint_m-1]-lastx_m) && fabs(xdata[nextpoint_m-1]-lastx_m)<=(mDeltaX+delxerr)) ){
-	  //std::cout << "    + |n_m-1 valid dx" << std::endl;
 	  //Next point is mDeltaX away so valid point
 	  nextpoint_m -= 1;
 	  lastx_m = xdata[nextpoint_m];
@@ -472,7 +462,6 @@ PeakAna* PeakAna::MeanFilter( Int_t sizeavgs, bool copy )
 	}
 	else{
 	  //Next point is not mDeltaX away so invalid point and add baseline and decrement lastx value
-	  //std::cout << "    + |n_m-1 invalid dx" << std::endl;
 	  lastx_m -= mDeltaX;
 	  if( mFilterWeights!=0 ){ sumvalues += mFilterWeights[sizeavgs-sizecounter-1]*Baseline(); }
 	  else{ sumvalues += Baseline(); }
@@ -482,16 +471,13 @@ PeakAna* PeakAna::MeanFilter( Int_t sizeavgs, bool copy )
 	else{ sumweights += 1; }
       }
       if( (nextpoint_p+1)<npoints ){
-	//std::cout << "    + |n_p+1<npoints" << std::endl;
 	if( mDeltaX<=0 || ((mDeltaX-delxerr)<=fabs(xdata[nextpoint_p+1]-lastx_p) && fabs(xdata[nextpoint_p+1]-lastx_p)<=(mDeltaX+delxerr)) ){
-	  //std::cout << "    + |n_p+1 valid dx" << std::endl;
 	  nextpoint_p += 1;
 	  lastx_p = xdata[nextpoint_p];
 	  if( mFilterWeights!=0 ){ sumvalues += mFilterWeights[sizeavgs+sizecounter+1]*ydata[nextpoint_p]; }
 	  else{ sumvalues += ydata[nextpoint_p]; }
 	}
 	else{
-	  //std::cout << "    + |n_p+1 invalid dx" << std::endl;
 	  lastx_p += mDeltaX;
 	  if( mFilterWeights!=0 ){ sumvalues += mFilterWeights[sizeavgs+sizecounter+1]*Baseline(); }
 	  else{ sumvalues += Baseline(); }
@@ -501,7 +487,6 @@ PeakAna* PeakAna::MeanFilter( Int_t sizeavgs, bool copy )
       }
     }
     ynew[ipoint] = sumvalues/sumweights;
-    //std::cout << " - |i:"<<ipoint << "|xdata:"<<xdata[ipoint] <<"|ydata:"<<ydata[ipoint] << "|ynew:"<<ynew[ipoint] << std::endl;
   }
 
   if( copy ){
@@ -514,30 +499,28 @@ PeakAna* PeakAna::MeanFilter( Int_t sizeavgs, bool copy )
     //@[July 6, 2022] > (Copy arrays in c++ )[https://stackoverflow.com/questions/16137953/is-there-a-function-to-copy-an-array-in-c-c]
     std::copy( ynew, ynew+npoints, ydata);
     //[July 3, 2022]>Taken from TGraph CtorAllocate(). Setting minimum and maximum to -1111 effectivley resets the  minimum and maximum.
-    this->GetData()->SetMinimum(-1111);
-    this->GetData()->SetMaximum(-1111);
+    GetData()->SetMinimum(-1111);
+    GetData()->SetMaximum(-1111);
   }
   else{ 
     TGraph* graph = new TGraph(npoints,xdata,ynew );
-    this->SetData(graph);
-    this->ForceInternal();
+    SetData(graph);
+    ForceInternal();
   }
-  this->ResetPeak();
+  ResetPeak();
   return this;
 }
 
-
 PeakAna* PeakAna::GausFilter( Int_t sizeavgs, bool copy )
 {
-  if( this->GetData()==0 ){return this;}
-  const int npoints = this->GetData()->GetN();
+  if( GetData()==0 ){return this;}
+  const int npoints = GetData()->GetN();
   if( sizeavgs==0 || npoints<=1 ){ return this; }
   if( sizeavgs<0 ){ sizeavgs = -sizeavgs; }
   double ynew[npoints];
-  double* xdata = this->GetData()->GetX();
-  double* ydata = this->GetData()->GetY();
+  double* xdata = GetData()->GetX();
+  double* ydata = GetData()->GetY();
   for( int ipoint=0; ipoint<npoints; ++ipoint ){
-    //std::cout << "|ipoint:"<<ipoint<< "|J-:"<<ipoint-sizeavgs << "|J+:"<<ipoint+sizeavgs<< std::endl;
     double sumweights = 1;
     if( mFilterWeights!=0 ){ sumweights = mFilterWeights[sizeavgs]; }
     double sumvalues = sumweights*ydata[ipoint];
@@ -545,15 +528,11 @@ PeakAna* PeakAna::GausFilter( Int_t sizeavgs, bool copy )
     int nextpoint_p = ipoint;
     double lastx_m = xdata[ipoint];
     double lastx_p = xdata[ipoint];
-    //std::cout << "|i:"<<ipoint << "|xdata:"<<xdata[ipoint] <<"|ydata:"<<ydata[ipoint] << std::endl;
     for( int sizecounter=0; sizecounter<sizeavgs; ++sizecounter ){
-      //std::cout << " + |i:"<<ipoint << "|sc:"<<sizecounter << "|n_m:"<<nextpoint_m << "|n_p:"<<nextpoint_p << "|l_m:"<<lastx_m << "|l_p:"<<lastx_p << std::endl;
       //Also need to check minimum and maximum x-values??
       Double_t delxerr = 0.001*mDeltaX;//Since comparing doubles add 0.1% tolerance to mDeltaX
       if( (nextpoint_m-1)>=0 ){
-	//std::cout << "    + |n_m-1>=0" << std::endl;
 	if( mDeltaX<=0 || ((mDeltaX-delxerr)<=fabs(xdata[nextpoint_m-1]-lastx_m) && fabs(xdata[nextpoint_m-1]-lastx_m)<=(mDeltaX+delxerr)) ){
-	  //std::cout << "    + |n_m-1 valid dx" << std::endl;
 	  //Next point is mDeltaX away so valid point
 	  nextpoint_m -= 1;
 	  lastx_m = xdata[nextpoint_m];
@@ -562,8 +541,7 @@ PeakAna* PeakAna::GausFilter( Int_t sizeavgs, bool copy )
 	}
 	else{
 	  //Next point is not mDeltaX away so invalid point and add baseline and decrement lastx value
-	  //I should add baselines even if nextpoint+-1 is outside array (is this padding)??
-	  //std::cout << "    + |n_m-1 invalid dx" << std::endl;
+	  //I should add baselines even if nextpoint+-1 is outside array (is this padding)?
 	  lastx_m -= mDeltaX;
 	  if( mFilterWeights!=0 ){ sumvalues += mFilterWeights[sizeavgs-sizecounter-1]*Baseline(); }
 	  else{ sumvalues += Baseline(); }
@@ -571,21 +549,17 @@ PeakAna* PeakAna::GausFilter( Int_t sizeavgs, bool copy )
       }
       else{
 	//nextpoint_m is now negative so add padding by copying first point
-	//std::cout << "    + |n_m-1<0" << std::endl;
 	if( mFilterWeights!=0 ){ sumvalues += mFilterWeights[sizeavgs-sizecounter-1]*ydata[0]; }
 	else{ sumvalues += ydata[0]; }
       }
       if( (nextpoint_p+1)<npoints ){
-	//std::cout << "    + |n_p+1<npoints" << std::endl;
 	if( mDeltaX<=0 || ((mDeltaX-delxerr)<=fabs(xdata[nextpoint_p+1]-lastx_p) && fabs(xdata[nextpoint_p+1]-lastx_p)<=(mDeltaX+delxerr)) ){
-	  //std::cout << "    + |n_p+1 valid dx" << std::endl;
 	  nextpoint_p += 1;
 	  lastx_p = xdata[nextpoint_p];
 	  if( mFilterWeights!=0 ){ sumvalues += mFilterWeights[sizeavgs+sizecounter+1]*ydata[nextpoint_p]; }
 	  else{ sumvalues += ydata[nextpoint_p]; }
 	}
 	else{
-	  //std::cout << "    + |n_p+1 invalid dx" << std::endl;
 	  lastx_p += mDeltaX;
 	  if( mFilterWeights!=0 ){ sumvalues += mFilterWeights[sizeavgs+sizecounter+1]*Baseline(); }
 	  else{ sumvalues += Baseline(); }
@@ -593,7 +567,6 @@ PeakAna* PeakAna::GausFilter( Int_t sizeavgs, bool copy )
       }
       else{
 	//nextpoint_p is now >=npoints so add padding by copying last point
-	//std::cout << "    + |n_p+1>=npoints" << std::endl;
 	if( mFilterWeights!=0 ){ sumvalues += mFilterWeights[sizeavgs+sizecounter+1]*ydata[npoints-1]; }
 	else{ sumvalues += ydata[npoints-1]; }
       }
@@ -605,7 +578,6 @@ PeakAna* PeakAna::GausFilter( Int_t sizeavgs, bool copy )
       else{ sumweights += 2; }
     }
     ynew[ipoint] = sumvalues/sumweights;
-    //std::cout << " - |i:"<<ipoint << "|xdata:"<<xdata[ipoint] <<"|ydata:"<<ydata[ipoint] << "|ynew:"<<ynew[ipoint] << std::endl;
   }
 
 
@@ -619,28 +591,25 @@ PeakAna* PeakAna::GausFilter( Int_t sizeavgs, bool copy )
     //@[July 6, 2022] > (Copy arrays in c++ )[https://stackoverflow.com/questions/16137953/is-there-a-function-to-copy-an-array-in-c-c]
     std::copy( ynew, ynew+npoints, ydata);
     //[July 3, 2022]>Taken from TGraph CtorAllocate(). Setting minimum and maximum to -1111 effectivley resets the  minimum and maximum.
-    this->GetData()->SetMinimum(-1111);
-    this->GetData()->SetMaximum(-1111);
+    GetData()->SetMinimum(-1111);
+    GetData()->SetMaximum(-1111);
   }
   else{
     TGraph* graph = new TGraph(npoints,xdata,ynew );
-    this->SetData(graph);
-    this->ForceInternal();
+    SetData(graph);
+    ForceInternal();
   }
-  this->ResetPeak();
+  ResetPeak();
   return this;
 }
 
-PeakAna* PeakAna::ConvertPeaksToAna()
+PeakAna PeakAna::ConvertPeaksToAna()
 {
   return PeakAna::ConvertPeaksToAna(*this);
 }
 
 bool PeakAna::PeakTunnel(const PeakWindow &window) const
 {
-  //if( mTunnelThreshold>=0 && 
-  //		window.PeakTunnelProb(mG_Data,mTunnelScale*BaselineSigma())<mTunnelThreshold )
-  //		{return true;}
   if( mTunnelThreshold>=0 ){
     Double_t prob = window.PeakTunnelProb(mG_Data,mTunnelScale,mTunnelSigma);
     if( GetDebug()>1 ){
@@ -660,13 +629,11 @@ Double_t PeakAna::PeakProb(const PeakWindow &window, Double_t scale, Double_t si
   return window.PeakTunnelProb(mG_Data,scale,sigma);
 }
 
-//std::vector<PeakWindow> PeakAna::GetPossiblePeaks()
 void PeakAna::GetPossiblePeaks()
 {
-  //Use running average smoothing to help reduce noise and prevent many peaks from being found??
   std::vector<PeakWindow> PossiblePeak;//Gather all the possible occurances when signal is larger than Sigma
   if( GetDebug()>1 ){std::cout << "PeakAna - In GetPossiblePeaks" << std::endl; }
-  //if( !FindBaseline() ){ std::cout << "ERROR:No valid baseline\nPlease either run \"AnalyzeForPedestal\" or call \"SetBaseline\" with values greater than or equal to zero" << std::endl; return PossiblePeak; }
+  
   Double_t baseline = Baseline();//Already checked baseline above
   Double_t slopecutoff = BaselineSigma()*BaselineSigmaScale();
   if( GetDebug() > 2){
@@ -675,7 +642,7 @@ void PeakAna::GetPossiblePeaks()
   PeakWindow peak(mXRangeMin-1,mXRangeMax+1);//peak values must be less than and greater than range for algorithm to work
   Double_t LocalMax=mXRangeMin-1;//Variable to help keep track of when slope changes (has to be less than minimum)
   if( GetDebug()>1 ){std::cout << "Finding Peak for cutoff " << slopecutoff << std::endl;}
-  //The idea is that you start with all things negative and loop through all the ADC values.  When the slope is greater than the cutoff you save it and then the signal will rise and then fall so slope will eventually go negative and this is when you keep track of the end values.  Once signal goes positive again or you no longer pass the slope cutoff stop and save the start and stop values
+  //The idea is that you start with all things negative and loop through all the ADC values.  When the slope is greater than the cutoff you save it and then the signal will rise and then fall so slope will eventually go negative and this is when you keep track of the end values.  Once signal goes positive again or you no longer pass the slope cutoff stop and save the start and stop values.
   if( GetDebug()>2 ){std::cout << "PeakAna::GetPossiblePeaks:Start graph reading loop" << std::endl;}
   Int_t npoints = mG_Data->GetN();
   for( Int_t ismp=0; ismp<npoints-1; ++ismp ){
@@ -702,22 +669,16 @@ void PeakAna::GetPossiblePeaks()
     }
     if( GetDebug()>2 ){std::cout << "  - |Slope:"<<Slope << std::endl;}
     //The purpose of this if statement is to ensure that any cases when there is no start time and no end time and the 'Ladc'==0 then we skip those points.  The additional nested if statement is for the case when there is a start and end time (like when the alogithm is working on negative slopes) and the 'Ladc' will still be >0; however since I dynamically change the "end" time until the slope changes to positive this statement ensures that 'continue' only gets called on positive slope results and not negative slopes when it is trying to find the correct end time.
-    //if( (peak.mStartX>=0 && peak.mEndX!=2000 && Ladc>0) ){continue;}
-
-    //if( fabs(Slope) > slopecutoff*10.0 ){ continue; }//Avoid large sudden changes in slope (Hard code to 10 times the slope cutoff for now in future think of better method
     if( GetDebug()>2 ){std::cout << "  - peak|ismp:"<<ismp << "|start:"<<peak.mStartX << "|end:"<<peak.mEndX << std::endl;}
     //Check above will skip bad values
     if( peak.mStartX<mXRangeMin  ){//No start time yet
-      //if( GetDebug()>2 ){std::cout << "  - G|iSmp:"<<ismp << "|LX:"<<LX << "|RX:"<<RX << std::endl;}
       if( GetDebug()>1 ){std::cout << "    + No StartTime" << std::endl;}
       if( LY>baseline+slopecutoff && Slope>0 ){
 	//Needs to be checked sequentially since we need to reject any points below the baseline+cutoff that may have a large slope
-	//if( Slope>slopecutoff ){
 	if( GetDebug()>1 ){std::cout << "    + Passed Slope and baselineCutoff setting as start time" << std::endl;}
 	peak.mStartX=LX;//Set start x-value
 	peak.mStartY=LY;//Set start y-value
 	LocalMax=LX;//Start checking local maximums
-	//}
       }
       //If didn't pass thresholds for start time then continue to next point
     }
@@ -726,7 +687,7 @@ void PeakAna::GetPossiblePeaks()
       if( GetDebug()>1 ){std::cout << "    + Found StartTime:"<< peak.mStartX << "|LocalMax:"<<LocalMax<<std::endl;}
       if( Slope >= 0 ){
 	LocalMax=LX; //keep moving local max as long slope>=0
-	if( Slope==0 && peak.mP_Peak>=0 ){ peak.mEndX=LX; } //if slope==0 and peak found i.e. mP_Peak>=0 then don't end finding but keep moving the end point i.e. peak.mEndX=LX. This condition is needed because sometimes a slope is zero and then will start decreasing again later. The importance of finding a peak is because it establishes the fact that the curve is convave and zero slope is ambiguous in which direction it will go. If slopes keep decreasing then expands peak window, if slope changes sign at next point algorithm will naturally stop. This is the desired behavior. Using the condition `Slope>0` does not produce the same the effect because sometimes this kind of zero slope behavior happens on the increasing slope side of the data and this should not be stopping the search because the next one could be positive.
+	if( Slope==0 && peak.mP_Peak>=0 ){ peak.mEndX=LX; } //if slope==0 and a peak was found i.e. mP_Peak>=0 then don't end finding but keep moving the end point i.e. peak.mEndX=LX. This condition is needed because sometimes a slope is zero and then will start decreasing again later. The importance of finding a peak is because it establishes the fact that the curve is convave and zero slope is ambiguous in which direction it will go. If slopes keep decreasing then expands peak window, if slope changes sign at next point algorithm will naturally stop. This is the desired behavior. Using the condition `Slope>0` does not produce the same the effect because sometimes this kind of zero slope behavior happens on the increasing slope side of the data and this should not be stopping the search because the next one could be positive.
 	if( GetDebug()>2){std::cout<<"      + Slope>=0|"<<Slope<<std::endl;}
       }
       else{ //Slope < 0
@@ -737,11 +698,9 @@ void PeakAna::GetPossiblePeaks()
 	}
 	if(GetDebug()>2){std::cout<<"      + Slope<0"<<std::endl;}
       }
-      //In the future I can also add a condition that end-start is larger than some value but it works good enough for now
       if( LocalMax>peak.mEndX || LY<baseline+slopecutoff || ismp==npoints-2 || RY<=mYRangeMin  ){//Slope is now positive again or there was a postive slope to negative but did not fall below threshold
 	if( ismp==npoints-2 ){ peak.mEndX=RX; peak.mEndY=RY; if(peak.mP_Peak<0){peak.mP_Peak=ismp+1;} }//last point is actually RX,RY not LX,LY and if no peak found then set last point as found peak
 	else{peak.mEndX=LX; peak.mEndY = LY;}//all others should be current point
-	//peak.mEndY = LY;
 	if( GetDebug()>2 ){std::cout << "    + Slope positive again|StartX:"<<peak.mStartX << "|StartY:"<<peak.mStartY << "|EndX:"<<peak.mEndX << "|EndY:"<<peak.mEndY << "|P:"<<peak.mP_Peak <<"|PeakX:"<<peak.mPeakX << "|PeakY:"<<peak.mPeakY << "|PeakProb:"<< peak.PeakTunnelProb(mG_Data,mTunnelScale,mTunnelSigma) << std::endl;}
 	if( PeakTunnel(peak) ){
 	  Int_t n = PossiblePeak.size();
@@ -761,16 +720,10 @@ void PeakAna::GetPossiblePeaks()
 	LocalMax=mXRangeMin-1;
 	--ismp;//Go back one point in case new signal starts at where slope was positive again
       }
-    }//Slope changed so get 
-    //From above we know slope was postive when a valid start time was found
-    //if( Slope > 0 ){ peak.mEndX=ismp; }
-    //if( LX>baseline+slopecutoff ){peak.mEndX=ismp;}
-    //else{PossiblePeak.push_back(peak); peak.Reset();}
-    
+    }
   }
-  //PossiblePeak.push_back(sig);
   if( GetDebug()>0 ){ std::cout << "PeakAna::GetPossiblePeaks:End graph reading loop|SizePeaks:" <<PossiblePeak.size() << std::endl; }
-  //return PossiblePeak;
+
   mPeaks.swap(PossiblePeak);
 }
 
@@ -786,7 +739,6 @@ Int_t PeakAna::SearchForPeak(const std::vector<PeakWindow> &PossiblePeaks)
     {
       if( GetDebug()>0 )
 	{
-	  //std::cout << "|Checking Name:"<<mName;
 	  std::cout << "|Size of Possible peaks:"<<PossiblePeaks.size();
 	  std::cout << "|Search Peak:"<<mSearch.mStartX;
 	  std::cout << "|Search Width:"<<mSearch.mEndX;
@@ -802,7 +754,6 @@ Int_t PeakAna::SearchForPeak(const std::vector<PeakWindow> &PossiblePeaks)
 	      PossiblePeaks.at(ipeak).Print();
 	      std::cout << std::endl;
 	    }
-	  //Double_t PeakLoc,temp; mG_Data->GetPoint(PossiblePeaks.at(ipeak).mP_Peak,PeakLoc,temp);
 	  Double_t PeakLoc = PossiblePeaks.at(ipeak).mPeakX;
 	  if( mSearch.mStartX-mSearch.mEndX<=PeakLoc && PeakLoc <= mSearch.mStartX+mSearch.mEndX )
 	    {
@@ -815,7 +766,6 @@ Int_t PeakAna::SearchForPeak(const std::vector<PeakWindow> &PossiblePeaks)
 		}
 	    }
 	}
-      //if( mSearch.mStartX>0 && PossiblePeaks.at(T0index).mStartX>0 )
       if( peakindex>=0 && mSearch.mStartX>0 && PossiblePeaks.at(peakindex).mP_Peak>0 )
 	{
 	  if(GetDebug()>1){PossiblePeaks.at(peakindex).Print();std::cout<<std::endl;}
@@ -1067,11 +1017,7 @@ double* PeakAna::GaussianMatrix2D(int rx,  double sx, int ry, double sy, bool kN
 
 void PeakAna::Draw(Option_t* opt)
 {
-  //mOption = opt;
-
   AppendPad(opt);
- 
-  //gPad->IncrementPaletteColor(1, mOption); (Doesn't work with ROOT v5)
 }
 
 void PeakAna::Paint(Option_t* opt)
@@ -1086,7 +1032,6 @@ void PeakAna::Paint(Option_t* opt)
 
 PeakAnaPainter* PeakAna::GetPainter(Option_t *opt)
 {
-  //if( mPainter==0 ){mPainter = PeakAnaPainter::MakePainter(this);}
   if( mPainter==0 ){
     mPainter = new PeakAnaPainter();
     mPainter->SetPeakAna(this);
@@ -1103,7 +1048,6 @@ void PeakAna::AddPeakStats(TPaveText* pave, const char* opt)
   bool statsdetailoption = false;
 
   option.ToLower();
-  //if( !option.Contains("s") ){return;}
   if( option.Contains("a") ){ statsalloption = true; }
   if( option.Contains("d") ){ statsdetailoption = true; }
 
@@ -1116,45 +1060,45 @@ void PeakAna::AddPeakStats(TPaveText* pave, const char* opt)
   if( !statsalloption ){
     TText* t = pave->AddText( Form("I:%u|S:[%2.2f,%2.2f]|E[%2.2f,%2.2f]|P(%d,%2.2f,%2.2f)",
       mComputedIndex,
-      (this->GetPeak(mComputedIndex)).mStartX,
-      (this->GetPeak(mComputedIndex)).mStartY,
-      (this->GetPeak(mComputedIndex)).mEndX,
-      (this->GetPeak(mComputedIndex)).mEndY,
-      (this->GetPeak(mComputedIndex)).mP_Peak,
-      (this->GetPeak(mComputedIndex)).mPeakX,
-      (this->GetPeak(mComputedIndex)).mPeakY
+      (GetPeak(mComputedIndex)).mStartX,
+      (GetPeak(mComputedIndex)).mStartY,
+      (GetPeak(mComputedIndex)).mEndX,
+      (GetPeak(mComputedIndex)).mEndY,
+      (GetPeak(mComputedIndex)).mP_Peak,
+      (GetPeak(mComputedIndex)).mPeakX,
+      (GetPeak(mComputedIndex)).mPeakY
       ) );
     t->SetTextAlign(11);
     if( statsdetailoption ){
       TText* t2 = pave->AddText( Form(" + |Prob:%1.4f|Chir:%3.1f|ChirProb:%1.4f",
-      (this->GetPeak(mComputedIndex)).PeakTunnelProb(this->GetData(),this->TunnelScale(),this->TunnelSigma()),
-      (this->GetPeak(mComputedIndex)).PeakChirality(this->ChiralityPeakScale(),this->ChiralityScale()),
-      (this->GetPeak(mComputedIndex)).PeakChiralityProb(this->ChiralityProbScale(),this->ChiralityPeakScale(),this->ChiralityScale())
+      (GetPeak(mComputedIndex)).PeakTunnelProb(GetData(),TunnelScale(),TunnelSigma()),
+      (GetPeak(mComputedIndex)).PeakChirality(ChiralityPeakScale(),ChiralityScale()),
+      (GetPeak(mComputedIndex)).PeakChiralityProb(ChiralityProbScale(),ChiralityPeakScale(),ChiralityScale())
       ) );
       t2->SetTextAlign(11);
     }
   }
   else{
     //pave->AddText( Form("|X:[%2.2f,%2.2f]|Y:[%2.2f,%2.2f]|BBS:(%d,%2.2f)|ProbSST:()") );
-    for( Int_t ipeak=0; ipeak<this->NPeaks(); ++ipeak ){
+    for( Int_t ipeak=0; ipeak<NPeaks(); ++ipeak ){
       TText* t = pave->AddText( Form("|I:%u|S[%2.2f,%2.2f]|E[%2.2f,%2.2f]",
         ipeak,
-        (this->GetPeak(ipeak)).mStartX,
-        (this->GetPeak(ipeak)).mStartY,
-        (this->GetPeak(ipeak)).mEndX,
-        (this->GetPeak(ipeak)).mEndY
+        (GetPeak(ipeak)).mStartX,
+        (GetPeak(ipeak)).mStartY,
+        (GetPeak(ipeak)).mEndX,
+        (GetPeak(ipeak)).mEndY
         ) );
       t->SetTextAlign(11);
       if( mComputedIndex==ipeak ){ t->SetTextColor(kRed+1); }
       if( statsdetailoption ){
         //|Chir:%3.1f|ChirProb:%1.4f
-        //(this->GetPeak(ipeak)).PeakChirality(this->ChiralityPeakScale(),this->ChiralityScale()),
-        //(this->GetPeak(ipeak)).PeakChiralityProb(this->ChiralityProbScale(),this->ChiralityPeakScale(),this->ChiralityScale())
+        //(GetPeak(ipeak)).PeakChirality(ChiralityPeakScale(),ChiralityScale()),
+        //(GetPeak(ipeak)).PeakChiralityProb(ChiralityProbScale(),ChiralityPeakScale(),ChiralityScale())
         TText* t2 = pave->AddText( Form(" + |P(%d,%2.2f,%2.2f)|Prob:%1.4f",
-          (this->GetPeak(ipeak)).mP_Peak,
-          (this->GetPeak(ipeak)).mPeakX,
-          (this->GetPeak(ipeak)).mPeakY,
-          (this->GetPeak(ipeak)).PeakTunnelProb(this->GetData(),this->TunnelScale(),this->TunnelSigma())
+          (GetPeak(ipeak)).mP_Peak,
+          (GetPeak(ipeak)).mPeakX,
+          (GetPeak(ipeak)).mPeakY,
+          (GetPeak(ipeak)).PeakTunnelProb(GetData(),TunnelScale(),TunnelSigma())
           ) );
         t2->SetTextAlign(11);
         if( mComputedIndex==ipeak ){ t2->SetTextColor(kRed+1); }

@@ -45,6 +45,8 @@ class StFcsPulseAna : public PeakAna
   virtual TObject* Clone(const char* newname) const;  //!< Clones internal graph as opposed to just copying the pointer
 
   virtual Int_t AnalyzeForPeak();  //!< Overwritten from #PeakAna to process peak tunneling after finding all peaks
+  virtual Int_t AnalyzeForPeak(Double_t peak, Double_t width){ return PeakAna::AnalyzeForPeak(peak,width); }//<! same as #AnalyzeForPeak() but also sets search parameters for peak
+  virtual Int_t AnalyzeForNoisyPeak(){ return PeakAna::AnalyzeForNoisyPeak(); }//<! First calls #ConvertToAna() function and then #AnalyzeForPeak() on the converted data
 
   static double MaxwellBoltzmannDist(double* x, double* p);//!< Maxwell Boltzmann Distribution function
   static void GetMBPars(const double& xpeak, const double& xrise, const double& yh, const double& ped, double& height, double& scale );//!< Get parameters for a Maxwell Boltzmann distribution from above based on the 4 const parameters 
@@ -91,7 +93,7 @@ class StFcsPulseAna : public PeakAna
 
   virtual void Print(Option_t* opt="") const; //!< Print class variables @param opt "ana" means call #PeakAna::Print(), "debug" print extra information
 
-  virtual void MergeByProbability(std::vector<PeakWindow>& merged); //!< Overwritten from #PeakAna::MergeByProbability() to change merge criteria
+  virtual void MergeByProbability(std::vector<PeakWindow>& merged) const; //!< Overwritten from #PeakAna::MergeByProbability() to change merge criteria
 
  protected:
   void Init(); //!< Initialize everything to zero except signal and background histograms

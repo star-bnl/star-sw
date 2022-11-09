@@ -160,7 +160,7 @@ Int_t StFcsDbPulse::getYMinMax(TGraphAsymmErrors* gae, Double_t &Ymin, Double_t 
   return index;
 }
 
-void StFcsDbPulse::Print(Option_t* opt)
+void StFcsDbPulse::Print(Option_t* opt) const
 {
   std::cout << "Constants"
 	    << "|sqrtpi:"  << sqrtpi()

@@ -63,9 +63,9 @@ public:
   virtual TObject* Clone(const char* newname="") const; //!< Clone whole object, name is irrelevant
   
   //To ease computation time I store the x,y values of the peak window/range rather than the graph point
-  Double_t mStartX; //!< x-value for start of the peak window
-  Double_t mStartY; //!< y value associated with #mStartX
+  Double_t mStartX; //!< x value for start of the peak window
   Double_t mEndX;   //!< x value for end of the peak window
+  Double_t mStartY; //!< y value associated with #mStartX
   Double_t mEndY;   //!< y value associated with #mEndX
   Int_t mP_Peak;    //!< Point Number of peak in a TGraph object (P for point), point is such that slope with previous point will be positive and next point will be negative
   Double_t mPeakX;  //!< x-value of peak position as determined by #SetPeak()
