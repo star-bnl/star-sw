@@ -1,0 +1,6 @@
+MACRO utgeo_create_Tag tag=y2022a
+DETP GEOM [tag]
+GEXE .$STAR_HOST_SYS/lib/StarAgmlUtil.so
+GEXE .$STAR_HOST_SYS/lib/xgeometry.so
+
+RETURN
