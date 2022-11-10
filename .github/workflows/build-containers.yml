@@ -42,6 +42,14 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }}
 
+      - name: Create latest tag for default branch
+        if: ${{ steps.branch-name.outputs.is_default == 'true' && env.STARENV == 'root5-gcc485' }}
+        run: docker buildx imagetools create ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-root5-gcc485 --tag ghcr.io/${{ github.repository_owner }}/star-sw:latest
+
+      - name: Create latest tag for SL* branches
+        if: ${{ steps.branch-name.outputs.is_default == 'false' && env.STARENV == 'root5-gcc485' }}
+        run: docker buildx imagetools create ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-root5-gcc485 --tag ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}
+
   build-cleanup:
     runs-on: ubuntu-latest
     needs: build
