@@ -39,8 +39,12 @@ jobs:
           build-args: |
             starenv=${{ matrix.starenv }}
             compiler=${{ matrix.compiler }}
-          push: true
+          load: true
           tags: ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }}
+
+      - name: Push container image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }}
 
   build-cleanup:
     runs-on: ubuntu-latest
