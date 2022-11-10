@@ -23,9 +23,9 @@ void PeakAnaPainter::Init()
 
 PeakAnaPainter::~PeakAnaPainter()
 {
-  if(mTheBaseLine!=0)    { delete mTheBaseLine; mTheBaseLine=0; }
-  if(mTheHitLine!=0)     { delete mTheHitLine;  mTheHitLine=0; }
-  if(mPaveT_PA!=0)       { delete mPaveT_PA; mPaveT_PA=0; }
+  delete mTheBaseLine;
+  delete mTheHitLine;  mTheHitLine=0;
+  delete mPaveT_PA; mPaveT_PA=0;
 }
 
 void PeakAnaPainter::SetPeakAna(PeakAna* ana)
@@ -91,7 +91,7 @@ void PeakAnaPainter::Paint(Option_t* opt)
       mPeakOption = option.substr(firstcolon+1,secondcolon-firstcolon-1);
       mStatsOption = option.substr(secondcolon+1);
       std::size_t thirdcolon = option.find(";",secondcolon+1);
-      if( thirdcolon!=std::string::npos ){ std::cout << "PeakAnaPainter - WARNING:Too many semicolons in draw option" << std::endl; }
+      if( thirdcolon!=std::string::npos ){ LOG_WARN << "PeakAnaPainter::Paint(): Too many semicolons in draw option" << endm; }
     }
     else{ mPeakOption = option.substr(firstcolon+1); }
   }
@@ -166,7 +166,6 @@ void PeakAnaPainter::PaintPeakQa( )
   if( !ValidGraph() ){return;}
 
   Int_t computedindex = mPA->FoundPeakIndex();
-  //std::cout << "PeakAnaPainter::PaintFoundPeak|computedindex:"<<computedindex << std::endl;
   if( computedindex<0 ){computedindex = mPA->AnalyzeForPeak();}
 
   this->PaintBaselines();
@@ -214,9 +213,9 @@ void PeakAnaPainter::PaintPeakRanges( )
   if(computedindex<0 ){computedindex = mPA->AnalyzeForPeak();}
 
   if( mPA->GetDebug() > 1){
-    std::cout<< "|SizePeaks:"<<mPA->NPeaks() << "|FoundPeak:"<<computedindex << "|Base:"<<mPA->Baseline() << "|Hit:"<<mPA->Baseline()+mPA->BaselineSigmaScale()*mPA->BaselineSigma();
-    if( mPA->NPeaks()!=0 && computedindex<mPA->NPeaks() ){(mPA->GetPeak(computedindex)).Print();}
-    std::cout << std::endl;
+    LOG_DEBUG<< "|SizePeaks:"<<mPA->NPeaks() << "|FoundPeak:"<<computedindex << "|Base:"<<mPA->Baseline() << "|Hit:"<<mPA->Baseline()+mPA->BaselineSigmaScale()*mPA->BaselineSigma();
+    if( mPA->NPeaks()!=0 && computedindex<mPA->NPeaks() ){(mPA->GetPeak(computedindex)).Print("debug");}
+    LOG_DEBUG << endm;
   }
   
   for( UShort_t ipeak = 0; ipeak<mPA->NPeaks(); ++ipeak ){

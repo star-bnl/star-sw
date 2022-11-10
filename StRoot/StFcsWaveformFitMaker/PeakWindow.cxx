@@ -95,9 +95,18 @@ void PeakWindow::Reset(Double_t start, Double_t end)
 
 void PeakWindow::Print(Option_t* opt)const
 {
-	std::cout <<"|Start:("<<mStartX<<","<<mStartY<<")"
-		  <<"|End:("<<mEndX<<","<<mEndY<<")"
-		  <<"|Ppeak:"<<mP_Peak<<"|Peak:("<<mPeakX<<","<<mPeakY<<")";
+  TString option(opt);
+  option.ToLower();
+  if( option.EqualTo("debug") ){
+    LOG_DEBUG <<"|Start:("<<mStartX<<","<<mStartY<<")"
+	      <<"|End:("<<mEndX<<","<<mEndY<<")"
+	      <<"|Ppeak:"<<mP_Peak<<"|Peak:("<<mPeakX<<","<<mPeakY<<")";
+  }
+  else{
+      std::cout <<"|Start:("<<mStartX<<","<<mStartY<<")"
+		<<"|End:("<<mEndX<<","<<mEndY<<")"
+		<<"|Ppeak:"<<mP_Peak<<"|Peak:("<<mPeakX<<","<<mPeakY<<")";
+    }
 }
 
 void PeakWindow::SetPeak(TGraph* gdata)
@@ -238,7 +247,7 @@ Double_t PeakWindow::PeakChiralityProb(Double_t probscale, Double_t peakscale, D
 Double_t PeakWindow::PeakTunnelProb(TGraph* graph, Double_t scale, Double_t sigma) const
 {
   if( sigma<0 ){sigma = fabs(sigma);}
-  else if(sigma==0){std::cout << "PeakWindow::PeakTunnelProb - ERROR:sigma cannot be 0 - Returning probability of 0" << std::endl; return 0;}
+  else if(sigma==0){LOG_ERROR << "PeakWindow::PeakTunnelProb - ERROR:sigma cannot be 0 - Returning probability of 0" << endm; return 0;}
   Double_t xdiff = mEndX-mStartX;
   Double_t ydiff = mEndY-mStartY;
   Double_t mslope = ydiff/xdiff; //slope of the line formed by the point (mStartX,mStartY) and (mEndX,mEndY)

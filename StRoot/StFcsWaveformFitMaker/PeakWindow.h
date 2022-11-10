@@ -47,6 +47,8 @@ Author: David Kapukchyan
 #include "TLine.h"
 #include "TMath.h"
 
+#include "St_base/StMessMgr.h"
+
 class PeakWindow : public TObject{
 public:
   /**@brief Default Constructor

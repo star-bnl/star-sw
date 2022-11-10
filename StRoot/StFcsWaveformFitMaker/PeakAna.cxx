@@ -229,7 +229,7 @@ void PeakAna::GetXYMax(Double_t xmin, Double_t xmax)
     if( Y>mMaxY ){ mMaxY=Y; mMaxX=X; }
   }
   if( mMaxY<0 && mMaxX<0 ){
-    std::cout << "Unable to find a maximum adc\nSetting to impossible values" << std::endl;
+    LOG_WARN << "Unable to find a maximum adc\nSetting to impossible values" << endm;
     mMaxY = 5000;
     mMaxX = 5000;
   }
@@ -329,7 +329,7 @@ void PeakAna::SetFilter( UInt_t filter, Int_t scale, Double_t sigma )
 
 void PeakAna::SetBaseline(Double_t value, Double_t sigma)
 {
-  if( sigma<0){ LOG_WARN << "PeakAna::SetBaseline - Baseline sigma should not be less than zero\n" << std::endl; }
+  if( sigma<0){ LOG_WARN << "PeakAna::SetBaseline - Baseline sigma should not be less than zero\n" << endm; }
   mBaseline = value;
   mBaselineSigma = sigma;
 }
@@ -613,9 +613,9 @@ bool PeakAna::PeakTunnel(const PeakWindow &window) const
   if( mTunnelThreshold>=0 ){
     Double_t prob = window.PeakTunnelProb(mG_Data,mTunnelScale,mTunnelSigma);
     if( GetDebug()>1 ){
-      std::cout << "PeakAna::PeakTunnel - |prob:"<<prob << "|thr:"<<mTunnelThreshold;
-      if( GetDebug()>2 ){ std::cout << "|scale:"<<mTunnelScale << "|sigma:"<< mTunnelSigma; }
-      std::cout << std::endl;
+      LOG_DEBUG << "PeakAna::PeakTunnel - |prob:"<<prob << "|thr:"<<mTunnelThreshold;
+      if( GetDebug()>2 ){ LOG_DEBUG << "|scale:"<<mTunnelScale << "|sigma:"<< mTunnelSigma; }
+      LOG_DEBUG << endm;
     }
     if( prob>mTunnelThreshold ){return true; }
     else{ return false; }
@@ -632,50 +632,50 @@ Double_t PeakAna::PeakProb(const PeakWindow &window, Double_t scale, Double_t si
 void PeakAna::GetPossiblePeaks()
 {
   std::vector<PeakWindow> PossiblePeak;//Gather all the possible occurances when signal is larger than Sigma
-  if( GetDebug()>1 ){std::cout << "PeakAna - In GetPossiblePeaks" << std::endl; }
+  if( GetDebug()>1 ){LOG_DEBUG << "PeakAna - In GetPossiblePeaks" << endm; }
   
   Double_t baseline = Baseline();//Already checked baseline above
   Double_t slopecutoff = BaselineSigma()*BaselineSigmaScale();
   if( GetDebug() > 2){
-    std::cout << "|baseline:"<<baseline << "|slopecutoff:"<<slopecutoff << std::endl;
+    LOG_DEBUG << "|baseline:"<<baseline << "|slopecutoff:"<<slopecutoff << endm;
   }
   PeakWindow peak(mXRangeMin-1,mXRangeMax+1);//peak values must be less than and greater than range for algorithm to work
   Double_t LocalMax=mXRangeMin-1;//Variable to help keep track of when slope changes (has to be less than minimum)
-  if( GetDebug()>1 ){std::cout << "Finding Peak for cutoff " << slopecutoff << std::endl;}
+  if( GetDebug()>1 ){LOG_DEBUG << "Finding Peak for cutoff " << slopecutoff << endm;}
   //The idea is that you start with all things negative and loop through all the ADC values.  When the slope is greater than the cutoff you save it and then the signal will rise and then fall so slope will eventually go negative and this is when you keep track of the end values.  Once signal goes positive again or you no longer pass the slope cutoff stop and save the start and stop values.
-  if( GetDebug()>2 ){std::cout << "PeakAna::GetPossiblePeaks:Start graph reading loop" << std::endl;}
+  if( GetDebug()>2 ){LOG_DEBUG << "PeakAna::GetPossiblePeaks:Start graph reading loop" << endm;}
   Int_t npoints = mG_Data->GetN();
   for( Int_t ismp=0; ismp<npoints-1; ++ismp ){
     Double_t LX; Double_t LY;//L for left (actually current point)
     Double_t RX; Double_t RY;//R for right (actually next point)
     mG_Data->GetPoint(ismp,LX,LY);
     mG_Data->GetPoint(ismp+1,RX,RY);
-    if( GetDebug()>1 ){std::cout << "  - |P:"<<ismp <<"|LX:"<<LX << "|LY:"<<LY<< "|RX:"<<RX << "|RY:"<<RY << std::endl;}
+    if( GetDebug()>1 ){LOG_DEBUG << "  - |P:"<<ismp <<"|LX:"<<LX << "|LY:"<<LY<< "|RX:"<<RX << "|RY:"<<RY << endm;}
 
     //Reject values outside the range
-    if( LX < mXRangeMin ){if( GetDebug()>2 ){std::cout << "'LX' too small"<<std::endl;} continue; }
-    if( LX > mXRangeMax ){if( GetDebug()>2 ){std::cout << "'LX' too large"<<std::endl;} continue; }
-    if( LY < mYRangeMin || LY > mYRangeMax){if( GetDebug()>2 ){std::cout << "'LY' outside y range"<<std::endl;} continue; }
-    if( RY < mYRangeMin || RY > mYRangeMax){if( GetDebug()>2 ){std::cout << "'RY' outside y range"<<std::endl;} continue; }
+    if( LX < mXRangeMin ){if( GetDebug()>2 ){LOG_DEBUG << "'LX' too small"<<endm;} continue; }
+    if( LX > mXRangeMax ){if( GetDebug()>2 ){LOG_DEBUG << "'LX' too large"<<endm;} continue; }
+    if( LY < mYRangeMin || LY > mYRangeMax){if( GetDebug()>2 ){LOG_DEBUG << "'LY' outside y range"<<endm;} continue; }
+    if( RY < mYRangeMin || RY > mYRangeMax){if( GetDebug()>2 ){LOG_DEBUG << "'RY' outside y range"<<endm;} continue; }
     Double_t Slope = (RY-LY)/(RX-LX);
     if( mDeltaX>0 ){
       Double_t delxerr = 0.001*mDeltaX;//Since comparing doubles add 0.1% tolerance to mDeltaX
       if( !((mDeltaX-delxerr)<=(RX-LX) && (RX-LX)<=(mDeltaX+delxerr)) ){
-	if( GetDebug()>2 ){ std::cout << "  - |DeltaX:"<<mDeltaX << "|RX-LX:"<<RX-LX << std::endl;}
+	if( GetDebug()>2 ){ LOG_DEBUG << "  - |DeltaX:"<<mDeltaX << "|RX-LX:"<<RX-LX << endm;}
 	RX=LX+mDeltaX;
 	RY=mYRangeMin;//Setting RY=mYRangeMin here is a flag that indicates a discontinuity
 	Slope = -1.0;//Force slope to be negative to stop peak search or to prevent start of search
       }
     }
-    if( GetDebug()>2 ){std::cout << "  - |Slope:"<<Slope << std::endl;}
+    if( GetDebug()>2 ){LOG_DEBUG << "  - |Slope:"<<Slope << endm;}
     //The purpose of this if statement is to ensure that any cases when there is no start time and no end time and the 'Ladc'==0 then we skip those points.  The additional nested if statement is for the case when there is a start and end time (like when the alogithm is working on negative slopes) and the 'Ladc' will still be >0; however since I dynamically change the "end" time until the slope changes to positive this statement ensures that 'continue' only gets called on positive slope results and not negative slopes when it is trying to find the correct end time.
-    if( GetDebug()>2 ){std::cout << "  - peak|ismp:"<<ismp << "|start:"<<peak.mStartX << "|end:"<<peak.mEndX << std::endl;}
+    if( GetDebug()>2 ){LOG_DEBUG << "  - peak|ismp:"<<ismp << "|start:"<<peak.mStartX << "|end:"<<peak.mEndX << endm;}
     //Check above will skip bad values
     if( peak.mStartX<mXRangeMin  ){//No start time yet
-      if( GetDebug()>1 ){std::cout << "    + No StartTime" << std::endl;}
+      if( GetDebug()>1 ){LOG_DEBUG << "    + No StartTime" << endm;}
       if( LY>baseline+slopecutoff && Slope>0 ){
 	//Needs to be checked sequentially since we need to reject any points below the baseline+cutoff that may have a large slope
-	if( GetDebug()>1 ){std::cout << "    + Passed Slope and baselineCutoff setting as start time" << std::endl;}
+	if( GetDebug()>1 ){LOG_DEBUG << "    + Passed Slope and baselineCutoff setting as start time" << endm;}
 	peak.mStartX=LX;//Set start x-value
 	peak.mStartY=LY;//Set start y-value
 	LocalMax=LX;//Start checking local maximums
@@ -684,11 +684,11 @@ void PeakAna::GetPossiblePeaks()
     }
     else{//Found a suitable start time which indicates positve slope above some thershold
       //The statements below will now check subsequent values and if the slope is >= 0 then we have wrong local max so set local max to next value.  Note this means that localmax is not greater than End which is mXRangeMax+1.  Once slope goes below 0 End will take that value and local max will be less than End.  Once the slope changes again LocalMax will now be greater than End
-      if( GetDebug()>1 ){std::cout << "    + Found StartTime:"<< peak.mStartX << "|LocalMax:"<<LocalMax<<std::endl;}
+      if( GetDebug()>1 ){LOG_DEBUG << "    + Found StartTime:"<< peak.mStartX << "|LocalMax:"<<LocalMax<<endm;}
       if( Slope >= 0 ){
 	LocalMax=LX; //keep moving local max as long slope>=0
 	if( Slope==0 && peak.mP_Peak>=0 ){ peak.mEndX=LX; } //if slope==0 and a peak was found i.e. mP_Peak>=0 then don't end finding but keep moving the end point i.e. peak.mEndX=LX. This condition is needed because sometimes a slope is zero and then will start decreasing again later. The importance of finding a peak is because it establishes the fact that the curve is convave and zero slope is ambiguous in which direction it will go. If slopes keep decreasing then expands peak window, if slope changes sign at next point algorithm will naturally stop. This is the desired behavior. Using the condition `Slope>0` does not produce the same the effect because sometimes this kind of zero slope behavior happens on the increasing slope side of the data and this should not be stopping the search because the next one could be positive.
-	if( GetDebug()>2){std::cout<<"      + Slope>=0|"<<Slope<<std::endl;}
+	if( GetDebug()>2){LOG_DEBUG<<"      + Slope>=0|"<<Slope<<endm;}
       }
       else{ //Slope < 0
 	peak.mEndX=LX;
@@ -696,12 +696,12 @@ void PeakAna::GetPossiblePeaks()
 	  peak.mP_Peak=ismp;
 	  mG_Data->GetPoint(ismp,peak.mPeakX,peak.mPeakY);
 	}
-	if(GetDebug()>2){std::cout<<"      + Slope<0"<<std::endl;}
+	if(GetDebug()>2){LOG_DEBUG<<"      + Slope<0"<<endm;}
       }
       if( LocalMax>peak.mEndX || LY<baseline+slopecutoff || ismp==npoints-2 || RY<=mYRangeMin  ){//Slope is now positive again or there was a postive slope to negative but did not fall below threshold
 	if( ismp==npoints-2 ){ peak.mEndX=RX; peak.mEndY=RY; if(peak.mP_Peak<0){peak.mP_Peak=ismp+1;} }//last point is actually RX,RY not LX,LY and if no peak found then set last point as found peak
 	else{peak.mEndX=LX; peak.mEndY = LY;}//all others should be current point
-	if( GetDebug()>2 ){std::cout << "    + Slope positive again|StartX:"<<peak.mStartX << "|StartY:"<<peak.mStartY << "|EndX:"<<peak.mEndX << "|EndY:"<<peak.mEndY << "|P:"<<peak.mP_Peak <<"|PeakX:"<<peak.mPeakX << "|PeakY:"<<peak.mPeakY << "|PeakProb:"<< peak.PeakTunnelProb(mG_Data,mTunnelScale,mTunnelSigma) << std::endl;}
+	if( GetDebug()>2 ){LOG_DEBUG << "    + Slope positive again|StartX:"<<peak.mStartX << "|StartY:"<<peak.mStartY << "|EndX:"<<peak.mEndX << "|EndY:"<<peak.mEndY << "|P:"<<peak.mP_Peak <<"|PeakX:"<<peak.mPeakX << "|PeakY:"<<peak.mPeakY << "|PeakProb:"<< peak.PeakTunnelProb(mG_Data,mTunnelScale,mTunnelSigma) << endm;}
 	if( PeakTunnel(peak) ){
 	  Int_t n = PossiblePeak.size();
 	  if( n==0 ){ PossiblePeak.push_back(peak); }//In case vector is empty and tunnel probablity is true
@@ -714,15 +714,15 @@ void PeakAna::GetPossiblePeaks()
 	}
 	else{ PossiblePeak.push_back(peak); }//Store windows
 	PossiblePeak.back().SetPeak(mG_Data);
-	if( GetDebug()>1){std::cout << "  * |Found:"; PossiblePeak.back().Print(); std::cout<<std::endl;}
+	if( GetDebug()>1){LOG_DEBUG << "  * |Found:"; PossiblePeak.back().Print("debug"); LOG_DEBUG<<endm;}
 	peak.Reset(mXRangeMin-1,mXRangeMax+1);//Reset variables
-	if( GetDebug()>2){std::cout << "  * |peakreset:"; peak.Print(); std::cout<<std::endl;}
+	if( GetDebug()>2){LOG_DEBUG << "  * |peakreset:"; peak.Print("debug"); LOG_DEBUG<<endm;}
 	LocalMax=mXRangeMin-1;
 	--ismp;//Go back one point in case new signal starts at where slope was positive again
       }
     }
   }
-  if( GetDebug()>0 ){ std::cout << "PeakAna::GetPossiblePeaks:End graph reading loop|SizePeaks:" <<PossiblePeak.size() << std::endl; }
+  if( GetDebug()>0 ){ LOG_DEBUG << "PeakAna::GetPossiblePeaks:End graph reading loop|SizePeaks:" <<PossiblePeak.size() << endm; }
 
   mPeaks.swap(PossiblePeak);
 }
@@ -732,27 +732,27 @@ Int_t PeakAna::SearchForPeak(const std::vector<PeakWindow> &PossiblePeaks)
 {
   if( PossiblePeaks.size()==0 )
     {
-      if( GetDebug()>0 ){std::cout << "PeakAna::SearchForPeak - Error:Unable to find a valid peak\nReturning impossible index" << std::endl; }
+      if( GetDebug()>0 ){LOG_DEBUG << "PeakAna::SearchForPeak - Error:Unable to find a valid peak\nReturning impossible index" << endm; }
       return PossiblePeaks.size();
     }
   else
     {
       if( GetDebug()>0 )
 	{
-	  std::cout << "|Size of Possible peaks:"<<PossiblePeaks.size();
-	  std::cout << "|Search Peak:"<<mSearch.mStartX;
-	  std::cout << "|Search Width:"<<mSearch.mEndX;
-	  std::cout << std::endl;
+	  LOG_DEBUG << "|Size of Possible peaks:"<<PossiblePeaks.size();
+	  LOG_DEBUG << "|Search Peak:"<<mSearch.mStartX;
+	  LOG_DEBUG << "|Search Width:"<<mSearch.mEndX;
+	  LOG_DEBUG << endm;
 	}
       Short_t peakindex=-1;
       for( UShort_t ipeak=0; ipeak<PossiblePeaks.size(); ++ipeak )
 	{
 	  if( GetDebug()>1 )
 	    {
-	      std::cout << " - ";
-	      std::cout << "|Index:"<<ipeak;
-	      PossiblePeaks.at(ipeak).Print();
-	      std::cout << std::endl;
+	      LOG_DEBUG << " - ";
+	      LOG_DEBUG << "|Index:"<<ipeak;
+	      PossiblePeaks.at(ipeak).Print("debug");
+	      LOG_DEBUG << endm;
 	    }
 	  Double_t PeakLoc = PossiblePeaks.at(ipeak).mPeakX;
 	  if( mSearch.mStartX-mSearch.mEndX<=PeakLoc && PeakLoc <= mSearch.mStartX+mSearch.mEndX )
@@ -760,15 +760,15 @@ Int_t PeakAna::SearchForPeak(const std::vector<PeakWindow> &PossiblePeaks)
 	      peakindex=ipeak;
 	      if( GetDebug()>1 )
 		{
-		  std::cout << "   + ";
-		  std::cout << "|TrueIndex:"<<peakindex;
-		  std::cout << std::endl;
+		  LOG_DEBUG << "   + ";
+		  LOG_DEBUG << "|TrueIndex:"<<peakindex;
+		  LOG_DEBUG << endm;
 		}
 	    }
 	}
       if( peakindex>=0 && mSearch.mStartX>0 && PossiblePeaks.at(peakindex).mP_Peak>0 )
 	{
-	  if(GetDebug()>1){PossiblePeaks.at(peakindex).Print();std::cout<<std::endl;}
+	  if(GetDebug()>1){PossiblePeaks.at(peakindex).Print("debug");LOG_DEBUG<<endm;}
 	  return peakindex;
 	}
       else{ return PossiblePeaks.size();}

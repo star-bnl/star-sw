@@ -76,7 +76,7 @@ public:
     virtual void Clear(Option_t* option = "");
     
     void setDebug(int v=1)        {SetDebug(v);}
-    void setTest(int v);
+    void setTest(int v);           //!< Set test level. Intended to be used for single files. Output file name can be changed with #writeFile()
     void setEnergySelect(int ecal=10, int hcal=10, int pres=1) {mEnergySelect[0]=ecal; mEnergySelect[1]=hcal; mEnergySelect[2]=pres;}
     void setCenterTimeBins(int v, int min=0, int max=512) {mCenterTB=v; mMinTB=min; mMaxTB=max;}
     void setAdcSaturation(int v)  {mAdcSaturation=(double)v;}
@@ -154,7 +154,7 @@ public:
     void setMaxPage(int v){mMaxPage=v;}         
     void setSkip(int v){mSkip=v;}         
     void setFileName(char* file, int maxpage=25, int skip=5){mFilename=file; mMaxPage=maxpage; mSkip=skip;} 
-    void writeFile(std::string filename);
+    void writeFile(std::string filename);       //!< Use to change the name of the file where test histograms will be saved
     void setFitDrawOn(int v=1) {mFitDrawOn=v;}  //=1 to keep for a event, =2 for a page
     void setFitFilter(char* filter) {mFilter=filter; mFitDrawOn=2;}
 

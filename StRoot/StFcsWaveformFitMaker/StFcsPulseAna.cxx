@@ -186,7 +186,7 @@ void StFcsPulseAna::AnalyzeForPedestal()
     {
       Double_t tb; Double_t adc;
       Int_t check = this->GetData()->GetPoint(ipoint,tb,adc);
-      if( check<0 ){ std::cout << "WARNING:Unable to find point " << ipoint << " in Signal graph" << std::endl; continue;}
+      if( check<0 ){ LOG_WARN << "Unable to find point " << ipoint << " in Signal graph" << endm; continue;}
       if( adc<0.1 ){continue;} //skip adc=0 from histogram since this is most likely missing data in non-pedestal subtracted data
       mH1_Baseline->Fill(adc);
     }
@@ -203,10 +203,10 @@ void StFcsPulseAna::AnalyzeForPedestal()
   if( FindBaseline() ){return;}
   else
     {
-      LOG_WARN << "Unable to find a proper baseline" << std::endl;
-      if( GetDebug()>2 ){std::cout << "->";Print();}
-      else{std::cout << "->Found baseline:"<< mBaseline << " Found BaselineSigma:"<<mBaselineSigma << std::endl
-		     << "->Setting baseline to 0 and sigma to 0.75 to prevent T0 algorithm from failing" << std::endl;}
+      LOG_WARN << "Unable to find a proper baseline" << endm;
+      if( GetDebug()>2 ){ LOG_DEBUG << "->";Print();}
+      else{LOG_INFO << "->Found baseline:"<< mBaseline << " Found BaselineSigma:"<<mBaselineSigma << endm
+		     << "->Setting baseline to 0 and sigma to 0.75 to prevent T0 algorithm from failing" << endm;}
       mBaseline=0;
       mBaselineSigma=0.75;
       return;
@@ -219,9 +219,9 @@ bool StFcsPulseAna::FindBaseline()
     {
       if( GetDebug()>2 )
 	{
-	  std::cout << "|BaselineValue:"<<mBaseline;
-	  std::cout << "|BaselineSigma:"<<mBaselineSigma;
-	  std::cout << std::endl;
+	  LOG_DEBUG << "|BaselineValue:"<<mBaseline;
+	  LOG_DEBUG << "|BaselineSigma:"<<mBaselineSigma;
+	  LOG_DEBUG << endm;
 	}
       return true;
     }
@@ -229,7 +229,7 @@ bool StFcsPulseAna::FindBaseline()
   if( mH1_Baseline==0 || mH1_Baseline->GetEntries()==0 ){mBaseline = -5.0; return false;}
   //For nonpedestal data use full range for pedestal data find largest bin and use a +-3 bin buffer for the fit
   Int_t XStartVal = mH1_Baseline->GetMaximumBin()-1;//Offset by one to make the value correct
-  if( GetDebug()>2 ){ std::cout << "|Height:"<<mH1_Baseline->GetBinContent(XStartVal+1) << "|XStartVal:"<< XStartVal << "|Range:"<<3 <<"|StartSigma:"<<0.9 <<std::endl; }
+  if( GetDebug()>2 ){ LOG_DEBUG << "|Height:"<<mH1_Baseline->GetBinContent(XStartVal+1) << "|XStartVal:"<< XStartVal << "|Range:"<<3 <<"|StartSigma:"<<0.9 << endm; }
   mF1_BaselineFit->SetRange(XStartVal-3,XStartVal+3);//Only do within this range
   mF1_BaselineFit->SetParameter(0,mH1_Baseline->GetBinContent(XStartVal+1));
   mF1_BaselineFit->SetParameter(1,XStartVal);//Use maximum instead of mean for more accurate center
@@ -239,7 +239,7 @@ bool StFcsPulseAna::FindBaseline()
   char opt[5] = "NRQ";
   if( GetDebug()>2 ){ opt[2] = '\0';}//Hack to to not quiet fit output
   Int_t FitStatus = mH1_Baseline->Fit(mF1_BaselineFit,opt);
-  if( GetDebug()>1 ){ std::cout << "|FitStatus:"<< FitStatus << std::endl; }
+  if( GetDebug()>1 ){ LOG_DEBUG << "|FitStatus:"<< FitStatus << endm; }
   if( FitStatus == 0 )
     {
       Double_t ratio = mF1_BaselineFit->GetChisquare()/static_cast<Double_t>(mF1_BaselineFit->GetNDF());
@@ -256,7 +256,7 @@ bool StFcsPulseAna::FindBaseline()
       //Max works better
       mBaseline = mH1_Baseline->GetMaximumBin()-1;//Offset by one to account for bin counting
       mBaselineSigma = 0.75;
-      if(GetDebug()>1){std::cout << "WARNING:Fit failed to converge setting baseline to mean of histogram and of sigma to 0.75" << std::endl;}
+      if(GetDebug()>1){LOG_WARN << "Fit failed to converge setting baseline to mean of histogram and of sigma to 0.75" << endm;}
       return true;
     }
   else{return false;}
@@ -430,9 +430,9 @@ Int_t StFcsPulseAna::Sum(Int_t Start, Int_t End)
       if( tb > End ){ break; }
       SumAdc += adc;
     }
-  if( GetDebug()>1 ){std::cout << "|Start:"<<Start << "|End:"<<End << "|SumAdcB:"<< SumAdc; }
+  if( GetDebug()>1 ){LOG_DEBUG << "|Start:"<<Start << "|End:"<<End << "|SumAdcB:"<< SumAdc; }
   SumAdc -= base*abs(End-Start+1);//Add one to account for the fact that the adc value at start and end is being summed
-  if( GetDebug()>1 ){std::cout << "|SumAdcA:"<< SumAdc << "|BaseArea:"<<base*abs(End-Start+1) << std::endl; }
+  if( GetDebug()>1 ){LOG_DEBUG << "|SumAdcA:"<< SumAdc << "|BaseArea:"<<base*abs(End-Start+1) << endm; }
   return SumAdc;
 }
 
@@ -525,9 +525,9 @@ Double_t StFcsPulseAna::GausFit(Int_t Start,Int_t End)
       Double_t FitStart = mF1_SignalFit->GetParameter(1) - 4.0*fabs(mF1_SignalFit->GetParameter(2));
       Double_t FitEnd = mF1_SignalFit->GetParameter(1) + 4.0*fabs(mF1_SignalFit->GetParameter(2));
       mSumAdcFit = mF1_SignalFit->Integral(FitStart,FitEnd);//Sum only in the range and subtract the area under the baseline
-      if( GetDebug()>2 ){std::cout << "|FitStart:"<<FitStart << "|FitEnd:"<<FitEnd << "|FitSumB:"<<mSumAdcFit; }
+      if( GetDebug()>2 ){LOG_DEBUG << "|FitStart:"<<FitStart << "|FitEnd:"<<FitEnd << "|FitSumB:"<<mSumAdcFit; }
       mSumAdcFit -= ((FitEnd-FitStart)*base);
-      if( GetDebug()>2 ){std::cout << "|FitSumA:"<<mSumAdcFit << "|BaseArea:"<<((FitEnd-FitStart)*base) << std::endl; }
+      if( GetDebug()>2 ){LOG_DEBUG << "|FitSumA:"<<mSumAdcFit << "|BaseArea:"<<((FitEnd-FitStart)*base) << endm; }
       mFitSum = true;
       return mSumAdcFit;
     }
@@ -568,9 +568,9 @@ Double_t StFcsPulseAna::MBFit(Int_t Start,Int_t End)
   if( fitstatus >= 0 )
     {
       mSumAdcFit = mF1_SignalFit->Integral(Start,End);//Sum only in the range and subtract the area under the baseline
-      if( GetDebug()>2 ){std::cout << "|FitStart:"<<Start << "|FitEnd:"<<End << "|FitSumB:"<<mSumAdcFit; }
+      if( GetDebug()>2 ){LOG_DEBUG << "|FitStart:"<<Start << "|FitEnd:"<<End << "|FitSumB:"<<mSumAdcFit; }
       mSumAdcFit -= ((End-Start)*base);
-      if( GetDebug()>2 ){std::cout << "|FitSumA:"<<mSumAdcFit << "|BaseArea:"<<((End-Start)*base) << std::endl; }
+      if( GetDebug()>2 ){LOG_DEBUG << "|FitSumA:"<<mSumAdcFit << "|BaseArea:"<<((End-Start)*base) << endm; }
       mFitSum = true;
       return mSumAdcFit;
     }
@@ -581,7 +581,7 @@ Double_t StFcsPulseAna::PulseFit(Int_t Start, Int_t End)
 {
   if( mFitSum ){ return mSumAdcFit; }
   mSumAdcFit = 0.0;
-  if( mDbPulse==0 ){std::cout <<"ERROR:No pulse object"<<std::endl; return mSumAdcFit;}
+  if( mDbPulse==0 ){LOG_ERROR <<"No pulse object"<<endm; return mSumAdcFit;}
   Double_t base = Baseline();//Necessary to check if pedestal value has been set
   if( base < -4.0 ){ return mSumAdcFit; }
   if( mG_Data==0 || mG_Data->GetN()==0 ){return mSumAdcFit;}
@@ -611,9 +611,9 @@ Double_t StFcsPulseAna::PulseFit(Int_t Start, Int_t End)
   if( fitstatus >= 0 )
     {
       mSumAdcFit = mF1_SignalFit->Integral(Start,End);//Sum only in the range and subtract the area under the baseline
-      if( GetDebug()>2 ){std::cout << "|FitStart:"<<Start << "|FitEnd:"<<End << "|FitSumB:"<<mSumAdcFit; }
+      if( GetDebug()>2 ){LOG_DEBUG << "|FitStart:"<<Start << "|FitEnd:"<<End << "|FitSumB:"<<mSumAdcFit; }
       mSumAdcFit -= ((End-Start)*base);
-      if( GetDebug()>2 ){std::cout << "|FitSumA:"<<mSumAdcFit << "|BaseArea:"<<((End-Start)*base) << std::endl; }
+      if( GetDebug()>2 ){LOG_DEBUG << "|FitSumA:"<<mSumAdcFit << "|BaseArea:"<<((End-Start)*base) << endm; }
       mFitSum = true;
       return mSumAdcFit;
     }

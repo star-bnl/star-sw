@@ -127,62 +127,62 @@ StFcsWaveformFitMaker::StFcsWaveformFitMaker(const char* name) : StMaker(name) {
 }
 
 StFcsWaveformFitMaker::~StFcsWaveformFitMaker() {
-  mChWaveData.Delete();//Completely clear all graphs (Put in Finish??)
-  if( mPulseFit!=0 ){delete mPulseFit;}
+  mChWaveData.Delete();
+  delete mPulseFit;
   for( UShort_t i=0; i<7; ++i ){
     if( i<3 ){
-      if( mH2_Dep0DepMod[i]!=0 ){delete mH2_Dep0DepMod[i];}
-      if( mH2_Sum8Dep0[i]!=0   ){delete mH2_Sum8Dep0[i];}
-      if( mH2_Sum8DepMod[i]!=0 ){delete mH2_Sum8DepMod[i];}
+      delete mH2_Dep0DepMod[i];
+      delete mH2_Sum8Dep0[i];
+      delete mH2_Sum8DepMod[i];
     }
     if( i<6 ){
-      if( mH2F_AdcTbAkio[i]!=0 )     {delete mH2F_AdcTbAkio[i];}
-      if( mH2F_AdcTbMine[i]!=0 )     {delete mH2F_AdcTbMine[i];}
-      if( mH2F_SumFitvSumWin[i]!=0 ) {delete mH2F_SumFitvSumWin[i];}
-      if( mH2F_APeakvMPeak[i]!=0 )   {delete mH2F_APeakvMPeak[i];}
-      if( mH1F_PeakStart[i]!=0 )     {delete mH1F_PeakStart[i];}
-      if( mH1F_PeakEnd[i]!=0 )       {delete mH1F_PeakEnd[i];}
-      if( mH2F_NOvsId[i]!=0    )     {delete mH2F_NOvsId[i];}
+      delete mH2F_AdcTbAkio[i];
+      delete mH2F_AdcTbMine[i];
+      delete mH2F_SumFitvSumWin[i];
+      delete mH2F_APeakvMPeak[i];
+      delete mH1F_PeakStart[i];
+      delete mH1F_PeakEnd[i];
+      delete mH2F_NOvsId[i];
     }
-    if( mH2F_AdcTbValidPeak[i]!=0 ){delete mH2F_AdcTbValidPeak[i];}
-    if( mH1F_NPeaks[i]!=0 )        {delete mH1F_NPeaks[i];}
-    if( mH1F_NPeaksFiltered[i]!=0 ){delete mH1F_NPeaksFiltered[i];}
+    delete mH2F_AdcTbValidPeak[i];
+    delete mH1F_NPeaks[i];
+    delete mH1F_NPeaksFiltered[i];
     
-    if( mH1F_Res0[i]!=0      )     {delete mH1F_Res0[i];}
-    if( mH1F_Res0Zoom[i]!=0  )     {delete mH1F_Res0Zoom[i];}
-    if( mH1F_Sum8Res0[i]!=0  )     {delete mH1F_Sum8Res0[i];}
-    if( mH1F_Sum8Res0Zoom[i]!=0 )  {delete mH1F_Sum8Res0Zoom[i];}
-    if( mH1F_FitRes0[i]!=0      )  {delete mH1F_FitRes0[i];}
-    if( mH1F_FitRes0Zoom[i]!=0  )  {delete mH1F_FitRes0Zoom[i];}
-    if( mH2F_Sum8vFit[i]!=0     )  {delete mH2F_Sum8vFit[i];}
+    delete mH1F_Res0[i];
+    delete mH1F_Res0Zoom[i];
+    delete mH1F_Sum8Res0[i];
+    delete mH1F_Sum8Res0Zoom[i];
+    delete mH1F_FitRes0[i];
+    delete mH1F_FitRes0Zoom[i];
+    delete mH2F_Sum8vFit[i];
   }
-  if( mTime!=0 )                  { delete mTime; }
+  delete mTime;
 
-  if( mH1_NPeaksAkio!=0 )         {delete mH1_NPeaksAkio;}
-  if( mH1_NPeaksFilteredAkio!=0 ) {delete mH1_NPeaksFilteredAkio;}
+  delete mH1_NPeaksAkio;
+  delete mH1_NPeaksFilteredAkio;
   
-  if( mH1_PeakTiming!=0 )         {delete mH1_PeakTiming;}
+  delete mH1_PeakTiming;
 
-  if( mH2_NPeakvsPeakXdiff )      {delete mH2_NPeakvsPeakXdiff;}
-  if( mH2_NPeakvsPeakYratio)      {delete mH2_NPeakvsPeakYratio;}
-  if( mH1_VOverlap!=0 )           {delete mH1_VOverlap;}
-  if( mH2_NOvsNPeaks!=0 )         {delete mH2_NOvsNPeaks;}
-  if( mH2_VvsNOverlap!=0    )     {delete mH2_VvsNOverlap;}
+  delete mH2_NPeakvsPeakXdiff;
+  delete mH2_NPeakvsPeakYratio;
+  delete mH1_VOverlap;
+  delete mH2_NOvsNPeaks;
+  delete mH2_VvsNOverlap;
 
-  if( mH1_TimeFitPulse!=0   )     {delete mH1_TimeFitPulse;}
+  delete mH1_TimeFitPulse;
 
-  if( mH2_HeightvsSigma!=0  )     {delete mH2_HeightvsSigma;}
-  if( mH2_HeightvsSigmaTrig!=0 )  {delete mH2_HeightvsSigmaTrig;}
-  if( mH1_ChiNdf!=0         )     {delete mH1_ChiNdf;}
-  if( mH2_HeightvsChiNdf!=0 )     {delete mH2_HeightvsChiNdf;}
-  if( mH2_MeanvsChiNdf!=0   )     {delete mH2_MeanvsChiNdf;}
-  if( mH2_SigmavsChiNdf!=0  )     {delete mH2_SigmavsChiNdf;}
+  delete mH2_HeightvsSigma;
+  delete mH2_HeightvsSigmaTrig;
+  delete mH1_ChiNdf;
+  delete mH2_HeightvsChiNdf;
+  delete mH2_MeanvsChiNdf;
+  delete mH2_SigmavsChiNdf;
 
-  if( mH1_PeakTimingGaus!=0 )     {delete mH1_PeakTimingGaus;}
-  if( mH1_PeakTimingPuls!=0 )     {delete mH1_PeakTimingPuls;}
-  if( mH2_PeakTimingCompare!=0 )  {delete mH2_PeakTimingCompare;}
+  delete mH1_PeakTimingGaus;
+  delete mH1_PeakTimingPuls;
+  delete mH2_PeakTimingCompare;
 
-  if( mOutFile!=0 ){ mOutFile->Close(); delete mOutFile; mOutFile=0; }
+  if( mOutFile!=0 ){ mOutFile->Close(); delete mOutFile; }
 }
 
 void StFcsWaveformFitMaker::writeFile(std::string filename){
@@ -382,7 +382,6 @@ int StFcsWaveformFitMaker::Finish(){
     delete c;
   }
   if( mOutFile!=0 ){
-    //mOutFile = new TFile(mOutFileName.c_str(),"RECREATE");
     mOutFile->cd();
     
     for( UShort_t i=0; i<7; ++i ){
@@ -436,7 +435,7 @@ int StFcsWaveformFitMaker::Finish(){
     if( mH1_PeakTimingGaus!=0   )      {mH1_PeakTimingGaus->Write();}
     if( mH1_PeakTimingPuls!=0   )      {mH1_PeakTimingPuls->Write();}
     if( mH2_PeakTimingCompare!=0)      {mH2_PeakTimingCompare->Write();}
-
+      
     //In case you want to save a particular graph needs mFitDrawOn==1
     //TGraphAsymmErrors* g = getGraph(0,161);
     //std::cout << "found graph:"<<g << std::endl;
@@ -560,7 +559,7 @@ TGraphAsymmErrors* StFcsWaveformFitMaker::getGraph(int det, int id)
       }
     }
   }
-  std::cout << "StFcsWaveformFitMaker::getGraph() - Error:Unable to find det:"<<det << " id:"<<id << " in graph array" << std::endl;
+  LOG_ERROR << "Unable to find det:"<<det << " id:"<<id << " in graph array" << std::endl;
   return 0;
 }
 
@@ -918,15 +917,6 @@ float StFcsWaveformFitMaker::gausFit(TGraphAsymmErrors* g, float* res, TF1*& fun
 	else{ mH2F_AdcTbValidPeak[6]->Fill(t[i],a[i]); }
 	//std::cout << "- |i:"<<i << "|t:"<<t[i] << "|a:"<< a[i] << std::endl;
       }
-      /*
-      if( myNpeaks == 0 && mprintout==0 && checkpeak ){ 
-	mPulseFit->SetDebug(3);
-	mPulseFit->ResetPeak();
-	mPulseFit->AnalyzeForPeak();
-	mPulseFit->SetDebug(0);
-	++mprintout;
-      }
-      */
     }
     //Continue with rest of peak finding
     
@@ -1111,7 +1101,7 @@ void StFcsWaveformFitMaker::drawRegion(int det, int col_low, int row_low, int co
 
   if( det<2 ){MaxDrawPad=6;}//Maximum to draw on one pad for Ecal
   else if( det>1 && det<4 ){MaxDrawPad=4;}//Maximum to draw on one pad for Hcal
-  else{ std::cout<< "ERROR:This function only works for det<4"<<std::endl; return; }
+  else{ LOG_ERROR<< "StFcsWaveformFitMaker::drawRegion(): This function only works for det<4"<<endm; return; }
   
   if( mCanvas==0 ){ mCanvas = new TCanvas("mCanvas","FCSWaveFormFit",10,10,2000,2000); }
   //gStyle->SetOptStat(0);
@@ -1121,7 +1111,6 @@ void StFcsWaveformFitMaker::drawRegion(int det, int col_low, int row_low, int co
   }
   mCanvas->Divide(4,4);
 
-  //int Nentries = mChWaveData.GetEntries();//Just to prevent multiple evaluation since ROOT loops through array to count elements (not needed Feb 05, 2021)
   //Need to loop to mHitIdx since that is the most hits for a given event and this function should be only used after all data is read in. This prevents reading old event that may have had more hits.
   for( unsigned int iCh=0; iCh<mHitIdx; ++iCh ){
     TGraphAsymmErrors* gTemp = (TGraphAsymmErrors*)mChWaveData.ConstructedAt(iCh);
@@ -1158,7 +1147,7 @@ void StFcsWaveformFitMaker::drawRegion(int det, int col_low, int row_low, int co
       ((TGraphAsymmErrors*)padTemp->GetListOfPrimitives()->At(1))->GetYaxis()->SetRangeUser(MinY[mPad],MaxY[mPad]);//For this function first graph in list of primitives is the graph with axis object (First object of list is TFrame)
       padTemp->Draw();//Update axes
     }
-    if( (++NumDrawnPad[mPad]) > MaxDrawPad ){std::cout << "WARNING:Drawing too many on one pad"<<std::endl;}
+    if( (++NumDrawnPad[mPad]) > MaxDrawPad ){LOG_WARN << "StFcsWaveformFitMaker::drawRegion(): Drawing too many on one pad"<<endm;}
   }
   std::stringstream SS_name;
   SS_name << "Det"<<det << "_Cl"<<col_low << "Rl"<<row_low << "_Ch"<<col_high << "Rh"<<row_high << "_Event"<<event <<".png";
@@ -1369,7 +1358,6 @@ float StFcsWaveformFitMaker::PulseFit1(TGraphAsymmErrors* gae, float* res, TF1*&
 }
 
 float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*& func){
-  //StFcsPulseFitter Fitter(gae);
   if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(gae); SetupDavidFitterMay2022();}
   else{mPulseFit->SetData(gae);}//Resets finder
   if( GetDebug()>2 ){mPulseFit->SetDebug(1);}
@@ -1381,7 +1369,6 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
   int det0 = 0; int ch0=0;
   mDb->getFromName( gae->GetName(), det0,ch0 );
 
-  //std::cout << "|compidx:"<<compidx << "|npeaks:"<<npeaks <<std::endl;
   if( mTest==6 ){
     mH1F_NPeaks[det0]->Fill(npeaks);
     mH1F_NPeaks[6]->Fill(npeaks);
@@ -1483,8 +1470,9 @@ float StFcsWaveformFitMaker::PulseFit2(TGraphAsymmErrors* gae, float* res, TF1*&
 float StFcsWaveformFitMaker::PedFit(TGraphAsymmErrors* gae, float* res, TF1*& func){
   if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(gae);}
   else{mPulseFit->SetData(gae);}//Resets finder
-  if( GetDebug()>2){mPulseFit->SetDebug(1);}
-  mPulseFit->SetRange(-4,0,1024,4096);
+  if( GetDebug()>2 ){mPulseFit->SetDebug(1);}
+  
+  mPulseFit->SetRange(-4,0,2000,5000);
   mPulseFit->SetBaselineFit(func);//Need to do this since func gets deleted outside
   mPulseFit->SetData(gae);
   mPulseFit->AnalyzeForPedestal();//Must be called before anything else otherwise crash
@@ -1501,29 +1489,29 @@ float StFcsWaveformFitMaker::LedFit(TGraphAsymmErrors* gae, float* res, TF1*& fu
   if( mPulseFit==0 ){mPulseFit = new StFcsPulseAna(gae);}
   else{mPulseFit->SetData(gae);}//Resets finder
   if( GetDebug()>2){mPulseFit->SetDebug(1);}
-  //mPulseFit->SetFitSignal(func);//Need to do this since func gets deleted in analyze waveform and this needs to get called first so when SetSignal resets finder mF1_FitSignal is not a dangling pointer
-  //StFcsPulseFit Fitter(gae);
-  //mPulseFit->SetSignal(gae);
-  mPulseFit->SetRange(-4,0,1024,4096);
-  mPulseFit->SetSearchWindow(mCenterTB,5);//Some suitable starting search parameter may need to be adjusted based on data
-  //std::cout << "::LedFit::mPulseFit:"<<mPulseFit << std::endl;
+
+  mPulseFit->SetBaselineSigmaScale(5);
+  mPulseFit->SetRange(-4,0,2000,5000);
+  mPulseFit->SetSearchWindow(centerTB(),4);//Check +- 4tb around triggered crossing. Mmay need to be adjusted based on data
   //Since LED data is raw (not pedestal subtracted) determine baseline first
   mPulseFit->AnalyzeForPedestal();//Must be called before anything else otherwise crash
-  func = mPulseFit->BaselineFit();
-  res[5] = mPulseFit->Baseline();
-  res[6] = mPulseFit->BaselineSigma();
-  if( func==0 ){ res[7]=0;}
-  else{res[7] = func->GetChisquare()/func->GetNDF();}   //chi2 from signal fit
-  
-  mPulseFit->SetSearchWindow(mCenterTB,4);//Check +- 4tb around triggered crossing
-  //Many more options to set but excluded for now to see how default values perform
-  res[0]=mPulseFit->MBFit();     //this is full integral (pedestal subtracted)
-  func = mPulseFit->SignalFit();     //Fitted function
-  if( func==0 ){ res[0]=0; res[1]=0; res[2]=0; res[3]=0; res[4]=0; return res[0];}
-  res[1]=func->GetParameter(0);  //this is peak height from signal fit
-  res[2]=func->GetParameter(1);  //this is peak position from signal fit [timebin]
-  res[3]=func->GetParameter(2);  //this is width from signal fit
-  res[4]=func->GetChisquare()/func->GetNDF();   //chi2 from signal fit
+
+  Int_t compidx = mPulseFit->FoundPeakIndex();
+  if( compidx<0 ){ compidx = mPulseFit->AnalyzeForPeak(); }
+  int npeaks = mPulseFit->NPeaks();
+
+  if( compidx==npeaks ){ res[0] = 0; }//no found peak case sum is 0
+  else{//At least 1 peak found
+    func = mDbPulse->createPulse(mMinTB,mMaxTB,2+npeaks*3);
+    mPulseFit->SetFitPars(func);
+    TFitResultPtr result = gae->Fit(func,"BNRQ");
+    res[5] = npeaks;
+    res[1] = func->GetParameter(compidx*3 + 2);
+    res[2] = func->GetParameter(compidx*3 + 3);
+    res[3] = func->GetParameter(compidx*3 + 4);
+    res[4] = func->GetChisquare()/func->GetNDF();
+    res[0] = res[1]*res[3]*StFcsDbPulse::sqrt2pi();
+  }
   return res[0];
 }
 
@@ -1548,7 +1536,7 @@ int StFcsWaveformFitMaker::PadNum4x4(int det, int col, int row)
       ncol = 2;
       nrow = 2;
     }
-  else{ std::cout << "This only works for Ecal and Hcal" << std::endl; return 0;}
+  else{ LOG_ERROR << "StFcsWaveformFitMaker::PadNum4x4: This only works for Ecal and Hcal" << endm; return 0;}
   int padcol = GenericPadPos(col,ncol,4);
   int padrow = GenericPadPos(row,nrow,4);
   return 4*(padrow-1)+padcol;
@@ -1589,7 +1577,7 @@ int StFcsWaveformFitMaker::NPeaksPre2Post1(int& trigidx,Double_t& xmin, Double_t
       if( xmax < mPulseFit->GetPeak(i).mEndX ){ xmax = mPulseFit->GetPeak(i).mEndX; }
     }
   }
-  if( !foundtrigidx ){ std::cout << "StFcsWaveformFitMaker::NPeakPre2Post1 - ERROR:Unable to find a matching triggered crossing possibly due to improper use of function" << std::endl; }
+  if( !foundtrigidx ){ LOG_ERROR << "StFcsWaveformFitMaker::NPeakPre2Post1: Unable to find a matching triggered crossing possibly due to improper use of function" << endm; }
   return npeaksxing;
 }
 
