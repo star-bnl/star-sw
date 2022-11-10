@@ -5,6 +5,7 @@ on:
     paths-ignore:
       - '.github/**'
       - 'docs/**'
+      - '!.github/workflows/**'
 
 jobs:
   build:
