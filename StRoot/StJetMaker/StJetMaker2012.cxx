@@ -74,7 +74,7 @@ int StJetMaker2012::Init()
       TString branchname(jetbranch->name);
       branchname.Append(jetuebranch->name);
       mTreeUe->Branch(branchname, "StUeOffAxisConesEvent",&((jetuebranch->eventUe)[iBranch]));
-      cout<<jetbranch->name<<" initialized!"<<endl;
+      LOG_INFO<<jetbranch->name<<" and "<<jetuebranch->name<<" initialized!"<<endm;
     }
   }
   
