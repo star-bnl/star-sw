@@ -1,9 +1,6 @@
 #ifdef __CLING__
 #  include "tables/St_itpcDeadFEE_Table.h"
 #endif
-#ifdef __CLING__
-#  include "tables/St_itpcDeadFEE_Table.h"
-#endif
 TDataSet *CreateTable() { 
   // ------  Test whether this table share library was loaded ------
   if (!gROOT->GetClass("St_itpcDeadFEE")) return 0;
