@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_sca_const_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/sca/sca_const Allocated rows: 1  Used rows: 1  Row size: 112 bytes

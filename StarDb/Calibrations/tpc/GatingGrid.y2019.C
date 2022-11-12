@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_GatingGrid_Table.h"
+#endif
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_GatingGrid")) return 0;
 /* 

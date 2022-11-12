@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_emc_pedestal_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/cal/org_ped_eprs Allocated rows: 1440  Used rows: 1440  Row size: 4 bytes

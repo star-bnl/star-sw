@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tpcAnodeHV_Table.h"
+#endif
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_tpcAnodeHV")) return 0;
   St_tpcAnodeHV *tableSet = new St_tpcAnodeHV("tpcAnodeHV",19*24);

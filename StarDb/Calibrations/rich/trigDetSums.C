@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_trigDetSums_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Calibrations/rich/.trigDetSums/trigDetSums Allocated rows: 1  Used rows: 1  Row size: 144 bytes

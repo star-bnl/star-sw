@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tpcSectorT0offset_Table.h"
+#endif
 TDataSet *CreateTable() { 
   // -----------------------------------------------------------------
   // db/.const/StarDb/Calibrations/tpc/.tpcSectorT0offset/tpcSectorT0offset Allocated rows: 1  Used rows: 1  Row size: 72 bytes

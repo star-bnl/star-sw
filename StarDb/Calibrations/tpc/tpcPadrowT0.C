@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tpcPadrowT0_Table.h"
+#endif
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_tpcPadrowT0")) return 0;
   tpcPadrowT0_st row;

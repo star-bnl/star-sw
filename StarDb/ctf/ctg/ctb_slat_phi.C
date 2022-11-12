@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_ctg_slat_phi_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ctg/ctb_slat_phi Allocated rows: 60  Used rows: 60  Row size: 16 bytes

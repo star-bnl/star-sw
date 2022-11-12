@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_sls_ctrl_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // sls_ctrl Allocated rows: 1  Used rows: 1  Row size: 80 bytes

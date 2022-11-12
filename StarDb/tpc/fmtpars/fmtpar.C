@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tfc_fmtpar_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/fmtpars/fmtpar Allocated rows: 1  Used rows: 1  Row size: 88 bytes

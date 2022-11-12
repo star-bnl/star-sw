@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_MDFCorrection_Table.h"
+#endif
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_MDFCorrection")) return 0;
   Int_t nrows = 1;

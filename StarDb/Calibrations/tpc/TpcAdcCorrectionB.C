@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tpcCorrection_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // bfc/.make/db/.const/StarDb/Calibrations/tpc/.TpcAdcCorrectionB/TpcAdcCorrectionB Allocated rows: 50  Used rows: 50  Row size: 120 bytes

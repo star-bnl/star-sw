@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tpcPadGainT0B_Table.h"
+#endif
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_tpcPadGainT0B")) return 0;
   St_tpcPadGainT0B *tableSet = new St_tpcPadGainT0B("tpcPadGainT0B",24);

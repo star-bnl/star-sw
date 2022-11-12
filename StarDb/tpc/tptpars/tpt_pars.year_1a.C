@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tpt_pars_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tptpars/tpt_pars Allocated rows: 2  Used rows: 2  Row size: 160 bytes

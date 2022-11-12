@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_svtRDOstripped_Table.h"
+#endif
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_svtRDOstripped")) return 0;
   svtRDOstripped_st row[72] = {

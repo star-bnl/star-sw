@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_richvoltages_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Calibrations/rich/.richvoltages/richvoltages Allocated rows: 1  Used rows: 1  Row size: 16 bytes

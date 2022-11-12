@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tofStatus_Table.h"
+#endif
 TDataSet *CreateTable() { 
   // -----------------------------------------------------------------
   // db/.const/StarDb/Calibrations/tof/.tofStatus/tofStatus Allocated rows: 1  Used rows: 1  Row size: 48000 bytes

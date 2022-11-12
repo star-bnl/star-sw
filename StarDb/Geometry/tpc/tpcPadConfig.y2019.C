@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tpcPadConfig_Table.h"
+#endif
 TDataSet *CreateTable() { 
   // -----------------------------------------------------------------
   // db/.const/StarDb/Geometry/tpc/.tpcPadConfig/tpcPadConfig Allocated rows: 1  Used rows: 1  Row size: 1392 bytes

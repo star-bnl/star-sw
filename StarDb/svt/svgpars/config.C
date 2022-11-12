@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_svg_config_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/svgpars/config Allocated rows: 1  Used rows: 1  Row size: 1168 bytes

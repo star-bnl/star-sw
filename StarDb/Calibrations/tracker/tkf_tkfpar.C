@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tkf_tkfpar_Table.h"
+#endif
 TDataSet *CreateTable(){
 // -----------------------------------------------------------------
 // tkfpar Allocated rows: 1  Used rows: 1 Row

@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_svtHybridDriftVelocity_Table.h"
+#endif
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_svtHybridDriftVelocity")) return 0;
   const double drift_dist = 29928.; //in microns

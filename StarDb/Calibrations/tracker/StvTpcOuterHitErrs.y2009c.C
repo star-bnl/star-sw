@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_StvTpcHitErrs_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // StvTpcOuterHitErrs Allocated rows: 1  Used rows: 1  Row size: 64 bytes

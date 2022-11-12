@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tte_control_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ttepars/tte_control Allocated rows: 1  Used rows: 1  Row size: 12 bytes

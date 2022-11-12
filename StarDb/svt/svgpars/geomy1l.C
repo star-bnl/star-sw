@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_svg_geom_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/svgpars/geom Allocated rows: 7  Used rows: 7 

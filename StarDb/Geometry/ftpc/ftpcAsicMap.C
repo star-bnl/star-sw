@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_ftpcAsicMap_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Geometry/ftpc/.ftpcAsicMap/ftpcAsicMap Allocated rows: 1  Used rows: 1  Row size: 4 bytes

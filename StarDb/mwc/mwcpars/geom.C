@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_mwc_geo_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/mwcpars/geom Allocated rows: 1  Used rows: 1  Row size: 28 bytes

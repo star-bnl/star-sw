@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_svtHybridDriftVelocity_Table.h"
+#endif
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_svtHybridDriftVelocity")) return 0;
   svtHybridDriftVelocity_st row[293] = {//Pass126 Cu62M

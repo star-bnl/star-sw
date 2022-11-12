@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_sdm_calib_par_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // sdm_calib_par Allocated rows: 1  Used rows: 1  Row size: 52 bytes

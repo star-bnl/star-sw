@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_TpcResponseSimulator_Table.h"
+#endif
 // $Id: TpcResponseSimulator.20151220.000001.C,v 1.1 2017/05/20 00:54:00 fisyak Exp $
 // $Log: TpcResponseSimulator.20151220.000001.C,v $
 // Revision 1.1  2017/05/20 00:54:00  fisyak

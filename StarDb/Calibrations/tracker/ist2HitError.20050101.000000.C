@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_HitError_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.data/StarDb/Calibrations/tracker/.ist2HitError/ist2HitError Allocated rows: 1  Used rows: 1  Row size: 48 bytes

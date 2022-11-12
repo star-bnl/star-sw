@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tpipar_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tidpars/tpipar Allocated rows: 1  Used rows: 1  Row size: 132 bytes

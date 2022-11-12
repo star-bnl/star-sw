@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_emc_jetpar_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/jet/emc_jetpar Allocated rows: 1  Used rows: 1  Row size: 76 bytes

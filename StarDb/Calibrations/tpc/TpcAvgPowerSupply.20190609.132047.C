@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_TpcAvgPowerSupply_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // bfc/.make/db/.const/StarDb/Calibrations/tpc/.TpcAvgPowerSupply/TpcAvgPowerSupply Allocated rows: 1  Used rows: 1  Row size: 2316 bytes

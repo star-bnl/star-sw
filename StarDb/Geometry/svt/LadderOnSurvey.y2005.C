@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_Survey_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 //

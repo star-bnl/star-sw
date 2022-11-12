@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_srs_activea_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/srspars/srs_activea Allocated rows: 4  Used rows: 4  Row size: 44 bytes

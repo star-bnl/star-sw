@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tpcGas_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // bfc/.make/db/.const/StarDb/Calibrations/tpc/.tpcGas/tpcGas Allocated rows: 1  Used rows: 1  Row size: 64 bytes

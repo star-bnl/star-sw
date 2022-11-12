@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tpcCorrection_Table.h"
+#endif
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // tpcCorrection! Allocated rows: 48  Used rows: 48  Row size: 16 bytes

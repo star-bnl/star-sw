@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tfs_fspar_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tfspars/tfs_fspar Allocated rows: 1  Used rows: 1  Row size: 160 bytes

@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_tpcPadPlanes_Table.h"
+#endif
 TDataSet *CreateTable() { 
   // -----------------------------------------------------------------
   // db/.const/StarDb/Geometry/tpc/.tpcPadPlanes/tpcPadPlanes Allocated rows: 1  Used rows: 1  Row size: 1392 bytes

@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_ems_control_Table.h"
+#endif
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ems/ems_control Allocated rows: 1  Used rows: 1  Row size: 340 bytes

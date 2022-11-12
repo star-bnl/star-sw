@@ -1,3 +1,6 @@
+#ifdef __CLING__
+#  include "tables/St_starTriggerDelay_Table.h"
+#endif
 TDataSet *CreateTable() { 
   // -----------------------------------------------------------------
   // bfc/.make/db/.const/StarDb/RunLog/onl/.starTriggerDelay/starTriggerDelay Allocated rows: 1  Used rows: 1  Row size: 16 bytes
