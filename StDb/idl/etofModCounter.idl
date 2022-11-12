@@ -1,0 +1,16 @@
+/* etofModCounter.idl
+*
+* table: etofModCounter
+*
+* description: flag to modify Hits on Counter
+*
+*                    0: no modification, 1: flip local X & Y position            
+*                    2: flip local X, 3: flip local Y, 4&5: rotate by +-90°
+*
+* author: Yannick Söhngen (Universität Heidelberg)
+*
+*/
+
+struct etofModCounter {
+    octet detectorModFlag[108];  /* flag for hit-modifications on counter level  */
+};
