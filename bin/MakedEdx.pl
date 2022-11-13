@@ -2077,7 +2077,7 @@ my $step = 0;
 #$hist = "RunXX50"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/23/21 restart from express productioon TFG20a h with TpcAdcCorrectionB.y2019.C
 #$hist = "RunXX50"; $NEvents = 1000; $disk = "/hlt/cephfs/reco/2020/TFG20g/RF"; $RECO = "/*GeV*/";  $Production = "*"; $year = "/"; $FILE = "hlt_"; $STAR_LEVEL = "TFG20k"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 01/25/21 restart from express productioon TFG20a h with TpcAdcCorrectionB.y2019.C
 #$hist = "RunXX100"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 5; $Mode = 2; $macro = "dEdx";# 10/16/2022 start with current .DEV2
-$hist = "RunXX200"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/02/2022 new dEdxModel
+#$hist = "RunXX200"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/ReversedFullField"; $Production = "/P22ic_calib";; $year = "/2020/*/*/"; $FILE = "st_"; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";# 11/02/2022 new dEdxModel
 # restore ln -s TpcAdcCorrectionB.y2019.C TpcAdcCorrectionB.y2020.C; mv TpcAdcCorrectionB.r2020.C TpcAdcCorrectionB.r2020.C.HOLD.012621
 # TpcAdcCorrectionB.y2020.C
 # TpcAvgPowerSupply.y2020.C
@@ -2483,8 +2483,13 @@ $hist = "RunXX200"; $NEvents = 1000; $disk = "data*/"; $RECO  = "reco/*/Reversed
 #$hist = "RunXIX_XXII_44"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG22g"; $year = "/*OO*2021/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  09/20/22  reprocessed FF_OO_200GeV_2021 with TFG22g
 #$hist = "RunXIX_XXII_45"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/2021/*F"; $Production = "/TFG22g"; $year = "/7p7GeV_2021/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  10/31/2022 new dEdxModel
 #$hist = "RunXIX_XXII_45"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22g"; $year = "/*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/01/2022 new dEdxModel
-$hist = "RunXIX_XXII_46"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/05/2022 new TpcSecRowB
-#$hist = "RunXIX_XXII_46"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/*F"; $Production = "/TFG22g"; $year = "/*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/05/2022 new TpcSecRowB
+#$hist = "RunXIX_XXII_46"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/05/2022 new TpcSecRowB
+#$hist = "RunXIX_XXII_47"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/07/2022 reset all corrections
+#$hist = "RunXIX_XXII_48"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/08/2022 TpcSecRow from SecRow3G4EY
+#$hist = "RunXIX_XXII_48"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/dAu*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/08/2022 TpcSecRow from SecRow3G4EY
+#$hist = "RunXIX_XXII_49"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/7p7GeV_2021/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/10/2022 TpcSecRow from SecRow3G4EY new FitG4EY with restrictions
+#$hist = "RunXIX_XXII_49"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/10/2022 TpcSecRow from SecRow3G4EY new FitG4EY with restrictions
+$hist = "RunXIX_XXII_50"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/12/2022 deactivate old entries in MySQL and rerun
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2499,15 +2504,6 @@ my $script = "";
 #my $CONDOR = "jobs.condor";
 #open (CONDOR,">$CONDOR") or die "Can't open $CONDOR";
 #my $XML = "jobs." . $hist . "." . $prod . ".xml";
-my $XML = "jobs." . $prod . ".xml";
-open (XML,">$XML") or die "Can't open $XML";
-print XML '<?xml version="1.0" encoding="utf-8" ?> 
-<job name="dEdx" maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
-	 <command>
-         cd ${SUBMITTINGDIRECTORY}
-if ($?INPUTFILE0) csh -x $INPUTFILE0
-         </command>
-';
 #if ($?INPUTFILE1) csh -x $INPUTFILE1
 #if ($?INPUTFILE2) csh -x $INPUTFILE2
 #if ($?INPUTFILE3) csh -x $INPUTFILE3
@@ -2526,6 +2522,7 @@ my $SCR = "/gpfs01/star/subsys-tpc/fisyak/dEdx/";
 if (! -r $SCR) {
   $SCR = "/net/l404/data/fisyak/dEdx/";
 }
+my @ProdFiles = ();
 my $hostname = `hostname`; chomp($hostname);
 #my $homedir  = "/afs/rhic/star/users/fisyak/public/.dev/dEdx";
 #my $homedir  = "/star/institutions/bnl/fisyak/dEdx/jobs/SL04i";
@@ -2559,63 +2556,16 @@ print "glb = $glb\n";
 my @Files = glob "$glb"; 
 print "Files $glb:  $#Files\n";
 my $count = 0;
-my $opened = 0;
 my $fileno = 0;
 my $badruns = ""; 
 my $now = time();
+
 if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";}
 {
   foreach my $file (@Files) {
-#    if ($file !~ /3p85GeV_fixedTarget_2021/ && $file !~ /7p7GeV_2021/) {next;}
-#    print "file = $file\n";
-#    next if $Production !~ 'adc' and $file =~ /adc/; 
-#    next if $file !~ /TOF/ and $file !~ /dEdx/;
-#    next if $file =~ /FieldOff/; 
-#    next if $file =~ /pmdftp/;
     my ($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks ) = stat $file;
-#    print " dev,  ino,  mode,  nlink,  uid,  gid,  rdev,  size,  atime,  mtime,  ctime,  blksize,  blocks\n";
-#    print "$dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks\n";
     my $dt = $now - $ctime;
     print "$file dt = $dt\n";
-#    my $da = $now - $mtime;
-#    print "da = $da\n";
-#    if ($dt < 3600) {print "$file is too young $dt --- skipped\n"; next};
-#    die;
-#    next if $size < 1000000000;
-    next if $size < 100000000;
-    my $dir = File::Basename::dirname($file);
-    my $fff = File::Basename::basename($file);
-    $fff =~ s/_adc_/_/;
-    $fff =~ s/_mtd_/_/;
-    my @words = split '_', $fff; #print "fff = $fff => words = @words\n";
-    my $Run = $words[2];
-#    if ($Run !~ /$listOfRuns/) {next;}
-    my @ddd = split '',$Run;
-    my $Day = $ddd[2] . $ddd[3] . $ddd[4];
-#    my ($Dummy,$Dummy, $Disk, $Dummy, $Dummy, $Dummy, $prod, $Year, $Day, $Run) = split('/', $dir);
-#    next  if $Day < $minDay || $Day > $maxDay;
-    my $f = File::Basename::basename($file);
-#    print "$file\n";    next;
-    my $local_file = $f;
-    $f =~ s|_raw_|_|; #print "f = $f size = $size\n"; 
-    $Total_Size += $size;
-    $f =~ s|\.root||;
-    foreach my $ff (@files ){goto ENDL if $ff eq $f;}
-    push @files, $f; print "push $f\n";
-    (my $ff = $f) =~ s|st_physics_||;
-    $dd =~ s|hlt_||;
-    $ff =~ s|st_fmsslow_||;
-    $ff =~ s|st_minbias_||;
-    $ff =~ s|st_hlt_||;
-    $ff =~ s|st_mtd_||;
-    $ff =~ s|adc_||;
-    $ff =~ s|hlt_||;
-#    $ff =~ s|_raw_0001||;
-    $ff =~ s/\.(dst|event)//g;
-    $ff =~ s/rcf//g; $ff =~ s/evts//;
-    $ff =~ s/AuAu200//g;
-    if ($badruns and $ff =~ $badruns) {print "============ Bad run $file =============\n"; next;}
-#    print "file = $file\n";
     my @words = split '/', $file;# for (my $i = 0; $i < $#words; $i++) {print "$i $words[$i]\n";}
     my $dd = $words[4] . '_' . $words[5];
     if ($dd !~ /GeV/ && $dd !~ /AuAu200/) {
@@ -2623,39 +2573,80 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     }
     $dd =~ s/production_//;
     $dd =~ s/_ReversedFullField//;
+    $ProdFiles{$dd} .= " " . $file;  
+  }
+  foreach my $dd (keys %ProdFiles) {
+    my @FilesRun = split " ", $ProdFiles{$dd};
+#    print "$dd => @FilesRun\n";
     my $scrr = $scr . $dd . "/"; #print "scrr = $scrr\n";
-    if ($step == 0) {$step = $NEvents;}
-    for (my $First = 1; $First < $NEvents; $First += $step) {
-      my $Last = $First - 1 + $step;
-      my $bff = $ff  . "_" . $First . "_" . $Last;# print "$ff => $bff \n";
-      my $root = $scrr . $bff  .".root";# print "root = $root\n";
-      my $logL = $bff . ".log";
-      my $log = $scrr . $logL;
-      my $SCRIPT = $script ."_" . $STAR_LEVEL ."_". $bff . ".csh";
-      next if   -r $SCRIPT;
-      my $LOG    = $script ."_" . $STAR_LEVEL ."_". $bff . ".log";
-      my $ERR    = $script ."_" . $STAR_LEVEL ."_". $bff . ".err";
-      # switch between all and 1-st one
-      my $ffile = $file; $ffile =~ s|0001\.dst|000\*\.dst|;
-      my $run   = $Run; #$ff; $run =~ s|_.*||; print "Run = $run\n";
-      next if -r $root;
-      #    print "file=$file $Disk $prod $Year Day=$Day Run=$Run \n";
-      $fileno++;
-      if ($keep and $fileno%$keep != 1) {
-	open(REM,">>skipped.csh") or die "Can't open skipped.csh";
-	print REM "rm $file\n";
-	close (REM);
-	goto ENDL;
-      } # skip all except each "keep"-th file
-      if ($opened && $count == $maxFjob ) {
-	close (OUT); $opened = 0; $count = 0;
-	chmod 0755, $SCRIPT;
-      }
-      if (! $opened) {
+    my $XML = "jobs." . $prod . "_" . $dd . ".xml";
+    open (XML,">$XML") or die "Can't open $XML";
+    print XML '<?xml version="1.0" encoding="utf-8" ?> 
+<job name="dEdx" maxFilesPerProcess="1" filesPerHour="1" simulateSubmission="false" fileListSyntax="paths">
+	 <command>
+         cd ${SUBMITTINGDIRECTORY}
+if ($?INPUTFILE0) csh -x $INPUTFILE0
+         </command>
+';
+    foreach my $file (@FilesRun) {
+      my $dir = File::Basename::dirname($file);
+      my $fff = File::Basename::basename($file);
+      $fff =~ s/_adc_/_/;
+      $fff =~ s/_mtd_/_/;
+      my @words = split '_', $fff; #print "fff = $fff => words = @words\n";
+      my $Run = $words[2];
+      #    if ($Run !~ /$listOfRuns/) {next;}
+      my @ddd = split '',$Run;
+      my $Day = $ddd[2] . $ddd[3] . $ddd[4];
+      my $f = File::Basename::basename($file);
+      #    print "$file\n";    next;
+      my $local_file = $f;
+      $f =~ s|_raw_|_|; #print "f = $f size = $size\n"; 
+      $Total_Size += $size;
+      $f =~ s|\.root||;
+      foreach my $ff (@files ){goto ENDL if $ff eq $f;}
+#      push @files, $f; print "push $f\n";
+      (my $ff = $f) =~ s|st_physics_||;
+      $dd =~ s|hlt_||;
+      $ff =~ s|st_fmsslow_||;
+      $ff =~ s|st_minbias_||;
+      $ff =~ s|st_hlt_||;
+      $ff =~ s|st_mtd_||;
+      $ff =~ s|adc_||;
+      $ff =~ s|hlt_||;
+      #    $ff =~ s|_raw_0001||;
+      $ff =~ s/\.(dst|event)//g;
+      $ff =~ s/rcf//g; $ff =~ s/evts//;
+      $ff =~ s/AuAu200//g;
+      if ($badruns and $ff =~ $badruns) {print "============ Bad run $file =============\n"; next;}
+      #    print "file = $file\n";
+      if ($step == 0) {$step = $NEvents;}
+      for (my $First = 1; $First < $NEvents; $First += $step) {
+	my $Last = $First - 1 + $step;
+	my $bff = $ff  . "_" . $First . "_" . $Last;# print "$ff => $bff \n";
+	my $root = $scrr . $bff  .".root";# print "root = $root\n";
+	my $logL = $bff . ".log";
+	my $log = $scrr . $logL;
+	my $BCRIPT = $script ."_" . $STAR_LEVEL ."_". $bff . "_" . $dd;
+	my $SCRIPT = $BCRIPT . ".csh";
+	next if   -r $SCRIPT;
+	my $LOG    = $BCRIPT . ".log";
+	my $ERR    = $BCRIPT . ".err";
+	# switch between all and 1-st one
+	my $ffile = $file; $ffile =~ s|0001\.dst|000\*\.dst|;
+	my $run   = $Run; #$ff; $run =~ s|_.*||; print "Run = $run\n";
+	next if -r $root;
+	#    print "file=$file $Disk $prod $Year Day=$Day Run=$Run \n";
+	$fileno++;
+	if ($keep and $fileno%$keep != 1) {
+	  open(REM,">>skipped.csh") or die "Can't open skipped.csh";
+	  print REM "rm $file\n";
+	  close (REM);
+	  goto ENDL;
+	} # skip all except each "keep"-th file
 	print "Create $SCRIPT\n";
 	print XML "<input URL=\"file:" . $DIR . "/" .  $SCRIPT ."\" />\n";
 	open (OUT,">$SCRIPT") or die "Can't open $SCRIPT";
-	$opened = 1;
 	print OUT "#! /usr/local/bin/tcsh -f\n";
 	if ($STAR_LEVEL ne "\.DEV2") {
 	  if ($STAR_LEVEL !~ "^\.DEV2" and $STAR_LEVEL !~ "^TFG") {
@@ -2663,22 +2654,19 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
 	  }
 	  print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
 	}  else {
-	  print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
+#	  print OUT "source $GROUP_DIR/.starver $STAR_LEVEL;\n";
 	}
 	print OUT "/usr/bin/test -d $scrr || mkdir -p $scrr;\n";
+	my $cmd = "/usr/bin/test ! -r " . $root . " && root.exe -q -b  '" . $macro;
+	$cmd .= ".C(" . $First ."," .$Last. ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\' >& $log";
+	#    $cmd .= "; cp -p $logL $log;";
+	print OUT "$cmd\n";
+	$count++;
+	close (OUT); $opened = 0; $count = 0;
+	chmod 0755, $SCRIPT;
       }
-      my $cmd = "/usr/bin/test ! -r " . $root . " && root.exe -q -b  '" . $macro;
-      $cmd .= ".C(" . $First ."," .$Last. ",\"" . $ffile . "\",\"" . $root . "\"," . $Mode . ")\' >& $log";
-      #    $cmd .= "; cp -p $logL $log;";
-      print OUT "$cmd\n";
-      $count++;
-    ENDL:
+  ENDL:
     }
-  }
-  if ($opened) {
-    close (OUT); $opened = 0;
-    chmod 0755, $SCRIPT;
-  }
 print XML '
 <stdout URL="file:./sched$JOBID.log" />
 <stderr URL="file:./sched$JOBID.err" />
@@ -2692,8 +2680,10 @@ print XML '
 </job>
 ';
 close (XML);
+  }
+
 #close (CONDOR);
 my $GB = $Total_Size/1024/1024/1024;
-print "Total size = $GB GB\n"; 
+print "Total size = $GB GB for $#Files event.root files  $count scripts have been created \n"; 
 }
 

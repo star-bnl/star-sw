@@ -27,7 +27,7 @@ ln -s ${p}.9p2GeV_2019.${ext}                             ${p}.20190628.081932.$
 ln -s ${p}.4p59GeV_fixedTarget_2019.${ext}                ${p}.20190629.032835.${ext} # 20190629.032834  ln -s ${p}.${ext}  ${p}.4p59GeV_fixedTarget_2019.${ext}         
 ln -s ${p}.9p2GeV_2019.${ext}                             ${p}.20190702.144152.${ext} # 20190702.144151  ln -s ${p}.${ext}  ${p}.9p2GeV_2019.${ext}                      
 ln -s ${p}.31GeV_fixedTarget_2019.${ext}                  ${p}.20190709.032313.${ext} # 20190709.032312  ln -s ${p}.${ext}  ${p}.31GeV_fixedTarget_2019.${ext}           
-ln -s ${p}.AuAu200GeV_2019.${ext}                            ${p}.20190710.110158.${ext} # 20190710.110157  ln -s ${p}.${ext}  ${p}.AuAu200GeV_2019.${ext}                     
+ln -s ${p}.AuAu200GeV_2019.${ext}                         ${p}.20190710.110158.${ext} # 20190710.110157  ln -s ${p}.${ext}  ${p}.AuAu200GeV_2019.${ext}                     
 ln -s ${p}.9p2GeV_2019.${ext}                             ${p}.20190715.085142.${ext} # 20190715.085141  ln -s ${p}.${ext}  ${p}.9p2GeV_2019.${ext}                      
 
 #         Checked
@@ -74,7 +74,7 @@ ln -s ${p}.ps_OO_200GeV_2021.${ext}                       ${p}.20210513.083121.$
 ln -s ${p}.OO_200GeV_2021.${ext}                          ${p}.20210513.084423.${ext} # 20210513.084422  ln -s TpcSecRowB.OO_200GeV_2021.C                          TpcSecRowB.20210513.084423.C # 20210513.084422     
 ln -s ${p}.ps_OO_200GeV_2021.${ext}                       ${p}.20210513.175229.${ext} # 20210513.175228  ln -s TpcSecRowB.ps_OO_200GeV_2021.C                       TpcSecRowB.20210513.175229.C # 20210513.175228     
 ln -s ${p}.OO_200GeV_2021.${ext}                          ${p}.20210513.182206.${ext} # 20210513.182205  ln -s TpcSecRowB.OO_200GeV_2021.C                          TpcSecRowB.20210513.182206.C # 20210513.182205     
-ln -s ${p}.OO_fcsTiming_2021.${ext}                       ${p}.20210514.144729.${ext} # 20210514.144728  ln -s TpcSecRowB.OO_fcsTiming.C                            TpcSecRowB.20210514.144729.C # 20210514.144728     
+#ln -s ${p}.OO_fcsTiming_2021.${ext}                       ${p}.20210514.144729.${ext} # 20210514.144728  ln -s TpcSecRowB.OO_fcsTiming.C                            TpcSecRowB.20210514.144729.C # 20210514.144728     
 ln -s ${p}.OO_200GeV_2021.${ext}                          ${p}.20210514.150241.${ext} # 20210514.150240  ln -s TpcSecRowB.OO_200GeV_2021.C                          TpcSecRowB.20210514.150241.C # 20210514.150240     
 ln -s ${p}.ps_OO_200GeV_2021.${ext}                       ${p}.20210516.112016.${ext} # 20210516.112015  ln -s TpcSecRowB.ps_OO_200GeV_2021.C                       TpcSecRowB.20210516.112016.C # 20210516.112015     
 ln -s ${p}.FF_OO_200GeV_2021.${ext}                       ${p}.20210522.023643.${ext} # 20210522.023642  ln -s TpcSecRowB.FF_OO_200GeV_2021.C                       TpcSecRowB.20210522.023643.C # 20210522.023642     
@@ -242,3 +242,17 @@ end
 # ln -s TpcSecRowB.pp500GeV_2022.C                              TpcSecRowB.20220305.042127.C # 20220305.042126 
 # ln -s TpcSecRowB.zeroFieldAligment_2022.C                  TpcSecRowB.20220313.051900.C # 20220313.051859 
 # ln -s TpcSecRowB.pp500GeV_2022.C                              TpcSecRowB.20220313.141509.C # 20220313.141508 
+
+
+# 
+foreach p (`dirc | grep TpcZCorrectionC | grep GeV | awk '{print $11}'`)
+  ln -s TpcZCorrectionC.C ${p}
+end
+
+foreach t (TpcSecRowB TpcAccumulatedQ TpcZCorrectionC TpcPadCorrectionMDF TpcLengthCorrectionMDN)
+ set ext = C
+ if (${t} == "TpcSecRowB") set ext = root;
+    foreach p (`dirc | grep ${t} | grep GeV | awk '{print $11}'`)
+	ln -s ${t}.${ext}  ${p}
+    end
+end
