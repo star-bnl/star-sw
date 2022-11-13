@@ -3,8 +3,8 @@
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TString.h"
-int         ids[100]={0};
-const char *cds[100]={0};
+int   ids[100]={0};
+char *cds[100]={0};
 static void detectorIdInit();
 //_____________________________________________________________________________
 const char *detectorNameById(StDetectorId id)
@@ -44,7 +44,7 @@ const char *paths[] = {
     if (notExi) continue;
     ids[0]=0;
     TString com;
-    com.Form("%s((int*)%p,(const char**)%p)",path.Data(),ids,cds);
+    com.Form("%s((int*)%p,(char**)%p)",path.Data(),ids,cds);
     gROOT->Macro(com.Data());
     assert(ids[0]);
     break;

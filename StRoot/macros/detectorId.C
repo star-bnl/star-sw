@@ -4,10 +4,10 @@
 
 
 
-void detectorId(int *ids=0,const char** cds=0)
+void detectorId(int *ids=0, char** cds=0)
 {
- int         myIds[100];
- const char *myCds[100];
+ int   myIds[100];
+ char *myCds[100];
  if (!ids) { ids = myIds; cds = myCds; }
 
 
