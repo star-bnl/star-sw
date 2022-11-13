@@ -3,18 +3,18 @@
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TString.h"
-int   ids[100]={0};
-char *cds[100]={0};
+int   ids[kMaxDetectorId+2]={0};
+char *cds[kMaxDetectorId+2]={0};
 static void detectorIdInit();
 //_____________________________________________________________________________
 void detectorId(int *ids=0, char** cds=0)
 {
- int   myIds[100];
- char *myCds[100];
+ int   myIds[kMaxDetectorId+2];
+ char *myCds[kMaxDetectorId+2];
  if (!ids) { ids = myIds; cds = myCds; }
 
- memset(ids,0,sizeof(ids[0])*100);
- memset(cds,0,sizeof(cds[0])*100);
+ memset(ids,0,sizeof(ids[0])*kMaxDetectorId+2);
+ memset(cds,0,sizeof(cds[0])*kMaxDetectorId+2);
 
  TString myPath("$STAR/StRoot/StEvent/StEnumerations.h");
  gSystem->ExpandPathName(myPath);
@@ -48,7 +48,7 @@ void detectorId(int *ids=0, char** cds=0)
    if (myE<0)                           break;
    TString com(tb.Data()+myK,myEq-myK);
    int id = gROOT->ProcessLineFast(com);
-   ids[0]++;
+   ids[0]++; // counts total number of entries
    ids[ids[0]] = id;
    cds[ids[0]] = new char[com.Length()+1];
    strcpy(cds[ids[0]],com.Data());
