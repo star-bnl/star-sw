@@ -18,7 +18,7 @@ void detectorId(int *ids=0, char** cds=0)
 
  TString myPath("$STAR/StRoot/StEvent/StEnumerations.h");
  gSystem->ExpandPathName(myPath);
-// printf ("=%s\n",myPath.Data());
+
  int notExi = gSystem->AccessPathName(myPath.Data(),kFileExists);
  if (notExi)    { ids[0]=-1; return;}
  FILE *fp = fopen(myPath.Data(),"r");
@@ -33,7 +33,6 @@ void detectorId(int *ids=0, char** cds=0)
    TString tb(buf);
 
    if(!kase) {
-//   enum StDetectorId {kUnknownId   = kUnknownIdentifier,
      if (tb.Index("enum")<0)            continue;
      if (tb.Index("StDetectorId")<0)    continue;
      if (tb.Index("=")<0)               continue;
@@ -47,14 +46,13 @@ void detectorId(int *ids=0, char** cds=0)
    int myE = tb.Index(",");
    if (myE<0) myE = tb.Index("}");
    if (myE<0)                           break;
-//   printf("%s",buf);
    TString com(tb.Data()+myK,myEq-myK);
    int id = gROOT->ProcessLineFast(com);
    ids[0]++;
    ids[ids[0]] = id;
    cds[ids[0]] = new char[com.Length()+1];
    strcpy(cds[ids[0]],com.Data());
-//   printf("%d = %s\n",ids[ids[0]],cds[ids[0]]);
+
    if (tb[myE]=='}')                    break;
  }
  fclose(fp);
@@ -86,27 +84,5 @@ StDetectorId detectorIdByName(const char *name)
 //_____________________________________________________________________________
 void detectorIdInit()
 {
-#if 0
-const char *paths[] = {
-                  "./detectorId.C",
-    "./StRoot/macros/detectorId.C",
-"$STAR/StRoot/macros/detectorId.C",
-                                0};
-
-  ids[0] = -1;
-  for (int ifa=0;paths[ifa];ifa++) {
-    TString path(paths[ifa]);
-    gSystem->ExpandPathName(path);
-    int notExi = gSystem->AccessPathName(path.Data());
-    if (notExi) continue;
-    ids[0]=0;
-    TString com;
-    com.Form("%s((int*)%p,(char**)%p)",path.Data(),ids,cds);
-    gROOT->Macro(com.Data());
-    assert(ids[0]);
-    break;
-  }
-#endif
   detectorId( ids, cds );
-
 }  
