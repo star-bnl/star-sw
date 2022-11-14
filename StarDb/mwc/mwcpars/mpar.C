@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_mwc_mpar_Table.h"
-#endif
+#include "tables/St_mwc_mpar_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/mwcpars/mpar Allocated rows: 1  Used rows: 1  Row size: 32 bytes

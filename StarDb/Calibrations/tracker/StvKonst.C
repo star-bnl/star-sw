@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_StvKonst_Table.h"
-#endif
+#include "tables/St_StvKonst_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // StvTpcOuterHitErrs Allocated rows: 1  Used rows: 1  Row size: 48 bytes

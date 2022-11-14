@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_KalmanTrackFinderParameters_Table.h"
-#endif
+#include "tables/St_KalmanTrackFinderParameters_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Calibrations/tracker/.KalmanTrackFinderParameters/KalmanTrackFinderParameters Allocated rows: 1  Used rows: 1  Row size: 68 bytes

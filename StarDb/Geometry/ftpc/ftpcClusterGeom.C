@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_ftpcClusterGeom_Table.h"
-#endif
+#include "tables/St_ftpcClusterGeom_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Geometry/ftpc/.ftpcClusterGeom/ftpcClusterGeom Allocated rows: 1  Used rows: 1  Row size: 48 bytes

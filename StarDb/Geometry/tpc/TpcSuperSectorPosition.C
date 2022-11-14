@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_Survey_Table.h"
-#endif
+#include "tables/St_Survey_Table.h"
+
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_Survey")) return 0;
   Survey_st row = {0, 1,0,0, 0,1,0, 0,0,1, 0,0,0, 1e-5,1e-5,1e-4,4e-3,4e-3,4e-3,"Ideal"};

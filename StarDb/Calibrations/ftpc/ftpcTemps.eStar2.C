@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_ftpcTemps_Table.h"
-#endif
+#include "tables/St_ftpcTemps_Table.h"
+
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_ftpcTemps")) return 0;
   ftpcTemps_st row;

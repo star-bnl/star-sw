@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_starMagOnl_Table.h"
-#endif
+#include "tables/St_starMagOnl_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/RunLog/onl/.starMagOnl/starMagOnl Allocated rows: 1  Used rows: 1  Row size: 16 bytes

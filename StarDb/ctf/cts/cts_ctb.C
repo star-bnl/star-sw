@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_cts_mpara_Table.h"
-#endif
+#include "tables/St_cts_mpara_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/cts/cts_ctb Allocated rows: 1  Used rows: 1  Row size: 1076 bytes

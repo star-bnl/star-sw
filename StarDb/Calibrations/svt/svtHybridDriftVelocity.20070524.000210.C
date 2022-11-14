@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_svtHybridDriftVelocity_Table.h"
-#endif
+#include "tables/St_svtHybridDriftVelocity_Table.h"
+
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_svtHybridDriftVelocity")) return 0;
   svtHybridDriftVelocity_st row[287] = {//Pass217 RFS Cleaned

@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_LocalTrackSeedFinder_Table.h"
-#endif
+#include "tables/St_LocalTrackSeedFinder_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.data/StarDb/Calibrations/tracker/.LocalTrackSeedFinder/LocalTrackSeedFinder Allocated rows: 4  Used rows: 4  Row size: 52 bytes

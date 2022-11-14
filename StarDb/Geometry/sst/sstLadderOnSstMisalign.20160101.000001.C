@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_Survey_Table.h"
-#endif
+#include "tables/St_Survey_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Geometry/sst/.sstLadderOnSst/sstLadderOnSstMisalign Allocated rows: 20  Used rows: 20  Row size: 180 bytes

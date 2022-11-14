@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_tcl_tpc_index_type_Table.h"
-#endif
+#include "tables/St_tcl_tpc_index_type_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tclpars/type Allocated rows: 1  Used rows: 1  Row size: 28 bytes

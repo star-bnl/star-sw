@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_ftpcFastSimGas_Table.h"
-#endif
+#include "tables/St_ftpcFastSimGas_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ftpcFastSimGas Allocated rows: 1  Used rows: 1  Row size: 100 bytes

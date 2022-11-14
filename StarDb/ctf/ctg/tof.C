@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_ctg_geo_Table.h"
-#endif
+#include "tables/St_ctg_geo_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ctg/tof Allocated rows: 1  Used rows: 1  Row size: 68 bytes

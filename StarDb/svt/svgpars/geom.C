@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_svg_geom_Table.h"
-#endif
+#include "tables/St_svg_geom_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/svgpars/geom Allocated rows: 536  Used rows: 536  Row size: 68 bytes

@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_StvHitErrs_Table.h"
-#endif
+#include "tables/St_StvHitErrs_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // StvTpcInnerPromptErrs Allocated rows: 1  Used rows: 1  Row size: 64 bytes

@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_ev0_ev0par2_Table.h"
-#endif
+#include "tables/St_ev0_ev0par2_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // ev0par2 Allocated rows: 6  Used rows: 6  Row size: 32 bytes

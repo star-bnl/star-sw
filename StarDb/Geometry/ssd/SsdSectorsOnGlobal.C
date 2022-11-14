@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_Survey_Table.h"
-#endif
+#include "tables/St_Survey_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // SsdSectorsOnGlobal Allocated rows: 4  Used rows: 4  Row size: 180 bytes

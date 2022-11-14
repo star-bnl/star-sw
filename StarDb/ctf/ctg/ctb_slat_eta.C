@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_ctg_slat_eta_Table.h"
-#endif
+#include "tables/St_ctg_slat_eta_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ctg/ctb_slat_eta Allocated rows: 4  Used rows: 4  Row size: 36 bytes

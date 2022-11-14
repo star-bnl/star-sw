@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_tfs_fsctrl_Table.h"
-#endif
+#include "tables/St_tfs_fsctrl_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tfspars/tfs_fsctrl Allocated rows: 1  Used rows: 1  Row size: 32 bytes

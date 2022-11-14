@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_tss_tsspar_Table.h"
-#endif
+#include "tables/St_tss_tsspar_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tsspars/tsspar Allocated rows: 1  Used rows: 1  Row size: 240 bytes

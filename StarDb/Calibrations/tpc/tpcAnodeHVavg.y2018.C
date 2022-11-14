@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_tpcAnodeHVavg_Table.h"
-#endif
+#include "tables/St_tpcAnodeHVavg_Table.h"
+
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_tpcAnodeHVavg")) return 0;
   St_tpcAnodeHVavg *tableSet = new St_tpcAnodeHVavg("tpcAnodeHVavg",19*24);

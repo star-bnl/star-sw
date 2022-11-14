@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_sdm_condition_par_Table.h"
-#endif
+#include "tables/St_sdm_condition_par_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // sdm_condition_par Allocated rows: 1  Used rows: 1  Row size: 96 bytes

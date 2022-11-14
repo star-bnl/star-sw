@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_TpcAvgPowerSupply_Table.h"
-#endif
+#include "tables/St_TpcAvgPowerSupply_Table.h"
+
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_TpcAvgPowerSupply")) return 0;
   TpcAvgPowerSupply_st row;

@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_iTPCSurvey_Table.h"
-#endif
+#include "tables/St_iTPCSurvey_Table.h"
+
 TDataSet *CreateTable() { 
   /* Shanmuganathan Prashanth <sprashan@kent.edu>  11/14/18
 	Position	iTPC-Sector

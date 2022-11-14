@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_emc_egrid_par_Table.h"
-#endif
+#include "tables/St_emc_egrid_par_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/jet/emc_egrid_par Allocated rows: 1  Used rows: 1  Row size: 16 bytes

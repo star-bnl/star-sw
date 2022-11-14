@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_stk_vtx_Table.h"
-#endif
+#include "tables/St_stk_vtx_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/vertices/stk_vtx Allocated rows: 1  Used rows: 1  Row size: 48 bytes

@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_TpcSecRowCor_Table.h"
-#endif
+#include "tables/St_TpcSecRowCor_Table.h"
+
 TDataSet *CreateTable() { 
   // -----------------------------------------------------------------
   // TpcSecRow Allocated rows: 24  Used rows: 24  Row size: 360 bytes

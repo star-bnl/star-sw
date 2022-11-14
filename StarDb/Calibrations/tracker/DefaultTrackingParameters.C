@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_TrackingParameters_Table.h"
-#endif
+#include "tables/St_TrackingParameters_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.data/StarDb/Calibrations/tracker/.DefaultTrackingParameters/DefaultTrackingParameters Allocated rows: 1  Used rows: 1  Row size: 32 bytes

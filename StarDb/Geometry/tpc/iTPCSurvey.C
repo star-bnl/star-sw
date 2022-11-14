@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_iTPCSurvey_Table.h"
-#endif
+#include "tables/St_iTPCSurvey_Table.h"
+
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_iTPCSurvey")) return 0;
   iTPCSurvey_st row[24] = {

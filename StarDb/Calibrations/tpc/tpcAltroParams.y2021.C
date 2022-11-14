@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_tpcAltroParams_Table.h"
-#endif
+#include "tables/St_tpcAltroParams_Table.h"
+
 TDataSet *CreateTable()
 	{ 
 	if (!gROOT->GetClass("St_tpcAltroParams")) return 0;

@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_tpcT0_Table.h"
-#endif
+#include "tables/St_tpcT0_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Calibrations/tpc/.tpcT0/tpcT0 Allocated rows: 1  Used rows: 1  Row size: 72 bytes

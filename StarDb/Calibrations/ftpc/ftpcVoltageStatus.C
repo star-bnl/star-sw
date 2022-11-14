@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_ftpcVoltageStatus_Table.h"
-#endif
+#include "tables/St_ftpcVoltageStatus_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Calibrations/ftpc/.ftpcVoltageStatus/ftpcVoltageStatus Allocated rows: 1  Used rows: 1  Row size: 20 bytes

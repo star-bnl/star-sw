@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_tpcCorrection_Table.h"
-#endif
+#include "tables/St_tpcCorrection_Table.h"
+
 TDataSet *CreateTable() { // Ad hoc accont of saturation in dE/dx
   if (!gROOT->GetClass("St_tpcCorrection")) return 0;
   tpcCorrection_st row;

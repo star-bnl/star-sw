@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_tcl_tclpar_Table.h"
-#endif
+#include "tables/St_tcl_tclpar_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tclpars/tclpar Allocated rows: 1  Used rows: 1  Row size: 48 bytes

@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_TpcEffectivedX_Table.h"
-#endif
+#include "tables/St_TpcEffectivedX_Table.h"
+
 TDataSet *CreateTable() { 
 // ------  Test whether this table share library was loaded ------
   if (!gROOT->GetClass("St_TpcEffectivedX")) return 0;

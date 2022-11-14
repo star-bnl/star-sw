@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_tpcGas_Table.h"
-#endif
+#include "tables/St_tpcGas_Table.h"
+
 TDataSet *CreateTable() { 
   if (!TClass::GetClass("St_tpcGas")) return 0;
   St_tpcGas *tableSet = new St_tpcGas("tpcGas",1);

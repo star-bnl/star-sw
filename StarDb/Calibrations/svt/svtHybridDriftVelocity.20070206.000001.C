@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_svtHybridDriftVelocity_Table.h"
-#endif
+#include "tables/St_svtHybridDriftVelocity_Table.h"
+
 TDataSet *CreateTable() {
   if (!gROOT->GetClass("St_svtHybridDriftVelocity")) return 0;
   svtHybridDriftVelocity_st row[376] = {//~kotov/public/macros/drift/AuAu2007120/tfit_AuAu2007_120_db.txt

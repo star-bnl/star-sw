@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_scf_ctrl_Table.h"
-#endif
+#include "tables/St_scf_ctrl_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // scf_ctrl Allocated rows: 1  Used rows: 1  Row size: 8 bytes

@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_tdeparm_Table.h"
-#endif
+#include "tables/St_tdeparm_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tidpars/tdeparm Allocated rows: 1  Used rows: 1  Row size: 60 bytes

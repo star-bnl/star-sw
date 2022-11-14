@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_ftpcFastSimPars_Table.h"
-#endif
+#include "tables/St_ftpcFastSimPars_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ftpcFastSimPars Allocated rows: 1  Used rows: 1  Row size: 44 bytes

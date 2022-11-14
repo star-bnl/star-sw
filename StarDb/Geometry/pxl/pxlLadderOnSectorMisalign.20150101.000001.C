@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_Survey_Table.h"
-#endif
+#include "tables/St_Survey_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // db/.const/StarDb/Geometry/pxl/.pxlLadderOnSector/pxlLadderOnSectorMisalign Allocated rows: 40  Used rows: 40  Row size: 180 bytes

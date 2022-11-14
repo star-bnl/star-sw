@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_tpcRDOMasks_Table.h"
-#endif
+#include "tables/St_tpcRDOMasks_Table.h"
+
 TDataSet *CreateTable() { 
   // -----------------------------------------------------------------
   // db/.const/StarDb/RunLog/onl/.tpcRDOMasks/tpcRDOMasks Allocated rows: 12  Used rows: 12  Row size: 12 bytes

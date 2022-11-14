@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_spr_sprpar_Table.h"
-#endif
+#include "tables/St_spr_sprpar_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/sprpars/sprpar Allocated rows: 1  Used rows: 1  Row size: 8 bytes

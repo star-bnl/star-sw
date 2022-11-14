@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_stk_filler_Table.h"
-#endif
+#include "tables/St_stk_filler_Table.h"
+
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/stkpars/stk_filler Allocated rows: 1  Used rows: 1  Row size: 240 bytes

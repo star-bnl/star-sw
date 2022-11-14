@@ -1,6 +1,5 @@
-#ifdef __CLING__
-#  include "tables/St_exi_exipar_Table.h"
-#endif
+#include "tables/St_exi_exipar_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // exipar Allocated rows: 3  Used rows: 3  Row size: 32 bytes
