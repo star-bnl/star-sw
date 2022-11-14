@@ -17,7 +17,7 @@
 #include "TMath.h"
 #include "StBichsel/StdEdxModel.h"
 #include "Ask.h"
-#define __FITGG__
+//#define __FITGG__
 //________________________________________________________________________________
 TH1D *AddZ(TH1D *h1, TH1D *h2) {
   if (! h1 || ! h2) return 0;
