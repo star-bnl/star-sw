@@ -92,4 +92,8 @@ StDetectorId detectorIdByName(const char *name)
 void detectorIdInit()
 {
   detectorId( ids, cds );
+  if ( ids[0] <= 0 ) {
+    std::cout << "Failed to parse StEnumerations.h / StDetectorId enumeration.  Kaboom." << std::endl;
+    assert( 0 == 2015 );
+  };
 }  
