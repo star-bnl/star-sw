@@ -118,8 +118,8 @@ Part_t Part[NMasses] = {// https://periodictable.com/Isotopes/
   {"2#pi",    3,     -1,     -2, -0.13956995},       	      //18 2*pi
   {"2p",      1,     -1,      0, -0.93827231}        	      //19 2*p 
 };
-const Int_t NF =   8;  //          0,      1,  2,    3,    4,     5.     6,   7,      8,     9,
-const Char_t *FNames[10] = {"Girrf","Sirrf","z","I70","I60","I70M","dNdx","zM","70Trs","zTrs"};
+const Int_t NF =   9; //          0,      1,  2,    3,    4,     5.     6,   7,    8.     9,     10,
+const Char_t *FNames[11] = {"Girrf","Sirrf","z","I70","I60","I70M","dNdx","zM", "zN", "70Trs","zTrs"};
 const Int_t Nlog2dx = 3;
 const Double_t log2dx[Nlog2dx] = {0,1,2};
 //________________________________________________________________________________
@@ -136,8 +136,19 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
     poverm *= charge;
     dx2 = TMath::Log2(5.);
   }
-  //  return  TMath::Log10(scale*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
+  return  TMath::Log10(scale*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(poverm),dx2)));//TMath::Exp(7.81779499999999961e-01));
   //  Charge*Charge* (TMath::Exp(Bichsel::Instance()->GetMostProbableZM(TMath::Log10(TMath::Abs(Charge)*p/M),dx2)))
+  // return TMath::Log10(1e6*scale*StdEdxPull::EvalPred(poverm, 1, charge));
+}
+//________________________________________________________________________________
+Double_t dEdxModelZ(Double_t *x,Double_t *par) { //new dEdxModel
+  Double_t pove   = TMath::Power(10.,x[0]);
+  Double_t scale = 1;
+  Double_t mass = par[0];
+  if (mass < 0) {mass = - mass; scale = 2;}
+  Double_t poverm = pove/mass; 
+  Double_t charge = par[1];
+  poverm *= charge;
   return TMath::Log10(1e6*scale*StdEdxPull::EvalPred(poverm, 1, charge));
 }
 //________________________________________________________________________________
@@ -349,9 +360,10 @@ void bichselG10(const Char_t *type="z", Int_t Nhyps = 9) {
     else if (f == 5) func = new TF1(FunName,bichsel70M ,xmin, xmax,3);
     else if (f == 6) func = new TF1(FunName,dNdx ,xmin, xmax,3);
     else if (f == 7) func = new TF1(FunName,bichselZM,xmin, xmax,3);
+    else if (f == 8) func = new TF1(FunName,dEdxModelZ,xmin, xmax,3);
 #if 0
-    else if (f == 8) func = new TF1(FunName,bichsel70Trs,xmin, xmax,3);
-    else if (f == 9) func = new TF1(FunName,bichselZTrs,xmin, xmax,3);
+    else if (f == 9) func = new TF1(FunName,bichsel70Trs,xmin, xmax,3);
+    else if (f ==10) func = new TF1(FunName,bichselZTrs,xmin, xmax,3);
 #endif
     else {
       return;
