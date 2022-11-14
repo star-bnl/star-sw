@@ -26,7 +26,14 @@ void detectorId(int *ids=0, char** cds=0)
  char buf[400];
 
  int kase = 0;
- while (2015) {
+ //
+ // Process the StEnumerations header file.  Once StDetectorId is found
+ // we begin the work.  Each instance of k<DetectorName> will be used to
+ // build a map, associating the enum value to the string name.  The loop
+ // will be terminated once the enumeration block is ended (the "}") is
+ // found.
+ //
+ while (true) {          
    fgets(buf,200,fp);
    int eof = feof(fp);
    if (eof)  break;
