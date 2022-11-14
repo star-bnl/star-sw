@@ -39,5 +39,29 @@ jobs:
           build-args: |
             starenv=${{ matrix.starenv }}
             compiler=${{ matrix.compiler }}
-          push: true
+          load: true
           tags: ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }}
+
+      - name: Push container image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }}
+
+      - name: Create latest tag for default branch
+        if: ${{ steps.branch-name.outputs.is_default == 'true' && env.STARENV == 'root5-gcc485' }}
+        run: |
+          docker tag  ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }} ghcr.io/${{ github.repository_owner }}/star-sw:latest
+          docker push ghcr.io/${{ github.repository_owner }}/star-sw:latest
+
+      - name: Create latest tag for SL* branches
+        if: ${{ steps.branch-name.outputs.is_default == 'false' && env.STARENV == 'root5-gcc485' }}
+        run: |
+          docker tag  ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}-${{ env.STARENV }} ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}
+          docker push ghcr.io/${{ github.repository_owner }}/star-sw:${{ steps.branch-name.outputs.current_branch }}
+
+  build-cleanup:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - run: .github/workflows/delete_untagged.py ${{ secrets.STAR_BNL_STAR_SW_TOKEN }}
