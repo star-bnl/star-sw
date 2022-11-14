@@ -64,6 +64,8 @@ void MakeTpcZCorrection1() {
   if (! FitP) return;
   fileIn.ReplaceAll("Z3C+Z3PCG4EY","");
   fileIn.ReplaceAll("Z3+Z3PG4EY","");
+  fileIn.ReplaceAll("Z3CG4EY","");
+  fileIn.ReplaceAll("Z3G4EY","");
 
   fileIn.ReplaceAll(".root","");
   TString fOut =  Form("%s.%s.C", tableName, fileIn.Data());
@@ -77,47 +79,47 @@ void MakeTpcZCorrection1() {
   Double_t maxOuter = 208.0;
   Double_t minInner =  16.5;
   Double_t maxInner = 208.0;
-#if 1
+#if 0
   if      (fileIn == "")                                  {nrows = 0;}
-  else if (fileIn.Contains("100GeV_fixedTarget_2021"))    {np = 3; npO = 3;} // ok
-  else if (fileIn.Contains("11p5GeV_2020"))               {nrows = 2; np = 3; npO = 3; minInner = 40;} // ok
-  else if (fileIn.Contains("13p5GeV_fixedTarget_2020"))   {np = 3; npO = 3;} // ok
-  else if (fileIn.Contains("14p5GeV_2019"))               {} // ok
-  else if (fileIn.Contains("17p3GeV_2021")) 		  {nrows = 2;} // ok
-  else if (fileIn.Contains("19GeV_2019"))   		  {} // ok
-  else if (fileIn.Contains("19p5GeV_fixedTarget_2020"))   {} // ok
-  else if (fileIn.Contains("26p5GeV_fixedTarget_2020"))   {} // ok
-  else if (fileIn.Contains("26p5GeV_fixedTarget_2021"))   {nrows = 0;} // 2; np = 3;} 
-  else if (fileIn.Contains("31GeV_fixedTarget_2019"))     {nrows = 4; np = 3;} 
-  else if (fileIn.Contains("31p2GeV_fixedTarget_2020"))   {} // ok
+  else if (fileIn.Contains("100GeV_fixedTarget_2021"))    {nrows = 0;} // np = 3; npO = 3;} 
+  //  else if (fileIn.Contains("11p5GeV_2020"))               {}           //ok 
+  //  else if (fileIn.Contains("13p5GeV_fixedTarget_2020"))   {}  
+  //  else if (fileIn.Contains("14p5GeV_2019"))               {}
+  //  else if (fileIn.Contains("17p3GeV_2021")) 		  {}
+  //  else if (fileIn.Contains("19GeV_2019"))   		  {}
+  //  else if (fileIn.Contains("19p5GeV_fixedTarget_2020"))   {}
+  //  else if (fileIn.Contains("26p5GeV_fixedTarget_2020"))   {}
+  else if (fileIn.Contains("26p5GeV_fixedTarget_2021"))   {nrows = 0;} 
+  else if (fileIn.Contains("31GeV_fixedTarget_2019"))     {nrows = 0;}
+  //  else if (fileIn.Contains("31p2GeV_fixedTarget_2020"))   {} 
   else if (fileIn.Contains("3p85GeV_fixedTarget_2019"))   {nrows = 0;} //
-  else if (fileIn.Contains("3p85GeV_fixedTarget_2021"))   {} // ok
-  else if (fileIn.Contains("44p5GeV_fixedTarget_2021"))   {} // ok
-  else if (fileIn.Contains("4p59GeV_fixedTarget_2019"))   {} //{} // ok
-  else if (fileIn.Contains("5p75GeV_fixedTarget_2020"))   {} // ok
-  else if (fileIn.Contains("70GeV_fixedTarget_2021"))     {} // ok
-  else if (fileIn.Contains("7.3GeV_fixedTarget_2019"))    {} // ok
-  else if (fileIn.Contains("7p3GeV_fixedTarget_2020"))    {} // ok
-  else if (fileIn.Contains("7p7GeV_2019"))                {nrows = 2; np = 5; npO = 2;}
-  else if (fileIn.Contains("7p7GeV_2020"))  		  {nrows = 2; np = 5; npO = 3;}
-  else if (fileIn.Contains("7p7GeV_2021"))  		  {nrows = 4; np = 5; npO = 2;}
-  else if (fileIn.Contains("9p2GeV_2019"))  		  {nrows = 2; np = 5; npO = 2;}
-  else if (fileIn.Contains("9p2GeV_2020"))  		  {nrows = 2; np = 5; npO = 2;}
-  else if (fileIn.Contains("9p2GeVb_2020")) 		  {nrows = 2; np = 5; npO = 2;}
-  else if (fileIn.Contains("9p2GeVc_2020")) 		  {nrows = 2; np = 5; npO = 2;}
-  else if (fileIn.Contains("9p8GeV_fixedTarget_2020"))    {} // ok
-  else if (fileIn.Contains("AuAu200GeV_2019"))            {nrows = 2; np = 5; npO = 3;}
-  else if (fileIn.Contains("COLGeV_2019"))                {nrows = 4; np = 5; npO = 3;}
-  else if (fileIn.Contains("COLGeV_2020")) 		  {nrows = 4; np = 5; npO = 3;}
-  else if (fileIn.Contains("COLGeV_2021")) 		  {nrows = 4; np = 5; npO = 3;}
-  else if (fileIn.Contains("dAu200GeV_2021"))             {nrows = 2; np = 5; npO = 2;}
-  else if (fileIn.Contains("FF_OO_200GeV_2021"))          {nrows = 2; np = 5; npO = 2;}
-  else if (fileIn.Contains("FXT_2019"))                   {} // ok
-  else if (fileIn.Contains("FXT_2020")) 		  {} // ok
-  else if (fileIn.Contains("FXT_2021")) 		  {} // ok
-  else if (fileIn.Contains("ps_OO_200GeV_2021"))          {nrows = 2; np = 5; npO = 2;}
-  else if (fileIn.Contains("OO_200GeV_2021"))             {nrows = 2; np = 5; npO = 2;}
-  else if (fileIn.Contains("pp500GeV_2022"))              {nrows = 2; minOuter = 16.6;} // np = 5; npO = 2;}
+  //  else if (fileIn.Contains("3p85GeV_fixedTarget_2021"))   {} // ?
+  else if (fileIn.Contains("44p5GeV_fixedTarget_2021"))   {nrows = 0;} // 
+  //  else if (fileIn.Contains("4p59GeV_fixedTarget_2019"))   {}
+  //  else if (fileIn.Contains("5p75GeV_fixedTarget_2020"))   {}
+  else if (fileIn.Contains("70GeV_fixedTarget_2021"))     {nrows = 0;}              
+  //  else if (fileIn.Contains("7.3GeV_fixedTarget_2019"))    {} 
+  //  else if (fileIn.Contains("7p3GeV_fixedTarget_2020"))    {} 
+  //  else if (fileIn.Contains("7p7GeV_2019"))                {} 
+  //  else if (fileIn.Contains("7p7GeV_2020"))  		  {}
+  //  else if (fileIn.Contains("7p7GeV_2021"))  		  {}
+  //  else if (fileIn.Contains("9p2GeV_2019"))  		  {}
+  //  else if (fileIn.Contains("9p2GeV_2020"))  		  {}
+  //  else if (fileIn.Contains("9p2GeVb_2020")) 		  {}
+  //  else if (fileIn.Contains("9p2GeVc_2020")) 		  {}
+  //  else if (fileIn.Contains("9p8GeV_fixedTarget_2020"))    {} 
+  //  else if (fileIn.Contains("AuAu200GeV_2019"))            {}
+  //  else if (fileIn.Contains("colGeV_2019"))                {}
+  //  else if (fileIn.Contains("colGeV_2020")) 		  {}
+  //  else if (fileIn.Contains("colGeV_2021")) 		  {}
+  //  else if (fileIn.Contains("dAu200GeV_2021"))             {} // ?
+  //  else if (fileIn.Contains("FF_OO_200GeV_2021"))          {}  // not in the game
+  //  else if (fileIn.Contains("fixedTarget_2019"))                   {} 
+  //  else if (fileIn.Contains("fixedTarget_2020")) 		  {} 
+  //  else if (fileIn.Contains("fixedTarget_2021")) 		  {} 
+  //  else if (fileIn.Contains("OO_200GeV_2021"))             {nrows = 0;}
+  //  else if (fileIn.Contains("pp500GeV_2022"))              {}
+  //  else if (fileIn.Contains("ps_OO_200GeV_2021"))          {} 
 #endif
   if (! nrows) {
     cout << "Reject " << fileIn.Data() << endl;
@@ -165,9 +167,13 @@ void MakeTpcZCorrection1() {
     if (! c2 ) c2 =  new TCanvas("cTemp","cTemp");
     c2->cd(); 
     c2->Clear();
-
+#ifdef __muJ__
     cout << "FitP->Draw(\"" << Form("mu-muJ:y>>%s(105,0,210)\"",histN[idx-1]) << ",\"" << cut << "\",\"" << prof << "\");" << endl;
     FitP->Draw(Form("mu-muJ:y>>%s(110,0,220)",histN[idx-1]),cut,prof);
+#else
+    cout << "FitP->Draw(\"" << Form("mu:y>>%s(105,0,210)\"",histN[idx-1]) << ",\"" << cut << "\",\"" << prof << "\");" << endl;
+    FitP->Draw(Form("mu:y>>%s(110,0,220)",histN[idx-1]),cut,prof);
+#endif
     c2->Update();
     hists[idx-1] = (TH1 *) gDirectory->Get(histN[idx-1]);
     if (! hists[idx-1]) continue;
