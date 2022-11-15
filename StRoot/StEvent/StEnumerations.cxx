@@ -3,6 +3,9 @@
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TString.h"
+
+#include "St_base/StMessMgr.h"
+
 int   ids[kMaxDetectorId+2]={0};
 char *cds[kMaxDetectorId+2]={0};
 static void detectorIdInit();
@@ -93,7 +96,7 @@ void detectorIdInit()
 {
   detectorId( ids, cds );
   if ( ids[0] <= 0 ) {
-    LOG_ERROR << "Failed to parse StEnumerations.h / StDetectorId enumeration.  Kaboom." << endm;
+    LOG_FATAL << "Failed to parse StEnumerations.h / StDetectorId enumeration.  Kaboom." << endm;
     assert( 0 == 2015 );
   };
 }  
