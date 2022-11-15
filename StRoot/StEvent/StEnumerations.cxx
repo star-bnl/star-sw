@@ -93,7 +93,7 @@ void detectorIdInit()
 {
   detectorId( ids, cds );
   if ( ids[0] <= 0 ) {
-    std::cout << "Failed to parse StEnumerations.h / StDetectorId enumeration.  Kaboom." << std::endl;
+    LOG_ERROR << "Failed to parse StEnumerations.h / StDetectorId enumeration.  Kaboom." << endm;
     assert( 0 == 2015 );
   };
 }  
