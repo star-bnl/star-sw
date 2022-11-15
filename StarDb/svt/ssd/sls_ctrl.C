@@ -1,4 +1,8 @@
 TDataSet *CreateTable() { 
+  std::cout << "Fatal: sls_ctrl is deprecated" << std::endl;
+  assert(0);
+  return 0;
+#if 0
 // -----------------------------------------------------------------
 // sls_ctrl Allocated rows: 1  Used rows: 1  Row size: 80 bytes
 //  Table: sls_ctrl_st[0]--> sls_ctrl_st[0]
@@ -25,4 +29,5 @@ memset(&row,0,tableSet->GetRowSize());
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
+#endif
 }
