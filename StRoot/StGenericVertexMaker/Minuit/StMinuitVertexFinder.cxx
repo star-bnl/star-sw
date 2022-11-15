@@ -8,18 +8,26 @@
  * Description: 
  *
  **************************************************************************/
-#include "StMinuitVertexFinder.h"
-#include "StEventTypes.h"
-#include "StEnumerations.h"
-#include "StGlobals.hh"
-#include "SystemOfUnits.h"
-#include "StCtbMatcher.h"
-#include "StMessMgr.h"
-#include <math.h>
+#include <vector>
+
 #include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StDcaGeometry.h"
-#include "St_VertexCutsC.h"
-#include "StMaker.h"
+#include "StEvent/StCtbTriggerDetector.h"
+#include "StEvent/StDcaGeometry.h"
+#include "StEvent/StEmcCollection.h"
+#include "StEvent/StEmcDetector.h"
+#include "StEvent/StEmcModule.h"
+#include "StEvent/StEmcRawHit.h"
+#include "StEvent/StEvent.h"
+#include "StEvent/StGlobalTrack.h"
+#include "StEvent/StTrackDetectorInfo.h"
+#include "StEvent/StTrackNode.h"
+#include "StEvent/StTriggerDetectorCollection.h"
+#include "StGenericVertexMaker/Minuit/StMinuitVertexFinder.h"
+#include "StGenericVertexMaker/Minuit/St_VertexCutsC.h"
+#include "StGenericVertexMaker/StCtbMatcher.h"
+#include "St_base/StMessMgr.h"
+
+
 std::vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
 std::vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
 std::vector<Double_t >          StMinuitVertexFinder::mZImpact;

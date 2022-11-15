@@ -1,6 +1,5 @@
 #ifndef EemcHitList_h
 #define EemcHitList_h
-#include <sys/types.h>
 #include "StGenericVertexMaker/StiPPVertex/ScintHitList.h"
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
 #include "StEEmcUtil/database/cstructs/eemcConstDB.hh"

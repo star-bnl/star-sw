@@ -2,7 +2,6 @@
 #define VertexFinderOptions_h
 
 #include <iostream>
-#include <string>
 
 
 namespace star_vertex {

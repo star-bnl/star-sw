@@ -1,6 +1,5 @@
 #include <string.h>
 #include <assert.h>
-#include <stdio.h>
 
 #include <TH1.h>
 #include <TObjArray.h>

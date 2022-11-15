@@ -1,6 +1,5 @@
 #include <string.h>
 #include <assert.h>
-#include <stdio.h>
 #include <StMessMgr.h>
 
 #include <TH1.h>

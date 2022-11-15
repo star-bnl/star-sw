@@ -8,10 +8,10 @@
  */
 
 #include <vector>
-#include <StThreeVectorD.hh>
-#include <StPhysicalHelixD.hh>
-#include "StGenericVertexFinder.h"
-#include "StCtbUtility.h"
+
+#include "StGenericVertexMaker/StCtbUtility.h"
+#include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "StarClassLibrary/StPhysicalHelixD.hh"
 
 class StEvent;
 class StTrack;

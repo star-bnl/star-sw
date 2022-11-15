@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <stdio.h>
 
 #include <StEvent/StEvent.h>
 #include "StEventToolkit.h"
