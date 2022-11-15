@@ -114,8 +114,6 @@ void  StCtbUtility::collectCTBhitsMC(St_DataSet *gds){// M-C CTB
   
   
   gMessMgr->Message("","I") << mCtbHits.size() << " CTB slats accepted from M-C data"<<endm;
-  
-  return ;
 }
 
 
@@ -133,7 +131,6 @@ void  StCtbUtility::collectCTBhitsData(StTriggerData *trgD){
     return ;
   }
 
-  //assert(trgD);
   for (UInt_t slat = 0; slat < 2; slat++) 
     for (UInt_t tray = 0; tray < 120; tray++) {
       ctbHit curHit;
@@ -143,27 +140,6 @@ void  StCtbUtility::collectCTBhitsData(StTriggerData *trgD){
       ctb_get_slat_from_data(slat,tray,curHit.phi, curHit.eta);
       mCtbHits.push_back(curHit);
     }
-
-#if 0
-  // old method , run just for cross check, delete later, JB
-
-  StTriggerDetectorCollection* trigCol = event->triggerDetectorCollection();
-  if(!trigCol){
-    LOG_WARN << "StCtbUtility scans: no trigCol in Data" << endm;
-    return ;
-  }
-
-  StCtbTriggerDetector* ctbDet = &(trigCol->ctb());
-  for (UInt_t slat = 0; slat < ctbDet->numberOfSlats(); slat++) 
-    for (UInt_t tray = 0; tray < ctbDet->numberOfTrays(); tray++) {
-      ctbHit curHit;
-      curHit.adc = ctbDet->mips(tray,slat,0);
-      if(curHit.adc<mCtbThres_ch) continue;
-      LOG_INFO<<Form("A sl=%3d tr=%3d  %4f\n",slat,tray, curHit.adc )<<endm;
-    }
-  
-#endif
-  return ;
 }
 
 
@@ -178,4 +154,3 @@ void  StCtbUtility::printCtb() {
            ,mCtbHits[ih].eta,mCtbHits[ih].phi/3.1416*180,mCtbHits[ih].adc)<<endm;
   }
 }
-     

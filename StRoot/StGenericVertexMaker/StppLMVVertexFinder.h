@@ -54,13 +54,9 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
     int    eveID;
     int    NCtbMatches();
 
-    /*!
-     * \struct
-     */
     struct JHelix {StPhysicalHelixD helix; float sigma; };
 
-    vector<JHelix> mPrimCand;
-
+    std::vector<JHelix> mPrimCand;
 };
 
 

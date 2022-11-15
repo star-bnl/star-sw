@@ -25,6 +25,7 @@ std::vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
 std::vector<Double_t >          StMinuitVertexFinder::mZImpact;
 Bool_t                     StMinuitVertexFinder::requireCTB;
 Int_t                      StMinuitVertexFinder::nCTBHits;
+
 //==========================================================
 //==========================================================
 void StMinuitVertexFinder::Clear(){

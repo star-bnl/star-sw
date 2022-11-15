@@ -1,19 +1,9 @@
 #ifndef BtofHitList_h
 #define BtofHitList_h
 
-#include "StGenericVertexMaker/StiPPVertex/ScintHitList.h"
 #include <vector>
 
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-#endif
-#ifndef __CINT__
-#if !defined(ST_NO_TEMPLATE_DEF_ARGS)
-typedef vector<Int_t>  IntVec;
-#else
-typedef vector<Int_t, allocator<Int_t> >  IntVec;
-#endif
-#endif
+#include "StGenericVertexMaker/StiPPVertex/ScintHitList.h"
 
 class StBTofTables;
 class StBTofCollection;
@@ -37,10 +27,10 @@ class BtofHitList : public ScintHitList {
   void build(StBTofCollection *btofColl);
   int  cell2bin(int tray, int module, int cell);
   int  addBtofTrack(int tray, int module, int cell);
-  int  addBtofMatch(IntVec ibinVec);
-  bool isMatched(IntVec ibinVec);
-  bool isVetoed(IntVec ibinVec);
-  float getWeight(IntVec ibinVec);
+  int  addBtofMatch(std::vector<int> ibinVec);
+  bool isMatched(std::vector<int> ibinVec);
+  bool isVetoed(std::vector<int> ibinVec);
+  float getWeight(std::vector<int> ibinVec);
   virtual   int etaBin(float eta);
   virtual float bin2EtaLeft(int iEta);
 
