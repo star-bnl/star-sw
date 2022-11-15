@@ -6,18 +6,18 @@
 
 #include "St_base/StMessMgr.h"
 
-int   ids[kMaxDetectorId+2]={0};
-char *cds[kMaxDetectorId+2]={0};
+int   ids[100]={0};
+char *cds[100]={0};
 static void detectorIdInit();
 //_____________________________________________________________________________
 void detectorId(int *ids=0, char** cds=0)
 {
- int   myIds[kMaxDetectorId+2];
- char *myCds[kMaxDetectorId+2];
+ int   myIds[100];
+ char *myCds[100];
  if (!ids) { ids = myIds; cds = myCds; }
 
- memset(ids,0,sizeof(ids[0])*kMaxDetectorId+2);
- memset(cds,0,sizeof(cds[0])*kMaxDetectorId+2);
+ memset(ids,0,sizeof(ids[0])*100);
+ memset(cds,0,sizeof(cds[0])*100);
 
  TString myPath("$STAR/StRoot/StEvent/StEnumerations.h");
  gSystem->ExpandPathName(myPath);
