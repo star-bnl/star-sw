@@ -316,10 +316,10 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Double_t dE  = dEU;
   Int_t sector            = CdEdx.sector; 
   Int_t row       	  = CdEdx.row;   
-  Double_t dx     	  = CdEdx.F.dx;    
+  Double_t dxC     	  = CdEdx.F.dx;    
   Double_t adcCF = CdEdx.adc;
   Int_t iok = 0;
-  if (dx <= 0 || (dEU <= 0 && adcCF <= 0)) {
+  if (dxC <= 0 || (dEU <= 0 && adcCF <= 0)) {
     iok = 1;
     return iok;
   }
@@ -392,7 +392,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Double_t ZdriftDistanceO2W = ZdriftDistanceO2*(*m_tpcGas)[0].ppmWaterOut;
   CdEdx.ZdriftDistanceO2 = ZdriftDistanceO2;
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
-  Double_t gc, ADC = 0, xL2, dXCorr;
+  Double_t gc, ADC = 0, xL2, dXCorr, gcRMS;
   Double_t slope = 0;
   Int_t nrows = 0;
   Double_t VarXs[kTpcLast] = {-999.};
@@ -441,7 +441,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (! table) goto ENDL;
       const TpcSecRowCor_st *gain = table->GetTable() + sector - 1;
       gc =  gain->GainScale[row-1];
-      if (gc <= 0.0) {
+      gcRMS = gain->GainRms[row-1];
+      if (gc <= 0.0 || gcRMS <= 0.0) {
 	return k;
       }
       dE *= gc;
@@ -449,9 +450,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (gain->GainRms[row-1] > 0.1) CdEdx.Weight = 1./(gain->GainRms[row-1]*gain->GainRms[row-1]);
       goto ENDL;
     } else if (k == kTpcEffectivedX) {
-      if      (kTpcOutIn == kTpcOuter) dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleOuter();
+      if      (kTpcOutIn == kTpcOuter) dxC *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleOuter();
       else if (kTpcOutIn == kTpcInner ||
-	       kTpcOutIn == kiTpc )    dx *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleInner();
+	       kTpcOutIn == kiTpc )    dxC *= ((const St_TpcEffectivedXC* ) m_Corrections[k].Chair)->scaleInner();
       goto ENDL;
     } else if (k == kTpcPadMDF) {
       l = 2*(sector-1);
@@ -567,7 +568,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	dE *=  TMath::Exp(-chairC->CalcCorrection(2+l,CdEdx.dCharge));
 	goto ENDL;
       } else if (k == kdXCorrection) {
-	xL2 = TMath::Log2(dx);
+	xL2 = TMath::Log2(dxC);
 	dXCorr = chairC->CalcCorrection(l,xL2); 
 	if (TMath::Abs(dXCorr) > 10) {
 	  return k;
@@ -576,8 +577,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	  dXCorr += chairC->CalcCorrection(2,xL2);
 	  dXCorr += chairC->CalcCorrection(5+kTpcOutIn,xL2);
 	}
-	CdEdx.dxC = TMath::Exp(dXCorr)*CdEdx.F.dx;
-	dE *= TMath::Exp(-dXCorr);
+	dxC       = TMath::Exp(dXCorr)*CdEdx.F.dx;
+	CdEdx.dxC = dxC;
+	dE *= TMath::Exp(-dXCorr); //   Check !!!!!!
 	goto ENDL;
       } else if (k == kSpaceCharge) {
 	if (cor[2*l  ].min <= CdEdx.QRatio && CdEdx.QRatio <= cor[2*l  ].max &&
@@ -664,7 +666,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     }
   ENDL:
     CdEdx.C[k].dE = dE;
-    CdEdx.C[k].dx = dx;
+    CdEdx.C[k].dx = dxC;
     CdEdx.C[k].dEdx    = CdEdx.C[k].dE/CdEdx.C[k].dx;
     CdEdx.C[k].dEdxL   = TMath::Log(CdEdx.C[k].dEdx);
     if (! k) CdEdx.C[k].ddEdxL = 0;

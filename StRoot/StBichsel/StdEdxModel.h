@@ -23,7 +23,8 @@ class StdEdxModel {
   TH1D                *GetdNdx()       {return    mdNdx;}       // dN/dx versus beta*gamma
   static Double_t      gausw(Double_t *x, Double_t *p); // vesus ksi, w, alpha
   static Double_t      ggaus(Double_t *x, Double_t *p);  // versus mu, sigm, alpha
-  static Double_t      gausexp(Double_t *x, Double_t *); // versus mu, sigma, k 
+  static Double_t      gausexp(Double_t *x, Double_t *p); // versus mu, sigma, k 
+  static Double_t      gausexpD(Double_t *x, Double_t *p, Double_t *der = 0); // versus mu, sigma, k 
   Double_t             dNdx(Double_t poverm, Double_t charge = 1.0);								      
   Double_t     	       dNdxEff(Double_t poverm, Double_t charge = 1.0);							      
   static Double_t      saturationFunc(Double_t *x, Double_t *p); // nP saturation versus beta*gamma from TpcRS (nP/dX - dN/dx_model) 
@@ -40,9 +41,8 @@ class StdEdxModel {
   Double_t 	       n(Double_t e) {return e/GeVperElectron();}   // ne  from energy (GeV)					       
   Double_t 	       LogE(Double_t Logne) {return fLogkeVperElectron  + Logne + TMath::Log(1e-6);} // deposited energy GeV from ne			       
   Double_t 	       Logne(Double_t LogE) {return LogE - fLogkeVperElectron - TMath::Log(1e-6);}   // ne  from energy (GeV)				       
-  void     	       Parameters(Double_t Np, Double_t *pars, Double_t *derivatives = 0); 						       
-  Double_t 	       Derivative(Double_t Np, Int_t k = 0) {return 0;}								       
-  Double_t 	       Parameter(Double_t Np, Int_t k = 0);										       
+  void     	       Parameters(Double_t Np, Double_t *pars, Double_t *dPardNp = 0); 						       
+  Double_t 	       Parameter(Double_t Np, Int_t k = 0, Double_t *dPardNp = 0);										       
   Double_t 	       MukeV(Double_t Np);                             // log(dE) (keV)
   Double_t 	       Sigma(Double_t Np) {return Parameter(Np, 1);}								       
   Double_t 	       Alpha(Double_t Np) {return Parameter(Np, 2);}								       
@@ -50,8 +50,8 @@ class StdEdxModel {
   Double_t 	       LogdEMPVeV (Double_t Np)   {return LogdEMPVkeV(Np) + TMath::Log(1e3);}
   Double_t 	       LogdEMPVkeV(Double_t Np)   {return MukeV(Np);} // log(dE) (keV)  
   Double_t 	       LogdEMPVGeV(Double_t Np)   {return MukeV(Np) + TMath::Log(1e-6);} // log(dE) (keV)  
-  Double_t 	       Prob(Double_t ee, Double_t Np); // probability for give log(dE/Np) versus Np					       
-  Double_t 	       ProbdEGeVlog(Double_t dEGeVLog, Double_t Np); // probability for give log(dE(GeV)) versus Np			       
+  Double_t 	       Prob(Double_t ee, Double_t Np, Double_t *der = 0); // probability for give log(dE/Np) versus Np					       
+  Double_t 	       ProbdEGeVlog(Double_t dEGeVLog, Double_t Np, Double_t *der = 0); // probability for give log(dE(GeV)) versus Np			       
   void     	       SetScale(Double_t scale = 1.0) {fScale = scale;}								       
   Double_t 	       dNdxScale() {return fScale;}											       
   static Double_t      zMP(Double_t *x, Double_t *p); // most probable log (dE) versus x = log10(p/M) and p[0] = log2dx and p[1] =  charge 

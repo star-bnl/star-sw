@@ -203,6 +203,10 @@ Double_t StdEdxModel::ggaus(Double_t *x, Double_t *p) {
 }
 //_______________________________________________________________________________
 Double_t StdEdxModel::gausexp(Double_t *x, Double_t *p) {
+  return gausexpD(x,p);
+}
+//_______________________________________________________________________________
+Double_t StdEdxModel::gausexpD(Double_t *x, Double_t *p, Double_t *der) {
   // Souvik Das, "A simple alternative to the Crystal Ball function"
   // https://arxiv.org/pdf/1603.08591.pdf
   //  Int_t    l     = p[4];// 
@@ -217,10 +221,15 @@ Double_t StdEdxModel::gausexp(Double_t *x, Double_t *p) {
     k = - kh;
     t = - t;
   }
+  Double_t dVdt = 0;
+  Double_t dVdk = 0;
   if (t < k) {
-    V = TMath::Exp(-t*t/2); // der = - V * t => - k * V
+    V = TMath::Exp(-t*t/2); // dV/dt = - V * t => - k * V
+    dVdt = -V*t;
   } else {
-    V = TMath::Exp(k*k/2 - k*t); // der =       - k * V 
+    V = TMath::Exp(k*k/2 - k*t); // dV/dt =       - k * V 
+    dVdt = -V*k;
+    dVdk =  V*(k - t);
   }
 // (%i5) integrate(exp(((-t)*t)/2),t,minf,k)
 //                                        k
@@ -246,7 +255,21 @@ Double_t StdEdxModel::gausexp(Double_t *x, Double_t *p) {
   Double_t D = SQ2pi*(1 + TMath::Erf(k/TMath::Sqrt2()));
   Double_t C = TMath::Exp(-k*k/2)/k;
   Double_t N = (D + C)*sigma;
-  return TMath::Exp(normL)*V/N;
+  Double_t Prob = TMath::Exp(normL)*V/N;
+  if (der) {
+    Double_t dtdM = -1./sigma;
+    Double_t dtdS = -t /sigma;
+    Double_t dDdk = TMath::Exp(-k*k/2.);
+    Double_t dCdk = - C*(k + 1./(k*k));
+    Double_t dNdk = (dDdk + dCdk) * sigma;
+    Double_t dPdM = Prob * dVdt / V * dtdM; // over mu
+    Double_t dPdS = Prob * dVdt / V * dtdS; // over sigma
+    Double_t dPdk = Prob *(dVdk / V - dNdk / N);
+    der[0] = dPdM;
+    der[1] = dPdS;
+    der[2] = dPdk;
+  }
+  return Prob;
 }
 //________________________________________________________________________________
 /* CERN-77-09 Sauli Yellow report
@@ -258,28 +281,48 @@ Double_t StdEdxModel::gausexp(Double_t *x, Double_t *p) {
    Ar:  (dE/dx)/nT   = 2.44/94    = 25.96 eV : W = 26   eV
 */
 //________________________________________________________________________________
-void StdEdxModel::Parameters(Double_t Np, Double_t *parameters, Double_t *derivatives) {
+void StdEdxModel::Parameters(Double_t Np, Double_t *parameters, Double_t *dPardNp) {
   parameters[0] = parameters[1] = parameters[2] = 0;
   if (Np <= 1.0) return;
   for (Int_t l = 0; l < 3; l++) {
-    parameters[l] = Parameter(Np, l);
+    if (! dPardNp) {
+      parameters[l] = Parameter(Np, l);
+    } else {
+      parameters[l] = Parameter(Np, l, &dPardNp[l]);
+    }
   }
 }
 //________________________________________________________________________________
-Double_t StdEdxModel::Parameter(Double_t Np, Int_t l) {
+Double_t StdEdxModel::Parameter(Double_t Np, Int_t l, Double_t *dPardNp) {
   static Double_t parsA[2] = {    5.4634,   -0.57598}; //alpha x
   static Double_t parsS[3] = {    1.6924,    -1.2912,    0.24698}; //sigma versus log(x)	 
   static Double_t parsM[8] = {   -4.3432,     4.6327,    -1.9522,     0.4691,  -0.066615,  0.0055111, -0.00024531, 4.5394e-06}; //mu pol7
   Double_t x = TMath::Log(Np);
+  Double_t dxdNp = 1./Np;
   if (l == 2) {
     Double_t alpha  = parsA[0] + x *  parsA[1];
+    if (dPardNp) dPardNp[0] =  parsA[1] * dxdNp;
     return alpha;
   } else if (l == 1) {
     Double_t xx = (x > 0) ? TMath::Log(x) : 0;
     Double_t sigma = parsS[0] + xx * ( parsS[1] + xx * parsS[2]);
+    if (dPardNp) {
+      Double_t dxxdx = 1./xx;
+      Double_t dxxdNp = dxxdx * dxdNp;
+      dPardNp[0] = (parsS[1] + 2 * xx * parsS[2]) * dxxdNp;
+    }
     return sigma;
   } else if (l == 0) {
     Double_t mu = fpol7F->EvalPar(&x, parsM);
+    if (dPardNp) {
+      static Double_t parsMD[7] = {0};
+      if (!parsMD[0]) {
+	for (Int_t i = 0; i < 7; i++) {
+	  parsMD[i] = (i+1)*parsM[i+1];
+	}
+      }
+      dPardNp[0] = fpol6F->EvalPar(&x, parsMD) * dxdNp;
+    }
     return mu;
   } else {
     assert(0);
@@ -291,16 +334,26 @@ Double_t StdEdxModel::MukeV(Double_t Np) {
   return Parameter(Np, 0) + fLogkeVperElectron + TMath::Log(Np);
 }
 //________________________________________________________________________________
-Double_t StdEdxModel::Prob(Double_t /* log(nE/Np) */ ee, Double_t Np) {
-  Double_t params[3] = {0};
-  Parameters(Np, &params[1]);
-  Double_t V = gausexp(&ee, params);
+Double_t StdEdxModel::Prob(Double_t /* log(nE/Np) */ ee, Double_t Np, Double_t *der) {
+  Double_t params[4] = {0};
+  Double_t V = 0;
+  if (! der) {
+    Parameters(Np, &params[1]);
+    V = gausexp(&ee, params);
+  } else {
+    Double_t dPardNp[3] = {0};
+    Parameters(Np, &params[1], dPardNp);
+    Double_t dVdP[3] = {0};
+    V = gausexpD(&ee, params, dVdP);
+    der[0] = 0;
+    for (Int_t l = 0; l < 3; l++) der[0] += dVdP[l]*dPardNp[l];
+  }
   return V;
 }
 //________________________________________________________________________________
-Double_t StdEdxModel::ProbdEGeVlog(Double_t dEGeVLog, Double_t Np) {
+Double_t StdEdxModel::ProbdEGeVlog(Double_t dEGeVLog, Double_t Np, Double_t *der) {
   Double_t ee = Logne(dEGeVLog) - TMath::Log(Np);
-  return Prob(ee, Np);
+  return Prob(ee, Np, der);
 }
 //________________________________________________________________________________
 Double_t StdEdxModel::zMP(Double_t *x, Double_t *p) { // log(keV/cm)

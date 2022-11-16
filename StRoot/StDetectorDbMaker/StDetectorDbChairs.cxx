@@ -2005,6 +2005,11 @@ MakeChairOptionalInstance2(starTriggerDelay,St_starTriggerDelayC,Calibrations/tp
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
 #include "St_trigDetSumsC.h"
 St_trigDetSumsC *St_trigDetSumsC::fgInstance = 0;
+//________________________________________________________________________________
+St_trigDetSumsC::~St_trigDetSumsC() {
+  fgInstance = 0;
+}
+//________________________________________________________________________________
 St_trigDetSumsC *St_trigDetSumsC::instance() {
   if (fgInstance) {
 #if 0
@@ -2023,7 +2028,8 @@ St_trigDetSumsC *St_trigDetSumsC::instance() {
 #endif
     return fgInstance;
   }
-  St_trigDetSums *table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("StEvent/trigDetSums");
+  St_trigDetSums *table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("inputStream_DAQ/trigDetSums");
+  if (! table)    table = (St_trigDetSums *) StMaker::GetChain()->GetDataSet("StEvent/trigDetSums");
   if (table) {
     static Int_t iBreak = 0;
     if (iBreak < 3) {
