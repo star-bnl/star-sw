@@ -2489,7 +2489,11 @@ my $step = 0;
 #$hist = "RunXIX_XXII_48"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/dAu*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/08/2022 TpcSecRow from SecRow3G4EY
 #$hist = "RunXIX_XXII_49"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/7p7GeV_2021/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/10/2022 TpcSecRow from SecRow3G4EY new FitG4EY with restrictions
 #$hist = "RunXIX_XXII_49"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/10/2022 TpcSecRow from SecRow3G4EY new FitG4EY with restrictions
-$hist = "RunXIX_XXII_50"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/12/2022 deactivate old entries in MySQL and rerun
+#$hist = "RunXIX_XXII_50"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/12/2022 deactivate old entries in MySQL and rerun
+#$hist = "RunXIX_XXII_51"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/13/2022 new TpcZCorrectionC
+##$hist = "RunXIX_XXII_52"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/14/2022 new TpcSecRow
+$hist = "RunXIX_XXII_53"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/15/2022 restart from tpc.111322.tz add dXCorrection
+
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2576,7 +2580,9 @@ if ($#badruns > -1) {$badruns = join "|", @badruns; print "Badruns: $badruns\n";
     $ProdFiles{$dd} .= " " . $file;  
   }
   foreach my $dd (keys %ProdFiles) {
-    my @FilesRun = split " ", $ProdFiles{$dd};
+    my $countperdd = 0;
+    my @FilesRun = split " ", $ProdFiles{$dd};# print "$dd => $#FielsRun ================================================================================\n";
+    if ($#FilesRun < 0) {next;}
 #    print "$dd => @FilesRun\n";
     my $scrr = $scr . $dd . "/"; #print "scrr = $scrr\n";
     my $XML = "jobs." . $prod . "_" . $dd . ".xml";
@@ -2662,6 +2668,7 @@ if ($?INPUTFILE0) csh -x $INPUTFILE0
 	#    $cmd .= "; cp -p $logL $log;";
 	print OUT "$cmd\n";
 	$count++;
+	$countperdd++;
 	close (OUT); $opened = 0; $count = 0;
 	chmod 0755, $SCRIPT;
       }
@@ -2680,10 +2687,29 @@ print XML '
 </job>
 ';
 close (XML);
+    if ($countperdd < 1) {unlink $XML;}
   }
 
 #close (CONDOR);
 my $GB = $Total_Size/1024/1024/1024;
 print "Total size = $GB GB for $#Files event.root files  $count scripts have been created \n"; 
 }
+__END__
+#  
+# foreach d ( 7p7GeV_2021  100GeV_fixedTarget_2021  17p3GeV_2021  26p5GeV_fixedTarget_2021  3p85GeV_fixedTarget_2021  44p5GeV_fixedTarget_2021  70GeV_fixedTarget_2021 dAu200GeV_2021  OO_200GeV_2021  ps_OO_200GeV_2021 \
+# 	   pp500GeV_2022 \
+# 	   11p5GeV_2020  13p5GeV_fixedTarget_2020  19p5GeV_fixedTarget_2020  26p5GeV_fixedTarget_2020  31p2GeV_fixedTarget_2020  5p75GeV_fixedTarget_2020  7p3GeV_fixedTarget_2020  7p7GeV_2020  9p2GeV_2020  9p2GeVb_2020  9p2GeVc_2020  9p8GeV_fixedTarget_2020 \
+# 	   14p5GeV_2019  19GeV_2019  31GeV_fixedTarget_2019  3p85GeV_fixedTarget_2019  4p59GeV_fixedTarget_2019  7.3GeV_fixedTarget_2019  7p7GeV_2019  9p2GeV_2019  AuAu200GeV_2019)
+foreach f (`ls -1d job*.xml`)
+  set d = `echo ${f} | sed -e 's/jobs.RunXIX_XXII_53_//' -e 's/.xml//'`
+  if (-d ${d}) continue;
+  mkdir ${d}
+  cd ${d}
+  lsf6X ../job*${d}*.xml
+  cd -
+end
+# Update All*.root
+foreach d (`ls -1d *`)
+    dir -ltr ${d}/*.root | tail -1 
+end
 

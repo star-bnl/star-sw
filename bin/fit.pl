@@ -69,7 +69,7 @@ foreach my $arg (@ARGV) {
 
 ################################################################################
 if ($all) {
-  push  @{ $Opts{GG} }, qw(dNdxVsBgC dNdxVsBgCI dNdxVsBgCO); 
+#  push  @{ $Opts{GG} }, qw(dNdxVsBgC dNdxVsBgCI dNdxVsBgCO); 
   push  @{ $Opts{G4EY} }, qw(
 			      SecRow3 SecRow3P SecRow3+SecRow3P SecRow3C SecRow3PC SecRow3C+SecRow3PC
 			      Z3 Z3P  Z3+Z3P  Z3C+Z3P 
@@ -77,6 +77,7 @@ if ($all) {
 			      xyPad3+xyPad3P xyPad3C+xyPad3PC
 			      xyPad3 xyPad3P xyPad3C xyPad3PC 
 			      Pressure PressureP Pressure+PressureP PressureC PressurePC PressureC+PressurePC
+			      dX3 dx3C
 			   );
 #   push  @{ $Opts{G4EG} }, qw(
 # 			      SecRow3 SecRow3P SecRow3+SecRow3P SecRow3C SecRow3PC SecRow3C+SecRow3PC

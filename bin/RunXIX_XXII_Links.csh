@@ -6,8 +6,9 @@
 # if (${p} == "TpcSecRowB") set ext = root;
 #echo "ln -s ${p}.3p85GeV_fixedTarget_2019.${ext}                ${p}.20190607.174703.${ext}" 
 #end
-
-foreach p (TpcSecRowB TpcAccumulatedQ TpcZCorrectionC TpcPadCorrectionMDF TpcLengthCorrectionMDN)
+#set list = "TpcSecRowB TpcAccumulatedQ TpcZCorrectionC TpcPadCorrectionMDF TpcLengthCorrectionMDN"
+set list = "TpcdXCorrectionB"
+foreach p (${list})
  set ext = C
  if (${p} == "TpcSecRowB") set ext = root;
 ln -sf ${p}.19GeV_2019.${ext}                              ${p}.20190225.202320.${ext}
@@ -101,10 +102,10 @@ ln -sf ${p}.pp500GeV_2022.${ext}                              ${p}.20220305.0421
 #ln -sf ${p}.zeroFieldAligment_2022.${ext}                  ${p}.20220313.051859.${ext}
 ln -sf ${p}.pp500GeV_2022.${ext}                              ${p}.20220313.141508.${ext}
 end
-foreach t (${p} TpcAccumulatedQ TpcZCorrectionC TpcPadCorrectionMDF TpcLengthCorrectionMDN)
- set ext = C
- if (${t} == "TpcSecRowB") set ext = root;
-    foreach p (`dirc | grep ${t} | grep GeV | awk '{print $11}'`)
-	ln -sf ${t}.${ext}  ${p}
-    end
-end
+#foreach p (${list})
+# set ext = C
+# if (${t} == "TpcSecRowB") set ext = root;
+#    foreach p (`dirc | grep ${t} | grep GeV | awk '{print $11}'`)
+#	ln -sf ${t}.${ext}  ${p}
+#    end
+#end
