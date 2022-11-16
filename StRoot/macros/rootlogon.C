@@ -236,7 +236,10 @@
   }
   delete [] file;
   gInterpreter->AddIncludePath(".");
+  gInterpreter->AddIncludePath("./macros");
+  gInterpreter->AddIncludePath("$STAR/macros");
   gInterpreter->AddIncludePath("./StRoot");
+  gInterpreter->AddIncludePath("$STAR/StRoot");
   if (TString(gSystem->Getenv("STAR_HOST_SYS_OPT")) != "") {
     gInterpreter->AddIncludePath("./.$STAR_HOST_SYS_OPT/include");
     gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS_OPT/include");
@@ -244,6 +247,5 @@
     gInterpreter->AddIncludePath("./.$STAR_HOST_SYS/include");
     gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS/include");
   }
-  gInterpreter->AddIncludePath("$STAR/StRoot");
   gInterpreter->AddIncludePath("/usr/include/mysql");
 }
