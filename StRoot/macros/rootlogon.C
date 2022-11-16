@@ -216,10 +216,10 @@
       gSystem->AddIncludePath(" -D__TFG__VERSION__");
     }
     if (TString(gSystem->Getenv("STAR_HOST_SYS_OPT")) != "") {
-      gSystem->AddIncludePath(" -I./.$STAR_HOST_SYS_OPT/include -I./StRoot -I$STAR/.$STAR_HOST_SYS_OPT/include -I$STAR/StRoot -I$STAR -I/usr/include/mysql");
+      //      gSystem->AddIncludePath(" -I./.$STAR_HOST_SYS_OPT/include -I./StRoot -I$STAR/.$STAR_HOST_SYS_OPT/include -I$STAR/StRoot -I$STAR -I/usr/include/mysql");
       gSystem->SetBuildDir(".$STAR_HOST_SYS_OPT",kTRUE);
     } else {
-      gSystem->AddIncludePath(" -I./.$STAR_HOST_SYS/include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/StRoot -I$STAR -I/usr/include/mysql");
+      //      gSystem->AddIncludePath(" -I./.$STAR_HOST_SYS/include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/StRoot -I$STAR -I/usr/include/mysql");
       gSystem->SetBuildDir(".$STAR_HOST_SYS",kTRUE);
     }
     if (GARFIELD_HOME != "$GARFIELD_HOME") gSystem->AddIncludePath(" -I$GARFIELD_HOME/Include -I$GARFIELD_HOME/Heed");
@@ -235,4 +235,15 @@
     gROOT->Macro(file);
   }
   delete [] file;
+  gInterpreter->AddIncludePath(".");
+  gInterpreter->AddIncludePath("./StRoot");
+  if (TString(gSystem->Getenv("STAR_HOST_SYS_OPT")) != "") {
+    gInterpreter->AddIncludePath("./.$STAR_HOST_SYS_OPT/include");
+    gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS_OPT/include");
+  } else {
+    gInterpreter->AddIncludePath("./.$STAR_HOST_SYS/include");
+    gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS/include");
+  }
+  gInterpreter->AddIncludePath("$STAR/StRoot");
+  gInterpreter->AddIncludePath("/usr/include/mysql");
 }
