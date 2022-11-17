@@ -4,7 +4,7 @@
 #include "StFstScanRadiusClusterAlgo.h"
 #include "StFstUtil/StFstCollection.h"
 #include "StFstUtil/StFstRawHitCollection.h"
-#include "StFstUtil/StFstRawHit.h"
+#include "StEvent/StFstRawHit.h"
 #include "StFstUtil/StFstClusterCollection.h"
 #include "StFstUtil/StFstCluster.h"
 #include "StEvent/StFstConsts.h"
