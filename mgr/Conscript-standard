@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-Import qw ( env CWD INCLUDE LIB BIN BUILD OBJ);
+Import qw ( env CWD INCLUDE LIB BIN BUILD OBJ warnoff_dirs);
 ( my $build = $OBJ ) =~ s/\#//g;
 $build =~ s/\\/\//g;                                    # print "OBJ = $OBJ build = $build\n";
 # print "MAIN = $MAIN\n";
@@ -246,6 +246,12 @@ if ($FC =~ m/g77/ || $FC =~ m/gfortran/ ){
     #	$SOFLAGS .= " " . $env1->{FLIBS};
     #	#print "\tFinal SOFLAGS are $SOFLAGS\n";
     #}
+}
+
+
+# Disable all compiler warnings if $Dir matches any value from @$warnoff_dirs
+if ( grep(index($Dir, $_) != -1, @$warnoff_dirs) ) {
+  $CXXFLAGS .= " -w";
 }
 
 #+
@@ -1011,6 +1017,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $envCint = $env2->clone('DEBUG' => $env2->{NOOPT},
 			    'CPPPATH'  => $Cint_CPPPATH,
 			    'CPPFLAGS' => $CPPFLAGS,
+			    'CXXFLAGS' => $CXXFLAGS,
 			    'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS);
 
     print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |", $env2->{LIBS},
