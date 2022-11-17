@@ -676,6 +676,16 @@ Int_t StBFChain::Instantiate()
       ProcessLine(cmd);
     }
 
+    // FST Raw hits in StEvent
+    if (maker == "StFstRawHitMaker" && GetOption("fstEvtRawHit") ){
+      mk->SetAttr("fstEvtRawHit", kTRUE);
+    }
+
+    // FST Raw hits in MuDST
+    if (maker == "StMuDstMaker" && GetOption("fstMuRawHit") ){
+      mk->SetAttr("fstMuRawHit", kTRUE);
+    }
+
     if ( maker == "StPicoDstMaker"){
       if ( GetOption("picoWrite") )  mk->SetMode(1);
       if ( GetOption("picoRead")  )  mk->SetMode(2);   // possibly more magic
