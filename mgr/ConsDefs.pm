@@ -468,7 +468,7 @@
 	$CERNLIB_CPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
         print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
 
-        $CXXFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Woverloaded-virtual";
+        $CXXFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Woverloaded-virtual -Werror";
 
 	# some fortran initial options
         if ($PGI) {
