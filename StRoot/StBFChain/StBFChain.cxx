@@ -638,12 +638,12 @@ Int_t StBFChain::Instantiate()
     }
 
     if (maker == "StStrangeMuDstMaker" && GetOption("CMuDST")&& GetOption("StrngMuDST") ) {
-      TString cmd(Form("StStrangeMuDstMaker *pSMMk = (StStrangeMuDstMaker*) %p;",mk));
-      cmd += "pSMMk->DoV0();";                                 // Set StrangeMuDstMaker parameters
-      cmd += "pSMMk->DoXi();";
-      cmd += "pSMMk->DoKink();";
-      cmd += "pSMMk->SetNoKeep();";                            // Set flag for output OFF
-      ProcessLine(cmd);
+
+      mk -> SetAttr( "DoV0", 1 );
+      mk -> SetAttr( "DoXi", 1 );
+      mk -> SetAttr( "DoKink", 1 );
+      mk -> SetAttr( "SetNoKeep", 1 );
+
     }
 
     // Alex requested an option (not turned by default) to disable all
