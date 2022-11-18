@@ -479,9 +479,7 @@ void  StMuDstMaker::streamerOff() {
   StMuL3EventSummary::Class()->IgnoreTObjectStreamer();
 #ifndef __NO_STRANGE_MUDST__
   StStrangeMuDst::Class()->IgnoreTObjectStreamer();
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,0,0) 
   StStrangeAssoc::Class()->IgnoreTObjectStreamer(); 
-#endif
   StV0MuDst::Class()->IgnoreTObjectStreamer();
   StXiMuDst::Class()->IgnoreTObjectStreamer();
   StKinkMuDst::Class()->IgnoreTObjectStreamer();
