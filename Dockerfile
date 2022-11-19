@@ -21,7 +21,7 @@ COPY . ${STAR}
 
 SHELL ["/bin/bash", "-l", "-c"]
 
-RUN cons \
+RUN cons EXTRA_CXXFLAGS="-Werror" \
  && find .$STAR_HOST_SYS -name *.o -exec rm '{}' \;
 
 COPY --chmod=0755 <<-"EOF" /opt/entrypoint.sh
