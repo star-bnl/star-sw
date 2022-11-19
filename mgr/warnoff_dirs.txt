@@ -3,8 +3,10 @@ StRoot/RTS
 StRoot/StAnalysisMaker
 StRoot/StAssociationMaker
 StRoot/StBTofPool.*
+StRoot/StBTofSimMaker
 StRoot/StChain
 StRoot/StDaqLib
+StRoot/StDbLib
 StRoot/StDbUtilities
 StRoot/StEEmcDbMaker
 StRoot/StEEmcPool.*
@@ -35,6 +37,9 @@ StRoot/StFgtPool.*
 StRoot/StFgtSimulatorMaker
 StRoot/StFgtUtil
 StRoot/StFilterMaker
+StRoot/StFlowAnalysisMaker
+StRoot/StFlowMaker
+StRoot/StFmsHitMaker
 StRoot/StFmsPointMaker
 StRoot/StFmsUtil
 StRoot/StFstClusterMaker
@@ -75,6 +80,7 @@ StRoot/StPmdUtil
 StRoot/StPreEclMaker
 StRoot/StPxlClusterMaker
 StRoot/StPxlDbMaker
+StRoot/StPxlSimMaker
 StRoot/StRefMultCorr
 StRoot/StSpectraPool.*
 StRoot/StSpinPool.*
@@ -102,6 +108,7 @@ StRoot/StTreeMaker
 StRoot/StTriggerUtilities
 StRoot/StTrsMaker
 StRoot/StXTrakMaker
+StRoot/St_base
 StRoot/St_ctf_Maker
 StRoot/St_emc_Maker
 StRoot/St_trg_Maker
@@ -114,8 +121,11 @@ StRoot/StiCA
 StRoot/StiTpc
 StRoot/StiUtilities
 StRoot/Stv
-StRoot/StvMake
+StRoot/StvMaker
+StRoot/StvSeed
+StRoot/StvUtil
 StarVMC/GeoTestMaker
 StarVMC/StarAgmlLib
 StarVMC/StarBASE
 StarVMC/StarGeometry
+StarVMC/geant3
