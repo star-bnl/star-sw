@@ -2,6 +2,7 @@ OnlTools/Jevp
 StRoot/RTS
 StRoot/StAnalysisMaker
 StRoot/StAssociationMaker
+StRoot/StBTofPool.*
 StRoot/StChain
 StRoot/StDaqLib
 StRoot/StDbUtilities
