@@ -110,6 +110,7 @@ StRoot/StTriggerUtilities
 StRoot/StTrsMaker
 StRoot/StUtilities
 StRoot/StXTrakMaker
+StRoot/St_QA_Maker
 StRoot/St_base
 StRoot/St_ctf_Maker
 StRoot/St_emc_Maker
