@@ -116,7 +116,7 @@ StRoot/St_ctf_Maker
 StRoot/St_emc_Maker
 StRoot/St_trg_Maker
 StRoot/StarClassLibrary
-StRoot/StarGenerator
+StRoot/StarGenerator.*
 StRoot/StarRoot
 StRoot/StdEdxY2Maker
 StRoot/Sti
