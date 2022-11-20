@@ -37,8 +37,6 @@ StRoot/StFgtPool.*
 StRoot/StFgtSimulatorMaker
 StRoot/StFgtUtil
 StRoot/StFilterMaker
-StRoot/StFlowAnalysisMaker
-StRoot/StFlowMaker
 StRoot/StFmsHitMaker
 StRoot/StFmsPointMaker
 StRoot/StFmsUtil
