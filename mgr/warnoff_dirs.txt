@@ -95,6 +95,7 @@ StRoot/StSvtPool.*
 StRoot/StSvtSeqAdjMaker
 StRoot/StSvtSimulationMaker
 StRoot/StTofCalibMaker
+StRoot/StTofHitMaker
 StRoot/StTofMaker
 StRoot/StTofPool.*
 StRoot/StTofSimMaker
