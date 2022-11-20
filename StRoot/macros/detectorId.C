@@ -6,11 +6,7 @@
 
 void detectorId(int *ids=0, char** cds=0)
 {
-<<<<<<< HEAD
 #ifndef __CLING__
- int         myIds[100];
- const char *myCds[100];
-=======
 
   std::cout << "------------------------------" << std::endl;
   std::cout << "detectorId has been deprecated" << std::endl;
@@ -18,7 +14,6 @@ void detectorId(int *ids=0, char** cds=0)
 
  int   myIds[100];
  char *myCds[100];
->>>>>>> upstream/main
  if (!ids) { ids = myIds; cds = myCds; }
 
 
