@@ -39,6 +39,7 @@ StRoot/StFgtUtil
 StRoot/StFilterMaker
 StRoot/StFmsHitMaker
 StRoot/StFlowAnalysisMaker
+StRoot/StFlowMaker
 StRoot/StFmsPointMaker
 StRoot/StFmsUtil
 StRoot/StFstClusterMaker
