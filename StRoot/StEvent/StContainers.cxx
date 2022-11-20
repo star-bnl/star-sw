@@ -167,6 +167,7 @@
 #include "StHltTriggerReason.h"
 #include "StHltVpdHit.h"
 #include "StIstHit.h"
+#include "StFstRawHit.h"
 #include "StFstHit.h"
 #include "StKinkVertex.h"
 #include "StL3AlgorithmInfo.h"
@@ -243,6 +244,7 @@ StCollectionImp(HltTrackNode)
 StCollectionImp(HltTriggerReason)
 StCollectionImp(HltVpdHit)
 StCollectionImp(IstHit)
+StCollectionImp(FstRawHit)
 StCollectionImp(FstHit)
 StCollectionImp(KinkVertex)
 StCollectionImp(L3AlgorithmInfo)

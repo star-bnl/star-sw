@@ -228,6 +228,7 @@ class StFgtCollection;
 class StPxlHitCollection;
 class StIstHitCollection;
 class StGmtCollection;
+class StFstEvtCollection;
 class StFstHitCollection;
 
 class StEvent : public StXRefMain {
@@ -307,6 +308,8 @@ public:
     StGmtCollection*                    gmtCollection();
     const StGmtCollection*              gmtCollection() const;
     
+    StFstEvtCollection*                 fstEvtCollection();
+    const StFstEvtCollection*           fstEvtCollection() const;
     StFstHitCollection*                 fstHitCollection();
     const StFstHitCollection*           fstHitCollection() const;
     StEpdCollection*                    epdCollection();
@@ -383,6 +386,7 @@ public:
     void setSstHitCollection(StSstHitCollection*);
     void setPxlHitCollection(StPxlHitCollection*);
     void setIstHitCollection(StIstHitCollection*);
+    void setFstEvtCollection(StFstEvtCollection*);
     void setFstHitCollection(StFstHitCollection*);
     void setEmcCollection(StEmcCollection*);
     void setEpdCollection(StEpdCollection*);
