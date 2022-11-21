@@ -283,7 +283,7 @@ protected:
        for ( auto v : volumes ) { 
 	 geant3->Gfnhit( container.c_str(), v.c_str(), nhits ); 
 	 std::string key = container + ":" + v;
-	 LOG_DEBUG << key << " found nhits=" << nhits << endm;
+	 LOG_INFO << key << " found nhits=" << nhits << endm;
 	 if (nhits) { mHitCounts[key] += nhits; mHitCounts["ALL"] += nhits; } 
 	 ntotal += nhits; 
        } 
