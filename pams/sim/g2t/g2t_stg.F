@@ -16,8 +16,6 @@
 
       "Setup readout for the GAS volumes STG*"
 
-      print *, 'WOOWOWOWOOWWO STG_G2t'
-
       Do Isys=1,3
            if (isys.eq.1) CALL g2r_get_sys('STGM','STGP',Iprin,Idigi)
            if (isys.eq.2) CALL g2r_get_sys('STGM','STGL',Iprin,Idigi)
