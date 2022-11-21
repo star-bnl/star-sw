@@ -347,14 +347,14 @@ foreach my $dir( "pams", "StRoot", "StPiD", "StarVMC" ) {
 print "subdirs = @subdirs\n" if $param::debug;
 
 if ( index($env->{EXTRA_CXXFLAGS}, "-Werror") != -1 ) {
-  # Read strings from the file into an array. They are matched against the names
+  # Read regex expressions from the file into an array. The patterns are matched against the names
   # of source directories in order to disable compiler warnings
-  open(warnoff_dirs_file, "mgr/warnoff_dirs.txt") or die "Can't open mgr/warnoff_dirs.txt";
+  open(warnoff_dirs_file, "mgr/warnoff_dirs.txt") or print "Warning: Can't open mgr/warnoff_dirs.txt\n";
   chomp(@warnoff_dirs = <warnoff_dirs_file>);
   close(warnoff_dirs_file);
 
   if (@warnoff_dirs) {
-    print "Compiler warnings inhibited for the following directories:\n";
+    print "Compiler warnings will be inhibited for directories matching the following patterns:\n";
     foreach $dir (@warnoff_dirs) {
       print "\t$dir\n";
     }
