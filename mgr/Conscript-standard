@@ -252,7 +252,7 @@ if ($FC =~ m/g77/ || $FC =~ m/gfortran/ ){
 # Disable all compiler warnings if $Dir matches any value from @$warnoff_dirs
 if ( index($EXTRA_CXXFLAGS, "-Werror") != -1 ) {
   if ( grep($Dir =~ m/^$_$/, @$warnoff_dirs) ) {
-    $EXTRA_CXXFLAGS =~ s/"-Werror"//;
+    $EXTRA_CXXFLAGS =~ s/-Werror//;
   }
 }
 
