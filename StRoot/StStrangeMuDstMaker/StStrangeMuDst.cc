@@ -30,19 +30,3 @@ StStrangeAssoc::StStrangeAssoc(Int_t indexRecoArray, Int_t indexMcArray)
   mIndexRecoArray = indexRecoArray;
   mIndexMcArray   = indexMcArray;
 }
-
-// The following code is necessary as of Root version 3 in order to prevent
-// the fBits and fUniqueID data members of TObject from being saved. It is
-// called upon loading of the library into Root.
-// StObject needs special attention because the StreamerInfo may be read
-// in from an input file, overriding the setting.
-int initializeForWriting() {
-#if  1 /* bug in TStreamerInfo*, fixed 09/05/14, ROOT_VERSION_CODE < ROOT_VERSION(5,34,20) */
-  StStrangeMuDst::Class()->IgnoreTObjectStreamer();
-  StStrangeAssoc::Class()->IgnoreTObjectStreamer();
-  StObject::Class()->IgnoreTObjectStreamer();
-  StObject::Class()->GetStreamerInfo()->Build();
-#endif
-  return 1;
-}
-int initialized = initializeForWriting();
