@@ -185,7 +185,6 @@ public:
          const TTable *fThisTable;
          vec_iterator  fCurrentRow;
       public:
-         iterator(): fRowSize(0), fThisTable(0) {;}
          iterator(const TTable &table, vec_iterator &arowPtr) :
             fRowSize(table.GetRowSize()), fThisTable(&table), fCurrentRow(arowPtr) {;}
          iterator(const TTable &table, vec_const_iterator &arowPtr) :
