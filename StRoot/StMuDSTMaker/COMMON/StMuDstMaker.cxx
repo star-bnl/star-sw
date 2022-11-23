@@ -480,6 +480,7 @@ void  StMuDstMaker::streamerOff() {
   StMuL3EventSummary::Class()->IgnoreTObjectStreamer();
 #ifndef __NO_STRANGE_MUDST__
   StStrangeMuDst::Class()->IgnoreTObjectStreamer();
+  StStrangeAssoc::Class()->IgnoreTObjectStreamer(); 
   StV0MuDst::Class()->IgnoreTObjectStreamer();
   StXiMuDst::Class()->IgnoreTObjectStreamer();
   StKinkMuDst::Class()->IgnoreTObjectStreamer();
