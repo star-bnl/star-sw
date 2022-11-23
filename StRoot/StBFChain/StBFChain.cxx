@@ -18,6 +18,7 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #include "TEnv.h"
+#include "StarVMC/StarGeometry/CreateGeometry.h"
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -1023,21 +1024,7 @@ Int_t StBFChain::Init() {
 	  if (GetOption("VmcGeo")) {
 	    path  = "./StarDb/VmcGeo:$STAR/StarDb/VmcGeo";
 	  }
-	  TString geom("Geometry.");
-	  geom +=  DbAlias[i].geometry;
-	  geom += ".C";
-	  Char_t *file = gSystem->Which(path.Data(),geom,kReadPermission);
-	  if (file) {
-	    LOG_INFO << "StBFChain::Init force load of " << file << endm;
-	    TString command = ".L "; command += file;
-	    gInterpreter->ProcessLine(command);
-	    gInterpreter->Calc("CreateTable()");
-	    command.ReplaceAll(".L ",".U ");
-	    gInterpreter->ProcessLine(command);
-	    delete [] file;
-	  } else {
-	    LOG_INFO << "StBFChain::Init file for geometry tag  " << geom << " has not been found in path" << path << endm;
-	  }
+	  CreateGeometry(DbAlias[i].geometry);
 	  break;
 	}
       }
