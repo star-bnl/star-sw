@@ -42,6 +42,8 @@
 TableImpl(Bfc);
 ClassImp(StBFChain);
 
+StBFChain *chain = nullptr;
+
 //_____________________________________________________________________________
 // Hack constructor.
 /*!
