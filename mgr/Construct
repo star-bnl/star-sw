@@ -164,6 +164,10 @@ print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
 foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
   print "---> looking for include in $dir\n" if ($param::debug);
   next if ! -r $dir;
+
+  # Do not export StRoot/Table headers if ROOT_VERSION < 6
+  next if ($dir =~ /StRoot\/Table$/ and $def->{ENV}->{ROOT_VERSION_MAJOR} < 6);
+
   opendir( DIR, $dir ) or die "Can't open $dir\n";
   my @incs = readdir DIR; print "incs = @incs\n" if ($param::debug);
   closedir DIR;
@@ -281,6 +285,10 @@ foreach my $dir( "pams", "StRoot", "StPiD", "StarVMC" ) {
     next if ( $sub_dir =~ $excludeDirList);
     my $sub_Dir = $dir . "/" . $sub_dir; 
     next if !-d $sub_Dir and !-l $sub_Dir;
+
+    # Do not build StRoot/Table if ROOT_VERSION < 6
+    next if ($sub_Dir =~ m/StRoot\/Table$/ and $def->{ENV}->{ROOT_VERSION_MAJOR} < 6);
+
     print "dir = $dir \t sub_dir = $sub_dir sub_Dir = $sub_Dir\n" if ($param::debug);
 #    print "$sub_dir => $items\n";
 #      if ($items and $sub_dir =~ /$items/) {print "skip dir: $sub_dir \t=> $items\n"; next;}
