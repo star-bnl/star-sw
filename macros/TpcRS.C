@@ -114,8 +114,8 @@ Int_t SetPartGun(TString RootFile,TString RunOpt, TString Opt) {
     //    cout << "Reduce bgMax10 = " << bgMaxL10 << endl;
   }
 #else
-  Double_t pTmin =  0.05;
-  Double_t pTmax = 10.00;
+  Double_t pTmin = 0.200;//  0.05;
+  Double_t pTmax = 1.000;// 10.00;
 #endif
 #endif
   if (Root4Star) {
@@ -188,7 +188,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   //ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
   if (RunOpt.Contains("y2005",TString::kIgnoreCase)) {
     //    ChainOpt = "ry2005b,in,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,ssdDb,IAna,fcf,VFMinuit,emcDY2,";
-    ChainOpt = "ry2005b,in,tpcI,Physics,Idst,l0,tags,Tree,evout,IAna,fcf,VFMinuit,emcDY2,";
+    ChainOpt = "ry2005b,in,tpcI,Physics,Idst,l0,Tree,evout,IAna,fcf,VFMinuit,emcDY2,";
     ChainOpt+= "ftpc,trgd,ZDCvtx,Corr3,DbV20060421,useCDV,ITTF,tofDat,NosstIT,NosvtIT,SCEbyE,OGridLeakFull,OShortR,OSpaceZ2,TpxClu,TpxRaw";//-VFMinuit,";
     ChainOpt+= ",useInTracker";
     ChainOpt += ",McTpcAna,";
@@ -211,18 +211,15 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     ChainOpt += "EvOut,-hitfilt,";
     ChainOpt += "McTpcAna,";
     // ChainOpt += ",tree,";
-#if 1
-    if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2" ||
-	TString(gSystem->Getenv("STAR_VERSION")) == "SL11d_embed") ChainOpt += "NoHistos,NoRunco,noTags,";
-    else                                                           ChainOpt += "tags,";
-#endif
   }
-#ifdef __TFG__VERSION__
-  ChainOpt += ",dEdxCalib";
-#else
-  ChainOpt.ReplaceAll("MC2021","sdt20210209,MC.StiCA,vmc,NewTpcAlignment,ExB");
-  ChainOpt.ReplaceAll("MC.StiCA","StiCA,geantOut,noRunco,noHistos,McTpcAna,tags");
-#endif
+  TString Version(gEnv->GetValue("VERSION","default"));
+  if (Version.Contains("TFG")) {
+    ChainOpt += ",NoHistos,NoRunco,noTags,dEdxCalib";
+  } else  {
+    ChainOpt.ReplaceAll("MC2021","sdt20210209,MC.StiCA,vmc,NewTpcAlignment,ExB");
+    ChainOpt.ReplaceAll("MC.StiCA","StiCA,geantOut,noRunco,noHistos,McTpcAna");
+    ChainOpt += ",tags";
+  }
   cout << "ChainOpt\t" << ChainOpt.Data() << endl;
   // ChainOpt += "MiniMcMk,IdTruth,useInTracker,-hitfilt,CMuDst,Tree,tags,evout,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
@@ -303,7 +300,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   //  output.ReplaceAll(".root","O.root");
   output.ReplaceAll("*","");
   if (RunOpt.Contains("devT,",TString::kIgnoreCase)) ChainOpt += ",useXgeom";
-  bfc(-1,ChainOpt.Data(),fileIn,output.Data(),RootFile.Data());
+  cout << "Run  bfc(-1,\"" << ChainOpt.Data() << "\",\"" << FileIn.Data() << "\",\"" << output.Data() << "\",\"" << RootFile.Data() << "\")" << endl;
+  bfc(-1,ChainOpt.Data(),FileIn.Data(),output.Data(),RootFile.Data());
   StTpcRSMaker *tpcRS = (StTpcRSMaker *) chain->Maker("TpcRS");
   if (tpcRS) {
     //      if (needAlias) tpcRS->SetInput("geant","bfc/.make/inputStream/.make/inputStream_Root/.data/bfcTree/geantBranch");

@@ -19,7 +19,7 @@
 #include "TCanvas.h"
 #include "tables/St_TpcSecRowCor_Table.h"
 #endif
-#define __RECOVER__
+//#define __RECOVER__
 #define __NO_TpcRowQ__
 //________________________________________________________________________________
 void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,
@@ -92,6 +92,7 @@ void MakeTpcSecRowB(TH1 *hist, TH1 *histSigma = 0,
 #else
 	  cout << "i/j\t" << i << "/" << j << " is empty. Reset to 1 !" << endl;
 	  row.GainScale[j-1] = 1;
+	  row.GainRms[j-1]   = 0;
 #endif
 	} else {
 	  row.GainScale[j-1] = TMath::Exp(-dev);

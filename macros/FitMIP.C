@@ -17,7 +17,8 @@
 #include "TMath.h"
 #include "StBichsel/StdEdxModel.h"
 #include "Ask.h"
-//#define __FITGG__
+#include "TMath.h"
+#define __FITGG__
 //________________________________________________________________________________
 TH1D *AddZ(TH1D *h1, TH1D *h2) {
   if (! h1 || ! h2) return 0;
@@ -37,8 +38,6 @@ TH1D *AddZ(TH1D *h1, TH1D *h2) {
 #ifdef __FITGG__
   //  TF1 *g = GG();
   TF1 *g = StdEdxModel::instance()->GausExp();
-  g->SetParLimits(1,-5.,5.);
-  g->SetParLimits(3,0.01,5.0);
 #endif
   return h3;
 }
@@ -64,8 +63,10 @@ TF1 *FitD(TH1D *h, Int_t p1, Int_t p2, Int_t i, Int_t j, TString &Line ) {
 #ifdef __FITGG__
   g = StdEdxModel::instance()->GausExp();
   g->SetParLimits(1,-5.,5.);
-  g->SetParLimits(3,0.01,5.0);
-  g->SetParameters(0,h->GetMean(),1,1);
+  g->SetParLimits(2,0.1,0.5);
+  g->SetParLimits(3,0.5,1.3);
+  g->SetParameters(TMath::Log(h->Integral()),h->GetMean(),h->GetRMS(),0.8);
+  h->Fit(g,"r");
   h->Fit(g,"mr");
   Line = Form("\t{%2i,%2i,%2i,%2i,%-32s, %10.5f, %10.5f, %10.5f, %10.5f}", 
 	      p1,p2,i,j,histName.Data(),g->GetParameter(0),g->GetParameter(1),g->GetParameter(2),g->GetParameter(3));
@@ -77,6 +78,7 @@ TF1 *FitD(TH1D *h, Int_t p1, Int_t p2, Int_t i, Int_t j, TString &Line ) {
   h->Fit(g,"mr");
   g->ReleaseParameter(3);
   g->SetParameter(3, TMath::PiOver4());
+  h->Fit(g,"r");
   h->Fit(g,"mr");
   Line = Form("\t{%2i,%2i,%2i,%2i,%-32s, %10.5f, %10.5f, %10.5f, %10.5f, %10.5f}", 
 	      p1,p2,i,j,histName.Data(),g->GetParameter(0),g->GetParameter(1),g->GetParameter(2),g->GetParameter(3),g->GetParameter(4));

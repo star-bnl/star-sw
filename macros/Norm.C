@@ -6,7 +6,7 @@
   .x Norm.C(neP,nePNorm);
 
  */
-void Norm(TH2F *hxz, TH2F *newh=0)
+TH2F *Norm(TH2F *hxz, TH2F *newh=0)
 {
   if (! newh) {
     newh = new TH2F(*hxz);
@@ -33,6 +33,7 @@ void Norm(TH2F *hxz, TH2F *newh=0)
       }
     }
   }
+  return newh;
 }
 //________________________________________________________________________________
 void NormL(TH2F *hxz, TH2F *newh=0)
