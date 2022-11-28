@@ -4,7 +4,7 @@
 #include "StEvent.h"
 #include "StEvent/StEnumerations.h"
 #include "StFstUtil/StFstCollection.h"
-#include "StFstUtil/StFstRawHit.h"
+#include "StEvent/StFstRawHit.h"
 #include "StFstUtil/StFstRawHitCollection.h"
 #include "StFstUtil/StFstCluster.h"
 #include "StFstUtil/StFstClusterCollection.h"

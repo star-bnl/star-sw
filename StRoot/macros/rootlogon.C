@@ -30,5 +30,10 @@
 
   std::cout << " *** Start at Date : " << TDatime().AsString() << std::endl;
 
-  gSystem->AddIncludePath(" -I. -I./.$STAR_HOST_SYS/include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/StRoot -I/usr/include/mysql");
+  gInterpreter->AddIncludePath(".");
+  gInterpreter->AddIncludePath("./.$STAR_HOST_SYS/include");
+  gInterpreter->AddIncludePath("./StRoot");
+  gInterpreter->AddIncludePath("$STAR/.$STAR_HOST_SYS/include");
+  gInterpreter->AddIncludePath("$STAR/StRoot");
+  gInterpreter->AddIncludePath("/usr/include/mysql");
 }

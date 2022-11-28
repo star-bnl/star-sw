@@ -52,57 +52,60 @@
 #define STROOT_STFCSWAVEFORMFITMAKER_STFCSWAVEFORMFITMAKER_H_
 
 #include "StMaker.h"
-#include "StFcsPulseFit.h"
+#include "StFcsPulseAna.h"
+
+#include "TH2.h"
 
 class StFcsCollection;
 class StFcsHit;
 class StFcsDb;
+class StFcsDbPulse;
 class TGraphAsymmErrors;
 class TGraph;
 class TCanvas;
-class TH1F;
-class TH2F;
 
 class StFcsWaveformFitMaker : public StMaker {
 public:
     
     StFcsWaveformFitMaker(const char* name = "StFcsWaveformFitMaker");
     ~StFcsWaveformFitMaker();
-    int InitRun(int runNumber);
-    int Make();
-    int Finish(); 
-    void Clear(Option_t* option = "");
+    virtual int Init();
+    virtual int InitRun(int runNumber);
+    virtual int Make();
+    virtual int Finish();
+    virtual void Clear(Option_t* option = "");
     
     void setDebug(int v=1)        {SetDebug(v);}
+    void setTest(int v);           //!< Set test level. Intended to be used for single files. Output file name can be changed with #writeFile()
     void setEnergySelect(int ecal=10, int hcal=10, int pres=1) {mEnergySelect[0]=ecal; mEnergySelect[1]=hcal; mEnergySelect[2]=pres;}
     void setCenterTimeBins(int v, int min=0, int max=512) {mCenterTB=v; mMinTB=min; mMaxTB=max;}
     void setAdcSaturation(int v)  {mAdcSaturation=(double)v;}
     void setError(double v)       {mError=v;}
     void setErrorSaturated(int v) {mErrorSaturated=v;}
     void setMinAdc(int v)         {mMinAdc=v;}
-    void setTail(int v)           {mTail=v;}
+    void setTail(int v);
     void setMaxPeak(int v)        {mMaxPeak=v;}
     void setPedTimeBins(int min, int max) {mPedMin=min; mPedMax=max;}
 
-    // Create or Reset TGraphAsymmErrors (at mHitIdx)
-    TGraphAsymmErrors* resetGraph();
-
+    TGraphAsymmErrors* resetGraph();    //! Create or Reset TGraphAsymmErrors (at mHitIdx)
+  
     // Return TGraphAsymmErrors at idx
     // if idx<0 (default) it returns "current" which is idx=mHitIdx-1
     // makeTGraphAsymmErrors() makes all at idx=mHitIdx=0 except when 
     // mFitDrawOn=1, then keep incrementing mHitIdx to hold them for a event
     // mFitDrawOn=2, then keep incrementing mHitIdx to hold them until new page
     TGraphAsymmErrors* getGraph(int idx=-1);
+    TGraphAsymmErrors* getGraph(int det, int id);
 
     //measuring fit time
     void setMeasureTime(char* file) {mMeasureTime=file;}
-    TH1F* mTime;
+    TH1F* mTime = 0;
 
     //stage0 peak algo study
     TH2F* mTimeIntg[4];
 
     //create makeTGraphAsymmErrors from given timebin and adc data
-    //with asymmetroc errors when adc is saturated
+    //with asymmetric errors when adc is saturated
     //Places graph at index 0 of internal TClonesArray and will be deleted in destructor
     TGraphAsymmErrors* makeTGraphAsymmErrors(int n, double* t, double* adc);    
     TGraphAsymmErrors* makeTGraphAsymmErrors(TGraph* g);
@@ -128,7 +131,8 @@ public:
     float highest3(TGraphAsymmErrors* g, float *res);         //! mEnergySelect=4
     float gausFit (TGraphAsymmErrors* g, float *res, TF1*& f, float ped=0.0); //! mEnergySelect=10
     float gausFitWithPed (TGraphAsymmErrors* g, float *res, TF1*& f);         //! mEnergySelect=11
-    float PulseFit(TGraphAsymmErrors* g, float* res, TF1*& f);                //! mEnergySelect=12
+    float PulseFit1(TGraphAsymmErrors* g, float* res, TF1*& f);                //! mEnergySelect=12
+    float PulseFit2(TGraphAsymmErrors* g, float* res, TF1*& f);                //! mEnergySelect=13
 
     //Pedestal Analysis methods
     //res[0] pedestal Value
@@ -145,40 +149,107 @@ public:
     // res[6] pedestal Sigma
     // res[7] pedestal Chi2/NDF
     float LedFit( TGraphAsymmErrors* g, float* res, TF1*& f);//! mEnergySelect=31 (TF1 is for LED pulse fit)
-
-    //pulse shape functions
-    double pulseShape(double* x, double* p);
-    double multiPulseShape(double* x, double* p);
-
+  
     //Draw fits    
     void setMaxPage(int v){mMaxPage=v;}         
     void setSkip(int v){mSkip=v;}         
     void setFileName(char* file, int maxpage=25, int skip=5){mFilename=file; mMaxPage=maxpage; mSkip=skip;} 
+    void writeFile(std::string filename);       //!< Use to change the name of the file where test histograms will be saved
     void setFitDrawOn(int v=1) {mFitDrawOn=v;}  //=1 to keep for a event, =2 for a page
     void setFitFilter(char* filter) {mFilter=filter; mFitDrawOn=2;}
 
     //Draw from David
-    StFcsPulseFit* davidFitter(){return mPulseFit;}
+    int centerTB()const{return mCenterTB;}
+    void setDavidFitter(StFcsPulseAna* v){if(mPulseFit==0){mPulseFit=v;}}
+    StFcsPulseAna* davidFitter(){return mPulseFit;}
+    StFcsPulseAna* InitFitter(Double_t ped=0);     //! Sets up basic values needed by #StFcsPulseAna
     static int GenericPadPos(int value, int Nvals, int PadNums );
     static int PadNum4x4(int det, int col, int row);
     void drawRegion(int det, int col_low, int row_low, int col_high, int row_high, int event=0);
     void drawEvent(int det, int event=0);
     void printArray() const;
+    void drawFitter(Option_t* opt){ if(mPulseFit!=0){mPulseFit->Draw(opt);} }
+    void drawCh(UInt_t detid, UInt_t ch) const;
 
  protected:
     TClonesArray mChWaveData;  //Contains all graph data
     void drawFit(TGraphAsymmErrors* g, TF1* func);
-    StFcsPulseFit* mPulseFit;
+    StFcsPulseAna* mPulseFit;
+
+    /**@brief Variable to use when testing StFcsWaveformFitMaker algorithms
+
+       Self contained analysis for testing various components/functions of #StFcsWaveformFitMaker
+       
+       - 0 = no testing
+       - 1 = test DEP algorithm
+       - 2 = test PeakAna vs. gausFit
+       - 3 = test PulseFit1 picking sum method
+       - 4 = test PulseFit1 all data with peaks
+       - 5 = test timing of gausFit() vs. PulseFit1()
+       - 6 = like test==3 but for PulseFit2()
+       - 7 = test PulseFit2() for overall quality doesn't include preshower
+    */
+    int mTest = 0;
+
+    TFile* mOutFile;//Root output file for testing
+    //For testing Dep0 algo (mTest==1)
+    TH2F* mH2_Dep0DepMod[3];
+    TH2F* mH2_Sum8Dep0[3];
+    TH2F* mH2_Sum8DepMod[3];
+    //For testing number of peaks finding (mTest==2||mTest==3||mTest==6)
+    TH1F* mH1_NPeaksAkio = 0;                       //Number of peaks found by gausFit
+    TH1F* mH1_NPeaksFilteredAkio = 0;               //Number of peaks found by gausFit for signals that had a triggered crossing
+    TH2F* mH2F_AdcTbAkio[6];     //Adc vs. Tb for different number of peaks Akio method
+    TH2F* mH2F_AdcTbMine[6];   //Adc vs. Tb for different number of peaks my method
+    TH2F* mH2F_AdcTbValidPeak[7];//Adc vs. Tb from my algorithm that had a peak at centerTb (Need an extra one for non-valid peaks)
+    TH2F* mH2F_SumFitvSumWin[6]; //Sum from Akio's Fit function vs. Sum from my found peak window for different number of peaks
+    TH2F* mH2F_APeakvMPeak[6];   //PeakLocations from Akio vs. Mine
+    TH1F* mH1F_PeakStart[6];     //PeakWindow Starting x-values
+    TH1F* mH1F_PeakEnd[6];       //PeakWindow Ending x-values
+    TH1F* mH1_PeakTiming = 0;                       //Timing for just peak finding.
+
+    TH1F* mH1F_NPeaks[7];           //Number of peaks found by peak finder
+    TH1F* mH1F_NPeaksFiltered[7];   //Number of peaks for cases where a valid peak was found
+    TH2F* mH2_NPeakvsPeakXdiff = 0; //Number of peaks vs. Peak X diff
+    TH2F* mH2_NPeakvsPeakYratio = 0;//Number of peaks vs. Peak Y ratio
+    TH1F* mH1_VOverlap = 0;         //Value of overlap
+    TH2F* mH2_NOvsNPeaks = 0;       //NO (Number of overlaps) vs. Number of peaks
+    TH2F* mH2_VvsNOverlap = 0;      //Compare value for that peak comparison vs. Overlap index
+    TH2F* mH2F_NOvsId[6];        //NO (number of overlaps) vs channel id for the 6 detector ids
+    TH1F* mH1F_Res0[7];          //Histogram of all res[0] regardless of method
+    TH1F* mH1F_Res0Zoom[7];      //Histogram of all res[0] with finer bining at low end
+    TH1F* mH1F_Sum8Res0[7];      //Histogram of "res[0]" using sum8 regardless of method called
+    TH1F* mH1F_Sum8Res0Zoom[7];  //same as above histogram with finer bining at low end
+    TH1F* mH1F_FitRes0[7];       //Histogram of "res[0]" from fit regardless of method called
+    TH1F* mH1F_FitRes0Zoom[7];   //same as above histogram with finer bining at low end
+    TH2F* mH2F_Sum8vFit[7];      //Histograms of Fit res[0] vs. sum8 res[0]     
+    TH1F* mH1_TimeFitPulse = 0;  //Histogram to time how long just the fitting takes in PulseFit()
+
+    //For testing peak height vs. sigma
+    TH2F* mH2_HeightvsSigma = 0;                //Histogram of all fitted peak heights vs. their sigma
+    TH2F* mH2_HeightvsSigmaTrig = 0;            //Histogram of height of fitted peaks in triggered crossing vs. their sigma
+    TH1F* mH1_ChiNdf = 0;                       //Histogram of chi^2/ndf for all fits
+    TH2F* mH2_HeightvsChiNdf = 0;               //Histogram of height vs. chi^2/ndf for all fits
+    TH2F* mH2_MeanvsChiNdf = 0;                 //Histogram of height vs. chi^2/ndf for all fits
+    TH2F* mH2_SigmavsChiNdf = 0;                //Histogram of chi^2/ndf for all fits
+
+    TH1F* mH1_PeakTimingGaus = 0;               //Histogram to test timing of gausFit()
+    TH1F* mH1_PeakTimingPuls = 0;               //Histogram to test timing of PulseFit()
+    TH2F* mH2_PeakTimingCompare = 0;            //Histogram to test timing between gausFit() and PulseFit()
+
+    void SetupDavidFitterMay2022(Double_t ped=0);    //! This special function is used to set all the parameters for #StFcsPulseAna based on cosmic and Run 22 data. It is intended to be used only for Run 22 data
+    int PeakCompare(const PeakWindow& pwin1, const PeakWindow& pwin2 ); //Compare if two peaks overlap and return a bit vector of tests passed/failed for comparing pwin1 to pwin2. 0 means all tests passed and pwin1 does not overlap with pwin2
+    int NPeaksPre2Post1(int& trigidx, Double_t& xmin, Double_t& xmax) const;//xmin and xmax will be the range of the pre-crossing -2 and post-crossing +1 peaks. trigidx is needed to pick up the triggered crossing in the new number of peaks
 
  private:
     StFcsDb* mDb=0;                    //! pointer to fcsDb
+    StFcsDbPulse* mDbPulse = 0;        //! pointer to fcsPulse
     StFcsCollection* mFcsCollection=0; //! pointer to fcsCollection
 
     unsigned int mHitIdx = 0; //running index for the TClonesArray
 
     //Figures out error to set on the TGraphAsymmErrors for a given point and adc
-    void setTGraphAsymmErrors(TGraphAsymmErrors* gae, const int &i, const double &adc);
-
+    //void setTGraphAsymmErrors(TGraphAsymmErrors* gae, const int &i, const double &adc);
     char *mMeasureTime=0;                //! output file for measuring fitting time
 
     int mEnergySelect[3];                //! 0=MC (straight from dE), >0 see above
@@ -207,10 +278,10 @@ public:
     char* mFilename=0;
     char* mFilter=0;
     char mDetName[100];
-    int mFitDrawOn=0;   //! If set, it will also create a new TGraphAsymmErrors for each hit
+    int mFitDrawOn=0;   //! If set to 1 it will create a new TGraphAsymmErrors for each hit, if set to 2 will create new TGraphAsmmErrors for each hit up to mMaxPage then reset
 
     virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
 
-    ClassDef(StFcsWaveformFitMaker, 3)
+    ClassDef(StFcsWaveformFitMaker, 4)
 };
 #endif  // STROOT_STFCSWAVEFORMFITMAKER_STFCSWAVEFORMFITMAKER_H_

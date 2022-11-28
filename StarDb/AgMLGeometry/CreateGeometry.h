@@ -1,3 +1,7 @@
+#include "StBFChain/StBFChain.h"
+
+extern StBFChain* chain;
+
 /**
  * Adapted from StarDb/VmcGeometry/CreateGeometry.h
  */

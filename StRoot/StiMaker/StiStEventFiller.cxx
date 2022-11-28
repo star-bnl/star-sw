@@ -978,6 +978,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       detInfo->addHit(hh,refCountIncr);
       if (!refCountIncr) 	continue;
       hh->setFitFlag(1);
+      FillTpcdX(track,node,hh);
 //Kind of HACK, save residials into StiHack 
       fillResHack(hh,stiHit,node);
   }
@@ -1468,6 +1469,32 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   gTrack->setDcaGeometry(dca);
   dca->set(setp,sete);
 
+}
+//_____________________________________________________________________________
+void StiStEventFiller::FillTpcdX(const StiKalmanTrack* track, const StiKalmanTrackNode *node, StHit *hh)
+{
+  StTpcHit *tpcHit = dynamic_cast<StTpcHit*>(hh); 
+  if (! tpcHit) return;
+  if (! node || ! hh) return;
+  originD->setX(node->x_g());
+  originD->setY(node->y_g());
+  originD->setZ(node->z_g());
+
+  physicalHelix->setParameters(fabs(node->getCurvature()),
+			       node->getDipAngle(),
+			       node->getPhase(),
+			       *originD,
+			       node->getHelicity());
+  StThreeVectorD upper(tpcHit->positionU().x(),tpcHit->positionU().y(),tpcHit->positionU().z());
+  StThreeVectorD lower(tpcHit->positionL().x(),tpcHit->positionL().y(),tpcHit->positionL().z());
+  StThreeVectorD middle(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
+  StThreeVectorD dif = upper - lower;
+  StThreeVectorD normal = dif.unit();
+  Double_t s[2];
+  s[0] = physicalHelix->pathLength(upper, normal);
+  s[1] = physicalHelix->pathLength(lower, normal);
+  Double_t dx = TMath::Abs(s[0]) + TMath::Abs(s[1]); 
+  tpcHit->setdX(dx);
 }
 //_____________________________________________________________________________
 void StiStEventFiller::FillStHitErr(StHit *hh,const StiKalmanTrackNode *node)

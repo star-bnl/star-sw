@@ -9,6 +9,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <ctime>
 
 using namespace OLDEVP;
 
@@ -97,8 +98,8 @@ SC_Reader::SC_Reader(EventReader *er) {
   //Keep BBCBkg scalers flipped as theyStRoot/StDaqLib/SC/SC_Reader.cxx were historically before 2009
   //Note that new DAQ reader leads to UTime = 0, or tm_year=70 (1970)
   //but new DAQ reader only gets used for 2009+ anyhow
-  unsigned int UTime = er->getEventInfo().UnixTime;
-  struct tm *time=gmtime((time_t*) &UTime);
+  std::time_t utime = er->getEventInfo().UnixTime;
+  std::tm *time = gmtime(&utime);
   flipBBCBkg = (time->tm_year > 95 && time->tm_year < 109 ? 1 : 0) ;
 
   //  LDate = (((1900+time->tm_year)*100 + 1 + time->tm_mon)*100 + time->tm_mday)*100;

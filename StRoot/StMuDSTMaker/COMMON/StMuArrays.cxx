@@ -30,7 +30,7 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVer
 /*fmsArrayNames    [__NFMSARRAYS__    ]*/                  "FmsHit","FmsCluster","FmsPoint","FmsInfo",
 /*fcsArrayNames    [__NFCSARRAYS__    ]*/                  "FcsHit","FcsCluster","FcsPoint", "FcsInfo",
 /*fttArrayNames    [__NFTTARRAYS__    ]*/                  "FttRawHit","FttCluster","FttPoint",
-/*fstArrayNames    [__NFSTARRAYS__    ]*/                  "FstHit",
+/*fstArrayNames    [__NFSTARRAYS__    ]*/                  "FstRawHit", "FstHit",
 /*tofArrayNames    [__NTOFARRAYS__    ]*/                  "TofHit","TofData", "TofRawData",
 /*btofArrayNames   [__NBTOFARRAYS__   ]*/                  "BTofHit","BTofRawHit","BTofHeader", // dongx
 /*etofArrayNames   [__NETOFARRAYS__   ]*/                  "ETofDigi","ETofHit","ETofHeader",   // jdb
@@ -80,7 +80,7 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrim
 /*fmsArrayTypes   [__NFMSARRAYS__     ]*/                  "StMuFmsHit","StMuFmsCluster","StMuFmsPoint","StMuFmsInfo",
 /*fcsArrayTypes   [__NFCSARRAYS__     ]*/                  "StMuFcsHit","StMuFcsCluster","StMuFcsPoint","StMuFcsInfo",
 /*fttArrayTypes   [__NFTTARRAYS__     ]*/                  "StMuFttRawHit","StMuFttCluster","StMuFttPoint",
-/*fstArrayTypes   [__NFSTARRAYS__     ]*/                  "StMuFstHit",
+/*fstArrayTypes   [__NFSTARRAYS__     ]*/                  "StMuFstRawHit","StMuFstHit",
 /*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData","StTofRawData",
 /*btofArrayTypes  [__NBTOFARRAYS__    ]*/                  "StMuBTofHit","StBTofRawHit","StBTofHeader",  // dongx
 /*etofArrayTypes  [__NETOFARRAYS__    ]*/                  "StMuETofDigi","StMuETofHit","StMuETofHeader",  // jdb+fseck
@@ -123,7 +123,7 @@ int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,10,1000,1000,1000,1
 /*fmsArraySizes    [__NFMSARRAYS__    ]*/                  1,1,1,1,
 /*fcsArraySizes    [__NFCSARRAYS__    ]*/                  1,1,1,1,
 /*fttArraySizes    [__NFTTARRAYS__    ]*/                  1,1,1,
-/*fstArraySizes    [__NFSTARRAYS__    ]*/                  1,
+/*fstArraySizes    [__NFSTARRAYS__    ]*/                  1,1,
 /*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200, 1000,
 /*btofArraySizes   [__NBTOFARRAYS__   ]*/                  1000,1000,1,   // dongx
 /*etofArraySizes   [__NETOFARRAYS__   ]*/                  1000,1000,1,   // jdb
@@ -163,7 +163,7 @@ int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,0,0
 /*fmsArrayCounters    [__NFMSARRAYS__    ]*/               0,0,0,0,
 /*fcsArrayCounters    [__NFCSARRAYS__    ]*/               0,0,0,0,
 /*fttArrayCounters    [__NFTTARRAYS__    ]*/               0,0,0,
-/*fstArrayCounters    [__NFSTARRAYS__    ]*/               0,
+/*fstArrayCounters    [__NFSTARRAYS__    ]*/               0,0,
 /*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0, 0,
 /*btofArrayCounters   [__NBTOFARRAYS__   ]*/               0, 0, 0,      // dongx
 /*etofArrayCounters   [__NETOFARRAYS__   ]*/               0, 0, 0,      // jdb

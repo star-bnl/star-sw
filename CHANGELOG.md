@@ -1,6 +1,6 @@
 # Changelog
 
-## SL22c_0 - 2022-09-06
+## SL22c_0 - 2022-09-09
 
 * ci: Expand tests with 2012, 2021, and 2022 data samples by @plexoos in  ([#371](https://github.com/star-bnl/star-sw/pull/371))
 * A minor bug fix in StFcsDb::getDetFromName by @akioogawa in  ([#373](https://github.com/star-bnl/star-sw/pull/373))
@@ -19,6 +19,9 @@
 * Fix memory leaks when MuDst included with FWD data. Introduce a switch for FTT calibration mode (dump values to file) by @jdbrice in  ([#387](https://github.com/star-bnl/star-sw/pull/387))
 * Removing old hardcoded alignment from StEtofMatchMaker.cxx by @PhilippWeidenkaff in  ([#390](https://github.com/star-bnl/star-sw/pull/390))
 * Add Geant track info (g2t) to StFcsHit by @akioogawa in  ([#379](https://github.com/star-bnl/star-sw/pull/379))
+* StRefMultCorr updated for standalone compilation by @nigmatkulov in  ([#388](https://github.com/star-bnl/star-sw/pull/388))
+* Add calculation dX in TPC using local curvature by @fisyak in  ([#383](https://github.com/star-bnl/star-sw/pull/383))
+* SpaceCharge distortion corrections for FXT by @genevb in  ([#393](https://github.com/star-bnl/star-sw/pull/393))
 
 
 ## SL22b_0 - 2022-06-22
