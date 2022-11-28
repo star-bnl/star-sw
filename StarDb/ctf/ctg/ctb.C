@@ -1,3 +1,5 @@
+#include "tables/St_ctg_geo_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/ctg/ctb Allocated rows: 1  Used rows: 1  Row size: 68 bytes

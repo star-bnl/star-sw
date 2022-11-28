@@ -1,3 +1,5 @@
+#include "tables/St_controlEmcPmtSimulator_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Simulator Allocated rows: 4  Used rows: 4  Row size: 32 bytes

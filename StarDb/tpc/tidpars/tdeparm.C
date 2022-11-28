@@ -1,3 +1,5 @@
+#include "tables/St_tdeparm_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/tidpars/tdeparm Allocated rows: 1  Used rows: 1  Row size: 60 bytes

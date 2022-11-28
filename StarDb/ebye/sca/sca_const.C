@@ -1,3 +1,5 @@
+#include "tables/St_sca_const_Table.h"
+
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
 // Top/sca/sca_const Allocated rows: 1  Used rows: 1  Row size: 112 bytes

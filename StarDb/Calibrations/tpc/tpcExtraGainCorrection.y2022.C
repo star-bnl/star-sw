@@ -1,3 +1,5 @@
+#include "tables/St_tpcExtraGainCorrection_Table.h"
+
 TDataSet *CreateTable() { 
   // ------  Test whether this table share library was loaded ------
   if (!gROOT->GetClass("St_tpcExtraGainCorrection")) return 0;
