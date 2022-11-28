@@ -116,7 +116,7 @@ jobs:
              docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
                sh -c "set -e; $TEST_CMD 2>&1 | tee log;  grep '<StIOMaker::Finish> StIO:' log"
 
-  ROOT6_test_ignore_fail:
+  ROOT6_test:
     runs-on: ubuntu-latest
     needs: build
     strategy:
@@ -137,4 +137,4 @@ jobs:
       - run: |
              TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-${{ env.STARENV }} tests/executest.py -c ${{ matrix.test_id }})
              docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
-               sh -c "MALLOC_CHECK_=3 $TEST_CMD || echo 'Failed with an exit code: '\$?"
+               sh -c "MALLOC_CHECK_=3 $TEST_CMD"
