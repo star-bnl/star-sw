@@ -198,10 +198,7 @@ void StTriggerData2022::readData(const TriggerDataBlk2022* data, int bs) {
         if (mMXQ[i]) decodeQT(mMXQ[i]->length/4, mMXQ[i]->data, mxq[i], tmxq[i]);
         if (mEQ3[i]) decodeQT(mEQ3[i]->length/4, mEQ3[i]->data, eq3[i], teq3[i]);
         if (mBBQ[i]) decodeQT(mBBQ[i]->length/4, mBBQ[i]->data, bbq[i], tbbq[i]);
-	//if (mQT1[i]) decodeQT(mQT1[i]->length/4, mQT1[i]->data, qt1[i], tqt1[i]);
-        //if (mQT2[i]) decodeQT(mQT2[i]->length/4, mQT2[i]->data, qt2[i], tqt2[i]);
-        //if (mQT3[i]) decodeQT(mQT3[i]->length/4, mQT3[i]->data, qt3[i], tqt3[i]);
-        //if (mQT4[i]) decodeQT(mQT4[i]->length/4, mQT4[i]->data, qt4[i], tqt4[i]);
+	// Crates 1 through 4 were not used in Run22
         if (mEQ1[i]) decodeQT(mEQ1[i]->length/4, mEQ1[i]->data, eq1[i], teq1[i]);
         if (mEQ2[i]) decodeQT(mEQ2[i]->length/4, mEQ2[i]->data, eq2[i], teq2[i]);
         if (mEQ4[i]) decodeQT(mEQ4[i]->length/4, mEQ4[i]->data, eq4[i], teq4[i]);
