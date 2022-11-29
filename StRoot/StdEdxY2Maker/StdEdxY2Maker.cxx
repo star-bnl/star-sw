@@ -19,6 +19,8 @@
   #ifdef __CHECK_RDOMAP_AND_VOLTAGE__
      #include "TProfile3D.h"
   #endif /* __CHECK_RDOMAP_AND_VOLTAGE__ */
+//#define __dZdY_dXdY__
+//#define __Pad_Tmbk__
 #endif /* __TFG__VERSION__ */
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -211,8 +213,21 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
     }
     QAPlots(0);
     // Switch between usage prediction dependence of log2(dX), new option is not to use it in predicetion due to PicoDst
+#ifndef __TFG__VERSION__
     fUsedx2 = kTRUE;
-    if (m_TpcdEdxCorrection->Correction(StTpcdEdxCorrection::kTpcLengthCorrectionMD2)) fUsedx2 = kFALSE;
+    if (m_TpcdEdxCorrection->Correction(StTpcdEdxCorrection::kTpcLengthCorrectionMD2)) {
+      fUsedx2 = kFALSE;
+    }
+#else
+    fUsedx2 = kFALSE;
+#endif
+    LOG_WARN << "StdEdxY2Maker::InitRun Force ";
+    if (fUsedx2) {
+      LOG_WARN << "to USE"; 
+    } else {
+      LOG_WARN << "NOT to USE";
+    }
+    LOG_WARN << " dx2L in dE/dx predictions "<< endm;
   }
   return kStOK;
 }
@@ -270,7 +285,10 @@ Int_t StdEdxY2Maker::Make(){
   static  StTpcLocalSectorDirection         localDirectionOfTrack;
   static  StThreeVectorD xyz[4];
   static  StThreeVectorD dirG;
-  static  Double_t s[2], s_in[2], s_out[2], w[2], w_in[2], w_out[2], dx, AdcI, dZdY, dXdY, dxC;
+  static  Double_t s[2], s_in[2], s_out[2], w[2], w_in[2], w_out[2], dx, AdcI, dxC;
+#ifdef __dZdY_dXdY__
+  static  Double dZdY, dXdY;
+#endif
   enum {kNdEdxMax  = 300};
   static dEdxY2_t CdEdxT[3*kNdEdxMax];//,FdEdxT[kNdEdxMax],dEdxST[kNdEdxMax];
   static Int_t sectorMin = 1, sectorMax = 24;
@@ -353,6 +371,8 @@ Int_t StdEdxY2Maker::Make(){
 #endif /* __BEST_VERTEX__ */   
     StPhysicalHelixD helixO = gTrack->outerGeometry()->helix();
     StPhysicalHelixD helixI = gTrack->geometry()->helix();
+    StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
+    Double_t etaG = g3.pseudoRapidity();
     if (Debug() > 1) {
       cout << "Track:" << i 
 	   << "\ttype " << gTrack->type()
@@ -362,6 +382,7 @@ Int_t StdEdxY2Maker::Make(){
 	   << "\tencodedMethod " << gTrack->encodedMethod()
 	   << "\timpactParameter " << gTrack->impactParameter()
 	   << "\tlength " << gTrack->length()
+	   << "\tEtaG " << etaG
 	   << "\tnumberOfPossiblePoints " << gTrack->numberOfPossiblePoints() << endl;
       cout << "pxyzI:        " << gTrack->geometry()->momentum() << "\tmag " << gTrack->geometry()->momentum().mag() << endl;
       cout << "pxyzO:        " << gTrack->outerGeometry()->momentum() << "\tmag " << gTrack->outerGeometry()->momentum().mag() << endl;
@@ -420,7 +441,10 @@ Int_t StdEdxY2Maker::Make(){
 	Float_t dX_TrackFit = tpcHit->dX();
 	Float_t dX_Helix = 0;
 	dx = dX_TrackFit; 
-	AdcI = dZdY = dXdY = 0;
+	AdcI = 0;
+#ifdef __dZdY_dXdY__
+	dZdY = dXdY = 0;
+#endif
 	static StGlobalDirection  globalDirectionOfTrack;
 	Int_t iokCheck = 0;
 #ifdef __TEST_DX__
@@ -537,7 +561,7 @@ Int_t StdEdxY2Maker::Make(){
 	    dX_Helix = -13;
 	    break;
 	  }
-#if 0
+#ifdef __dZdY_dXdY__
 	  dY = D.dot(V);
 	  if (TMath::Abs(dY) > 1e-7) {
 	    dZdY = D.dot(W)/dY;
@@ -601,8 +625,10 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].rCharge=  0.5*m_TpcdEdxCorrection->Adc2GeV()*TMath::Pi()/4.*CdEdx[NdEdx].Npads*CdEdx[NdEdx].Ntbks;
 	if (TESTBIT(m_Mode, kEmbeddingShortCut) && 
 	    (tpcHit->idTruth() && tpcHit->qaTruth() > 95)) CdEdx[NdEdx].lSimulated = tpcHit->idTruth();
+#ifdef __dZdY_dXdY__
 	CdEdx[NdEdx].dZdY = dZdY;
 	CdEdx[NdEdx].dXdY = dXdY;
+#endif
 	CdEdx[NdEdx].AdcI = AdcI;
 	dxC = dx;
 #if 1
@@ -636,6 +662,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].xyzD[2] = localDirectionOfTrack.position().z();
 	CdEdx[NdEdx].ZdriftDistance = localSect[3].position().z();
 	CdEdx[NdEdx].zG      = tpcHit->position().z();
+	CdEdx[NdEdx].etaG    = etaG;
 	Double_t pT2 = CdEdx[NdEdx].xyzD[0]*CdEdx[NdEdx].xyzD[0]+CdEdx[NdEdx].xyzD[1]*CdEdx[NdEdx].xyzD[1];
 	if (pT2 > 1e-14)
 	  CdEdx[NdEdx].TanL = -CdEdx[NdEdx].xyzD[2]/TMath::Sqrt(pT2);
@@ -672,8 +699,6 @@ Int_t StdEdxY2Maker::Make(){
       Double_t SumdEdX = 0;
       Double_t SumdX = 0;
       Int_t N70 = NdEdx - (int) (0.3*NdEdx + 0.5); 
-      StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
-      Double_t etaG = g3.pseudoRapidity();
       if (N70 > 1) {
 	Int_t k;
 	for (k = 0; k < N70; k++) {
@@ -958,6 +983,21 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #ifndef MakeString
 #define MakeString(PATH) # PATH
 #endif
+#ifdef __dZdY_dXdY__ /* skip dZdY and dXdY */
+#define __BOOK__VARS__dZdY(SIGN,NEGPOS) \
+  static Hists3D dZdY3 ## SIGN ("dZdY3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","dZdY",-NoRows,200,-5,5); \
+  static Hists3D dXdY3 ## SIGN ("dXdY3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","dXdY",-NoRows,200,-2.5,2.5); 
+#else
+#define __BOOK__VARS__dZdY(SIGN,NEGPOS)
+#endif
+#ifdef __Pad_Tmbk__  /* skip Pad and Tbk */
+#define __BOOK__VARS__PadTmbk(SIGN,NEGPOS) \
+  static Hists3D nPad3 ## SIGN ("nPad3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","npad",-NoRows,18,0.5,18.5); \
+  static Hists3D nTbk3 ## SIGN ("nTbk3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","ntimebuckets",-NoRows,35,2.5,37.5);
+#else 
+#define __BOOK__VARS__PadTmbk(SIGN,NEGPOS)
+#endif
+
 #define __BOOK__VARS__(SIGN,NEGPOS) \
   static Hists3D SecRow3 ## SIGN ("SecRow3" MakeString(SIGN) ,"<log(dEdx/Pion)>"  MakeString(NEGPOS) ,"sector","row",numberOfSectors,NoRows); \
   static Hists3D Pressure ## SIGN ("Pressure" MakeString(SIGN) ,"log(dE/dx)" MakeString(NEGPOS) ,"row","Log(Pressure)",-NoRows,150, 6.84, 6.99); \
@@ -965,9 +1005,10 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static Hists3D Z3 ## SIGN ("Z3" MakeString(SIGN) ,"<log(dEdx/Pion)>" MakeString(NEGPOS) ,"row","Drift Distance",-NoRows,220,-5,215); \
   static Hists3D G3 ## SIGN ("G3" MakeString(SIGN) ,"<log(dEdx/Pion)>" MakeString(NEGPOS) ,"row","drift time to Gating Grid (us)",-NoRows,100,-5,15); \
   static Hists3D xyPad3 ## SIGN ("xyPad3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5); \
-  static Hists3D dZdY3 ## SIGN ("dZdY3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","dZdY",-NoRows,200,-5,5); \
-  static Hists3D dXdY3 ## SIGN ("dXdY3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","dXdY",-NoRows,200,-2.5,2.5); \
-  static Hists3D dX3 ## SIGN ("dX3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","log2(dX)",-NoRows,40,-0.5,7.5); 
+  static Hists3D dX3 ## SIGN ("dX3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","log2(dX)",-NoRows,40,-0.5,7.5); \
+  static Hists3D Eta3 ## SIGN ("Eta3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","#eta_{G}",-NoRows,50,-2.5,2.5); \
+__BOOK__VARS__dZdY(SIGN,NEGPOS) \
+__BOOK__VARS__PadTmbk(SIGN,NEGPOS)
 #if 0 /* skip Pad and Tbk */
   static Hists3D nPad3 ## SIGN ("nPad3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","npad",-NoRows,18,0.5,18.5); \
   static Hists3D nTbk3 ## SIGN ("nTbk3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","ntimebuckets",-NoRows,35,2.5,37.5);
@@ -996,6 +1037,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   };
 #ifdef  __FIT_PULLS__
   static TH2F *Pulls[2][kTotalMethods] = {0};
+  static TH2F *nPulls[2][kTotalMethods] = {0};
   enum {kNPulls = 3};
   struct PullH_t {
     StPidStatus::PiDStatusIDs kPid;
@@ -1067,12 +1109,15 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	             	      Form("%s versus Length in Tpc and <log_{2}(dX)> in TPC - iTPC %s p > 0.4 GeV/c",T[t],TS[s]),
 	             	      190,10,200., Nlog2dx, log2dxLow, log2dxHigh, 500,-1.,4.);
 	NPoints[s][t]   = new TH3F(Form("NPoints%s%s",N[t],NS[s]),
-				      Form("%s versus Length in Tpc and <log_{2}(dX)>%s p > 0.4 GeV/c",T[t],TS[s]),
+				      Form("%s versus no. dEdx points in Tpc and #eta_{G} for %s p > 0.4 GeV/c",T[t],TS[s]),
 				      100,0.5,100.5, 40, -2, 2, 500,-1.,4.);
 #ifdef  __FIT_PULLS__
 	Pulls[s][t] = new TH2F(Form("Pull%s%s",N[t],NS[s]),
-			       Form("Pull %s versus Length in TPC - iTPC %s",T[t],TS[s]),
+			       Form("Pull %s versus Length in TPC %s",T[t],TS[s]),
 			       190,10.,200,nZBins,ZdEdxMin,ZdEdxMax);
+	nPulls[s][t] = new TH2F(Form("nPull%s%s",N[t],NS[s]),
+			       Form("Pull %s versus no. dEdx points in TPC  %s",T[t],TS[s]),
+			       100,0.5,100.5,nZBins,ZdEdxMin,ZdEdxMax);
 #endif /*  __FIT_PULLS__ */
 #ifdef __ETA_PLOTS__
 	if (s == 0 && t < 2) {
@@ -1136,6 +1181,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (FdEdx[k].dX_Helix     > 1e-4) dXTest[sCharge]->Fill(0., FdEdx[k].dX_Helix,   -0.1);
       }
     }
+    
   }
 #endif /* __TEST_DX__ */
   StDedxMethod kMethod;
@@ -1175,6 +1221,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     if (PiD.dEdxStatus(kMethod)) {
 #ifdef  __FIT_PULLS__
       Pulls[sCharge][j]->Fill(PiD.dEdxStatus(kMethod)->TrackLength(),PiD.dEdxStatus(kMethod)->devS[kPidPion]);
+      nPulls[sCharge][j]->Fill(PiD.dEdxStatus(kMethod)->N(),PiD.dEdxStatus(kMethod)->devS[kPidPion]);
 #endif /*  __FIT_PULLS__ */
 #ifdef __ETA_PLOTS__
       if (j < 2 && PiD.dEdxStatus(kMethod)->TrackLength() > 40) {
@@ -1237,6 +1284,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	} else {
 	  FdEdx[k].C[l].dEdxN = FdEdx[k].F.dEdxN - FdEdx[k].C[l].ddEdxL;
 	}
+	if (l) FdEdx[k].C[l].dx = FdEdx[k].C[l-1].dx;
       }
       Int_t cs = NumberOfChannels*(sector-1)+FdEdx[k].channel;
       //      if (pMomentum > pMomin && pMomentum < pMomax &&PiD.dEdxStatus(kMethod)->TrackLength() > 40 ) continue; // { // Momentum cut
@@ -1286,6 +1334,25 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (Time)    Time->Fill(vars);
 	//	if (TimeP)  {vars[1] = FdEdx[k].C[StTpcdEdxCorrection::ktpcTime].dEdxN; TimeP->Fill(vars);}
 	if (TimeC)  {vars[1] = FdEdx[k].F.dEdxN; TimeC->Fill(vars);}
+	Double_t VarsY[8] = {0};
+#ifdef __dZdY_dXdY__
+#define __FILL___VARS__dZdY(SIGN) \
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kdZdY].dEdxN;   \
+	dZdY3  ## SIGN .Fill(rowS,FdEdx[k].dZdY,Vars);       \
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kdXdY].dEdxN;   \
+	dXdY3  ## SIGN .Fill(rowS,FdEdx[k].dXdY,Vars);	
+#else
+#define __FILL__VARS__dZdY(SIGN)
+#endif
+#ifdef __Pad_Tmbk__  /* skip Pad and Tbk */
+#define __FILL__VARS__PadTmbk(SIGN) \
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::knPad].dEdxN;   \
+	nPad3  ## SIGN .Fill(rowS,FdEdx[k].Npads,&Vars[1]);       \
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::knTbk].dEdxN;   \
+	nTbk3  ## SIGN .Fill(rowS,FdEdx[k].Ntbks,&Vars[1]);      
+#else
+#define __FILL__VARS__PadTmbk(SIGN)
+#endif
 #define __FILL__VARS__(SIGN) \
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRowB].dEdxN; \
 	SecRow3 ## SIGN .Fill(sector,row,Vars);			       \
@@ -1296,21 +1363,16 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	G3     ## SIGN .Fill(rowS,FdEdx[k].driftTime,Vars);     \
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kTpcPadMDF].dEdxN;   \
 	xyPad3 ## SIGN .Fill(FdEdx[k].yrow,FdEdx[k].xpad, Vars); \
-	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kdZdY].dEdxN;   \
-	dZdY3  ## SIGN .Fill(rowS,FdEdx[k].dZdY,Vars);       \
-	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kdXdY].dEdxN;   \
-	dXdY3  ## SIGN .Fill(rowS,FdEdx[k].dXdY,Vars);	\
+	VarsY[0] = TMath::Log2(FdEdx[k].C[StTpcdEdxCorrection::kdXCorrection].dx); \
+        VarsY[1] = TMath::Log2(FdEdx[k].F.dx); \
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kdXCorrection].dEdxN;   \
-	dX3  ## SIGN .Fill(rowS,TMath::Log2(FdEdx[k].F.dx),Vars);	\
+	dX3  ## SIGN .FillY(rowS,VarsY,Vars);	\
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kEtaCorrection].dEdxN;   \
+	Eta3  ## SIGN .Fill(rowS,FdEdx[k].etaG,Vars);	\
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::ktpcPressure].dEdxN;   \
-	Pressure ## SIGN.Fill(rowS,press,Vars);
-#if 0  /* skip Pad and Tbk */
-	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::knPad].dEdxN;   \
-	nPad3  ## SIGN .Fill(rowS,FdEdx[k].Npads,&Vars[1]);       \
-	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::knTbk].dEdxN;   \
-	nTbk3  ## SIGN .Fill(rowS,FdEdx[k].Ntbks,&Vars[1]);      \
-
-#endif
+	Pressure ## SIGN.Fill(rowS,press,Vars); \
+__FILL__VARS__dZdY(SIGN) \
+__FILL__VARS__PadTmbk(SIGN) 
 #if ! defined(__NEGATIVE_ONLY__) && ! defined(__NEGATIVE_AND_POSITIVE__)
 	__FILL__VARS__();
 #else /* ! __NEGATIVE_AND_POSITIVE__ */

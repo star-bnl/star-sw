@@ -56,6 +56,15 @@ void Hists3D::Fill(Double_t x, Double_t y, Double_t *z) {
   }
 }
 //________________________________________________________________________________
+void Hists3D::FillY(Double_t x, Double_t *y, Double_t *z) {
+  for (Int_t i = 0; i < TMath::Min(2,fNHist); i++) {
+    if (hists[i]) {
+      if (i < 8) ((TH3F *) hists[i])->Fill(x,y[i],z[i]);
+      else       ((TProfile2D *) hists[i])->Fill(x,y[i],z[i]);
+    }
+  }
+}
+//________________________________________________________________________________
 Hists2D::Hists2D(const Char_t *Name) {
   memset(dev, 0, 3*KPidParticles*sizeof(TH2F*));
   TString nameP;

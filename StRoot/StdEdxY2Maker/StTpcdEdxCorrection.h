@@ -67,23 +67,24 @@ class StTpcdEdxCorrection : public TObject {
       kPhiDirection          = 27,//p   correction wrt local interception angle  
       kTanL                  = 28,//p   correction wrt local tan(lambda)  
       kdXCorrection          = 29,//X  					     
-      kTpcEffectivedX        = 30,//X   Effective pad row height
-      kTpcPadTBins           = 31,//d  					     
-      kTpcZDC                = 32,//   					     
-      kTpcPadMDF             = 33, 
-      kAdcI                  = 34,
-      knPad                  = 35, 
-      knTbk                  = 36,
-      kdZdY                  = 37, 
-      kdXdY                  = 38,
-      kTpcLast               = 39,//                                             
-      kTpcNoAnodeVGainC      = 40,//   					     
-      kTpcLengthCorrection   = 41,//                                             
-      kTpcLengthCorrectionMDF= 42,//   					   
-      kTpcLengthCorrectionMD2= 43,//   					   
-      kTpcLengthCorrectionMDN= 44,//   					   
-      kTpcdEdxCor            = 45,//   					   
-      kTpcAllCorrections     = 46 //                                             
+      kEtaCorrection         = 30,//Eta  					     
+      kTpcEffectivedX        = 31,//X   Effective pad row height
+      kTpcPadTBins           = 32,//d  					     
+      kTpcZDC                = 33,//   					     
+      kTpcPadMDF             = 34, 
+      kAdcI                  = 35,
+      knPad                  = 36, 
+      knTbk                  = 37,
+      kdZdY                  = 38, 
+      kdXdY                  = 39,
+      kTpcLast               = 40,//                                             
+      kTpcNoAnodeVGainC      = 41,//   					     
+      kTpcLengthCorrection   = 42,//                                             
+      kTpcLengthCorrectionMDF= 43,//   					   
+      kTpcLengthCorrectionMD2= 44,//   					   
+      kTpcLengthCorrectionMDN= 45,//   					   
+      kTpcdEdxCor            = 46,//   					   
+      kTpcAllCorrections     = 47 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
@@ -105,6 +106,7 @@ class StTpcdEdxCorrection : public TObject {
   St_tpcCorrectionC *AdcCorrection()       {return Correction(kAdcCorrection);}
   St_tpcCorrectionC *zCorrection()         {return Correction(kzCorrection);}
   St_tpcCorrectionC *dXCorrection()        {return Correction(kdXCorrection);}
+  St_tpcCorrectionC *EtaCorrection()       {return Correction(kEtaCorrection);}
   St_tpcCorrectionC *TpcdEdxCor()          {return Correction(kTpcdEdxCor);}
   St_tpcCorrectionC *TpcLengthCorrection() {return Correction(kTpcLengthCorrection);}
   St_tpcCorrectionC *tpcPressure()         {return Correction(ktpcPressure);}
@@ -188,6 +190,7 @@ class dEdxY2_t {
   Float_t  driftTime; // in microsecconds 
   Float_t  dX_TrackFit; // dX from local curvature obtained during track fit
   Float_t  dX_Helix;    // dX from helices from the first and last hit
+  Float_t  etaG;  // eta at the first hit point
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
 }; 
