@@ -137,4 +137,4 @@ jobs:
       - run: |
              TEST_CMD=$(docker run --rm ghcr.io/star-bnl/star-sw-${{ env.STARENV }} tests/executest.py -c ${{ matrix.test_id }})
              docker run --volumes-from star-test-data ghcr.io/star-bnl/star-sw-${{ env.STARENV }} \
-               sh -c "MALLOC_CHECK_=3 $TEST_CMD"
+               sh -l -c "module unload kfparticle-1.1-root-6.16.00; MALLOC_CHECK_=3 $TEST_CMD"
