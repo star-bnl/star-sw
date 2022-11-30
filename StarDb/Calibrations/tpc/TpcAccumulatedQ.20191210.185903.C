@@ -1,1 +1,0 @@
-TpcAccumulatedQ.11p5GeV_2020.C

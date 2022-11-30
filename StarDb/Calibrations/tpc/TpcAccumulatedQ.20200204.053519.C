@@ -1,1 +1,0 @@
-TpcAccumulatedQ.7p3GeV_fixedTarget_2020.C
