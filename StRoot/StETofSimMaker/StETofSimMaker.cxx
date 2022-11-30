@@ -144,7 +144,7 @@ Int_t
 StETofSimMaker::Finish()
 {
     LOG_INFO << "StETofSimMaker::Finish()" << endm;
-    
+#if 0    
     if ( mWriteHistos ) {        
         setHistoFileName();
         
@@ -156,6 +156,7 @@ StETofSimMaker::Finish()
         writeHistograms();
         aFile.Close();
     }
+#endif
     return kStOK;
 }
 
@@ -297,7 +298,7 @@ StETofSimMaker::combineRawHits()
         }
         LOG_DEBUG << "strip " << kv.first << " has seen " << nTracks << " track(s)" << endm;
 
-        mHistograms.at( "nTracks" )->Fill( nTracks );
+        if (mHistograms.at( "nTracks" )) mHistograms.at( "nTracks" )->Fill( nTracks );
 
 
         // now combine hits on a given strip and add to list
@@ -323,8 +324,8 @@ StETofSimMaker::combineRawHits()
 
     }
 
-    mHistograms.at( "nStrips"    )->Fill( nStrips    );
-    mHistograms.at( "nDetectors" )->Fill( nDetectors );
+    if (mHistograms.at( "nStrips"    )) mHistograms.at( "nStrips"    )->Fill( nStrips    );
+    if (mHistograms.at( "nDetectors" )) mHistograms.at( "nDetectors" )->Fill( nDetectors );
 
     // uncomment to get print out of every combined hit
     //for( const auto& hit : mCombinedHitVec ) {
@@ -398,7 +399,7 @@ StETofSimMaker::fastDetectorResponse()
         if( mHistograms.count( "dataTotDistribution" ) ) {
             sampledTot = mHistograms.at( "dataTotDistribution" )->GetRandom();
         }
-        mHistograms.at( "fastsim_unclusteredTot" )->Fill( sampledTot );
+        if (mHistograms.at( "fastsim_unclusteredTot" )) mHistograms.at( "fastsim_unclusteredTot" )->Fill( sampledTot );
 
         kv.second.setTot( sampledTot );
 
@@ -432,8 +433,8 @@ StETofSimMaker::fastDetectorResponse()
 
         LOG_DEBUG << " hit time w/o blur: " << mMergedHitVec.at( i ).time() << " add a blur of: " << timeBlur << endm;
 
-        mHistograms.at( "mergedHit_tof_w/o_blur" )->Fill( mMergedHitVec.at( i ).time()  );
-        mHistograms.at( "mergedHit_timeBlur"     )->Fill( timeBlur );
+        if (mHistograms.at( "mergedHit_tof_w/o_blur" )) mHistograms.at( "mergedHit_tof_w/o_blur" )->Fill( mMergedHitVec.at( i ).time()  );
+        if (mHistograms.at( "mergedHit_timeBlur"     )) mHistograms.at( "mergedHit_timeBlur"     )->Fill( timeBlur );
 
         mMergedHitVec.at(i).setTime( mMergedHitVec.at( i ).time() + timeBlur );
 
@@ -449,10 +450,10 @@ StETofSimMaker::fastDetectorResponse()
         LOG_DEBUG << " hit local x w/o blur: " << mMergedHitVec.at( i ).pos().x() << " add a blur of: " << xBlur << endm;
         LOG_DEBUG << " hit local y w/o blur: " << mMergedHitVec.at( i ).pos().y() << " add a blur of: " << yBlur << endm;
 
-        mHistograms.at( "mergedHit_localX_w/o_blur" )->Fill( mMergedHitVec.at( i ).pos().x()  );
-        mHistograms.at( "mergedHit_localY_w/o_blur" )->Fill( mMergedHitVec.at( i ).pos().y()  );
-        mHistograms.at( "mergedHit_xBlur"           )->Fill( xBlur );
-        mHistograms.at( "mergedHit_yBlur"           )->Fill( yBlur );
+        if (mHistograms.at( "mergedHit_localX_w/o_blur" )) mHistograms.at( "mergedHit_localX_w/o_blur" )->Fill( mMergedHitVec.at( i ).pos().x()  );
+        if (mHistograms.at( "mergedHit_localY_w/o_blur" )) mHistograms.at( "mergedHit_localY_w/o_blur" )->Fill( mMergedHitVec.at( i ).pos().y()  );
+        if (mHistograms.at( "mergedHit_xBlur"           )) mHistograms.at( "mergedHit_xBlur"           )->Fill( xBlur );
+        if (mHistograms.at( "mergedHit_yBlur"           )) mHistograms.at( "mergedHit_yBlur"           )->Fill( yBlur );
 
         mMergedHitVec.at( i ).setPos( mMergedHitVec.at( i ).pos().x() + xBlur, mMergedHitVec.at( i ).pos().y() + yBlur, mMergedHitVec.at( i ).pos().z() );
 
@@ -584,8 +585,8 @@ StETofSimMaker::mergeClusters( vector< CombinedGeantHit >& v )
         LOG_DEBUG << "localY="          << setprecision(  4 ) << weightedPosY  << endm;
 
         if( nTracks_contributing > 1 ) {
-            mHistograms.at( "mergedHits_track_p_fail"             )->Fill( trackMap.size() );
-            mHistograms.at( "mergedHits_track_p_fail_clusterSize" )->Fill( trackMap.size(), clusterSize );
+          if (mHistograms.at( "mergedHits_track_p_fail"             )) mHistograms.at( "mergedHits_track_p_fail"             )->Fill( trackMap.size() );
+	  if (mHistograms.at( "mergedHits_track_p_fail_clusterSize" )) mHistograms.at( "mergedHits_track_p_fail_clusterSize" )->Fill( trackMap.size(), clusterSize );
         }
 
         //add merged hit to a storage vector
@@ -698,6 +699,7 @@ StETofSimMaker::calcDetectorIndex( const vector< int >& volId )
 void
 StETofSimMaker::fillRawHitsToHistograms( const St_g2t_ctf_hit* g2t_eto_hits )
 {
+  if (! mHistograms.at( "id"        )) return;
     size_t nRawHits = g2t_eto_hits->GetNRows();
 
     size_t nRawHitsHighP = 0;
@@ -764,6 +766,7 @@ StETofSimMaker::fillRawHitsToHistograms( const St_g2t_ctf_hit* g2t_eto_hits )
 void
 StETofSimMaker::fillCombinedHitsToHistograms()
 {
+  if (! mHistograms.at( "nCombinedHits" )) return;
     mHistograms.at( "nCombinedHits" )->Fill( mCombinedHitVec.size() );
 
     for( const auto& hit : mCombinedHitVec ) {   
@@ -790,6 +793,7 @@ StETofSimMaker::fillCombinedHitsToHistograms()
 void
 StETofSimMaker::fillMergedHitsToHistograms()
 {
+  if (! mHistograms.at( "nMergedHits" )) return;
     mHistograms.at( "nMergedHits" )->Fill( mMergedHitVec.size() );
 
     for( const auto& hit : mMergedHitVec ) {   
@@ -823,7 +827,9 @@ void
 StETofSimMaker::bookHistograms()
 {
     LOG_INFO << "StETofSimMaker::bookHistograms" << endm;
-
+    TFile *f = GetTFile();
+    if (f) {
+      f->cd();
     // histograms for raw hits from geant
     mHistograms[ "nRawHits" ]      = new TH1F( "nRawHits",      "# of raw eTof hits from GEANT;# hits;# events",               2000, 0., 2000. );
     mHistograms[ "nRawHitsHighP" ] = new TH1F( "nRawHitsHighP", "# of raw eTof hits from GEANT with p > 1GeV;# hits;# events",  200, 0.,  200. );
@@ -922,11 +928,12 @@ StETofSimMaker::bookHistograms()
     mHistograms[ "mergedHit_timeBlur" ] = new TH1F( "mergedHits_timeBlur", "merged hit time blur; blur (ns);# hits",      1000, -10., 10. );  
     mHistograms[ "mergedHit_xBlur"    ] = new TH1F( "mergedHits_xBlur",    "merged hit local x blur; blur (cm); # hits",  1000, -10., 10. );
     mHistograms[ "mergedHit_yBlur"    ] = new TH1F( "mergedHits_yBlur",    "merged hit local y blur; blur (cm); # hits",  1000, -10., 10. );
-
-
+    }
+#if 0
     for ( auto& kv : mHistograms ) {
         kv.second->SetDirectory( 0 );
     }
+#endif
 }
 
 
@@ -969,10 +976,12 @@ StETofSimMaker::setHistoFileName()
 void
 StETofSimMaker::writeHistograms()
 {
+#if 0
     LOG_DEBUG << "StETofSimMaker::writeHistograms()" << endm;
     for ( const auto& kv : mHistograms ) {
         if( kv.second->GetEntries() > 0 ) kv.second->Write();
     }
+#endif
 }
 
 //_____________________________________________________________

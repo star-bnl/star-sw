@@ -43,6 +43,8 @@ class StdEdxModel {
   Double_t 	       Logne(Double_t LogE) {return LogE - fLogkeVperElectron - TMath::Log(1e-6);}   // ne  from energy (GeV)				       
   void     	       Parameters(Double_t Np, Double_t *pars, Double_t *dPardNp = 0); 						       
   Double_t 	       Parameter(Double_t Np, Int_t k = 0, Double_t *dPardNp = 0);										       
+  static Double_t      funParam(Double_t *x, Double_t *p);
+  TF1                 *FParam(Int_t l = 0); // l = 0 -> mu, l = 1 -> sigma, l = 2 -> alpha
   Double_t 	       MukeV(Double_t Np);                             // log(dE) (keV)
   Double_t 	       Sigma(Double_t Np) {return Parameter(Np, 1);}								       
   Double_t 	       Alpha(Double_t Np) {return Parameter(Np, 2);}								       

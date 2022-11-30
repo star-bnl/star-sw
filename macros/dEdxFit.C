@@ -2502,6 +2502,7 @@ TF1 *GG() {
     f = new TF1("GG",ggaus,-5,5,4);
     f->SetParNames("norl","mu","sigma","alpha");
   }
+  f->SetNpx(1000);
   f->SetParameters(0,0.8,1,1);
   f->SetParLimits(3,-10,10);
   //  f->SetParLimits(1,0.6,1.0);

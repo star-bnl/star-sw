@@ -334,6 +334,28 @@ Double_t StdEdxModel::MukeV(Double_t Np) {
   return Parameter(Np, 0) + fLogkeVperElectron + TMath::Log(Np);
 }
 //________________________________________________________________________________
+Double_t StdEdxModel::funParam(Double_t *x, Double_t *p) {
+  Int_t l = p[0];
+  if (l < 0 || l > 2) return 0;
+  Double_t Np = TMath::Exp(x[0]);
+  return StdEdxModel::instance()->Parameter(Np, l);
+}
+//________________________________________________________________________________
+TF1 *StdEdxModel::FParam(Int_t l) {
+  const Char_t *fNames[3] = {"MuPar","sigmaPar","alphaPar"};
+  TF1 *f = 0;
+  if (l < 0 || l > 2) return f;
+  f = (TF1 *) gROOT->GetListOfFunctions()->FindObject(fNames[l]);
+  if (! f) {
+    f = new TF1(fNames[l],funParam,1.5,12,1);
+    f->SetParName(0,fNames[l]);
+    f->SetParameter(0,l);
+    cout << "Create FParam with name " << f->GetName() << endl;
+  }
+  return f;
+  
+}
+//________________________________________________________________________________
 Double_t StdEdxModel::Prob(Double_t /* log(nE/Np) */ ee, Double_t Np, Double_t *der) {
   Double_t params[4] = {0};
   Double_t V = 0;

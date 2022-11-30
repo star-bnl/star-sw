@@ -47,6 +47,7 @@
 #include "StDetectorDbMaker/St_TpcdZdYC.h"
 #include "StDetectorDbMaker/St_TpcdXdYC.h"
 #include "StDetectorDbMaker/St_TpcdXCorrectionBC.h"
+#include "StDetectorDbMaker/St_TpcEtaCorrectionC.h"
 #include "StDetectorDbMaker/St_TpcEtaCorrectionBC.h"
 #include "StDetectorDbMaker/St_TpcEffectivedXC.h" 
 #include "StDetectorDbMaker/St_TpcZDCC.h"
@@ -179,7 +180,8 @@ void StTpcdEdxCorrection::ReSetCorrections() {
   m_Corrections[kPhiDirection          ] = dEdxCorrection_t("TpcPhiDirection"     ,"Gain on interception angle"				                ,St_TpcPhiDirectionC::instance());	     
   m_Corrections[kTanL                  ] = dEdxCorrection_t("TpcTanL"             ,"Gain on Tan(lambda)"					        ,St_TpcTanLC::instance());		     
   m_Corrections[kdXCorrection          ] = dEdxCorrection_t("TpcdXCorrectionB"    ,"dX correction"							,St_TpcdXCorrectionBC::instance());	     
-  m_Corrections[kEtaCorrection         ] = dEdxCorrection_t("TpcEtaCorrectionB"    ,"Eta correction"							,St_TpcEtaCorrectionBC::instance());	     
+  m_Corrections[kEtaCorrection         ] = dEdxCorrection_t("TpcEtaCorrection"    ,"Eta correction MC"							,St_TpcEtaCorrectionC::instance());	     
+  m_Corrections[kEtaCorrectionB        ] = dEdxCorrection_t("TpcEtaCorrectionB"   ,"Eta correction RC"							,St_TpcEtaCorrectionBC::instance());	     
   m_Corrections[kTpcEffectivedX        ] = dEdxCorrection_t("TpcEffectivedX"      ,"dEdx correction wrt Bichsel parameterization"			,St_TpcEffectivedXC::instance()); 	     
   m_Corrections[kTpcPadTBins           ] = dEdxCorrection_t("TpcPadTBins"         ,"Variation on cluster size"						,0);					     
   m_Corrections[kTpcZDC                ] = dEdxCorrection_t("TpcZDC"        	  ,"Gain on Zdc CoincidenceRate"				        ,St_TpcZDCC::instance());		     
@@ -426,6 +428,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   VarXs[kdZdY]                 = CdEdx.dZdY;
   VarXs[kdXdY]                 = CdEdx.dXdY;
   VarXs[kEtaCorrection]        = CdEdx.etaG*CdEdx.etaG;
+  VarXs[kEtaCorrectionB]       = CdEdx.etaG;
   Int_t NLoops = 0;
   Int_t m = 0;
   for (Int_t k = kUncorrected; k <= kTpcLast; k++) {

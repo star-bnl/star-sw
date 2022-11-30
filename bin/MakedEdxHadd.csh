@@ -14,10 +14,6 @@ foreach d (`ls -1d *GeV*`)
   endif
   cd -;
 end
-#foreach y (2019 2020 2021) 
-#   hadd COLGeV_${y}.root [0-9]*GeV_${y}.root >& COLGeV_${y}.log &
-#   hadd FXT_${y}.root [0-9]*get_${y}.root >& FXT_${y}.log &
-#end
 #  100GeV_fixedTarget_2021     100GeV_fixedTarget_2021.root   
 #  11p5GeV_2020		    11p5GeV_2020.root	       
 #  13p5GeV_fixedTarget_2020    13p5GeV_fixedTarget_2020.root  
@@ -53,9 +49,6 @@ end
 #  
 #  #  Sum
 #  foreach y (2019 2020 2021)
-#    hadd colGeV_${y}.root [0-9]*GeV_${y}.root >& colGeV_${y}.log &
-#    hadd fixedTarget_${y}.root [0-9]*get_${y}.root >& fixedTarget_${y}.log &
-#  end
 
 
 

@@ -11,7 +11,7 @@ St_tpcRDOMasks *tableSet = new St_tpcRDOMasks("tpcRDOMasks",12);
 memset(&row,0,tableSet->GetRowSize());
     row.runNumber	 =   21243009; // run number  ;
     row.sector	 =          1; // sector  ;
-    row.mask	 =      65535 & & ~( (1 << 6) + (1 << 7)  + (1 << 14) + (1 << 15))~; // Dead RDO 7 & 8 for sector 1 & 2
+    row.mask	 =      65535  & ~( (1 << 6) + (1 << 7)  + (1 << 14) + (1 << 15)); // Dead RDO 7 & 8 for sector 1 & 2
 tableSet->AddAt(&row);
 memset(&row,0,tableSet->GetRowSize());
     row.runNumber	 =   21243009; // run number  ;

@@ -256,8 +256,8 @@ StBFChain *bfc(Int_t First, Int_t Last,
 #endif
     gSystem->Exit(1);
   }
-  chain->Set_IO_Files(infile,outfile);
   if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
+  chain->Set_IO_Files(infile,outfile);
   if (Last < -1) return chain;
   if (chain->Instantiate() > kStOk)  { 
 #ifndef __CLING__

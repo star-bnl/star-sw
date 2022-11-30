@@ -2492,8 +2492,23 @@ my $step = 0;
 #$hist = "RunXIX_XXII_50"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/12/2022 deactivate old entries in MySQL and rerun
 #$hist = "RunXIX_XXII_51"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/13/2022 new TpcZCorrectionC
 ##$hist = "RunXIX_XXII_52"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/14/2022 new TpcSecRow
-$hist = "RunXIX_XXII_53"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/15/2022 restart from tpc.111322.tz add dXCorrection
-
+#$hist = "RunXIX_XXII_53"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/15/2022 restart from tpc.111322.tz add dXCorrection
+#$hist = "RunXIX_XXII_54"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/16/2022 fix a bug in dxC
+#$hist = "RunXIX_XXII_55"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 2; $Mode = 2; $macro = "dEdx";#  11/17/2022 restart from pass 50 with fixing histograms for dX3
+#$hist = "RunXIX_XXII_56"; $NEvents = 10000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/18/2022 disable dX correction, add Eta3 histograms 
+#$hist = "RunXIX_XXII_57"; $NEvents = 2000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/19/2022 add TpcEtaCorrection one for whole 
+#$hist = "RunXIX_XXII_58"; $NEvents = 2000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/20/2022  new TpcSecRowB
+#$hist = "RunXIX_XXII_59"; $NEvents = 2000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/21/2022  new TpcSecRowB, TpcZCorrectionC, and TpcEtaCorrectionB
+#$hist = "RunXIX_XXII_60"; $NEvents = 2000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/22/2022  new TpcSecRowB
+#$hist = "RunXIX_XXII_61"; $NEvents = 2000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/23/2023  new TpcZCorrectionC & TpcEtaCorrectionB without muJ
+#$hist = "RunXIX_XXII_62"; $NEvents = 2000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/24/2023  new TpcSecRowB
+#$hist = "RunXIX_XXII_63"; $NEvents = 2000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/7p7GeV_2021/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/26/2023  back to RunXIX_XXII_60 : mv TpcSecRowB*GeV* TpcZCorrectionC*GeV* TpcEtaCorrectionB*GeV* hold.RunXIX_XXII_62/; hold.RunXIX_XXII_61 $ cp -p *.root ../; hold.RunXIX_XXII_60 $ cp -p *.C ../
+#$hist = "RunXIX_XXII_64"; $NEvents = 2000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/7p7GeV_2021/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/26/2023  reset TpcnPad
+#$hist = "RunXIX_XXII_65"; $NEvents = 2000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/26/2023  reset all 
+#$hist = "RunXIX_XXII_66"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/27/2023  new TpcSecRowB and TpcEtaCorrectionB from MC
+#$hist = "RunXIX_XXII_67"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/28/2023  new TpcSecRowB 
+#$hist = "RunXIX_XXII_68"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/29/2023  new TpcEtaCorrectionB
+$hist = "RunXIX_XXII_69"; $NEvents = 1000; $disk = "/hlt/cephfs/";  $RECO = "reco/20*/RF"; $Production = "/TFG22g"; $year = "/*GeV*/*/*/*"; $FILE = ""; $STAR_LEVEL = ".DEV2"; $select = "*";  $keep = 0; $Mode = 2; $macro = "dEdx";#  11/29/2023  new TpcSecRowB
 my $Year = $year;
 if ($Year eq "/") {$Year = "2020";}
 my @badruns = ();
@@ -2524,7 +2539,8 @@ $script = $prod;# . "O";
 #my $SCR = "/star/data05/scratch/fisyak/dEdx/";
 my $SCR = "/gpfs01/star/subsys-tpc/fisyak/dEdx/";
 if (! -r $SCR) {
-  $SCR = "/net/l404/data/fisyak/dEdx/";
+#  $SCR = "/net/l404/data/fisyak/dEdx/";
+  $SCR = "/hlt/cephfs/fisyak/dEdx/";
 }
 my @ProdFiles = ();
 my $hostname = `hostname`; chomp($hostname);
@@ -2695,21 +2711,38 @@ my $GB = $Total_Size/1024/1024/1024;
 print "Total size = $GB GB for $#Files event.root files  $count scripts have been created \n"; 
 }
 __END__
-#  
-# foreach d ( 7p7GeV_2021  100GeV_fixedTarget_2021  17p3GeV_2021  26p5GeV_fixedTarget_2021  3p85GeV_fixedTarget_2021  44p5GeV_fixedTarget_2021  70GeV_fixedTarget_2021 dAu200GeV_2021  OO_200GeV_2021  ps_OO_200GeV_2021 \
-# 	   pp500GeV_2022 \
-# 	   11p5GeV_2020  13p5GeV_fixedTarget_2020  19p5GeV_fixedTarget_2020  26p5GeV_fixedTarget_2020  31p2GeV_fixedTarget_2020  5p75GeV_fixedTarget_2020  7p3GeV_fixedTarget_2020  7p7GeV_2020  9p2GeV_2020  9p2GeVb_2020  9p2GeVc_2020  9p8GeV_fixedTarget_2020 \
-# 	   14p5GeV_2019  19GeV_2019  31GeV_fixedTarget_2019  3p85GeV_fixedTarget_2019  4p59GeV_fixedTarget_2019  7.3GeV_fixedTarget_2019  7p7GeV_2019  9p2GeV_2019  AuAu200GeV_2019)
-foreach f (`ls -1d job*.xml`)
-  set d = `echo ${f} | sed -e 's/jobs.RunXIX_XXII_53_//' -e 's/.xml//'`
-  if (-d ${d}) continue;
-  mkdir ${d}
+  foreach f (`ls -1d job*.xml`)
+    set d = `echo ${f} | sed -e 's/jobs.RunXIX_XXII_.._//' -e 's/.xml//'`
+  if (! -d ${d})   mkdir ${d}
+  cd ${d}
+  lsf6X ../job*${d}*.xml
+  cd -
+end
+#  3p85GeV_fixedTarget_2019 
+foreach d (  7p7GeV_2021  100GeV_fixedTarget_2021  17p3GeV_2021  26p5GeV_fixedTarget_2021  3p85GeV_fixedTarget_2021  \
+  	     44p5GeV_fixedTarget_2021  70GeV_fixedTarget_2021 dAu200GeV_2021  OO_200GeV_2021  ps_OO_200GeV_2021 \
+  	     pp500GeV_2022 \
+  	     11p5GeV_2020  13p5GeV_fixedTarget_2020  19p5GeV_fixedTarget_2020  26p5GeV_fixedTarget_2020  31p2GeV_fixedTarget_2020  \
+  	     5p75GeV_fixedTarget_2020  7p3GeV_fixedTarget_2020  7p7GeV_2020  9p2GeV_2020  9p2GeVb_2020  9p2GeVc_2020  9p8GeV_fixedTarget_2020 \
+  	     14p5GeV_2019  19GeV_2019  31GeV_fixedTarget_2019   4p59GeV_fixedTarget_2019  7.3GeV_fixedTarget_2019  \
+  	     7p7GeV_2019  9p2GeV_2019  AuAu200GeV_2019)
+  if (! -d ${d})   mkdir ${d}
   cd ${d}
   lsf6X ../job*${d}*.xml
   cd -
 end
 # Update All*.root
 foreach d (`ls -1d *`)
-    dir -ltr ${d}/*.root | tail -1 
+    dir -ltr ${d}/*.root | tail -1 | grep -v All
+end
+foreach d (`ls -1d *`)
+    dir -ltr ${d}/*.root | tail -1 | grep All
 end
 
+foreach y (2019 2020 2021)
+   hadd colGeV_${y}.root [0-9]*GeV_${y}.root >&  colGeV_${y}.log &
+   hadd fixetTarget_${y}.root [0-9]*get_${y}.root >&  fixetTarget_${y}.log &
+end
+hadd 9p2GeVabc_2020.root 9p2GeV*_2020.root >& 9p2GeVabc_2020.log &
+
+fit.pl *.root G4EY=SecRow3,SecRow3C,SecRow3PC,Eta3,Eta3C,EtaB3,EtaB3C,Z3,Z3C GP=NPointsF,NPointsN,TPointsF,TPointsN

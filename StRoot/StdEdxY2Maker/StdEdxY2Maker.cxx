@@ -891,7 +891,7 @@ Int_t StdEdxY2Maker::Make(){
 	NoOfPads = St_tpcPadConfigC::instance()->numberOfPadsAtRow(1,72);
       } 
       Int_t nrows = St_tpcPadConfigC::instance()->numberOfRows(20);
-      //      if (GetTFile()) GetTFile()->cd();
+      if (GetTFile()) GetTFile()->cd();
       AlivePads = new TH3F("AlivePads","Active pads from RDO map, tpcGainPadT0,  and Tpc Anode Voltage:sector:row:pad",24,0.5,24.5,nrows,0.5,nrows+.5,NoOfPads,0.5,NoOfPads+0.5);
       for (Int_t sector = 1; sector <= 24; sector++) {
 	for(Int_t row = 1; row <= St_tpcPadConfigC::instance()->numberOfRows(sector); row++) {
@@ -1006,7 +1006,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static Hists3D G3 ## SIGN ("G3" MakeString(SIGN) ,"<log(dEdx/Pion)>" MakeString(NEGPOS) ,"row","drift time to Gating Grid (us)",-NoRows,100,-5,15); \
   static Hists3D xyPad3 ## SIGN ("xyPad3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"sector+yrow[-0.5,0.5] and xpad [-1,1]"," xpad",numberOfSectors*20, 32,-1,1, 200, -5., 5., 0.5, 24.5); \
   static Hists3D dX3 ## SIGN ("dX3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","log2(dX)",-NoRows,40,-0.5,7.5); \
-  static Hists3D Eta3 ## SIGN ("Eta3" MakeString(SIGN) ,"log(dEdx/Pion)" MakeString(NEGPOS) ,"row","#eta_{G}",-NoRows,50,-2.5,2.5); \
+  static Hists3D Eta3 ## SIGN ("Eta3" MakeString(SIGN) ,"log(dEdx/Pion) MC" MakeString(NEGPOS) ,"row","#eta_{G}",-NoRows,50,-2.5,2.5); \
+  static Hists3D EtaB3 ## SIGN ("EtaB3" MakeString(SIGN) ,"log(dEdx/Pion) RC" MakeString(NEGPOS) ,"row","#eta_{G}",-NoRows,50,-2.5,2.5); \
 __BOOK__VARS__dZdY(SIGN,NEGPOS) \
 __BOOK__VARS__PadTmbk(SIGN,NEGPOS)
 #if 0 /* skip Pad and Tbk */
@@ -1369,6 +1370,8 @@ __BOOK__VARS__PadTmbk(SIGN,NEGPOS)
 	dX3  ## SIGN .FillY(rowS,VarsY,Vars);	\
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kEtaCorrection].dEdxN;   \
 	Eta3  ## SIGN .Fill(rowS,FdEdx[k].etaG,Vars);	\
+	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::kEtaCorrectionB].dEdxN;   \
+	EtaB3  ## SIGN .Fill(rowS,FdEdx[k].etaG,Vars);	\
 	Vars[0] = FdEdx[k].C[StTpcdEdxCorrection::ktpcPressure].dEdxN;   \
 	Pressure ## SIGN.Fill(rowS,press,Vars); \
 __FILL__VARS__dZdY(SIGN) \

@@ -7,7 +7,8 @@
 #echo "ln -s ${p}.3p85GeV_fixedTarget_2019.${ext}                ${p}.20190607.174703.${ext}" 
 #end
 #set list = "TpcSecRowB TpcAccumulatedQ TpcZCorrectionC TpcPadCorrectionMDF TpcLengthCorrectionMDN"
-set list = "TpcdXCorrectionB"
+#set list = "TpcdXCorrectionB"
+set list = "TpcEtaCorrectionB"
 foreach p (${list})
  set ext = C
  if (${p} == "TpcSecRowB") set ext = root;
@@ -28,7 +29,7 @@ ln -sf ${p}.9p2GeV_2019.${ext}                             ${p}.20190628.081931.
 ln -sf ${p}.4p59GeV_fixedTarget_2019.${ext}                ${p}.20190629.032834.${ext}
 ln -sf ${p}.9p2GeV_2019.${ext}                             ${p}.20190702.144151.${ext}
 ln -sf ${p}.31GeV_fixedTarget_2019.${ext}                  ${p}.20190709.032312.${ext}
-ln -sf ${p}.AuAu200GeV_2019.${ext}                            ${p}.20190710.110157.${ext}
+ln -sf ${p}.AuAu200GeV_2019.${ext}                            ${p}.20190710.110157.${ext} # Wed Jul 10 07:01:57 EDT [ 2019-07-10 11:01:57 GMT ]a
 ln -sf ${p}.9p2GeV_2019.${ext}                             ${p}.20190715.085141.${ext}
 
 ln -sf ${p}.11p5GeV_2020.${ext}                            ${p}.20191208.091308.${ext}

@@ -68,23 +68,24 @@ class StTpcdEdxCorrection : public TObject {
       kTanL                  = 28,//p   correction wrt local tan(lambda)  
       kdXCorrection          = 29,//X  					     
       kEtaCorrection         = 30,//Eta  					     
-      kTpcEffectivedX        = 31,//X   Effective pad row height
-      kTpcPadTBins           = 32,//d  					     
-      kTpcZDC                = 33,//   					     
-      kTpcPadMDF             = 34, 
-      kAdcI                  = 35,
-      knPad                  = 36, 
-      knTbk                  = 37,
-      kdZdY                  = 38, 
-      kdXdY                  = 39,
-      kTpcLast               = 40,//                                             
-      kTpcNoAnodeVGainC      = 41,//   					     
-      kTpcLengthCorrection   = 42,//                                             
-      kTpcLengthCorrectionMDF= 43,//   					   
-      kTpcLengthCorrectionMD2= 44,//   					   
-      kTpcLengthCorrectionMDN= 45,//   					   
-      kTpcdEdxCor            = 46,//   					   
-      kTpcAllCorrections     = 47 //                                             
+      kEtaCorrectionB        = 31,//EtaB  					     
+      kTpcEffectivedX        = 32,//X   Effective pad row height
+      kTpcPadTBins           = 33,//d  					     
+      kTpcZDC                = 34,//   					     
+      kTpcPadMDF             = 35, 
+      kAdcI                  = 36,
+      knPad                  = 37, 
+      knTbk                  = 38,
+      kdZdY                  = 39, 
+      kdXdY                  = 40,
+      kTpcLast               = 41,//                                             
+      kTpcNoAnodeVGainC      = 42,//   					     
+      kTpcLengthCorrection   = 43,//                                             
+      kTpcLengthCorrectionMDF= 44,//   					   
+      kTpcLengthCorrectionMD2= 45,//   					   
+      kTpcLengthCorrectionMDN= 46,//   					   
+      kTpcdEdxCor            = 47,//   					   
+      kTpcAllCorrections     = 48 //                                             
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();

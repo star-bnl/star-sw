@@ -27,7 +27,7 @@ my $all = 1;
 my $time = 0;
 my $adc = 0;
 my $debug = 0;
-my @FitOptions = qw (G GF GDP RL5 NF NX ADC G4F G4E G4EX G4EY G4EG GG GG2 GG3 GG4);
+my @FitOptions = qw (G GF GDP RL5 NF NX ADC G4F G4E G4EX G4EY G4EG GG GG2 GG3 GG4 GP);
 my %Opts  = ();
 my @opt;
 foreach my $arg (@ARGV) {
@@ -38,9 +38,11 @@ foreach my $arg (@ARGV) {
 	$rootf =~ /^fit/ || 
 	$rootf =~ /^G3/  || 
 	$rootf =~ /^Z3/  || 
+	$rootf =~ /^dX3/ ||
 	$rootf =~ /^NP/  ||
 	$rootf =~ /^Pre/ ||
 	$rootf =~ /^Qcm/ ||
+	$rootf =~ /^Eta/ ||
 	$rootf =~ /^Sec/ || 
 	$rootf =~ /^Time/ || 
 	$rootf =~ /^TP/ || 
@@ -158,10 +160,10 @@ foreach my $rootfile (@rootfiles) {
 	print OUT "#!/bin/tcsh -v\n";
 	print OUT "cd $DIR\n";
 	print OUT "setenv STARFPE NO\n";
-	print OUT "setenv NODEBUG yes\n";
-	print OUT "setup 64b\n";
+#	print OUT "setenv NODEBUG yes\n";
+#	print OUT "setup 64b\n";
 	#      print OUT "setup gcc\n";
-	print OUT "starver .DEV2\n";
+#	print OUT "starver .DEV2\n";
 	my $cmd = "test ! -r " . $newfilew . " && " . $rootcmd;
 	print OUT "$cmd\n";
 	close (OUT);

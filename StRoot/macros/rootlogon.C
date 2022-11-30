@@ -213,6 +213,7 @@
     // can be removed only at the net root release ... 
     gSystem->SetIncludePath(" -D__ROOT__ -I.");
     if (STAR_LEVEL.Contains("TFG") || STAR_LEVEL.Contains(".DEV2")) {
+      gEnv->SetValue("VERSION","TFG__VERSION");
       gSystem->AddIncludePath(" -D__TFG__VERSION__");
     }
     if (TString(gSystem->Getenv("STAR_HOST_SYS_OPT")) != "") {

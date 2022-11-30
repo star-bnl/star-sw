@@ -71,17 +71,17 @@ void MakeTpcEtaCorrection1() {
   TString fOut =  Form("%s.%s.C", tableName, fileIn.Data());
   TF1* f[2] = {(TF1 *) gROOT->GetFunction("pol2"), (TF1 *) gROOT->GetFunction("pol5")};
   Int_t nrows = 4; // for separate West and East
-  Int_t np = 5;
+  Int_t np = 10;
   Int_t npO = -1;
-//   Double_t min      =  -2.5;
-//   Double_t max      =   2.5;
-  Double_t min      =   0.0;
-  Double_t max      =  6.25;
+  Double_t min      =  -2.5;
+  Double_t max      =   2.5;
+//   Double_t min      =   0.0;
+//   Double_t max      =  6.25;
   Double_t minOuter =  min;
   Double_t maxOuter =  max;
   Double_t minInner =  min;
   Double_t maxInner =  max;
-#if 1
+#if 0
   if      (fileIn == "")                                  {nrows = 0;}
   else if (fileIn.Contains("GeV_20"))                     {nrows = 2;}           //ok 
   else if (fileIn.Contains("GeVb_20"))                    {nrows = 2;}           //ok 
@@ -171,16 +171,17 @@ void MakeTpcEtaCorrection1() {
     if (! c2 ) c2 =  new TCanvas("cTemp","cTemp");
     c2->cd(); 
     c2->Clear();
-    //#define __muJ__
+#define __muJ__
 #ifdef __muJ__
-    //    cout << "FitP->Draw(\"" << Form("mu-muJ:y>>%s(50,-2.5,2.5)\"",histN[idx-1]) << ",\"" << cut << "\",\"" << prof << "\");" << endl;
-    //    FitP->Draw(Form("mu-muJ:y>>%s(50,-2.5,2.5)",histN[idx-1]),cut,prof);
-    cout << "FitP->Draw(\"" << Form("mu-muJ:y*y>>%s(50,0,6.25)\"",histN[idx-1]) << ",\"" << cut << "\",\"" << prof << "\");" << endl;
-    FitP->Draw(Form("mu-muJ:y*y>>%s(50,0.0,6.25)",histN[idx-1]),cut,prof);
+    cout << "FitP->Draw(\"" << Form("mu-muJ:y>>%s(50,-2.5,2.5)\"",histN[idx-1]) << ",\"" << cut << "\",\"" << prof << "\");" << endl;
+    FitP->Draw(Form("mu-muJ:y>>%s(50,-2.5,2.5)",histN[idx-1]),cut,prof);
+//     cout << "FitP->Draw(\"" << Form("mu-muJ:y*y>>%s(50,0,6.25)\"",histN[idx-1]) << ",\"" << cut << "\",\"" << prof << "\");" << endl;
+//     FitP->Draw(Form("mu-muJ:y*y>>%s(50,0.0,6.25)",histN[idx-1]),cut,prof);
 #else
     cout << "FitP->Draw(\"" << Form("mu:y>>%s(50,-2.5,2.5)\"",histN[idx-1]) << ",\"" << cut << "\",\"" << prof << "\");" << endl;
+    FitP->Draw(Form("mu:y>>%s(50,-2.5,2.5)",histN[idx-1]),cut,prof);
     //    FitP->Draw(Form("mu:TMath::Sign(y,x)>>%s(50,-2.5,2.5)",histN[idx-1]),cut,prof);
-    FitP->Draw(Form("mu:y*y>>%s(50,0.0,6.25)",histN[idx-1]),cut,prof);
+    //    FitP->Draw(Form("mu:y*y>>%s(50,0.0,6.25)",histN[idx-1]),cut,prof);
 #endif
     c2->Update();
     hists[idx-1] = (TH1 *) gDirectory->Get(histN[idx-1]);

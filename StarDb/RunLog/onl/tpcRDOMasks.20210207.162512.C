@@ -16,7 +16,7 @@ tableSet->AddAt(&row);
 memset(&row,0,tableSet->GetRowSize());
     row.runNumber	 =   22038018; // run number  ;
     row.sector	 =          3; // sector  ;
-    row.mask	 =      65535 & ~( (1 << 6) + (1 << 7)  + (1 << 14) + (1 << 15))~; // Dead RDO 7 & 8 for sector 3 & 4; // enable mask  ;
+    row.mask	 =      65535 & ~( (1 << 6) + (1 << 7)  + (1 << 14) + (1 << 15)); // Dead RDO 7 & 8 for sector 3 & 4; // enable mask  ;
 tableSet->AddAt(&row);
 memset(&row,0,tableSet->GetRowSize());
     row.runNumber	 =   22038018; // run number  ;

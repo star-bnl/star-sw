@@ -10,6 +10,7 @@
 // Volume ID functor (for sensitive volumes)
 class AgMLVolumeId {
 public:
+  virtual ~AgMLVolumeId() {}
   virtual int id( int* numbv ) const { return 0; }
 };
 

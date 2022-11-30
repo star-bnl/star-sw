@@ -207,6 +207,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection5MDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection6MDF);
     CLRBIT(Mask,StTpcdEdxCorrection::kEdge);
+    CLRBIT(Mask,StTpcdEdxCorrection::kEtaCorrection);
 #if 0
     CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
     CLRBIT(Mask,StTpcdEdxCorrection::kzCorrectionC);

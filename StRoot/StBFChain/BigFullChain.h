@@ -1944,7 +1944,7 @@ Bfc_st BFC[] = { // standard chains
   {"BeamBack" ,"","","StEvent",                          "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"LdEdxY2"     ,"","","tpcDb,StEvent", "","libMinuit,StPicoEvent,StdEdxY2Maker","Load dEdx Maker",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","LdEdxY2","StdEdxY2Maker","",         "Bichsel method used for dEdx",kFALSE},
-  {"dEdxCalib"    ,"","","dEdxY2","",                       "switch on dEdx calibration histograms",kFALSE},
+  {"dEdxCalib"    ,"","","dEdxY2,TTreeFile",""          ,"","switch on dEdx calibration histograms",kFALSE},
   {"ForcedX"     ,"","","dEdxY2","",                      "Force recalculation of dX using Helices",kFALSE},
   {"SkipdNdx", "", "", "dEdxY2", "", "",              "Option for StdEdxY2Maker to calculate dN/dx",kFALSE},
   // Options in need to be done after the tracker
