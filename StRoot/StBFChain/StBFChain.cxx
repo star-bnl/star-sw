@@ -1804,6 +1804,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
 }
 //_____________________________________________________________________
 void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
+#if 0 /* ?? no ue of gc  */
   TString gc("");
   if (infile) {
     if (strlen(infile) > 2) {
@@ -1811,6 +1812,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
       gc.ToLower();
     }
   }
+#endif
   SetInputFile(infile);
   if (! GetOption("NoOutput")) SetOutputFile(outfile);
 }
