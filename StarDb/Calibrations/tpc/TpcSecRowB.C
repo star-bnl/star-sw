@@ -11,7 +11,7 @@ TDataSet *CreateTable() {
   memset(&row,0,tableSet->GetRowSize());
   for (int i=0;i<72;i++) { 
     row.GainScale[i]     =   1.;
-    row.GainRms[i]       =   0.;
+    row.GainRms[i]       =   0.01;
   }
   for (int k=0;k<24;k++) {
     tableSet->AddAt(&row);

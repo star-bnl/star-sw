@@ -1,0 +1,75 @@
+TDataSet *CreateTable() {
+  if (!gROOT->GetClass("St_tpcCorrection")) return 0;
+  Int_t nrows = 4;
+  St_tpcCorrection *tableSet = new St_tpcCorrection("TpcEtaCorrectionB",nrows);
+  tpcCorrection_st row;
+  memset(&row,0,tableSet->GetRowSize());
+  row.idx   = 1;
+  row.nrows = nrows;
+  row.min =  -1.3;
+  row.max =   1.8;
+  row.npar =           10;// 9p2GeVabc_2020
+  row.a[0] =   -0.0058969;
+  row.a[1] =     0.012581;
+  row.a[2] =     0.032909;
+  row.a[3] =     0.059517;
+  row.a[4] =     -0.16514;
+  row.a[5] =    -0.027379;
+  row.a[6] =      0.14132;
+  row.a[7] =     -0.02172;
+  row.a[8] =    -0.036942;
+  row.a[9] =        0.011;
+  tableSet->AddAt(&row);
+  memset(&row,0,tableSet->GetRowSize());
+  row.idx   = 2;
+  row.nrows = nrows;
+  row.min =  -1.9;
+  row.max =   2.2;
+  row.npar =           10;// 9p2GeVabc_2020
+  row.a[0] =     0.048417;
+  row.a[1] =     0.036179;
+  row.a[2] =     -0.32068;
+  row.a[3] =      0.10455;
+  row.a[4] =      0.31938;
+  row.a[5] =     -0.11389;
+  row.a[6] =     -0.13361;
+  row.a[7] =     0.051817;
+  row.a[8] =      0.01957;
+  row.a[9] =   -0.0082156;
+  tableSet->AddAt(&row);
+  memset(&row,0,tableSet->GetRowSize());
+  row.idx   = 3;
+  row.nrows = nrows;
+  row.min =  -1.7;
+  row.max =   1.4;
+  row.npar =           10;// 9p2GeVabc_2020
+  row.a[0] =    -0.005359;
+  row.a[1] =     -0.01266;
+  row.a[2] =     0.032067;
+  row.a[3] =    -0.046617;
+  row.a[4] =     -0.14701;
+  row.a[5] =     0.018955;
+  row.a[6] =      0.12996;
+  row.a[7] =     0.023649;
+  row.a[8] =    -0.038397;
+  row.a[9] =    -0.013423;
+  tableSet->AddAt(&row);
+  memset(&row,0,tableSet->GetRowSize());
+  row.idx   = 4;
+  row.nrows = nrows;
+  row.min =  -2.2;
+  row.max =   2.1;
+  row.npar =           10;// 9p2GeVabc_2020
+  row.a[0] =     0.047811;
+  row.a[1] =    -0.041372;
+  row.a[2] =      -0.2958;
+  row.a[3] =    -0.091041;
+  row.a[4] =      0.24459;
+  row.a[5] =     0.076896;
+  row.a[6] =    -0.074091;
+  row.a[7] =    -0.023336;
+  row.a[8] =    0.0075012;
+  row.a[9] =    0.0024604;
+  tableSet->AddAt(&row);
+  return (TDataSet *)tableSet;
+}

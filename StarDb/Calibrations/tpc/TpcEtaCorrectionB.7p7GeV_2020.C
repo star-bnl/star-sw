@@ -1,0 +1,71 @@
+TDataSet *CreateTable() {
+  if (!gROOT->GetClass("St_tpcCorrection")) return 0;
+  Int_t nrows = 4;
+  St_tpcCorrection *tableSet = new St_tpcCorrection("TpcEtaCorrectionB",nrows);
+  tpcCorrection_st row;
+  memset(&row,0,tableSet->GetRowSize());
+  row.idx   = 1;
+  row.nrows = nrows;
+  row.min =  -1.0;
+  row.max =   1.7;
+  row.npar =            9;// 7p7GeV_2020
+  row.a[0] =    -0.001946;
+  row.a[1] =    0.0051548;
+  row.a[2] =     0.018729;
+  row.a[3] =     0.077255;
+  row.a[4] =     -0.10343;
+  row.a[5] =     -0.10131;
+  row.a[6] =     0.075536;
+  row.a[7] =     0.080956;
+  row.a[8] =    -0.052077;
+  tableSet->AddAt(&row);
+  memset(&row,0,tableSet->GetRowSize());
+  row.idx   = 2;
+  row.nrows = nrows;
+  row.min =  -1.6;
+  row.max =   2.1;
+  row.npar =           10;// 7p7GeV_2020
+  row.a[0] =      0.03046;
+  row.a[1] =     0.043749;
+  row.a[2] =     -0.31474;
+  row.a[3] =     0.087217;
+  row.a[4] =       0.3924;
+  row.a[5] =     -0.12725;
+  row.a[6] =     -0.20187;
+  row.a[7] =     0.075502;
+  row.a[8] =     0.035321;
+  row.a[9] =    -0.014712;
+  tableSet->AddAt(&row);
+  memset(&row,0,tableSet->GetRowSize());
+  row.idx   = 3;
+  row.nrows = nrows;
+  row.min =  -1.6;
+  row.max =   1.0;
+  row.npar =            7;// 7p7GeV_2020
+  row.a[0] =   -0.0025448;
+  row.a[1] =    -0.013232;
+  row.a[2] =      0.02786;
+  row.a[3] =     0.010017;
+  row.a[4] =    -0.083382;
+  row.a[5] =    -0.085442;
+  row.a[6] =    -0.029749;
+  tableSet->AddAt(&row);
+  memset(&row,0,tableSet->GetRowSize());
+  row.idx   = 4;
+  row.nrows = nrows;
+  row.min =  -2.0;
+  row.max =   1.6;
+  row.npar =           10;// 7p7GeV_2020
+  row.a[0] =     0.029906;
+  row.a[1] =    -0.054253;
+  row.a[2] =     -0.34695;
+  row.a[3] =     -0.08457;
+  row.a[4] =      0.47259;
+  row.a[5] =      0.13818;
+  row.a[6] =     -0.26016;
+  row.a[7] =    -0.091342;
+  row.a[8] =      0.04932;
+  row.a[9] =     0.019956;
+  tableSet->AddAt(&row);
+  return (TDataSet *)tableSet;
+}
