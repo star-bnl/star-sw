@@ -71,7 +71,7 @@ void MakeTpcZCorrection1() {
   TString fOut =  Form("%s.%s.C", tableName, fileIn.Data());
   TF1* f[2] = {(TF1 *) gROOT->GetFunction("pol2"), (TF1 *) gROOT->GetFunction("pol5")};
   Int_t nrows = 4; // for separate West and East
-  Int_t np = 3;
+  Int_t np = 5;
   Int_t npO = -1;
   Double_t min      =  15.0;
   Double_t max      = 210.0;
@@ -82,17 +82,27 @@ void MakeTpcZCorrection1() {
 #if 1
   if      (fileIn == "")                                  {nrows = 0;}
   else if (fileIn.Contains("100GeV_fixedTarget_2021"))    {nrows = 0;} // np = 3; npO = 3;} 
+  else if (fileIn.Contains("13p5GeV_fixedTarget_2020"))   {nrows = 0;} // np = 3; npO = 3;} 
+  else if (fileIn.Contains("19p5GeV_fixedTarget_2020"))   {nrows = 0;} // np = 3; npO = 3;} 
   else if (fileIn.Contains("26p5GeV_fixedTarget_2021"))   {nrows = 0;} 
   else if (fileIn.Contains("31GeV_fixedTarget_2019"))     {nrows = 0;}
+  else if (fileIn.Contains("31GeV_fixedTarget_2019"))     {nrows = 0;}
+  else if (fileIn.Contains("31p2GeV_fixedTarget_2020"))   {nrows = 0;}
   else if (fileIn.Contains("3p85GeV_fixedTarget_2019"))   {nrows = 0;} //
+  else if (fileIn.Contains("3p85GeV_fixedTarget_2021"))   {nrows = 0;} //
   else if (fileIn.Contains("44p5GeV_fixedTarget_2021"))   {nrows = 0;} // 
+  else if (fileIn.Contains("4p59GeV_fixedTarget_2019"))   {nrows = 0;} // 
+  else if (fileIn.Contains("5p75GeV_fixedTarget_2020"))   {nrows = 0;} // 
   else if (fileIn.Contains("70GeV_fixedTarget_2021"))     {nrows = 0;}              
   else if (fileIn.Contains("7.3GeV_fixedTarget_2019"))    {nrows = 0;} 
+  else if (fileIn.Contains("7p3GeV_fixedTarget_2020"))    {nrows = 0;} 
+  else if (fileIn.Contains("9p8GeV_fixedTarget_2020"))    {nrows = 0;} 
   else if (fileIn.Contains("YfixedTarget_2021"))          {np = 5;} 
-  else if (fileIn.Contains("OO_200GeV_2021"))             {nrows = 0;}
-  else if (fileIn.Contains("GeV_2"))                      {nrows = 2; np = 5;} 
-  else if (fileIn.Contains("GeVb_2"))                     {nrows = 2; np = 5;} 
-  else if (fileIn.Contains("GeVc_2"))                     {nrows = 2; np = 5;} 
+  //  else if (fileIn.Contains("OO_200GeV_2021"))             {nrows = 0;}
+  else if (fileIn.Contains("GeV_2") || 
+	   fileIn.Contains("GeVb_2") ||  
+	   fileIn.Contains("GeVc_2") || 
+	   fileIn.Contains("GeVabc_2"))                   {nrows = 2; np = 5;} 
 #endif
   if (! nrows) {
     cout << "Reject " << fileIn.Data() << endl;

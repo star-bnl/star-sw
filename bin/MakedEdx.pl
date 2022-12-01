@@ -2741,7 +2741,7 @@ end
 
 foreach y (2019 2020 2021)
    hadd colGeV_${y}.root [0-9]*GeV_${y}.root >&  colGeV_${y}.log &
-   hadd fixetTarget_${y}.root [0-9]*get_${y}.root >&  fixetTarget_${y}.log &
+   hadd fixedTarget_${y}.root [0-9]*get_${y}.root >&  fixetTarget_${y}.log &
 end
 hadd 9p2GeVabc_2020.root 9p2GeV*_2020.root >& 9p2GeVabc_2020.log &
 

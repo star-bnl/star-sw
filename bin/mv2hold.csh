@@ -1,7 +1,7 @@
 #! /bin/tcsh -f
-set D = ~/work/Histograms/RunXIX_XXII_68
-set T = TpcSecRowB; 
-#set T = TpcZCorrectionC;  
+set D = ~/work/Histograms/RunXIX_XXII_69
+#set T = TpcSecRowB; 
+set T = TpcZCorrectionC;  
 #set T = TpcEtaCorrectionB; 
 set H = hold.`basename ${D}`
 echo "D = ${D}, T = ${T}, H = ${H}"
