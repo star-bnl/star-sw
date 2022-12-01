@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<job minFilesPerProcess="10" maxFilesPerProcess="100" filesPerHour="50" fileListSyntax="xrootd" simulateSubmission ="false" copyInputLocally="false">
+        <command>
+  set CURRENT_DIR = `pwd`
+#  cd ${SUBMITTINGDIRECTORY}
+  setenv STARFPE NO
+foreach item (`cat $FILELIST`)
+  set input  = `echo ${item} | awk '{print $1}'`
+  xrdcopy ${input} .
+end
+#  set input  = `echo ${item} | awk '{print $1}'`
+#  set file   = `echo ${input} | sed -e '#/root://xrdstar.rcf.bnl.gov:1095/##'`
+#  set filel  = `basename ${file} .picoDst.root`;
+  set filel  = ${JOBINDEX};
+  set log    = ${filel}B.log
+  set output = ${filel}.root
+  set logF   = ${SUBMITTINGDIRECTORY}/${filel}B.log
+  set outputF =  ${SUBMITTINGDIRECTORY}/${filel}.root
+  set bla     =  ${SUBMITTINGDIRECTORY}/${filel}.bla
+  if (-r $bla) continue;
+  if (-r ${logF}) continue;
+  if (-r ${outputF}) continue;
+  touch ${bla}
+  set idNdx = kFALSE;
+#  root.exe -q -b -x  'kfpAnalysis.C(1000000,"'${input}'","'${output}'","y2018",'${idNdx}')' &gt;&amp; ${log}
+  root.exe -q -b -x  'kfpAnalysis.C(1000000,"*.picoDst.root","'${output}'","y2019",'${idNdx}')' &gt;&amp; ${log}
+  rm ${bla}
+  mv ${log} ${output}  ${SUBMITTINGDIRECTORY}/
+        </command>
+    <ResourceUsage>
+      <Priority>99</Priority>
+    </ResourceUsage>
+    <stdout URL="file:./sched$JOBID.log" />
+    <stderr URL="file:./sched$JOBID.err" />
+<!--     <input URL="command:PicoL.pl" />   -->
+<!-- <input URL="catalog:star.bnl.gov?filename~st_physics,trgsetupname=production_AuAu200_2021,production=P22ib,storage!=HPSS,filetype=daq_reco_picoDst" nFiles="all" />  -->
+<input URL="catalog:star.bnl.gov?production=P22ia,trgsetupname=production_AuAu200_2019,runnumber>20191005,sanity=1,itpc=1,filetype=daq_reco_picoDst,filename~st_physics,storage=local" nFiles="all" /> 
+</job>
+
