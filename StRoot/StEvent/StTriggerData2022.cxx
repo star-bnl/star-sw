@@ -1402,10 +1402,6 @@ unsigned short StTriggerData2022::fmsADC(int crt, int adr, int ch, int prepost) 
     if (buffer >= 0 && crt>=1 && crt<=8 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
 	    case 0: return bbq[buffer][adr][ch];
-	    //case 1: return qt1[buffer][adr][ch];
-	    //case 2: return qt2[buffer][adr][ch];
-	    //case 3: return qt3[buffer][adr][ch];
-	    //case 4: return qt4[buffer][adr][ch];
             case 5: return eq3[buffer][adr][ch];
             case 6: return eq1[buffer][adr][ch];
             case 7: return eq2[buffer][adr][ch];
