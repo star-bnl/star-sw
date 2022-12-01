@@ -1422,10 +1422,6 @@ unsigned short StTriggerData2022::fmsTDC(int crt, int adr, int ch, int prepost) 
     if (buffer >= 0 && crt>=0 && crt<=8 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
             case 0: return tbbq[buffer][adr][ch];
-	      //case 1: return tqt1[buffer][adr][ch];
-	      //case 2: return tqt2[buffer][adr][ch];
-	      //case 3: return tqt3[buffer][adr][ch];
-	      //case 4: return tqt4[buffer][adr][ch];
             case 5: return teq3[buffer][adr][ch];
             case 6: return teq1[buffer][adr][ch];
             case 7: return teq2[buffer][adr][ch];
