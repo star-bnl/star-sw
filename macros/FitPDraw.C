@@ -424,7 +424,7 @@ void FitPDraw(TString Opt = "I", TString plot = "") {
     } else {
       MuDraw(muPlot.Data(),"dXO", 2*ny, -yMax, yMax, "(i&&j&&abs(x)>40.5&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "Outer", "dX", "#mu versus log2(dX)");
     }
-  } else if (Name.BeginsWith("Eta3"))      {
+  } else if (Name.BeginsWith("Eta3") || Name.BeginsWith("EtaB3" ))      {
     muPlot += ":y";
     if (Opt == "") {
       MuDraw(muPlot.Data(),"EtaI", ny, yMin, yMax, "(i&&j&&dmu>0&&dmu<0.1&&abs(mu)<0.4)", "prof", -0.4,  0.4, "All", "Eta", "#mu versus #eta");

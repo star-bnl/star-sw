@@ -198,6 +198,9 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double
   case 13: // ADC correction and offset correction via TpcAdcCorrection6MDF
     Sum = x * TMath::Exp(cor->a[0] + cor->a[1] + TMath::Exp(cor->a[2] + cor->a[3]*x));
     break;
+  case 30: // TanH saturation function: [0]+[1]*TMath::TanH([2]*(x-[3]))
+    Sum = cor->a[0]+cor->a[1]*TMath::TanH(cor->a[2]*(x-cor->a[3]));
+    break;
   case 1000:
   case 1100:
   case 1200:
@@ -359,6 +362,10 @@ MakeChairInstance2(tpcCorrection,St_TpcZCorrectionBC,Calibrations/tpc/TpcZCorrec
 MakeChairInstance2(tpcCorrection,St_TpcZCorrectionCC,Calibrations/tpc/TpcZCorrectionC);
 #include "St_TpcdXCorrectionBC.h"
 MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorrectionB);
+#include "St_TpcEtaCorrectionC.h"
+MakeChairInstance2(tpcCorrection,St_TpcEtaCorrectionC,Calibrations/tpc/TpcEtaCorrection);
+#include "St_TpcEtaCorrectionBC.h"
+MakeChairInstance2(tpcCorrection,St_TpcEtaCorrectionBC,Calibrations/tpc/TpcEtaCorrectionB);
 #include "St_tpcPressureBC.h"
 MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB);
 //________________________________________________________________________________
