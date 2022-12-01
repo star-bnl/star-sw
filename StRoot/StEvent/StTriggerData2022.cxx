@@ -148,10 +148,6 @@ void StTriggerData2022::readData(const TriggerDataBlk2022* data, int bs) {
     memset(mxq,0,sizeof(mxq)); memset(tmxq,0,sizeof(tmxq));
     memset(eq3,0,sizeof(eq3)); memset(teq3,0,sizeof(teq3));
     memset(bbq,0,sizeof(bbq)); memset(tbbq,0,sizeof(tbbq));
-    //memset(qt1,0,sizeof(qt1)); memset(tqt1,0,sizeof(tqt1));
-    //memset(qt2,0,sizeof(qt2)); memset(tqt2,0,sizeof(tqt2));
-    //memset(qt3,0,sizeof(qt3)); memset(tqt3,0,sizeof(tqt3));
-    //memset(qt4,0,sizeof(qt4)); memset(tqt4,0,sizeof(tqt4));
     memset(eq1,0,sizeof(eq1)); memset(teq1,0,sizeof(teq1));
     memset(eq2,0,sizeof(eq2)); memset(teq2,0,sizeof(teq2));
     memset(eq4,0,sizeof(eq4)); memset(teq4,0,sizeof(teq4));
