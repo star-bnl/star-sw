@@ -1504,10 +1504,12 @@ c          write (*,*) csys, volume_id
 
 !//______________________________________________________________________________________      
     Integer function g2t_stg_volume_id ( numbv )
-      Integer, intent(in) :: numbv(15)
-      
-      g2t_stg_volume_id = numbv(1)
-
+      Integer, intent(in) :: numbv(15)    
+      Integer :: station, plane, gasmod
+      station = (numbv(1) -1 ) / 4
+      plane   = MOD ( (numbv(1) -1), 4)
+      gasmod  = numbv(2)
+      g2t_stg_volume_id = gasmod + 10*plane +100*station
     End Function g2t_stg_volume_id
 !//______________________________________________________________________________________      
      Integer function g2t_wca_volume_id( numbv ) 
