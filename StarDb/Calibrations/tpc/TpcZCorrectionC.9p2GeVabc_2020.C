@@ -9,11 +9,11 @@ TDataSet *CreateTable() {
   row.min =  22.5;
   row.max = 208.0;
   row.npar =            5;// 9p2GeVabc_2020
-  row.a[0] =     0.044153;
-  row.a[1] =   2.4815e-05;
-  row.a[2] =  -6.8552e-06;
-  row.a[3] =    4.468e-08;
-  row.a[4] =  -9.2879e-11;
+  row.a[0] =     0.043683;
+  row.a[1] =  -1.1268e-06;
+  row.a[2] =   -6.505e-06;
+  row.a[3] =   4.2906e-08;
+  row.a[4] =  -8.9214e-11;
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize());
   row.idx   = 2;
@@ -21,11 +21,11 @@ TDataSet *CreateTable() {
   row.min =  16.5;
   row.max = 208.0;
   row.npar =            5;// 9p2GeVabc_2020
-  row.a[0] =     0.066344;
-  row.a[1] =    0.0036596;
-  row.a[2] =  -5.8568e-05;
-  row.a[3] =   2.4634e-07;
-  row.a[4] =  -3.0669e-10;
+  row.a[0] =     0.060486;
+  row.a[1] =     0.003716;
+  row.a[2] =  -5.8667e-05;
+  row.a[3] =   2.4576e-07;
+  row.a[4] =  -3.0439e-10;
   tableSet->AddAt(&row);
   return (TDataSet *)tableSet;
 }
